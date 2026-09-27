@@ -13,6 +13,7 @@ import {
   type Movimento,
   type Situacao,
 } from '@safrion/domain';
+import type { DadosMovimento } from '@safrion/contracts';
 import type { ClientBase } from 'pg';
 
 import type { Efeito } from './comando.js';
@@ -39,6 +40,29 @@ export interface PedidoMovimento {
   readonly lotId: string;
   readonly locationId: string;
   readonly movimento: NovoMovimento;
+}
+
+/** Do contrato externo (quantidade como objeto valor + unidade) para o pedido interno do efeito. */
+export function pedidoDeMovimento(dados: DadosMovimento): PedidoMovimento {
+  const m = dados.movimento;
+  const movimento: NovoMovimento =
+    m.tipo === 'estorno'
+      ? { tipo: 'estorno', estornaId: m.estornaId }
+      : m.tipo === 'entrada'
+        ? {
+            tipo: 'entrada',
+            quantidade: m.quantidade.valor,
+            unidade: m.quantidade.unidade,
+            situacao: m.situacao,
+          }
+        : {
+            tipo: 'mudanca',
+            quantidade: m.quantidade.valor,
+            unidade: m.quantidade.unidade,
+            de: m.de,
+            para: m.para,
+          };
+  return { lotId: dados.lote, locationId: dados.local, movimento };
 }
 
 /**

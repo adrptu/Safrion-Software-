@@ -6,7 +6,10 @@ import { defineConfig } from 'vitest/config';
 // (um arquivo novo sem teste não se esconde na média).
 export default defineConfig({
   resolve: {
-    alias: { '@safrion/domain': fileURLToPath(new URL('./packages/domain/src/index.ts', import.meta.url)) },
+    alias: {
+      '@safrion/domain': fileURLToPath(new URL('./packages/domain/src/index.ts', import.meta.url)),
+      '@safrion/contracts': fileURLToPath(new URL('./packages/contracts/src/index.ts', import.meta.url)),
+    },
   },
   test: {
     include: ['packages/*/test/**/*.test.ts', 'tools/dev/test/**/*.test.ts'],
@@ -17,7 +20,12 @@ export default defineConfig({
     testTimeout: 30_000,
     coverage: {
       provider: 'v8',
-      include: ['packages/domain/src/**/*.ts', 'packages/db/src/canonico.ts'],
+      include: [
+        'packages/domain/src/**/*.ts',
+        'packages/contracts/src/**/*.ts',
+        'packages/db/src/canonico.ts',
+        'packages/db/src/resposta.ts',
+      ],
       reporter: ['text', 'json-summary'],
       thresholds: { perFile: true, lines: 95, statements: 95, functions: 95, branches: 95 },
     },

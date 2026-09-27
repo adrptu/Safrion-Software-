@@ -6,7 +6,10 @@ import { defineConfig } from 'vitest/config';
 // SAFRION_TEST_DATABASE_URL. Cada arquivo cria e apaga o seu banco.
 export default defineConfig({
   resolve: {
-    alias: { '@safrion/domain': fileURLToPath(new URL('./packages/domain/src/index.ts', import.meta.url)) },
+    alias: {
+      '@safrion/domain': fileURLToPath(new URL('./packages/domain/src/index.ts', import.meta.url)),
+      '@safrion/contracts': fileURLToPath(new URL('./packages/contracts/src/index.ts', import.meta.url)),
+    },
   },
   test: {
     include: ['packages/*/test/**/*.int.test.ts'],

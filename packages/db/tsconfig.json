@@ -3,7 +3,10 @@
   "compilerOptions": {
     "noEmit": true,
     "types": ["node"],
-    "paths": { "@safrion/domain": ["../domain/src/index.ts"] }
+    "paths": {
+      "@safrion/domain": ["../domain/src/index.ts"],
+      "@safrion/contracts": ["../contracts/src/index.ts"]
+    }
   },
   "include": ["src", "test"]
 }

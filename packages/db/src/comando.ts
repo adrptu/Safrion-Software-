@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
+import type { Registrador } from '@safrion/contracts';
 import { ErroDominio } from '@safrion/domain';
 import type { Pool, PoolClient } from 'pg';
 
@@ -76,6 +77,8 @@ export interface Recibo {
 export interface OpcoesComando {
   /** Espera pela inserção da mesma chave em outra transação (IDEM-15; valor inicial 2 s). */
   readonly esperaChaveMs?: number;
+  /** Uma linha por comando, com a correlação (ENG-081); nunca o conteúdo do comando. */
+  readonly registrador?: Registrador;
 }
 
 interface LinhaIntencao {
@@ -191,6 +194,70 @@ export async function executarComando(
   intencao: Intencao,
   efeito: Efeito,
   opcoes: OpcoesComando = {},
+): Promise<Recibo> {
+  const inicio = performance.now();
+  // A intenção pode chegar fora do contrato: os campos do log são lidos sem confiar no formato.
+  const objeto = (v: unknown): Record<string, unknown> =>
+    typeof v === 'object' && v !== null ? (v as Record<string, unknown>) : {};
+  const bruto = objeto(intencao);
+  const alvo = objeto(bruto['target']);
+  const curto = (v: unknown) => (typeof v === 'string' ? v.slice(0, 128) : undefined);
+  const correlacao = curto(bruto['correlationId'])?.trim() || 'sem-correlacao';
+  const campos = () => ({
+    organization_id: curto(organizationId),
+    command_type: curto(bruto['commandType']),
+    idempotency_key: curto(bruto['idempotencyKey']),
+    target_type: curto(alvo['type']),
+    target_id: curto(alvo['id']),
+    duracao_ms: Math.round(performance.now() - inicio),
+  });
+  // O registro nunca muda o resultado: falha do log depois de um COMMIT não pode virar erro para quem enviou.
+  const registrar = (...args: Parameters<Registrador['registrar']>) => {
+    try {
+      opcoes.registrador?.registrar(...args);
+    } catch {
+      /* o log é acessório ao resultado do comando */
+    }
+  };
+  try {
+    const r = await processarComando(pool, organizationId, intencao, efeito, opcoes);
+    registrar('info', 'comando.processado', correlacao, {
+      ...campos(),
+      outcome: r.outcome,
+      reason_code: r.reasonCode,
+      receipt_id: r.receiptId,
+      already_received: r.alreadyReceived,
+    });
+    return r;
+  } catch (erro) {
+    const codigo = erro instanceof ErroComando ? erro.codigo : 'NAO_CLASSIFICADO';
+    registrar(
+      codigo === 'FALHA_TRANSITORIA' || codigo === 'NAO_CLASSIFICADO' ? 'erro' : 'aviso',
+      'comando.falhou',
+      correlacao,
+      {
+        ...campos(),
+        erro_codigo: codigo,
+        resultado_incerto: erro instanceof ErroComando ? erro.detalhe['resultadoIncerto'] : undefined,
+        causa:
+          erro instanceof ErroComando
+            ? erro.detalhe['causa']
+            : erro instanceof Error
+              ? erro.message
+              : String(erro),
+        codigo_pg: erro instanceof ErroComando ? erro.detalhe['codigoPg'] : undefined,
+      },
+    );
+    throw erro;
+  }
+}
+
+async function processarComando(
+  pool: Pool,
+  organizationId: string,
+  intencao: Intencao,
+  efeito: Efeito,
+  opcoes: OpcoesComando,
 ): Promise<Recibo> {
   const org = organizacaoValida(organizationId);
   validarIntencao(intencao);

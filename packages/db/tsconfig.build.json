@@ -7,5 +7,5 @@
     "types": ["node"]
   },
   "include": ["src"],
-  "references": [{ "path": "../domain/tsconfig.build.json" }]
+  "references": [{ "path": "../domain/tsconfig.build.json" }, { "path": "../contracts/tsconfig.build.json" }]
 }
