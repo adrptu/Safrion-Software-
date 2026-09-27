@@ -2,6 +2,12 @@
 
 Atualizado em 27/09/2026 por Claude Code. Leia este arquivo no início de cada sessão e atualize-o no fim de cada incremento (PRD 23.4).
 
+## Incremento em revisão — Codex, 27/09/2026
+
+- Branch `fix/codex-contrato-ci-tipos`: o portão de código rejeita tipos inválidos no manifesto e exige comandos textuais não vazios. O restante deste documento conserva o registro anterior do projeto.
+- Verificação local executada: 14 testes passaram; os novos casos reproduziram 55 falhas de subtestes antes da correção. Código e testes publicados conferidos com os arquivos executados.
+- Pendente: revisão crítica do Claude e CI remota da candidata. Este incremento não entrega aplicação ou acesso de homologação e não altera os ajustes de Gitleaks/Trivy.
+
 ## Onde estamos
 | Frente | Estado | Evidência / local |
 |---|---|---|
