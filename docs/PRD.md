@@ -6932,9 +6932,11 @@ A necessidade técnica do plano (operação, cultura, alvo, área e janela) é s
 **Troca de marca (item com alternativas).**
 - Aceitar tecnicamente B para uma necessidade só o torna elegível. **Adotar** B num escopo futuro (área, data, versão) cria a alocação, muda o atendimento ali e invalida só as O.S. futuras desse escopo (41.3).
 - A necessidade pode ter alocações parciais por área, data, produto, dose e versão. A soma é a necessidade, sem demanda nem reserva duplicada, inclusive entre safras. Uma O.S. pode ter vários produtos.
-- A contratação de B exige B aceito e adotado num escopo que ainda precise dele, sem exceder a necessidade líquida. Pedidos parciais legítimos continuam.
+- Candidato sem registro para a cultura e o alvo da necessidade não pode ser aceito nem adotado (RN-016): aparece com esse motivo, sem convite a revisar.
+- A contratação de B exige B aceito e adotado num escopo que ainda precise dele, sem exceder a necessidade líquida. O arredondamento por embalagem indivisível fica identificado como excedente (CAL-11; 42.1) e não eleva a dose. Pedidos parciais legítimos continuam.
+- Antes de confirmar, a adoção mostra o impacto nos compromissos do escopo: pedidos e entregas em aberto de A, reservas e O.S. futuras. Reserva de A no escopo segue 73.4. Pedido de A que passa a exceder a necessidade vira pendência de compras, sem cancelamento automático.
 - A dose de B vem da bula de B, definida pelo habilitado. A referência por ingrediente (CAL-11) é só comparação: fora da faixa da bula, fica invalidada aquela equivalência e dose, não a marca. Nova recomendação dentro da bula é caminho próprio, com versão.
-- Mistura de ativos se compara ingrediente a ingrediente, sem ser proibida. Biológico e fertilizante seguem a regra da categoria. Outra formulação com o mesmo ingrediente revalida mistura e preparo (41.4), carência, reentrada e datas de colheita.
+- Mistura de ativos se compara ingrediente a ingrediente, sem ser proibida. Biológico e fertilizante seguem a regra da categoria. Toda adoção revalida, nas parcelas do escopo, carência, reentrada e datas de colheita pela bula de B. Outra formulação revalida também mistura e preparo (41.4).
 - A IA sugere candidatos com fonte e não aceita, adota nem aprova. Compras aprova preço e condições. Aceite e adoção são do habilitado e não dispensam a aprovação de cada O.S. (41; APROV-05).
 
 **Interface.** A comparação fica na própria linha do insumo (PL-02) e da necessidade (SU-04), sem tela nova: planejado → candidato, com dose e base, quantidade, custo/ha, total e diferença. A composição aparece como fato ("Mesmo ingrediente: …"), sem selo "Equivalente" só pelo ativo. Bula, carência, reentrada e registro abrem em detalhe na linha, sem perder filtro nem posição. Compras nunca vê "Aceitar" nem "Adotar". As situações usam as mesmas palavras em plano, cotação e O.S., com as cores do design system e sempre com texto; a linha funciona pelo teclado e preserva o foco.
@@ -6948,24 +6950,27 @@ A necessidade técnica do plano (operação, cultura, alvo, área e janela) é s
 | Adotado (escopo) | Aprovar contratação | Ver O.S. afetadas |
 | Recusado | sem ação; motivo em texto | Reabrir revisão |
 | Fora do produto fixado (ocorrência) | sem ação; motivo em texto | Revisar modo do item |
+| Sem registro para esta cultura e alvo | sem ação; motivo em texto | sem aceite (RN-016); bula e motivo em texto |
 
 ### 40.6 Critérios de aceite — SUBST
 
 - **SUBST-01:** B aceito continua fora do plano e das O.S. até ser adotado; aceitar não muda quantidade, demanda, reserva nem aprovação.
 - **SUBST-02:** adotar B numa área e período futuros cria a alocação e troca o atendimento só ali, com a quantidade pela dose da bula de B. A demanda total é a soma das alocações, sem duplicar nem reservar duas vezes. Só as O.S. futuras do escopo perdem a aprovação.
-- **SUBST-03:** "Aprovar contratação" de B só existe com B aceito e adotado num escopo que ainda precise do produto. Com B só aceito, compras compara e não contrata. A contratação não excede nem duplica a necessidade líquida do escopo; pedidos parciais legítimos continuam possíveis.
+- **SUBST-03:** "Aprovar contratação" de B só existe com B aceito e adotado num escopo que ainda precise do produto. Com B só aceito, compras compara e não contrata. A contratação não excede nem duplica a necessidade líquida do escopo; o arredondamento por embalagem indivisível aparece como excedente identificado e não eleva a dose. Pedidos parciais legítimos continuam possíveis.
 - **SUBST-04:** a comparação mostra ativo por hectare, dose de referência e faixa da bula de B na unidade resultante, sem densidade. A dose autorizada é do habilitado, dentro da bula. Referência fora da faixa invalida aquela equivalência, e nova recomendação tem versão própria.
 - **SUBST-05:** a ordenação é por custo por hectare e custo total da área coberta, não por R$/L. Sem dose normalizada por hectare ou faixa aplicável com contexto completo, a linha mostra "Dose técnica pendente", sem custo e fora da ordenação.
 - **SUBST-06:** calda preparada, entregas feitas e realizado mantêm o produto real. O.S. em execução é pausada e só o saldo recebe nova versão.
 - **SUBST-07:** B só atende O.S. cuja versão aprovada cita B; a mesma O.S. pode ter A e B em linhas ou parcelas diferentes. Recebimento de produto diferente do pedido fica em divergência (SU-06).
 - **SUBST-08:** mistura com proporção diferente, sal × equivalente ácido sem fator, biológico ou fertilizante não têm simulação automática. Mistura não é proibida por ser mistura.
-- **SUBST-09:** adoção de outra formulação revalida mistura e preparo, carência, reentrada e datas de colheita; um conflito bloqueia a adoção.
+- **SUBST-09:** toda adoção de B revalida carência, reentrada e datas de colheita das parcelas do escopo pela bula de B; outra formulação revalida também mistura e preparo. Um conflito bloqueia a adoção naquela parcela.
 - **SUBST-10:** a IA sugere com fonte e não aceita, adota nem aprova. Compras aprova preço e condições; aceite e adoção são do habilitado. Nada disso dispensa a aprovação de cada O.S.
 - **SUBST-11:** item novo preserva o produto planejado. "Usar somente este produto" no plano padrão vale para os talhões que herdam. Item fixo não sugere candidatos, nem pela IA, nem troca por preço ou falta. A revisão técnica não muda a preferência comercial em silêncio.
 - **SUBST-12:** fixo é mesmo registro, formulação e concentração. Outra embalagem ou lote apto do mesmo produto atende, e código de fornecedor diferente para o mesmo produto atende. Proposta divergente já recebida fica só como ocorrência "Fora do produto fixado", sem recomendação nem seleção.
 - **SUBST-13:** sem saldo nem entrega a tempo, o item mostra "Falta [produto] para [necessidade]", com a ação de cada papel: compras "Cotar este produto", PCP "Reprogramar", habilitado "Revisar modo do item". Nada troca de produto sozinho.
 - **SUBST-14:** produto diferente do fixado fica registrado pelo produto real, em divergência, e nunca atende O.S. do item fixo. O destino segue decisão explícita de SU-06, sem baixa ou entrada automática.
 - **SUBST-15:** mudar o modo exige a permissão que já existe, com revisão versionada do escopo futuro e revalidação, registrada no histórico do item com autor, motivo e escopo. Produto fixo que deixa de ser regular bloqueia o item para decisão técnica, sem forçar o uso.
+- **SUBST-16:** candidato sem registro para a cultura e o alvo da necessidade aparece como "Sem registro para esta cultura e alvo"; não pode ser aceito nem adotado, e ninguém recebe convite para revisá-lo.
+- **SUBST-17:** com pedido de A em aberto para o escopo, adotar B mostra antes o impacto: quanto do pedido de A deixa de ter necessidade, reservas de A no escopo e O.S. futuras afetadas. O pedido excedente vira pendência de compras, sem cancelamento automático, e não se soma à compra de B.
 
 ## 41. Aprovação agronômica de cada O.S. e execução guiada
 
