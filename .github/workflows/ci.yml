@@ -61,15 +61,26 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
       # Gate do PRD 25.2: nenhuma alta/crítica aplicável sem resolução. Bloqueia com ou sem correção disponível (FERR-01).
       # Exceção só por não aplicabilidade comprovada, em .trivyignore.yaml com motivo e validade (SECURITY.md).
       - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
+          # 0.74 lê o documento do projeto nos lockfiles pnpm 11+ (FERR-05).
+          version: v0.74.0
           scan-type: fs
+          format: json
+          output: ${{ runner.temp }}/trivy-report.json
+          list-all-pkgs: true
           scanners: vuln,secret,misconfig
           severity: HIGH,CRITICAL
           exit-code: "1"
           ignore-unfixed: false
+      - name: Conferir cobertura das dependências de produção (FERR-05)
+        if: ${{ !cancelled() }}
+        run: python3 tools/ci/conferir_cobertura_trivy.py "$RUNNER_TEMP/trivy-report.json" .
 
   codigo:
     name: Código (lockfile, lint, tipos, testes, build)
