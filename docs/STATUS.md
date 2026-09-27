@@ -14,14 +14,15 @@ Atualizado em 27/09/2026 por Claude Code (R-005). Leia este arquivo no início d
 ## CI
 | Job | Situação |
 |---|---|
-| **CI remota** | **Não executou.** A primeira execução não iniciou nenhuma etapa: a conta está bloqueada pelo GitHub, e o titular já foi avisado (informado pelo Codex, 27/09/2026). Não marcar CI verde nem mexer em plano ou cobrança; manter as verificações locais. |
+| **CI remota** | **Roda desde 27/09** (upgrade da conta). Última execução na `main` antiga: documentação e Trivy aprovados, código N/A, Gitleaks com defeito de intervalo (correção em revisão). Não declarar verde o que não rodou no commit. |
 | Integridade da documentação (`tools/docs/checar_docs.py`) | Executado localmente em 27/09/2026. Na CI, só depois de a conta ser liberada. |
 | Varredura de segredos (Gitleaks) | Configurado; **ainda não executado** (depende da CI remota) |
 | Vulnerabilidades e configuração (Trivy fs) | Configurado; **ainda não executado** |
 | Código: instalação com lockfile, lint, tipos, testes, build | Configurado para ativar quando houver `package.json` e `pnpm-lock.yaml`; **não executado** |
 
 ## Bloqueios e pendências
-1. **CI remota bloqueada pela conta do GitHub.** Segunda tentativa em 27/09 às 10h54 falhou antes de iniciar, com aviso de pagamentos ou limite de gastos (`actions/runs/36320502642`). A liberação da conta é com o titular; os agentes não alteram plano nem cobrança e não repetem a tentativa até a conta mudar. Nesta máquina não há `gh` nem credencial de push para o Claude.
+1. **CI remota liberada em 27/09**, depois do upgrade informado pelo proprietário. Tentativa 3 do run `36320502642`, verificada pelo Codex: documentação e Trivy aprovados na `main` antiga; código N/A; **Gitleaks falhou por defeito da action** (intervalo `<commit raiz>^..HEAD` no primeiro push), sem segredo encontrado. Correção na branch `fix/ci-gitleaks-historico` (`c345ca5`), aguardando revisão e execução nova. Nesta máquina não há `gh` nem credencial de push para o Claude.
+2. **Repositório no iCloud Drive.** Com o disco 95 % cheio, o macOS tira do disco o conteúdo de arquivos do `.git` (atributo `dataless`), e o git trava esperando o download. Proposta: mover para uma pasta fora do iCloud, com backup e `git fsck` (R-006 §7). Liberar espaço em disco é com o proprietário.
 2. **Proteção da `main`: nada aplicado.** O arquivo `tools/github/protecao-main.json` é só configuração local.
    - Segundo a documentação oficial do GitHub, consultada em 27/09/2026, proteção de branch e rulesets em repositório **privado** exigem GitHub Pro, Team ou Enterprise; na conta Free, só em repositório público.
    - **O plano real da conta não foi verificado.** Pode já ser Pro. Verificar antes de qualquer proposta; PEND-REPO-01 só se aplica se o plano for Free.

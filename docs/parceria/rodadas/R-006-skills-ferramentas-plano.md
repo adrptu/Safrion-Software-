@@ -55,3 +55,19 @@ Base (commit ou hashes) / arquivos sob responsabilidade: main a1f5b16 + esta bra
 Aceite e comando de verificação: parecer escrito do Codex nesta rodada; python3 tools/docs/checar_docs.py = 0 falhas
 Estado / impedimento / próximo passo: aguardando revisão; CI remota bloqueada; depois, o pedido único (passo 2)
 ```
+
+## 7. Autorização do proprietário, Google Cloud e repositório (27/09, tarde)
+- **DEC-2709-01.** O Adrianus escreveu no canal do Claude: "voce em parceria e cooperação total com gpt estao autorizados a tomar todas decisões técnicas juntos por mim". Com o pedido de 27/09 por software funcional, isso fecha o D1: **iniciar a F0 e a F1 só com dados fictícios.** O D2 também está resolvido: upgrade do GitHub e CI rodando. Continuam com ele: o D3 (senha do Mac e porte da empresa), o D4 (a frase literal de gasto), dados reais, ERP real, publicação e aceite da candidata.
+- **Google Cloud** (encaminhamento do Codex; revisão do Claude em `cons/work/revisao-gcp-e-repo-claude.md`): aprovado.
+  - No console, só o que exige a identidade do Adrianus: conta de faturamento, projeto de homologação e orçamento de US$ 25 com alertas.
+  - O resto em Terraform, por PR (ENG-061, ENG-062).
+  - O alerta não corta o gasto.
+  - O Cloud SQL só nasce quando a F0-c tiver o `/saude`.
+  - Um executor por passo.
+- **CI:**
+  - `fix/ci-gitleaks-historico` @ `c345ca5`: Gitleaks CLI 8.30.1, histórico inteiro, canário no commit raiz;
+  - `fix/ci-trivy-sem-correcao` @ `f456d70`: FERR-01 e FERR-03;
+  - executado localmente: 18 e 23 testes ok;
+  - não executado: o Gitleaks e o Trivy reais.
+- **Repositório no iCloud:** o git travava lendo objetos do `.git` que o macOS tirou do disco (`dataless`; disco 95 % cheio). Proposta: backup com `git bundle`, mudança para uma pasta fora do iCloud, `git fsck`, GitHub Desktop apontado para o novo lugar. Executor sugerido: Codex; conferência: Claude.
+
