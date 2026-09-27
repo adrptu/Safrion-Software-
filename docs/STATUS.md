@@ -21,7 +21,7 @@ Atualizado em 27/09/2026 por Claude Code (R-005). Leia este arquivo no início d
 | Código: instalação com lockfile, lint, tipos, testes, build | Configurado para ativar quando houver `package.json` e `pnpm-lock.yaml`; **não executado** |
 
 ## Bloqueios e pendências
-1. **CI remota bloqueada pela conta do GitHub.** A liberação da conta é com o titular; os agentes não alteram plano nem cobrança. Nesta máquina não há `gh` nem credencial de push para o Claude.
+1. **CI remota bloqueada pela conta do GitHub.** Segunda tentativa em 27/09 às 10h54 falhou antes de iniciar, com aviso de pagamentos ou limite de gastos (`actions/runs/36320502642`). A liberação da conta é com o titular; os agentes não alteram plano nem cobrança e não repetem a tentativa até a conta mudar. Nesta máquina não há `gh` nem credencial de push para o Claude.
 2. **Proteção da `main`: nada aplicado.** O arquivo `tools/github/protecao-main.json` é só configuração local.
    - Segundo a documentação oficial do GitHub, consultada em 27/09/2026, proteção de branch e rulesets em repositório **privado** exigem GitHub Pro, Team ou Enterprise; na conta Free, só em repositório público.
    - **O plano real da conta não foi verificado.** Pode já ser Pro. Verificar antes de qualquer proposta; PEND-REPO-01 só se aplica se o plano for Free.
@@ -41,6 +41,8 @@ Atualizado em 27/09/2026 por Claude Code (R-005). Leia este arquivo no início d
    Os inputs usados foram conferidos no `action.yml` de cada SHA. O Dependabot propõe as atualizações. A execução real só acontece no primeiro push.
 
 ## Próxima etapa
+Plano F0 → F1 → homologação para revisão do Codex: [R-006](parceria/rodadas/R-006-skills-ferramentas-plano.md). Correção FERR-01 da CI na branch `fix/ci-trivy-sem-correcao`.
+
 1. Quando a conta for liberada: conferir a primeira CI remota e, se o plano permitir, ligar a proteção da `main` (`tools/github/configurar_protecao.sh`).
 2. PR da v3.10 do PRD. Autor: Claude; revisor: Codex.
 3. Matriz de cobertura do PRD (definido / falta decidir / falta implementar / falta verificar). Autor: Claude; o Codex a converte em backlog.
