@@ -1,6 +1,6 @@
 # PRD consolidado — Do Talhão à O.S.
 
-**Versão 3.10 · 27 de setembro de 2026 · Confiabilidade transacional, resiliência offline e desempenho; design system; melhoria contínua; refinamentos selecionados da comparação externa** (versão anterior preservada: v3.9 de 26/09/2026)
+**Versão 3.11 · 27 de setembro de 2026 · Produto fixo ou troca de marca pelo mesmo ingrediente ativo (40.5); sobre a v3.10: confiabilidade transacional, resiliência offline e desempenho; design system; melhoria contínua; refinamentos selecionados da comparação externa** (versão anterior preservada: v3.10 de 27/09/2026)
 
 **Destinatários:** direção, produto, design, agronomia, operações, controladoria e engenharia.  
 **Finalidade imediata:** orientar a atualização do protótipo para validação pelo proprietário. Iniciar o software real somente após comando explícito posterior; preservar os requisitos de engenharia para essa fase.
@@ -9,7 +9,7 @@
 
 **Conteúdo:** 63 diagramas editáveis com raias e etapas; 56 diagramas substituídos, 4 fluxos UX integrados e 3 novos. Mantém a especificação integrada de produto, negócio, agronomia, UX e engenharia. O catálogo canônico contém 98 famílias de telas, incluindo quatro destinos administrativos exclusivos da plataforma. Os capítulos 33–68 são contratos detalhados dos respectivos domínios, vinculados às telas no capítulo 5; o capítulo 69 apresenta a matriz de cobertura e os fluxos de reconciliação; o capítulo 70 registra o tratamento dos 68 achados da revisão independente e as decisões ainda pendentes. As referências às 91 telas do protótipo anterior são históricas e não numeração desta entrega.
 
-**Estado da entrega:** v3.10: acrescenta o capítulo 73 (idempotência de ponta a ponta, validade das reservas de material, conciliação de fatos de campo, integrações resilientes, consultas e projeções seletivas, metas mensuráveis, aprovação agronômica das operações mecânicas e decisões pendentes) e o capítulo 74 (design system: tokens, cores com significado, componentes, padrões de tela, dados e mapa, acessibilidade medida e governança) e o capítulo 75 (relato com print e comentário, uso real e simplificação, produtividade da interface, incidentes com plantão real e assistente com validação cruzada entre dois modelos), reconcilia as seções afetadas e incorpora os refinamentos aprovados da comparação externa; a v3.9 permanece como versão anterior. A v3.9 incorporou ao v3.8 de processos as decisões do proprietário de 26/09/2026 e as correções verificadas na reconciliação com o protótipo (capítulo 72); 7 fluxogramas atualizados, demais preservados. Navegação recente reconciliada nos capítulos 71 e 72. Contratos técnicos anteriores preservados. A revisão documental não equivale à homologação do produto nem à validação de protocolos, integrações ou máquinas reais.
+**Estado da entrega:** v3.11: acrescenta 40.5 e 40.6 (modo do item do plano: produto fixo ou alternativas com aprovação técnica; troca de marca pelo mesmo ingrediente ativo, do plano à compra e à O.S.) e ajusta 11.1, CAL-11, 40.1 e SU-04, com validação tripla Codex, Gemini e Claude. v3.10: acrescenta o capítulo 73 (idempotência de ponta a ponta, validade das reservas de material, conciliação de fatos de campo, integrações resilientes, consultas e projeções seletivas, metas mensuráveis, aprovação agronômica das operações mecânicas e decisões pendentes) e o capítulo 74 (design system: tokens, cores com significado, componentes, padrões de tela, dados e mapa, acessibilidade medida e governança) e o capítulo 75 (relato com print e comentário, uso real e simplificação, produtividade da interface, incidentes com plantão real e assistente com validação cruzada entre dois modelos), reconcilia as seções afetadas e incorpora os refinamentos aprovados da comparação externa; a v3.9 permanece como versão anterior. A v3.9 incorporou ao v3.8 de processos as decisões do proprietário de 26/09/2026 e as correções verificadas na reconciliação com o protótipo (capítulo 72); 7 fluxogramas atualizados, demais preservados. Navegação recente reconciliada nos capítulos 71 e 72. Contratos técnicos anteriores preservados. A revisão documental não equivale à homologação do produto nem à validação de protocolos, integrações ou máquinas reais.
 
 **Índice navegável**
 
@@ -1193,7 +1193,7 @@ Desktop, móvel e portal consomem os mesmos objetos de domínio quando têm o me
 
 **Botões e destinos:** Preparar cotação → FO-16; Revisar destinatários; Enviar; Comparar; Selecionar proposta; Aprovar contratação → SU-05.
 
-**Continuidade e estados:** Comparar qualidade/especificação, frete, prazo, tributos conforme política e condições financeiras. Token externo leva a PT-02, não à lista interna.
+**Continuidade e estados:** Comparar qualidade/especificação, frete, prazo, tributos conforme política e condições financeiras. No item com produto fixo, só propostas do mesmo produto (registro, formulação e concentração) são comparáveis; proposta divergente fica como ocorrência "Fora do produto fixado", sem recomendação nem seleção. No item com alternativas, a proposta de outro produto aparece na linha da necessidade com planejado → candidato (40.5), e a contratação só é aprovada com o candidato aceito e adotado num escopo que ainda precise dele, sem exceder a necessidade líquida. Token externo leva a PT-02, não à lista interna.
 
 **Contrato reconciliado de implementação:** Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.
 
@@ -4420,6 +4420,8 @@ Quantidade de compra, quantidade preparada e quantidade efetivamente aplicada s�
 
 O limite da dose aplicada permanece válido. Margem de compra não autoriza elevar dose para esvaziar embalagem. Último tanque é proporcional à área remanescente; dose por hectare, concentração, volume de calda e quantidade por tanque têm unidades explícitas.
 
+**Comparação por ingrediente ativo e custo por hectare (40.5):** `ativo_ha = dose_ha × concentração`, na mesma base de expressão; `dose_referencia_B = ativo_ha ÷ concentração_B`, na unidade resultante (g/ha ÷ g/L = L/ha; g/ha ÷ g/kg = kg/ha), sem densidade; densidade só converte massa e volume do mesmo material, e sal × equivalente ácido só com fator declarado. A referência é comparação, não dose autorizada: a dose vem da bula do produto, definida pelo habilitado. `custo_ha = dose_ha × preço por unidade-base`, só com dose normalizada por hectare; dose por 100 L, por planta ou por semente usa as bases de 41.5. Antes da dose autorizada, faixa estimada só quando a bula tem faixa explícita aplicável e o contexto dimensional está completo; senão, **Dose técnica pendente**, sem custo e fora da ordenação por preço. Custo da área = `custo_ha × área coberta` + frete e demais condições de SU-04.
+
 ### CAL-12 — MIP/MID e avaliação
 
 `media = soma_das_observacoes_validas / numero_de_amostras_validas`, somente entre métodos/unidades comparáveis. Protocolo define quando estratificar, ponderar ou avaliar máximos/distribuição.
@@ -4544,9 +4546,9 @@ Para o protótipo, usar protocolos sintéticos marcados **“Exemplo — não us
 | Geografia | Talhão, versão de geometria, parcela, setor irrigado, restrição geográfica | Divisão/união conserva linhagem; área histórica reproduzível |
 | Cultivo | Ciclo produtivo, cultura/cultivar planejada e real, ocupação, safra gerencial, vínculo ciclo–safra, evento tipado previsto/observado, coorte de plantio | Capítulo 39: ocupação temporal, variedade por parcela, âncora e saldo preservados; sem duplicar área física |
 | Técnica | Amostra/área representada, resultado analítico tipado, laudo, observação, fonte/edição/tabela, protocolo/versão, diagnóstico, recomendação/versão, prescrição, perfil de máquina, pacote/transferência e aplicação retornada | Sugestão científica cita evidências e fonte; decisão direta registra autor/origem sem exigir recomendação. Capítulos 33–38 |
-| Plano | Modelo publicado, plano do ciclo, ajuste, operação planejada, ocorrência recorrente, necessidade | Modelo + ajustes não perde sua origem; instância de recorrência tem ID |
+| Plano | Modelo publicado, plano do ciclo, ajuste, operação planejada, ocorrência recorrente, necessidade | Modelo + ajustes não perde sua origem; instância de recorrência tem ID; necessidade tem modo (produto fixo ou alternativas, 40.5) e pode ter alocações parciais por área, data, produto, dose e versão, cuja soma é a necessidade, sem duplicar demanda nem reserva |
 | Trabalho | O.S., item de ordem por parcela, programação, alocação, autorização, checklist, apontamento | Ordem pode ter várias parcelas; realizado tem versão técnica e área/quantidade própria |
-| Materiais | Item, unidade, conversão, lote, proprietário, local, reserva (finalidade, validade, política e versão aplicadas, versão da linha; RSV-01), requisição, custódia, movimento, inventário | Ledger físico e reservas reconciliáveis; local virtual de custódia não duplica o item |
+| Materiais | Item (produto comercial registrado com composição versionada: ingredientes, concentração e base de expressão, formulação, registro e bula; de-para do código do fornecedor), unidade, conversão, lote, proprietário, local, reserva (finalidade, validade, política e versão aplicadas, versão da linha; RSV-01), requisição, custódia, movimento, inventário | Ledger físico e reservas reconciliáveis; local virtual de custódia não duplica o item; saldo, reserva e entrega pelo produto comercial e lote reais, nunca por ingrediente nem por código de fornecedor |
 | Compras | Solicitação, reposição proposta, cotação, convite, proposta, contrato, liberação, pedido, recebimento | Saldo contratual, entrega e obrigação financeira separados |
 | Ativos | Ativo, componente, conjunto, contador, leitura, plano de manutenção, solicitação, ordem, teste, bloqueio | O.S. de manutenção pertence ao ativo, não migra artificialmente de safra |
 | Água | Captação, limite/vigência, setor, calibração, medidor, leitura, balanço, recomendação, ordem/aplicação | Volume, lâmina, área e energia possuem origem; medição parcial mantém cobertura |
@@ -6888,7 +6890,7 @@ Para várias parcelas no talhão, a seleção precisa indicar a área efetivamen
 | Alterar dose | Editar na linha; mostrar dose padrão, nova dose, unidade e diferença de quantidade/custo para a área. Preservar dose padrão como referência. |
 | Adicionar produto | Buscar produto no catálogo contextual; informar dose/unidade e finalidade quando necessária. Identificar se pertence à operação atual ou requer outra operação. A seleção não comprova compatibilidade de mistura. |
 | Retirar produto | Retirar somente do saldo planejado desse talhão; manter referência “Retirado neste talhão” no comparativo e opção de desfazer. Não apagar consumo, entrega ou aplicação já registrada. |
-| Trocar produto | Ação explícita de substituição, recalculando garantias, doses e restrições pertinentes; não equiparar produtos pelo volume ou nome parecido. |
+| Trocar produto | Ação explícita de substituição, recalculando garantias, doses e restrições pertinentes; não equiparar produtos pelo volume ou nome parecido.; modo do item (produto fixo ou alternativas) e troca de marca pelo mesmo ingrediente ativo seguem 40.5. |
 | Adicionar operação | Abrir formulário curto já preenchido com área/ciclo; permitir momento relativo ao plantio ou outro evento, data fixa ou gatilho conforme capítulo 39. |
 | Restaurar padrão | Restaurar item selecionado após prévia de impactos futuros; não descartar outras alterações locais. Restaurar plano inteiro exige ação separada e confirmação concreta do alcance. |
 | Copiar ajuste | Selecionar outros talhões/parcelas; revalidar área, cultura, contexto e unidades em cada destino; apresentar sucessos e impedimentos individualmente. |
@@ -6918,6 +6920,52 @@ Modelo novo não altera executado. Plano em rascunho permite salvar rapidamente 
 - **AJUSTE-09:** ajuste após execução parcial altera somente saldo futuro; consumo efetivo e histórico permanecem, com devolução física tratada separadamente.
 - **AJUSTE-10:** repetir o comando não duplica demanda. Teste de tarefa do capítulo 39 inclui alteração individual, comparação com padrão e atualização conflitante; registrar sucesso sem ajuda, erros e tempo, corrigindo qualquer alteração involuntária de outro talhão antes da liberação.
 
+
+### 40.5 Produto fixo ou troca de marca pelo mesmo ingrediente ativo
+
+A necessidade técnica do plano (operação, cultura, alvo, área e janela) é separada do produto comercial que a atende. O catálogo guarda cada produto registrado com composição versionada (11.1). Equivalência é contextual (cultura, alvo, dose, formulação e restrições), nunca uma tabela global pelo nome do ativo (AG-07). Regra determinística calcula e confere; a IA só sugere, com fonte.
+
+**Modo do item.** Cada item de produto do plano tem, na própria linha, o modo **Usar somente este produto** ou **Permitir alternativas com aprovação técnica**. O modo segue a herança do plano padrão para os talhões (40.3), sem nível novo de configuração ou alçada, e acompanha a necessidade até compra, recebimento, reserva e O.S. O produto planejado é preservado até escolha explícita. Mudar o modo usa a permissão de alteração do item (40.1): é revisão versionada do escopo futuro, com as revalidações pertinentes, registrada no histórico do item. Se houver alternativa adotada no escopo, a revisão diz qual produto fica fixo e mostra o impacto. A revisão técnica não altera a preferência comercial em silêncio.
+
+**Produto fixo.** Atende só o mesmo registro, formulação e concentração; outra embalagem ou lote apto do mesmo produto atende, e o código do fornecedor é de-para, nunca identidade. Não há sugestão de outra marca, nem pela IA, nem troca por preço ou falta. Fornecedores e preços do mesmo produto continuam comparáveis. Falta de estoque vira pendência com a ação de cada papel. Entrega de outro produto fica registrada pelo produto real, em divergência (SU-06), com destino por decisão explícita, e nunca atende O.S. do item fixo. A preferência não supera restrição técnica (RN-016): produto fixo que deixa de ser regular para a cultura e o alvo bloqueia o item para decisão técnica.
+
+**Troca de marca (item com alternativas).**
+- Aceitar tecnicamente B para uma necessidade só o torna elegível. **Adotar** B num escopo futuro (área, data, versão) cria a alocação, muda o atendimento ali e invalida só as O.S. futuras desse escopo (41.3).
+- A necessidade pode ter alocações parciais por área, data, produto, dose e versão. A soma é a necessidade, sem demanda nem reserva duplicada, inclusive entre safras. Uma O.S. pode ter vários produtos.
+- A contratação de B exige B aceito e adotado num escopo que ainda precise dele, sem exceder a necessidade líquida. Pedidos parciais legítimos continuam.
+- A dose de B vem da bula de B, definida pelo habilitado. A referência por ingrediente (CAL-11) é só comparação: fora da faixa da bula, fica invalidada aquela equivalência e dose, não a marca. Nova recomendação dentro da bula é caminho próprio, com versão.
+- Mistura de ativos se compara ingrediente a ingrediente, sem ser proibida. Biológico e fertilizante seguem a regra da categoria. Outra formulação com o mesmo ingrediente revalida mistura e preparo (41.4), carência, reentrada e datas de colheita.
+- A IA sugere candidatos com fonte e não aceita, adota nem aprova. Compras aprova preço e condições. Aceite e adoção são do habilitado e não dispensam a aprovação de cada O.S. (41; APROV-05).
+
+**Interface.** A comparação fica na própria linha do insumo (PL-02) e da necessidade (SU-04), sem tela nova: planejado → candidato, com dose e base, quantidade, custo/ha, total e diferença. A composição aparece como fato ("Mesmo ingrediente: …"), sem selo "Equivalente" só pelo ativo. Bula, carência, reentrada e registro abrem em detalhe na linha, sem perder filtro nem posição. Compras nunca vê "Aceitar" nem "Adotar". As situações usam as mesmas palavras em plano, cotação e O.S., com as cores do design system e sempre com texto; a linha funciona pelo teclado e preserva o foco.
+
+| Situação | Compras vê | Habilitado vê |
+|---|---|---|
+| Requer revisão agronômica | Pedir revisão | Revisar candidato |
+| Dose técnica pendente | sem ação; motivo em texto | Completar contexto da dose |
+| Fora da bula (aquela dose) | sem ação; motivo em texto | Nova recomendação |
+| Aceito para esta necessidade | Comparar (sem contratar) | Adotar no saldo futuro |
+| Adotado (escopo) | Aprovar contratação | Ver O.S. afetadas |
+| Recusado | sem ação; motivo em texto | Reabrir revisão |
+| Fora do produto fixado (ocorrência) | sem ação; motivo em texto | Revisar modo do item |
+
+### 40.6 Critérios de aceite — SUBST
+
+- **SUBST-01:** B aceito continua fora do plano e das O.S. até ser adotado; aceitar não muda quantidade, demanda, reserva nem aprovação.
+- **SUBST-02:** adotar B numa área e período futuros cria a alocação e troca o atendimento só ali, com a quantidade pela dose da bula de B. A demanda total é a soma das alocações, sem duplicar nem reservar duas vezes. Só as O.S. futuras do escopo perdem a aprovação.
+- **SUBST-03:** "Aprovar contratação" de B só existe com B aceito e adotado num escopo que ainda precise do produto. Com B só aceito, compras compara e não contrata. A contratação não excede nem duplica a necessidade líquida do escopo; pedidos parciais legítimos continuam possíveis.
+- **SUBST-04:** a comparação mostra ativo por hectare, dose de referência e faixa da bula de B na unidade resultante, sem densidade. A dose autorizada é do habilitado, dentro da bula. Referência fora da faixa invalida aquela equivalência, e nova recomendação tem versão própria.
+- **SUBST-05:** a ordenação é por custo por hectare e custo total da área coberta, não por R$/L. Sem dose normalizada por hectare ou faixa aplicável com contexto completo, a linha mostra "Dose técnica pendente", sem custo e fora da ordenação.
+- **SUBST-06:** calda preparada, entregas feitas e realizado mantêm o produto real. O.S. em execução é pausada e só o saldo recebe nova versão.
+- **SUBST-07:** B só atende O.S. cuja versão aprovada cita B; a mesma O.S. pode ter A e B em linhas ou parcelas diferentes. Recebimento de produto diferente do pedido fica em divergência (SU-06).
+- **SUBST-08:** mistura com proporção diferente, sal × equivalente ácido sem fator, biológico ou fertilizante não têm simulação automática. Mistura não é proibida por ser mistura.
+- **SUBST-09:** adoção de outra formulação revalida mistura e preparo, carência, reentrada e datas de colheita; um conflito bloqueia a adoção.
+- **SUBST-10:** a IA sugere com fonte e não aceita, adota nem aprova. Compras aprova preço e condições; aceite e adoção são do habilitado. Nada disso dispensa a aprovação de cada O.S.
+- **SUBST-11:** item novo preserva o produto planejado. "Usar somente este produto" no plano padrão vale para os talhões que herdam. Item fixo não sugere candidatos, nem pela IA, nem troca por preço ou falta. A revisão técnica não muda a preferência comercial em silêncio.
+- **SUBST-12:** fixo é mesmo registro, formulação e concentração. Outra embalagem ou lote apto do mesmo produto atende, e código de fornecedor diferente para o mesmo produto atende. Proposta divergente já recebida fica só como ocorrência "Fora do produto fixado", sem recomendação nem seleção.
+- **SUBST-13:** sem saldo nem entrega a tempo, o item mostra "Falta [produto] para [necessidade]", com a ação de cada papel: compras "Cotar este produto", PCP "Reprogramar", habilitado "Revisar modo do item". Nada troca de produto sozinho.
+- **SUBST-14:** produto diferente do fixado fica registrado pelo produto real, em divergência, e nunca atende O.S. do item fixo. O destino segue decisão explícita de SU-06, sem baixa ou entrada automática.
+- **SUBST-15:** mudar o modo exige a permissão que já existe, com revisão versionada do escopo futuro e revalidação, registrada no histórico do item com autor, motivo e escopo. Produto fixo que deixa de ser regular bloqueia o item para decisão técnica, sem forçar o uso.
 
 ## 41. Aprovação agronômica de cada O.S. e execução guiada
 

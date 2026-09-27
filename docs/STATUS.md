@@ -5,7 +5,7 @@ Atualizado em 27/09/2026 por Claude Code. Leia este arquivo no início de cada s
 ## Onde estamos
 | Frente | Estado | Evidência / local |
 |---|---|---|
-| PRD | **v3.10** (27/09/2026): caps. 73 (confiabilidade transacional, offline, desempenho), 74 (design system) e 75 (melhoria contínua), com as seções existentes reconciliadas. Vigente depois da revisão do Codex e do merge. | `docs/PRD.md`; registro em `docs/prd/v3_10-reconciliacao.md` |
+| PRD | **v3.11** (27/09/2026): 40.5 e 40.6, produto fixo ou troca de marca pelo mesmo ingrediente ativo, sobre a **v3.10**: caps. 73 (confiabilidade transacional, offline, desempenho), 74 (design system) e 75 (melhoria contínua), com as seções existentes reconciliadas. Vigente depois da revisão do Codex e do merge. | `docs/PRD.md`; registro em `docs/prd/v3_10-reconciliacao.md` |
 | Fluxogramas | v3.10: 14 dos 63 fluxos alterados, mesmas raias; v3.9 mantida ao lado | `docs/prd/fluxogramas/` |
 | Protótipo navegável | Em validação pelo proprietário. **Não é produção.** | https://claude.ai/artifact/WPDgqGvKX6CYTCdPjidBLo |
 | Repositório | Criado localmente em 27/09/2026 com documentação e CI. **Ainda não publicado no GitHub.** | este repositório |
