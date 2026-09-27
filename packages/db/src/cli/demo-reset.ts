@@ -1,12 +1,27 @@
 // pnpm run demo:reset -- --confirmar <dev|hml>
 // Restaura a demonstração com dados fictícios, conferindo a identidade do ambiente (PRD 23.4). Lê DATABASE_URL (papel
-// app_runtime) e SAFRION_AMBIENTE. Saída 0 = feito; 1 = recusado pelas travas, nada foi feito; 2 = uso incorreto.
+// app_runtime) e SAFRION_AMBIENTE. Saída 0 = feito; 1 = recusado pelas travas, nada foi feito; 2 = uso incorreto;
+// 3 = falha de infraestrutura (banco fora do ar, endereço, banco ou senha inválidos), relatada só por códigos (F0B2-01):
+// mensagem, stack e propriedades do erro do driver trazem host, usuário ou nome do banco e não vão à tela nem ao log da CI.
 import { pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
 
 import pg from 'pg';
 
 import { ErroAmbiente, restaurarDemonstracao } from '../ambiente.js';
+
+const se = (v: unknown, formato: RegExp) => (typeof v === 'string' && formato.test(v) ? v : undefined);
+
+function falhaSemTextoLivre(erro: unknown) {
+  const code = typeof erro === 'object' && erro !== null && 'code' in erro ? erro.code : undefined;
+  return {
+    resultado: 'falha',
+    codigo: 'FALHA_INFRAESTRUTURA',
+    erro_tipo: erro instanceof Error ? se(erro.name, /^[A-Za-z]{1,64}$/) : typeof erro,
+    // SQLSTATE do PostgreSQL (3D000, 28P01) ou código do Node (ENOTFOUND, ECONNREFUSED, ERR_INVALID_URL).
+    codigo_tecnico: se(code, /^[0-9A-Z_]{5,40}$/),
+  };
+}
 
 export async function executarCli(
   argv: readonly string[],
@@ -47,7 +62,8 @@ export async function executarCli(
       escrever(JSON.stringify({ resultado: 'recusado', codigo: erro.codigo, mensagem: erro.message }));
       return 1;
     }
-    throw erro;
+    escrever(JSON.stringify(falhaSemTextoLivre(erro)));
+    return 3;
   } finally {
     await pool.end();
   }

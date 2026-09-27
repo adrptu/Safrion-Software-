@@ -217,4 +217,46 @@ describe('demonstração com dados fictícios (pnpm demo:reset)', () => {
     });
     expect(linhas.join('\n')).not.toContain(hml.url('app_runtime'));
   });
+
+  it('falha de infraestrutura sai 3 só com códigos: nada do endereço, do banco ou da variável do processo', async () => {
+    const CANARIO = 'CANARIO_FICTICIO_9b2e';
+    const linhas: string[] = [];
+    const escrever = (l: string) => linhas.push(l);
+    const semBanco = new URL(hml.url('app_runtime'));
+    semBanco.pathname = `/${CANARIO}`;
+    // Banco inexistente: a mensagem do PostgreSQL repete o nome do banco.
+    expect(
+      await executarCli(
+        ['--confirmar', 'hml'],
+        { DATABASE_URL: semBanco.href, SAFRION_AMBIENTE: 'hml' },
+        escrever,
+      ),
+    ).toBe(3);
+    expect(JSON.parse(linhas.at(-1) ?? '')).toEqual({
+      resultado: 'falha',
+      codigo: 'FALHA_INFRAESTRUTURA',
+      erro_tipo: 'error',
+      codigo_tecnico: '3D000',
+    });
+    // Endereço malformado: o erro do Node carrega o endereço inteiro, com a senha, na propriedade input.
+    expect(
+      await executarCli(
+        ['--confirmar', 'hml'],
+        { DATABASE_URL: `postgresql://qa:${CANARIO}@exemplo.invalid:porta/db`, SAFRION_AMBIENTE: 'hml' },
+        escrever,
+      ),
+    ).toBe(3);
+    expect(JSON.parse(linhas.at(-1) ?? '')).toMatchObject({ codigo_tecnico: 'ERR_INVALID_URL' });
+    // Variável do processo com texto livre: recusa pela trava, sem repetir o valor.
+    expect(
+      await executarCli(
+        ['--confirmar', 'hml'],
+        { DATABASE_URL: hml.url('app_runtime'), SAFRION_AMBIENTE: CANARIO },
+        escrever,
+      ),
+    ).toBe(1);
+    expect(JSON.parse(linhas.at(-1) ?? '')).toMatchObject({ codigo: 'IDENTIDADE_DIVERGENTE' });
+    expect(linhas).toHaveLength(3);
+    expect(linhas.join('\n')).not.toContain(CANARIO);
+  });
 });

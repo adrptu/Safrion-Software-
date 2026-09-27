@@ -120,9 +120,13 @@ export async function restaurarDemonstracao(
     throw new ErroAmbiente('AMBIENTE_PROIBIDO', 'Demonstração não roda em produção; nada foi feito.');
   }
   if (opcoes.ambienteDoProcesso !== identidade) {
+    // O valor da variável só é repetido se for um nome de ambiente; texto livre do processo não sai na mensagem.
+    const doProcesso = ehNomeAmbiente(opcoes.ambienteDoProcesso)
+      ? `"${opcoes.ambienteDoProcesso}"`
+      : 'outro valor (nem dev, nem hml, nem prod)';
     throw new ErroAmbiente(
       'IDENTIDADE_DIVERGENTE',
-      `O processo diz "${String(opcoes.ambienteDoProcesso)}" e o banco é "${identidade}"; nada foi feito.`,
+      `O processo diz ${doProcesso} e o banco é "${identidade}"; nada foi feito.`,
     );
   }
   if (opcoes.confirmar !== identidade) {
