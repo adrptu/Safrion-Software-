@@ -29,6 +29,7 @@ Plataforma de gestão agrícola integrada: planejamento da safra, planos agronô
 | `pnpm run lint` | ESLint e o script de fronteiras: pacote sem dependência não declarada e sem ciclo de imports (ENG-012) |
 | `pnpm run test` | Testes com cobertura mínima de 95 % em cada arquivo do domínio (ENG-032/033) |
 | `pnpm run test:integration` | Banco real: papéis, RLS, isolamento entre organizações, idempotência e imutabilidade. Precisa de Docker, ou de `SAFRION_TEST_DATABASE_URL` com um PostgreSQL descartável e usuário administrador. Roda na CI depois dos testes |
+| `pnpm run demo:reset -- --confirmar <dev\|hml>` | Cria uma geração nova de dados fictícios de demonstração. Só roda com o banco identificado como `dev` ou `hml`, o processo dizendo o mesmo ambiente (`SAFRION_AMBIENTE`) e o nome repetido no comando; em produção, recusa sem tocar em nada. Nada é apagado: movimento e auditoria são imutáveis |
 | `python3 tools/docs/checar_docs.py` | Confere a integridade da documentação: arquivos obrigatórios, IDs sem repetição, decisões e links |
 
-Os comandos `pnpm dev`, `test:e2e`, `test:load` e `demo:reset` do PRD 23.4 **ainda não existem**: entram na F0-c. Os nomes `setup` e `doctor` do PRD coincidem com comandos do próprio pnpm, então se chamam com `pnpm run`.
+Os comandos `pnpm dev`, `test:e2e` e `test:load` do PRD 23.4 **ainda não existem**: entram com a web da F0-c (ADR 0004, em revisão). Os nomes `setup` e `doctor` do PRD coincidem com comandos do próprio pnpm, então se chamam com `pnpm run`.

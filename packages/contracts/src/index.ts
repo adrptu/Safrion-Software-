@@ -2,11 +2,13 @@ export {
   EsquemaDadosMovimento,
   EsquemaPedidoComando,
   EsquemaRecibo,
+  EsquemaSaude,
   EsquemaUuid,
   statusDoRecibo,
   type DadosMovimento,
   type PedidoComando,
   type ReciboContrato,
+  type SaudeContrato,
 } from './comando.js';
 export {
   ERROS,

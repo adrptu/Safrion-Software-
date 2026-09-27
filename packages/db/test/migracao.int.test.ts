@@ -22,7 +22,7 @@ describe('migrações (plano R-006, passo 7)', () => {
     const r = await amb.migrator.query<{ versao: string; sha256: string }>(
       'SELECT versao, sha256 FROM migracao.registro ORDER BY versao',
     );
-    expect(r.rows.map((l) => l.versao)).toEqual(['0001_fundacao.sql']);
+    expect(r.rows.map((l) => l.versao)).toEqual(['0001_fundacao.sql', '0002_ambiente_e_demonstracao.sql']);
     expect(r.rows[0]?.sha256).toMatch(/^[0-9a-f]{64}$/);
   });
 
@@ -30,7 +30,10 @@ describe('migrações (plano R-006, passo 7)', () => {
     const c = new pg.Client({ connectionString: amb.url('migrator') });
     await c.connect();
     try {
-      expect(await aplicarMigracoes(c)).toEqual({ aplicadas: [], jaAplicadas: ['0001_fundacao.sql'] });
+      expect(await aplicarMigracoes(c)).toEqual({
+        aplicadas: [],
+        jaAplicadas: ['0001_fundacao.sql', '0002_ambiente_e_demonstracao.sql'],
+      });
     } finally {
       await c.end();
     }

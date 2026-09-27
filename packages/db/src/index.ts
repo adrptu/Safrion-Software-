@@ -1,3 +1,15 @@
+export {
+  ErroAmbiente,
+  definirIdentidadeAmbiente,
+  ehNomeAmbiente,
+  estadoDeSaude,
+  lerIdentidadeAmbiente,
+  restaurarDemonstracao,
+  type CodigoErroAmbiente,
+  type Demonstracao,
+  type EstadoSaude,
+  type NomeAmbiente,
+} from './ambiente.js';
 export { VERSAO_CANONICA, canonizar, hashCanonico } from './canonico.js';
 export {
   executarComando,

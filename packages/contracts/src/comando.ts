@@ -72,3 +72,14 @@ export type ReciboContrato = z.infer<typeof EsquemaRecibo>;
 export function statusDoRecibo(outcome: ReciboContrato['outcome']): 200 | 409 | 422 {
   return outcome === 'confirmed' ? 200 : outcome === 'version_conflict' ? 409 : 422;
 }
+
+/** Resposta de /saude (plano R-006, passo 8): sem endereço do banco, usuário ou detalhe de erro do driver. */
+export const EsquemaSaude = z.strictObject({
+  status: z.enum(['ok', 'sem_identidade', 'indisponivel']),
+  ambiente: z.enum(['dev', 'hml', 'prod']).nullable(),
+  versao: z.string().min(1),
+  commit: z.string().min(1),
+  migracao: z.string().nullable(),
+  verificadoEm: z.iso.datetime({ offset: true }),
+});
+export type SaudeContrato = z.infer<typeof EsquemaSaude>;

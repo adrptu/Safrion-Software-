@@ -15,7 +15,8 @@
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "build": "tsc -b packages/domain/tsconfig.build.json packages/contracts/tsconfig.build.json packages/db/tsconfig.build.json",
     "check": "pnpm run doctor && pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build",
-    "doctor": "node tools/dev/doctor.mjs"
+    "doctor": "node tools/dev/doctor.mjs",
+    "demo:reset": "pnpm run build && node packages/db/dist/cli/demo-reset.js"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
