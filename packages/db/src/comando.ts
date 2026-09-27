@@ -201,14 +201,16 @@ export async function executarComando(
     typeof v === 'object' && v !== null ? (v as Record<string, unknown>) : {};
   const bruto = objeto(intencao);
   const alvo = objeto(bruto['target']);
-  const curto = (v: unknown) => (typeof v === 'string' ? v.slice(0, 128) : undefined);
-  const correlacao = curto(bruto['correlationId'])?.trim() || 'sem-correlacao';
+  // Só entra no log o que tem formato de identificador; texto livre do cliente fica de fora (F0B2-01).
+  const se = (v: unknown, formato: RegExp) => (typeof v === 'string' && formato.test(v) ? v : undefined);
+  const IDENTIFICADOR = /^[A-Za-z0-9._:-]{1,128}$/;
+  const correlacao = se(bruto['correlationId'], IDENTIFICADOR) ?? 'sem-correlacao';
   const campos = () => ({
-    organization_id: curto(organizationId),
-    command_type: curto(bruto['commandType']),
-    idempotency_key: curto(bruto['idempotencyKey']),
-    target_type: curto(alvo['type']),
-    target_id: curto(alvo['id']),
+    organization_id: ehUuid(organizationId) ? organizationId : undefined,
+    command_type: se(bruto['commandType'], /^[A-Za-z0-9._-]{1,64}$/),
+    idempotency_key: se(bruto['idempotencyKey'], IDENTIFICADOR),
+    target_type: se(alvo['type'], /^[A-Za-z0-9._-]{1,64}$/),
+    target_id: ehUuid(alvo['id']) ? alvo['id'] : undefined,
     duracao_ms: Math.round(performance.now() - inicio),
   });
   // O registro nunca muda o resultado: falha do log depois de um COMMIT não pode virar erro para quem enviou.
@@ -230,7 +232,11 @@ export async function executarComando(
     });
     return r;
   } catch (erro) {
+    // Diagnóstico só por códigos seguros e pela correlação; nenhuma mensagem, causa ou stack de infraestrutura vai ao
+    // log (F0B2-01). O erro original sobe intacto para quem chamou.
     const codigo = erro instanceof ErroComando ? erro.codigo : 'NAO_CLASSIFICADO';
+    const incerto = erro instanceof ErroComando ? erro.detalhe['resultadoIncerto'] : undefined;
+    const sqlstate = erro instanceof ErroComando ? erro.detalhe['codigoPg'] : codigoPg(erro);
     registrar(
       codigo === 'FALHA_TRANSITORIA' || codigo === 'NAO_CLASSIFICADO' ? 'erro' : 'aviso',
       'comando.falhou',
@@ -238,14 +244,9 @@ export async function executarComando(
       {
         ...campos(),
         erro_codigo: codigo,
-        resultado_incerto: erro instanceof ErroComando ? erro.detalhe['resultadoIncerto'] : undefined,
-        causa:
-          erro instanceof ErroComando
-            ? erro.detalhe['causa']
-            : erro instanceof Error
-              ? erro.message
-              : String(erro),
-        codigo_pg: erro instanceof ErroComando ? erro.detalhe['codigoPg'] : undefined,
+        erro_tipo: erro instanceof Error ? se(erro.name, /^[A-Za-z]{1,64}$/) : typeof erro,
+        resultado_incerto: typeof incerto === 'boolean' ? incerto : undefined,
+        codigo_pg: se(sqlstate, /^[0-9A-Z]{5}$/),
       },
     );
     throw erro;
@@ -463,11 +464,8 @@ async function processarComando(
       commitEnviado
         ? 'A confirmação não voltou e o resultado é incerto; repita com a mesma chave e o mesmo conteúdo: se já foi gravado, volta o recibo registrado.'
         : 'A operação não terminou e nada foi gravado; repita com a mesma chave e o mesmo conteúdo.',
-      {
-        resultadoIncerto: commitEnviado,
-        causa: erro instanceof Error ? erro.message : String(erro),
-        codigoPg: codigoPg(erro),
-      },
+      { resultadoIncerto: commitEnviado, codigoPg: codigoPg(erro) },
+      { cause: erro },
     );
   } finally {
     cliente.release(quebrado);

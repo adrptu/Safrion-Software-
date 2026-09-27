@@ -14,7 +14,10 @@ const DESTINO: Readonly<Record<CodigoErroComando, CodigoErro>> = {
   MIGRACAO_ALTERADA: 'FALHA_INTERNA',
 };
 
-/** Só estes detalhes do envelope saem para o cliente; causa e código do banco ficam no log (ENG-015; ENG-081). */
+/**
+ * Só estes detalhes do envelope saem para o cliente. O erro original fica em `cause`, fora de resposta e de log; o
+ * log leva só códigos seguros (ENG-015; ENG-081; F0B2-01).
+ */
 const DETALHE_PUBLICO: Readonly<Partial<Record<CodigoErroComando, readonly string[]>>> = {
   IDEMPOTENCY_KEY_REUSED: ['receiptId'],
   IDEMPOTENCY_IN_PROGRESS: ['repetirEmMs'],

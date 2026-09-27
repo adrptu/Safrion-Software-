@@ -10,14 +10,20 @@ export type CodigoErroComando =
   | 'FALHA_TRANSITORIA' // repetir com a mesma chave e o mesmo conteúdo
   | 'MIGRACAO_ALTERADA';
 
+/**
+ * O detalhe só leva códigos e valores estruturados, nunca texto livre de infraestrutura (mensagem do driver, URL,
+ * stack). O erro original, quando houver, vai em `cause`: fica disponível para depuração no processo e não é
+ * serializado em log nem em resposta (F0B2-01).
+ */
 export class ErroComando extends Error {
   override readonly name = 'ErroComando';
   constructor(
     readonly codigo: CodigoErroComando,
     mensagem: string,
     readonly detalhe: Readonly<Record<string, unknown>> = {},
+    opcoes: { readonly cause?: unknown } = {},
   ) {
-    super(mensagem);
+    super(mensagem, opcoes);
   }
 }
 

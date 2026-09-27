@@ -5,6 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { executarComando } from '../src/comando.js';
 import { ErroComando } from '../src/erros.js';
 import { conteudoDoMovimento, pedidoDeMovimento, registrarMovimento } from '../src/estoque.js';
+import { respostaDeErro } from '../src/resposta.js';
 import { criarBanco, semear, type Ambiente, type Semente } from './ambiente.js';
 
 let amb: Ambiente;
@@ -103,6 +104,33 @@ describe('contrato e log do envelope (F0-b2)', () => {
     const { intencao, efeito } = comando('c-3', 1, '1');
     const r = await executarComando(amb.app, s.org, intencao, efeito, { registrador: quebrado });
     expect(r.outcome).toBe('confirmed');
+  });
+
+  it('falha real de transação com canário na mensagem do banco: fora do log e da resposta, preservada em cause', async () => {
+    const canario = 'CANARIO_FICTICIO_TRANSACAO_7f31';
+    const { intencao } = comando('c-5', 3, '1');
+    const erro: unknown = await executarComando(
+      amb.app,
+      s.org,
+      intencao,
+      async (c) => {
+        await c.query('SELECT $1::int', [canario]); // o PostgreSQL recusa e repete o valor na mensagem
+        return { resultingVersion: null, effects: {} };
+      },
+      { registrador },
+    ).catch((e: unknown) => e);
+    expect(erro).toBeInstanceOf(ErroComando);
+    expect((erro as ErroComando).codigo).toBe('FALHA_TRANSITORIA');
+    expect(String((erro as Error).cause instanceof Error ? (erro as Error).cause : '')).toContain(canario);
+    expect(JSON.stringify((erro as ErroComando).detalhe)).not.toContain(canario);
+    const linha = logs().at(-1);
+    expect(linha).toMatchObject({
+      correlation_id: 'corr-c-5',
+      erro_codigo: 'FALHA_TRANSITORIA',
+      codigo_pg: '22P02',
+    });
+    expect(linhas.join('\n')).not.toContain(canario);
+    expect(JSON.stringify(respostaDeErro(erro, 'corr-c-5'))).not.toContain(canario);
   });
 
   it('pedido fora do contrato é registrado com a correlação que houver', async () => {
