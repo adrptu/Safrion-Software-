@@ -94,6 +94,9 @@ jobs:
       - name: Instalação reproduzível (ENG-006)
         if: steps.contrato.outputs.ativo == 'true'
         run: pnpm install --frozen-lockfile
+      - name: Versões fixadas de Node e pnpm (ENG-006)
+        if: steps.contrato.outputs.ativo == 'true'
+        run: pnpm run doctor
       - name: Formatação (ENG-010)
         if: steps.contrato.outputs.ativo == 'true'
         run: pnpm run format:check

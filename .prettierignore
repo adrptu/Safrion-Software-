@@ -1,0 +1,8 @@
+# Documentos escritos à mão e gerados ficam fora do Prettier (o conteúdo é revisado nas rodadas).
+**/*.md
+docs/
+.github/
+tools/**/*.py
+pnpm-lock.yaml
+**/dist/
+coverage/
