@@ -1,0 +1,9 @@
+Evidência R-002 · portão do job de código (R001-01) · 27/09/2026 09:26 · python3 3.9.6
+Script: tools/ci/checar_contrato_codigo.py · sha256 2a2bb759ceb25eec3f55a2a87a74fbe3e876720c2dfc094b8f656354a02bc6ad
+[1_nenhum] exit=0 · ativo=false · N/A: sem package.json e sem pnpm-lock.yaml — repositório só de documentação (ADR 0002). 
+[2_so_manifest] exit=1 · ativo=false · ERRO: package.json sem pnpm-lock.yaml 
+[3_so_lock] exit=1 · ativo=false · ERRO: pnpm-lock.yaml sem package.json 
+[4_script_ausente] exit=1 · ativo=false · ERRO: scripts obrigatórios ausentes na raiz: format:check 
+[5_completo] exit=0 · ativo=true · OK: contrato de código atendido; job de código ativo. 
+[6_versao_nao_fixada] exit=1 · ativo=false · ERRO: packageManager deve fixar pnpm@X.Y.Z (encontrado: 'pnpm') ERRO: .nvmrc ausente ou sem versão exata (X.Y.Z) 
+Não executado: o job no GitHub Actions (não há remoto). No cenário 5 os scripts são fictícios; executar os comandos reais depende do primeiro PR de código.

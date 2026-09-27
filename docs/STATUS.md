@@ -21,11 +21,23 @@ Atualizado em 27/09/2026 por Claude Code. Leia este arquivo no início de cada s
 
 ## Bloqueios e pendências
 1. **Publicar no GitHub.** Usuário `adrptu`, confirmado pelo conector do Codex. Nome `do-talhao-a-os`, privado. O repositório remoto ainda não foi criado; o Codex faz as operações remotas depois da revisão deste pacote. Nesta máquina não há `gh`.
-2. **Revisão obrigatória na `main`.** Com uma só conta humana, exigir uma aprovação impede todo merge, porque o autor não aprova o próprio pull request. É preciso decidir como o Codex e o Claude aparecem no GitHub (conta ou app de cada um) antes de ligar a exigência. Até lá: pull request obrigatório, checks obrigatórios, sem force push e revisão registrada em `docs/parceria/rodadas/`.
+2. **Proteção da `main`: nada aplicado.** O arquivo `tools/github/protecao-main.json` é só configuração local.
+   - Segundo a documentação oficial do GitHub, consultada em 27/09/2026, proteção de branch e rulesets em repositório **privado** exigem GitHub Pro, Team ou Enterprise; na conta Free, só em repositório público.
+   - Contratar o Pro é custo e depende do proprietário: decisão pendente PEND-REPO-01 em `docs/DECISIONS.md`.
+   - Enquanto isso, a disciplina é de processo: pull request, CI verde e parecer escrito do outro agente em `docs/parceria/rodadas/`. Isso **não** é proteção imposta pelo servidor.
+   - Os dois agentes operam com a mesma conta `adrptu`. A revisão independente é registrada nas rodadas; não existe identidade de revisor no GitHub e não será simulada.
 3. **Ferramentas locais.** Node.js e pnpm não estão no PATH comum, mas existem no runtime do Codex: Node v24.19.0 e pnpm 11.25.0, conferidos em 27/09/2026. Servem para verificação local. A instalação reproduzível do projeto não pode depender desse caminho: versões fixadas no repositório (`packageManager`, `.nvmrc`) quando houver código. Docker não confirmado.
 4. **Versões da stack** a fixar no primeiro commit executável (`docs/architecture/versions.md`).
 5. **Decisões pendentes do proprietário:** `docs/DECISIONS.md`.
-6. **Actions da CI referenciadas por versão maior** (`@v4`, `@v5`, `@v2`, `@0.28.0`). Antes do primeiro push, conferir a versão atual de cada action na fonte oficial e fixar por SHA do commit (prática de cadeia de suprimento, PRD 26). O Dependabot mantém atualizado depois. Ainda não feito: nesta máquina não foi consultada a fonte.
+6. **Actions da CI fixadas por SHA** em 27/09/2026, a partir da API pública do GitHub. Cada tag foi resolvida até o commit e conferida:
+   - `checkout` v7.0.1;
+   - `setup-python` v7.0.0;
+   - `setup-node` v7.0.0;
+   - `pnpm/action-setup` v6.1.0;
+   - `gitleaks-action` v3.0.0: gratuita para conta pessoal; organização exige licença, o que é custo;
+   - `trivy-action` v0.36.0.
+
+   Os inputs usados foram conferidos no `action.yml` de cada SHA. O Dependabot propõe as atualizações. A execução real só acontece no primeiro push.
 
 ## Próxima etapa
 1. Publicar o repositório e ligar a proteção da `main`: `tools/github/configurar_protecao.sh`.

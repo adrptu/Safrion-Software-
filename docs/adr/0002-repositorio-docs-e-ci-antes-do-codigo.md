@@ -18,12 +18,12 @@ Até 27/09/2026, a regra do proprietário era validar primeiro o protótipo e o 
 ## Alternativas consideradas
 | Alternativa | Por que não |
 |---|---|
-| Criar o esqueleto completo de apps e pacotes já | Criaria pacotes sem responsabilidade real (PRD 23.3) e configurações não verificadas; nesta máquina não há Node/pnpm para validar |
+| Criar o esqueleto completo de apps e pacotes já | Criaria pacotes sem responsabilidade real (PRD 23.3) antes da fatia que os usa; o esqueleto nasce na fundação F0 (R-002 §5) |
 | Repositório público | Não há decisão de publicação; o proprietário escolheu privado |
 
 ## Consequências
 - Nenhum job de código é declarado aprovado antes de rodar de fato.
-- A proteção da `main` e a revisão obrigatória dependem da conta e das identidades reais no GitHub (ver `docs/STATUS.md`, bloqueios).
+- A proteção da `main` imposta pelo servidor depende de plano pago em repositório privado (PEND-REPO-01). A revisão obrigatória depende das identidades reais no GitHub: hoje só existe `adrptu`. Até lá vale a disciplina de processo, declarada como tal (`docs/STATUS.md`, bloqueio 2).
 
 ## Verificação
 - CI verde nos jobs ativos no primeiro push.

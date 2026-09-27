@@ -41,10 +41,39 @@ Sistema **"Do Talhão à O.S."**: plataforma de gestão agrícola integrada. Vai
     - S2: cálculo material incorreto, movimento duplicado, fluxo essencial bloqueado ou lentidão que inviabiliza o trabalho;
     - S3: problema limitado com alternativa segura;
     - S4: cosmético ou melhoria.
-  - Quebra da aprovação agronômica é tratada como S1 quando permite executar sem aprovação; caso contrário, S2.
+  - Quebra da aprovação agronômica, **quando a aprovação é exigida pelo domínio**, é S1 se permite executar sem aprovação; caso contrário, S2.
+    - As exceções expressas do PRD não são quebra: irrigação só com água (DEC-2609-10), manutenção e beneficiamento com responsável próprio.
+    - Produto na água (fertirrigação) volta a exigir aprovação.
   - Nenhuma versão sai com S1 ou S2 conhecido no escopo.
   - **Prioridade (P0–P3)** é a ordem de trabalho: impacto, risco, alcance, esforço e dependências.
-- O protocolo completo está em [`docs/parceria/protocolo.md`](docs/parceria/protocolo.md).
+- O protocolo completo está em [`docs/parceria/protocolo.md`](docs/parceria/protocolo.md). O comando-mestre da equipe, com as instruções do proprietário de 27/09/2026, tem como autor o Codex e será versionado em `docs/parceria/comando-mestre.md`. O essencial está nas seções 3.1 e 3.2 abaixo.
+
+### 3.1 Uma fatia por vez, validada pelo proprietário
+- **Uma fatia funcional ativa por vez:** pequena, útil e testável do começo ao fim. Só se prepara a dependência imediata dela.
+  - Consolidar os rascunhos em andamento antes de abrir outra frente.
+  - Nenhum rascunho vira código de produção só por estar escrito.
+- **Três ambientes:**
+  - desenvolvimento, com dados sintéticos;
+  - homologação: candidata identificada por commit e artefato, dados fictícios, serviços externos em sandbox, cobranças desligadas e ambiente visualmente reconhecível;
+  - produção: dados e credenciais isolados, recebe exatamente o artefato aprovado.
+  - Criar a configuração e a automação dos ambientes faz parte da autonomia técnica. Contratar plano ou gerar gasto exige autorização concreta, com estimativa de custo e fonte.
+- **Ciclo da fatia:**
+  1. O Codex escreve a tarefa e o roteiro; o Claude revisa.
+  2. O Claude implementa com testes; o Codex revisa e reproduz; o Claude corrige.
+  3. A candidata vai para homologação, e o proprietário recebe link, versão, o que está pronto, uma tarefa curta de teste e as limitações.
+  4. O feedback vira casos rastreáveis; corrige-se e ele retesta os itens afetados.
+- **Produção** só com o aceite explícito do proprietário sobre a candidata em homologação, o parecer favorável dos dois agentes e as verificações de liberação concluídas. Silêncio, prazo ou consenso só dos agentes não é aceite.
+
+### 3.2 Proteger o tempo do proprietário
+- Antes de pedir validação humana, rodar os testes proporcionais ao risco:
+  - unidade e propriedade para cálculos, unidades, estados e invariantes;
+  - integração com banco real de teste para transações, concorrência, reservas, custódia, idempotência, isolamento e permissões;
+  - contratos e falhas de dependências;
+  - ponta a ponta no navegador para a tarefa da fatia (normal, erro, permissão, repetição, conflito e, quando houver, sem internet);
+  - migração, acessibilidade, desempenho, segredos e vulnerabilidades, na medida do risco.
+- Todo defeito corrigido ganha proteção de regressão. Não esconder teste instável, ignorado ou falho.
+- Não chamar o proprietário para testar tela vazia ou fluxo que já se sabe quebrado.
+- Não passar a ele perguntas de programação. Perguntar só o que depende da realidade da fazenda, do aceite humano ou de autorização externa.
 
 ## 4. Regras de produto que o código não pode quebrar
 - **Master-detail** (Menu → Listagem → Detalhe → Sub-detalhe), uma ação primária por tela, estado sempre visível e próximo passo com verbo (PRD 4.2 e 4.3).

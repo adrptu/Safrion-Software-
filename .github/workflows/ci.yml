@@ -18,8 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
       - name: Conferir PRD, instruções e decisões
@@ -30,10 +30,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@v2
+      - uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -42,8 +42,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: aquasecurity/trivy-action@0.28.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: fs
           scanners: vuln,secret,misconfig
@@ -56,33 +56,36 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
-      - name: Há código de aplicação?
-        id: tem
-        run: |
-          if [ -f package.json ] && [ -f pnpm-lock.yaml ]; then echo "sim=true" >> "$GITHUB_OUTPUT"; else echo "sim=false" >> "$GITHUB_OUTPUT"; echo "Sem package.json/pnpm-lock.yaml: job de código não se aplica ainda (ADR 0002)."; fi
-      - uses: pnpm/action-setup@v4
-        if: steps.tem.outputs.sim == 'true'
-      - uses: actions/setup-node@v4
-        if: steps.tem.outputs.sim == 'true'
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Portão do contrato de código (R001-01)
+        id: contrato
+        # N/A só sem package.json e sem pnpm-lock.yaml; só um deles ou contrato incompleto = falha.
+        run: python3 tools/ci/checar_contrato_codigo.py
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        if: steps.contrato.outputs.ativo == 'true'
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        if: steps.contrato.outputs.ativo == 'true'
         with:
           node-version-file: .nvmrc
           cache: pnpm
       - name: Instalação reproduzível (ENG-006)
-        if: steps.tem.outputs.sim == 'true'
+        if: steps.contrato.outputs.ativo == 'true'
         run: pnpm install --frozen-lockfile
       - name: Formatação (ENG-010)
-        if: steps.tem.outputs.sim == 'true'
-        run: pnpm exec prettier --check .
+        if: steps.contrato.outputs.ativo == 'true'
+        run: pnpm run format:check
       - name: Lint (ENG-008/009)
-        if: steps.tem.outputs.sim == 'true'
-        run: pnpm exec eslint . --max-warnings 0
+        if: steps.contrato.outputs.ativo == 'true'
+        run: pnpm run lint
       - name: Tipos (ENG-007)
-        if: steps.tem.outputs.sim == 'true'
-        run: pnpm -r --if-present run typecheck
+        if: steps.contrato.outputs.ativo == 'true'
+        run: pnpm run typecheck
       - name: Testes
-        if: steps.tem.outputs.sim == 'true'
-        run: pnpm -r --if-present run test
+        if: steps.contrato.outputs.ativo == 'true'
+        run: pnpm run test
       - name: Build
-        if: steps.tem.outputs.sim == 'true'
-        run: pnpm -r --if-present run build
+        if: steps.contrato.outputs.ativo == 'true'
+        run: pnpm run build
