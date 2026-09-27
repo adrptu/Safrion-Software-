@@ -142,6 +142,7 @@ CREATE TABLE app.stock_movement (
   actor_id uuid NOT NULL,
   recorded_at timestamptz NOT NULL DEFAULT clock_timestamp(),
   UNIQUE (organization_id, id),
+  UNIQUE (organization_id, id, lot_id, location_id),
   UNIQUE (organization_id, intent_command_type, intent_key, intent_item),
   -- Ordem do extrato: cada comando sobe a versão do lote uma vez; itens da mesma intenção se ordenam pelo número.
   UNIQUE (organization_id, lot_id, lot_version, intent_item),
@@ -149,15 +150,23 @@ CREATE TABLE app.stock_movement (
   -- A unidade-base do movimento é a do lote (MATCH SIMPLE: estorno, sem quantidade, não é conferido aqui).
   FOREIGN KEY (organization_id, lot_id, base_unit) REFERENCES app.lot (organization_id, id, base_unit),
   FOREIGN KEY (organization_id, location_id) REFERENCES app.stock_location (organization_id, id),
-  FOREIGN KEY (organization_id, reverses_id) REFERENCES app.stock_movement (organization_id, id),
+  -- O estorno fica no mesmo lote e no mesmo local do movimento estornado.
+  FOREIGN KEY (organization_id, reverses_id, lot_id, location_id)
+    REFERENCES app.stock_movement (organization_id, id, lot_id, location_id),
   FOREIGN KEY (organization_id, conversion_id) REFERENCES app.packaging_conversion (organization_id, id),
+  -- IS NOT NULL explícito: num CHECK, "NULL > 0" dá nulo e o PostgreSQL deixa passar.
   CHECK (
     (kind = 'entrada' AND situation IS NOT NULL AND from_situation IS NULL AND to_situation IS NULL
-      AND reverses_id IS NULL AND base_quantity > 0 AND original_quantity > 0)
+      AND reverses_id IS NULL
+      AND original_quantity IS NOT NULL AND original_unit IS NOT NULL AND base_quantity IS NOT NULL
+      AND base_unit IS NOT NULL AND original_quantity > 0 AND base_quantity > 0)
     OR (kind = 'mudanca' AND situation IS NULL AND from_situation IS NOT NULL AND to_situation IS NOT NULL
-      AND from_situation <> to_situation AND reverses_id IS NULL AND base_quantity > 0 AND original_quantity > 0)
+      AND from_situation <> to_situation AND reverses_id IS NULL
+      AND original_quantity IS NOT NULL AND original_unit IS NOT NULL AND base_quantity IS NOT NULL
+      AND base_unit IS NOT NULL AND original_quantity > 0 AND base_quantity > 0)
     OR (kind = 'estorno' AND situation IS NULL AND from_situation IS NULL AND to_situation IS NULL
-      AND reverses_id IS NOT NULL AND base_quantity IS NULL AND original_quantity IS NULL)
+      AND reverses_id IS NOT NULL AND original_quantity IS NULL AND original_unit IS NULL
+      AND base_quantity IS NULL AND base_unit IS NULL AND conversion_id IS NULL)
   ),
   CHECK ((conversion_id IS NULL) = (conversion_version IS NULL))
 );

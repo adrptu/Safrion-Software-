@@ -78,14 +78,16 @@ interface LinhaMovimento {
   original_unit: string | null;
   lot_version: string;
   recorded_at: Date;
+  location_id: string;
 }
 
 // A data vai como texto: o tipo date do driver viraria instante no fuso local e poderia mudar de dia (PRD 10.0).
 const SELECT_LOTE = `SELECT id, code, expiry_date::text AS expiry_date, base_unit, version FROM app.lot WHERE id = $1`;
 const SELECT_MOVIMENTOS = `SELECT id, kind, situation, from_situation, to_situation, reverses_id,
     base_quantity::text AS base_quantity, base_unit, original_quantity::text AS original_quantity, original_unit,
-    lot_version, recorded_at
-  FROM app.stock_movement WHERE lot_id = $1 ORDER BY lot_version, intent_item`;
+    lot_version, recorded_at, location_id
+  FROM app.stock_movement WHERE lot_id = $1 AND ($2::uuid IS NULL OR location_id = $2)
+  ORDER BY lot_version, intent_item`;
 
 function paraDominio(m: LinhaMovimento): Movimento {
   switch (m.kind) {
@@ -109,17 +111,19 @@ function paraDominio(m: LinhaMovimento): Movimento {
   }
 }
 
-async function estadoDoLote(cliente: ClientBase, l: LinhaLote): Promise<EstadoLote> {
-  const movs = await cliente.query<LinhaMovimento>(SELECT_MOVIMENTOS, [l.id]);
+/** Estado do lote num local, ou em todos quando local é null (saldo agregado). */
+async function estadoDoLote(cliente: ClientBase, l: LinhaLote, local: string | null): Promise<EstadoLote> {
+  const movs = await cliente.query<LinhaMovimento>(SELECT_MOVIMENTOS, [l.id, local]);
   let estado = estadoInicial(loteDoDominio(l.code, l.expiry_date, l.base_unit as 'L' | 'kg' | 'un'));
   for (const m of movs.rows) estado = aplicar(estado, paraDominio(m));
   return estado;
 }
 
 /**
- * Efeito do envelope: registra um movimento no lote alvo (target.id) sobre a versão esperada. Lote de outra
- * organização é tratado como inexistente (RLS). O domínio (F0-a) valida quantidade, unidade, escala, item indivisível,
- * situação e saldo; a violação vira rejeição registrada.
+ * Efeito do envelope: registra um movimento no lote alvo (target.id), num local, sobre a versão esperada do lote. Lote
+ * de outra organização é tratado como inexistente (RLS). O domínio (F0-a) valida quantidade, unidade, escala, item
+ * indivisível, situação e saldo contra o estado DO LOCAL: um local não usa o saldo de outro, e o estorno só encontra o
+ * movimento estornado no mesmo local. A violação vira rejeição registrada.
  */
 export function registrarMovimento(pedido: PedidoMovimento): Efeito {
   return async (cliente, ctx) => {
@@ -140,7 +144,7 @@ export function registrarMovimento(pedido: PedidoMovimento): Efeito {
     if (!local.rowCount)
       throw new RejeicaoNegocio('LOCAL_NAO_ENCONTRADO', 'Local de estoque não encontrado.');
 
-    const antes = await estadoDoLote(cliente, loteAtual);
+    const antes = await estadoDoLote(cliente, loteAtual, pedido.locationId);
     const id = randomUUID();
     const m = pedido.movimento;
     let dominio: Movimento;
@@ -231,15 +235,20 @@ export interface SaldoTexto {
   readonly loteVencido: boolean;
 }
 
-/** Saldo do lote na data civil informada, reconstruído dos movimentos (RF-SUP-003); null se o lote não é visível. */
+/**
+ * Saldo do lote na data civil informada, reconstruído dos movimentos (RF-SUP-003): de um local, ou agregado de todos os
+ * locais quando o local não é informado. null se o lote (ou o local) não é visível ou não é um identificador válido.
+ */
 export async function saldoDoLote(
   cliente: ClientBase,
   lotId: string,
   hoje: string,
+  local?: string,
 ): Promise<SaldoTexto | null> {
-  const l = (await cliente.query<LinhaLote>(SELECT_LOTE, [ehUuid(lotId) ? lotId : null])).rows[0];
+  if (!ehUuid(lotId) || (local !== undefined && !ehUuid(local))) return null;
+  const l = (await cliente.query<LinhaLote>(SELECT_LOTE, [lotId])).rows[0];
   if (!l) return null;
-  const s = saldo(await estadoDoLote(cliente, l), hoje);
+  const s = saldo(await estadoDoLote(cliente, l, local ?? null), hoje);
   return {
     version: Number(l.version),
     fisico: paraTexto(s.fisico, 6),
@@ -253,6 +262,7 @@ export async function saldoDoLote(
 
 export interface LinhaExtrato {
   readonly movementId: string;
+  readonly locationId: string;
   readonly kind: 'entrada' | 'mudanca' | 'estorno';
   readonly lotVersion: number;
   readonly baseQuantity: string | null;
@@ -262,11 +272,17 @@ export interface LinhaExtrato {
   readonly recordedAt: string;
 }
 
-/** Extrato imutável do lote, na ordem das versões. */
-export async function extratoDoLote(cliente: ClientBase, lotId: string): Promise<LinhaExtrato[]> {
-  const r = await cliente.query<LinhaMovimento>(SELECT_MOVIMENTOS, [ehUuid(lotId) ? lotId : null]);
+/** Extrato imutável do lote, na ordem das versões: de um local, ou de todos quando o local não é informado. */
+export async function extratoDoLote(
+  cliente: ClientBase,
+  lotId: string,
+  local?: string,
+): Promise<LinhaExtrato[]> {
+  if (!ehUuid(lotId) || (local !== undefined && !ehUuid(local))) return [];
+  const r = await cliente.query<LinhaMovimento>(SELECT_MOVIMENTOS, [lotId, local ?? null]);
   return r.rows.map((m) => ({
     movementId: m.id,
+    locationId: m.location_id,
     kind: m.kind,
     lotVersion: Number(m.lot_version),
     baseQuantity: m.base_quantity,

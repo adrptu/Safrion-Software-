@@ -181,7 +181,9 @@ const COLUNAS_RECIBO = `receipt_id, command_type, idempotency_key, payload_hash,
  * - mesma chave e mesmo conteúdo: devolve o recibo registrado, marcado como já recebido, sem reavaliar;
  * - mesma chave com outro conteúdo: IDEMPOTENCY_KEY_REUSED, nada gravado;
  * - mesma chave em transação em curso por mais que o limite: IDEMPOTENCY_IN_PROGRESS;
- * - qualquer outra falha: FALHA_TRANSITORIA, nada gravado; repetir com a mesma chave e o mesmo conteúdo.
+ * - qualquer outra falha: FALHA_TRANSITORIA; repetir com a mesma chave e o mesmo conteúdo. Antes do COMMIT, nada foi
+ *   gravado; se a falha chega no COMMIT ou depois dele (conexão perdida), o resultado é incerto (resultadoIncerto) e o
+ *   reenvio devolve o recibo, se a transação chegou a confirmar.
  */
 export async function executarComando(
   pool: Pool,
@@ -210,6 +212,7 @@ export async function executarComando(
 
   const cliente = await pool.connect();
   let quebrado: Error | undefined;
+  let commitEnviado = false;
   try {
     await cliente.query('BEGIN');
     await cliente.query("SELECT set_config('app.organization_id', $1, true)", [org]);
@@ -376,6 +379,7 @@ export async function executarComando(
         i.correlationId,
       ],
     );
+    commitEnviado = true;
     await cliente.query('COMMIT');
     const r = registrado.rows[0];
     if (!r) throw new Error('registro da intenção não atualizado');
@@ -389,8 +393,14 @@ export async function executarComando(
     if (erro instanceof ErroComando) throw erro;
     throw new ErroComando(
       'FALHA_TRANSITORIA',
-      'A operação não terminou e nada foi gravado; repita com a mesma chave e o mesmo conteúdo.',
-      { causa: erro instanceof Error ? erro.message : String(erro), codigoPg: codigoPg(erro) },
+      commitEnviado
+        ? 'A confirmação não voltou e o resultado é incerto; repita com a mesma chave e o mesmo conteúdo: se já foi gravado, volta o recibo registrado.'
+        : 'A operação não terminou e nada foi gravado; repita com a mesma chave e o mesmo conteúdo.',
+      {
+        resultadoIncerto: commitEnviado,
+        causa: erro instanceof Error ? erro.message : String(erro),
+        codigoPg: codigoPg(erro),
+      },
     );
   } finally {
     cliente.release(quebrado);
