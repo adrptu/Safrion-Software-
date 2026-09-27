@@ -1,0 +1,6 @@
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.pdf binary
+docs/prd/fluxogramas/*.html linguist-generated=true
+docs/prd/fluxogramas/*.json linguist-generated=true

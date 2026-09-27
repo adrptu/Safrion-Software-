@@ -1,0 +1,22 @@
+name: Decisão do proprietário
+description: Assunto que só o proprietário decide (custo, conta, dados reais, publicação, regra de negócio material)
+labels: ["tipo:decisao", "precisa-proprietario"]
+body:
+  - type: textarea
+    id: pergunta
+    attributes:
+      label: O que precisa ser decidido, em linguagem simples
+    validations:
+      required: true
+  - type: textarea
+    id: opcoes
+    attributes:
+      label: Opções, com custo, risco e efeito de cada uma, e a recomendação dos agentes
+    validations:
+      required: true
+  - type: textarea
+    id: ate
+    attributes:
+      label: Até decidir, vale
+    validations:
+      required: true

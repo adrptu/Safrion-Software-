@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  documentacao:
+    name: Integridade da documentação
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Conferir PRD, instruções e decisões
+        run: python3 tools/docs/checar_docs.py
+
+  segredos:
+    name: Varredura de segredos (Gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  vulnerabilidades:
+    name: Vulnerabilidades e configuração (Trivy)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scanners: vuln,secret,misconfig
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+          ignore-unfixed: true
+
+  codigo:
+    name: Código (lockfile, lint, tipos, testes, build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Há código de aplicação?
+        id: tem
+        run: |
+          if [ -f package.json ] && [ -f pnpm-lock.yaml ]; then echo "sim=true" >> "$GITHUB_OUTPUT"; else echo "sim=false" >> "$GITHUB_OUTPUT"; echo "Sem package.json/pnpm-lock.yaml: job de código não se aplica ainda (ADR 0002)."; fi
+      - uses: pnpm/action-setup@v4
+        if: steps.tem.outputs.sim == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.tem.outputs.sim == 'true'
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Instalação reproduzível (ENG-006)
+        if: steps.tem.outputs.sim == 'true'
+        run: pnpm install --frozen-lockfile
+      - name: Formatação (ENG-010)
+        if: steps.tem.outputs.sim == 'true'
+        run: pnpm exec prettier --check .
+      - name: Lint (ENG-008/009)
+        if: steps.tem.outputs.sim == 'true'
+        run: pnpm exec eslint . --max-warnings 0
+      - name: Tipos (ENG-007)
+        if: steps.tem.outputs.sim == 'true'
+        run: pnpm -r --if-present run typecheck
+      - name: Testes
+        if: steps.tem.outputs.sim == 'true'
+        run: pnpm -r --if-present run test
+      - name: Build
+        if: steps.tem.outputs.sim == 'true'
+        run: pnpm -r --if-present run build

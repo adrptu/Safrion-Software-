@@ -1,0 +1,42 @@
+name: Defeito
+description: Falha reproduzível com evidência
+labels: ["tipo:defeito"]
+body:
+  - type: input
+    id: versao
+    attributes:
+      label: Versão e ambiente (commit, tela, aparelho)
+    validations:
+      required: true
+  - type: textarea
+    id: passos
+    attributes:
+      label: Passos para reproduzir
+    validations:
+      required: true
+  - type: textarea
+    id: observado
+    attributes:
+      label: Resultado observado e evidência
+    validations:
+      required: true
+  - type: textarea
+    id: esperado
+    attributes:
+      label: Resultado esperado, impacto para o usuário e requisito do PRD
+    validations:
+      required: true
+  - type: dropdown
+    id: severidade
+    attributes:
+      label: Severidade (PRD 22.1)
+      options: ["S1 — perda de dados, acesso indevido, comando físico perigoso, indisponibilidade crítica", "S2 — cálculo incorreto, movimento duplicado, fluxo essencial bloqueado", "S3 — limitado, com alternativa segura", "S4 — cosmético ou melhoria"]
+    validations:
+      required: true
+  - type: dropdown
+    id: prioridade
+    attributes:
+      label: Prioridade
+      options: ["P0", "P1", "P2", "P3"]
+    validations:
+      required: true

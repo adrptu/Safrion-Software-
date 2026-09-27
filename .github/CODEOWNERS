@@ -1,0 +1,3 @@
+# Responsável pelo repositório (proprietário). A revisão de código obrigatória por CODEOWNERS fica desligada
+# até decidir as identidades de revisão dos agentes no GitHub (docs/STATUS.md, bloqueio 2).
+*                @adrptu

@@ -1,0 +1,27 @@
+# dependências e builds
+node_modules/
+.pnpm-store/
+dist/
+build/
+.next/
+out/
+coverage/
+.turbo/
+# ambiente e segredos (use .env.example)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+# sistema e editores
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+# testes e relatórios
+playwright-report/
+test-results/
+# infraestrutura
+.terraform/
+*.tfstate
+*.tfstate.*

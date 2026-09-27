@@ -1,0 +1,34 @@
+name: Tarefa
+description: Incremento pequeno com critérios de aceite observáveis
+labels: ["tipo:tarefa"]
+body:
+  - type: textarea
+    id: problema
+    attributes:
+      label: Problema e resultado esperado
+    validations:
+      required: true
+  - type: input
+    id: prd
+    attributes:
+      label: Requisitos do PRD (IDs)
+      placeholder: "CMD-44, RSV-03, AC-77"
+    validations:
+      required: true
+  - type: textarea
+    id: aceite
+    attributes:
+      label: Critérios de aceite (precondição · ação · resultado)
+    validations:
+      required: true
+  - type: textarea
+    id: escopo
+    attributes:
+      label: Escopo, fora do escopo e dependências
+  - type: dropdown
+    id: prioridade
+    attributes:
+      label: Prioridade
+      options: ["P0", "P1", "P2", "P3"]
+    validations:
+      required: true
