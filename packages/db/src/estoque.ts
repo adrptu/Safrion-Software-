@@ -1,0 +1,278 @@
+import { randomUUID } from 'node:crypto';
+
+import {
+  aplicar,
+  decimal,
+  estadoInicial,
+  lote as loteDoDominio,
+  paraBase,
+  paraTexto,
+  quantidade,
+  saldo,
+  type EstadoLote,
+  type Movimento,
+  type Situacao,
+} from '@safrion/domain';
+import type { ClientBase } from 'pg';
+
+import type { Efeito } from './comando.js';
+import { ConflitoVersao, RejeicaoNegocio } from './erros.js';
+import { ehUuid } from './sessao.js';
+
+export type NovoMovimento =
+  | {
+      readonly tipo: 'entrada';
+      readonly quantidade: string;
+      readonly unidade: string;
+      readonly situacao: Situacao;
+    }
+  | {
+      readonly tipo: 'mudanca';
+      readonly quantidade: string;
+      readonly unidade: string;
+      readonly de: Situacao;
+      readonly para: Situacao;
+    }
+  | { readonly tipo: 'estorno'; readonly estornaId: string };
+
+export interface PedidoMovimento {
+  readonly lotId: string;
+  readonly locationId: string;
+  readonly movimento: NovoMovimento;
+}
+
+/**
+ * Conteúdo canônico do pedido para o hash da intenção (IDEM-13): decimal normalizado na mesma unidade ("1.0" e "1"
+ * são o mesmo conteúdo); outra unidade é outro conteúdo, mesmo que fisicamente igual (1000 mL e 1 L).
+ */
+export function conteudoDoMovimento(pedido: PedidoMovimento): Record<string, unknown> {
+  const m = pedido.movimento;
+  const q = (v: string) => decimal(v).toString();
+  const movimento =
+    m.tipo === 'estorno'
+      ? { tipo: m.tipo, estornaId: m.estornaId }
+      : m.tipo === 'entrada'
+        ? { tipo: m.tipo, quantidade: q(m.quantidade), unidade: m.unidade, situacao: m.situacao }
+        : { tipo: m.tipo, quantidade: q(m.quantidade), unidade: m.unidade, de: m.de, para: m.para };
+  return { lote: pedido.lotId, local: pedido.locationId, movimento };
+}
+
+interface LinhaLote {
+  id: string;
+  code: string;
+  expiry_date: string;
+  base_unit: string;
+  version: string;
+}
+
+interface LinhaMovimento {
+  id: string;
+  kind: 'entrada' | 'mudanca' | 'estorno';
+  situation: Situacao | null;
+  from_situation: Situacao | null;
+  to_situation: Situacao | null;
+  reverses_id: string | null;
+  base_quantity: string | null;
+  base_unit: string | null;
+  original_quantity: string | null;
+  original_unit: string | null;
+  lot_version: string;
+  recorded_at: Date;
+}
+
+// A data vai como texto: o tipo date do driver viraria instante no fuso local e poderia mudar de dia (PRD 10.0).
+const SELECT_LOTE = `SELECT id, code, expiry_date::text AS expiry_date, base_unit, version FROM app.lot WHERE id = $1`;
+const SELECT_MOVIMENTOS = `SELECT id, kind, situation, from_situation, to_situation, reverses_id,
+    base_quantity::text AS base_quantity, base_unit, original_quantity::text AS original_quantity, original_unit,
+    lot_version, recorded_at
+  FROM app.stock_movement WHERE lot_id = $1 ORDER BY lot_version, intent_item`;
+
+function paraDominio(m: LinhaMovimento): Movimento {
+  switch (m.kind) {
+    case 'entrada':
+      return {
+        id: m.id,
+        tipo: 'entrada',
+        quantidade: quantidade(m.base_quantity, m.base_unit),
+        situacao: m.situation as Situacao,
+      };
+    case 'mudanca':
+      return {
+        id: m.id,
+        tipo: 'mudanca',
+        quantidade: quantidade(m.base_quantity, m.base_unit),
+        de: m.from_situation as Situacao,
+        para: m.to_situation as Situacao,
+      };
+    case 'estorno':
+      return { id: m.id, tipo: 'estorno', estornaId: m.reverses_id as string };
+  }
+}
+
+async function estadoDoLote(cliente: ClientBase, l: LinhaLote): Promise<EstadoLote> {
+  const movs = await cliente.query<LinhaMovimento>(SELECT_MOVIMENTOS, [l.id]);
+  let estado = estadoInicial(loteDoDominio(l.code, l.expiry_date, l.base_unit as 'L' | 'kg' | 'un'));
+  for (const m of movs.rows) estado = aplicar(estado, paraDominio(m));
+  return estado;
+}
+
+/**
+ * Efeito do envelope: registra um movimento no lote alvo (target.id) sobre a versão esperada. Lote de outra
+ * organização é tratado como inexistente (RLS). O domínio (F0-a) valida quantidade, unidade, escala, item indivisível,
+ * situação e saldo; a violação vira rejeição registrada.
+ */
+export function registrarMovimento(pedido: PedidoMovimento): Efeito {
+  return async (cliente, ctx) => {
+    const esperada = ctx.intencao.target.expectedVersion;
+    if (!ehUuid(pedido.lotId) || pedido.lotId !== ctx.intencao.target.id || esperada === undefined) {
+      throw new RejeicaoNegocio(
+        'ALVO_INVALIDO',
+        'O movimento precisa do lote como alvo e da versão esperada.',
+      );
+    }
+    const loteAtual = (await cliente.query<LinhaLote>(`${SELECT_LOTE} FOR UPDATE`, [pedido.lotId])).rows[0];
+    if (!loteAtual) throw new RejeicaoNegocio('LOTE_NAO_ENCONTRADO', 'Lote não encontrado.');
+    const versaoAtual = Number(loteAtual.version);
+    if (versaoAtual !== esperada) throw new ConflitoVersao(versaoAtual);
+    const local = await cliente.query('SELECT 1 FROM app.stock_location WHERE id = $1', [
+      ehUuid(pedido.locationId) ? pedido.locationId : null,
+    ]);
+    if (!local.rowCount)
+      throw new RejeicaoNegocio('LOCAL_NAO_ENCONTRADO', 'Local de estoque não encontrado.');
+
+    const antes = await estadoDoLote(cliente, loteAtual);
+    const id = randomUUID();
+    const m = pedido.movimento;
+    let dominio: Movimento;
+    let original: { quantidade: string; unidade: string } | null = null;
+    switch (m.tipo) {
+      case 'entrada':
+        dominio = {
+          id,
+          tipo: 'entrada',
+          quantidade: quantidade(m.quantidade, m.unidade),
+          situacao: m.situacao,
+        };
+        original = { quantidade: m.quantidade, unidade: m.unidade };
+        break;
+      case 'mudanca':
+        dominio = {
+          id,
+          tipo: 'mudanca',
+          quantidade: quantidade(m.quantidade, m.unidade),
+          de: m.de,
+          para: m.para,
+        };
+        original = { quantidade: m.quantidade, unidade: m.unidade };
+        break;
+      case 'estorno':
+        dominio = { id, tipo: 'estorno', estornaId: m.estornaId };
+        break;
+    }
+    aplicar(antes, dominio); // lança ErroDominio se o movimento for inválido ou deixar saldo negativo
+    const base = dominio.tipo === 'estorno' ? null : paraBase(dominio.quantidade);
+    const novaVersao = versaoAtual + 1;
+    await cliente.query(
+      `INSERT INTO app.stock_movement (id, organization_id, lot_id, location_id, kind, situation, from_situation,
+         to_situation, reverses_id, original_quantity, original_unit, base_quantity, base_unit, lot_version,
+         intent_command_type, intent_key, intent_item, actor_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, 1, $17)`,
+      [
+        id,
+        ctx.organizationId,
+        pedido.lotId,
+        pedido.locationId,
+        m.tipo,
+        m.tipo === 'entrada' ? m.situacao : null,
+        m.tipo === 'mudanca' ? m.de : null,
+        m.tipo === 'mudanca' ? m.para : null,
+        m.tipo === 'estorno' ? m.estornaId : null,
+        original?.quantidade ?? null,
+        original?.unidade ?? null,
+        base ? base.valor.toString() : null,
+        base ? base.unidade : null,
+        novaVersao,
+        ctx.intencao.commandType,
+        ctx.intencao.idempotencyKey,
+        ctx.intencao.actorId,
+      ],
+    );
+    await cliente.query('UPDATE app.lot SET version = $2 WHERE id = $1', [pedido.lotId, novaVersao]);
+    const eventId = ctx.emitir({
+      type: 'estoque.movimento_registrado',
+      schemaVersion: 1,
+      entityType: 'lot',
+      entityId: pedido.lotId,
+      entityVersion: novaVersao,
+      previousVersion: versaoAtual,
+      payload: {
+        movementId: id,
+        kind: m.tipo,
+        baseQuantity: base?.valor.toString() ?? null,
+        baseUnit: base?.unidade,
+      },
+    });
+    return {
+      resultingVersion: novaVersao,
+      effects: { movements: [id] },
+      before: { version: versaoAtual },
+      after: { version: novaVersao, movementId: id, eventId },
+    };
+  };
+}
+
+export interface SaldoTexto {
+  readonly version: number;
+  readonly fisico: string;
+  readonly utilizavel: string;
+  readonly quarentena: string;
+  readonly bloqueado: string;
+  readonly vencido: string;
+  readonly loteVencido: boolean;
+}
+
+/** Saldo do lote na data civil informada, reconstruído dos movimentos (RF-SUP-003); null se o lote não é visível. */
+export async function saldoDoLote(
+  cliente: ClientBase,
+  lotId: string,
+  hoje: string,
+): Promise<SaldoTexto | null> {
+  const l = (await cliente.query<LinhaLote>(SELECT_LOTE, [ehUuid(lotId) ? lotId : null])).rows[0];
+  if (!l) return null;
+  const s = saldo(await estadoDoLote(cliente, l), hoje);
+  return {
+    version: Number(l.version),
+    fisico: paraTexto(s.fisico, 6),
+    utilizavel: paraTexto(s.utilizavel, 6),
+    quarentena: paraTexto(s.quarentena, 6),
+    bloqueado: paraTexto(s.bloqueado, 6),
+    vencido: paraTexto(s.vencido, 6),
+    loteVencido: s.loteVencido,
+  };
+}
+
+export interface LinhaExtrato {
+  readonly movementId: string;
+  readonly kind: 'entrada' | 'mudanca' | 'estorno';
+  readonly lotVersion: number;
+  readonly baseQuantity: string | null;
+  readonly baseUnit: string | null;
+  readonly originalQuantity: string | null;
+  readonly originalUnit: string | null;
+  readonly recordedAt: string;
+}
+
+/** Extrato imutável do lote, na ordem das versões. */
+export async function extratoDoLote(cliente: ClientBase, lotId: string): Promise<LinhaExtrato[]> {
+  const r = await cliente.query<LinhaMovimento>(SELECT_MOVIMENTOS, [ehUuid(lotId) ? lotId : null]);
+  return r.rows.map((m) => ({
+    movementId: m.id,
+    kind: m.kind,
+    lotVersion: Number(m.lot_version),
+    baseQuantity: m.base_quantity,
+    baseUnit: m.base_unit,
+    originalQuantity: m.original_quantity,
+    originalUnit: m.original_unit,
+    recordedAt: m.recorded_at.toISOString(),
+  }));
+}

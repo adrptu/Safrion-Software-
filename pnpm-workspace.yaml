@@ -4,3 +4,10 @@ packages:
 # Quarentena de 7 dias (em minutos) contra versões recém-publicadas e ainda não examinadas pela comunidade:
 # vale para todas as dependências, diretas e indiretas.
 minimumReleaseAge: 10080
+
+# Scripts de instalação desligados: são compilações nativas opcionais das dependências do Testcontainers (a conexão
+# SSH funciona sem elas). Nenhum pacote roda script de instalação sem decisão registrada aqui.
+allowBuilds:
+  cpu-features: false
+  protobufjs: false
+  ssh2: false

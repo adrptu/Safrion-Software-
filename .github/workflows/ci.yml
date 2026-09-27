@@ -120,6 +120,10 @@ jobs:
       - name: Testes
         if: steps.contrato.outputs.ativo == 'true'
         run: pnpm run test
+      - name: Integração com PostgreSQL real (ENG-025, ENG-034)
+        if: steps.contrato.outputs.ativo == 'true'
+        # Testcontainers sobe PostgreSQL 17 + PostGIS 3.5 fixado por digest; papéis, RLS, idempotência e isolamento.
+        run: pnpm run test:integration
       - name: Build
         if: steps.contrato.outputs.ativo == 'true'
         run: pnpm run build
