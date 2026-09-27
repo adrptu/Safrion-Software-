@@ -20,10 +20,10 @@ Atualizado em 27/09/2026 por Claude Code. Leia este arquivo no início de cada s
 | Código: instalação com lockfile, lint, tipos, testes, build | Configurado para ativar quando houver `package.json` e `pnpm-lock.yaml`; **não executado** |
 
 ## Bloqueios e pendências
-1. **Publicar no GitHub.** Usuário `adrptu`, confirmado pelo conector do Codex. Nome `do-talhao-a-os`, privado. O repositório remoto ainda não foi criado; o Codex faz as operações remotas depois da revisão deste pacote. Nesta máquina não há `gh`.
+1. **Publicar no GitHub.** Usuário `adrptu`, confirmado pelo conector do Codex. Nome `do-talhao-a-os`, privado. Publicação aprovada pelo Codex na R-003, só para executar a CI (não é aceite de produto). O Codex publica pelo GitHub Desktop. Nesta máquina não há `gh`.
 2. **Proteção da `main`: nada aplicado.** O arquivo `tools/github/protecao-main.json` é só configuração local.
    - Segundo a documentação oficial do GitHub, consultada em 27/09/2026, proteção de branch e rulesets em repositório **privado** exigem GitHub Pro, Team ou Enterprise; na conta Free, só em repositório público.
-   - Contratar o Pro é custo e depende do proprietário: decisão pendente PEND-REPO-01 em `docs/DECISIONS.md`.
+   - **O plano real da conta não foi verificado.** Pode já ser Pro. Verificar antes de qualquer proposta; PEND-REPO-01 só se aplica se o plano for Free.
    - Enquanto isso, a disciplina é de processo: pull request, CI verde e parecer escrito do outro agente em `docs/parceria/rodadas/`. Isso **não** é proteção imposta pelo servidor.
    - Os dois agentes operam com a mesma conta `adrptu`. A revisão independente é registrada nas rodadas; não existe identidade de revisor no GitHub e não será simulada.
 3. **Ferramentas locais.** Node.js e pnpm não estão no PATH comum, mas existem no runtime do Codex: Node v24.19.0 e pnpm 11.25.0, conferidos em 27/09/2026. Servem para verificação local. A instalação reproduzível do projeto não pode depender desse caminho: versões fixadas no repositório (`packageManager`, `.nvmrc`) quando houver código. Docker não confirmado.
@@ -43,4 +43,4 @@ Atualizado em 27/09/2026 por Claude Code. Leia este arquivo no início de cada s
 1. Publicar o repositório e ligar a proteção da `main`: `tools/github/configurar_protecao.sh`.
 2. PR da v3.10 do PRD. Autor: Claude; revisor: Codex.
 3. Matriz de cobertura do PRD (definido / falta decidir / falta implementar / falta verificar). Autor: Claude; o Codex a converte em backlog.
-4. Primeiro pull request de código, só depois do backlog priorizado e da confirmação do proprietário sobre o primeiro incremento.
+4. Depois da publicação e da primeira CI verde: F0 (fundação verificável) em `feat/f0-fundacao`, sequência acordada na R-002/R-003 (F0 → F1 → F2 → F3 → F4 → F5). O primeiro incremento técnico foi delegado aos agentes. Dependências externas concretas continuam com o proprietário: custo e conta de homologação, dados reais, aceite de produção.
