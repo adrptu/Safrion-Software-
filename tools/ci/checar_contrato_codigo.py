@@ -25,20 +25,28 @@ if tem_pkg != tem_lock:
     erros.append('package.json sem pnpm-lock.yaml' if tem_pkg else 'pnpm-lock.yaml sem package.json')
 else:
     try:
-        pkg = json.load(open(os.path.join(raiz, 'package.json'), encoding='utf-8'))
-    except Exception as e:
+        with open(os.path.join(raiz, 'package.json'), encoding='utf-8') as f:
+            pkg = json.load(f)
+    except (OSError, UnicodeError, json.JSONDecodeError) as e:
         pkg = {}; erros.append(f'package.json inválido: {e}')
+    if not isinstance(pkg, dict):
+        pkg = {}; erros.append('package.json deve conter um objeto JSON')
     pm = pkg.get('packageManager', '')
-    if not re.fullmatch(r'pnpm@\d+\.\d+\.\d+(\+sha\d+\.[0-9a-f]+)?', pm):
+    if not isinstance(pm, str) or not re.fullmatch(r'pnpm@\d+\.\d+\.\d+(\+sha\d+\.[0-9a-f]+)?', pm):
         erros.append(f'packageManager deve fixar pnpm@X.Y.Z (encontrado: {pm!r})')
-    if not (pkg.get('engines') or {}).get('node'):
-        erros.append('engines.node ausente')
+    engines = pkg.get('engines')
+    node = engines.get('node') if isinstance(engines, dict) else None
+    if not isinstance(node, str) or not node.strip():
+        erros.append('engines.node deve ser texto não vazio')
     nvmrc = os.path.join(raiz, '.nvmrc')
     if not os.path.isfile(nvmrc) or not re.fullmatch(r'v?\d+\.\d+\.\d+', open(nvmrc, encoding='utf-8').read().strip()):
         erros.append('.nvmrc ausente ou sem versão exata (X.Y.Z)')
-    scripts = pkg.get('scripts') or {}
-    falta = [s for s in SCRIPTS_OBRIGATORIOS if not str(scripts.get(s, '')).strip()]
-    if falta: erros.append('scripts obrigatórios ausentes na raiz: ' + ', '.join(falta))
+    scripts = pkg.get('scripts')
+    if not isinstance(scripts, dict):
+        scripts = {}; erros.append('scripts deve ser um objeto JSON')
+    falta = [s for s in SCRIPTS_OBRIGATORIOS
+             if not isinstance(scripts.get(s), str) or not scripts[s].strip()]
+    if falta: erros.append('scripts obrigatórios ausentes ou sem texto não vazio na raiz: ' + ', '.join(falta))
 
 if erros:
     for e in erros: print('ERRO:', e)
