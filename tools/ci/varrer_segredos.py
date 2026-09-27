@@ -9,7 +9,9 @@ sem intervalo. Passos, todos obrigatórios:
    commit raiz são lidos, não só os arquivos atuais.
 2. Varredura real, com segredos mascarados (--redact).
 3. Resumo conferido (cmd/root.go da v8.30.1): "scanned ~N bytes" com N > 0, nenhuma "partial scan" e resumo coerente
-   com o código de saída ("no leaks found" com 0, "leaks found: N" com 1).
+   com o código de saída ("no leaks found" com 0, "leaks found: N" com 1). O log sai colorido na CI
+   ("ESC[1mleaks found: 1ESC[0m", run 36339876662): as sequências ANSI são removidas antes dos regexes, porque o "m" final
+   do código encosta na palavra e anula o limite \b.
 4. Checkout inteiro: clone raso é recusado. No evento pull_request o checkout fica no commit de merge
    (refs/remotes/pull/N/merge); com fetch-depth 0 o "--all" alcança os commits do PR, da main e dos outros ramos. A CLI
    não chama a API do GitHub nem precisa de token, então não depende da permissão pull-requests (a gitleaks-action
@@ -24,6 +26,7 @@ if '--gitleaks' in args:
     i = args.index('--gitleaks'); gitleaks = args[i + 1]; del args[i:i + 2]
 raiz = os.path.abspath(args[0] if args else os.getcwd())
 FLAGS = ['git', '--no-banner', '--redact', '--exit-code', '1', '--log-level', 'info']
+ANSI = re.compile(r'\x1b\[[0-?]*[ -/]*[@-~]')
 BYTES = re.compile(r'scanned ~(\d+) bytes')
 PARCIAL = re.compile(r'partial scan', re.I)
 SEM_VAZAMENTO = re.compile(r'\bno leaks found\b')
@@ -43,7 +46,7 @@ def invalida(msg, saida=''):
 def varrer(repo):
     """Roda o Gitleaks e confere o resumo; devolve (saída, texto) só quando a varredura é íntegra."""
     p = subprocess.run([gitleaks, *FLAGS, repo], capture_output=True, text=True)
-    texto = (p.stdout or '') + (p.stderr or '')
+    texto = ANSI.sub('', (p.stdout or '') + (p.stderr or ''))
     if p.returncode not in (0, 1):
         invalida(f'Gitleaks terminou com erro (saída {p.returncode}) em {repo}', texto)
     if PARCIAL.search(texto):

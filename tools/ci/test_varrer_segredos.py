@@ -8,7 +8,10 @@ CI = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '.gith
 SIMULADO = textwrap.dedent('''
     # Imita o resumo da CLI 8.30.1 (cmd/root.go): "scanned ~N bytes", "no leaks found" / "leaks found: N", "partial scan".
     import json, os, subprocess, sys
-    modo = os.environ.get('SIM_MODO', 'ok'); repo = sys.argv[-1]
+    modo = os.environ.get('SIM_MODO', 'ok'); repo = sys.argv[-1]; cor = os.environ.get('SIM_COR') == '1'
+    def diz(nivel, msg):
+        # Com SIM_COR=1 imita o console colorido da CI: hora cinza, nível colorido e mensagem em negrito.
+        print(f'\x1b[90m3:04PM\x1b[0m \x1b[32m{nivel}\x1b[0m \x1b[1m{msg}\x1b[0m' if cor else f'{nivel} {msg}')
     canario = os.path.basename(repo).startswith('canario-segredos-')
     info = {'args': sys.argv[1:], 'canario': canario, 'token': 'GITHUB_TOKEN' in os.environ,
             'commits': int(subprocess.run(['git', 'rev-list', '--all', '--count'], cwd=repo, capture_output=True, text=True).stdout)}
@@ -17,17 +20,17 @@ SIMULADO = textwrap.dedent('''
         info['segredo_no_historico'] = '+GITHUB_TOKEN=ghp' in log
         info['segredo_na_arvore'] = os.path.exists(os.path.join(repo, 'config.env'))
     with open(os.environ['SIM_LOG'], 'a', encoding='utf-8') as f: f.write(json.dumps(info) + '\\n')
-    if modo == 'erro': print('ERR fatal'); sys.exit(126)
+    if modo == 'erro': diz('ERR', 'fatal'); sys.exit(126)
     if modo == 'sem_resumo': sys.exit(0)
-    if modo == 'parcial': print('WRN scanned ~0 bytes (0)'); print('WRN partial scan completed in 1ms'); print('WRN no leaks found in partial scan'); sys.exit(1)
-    if modo == 'zero_bytes': print('INF scanned ~0 bytes (0) in 1ms'); print('INF no leaks found'); sys.exit(0)
-    print('INF scanned ~2048 bytes (2.05 KB) in 12ms')
+    if modo == 'parcial': diz('WRN', 'scanned ~0 bytes (0)'); diz('WRN', 'partial scan completed in 1ms'); diz('WRN', 'no leaks found in partial scan'); sys.exit(1)
+    if modo == 'zero_bytes': diz('INF', 'scanned ~0 bytes (0) in 1ms'); diz('INF', 'no leaks found'); sys.exit(0)
+    diz('INF', 'scanned ~2048 bytes (2.05 KB) in 12ms')
     if canario:
-        if modo == 'canario_cego': print('INF no leaks found'); sys.exit(0)
-        print('WRN leaks found: 1'); sys.exit(1)
-    if modo == 'contraditorio': print('WRN leaks found: 2'); sys.exit(0)
-    if modo == 'vazamento': print('WRN leaks found: 1'); sys.exit(1)
-    print('INF no leaks found'); sys.exit(0)
+        if modo == 'canario_cego': diz('INF', 'no leaks found'); sys.exit(0)
+        diz('WRN', 'leaks found: 1'); sys.exit(1)
+    if modo == 'contraditorio': diz('WRN', 'leaks found: 2'); sys.exit(0)
+    if modo == 'vazamento': diz('WRN', 'leaks found: 1'); sys.exit(1)
+    diz('INF', 'no leaks found'); sys.exit(0)
 ''')
 
 
@@ -72,8 +75,8 @@ class VarrerSegredos(unittest.TestCase):
         git(r, 'update-ref', 'refs/remotes/pull/2/merge', 'HEAD'); git(r, 'branch', '-q', '-D', 'pr')
         return r
 
-    def rodar(self, repo, modo='ok', sem_token=False):
-        env = {**os.environ, 'SIM_MODO': modo, 'SIM_LOG': self.log}
+    def rodar(self, repo, modo='ok', sem_token=False, cor=False):
+        env = {**os.environ, 'SIM_MODO': modo, 'SIM_LOG': self.log, 'SIM_COR': '1' if cor else '0'}
         if sem_token:
             env.pop('GITHUB_TOKEN', None)
         p = subprocess.run([sys.executable, SCRIPT, '--gitleaks', self.bin, repo], capture_output=True, text=True, env=env)
@@ -156,6 +159,17 @@ class VarrerSegredos(unittest.TestCase):
         for proibido in ('gitleaks-action', 'GITHUB_TOKEN', 'secrets.', 'api.github.com'):
             self.assertNotIn(proibido, job)
         self.assertIn('varrer_segredos.py', job)
+
+    def test_log_colorido_da_ci(self):
+        # Run 36339876662: o canário achou o segredo (saída 1), mas "ESC[1mleaks found: 1" não casava com \bleaks.
+        r = self.repo(True)
+        casos = [('ok', 0, 'histórico inteiro varrido'), ('vazamento', 1, 'segredo encontrado'),
+                 ('parcial', 2, 'parcial'), ('zero_bytes', 2, 'bytes varridos'), ('contraditorio', 2, 'contradiz'),
+                 ('canario_cego', 2, 'não está validando')]
+        for modo, esperado, trecho in casos:
+            with self.subTest(modo=modo):
+                code, out = self.rodar(r, modo, cor=True)
+                self.assertEqual(code, esperado, out); self.assertIn(trecho, out)
 
     def test_canario_nao_fica_gravado_no_repositorio(self):
         with open(SCRIPT, encoding='utf-8') as a, open(__file__, encoding='utf-8') as b:
