@@ -5,8 +5,8 @@ Atualizado em 27/09/2026 por Claude Code. Leia este arquivo no início de cada s
 ## Onde estamos
 | Frente | Estado | Evidência / local |
 |---|---|---|
-| PRD | **v3.9 vigente** (26/09/2026). A v3.10 está em revisão: cap. 73 (confiabilidade transacional, offline, desempenho), cap. 74 (design system) e refinamentos da comparação externa. | `docs/PRD.md`; rascunhos fora do repositório até o pull request da v3.10 |
-| Fluxogramas | v3.9: 63 fluxos com raias | `docs/prd/fluxogramas/` |
+| PRD | **v3.10** (27/09/2026): caps. 73 (confiabilidade transacional, offline, desempenho), 74 (design system) e 75 (melhoria contínua), com as seções existentes reconciliadas. Vigente depois da revisão do Codex e do merge. | `docs/PRD.md`; registro em `docs/prd/v3_10-reconciliacao.md` |
+| Fluxogramas | v3.10: 14 dos 63 fluxos alterados, mesmas raias; v3.9 mantida ao lado | `docs/prd/fluxogramas/` |
 | Protótipo navegável | Em validação pelo proprietário. **Não é produção.** | https://claude.ai/artifact/WPDgqGvKX6CYTCdPjidBLo |
 | Repositório | Criado localmente em 27/09/2026 com documentação e CI. **Ainda não publicado no GitHub.** | este repositório |
 | Código de produto | **Nenhum.** Não há backend, banco, integração ou implantação. | — |
