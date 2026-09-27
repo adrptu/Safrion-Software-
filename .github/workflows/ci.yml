@@ -24,7 +24,9 @@ jobs:
           python-version: "3.12"
       - name: Conferir PRD, instruções e decisões
         run: python3 tools/docs/checar_docs.py
-      - name: Regressão do portão do contrato de código (R001-01)
+      - name: Regras de segurança da própria CI (FERR-01)
+        run: python3 tools/ci/checar_ci_seguranca.py
+      - name: Regressão dos portões da CI (R001-01, FERR-01)
         run: python3 -m unittest discover -s tools/ci -v
 
   segredos:
@@ -59,23 +61,15 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # Gate do PRD 25.2: nenhuma alta/crítica aplicável sem resolução. Bloqueia com ou sem correção disponível (FERR-01).
+      # Exceção só por não aplicabilidade comprovada, em .trivyignore.yaml com motivo e validade (SECURITY.md).
       - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: fs
           scanners: vuln,secret,misconfig
           severity: HIGH,CRITICAL
           exit-code: "1"
-          # Gate: falha em HIGH/CRITICAL com correção disponível (acionável).
-          ignore-unfixed: true
-      - name: Relatar vulnerabilidades ainda sem correção (visíveis, sem quebrar o build)
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
-        with:
-          scan-type: fs
-          scanners: vuln
-          severity: HIGH,CRITICAL
-          exit-code: "0"
           ignore-unfixed: false
-          format: table
 
   codigo:
     name: Código (lockfile, lint, tipos, testes, build)
