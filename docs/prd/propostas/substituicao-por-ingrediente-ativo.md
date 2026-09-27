@@ -2,9 +2,9 @@
 
 27/09/2026 · Autor: Claude · Revisores: Codex e Gemini (validação tripla, protocolo v4.1). Base: PRD v3.10 (`docs/prd-v3-10`, `f498ab4`).
 Pedidos do Adrianus: (1) o plano prevê a marca A; a compra escolhe a marca B com o mesmo ingrediente ativo, com concentração igual ou diferente. Como planejamento, compras e O.S. se conectam, com foco técnico no ingrediente ativo. (2) Alguns clientes só querem comprar e usar o produto comercial da preferência deles; o sistema precisa oferecer essa opção.
-**Situação:** proposta, revisão 3.
+**Situação:** proposta, revisão 4 (dois esclarecimentos do Codex; parecer do Gemini sobre o modo fixo em `gemini-pro-produto-fixo.json`, que analisou os trechos enviados e não executou testes). Aceite do Codex: especificação no escopo, sem prescrição nem homologação de produto.
 - A revisão 2 (`73806ac`) teve os trechos de interface e cálculo aceitos pelo Gemini 3.1 Pro, com três correções do Codex (registro no espaço de trabalho do Codex: `gemini-pro-ux-substituicao-final.json`). Isso é aceite de texto, não teste de produto nem homologação agronômica.
-- A revisão 3 incorpora essas três correções e o modo de produto fixo pedido pelo Adrianus. O modo fixo está em avaliação pelo Gemini.
+- A revisão 3 incorporou essas três correções e o modo de produto fixo pedido pelo Adrianus.
 - Nada foi aplicado ao PRD.
 
 ## 1. O que o PRD já garante (não duplicar)
@@ -79,7 +79,7 @@ Sugestões do Gemini que continuam rejeitadas:
 **Troca de marca (item com alternativas)**
 - **SUBST-01 · aceitar não é adotar:** B aceito continua fora do plano e das O.S. até ser adotado. Aceitar não muda quantidade, demanda, reserva nem aprovação de O.S.
 - **SUBST-02 · adoção por escopo:** adotar B numa área e período futuros cria a alocação e troca o atendimento só ali. A quantidade vem da dose definida dentro da bula de B. A demanda total é a soma das alocações, sem duplicar nem reservar duas vezes. Só as O.S. futuras do escopo perdem a aprovação (41.3).
-- **SUBST-03 · contratação:** "Aprovar contratação" de B só existe com B aceito e adotado num escopo que ainda precise do produto. Com B só aceito, compras compara, mas não contrata. Duas compras para a mesma parcela são impossíveis.
+- **SUBST-03 · contratação:** "Aprovar contratação" de B só existe com B aceito e adotado num escopo que ainda precise do produto. Com B só aceito, compras compara, mas não contrata. A contratação não excede nem duplica a necessidade líquida do mesmo escopo; pedidos parciais legítimos continuam possíveis.
 - **SUBST-04 · dose e unidade:** a comparação mostra ativo por hectare, dose de referência e faixa da bula de B na unidade resultante, sem densidade. A dose autorizada é do habilitado, dentro da bula. Referência fora da faixa invalida aquela equivalência; nova recomendação tem versão própria.
 - **SUBST-05 · custo:** ordenação por custo por hectare e custo total da área coberta (frete, prazo e embalagem), não por R$/L. Custo por hectare só com dose normalizada por hectare. Antes da dose autorizada, faixa só se a bula tiver faixa explícita aplicável e o contexto dimensional estiver completo. Senão, "Dose técnica pendente", sem custo e fora da ordenação por preço.
 - **SUBST-06 · sem efeito retroativo:** calda preparada, entregas feitas e realizado mantêm o produto real. O.S. em execução é pausada e só o saldo recebe nova versão.
@@ -89,11 +89,11 @@ Sugestões do Gemini que continuam rejeitadas:
 - **SUBST-10 · papéis:** a IA sugere candidatos com fonte e não aceita, não adota nem aprova. Compras aprova preço e condições. Aceite e adoção são do habilitado. Nada disso dispensa a aprovação de cada O.S. (41; APROV-05).
 
 **Produto fixo**
-- **SUBST-11 · escolha e herança:** um item novo nasce com o produto planejado preservado. "Usar somente este produto" marcado no plano padrão vale para os talhões que herdam; o ajuste local segue 40.3. Um item fixo não mostra candidatos, nem sugestão da IA, nem troca por preço ou falta.
-- **SUBST-12 · identidade exata:** fixo significa mesmo registro, formulação e concentração. Outra embalagem do mesmo produto atende. Código de fornecedor diferente para o mesmo produto do catálogo atende. Na cotação, proposta de outro produto aparece como "Fora do produto fixado" e não pode ser selecionada. Preço e prazo entre fornecedores do mesmo produto continuam comparáveis.
+- **SUBST-11 · escolha e herança:** um item novo nasce com o produto planejado preservado. "Usar somente este produto" marcado no plano padrão vale para os talhões que herdam; o ajuste local segue 40.3. Um item fixo não sugere candidatos, nem pela IA, nem troca por preço ou falta. A revisão técnica não altera a preferência comercial em silêncio: mudar o modo usa a permissão de alteração do plano (SUBST-15).
+- **SUBST-12 · identidade exata:** fixo significa mesmo registro, formulação e concentração. Outra embalagem ou qualquer lote apto do mesmo produto atende. Código de fornecedor diferente para o mesmo produto do catálogo atende. Proposta divergente já recebida na cotação fica visível só como ocorrência "Fora do produto fixado", sem recomendação e sem seleção. Preço e prazo entre fornecedores do mesmo produto continuam comparáveis.
 - **SUBST-13 · falta de estoque:** sem saldo nem entrega prevista a tempo, o item mostra a pendência "Falta [produto] para [necessidade]", com a ação de cada papel: compras "Cotar este produto", PCP "Reprogramar", habilitado "Revisar modo do item". Nada troca de produto sozinho.
-- **SUBST-14 · entrega diferente:** produto diferente do fixado fica registrado pelo produto real, em divergência (SU-06), e nunca atende O.S. do item fixo. Pode atender outra necessidade só se for o produto dela, depois de resolvida a divergência.
-- **SUBST-15 · mudança de modo e regularidade:** mudar o modo exige a permissão que já existe para alterar o item, com revisão versionada do escopo futuro e revalidação. Com alternativa adotada no escopo, a revisão diz qual produto fica fixo e mostra o impacto. Produto fixo que deixa de ser regular para a cultura e o alvo bloqueia o item para decisão técnica, sem forçar o uso.
+- **SUBST-14 · entrega diferente:** produto diferente do fixado fica registrado pelo produto real, em divergência (SU-06), e nunca atende O.S. do item fixo. O destino do material segue a decisão explícita de SU-06, nunca uma baixa ou entrada automática. Pode atender outra necessidade só se for o produto dela, depois de resolvida a divergência.
+- **SUBST-15 · mudança de modo e regularidade:** mudar o modo exige a permissão que já existe para alterar o item, com revisão versionada do escopo futuro e revalidação. Com alternativa adotada no escopo, a revisão diz qual produto fica fixo e mostra o impacto. Cada mudança de modo fica no histórico versionado do item, com autor, motivo e escopo. Produto fixo que deixa de ser regular para a cultura e o alvo bloqueia o item para decisão técnica, sem forçar o uso.
 
 ## 5. Interface: comparação na própria linha (Codex; aceita pelo Gemini com correções)
 
@@ -115,7 +115,7 @@ Situação técnica sempre em texto, com uma ação primária por estado e papel
 | Aceito para esta necessidade | Comparar (sem contratar) | Adotar no saldo futuro |
 | Adotado (escopo) | Aprovar contratação | Ver O.S. afetadas |
 | Recusado | sem ação; motivo em texto | Reabrir revisão |
-| Fora do produto fixado | sem ação; motivo em texto | Revisar modo do item |
+| Fora do produto fixado (ocorrência) | sem ação; motivo em texto | Revisar modo do item |
 
 Regras de interface:
 - compras nunca vê "Aceitar" nem "Adotar";
