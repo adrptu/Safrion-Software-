@@ -27,7 +27,7 @@ else:
     try:
         with open(os.path.join(raiz, 'package.json'), encoding='utf-8') as f:
             pkg = json.load(f)
-    except (OSError, UnicodeError, json.JSONDecodeError) as e:
+    except (OSError, ValueError, RecursionError) as e:
         pkg = {}; erros.append(f'package.json inválido: {e}')
     if not isinstance(pkg, dict):
         pkg = {}; erros.append('package.json deve conter um objeto JSON')

@@ -70,7 +70,7 @@ class PortaoContrato(unittest.TestCase):
                 pkg = dict(COMPLETO, scripts=valor)
                 code, ativo, out = self.rodar({'package.json': pkg, 'pnpm-lock.yaml': 'x', '.nvmrc': '24.19.0'})
                 self.assertEqual((code, ativo), (1, 'ativo=false'))
-                self.assertIn('scripts', out)
+                self.assertIn('scripts deve ser um objeto JSON', out)
 
     def test_cada_script_obrigatorio_deve_ser_texto_nao_vazio(self):
         for nome in COMPLETO['scripts']:
@@ -83,6 +83,18 @@ class PortaoContrato(unittest.TestCase):
 
     def test_json_malformado_falha_com_diagnostico(self):
         code, ativo, out = self.rodar({'package.json': '{invalido', 'pnpm-lock.yaml': 'x', '.nvmrc': '24.19.0'})
+        self.assertEqual((code, ativo), (1, 'ativo=false'))
+        self.assertIn('package.json inválido', out)
+
+    def test_json_profundo_falha_com_diagnostico(self):
+        profundo = '[' * 200_000 + '0' + ']' * 200_000
+        code, ativo, out = self.rodar({'package.json': profundo, 'pnpm-lock.yaml': 'x', '.nvmrc': '24.19.0'})
+        self.assertEqual((code, ativo), (1, 'ativo=false'))
+        self.assertIn('package.json inválido', out)
+
+    def test_inteiro_json_acima_do_limite_falha_com_diagnostico(self):
+        inteiro = '9' * 5000
+        code, ativo, out = self.rodar({'package.json': inteiro, 'pnpm-lock.yaml': 'x', '.nvmrc': '24.19.0'})
         self.assertEqual((code, ativo), (1, 'ativo=false'))
         self.assertIn('package.json inválido', out)
 
