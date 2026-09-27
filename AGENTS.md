@@ -75,6 +75,22 @@ Sistema **"Do Talhão à O.S."**: plataforma de gestão agrícola integrada. Vai
 - Não chamar o proprietário para testar tela vazia ou fluxo que já se sabe quebrado.
 - Não passar a ele perguntas de programação. Perguntar só o que depende da realidade da fazenda, do aceite humano ou de autorização externa.
 
+### 3.3 Benchmark e produtividade em cada fatia (pedido do proprietário, 27/09/2026)
+- **Referências.** Cinco referências do setor por **módulo**, com fonte oficial e data, reaproveitadas pelas fatias do mesmo módulo. Decisão por prática: adotar, adaptar, adiar ou descartar. Estar no mercado não prova que a regra de domínio está correta.
+- **Corte de cliques e de digitação:**
+  - herdar o contexto (organização, fazenda, safra, talhão, ordem, local, unidade), visível e corrigível;
+  - não pedir o mesmo dado duas vezes;
+  - nada de tela intermediária sem decisão, campo calculável ou confirmação redundante.
+- **Seleção rápida:**
+  - lista curta: um toque;
+  - catálogo: busca com sugestões;
+  - número: teclado numérico com unidade;
+  - data: atalhos;
+  - código físico: leitura.
+- **Último valor:** nunca para lote, dose, quantidade ou autorização.
+- **Medição:** cliques e digitação medidos nos testes ponta a ponta do mesmo cenário, antes e depois. Reduzir cliques nunca pode custar legibilidade, segurança, acessibilidade ou rastreabilidade.
+- **Detalhe:** `docs/parceria/rodadas/R-004-harness-item-a-e-produtividade.md` §3 e o design system (cap. 74).
+
 ## 4. Regras de produto que o código não pode quebrar
 - **Master-detail** (Menu → Listagem → Detalhe → Sub-detalhe), uma ação primária por tela, estado sempre visível e próximo passo com verbo (PRD 4.2 e 4.3).
 - **Toda O.S. agrícola tem aprovação agronômica individual**, inclusive operação mecânica (PRD 41; revisão v3.10, 73.9).
