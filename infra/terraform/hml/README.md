@@ -63,18 +63,28 @@ Na HML, a versão do segredo é só do Terraform. O passo 3 do R-006 (linha Segr
 
 ## Achados do scanner: decisão proposta (ainda não aprovada)
 
-Trivy 0.74, com os checks embutidos, sobre `41dd295`: 2 achados HIGH, os dois em `google_sql_database_instance.hml` (`hml/banco.tf`). Até existir aprovação ENG-005 registrada, **o gate continua vermelho**. A proposta está em `excecoes-trivy.proposta.yaml`, que fica inerte: nenhum comando passa `--ignorefile`.
+Trivy 0.74, com os checks embutidos, sobre `41dd295`: 2 achados HIGH, os dois em `google_sql_database_instance.hml` (`hml/banco.tf`). A regra do `SECURITY.md` é que alta ou crítica bloqueia e que a exceção só vale por não aplicabilidade comprovada, com prova e até 90 dias. **Até haver aprovação, o gate continua vermelho.**
 
-| Achado | Leitura | Evidência | Trava que tem de continuar | Validade |
-|---|---|---|---|---|
-| GCP-0015 ("does not require TLS") | **Falso positivo** neste perfil: `ssl_mode = "ENCRYPTED_ONLY"` exige TLS | Contraprova do Codex: o mesmo check acusa `ENCRYPTED_ONLY` e o texto claro, e só se cala com o `require_ssl` legado (`candidate-41dd295/evidence/tls-counterexamples`); issue aquasecurity/trivy#9999 | `ssl_mode = "ENCRYPTED_ONLY"`. Não trocar pelo `require_ssl` legado só para o scanner | até 31/12/2026, ou antes, se o Trivy corrigir |
-| GCP-0017 ("public internet address") | **Achado real**, exigido pelo desenho sem VPC | R-006: IP público sem redes autorizadas, só conector com IAM | nenhuma `authorized_networks`, `connector_enforcement = "REQUIRED"` e `ssl_mode = "ENCRYPTED_ONLY"` | até 31/12/2026 ou até o piloto, o que vier primeiro. No piloto, rever para IP privado |
+| Achado | Leitura | Proposta |
+|---|---|---|
+| **GCP-0015** ("does not require TLS") | **Não aplicável:** `ssl_mode = "ENCRYPTED_ONLY"` recusa conexão sem TLS. O check só reconhece o `require_ssl` legado. Contraprova do Codex: `candidate-41dd295/evidence/tls-counterexamples`; issue aquasecurity/trivy#9999 | Exceção em `excecoes-trivy.proposta.yaml`, só para `hml/banco.tf`, **até 28/10/2026** (30 dias). Motivo do prazo: reavaliar na próxima atualização do Trivy, depois da quarentena de 7 dias, e o estado da #9999. Não trocar pelo `require_ssl` legado só para calar o scanner |
+| **GCP-0017** ("public internet address") | **Risco real, mitigado**, e não falta de aplicabilidade: o IP existe. A mitigação é nenhuma rede autorizada, `connector_enforcement = "REQUIRED"` (só Auth Proxy ou conector, com IAM) e TLS obrigatório | **Não entra no arquivo de exceção:** o `SECURITY.md` não admite. Pede uma decisão à parte (abaixo) |
 
-- **Travas verificáveis:** `python3 checar_travas.py` confere o código, sem credencial, e pode rodar em PR. `checar_travas.py --plano <plan.json>` confere o plan resolvido.
-  - Contraprova: tirar `ssl_mode`, afrouxar `connector_enforcement`, acrescentar uma rede autorizada ou deixar o `ssl_mode` só em comentário faz o check falhar. O código atual passa.
-  - Se uma trava cair, a exceção correspondente perde a base.
-- **Escopo estrito:** cada exceção vale só para o seu ID em `hml/banco.tf`, nunca para o módulo inteiro. Não há supressão genérica.
-- **Aprovação:** exceção ENG-005 com escopo, risco, compensação, aprovador e vencimento, registrada na rodada. Só depois o CI passa a usar `--ignorefile excecoes-trivy.proposta.yaml`, com o arquivo renomeado sem `.proposta`. Parecer de agente não aprova.
+**GCP-0017: opções para o time decidir**
+1. **IP privado** (Private Service Access e Direct VPC egress no Cloud Run). O achado deixa de se aplicar, mas o operador perde o Auth Proxy do próprio computador: a concessão de vínculo passaria a exigir um caminho até a VPC (bastion ou VPN, com custo não levantado) ou uma mudança no fluxo do `vincular-identidade`.
+2. **Categoria nova de aceite de risco mitigado no `SECURITY.md`**, com as travas verificadas por guard na CI, prazo curto (até 30 dias, renovável com nova revisão), escopo por recurso e aprovação ENG-005 registrada. Muda uma política de segurança, então não é decisão só de agente.
+3. **Manter bloqueado**: o Terraform fica fora do `main` até 1 ou 2.
+
+**Recomendação do autor:** a opção 2 para a HML (só dados fictícios e a identidade dos testadores), com a 1 como condição antes do piloto. A decisão é do time, com o aprovador que o ENG-005 pedir.
+
+**Travas verificáveis** (valem para a exceção do GCP-0015 e para qualquer decisão sobre o GCP-0017):
+- `python3 checar_travas.py [módulo]` lê o HCL com analisador léxico: comentários `#`, `//` e `/* */`, strings com `${}` e heredocs não contam como trava.
+  - Exige exatamente uma `google_sql_database_instance`, a `hml`, em `banco.tf`, sem segunda instância no módulo nem no arquivo.
+  - Exige `settings` e `ip_configuration` uma vez cada; `ssl_mode` e `connector_enforcement` como texto literal; nenhuma `authorized_networks`, nem `dynamic`; nenhum `ignore_changes` que cubra uma trava.
+- `checar_travas.py --plano <plan.json>` faz o mesmo no plan resolvido e **recusa valor desconhecido** (`after_unknown`).
+- Regressões em `test_checar_travas.py`: 21 testes, com as três contraprovas do Codex (trava em `/* */`, segunda instância no mesmo arquivo, rede desconhecida no plan) e os casos achados na revisão do autor (índice legado `settings.0.…` no `ignore_changes`, arquivo de override, `.tf.json`, fonte de dados no plan).
+  - Rodar com `python3 -m unittest discover -s infra/terraform -p 'test_*.py'`.
+  - Proposta ao CI estático: rodar essas regressões e o `checar_travas.py`.
 
 ## A conferir no 1º plan e na 1ª publicação
 
