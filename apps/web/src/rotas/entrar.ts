@@ -24,6 +24,7 @@ import {
 } from '../seguranca/cookies';
 import { correlacaoDe, ErroRequisicao, exigirOrigem, lerCorpoLimitado } from '../seguranca/requisicao';
 import type { Dependencias } from '../servidor/ambiente';
+import type { FabricaOidc } from '../servidor/oidc';
 import { redirecionar } from './resposta';
 
 type Deps = Pick<Dependencias, 'banco' | 'origem' | 'registrador' | 'ambienteDoProcesso'>;
@@ -31,18 +32,31 @@ type Deps = Pick<Dependencias, 'banco' | 'origem' | 'registrador' | 'ambienteDoP
 const LIMITE_FORMULARIO_BYTES = 2048;
 const PAPEL = /^[a-z][a-z_]*$/;
 
+type Ativo =
+  | { readonly provedor: ProvedorIdentidade }
+  | {
+      readonly codigo: 'LOGIN_INDISPONIVEL' | 'PROVEDOR_INDISPONIVEL';
+      readonly motivo: 'SEM_CONFIGURACAO' | 'CONFIGURACAO_INVALIDA' | 'DESCOBERTA_FALHOU';
+    };
+
 /**
  * Provedor ativo: o de desenvolvimento só com a trava dupla (processo e banco dizem dev); fora disso, o adaptador OIDC do
- * Codex (passo 3 do R-006), que entra por `oidc`. Sem nenhum dos dois, o login fica indisponível, e não há atalho.
+ * Codex (passo 3 do R-006), pela fábrica da casca. Sem configuração, o login fica indisponível, e não há atalho. O
+ * adaptador só informa o código: descoberta que falhou é provedor indisponível (tentar de novo em alguns minutos);
+ * configuração inválida é login indisponível (avisar o responsável). O motivo vai só para o log.
  */
-async function provedorAtivo(
-  d: Deps,
-  oidc?: (d: Deps) => ProvedorIdentidade,
-): Promise<ProvedorIdentidade | null> {
+async function provedorAtivo(d: Deps, oidc?: FabricaOidc): Promise<Ativo> {
   if (await desenvolvimentoLiberado(d.banco, d.ambienteDoProcesso)) {
-    return criarProvedorDesenvolvimento(criarArmazemTransacaoLogin(d.banco), d.origem);
+    return { provedor: criarProvedorDesenvolvimento(criarArmazemTransacaoLogin(d.banco), d.origem) };
   }
-  return oidc ? oidc(d) : null;
+  try {
+    const provedor = oidc ? await oidc(d) : null;
+    return provedor ? { provedor } : { codigo: 'LOGIN_INDISPONIVEL', motivo: 'SEM_CONFIGURACAO' };
+  } catch (e) {
+    return e instanceof Error && e.message === 'PROVEDOR_INDISPONIVEL'
+      ? { codigo: 'PROVEDOR_INDISPONIVEL', motivo: 'DESCOBERTA_FALHOU' }
+      : { codigo: 'LOGIN_INDISPONIVEL', motivo: 'CONFIGURACAO_INVALIDA' };
+  }
 }
 
 /** Formulário urlencoded estrito: só os campos permitidos, sem repetição; qualquer outro campo é recusa de contrato. */
@@ -59,15 +73,19 @@ async function formulario(requisicao: Request, permitidos: readonly string[]): P
   return campos;
 }
 
-export function criarRotasEntrar(deps: () => Deps, oidc?: (d: Deps) => ProvedorIdentidade) {
+export function criarRotasEntrar(deps: () => Deps, oidc?: FabricaOidc) {
   /** Falha do fluxo de login: volta para /entrar só com o código, e registra o evento sem texto livre. */
   function recusar(
     d: Deps,
     correlationId: string,
     codigo: string,
     cookies: readonly string[] = [],
+    motivo?: string,
   ): Response {
-    d.registrador.registrar('aviso', 'login.recusado', correlationId, { codigo });
+    d.registrador.registrar('aviso', 'login.recusado', correlationId, {
+      codigo,
+      ...(motivo ? { motivo } : {}),
+    });
     return redirecionar(d.origem, `/entrar?erro=${codigo}`, cookies);
   }
 
@@ -102,10 +120,10 @@ export function criarRotasEntrar(deps: () => Deps, oidc?: (d: Deps) => ProvedorI
       const d = deps();
       const correlationId = correlacaoDe(requisicao);
       try {
-        const provedor = await provedorAtivo(d, oidc);
-        if (!provedor) return recusar(d, correlationId, 'LOGIN_INDISPONIVEL');
+        const ativo = await provedorAtivo(d, oidc);
+        if (!('provedor' in ativo)) return recusar(d, correlationId, ativo.codigo, [], ativo.motivo);
         const destino = caminhoInterno(new URL(requisicao.url).searchParams.get('destino')) ?? INICIO;
-        const { redirecionarPara, ticket, expiraEm } = await provedor.iniciar(destino);
+        const { redirecionarPara, ticket, expiraEm } = await ativo.provedor.iniciar(destino);
         const cabecalhos = new Headers({
           location: redirecionarPara.toString(),
           'cache-control': 'no-store',
@@ -126,9 +144,9 @@ export function criarRotasEntrar(deps: () => Deps, oidc?: (d: Deps) => ProvedorI
       const correlationId = correlacaoDe(requisicao);
       const semLogin = apagarCookie(COOKIE_LOGIN);
       try {
-        const provedor = await provedorAtivo(d, oidc);
-        if (!provedor) return recusar(d, correlationId, 'LOGIN_INDISPONIVEL', [semLogin]);
-        const resultado = await provedor.concluir({
+        const ativo = await provedorAtivo(d, oidc);
+        if (!('provedor' in ativo)) return recusar(d, correlationId, ativo.codigo, [semLogin], ativo.motivo);
+        const resultado = await ativo.provedor.concluir({
           ticket: lerCookie(requisicao, COOKIE_LOGIN),
           parametros: new URL(requisicao.url).searchParams,
         });

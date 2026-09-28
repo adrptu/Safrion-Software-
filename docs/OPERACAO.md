@@ -28,9 +28,17 @@ Sem shell na imagem, diagnóstico é por log e por `/saude`, não por `docker ex
 - `DATABASE_URL`: papel `app_runtime`, vinda do cofre de segredos;
 - `SAFRION_ORIGEM`: https;
 - `SAFRION_AMBIENTE=hml`;
-- `SAFRION_VERSAO` e `SAFRION_COMMIT`.
+- `SAFRION_VERSAO` e `SAFRION_COMMIT`;
+- `SAFRION_OIDC_ISSUER` (https, sem `.well-known`), `SAFRION_OIDC_CLIENT_ID` e `SAFRION_OIDC_CLIENT_SECRET`, este vindo do cofre de segredos.
 
-O login em HML depende do adaptador OIDC. O provedor de desenvolvimento fica fechado fora de `dev`.
+Login em HML (adaptador OIDC do Codex, ligado pela casca):
+- o callback a cadastrar no provedor é `${SAFRION_ORIGEM}/entrar/retorno`; ele nunca vem da requisição;
+- a descoberta acontece no primeiro login e vale para o processo inteiro; se falhar, o próximo login tenta de novo, sem reiniciar;
+- sem as três variáveis, ou com configuração inválida, `/entrar` mostra "acesso indisponível". Com o provedor fora do ar, mostra "o serviço de acesso não respondeu";
+- no log, `login.recusado` traz o motivo como código: `SEM_CONFIGURACAO`, `CONFIGURACAO_INVALIDA` ou `DESCOBERTA_FALHOU`. Nenhum segredo, código ou token é registrado;
+- só entra quem tem vínculo explícito entre issuer + subject e um usuário da organização. O e-mail nunca vincula.
+
+O provedor de desenvolvimento fica fechado fora de `dev`.
 
 **Preparo do banco** (alvo `preparo`, ou `node packages/db/dist/cli/preparar-banco.js --ambiente hml --banco <nome>` depois do build). Lê:
 - `SAFRION_ADMIN_URL`: o administrador do servidor no banco `postgres`, sem superusuário no Cloud SQL;
