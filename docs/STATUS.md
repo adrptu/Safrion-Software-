@@ -17,8 +17,8 @@ Atualizado em 27/09/2026 por Codex. Estado desta proposta; PR aberto não signif
 - PR #5, [CI 36345797548](https://github.com/adrptu/Safrion-Software-/actions/runs/36345797548): instalação com lockfile, versões, formatação, lint, tipos, 49 testes e build passaram. Gitleaks conferiu canário e histórico.
 - O job Trivy dessa execução terminou verde, mas **não comprovou cobertura**: versão 0.70 leu somente o primeiro documento do lockfile pnpm 12 e omitiu as dependências do projeto (FERR-05). Esse verde não libera a candidata.
 - Esta correção fixa Trivy 0.74.0 e exige inventário JSON com as dependências diretas de produção dos manifestos (`package.json`, `packages/*`, `apps/*`). Relatório vazio, inválido, sem alvo pnpm ou sem nome/versão esperado falha. O exit-code bloqueante do scanner continua obrigatório.
-- O verificador de cobertura é um smoke test das dependências diretas fixadas; não certifica transitivas, ferramentas de desenvolvimento ou ausência de vulnerabilidades. Versões em intervalo, referências workspace/URL e estruturas novas exigem revisão explícita do contrato.
-- Regressões locais do FERR-05: `python3 -m unittest discover -s tools/ci -p 'test_conferir_cobertura_trivy.py' -v`, 14 testes passaram. A execução real da proposta e o parecer independente ficam no PR e na issue #1; não se presume aprovação pelo código presente aqui.
+- O verificador de cobertura é um smoke test das dependências diretas fixadas; não certifica transitivas, ferramentas de desenvolvimento ou ausência de vulnerabilidades. `workspace:*` é aceito somente para nomes internos existentes e unívocos em `packages/*` ou `apps/*`; suas dependências externas continuam obrigatórias no inventário. Versões em intervalo, outras referências workspace/URL/file/link e estruturas novas exigem revisão explícita do contrato. A resolução real do workspace continua verificada pela instalação com lockfile congelado.
+- Regressões locais do FERR-05: `python3 -m unittest discover -s tools/ci -p 'test_conferir_cobertura_trivy.py' -v`, 24 testes passaram após adaptação para pacotes internos. Relatórios anteriores de CI não validam este delta; execução remota e pareceres por versão ficam no PR e na issue #1. Não se presume aprovação pelo código presente aqui.
 
 ## Próximo passo e responsáveis
 
@@ -33,3 +33,4 @@ Atualizado em 27/09/2026 por Codex. Estado desta proposta; PR aberto não signif
 - Conta, gastos, dados de clientes e produção dependem da autorização concreta do proprietário.
 - Os agentes usam a mesma identidade GitHub; parecer independente precisa identificar agente, versão, testes e limites. Proteção efetiva da `main` deve ser comprovada pelo servidor; um arquivo de configuração não prova aplicação.
 - Versões da fundação: `docs/architecture/versions.md`. Decisões materiais pendentes: `docs/DECISIONS.md`.
+

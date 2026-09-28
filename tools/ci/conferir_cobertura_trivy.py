@@ -28,14 +28,30 @@ def dependencias_esperadas(raiz):
     # Estrutura contratada em AGENTS.md; não lê node_modules nem fixtures.
     manifestos = [raiz / "package.json", *sorted(raiz.glob("packages/*/package.json")),
                   *sorted(raiz.glob("apps/*/package.json"))]
+    dados = [(caminho, ler_objeto(caminho)) for caminho in manifestos]
+    internos = set()
+    for caminho, manifesto in dados[1:]:
+        nome = manifesto.get("name")
+        if nome is None:
+            continue
+        if not isinstance(nome, str) or not nome:
+            raise ValueError(f"{caminho.relative_to(raiz)}: nome interno inválido")
+        if nome in internos:
+            raise ValueError(f"nome interno duplicado: {nome}")
+        internos.add(nome)
     esperadas = set()
-    for caminho in manifestos:
-        manifesto = ler_objeto(caminho)
+    for caminho, manifesto in dados:
         for campo in ("dependencies", "optionalDependencies"):
             dependencias = manifesto.get(campo, {})
             if not isinstance(dependencias, dict):
                 raise ValueError(f"{caminho.relative_to(raiz)}: {campo} inválido")
             for nome, versao in dependencias.items():
+                if versao == "workspace:*":
+                    if nome not in internos:
+                        raise ValueError(f"{caminho.relative_to(raiz)}: pacote interno ausente: {nome}")
+                    # Código local não aparece no inventário do registro. Suas
+                    # dependências externas continuam examinadas neste laço.
+                    continue
                 if not isinstance(versao, str) or not VERSAO_EXATA.fullmatch(versao):
                     raise ValueError(f"{caminho.relative_to(raiz)}: {nome} exige versão exata; revisar contrato")
                 esperadas.add((nome, versao))
