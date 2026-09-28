@@ -7,5 +7,5 @@ misconfigurations:
   - id: GCP-0015
     paths:
       - "hml/banco.tf"
-    statement: "Não aplicável: ssl_mode ENCRYPTED_ONLY recusa conexão sem TLS; o check do Trivy 0.74 só reconhece o require_ssl legado (aquasecurity/trivy#9999; contraprova do Codex em candidate-41dd295/evidence/tls-counterexamples). Prova mantida por checar_travas.py na CI. Prazo de 30 dias para reavaliar na próxima atualização do Trivy e o estado da #9999."
+    statement: "Não aplicável: ssl_mode ENCRYPTED_ONLY recusa conexão sem TLS; o Trivy 0.74 com checks embutidos acusa GCP-0015 com ENCRYPTED_ONLY, e nas fixtures só o require_ssl legado silenciou o achado (aquasecurity/trivy#9999; contraprova do Codex em candidate-41dd295/evidence/tls-counterexamples). Prova mantida por checar_travas.py na CI. Prazo de 30 dias para reavaliar na próxima atualização do Trivy e o estado da #9999."
     expired_at: 2026-10-28

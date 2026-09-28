@@ -67,7 +67,7 @@ Trivy 0.74, com os checks embutidos, sobre `41dd295`: 2 achados HIGH, os dois em
 
 | Achado | Leitura | Proposta |
 |---|---|---|
-| **GCP-0015** ("does not require TLS") | **Não aplicável:** `ssl_mode = "ENCRYPTED_ONLY"` recusa conexão sem TLS. O check só reconhece o `require_ssl` legado. Contraprova do Codex: `candidate-41dd295/evidence/tls-counterexamples`; issue aquasecurity/trivy#9999 | Exceção em `excecoes-trivy.proposta.yaml`, só para `hml/banco.tf`, **até 28/10/2026** (30 dias). Motivo do prazo: reavaliar na próxima atualização do Trivy, depois da quarentena de 7 dias, e o estado da #9999. Não trocar pelo `require_ssl` legado só para calar o scanner |
+| **GCP-0015** ("does not require TLS") | **Não aplicável:** `ssl_mode = "ENCRYPTED_ONLY"` recusa conexão sem TLS. O Trivy 0.74, com checks embutidos, acusa GCP-0015 com `ENCRYPTED_ONLY`, e nas fixtures só o `require_ssl` legado silenciou o achado. Não se demonstrou que o check desconhece todo `ssl_mode`. Contraprova do Codex: `candidate-41dd295/evidence/tls-counterexamples`; issue aquasecurity/trivy#9999 | Exceção em `excecoes-trivy.proposta.yaml`, só para `hml/banco.tf`, **até 28/10/2026** (30 dias). Motivo do prazo: reavaliar na próxima atualização do Trivy, depois da quarentena de 7 dias, e o estado da #9999. Não trocar pelo `require_ssl` legado só para calar o scanner |
 | **GCP-0017** ("public internet address") | **Risco real, mitigado**, e não falta de aplicabilidade: o IP existe. A mitigação é nenhuma rede autorizada, `connector_enforcement = "REQUIRED"` (só Auth Proxy ou conector, com IAM) e TLS obrigatório | **Não entra no arquivo de exceção:** o `SECURITY.md` não admite. Pede uma decisão à parte (abaixo) |
 
 **GCP-0017: opções para o time decidir**
