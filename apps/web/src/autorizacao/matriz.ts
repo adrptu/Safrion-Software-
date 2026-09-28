@@ -6,14 +6,14 @@
 export const COMANDOS = ['estoque.registrar-entrada'] as const;
 export type Comando = (typeof COMANDOS)[number];
 
-export const LEITURAS = ['estoque'] as const;
+export const LEITURAS = ['estoque', 'cadastros'] as const;
 export type Leitura = (typeof LEITURAS)[number];
 
 const MATRIZ: Readonly<
   Record<string, { readonly comandos: readonly Comando[]; readonly leituras: readonly Leitura[] }>
 > = {
-  almoxarife: { comandos: ['estoque.registrar-entrada'], leituras: ['estoque'] },
-  gerente: { comandos: [], leituras: ['estoque'] },
+  almoxarife: { comandos: ['estoque.registrar-entrada'], leituras: ['estoque', 'cadastros'] },
+  gerente: { comandos: [], leituras: ['estoque', 'cadastros'] },
 };
 
 export function ehComando(valor: string): valor is Comando {
@@ -28,6 +28,16 @@ export function podeExecutar(papel: string, comando: string): boolean {
 export function podeLer(papel: string, leitura: string): boolean {
   const regras = Object.hasOwn(MATRIZ, papel) ? MATRIZ[papel] : undefined;
   return regras !== undefined && (regras.leituras as readonly string[]).includes(leitura);
+}
+
+const NOMES: ReadonlyMap<string, string> = new Map([
+  ['almoxarife', 'Almoxarife'],
+  ['gerente', 'Gerente'],
+]);
+
+/** Nome do papel para a tela; papel fora da matriz aparece como veio, sem ganhar permissão por isso. */
+export function nomeDoPapel(papel: string): string {
+  return NOMES.get(papel) ?? papel;
 }
 
 /** Papéis que a matriz conhece, para o teste papel × comando. */

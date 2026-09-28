@@ -10,6 +10,14 @@ export {
   type EstadoSaude,
   type NomeAmbiente,
 } from './ambiente.js';
+export {
+  listarLocais,
+  listarProdutos,
+  perfilDaSessao,
+  type LocalResumo,
+  type Perfil,
+  type ProdutoResumo,
+} from './cadastros.js';
 export { VERSAO_CANONICA, canonizar, hashCanonico } from './canonico.js';
 export {
   executarComando,
@@ -28,9 +36,11 @@ export {
   conteudoDoMovimento,
   pedidoDeMovimento,
   extratoDoLote,
+  listarLotes,
   registrarMovimento,
   saldoDoLote,
   type LinhaExtrato,
+  type LoteResumo,
   type NovoMovimento,
   type PedidoMovimento,
   type SaldoTexto,

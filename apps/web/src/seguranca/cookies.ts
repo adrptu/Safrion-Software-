@@ -10,7 +10,14 @@ const NOME = /^[A-Za-z0-9_-]+$/;
 
 /** Valor do cookie; ausente, vazio ou repetido na requisição (tentativa de plantar outro) devolve undefined. */
 export function lerCookie(requisicao: Request, nome: string): string | undefined {
-  const cabecalho = requisicao.headers.get('cookie');
+  return lerCookieDoCabecalho(requisicao.headers.get('cookie'), nome);
+}
+
+/**
+ * A mesma regra sobre o cabeçalho Cookie bruto, para as páginas (o cookies() do Next junta nomes repetidos e esconderia
+ * a tentativa de plantar um segundo cookie).
+ */
+export function lerCookieDoCabecalho(cabecalho: string | null, nome: string): string | undefined {
   if (cabecalho === null) return undefined;
   const valores = cabecalho
     .split(';')

@@ -107,9 +107,10 @@ interface LinhaMovimento {
 
 // A data vai como texto: o tipo date do driver viraria instante no fuso local e poderia mudar de dia (PRD 10.0).
 const SELECT_LOTE = `SELECT id, code, expiry_date::text AS expiry_date, base_unit, version FROM app.lot WHERE id = $1`;
-const SELECT_MOVIMENTOS = `SELECT id, kind, situation, from_situation, to_situation, reverses_id,
+const COLUNAS_MOVIMENTO = `id, kind, situation, from_situation, to_situation, reverses_id,
     base_quantity::text AS base_quantity, base_unit, original_quantity::text AS original_quantity, original_unit,
-    lot_version, recorded_at, location_id
+    lot_version, recorded_at, location_id`;
+const SELECT_MOVIMENTOS = `SELECT ${COLUNAS_MOVIMENTO}
   FROM app.stock_movement WHERE lot_id = $1 AND ($2::uuid IS NULL OR location_id = $2)
   ORDER BY lot_version, intent_item`;
 
@@ -138,8 +139,12 @@ function paraDominio(m: LinhaMovimento): Movimento {
 /** Estado do lote num local, ou em todos quando local é null (saldo agregado). */
 async function estadoDoLote(cliente: ClientBase, l: LinhaLote, local: string | null): Promise<EstadoLote> {
   const movs = await cliente.query<LinhaMovimento>(SELECT_MOVIMENTOS, [l.id, local]);
+  return reconstruir(l, movs.rows);
+}
+
+function reconstruir(l: LinhaLote, movimentos: readonly LinhaMovimento[]): EstadoLote {
   let estado = estadoInicial(loteDoDominio(l.code, l.expiry_date, l.base_unit as 'L' | 'kg' | 'un'));
-  for (const m of movs.rows) estado = aplicar(estado, paraDominio(m));
+  for (const m of movimentos) estado = aplicar(estado, paraDominio(m));
   return estado;
 }
 
@@ -277,7 +282,11 @@ export async function saldoDoLote(
   if (!ehUuid(lotId) || (local !== undefined && !ehUuid(local))) return null;
   const l = (await cliente.query<LinhaLote>(SELECT_LOTE, [lotId])).rows[0];
   if (!l) return null;
-  const s = saldo(await estadoDoLote(cliente, l, local ?? null), hoje);
+  return saldoEmTexto(l, await estadoDoLote(cliente, l, local ?? null), hoje);
+}
+
+function saldoEmTexto(l: LinhaLote, estado: EstadoLote, hoje: string): SaldoTexto {
+  const s = saldo(estado, hoje);
   return {
     version: Number(l.version),
     fisico: paraTexto(s.fisico, 6),
@@ -289,10 +298,85 @@ export async function saldoDoLote(
   };
 }
 
+export interface LoteResumo {
+  readonly id: string;
+  readonly codigo: string;
+  readonly produtoId: string;
+  readonly produto: string;
+  /** Data civil AAAA-MM-DD. */
+  readonly validade: string;
+  readonly unidade: string;
+  /** Movimentos registrados em todos os locais: zero é lote ainda sem entrada. */
+  readonly movimentos: number;
+  readonly saldo: SaldoTexto;
+}
+
+interface LinhaLoteProduto extends LinhaLote {
+  product_id: string;
+  product_name: string;
+}
+
+const SELECT_LOTES = `SELECT l.id, l.code, l.expiry_date::text AS expiry_date, l.base_unit, l.version, l.product_id,
+    p.name AS product_name
+  FROM app.lot l JOIN app.product p ON p.organization_id = l.organization_id AND p.id = l.product_id
+  WHERE ($1::uuid IS NULL OR l.id = $1) AND ($2::uuid IS NULL OR l.product_id = $2)
+  ORDER BY p.name, l.code, l.id`;
+const SELECT_MOVIMENTOS_DOS_LOTES = `SELECT lot_id, ${COLUNAS_MOVIMENTO}
+  FROM app.stock_movement WHERE lot_id = ANY($1::uuid[])
+  ORDER BY lot_id, lot_version, intent_item`;
+
+/**
+ * Lotes visíveis da organização com o saldo agregado de todos os locais na data civil informada: a listagem do Estoque, o
+ * detalhe (filtro por lote) e os lotes de um produto (filtro por produto). Duas consultas, qualquer que seja o número de
+ * lotes; o saldo sai do mesmo domínio que valida o movimento. Filtro com identificador inválido devolve lista vazia.
+ */
+export async function listarLotes(
+  cliente: ClientBase,
+  hoje: string,
+  filtro: { readonly lote?: string; readonly produto?: string } = {},
+): Promise<LoteResumo[]> {
+  if (
+    (filtro.lote !== undefined && !ehUuid(filtro.lote)) ||
+    (filtro.produto !== undefined && !ehUuid(filtro.produto))
+  )
+    return [];
+  const lotes = (
+    await cliente.query<LinhaLoteProduto>(SELECT_LOTES, [filtro.lote ?? null, filtro.produto ?? null])
+  ).rows;
+  if (lotes.length === 0) return [];
+  const movimentos = await cliente.query<LinhaMovimento & { lot_id: string }>(SELECT_MOVIMENTOS_DOS_LOTES, [
+    lotes.map((l) => l.id),
+  ]);
+  const porLote = new Map<string, LinhaMovimento[]>();
+  for (const m of movimentos.rows) {
+    const lista = porLote.get(m.lot_id);
+    if (lista) lista.push(m);
+    else porLote.set(m.lot_id, [m]);
+  }
+  return lotes.map((l) => {
+    const lista = porLote.get(l.id) ?? [];
+    return {
+      id: l.id,
+      codigo: l.code,
+      produtoId: l.product_id,
+      produto: l.product_name,
+      validade: l.expiry_date,
+      unidade: l.base_unit,
+      movimentos: lista.length,
+      saldo: saldoEmTexto(l, reconstruir(l, lista), hoje),
+    };
+  });
+}
+
 export interface LinhaExtrato {
   readonly movementId: string;
   readonly locationId: string;
   readonly kind: 'entrada' | 'mudanca' | 'estorno';
+  /** Situação da entrada; de e para da mudança; o movimento estornado. Nulos quando não se aplicam ao tipo. */
+  readonly situacao: Situacao | null;
+  readonly de: Situacao | null;
+  readonly para: Situacao | null;
+  readonly estornaId: string | null;
   readonly lotVersion: number;
   readonly baseQuantity: string | null;
   readonly baseUnit: string | null;
@@ -313,6 +397,10 @@ export async function extratoDoLote(
     movementId: m.id,
     locationId: m.location_id,
     kind: m.kind,
+    situacao: m.situation,
+    de: m.from_situation,
+    para: m.to_situation,
+    estornaId: m.reverses_id,
     lotVersion: Number(m.lot_version),
     baseQuantity: m.base_quantity,
     baseUnit: m.base_unit,

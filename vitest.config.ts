@@ -32,6 +32,11 @@ export default defineConfig({
         'apps/web/src/identidade/caminho.ts',
         'apps/web/src/seguranca/**/*.ts',
         'apps/web/src/autorizacao/**/*.ts',
+        // B2: formatação, estado do lote, entrada, listas, tabela G2 e mensagens do acesso.
+        'apps/web/src/formato/**/*.ts',
+        'apps/web/src/estoque/*.ts',
+        'apps/web/src/tabela/logica.ts',
+        'apps/web/src/entrar/**/*.ts',
       ],
       reporter: ['text', 'json-summary'],
       thresholds: { perFile: true, lines: 95, statements: 95, functions: 95, branches: 95 },

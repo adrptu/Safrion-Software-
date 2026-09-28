@@ -4,14 +4,24 @@
  * e não deve entrar no servidor web nem no seu empacotamento.
  */
 export { estadoDeSaude, lerIdentidadeAmbiente, type EstadoSaude, type NomeAmbiente } from './ambiente.js';
+export {
+  listarLocais,
+  listarProdutos,
+  perfilDaSessao,
+  type LocalResumo,
+  type Perfil,
+  type ProdutoResumo,
+} from './cadastros.js';
 export { executarComando, type Intencao, type Recibo } from './comando.js';
 export { ErroComando, type CodigoErroComando } from './erros.js';
 export {
   extratoDoLote,
+  listarLotes,
   pedidoDeMovimento,
   registrarMovimento,
   saldoDoLote,
   type LinhaExtrato,
+  type LoteResumo,
   type SaldoTexto,
 } from './estoque.js';
 export { respostaDeErro } from './resposta.js';

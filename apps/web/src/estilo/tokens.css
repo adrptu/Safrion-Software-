@@ -1,0 +1,150 @@
+/*
+ * Tokens do design system (PRD 74.3), o único arquivo com valores literais de cor, espaço, raio, sombra, camada e
+ * duração (DS-12). Três camadas (DS-10): referência (--ref-*), usada só aqui; semântica; e componente, só as exceções.
+ * Fontes: Manrope e Sora ainda não hospedadas (PEND-DS-05); o system-ui é a reserva prevista.
+ */
+:root {
+  /* 74.3.2 Referência */
+  --ref-green-950: #0f241a;
+  --ref-green-800: #15603a;
+  --ref-green-700: #1e7a4c;
+  --ref-green-500: #719e85;
+  --ref-green-200: #bfe0cb;
+  --ref-green-100: #e4f3e9;
+  --ref-green-50: #f2f8f4;
+  --ref-green-50b: #eef4ef;
+  --ref-neutral-900: #15201a;
+  --ref-neutral-600: #5b6660;
+  --ref-neutral-500: #859189;
+  --ref-neutral-200: #e4e9e5;
+  --ref-neutral-150: #eef1ee;
+  --ref-neutral-100: #f4f6f3;
+  --ref-neutral-50: #fbfcfa;
+  --ref-neutral-0: #ffffff;
+  --ref-amber-700: #8a5a00;
+  --ref-amber-300: #f0d9a0;
+  --ref-amber-100: #fff3d6;
+  --ref-red-700: #b42318;
+  --ref-red-300: #f4c7c1;
+  --ref-red-100: #fde8e6;
+  --ref-blue-700: #1e5f8f;
+  --ref-blue-100: #e3f0fb;
+  --ref-nav-text: #d3e2d8;
+  --ref-nav-text-muted: #86a08f;
+
+  /* 74.3.3 Cor · semântica */
+  --color-text-primary: var(--ref-neutral-900);
+  --color-text-secondary: var(--ref-neutral-600);
+  --color-text-inverse: var(--ref-neutral-0);
+  --color-text-link: var(--ref-green-700);
+  --color-text-link-hover: var(--ref-green-800);
+  --color-bg-app: var(--ref-neutral-100);
+  --color-surface: var(--ref-neutral-0);
+  --color-surface-subtle: var(--ref-neutral-150);
+  --color-surface-nested: var(--ref-neutral-50);
+  --color-surface-hover: var(--ref-green-50);
+  --color-surface-selected: var(--ref-green-100);
+  --color-border-divider: var(--ref-neutral-200);
+  --color-border-field: var(--ref-neutral-500);
+  --color-icon-muted: var(--ref-neutral-500);
+  --color-action-primary: var(--ref-green-700);
+  --color-action-primary-hover: var(--ref-green-800);
+  --color-action-danger: var(--ref-red-700);
+  --color-focus: var(--ref-green-700);
+  --color-focus-inverse: var(--ref-neutral-0);
+  --color-success-fg: var(--ref-green-700);
+  --color-success-bg: var(--ref-green-100);
+  --color-success-border: var(--ref-green-200);
+  --color-warning-fg: var(--ref-amber-700);
+  --color-warning-bg: var(--ref-amber-100);
+  --color-warning-border: var(--ref-amber-300);
+  --color-danger-fg: var(--ref-red-700);
+  --color-danger-bg: var(--ref-red-100);
+  --color-danger-border: var(--ref-red-300);
+  --color-neutral-fg: var(--ref-neutral-600);
+  --color-neutral-bg: var(--ref-neutral-150);
+  --color-info-fg: var(--ref-blue-700);
+  --color-info-bg: var(--ref-blue-100);
+  --color-overlay: rgba(21, 32, 26, 0.32);
+  --color-nav-bg: var(--ref-green-950);
+  --color-nav-text: var(--ref-nav-text);
+  --color-nav-text-muted: var(--ref-nav-text-muted);
+  --color-nav-active-bg: var(--ref-green-700);
+  --color-nav-divider: rgba(255, 255, 255, 0.08);
+  --color-nav-badge-bg: rgba(255, 255, 255, 0.06);
+
+  /* 74.3.4 Componente */
+  --table-total-hover: var(--ref-green-50b);
+
+  /* 74.3.5 Tipografia */
+  --font-text: 'Manrope', system-ui, sans-serif;
+  --font-display: 'Sora', 'Manrope', system-ui, sans-serif;
+  --type-label-caps: 700 11px/1.25 var(--font-text);
+  --type-caption-size: 12px;
+  --type-body-sm-size: 13px;
+  --type-body-size: 14px;
+  --type-title-block: 700 15px/1.25 var(--font-text);
+  --type-app-field-size: 16px;
+  --type-title-panel: 700 19px/1.25 var(--font-display);
+  --type-title-page: 700 23px/1.1 var(--font-display);
+  --line-compact: 1.25;
+  --line-paragraph: 1.45;
+
+  /* 74.3.6 Espaçamento */
+  --space-0: 0;
+  --space-2: 2px;
+  --space-4: 4px;
+  --space-6: 6px;
+  --space-8: 8px;
+  --space-10: 10px;
+  --space-12: 12px;
+  --space-14: 14px;
+  --space-16: 16px;
+  --space-18: 18px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-32: 32px;
+
+  /* 74.3.7 Raio */
+  --radius-8: 8px;
+  --radius-10: 10px;
+  --radius-12: 12px;
+  --radius-16: 16px;
+  --radius-pill: 999px;
+
+  /* 74.3.8 Elevação */
+  --shadow-1: 0 1px 2px rgba(21, 32, 26, 0.04), 0 10px 24px -18px rgba(21, 32, 26, 0.22);
+  --shadow-3: 0 12px 32px -8px rgba(21, 32, 26, 0.4);
+  --shadow-btn-primary: 0 1px 2px rgba(30, 122, 76, 0.25);
+
+  /* 74.3.9 Bordas e foco */
+  --border-1: 1px solid;
+  --border-2: 2px solid;
+  --border-3: 3px solid;
+  --focus-ring: 2px solid var(--color-focus);
+  --focus-ring-inverse: 2px solid var(--color-focus-inverse);
+  --focus-offset: 2px;
+  --focus-offset-row: -2px;
+
+  /* 74.3.10 Movimento e opacidade */
+  --motion-short: 200ms ease;
+  --opacity-disabled: 0.55;
+
+  /* 74.3.11 Layout, alvos e pontos */
+  --layout-nav: 232px;
+  --target-min: 24px;
+  --target-field: 44px;
+  --icon-12: 12px;
+  --icon-20: 20px;
+  --dot: 6px;
+
+  /* 74.3.12 Camadas */
+  --z-table-sticky: 2;
+  --z-dropdown: 40;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-short: 0ms linear;
+  }
+}

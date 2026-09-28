@@ -10,3 +10,5 @@ next-env.d.ts
 coverage/
 # Fixtures sintéticas são verificadas pelo Semgrep nativo, não compiladas como aplicação.
 .semgrep/
+**/test-results/
+**/playwright-report/

@@ -7,7 +7,11 @@
     "moduleResolution": "Bundler",
     "jsx": "react-jsx",
     "types": ["node"],
-    "plugins": [{ "name": "next" }],
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
     "customConditions": ["source"]
   },
   "include": [
@@ -16,6 +20,8 @@
     "src",
     "test",
     ".next/types/**/*.ts",
-    "../../packages/db/test/global-setup.ts"
+    "../../packages/db/test/global-setup.ts",
+    "e2e",
+    "playwright.config.ts"
   ]
 }
