@@ -1,21 +1,25 @@
 import pg from 'pg';
 
-import {
-  definirIdentidadeAmbiente,
-  ErroAmbiente,
-  lerIdentidadeAmbiente,
-  type NomeAmbiente,
-} from './ambiente.js';
+import { definirIdentidadeAmbiente, ErroAmbiente, ehNomeAmbiente, type NomeAmbiente } from './ambiente.js';
 import { aplicarMigracoes, type ResultadoMigracao } from './migrar.js';
 import { provisionarPapeis } from './papeis.js';
 
 /**
  * Preparo do banco de um ambiente (HML da F0-c), com o administrador do servidor, que no Cloud SQL não é superusuário:
- * papéis → banco com dono migrator → migrações → identidade do ambiente. Idempotente: repetir não muda nada. Falha
- * segura: o ambiente é explícito, produção fica fora da F0, banco de outro dono e identidade divergente param antes de
- * qualquer migração. Uma trava consultiva no servidor impede dois preparos ao mesmo tempo.
+ * papéis → banco com dono migrator → migrações → identidade do ambiente. Idempotente: repetir não muda nada.
+ *
+ * Nada muda antes de tudo ser conferido (HML-PREP-01/02): opções sem rede; dono do banco; identidade do banco
+ * existente, lida pelo administrador assumindo o papel migrator só para ler (SET ROLE); e as senhas informadas dos
+ * papéis que já existem, que precisam autenticar. O preparo nunca troca senha: rotação é outro procedimento. Se uma
+ * conferência não puder ser feita com o acesso disponível, recusa sem alterar nada. Produção fica fora da F0. Uma
+ * trava consultiva no servidor impede dois preparos ao mesmo tempo.
  */
-export type CodigoErroPreparo = 'OPCAO_INVALIDA' | 'AMBIENTE_PROIBIDO' | 'BANCO_DE_OUTRO_DONO';
+export type CodigoErroPreparo =
+  | 'OPCAO_INVALIDA'
+  | 'AMBIENTE_PROIBIDO'
+  | 'BANCO_DE_OUTRO_DONO'
+  | 'IDENTIDADE_NAO_VERIFICAVEL'
+  | 'CREDENCIAL_DIVERGENTE';
 
 export class ErroPreparo extends Error {
   override readonly name = 'ErroPreparo';
@@ -68,50 +72,129 @@ export function validarOpcoes(o: OpcoesPreparo): NomeAmbiente {
 interface ParametrosConexao {
   readonly host: string;
   readonly port: number;
+  readonly user: string;
+  readonly password: unknown;
   readonly ssl: unknown;
 }
 
 function ehParametros(v: unknown): v is ParametrosConexao {
   if (typeof v !== 'object' || v === null) return false;
   const p = v as Record<string, unknown>;
-  return typeof p['host'] === 'string' && typeof p['port'] === 'number';
+  return typeof p['host'] === 'string' && typeof p['port'] === 'number' && typeof p['user'] === 'string';
 }
 
 /**
- * Conexão do migrator no banco-alvo, com o mesmo servidor, porta e TLS do administrador. Usa os parâmetros que o próprio
- * pg já interpretou da conexão do administrador: vale para host:porta e para o socket do Cloud SQL (?host=/cloudsql/…),
- * sem remontar a URL à mão. Nenhuma senha sai daqui para log.
+ * Conexão no banco-alvo com o mesmo servidor, porta e TLS do administrador, como outro papel (senha informada) ou
+ * como o próprio administrador. Usa os parâmetros que o pg já interpretou da conexão do administrador: vale para
+ * host:porta e para o socket do Cloud SQL (?host=/cloudsql/…), sem remontar a URL à mão. Nenhuma senha vai para log.
  */
-export function conexaoDoMigrator(admin: pg.Client, banco: string, senha: string): pg.ClientConfig {
+function conexaoNoBanco(
+  admin: pg.Client,
+  banco: string,
+  credencial?: { readonly usuario: string; readonly senha: string },
+): pg.ClientConfig {
   const p: unknown = (admin as unknown as { connectionParameters?: unknown }).connectionParameters;
   if (!ehParametros(p))
     throw new ErroPreparo('OPCAO_INVALIDA', 'Conexão do administrador sem servidor e porta.');
+  const senhaAdmin = typeof p.password === 'string' ? p.password : undefined;
   return {
     host: p.host,
     port: p.port,
     database: banco,
-    user: 'migrator',
-    password: senha,
+    user: credencial?.usuario ?? p.user,
+    ...(credencial
+      ? { password: credencial.senha }
+      : senhaAdmin !== undefined
+        ? { password: senhaAdmin }
+        : {}),
     ...(typeof p.ssl === 'boolean' || (typeof p.ssl === 'object' && p.ssl !== null) ? { ssl: p.ssl } : {}),
   };
 }
 
-async function identidadeSeExistir(migrator: pg.Client): Promise<NomeAmbiente | null> {
-  const r = await migrator.query<{ existe: boolean }>(
-    "SELECT to_regclass('app.environment_identity') IS NOT NULL AS existe",
-  );
-  return r.rows[0]?.existe ? lerIdentidadeAmbiente(migrator) : null;
+/** Conexão do migrator no banco-alvo, com a senha informada. */
+export function conexaoDoMigrator(admin: pg.Client, banco: string, senha: string): pg.ClientConfig {
+  return conexaoNoBanco(admin, banco, { usuario: 'migrator', senha });
+}
+
+const codigoPg = (e: unknown) => (typeof e === 'object' && e !== null && 'code' in e ? e.code : undefined);
+
+type Conectar = (config: pg.ClientConfig) => pg.Client;
+
+/**
+ * Identidade do banco existente, lida pelo administrador assumindo o migrator (dono das tabelas) só nesta sessão e só
+ * para ler. Sem poder assumir o papel, a conferência não acontece: IDENTIDADE_NAO_VERIFICAVEL, nada alterado.
+ */
+async function identidadeDoBanco(
+  admin: pg.Client,
+  banco: string,
+  conectar: Conectar,
+): Promise<NomeAmbiente | null> {
+  const c = conectar(conexaoNoBanco(admin, banco));
+  c.on('error', () => undefined);
+  await c.connect();
+  try {
+    try {
+      await c.query('SET ROLE migrator');
+    } catch (e) {
+      if (codigoPg(e) === '42501') {
+        throw new ErroPreparo(
+          'IDENTIDADE_NAO_VERIFICAVEL',
+          'O administrador não pode assumir o papel migrator para ler a identidade do banco; nada foi alterado.',
+        );
+      }
+      throw e;
+    }
+    const r = await c.query<{ name: string | null }>(
+      "SELECT CASE WHEN to_regclass('app.environment_identity') IS NULL THEN NULL ELSE (SELECT name FROM app.environment_identity) END AS name",
+    );
+    const nome = r.rows[0]?.name ?? null;
+    return ehNomeAmbiente(nome) ? nome : null;
+  } finally {
+    await c.end().catch(() => undefined);
+  }
+}
+
+/**
+ * A senha informada autentica o papel que já existe com login? Papel inexistente ou sem login não tem senha em uso a
+ * conferir. Senha recusada pelo servidor (28P01) recusa o preparo sem alterar nada: provisionar trocaria a senha de
+ * quem já usa o papel. Qualquer outra falha também para antes das mudanças, como falha de infraestrutura.
+ */
+async function conferirCredencial(
+  admin: pg.Client,
+  papel: 'migrator' | 'app_runtime',
+  senha: string,
+  banco: string,
+  conectar: Conectar,
+): Promise<void> {
+  const existe = await admin.query('SELECT 1 FROM pg_roles WHERE rolname = $1 AND rolcanlogin', [papel]);
+  if (!existe.rowCount) return;
+  const c = conectar(conexaoNoBanco(admin, banco, { usuario: papel, senha }));
+  c.on('error', () => undefined);
+  try {
+    await c.connect();
+  } catch (e) {
+    if (codigoPg(e) === '28P01') {
+      throw new ErroPreparo(
+        'CREDENCIAL_DIVERGENTE',
+        `A senha informada para ${papel} não é a atual; nada foi alterado. Rotação de senha é um procedimento à parte.`,
+      );
+    }
+    throw e;
+  } finally {
+    await c.end().catch(() => undefined);
+  }
 }
 
 export async function prepararBanco(
   admin: pg.Client,
   opcoes: OpcoesPreparo,
-  conectar: (config: pg.ClientConfig) => pg.Client = (config) => new pg.Client(config),
+  conectar: Conectar = (config) => new pg.Client(config),
 ): Promise<ResultadoPreparo> {
   const ambiente = validarOpcoes(opcoes);
   const { banco, senhas } = opcoes;
   await admin.query("SELECT pg_advisory_lock(hashtext('safrion.preparo'))");
   try {
+    // 1. Conferências, sem alterar nada.
     const dono = await admin.query<{ dono: string }>(
       'SELECT pg_get_userbyid(datdba) AS dono FROM pg_database WHERE datname = $1',
       [banco],
@@ -120,6 +203,18 @@ export async function prepararBanco(
     if (existia && dono.rows[0]?.dono !== 'migrator') {
       throw new ErroPreparo('BANCO_DE_OUTRO_DONO', 'O banco existe com outro dono; nada foi alterado.');
     }
+    const antes = existia ? await identidadeDoBanco(admin, banco, conectar) : null;
+    if (antes !== null && antes !== ambiente) {
+      throw new ErroAmbiente(
+        'IDENTIDADE_DIVERGENTE',
+        `Este banco é "${antes}", não "${ambiente}"; nada foi alterado.`,
+      );
+    }
+    const bancoDaConferencia = existia ? banco : (admin.database ?? 'postgres');
+    await conferirCredencial(admin, 'migrator', senhas.migrator, bancoDaConferencia, conectar);
+    await conferirCredencial(admin, 'app_runtime', senhas.appRuntime, bancoDaConferencia, conectar);
+
+    // 2. Mudanças: papéis (as senhas já conferidas não mudam), banco, migrações e identidade.
     await provisionarPapeis(admin, senhas);
     if (!existia) {
       // Sem superusuário (Cloud SQL), criar com dono migrator exige poder assumir o papel; herança continua desligada.
@@ -127,15 +222,9 @@ export async function prepararBanco(
       await admin.query(`CREATE DATABASE ${admin.escapeIdentifier(banco)} OWNER migrator`);
     }
     const migrator = conectar(conexaoDoMigrator(admin, banco, senhas.migrator));
+    migrator.on('error', () => undefined);
     await migrator.connect();
     try {
-      const antes = await identidadeSeExistir(migrator);
-      if (antes !== null && antes !== ambiente) {
-        throw new ErroAmbiente(
-          'IDENTIDADE_DIVERGENTE',
-          `Este banco é "${antes}", não "${ambiente}"; nenhuma migração foi aplicada.`,
-        );
-      }
       const migracoes = await aplicarMigracoes(migrator);
       await definirIdentidadeAmbiente(migrator, ambiente);
       return {

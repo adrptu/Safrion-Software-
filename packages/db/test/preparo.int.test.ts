@@ -18,8 +18,10 @@ const bancos = {
   outro: `prep_outro_${sufixo}`,
   limitado: `prep_lim_${sufixo}`,
   cli: `prep_cli_${sufixo}`,
+  semCredencial: `prep_semcred_${sufixo}`,
 };
 const administrador = `adm_prep_${sufixo}`;
+const semSet = `adm_semset_${sufixo}`;
 const senhaAdministrador = randomUUID();
 const senhas = () => ({ migrator: inject('senhaMigrator'), appRuntime: inject('senhaApp') });
 let raiz: pg.Client;
@@ -60,8 +62,10 @@ beforeAll(async () => {
 });
 afterAll(async () => {
   for (const b of Object.values(bancos)) await raiz.query(`DROP DATABASE IF EXISTS ${b}`);
-  await raiz.query(`DROP OWNED BY ${administrador}`).catch(() => undefined);
-  await raiz.query(`DROP ROLE IF EXISTS ${administrador}`);
+  for (const papel of [administrador, semSet]) {
+    await raiz.query(`DROP OWNED BY ${papel}`).catch(() => undefined);
+    await raiz.query(`DROP ROLE IF EXISTS ${papel}`);
+  }
   await raiz.end();
 });
 
@@ -200,6 +204,82 @@ describe('preparo com banco real', () => {
   });
 });
 
+describe('nada muda antes de conferir identidade e senhas (HML-PREP-01)', () => {
+  const novas = () => ({ migrator: randomUUID(), appRuntime: randomUUID() });
+  // Todo ALTER ROLE … PASSWORD grava um verificador SCRAM com sal novo: impressão igual prova que nenhuma senha foi
+  // regravada, com ou sem conferência de senha no servidor. Só a igualdade vai para o relatório, nunca o verificador.
+  const impressao = async () =>
+    (
+      await raiz.query<{ p: string }>(
+        `SELECT string_agg(rolname || ':' || coalesce(rolpassword, ''), ',' ORDER BY rolname) AS p
+           FROM pg_authid WHERE rolname IN ('migrator', 'app_runtime')`,
+      )
+    ).rows[0]?.p ?? '';
+  const servidorConfereSenha = async () => {
+    try {
+      await (await conectar('app_runtime', randomUUID())).end();
+      return false;
+    } catch (e) {
+      if ((e as { code?: unknown }).code === '28P01') return true;
+      throw e;
+    }
+  };
+
+  it('ambiente divergente com senhas novas: recusa sem regravar senha nenhuma', async () => {
+    const antes = await impressao();
+    const erro = await falhaDe(prepararBanco(raiz, { ambiente: 'dev', banco: bancos.hml, senhas: novas() }));
+    expect(erro).toMatchObject({ codigo: 'IDENTIDADE_DIVERGENTE' });
+    expect((await impressao()) === antes, 'credenciais intactas').toBe(true);
+  });
+
+  it('administrador sem poder assumir o migrator num banco existente: não verificável, nada muda', async () => {
+    await raiz.query(
+      `CREATE ROLE ${semSet} LOGIN CREATEROLE CREATEDB NOSUPERUSER NOBYPASSRLS NOREPLICATION PASSWORD '${senhaAdministrador}'`,
+    );
+    await raiz.query(
+      `GRANT migrator, app_runtime, app_sessao TO ${semSet} WITH ADMIN TRUE, INHERIT FALSE, SET FALSE`,
+    );
+    const antes = await impressao();
+    const limitado = await conectar(semSet, senhaAdministrador);
+    try {
+      const erro = await falhaDe(
+        prepararBanco(limitado, { ambiente: 'hml', banco: bancos.hml, senhas: novas() }),
+      );
+      expect(erro).toMatchObject({ codigo: 'IDENTIDADE_NAO_VERIFICAVEL' });
+    } finally {
+      await limitado.end();
+    }
+    expect((await impressao()) === antes, 'credenciais intactas').toBe(true);
+    const assumir = await raiz.query(
+      `SELECT 1 FROM pg_auth_members m JOIN pg_roles u ON u.oid = m.member WHERE u.rolname = $1 AND m.set_option`,
+      [semSet],
+    );
+    expect(assumir.rowCount, 'nenhum papel concedido para verificar').toBe(0);
+    expect(await noBanco(bancos.hml, (c) => lerIdentidadeAmbiente(c))).toBe('hml');
+  });
+
+  it('senha informada que não é a atual: recusa sem regravar nem criar banco', async (ctx) => {
+    // Servidor em trust aceita qualquer senha: a conferência só é medida com autenticação por senha (SCRAM).
+    if (!(await servidorConfereSenha())) return ctx.skip();
+    const antes = await impressao();
+    const novo = await falhaDe(
+      prepararBanco(raiz, { ambiente: 'hml', banco: bancos.semCredencial, senhas: novas() }),
+    );
+    expect(novo).toMatchObject({ codigo: 'CREDENCIAL_DIVERGENTE' });
+    const existente = await falhaDe(
+      prepararBanco(raiz, {
+        ambiente: 'hml',
+        banco: bancos.hml,
+        senhas: { ...senhas(), appRuntime: randomUUID() },
+      }),
+    );
+    expect(existente).toMatchObject({ codigo: 'CREDENCIAL_DIVERGENTE' });
+    expect((await impressao()) === antes, 'credenciais intactas').toBe(true);
+    const criado = await raiz.query('SELECT 1 FROM pg_database WHERE datname = $1', [bancos.semCredencial]);
+    expect(criado.rowCount).toBe(0);
+  });
+});
+
 describe('comando preparar-banco', () => {
   const linhas: string[] = [];
   const env = () => ({
@@ -207,9 +287,13 @@ describe('comando preparar-banco', () => {
     SAFRION_SENHA_MIGRATOR: inject('senhaMigrator'),
     SAFRION_SENHA_APP_RUNTIME: inject('senhaApp'),
   });
-  const rodar = async (args: string[], e: Record<string, string | undefined>) => {
+  const rodar = async (
+    args: string[],
+    e: Record<string, string | undefined>,
+    conectar?: (config: pg.ClientConfig) => pg.Client,
+  ) => {
     linhas.length = 0;
-    return executarCli(args, e, (l) => linhas.push(l));
+    return executarCli(args, e, (l) => linhas.push(l), conectar);
   };
 
   it('uso incorreto: 2, sem tocar no servidor', async () => {
@@ -222,6 +306,23 @@ describe('comando preparar-banco', () => {
     ).toBe(2);
     expect(await rodar(['--desconhecida'], env())).toBe(2);
     expect(linhas[0]).toContain('Uso:');
+  });
+
+  it('opção recusada: 1 sem criar nem conectar cliente (HML-PREP-02)', async () => {
+    let clientes = 0;
+    const contar = (): pg.Client => {
+      clientes++;
+      throw new Error('cliente que não deveria existir');
+    };
+    const casos = [
+      [['--ambiente', 'prod', '--banco', bancos.cli], 'AMBIENTE_PROIBIDO'],
+      [['--ambiente', 'hml', '--banco', 'postgres'], 'OPCAO_INVALIDA'],
+    ] as const;
+    for (const [args, codigo] of casos) {
+      expect(await rodar([...args], env(), contar), codigo).toBe(1);
+      expect(JSON.parse(linhas[0] ?? '{}')).toMatchObject({ resultado: 'recusado', codigo });
+    }
+    expect(clientes).toBe(0);
   });
 
   it('preparado: 0 com o resumo; recusado: 1 com o código', async () => {

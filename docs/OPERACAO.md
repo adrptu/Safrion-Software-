@@ -32,13 +32,25 @@ O login em HML depende do adaptador OIDC. O provedor de desenvolvimento fica fec
 - `SAFRION_ADMIN_URL`: o administrador do servidor no banco `postgres`, sem superusuário no Cloud SQL;
 - `SAFRION_SENHA_MIGRATOR` e `SAFRION_SENHA_APP_RUNTIME`: as mesmas senhas guardadas no cofre para o migrator e para a aplicação.
 
-Em ordem, ele:
-1. provisiona os papéis;
+Primeiro confere, sem alterar nada:
+1. as opções, antes de abrir conexão: produção é recusada na F0;
+2. o dono do banco, se ele já existe;
+3. a identidade do banco existente, lida pelo administrador ao assumir o papel `migrator` só para ler;
+4. as senhas informadas dos papéis que já existem: cada uma precisa autenticar.
+
+Só então muda, em ordem:
+1. provisiona os papéis, sem trocar senha em uso;
 2. cria o banco com dono `migrator` (o administrador recebe só `SET` nesse papel, sem herança);
 3. aplica as migrações;
 4. grava a identidade do ambiente.
 
-Repetir não muda nada. Produção é recusada na F0. Banco de outro dono e identidade divergente param antes de qualquer migração.
+Repetir não muda nada. Qualquer conferência que falhe recusa o preparo sem alterar papel, senha, banco ou migração:
+- banco de outro dono: `BANCO_DE_OUTRO_DONO`;
+- identidade divergente: `IDENTIDADE_DIVERGENTE`;
+- administrador que não pode assumir o `migrator` num banco existente: `IDENTIDADE_NAO_VERIFICAVEL`;
+- senha informada que não é a atual: `CREDENCIAL_DIVERGENTE`.
+
+O preparo nunca troca senha. Rotação é um procedimento à parte, ainda não escrito.
 
 Saída:
 - 0: preparado;

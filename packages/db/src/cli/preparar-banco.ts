@@ -11,7 +11,7 @@ import pg from 'pg';
 
 import { ErroAmbiente } from '../ambiente.js';
 import { ErroPapeis } from '../papeis.js';
-import { ErroPreparo, prepararBanco } from '../preparo.js';
+import { ErroPreparo, prepararBanco, validarOpcoes } from '../preparo.js';
 
 const se = (v: unknown, formato: RegExp) => (typeof v === 'string' && formato.test(v) ? v : undefined);
 const USO =
@@ -58,6 +58,14 @@ export async function executarCli(
     banco: valores.banco,
     senhas: { migrator: senhaMigrator, appRuntime: senhaApp },
   };
+  // Opção recusada não abre conexão nenhuma (HML-PREP-02): produção e nome inválido param aqui.
+  try {
+    validarOpcoes(opcoes);
+  } catch (erro) {
+    if (!(erro instanceof ErroPreparo)) throw erro;
+    escrever(JSON.stringify({ resultado: 'recusado', codigo: erro.codigo, mensagem: erro.message }));
+    return 1;
+  }
   let admin: pg.Client | undefined;
   try {
     admin = conectar({ connectionString: url });
