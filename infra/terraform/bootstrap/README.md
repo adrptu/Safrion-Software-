@@ -34,12 +34,12 @@ Todas: só pelo `infra-hml.yml`, que roda só Terraform. Scanner com achado alto
 
 ## Como aplicar
 
-Pré-requisitos (R-006 §3): Terraform ≥ 1.11, TFLint e Trivy conferidos pelo checksum oficial; credencial de vida curta pelo wrapper (`GOOGLE_OAUTH_ACCESS_TOKEN`), sem gravar arquivo ADC.
+Pré-requisitos (R-006 §3): Terraform 1.16.3 (a versão fixada em `versions.tf`), TFLint e Trivy conferidos pelo checksum oficial; credencial de vida curta pelo wrapper (`GOOGLE_OAUTH_ACCESS_TOKEN`), sem gravar arquivo ADC.
 
 ```sh
 cp terraform.tfvars.example terraform.tfvars   # valores reais; o arquivo fica fora do Git
 terraform init
-terraform fmt -check && terraform validate && tflint && trivy config .
+terraform fmt -check && terraform validate && tflint && trivy config --severity HIGH,CRITICAL --exit-code 1 .
 terraform plan -out=bootstrap.tfplan
 shasum -a 256 bootstrap.tfplan                 # hash e contagem vão para a rodada
 terraform apply bootstrap.tfplan               # só depois da aprovação por esse hash

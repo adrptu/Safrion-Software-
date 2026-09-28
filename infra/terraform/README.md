@@ -41,7 +41,7 @@ Fonte do desenho: [R-006, atualização de 28/09/2026](../../docs/parceria/rodad
 
 ## Antes de cada apply (ENG-063)
 
-1. `terraform fmt -check`, `terraform validate`, `tflint` e `trivy config .` sem achado alto não justificado.
+1. `terraform fmt -check`, `terraform init -backend=false` seguido de `terraform validate`, `tflint` e `trivy config --severity HIGH,CRITICAL --exit-code 1 .` sem achado alto não justificado, e sem supressão genérica.
 2. `terraform plan -out=<arquivo>` fora do Git; na rodada, só o hash SHA-256 e a contagem add/change/destroy.
 3. O time aprova o plan por esse hash, com veto do Adrianus; o apply usa só esse arquivo.
 4. Plan com `destroy` ou `must be replaced` em Cloud SQL, bucket do state, segredos ou WIF é recusado e volta como plano específico (PRD 28.2).

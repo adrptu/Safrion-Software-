@@ -34,7 +34,7 @@ Workflow `infra-hml.yml` (a criar): só Terraform, sem `npm` nem build, na `main
 ```sh
 echo "::add-mask::$TF_VAR_operador"                    # se um erro citar o membro, o log mascara
 terraform init -backend-config="bucket=<bucket_state do bootstrap>"
-terraform fmt -check && terraform validate && tflint && trivy config .
+terraform fmt -check && terraform validate && tflint && trivy config --severity HIGH,CRITICAL --exit-code 1 .
 terraform plan -no-color -out=hml.tfplan > /dev/null   # o diff traz membros de IAM: fora do log (ENG-062)
 shasum -a 256 hml.tfplan
 terraform show -json hml.tfplan | jq -r '.resource_changes[] | select(.change.actions != ["no-op"]) | "\(.change.actions | join("/")) \(.address)"'
@@ -55,9 +55,9 @@ Variáveis: `TF_VAR_projeto_id`, `TF_VAR_projeto_numero`, `TF_VAR_operador`, `TF
 Na HML, a versão do segredo é só do Terraform. O passo 3 do R-006 (linha Segredos) vira apply, sem `gcloud --update-secrets`: se a publicação trocasse a versão, o apply seguinte voltaria à antiga, já recusada pelo banco.
 
 1. Gravar a nova versão por stdin.
-2. Atualizar `TF_VAR_versoes_segredos` no environment `hml`, gerar o plan e aprová-lo pelo hash. Só web e jobs mudam.
+2. Atualizar `TF_VAR_versoes_segredos` no environment `hml-infra` (o do `infra-hml.yml`), gerar o plan e aprová-lo pelo hash. Conferir no plan que só mudam as referências de versão de web e jobs.
 3. Trocar a senha no banco e aplicar o plan aprovado logo em seguida. Entre os dois, conexões novas falham.
-4. Validar `/saude`, o login, `safrion-preparo` e `safrion-demo-reset`.
+4. Validar **sem destruir nada**: `/saude` e o login confirmam a credencial `app_runtime`, a mesma do `demo-reset`; `gcloud run jobs describe` confirma a versão fixada nos 2 jobs. **Não executar `safrion-demo-reset`** para validar (o reset troca a geração e derruba os vínculos reais), nem o `safrion-preparo` sem migração pendente. A credencial do admin, o operador confere pelo Auth Proxy.
 5. Desativar a versão antiga.
 6. Destruir só depois de 7 dias e de um teste de recuperação, com confirmação do Adrianus, que faz a destruição. O `version_destroy_ttl` ainda segura a versão por 7 dias depois do pedido.
 
@@ -67,6 +67,6 @@ Na HML, a versão do segredo é só do Terraform. O passo 3 do R-006 (linha Segr
 - Se a publicação pelo `gcloud` deixa outras diferenças além de imagem, `client` e `client_version` (anotações, rótulos, nome da revisão). Só então ampliar o `ignore_changes`.
 - `SAFRION_VERSAO` e `SAFRION_COMMIT` entram na imagem por build-arg, nunca como variável da revisão: o apply seguinte a apagaria.
 - Se o IAP aceita `group:` de grupo Google sem organização.
-- Se o provider `~> 8.3` aceita `retain_backups_on_delete` e `version_destroy_ttl` (a doc da `main` tem os dois).
+- Se o provider 8.3.0 aceita `retain_backups_on_delete` e `version_destroy_ttl`. O `validate` do Codex passou com o 8.4.0, que não cumpre a quarentena; falta repetir com o 8.3.0 e o lock dele.
 - Se o socket `/cloudsql` do Cloud Run conecta com `connector_enforcement = "REQUIRED"`.
 - Se a identidade do teste de `/saude` passa pelo IAP e com qual audiência.
