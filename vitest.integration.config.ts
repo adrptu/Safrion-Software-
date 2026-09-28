@@ -9,10 +9,13 @@ export default defineConfig({
     alias: {
       '@safrion/domain': fileURLToPath(new URL('./packages/domain/src/index.ts', import.meta.url)),
       '@safrion/contracts': fileURLToPath(new URL('./packages/contracts/src/index.ts', import.meta.url)),
+      // Antes de '@safrion/db': o alias casa pelo prefixo e o primeiro vence.
+      '@safrion/db/web': fileURLToPath(new URL('./packages/db/src/web.ts', import.meta.url)),
+      '@safrion/db': fileURLToPath(new URL('./packages/db/src/index.ts', import.meta.url)),
     },
   },
   test: {
-    include: ['packages/*/test/**/*.int.test.ts'],
+    include: ['packages/*/test/**/*.int.test.ts', 'apps/*/test/**/*.int.test.ts'],
     globalSetup: ['packages/db/test/global-setup.ts'],
     testTimeout: 60_000,
     hookTimeout: 300_000,

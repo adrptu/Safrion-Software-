@@ -7,6 +7,8 @@ import { z } from 'zod';
  */
 export const ERROS = {
   CONTRATO_INVALIDO: { classe: 'validacao', status: 400 },
+  CORPO_EXCEDE_LIMITE: { classe: 'validacao', status: 413 },
+  TIPO_DE_CONTEUDO_INVALIDO: { classe: 'validacao', status: 415 },
   NAO_AUTENTICADO: { classe: 'acesso', status: 401 },
   ORGANIZACAO_INVALIDA: { classe: 'acesso', status: 401 },
   SEM_PERMISSAO: { classe: 'acesso', status: 403 },

@@ -31,6 +31,7 @@ const FUNCOES = [
   'resolver_sessao',
   'revogar_sessao',
   'trocar_papel',
+  'vincular_demonstracao',
 ];
 
 let amb: Ambiente;

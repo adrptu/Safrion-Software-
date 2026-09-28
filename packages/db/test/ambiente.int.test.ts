@@ -12,6 +12,7 @@ import {
   restaurarDemonstracao,
 } from '../src/ambiente.js';
 import { executarCli } from '../src/cli/demo-reset.js';
+import { abrirContinuacao, vinculosDaContinuacao } from '../src/sessao-web.js';
 import { emOrganizacao } from '../src/sessao.js';
 import { contagens, criarBanco, semear, type Ambiente } from './ambiente.js';
 
@@ -52,7 +53,7 @@ describe('identidade do ambiente e saúde', () => {
     expect(saude).toMatchObject({
       status: 'sem_identidade',
       ambiente: null,
-      migracao: '0003_sessao_e_identidade.sql',
+      migracao: '0004_vinculo_demonstracao.sql',
     });
     expect(
       await codigo(restaurarDemonstracao(hml.app, { confirmar: 'hml', ambienteDoProcesso: 'hml' })),
@@ -89,7 +90,7 @@ describe('identidade do ambiente e saúde', () => {
       ambiente: 'hml',
       versao: '0.0.0-teste',
       commit: 'abc1234',
-      migracao: '0003_sessao_e_identidade.sql',
+      migracao: '0004_vinculo_demonstracao.sql',
       verificadoEm: '2026-09-27T20:00:00.000Z',
     });
     const texto = JSON.stringify(saude);
@@ -161,6 +162,36 @@ describe('demonstração com dados fictícios (pnpm demo:reset)', () => {
       lote: (await c.query<{ id: string }>('SELECT id FROM app.lot')).rows.map((r) => r.id),
     }));
     expect(anterior).toEqual({ org: [{ name: 'Demonstração · geração 1' }], lote: [primeira.loteId] });
+    // Login de DEV (migração 0004): cada identidade fictícia aponta só para a geração atual, com o papel certo.
+    for (const u of d2.usuarios) {
+      const { ticket } = await abrirContinuacao(
+        hml.app,
+        { issuer: 'urn:safrion:desenvolvimento', subject: u.subject },
+        '/',
+      );
+      expect(await vinculosDaContinuacao(hml.app, ticket), u.subject).toEqual([
+        { organizationId: d2.organizationId, organizacao: 'Demonstração · geração 2', papeis: [u.papel] },
+      ]);
+    }
+  });
+
+  it('vínculo de demonstração só em organização fictícia, e o app_runtime não escreve vínculo direto', async () => {
+    const real = await semear(hml.app, 'SemVinculo');
+    await expect(
+      hml.app.query('SELECT app.vincular_demonstracao($1, $2, $3)', [
+        real.org,
+        real.usuario,
+        'demo-almoxarife',
+      ]),
+    ).rejects.toMatchObject({ code: 'P0001' });
+    await expect(
+      emOrganizacao(hml.app, real.org, (c) =>
+        c.query(
+          'INSERT INTO app.identity_link (issuer, subject, organization_id, user_id) VALUES ($1, $2, $3, $4)',
+          ['urn:safrion:desenvolvimento', 'demo-almoxarife', real.org, real.usuario],
+        ),
+      ),
+    ).rejects.toMatchObject({ code: '42501' });
   });
 
   it('em produção a demonstração é recusada, e nem escrita direta no ponteiro passa', async () => {
@@ -172,6 +203,12 @@ describe('demonstração com dados fictícios (pnpm demo:reset)', () => {
       prod.app.query(
         'INSERT INTO app.demo_state (current_organization, generation) VALUES (gen_random_uuid(), 1)',
       ),
+    ).rejects.toMatchObject({ code: 'P0001' });
+    // Nem vínculo de identidade fictícia em banco de produção (migração 0004).
+    await expect(
+      prod.app.query('SELECT app.vincular_demonstracao(gen_random_uuid(), gen_random_uuid(), $1)', [
+        'demo-almoxarife',
+      ]),
     ).rejects.toMatchObject({ code: 'P0001' });
   });
 

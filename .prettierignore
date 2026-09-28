@@ -5,6 +5,8 @@ docs/
 tools/**/*.py
 pnpm-lock.yaml
 **/dist/
+**/.next/
+next-env.d.ts
 coverage/
 # Fixtures sintéticas são verificadas pelo Semgrep nativo, não compiladas como aplicação.
 .semgrep/

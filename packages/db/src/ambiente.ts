@@ -99,7 +99,12 @@ export interface Demonstracao {
   readonly ambiente: 'dev' | 'hml';
   readonly organizationId: string;
   readonly geracao: number;
-  readonly usuarios: readonly { readonly papel: string; readonly usuarioId: string }[];
+  /** Usuários fictícios e o subject de desenvolvimento vinculado a cada um (issuer urn:safrion:desenvolvimento). */
+  readonly usuarios: readonly {
+    readonly papel: string;
+    readonly usuarioId: string;
+    readonly subject: string;
+  }[];
   readonly loteId: string;
 }
 
@@ -172,6 +177,8 @@ export async function restaurarDemonstracao(
         id,
         papel,
       ]);
+      // Login de DEV: a identidade fictícia passa a apontar só para esta geração (migração 0004).
+      await c.query('SELECT app.vincular_demonstracao($1, $2, $3)', [org, id, `demo-${papel}`]);
     }
     await c.query(
       "INSERT INTO app.farm (id, organization_id, name) VALUES ($1, $2, 'Fazenda Demonstração')",
@@ -197,8 +204,8 @@ export async function restaurarDemonstracao(
     organizationId: org,
     geracao,
     usuarios: [
-      { papel: 'almoxarife', usuarioId: almoxarife },
-      { papel: 'gerente', usuarioId: gerente },
+      { papel: 'almoxarife', usuarioId: almoxarife, subject: 'demo-almoxarife' },
+      { papel: 'gerente', usuarioId: gerente, subject: 'demo-gerente' },
     ],
     loteId: lote,
   };
