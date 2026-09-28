@@ -36,7 +36,6 @@ jobs:
       NEXT_TELEMETRY_DISABLED: "1"
       # Credencial sintética de um serviço efêmero, sem segredo ou acesso externo.
       SAFRION_TEST_DATABASE_URL: postgres://postgres:teste@127.0.0.1:5432/postgres
-      PLAYWRIGHT_JSON_OUTPUT_FILE: ${{ runner.temp }}/e2e-bruto.json
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -59,10 +58,12 @@ jobs:
         run: pnpm run build
       - name: Executar jornadas, sem retries
         # Reutiliza o Chrome do runner e os testes existentes; login DEV, dados fictícios e banco real.
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: ${{ runner.temp }}/e2e-bruto.json
         run: pnpm run test:e2e --reporter=list,json
       - name: Conferir execução completa e gerar recibo sem dados de sessão
         if: ${{ !cancelled() }}
-        run: python3 tools/ci/conferir_e2e.py "$PLAYWRIGHT_JSON_OUTPUT_FILE" evidencias/navegador/resumo.json
+        run: python3 tools/ci/conferir_e2e.py "$RUNNER_TEMP/e2e-bruto.json" evidencias/navegador/resumo.json
       - name: Preservar somente o recibo sanitizado
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

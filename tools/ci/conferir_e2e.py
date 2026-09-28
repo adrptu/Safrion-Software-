@@ -48,11 +48,11 @@ def main():
     destino = Path(sys.argv[2])
     recibo = {"aprovado": False, "commit": os.environ.get("GITHUB_SHA", "local")}
     try:
-        recibo.update(conferir(json.loads(Path(sys.argv[1]).read_text())))
+        recibo.update(conferir(json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))))
     except (OSError, ValueError, KeyError, TypeError, IndexError):
         recibo["motivo"] = "EVIDENCIA_E2E_INCOMPLETA_OU_REPROVADA"
     destino.parent.mkdir(parents=True, exist_ok=True)
-    destino.write_text(json.dumps(recibo, ensure_ascii=False, indent=2) + "\n")
+    destino.write_text(json.dumps(recibo, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(recibo, ensure_ascii=False))
     return 0 if recibo["aprovado"] else 1
 
