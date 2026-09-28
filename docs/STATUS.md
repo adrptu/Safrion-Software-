@@ -37,6 +37,16 @@ Dependabot para npm/pnpm 12 permanece sem compatibilidade comprovada; a configur
 3. Claude conduz a dependência imediata da F1, com Codex revisando/testando. Critérios e divisão permanecem na issue #1 e nas rodadas; sem abrir módulos paralelos.
 4. Codex e Claude conduzem a homologação técnica e funcional, conforme autorização atual do proprietário. Adrianus recebe a candidata verificada e dá feedback; produção exige seu aceite explícito da versão.
 
+## Jornadas de navegador na CI
+
+A proposta em `.github/workflows/navegador.yml` executa as jornadas Playwright/axe existentes em runner Ubuntu 24.04, com Chrome do runner e PostgreSQL/PostGIS efêmero fixado pelo mesmo digest da integração. Não usa segredos, dados reais ou serviços GCP. A versão efetiva do navegador fica no log; ela acompanha a imagem do runner e não é fixada pelo projeto.
+
+`tools/ci/conferir_e2e.py` exige no mínimo as oito jornadas desktop e uma celular, resultado real aprovado em uma tentativa, nenhum skip/falha esperada/erro global e totais coerentes. O recibo publicado contém só commit, nome e resultado dos casos; traces, cookies e relatórios brutos não são artefatos publicados. As contraprovas locais do verificador passam; a execução remota e a revisão tripla por versão são registradas no PR #8 e na issue #1.
+
+Essa prova usa a aplicação e o banco reais em modo DEV, com identidades fictícias. Não demonstra autenticação com provedor real, hospedagem funcional nem autonomia remota dos agentes. Os serviços descartáveis pertencem somente ao job e são removidos pelo runner.
+
+Referências consultadas em 28/09/2026: [Playwright na CI](https://playwright.dev/docs/ci-intro), [relatório JSON](https://playwright.dev/docs/test-reporters#json-reporter), [serviço PostgreSQL](https://docs.github.com/en/actions/tutorials/use-containerized-services/create-postgresql-service-containers) e [inventário do runner Ubuntu 24.04](https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md).
+
 ## Condições preservadas
 
 - Segredos e dados reais nunca entram em código, testes ou logs (`AGENTS.md`, `SECURITY.md`).
