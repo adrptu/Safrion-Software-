@@ -260,3 +260,44 @@ test('B2-C02: resposta perdida depois de gravar, recarregar e conferir não dupl
   await expect(page.getByRole('region', { name: 'Saldo' })).toContainText('Físico23,5 L');
   await expect(depois.getByRole('textbox', { name: 'Quantidade' })).toBeEditable();
 });
+
+test('B2-C03: o envio é guardado antes de sair; recarregar no meio e conferir não duplica', async ({
+  page,
+}) => {
+  const proximo = await abrirLote(page);
+  await proximo.getByRole('textbox', { name: 'Quantidade' }).fill('2');
+  await proximo.locator('label', { hasText: 'Liberado' }).click();
+  const chaves: string[] = [];
+  const recibos: { receiptId: string; alreadyReceived: boolean }[] = [];
+  let chegou!: () => void;
+  const gravadoNoServidor = new Promise<void>((r) => (chegou = r));
+  await page.route(COMANDO, async (route) => {
+    chaves.push((route.request().postDataJSON() as { idempotencyKey: string }).idempotencyKey);
+    const resposta = await route.fetch();
+    recibos.push((await resposta.json()) as { receiptId: string; alreadyReceived: boolean });
+    // O primeiro pedido fica sem resposta: a página recarrega enquanto ele está "Enviando".
+    if (chaves.length === 1) chegou();
+    else await route.fulfill({ response: resposta });
+  });
+  await proximo.getByRole('button', { name: 'Registrar entrada' }).click();
+  await gravadoNoServidor;
+  const guardado = await page.evaluate(() =>
+    Object.keys(sessionStorage)
+      .filter((k) => k.startsWith('safrion:entrada:'))
+      .map((k) => JSON.parse(sessionStorage.getItem(k) ?? 'null') as { incerto: { chave: string } | null }),
+  );
+  expect(guardado.map((r) => r.incerto?.chave)).toEqual([chaves[0]]);
+  await page.reload();
+  const depois = page.getByRole('region', { name: 'Próximo passo' });
+  await expect(depois.getByRole('status')).toContainText('a resposta não chegou');
+  await expect(depois.getByRole('textbox', { name: 'Quantidade' })).toHaveValue('2');
+  await depois.getByRole('button', { name: 'Registrar entrada' }).click();
+  await expect(depois.getByRole('status')).toContainText('o envio anterior já tinha chegado');
+  expect(chaves).toEqual([chaves[0], chaves[0]]);
+  expect(recibos[1]).toMatchObject({ receiptId: recibos[0]?.receiptId, alreadyReceived: true });
+  await expect(page.getByRole('region', { name: 'Saldo' })).toContainText('Físico25,5 L');
+  const depoisDeConferir = await page.evaluate(() =>
+    Object.keys(sessionStorage).filter((k) => k.startsWith('safrion:entrada:')),
+  );
+  expect(depoisDeConferir).toEqual([]);
+});

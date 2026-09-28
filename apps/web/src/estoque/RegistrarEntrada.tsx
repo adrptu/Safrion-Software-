@@ -30,14 +30,17 @@ interface Aviso {
 
 const AVISO_INCERTO =
   'A última entrada foi enviada, mas a resposta não chegou. Registre de novo para conferir, sem duplicar.';
+const SEM_GUARDA =
+  ' Não feche nem recarregue esta página: o navegador não deixou guardar o envio para conferir depois.';
 
 /**
  * Próximo passo do lote para quem registra entrada: quantidade com unidade, situação e local, e um único comando
  * explícito. Cada envio tem a sua chave de idempotência.
  * - Enquanto envia, os campos ficam só leitura (B2-C01): a resposta nunca apaga o que foi digitado depois dela.
  * - O rascunho fica na sessão do navegador, por usuário, organização e lote (B2-C02), e volta depois de recarregar.
- * - Envio sem resposta certa fica guardado com a chave, o conteúdo e a versão; até ser conferido, os campos ficam
- *   travados e "Registrar entrada" reenvia exatamente o mesmo pedido, que o servidor não duplica.
+ * - Todo envio é guardado com a chave, o conteúdo e a versão antes de sair (B2-C03). Sem resposta certa, ou depois de
+ *   uma recarga no meio do envio, os campos ficam travados e "Registrar entrada" reenvia exatamente o mesmo pedido,
+ *   que o servidor não duplica. Sem armazenamento no navegador, a tela diz que não dá para conferir depois.
  * - Erro nunca apaga o que foi digitado.
  */
 export function RegistrarEntrada({
@@ -91,8 +94,8 @@ export function RegistrarEntrada({
     if (r.incerto) setAviso({ papel: 'atencao', texto: AVISO_INCERTO });
   }, [chaveRascunho]);
 
-  function guardar(proximos: CamposEntrada, envio: EnvioIncerto | null) {
-    gravarRascunho(armazemDaSessao(), chaveRascunho, { campos: proximos, incerto: envio });
+  function guardar(proximos: CamposEntrada, envio: EnvioIncerto | null): boolean {
+    return gravarRascunho(armazemDaSessao(), chaveRascunho, { campos: proximos, incerto: envio });
   }
 
   function mudar(campo: CampoEntrada, valor: string) {
@@ -103,11 +106,11 @@ export function RegistrarEntrada({
     guardar(proximos, null);
   }
 
-  function aplicar(d: Desfecho, envio: EnvioIncerto) {
+  function aplicar(d: Desfecho, envio: EnvioIncerto, duravel: boolean) {
     if (d.tipo === 'falha' && d.incerto) {
+      // O envio já está guardado desde antes da requisição; sem armazenamento, o limite fica dito na tela.
       setIncerto(envio);
-      guardar(envio.campos, envio);
-      setAviso({ papel: 'erro', texto: d.mensagem });
+      setAviso({ papel: 'erro', texto: duravel ? d.mensagem : d.mensagem + SEM_GUARDA });
       return;
     }
     // Daqui em diante a resposta é certa: o envio não está mais pendente.
@@ -155,6 +158,9 @@ export function RegistrarEntrada({
     setErros({});
     setAviso(null);
     setEnviando(true);
+    // B2-C03: o envio fica guardado ANTES de sair (chave, conteúdo e versão), para uma recarga ou uma aba fechada no
+    // meio do caminho ainda poder conferir o mesmo pedido. A resposta conclusiva limpa isso em `aplicar`.
+    const duravel = guardar(envio.campos, envio);
     let d: Desfecho;
     try {
       const resposta = await fetch('/api/v1/comandos/estoque.registrar-entrada', {
@@ -168,7 +174,7 @@ export function RegistrarEntrada({
     } catch {
       d = SEM_CONEXAO;
     }
-    aplicar(d, envio);
+    aplicar(d, envio, duravel);
     setEnviando(false);
   }
 
