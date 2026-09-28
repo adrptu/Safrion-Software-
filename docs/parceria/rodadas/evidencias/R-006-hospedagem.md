@@ -260,6 +260,219 @@ Em 28/09, o Adrianus delegou às 3 IAs as decisões que dependiam dele. Os **ato
 - **Faixa HOMOLOGAÇÃO.** A casca já mostra um selo permanente do ambiente no cabeçalho (`(app)/layout.tsx`, a partir da identidade do banco). Conferir se atende "todas as telas", inclusive `/entrar` e erros (PRD:5495).
 - **Rotação de senha:** o procedimento está resumido na linha Segredos; falta escrevê-lo em `OPERACAO.md` antes da 1ª troca.
 
+### GCP-0017: IP privado × concessão fora da máquina do operador (comparação pedida pelo Codex; proposta, não aceita)
+
+*Análise de 28/09/2026, revisada no mesmo dia por verificação adversarial. Fontes: documentação oficial e o repositório. Nenhum recurso foi provisionado e nenhum dado real foi usado. As fontes G1 a G38 estão no fim da seção, com numeração própria dela.*
+
+#### 1) Resumo
+
+O GCP-0017 tem duas regras: IP público ligado e rede autorizada com CIDR público [G1]. O Trivy trata o `ipv4_enabled` ausente ou não resolvido como `true` [G2]. Por isso, o achado só fecha com `ipv4_enabled = false` literal e sem `authorized_networks`. Mudar só o fluxo da concessão (job ou Studio com IP público) não fecha o achado.
+
+Um caminho privado é obrigatório. Entre as duas formas:
+- o PSA não cobra pela conexão [G6];
+- o endpoint do Private Service Connect cobra US$ 0,01/h [G6], cerca de 7,30 por mês.
+
+Sem IP público, o Auth Proxy do notebook perde o caminho até o banco [G13, G5], e a concessão passa para um job.
+
+**Recomendação:**
+- **Rede:** IP privado com PSA (faixa RFC 1918 explícita) e Direct VPC egress `PRIVATE_RANGES_ONLY` na web e nos jobs.
+- **Conexão ao banco:** conector Node.js com `ipType PRIVATE`, para manter `connector_enforcement = REQUIRED` [G11, G12].
+- **Concessão:** job `safrion-vinculo`, executado sem overrides. O pedido, com o código, entra por uma versão de uso único de um segredo sem destruição adiada, montada como arquivo.
+- **Ordem:** a rede precisa existir antes da 1ª criação da instância. Ligar o IP privado numa instância existente a reinicia e não aceita faixa nomeada [G33]. Hoje nada está provisionado (R-006).
+
+**Custo e esforço:** de US$ 0,00 a 0,11 por mês sobre a base de US$ 15,22. O GCP-0017 deixa de bloquear sem manutenção recorrente relevante. O gate só fica verde quando a exceção do GCP-0015, outro HIGH, também for aprovada (`hml/README.md`). O trabalho pontual é:
+- cerca de 12 recursos;
+- conector no `packages/db`;
+- modo arquivo no CLI;
+- emenda ao ADR 0004 §11;
+- caminho novo para a rotação de senhas;
+- o procedimento da conta padrão do Compute.
+
+#### 2) Opções
+
+| Opção | Resolve GCP-0017? | Desenho mínimo (recursos novos) | Custo incremental US$/mês | Permissões novas | Fluxo do operador | Manutenção extra | Riscos |
+|---|---|---|---|---|---|---|---|
+| **A. IP privado + job de vínculo (recomendada)** | **Sim**, com `ipv4_enabled = false` literal e sem `authorized_networks` [G1, G2]. Surgem só achados abaixo do gate `HIGH,CRITICAL` (`ci.yml`, linhas 52 e 61): GCP-0076 (MEDIUM) [G3] e GCP-0029 (LOW) [G32]. O GCP-0075 (LOW) fecha com `private_ip_google_access = true` [G31]. O GCP-0015 segue à parte | **Bootstrap:** APIs `compute` e `servicenetworking` [G4]; rede custom; sub-rede RFC 1918; faixa PSA com `address` RFC 1918 explícito; conexão PSA.<br>**hml/:** `vpc_access` na web e nos 2 jobs; job `safrion-vinculo`; segredo `hml-vinculo-pedido` sem `version_destroy_ttl`; 2 vínculos IAM no segredo (os do job vêm de `local.jobs`).<br>Cerca de 12 recursos. Sem NAT, conector VPC, regra de firewall, bastion ou VPN | **Conexão PSA:** 0 [G6]<br>**IPs internos:** 0 [G6]<br>**Direct VPC:** só tráfego [G8]. Cloud Run → Cloud SQL é cobrado como VM para VM: mesma zona 0, outra zona 0,01/GiB [G9, G6]. Cloud SQL → Cloud Run na mesma região: 0 [G25]. Com 1 a 5 GiB (volume estimado, teto), 0,00 a 0,05<br>**Job:** segundos, dentro da franquia: 0<br>**Segredo:** cobrança proporcional [G21]; a versão destruída na hora custa perto de 0; no pior caso, 1 versão esquecida acima das 6 grátis custa 0,06<br>**Rede e sub-rede:** nenhum SKU achado; não verificado<br>**Total:** 0,00 a 0,11 | **Dono:** aplica a rede no bootstrap. A CI não ganha `compute.networkAdmin` [G4]<br>**Operador:** `run.invoker` só no job, automático por `local.jobs` (basta para o gcloud [G15]); `secretVersionManager` só no segredo novo, que grava e destrói sem ler o valor [G19]<br>**`sa-preparo`:** `secretAccessor` só no segredo novo<br>**Agente do Cloud Run:** nada, porque o `run.serviceAgent` já cobre [G7]<br>**`sa-deploy-github`:** nada previsto (não verificado) | Confirmar o pedido → gravar a versão pela entrada padrão → executar o job sem overrides → ler o resultado no Logging → destruir a versão. Sem checkout, Node, Auth Proxy nem senha do admin no notebook. Ainda exige sessão autenticada por concessão (gcloud ou Cloud Shell): reduz o conflito com o PRD 31.7, não o elimina | **Pontual:** conector (dependência nova, passa pela quarentena), modo arquivo no CLI, `vpc_access`, probe, retentativa, `checar_travas.py`, textos e o procedimento da conta padrão do Compute.<br>**Recorrente:** perto de zero; 3 comandos por concessão | Conexão pode levar 1 min ou mais na subida [G7], e a subida a partir de zero fica mais lenta [G8].<br>IP privado e faixa são irreversíveis; em instância existente, ligar o IP privado reinicia e não aceita faixa [G5, G33].<br>O PSA atrapalha desmontar a rede [G27].<br>Ligar o Compute cria a conta padrão, que pode receber Editor [G37].<br>A rotação de senha fica sem caminho até ganhar subcomando no job.<br>Corrida se dois operadores gravarem ao mesmo tempo, porque o volume lê a última versão [G18] |
+| **B. IP privado + Cloud SQL Studio (viável por dedução; não recomendada)** | **Formalmente sim**, pelo mesmo `ipv4_enabled = false`. Mas o Studio usa o `executeSql` [G23], que vem proibido por padrão [G22]. Ligar `ALLOW_DATA_API` abre esse acesso pela internet numa instância só de IP privado [G22], sem barreira de rede: fica só IAM mais a credencial do banco [G38]. O Trivy não olha esse campo [G2]. Contorna a política em vez de tirar o risco | A mesma rede e as mesmas mudanças de conexão da opção A: web e jobs continuam precisando do conector.<br>+ `data_api_access = ALLOW_DATA_API`.<br>+ credencial do banco: segredo regional com a senha do admin, ou usuário IAM do operador com `GRANT migrator` [G38]. Sem job | Rede igual à A. Data API: nenhum SKU achado; não verificado | **Operador:** `roles/cloudsql.studioUser` [G24], dado e retirado a cada uso, mais acesso à credencial | Colar num único script `SET ROLE migrator` e a chamada de `app.conceder_vinculo` com o SHA-256 calculado à mão. Cada execução abre uma sessão nova [G23] | Menos código: sem job e sem modo arquivo. Em troca, um ritual manual de hash e IAM a cada concessão | Código ou hash no texto SQL.<br>Um erro de sintaxe grava a consulta no `postgres.log` [G23], que os agentes leem (`logging.viewer`).<br>O script e a resposta podem passar por locais intermediários [G23].<br>Pula a normalização e as recusas do CLI.<br>Hash de código de 10 caracteres em base 32: cerca de 2^50 tentativas.<br>Não verificado se respeita `REQUIRED` |
+| **C. Manter IP público + exceção (só referência)** | **Não.** O GCP-0017 continua HIGH, e a política não aceita exceção para risco real | Nenhum | 0 (base de 15,22) | Nenhuma | O atual: Auth Proxy no notebook, senha do admin local, checkout e Node 24.21 | Renovar a exceção a cada 30 dias no máximo (opção 2 do README), com aprovação ENG-005 | Endpoint público, mitigado por zero redes autorizadas, `REQUIRED` e `ENCRYPTED_ONLY`.<br>O Terraform fica fora do `main`.<br>O conflito com o PRD 31.7 (sessão gcloud por concessão) continua |
+
+#### 3) Desenho mínimo da concessão (opção A)
+
+**Configuração, feita uma vez:**
+- **Job `safrion-vinculo`:**
+  - imagem `preparo` pelo mesmo digest do pipeline; entra em `local.jobs`, o que já dá `run.developer` à CI e `run.invoker` ao operador;
+  - `command node` e args fixos: `dist/cli/vincular-identidade.js --ambiente hml --banco safrion_hml`;
+  - `task_count 1`, `max_retries 0`, timeout de 600 s;
+  - `vpc_access` com `PRIVATE_RANGES_ONLY`;
+  - conta `sa-preparo`. Ela já tem `cloudsql.client` e lê `hml-db-admin-senha`, então o raio de dano não cresce;
+  - variáveis de ambiente: nome de conexão da instância, `PGPASSWORD` de `hml-db-admin-senha` em versão fixa (F40) e `SAFRION_PEDIDO_ARQUIVO=/run/segredos/vinculo/pedido`;
+  - volume do segredo `hml-vinculo-pedido` na versão `latest`. É exceção registrada à F40, porque o volume lê a versão atual a cada leitura [G18]. O volume não é conferido na subida, e a leitura falha se não houver versão acessível [G18]; o CLI trata isso como recusa.
+- **Segredo `hml-vinculo-pedido`:**
+  - replicação em southamerica-east1;
+  - **sem `version_destroy_ttl`**, diferente dos 4 segredos atuais. Com o atraso, destruir só desativaria a versão, e o pedido com o código seguiria recuperável e cobrado como ativo por 7 dias [G34, G21];
+  - contém o pedido inteiro em linhas `chave=valor`: ação, organização, usuário, responsável (um identificador, não o nome) e motivo, mais o código quando a ação é conceder;
+  - como nada varia por execução, não há overrides.
+- **Sem overrides, por quê:** os overrides trocam args e variáveis de ambiente [G15, G16]. Num job `node`, isso vira execução de código com a conta do job. Os valores ficam na Execution [G17], que o `run.viewer` lê. Por isso o operador fica só com `run.invoker`: nunca `run.developer` nem `run.jobsExecutorWithOverrides`. A execução pelo console exige `run.developer` [G15], então o operador usa o gcloud.
+
+**Por concessão:**
+1. Confirmar por canal independente quem pediu, como hoje.
+2. No terminal do operador, ou no Cloud Shell, que aqui só chama APIs (o Cloud Shell só não alcança IP privado [G14]):
+   - ler o código com `read -rs`: sem eco e fora do histórico;
+   - montar o pedido com o `printf` do shell, que é builtin: nenhum binário é executado com o código nos argumentos;
+   - mandar por pipe para `gcloud secrets versions add hml-vinculo-pedido --data-file=-`. O Google desaconselha pôr o valor na linha de comando, porque ele aparece na lista de processos [G20];
+   - `unset` na variável.
+3. `gcloud run jobs execute safrion-vinculo --region southamerica-east1`, sem `--args` nem `--update-env-vars`. Override exige `run.jobs.runWithOverrides` [G16], que o `run.invoker` não tem.
+4. Ler no Logging o JSON do resultado: concedido, ou recusado com o código de recusa. O CLI nunca imprime o pedido.
+5. `gcloud secrets versions destroy <N> --secret hml-vinculo-pedido` na hora. Sem TTL no segredo, a destruição é imediata e definitiva [G34]. Esquecer não reabre o acesso (código consumido gera `PEDIDO_CONSUMIDO`), mas deixa o texto legível para a `sa-preparo` e para o dono, e a versão continua cobrada [G21].
+
+**Revogar:** o mesmo fluxo, com `acao=revogar` e sem código.
+
+**Por onde o código passa:**
+- terminal sem eco → pipe → API do Secret Manager → versão do segredo → arquivo montado no job → memória do CLI → hash parametrizado na consulta.
+
+**Por onde o código não passa:**
+- argumento de processo, variável de ambiente, spec da Execution, log do CLI, histórico do shell e texto SQL.
+
+Os agentes (`run.viewer`, `logging.viewer`, `cloudsql.viewer`, sem `secretAccessor`, conforme `bootstrap/contas.tf`) veem só o nome do segredo, a execução e o resultado.
+
+#### 4) Mudanças necessárias (arquivos)
+
+**Terraform**
+- **`bootstrap/main.tf`:**
+  - acrescentar `compute.googleapis.com` e `servicenetworking.googleapis.com` em `local.apis`;
+  - criar a rede, aplicada pelo dono, **antes de qualquer apply do `hml/` que crie a instância** [G33]:
+    - `google_compute_network` com `auto_create_subnetworks = false`;
+    - `google_compute_subnetwork` /24 RFC 1918 em southamerica-east1. O mínimo é /26 [G7]; a /24 dá folga para os blocos de 16 IPs. Com `private_ip_google_access = true` [G31] e sem `log_config`, porque flow logs custam;
+    - `google_compute_global_address` com `VPC_PEERING`/`INTERNAL`, /20, com **`address` explícito em RFC 1918**, sem sobrepor a sub-rede. Motivos: o `PRIVATE_RANGES_ONLY` só manda para a VPC destinos RFC 1918 ou RFC 6598 [G35]; o Cloud SQL autoriza automaticamente só RFC 1918 [G5]; e a escolha automática não diz a faixa [G36]. O mínimo é /24 [G5], e IP interno não custa;
+    - `google_service_networking_connection` com `deletion_policy = "PREVENT"` [G27].
+- **`bootstrap/README.md`, "Depois do apply":** ligar o Compute cria a conta padrão do Compute, que pode receber Editor [G37]. Rodar o procedimento já escrito (tirar o Editor e desativar) e conferir a rede `default` (seção 5).
+- **`bootstrap/outputs.tf`:** exportar o self_link da rede e da sub-rede e o nome da faixa.
+- **`hml/variables.tf` e `terraform.tfvars.example`:** receber os self_links por variável. Não usar `data`, que o HML-TF-04 recusa.
+- **`hml/banco.tf`:**
+  - `ip_configuration` com `ipv4_enabled = false` literal [G2], `private_network` e `allocated_ip_range`. A faixa só pode ser dada na criação e não muda depois [G33];
+  - `ssl_mode`, `server_ca_mode` e `connector_enforcement` como hoje;
+  - sem `authorized_networks` [G1] e sem `data_api_access`, cujo padrão é DISALLOW [G22];
+  - o `depends_on` [G26] não funciona entre estados, então a ordem vem do procedimento: bootstrap antes do hml.
+- **`hml/main.tf` e `hml/cloud_run.tf`:**
+  - remover o `local.socket`, o volume `cloud_sql_instance` e o `/cloudsql`;
+  - pôr `vpc_access` no `template` da web e no `template.template` do preparo e do demo-reset [G28];
+  - passar por variável de ambiente o nome de conexão da instância;
+  - subir o `startup_probe` da web de 6 para cerca de 18 tentativas × 10 s (valor especificado, não medido) [G7];
+  - criar o job `safrion-vinculo` em `local.jobs`.
+- **`hml/segredos.tf`:** criar o segredo `hml-vinculo-pedido` fora do `local.segredos`, **sem `version_destroy_ttl`**, com `secretAccessor` para a `sa-preparo` e `secretVersionManager` para o operador. Explicar num comentário por que ele não segue os outros 4.
+- **`hml/README.md`:**
+  - dar o GCP-0017 como fechado e manter o GCP-0015 como decisão pendente;
+  - corrigir a opção 1, que ainda diz "bastion ou VPN";
+  - listar GCP-0076, GCP-0029 e GCP-0075 como não bloqueantes;
+  - mudar o passo da credencial admin conferida pelo Auth Proxy.
+- **`checar_travas.py` e `test_checar_travas.py`:**
+  - exigir `ipv4_enabled = false` literal, `private_network` presente, `data_api_access` ausente ou `DISALLOW_DATA_API` e `egress = PRIVATE_RANGES_ONLY`;
+  - recusar `ignore_changes` sobre esses campos;
+  - opcional: recusar `version_destroy_ttl` no `hml-vinculo-pedido`.
+
+**Código**
+- **`packages/db`:**
+  - fábrica de conexão com `@google-cloud/cloud-sql-connector` (`ipType PRIVATE`, autenticação por senha) quando houver o nome de conexão da instância [G12]. A URL comum continua para o Postgres local e a CI;
+  - retentativa com espera crescente, até cerca de 3 min, na primeira conexão [G7];
+  - usada em `src/preparo.ts`, `src/cli/preparar-banco.ts`, `src/cli/demo-reset.ts` e `src/cli/vincular-identidade.ts`.
+- **`apps/web/src/servidor/ambiente.ts`:** usar a mesma fábrica.
+- **`src/cli/vincular-identidade.ts`, modo pedido:**
+  - quando `SAFRION_PEDIDO_ARQUIVO` está definida e a entrada não é terminal, ler do arquivo a ação, o destino e o código, com as mesmas validações, normalização e hash;
+  - `--codigo` continua recusado;
+  - arquivo ausente, ilegível ou incompleto dá recusa com saída 1, sem ecoar o conteúdo. Esse é também o caso de segredo sem versão [G18];
+  - testes unitários e de integração, incluindo um log sem o código.
+- **Rotação:** subcomandos no job para conferir a credencial do admin e trocar a senha de `migrator` e `app_runtime` lendo de segredo em versão fixa. Precisam existir antes da 1ª rotação, não antes da 1ª subida.
+
+**Documentos**
+- **ADR 0004 §11** (`docs/adr/0004-web-sessao-e-autorizacao.md`):
+  - manter "nunca por argumento";
+  - acrescentar que, em HML com o banco só em IP privado, o código entra por uma versão de uso único do `hml-vinculo-pedido` (sem destruição adiada), gravada pela entrada padrão, montada como arquivo e destruída logo depois;
+  - registrar a exceção à F40.
+- **`OPERACAO.md`:** fluxo novo de concessão e de rotação.
+- **R-006:**
+  - linha "Vínculo de identidade" do desenho mínimo, permissões do operador e custo;
+  - ordem de execução: rede antes da instância;
+  - conta padrão do Compute.
+
+#### 5) Não verificado e limites
+
+**Não verificado:**
+- **Socket `/cloudsql` com instância só em IP privado.** A doc descreve o socket só para IP público [G11]. O desenho usa o conector por isso. Se um ensaio provar que o socket funciona, a mudança de código encolhe. Também não foi avaliada uma alternativa sem dependência nova: o Auth Proxy como sidecar, em IP privado, mantendo o socket. A doc de sidecars não cita o Cloud SQL Auth Proxy, e nos jobs o fim do sidecar é uma dúvida.
+- **Direct VPC em southamerica-east1.** Não há lista positiva de regiões; nada exclui a região.
+- **Permissões de rede das contas da CI:**
+  - a `sa-deploy-github` (`run.developer`) publicando com `vpc_access`;
+  - a `sa-infra-github` criando a instância com `private_network` de uma rede do bootstrap.
+
+  A doc do Direct VPC só lista permissões do agente de serviço [G7]. Conferir no 1º plan e na 1ª publicação.
+- **Custo da VPC e da sub-rede em si.** Não há SKU nem frase explícita de gratuidade.
+- **Se a cobrança de IPv4 ocioso [G25] vale para IP privado.** Isso afeta a sensibilidade (e).
+- **Criação do job pelo Terraform com o segredo ainda sem versão.** A doc só cita a checagem de permissão na criação [G18]. Na subida e na leitura, verificado: sem checagem e com falha de leitura.
+- **Se o campo de valor do console do Secret Manager esconde o que é digitado.** Por isso o fluxo usa a entrada padrão.
+- **Se o corpo dos overrides e o `sqlStatement` entram na auditoria.**
+- **Studio:** se respeita `REQUIRED`. A exigência de `ALLOW_DATA_API` é dedução de G22 com G23.
+- **Rede `default` ao ligar o Compute.** Não se sabe se ela nasce num projeto já existente; a doc fala de projeto novo, com SSH e RDP abertos para 0.0.0.0/0 [G29, G38]. Conferir depois do apply e apagá-la; o Trivy não a vê.
+
+**Limites:**
+- Operador único.
+- Tráfego estimado em 1 a 5 GiB por mês, não medido; é teto, porque a volta do Cloud SQL na mesma região não custa [G25].
+- Trivy 0.74 com o `trivy-checks` atual.
+- Antes da 1ª subida, recomenda-se um ensaio numa instância descartável, sem dado real, do conector `PRIVATE` com o Direct VPC.
+- Risco residual: a CI (`run.developer` via `local.jobs`) pode executar os jobs com overrides como `sa-preparo`, e isso já existe hoje. No job novo, isso inclui ler um pedido pendente durante a janela curta entre gravar e destruir.
+- Achado lateral: o `cloudsql.viewer` dos agentes inclui `cloudsql.instances.export` e `cloudsql.backupRuns.export` [G30]. Avaliar um papel customizado sem export (não testado).
+
+**Fontes** (acessadas em 28/09/2026)
+- G1 https://raw.githubusercontent.com/aquasecurity/trivy-checks/main/checks/cloud/google/sql/no_public_access.rego: "enableipv4.value == true"; "cidr.is_public(network.cidr.value)"
+- G2 https://raw.githubusercontent.com/aquasecurity/trivy/v0.74.0/pkg/iac/adapters/terraform/google/sql/adapt.go: "AsBoolValueOrDefault(true, resource)"
+- G3 https://raw.githubusercontent.com/aquasecurity/trivy-checks/main/checks/cloud/google/compute/enable_subnetwork_flow_logs.rego: "GCP-0076 … severity: MEDIUM"
+- G4 https://docs.cloud.google.com/sql/docs/postgres/configure-private-services-access: "fails with SERVICE_NETWORKING_NOT_ENABLED"; "roles/compute.networkAdmin"
+- G5 https://docs.cloud.google.com/sql/docs/postgres/private-ip: "can't remove the private IP capability"; "minimum size is a single /24 block"; "automatically authorized for RFC 1918"
+- G6 https://cloud.google.com/vpc/network-pricing: "no hourly or data charges for the connection itself"; "no charge for static or ephemeral internal IP addresses"; "priced the same as VM-to-VM traffic"; PSC endpoint "$0.01 / 1 hour"
+- G7 https://docs.cloud.google.com/run/docs/configuring/vpc-direct-vpc: "/26 or larger"; "delays of a minute or more"; "roles/run.serviceAgent) that contains the necessary permissions"
+- G8 https://docs.cloud.google.com/run/docs/configuring/connecting-vpc: "you pay only for network egress"; "slower, including starting from zero"
+- G9 https://cloud.google.com/run/pricing: "billed as Data transfer from a VM"
+- G10 https://docs.cloud.google.com/run/docs/securing/private-networking: "public destinations continue to be routed directly to the internet"
+- G11 https://docs.cloud.google.com/sql/docs/postgres/connect-run: "For public IP paths … Through Unix sockets"; "uses TCP … without using the Cloud SQL Auth Proxy"
+- G12 https://docs.cloud.google.com/sql/docs/postgres/connect-connectors: "Cloud SQL rejects direct connections to the database"; "don't provide new paths to connectivity"
+- G13 https://docs.cloud.google.com/sql/docs/postgres/sql-proxy: "does not provide a new connectivity path"
+- G14 https://docs.cloud.google.com/sql/docs/postgres/connect-instance-cloud-shell: "Cloud Shell doesn't work with a private IP address"
+- G15 https://docs.cloud.google.com/run/docs/execute/jobs: "Cloud Run Invoker (roles/run.invoker) on the Cloud Run job"; "override the arguments, environment variables"; "Cloud Run Developer"
+- G16 https://docs.cloud.google.com/run/docs/reference/iam/roles: "execute and cancel Cloud Run jobs with overrides"; e https://docs.cloud.google.com/run/docs/reference/rest/v2/projects.locations.jobs/run: "run.jobs.runWithOverrides"
+- G17 https://docs.cloud.google.com/run/docs/reference/rest/v2/projects.locations.jobs.executions: "template used to create tasks for this execution"
+- G18 https://docs.cloud.google.com/run/docs/configuring/jobs/secrets: "fetches the secret value … with the latest version"; "doesn't perform any checks during instance startup"
+- G19 https://docs.cloud.google.com/secret-manager/docs/access-control: "secretmanager.versions.add … secretmanager.versions.destroy"
+- G20 https://docs.cloud.google.com/secret-manager/docs/add-secret-version: "appears as plaintext in the list of processes"
+- G21 https://cloud.google.com/secret-manager/pricing: "\"active\" … Enabled and Disabled"; "billed proportional to that usage"
+- G22 https://docs.cloud.google.com/sql/docs/postgres/admin-api/rest/v1/instances: "Not allowed by default"; "from the public internet using instances.executeSql API"
+- G23 https://docs.cloud.google.com/sql/docs/postgres/manage-data-using-studio: "uses the executeSql API"; "every execution starts a new session"; "contain the invalid query"; "might transit through intermediate locations"
+- G24 https://docs.cloud.google.com/iam/docs/roles-permissions/cloudsql: "Role allowing access to Cloud SQL Studio"
+- G25 https://cloud.google.com/sql/pricing: "IPv4 addresses while idle"; "Within the same region: free"
+- G26 https://raw.githubusercontent.com/hashicorp/terraform-provider-google/v8.3.0/website/docs/r/sql_database_instance.html.markdown: "explicitly add a `depends_on`"; exemplos com `psc_config` e `ipv4_enabled = false`
+- G27 https://raw.githubusercontent.com/hashicorp/terraform-provider-google/v8.3.0/website/docs/r/service_networking_connection.html.markdown: "fail if this field is set to \"PREVENT\""
+- G28 https://raw.githubusercontent.com/hashicorp/terraform-provider-google/v8.3.0/website/docs/r/cloud_run_v2_job.html.markdown: "only single network interface is supported"
+- G29 https://docs.cloud.google.com/vpc/docs/vpc: "pre-populated IPv4 firewall rules"; "ingress rules allowing protocols such as RDP and SSH"
+- G30 https://docs.cloud.google.com/iam/docs/roles-permissions/cloudsql: `roles/cloudsql.viewer` com "cloudsql.instances.export"
+- G31 https://raw.githubusercontent.com/aquasecurity/trivy-checks/main/checks/cloud/google/compute/enable_subnetwork_private_google_access.rego: "id: GCP-0075"; "severity: LOW"
+- G32 https://raw.githubusercontent.com/aquasecurity/trivy-checks/main/checks/cloud/google/compute/enable_vpc_flow_logs.rego: "id: GCP-0029"; "severity: LOW"
+- G33 https://docs.cloud.google.com/sql/docs/postgres/configure-private-ip: "causes the instance to restart"; "can't assign an allocated range name for an existing instance"; "you can't modify the range"
+- G34 https://docs.cloud.google.com/secret-manager/docs/delay-destruction-of-secret-versions: "The version is disabled, preventing its use."
+- G35 https://docs.cloud.google.com/run/docs/configuring/vpc-connectors: "RFC 1918"; "RFC 6598"; "Packets to any other destination are routed"
+- G36 https://docs.cloud.google.com/vpc/docs/configure-private-services-access: "automatically selects an unused address range"
+- G37 https://docs.cloud.google.com/compute/docs/access/service-accounts: "when you enable the Compute Engine API"; "might automatically be granted the Editor role"
+- G38 https://docs.cloud.google.com/sql/docs/postgres/admin-api/rest/v1/instances/executeSql: "passwordSecretVersion"; "autoIamAuthn"; e https://docs.cloud.google.com/firewall/docs/firewalls: "default-allow-ssh" com "0.0.0.0/0"
+
+**Arquivos citados:**
+- infra/terraform/hml/README.md (linha 74, trecho "bastion ou VPN" a corrigir; GCP-0015 pendente)
+- infra/terraform/hml/cloud_run.tf (`local.jobs`, linhas 339 a 355)
+- infra/terraform/hml/segredos.tf (linha 43, `version_destroy_ttl = "604800s"`, que o segredo novo não deve copiar)
+- infra/terraform/bootstrap/main.tf
+- infra/terraform/bootstrap/contas.tf
+- infra/terraform/bootstrap/README.md (linha 52, procedimento "Conta padrão do Compute")
+- .github/workflows/ci.yml (linhas 52 e 61, gate `HIGH,CRITICAL`)
+- docs/parceria/rodadas/evidencias/R-006-hospedagem.md (nada provisionado; conflito com o PRD 31.7)
+- (produto, 182ad2a) packages/db/src/cli/vincular-identidade.ts
+- (produto, 182ad2a) apps/web/src/servidor/ambiente.ts
+- (produto, 182ad2a) docs/adr/0004-web-sessao-e-autorizacao.md
+
 ### Correções ao texto de 27/09 abaixo
 
 - os alertas passam de 50/90/100 para **70/90/100** (PRD 28.4);
