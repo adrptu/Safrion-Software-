@@ -58,31 +58,38 @@
         "@types/react-dom",
         "eslint-plugin-react-hooks"
       ],
-      "groupName": "framework web"
+      "groupName": "framework web",
+      "separateMajorMinor": false
     },
     {
       "matchPackageNames": ["typescript", "typescript-eslint", "eslint", "@eslint/js"],
-      "groupName": "analise estatica"
+      "groupName": "analise estatica",
+      "separateMajorMinor": false
     },
     {
       "matchPackageNames": ["vitest", "@vitest/coverage-v8", "vite"],
-      "groupName": "testes unitarios"
+      "groupName": "testes unitarios",
+      "separateMajorMinor": false
     },
     {
       "matchPackageNames": ["node", "@types/node"],
-      "groupName": "runtime Node"
+      "groupName": "runtime Node",
+      "separateMajorMinor": false
     },
     {
       "matchPackageNames": ["semgrep/semgrep"],
-      "groupName": "Semgrep e contrato"
+      "groupName": "Semgrep e contrato",
+      "separateMajorMinor": false
     },
     {
       "matchPackageNames": ["postgis/postgis"],
-      "groupName": "PostgreSQL e PostGIS"
+      "groupName": "PostgreSQL e PostGIS",
+      "separateMajorMinor": false
     },
     {
       "matchManagers": ["terraform", "terraform-version"],
-      "groupName": "Terraform e provider Google"
+      "groupName": "Terraform e provider Google",
+      "separateMajorMinor": false
     },
     {
       "matchDatasources": ["github-release-attachments"],
@@ -94,7 +101,8 @@
     },
     {
       "matchPackageNames": ["hashicorp/terraform"],
-      "groupName": "Terraform e provider Google"
+      "groupName": "Terraform e provider Google",
+      "separateMajorMinor": false
     },
     {
       "description": "Linha LTS homologada. Rever junto dos tipos e Docker na migração para nova LTS (versions.md).",
@@ -117,6 +125,11 @@
       "matchUpdateTypes": ["digest"],
       "groupName": "digests das imagens base",
       "schedule": ["* 3-7 * * 1"]
+    },
+    {
+      "description": "Não propor gerenciador que exige outro runtime Node.",
+      "matchPackageNames": ["pnpm"],
+      "constraintsFiltering": "strict"
     }
   ],
   "customManagers": [
