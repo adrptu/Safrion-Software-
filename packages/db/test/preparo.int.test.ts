@@ -10,7 +10,13 @@ import { afterAll, beforeAll, describe, expect, inject, it } from 'vitest';
 import { ErroAmbiente, lerIdentidadeAmbiente } from '../src/ambiente.js';
 import { executarCli } from '../src/cli/preparar-banco.js';
 import { PASTA_MIGRACOES } from '../src/migrar.js';
-import { conexaoDoMigrator, ErroPreparo, prepararBanco, validarOpcoes } from '../src/preparo.js';
+import {
+  conexaoDoMigrator,
+  ErroPreparo,
+  prepararBanco,
+  validarOpcoes,
+  type OpcoesPreparo,
+} from '../src/preparo.js';
 
 const sufixo = randomUUID().replaceAll('-', '').slice(0, 10);
 const bancos = {
@@ -19,6 +25,7 @@ const bancos = {
   limitado: `prep_lim_${sufixo}`,
   cli: `prep_cli_${sufixo}`,
   semCredencial: `prep_semcred_${sufixo}`,
+  vazio: `prep_vazio_${sufixo}`,
 };
 const administrador = `adm_prep_${sufixo}`;
 const semSet = `adm_semset_${sufixo}`;
@@ -204,17 +211,44 @@ describe('preparo com banco real', () => {
   });
 });
 
-describe('nada muda antes de conferir identidade e senhas (HML-PREP-01)', () => {
+describe('nada muda antes de conferir identidade e senhas (HML-PREP-01/03)', () => {
   const novas = () => ({ migrator: randomUUID(), appRuntime: randomUUID() });
-  // Todo ALTER ROLE … PASSWORD grava um verificador SCRAM com sal novo: impressão igual prova que nenhuma senha foi
-  // regravada, com ou sem conferência de senha no servidor. Só a igualdade vai para o relatório, nunca o verificador.
-  const impressao = async () =>
-    (
-      await raiz.query<{ p: string }>(
-        `SELECT string_agg(rolname || ':' || coalesce(rolpassword, ''), ',' ORDER BY rolname) AS p
-           FROM pg_authid WHERE rolname IN ('migrator', 'app_runtime')`,
-      )
-    ).rows[0]?.p ?? '';
+  const ALTERA = /^(ALTER|CREATE|GRANT|REVOKE|DROP|INSERT|UPDATE|DELETE|TRUNCATE|COMMENT|SECURITY)\b/i;
+
+  /**
+   * "Nada mudou" é conferido pelo que a própria chamada enviou ao servidor, pelo administrador e pelas conexões que
+   * abriu, e não pelo estado global dos papéis: outros arquivos da bateria rodam em paralelo e podem regravar as mesmas
+   * senhas. Só as duas primeiras palavras de cada comando são guardadas, para nenhuma senha ir ao relatório.
+   */
+  function anotado(c: pg.Client, comandos: string[]): pg.Client {
+    const consultar: (...a: unknown[]) => unknown = c.query.bind(c);
+    const query = (...a: unknown[]) => {
+      const [q] = a;
+      const texto =
+        typeof q === 'string' ? q : typeof q === 'object' && q && 'text' in q ? String(q.text) : '';
+      comandos.push(texto.trim().split(/\s+/).slice(0, 2).join(' '));
+      return consultar(...a);
+    };
+    return Object.assign(c, { query });
+  }
+
+  async function recusa(admin: pg.Client, opcoes: OpcoesPreparo) {
+    const comandos: string[] = [];
+    const erro = await falhaDe(
+      prepararBanco(anotado(admin, comandos), opcoes, (config) => anotado(new pg.Client(config), comandos)),
+    );
+    return { erro, comandos, alteracoes: comandos.filter((c) => ALTERA.test(c)) };
+  }
+
+  async function comAdministrador<T>(usuario: string | undefined, f: (c: pg.Client) => Promise<T>) {
+    const c = usuario ? await conectar(usuario, senhaAdministrador) : await conectar();
+    try {
+      return await f(c);
+    } finally {
+      await c.end();
+    }
+  }
+
   const servidorConfereSenha = async () => {
     try {
       await (await conectar('app_runtime', randomUUID())).end();
@@ -225,11 +259,13 @@ describe('nada muda antes de conferir identidade e senhas (HML-PREP-01)', () => 
     }
   };
 
-  it('ambiente divergente com senhas novas: recusa sem regravar senha nenhuma', async () => {
-    const antes = await impressao();
-    const erro = await falhaDe(prepararBanco(raiz, { ambiente: 'dev', banco: bancos.hml, senhas: novas() }));
-    expect(erro).toMatchObject({ codigo: 'IDENTIDADE_DIVERGENTE' });
-    expect((await impressao()) === antes, 'credenciais intactas').toBe(true);
+  it('ambiente divergente com senhas novas: recusa sem enviar alteração nenhuma', async () => {
+    const r = await comAdministrador(undefined, (c) =>
+      recusa(c, { ambiente: 'dev', banco: bancos.hml, senhas: novas() }),
+    );
+    expect(r.erro).toMatchObject({ codigo: 'IDENTIDADE_DIVERGENTE' });
+    expect(r.alteracoes).toEqual([]);
+    expect(r.comandos, 'a identidade foi lida').toContain('SET ROLE');
   });
 
   it('administrador sem poder assumir o migrator num banco existente: não verificável, nada muda', async () => {
@@ -239,17 +275,12 @@ describe('nada muda antes de conferir identidade e senhas (HML-PREP-01)', () => 
     await raiz.query(
       `GRANT migrator, app_runtime, app_sessao TO ${semSet} WITH ADMIN TRUE, INHERIT FALSE, SET FALSE`,
     );
-    const antes = await impressao();
-    const limitado = await conectar(semSet, senhaAdministrador);
-    try {
-      const erro = await falhaDe(
-        prepararBanco(limitado, { ambiente: 'hml', banco: bancos.hml, senhas: novas() }),
-      );
-      expect(erro).toMatchObject({ codigo: 'IDENTIDADE_NAO_VERIFICAVEL' });
-    } finally {
-      await limitado.end();
-    }
-    expect((await impressao()) === antes, 'credenciais intactas').toBe(true);
+    const r = await comAdministrador(semSet, (c) =>
+      recusa(c, { ambiente: 'hml', banco: bancos.hml, senhas: novas() }),
+    );
+    expect(r.erro).toMatchObject({ codigo: 'IDENTIDADE_NAO_VERIFICAVEL' });
+    expect(r.alteracoes).toEqual([]);
+    expect(r.comandos).toContain('SET ROLE');
     const assumir = await raiz.query(
       `SELECT 1 FROM pg_auth_members m JOIN pg_roles u ON u.oid = m.member WHERE u.rolname = $1 AND m.set_option`,
       [semSet],
@@ -258,23 +289,39 @@ describe('nada muda antes de conferir identidade e senhas (HML-PREP-01)', () => 
     expect(await noBanco(bancos.hml, (c) => lerIdentidadeAmbiente(c))).toBe('hml');
   });
 
-  it('senha informada que não é a atual: recusa sem regravar nem criar banco', async (ctx) => {
+  it('banco criado e interrompido antes da primeira migração: retoma; sem SET no migrator, recusa sem efeito (HML-PREP-03)', async () => {
+    await raiz.query(`CREATE DATABASE ${bancos.vazio} OWNER migrator`);
+    const r = await comAdministrador(semSet, (c) =>
+      recusa(c, { ambiente: 'hml', banco: bancos.vazio, senhas: senhas() }),
+    );
+    expect(r.erro).toMatchObject({ codigo: 'IDENTIDADE_NAO_VERIFICAVEL' });
+    expect(r.alteracoes).toEqual([]);
+    const esquema = await noBanco(bancos.vazio, (c) =>
+      c.query("SELECT 1 FROM pg_namespace WHERE nspname IN ('app', 'migracao')"),
+    );
+    expect(esquema.rowCount, 'recusa sem migrar').toBe(0);
+    expect(await prepararBanco(raiz, { ambiente: 'hml', banco: bancos.vazio, senhas: senhas() })).toEqual({
+      ambiente: 'hml',
+      banco: 'existente',
+      migracoes: { aplicadas: migracoes, jaAplicadas: [] },
+      identidade: 'definida',
+    });
+    expect(await noBanco(bancos.vazio, (c) => lerIdentidadeAmbiente(c))).toBe('hml');
+  });
+
+  it('senha informada que não é a atual: recusa sem alterar nem criar banco', async (ctx) => {
     // Servidor em trust aceita qualquer senha: a conferência só é medida com autenticação por senha (SCRAM).
     if (!(await servidorConfereSenha())) return ctx.skip();
-    const antes = await impressao();
-    const novo = await falhaDe(
-      prepararBanco(raiz, { ambiente: 'hml', banco: bancos.semCredencial, senhas: novas() }),
+    const novo = await comAdministrador(undefined, (c) =>
+      recusa(c, { ambiente: 'hml', banco: bancos.semCredencial, senhas: novas() }),
     );
-    expect(novo).toMatchObject({ codigo: 'CREDENCIAL_DIVERGENTE' });
-    const existente = await falhaDe(
-      prepararBanco(raiz, {
-        ambiente: 'hml',
-        banco: bancos.hml,
-        senhas: { ...senhas(), appRuntime: randomUUID() },
-      }),
+    expect(novo.erro).toMatchObject({ codigo: 'CREDENCIAL_DIVERGENTE' });
+    expect(novo.alteracoes).toEqual([]);
+    const existente = await comAdministrador(undefined, (c) =>
+      recusa(c, { ambiente: 'hml', banco: bancos.hml, senhas: { ...senhas(), appRuntime: randomUUID() } }),
     );
-    expect(existente).toMatchObject({ codigo: 'CREDENCIAL_DIVERGENTE' });
-    expect((await impressao()) === antes, 'credenciais intactas').toBe(true);
+    expect(existente.erro).toMatchObject({ codigo: 'CREDENCIAL_DIVERGENTE' });
+    expect(existente.alteracoes).toEqual([]);
     const criado = await raiz.query('SELECT 1 FROM pg_database WHERE datname = $1', [bancos.semCredencial]);
     expect(criado.rowCount).toBe(0);
   });
