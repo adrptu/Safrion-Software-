@@ -70,14 +70,19 @@ export function lerRascunho(armazem: Leitura | null, chave: string): Rascunho | 
   }
 }
 
-/** Grava o rascunho; sem nada digitado e sem envio incerto, apaga. Falha do armazenamento não impede o trabalho. */
-export function gravarRascunho(armazem: Escrita | null, chave: string, r: Rascunho): void {
+/**
+ * Grava o rascunho; sem nada digitado e sem envio incerto, apaga. Devolve se ficou guardado: sem armazenamento, o
+ * trabalho continua, mas a tela não pode prometer recuperar depois de recarregar (B2-C03).
+ */
+export function gravarRascunho(armazem: Escrita | null, chave: string, r: Rascunho): boolean {
+  if (!armazem) return false;
   try {
     if (r.incerto === null && r.campos.quantidade.trim() === '' && r.campos.situacao === '')
-      armazem?.removeItem(chave);
-    else armazem?.setItem(chave, JSON.stringify(r));
+      armazem.removeItem(chave);
+    else armazem.setItem(chave, JSON.stringify(r));
+    return true;
   } catch {
-    // Sem armazenamento, o rascunho só não sobrevive a uma recarga.
+    return false;
   }
 }
 

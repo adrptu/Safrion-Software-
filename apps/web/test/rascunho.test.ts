@@ -55,7 +55,7 @@ describe('rascunho da entrada (B2-C02)', () => {
 
   it('grava e lê o que foi digitado e o envio incerto', () => {
     const a = memoria();
-    gravarRascunho(a, CHAVE, { campos, incerto: null });
+    expect(gravarRascunho(a, CHAVE, { campos, incerto: null })).toBe(true);
     expect(lerRascunho(a, CHAVE)).toEqual({ campos, incerto: null });
     gravarRascunho(a, CHAVE, { campos, incerto: envio });
     expect(lerRascunho(a, CHAVE)).toEqual({ campos, incerto: envio });
@@ -92,15 +92,13 @@ describe('rascunho da entrada (B2-C02)', () => {
   it('armazenamento bloqueado não derruba a tela', () => {
     const a = memoria(true);
     const r: Rascunho = { campos, incerto: null };
-    expect(() => {
-      gravarRascunho(a, CHAVE, r);
-    }).not.toThrow();
+    expect(gravarRascunho(a, CHAVE, r)).toBe(false);
     expect(lerRascunho(a, CHAVE)).toBeNull();
     expect(() => {
       apagarRascunhos(a);
     }).not.toThrow();
+    expect(gravarRascunho(null, CHAVE, r)).toBe(false);
     expect(() => {
-      gravarRascunho(null, CHAVE, r);
       apagarRascunhos(null);
     }).not.toThrow();
   });
