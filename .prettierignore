@@ -6,3 +6,5 @@ tools/**/*.py
 pnpm-lock.yaml
 **/dist/
 coverage/
+# Fixtures sintéticas são verificadas pelo Semgrep nativo, não compiladas como aplicação.
+.semgrep/

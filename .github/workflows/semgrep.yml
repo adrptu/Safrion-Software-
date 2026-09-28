@@ -1,0 +1,31 @@
+name: Segurança estática
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: semgrep-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  semgrep:
+    name: Semgrep (regras, fixtures e inventário)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Analisar com Semgrep CE 1.178.0, sem rede durante a execução
+        env:
+          SEMGREP_IMAGE: semgrep/semgrep@sha256:32e459968daabe7ab86968184a29109b9564aa00392401156f9788452b42786b
+        run: |
+          docker pull "$SEMGREP_IMAGE"
+          mkdir -p "$RUNNER_TEMP/safrion-semgrep"
+          docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges \
+            -v "$GITHUB_WORKSPACE:/src:ro" -v "$RUNNER_TEMP/safrion-semgrep:/evidence" \
+            -w /src --entrypoint python3 "$SEMGREP_IMAGE" \
+            tools/ci/check_semgrep.py --report-dir /evidence .
