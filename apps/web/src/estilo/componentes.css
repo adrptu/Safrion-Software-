@@ -429,6 +429,9 @@ h1 {
   color: var(--color-text-primary);
   font: inherit;
 }
+.campo input[readonly] {
+  background: var(--color-bg-app);
+}
 .campo[data-erro] input,
 .campo[data-erro] select {
   border-color: var(--color-danger-fg);
@@ -480,6 +483,10 @@ h1 {
   border-color: var(--color-action-primary);
   background: var(--color-action-primary);
   color: var(--color-text-inverse);
+}
+.pilulas input:disabled + label,
+.campo select:disabled {
+  cursor: not-allowed;
 }
 .pilulas input:focus-visible + label {
   outline: var(--focus-ring);
