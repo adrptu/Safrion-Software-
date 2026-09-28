@@ -2,6 +2,7 @@ import { perfilDaSessao } from '@safrion/db/web';
 import type { ReactNode } from 'react';
 
 import { nomeDoPapel, podeLer } from '../../autorizacao/matriz';
+import { BotaoSair } from '../../componentes/BotaoSair';
 import { ItemMenu } from '../../componentes/ItemMenu';
 import { ambienteAtual, consultar, NOME_DO_AMBIENTE, sessaoAtual } from '../../servidor/pagina';
 
@@ -45,11 +46,7 @@ export default async function Casca({ children }: { readonly children: ReactNode
               {perfil ? ` · ${perfil.organizacao}` : ''}
             </span>
           </p>
-          <form method="post" action="/sair">
-            <button type="submit" className="sair">
-              Sair
-            </button>
-          </form>
+          <BotaoSair />
         </div>
       </nav>
       <main id="conteudo" className="coluna">

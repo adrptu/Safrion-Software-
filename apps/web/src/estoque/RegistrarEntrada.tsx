@@ -7,12 +7,15 @@ import { useEffect, useId, useRef, useState, useTransition, type SubmitEvent } f
 import {
   desfechoDaResposta,
   pedidoDeEntrada,
+  SEM_CONEXAO,
   validarEntrada,
   type CampoEntrada,
   type CamposEntrada,
+  type Desfecho,
   type ErrosEntrada,
 } from './entrada';
 import { palavraDaSituacao, SITUACOES_DE_ENTRADA } from './estado';
+import { armazemDaSessao, chaveDoRascunho, gravarRascunho, lerRascunho, type EnvioIncerto } from './rascunho';
 
 export interface Opcao {
   readonly valor: string;
@@ -25,10 +28,20 @@ interface Aviso {
   readonly entrar?: boolean;
 }
 
+const AVISO_INCERTO =
+  'A última entrada foi enviada, mas a resposta não chegou. Registre de novo para conferir, sem duplicar.';
+const SEM_GUARDA =
+  ' Não feche nem recarregue esta página: o navegador não deixou guardar o envio para conferir depois.';
+
 /**
  * Próximo passo do lote para quem registra entrada: quantidade com unidade, situação e local, e um único comando
- * explícito. A chave de idempotência nasce no primeiro envio e é reaproveitada no reenvio do mesmo conteúdo (falha de
- * rede não duplica a entrada); mudar um campo ou a versão do lote gera outra. Erro nunca apaga o que foi digitado.
+ * explícito. Cada envio tem a sua chave de idempotência.
+ * - Enquanto envia, os campos ficam só leitura (B2-C01): a resposta nunca apaga o que foi digitado depois dela.
+ * - O rascunho fica na sessão do navegador, por usuário, organização e lote (B2-C02), e volta depois de recarregar.
+ * - Todo envio é guardado com a chave, o conteúdo e a versão antes de sair (B2-C03). Sem resposta certa, ou depois de
+ *   uma recarga no meio do envio, os campos ficam travados e "Registrar entrada" reenvia exatamente o mesmo pedido,
+ *   que o servidor não duplica. Sem armazenamento no navegador, a tela diz que não dá para conferir depois.
+ * - Erro nunca apaga o que foi digitado.
  */
 export function RegistrarEntrada({
   lote,
@@ -36,12 +49,16 @@ export function RegistrarEntrada({
   unidadePadrao,
   locais,
   destino,
+  usuarioId,
+  organizacaoId,
 }: {
   readonly lote: { readonly id: string; readonly versao: number };
   readonly unidades: readonly Opcao[];
   readonly unidadePadrao: string;
   readonly locais: readonly Opcao[];
   readonly destino: string;
+  readonly usuarioId: string;
+  readonly organizacaoId: string;
 }) {
   const id = useId();
   const router = useRouter();
@@ -52,34 +69,82 @@ export function RegistrarEntrada({
       router.refresh();
     });
   };
-  const [campos, setCampos] = useState<CamposEntrada>({
+  const vazio: CamposEntrada = {
     quantidade: '',
     unidade: unidadePadrao,
     situacao: '',
     local: locais.length === 1 ? (locais[0]?.valor ?? '') : '',
-  });
+  };
+  const [campos, setCampos] = useState<CamposEntrada>(vazio);
+  const [incerto, setIncerto] = useState<EnvioIncerto | null>(null);
   const [erros, setErros] = useState<ErrosEntrada>({});
   const [enviando, setEnviando] = useState(false);
   const [aviso, setAviso] = useState<Aviso | null>(null);
-  const chave = useRef<string | null>(null);
   const formulario = useRef<HTMLFormElement>(null);
+  const chaveRascunho = chaveDoRascunho(usuarioId, organizacaoId, lote.id);
+  const travado = enviando || incerto !== null;
 
-  // Nova versão do lote (depois de salvar ou de um conflito) é outro pedido: outra chave.
+  // Recupera o rascunho desta pessoa, organização e lote depois de recarregar; nunca envia sozinho.
   useEffect(() => {
-    chave.current = null;
-  }, [lote.versao]);
+    const r = lerRascunho(armazemDaSessao(), chaveRascunho);
+    if (!r) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sessionStorage só existe no navegador, depois da hidratação
+    setCampos(r.campos);
+    setIncerto(r.incerto);
+    if (r.incerto) setAviso({ papel: 'atencao', texto: AVISO_INCERTO });
+  }, [chaveRascunho]);
+
+  function guardar(proximos: CamposEntrada, envio: EnvioIncerto | null): boolean {
+    return gravarRascunho(armazemDaSessao(), chaveRascunho, { campos: proximos, incerto: envio });
+  }
 
   function mudar(campo: CampoEntrada, valor: string) {
-    setCampos((c) => ({ ...c, [campo]: valor }));
+    if (travado) return;
+    const proximos = { ...campos, [campo]: valor };
+    setCampos(proximos);
     setErros((e) => ({ ...e, [campo]: undefined }));
-    chave.current = null;
+    guardar(proximos, null);
+  }
+
+  function aplicar(d: Desfecho, envio: EnvioIncerto, duravel: boolean) {
+    if (d.tipo === 'falha' && d.incerto) {
+      // O envio já está guardado desde antes da requisição; sem armazenamento, o limite fica dito na tela.
+      setIncerto(envio);
+      setAviso({ papel: 'erro', texto: duravel ? d.mensagem : d.mensagem + SEM_GUARDA });
+      return;
+    }
+    // Daqui em diante a resposta é certa: o envio não está mais pendente.
+    setIncerto(null);
+    if (d.tipo === 'confirmado') {
+      const limpos = { ...envio.campos, quantidade: '', situacao: '' };
+      setCampos(limpos);
+      guardar(limpos, null);
+      setAviso({
+        papel: 'sucesso',
+        texto: d.jaRecebido ? 'Entrada registrada · o envio anterior já tinha chegado' : 'Entrada registrada',
+      });
+      atualizar();
+      return;
+    }
+    guardar(envio.campos, null);
+    if (d.tipo === 'conflito') {
+      setAviso({ papel: 'atencao', texto: d.mensagem });
+      atualizar();
+    } else if (d.tipo === 'recusado') {
+      setAviso({ papel: 'erro', texto: d.mensagem });
+      if (d.campo) setErros({ [d.campo]: d.mensagem });
+    } else {
+      setAviso({ papel: 'erro', texto: d.mensagem, entrar: d.tipo === 'sessao' });
+    }
   }
 
   async function enviar(evento: SubmitEvent<HTMLFormElement>) {
     evento.preventDefault();
     if (enviando) return;
+    // Com envio incerto, reenvia exatamente o mesmo pedido (chave, conteúdo e versão); senão, um pedido novo.
+    const envio: EnvioIncerto = incerto ?? { chave: crypto.randomUUID(), campos, versao: lote.versao };
     const v = validarEntrada(
-      campos,
+      envio.campos,
       unidades.map((u) => u.valor),
       locais.map((l) => l.valor),
     );
@@ -93,39 +158,24 @@ export function RegistrarEntrada({
     setErros({});
     setAviso(null);
     setEnviando(true);
-    chave.current ??= crypto.randomUUID();
+    // B2-C03: o envio fica guardado ANTES de sair (chave, conteúdo e versão), para uma recarga ou uma aba fechada no
+    // meio do caminho ainda poder conferir o mesmo pedido. A resposta conclusiva limpa isso em `aplicar`.
+    const duravel = guardar(envio.campos, envio);
+    let d: Desfecho;
     try {
       const resposta = await fetch('/api/v1/comandos/estoque.registrar-entrada', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         credentials: 'same-origin',
-        body: JSON.stringify(pedidoDeEntrada(lote, v.dados, chave.current)),
+        body: JSON.stringify(pedidoDeEntrada({ id: lote.id, versao: envio.versao }, v.dados, envio.chave)),
       });
       const corpo: unknown = await resposta.json().catch(() => null);
-      const d = desfechoDaResposta(resposta.status, corpo);
-      if (d.tipo === 'confirmado') {
-        chave.current = null;
-        setCampos((c) => ({ ...c, quantidade: '', situacao: '' }));
-        setAviso({ papel: 'sucesso', texto: 'Entrada registrada' });
-        atualizar();
-      } else if (d.tipo === 'conflito') {
-        chave.current = null;
-        setAviso({ papel: 'atencao', texto: d.mensagem });
-        atualizar();
-      } else if (d.tipo === 'recusado') {
-        setAviso({ papel: 'erro', texto: d.mensagem });
-        if (d.campo) setErros({ [d.campo]: d.mensagem });
-      } else {
-        setAviso({ papel: 'erro', texto: d.mensagem, entrar: d.tipo === 'sessao' });
-      }
+      d = desfechoDaResposta(resposta.status, corpo);
     } catch {
-      setAviso({
-        papel: 'erro',
-        texto: 'Sem conexão com o servidor. Seus dados continuam aqui; tente de novo.',
-      });
-    } finally {
-      setEnviando(false);
+      d = SEM_CONEXAO;
     }
+    aplicar(d, envio, duravel);
+    setEnviando(false);
   }
 
   const erroDe = (campo: CampoEntrada) =>
@@ -137,7 +187,13 @@ export function RegistrarEntrada({
   const descrito = (campo: CampoEntrada) => (erros[campo] ? `${id}-${campo}-erro` : undefined);
 
   return (
-    <form ref={formulario} className="bloco-corpo" noValidate onSubmit={(e) => void enviar(e)}>
+    <form
+      ref={formulario}
+      className="bloco-corpo"
+      noValidate
+      aria-busy={enviando}
+      onSubmit={(e) => void enviar(e)}
+    >
       <div className="formulario">
         <div className="campo" data-erro={erros.quantidade || erros.unidade ? '' : undefined}>
           <label htmlFor={`${id}-quantidade`}>Quantidade</label>
@@ -149,6 +205,7 @@ export function RegistrarEntrada({
               inputMode="decimal"
               autoComplete="off"
               value={campos.quantidade}
+              readOnly={travado}
               aria-invalid={erros.quantidade ? true : undefined}
               aria-describedby={descrito('quantidade')}
               onChange={(e) => {
@@ -159,6 +216,7 @@ export function RegistrarEntrada({
               data-campo="unidade"
               aria-label="Unidade"
               value={campos.unidade}
+              disabled={travado}
               aria-invalid={erros.unidade ? true : undefined}
               aria-describedby={descrito('unidade')}
               onChange={(e) => {
@@ -191,6 +249,7 @@ export function RegistrarEntrada({
                   name={`${id}-situacao`}
                   value={s}
                   checked={campos.situacao === s}
+                  disabled={travado}
                   onChange={() => {
                     mudar('situacao', s);
                   }}
@@ -213,6 +272,7 @@ export function RegistrarEntrada({
               id={`${id}-local`}
               data-campo="local"
               value={campos.local}
+              disabled={travado}
               aria-invalid={erros.local ? true : undefined}
               aria-describedby={descrito('local')}
               onChange={(e) => {

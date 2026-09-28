@@ -2,7 +2,7 @@ import { EsquemaDadosMovimento, EsquemaPedidoComando } from '@safrion/contracts'
 import type { LinhaExtrato, LoteResumo } from '@safrion/db/web';
 import { describe, expect, it } from 'vitest';
 
-import { desfechoDaResposta, pedidoDeEntrada, validarEntrada } from '../src/estoque/entrada';
+import { desfechoDaResposta, pedidoDeEntrada, SEM_CONEXAO, validarEntrada } from '../src/estoque/entrada';
 import { estadoDoLote, palavraDaSituacao } from '../src/estoque/estado';
 import { linhaDoLote, linhaDoMovimento, linhaDoProduto, unidadesDoLote } from '../src/estoque/lista';
 
@@ -129,11 +129,17 @@ describe('registrar entrada', () => {
   });
 
   it('lê a resposta do servidor', () => {
+    expect(desfechoDaResposta(200, { outcome: 'confirmed', alreadyReceived: false })).toEqual({
+      tipo: 'confirmado',
+      jaRecebido: false,
+    });
     expect(desfechoDaResposta(200, { outcome: 'confirmed', alreadyReceived: true })).toEqual({
       tipo: 'confirmado',
+      jaRecebido: true,
     });
-    expect(desfechoDaResposta(200, { outcome: 'rejected' }).tipo).toBe('falha');
-    expect(desfechoDaResposta(200, null).tipo).toBe('falha');
+    // 200 sem recibo confirmado é resposta inesperada: a entrada pode ter sido gravada, fica para conferir.
+    expect(desfechoDaResposta(200, { outcome: 'rejected' })).toMatchObject({ tipo: 'falha', incerto: true });
+    expect(desfechoDaResposta(200, null)).toMatchObject({ tipo: 'falha', incerto: true });
     expect(desfechoDaResposta(409, { outcome: 'version_conflict' })).toEqual({
       tipo: 'conflito',
       mensagem: 'O lote mudou enquanto você registrava. Confira o saldo atualizado e registre de novo.',
@@ -156,17 +162,23 @@ describe('registrar entrada', () => {
     expect(desfechoDaResposta(403, {})).toEqual({
       tipo: 'falha',
       mensagem: 'Seu papel não permite registrar entrada.',
+      incerto: false,
     });
     for (const status of [400, 413, 415])
       expect(desfechoDaResposta(status, {}).tipo === 'falha' && desfechoDaResposta(status, {})).toMatchObject(
         {
           mensagem: 'O pedido não foi aceito. Recarregue a página e tente de novo.',
+          incerto: false,
         },
       );
-    expect(desfechoDaResposta(500, 'x')).toEqual({
-      tipo: 'falha',
-      mensagem: 'O servidor não respondeu como esperado. Seus dados continuam aqui; tente de novo.',
-    });
+    for (const status of [500, 502, 504])
+      expect(desfechoDaResposta(status, 'x')).toEqual({
+        tipo: 'falha',
+        mensagem:
+          'O servidor não respondeu como esperado. A entrada pode ter chegado: registre de novo para conferir, sem duplicar.',
+        incerto: true,
+      });
+    expect(SEM_CONEXAO).toMatchObject({ tipo: 'falha', incerto: true });
   });
 });
 

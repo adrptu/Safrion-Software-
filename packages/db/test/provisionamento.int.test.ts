@@ -65,12 +65,22 @@ async function derrubarAntesDe(cliente: pg.Client, gatilho: string): Promise<voi
   };
 }
 
-async function travaLivre(): Promise<boolean> {
-  const r = await raiz.query<{ ok: boolean }>(
-    "SELECT pg_try_advisory_lock(hashtext('safrion.papeis')) AS ok",
+/** Pid da sessão do cliente, lido antes de derrubá-la. */
+async function pidDe(cliente: pg.Client): Promise<number> {
+  const r = await cliente.query<{ pid: number }>('SELECT pg_backend_pid() AS pid');
+  return r.rows[0]?.pid ?? -1;
+}
+
+/**
+ * A sessão que provisionou não ficou com nenhuma trava consultiva. Olha a sessão, e não se a trava está livre no
+ * servidor: outro arquivo da bateria (o preparo do banco) provisiona ao mesmo tempo e pode segurá-la legitimamente.
+ */
+async function travaSoltaPor(pid: number): Promise<boolean> {
+  const r = await raiz.query<{ presa: boolean }>(
+    "SELECT EXISTS (SELECT 1 FROM pg_locks WHERE locktype = 'advisory' AND pid = $1) AS presa",
+    [pid],
   );
-  if (r.rows[0]?.ok) await raiz.query("SELECT pg_advisory_unlock(hashtext('safrion.papeis'))");
-  return r.rows[0]?.ok === true;
+  return r.rows[0]?.presa === false;
 }
 
 beforeAll(async () => {
@@ -160,6 +170,7 @@ describe('provisionamento dos papéis por administrador sem superusuário (Cloud
     const cliente = await conectarLimitado();
     try {
       const antes = await hashes();
+      const pid = await pidDe(cliente);
       await derrubarAntesDe(cliente, 'ROLLBACK');
       const senhas = novasSenhas();
       const erro = await falhaDe(provisionarPapeis(cliente, senhas, nomes));
@@ -170,7 +181,7 @@ describe('provisionamento dos papéis por administrador sem superusuário (Cloud
       expect((erro as Error).cause).toMatchObject({ code: '42501' });
       expect((erro as Error).message).not.toContain(senhas.migrator);
       expect(await hashes()).toEqual(antes);
-      expect(await travaLivre()).toBe(true);
+      expect(await travaSoltaPor(pid)).toBe(true);
     } finally {
       await raiz.query(`ALTER ROLE ${nomes.migrator} NOSUPERUSER`);
       await cliente.end();
@@ -180,13 +191,14 @@ describe('provisionamento dos papéis por administrador sem superusuário (Cloud
   it('queda no COMMIT: o resultado é incerto, nunca sucesso', async () => {
     const cliente = await conectarLimitado();
     try {
+      const pid = await pidDe(cliente);
       await derrubarAntesDe(cliente, 'COMMIT');
       const erro = await falhaDe(provisionarPapeis(cliente, novasSenhas(), nomes));
       expect(erro).toMatchObject({
         codigo: 'FALHA_NO_BANCO',
         detalhe: { efeito: 'incerto', limpezaFalhou: ['DESBLOQUEIO'] },
       });
-      expect(await travaLivre()).toBe(true);
+      expect(await travaSoltaPor(pid)).toBe(true);
     } finally {
       await cliente.end();
     }
@@ -196,6 +208,7 @@ describe('provisionamento dos papéis por administrador sem superusuário (Cloud
     const cliente = await conectarLimitado();
     try {
       const antes = await hashes();
+      const pid = await pidDe(cliente);
       await derrubarAntesDe(cliente, 'SELECT pg_advisory_unlock');
       const erro = await falhaDe(provisionarPapeis(cliente, novasSenhas(), nomes));
       expect(erro).toMatchObject({
@@ -203,7 +216,7 @@ describe('provisionamento dos papéis por administrador sem superusuário (Cloud
         detalhe: { efeito: 'gravado', limpezaFalhou: ['DESBLOQUEIO'] },
       });
       expect(await hashes()).not.toEqual(antes);
-      expect(await travaLivre()).toBe(true);
+      expect(await travaSoltaPor(pid)).toBe(true);
     } finally {
       await cliente.end();
     }

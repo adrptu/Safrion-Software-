@@ -48,6 +48,13 @@ export {
 export { PASTA_MIGRACOES, aplicarMigracoes, type ResultadoMigracao } from './migrar.js';
 export { respostaDeErro } from './resposta.js';
 export { ErroPapeis, provisionarPapeis } from './papeis.js';
+export {
+  ErroPreparo,
+  prepararBanco,
+  type CodigoErroPreparo,
+  type OpcoesPreparo,
+  type ResultadoPreparo,
+} from './preparo.js';
 export { emOrganizacao, ehUuid, organizacaoValida } from './sessao.js';
 export {
   abrirContinuacao,

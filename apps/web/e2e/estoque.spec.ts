@@ -171,3 +171,133 @@ test('lote inexistente ou de outra organização é 404; segurança nos cabeçal
   expect(lista?.headers()['x-powered-by']).toBeUndefined();
   expect(erros.filter((e) => !e.includes('404'))).toEqual([]);
 });
+
+// B2-C01 e B2-C02 (achados do Codex): envio pendente não aceita edição, o rascunho volta depois de recarregar, envio
+// sem resposta é conferido com a mesma chave e sair apaga os rascunhos. Saldo esperado a partir dos 15 L do 1º teste.
+const COMANDO = '**/api/v1/comandos/estoque.registrar-entrada';
+
+async function abrirLote(page: import('@playwright/test').Page) {
+  await entrarComo(page, 'Almoxarife');
+  await page.getByRole('link', { name: 'DEMO-001' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Lote DEMO-001' })).toBeVisible();
+  return page.getByRole('region', { name: 'Próximo passo' });
+}
+
+test('B2-C01: com a resposta retida, os campos ficam só leitura e nada digitado depois se perde', async ({
+  page,
+}) => {
+  const proximo = await abrirLote(page);
+  const quantidade = proximo.getByRole('textbox', { name: 'Quantidade' });
+  await quantidade.fill('1');
+  await proximo.locator('label', { hasText: 'Liberado' }).click();
+  let liberar!: () => void;
+  const retida = new Promise<void>((r) => (liberar = r));
+  let chegou!: () => void;
+  const noServidor = new Promise<void>((r) => (chegou = r));
+  await page.route(COMANDO, async (route) => {
+    const resposta = await route.fetch();
+    chegou();
+    await retida;
+    await route.fulfill({ response: resposta });
+  });
+  await proximo.getByRole('button', { name: 'Registrar entrada' }).click();
+  await noServidor;
+  await expect(proximo.getByRole('button', { name: 'Enviando' })).toBeVisible();
+  await expect(quantidade).not.toBeEditable();
+  await expect(proximo.getByRole('radio', { name: 'Em inspeção' })).toBeDisabled();
+  await quantidade.press('2', { timeout: 1000 }).catch(() => undefined);
+  await expect(quantidade).toHaveValue('1');
+  liberar();
+  await expect(proximo.getByRole('status')).toContainText('Entrada registrada');
+  await expect(quantidade).toHaveValue('');
+  await expect(quantidade).toBeEditable();
+  await expect(page.getByRole('region', { name: 'Saldo' })).toContainText('Físico16 L');
+});
+
+test('B2-C02: o rascunho volta depois de recarregar e sair o apaga', async ({ page }) => {
+  const proximo = await abrirLote(page);
+  await proximo.getByRole('textbox', { name: 'Quantidade' }).fill('7,5');
+  await proximo.locator('label', { hasText: 'Liberado' }).click();
+  await page.reload();
+  const depois = page.getByRole('region', { name: 'Próximo passo' });
+  await expect(depois.getByRole('textbox', { name: 'Quantidade' })).toHaveValue('7,5');
+  await expect(depois.getByRole('radio', { name: 'Liberado' })).toBeChecked();
+  await expect(depois.getByRole('textbox', { name: 'Quantidade' })).toBeEditable();
+  await page.getByRole('button', { name: 'Sair' }).click();
+  await expect(page).toHaveURL('/entrar');
+  const deNovo = await abrirLote(page);
+  await expect(deNovo.getByRole('textbox', { name: 'Quantidade' })).toHaveValue('');
+});
+
+test('B2-C02: resposta perdida depois de gravar, recarregar e conferir não duplica a entrada', async ({
+  page,
+}) => {
+  const proximo = await abrirLote(page);
+  await proximo.getByRole('textbox', { name: 'Quantidade' }).fill('7,5');
+  await proximo.locator('label', { hasText: 'Liberado' }).click();
+  const chaves: string[] = [];
+  const recibos: { receiptId: string; alreadyReceived: boolean }[] = [];
+  await page.route(COMANDO, async (route) => {
+    chaves.push((route.request().postDataJSON() as { idempotencyKey: string }).idempotencyKey);
+    const resposta = await route.fetch();
+    recibos.push((await resposta.json()) as { receiptId: string; alreadyReceived: boolean });
+    if (chaves.length === 1) await route.abort('failed');
+    else await route.fulfill({ response: resposta });
+  });
+  await proximo.getByRole('button', { name: 'Registrar entrada' }).click();
+  await expect(proximo.getByRole('status')).toContainText('Sem conexão com o servidor');
+  await page.reload();
+  const depois = page.getByRole('region', { name: 'Próximo passo' });
+  await expect(depois.getByRole('status')).toContainText('a resposta não chegou');
+  await expect(depois.getByRole('textbox', { name: 'Quantidade' })).toHaveValue('7,5');
+  await expect(depois.getByRole('textbox', { name: 'Quantidade' })).not.toBeEditable();
+  await semViolacoes(page);
+  await depois.getByRole('button', { name: 'Registrar entrada' }).click();
+  await expect(depois.getByRole('status')).toContainText('o envio anterior já tinha chegado');
+  expect(chaves).toHaveLength(2);
+  expect(chaves[1]).toBe(chaves[0]);
+  expect(recibos[1]).toMatchObject({ receiptId: recibos[0]?.receiptId, alreadyReceived: true });
+  await expect(page.getByRole('region', { name: 'Saldo' })).toContainText('Físico23,5 L');
+  await expect(depois.getByRole('textbox', { name: 'Quantidade' })).toBeEditable();
+});
+
+test('B2-C03: o envio é guardado antes de sair; recarregar no meio e conferir não duplica', async ({
+  page,
+}) => {
+  const proximo = await abrirLote(page);
+  await proximo.getByRole('textbox', { name: 'Quantidade' }).fill('2');
+  await proximo.locator('label', { hasText: 'Liberado' }).click();
+  const chaves: string[] = [];
+  const recibos: { receiptId: string; alreadyReceived: boolean }[] = [];
+  let chegou!: () => void;
+  const gravadoNoServidor = new Promise<void>((r) => (chegou = r));
+  await page.route(COMANDO, async (route) => {
+    chaves.push((route.request().postDataJSON() as { idempotencyKey: string }).idempotencyKey);
+    const resposta = await route.fetch();
+    recibos.push((await resposta.json()) as { receiptId: string; alreadyReceived: boolean });
+    // O primeiro pedido fica sem resposta: a página recarrega enquanto ele está "Enviando".
+    if (chaves.length === 1) chegou();
+    else await route.fulfill({ response: resposta });
+  });
+  await proximo.getByRole('button', { name: 'Registrar entrada' }).click();
+  await gravadoNoServidor;
+  const guardado = await page.evaluate(() =>
+    Object.keys(sessionStorage)
+      .filter((k) => k.startsWith('safrion:entrada:'))
+      .map((k) => JSON.parse(sessionStorage.getItem(k) ?? 'null') as { incerto: { chave: string } | null }),
+  );
+  expect(guardado.map((r) => r.incerto?.chave)).toEqual([chaves[0]]);
+  await page.reload();
+  const depois = page.getByRole('region', { name: 'Próximo passo' });
+  await expect(depois.getByRole('status')).toContainText('a resposta não chegou');
+  await expect(depois.getByRole('textbox', { name: 'Quantidade' })).toHaveValue('2');
+  await depois.getByRole('button', { name: 'Registrar entrada' }).click();
+  await expect(depois.getByRole('status')).toContainText('o envio anterior já tinha chegado');
+  expect(chaves).toEqual([chaves[0], chaves[0]]);
+  expect(recibos[1]).toMatchObject({ receiptId: recibos[0]?.receiptId, alreadyReceived: true });
+  await expect(page.getByRole('region', { name: 'Saldo' })).toContainText('Físico25,5 L');
+  const depoisDeConferir = await page.evaluate(() =>
+    Object.keys(sessionStorage).filter((k) => k.startsWith('safrion:entrada:')),
+  );
+  expect(depoisDeConferir).toEqual([]);
+});
