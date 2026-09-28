@@ -16,38 +16,90 @@ Data de referência e de acesso às fontes: **27/09/2026**; a seção "Atualiza�
 - O projeto `project-d6996034-e2ee-4e56-836` existe com faturamento vinculado e só Vertex AI habilitado. Não há servidor, banco nem orçamento criado (`conexao-google-cloud.md`, 28/09 15:58 UTC).
 - **Nenhum recurso foi criado por esta atualização.**
 
+**Corrigido depois de `622bdea` (revisão do Codex de 28/09 e checagem adversarial de segurança; só texto, nada provisionado):**
+- **Backups:** 7 → **35 retidos**, alinhado ao PRD 30.5. Com 7 backups e 7 dias de log, sobravam só 6 a 7 dias de PITR.
+- **PITR:** sem custo de log na Enterprise nova. A sensibilidade de "log no disco" virou (g), o crescimento do disco.
+- **Franquia do Cloud Run:** é desconto sobre o gasto, da conta de faturamento. A web e os jobs passam a US$ 0, e todos os cenários foram refeitos.
+- **Segredos:** `PGPASSWORD` explícito no `demo-reset`; versão fixa; rotação que desativa antes e só destrói depois de 7 dias e de um teste de recuperação.
+- **Segurança:**
+  - condição completa do WIF;
+  - senhas geradas sem o agente ver;
+  - `postgres` fora do state;
+  - proteção contra exclusão nos recursos críticos;
+  - sessão do dono registrada como exceção, com revogação comprovada nos dois caminhos de ADC;
+  - conta própria dos agentes;
+  - operador humano;
+  - IAP como padrão;
+  - dados só fictícios;
+  - imagem provisória com `ignore_changes`;
+  - faturamento só do Adrianus.
+
 **Câmbio:** PTAX de venda de 28/09/2026 = **R$ 5,2132** (boletim das 13:03). Com IOF de 3,5%, dá R$ 5,3957 (IOF não reconferido hoje). **Se a conta de faturamento for de contratação local no Brasil, os preços dos SKUs não incluem impostos (14% sobre o uso) e o IOF provavelmente não se aplica.** Só o console mostra qual caso vale para a conta do Adrianus (https://docs.cloud.google.com/billing/docs/resources/vat-overview).
 
-### Custo mensal da HML mínima (preços de São Paulo relidos em 28/09; mês = 730 h)
+### Custo mensal da HML mínima (preços de São Paulo relidos em 28/09; mês = 730 h; corrigido em 28/09 após a revisão do Codex)
 
-| Item                                                                                                                     | Conta                                                              | US$/mês                                                                                       |
-| ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
-| Cloud SQL PostgreSQL 17, `db-f1-micro`, Enterprise, zonal                                                                | 0,0158 × 730                                                       | 11,53                                                                                         |
-| Disco SSD de 10 GB (o mínimo da API), autoaumento até 20 GB                                                              | 0,000349315 × 730 × 10                                             | 2,55                                                                                          |
-| Backup diário, 7 retidos, cerca de 2 GiB usados                                                                          | 0,000164384 × 730 × 2                                              | 0,24                                                                                          |
-| Cloud Run web, 20 h de uso, 1 vCPU e 0,5 GiB, com a franquia (desconto a preço Tier 1)                                   | 72.000 × (0,0000336 − 0,000024) + 36.000 × (0,0000035 − 0,0000025) | 0,73                                                                                          |
-| Cloud Run Jobs `safrion-preparo` (10 × 3 min) e `safrion-demo-reset` (4 × 2 min), com a franquia                         | 2.280 × (0,0000216 − 0,000018) + 1.140 × (0,0000024 − 0,000002)    | 0,01                                                                                          |
-| Artifact Registry, 2 GiB (0,5 GiB grátis; preço único para todas as regiões)                                             | 1,5 × 0,000136986 × 730                                            | 0,15                                                                                          |
-| Saída de internet para os testadores, cerca de 1 GiB                                                                     | 1 × 0,19                                                           | 0,19                                                                                          |
-| Secret Manager (4 versões ativas ≤ 6 grátis), Logging (< 50 GiB grátis), Monitoring, WIF, IAM, requisições (< 2 milhões) | —                                                                  | 0                                                                                             |
-| Bucket do state do Terraform (< 10 MiB)                                                                                  | 0,000047945 × 730 × 0,01                                           | 0,00                                                                                          |
-| **Total**                                                                                                                |                                                                    | **≈ 15,40** (R$ 80,29 pela PTAX; **R$ 83,10 com IOF**; com imposto local de 14%, ≈ US$ 17,56) |
+| Item | Conta | US$/mês |
+| --- | --- | --- |
+| Cloud SQL PostgreSQL 17, `db-f1-micro`, Enterprise, zonal | 0,0158 × 730 | 11,53 |
+| Disco SSD de 10 GiB (o mínimo da API), autoaumento até 20 GiB | 0,000349315 × 730 × 10 | 2,55 |
+| Backup diário, **35 retidos** (PRD 30.5). Premissa: 1 completo de cerca de 1 GiB + 34 incrementais de cerca de 0,17 GiB = 6,67 GiB | 0,000164384 × 730 × 6,67 | 0,80 |
+| **PITR de 7 dias** (o máximo da edição Enterprise), com os logs no Cloud Storage da mesma região | sem custo adicional por instância (F35) | 0 |
+| Cloud Run web, 20 h de uso, 1 vCPU e 0,5 GiB, cobrança por requisição | bruto 72.000 × 0,0000336 + 36.000 × 0,0000035 = 2,55; **coberto pela franquia** (US$ 4,32 de CPU e US$ 0,90 de memória) | 0 |
+| Cloud Run Jobs `safrion-preparo` (10 × 3 min) e `safrion-demo-reset` (4 × 2 min), cobrança por instância | bruto 2.280 × 0,0000216 + 1.140 × 0,0000024 = 0,05; coberto pela franquia | 0 |
+| Artifact Registry, 2 GiB (0,5 GiB grátis; mesmo preço em repositório regional e multirregional) | 1,5 × 0,000136986 × 730 | 0,15 |
+| Saída de internet para os testadores, cerca de 1 GiB | 1 × 0,19 | 0,19 |
+| Secret Manager (4 versões ativas; franquia de 6 **por conta de faturamento**), Logging (< 50 GiB grátis), Monitoring, WIF, IAM, requisições (< 2 milhões) | — | 0 |
+| Bucket do state do Terraform (< 10 MiB) | 0,000047945 × 730 × 0,01 | 0,00 |
+| **Total** | | **≈ 15,22** (R$ 79,37 pela PTAX; **R$ 82,15 com IOF**; com imposto local de 14%, ≈ US$ 17,36) |
 
-Se o Google aplicar a franquia do Cloud Run como crédito em dólar, a web e os jobs zeram e o total fica em US$ 14,67. A diferença, US$ 0,74, não muda a decisão.
+**Rótulos:**
+- Preços unitários: _verificado_ em 28/09 nas páginas oficiais: Cloud Run (F12), Cloud SQL, inclusive o IP ocioso de São Paulo a US$ 0,015/h (F13b), Artifact Registry (F38) e Secret Manager (F39).
+- Saída de internet: US$ 0,19 é o preço de saída do Cloud SQL. O Cloud Run cobra pela tabela de rede Premium, _não verificada_ nesta rodada; o efeito é menor que US$ 0,10 com 1 GiB.
+- Quantidades (20 h, 38 min, 2 GiB de imagens, 1 GiB de saída, 6,67 GiB de backup) e totais: _especificado_.
+- IOF e imposto local: _não verificado_.
 
-**Sensibilidades:**
+**Franquia do Cloud Run (corrigida):**
+- Ela é "a spending based discount using Tier 1 pricing" e "aggregated across projects by billing account" (F12). Ou seja, é um desconto sobre o gasto, em dólar, valorado a preço de us-central1: US$ 4,32 de CPU e US$ 0,90 de memória por mês. É abatido ao preço de São Paulo, não acumula de um mês para outro e é **da conta de faturamento, não do projeto**. Em São Paulo, cobre cerca de 35,7 h/mês de web ativa com 1 vCPU.
+- A versão `622bdea` tratava a franquia como desconto por unidade e atribuía US$ 0,74 à web e aos jobs; isso foi retirado.
+- _Não verificado_: se os jobs dividem o saldo com a web (a página mostra franquias de mesmo valor); se a franquia cobre o tempo ocioso de uma instância mínima; como a fatura em região Tier 2 aplica o desconto (a página só tem exemplos em Tier 1). **Conferir na 1ª fatura.**
+- **Pior caso:** se outro projeto da mesma conta de faturamento (o projeto atual ou outro) consumir a franquia, a HML paga o bruto de 2,60, e o total vai a **17,82**.
 
-- (a) web com 1 instância mínima: **28,82**;
-- (b) banco `db-g1-small`: **42,19**;
-- (c) PITR de 7 dias ligado, no pior caso de o log ocupar o disco até 20 GB: **17,95**. É a configuração que o requisito pede (§30.5; ENG-067);
-- (d) 100 h de uso por mês: **23,39**;
-- (c) + (d): **25,94**;
-- (e) parar a instância quase não economiza, porque o IP ocioso custa US$ 10,95: **14,82**. Só apagar a instância economiza de verdade;
-- (f) se o IPv4 fosse cobrado com a instância rodando, o que a página não indica: **26,35**. Conferir na 1ª fatura.
+**Sensibilidades (sobre a base de 15,22):**
 
-**O Cloud SQL é cerca de 92% da conta e não tem teto automático.**
+- (a) web com 1 instância mínima, cobrança por requisição: **25,97 a 28,64**, conforme a franquia cubra ou não o tempo ocioso. Com CPU sempre alocada (cobrança por instância), **≈ 69,92**;
+- (b) banco `db-g1-small`: **42,01**;
+- (c) PITR de 7 dias: **+0**. A versão `622bdea` somava 2,55 porque supunha o log no disco; em instância Enterprise nova, o log fica no Cloud Storage (F35);
+- (d) 100 h de uso por mês, com cerca de 5 GiB de saída: **23,76**. A faixa vai de 23,49 a 23,81: 23,49 se a franquia for um saldo único de US$ 5,22 para CPU e memória; 23,81 se os jobs dividirem o saldo com a web;
+- (g) disco cresce por autoaumento de 10 para 20 GiB (dados, cerca de 1 dia de WAL local, arquivos temporários): **17,77**, acima do aviso de 70% (US$ 17,50);
+- (d) + (g): **26,31** (26,04 a 26,36), acima do orçamento de alerta de US$ 25;
+- (e) parar a instância quase não economiza, porque o IP ocioso custa US$ 10,95 (US$ 0,015/h em São Paulo, F13b): **14,64**. Apagar a instância exige desligar a proteção por plano específico e a confirmação do Adrianus, e os backups automáticos vão junto (retenção depois da exclusão: não verificado);
+- (f) se o IPv4 fosse cobrado com a instância rodando, o que a página não indica: **26,17**. Conferir na 1ª fatura;
+- (h) franquia do Cloud Run consumida por outro projeto da conta: **17,82**;
+- (i) volume de backup, que é premissa: **14,54** se quase nada mudar por dia e **18,62** se cada backup regravar o banco inteiro.
 
-**Orçamento:** US$ 25/mês **só de alerta**, com escopo no projeto HML e avisos em **70% (US$ 17,50), 90% e 100%** do gasto real e em 100% do previsto (PRD 28.4; plano R-006 passos 11 e 12). **Orçamento não limita uso nem gasto.** O teto de gasto nativo do Google só vale para Cloud Run, Cloud Run functions, Gemini API e Vertex; **o Cloud SQL não está coberto**. Aumentar o orçamento **antes** de mudar a configuração: US$ 30 com PITR e uso intenso, US$ 35 com mínimo 1, US$ 50 com `db-g1-small`.
+**O Cloud SQL (instância, disco e backups) é cerca de 98% da conta e não tem teto automático.** O máximo de instâncias do Cloud Run também **não é teto em dinheiro**: com as 2 instâncias ocupadas o mês todo, a web passaria de US$ 180.
+
+**Orçamento:**
+- US$ 25/mês **só de alerta**, com escopo no projeto HML e avisos em **70% (US$ 17,50), 90% e 100%** do gasto real e em 100% do previsto (PRD 28.4; plano R-006 passos 11 e 12). A base usa 61%. O aviso de 70% dispara com o disco em 20 GiB ou com a franquia dividida, e isso é esperado: é aviso, não corte.
+- **Orçamento não limita uso nem gasto.** O teto de gasto nativo do Google só vale para Cloud Run, Cloud Run functions, Gemini API e Vertex; **o Cloud SQL não está coberto**.
+- Aumentar o orçamento **antes** de mudar a configuração:
+  - US$ 30 com uso intenso;
+  - US$ 35 com mínimo 1;
+  - US$ 50 com `db-g1-small`;
+  - US$ 75 com CPU sempre alocada.
+- O valor é autorização de gasto do Adrianus, em frase literal (R-006 §3; leitura do Codex de 28/09 17:04).
+
+**Fontes desta atualização (acessadas em 28/09/2026):**
+- F12 https://cloud.google.com/run/pricing;
+- F13b https://cloud.google.com/sql/pricing (região São Paulo);
+- F15 https://docs.cloud.google.com/sql/docs/postgres/backup-recovery/backups (backups incrementais, cobrança pelo tamanho);
+- F35 https://docs.cloud.google.com/sql/docs/postgres/backup-recovery/restore#log-storage-for-pitr (instâncias Enterprise criadas depois de 09/01/2023: logs do PITR no Cloud Storage, sem custo adicional por instância);
+- F36 https://docs.cloud.google.com/sql/docs/postgres/backup-recovery/backup-options (retenção de log de 1 a 7 dias na Enterprise; 7 backups com 7 dias de log retêm só de 6 a 7 dias de log);
+- F37 https://docs.cloud.google.com/sql/docs/postgres/backup-recovery/configure-pitr (por Terraform, backup e PITR precisam ser ligados explicitamente);
+- F38 https://cloud.google.com/artifact-registry/pricing;
+- F39 https://cloud.google.com/secret-manager/pricing (versão desativada conta como ativa; US$ 0,06/mês por versão acima da franquia; destruída é grátis);
+- F40 https://docs.cloud.google.com/run/docs/configuring/jobs/secrets (variável declarada por segredo; versão fixa recomendada; sem o segredo, a instância não sobe);
+- F41 https://docs.cloud.google.com/secret-manager/docs/destroy-secret-version e https://docs.cloud.google.com/secret-manager/docs/best-practices (destruir é permanente; desativar antes e observar).
 
 ### Desenho mínimo (sem domínio próprio)
 
@@ -55,64 +107,106 @@ Se o Google aplicar a franquia do Cloud Run como crédito em dólar, a web e os 
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
 | Web (`web@sha256`)         | Cloud Run service `safrion-web`, southamerica-east1, mínimo 0 e máximo 2, concorrência 20, 1 vCPU, 512 MiB, CPU só na requisição, conta `sa-web`                                                                                                                                                                                                                                                                                                                                                                                     | `DATABASE_URL=postgresql://app_runtime@/safrion_hml?host=/cloudsql/<PROJ>:southamerica-east1:safrion-hml` **sem senha**; `PGPASSWORD` vindo do segredo `hml-db-app-runtime-senha` (o `pg` 8.23 lê `PGPASSWORD`, sem mudança de código); `SAFRION_ORIGEM=https://safrion-web-<NUM>.southamerica-east1.run.app`; `SAFRION_AMBIENTE=hml`; `SAFRION_VERSAO`/`SAFRION_COMMIT` injetados na publicação; `SAFRION_OIDC_ISSUER=https://accounts.google.com`; `SAFRION_OIDC_CLIENT_ID`; `SAFRION_OIDC_CLIENT_SECRET` do segredo `hml-oidc-client-secret` | Conexão Cloud SQL integrada do Cloud Run (socket `/cloudsql`) |
 | Preparo (`preparo@sha256`) | Cloud Run Job `safrion-preparo`, 1 tarefa, `max_retries 0`, 600 s, conta `sa-preparo`, args `--ambiente hml --banco safrion_hml`                                                                                                                                                                                                                                                                                                                                                                                                     | `SAFRION_ADMIN_URL=postgresql://postgres@/postgres?host=/cloudsql/…` sem senha; `PGPASSWORD` de `hml-db-admin-senha`; `SAFRION_SENHA_MIGRATOR` e `SAFRION_SENHA_APP_RUNTIME` dos segredos próprios                                                                                                                                                                                                                                                                                                                                              | Socket `/cloudsql`                                            |
-| Demonstração               | Cloud Run Job `safrion-demo-reset` com a imagem `preparo`, command `node`, args `dist/cli/demo-reset.js --confirmar hml`, conta `sa-demo`                                                                                                                                                                                                                                                                                                                                                                                            | `DATABASE_URL` do `app_runtime` (como a web), `SAFRION_AMBIENTE=hml`                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Socket `/cloudsql`                                            |
+| Demonstração               | Cloud Run Job `safrion-demo-reset` com a imagem `preparo`, command `node`, args `dist/cli/demo-reset.js --confirmar hml`, conta `sa-demo`                                                                                                                                                                                                                                                                                                                                                                                            | `DATABASE_URL` do `app_runtime` sem senha (como a web), **`PGPASSWORD` declarado no job com referência ao segredo `hml-db-app-runtime-senha`, em versão fixa** (`--set-secrets PGPASSWORD=hml-db-app-runtime-senha:<N>`; no Terraform, `env` com `value_source.secret_key_ref`). O `secretAccessor` da `sa-demo` autoriza a leitura, mas não cria a variável (F40). O vínculo de IAM nasce antes do job (`depends_on`), e a versão `<N>` existe antes da 1ª execução. `SAFRION_AMBIENTE=hml` | Socket `/cloudsql`                                            |
 | Vínculo de identidade      | **Na máquina do operador, não em job**: o código entra pela entrada padrão, sem eco, e um job não tem terminal. Cloud SQL Auth Proxy em 127.0.0.1 com a identidade IAM do operador (Cloud SQL Client)                                                                                                                                                                                                                                                                                                                                | `SAFRION_ADMIN_URL=postgresql://postgres@127.0.0.1:6543/postgres`; `PGPASSWORD` lido do Secret Manager sem aparecer na tela, com `unset` ao final; checkout do commit publicado; Node 24.21                                                                                                                                                                                                                                                                                                                                                     | Auth Proxy (TLS + IAM)                                        |
-| Banco                      | Cloud SQL `safrion-hml`: **`database_version = POSTGRES_17`, `edition = ENTERPRISE`, `tier = db-f1-micro`, explícitos** (PG16+ nasce Enterprise Plus); zonal; SSD de 10 GB com autoaumento até 20 GB; backup diário com 7 retidos; **PITR de 7 dias** (requisito; ligar explicitamente no Terraform); `deletion_protection`; IP público **sem redes autorizadas** (só conector com IAM); `server_ca_mode = GOOGLE_MANAGED_INTERNAL_CA` explícito; `max_connections` padrão 25 → orçamento de ≤ 18 (web 2 × pool 3 + jobs + operador) | O Terraform cria **só a instância e o usuário `postgres`**. Banco `safrion_hml`, `migrator`, `app_runtime` e `app_sessao` nascem **só pelo job de preparo**                                                                                                                                                                                                                                                                                                                                                                                     |
-| Segredos                   | Secret Manager, replicação em southamerica-east1: `hml-db-admin-senha`, `hml-db-migrator-senha`, `hml-db-app-runtime-senha`, `hml-oidc-client-secret`                                                                                                                                                                                                                                                                                                                                                                                | O Terraform cria o segredo e o IAM; **os valores entram por stdin, fora do Terraform** (senão iriam para o state e o plan). Senhas alfanuméricas de 32 caracteres. Ao trocar, **destruir** a versão antiga, não só desativá-la: versões desativadas contam na franquia de 6                                                                                                                                                                                                                                                                     | —                                                             |
+| Banco                      | Cloud SQL `safrion-hml`: **`database_version = POSTGRES_17`, `edition = ENTERPRISE`, `tier = db-f1-micro`, explícitos** (PG16+ nasce Enterprise Plus); zonal; SSD de 10 GB com autoaumento até 20 GB; backup automático diário standard com **35 retidos** (PRD 30.5; o Google recomenda reter mais backups que os dias de log, F36); **PITR de 7 dias**, o máximo da Enterprise (35 dias de log só na Enterprise Plus). No Terraform, tudo explícito (F37): `backup_configuration { enabled = true, point_in_time_recovery_enabled = true, transaction_log_retention_days = 7, location = "southamerica-east1", backup_retention_settings { retained_backups = 35, retention_unit = "COUNT" } }`. O campo que escolhe backup standard ou enhanced: não verificado. **Local dos backups fixado em southamerica-east1:** sem isso, eles vão para uma multirregião (asia, eu ou us), fora do Brasil, onde o preço de backup de São Paulo usado no custo não vale. A HML guarda a identidade real dos testadores; proteção contra exclusão tripla: `deletion_protection = true` (Terraform), `settings.deletion_protection_enabled = true` (API) e `lifecycle { prevent_destroy = true }`; IP público **sem redes autorizadas** (só conector com IAM); `server_ca_mode = GOOGLE_MANAGED_INTERNAL_CA` explícito; `max_connections` padrão 25 → orçamento de ≤ 18 (web 2 × pool 3 + jobs + operador) | O Terraform cria **só a instância, sem `root_password` e sem `google_sql_user` para o `postgres`**: a senha nunca entra no state nem no plan. Banco `safrion_hml`, `migrator`, `app_runtime` e `app_sessao` nascem **só pelo job de preparo**                                                                                                                                                                                                                                                                                                                                                                                     |
+| Segredos                   | Secret Manager, replicação em southamerica-east1: `hml-db-admin-senha`, `hml-db-migrator-senha`, `hml-db-app-runtime-senha`, `hml-oidc-client-secret`                                                                                                                                                                                                                                                                                                                                                                                | O Terraform cria o segredo e o IAM; **os valores entram por stdin, fora do Terraform** (senão iriam para o state e o plan). Senhas alfanuméricas de 32 caracteres. `prevent_destroy` nos 4 segredos (apagar o segredo apaga todas as versões). Web e jobs referem **número de versão fixo, nunca `latest`** (F40).<br>**Rotação:**<br>(1) gravar a nova versão por stdin;<br>(2) trocar a senha no banco. A antiga deixa de valer na hora, e conexões novas falham até o passo 3;<br>(3) republicar a web e atualizar os jobs com o novo número, usando **`--update-secrets`**: `--set-secrets` apaga os outros segredos do job, e o `safrion-preparo` tem 3;<br>(4) validar `/saude`, o login, `safrion-preparo` e `safrion-demo-reset`;<br>(5) **desativar** a versão antiga. É reversível e leva algum tempo para propagar;<br>(6) destruir só depois de 7 dias de observação e de um teste de recuperação registrado, com confirmação do Adrianus. O Google recomenda desativar antes de destruir e dá como exemplo esperar uma semana (F41). Destruir é permanente.<br>**Custo:** versão desativada conta como ativa. Com as 4 em uso, até 2 desativadas cabem na franquia de 6, se nenhum outro projeto da conta a usar; acima disso, US$ 0,06/mês cada (F39). Um restore traz de volta os usuários do backup, possivelmente com a senha da época: conferir no ensaio de restauração                                                                                                                                                                                                                                                                     | —                                                             |
 | Imagens                    | Artifact Registry `safrion` (Docker, southamerica-east1), tags imutáveis, limpeza: 10 versões mais recentes e sem tag por 14 dias                                                                                                                                                                                                                                                                                                                                                                                                    | Publica o **mesmo digest que o Trivy varreu**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | —                                                             |
-| Publicação                 | GitHub Actions `publicar-hml.yml` (**a criar**): push em `main`, environment `hml` com revisor, `permissions: id-token: write, contents: read`, WIF                                                                                                                                                                                                                                                                                                                                                                                  | Publica as imagens → executa o preparo → publica a web por digest → testa `/saude` exigindo `ok`, `hml` e `commit = GITHUB_SHA` → grava o manifesto da publicação                                                                                                                                                                                                                                                                                                                                                                               | —                                                             |
+| Publicação                 | GitHub Actions `publicar-hml.yml` (**a criar**): push em `main`, environment `hml` com revisor, `permissions: id-token: write, contents: read`, WIF                                                                                                                                                                                                                                                                                                                                                                                  | Publica as imagens → executa o preparo → publica a web por digest → testa `/saude` exigindo `ok`, `hml` e `commit = GITHUB_SHA` → grava o manifesto da publicação. Serviço e jobs nascem no Terraform com imagem provisória (`us-docker.pkg.dev/cloudrun/container/hello`) e `lifecycle { ignore_changes = [<atributo de imagem>, client, client_version] }`: a imagem real é só do pipeline, senão o próximo apply reverte a HML em silêncio                                                                                                                                                                                                                                                                                                                                                                               | —                                                             |
 
 **Identidades de menor privilégio, sem chave JSON:**
 
 - `sa-web`: `cloudsql.client` e `secretAccessor` só em `app-runtime` e `oidc`;
 - `sa-preparo`: `cloudsql.client` e `secretAccessor` nas 3 senhas do banco;
 - `sa-demo`: `cloudsql.client` e `secretAccessor` só em `app-runtime`;
-- `sa-deploy-github`: `artifactregistry.writer` no repositório, `run.developer` nos 3 recursos, `iam.serviceAccountUser` nas 3 SAs de runtime. Recebe `workloadIdentityUser` do principal do repositório, com a condição `repository_id` e ref `main`;
-- operador humano: `run.invoker` nos jobs, `cloudsql.client`, `secretAccessor`, `logging.viewer`;
-- proprietário: `owner` só para o bootstrap e emergências, e o papel de faturamento que cria o orçamento;
-- agentes: `sa-agentes-leitura`, só leitura (`run.viewer`, `cloudsql.viewer`, `logging.viewer`, `monitoring.viewer`, `artifactregistry.reader`), por _impersonation_, **sem** `secretAccessor`.
-- Desligar a concessão automática de Editor à conta padrão do Compute.
+- `sa-deploy-github`: `artifactregistry.writer` no repositório, `run.developer` nos 3 recursos, `iam.serviceAccountUser` nas 3 SAs de runtime. `workloadIdentityUser` só para `principalSet://…/attribute.repository_id/<ID_REPO>`. O provider do WIF tem `attribute_condition`:
+  `assertion.repository_id == '<ID_REPO>' && assertion.repository_owner_id == '<ID_DONO>' && assertion.ref == 'refs/heads/main' && assertion.event_name in ['push','workflow_dispatch'] && assertion.workflow_ref.startsWith('adrptu/Safrion-Software-/.github/workflows/publicar-hml.yml@') && assertion.environment == 'hml'`.
+  Sem `workflow_ref` e `event_name`, qualquer workflow com ref `main` (inclusive `pull_request_target`) receberia a SA. **Atenção:** na prática, ela soma o poder das SAs de runtime, inclusive a senha do `postgres` via `sa-preparo`. A página de segredos cita `run.admin` para configurá-los: confirmar no 1º plan se `run.developer` basta para trocar a versão do segredo, sem ampliar o papel antes de testar;
+- operador humano (o Adrianus, nunca um agente): `run.invoker` nos jobs, `cloudsql.client`, `secretAccessor` **só em `hml-db-admin-senha`**, `logging.viewer`. A verificar: autenticação IAM do Cloud SQL pelo Auth Proxy (`--auto-iam-authn`), com o usuário IAM dele membro de `migrator`, tira a senha do caminho;
+- proprietário: `owner` só para o bootstrap e emergências. Conta de faturamento, orçamento, cartão e aceites de termos são só dele: agente não usa `gcloud billing` nem a API de orçamentos;
+- agentes: `sa-agentes-leitura`, só leitura (`run.viewer`, `cloudsql.viewer`, `logging.viewer`, `monitoring.viewer`, `artifactregistry.reader`), por _impersonation_, **sem** `secretAccessor`. **Base da personificação:** uma conta Google separada para os agentes, criada pelo Adrianus (agente não cria conta), sem papel no projeto além de `roles/iam.serviceAccountTokenCreator` em `sa-agentes-leitura`. Se o Gemini continuar pelo Vertex, ela recebe o mesmo papel em `sa-vertex`, que tem `roles/aiplatform.user`. Todo comando dos agentes usa `--impersonate-service-account`;
+- `allUsers` com `run.invoker` só no serviço web e só se o ingress público for a exceção aprovada (lacunas); nunca nos jobs;
+- conta padrão do Compute: depois de habilitar as APIs, ver se `<NUM>-compute@developer.gserviceaccount.com` existe. Se existir, tirar dela `roles/editor` e desativá-la. Declarar `service_account` explícito em toda revisão e todo job. Sem organização, a política que desliga a concessão automática não se aplica (não verificado).
 
 **Sondas:** o `HEALTHCHECK` do Dockerfile não vale no Cloud Run. Usar a **sonda de inicialização HTTP em `/saude`**, que trava a revisão sem banco, e **nenhuma sonda de atividade em `/saude`**, porque ela responde 503 quando o banco cai e derrubaria instâncias sadias.
 
+**Dados:** só fictícios na HML (PRD 27.4). É proibido carregar dump, planilha ou cadastro real. O único dado pessoal real é a identidade OIDC do testador, guardada só no vínculo e apagada ao encerrar o teste. A web não registra e-mail nem `sub` em log, só o id interno, porque os agentes leem os logs (AGT-01).
+
 ### Ordem de execução, com quem faz o quê (nada foi executado)
 
+Em 28/09, o Adrianus delegou às 3 IAs as decisões que dependiam dele. Os **atos que exigem a identidade dele** continuam com ele: login, aceite de termos, faturamento, cartão e criação de conta.
+
 1. **Adrianus:**
-   - (a) decidir entre o **projeto dedicado `safrion-hml`** (recomendado pelo PRD 27.4 e ENG-064: ambientes separados de fato) e o projeto atual;
-   - (b) ver no console **se a conta de faturamento é em US$ com cartão ou contratação local**;
-   - (c) autorizar o **orçamento de alerta de US$ 25/mês** (D4) e criá-lo na conta de faturamento com 70/90/100%.
+   - (a) criar o **projeto dedicado `safrion-hml-<sufixo>`** (o ID é global; PRD 27.4 e ENG-064) e vinculá-lo à conta de faturamento no console, ou usar o projeto atual, se o time decidir assim;
+   - (b) ver no console **se a cobrança é em US$ com cartão ou por contratação local**;
+   - (c) criar o **orçamento de alerta** no valor decidido, com 70/90/100% e escopo no projeto da HML (D4);
+   - (d) criar a **conta Google dos agentes** (base da personificação).
 2. **Adrianus, no console, antes de todo o resto (risco que derruba o desenho):** na Google Auth Platform do projeto HML:
    - identidade visual "Safrion HML", público Externo, status Em teste, escopo só `openid`;
    - **registrar o domínio autorizado e o URI `https://safrion-web-<NUM>.southamerica-east1.run.app/entrar/retorno`**. Se o Google **recusar** `run.app`, a HML precisa de domínio próprio com balanceador global, a partir de **US$ 18,25/mês**, e o total passa de US$ 25: decisão nova de custo;
-   - com escopo só `openid`, a lista de usuários de teste não barra ninguém, e qualquer conta Google chega ao pedido de acesso.
-3. **Agente (Codex) com a sessão do dono, uma única vez (bootstrap):**
-   - bucket do state com versionamento, `prevent_destroy` e acesso só do dono;
-   - APIs (run, sqladmin, artifactregistry, secretmanager, iam, iamcredentials, sts, cloudresourcemanager, serviceusage, billingbudgets se o orçamento for por Terraform);
-   - pool e provider WIF do GitHub;
-   - SAs;
-   - `terraform plan` revisado (fmt, validate, TFLint, scanner), apply do plan aprovado.
-   - Depois, **revogar a sessão e a ADC** (plano R-006 passo 12).
-4. **Senhas:** gerar 3 senhas, gravar as versões por stdin e definir a senha do `postgres` da instância igual à do segredo.
+   - com escopo só `openid`, a lista de usuários de teste talvez não barre ninguém, e aí qualquer conta Google chega ao pedido de acesso. **Não verificado:** testar com uma conta fora da lista. Se a lista barrar, ela vira a lista de permitidos, sem custo.
+3. **Codex, bootstrap, uma única vez:**
+   - **Estado em 28/09:** a sessão de `adrptu@gmail.com` está gravada em `/Users/adrianussanders/.config/safrion-gcloud` desde 27/09 e é compartilhada por Codex e Claude, inclusive para o Gemini via Vertex. Isso dá poder de Owner e acesso ao faturamento nesta máquina. **Exceção ENG-005 até o fim deste passo.** Escopo: leitura e Vertex no projeto atual. Compensação: nenhum comando de escrita, de segredo ou de faturamento fora do bootstrap. Aprovação pelo time, por delegação, com veto do Adrianus. Vencida sem bootstrap, a sessão é revogada, e o Adrianus entra de novo só na janela do bootstrap.
+   - **Pré-requisitos:** instalar Terraform, TFLint, um scanner de configuração e o Cloud SQL Auth Proxy, conferindo o checksum oficial.
+   - Com projeto dedicado, todo comando usa `--project=<id da HML>`, o provider fixa `project`, e o wrapper ganha uma variante da HML. O wrapper atual fixa o projeto do Vertex.
+   - O que o bootstrap cria:
+     - bucket do state com versionamento, `uniform_bucket_level_access`, `public_access_prevention = "enforced"`, `prevent_destroy` e acesso só do dono;
+     - APIs (run, sqladmin, artifactregistry, secretmanager, iam, iamcredentials, sts, cloudresourcemanager, serviceusage);
+     - pool e provider WIF, com a condição da seção de identidades e `prevent_destroy`;
+     - SAs.
+   - **Divisão do R-006:** localmente, só o bootstrap. O `infra/terraform/hml` é aplicado pela CI por WIF.
+   - **Aprovação do plan:**
+     - `terraform plan -out` revisado (fmt, validate, TFLint, scanner);
+     - o plan fica fora do Git; na rodada vão só o hash e a contagem add/change/destroy;
+     - o time aprova o plan por esse hash, com veto do Adrianus;
+     - o apply usa só esse arquivo;
+     - plan com `destroy` ou `must be replaced` em Cloud SQL, bucket do state, segredos ou pool WIF é recusado e volta como plano específico (PRD 28.2).
+   - **Revogação ao final, pelo wrapper `safrion-gcloud`:** `auth revoke --all` e `auth application-default revoke`.
+     - Prova no canal: `safrion-gcloud auth list` sem conta e ausência dos dois arquivos ADC (`/Users/adrianussanders/.config/safrion-gcloud/application_default_credentials.json` e `~/.config/gcloud/application_default_credentials.json`).
+     - Para o Terraform, preferir `GOOGLE_OAUTH_ACCESS_TOKEN` de vida curta emitido pelo wrapper, sem gravar arquivo ADC.
+     - A partir daí, os agentes usam só a conta própria, por personificação.
+   - **3b. Adrianus, no console, depois do bootstrap:** gerar um novo segredo no cliente OAuth e colá-lo direto no Secret Manager como versão de `hml-oidc-client-secret`. Não enviar a ninguém nem ao chat; se baixar o JSON, apagá-lo. O agente só confere que a versão existe.
+4. **Senhas, pelo agente no fim do passo 3, sem ver o valor.** Cada senha nasce e é gravada num só comando, sem eco e sem argumento:
+   `P=$(openssl rand -hex 16); printf %s "$P" | gcloud secrets versions add hml-db-admin-senha --data-file=- >/dev/null; printf '%s\n' "$P" | gcloud sql users set-password postgres --instance=safrion-hml --prompt-for-password; unset P`.
+   - Para `migrator` e `app_runtime`, só o `versions add`, porque o job de preparo cria os papéis.
+   - Proibido na sessão do agente: `gcloud secrets versions access`, `--password=`, `set -x` e eco de variável de senha. A conferência é só pelo número da versão.
+   - **Não verificado:** se `--prompt-for-password` lê a entrada padrão sem terminal; ensaiar antes. Se não ler, usar `password_wo` no `google_sql_user`, com valor efêmero (Terraform ≥ 1.11; suporte do provider não verificado).
 5. **GitHub (Adrianus, administrador):**
-   - environment `hml` com revisor, restrito a `main`, e variáveis `GCP_PROJECT_ID`, `GCP_REGION`, `WIF_PROVIDER` e `DEPLOY_SA`;
-   - se o plano do GitHub não oferecer environments em repositório privado, a condição do WIF fica por repositório e ref `main`.
+   - environment `hml` restrito a `main`, **com o Adrianus como único revisor**. Os agentes usam a mesma conta `adrptu` e nunca aprovam; a conta GitHub própria dos agentes resolve isso;
+   - variáveis `GCP_PROJECT_ID`, `GCP_REGION`, `WIF_PROVIDER` e `DEPLOY_SA`;
+   - **sem environment com revisor, o pipeline não publica na HML** até existir a proteção do `main` (PEND-REPO-01), com PR revisado por quem não é o autor. Nesse caso, a condição do WIF perde só `environment` e mantém `workflow_ref` e `event_name`.
 6. **1ª subida, com aprovação no environment:**
    - publicar as imagens → job `safrion-preparo` → job `safrion-demo-reset` → publicar a web;
-   - conferir `/saude` (ok, hml, commit), a **faixa ou selo "Homologação"** em todas as telas e o login.
+   - **provas:**
+     - `/saude` com `ok`, `hml`, commit e **digest** publicados;
+     - com a credencial publicada: `SELECT rolsuper, rolbypassrls FROM pg_roles WHERE rolname = current_user` = f/f, a consulta A5 e o AC-04 repetido;
+     - a faixa ou selo "Homologação" em todas as telas;
+     - o login.
+   - **Só F0 e vínculo no ar é infraestrutura pronta, não homologação:** nenhum link vai ao Adrianus como candidata antes do ensaio do Codex (R-006 passo 16).
 7. **Acesso de cada testador:**
-   - a pessoa entra e passa o código; o operador confirma quem é por canal independente;
-   - `vincular-identidade conceder` roda na máquina do operador pelo Auth Proxy;
+   - a pessoa entra e passa o código;
+   - o **operador humano (o Adrianus, nunca um agente)** confirma quem é por canal independente e roda `vincular-identidade conceder` da máquina dele, pelo Auth Proxy;
    - **repetir depois de cada `demo-reset`**, que revoga os acessos reais à geração anterior.
 
 ### Lacunas que precisam de decisão ou código antes ou durante a 1ª subida
 
+- **(código, autor Claude, revisor Codex; R-006 passo 11)** `infra/terraform/bootstrap` (bucket do state, APIs, WIF, SAs) e `infra/terraform/hml` (Cloud Run web e jobs, Cloud SQL, segredos sem valor, Artifact Registry), mais a ADR curta da região southamerica-east1. Aceite: fmt, validate, TFLint e scanner sem achado alto, rodados localmente. Hoje não existe nenhum arquivo `infra/` nem `.tf`.
 - **Publicação inexistente.** O `publicar-hml.yml` e o manifesto da publicação (ENG-060) estão por fazer. Hoje a imagem varrida é descartada.
 - **O operador não tem como saber o `--usuario` a conceder.** Proposta (código Claude): `vincular-identidade listar --organizacao <id>` rodando como migrator, que mostra papel e id dos usuários fictícios (não é dado pessoal), ou o `demo-reset` imprimindo esses ids.
-- **Vínculo pela máquina do operador × PRD 31.7 e o passo 12 (revogar a sessão depois do bootstrap).** Cada concessão exige sessão gcloud ativa (Auth Proxy e `secrets access`). Decidir entre login e revogação a cada concessão, com um roteiro de um comando, ou uma exceção explícita registrada.
-- **URL controlada (PRD 27.4; plano passo 11: IAP ou exceção ENG-005).** O IAP direto no Cloud Run é GA, custa **US$ 0** e funciona sem organização. Decidir entre IAP com lista de permitidos e ingress público com vínculo explícito como controle. Com IAP, o teste de `/saude` da publicação precisa de identidade com acesso.
+- **Vínculo pela máquina do operador × PRD 31.7 e o passo 12 (revogar a sessão depois do bootstrap).** Cada concessão exige sessão gcloud ativa (Auth Proxy e acesso ao segredo). Opções: login e revogação a cada concessão, com roteiro de um comando; autenticação IAM do Cloud SQL, sem senha; ou exceção explícita registrada.
+- **URL controlada (PRD 27.4; plano passo 11).**
+  - **Padrão proposto:** IAP direto no Cloud Run com lista de permitidos, sem `allUsers`. Entram na lista as contas dos testadores e a identidade do teste de `/saude`, com `roles/iap.httpsResourceAccessor`.
+  - Custo zero e funcionamento sem organização: **não verificados** até citar a página.
+  - Ingress público só com exceção ENG-005 aprovada:
+    - escopo: `/entrar` e o pedido de acesso;
+    - risco: qualquer conta Google cria pedido e gera tráfego pago;
+    - compensação: `allUsers` só na web, máximo 2 instâncias, teto nativo de gasto do Cloud Run ligado, cota de pedidos e nenhum dado exibido antes do vínculo;
+    - vencimento: antes do piloto.
+  - Com o máximo de 2 instâncias ocupadas o mês todo, CPU e memória dariam cerca de US$ 186/mês, antes da franquia (especificado: 2 × 2.628.000 s × US$ 0,0000336 + 2 × 0,5 × 2.628.000 × US$ 0,0000035). O orçamento só avisa.
+- **Identidade para testar o login e ensaiar a tarefa.** O primeiro login real é do Adrianus. O ensaio do Codex usa uma conta de teste criada por ele, porque agente não cria conta nem digita senha.
 - **Migração usa a senha do administrador do banco.** Aceitável na HML, com a `sa-preparo` isolada. Antes do piloto, um comando `migrar` só com o `migrator`.
 - **Faixa HOMOLOGAÇÃO.** A casca já mostra um selo permanente do ambiente no cabeçalho (`(app)/layout.tsx`, a partir da identidade do banco). Conferir se atende "todas as telas", inclusive `/entrar` e erros (PRD:5495).
-- **Backups:** o local padrão dos backups automáticos é a multirregião mais próxima, possivelmente fora do Brasil. Fixar `location` em southamerica-east1 se a LGPD pedir (não verificado).
+- **Rotação de senha:** o procedimento está resumido na linha Segredos; falta escrevê-lo em `OPERACAO.md` antes da 1ª troca.
 
 ### Correções ao texto de 27/09 abaixo
 
@@ -237,5 +331,7 @@ Próximo passo mínimo, sem chamar protótipo de homologação: com as autoriza�
 - F34 PRD e STATUS (leitura local): `docs/PRD.md` §27.4, §28.1, §30.5, NFR-11 e NFR-24; `docs/STATUS.md`, linha 12
 
 ## Não verificado
+
+_Em 28/09, os preços de Artifact Registry e Secret Manager e os dias de PITR foram verificados (ver "Fontes desta atualização"). O restante desta lista continua como estava em 27/09._
 
 Se o Google Cloud bloqueia o gasto no teto · PITR do Cloud SQL em dias · menor disco do Cloud SQL · preço exato de Cloud Storage, Artifact Registry, Secret Manager e Cloud Scheduler em São Paulo · se o acréscimo de `gru` vale para o MPG do Fly · frequência e retenção de backup do MPG · diferença de preço regional do Neon e do Supabase em `sa-east-1` · cartão exigido por Render, Vercel, Supabase, AWS, DigitalOcean e Hetzner · prazo do Free Tier do Lightsail · PostGIS no banco gerenciado do Lightsail e no banco de dev da DigitalOcean · backup da DigitalOcean · regras da ANPD para transferência internacional · Magalu Cloud (a calculadora de preços em reais não carregou em https://magalu.cloud/precos/) · spread do banco no cartão.
