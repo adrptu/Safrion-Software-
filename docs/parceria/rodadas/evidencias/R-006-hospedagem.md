@@ -40,6 +40,11 @@ Data de referência e de acesso às fontes: **27/09/2026**; a seção "Atualiza�
 - IAP direto confirmado sem organização, com a 1ª ativação pelo console e o agente de serviço do IAP;
 - rotação validada sem resetar a demonstração.
 
+**Corrigido depois de `85d2fd2` (3ª revisão do Codex, 28/09):**
+- condição canônica única do WIF, com os pares publicar/`hml` e infra/`hml-infra`, e PR sem credencial;
+- risco real do principal de infraestrutura: acesso indireto aos valores, sem promessa de isolamento;
+- o teto nativo derruba tarefas de job em curso e está em Preview.
+
 **Câmbio:** PTAX de venda de 28/09/2026 = **R$ 5,2132** (boletim das 13:03). Com IOF de 3,5%, dá R$ 5,3957 (IOF não reconferido hoje). **Se a conta de faturamento for de contratação local no Brasil, os preços dos SKUs não incluem impostos (14% sobre o uso) e o IOF provavelmente não se aplica.** Só o console mostra qual caso vale para a conta do Adrianus (https://docs.cloud.google.com/billing/docs/resources/vat-overview).
 
 ### Custo mensal da HML mínima (preços de São Paulo relidos em 28/09; mês = 730 h; corrigido em 28/09 após a revisão do Codex)
@@ -96,7 +101,7 @@ Data de referência e de acesso às fontes: **27/09/2026**; a seção "Atualiza�
 - O valor é autorização de gasto do Adrianus, em frase literal (R-006 §3; leitura do Codex de 28/09 17:04).
 
 **Teto de gasto nativo do Cloud Run (proposta; não configurado nem autorizado):**
-- É um orçamento separado do alerta: vale para **um projeto e um serviço**, é mensal e **pausa os pedidos novos** ao Cloud Run (web e jobs) quando o custo estimado passa do valor. Não apaga recurso nem dado; os pedidos em curso terminam (F42).
+- É um orçamento separado do alerta: vale para **um projeto e um serviço**, é mensal e **pausa todo o Cloud Run do projeto** quando o custo estimado passa do valor: o serviço passa a responder erro 5xx, **tarefas de job novas não começam e as em curso falham** (F45). Não apaga recurso nem dado (F42). O recurso está em **Preview** (termos Pre-GA), e o aceite desses termos é do Adrianus. Um `safrion-preparo` interrompido pelo teto só conta como feito com recibo confirmado; a retomada segue a idempotência do preparo e das migrações, a conferir no ensaio.
 - Usa **custo bruto estimado, sem franquia nem créditos**. A aplicação não é instantânea: o que passar por atraso de medição é cobrado normalmente, e o Google recomenda um valor um pouco abaixo do limite real. Avisa em 50%, 80% e 100%. Depois de liberar, o serviço pode levar até 1 h para voltar (F42).
 - **Não cobre o Cloud SQL**, que é cerca de 98% da conta, mas custo fixo e previsível.
 - **Valor proposto: US$ 15/mês, no Cloud Run do projeto da HML.** O bruto estimado do Cloud Run é 2,60 no uso base, 12,78 com 100 h e 16,02 com 1 instância mínima (especificado, com os preços da tabela). Os US$ 15 cobrem o uso normal e o intenso e param um abuso por ingress público ou um laço de jobs. Ligar a instância mínima exige **subir o teto antes**, como o orçamento.
@@ -116,7 +121,9 @@ Data de referência e de acesso às fontes: **27/09/2026**; a seção "Atualiza�
 - F41 https://docs.cloud.google.com/secret-manager/docs/destroy-secret-version e https://docs.cloud.google.com/secret-manager/docs/best-practices (destruir é permanente; desativar antes e observar);
 - F42 https://docs.cloud.google.com/billing/docs/how-to/budgets-spend-caps (teto de gasto: serviços elegíveis, um projeto e um serviço, custo bruto estimado, pausa de pedidos novos, atraso de aplicação, avisos 50/80/100%);
 - F43 https://docs.cloud.google.com/run/docs/securing/identity-aware-proxy-cloud-run (IAP direto no Cloud Run, projeto sem organização, cliente OAuth pelo console, papéis);
-- F44 https://developer.hashicorp.com/terraform/language/backend/gcs (backend gcs: Storage Object Admin no bucket do state; fonte conferida pelo Codex em 28/09).
+- F44 https://developer.hashicorp.com/terraform/language/backend/gcs (backend gcs: Storage Object Admin no bucket do state; fonte conferida pelo Codex em 28/09);
+- F45 https://docs.cloud.google.com/run/docs/tips/services-cost-optimization#budget_spend_caps (teto no Cloud Run: Preview; serviço responde 5xx, tarefas de job novas não começam e as em curso falham);
+- F46 https://docs.cloud.google.com/secret-manager/docs/access-control (permissões de segredo, inclusive `secrets.setIamPolicy` e `versions.access`).
 
 ### Desenho mínimo (sem domínio próprio)
 
@@ -136,10 +143,14 @@ Data de referência e de acesso às fontes: **27/09/2026**; a seção "Atualiza�
 - `sa-web`: `cloudsql.client` e `secretAccessor` só em `app-runtime` e `oidc`;
 - `sa-preparo`: `cloudsql.client` e `secretAccessor` nas 3 senhas do banco;
 - `sa-demo`: `cloudsql.client` e `secretAccessor` só em `app-runtime`;
-- `sa-deploy-github`: `artifactregistry.writer` no repositório, `run.developer` nos 3 recursos, `iam.serviceAccountUser` nas 3 SAs de runtime. `workloadIdentityUser` só para `principalSet://…/attribute.repository_id/<ID_REPO>`. O provider do WIF tem `attribute_condition`:
-  `assertion.repository_id == '<ID_REPO>' && assertion.repository_owner_id == '<ID_DONO>' && assertion.ref == 'refs/heads/main' && assertion.event_name in ['push','workflow_dispatch'] && assertion.workflow_ref.startsWith('adrptu/Safrion-Software-/.github/workflows/publicar-hml.yml@') && assertion.environment == 'hml'`.
-  Sem `workflow_ref` e `event_name`, qualquer workflow com ref `main` (inclusive `pull_request_target`) receberia a SA. **Atenção:** na prática, ela soma o poder das SAs de runtime, inclusive a senha do `postgres` via `sa-preparo`. A página de segredos cita `run.admin` para configurá-los: confirmar no 1º plan se `run.developer` basta para trocar a versão do segredo, sem ampliar o papel antes de testar;
-- `sa-infra-github`: aplica o `infra/terraform/hml` pela CI, com as permissões da divisão do R-006 no passo 3; `workloadIdentityUser` só para o `principalSet` do workflow `infra-hml.yml` em `main`;
+- **Condição canônica do WIF (uma só, para os dois caminhos):**
+  - mapeamento: `google.subject = assertion.sub`, `attribute.repository_id = assertion.repository_id` e `attribute.fluxo`, calculado por expressão (`'publicar'` se `workflow_ref` começa por `adrptu/Safrion-Software-/.github/workflows/publicar-hml.yml@`, `'infra'` se começa por `…/infra-hml.yml@`, senão `'outro'`);
+  - `attribute_condition`: `assertion.repository_id == '<ID_REPO>' && assertion.repository_owner_id == '<ID_DONO>' && assertion.ref == 'refs/heads/main' && assertion.event_name in ['push','workflow_dispatch'] && ((attribute.fluxo == 'publicar' && assertion.environment == 'hml') || (attribute.fluxo == 'infra' && assertion.environment == 'hml-infra'))`;
+  - `workloadIdentityUser`: `sa-deploy-github` ← `principalSet://…/attribute.fluxo/publicar`; `sa-infra-github` ← `principalSet://…/attribute.fluxo/infra`;
+  - **aceite futuro:** os dois caminhos legítimos autenticam. Trocar a ref, o workflow ou o environment falha, inclusive `pull_request_target` e o workflow de um no environment do outro. Sem `workflow_ref` e `event_name`, qualquer workflow com ref `main` receberia a SA. O nome exato da função de expressão no mapeamento fica a conferir no 1º plan;
+  - **PR não autentica:** no PR rodam só checagens estáticas sem credencial (fmt, validate com `-backend=false`, TFLint, scanner). Plan e apply autenticados só em `main`, no environment revisado. A SA de aplicação nunca fica acessível a PR.
+- `sa-deploy-github`: `artifactregistry.writer` no repositório, `run.developer` nos 3 recursos, `iam.serviceAccountUser` nas 3 SAs de runtime. **Atenção:** na prática, ela soma o poder das SAs de runtime, inclusive a senha do `postgres` via `sa-preparo`. A página de segredos cita `run.admin` para configurá-los: confirmar no 1º plan se `run.developer` basta para trocar a versão do segredo, sem ampliar o papel antes de testar;
+- `sa-infra-github`: aplica o `infra/terraform/hml` pela CI, com as permissões da divisão do R-006 no passo 3; `workloadIdentityUser` só para `attribute.fluxo/infra` (condição canônica acima);
 - operador humano (o Adrianus, nunca um agente): `run.invoker` nos jobs, `cloudsql.client`, `secretAccessor` **só em `hml-db-admin-senha`**, `logging.viewer`. A verificar: autenticação IAM do Cloud SQL pelo Auth Proxy (`--auto-iam-authn`), com o usuário IAM dele membro de `migrator`, tira a senha do caminho;
 - proprietário: `owner` só para o bootstrap e emergências. Conta de faturamento, orçamento, cartão e aceites de termos são só dele: agente não usa `gcloud billing` nem a API de orçamentos;
 - agentes: `sa-agentes-leitura`, só leitura (`run.viewer`, `cloudsql.viewer`, `logging.viewer`, `monitoring.viewer`, `artifactregistry.reader`), por _impersonation_, **sem** `secretAccessor`. **Base da personificação:** uma conta Google separada para os agentes, criada pelo Adrianus (agente não cria conta), sem papel no projeto além de `roles/iam.serviceAccountTokenCreator` em `sa-agentes-leitura`. Se o Gemini continuar pelo Vertex, ela recebe o mesmo papel em `sa-vertex`, que tem `roles/aiplatform.user`. Todo comando dos agentes usa `--impersonate-service-account`;
@@ -174,7 +185,7 @@ Em 28/09, o Adrianus delegou às 3 IAs as decisões que dependiam dele. Os **ato
      - pool e provider WIF, com a condição da seção de identidades e `prevent_destroy`;
      - SAs.
    - **Divisão do R-006:** localmente, só o bootstrap. O `infra/terraform/hml` é aplicado pela CI por WIF, com **principal próprio de infraestrutura**, e não com a SA de publicação (achado do Codex, 28/09):
-     - **`sa-infra-github`**, usada só pelo workflow `infra-hml.yml` (plan em PR, apply em `main`, environment `hml-infra` com o Adrianus como único revisor). O WIF liga cada SA ao seu workflow pelo `principalSet` do atributo `workflow_ref`: `sa-deploy-github` ← `…/publicar-hml.yml@refs/heads/main`, `sa-infra-github` ← `…/infra-hml.yml@refs/heads/main`. A condição do provider aceita só esses dois workflows. Outra ref ou outro workflow não recebe nenhuma das duas;
+     - **`sa-infra-github`**, usada só pelo workflow `infra-hml.yml`: checagens estáticas sem credencial em PR; plan e apply autenticados só em `main`, no environment `hml-infra`, com o Adrianus como único revisor. O WIF segue a condição canônica da seção de identidades, com os pares publicar/`hml` e infra/`hml-infra`. Outra ref, outro workflow ou outro environment não recebe nenhuma das duas SAs;
      - **state:** `roles/storage.objectAdmin` **só no bucket do state** para `sa-infra-github` (backend gcs, F44). O "acesso só do dono" do bucket vira dono + `sa-infra-github`;
      - **o que ela cria na HML:**
        - `roles/cloudsql.admin`;
@@ -182,9 +193,13 @@ Em 28/09, o Adrianus delegou às 3 IAs as decisões que dependiam dele. Os **ato
        - `roles/artifactregistry.admin`;
        - `roles/iap.admin` (política de acesso do IAP);
        - `roles/iam.serviceAccountUser` só nas 3 SAs de runtime;
-       - para segredos, **papel customizado** `safrionInfraSegredos`, com criar/ler metadados/atualizar/listar segredos e get/setIamPolicy, **sem `secretmanager.versions.access`**. O papel pronto `secretmanager.admin` lê o valor dos segredos, e por isso fica de fora;
+       - para segredos, **papel customizado** `safrionInfraSegredos`, com criar/ler metadados/atualizar/listar segredos e get/setIamPolicy, sem `secretmanager.versions.access` direto. **Isso não isola o valor** (F46): com `setIamPolicy`, ela pode se dar acesso ao valor; com `run.admin` e `actAs` nas SAs de runtime, pode rodar código como elas, e elas leem os segredos. O papel customizado só evita a leitura direta por engano. **Na prática, o principal de infraestrutura tem acesso efetivo aos valores**;
      - **IAM do projeto fica no bootstrap:** `cloudsql.client` das SAs de runtime e do operador, `logging.viewer` e os papéis da `sa-agentes-leitura` são aplicados pelo dono, uma vez. Assim, `sa-infra-github` não precisa de `resourcemanager.projectIamAdmin`, que lhe permitiria se dar Owner;
-     - **nunca Owner nem Editor para SA de CI.** Mesmo assim, `sa-infra-github` é poderosa (Cloud SQL, Run, segredos sem valor). A compensação: revisor humano no environment, plan aprovado por hash e `prevent_destroy`/`deletion_protection` nos recursos críticos;
+     - **nunca Owner nem Editor para SA de CI.** Mesmo assim, `sa-infra-github` é poderosa: Cloud SQL, Run e, por via indireta, os valores dos segredos. **Não prometemos isolamento de valores.** A compensação:
+       - revisão protegida do workflow e do plan, com revisor humano no environment e plan aprovado por hash;
+       - nenhuma impressão de segredo em log, plan ou saída;
+       - `prevent_destroy`/`deletion_protection` nos recursos críticos;
+       - trilha de auditoria do IAM;
      - **aceite futuro:** init, plan e apply autenticados com esse principal; tentativa com outra ref ou outro workflow negada; nenhuma saída de plan ou apply com valor de segredo;
      - **alternativa, se o time preferir menos privilégio parado:** aplicar também o `infra/terraform/hml` localmente, na janela de sessão do dono, sem SA de infraestrutura. O custo é abrir uma janela de sessão a cada mudança de infraestrutura.
    - **Aprovação do plan:**
@@ -206,7 +221,7 @@ Em 28/09, o Adrianus delegou às 3 IAs as decisões que dependiam dele. Os **ato
 5. **GitHub (Adrianus, administrador):**
    - environment `hml` restrito a `main`, **com o Adrianus como único revisor**. Os agentes usam a mesma conta `adrptu` e nunca aprovam; a conta GitHub própria dos agentes resolve isso;
    - variáveis `GCP_PROJECT_ID`, `GCP_REGION`, `WIF_PROVIDER` e `DEPLOY_SA`;
-   - **sem environment com revisor, o pipeline não publica na HML** até existir a proteção do `main` (PEND-REPO-01), com PR revisado por quem não é o autor. Nesse caso, a condição do WIF perde só `environment` e mantém `workflow_ref` e `event_name`.
+   - **sem environment com revisor, nenhum dos dois caminhos autenticados é ligado** (publicar e infra). A HML espera a proteção do `main` (PEND-REPO-01) e os environments `hml` e `hml-infra`, cada um com o Adrianus como revisor. Não há condição do WIF sem `environment`.
 6. **1ª subida, com aprovação no environment:**
    - publicar as imagens → job `safrion-preparo` → job `safrion-demo-reset` → publicar a web;
    - **provas:**
