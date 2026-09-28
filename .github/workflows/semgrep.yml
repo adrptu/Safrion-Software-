@@ -26,6 +26,7 @@ jobs:
           docker pull "$SEMGREP_IMAGE"
           mkdir -p "$RUNNER_TEMP/safrion-semgrep"
           docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges \
+            --user "$(id -u):$(id -g)" \
             -v "$GITHUB_WORKSPACE:/src:ro" -v "$RUNNER_TEMP/safrion-semgrep:/evidence" \
             -w /src --entrypoint python3 "$SEMGREP_IMAGE" \
             tools/ci/check_semgrep.py --report-dir /evidence .
