@@ -1,6 +1,6 @@
 # ADR 0004: Aplicação web da F0-c — um caminho de comando, sessão no servidor e autorização por matriz
 
-- **Situação:** proposta, revisão 2
+- **Situação:** contrato de tipos aceito pelo Codex em 28/09; revisão 2, com a continuação depois do callback (§5) pedida na aceitação
 - **Data:** 2026-09-28. A revisão 1 é de 2026-09-27 (`c02bced`).
 - **Autor:** Claude Code
 - **Revisores:** Codex e Gemini (validação tripla, protocolo v4.1)
@@ -35,14 +35,16 @@ Três decisões precisam valer desde já, porque são caras de mudar depois: por
 
 3. **Sessão no servidor, revogável e resolvida antes do RLS** (ENG-042; pontos SESSÃO e RESOLUÇÃO).
    - O cookie leva só um identificador aleatório de 256 bits (`HttpOnly`, `Secure`, `SameSite=Lax`, sem dado pessoal). O banco guarda apenas o hash SHA-256 desse identificador.
-   - A migração `0003` cria três tabelas:
+   - A migração `0003` cria quatro tabelas:
      - `app.identity_link` (issuer, subject, usuário e organização);
      - `app.session` (hash, usuário, organização, papel ativo, criação, expiração, revogação e sessão de origem na troca de papel);
-     - a tabela da transação de login do §5.
+     - a transação de login do §5 (antes do callback);
+     - a continuação depois do callback (§5): hash do ticket, identidade validada, destino, expiração e consumo.
    - **O `app_runtime` não tem SELECT, INSERT, UPDATE nem DELETE nessas tabelas.** Tudo passa por funções `SECURITY DEFINER` com dono próprio `NOLOGIN` (nem `migrator` nem `app_runtime`), `SET search_path` fixo, `EXECUTE` revogado de `PUBLIC` e concedido só ao `app_runtime`:
      - `resolver_sessao(hash)`: devolve usuário, organização, papel e expiração **só** de uma sessão não revogada, não expirada, cujo usuário está ativo (`app_user.active`) e ainda tem aquele papel na organização (`user_role`). Caso contrário, não devolve nada;
-     - `vinculos_da_identidade(issuer, subject)`: devolve as organizações e os papéis vivos daquela identidade;
-     - `abrir_sessao(…)`, `revogar_sessao(hash)` e `trocar_papel(hash, papel)`. A troca só aceita papel vinculado, revoga a sessão antiga e devolve uma nova.
+     - `abrir_transacao_login` e `consumir_transacao_login`: a porta do §5;
+     - `abrir_continuacao(issuer, subject, destino)`, `vinculos_da_continuacao(hash)` e `concluir_continuacao(hash, organização, papel)`: a continuação do §5, **o único caminho que cria sessão**;
+     - `revogar_sessao(hash)` e `trocar_papel(hash, papel)`. A troca só aceita papel vinculado, revoga a sessão antiga e devolve uma nova.
    - **Toda requisição resolve a sessão junto com o vínculo vivo.** Usuário desativado, papel removido, sessão revogada ou expirada: a próxima requisição é negada.
    - A organização só entra no contexto do RLS (`emOrganizacao`) **depois** da resolução, e a transação seguinte não herda organização da anterior (já provado na F0-b).
    - A consulta de recibo é leitura autorizada à parte, e nunca reexecuta o efeito.
@@ -65,6 +67,17 @@ Três decisões precisam valer desde já, porque são caras de mudar depois: por
    - **Transação de login com uso único:** o adaptador guarda `state`, `nonce` e o verificador PKCE por uma **porta de armazenamento** implementada pelo Claude.
      - A porta devolve um ticket aleatório, que vai num cookie do navegador, com validade curta.
      - O callback consome o ticket de forma atômica: a segunda tentativa não acha nada.
+   - **Continuação depois do callback (Claude; pedido do Codex de 28/09).** Com o `ResultadoLogin` de sucesso, a casca não confia em nada que venha depois do navegador:
+     1. `abrir_continuacao` guarda no servidor a identidade validada e o destino e devolve um ticket opaco de 256 bits. O banco guarda só o hash; o ticket vai num cookie `HttpOnly` do navegador, com validade curta.
+     2. A tela de escolha lista as organizações e os papéis por `vinculos_da_continuacao(hash)`, nunca por issuer, subject ou usuário vindos do navegador.
+     3. O POST da escolha informa **só** a organização e o papel escolhidos. Qualquer campo de identidade no corpo é recusado pelo contrato.
+     4. `concluir_continuacao` faz tudo numa transação:
+        - consome o ticket de forma atômica (uso único, só se não expirado);
+        - **revalida** o vínculo vivo naquele momento: identidade ligada à organização, usuário ativo e papel atribuído;
+        - cria a sessão.
+
+        Se qualquer passo falha, não há sessão.
+     - Com um só vínculo e um só papel, a casca pode concluir sem mostrar a tela, pela mesma função.
    - **O issuer, o client id e a URL de callback vêm de configuração confiável**, nunca de parâmetro da requisição. O destino depois do login é só um caminho interno validado, nunca uma URL livre.
    - **Provedor de desenvolvimento**, para DEV e para os testes ponta a ponta locais: usuários fictícios, e só liga com trava dupla, falhando fechado se qualquer uma faltar:
      - `SAFRION_AMBIENTE=dev`;
@@ -142,6 +155,12 @@ Três decisões precisam valer desde já, porque são caras de mudar depois: por
 - **Transação de login:**
   - ticket inexistente, expirado ou já consumido não devolve nada;
   - duas tentativas simultâneas com o mesmo ticket: só uma consome.
+- **Continuação depois do callback:**
+  - sem continuação válida, nenhuma sessão é criada;
+  - identidade no corpo da escolha é recusada;
+  - organização sem vínculo é recusada;
+  - ticket expirado ou já usado, ou duas escolhas simultâneas, nunca geram duas sessões;
+  - vínculo revogado, usuário desativado ou papel removido entre o callback e a escolha impedem o acesso.
 - **OIDC (testes do Codex no adaptador):**
   - callback repetido;
   - `state` ou `nonce` inválidos;
