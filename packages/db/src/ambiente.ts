@@ -197,6 +197,9 @@ export async function restaurarDemonstracao(
        VALUES ($1, $2, $3, 'DEMO-001', '2027-06-30', 'L')`,
       [lote, org, produto],
     );
+    // Em hml, acesso real concedido a gerações anteriores cai aqui, com evento e sessões revogadas, na mesma transação;
+    // nada passa para a geração nova sem concessão explícita (ADR 0004 §11). Em dev, a função não faz nada.
+    await c.query('SELECT app.revogar_vinculos_demonstracao($1)', [org]);
     return n;
   });
   return {
