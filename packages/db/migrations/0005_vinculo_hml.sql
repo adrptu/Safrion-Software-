@@ -5,7 +5,8 @@
 --   com responsável e motivo. O app_runtime não concede nem revoga.
 -- - Auditoria imutável em identity_link_event. O audit_log exige um usuário da aplicação como autor; o operador não é.
 -- - Concessão, revogação, conclusão de login e troca de papel usam a mesma trava por organização e usuário: uma sessão
---   criada durante a revogação nunca sobra para voltar a valer numa concessão posterior.
+--   criada durante a revogação nunca sobra para voltar a valer numa concessão posterior. Registro de pedido e concessão
+--   usam também a trava da cota, sempre antes da do vínculo.
 
 CREATE TABLE app.access_request (
   code_hash bytea PRIMARY KEY CHECK (octet_length(code_hash) = 32),
@@ -120,6 +121,9 @@ BEGIN
      OR p_motivo IS NULL OR length(btrim(p_motivo)) NOT BETWEEN 1 AND 200 OR p_motivo ~ '[[:cntrl:]]' THEN
     RETURN 'OPCAO_INVALIDA';
   END IF;
+  -- Mesma trava do registro de pedidos (HML-VINC-01): consumir e renovar nunca se cruzam, e a cota é contada sobre
+  -- estado firme. Ordem fixa: a da cota antes da do vínculo; ninguém toma as duas na ordem inversa.
+  PERFORM pg_advisory_xact_lock(hashtext('safrion.pedido_acesso'));
   PERFORM app.travar_vinculo(p_organizacao, p_usuario);
   SELECT * INTO v_pedido FROM app.access_request r WHERE r.code_hash = p_codigo_hash FOR UPDATE;
   IF NOT FOUND OR v_pedido.issuer = 'urn:safrion:desenvolvimento' THEN

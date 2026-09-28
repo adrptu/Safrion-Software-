@@ -411,6 +411,64 @@ describe('concorrência', () => {
   });
 });
 
+/** Espera a sessão do pid entrar em espera de trava (a ordem entre duas transações fica determinada, sem sleep). */
+async function esperandoTrava(pid: number) {
+  const limite = Date.now() + 5000;
+  while (Date.now() < limite) {
+    const r = await raiz.query<{ espera: string | null }>(
+      'SELECT wait_event_type AS espera FROM pg_stat_activity WHERE pid = $1',
+      [pid],
+    );
+    if (r.rows[0]?.espera === 'Lock') return;
+    await new Promise<void>((resolve) => setImmediate(resolve));
+  }
+  throw new Error('NAO_ENTROU_NA_ESPERA_ESPERADA');
+}
+
+// HML-VINC-01 (prova do Codex, 28/09): a renovação que chega enquanto a concessão consome o mesmo pedido esperava só o
+// índice e inseria depois do COMMIT, passando de 1000 retidos. Agora espera a trava da cota e conta sobre estado firme.
+describe('HML-VINC-01: renovação durante a concessão do mesmo pedido', () => {
+  it('não ultrapassa 1000 retidos e recusa pela cota, sem apagar retidos recentes', async () => {
+    await raiz.query('DELETE FROM app.access_request');
+    const usuario = await novoUsuario(['almoxarife']);
+    const id = identidade();
+    const codigo = await pedir(id);
+    await raiz.query(
+      `INSERT INTO app.access_request (code_hash, issuer, subject, expires_at, consumed_at, organization_id, user_id)
+       SELECT sha256(convert_to('retido-' || i, 'UTF8')), 'https://retido.invalid', 'retido-' || i,
+              now() + interval '1 day', now(), $1, $2
+         FROM generate_series(1, 999) i`,
+      [demo.organizationId, usuario],
+    );
+    const admin = await hml.migrator.connect();
+    const solicitante = await hml.app.connect();
+    let renovacao: ReturnType<typeof registrarPedidoAcesso> | undefined;
+    try {
+      await admin.query('BEGIN');
+      expect(await concederVinculo(admin, { ...destino(usuario), codigo })).toBe('concedido');
+      const pid =
+        (await solicitante.query<{ pid: number }>('SELECT pg_backend_pid() AS pid')).rows[0]?.pid ?? 0;
+      renovacao = registrarPedidoAcesso(solicitante, id);
+      await esperandoTrava(pid);
+      await admin.query('COMMIT');
+      const resultado = await renovacao;
+      const total = (await raiz.query<{ n: number }>('SELECT count(*)::int AS n FROM app.access_request'))
+        .rows[0]?.n;
+      expect({ resultado: resultado.resultado, total }).toEqual({ resultado: 'cota_esgotada', total: 1000 });
+      const retidos = await raiz.query(
+        "SELECT 1 FROM app.access_request WHERE issuer = 'https://retido.invalid'",
+      );
+      expect(retidos.rowCount).toBe(999);
+    } finally {
+      await admin.query('ROLLBACK');
+      await renovacao?.catch(() => undefined);
+      admin.release();
+      solicitante.release();
+      await raiz.query('DELETE FROM app.access_request');
+    }
+  });
+});
+
 describe('cota de pedidos em HML', () => {
   it('até 100 vivos, inclusive com registros simultâneos; 1000 retidos; limpeza de vencidos e de consumidos antigos', async () => {
     await raiz.query('DELETE FROM app.access_request');
