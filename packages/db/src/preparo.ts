@@ -1,6 +1,11 @@
 import pg from 'pg';
 
-import { definirIdentidadeAmbiente, ErroAmbiente, ehNomeAmbiente, type NomeAmbiente } from './ambiente.js';
+import {
+  definirIdentidadeAmbiente,
+  ErroAmbiente,
+  lerIdentidadeAmbiente,
+  type NomeAmbiente,
+} from './ambiente.js';
 import { aplicarMigracoes, type ResultadoMigracao } from './migrar.js';
 import { provisionarPapeis } from './papeis.js';
 
@@ -144,11 +149,12 @@ async function identidadeDoBanco(
       }
       throw e;
     }
-    const r = await c.query<{ name: string | null }>(
-      "SELECT CASE WHEN to_regclass('app.environment_identity') IS NULL THEN NULL ELSE (SELECT name FROM app.environment_identity) END AS name",
+    // Existência numa consulta à parte (HML-PREP-03): o PostgreSQL resolve toda tabela citada ao analisar a consulta,
+    // mesmo num ramo que não roda, e o banco criado por um preparo interrompido antes da primeira migração não a tem.
+    const tabela = await c.query<{ existe: boolean }>(
+      "SELECT to_regclass('app.environment_identity') IS NOT NULL AS existe",
     );
-    const nome = r.rows[0]?.name ?? null;
-    return ehNomeAmbiente(nome) ? nome : null;
+    return tabela.rows[0]?.existe ? await lerIdentidadeAmbiente(c) : null;
   } finally {
     await c.end().catch(() => undefined);
   }

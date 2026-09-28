@@ -16,9 +16,13 @@ Nada disso está feito. Não afirme o contrário.
 
 Nada abaixo foi executado em nuvem. Projeto, cobrança, banco hospedado e domínio são decisões do proprietário.
 
-**Imagem** (`Dockerfile` na raiz, base `node:24.21.0-bookworm-slim` fixada por digest):
-- alvo padrão `web`: build standalone do Next, usuário `node`, porta `PORT` (8080), `HEALTHCHECK` em `/saude`;
-- alvo `preparo`: o comando de preparo do banco, com só o pacote `@safrion/db` e as suas dependências de produção.
+**Imagem** (`Dockerfile` na raiz):
+- construção em `node:24.21.0-bookworm-slim`, fixada por digest;
+- execução em `gcr.io/distroless/cc-debian13:nonroot`, fixada por digest, só com o binário `node` da construção: sem shell, sem gerenciador de pacotes e sem npm, corepack ou yarn;
+- alvo padrão `web`: build standalone do Next, usuário 65532, porta `PORT` (8080), `HEALTHCHECK` em `/saude`;
+- alvo `preparo`: o comando de preparo do banco, com só o pacote `@safrion/db` e as suas dependências de produção, também como usuário 65532.
+
+Sem shell na imagem, diagnóstico é por log e por `/saude`, não por `docker exec … sh`.
 
 **Variáveis da web**, todas na execução e nunca na imagem:
 - `DATABASE_URL`: papel `app_runtime`, vinda do cofre de segredos;
@@ -60,4 +64,4 @@ Saída:
 
 **Limites conhecidos:**
 - a imagem não foi construída nesta máquina, que não tem Docker. Foram verificados os passos da construção numa árvore limpa, o servidor standalone copiado para uma pasta isolada (bateria ponta a ponta completa) e o preparo a partir do pacote de produção isolado;
-- a primeira construção real e a varredura da imagem ficam para a CI.
+- a construção real, as provas de execução e a varredura da imagem são da CI (`imagem.yml`), que bloqueia achados HIGH e CRITICAL, com ou sem correção disponível.
