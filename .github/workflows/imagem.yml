@@ -63,6 +63,23 @@ jobs:
         run: |
           trivy image --format cyclonedx --output "$RUNNER_TEMP/imagem/web-sbom.json" safrion-web:ci
           trivy image --format cyclonedx --output "$RUNNER_TEMP/imagem/preparo-sbom.json" safrion-preparo:ci
+      - name: Resumir achados sem revelar valores de segredos
+        if: ${{ !cancelled() && steps.construcao.outcome == 'success' }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          for alvo in ('web', 'preparo'):
+              p = Path(os.environ['RUNNER_TEMP']) / 'imagem' / (alvo + '-trivy.json')
+              d = json.loads(p.read_text())
+              achados = []
+              for r in d.get('Results', []):
+                  for v in r.get('Vulnerabilities', []) or []:
+                      achados.append({k: v.get(k) for k in ('VulnerabilityID', 'PkgName', 'InstalledVersion', 'FixedVersion', 'Severity')})
+                  for s in r.get('Secrets', []) or []:
+                      achados.append({'tipo': 'segredo', 'regra': s.get('RuleID'), 'gravidade': s.get('Severity')})
+              print(json.dumps({'imagem': alvo, 'achados': achados}))
+          PY
       - name: Preservar evidência da candidata (sem publicar as imagens)
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
