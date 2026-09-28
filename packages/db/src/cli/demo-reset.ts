@@ -68,8 +68,8 @@ export async function executarCli(
   let pool: pg.Pool | undefined;
   try {
     conexao = await preparar(env);
+    await conexao.aguardar({ connectionString: url });
     pool = new pg.Pool({ connectionString: url, max: 1, ...conexao.extra });
-    await conexao.aguardar(pool);
     const d = await restaurarDemonstracao(pool, { confirmar, ambienteDoProcesso: env['SAFRION_AMBIENTE'] });
     escrever(
       JSON.stringify({

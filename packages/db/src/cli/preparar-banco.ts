@@ -16,7 +16,6 @@ import {
   ErroConexao,
   prepararConexao,
   sairNaRejeicaoSolta,
-  sondaPorCliente,
   type Conexao,
   type PrepararConexao,
 } from '../conexao.js';
@@ -89,7 +88,7 @@ export async function executarCli(
     const { extra } = conexao;
     // O preparo abre clientes no banco-alvo com o mesmo conectar: todos recebem o conector, não só o do administrador.
     const conectarComExtra = (config: pg.ClientConfig) => conectar({ ...config, ...extra });
-    await conexao.aguardar(sondaPorCliente(() => conectarComExtra({ connectionString: url })));
+    await conexao.aguardar({ connectionString: url }, { abrir: conectar });
     admin = conectarComExtra({ connectionString: url });
     admin.on('error', () => undefined);
     await admin.connect();

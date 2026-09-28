@@ -15,7 +15,13 @@ export {
 export { executarComando, type Intencao, type Recibo } from './comando.js';
 // Conexão por IP privado na subida do servidor (instrumentation.ts), só com SAFRION_CLOUDSQL_INSTANCIA.
 export { criarConectorGoogle } from './conector-google.js';
-export { ErroConexao, prepararConexao, type Conexao, type PrepararConexao } from './conexao.js';
+export {
+  ErroConexao,
+  prepararConexao,
+  type Conector,
+  type Conexao,
+  type PrepararConexao,
+} from './conexao.js';
 export { ErroComando, type CodigoErroComando } from './erros.js';
 export {
   extratoDoLote,

@@ -17,3 +17,10 @@ allowBuilds:
   ssh2: false
   # Otimização de imagem do Next (dependência opcional com script nativo): a F0-c não tem imagem para otimizar.
   sharp: false
+
+# Correção local do conector do Cloud SQL 1.12.0 (revisão do Codex de eb90a5f; ADR 0006): a renovação do certificado
+# que falha antes da 1ª conexão deixava promessas rejeitadas sem consumidor (o Next as imprimia com a URL da API), e,
+# depois dela, o conector não renovava mais. Com versão nova do pacote, o pnpm recusa a instalação até o patch ser
+# revisto: sai quando uma versão publicada trouxer a correção.
+patchedDependencies:
+  '@google-cloud/cloud-sql-connector@1.12.0': patches/@google-cloud__cloud-sql-connector@1.12.0.patch

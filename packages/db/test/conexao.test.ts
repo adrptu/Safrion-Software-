@@ -6,7 +6,7 @@ import { EventEmitter } from 'node:events';
 import { createServer } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { createRequire } from 'node:module';
-import { PassThrough } from 'node:stream';
+import { PassThrough, type Duplex } from 'node:stream';
 
 import pg from 'pg';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -19,10 +19,11 @@ import {
   ErroConexao,
   prepararConexao,
   sairNaRejeicaoSolta,
-  sondaPorCliente,
+  type AbrirCliente,
   type Conector,
   type Conexao,
 } from '../src/conexao.js';
+import { TransportePg } from './transporte-pg.js';
 
 const INSTANCIA = 'projeto-teste:southamerica-east1:safrion-hml';
 const IP = '10.20.0.3';
@@ -69,19 +70,52 @@ function esperas() {
   };
 }
 
-/** Consulta falsa que falha nas primeiras `falhas` vezes com texto de driver (host e senha). */
-function bancoFalso(falhas: number) {
-  const consultas: string[] = [];
-  return {
-    consultas,
-    query: (texto: string) => {
-      consultas.push(texto);
-      return consultas.length <= falhas
-        ? Promise.reject(new Error(`connect ETIMEDOUT ${IP}:5432 senha ${SENHA}`))
-        : Promise.resolve({ rows: [{ '?column?': 1 }] });
-    },
+const URL_SONDA = 'postgresql://app_runtime@/safrion_hml';
+const STREAM = () => new PassThrough();
+
+/**
+ * Clientes de sonda falsos, um por tentativa: os `falhas` primeiros falham ao conectar com texto de driver (host e
+ * senha); os outros conectam e respondem. Cada um cria o transporte pelo `stream` da configuração, como o pg, e a
+ * consulta que não responde (`responde` falso) só termina quando o transporte é destruído.
+ */
+function sondasFalsas(falhas: number, responde = true) {
+  const eventos: string[] = [];
+  const configs: pg.ClientConfig[] = [];
+  const transportes: Duplex[] = [];
+  const abrir: AbrirCliente = (config) => {
+    configs.push(config);
+    const id = String(configs.length);
+    const transporte = config.stream?.();
+    if (transporte) transportes.push(transporte);
+    return {
+      on: () => undefined,
+      connect: () => {
+        eventos.push(`${id}:connect`);
+        return Number(id) <= falhas
+          ? Promise.reject(new Error(`connect ETIMEDOUT ${IP}:5432 senha ${SENHA}`))
+          : Promise.resolve();
+      },
+      query: (texto: string) => {
+        eventos.push(`${id}:${texto}`);
+        if (responde) return Promise.resolve({ rows: [] });
+        return new Promise((_, rejeitar) => {
+          transporte?.once('close', () => {
+            rejeitar(new Error(`Connection terminated unexpectedly ${IP}`));
+          });
+        });
+      },
+      end: () => {
+        eventos.push(`${id}:end`);
+        return Promise.resolve();
+      },
+    };
   };
+  return { eventos, configs, transportes, abrir };
 }
+
+const nenhumaSonda: AbrirCliente = () => {
+  throw new Error('sonda que não deveria existir');
+};
 
 async function erroDe(promessa: Promise<unknown>): Promise<unknown> {
   try {
@@ -120,9 +154,7 @@ describe('prepararConexao', () => {
     const { criarConector } = conectorFalso();
     const conexao = await prepararConexao({ DATABASE_URL: 'postgresql://x@localhost/db' }, { criarConector });
     expect(conexao.extra).toEqual({});
-    const banco = bancoFalso(0);
-    await conexao.aguardar(banco);
-    expect(banco.consultas).toEqual([]);
+    await conexao.aguardar({ connectionString: URL_SONDA }, { abrir: nenhumaSonda });
     conexao.fechar();
     expect(criarConector).not.toHaveBeenCalled();
   });
@@ -270,18 +302,25 @@ describe('prepararConexao', () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 
-  it('com a instância, aguardar espera o banco com SELECT 1', async () => {
-    const f = conectorFalso();
+  it('com a instância, aguardar sonda com clientes próprios, pelo transporte do conector e com o limite de conexão', async () => {
+    const f = conectorFalso(0, { stream: STREAM });
     const conexao = await prepararConexao(COM_INSTANCIA, { criarConector: f.criarConector });
-    const banco = bancoFalso(1);
+    const s = sondasFalsas(1);
     const { esperar, feitas } = esperas();
-    await conexao.aguardar(banco, { esperar });
-    expect(banco.consultas).toEqual(['SELECT 1', 'SELECT 1']);
+    await conexao.aguardar({ connectionString: URL_SONDA }, { abrir: s.abrir, esperar });
+    expect(s.eventos).toEqual(['1:connect', '1:end', '2:connect', '2:SELECT 1', '2:end']);
     expect(feitas).toEqual([2_000]);
+    expect(s.configs).toHaveLength(2);
+    for (const config of s.configs) {
+      expect(config).toMatchObject({ connectionString: URL_SONDA, connectionTimeoutMillis: 10_000 });
+    }
+    // Um transporte do conector por tentativa, e nenhum continua aberto.
+    expect(s.transportes).toHaveLength(2);
+    expect(s.transportes.every((t) => t.destroyed)).toBe(true);
   });
 });
 
-describe('conector real 1.12.0 contra uma API falsa em 127.0.0.1 (sem rede externa)', () => {
+describe('conector real 1.12.0, sem rede externa', () => {
   it('API recusa: 4 chamadas reais, CONECTOR_INDISPONIVEL sem texto do Google e nenhuma rejeição solta', async () => {
     // O pacote real: prova que cada tentativa chama a API (sem o erro guardado) e que nada fica solto depois.
     const { Connector } = await import('@google-cloud/cloud-sql-connector');
@@ -321,6 +360,73 @@ describe('conector real 1.12.0 contra uma API falsa em 127.0.0.1 (sem rede exter
     } finally {
       process.off('unhandledRejection', aoSoltar);
       await new Promise((resolve) => api.close(resolve));
+    }
+  });
+
+  it('renovação que falha antes da 1ª conexão, com ou sem fechar no meio, não vira rejeição solta (patch do SDK)', async () => {
+    // patches/@google-cloud__cloud-sql-connector@1.12.0.patch (revisão do Codex de eb90a5f): sem ele, o SDK deixava
+    // promessas rejeitadas sem consumidor, e o Next as imprimia com a URL da API. Só a API do Cloud SQL e o TLS são
+    // falsos; o Connector e o ciclo de renovação são os do pacote.
+    const tls = (await import('node:tls')).default;
+    vi.spyOn(tls, 'createSecureContext').mockReturnValue({} as ReturnType<typeof tls.createSecureContext>);
+    vi.spyOn(tls, 'connect').mockImplementation(() => {
+      const s = new PassThrough();
+      return Object.assign(s, { setKeepAlive: () => s }) as unknown as ReturnType<typeof tls.connect>;
+    });
+    const { Connector } = await import('@google-cloud/cloud-sql-connector');
+    const soltas: unknown[] = [];
+    const aoSoltar = (motivo: unknown) => soltas.push(motivo);
+    process.on('unhandledRejection', aoSoltar);
+    try {
+      for (const fecharNoMeio of [false, true]) {
+        let metadados = 0;
+        let recusar: (erro: Error) => void = () => undefined;
+        let avisar: () => void = () => undefined;
+        const renovando = new Promise<void>((resolve) => {
+          avisar = resolve;
+        });
+        const conector = new Connector();
+        const api = (conector as unknown as { sqlAdminFetcher: Record<string, unknown> }).sqlAdminFetcher;
+        api['getInstanceMetadata'] = () => {
+          metadados++;
+          if (metadados === 1) {
+            return Promise.resolve({
+              ipAddresses: { private: IP },
+              serverCaCert: { cert: 'CA-FALSA' },
+              serverCaMode: '',
+              dnsName: '',
+            });
+          }
+          avisar();
+          return new Promise((_, rejeitar) => {
+            recusar = rejeitar;
+          });
+        };
+        api['getEphemeralCertificate'] = () =>
+          Promise.resolve({
+            cert: 'CERT-FALSO',
+            expirationTime: new Date(Date.now() + 3_600_000).toISOString(),
+          });
+        const conexao = await prepararConexao(COM_INSTANCIA, {
+          criarConector: () => Promise.resolve(conector as unknown as Conector),
+        });
+        const socket = (conexao.extra.stream as () => Duplex)();
+        socket.on('error', () => undefined);
+        socket.emit('error', new Error(`socket para ${IP}`));
+        await renovando;
+        if (fecharNoMeio) conexao.fechar();
+        recusar(
+          new Error(`request to https://sqladmin.googleapis.com/sql/v1beta4/projects/${INSTANCIA} failed`),
+        );
+        // Rejeição solta chega no próximo giro do laço de eventos: dá tempo a ela antes de conferir.
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        if (!fecharNoMeio) conexao.fechar();
+        expect(metadados).toBe(2);
+      }
+      expect(soltas).toEqual([]);
+    } finally {
+      process.off('unhandledRejection', aoSoltar);
+      vi.restoreAllMocks();
     }
   });
 });
@@ -385,101 +491,156 @@ describe('sairNaRejeicaoSolta', () => {
 });
 
 describe('aguardarBanco', () => {
-  it('falha 2 vezes e passa: só SELECT 1, esperas de 2 e 4 s', async () => {
-    const banco = bancoFalso(2);
+  it('falha 2 vezes e passa: só SELECT 1, esperas de 2 e 4 s, um cliente novo por tentativa', async () => {
+    const s = sondasFalsas(2);
     const { esperar, feitas } = esperas();
-    await aguardarBanco(banco, { esperar });
-    expect(banco.consultas).toEqual(['SELECT 1', 'SELECT 1', 'SELECT 1']);
+    await aguardarBanco({ connectionString: URL_SONDA }, STREAM, { abrir: s.abrir, esperar });
+    expect(s.eventos).toEqual([
+      '1:connect',
+      '1:end',
+      '2:connect',
+      '2:end',
+      '3:connect',
+      '3:SELECT 1',
+      '3:end',
+    ]);
     expect(feitas).toEqual([2_000, 4_000]);
+    expect(s.transportes.every((t) => t.destroyed)).toBe(true);
   });
 
   it('sempre falha: 6 tentativas, esperas de 2, 4, 8, 16 e 30 s, BANCO_INDISPONIVEL sem texto do driver', async () => {
-    const banco = bancoFalso(Infinity);
+    const s = sondasFalsas(Infinity);
     const { esperar, feitas } = esperas();
-    const erro = await erroDe(aguardarBanco(banco, { esperar }));
+    const erro = await erroDe(
+      aguardarBanco({ connectionString: URL_SONDA }, STREAM, { abrir: s.abrir, esperar }),
+    );
     expect(erro).toBeInstanceOf(ErroConexao);
     expect(erro).toMatchObject({ name: 'ErroConexao', codigo: 'BANCO_INDISPONIVEL' });
-    expect(banco.consultas).toEqual(Array<string>(6).fill('SELECT 1'));
+    expect(s.eventos.filter((e) => e.endsWith(':connect'))).toHaveLength(6);
     expect(feitas).toEqual([2_000, 4_000, 8_000, 16_000, 30_000]);
+    expect(s.transportes.every((t) => t.destroyed)).toBe(true);
     semSegredos(`${(erro as Error).message} ${JSON.stringify(erro)}`);
   });
 
-  it('sem opções: banco que responde não espera; a espera padrão usa o relógio', async () => {
-    const pronto = bancoFalso(0);
-    await aguardarBanco(pronto);
-    expect(pronto.consultas).toEqual(['SELECT 1']);
+  it('sem esperar injetado: banco que responde não espera; a espera padrão usa o relógio', async () => {
+    const pronto = sondasFalsas(0);
+    await aguardarBanco({ connectionString: URL_SONDA }, STREAM, { abrir: pronto.abrir });
+    expect(pronto.eventos).toEqual(['1:connect', '1:SELECT 1', '1:end']);
     vi.useFakeTimers();
-    const banco = bancoFalso(1);
-    const aguardando = aguardarBanco(banco, { tentativas: 2 });
+    const s = sondasFalsas(1);
+    const aguardando = aguardarBanco({ connectionString: URL_SONDA }, STREAM, {
+      abrir: s.abrir,
+      tentativas: 2,
+    });
     await vi.advanceTimersByTimeAsync(1_999);
-    expect(banco.consultas).toHaveLength(1);
+    expect(s.configs).toHaveLength(1);
     await vi.advanceTimersByTimeAsync(1);
     await aguardando;
-    expect(banco.consultas).toHaveLength(2);
+    expect(s.configs).toHaveLength(2);
   });
 
-  it('SELECT 1 que não responde: cada tentativa para em 10 s, BANCO_INDISPONIVEL aos 120 s (com o conector, 167 s < 180 s)', async () => {
+  it('SELECT 1 que não responde: cada tentativa para em 10 s e destrói o transporte; BANCO_INDISPONIVEL aos 120 s (com o conector, 167 s < 180 s)', async () => {
     vi.useFakeTimers();
-    const consultas: string[] = [];
-    const responder: (() => void)[] = [];
-    const banco = {
-      query: (texto: string) => {
-        consultas.push(texto);
-        return new Promise<void>((resolve) => {
-          responder.push(resolve);
-        });
-      },
-    };
-    const estado = acompanhar(aguardarBanco(banco));
+    const s = sondasFalsas(0, false);
+    const estado = acompanhar(aguardarBanco({ connectionString: URL_SONDA }, STREAM, { abrir: s.abrir }));
     await vi.advanceTimersByTimeAsync(119_999);
     expect(estado.pronto).toBe(false);
-    expect(consultas).toHaveLength(6);
+    expect(s.eventos.filter((e) => e.endsWith(':SELECT 1'))).toHaveLength(6);
     await vi.advanceTimersByTimeAsync(1);
     expect(estado.erro).toMatchObject({ codigo: 'BANCO_INDISPONIVEL' });
-    // Resposta depois do prazo não muda o resultado.
-    responder[0]?.();
-    await vi.advanceTimersByTimeAsync(0);
-    expect(estado.erro).toMatchObject({ codigo: 'BANCO_INDISPONIVEL' });
+    // Nenhuma consulta nem transporte da sonda fica vivo, e cada cliente recebeu end().
+    expect(s.transportes).toHaveLength(6);
+    expect(s.transportes.every((t) => t.destroyed)).toBe(true);
+    expect(s.eventos.filter((e) => e.endsWith(':end'))).toHaveLength(6);
     expect(vi.getTimerCount()).toBe(0);
   });
 
-  it('sondaPorCliente: cada tentativa abre e fecha um cliente novo; o que falhou ao conectar não volta', async () => {
-    const eventos: string[] = [];
-    let abertos = 0;
-    const abrir = () => {
-      const id = ++abertos;
+  it('cliente que falha ao encerrar não esconde o resultado; o transporte é destruído mesmo assim', async () => {
+    const transportes: Duplex[] = [];
+    const abrir: AbrirCliente = (config) => {
+      const t = config.stream?.();
+      if (t) transportes.push(t);
       return {
-        on: (evento: 'error', ouvinte: () => void) => {
-          eventos.push(`${String(id)}:on:${evento}`);
-          ouvinte();
-        },
-        connect: () => {
-          eventos.push(`${String(id)}:connect`);
-          return id === 1 ? Promise.reject(new Error(`connect ECONNREFUSED ${IP}`)) : Promise.resolve();
-        },
-        query: (texto: string) => {
-          eventos.push(`${String(id)}:${texto}`);
-          return Promise.resolve({ rows: [] });
-        },
-        end: () => {
-          eventos.push(`${String(id)}:end`);
-          // Falha ao encerrar não esconde o resultado da consulta.
-          return id === 2 ? Promise.reject(new Error('fim')) : Promise.resolve();
-        },
+        on: () => undefined,
+        connect: () => Promise.resolve(),
+        query: () => Promise.resolve({ rows: [] }),
+        end: () => Promise.reject(new Error(`fim com ${IP}`)),
       };
     };
-    const { esperar, feitas } = esperas();
-    await aguardarBanco(sondaPorCliente(abrir), { esperar });
-    expect(eventos).toEqual([
-      '1:on:error',
-      '1:connect',
-      '1:end',
-      '2:on:error',
-      '2:connect',
-      '2:SELECT 1',
-      '2:end',
-    ]);
-    expect(feitas).toEqual([2_000]);
+    await aguardarBanco({ connectionString: URL_SONDA }, STREAM, { abrir });
+    expect(transportes).toHaveLength(1);
+    expect(transportes[0]?.destroyed).toBe(true);
+  });
+
+  it('cliente cujo end() não termina: a sonda desiste em 1 s e destrói o transporte', async () => {
+    vi.useFakeTimers();
+    const transportes: Duplex[] = [];
+    const abrir: AbrirCliente = (config) => {
+      const t = config.stream?.();
+      if (t) transportes.push(t);
+      return {
+        on: () => undefined,
+        connect: () => Promise.resolve(),
+        query: () => Promise.resolve({ rows: [] }),
+        end: () => new Promise(() => undefined),
+      };
+    };
+    const estado = acompanhar(aguardarBanco({ connectionString: URL_SONDA }, STREAM, { abrir }));
+    await vi.advanceTimersByTimeAsync(999);
+    expect(estado.pronto).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(estado.pronto).toBe(true);
+    expect(estado).not.toHaveProperty('erro');
+    expect(transportes[0]?.destroyed).toBe(true);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+});
+
+describe('sonda com o driver pg real e transporte PostgreSQL em memória (CONEXAO-01, sem rede)', () => {
+  it('controle: o banco responde, a sonda passa e o transporte termina fechado', async () => {
+    const transportes: TransportePg[] = [];
+    const stream = () => {
+      const t = new TransportePg(true);
+      transportes.push(t);
+      return t;
+    };
+    await aguardarBanco({ connectionString: URL_SONDA }, stream);
+    expect(transportes).toHaveLength(1);
+    expect(transportes[0]?.consultas).toBe(1);
+    expect(transportes[0]?.destroyed).toBe(true);
+  });
+
+  it('autentica e não responde ao SELECT 1: BANCO_INDISPONIVEL no prazo e nenhum cliente nem transporte vivo', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    const transportes: TransportePg[] = [];
+    const clientes: pg.Client[] = [];
+    const stream = () => {
+      const t = new TransportePg(false);
+      transportes.push(t);
+      return t;
+    };
+    const abrir: AbrirCliente = (config) => {
+      const c = new pg.Client(config);
+      clientes.push(c);
+      return c;
+    };
+    const estado = acompanhar(
+      aguardarBanco({ connectionString: URL_SONDA }, stream, {
+        abrir,
+        tentativas: 2,
+        esperar: () => Promise.resolve(),
+      }),
+    );
+    await vi.advanceTimersByTimeAsync(10_000);
+    expect(estado.pronto).toBe(false);
+    await vi.advanceTimersByTimeAsync(10_000);
+    expect(estado.erro).toMatchObject({ codigo: 'BANCO_INDISPONIVEL' });
+    await vi.advanceTimersByTimeAsync(0);
+    expect(transportes.map((t) => t.consultas)).toEqual([1, 1]);
+    expect(transportes.every((t) => t.destroyed)).toBe(true);
+    // O pg marca o cliente como encerrado quando o transporte fecha: nada fica esperando uma resposta que não vem.
+    expect(clientes.map((c) => (c as unknown as { _ending: boolean })._ending)).toEqual([true, true]);
+    expect(vi.getTimerCount()).toBe(0);
   });
 });
 
@@ -514,13 +675,19 @@ describe('comandos de linha com a conexão privada', () => {
     codigo_tecnico: codigoTecnico,
   });
 
-  /** Conexão preparada falsa: registra a sonda e o fechamento, com uma marca no extra. */
+  /**
+   * Conexão preparada falsa: registra a sonda e o fechamento, com uma marca no extra. A sonda abre um cliente pelo
+   * `abrir` do comando com a configuração recebida; a real acrescenta o transporte do conector (testado acima).
+   */
   function conexaoFalsa(eventos: string[]): Conexao {
     return {
       extra: { application_name: 'marca-conexao-privada' },
-      aguardar: async (alvo) => {
+      aguardar: async (config, sonda) => {
         eventos.push('aguardar');
-        await alvo.query('SELECT 1');
+        const cliente = (sonda?.abrir ?? nenhumaSonda)(config);
+        await cliente.connect();
+        await cliente.query('SELECT 1');
+        await cliente.end();
       },
       fechar: () => {
         eventos.push('fechar');
@@ -641,9 +808,10 @@ describe('comandos de linha com a conexão privada', () => {
     );
     expect(saida).toBe(3);
     expect(linhas.map((l) => JSON.parse(l) as unknown)).toEqual([falha('ECONNREFUSED', 'Error')]);
-    // O 3º cliente é o que o preparo abre no banco-alvo para ler a identidade: também passa pelo conector.
+    // O 1º é o da sonda (o extra vem da conexão real); o 3º é o que o preparo abre no banco-alvo para ler a
+    // identidade, que também passa pelo conector.
     expect(configs).toEqual([
-      { connectionString: URL_ADMIN, ...conexao.extra },
+      { connectionString: URL_ADMIN },
       { connectionString: URL_ADMIN, ...conexao.extra },
       {
         host: IP,
@@ -684,31 +852,27 @@ describe('comandos de linha com a conexão privada', () => {
     expect(saida).toBe(3);
     expect(linhas.map((l) => JSON.parse(l) as unknown)).toEqual([falha('ECONNREFUSED', 'Error')]);
     expect(configs).toHaveLength(2);
-    for (const config of configs) {
-      expect(config).toMatchObject({
-        host: IP,
-        port: 5432,
-        database: 'safrion_hml',
-        user: 'admin',
-        ...conexao.extra,
-      });
-    }
+    const alvo = { host: IP, port: 5432, database: 'safrion_hml', user: 'admin' };
+    // A sonda recebe o banco-alvo sem o extra (a conexão real acrescenta o transporte); o cliente de trabalho, com.
+    expect(configs[0]).toMatchObject(alvo);
+    expect(configs[0]).not.toHaveProperty('application_name');
+    expect(configs[1]).toMatchObject({ ...alvo, ...conexao.extra });
     expect(eventos).toEqual(['aguardar', '1:connect', '1:SELECT 1', '1:end', '2:connect', '2:end', 'fechar']);
     semSegredos(linhas.join('\n'));
   });
 
-  it('demo-reset: o pool recebe o extra; banco indisponível sai 3 com o código; fechar depois de encerrar o pool', async () => {
+  it('demo-reset: a sonda vem antes do pool; banco indisponível sai 3 com o código, sem pool, e fecha o conector', async () => {
     const linhas: string[] = [];
     let recebido: unknown;
-    let poolEncerradoAoFechar: boolean | undefined;
+    let fechou = false;
     const conexao: Conexao = {
       extra: { application_name: 'marca-conexao-privada' },
-      aguardar: (alvo) => {
-        recebido = alvo;
+      aguardar: (config) => {
+        recebido = config;
         return Promise.reject(new ErroConexao('BANCO_INDISPONIVEL'));
       },
       fechar: () => {
-        poolEncerradoAoFechar = (recebido as pg.Pool).ended;
+        fechou = true;
       },
     };
     const saida = await demoReset(
@@ -719,13 +883,8 @@ describe('comandos de linha com a conexão privada', () => {
     );
     expect(saida).toBe(3);
     expect(linhas.map((l) => JSON.parse(l) as unknown)).toEqual([falha('BANCO_INDISPONIVEL')]);
-    expect(recebido).toBeInstanceOf(pg.Pool);
-    expect((recebido as pg.Pool).options).toMatchObject({
-      connectionString: URL_ADMIN,
-      max: 1,
-      application_name: 'marca-conexao-privada',
-    });
-    expect(poolEncerradoAoFechar).toBe(true);
+    expect(recebido).toEqual({ connectionString: URL_ADMIN });
+    expect(fechou).toBe(true);
     semSegredos(linhas.join('\n'));
   });
 });

@@ -27,7 +27,9 @@ A comparação, com fontes e custos, está no R-006 (`docs/hml-custo-infra`, `89
   - URLs do banco sem host, senha por `PGPASSWORD`;
   - sem a variável, desenvolvimento e CI seguem com a URL comum;
   - retentativa só na abertura inicial, com prazo de 10 s por tentativa: até 4 para as opções do conector (no pior caso, 47 s) e até 6 para o `SELECT 1` (120 s). Somadas, 167 s, dentro da sonda de inicialização da web (18 × 10 s);
+  - o `SELECT 1` usa clientes só da sonda, nunca o pool nem o cliente de trabalho, e cada tentativa destrói o transporte no fim ou no prazo. Assim, um banco que autentica e não responde não deixa conexão viva nem prende o encerramento (revisão do Codex, CONEXAO-01);
   - um conector novo por tentativa. O 1.12.0 guarda a carga que falhou e, fechado com ela, solta uma rejeição com a URL da API. Nos comandos, uma rejeição solta termina o processo com saída 3 e uma linha só com códigos;
+  - **patch local do conector 1.12.0** (`patches/`, `patchedDependencies` no `pnpm-workspace.yaml`): a renovação do certificado que falha antes da 1ª conexão deixava promessas rejeitadas sem consumidor, que o Next imprimia com a URL da API, e depois dela o conector não renovava mais. O patch consome essas promessas, libera o ciclo que falhou e mantém o erro para quem abre a próxima conexão. Com versão nova do pacote, o pnpm recusa instalar até o patch ser revisto;
   - no pool da web, o limite de 10 s para abrir a conexão vale também para a espera por uma vaga: na HML, a requisição que espera mais que isso falha, em vez de esperar sem fim como em desenvolvimento e na CI;
   - **nunca se repete uma transação com commit incerto.**
 - **Travas propostas para a CI** (o passo no `ci.yml` é do Codex; até lá, rodam só localmente): o `checar_travas.py` exige tudo isso no código e no plan (`ipv4_enabled`, `private_network`, `data_api_access`, `psc_config` e `egress`) e recusa `ignore_changes` sobre esses campos.
@@ -54,7 +56,7 @@ A comparação, com fontes e custos, está no R-006 (`docs/hml-custo-infra`, `89
 
 ## Verificação
 - `python3 infra/terraform/checar_travas.py` e as regressões em `infra/terraform/test_checar_travas.py`, no código e no plan (`--plano`). Só depois do passo no workflow e de uma execução verde registrada elas passam a valer como trava da CI.
-- Testes da conexão (`packages/db/test/conexao.test.ts`, com o conector real contra uma API falsa local) e da subida da web (`apps/web/test/servidor-ambiente.test.ts`).
+- Testes da conexão (`packages/db/test/conexao.test.ts`: o conector real contra uma API falsa local, a renovação que falha com o patch e a sonda com o driver `pg` real sobre um transporte PostgreSQL em memória) e da subida da web (`apps/web/test/servidor-ambiente.test.ts`).
 - Trivy do revisor sobre `infra/terraform`, sem GCP-0017.
 - No 1º plan e na 1ª publicação:
   - permissões da `sa-infra-github` para `private_network` e da `sa-deploy-github` para `vpc_access`;

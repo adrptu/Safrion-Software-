@@ -74,24 +74,20 @@ export function dependencias(): Dependencias {
 const prepararPadrao: PrepararConexao = (env) => prepararConexao(env, { criarConector: criarConectorGoogle });
 
 /**
- * Subida com o Cloud SQL por IP privado (R-006, GCP-0017): prepara o conector, cria o pool com ele e espera o banco
- * responder antes de o servidor atender. Sem SAFRION_CLOUDSQL_INSTANCIA, não faz nada e dependencias() segue como antes.
- * Na falha, encerra o pool antes do conector, registra só o código e lança um erro sem texto do conector nem do driver.
- * A preparação é injetável para teste.
+ * Subida com o Cloud SQL por IP privado (R-006, GCP-0017): prepara o conector, espera o banco responder à sonda (com
+ * clientes dela, não do pool) e só então cria o pool, antes de o servidor atender. Sem SAFRION_CLOUDSQL_INSTANCIA, não
+ * faz nada e dependencias() segue como antes. Na falha, fecha o conector, registra só o código e lança um erro sem
+ * texto do conector nem do driver. A preparação é injetável para teste.
  */
 export async function prepararDependencias(preparar: PrepararConexao = prepararPadrao): Promise<void> {
   if (!comInstancia() || guardadas[CHAVE]) return;
   const base = lerAmbiente();
   let conexao: Conexao | undefined;
-  let banco: pg.Pool | undefined;
   try {
     conexao = await preparar(process.env);
-    const deps = montar(base, conexao.extra);
-    banco = deps.banco;
-    await conexao.aguardar(banco);
-    guardadas[CHAVE] = deps;
+    await conexao.aguardar({ connectionString: base.url });
+    guardadas[CHAVE] = montar(base, conexao.extra);
   } catch (erro) {
-    await banco?.end().catch(() => undefined);
     conexao?.fechar();
     const codigo = erro instanceof ErroConexao ? erro.codigo : undefined;
     base.registrador.registrar('erro', 'banco.subida', 'sem-correlacao', { codigo });

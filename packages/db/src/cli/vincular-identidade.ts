@@ -19,7 +19,6 @@ import {
   ErroConexao,
   prepararConexao,
   sairNaRejeicaoSolta,
-  sondaPorCliente,
   type Conexao,
   type PrepararConexao,
 } from '../conexao.js';
@@ -155,9 +154,9 @@ export async function executarCli(
     conexao = await preparar(env);
     const { extra } = conexao;
     // Mesmo servidor, porta e TLS do administrador, no banco-alvo; o modelo nunca conecta.
-    const config = { ...conexaoNoBanco(new pg.Client({ connectionString: url }), banco), ...extra };
-    await conexao.aguardar(sondaPorCliente(() => conectar(config)));
-    cliente = conectar(config);
+    const alvo = conexaoNoBanco(new pg.Client({ connectionString: url }), banco);
+    await conexao.aguardar(alvo, { abrir: conectar });
+    cliente = conectar({ ...alvo, ...extra });
     cliente.on('error', () => undefined);
     await cliente.connect();
     await cliente.query('SET ROLE migrator');

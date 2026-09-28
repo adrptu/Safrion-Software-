@@ -1,6 +1,9 @@
 // Subida da web com o Cloud SQL por IP privado (R-006, GCP-0017), sem rede nem banco: a conexão preparada é falsa e o
-// pool nunca conecta. Sem a instância, dependencias() segue como antes da conexão privada.
-import { ErroConexao, type Conexao } from '@safrion/db/web';
+// pool nunca conecta, fora um teste com o driver pg real sobre um transporte PostgreSQL em memória (CONEXAO-01). Sem a
+// instância, dependencias() segue como antes da conexão privada.
+import { Duplex } from 'node:stream';
+
+import { ErroConexao, prepararConexao, type Conector, type Conexao } from '@safrion/db/web';
 import pg from 'pg';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -34,23 +37,67 @@ afterEach(async () => {
   vi.restoreAllMocks();
 });
 
-/** Conexão preparada falsa: guarda o alvo da sonda e registra a ordem entre o fim do pool e o fechamento. */
-function conexaoFalsa(aguardar: (alvo: pg.Pool) => Promise<void> = () => Promise.resolve()) {
+/** Conexão preparada falsa: guarda a configuração da sonda e registra se já havia pool ao aguardar e ao fechar. */
+function conexaoFalsa(aguardar: () => Promise<void> = () => Promise.resolve()) {
   const eventos: string[] = [];
-  let alvo: pg.Pool | undefined;
+  let config: pg.ClientConfig | undefined;
   const stream = () => undefined;
   const conexao: Conexao = {
     extra: { stream, connectionTimeoutMillis: 10_000 },
-    aguardar: (a) => {
-      alvo = a as pg.Pool;
-      eventos.push('aguardar');
-      return aguardar(alvo);
+    aguardar: (c) => {
+      config = c;
+      eventos.push(`aguardar (pool: ${String(guardadas[CHAVE] !== undefined)})`);
+      return aguardar();
     },
     fechar: () => {
-      eventos.push(`fechar (pool encerrado: ${String(alvo?.ended)})`);
+      eventos.push(`fechar (pool: ${String(guardadas[CHAVE] !== undefined)})`);
     },
   };
-  return { conexao, eventos, stream, alvo: () => alvo };
+  return { conexao, eventos, stream, config: () => config };
+}
+
+/** Mensagem do protocolo do PostgreSQL: tipo, tamanho (com ele mesmo) e corpo. */
+function quadro(tipo: string, corpo: Buffer): Buffer {
+  const b = Buffer.alloc(corpo.length + 5);
+  b.write(tipo, 0);
+  b.writeInt32BE(corpo.length + 4, 1);
+  corpo.copy(b, 5);
+  return b;
+}
+
+/**
+ * Transporte PostgreSQL em memória que autentica e nunca responde a consulta (a perda de resposta da revisão do Codex,
+ * CONEXAO-01); só termina quando alguém o destrói.
+ */
+class TransporteMudo extends Duplex {
+  private inicio = true;
+  consultas = 0;
+  setNoDelay() {
+    return this;
+  }
+  setKeepAlive() {
+    return this;
+  }
+  connect() {
+    queueMicrotask(() => this.emit('connect'));
+    return this;
+  }
+  override _read() {
+    // As respostas entram por push.
+  }
+  override _write(bytes: Buffer, _codificacao: BufferEncoding, pronto: (erro?: Error | null) => void) {
+    if (this.inicio) {
+      this.inicio = false;
+      queueMicrotask(() =>
+        this.push(Buffer.concat([quadro('R', Buffer.alloc(4)), quadro('Z', Buffer.from('I'))])),
+      );
+    } else if (bytes[0] === 0x51) {
+      this.consultas++;
+    } else if (bytes[0] === 0x58) {
+      queueMicrotask(() => this.destroy());
+    }
+    pronto();
+  }
 }
 
 function registros() {
@@ -126,15 +173,15 @@ describe('com SAFRION_CLOUDSQL_INSTANCIA', () => {
     semSegredos(erro.message);
   });
 
-  it('sucesso: o pool recebe o stream e o limite, espera o banco e fica guardado; fechar não é chamado', async () => {
+  it('sucesso: a sonda vem antes do pool; o pool recebe o stream e o limite e fica guardado; fechar não é chamado', async () => {
     vi.stubEnv('SAFRION_VERSAO', '1.2.3');
     vi.stubEnv('SAFRION_COMMIT', 'abc1234');
     const f = conexaoFalsa();
     const preparar = vi.fn(() => Promise.resolve(f.conexao));
     await prepararDependencias(preparar);
     expect(preparar).toHaveBeenCalledTimes(1);
+    expect(f.config()).toEqual({ connectionString: URL_BANCO });
     const deps = dependencias();
-    expect(deps.banco).toBe(f.alvo());
     expect(deps.banco.options).toMatchObject({
       connectionString: URL_BANCO,
       max: 3,
@@ -142,14 +189,14 @@ describe('com SAFRION_CLOUDSQL_INSTANCIA', () => {
       connectionTimeoutMillis: 10_000,
     });
     expect(deps).toMatchObject({ versao: '1.2.3', commit: 'abc1234' });
-    expect(f.eventos).toEqual(['aguardar']);
+    expect(f.eventos).toEqual(['aguardar (pool: false)']);
     // Já pronta: uma segunda subida não prepara de novo.
     await prepararDependencias(preparar);
     expect(preparar).toHaveBeenCalledTimes(1);
     expect(linhas).toEqual([]);
   });
 
-  it('banco indisponível: pool encerrado antes do conector, registro só com o código, erro de texto fixo', async () => {
+  it('banco indisponível: nenhum pool criado, conector fechado, registro só com o código, erro de texto fixo', async () => {
     const f = conexaoFalsa(() => Promise.reject(new ErroConexao('BANCO_INDISPONIVEL')));
     const erro = await erroDe(prepararDependencias(() => Promise.resolve(f.conexao)));
     expect(erro).toBeInstanceOf(ErroConexao);
@@ -157,7 +204,7 @@ describe('com SAFRION_CLOUDSQL_INSTANCIA', () => {
       codigo: 'BANCO_INDISPONIVEL',
       message: 'O banco não respondeu depois das tentativas.',
     });
-    expect(f.eventos).toEqual(['aguardar', 'fechar (pool encerrado: true)']);
+    expect(f.eventos).toEqual(['aguardar (pool: false)', 'fechar (pool: false)']);
     expect(guardadas[CHAVE]).toBeUndefined();
     expect(() => dependencias()).toThrow('não está pronta');
     expect(registros()).toEqual([
@@ -166,20 +213,70 @@ describe('com SAFRION_CLOUDSQL_INSTANCIA', () => {
     semSegredos(linhas.join('\n'));
   });
 
-  it('erro com texto do driver: relançado com mensagem fixa, registro sem código; pool que falha ao encerrar não esconde', async () => {
-    const f = conexaoFalsa(async (pool) => {
-      await pool.end();
-      throw new Error(`connect ECONNREFUSED ${IP}:5432 senha ${SENHA} em ${INSTANCIA}`);
-    });
+  it('erro com texto do driver: relançado com mensagem fixa, registro sem código', async () => {
+    const f = conexaoFalsa(() =>
+      Promise.reject(new Error(`connect ECONNREFUSED ${IP}:5432 senha ${SENHA} em ${INSTANCIA}`)),
+    );
     const erro = await erroDe(prepararDependencias(() => Promise.resolve(f.conexao)));
     expect(erro).not.toBeInstanceOf(ErroConexao);
     expect(erro.message).toBe('Falha ao preparar a conexão com o banco.');
     expect(erro.cause).toBeUndefined();
-    expect(f.eventos).toEqual(['aguardar', 'fechar (pool encerrado: true)']);
+    expect(f.eventos).toEqual(['aguardar (pool: false)', 'fechar (pool: false)']);
     const [registro] = registros();
     expect(registro).toMatchObject({ evento: 'banco.subida' });
     expect(registro).not.toHaveProperty('codigo');
     semSegredos(`${erro.message} ${erro.stack ?? ''} ${linhas.join('\n')}`);
+  });
+
+  it('driver real, banco que autentica e não responde: BANCO_INDISPONIVEL aos 120 s, sem cliente nem transporte vivo', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    try {
+      const transportes: TransporteMudo[] = [];
+      let fechados = 0;
+      const conector: Conector = {
+        getOptions: () =>
+          Promise.resolve({
+            stream: () => {
+              const t = new TransporteMudo();
+              transportes.push(t);
+              return t;
+            },
+          }),
+        close: () => {
+          fechados++;
+        },
+      };
+      const preparar = (env: Record<string, string | undefined>) =>
+        prepararConexao(env, { criarConector: () => Promise.resolve(conector) });
+      let erro: unknown;
+      let terminou = false;
+      const subida = prepararDependencias(preparar).then(
+        () => {
+          terminou = true;
+        },
+        (e: unknown) => {
+          erro = e;
+          terminou = true;
+        },
+      );
+      await vi.advanceTimersByTimeAsync(119_999);
+      expect(terminou).toBe(false);
+      await vi.advanceTimersByTimeAsync(1);
+      await subida;
+      expect(erro).toMatchObject({ codigo: 'BANCO_INDISPONIVEL' });
+      expect(transportes).toHaveLength(6);
+      expect(transportes.map((t) => t.consultas)).toEqual([1, 1, 1, 1, 1, 1]);
+      expect(transportes.every((t) => t.destroyed)).toBe(true);
+      expect(fechados).toBe(1);
+      expect(guardadas[CHAVE]).toBeUndefined();
+      expect(registros()).toEqual([
+        expect.objectContaining({ evento: 'banco.subida', codigo: 'BANCO_INDISPONIVEL' }),
+      ]);
+      semSegredos(linhas.join('\n'));
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('preparação que falha: nada a encerrar nem a fechar, só o código no registro', async () => {

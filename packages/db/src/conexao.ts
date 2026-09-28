@@ -1,6 +1,6 @@
 import type { Duplex } from 'node:stream';
 
-import type pg from 'pg';
+import pg from 'pg';
 
 /**
  * Conexão com o Cloud SQL por IP privado (R-006, GCP-0017, opção A). Sem IP público, a web e os jobs chegam ao banco
@@ -10,8 +10,9 @@ import type pg from 'pg';
  *
  * Há retentativa limitada em dois pontos, ambos sem efeito no banco: obter as opções do conector e o `SELECT 1` da
  * primeira conexão, porque o Direct VPC pode levar 1 min ou mais na subida. Cada tentativa tem prazo, e as duas fases
- * somadas cabem na sonda de inicialização da web. Nenhuma outra consulta nem transação é repetida: um commit incerto
- * nunca é reexecutado.
+ * somadas cabem na sonda de inicialização da web. A sonda usa clientes só dela, nunca o pool nem o cliente de trabalho,
+ * e destrói o transporte de cada tentativa no fim ou no prazo. Nenhuma outra consulta nem transação é repetida nem ganha
+ * prazo novo: um commit incerto nunca é reexecutado.
  */
 
 /** O mínimo do Connector de @google-cloud/cloud-sql-connector usado aqui (o pacote é carregado em conector-google.ts). */
@@ -69,31 +70,42 @@ const POLITICA_BANCO: Politica = { tentativas: 6, primeiraEspera: 2_000, teto: 3
 // a espera por uma conexão livre: na HML, a requisição que espera mais de 10 s por uma vaga do pool falha, em vez de
 // esperar sem fim como em desenvolvimento e na CI (ADR 0006).
 const LIMITE_CONEXAO_MS = 10_000;
+// Encerrar a sonda com o Terminate do protocolo tem este limite; depois, o transporte é destruído de qualquer jeito.
+const LIMITE_ENCERRAR_MS = 1_000;
 
 const dormir = (ms: number) =>
   new Promise<void>((resolve) => {
     setTimeout(resolve, ms);
   });
 
+/** Uma tentativa em curso e, se houver, o que ela segura e precisa ser liberado quando o prazo vence. */
+interface Tentativa<T> {
+  readonly resultado: Promise<T>;
+  readonly descartar?: () => void;
+}
+
 /**
- * A promessa, ou rejeição depois de `ms`. Ela não é cancelada: se resolver depois do prazo, o valor vai para `tardio`
- * (o conector aberto tarde é fechado ali); se rejeitar depois, a rejeição fica tratada aqui e não vira rejeição solta.
+ * O resultado da tentativa, ou rejeição depois de `ms`. No prazo, `descartar` libera o que a tentativa segura (a sonda
+ * destrói o transporte, e a consulta pendente termina com erro). Se ainda assim resolver depois, o valor vai para
+ * `tardio` (o conector aberto tarde é fechado ali); se rejeitar depois, a rejeição fica tratada aqui, sem ficar solta.
  */
-function comPrazo<T>(promessa: Promise<T>, ms: number, tardio: (valor: T) => void): Promise<T> {
+function comPrazo<T>(tentativa: Tentativa<T>, ms: number, tardio: (valor: T) => void): Promise<T> {
+  const { resultado, descartar } = tentativa;
   let relogio: ReturnType<typeof setTimeout> | undefined;
   const prazo = new Promise<never>((_, rejeitar) => {
     relogio = setTimeout(() => {
-      promessa.then(tardio, () => undefined);
+      resultado.then(tardio, () => undefined);
+      descartar?.();
       rejeitar(new Error('prazo da tentativa esgotado'));
     }, ms);
   });
-  return Promise.race([promessa, prazo]).finally(() => {
+  return Promise.race([resultado, prazo]).finally(() => {
     clearTimeout(relogio);
   });
 }
 
 async function comRetentativa<T>(
-  acao: () => Promise<T>,
+  iniciar: () => Tentativa<T>,
   politica: Politica,
   opcoes: Retentativa,
   falha: CodigoErroConexao,
@@ -104,7 +116,7 @@ async function comRetentativa<T>(
   const esperar = opcoes.esperar ?? dormir;
   for (let tentativa = 1; ; tentativa++) {
     try {
-      return await comPrazo(acao(), politica.prazo, tardio);
+      return await comPrazo(iniciar(), politica.prazo, tardio);
     } catch (erro) {
       // Erro já classificado (pacote do conector que não carrega) não é passageiro: sem nova tentativa.
       if (erro instanceof ErroConexao) throw erro;
@@ -115,50 +127,96 @@ async function comRetentativa<T>(
   }
 }
 
-/** O que responde a uma consulta: pg.Pool, pg.Client já conectado ou sondaPorCliente. */
-export interface Consultavel {
-  query(texto: string): Promise<unknown>;
-}
-
-/**
- * Espera o banco responder a `SELECT 1`, com retentativa limitada; esgotada, BANCO_INDISPONIVEL. Só essa consulta é
- * repetida, e ela não muda nada.
- */
-export async function aguardarBanco(alvo: Consultavel, opcoes: Retentativa = {}): Promise<void> {
-  await comRetentativa(() => alvo.query('SELECT 1'), POLITICA_BANCO, opcoes, 'BANCO_INDISPONIVEL');
-}
-
-interface ClienteDeSonda {
+/** O mínimo do pg.Client que a sonda usa; injetável para teste. */
+export interface ClienteDeSonda {
   on(evento: 'error', ouvinte: () => void): unknown;
   connect(): Promise<unknown>;
   query(texto: string): Promise<unknown>;
   end(): Promise<unknown>;
 }
 
+export type AbrirCliente = (config: pg.ClientConfig) => ClienteDeSonda;
+
+export type OpcoesSonda = Retentativa & {
+  /** Cria o cliente de cada tentativa; o padrão é pg.Client. */
+  readonly abrir?: AbrirCliente;
+};
+
+const abrirPadrao: AbrirCliente = (config) => new pg.Client(config);
+
+/** end() do cliente, sem esperar mais que LIMITE_ENCERRAR_MS e sem lançar. */
+async function encerrar(cliente: ClienteDeSonda): Promise<void> {
+  let relogio: ReturnType<typeof setTimeout> | undefined;
+  const limite = new Promise<void>((resolve) => {
+    relogio = setTimeout(resolve, LIMITE_ENCERRAR_MS);
+  });
+  await Promise.race([cliente.end().catch(() => undefined), limite]);
+  clearTimeout(relogio);
+}
+
 /**
- * Cada consulta abre um cliente novo e o fecha em seguida: o pg não reaproveita um cliente que falhou ao conectar.
- * Serve para os comandos, que trabalham com pg.Client, esperarem o banco antes da primeira conexão de verdade.
+ * Uma tentativa da sonda: cliente novo, só desta tentativa, com o transporte do conector registrado ao ser criado. O pg
+ * não reaproveita um cliente que falhou ao conectar, e um SELECT 1 sem resposta prenderia o cliente (e o pool.end() de
+ * quem o emprestasse) para sempre; por isso, no fim ou no prazo, o transporte é destruído (revisão do Codex,
+ * CONEXAO-01).
  */
-export function sondaPorCliente(abrir: () => ClienteDeSonda): Consultavel {
-  return {
-    async query(texto) {
-      const cliente = abrir();
-      cliente.on('error', () => undefined);
-      try {
-        await cliente.connect();
-        return await cliente.query(texto);
-      } finally {
-        await cliente.end().catch(() => undefined);
-      }
-    },
+function tentativaDeSonda(
+  config: pg.ClientConfig,
+  stream: () => Duplex,
+  abrir: AbrirCliente,
+): Tentativa<void> {
+  const transportes: Duplex[] = [];
+  const destruir = () => {
+    for (const t of transportes) t.destroy();
   };
+  const cliente = abrir({
+    ...config,
+    stream: () => {
+      const t = stream();
+      transportes.push(t);
+      return t;
+    },
+  });
+  cliente.on('error', () => undefined);
+  const resultado = (async () => {
+    try {
+      await cliente.connect();
+      await cliente.query('SELECT 1');
+    } finally {
+      await encerrar(cliente);
+      destruir();
+    }
+  })();
+  return { resultado, descartar: destruir };
+}
+
+/**
+ * Espera o banco responder a `SELECT 1` por clientes próprios, pelo transporte `stream` do conector, com retentativa
+ * limitada; esgotada, BANCO_INDISPONIVEL. Só essa consulta é repetida, e ela não muda nada. Ao terminar, por sucesso ou
+ * falha, nenhum cliente nem transporte da sonda continua aberto.
+ */
+export async function aguardarBanco(
+  config: pg.ClientConfig,
+  stream: () => Duplex,
+  opcoes: OpcoesSonda = {},
+): Promise<void> {
+  const abrir = opcoes.abrir ?? abrirPadrao;
+  await comRetentativa(
+    () => tentativaDeSonda(config, stream, abrir),
+    POLITICA_BANCO,
+    opcoes,
+    'BANCO_INDISPONIVEL',
+  );
 }
 
 export interface Conexao {
   /** Somar a todo cliente e pool do processo; vazio sem a instância. */
   readonly extra: Partial<pg.ClientConfig>;
-  /** Com a instância, aguardarBanco; sem ela, não consulta nada. */
-  aguardar(alvo: Consultavel, opcoes?: Retentativa): Promise<void>;
+  /**
+   * Com a instância, aguardarBanco com clientes da sonda na `config` (sem o extra, que a sonda põe); sem ela, não
+   * consulta nada. Chamar antes de criar o pool ou o cliente de trabalho.
+   */
+  aguardar(config: pg.ClientConfig, opcoes?: OpcoesSonda): Promise<void>;
   /** Encerra o conector; chamar depois de encerrar os clientes e pools. */
   fechar(): void;
 }
@@ -215,7 +273,7 @@ export async function prepararConexao(env: Ambiente, opcoes: OpcoesConexao): Pro
   if (instancia === undefined) return SEM_CONECTOR;
   if (!NOME_DE_CONEXAO.test(instancia)) throw new ErroConexao('CONFIGURACAO_INVALIDA');
   const { conector, stream } = await comRetentativa(
-    () => abrir(opcoes.criarConector, instancia),
+    () => ({ resultado: abrir(opcoes.criarConector, instancia) }),
     POLITICA_CONECTOR,
     opcoes,
     'CONECTOR_INDISPONIVEL',
@@ -226,7 +284,8 @@ export async function prepararConexao(env: Ambiente, opcoes: OpcoesConexao): Pro
   );
   return {
     extra: { stream, connectionTimeoutMillis: LIMITE_CONEXAO_MS },
-    aguardar: aguardarBanco,
+    aguardar: (config, sonda) =>
+      aguardarBanco({ ...config, connectionTimeoutMillis: LIMITE_CONEXAO_MS }, stream, sonda),
     fechar: () => {
       conector.close();
     },

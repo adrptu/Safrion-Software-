@@ -1,0 +1,118 @@
+diff --git a/dist/cjs/cloud-sql-instance.js b/dist/cjs/cloud-sql-instance.js
+index ec28f5a..1c3ac99 100644
+--- a/dist/cjs/cloud-sql-instance.js
++++ b/dist/cjs/cloud-sql-instance.js
+@@ -85,7 +85,8 @@ class CloudSQLInstance {
+         if (this.next) {
+             return new Promise(resolve => {
+                 if (this.next) {
+-                    this.next.finally(resolve);
++                    // Safrion: then(resolve, resolve) em vez de finally(resolve), que criava uma promessa rejeitada sem consumidor.
++                    this.next.then(() => resolve(), () => resolve());
+                 }
+                 else {
+                     resolve();
+@@ -101,7 +102,8 @@ class CloudSQLInstance {
+                 if (this.next) {
+                     // If there is a refresh promise in progress, resolve this promise
+                     // when the refresh is complete.
+-                    this.next.finally(resolve);
++                    // Safrion: then(resolve, resolve) em vez de finally(resolve), que criava uma promessa rejeitada sem consumidor.
++                    this.next.then(() => resolve(), () => resolve());
+                 }
+                 else {
+                     // Else resolve immediately.
+@@ -171,6 +173,8 @@ class CloudSQLInstance {
+                 }
+             }
+             else {
++                // Safrion: libera o ciclo que falhou antes de relançar; sem isso, o próximo forceRefresh ficaria preso a ele.
++                this.next = undefined;
+                 throw err;
+             }
+             // This refresh cycle has failed, releases ref to next
+@@ -260,7 +264,10 @@ class CloudSQLInstance {
+         if (this.closed) {
+             return;
+         }
+-        this.scheduledRefreshID = setTimeout(() => this.refresh(), delay);
++        // Safrion: ciclo em segundo plano. A falha chega a quem abrir a próxima conexão; sem o catch, virava rejeição solta.
++        this.scheduledRefreshID = setTimeout(() => {
++            this.refresh().catch(() => undefined);
++        }, delay);
+     }
+     cancelRefresh() {
+         // If refresh has not yet started, then cancel the setTimeout
+diff --git a/dist/cjs/connector.js b/dist/cjs/connector.js
+index 5dd458b..b5e6632 100644
+--- a/dist/cjs/connector.js
++++ b/dist/cjs/connector.js
+@@ -401,7 +401,8 @@ class Connector {
+     // Also clear up any local proxy servers and socket connections.
+     close() {
+         for (const instance of this.instances.values()) {
+-            instance.promise.then(inst => inst.close());
++            // Safrion: carga inicial que falhou não tem o que fechar e não deve virar rejeição solta.
++            instance.promise.then(inst => inst.close(), () => undefined);
+         }
+         for (const server of this.localProxies) {
+             server.close();
+diff --git a/dist/mjs/cloud-sql-instance.js b/dist/mjs/cloud-sql-instance.js
+index 678d606..59dddef 100644
+--- a/dist/mjs/cloud-sql-instance.js
++++ b/dist/mjs/cloud-sql-instance.js
+@@ -82,7 +82,8 @@ export class CloudSQLInstance {
+         if (this.next) {
+             return new Promise(resolve => {
+                 if (this.next) {
+-                    this.next.finally(resolve);
++                    // Safrion: then(resolve, resolve) em vez de finally(resolve), que criava uma promessa rejeitada sem consumidor.
++                    this.next.then(() => resolve(), () => resolve());
+                 }
+                 else {
+                     resolve();
+@@ -98,7 +99,8 @@ export class CloudSQLInstance {
+                 if (this.next) {
+                     // If there is a refresh promise in progress, resolve this promise
+                     // when the refresh is complete.
+-                    this.next.finally(resolve);
++                    // Safrion: then(resolve, resolve) em vez de finally(resolve), que criava uma promessa rejeitada sem consumidor.
++                    this.next.then(() => resolve(), () => resolve());
+                 }
+                 else {
+                     // Else resolve immediately.
+@@ -168,6 +170,8 @@ export class CloudSQLInstance {
+                 }
+             }
+             else {
++                // Safrion: libera o ciclo que falhou antes de relançar; sem isso, o próximo forceRefresh ficaria preso a ele.
++                this.next = undefined;
+                 throw err;
+             }
+             // This refresh cycle has failed, releases ref to next
+@@ -257,7 +261,10 @@ export class CloudSQLInstance {
+         if (this.closed) {
+             return;
+         }
+-        this.scheduledRefreshID = setTimeout(() => this.refresh(), delay);
++        // Safrion: ciclo em segundo plano. A falha chega a quem abrir a próxima conexão; sem o catch, virava rejeição solta.
++        this.scheduledRefreshID = setTimeout(() => {
++            this.refresh().catch(() => undefined);
++        }, delay);
+     }
+     cancelRefresh() {
+         // If refresh has not yet started, then cancel the setTimeout
+diff --git a/dist/mjs/connector.js b/dist/mjs/connector.js
+index 3d06a21..f6eaebb 100644
+--- a/dist/mjs/connector.js
++++ b/dist/mjs/connector.js
+@@ -397,7 +397,8 @@ export class Connector {
+     // Also clear up any local proxy servers and socket connections.
+     close() {
+         for (const instance of this.instances.values()) {
+-            instance.promise.then(inst => inst.close());
++            // Safrion: carga inicial que falhou não tem o que fechar e não deve virar rejeição solta.
++            instance.promise.then(inst => inst.close(), () => undefined);
+         }
+         for (const server of this.localProxies) {
+             server.close();
