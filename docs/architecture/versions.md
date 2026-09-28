@@ -30,5 +30,7 @@ Fixadas em 27/09/2026 no primeiro commit executável (F0-a), com versões exatas
 | Playwright (@playwright/test) | 1.63.0 | 04/09/2026 | `registry.npmjs.org/@playwright/test` (28/09/2026) | Linha 1 | Ponta a ponta da F0-c (B2) no Chrome do sistema (`channel: 'chrome'`), sem baixar navegador; na CI, instalar o navegador é passo da esteira | Mensal |
 | @axe-core/playwright / axe-core | 4.13.0 | 11/08/2026 / 05/08/2026 | `registry.npmjs.org/@axe-core/playwright` (28/09/2026) | Linha 4 | Acessibilidade WCAG 2.2 A/AA medida em cada tela nos testes ponta a ponta (a regra jsx-a11y do ESLint fica fora pelo ESLint 10) | Mensal |
 
+| openid-client | 6.8.8 | 05/09/2026 | `registry.npmjs.org/openid-client`, `github.com/panva/openid-client` (28/09/2026) | Linha 6 | Adaptador OIDC do ADR 0004: PKCE, nonce/state e validação explícita de assinatura; não gerencia sessão nem autorização | Mensal ou em alerta de segurança |
+
 ## A fixar quando entrarem (não instalados e não testados, portanto sem número aqui)
 Prisma (não adotado na F0-b: SQL explícito com `pg`, ADR 0003), versão do PostgreSQL da HML no Cloud SQL, Dexie e Workbox, Terraform e provedor Google. Cada um entra no PR que o usa, com fonte e data, sob a mesma quarentena.
