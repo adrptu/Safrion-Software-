@@ -1,6 +1,8 @@
 // ESLint em configuração flat (ENG-008), com regras tipadas do typescript-eslint (ENG-009) e a fronteira do domínio (ENG-012).
 import js from '@eslint/js';
+import nextPlugin from '@next/eslint-plugin-next';
 import { defineConfig } from 'eslint/config';
+import reactHooks from 'eslint-plugin-react-hooks';
 import tseslint from 'typescript-eslint';
 
 const DOMINIO = [
@@ -10,7 +12,7 @@ const DOMINIO = [
 ];
 
 export default defineConfig(
-  { ignores: ['**/dist/**', 'coverage/**', '.semgrep/**'] },
+  { ignores: ['**/dist/**', 'coverage/**', '.semgrep/**', '**/.next/**', '**/next-env.d.ts'] },
   { linterOptions: { reportUnusedDisableDirectives: 'error' } },
   js.configs.recommended,
   tseslint.configs.strictTypeChecked,
@@ -67,6 +69,13 @@ export default defineConfig(
         },
       ],
     },
+  },
+  {
+    // Aplicação web (ADR 0004): regras do Next e dos hooks do React. O eslint-config-next não entra: seus plugins de React,
+    // import e jsx-a11y ainda não aceitam o ESLint 10; a acessibilidade é conferida com axe nos testes ponta a ponta.
+    files: ['apps/web/**/*.{ts,tsx}'],
+    extends: [nextPlugin.configs['core-web-vitals'], reactHooks.configs.flat.recommended],
+    settings: { next: { rootDir: 'apps/web/' } },
   },
   {
     files: ['**/*.js', '**/*.mjs'],

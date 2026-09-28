@@ -5,6 +5,8 @@ dist/
 *.tsbuildinfo
 build/
 .next/
+# gerado pelo Next a cada build/typegen (docs do Next 16: não versionar)
+next-env.d.ts
 out/
 coverage/
 .turbo/
