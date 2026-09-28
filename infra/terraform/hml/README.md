@@ -61,6 +61,21 @@ Na HML, a versão do segredo é só do Terraform. O passo 3 do R-006 (linha Segr
 5. Desativar a versão antiga.
 6. Destruir só depois de 7 dias e de um teste de recuperação, com confirmação do Adrianus, que faz a destruição. O `version_destroy_ttl` ainda segura a versão por 7 dias depois do pedido.
 
+## Achados do scanner: decisão proposta (ainda não aprovada)
+
+Trivy 0.74, com os checks embutidos, sobre `41dd295`: 2 achados HIGH, os dois em `google_sql_database_instance.hml` (`hml/banco.tf`). Até existir aprovação ENG-005 registrada, **o gate continua vermelho**. A proposta está em `excecoes-trivy.proposta.yaml`, que fica inerte: nenhum comando passa `--ignorefile`.
+
+| Achado | Leitura | Evidência | Trava que tem de continuar | Validade |
+|---|---|---|---|---|
+| GCP-0015 ("does not require TLS") | **Falso positivo** neste perfil: `ssl_mode = "ENCRYPTED_ONLY"` exige TLS | Contraprova do Codex: o mesmo check acusa `ENCRYPTED_ONLY` e o texto claro, e só se cala com o `require_ssl` legado (`candidate-41dd295/evidence/tls-counterexamples`); issue aquasecurity/trivy#9999 | `ssl_mode = "ENCRYPTED_ONLY"`. Não trocar pelo `require_ssl` legado só para o scanner | até 31/12/2026, ou antes, se o Trivy corrigir |
+| GCP-0017 ("public internet address") | **Achado real**, exigido pelo desenho sem VPC | R-006: IP público sem redes autorizadas, só conector com IAM | nenhuma `authorized_networks`, `connector_enforcement = "REQUIRED"` e `ssl_mode = "ENCRYPTED_ONLY"` | até 31/12/2026 ou até o piloto, o que vier primeiro. No piloto, rever para IP privado |
+
+- **Travas verificáveis:** `python3 checar_travas.py` confere o código, sem credencial, e pode rodar em PR. `checar_travas.py --plano <plan.json>` confere o plan resolvido.
+  - Contraprova: tirar `ssl_mode`, afrouxar `connector_enforcement`, acrescentar uma rede autorizada ou deixar o `ssl_mode` só em comentário faz o check falhar. O código atual passa.
+  - Se uma trava cair, a exceção correspondente perde a base.
+- **Escopo estrito:** cada exceção vale só para o seu ID em `hml/banco.tf`, nunca para o módulo inteiro. Não há supressão genérica.
+- **Aprovação:** exceção ENG-005 com escopo, risco, compensação, aprovador e vencimento, registrada na rodada. Só depois o CI passa a usar `--ignorefile excecoes-trivy.proposta.yaml`, com o arquivo renomeado sem `.proposta`. Parecer de agente não aprova.
+
 ## A conferir no 1º plan e na 1ª publicação
 
 - Se `run.developer` basta para a `sa-deploy-github` trocar só a imagem de web e jobs que já declaram segredos (a página de segredos do Cloud Run cita `run.admin`).

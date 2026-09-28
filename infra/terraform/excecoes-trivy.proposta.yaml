@@ -1,0 +1,20 @@
+# PROPOSTA de exceção ENG-005, AINDA NÃO APROVADA. Inerte: o Trivy só lê este arquivo com --ignorefile, e nenhum
+# comando do repositório o passa. Enquanto não houver aprovação registrada, o gate continua vermelho (exit 1).
+# Decisão, evidências e travas: hml/README.md, "Achados do scanner". Cada item vale só para hml/banco.tf e vence.
+misconfigurations:
+  - id: GCP-0015
+    paths:
+      - "hml/banco.tf"
+    expired_at: 2026-12-31
+    statement: >-
+      Falso positivo do Trivy 0.74 com ssl_mode = ENCRYPTED_ONLY (issue aquasecurity/trivy#9999; contraprova do Codex
+      em work/hml-review/candidate-41dd295/evidence/tls-counterexamples). TLS é exigido pelo ssl_mode moderno; não
+      trocar pelo require_ssl legado só para o scanner. Trava verificada por checar_travas.py.
+  - id: GCP-0017
+    paths:
+      - "hml/banco.tf"
+    expired_at: 2026-12-31
+    statement: >-
+      IP público exigido pelo desenho sem VPC da HML (R-006). Compensação verificada por checar_travas.py: nenhuma
+      rede autorizada, connector_enforcement = REQUIRED (só Auth Proxy/conector com IAM) e ssl_mode = ENCRYPTED_ONLY.
+      Rever antes do piloto (IP privado com VPC) ou no vencimento, o que vier primeiro.

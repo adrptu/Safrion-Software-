@@ -23,8 +23,10 @@ locals {
   }
 
   # Imagens provisórias públicas do Google. A imagem real é só do pipeline, por digest.
-  imagem_web_provisoria = "us-docker.pkg.dev/cloudrun/container/hello"
-  imagem_job_provisoria = "us-docker.pkg.dev/cloudrun/container/job"
+  # Imagens provisórias públicas do Google, por digest (lidas em 28/09/2026 no registro; tag móvel não entra).
+  # Só existem até o pipeline publicar a imagem do Safrion; resposta 200 delas não é saúde do produto.
+  imagem_web_provisoria = "us-docker.pkg.dev/cloudrun/container/hello@sha256:2010579f8f7ce243767c2875e4c481f7388484f3ecab83d27a4288a599981f35"
+  imagem_job_provisoria = "us-docker.pkg.dev/cloudrun/container/job@sha256:2181d939d7606e32befcb266a7e9f76dcf0e8bd5e7319f13d71ba5233d658acb"
 }
 
 # Imagens da HML: tags imutáveis; o pipeline publica o mesmo digest que o Trivy varreu.
