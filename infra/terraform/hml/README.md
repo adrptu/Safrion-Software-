@@ -82,7 +82,8 @@ Trivy 0.74, com os checks embutidos, sobre `41dd295`: 2 achados HIGH, os dois em
   - Exige exatamente uma `google_sql_database_instance`, a `hml`, em `banco.tf`, sem segunda instância no módulo nem no arquivo.
   - Exige `settings` e `ip_configuration` uma vez cada; `ssl_mode` e `connector_enforcement` como texto literal; nenhuma `authorized_networks`, nem `dynamic`; nenhum `ignore_changes` que cubra uma trava.
 - `checar_travas.py --plano <plan.json>` faz o mesmo no plan resolvido e **recusa valor desconhecido** (`after_unknown`).
-- Regressões em `test_checar_travas.py`: 21 testes, com as três contraprovas do Codex (trava em `/* */`, segunda instância no mesmo arquivo, rede desconhecida no plan) e os casos achados na revisão do autor (índice legado `settings.0.…` no `ignore_changes`, arquivo de override, `.tf.json`, fonte de dados no plan).
+- **Subconjunto explícito, falha fechado (HML-TF-04):** nada de arquivo de override, `.tf.json` ou `.tofu`; rótulos só com `[A-Za-z0-9_-]`, sem escape `\u`; blocos de topo só `terraform`, `provider`, `resource`, `variable`, `locals` e `output`; nenhum `dynamic` na instância do Cloud SQL. Não se tenta entender todo o HCL.
+- Regressões em `test_checar_travas.py`: 23 testes, incluindo os rótulos escapados do HML-TF-04 e o subconjunto; com as três contraprovas do Codex (trava em `/* */`, segunda instância no mesmo arquivo, rede desconhecida no plan) e os casos achados na revisão do autor (índice legado `settings.0.…` no `ignore_changes`, arquivo de override, `.tf.json`, fonte de dados no plan).
   - Rodar com `python3 -m unittest discover -s infra/terraform -p 'test_*.py'`.
   - Proposta ao CI estático: rodar essas regressões e o `checar_travas.py`.
 

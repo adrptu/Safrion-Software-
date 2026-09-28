@@ -113,6 +113,22 @@ class Codigo(unittest.TestCase):
         self.assertTrue(self.faltas(extra={'banco_override.tf': sobreposicao}))
         self.assertTrue(self.faltas(extra={'override.tf.json': '{"resource": {}}'}))
 
+    def test_rotulo_com_escape_unicode(self):
+        # HML-TF-04 (Codex): o Terraform interpreta \u0067 e \u006e nos rótulos; o guard não pode aceitar a forma.
+        escapado = 'resource "\\u0067oogle_sql_database_instance" "hml" {\n  settings {\n    ip_configuration {\n      ssl_mode = "ALLOW_UNENCRYPTED_AND_ENCRYPTED"\n    }\n  }\n}\n'
+        self.assertTrue(self.faltas(extra={'rede.tf': escapado}))
+        rede = CA + '\n      dynamic "authorized_\\u006eetworks" {\n        for_each = ["0.0.0.0/0"]\n        content {\n          value = authorized_networks.value\n        }\n      }'
+        self.assertTrue(self.faltas(self.troca(CA, rede)))
+
+    def test_fora_do_subconjunto(self):
+        for nome in ('override.tf', 'x_override.tf', 'x.tofu', 'x.tofu.json', 'x.tf.json'):
+            with self.subTest(arquivo=nome):
+                self.assertTrue(self.faltas(extra={nome: '# vazio\n'}))
+                (self.dir / nome).unlink()
+        self.assertTrue(self.faltas(extra={'mod.tf': 'module "m" {\n  source = "./m"\n}\n'}))
+        qualquer = CA + '\n      dynamic "x" {\n        for_each = []\n        content {}\n      }'
+        self.assertTrue(self.faltas(self.troca(CA, qualquer)))
+
     def test_hcl_ilegivel_falha(self):
         self.assertTrue(self.faltas(self.troca(SSL, '/* ssl_mode = "ENCRYPTED_ONLY"')))
 

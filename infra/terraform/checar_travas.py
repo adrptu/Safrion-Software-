@@ -7,9 +7,13 @@
 #
 # O código é lido por um analisador léxico de HCL (comentários #, // e /* */, strings com ${...}, heredocs), não por
 # expressão regular sobre o texto: comentário, string ou heredoc que contenha a trava não conta como trava.
+# O guard aceita só um SUBCONJUNTO explícito de HCL e falha fechado fora dele, em vez de tentar entender todo o HCL
+# (HML-TF-04): nada de arquivo de override, .tf.json ou .tofu; rótulos só com [A-Za-z0-9_-] (sem escape \u);
+# blocos de topo só os que o módulo usa; nenhum bloco dynamic na instância do Cloud SQL.
 from __future__ import annotations
 
 import json
+import re
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -19,6 +23,10 @@ NOME = 'hml'
 ARQUIVO = 'banco.tf'
 SSL = 'ENCRYPTED_ONLY'
 CONECTOR = 'REQUIRED'
+TOPO_ACEITO = {'terraform', 'provider', 'resource', 'variable', 'locals', 'output'}
+ROTULO = re.compile(r'[A-Za-z_][A-Za-z0-9_-]*')
+# Arquivos que o Terraform (ou o OpenTofu) mescla ou lê além dos .tf comuns: fora do subconjunto.
+FORA_DO_SUBCONJUNTO = ('*.tf.json', '*.tofu', '*.tofu.json', 'override.tf', '*_override.tf')
 # Caminhos que o ignore_changes não pode cobrir: deixaria a trava mudar fora do Terraform sem o plan mostrar.
 PROTEGIDOS = ('settings', 'ip_configuration', 'ssl_mode', 'connector_enforcement', 'authorized_networks')
 
@@ -222,18 +230,27 @@ def conferir_codigo(modulo: Path) -> list[str]:
     arquivos = sorted(modulo.glob('*.tf'))
     if not arquivos:
         return [f'nenhum .tf em {modulo}']
-    json_tf = sorted(p.name for p in modulo.glob('*.tf.json'))
-    if json_tf:
-        return [f'configuração em JSON não é lida pelo guard e não é aceita no módulo: {json_tf}']
+    fora = sorted({p.name for padrao in FORA_DO_SUBCONJUNTO for p in modulo.glob(padrao)})
+    if fora:
+        return [f'arquivos fora do subconjunto aceito (override, JSON ou OpenTofu): {fora}']
     faltas, instancias = [], []
     for arq in arquivos:
         try:
             raiz = analisar(arq.read_text(encoding='utf-8'))
         except ErroHcl as erro:
             return [f'{arq.name}: {erro}']
+        for b in raiz.blocos:
+            if b.tipo not in TOPO_ACEITO:
+                faltas.append(f'{arq.name}:{b.linha}: bloco de topo {b.tipo} fora do subconjunto aceito')
+        for b in todos(raiz):
+            for r in b.rotulos:
+                if not ROTULO.fullmatch(r):
+                    faltas.append(f'{arq.name}:{b.linha}: rótulo {r!r} fora do subconjunto (escape ou caractere especial)')
         for r in blocos(raiz, 'resource'):
             if r.rotulos[:1] == [TIPO]:
                 instancias.append((arq.name, r))
+    if faltas:
+        return faltas
     # A exceção é por arquivo: nenhuma outra instância pode existir no módulo, nem no próprio banco.tf.
     if [(a, r.rotulos) for a, r in instancias] != [(ARQUIVO, [TIPO, NOME])]:
         achadas = ', '.join(f'{a}:{r.linha} {".".join(r.rotulos)}' for a, r in instancias) or 'nenhuma'
@@ -251,7 +268,9 @@ def conferir_codigo(modulo: Path) -> list[str]:
     elif literal(ip[0].atributos.get('ssl_mode', [])) != SSL:
         faltas.append(f'ssl_mode = "{SSL}" ausente ou não literal')
     for b in todos(recurso):
-        if b.tipo == 'authorized_networks' or (b.tipo == 'dynamic' and b.rotulos[:1] == ['authorized_networks']):
+        if b.tipo == 'dynamic':
+            faltas.append(f'linha {b.linha}: bloco dynamic na instância do Cloud SQL, fora do subconjunto aceito')
+        if b.tipo == 'authorized_networks':
             faltas.append(f'linha {b.linha}: authorized_networks presente; nenhuma rede autorizada é a trava')
         if 'authorized_networks' in b.atributos:
             faltas.append('authorized_networks como atributo')
