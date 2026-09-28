@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1
 # Imagem da F0-c: a aplicação web (alvo padrão) e o preparo do banco (alvo "preparo"), da mesma construção.
 # Construção: node:24.21.0-bookworm-slim oficial, fixada pelo digest do índice multiplataforma consultado em
 # registry-1.docker.io em 28/09/2026. Execução (HML-IMG-01): distroless cc-debian13 nonroot, fixada pelo digest do
@@ -6,6 +5,7 @@
 # construção. Sem shell, sem gerenciador de pacotes e sem npm, corepack ou yarn, que o runtime não usa.
 # Para o Cloud Run: docker build --platform linux/amd64.
 # Nenhum segredo entra na imagem: banco, origem, ambiente e credenciais chegam por variáveis na execução.
+# Sem diretiva syntax: o frontend do Dockerfile embutido no BuildKit basta, e nada é baixado por etiqueta móvel.
 ARG NODE_IMAGEM=node:24.21.0-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6
 ARG EXECUCAO_IMAGEM=gcr.io/distroless/cc-debian13:nonroot@sha256:54df941ed0d06a1bd95ef5e0ce391fd8d9f94b64782dc9a60062727849ee3f97
 
