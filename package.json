@@ -10,7 +10,7 @@
     "format:check": "prettier --check .",
     "format": "prettier --write .",
     "lint": "eslint . --max-warnings 0 && node tools/dev/fronteiras.mjs",
-    "typecheck": "tsc -p tsconfig.json && tsc -p packages/domain/tsconfig.json && tsc -p packages/contracts/tsconfig.json && tsc -p packages/db/tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json && tsc -p packages/domain/tsconfig.json && tsc -p packages/contracts/tsconfig.json && tsc -p packages/db/tsconfig.json && tsc -p apps/web/tsconfig.json",
     "test": "vitest run --coverage",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "build": "tsc -b packages/domain/tsconfig.build.json packages/contracts/tsconfig.build.json packages/db/tsconfig.build.json",
