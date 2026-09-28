@@ -72,6 +72,12 @@ export function criarRotaComandos(deps: () => Pick<Dependencias, 'banco' | 'orig
       if (!dados.success || dados.data.movimento.tipo !== 'entrada') {
         return erro('CONTRATO_INVALIDO', 'Este comando só aceita uma entrada de estoque.', correlationId);
       }
+      // B1-C01: o alvo é o próprio lote da entrada. Tipo de outra entidade ou outro ID é recusa de contrato, antes do
+      // envelope: nada é gravado, e recibo e auditoria nunca levam o tipo errado.
+      const { target } = pedido.data;
+      if (target.type !== 'lot' || target.id !== dados.data.lote) {
+        return erro('CONTRATO_INVALIDO', 'O alvo da entrada tem de ser o lote informado.', correlationId);
+      }
       const recibo = await executarComando(
         banco,
         sessao.organizationId,

@@ -152,7 +152,12 @@ async function estadoDoLote(cliente: ClientBase, l: LinhaLote, local: string | n
 export function registrarMovimento(pedido: PedidoMovimento): Efeito {
   return async (cliente, ctx) => {
     const esperada = ctx.intencao.target.expectedVersion;
-    if (!ehUuid(pedido.lotId) || pedido.lotId !== ctx.intencao.target.id || esperada === undefined) {
+    if (
+      ctx.intencao.target.type !== 'lot' ||
+      !ehUuid(pedido.lotId) ||
+      pedido.lotId !== ctx.intencao.target.id ||
+      esperada === undefined
+    ) {
       throw new RejeicaoNegocio(
         'ALVO_INVALIDO',
         'O movimento precisa do lote como alvo e da versão esperada.',

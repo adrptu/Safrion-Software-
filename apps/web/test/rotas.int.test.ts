@@ -13,7 +13,7 @@ import {
 import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { criarBanco, type Ambiente } from '../../../packages/db/test/ambiente';
+import { contagens, criarBanco, type Ambiente } from '../../../packages/db/test/ambiente';
 import { criarRotaComandos } from '../src/rotas/comandos';
 import { criarRotasEntrar } from '../src/rotas/entrar';
 import { criarRotaSaude } from '../src/rotas/saude';
@@ -122,6 +122,14 @@ const entrada = (chave = randomUUID()) => ({
     movimento: { tipo: 'entrada', quantidade: { valor: '20', unidade: 'L' }, situacao: 'liberado_livre' },
   },
 });
+
+/** Versão atual do lote da demonstração (outros testes deste arquivo já registraram entradas). */
+async function versaoDoLote(): Promise<number> {
+  const r = await emOrganizacao(amb.app, demo.organizationId, (c) =>
+    c.query<{ version: string }>('SELECT version FROM app.lot WHERE id = $1', [demo.loteId]),
+  );
+  return Number(r.rows[0]?.version);
+}
 
 beforeAll(async () => {
   amb = await criarBanco();
@@ -284,6 +292,34 @@ describe('proteções da API de comandos', () => {
     const r = await comandos(req, { params: Promise.resolve({ commandType: 'estoque.registrar-entrada' }) });
     expect(r.status).toBe(413);
     expect(await r.json()).toMatchObject({ codigo: 'CORPO_EXCEDE_LIMITE' });
+  });
+
+  it('B1-C01: alvo de outro tipo ou de outro lote é 400 sem efeito; o alvo lot do próprio lote passa', async () => {
+    const sessao = await loginDev('demo-almoxarife');
+    const antes = await contagens(amb.app, demo.organizationId);
+    const base = entrada();
+    for (const target of [
+      { ...base.target, type: 'invoice' },
+      { ...base.target, type: 'Lot' },
+      { ...base.target, id: randomUUID() },
+    ]) {
+      const r = await comando({ ...base, idempotencyKey: randomUUID(), target }, sessao);
+      expect(r.status, JSON.stringify(target)).toBe(400);
+      expect(await r.json()).toMatchObject({ codigo: 'CONTRATO_INVALIDO' });
+    }
+    expect(await contagens(amb.app, demo.organizationId)).toEqual(antes);
+    const ok = await comando(
+      { ...base, target: { ...base.target, expectedVersion: await versaoDoLote() } },
+      sessao,
+    );
+    expect(ok.status).toBe(200);
+    expect(await ok.json()).toMatchObject({ outcome: 'confirmed', targetType: 'lot', targetId: demo.loteId });
+    expect(await contagens(amb.app, demo.organizationId)).toEqual({
+      movimentos: (antes['movimentos'] ?? 0) + 1,
+      intencoes: (antes['intencoes'] ?? 0) + 1,
+      auditoria: (antes['auditoria'] ?? 0) + 1,
+      outbox: (antes['outbox'] ?? 0) + 1,
+    });
   });
 
   it('organização no corpo é recusa de contrato (a organização vem da sessão); JSON inválido também', async () => {

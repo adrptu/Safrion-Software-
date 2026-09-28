@@ -198,6 +198,24 @@ describe('envelope de comando (73.3; IDEM-12 a IDEM-17; ENG-022)', () => {
     expect(await versaoDoLote(s)).toBe(1);
   });
 
+  it('B1-C01: movimento com alvo de outro tipo de entidade é rejeitado sem efeito; o recibo não vira do lote', async () => {
+    const s = await semear(amb.app, 'AlvoTipo');
+    const { intencao, efeito } = intencaoMovimento(s, 'k-t1', 0, ENTRADA);
+    const r = await executarComando(
+      amb.app,
+      s.org,
+      { ...intencao, target: { ...intencao.target, type: 'invoice' } },
+      efeito,
+    );
+    expect(r).toMatchObject({ outcome: 'rejected', reasonCode: 'ALVO_INVALIDO', targetType: 'invoice' });
+    expect(await contagens(amb.app, s.org)).toMatchObject({ movimentos: 0, outbox: 0 });
+    expect(await versaoDoLote(s)).toBe(0);
+    expect(await mover(amb.app, s, 'k-t2', 0, ENTRADA)).toMatchObject({
+      outcome: 'confirmed',
+      targetType: 'lot',
+    });
+  });
+
   it('rejeição depois de o efeito já ter gravado desfaz o que ele gravou (savepoint) e registra só o resultado', async () => {
     const s = await semear(amb.app, 'Parcial');
     const { intencao, efeito } = intencaoMovimento(s, 'k-parcial', 0, ENTRADA);
