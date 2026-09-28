@@ -1,4 +1,11 @@
 import { criarRegistrador, type Registrador } from '@safrion/contracts';
+import {
+  criarConectorGoogle,
+  ErroConexao,
+  prepararConexao,
+  type Conexao,
+  type PrepararConexao,
+} from '@safrion/db/web';
 import pg from 'pg';
 
 /**
@@ -14,10 +21,14 @@ export interface Dependencias {
   readonly ambienteDoProcesso: string | undefined;
 }
 
-let atual: Dependencias | undefined;
+// Em globalThis, não numa variável do módulo: o Next compila a instrumentação e as rotas separadamente, e cada uma pode
+// ter a sua cópia deste módulo. Symbol.for dá a mesma chave às duas.
+const CHAVE = Symbol.for('safrion.web.dependencias');
+const guardadas = globalThis as typeof globalThis & { [CHAVE]?: Dependencias };
 
-export function dependencias(): Dependencias {
-  if (atual) return atual;
+const comInstancia = () => process.env['SAFRION_CLOUDSQL_INSTANCIA'] !== undefined;
+
+function lerAmbiente() {
   const url = process.env['DATABASE_URL'];
   const origem = process.env['SAFRION_ORIGEM'];
   if (!url || !origem) throw new Error('DATABASE_URL e SAFRION_ORIGEM são obrigatórios no servidor web.');
@@ -31,14 +42,59 @@ export function dependencias(): Dependencias {
     },
     agora: () => new Date().toISOString(),
   });
+  return { url, origem, versao, commit, registrador };
+}
+
+function montar(base: ReturnType<typeof lerAmbiente>, extra: Conexao['extra']): Dependencias {
+  const { url, origem, versao, commit, registrador } = base;
   // Pool pequeno por instância (plano R-006, passo 11). Erro de conexão ociosa não derruba o processo nem vai ao log
   // com mensagem do driver: só o código.
-  const banco = new pg.Pool({ connectionString: url, max: 3 });
+  const banco = new pg.Pool({ connectionString: url, max: 3, ...extra });
   banco.on('error', (erro: Error & { code?: unknown }) => {
     registrador.registrar('erro', 'banco.conexao_ociosa', 'sem-correlacao', {
       codigo: typeof erro.code === 'string' && /^[0-9A-Z]{5}$/.test(erro.code) ? erro.code : undefined,
     });
   });
-  atual = { banco, origem, registrador, versao, commit, ambienteDoProcesso: process.env['SAFRION_AMBIENTE'] };
-  return atual;
+  return { banco, origem, registrador, versao, commit, ambienteDoProcesso: process.env['SAFRION_AMBIENTE'] };
+}
+
+export function dependencias(): Dependencias {
+  const prontas = guardadas[CHAVE];
+  if (prontas) return prontas;
+  if (comInstancia()) {
+    throw new Error(
+      'Com SAFRION_CLOUDSQL_INSTANCIA, a conexão com o banco é preparada na subida (instrumentation.ts) e não está pronta.',
+    );
+  }
+  const novas = montar(lerAmbiente(), {});
+  guardadas[CHAVE] = novas;
+  return novas;
+}
+
+const prepararPadrao: PrepararConexao = (env) => prepararConexao(env, { criarConector: criarConectorGoogle });
+
+/**
+ * Subida com o Cloud SQL por IP privado (R-006, GCP-0017): prepara o conector, cria o pool com ele e espera o banco
+ * responder antes de o servidor atender. Sem SAFRION_CLOUDSQL_INSTANCIA, não faz nada e dependencias() segue como antes.
+ * Na falha, encerra o pool antes do conector, registra só o código e lança um erro sem texto do conector nem do driver.
+ * A preparação é injetável para teste.
+ */
+export async function prepararDependencias(preparar: PrepararConexao = prepararPadrao): Promise<void> {
+  if (!comInstancia() || guardadas[CHAVE]) return;
+  const base = lerAmbiente();
+  let conexao: Conexao | undefined;
+  let banco: pg.Pool | undefined;
+  try {
+    conexao = await preparar(process.env);
+    const deps = montar(base, conexao.extra);
+    banco = deps.banco;
+    await conexao.aguardar(banco);
+    guardadas[CHAVE] = deps;
+  } catch (erro) {
+    await banco?.end().catch(() => undefined);
+    conexao?.fechar();
+    const codigo = erro instanceof ErroConexao ? erro.codigo : undefined;
+    base.registrador.registrar('erro', 'banco.subida', 'sem-correlacao', { codigo });
+    throw erro instanceof ErroConexao ? erro : new Error('Falha ao preparar a conexão com o banco.');
+  }
 }

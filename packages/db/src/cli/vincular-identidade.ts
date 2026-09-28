@@ -3,8 +3,9 @@
 // node packages/db/dist/cli/vincular-identidade.js revogar --ambiente hml --banco <nome> --organizacao <id>
 //      --usuario <id> --responsavel <quem autorizou> --motivo <texto curto>
 // Vínculo de identidade real em HML (ADR 0004 §11), com o administrador do servidor em SAFRION_ADMIN_URL, que assume o
-// papel migrator no banco-alvo. Na concessão, o código de referência entra pela entrada padrão (sem eco no terminal),
-// nunca por argumento, que ficaria no histórico e no ps. Saída 0 = concedido, mantido, revogado ou sem vínculo;
+// papel migrator no banco-alvo; com SAFRION_CLOUDSQL_INSTANCIA, pelo conector em IP privado (conexao.ts). Na
+// concessão, o código de referência entra pela entrada padrão (sem eco no terminal), nunca por argumento, que ficaria
+// no histórico e no ps. Saída 0 = concedido, mantido, revogado ou sem vínculo;
 // 1 = recusado, nada mudou; 2 = uso incorreto; 3 = falha de infraestrutura, só com códigos. Nenhuma saída traz código,
 // subject, hash, senha ou host.
 import { pathToFileURL } from 'node:url';
@@ -13,6 +14,15 @@ import { parseArgs } from 'node:util';
 import pg from 'pg';
 
 import { lerIdentidadeAmbiente } from '../ambiente.js';
+import { criarConectorGoogle } from '../conector-google.js';
+import {
+  ErroConexao,
+  prepararConexao,
+  sairNaRejeicaoSolta,
+  sondaPorCliente,
+  type Conexao,
+  type PrepararConexao,
+} from '../conexao.js';
 import { conexaoNoBanco, ErroPreparo } from '../preparo.js';
 import { concederVinculo, ErroVinculo, revogarVinculos, validarDestino } from '../vinculo.js';
 
@@ -77,6 +87,7 @@ export async function executarCli(
   escrever: (linha: string) => void,
   lerCodigo: () => Promise<string> = () => lerDaEntrada(),
   conectar: (config: pg.ClientConfig) => pg.Client = (config) => new pg.Client(config),
+  preparar: PrepararConexao = (e) => prepararConexao(e, { criarConector: criarConectorGoogle }),
 ): Promise<number> {
   const args = argv[0] === '--' ? argv.slice(1) : [...argv];
   let lidos: { values: Record<string, string | undefined>; positionals: string[] };
@@ -139,9 +150,14 @@ export async function executarCli(
     }
   }
   let cliente: pg.Client | undefined;
+  let conexao: Conexao | undefined;
   try {
+    conexao = await preparar(env);
+    const { extra } = conexao;
     // Mesmo servidor, porta e TLS do administrador, no banco-alvo; o modelo nunca conecta.
-    cliente = conectar(conexaoNoBanco(new pg.Client({ connectionString: url }), banco));
+    const config = { ...conexaoNoBanco(new pg.Client({ connectionString: url }), banco), ...extra };
+    await conexao.aguardar(sondaPorCliente(() => conectar(config)));
+    cliente = conectar(config);
     cliente.on('error', () => undefined);
     await cliente.connect();
     await cliente.query('SET ROLE migrator');
@@ -158,7 +174,12 @@ export async function executarCli(
       escrever(recusado(erro.codigo, erro.message));
       return 1;
     }
-    const code = typeof erro === 'object' && erro !== null && 'code' in erro ? erro.code : undefined;
+    const code =
+      erro instanceof ErroConexao
+        ? erro.codigo
+        : typeof erro === 'object' && erro !== null && 'code' in erro
+          ? erro.code
+          : undefined;
     escrever(
       JSON.stringify({
         resultado: 'falha',
@@ -170,12 +191,15 @@ export async function executarCli(
     return 3;
   } finally {
     await cliente?.end().catch(() => undefined);
+    conexao?.fechar();
   }
 }
 
-// Ponto de entrada do processo; a lógica acima é testada com banco real.
+// Ponto de entrada do processo; a lógica acima é testada com banco real. Rejeição solta sai com 3, só com códigos.
 if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  process.exitCode = await executarCli(process.argv.slice(2), process.env, (l) => {
+  const escrever = (l: string) => {
     console.log(l);
-  });
+  };
+  sairNaRejeicaoSolta(escrever);
+  process.exitCode = await executarCli(process.argv.slice(2), process.env, escrever);
 }

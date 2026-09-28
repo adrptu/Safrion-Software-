@@ -31,6 +31,20 @@ export {
   type ResultadoIntencao,
   type TipoIniciador,
 } from './comando.js';
+export { criarConectorGoogle } from './conector-google.js';
+export {
+  ErroConexao,
+  aguardarBanco,
+  prepararConexao,
+  sondaPorCliente,
+  type CodigoErroConexao,
+  type Conector,
+  type Conexao,
+  type Consultavel,
+  type CriarConector,
+  type PrepararConexao,
+  type Retentativa,
+} from './conexao.js';
 export { ConflitoVersao, ErroComando, RejeicaoNegocio, type CodigoErroComando } from './erros.js';
 export {
   conteudoDoMovimento,
