@@ -47,34 +47,19 @@ export async function criarBanco(opcoes: { maxApp?: number } = {}): Promise<Ambi
     migrator,
     url,
     async encerrar() {
-      await fecharPool(app);
-      await fecharPool(migrator);
-      await admin.query(`DROP DATABASE ${banco} WITH (FORCE)`);
-      await admin.end();
+      await app.end();
+      await migrator.end();
+      // Sem FORCE: o servidor nunca derruba conexão ainda fechando. O pool.end() do pg-pool 3.14 resolve antes do fim
+      // real de cada conexão, e a retirada por release(erro) sai da contagem antes de fechar; com FORCE, o DROP a
+      // encerrava e o pool recebia 57P01 sem ouvinte. O PostgreSQL espera as outras sessões saírem (medido: até ~5 s) e,
+      // se alguma continuar aberta, falha com 55006: explícito, sem matar nada.
+      try {
+        await admin.query(`DROP DATABASE ${banco}`);
+      } finally {
+        await admin.end();
+      }
     },
   };
-}
-
-/**
- * Fecha o pool e só resolve quando cada conexão fechou de fato. O pool.end() do pg-pool 3.14 resolve assim que tira os
- * clientes da lista, antes de o client.end() terminar: um DROP DATABASE ... WITH (FORCE) logo em seguida ainda alcança
- * a conexão, o servidor responde 57P01 e o pool emite 'error' sem ouvinte, erro não tratado com as asserções verdes.
- */
-export async function fecharPool(pool: pg.Pool): Promise<void> {
-  const abertas = pool.totalCount;
-  let fechadas = 0;
-  const todasFechadas = new Promise<void>((resolve) => {
-    if (abertas === 0) {
-      resolve();
-      return;
-    }
-    pool.on('remove', () => {
-      fechadas += 1;
-      if (fechadas === abertas) resolve();
-    });
-  });
-  await pool.end();
-  await todasFechadas;
 }
 
 export interface Semente {
