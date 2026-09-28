@@ -55,13 +55,18 @@ function sqlstate(erro: unknown): string | undefined {
  * estiver ligado, a transação é desfeita e a chamada falha, sem efeito. Uma falha na limpeza (ROLLBACK, liberação da
  * trava) nunca substitui a causa original; ela é informada à parte (HML-A1-02). As senhas vêm do cofre de segredos do
  * ambiente. Os nomes só mudam nos testes, que não podem mexer nos papéis compartilhados pela bateria.
+ *
+ * Cria também o papel das funções de sessão (app_sessao, migração 0003; ADR 0004 §3): NOLOGIN, sem atributo
+ * privilegiado, dono das funções SECURITY DEFINER. O migrator recebe esse papel sem herança e com SET, só para poder
+ * entregar a posse das funções; o app_runtime não pode ter filiação a papel algum (aceite A5), e isso é conferido aqui.
  */
 export async function provisionarPapeis(
   admin: ClientBase,
   senhas: { readonly migrator: string; readonly appRuntime: string },
-  nomes: { readonly migrator: string; readonly appRuntime: string } = {
+  nomes: { readonly migrator: string; readonly appRuntime: string; readonly sessao: string } = {
     migrator: 'migrator',
     appRuntime: 'app_runtime',
+    sessao: 'app_sessao',
   },
 ): Promise<void> {
   const papeis = [
@@ -87,17 +92,34 @@ export async function provisionarPapeis(
           `${verbo} ROLE ${admin.escapeIdentifier(papel)} ${atributos} PASSWORD ${admin.escapeLiteral(senha)}`,
         );
       }
+      const sessao = admin.escapeIdentifier(nomes.sessao);
+      const existeSessao = await admin.query('SELECT 1 FROM pg_roles WHERE rolname = $1', [nomes.sessao]);
+      await admin.query(
+        existeSessao.rowCount
+          ? `ALTER ROLE ${sessao} NOLOGIN NOCREATEDB NOCREATEROLE`
+          : `CREATE ROLE ${sessao} NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS NOREPLICATION`,
+      );
+      await admin.query(
+        `GRANT ${sessao} TO ${admin.escapeIdentifier(nomes.migrator)} WITH INHERIT FALSE, SET TRUE`,
+      );
+      const todos = [...papeis.map(([papel]) => papel), nomes.sessao];
       const r = await admin.query<
-        Record<(typeof PROIBIDOS)[number] | 'rolcanlogin', boolean> & { rolname: string }
+        Record<(typeof PROIBIDOS)[number] | 'rolcanlogin' | 'filiado', boolean> & { rolname: string }
       >(
-        `SELECT rolname, ${PROIBIDOS.join(', ')}, rolcanlogin FROM pg_roles WHERE rolname = ANY($1::text[])`,
-        [papeis.map(([papel]) => papel)],
+        `SELECT r.rolname, ${PROIBIDOS.map((a) => `r.${a}`).join(', ')}, r.rolcanlogin,
+                EXISTS (SELECT 1 FROM pg_auth_members m WHERE m.member = r.oid) AS filiado
+           FROM pg_roles r WHERE r.rolname = ANY($1::text[])`,
+        [todos],
       );
       problemas = r.rows.flatMap((l) => {
         const ligados = PROIBIDOS.filter((a) => l[a]).map((a) => a.slice(3).toUpperCase());
-        return [...ligados, ...(l.rolcanlogin ? [] : ['NOLOGIN'])].map((a) => `${l.rolname}: ${a}`);
+        const eSessao = l.rolname === nomes.sessao;
+        // O papel das funções não faz login; os outros dois fazem. Só o app_runtime não pode ter filiação alguma.
+        const login = eSessao ? (l.rolcanlogin ? ['LOGIN'] : []) : l.rolcanlogin ? [] : ['NOLOGIN'];
+        const filiacao = l.rolname === nomes.appRuntime && l.filiado ? ['FILIACAO'] : [];
+        return [...ligados, ...login, ...filiacao].map((a) => `${l.rolname}: ${a}`);
       });
-      if (r.rowCount !== papeis.length) problemas.push('papel ausente depois do provisionamento');
+      if (r.rowCount !== todos.length) problemas.push('papel ausente depois do provisionamento');
       if (problemas.length === 0) {
         commitEnviado = true;
         await admin.query('COMMIT');

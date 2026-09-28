@@ -52,7 +52,7 @@ describe('identidade do ambiente e saúde', () => {
     expect(saude).toMatchObject({
       status: 'sem_identidade',
       ambiente: null,
-      migracao: '0002_ambiente_e_demonstracao.sql',
+      migracao: '0003_sessao_e_identidade.sql',
     });
     expect(
       await codigo(restaurarDemonstracao(hml.app, { confirmar: 'hml', ambienteDoProcesso: 'hml' })),
@@ -89,7 +89,7 @@ describe('identidade do ambiente e saúde', () => {
       ambiente: 'hml',
       versao: '0.0.0-teste',
       commit: 'abc1234',
-      migracao: '0002_ambiente_e_demonstracao.sql',
+      migracao: '0003_sessao_e_identidade.sql',
       verificadoEm: '2026-09-27T20:00:00.000Z',
     });
     const texto = JSON.stringify(saude);

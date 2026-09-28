@@ -39,3 +39,20 @@ export { PASTA_MIGRACOES, aplicarMigracoes, type ResultadoMigracao } from './mig
 export { respostaDeErro } from './resposta.js';
 export { ErroPapeis, provisionarPapeis } from './papeis.js';
 export { emOrganizacao, ehUuid, organizacaoValida } from './sessao.js';
+export {
+  abrirContinuacao,
+  abrirTransacaoLogin,
+  concluirContinuacao,
+  consumirTransacaoLogin,
+  hashDoToken,
+  novoToken,
+  resolverSessao,
+  revogarSessao,
+  trocarPapel,
+  vinculosDaContinuacao,
+  type ResultadoConclusao,
+  type ResultadoTroca,
+  type SessaoResolvida,
+  type TransacaoLoginGuardada,
+  type VinculoDisponivel,
+} from './sessao-web.js';

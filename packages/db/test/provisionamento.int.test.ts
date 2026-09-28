@@ -11,7 +11,7 @@ import { afterAll, beforeAll, describe, expect, inject, it } from 'vitest';
 import { ErroPapeis, provisionarPapeis } from '../src/papeis.js';
 
 const sufixo = randomUUID().replaceAll('-', '').slice(0, 12);
-const nomes = { migrator: `mig_${sufixo}`, appRuntime: `app_${sufixo}` };
+const nomes = { migrator: `mig_${sufixo}`, appRuntime: `app_${sufixo}`, sessao: `ses_${sufixo}` };
 const administrador = `adm_${sufixo}`;
 const senhaAdministrador = randomUUID();
 let raiz: pg.Client;
@@ -85,7 +85,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await limitado.end();
-  for (const papel of [nomes.migrator, nomes.appRuntime, administrador]) {
+  for (const papel of [nomes.migrator, nomes.appRuntime, nomes.sessao, administrador]) {
     await raiz.query(`DROP ROLE IF EXISTS ${papel}`);
   }
   await raiz.end();
@@ -107,6 +107,29 @@ describe('provisionamento dos papéis por administrador sem superusuário (Cloud
     expect(await hashes()).not.toEqual(antes);
     expect(await atributos(nomes.migrator)).toEqual(limpo);
     expect(await atributos(nomes.appRuntime)).toEqual(limpo);
+    // Papel das funções de sessão (0003): sem login, sem atributo privilegiado; o migrator pode assumi-lo, sem herança.
+    expect(await atributos(nomes.sessao)).toEqual({ ...limpo, rolcanlogin: false });
+    const filiacao = await raiz.query<{ herda: boolean; assume: boolean }>(
+      `SELECT pg_has_role($1, $2, 'USAGE') AS herda, pg_has_role($1, $2, 'SET') AS assume`,
+      [nomes.migrator, nomes.sessao],
+    );
+    expect(filiacao.rows[0]).toEqual({ herda: false, assume: true });
+  });
+
+  it('app_runtime com qualquer filiação é recusado, sem efeito (aceite A5 no provisionamento)', async () => {
+    await provisionarPapeis(limitado, novasSenhas(), nomes);
+    await raiz.query(`GRANT ${nomes.sessao} TO ${nomes.appRuntime}`);
+    try {
+      const antes = await hashes();
+      const erro = await falhaDe(provisionarPapeis(limitado, novasSenhas(), nomes));
+      expect(erro).toMatchObject({
+        codigo: 'ATRIBUTO_PROIBIDO',
+        detalhe: { efeito: 'nenhum', problemas: [`${nomes.appRuntime}: FILIACAO`] },
+      });
+      expect(await hashes()).toEqual(antes);
+    } finally {
+      await raiz.query(`REVOKE ${nomes.sessao} FROM ${nomes.appRuntime}`);
+    }
   });
 
   it('papel existente com atributo que o administrador não pode tirar: falha sem efeito, nem as senhas mudam', async () => {
