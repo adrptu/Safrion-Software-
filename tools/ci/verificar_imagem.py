@@ -49,9 +49,11 @@ def verificar(destino):
             imagem = "safrion-" + alvo + ":ci"
             info = json.loads(executar(["image", "inspect", imagem]))[0]
             evidencia["imagens"][alvo] = {"id": info["Id"], "usuario": info["Config"]["User"]}
+            if alvo == "web" and info["Config"].get("Healthcheck", {}).get("Test", [])[:1] != ["CMD"]:
+                raise AssertionError("healthcheck requer forma exec na imagem sem shell")
             registrar(alvo + ": usuário não-root", lambda a=alvo, i=imagem: rodar(
                 a, a + "-uid", "--entrypoint", "node", i, "-e",
-                "if (!process.getuid || process.getuid() === 0) process.exit(1)"))
+                "if (!process.getuid || !process.getgid || process.getuid() === 0 || process.getgid() === 0) process.exit(1)"))
 
         registrar("preparo: argumentos obrigatórios", lambda: rodar(
             "preparo", "uso", "safrion-preparo:ci", esperado=2))
@@ -99,13 +101,15 @@ def verificar(destino):
     except Exception as erro:
         falha = erro
     finally:
-        try:
-            # Nomes exclusivos deste processo; não afeta containers de outros trabalhos.
-            for nome in containers:
+        limpeza = True
+        # Tenta todos os nomes exclusivos, mesmo se uma remoção falhar.
+        for nome in containers:
+            try:
                 executar(["rm", "--force", nome])
-            evidencia["limpeza"] = True
-        except Exception as erro:
-            falha = falha or erro
+            except Exception as erro:
+                limpeza = False
+                falha = falha or erro
+        evidencia["limpeza"] = limpeza
         destino.parent.mkdir(parents=True, exist_ok=True)
         destino.write_text(json.dumps(evidencia, ensure_ascii=False, indent=2) + "\n")
     if falha:
