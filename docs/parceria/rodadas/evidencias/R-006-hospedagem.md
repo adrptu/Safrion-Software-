@@ -337,7 +337,7 @@ Os agentes (`run.viewer`, `logging.viewer`, `cloudsql.viewer`, sem `secretAccess
 
 #### 3b) Contrato do job de vínculo, versão 2 (recibo durável; responde às simulações do Codex de 28/09, 21:19 e 21:31)
 
-**Proposta; não implementada.** Substitui a versão 1 (`3fadd6e`), que ainda falhava em três casos das simulações do Codex:
+**Proposta; substituída em parte pela v3 (3c).** Substitui a versão 1 (`3fadd6e`), que ainda falhava em três casos das simulações do Codex:
 - revogação repetida atrasada apagava uma concessão posterior;
 - o commit seguido de perda de conexão soltava a trava;
 - o TTL podia chamar de atrasado um pedido já aplicado.
@@ -395,6 +395,104 @@ Os agentes (`run.viewer`, `logging.viewer`, `cloudsql.viewer`, sem `secretAccess
 - `processar_pedido_vinculo` sem EXECUTE para o `app_runtime`;
 - recibo imutável;
 - contraprova de que, sem o recibo, a sequência A, B, A repetido remove B.
+
+#### 3c) Contrato do job de vínculo, versão 3 (correções aceitas na revisão HML-JOB-01 do Codex e na fixture de cenários)
+
+**Proposta; implementação a seguir, na branch `feat/vinculo-fila`.** Vale a v2 (3b), exceto nos pontos abaixo. A fixture é `vinculo-fila-cenarios-revisado.json` (sha256 `e2f0ed82…`, 15 cenários, Gemini e Codex).
+
+**1. Pedido (conteúdo de uma versão do `hml-vinculo-pedido`).**
+- Um objeto JSON com exatamente estas chaves:
+  - `pedido_id` (UUID);
+  - `acao` (`conceder` ou `revogar`);
+  - `organizacao` e `usuario` (UUID);
+  - `responsavel` e `motivo`;
+  - `codigo`, só em `conceder`.
+- Validações: as mesmas de `validarDestino` e `normalizarCodigo`, com no máximo 4 KiB.
+- Qualquer outra forma é **`PEDIDO_INVALIDO`**, sem chamar o SQL. Entram aqui:
+  - JSON quebrado;
+  - chave desconhecida ou faltante;
+  - tipo errado;
+  - UUID inválido;
+  - `acao` fora das duas;
+  - `codigo` em `revogar`, ou ausente ou fora do formato em `conceder`.
+- O volume `latest` do §3 sai: o job lê o segredo pela API, versão a versão.
+
+**2. Identidade do pedido.**
+- `conteudo_hash` = `hashCanonico` (`canonico.ts`) do objeto `{formato: 'VINCULO-PEDIDO-1', pedido_id, acao, organizacao, usuario, responsavel, motivo, codigo_hash}`, com:
+  - UUIDs em minúsculas;
+  - texto como é aplicado;
+  - `codigo_hash` = SHA-256 hexadecimal do código normalizado, e `null` explícito em `revogar`.
+- Isso substitui a concatenação com `|`, que o Codex provou ambígua (CEN-08).
+
+**3. Função `app.processar_pedido_vinculo`.**
+- Parâmetros: `p_pedido_id uuid`, `p_conteudo_hash bytea`, `p_versao_segredo bigint`, `p_acao text`, `p_codigo_hash bytea`, `p_organizacao uuid`, `p_usuario uuid`, `p_responsavel text`, `p_motivo text`, `p_criado_em timestamptz`.
+- Devolve `TABLE (resultado text, revogados integer, repetido boolean)`.
+- Ordem dentro da função:
+  1. `pg_advisory_xact_lock` pela chave do pedido;
+  2. o recibo primeiro: mesmo `conteudo_hash` devolve o resultado gravado com `repetido = true`; outro conteúdo devolve `PEDIDO_ID_REUTILIZADO`, sem efeito e sem recibo novo;
+  3. o TTL, **fixo na função em 60 min**, com `now()` do início da transação: `now() − p_criado_em > 60 min` grava o recibo `PEDIDO_ATRASADO` (60:00 exato ainda vale);
+  4. o efeito, por `conceder_vinculo` ou `revogar_vinculos`;
+  5. o recibo, com a `versao_segredo` da 1ª aplicação.
+- Recusa de negócio grava recibo e é final (CEN-14).
+
+**4. Permissões** (padrão do `identity_link_event` da 0005):
+- `app.vinculo_pedido_recibo` com RLS FORCE e gatilho `impedir_alteracao` em UPDATE e DELETE;
+- `GRANT SELECT, INSERT` ao `app_sessao`, com as políticas `recibo_sessao_select` e `recibo_sessao_insert`;
+- `SELECT` com a política `leitura_auditoria` ao `migrator`;
+- **nada ao `app_runtime`**;
+- a função é SECURITY DEFINER, com dono `app_sessao` (NOBYPASSRLS). `REVOKE ALL FROM PUBLIC` antes do `ALTER OWNER`; depois, `SET LOCAL ROLE app_sessao` e `GRANT EXECUTE` só ao `migrator`.
+
+**5. Transação por pedido.**
+- Uma transação curta por pedido: `BEGIN`, `SET LOCAL lock_timeout = '5s'`, `SET LOCAL statement_timeout = '30s'`, a função, `COMMIT`.
+- Nenhum pedido compartilha transação com outro.
+
+**6. Fila, no CLI `vincular-identidade` em modo fila.**
+- **Conexão:** dedicada, pelo conector PRIVATE. `error` ou `end` inesperado para com saída 3.
+- **Trava:** `pg_try_advisory_lock` da fila antes de ler qualquer segredo. Sem ela, `OCUPADO` e saída 1 (CEN-10).
+- **Listagem:** `versions.list` com `filter=state:ENABLED`, lendo **todas as páginas**. A ordem é por `createTime` crescente e, no desempate, pelo número da versão; a ordem da API não conta.
+- **Para cada versão:**
+  1. `versions.get` pelo nome exato. Se ela deixou de estar ENABLED, fica de fora (log `VERSAO_INATIVA`). Se está, o `etag` lido aqui é o que vale;
+  2. `:access`;
+  3. validar;
+  4. calcular o hash;
+  5. chamar a função, com o `createTime` como `criado_em`.
+- **Destino da versão:**
+  - `PEDIDO_INVALIDO` e `PEDIDO_ID_REUTILIZADO` **desativam** a versão (`:disable` com `etag`), o que é reversível. Destruir fica com o dono;
+  - qualquer outro resultado **destrói** a versão (`:destroy` com `etag`) depois do recibo confirmado.
+- **Log por pedido:** exatamente `{pedido_id, versao, resultado, repetido}`. No inválido, só `{versao, resultado}`. Nunca código, subject, hashes ou conteúdo (CEN-13).
+- **Saída:**
+  - **3** em falha de infraestrutura, e a fila para na hora. Isso cobre banco, API, `etag` recusado e falha ao desativar ou destruir;
+  - senão, **1** se houve qualquer `OCUPADO`, inválido, reutilizado, atrasado ou recusa de negócio;
+  - senão, **0**.
+- **Segredo:** vem de `SAFRION_PEDIDO_SEGREDO` (`projects/<p>/secrets/hml-vinculo-pedido`). O token vem do servidor de metadados, e as chamadas são REST, por `fetch`, sem dependência nova. O cliente é injetável: os testes usam uma API falsa em memória, com semântica de `etag` e de estado.
+
+**7. Terraform.**
+- Job `safrion-vinculo` em `local.jobs`, com:
+  - args fixos do modo fila;
+  - `max_retries 0`;
+  - `vpc_access` `PRIVATE_RANGES_ONLY`;
+  - a conta `sa-preparo`.
+- Segredo `hml-vinculo-pedido` **sem `version_destroy_ttl`**, com o guard recusando o campo nesse segredo.
+- IAM só nesse segredo:
+  - operador com `secretVersionAdder`;
+  - `sa-preparo` com `secretAccessor` e `secretVersionManager`.
+
+**8. Testes** (PG real no `vinculo-fila.int.test.ts`; unitários no restante):
+- os 15 cenários da fixture, lidos do JSON em `packages/db/test/fixtures/`. O CEN-05 monta `criado_em = now() − 3600 s` na mesma transação;
+- concorrência do mesmo `pedido_id` por duas conexões: um efeito, um recibo, o outro `repetido`;
+- UPDATE e DELETE do recibo recusados;
+- `app_runtime` recebe **erro de privilégio** em SELECT, INSERT e EXECUTE;
+- paginação e ordem fora da ordem da API;
+- versão desativada entre a listagem e o acesso;
+- conexão perdida depois do 1º pedido;
+- campo desconhecido dá inválido;
+- contraprova: sem o recibo, a sequência A, B, A repetido remove B.
+
+**Limites:**
+- O `createTime` vem do relógio do Secret Manager e o `now()` vem do banco. Uma diferença de segundos é aceita para um TTL de 60 min.
+- A função não recalcula o `conteudo_hash`: quem a chama é o `migrator`, e o hash só separa repetição de reutilização.
+- Os papéis do Secret Manager (`versions.list`, `get`, `disable` e `destroy` no `secretVersionManager`) devem ser conferidos na página de controle de acesso antes da 1ª subida.
+- Nada roda no GCP antes do ensaio.
 
 #### 4) Mudanças necessárias (arquivos)
 
