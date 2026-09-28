@@ -1,0 +1,73 @@
+name: Jornadas de navegador
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: navegador-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  navegador:
+    name: Estoque e cadastros no navegador (desktop e celular)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        # A mesma imagem da integração; servidor exclusivo e descartável deste job.
+        image: postgis/postgis:17-3.5@sha256:01a6a70e41e6c4467c8f55f6063555ed72db2d6662cd0d571040d42eadaeb6f6
+        env:
+          POSTGRES_PASSWORD: teste
+          POSTGRES_DB: postgres
+        ports:
+          - 127.0.0.1:5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      CI: "1"
+      NEXT_TELEMETRY_DISABLED: "1"
+      # Credencial sintética de um serviço efêmero, sem segredo ou acesso externo.
+      SAFRION_TEST_DATABASE_URL: postgres://postgres:teste@127.0.0.1:5432/postgres
+      PLAYWRIGHT_JSON_OUTPUT_FILE: ${{ runner.temp }}/e2e-bruto.json
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Instalar e conferir versões
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm run doctor
+          pnpm exec playwright --version
+          google-chrome --version
+      - name: Construir aplicação e pacotes internos
+        run: pnpm run build
+      - name: Executar jornadas, sem retries
+        # Reutiliza o Chrome do runner e os testes existentes; login DEV, dados fictícios e banco real.
+        run: pnpm run test:e2e --reporter=list,json
+      - name: Conferir execução completa e gerar recibo sem dados de sessão
+        if: ${{ !cancelled() }}
+        run: python3 tools/ci/conferir_e2e.py "$PLAYWRIGHT_JSON_OUTPUT_FILE" evidencias/navegador/resumo.json
+      - name: Preservar somente o recibo sanitizado
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: navegador-${{ github.sha }}
+          path: evidencias/navegador/resumo.json
+          if-no-files-found: error
+          retention-days: 7
