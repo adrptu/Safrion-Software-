@@ -115,11 +115,10 @@ resource "google_storage_bucket_iam_member" "infra_state" {
 
 # --- Acesso ao banco e aos logs (no projeto) ---
 
+# Só as contas de runtime. O operador não conecta mais ao banco da HML: sem IP público, o Auth Proxy do notebook, que
+# usava este papel, não tem caminho (ADR 0006).
 resource "google_project_iam_member" "cloudsql_client" {
-  for_each = merge(
-    { for id in local.runtime : id => local.membro[id] },
-    { operador = var.operador },
-  )
+  for_each = { for id in local.runtime : id => local.membro[id] }
 
   project = var.projeto_id
   role    = "roles/cloudsql.client"

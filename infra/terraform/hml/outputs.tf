@@ -9,7 +9,7 @@ output "origem" {
 }
 
 output "conexao_cloud_sql" {
-  description = "Nome de conexão do Cloud SQL (socket /cloudsql e Auth Proxy)."
+  description = "Nome de conexão do Cloud SQL: SAFRION_CLOUDSQL_INSTANCIA do conector ipType PRIVATE (ADR 0006)."
   value       = google_sql_database_instance.hml.connection_name
 }
 

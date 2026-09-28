@@ -31,6 +31,14 @@ Sem shell na imagem, diagnóstico é por log e por `/saude`, não por `docker ex
 - `SAFRION_VERSAO` e `SAFRION_COMMIT`;
 - `SAFRION_OIDC_ISSUER` (https, sem `.well-known`), `SAFRION_OIDC_CLIENT_ID` e `SAFRION_OIDC_CLIENT_SECRET`, este vindo do cofre de segredos.
 
+**Conexão ao banco em HML** ([ADR 0006](adr/0006-rede-privada-hml.md); especificado, nada implantado):
+- o banco só tem IP privado. Web e jobs chegam a ele pela VPC (Direct VPC egress), com o conector oficial em `ipType PRIVATE`, que faz o TLS;
+- `SAFRION_CLOUDSQL_INSTANCIA`: nome de conexão da instância (`<projeto>:southamerica-east1:safrion-hml`), posto pelo Terraform. Sem ela (desenvolvimento e CI), vale a URL comum;
+- `DATABASE_URL` (web e `demo-reset`) é `postgresql://app_runtime@/safrion_hml`, e `SAFRION_ADMIN_URL` (preparo) é `postgresql://postgres@/postgres`: sem host e sem senha;
+- `PGPASSWORD` vem do Secret Manager, em versão fixa;
+- **o operador não conecta mais ao banco da HML pelo notebook.** Sem IP público, o Auth Proxy local não tem caminho, e o Cloud Shell não alcança IP privado;
+- por isso, em HML, a concessão e a revogação de vínculo (abaixo) e a rotação de senhas ficam **a definir**. Dependem do job `safrion-vinculo` e de subcomandos de rotação, que são entrega à parte.
+
 Login em HML (adaptador OIDC do Codex, ligado pela casca):
 - o callback a cadastrar no provedor é `${SAFRION_ORIGEM}/entrar/retorno`; ele nunca vem da requisição;
 - a descoberta acontece no primeiro login e vale para o processo inteiro; se falhar, o próximo login tenta de novo, sem reiniciar;
@@ -46,6 +54,7 @@ Login em HML (adaptador OIDC do Codex, ligado pela casca):
 4. O administrador roda o comando no alvo `preparo` da imagem, com `SAFRION_ADMIN_URL` (administrador do servidor):
    `docker run --rm -it -e SAFRION_ADMIN_URL --entrypoint node <imagem-preparo> dist/cli/vincular-identidade.js conceder --ambiente hml --banco <nome> --organizacao <id> --usuario <id> --responsavel <quem autorizou> --motivo <texto curto>`.
    **O código é pedido no terminal e não aparece na tela.** Ele também pode vir por pipe, nunca como argumento.
+   Na HML, o banco só tem IP privado, e este passo fica a definir (ver "Conexão ao banco em HML").
 5. Repetir o mesmo comando devolve `mantido` e não muda nada.
 
 Para tirar o acesso, use o mesmo comando com `revogar` no lugar de `conceder`, sem código:

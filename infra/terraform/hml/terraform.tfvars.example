@@ -5,6 +5,11 @@ projeto_numero = "123456789012"
 operador       = "user:operador@example.com"
 oidc_client_id = "000000000000-exemplo.apps.googleusercontent.com"
 
+# Saídas do bootstrap (rede privada, ADR 0006).
+rede_self_link    = "https://www.googleapis.com/compute/v1/projects/safrion-hml-exemplo/global/networks/safrion-hml"
+subrede_self_link = "https://www.googleapis.com/compute/v1/projects/safrion-hml-exemplo/regions/southamerica-east1/subnetworks/safrion-hml-run"
+faixa_psa_nome    = "safrion-hml-psa"
+
 # 1ª aplicação: false. Depois das versões dos segredos: true com os números abaixo.
 criar_cloud_run = false
 

@@ -108,3 +108,35 @@ variable "origem" {
     error_message = "Use https://host, sem barra no fim."
   }
 }
+
+# Rede privada (ADR 0006), das saídas do bootstrap. Por variável, e não por bloco data, que o checar_travas.py recusa.
+# O bootstrap precisa ser aplicado antes: a instância só aceita a faixa na criação.
+variable "rede_self_link" {
+  description = "self_link da rede da HML (saída rede_self_link do bootstrap)."
+  type        = string
+
+  validation {
+    condition     = can(regex("^https://www\\.googleapis\\.com/compute/v1/projects/[a-z][a-z0-9-]{4,28}[a-z0-9]/global/networks/[a-z]([-a-z0-9]{0,61}[a-z0-9])?$", var.rede_self_link)) && startswith(var.rede_self_link, "https://www.googleapis.com/compute/v1/projects/${var.projeto_id}/")
+    error_message = "Use a saída rede_self_link do bootstrap deste projeto."
+  }
+}
+
+variable "subrede_self_link" {
+  description = "self_link da sub-rede do Direct VPC egress (saída subrede_self_link do bootstrap)."
+  type        = string
+
+  validation {
+    condition     = can(regex("^https://www\\.googleapis\\.com/compute/v1/projects/[a-z][a-z0-9-]{4,28}[a-z0-9]/regions/[a-z0-9-]+/subnetworks/[a-z]([-a-z0-9]{0,61}[a-z0-9])?$", var.subrede_self_link)) && startswith(var.subrede_self_link, "https://www.googleapis.com/compute/v1/projects/${var.projeto_id}/regions/${var.regiao}/")
+    error_message = "Use a saída subrede_self_link do bootstrap deste projeto, na região da HML."
+  }
+}
+
+variable "faixa_psa_nome" {
+  description = "Nome da faixa do Private Service Access (saída faixa_psa_nome do bootstrap)."
+  type        = string
+
+  validation {
+    condition     = can(regex("^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$", var.faixa_psa_nome))
+    error_message = "Use a saída faixa_psa_nome do bootstrap."
+  }
+}

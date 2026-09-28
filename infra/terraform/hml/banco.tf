@@ -1,5 +1,7 @@
 # Cloud SQL da HML. Sem root_password e sem google_sql_user do postgres: a senha nunca entra no state nem no plan.
 # O banco safrion_hml e os papéis migrator, app_runtime e app_sessao nascem só pelo job de preparo.
+# Só IP privado (ADR 0006). A rede e a conexão PSA são do bootstrap, em outro state: o depends_on que a doc do provider
+# pede não alcança, e a ordem vem do procedimento (bootstrap aplicado antes da 1ª criação desta instância).
 resource "google_sql_database_instance" "hml" {
   name                = "safrion-hml"
   region              = var.regiao
@@ -20,8 +22,12 @@ resource "google_sql_database_instance" "hml" {
     # Se a instância for apagada fora do Terraform, os backups ficam pela retenção configurada.
     retain_backups_on_delete = true
 
-    # Só Auth Proxy ou conectores; o Cloud Run usa o Auth Proxy embutido no socket /cloudsql.
+    # Só Auth Proxy ou conectores; web e jobs usam o conector Node.js com ipType PRIVATE (ADR 0006).
     connector_enforcement = "REQUIRED"
+
+    # ExecuteSql (Cloud SQL Studio) fechado de forma explícita: o provider calcula o campo, e sem valor no código uma
+    # mudança no console não voltaria no apply nem sairia conhecida no plan (checar_travas.py --plano recusa desconhecido).
+    data_api_access = "DISALLOW_DATA_API"
 
     user_labels = {
       sistema  = "safrion"
@@ -41,11 +47,15 @@ resource "google_sql_database_instance" "hml" {
       }
     }
 
-    # IP público sem redes autorizadas: só conector com IAM, sempre com TLS.
+    # Sem IP público e sem redes autorizadas: só IP privado, só conector com IAM, sempre com TLS. ipv4_enabled fica
+    # false literal, porque o Trivy trata ausente ou não resolvido como true (GCP-0017). O IP privado não sai mais da
+    # instância, e a faixa só vale na criação.
     ip_configuration {
-      ipv4_enabled   = true
-      ssl_mode       = "ENCRYPTED_ONLY"
-      server_ca_mode = "GOOGLE_MANAGED_INTERNAL_CA"
+      ipv4_enabled       = false
+      private_network    = var.rede_self_link
+      allocated_ip_range = var.faixa_psa_nome
+      ssl_mode           = "ENCRYPTED_ONLY"
+      server_ca_mode     = "GOOGLE_MANAGED_INTERNAL_CA"
     }
   }
 

@@ -10,6 +10,7 @@ provider "google" {
 
 locals {
   # storage entra porque o bucket do state depende dela (costuma vir ligada).
+  # compute e servicenetworking são da rede privada (rede.tf). Ligar o compute cria a conta padrão do Compute (README).
   apis = toset(concat([
     "run.googleapis.com",
     "sqladmin.googleapis.com",
@@ -21,6 +22,8 @@ locals {
     "cloudresourcemanager.googleapis.com",
     "serviceusage.googleapis.com",
     "storage.googleapis.com",
+    "compute.googleapis.com",
+    "servicenetworking.googleapis.com",
   ], var.habilitar_iap ? ["iap.googleapis.com"] : []))
 
   bucket_state = "${var.projeto_id}-tfstate-hml"

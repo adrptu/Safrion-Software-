@@ -81,3 +81,43 @@ variable "criar_sa_vertex" {
   type        = bool
   default     = false
 }
+
+# Rede privada (ADR 0006). Os dois blocos ficam em RFC 1918: o PRIVATE_RANGES_ONLY só leva à VPC destinos RFC 1918, e o
+# Cloud SQL só autoriza sozinho origens RFC 1918. Mudar depois do apply recria a sub-rede ou a faixa, que a instância usa.
+variable "subrede_cidr" {
+  description = "Sub-rede do Direct VPC egress do Cloud Run: bloco /24 alinhado, em RFC 1918."
+  type        = string
+  default     = "10.10.0.0/24"
+
+  validation {
+    condition     = try(endswith(var.subrede_cidr, "/24") && cidrhost(var.subrede_cidr, 0) == split("/", var.subrede_cidr)[0], false)
+    error_message = "Use um bloco /24 alinhado, como 10.10.0.0/24."
+  }
+
+  validation {
+    condition     = can(regex("^(10\\.|172\\.(1[6-9]|2[0-9]|3[01])\\.|192\\.168\\.)", var.subrede_cidr))
+    error_message = "A sub-rede fica em RFC 1918 (10.0.0.0/8, 172.16.0.0/12 ou 192.168.0.0/16)."
+  }
+}
+
+variable "faixa_psa_cidr" {
+  description = "Faixa do Private Service Access, onde o Cloud SQL recebe o IP privado: bloco /20 alinhado, em RFC 1918, sem conter a sub-rede."
+  type        = string
+  default     = "10.20.0.0/20"
+
+  validation {
+    condition     = try(endswith(var.faixa_psa_cidr, "/20") && cidrhost(var.faixa_psa_cidr, 0) == split("/", var.faixa_psa_cidr)[0], false)
+    error_message = "Use um bloco /20 alinhado, como 10.20.0.0/20."
+  }
+
+  validation {
+    condition     = can(regex("^(10\\.|172\\.(1[6-9]|2[0-9]|3[01])\\.|192\\.168\\.)", var.faixa_psa_cidr))
+    error_message = "A faixa fica em RFC 1918 (10.0.0.0/8, 172.16.0.0/12 ou 192.168.0.0/16)."
+  }
+
+  # Blocos alinhados só se sobrepõem quando um contém o outro; aqui, quando a /24 cai dentro da /20.
+  validation {
+    condition     = try(cidrhost(format("%s/20", split("/", var.subrede_cidr)[0]), 0) != split("/", var.faixa_psa_cidr)[0], false)
+    error_message = "A faixa do PSA não pode conter a sub-rede (subrede_cidr)."
+  }
+}

@@ -1,23 +1,23 @@
 # Terraform da HML
 
-Fonte do desenho: [R-006, atualização de 28/09/2026](../../docs/parceria/rodadas/evidencias/R-006-hospedagem.md) (commit `090caf7`). Região: [ADR 0005](../../docs/adr/0005-regiao-hml.md). Nada aqui foi aplicado.
+Fonte do desenho: [R-006, atualização de 28/09/2026](../../docs/parceria/rodadas/evidencias/R-006-hospedagem.md) (commit `090caf7`). Região: [ADR 0005](../../docs/adr/0005-regiao-hml.md). Rede privada: [ADR 0006](../../docs/adr/0006-rede-privada-hml.md). Nada aqui foi aplicado.
 
 | Pasta | O que cria | Quem aplica | State |
 |---|---|---|---|
-| [`bootstrap/`](bootstrap/README.md) | APIs, bucket do state, WIF do GitHub, contas de serviço, papéis no projeto e nas contas | Codex, localmente, uma vez, na janela da sessão do dono | Local; migrável para o bucket |
+| [`bootstrap/`](bootstrap/README.md) | APIs, bucket do state, WIF do GitHub, contas de serviço, papéis no projeto e nas contas, rede privada (VPC, sub-rede, faixa e conexão PSA) | Codex, localmente, uma vez, na janela da sessão do dono | Local; migrável para o bucket |
 | [`hml/`](hml/README.md) | Artifact Registry, Cloud SQL, segredos sem valor, Cloud Run web e jobs, IAM por recurso, IAP | CI por WIF, só no `infra-hml.yml`, com a `sa-infra-github` | Bucket do bootstrap, prefixo `hml/` |
 
 ## Ordem
 
 1. **Adrianus, no console:** os atos da lista abaixo, antes de tudo.
-2. **`bootstrap/`**, local, uma vez.
-3. **`hml/` fase 1**, pela CI (`infra-hml.yml`, a criar), com `criar_cloud_run = false`: registro, banco, segredos vazios e IAM.
+2. **`bootstrap/`**, local, uma vez, com a rede privada. Logo depois do apply, desativar a conta padrão do Compute e conferir a rede `default` ([bootstrap](bootstrap/README.md#depois-do-apply)).
+3. **`hml/` fase 1**, pela CI (`infra-hml.yml`, a criar), com `criar_cloud_run = false` e as 3 saídas da rede: registro, banco, segredos vazios e IAM.
 4. **Valores fora do Terraform:** senhas por stdin, sem eco (R-006, passo 4), e segredo OAuth pelo Adrianus no console (passo 3b). Anotar só o número de cada versão.
 5. **Se `url_controlada = "iap"`:** o Adrianus configura uma vez, no console, o cliente OAuth do IAP. Projeto sem organização não cria cliente OAuth por API.
 6. **`hml/` fase 2**, pela CI, com `criar_cloud_run = true` e `versoes_segredos`.
 7. **Publicação** (`publicar-hml.yml`, outro autor): imagens por digest, `safrion-preparo`, `safrion-demo-reset` e a web.
 
-**Atenção à ordem:** o passo 4 precisa da instância criada no passo 3. Se a sessão do dono for revogada ao fim do bootstrap (R-006 §3), as senhas exigem nova janela de login dele.
+**Atenção à ordem:** o passo 3 precisa da rede do passo 2, porque a instância só aceita a faixa do IP privado na criação e o IP privado não sai mais dela. O passo 4 precisa da instância criada no passo 3. Se a sessão do dono for revogada ao fim do bootstrap (R-006 §3), as senhas exigem nova janela de login dele.
 
 ## O que só o Adrianus faz
 
@@ -47,7 +47,8 @@ Fonte do desenho: [R-006, atualização de 28/09/2026](../../docs/parceria/rodad
 4. Plan com `destroy` ou `must be replaced` em Cloud SQL, bucket do state, segredos ou WIF é recusado e volta como plano específico (PRD 28.2).
 
 **Achados esperados do scanner** (nada foi rodado; confirmar a severidade na 1ª execução):
-- Cloud SQL com IP público: exigido pelo desenho sem VPC. Compensação: nenhuma rede autorizada, `connector_enforcement = "REQUIRED"` e `ssl_mode = "ENCRYPTED_ONLY"`.
+- Cloud SQL: sem IP público (ADR 0006), o GCP-0017 fecha pelo desenho; o GCP-0015 segue com exceção proposta ([hml](hml/README.md#achados-do-scanner)).
+- Rede do bootstrap: GCP-0076 (MEDIUM) e GCP-0029 (LOW), flow logs desligados por custo, abaixo do gate.
 - Papéis `*.admin` da `sa-infra-github`: exceção ENG-005 proposta, com risco e compensação por papel no [bootstrap](bootstrap/README.md).
 - Se algum sair como alto, registrar a exceção pela ENG-005 antes do apply.
 

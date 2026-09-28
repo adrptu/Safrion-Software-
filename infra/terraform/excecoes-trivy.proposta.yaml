@@ -2,10 +2,11 @@
 # repositório o passa. Segue o SECURITY.md: só não aplicabilidade comprovada, com prova e validade de até 90 dias.
 # Aprovada, vira .trivyignore.yaml referenciado no passo do Trivy, e os dois agentes revisam no PR. Formato aceito por
 # tools/ci/checar_ci_seguranca.py (statement numa linha só). Prova e prazo detalhados: hml/README.md.
-# O GCP-0017 (IP público) NÃO entra aqui: é risco real mitigado, não falta de aplicabilidade.
+# Só o GCP-0015. O GCP-0017 (IP público) deixa de existir com ipv4_enabled = false literal e sem redes autorizadas
+# (ADR 0006): não entra aqui.
 misconfigurations:
   - id: GCP-0015
     paths:
-      - "hml/banco.tf"
-    statement: "Não aplicável: ssl_mode ENCRYPTED_ONLY recusa conexão sem TLS; o Trivy 0.74 com checks embutidos acusa GCP-0015 com ENCRYPTED_ONLY, e nas fixtures só o require_ssl legado silenciou o achado (aquasecurity/trivy#9999; contraprova do Codex em candidate-41dd295/evidence/tls-counterexamples). Prova mantida por checar_travas.py na CI. Prazo de 30 dias para reavaliar na próxima atualização do Trivy e o estado da #9999."
+      - 'hml/banco.tf'
+    statement: 'Não aplicável: ssl_mode ENCRYPTED_ONLY recusa conexão sem TLS; o Trivy 0.74 com checks embutidos acusa GCP-0015 com ENCRYPTED_ONLY, e nas fixtures só o require_ssl legado silenciou o achado (aquasecurity/trivy#9999; contraprova do Codex em candidate-41dd295/evidence/tls-counterexamples). Trava de código em checar_travas.py; o passo na CI está proposto, ainda não roda. Prazo de 30 dias para reavaliar na próxima atualização do Trivy e o estado da aquasecurity/trivy#9999.'
     expired_at: 2026-10-28

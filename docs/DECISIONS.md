@@ -52,3 +52,4 @@ Ficam em `docs/adr/`, uma por arquivo, no modelo `0000-modelo.md`. As escolhas j
 | 0001 | Arquitetura e stack de referência adotadas pelo PRD | Aceita (origem: PRD 12.1, 23.1, 28) |
 | 0002 | Repositório privado com documentação e CI antes do código de produto | Aceita (proprietário, 27/09/2026) |
 | 0005 | Hospedar a HML em southamerica-east1 (São Paulo) | Proposta (revisão do Codex pendente) |
+| 0006 | Ligar o banco da HML só por rede privada (PSA, Direct VPC e conector `PRIVATE`) | Proposta (revisão do Codex pendente) |

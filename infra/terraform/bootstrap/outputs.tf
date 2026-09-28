@@ -22,3 +22,19 @@ output "contas" {
   description = "E-mail de cada conta de serviço criada."
   value       = { for id, sa in google_service_account.contas : id => sa.email }
 }
+
+# Entradas do hml/ (TF_VAR_rede_self_link, TF_VAR_subrede_self_link e TF_VAR_faixa_psa_nome): sem bloco data lá.
+output "rede_self_link" {
+  description = "Rede privada da HML: variável rede_self_link do hml/."
+  value       = google_compute_network.hml.self_link
+}
+
+output "subrede_self_link" {
+  description = "Sub-rede do Direct VPC egress: variável subrede_self_link do hml/."
+  value       = google_compute_subnetwork.run.self_link
+}
+
+output "faixa_psa_nome" {
+  description = "Nome da faixa do Private Service Access: variável faixa_psa_nome do hml/."
+  value       = google_compute_global_address.psa.name
+}

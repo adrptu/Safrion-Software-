@@ -3,14 +3,17 @@
 # Tudo aqui só existe com criar_cloud_run = true, depois que as versões dos segredos existirem.
 
 locals {
-  url_app_runtime = "postgresql://app_runtime@/${local.banco}?host=${local.socket}"
+  # URLs sem host (ADR 0006): com SAFRION_CLOUDSQL_INSTANCIA, o conector ipType PRIVATE abre o caminho até o IP privado
+  # e faz o TLS; a senha vem de PGPASSWORD. Sem essa variável (dev e CI), a URL comum segue valendo sozinha.
+  url_app_runtime = "postgresql://app_runtime@/${local.banco}"
 
   env_web = {
-    DATABASE_URL           = local.url_app_runtime
-    SAFRION_AMBIENTE       = "hml"
-    SAFRION_ORIGEM         = local.origem
-    SAFRION_OIDC_ISSUER    = "https://accounts.google.com"
-    SAFRION_OIDC_CLIENT_ID = var.oidc_client_id
+    DATABASE_URL               = local.url_app_runtime
+    SAFRION_CLOUDSQL_INSTANCIA = local.instancia
+    SAFRION_AMBIENTE           = "hml"
+    SAFRION_ORIGEM             = local.origem
+    SAFRION_OIDC_ISSUER        = "https://accounts.google.com"
+    SAFRION_OIDC_CLIENT_ID     = var.oidc_client_id
   }
 
   segredos_web = {
@@ -19,7 +22,8 @@ locals {
   }
 
   env_preparo = {
-    SAFRION_ADMIN_URL = "postgresql://postgres@/postgres?host=${local.socket}"
+    SAFRION_ADMIN_URL          = "postgresql://postgres@/postgres"
+    SAFRION_CLOUDSQL_INSTANCIA = local.instancia
   }
 
   segredos_preparo = {
@@ -29,8 +33,9 @@ locals {
   }
 
   env_demo = {
-    DATABASE_URL     = local.url_app_runtime
-    SAFRION_AMBIENTE = "hml"
+    DATABASE_URL               = local.url_app_runtime
+    SAFRION_CLOUDSQL_INSTANCIA = local.instancia
+    SAFRION_AMBIENTE           = "hml"
   }
 
   segredos_demo = {
@@ -63,11 +68,14 @@ resource "google_cloud_run_v2_service" "web" {
       max_instance_count = 2
     }
 
-    volumes {
-      name = "cloudsql"
+    # Direct VPC egress: só destinos privados (RFC 1918) vão pela VPC, até o IP privado do Cloud SQL; o resto (Google
+    # OIDC, APIs) sai direto para a internet. Sem conector VPC nem NAT. checar_travas.py exige este egress.
+    vpc_access {
+      egress = "PRIVATE_RANGES_ONLY"
 
-      cloud_sql_instance {
-        instances = [google_sql_database_instance.hml.connection_name]
+      network_interfaces {
+        network    = local.rede
+        subnetwork = local.subrede
       }
     }
 
@@ -85,20 +93,17 @@ resource "google_cloud_run_v2_service" "web" {
       }
 
       # /saude trava a revisão sem banco. Sem liveness_probe: /saude responde 503 quando o banco cai
-      # e derrubaria instâncias sadias.
+      # e derrubaria instâncias sadias. 18 × 10 s = 3 min (valor especificado, não medido): o Direct VPC pode levar
+      # 1 min ou mais para conectar na subida, e a retentativa limitada da 1ª conexão ao banco precisa caber aqui.
+      # O Cloud Run aceita até 600 s de sonda de inicialização.
       startup_probe {
         period_seconds    = 10
         timeout_seconds   = 5
-        failure_threshold = 6
+        failure_threshold = 18
 
         http_get {
           path = "/saude"
         }
-      }
-
-      volume_mounts {
-        name       = "cloudsql"
-        mount_path = "/cloudsql"
       }
 
       dynamic "env" {
@@ -195,11 +200,13 @@ resource "google_cloud_run_v2_job" "preparo" {
       max_retries     = 0
       timeout         = "600s"
 
-      volumes {
-        name = "cloudsql"
+      # Mesmo caminho da web até o IP privado do banco (checar_travas.py exige este egress).
+      vpc_access {
+        egress = "PRIVATE_RANGES_ONLY"
 
-        cloud_sql_instance {
-          instances = [google_sql_database_instance.hml.connection_name]
+        network_interfaces {
+          network    = local.rede
+          subnetwork = local.subrede
         }
       }
 
@@ -212,11 +219,6 @@ resource "google_cloud_run_v2_job" "preparo" {
             cpu    = "1"
             memory = "512Mi"
           }
-        }
-
-        volume_mounts {
-          name       = "cloudsql"
-          mount_path = "/cloudsql"
         }
 
         dynamic "env" {
@@ -272,11 +274,13 @@ resource "google_cloud_run_v2_job" "demo_reset" {
       max_retries     = 0
       timeout         = "600s"
 
-      volumes {
-        name = "cloudsql"
+      # Mesmo caminho da web até o IP privado do banco (checar_travas.py exige este egress).
+      vpc_access {
+        egress = "PRIVATE_RANGES_ONLY"
 
-        cloud_sql_instance {
-          instances = [google_sql_database_instance.hml.connection_name]
+        network_interfaces {
+          network    = local.rede
+          subnetwork = local.subrede
         }
       }
 
@@ -290,11 +294,6 @@ resource "google_cloud_run_v2_job" "demo_reset" {
             cpu    = "1"
             memory = "512Mi"
           }
-        }
-
-        volume_mounts {
-          name       = "cloudsql"
-          mount_path = "/cloudsql"
         }
 
         dynamic "env" {

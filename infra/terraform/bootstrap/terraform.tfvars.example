@@ -10,3 +10,5 @@ operador             = "user:operador@example.com"
 # habilitar_iap      = true
 # agentes            = ["user:agentes@example.com"]
 # criar_sa_vertex    = false
+# subrede_cidr       = "10.10.0.0/24"   # RFC 1918, /24
+# faixa_psa_cidr     = "10.20.0.0/20"   # RFC 1918, /20, sem conter a sub-rede

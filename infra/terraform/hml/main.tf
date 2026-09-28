@@ -10,9 +10,15 @@ provider "google" {
 
 locals {
   banco  = "safrion_hml"
-  socket = "/cloudsql/${google_sql_database_instance.hml.connection_name}"
   origem = coalesce(var.origem, "https://safrion-web-${var.projeto_numero}.${var.regiao}.run.app")
   iap    = var.url_controlada == "iap"
+
+  # Nome de conexão (<projeto>:<região>:safrion-hml): o conector ipType PRIVATE chega ao IP privado por ele (ADR 0006).
+  instancia = google_sql_database_instance.hml.connection_name
+
+  # O Direct VPC egress recebe o nome completo do recurso (projects/…), como na doc do Cloud Run, e não a URL do self_link.
+  rede    = trimprefix(var.rede_self_link, "https://www.googleapis.com/compute/v1/")
+  subrede = trimprefix(var.subrede_self_link, "https://www.googleapis.com/compute/v1/")
 
   # Contas criadas pelo bootstrap (mesmos nomes de infra/terraform/bootstrap/contas.tf).
   sa = {
