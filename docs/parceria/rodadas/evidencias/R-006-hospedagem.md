@@ -335,38 +335,66 @@ Sem IP público, o Auth Proxy do notebook perde o caminho até o banco [G13, G5]
 
 Os agentes (`run.viewer`, `logging.viewer`, `cloudsql.viewer`, sem `secretAccessor`, conforme `bootstrap/contas.tf`) veem só o nome do segredo, a execução e o resultado.
 
-#### 3b) Contrato do job de vínculo, revisto (pontos do Codex às 21:19: `latest`, concorrência, execução atrasada, dois pedidos, falha depois do commit, destruição)
+#### 3b) Contrato do job de vínculo, versão 2 (recibo durável; responde às simulações do Codex de 28/09, 21:19 e 21:31)
 
-Substitui o volume em `latest` e a destruição manual do passo 5 acima. **Proposta; não implementada.**
+**Proposta; não implementada.** Substitui a versão 1 (`3fadd6e`), que ainda falhava em três casos das simulações do Codex:
+- revogação repetida atrasada apagava uma concessão posterior;
+- o commit seguido de perda de conexão soltava a trava;
+- o TTL podia chamar de atrasado um pedido já aplicado.
 
-- **Pedido imutável e identificado.** Cada versão do `hml-vinculo-pedido` é um pedido completo, com `pedido_id` (UUID gerado pelo operador), ação, organização, usuário, responsável, motivo e, se for conceder, o código. O conteúdo de uma versão não muda. O job **não monta `latest`**: ele **enumera as versões ENABLED pela API** (`versions.list`), da mais antiga para a mais nova, e lê cada uma pelo nome exato (`versions/N:access`). O log de cada pedido traz `{pedido_id, versao, resultado}`, nunca o código. O operador confere o seu `pedido_id`.
-- **Uma execução por vez.** Na conexão, o job faz `pg_try_advisory_lock` de sessão numa chave própria (`safrion.vinculo_job`). Sem a trava, sai com `OCUPADO` (código 1) sem ler nenhum pedido. `task_count 1` e `max_retries 0` continuam, mas quem impede a concorrência é a trava.
-- **Um pedido termina antes do próximo começar.** Para cada versão, na ordem:
-  1. conferir que ela ainda está ENABLED;
-  2. ler;
-  3. aplicar pelas funções atuais (`conceder_vinculo` ou `revogar_vinculos`, com as travas de vínculo);
-  4. registrar o resultado no log;
-  5. **destruir a própria versão** (`versions.destroy` com o `etag` lido).
+**Princípio:** cada pedido tem **um recibo durável e único no banco, gravado na mesma transação do efeito**. Repetir o pedido devolve o recibo, **nunca reaplica**. Ordem, trava e TTL passam a ser proteções auxiliares, não a garantia.
 
-  Qualquer falha de infraestrutura, ou falha ao destruir, **para a execução** com código 3, sem passar para o pedido seguinte. Assim, uma nova tentativa só repete o último pedido inacabado, sem nenhuma mudança posterior no meio.
-- **Falha depois do commit e antes de destruir.** A próxima execução repete esse pedido primeiro. `conceder_vinculo` devolve `mantido` quando o mesmo pedido já criou o vínculo (código consumido, mesmo destino e vínculo existente; migração 0005). Se um `demo:reset` derrubou o vínculo no intervalo, devolve `PEDIDO_CONSUMIDO`, e o operador pede de novo, como já acontece depois de todo reset. `revogar_vinculos` repetido revoga 0. Nenhum dos dois aplica efeito duas vezes.
-- **Recusa de negócio é final.** Vencido, inexistente, conflitante ou usuário inválido: a versão é destruída e o resultado vai para o log. Um novo pedido é uma nova versão.
-- **Execução atrasada.** A versão que tiver mais de 60 minutos (pelo `createTime`) é recusada como `PEDIDO_ATRASADO` e destruída sem ser aplicada, para que um pedido esquecido não entre dias depois. O código de acesso já vence em 24 h (migração 0005).
-- **Dois pedidos.** Saem na ordem de criação e são processados um a um. Com dois operadores, cada um confere o seu `pedido_id` no log.
-- **Permissões, todas só neste segredo:**
-  - operador: **`secretmanager.secretVersionAdder`** (só grava versão; não lê, não lista e não destrói) e `run.invoker` no job. Destruir à mão deixa de ser passo do operador, e a exceção fica com o dono;
-  - `sa-preparo`: `secretAccessor` e **`secretVersionManager`** (lista, obtém e destrói versões; não inclui ler o valor);
-  - papéis conferidos em https://docs.cloud.google.com/secret-manager/docs/access-control.
-- **Sem dependência nova.** O CLI chama a API REST do Secret Manager com o token da conta do job, obtido no servidor de metadados do Cloud Run, pelo `fetch` do Node 24 (a verificar no ensaio). O segredo continua sem `version_destroy_ttl`, para a destruição ser imediata.
-- **Fluxo do operador:** confirmar quem pediu; `read -rs` o código; montar o pedido com `pedido_id=$(uuidgen)`; gravar a versão por pipe; `gcloud run jobs execute safrion-vinculo`; ler no log a linha do seu `pedido_id`. **Três passos, e nenhum de destruição.**
-- **Testes que o código precisa ter:**
-  - duas execuções simultâneas: uma sai `OCUPADO`;
-  - pedido duplicado dá `mantido`;
-  - falha simulada na destruição para a execução, e a seguinte repete só esse pedido;
-  - revogação seguida de concessão na mesma fila respeita a ordem;
-  - pedido com mais de 60 minutos é recusado;
-  - log sem o código;
-  - versão destruída por outra execução é ignorada.
+**Banco (migração 0006, autoria Claude):**
+- **Tabela `app.vinculo_pedido_recibo`:**
+  - colunas: `pedido_id uuid PRIMARY KEY`, `conteudo_hash bytea` (32 bytes), `acao` (`conceder` ou `revogar`), `organization_id`, `user_id`, `resultado`, `revogados`, `versao_segredo`, `processado_em` e `database_user DEFAULT session_user`;
+  - imutável, com o mesmo gatilho `impedir_alteracao` de `identity_link_event`;
+  - RLS FORCE, `SELECT` só para o `migrator` e nenhum acesso para o `app_runtime`.
+- **Função `app.processar_pedido_vinculo(pedido_id, conteudo_hash, acao, codigo_hash, organizacao, usuario, responsavel, motivo, criado_em, validade)`:**
+  - SECURITY DEFINER, dono `app_sessao`, EXECUTE só para o `migrator`. Numa só transação:
+  1. `pg_advisory_xact_lock` pela chave do pedido;
+  2. **consultar o recibo primeiro**:
+     - se existe com o mesmo `conteudo_hash`, devolve o resultado gravado, marcado `repetido`;
+     - se existe com outro conteúdo, devolve `PEDIDO_ID_REUTILIZADO`, sem efeito;
+  3. só então o TTL: `criado_em` mais antigo que a validade grava o recibo `PEDIDO_ATRASADO`, sem aplicar;
+  4. aplica `conceder_vinculo` ou `revogar_vinculos` (funções atuais, com as travas de vínculo);
+  5. grava o recibo com o resultado, **na mesma transação**.
+  - A recusa de negócio também grava recibo e é final. A falha de infraestrutura desfaz tudo e não deixa recibo, então repetir é seguro.
+- **O que as simulações do Codex dão com recibo:**
+  - A(revogar), B(conceder), A repetido: o A repetido devolve o recibo de A sem revogar de novo, e **B fica**;
+  - commit seguido de perda de conexão: o recibo existe, a próxima execução repete, recebe `repetido` e só então destrói a versão;
+  - TTL depois de aplicado: o recibo é consultado antes do TTL e devolve o resultado real, não `PEDIDO_ATRASADO`.
+
+**Job (CLI `vincular-identidade` em modo fila):**
+- **Conexão dedicada** (um `pg.Client`, sem pool) pelo conector PRIVATE. `error` ou `end` inesperado **para a execução com código 3**. A trava de sessão `pg_try_advisory_lock` ordena execuções e, sem ela, sai `OCUPADO`. Se cair junto com a conexão, a execução já parou.
+- **Fila:** para cada versão ENABLED do `hml-vinculo-pedido`, da mais antiga para a mais nova, com `versions.list`:
+  1. conferir que ainda está ENABLED;
+  2. ler pelo nome exato;
+  3. validar o pedido (`pedido_id` UUID e campos, com as mesmas validações e a normalização do código);
+  4. calcular o `conteudo_hash`: SHA-256 da forma canônica `pedido_id|acao|organizacao|usuario|responsavel|motivo|sha256(codigo)`;
+  5. chamar `processar_pedido_vinculo` com o `createTime` da versão como `criado_em`;
+  6. registrar no log `{pedido_id, versao, resultado, repetido}`, sem código, subject nem hash;
+  7. **destruir só essa versão, com `etag`, depois do recibo confirmado.**
+
+  Falha ao destruir para a fila com código 3. O recibo já existe, e a próxima execução repete e destrói.
+- **Sem dependência nova:** REST do Secret Manager com o token do servidor de metadados, por `fetch` (a verificar no ensaio).
+- **Permissões, só neste segredo:** operador com `secretVersionAdder` e `run.invoker` no job; `sa-preparo` com `secretAccessor` e `secretVersionManager`. Papéis conferidos na página de controle de acesso do Secret Manager.
+
+**Limites conhecidos:**
+- `conteudo_hash` contém o hash do código, que tem cerca de 2^50 possibilidades. Isso fica só na tabela lida pelo `migrator`, e o pedido de acesso vence em 24 h e é consumido.
+- A ordem entre pedidos diferentes vale por execução serializada. Com recibo, a perda da trava não reaplica nada, mas dois pedidos diferentes feitos em execuções simultâneas seguem a ordem em que cada um entrou na transação.
+
+**Contribuição do Gemini, desde o desenho (protocolo de 28/09):**
+- **o quê:** um conjunto determinístico de cenários com entrada e resultado esperado, cobrindo sequências de pedidos, repetição, perda de conexão depois do commit, execuções simultâneas, TTL, `pedido_id` reutilizado com outro conteúdo e destruição que falha;
+- **em que arquivo:** `packages/db/test/fixtures/vinculo-fila-cenarios.json`, de autoria Gemini;
+- **como entra:** o autor (Claude) transforma os cenários em testes de integração com PG real, e o executor (Codex) roda.
+
+**Testes obrigatórios:**
+- os cenários acima;
+- cada caso das 3 simulações do Codex;
+- log sem código;
+- `processar_pedido_vinculo` sem EXECUTE para o `app_runtime`;
+- recibo imutável;
+- contraprova de que, sem o recibo, a sequência A, B, A repetido remove B.
 
 #### 4) Mudanças necessárias (arquivos)
 
