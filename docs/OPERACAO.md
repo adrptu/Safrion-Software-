@@ -38,6 +38,17 @@ Login em HML (adaptador OIDC do Codex, ligado pela casca):
 - no log, `login.recusado` traz o motivo como código: `SEM_CONFIGURACAO`, `CONFIGURACAO_INVALIDA` ou `DESCOBERTA_FALHOU`. Nenhum segredo, código ou token é registrado;
 - só entra quem tem vínculo explícito entre issuer + subject e um usuário da organização. O e-mail nunca vincula.
 
+**Conceder acesso em HML** (proposto no ADR 0004 §11; **ainda não implementado**):
+1. A pessoa entra pelo provedor. Sem vínculo, a tela mostra um código de referência, válido por 24 h.
+2. Ela passa o código ao administrador por um canal que ele reconhece.
+3. O administrador confere quem é e com que papel deve entrar, e roda, pelo alvo `preparo` da imagem, com `SAFRION_ADMIN_URL`:
+   `vincular-identidade --ambiente hml --codigo <código> --organizacao <id> --usuario <id> --responsavel <quem autorizou> --motivo <texto curto>`.
+4. Repetir o mesmo comando não muda nada.
+
+Para tirar o acesso: `desvincular-identidade --ambiente hml --organizacao <id> --usuario <id> --responsavel … --motivo …`. A próxima requisição da pessoa já é negada.
+
+Cada concessão e cada revogação ficam gravadas, sem poder ser alteradas, com responsável e motivo. Depois de um `demo:reset` em HML, os acessos reais à geração anterior caem, e é preciso conceder de novo.
+
 O provedor de desenvolvimento fica fechado fora de `dev`.
 
 **Preparo do banco** (alvo `preparo`, ou `node packages/db/dist/cli/preparar-banco.js --ambiente hml --banco <nome>` depois do build). Lê:
