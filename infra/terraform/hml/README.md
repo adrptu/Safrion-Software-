@@ -71,11 +71,11 @@ Trivy 0.74, com os checks embutidos, sobre `41dd295`: 2 achados HIGH, os dois em
 | **GCP-0017** ("public internet address") | **Risco real, mitigado**, e não falta de aplicabilidade: o IP existe. A mitigação é nenhuma rede autorizada, `connector_enforcement = "REQUIRED"` (só Auth Proxy ou conector, com IAM) e TLS obrigatório | **Não entra no arquivo de exceção:** o `SECURITY.md` não admite. Pede uma decisão à parte (abaixo) |
 
 **GCP-0017: opções para o time decidir**
-1. **IP privado** (Private Service Access e Direct VPC egress no Cloud Run). O achado deixa de se aplicar, mas o operador perde o Auth Proxy do próprio computador: a concessão de vínculo passaria a exigir um caminho até a VPC (bastion ou VPN, com custo não levantado) ou uma mudança no fluxo do `vincular-identidade`.
+1. **IP privado** (Private Service Access e Direct VPC egress na web e nos jobs), com a concessão de vínculo passando para um job `safrion-vinculo` sem overrides: o pedido entra por uma versão de uso único de segredo, **sem bastion nem VPN**. Fecha o GCP-0017, com custo incremental de US$ 0,00 a 0,11 por mês. Pede mudanças de Terraform, código (conector com `ipType PRIVATE`, modo arquivo no CLI) e emenda à ADR 0004 §11. Comparação completa, com fontes, no R-006 (`docs/hml-custo-infra` `894ef4d`, seção "GCP-0017: IP privado × concessão fora da máquina do operador").
 2. **Categoria nova de aceite de risco mitigado no `SECURITY.md`**, com as travas verificadas por guard na CI, prazo curto (até 30 dias, renovável com nova revisão), escopo por recurso e aprovação ENG-005 registrada. Muda uma política de segurança, então não é decisão só de agente.
 3. **Manter bloqueado**: o Terraform fica fora do `main` até 1 ou 2.
 
-**Recomendação do autor:** a opção 2 para a HML (só dados fictícios e a identidade dos testadores), com a 1 como condição antes do piloto. A decisão é do time, com o aprovador que o ENG-005 pedir.
+**Recomendação do autor (revista depois da comparação pedida pelo Codex):** a opção 1, que tira o risco em vez de aceitá-lo. A decisão é do time.
 
 **Travas verificáveis** (valem para a exceção do GCP-0015 e para qualquer decisão sobre o GCP-0017):
 - `python3 checar_travas.py [módulo]` lê o HCL com analisador léxico: comentários `#`, `//` e `/* */`, strings com `${}` e heredocs não contam como trava.
