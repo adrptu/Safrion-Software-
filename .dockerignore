@@ -1,0 +1,13 @@
+# Só o código versionado entra na construção; nada local, gerado ou sensível.
+**/node_modules
+**/.next
+**/dist
+**/coverage
+**/test-results
+**/playwright-report
+**/*.log
+**/.env*
+.git
+.github
+.semgrep
+tools/ci

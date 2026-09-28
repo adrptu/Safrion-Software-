@@ -41,6 +41,74 @@ class PortaoContrato(unittest.TestCase):
     def test_contrato_completo_ativa(self):
         self.assertEqual(self.rodar({'package.json': COMPLETO, 'pnpm-lock.yaml': 'x', '.nvmrc': '24.19.0'})[:2], (0, 'ativo=true'))
 
+    def test_manifesto_deve_ser_objeto(self):
+        for pkg in [None, [], 42, True, '"texto"']:
+            with self.subTest(pkg=pkg):
+                code, ativo, out = self.rodar({'package.json': pkg, 'pnpm-lock.yaml': 'x', '.nvmrc': '24.19.0'})
+                self.assertEqual((code, ativo), (1, 'ativo=false'))
+                self.assertIn('package.json deve conter um objeto', out)
+
+    def test_package_manager_deve_ser_texto(self):
+        for valor in [None, 123, True, [], {}]:
+            with self.subTest(valor=valor):
+                pkg = dict(COMPLETO, packageManager=valor)
+                code, ativo, out = self.rodar({'package.json': pkg, 'pnpm-lock.yaml': 'x', '.nvmrc': '24.19.0'})
+                self.assertEqual((code, ativo), (1, 'ativo=false'))
+                self.assertIn('packageManager', out)
+
+    def test_engines_deve_conter_node_textual(self):
+        for valor in [None, 123, True, '>=24', [], {'node': 24}, {'node': True}, {'node': ['>=24']}, {'node': '   '}]:
+            with self.subTest(valor=valor):
+                pkg = dict(COMPLETO, engines=valor)
+                code, ativo, out = self.rodar({'package.json': pkg, 'pnpm-lock.yaml': 'x', '.nvmrc': '24.19.0'})
+                self.assertEqual((code, ativo), (1, 'ativo=false'))
+                self.assertIn('engines.node', out)
+
+    def test_scripts_deve_ser_objeto(self):
+        for valor in [None, 123, True, 'test', []]:
+            with self.subTest(valor=valor):
+                pkg = dict(COMPLETO, scripts=valor)
+                code, ativo, out = self.rodar({'package.json': pkg, 'pnpm-lock.yaml': 'x', '.nvmrc': '24.19.0'})
+                self.assertEqual((code, ativo), (1, 'ativo=false'))
+                self.assertIn('scripts deve ser um objeto JSON', out)
+
+    def test_cada_script_obrigatorio_deve_ser_texto_nao_vazio(self):
+        for nome in COMPLETO['scripts']:
+            for valor in [None, 0, 1, False, True, [], {}, '', '   ']:
+                with self.subTest(script=nome, valor=valor):
+                    pkg = dict(COMPLETO, scripts={**COMPLETO['scripts'], nome: valor})
+                    code, ativo, out = self.rodar({'package.json': pkg, 'pnpm-lock.yaml': 'x', '.nvmrc': '24.19.0'})
+                    self.assertEqual((code, ativo), (1, 'ativo=false'))
+                    self.assertIn(nome, out)
+
+    def test_json_malformado_falha_com_diagnostico(self):
+        code, ativo, out = self.rodar({'package.json': '{invalido', 'pnpm-lock.yaml': 'x', '.nvmrc': '24.19.0'})
+        self.assertEqual((code, ativo), (1, 'ativo=false'))
+        self.assertIn('package.json inválido', out)
+
+    def test_json_profundo_falha_com_diagnostico(self):
+        profundo = '[' * 200_000 + '0' + ']' * 200_000
+        code, ativo, out = self.rodar({'package.json': profundo, 'pnpm-lock.yaml': 'x', '.nvmrc': '24.19.0'})
+        self.assertEqual((code, ativo), (1, 'ativo=false'))
+        self.assertIn('package.json inválido', out)
+
+    def test_inteiro_json_acima_do_limite_falha_com_diagnostico(self):
+        inteiro = '9' * 5000
+        code, ativo, out = self.rodar({'package.json': inteiro, 'pnpm-lock.yaml': 'x', '.nvmrc': '24.19.0'})
+        self.assertEqual((code, ativo), (1, 'ativo=false'))
+        self.assertIn('package.json inválido', out)
+
+    def test_nvmrc_invalido_falha_com_diagnostico(self):
+        for valor in ['', '24', 'lts/*']:
+            with self.subTest(valor=valor):
+                code, ativo, out = self.rodar({'package.json': COMPLETO, 'pnpm-lock.yaml': 'x', '.nvmrc': valor})
+                self.assertEqual((code, ativo), (1, 'ativo=false'))
+                self.assertIn('.nvmrc', out)
+
+    def test_contrato_com_hash_e_prefixo_v_ativa(self):
+        pkg = dict(COMPLETO, packageManager='pnpm@11.25.0+sha512.ab12')
+        self.assertEqual(self.rodar({'package.json': pkg, 'pnpm-lock.yaml': 'x', '.nvmrc': 'v24.19.0\n'})[:2], (0, 'ativo=true'))
+
 
 if __name__ == '__main__':
     unittest.main()

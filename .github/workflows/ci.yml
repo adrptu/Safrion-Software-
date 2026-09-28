@@ -24,20 +24,36 @@ jobs:
           python-version: "3.12"
       - name: Conferir PRD, instruções e decisões
         run: python3 tools/docs/checar_docs.py
-      - name: Regressão do portão do contrato de código (R001-01)
+      - name: Regras de segurança da própria CI (FERR-01)
+        run: python3 tools/ci/checar_ci_seguranca.py
+      - name: Regressão dos portões da CI (R001-01, FERR-01)
         run: python3 -m unittest discover -s tools/ci -v
 
   segredos:
-    name: Varredura de segredos (Gitleaks)
+    name: Varredura de segredos (Gitleaks, histórico inteiro)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      # CLI fixada e conferida pelo checksum oficial da release (gitleaks_8.30.1_checksums.txt).
+      # A gitleaks-action montava "<raiz>^..HEAD" no primeiro push e não aceita outro intervalo; no pull_request
+      # pedia GET /pulls/N/commits e recebia 403 sem pull-requests: read. A CLI não usa a API nem token.
+      - name: Instalar Gitleaks 8.30.1 conferindo o checksum
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_VERSAO: 8.30.1
+          GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/gitleaks.tar.gz" "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSAO}/gitleaks_${GITLEAKS_VERSAO}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  $RUNNER_TEMP/gitleaks.tar.gz" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP" gitleaks
+          "$RUNNER_TEMP/gitleaks" version
+      - name: Varrer o histórico inteiro, com canário no commit raiz e cobertura conferida
+        run: python3 tools/ci/varrer_segredos.py --gitleaks "$RUNNER_TEMP/gitleaks" .
 
   vulnerabilidades:
     name: Vulnerabilidades e configuração (Trivy)
@@ -45,23 +61,26 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      # Gate do PRD 25.2: nenhuma alta/crítica aplicável sem resolução. Bloqueia com ou sem correção disponível (FERR-01).
+      # Exceção só por não aplicabilidade comprovada, em .trivyignore.yaml com motivo e validade (SECURITY.md).
       - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
+          # 0.74 lê o documento do projeto nos lockfiles pnpm 11+ (FERR-05).
+          version: v0.74.0
           scan-type: fs
+          format: json
+          output: ${{ runner.temp }}/trivy-report.json
+          list-all-pkgs: true
           scanners: vuln,secret,misconfig
           severity: HIGH,CRITICAL
           exit-code: "1"
-          # Gate: falha em HIGH/CRITICAL com correção disponível (acionável).
-          ignore-unfixed: true
-      - name: Relatar vulnerabilidades ainda sem correção (visíveis, sem quebrar o build)
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
-        with:
-          scan-type: fs
-          scanners: vuln
-          severity: HIGH,CRITICAL
-          exit-code: "0"
           ignore-unfixed: false
-          format: table
+      - name: Conferir cobertura das dependências de produção (FERR-05)
+        if: ${{ !cancelled() }}
+        run: python3 tools/ci/conferir_cobertura_trivy.py "$RUNNER_TEMP/trivy-report.json" .
 
   codigo:
     name: Código (lockfile, lint, tipos, testes, build)
@@ -86,6 +105,9 @@ jobs:
       - name: Instalação reproduzível (ENG-006)
         if: steps.contrato.outputs.ativo == 'true'
         run: pnpm install --frozen-lockfile
+      - name: Versões fixadas de Node e pnpm (ENG-006)
+        if: steps.contrato.outputs.ativo == 'true'
+        run: pnpm run doctor
       - name: Formatação (ENG-010)
         if: steps.contrato.outputs.ativo == 'true'
         run: pnpm run format:check
@@ -98,6 +120,10 @@ jobs:
       - name: Testes
         if: steps.contrato.outputs.ativo == 'true'
         run: pnpm run test
+      - name: Integração com PostgreSQL real (ENG-025, ENG-034)
+        if: steps.contrato.outputs.ativo == 'true'
+        # Testcontainers sobe PostgreSQL 17 + PostGIS 3.5 fixado por digest; papéis, RLS, idempotência e isolamento.
+        run: pnpm run test:integration
       - name: Build
         if: steps.contrato.outputs.ativo == 'true'
         run: pnpm run build

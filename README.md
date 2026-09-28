@@ -2,7 +2,7 @@
 
 Plataforma de gestão agrícola integrada: planejamento da safra, planos agronômicos, ordens de serviço com aprovação agronômica, almoxarifado integrado, app de campo com operação sem internet, compras, estoque e custos.
 
-**Estado:** documentação e CI. Ainda não há código de produto. Veja [`docs/STATUS.md`](docs/STATUS.md).
+**Estado:** fundação F0-a — o pacote de domínio (`packages/domain`), com decimal, unidades e saldo por lote, ainda sem banco, API ou tela. Veja [`docs/STATUS.md`](docs/STATUS.md).
 
 ## Onde está cada coisa
 | O quê | Onde |
@@ -16,9 +16,20 @@ Plataforma de gestão agrícola integrada: planejamento da safra, planos agronô
 | Parceria Claude + Codex | [`docs/parceria/`](docs/parceria/) |
 | Protótipo navegável (validação) | https://claude.ai/artifact/WPDgqGvKX6CYTCdPjidBLo |
 
+## Como rodar (3 passos)
+1. Instale o Node **24.21.0** (versão em `.nvmrc`) e ative o pnpm pela versão fixada: `corepack enable`.
+2. `pnpm install --frozen-lockfile`
+3. `pnpm run check`: confere versões, formatação, lint e fronteiras entre pacotes, tipos, testes com cobertura e build.
+
 ## Comandos que existem hoje
 | Comando | O que faz |
 |---|---|
+| `pnpm run check` | Os mesmos passos que a CI roda no código, na mesma ordem (a instalação fica de fora) |
+| `pnpm run doctor` | Confere se o Node e o pnpm em uso são os fixados (`pnpm doctor`, sem `run`, é um comando do próprio pnpm) |
+| `pnpm run lint` | ESLint e o script de fronteiras: pacote sem dependência não declarada e sem ciclo de imports (ENG-012) |
+| `pnpm run test` | Testes com cobertura mínima de 95 % em cada arquivo do domínio (ENG-032/033) |
+| `pnpm run test:integration` | Banco real: papéis, RLS, isolamento entre organizações, idempotência e imutabilidade. Precisa de Docker, ou de `SAFRION_TEST_DATABASE_URL` com um PostgreSQL descartável e usuário administrador. Roda na CI depois dos testes |
+| `pnpm run demo:reset -- --confirmar <dev\|hml>` | Cria uma geração nova de dados fictícios de demonstração. Só roda com o banco identificado como `dev` ou `hml`, o processo dizendo o mesmo ambiente (`SAFRION_AMBIENTE`) e o nome repetido no comando; em produção, recusa sem tocar em nada. Nada é apagado: movimento e auditoria são imutáveis |
 | `python3 tools/docs/checar_docs.py` | Confere a integridade da documentação: arquivos obrigatórios, IDs sem repetição, decisões e links |
 
-Os comandos `pnpm setup`, `pnpm dev`, `pnpm check` e os demais do PRD 23.4 **ainda não existem**. Eles serão criados no primeiro incremento de código.
+Os comandos `pnpm dev`, `test:e2e` e `test:load` do PRD 23.4 **ainda não existem**: entram com a web da F0-c (ADR 0004, em revisão). Os nomes `setup` e `doctor` do PRD coincidem com comandos do próprio pnpm, então se chamam com `pnpm run`.
