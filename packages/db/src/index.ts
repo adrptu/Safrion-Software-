@@ -37,5 +37,5 @@ export {
 } from './estoque.js';
 export { PASTA_MIGRACOES, aplicarMigracoes, type ResultadoMigracao } from './migrar.js';
 export { respostaDeErro } from './resposta.js';
-export { provisionarPapeis } from './papeis.js';
+export { ErroPapeis, provisionarPapeis } from './papeis.js';
 export { emOrganizacao, ehUuid, organizacaoValida } from './sessao.js';
