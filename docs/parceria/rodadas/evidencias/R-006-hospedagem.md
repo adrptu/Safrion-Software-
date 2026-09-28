@@ -335,6 +335,39 @@ Sem IP público, o Auth Proxy do notebook perde o caminho até o banco [G13, G5]
 
 Os agentes (`run.viewer`, `logging.viewer`, `cloudsql.viewer`, sem `secretAccessor`, conforme `bootstrap/contas.tf`) veem só o nome do segredo, a execução e o resultado.
 
+#### 3b) Contrato do job de vínculo, revisto (pontos do Codex às 21:19: `latest`, concorrência, execução atrasada, dois pedidos, falha depois do commit, destruição)
+
+Substitui o volume em `latest` e a destruição manual do passo 5 acima. **Proposta; não implementada.**
+
+- **Pedido imutável e identificado.** Cada versão do `hml-vinculo-pedido` é um pedido completo, com `pedido_id` (UUID gerado pelo operador), ação, organização, usuário, responsável, motivo e, se for conceder, o código. O conteúdo de uma versão não muda. O job **não monta `latest`**: ele **enumera as versões ENABLED pela API** (`versions.list`), da mais antiga para a mais nova, e lê cada uma pelo nome exato (`versions/N:access`). O log de cada pedido traz `{pedido_id, versao, resultado}`, nunca o código. O operador confere o seu `pedido_id`.
+- **Uma execução por vez.** Na conexão, o job faz `pg_try_advisory_lock` de sessão numa chave própria (`safrion.vinculo_job`). Sem a trava, sai com `OCUPADO` (código 1) sem ler nenhum pedido. `task_count 1` e `max_retries 0` continuam, mas quem impede a concorrência é a trava.
+- **Um pedido termina antes do próximo começar.** Para cada versão, na ordem:
+  1. conferir que ela ainda está ENABLED;
+  2. ler;
+  3. aplicar pelas funções atuais (`conceder_vinculo` ou `revogar_vinculos`, com as travas de vínculo);
+  4. registrar o resultado no log;
+  5. **destruir a própria versão** (`versions.destroy` com o `etag` lido).
+
+  Qualquer falha de infraestrutura, ou falha ao destruir, **para a execução** com código 3, sem passar para o pedido seguinte. Assim, uma nova tentativa só repete o último pedido inacabado, sem nenhuma mudança posterior no meio.
+- **Falha depois do commit e antes de destruir.** A próxima execução repete esse pedido primeiro. `conceder_vinculo` devolve `mantido` quando o mesmo pedido já criou o vínculo (código consumido, mesmo destino e vínculo existente; migração 0005). Se um `demo:reset` derrubou o vínculo no intervalo, devolve `PEDIDO_CONSUMIDO`, e o operador pede de novo, como já acontece depois de todo reset. `revogar_vinculos` repetido revoga 0. Nenhum dos dois aplica efeito duas vezes.
+- **Recusa de negócio é final.** Vencido, inexistente, conflitante ou usuário inválido: a versão é destruída e o resultado vai para o log. Um novo pedido é uma nova versão.
+- **Execução atrasada.** A versão que tiver mais de 60 minutos (pelo `createTime`) é recusada como `PEDIDO_ATRASADO` e destruída sem ser aplicada, para que um pedido esquecido não entre dias depois. O código de acesso já vence em 24 h (migração 0005).
+- **Dois pedidos.** Saem na ordem de criação e são processados um a um. Com dois operadores, cada um confere o seu `pedido_id` no log.
+- **Permissões, todas só neste segredo:**
+  - operador: **`secretmanager.secretVersionAdder`** (só grava versão; não lê, não lista e não destrói) e `run.invoker` no job. Destruir à mão deixa de ser passo do operador, e a exceção fica com o dono;
+  - `sa-preparo`: `secretAccessor` e **`secretVersionManager`** (lista, obtém e destrói versões; não inclui ler o valor);
+  - papéis conferidos em https://docs.cloud.google.com/secret-manager/docs/access-control.
+- **Sem dependência nova.** O CLI chama a API REST do Secret Manager com o token da conta do job, obtido no servidor de metadados do Cloud Run, pelo `fetch` do Node 24 (a verificar no ensaio). O segredo continua sem `version_destroy_ttl`, para a destruição ser imediata.
+- **Fluxo do operador:** confirmar quem pediu; `read -rs` o código; montar o pedido com `pedido_id=$(uuidgen)`; gravar a versão por pipe; `gcloud run jobs execute safrion-vinculo`; ler no log a linha do seu `pedido_id`. **Três passos, e nenhum de destruição.**
+- **Testes que o código precisa ter:**
+  - duas execuções simultâneas: uma sai `OCUPADO`;
+  - pedido duplicado dá `mantido`;
+  - falha simulada na destruição para a execução, e a seguinte repete só esse pedido;
+  - revogação seguida de concessão na mesma fila respeita a ordem;
+  - pedido com mais de 60 minutos é recusado;
+  - log sem o código;
+  - versão destruída por outra execução é ignorada.
+
 #### 4) Mudanças necessárias (arquivos)
 
 **Terraform**
