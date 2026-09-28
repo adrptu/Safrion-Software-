@@ -39,9 +39,9 @@ Dependabot para npm/pnpm 12 permanece sem compatibilidade comprovada; a configur
 
 ## Jornadas de navegador na CI
 
-A proposta em `.github/workflows/navegador.yml` executa as jornadas Playwright/axe existentes em runner Ubuntu 24.04, com Chrome do runner e PostgreSQL/PostGIS efêmero fixado pelo mesmo digest da integração. Não usa segredos, dados reais ou serviços GCP. A versão efetiva do navegador fica no log; ela acompanha a imagem do runner e não é fixada pelo projeto.
+O workflow `.github/workflows/navegador.yml` executa as jornadas Playwright/axe existentes em runner Ubuntu 24.04, com Chrome do runner e PostgreSQL/PostGIS efêmero fixado pelo mesmo digest da integração. Não usa segredos, dados reais ou serviços GCP. A versão efetiva do navegador fica no log; ela acompanha a imagem do runner e não é fixada pelo projeto.
 
-`tools/ci/conferir_e2e.py` exige no mínimo as oito jornadas desktop e uma celular, resultado real aprovado em uma tentativa, nenhum skip/falha esperada/erro global e totais coerentes. O recibo publicado contém só commit, nome e resultado dos casos; traces, cookies e relatórios brutos não são artefatos publicados. As contraprovas locais do verificador passam; a execução remota e a revisão tripla por versão são registradas no PR #8 e na issue #1.
+`tools/ci/conferir_e2e.py` exige no mínimo nove jornadas desktop e uma celular, incluindo a nova jornada do pedido de acesso, resultado real aprovado em uma tentativa, nenhum skip/falha esperada/erro global e totais coerentes. O recibo publicado contém só commit, nome e resultado dos casos; traces, cookies e relatórios brutos não são artefatos publicados. A regressão recusa o relatório antigo de oito desktop e uma celular. A execução remota e a revisão tripla por versão são registradas no PR correspondente e na issue #1.
 
 Essa prova usa a aplicação e o banco reais em modo DEV, com identidades fictícias. Não demonstra autenticação com provedor real, hospedagem funcional nem autonomia remota dos agentes. Os serviços descartáveis pertencem somente ao job e são removidos pelo runner.
 

@@ -43,7 +43,8 @@ describe('papel da aplicação e RLS (ENG-025; aceite técnico da F1)', () => {
                  WHERE a.attrelid = c.oid AND a.attname = 'organization_id' AND NOT a.attisdropped))
         ORDER BY 1`,
     );
-    expect(r.rows.length).toBe(14); // 12 da F0-b + identity_link e session (0003)
+    // 12 da F0-b + identity_link e session (0003) + access_request e identity_link_event (0005)
+    expect(r.rows.length).toBe(16);
     expect(r.rows.filter((l) => !l.rls || !l.force)).toEqual([]);
   });
 

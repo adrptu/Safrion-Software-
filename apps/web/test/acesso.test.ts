@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { MENSAGEM_GENERICA, mensagemDeLogin } from '../src/entrar/mensagens';
+import { codigoDoPedido, MENSAGEM_GENERICA, mensagemDeLogin } from '../src/entrar/mensagens';
 import { CABECALHOS_DE_SEGURANCA, novoNonce, politicaDeConteudo } from '../src/seguranca/csp';
 import { lerCookieDoCabecalho } from '../src/seguranca/cookies';
 
@@ -16,6 +16,12 @@ describe('mensagens do /entrar', () => {
       expect(mensagemDeLogin(c)).toBe(MENSAGEM_GENERICA);
     expect(mensagemDeLogin(undefined)).toBeNull();
     expect(mensagemDeLogin('')).toBeNull();
+  });
+
+  it('código do pedido de acesso (ADR 0004 §11): em dois grupos; fora do formato do servidor, nada', () => {
+    expect(codigoDoPedido('ABCDE12345')).toBe('ABCDE-12345');
+    for (const v of [undefined, '', 'abcde12345', 'ABCDE1234', 'ABCDE123456', 'ABCDEFGHIJ', '<b>ABCDE</b>'])
+      expect(codigoDoPedido(v), String(v)).toBeNull();
   });
 });
 

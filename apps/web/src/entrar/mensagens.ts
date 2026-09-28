@@ -24,6 +24,18 @@ const MENSAGENS: ReadonlyMap<string, string> = new Map(
 
 export const MENSAGEM_GENERICA = 'Não foi possível entrar. Tente de novo.';
 
+const FORMATO_CODIGO_PEDIDO = /^[0-9A-HJKMNP-TV-Z]{10}$/;
+
+/**
+ * Código de referência do pedido de acesso (ADR 0004 §11), vindo do cookie, em dois grupos para ler e ditar
+ * (ABCDE-FGHJK). Fora do formato gerado pelo servidor, nada é mostrado.
+ */
+export function codigoDoPedido(valor: string | undefined): string | null {
+  return valor !== undefined && FORMATO_CODIGO_PEDIDO.test(valor)
+    ? `${valor.slice(0, 5)}-${valor.slice(5)}`
+    : null;
+}
+
 export function mensagemDeLogin(codigo: string | undefined): string | null {
   if (codigo === undefined || codigo === '') return null;
   return MENSAGENS.get(codigo) ?? MENSAGEM_GENERICA;
