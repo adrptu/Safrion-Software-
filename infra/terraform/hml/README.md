@@ -15,7 +15,7 @@ Aplicada **pela CI, por WIF, com a `sa-infra-github`**, só pelo workflow `infra
 
 Web e jobs recebem `SAFRION_CLOUDSQL_INSTANCIA` (nome de conexão da instância), URLs do banco sem host (`postgresql://app_runtime@/safrion_hml` e `postgresql://postgres@/postgres`) e a senha por `PGPASSWORD`. Sem volume nem socket `/cloudsql`.
 
-Acesso aos segredos (`secretAccessor` no segredo): `sa-web` → app-runtime e oidc; `sa-preparo` → admin, migrator e app-runtime; `sa-demo` → app-runtime; operador → só admin.
+Acesso aos segredos (`secretAccessor` no segredo): `sa-web` → app-runtime e oidc; `sa-preparo` → admin, migrator e app-runtime; `sa-demo` → app-runtime; operador → nenhum (não conecta ao banco, ADR 0006).
 `sa-deploy-github`: `artifactregistry.writer` no repositório e `run.developer` na web e nos 2 jobs. Operador: `run.invoker` nos 2 jobs.
 Web e jobs referem **versão fixa** de cada segredo, nunca `latest`.
 

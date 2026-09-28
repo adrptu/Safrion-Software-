@@ -9,12 +9,12 @@ locals {
     "hml-oidc-client-secret",
   ])
 
-  # secretAccessor no nível do segredo, nunca no projeto.
+  # secretAccessor no nível do segredo, nunca no projeto, e só para contas de serviço. O operador não lê senha
+  # nenhuma: sem IP público ele não conecta ao banco (ADR 0006), e o job de preparo lê a do admin pela sa-preparo.
   leitores = {
-    web      = { membro = "serviceAccount:${local.sa.web}", segredos = ["hml-db-app-runtime-senha", "hml-oidc-client-secret"] }
-    preparo  = { membro = "serviceAccount:${local.sa.preparo}", segredos = ["hml-db-admin-senha", "hml-db-migrator-senha", "hml-db-app-runtime-senha"] }
-    demo     = { membro = "serviceAccount:${local.sa.demo}", segredos = ["hml-db-app-runtime-senha"] }
-    operador = { membro = var.operador, segredos = ["hml-db-admin-senha"] }
+    web     = { membro = "serviceAccount:${local.sa.web}", segredos = ["hml-db-app-runtime-senha", "hml-oidc-client-secret"] }
+    preparo = { membro = "serviceAccount:${local.sa.preparo}", segredos = ["hml-db-admin-senha", "hml-db-migrator-senha", "hml-db-app-runtime-senha"] }
+    demo    = { membro = "serviceAccount:${local.sa.demo}", segredos = ["hml-db-app-runtime-senha"] }
   }
 
   acesso_segredos = merge([

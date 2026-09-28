@@ -266,6 +266,30 @@ class Codigo(unittest.TestCase):
                       '  template {\n    template {\n      containers {\n        image = "x"\n      }\n    }\n  }\n}\n')
         self.assertTrue(self.faltas(extra={'outro.tf': sem_egress}))
 
+    def test_network_interfaces_sem_destino_utilizavel(self):
+        # HML-TF-05 (revisão do Codex de eb90a5f): bloco vazio ou sem network/subnetwork aceitável passava.
+        interface = 'network_interfaces {\n        network    = local.rede\n        subnetwork = local.subrede\n      }'
+        self.assertEqual(CLOUD_RUN.count(interface), 1)  # a web; os jobs têm um recuo a mais
+        for novo in ('network_interfaces {\n      }', 'network_interfaces {\n        tags = ["x"]\n      }',
+                     'network_interfaces {\n        network = ""\n      }',
+                     'network_interfaces {\n        network = null\n      }',
+                     'network_interfaces {\n        subnetwork = trimspace(local.subrede)\n      }',
+                     'network_interfaces {\n        network    = local.rede\n        subnetwork = "  "\n      }'):
+            with self.subTest(novo=novo):
+                self.assertEqual(self.faltas(extra={'cloud_run.tf': CLOUD_RUN.replace(interface, novo)}),
+                                 ['cloud_run.tf:53 google_cloud_run_v2_service.web: network_interfaces sem network nem '
+                                  'subnetwork em forma aceita (referência ou texto não vazio)'])
+        # Controle positivo: basta um dos dois, em forma aceita.
+        for novo in ('network_interfaces {\n        subnetwork = local.subrede\n      }',
+                     'network_interfaces {\n        network = "projects/p/global/networks/n"\n      }'):
+            with self.subTest(positivo=novo):
+                self.assertEqual(self.faltas(extra={'cloud_run.tf': CLOUD_RUN.replace(interface, novo)}), [])
+        # Nos jobs também.
+        do_job = 'network_interfaces {\n          network    = local.rede\n          subnetwork = local.subrede\n        }'
+        self.assertEqual(CLOUD_RUN.count(do_job), 2)
+        texto = CLOUD_RUN.replace(do_job, 'network_interfaces {\n        }', 1)
+        self.assertEqual(len(self.faltas(extra={'cloud_run.tf': texto})), 1)
+
     # --- R006-01..05: fixtures do Gemini revisadas pelo Codex. Cada mutação atinge um único trecho, identificado sem
     # "primeira ocorrência", e o diagnóstico tem de ser exatamente o da trava alvo, nada além. Os textos esperados
     # prendem a versão entregue: mudou a mensagem ou a linha, o teste é revisto junto.
@@ -453,6 +477,33 @@ class Plano(unittest.TestCase):
         for psc in ((), None, [{'psc_enabled': False, 'allowed_consumer_projects': []}]):
             with self.subTest(psc_ok=psc):
                 self.assertEqual(self.faltas(self.plano(psc=psc, caminho_google=False)), [])
+
+    def test_network_interfaces_vazia_ou_desconhecida_no_plano(self):
+        # HML-TF-05: [{}], campos nulos ou desconhecidos passavam no plan.
+        for tipo in ('google_cloud_run_v2_service', 'google_cloud_run_v2_job'):
+            for interface, d in (({}, {}), ({'network': None, 'subnetwork': None}, {}),
+                                 ({'network': '', 'subnetwork': '  '}, {}),
+                                 ({'network': None, 'subnetwork': None}, {'network': True, 'subnetwork': True}),
+                                 ({'network': 'n', 'subnetwork': None}, {'subnetwork': True})):
+                with self.subTest(tipo=tipo, interface=interface, desconhecido=d):
+                    r = web(tipo=tipo)
+                    alvo = r['change']['after']['template'][0]
+                    alvo = alvo['template'][0] if tipo == 'google_cloud_run_v2_job' else alvo
+                    alvo['vpc_access'][0]['network_interfaces'] = [interface]
+                    desc = {'network_interfaces': [d]}
+                    r['change']['after_unknown'] = ({'template': [{'template': [{'vpc_access': [desc]}]}]}
+                                                    if tipo == 'google_cloud_run_v2_job'
+                                                    else {'template': [{'vpc_access': [desc]}]})
+                    faltas = self.faltas(self.plano(extra=[r]))
+                    self.assertEqual(len(faltas), 1, faltas)
+                    self.assertIn('network_interfaces sem network nem subnetwork resolvido e não vazio', faltas[0])
+        r = web()
+        r['change']['after_unknown'] = {'template': [{'vpc_access': [{'network_interfaces': [True]}]}]}
+        self.assertEqual(self.faltas(self.plano(extra=[r])), [f'{r["address"]}: network_interfaces desconhecida no plan'])
+        # Controle positivo: só a sub-rede, resolvida.
+        r = web()
+        r['change']['after']['template'][0]['vpc_access'][0]['network_interfaces'] = [{'network': None, 'subnetwork': 's'}]
+        self.assertEqual(self.faltas(self.plano(extra=[r])), [])
 
     # --- R006-02 (fixture do Gemini revisada pelo Codex): rede privada desconhecida no plan ---
 

@@ -370,13 +370,24 @@ def _conferir_cloud_run(arq: str, r: Bloco) -> list[str]:
             faltas.append(f'{nome}: egress = "{EGRESS}" ausente ou não literal')
         if 'connector' in vpc[0].atributos:
             faltas.append(f'{nome}: connector no vpc_access; o desenho é Direct VPC (network_interfaces)')
-        if len(blocos(vpc[0], 'network_interfaces')) != 1:
+        interfaces = blocos(vpc[0], 'network_interfaces')
+        if len(interfaces) != 1:
             faltas.append(f'{nome}: network_interfaces deve aparecer uma vez no vpc_access')
+        elif not _interface_utilizavel(interfaces[0]):
+            faltas.append(f'{nome}: network_interfaces sem network nem subnetwork em forma aceita '
+                          '(referência ou texto não vazio)')
     protegido = [*CLOUD_RUN[r.rotulos[0]], 'vpc_access']
     for ciclo in blocos(r, 'lifecycle'):
         if not _ignore_changes_fora_de(ciclo.atributos.get('ignore_changes', []), protegido):
             faltas.append(f'{nome}: lifecycle.ignore_changes cobre o vpc_access (ou tem forma não reconhecida)')
     return faltas
+
+
+def _interface_utilizavel(b: Bloco) -> bool:
+    """O Direct VPC exige network ou subnetwork (doc do provider 8.3.0, cloud_run_v2_service, network_interfaces); cada
+    um que aparece é referência ou texto não vazio. Bloco vazio, null, "" ou função: recusado (HML-TF-05)."""
+    campos = [b.atributos[c] for c in ('network', 'subnetwork') if c in b.atributos]
+    return bool(campos) and all(referencia(e) or bool((literal(e) or '').strip()) for e in campos)
 
 
 def _ignore_changes_fora_de(expr: list[Token], protegido: list[str]) -> bool:
@@ -518,9 +529,26 @@ def _plano_cloud_run(plano: dict) -> list[str]:
             if desc.get('egress') or valor.get('egress') != EGRESS:
                 faltas.append(f'{endereco}: egress = {valor.get("egress")!r} (desconhecido: {bool(desc.get("egress"))})')
             interfaces = valor.get('network_interfaces')
-            if desc.get('network_interfaces') is True or not isinstance(interfaces, list) or len(interfaces) != 1:
+            desc_interfaces = desc.get('network_interfaces')
+            if desc_interfaces is True or not isinstance(interfaces, list) or len(interfaces) != 1:
                 faltas.append(f'{endereco}: network_interfaces ausente, repetido ou desconhecido no plan')
+            else:
+                faltas += _interface_do_plano(endereco, interfaces[0], desc_interfaces)
     return faltas
+
+
+def _interface_do_plano(endereco: str, interface: object, desc: object) -> list[str]:
+    """No plan, network ou subnetwork resolvido e não vazio, e nenhum dos dois desconhecido: o código dá os dois, e um
+    valor que só se resolve no apply não é conferível aqui (falha fechado, HML-TF-05)."""
+    d = desc[0] if isinstance(desc, list) and desc else {}
+    if d is True or not isinstance(interface, dict) or not isinstance(d, dict):
+        return [f'{endereco}: network_interfaces desconhecida no plan']
+    desconhecidos = [c for c in ('network', 'subnetwork') if d.get(c)]
+    validos = [c for c in ('network', 'subnetwork') if isinstance(interface.get(c), str) and interface[c].strip()]
+    if desconhecidos or not validos:
+        return [f'{endereco}: network_interfaces sem network nem subnetwork resolvido e não vazio '
+                f'(desconhecidos: {desconhecidos})']
+    return []
 
 
 def main(argv: list[str]) -> int:
