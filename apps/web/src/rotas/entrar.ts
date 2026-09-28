@@ -1,6 +1,7 @@
 import {
   abrirContinuacao,
   concluirContinuacao,
+  registrarPedidoAcesso,
   revogarSessao,
   vinculosDaContinuacao,
   type ResultadoConclusao,
@@ -13,11 +14,12 @@ import {
   desenvolvimentoLiberado,
   USUARIOS_DESENVOLVIMENTO,
 } from '../identidade/desenvolvimento';
-import type { ProvedorIdentidade } from '../identidade/provedor';
+import type { IdentidadeValidada, ProvedorIdentidade } from '../identidade/provedor';
 import {
   apagarCookie,
   COOKIE_CONTINUACAO,
   COOKIE_LOGIN,
+  COOKIE_PEDIDO,
   COOKIE_SESSAO,
   definirCookie,
   lerCookie,
@@ -30,6 +32,36 @@ import { redirecionar } from './resposta';
 type Deps = Pick<Dependencias, 'banco' | 'origem' | 'registrador' | 'ambienteDoProcesso'>;
 
 const LIMITE_FORMULARIO_BYTES = 2048;
+const CODIGO_NA_TELA_MS = 10 * 60_000;
+const MOTIVO_DO_PEDIDO = {
+  registrado: 'PEDIDO_REGISTRADO',
+  cota_esgotada: 'PEDIDOS_ESGOTADOS',
+  fora_de_hml: 'PEDIDO_FORA_DE_HML',
+  recusado: 'PEDIDO_RECUSADO',
+} as const;
+
+/**
+ * Login OIDC validado e sem vínculo (ADR 0004 §11): registra o pedido de acesso, que não concede nada, e entrega o
+ * código de referência num cookie HttpOnly de 10 minutos para a tela de /entrar mostrar; nunca na URL nem no log. Sem
+ * código novo (fora de hml, cota cheia ou falha), o cookie anterior é apagado: a tela nunca mostra código de outra
+ * pessoa que usou o mesmo navegador. Falha ao registrar não muda a resposta: a pessoa vê "sem acesso", sem código.
+ */
+async function pedidoDeAcesso(
+  d: Deps,
+  identidade: IdentidadeValidada,
+): Promise<{ readonly cookie: string; readonly motivo: string }> {
+  try {
+    const p = await registrarPedidoAcesso(d.banco, identidade);
+    return p.resultado === 'registrado'
+      ? {
+          cookie: definirCookie(COOKIE_PEDIDO, p.codigo, new Date(Date.now() + CODIGO_NA_TELA_MS)),
+          motivo: MOTIVO_DO_PEDIDO.registrado,
+        }
+      : { cookie: apagarCookie(COOKIE_PEDIDO), motivo: MOTIVO_DO_PEDIDO[p.resultado] };
+  } catch {
+    return { cookie: apagarCookie(COOKIE_PEDIDO), motivo: 'PEDIDO_FALHOU' };
+  }
+}
 const PAPEL = /^[a-z][a-z_]*$/;
 
 type Ativo =
@@ -111,6 +143,7 @@ export function criarRotasEntrar(deps: () => Deps, oidc?: FabricaOidc) {
     return redirecionar(d.origem, caminhoInterno(r.destino) ?? INICIO, [
       ...cookies,
       definirCookie(COOKIE_SESSAO, r.sessao.token, r.sessao.expiraEm),
+      apagarCookie(COOKIE_PEDIDO),
     ]);
   }
 
@@ -154,8 +187,11 @@ export function criarRotasEntrar(deps: () => Deps, oidc?: FabricaOidc) {
         const { ticket, expiraEm } = await abrirContinuacao(d.banco, resultado.identidade, resultado.destino);
         const vinculos = await vinculosDaContinuacao(d.banco, ticket);
         const [unico] = vinculos;
-        if (vinculos.length === 0 || unico === undefined)
-          return recusar(d, correlationId, 'SEM_VINCULO', [semLogin]);
+        if (vinculos.length === 0 || unico === undefined) {
+          if (ativo.provedor.nome !== 'oidc') return recusar(d, correlationId, 'SEM_VINCULO', [semLogin]);
+          const pedido = await pedidoDeAcesso(d, resultado.identidade);
+          return recusar(d, correlationId, 'SEM_VINCULO', [semLogin, pedido.cookie], pedido.motivo);
+        }
         const [papel] = unico.papeis;
         if (vinculos.length === 1 && unico.papeis.length === 1 && papel !== undefined) {
           const r = await concluirContinuacao(d.banco, ticket, {

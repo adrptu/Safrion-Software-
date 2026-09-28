@@ -73,3 +73,12 @@ export {
   type TransacaoLoginGuardada,
   type VinculoDisponivel,
 } from './sessao-web.js';
+export {
+  concederVinculo,
+  ErroVinculo,
+  normalizarCodigo,
+  registrarPedidoAcesso,
+  revogarVinculos,
+  type CodigoErroVinculo,
+  type PedidoAcesso,
+} from './vinculo.js';

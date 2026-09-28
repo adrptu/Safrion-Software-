@@ -38,6 +38,34 @@ Login em HML (adaptador OIDC do Codex, ligado pela casca):
 - no log, `login.recusado` traz o motivo como código: `SEM_CONFIGURACAO`, `CONFIGURACAO_INVALIDA` ou `DESCOBERTA_FALHOU`. Nenhum segredo, código ou token é registrado;
 - só entra quem tem vínculo explícito entre issuer + subject e um usuário da organização. O e-mail nunca vincula.
 
+**Conceder acesso em HML** (ADR 0004 §11):
+1. A pessoa entra pelo provedor. Sem vínculo, a tela mostra um código de referência, válido por 24 h. Um login novo troca o código.
+2. Ela passa o código ao administrador.
+3. **O código não prova quem é a pessoa.** O administrador confirma quem pediu por um canal autenticado independente, e confere organização, usuário e papel.
+4. O administrador roda o comando no alvo `preparo` da imagem, com `SAFRION_ADMIN_URL` (administrador do servidor):
+   `docker run --rm -it -e SAFRION_ADMIN_URL --entrypoint node <imagem-preparo> dist/cli/vincular-identidade.js conceder --ambiente hml --banco <nome> --organizacao <id> --usuario <id> --responsavel <quem autorizou> --motivo <texto curto>`.
+   **O código é pedido no terminal e não aparece na tela.** Ele também pode vir por pipe, nunca como argumento.
+5. Repetir o mesmo comando devolve `mantido` e não muda nada.
+
+Para tirar o acesso, use o mesmo comando com `revogar` no lugar de `conceder`, sem código:
+- ele remove **todos os vínculos desse usuário nessa organização** e as sessões dele ali;
+- a próxima requisição da pessoa já é negada;
+- o código antigo não reabre o acesso: vincular de novo pede um código novo.
+
+Saída do comando:
+- 0: concedido, mantido, revogado ou sem vínculo;
+- 1: recusado, com o código do motivo;
+- 2: uso incorreto;
+- 3: falha de infraestrutura, só com códigos.
+
+Nenhuma saída traz código, subject ou hash.
+
+**Registro e limites:**
+- cada concessão e cada revogação ficam gravadas em `app.identity_link_event`, sem poder ser alteradas pela aplicação, com responsável, motivo e usuário do banco;
+- o `migrator` lê esse registro;
+- limites de HML: até 100 pedidos pendentes e 1000 guardados;
+- depois de um `demo:reset` em HML, os acessos reais à geração anterior caem, e é preciso conceder de novo.
+
 O provedor de desenvolvimento fica fechado fora de `dev`.
 
 **Preparo do banco** (alvo `preparo`, ou `node packages/db/dist/cli/preparar-banco.js --ambiente hml --banco <nome>` depois do build). Lê:

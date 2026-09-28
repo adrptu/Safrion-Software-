@@ -5,6 +5,8 @@
 export const COOKIE_SESSAO = '__Host-safrion-sessao';
 export const COOKIE_LOGIN = '__Host-safrion-login';
 export const COOKIE_CONTINUACAO = '__Host-safrion-continuacao';
+/** Código de referência do pedido de acesso (ADR 0004 §11), só para a tela de /entrar mostrar; não autentica nada. */
+export const COOKIE_PEDIDO = '__Host-safrion-pedido';
 
 const NOME = /^[A-Za-z0-9_-]+$/;
 

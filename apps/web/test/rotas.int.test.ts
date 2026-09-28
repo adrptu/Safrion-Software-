@@ -5,6 +5,7 @@ import { createHash, generateKeyPairSync, randomUUID, sign } from 'node:crypto';
 
 import { criarRegistrador } from '@safrion/contracts';
 import {
+  concederVinculo,
   definirIdentidadeAmbiente,
   emOrganizacao,
   restaurarDemonstracao,
@@ -18,7 +19,7 @@ import { contagens, criarBanco, type Ambiente } from '../../../packages/db/test/
 import { criarRotaComandos } from '../src/rotas/comandos';
 import { criarRotasEntrar } from '../src/rotas/entrar';
 import { criarRotaSaude } from '../src/rotas/saude';
-import { COOKIE_CONTINUACAO, COOKIE_LOGIN, COOKIE_SESSAO } from '../src/seguranca/cookies';
+import { COOKIE_CONTINUACAO, COOKIE_LOGIN, COOKIE_PEDIDO, COOKIE_SESSAO } from '../src/seguranca/cookies';
 import { criarFabricaOidc } from '../src/servidor/oidc';
 
 const ORIGEM = 'http://localhost:3000';
@@ -522,8 +523,12 @@ describe('login OIDC pela casca (adaptador do Codex, provedor sintético)', () =
   it('identidade sem vínculo não entra, mesmo com o provedor confirmando', async () => {
     const idp = criarIdp();
     const rotas = criarRotasEntrar(depsHml, criarFabricaOidc({ env: ENV_OIDC, transporte: idp.transporte }));
+    linhas.length = 0;
     const { retorno } = await entrarPeloIdp(rotas, idp, 'oidc-sem-vinculo');
     expect(destinoDe(retorno)).toBe('/entrar?erro=SEM_VINCULO');
+    // Banco de dev: nenhum pedido é registrado, e nenhum código antigo sobra no navegador.
+    expect(cookieDe(retorno, COOKIE_PEDIDO)).toBeUndefined();
+    expect(linhas.join('\n')).toContain('"motivo":"PEDIDO_FORA_DE_HML"');
     expect(cookieDe(retorno, COOKIE_SESSAO)).toBeUndefined();
     expect(idp.chamadas.token).toBe(1);
   });
@@ -579,6 +584,108 @@ describe('login OIDC pela casca (adaptador do Codex, provedor sintético)', () =
       expect(tudo.includes(segredo)).toBe(false);
     }
   });
+  describe('pedido de acesso em HML (ADR 0004 §11)', () => {
+    let ambHml: Ambiente;
+    let demoHml: Demonstracao;
+    let raizHml: pg.Client;
+    const depsBancoHml = () => ({ ...depsHml(), banco: ambHml.app });
+    const linhaDoCookie = (r: Response, nome: string) =>
+      r.headers.getSetCookie().find((c) => c.startsWith(`${nome}=`)) ?? '';
+
+    beforeAll(async () => {
+      ambHml = await criarBanco();
+      const mig = new pg.Client({ connectionString: ambHml.url('migrator') });
+      await mig.connect();
+      try {
+        await definirIdentidadeAmbiente(mig, 'hml');
+      } finally {
+        await mig.end();
+      }
+      demoHml = await restaurarDemonstracao(ambHml.app, { confirmar: 'hml', ambienteDoProcesso: 'hml' });
+      const url = new URL(inject('urlAdmin'));
+      url.pathname = `/${ambHml.banco}`;
+      raizHml = new pg.Client({ connectionString: url.toString() });
+      await raizHml.connect();
+    });
+    afterAll(async () => {
+      await raizHml.end();
+      await ambHml.encerrar();
+    });
+
+    it('sem vínculo: pedido registrado, código só no cookie; o administrador concede e a pessoa entra', async () => {
+      const idp = criarIdp();
+      const rotas = criarRotasEntrar(
+        depsBancoHml,
+        criarFabricaOidc({ env: ENV_OIDC, transporte: idp.transporte }),
+      );
+      linhas.length = 0;
+      const { retorno } = await entrarPeloIdp(rotas, idp, 'oidc-pedido');
+      expect(destinoDe(retorno)).toBe('/entrar?erro=SEM_VINCULO');
+      expect(cookieDe(retorno, COOKIE_SESSAO)).toBeUndefined();
+      const codigo = cookieDe(retorno, COOKIE_PEDIDO) ?? '';
+      expect(codigo).toMatch(/^[0-9A-HJKMNP-TV-Z]{10}$/);
+      const linha = linhaDoCookie(retorno, COOKIE_PEDIDO);
+      expect(linha).toContain('; Path=/;');
+      expect(linha).toMatch(/; HttpOnly; Secure; SameSite=Lax$/);
+      const validade = Date.parse(/Expires=([^;]+)/.exec(linha)?.[1] ?? '') - Date.now();
+      expect(validade).toBeGreaterThan(9 * 60_000);
+      expect(validade).toBeLessThanOrEqual(10 * 60_000);
+      expect(retorno.headers.get('location')).not.toContain(codigo);
+      expect(retorno.headers.get('cache-control')).toBe('no-store');
+      const log = linhas.join('\n');
+      expect(log).toContain('"motivo":"PEDIDO_REGISTRADO"');
+      for (const segredo of [codigo, 'oidc-pedido']) expect(log.includes(segredo)).toBe(false);
+      // O pedido não concede nada: entrar de novo antes da concessão continua sem vínculo.
+      expect(destinoDe((await entrarPeloIdp(rotas, idp, 'oidc-pedido')).retorno)).toBe(
+        '/entrar?erro=SEM_VINCULO',
+      );
+      // O código mostrado por último é o que vale; o administrador concede por ele.
+      const atual = cookieDe((await entrarPeloIdp(rotas, idp, 'oidc-pedido')).retorno, COOKIE_PEDIDO) ?? '';
+      const almoxarife = demoHml.usuarios.find((u) => u.papel === 'almoxarife')?.usuarioId ?? '';
+      const mig = await ambHml.migrator.connect();
+      try {
+        expect(
+          await concederVinculo(mig, {
+            codigo: atual,
+            organizacao: demoHml.organizationId,
+            usuario: almoxarife,
+            responsavel: 'teste de rota',
+            motivo: 'pedido pela casca',
+          }),
+        ).toBe('concedido');
+      } finally {
+        mig.release();
+      }
+      const segunda = await entrarPeloIdp(rotas, idp, 'oidc-pedido');
+      expect(destinoDe(segunda.retorno)).toBe('/estoque');
+      expect(cookieDe(segunda.retorno, COOKIE_SESSAO)).toBeDefined();
+      expect(linhaDoCookie(segunda.retorno, COOKIE_PEDIDO)).toContain('Max-Age=0');
+    });
+
+    it('cota cheia: sem código novo, o cookie anterior é apagado e o motivo vai para o log', async () => {
+      await raizHml.query(
+        `INSERT INTO app.access_request (code_hash, issuer, subject, expires_at)
+         SELECT sha256(convert_to('cota-' || i, 'UTF8')), 'https://carga.invalid', 'cota-' || i,
+                now() + interval '1 hour'
+           FROM generate_series(1, 100) i`,
+      );
+      try {
+        const idp = criarIdp();
+        const rotas = criarRotasEntrar(
+          depsBancoHml,
+          criarFabricaOidc({ env: ENV_OIDC, transporte: idp.transporte }),
+        );
+        linhas.length = 0;
+        const { retorno } = await entrarPeloIdp(rotas, idp, 'oidc-sem-cota');
+        expect(destinoDe(retorno)).toBe('/entrar?erro=SEM_VINCULO');
+        expect(cookieDe(retorno, COOKIE_PEDIDO)).toBeUndefined();
+        expect(linhaDoCookie(retorno, COOKIE_PEDIDO)).toContain('Max-Age=0');
+        expect(linhas.join('\n')).toContain('"motivo":"PEDIDOS_ESGOTADOS"');
+      } finally {
+        await raizHml.query("DELETE FROM app.access_request WHERE issuer = 'https://carga.invalid'");
+      }
+    });
+  });
 });
 
 describe('/saude e log', () => {
@@ -589,7 +696,7 @@ describe('/saude e log', () => {
     expect(corpo).toMatchObject({
       status: 'ok',
       ambiente: 'dev',
-      migracao: '0004_vinculo_demonstracao.sql',
+      migracao: '0005_vinculo_hml.sql',
       commit: 'abc1234',
     });
     expect(JSON.stringify(corpo)).not.toContain('postgres');
