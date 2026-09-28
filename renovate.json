@@ -1,0 +1,161 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "ATUALIZA-01: candidatos estáveis, pins exatos e revisão da equipe antes de integrar.",
+  "timezone": "America/Sao_Paulo",
+  "schedule": ["* 3-7 * * *"],
+  "prHourlyLimit": 1,
+  "prConcurrentLimit": 2,
+  "branchConcurrentLimit": 2,
+  "automerge": false,
+  "platformAutomerge": false,
+  "ignoreUnstable": true,
+  "respectLatest": true,
+  "minimumReleaseAge": "7 days",
+  "minimumReleaseAgeBehaviour": "timestamp-required",
+  "internalChecksFilter": "strict",
+  "rangeStrategy": "pin",
+  "pinDigests": true,
+  "ignoreScripts": true,
+  "dependencyDashboard": false,
+  "labels": ["dependencias"],
+  "enabledManagers": [
+    "npm",
+    "nvm",
+    "dockerfile",
+    "github-actions",
+    "terraform",
+    "terraform-version",
+    "tflint-plugin",
+    "custom.regex"
+  ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["* 3-7 * * 1"]
+  },
+  "prBodyNotes": [
+    "Equipe: conferir compatibilidade, fontes/datas, pins repetidos e checks pertinentes. Três pareceres na versão revisada antes da integração; produção exige aceite da candidata.",
+    "Não contornar checksum, lockfile, quarentena ou gate para fazer uma atualização passar. Ausência de timestamp exige verificação, não exceção automática."
+  ],
+  "packageRules": [
+    {
+      "description": "Actions continuam exclusivamente com Dependabot; Renovate cuida das imagens e inputs dos workflows.",
+      "matchManagers": ["github-actions"],
+      "matchDepTypes": ["action", "workflow"],
+      "enabled": false
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["engines"],
+      "rangeStrategy": "replace"
+    },
+    {
+      "matchPackageNames": [
+        "next",
+        "@next/eslint-plugin-next",
+        "react",
+        "react-dom",
+        "@types/react",
+        "@types/react-dom",
+        "eslint-plugin-react-hooks"
+      ],
+      "groupName": "framework web"
+    },
+    {
+      "matchPackageNames": ["typescript", "typescript-eslint", "eslint", "@eslint/js"],
+      "groupName": "analise estatica"
+    },
+    {
+      "matchPackageNames": ["vitest", "@vitest/coverage-v8", "vite"],
+      "groupName": "testes unitarios"
+    },
+    {
+      "matchPackageNames": ["node", "@types/node"],
+      "groupName": "runtime Node"
+    },
+    {
+      "matchPackageNames": ["semgrep/semgrep"],
+      "groupName": "Semgrep e contrato"
+    },
+    {
+      "matchPackageNames": ["postgis/postgis"],
+      "groupName": "PostgreSQL e PostGIS"
+    },
+    {
+      "matchManagers": ["terraform", "terraform-version"],
+      "groupName": "Terraform e provider Google"
+    },
+    {
+      "matchDatasources": ["github-release-attachments"],
+      "pinDigests": false
+    },
+    {
+      "matchPackageNames": ["postgis/postgis"],
+      "versioning": "regex:^(?<major>\\d+)-(?<minor>\\d+)\\.(?<patch>\\d+)$"
+    },
+    {
+      "matchPackageNames": ["hashicorp/terraform"],
+      "groupName": "Terraform e provider Google"
+    },
+    {
+      "description": "Linha LTS homologada. Rever junto dos tipos e Docker na migração para nova LTS (versions.md).",
+      "matchPackageNames": ["node"],
+      "allowedVersions": "/^24\\./"
+    },
+    {
+      "description": "Tipos não podem prometer APIs de outra major do runtime.",
+      "matchPackageNames": ["@types/node"],
+      "allowedVersions": ">=24 <25"
+    },
+    {
+      "description": "Mesmo PostgreSQL/PostGIS da HML; major e minor PostGIS mudam com migração ensaiada.",
+      "matchPackageNames": ["postgis/postgis"],
+      "allowedVersions": "/^17-3\\.5(?:\\.|$)/"
+    },
+    {
+      "description": "Rebuilds das imagens base juntos, semanalmente. Versões continuam no grupo do runtime.",
+      "matchManagers": ["dockerfile"],
+      "matchUpdateTypes": ["digest"],
+      "groupName": "digests das imagens base",
+      "schedule": ["* 3-7 * * 1"]
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/(ci|infra)\\.yml$/"],
+      "matchStrings": [
+        "# renovate: datasource=github-release-attachments depName=(?<depName>[^\\s]+)\\s+(?<variable>[A-Z]+)_VERSAO: (?<currentValue>v[0-9.]+)\\s+[A-Z]+_SHA256: (?<currentDigest>[a-f0-9]{64})"
+      ],
+      "datasourceTemplate": "github-release-attachments",
+      "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^\\.github/workflows/semgrep\\.yml$/",
+        "/^packages/db/test/global-setup\\.ts$/"
+      ],
+      "matchStrings": [
+        "(?<depName>semgrep/semgrep|postgis/postgis):(?<currentValue>[0-9.-]+)@(?<currentDigest>sha256:[a-f0-9]{64})"
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^tools/ci/check_semgrep\\.py$/"],
+      "matchStrings": ["VERSION = \"(?<currentValue>[0-9.]+)\""],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "semgrep/semgrep",
+      "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/infra\\.yml$/"],
+      "matchStrings": ["TERRAFORM_VERSAO: \"(?<currentValue>[0-9.]+)\""],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "hashicorp/terraform",
+      "extractVersionTemplate": "^v(?<version>.*)$",
+      "versioningTemplate": "semver"
+    }
+  ]
+}

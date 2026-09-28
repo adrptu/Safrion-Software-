@@ -4,6 +4,31 @@ Fixadas em 27/09/2026 no primeiro commit executável (F0-a), com versões exatas
 
 **Quarentena de 7 dias** (`minimumReleaseAge: 10080` no `pnpm-workspace.yaml`): nenhuma dependência, direta ou indireta, entra com menos de 7 dias de publicada. É a proteção contra versão maliciosa recém-publicada no registro. Exceção só com motivo registrado no PR (`minimumReleaseAgeExclude`). Prova de 27/09: pedir o Vitest 5.0.2, de 2 dias, foi recusado.
 
+## Atualizações automáticas — ATUALIZA-01
+
+O alvo é a versão estável mais recente **compatível e verificada**, incluindo mudanças de major. Uma versão nova gera candidata; não altera produção. Node deve permanecer em LTS suportada e banco precisa de migração/recuperação ensaiadas. Incompatibilidades ficam no PR existente com motivo e condição de retomada, em vez de congelar a stack sem prazo.
+
+- Dependabot verifica **Actions diariamente**, com 7 dias de quarentena e até 2 PRs. Renovate não atualiza essas mesmas Actions.
+- `renovate.json` prepara consulta diária das demais dependências, no executor remoto do bot: pacotes diretos, lockfile/transitivos, Node, pnpm, imagens/digests, inputs de ferramentas nos workflows e Terraform/provider. Até 2 PRs de versão em aberto; conjuntos acoplados atualizam juntos; manutenção de lock semanal. Não roda scripts de instalação, não faz merge, apply ou deploy.
+- Mantêm-se pins exatos, SHAs/digests, `--frozen-lockfile`, scanners e testes existentes. Major também vira PR, com revisão de migração, exceto as linhas de Node/tipos e PostgreSQL/PostGIS temporariamente vinculadas ao runtime homologado abaixo. Segurança aplicável tem prioridade; redução de quarentena requer motivo revisado na própria correção.
+- O bot propõe; a equipe resolve quebra de API, peers, testes e pins auxiliares. A integração requer CI e pareceres pertinentes da equipe; produção continua exigindo aceite da candidata por Adrianus.
+
+| Cobertura | Mecanismo e limite |
+|---|---|
+| Next/React, bibliotecas, lint, testes, driver e pnpm | Managers npm + lock; regeneração real dos dois documentos do `pnpm-lock.yaml` e instalação frozen comprovadas localmente com Renovate44.116.1/pnpm12.5.1; ensaio hospedado/cold-cache ainda pendente. |
+| Node | `.nvmrc`, engines e imagem de build; conferir a mesma versão efetiva no Docker/CI e LTS nas fontes antes de integrar; bot mantém Node24/tipos24; revisar a restrição junto da próxima LTS em 28/10/2026, conforme tabela. Não avançar tipos isoladamente para outro major. |
+| Imagens de runtime, Semgrep, PostGIS | Docker + regex para pins em env/TypeScript; Semgrep inclui asserção do scanner no mesmo grupo. linha17-3.5 alinhada à HML; outra linha exige alterar a restrição no mesmo PR da migração Cloud SQL/guard. Digests das imagens base agrupados semanalmente. |
+| Actions, Python e Trivy | Dependabot para SHAs das Actions; Renovate para inputs/imagens. Python minor é canal, não pin de patch. Chrome/Docker/SO herdados de `ubuntu-latest` são mantidos pelo GitHub e verificados pela CI; não são geridos como dependências do produto. |
+| Gitleaks e TFLint | Versão e checksum de release via `github-release-attachments`, sem remover a conferência de hash. TFLint entra quando o workflow de infra for integrado. |
+| Terraform CLI/provider | Manager Terraform atualiza constraints e lock; regex cobre CLI no workflow de infra, no mesmo grupo do required_version/provider. **O SHA do zip da CLI HashiCorp ainda precisa ser obtido/conferido pela equipe no mesmo PR**; hash antigo falha fechado. Não declarar esta etapa automática antes da prova. |
+| Serviços gerenciados e modelos de IA | Mudanças de API, manutenção do banco e novos modelos exigem revisão de contrato/custo/comportamento. O bot não troca projeto, região, banco, modelo ou serviço apenas por existir versão mais nova. |
+
+**Ativação:** esta configuração ainda não comprova executor ativo. Precisa entrar na branch padrão após revisão independente e o GitHub App Renovate precisa estar instalado somente neste repositório, com recibo real de extração, atualização do lock e primeiro PR/CI. Não usa token pessoal nem depende do Mac. Até lá, somente Dependabot já existente está configurado; o recebimento de PR confirma operação, não este texto. Erros de bot/registro/lock ficam visíveis no PR/log e no checkpoint da issue1, sem outra fila de trabalho.
+
+**Limite da quarentena:** Renovate exige timestamp do registro; se faltar, a atualização permanece retida para investigação. Para digests, a data pode ser da tag e não do blob; revisão de origem permanece necessária. Atualização pendente, falha de consulta ou PR vermelho nunca significa stack atualizada.
+
+Fontes oficiais conferidas em 28/09/2026: [managers Renovate](https://docs.renovatebot.com/modules/manager/), [npm/lock](https://docs.renovatebot.com/modules/manager/npm/), [Actions e inputs](https://docs.renovatebot.com/modules/manager/github-actions/), [Terraform](https://docs.renovatebot.com/modules/manager/terraform/), [idade de releases](https://docs.renovatebot.com/key-concepts/minimum-release-age/), [suporte Dependabot](https://docs.github.com/en/code-security/reference/supply-chain-security/supported-ecosystems-and-repositories). Dependabot documenta pnpm até10 e Terraform até1.15.x; isso não prova falha no12/1.16, mas impede prometer cobertura sem ensaio.
+
 ## Em uso
 
 | Componente | Versão | Publicada em | Fonte (consultada em 27/09/2026) | Suporte | Motivo | Próxima revisão |
