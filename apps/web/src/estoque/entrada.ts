@@ -60,12 +60,25 @@ export function pedidoDeEntrada(
   };
 }
 
+/**
+ * `incerto`: a entrada pode ter sido gravada sem a resposta chegar (erro do servidor, resposta inesperada ou rede). A
+ * tela guarda o envio e só reenvia o mesmo, com a mesma chave, que o servidor não duplica. As recusas antes do efeito
+ * (sessão, papel, contrato) são certas: nada foi gravado.
+ */
 export type Desfecho =
-  | { readonly tipo: 'confirmado' }
+  | { readonly tipo: 'confirmado'; readonly jaRecebido: boolean }
   | { readonly tipo: 'conflito'; readonly mensagem: string }
   | { readonly tipo: 'recusado'; readonly mensagem: string; readonly campo?: CampoEntrada }
   | { readonly tipo: 'sessao'; readonly mensagem: string }
-  | { readonly tipo: 'falha'; readonly mensagem: string };
+  | { readonly tipo: 'falha'; readonly mensagem: string; readonly incerto: boolean };
+
+/** A rede caiu depois do envio: mesmo tratamento de uma resposta inesperada. */
+export const SEM_CONEXAO: Desfecho = {
+  tipo: 'falha',
+  mensagem:
+    'Sem conexão com o servidor. A entrada pode ter chegado: registre de novo para conferir, sem duplicar.',
+  incerto: true,
+};
 
 const MOTIVOS: Readonly<Record<string, { readonly mensagem: string; readonly campo?: CampoEntrada }>> = {
   UNIDADE_INCOMPATIVEL: { mensagem: 'Esta unidade não serve para o produto do lote.', campo: 'unidade' },
@@ -91,13 +104,14 @@ function codigo(corpo: unknown, campo: 'reasonCode' | 'codigo'): string | null {
 
 /**
  * Resposta do servidor para o que a tela mostra. Recibo confirmado (200) e reenvio já recebido são sucesso; conflito de
- * versão (409) pede conferir os dados atualizados; rejeição registrada (422) diz o motivo; 401 volta ao login; o resto é
- * falha com os dados mantidos no formulário.
+ * versão (409) pede conferir os dados atualizados; rejeição registrada (422) diz o motivo; 401 volta ao login; 403, 400,
+ * 413 e 415 são recusas certas; o resto é incerto e fica guardado para conferir sem duplicar.
  */
 export function desfechoDaResposta(status: number, corpo: unknown): Desfecho {
   const resultado = codigo(corpo, 'reasonCode');
-  if (status === 200 && (corpo as { outcome?: unknown } | null)?.outcome === 'confirmed')
-    return { tipo: 'confirmado' };
+  const recibo = corpo as { outcome?: unknown; alreadyReceived?: unknown } | null;
+  if (status === 200 && recibo?.outcome === 'confirmed')
+    return { tipo: 'confirmado', jaRecebido: recibo.alreadyReceived === true };
   if (status === 409) {
     return {
       tipo: 'conflito',
@@ -112,12 +126,19 @@ export function desfechoDaResposta(status: number, corpo: unknown): Desfecho {
   }
   if (status === 401)
     return { tipo: 'sessao', mensagem: 'Sua sessão terminou. Entre de novo para registrar.' };
-  if (status === 403) return { tipo: 'falha', mensagem: 'Seu papel não permite registrar entrada.' };
+  if (status === 403)
+    return { tipo: 'falha', mensagem: 'Seu papel não permite registrar entrada.', incerto: false };
   if (status === 400 || status === 413 || status === 415) {
-    return { tipo: 'falha', mensagem: 'O pedido não foi aceito. Recarregue a página e tente de novo.' };
+    return {
+      tipo: 'falha',
+      mensagem: 'O pedido não foi aceito. Recarregue a página e tente de novo.',
+      incerto: false,
+    };
   }
   return {
     tipo: 'falha',
-    mensagem: 'O servidor não respondeu como esperado. Seus dados continuam aqui; tente de novo.',
+    mensagem:
+      'O servidor não respondeu como esperado. A entrada pode ter chegado: registre de novo para conferir, sem duplicar.',
+    incerto: true,
   };
 }

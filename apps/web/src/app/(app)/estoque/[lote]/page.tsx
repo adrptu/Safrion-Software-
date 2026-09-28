@@ -71,6 +71,8 @@ export default async function Lote({
               unidadePadrao={lote.unidade}
               locais={locais.map((l) => ({ valor: l.id, rotulo: `${l.nome} · ${l.fazenda}` }))}
               destino={`/estoque/${lote.id}`}
+              usuarioId={sessao.usuarioId}
+              organizacaoId={sessao.organizationId}
             />
           ) : (
             <div className="bloco-corpo">
