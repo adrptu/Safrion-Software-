@@ -5,6 +5,9 @@ packages:
 # Quarentena de 7 dias (em minutos) contra versões recém-publicadas e ainda não examinadas pela comunidade:
 # vale para todas as dependências, diretas e indiretas.
 minimumReleaseAge: 10080
+# Modo estrito: versão fora da quarentena é recusada, sem pedir confirmação e sem entrar sozinha no
+# minimumReleaseAgeExclude. Exceção só com motivo registrado no PR.
+minimumReleaseAgeStrict: true
 
 # Scripts de instalação desligados: são compilações nativas opcionais das dependências do Testcontainers (a conexão
 # SSH funciona sem elas). Nenhum pacote roda script de instalação sem decisão registrada aqui.
