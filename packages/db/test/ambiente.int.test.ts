@@ -235,11 +235,25 @@ describe('demonstração com dados fictícios (pnpm demo:reset)', () => {
         escrever,
       ),
     ).toBe(0);
-    expect(JSON.parse(linhas.at(-1) ?? '')).toMatchObject({
-      resultado: 'demonstracao_restaurada',
-      ambiente: 'hml',
-      geracao: 3,
-    });
+    const saida = JSON.parse(linhas.at(-1) ?? '') as {
+      organizacao: string;
+      usuarios: { papel: string; usuario: string }[];
+    };
+    expect(saida).toMatchObject({ resultado: 'demonstracao_restaurada', ambiente: 'hml', geracao: 3 });
+    // O operador precisa do id e do papel de cada usuário fictício para conceder acesso em HML; o subject de
+    // desenvolvimento não sai. Os ids batem com os usuários ativos da organização nova.
+    const doBanco = await emOrganizacao(hml.app, saida.organizacao, async (c) =>
+      (
+        await c.query<{ user_id: string; role_code: string }>(
+          `SELECT r.user_id, r.role_code FROM app.user_role r JOIN app.app_user u ON u.id = r.user_id
+            WHERE u.active`,
+        )
+      ).rows.map((r) => [r.role_code, r.user_id]),
+    );
+    expect(saida.usuarios.map((u) => [u.papel, u.usuario]).sort()).toEqual(doBanco.sort());
+    expect(saida.usuarios.length).toBeGreaterThan(0);
+    for (const u of saida.usuarios) expect(Object.keys(u).sort()).toEqual(['papel', 'usuario']);
+    expect(linhas.at(-1)).not.toContain('subject');
     // Formato exato que o pnpm 12 entrega ao programa: o "--" separador vem junto (achado na prova com o comando real).
     expect(
       await executarCli(
