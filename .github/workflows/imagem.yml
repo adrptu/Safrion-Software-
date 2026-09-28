@@ -39,7 +39,8 @@ jobs:
           image-ref: safrion-web:ci
           scanners: vuln,secret
           format: json
-          output: ${{ runner.temp }}/imagem/web-trivy.json
+          # Relatório bruto fora da pasta publicada; pode conter conteúdo de segredo detectado.
+          output: ${{ runner.temp }}/web-trivy.json
           list-all-pkgs: true
           severity: HIGH,CRITICAL
           exit-code: "1"
@@ -53,7 +54,7 @@ jobs:
           image-ref: safrion-preparo:ci
           scanners: vuln,secret
           format: json
-          output: ${{ runner.temp }}/imagem/preparo-trivy.json
+          output: ${{ runner.temp }}/preparo-trivy.json
           list-all-pkgs: true
           severity: HIGH,CRITICAL
           exit-code: "1"
@@ -70,7 +71,7 @@ jobs:
           import json, os
           from pathlib import Path
           for alvo in ('web', 'preparo'):
-              p = Path(os.environ['RUNNER_TEMP']) / 'imagem' / (alvo + '-trivy.json')
+              p = Path(os.environ['RUNNER_TEMP']) / (alvo + '-trivy.json')
               d = json.loads(p.read_text())
               achados = []
               for r in d.get('Results', []):
@@ -79,6 +80,10 @@ jobs:
                   for s in r.get('Secrets', []) or []:
                       achados.append({'tipo': 'segredo', 'regra': s.get('RuleID'), 'gravidade': s.get('Severity')})
               print(json.dumps({'imagem': alvo, 'achados': achados}))
+              # SBOM preserva o inventário; este recibo guarda só identificação dos achados.
+              # Não publica Match, Code, ambiente da imagem ou outro trecho possivelmente sensível.
+              destino = p.parent / 'imagem' / (alvo + '-achados.json')
+              destino.write_text(json.dumps({'imagem': alvo, 'achados': achados}) + '\n')
           PY
       - name: Preservar evidência da candidata (sem publicar as imagens)
         if: ${{ !cancelled() }}
