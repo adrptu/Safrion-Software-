@@ -139,6 +139,13 @@ class CoberturaTrivy(unittest.TestCase):
         }, extras={"apps/duplicado/package.json": {"name": "@safrion/domain"}}),
             "nome interno duplicado")
 
+    def test_nome_interno_invalido_bloqueia(self):
+        for nome in ("", 7, [], {}):
+            with self.subTest(nome=nome):
+                self.exigir_falha(self.rodar(relatorio(), extras={
+                    "packages/db/package.json": {"name": nome},
+                }), "nome interno inválido")
+
     def test_manifesto_fora_do_escopo_nao_resolve_workspace(self):
         self.exigir_falha(self.rodar(relatorio(), extras={
             "fixtures/domain/package.json": {"name": "@safrion/domain"},
