@@ -1,0 +1,73 @@
+name: Imagens de homologação
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: imagem-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  imagem:
+    name: Construção, execução e segurança das imagens
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Construir os dois alvos, compartilhando as camadas de compilação
+        id: construcao
+        run: |
+          mkdir -p "$RUNNER_TEMP/imagem"
+          docker build --platform linux/amd64 --target web --tag safrion-web:ci --iidfile "$RUNNER_TEMP/imagem/web.id" .
+          docker build --platform linux/amd64 --target preparo --tag safrion-preparo:ci --iidfile "$RUNNER_TEMP/imagem/preparo.id" .
+      - name: Executar os containers sem rede, como não-root e somente leitura
+        id: smoke
+        run: python3 tools/ci/verificar_imagem.py "$RUNNER_TEMP/imagem/execucao.json"
+      - name: Varrer a imagem web
+        if: ${{ !cancelled() && steps.construcao.outcome == 'success' }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          version: v0.74.0
+          scan-type: image
+          image-ref: safrion-web:ci
+          scanners: vuln,secret
+          format: json
+          output: ${{ runner.temp }}/imagem/web-trivy.json
+          list-all-pkgs: true
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+          ignore-unfixed: false
+      - name: Varrer a imagem de preparo
+        if: ${{ !cancelled() && steps.construcao.outcome == 'success' }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          version: v0.74.0
+          scan-type: image
+          image-ref: safrion-preparo:ci
+          scanners: vuln,secret
+          format: json
+          output: ${{ runner.temp }}/imagem/preparo-trivy.json
+          list-all-pkgs: true
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+          ignore-unfixed: false
+      - name: Gerar inventários SBOM das imagens locais
+        if: ${{ !cancelled() && steps.smoke.outcome != 'skipped' }}
+        run: |
+          trivy image --format cyclonedx --output "$RUNNER_TEMP/imagem/web-sbom.json" safrion-web:ci
+          trivy image --format cyclonedx --output "$RUNNER_TEMP/imagem/preparo-sbom.json" safrion-preparo:ci
+      - name: Preservar evidência da candidata (sem publicar as imagens)
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: imagem-${{ github.sha }}
+          path: ${{ runner.temp }}/imagem/
+          if-no-files-found: error
+          retention-days: 7
