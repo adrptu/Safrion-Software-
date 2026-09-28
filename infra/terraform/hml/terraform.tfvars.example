@@ -1,0 +1,21 @@
+# Na CI, os valores vêm de variáveis do environment hml (TF_VAR_*). Localmente, só para validate.
+# Nunca coloque senha ou segredo aqui: o Terraform não recebe valor de segredo.
+projeto_id     = "safrion-hml-exemplo"
+projeto_numero = "123456789012"
+operador       = "user:operador@example.com"
+oidc_client_id = "000000000000-exemplo.apps.googleusercontent.com"
+
+# 1ª aplicação: false. Depois das versões dos segredos: true com os números abaixo.
+criar_cloud_run = false
+
+# versoes_segredos = {
+#   admin       = 1
+#   migrator    = 1
+#   app_runtime = 1
+#   oidc        = 1
+# }
+
+# Opcionais (padrões em variables.tf).
+# url_controlada = "iap"
+# iap_permitidos = ["group:testadores@example.com"]
+# origem         = "https://safrion-web-123456789012.southamerica-east1.run.app"
