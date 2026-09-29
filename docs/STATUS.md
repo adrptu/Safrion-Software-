@@ -1,46 +1,35 @@
 # Estado do projeto
 
-Atualizado em 27/09/2026 por Claude Code. Leia este arquivo no início de cada sessão e atualize-o no fim de cada incremento (PRD 23.4).
+Atualizado em 27/09/2026 por Codex. Estado desta proposta; PR aberto não significa integrado à `main`.
 
 ## Onde estamos
-| Frente | Estado | Evidência / local |
+
+| Frente | Estado | Evidência |
 |---|---|---|
-| PRD | **v3.9 vigente** (26/09/2026). A v3.10 está em revisão: cap. 73 (confiabilidade transacional, offline, desempenho), cap. 74 (design system) e refinamentos da comparação externa. | `docs/PRD.md`; rascunhos fora do repositório até o pull request da v3.10 |
-| Fluxogramas | v3.9: 63 fluxos com raias | `docs/prd/fluxogramas/` |
-| Protótipo navegável | Em validação pelo proprietário. **Não é produção.** | https://claude.ai/artifact/WPDgqGvKX6CYTCdPjidBLo |
-| Repositório | Criado localmente em 27/09/2026 com documentação e CI. **Ainda não publicado no GitHub.** | este repositório |
-| Código de produto | **Nenhum.** Não há backend, banco, integração ou implantação. | — |
+| PRD | v3.9 vigente; v3.10 em revisão | `docs/PRD.md`, `docs/DECISIONS.md` |
+| Protótipo | Navegável; sem banco ou login reais | https://claude.ai/artifact/WPDgqGvKX6CYTCdPjidBLo |
+| Repositório | Publicado, privado | https://github.com/adrptu/Safrion-Software- |
+| Fundação F0-a | Domínio de decimais, unidades e saldo por lote; proposta de Claude revisada por Codex | PR #5, base `a9e038dc4b4134ea7e6abc08efd7625ee0832137` |
+| Ambiente funcional | Ainda sem banco, API, telas ou homologação acessível | F0-a é fundação técnica, não uma entrega de uso pelo agricultor |
 
-## CI
-| Job | Situação |
-|---|---|
-| Integridade da documentação (`tools/docs/checar_docs.py`) | Executado localmente em 27/09/2026 (ver a saída no pull request inicial). Roda na CI a partir do primeiro push. |
-| Varredura de segredos (Gitleaks) | Configurado; **ainda não executado** (roda no primeiro push) |
-| Vulnerabilidades e configuração (Trivy fs) | Configurado; **ainda não executado** |
-| Código: instalação com lockfile, lint, tipos, testes, build | Configurado para ativar quando houver `package.json` e `pnpm-lock.yaml`; **não executado** |
+## Verificação executada e limite
 
-## Bloqueios e pendências
-1. **Publicar no GitHub.** Usuário `adrptu`, confirmado pelo conector do Codex. Nome `do-talhao-a-os`, privado. Publicação aprovada pelo Codex na R-003, só para executar a CI (não é aceite de produto). O Codex publica pelo GitHub Desktop. Nesta máquina não há `gh`.
-2. **Proteção da `main`: nada aplicado.** O arquivo `tools/github/protecao-main.json` é só configuração local.
-   - Segundo a documentação oficial do GitHub, consultada em 27/09/2026, proteção de branch e rulesets em repositório **privado** exigem GitHub Pro, Team ou Enterprise; na conta Free, só em repositório público.
-   - **O plano real da conta não foi verificado.** Pode já ser Pro. Verificar antes de qualquer proposta; PEND-REPO-01 só se aplica se o plano for Free.
-   - Enquanto isso, a disciplina é de processo: pull request, CI verde e parecer escrito do outro agente em `docs/parceria/rodadas/`. Isso **não** é proteção imposta pelo servidor.
-   - Os dois agentes operam com a mesma conta `adrptu`. A revisão independente é registrada nas rodadas; não existe identidade de revisor no GitHub e não será simulada.
-3. **Ferramentas locais.** Node.js e pnpm não estão no PATH comum, mas existem no runtime do Codex: Node v24.19.0 e pnpm 11.25.0, conferidos em 27/09/2026. Servem para verificação local. A instalação reproduzível do projeto não pode depender desse caminho: versões fixadas no repositório (`packageManager`, `.nvmrc`) quando houver código. Docker não confirmado.
-4. **Versões da stack** a fixar no primeiro commit executável (`docs/architecture/versions.md`).
-5. **Decisões pendentes do proprietário:** `docs/DECISIONS.md`.
-6. **Actions da CI fixadas por SHA** em 27/09/2026, a partir da API pública do GitHub. Cada tag foi resolvida até o commit e conferida:
-   - `checkout` v7.0.1;
-   - `setup-python` v7.0.0;
-   - `setup-node` v7.0.0;
-   - `pnpm/action-setup` v6.1.0;
-   - `gitleaks-action` v3.0.0: gratuita para conta pessoal; organização exige licença, o que é custo;
-   - `trivy-action` v0.36.0.
+- PR #5, [CI 36345797548](https://github.com/adrptu/Safrion-Software-/actions/runs/36345797548): instalação com lockfile, versões, formatação, lint, tipos, 49 testes e build passaram. Gitleaks conferiu canário e histórico.
+- O job Trivy dessa execução terminou verde, mas **não comprovou cobertura**: versão 0.70 leu somente o primeiro documento do lockfile pnpm 12 e omitiu as dependências do projeto (FERR-05). Esse verde não libera a candidata.
+- Esta correção fixa Trivy 0.74.0 e exige inventário JSON com as dependências diretas de produção dos manifestos (`package.json`, `packages/*`, `apps/*`). Relatório vazio, inválido, sem alvo pnpm ou sem nome/versão esperado falha. O exit-code bloqueante do scanner continua obrigatório.
+- O verificador de cobertura é um smoke test das dependências diretas fixadas; não certifica transitivas, ferramentas de desenvolvimento ou ausência de vulnerabilidades. `workspace:*` é aceito somente para nomes internos existentes e unívocos em `packages/*` ou `apps/*`; suas dependências externas continuam obrigatórias no inventário. Versões em intervalo, outras referências workspace/URL/file/link e estruturas novas exigem revisão explícita do contrato. Excluir o nome da raiz como alvo é uma restrição deste controle, não uma limitação do pnpm. A resolução real do workspace continua verificada pela instalação com lockfile congelado. Novo glob em pnpm-workspace.yaml exige atualizar o guard no mesmo PR.
+- Regressões locais do FERR-05: `python3 -m unittest discover -s tools/ci -p 'test_conferir_cobertura_trivy.py' -v`, 25 testes passaram após adaptação para pacotes internos. Relatórios anteriores de CI não validam este delta; execução remota e pareceres por versão ficam no PR e na issue #1. Não se presume aprovação pelo código presente aqui.
 
-   Os inputs usados foram conferidos no `action.yml` de cada SHA. O Dependabot propõe as atualizações. A execução real só acontece no primeiro push.
+## Próximo passo e responsáveis
 
-## Próxima etapa
-1. Publicar o repositório e ligar a proteção da `main`: `tools/github/configurar_protecao.sh`.
-2. PR da v3.10 do PRD. Autor: Claude; revisor: Codex.
-3. Matriz de cobertura do PRD (definido / falta decidir / falta implementar / falta verificar). Autor: Claude; o Codex a converte em backlog.
-4. Depois da publicação e da primeira CI verde: F0 (fundação verificável) em `feat/f0-fundacao`, sequência acordada na R-002/R-003 (F0 → F1 → F2 → F3 → F4 → F5). O primeiro incremento técnico foi delegado aos agentes. Dependências externas concretas continuam com o proprietário: custo e conta de homologação, dados reais, aceite de produção.
+1. Codex verifica a CI real desta correção; Claude faz revisão crítica e integra somente após aceite técnico. Codex não aprova nem integra o próprio PR.
+2. Continuar a sequência já aberta: #3 (Gitleaks) → #4 (política Trivy) → #5 (domínio), incorporando FERR-05 antes da liberação. O #2 (contrato CI) permanece separado e requer atualização da base.
+3. Claude conduz a dependência imediata da F1, com Codex revisando/testando. Critérios e divisão permanecem na issue #1 e nas rodadas; sem abrir módulos paralelos.
+4. Codex e Claude conduzem a homologação técnica e funcional, conforme autorização atual do proprietário. Adrianus recebe a candidata verificada e dá feedback; produção exige seu aceite explícito da versão.
+
+## Condições preservadas
+
+- Segredos e dados reais nunca entram em código, testes ou logs (`AGENTS.md`, `SECURITY.md`).
+- Conta, gastos, dados de clientes e produção dependem da autorização concreta do proprietário.
+- Os agentes usam a mesma identidade GitHub; parecer independente precisa identificar agente, versão, testes e limites. Proteção efetiva da `main` deve ser comprovada pelo servidor; um arquivo de configuração não prova aplicação.
+- Versões da fundação: `docs/architecture/versions.md`. Decisões materiais pendentes: `docs/DECISIONS.md`.
