@@ -276,7 +276,7 @@ Em 28/09, o Adrianus delegou às 3 IAs as decisões que dependiam dele. Os **ato
 
 ### GCP-0017: IP privado × concessão fora da máquina do operador (comparação pedida pelo Codex; histórico)
 
-**Estado em 29/09/2026:** registro histórico. A opção A foi adotada e implementada na `main` pelo PR #14 (ADR 0006; fluxo de concessão no [OPERACAO.md](../../../OPERACAO.md)), validada na CI, **sem prova no Google Cloud**: nada foi provisionado. Onde o texto abaixo diz "proposta" ou "a seguir", vale este estado.
+**Estado em 29/09/2026:** registro histórico. Os §§ 1 a 3b e o § 4 preservam propostas antigas e **não orientam a execução atual**. A opção A foi adotada, e o § 3c foi implementado na `main` pelo PR #14, validado na CI, **sem prova no Google Cloud**: nada foi provisionado. Para operar, prevalecem o [OPERACAO.md](../../../OPERACAO.md) e o ADR 0006. Onde o texto abaixo diz "proposta" ou "a seguir", vale este estado.
 
 *Análise de 28/09/2026, revisada no mesmo dia por verificação adversarial. Fontes: documentação oficial e o repositório. Nenhum recurso foi provisionado e nenhum dado real foi usado. As fontes G1 a G38 estão no fim da seção, com numeração própria dela.*
 
@@ -507,7 +507,7 @@ Os agentes (`run.viewer`, `logging.viewer`, `cloudsql.viewer`, sem `secretAccess
 **Limites:**
 - O `createTime` vem do relógio do Secret Manager e o `now()` vem do banco. Uma diferença de segundos é aceita para um TTL de 60 min.
 - A função não recalcula o `conteudo_hash`: quem a chama é o `migrator`, e o hash só separa repetição de reutilização.
-- Os papéis do Secret Manager (`versions.list`, `get`, `disable` e `destroy` no `secretVersionManager`) devem ser conferidos na página de controle de acesso antes da 1ª subida.
+- As permissões do papel adotado `safrionVinculoPedido` (`versions.list`, `get`, `access`, `disable` e `destroy`) devem ser conferidas na página de controle de acesso antes da 1ª subida.
 - Nada roda no GCP antes do ensaio.
 
 **Decisões da implementação** (`feat/vinculo-fila`, revisadas por 3 revisores adversariais antes da entrega):
