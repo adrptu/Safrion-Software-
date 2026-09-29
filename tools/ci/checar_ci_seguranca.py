@@ -3,14 +3,33 @@
 Confere em .github/workflows/*.yml:
 - todo passo do Trivy bloqueia (exit-code "1"), cobre HIGH e CRITICAL e não ignora vulnerabilidade sem correção
   (ignore-unfixed ausente ou false);
+- o with do passo do Trivy só tem inputs da lista fechada ENTRADAS, os usados nas branches em 29/09/2026 (um por
+  linha, sem repetição); scan-type é fs ou image; image-ref só com scan-type image (com fs, o entrypoint o usa como
+  alvo e troca a pasta varrida, como scan-ref); scanners, se houver, inclui vuln. Os demais inputs da action
+  (skip-dirs, skip-files, ignore-policy, trivy-config, vuln-type, scan-ref, template…) viram TRIVY_* e mudam o que a CLI
+  varre ou ignora sem passar por esta conferência (action.yaml em ed142fd, linhas 214–231). Entrar na lista pede revisão;
+- nenhum trivy.yaml na raiz: sem --config, o Trivy lê ./trivy.yaml por padrão, e ele pode redefinir ignorefile,
+  severidade e ignore-unfixed por fora dos inputs;
 - nenhum passo ou job com continue-on-error: true;
+- nenhuma variável TRIVY_* nos workflows: env de workflow, job ou passo, escrita em $GITHUB_ENV ou qualquer outra
+  linha que não seja comentário inteiro; env dinâmico (env: ${{ … }}) também é recusado, porque não dá para conferir.
+  A política vem só dos inputs conferidos aqui. Motivo (PR4-TRIAGEM-02, action.yaml e entrypoint.sh em ed142fd): a
+  action só exporta o input que difere do padrão dela, então ignore-unfixed: false não sobrescreve um
+  TRIVY_IGNORE_UNFIXED=true herdado, e sem trivyignores o TRIVY_IGNOREFILE herdado segue até a CLI. Outras, como
+  TRIVY_EXIT_CODE e TRIVY_SEVERITY, foram sobrescritas pelos inputs nessa versão; são recusadas do mesmo jeito, porque a
+  sobrescrita depende de o input diferir do padrão da action;
 - exceção só em .trivyignore.yaml (formato do Trivy, referenciado em trivyignores), cada item com statement
   (não aplicabilidade comprovada) e expired_at (aaaa-mm-dd, no máximo 90 dias à frente). .trivyignore simples, sem
   motivo nem validade, é recusado.
 Sem PyYAML: o .trivyignore.yaml é lido num subconjunto estrito, com as chaves em qualquer ordem. O que fica fora dele
 é recusado, nunca aprovado (FERR-03). Nulo do YAML 1.2 (null, Null, NULL, ~) é ausência de valor, não texto: é
 recusado em qualquer campo, também entre aspas, porque nunca é id, motivo, data ou caminho válido (FERR-04).
-O YAML dos workflows é lido por texto, no formato deste repositório.
+O YAML dos workflows é lido por texto, no formato deste repositório. Nos passos do Trivy, exit-code, ignore-unfixed,
+severity e trivyignores são lidos como escalar de uma linha: entre aspas (sem escape), o # faz parte do valor; sem
+aspas, só # no início ou depois de espaço abre comentário. Valor fora disso (aspas sem fechar, escape, texto depois das
+aspas, âncora, tag, coleção, bloco) é recusado e nunca vira ausência (PR4-TRIAGEM-01: " #x.yaml" virava vazio, o
+portão pulava a checagem e a action exportava TRIVY_IGNOREFILE=#x.yaml). trivyignores é dividido em vírgulas e
+espaços, como no entrypoint da action, e cada parte tem de ser .trivyignore.yaml.
 Uso: python3 tools/ci/checar_ci_seguranca.py [raiz] [--hoje=AAAA-MM-DD]"""
 import datetime, glob, os, re, sys
 
@@ -27,6 +46,35 @@ def indent(linha):
 
 def valor(v):
     return v.split(' #', 1)[0].strip().strip('"\'')
+
+
+POLITICA = ('exit-code', 'ignore-unfixed', 'severity', 'trivyignores', 'scan-type', 'scanners')
+ENTRADAS = {'scan-type', 'image-ref', 'scanners', 'severity', 'exit-code', 'ignore-unfixed', 'trivyignores', 'format',
+            'output', 'list-all-pkgs', 'version'}
+TIPOS = {'fs', 'image'}
+SCANNERS = {'vuln', 'secret', 'misconfig', 'license'}
+VARIAVEL_TRIVY = re.compile(r'TRIVY_[A-Z0-9_]*')
+
+
+def escalar(bruto):
+    """Escalar YAML de uma linha no subconjunto aceito; devolve (valor, None) ou (None, motivo). Entre aspas duplas ou
+    simples, sem escape, o # é parte do valor e depois das aspas só cabe comentário (' #…'). Sem aspas, o comentário
+    começa em # no início ou depois de espaço. O que não se entende nunca vira ausência (PR4-TRIAGEM-01)."""
+    b = bruto.strip()
+    if b[:1] in ('"', "'"):
+        fim = b.find(b[0], 1)
+        if fim < 0:
+            return None, 'aspas sem fechamento'
+        interior, resto = b[1:fim], b[fim + 1:]
+        if (b[0] == '"' and '\\' in interior) or (b[0] == "'" and resto.startswith("'")):
+            return None, 'escape entre aspas'
+        if resto.strip() and not re.match(r'\s+#', resto):
+            return None, f'texto depois das aspas: {resto.strip()!r}'
+        return interior, None
+    v = re.split(r'(?:^|\s)#', b, 1)[0].strip()
+    if v[:1] in ('&', '*', '!', '{', '[', '|', '>', '%', '@', '`'):
+        return None, 'âncora, tag, coleção ou bloco'
+    return v, None
 
 
 def blocos_trivy(linhas):
@@ -46,12 +94,39 @@ def blocos_trivy(linhas):
             if m.strip() and indent(m) <= base:
                 break
             bloco.append(m)
-        chaves = {}
-        for m in bloco:
-            k = re.match(r'\s*([A-Za-z-]+):\s*(.*)$', m)
-            if k:
-                chaves[k.group(1)] = valor(k.group(2))
-        yield i + 1, chaves
+        # Só os filhos diretos do with: são inputs; linha mais funda é continuação de valor.
+        chaves, problemas, entradas = {}, [], []
+        for j, m in enumerate(bloco):
+            w = re.match(r'(\s*)with:(.*)$', m)
+            if not w:
+                continue
+            if w.group(2).split(' #', 1)[0].strip():
+                problemas.append('with em formato não suportado; use um input por linha')
+            filho = None
+            for f in bloco[j + 1:]:
+                if not f.strip() or f.lstrip().startswith('#'):
+                    continue
+                if indent(f) <= len(w.group(1)):
+                    break
+                filho = indent(f) if filho is None else filho
+                if indent(f) != filho:
+                    continue
+                k = re.match(r'\s*([^\s:]+):(?:\s+(.*))?$', f)
+                if not k:
+                    problemas.append(f'linha do with não suportada: {f.strip()!r}'); continue
+                nome, bruto = k.group(1), k.group(2) or ''
+                if nome in entradas:
+                    problemas.append(f'input {nome!r} repetido'); continue
+                entradas.append(nome)
+                if nome not in POLITICA:
+                    chaves[nome] = valor(bruto)
+                    continue
+                v, motivo = escalar(bruto)
+                if motivo:
+                    problemas.append(f'{nome} fora do subconjunto aceito ({motivo}); sem conferir o valor, é recusado')
+                else:
+                    chaves[nome] = v
+        yield i + 1, chaves, entradas, problemas
 
 
 workflows = sorted(glob.glob(os.path.join(raiz, '.github', 'workflows', '*.yml')) + glob.glob(os.path.join(raiz, '.github', 'workflows', '*.yaml')))
@@ -65,8 +140,27 @@ for wf in workflows:
     for n, l in enumerate(linhas, 1):
         if re.match(r'\s*continue-on-error:\s*["\']?true', l):
             erros.append(f'{nome}:{n}: continue-on-error: true esconde falha')
-    for n, k in blocos_trivy(linhas):
+        if l.lstrip().startswith('#'):
+            continue
+        for var in sorted(set(VARIAVEL_TRIVY.findall(l))):
+            erros.append(f'{nome}:{n}: {var} muda a política do Trivy por fora dos inputs conferidos; não é aceito')
+        if re.match(r'\s*env:\s*["\']?\$\{\{', l):
+            erros.append(f'{nome}:{n}: env dinâmico (${{{{ … }}}}) pode trazer TRIVY_* sem aparecer no texto; não é aceito')
+    for n, k, entradas, problemas in blocos_trivy(linhas):
         passos += 1
+        for p in problemas:
+            erros.append(f'{nome}:{n}: {p}')
+        for e in entradas:
+            if e not in ENTRADAS:
+                erros.append(f'{nome}:{n}: input {e!r} fora da lista fechada do passo do Trivy ({", ".join(sorted(ENTRADAS))})')
+        if k.get('scan-type') not in TIPOS:
+            erros.append(f'{nome}:{n}: scan-type precisa ser fs ou image, explícito')
+        if 'image-ref' in entradas and k.get('scan-type') != 'image':
+            erros.append(f'{nome}:{n}: image-ref só com scan-type image; com fs ele vira o alvo e troca a pasta varrida')
+        if 'scanners' in k:
+            sc = {s.strip() for s in k['scanners'].split(',') if s.strip()}
+            if 'vuln' not in sc or not sc <= SCANNERS:
+                erros.append(f'{nome}:{n}: scanners precisa incluir vuln e só {", ".join(sorted(SCANNERS))}, não {k["scanners"]!r}')
         if k.get('exit-code') != '1':
             erros.append(f'{nome}:{n}: passo do Trivy sem exit-code "1" (não bloqueia)')
         if k.get('ignore-unfixed', 'false').lower() != 'false':
@@ -74,15 +168,19 @@ for wf in workflows:
         sev = {s.strip().upper() for s in k.get('severity', 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL').split(',')}
         if not {'HIGH', 'CRITICAL'} <= sev:
             erros.append(f'{nome}:{n}: severity precisa incluir HIGH e CRITICAL')
-        if k.get('trivyignores'):
-            for r in k['trivyignores'].split(','):
-                r = r.strip()
+        if k.get('trivyignores', '').strip():
+            partes = [r for r in re.split(r'[\s,]+', k['trivyignores']) if r]
+            if not partes:
+                erros.append(f'{nome}:{n}: trivyignores sem arquivo ({k["trivyignores"]!r}); não é aceito')
+            for r in partes:
                 referencias_ignore.add(r)
                 if r != '.trivyignore.yaml':
                     erros.append(f'{nome}:{n}: trivyignores só aceita .trivyignore.yaml (com motivo e validade), não {r!r}')
 if workflows and passos == 0:
     erros.append('nenhum passo do Trivy encontrado nos workflows')
 
+if os.path.lexists(os.path.join(raiz, 'trivy.yaml')):
+    erros.append('trivy.yaml na raiz é lido pelo Trivy por padrão e muda a política por fora dos inputs; não é aceito')
 if os.path.exists(os.path.join(raiz, '.trivyignore')):
     erros.append('.trivyignore simples não registra motivo nem validade; use .trivyignore.yaml')
 SECOES = ('vulnerabilities', 'misconfigurations', 'secrets', 'licenses')
