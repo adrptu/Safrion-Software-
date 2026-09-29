@@ -124,6 +124,7 @@ Sistema **"Do Talhão à O.S."**: plataforma de gestão agrícola integrada. Vai
   - Grava o efeito, o recibo e a outbox na mesma transação.
 - **Kanban da O.S. com 5 fases** (A liberar, Liberadas, Em execução, Em conferência, Encerradas). Não criar coluna nova.
 - **Fórmula agronômica ou econômica** existe num único serviço de domínio (ENG-011). Unidades explícitas; decimal para dinheiro e quantidade (ENG-013).
+- **Trava só onde protege algo concreto:** resultado técnico da lavoura (receita, produto, dose, versão), dinheiro e estoque, lei (receituário, carência, reentrada, registro e bula), segurança da informação, integridade do fato registrado ou decisão explícita do proprietário. O secundário vira aviso, alerta ou registro, só onde agregar valor (proprietário, 29/09/2026). Ao escrever regra, aceite ou tela, nomeie o dano que a trava evita.
 
 ## 5. Código
 - **Stack do PRD** (23.1): TypeScript estrito, Next.js/React, Node LTS, PostgreSQL/PostGIS, Prisma, PWA com Dexie/Workbox, workers, pnpm workspace, Vitest/Playwright/Testcontainers/fast-check, Docker e GitHub Actions. Na fundação, o acesso a dados usa SQL explícito com `pg`, sem Prisma (ADR 0003).
