@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Regressão da varredura de segredos (commit raiz, histórico normal, cobertura e canário), com um Gitleaks simulado.
-O Gitleaks real roda no job de segredos da CI, com checksum conferido; aqui se testa o contrato do script."""
+"""Regressão da varredura de segredos (commit raiz, merge, histórico normal, cobertura e canário), com um Gitleaks simulado.
+O Gitleaks real roda no job de segredos da CI, com checksum conferido; aqui se testa o contrato do script. O simulado lê
+o git log -p com as mesmas --log-opts recebidas, então a detecção de merge depende das opções que o script passa."""
 import json, os, stat, subprocess, sys, tempfile, textwrap, unittest
 
 SCRIPT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'varrer_segredos.py')
@@ -12,24 +13,51 @@ SIMULADO = textwrap.dedent('''
     def diz(nivel, msg):
         # Com SIM_COR=1 imita o console colorido da CI: hora cinza, nível colorido e mensagem em negrito.
         print(f'\x1b[90m3:04PM\x1b[0m \x1b[32m{nivel}\x1b[0m \x1b[1m{msg}\x1b[0m' if cor else f'{nivel} {msg}')
+    def git(*a, ok=(0,)):
+        p = subprocess.run(['git', *a], cwd=repo, capture_output=True, text=True)
+        assert p.returncode in ok, (a, p.stderr)
+        return p
+    def tem_segredo(rev, arquivo):
+        p = git('show', f'{rev}:{arquivo}', ok=(0, 128))
+        return p.returncode == 0 and 'GITHUB_TOKEN=ghp' in p.stdout
     canario = os.path.basename(repo).startswith('canario-segredos-')
+    # Como a CLI: com --log-opts, "git log -p -U0" mais as opções recebidas; sem, o padrão de sources/git.go.
+    opcoes = [a.split('=', 1)[1] for a in sys.argv[1:] if a.startswith('--log-opts=')]
+    opcoes = opcoes[0].split(' ') if opcoes else ['--full-history', '--all', '--diff-filter=tuxdb']
+    if canario and modo == 'canario_sem_merge': opcoes = [o for o in opcoes if o not in ('-m', '--diff-merges=separate')]
+    achados, atual = [], None
+    for linha in git('log', '-p', '-U0', *opcoes).stdout.splitlines():
+        if linha.startswith('commit '): atual = linha.split()[1]
+        elif linha.startswith('+') and not linha.startswith('+++') and 'GITHUB_TOKEN=ghp' in linha: achados.append(atual)
+    if canario and modo == 'canario_sem_raiz':
+        raizes = set(git('rev-list', '--max-parents=0', '--all').stdout.split()); achados = [c for c in achados if c not in raizes]
     info = {'args': sys.argv[1:], 'canario': canario, 'token': 'GITHUB_TOKEN' in os.environ,
-            'commits': int(subprocess.run(['git', 'rev-list', '--all', '--count'], cwd=repo, capture_output=True, text=True).stdout)}
+            'commits': int(git('rev-list', '--all', '--count').stdout)}
     if canario:
-        log = subprocess.run(['git', 'log', '--all', '-p', '--format=%H'], cwd=repo, capture_output=True, text=True).stdout
-        info['segredo_no_historico'] = '+GITHUB_TOKEN=ghp' in log
-        info['segredo_na_arvore'] = os.path.exists(os.path.join(repo, 'config.env'))
+        raiz = git('rev-list', '--max-parents=0', '--all').stdout.split()
+        merges = git('rev-list', '--min-parents=2', '--all').stdout.split()
+        pais = git('show', '-s', '--format=%P', merges[0]).stdout.split() if len(merges) == 1 else []
+        info['raiz_com_segredo'] = len(raiz) == 1 and tem_segredo(raiz[0], 'config.env')
+        info['merge_com_segredo'] = bool(pais) and tem_segredo(merges[0], 'modo.env')
+        info['pais_do_merge'] = len(pais)
+        info['pais_sem_segredo'] = bool(pais) and not any(tem_segredo(p, 'modo.env') for p in pais)
+        info['conflito'] = bool(pais) and git('merge-tree', '--write-tree', *pais, ok=(0, 1)).returncode == 1
+        info['segredo_na_arvore'] = any(tem_segredo('HEAD', a) for a in ('config.env', 'modo.env'))
+        info['commits_achados'] = sorted(set(achados)); info['raiz'] = raiz; info['merges'] = merges
     with open(os.environ['SIM_LOG'], 'a', encoding='utf-8') as f: f.write(json.dumps(info) + '\\n')
+    if '--report-path' in sys.argv and modo != 'sem_relatorio':
+        with open(sys.argv[sys.argv.index('--report-path') + 1], 'w', encoding='utf-8') as f:
+            json.dump([{'Commit': c, 'RuleID': 'github-pat', 'Secret': 'REDACTED'} for c in achados], f)
     if modo == 'erro': diz('ERR', 'fatal'); sys.exit(126)
     if modo == 'sem_resumo': sys.exit(0)
     if modo == 'parcial': diz('WRN', 'scanned ~0 bytes (0)'); diz('WRN', 'partial scan completed in 1ms'); diz('WRN', 'no leaks found in partial scan'); sys.exit(1)
     if modo == 'zero_bytes': diz('INF', 'scanned ~0 bytes (0) in 1ms'); diz('INF', 'no leaks found'); sys.exit(0)
     diz('INF', 'scanned ~2048 bytes (2.05 KB) in 12ms')
     if canario:
-        if modo == 'canario_cego': diz('INF', 'no leaks found'); sys.exit(0)
-        diz('WRN', 'leaks found: 1'); sys.exit(1)
+        if modo == 'canario_cego' or not achados: diz('INF', 'no leaks found'); sys.exit(0)
+        diz('WRN', f'leaks found: {len(achados)}'); sys.exit(1)
     if modo == 'contraditorio': diz('WRN', 'leaks found: 2'); sys.exit(0)
-    if modo == 'vazamento': diz('WRN', 'leaks found: 1'); sys.exit(1)
+    if modo == 'vazamento' or achados: diz('WRN', f'leaks found: {len(achados) or 1}'); sys.exit(1)
     diz('INF', 'no leaks found'); sys.exit(0)
 ''')
 
@@ -64,6 +92,32 @@ class VarrerSegredos(unittest.TestCase):
             git(r, 'merge', '-q', '--no-ff', '-m', 'merge', 'ramo'); git(r, 'commit', '-q', '--allow-empty', '-m', 'vazio')
         return r
 
+    def repo_com_segredo_no_merge(self, octopus=False):
+        """Contraprova A do Codex: segredo sintético só no commit de merge (conflito resolvido ou arquivo novo no octopus),
+        ausente em todos os pais e apagado no commit seguinte. Valor fixo de teste, montado na hora."""
+        r = self.repo(False); segredo = 'GITHUB_TOKEN=ghp' + '_' + 'x' * 36 + '\n'
+        escrever(os.path.join(r, 'modo.env'), 'MODO=base\n'); git(r, 'add', '.'); git(r, 'commit', '-q', '-m', 'base')
+        ramos = ['um', 'dois'] if octopus else ['lado']
+        for ramo in ramos:
+            git(r, 'checkout', '-q', '-b', ramo, 'main'); escrever(os.path.join(r, ramo + '.txt'), ramo + '\n')
+            if not octopus:
+                escrever(os.path.join(r, 'modo.env'), 'MODO=lado\n')
+            git(r, 'add', '.'); git(r, 'commit', '-q', '-m', ramo)
+        git(r, 'checkout', '-q', 'main')
+        if octopus:
+            git(r, 'merge', '-q', '--no-ff', '--no-commit', *ramos); escrever(os.path.join(r, 'novo.env'), segredo)
+        else:
+            escrever(os.path.join(r, 'modo.env'), 'MODO=principal\n'); git(r, 'add', '.'); git(r, 'commit', '-q', '-m', 'principal')
+            p = subprocess.run(['git', 'merge', '-q', '--no-ff', '--no-commit', 'lado'], cwd=r, capture_output=True, text=True)
+            self.assertEqual(p.returncode, 1, p.stdout + p.stderr)
+            escrever(os.path.join(r, 'modo.env'), 'MODO=resolvido\n' + segredo)
+        git(r, 'add', '.'); git(r, 'commit', '-q', '-m', 'merge com segredo')
+        pais = subprocess.run(['git', 'show', '-s', '--format=%P'], cwd=r, capture_output=True, text=True).stdout.split()
+        self.assertEqual(len(pais), 3 if octopus else 2)
+        git(r, 'rm', '-q', '--ignore-unmatch', 'novo.env'); escrever(os.path.join(r, 'modo.env'), 'MODO=resolvido\n')
+        git(r, 'add', '.'); git(r, 'commit', '-q', '-m', 'apaga o segredo')
+        return r
+
     def checkout_de_pull_request(self):
         """Estado do actions/checkout no evento pull_request com fetch-depth 0: HEAD destacado no commit de merge
         (refs/remotes/pull/2/merge) e os commits do PR alcançáveis só por esse ref."""
@@ -88,23 +142,52 @@ class VarrerSegredos(unittest.TestCase):
 
     def test_repositorio_so_com_commit_raiz_passa(self):
         code, out = self.rodar(self.repo(False))
-        self.assertEqual(code, 0, out); self.assertIn('1 commits', out)
+        self.assertEqual(code, 0, out); self.assertIn('1 commits enumerados', out)
 
     def test_historico_normal_passa(self):
         code, out = self.rodar(self.repo(True))
-        self.assertEqual(code, 0, out); self.assertIn('histórico inteiro varrido', out)
+        self.assertEqual(code, 0, out); self.assertIn('nenhum segredo encontrado', out)
+        # A contagem do rev-list é do repositório; a mensagem não pode apresentá-la como cobertura do scanner.
+        self.assertIn('não do que o Gitleaks leu', out); self.assertNotIn('histórico inteiro varrido', out)
 
-    def test_sem_intervalo_e_com_segredos_mascarados(self):
+    def test_padrao_da_cli_mais_diff_de_merge_sem_intervalo_e_mascarado(self):
         self.rodar(self.repo(True))
         cs = self.chamadas(); self.assertEqual([c['canario'] for c in cs], [True, False])
         for c in cs:
-            texto = ' '.join(c['args'])
-            self.assertNotIn('--log-opts', texto); self.assertNotIn('^', texto); self.assertIn('--redact', texto)
+            opcoes = [a for a in c['args'] if a.startswith('--log-opts')]
+            self.assertEqual(opcoes, ['--log-opts=--full-history --all --diff-merges=separate --diff-filter=tuxdb'])
+            texto = ' '.join(c['args']); self.assertNotIn('^', texto); self.assertNotIn('..', texto); self.assertIn('--redact', texto)
+        # Só o canário pede relatório: é nele que o commit de cada achado é conferido.
+        self.assertIn('--report-path', cs[0]['args']); self.assertNotIn('--report-path', cs[1]['args'])
 
-    def test_canario_tem_segredo_so_no_historico_do_commit_raiz(self):
+    def test_canario_tem_segredos_so_no_historico_da_raiz_e_da_resolucao_de_merge(self):
         self.rodar(self.repo(False))
         c = self.chamadas()[0]
-        self.assertEqual(c['commits'], 2); self.assertTrue(c['segredo_no_historico']); self.assertFalse(c['segredo_na_arvore'])
+        self.assertEqual(c['commits'], 6); self.assertTrue(c['raiz_com_segredo']); self.assertFalse(c['segredo_na_arvore'])
+        self.assertEqual(c['pais_do_merge'], 2); self.assertTrue(c['conflito'])
+        self.assertTrue(c['merge_com_segredo']); self.assertTrue(c['pais_sem_segredo'])
+        self.assertEqual(c['commits_achados'], sorted(c['raiz'] + c['merges']))
+
+    def test_segredo_so_na_resolucao_de_merge_falha(self):
+        # Contraprova A sobre 70a8bb6: sem diff de merge, a varredura dava 0 e "histórico inteiro varrido".
+        code, out = self.rodar(self.repo_com_segredo_no_merge())
+        self.assertEqual(code, 1, out); self.assertIn('segredo encontrado', out)
+
+    def test_segredo_so_no_merge_octopus_falha(self):
+        code, out = self.rodar(self.repo_com_segredo_no_merge(octopus=True))
+        self.assertEqual(code, 1, out); self.assertIn('segredo encontrado', out)
+
+    def test_canario_sem_diff_de_merge_invalida(self):
+        code, out = self.rodar(self.repo(False), 'canario_sem_merge')
+        self.assertEqual(code, 2, out); self.assertIn('não lê o diff de merge', out)
+
+    def test_canario_sem_commit_raiz_invalida(self):
+        code, out = self.rodar(self.repo(False), 'canario_sem_raiz')
+        self.assertEqual(code, 2, out); self.assertIn('commit raiz não foi detectado', out)
+
+    def test_canario_sem_relatorio_invalida(self):
+        code, out = self.rodar(self.repo(False), 'sem_relatorio')
+        self.assertEqual(code, 2, out); self.assertIn('relatório JSON do canário ilegível', out)
 
     def test_segredo_no_historico_falha(self):
         code, out = self.rodar(self.repo(True), 'vazamento')
@@ -134,7 +217,7 @@ class VarrerSegredos(unittest.TestCase):
         # PR #2: a gitleaks-action pedia GET /pulls/2/commits e recebia 403 sem pull-requests: read. A CLI não usa a API.
         r = self.checkout_de_pull_request()
         code, out = self.rodar(r, sem_token=True)
-        self.assertEqual(code, 0, out); self.assertIn('(9 commits)', out)
+        self.assertEqual(code, 0, out); self.assertIn('9 commits enumerados', out)
         real = self.chamadas()[1]
         self.assertFalse(real['canario']); self.assertFalse(real['token']); self.assertEqual(real['commits'], 9)
 
@@ -163,7 +246,7 @@ class VarrerSegredos(unittest.TestCase):
     def test_log_colorido_da_ci(self):
         # Run 36339876662: o canário achou o segredo (saída 1), mas "ESC[1mleaks found: 1" não casava com \bleaks.
         r = self.repo(True)
-        casos = [('ok', 0, 'histórico inteiro varrido'), ('vazamento', 1, 'segredo encontrado'),
+        casos = [('ok', 0, 'nenhum segredo encontrado'), ('vazamento', 1, 'segredo encontrado'),
                  ('parcial', 2, 'parcial'), ('zero_bytes', 2, 'bytes varridos'), ('contraditorio', 2, 'contradiz'),
                  ('canario_cego', 2, 'não está validando')]
         for modo, esperado, trecho in casos:
