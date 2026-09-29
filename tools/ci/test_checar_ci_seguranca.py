@@ -71,6 +71,122 @@ class PortaoSegurancaCI(unittest.TestCase):
         code, out = self.rodar(extra=ref, arquivos={'.trivyignore.yaml': 'vulnerabilities:\n  - id: CVE-2026-0001\n'})
         self.assertEqual(code, 1); self.assertIn('statement', out); self.assertIn('expired_at', out)
 
+    def test_hash_entre_aspas_em_trivyignores_falha(self):
+        # PR4-TRIAGEM-01: " #x.yaml" virava vazio no portão, e a action exportava TRIVY_IGNOREFILE=#x.yaml.
+        for aspas in ('"', "'"):
+            with self.subTest(aspas=aspas):
+                ref = f'          trivyignores: {aspas} #x.yaml{aspas}\n'
+                code, out = self.rodar(extra=ref, arquivos={'#x.yaml': 'vulnerabilities:\n  - id: CVE-2026-0001\n'})
+                self.assertEqual(code, 1, out); self.assertIn("não '#x.yaml'", out)
+
+    def test_trivyignores_com_comentario_fora_das_aspas_passa(self):
+        y = 'vulnerabilities:\n  - id: CVE-2026-0001\n    statement: pacote só de teste, fora da imagem publicada\n    expired_at: 2026-10-20\n'
+        for ref in ('.trivyignore.yaml # exceções revisadas', '".trivyignore.yaml" # exceções revisadas', "'.trivyignore.yaml'"):
+            with self.subTest(ref=ref):
+                code, out = self.rodar(extra=f'          trivyignores: {ref}\n', arquivos={'.trivyignore.yaml': y})
+                self.assertEqual(code, 0, out)
+
+    def test_valor_de_politica_fora_do_subconjunto_falha(self):
+        casos = {'exit-code: "1"': ['exit-code: "1', 'exit-code: "1"x', 'exit-code: &a "1"'],
+                 'severity: HIGH,CRITICAL': ['severity: [HIGH, CRITICAL]', 'severity: >'],
+                 'ignore-unfixed: false': ['ignore-unfixed: "fal\\\\se"']}
+        for original, trocas in casos.items():
+            for troca in trocas:
+                with self.subTest(troca=troca):
+                    code, out = self.rodar(workflow=PASSO.format(extra='').replace(original, troca))
+                    self.assertEqual(code, 1, out); self.assertIn('fora do subconjunto aceito', out)
+        code, out = self.rodar(extra='          trivyignores: .trivyignore.yaml#x\n')
+        self.assertEqual(code, 1, out); self.assertIn("não '.trivyignore.yaml#x'", out)
+
+    def test_variavel_trivy_no_workflow_falha(self):
+        # PR4-TRIAGEM-02: com ignore-unfixed: false e sem trivyignores, TRIVY_IGNORE_UNFIXED=true e TRIVY_IGNOREFILE
+        # herdados chegavam à CLI e o portão saía 0. Escopos: workflow, job, passo e $GITHUB_ENV.
+        job = PASSO.format(extra='').replace('    runs-on: ubuntu-latest\n', '    runs-on: ubuntu-latest\n    env:\n      TRIVY_IGNORE_UNFIXED: "true"\n      TRIVY_IGNOREFILE: "y.yaml"\n')
+        casos = {
+            'workflow': 'env:\n  TRIVY_IGNORE_UNFIXED: "true"\n' + PASSO.format(extra=''),
+            'job': job,
+            'passo': PASSO.format(extra='        env:\n          "TRIVY_IGNOREFILE": y.yaml\n'),
+            'GITHUB_ENV': PASSO.format(extra='').replace('    steps:\n', '    steps:\n      - run: echo "TRIVY_SEVERITY=LOW" >> "$GITHUB_ENV"\n'),
+        }
+        for escopo, wf in casos.items():
+            with self.subTest(escopo=escopo):
+                code, out = self.rodar(workflow=wf)
+                self.assertEqual(code, 1, out); self.assertIn('muda a política do Trivy', out)
+        code, out = self.rodar(workflow=job)
+        self.assertIn('TRIVY_IGNORE_UNFIXED', out); self.assertIn('TRIVY_IGNOREFILE', out)
+
+    def test_env_dinamico_falha(self):
+        wf = PASSO.format(extra='').replace('    runs-on: ubuntu-latest\n', '    runs-on: ubuntu-latest\n    env: ${{ fromJSON(vars.AMBIENTE) }}\n')
+        code, out = self.rodar(workflow=wf)
+        self.assertEqual(code, 1, out); self.assertIn('env dinâmico', out)
+
+    def test_env_sem_trivy_e_comentario_passam(self):
+        wf = '# TRIVY_IGNOREFILE não é usado: a política vem dos inputs.\n' + PASSO.format(extra='').replace(
+            '    runs-on: ubuntu-latest\n', '    runs-on: ubuntu-latest\n    env:\n      NODE_ENV: test\n')
+        code, out = self.rodar(workflow=wf)
+        self.assertEqual(code, 0, out)
+
+    def test_inputs_das_branches_atuais_passam(self):
+        # Formas em uso em 29/09/2026: fs com vuln,secret,misconfig (ci.yml) e imagem com relatório JSON (imagem.yml).
+        imagem = """\
+jobs:
+  imagem:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Varrer a imagem web
+        if: ${{ !cancelled() && steps.construcao.outcome == 'success' }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          version: v0.74.0
+          scan-type: image
+          image-ref: safrion-web:ci
+          scanners: vuln,secret
+          format: json
+          # Relatório bruto fora da pasta publicada.
+          output: ${{ runner.temp }}/web-trivy.json
+          list-all-pkgs: true
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+          ignore-unfixed: false
+"""
+        fs = PASSO.format(extra='').replace('          scan-type: fs\n', '          scan-type: fs\n          scanners: vuln,secret,misconfig\n')
+        for wf in (imagem, fs):
+            code, out = self.rodar(workflow=wf)
+            self.assertEqual(code, 0, out)
+
+    def test_input_fora_da_lista_fechada_falha(self):
+        for linha in ('skip-dirs: packages', 'skip-files: a.ts', 'ignore-policy: politica.rego', 'trivy-config: t.yaml',
+                      'vuln-type: os', 'scan-ref: docs', 'template: "@x.tpl"', 'Exit-Code: "0"'):
+            with self.subTest(linha=linha):
+                code, out = self.rodar(extra=f'          {linha}\n')
+                self.assertEqual(code, 1, out); self.assertIn('fora da lista fechada', out)
+
+    def test_scanners_e_scan_type_fora_da_politica_falham(self):
+        casos = [('scan-type: fs', 'scan-type: config', 'scan-type'), ('scan-type: fs', 'scan-type: repo', 'scan-type'),
+                 ('          scan-type: fs\n', '', 'scan-type'),
+                 ('scan-type: fs', 'scan-type: fs\n          scanners: secret', 'scanners'),
+                 ('scan-type: fs', 'scan-type: fs\n          scanners: vuln,outro', 'scanners')]
+        for original, troca, trecho in casos:
+            with self.subTest(troca=troca):
+                code, out = self.rodar(workflow=PASSO.format(extra='').replace(original, troca))
+                self.assertEqual(code, 1, out); self.assertIn(trecho, out)
+
+    def test_image_ref_com_fs_falha(self):
+        # Revisão Codex de a1fbd86: fs + image-ref: docs passava 0 e o entrypoint entregava [fs, docs] à CLI.
+        code, out = self.rodar(extra='          image-ref: docs\n')
+        self.assertEqual(code, 1, out); self.assertIn('image-ref só com scan-type image', out)
+
+    def test_with_fora_do_formato_ou_repetido_falha(self):
+        flow = PASSO.format(extra='').replace('        with:\n', '        with: {exit-code: "1"}\n')
+        code, out = self.rodar(workflow=flow)
+        self.assertEqual(code, 1, out); self.assertIn('with em formato não suportado', out)
+        code, out = self.rodar(extra='          exit-code: "0"\n')
+        self.assertEqual(code, 1, out); self.assertIn("input 'exit-code' repetido", out)
+
+    def test_trivy_yaml_na_raiz_falha(self):
+        code, out = self.rodar(arquivos={'trivy.yaml': 'severity:\n  - LOW\n'})
+        self.assertEqual(code, 1, out); self.assertIn('trivy.yaml na raiz', out)
+
     def test_excecao_vencida_ou_longa_falha(self):
         ref = '          trivyignores: .trivyignore.yaml\n'
         for data in ('2026-09-01', '2027-03-01'):
