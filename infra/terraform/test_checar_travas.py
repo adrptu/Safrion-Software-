@@ -885,6 +885,29 @@ class StateBootstrap(unittest.TestCase):
     def test_comentario_nao_conta(self):
         self.assertEqual(self.faltas(extra={'extra.tf': '# roles/storage.admin e tfstate-bootstrap só em comentário\n'}), [])
 
+    def test_escape_unicode_falha_fechado(self):
+        """STATE-ESC-01 (Codex): "roles/\\u0073torage.objectViewer" é roles/storage.objectViewer para o Terraform."""
+        membro = 'resource "google_project_iam_member" "ler_state" {\n  project = var.projeto_id\n  role    = "%s"\n' \
+                 '  member  = local.membro["sa-infra-github"]\n}\n'
+        for papel in ('roles/\\u0073torage.objectViewer', 'roles/\\U00000073torage.admin'):
+            with self.subTest(papel=papel):
+                self.acusa(self.faltas(extra={'extra.tf': membro % papel}), 'extra.tf: linha 3: escape Unicode')
+        self.acusa(self.faltas('    "secretmanager.secrets.create",\n',
+                               '    "secretmanager.secrets.create",\n    "\\u0073torage.objects.list",\n'),
+                   'contas.tf: linha ')
+
+    def test_escape_unicode_no_modulo_hml(self):
+        with self.assertRaisesRegex(ct.ErroHcl, 'escape Unicode'):
+            ct.tokens('papel = "roles/\\u0073torage.admin"\n')
+
+    def test_barra_escapada_seguida_de_u_e_aceita(self):
+        self.assertEqual([t.valor for t in ct.tokens('x = "a\\\\u"\n') if t.tipo == 'texto'], ['a\\\\u'])
+        self.assertEqual(self.faltas(extra={'extra.tf': 'locals {\n  x = "a\\\\u"\n}\n'}), [])
+
+    def test_escape_unicode_em_arquivo_nao_analisavel(self):
+        self.acusa(self.faltas(extra={'wif.tf': 'locals {\n  x = "${join("a", ["roles/\\u0073torage.admin"])}"\n}\n'}),
+                   'wif.tf: fora do subconjunto do analisador e com escape Unicode')
+
     def test_arquivo_nao_analisavel_com_storage(self):
         self.acusa(self.faltas(extra={'wif.tf': 'locals {\n  x = "${join("a", ["roles/storage.admin"])}"\n}\n'}),
                    "wif.tf: fora do subconjunto do analisador e com ['storage']")

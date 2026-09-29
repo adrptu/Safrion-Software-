@@ -125,6 +125,10 @@ def _string(fonte: str, i: int, linha: int, saida: list[Token]) -> int:
         if c == '\\':
             if i + 1 >= n or fonte[i + 1] == '\n':
                 raise ErroHcl(f'linha {linha}: escape sem caractere')
+            # \uNNNN e \UNNNNNNNN: o Terraform decodifica, e o guard compararia o texto cru ("roles/storage…"
+            # passaria por outro papel; revisão do Codex, STATE-ESC-01). Fora do subconjunto: falha fechado.
+            if fonte[i + 1] in 'uU':
+                raise ErroHcl(f'linha {linha}: escape Unicode (\\{fonte[i + 1]}) em string, fora do subconjunto aceito')
             partes.append(fonte[i : i + 2])
             i += 2
         elif fonte.startswith('$${', i) or fonte.startswith('%%{', i):
@@ -517,6 +521,10 @@ def conferir_bootstrap(modulo: Path) -> list[str]:
             if achados:
                 faltas.append(f'{arq.name}: fora do subconjunto do analisador e com {achados} no texto; IAM de projeto e '
                               'papéis só em arquivo conferível')
+            # A busca por palavra não vê o que um escape Unicode esconde ("storage"): no arquivo não analisável,
+            # qualquer \u ou \U falha fechado, mesmo precedido de outra barra.
+            if re.search(r'\\[uU]', texto):
+                faltas.append(f'{arq.name}: fora do subconjunto do analisador e com escape Unicode (\\u ou \\U) no texto')
     if ARQUIVO_PAPEL not in raizes:
         return faltas + [f'{ARQUIVO_PAPEL} ausente ou fora do subconjunto do analisador']
     recursos = [(a, r) for a, raiz in raizes.items() for r in blocos(raiz, 'resource')]

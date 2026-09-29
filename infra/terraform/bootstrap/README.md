@@ -42,7 +42,7 @@ Todas: só pelo `infra-hml.yml`, que roda só Terraform. Scanner com achado alto
 
 ## State do bootstrap
 
-O state do bootstrap fica, desde o 1º `init`, num bucket só dele: `<projeto>-tfstate-bootstrap`. O bucket nasce fora do Terraform, porque o bootstrap não pode guardar o state num bucket que ele mesmo cria, e fica sem nenhum membro direto: só o dono do projeto o alcança. A `sa-infra-github` não tem papel de Storage no projeto e só tem `objectAdmin` no `<projeto>-tfstate-hml` (`contas.tf`); não lê nem grava este state. Nenhuma cópia do state fica em máquina local, e não há migração nem condição de IAM por prefixo. O `checar_travas.py` recusa, no código, papel de Storage no projeto, outro IAM ou ACL de bucket e qualquer recurso com `tfstate-bootstrap`; o isolamento efetivo só vale depois da conferência do passo 3, lida do servidor.
+O state do bootstrap fica, desde o 1º `init`, num bucket só dele: `<projeto>-tfstate-bootstrap`. O bucket nasce fora do Terraform, porque o bootstrap não pode guardar o state num bucket que ele mesmo cria, e fica sem nenhum membro direto. **Pelo código**, a `sa-infra-github` não tem papel de Storage no projeto e só tem `objectAdmin` no `<projeto>-tfstate-hml` (`contas.tf`); o `checar_travas.py` recusa papel ou permissão de Storage no projeto, outro IAM ou ACL de bucket e qualquer recurso com `tfstate-bootstrap`. **O isolamento efetivo só vale depois da conferência do passo 3**, que lê o IAM do bucket e o do projeto, porque o IAM do bucket não mostra o acesso que vem do projeto. Nenhuma cópia do state fica em máquina local, e não há migração nem condição de IAM por prefixo.
 
 1. Criar o bucket, uma vez, na região da HML:
    ```sh
@@ -50,14 +50,18 @@ O state do bootstrap fica, desde o 1º `init`, num bucket só dele: `<projeto>-t
    gcloud storage buckets update gs://<projeto>-tfstate-bootstrap --versioning --lifecycle-file=<arquivo>
    ```
    O `<arquivo>` repete a regra do bucket da HML (`main.tf`): apagar versões arquivadas além das 11 mais novas.
-2. Tirar os vínculos de conveniência de editor e leitor do projeto, para ficar só o dono:
+2. Tirar os vínculos de conveniência de editor e leitor do projeto que existirem, para ficar só o dono. Ler a política antes (`gcloud storage buckets get-iam-policy`) e remover **só os pares presentes**: remover um vínculo ausente é erro do `gcloud`, que não se ignora. Os pares possíveis:
    ```sh
    gcloud storage buckets remove-iam-policy-binding gs://<projeto>-tfstate-bootstrap --member=projectEditor:<projeto> --role=roles/storage.legacyBucketOwner
    gcloud storage buckets remove-iam-policy-binding gs://<projeto>-tfstate-bootstrap --member=projectEditor:<projeto> --role=roles/storage.legacyObjectOwner
    gcloud storage buckets remove-iam-policy-binding gs://<projeto>-tfstate-bootstrap --member=projectViewer:<projeto> --role=roles/storage.legacyBucketReader
    gcloud storage buckets remove-iam-policy-binding gs://<projeto>-tfstate-bootstrap --member=projectViewer:<projeto> --role=roles/storage.legacyObjectReader
    ```
-3. Conferir pelo servidor, e parar se algo diferir: `gcloud storage buckets describe` mostra acesso uniforme, prevenção de acesso público `enforced` e versionamento ligado; `gcloud storage buckets get-iam-policy` só tem membros `projectOwner:<projeto>`.
+3. Conferir pelo servidor, e parar se algo diferir ou não puder ser lido:
+   - `gcloud storage buckets describe`: acesso uniforme, prevenção de acesso público `enforced` e versionamento ligado;
+   - `gcloud storage buckets get-iam-policy`: só membros `projectOwner:<projeto>`;
+   - `gcloud projects describe`: o projeto não tem pasta nem organização acima (sem `parent`). Com pai, o acesso herdado não é conferível daqui: **parar**;
+   - `gcloud projects get-iam-policy`: nenhum membro além da conta do dono com `roles/owner`, `roles/editor`, `roles/viewer`, papel `roles/storage.*` ou papel customizado com permissão `storage.*` (conferir as permissões de cada papel customizado com `gcloud iam roles describe`).
 4. `terraform init -backend-config="bucket=<projeto>-tfstate-bootstrap"`.
 
 O roteiro do Cloud Shell executa e confere estes passos.
