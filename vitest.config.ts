@@ -30,6 +30,7 @@ export default defineConfig({
         'packages/db/src/resposta.ts',
         // Web (ADR 0004): partes puras da segurança e da autorização.
         'apps/web/src/identidade/caminho.ts',
+        'apps/web/src/identidade/oidc/**/*.ts',
         'apps/web/src/seguranca/**/*.ts',
         'apps/web/src/autorizacao/**/*.ts',
         // B2: formatação, estado do lote, entrada, listas, tabela G2 e mensagens do acesso.

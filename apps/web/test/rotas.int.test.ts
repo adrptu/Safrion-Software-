@@ -1,7 +1,7 @@
 // Rotas da casca web (ADR 0004) chamadas direto, com banco real identificado como dev e a demonstração restaurada:
 // login de DEV pelo mesmo fluxo da homologação (transação → retorno → continuação → sessão), a matriz na API, as
 // proteções de requisição e a trava dupla do provedor de desenvolvimento.
-import { randomUUID } from 'node:crypto';
+import { createHash, generateKeyPairSync, randomUUID, sign } from 'node:crypto';
 
 import { criarRegistrador } from '@safrion/contracts';
 import {
@@ -10,14 +10,16 @@ import {
   restaurarDemonstracao,
   type Demonstracao,
 } from '@safrion/db';
+import type { CustomFetch } from 'openid-client';
 import pg from 'pg';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, inject, it } from 'vitest';
 
 import { contagens, criarBanco, type Ambiente } from '../../../packages/db/test/ambiente';
 import { criarRotaComandos } from '../src/rotas/comandos';
 import { criarRotasEntrar } from '../src/rotas/entrar';
 import { criarRotaSaude } from '../src/rotas/saude';
 import { COOKIE_CONTINUACAO, COOKIE_LOGIN, COOKIE_SESSAO } from '../src/seguranca/cookies';
+import { criarFabricaOidc } from '../src/servidor/oidc';
 
 const ORIGEM = 'http://localhost:3000';
 let amb: Ambiente;
@@ -343,6 +345,238 @@ describe('trava dupla do provedor de desenvolvimento', () => {
       expect(destinoDe(inicio)).toBe('/entrar?erro=LOGIN_INDISPONIVEL');
     } finally {
       ambienteDoProcesso = 'dev';
+    }
+  });
+});
+
+describe('login OIDC pela casca (adaptador do Codex, provedor sintético)', () => {
+  const ORIGEM_HML = 'https://hml.safrion.invalid';
+  const ISSUER = 'https://idp.sintetico.invalid';
+  const CLIENTE = { id: 'safrion-hml', segredo: `segredo-${randomUUID()}` };
+  const ENV_OIDC = {
+    SAFRION_OIDC_ISSUER: ISSUER,
+    SAFRION_OIDC_CLIENT_ID: CLIENTE.id,
+    SAFRION_OIDC_CLIENT_SECRET: CLIENTE.segredo,
+  };
+  // Processo diz hml: a trava do provedor de desenvolvimento fecha e o OIDC é o único caminho.
+  const depsHml = () => ({ ...deps(), origem: ORIGEM_HML, ambienteDoProcesso: 'hml' });
+
+  /**
+   * Provedor OIDC sintético atrás do transporte HTTP do adaptador: descoberta, chaves e troca do código com
+   * client_secret_post e PKCE S256 conferidos de verdade, código de uso único. A "tela de autorização" é o teste:
+   * autorizar() lê a URL que a casca devolveu e emite um código para o subject escolhido.
+   */
+  function criarIdp() {
+    const chave = generateKeyPairSync('rsa', { modulusLength: 2048 });
+    const jwk = { ...chave.publicKey.export({ format: 'jwk' }), kid: 'k1', alg: 'RS256', use: 'sig' };
+    const pendentes = new Map<string, { subject: string; nonce: string; desafio: string; retorno: string }>();
+    const chamadas = { descoberta: 0, token: 0 };
+    const emitidos: string[] = [];
+    let foraDoAr = false;
+    const b64 = (o: unknown) => Buffer.from(JSON.stringify(o)).toString('base64url');
+    const transporte: CustomFetch = (url, opcoes) => {
+      const caminho = new URL(url).pathname;
+      if (caminho === '/.well-known/openid-configuration') {
+        chamadas.descoberta++;
+        if (foraDoAr) return Promise.reject(new TypeError('fetch failed'));
+        return Promise.resolve(
+          Response.json({
+            issuer: ISSUER,
+            authorization_endpoint: `${ISSUER}/authorize`,
+            token_endpoint: `${ISSUER}/token`,
+            jwks_uri: `${ISSUER}/jwks`,
+            response_types_supported: ['code'],
+            id_token_signing_alg_values_supported: ['RS256'],
+            authorization_response_iss_parameter_supported: true,
+          }),
+        );
+      }
+      if (caminho === '/jwks') return Promise.resolve(Response.json({ keys: [jwk] }));
+      chamadas.token++;
+      const corpo = new URLSearchParams(
+        typeof opcoes.body === 'string' || opcoes.body instanceof URLSearchParams ? opcoes.body : '',
+      );
+      const codigo = corpo.get('code') ?? '';
+      const pedido = pendentes.get(codigo);
+      pendentes.delete(codigo);
+      const desafio = createHash('sha256')
+        .update(corpo.get('code_verifier') ?? '')
+        .digest('base64url');
+      if (
+        !pedido ||
+        corpo.get('grant_type') !== 'authorization_code' ||
+        corpo.get('client_id') !== CLIENTE.id ||
+        corpo.get('client_secret') !== CLIENTE.segredo ||
+        corpo.get('redirect_uri') !== pedido.retorno ||
+        desafio !== pedido.desafio
+      ) {
+        return Promise.resolve(Response.json({ error: 'invalid_grant' }, { status: 400 }));
+      }
+      const agora = Math.floor(Date.now() / 1000);
+      const conteudo = `${b64({ alg: 'RS256', kid: 'k1', typ: 'JWT' })}.${b64({
+        iss: ISSUER,
+        sub: pedido.subject,
+        aud: CLIENTE.id,
+        iat: agora,
+        exp: agora + 300,
+        nonce: pedido.nonce,
+      })}`;
+      const idToken = `${conteudo}.${sign('RSA-SHA256', Buffer.from(conteudo), chave.privateKey).toString('base64url')}`;
+      emitidos.push(idToken);
+      return Promise.resolve(
+        Response.json({
+          access_token: randomUUID(),
+          token_type: 'Bearer',
+          expires_in: 300,
+          id_token: idToken,
+        }),
+      );
+    };
+    return {
+      transporte,
+      chamadas,
+      emitidos,
+      ficarForaDoAr(v: boolean) {
+        foraDoAr = v;
+      },
+      autorizar(location: string, subject: string): URLSearchParams {
+        const p = new URL(location).searchParams;
+        const codigo = randomUUID();
+        emitidos.push(codigo);
+        pendentes.set(codigo, {
+          subject,
+          nonce: p.get('nonce') ?? '',
+          desafio: p.get('code_challenge') ?? '',
+          retorno: p.get('redirect_uri') ?? '',
+        });
+        return new URLSearchParams({ code: codigo, state: p.get('state') ?? '', iss: ISSUER });
+      },
+    };
+  }
+
+  /** Vínculo explícito issuer + subject → usuário da demonstração, gravado pelo administrador do servidor de teste. */
+  async function vincular(subject: string, papel: string) {
+    const usuario = demo.usuarios.find((u) => u.papel === papel);
+    if (!usuario) throw new Error(`papel ${papel} ausente na demonstração`);
+    const url = new URL(inject('urlAdmin'));
+    url.pathname = `/${amb.banco}`;
+    const admin = new pg.Client({ connectionString: url.toString() });
+    await admin.connect();
+    try {
+      await admin.query(
+        'INSERT INTO app.identity_link (issuer, subject, organization_id, user_id) VALUES ($1, $2, $3, $4)',
+        [ISSUER, subject, demo.organizationId, usuario.usuarioId],
+      );
+    } finally {
+      await admin.end();
+    }
+  }
+
+  async function entrarPeloIdp(
+    rotas: ReturnType<typeof criarRotasEntrar>,
+    idp: ReturnType<typeof criarIdp>,
+    subject: string,
+  ) {
+    const inicio = await rotas.iniciar(new Request(`${ORIGEM_HML}/entrar/iniciar?destino=%2Festoque`));
+    expect(inicio.status).toBe(303);
+    const location = inicio.headers.get('location') ?? '';
+    const pedido = new Request(
+      `${ORIGEM_HML}/entrar/retorno?${idp.autorizar(location, subject).toString()}`,
+      {
+        headers: { cookie: `${COOKIE_LOGIN}=${cookieDe(inicio, COOKIE_LOGIN) ?? ''}` },
+      },
+    );
+    return { location, pedido, retorno: await rotas.retorno(pedido.clone()) };
+  }
+
+  it('identidade vinculada entra: PKCE S256, callback fixo na origem e sessão do papel vinculado', async () => {
+    const idp = criarIdp();
+    const rotas = criarRotasEntrar(depsHml, criarFabricaOidc({ env: ENV_OIDC, transporte: idp.transporte }));
+    await vincular('oidc-almoxarife', 'almoxarife');
+    const { location, pedido, retorno } = await entrarPeloIdp(rotas, idp, 'oidc-almoxarife');
+    const autorizacao = new URL(location);
+    expect(`${autorizacao.origin}${autorizacao.pathname}`).toBe(`${ISSUER}/authorize`);
+    expect(Object.fromEntries(autorizacao.searchParams)).toMatchObject({
+      client_id: CLIENTE.id,
+      redirect_uri: `${ORIGEM_HML}/entrar/retorno`,
+      response_type: 'code',
+      scope: 'openid',
+      code_challenge_method: 'S256',
+    });
+    expect(location).not.toContain(CLIENTE.segredo);
+    expect(destinoDe(retorno)).toBe('/estoque');
+    const sessao = cookieDe(retorno, COOKIE_SESSAO);
+    if (!sessao) throw new Error('login OIDC não criou sessão');
+    expect(idp.chamadas).toEqual({ descoberta: 1, token: 1 });
+    // A sessão é a do almoxarife vinculado: a API aceita o comando dele.
+    const r = await comando(
+      { ...entrada(), target: { type: 'lot', id: demo.loteId, expectedVersion: await versaoDoLote() } },
+      sessao,
+    );
+    expect(r.status).toBe(200);
+    // O mesmo retorno de novo não entra: a transação do login é de uso único.
+    expect(destinoDe(await rotas.retorno(pedido))).toBe('/entrar?erro=TICKET_AUSENTE_OU_USADO');
+    expect(idp.chamadas.token).toBe(1);
+  });
+
+  it('identidade sem vínculo não entra, mesmo com o provedor confirmando', async () => {
+    const idp = criarIdp();
+    const rotas = criarRotasEntrar(depsHml, criarFabricaOidc({ env: ENV_OIDC, transporte: idp.transporte }));
+    const { retorno } = await entrarPeloIdp(rotas, idp, 'oidc-sem-vinculo');
+    expect(destinoDe(retorno)).toBe('/entrar?erro=SEM_VINCULO');
+    expect(cookieDe(retorno, COOKIE_SESSAO)).toBeUndefined();
+    expect(idp.chamadas.token).toBe(1);
+  });
+
+  it('sem configuração, ou com issuer sem https: login indisponível, sem chamar o provedor', async () => {
+    const idp = criarIdp();
+    for (const [env, motivo] of [
+      [{}, 'SEM_CONFIGURACAO'],
+      [{ ...ENV_OIDC, SAFRION_OIDC_ISSUER: 'http://idp.sintetico.invalid' }, 'CONFIGURACAO_INVALIDA'],
+    ] as const) {
+      linhas.length = 0;
+      const rotas = criarRotasEntrar(depsHml, criarFabricaOidc({ env, transporte: idp.transporte }));
+      const inicio = await rotas.iniciar(new Request(`${ORIGEM_HML}/entrar/iniciar`));
+      expect(destinoDe(inicio), motivo).toBe('/entrar?erro=LOGIN_INDISPONIVEL');
+      expect(linhas.join('\n'), motivo).toContain(`"motivo":"${motivo}"`);
+    }
+    expect(idp.chamadas).toEqual({ descoberta: 0, token: 0 });
+  });
+
+  it('provedor fora do ar: indisponível agora; quando volta, entra sem reiniciar e descobre uma vez só', async () => {
+    const idp = criarIdp();
+    const rotas = criarRotasEntrar(depsHml, criarFabricaOidc({ env: ENV_OIDC, transporte: idp.transporte }));
+    idp.ficarForaDoAr(true);
+    linhas.length = 0;
+    const fora = await rotas.iniciar(new Request(`${ORIGEM_HML}/entrar/iniciar`));
+    expect(destinoDe(fora)).toBe('/entrar?erro=PROVEDOR_INDISPONIVEL');
+    expect(linhas.join('\n')).toContain('"motivo":"DESCOBERTA_FALHOU"');
+    idp.ficarForaDoAr(false);
+    for (let i = 0; i < 2; i++) {
+      const inicio = await rotas.iniciar(new Request(`${ORIGEM_HML}/entrar/iniciar`));
+      expect(new URL(inicio.headers.get('location') ?? '').origin).toBe(ISSUER);
+    }
+    expect(idp.chamadas.descoberta).toBe(2);
+  });
+
+  it('nenhuma linha de log traz segredo do cliente, código, id_token ou ticket', async () => {
+    const idp = criarIdp();
+    const rotas = criarRotasEntrar(depsHml, criarFabricaOidc({ env: ENV_OIDC, transporte: idp.transporte }));
+    await vincular('oidc-log', 'almoxarife');
+    linhas.length = 0;
+    const { pedido, retorno } = await entrarPeloIdp(rotas, idp, 'oidc-log');
+    expect(destinoDe(retorno)).toBe('/estoque');
+    const tudo = linhas.join('\n');
+    expect(linhas.length).toBeGreaterThan(0);
+    const ticket = (pedido.headers.get('cookie') ?? '').split('=')[1] ?? '';
+    for (const segredo of [
+      CLIENTE.segredo,
+      ticket,
+      cookieDe(retorno, COOKIE_SESSAO) ?? '',
+      ...idp.emitidos,
+    ]) {
+      expect(segredo.length).toBeGreaterThan(8);
+      expect(tudo.includes(segredo)).toBe(false);
     }
   });
 });
