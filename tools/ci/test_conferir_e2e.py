@@ -10,10 +10,14 @@ import unittest
 from conferir_e2e import conferir
 
 
+ISOLAMENTO = ["HML-ISO-01: listas", "HML-ISO-02: comando", "HML-ISO-03: API"]
+
+
 def relatorio():
     specs = []
+    titulos = ISOLAMENTO + [f"jornada {i}" for i in range(3, 10)]
     for i, projeto in enumerate(["desktop"] * 9 + ["celular"]):
-        specs.append({"id": str(i), "title": f"jornada {i}", "ok": True, "tests": [{
+        specs.append({"id": str(i), "title": titulos[i], "ok": True, "tests": [{
             "projectName": projeto, "expectedStatus": "passed", "status": "expected",
             "results": [{"status": "passed", "retry": 0, "errors": [],
                          "stdout": [{"text": "CANARIO_PRIVADO"}], "attachments": [{"body": "CANARIO_PRIVADO"}]}],
@@ -77,6 +81,27 @@ class ConferirE2E(unittest.TestCase):
     def test_resultado_com_erro_nao_passa(self):
         self.t["results"][0]["errors"] = [{"message": "CANARIO_PRIVADO"}]
         with self.assertRaises(ValueError): conferir(self.r)
+
+    def test_prova_de_isolamento_trocada_por_outra_jornada_com_os_mesmos_totais(self):
+        # Mesmos 9 desktop + 1 celular, todos verdes, IDs únicos: só falta HML-ISO-02.
+        self.specs[1] = copy.deepcopy(self.specs[3])
+        self.specs[1].update(id="extra", title="jornada extra aprovada")
+        with self.assertRaises(ValueError) as erro: conferir(self.r)
+        self.assertEqual(str(erro.exception), "PROVA_OBRIGATORIA_AUSENTE")
+
+    def test_prova_de_isolamento_so_no_celular_nao_vale(self):
+        self.specs[0]["tests"][0]["projectName"] = "celular"
+        self.specs.append(copy.deepcopy(self.specs[3]))
+        self.specs[-1].update(id="extra", title="jornada extra desktop")
+        self.r["stats"]["expected"] = 11
+        with self.assertRaises(ValueError) as erro: conferir(self.r)
+        self.assertEqual(str(erro.exception), "PROVA_OBRIGATORIA_AUSENTE")
+
+    def test_id_so_no_inicio_do_titulo_e_com_dois_digitos(self):
+        for titulo in ("jornada HML-ISO-03: API", "HML-ISO-030: API", "HML-ISO-03 API"):
+            with self.subTest(titulo=titulo):
+                self.specs[2]["title"] = titulo
+                with self.assertRaises(ValueError): conferir(self.r)
 
     def test_cli_json_invalido_recibo_seguro_e_saida_um(self):
         with tempfile.TemporaryDirectory() as tmp:

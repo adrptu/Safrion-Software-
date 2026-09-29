@@ -154,7 +154,8 @@ test('cadastros: produto com os seus lotes, que levam ao detalhe do lote', async
   await expect(page.getByRole('heading', { level: 1, name: 'Lote DEMO-001' })).toBeVisible();
 });
 
-test('lote inexistente ou de outra organização é 404; segurança nos cabeçalhos', async ({ page }) => {
+// Lote de outra organização que existe: HML-ISO-01, no isolamento.spec.ts. Aqui, só o UUID que não existe.
+test('lote inexistente é 404; segurança nos cabeçalhos', async ({ page }) => {
   const erros = errosDoConsole(page);
   await entrarComo(page, 'Almoxarife');
   const resposta = await page.goto(`/estoque/${randomUUID()}`);

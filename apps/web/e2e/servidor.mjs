@@ -3,13 +3,27 @@
 // server.js do build standalone copiado para essa pasta, como na imagem de implantação.
 // Roda como webServer do Playwright porque o setup global dele só começa depois do servidor.
 // Precisa de SAFRION_TEST_DATABASE_URL com um administrador de um PostgreSQL descartável, como a integração.
+//
+// Isolamento (HML-ISO, e2e/isolamento.spec.ts): a demonstração é restaurada duas vezes. A geração 1 fica como a
+// organização B, porque restaurar nunca apaga; a geração 2 é a A, a única que o login de DEV alcança. B ganha um vínculo
+// de identidade de teste e uma sessão pelas funções reais de login (continuação → sessão). IDs, nome do banco e o token
+// de B vão para um JSON efêmero, criado com exclusividade (600) e apagado no fim. Sessão de fixture prova autorização
+// HTTP, não autenticação OIDC.
 import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
-import { existsSync } from 'node:fs';
+import { closeSync, constants, existsSync, openSync, rmSync, writeSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { setTimeout as esperar } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
 
-import { prepararBanco, restaurarDemonstracao } from '@safrion/db';
+import {
+  abrirContinuacao,
+  concluirContinuacao,
+  emOrganizacao,
+  prepararBanco,
+  restaurarDemonstracao,
+} from '@safrion/db';
 import pg from 'pg';
 
 const PREFIXO = 'safrion_e2e_';
@@ -43,11 +57,84 @@ try {
 } finally {
   await raiz.end();
 }
+// Mesmo caminho lido pelo isolamento.spec.ts.
+const FIXTURE = join(tmpdir(), `safrion-e2e-isolamento-${porta}.json`);
+const IDENTIDADE_B = { issuer: 'urn:safrion:e2e', subject: 'organizacao-b-almoxarife' };
+let fixtureCriada = false;
+
+/** Cria o arquivo só se ele não existir (nem como link) e só para o dono; nunca substitui nada. */
+function gravarFixture(dados) {
+  let fd;
+  try {
+    fd = openSync(
+      FIXTURE,
+      constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | (constants.O_NOFOLLOW ?? 0),
+      0o600,
+    );
+  } catch (e) {
+    if (e?.code === 'EEXIST')
+      throw new Error(`${FIXTURE} já existe. Apague-o se nenhum teste ponta a ponta estiver rodando.`, {
+        cause: e,
+      });
+    throw e;
+  }
+  fixtureCriada = true;
+  try {
+    writeSync(fd, JSON.stringify(dados));
+  } finally {
+    closeSync(fd);
+  }
+}
+
+function apagarFixture() {
+  if (fixtureCriada) rmSync(FIXTURE, { force: true });
+  fixtureCriada = false;
+}
+
+/** Produto e local de um lote, lidos na própria organização. */
+async function doLote(pool, organizationId, loteId) {
+  const r = await emOrganizacao(pool, organizationId, (c) =>
+    c.query(
+      `SELECT l.product_id, (SELECT s.id FROM app.stock_location s ORDER BY s.id LIMIT 1) AS local_id
+         FROM app.lot l WHERE l.id = $1`,
+      [loteId],
+    ),
+  );
+  const linha = r.rows[0];
+  if (!linha?.product_id || !linha.local_id)
+    throw new Error('Demonstração sem produto ou local para o lote.');
+  return { organizationId, loteId, produtoId: linha.product_id, localId: linha.local_id };
+}
+
 const pool = new pg.Pool({ connectionString: url('app_runtime', senhas.appRuntime), max: 2 });
+const migrator = new pg.Pool({ connectionString: url('migrator', senhas.migrator), max: 1 });
 try {
-  await restaurarDemonstracao(pool, { confirmar: 'dev', ambienteDoProcesso: 'dev' });
+  const b = await restaurarDemonstracao(pool, { confirmar: 'dev', ambienteDoProcesso: 'dev' });
+  const a = await restaurarDemonstracao(pool, { confirmar: 'dev', ambienteDoProcesso: 'dev' });
+  const almoxarifeB = b.usuarios.find((u) => u.papel === 'almoxarife')?.usuarioId;
+  await emOrganizacao(migrator, b.organizationId, (c) =>
+    c.query(
+      'INSERT INTO app.identity_link (issuer, subject, organization_id, user_id) VALUES ($1, $2, $3, $4)',
+      [IDENTIDADE_B.issuer, IDENTIDADE_B.subject, b.organizationId, almoxarifeB],
+    ),
+  );
+  const continuacao = await abrirContinuacao(pool, IDENTIDADE_B, '/estoque');
+  const sessaoB = await concluirContinuacao(pool, continuacao.ticket, {
+    organizationId: b.organizationId,
+    papel: 'almoxarife',
+  });
+  if (!sessaoB.ok) throw new Error(`Sessão de B não criada: ${sessaoB.codigo}.`);
+  gravarFixture({
+    banco,
+    a: await doLote(pool, a.organizationId, a.loteId),
+    b: { ...(await doLote(pool, b.organizationId, b.loteId)), sessao: sessaoB.sessao.token },
+  });
+} catch (e) {
+  apagarFixture();
+  throw e;
 } finally {
   await pool.end();
+  await migrator.end();
 }
 
 const comando = standalone
@@ -74,6 +161,7 @@ let saindo = false;
 async function encerrar(codigo) {
   if (saindo) return;
   saindo = true;
+  apagarFixture();
   next.kill('SIGTERM');
   await esperar(500);
   const fim = new pg.Client({ connectionString: admin });
