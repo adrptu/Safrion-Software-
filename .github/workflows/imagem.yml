@@ -25,8 +25,14 @@ jobs:
         id: construcao
         run: |
           mkdir -p "$RUNNER_TEMP/imagem"
-          docker build --platform linux/amd64 --target web --tag safrion-web:ci --iidfile "$RUNNER_TEMP/imagem/web.id" .
-          docker build --platform linux/amd64 --target preparo --tag safrion-preparo:ci --iidfile "$RUNNER_TEMP/imagem/preparo.id" .
+          # Versão do pacote da web e commit do checkout entram na imagem (E08); o smoke confere os dois. O commit é o do
+          # código construído (git rev-parse HEAD): em PR, o de composição que o checkout usou, igual ao GITHUB_SHA.
+          versao="$(python3 -c "import json; print(json.load(open('apps/web/package.json'))['version'])")"
+          commit="$(git rev-parse HEAD)"
+          docker build --platform linux/amd64 --target web --build-arg SAFRION_VERSAO="$versao" \
+            --build-arg SAFRION_COMMIT="$commit" --tag safrion-web:ci --iidfile "$RUNNER_TEMP/imagem/web.id" .
+          docker build --platform linux/amd64 --target preparo --build-arg SAFRION_VERSAO="$versao" \
+            --build-arg SAFRION_COMMIT="$commit" --tag safrion-preparo:ci --iidfile "$RUNNER_TEMP/imagem/preparo.id" .
       - name: Executar os containers sem rede, como não-root e somente leitura
         id: smoke
         run: python3 tools/ci/verificar_imagem.py "$RUNNER_TEMP/imagem/execucao.json"

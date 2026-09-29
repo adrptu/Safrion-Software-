@@ -28,8 +28,9 @@ Sem shell na imagem, diagnóstico é por log e por `/saude`, não por `docker ex
 - `DATABASE_URL`: papel `app_runtime`, vinda do cofre de segredos;
 - `SAFRION_ORIGEM`: https;
 - `SAFRION_AMBIENTE=hml`;
-- `SAFRION_VERSAO` e `SAFRION_COMMIT`;
 - `SAFRION_OIDC_ISSUER` (https, sem `.well-known`), `SAFRION_OIDC_CLIENT_ID` e `SAFRION_OIDC_CLIENT_SECRET`, este vindo do cofre de segredos.
+
+`SAFRION_VERSAO` e `SAFRION_COMMIT` são o contrário: entram na **imagem**, pela construção (`--build-arg`, [Dockerfile](../Dockerfile)), e aparecem no `/saude`. Como variável da revisão do Cloud Run, o apply seguinte do Terraform os apagaria.
 
 **Conexão ao banco em HML** ([ADR 0006](adr/0006-rede-privada-hml.md); especificado, nada implantado):
 - o banco só tem IP privado. Web e jobs chegam a ele pela VPC (Direct VPC egress), com o conector oficial em `ipType PRIVATE`, que faz o TLS;
