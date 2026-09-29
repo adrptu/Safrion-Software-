@@ -2,7 +2,8 @@
 """Integridade da documentação (roda localmente e na CI, só com Python padrão).
 Confere: arquivos obrigatórios do PRD 23.4; CLAUDE.md importa AGENTS.md (fonte única); PRD com versão identificada;
 IDs definidos em tabela não repetidos (RN, CMD, CAL, FO, AC, DEC-2609, ENG, NFR, ACE); decisões do índice existem no PRD;
-links relativos entre arquivos .md existem; nenhum marcador de conflito de merge."""
+links relativos entre arquivos .md existem; nenhum marcador de conflito de merge; inventário de dados pessoais bate
+com migrações e Terraform (dados_pessoais.py)."""
 import os, re, sys
 RAIZ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 falhas, oks = [], []
@@ -39,6 +40,11 @@ for base, _, arqs in os.walk(RAIZ):
             if alvo.startswith(('http', 'mailto')): continue
             if not os.path.exists(os.path.normpath(os.path.join(base, alvo))): quebrados.append(f'{os.path.relpath(p, RAIZ)} → {alvo}')
 ok(not quebrados, 'links relativos entre documentos existem' + (f' — quebrados: {quebrados[:10]}' if quebrados else ''))
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import dados_pessoais
+pessoais = dados_pessoais.conferir(RAIZ)
+ok(not pessoais, 'inventário de dados pessoais bate com migrações e Terraform' + (f' — {pessoais[:10]}' if pessoais else ''))
 
 for m_ in oks: print('OK    ', m_)
 for m_ in falhas: print('FALHA ', m_)
