@@ -13,6 +13,8 @@ AQUI = Path(__file__).resolve().parent
 BANCO = (AQUI / 'hml' / 'banco.tf').read_text(encoding='utf-8')
 CLOUD_RUN = (AQUI / 'hml' / 'cloud_run.tf').read_text(encoding='utf-8')
 SEGREDOS = (AQUI / 'hml' / 'segredos.tf').read_text(encoding='utf-8')
+FORMAS = ('secret_id fora das formas conferíveis (google_secret_manager_secret.hml[each.value.segredo].secret_id ou '
+          'google_secret_manager_secret.vinculo_pedido.secret_id); alias, parênteses ou outra expressão não são reconhecidos')
 SSL = 'ssl_mode           = "ENCRYPTED_ONLY"'
 CONECTOR = 'connector_enforcement = "REQUIRED"'
 CA = 'server_ca_mode     = "GOOGLE_MANAGED_INTERNAL_CA"'
@@ -414,6 +416,8 @@ class Codigo(unittest.TestCase):
                     "'segredos.tf:101']",
                     'SAFRION_PEDIDO_SEGREDO deve aparecer uma vez, como google_secret_manager_secret.vinculo_pedido.id; '
                     'achadas: cloud_run.tf:49',
+                    'segredos.tf:90 google_secret_manager_secret_iam_member.pedido_operador: ' + FORMAS,
+                    'segredos.tf:100 google_secret_manager_secret_iam_member.pedido_fila: ' + FORMAS,
                     'nenhum google_secret_manager_secret_iam_member com secret_id = '
                     'google_secret_manager_secret.vinculo_pedido.secret_id',
                     'IAM do pedido: operador com roles/secretmanager.secretVersionAdder deve aparecer exatamente uma '
@@ -466,7 +470,8 @@ class Codigo(unittest.TestCase):
         velho = self.trecho_unico(SEGREDOS, ancora + 'secret_id = google_secret_manager_secret.vinculo_pedido.secret_id')
         for novo, esperado in (
                 (ancora + 'secret_id = google_secret_manager_secret.hml["hml-db-admin-senha"].secret_id',
-                 ['IAM do pedido: sa-preparo com o papel safrionVinculoPedido deve aparecer exatamente uma vez; '
+                 ['segredos.tf:98 google_secret_manager_secret_iam_member.pedido_fila: ' + FORMAS,
+                  'IAM do pedido: sa-preparo com o papel safrionVinculoPedido deve aparecer exatamente uma vez; '
                   'apareceu 0']),
                 (ancora + 'secret_id = google_secret_manager_secret.vinculo_pedido.name',
                  ['segredos.tf:98 google_secret_manager_secret_iam_member.pedido_fila: secret_id fora da forma '
@@ -553,6 +558,58 @@ class Codigo(unittest.TestCase):
                 self.assertEqual(self.iam_pedido(self.FILA, novo), [
                     f'segredos.tf:98 google_secret_manager_secret_iam_member.pedido_fila: {meta.split()[0]} no IAM do '
                     'pedido; os vínculos são explícitos'])
+
+    # --- Contraprovas do Codex na revisão de 7d71682: formas que o guard ignorava e agora recusa ---
+
+    @staticmethod
+    def iam_segredo(ref, papel='"roles/secretmanager.secretVersionManager"', extra='', tipo='member'):
+        campo = ('member = "serviceAccount:${local.sa.preparo}"' if tipo == 'member'
+                 else 'members = ["serviceAccount:${local.sa.preparo}"]')
+        return (f'resource "google_secret_manager_secret_iam_{tipo}" "revisao" {{\n  {extra}\n  secret_id = {ref}\n'
+                f'  role = {papel}\n  {campo}\n}}\n')
+
+    def test_iam_de_segredo_em_forma_nao_conferivel(self):
+        ref = 'google_secret_manager_secret.vinculo_pedido.secret_id'
+        alias = 'locals {\n  alias_pedido = ' + ref + '\n}\n'
+        casos = {
+            'parenteses': self.iam_segredo('(' + ref + ')'),
+            'alias_count': alias + self.iam_segredo('local.alias_pedido', extra='count = 1'),
+            'alias_papel_esperado': alias + self.iam_segredo(
+                'local.alias_pedido', papel='"projects/${var.projeto_id}/roles/safrionVinculoPedido"'),
+            'segredo_por_nome': self.iam_segredo('"hml-db-admin-senha"'),
+        }
+        for nome, texto in casos.items():
+            with self.subTest(caso=nome):
+                faltas = self.faltas(extra={'revisao.tf': texto})
+                self.assertTrue(any('google_secret_manager_secret_iam_member.revisao: ' + FORMAS in f for f in faltas),
+                                faltas)
+        # binding, com ou sem parênteses: recusado pela forma antes de olhar o papel.
+        for ref_binding in (ref, '(' + ref + ')'):
+            with self.subTest(binding=ref_binding):
+                faltas = self.faltas(extra={'revisao.tf': self.iam_segredo(ref_binding, tipo='binding')})
+                self.assertTrue(faltas and all('revisao' in f or 'IAM do pedido' in f for f in faltas), faltas)
+        # Controle: o vínculo largo com a referência exata já era recusado e continua.
+        self.assertEqual(self.faltas(extra={'revisao.tf': self.iam_segredo(ref)}),
+                         ['revisao.tf:1 google_secret_manager_secret_iam_member.revisao: papel ou membro fora do desenho '
+                          'no IAM do pedido'])
+
+    def test_segredo_do_banco_so_com_accessor(self):
+        velho = self.trecho_unico(SEGREDOS, '  role      = "roles/secretmanager.secretAccessor"')
+        for papel in ('roles/secretmanager.secretVersionManager', 'roles/secretmanager.admin'):
+            with self.subTest(papel=papel):
+                self.assertEqual(self.faltas(extra={'segredos.tf': SEGREDOS.replace(velho, f'  role      = "{papel}"')}),
+                                 ['segredos.tf:58 google_secret_manager_secret_iam_member.acesso: segredo do banco com '
+                                  'papel diferente de "roles/secretmanager.secretAccessor"'])
+
+    def test_iam_de_projeto_no_hml(self):
+        for tipo in ('google_project_iam_member', 'google_project_iam_binding', 'google_folder_iam_member'):
+            with self.subTest(tipo=tipo):
+                texto = (f'resource "{tipo}" "revisao" {{\n  project = var.projeto_id\n'
+                         '  role = "roles/secretmanager.secretVersionManager"\n'
+                         '  member = "serviceAccount:${local.sa.preparo}"\n}\n')
+                self.assertEqual(self.faltas(extra={'revisao.tf': texto}),
+                                 [f'revisao.tf:1 {tipo}.revisao: IAM de projeto, pasta ou organização no hml; fica no '
+                                  'bootstrap, onde é conferido'])
 
 
 REDE_PLANO = 'https://www.googleapis.com/compute/v1/projects/safrion-hml-exemplo/global/networks/safrion-hml'
@@ -646,12 +703,74 @@ class Bootstrap(unittest.TestCase):
                           '  member  = local.membro["sa-preparo"]\n}\n')
         faltas = self.faltas(extra={'extra.tf': por_referencia})
         self.assertEqual(faltas, ['extra.tf:3: o papel da fila é usado no bootstrap; ele só se vincula no segredo do '
-                                  'pedido, pelo hml'])
+                                  'pedido, pelo hml',
+                                  'extra.tf:1 google_project_iam_member.fila_no_projeto: papel customizado vinculo_pedido '
+                                  'não conferível aqui'])
         self.setUp()
         por_nome = por_referencia.replace('google_project_iam_custom_role.vinculo_pedido.name',
                                           '"projects/${var.projeto_id}/roles/safrionVinculoPedido"')
         self.assertEqual(self.faltas(extra={'extra.tf': por_nome}),
-                         ['"safrionVinculoPedido" aparece 2 vezes no bootstrap; só no role_id do papel'])
+                         ['"safrionVinculoPedido" aparece 2 vezes no bootstrap; só no role_id do papel',
+                          'extra.tf:1 google_project_iam_member.fila_no_projeto: papel fora das formas conferíveis '
+                          '(literal, each.value de local literal ou papel customizado)'])
+
+    # --- Contraprovas do Codex na revisão de 7d71682 e formas vizinhas ---
+
+    @staticmethod
+    def iam_projeto(papel, extra=''):
+        return (f'resource "google_project_iam_member" "revisao" {{\n  {extra}\n  project = var.projeto_id\n'
+                f'  role = {papel}\n  member = local.membro["sa-preparo"]\n}}\n')
+
+    def test_referencia_ao_papel_com_comentario_no_meio(self):
+        for papel in ('google_project_iam_custom_role /* gap */ . vinculo_pedido.name',
+                      '(google_project_iam_custom_role # gap\n    .vinculo_pedido.name)',
+                      '(google_project_iam_custom_role\n    .vinculo_pedido\n    .name)'):
+            with self.subTest(papel=papel):
+                faltas = self.faltas(extra={'revisao.tf': self.iam_projeto(papel)})
+                self.assertIn('o papel da fila é usado no bootstrap', ' '.join(faltas))
+                self.setUp()
+        # Sem parênteses, a quebra de linha não é HCL válido: o analisador recusa, e o guard falha fechado.
+        faltas = self.faltas(extra={'revisao.tf': self.iam_projeto('google_project_iam_custom_role # gap\n    .vinculo_pedido.name')})
+        self.assertTrue(faltas and faltas[0].startswith('revisao.tf: linha '), faltas)
+
+    def test_secret_manager_ou_papel_amplo_no_projeto(self):
+        for papel in ('"roles/secretmanager.secretVersionManager"', '"roles/secretmanager.secretAccessor"',
+                      '"roles/owner"', '"roles/editor"'):
+            with self.subTest(papel=papel):
+                faltas = self.faltas(extra={'revisao.tf': self.iam_projeto(papel)})
+                self.assertTrue(any(f.startswith('revisao.tf:4: ') for f in faltas), faltas)
+                self.setUp()
+        # Pelo local do for_each também.
+        papeis = '    "roles/run.viewer",\n'
+        faltas = self.faltas(papeis, papeis + '    "roles/secretmanager.secretAccessor",\n')
+        self.assertTrue(any('Secret Manager fora de papel customizado' in f for f in faltas), faltas)
+
+    def test_papel_de_projeto_fora_das_formas_conferiveis(self):
+        casos = {
+            'modelo': '"roles/${var.papel}"',
+            'variavel': 'var.papel',
+            'funcao': 'lower("ROLES/RUN.VIEWER")',
+            'each_de_variavel': 'each.value',
+        }
+        for nome, papel in casos.items():
+            with self.subTest(caso=nome):
+                extra = 'for_each = toset(var.papeis)' if nome == 'each_de_variavel' else ''
+                faltas = self.faltas(extra={'revisao.tf': self.iam_projeto(papel, extra)})
+                self.assertTrue(any(f.startswith('revisao.tf:1 google_project_iam_member.revisao: ') for f in faltas),
+                                faltas)
+                self.setUp()
+        # binding e policy no projeto: fora do subconjunto.
+        texto = self.iam_projeto('"roles/run.viewer"').replace('google_project_iam_member', 'google_project_iam_binding')
+        self.assertEqual(self.faltas(extra={'revisao.tf': texto}),
+                         ['revisao.tf:1 google_project_iam_binding.revisao: google_project_iam_binding fora do '
+                          'subconjunto; IAM de projeto só como google_project_iam_member'])
+
+    def test_arquivo_nao_analisavel_sem_iam(self):
+        # O wif.tf fica fora do analisador; com IAM de projeto ou Secret Manager no texto, falha.
+        wif = (AQUI / 'bootstrap' / 'wif.tf').read_text(encoding='utf-8')
+        self.assertEqual(self.faltas(extra={'wif.tf': wif + '\n' + self.iam_projeto('"roles/run.viewer"')}),
+                         ["wif.tf: fora do subconjunto do analisador e com ['google_project_iam'] no texto; IAM de "
+                          'projeto e papéis só em arquivo conferível'])
 
 
 class Plano(unittest.TestCase):

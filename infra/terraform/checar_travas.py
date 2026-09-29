@@ -48,6 +48,20 @@ PERMISSOES_PEDIDO = frozenset({'secretmanager.versions.list', 'secretmanager.ver
                                'secretmanager.versions.disable', 'secretmanager.versions.destroy'})
 PAPEL_CUSTOMIZADO = 'google_project_iam_custom_role'
 ARQUIVO_PAPEL = 'contas.tf'
+# IAM de segredo no hml: só estas formas de secret_id são conferíveis (revisão do Codex de 7d71682). Alias em local,
+# parênteses ou outra expressão escondiam do guard um vínculo largo no segredo do pedido.
+FORMA_BANCO = [('nome', SEGREDO), ('simbolo', '.'), ('nome', 'hml'), ('simbolo', '['), ('nome', 'each'), ('simbolo', '.'),
+               ('nome', 'value'), ('simbolo', '.'), ('nome', 'segredo'), ('simbolo', ']'), ('simbolo', '.'),
+               ('nome', 'secret_id')]
+PAPEL_BANCO = [('texto', 'roles/secretmanager.secretAccessor')]
+# IAM acima do segredo (projeto, pasta, organização) daria acesso a todos os segredos: no hml, nenhum.
+IAM_ACIMA_DO_SEGREDO = ('google_project_iam', 'google_folder_iam', 'google_organization_iam')
+# O wif.tf tem aspas dentro de ${...}, fora do subconjunto do analisador. Arquivo não analisável só passa se o texto não
+# tiver nada de IAM de projeto, Secret Manager, papel customizado ou papel básico amplo.
+NAO_ANALISAVEIS = {'wif.tf'}
+PROIBIDO_SEM_ANALISE = ('google_project_iam', 'google_folder_iam', 'google_organization_iam', 'secretmanager',
+                        'custom_role', PAPEL_PEDIDO.lower(), 'roles/owner', 'roles/editor')
+PAPEIS_AMPLOS = ('roles/owner', 'roles/editor')
 # Blocos, a partir do recurso, até o que leva o vpc_access. Todo recurso destes tipos precisa do egress privado.
 CLOUD_RUN = {'google_cloud_run_v2_service': ('template',), 'google_cloud_run_v2_job': ('template', 'template')}
 CLOUD_RUN_IAM = {'google_cloud_run_v2_service_iam_member', 'google_cloud_run_v2_job_iam_member'}
@@ -327,6 +341,9 @@ def conferir_codigo(modulo: Path) -> list[str]:
                 pedidos.append((arq.name, r))
             elif tipo.startswith(SEGREDO + '_iam'):
                 iam_segredos.append((arq.name, r))
+            elif tipo.startswith(IAM_ACIMA_DO_SEGREDO):
+                faltas.append(f'{arq.name}:{r.linha} {".".join(r.rotulos)}: IAM de projeto, pasta ou organização no hml; '
+                              'fica no bootstrap, onde é conferido')
             elif tipo.startswith('google_cloud_run') and tipo not in CLOUD_RUN_IAM:
                 faltas.append(f'{arq.name}:{r.linha}: {tipo} fora do subconjunto aceito (Cloud Run só v2 service, v2 job e IAM)')
     if faltas:
@@ -419,14 +436,24 @@ def _conferir_pedido(pedidos: list[tuple[str, Bloco]], iam_segredos: list[tuple[
     # IAM do pedido: o que aponta para o recurso usa o próprio recurso, e são exatamente os dois vínculos do desenho,
     # explícitos: operador só grava versão; a sa-preparo tem o papel customizado, sem secretAccessor nem
     # secretVersionManager (revisão do Codex de 8537b81). _iam_binding e _iam_policy trocariam a lista inteira.
+    # Todo IAM de segredo do módulo passa por aqui, não só o que parece ser do pedido: secret_id fora das formas
+    # conhecidas falha, em vez de ser ignorado (revisão do Codex de 7d71682).
     do_pedido = 0
     achados: dict[tuple, int] = {}
     for a, b in iam_segredos:
         ref = [(t.tipo, t.valor) for t in b.atributos.get('secret_id', [])]
+        onde = f'{a}:{b.linha} {".".join(b.rotulos)}'
+        if ref == FORMA_BANCO:
+            if b.rotulos[0] != SEGREDO_IAM:
+                faltas.append(f'{onde}: {b.rotulos[0]} em segredo do banco; só {SEGREDO_IAM}')
+            elif [(t.tipo, t.valor) for t in b.atributos.get('role', [])] != PAPEL_BANCO:
+                faltas.append(f'{onde}: segredo do banco com papel diferente de "{PAPEL_BANCO[0][1]}"')
+            continue
         if ref[:3] != [('nome', SEGREDO), ('simbolo', '.'), ('nome', rotulo)]:
+            faltas.append(f'{onde}: secret_id fora das formas conferíveis ({SEGREDO}.hml[each.value.segredo].secret_id '
+                          f'ou {SEGREDO}.{rotulo}.secret_id); alias, parênteses ou outra expressão não são reconhecidos')
             continue
         do_pedido += 1
-        onde = f'{a}:{b.linha} {".".join(b.rotulos)}'
         if ref[3:] not in ([('simbolo', '.'), ('nome', 'secret_id')], [('simbolo', '.'), ('nome', 'id')]):
             faltas.append(f'{onde}: secret_id fora da forma {SEGREDO}.{rotulo}.secret_id')
         if b.rotulos[0] != SEGREDO_IAM:
@@ -449,41 +476,51 @@ def _conferir_pedido(pedidos: list[tuple[str, Bloco]], iam_segredos: list[tuple[
 
 
 def conferir_bootstrap(modulo: Path) -> list[str]:
-    """Papel customizado da fila (R-006 §3c): um só google_project_iam_custom_role com role_id "safrionVinculoPedido", em
-    contas.tf, com as 5 permissões literais (nenhuma a mais, nenhuma a menos), e nenhum uso dele em outro lugar do
-    bootstrap: vinculado no projeto, valeria para todos os segredos. O vínculo no segredo do pedido é conferido no hml.
-    Só contas.tf passa pelo analisador: o wif.tf tem aspas dentro de ${...}, fora do subconjunto, e os outros arquivos
-    são conferidos pelo texto (qualquer menção ao papel fora do role_id falha, inclusive em comentário)."""
+    """Papel customizado da fila (R-006 §3c) e IAM de projeto do bootstrap, falhando fechado fora das formas conhecidas
+    (revisão do Codex de 7d71682):
+    - um só google_project_iam_custom_role "safrionVinculoPedido", em contas.tf, com as 5 permissões literais, e nenhuma
+      referência a ele (comentários não contam: a leitura é por tokens);
+    - Secret Manager só em papel customizado (permissões) e no nome da API; papel básico amplo (owner, editor) em
+      nenhum lugar;
+    - IAM de projeto só como google_project_iam_member, com papel literal, each.value de um local só com papéis
+      literais ou referência a outro papel customizado sem acesso a versões de segredo;
+    - arquivo fora do subconjunto do analisador (NAO_ANALISAVEIS) só passa sem nenhum desses assuntos no texto."""
     arquivos = sorted(modulo.glob('*.tf'))
     if not arquivos:
         return [f'nenhum .tf em {modulo}']
     fora = sorted({p.name for padrao in FORA_DO_SUBCONJUNTO for p in modulo.glob(padrao)})
     if fora:
         return [f'arquivos fora do subconjunto aceito (override, JSON ou OpenTofu): {fora}']
-    contas = modulo / ARQUIVO_PAPEL
-    try:
-        raiz = analisar(contas.read_text(encoding='utf-8'))
-    except (OSError, ErroHcl) as erro:
-        return [f'{ARQUIVO_PAPEL}: {erro}']
-    papeis = [r for r in blocos(raiz, 'resource')
-              if r.rotulos and r.rotulos[0] == PAPEL_CUSTOMIZADO and literal(r.atributos.get('role_id', [])) == PAPEL_PEDIDO]
-    if len(papeis) != 1:
-        achados = ', '.join(f'{ARQUIVO_PAPEL}:{r.linha} {".".join(r.rotulos)}' for r in papeis) or 'nenhum'
-        return [f'{ARQUIVO_PAPEL} deve ter exatamente um {PAPEL_CUSTOMIZADO} com role_id = "{PAPEL_PEDIDO}"; '
-                f'achados: {achados}']
-    r = papeis[0]
+    faltas, raizes, lexicos = [], {}, []
+    for arq in arquivos:
+        texto = arq.read_text(encoding='utf-8')
+        try:
+            raizes[arq.name] = analisar(texto)
+            lexicos.append((arq.name, tokens(texto)))
+        except ErroHcl as erro:
+            if arq.name not in NAO_ANALISAVEIS:
+                return [f'{arq.name}: {erro}']
+            achados = [p for p in PROIBIDO_SEM_ANALISE if p in texto.lower()]
+            if achados:
+                faltas.append(f'{arq.name}: fora do subconjunto do analisador e com {achados} no texto; IAM de projeto e '
+                              'papéis só em arquivo conferível')
+    if ARQUIVO_PAPEL not in raizes:
+        return faltas + [f'{ARQUIVO_PAPEL} ausente ou fora do subconjunto do analisador']
+    recursos = [(a, r) for a, raiz in raizes.items() for r in blocos(raiz, 'resource')]
+    customizados = {r.rotulos[1]: (a, r) for a, r in recursos if len(r.rotulos) > 1 and r.rotulos[0] == PAPEL_CUSTOMIZADO}
+    papeis = [(a, r) for a, r in customizados.values() if literal(r.atributos.get('role_id', [])) == PAPEL_PEDIDO]
+    if [a for a, _ in papeis] != [ARQUIVO_PAPEL]:
+        achados = ', '.join(f'{a}:{r.linha} {".".join(r.rotulos)}' for a, r in papeis) or 'nenhum'
+        return faltas + [f'{ARQUIVO_PAPEL} deve ter exatamente um {PAPEL_CUSTOMIZADO} com role_id = "{PAPEL_PEDIDO}"; '
+                         f'achados: {achados}']
+    _, r = papeis[0]
     nome = f'{ARQUIVO_PAPEL}:{r.linha} {".".join(r.rotulos)}'
-    faltas = []
+    rotulo = r.rotulos[1]
     for meta in ('count', 'for_each'):
         if meta in r.atributos:
             faltas.append(f'{nome}: {meta} no papel da fila')
-    expr = [t for t in r.atributos.get('permissions', []) if t.tipo != 'fim_linha']
-    textos = [t.valor for t in expr if t.tipo == 'texto']
-    estrutura = [(t.tipo, t.valor) for t in expr if t.tipo != 'texto']
-    lista_literal = (bool(expr) and (expr[0].tipo, expr[0].valor) == ('simbolo', '[')
-                     and (expr[-1].tipo, expr[-1].valor) == ('simbolo', ']')
-                     and all(x in (('simbolo', '['), ('simbolo', ']'), ('simbolo', ',')) for x in estrutura))
-    if not lista_literal:
+    textos = _lista_literal(r.atributos.get('permissions', []))
+    if textos is None:
         faltas.append(f'{nome}: permissions fora da forma de lista de strings literais')
     elif len(textos) != len(set(textos)) or set(textos) != PERMISSOES_PEDIDO:
         a_mais = sorted(set(textos) - PERMISSOES_PEDIDO)
@@ -493,18 +530,82 @@ def conferir_bootstrap(modulo: Path) -> list[str]:
     for ciclo in blocos(r, 'lifecycle'):
         if not _ignore_changes_fora_de(ciclo.atributos.get('ignore_changes', []), ['permissions']):
             faltas.append(f'{nome}: lifecycle.ignore_changes cobre permissions (ou tem forma não reconhecida)')
-    rotulo = r.rotulos[1] if len(r.rotulos) > 1 else ''
-    referencia_papel = re.compile(rf'{PAPEL_CUSTOMIZADO}\s*\.\s*{re.escape(rotulo)}\b')
+    # Tokens: comentário não esconde referência nem conta como menção.
+    permitidos = {(a, t.linha, t.valor) for a, c in customizados.values() for t in c.atributos.get('permissions', [])
+                  if t.tipo == 'texto'}
     mencoes = 0
-    for arq in arquivos:
-        texto = arq.read_text(encoding='utf-8')
-        mencoes += texto.count(PAPEL_PEDIDO)
-        for m in referencia_papel.finditer(texto):
-            faltas.append(f'{arq.name}:{texto.count(chr(10), 0, m.start()) + 1}: o papel da fila é usado no bootstrap; '
-                          'ele só se vincula no segredo do pedido, pelo hml')
+    for a, lista in lexicos:
+        # Quebra de linha dentro de parênteses é HCL válido: não separa uma referência.
+        lista = [t for t in lista if t.tipo != 'fim_linha']
+        for i, t in enumerate(lista):
+            if t.tipo in ('texto', 'modelo'):
+                baixo = t.valor.lower()
+                mencoes += PAPEL_PEDIDO.lower() in baixo
+                if 'secretmanager' in baixo and baixo != 'secretmanager.googleapis.com' and (a, t.linha, t.valor) not in permitidos:
+                    faltas.append(f'{a}:{t.linha}: Secret Manager fora de papel customizado ({t.valor!r}); papel de '
+                                  'segredo só no próprio segredo, pelo hml')
+                if any(p in baixo for p in PAPEIS_AMPLOS):
+                    faltas.append(f'{a}:{t.linha}: papel básico amplo ({t.valor!r}); dá acesso aos segredos')
+            elif ((t.tipo, t.valor) == ('nome', PAPEL_CUSTOMIZADO) and i + 2 < len(lista)
+                  and (lista[i + 1].tipo, lista[i + 1].valor) == ('simbolo', '.') and lista[i + 2].valor == rotulo):
+                faltas.append(f'{a}:{t.linha}: o papel da fila é usado no bootstrap; ele só se vincula no segredo do '
+                              'pedido, pelo hml')
     if mencoes != 1:
         faltas.append(f'"{PAPEL_PEDIDO}" aparece {mencoes} vezes no bootstrap; só no role_id do papel')
+    locais = {k: v for raiz in raizes.values() for b in blocos(raiz, 'locals') for k, v in b.atributos.items()}
+    for a, v in recursos:
+        tipo = v.rotulos[0]
+        if not tipo.startswith(IAM_ACIMA_DO_SEGREDO) or tipo == PAPEL_CUSTOMIZADO:
+            continue
+        onde = f'{a}:{v.linha} {".".join(v.rotulos)}'
+        if tipo != 'google_project_iam_member':
+            faltas.append(f'{onde}: {tipo} fora do subconjunto; IAM de projeto só como google_project_iam_member')
+            continue
+        erro = _papel_de_projeto(v, locais, customizados, rotulo)
+        if erro:
+            faltas.append(f'{onde}: {erro}')
     return faltas
+
+
+def _lista_literal(expr: list[Token]) -> list[str] | None:
+    """Os valores de uma lista só de strings literais ([ "a", "b", ]); outra forma dá None."""
+    expr = [t for t in expr if t.tipo != 'fim_linha']
+    estrutura = [(t.tipo, t.valor) for t in expr if t.tipo != 'texto']
+    if (not expr or (expr[0].tipo, expr[0].valor) != ('simbolo', '[') or (expr[-1].tipo, expr[-1].valor) != ('simbolo', ']')
+            or any(x not in (('simbolo', '['), ('simbolo', ']'), ('simbolo', ',')) for x in estrutura)):
+        return None
+    return [t.valor for t in expr if t.tipo == 'texto']
+
+
+def _papel_de_projeto(v: Bloco, locais: dict[str, list[Token]], customizados: dict, rotulo_pedido: str) -> str | None:
+    """None se o papel de um google_project_iam_member está numa forma conferível; senão, o motivo."""
+    papel = [(t.tipo, t.valor) for t in v.atributos.get('role', []) if t.tipo != 'fim_linha']
+    if len(papel) == 1 and papel[0][0] == 'texto':
+        return None
+    if papel == [('nome', 'each'), ('simbolo', '.'), ('nome', 'value')]:
+        origem = [(t.tipo, t.valor) for t in v.atributos.get('for_each', []) if t.tipo != 'fim_linha']
+        if len(origem) != 3 or origem[:2] != [('nome', 'local'), ('simbolo', '.')] or origem[2][1] not in locais:
+            return 'papel each.value com for_each fora da forma local.<nome>'
+        valor = [t for t in locais[origem[2][1]] if t.tipo != 'fim_linha']
+        # Só strings literais "roles/…"; referência só como condição (var.x ? … : …), que não produz papel.
+        for i, t in enumerate(valor):
+            if t.tipo == 'modelo' or (t.tipo == 'texto' and not t.valor.startswith('roles/')):
+                return f'local.{origem[2][1]} com valor que não é papel literal ({t.valor!r})'
+            if t.tipo == 'nome' and t.valor in ('var', 'local', 'data', 'module'):
+                seguinte = valor[i + 3] if i + 3 < len(valor) else None
+                if not (seguinte and (seguinte.tipo, seguinte.valor) == ('simbolo', '?')):
+                    return f'local.{origem[2][1]} com referência que pode produzir papel ({t.valor}.…)'
+        return None
+    if (len(papel) == 5 and papel[:2] == [('nome', PAPEL_CUSTOMIZADO), ('simbolo', '.')]
+            and papel[3] == ('simbolo', '.') and papel[4] in (('nome', 'name'), ('nome', 'id'))):
+        alvo = papel[2][1]
+        if alvo == rotulo_pedido or alvo not in customizados:
+            return f'papel customizado {alvo} não conferível aqui'
+        permissoes = _lista_literal(customizados[alvo][1].atributos.get('permissions', []))
+        if permissoes is None or any(p.startswith('secretmanager.versions.') for p in permissoes):
+            return f'papel customizado {alvo} com acesso a versões de segredo ou fora da forma literal'
+        return None
+    return 'papel fora das formas conferíveis (literal, each.value de local literal ou papel customizado)'
 
 def _valor_atribuido(lista: list[Token], i: int) -> list[tuple[str, str]] | None:
     """Tokens do valor de `nome =` na posição i, até o fim da linha, a vírgula ou o fecho do mapa; None sem o `=`."""
