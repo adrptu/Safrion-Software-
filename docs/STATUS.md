@@ -11,7 +11,7 @@ Atualizado em 29/09/2026 por Claude, sobre a `main` `15e53d27`. PR aberto não s
 | Repositório | Privado; PRs #2 a #15 integrados | https://github.com/adrptu/Safrion-Software- |
 | Fundação | Domínio (decimal, unidades e saldo por lote); PostgreSQL/PostGIS com RLS e isolamento entre organizações; login OIDC com sessões; concessão e revogação de acesso; primeira interface de estoque e cadastros; imagens de homologação verificadas na CI | PRs #5, #7, #8, #9, #10 e #11 |
 | Homologação | Terraform, conexão ao banco por IP privado e fila de vínculo integrados e validados na CI, sem plan nem apply. **Nenhum ambiente hospedado**: provisionar depende de autorização concreta de custo e destino | PR #14; `infra/terraform/`; `docs/OPERACAO.md` |
-| Proteção da `main` | Ruleset ativo com exclusão e force push bloqueados e pull request obrigatório. Os 10 checks obrigatórios do PR #15 só contam como ativos depois da leitura do ruleset no servidor | PR #15; `tools/github/` |
+| Proteção da `main` | Ruleset `24154464` ativo, conferido na leitura do servidor (alterado em 29/09, 10:13 de Brasília): exclusão e force push bloqueados, pull request obrigatório e os 10 checks obrigatórios do app GitHub Actions, com branch atualizada antes do merge. Sem exceção de bypass | PR #15; `tools/github/` |
 | Produção | Não existe | — |
 
 ## Verificação executada e limite
@@ -24,7 +24,7 @@ Atualizado em 29/09/2026 por Claude, sobre a `main` `15e53d27`. PR aberto não s
 
 ### Sequência
 
-1. Codex aplica os checks obrigatórios no ruleset existente e confere a leitura de volta.
+1. Feito em 29/09: os 10 checks obrigatórios estão no ruleset existente, conferidos na leitura do servidor.
 2. Ensaio remoto da homologação, com autorização de custo e destino do proprietário: restauração do backup em instância isolada, logs sem dados pessoais, acesso e revogação.
 3. Antes do primeiro usuário externo: teste de todas as rotas com usuário de outra organização e inventário dos dados pessoais tratados.
 4. PRD v3.10: revisão das propostas por tema pelas três IAs.
@@ -36,7 +36,7 @@ Semgrep CE 1.178.0 acrescenta duas regras locais: verificação TLS desabilitada
 
 Local: `python3 tools/ci/check_semgrep.py --semgrep /caminho/semgrep .` (mesma versão). CI: workflow próprio, imagem oficial por digest, código montado somente para leitura e rede desativada no container; sem login, métricas, regras remotas ou envio de achados. Os fixtures sintéticos são excluídos do lint tipado/formatação e verificados pelo scanner nativo. Resultados locais, CI e pareceres por versão ficam no PR e na issue #1; presença de configuração não equivale a gate executado/aprovado nem a proteção aplicada à main.
 
-O Dependabot cobre GitHub Actions; pacotes, lockfile, imagens e ferramentas ficam com o Renovate (PR #12), cujo primeiro PR automático ainda não foi comprovado. Sonar (ENG-018) permanece pendente de consumidor/conta e comprovação do gate. Playwright/axe acompanham as telas do Claude; Terraform/TFLint, testes de carga/ZAP e telemetria exigem seus alvos concretos. Nenhum destes itens pendentes é contado como ativo.
+O Dependabot cobre GitHub Actions; pacotes, lockfile, imagens e ferramentas ficam com o Renovate (PR #12), cujo primeiro PR automático ainda não foi comprovado. Sonar (ENG-018) permanece pendente de consumidor/conta e comprovação do gate. Playwright e axe rodam na CI (jornadas de navegador). Terraform (formatação, init sem backend e validate) e TFLint rodam na CI de infraestrutura (`infra.yml`); plan, apply e hospedagem continuam pendentes. Testes de carga, ZAP e telemetria exigem alvos concretos. Nenhum item pendente é contado como ativo.
 
 ## Jornadas de navegador na CI
 
