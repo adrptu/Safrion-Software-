@@ -40,3 +40,5 @@ export {
   type SessaoResolvida,
   type VinculoDisponivel,
 } from './sessao-web.js';
+// Só o pedido de acesso: concessão e revogação são do administrador (CLI), nunca da aplicação web.
+export { registrarPedidoAcesso, type PedidoAcesso } from './vinculo.js';

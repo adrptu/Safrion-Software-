@@ -12,14 +12,14 @@ from conferir_e2e import conferir
 
 def relatorio():
     specs = []
-    for i, projeto in enumerate(["desktop"] * 8 + ["celular"]):
+    for i, projeto in enumerate(["desktop"] * 9 + ["celular"]):
         specs.append({"id": str(i), "title": f"jornada {i}", "ok": True, "tests": [{
             "projectName": projeto, "expectedStatus": "passed", "status": "expected",
             "results": [{"status": "passed", "retry": 0, "errors": [],
                          "stdout": [{"text": "CANARIO_PRIVADO"}], "attachments": [{"body": "CANARIO_PRIVADO"}]}],
         }]})
     return {"errors": [], "suites": [{"specs": [], "suites": [{"specs": specs}]}],
-            "stats": {"expected": 9, "unexpected": 0, "skipped": 0, "flaky": 0}}
+            "stats": {"expected": 10, "unexpected": 0, "skipped": 0, "flaky": 0}}
 
 
 class ConferirE2E(unittest.TestCase):
@@ -30,7 +30,7 @@ class ConferirE2E(unittest.TestCase):
 
     def test_jornadas_aninhadas_e_recibo_sem_canario(self):
         resultado = conferir(self.r)
-        self.assertEqual(resultado["quantidade"], 9)
+        self.assertEqual(resultado["quantidade"], 10)
         self.assertNotIn("CANARIO_PRIVADO", json.dumps(resultado))
 
     def test_vazio_nao_e_verde(self):
@@ -38,7 +38,12 @@ class ConferirE2E(unittest.TestCase):
         self.r["stats"]["expected"] = 0
         with self.assertRaises(ValueError): conferir(self.r)
 
-    def test_celular_omitido_recusado_mesmo_com_nove_desktop(self):
+    def test_nove_jornadas_antigas_sem_a_nova_de_acesso_nao_bastam(self):
+        self.r["suites"][0]["suites"][0]["specs"] = self.specs[:8] + [self.specs[-1]]
+        self.r["stats"]["expected"] = 9
+        with self.assertRaises(ValueError): conferir(self.r)
+
+    def test_celular_omitido_recusado_mesmo_com_dez_desktop(self):
         self.specs[-1]["tests"][0]["projectName"] = "desktop"
         with self.assertRaises(ValueError): conferir(self.r)
 
@@ -62,7 +67,7 @@ class ConferirE2E(unittest.TestCase):
         with self.assertRaises(ValueError): conferir(self.r)
 
     def test_total_adulterado(self):
-        self.r["stats"]["expected"] = 10
+        self.r["stats"]["expected"] = 11
         with self.assertRaises(ValueError): conferir(self.r)
 
     def test_id_duplicado_nao_infla_contagem(self):

@@ -93,7 +93,7 @@ function ehParametros(v: unknown): v is ParametrosConexao {
  * como o próprio administrador. Usa os parâmetros que o pg já interpretou da conexão do administrador: vale para
  * host:porta e para o socket do Cloud SQL (?host=/cloudsql/…), sem remontar a URL à mão. Nenhuma senha vai para log.
  */
-function conexaoNoBanco(
+export function conexaoNoBanco(
   admin: pg.Client,
   banco: string,
   credencial?: { readonly usuario: string; readonly senha: string },

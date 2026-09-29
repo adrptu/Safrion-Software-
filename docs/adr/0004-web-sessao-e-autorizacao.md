@@ -1,6 +1,6 @@
 # ADR 0004: Aplicação web da F0-c — um caminho de comando, sessão no servidor e autorização por matriz
 
-- **Situação:** contrato de tipos aceito pelo Codex em 28/09; revisão 2, com a continuação depois do callback (§5) pedida na aceitação
+- **Situação:** contrato de tipos aceito pelo Codex em 28/09; revisão 2, com a continuação depois do callback (§5) pedida na aceitação. O §11 (vínculo de identidade em HML) foi proposto em 28/09, revisado pelo Codex e pelo Gemini, e implementado na F1 (migração `0005`)
 - **Data:** 2026-09-28. A revisão 1 é de 2026-09-27 (`c02bced`).
 - **Autor:** Claude Code
 - **Revisores:** Codex e Gemini (validação tripla, protocolo v4.1)
@@ -120,6 +120,54 @@ Três decisões precisam valer desde já, porque são caras de mudar depois: por
 
     Se o adaptador precisar de outro dado persistido, o Codex especifica e o Claude põe na migração. A sequência de migrações tem um só autor.
 
+11. **Vínculo de identidade em HML (implementado na F1, migração `0005`; revisão do Codex de 28/09 incorporada).** Até aqui, o único vínculo que o sistema criava era o das identidades fictícias de desenvolvimento (`vincular_demonstracao`, migração `0004`). Para alguém entrar em HML pelo OIDC, um administrador concede o vínculo da identidade que o provedor verificou.
+    - **A identidade vem de um login validado, nunca de digitação nem de e-mail.**
+      1. A pessoa entra pelo provedor. O adaptador valida o ID token e a casca não acha vínculo (`SEM_VINCULO`).
+      2. Só nesse caso, e só com o provedor OIDC (nunca com o de desenvolvimento), a casca chama `registrar_pedido_acesso(issuer, subject, hash)`.
+         - A aplicação gera um **código de referência** de 10 caracteres (Crockford base32, 50 bits aleatórios); o banco guarda só o SHA-256 dele.
+         - O código vai num cookie `__Host-` do utilitário existente (`HttpOnly`, `Secure`, `SameSite=Lax`, `Path=/`), com 10 minutos.
+      3. A tela "Sua conta ainda não tem acesso" mostra o código lido desse cookie, em dois grupos, com a renderização do React. A página não vai para cache (`no-store`). O código nunca vai para a URL nem para o log.
+      4. A pessoa passa o código ao administrador.
+    - **O código só localiza o pedido; ele não prova ao administrador quem é a pessoa.** Antes de conceder, o administrador confirma por um canal autenticado independente quem pediu, e confere organização, usuário e papel. Ele registra responsável e motivo.
+    - **O pedido não concede nada.**
+      - Há um pedido vivo por identidade: um novo login sem vínculo troca o código (o anterior deixa de existir) e renova o prazo de 24 h.
+      - Limites operacionais de HML: **no máximo 100 pedidos vivos e 1000 retidos.** Uma trava consultiva serializa os registros, então a cota vale também com registros simultâneos.
+      - A limpeza é oportunista, na própria transação do registro, sem serviço à parte:
+        - pendente vencido sai;
+        - consumido sai depois de 30 dias, o mínimo para a idempotência;
+        - consumido mais novo nunca sai para abrir espaço.
+      - Acima da cota, não há código novo, e o log registra o motivo `PEDIDOS_ESGOTADOS`. Não é proteção total contra abuso de quem autentica no provedor; é teto de HML.
+      - O pedido guarda só issuer, subject, hash do código e datas: nem e-mail nem nome (o escopo é só `openid`).
+      - Sem código novo, o cookie anterior é apagado. Ele também é apagado ao entrar, e a tela nunca mostra o código de outra pessoa que usou o mesmo navegador.
+    - **Concessão: comando do administrador, explícita e auditável.**
+      - `vincular-identidade.js conceder --ambiente hml --banco <nome> --organizacao <id> --usuario <id> --responsavel <quem autorizou> --motivo <texto curto>`, no alvo `preparo` da imagem.
+      - **O código entra pela entrada padrão, sem eco no terminal, nunca por argumento**, que ficaria no histórico e no `ps`. Um `--codigo` é recusado como uso incorreto.
+      - O administrador do servidor assume o `migrator` no banco-alvo, que precisa estar identificado como `hml`. `dev` e `prod` são recusados antes de ler o código e de abrir conexão.
+      - A função `conceder_vinculo` é `SECURITY DEFINER` (dono `app_sessao`), com `EXECUTE` revogado de `PUBLIC` e concedido só ao `migrator`. **O `app_runtime` não concede nem revoga.** Ela também recusa banco que não seja `hml`.
+      - Numa transação, com a trava por organização e usuário:
+        - confere o pedido pelo hash, o usuário ativo com papel na organização e que o issuer não é o de desenvolvimento;
+        - revoga qualquer sessão que tenha sobrado dessa identidade nessa organização;
+        - grava o vínculo, consome o pedido guardando o destino, e registra o evento.
+      - **Idempotência:** o mesmo pedido, já consumido para o mesmo destino e com a concessão ainda vigente, devolve `mantido`, sem evento novo.
+      - **Depois de uma revogação, o código antigo não reabre o acesso** (`PEDIDO_CONSUMIDO`).
+      - Recusas sem efeito: pedido para outro destino, ou identidade já ligada a outro usuário na mesma organização (`VINCULO_CONFLITANTE`); pedido vencido (`PEDIDO_VENCIDO`); inexistente (`PEDIDO_INEXISTENTE`); usuário inválido (`USUARIO_INVALIDO`).
+      - Saída como no preparo: 0 concedido ou mantido; 1 recusado, com o código do motivo; 2 uso incorreto; 3 infraestrutura, só com códigos. Nunca imprime subject, código de referência ou hash.
+    - **Revogação:** `vincular-identidade.js revogar … --organizacao <id> --usuario <id> --responsavel … --motivo …`.
+      - Remove **todos os vínculos desse usuário nessa organização**, com um evento por vínculo, e revoga as sessões dele ali. Outras organizações não mudam.
+      - Repetir não muda nada (`sem_vinculo`).
+      - Vincular de novo exige um pedido novo, e **nenhuma sessão anterior volta a valer.**
+      - **Concorrência:** concessão, revogação, `concluir_continuacao` e `trocar_papel` usam a mesma trava por organização e usuário. Uma sessão criada no meio da revogação é revogada por ela, ou a conclusão espera e já não acha o vínculo. Mesmo sem a trava, a sessão só resolve com o vínculo vivo (§3), e a concessão seguinte revoga a sessão que tiver sobrado.
+    - **Auditoria:** tabela `app.identity_link_event` com:
+      - organização, momento, ação (`concedido` ou `revogado`), issuer, subject e usuário;
+      - o `session_user` do banco (quem estava conectado, não o dono da função);
+      - responsável e motivo.
+
+      Ela é imutável para os papéis da aplicação: RLS com FORCE, o `app_sessao` só insere e lê, o `app_runtime` não tem privilégio, e um gatilho recusa UPDATE e DELETE. Não é promessa absoluta contra o administrador do banco. O `migrator` lê a auditoria. O `app.audit_log` não serve, porque exige um usuário da aplicação como autor.
+    - **Demonstração em HML:** o `demo:reset` revoga, na mesma transação, os vínculos reais e as sessões que apontam para gerações anteriores da organização fictícia, com evento `revogado` e motivo `demo_reset`. Falha no reset desfaz tudo junto. Nada passa para a geração nova sem concessão explícita. Em `dev`, a função não faz nada, e o vínculo sintético da `0004` continua como antes.
+    - **Limite conhecido:** uma identidade já vinculada a alguma organização entra por ela e não gera pedido. Vincular a mesma identidade a uma segunda organização pede um caminho próprio (por exemplo, a partir de uma sessão), fora deste recorte.
+    - **Fora deste recorte:** tela de acessos na web (depende de um papel administrador na matriz), produção, convite por e-mail e autoinscrição.
+    - **Autoria:** Claude (migração `0005`, `vinculo.ts`, comando, casca e testes); revisão Codex e Gemini. O adaptador OIDC não muda.
+
 ## Alternativas consideradas
 | Alternativa | Por que não |
 |---|---|
@@ -131,6 +179,10 @@ Três decisões precisam valer desde já, porque são caras de mudar depois: por
 | Biblioteca de autenticação completa agora (NextAuth/Auth.js e similares) | O provedor da HML é do passo 3; a interface permite usar a biblioteca dentro do adaptador sem mudar rota, sessão nem matriz |
 | Autorização só pelo RLS | O RLS isola organização, não decide ação por papel (gerente × almoxarife); a ENG-043 exige a matriz por ação |
 | Atalho de login para testes na HML | Enfraquece a autenticação do ambiente que o Adrianus usa; a verificação hospedada usa contas de teste reais |
+| Administrador digita o `sub` visto no console do provedor (§11) | Em provedores com `sub` por aplicação (pairwise) o valor nem aparece no console; digitado à mão, um erro vincula outra pessoa sem que ninguém perceba |
+| Convite por link ou autoinscrição no primeiro login (§11) | Concede acesso a quem tiver o link ou uma conta no provedor; a concessão deixa de ser um ato explícito do administrador |
+| Concessão pela tela da web já na F0-c (§11) | Exige papel de administrador na matriz e abre mais superfície na aplicação; o comando do operador cobre a HML pela mesma função, que a tela pode chamar depois |
+| Registrar a concessão no `app.audit_log` (§11) | A tabela exige um usuário da aplicação como autor; o operador não é um, e um autor fictício quebraria a auditoria |
 
 ## Consequências
 - Web e app offline compartilham o mesmo endpoint, contrato, envelope e recibo, e o reenvio offline é o mesmo comando.
@@ -172,3 +224,20 @@ Três decisões precisam valer desde já, porque são caras de mudar depois: por
 - **Log:** falha HTTP e falha OIDC com canário registram um evento útil sem o canário, com a correlação preservada e a resposta original intacta.
 - **Provedor de desenvolvimento:** a rota responde 404 com `SAFRION_AMBIENTE` diferente de `dev` ou com a identidade do banco diferente de `dev`.
 - **Contrato:** `organizationId` no corpo é recusado, e uma sessão de A não executa comando em lote de B.
+- **Vínculo em HML (§11)** (`packages/db/test/vinculo.int.test.ts`, `apps/web/test/rotas.int.test.ts`, `apps/web/e2e/acesso.spec.ts`):
+  - código inexistente, vencido ou já consumido para outro destino é recusado, sem vínculo nem evento;
+  - a concessão cria o vínculo, consome o pedido e grava um evento; repetir devolve `mantido` sem evento novo;
+  - identidade ligada a outro usuário na mesma organização é recusada com `VINCULO_CONFLITANTE`;
+  - o `app_runtime` não executa concessão nem revogação: a casca só registra pedido;
+  - nenhum pedido nasce do provedor ou do issuer de desenvolvimento;
+  - e-mail igual ao de um usuário não muda nada, porque o pedido não tem e-mail;
+  - depois da revogação, a próxima requisição com a sessão existente é negada, e o evento fica gravado;
+  - o `demo:reset` em HML revoga os vínculos reais da geração anterior, com evento;
+  - um pedido vivo por identidade, com teto, validade e limpeza provados;
+  - a saída do comando e o log não trazem subject, código de referência nem hash;
+  - depois da revogação, o código antigo não reabre o acesso (`PEDIDO_CONSUMIDO`);
+  - revogação ao mesmo tempo que a conclusão do login ou a troca de papel nunca deixa sessão válida, nem depois de uma concessão nova;
+  - duas concessões simultâneas do mesmo pedido: uma concede, a outra mantém, com um evento só;
+  - falha na mesma transação desfaz concessão, consumo e evento, e também a revogação feita pelo `demo:reset`;
+  - o comando recusa `dev` e `prod` antes de ler o código e de conectar, e recusa `--codigo` como argumento;
+  - a página mostra o código só vindo do cookie, sem cache, nunca o da URL nem um cookie repetido.

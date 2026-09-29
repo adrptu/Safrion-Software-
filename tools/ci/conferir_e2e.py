@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 
 
-MINIMOS = {"desktop": 8, "celular": 1}
+MINIMOS = {"desktop": 9, "celular": 1}
 
 
 def conferir(relatorio):
