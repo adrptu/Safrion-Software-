@@ -8,7 +8,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 
 import pg from 'pg';
-import { describe, expect, inject, it } from 'vitest';
+import { describe, expect, inject, it, vi } from 'vitest';
 
 import { definirIdentidadeAmbiente } from '../src/ambiente.js';
 import { executarCli } from '../src/cli/vincular-identidade.js';
@@ -125,13 +125,16 @@ class ApiFalsa {
   antes: (op: Operacao, versao?: string) => Promise<void> | void = () => undefined;
   depois: (op: Operacao, versao?: string) => Promise<void> | void = () => undefined;
   private operacoes = 0;
+  /** Relógio real lido uma vez por instância: dois pedidos com o mesmo createTime na fixture continuam empatados. */
+  private ancora: number | undefined;
 
   adicionar(versao: string, createTime: string, conteudo: unknown, etag = `etag-${versao}`): void {
+    this.ancora ??= Date.now();
     this.versoes.set(versao, {
       estado: 'ENABLED',
       etag,
       // O Secret Manager dá o createTime no relógio real; a idade é a da fixture.
-      createTime: new Date(Date.now() - idade(createTime) * 1000).toISOString(),
+      createTime: new Date(this.ancora - idade(createTime) * 1000).toISOString(),
       dados: Buffer.from(typeof conteudo === 'string' ? conteudo : JSON.stringify(conteudo)),
     });
   }
@@ -990,6 +993,25 @@ describe('banco: concorrência, imutabilidade e contraprova', () => {
       await revogar();
       expect(await vinculos(p)).toEqual([]);
     });
+  });
+});
+
+describe('API falsa do Secret Manager', () => {
+  it('mantém o empate da fixture mesmo com o relógio avançando entre as inserções', () => {
+    const base = Date.now();
+    let passo = 0;
+    vi.spyOn(Date, 'now').mockImplementation(() => base + passo++);
+    try {
+      const api = new ApiFalsa();
+      api.adicionar('4', '2026-09-28T21:51:00Z', {});
+      api.adicionar('2', '2026-09-28T21:51:00Z', {});
+      api.adicionar('5', '2026-09-28T21:50:00Z', {});
+      const instante = (v: string) => Date.parse(api.versoes.get(v)?.createTime ?? '');
+      expect(instante('4')).toBe(instante('2'));
+      expect(instante('4') - instante('5')).toBe(60_000);
+    } finally {
+      vi.restoreAllMocks();
+    }
   });
 });
 
