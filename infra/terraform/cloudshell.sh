@@ -131,7 +131,7 @@ lock_preso() {
 
 cmd_conferir() {
   exigir git gh python3
-  local url ramo local_ remoto checks
+  local url ramo local_ remoto checks mudancas
   url="$(git -C "$RAIZ" remote get-url origin)"
   case "$url" in
     https://github.com/"$REPO_GH" | https://github.com/"$REPO_GH".git | git@github.com:"$REPO_GH".git) ;;
@@ -139,10 +139,12 @@ cmd_conferir() {
   esac
   ramo="$(git -C "$RAIZ" rev-parse --abbrev-ref HEAD)"
   [ "$ramo" = main ] || falha "a cópia está em '$ramo', não na main"
-  [ -z "$(git -C "$RAIZ" status --porcelain)" ] || falha 'a cópia tem mudanças locais'
+  mudancas="$(git -C "$RAIZ" status --porcelain)" || falha 'não li o estado da cópia'
+  [ -z "$mudancas" ] || falha 'a cópia tem mudanças locais'
   # O .gitignore esconde *.tfvars e *.auto.tfvars, que o Terraform carrega sozinho e mudariam o plano.
-  [ -z "$(git -C "$RAIZ" status --porcelain --ignored -- infra/terraform/bootstrap infra/terraform/hml)" ] ||
-    falha 'há arquivos ignorados pelo Git nos módulos do Terraform (tfvars?); tire-os antes'
+  mudancas="$(git -C "$RAIZ" status --porcelain --ignored -- infra/terraform/bootstrap infra/terraform/hml)" ||
+    falha 'não li o estado da cópia'
+  [ -z "$mudancas" ] || falha 'há arquivos ignorados pelo Git nos módulos do Terraform (tfvars?); tire-os antes'
   git -C "$RAIZ" fetch -q origin main
   local_="$(git -C "$RAIZ" rev-parse HEAD)"
   # A main de verdade vem do servidor, não do ref local, que um refspec trocado deixaria parado.
@@ -169,7 +171,8 @@ PY
 cmd_state() {
   projeto "${1:-}"
   exigir gcloud python3
-  local p="$1" b="gs://$1-tfstate-bootstrap" regras politica membro papel
+  local p="$1" b="gs://$1-tfstate-bootstrap" regras politica membro papel numero dono
+  numero="$(numero_do_projeto "$p")"
   if ! gcloud storage buckets describe "$b" --format='value(name)' >/dev/null 2>"$DIR/describe.err"; then
     grep -qiE '404|not ?found' "$DIR/describe.err" || falha "não consegui ler $b (permissão ou rede); nada foi criado"
     gcloud storage buckets create "$b" --project="$p" --location="$REGIAO" \
@@ -177,6 +180,9 @@ cmd_state() {
       falha "não consegui criar $b (o nome pode já existir noutro projeto)"
     echo "Criado: $b"
   fi
+  # Nome de bucket é global: só se mexe nele depois de confirmar que é deste projeto (inclusive numa retomada).
+  dono="$(gcloud storage buckets describe "$b" --raw --format='value(projectNumber)')" || falha "não li $b; nada foi alterado"
+  [ "$dono" = "$numero" ] || falha "o bucket $b não é do projeto $p; nada foi alterado"
   # Mesma regra do bucket do state da HML (bootstrap/main.tf): versões arquivadas além das 11 mais novas são apagadas.
   regras="$DIR/ciclo-de-vida.json"
   printf '%s\n' '{"lifecycle": {"rule": [{"action": {"type": "Delete"}, "condition": {"isLive": false, "numNewerVersions": 11}}]}}' >"$regras"
@@ -197,7 +203,9 @@ PY
       falha "não consegui tirar $membro de $b"
   done <"$DIR/vinculos-a-tirar.txt"
   verificar_state "$p"
-  echo "OK: $b do projeto $p, com acesso uniforme, sem acesso público, versionado e só com o dono do projeto."
+  echo "OK: $b do projeto $p, com acesso uniforme, sem acesso público, versionado, sem pasta gerenciada e só o dono no IAM."
+  echo "No IAM do projeto, fora o dono e os agentes do Google listados, ninguém alcança objetos, muda IAM ou gera credencial"
+  echo "de conta de serviço. A conferência não cobre abuso dos próprios agentes do Google."
 }
 
 # Só leitura: o bucket é do projeto, está como o README exige, e ninguém além do dono alcança objetos, nem pelo bucket,
@@ -284,7 +292,13 @@ papeis = json.load(open(sys.argv[2], encoding='utf-8'))
 dono, numero, dominios = sys.argv[3], sys.argv[4], sys.argv[5].split()
 agentes = {f'serviceAccount:{numero}@cloudservices.gserviceaccount.com'} | \
           {f'serviceAccount:service-{numero}@{d}.iam.gserviceaccount.com' for d in dominios}
-perigosas = {'storage.buckets.setIamPolicy', 'resourcemanager.projects.setIamPolicy', 'iam.roles.update'}
+# Acesso indireto: mudar IAM ou papéis, ou agir como conta de serviço (token, assinatura, chave, actAs, federação),
+# conforme docs.cloud.google.com/iam/docs/service-account-permissions.
+perigosas = {'storage.buckets.setIamPolicy', 'resourcemanager.projects.setIamPolicy', 'iam.roles.update',
+             'iam.serviceAccounts.getAccessToken', 'iam.serviceAccounts.getOpenIdToken',
+             'iam.serviceAccounts.implicitDelegation', 'iam.serviceAccounts.signBlob', 'iam.serviceAccounts.signJwt',
+             'iam.serviceAccounts.actAs', 'iam.serviceAccounts.setIamPolicy', 'iam.serviceAccountKeys.create',
+             'iam.workloadIdentityPoolProviders.create', 'iam.workloadIdentityPoolProviders.update'}
 compute = f'serviceAccount:{numero}-compute@developer.gserviceaccount.com'
 erros, pulados = 0, set()
 for b in politica.get('bindings', []):
@@ -529,8 +543,9 @@ PY
         gcloud compute firewall-rules delete "$r" --project="$p" --quiet >/dev/null || falha "não consegui apagar a regra $r"
       done
       gcloud compute networks delete default --project="$p" --quiet >/dev/null || falha 'não consegui apagar a rede default'
-      [ -z "$(gcloud compute networks list --project="$p" --filter='name=default' --format='value(name)')" ] ||
-        falha 'a rede default continua no projeto'
+      redes="$(gcloud compute networks list --project="$p" --filter='name=default' --format='value(name)')" ||
+        falha 'não consegui conferir a rede default depois de apagar'
+      [ -z "$redes" ] || falha 'a rede default continua no projeto'
       echo 'Rede default: apagada (conferido).'
     else
       echo 'Rede default: mantida (resposta diferente de s).'

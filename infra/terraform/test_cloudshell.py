@@ -40,6 +40,8 @@ if a[:2] == ['auth', 'print-access-token']:
 if a[:3] == ['storage', 'buckets', 'describe']:
     if not e['bucket']:
         erro('HTTPError 404: The specified bucket does not exist.')
+    if 'value(projectNumber)' in j:
+        sai(e['bucket']['projectNumber'])
     sai(e['bucket']['name'] if 'value(name)' in j else json.dumps(e['bucket']))
 if a[:3] == ['storage', 'buckets', 'create']:
     e['bucket'] = {'name': a[3][len('gs://'):], 'projectNumber': e['numero'], 'versioning': {'enabled': False},
@@ -115,7 +117,10 @@ if a[:3] == ['compute', 'firewall-rules', 'list']:
 if a[:3] == ['compute', 'firewall-rules', 'delete']:
     e['regras'].remove(a[3]); salvar(); sai()
 if a[:3] == ['compute', 'networks', 'delete']:
-    e['rede_default'] = False; salvar(); sai()
+    e['rede_default'] = False
+    if e.get('falhar_releitura'):
+        e['falhas'] = ['compute networks list']
+    salvar(); sai()
 print('gcloud falso: comando não previsto: ' + j, file=sys.stderr)
 sys.exit(9)
 '''
@@ -378,7 +383,8 @@ class CloudShell(unittest.TestCase):
     def test_state_cria_confere_e_tira_so_os_vinculos_presentes(self):
         r, chamadas = self.rodar('state', PROJETO)
         self.assertEqual(r.returncode, 0, r.stderr)
-        self.assertIn('só com o dono do projeto', r.stdout)
+        self.assertIn('sem pasta gerenciada e só o dono no IAM', r.stdout)
+        self.assertIn('não cobre abuso dos próprios agentes do Google', r.stdout)
         remocoes = [c for c in chamadas if 'remove-iam-policy-binding' in c]
         self.assertEqual(len(remocoes), 2, remocoes)
         self.assertTrue(any('--uniform-bucket-level-access --public-access-prevention' in c for c in chamadas))
@@ -399,6 +405,22 @@ class CloudShell(unittest.TestCase):
         r, _ = self.rodar('state', PROJETO)
         self.assertNotEqual(r.returncode, 0)
         self.assertIn('***@example.com] does not have permission', r.stderr)
+        self.assertMascarado(r)
+
+    def test_state_nao_mexe_em_bucket_de_outro_projeto(self):
+        self.rodar('state', PROJETO)
+        self.mudar(bucket={**self.estado()['bucket'], 'projectNumber': '123'})
+        politica = self.estado()['politica_bucket']
+        politica['bindings'].append({'role': 'roles/storage.legacyBucketReader', 'members': ['projectViewer:outro']})
+        self.mudar(politica_bucket=politica)
+        (self.falso / 'chamadas.log').unlink()
+        r, chamadas = self.rodar('state', PROJETO)
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn(f'não é do projeto {PROJETO}; nada foi alterado', r.stderr)
+        self.assertFalse([c for c in chamadas if ' update ' in c or 'remove-iam' in c or ' create ' in c])
+        self.mudar(falhas=['storage buckets describe gs://' + PROJETO + '-tfstate-bootstrap --raw'])
+        r, chamadas = self.rodar('state', PROJETO)
+        self.assertIn('nada foi alterado', r.stderr)
         self.assertMascarado(r)
 
     def test_state_para_com_membro_extra_no_bucket(self):
@@ -446,6 +468,13 @@ class CloudShell(unittest.TestCase):
             ('roles/iam.securityAdmin', 'user:outro@x.com', {'roles/iam.securityAdmin': ['resourcemanager.projects.setIamPolicy']}),
             ('roles/iam.roleAdmin', 'user:outro@x.com', {'roles/iam.roleAdmin': ['iam.roles.update']}),
             ('roles/owner', 'user:segundo-dono@x.com', {}),
+            ('roles/iam.serviceAccountTokenCreator', 'user:outro@x.com',
+             {'roles/iam.serviceAccountTokenCreator': ['iam.serviceAccounts.getAccessToken', 'iam.serviceAccounts.signBlob']}),
+            ('roles/iam.serviceAccountUser', 'user:outro@x.com', {'roles/iam.serviceAccountUser': ['iam.serviceAccounts.actAs']}),
+            ('roles/iam.serviceAccountKeyAdmin', 'user:outro@x.com',
+             {'roles/iam.serviceAccountKeyAdmin': ['iam.serviceAccountKeys.create']}),
+            ('roles/iam.workloadIdentityPoolAdmin', 'user:outro@x.com',
+             {'roles/iam.workloadIdentityPoolAdmin': ['iam.workloadIdentityPoolProviders.update']}),
             ('roles/run.serviceAgent', 'serviceAccount:service-123@serverless-robot-prod.iam.gserviceaccount.com', {}),
         ]
         for papel, membro, papeis in casos:
@@ -639,6 +668,15 @@ class CloudShell(unittest.TestCase):
         r, _ = self.rodar('depois', PROJETO, entrada='s\n')
         self.assertNotEqual(r.returncode, 0)
         self.assertIn('não consegui listar as redes', r.stderr)
+
+    def test_depois_nao_da_rede_por_apagada_sem_reler(self):
+        self.projeto_com_padroes_do_google()
+        self.mudar(falhar_releitura=True)
+        r, _ = self.rodar('depois', PROJETO, entrada='n\ns\n')
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn('não consegui conferir a rede default depois de apagar', r.stderr)
+        self.assertNotIn('apagada (conferido)', r.stdout)
+        self.assertMascarado(r)
 
     # variaveis, config-hml e limpar ---------------------------------------------------------------------------------
 

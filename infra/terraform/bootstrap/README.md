@@ -35,7 +35,7 @@ Aplicado **uma vez, no Cloud Shell do Google**, pelo Adrianus, com o `../cloudsh
 |---|---|---|---|
 | `artifactregistry.admin` | Criar o repositório e dar `writer` à publicação | Apagar imagens | Tags imutáveis; a imagem se reconstrói do commit publicado |
 | `cloudsql.admin` | Criar e configurar a instância | Desligar a proteção, apagar a instância, trocar a senha do `postgres` | Backups mantidos ao apagar (`retain_backups_on_delete`); `prevent_destroy` |
-| `run.admin` | Criar web e jobs e dar IAM neles | Pôr `allUsers` na web; executar job com a `sa-preparo` e ler as senhas do banco | Só o `infra-hml.yml`, na `main`, com o Adrianus como revisor do environment; plan aprovado por hash |
+| `run.admin` | Criar web e jobs e dar IAM neles | Pôr `allUsers` na web; executar job com a `sa-preparo` e ler as senhas do banco | Só o `infra-hml.yml`, na `main`; plan aprovado por hash, com veto do Adrianus (revisor obrigatório de environment não está disponível em repositório privado no plano atual) |
 | `iap.admin` | Dar acesso pelo IAP ao grupo dos testadores e à conta do teste | Abrir o IAP a outros | Mesma compensação do `run.admin` |
 
 Todas: só pelo `infra-hml.yml`, que roda só Terraform. Scanner com achado alto sobre esses papéis aponta para esta tabela.
@@ -58,11 +58,11 @@ O state do bootstrap fica, desde o 1º `init`, num bucket só dele: `<projeto>-t
    gcloud storage buckets remove-iam-policy-binding gs://<projeto>-tfstate-bootstrap --member=projectViewer:<projeto> --role=roles/storage.legacyObjectReader
    ```
 3. Conferir pelo servidor, e parar se algo diferir ou não puder ser lido:
-   - `gcloud storage buckets describe --raw`: o bucket é deste projeto (`projectNumber`), com acesso uniforme, prevenção de acesso público `enforced` e versionamento ligado. Se o `describe` falhar por outro motivo que não "não existe" (permissão, rede), não criar nada;
+   - `gcloud storage buckets describe --raw`: o bucket é deste projeto (`projectNumber`), com acesso uniforme, prevenção de acesso público `enforced` e versionamento ligado. Nome de bucket é global: o `projectNumber` se confere **antes** de qualquer mudança dos passos 1 e 2, inclusive numa retomada. Se o `describe` falhar por outro motivo que não "não existe" (permissão, rede), não criar nem mudar nada;
    - `gcloud storage buckets get-iam-policy`: só membros `projectOwner:<projeto>`;
    - `gcloud storage managed-folders list`: nenhuma pasta gerenciada, que teria IAM próprio;
    - `gcloud projects describe`: o projeto não tem pasta nem organização acima (sem `parent`). Com pai, o acesso herdado não é conferível daqui: **parar**;
-   - `gcloud projects get-iam-policy`: só o dono tem `roles/owner`. Fora o dono e os agentes de serviço que o Google cria com o número deste projeto, ninguém tem papel (básico, predefinido ou customizado, expandido com `gcloud iam roles describe`) que alcance objetos (`storage.objects.*`, `storage.managedFolders.*`, `roles/storage.*`) ou que permita se dar acesso (`storage.buckets.setIamPolicy`, `resourcemanager.projects.setIamPolicy`, `iam.roles.update`). Os agentes pulados aparecem na tela pelo domínio. Se a conta padrão do Compute aparecer com Editor, rodar o `depois` antes.
+   - `gcloud projects get-iam-policy`: só o dono tem `roles/owner`. Fora o dono e os agentes de serviço que o Google cria com o número deste projeto, ninguém tem papel (básico, predefinido ou customizado, expandido com `gcloud iam roles describe`) que alcance objetos (`storage.objects.*`, `storage.managedFolders.*`, `roles/storage.*`), que permita se dar acesso (`storage.buckets.setIamPolicy`, `resourcemanager.projects.setIamPolicy`, `iam.roles.update`) ou que permita agir como conta de serviço (token, assinatura, chave, `actAs`, IAM da conta ou provider do WIF; [permissões de conta de serviço](https://docs.cloud.google.com/iam/docs/service-account-permissions)). Os vínculos de personificação que o bootstrap cria ficam em cada conta, não no projeto. Os agentes pulados aparecem na tela pelo domínio, e a conferência não cobre abuso dos próprios agentes do Google. Se a conta padrão do Compute aparecer com Editor, rodar o `depois` antes.
 4. `terraform init -backend-config="bucket=<projeto>-tfstate-bootstrap"`.
 
 O `cloudshell.sh` executa e confere estes passos: `state` cria e ajusta; `planejar` e `aplicar` repetem a conferência antes de tocar no Terraform.
