@@ -632,9 +632,11 @@ PY
 
 # Senhas do banco da HML (R-006, passo 4; roteiro E09), depois da fase 1, que cria a instância e os segredos sem versão.
 # Cada senha nasce aqui (openssl, 32 hexadecimais) e só passa pela entrada padrão: nunca em argumento, eco, arquivo ou
-# log, e ninguém a lê de volta (sem `secrets versions access`). Segredo que já tem versão fica como está.
-# A do admin troca primeiro a senha do postgres e só depois vira versão do segredo: se a gravação falhar, rodar de novo
-# gera outra e troca de novo, sem senha perdida no banco. A troca vai pela API REST do Cloud SQL (users.update), com o
+# log, e ninguém a lê de volta (sem `secrets versions access`). Segredo com versão ativa fica como está; só com
+# versão desativada, o comando para sem gerar nem reativar.
+# A do admin troca primeiro a senha do postgres e só depois vira versão do segredo. Se a troca não se confirmar ou a
+# gravação falhar, o postgres pode ficar com uma senha não guardada até rodar de novo, que gera outra e troca de novo.
+# A troca vai pela API REST do Cloud SQL (users.update), com o
 # corpo pela entrada padrão: o --prompt-for-password do gcloud lê do terminal, não de um pipe.
 SEGREDOS_BANCO='hml-db-admin-senha hml-db-migrator-senha hml-db-app-runtime-senha'
 INSTANCIA='safrion-hml'
@@ -658,18 +660,44 @@ senha_postgres() {
   gcloud sql operations wait "$operacao" --project="$p" --timeout=300 >/dev/null
 }
 
-senha_do_segredo() {
-  local p="$1" s="$2" atual senha versao
-  atual="$(gcloud secrets versions list "$s" --project="$p" --filter='state!=DESTROYED' --limit=1 --format='value(name)')" ||
-    falha "não li as versões de $s"
-  if [ -n "$atual" ]; then
-    echo "$s: já tem a versão ${atual##*/}; mantida, sem gerar outra."
-    return 0
+# Situação de um segredo: "ativa N", "desativada N" ou "vazia". Só versão ativa conta como pronta: a desativada não
+# serve à web nem aos jobs, e gerar outra por cima dela esconderia o motivo de ela ter sido desativada.
+situacao_do_segredo() {
+  local p="$1" s="$2" versoes nome estado ativa='' desativada=''
+  versoes="$(gcloud secrets versions list "$s" --project="$p" --filter='state!=DESTROYED' --format='value(name,state)')" ||
+    falha "não li as versões de $s; nada foi gerado"
+  while read -r nome estado; do
+    [ -n "$nome" ] || continue
+    case "$estado" in
+      ENABLED) [ -n "$ativa" ] || ativa="${nome##*/}" ;;
+      *) desativada="${nome##*/}" ;;
+    esac
+  done <<<"$versoes"
+  if [ -n "$ativa" ]; then
+    echo "ativa $ativa"
+  elif [ -n "$desativada" ]; then
+    echo "desativada $desativada"
+  else
+    echo vazia
   fi
+}
+
+senha_do_segredo() {
+  local p="$1" s="$2" situacao senha versao
+  # Relida na hora de gerar: entre a conferência inicial e aqui, outra sessão pode ter mudado o segredo.
+  situacao="$(situacao_do_segredo "$p" "$s")"
+  case "$situacao" in
+    ativa\ *)
+      echo "$s: já tem a versão ${situacao#ativa } ativa; mantida, sem gerar outra."
+      return 0
+      ;;
+    desativada\ *) falha "$s passou a ter só versão desativada (${situacao#desativada }); pare e confira no Secret Manager" ;;
+  esac
   senha="$(openssl rand -hex 16)" || falha 'o openssl não gerou a senha'
   [[ "$senha" =~ ^[0-9a-f]{32}$ ]] || falha 'o openssl não gerou a senha'
   if [ "$s" = hml-db-admin-senha ]; then
-    senha_postgres "$p" "$senha" || falha 'não troquei a senha do postgres; nada foi gravado no segredo (rode senhas de novo)'
+    senha_postgres "$p" "$senha" ||
+      falha 'não confirmei a troca da senha do postgres; o segredo não foi gravado. Confira a operação no Cloud SQL e rode senhas de novo'
   fi
   versao="$(printf %s "$senha" | gcloud secrets versions add "$s" --project="$p" --data-file=- --format='value(name)')" ||
     falha "não gravei a versão de $s; rode senhas de novo, que gera outra senha"
@@ -694,6 +722,16 @@ cmd_senhas() {
     gcloud secrets describe "$s" --project="$p" --format='value(name)' >/dev/null ||
       falha "segredo $s ausente: aplique a fase 1 do hml/ antes"
   done
+  # Antes de gerar qualquer senha: um segredo só com versão desativada para tudo, sem mudar nada.
+  local situacao bloqueados=''
+  for s in $SEGREDOS_BANCO; do
+    situacao="$(situacao_do_segredo "$p" "$s")"
+    case "$situacao" in
+      desativada\ *) bloqueados="$bloqueados $s (versão ${situacao#desativada })" ;;
+    esac
+  done
+  [ -z "$bloqueados" ] ||
+    falha "só com versão desativada:$bloqueados. Reative ou destrua no Secret Manager antes; nada foi gerado"
   confirmar 'Gerar as 3 senhas do banco da HML sem eco? A do admin também troca a senha do postgres.' ||
     falha 'nada foi gerado'
   for s in $SEGREDOS_BANCO; do
