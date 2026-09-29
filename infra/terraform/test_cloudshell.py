@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Regressão do cloudshell.sh sem rede nem nuvem: gcloud, gh, terraform, tflint, curl, uname e git fetch falsos.
 Roda na CI: python3 -m unittest discover -s infra/terraform -p 'test_*.py'"""
-import hashlib, io, json, os, shutil, stat, subprocess, tempfile, unittest, zipfile
+import hashlib, io, json, os, re, shutil, stat, subprocess, tempfile, unittest, zipfile
 from pathlib import Path
 
 AQUI = Path(__file__).resolve().parent
@@ -73,7 +73,8 @@ if a[:2] == ['storage', 'cp']:
     if destino.startswith('gs://'):
         if '--if-generation-match=0' in a and destino in objs:
             erro('PreconditionFailed')
-        objs[destino] = {'geracao': 1000 + len(objs), 'conteudo': open(origem, encoding='utf-8').read()}
+        conteudo = '{}' if e.get('corromper') else open(origem, encoding='utf-8').read()
+        objs[destino] = {'geracao': 1000 + len(objs), 'conteudo': conteudo}
         salvar(); sai()
     nome, _, geracao = origem.partition('#')
     o = objs.get(nome)
@@ -199,10 +200,10 @@ class CloudShell(unittest.TestCase):
         # Caminho real: o script resolve links (no macOS, /var aponta para /private/var).
         self.tmp = Path(tempfile.mkdtemp()).resolve()
         self.repo = self.tmp / 'repo'
-        for rel in ('infra/terraform', 'tools/github', '.github/workflows'):
+        for rel in ('infra/terraform', 'tools/github', 'tools/hml', '.github/workflows'):
             shutil.copytree(RAIZ_REAL / rel, self.repo / rel, ignore=shutil.ignore_patterns('__pycache__', '.terraform'))
-        (self.repo / 'tools/hml').mkdir(parents=True, exist_ok=True)
-        (self.repo / 'tools/hml/planejar.py').write_text(f"PROJETO = '{PROJETO}'\n", encoding='utf-8')
+        # O planejar.py real (validar_config é a fonte única), com o projeto do teste no lugar do fixo.
+        self.projeto_fixo(PROJETO)
         (self.repo / '.gitignore').write_text('*.tfvars\n__pycache__/\n', encoding='utf-8')
         self.falso = self.tmp / 'falso'
         self.falso.mkdir()
@@ -235,6 +236,13 @@ class CloudShell(unittest.TestCase):
     def git(self, *args):
         return subprocess.run([self.git_real, '-C', str(self.repo), *args], check=True, capture_output=True,
                               text=True).stdout.strip()
+
+    def projeto_fixo(self, projeto):
+        p = self.repo / 'tools/hml/planejar.py'
+        t = p.read_text(encoding='utf-8')
+        t, n = re.subn(r"^PROJETO = '[a-z0-9-]+'$", f"PROJETO = '{projeto}'", t, flags=re.M)
+        self.assertEqual(n, 1)
+        p.write_text(t, encoding='utf-8')
 
     def publicar(self):
         """O commit local vira a main do GitHub falso (ref local e API)."""
@@ -676,13 +684,30 @@ class CloudShell(unittest.TestCase):
 
     def test_config_hml_para_com_outro_projeto_ou_saidas_incoerentes(self):
         self.aplicado()
-        (self.repo / 'tools/hml/planejar.py').write_text("PROJETO = 'safrion-hml-outro'\n", encoding='utf-8')
-        r, _ = self.rodar('config-hml', PROJETO)
-        self.assertIn('só planeja o projeto safrion-hml-outro', r.stderr)
-        (self.repo / 'tools/hml/planejar.py').write_text(f"PROJETO = '{PROJETO}'\n", encoding='utf-8')
-        r, _ = self.rodar('config-hml', PROJETO, extra_env={'FAIXA': 'outra-faixa'})
+        self.projeto_fixo('safrion-hml-outro')
+        r, chamadas = self.rodar('config-hml', PROJETO)
         self.assertNotEqual(r.returncode, 0)
-        self.assertIn('não batem com o destino', r.stderr)
+        self.assertIn('só planeja o projeto safrion-hml-outro', r.stderr)
+        self.projeto_fixo(PROJETO)
+        r, chamadas = self.rodar('config-hml', PROJETO, extra_env={'FAIXA': 'outra-faixa'})
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn('validar_config do tools/hml/planejar.py recusou: CONFIG_DESTINO', r.stderr)
+        self.assertIn('nada foi gravado', r.stderr)
+        self.assertFalse([c for c in chamadas if c.startswith('gcloud storage cp ') and 'gs://' in c.split()[-1]])
+        self.assertMascarado(r)
+
+    def test_config_hml_sem_o_planejar_da_main(self):
+        (self.repo / 'tools/hml/planejar.py').unlink()
+        r, _ = self.rodar('config-hml', PROJETO)
+        self.assertIn('tools/hml/planejar.py ausente nesta cópia', r.stderr)
+
+    def test_config_hml_para_se_a_releitura_difere(self):
+        self.aplicado()
+        self.mudar(corromper=True)
+        r, _ = self.rodar('config-hml', PROJETO)
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn('difere da gravada; não use estes valores', r.stderr)
+        self.assertNotIn('config_sha256', r.stdout)
 
     def test_limpar_apaga_so_o_projeto(self):
         (self.home / '.safrion' / 'outro').mkdir(parents=True)

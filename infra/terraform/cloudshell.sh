@@ -562,43 +562,55 @@ PY
 }
 
 # JSON privado da fase 1 que o infra-hml.yml lê pela geração e pelo SHA-256 (tools/hml/README.md), a partir das saídas
-# do bootstrap e da conta logada. O destino é o mesmo fixado em tools/hml/planejar.py; nunca sobrescreve outra versão.
+# do bootstrap e da conta logada. Destino e aceitação vêm do próprio tools/hml/planejar.py (PROJETO e validar_config),
+# fonte única com o workflow. Grava uma vez; nunca sobrescreve outra versão; relê pela geração antes de dar os valores.
 cmd_config_hml() {
   projeto "${1:-}"
-  local p="$1" fixo objeto numero conta sha geracao atual
+  local p="$1" objeto numero conta sha geracao lida novo=0
   exigir gcloud python3 sha256sum
-  fixo="$(sed -n "s/^PROJETO = '\([a-z0-9-]*\)'$/\1/p" "$RAIZ/tools/hml/planejar.py" 2>/dev/null || true)"
-  [ -n "$fixo" ] || falha 'tools/hml/planejar.py ausente nesta cópia: atualize a main'
-  [ "$p" = "$fixo" ] || falha "o infra-hml.yml só planeja o projeto $fixo; este é $p"
+  [ -f "$RAIZ/tools/hml/planejar.py" ] || falha 'tools/hml/planejar.py ausente nesta cópia: atualize a main'
   numero="$(numero_do_projeto "$p")"
   conta="$(conta_logada)"
   saidas "$p"
-  python3 - "$DIR/saidas.json" "$p" "$numero" "user:$conta" >"$DIR/hml.tfvars.json" <<'PY' || falha 'as saídas do bootstrap não batem com o destino do infra-hml.yml'
-import json, re, sys
-s = {k: v['value'] for k, v in json.load(open(sys.argv[1], encoding='utf-8')).items()}
-projeto, numero, operador = sys.argv[2:5]
-prefixo = f'https://www.googleapis.com/compute/v1/projects/{projeto}'
-esperado = {'rede_self_link': f'{prefixo}/global/networks/safrion-hml',
-            'subrede_self_link': f'{prefixo}/regions/southamerica-east1/subnetworks/safrion-hml-run',
-            'faixa_psa_nome': 'safrion-hml-psa'}
-if any(s.get(k) != v for k, v in esperado.items()) or not re.fullmatch(r'user:[^@\s"\\]+@[^@\s"\\]+', operador):
+  # -B: o import não deixa __pycache__ na cópia nem reaproveita bytecode de outra versão do planejar.py.
+  python3 -B - "$RAIZ/tools/hml" "$DIR/saidas.json" "$p" "$numero" "user:$conta" "$DIR/hml.tfvars.json" <<'PY' ||
+import hashlib, json, sys
+sys.path.insert(0, sys.argv[1])
+import planejar
+projeto, numero, operador, destino = sys.argv[3:7]
+if projeto != planejar.PROJETO:
+    print(f'o infra-hml.yml só planeja o projeto {planejar.PROJETO}; este é {projeto}', file=sys.stderr)
     sys.exit(1)
-cfg = {'projeto_id': projeto, 'projeto_numero': numero, **esperado, 'operador': operador, 'criar_cloud_run': False}
-print(json.dumps(cfg, ensure_ascii=False, sort_keys=True, indent=2))
+s = {k: v['value'] for k, v in json.load(open(sys.argv[2], encoding='utf-8')).items()}
+cfg = {'projeto_id': projeto, 'projeto_numero': numero, 'rede_self_link': s.get('rede_self_link'),
+       'subrede_self_link': s.get('subrede_self_link'), 'faixa_psa_nome': s.get('faixa_psa_nome'),
+       'operador': operador, 'criar_cloud_run': False}
+raw = (json.dumps(cfg, ensure_ascii=False, sort_keys=True, indent=2) + '\n').encode('utf-8')
+try:
+    planejar.validar_config(raw, {'config_sha': hashlib.sha256(raw).hexdigest(), 'projeto_numero': numero})
+except planejar.Recusa as e:
+    print(f'validar_config do tools/hml/planejar.py recusou: {e}', file=sys.stderr)
+    sys.exit(1)
+open(destino, 'wb').write(raw)
 PY
+    falha 'a configuração da fase 1 não passou na conferência; nada foi gravado'
   sha="$(sha256sum "$DIR/hml.tfvars.json" | cut -d' ' -f1)"
   objeto="gs://$p-tfstate-hml/config/hml.tfvars.json"
-  if geracao="$(gcloud storage objects describe "$objeto" --format='value(generation)' 2>"$DIR/objeto.err")" && [ -n "$geracao" ]; then
-    gcloud storage cp "$objeto#$geracao" "$DIR/config-atual.json" >/dev/null || falha "não li $objeto"
-    atual="$(sha256sum "$DIR/config-atual.json" | cut -d' ' -f1)"
-    [ "$atual" = "$sha" ] || falha "já existe outra configuração ($objeto, geração $geracao); revise antes de substituir"
-  else
+  if ! geracao="$(gcloud storage objects describe "$objeto" --format='value(generation)' 2>"$DIR/objeto.err")" || [ -z "$geracao" ]; then
     grep -qiE '404|not ?found' "$DIR/objeto.err" || falha "não consegui ler $objeto (permissão ou rede)"
     gcloud storage cp "$DIR/hml.tfvars.json" "$objeto" --if-generation-match=0 >/dev/null || falha "não gravei $objeto"
     geracao="$(gcloud storage objects describe "$objeto" --format='value(generation)')" || falha "não li $objeto"
+    novo=1
   fi
   [[ "$geracao" =~ ^[1-9][0-9]{0,19}$ ]] || falha 'geração da configuração ilegível'
-  echo 'Configuração da fase 1 no bucket da HML (tem o seu e-mail: não cole o arquivo no chat).'
+  lida="$DIR/config-lida.json"
+  rm -f "$lida"
+  gcloud storage cp "$objeto#$geracao" "$lida" >/dev/null || falha "não li $objeto na geração $geracao"
+  if [ "$(sha256sum "$lida" | cut -d' ' -f1)" != "$sha" ]; then
+    [ "$novo" = 1 ] || falha "já existe outra configuração ($objeto, geração $geracao); revise antes de substituir"
+    falha "a configuração lida do bucket (geração $geracao) difere da gravada; não use estes valores"
+  fi
+  echo 'Configuração da fase 1 no bucket da HML, relida pela geração (tem o seu e-mail: não cole o arquivo no chat).'
   echo "Entradas do infra-hml.yml: config_generation = $geracao · config_sha256 = $sha"
 }
 
