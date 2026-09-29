@@ -14,3 +14,14 @@ condition = "AND"
 regexTarget = "secret"
 paths = ['''^packages/db/test/preparo\.int\.test\.ts$''', '''^packages/db/test/vinculo\.int\.test\.ts$''']
 regexes = ['''^SenhaQueNaoPodeVazar123$''']
+
+# HML-SECRET-02: nomes de Secret Manager usados por value_source.secret_key_ref.
+# Este identificador não é senha; outros valores/arquivos continuam sujeitos à regra.
+[[rules]]
+id = "hashicorp-tf-password"
+[[rules.allowlists]]
+description = "Identificador exato do Secret Manager no mapa de referências da HML"
+condition = "AND"
+regexTarget = "secret"
+paths = ['''^infra/terraform/hml/cloud_run\.tf$''']
+regexes = ['''^"hml-db-admin-senha"$''']
