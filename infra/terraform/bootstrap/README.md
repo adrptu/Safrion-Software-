@@ -40,13 +40,39 @@ Aplicado **uma vez, localmente**, pelo Codex, na janela da sessão do dono (R-00
 
 Todas: só pelo `infra-hml.yml`, que roda só Terraform. Scanner com achado alto sobre esses papéis aponta para esta tabela.
 
+## State do bootstrap
+
+O state do bootstrap fica, desde o 1º `init`, num bucket só dele: `<projeto>-tfstate-bootstrap`. O bucket nasce fora do Terraform, porque o bootstrap não pode guardar o state num bucket que ele mesmo cria, e fica sem nenhum membro direto. **Pelo código**, a `sa-infra-github` não tem papel de Storage no projeto e só tem `objectAdmin` no `<projeto>-tfstate-hml` (`contas.tf`); o `checar_travas.py` recusa papel ou permissão de Storage no projeto, outro IAM ou ACL de bucket e qualquer recurso com `tfstate-bootstrap`. **O isolamento efetivo só vale depois da conferência do passo 3**, que lê o IAM do bucket e o do projeto, porque o IAM do bucket não mostra o acesso que vem do projeto. Nenhuma cópia do state fica em máquina local, e não há migração nem condição de IAM por prefixo.
+
+1. Criar o bucket, uma vez, na região da HML:
+   ```sh
+   gcloud storage buckets create gs://<projeto>-tfstate-bootstrap --project=<projeto> --location=southamerica-east1 --uniform-bucket-level-access --public-access-prevention
+   gcloud storage buckets update gs://<projeto>-tfstate-bootstrap --versioning --lifecycle-file=<arquivo>
+   ```
+   O `<arquivo>` repete a regra do bucket da HML (`main.tf`): apagar versões arquivadas além das 11 mais novas.
+2. Tirar os vínculos de conveniência de editor e leitor do projeto que existirem, para ficar só o dono. Ler a política antes (`gcloud storage buckets get-iam-policy`) e remover **só os pares presentes**: remover um vínculo ausente é erro do `gcloud`, que não se ignora. Os pares possíveis:
+   ```sh
+   gcloud storage buckets remove-iam-policy-binding gs://<projeto>-tfstate-bootstrap --member=projectEditor:<projeto> --role=roles/storage.legacyBucketOwner
+   gcloud storage buckets remove-iam-policy-binding gs://<projeto>-tfstate-bootstrap --member=projectEditor:<projeto> --role=roles/storage.legacyObjectOwner
+   gcloud storage buckets remove-iam-policy-binding gs://<projeto>-tfstate-bootstrap --member=projectViewer:<projeto> --role=roles/storage.legacyBucketReader
+   gcloud storage buckets remove-iam-policy-binding gs://<projeto>-tfstate-bootstrap --member=projectViewer:<projeto> --role=roles/storage.legacyObjectReader
+   ```
+3. Conferir pelo servidor, e parar se algo diferir ou não puder ser lido:
+   - `gcloud storage buckets describe`: acesso uniforme, prevenção de acesso público `enforced` e versionamento ligado;
+   - `gcloud storage buckets get-iam-policy`: só membros `projectOwner:<projeto>`;
+   - `gcloud projects describe`: o projeto não tem pasta nem organização acima (sem `parent`). Com pai, o acesso herdado não é conferível daqui: **parar**;
+   - `gcloud projects get-iam-policy`: nenhum membro além da conta do dono com `roles/owner`, `roles/editor`, `roles/viewer`, papel `roles/storage.*` ou papel customizado com permissão `storage.*` (conferir as permissões de cada papel customizado com `gcloud iam roles describe`).
+4. `terraform init -backend-config="bucket=<projeto>-tfstate-bootstrap"`.
+
+O roteiro do Cloud Shell executa e confere estes passos.
+
 ## Como aplicar
 
 Pré-requisitos (R-006 §3): Terraform 1.16.3 (a versão fixada em `versions.tf`), TFLint e Trivy conferidos pelo checksum oficial; credencial de vida curta pelo wrapper (`GOOGLE_OAUTH_ACCESS_TOKEN`), sem gravar arquivo ADC.
 
 ```sh
 cp terraform.tfvars.example terraform.tfvars   # valores reais; o arquivo fica fora do Git
-terraform init
+terraform init -backend-config="bucket=<projeto>-tfstate-bootstrap"   # state remoto desde já (seção acima)
 terraform fmt -check && terraform validate && tflint && trivy config --severity HIGH,CRITICAL --exit-code 1 .
 terraform plan -out=bootstrap.tfplan
 shasum -a 256 bootstrap.tfplan                 # hash e contagem vão para a rodada
@@ -66,7 +92,7 @@ Saídas para o GitHub (environment `hml`): `WIF_PROVIDER` = `wif_provider`, `DEP
 
 **Rede `default`** (fora do Terraform): a doc descreve a criação dela em projeto novo, com regras de firewall que abrem SSH e RDP para `0.0.0.0/0`; não se sabe se nasce num projeto já existente, e o Trivy não a vê. Conferir com `gcloud compute networks list --project=<id>`. Se aparecer, apagar as regras dela (`gcloud compute firewall-rules list --project=<id> --filter="network~/default$"` e `gcloud compute firewall-rules delete <regra> --project=<id>`), depois a rede (`gcloud compute networks delete default --project=<id>`), e registrar na rodada.
 
-**Migrar o state para o bucket** (plano R-006, passo 12): acrescentar `backend "gcs" { prefix = "bootstrap" }` em `versions.tf` e rodar `terraform init -migrate-state -backend-config="bucket=<bucket_state>"`. Antes, restringir o acesso da `sa-infra-github` ao prefixo `hml/` (condição de IAM no bucket, a ensaiar), porque o `objectAdmin` dela vale para o bucket todo.
+**State:** já nasce no bucket próprio ([State do bootstrap](#state-do-bootstrap)); não há migração. O `objectAdmin` da `sa-infra-github` vale para o bucket do state da HML inteiro, e não alcança o do bootstrap.
 
 **Revogar a sessão do dono** ao fim da janela, pelo wrapper: `auth revoke --all` e `auth application-default revoke`, com a prova pedida no R-006 §3.
 

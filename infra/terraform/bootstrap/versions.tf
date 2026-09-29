@@ -11,5 +11,10 @@ terraform {
     }
   }
 
-  # State local na 1ª aplicação. Migração para o bucket: ver README.md.
+  # State remoto desde o 1º init, num bucket só do bootstrap, criado fora do Terraform antes do init (README.md,
+  # "State do bootstrap"): terraform init -backend-config="bucket=<projeto>-tfstate-bootstrap". A sa-infra-github não o
+  # alcança: não tem papel de Storage no projeto e só tem objectAdmin no bucket do state da HML (contas.tf).
+  backend "gcs" {
+    prefix = "bootstrap"
+  }
 }

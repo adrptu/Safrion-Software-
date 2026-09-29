@@ -63,6 +63,31 @@ resource "google_storage_bucket" "state" {
     }
   }
 
+  # Planos do infra-hml.yml (planos/<run_id>/<tentativa>/): o plano vale para uma revisão, e o hash fica no recibo, fora
+  # do bucket. Apagado em 30 dias; a versão arquivada, no dia seguinte (a regra acima não apaga objeto de versão única).
+  lifecycle_rule {
+    condition {
+      age            = 30
+      matches_prefix = ["planos/"]
+    }
+
+    action {
+      type = "Delete"
+    }
+  }
+
+  lifecycle_rule {
+    condition {
+      with_state                 = "ARCHIVED"
+      matches_prefix             = ["planos/"]
+      days_since_noncurrent_time = 1
+    }
+
+    action {
+      type = "Delete"
+    }
+  }
+
   lifecycle {
     prevent_destroy = true
   }

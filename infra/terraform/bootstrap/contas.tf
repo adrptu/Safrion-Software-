@@ -125,7 +125,8 @@ resource "google_project_iam_member" "infra_segredos" {
   member  = local.membro["sa-infra-github"]
 }
 
-# State da HML: o backend gcs pede Storage Object Admin no bucket (R-006, F44). O state do bootstrap fica local.
+# State da HML: o backend gcs pede Storage Object Admin no bucket (R-006, F44). O do bootstrap fica noutro bucket, fora
+# do Terraform e sem este acesso (README.md, "State do bootstrap"); checar_travas.py confere.
 resource "google_storage_bucket_iam_member" "infra_state" {
   bucket = google_storage_bucket.state.name
   role   = "roles/storage.objectAdmin"
