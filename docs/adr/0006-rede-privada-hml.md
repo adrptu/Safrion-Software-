@@ -1,9 +1,9 @@
 # ADR 0006: Ligar o banco da HML só por rede privada
 
-- **Situação:** proposta; implementada no Terraform da `main` pelo PR #14 (validado na CI, sem plan nem apply). Parecer técnico favorável do Codex em 29/09 (revisão do PR #16); parecer do Gemini pendente.
+- **Situação:** implementada no Terraform da `main` pelo PR #14 (validado na CI, sem plan nem apply). Aceita em 29/09: parecer técnico favorável do Codex e parecer documental favorável do Gemini, na revisão do PR #16.
 - **Data:** 2026-09-28
 - **Autor:** Claude Code
-- **Revisor:** Codex (pendente)
+- **Revisores:** Codex (parecer técnico) e Gemini (parecer documental), favoráveis em 29/09, na revisão do PR #16
 - **Requisitos do PRD afetados:** 28.1 (serviços gerenciados na HML), 27.4 (HML equivalente à produção), ENG-005 (exceções), ENG-017 (segredos), ENG-061 a ENG-064
 
 ## Contexto

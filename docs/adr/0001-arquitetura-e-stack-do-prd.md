@@ -3,7 +3,7 @@
 - **Situação:** aceita
 - **Data:** 2026-09-27
 - **Autor:** Claude Code
-- **Revisor:** Codex, parecer técnico favorável em 29/09 (revisão do PR #16); parecer do Gemini pendente. Em uso na `main`, com uma exceção: o acesso a dados usa SQL explícito com `pg`, sem Prisma (ADR 0003).
+- **Revisores:** Codex (parecer técnico) e Gemini (parecer documental), favoráveis em 29/09, na revisão do PR #16. Em uso na `main`, com uma exceção: o acesso a dados usa SQL explícito com `pg`, sem Prisma (ADR 0003).
 - **Requisitos do PRD afetados:** 12.1, 12.2, 23.1–23.3, 24, 28; ENG-006..020
 
 ## Contexto
