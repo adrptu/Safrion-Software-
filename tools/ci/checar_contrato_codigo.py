@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Portão do job de código da CI (revisão R001-01 do Codex).
 - Nem package.json nem pnpm-lock.yaml: repositório só de documentação → job de código N/A (ativo=false), saída 0.
+- Caminho existente que não é arquivo regular: erro, nunca documentação.
 - Só um dos dois: erro (aplicação sem lockfile ou lockfile órfão).
 - Os dois: exige o contrato mínimo (PRD 23.1/23.4, ENG-006): packageManager "pnpm@X.Y.Z" exato, engines.node,
   .nvmrc com versão exata e os scripts obrigatórios na raiz. Os scripts rodam na CI SEM --if-present.
@@ -17,6 +18,12 @@ def saida(ativo):
     gh = os.environ.get('GITHUB_OUTPUT')
     if gh:
         with open(gh, 'a', encoding='utf-8') as f: f.write(f'ativo={"true" if ativo else "false"}\n')
+
+invalidos = [nome for nome in ('package.json', 'pnpm-lock.yaml')
+             if os.path.lexists(os.path.join(raiz, nome)) and not os.path.isfile(os.path.join(raiz, nome))]
+if invalidos:
+    for nome in invalidos: print(f'ERRO: {nome} existe, mas não é arquivo regular')
+    saida(False); sys.exit(1)
 
 if not tem_pkg and not tem_lock:
     print('N/A: sem package.json e sem pnpm-lock.yaml — repositório só de documentação (ADR 0002).')

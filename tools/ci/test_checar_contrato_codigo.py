@@ -23,6 +23,21 @@ class PortaoContrato(unittest.TestCase):
     def test_so_documentacao_e_na(self):
         self.assertEqual(self.rodar({})[:2], (0, 'ativo=false'))
 
+    def test_diretorios_nao_sao_documentacao(self):
+        with tempfile.TemporaryDirectory() as d:
+            for nome in ('package.json', 'pnpm-lock.yaml'):
+                os.mkdir(os.path.join(d, nome))
+                with open(os.path.join(d, nome, 'arquivo-inerte.txt'), 'w') as f:
+                    f.write('fixture')
+            saida = os.path.join(d, 'gh_output')
+            p = subprocess.run([sys.executable, SCRIPT, d], capture_output=True, text=True,
+                               env={**os.environ, 'GITHUB_OUTPUT': saida})
+            with open(saida, encoding='utf-8') as f:
+                self.assertEqual((p.returncode, f.read().strip()), (1, 'ativo=false'))
+            self.assertIn('package.json existe, mas não é arquivo regular', p.stdout)
+            self.assertIn('pnpm-lock.yaml existe, mas não é arquivo regular', p.stdout)
+            self.assertNotIn('N/A:', p.stdout)
+
     def test_manifesto_sem_lockfile_falha(self):
         self.assertEqual(self.rodar({'package.json': {}})[0], 1)
 
