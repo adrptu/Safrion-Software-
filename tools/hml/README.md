@@ -31,9 +31,16 @@ readback divergente. Executa `init` com lockfile somente leitura, `plan` com loc
 Exemplo `.tfvars.example` não é configuração automática. O arquivo temporário de credenciais criado pela action
 `auth` fica no checkout até sua limpeza final: nenhum passo deste job deve enviar o workspace como artefato.
 
-Binário e hash ficam privados em `planos/<run_id>/<tentativa>/`, com escrita condicionada à ausência do objeto e
-expiração de 30 dias. O recibo no summary contém commit, hash/geração da configuração, hash/geração do plano,
-contagens, drift e resultado das travas. Nenhum endereço, e-mail, valor ou JSON bruto do plano é publicado.
+Binário, hash e `recibo.json` ficam privados em `planos/<run_id>/<tentativa>/`, com escrita condicionada à ausência
+do objeto e expiração de 30 dias. O recibo de origem só é gravado depois de conferir o binário e seu hash; é relido
+pela geração e comparado byte a byte antes de anunciar sucesso. Contém apenas `repositorio`, `workflow`, `evento`,
+`ref`, `head_sha`, `run_id`, `tentativa`, `config_generation`, `config_sha256`, `plan_sha256`, `plan_generation` e
+`escopo` (`fase1`). Não é uma assinatura criptográfica: o consumidor ainda precisa conferir a execução oficial
+bem-sucedida na API do GitHub, a main atual e a geração/hash do plano antes de aplicar.
+
+O resumo humano no summary preserva commit, hash/geração da configuração e do plano, contagens, drift, resultado
+das travas e o aviso de que só houve PLAN. Acrescenta objeto, geração e SHA256 do recibo de origem. Nenhum endereço
+de recurso do plano, e-mail, valor ou JSON bruto do plano é publicado.
 Revisores autorizados devem conferir o binário privado pela geração e compará-lo ao hash do recibo externo;
 o resumo por contagens não substitui essa revisão. Produção segue o aceite explícito da candidata.
 

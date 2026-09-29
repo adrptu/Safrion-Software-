@@ -347,6 +347,7 @@ class PlanejamentoLocal(RecusasSemDados):
         self.pj['output_changes'] = {'privado': {'after': CANARIO, 'after_sensitive': True}}
         self.chamadas = []
         self.falha = None
+        self.origem_gravada = None
         self.stdout = io.StringIO()
         self.stderr = io.StringIO()
         mascara = os.umask(0o077)
@@ -375,14 +376,24 @@ class PlanejamentoLocal(RecusasSemDados):
             saida.write_text(json.dumps(self.pj))
         elif codigo.startswith('GRAVAR_'):
             self.assertIn('--if-generation-match=0', args, 'Artefato de revisão anterior não pode ser sobrescrito.')
+            if codigo == 'GRAVAR_RECIBO':
+                self.assertTrue(args[-2].endswith('/planos/1234/2/recibo.json'))
+                self.origem_gravada = Path(args[-3]).read_bytes()
         elif codigo == 'METADADOS':
             saida.write_text('{"generation":"456789"}')
+        elif codigo == 'METADADOS_RECIBO':
+            self.assertTrue(args[-2].endswith('/planos/1234/2/recibo.json'))
+            saida.write_text(json.dumps({'generation': '0' if self.falha == 'RECIBO_GERACAO' else '789012'}))
         elif codigo == 'LER_PLANO':
             self.assertIn('#456789', args[-2])
             Path(args[-1]).write_bytes(b'PLANO_DIVERGENTE' if self.falha == 'BINARIO_DIVERGENTE' else self.binario)
         elif codigo == 'LER_HASH':
             conteudo = ('0' * 64 if self.falha == 'HASH_DIVERGENTE' else self.digest) + '\n'
             Path(args[-1]).write_text(conteudo)
+        elif codigo == 'LER_RECIBO':
+            self.assertTrue(args[-2].endswith('/planos/1234/2/recibo.json#789012'))
+            self.assertIsNotNone(self.origem_gravada)
+            Path(args[-1]).write_bytes(b'RECIBO_DIVERGENTE' if self.falha == 'ORIGEM_DIVERGENTE' else self.origem_gravada)
         elif codigo not in ('TRAVAS_CODIGO', 'INIT', 'TRAVAS_PLANO'):
             self.fail('Ferramenta inesperada na simulação: ' + codigo)
         return 0
@@ -416,8 +427,23 @@ class PlanejamentoLocal(RecusasSemDados):
         self.assertNotIn(CANARIO, json.dumps(recibo))
         self.assertNotIn('output_changes', recibo)
         self.assertEqual([c for c, _ in self.chamadas if c.startswith('GRAVAR_')],
-                         ['GRAVAR_TFPLAN', 'GRAVAR_TFPLAN_SHA256'])
-        self.assertIn('LER_HASH', [c for c, _ in self.chamadas])
+                         ['GRAVAR_TFPLAN', 'GRAVAR_TFPLAN_SHA256', 'GRAVAR_RECIBO'])
+        codigos = [c for c, _ in self.chamadas]
+        self.assertLess(codigos.index('LER_HASH'), codigos.index('GRAVAR_RECIBO'))
+        self.assertEqual(codigos[-1], 'LER_RECIBO')
+        self.assertEqual(json.loads(self.origem_gravada), {
+            'repositorio': 'adrptu/Safrion-Software-', 'workflow': '.github/workflows/infra-hml.yml',
+            'evento': 'workflow_dispatch', 'ref': 'refs/heads/main', 'head_sha': SHA,
+            'run_id': '1234', 'tentativa': '2', 'config_generation': self.ctx['geracao'],
+            'config_sha256': self.ctx['config_sha'], 'plan_sha256': self.digest,
+            'plan_generation': '456789', 'escopo': 'fase1',
+        })
+        self.assertEqual(recibo['recibo_objeto'], f'gs://{PROJETO}-tfstate-hml/planos/1234/2/recibo.json')
+        self.assertEqual(recibo['recibo_generation'], '789012')
+        self.assertEqual(recibo['recibo_sha256'], hashlib.sha256(self.origem_gravada).hexdigest())
+        self.assertNotIn(CANARIO.encode(), self.origem_gravada)
+        self.assertNotIn(b'operador@example.com', self.origem_gravada)
+        self.assertIn('nenhum apply', recibo['escopo'])
         self.conferir_limpeza()
 
     def test_readback_divergente_do_binario_ou_hash_nao_entrega_recibo(self):
@@ -426,6 +452,19 @@ class PlanejamentoLocal(RecusasSemDados):
                 self.falha = falha
                 self.chamadas.clear()
                 self.recusa(self.executar)
+                self.assertIsNone(self.origem_gravada, 'Não publicar origem de um plano não conferido.')
+                self.conferir_limpeza()
+
+    def test_recibo_sem_confirmacao_nao_entrega_sucesso_nem_repete_gravacao(self):
+        for falha in ('GRAVAR_RECIBO', 'METADADOS_RECIBO', 'LER_RECIBO', 'RECIBO_GERACAO', 'ORIGEM_DIVERGENTE'):
+            with self.subTest(falha=falha):
+                self.falha = falha
+                self.chamadas.clear()
+                self.recusa(self.executar)
+                codigos = [c for c, _ in self.chamadas]
+                self.assertEqual(codigos.count('GRAVAR_RECIBO'), 1)
+                if falha in ('GRAVAR_RECIBO', 'METADADOS_RECIBO', 'RECIBO_GERACAO'):
+                    self.assertNotIn('LER_RECIBO', codigos)
                 self.conferir_limpeza()
 
     def test_plano_destrutivo_nao_faz_upload(self):

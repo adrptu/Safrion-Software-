@@ -197,6 +197,24 @@ def planejar(ctx, env):
         conferido_hash = temp / 'readback.sha256'
         rodar(gcloud + ['storage', 'cp', f'{destino}/tfplan.sha256', str(conferido_hash)], 'ler_hash')
         exigir(conferido_hash.read_bytes() == (digest + '\n').encode(), 'RECIBO_HASH_READBACK')
+        # Contrato aplicar-hml v3 (Claude, revisto por Codex/Gemini): origem separada do resumo humano.
+        origem = {'repositorio': REPO, 'workflow': '.github/workflows/infra-hml.yml',
+                  'evento': 'workflow_dispatch', 'ref': 'refs/heads/main', 'head_sha': ctx['sha'],
+                  'run_id': ctx['run_id'], 'tentativa': ctx['tentativa'],
+                  'config_generation': ctx['geracao'], 'config_sha256': ctx['config_sha'],
+                  'plan_sha256': digest, 'plan_generation': geracao, 'escopo': 'fase1'}
+        raw_origem = (json.dumps(origem, sort_keys=True, indent=2) + '\n').encode('utf-8')
+        arquivo_origem = temp / 'recibo.json'; arquivo_origem.write_bytes(raw_origem)
+        objeto_origem = destino + '/recibo.json'
+        rodar(gcloud + ['storage', 'cp', str(arquivo_origem), objeto_origem, '--if-generation-match=0'], 'gravar_recibo')
+        rodar(gcloud + ['storage', 'objects', 'describe', objeto_origem, '--format=json(generation)'], 'metadados_recibo')
+        geracao_origem = str(json_estrito((temp / 'metadados_recibo.stdout').read_bytes()).get('generation', ''))
+        exigir(re.fullmatch(r'[1-9][0-9]{0,19}', geracao_origem), 'RECIBO_GERACAO_INVALIDA')
+        conferido_origem = temp / 'readback-recibo.json'
+        rodar(gcloud + ['storage', 'cp', f'{objeto_origem}#{geracao_origem}', str(conferido_origem)], 'ler_recibo')
+        exigir(conferido_origem.read_bytes() == raw_origem, 'ORIGEM_READBACK_DIVERGENTE')
+        recibo.update(recibo_objeto=objeto_origem, recibo_generation=geracao_origem,
+                      recibo_sha256=hashlib.sha256(raw_origem).hexdigest())
         # Só este esquema fechado sai do diretório efêmero. JSON do plan e erros brutos são eliminados no finally.
         return recibo
 
