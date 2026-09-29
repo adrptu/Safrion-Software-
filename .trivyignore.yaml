@@ -1,0 +1,16 @@
+# Exceção ATIVA por não aplicabilidade comprovada (SECURITY.md), referenciada em trivyignores no passo do Trivy do
+# ci.yml. Revisão tripla do GCP-0015 em 29/09/2026: proposta de Claude (bc63227), revisão do Codex e 6 controles do
+# Gemini (dois scans offline, guard aceito e TLS inseguro recusado, validade). Formato conferido por
+# tools/ci/checar_ci_seguranca.py (statement numa linha só). Prova e prazo detalhados: infra/terraform/hml/README.md.
+# Caminho a partir da raiz do repositório, onde o Trivy roda fs: hml/banco.tf não casa (ensaio do Codex de 29/09,
+# ci/excecao-review). Granularidade: regra e arquivo, não recurso nem ssl_mode. A exceção cobre todo GCP-0015 desse
+# arquivo, inclusive TLS inseguro ou uma segunda instância; por isso só se ativa junto do checar_travas.py obrigatório na
+# CI (infra.yml), que recusa as duas coisas.
+# Só o GCP-0015. O GCP-0017 (IP público) deixa de existir com ipv4_enabled = false literal e sem redes autorizadas
+# (ADR 0006): não entra aqui.
+misconfigurations:
+  - id: GCP-0015
+    paths:
+      - 'infra/terraform/hml/banco.tf'
+    statement: 'Não aplicável: ssl_mode ENCRYPTED_ONLY recusa conexão sem TLS; o Trivy 0.74 com checks embutidos acusa GCP-0015 com ENCRYPTED_ONLY, e nas fixtures só o require_ssl legado silenciou o achado (aquasecurity/trivy#9999; contraprova do Codex em candidate-41dd295/evidence/tls-counterexamples). A exceção vale por regra e arquivo e cobre também TLS inseguro ou segunda instância no arquivo: só vale junto do checar_travas.py obrigatório na CI (infra.yml), que recusa ssl_mode diferente de ENCRYPTED_ONLY e segunda instância. Prazo de 30 dias para reavaliar na próxima atualização do Trivy e o estado da aquasecurity/trivy#9999.'
+    expired_at: 2026-10-28

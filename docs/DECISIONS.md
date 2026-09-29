@@ -22,6 +22,7 @@ Registradas no capítulo 72 do PRD v3.9 (26/09/2026).
 | DEC-2609-12 | Nomes das funcionalidades do mapa | PRD 72.2 |
 | DEC-2609-13 | Estoque e app de campo prontos para os primeiros testes com clientes | PRD 72.2 |
 | DEC-2609-14 | Cadastros completos para a inteligência do sistema | PRD 72.2 |
+| DEC-2709-01 | Início do software real (F0 e F1) só com dados fictícios; decisões técnicas delegadas a Claude e Codex juntos. Continuam com o proprietário: custo, conta e contrato, dados reais, ERP real, publicação a usuários reais e aceite da candidata antes da produção | `docs/parceria/rodadas/R-006-skills-ferramentas-plano.md` §7 |
 
 ## Decisões pendentes do proprietário
 
@@ -39,7 +40,7 @@ Até a decisão, vale o comportamento conservador descrito no próprio PRD.
 | DEC-08 | Gessagem e subsuperfície | PRD 70.4 |
 | DEC-09 | Trial do agricultor e franquias | PRD 70.4 |
 | PEND-01.. | Pendências da revisão v3.10 (confiabilidade transacional, offline e desempenho), entre elas a proposta de pré-autorização por limiares, **não aprovada** | PRD 73.12 (em revisão) |
-| PEND-REPO-01 | **Só se o plano da conta for Free** (ainda não verificado): proteção da `main` imposta pelo servidor em repositório privado exige GitHub Pro (custo mensal da conta). Opções: contratar o Pro; ou manter privado sem proteção imposta, com a disciplina de pull request, CI e parecer escrito. Tornar público só por decisão expressa. **Até decidir:** privado, sem proteção imposta, disciplina de processo. | `docs/STATUS.md`, bloqueio 2 |
+| PEND-REPO-01 | Em 27/09 o proprietário informou "Fiz upgrade no git", e a CI remota voltou a rodar. Plano exato ainda não conferido; se permitir, aplicar a proteção da `main` (`tools/github/configurar_protecao.sh`). Texto anterior: **só se o plano da conta for Free** (ainda não verificado): proteção da `main` imposta pelo servidor em repositório privado exige GitHub Pro (custo mensal da conta). Opções: contratar o Pro; ou manter privado sem proteção imposta, com a disciplina de pull request, CI e parecer escrito. Tornar público só por decisão expressa. **Até decidir:** privado, sem proteção imposta, disciplina de processo. | `docs/STATUS.md`, bloqueio 2 |
 | PEND-DS-01.. | Pendências do design system (modo escuro, marca, fontes de títulos e outras) | PRD 74.12 (em revisão) |
 
 ## Decisões de arquitetura (ADR)
@@ -50,3 +51,5 @@ Ficam em `docs/adr/`, uma por arquivo, no modelo `0000-modelo.md`. As escolhas j
 |---|---|---|
 | 0001 | Arquitetura e stack de referência adotadas pelo PRD | Aceita (origem: PRD 12.1, 23.1, 28) |
 | 0002 | Repositório privado com documentação e CI antes do código de produto | Aceita (proprietário, 27/09/2026) |
+| 0005 | Hospedar a HML em southamerica-east1 (São Paulo) | Proposta (revisão do Codex pendente) |
+| 0006 | Ligar o banco da HML só por rede privada (PSA, Direct VPC e conector `PRIVATE`) | Proposta (revisão do Codex pendente) |

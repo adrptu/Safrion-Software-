@@ -2,6 +2,11 @@
 
 Este arquivo é a **fonte única de instruções** para Claude Code, Codex e qualquer outro agente. O `CLAUDE.md` apenas importa este arquivo. Não crie outra lista de regras paralela: mude aqui e registre o motivo no pull request.
 
+## 0. Missão
+Fazer diferença real na melhoria, na evolução e no sucesso contínuo da agricultura brasileira, com gestão, inteligência e automação simples, intuitivas, objetivas e essenciais (pedido do proprietário, 27/09/2026).
+- O valor se mede por esforço poupado, erros evitados e resultado verificado na fazenda. Nada de promessa sem evidência.
+- Minimalismo e essencialismo valem para produto, PRD, código, fluxograma e mensagens (§3.4), sem remover controle necessário ao trabalho correto.
+
 ## 1. O que é este repositório
 Sistema **"Do Talhão à O.S."**: plataforma de gestão agrícola integrada. Vai do planejamento da safra à ordem de serviço, ao almoxarifado, ao app de campo e aos custos.
 
@@ -90,6 +95,24 @@ Sistema **"Do Talhão à O.S."**: plataforma de gestão agrícola integrada. Vai
 - **Último valor:** nunca para lote, dose, quantidade ou autorização.
 - **Medição:** cliques e digitação medidos nos testes ponta a ponta do mesmo cenário, antes e depois. Reduzir cliques nunca pode custar legibilidade, segurança, acessibilidade ou rastreabilidade.
 - **Detalhe:** `docs/parceria/rodadas/R-004-harness-item-a-e-produtividade.md` §3 e o design system (cap. 74).
+
+### 3.4 Método de trabalho (protocolo v3, pedido do proprietário, 27/09/2026)
+- **Acordo curto antes de editar**, no arquivo da rodada ou na tarefa. Só estes campos:
+  ```text
+  ID / resultado útil / persona:
+  Requisitos do PRD e fora do escopo:
+  Autor / revisor / integrador:
+  Base (commit ou hashes) / arquivos sob responsabilidade:
+  Aceite e comando de verificação:
+  Estado / impedimento / próximo passo:
+  ```
+- **Uma solução por problema:** se o outro agente já fez, revisar ou reaproveitar. Quem integra aplica o patch; quem propõe não sobrescreve arquivo ativo do outro. Perfil de navegador, porta de teste e estado de demonstração não se compartilham sem combinar.
+- **Revisão por contraexemplo:** o revisor tenta quebrar o resultado como a persona faria. Cada achado é aceito, ajustado ou recusado com fundamento; polimento não reabre entrega aceita.
+- **Destravar sem repetir:** travamento não é defeito; retomar do último ponto verificado. Duas falhas pelo mesmo motivo obrigam a mudar a hipótese, reduzir a tarefa ou corrigir a ferramenta antes de tentar de novo.
+- **Conferir o resultado real**, não só o código de saída. Corrigido um classificador de testes, reaproveitar os logs válidos em vez de rodar tudo de novo.
+- **Corte do supérfluo** em PRD, código, fluxograma, testes e mensagens: cada trecho ajuda a entender, decidir, implementar, verificar ou operar. Regra repetida vira referência à fonte única; IDs e rastreabilidade são preservados.
+- **Mensagem enviada não é trabalho integrado.** Pedido entre agentes leva caminho, versão, decisão necessária e impedimento.
+- Protocolo completo: [`docs/parceria/protocolo.md`](docs/parceria/protocolo.md).
 
 ## 4. Regras de produto que o código não pode quebrar
 - **Master-detail** (Menu → Listagem → Detalhe → Sub-detalhe), uma ação primária por tela, estado sempre visível e próximo passo com verbo (PRD 4.2 e 4.3).

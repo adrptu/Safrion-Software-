@@ -1,0 +1,14 @@
+# Copie para terraform.tfvars (fora do Git) e troque os valores fictícios.
+projeto_id           = "safrion-hml-exemplo"
+github_repositorio   = "dono/repositorio"
+github_repository_id = "123456789"
+github_owner_id      = "987654321"
+operador             = "user:operador@example.com"
+
+# Opcionais (padrões em variables.tf).
+# regiao             = "southamerica-east1"
+# habilitar_iap      = true
+# agentes            = ["user:agentes@example.com"]
+# criar_sa_vertex    = false
+# subrede_cidr       = "10.10.0.0/24"   # RFC 1918, /24
+# faixa_psa_cidr     = "10.20.0.0/20"   # RFC 1918, /20, sem conter a sub-rede

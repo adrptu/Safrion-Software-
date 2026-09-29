@@ -2,14 +2,23 @@
 // Prepara o banco de um ambiente com o administrador do servidor (PRD 27; ADR 0004): papéis, banco com dono migrator,
 // migrações e identidade do ambiente. Idempotente. Lê SAFRION_ADMIN_URL (administrador, banco postgres),
 // SAFRION_SENHA_MIGRATOR e SAFRION_SENHA_APP_RUNTIME (as mesmas senhas que a aplicação e o migrator usam, vindas do
-// cofre de segredos). Saída 0 = preparado; 1 = recusado pelas travas, nada além do já relatado mudou; 2 = uso incorreto;
-// 3 = falha de infraestrutura, relatada só por códigos (F0B2-01): nenhuma senha, host ou mensagem do driver sai daqui.
+// cofre de segredos). Com SAFRION_CLOUDSQL_INSTANCIA, toda conexão passa pelo conector em IP privado (conexao.ts).
+// Saída 0 = preparado; 1 = recusado pelas travas, nada além do já relatado mudou; 2 = uso incorreto; 3 = falha de
+// infraestrutura, relatada só por códigos (F0B2-01): nenhuma senha, host ou mensagem do driver sai daqui.
 import { pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
 
 import pg from 'pg';
 
 import { ErroAmbiente } from '../ambiente.js';
+import { criarConectorGoogle } from '../conector-google.js';
+import {
+  ErroConexao,
+  prepararConexao,
+  sairNaRejeicaoSolta,
+  type Conexao,
+  type PrepararConexao,
+} from '../conexao.js';
 import { ErroPapeis } from '../papeis.js';
 import { ErroPreparo, prepararBanco, validarOpcoes } from '../preparo.js';
 
@@ -19,7 +28,12 @@ const USO =
   'SAFRION_SENHA_MIGRATOR e SAFRION_SENHA_APP_RUNTIME definidos.';
 
 function falhaSemTextoLivre(erro: unknown) {
-  const code = typeof erro === 'object' && erro !== null && 'code' in erro ? erro.code : undefined;
+  const code =
+    erro instanceof ErroConexao
+      ? erro.codigo
+      : typeof erro === 'object' && erro !== null && 'code' in erro
+        ? erro.code
+        : undefined;
   return {
     resultado: 'falha',
     codigo: 'FALHA_INFRAESTRUTURA',
@@ -33,6 +47,7 @@ export async function executarCli(
   env: Readonly<Record<string, string | undefined>>,
   escrever: (linha: string) => void,
   conectar: (config: pg.ClientConfig) => pg.Client = (config) => new pg.Client(config),
+  preparar: PrepararConexao = (e) => prepararConexao(e, { criarConector: criarConectorGoogle }),
 ): Promise<number> {
   const args = argv[0] === '--' ? argv.slice(1) : [...argv];
   let valores: { ambiente?: string | undefined; banco?: string | undefined };
@@ -67,11 +82,17 @@ export async function executarCli(
     return 1;
   }
   let admin: pg.Client | undefined;
+  let conexao: Conexao | undefined;
   try {
-    admin = conectar({ connectionString: url });
+    conexao = await preparar(env);
+    const { extra } = conexao;
+    // O preparo abre clientes no banco-alvo com o mesmo conectar: todos recebem o conector, não só o do administrador.
+    const conectarComExtra = (config: pg.ClientConfig) => conectar({ ...config, ...extra });
+    await conexao.aguardar({ connectionString: url }, { abrir: conectar });
+    admin = conectarComExtra({ connectionString: url });
     admin.on('error', () => undefined);
     await admin.connect();
-    const r = await prepararBanco(admin, opcoes, conectar);
+    const r = await prepararBanco(admin, opcoes, conectarComExtra);
     escrever(
       JSON.stringify({
         resultado: 'preparado',
@@ -96,12 +117,15 @@ export async function executarCli(
     return 3;
   } finally {
     await admin?.end().catch(() => undefined);
+    conexao?.fechar();
   }
 }
 
-// Ponto de entrada do processo; a lógica acima é testada com banco real.
+// Ponto de entrada do processo; a lógica acima é testada com banco real. Rejeição solta sai com 3, só com códigos.
 if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  process.exitCode = await executarCli(process.argv.slice(2), process.env, (l) => {
+  const escrever = (l: string) => {
     console.log(l);
-  });
+  };
+  sairNaRejeicaoSolta(escrever);
+  process.exitCode = await executarCli(process.argv.slice(2), process.env, escrever);
 }

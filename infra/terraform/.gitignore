@@ -1,0 +1,9 @@
+# Terraform: nada de state, plan ou valores reais no Git (ENG-062).
+# O .terraform.lock.hcl entra no Git.
+.terraform/
+*.tfstate*
+*.tfplan
+tfplan*
+*.tfvars
+*.tfvars.json
+crash.log

@@ -1,0 +1,87 @@
+name: Infraestrutura (validação estática)
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: infra-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  travas:
+    name: Travas de segurança do Cloud SQL
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.12'
+      - name: Testar contraprovas das travas
+        run: python3 -m unittest discover -s infra/terraform -p 'test_*.py'
+      - name: Conferir travas no módulo real
+        run: python3 infra/terraform/checar_travas.py
+  terraform:
+    name: Terraform — ${{ matrix.modulo }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        modulo: [bootstrap, hml]
+    defaults:
+      run:
+        shell: bash
+        working-directory: infra/terraform/${{ matrix.modulo }}
+    env:
+      TF_IN_AUTOMATION: "true"
+      TF_INPUT: "false"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Instalar versões fixadas com checksum
+        env:
+          TERRAFORM_VERSAO: "1.16.3"
+          TERRAFORM_SHA256: 093b6ae9a2228af5029c41606bc96eb583553528aad1bfe7e0b4d62fc91e25d8
+          # renovate: datasource=github-release-attachments depName=terraform-linters/tflint
+          TFLINT_VERSAO: v0.64.0
+          TFLINT_SHA256: cca9d13e2e1d7a2c627af60ff899a3c9b74212899416aeb96ec764d2ef954537
+        run: |
+          set -euo pipefail
+          ferramentas_dir="$RUNNER_TEMP/safrion-infra"
+          mkdir -p "$ferramentas_dir/bin"
+
+          curl --fail --silent --show-error --location --retry 3 --connect-timeout 15 --max-time 120 \
+            --output "$ferramentas_dir/terraform.zip" \
+            "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSAO}/terraform_${TERRAFORM_VERSAO}_linux_amd64.zip"
+          printf '%s  %s\n' "$TERRAFORM_SHA256" "$ferramentas_dir/terraform.zip" | sha256sum --check -
+          unzip -q "$ferramentas_dir/terraform.zip" terraform -d "$ferramentas_dir/bin"
+
+          curl --fail --silent --show-error --location --retry 3 --connect-timeout 15 --max-time 120 \
+            --output "$ferramentas_dir/tflint.zip" \
+            "https://github.com/terraform-linters/tflint/releases/download/${TFLINT_VERSAO}/tflint_linux_amd64.zip"
+          printf '%s  %s\n' "$TFLINT_SHA256" "$ferramentas_dir/tflint.zip" | sha256sum --check -
+          unzip -q "$ferramentas_dir/tflint.zip" tflint -d "$ferramentas_dir/bin"
+
+          printf '%s\n' "$ferramentas_dir/bin" >> "$GITHUB_PATH"
+          "$ferramentas_dir/bin/terraform" version
+          "$ferramentas_dir/bin/tflint" --version
+      - name: Conferir formatação
+        run: terraform fmt -check -diff -recursive
+      - name: Inicializar sem backend e sem alterar o lockfile
+        run: terraform init -backend=false -input=false -lockfile=readonly -no-color
+      - name: Validar configuração e schema do provider
+        run: terraform validate -no-color
+      # Somente o ruleset Terraform embutido; não cobre regras específicas do Google.
+      # Configuração vazia explícita evita carregar plugins externos de .tflint.hcl.
+      - name: Executar TFLint com ruleset Terraform embutido
+        run: tflint --config=/dev/null --enable-plugin=terraform --no-color
+      # Trivy com misconfig já cobre Terraform em ci.yml; não duplicar a varredura aqui.

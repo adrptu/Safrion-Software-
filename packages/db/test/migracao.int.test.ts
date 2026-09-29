@@ -28,6 +28,7 @@ describe('migrações (plano R-006, passo 7)', () => {
       '0003_sessao_e_identidade.sql',
       '0004_vinculo_demonstracao.sql',
       '0005_vinculo_hml.sql',
+      '0006_vinculo_fila.sql',
     ]);
     expect(r.rows[0]?.sha256).toMatch(/^[0-9a-f]{64}$/);
   });
@@ -44,6 +45,7 @@ describe('migrações (plano R-006, passo 7)', () => {
           '0003_sessao_e_identidade.sql',
           '0004_vinculo_demonstracao.sql',
           '0005_vinculo_hml.sql',
+          '0006_vinculo_fila.sql',
         ],
       });
     } finally {

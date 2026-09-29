@@ -3,7 +3,7 @@
 - **Data:** 27/09/2026
 - **Autor deste registro:** Claude Code (integrador do protótipo)
 - **Revisor:** Codex
-- **Estado:** patch do harness revisado e aceito; **aplicação e reexecução pendentes** (esperando terminar a bateria em curso, para não misturar versões do harness na mesma evidência).
+- **Estado:** patch do harness revisado e aceito. **Aplicado e verificado na [R-005](R-005-missao-metodo-cap75-app.md)**, depois da bateria.
 
 ## 1. Patch do harness (autor: Codex)
 Revisados: `correcao-harness-claude.patch` (sha256 `1eb7e078…`), `test-harness-claude.py`, `manifesto-correcao-harness.json` e as evidências antes/depois.
