@@ -90,9 +90,11 @@ NUNCA_TIPOS = frozenset({'google_secret_manager_secret_version', 'google_sql_use
                          'google_project', 'google_iap_brand', 'google_iap_client'})
 NUNCA_PREFIXOS = ('google_billing_', 'google_iam_oauth_client')
 NUNCA_ATRIBUTO = 'root_password'  # e variantes, como root_password_wo
+# No arquivo que o analisador não lê, pelo texto e falhando fechado: a palavra module inteira, mesmo em comentário
+# (um comentário entre module e o rótulo esconderia o bloco de qualquer padrão mais estreito; revisão do Codex, E05).
 NUNCA_TEXTO = re.compile(r'\b(?:google_secret_manager_secret_version|google_sql_user|google_service_account_key|'
                          r'google_project|google_iap_brand|google_iap_client|google_billing_\w*|google_iam_oauth_client\w*|'
-                         r'root_password\w*)\b|\bmodule\s*"')
+                         r'root_password\w*|module)\b')
 # Caminhos que o ignore_changes não pode cobrir: deixaria a trava mudar fora do Terraform sem o plan mostrar.
 PROTEGIDOS = ('settings', 'ip_configuration', 'ssl_mode', 'connector_enforcement', 'authorized_networks',
               'ipv4_enabled', 'private_network', 'data_api_access', 'psc_config',
@@ -549,7 +551,7 @@ def conferir_bootstrap(modulo: Path) -> list[str]:
             if arq.name not in NAO_ANALISAVEIS:
                 return [f'{arq.name}: {erro}']
             # Sem análise, a lista "Nunca" vale pelo texto, comentário incluído: falha fechado.
-            nunca = sorted({m.group(0).rstrip(' "') for m in NUNCA_TEXTO.finditer(texto)})
+            nunca = sorted({m.group(0) for m in NUNCA_TEXTO.finditer(texto)})
             if nunca:
                 faltas.append(f'{arq.name}: fora do subconjunto do analisador e com {nunca} no texto (lista "Nunca no '
                               'Terraform" ou module)')

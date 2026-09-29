@@ -1166,15 +1166,22 @@ class NuncaNoTerraform(unittest.TestCase):
 
     def test_bloco_module_nos_dois_modulos(self):
         for pasta, conferir, modulo in ((self.hml, ct.conferir_codigo, 'hml'), (self.boot, ct.conferir_bootstrap, 'bootstrap')):
-            with self.subTest(modulo=modulo):
-                self.escrever(pasta, 'mod.tf', 'module "m" {\n  source = "./m"\n}\n')
-                self.assertIn('mod.tf:1: bloco module; o guard não enxerga os recursos de dentro de um módulo',
-                              conferir(pasta))
+            for texto in ('module "m" {\n  source = "./m"\n}\n',
+                          'module /* separador */ "m" {\n  source = "./m"\n}\n'):
+                with self.subTest(modulo=modulo, texto=texto):
+                    self.escrever(pasta, 'mod.tf', texto)
+                    self.assertIn('mod.tf:1: bloco module; o guard não enxerga os recursos de dentro de um módulo',
+                                  conferir(pasta))
 
     def test_arquivo_nao_analisavel_falha_pelo_texto(self):
         wif = (AQUI / 'bootstrap' / 'wif.tf').read_text(encoding='utf-8')
         for trecho, achado in (('# google_service_account_key', 'google_service_account_key'),
-                               ('module "m" {}', 'module'), ('# google_billing_budget', 'google_billing_budget')):
+                               ('module "m" {}', 'module'), ('# google_billing_budget', 'google_billing_budget'),
+                               # Contraprova do Codex (6ec3048): comentário entre module e o rótulo escondia o bloco.
+                               ('module /* separador HCL valido */ "m" { source = "./filho" }', 'module'),
+                               ('module // comentário de linha\n"m" { source = "./filho" }', 'module'),
+                               ('module\n  "m" {}', 'module'),
+                               ('# module só em comentário também falha', 'module')):
             with self.subTest(trecho=trecho):
                 self.escrever(self.boot, 'wif.tf', wif + '\n' + trecho + '\n')
                 self.assertTrue([f for f in ct.conferir_bootstrap(self.boot)
