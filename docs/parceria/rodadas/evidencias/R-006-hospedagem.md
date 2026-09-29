@@ -494,6 +494,18 @@ Os agentes (`run.viewer`, `logging.viewer`, `cloudsql.viewer`, sem `secretAccess
 - Os papéis do Secret Manager (`versions.list`, `get`, `disable` e `destroy` no `secretVersionManager`) devem ser conferidos na página de controle de acesso antes da 1ª subida.
 - Nada roda no GCP antes do ensaio.
 
+**Decisões da implementação** (`feat/vinculo-fila`, revisadas por 3 revisores adversariais antes da entrega):
+- Banco fora de hml: a função devolve `AMBIENTE_PROIBIDO` sem recibo, e a fila trata como resultado inesperado: ROLLBACK e saída 3, sem destruir nada. O CLI já recusa antes da trava, com saída 1.
+- A trava da fila é `pg_try_advisory_lock(hashtext('safrion.vinculo_fila'))`, na forma das outras travas de sessão do pacote. Só é solta no fim sem falha; depois de uma saída 3, sai junto com a conexão.
+- Chave repetida no JSON é `PEDIDO_INVALIDO`: o `JSON.parse` fica com o último valor e esconderia a troca de `usuario` ou `acao`.
+- `VERSAO_INATIVA` não muda a saída. Versão desativada entre o `get` e o `access` dá saída 3.
+- A conexão perdida é conferida depois de cada espera (API e banco). Isso para a fila antes da chamada seguinte.
+
+**Limites acrescentados na revisão:**
+- **TRUNCATE:** um gatilho de instrução recusa TRUNCATE no recibo. O dono do banco ainda pode desativar o gatilho, e os outros registros imutáveis (inclusive o `identity_link_event`) não barram TRUNCATE.
+- **Travas consultivas:** qualquer papel, o `app_runtime` inclusive, pode tomar a trava da fila ou a de um pedido. Isso deixa o job em `OCUPADO` ou em saída 3 com `55P03`. Não há efeito indevido, só bloqueio; o diagnóstico é por `pg_locks` (`locktype = 'advisory'`). Como rodá-lo na HML sem conexão do notebook fica a definir.
+- **`secretVersionManager`:** o papel também concede `versions.add`, `versions.enable` e `secrets.rotate`. Quem roda como `sa-preparo` pode reativar e ler uma versão desativada que ainda tem o código, e gravar pedidos. Isso não amplia o que a conta já pode. **Proposta:** papel customizado só com `versions.list`, `versions.get`, `versions.access`, `versions.disable` e `versions.destroy`, a decidir antes da 1ª subida.
+
 #### 4) Mudanças necessárias (arquivos)
 
 **Terraform**
