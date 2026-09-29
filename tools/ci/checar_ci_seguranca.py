@@ -4,7 +4,8 @@ Confere em .github/workflows/*.yml:
 - todo passo do Trivy bloqueia (exit-code "1"), cobre HIGH e CRITICAL e não ignora vulnerabilidade sem correção
   (ignore-unfixed ausente ou false);
 - o with do passo do Trivy só tem inputs da lista fechada ENTRADAS, os usados nas branches em 29/09/2026 (um por
-  linha, sem repetição); scan-type é fs ou image; scanners, se houver, inclui vuln. Os demais inputs da action
+  linha, sem repetição); scan-type é fs ou image; image-ref só com scan-type image (com fs, o entrypoint o usa como
+  alvo e troca a pasta varrida, como scan-ref); scanners, se houver, inclui vuln. Os demais inputs da action
   (skip-dirs, skip-files, ignore-policy, trivy-config, vuln-type, scan-ref, template…) viram TRIVY_* e mudam o que a CLI
   varre ou ignora sem passar por esta conferência (action.yaml em ed142fd, linhas 214–231). Entrar na lista pede revisão;
 - nenhum trivy.yaml na raiz: sem --config, o Trivy lê ./trivy.yaml por padrão, e ele pode redefinir ignorefile,
@@ -154,6 +155,8 @@ for wf in workflows:
                 erros.append(f'{nome}:{n}: input {e!r} fora da lista fechada do passo do Trivy ({", ".join(sorted(ENTRADAS))})')
         if k.get('scan-type') not in TIPOS:
             erros.append(f'{nome}:{n}: scan-type precisa ser fs ou image, explícito')
+        if 'image-ref' in entradas and k.get('scan-type') != 'image':
+            erros.append(f'{nome}:{n}: image-ref só com scan-type image; com fs ele vira o alvo e troca a pasta varrida')
         if 'scanners' in k:
             sc = {s.strip() for s in k['scanners'].split(',') if s.strip()}
             if 'vuln' not in sc or not sc <= SCANNERS:

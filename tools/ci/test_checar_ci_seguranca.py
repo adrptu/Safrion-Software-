@@ -171,6 +171,11 @@ jobs:
                 code, out = self.rodar(workflow=PASSO.format(extra='').replace(original, troca))
                 self.assertEqual(code, 1, out); self.assertIn(trecho, out)
 
+    def test_image_ref_com_fs_falha(self):
+        # Revisão Codex de a1fbd86: fs + image-ref: docs passava 0 e o entrypoint entregava [fs, docs] à CLI.
+        code, out = self.rodar(extra='          image-ref: docs\n')
+        self.assertEqual(code, 1, out); self.assertIn('image-ref só com scan-type image', out)
+
     def test_with_fora_do_formato_ou_repetido_falha(self):
         flow = PASSO.format(extra='').replace('        with:\n', '        with: {exit-code: "1"}\n')
         code, out = self.rodar(workflow=flow)
