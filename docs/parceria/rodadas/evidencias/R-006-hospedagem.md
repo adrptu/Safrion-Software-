@@ -16,9 +16,9 @@ Data de referência e de acesso às fontes: **27/09/2026**; a seção "Atualiza�
 - uso leve com as franquias da conta: **US$ 15,22–15,28/mês**;
 - sem as franquias de Cloud Run, Artifact Registry e Secret Manager: **US$ 18,17**; com hipóteses de requisições, acessos a segredos e rede privada, **US$ 19,05**;
 - mês de testes intenso (100 h de web, 5 GiB de saída e disco em 20 GiB): **cerca de US$ 27**;
-- ensaio de restauração em instância isolada (`db-f1-micro`, SSD de 10 GiB, até 4 h): **cerca de US$ 0,08 por ensaio**. O roteiro apaga a instância de teste no fim e confere que ela não existe mais; esquecida ligada, custaria cerca de US$ 11,53/mês.
+- ensaio de restauração em instância isolada (`db-f1-micro`, SSD de 10 GiB, até 4 h): **cerca de US$ 0,08 por ensaio**. O roteiro apaga a instância de teste no fim e confere que ela não existe mais; esquecida ligada, só a computação custaria cerca de US$ 11,53/mês, mais o disco (cerca de US$ 2,55/mês com 10 GiB) e os backups que a instância de teste gerar.
 
-**Alertas:** orçamento de alerta com **referência de US$ 30/mês**, escopo no projeto da HML, avisos em **70%, 90% e 100% do gasto real e em 100% do gasto previsto** (PRD 28.4). O proprietário cria o orçamento no console, com o Codex guiando; agente não usa a API de orçamentos nem a conta de faturamento (desenho mínimo, abaixo). O valor de US$ 25 das seções abaixo não foi aceito e fica substituído por este. O teto nativo de gasto do Cloud Run (proposta de US$ 15, em Preview, só Cloud Run) continua proposto e não configurado.
+**Alertas:** orçamento de alerta com **referência de US$ 30/mês**, escopo no projeto da HML, avisos em **70%, 90% e 100% do gasto real e em 100% do gasto previsto** (PRD 28.4). O aceite incluiu a configuração dos alertas: a equipe os cria pela API autorizada, com o acesso que o proprietário conceder na conta de faturamento, limitado a orçamentos. Ficam só com ele as ações pessoais: conta, cartão, aceite de termos, autenticação e segredo do cliente OAuth. O valor de US$ 25 das seções abaixo não foi aceito e fica substituído por este. O teto nativo de gasto do Cloud Run (proposta de US$ 15, em Preview, só Cloud Run) continua proposto e não configurado.
 
 **Continua valendo:** nenhum plan, apply ou recurso foi criado com este aceite; cada apply segue o plano revisado pelas três IAs, com veto do proprietário (README do Terraform). Não se reduz backup, monitoramento ou isolamento para caber na estimativa.
 
@@ -166,7 +166,7 @@ Data de referência e de acesso às fontes: **27/09/2026**; a seção "Atualiza�
 - `sa-deploy-github`: `artifactregistry.writer` no repositório, `run.developer` nos 3 recursos, `iam.serviceAccountUser` nas 3 SAs de runtime. **Atenção:** na prática, ela soma o poder das SAs de runtime, inclusive a senha do `postgres` via `sa-preparo`. A página de segredos cita `run.admin` para configurá-los: confirmar no 1º plan se `run.developer` basta para trocar a versão do segredo, sem ampliar o papel antes de testar;
 - `sa-infra-github`: aplica o `infra/terraform/hml` pela CI, com as permissões da divisão do R-006 no passo 3; `workloadIdentityUser` só para `attribute.fluxo/infra` (condição canônica acima);
 - operador humano (o Adrianus, nunca um agente): `run.invoker` nos jobs, `cloudsql.client`, `secretAccessor` **só em `hml-db-admin-senha`**, `logging.viewer`. A verificar: autenticação IAM do Cloud SQL pelo Auth Proxy (`--auto-iam-authn`), com o usuário IAM dele membro de `migrator`, tira a senha do caminho;
-- proprietário: `owner` só para o bootstrap e emergências. Conta de faturamento, orçamento, cartão e aceites de termos são só dele: agente não usa `gcloud billing` nem a API de orçamentos;
+- proprietário: `owner` só para o bootstrap e emergências. Conta de faturamento, cartão e aceites de termos são só dele; orçamentos de alerta a equipe cria pela API, com acesso limitado a eles, depois do aceite de 29/09 (atualização no topo);
 - agentes: `sa-agentes-leitura`, só leitura (`run.viewer`, `cloudsql.viewer`, `logging.viewer`, `monitoring.viewer`, `artifactregistry.reader`), por _impersonation_, **sem** `secretAccessor`. **Base da personificação:** uma conta Google separada para os agentes, criada pelo Adrianus (agente não cria conta), sem papel no projeto além de `roles/iam.serviceAccountTokenCreator` em `sa-agentes-leitura`. Se o Gemini continuar pelo Vertex, ela recebe o mesmo papel em `sa-vertex`, que tem `roles/aiplatform.user`. Todo comando dos agentes usa `--impersonate-service-account`;
 - `allUsers` com `run.invoker` só no serviço web e só se o ingress público for a exceção aprovada (lacunas); nunca nos jobs. Com IAP, o `run.invoker` vai para o agente de serviço do IAP;
 - conta padrão do Compute: depois de habilitar as APIs, ver se `<NUM>-compute@developer.gserviceaccount.com` existe. Se existir, tirar dela `roles/editor` e desativá-la. Declarar `service_account` explícito em toda revisão e todo job. Sem organização, a política que desliga a concessão automática não se aplica (não verificado).
@@ -274,7 +274,9 @@ Em 28/09, o Adrianus delegou às 3 IAs as decisões que dependiam dele. Os **ato
 - **Faixa HOMOLOGAÇÃO.** A casca já mostra um selo permanente do ambiente no cabeçalho (`(app)/layout.tsx`, a partir da identidade do banco). Conferir se atende "todas as telas", inclusive `/entrar` e erros (PRD:5495).
 - **Rotação de senha:** o procedimento está resumido na linha Segredos; falta escrevê-lo em `OPERACAO.md` antes da 1ª troca.
 
-### GCP-0017: IP privado × concessão fora da máquina do operador (comparação pedida pelo Codex; proposta, não aceita)
+### GCP-0017: IP privado × concessão fora da máquina do operador (comparação pedida pelo Codex; histórico)
+
+**Estado em 29/09/2026:** registro histórico. A opção A foi adotada e implementada na `main` pelo PR #14 (ADR 0006; fluxo de concessão no [OPERACAO.md](../../../OPERACAO.md)), validada na CI, **sem prova no Google Cloud**: nada foi provisionado. Onde o texto abaixo diz "proposta" ou "a seguir", vale este estado.
 
 *Análise de 28/09/2026, revisada no mesmo dia por verificação adversarial. Fontes: documentação oficial e o repositório. Nenhum recurso foi provisionado e nenhum dado real foi usado. As fontes G1 a G38 estão no fim da seção, com numeração própria dela.*
 
@@ -412,7 +414,7 @@ Os agentes (`run.viewer`, `logging.viewer`, `cloudsql.viewer`, sem `secretAccess
 
 #### 3c) Contrato do job de vínculo, versão 3 (correções aceitas na revisão HML-JOB-01 do Codex e na fixture de cenários)
 
-**Proposta; implementação a seguir, na branch `feat/vinculo-fila`.** Vale a v2 (3b), exceto nos pontos abaixo. A fixture é `vinculo-fila-cenarios-revisado.json` (sha256 `e2f0ed82…`, 15 cenários, Gemini e Codex).
+**Histórico: proposta de 28/09, implementada na `main` pelo PR #14 (job `safrion-vinculo` e comando de fila), sem prova no Google Cloud.** Vale a v2 (3b), exceto nos pontos abaixo. A fixture é `vinculo-fila-cenarios-revisado.json` (sha256 `e2f0ed82…`, 15 cenários, Gemini e Codex).
 
 **1. Pedido (conteúdo de uma versão do `hml-vinculo-pedido`).**
 - Um objeto JSON com exatamente estas chaves:
