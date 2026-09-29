@@ -4,14 +4,14 @@ Fonte do desenho: [R-006, atualização de 28/09/2026](../../docs/parceria/rodad
 
 | Pasta | O que cria | Quem aplica | State |
 |---|---|---|---|
-| [`bootstrap/`](bootstrap/README.md) | APIs, bucket do state, WIF do GitHub, contas de serviço, papéis no projeto e nas contas, rede privada (VPC, sub-rede, faixa e conexão PSA) | Codex, localmente, uma vez, na janela da sessão do dono | Local; migrável para o bucket |
+| [`bootstrap/`](bootstrap/README.md) | APIs, bucket do state, WIF do GitHub, contas de serviço, papéis no projeto e nas contas, rede privada (VPC, sub-rede, faixa e conexão PSA) | O Adrianus no Cloud Shell, uma vez, com o `cloudshell.sh`; o Claude responde pelo plan e as 3 IAs revisam pelo hash | Bucket próprio, fora do Terraform ([State do bootstrap](bootstrap/README.md#state-do-bootstrap)) |
 | [`hml/`](hml/README.md) | Artifact Registry, Cloud SQL, segredos sem valor, Cloud Run web e jobs, IAM por recurso, IAP | CI por WIF, só no `infra-hml.yml`, com a `sa-infra-github` | Bucket do bootstrap, prefixo `hml/` |
 
 ## Ordem
 
-1. **Adrianus, no console:** os atos da lista abaixo, antes de tudo.
+1. **Adrianus, guiado pelas IAs:** login e consentimentos da lista abaixo, antes de tudo.
 2. **`bootstrap/`**, uma vez, com a rede privada e o state no bucket próprio, criado antes do `init` ([State do bootstrap](bootstrap/README.md#state-do-bootstrap)). Logo depois do apply, desativar a conta padrão do Compute e conferir a rede `default` ([bootstrap](bootstrap/README.md#depois-do-apply)).
-3. **`hml/` fase 1**, pela CI (`infra-hml.yml`, a criar), com `criar_cloud_run = false` e as 3 saídas da rede: registro, banco, segredos vazios e IAM. O `oidc_client_id` pode ficar vazio: só a fase 2 o exige.
+3. **`hml/` fase 1**, pela CI (`infra-hml.yml`, integrado: por ora só gera o plan; o apply pelo hash vem à parte), com `criar_cloud_run = false` e as 3 saídas da rede: registro, banco, segredos vazios e IAM. O `oidc_client_id` pode ficar vazio: só a fase 2 o exige.
 4. **Valores fora do Terraform:** senhas por stdin, sem eco (R-006, passo 4), e segredo OAuth pelo Adrianus no console (passo 3b). Anotar só o número de cada versão.
 5. **Se `url_controlada = "iap"`:** o Adrianus configura uma vez, no console, o cliente OAuth do IAP. Projeto sem organização não cria cliente OAuth por API.
 6. **`hml/` fase 2**, pela CI, com `criar_cloud_run = true`, `versoes_segredos` e `oidc_client_id`.
@@ -19,16 +19,18 @@ Fonte do desenho: [R-006, atualização de 28/09/2026](../../docs/parceria/rodad
 
 **Atenção à ordem:** o passo 3 precisa da rede do passo 2, porque a instância só aceita a faixa do IP privado na criação e o IP privado não sai mais dela. O passo 4 precisa da instância criada no passo 3. Se a sessão do dono for revogada ao fim do bootstrap (R-006 §3), as senhas exigem nova janela de login dele.
 
-## O que só o Adrianus faz
+## O que depende do Adrianus
 
-- Criar o projeto da HML e vincular o faturamento; ver se a cobrança é em US$ com cartão ou por contratação local.
-- Criar o orçamento de alerta (US$ 25, avisos em 70, 90 e 100%). Orçamento não limita gasto.
+As IAs preparam cada passo e guiam na tela. Ao Adrianus ficam o login, os consentimentos e o que envolve conta, cobrança ou contrato dele.
+
+- Criar o projeto da HML (`safrion-hml-1390827288`) e vincular a conta de faturamento, que cobra em BRL.
+- Orçamento de alerta da HML: referência de US$ 30/mês, autorizada por ele em 29/09/2026 (avisos em 70, 90 e 100%). A referência não é teto, e orçamento de alerta não limita gasto.
 - Criar a conta Google dos agentes (base da personificação).
 - Google Auth Platform: identidade "Safrion HML", público Externo, em teste, escopo `openid`, domínio autorizado e URI `<origem>/entrar/retorno` (saída `origem` do `hml/`).
 - Colar o segredo do cliente OAuth como versão de `hml-oidc-client-secret`, direto no console.
 - Configurar o cliente OAuth do IAP no console (passo 5).
 - Criar o grupo Google dos testadores e pôr e tirar gente dele. Só o grupo entra no Terraform (`iap_permitidos`).
-- GitHub: environment `hml` com ele como único revisor e as variáveis do [`bootstrap/README.md`](bootstrap/README.md).
+- GitHub: variáveis dos environments `hml` e `hml-infra`, impressas pelo `cloudshell.sh variaveis` ([`bootstrap/README.md`](bootstrap/README.md#como-aplicar)). Revisor obrigatório de environment não está disponível em repositório privado no plano atual do GitHub: o portão humano é a aprovação do plan pelo hash, com veto dele.
 
 ## Nunca no Terraform
 

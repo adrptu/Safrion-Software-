@@ -233,9 +233,9 @@ Em 28/09, o Adrianus delegou às 3 IAs as decisões que dependiam dele. Os **ato
    - Proibido na sessão do agente: `gcloud secrets versions access`, `--password=`, `set -x` e eco de variável de senha. A conferência é só pelo número da versão.
    - **Não verificado:** se `--prompt-for-password` lê a entrada padrão sem terminal; ensaiar antes. Se não ler, usar `password_wo` no `google_sql_user`, com valor efêmero (Terraform ≥ 1.11; suporte do provider não verificado).
 5. **GitHub (Adrianus, administrador):**
-   - environment `hml` restrito a `main`, **com o Adrianus como único revisor**. Os agentes usam a mesma conta `adrptu` e nunca aprovam; a conta GitHub própria dos agentes resolve isso;
-   - variáveis `GCP_PROJECT_ID`, `GCP_REGION`, `WIF_PROVIDER` e `DEPLOY_SA`;
-   - **sem environment com revisor, nenhum dos dois caminhos autenticados é ligado** (publicar e infra). A HML espera a proteção do `main` (PEND-REPO-01) e os environments `hml` e `hml-infra`, cada um com o Adrianus como revisor. Não há condição do WIF sem `environment`.
+   - environment `hml` restrito a `main`, com as variáveis `GCP_PROJECT_ID`, `GCP_REGION`, `WIF_PROVIDER` e `DEPLOY_SA`; environment `hml-infra` com `HML_PROJECT_NUMBER`. Os agentes usam a mesma conta `adrptu` e nunca aprovam; a conta GitHub própria dos agentes resolve isso;
+   - **atualização de 29/09/2026 (PR #21, merge `4c069aa`):** revisor obrigatório de environment não está disponível em repositório privado no plano atual do GitHub, e não se presume que esteja. O PR #21 liga **só** o PLAN manual autenticado da fase 1: `infra-hml.yml` por `workflow_dispatch` na `main` protegida (ruleset `24154464`), no environment `hml-infra`, com a configuração identificada por geração e SHA-256 e sem apply. Publicação e aplicação continuam desligadas até um portão efetivo e comprovado (decisão E03). Não há condição do WIF sem `environment`;
+   - texto anterior (substituído pela atualização acima): environments `hml` e `hml-infra` "cada um com o Adrianus como revisor" e "**sem environment com revisor, nenhum dos dois caminhos autenticados é ligado** (publicar e infra)".
 6. **1ª subida, com aprovação no environment:**
    - publicar as imagens → job `safrion-preparo` → job `safrion-demo-reset` → publicar a web;
    - **provas:**

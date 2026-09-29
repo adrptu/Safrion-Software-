@@ -35,21 +35,11 @@ Sem a fase 1 antes, a web nasceria sem as versões dos segredos e a revisão nã
 
 ## Na CI
 
-Workflow `infra-hml.yml` (a criar): só Terraform, sem `npm` nem build, na `main`, environment `hml-infra` (o Adrianus como único revisor); em PR, só checagens estáticas sem credencial. O `publicar-hml.yml` não consegue a `sa-infra-github` (vínculos do WIF no bootstrap).
+Workflow [`infra-hml.yml`](../../../.github/workflows/infra-hml.yml): **só o plan da fase 1**, disparado à mão na `main`, no environment `hml-infra`, sem apply (o portão da aplicação vem à parte). Em PR, só as checagens estáticas do `infra.yml`, sem credencial. O `publicar-hml.yml` não consegue a `sa-infra-github` (vínculos do WIF no bootstrap). Como disparar, o que o workflow recusa e o recibo: [tools/hml](../../../tools/hml/README.md).
 
-```sh
-echo "::add-mask::$TF_VAR_operador"                    # se um erro citar o membro, o log mascara
-terraform init -backend-config="bucket=<bucket_state do bootstrap>"
-terraform fmt -check && terraform validate && tflint && trivy config --severity HIGH,CRITICAL --exit-code 1 .
-terraform plan -no-color -out=hml.tfplan > /dev/null   # o diff traz membros de IAM: fora do log (ENG-062)
-shasum -a 256 hml.tfplan
-terraform show -json hml.tfplan | jq -r '.resource_changes[] | select(.change.actions != ["no-op"]) | "\(.change.actions | join("/")) \(.address)"'
-terraform apply -no-color hml.tfplan > /dev/null        # só depois da aprovação por esse hash (ENG-063)
-```
+A configuração não vem de variáveis do GitHub. É um JSON privado, `config/hml.tfvars.json` no bucket do state da HML, gravado uma vez pelo `cloudshell.sh config-hml` ([bootstrap](../bootstrap/README.md#como-aplicar)) e conferido pelo mesmo `validar_config` do workflow. As entradas do disparo são só a geração e o SHA-256 desse arquivo. No log, só contagens e hashes; endereços, membros e valores ficam no plano privado (ENG-062), que se aprova pelo hash (ENG-063).
 
-No log, só o hash e a ação por endereço, sem valores.
-
-Variáveis: `TF_VAR_projeto_id`, `TF_VAR_projeto_numero`, `TF_VAR_operador`, `TF_VAR_oidc_client_id`, `TF_VAR_rede_self_link`, `TF_VAR_subrede_self_link`, `TF_VAR_faixa_psa_nome`, `TF_VAR_criar_cloud_run`, `TF_VAR_versoes_segredos` e, se usados, `TF_VAR_iap_permitidos`, `TF_VAR_url_controlada` e `TF_VAR_origem`. Nenhuma é segredo. `iap_permitidos` só aceita `group:` e `serviceAccount:`: os testadores entram no grupo Google, gerido pelo Adrianus fora do Terraform, e nenhum e-mail de testador vai para o plan, o state ou o log. O `operador` fica no plan e no state, fora do Git e do log.
+Chaves da configuração, com o nome das variáveis do módulo: `projeto_id`, `projeto_numero`, `operador`, `rede_self_link`, `subrede_self_link`, `faixa_psa_nome` e `criar_cloud_run` na fase 1; `versoes_segredos`, `oidc_client_id` e, se usados, `iap_permitidos`, `url_controlada` e `origem` na fase 2, que o workflow ainda recusa. Nenhuma é segredo. `iap_permitidos` só aceita `group:` e `serviceAccount:`: os testadores entram no grupo Google, gerido pelo Adrianus fora do Terraform, e nenhum e-mail de testador vai para o plan, o state ou o log. O `operador` fica no JSON privado, no plan e no state, fora do Git e do log.
 
 ## URL controlada
 
@@ -61,7 +51,7 @@ Variáveis: `TF_VAR_projeto_id`, `TF_VAR_projeto_numero`, `TF_VAR_operador`, `TF
 Na HML, a versão do segredo é só do Terraform. O passo 3 do R-006 (linha Segredos) vira apply, sem `gcloud --update-secrets`: se a publicação trocasse a versão, o apply seguinte voltaria à antiga, já recusada pelo banco.
 
 1. Gravar a nova versão por stdin.
-2. Atualizar `TF_VAR_versoes_segredos` no environment `hml-infra` (o do `infra-hml.yml`), gerar o plan e aprová-lo pelo hash. Conferir no plan que só mudam as referências de versão de web e jobs.
+2. Atualizar `versoes_segredos` na configuração da fase 2 (o `infra-hml.yml` ainda só planeja a fase 1), gerar o plan e aprová-lo pelo hash. Conferir no plan que só mudam as referências de versão de web e jobs.
 3. Trocar a senha no banco e aplicar o plan aprovado logo em seguida. Entre os dois, conexões novas falham. **A definir:** com o banco só em IP privado, o notebook não alcança mais o banco; trocar as senhas de `migrator` e `app_runtime` pede subcomando num job (R-006, `894ef4d`, seção 4, "Rotação"). Até lá, não há rotação na HML.
 4. Validar **sem destruir nada**: `/saude` e o login confirmam a credencial `app_runtime`, a mesma do `demo-reset`; `gcloud run jobs describe` confirma a versão fixada nos 3 jobs. **Não executar `safrion-demo-reset`** para validar (o reset troca a geração e derruba os vínculos reais), nem o `safrion-preparo` sem migração pendente. Conferir a credencial do admin também fica para o job (a definir).
 5. Desativar a versão antiga.
