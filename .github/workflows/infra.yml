@@ -80,6 +80,11 @@ jobs:
         run: terraform init -backend=false -input=false -lockfile=readonly -no-color
       - name: Validar configuração e schema do provider
         run: terraform validate -no-color
+      # Fases da HML com provider simulado, sem credencial nem nuvem (hml/tests): a fase 1 sai sem o client ID de login;
+      # a fase 2 o exige.
+      - name: Testar as fases da HML com provider simulado
+        if: ${{ matrix.modulo == 'hml' }}
+        run: terraform test -no-color
       # Somente o ruleset Terraform embutido; não cobre regras específicas do Google.
       # Configuração vazia explícita evita carregar plugins externos de .tflint.hcl.
       - name: Executar TFLint com ruleset Terraform embutido
