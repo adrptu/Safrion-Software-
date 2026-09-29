@@ -1,0 +1,92 @@
+name: HML — planejar infraestrutura
+
+on:
+  workflow_dispatch:
+    inputs:
+      config_generation:
+        description: Geração do JSON privado config/hml.tfvars.json
+        type: string
+        required: true
+      config_sha256:
+        description: SHA256 dos bytes da configuração revisada
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: safrion-hml-plan
+  cancel-in-progress: false
+
+env:
+  CONFIG_GENERATION: ${{ inputs.config_generation }}
+  CONFIG_SHA256: ${{ inputs.config_sha256 }}
+
+jobs:
+  conferir:
+    name: Conferir origem sem credencial GCP
+    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: hml-infra
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.12'
+      - run: python3 tools/hml/planejar.py conferir
+        env:
+          HML_PROJECT_NUMBER: ${{ vars.HML_PROJECT_NUMBER }}
+
+  planejar:
+    name: Preparar plano privado para revisão
+    needs: conferir
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: hml-infra
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.12'
+      - name: Instalar Terraform fixado antes de autenticar
+        env:
+          TERRAFORM_VERSAO: '1.16.3'
+          TERRAFORM_SHA256: 093b6ae9a2228af5029c41606bc96eb583553528aad1bfe7e0b4d62fc91e25d8
+        run: |
+          set -euo pipefail
+          ferramentas_dir="$RUNNER_TEMP/safrion-plan-bin"
+          mkdir -p "$ferramentas_dir"
+          curl --fail --silent --show-error --location --retry 3 --connect-timeout 15 --max-time 120 \
+            --output "$ferramentas_dir/terraform.zip" \
+            "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSAO}/terraform_${TERRAFORM_VERSAO}_linux_amd64.zip"
+          printf '%s  %s\n' "$TERRAFORM_SHA256" "$ferramentas_dir/terraform.zip" | sha256sum --check -
+          unzip -q "$ferramentas_dir/terraform.zip" terraform -d "$ferramentas_dir"
+          printf 'SAFRION_TERRAFORM=%s/terraform\n' "$ferramentas_dir" >> "$GITHUB_ENV"
+      - uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
+        with:
+          version: '586.0.0'
+      - name: Revalidar antes de solicitar identidade
+        run: python3 tools/hml/planejar.py conferir
+        env:
+          HML_PROJECT_NUMBER: ${{ vars.HML_PROJECT_NUMBER }}
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          project_id: safrion-hml-1390827288
+          workload_identity_provider: projects/${{ vars.HML_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-hml/providers/github-oidc
+          service_account: sa-infra-github@safrion-hml-1390827288.iam.gserviceaccount.com
+          create_credentials_file: true
+      - name: Planejar, conferir e guardar recibo sem valores privados
+        run: python3 tools/hml/planejar.py planejar
+        env:
+          HML_PROJECT_NUMBER: ${{ vars.HML_PROJECT_NUMBER }}
