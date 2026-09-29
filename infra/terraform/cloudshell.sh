@@ -9,12 +9,13 @@
 #   infra/terraform/cloudshell.sh depois <projeto>          conta padrão do Compute e rede default, com s/n
 #   infra/terraform/cloudshell.sh variaveis <projeto>       variáveis dos environments hml e hml-infra
 #   infra/terraform/cloudshell.sh config-hml <projeto>      JSON privado da fase 1 para o infra-hml.yml (geração e SHA)
+#   infra/terraform/cloudshell.sh senhas <projeto>          as 3 senhas do banco, sem eco; mostra só as versões
 #   infra/terraform/cloudshell.sh destravar <projeto> <ID>  solta o lock do state deixado por uma sessão que caiu
 #   infra/terraform/cloudshell.sh limpar <projeto>          apaga os arquivos locais do projeto
 #
 # Arquivos de trabalho (tfvars, plano, .terraform, saídas, logs) ficam em ~/.safrion/<projeto>, fora do checkout, só
 # para o dono. Na tela vai só o que se cola no chat: hash, contagens e endereços, com e-mails mascarados, inclusive nos
-# erros do gcloud e do gh. Nenhuma senha passa por aqui (senhas: passo próprio, depois da fase 1 do hml/).
+# erros do gcloud e do gh. Senha só no subcomando senhas, depois da fase 1 do hml/: nasce e sai pela entrada padrão.
 set -euo pipefail
 umask 077
 
@@ -629,6 +630,79 @@ PY
   echo "Entradas do infra-hml.yml: config_generation = $geracao · config_sha256 = $sha"
 }
 
+# Senhas do banco da HML (R-006, passo 4; roteiro E09), depois da fase 1, que cria a instância e os segredos sem versão.
+# Cada senha nasce aqui (openssl, 32 hexadecimais) e só passa pela entrada padrão: nunca em argumento, eco, arquivo ou
+# log, e ninguém a lê de volta (sem `secrets versions access`). Segredo que já tem versão fica como está.
+# A do admin troca primeiro a senha do postgres e só depois vira versão do segredo: se a gravação falhar, rodar de novo
+# gera outra e troca de novo, sem senha perdida no banco. A troca vai pela API REST do Cloud SQL (users.update), com o
+# corpo pela entrada padrão: o --prompt-for-password do gcloud lê do terminal, não de um pipe.
+SEGREDOS_BANCO='hml-db-admin-senha hml-db-migrator-senha hml-db-app-runtime-senha'
+INSTANCIA='safrion-hml'
+
+senha_postgres() {
+  local p="$1" cabecalho="$DIR/cabecalho-sql" resposta="$DIR/sql-users.json" operacao
+  token
+  # O token vai num arquivo privado lido pelo curl (-H @arquivo), não em argumento visível no ps.
+  printf 'Authorization: Bearer %s\n' "$GOOGLE_OAUTH_ACCESS_TOKEN" >"$cabecalho"
+  if ! printf '{"password": "%s"}' "$2" | curl --fail --silent --show-error --connect-timeout 15 --max-time 120 \
+    -X PUT -H @"$cabecalho" -H 'Content-Type: application/json' --data-binary @- --output "$resposta" \
+    "https://sqladmin.googleapis.com/v1/projects/$p/instances/$INSTANCIA/users?name=postgres" 2>"$DIR/sql-users.err"; then
+    rm -f "$cabecalho"
+    mascarar <"$DIR/sql-users.err" >&2
+    return 1
+  fi
+  rm -f "$cabecalho"
+  operacao="$(python3 -c 'import json, sys; print(json.load(open(sys.argv[1], encoding="utf-8")).get("name", ""))' "$resposta")" ||
+    return 1
+  [[ "$operacao" =~ ^[A-Za-z0-9-]{1,100}$ ]] || return 1
+  gcloud sql operations wait "$operacao" --project="$p" --timeout=300 >/dev/null
+}
+
+senha_do_segredo() {
+  local p="$1" s="$2" atual senha versao
+  atual="$(gcloud secrets versions list "$s" --project="$p" --filter='state!=DESTROYED' --limit=1 --format='value(name)')" ||
+    falha "não li as versões de $s"
+  if [ -n "$atual" ]; then
+    echo "$s: já tem a versão ${atual##*/}; mantida, sem gerar outra."
+    return 0
+  fi
+  senha="$(openssl rand -hex 16)" || falha 'o openssl não gerou a senha'
+  [[ "$senha" =~ ^[0-9a-f]{32}$ ]] || falha 'o openssl não gerou a senha'
+  if [ "$s" = hml-db-admin-senha ]; then
+    senha_postgres "$p" "$senha" || falha 'não troquei a senha do postgres; nada foi gravado no segredo (rode senhas de novo)'
+  fi
+  versao="$(printf %s "$senha" | gcloud secrets versions add "$s" --project="$p" --data-file=- --format='value(name)')" ||
+    falha "não gravei a versão de $s; rode senhas de novo, que gera outra senha"
+  senha=''
+  versao="${versao##*/}"
+  [[ "$versao" =~ ^[1-9][0-9]{0,5}$ ]] || falha "versão de $s ilegível"
+  echo "$s: versão $versao"
+}
+
+cmd_senhas() {
+  projeto "${1:-}"
+  local p="$1" s estado
+  # Com rastreamento (bash -x ou SHELLOPTS), a senha apareceria no terminal.
+  case "$-" in
+    *x*) falha 'rode sem -x: o rastreamento mostraria as senhas' ;;
+  esac
+  exigir gcloud curl python3 openssl
+  estado="$(gcloud sql instances describe "$INSTANCIA" --project="$p" --format='value(state)')" ||
+    falha "não li a instância $INSTANCIA: aplique a fase 1 do hml/ antes"
+  [ "$estado" = RUNNABLE ] || falha "a instância $INSTANCIA está em '$estado', não RUNNABLE"
+  for s in $SEGREDOS_BANCO; do
+    gcloud secrets describe "$s" --project="$p" --format='value(name)' >/dev/null ||
+      falha "segredo $s ausente: aplique a fase 1 do hml/ antes"
+  done
+  confirmar 'Gerar as 3 senhas do banco da HML sem eco? A do admin também troca a senha do postgres.' ||
+    falha 'nada foi gerado'
+  for s in $SEGREDOS_BANCO; do
+    senha_do_segredo "$p" "$s"
+  done
+  echo 'Nenhuma senha foi mostrada nem lida de volta. Cole no chat só os números das versões acima: vão para'
+  echo 'versoes_segredos da fase 2 (admin, migrator, app_runtime; oidc é a versão criada no console).'
+}
+
 cmd_destravar() {
   projeto "${1:-}"
   local p="$1" id="${2:-}"
@@ -650,7 +724,7 @@ cmd_limpar() {
 }
 
 uso() {
-  sed -n '5,13p' "${BASH_SOURCE[0]}" | sed 's/^#   //'
+  sed -n '5,14p' "${BASH_SOURCE[0]}" | sed 's/^#   //'
   exit 2
 }
 
@@ -662,6 +736,7 @@ case "${1:-}" in
   depois) cmd_depois "${2:-}" ;;
   variaveis) cmd_variaveis "${2:-}" ;;
   config-hml) cmd_config_hml "${2:-}" ;;
+  senhas) cmd_senhas "${2:-}" ;;
   destravar) cmd_destravar "${2:-}" "${3:-}" ;;
   limpar) cmd_limpar "${2:-}" ;;
   *) uso ;;
