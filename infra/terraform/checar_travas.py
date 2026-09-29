@@ -15,6 +15,8 @@
 # e chamada simples, sem aspas, chaves, comentário nem quebra de linha; nenhuma diretiva %{; rótulos só com
 # [A-Za-z0-9_-] (sem escape \u); blocos de topo só os que o módulo usa; nenhum bloco dynamic na instância do Cloud SQL;
 # no Cloud Run, só dynamic "env" e, de google_cloud_run*, só v2 service, v2 job e o IAM deles (no código e no plan).
+# Nos dois módulos e no plan, a lista "Nunca no Terraform" do README (E05): valor de segredo, usuário e senha do banco,
+# chave de conta de serviço, faturamento, projeto e cliente ou marca OAuth; e nenhum bloco module, que o guard não lê.
 from __future__ import annotations
 
 import json
@@ -82,6 +84,21 @@ TOPO_ACEITO = {'terraform', 'provider', 'resource', 'variable', 'locals', 'outpu
 ROTULO = re.compile(r'[A-Za-z_][A-Za-z0-9_-]*')
 # Arquivos que o Terraform (ou o OpenTofu) mescla ou lê além dos .tf comuns: fora do subconjunto.
 FORA_DO_SUBCONJUNTO = ('*.tf.json', '*.tofu', '*.tofu.json', 'override.tf', '*_override.tf')
+# "Nunca no Terraform" (README do Terraform; roteiro E05). Tipo exato, e prefixo só onde a família inteira fica de fora:
+# google_project não pega google_project_service nem google_project_iam_*. Vale para resource e data.
+NUNCA_TIPOS = frozenset({'google_sql_user', 'google_service_account_key',
+                         'google_project', 'google_iap_brand', 'google_iap_client'})
+# Versão de segredo, global ou regional, em qualquer forma: recurso que grava o valor e fonte de dados que o lê
+# (google_secret_manager_secret_version_access devolve secret_data; revisão do Codex em 1fa85be).
+NUNCA_PREFIXOS = ('google_billing_', 'google_iam_oauth_client', 'google_secret_manager_secret_version',
+                  'google_secret_manager_regional_secret_version')
+NUNCA_ATRIBUTO = 'root_password'  # e variantes, como root_password_wo
+# No arquivo que o analisador não lê, pelo texto e falhando fechado: a palavra module inteira, mesmo em comentário
+# (um comentário entre module e o rótulo esconderia o bloco de qualquer padrão mais estreito; revisão do Codex, E05).
+NUNCA_TEXTO = re.compile(r'\b(?:google_secret_manager_secret_version\w*|google_secret_manager_regional_secret_version\w*|'
+                         r'google_sql_user|google_service_account_key|'
+                         r'google_project|google_iap_brand|google_iap_client|google_billing_\w*|google_iam_oauth_client\w*|'
+                         r'root_password\w*|module)\b')
 # Caminhos que o ignore_changes não pode cobrir: deixaria a trava mudar fora do Terraform sem o plan mostrar.
 PROTEGIDOS = ('settings', 'ip_configuration', 'ssl_mode', 'connector_enforcement', 'authorized_networks',
               'ipv4_enabled', 'private_network', 'data_api_access', 'psc_config',
@@ -326,6 +343,24 @@ def todos(b: Bloco):
         yield from todos(x)
 
 
+def _nunca(tipo: str) -> bool:
+    return tipo in NUNCA_TIPOS or tipo.startswith(NUNCA_PREFIXOS)
+
+
+def _nunca_no_codigo(arq: str, raiz: Bloco) -> list[str]:
+    faltas = []
+    for b in raiz.blocos:
+        if b.tipo == 'module':
+            faltas.append(f'{arq}:{b.linha}: bloco module; o guard não enxerga os recursos de dentro de um módulo')
+        elif b.tipo in ('resource', 'data') and b.rotulos and _nunca(b.rotulos[0]):
+            faltas.append(f'{arq}:{b.linha}: {b.tipo} {b.rotulos[0]} está na lista "Nunca no Terraform"')
+    for b in todos(raiz):
+        for nome in b.atributos:
+            if nome.startswith(NUNCA_ATRIBUTO):
+                faltas.append(f'{arq}:{b.linha}: atributo {nome}; a senha do postgres fica fora do Terraform')
+    return faltas
+
+
 def conferir_codigo(modulo: Path) -> list[str]:
     arquivos = sorted(modulo.glob('*.tf'))
     if not arquivos:
@@ -341,6 +376,7 @@ def conferir_codigo(modulo: Path) -> list[str]:
         except ErroHcl as erro:
             return [f'{arq.name}: {erro}']
         lexicos.append((arq.name, tokens(fonte)))
+        faltas += _nunca_no_codigo(arq.name, raiz)
         for b in raiz.blocos:
             if b.tipo not in TOPO_ACEITO:
                 faltas.append(f'{arq.name}:{b.linha}: bloco de topo {b.tipo} fora do subconjunto aceito')
@@ -514,9 +550,15 @@ def conferir_bootstrap(modulo: Path) -> list[str]:
         try:
             raizes[arq.name] = analisar(texto)
             lexicos.append((arq.name, tokens(texto)))
+            faltas += _nunca_no_codigo(arq.name, raizes[arq.name])
         except ErroHcl as erro:
             if arq.name not in NAO_ANALISAVEIS:
                 return [f'{arq.name}: {erro}']
+            # Sem análise, a lista "Nunca" vale pelo texto, comentário incluído: falha fechado.
+            nunca = sorted({m.group(0) for m in NUNCA_TEXTO.finditer(texto)})
+            if nunca:
+                faltas.append(f'{arq.name}: fora do subconjunto do analisador e com {nunca} no texto (lista "Nunca no '
+                              'Terraform" ou module)')
             achados = [p for p in PROIBIDO_SEM_ANALISE if p in texto.lower()]
             if achados:
                 faltas.append(f'{arq.name}: fora do subconjunto do analisador e com {achados} no texto; IAM de projeto e '
@@ -797,6 +839,48 @@ def conferir_plano(caminho: Path) -> list[str]:
         plano = json.loads(caminho.read_text(encoding='utf-8'))
     except (OSError, json.JSONDecodeError) as erro:
         return [f'plan ilegível: {erro}']
+    if not isinstance(plano, dict) or not isinstance(plano.get('resource_changes', []), list):
+        return ['plan em formato inesperado']
+    if not all(isinstance(m, dict) for m in plano.get('resource_changes', [])):
+        return ['resource_changes com item fora do formato']
+    return _plano_nunca(plano) + _plano_banco(plano)
+
+
+def _tipo_no_plano(m: dict) -> str:
+    if isinstance(m.get('type'), str):
+        return m['type']
+    partes = [p for p in str(m.get('address', '')).split('.') if p]
+    while partes[:1] == ['module'] and len(partes) > 2:
+        partes = partes[2:]
+    if partes[:1] == ['data']:
+        partes = partes[1:]
+    return partes[0].split('[')[0] if partes else ''
+
+
+def _plano_nunca(plano: dict) -> list[str]:
+    """Lista "Nunca no Terraform" no plan resolvido: o que fica (after não nulo), inclusive fonte de dados. Recurso que
+    sai do plan (after nulo) não conta. Nenhum valor é impresso: root_password só se diz presente ou desconhecido."""
+    faltas = []
+    for m in plano.get('resource_changes', []):
+        endereco = m.get('address', '?')
+        mudanca = m.get('change') if isinstance(m.get('change'), dict) else {}
+        if mudanca.get('after') is None:
+            continue
+        if m.get('module_address'):
+            faltas.append(f'{endereco}: recurso dentro de módulo no plan; o guard não confere módulos')
+        tipo = _tipo_no_plano(m)
+        if _nunca(tipo):
+            faltas.append(f'{endereco}: {tipo} está na lista "Nunca no Terraform"')
+        depois = mudanca['after'] if isinstance(mudanca['after'], dict) else {}
+        desconhecido = mudanca.get('after_unknown') if isinstance(mudanca.get('after_unknown'), dict) else {}
+        for chave in sorted(set(depois) | set(desconhecido)):
+            if chave.startswith(NUNCA_ATRIBUTO) and (depois.get(chave) not in (None, '') or desconhecido.get(chave)):
+                faltas.append(f'{endereco}: {chave} presente ou desconhecido no plan; a senha do postgres fica fora do '
+                              'Terraform')
+    return faltas
+
+
+def _plano_banco(plano: dict) -> list[str]:
     ativas = [
         m for m in plano.get('resource_changes', [])
         if m.get('mode', 'managed') == 'managed'
