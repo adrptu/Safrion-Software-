@@ -106,6 +106,15 @@ async function doLote(pool, organizationId, loteId) {
   return { organizationId, loteId, produtoId: linha.product_id, localId: linha.local_id };
 }
 
+// Um só handler por sinal, registrado antes do JSON e nunca removido: trocar handlers deixaria cair um sinal já
+// recebido. Durante o preparo ele apaga o JSON desta execução e sai; depois do spawn, passa a encerrar tudo.
+let aoSinal = () => {
+  apagarFixture();
+  process.exit(1);
+};
+process.on('SIGTERM', () => aoSinal());
+process.on('SIGINT', () => aoSinal());
+
 const pool = new pg.Pool({ connectionString: url('app_runtime', senhas.appRuntime), max: 2 });
 const migrator = new pg.Pool({ connectionString: url('migrator', senhas.migrator), max: 1 });
 try {
@@ -173,6 +182,5 @@ async function encerrar(codigo) {
   }
   process.exit(codigo);
 }
-process.on('SIGTERM', () => void encerrar(0));
-process.on('SIGINT', () => void encerrar(0));
+aoSinal = () => void encerrar(0);
 next.on('exit', (codigo) => void encerrar(codigo ?? 1));

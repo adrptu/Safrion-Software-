@@ -6,7 +6,7 @@ import re
 import sys
 
 
-MINIMOS = {"desktop": 9, "celular": 1}
+MINIMOS = {"desktop": 12, "celular": 1}
 # Provas nomeadas que não podem sumir, mesmo que outra jornada mantenha a contagem: o ID abre o título ("HML-ISO-01: …").
 OBRIGATORIAS = {"desktop": ("HML-ISO-01", "HML-ISO-02", "HML-ISO-03")}
 ID_DO_TITULO = re.compile(r"^([A-Z]+(?:-[A-Z]+)*-\d{2}): ")
