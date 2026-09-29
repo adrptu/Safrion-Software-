@@ -1107,7 +1107,9 @@ class Plano(unittest.TestCase):
 
 # --- Lista "Nunca no Terraform" (roteiro E05): um caso positivo e um negativo por tipo, no código e no plan ---
 
-NUNCA = ('google_secret_manager_secret_version', 'google_sql_user', 'google_service_account_key', 'google_project',
+NUNCA = ('google_secret_manager_secret_version', 'google_secret_manager_secret_version_access',
+         'google_secret_manager_regional_secret_version', 'google_secret_manager_regional_secret_version_access',
+         'google_sql_user', 'google_service_account_key', 'google_project',
          'google_iap_brand', 'google_iap_client', 'google_billing_budget', 'google_billing_account_iam_member',
          'google_billing_project_info', 'google_iam_oauth_client', 'google_iam_oauth_client_credential')
 # Vizinhos de nome que seguem permitidos: o controle negativo de cada família.
@@ -1143,7 +1145,9 @@ class NuncaNoTerraform(unittest.TestCase):
                     (pasta / 'nunca.tf').unlink()
 
     def test_fonte_de_dados_tambem_no_bootstrap(self):
-        for tipo in ('google_billing_account', 'google_project', 'google_sql_user'):
+        # Contraprova do Codex (1fa85be): a fonte de dados que devolve secret_data passava no código.
+        for tipo in ('google_billing_account', 'google_project', 'google_sql_user', 'google_secret_manager_secret_version_access',
+                     'google_secret_manager_regional_secret_version_access'):
             with self.subTest(tipo=tipo):
                 self.escrever(self.boot, 'nunca.tf', f'data "{tipo}" "x" {{\n  name = "x"\n}}\n')
                 self.assertIn(f'nunca.tf:1: data {tipo} está na lista "Nunca no Terraform"',
@@ -1176,6 +1180,8 @@ class NuncaNoTerraform(unittest.TestCase):
     def test_arquivo_nao_analisavel_falha_pelo_texto(self):
         wif = (AQUI / 'bootstrap' / 'wif.tf').read_text(encoding='utf-8')
         for trecho, achado in (('# google_service_account_key', 'google_service_account_key'),
+                               ('data "google_secret_manager_secret_version_access" "x" {}',
+                                'google_secret_manager_secret_version_access'),
                                ('module "m" {}', 'module'), ('# google_billing_budget', 'google_billing_budget'),
                                # Contraprova do Codex (6ec3048): comentário entre module e o rótulo escondia o bloco.
                                ('module /* separador HCL valido */ "m" { source = "./filho" }', 'module'),
@@ -1218,6 +1224,13 @@ class NuncaNoPlano(unittest.TestCase):
     def test_fonte_de_dados_conta_e_saida_nao(self):
         self.assertIn('data.google_billing_account.x: google_billing_account está na lista "Nunca no Terraform"',
                       self.faltas(self.plano(self.mudanca('google_billing_account', modo='data', acoes=('read',)))))
+        # Contraprova do Codex (1fa85be): leitura do valor do segredo no plan, com secret_data sintético.
+        acesso = self.mudanca('google_secret_manager_secret_version_access', modo='data', acoes=('read',),
+                              after={'secret': 'hml-db-admin-senha', 'secret_data': 'valor-sintetico'})
+        faltas = self.faltas(self.plano(acesso))
+        self.assertIn('data.google_secret_manager_secret_version_access.x: google_secret_manager_secret_version_access '
+                      'está na lista "Nunca no Terraform"', faltas)
+        self.assertNotIn('valor-sintetico', ' '.join(faltas))
         saindo = self.mudanca('google_sql_user')
         saindo['change'] = {'actions': ['delete'], 'after': None}
         self.assertEqual(self.faltas(self.plano(saindo)), [])

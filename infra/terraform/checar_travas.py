@@ -86,13 +86,17 @@ ROTULO = re.compile(r'[A-Za-z_][A-Za-z0-9_-]*')
 FORA_DO_SUBCONJUNTO = ('*.tf.json', '*.tofu', '*.tofu.json', 'override.tf', '*_override.tf')
 # "Nunca no Terraform" (README do Terraform; roteiro E05). Tipo exato, e prefixo só onde a família inteira fica de fora:
 # google_project não pega google_project_service nem google_project_iam_*. Vale para resource e data.
-NUNCA_TIPOS = frozenset({'google_secret_manager_secret_version', 'google_sql_user', 'google_service_account_key',
+NUNCA_TIPOS = frozenset({'google_sql_user', 'google_service_account_key',
                          'google_project', 'google_iap_brand', 'google_iap_client'})
-NUNCA_PREFIXOS = ('google_billing_', 'google_iam_oauth_client')
+# Versão de segredo, global ou regional, em qualquer forma: recurso que grava o valor e fonte de dados que o lê
+# (google_secret_manager_secret_version_access devolve secret_data; revisão do Codex em 1fa85be).
+NUNCA_PREFIXOS = ('google_billing_', 'google_iam_oauth_client', 'google_secret_manager_secret_version',
+                  'google_secret_manager_regional_secret_version')
 NUNCA_ATRIBUTO = 'root_password'  # e variantes, como root_password_wo
 # No arquivo que o analisador não lê, pelo texto e falhando fechado: a palavra module inteira, mesmo em comentário
 # (um comentário entre module e o rótulo esconderia o bloco de qualquer padrão mais estreito; revisão do Codex, E05).
-NUNCA_TEXTO = re.compile(r'\b(?:google_secret_manager_secret_version|google_sql_user|google_service_account_key|'
+NUNCA_TEXTO = re.compile(r'\b(?:google_secret_manager_secret_version\w*|google_secret_manager_regional_secret_version\w*|'
+                         r'google_sql_user|google_service_account_key|'
                          r'google_project|google_iap_brand|google_iap_client|google_billing_\w*|google_iam_oauth_client\w*|'
                          r'root_password\w*|module)\b')
 # Caminhos que o ignore_changes não pode cobrir: deixaria a trava mudar fora do Terraform sem o plan mostrar.
