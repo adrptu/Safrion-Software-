@@ -2,6 +2,7 @@
 node_modules/
 .pnpm-store/
 dist/
+*.tsbuildinfo
 build/
 .next/
 out/
@@ -25,3 +26,5 @@ test-results/
 .terraform/
 *.tfstate
 *.tfstate.*
+# Python (portões da CI)
+__pycache__/

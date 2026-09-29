@@ -1,0 +1,6 @@
+packages:
+  - packages/*
+
+# Quarentena de 7 dias (em minutos) contra versões recém-publicadas e ainda não examinadas pela comunidade:
+# vale para todas as dependências, diretas e indiretas.
+minimumReleaseAge: 10080
