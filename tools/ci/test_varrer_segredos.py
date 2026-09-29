@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Regressão da varredura de segredos (commit raiz, merge, histórico normal, cobertura e canário), com um Gitleaks simulado.
+"""Regressão da varredura de segredos (raiz, merge, troca de tipo, configuração, cobertura e canário), com Gitleaks simulado.
 O Gitleaks real roda no job de segredos da CI, com checksum conferido; aqui se testa o contrato do script. O simulado lê
 o git log -p com as mesmas --log-opts recebidas, então a detecção de merge depende das opções que o script passa."""
 import json, os, stat, subprocess, sys, tempfile, textwrap, unittest
@@ -25,6 +25,7 @@ SIMULADO = textwrap.dedent('''
     opcoes = [a.split('=', 1)[1] for a in sys.argv[1:] if a.startswith('--log-opts=')]
     opcoes = opcoes[0].split(' ') if opcoes else ['--full-history', '--all', '--diff-filter=tuxdb']
     if canario and modo == 'canario_sem_merge': opcoes = [o for o in opcoes if o not in ('-m', '--diff-merges=separate')]
+    if canario and modo == 'canario_sem_tipo': opcoes = ['--diff-filter=tuxdb' if o.startswith('--diff-filter=') else o for o in opcoes]
     achados, atual = [], None
     for linha in git('log', '-p', '-U0', *opcoes).stdout.splitlines():
         if linha.startswith('commit '): atual = linha.split()[1]
@@ -42,13 +43,17 @@ SIMULADO = textwrap.dedent('''
         info['pais_do_merge'] = len(pais)
         info['pais_sem_segredo'] = bool(pais) and not any(tem_segredo(p, 'modo.env') for p in pais)
         info['conflito'] = bool(pais) and git('merge-tree', '--write-tree', *pais, ok=(0, 1)).returncode == 1
-        info['segredo_na_arvore'] = any(tem_segredo('HEAD', a) for a in ('config.env', 'modo.env'))
-        info['commits_achados'] = sorted(set(achados)); info['raiz'] = raiz; info['merges'] = merges
+        tipos = git('log', '--all', '--diff-filter=T', '--format=%H').stdout.split()
+        info['tipo_com_segredo'] = (len(tipos) == 1 and tem_segredo(tipos[0], 'tipo.env')
+                                    and git('ls-tree', tipos[0] + '^', 'tipo.env').stdout.startswith('120000'))
+        info['segredo_na_arvore'] = any(tem_segredo('HEAD', a) for a in ('config.env', 'modo.env', 'tipo.env'))
+        info['commits_achados'] = sorted(set(achados)); info['raiz'] = raiz; info['merges'] = merges; info['tipos'] = tipos
     with open(os.environ['SIM_LOG'], 'a', encoding='utf-8') as f: f.write(json.dumps(info) + '\\n')
     if '--report-path' in sys.argv and modo != 'sem_relatorio':
         with open(sys.argv[sys.argv.index('--report-path') + 1], 'w', encoding='utf-8') as f:
             json.dump([{'Commit': c, 'RuleID': 'github-pat', 'Secret': 'REDACTED'} for c in achados], f)
     if modo == 'erro': diz('ERR', 'fatal'); sys.exit(126)
+    if modo == 'config_invalida': diz('FTL', 'unable to load gitleaks config, err: toml: line 1: expected'); sys.exit(1)
     if modo == 'sem_resumo': sys.exit(0)
     if modo == 'parcial': diz('WRN', 'scanned ~0 bytes (0)'); diz('WRN', 'partial scan completed in 1ms'); diz('WRN', 'no leaks found in partial scan'); sys.exit(1)
     if modo == 'zero_bytes': diz('INF', 'scanned ~0 bytes (0) in 1ms'); diz('INF', 'no leaks found'); sys.exit(0)
@@ -129,8 +134,9 @@ class VarrerSegredos(unittest.TestCase):
         git(r, 'update-ref', 'refs/remotes/pull/2/merge', 'HEAD'); git(r, 'branch', '-q', '-D', 'pr')
         return r
 
-    def rodar(self, repo, modo='ok', sem_token=False, cor=False):
-        env = {**os.environ, 'SIM_MODO': modo, 'SIM_LOG': self.log, 'SIM_COR': '1' if cor else '0'}
+    def rodar(self, repo, modo='ok', sem_token=False, cor=False, env_extra=None):
+        env = {k: v for k, v in os.environ.items() if not k.startswith('GITLEAKS_CONFIG')}
+        env.update({'SIM_MODO': modo, 'SIM_LOG': self.log, 'SIM_COR': '1' if cor else '0', **(env_extra or {})})
         if sem_token:
             env.pop('GITHUB_TOKEN', None)
         p = subprocess.run([sys.executable, SCRIPT, '--gitleaks', self.bin, repo], capture_output=True, text=True, env=env)
@@ -155,7 +161,7 @@ class VarrerSegredos(unittest.TestCase):
         cs = self.chamadas(); self.assertEqual([c['canario'] for c in cs], [True, False])
         for c in cs:
             opcoes = [a for a in c['args'] if a.startswith('--log-opts')]
-            self.assertEqual(opcoes, ['--log-opts=--full-history --all --diff-merges=separate --diff-filter=tuxdb'])
+            self.assertEqual(opcoes, ['--log-opts=--full-history --all --diff-merges=separate --diff-filter=uxdb'])
             texto = ' '.join(c['args']); self.assertNotIn('^', texto); self.assertNotIn('..', texto); self.assertIn('--redact', texto)
         # Só o canário pede relatório: é nele que o commit de cada achado é conferido.
         self.assertIn('--report-path', cs[0]['args']); self.assertNotIn('--report-path', cs[1]['args'])
@@ -163,10 +169,10 @@ class VarrerSegredos(unittest.TestCase):
     def test_canario_tem_segredos_so_no_historico_da_raiz_e_da_resolucao_de_merge(self):
         self.rodar(self.repo(False))
         c = self.chamadas()[0]
-        self.assertEqual(c['commits'], 6); self.assertTrue(c['raiz_com_segredo']); self.assertFalse(c['segredo_na_arvore'])
+        self.assertEqual(c['commits'], 9); self.assertTrue(c['raiz_com_segredo']); self.assertFalse(c['segredo_na_arvore'])
         self.assertEqual(c['pais_do_merge'], 2); self.assertTrue(c['conflito'])
-        self.assertTrue(c['merge_com_segredo']); self.assertTrue(c['pais_sem_segredo'])
-        self.assertEqual(c['commits_achados'], sorted(c['raiz'] + c['merges']))
+        self.assertTrue(c['merge_com_segredo']); self.assertTrue(c['pais_sem_segredo']); self.assertTrue(c['tipo_com_segredo'])
+        self.assertEqual(c['commits_achados'], sorted(c['raiz'] + c['merges'] + c['tipos']))
 
     def test_segredo_so_na_resolucao_de_merge_falha(self):
         # Contraprova A sobre 70a8bb6: sem diff de merge, a varredura dava 0 e "histórico inteiro varrido".
@@ -176,6 +182,54 @@ class VarrerSegredos(unittest.TestCase):
     def test_segredo_so_no_merge_octopus_falha(self):
         code, out = self.rodar(self.repo_com_segredo_no_merge(octopus=True))
         self.assertEqual(code, 1, out); self.assertIn('segredo encontrado', out)
+
+    def test_segredo_em_troca_de_tipo_falha(self):
+        # Cenário G: com o --diff-filter=tuxdb padrão, um atalho que vira arquivo com segredo passava sem achado.
+        r = self.repo(False)
+        os.symlink('a.txt', os.path.join(r, 'tipo.env')); git(r, 'add', '.'); git(r, 'commit', '-q', '-m', 'atalho')
+        os.remove(os.path.join(r, 'tipo.env')); escrever(os.path.join(r, 'tipo.env'), 'GITHUB_TOKEN=ghp' + '_' + 'y' * 36 + '\n')
+        git(r, 'add', '.'); git(r, 'commit', '-q', '-m', 'atalho vira arquivo com segredo')
+        git(r, 'rm', '-q', 'tipo.env'); git(r, 'commit', '-q', '-m', 'apaga')
+        code, out = self.rodar(r)
+        self.assertEqual(code, 1, out); self.assertIn('segredo encontrado', out)
+
+    def test_canario_sem_troca_de_tipo_invalida(self):
+        code, out = self.rodar(self.repo(False), 'canario_sem_tipo')
+        self.assertEqual(code, 2, out); self.assertIn('exclui a troca de tipo', out)
+
+    def test_mesma_configuracao_no_canario_e_na_varredura(self):
+        sem = self.repo(False); self.rodar(sem)
+        com = self.repo(False); escrever(os.path.join(com, '.gitleaks.toml'), '[extend]\nuseDefault = true\n')
+        escrever(os.path.join(com, '.gitleaksignore'), '')
+        code, out = self.rodar(com)
+        self.assertEqual(code, 0, out); self.assertIn('.gitleaks.toml do repositório', out)
+        cs = self.chamadas(); self.assertEqual([c['canario'] for c in cs], [True, False, True, False])
+        for c in cs[:2]:
+            self.assertNotIn('--config', c['args'])
+            self.assertEqual(c['args'][c['args'].index('--gitleaks-ignore-path') + 1], sem)
+        for c in cs[2:]:
+            self.assertEqual(c['args'][c['args'].index('--config') + 1], os.path.join(com, '.gitleaks.toml'))
+            self.assertEqual(c['args'][c['args'].index('--gitleaks-ignore-path') + 1], com)
+
+    def test_configuracao_ilegivel_invalida(self):
+        for nome in ('.gitleaks.toml', '.gitleaksignore'):
+            for forma in ('pasta', 'atalho quebrado'):
+                with self.subTest(nome=nome, forma=forma):
+                    r = self.repo(False); caminho = os.path.join(r, nome)
+                    os.mkdir(caminho) if forma == 'pasta' else os.symlink(os.path.join(r, 'nao-existe'), caminho)
+                    code, out = self.rodar(r)
+                    self.assertEqual(code, 2, out); self.assertIn(nome + ' existe mas está ilegível', out)
+                    self.assertNotIn('OK canário', out)
+
+    def test_configuracao_invalida_no_gitleaks_invalida(self):
+        code, out = self.rodar(self.repo(False), 'config_invalida')
+        self.assertEqual(code, 2, out); self.assertIn('Gitleaks abortou', out)
+
+    def test_configuracao_por_variavel_de_ambiente_invalida(self):
+        for var in ('GITLEAKS_CONFIG', 'GITLEAKS_CONFIG_TOML'):
+            with self.subTest(var=var):
+                code, out = self.rodar(self.repo(False), env_extra={var: 'x'})
+                self.assertEqual(code, 2, out); self.assertIn(var, out)
 
     def test_canario_sem_diff_de_merge_invalida(self):
         code, out = self.rodar(self.repo(False), 'canario_sem_merge')
