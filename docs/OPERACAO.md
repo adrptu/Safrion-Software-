@@ -34,10 +34,10 @@ Sem shell na imagem, diagnóstico é por log e por `/saude`, não por `docker ex
 **Conexão ao banco em HML** ([ADR 0006](adr/0006-rede-privada-hml.md); especificado, nada implantado):
 - o banco só tem IP privado. Web e jobs chegam a ele pela VPC (Direct VPC egress), com o conector oficial em `ipType PRIVATE`, que faz o TLS;
 - `SAFRION_CLOUDSQL_INSTANCIA`: nome de conexão da instância (`<projeto>:southamerica-east1:safrion-hml`), posto pelo Terraform. Sem ela (desenvolvimento e CI), vale a URL comum;
-- `DATABASE_URL` (web e `demo-reset`) é `postgresql://app_runtime@/safrion_hml`, e `SAFRION_ADMIN_URL` (preparo) é `postgresql://postgres@/postgres`: sem host e sem senha;
+- `DATABASE_URL` (web e `demo-reset`) é `postgresql://app_runtime@/safrion_hml`, e `SAFRION_ADMIN_URL` (preparo e vínculo) é `postgresql://postgres@/postgres`: sem host e sem senha;
 - `PGPASSWORD` vem do Secret Manager, em versão fixa;
 - **o operador não conecta mais ao banco da HML pelo notebook.** Sem IP público, o Auth Proxy local não tem caminho, e o Cloud Shell não alcança IP privado;
-- por isso, em HML, a concessão e a revogação de vínculo (abaixo) e a rotação de senhas ficam **a definir**. Dependem do job `safrion-vinculo` e de subcomandos de rotação, que são entrega à parte.
+- por isso, em HML, a concessão e a revogação de vínculo passam pelo job `safrion-vinculo` (abaixo). A rotação de senhas fica **a definir**: depende de subcomandos de rotação, entrega à parte.
 
 Login em HML (adaptador OIDC do Codex, ligado pela casca):
 - o callback a cadastrar no provedor é `${SAFRION_ORIGEM}/entrar/retorno`; ele nunca vem da requisição;
@@ -46,35 +46,60 @@ Login em HML (adaptador OIDC do Codex, ligado pela casca):
 - no log, `login.recusado` traz o motivo como código: `SEM_CONFIGURACAO`, `CONFIGURACAO_INVALIDA` ou `DESCOBERTA_FALHOU`. Nenhum segredo, código ou token é registrado;
 - só entra quem tem vínculo explícito entre issuer + subject e um usuário da organização. O e-mail nunca vincula.
 
-**Conceder acesso em HML** (ADR 0004 §11):
+**Conceder acesso em HML** (ADR 0004 §11; job `safrion-vinculo`, R-006 3c; especificado, nada implantado):
 1. A pessoa entra pelo provedor. Sem vínculo, a tela mostra um código de referência, válido por 24 h. Um login novo troca o código.
 2. Ela passa o código ao administrador.
 3. **O código não prova quem é a pessoa.** O administrador confirma quem pediu por um canal autenticado independente, e confere organização, usuário e papel.
    Os ids vêm da última saída do `demo:reset`: `organizacao` e, em `usuarios`, o `usuario` de cada `papel`. Na HML, estão no log da execução do job `safrion-demo-reset`. São ids de usuários fictícios, não dado pessoal.
-4. O administrador roda o comando no alvo `preparo` da imagem, com `SAFRION_ADMIN_URL` (administrador do servidor):
-   `docker run --rm -it -e SAFRION_ADMIN_URL --entrypoint node <imagem-preparo> dist/cli/vincular-identidade.js conceder --ambiente hml --banco <nome> --organizacao <id> --usuario <id> --responsavel <quem autorizou> --motivo <texto curto>`.
-   **O código é pedido no terminal e não aparece na tela.** Ele também pode vir por pipe, nunca como argumento.
-   Na HML, o banco só tem IP privado, e este passo fica a definir (ver "Conexão ao banco em HML").
-5. Repetir o mesmo comando devolve `mantido` e não muda nada.
+4. O administrador grava o pedido no segredo `hml-vinculo-pedido` e executa o job, no terminal dele ou no Cloud Shell (que aqui só chama APIs), com o gcloud na conta do operador e no projeto da HML:
+   ```sh
+   read -rs CODIGO
+   PEDIDO_ID=$(uuidgen | tr '[:upper:]' '[:lower:]')
+   printf '{"pedido_id":"%s","acao":"conceder","organizacao":"%s","usuario":"%s","responsavel":"%s","motivo":"%s","codigo":"%s"}' \
+     "$PEDIDO_ID" '<organizacao>' '<usuario>' '<quem autorizou>' '<motivo curto>' "$CODIGO" \
+     | gcloud secrets versions add hml-vinculo-pedido --data-file=-
+   unset CODIGO
+   gcloud run jobs execute safrion-vinculo --region southamerica-east1
+   ```
+   - **O código nunca vai para argumento de programa.** O `read -rs` o lê sem eco e fora do histórico (nunca `export`), o `printf` é do próprio shell, e o gcloud lê o pedido da entrada padrão.
+   - Cada pedido tem um `pedido_id` novo, do `uuidgen`.
+   - Nada de comentário `#` nas linhas do bloco: o zsh interativo, por padrão, não aceita comentário (`interactivecomments` desligado), o `#` vira comando e o `PEDIDO_ID` sai vazio.
+   - `responsavel` é um identificador de quem autorizou, não o nome. Em `responsavel` e `motivo`, nada de aspas nem barra invertida: o JSON quebrado ou com chave repetida sai `PEDIDO_INVALIDO`.
+   - O job roda sem overrides (`--args`, `--update-env-vars`), que o operador nem tem permissão de usar. Execute em até 60 min depois de gravar; depois disso, o pedido sai `PEDIDO_ATRASADO`.
+5. Leia o resultado no Logging da execução, por exemplo `gcloud logging read 'resource.type="cloud_run_job" AND resource.labels.job_name="safrion-vinculo"' --freshness=1h`. Há uma linha por pedido, com `pedido_id`, `versao`, `resultado` e `repetido`.
+   - O job grava um recibo no banco e **destrói a versão** logo depois, sem destruição adiada.
+   - `PEDIDO_INVALIDO` e `PEDIDO_ID_REUTILIZADO` só **desativam** a versão, para o dono do projeto conferir e destruir: `gcloud secrets versions destroy <versao> --secret hml-vinculo-pedido`.
+6. Com saída 3, execute de novo: a versão que ficou devolve o recibo já gravado (`repetido`), sem reaplicar. Conceder de novo o mesmo destino, com pedido novo, devolve `mantido`.
 
-Para tirar o acesso, use o mesmo comando com `revogar` no lugar de `conceder`, sem código:
-- ele remove **todos os vínculos desse usuário nessa organização** e as sessões dele ali;
+Para tirar o acesso, use o mesmo fluxo com `"acao":"revogar"` e sem a chave `codigo` (e sem o `read`):
+```sh
+printf '{"pedido_id":"%s","acao":"revogar","organizacao":"%s","usuario":"%s","responsavel":"%s","motivo":"%s"}' \
+  "$(uuidgen | tr '[:upper:]' '[:lower:]')" '<organizacao>' '<usuario>' '<quem autorizou>' '<motivo curto>' \
+  | gcloud secrets versions add hml-vinculo-pedido --data-file=-
+gcloud run jobs execute safrion-vinculo --region southamerica-east1
+```
+
+A revogação:
+- remove **todos os vínculos desse usuário nessa organização** e as sessões dele ali;
 - a próxima requisição da pessoa já é negada;
 - o código antigo não reabre o acesso: vincular de novo pede um código novo.
 
-Saída do comando:
-- 0: concedido, mantido, revogado ou sem vínculo;
-- 1: recusado, com o código do motivo;
+Saída do job:
+- 0: todos os pedidos concedidos, mantidos, revogados ou sem vínculo;
+- 1: algum pedido recusado, com o código do motivo, ou outra execução em andamento (`OCUPADO`: execute de novo depois);
 - 2: uso incorreto;
-- 3: falha de infraestrutura, só com códigos.
+- 3: falha de infraestrutura, só com códigos. A fila para, e as versões não processadas ficam para a próxima execução.
 
-Nenhuma saída traz código, subject ou hash.
+Nenhuma saída traz código, subject, hash ou o conteúdo do pedido.
 
 **Registro e limites:**
 - cada concessão e cada revogação ficam gravadas em `app.identity_link_event`, sem poder ser alteradas pela aplicação, com responsável, motivo e usuário do banco;
 - o `migrator` lê esse registro;
 - limites de HML: até 100 pedidos pendentes e 1000 guardados;
-- depois de um `demo:reset` em HML, os acessos reais à geração anterior caem, e é preciso conceder de novo.
+- depois de um `demo:reset` em HML, os acessos reais à geração anterior caem, e é preciso conceder de novo;
+- o recibo da fila (`app.vinculo_pedido_recibo`) recusa UPDATE, DELETE e TRUNCATE por gatilho. Não é promessa contra o dono do banco (`migrator`, ou o administrador que o assume), que pode desativar o gatilho. Sem o recibo, uma versão que ficou ENABLED seria reaplicada. Nos outros registros imutáveis (`app.identity_link_event` inclusive), o gatilho não cobre TRUNCATE, e o dono consegue esvaziá-los;
+- `OCUPADO` que se repete, ou saída 3 com `55P03` (espera de trava estourada), pode ser uma trava consultiva da fila ou do pedido presa por outra sessão. Qualquer papel do banco consegue tomá-la, inclusive o `app_runtime`; não forja efeito nem recibo, só impede a fila. Diagnóstico: `pg_locks` com `locktype = 'advisory'` e a sessão dona em `pg_stat_activity`. Na HML, sem conexão do notebook ao banco, como rodar esse diagnóstico fica a definir, como a rotação de senhas;
+- a `sa-preparo` tem `secretVersionManager` no `hml-vinculo-pedido`, que dá também `versions.add` e `versions.enable`. Com o `secretAccessor`, quem roda como ela (o `safrion-vinculo`, o `safrion-preparo` e a CI por override) reativa e lê uma versão desativada, que ainda tem o código, e grava pedidos. Não amplia o que ela já pode: ela lê a senha do administrador do banco.
 
 O provedor de desenvolvimento fica fechado fora de `dev`.
 

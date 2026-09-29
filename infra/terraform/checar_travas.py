@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # Travas do Cloud SQL e do Cloud Run da HML que sustentam a exceção GCP-0015 do Trivy e o fechamento do GCP-0017 pelo
 # desenho de rede privada (ADR 0006; hml/README.md, "Achados do scanner"). Sem elas, a exceção e o fechamento caem.
+# Também: o segredo hml-vinculo-pedido sem version_destroy_ttl, num recurso literal que o job e o IAM usam, para o pedido
+# destruído sumir na hora (R-006 3b e 3c).
 # Dois modos:
 #   python3 checar_travas.py [módulo]           confere o código (padrão: hml/), sem credencial; roda em PR;
 #   python3 checar_travas.py --plano p.json     confere o plan (terraform show -json), com os valores resolvidos.
@@ -28,6 +30,10 @@ SSL = 'ENCRYPTED_ONLY'
 CONECTOR = 'REQUIRED'
 DATA_API = 'DISALLOW_DATA_API'
 EGRESS = 'PRIVATE_RANGES_ONLY'
+SEGREDO = 'google_secret_manager_secret'
+SEGREDO_IAM = 'google_secret_manager_secret_iam_member'
+PEDIDO = 'hml-vinculo-pedido'
+VARIAVEL_PEDIDO = 'SAFRION_PEDIDO_SEGREDO'
 # Blocos, a partir do recurso, até o que leva o vpc_access. Todo recurso destes tipos precisa do egress privado.
 CLOUD_RUN = {'google_cloud_run_v2_service': ('template',), 'google_cloud_run_v2_job': ('template', 'template')}
 CLOUD_RUN_IAM = {'google_cloud_run_v2_service_iam_member', 'google_cloud_run_v2_job_iam_member'}
@@ -282,12 +288,14 @@ def conferir_codigo(modulo: Path) -> list[str]:
     fora = sorted({p.name for padrao in FORA_DO_SUBCONJUNTO for p in modulo.glob(padrao)})
     if fora:
         return [f'arquivos fora do subconjunto aceito (override, JSON ou OpenTofu): {fora}']
-    faltas, instancias, cloud_run = [], [], []
+    faltas, instancias, cloud_run, pedidos, iam_segredos, lexicos = [], [], [], [], [], []
     for arq in arquivos:
         try:
-            raiz = analisar(arq.read_text(encoding='utf-8'))
+            fonte = arq.read_text(encoding='utf-8')
+            raiz = analisar(fonte)
         except ErroHcl as erro:
             return [f'{arq.name}: {erro}']
+        lexicos.append((arq.name, tokens(fonte)))
         for b in raiz.blocos:
             if b.tipo not in TOPO_ACEITO:
                 faltas.append(f'{arq.name}:{b.linha}: bloco de topo {b.tipo} fora do subconjunto aceito')
@@ -301,6 +309,10 @@ def conferir_codigo(modulo: Path) -> list[str]:
                 instancias.append((arq.name, r))
             elif tipo in CLOUD_RUN:
                 cloud_run.append((arq.name, r))
+            elif tipo == SEGREDO and literal(r.atributos.get('secret_id', [])) == PEDIDO:
+                pedidos.append((arq.name, r))
+            elif tipo == SEGREDO_IAM:
+                iam_segredos.append((arq.name, r))
             elif tipo.startswith('google_cloud_run') and tipo not in CLOUD_RUN_IAM:
                 faltas.append(f'{arq.name}:{r.linha}: {tipo} fora do subconjunto aceito (Cloud Run só v2 service, v2 job e IAM)')
     if faltas:
@@ -347,7 +359,81 @@ def conferir_codigo(modulo: Path) -> list[str]:
             faltas.append('lifecycle.ignore_changes cobre uma trava (ou tem forma não reconhecida)')
     for arq, r in cloud_run:
         faltas += _conferir_cloud_run(arq, r)
+    return faltas + _conferir_pedido(pedidos, iam_segredos, lexicos)
+
+
+def _conferir_pedido(pedidos: list[tuple[str, Bloco]], iam_segredos: list[tuple[str, Bloco]],
+                     lexicos: list[tuple[str, list[Token]]]) -> list[str]:
+    """O hml-vinculo-pedido guarda pedidos de uso único com o código de referência. Com version_destroy_ttl, destruir só
+    desativaria a versão, que seguiria legível por dias (R-006 3b). O nome precisa ser literal num único recurso: em
+    for_each ou variável, o código não o resolve (o plan confere o valor resolvido).
+    O recurso literal só vale se é ele que o job e o IAM usam: sem count nem for_each, o nome em nenhuma outra string do
+    módulo e SAFRION_PEDIDO_SEGREDO e o IAM do pedido como referência a ele. Sem isso, uma isca com count = 0 passava e
+    o segredo real vinha de local.segredos, com TTL (revisão de 28/09). Nome ou chave montados por função (join, format)
+    não são reconhecidos: ficam para a revisão do diff, e o plan confere o TTL de todo segredo resolvido com esse nome."""
+    if len(pedidos) != 1:
+        achados = ', '.join(f'{a}:{r.linha} {".".join(r.rotulos)}' for a, r in pedidos) or 'nenhum'
+        return [f'o módulo deve ter exatamente um {SEGREDO} com secret_id = "{PEDIDO}" literal; achados: {achados}']
+    arq, r = pedidos[0]
+    nome = f'{arq}:{r.linha} {".".join(r.rotulos)}'
+    rotulo = r.rotulos[1] if len(r.rotulos) > 1 else ''
+    faltas = []
+    if any('version_destroy_ttl' in b.atributos or b.tipo == 'version_destroy_ttl' for b in todos(r)):
+        faltas.append(f'{nome}: version_destroy_ttl presente; o pedido destruído tem de sumir na hora')
+    for ciclo in blocos(r, 'lifecycle'):
+        if not _ignore_changes_fora_de(ciclo.atributos.get('ignore_changes', []), ['version_destroy_ttl']):
+            faltas.append(f'{nome}: lifecycle.ignore_changes cobre o version_destroy_ttl (ou tem forma não reconhecida)')
+    for meta in ('count', 'for_each'):
+        if meta in r.atributos:
+            faltas.append(f'{nome}: {meta} no recurso do pedido; ele existe sempre, uma vez')
+    # O nome só no secret_id do recurso: em local.segredos ou num id escrito à mão, o código não sabe qual TTL vale.
+    strings = [(a, t) for a, lista in lexicos for t in lista if t.tipo in ('texto', 'modelo')]
+    outras = [f'{a}:{t.linha}' for a, t in strings if 'vinculo-pedido' in t.valor.lower()]
+    outras.remove(f'{arq}:{r.atributos["secret_id"][0].linha}')
+    if outras:
+        faltas.append(f'"{PEDIDO}" em string fora do secret_id de {nome}: {outras}')
+    # O job lê o segredo de SAFRION_PEDIDO_SEGREDO: uma declaração só, chave = id do próprio recurso.
+    esperado = [('nome', SEGREDO), ('simbolo', '.'), ('nome', rotulo), ('simbolo', '.'), ('nome', 'id')]
+    declaracoes = [(a, t, _valor_atribuido(lista, i)) for a, lista in lexicos
+                   for i, t in enumerate(lista) if (t.tipo, t.valor) == ('nome', VARIAVEL_PEDIDO)]
+    citacoes = [f'{a}:{t.linha}' for a, t in strings if VARIAVEL_PEDIDO.lower() in t.valor.lower()]
+    if citacoes:
+        faltas.append(f'{VARIAVEL_PEDIDO} em string ({citacoes}); só a forma chave = referência é reconhecida')
+    if len(declaracoes) != 1 or declaracoes[0][2] != esperado:
+        achadas = ', '.join(f'{a}:{t.linha}' for a, t, _ in declaracoes) or 'nenhuma'
+        faltas.append(f'{VARIAVEL_PEDIDO} deve aparecer uma vez, como {SEGREDO}.{rotulo}.id; achadas: {achadas}')
+    # IAM do pedido: o que aponta para o recurso usa o próprio recurso, e há ao menos um.
+    do_pedido = 0
+    for a, b in iam_segredos:
+        ref = [(t.tipo, t.valor) for t in b.atributos.get('secret_id', [])]
+        if ref[:3] != [('nome', SEGREDO), ('simbolo', '.'), ('nome', rotulo)]:
+            continue
+        do_pedido += 1
+        if ref[3:] not in ([('simbolo', '.'), ('nome', 'secret_id')], [('simbolo', '.'), ('nome', 'id')]):
+            faltas.append(f'{a}:{b.linha} {".".join(b.rotulos)}: secret_id fora da forma {SEGREDO}.{rotulo}.secret_id')
+    if not do_pedido:
+        faltas.append(f'nenhum {SEGREDO_IAM} com secret_id = {SEGREDO}.{rotulo}.secret_id')
     return faltas
+
+
+def _valor_atribuido(lista: list[Token], i: int) -> list[tuple[str, str]] | None:
+    """Tokens do valor de `nome =` na posição i, até o fim da linha, a vírgula ou o fecho do mapa; None sem o `=`."""
+    if i + 1 >= len(lista) or (lista[i + 1].tipo, lista[i + 1].valor) != ('simbolo', '='):
+        return None
+    valor, profundidade = [], 0
+    for t in lista[i + 2:]:
+        if t.tipo == 'fim_linha' and profundidade == 0:
+            break
+        if t.tipo == 'simbolo' and t.valor in '([{':
+            profundidade += 1
+        elif t.tipo == 'simbolo' and t.valor in ')]}':
+            if profundidade == 0:
+                break
+            profundidade -= 1
+        elif t.tipo == 'simbolo' and t.valor == ',' and profundidade == 0:
+            break
+        valor.append((t.tipo, t.valor))
+    return valor
 
 
 def _conferir_cloud_run(arq: str, r: Bloco) -> list[str]:
@@ -495,7 +581,7 @@ def conferir_plano(caminho: Path) -> list[str]:
     caminho_google = 'enable_private_path_for_google_cloud_services'
     if ip_desc.get(caminho_google) or ip[0].get(caminho_google) not in (None, False):
         faltas.append(f'{caminho_google} = {ip[0].get(caminho_google)!r} (desconhecido: {bool(ip_desc.get(caminho_google))})')
-    return faltas + _plano_cloud_run(plano)
+    return faltas + _plano_cloud_run(plano) + _plano_pedido(plano)
 
 
 def _plano_cloud_run(plano: dict) -> list[str]:
@@ -549,6 +635,24 @@ def _interface_do_plano(endereco: str, interface: object, desc: object) -> list[
         return [f'{endereco}: network_interfaces sem network nem subnetwork resolvido e não vazio '
                 f'(desconhecidos: {desconhecidos})']
     return []
+
+
+def _plano_pedido(plano: dict) -> list[str]:
+    """No plan, todo segredo resolvido como hml-vinculo-pedido tem version_destroy_ttl nulo (ou vazio) e conhecido. Pega o
+    nome vindo de for_each ou variável, que o código não resolve; secret_id desconhecido falha fechado."""
+    faltas = []
+    for m in plano.get('resource_changes', []):
+        mudanca = m.get('change') or {}
+        tipo = m.get('type', m.get('address', '').split('.')[0])
+        if m.get('mode', 'managed') != 'managed' or tipo != SEGREDO or mudanca.get('after') is None:
+            continue
+        endereco, valor, desc = m.get('address'), mudanca['after'], mudanca.get('after_unknown') or {}
+        if not isinstance(valor, dict) or not isinstance(desc, dict) or desc.get('secret_id'):
+            faltas.append(f'{endereco}: secret_id desconhecido ou em formato inesperado no plan')
+        elif valor.get('secret_id') == PEDIDO and (desc.get('version_destroy_ttl') or valor.get('version_destroy_ttl') not in (None, '')):
+            faltas.append(f'{endereco}: version_destroy_ttl = {valor.get("version_destroy_ttl")!r} '
+                          f'(desconhecido: {bool(desc.get("version_destroy_ttl"))})')
+    return faltas
 
 
 def main(argv: list[str]) -> int:

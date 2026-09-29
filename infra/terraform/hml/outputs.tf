@@ -20,7 +20,7 @@ output "repositorio_imagens" {
 
 output "segredos" {
   description = "IDs dos segredos. As versões entram fora do Terraform."
-  value       = sort([for s in google_secret_manager_secret.hml : s.secret_id])
+  value       = sort(concat([for s in google_secret_manager_secret.hml : s.secret_id], [google_secret_manager_secret.vinculo_pedido.secret_id]))
 }
 
 output "jobs" {

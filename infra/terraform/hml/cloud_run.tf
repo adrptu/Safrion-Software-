@@ -42,9 +42,21 @@ locals {
     PGPASSWORD = "hml-db-app-runtime-senha"
   }
 
+  # Vínculo (R-006 3c): o pedido não entra por variável nem volume; o job lê o segredo pela API, versão a versão.
+  env_vinculo = {
+    SAFRION_ADMIN_URL          = "postgresql://postgres@/postgres"
+    SAFRION_CLOUDSQL_INSTANCIA = local.instancia
+    SAFRION_PEDIDO_SEGREDO     = google_secret_manager_secret.vinculo_pedido.id
+  }
+
+  segredos_vinculo = {
+    PGPASSWORD = "hml-db-admin-senha"
+  }
+
   jobs = var.criar_cloud_run ? {
     preparo = google_cloud_run_v2_job.preparo[0].name
     demo    = google_cloud_run_v2_job.demo_reset[0].name
+    vinculo = google_cloud_run_v2_job.vinculo[0].name
   } : {}
 }
 
@@ -335,7 +347,86 @@ resource "google_cloud_run_v2_job" "demo_reset" {
   depends_on = [google_secret_manager_secret_iam_member.acesso]
 }
 
-# Publicação troca a imagem e executa os jobs; o operador humano executa os jobs.
+# Concessão e revogação de vínculo em HML (R-006 3c; fluxo em docs/OPERACAO.md). O operador grava o pedido no
+# hml-vinculo-pedido e executa o job sem overrides (só run.invoker): os args são fixos e nada varia por execução.
+# O job processa cada versão ENABLED com recibo no banco e a destrói; inválida ou reutilizada fica desativada.
+resource "google_cloud_run_v2_job" "vinculo" {
+  count = var.criar_cloud_run ? 1 : 0
+
+  name                = "safrion-vinculo"
+  location            = var.regiao
+  deletion_protection = true
+
+  template {
+    task_count = 1
+
+    template {
+      service_account = local.sa.preparo
+      max_retries     = 0
+      timeout         = "600s"
+
+      # Mesmo caminho da web até o IP privado do banco (checar_travas.py exige este egress).
+      vpc_access {
+        egress = "PRIVATE_RANGES_ONLY"
+
+        network_interfaces {
+          network    = local.rede
+          subnetwork = local.subrede
+        }
+      }
+
+      containers {
+        image   = local.imagem_job_provisoria
+        command = ["node"]
+        args    = ["dist/cli/vincular-identidade.js", "fila", "--ambiente", "hml", "--banco", local.banco]
+
+        resources {
+          limits = {
+            cpu    = "1"
+            memory = "512Mi"
+          }
+        }
+
+        dynamic "env" {
+          for_each = local.env_vinculo
+
+          content {
+            name  = env.key
+            value = env.value
+          }
+        }
+
+        dynamic "env" {
+          for_each = local.segredos_vinculo
+
+          content {
+            name = env.key
+
+            value_source {
+              secret_key_ref {
+                secret  = google_secret_manager_secret.hml[env.value].secret_id
+                version = local.versao[env.value]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      template[0].template[0].containers[0].image,
+      client,
+      client_version,
+    ]
+  }
+
+  depends_on = [google_secret_manager_secret_iam_member.acesso, google_secret_manager_secret_iam_member.vinculo_pedido]
+}
+
+# Publicação troca a imagem e executa os jobs; o operador humano executa os jobs. No safrion-vinculo, o run.developer
+# da CI permite overrides como sa-preparo, inclusive ler um pedido pendente (risco residual, R-006 seção 5).
 resource "google_cloud_run_v2_job_iam_member" "deploy_jobs" {
   for_each = local.jobs
 

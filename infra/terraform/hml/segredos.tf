@@ -23,6 +23,17 @@ locals {
     }
   ]...)
 
+  # IAM só no hml-vinculo-pedido (R-006 3c). Operador: grava versão, sem ler nem destruir. sa-preparo (o job): lista,
+  # lê, desativa e destrói. O secretVersionManager também dá versions.add, versions.enable e secrets.rotate (sem
+  # access): com o secretAccessor, quem roda como sa-preparo reativa e lê uma versão desativada, que ainda tem o código,
+  # e grava pedidos. Não amplia o que ela já pode, porque lê a senha do admin do banco.
+  # Chave sem e-mail: o endereço vai para o log do plan.
+  acesso_pedido = {
+    "operador/versionAdder"  = { membro = var.operador, papel = "roles/secretmanager.secretVersionAdder" }
+    "preparo/accessor"       = { membro = "serviceAccount:${local.sa.preparo}", papel = "roles/secretmanager.secretAccessor" }
+    "preparo/versionManager" = { membro = "serviceAccount:${local.sa.preparo}", papel = "roles/secretmanager.secretVersionManager" }
+  }
+
   # Versão fixa de cada segredo (R-006, F40). Vazio enquanto criar_cloud_run = false.
   # Só o Terraform troca a versão: sem gcloud --update-secrets, o apply seguinte não volta à antiga.
   versao = var.versoes_segredos == null ? {} : {
@@ -60,5 +71,33 @@ resource "google_secret_manager_secret_iam_member" "acesso" {
 
   secret_id = google_secret_manager_secret.hml[each.value.segredo].secret_id
   role      = "roles/secretmanager.secretAccessor"
+  member    = each.value.membro
+}
+
+# Pedido de vínculo: cada versão é um pedido de uso único, com o código de referência. Fora de local.segredos e SEM
+# version_destroy_ttl: com o atraso, destruir só desativaria a versão, e o pedido seguiria recuperável e cobrado por
+# 7 dias (R-006 3b). Assim, a destruição pelo job é imediata. checar_travas.py recusa o campo aqui.
+resource "google_secret_manager_secret" "vinculo_pedido" {
+  secret_id           = "hml-vinculo-pedido"
+  deletion_protection = true
+
+  replication {
+    user_managed {
+      replicas {
+        location = var.regiao
+      }
+    }
+  }
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "google_secret_manager_secret_iam_member" "vinculo_pedido" {
+  for_each = local.acesso_pedido
+
+  secret_id = google_secret_manager_secret.vinculo_pedido.secret_id
+  role      = each.value.papel
   member    = each.value.membro
 }

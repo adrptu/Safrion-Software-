@@ -12,6 +12,7 @@ import checar_travas as ct
 AQUI = Path(__file__).resolve().parent
 BANCO = (AQUI / 'hml' / 'banco.tf').read_text(encoding='utf-8')
 CLOUD_RUN = (AQUI / 'hml' / 'cloud_run.tf').read_text(encoding='utf-8')
+SEGREDOS = (AQUI / 'hml' / 'segredos.tf').read_text(encoding='utf-8')
 SSL = 'ssl_mode           = "ENCRYPTED_ONLY"'
 CONECTOR = 'connector_enforcement = "REQUIRED"'
 CA = 'server_ca_mode     = "GOOGLE_MANAGED_INTERNAL_CA"'
@@ -19,6 +20,7 @@ IPV4 = 'ipv4_enabled       = false'
 REDE = 'private_network    = var.rede_self_link'
 DATA_API = 'data_api_access = "DISALLOW_DATA_API"'
 EGRESS = 'egress = "PRIVATE_RANGES_ONLY"'
+PEDIDO = 'secret_id           = "hml-vinculo-pedido"'
 IGNORE_WEB = '      template[0].containers[0].image,'
 IGNORE_JOB = '      template[0].template[0].containers[0].image,'
 SEGUNDA = '''
@@ -38,6 +40,10 @@ resource "google_sql_database_instance" "outra" {
 class Codigo(unittest.TestCase):
     def setUp(self):
         self.dir = Path(tempfile.mkdtemp())
+        self.restaurar()
+
+    def restaurar(self):
+        """Volta a cópia ao módulo real: faltas() grava por cima, e um subTest herdaria a mutação do anterior."""
         for arq in (AQUI / 'hml').glob('*.tf'):
             shutil.copy(arq, self.dir / arq.name)
 
@@ -226,13 +232,13 @@ class Codigo(unittest.TestCase):
         return self.faltas(extra={'cloud_run.tf': CLOUD_RUN.replace(velho, novo)})
 
     def test_egress_frouxo_ou_nao_literal_na_web_e_nos_jobs(self):
-        # 3 ocorrências: web, preparo e demo-reset; cada uma sozinha basta para falhar.
+        # 4 ocorrências: web, preparo, demo-reset e vínculo; cada uma sozinha basta para falhar.
         for novo in ('egress = "ALL_TRAFFIC"', '# egress = "PRIVATE_RANGES_ONLY"', 'egress = var.egress',
                      'egress = "${var.x}"'):
-            for ordem in range(3):
+            for ordem in range(4):
                 with self.subTest(novo=novo, ordem=ordem):
                     partes = CLOUD_RUN.split(EGRESS)
-                    self.assertEqual(len(partes), 4)
+                    self.assertEqual(len(partes), 5)
                     texto = EGRESS.join(partes[: ordem + 1]) + novo + EGRESS.join(partes[ordem + 1 :])
                     self.assertTrue(self.faltas(extra={'cloud_run.tf': texto}))
 
@@ -240,10 +246,10 @@ class Codigo(unittest.TestCase):
         sem_vpc = re.sub(r'\n *vpc_access \{.*?\n( *)network_interfaces \{.*?\n\1\}\n *\}\n', '\n', CLOUD_RUN, count=1, flags=re.S)
         self.assertNotEqual(sem_vpc, CLOUD_RUN)
         self.assertTrue(self.faltas(extra={'cloud_run.tf': sem_vpc}))
-        self.assertTrue(self.cloud_run(EGRESS, EGRESS + '\n      connector = "projects/p/locations/r/connectors/c"', 3))
-        self.assertTrue(self.cloud_run('network_interfaces {', 'network_interfaces_x {', 3))
+        self.assertTrue(self.cloud_run(EGRESS, EGRESS + '\n      connector = "projects/p/locations/r/connectors/c"', 4))
+        self.assertTrue(self.cloud_run('network_interfaces {', 'network_interfaces_x {', 4))
         dinamico = 'dynamic "vpc_access" {\n      for_each = []\n      content {\n        egress = "ALL_TRAFFIC"\n      }\n    }\n\n    vpc_access {'
-        self.assertTrue(self.cloud_run('vpc_access {', dinamico, 3))
+        self.assertTrue(self.cloud_run('vpc_access {', dinamico, 4))
 
     def test_ignore_changes_que_esconde_o_vpc_access(self):
         for alvo in ('template[0].vpc_access', 'template[0].vpc_access[0].egress', 'template', 'template[0]',
@@ -252,12 +258,12 @@ class Codigo(unittest.TestCase):
                 self.assertTrue(self.cloud_run(IGNORE_WEB, f'{IGNORE_WEB}\n      {alvo},'))
         for alvo in ('template[0].template[0].vpc_access', 'template[0].template', 'template'):
             with self.subTest(job=alvo):
-                self.assertTrue(self.cloud_run(IGNORE_JOB, f'{IGNORE_JOB}\n      {alvo},', 2))
-        self.assertTrue(self.cloud_run('ignore_changes = [', 'ignore_changes = all\n    x = [', 3))
+                self.assertTrue(self.cloud_run(IGNORE_JOB, f'{IGNORE_JOB}\n      {alvo},', 3))
+        self.assertTrue(self.cloud_run('ignore_changes = [', 'ignore_changes = all\n    x = [', 4))
 
     def test_ignore_changes_fora_do_vpc_access_passa(self):
         self.assertEqual(self.cloud_run(IGNORE_WEB, f'{IGNORE_WEB}\n      template[0].scaling,'), [])
-        self.assertEqual(self.cloud_run(IGNORE_JOB, f'{IGNORE_JOB}\n      template[0].template[0].timeout,', 2), [])
+        self.assertEqual(self.cloud_run(IGNORE_JOB, f'{IGNORE_JOB}\n      template[0].template[0].timeout,', 3), [])
 
     def test_cloud_run_fora_do_subconjunto(self):
         v1 = 'resource "google_cloud_run_service" "velho" {\n  name     = "velho"\n  location = "southamerica-east1"\n}\n'
@@ -277,7 +283,7 @@ class Codigo(unittest.TestCase):
                      'network_interfaces {\n        network    = local.rede\n        subnetwork = "  "\n      }'):
             with self.subTest(novo=novo):
                 self.assertEqual(self.faltas(extra={'cloud_run.tf': CLOUD_RUN.replace(interface, novo)}),
-                                 ['cloud_run.tf:53 google_cloud_run_v2_service.web: network_interfaces sem network nem '
+                                 ['cloud_run.tf:65 google_cloud_run_v2_service.web: network_interfaces sem network nem '
                                   'subnetwork em forma aceita (referência ou texto não vazio)'])
         # Controle positivo: basta um dos dois, em forma aceita.
         for novo in ('network_interfaces {\n        subnetwork = local.subrede\n      }',
@@ -286,7 +292,7 @@ class Codigo(unittest.TestCase):
                 self.assertEqual(self.faltas(extra={'cloud_run.tf': CLOUD_RUN.replace(interface, novo)}), [])
         # Nos jobs também.
         do_job = 'network_interfaces {\n          network    = local.rede\n          subnetwork = local.subrede\n        }'
-        self.assertEqual(CLOUD_RUN.count(do_job), 2)
+        self.assertEqual(CLOUD_RUN.count(do_job), 3)  # preparo, demo-reset e vínculo
         texto = CLOUD_RUN.replace(do_job, 'network_interfaces {\n        }', 1)
         self.assertEqual(len(self.faltas(extra={'cloud_run.tf': texto})), 1)
 
@@ -322,9 +328,9 @@ class Codigo(unittest.TestCase):
         fim = CLOUD_RUN.index(EGRESS, inicio) + len(EGRESS)
         trecho = self.trecho_unico(CLOUD_RUN, CLOUD_RUN[inicio:fim])
         texto = CLOUD_RUN.replace(trecho, trecho.replace(EGRESS, 'egress = "ALL_TRAFFIC"'))
-        self.assertEqual(texto.count(EGRESS), 2)  # web e demo-reset seguem privados
+        self.assertEqual(texto.count(EGRESS), 3)  # web, demo-reset e vínculo seguem privados
         self.assertEqual(self.faltas(extra={'cloud_run.tf': texto}),
-                         ['cloud_run.tf:188 google_cloud_run_v2_job.preparo: egress = "PRIVATE_RANGES_ONLY" ausente ou '
+                         ['cloud_run.tf:200 google_cloud_run_v2_job.preparo: egress = "PRIVATE_RANGES_ONLY" ausente ou '
                           'não literal'])
 
     def test_r006_05_ignore_changes_esconde_ip_configuration(self):
@@ -333,7 +339,146 @@ class Codigo(unittest.TestCase):
         self.assertEqual(self.faltas(BANCO.replace(velho, novo)),
                          ['lifecycle.ignore_changes cobre uma trava (ou tem forma não reconhecida)'])
         # Os lifecycles do Cloud Run ficam intactos: o mesmo diagnóstico, sozinho.
-        self.assertEqual(CLOUD_RUN.count('ignore_changes = ['), 3)
+        self.assertEqual(CLOUD_RUN.count('ignore_changes = ['), 4)
+
+    # --- Vínculo (R-006 3c): o hml-vinculo-pedido sem destruição adiada e o job safrion-vinculo com egress privado.
+    # Mesmo padrão dos R006: mutação num trecho único e diagnóstico exato, com a linha da versão entregue.
+
+    def no_pedido(self, velho, novo):
+        """Troca `velho` pela 1ª ocorrência dele a partir do recurso do pedido, sem tocar nos outros segredos."""
+        inicio = SEGREDOS.index(self.trecho_unico(SEGREDOS, 'resource "google_secret_manager_secret" "vinculo_pedido" {'))
+        trecho = self.trecho_unico(SEGREDOS, SEGREDOS[inicio : SEGREDOS.index(velho, inicio) + len(velho)])
+        return self.faltas(extra={'segredos.tf': SEGREDOS.replace(trecho, trecho[: -len(velho)] + novo)})
+
+    def test_vinculo_controle_positivo(self):
+        self.assertEqual(self.faltas(), [])
+        self.trecho_unico(SEGREDOS, PEDIDO)
+        self.trecho_unico(CLOUD_RUN, 'name                = "safrion-vinculo"')
+        self.assertEqual(self.no_pedido('prevent_destroy = true', 'prevent_destroy = true\n    ignore_changes  = [labels]'), [])
+
+    def test_vinculo_pedido_com_destruicao_adiada(self):
+        # Com o TTL, destruir só desativa: o pedido com o código seguiria legível por dias. Qualquer valor é recusado.
+        for valor in ('"604800s"', '"0s"', 'var.ttl', 'null'):
+            with self.subTest(valor=valor):
+                self.assertEqual(self.no_pedido(PEDIDO, f'{PEDIDO}\n  version_destroy_ttl = {valor}'),
+                                 ['segredos.tf:80 google_secret_manager_secret.vinculo_pedido: version_destroy_ttl presente; '
+                                  'o pedido destruído tem de sumir na hora'])
+
+    def test_vinculo_pedido_ignore_changes_esconde_o_ttl(self):
+        # Um TTL posto fora do Terraform (console) sumiria do plan.
+        for alvo in ('[version_destroy_ttl]', '[labels, version_destroy_ttl]', 'all', '[all]', '["version_destroy_ttl"]'):
+            with self.subTest(alvo=alvo):
+                self.assertEqual(self.no_pedido('prevent_destroy = true', f'prevent_destroy = true\n    ignore_changes  = {alvo}'),
+                                 ['segredos.tf:80 google_secret_manager_secret.vinculo_pedido: lifecycle.ignore_changes cobre o '
+                                  'version_destroy_ttl (ou tem forma não reconhecida)'])
+
+    def test_vinculo_pedido_ausente_nao_literal_ou_repetido(self):
+        # Fora de um recurso com o nome literal (for_each, variável, interpolação), o código não sabe se tem TTL.
+        for novo in ('secret_id           = local.pedido', 'secret_id           = "hml-vinculo-${local.x}"'):
+            with self.subTest(novo=novo):
+                self.assertEqual(self.no_pedido(PEDIDO, novo),
+                                 ['o módulo deve ter exatamente um google_secret_manager_secret com secret_id = '
+                                  '"hml-vinculo-pedido" literal; achados: nenhum'])
+        copia = 'resource "google_secret_manager_secret" "copia" {\n  secret_id           = "hml-vinculo-pedido"\n}\n'
+        # segredos.tf volta ao original: o laço acima o trocou no diretório do teste.
+        self.assertEqual(self.faltas(extra={'segredos.tf': SEGREDOS, 'copia.tf': copia}),
+                         ['o módulo deve ter exatamente um google_secret_manager_secret com secret_id = "hml-vinculo-pedido" '
+                          'literal; achados: copia.tf:1 google_secret_manager_secret.copia, '
+                          'segredos.tf:80 google_secret_manager_secret.vinculo_pedido'])
+
+    def isca(self, meta):
+        """Contraprova da revisão de 28/09: o recurso literal vira isca (`meta`), o nome entra em local.segredos (com TTL)
+        e o job, o IAM e a saída passam a usar o segredo do for_each."""
+        real = 'google_secret_manager_secret.hml["hml-vinculo-pedido"]'
+        segredos = SEGREDOS.replace(self.trecho_unico(SEGREDOS, '    "hml-oidc-client-secret",\n'),
+                                    '    "hml-oidc-client-secret",\n    "hml-vinculo-pedido",\n')
+        segredos = segredos.replace(PEDIDO, f'{meta}\n  {PEDIDO}')
+        segredos = segredos.replace(self.trecho_unico(segredos, 'secret_id = google_secret_manager_secret.vinculo_pedido.secret_id'),
+                                    f'secret_id = {real}.secret_id')
+        cloud_run = CLOUD_RUN.replace(self.trecho_unico(CLOUD_RUN, 'google_secret_manager_secret.vinculo_pedido.id'), f'{real}.id')
+        saidas = (AQUI / 'hml' / 'outputs.tf').read_text(encoding='utf-8')
+        saidas = saidas.replace(self.trecho_unico(saidas, '[google_secret_manager_secret.vinculo_pedido.secret_id]'), '[]')
+        self.restaurar()
+        return self.faltas(extra={'segredos.tf': segredos, 'cloud_run.tf': cloud_run, 'outputs.tf': saidas})
+
+    def test_vinculo_isca_com_count_ou_for_each(self):
+        # Antes: "OK", saída 0, com o segredo que o job lê sob destruição adiada de 7 dias.
+        for meta in ('count = 0', 'for_each = toset([])'):
+            with self.subTest(meta=meta):
+                self.assertEqual(self.isca(meta), [
+                    f'segredos.tf:81 google_secret_manager_secret.vinculo_pedido: {meta.split()[0]} no recurso do pedido; '
+                    'ele existe sempre, uma vez',
+                    '"hml-vinculo-pedido" em string fora do secret_id de segredos.tf:81 '
+                    "google_secret_manager_secret.vinculo_pedido: ['cloud_run.tf:49', 'segredos.tf:10', 'segredos.tf:102']",
+                    'SAFRION_PEDIDO_SEGREDO deve aparecer uma vez, como google_secret_manager_secret.vinculo_pedido.id; '
+                    'achadas: cloud_run.tf:49',
+                    'nenhum google_secret_manager_secret_iam_member com secret_id = '
+                    'google_secret_manager_secret.vinculo_pedido.secret_id',
+                ])
+        # Só a isca, sem mais nada: também recusada.
+        for meta in ('count = 1', 'for_each = toset(["x"])'):
+            with self.subTest(so=meta):
+                self.restaurar()
+                self.assertEqual(self.no_pedido(PEDIDO, f'{meta}\n  {PEDIDO}'), [
+                    f'segredos.tf:80 google_secret_manager_secret.vinculo_pedido: {meta.split()[0]} no recurso do pedido; '
+                    'ele existe sempre, uma vez'])
+
+    def test_vinculo_nome_em_outra_string(self):
+        # Em local.segredos (TTL de 7 dias) ou num id escrito à mão, o código não sabe que é o mesmo segredo.
+        for velho, novo, linha in (
+                ('    "hml-oidc-client-secret",\n', '    "hml-oidc-client-secret",\n    "hml-vinculo-pedido",\n', 'segredos.tf:10'),
+                ('    "hml-oidc-client-secret",\n', '    "hml-oidc-client-secret",\n    "HML-VINCULO-PEDIDO",\n', 'segredos.tf:10'),
+                ('    "hml-oidc-client-secret",\n', '    "hml-oidc-client-secret",\n    "${var.x}-vinculo-pedido",\n', 'segredos.tf:10')):
+            with self.subTest(novo=novo):
+                texto = SEGREDOS.replace(self.trecho_unico(SEGREDOS, velho), novo)
+                self.assertEqual(self.faltas(extra={'segredos.tf': texto}), [
+                    '"hml-vinculo-pedido" em string fora do secret_id de segredos.tf:81 '
+                    f"google_secret_manager_secret.vinculo_pedido: ['{linha}']"])
+
+    def test_vinculo_variavel_do_job_fora_do_recurso(self):
+        ref = 'SAFRION_PEDIDO_SEGREDO     = google_secret_manager_secret.vinculo_pedido.id'
+        self.trecho_unico(CLOUD_RUN, ref)
+        erro = ('SAFRION_PEDIDO_SEGREDO deve aparecer uma vez, como google_secret_manager_secret.vinculo_pedido.id; '
+                'achadas: ')
+        for novo, esperado in (
+                # Outro segredo, atributo errado, expressão ou mais de uma declaração.
+                ('SAFRION_PEDIDO_SEGREDO     = google_secret_manager_secret.hml["hml-db-admin-senha"].id', [erro + 'cloud_run.tf:49']),
+                ('SAFRION_PEDIDO_SEGREDO     = google_secret_manager_secret.vinculo_pedido.name', [erro + 'cloud_run.tf:49']),
+                ('SAFRION_PEDIDO_SEGREDO     = var.segredo', [erro + 'cloud_run.tf:49']),
+                (f'{ref} == "" ? var.x : var.y', [erro + 'cloud_run.tf:49']),
+                (f'{ref}\n    SAFRION_PEDIDO_SEGREDO     = var.x', [erro + 'cloud_run.tf:49, cloud_run.tf:50']),
+                ('SAFRION_ADMIN_URL_2        = google_secret_manager_secret.vinculo_pedido.id', [erro + 'nenhuma']),
+                # Chave entre aspas ou montada num modelo: fora da forma reconhecida.
+                ('"SAFRION_PEDIDO_SEGREDO"   = google_secret_manager_secret.vinculo_pedido.id',
+                 ["SAFRION_PEDIDO_SEGREDO em string (['cloud_run.tf:49']); só a forma chave = referência é reconhecida",
+                  erro + 'nenhuma'])):
+            with self.subTest(novo=novo):
+                self.assertEqual(self.faltas(extra={'cloud_run.tf': CLOUD_RUN.replace(ref, novo)}), esperado)
+
+    def test_vinculo_iam_fora_do_recurso(self):
+        velho = self.trecho_unico(SEGREDOS, 'secret_id = google_secret_manager_secret.vinculo_pedido.secret_id')
+        for novo, esperado in (
+                ('secret_id = google_secret_manager_secret.hml["hml-db-admin-senha"].secret_id',
+                 ['nenhum google_secret_manager_secret_iam_member com secret_id = '
+                  'google_secret_manager_secret.vinculo_pedido.secret_id']),
+                ('secret_id = google_secret_manager_secret.vinculo_pedido.name',
+                 ['segredos.tf:97 google_secret_manager_secret_iam_member.vinculo_pedido: secret_id fora da forma '
+                  'google_secret_manager_secret.vinculo_pedido.secret_id'])):
+            with self.subTest(novo=novo):
+                self.assertEqual(self.faltas(extra={'segredos.tf': SEGREDOS.replace(velho, novo)}), esperado)
+        self.assertEqual(self.faltas(extra={'segredos.tf': SEGREDOS.replace(
+            velho, 'secret_id = google_secret_manager_secret.vinculo_pedido.id')}), [])
+
+    def test_vinculo_egress_aberto_so_no_job_vinculo(self):
+        # Confirma que a checagem de egress, feita em todo google_cloud_run_v2_job, cobre o job novo.
+        inicio = CLOUD_RUN.index(self.trecho_unico(CLOUD_RUN, 'resource "google_cloud_run_v2_job" "vinculo" {'))
+        fim = CLOUD_RUN.index(EGRESS, inicio) + len(EGRESS)
+        trecho = self.trecho_unico(CLOUD_RUN, CLOUD_RUN[inicio:fim])
+        texto = CLOUD_RUN.replace(trecho, trecho.replace(EGRESS, 'egress = "ALL_TRAFFIC"'))
+        self.assertEqual(texto.count(EGRESS), 3)  # web, preparo e demo-reset seguem privados
+        self.assertEqual(self.faltas(extra={'cloud_run.tf': texto}),
+                         ['cloud_run.tf:353 google_cloud_run_v2_job.vinculo: egress = "PRIVATE_RANGES_ONLY" ausente ou '
+                          'não literal'])
 
 
 REDE_PLANO = 'https://www.googleapis.com/compute/v1/projects/safrion-hml-exemplo/global/networks/safrion-hml'
@@ -504,6 +649,31 @@ class Plano(unittest.TestCase):
         r = web()
         r['change']['after']['template'][0]['vpc_access'][0]['network_interfaces'] = [{'network': None, 'subnetwork': 's'}]
         self.assertEqual(self.faltas(self.plano(extra=[r])), [])
+
+    # --- Vínculo (R-006 3c): no plan, o nome resolvido pega também o segredo vindo de for_each ou variável ---
+
+    def segredo(self, secret_id=ct.PEDIDO, ttl=None, desconhecido=None, endereco='google_secret_manager_secret.vinculo_pedido'):
+        return {'address': endereco, 'type': 'google_secret_manager_secret',
+                'change': {'actions': ['create'], 'after': {'secret_id': secret_id, 'version_destroy_ttl': ttl},
+                           'after_unknown': desconhecido or {}}}
+
+    def test_vinculo_pedido_controle_positivo_no_plano(self):
+        outro = self.segredo('hml-db-admin-senha', '604800s', endereco='google_secret_manager_secret.hml["hml-db-admin-senha"]')
+        for ttl in (None, ''):
+            with self.subTest(ttl=ttl):
+                self.assertEqual(self.faltas(self.plano(extra=[self.segredo(ttl=ttl), outro])), [])
+        saindo = self.segredo(ttl='604800s')
+        saindo['change'] = {'actions': ['delete'], 'after': None}
+        self.assertEqual(self.faltas(self.plano(extra=[saindo])), [])
+
+    def test_vinculo_pedido_com_destruicao_adiada_no_plano(self):
+        endereco = 'google_secret_manager_secret.hml["hml-vinculo-pedido"]'
+        self.assertEqual(self.faltas(self.plano(extra=[self.segredo(ttl='604800s', endereco=endereco)])),
+                         [f"{endereco}: version_destroy_ttl = '604800s' (desconhecido: False)"])
+        self.assertEqual(self.faltas(self.plano(extra=[self.segredo(desconhecido={'version_destroy_ttl': True})])),
+                         ['google_secret_manager_secret.vinculo_pedido: version_destroy_ttl = None (desconhecido: True)'])
+        self.assertEqual(self.faltas(self.plano(extra=[self.segredo(secret_id=None, desconhecido={'secret_id': True})])),
+                         ['google_secret_manager_secret.vinculo_pedido: secret_id desconhecido ou em formato inesperado no plan'])
 
     # --- R006-02 (fixture do Gemini revisada pelo Codex): rede privada desconhecida no plan ---
 

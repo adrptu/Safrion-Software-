@@ -33,7 +33,7 @@ A comparação, com fontes e custos, está no R-006 (`docs/hml-custo-infra`, `89
   - no pool da web, o limite de 10 s para abrir a conexão vale também para a espera por uma vaga: na HML, a requisição que espera mais que isso falha, em vez de esperar sem fim como em desenvolvimento e na CI;
   - **nunca se repete uma transação com commit incerto.**
 - **Travas propostas para a CI** (o passo no `ci.yml` é do Codex; até lá, rodam só localmente): o `checar_travas.py` exige tudo isso no código e no plan (`ipv4_enabled`, `private_network`, `data_api_access`, `psc_config` e `egress`) e recusa `ignore_changes` sobre esses campos.
-- **Fora desta decisão:** a concessão de vínculo em HML (job `safrion-vinculo`, R-006 seção 3b) e a rotação de senhas no banco. As duas ficam a definir, porque o notebook do operador deixa de alcançar o banco.
+- **Fora desta decisão:** a concessão de vínculo em HML, que passa pelo job `safrion-vinculo` (R-006 3c; fluxo no [OPERACAO.md](../OPERACAO.md)), e a rotação de senhas no banco, que fica a definir, porque o notebook do operador deixa de alcançar o banco.
 
 ## Alternativas consideradas
 | Alternativa | Por que não |
