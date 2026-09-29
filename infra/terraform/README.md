@@ -4,7 +4,7 @@ Fonte do desenho: [R-006, atualização de 28/09/2026](../../docs/parceria/rodad
 
 | Pasta | O que cria | Quem aplica | State |
 |---|---|---|---|
-| [`bootstrap/`](bootstrap/README.md) | APIs, bucket do state, WIF do GitHub, contas de serviço, papéis no projeto e nas contas, rede privada (VPC, sub-rede, faixa e conexão PSA) | Codex, localmente, uma vez, na janela da sessão do dono | Local; migrável para o bucket |
+| [`bootstrap/`](bootstrap/README.md) | APIs, bucket do state, WIF do GitHub, contas de serviço, papéis no projeto e nas contas, rede privada (VPC, sub-rede, faixa e conexão PSA) | O Adrianus no Cloud Shell, uma vez, com o `cloudshell.sh`; o Claude responde pelo plan e as 3 IAs revisam pelo hash | Bucket próprio, fora do Terraform ([State do bootstrap](bootstrap/README.md#state-do-bootstrap)) |
 | [`hml/`](hml/README.md) | Artifact Registry, Cloud SQL, segredos sem valor, Cloud Run web e jobs, IAM por recurso, IAP | CI por WIF, só no `infra-hml.yml`, com a `sa-infra-github` | Bucket do bootstrap, prefixo `hml/` |
 
 ## Ordem

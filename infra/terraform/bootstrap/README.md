@@ -1,6 +1,6 @@
 # Bootstrap da HML
 
-Aplicado **uma vez, localmente**, pelo Codex, na janela da sessão do dono (R-006 §3). Ordem geral e o que nunca vai no Terraform: [README do Terraform](../README.md).
+Aplicado **uma vez, no Cloud Shell do Google**, pelo Adrianus, com o `../cloudshell.sh` e guiado pelo Codex; o Claude responde pelo plan, e as três IAs revisam pelo hash antes do apply. Nada depende de uma máquina local (ordem do proprietário, 29/09/2026). Ordem geral e o que nunca vai no Terraform: [README do Terraform](../README.md).
 
 ## O que cria
 
@@ -68,16 +68,18 @@ O roteiro do Cloud Shell executa e confere estes passos.
 
 ## Como aplicar
 
-Pré-requisitos (R-006 §3): Terraform 1.16.3 (a versão fixada em `versions.tf`), TFLint e Trivy conferidos pelo checksum oficial; credencial de vida curta pelo wrapper (`GOOGLE_OAUTH_ACCESS_TOKEN`), sem gravar arquivo ADC.
+No Cloud Shell do projeto, numa cópia limpa da `main` (`gh auth login` pelo código de dispositivo, digitado pelo próprio Adrianus; `gh repo clone adrptu/Safrion-Software-`):
 
 ```sh
-cp terraform.tfvars.example terraform.tfvars   # valores reais; o arquivo fica fora do Git
-terraform init -backend-config="bucket=<projeto>-tfstate-bootstrap"   # state remoto desde já (seção acima)
-terraform fmt -check && terraform validate && tflint && trivy config --severity HIGH,CRITICAL --exit-code 1 .
-terraform plan -out=bootstrap.tfplan
-shasum -a 256 bootstrap.tfplan                 # hash e contagem vão para a rodada
-terraform apply bootstrap.tfplan               # só depois da aprovação por esse hash
+infra/terraform/cloudshell.sh conferir                 # a cópia é a main atual, com os 10 checks obrigatórios verdes
+infra/terraform/cloudshell.sh state <projeto>          # bucket do state do bootstrap, conferido no servidor (seção acima)
+infra/terraform/cloudshell.sh planejar <projeto>       # Terraform e TFLint pelo SHA-256 do infra.yml, travas e plan
+infra/terraform/cloudshell.sh aplicar <projeto> <hash> # só depois dos pareceres pelo hash, e sem veto do Adrianus
+infra/terraform/cloudshell.sh depois <projeto>         # conta padrão do Compute e rede default (seção abaixo)
+infra/terraform/cloudshell.sh variaveis <projeto>      # variáveis dos environments hml e hml-infra
 ```
+
+O `planejar` gera o tfvars a partir do GitHub e da conta logada, sem valores digitados, e guarda tfvars, plano e `.terraform` em `~/.safrion/<projeto>`, fora do checkout. Na tela ficam só o SHA-256, a contagem e os endereços, com e-mails mascarados: é o que vai para a rodada. O Trivy não roda no Cloud Shell: vale o `ci.yml` verde do mesmo commit, que o `conferir` exige. A credencial é de vida curta (`gcloud auth print-access-token`, só no ambiente do processo), sem arquivo ADC. `cloudshell.sh limpar <projeto>` apaga os arquivos locais; o state continua no bucket.
 
 Saídas para o GitHub (environment `hml`): `WIF_PROVIDER` = `wif_provider`, `DEPLOY_SA` = `sa_deploy_github`, `GCP_PROJECT_ID` e `GCP_REGION`. O Terraform da HML usa também `sa_infra_github`, `bucket_state` e as saídas da rede (`TF_VAR_rede_self_link`, `TF_VAR_subrede_self_link` e `TF_VAR_faixa_psa_nome` no environment `hml-infra`).
 
