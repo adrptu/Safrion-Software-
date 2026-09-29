@@ -57,5 +57,16 @@ Fontes oficiais conferidas em 28/09/2026: [managers Renovate](https://docs.renov
 
 | openid-client | 6.8.8 | 05/09/2026 | `registry.npmjs.org/openid-client`, `github.com/panva/openid-client` (28/09/2026) | Linha 6 | Adaptador OIDC do ADR 0004: PKCE, nonce/state e validação explícita de assinatura; não gerencia sessão nem autorização | Mensal ou em alerta de segurança |
 
+## Infraestrutura da homologação (fixada no PR #14, validada na CI, sem provisionar)
+
+| Ferramenta | Versão | Onde está fixada | Validação |
+|---|---|---|---|
+| Terraform CLI | 1.16.3, com SHA-256 do pacote | `infra/terraform/*/versions.tf` (`required_version`) e `.github/workflows/infra.yml` | Jobs "Terraform — bootstrap" e "Terraform — hml": formatação, init sem backend, validate e TFLint |
+| Provider Google | 8.3.0 | `infra/terraform/*/versions.tf` e o `.terraform.lock.hcl` de cada módulo | Os mesmos jobs |
+| TFLint | v0.64.0, com SHA-256 do pacote | `.github/workflows/infra.yml` | Os mesmos jobs |
+| PostgreSQL da HML (Cloud SQL) | 17 (`POSTGRES_17`) | `infra/terraform/hml/banco.tf` | Job "Travas de segurança do Cloud SQL"; a instância ainda não foi criada. Integração e jornadas de navegador usam `postgis/postgis:17-3.5` por digest |
+
+A data de publicação e a fonte oficial de cada versão entram nesta tabela na próxima atualização delas (ATUALIZA-01).
+
 ## A fixar quando entrarem (não instalados e não testados, portanto sem número aqui)
-Prisma (não adotado na F0-b: SQL explícito com `pg`, ADR 0003), versão do PostgreSQL da HML no Cloud SQL, Dexie e Workbox, Terraform e provedor Google. Cada um entra no PR que o usa, com fonte e data, sob a mesma quarentena.
+Prisma (não adotado na F0-b: SQL explícito com `pg`, ADR 0003), Dexie e Workbox. Cada um entra no PR que o usa, com fonte e data, sob a mesma quarentena.

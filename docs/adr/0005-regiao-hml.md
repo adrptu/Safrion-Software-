@@ -1,9 +1,9 @@
 # ADR 0005: Hospedar a HML em southamerica-east1 (São Paulo)
 
-- **Situação:** proposta
+- **Situação:** implementada no Terraform da `main` pelo PR #14 (validado na CI, sem plan nem apply). Aceita em 29/09: parecer técnico favorável do Codex e parecer documental favorável do Gemini, na revisão do PR #16.
 - **Data:** 2026-09-28
 - **Autor:** Claude Code
-- **Revisor:** Codex (pendente)
+- **Revisores:** Codex (parecer técnico) e Gemini (parecer documental), favoráveis em 29/09, na revisão do PR #16
 - **Requisitos do PRD afetados:** 28.1 (região em ADR), 27.4 (HML equivalente à produção), 30.5 (backup e PITR), ENG-061 a ENG-064
 
 ## Contexto

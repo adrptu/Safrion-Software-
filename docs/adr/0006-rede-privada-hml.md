@@ -1,9 +1,9 @@
 # ADR 0006: Ligar o banco da HML só por rede privada
 
-- **Situação:** proposta
+- **Situação:** implementada no Terraform da `main` pelo PR #14 (validado na CI, sem plan nem apply). Aceita em 29/09: parecer técnico favorável do Codex e parecer documental favorável do Gemini, na revisão do PR #16.
 - **Data:** 2026-09-28
 - **Autor:** Claude Code
-- **Revisor:** Codex (pendente)
+- **Revisores:** Codex (parecer técnico) e Gemini (parecer documental), favoráveis em 29/09, na revisão do PR #16
 - **Requisitos do PRD afetados:** 28.1 (serviços gerenciados na HML), 27.4 (HML equivalente à produção), ENG-005 (exceções), ENG-017 (segredos), ENG-061 a ENG-064
 
 ## Contexto
@@ -33,7 +33,7 @@ A comparação, com fontes e custos, está no R-006 (`docs/hml-custo-infra`, `89
   - encerramento: com uma renovação já agendada, o limitador do conector (1 renovação a cada 30 s) pode manter o comando vivo até cerca de 31 s depois de `fechar()`, medido na revisão do Codex de `53f397a`. A linha de resultado e o código de saída já estão definidos; o job tem 600 s. Não se amplia o patch por isso;
   - no pool da web, o limite de 10 s para abrir a conexão vale também para a espera por uma vaga: na HML, a requisição que espera mais que isso falha, em vez de esperar sem fim como em desenvolvimento e na CI;
   - **nunca se repete uma transação com commit incerto.**
-- **Travas propostas para a CI** (o passo no `ci.yml` é do Codex; até lá, rodam só localmente): o `checar_travas.py` exige tudo isso no código e no plan (`ipv4_enabled`, `private_network`, `data_api_access`, `psc_config` e `egress`) e recusa `ignore_changes` sobre esses campos.
+- **Travas na CI:** o job "Travas de segurança do Cloud SQL" (`infra.yml`) roda o `checar_travas.py`, que exige tudo isso no código e no plan (`ipv4_enabled`, `private_network`, `data_api_access`, `psc_config` e `egress`) e recusa `ignore_changes` sobre esses campos.
 - **Fora desta decisão:** a concessão de vínculo em HML, que passa pelo job `safrion-vinculo` (R-006 3c; fluxo no [OPERACAO.md](../OPERACAO.md)), e a rotação de senhas no banco, que fica a definir, porque o notebook do operador deixa de alcançar o banco.
 
 ## Alternativas consideradas
@@ -51,12 +51,12 @@ A comparação, com fontes e custos, está no R-006 (`docs/hml-custo-infra`, `89
   - o PSA impede apagar a rede enquanto o Cloud SQL guardar recursos nela.
 - **Mais lento:** o Direct VPC pode levar 1 min ou mais para conectar na subida, e a partida a frio fica mais lenta. A sonda da web passa de 6 para 18 tentativas.
 - **Conta padrão do Compute:** ligar a API do Compute cria essa conta, que pode receber Editor. O dono roda o procedimento do bootstrap depois do apply e confere a rede `default`.
-- **Operação:** o operador não conecta mais ao banco da HML pelo notebook e perde o `cloudsql.client`, que servia ao Auth Proxy. A concessão de vínculo e a rotação de senhas ficam sem caminho até o job existir. Até lá, não há concessão real na HML.
+- **Operação:** o operador não conecta mais ao banco da HML pelo notebook e perde o `cloudsql.client`, que servia ao Auth Proxy. A concessão de vínculo passa pelo job `safrion-vinculo` e pelo comando de fila, já implementados (PR #14); a execução hospedada ainda não foi provada. A rotação de senhas continua sem caminho definido.
 - **Achados abaixo do gate:** GCP-0076 (MEDIUM) e GCP-0029 (LOW), de flow logs desligados por custo.
 - **Reversão:** HML sem dado real pode ser recriada com IP público por ADR nova, instância nova e novo preparo. A rede fica até o Cloud SQL liberar a faixa.
 
 ## Verificação
-- `python3 infra/terraform/checar_travas.py` e as regressões em `infra/terraform/test_checar_travas.py`, no código e no plan (`--plano`). Só depois do passo no workflow e de uma execução verde registrada elas passam a valer como trava da CI.
+- `python3 infra/terraform/checar_travas.py` e as regressões em `infra/terraform/test_checar_travas.py`, no código e no plan (`--plano`). Rodam no job "Travas de segurança do Cloud SQL" da CI de infraestrutura, verde nos PRs #14 e #15. A verificação no plan (`--plano`) só acontece no primeiro plan.
 - Testes da conexão (`packages/db/test/conexao.test.ts`: o conector real contra uma API falsa local, a renovação que falha com o patch e a sonda com o driver `pg` real sobre um transporte PostgreSQL em memória) e da subida da web (`apps/web/test/servidor-ambiente.test.ts`).
 - Trivy do revisor sobre `infra/terraform`, sem GCP-0017.
 - No 1º plan e na 1ª publicação:
