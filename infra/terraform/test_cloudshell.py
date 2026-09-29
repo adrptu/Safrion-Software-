@@ -923,7 +923,7 @@ class CloudShell(unittest.TestCase):
         self.gcloud({'falhar_add': ['hml-db-admin-senha']})
         r, chamadas = self.senhas()
         self.assertNotEqual(r.returncode, 0)
-        self.assertIn('rode senhas de novo, que gera outra senha', r.stderr)
+        self.assertIn('não confirmei a gravação da versão de hml-db-admin-senha; rode senhas de novo', r.stderr)
         self.assertEqual(len(self.valores()[1]), 1)
         r, chamadas = self.senhas()
         self.assertEqual(r.returncode, 0, r.stderr)

@@ -663,9 +663,11 @@ senha_postgres() {
 # Situação de um segredo: "ativa N", "desativada N" ou "vazia". Só versão ativa conta como pronta: a desativada não
 # serve à web nem aos jobs, e gerar outra por cima dela esconderia o motivo de ela ter sido desativada.
 situacao_do_segredo() {
-  local p="$1" s="$2" versoes nome estado ativa='' desativada=''
+  # $3 = "inicial" na conferência antes de gerar, quando ainda é verdade que nada foi gerado.
+  local p="$1" s="$2" versoes nome estado ativa='' desativada='' sufixo=''
+  [ "${3:-}" != inicial ] || sufixo='; nada foi gerado'
   versoes="$(gcloud secrets versions list "$s" --project="$p" --filter='state!=DESTROYED' --format='value(name,state)')" ||
-    falha "não li as versões de $s; nada foi gerado"
+    falha "não li as versões de $s$sufixo"
   while read -r nome estado; do
     [ -n "$nome" ] || continue
     case "$estado" in
@@ -700,7 +702,7 @@ senha_do_segredo() {
       falha 'não confirmei a troca da senha do postgres; o segredo não foi gravado. Confira a operação no Cloud SQL e rode senhas de novo'
   fi
   versao="$(printf %s "$senha" | gcloud secrets versions add "$s" --project="$p" --data-file=- --format='value(name)')" ||
-    falha "não gravei a versão de $s; rode senhas de novo, que gera outra senha"
+    falha "não confirmei a gravação da versão de $s; rode senhas de novo: versão ativa já gravada é preservada, e só o que faltar é gerado"
   senha=''
   versao="${versao##*/}"
   [[ "$versao" =~ ^[1-9][0-9]{0,5}$ ]] || falha "versão de $s ilegível"
@@ -725,7 +727,7 @@ cmd_senhas() {
   # Antes de gerar qualquer senha: um segredo só com versão desativada para tudo, sem mudar nada.
   local situacao bloqueados=''
   for s in $SEGREDOS_BANCO; do
-    situacao="$(situacao_do_segredo "$p" "$s")"
+    situacao="$(situacao_do_segredo "$p" "$s" inicial)"
     case "$situacao" in
       desativada\ *) bloqueados="$bloqueados $s (versão ${situacao#desativada })" ;;
     esac
