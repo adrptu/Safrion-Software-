@@ -800,6 +800,96 @@ class Bootstrap(unittest.TestCase):
         self.assertEqual(self.faltas(extra={'revisao.tf': texto}), [])
 
 
+class StateBootstrap(unittest.TestCase):
+    """State do bootstrap num bucket fora do Terraform e fora do alcance da sa-infra-github (contrato de 29/09): o único IAM
+    de bucket é o infra_state, sem ACL, sem papel ou permissão de Storage em outro lugar e sem tfstate-bootstrap."""
+
+    IAM = """resource "google_storage_bucket_iam_member" "infra_state" {
+  bucket = google_storage_bucket.state.name
+  role   = "roles/storage.objectAdmin"
+  member = local.membro["sa-infra-github"]
+}"""
+
+    def setUp(self):
+        self.dir = Path(tempfile.mkdtemp())
+        for arq in (AQUI / 'bootstrap').glob('*.tf'):
+            shutil.copy(arq, self.dir / arq.name)
+
+    def tearDown(self):
+        shutil.rmtree(self.dir)
+
+    def faltas(self, velho=None, novo=None, arquivo='contas.tf', extra=None):
+        if velho is not None:
+            texto = (AQUI / 'bootstrap' / arquivo).read_text(encoding='utf-8')
+            self.assertEqual(texto.count(velho), 1, velho)
+            (self.dir / arquivo).write_text(texto.replace(velho, novo), encoding='utf-8')
+        for nome, texto in (extra or {}).items():
+            (self.dir / nome).write_text(texto, encoding='utf-8')
+        return ct.conferir_bootstrap(self.dir)
+
+    def acusa(self, faltas, trecho):
+        self.assertTrue(any(trecho in f for f in faltas), faltas)
+
+    def test_controle_positivo(self):
+        self.assertEqual(ct.conferir_bootstrap(AQUI / 'bootstrap'), [])
+        self.assertIn(self.IAM, (AQUI / 'bootstrap' / 'contas.tf').read_text(encoding='utf-8'))
+
+    def test_papel_de_storage_no_projeto(self):
+        extra = {'extra.tf': 'resource "google_project_iam_member" "ler_state" {\n  project = var.projeto_id\n'
+                             '  role    = "roles/storage.objectViewer"\n  member  = local.membro["sa-infra-github"]\n}\n'}
+        self.acusa(self.faltas(extra=extra), "'roles/storage.objectViewer': papel ou permissão de Storage")
+
+    def test_papel_de_storage_por_local(self):
+        self.acusa(self.faltas('"roles/artifactregistry.admin",', '"roles/artifactregistry.admin",\n    "roles/storage.admin",'),
+                   "'roles/storage.admin': papel ou permissão de Storage")
+
+    def test_permissao_de_storage_em_papel_customizado(self):
+        self.acusa(self.faltas('    "secretmanager.secrets.create",\n',
+                               '    "secretmanager.secrets.create",\n    "storage.objects.get",\n'),
+                   "'storage.objects.get': papel ou permissão de Storage")
+
+    def test_outro_iam_de_bucket(self):
+        for tipo in ('google_storage_bucket_iam_member', 'google_storage_bucket_iam_binding', 'google_storage_bucket_iam_policy'):
+            with self.subTest(tipo=tipo):
+                extra = {'extra.tf': f'resource "{tipo}" "outro" {{\n  bucket = google_storage_bucket.state.name\n}}\n'}
+                self.acusa(self.faltas(extra=extra), f'extra.tf:1 {tipo}.outro')
+
+    def test_acl_de_storage(self):
+        for tipo in ('google_storage_bucket_acl', 'google_storage_default_object_acl', 'google_storage_object_access_control',
+                     'google_storage_managed_folder_iam_member'):
+            with self.subTest(tipo=tipo):
+                extra = {'extra.tf': f'resource "{tipo}" "x" {{\n  bucket = google_storage_bucket.state.name\n}}\n'}
+                self.acusa(self.faltas(extra=extra), f'{tipo}.x: ACL ou IAM de pasta do Storage')
+
+    def test_bucket_do_bootstrap_no_terraform(self):
+        extra = {'extra.tf': 'resource "google_storage_bucket" "b" {\n  name     = "${var.projeto_id}-tfstate-bootstrap"\n'
+                             '  location = var.regiao\n}\n'}
+        self.acusa(self.faltas(extra=extra), 'o bucket do state do bootstrap fica fora do Terraform')
+
+    def test_iam_do_state_fora_da_forma(self):
+        for velho, novo, campo in (
+                ('  bucket = google_storage_bucket.state.name\n  role   = "roles/storage.objectAdmin"',
+                 '  bucket = "${var.projeto_id}-tfstate-hml"\n  role   = "roles/storage.objectAdmin"', 'bucket'),
+                ('  role   = "roles/storage.objectAdmin"\n  member = local.membro["sa-infra-github"]',
+                 '  role   = "roles/storage.admin"\n  member = local.membro["sa-infra-github"]', 'role'),
+                ('  role   = "roles/storage.objectAdmin"\n  member = local.membro["sa-infra-github"]',
+                 '  role   = "roles/storage.objectAdmin"\n  member = local.membro["sa-deploy-github"]', 'member')):
+            with self.subTest(campo=campo):
+                self.acusa(self.faltas(velho, novo), f'{campo} fora da forma do state da HML')
+
+    def test_condicao_ou_multiplicacao_no_iam_do_state(self):
+        self.acusa(self.faltas('  member = local.membro["sa-infra-github"]\n}',
+                               '  member = local.membro["sa-infra-github"]\n  condition {\n    title      = "x"\n'
+                               '    expression = "true"\n  }\n}'), 'condition no IAM do state')
+
+    def test_comentario_nao_conta(self):
+        self.assertEqual(self.faltas(extra={'extra.tf': '# roles/storage.admin e tfstate-bootstrap só em comentário\n'}), [])
+
+    def test_arquivo_nao_analisavel_com_storage(self):
+        self.acusa(self.faltas(extra={'wif.tf': 'locals {\n  x = "${join("a", ["roles/storage.admin"])}"\n}\n'}),
+                   "wif.tf: fora do subconjunto do analisador e com ['storage']")
+
+
 class Plano(unittest.TestCase):
     def plano(self, ssl='ENCRYPTED_ONLY', conector='REQUIRED', redes=None, desconhecido=None, extra=(),
               ipv4=False, rede=REDE_PLANO, data_api='DISALLOW_DATA_API', psc=(), caminho_google=None):

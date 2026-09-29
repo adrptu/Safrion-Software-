@@ -60,8 +60,21 @@ IAM_ACIMA_DO_SEGREDO = ('google_project_iam', 'google_folder_iam', 'google_organ
 # tiver nada de IAM de projeto, Secret Manager, papel customizado ou papel básico amplo.
 NAO_ANALISAVEIS = {'wif.tf'}
 PROIBIDO_SEM_ANALISE = ('google_project_iam', 'google_folder_iam', 'google_organization_iam', 'secretmanager',
-                        'custom_role', PAPEL_PEDIDO.lower(), 'roles/owner', 'roles/editor')
+                        'custom_role', PAPEL_PEDIDO.lower(), 'roles/owner', 'roles/editor', 'storage', 'tfstate')
 PAPEIS_AMPLOS = ('roles/owner', 'roles/editor')
+# State (contrato de 29/09): o do bootstrap fica num bucket fora do Terraform, sem membro direto; o da HML só dá
+# objectAdmin à sa-infra-github. Papel ou permissão de Storage no projeto alcançaria os dois buckets.
+IAM_STATE = ('contas.tf', 'google_storage_bucket_iam_member', 'infra_state')
+FORMA_IAM_STATE = {
+    'bucket': [('nome', 'google_storage_bucket'), ('simbolo', '.'), ('nome', 'state'), ('simbolo', '.'), ('nome', 'name')],
+    'role': [('texto', 'roles/storage.objectAdmin')],
+    'member': [('nome', 'local'), ('simbolo', '.'), ('nome', 'membro'), ('simbolo', '['), ('texto', 'sa-infra-github'),
+               ('simbolo', ']')],
+}
+ACL_STORAGE = ('google_storage_bucket_acl', 'google_storage_default_object_acl', 'google_storage_object_acl',
+               'google_storage_bucket_access_control', 'google_storage_default_object_access_control',
+               'google_storage_object_access_control', 'google_storage_managed_folder_iam')
+BUCKET_BOOTSTRAP = 'tfstate-bootstrap'
 # Blocos, a partir do recurso, até o que leva o vpc_access. Todo recurso destes tipos precisa do egress privado.
 CLOUD_RUN = {'google_cloud_run_v2_service': ('template',), 'google_cloud_run_v2_job': ('template', 'template')}
 CLOUD_RUN_IAM = {'google_cloud_run_v2_service_iam_member', 'google_cloud_run_v2_job_iam_member'}
@@ -564,6 +577,46 @@ def conferir_bootstrap(modulo: Path) -> list[str]:
         erro = _papel_de_projeto(v, locais, customizados, rotulo)
         if erro:
             faltas.append(f'{onde}: {erro}')
+    return faltas + _conferir_state(recursos, lexicos)
+
+
+def _conferir_state(recursos: list[tuple[str, Bloco]], lexicos: list[tuple[str, list[Token]]]) -> list[str]:
+    """Bucket do state do bootstrap fora do Terraform e fora do alcance da sa-infra-github: o único IAM de bucket é o
+    infra_state, na forma exata; nenhuma ACL; nenhum papel ou permissão de Storage em outro lugar (tokens: comentário não
+    conta); nada com tfstate-bootstrap. É leitura do código: o isolamento efetivo se confere no servidor (README.md)."""
+    faltas, iam = [], []
+    for a, r in recursos:
+        tipo = r.rotulos[0] if r.rotulos else ''
+        onde = f'{a}:{r.linha} {".".join(r.rotulos)}'
+        if tipo.startswith(ACL_STORAGE):
+            faltas.append(f'{onde}: ACL ou IAM de pasta do Storage; o acesso ao state é só o IAM infra_state')
+        elif tipo.startswith('google_storage_bucket_iam'):
+            iam.append((a, r))
+    if [(a, *r.rotulos) for a, r in iam] != [IAM_STATE]:
+        achados = ', '.join(f'{a}:{r.linha} {".".join(r.rotulos)}' for a, r in iam) or 'nenhum'
+        faltas.append(f'IAM de bucket só como {IAM_STATE[1]}.{IAM_STATE[2]}, em {IAM_STATE[0]}; achados: {achados}')
+        permitido = None
+    else:
+        a, r = iam[0]
+        onde = f'{a}:{r.linha} {".".join(r.rotulos)}'
+        for campo, forma in FORMA_IAM_STATE.items():
+            if [(t.tipo, t.valor) for t in r.atributos.get(campo, []) if t.tipo != 'fim_linha'] != forma:
+                faltas.append(f'{onde}: {campo} fora da forma do state da HML (objectAdmin da sa-infra-github no bucket state)')
+        for meta in ('count', 'for_each', 'condition'):
+            if meta in r.atributos or blocos(r, meta):
+                faltas.append(f'{onde}: {meta} no IAM do state')
+        papel = [t for t in r.atributos.get('role', []) if t.tipo == 'texto']
+        permitido = (a, papel[0].linha) if len(papel) == 1 else None
+    for a, lista in lexicos:
+        for t in lista:
+            if t.tipo not in ('texto', 'modelo'):
+                continue
+            baixo = t.valor.lower()
+            if BUCKET_BOOTSTRAP in baixo:
+                faltas.append(f'{a}:{t.linha}: {t.valor!r}: o bucket do state do bootstrap fica fora do Terraform')
+            elif ((baixo.startswith('roles/storage.') and (a, t.linha) != permitido)
+                  or (baixo.startswith('storage.') and baixo != 'storage.googleapis.com')):
+                faltas.append(f'{a}:{t.linha}: {t.valor!r}: papel ou permissão de Storage fora do IAM do state da HML')
     return faltas
 
 

@@ -89,12 +89,13 @@ variable "operador" {
 }
 
 variable "oidc_client_id" {
-  description = "Client ID do cliente OAuth da HML (Google Auth Platform)."
+  description = "Client ID do cliente OAuth da HML (Google Auth Platform). Só a web usa: vazio na fase 1."
   type        = string
+  default     = ""
 
   validation {
-    condition     = length(trimspace(var.oidc_client_id)) > 0
-    error_message = "Informe o client ID."
+    condition     = !var.criar_cloud_run || length(trimspace(var.oidc_client_id)) > 0
+    error_message = "Com criar_cloud_run = true, informe o client ID."
   }
 }
 

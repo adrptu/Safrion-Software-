@@ -10,11 +10,11 @@ Fonte do desenho: [R-006, atualização de 28/09/2026](../../docs/parceria/rodad
 ## Ordem
 
 1. **Adrianus, no console:** os atos da lista abaixo, antes de tudo.
-2. **`bootstrap/`**, local, uma vez, com a rede privada. Logo depois do apply, desativar a conta padrão do Compute e conferir a rede `default` ([bootstrap](bootstrap/README.md#depois-do-apply)).
-3. **`hml/` fase 1**, pela CI (`infra-hml.yml`, a criar), com `criar_cloud_run = false` e as 3 saídas da rede: registro, banco, segredos vazios e IAM.
+2. **`bootstrap/`**, uma vez, com a rede privada e o state no bucket próprio, criado antes do `init` ([State do bootstrap](bootstrap/README.md#state-do-bootstrap)). Logo depois do apply, desativar a conta padrão do Compute e conferir a rede `default` ([bootstrap](bootstrap/README.md#depois-do-apply)).
+3. **`hml/` fase 1**, pela CI (`infra-hml.yml`, a criar), com `criar_cloud_run = false` e as 3 saídas da rede: registro, banco, segredos vazios e IAM. O `oidc_client_id` pode ficar vazio: só a fase 2 o exige.
 4. **Valores fora do Terraform:** senhas por stdin, sem eco (R-006, passo 4), e segredo OAuth pelo Adrianus no console (passo 3b). Anotar só o número de cada versão.
 5. **Se `url_controlada = "iap"`:** o Adrianus configura uma vez, no console, o cliente OAuth do IAP. Projeto sem organização não cria cliente OAuth por API.
-6. **`hml/` fase 2**, pela CI, com `criar_cloud_run = true` e `versoes_segredos`.
+6. **`hml/` fase 2**, pela CI, com `criar_cloud_run = true`, `versoes_segredos` e `oidc_client_id`.
 7. **Publicação** (`publicar-hml.yml`, outro autor): imagens por digest, `safrion-preparo`, `safrion-demo-reset` e a web.
 
 **Atenção à ordem:** o passo 3 precisa da rede do passo 2, porque a instância só aceita a faixa do IP privado na criação e o IP privado não sai mais dela. O passo 4 precisa da instância criada no passo 3. Se a sessão do dono for revogada ao fim do bootstrap (R-006 §3), as senhas exigem nova janela de login dele.
