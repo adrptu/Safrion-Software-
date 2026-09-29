@@ -1104,5 +1104,148 @@ class Plano(unittest.TestCase):
                          ['private_network ausente, vazio ou desconhecido (desconhecido: True)'])
 
 
+
+# --- Lista "Nunca no Terraform" (roteiro E05): um caso positivo e um negativo por tipo, no código e no plan ---
+
+NUNCA = ('google_secret_manager_secret_version', 'google_sql_user', 'google_service_account_key', 'google_project',
+         'google_iap_brand', 'google_iap_client', 'google_billing_budget', 'google_billing_account_iam_member',
+         'google_billing_project_info', 'google_iam_oauth_client', 'google_iam_oauth_client_credential')
+# Vizinhos de nome que seguem permitidos: o controle negativo de cada família.
+VIZINHOS = ('google_project_service', 'google_secret_manager_secret', 'google_service_account', 'google_iap_web_iam_member',
+            'google_sql_database')
+
+
+class NuncaNoTerraform(unittest.TestCase):
+    def setUp(self):
+        self.hml = Path(tempfile.mkdtemp())
+        self.boot = Path(tempfile.mkdtemp())
+        for origem, destino in ((AQUI / 'hml', self.hml), (AQUI / 'bootstrap', self.boot)):
+            for arq in origem.glob('*.tf'):
+                shutil.copy(arq, destino / arq.name)
+
+    def tearDown(self):
+        shutil.rmtree(self.hml)
+        shutil.rmtree(self.boot)
+
+    def escrever(self, pasta, nome, texto):
+        (pasta / nome).write_text(texto, encoding='utf-8')
+
+    def test_controle_positivo_modulos_reais(self):
+        self.assertEqual(ct.conferir_codigo(self.hml), [])
+        self.assertEqual(ct.conferir_bootstrap(self.boot), [])
+
+    def test_cada_tipo_como_resource_nos_dois_modulos(self):
+        for tipo in NUNCA:
+            for pasta, conferir, modulo in ((self.hml, ct.conferir_codigo, 'hml'), (self.boot, ct.conferir_bootstrap, 'bootstrap')):
+                with self.subTest(tipo=tipo, modulo=modulo):
+                    self.escrever(pasta, 'nunca.tf', f'resource "{tipo}" "x" {{\n  name = "x"\n}}\n')
+                    self.assertIn(f'nunca.tf:1: resource {tipo} está na lista "Nunca no Terraform"', conferir(pasta))
+                    (pasta / 'nunca.tf').unlink()
+
+    def test_fonte_de_dados_tambem_no_bootstrap(self):
+        for tipo in ('google_billing_account', 'google_project', 'google_sql_user'):
+            with self.subTest(tipo=tipo):
+                self.escrever(self.boot, 'nunca.tf', f'data "{tipo}" "x" {{\n  name = "x"\n}}\n')
+                self.assertIn(f'nunca.tf:1: data {tipo} está na lista "Nunca no Terraform"',
+                              ct.conferir_bootstrap(self.boot))
+
+    def test_vizinhos_de_nome_e_comentario_nao_contam(self):
+        for tipo in VIZINHOS:
+            with self.subTest(tipo=tipo):
+                self.escrever(self.boot, 'vizinho.tf', f'# google_sql_user e root_password só em comentário\n'
+                                                       f'resource "{tipo}" "x" {{\n  name = "google_project"\n}}\n')
+                self.assertFalse([f for f in ct.conferir_bootstrap(self.boot) if 'Nunca' in f or 'root_password' in f])
+
+    def test_root_password_na_instancia(self):
+        for nome in ('root_password', 'root_password_wo'):
+            with self.subTest(nome=nome):
+                banco = BANCO.replace(CONECTOR, f'{CONECTOR}\n    {nome} = var.senha', 1)
+                self.assertNotEqual(banco, BANCO)
+                self.escrever(self.hml, 'banco.tf', banco)
+                self.assertTrue([f for f in ct.conferir_codigo(self.hml) if f'atributo {nome}' in f])
+
+    def test_bloco_module_nos_dois_modulos(self):
+        for pasta, conferir, modulo in ((self.hml, ct.conferir_codigo, 'hml'), (self.boot, ct.conferir_bootstrap, 'bootstrap')):
+            with self.subTest(modulo=modulo):
+                self.escrever(pasta, 'mod.tf', 'module "m" {\n  source = "./m"\n}\n')
+                self.assertIn('mod.tf:1: bloco module; o guard não enxerga os recursos de dentro de um módulo',
+                              conferir(pasta))
+
+    def test_arquivo_nao_analisavel_falha_pelo_texto(self):
+        wif = (AQUI / 'bootstrap' / 'wif.tf').read_text(encoding='utf-8')
+        for trecho, achado in (('# google_service_account_key', 'google_service_account_key'),
+                               ('module "m" {}', 'module'), ('# google_billing_budget', 'google_billing_budget')):
+            with self.subTest(trecho=trecho):
+                self.escrever(self.boot, 'wif.tf', wif + '\n' + trecho + '\n')
+                self.assertTrue([f for f in ct.conferir_bootstrap(self.boot)
+                                 if f.startswith('wif.tf: fora do subconjunto') and achado in f])
+        self.escrever(self.boot, 'wif.tf', wif + '\n# google_project_service fica\n')
+        self.assertEqual(ct.conferir_bootstrap(self.boot), [])
+
+
+class NuncaNoPlano(unittest.TestCase):
+    def plano(self, *extra):
+        return Plano.plano(self, redes=[], extra=extra)
+
+    def faltas(self, plano):
+        return Plano.faltas(self, plano)
+
+    @staticmethod
+    def mudanca(tipo, after=None, modo='managed', acoes=('create',), **kw):
+        prefixo = 'data.' if modo == 'data' else ''
+        return {'address': f'{prefixo}{tipo}.x', 'mode': modo, 'type': tipo,
+                'change': {'actions': list(acoes), 'after': {} if after is None else after, **kw}}
+
+    def test_controle_positivo(self):
+        self.assertEqual(self.faltas(self.plano()), [])
+        for tipo in VIZINHOS:
+            with self.subTest(tipo=tipo):
+                self.assertEqual(self.faltas(self.plano(self.mudanca(tipo))), [])
+
+    def test_cada_tipo_no_plano(self):
+        for tipo in NUNCA:
+            with self.subTest(tipo=tipo):
+                self.assertIn(f'{tipo}.x: {tipo} está na lista "Nunca no Terraform"',
+                              self.faltas(self.plano(self.mudanca(tipo))))
+
+    def test_fonte_de_dados_conta_e_saida_nao(self):
+        self.assertIn('data.google_billing_account.x: google_billing_account está na lista "Nunca no Terraform"',
+                      self.faltas(self.plano(self.mudanca('google_billing_account', modo='data', acoes=('read',)))))
+        saindo = self.mudanca('google_sql_user')
+        saindo['change'] = {'actions': ['delete'], 'after': None}
+        self.assertEqual(self.faltas(self.plano(saindo)), [])
+
+    def test_tipo_pelo_endereco_quando_falta_o_campo(self):
+        m = self.mudanca('google_service_account_key')
+        del m['type']
+        m['address'] = 'module.a.google_service_account_key.x["k"]'
+        m['module_address'] = 'module.a'
+        faltas = self.faltas(self.plano(m))
+        self.assertIn('module.a.google_service_account_key.x["k"]: recurso dentro de módulo no plan; o guard não confere '
+                      'módulos', faltas)
+        self.assertIn('module.a.google_service_account_key.x["k"]: google_service_account_key está na lista "Nunca no '
+                      'Terraform"', faltas)
+
+    def test_root_password_presente_ou_desconhecido_sem_imprimir_valor(self):
+        valor = 'senha-canario-9f3'
+        plano = self.plano()
+        plano['resource_changes'][0]['change']['after']['root_password'] = valor
+        faltas = self.faltas(plano)
+        self.assertIn('google_sql_database_instance.hml: root_password presente ou desconhecido no plan; a senha do '
+                      'postgres fica fora do Terraform', faltas)
+        self.assertNotIn(valor, ' '.join(faltas))
+        plano = self.plano()
+        plano['resource_changes'][0]['change']['after_unknown'] = {'root_password': True}
+        self.assertTrue([f for f in self.faltas(plano) if 'root_password presente ou desconhecido' in f])
+        plano = self.plano()
+        plano['resource_changes'][0]['change']['after']['root_password'] = None
+        self.assertEqual(self.faltas(plano), [])
+
+    def test_formato_inesperado(self):
+        self.assertEqual(self.faltas([]), ['plan em formato inesperado'])
+        self.assertEqual(self.faltas({'resource_changes': {}}), ['plan em formato inesperado'])
+        self.assertEqual(self.faltas(self.plano('x')), ['resource_changes com item fora do formato'])
+
+
 if __name__ == '__main__':
     unittest.main()

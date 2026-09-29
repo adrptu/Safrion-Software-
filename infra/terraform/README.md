@@ -34,6 +34,8 @@ As IAs preparam cada passo e guiam na tela. Ao Adrianus ficam o login, os consen
 
 ## Nunca no Terraform
 
+O `checar_travas.py` recusa os tipos e atributos desta lista, no código dos dois módulos e no plan ([hml/README.md](hml/README.md#achados-do-scanner)).
+
 - Valor de segredo ou senha, `google_secret_manager_secret_version`, `root_password` ou `google_sql_user` do `postgres`.
 - Chave JSON de conta de serviço (`google_service_account_key`).
 - Faturamento, orçamento e conta de faturamento (`google_billing_*`).
