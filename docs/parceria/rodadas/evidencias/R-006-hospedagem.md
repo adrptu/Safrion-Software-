@@ -8,6 +8,20 @@ Data de referência e de acesso às fontes: **27/09/2026**; a seção "Atualiza�
 
 **O que o PRD já decidiu (lido no repositório, só leitura).** §28.1 dá como topologia de referência _Google Cloud Run + Cloud SQL PostgreSQL/PostGIS com HA regional + Cloud Storage + Secret Manager + Cloud Tasks/Jobs_, via Terraform, com região escolhida em ADR. §27.4 exige HML com estrutura equivalente à produção, projeto e banco próprios e **a mesma imagem por digest** promovida para produção. §30.5 pede backup diário com retenção de 35 dias e PITR de pelo menos 7 dias. NFR-11 pede RPO ≤ 15 min e RTO ≤ 4 h. Isso pesa na recomendação.
 
+## Atualização de 29/09/2026: custo revisado e aceite financeiro da HML (substitui valores de orçamento abaixo onde houver diferença)
+
+**Aceite do proprietário (29/09/2026, 13:47 UTC, registro da equipe):** "Autorizar HML com referência de US$30/mês". A pergunta trazia a estimativa abaixo, o ensaio de restauração e a informação de que alertas não interrompem a cobrança. Vale **só para a HML**, antes de tributos; não vale para produção nem para mídia. A referência não é teto: nenhum mecanismo do Google Cloud corta o gasto da HML inteira nesse valor.
+
+**Estimativa revisada** (recibo de custo da equipe, 29/09, revisado por Claude e Gemini; preços de `southamerica-east1`, mês de 730 h, antes de tributos; quantidades são hipóteses, não consumo observado):
+- uso leve com as franquias da conta: **US$ 15,22–15,28/mês**;
+- sem as franquias de Cloud Run, Artifact Registry e Secret Manager: **US$ 18,17**; com hipóteses de requisições, acessos a segredos e rede privada, **US$ 19,05**;
+- mês de testes intenso (100 h de web, 5 GiB de saída e disco em 20 GiB): **cerca de US$ 27**;
+- ensaio de restauração em instância isolada (`db-f1-micro`, SSD de 10 GiB, até 4 h): **cerca de US$ 0,08 por ensaio**. O roteiro apaga a instância de teste no fim e confere que ela não existe mais; esquecida ligada, custaria cerca de US$ 11,53/mês.
+
+**Alertas:** orçamento de alerta com **referência de US$ 30/mês**, escopo no projeto da HML, avisos em **70%, 90% e 100% do gasto real e em 100% do gasto previsto** (PRD 28.4). O proprietário cria o orçamento no console, com o Codex guiando; agente não usa a API de orçamentos nem a conta de faturamento (desenho mínimo, abaixo). O valor de US$ 25 das seções abaixo não foi aceito e fica substituído por este. O teto nativo de gasto do Cloud Run (proposta de US$ 15, em Preview, só Cloud Run) continua proposto e não configurado.
+
+**Continua valendo:** nenhum plan, apply ou recurso foi criado com este aceite; cada apply segue o plano revisado pelas três IAs, com veto do proprietário (README do Terraform). Não se reduz backup, monitoramento ou isolamento para caber na estimativa.
+
 ## Atualização de 28/09/2026: a HML do artefato real (substitui a recomendação de HML abaixo onde houver diferença)
 
 **O que mudou desde 27/09:**
