@@ -475,7 +475,7 @@ Os agentes (`run.viewer`, `logging.viewer`, `cloudsql.viewer`, sem `secretAccess
 - Segredo `hml-vinculo-pedido` **sem `version_destroy_ttl`**, com o guard recusando o campo nesse segredo.
 - IAM só nesse segredo:
   - operador com `secretVersionAdder`;
-  - `sa-preparo` com `secretAccessor` e `secretVersionManager`.
+  - `sa-preparo` com o papel customizado `safrionVinculoPedido`, criado no bootstrap, só com `versions.list`, `get`, `access`, `disable` e `destroy`. É o desenho adotado na revisão do Codex de `8537b81`, no lugar de `secretAccessor` + `secretVersionManager`. O guard confere os dois vínculos exatos no hml e o conjunto exato de permissões no bootstrap.
 
 **8. Testes** (PG real no `vinculo-fila.int.test.ts`; unitários no restante):
 - os 15 cenários da fixture, lidos do JSON em `packages/db/test/fixtures/`. O CEN-05 monta `criado_em = now() − 3600 s` na mesma transação;
@@ -504,7 +504,10 @@ Os agentes (`run.viewer`, `logging.viewer`, `cloudsql.viewer`, sem `secretAccess
 **Limites acrescentados na revisão:**
 - **TRUNCATE:** um gatilho de instrução recusa TRUNCATE no recibo. O dono do banco ainda pode desativar o gatilho, e os outros registros imutáveis (inclusive o `identity_link_event`) não barram TRUNCATE.
 - **Travas consultivas:** qualquer papel, o `app_runtime` inclusive, pode tomar a trava da fila ou a de um pedido. Isso deixa o job em `OCUPADO` ou em saída 3 com `55P03`. Não há efeito indevido, só bloqueio; o diagnóstico é por `pg_locks` (`locktype = 'advisory'`). Como rodá-lo na HML sem conexão do notebook fica a definir.
-- **`secretVersionManager`:** o papel também concede `versions.add`, `versions.enable` e `secrets.rotate`. Quem roda como `sa-preparo` pode reativar e ler uma versão desativada que ainda tem o código, e gravar pedidos. Isso não amplia o que a conta já pode. **Proposta:** papel customizado só com `versions.list`, `versions.get`, `versions.access`, `versions.disable` e `versions.destroy`, a decidir antes da 1ª subida.
+- **Papel do job, adotado:** `safrionVinculoPedido` tira da conta do job `versions.add`, `versions.enable` e `secrets.rotate`, que o `secretVersionManager` dava. Resta: ela lê pedidos ENABLED e destrói versões. O papel não isola os dois jobs que usam a `sa-preparo` nem código alterado por quem tem `run.developer`.
+- **Revisão da fila (Codex, S4/P3), documentadas sem mudar o código:**
+  - se a conexão cai enquanto chega a resposta do `pg_try_advisory_lock`, a fila ainda faz uma listagem sem a trava antes de parar com saída 3. Não há leitura de conteúdo, efeito no banco nem mudança no segredo;
+  - erro no desbloqueio final, ou conexão perdida depois dele, não muda a saída: o trabalho já terminou, e a saída 0 ou 1 vale. É exceção ao "`error`/`end` implicam saída 3".
 
 #### 4) Mudanças necessárias (arquivos)
 
