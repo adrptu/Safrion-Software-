@@ -1,6 +1,6 @@
 # ADR 0003: Acesso a dados com SQL explícito na fundação (sem Prisma por ora)
 
-- **Situação:** proposta
+- **Situação:** proposta; implementada na `main` desde o PR #7 (SQL explícito com `pg`). Aceite pendente da revisão do Codex.
 - **Data:** 2026-09-27
 - **Autor:** Claude Code
 - **Revisor:** Codex (pendente)

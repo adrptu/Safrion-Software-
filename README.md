@@ -28,7 +28,7 @@ Plataforma de gestão agrícola integrada: planejamento da safra, planos agronô
 |---|---|
 | `pnpm run check` | Os mesmos passos que a CI roda no código, na mesma ordem (a instalação fica de fora) |
 | `pnpm run doctor` | Confere se o Node e o pnpm em uso são os fixados (`pnpm doctor`, sem `run`, é um comando do próprio pnpm) |
-| `pnpm run lint` | ESLint e o script de fronteiras: pacote sem dependência não declarada e sem ciclo de imports (ENG-012) |
+| `pnpm run lint` | ESLint e o script de fronteiras dos pacotes em `packages/`: sem dependência não declarada e sem ciclo de imports (ENG-012); `apps/web` fica fora do script |
 | `pnpm run test` | Testes unitários, com cobertura mínima de 95 % por arquivo nos módulos listados em `vitest.config.ts` (ENG-032/033) |
 | `pnpm run test:integration` | Banco real: papéis, RLS, isolamento entre organizações, idempotência e imutabilidade. Precisa de Docker, ou de `SAFRION_TEST_DATABASE_URL` com um PostgreSQL descartável e usuário administrador. Roda na CI depois dos testes |
 | `pnpm run demo:reset -- --confirmar <dev\|hml>` | Cria uma geração nova de dados fictícios de demonstração. Só roda com o banco identificado como `dev` ou `hml`, o processo dizendo o mesmo ambiente (`SAFRION_AMBIENTE`) e o nome repetido no comando; em produção, recusa sem tocar em nada. Nada é apagado: movimento e auditoria são imutáveis |

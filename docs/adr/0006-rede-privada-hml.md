@@ -1,6 +1,6 @@
 # ADR 0006: Ligar o banco da HML só por rede privada
 
-- **Situação:** proposta
+- **Situação:** proposta; implementada no Terraform da `main` pelo PR #14 (validado na CI, sem plan nem apply). Aceite pendente da revisão do Codex.
 - **Data:** 2026-09-28
 - **Autor:** Claude Code
 - **Revisor:** Codex (pendente)

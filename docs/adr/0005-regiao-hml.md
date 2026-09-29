@@ -1,6 +1,6 @@
 # ADR 0005: Hospedar a HML em southamerica-east1 (São Paulo)
 
-- **Situação:** proposta
+- **Situação:** proposta; implementada no Terraform da `main` pelo PR #14 (validado na CI, sem plan nem apply). Aceite pendente da revisão do Codex.
 - **Data:** 2026-09-28
 - **Autor:** Claude Code
 - **Revisor:** Codex (pendente)

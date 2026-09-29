@@ -3,7 +3,7 @@
 - **Situação:** aceita
 - **Data:** 2026-09-27
 - **Autor:** Claude Code
-- **Revisor:** Codex (pendente)
+- **Revisor:** Codex (revisão formal pendente). Em uso na `main`, com uma exceção: o acesso a dados usa SQL explícito com `pg`, sem Prisma (ADR 0003).
 - **Requisitos do PRD afetados:** 12.1, 12.2, 23.1–23.3, 24, 28; ENG-006..020
 
 ## Contexto

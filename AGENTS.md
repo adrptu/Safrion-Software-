@@ -125,12 +125,12 @@ Sistema **"Do Talhão à O.S."**: plataforma de gestão agrícola integrada. Vai
 - **Kanban da O.S. com 5 fases** (A liberar, Liberadas, Em execução, Em conferência, Encerradas). Não criar coluna nova.
 - **Fórmula agronômica ou econômica** existe num único serviço de domínio (ENG-011). Unidades explícitas; decimal para dinheiro e quantidade (ENG-013).
 
-## 5. Código (quando houver)
-- **Stack do PRD** (23.1): TypeScript estrito, Next.js/React, Node LTS, PostgreSQL/PostGIS, Prisma, PWA com Dexie/Workbox, workers, pnpm workspace, Vitest/Playwright/Testcontainers/fast-check, Docker e GitHub Actions.
+## 5. Código
+- **Stack do PRD** (23.1): TypeScript estrito, Next.js/React, Node LTS, PostgreSQL/PostGIS, Prisma, PWA com Dexie/Workbox, workers, pnpm workspace, Vitest/Playwright/Testcontainers/fast-check, Docker e GitHub Actions. Na fundação, o acesso a dados usa SQL explícito com `pg`, sem Prisma (ADR 0003).
   - Versões fixadas em [`docs/architecture/versions.md`](docs/architecture/versions.md) no primeiro commit executável.
 - **Estrutura** (23.3): `apps/web`, `apps/worker`, `packages/domain`, `packages/application`, `packages/db`, `packages/contracts`, `packages/ui`, `packages/integrations`, `packages/observability`, `tests`, `infra/terraform` e `docs`. Crie um pacote só quando ele tiver responsabilidade real.
-- **Comandos contratados** (23.4): `pnpm setup | dev | check | test:integration | test:e2e | test:load | demo:reset | doctor`. **Ainda não existem.** Não diga que existem até o PR que os cria passar na CI.
-- **Checks que já existem hoje:** `python3 tools/docs/checar_docs.py` (integridade da documentação). A CI também roda a varredura de segredos e de vulnerabilidades.
+- **Comandos contratados** (23.4): `pnpm setup | dev | check | test:integration | test:e2e | test:load | demo:reset | doctor`. Existem hoje, com `pnpm run`: `check`, `test:integration`, `test:e2e`, `demo:reset` e `doctor`. **Ainda não existem** `setup`, `dev` na raiz e `test:load`: não diga que existem até o PR que os cria passar na CI.
+- **Checks que existem hoje:** os 10 jobs da CI (documentação, segredos, vulnerabilidades, código, navegador, imagens, Semgrep, travas do Cloud SQL e Terraform dos dois módulos), os mesmos nomes de `tools/github/protecao-main.json`. Os comandos locais equivalentes estão no `README.md`.
 
 ## 6. Ao terminar cada incremento
 Atualize `docs/STATUS.md` e explique ao proprietário, em português simples:
