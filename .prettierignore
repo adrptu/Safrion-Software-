@@ -10,5 +10,7 @@ next-env.d.ts
 coverage/
 # Fixtures sintéticas são verificadas pelo Semgrep nativo, não compiladas como aplicação.
 .semgrep/
+# Fixture de cenários de autoria externa (Gemini e Codex): o teste confere o sha256 do arquivo como veio.
+packages/db/test/fixtures/vinculo-fila-cenarios.json
 **/test-results/
 **/playwright-report/

@@ -30,6 +30,9 @@ export default defineConfig({
         // Conexão por IP privado (R-006, GCP-0017); conector-google.ts, só o import do pacote, fica de fora.
         'packages/db/src/conexao.ts',
         'packages/db/src/resposta.ts',
+        // Fila de vínculo em HML (R-006, GCP-0017, §3c): validação, hash, fila e cliente do Secret Manager.
+        'packages/db/src/vinculo-fila.ts',
+        'packages/db/src/segredo-pedido.ts',
         // Web (ADR 0004): partes puras da segurança e da autorização.
         'apps/web/src/identidade/caminho.ts',
         'apps/web/src/identidade/oidc/**/*.ts',

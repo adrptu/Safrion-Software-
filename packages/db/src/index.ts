@@ -70,6 +70,14 @@ export {
   type OpcoesPreparo,
   type ResultadoPreparo,
 } from './preparo.js';
+export {
+  ErroSegredo,
+  criarSegredoPedido,
+  type CodigoErroSegredo,
+  type EstadoVersao,
+  type SegredoPedido,
+  type VersaoAtiva,
+} from './segredo-pedido.js';
 export { emOrganizacao, ehUuid, organizacaoValida } from './sessao.js';
 export {
   abrirContinuacao,
@@ -97,3 +105,11 @@ export {
   type CodigoErroVinculo,
   type PedidoAcesso,
 } from './vinculo.js';
+export {
+  PEDIDO_INVALIDO,
+  conteudoHash,
+  processarFila,
+  validarPedido,
+  type OpcoesFila,
+  type Pedido,
+} from './vinculo-fila.js';

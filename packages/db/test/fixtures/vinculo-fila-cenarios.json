@@ -1,0 +1,1263 @@
+{
+  "schema_version": 2,
+  "base_contrato": "b3e17eddfe64334ae5fa5cbc3c9432c46293bd82",
+  "dados": "sinteticos",
+  "estado": "fixture_de_aceite_proposta_nao_executada",
+  "origem": {
+    "modelo": "gemini-3.1-pro-preview",
+    "responseId": "reS6avqIOauZn_APqO6e2Ag",
+    "arquivo": "gemini-retorno.json",
+    "sha256": "73de76c8948741f82113c686fa670fe9fd609f334f77ed41f6828049675bb661",
+    "cenarios_originais": 15,
+    "autoria_origem": "Gemini real",
+    "adaptacao": "Codex GPT; somente dados, expectativas e pendências desta fixture; contrato e implementação permanecem de Claude"
+  },
+  "parametros_ensaio": {
+    "agora": "2026-09-28T22:00:00Z",
+    "validade_segundos": 3600,
+    "expira_quando": "idade_segundos > validade_segundos",
+    "origem_TTL": "prompt-gemini.txt: TTL 60 minutos, exatamente 60 minutos ainda válido; parâmetro deste ensaio, não configuração implantada",
+    "versoes_segredo": "Identificadores numéricos sintéticos; o adaptador de teste deve formar nomes exatos em um segredo fictício, sem GCP.",
+    "isolamento": "Cada cenário começa com estado próprio. Nenhuma execução de cenário SQL/CLI ocorreu nesta adaptação."
+  },
+  "convencoes": {
+    "payload": "Conteúdo sintético da versão; metadados createTime/versao/etag não são parte do payload.",
+    "pedido_ref": "Referência local ao objeto de pedidos dentro do cenário; não é o pedido_id UUID.",
+    "recibo_inicial": "Estado a preparar pelo futuro teste; campos conteudo referenciam payload, sem afirmar inserção executada.",
+    "precondicoes": "A descrição de estado deve ser preparada por teste futuro. UUID/código não correspondem a contas reais.",
+    "canonizacao": "CEN-08 registra a falha do contrato b3e17ed e o critério de correção com helper existente; não presume alteração aprovada/implementada.",
+    "exit_code": "Somente definido quando conhecido; null significa decisão pendente, nunca sucesso."
+  },
+  "alteracoes_Codex": [
+    "Substituídos UUIDs p-* por UUIDs canônicos válidos; mantido apenas UUID malformado intencional em CEN-09.",
+    "Completados payloads e metadados sintéticos e referências explícitas entre passos/pedidos/recibos.",
+    "Separada queda comprovadamente antes de COMMIT de queda depois do commit antes da resposta.",
+    "OCUPADO fixado em exit 1; falha etag em exit 3, interrompendo fila antes do pedido seguinte.",
+    "Substituído papel runtime incorreto app_sessao por app_runtime; necessidade interna app_sessao preservada, política pendente.",
+    "Recusada destruição de versão inválida sem recibo; recuperação/continuidade/exit desse caso permanecem pendentes.",
+    "Par de ambiguidade do hash reproduz o recibo local Codex, com responsável/motivo diferentes e mesmo destino/ação.",
+    "Resultado genérico ERRO_NEGOCIO substituído por USUARIO_INVALIDO existente.",
+    "TTL expresso como parâmetro de ensaio vindo do prompt, incluindo fronteiras determinísticas.",
+    "Incorporado parecer Claude 22:07: princípios de hash/RLS aceitos; desativação do inválido registrada somente como proposta pendente, sem autorizar destruição."
+  ],
+  "limites": [
+    "Validação estrutural e matemática local não executa SQL, transações, fila, CLI, IAM, GCP ou exclusão de versões.",
+    "Os 15 cenários não são cobertura completa: concorrência direta do mesmo pedido_id e imutabilidade UPDATE/DELETE do recibo continuam critérios do contrato a converter em testes pelo autor.",
+    "CEN-09 aguarda decisão sobre desativação reversível/continuidade; CEN-15 aguarda formalização da política interna já aceita pelo autor; CEN-08 é critério de correção aceita, ainda não implementada."
+  ],
+  "cenarios": [
+    {
+      "id": "CEN-01-REGRESSAO-ESSENCIAL-ABA",
+      "origem_id": "CEN-01-REGRESSAO-ESSENCIAL-ABA",
+      "objetivo": "A(revogar), B(conceder), A duplicado NÃO revoga B. Garantir imutabilidade histórica do recibo sem repetição de efeitos de negócio.",
+      "nivel": "banco",
+      "estado_inicial": {
+        "tempo_agora": "2026-09-28T22:00:00Z",
+        "ambiente": "hml",
+        "organizacao_ativa": true,
+        "usuario_ativo_com_papel_valido": true,
+        "vinculo_alvo": "presente_uma_identidade_anterior",
+        "recibos": [],
+        "pedidos_acesso": [
+          {
+            "codigo": "0123456789",
+            "issuer": "https://idp.sintetico.invalid",
+            "subject": "subject-sintetico-1-1",
+            "criado_em": "2026-09-28T18:00:00Z",
+            "expira_em": "2026-09-29T18:00:00Z",
+            "consumido": false
+          }
+        ]
+      },
+      "pedidos": [
+        {
+          "ref": "A",
+          "versao": "1",
+          "createTime": "2026-09-28T21:50:00Z",
+          "etag": "etag-sintetico-1",
+          "estado_segredo": "ENABLED",
+          "payload": {
+            "pedido_id": "00000000-0000-4000-8000-000000000001",
+            "acao": "revogar",
+            "organizacao": "22222222-2222-4222-8222-222222222222",
+            "usuario": "33333333-3333-4333-8333-333333333333",
+            "responsavel": "Operador sintético",
+            "motivo": "Teste de contrato da fila"
+          }
+        },
+        {
+          "ref": "B",
+          "versao": "2",
+          "createTime": "2026-09-28T21:51:00Z",
+          "etag": "etag-sintetico-2",
+          "estado_segredo": "ENABLED",
+          "payload": {
+            "pedido_id": "00000000-0000-4000-8000-000000000002",
+            "acao": "conceder",
+            "organizacao": "22222222-2222-4222-8222-222222222222",
+            "usuario": "33333333-3333-4333-8333-333333333333",
+            "responsavel": "Operador sintético",
+            "motivo": "Teste de contrato da fila",
+            "codigo": "0123456789"
+          }
+        },
+        {
+          "ref": "A-duplicado",
+          "versao": "3",
+          "createTime": "2026-09-28T21:52:00Z",
+          "etag": "etag-sintetico-3",
+          "estado_segredo": "ENABLED",
+          "payload": {
+            "pedido_id": "00000000-0000-4000-8000-000000000001",
+            "acao": "revogar",
+            "organizacao": "22222222-2222-4222-8222-222222222222",
+            "usuario": "33333333-3333-4333-8333-333333333333",
+            "responsavel": "Operador sintético",
+            "motivo": "Teste de contrato da fila"
+          }
+        }
+      ],
+      "passos": [
+        {
+          "acao": "processar_pedido",
+          "pedido_ref": "A"
+        },
+        {
+          "acao": "processar_pedido",
+          "pedido_ref": "B"
+        },
+        {
+          "acao": "processar_pedido",
+          "pedido_ref": "A-duplicado"
+        }
+      ],
+      "esperado": {
+        "retornos": [
+          {
+            "pedido_ref": "A",
+            "resultado": "revogado",
+            "revogados": 1,
+            "repetido": false
+          },
+          {
+            "pedido_ref": "B",
+            "resultado": "concedido",
+            "repetido": false
+          },
+          {
+            "pedido_ref": "A-duplicado",
+            "resultado": "revogado",
+            "revogados": 1,
+            "repetido": true
+          }
+        ],
+        "recibos_finais": 2,
+        "efeitos_aplicados": 2,
+        "vinculo_alvo_final": "criado_por_B",
+        "recibo_A_inalterado": true
+      },
+      "depende_de_decisao": false,
+      "estado": "proposto_nao_executado"
+    },
+    {
+      "id": "CEN-02-QUEDA-POS-COMMIT",
+      "origem_id": "CEN-02-QUEDA-POS-COMMIT",
+      "objetivo": "Commit seguido de queda antes da resposta recupera recibo sem duplicar efeito, e procede com a destruição.",
+      "nivel": "cli",
+      "estado_inicial": {
+        "tempo_agora": "2026-09-28T22:00:00Z",
+        "ambiente": "hml",
+        "organizacao_ativa": true,
+        "usuario_ativo_com_papel_valido": true,
+        "vinculo_alvo": "ausente",
+        "recibos": [],
+        "pedidos_acesso": [
+          {
+            "codigo": "0123456789",
+            "issuer": "https://idp.sintetico.invalid",
+            "subject": "subject-sintetico-2-1",
+            "criado_em": "2026-09-28T18:00:00Z",
+            "expira_em": "2026-09-29T18:00:00Z",
+            "consumido": false
+          }
+        ]
+      },
+      "pedidos": [
+        {
+          "ref": "P",
+          "versao": "1",
+          "createTime": "2026-09-28T21:50:00Z",
+          "etag": "etag-sintetico-1",
+          "estado_segredo": "ENABLED",
+          "payload": {
+            "pedido_id": "00000000-0000-4000-8000-000000000003",
+            "acao": "conceder",
+            "organizacao": "22222222-2222-4222-8222-222222222222",
+            "usuario": "33333333-3333-4333-8333-333333333333",
+            "responsavel": "Operador sintético",
+            "motivo": "Teste de contrato da fila",
+            "codigo": "0123456789"
+          }
+        }
+      ],
+      "passos": [
+        {
+          "acao": "executar_cli",
+          "pedido_ref": "P",
+          "execucao": "E1",
+          "falha": "conexao_cai_depois_do_commit_antes_da_resposta"
+        },
+        {
+          "acao": "observar_apos_confirmar_commit_no_banco",
+          "pedido_ref": "P"
+        },
+        {
+          "acao": "executar_cli",
+          "pedido_ref": "P",
+          "execucao": "E2"
+        }
+      ],
+      "esperado": {
+        "execucoes": [
+          {
+            "ref": "E1",
+            "exit_code": 3,
+            "commit_confirmado_no_banco": true,
+            "recibos_apos": 1,
+            "efeitos_acumulados": 1,
+            "destruir_versao": false,
+            "estado_segredo": "ENABLED"
+          },
+          {
+            "ref": "E2",
+            "exit_code": 0,
+            "resultado": "concedido",
+            "repetido": true,
+            "recibos_apos": 1,
+            "efeitos_acumulados": 1,
+            "destruir_versao_exata": "1",
+            "usar_etag_lido": true
+          }
+        ],
+        "vinculo_alvo_final": "presente"
+      },
+      "depende_de_decisao": false,
+      "estado": "proposto_nao_executado"
+    },
+    {
+      "id": "CEN-03-REPLAY-APOS-TTL",
+      "origem_id": "CEN-03-REPLAY-APOS-TTL",
+      "objetivo": "Replay após TTL devolve resultado original em vez de erro de atraso, pois consulta ao recibo prevalece sobre o TTL.",
+      "nivel": "banco",
+      "estado_inicial": {
+        "tempo_agora": "2026-09-28T22:00:00Z",
+        "ambiente": "hml",
+        "organizacao_ativa": true,
+        "usuario_ativo_com_papel_valido": true,
+        "vinculo_alvo": "presente",
+        "recibos": [
+          {
+            "pedido_ref": "P",
+            "resultado": "concedido",
+            "processado_em": "2026-09-28T19:01:00Z",
+            "conteudo": "igual_ao_payload_de_P"
+          }
+        ],
+        "pedidos_acesso": [
+          {
+            "codigo": "0123456789",
+            "issuer": "https://idp.sintetico.invalid",
+            "subject": "subject-sintetico-3-1",
+            "criado_em": "2026-09-28T18:00:00Z",
+            "expira_em": "2026-09-29T18:00:00Z",
+            "consumido": true
+          }
+        ]
+      },
+      "pedidos": [
+        {
+          "ref": "P",
+          "versao": "1",
+          "createTime": "2026-09-28T19:00:00Z",
+          "etag": "etag-sintetico-1",
+          "estado_segredo": "ENABLED",
+          "payload": {
+            "pedido_id": "00000000-0000-4000-8000-000000000004",
+            "acao": "conceder",
+            "organizacao": "22222222-2222-4222-8222-222222222222",
+            "usuario": "33333333-3333-4333-8333-333333333333",
+            "responsavel": "Operador sintético",
+            "motivo": "Teste de contrato da fila",
+            "codigo": "0123456789"
+          }
+        }
+      ],
+      "passos": [
+        {
+          "acao": "processar_pedido",
+          "pedido_ref": "P"
+        }
+      ],
+      "esperado": {
+        "resultado": "concedido",
+        "repetido": true,
+        "resultado_proibido": "PEDIDO_ATRASADO",
+        "novos_efeitos": 0,
+        "recibos_finais": 1
+      },
+      "depende_de_decisao": false,
+      "estado": "proposto_nao_executado"
+    },
+    {
+      "id": "CEN-04-TTL-59-59-VALIDO",
+      "origem_id": "CEN-04-TTL-59-59-VALIDO",
+      "objetivo": "Pedido criado há 59 minutos e 59 segundos deve ser processado normalmente.",
+      "nivel": "banco",
+      "estado_inicial": {
+        "tempo_agora": "2026-09-28T22:00:00Z",
+        "ambiente": "hml",
+        "organizacao_ativa": true,
+        "usuario_ativo_com_papel_valido": true,
+        "vinculo_alvo": "ausente",
+        "recibos": [],
+        "pedidos_acesso": [
+          {
+            "codigo": "0123456789",
+            "issuer": "https://idp.sintetico.invalid",
+            "subject": "subject-sintetico-4-1",
+            "criado_em": "2026-09-28T18:00:00Z",
+            "expira_em": "2026-09-29T18:00:00Z",
+            "consumido": false
+          }
+        ]
+      },
+      "pedidos": [
+        {
+          "ref": "P",
+          "versao": "1",
+          "createTime": "2026-09-28T21:00:01Z",
+          "etag": "etag-sintetico-1",
+          "estado_segredo": "ENABLED",
+          "payload": {
+            "pedido_id": "00000000-0000-4000-8000-000000000005",
+            "acao": "conceder",
+            "organizacao": "22222222-2222-4222-8222-222222222222",
+            "usuario": "33333333-3333-4333-8333-333333333333",
+            "responsavel": "Operador sintético",
+            "motivo": "Teste de contrato da fila",
+            "codigo": "0123456789"
+          }
+        }
+      ],
+      "passos": [
+        {
+          "acao": "processar_pedido",
+          "pedido_ref": "P"
+        }
+      ],
+      "esperado": {
+        "idade_segundos": 3599,
+        "resultado": "concedido",
+        "repetido": false,
+        "efeitos_aplicados": 1,
+        "recibos_finais": 1
+      },
+      "depende_de_decisao": false,
+      "estado": "proposto_nao_executado"
+    },
+    {
+      "id": "CEN-05-TTL-60-00-EXATO",
+      "origem_id": "CEN-05-TTL-60-00-EXATO",
+      "objetivo": "Pedido criado há exatamente 60 minutos é considerado o limite válido e deve ser processado.",
+      "nivel": "banco",
+      "estado_inicial": {
+        "tempo_agora": "2026-09-28T22:00:00Z",
+        "ambiente": "hml",
+        "organizacao_ativa": true,
+        "usuario_ativo_com_papel_valido": true,
+        "vinculo_alvo": "ausente",
+        "recibos": [],
+        "pedidos_acesso": [
+          {
+            "codigo": "0123456789",
+            "issuer": "https://idp.sintetico.invalid",
+            "subject": "subject-sintetico-5-1",
+            "criado_em": "2026-09-28T18:00:00Z",
+            "expira_em": "2026-09-29T18:00:00Z",
+            "consumido": false
+          }
+        ]
+      },
+      "pedidos": [
+        {
+          "ref": "P",
+          "versao": "1",
+          "createTime": "2026-09-28T21:00:00Z",
+          "etag": "etag-sintetico-1",
+          "estado_segredo": "ENABLED",
+          "payload": {
+            "pedido_id": "00000000-0000-4000-8000-000000000006",
+            "acao": "conceder",
+            "organizacao": "22222222-2222-4222-8222-222222222222",
+            "usuario": "33333333-3333-4333-8333-333333333333",
+            "responsavel": "Operador sintético",
+            "motivo": "Teste de contrato da fila",
+            "codigo": "0123456789"
+          }
+        }
+      ],
+      "passos": [
+        {
+          "acao": "processar_pedido",
+          "pedido_ref": "P"
+        }
+      ],
+      "esperado": {
+        "idade_segundos": 3600,
+        "resultado": "concedido",
+        "repetido": false,
+        "efeitos_aplicados": 1,
+        "recibos_finais": 1
+      },
+      "depende_de_decisao": false,
+      "estado": "proposto_nao_executado"
+    },
+    {
+      "id": "CEN-06-TTL-60-01-EXPIRADO",
+      "origem_id": "CEN-06-TTL-60-01-EXPIRADO",
+      "objetivo": "Pedido novo criado há 60 minutos e 1 segundo é rejeitado por atraso.",
+      "nivel": "banco",
+      "estado_inicial": {
+        "tempo_agora": "2026-09-28T22:00:00Z",
+        "ambiente": "hml",
+        "organizacao_ativa": true,
+        "usuario_ativo_com_papel_valido": true,
+        "vinculo_alvo": "ausente",
+        "recibos": [],
+        "pedidos_acesso": [
+          {
+            "codigo": "0123456789",
+            "issuer": "https://idp.sintetico.invalid",
+            "subject": "subject-sintetico-6-1",
+            "criado_em": "2026-09-28T18:00:00Z",
+            "expira_em": "2026-09-29T18:00:00Z",
+            "consumido": false
+          }
+        ]
+      },
+      "pedidos": [
+        {
+          "ref": "P",
+          "versao": "1",
+          "createTime": "2026-09-28T20:59:59Z",
+          "etag": "etag-sintetico-1",
+          "estado_segredo": "ENABLED",
+          "payload": {
+            "pedido_id": "00000000-0000-4000-8000-000000000007",
+            "acao": "conceder",
+            "organizacao": "22222222-2222-4222-8222-222222222222",
+            "usuario": "33333333-3333-4333-8333-333333333333",
+            "responsavel": "Operador sintético",
+            "motivo": "Teste de contrato da fila",
+            "codigo": "0123456789"
+          }
+        }
+      ],
+      "passos": [
+        {
+          "acao": "processar_pedido",
+          "pedido_ref": "P"
+        }
+      ],
+      "esperado": {
+        "idade_segundos": 3601,
+        "resultado": "PEDIDO_ATRASADO",
+        "repetido": false,
+        "efeitos_aplicados": 0,
+        "recibos_finais": 1
+      },
+      "depende_de_decisao": false,
+      "estado": "proposto_nao_executado"
+    },
+    {
+      "id": "CEN-07-CONFLITO-CONTEUDO-REUTILIZADO",
+      "origem_id": "CEN-07-CONFLITO-CONTEUDO-REUTILIZADO",
+      "objetivo": "Mesmo pedido_id com conteúdo (hash) diferente do que já está gravado no recibo deve ser rejeitado.",
+      "nivel": "banco",
+      "estado_inicial": {
+        "tempo_agora": "2026-09-28T22:00:00Z",
+        "ambiente": "hml",
+        "organizacao_ativa": true,
+        "usuario_ativo_com_papel_valido": true,
+        "vinculo_alvo": "ausente",
+        "recibos": [
+          {
+            "pedido_ref": "original",
+            "resultado": "revogado",
+            "revogados": 1,
+            "processado_em": "2026-09-28T21:50:01Z",
+            "conteudo": "igual_ao_payload_original"
+          }
+        ],
+        "pedidos_acesso": []
+      },
+      "pedidos": [
+        {
+          "ref": "original",
+          "versao": "1",
+          "createTime": "2026-09-28T21:50:00Z",
+          "etag": "etag-sintetico-1",
+          "estado_segredo": "ENABLED",
+          "payload": {
+            "pedido_id": "00000000-0000-4000-8000-000000000008",
+            "acao": "revogar",
+            "organizacao": "22222222-2222-4222-8222-222222222222",
+            "usuario": "33333333-3333-4333-8333-333333333333",
+            "responsavel": "Operador sintético",
+            "motivo": "Motivo original"
+          }
+        },
+        {
+          "ref": "alterado",
+          "versao": "2",
+          "createTime": "2026-09-28T21:51:00Z",
+          "etag": "etag-sintetico-2",
+          "estado_segredo": "ENABLED",
+          "payload": {
+            "pedido_id": "00000000-0000-4000-8000-000000000008",
+            "acao": "revogar",
+            "organizacao": "22222222-2222-4222-8222-222222222222",
+            "usuario": "33333333-3333-4333-8333-333333333333",
+            "responsavel": "Operador sintético",
+            "motivo": "Motivo alterado"
+          }
+        }
+      ],
+      "passos": [
+        {
+          "acao": "processar_pedido",
+          "pedido_ref": "alterado"
+        }
+      ],
+      "esperado": {
+        "resultado": "PEDIDO_ID_REUTILIZADO",
+        "novos_efeitos": 0,
+        "recibos_finais": 1,
+        "recibo_original_inalterado": true
+      },
+      "depende_de_decisao": false,
+      "estado": "proposto_nao_executado"
+    },
+    {
+      "id": "CEN-08-AMBIGUIDADE-HASH-CANONICO",
+      "origem_id": "CEN-08-AMBIGUIDADE-HASH-CANONICO",
+      "objetivo": "Garantir que a serialização canônica JSON diferencie adequadamente valores com delimitadores movidos (prevenindo a falha encontrada na revisão).",
+      "nivel": "contrato",
+      "estado_inicial": {
+        "tempo_agora": "2026-09-28T22:00:00Z",
+        "ambiente": "hml",
+        "organizacao_ativa": true,
+        "usuario_ativo_com_papel_valido": true,
+        "vinculo_alvo": "ausente",
+        "recibos": [],
+        "pedidos_acesso": [
+          {
+            "codigo": "0123456789",
+            "issuer": "https://idp.sintetico.invalid",
+            "subject": "subject-sintetico-8-1",
+            "criado_em": "2026-09-28T18:00:00Z",
+            "expira_em": "2026-09-29T18:00:00Z",
+            "consumido": false
+          }
+        ]
+      },
+      "pedidos": [
+        {
+          "ref": "A",
+          "versao": "1",
+          "createTime": "2026-09-28T21:50:00Z",
+          "etag": "etag-sintetico-1",
+          "estado_segredo": "ENABLED",
+          "payload": {
+            "pedido_id": "11111111-1111-4111-8111-111111111111",
+            "acao": "conceder",
+            "organizacao": "22222222-2222-4222-8222-222222222222",
+            "usuario": "33333333-3333-4333-8333-333333333333",
+            "responsavel": "operador|campo",
+            "motivo": "ajuste",
+            "codigo": "0123456789"
+          }
+        },
+        {
+          "ref": "B",
+          "versao": "2",
+          "createTime": "2026-09-28T21:51:00Z",
+          "etag": "etag-sintetico-2",
+          "estado_segredo": "ENABLED",
+          "payload": {
+            "pedido_id": "11111111-1111-4111-8111-111111111111",
+            "acao": "conceder",
+            "organizacao": "22222222-2222-4222-8222-222222222222",
+            "usuario": "33333333-3333-4333-8333-333333333333",
+            "responsavel": "operador",
+            "motivo": "campo|ajuste",
+            "codigo": "0123456789"
+          }
+        }
+      ],
+      "passos": [
+        {
+          "acao": "calcular_hash_proposto_com_separador",
+          "pedido_ref": "A"
+        },
+        {
+          "acao": "calcular_hash_proposto_com_separador",
+          "pedido_ref": "B"
+        },
+        {
+          "acao": "calcular_hashCanonico_existente",
+          "pedido_ref": "A"
+        },
+        {
+          "acao": "calcular_hashCanonico_existente",
+          "pedido_ref": "B"
+        }
+      ],
+      "esperado": {
+        "contrato_b3e17ed": {
+          "serializacoes_iguais": true,
+          "hashes_iguais": true,
+          "hash_esperado": "78bd1e9503ec808f32fdb86c1877fdef8db64f6efe5001c7bfcda707832bd1a3"
+        },
+        "criterio_correcao": {
+          "helper": "packages/db/src/canonico.ts:hashCanonico",
+          "objeto": "payload sem codigo, incluindo codigo_hash SHA-256 hexadecimal do codigo normalizado",
+          "hashes_distintos": true,
+          "segunda_submissao_sql_futura": "PEDIDO_ID_REUTILIZADO"
+        },
+        "limite": "A distinção matemática já foi comprovada localmente; fila e recibo SQL não foram executados."
+      },
+      "depende_de_decisao": false,
+      "estado": "criterio_para_correcao_contratual_nao_implementada",
+      "fonte_contraprova": {
+        "arquivo": "revisor-gpt/resultado-hash.json",
+        "sha256": "665d4a2b89d553bf9318d3a91ae0aac3c845796c27d4fb7ff26ea54e04b10d07"
+      }
+    },
+    {
+      "id": "CEN-09-FILA-MALFORMED-UUID",
+      "origem_id": "CEN-09-FILA-MALFORMED-UUID",
+      "objetivo": "Evidenciar a ausência de política para UUID inválido sem autorizar descarte nem simular um recibo impossível.",
+      "nivel": "cli",
+      "estado_inicial": {
+        "tempo_agora": "2026-09-28T22:00:00Z",
+        "ambiente": "hml",
+        "organizacao_ativa": true,
+        "usuario_ativo_com_papel_valido": true,
+        "vinculo_alvo": "ausente",
+        "recibos": [],
+        "pedidos_acesso": [
+          {
+            "codigo": "0123456789",
+            "issuer": "https://idp.sintetico.invalid",
+            "subject": "subject-sintetico-9-1",
+            "criado_em": "2026-09-28T18:00:00Z",
+            "expira_em": "2026-09-29T18:00:00Z",
+            "consumido": false
+          }
+        ]
+      },
+      "pedidos": [
+        {
+          "ref": "invalido",
+          "versao": "1",
+          "createTime": "2026-09-28T21:50:00Z",
+          "etag": "etag-sintetico-1",
+          "estado_segredo": "ENABLED",
+          "payload": {
+            "pedido_id": "invalid-uuid-format",
+            "acao": "conceder",
+            "organizacao": "22222222-2222-4222-8222-222222222222",
+            "usuario": "33333333-3333-4333-8333-333333333333",
+            "responsavel": "Operador sintético",
+            "motivo": "Teste de contrato da fila",
+            "codigo": "0123456789"
+          }
+        },
+        {
+          "ref": "seguinte",
+          "versao": "2",
+          "createTime": "2026-09-28T21:51:00Z",
+          "etag": "etag-sintetico-2",
+          "estado_segredo": "ENABLED",
+          "payload": {
+            "pedido_id": "00000000-0000-4000-8000-000000000011",
+            "acao": "conceder",
+            "organizacao": "22222222-2222-4222-8222-222222222222",
+            "usuario": "33333333-3333-4333-8333-333333333333",
+            "responsavel": "Operador sintético",
+            "motivo": "Teste de contrato da fila",
+            "codigo": "0123456789"
+          }
+        }
+      ],
+      "passos": [
+        {
+          "acao": "validar_payload",
+          "pedido_ref": "invalido"
+        }
+      ],
+      "esperado": {
+        "resultado": "PENDENTE_DECISAO_CONTRATO",
+        "erro_estrutural": "pedido_id_invalido",
+        "chamar_sql_com_payload_invalido": false,
+        "recibo_uuid_possivel": false,
+        "destruir_sem_recibo": false,
+        "exit_code": null,
+        "continuar_para_seguinte": null,
+        "decisao_necessaria": "Avaliar e formalizar a proposta de Claude de desativar reversivelmente a versão inválida e continuar a fila. Não há recibo UUID; manter rastreabilidade pelo nome exato da versão e definir recuperação. Nenhuma destruição sem recibo é adotada nesta fixture.",
+        "proposta_Gemini_recusada": "Destruir imediatamente a versão inválida sem recibo confirmado.",
+        "proposta_Claude_22_07": {
+          "estado": "proposta_nao_adotada_depende_de_decisao",
+          "acao": "DESATIVAR",
+          "reversivel": true,
+          "log": {
+            "versao": "1",
+            "resultado": "PEDIDO_INVALIDO"
+          },
+          "log_sem_conteudo": true,
+          "seguir_fila": true,
+          "destruicao": "decisao_separada_do_dono"
+        }
+      },
+      "depende_de_decisao": true,
+      "estado": "pendente_decisao_contrato",
+      "invalido_intencional": [
+        "pedidos[0].payload.pedido_id"
+      ]
+    },
+    {
+      "id": "CEN-10-CONCORRENCIA-OCUPADO",
+      "origem_id": "CEN-10-CONCORRENCIA-OCUPADO",
+      "objetivo": "Trava de sessão global impede execução simultânea sem travar as transações.",
+      "nivel": "cli",
+      "estado_inicial": {
+        "tempo_agora": "2026-09-28T22:00:00Z",
+        "ambiente": "hml",
+        "organizacao_ativa": true,
+        "usuario_ativo_com_papel_valido": true,
+        "vinculo_alvo": "ausente",
+        "recibos": [],
+        "pedidos_acesso": [
+          {
+            "codigo": "0123456789",
+            "issuer": "https://idp.sintetico.invalid",
+            "subject": "subject-sintetico-10-1",
+            "criado_em": "2026-09-28T18:00:00Z",
+            "expira_em": "2026-09-29T18:00:00Z",
+            "consumido": false
+          }
+        ],
+        "lock_global": "mantido_pela_execucao_E1_em_conexao_viva"
+      },
+      "pedidos": [
+        {
+          "ref": "P",
+          "versao": "1",
+          "createTime": "2026-09-28T21:50:00Z",
+          "etag": "etag-sintetico-1",
+          "estado_segredo": "ENABLED",
+          "payload": {
+            "pedido_id": "00000000-0000-4000-8000-000000000012",
+            "acao": "conceder",
+            "organizacao": "22222222-2222-4222-8222-222222222222",
+            "usuario": "33333333-3333-4333-8333-333333333333",
+            "responsavel": "Operador sintético",
+            "motivo": "Teste de contrato da fila",
+            "codigo": "0123456789"
+          }
+        }
+      ],
+      "passos": [
+        {
+          "acao": "executar_cli_concorrente",
+          "execucao": "E2"
+        }
+      ],
+      "esperado": {
+        "resultado": "OCUPADO",
+        "exit_code": 1,
+        "leituras_de_segredo": 0,
+        "chamadas_processador_sql": 0,
+        "novos_recibos": 0,
+        "novos_efeitos": 0
+      },
+      "depende_de_decisao": false,
+      "estado": "proposto_nao_executado"
+    },
+    {
+      "id": "CEN-11-FALHA-INFRAESTRUTURA-SQL",
+      "origem_id": "CEN-11-FALHA-INFRAESTRUTURA-SQL",
+      "objetivo": "Erro de conexão/infra durante transação reverte tudo e encerra consumo.",
+      "nivel": "cli",
+      "estado_inicial": {
+        "tempo_agora": "2026-09-28T22:00:00Z",
+        "ambiente": "hml",
+        "organizacao_ativa": true,
+        "usuario_ativo_com_papel_valido": true,
+        "vinculo_alvo": "ausente",
+        "recibos": [],
+        "pedidos_acesso": [
+          {
+            "codigo": "0123456789",
+            "issuer": "https://idp.sintetico.invalid",
+            "subject": "subject-sintetico-11-1",
+            "criado_em": "2026-09-28T18:00:00Z",
+            "expira_em": "2026-09-29T18:00:00Z",
+            "consumido": false
+          }
+        ]
+      },
+      "pedidos": [
+        {
+          "ref": "P",
+          "versao": "1",
+          "createTime": "2026-09-28T21:50:00Z",
+          "etag": "etag-sintetico-1",
+          "estado_segredo": "ENABLED",
+          "payload": {
+            "pedido_id": "00000000-0000-4000-8000-000000000013",
+            "acao": "conceder",
+            "organizacao": "22222222-2222-4222-8222-222222222222",
+            "usuario": "33333333-3333-4333-8333-333333333333",
+            "responsavel": "Operador sintético",
+            "motivo": "Teste de contrato da fila",
+            "codigo": "0123456789"
+          }
+        }
+      ],
+      "passos": [
+        {
+          "acao": "executar_cli",
+          "pedido_ref": "P",
+          "execucao": "E1",
+          "falha": "encerrar_conexao_com_transacao_aberta_antes_de_enviar_COMMIT"
+        },
+        {
+          "acao": "aguardar_rollback_confirmado_pelo_servidor_sem_sleep",
+          "pedido_ref": "P"
+        },
+        {
+          "acao": "executar_cli",
+          "pedido_ref": "P",
+          "execucao": "E2"
+        }
+      ],
+      "esperado": {
+        "execucoes": [
+          {
+            "ref": "E1",
+            "exit_code": 3,
+            "commit_enviado": false,
+            "rollback_confirmado": true,
+            "recibos_apos": 0,
+            "efeitos_persistidos_acumulados": 0,
+            "destruir_versao": false,
+            "estado_segredo": "ENABLED"
+          },
+          {
+            "ref": "E2",
+            "exit_code": 0,
+            "resultado": "concedido",
+            "repetido": false,
+            "recibos_apos": 1,
+            "efeitos_persistidos_acumulados": 1,
+            "destruir_versao_exata": "1"
+          }
+        ],
+        "limite": "Não inferir rollback de desconexão genérica; a injeção ocorre comprovadamente antes de enviar COMMIT."
+      },
+      "depende_de_decisao": false,
+      "estado": "proposto_nao_executado"
+    },
+    {
+      "id": "CEN-12-DESTRUICAO-FALHA-ETAG",
+      "origem_id": "CEN-12-DESTRUICAO-FALHA-ETAG",
+      "objetivo": "CLI tenta destruir versão mas etag mudou ou falha isolada na API do Secret Manager; não deve corromper banco.",
+      "nivel": "cli",
+      "estado_inicial": {
+        "tempo_agora": "2026-09-28T22:00:00Z",
+        "ambiente": "hml",
+        "organizacao_ativa": true,
+        "usuario_ativo_com_papel_valido": true,
+        "vinculo_alvo": "ausente",
+        "recibos": [],
+        "pedidos_acesso": [
+          {
+            "codigo": "0123456789",
+            "issuer": "https://idp.sintetico.invalid",
+            "subject": "subject-sintetico-12-1",
+            "criado_em": "2026-09-28T18:00:00Z",
+            "expira_em": "2026-09-29T18:00:00Z",
+            "consumido": false
+          }
+        ]
+      },
+      "pedidos": [
+        {
+          "ref": "A",
+          "versao": "1",
+          "createTime": "2026-09-28T21:50:00Z",
+          "etag": "etag-sintetico-1",
+          "estado_segredo": "ENABLED",
+          "payload": {
+            "pedido_id": "00000000-0000-4000-8000-000000000014",
+            "acao": "conceder",
+            "organizacao": "22222222-2222-4222-8222-222222222222",
+            "usuario": "33333333-3333-4333-8333-333333333333",
+            "responsavel": "Operador sintético",
+            "motivo": "Teste de contrato da fila",
+            "codigo": "0123456789"
+          }
+        },
+        {
+          "ref": "B",
+          "versao": "2",
+          "createTime": "2026-09-28T21:51:00Z",
+          "etag": "etag-sintetico-2",
+          "estado_segredo": "ENABLED",
+          "payload": {
+            "pedido_id": "00000000-0000-4000-8000-000000000015",
+            "acao": "revogar",
+            "organizacao": "22222222-2222-4222-8222-222222222222",
+            "usuario": "33333333-3333-4333-8333-333333333333",
+            "responsavel": "Operador sintético",
+            "motivo": "Teste de contrato da fila"
+          }
+        }
+      ],
+      "passos": [
+        {
+          "acao": "executar_cli",
+          "pedido_ref": "A",
+          "execucao": "E1",
+          "falha": "etag_muda_apos_leitura_antes_de_destroy",
+          "etag_novo": "etag-sintetico-1-novo",
+          "estado_apos": "ENABLED"
+        },
+        {
+          "acao": "executar_cli",
+          "execucao": "E2",
+          "ordem_pedidos": [
+            "A",
+            "B"
+          ]
+        }
+      ],
+      "esperado": {
+        "execucoes": [
+          {
+            "ref": "E1",
+            "exit_code": 3,
+            "resultado_falha": "falha_precondicao_etag",
+            "recibos_apos": 1,
+            "efeitos_acumulados": 1,
+            "recibo_A_confirmado": true,
+            "recibo_A_desfeito": false,
+            "estado_segredo_A": "ENABLED",
+            "processar_B": false,
+            "destruir_B": false
+          },
+          {
+            "ref": "E2",
+            "exit_code": 0,
+            "retornos": [
+              {
+                "pedido_ref": "A",
+                "resultado": "concedido",
+                "repetido": true
+              },
+              {
+                "pedido_ref": "B",
+                "resultado": "revogado",
+                "revogados": 1,
+                "repetido": false
+              }
+            ],
+            "destruicoes_em_ordem": [
+              {
+                "versao": "1",
+                "etag": "etag-sintetico-1-novo"
+              },
+              {
+                "versao": "2",
+                "etag": "etag-sintetico-2"
+              }
+            ],
+            "recibos_apos": 2,
+            "efeitos_acumulados": 2
+          }
+        ],
+        "vinculo_alvo_final": "ausente",
+        "reler_etag_na_nova_execucao": true
+      },
+      "depende_de_decisao": false,
+      "estado": "proposto_nao_executado"
+    },
+    {
+      "id": "CEN-13-PRIVACIDADE-DE-LOGS",
+      "origem_id": "CEN-13-PRIVACIDADE-DE-LOGS",
+      "objetivo": "Garantir que hash, subject, e código Crockford10 NUNCA vazem para os logs do CLI.",
+      "nivel": "cli",
+      "estado_inicial": {
+        "tempo_agora": "2026-09-28T22:00:00Z",
+        "ambiente": "hml",
+        "organizacao_ativa": true,
+        "usuario_ativo_com_papel_valido": true,
+        "vinculo_alvo": "ausente",
+        "recibos": [],
+        "pedidos_acesso": [
+          {
+            "codigo": "ABCDEF1234",
+            "issuer": "https://idp.sintetico.invalid",
+            "subject": "subject-sintetico-13-1",
+            "criado_em": "2026-09-28T18:00:00Z",
+            "expira_em": "2026-09-29T18:00:00Z",
+            "consumido": false
+          }
+        ]
+      },
+      "pedidos": [
+        {
+          "ref": "P",
+          "versao": "1",
+          "createTime": "2026-09-28T21:50:00Z",
+          "etag": "etag-sintetico-1",
+          "estado_segredo": "ENABLED",
+          "payload": {
+            "pedido_id": "00000000-0000-4000-8000-000000000016",
+            "acao": "conceder",
+            "organizacao": "22222222-2222-4222-8222-222222222222",
+            "usuario": "33333333-3333-4333-8333-333333333333",
+            "responsavel": "Operador sintético",
+            "motivo": "Teste de contrato da fila",
+            "codigo": "ABCDEF1234"
+          }
+        }
+      ],
+      "passos": [
+        {
+          "acao": "executar_cli",
+          "pedido_ref": "P"
+        }
+      ],
+      "esperado": {
+        "resultado": "concedido",
+        "exit_code": 0,
+        "campos_exatos_log_de_pedido": [
+          "pedido_id",
+          "versao",
+          "resultado",
+          "repetido"
+        ],
+        "nao_emitir": [
+          "codigo",
+          "subject",
+          "conteudo_hash",
+          "codigo_hash",
+          "payload_integral"
+        ],
+        "valores_proibidos_dinamicos": [
+          "payload.codigo",
+          "sha256(codigo_normalizado)",
+          "conteudo_hash",
+          "estado_inicial.pedidos_acesso[0].subject"
+        ],
+        "log_esperado": {
+          "pedido_id": "00000000-0000-4000-8000-000000000016",
+          "versao": "1",
+          "resultado": "concedido",
+          "repetido": false
+        },
+        "limite": "A lista de campos refere-se ao log do pedido, sem inventar formato de diagnósticos de infraestrutura."
+      },
+      "depende_de_decisao": false,
+      "estado": "proposto_nao_executado"
+    },
+    {
+      "id": "CEN-14-RECUSA-DE-NEGOCIO-FINAL",
+      "origem_id": "CEN-14-RECUSA-DE-NEGOCIO-FINAL",
+      "objetivo": "Erro nas regras de negócio (ex: usuário inexistente) salva recibo com falha e não retenta regras na próxima execução.",
+      "nivel": "banco",
+      "estado_inicial": {
+        "tempo_agora": "2026-09-28T22:00:00Z",
+        "ambiente": "hml",
+        "organizacao_ativa": true,
+        "usuario_ativo_com_papel_valido": false,
+        "vinculo_alvo": "ausente",
+        "recibos": [],
+        "pedidos_acesso": [
+          {
+            "codigo": "0123456789",
+            "issuer": "https://idp.sintetico.invalid",
+            "subject": "subject-sintetico-14-1",
+            "criado_em": "2026-09-28T18:00:00Z",
+            "expira_em": "2026-09-29T18:00:00Z",
+            "consumido": false
+          }
+        ],
+        "usuario_existe": false
+      },
+      "pedidos": [
+        {
+          "ref": "P",
+          "versao": "1",
+          "createTime": "2026-09-28T21:50:00Z",
+          "etag": "etag-sintetico-1",
+          "estado_segredo": "ENABLED",
+          "payload": {
+            "pedido_id": "00000000-0000-4000-8000-000000000017",
+            "acao": "conceder",
+            "organizacao": "22222222-2222-4222-8222-222222222222",
+            "usuario": "33333333-3333-4333-8333-333333333333",
+            "responsavel": "Operador sintético",
+            "motivo": "Teste de contrato da fila",
+            "codigo": "0123456789"
+          }
+        }
+      ],
+      "passos": [
+        {
+          "acao": "processar_pedido",
+          "pedido_ref": "P"
+        },
+        {
+          "acao": "criar_usuario_valido_depois_da_recusa",
+          "pedido_ref": "P"
+        },
+        {
+          "acao": "processar_pedido",
+          "pedido_ref": "P"
+        }
+      ],
+      "esperado": {
+        "retornos": [
+          {
+            "pedido_ref": "P",
+            "resultado": "USUARIO_INVALIDO",
+            "repetido": false
+          },
+          {
+            "pedido_ref": "P",
+            "resultado": "USUARIO_INVALIDO",
+            "repetido": true
+          }
+        ],
+        "recibos_finais": 1,
+        "recibo_original_inalterado": true,
+        "efeitos_aplicados": 0,
+        "reavaliar_negocio_no_replay": false
+      },
+      "depende_de_decisao": false,
+      "estado": "proposto_nao_executado"
+    },
+    {
+      "id": "CEN-15-RESTRICAO-RUNTIME-RLS",
+      "origem_id": "CEN-15-RESTRICAO-RUNTIME-RLS",
+      "objetivo": "Separar proibição do runtime e permissões internas necessárias ao SECURITY DEFINER, aguardando política explícita do autor.",
+      "nivel": "banco",
+      "estado_inicial": {
+        "tempo_agora": "2026-09-28T22:00:00Z",
+        "ambiente": "hml",
+        "organizacao_ativa": true,
+        "usuario_ativo_com_papel_valido": true,
+        "vinculo_alvo": "ausente",
+        "recibos": [],
+        "pedidos_acesso": [
+          {
+            "codigo": "0123456789",
+            "issuer": "https://idp.sintetico.invalid",
+            "subject": "subject-sintetico-15-1",
+            "criado_em": "2026-09-28T18:00:00Z",
+            "expira_em": "2026-09-29T18:00:00Z",
+            "consumido": false
+          }
+        ],
+        "role_ativa": "app_runtime"
+      },
+      "pedidos": [
+        {
+          "ref": "P",
+          "versao": "1",
+          "createTime": "2026-09-28T21:50:00Z",
+          "etag": "etag-sintetico-1",
+          "estado_segredo": "ENABLED",
+          "payload": {
+            "pedido_id": "00000000-0000-4000-8000-000000000018",
+            "acao": "conceder",
+            "organizacao": "22222222-2222-4222-8222-222222222222",
+            "usuario": "33333333-3333-4333-8333-333333333333",
+            "responsavel": "Operador sintético",
+            "motivo": "Teste de contrato da fila",
+            "codigo": "0123456789"
+          }
+        }
+      ],
+      "passos": [
+        {
+          "acao": "tentar_SELECT_recibos",
+          "papel": "app_runtime"
+        },
+        {
+          "acao": "tentar_INSERT_recibo",
+          "papel": "app_runtime"
+        },
+        {
+          "acao": "tentar_EXECUTE_processar_pedido",
+          "pedido_ref": "P",
+          "papel": "app_runtime"
+        },
+        {
+          "acao": "invocar_funcao_com_SECURITY_DEFINER",
+          "pedido_ref": "P",
+          "papel": "migrator",
+          "papel_efetivo_interno": "app_sessao"
+        }
+      ],
+      "esperado": {
+        "resultado": "PENDENTE_DECISAO_CONTRATO",
+        "invariantes_runtime": {
+          "papel": "app_runtime",
+          "pode_ler_recibos": false,
+          "pode_inserir_recibos": false,
+          "pode_executar_funcao": false,
+          "negacao": "Negação de privilégio/EXECUTE; não aceitar simplesmente zero linhas como prova de ausência de acesso."
+        },
+        "invariantes_funcao_interna": {
+          "dono": "app_sessao",
+          "bypassrls": false,
+          "precisa_SELECT_e_INSERT_com_politicas_RLS": true,
+          "migrator_pode_invocar": true,
+          "recibo_gerado_na_mesma_transacao_do_efeito": true
+        },
+        "decisao_necessaria": "Claude aceitou em 22:07 o princípio de SELECT/INSERT e políticas internas para app_sessao, runtime sem acesso. Ainda falta formalizar essa correção no contrato e na migração; manter o cenário pendente até essa definição concreta, sem inventar grants/SQL.",
+        "implementacao_sql_testada": false,
+        "principio_aceito_pelo_autor": true
+      },
+      "depende_de_decisao": true,
+      "estado": "pendente_formalizacao_contrato_e_politicas"
+    }
+  ],
+  "parecer_autor_posterior": {
+    "fonte": "work/fontes-claude/revisao-adaptador-gemini-228c6c1.md:2772",
+    "data": "2026-09-28T22:07:00Z",
+    "estado": "parecer recebido; correção do contrato/implementação ainda pendente",
+    "aceitos": [
+      "hashCanonico sobre campos fixos normalizados",
+      "SELECT/INSERT e políticas internas para app_sessao, runtime sem acesso",
+      "versao_segredo na assinatura",
+      "listagem de todas as páginas ENABLED, createTime ascendente, desempate pelo número da versão"
+    ],
+    "proposta_nao_adotada": "Para inválido, desativar reversivelmente a versão, logar PEDIDO_INVALIDO sem conteúdo e seguir fila; destruição seria decisão do dono."
+  }
+}
