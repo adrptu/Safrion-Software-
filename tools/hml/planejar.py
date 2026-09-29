@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -13,6 +14,7 @@ import tempfile
 PROJETO = 'safrion-hml-1390827288'
 REPO = 'adrptu/Safrion-Software-'
 RAIZ = Path(__file__).resolve().parents[2]
+TEMPO_COMANDO = 600
 
 
 class Recusa(Exception):
@@ -110,20 +112,39 @@ def resumir_plano(plano):
 def ambiente_ferramentas(env, temp):
     adc = env.get('GOOGLE_APPLICATION_CREDENTIALS', '')
     exigir(adc and Path(adc).is_file() and not Path(adc).is_symlink(), 'ADC_AUSENTE')
+    cli_config = temp / 'terraform.rc'
+    cli_config.write_text('', encoding='utf-8')
     return {'PATH': '/usr/bin:/bin', 'LANG': 'C.UTF-8', 'HOME': env.get('HOME', ''),
             'TMPDIR': str(temp), 'GOOGLE_APPLICATION_CREDENTIALS': adc,
             'CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE': adc, 'CLOUDSDK_CONFIG': str(temp / 'gcloud'),
             'CLOUDSDK_PYTHON': sys.executable, 'CLOUDSDK_CORE_DISABLE_PROMPTS': '1',
-            'TF_IN_AUTOMATION': 'true', 'TF_INPUT': 'false', 'TF_DATA_DIR': str(temp / 'tfdata')}
+            'TF_IN_AUTOMATION': 'true', 'TF_INPUT': 'false', 'TF_DATA_DIR': str(temp / 'tfdata'),
+            'TF_CLI_CONFIG_FILE': str(cli_config)}
 
 
 def comando(args, *, env, cwd, saida, codigo, permitidos=(0,)):
     # Erros de provider, validação de tfvars e guard podem conter valores privados.
     with saida.open('wb') as out, saida.with_suffix('.stderr').open('wb') as err:
         try:
-            proc = subprocess.run(args, cwd=cwd, env=env, stdin=subprocess.DEVNULL,
-                                  stdout=out, stderr=err, timeout=600, check=False)
-        except (OSError, subprocess.TimeoutExpired):
+            proc = subprocess.Popen(args, cwd=cwd, env=env, stdin=subprocess.DEVNULL,
+                                    stdout=out, stderr=err, start_new_session=True)
+        except OSError:
+            raise Recusa(codigo) from None
+        try:
+            proc.wait(timeout=TEMPO_COMANDO)
+        except subprocess.TimeoutExpired:
+            # Dar à CLI chance de liberar o lock; depois encerrar seus descendentes antes de limpar os arquivos.
+            try:
+                proc.send_signal(signal.SIGINT)
+                proc.wait(timeout=5)
+            except (ProcessLookupError, subprocess.TimeoutExpired):
+                pass
+            finally:
+                try:
+                    os.killpg(proc.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                proc.wait()
             raise Recusa(codigo) from None
     exigir(proc.returncode in permitidos, codigo)
     return proc.returncode

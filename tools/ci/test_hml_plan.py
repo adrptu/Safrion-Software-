@@ -12,8 +12,11 @@ import io
 import json
 import os
 from pathlib import Path
+import signal
+import subprocess
 import sys
 import tempfile
+import time
 import unittest
 from unittest import mock
 
@@ -96,9 +99,9 @@ def plano():
 
 
 class RecusasSemDados(unittest.TestCase):
-    def recusa(self, funcao, *args):
+    def recusa(self, funcao, *args, **kwargs):
         with self.assertRaises(planejar.Recusa) as erro:
-            funcao(*args)
+            funcao(*args, **kwargs)
         self.assertRegex(str(erro.exception), r'^[A-Z][A-Z0-9_]*$')
         self.assertNotIn(CANARIO, str(erro.exception))
 
@@ -461,6 +464,77 @@ class PlanejamentoLocal(RecusasSemDados):
         self.recusa(self.executar)
         self.assertEqual(self.chamadas, [])
         self.conferir_limpeza()
+
+    def test_configuracao_cli_temporaria_vazia_isola_terraformrc_do_home(self):
+        hostil = self.raiz / '.terraformrc'
+        conteudo = 'provider_installation { dev_overrides { "hashicorp/google" = "/nao-executar" } }\n'
+        hostil.write_text(conteudo)
+        env = {**self.env, 'TF_CLI_CONFIG_FILE': str(hostil)}
+        limpo = planejar.ambiente_ferramentas(env, self.runner)
+        escolhido = Path(limpo['TF_CLI_CONFIG_FILE'])
+        self.assertNotEqual(escolhido, hostil)
+        self.assertTrue(escolhido.resolve().is_relative_to(self.runner.resolve()))
+        self.assertTrue(escolhido.is_file())
+        self.assertEqual(escolhido.read_bytes(), b'')
+        self.assertEqual(hostil.read_text(), conteudo)
+
+    def test_timeout_encerra_filho_que_ignora_sigint_antes_de_limpar(self):
+        # O marcador fica fora do workspace apagado: um órfão conseguiria escrevê-lo após a limpeza.
+        marcador = self.raiz / 'efeito-indevido'
+        pronto = self.raiz / 'filho-pronto'
+        pid_filho = self.raiz / 'filho.pid'
+        codigo_filho = (
+            'import os,signal,sys,time; from pathlib import Path; '
+            'signal.signal(signal.SIGINT, signal.SIG_IGN); '
+            'Path(sys.argv[1]).write_text(str(os.getpid())); Path(sys.argv[2]).touch(); '
+            'time.sleep(.6); Path(sys.argv[3]).write_text("efeito")'
+        )
+        codigo_pai = (
+            'import subprocess,sys; '
+            'filho=subprocess.Popen([sys.executable,"-c",sys.argv[1],*sys.argv[2:]]); filho.wait()'
+        )
+        processos = []
+        popen_real = subprocess.Popen
+
+        def iniciar_e_aguardar_prontidao(*args, **kwargs):
+            proc = popen_real(*args, **kwargs)
+            processos.append(proc)
+            # Não simula processo ou sinal: só exclui o tempo de startup da janela de timeout de 100 ms.
+            limite = time.monotonic() + 3
+            while not pronto.exists() and proc.poll() is None and time.monotonic() < limite:
+                time.sleep(.005)
+            self.assertTrue(pronto.is_file(), 'A prova exige o filho real pronto antes do timeout.')
+            return proc
+
+        try:
+            with tempfile.TemporaryDirectory(prefix='comando-', dir=self.runner) as pasta:
+                workspace = Path(pasta)
+                with mock.patch.object(planejar, 'TEMPO_COMANDO', .1), \
+                        mock.patch.object(planejar.subprocess, 'Popen', side_effect=iniciar_e_aguardar_prontidao):
+                    self.recusa(planejar.comando,
+                                [sys.executable, '-c', codigo_pai, codigo_filho,
+                                 str(pid_filho), str(pronto), str(marcador)],
+                                env={'PATH': '/usr/bin:/bin', 'PYTHONDONTWRITEBYTECODE': '1'},
+                                cwd=workspace, saida=workspace / 'comando.stdout', codigo='PRAZO_TESTE')
+                self.assertTrue(pid_filho.is_file())
+            self.assertFalse(workspace.exists())
+            time.sleep(.8)  # Janela real para detectar o efeito tardio do filho, caso a árvore tenha sobrevivido.
+            self.assertFalse(marcador.exists(), 'Filho sobrevivente escreveu após a recusa e a limpeza.')
+        finally:
+            # Só alcança processos criados nesta prova; nunca deixa órfãos se alguma asserção falhar.
+            filho = int(pid_filho.read_text()) if pid_filho.is_file() else None
+            for proc in processos:
+                try:
+                    os.killpg(proc.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                if filho is not None:
+                    try:
+                        if os.getpgid(filho) == proc.pid:
+                            os.kill(filho, signal.SIGKILL)
+                    except ProcessLookupError:
+                        pass
+                proc.wait(timeout=3)
 
 
 if __name__ == '__main__':

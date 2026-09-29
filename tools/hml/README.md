@@ -27,7 +27,9 @@ a execução. Terraform 1.16.3 e gcloud 586.0.0 são fixados; actions usam SHA c
 
 O helper recusa configuração duplicada/desconhecida, outro destino, fase 2, plano destrutivo, guard reprovado e
 readback divergente. Executa `init` com lockfile somente leitura, `plan` com lock e `show` privado. Não recebe
-`TF_VAR_*`, `TF_CLI_ARGS` ou `TF_LOG` herdados. Exemplo `.tfvars.example` não é configuração automática.
+`TF_VAR_*`, `TF_CLI_ARGS` ou `TF_LOG` herdados; arquivo CLI vazio impede carregar `~/.terraformrc`.
+Exemplo `.tfvars.example` não é configuração automática. O arquivo temporário de credenciais criado pela action
+`auth` fica no checkout até sua limpeza final: nenhum passo deste job deve enviar o workspace como artefato.
 
 Binário e hash ficam privados em `planos/<run_id>/<tentativa>/`, com escrita condicionada à ausência do objeto e
 expiração de 30 dias. O recibo no summary contém commit, hash/geração da configuração, hash/geração do plano,
@@ -40,6 +42,9 @@ inclusive por exceção; encerramento abrupto depende do descarte do runner efê
 privado até expirar; não gera recibo de sucesso. A identidade atual tem poderes de administração da HML:
 PLAN é uma restrição deste workflow, **não IAM somente leitura**. `objectAdmin` pode alterar objetos; geração e hash
 externo detectam divergência, não tornam o bucket imutável nem protegem contra administradores de ambas as contas.
+Timeout tenta interromper a CLI cooperativamente e encerra o grupo de processos antes de remover temporários.
+Interrupção abrupta ainda pode deixar um lock remoto; conferir execução e lock com a equipe antes de desbloquear,
+sem `force-unlock` automático.
 
 Os testes locais de contrato e orquestração estão em `tools/ci/test_hml_plan.py`, executados pelo check existente
 de documentação/CI. Usam dados sintéticos e ferramentas simuladas; não comprovam WIF, IAM ou Terraform real.
