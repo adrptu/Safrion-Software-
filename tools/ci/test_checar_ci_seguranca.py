@@ -71,6 +71,61 @@ class PortaoSegurancaCI(unittest.TestCase):
         code, out = self.rodar(extra=ref, arquivos={'.trivyignore.yaml': 'vulnerabilities:\n  - id: CVE-2026-0001\n'})
         self.assertEqual(code, 1); self.assertIn('statement', out); self.assertIn('expired_at', out)
 
+    def test_hash_entre_aspas_em_trivyignores_falha(self):
+        # PR4-TRIAGEM-01: " #x.yaml" virava vazio no portão, e a action exportava TRIVY_IGNOREFILE=#x.yaml.
+        for aspas in ('"', "'"):
+            with self.subTest(aspas=aspas):
+                ref = f'          trivyignores: {aspas} #x.yaml{aspas}\n'
+                code, out = self.rodar(extra=ref, arquivos={'#x.yaml': 'vulnerabilities:\n  - id: CVE-2026-0001\n'})
+                self.assertEqual(code, 1, out); self.assertIn("não '#x.yaml'", out)
+
+    def test_trivyignores_com_comentario_fora_das_aspas_passa(self):
+        y = 'vulnerabilities:\n  - id: CVE-2026-0001\n    statement: pacote só de teste, fora da imagem publicada\n    expired_at: 2026-10-20\n'
+        for ref in ('.trivyignore.yaml # exceções revisadas', '".trivyignore.yaml" # exceções revisadas', "'.trivyignore.yaml'"):
+            with self.subTest(ref=ref):
+                code, out = self.rodar(extra=f'          trivyignores: {ref}\n', arquivos={'.trivyignore.yaml': y})
+                self.assertEqual(code, 0, out)
+
+    def test_valor_de_politica_fora_do_subconjunto_falha(self):
+        casos = {'exit-code: "1"': ['exit-code: "1', 'exit-code: "1"x', 'exit-code: &a "1"'],
+                 'severity: HIGH,CRITICAL': ['severity: [HIGH, CRITICAL]', 'severity: >'],
+                 'ignore-unfixed: false': ['ignore-unfixed: "fal\\\\se"']}
+        for original, trocas in casos.items():
+            for troca in trocas:
+                with self.subTest(troca=troca):
+                    code, out = self.rodar(workflow=PASSO.format(extra='').replace(original, troca))
+                    self.assertEqual(code, 1, out); self.assertIn('fora do subconjunto aceito', out)
+        code, out = self.rodar(extra='          trivyignores: .trivyignore.yaml#x\n')
+        self.assertEqual(code, 1, out); self.assertIn("não '.trivyignore.yaml#x'", out)
+
+    def test_variavel_trivy_no_workflow_falha(self):
+        # PR4-TRIAGEM-02: com ignore-unfixed: false e sem trivyignores, TRIVY_IGNORE_UNFIXED=true e TRIVY_IGNOREFILE
+        # herdados chegavam à CLI e o portão saía 0. Escopos: workflow, job, passo e $GITHUB_ENV.
+        job = PASSO.format(extra='').replace('    runs-on: ubuntu-latest\n', '    runs-on: ubuntu-latest\n    env:\n      TRIVY_IGNORE_UNFIXED: "true"\n      TRIVY_IGNOREFILE: "y.yaml"\n')
+        casos = {
+            'workflow': 'env:\n  TRIVY_IGNORE_UNFIXED: "true"\n' + PASSO.format(extra=''),
+            'job': job,
+            'passo': PASSO.format(extra='        env:\n          "TRIVY_IGNOREFILE": y.yaml\n'),
+            'GITHUB_ENV': PASSO.format(extra='').replace('    steps:\n', '    steps:\n      - run: echo "TRIVY_SEVERITY=LOW" >> "$GITHUB_ENV"\n'),
+        }
+        for escopo, wf in casos.items():
+            with self.subTest(escopo=escopo):
+                code, out = self.rodar(workflow=wf)
+                self.assertEqual(code, 1, out); self.assertIn('muda a política do Trivy', out)
+        code, out = self.rodar(workflow=job)
+        self.assertIn('TRIVY_IGNORE_UNFIXED', out); self.assertIn('TRIVY_IGNOREFILE', out)
+
+    def test_env_dinamico_falha(self):
+        wf = PASSO.format(extra='').replace('    runs-on: ubuntu-latest\n', '    runs-on: ubuntu-latest\n    env: ${{ fromJSON(vars.AMBIENTE) }}\n')
+        code, out = self.rodar(workflow=wf)
+        self.assertEqual(code, 1, out); self.assertIn('env dinâmico', out)
+
+    def test_env_sem_trivy_e_comentario_passam(self):
+        wf = '# TRIVY_IGNOREFILE não é usado: a política vem dos inputs.\n' + PASSO.format(extra='').replace(
+            '    runs-on: ubuntu-latest\n', '    runs-on: ubuntu-latest\n    env:\n      NODE_ENV: test\n')
+        code, out = self.rodar(workflow=wf)
+        self.assertEqual(code, 0, out)
+
     def test_excecao_vencida_ou_longa_falha(self):
         ref = '          trivyignores: .trivyignore.yaml\n'
         for data in ('2026-09-01', '2027-03-01'):
