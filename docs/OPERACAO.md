@@ -93,6 +93,7 @@ Saída do job:
 Nenhuma saída traz código, subject, hash ou o conteúdo do pedido.
 
 **Registro e limites:**
+- a execução pode continuar até cerca de 31 s depois da última linha de resultado: é o limitador de renovação do conector do Cloud SQL encerrando (ADR 0006). O resultado e o código de saída já valem; não é travamento;
 - cada concessão e cada revogação ficam gravadas em `app.identity_link_event`, sem poder ser alteradas pela aplicação, com responsável, motivo e usuário do banco;
 - o `migrator` lê esse registro;
 - limites de HML: até 100 pedidos pendentes e 1000 guardados;
