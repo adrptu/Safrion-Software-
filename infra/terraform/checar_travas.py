@@ -587,14 +587,30 @@ def _papel_de_projeto(v: Bloco, locais: dict[str, list[Token]], customizados: di
         if len(origem) != 3 or origem[:2] != [('nome', 'local'), ('simbolo', '.')] or origem[2][1] not in locais:
             return 'papel each.value com for_each fora da forma local.<nome>'
         valor = [t for t in locais[origem[2][1]] if t.tipo != 'fim_linha']
-        # Só strings literais "roles/…"; referência só como condição (var.x ? … : …), que não produz papel.
-        for i, t in enumerate(valor):
-            if t.tipo == 'modelo' or (t.tipo == 'texto' and not t.valor.startswith('roles/')):
-                return f'local.{origem[2][1]} com valor que não é papel literal ({t.valor!r})'
-            if t.tipo == 'nome' and t.valor in ('var', 'local', 'data', 'module'):
-                seguinte = valor[i + 3] if i + 3 < len(valor) else None
-                if not (seguinte and (seguinte.tipo, seguinte.valor) == ('simbolo', '?')):
-                    return f'local.{origem[2][1]} com referência que pode produzir papel ({t.valor}.…)'
+        # Lista de papéis literais "roles/…", com toset/concat e, como única referência, uma condição var.x ? … : …, que
+        # escolhe entre listas e não produz papel. Qualquer outro nome (recurso, local, mapa, função) falha: por um mapa,
+        # um papel customizado largo entrava sem passar pela referência direta (revisão do Codex de 5f3437e).
+        i = 0
+        while i < len(valor):
+            t = valor[i]
+            if t.tipo == 'texto':
+                if not t.valor.startswith('roles/'):
+                    return f'local.{origem[2][1]} com valor que não é papel literal ({t.valor!r})'
+            elif t.tipo == 'simbolo':
+                if t.valor not in ('[', ']', '(', ')', ',', '?', ':'):
+                    return f'local.{origem[2][1]} fora da forma de lista literal de papéis (símbolo {t.valor!r})'
+            elif t.tipo == 'nome' and t.valor in ('toset', 'concat'):
+                if not (i + 1 < len(valor) and (valor[i + 1].tipo, valor[i + 1].valor) == ('simbolo', '(')):
+                    return f'local.{origem[2][1]} com {t.valor} fora da forma de chamada'
+            elif t.tipo == 'nome' and t.valor == 'var':
+                condicao = [(x.tipo, x.valor) for x in valor[i + 1:i + 4]]
+                if len(condicao) != 3 or condicao[0] != ('simbolo', '.') or condicao[1][0] != 'nome' or condicao[2] != ('simbolo', '?'):
+                    return f'local.{origem[2][1]} com referência que pode produzir papel (var.…)'
+                i += 3
+                continue
+            else:
+                return f'local.{origem[2][1]} fora da forma de lista literal de papéis ({t.tipo} {t.valor!r})'
+            i += 1
         return None
     if (len(papel) == 5 and papel[:2] == [('nome', PAPEL_CUSTOMIZADO), ('simbolo', '.')]
             and papel[3] == ('simbolo', '.') and papel[4] in (('nome', 'name'), ('nome', 'id'))):

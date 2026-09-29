@@ -772,6 +772,33 @@ class Bootstrap(unittest.TestCase):
                          ["wif.tf: fora do subconjunto do analisador e com ['google_project_iam'] no texto; IAM de "
                           'projeto e papéis só em arquivo conferível'])
 
+    def test_each_value_so_de_lista_literal_de_papeis(self):
+        # Revisão do Codex de 5f3437e: por um mapa no local do for_each, um papel customizado largo entrava.
+        papel_largo = ('resource "google_project_iam_custom_role" "revisao" {\n  role_id = "revisaoExtra"\n'
+                       '  title = "Revisao"\n  permissions = ["secretmanager.versions.add", "secretmanager.versions.enable"]\n}\n')
+        vinculo = ('resource "google_project_iam_member" "revisao" {\n  for_each = local.papeis_revisao\n'
+                   '  project = var.projeto_id\n  role = each.value\n  member = local.membro["sa-preparo"]\n}\n')
+        casos = {
+            'mapa_com_recurso': ('{ grant = google_project_iam_custom_role.revisao.name }', "(símbolo '{')"),
+            'mapa_literal': ('{ grant = "roles/run.viewer" }', "(símbolo '{')"),
+            'lista_com_recurso': ('toset([google_project_iam_custom_role.revisao.name])',
+                                  "(nome 'google_project_iam_custom_role')"),
+            'outro_local': ('concat(local.outros, ["roles/run.viewer"])', "(nome 'local')"),
+            'funcao_fora': ('setunion(["roles/run.viewer"], [])', "(nome 'setunion')"),
+            'variavel_como_valor': ('toset(var.papeis)', 'com referência que pode produzir papel (var.…)'),
+        }
+        for nome, (valor, motivo) in casos.items():
+            with self.subTest(caso=nome):
+                texto = papel_largo + 'locals {\n  papeis_revisao = ' + valor + '\n}\n' + vinculo
+                faltas = self.faltas(extra={'revisao.tf': texto})
+                self.assertTrue(any(f.startswith('revisao.tf:9 google_project_iam_member.revisao: local.papeis_revisao')
+                                    and motivo in f for f in faltas), faltas)
+                self.setUp()
+        # Controle: a forma real (lista literal com condição var.x ? … : …) passa.
+        texto = ('locals {\n  papeis_revisao = toset(concat(["roles/run.viewer"], var.habilitar_iap ? '
+                 '["roles/iap.admin"] : []))\n}\n' + vinculo)
+        self.assertEqual(self.faltas(extra={'revisao.tf': texto}), [])
+
 
 class Plano(unittest.TestCase):
     def plano(self, ssl='ENCRYPTED_ONLY', conector='REQUIRED', redes=None, desconhecido=None, extra=(),
