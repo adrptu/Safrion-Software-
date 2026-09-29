@@ -6,6 +6,7 @@ As recusas protegem o destino e a fase autorizados; o resumo nunca transporta va
 """
 import copy
 from contextlib import redirect_stderr, redirect_stdout
+import errno
 import hashlib
 import importlib.util
 import io
@@ -479,15 +480,18 @@ class PlanejamentoLocal(RecusasSemDados):
         self.assertEqual(hostil.read_text(), conteudo)
 
     def test_timeout_encerra_filho_que_ignora_sigint_antes_de_limpar(self):
-        # O marcador fica fora do workspace apagado: um órfão conseguiria escrevê-lo após a limpeza.
-        marcador = self.raiz / 'efeito-indevido'
+        # O leitor fica fora do workspace apagado e só sai por sinal, nunca por um prazo da fixture.
+        # Assim, startup lento não é confundido com sobrevivência depois da recusa e da limpeza.
+        fifo = self.raiz / 'filho-aguarda'
+        os.mkfifo(fifo, 0o600)
         pronto = self.raiz / 'filho-pronto'
         pid_filho = self.raiz / 'filho.pid'
         codigo_filho = (
-            'import os,signal,sys,time; from pathlib import Path; '
+            'import os,signal,sys; from pathlib import Path; '
             'signal.signal(signal.SIGINT, signal.SIG_IGN); '
+            'fd=os.open(sys.argv[3],os.O_RDWR); '
             'Path(sys.argv[1]).write_text(str(os.getpid())); Path(sys.argv[2]).touch(); '
-            'time.sleep(.6); Path(sys.argv[3]).write_text("efeito")'
+            'os.read(fd,1)'
         )
         codigo_pai = (
             'import subprocess,sys; '
@@ -500,7 +504,7 @@ class PlanejamentoLocal(RecusasSemDados):
             proc = popen_real(*args, **kwargs)
             processos.append(proc)
             # Não simula processo ou sinal: só exclui o tempo de startup da janela de timeout de 100 ms.
-            limite = time.monotonic() + 3
+            limite = time.monotonic() + 10
             while not pronto.exists() and proc.poll() is None and time.monotonic() < limite:
                 time.sleep(.005)
             self.assertTrue(pronto.is_file(), 'A prova exige o filho real pronto antes do timeout.')
@@ -513,13 +517,24 @@ class PlanejamentoLocal(RecusasSemDados):
                         mock.patch.object(planejar.subprocess, 'Popen', side_effect=iniciar_e_aguardar_prontidao):
                     self.recusa(planejar.comando,
                                 [sys.executable, '-c', codigo_pai, codigo_filho,
-                                 str(pid_filho), str(pronto), str(marcador)],
+                                 str(pid_filho), str(pronto), str(fifo)],
                                 env={'PATH': '/usr/bin:/bin', 'PYTHONDONTWRITEBYTECODE': '1'},
                                 cwd=workspace, saida=workspace / 'comando.stdout', codigo='PRAZO_TESTE')
                 self.assertTrue(pid_filho.is_file())
             self.assertFalse(workspace.exists())
-            time.sleep(.8)  # Janela real para detectar o efeito tardio do filho, caso a árvore tenha sobrevivido.
-            self.assertFalse(marcador.exists(), 'Filho sobrevivente escreveu após a recusa e a limpeza.')
+            # Sem leitores, abrir um writer não bloqueante falha com ENXIO, inclusive se restar um zombie.
+            # O prazo acomoda o fechamento de descritores pelo SO; nunca libera a saída normal do filho.
+            limite = time.monotonic() + 5
+            while True:
+                try:
+                    fd = os.open(fifo, os.O_WRONLY | os.O_NONBLOCK)
+                except OSError as erro:
+                    self.assertEqual(erro.errno, errno.ENXIO)
+                    break
+                else:
+                    os.close(fd)
+                self.assertLess(time.monotonic(), limite, 'Filho mantém leitor após a recusa e a limpeza.')
+                time.sleep(.005)
         finally:
             # Só alcança processos criados nesta prova; nunca deixa órfãos se alguma asserção falhar.
             filho = int(pid_filho.read_text()) if pid_filho.is_file() else None
