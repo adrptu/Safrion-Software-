@@ -3,6 +3,12 @@
 Confere em .github/workflows/*.yml:
 - todo passo do Trivy bloqueia (exit-code "1"), cobre HIGH e CRITICAL e não ignora vulnerabilidade sem correção
   (ignore-unfixed ausente ou false);
+- o with do passo do Trivy só tem inputs da lista fechada ENTRADAS, os usados nas branches em 29/09/2026 (um por
+  linha, sem repetição); scan-type é fs ou image; scanners, se houver, inclui vuln. Os demais inputs da action
+  (skip-dirs, skip-files, ignore-policy, trivy-config, vuln-type, scan-ref, template…) viram TRIVY_* e mudam o que a CLI
+  varre ou ignora sem passar por esta conferência (action.yaml em ed142fd, linhas 214–231). Entrar na lista pede revisão;
+- nenhum trivy.yaml na raiz: sem --config, o Trivy lê ./trivy.yaml por padrão, e ele pode redefinir ignorefile,
+  severidade e ignore-unfixed por fora dos inputs;
 - nenhum passo ou job com continue-on-error: true;
 - nenhuma variável TRIVY_* nos workflows: env de workflow, job ou passo, escrita em $GITHUB_ENV ou qualquer outra
   linha que não seja comentário inteiro; env dinâmico (env: ${{ … }}) também é recusado, porque não dá para conferir.
@@ -41,7 +47,11 @@ def valor(v):
     return v.split(' #', 1)[0].strip().strip('"\'')
 
 
-POLITICA = ('exit-code', 'ignore-unfixed', 'severity', 'trivyignores')
+POLITICA = ('exit-code', 'ignore-unfixed', 'severity', 'trivyignores', 'scan-type', 'scanners')
+ENTRADAS = {'scan-type', 'image-ref', 'scanners', 'severity', 'exit-code', 'ignore-unfixed', 'trivyignores', 'format',
+            'output', 'list-all-pkgs', 'version'}
+TIPOS = {'fs', 'image'}
+SCANNERS = {'vuln', 'secret', 'misconfig', 'license'}
 VARIAVEL_TRIVY = re.compile(r'TRIVY_[A-Z0-9_]*')
 
 
@@ -83,20 +93,39 @@ def blocos_trivy(linhas):
             if m.strip() and indent(m) <= base:
                 break
             bloco.append(m)
-        chaves, problemas = {}, []
-        for m in bloco:
-            k = re.match(r'\s*([A-Za-z-]+):\s*(.*)$', m)
-            if not k:
+        # Só os filhos diretos do with: são inputs; linha mais funda é continuação de valor.
+        chaves, problemas, entradas = {}, [], []
+        for j, m in enumerate(bloco):
+            w = re.match(r'(\s*)with:(.*)$', m)
+            if not w:
                 continue
-            if k.group(1) not in POLITICA:
-                chaves[k.group(1)] = valor(k.group(2))
-                continue
-            v, motivo = escalar(k.group(2))
-            if motivo:
-                problemas.append(f'{k.group(1)} fora do subconjunto aceito ({motivo}); sem conferir o valor, é recusado')
-            else:
-                chaves[k.group(1)] = v
-        yield i + 1, chaves, problemas
+            if w.group(2).split(' #', 1)[0].strip():
+                problemas.append('with em formato não suportado; use um input por linha')
+            filho = None
+            for f in bloco[j + 1:]:
+                if not f.strip() or f.lstrip().startswith('#'):
+                    continue
+                if indent(f) <= len(w.group(1)):
+                    break
+                filho = indent(f) if filho is None else filho
+                if indent(f) != filho:
+                    continue
+                k = re.match(r'\s*([^\s:]+):(?:\s+(.*))?$', f)
+                if not k:
+                    problemas.append(f'linha do with não suportada: {f.strip()!r}'); continue
+                nome, bruto = k.group(1), k.group(2) or ''
+                if nome in entradas:
+                    problemas.append(f'input {nome!r} repetido'); continue
+                entradas.append(nome)
+                if nome not in POLITICA:
+                    chaves[nome] = valor(bruto)
+                    continue
+                v, motivo = escalar(bruto)
+                if motivo:
+                    problemas.append(f'{nome} fora do subconjunto aceito ({motivo}); sem conferir o valor, é recusado')
+                else:
+                    chaves[nome] = v
+        yield i + 1, chaves, entradas, problemas
 
 
 workflows = sorted(glob.glob(os.path.join(raiz, '.github', 'workflows', '*.yml')) + glob.glob(os.path.join(raiz, '.github', 'workflows', '*.yaml')))
@@ -116,10 +145,19 @@ for wf in workflows:
             erros.append(f'{nome}:{n}: {var} muda a política do Trivy por fora dos inputs conferidos; não é aceito')
         if re.match(r'\s*env:\s*["\']?\$\{\{', l):
             erros.append(f'{nome}:{n}: env dinâmico (${{{{ … }}}}) pode trazer TRIVY_* sem aparecer no texto; não é aceito')
-    for n, k, problemas in blocos_trivy(linhas):
+    for n, k, entradas, problemas in blocos_trivy(linhas):
         passos += 1
         for p in problemas:
             erros.append(f'{nome}:{n}: {p}')
+        for e in entradas:
+            if e not in ENTRADAS:
+                erros.append(f'{nome}:{n}: input {e!r} fora da lista fechada do passo do Trivy ({", ".join(sorted(ENTRADAS))})')
+        if k.get('scan-type') not in TIPOS:
+            erros.append(f'{nome}:{n}: scan-type precisa ser fs ou image, explícito')
+        if 'scanners' in k:
+            sc = {s.strip() for s in k['scanners'].split(',') if s.strip()}
+            if 'vuln' not in sc or not sc <= SCANNERS:
+                erros.append(f'{nome}:{n}: scanners precisa incluir vuln e só {", ".join(sorted(SCANNERS))}, não {k["scanners"]!r}')
         if k.get('exit-code') != '1':
             erros.append(f'{nome}:{n}: passo do Trivy sem exit-code "1" (não bloqueia)')
         if k.get('ignore-unfixed', 'false').lower() != 'false':
@@ -138,6 +176,8 @@ for wf in workflows:
 if workflows and passos == 0:
     erros.append('nenhum passo do Trivy encontrado nos workflows')
 
+if os.path.lexists(os.path.join(raiz, 'trivy.yaml')):
+    erros.append('trivy.yaml na raiz é lido pelo Trivy por padrão e muda a política por fora dos inputs; não é aceito')
 if os.path.exists(os.path.join(raiz, '.trivyignore')):
     erros.append('.trivyignore simples não registra motivo nem validade; use .trivyignore.yaml')
 SECOES = ('vulnerabilities', 'misconfigurations', 'secrets', 'licenses')

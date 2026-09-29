@@ -126,6 +126,62 @@ class PortaoSegurancaCI(unittest.TestCase):
         code, out = self.rodar(workflow=wf)
         self.assertEqual(code, 0, out)
 
+    def test_inputs_das_branches_atuais_passam(self):
+        # Formas em uso em 29/09/2026: fs com vuln,secret,misconfig (ci.yml) e imagem com relatório JSON (imagem.yml).
+        imagem = """\
+jobs:
+  imagem:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Varrer a imagem web
+        if: ${{ !cancelled() && steps.construcao.outcome == 'success' }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          version: v0.74.0
+          scan-type: image
+          image-ref: safrion-web:ci
+          scanners: vuln,secret
+          format: json
+          # Relatório bruto fora da pasta publicada.
+          output: ${{ runner.temp }}/web-trivy.json
+          list-all-pkgs: true
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+          ignore-unfixed: false
+"""
+        fs = PASSO.format(extra='').replace('          scan-type: fs\n', '          scan-type: fs\n          scanners: vuln,secret,misconfig\n')
+        for wf in (imagem, fs):
+            code, out = self.rodar(workflow=wf)
+            self.assertEqual(code, 0, out)
+
+    def test_input_fora_da_lista_fechada_falha(self):
+        for linha in ('skip-dirs: packages', 'skip-files: a.ts', 'ignore-policy: politica.rego', 'trivy-config: t.yaml',
+                      'vuln-type: os', 'scan-ref: docs', 'template: "@x.tpl"', 'Exit-Code: "0"'):
+            with self.subTest(linha=linha):
+                code, out = self.rodar(extra=f'          {linha}\n')
+                self.assertEqual(code, 1, out); self.assertIn('fora da lista fechada', out)
+
+    def test_scanners_e_scan_type_fora_da_politica_falham(self):
+        casos = [('scan-type: fs', 'scan-type: config', 'scan-type'), ('scan-type: fs', 'scan-type: repo', 'scan-type'),
+                 ('          scan-type: fs\n', '', 'scan-type'),
+                 ('scan-type: fs', 'scan-type: fs\n          scanners: secret', 'scanners'),
+                 ('scan-type: fs', 'scan-type: fs\n          scanners: vuln,outro', 'scanners')]
+        for original, troca, trecho in casos:
+            with self.subTest(troca=troca):
+                code, out = self.rodar(workflow=PASSO.format(extra='').replace(original, troca))
+                self.assertEqual(code, 1, out); self.assertIn(trecho, out)
+
+    def test_with_fora_do_formato_ou_repetido_falha(self):
+        flow = PASSO.format(extra='').replace('        with:\n', '        with: {exit-code: "1"}\n')
+        code, out = self.rodar(workflow=flow)
+        self.assertEqual(code, 1, out); self.assertIn('with em formato não suportado', out)
+        code, out = self.rodar(extra='          exit-code: "0"\n')
+        self.assertEqual(code, 1, out); self.assertIn("input 'exit-code' repetido", out)
+
+    def test_trivy_yaml_na_raiz_falha(self):
+        code, out = self.rodar(arquivos={'trivy.yaml': 'severity:\n  - LOW\n'})
+        self.assertEqual(code, 1, out); self.assertIn('trivy.yaml na raiz', out)
+
     def test_excecao_vencida_ou_longa_falha(self):
         ref = '          trivyignores: .trivyignore.yaml\n'
         for data in ('2026-09-01', '2027-03-01'):
