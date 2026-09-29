@@ -59,6 +59,6 @@ As IAs preparam cada passo e guiam na tela. Ao Adrianus ficam o login, os consen
 O desenho segue o R-006 (`docs/hml-custo-infra`, até `6345d23`): `sa-infra-github`, WIF canônico por fluxo e environment, papel customizado e IAM do projeto no bootstrap. Estes quatro pontos o código resolve de um jeito que o R-006 ainda não descreve. Com o aceite do Codex, entram no R-006 e no `OPERACAO.md`:
 
 - **Rotação de segredo na HML:** a versão fixada muda por apply do Terraform (`versoes_segredos`), não por `gcloud --update-secrets`. Assim a versão tem um dono só ([hml](hml/README.md#rotação-de-segredo)).
-- **`SAFRION_VERSAO` e `SAFRION_COMMIT`:** entram por build-arg da imagem, não como variável da revisão, que o apply seguinte apagaria. Isso muda o Dockerfile na publicação.
+- **`SAFRION_VERSAO` e `SAFRION_COMMIT`:** entram por build-arg da imagem, não como variável da revisão, que o apply seguinte apagaria. O [Dockerfile](../../Dockerfile) já os recebe nos alvos web e preparo (E08); a publicação passa os dois `--build-arg`.
 - **Testadores no IAP:** por grupo Google, criado pelo Adrianus, e não por e-mail no Terraform. Entrar e sair do teste não passa por apply, e nenhum e-mail vai para o plan ou para o state. Não verificado: IAP com grupo em projeto sem organização.
 - **Ordem da 1ª subida:** as senhas (R-006, passo 4) precisam da instância, que nasce na fase 1 do `hml/`, pela CI. Por isso a janela da sessão do dono vai do bootstrap até as senhas, passando pela fase 1. A revogação vem depois delas.
