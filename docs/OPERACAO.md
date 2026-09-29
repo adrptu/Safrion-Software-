@@ -42,6 +42,7 @@ Login em HML (adaptador OIDC do Codex, ligado pela casca):
 1. A pessoa entra pelo provedor. Sem vínculo, a tela mostra um código de referência, válido por 24 h. Um login novo troca o código.
 2. Ela passa o código ao administrador.
 3. **O código não prova quem é a pessoa.** O administrador confirma quem pediu por um canal autenticado independente, e confere organização, usuário e papel.
+   Os ids vêm da última saída do `demo:reset`: `organizacao` e, em `usuarios`, o `usuario` de cada `papel`. Na HML, estão no log da execução do job `safrion-demo-reset`. São ids de usuários fictícios, não dado pessoal.
 4. O administrador roda o comando no alvo `preparo` da imagem, com `SAFRION_ADMIN_URL` (administrador do servidor):
    `docker run --rm -it -e SAFRION_ADMIN_URL --entrypoint node <imagem-preparo> dist/cli/vincular-identidade.js conceder --ambiente hml --banco <nome> --organizacao <id> --usuario <id> --responsavel <quem autorizou> --motivo <texto curto>`.
    **O código é pedido no terminal e não aparece na tela.** Ele também pode vir por pipe, nunca como argumento.
