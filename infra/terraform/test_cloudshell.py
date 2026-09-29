@@ -65,6 +65,8 @@ if a[:3] == ['storage', 'buckets', 'remove-iam-policy-binding']:
 if a[:3] == ['storage', 'managed-folders', 'list']:
     sai('\n'.join(e.get('pastas', [])))
 if a[:3] == ['storage', 'objects', 'describe']:
+    if a[3] in e.get('indisponivel', []):
+        erro('HTTPError 503: Service Unavailable')
     o = e.setdefault('objetos', {}).get(a[3])
     if not o:
         erro('HTTPError 404: No URLs matched')
@@ -1274,6 +1276,23 @@ class CloudShell(unittest.TestCase):
                 r, chamadas = self.aplicar_hml(digest, **env)
                 self.assertIn('a marca de uso deste plano já existe', r.stderr)
                 self.assertFalse(self.aplicou(chamadas))
+
+    def test_aplicar_hml_marca_incerta_nao_promete_plano(self):
+        marca = f'{self.prefixo_hml()}/aplicacao-inicio.json'
+        # A marca foi gravada, mas o ACK se perdeu e a releitura dá 503: não se sabe se o plano foi consumido.
+        digest = self.preparar_hml(ack_perdido=[marca], indisponivel=[marca])
+        r, chamadas = self.aplicar_hml(digest)
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn('não consegui confirmar se a marca de uso foi gravada', r.stderr)
+        self.assertIn('503', r.stderr)
+        self.assertNotIn('o plano continua disponível', r.stderr)
+        self.assertFalse(self.aplicou(chamadas))
+        self.assertIsNotNone(self.marca())
+        # O gcloud volta: o mesmo comando recusa, porque a marca existe; o apply nunca roda.
+        self.mudar(indisponivel=[])
+        r, chamadas = self.aplicar_hml(digest)
+        self.assertIn('a marca de uso deste plano já existe', r.stderr)
+        self.assertFalse(self.aplicou(chamadas))
 
     def test_aplicar_hml_errored_tfstate_sai_da_copia(self):
         digest = self.preparar_hml()

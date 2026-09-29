@@ -816,9 +816,18 @@ gravar_uma_vez() {
   objeto_confere "$1" "$2"
 }
 
-# O objeto existe no bucket (qualquer conteúdo)?
-objeto_existe() {
-  gcloud storage objects describe "$1" --format='value(generation)' >/dev/null 2>&1
+# Estado do objeto no bucket: "existe", "ausente" (só com 404 provado) ou "incerto" (rede, permissão, 5xx). O erro do
+# caso incerto vai para a tela, mascarado.
+estado_objeto() {
+  local err
+  if err="$(command gcloud storage objects describe "$1" --format='value(generation)' 2>&1 >/dev/null)"; then
+    echo existe
+  elif printf '%s' "$err" | grep -Eqi '(^|[^0-9])404([^0-9]|$)|No URLs matched|matched no objects'; then
+    echo ausente
+  else
+    printf '%s\n' "$err" | mascarar >&2
+    echo incerto
+  fi
 }
 
 # Aplica na HML só o plano da fase 1 gerado pelo infra-hml.yml oficial (contrato aplicar-hml v3, aprovado pelas 3 IAs):
@@ -954,9 +963,11 @@ print(json.dumps({'commit': main, 'run_id': run, 'tentativa': tentativa, 'plan_s
                   'nonce': os.urandom(16).hex()}, sort_keys=True))
 PY
   if ! gravar_uma_vez "$inicio" "$prefixo/aplicacao-inicio.json"; then
-    objeto_existe "$prefixo/aplicacao-inicio.json" ||
-      falha 'não gravei a marca de uso (erro acima); nada foi aplicado; o plano continua disponível'
-    falha 'a marca de uso deste plano já existe (plano usado ou apply em andamento); nada foi aplicado'
+    case "$(estado_objeto "$prefixo/aplicacao-inicio.json")" in
+      ausente) falha 'não gravei a marca de uso (erro acima); nada foi aplicado; o plano continua disponível' ;;
+      existe) falha 'a marca de uso deste plano já existe (plano usado ou apply em andamento); nada foi aplicado' ;;
+      *) falha 'não consegui confirmar se a marca de uso foi gravada (erro acima); nada foi aplicado. Quando o gcloud voltar, rode o mesmo comando: se a marca existir, ele recusa e o caminho é um plano novo' ;;
+    esac
   fi
 
   # Credencial renovada logo antes do apply: a pergunta pode ter levado minutos, e o token do provider não se renova.
