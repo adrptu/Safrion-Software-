@@ -58,34 +58,44 @@ O state do bootstrap fica, desde o 1º `init`, num bucket só dele: `<projeto>-t
    gcloud storage buckets remove-iam-policy-binding gs://<projeto>-tfstate-bootstrap --member=projectViewer:<projeto> --role=roles/storage.legacyObjectReader
    ```
 3. Conferir pelo servidor, e parar se algo diferir ou não puder ser lido:
-   - `gcloud storage buckets describe`: acesso uniforme, prevenção de acesso público `enforced` e versionamento ligado;
+   - `gcloud storage buckets describe --raw`: o bucket é deste projeto (`projectNumber`), com acesso uniforme, prevenção de acesso público `enforced` e versionamento ligado. Se o `describe` falhar por outro motivo que não "não existe" (permissão, rede), não criar nada;
    - `gcloud storage buckets get-iam-policy`: só membros `projectOwner:<projeto>`;
+   - `gcloud storage managed-folders list`: nenhuma pasta gerenciada, que teria IAM próprio;
    - `gcloud projects describe`: o projeto não tem pasta nem organização acima (sem `parent`). Com pai, o acesso herdado não é conferível daqui: **parar**;
-   - `gcloud projects get-iam-policy`: nenhum membro além da conta do dono com `roles/owner`, `roles/editor`, `roles/viewer`, papel `roles/storage.*` ou papel customizado com permissão `storage.*` (conferir as permissões de cada papel customizado com `gcloud iam roles describe`).
+   - `gcloud projects get-iam-policy`: só o dono tem `roles/owner`. Fora o dono e os agentes de serviço que o Google cria com o número deste projeto, ninguém tem papel (básico, predefinido ou customizado, expandido com `gcloud iam roles describe`) que alcance objetos (`storage.objects.*`, `storage.managedFolders.*`, `roles/storage.*`) ou que permita se dar acesso (`storage.buckets.setIamPolicy`, `resourcemanager.projects.setIamPolicy`, `iam.roles.update`). Os agentes pulados aparecem na tela pelo domínio. Se a conta padrão do Compute aparecer com Editor, rodar o `depois` antes.
 4. `terraform init -backend-config="bucket=<projeto>-tfstate-bootstrap"`.
 
-O roteiro do Cloud Shell executa e confere estes passos.
+O `cloudshell.sh` executa e confere estes passos: `state` cria e ajusta; `planejar` e `aplicar` repetem a conferência antes de tocar no Terraform.
 
 ## Como aplicar
 
-No Cloud Shell do projeto, numa cópia limpa da `main` (`gh auth login` pelo código de dispositivo, digitado pelo próprio Adrianus; `gh repo clone adrptu/Safrion-Software-`):
+**Ferramentas no Cloud Shell.** Usar o Cloud Shell no modo normal, não no efêmero: o `$HOME` (cópia do repositório e `~/.safrion`) precisa sobreviver entre sessões. Antes do 1º comando, conferir `gh --version` e `python3 --version`; sem `gh`, instalar na sessão (`sudo apt-get install -y gh`), o que some quando a sessão reinicia. Terraform e TFLint não se instalam: o `cloudshell.sh` baixa as versões do `infra.yml` e confere o SHA-256.
+
+Numa cópia limpa da `main` (`gh auth login` pelo código de dispositivo, digitado pelo próprio Adrianus; `gh repo clone adrptu/Safrion-Software-`):
 
 ```sh
-infra/terraform/cloudshell.sh conferir                 # a cópia é a main atual, com os 10 checks obrigatórios verdes
+infra/terraform/cloudshell.sh conferir                 # a cópia é a main atual do GitHub, com os 10 checks obrigatórios verdes
 infra/terraform/cloudshell.sh state <projeto>          # bucket do state do bootstrap, conferido no servidor (seção acima)
 infra/terraform/cloudshell.sh planejar <projeto>       # Terraform e TFLint pelo SHA-256 do infra.yml, travas e plan
 infra/terraform/cloudshell.sh aplicar <projeto> <hash> # só depois dos pareceres pelo hash, e sem veto do Adrianus
 infra/terraform/cloudshell.sh depois <projeto>         # conta padrão do Compute e rede default (seção abaixo)
 infra/terraform/cloudshell.sh variaveis <projeto>      # variáveis dos environments hml e hml-infra
+infra/terraform/cloudshell.sh config-hml <projeto>     # JSON privado da fase 1: imprime a geração e o SHA-256
 ```
 
-O `planejar` gera o tfvars a partir do GitHub e da conta logada, sem valores digitados, e guarda tfvars, plano e `.terraform` em `~/.safrion/<projeto>`, fora do checkout. Na tela ficam só o SHA-256, a contagem e os endereços, com e-mails mascarados: é o que vai para a rodada. O Trivy não roda no Cloud Shell: vale o `ci.yml` verde do mesmo commit, que o `conferir` exige. A credencial é de vida curta (`gcloud auth print-access-token`, só no ambiente do processo), sem arquivo ADC. `cloudshell.sh limpar <projeto>` apaga os arquivos locais; o state continua no bucket.
+O `planejar` gera o tfvars a partir do GitHub e da conta logada, sem valores digitados, e guarda tfvars, plano, `.terraform`, binários e logs em `~/.safrion/<projeto>`, fora do checkout e só para o dono. O plano anterior é apagado no início: o hash na tela é sempre o do plano que existe. Na tela ficam só o SHA-256, a contagem e os endereços, com e-mails mascarados, inclusive nos erros do `gcloud` e do `gh`: é o que vai para a rodada. `TF_VAR_*`, `TF_CLI_ARGS*` e o `~/.terraformrc` do shell não entram no Terraform, e o `conferir` recusa `*.tfvars` ignorados pelo Git nos módulos. O Trivy não roda no Cloud Shell: vale o `ci.yml` verde do mesmo commit, que o `conferir` exige. A credencial é de vida curta (`gcloud auth print-access-token`, só no ambiente do processo), sem arquivo ADC.
 
-Saídas para o GitHub (environment `hml`): `WIF_PROVIDER` = `wif_provider`, `DEPLOY_SA` = `sa_deploy_github`, `GCP_PROJECT_ID` e `GCP_REGION`. O Terraform da HML usa também `sa_infra_github`, `bucket_state` e as saídas da rede (`TF_VAR_rede_self_link`, `TF_VAR_subrede_self_link` e `TF_VAR_faixa_psa_nome` no environment `hml-infra`).
+O `aplicar` usa uma cópia privada do plano, conferida pelo hash, com o mesmo Terraform extraído no `planejar`. **Não fechar a aba durante o `aplicar`.** Se a sessão cair no meio, o state pode ficar travado: o `planejar` ou o `aplicar` seguinte mostra o ID do lock e o comando `cloudshell.sh destravar <projeto> <ID>`, que pede `s` antes de soltar. Depois, planejar de novo e revisar o novo hash. Um comando por vez em cada projeto: um segundo comando, noutra aba, para sem mexer em nada.
+
+Ao encerrar a janela: `cloudshell.sh limpar <projeto>` apaga os arquivos locais (o state continua no bucket), `gh auth logout --hostname github.com` e a revogação do `gcloud` (abaixo).
+
+Saídas para o GitHub, impressas pelo `variaveis`: no environment `hml`, `WIF_PROVIDER` = `wif_provider`, `DEPLOY_SA` = `sa_deploy_github`, `GCP_PROJECT_ID` e `GCP_REGION`; no `hml-infra`, `HML_PROJECT_NUMBER`. As saídas da rede e o operador não viram variável do GitHub: vão no JSON privado da fase 1, que o `config-hml` grava uma vez no bucket do state da HML e que o `infra-hml.yml` lê pela geração e pelo SHA-256.
 
 **A rede vem antes da 1ª instância.** Aplicar o bootstrap com a rede antes de qualquer apply do `hml/` que crie o Cloud SQL: o IP privado não sai mais da instância, e a faixa só se atribui na criação. Ligar o IP privado numa instância existente a reinicia e não aceita faixa nomeada. Mudar `subrede_cidr` ou `faixa_psa_cidr` depois do apply recria o recurso, e o `prevent_destroy` recusa o plan.
 
 ## Depois do apply
+
+O `cloudshell.sh depois <projeto>` faz os dois passos abaixo com pergunta `s/n` para cada um, relê o resultado no servidor e diz o que ficou; resposta diferente de `s` mantém e avisa.
 
 **Conta padrão do Compute** (fora do Terraform, R-006): ligar a API do Compute cria a conta padrão, que pode receber o papel Editor. Depois do apply, ver se `<NUM>-compute@developer.gserviceaccount.com` existe (`gcloud iam service-accounts list --project=<id>`). Se existir:
 1. `gcloud projects remove-iam-policy-binding <id> --member=serviceAccount:<NUM>-compute@developer.gserviceaccount.com --role=roles/editor`;
