@@ -1,26 +1,34 @@
 # Estado do projeto
 
-Atualizado em 28/09/2026 por Codex. Estado desta proposta; PR aberto não significa integrado à `main`.
+Atualizado em 29/09/2026 por Claude, sobre a `main` `15e53d27`. PR aberto não significa integrado; configuração só vale depois de lida no servidor.
 
 ## Onde estamos
 
 | Frente | Estado | Evidência |
 |---|---|---|
-| PRD | v3.9 vigente; v3.10 em revisão | `docs/PRD.md`, `docs/DECISIONS.md` |
+| PRD | v3.9 vigente; v3.10 em revisão, com propostas de edição por tema aguardando as três IAs | `docs/PRD.md`, `docs/DECISIONS.md` |
 | Protótipo | Navegável; sem banco ou login reais | https://claude.ai/artifact/WPDgqGvKX6CYTCdPjidBLo |
-| Repositório | Publicado, privado | https://github.com/adrptu/Safrion-Software- |
-| Fundação F0-a | Domínio de decimais, unidades e saldo por lote; proposta de Claude revisada por Codex | PR #5, base `a9e038dc4b4134ea7e6abc08efd7625ee0832137` |
-| Ambiente funcional | Sem homologação hospedada acessível; banco e servidor web em revisão local na cadeia de Claude | Esta base remota contém o domínio; não é uma entrega de uso pelo agricultor |
+| Repositório | Privado; PRs #2 a #15 integrados | https://github.com/adrptu/Safrion-Software- |
+| Fundação | Domínio (decimal, unidades e saldo por lote); PostgreSQL/PostGIS com RLS e isolamento entre organizações; login OIDC com sessões; concessão e revogação de acesso; primeira interface de estoque e cadastros; imagens de homologação verificadas na CI | PRs #5, #7, #8, #9, #10 e #11 |
+| Homologação | Terraform, conexão ao banco por IP privado e fila de vínculo integrados e validados na CI, sem plan nem apply. **Nenhum ambiente hospedado**: provisionar depende de autorização concreta de custo e destino | PR #14; `infra/terraform/`; `docs/OPERACAO.md` |
+| Proteção da `main` | Ruleset `24154464` ativo, conferido na leitura do servidor (alterado em 29/09, 10:13 de Brasília): exclusão e force push bloqueados, pull request obrigatório e os 10 checks obrigatórios do app GitHub Actions, com branch atualizada antes do merge. Sem exceção de bypass | PR #15; `tools/github/` |
+| Produção | Não existe | — |
 
 ## Verificação executada e limite
 
-- PR #5, [CI 36345797548](https://github.com/adrptu/Safrion-Software-/actions/runs/36345797548): instalação com lockfile, versões, formatação, lint, tipos, 49 testes e build passaram. Gitleaks conferiu canário e histórico.
-- O job Trivy dessa execução terminou verde, mas **não comprovou cobertura**: versão 0.70 leu somente o primeiro documento do lockfile pnpm 12 e omitiu as dependências do projeto (FERR-05). Esse verde não libera a candidata.
-- Esta correção fixa Trivy 0.74.0 e exige inventário JSON com as dependências diretas de produção dos manifestos (`package.json`, `packages/*`, `apps/*`). Relatório vazio, inválido, sem alvo pnpm ou sem nome/versão esperado falha. O exit-code bloqueante do scanner continua obrigatório.
-- O verificador de cobertura é um smoke test das dependências diretas fixadas; não certifica transitivas, ferramentas de desenvolvimento ou ausência de vulnerabilidades. `workspace:*` é aceito somente para nomes internos existentes e unívocos em `packages/*` ou `apps/*`; suas dependências externas continuam obrigatórias no inventário. Versões em intervalo, outras referências workspace/URL/file/link e estruturas novas exigem revisão explícita do contrato. Excluir o nome da raiz como alvo é uma restrição deste controle, não uma limitação do pnpm. A resolução real do workspace continua verificada pela instalação com lockfile congelado. Novo glob em pnpm-workspace.yaml exige atualizar o guard no mesmo PR.
-- Regressões locais do FERR-05: `python3 -m unittest discover -s tools/ci -p 'test_conferir_cobertura_trivy.py' -v`, 25 testes passaram após adaptação para pacotes internos. Relatórios anteriores de CI não validam este delta; execução remota e pareceres por versão ficam no PR e na issue #1. Não se presume aprovação pelo código presente aqui.
+- PR #14, candidata `a1c880e`: 10 checks com success; 247 testes unitários; integração com PostgreSQL real, 171 testes em 16 arquivos, nenhum pulado; jornadas de navegador no desktop e no celular; imagens com SBOM; Terraform validado sem credencial.
+- PR #15, candidata `b300f6ad`: 10 checks com success, inclusive a regressão da proteção da `main` (`tools/ci/test_protecao_main.py`); simulação contra o GitHub real só com leitura.
+- CI verde não prova operação hospedada, login com provedor real na homologação nem restauração de backup.
 
 ## Próximo passo e responsáveis
+
+### Sequência
+
+1. Feito em 29/09: os 10 checks obrigatórios estão no ruleset existente, conferidos na leitura do servidor.
+2. Ensaio remoto da homologação, com autorização de custo e destino do proprietário: restauração do backup em instância isolada, logs sem dados pessoais, acesso e revogação.
+3. Antes do primeiro usuário externo: teste de todas as rotas com usuário de outra organização e inventário dos dados pessoais tratados.
+4. PRD v3.10: revisão das propostas por tema pelas três IAs.
+5. Codex e Claude conduzem a homologação técnica e funcional. Adrianus recebe a candidata verificada e dá feedback; produção exige o aceite explícito dele para a versão.
 
 ### Segurança estática — FERR-06
 
@@ -28,14 +36,7 @@ Semgrep CE 1.178.0 acrescenta duas regras locais: verificação TLS desabilitada
 
 Local: `python3 tools/ci/check_semgrep.py --semgrep /caminho/semgrep .` (mesma versão). CI: workflow próprio, imagem oficial por digest, código montado somente para leitura e rede desativada no container; sem login, métricas, regras remotas ou envio de achados. Os fixtures sintéticos são excluídos do lint tipado/formatação e verificados pelo scanner nativo. Resultados locais, CI e pareceres por versão ficam no PR e na issue #1; presença de configuração não equivale a gate executado/aprovado nem a proteção aplicada à main.
 
-Dependabot para npm/pnpm 12 permanece sem compatibilidade comprovada; a configuração existente cobre GitHub Actions. Sonar (ENG-018) permanece pendente de consumidor/conta e comprovação do gate. Playwright/axe acompanham as telas do Claude; Terraform/TFLint, testes de carga/ZAP e telemetria exigem seus alvos concretos. Nenhum destes itens pendentes é contado como ativo.
-
-### Sequência de integração
-
-1. A base #6 `82ba9ca` tem CI 36362052077 aprovada e parecer estático final do Claude; o Gemini revisou o mesmo script de produção, inalterado. A composição atual do #2 preserva os dois arquivos de contrato de `d0e7e336` e incorpora essa base. CI e revisão específicas da nova composição são registradas no PR antes da integração. Codex não aprova nem integra o próprio PR.
-2. Continuar a sequência já aberta: #3 (Gitleaks) → #4 (política Trivy) → #5 (domínio) → #6 (cobertura Trivy) → #2 (contrato CI). A nova composição do #2 está alinhada à base #6, sem mudança de comportamento no contrato. Nenhum desses registros equivale a merge ou homologação funcional.
-3. Claude conduz a dependência imediata da F1, com Codex revisando/testando. Critérios e divisão permanecem na issue #1 e nas rodadas; sem abrir módulos paralelos.
-4. Codex e Claude conduzem a homologação técnica e funcional, conforme autorização atual do proprietário. Adrianus recebe a candidata verificada e dá feedback; produção exige seu aceite explícito da versão.
+O Dependabot cobre GitHub Actions; pacotes, lockfile, imagens e ferramentas ficam com o Renovate (PR #12), cujo primeiro PR automático ainda não foi comprovado. Sonar (ENG-018) permanece pendente de consumidor/conta e comprovação do gate. Playwright e axe rodam na CI (jornadas de navegador). Terraform (formatação, init sem backend e validate) e TFLint rodam na CI de infraestrutura (`infra.yml`); plan, apply e hospedagem continuam pendentes. Testes de carga, ZAP e telemetria exigem alvos concretos. Nenhum item pendente é contado como ativo.
 
 ## Jornadas de navegador na CI
 
