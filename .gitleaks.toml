@@ -1,0 +1,16 @@
+title = "Safrion — regras padrão e canário de privacidade identificado"
+
+[extend]
+useDefault = true
+
+# HML-SECRET-01: literal sintético dos testes de falha de conexão (porta 1).
+# A exceção também cobre sua introdução no histórico, antes desta configuração.
+# Não libera outros valores nos testes, nem este valor fora desses dois arquivos.
+[[rules]]
+id = "generic-api-key"
+[[rules.allowlists]]
+description = "Canário exato de privacidade de preparo e vínculo; não é credencial de ambiente"
+condition = "AND"
+regexTarget = "secret"
+paths = ['''^packages/db/test/preparo\.int\.test\.ts$''', '''^packages/db/test/vinculo\.int\.test\.ts$''']
+regexes = ['''^SenhaQueNaoPodeVazar123$''']
