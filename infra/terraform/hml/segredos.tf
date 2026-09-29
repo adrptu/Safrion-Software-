@@ -23,17 +23,6 @@ locals {
     }
   ]...)
 
-  # IAM só no hml-vinculo-pedido (R-006 3c). Operador: grava versão, sem ler nem destruir. sa-preparo (o job): lista,
-  # lê, desativa e destrói. O secretVersionManager também dá versions.add, versions.enable e secrets.rotate (sem
-  # access): com o secretAccessor, quem roda como sa-preparo reativa e lê uma versão desativada, que ainda tem o código,
-  # e grava pedidos. Não amplia o que ela já pode, porque lê a senha do admin do banco.
-  # Chave sem e-mail: o endereço vai para o log do plan.
-  acesso_pedido = {
-    "operador/versionAdder"  = { membro = var.operador, papel = "roles/secretmanager.secretVersionAdder" }
-    "preparo/accessor"       = { membro = "serviceAccount:${local.sa.preparo}", papel = "roles/secretmanager.secretAccessor" }
-    "preparo/versionManager" = { membro = "serviceAccount:${local.sa.preparo}", papel = "roles/secretmanager.secretVersionManager" }
-  }
-
   # Versão fixa de cada segredo (R-006, F40). Vazio enquanto criar_cloud_run = false.
   # Só o Terraform troca a versão: sem gcloud --update-secrets, o apply seguinte não volta à antiga.
   versao = var.versoes_segredos == null ? {} : {
@@ -94,10 +83,20 @@ resource "google_secret_manager_secret" "vinculo_pedido" {
   }
 }
 
-resource "google_secret_manager_secret_iam_member" "vinculo_pedido" {
-  for_each = local.acesso_pedido
-
+# IAM só no hml-vinculo-pedido (R-006 §3c), em dois vínculos explícitos que o checar_travas.py confere.
+# Operador: grava versão (secretVersionAdder), sem ler, desativar nem destruir.
+resource "google_secret_manager_secret_iam_member" "pedido_operador" {
   secret_id = google_secret_manager_secret.vinculo_pedido.secret_id
-  role      = each.value.papel
-  member    = each.value.membro
+  role      = "roles/secretmanager.secretVersionAdder"
+  member    = var.operador
+}
+
+# Job (sa-preparo): o papel safrionVinculoPedido do bootstrap (versions.list, get, access, disable e destroy), no lugar
+# de secretAccessor + secretVersionManager. Sem add, enable nem rotate: a conta do job não grava pedido nem reativa
+# versão desativada. Resta: lê pedidos ENABLED e destrói versões. Não isola os dois jobs que usam a sa-preparo nem
+# código alterado por quem tem run.developer. O bootstrap cria o papel antes do apply do hml.
+resource "google_secret_manager_secret_iam_member" "pedido_fila" {
+  secret_id = google_secret_manager_secret.vinculo_pedido.secret_id
+  role      = "projects/${var.projeto_id}/roles/safrionVinculoPedido"
+  member    = "serviceAccount:${local.sa.preparo}"
 }

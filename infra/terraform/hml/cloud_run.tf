@@ -422,7 +422,11 @@ resource "google_cloud_run_v2_job" "vinculo" {
     ]
   }
 
-  depends_on = [google_secret_manager_secret_iam_member.acesso, google_secret_manager_secret_iam_member.vinculo_pedido]
+  depends_on = [
+    google_secret_manager_secret_iam_member.acesso,
+    google_secret_manager_secret_iam_member.pedido_operador,
+    google_secret_manager_secret_iam_member.pedido_fila,
+  ]
 }
 
 # Publicação troca a imagem e executa os jobs; o operador humano executa os jobs. No safrion-vinculo, o run.developer

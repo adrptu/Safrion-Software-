@@ -100,6 +100,25 @@ resource "google_project_iam_custom_role" "segredos_sem_valor" {
   depends_on = [google_project_service.apis]
 }
 
+# Job de vínculo (R-006 §3c): só o que a fila usa no hml-vinculo-pedido, vinculado no próprio segredo pelo hml/.
+# Sem versions.add, versions.enable nem secrets.rotate, que o secretVersionManager daria: a conta do job não grava
+# pedido nem reativa versão desativada (que ainda tem o código). Aqui, e não no hml/, porque criar papel pede
+# iam.roles.create, que a sa-infra-github não tem. checar_travas.py confere o conjunto exato.
+resource "google_project_iam_custom_role" "vinculo_pedido" {
+  role_id     = "safrionVinculoPedido"
+  title       = "Safrion HML: fila de pedidos de vínculo"
+  description = "Job safrion-vinculo: lista, lê, desativa e destrói versões do hml-vinculo-pedido."
+  permissions = [
+    "secretmanager.versions.list",
+    "secretmanager.versions.get",
+    "secretmanager.versions.access",
+    "secretmanager.versions.disable",
+    "secretmanager.versions.destroy",
+  ]
+
+  depends_on = [google_project_service.apis]
+}
+
 resource "google_project_iam_member" "infra_segredos" {
   project = var.projeto_id
   role    = google_project_iam_custom_role.segredos_sem_valor.name

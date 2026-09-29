@@ -14,6 +14,7 @@ Aplicado **uma vez, localmente**, pelo Codex, na janela da sessão do dono (R-00
   As duas faixas são validadas: RFC 1918, alinhadas, e a do PSA sem conter a sub-rede. Sem NAT, conector VPC, regra de firewall, bastion ou VPN. Custo: nenhum pela conexão nem pelos IPs internos; só o tráfego (R-006, `894ef4d`).
 - Bucket `<projeto>-tfstate-hml` em southamerica-east1: versionado (a versão atual e as 10 anteriores), acesso uniforme, prevenção de acesso público, `prevent_destroy`.
 - WIF: pool `github-hml` e provider `github-oidc`, só para `publicar-hml.yml` no environment `hml` e `infra-hml.yml` no environment `hml-infra`, na `main`, por `push` ou `workflow_dispatch`. Ambos com `prevent_destroy`. O atributo `fluxo` (`publicar` ou `infra`) sai do `workflow_ref` e prende cada conta ao seu workflow.
+- Papel customizado `safrionVinculoPedido` (R-006 §3c): só `secretmanager.versions.list`, `get`, `access`, `disable` e `destroy`, para o job `safrion-vinculo`. Não se vincula no projeto: o `hml/` o dá à `sa-preparo` só no segredo `hml-vinculo-pedido`, então o bootstrap vai antes do apply do `hml/` que cria esse vínculo. `checar_travas.py` confere o conjunto exato.
 - Papel customizado `safrionInfraSegredos`: cria segredos, lê os metadados, atualiza e dá IAM, sem ler, gravar ou destruir versão. **Não isola o valor:** `setIamPolicy` e `run.admin` com `actAs` dão acesso indireto (R-006).
 - Contas sem chave: `sa-web`, `sa-preparo`, `sa-demo`, `sa-deploy-github`, `sa-infra-github`, `sa-agentes-leitura` e, com `criar_sa_vertex`, `sa-vertex`.
 

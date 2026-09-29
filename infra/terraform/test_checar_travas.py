@@ -361,7 +361,7 @@ class Codigo(unittest.TestCase):
         for valor in ('"604800s"', '"0s"', 'var.ttl', 'null'):
             with self.subTest(valor=valor):
                 self.assertEqual(self.no_pedido(PEDIDO, f'{PEDIDO}\n  version_destroy_ttl = {valor}'),
-                                 ['segredos.tf:80 google_secret_manager_secret.vinculo_pedido: version_destroy_ttl presente; '
+                                 ['segredos.tf:69 google_secret_manager_secret.vinculo_pedido: version_destroy_ttl presente; '
                                   'o pedido destruído tem de sumir na hora'])
 
     def test_vinculo_pedido_ignore_changes_esconde_o_ttl(self):
@@ -369,7 +369,7 @@ class Codigo(unittest.TestCase):
         for alvo in ('[version_destroy_ttl]', '[labels, version_destroy_ttl]', 'all', '[all]', '["version_destroy_ttl"]'):
             with self.subTest(alvo=alvo):
                 self.assertEqual(self.no_pedido('prevent_destroy = true', f'prevent_destroy = true\n    ignore_changes  = {alvo}'),
-                                 ['segredos.tf:80 google_secret_manager_secret.vinculo_pedido: lifecycle.ignore_changes cobre o '
+                                 ['segredos.tf:69 google_secret_manager_secret.vinculo_pedido: lifecycle.ignore_changes cobre o '
                                   'version_destroy_ttl (ou tem forma não reconhecida)'])
 
     def test_vinculo_pedido_ausente_nao_literal_ou_repetido(self):
@@ -384,7 +384,7 @@ class Codigo(unittest.TestCase):
         self.assertEqual(self.faltas(extra={'segredos.tf': SEGREDOS, 'copia.tf': copia}),
                          ['o módulo deve ter exatamente um google_secret_manager_secret com secret_id = "hml-vinculo-pedido" '
                           'literal; achados: copia.tf:1 google_secret_manager_secret.copia, '
-                          'segredos.tf:80 google_secret_manager_secret.vinculo_pedido'])
+                          'segredos.tf:69 google_secret_manager_secret.vinculo_pedido'])
 
     def isca(self, meta):
         """Contraprova da revisão de 28/09: o recurso literal vira isca (`meta`), o nome entra em local.segredos (com TTL)
@@ -393,8 +393,9 @@ class Codigo(unittest.TestCase):
         segredos = SEGREDOS.replace(self.trecho_unico(SEGREDOS, '    "hml-oidc-client-secret",\n'),
                                     '    "hml-oidc-client-secret",\n    "hml-vinculo-pedido",\n')
         segredos = segredos.replace(PEDIDO, f'{meta}\n  {PEDIDO}')
-        segredos = segredos.replace(self.trecho_unico(segredos, 'secret_id = google_secret_manager_secret.vinculo_pedido.secret_id'),
-                                    f'secret_id = {real}.secret_id')
+        vinculo = 'secret_id = google_secret_manager_secret.vinculo_pedido.secret_id'
+        self.assertEqual(segredos.count(vinculo), 2)  # operador e fila
+        segredos = segredos.replace(vinculo, f'secret_id = {real}.secret_id')
         cloud_run = CLOUD_RUN.replace(self.trecho_unico(CLOUD_RUN, 'google_secret_manager_secret.vinculo_pedido.id'), f'{real}.id')
         saidas = (AQUI / 'hml' / 'outputs.tf').read_text(encoding='utf-8')
         saidas = saidas.replace(self.trecho_unico(saidas, '[google_secret_manager_secret.vinculo_pedido.secret_id]'), '[]')
@@ -406,21 +407,26 @@ class Codigo(unittest.TestCase):
         for meta in ('count = 0', 'for_each = toset([])'):
             with self.subTest(meta=meta):
                 self.assertEqual(self.isca(meta), [
-                    f'segredos.tf:81 google_secret_manager_secret.vinculo_pedido: {meta.split()[0]} no recurso do pedido; '
+                    f'segredos.tf:70 google_secret_manager_secret.vinculo_pedido: {meta.split()[0]} no recurso do pedido; '
                     'ele existe sempre, uma vez',
-                    '"hml-vinculo-pedido" em string fora do secret_id de segredos.tf:81 '
-                    "google_secret_manager_secret.vinculo_pedido: ['cloud_run.tf:49', 'segredos.tf:10', 'segredos.tf:102']",
+                    '"hml-vinculo-pedido" em string fora do secret_id de segredos.tf:70 '
+                    "google_secret_manager_secret.vinculo_pedido: ['cloud_run.tf:49', 'segredos.tf:10', 'segredos.tf:91', "
+                    "'segredos.tf:101']",
                     'SAFRION_PEDIDO_SEGREDO deve aparecer uma vez, como google_secret_manager_secret.vinculo_pedido.id; '
                     'achadas: cloud_run.tf:49',
                     'nenhum google_secret_manager_secret_iam_member com secret_id = '
                     'google_secret_manager_secret.vinculo_pedido.secret_id',
+                    'IAM do pedido: operador com roles/secretmanager.secretVersionAdder deve aparecer exatamente uma '
+                    'vez; apareceu 0',
+                    'IAM do pedido: sa-preparo com o papel safrionVinculoPedido deve aparecer exatamente uma vez; '
+                    'apareceu 0',
                 ])
         # Só a isca, sem mais nada: também recusada.
         for meta in ('count = 1', 'for_each = toset(["x"])'):
             with self.subTest(so=meta):
                 self.restaurar()
                 self.assertEqual(self.no_pedido(PEDIDO, f'{meta}\n  {PEDIDO}'), [
-                    f'segredos.tf:80 google_secret_manager_secret.vinculo_pedido: {meta.split()[0]} no recurso do pedido; '
+                    f'segredos.tf:69 google_secret_manager_secret.vinculo_pedido: {meta.split()[0]} no recurso do pedido; '
                     'ele existe sempre, uma vez'])
 
     def test_vinculo_nome_em_outra_string(self):
@@ -432,7 +438,7 @@ class Codigo(unittest.TestCase):
             with self.subTest(novo=novo):
                 texto = SEGREDOS.replace(self.trecho_unico(SEGREDOS, velho), novo)
                 self.assertEqual(self.faltas(extra={'segredos.tf': texto}), [
-                    '"hml-vinculo-pedido" em string fora do secret_id de segredos.tf:81 '
+                    '"hml-vinculo-pedido" em string fora do secret_id de segredos.tf:70 '
                     f"google_secret_manager_secret.vinculo_pedido: ['{linha}']"])
 
     def test_vinculo_variavel_do_job_fora_do_recurso(self):
@@ -456,18 +462,19 @@ class Codigo(unittest.TestCase):
                 self.assertEqual(self.faltas(extra={'cloud_run.tf': CLOUD_RUN.replace(ref, novo)}), esperado)
 
     def test_vinculo_iam_fora_do_recurso(self):
-        velho = self.trecho_unico(SEGREDOS, 'secret_id = google_secret_manager_secret.vinculo_pedido.secret_id')
+        ancora = 'resource "google_secret_manager_secret_iam_member" "pedido_fila" {\n  '
+        velho = self.trecho_unico(SEGREDOS, ancora + 'secret_id = google_secret_manager_secret.vinculo_pedido.secret_id')
         for novo, esperado in (
-                ('secret_id = google_secret_manager_secret.hml["hml-db-admin-senha"].secret_id',
-                 ['nenhum google_secret_manager_secret_iam_member com secret_id = '
-                  'google_secret_manager_secret.vinculo_pedido.secret_id']),
-                ('secret_id = google_secret_manager_secret.vinculo_pedido.name',
-                 ['segredos.tf:97 google_secret_manager_secret_iam_member.vinculo_pedido: secret_id fora da forma '
+                (ancora + 'secret_id = google_secret_manager_secret.hml["hml-db-admin-senha"].secret_id',
+                 ['IAM do pedido: sa-preparo com o papel safrionVinculoPedido deve aparecer exatamente uma vez; '
+                  'apareceu 0']),
+                (ancora + 'secret_id = google_secret_manager_secret.vinculo_pedido.name',
+                 ['segredos.tf:98 google_secret_manager_secret_iam_member.pedido_fila: secret_id fora da forma '
                   'google_secret_manager_secret.vinculo_pedido.secret_id'])):
             with self.subTest(novo=novo):
                 self.assertEqual(self.faltas(extra={'segredos.tf': SEGREDOS.replace(velho, novo)}), esperado)
         self.assertEqual(self.faltas(extra={'segredos.tf': SEGREDOS.replace(
-            velho, 'secret_id = google_secret_manager_secret.vinculo_pedido.id')}), [])
+            velho, ancora + 'secret_id = google_secret_manager_secret.vinculo_pedido.id')}), [])
 
     def test_vinculo_egress_aberto_so_no_job_vinculo(self):
         # Confirma que a checagem de egress, feita em todo google_cloud_run_v2_job, cobre o job novo.
@@ -480,6 +487,73 @@ class Codigo(unittest.TestCase):
                          ['cloud_run.tf:353 google_cloud_run_v2_job.vinculo: egress = "PRIVATE_RANGES_ONLY" ausente ou '
                           'não literal'])
 
+    # --- IAM do pedido (revisão do Codex de 8537b81): só o operador com secretVersionAdder e a sa-preparo com o papel
+    # customizado, em dois vínculos explícitos; qualquer papel a mais, a menos ou em outra forma falha ---
+
+    FILA = ('resource "google_secret_manager_secret_iam_member" "pedido_fila" {\n'
+            '  secret_id = google_secret_manager_secret.vinculo_pedido.secret_id\n'
+            '  role      = "projects/${var.projeto_id}/roles/safrionVinculoPedido"\n'
+            '  member    = "serviceAccount:${local.sa.preparo}"\n'
+            '}')
+    OPERADOR_PAPEL = '  role      = "roles/secretmanager.secretVersionAdder"'
+    SO_FILA = 'IAM do pedido: sa-preparo com o papel safrionVinculoPedido deve aparecer exatamente uma vez; apareceu '
+    SO_OPERADOR = ('IAM do pedido: operador com roles/secretmanager.secretVersionAdder deve aparecer exatamente uma vez; '
+                   'apareceu ')
+
+    def iam_pedido(self, velho, novo):
+        return self.faltas(extra={'segredos.tf': SEGREDOS.replace(self.trecho_unico(SEGREDOS, velho), novo)})
+
+    def test_iam_do_pedido_controle_positivo(self):
+        self.trecho_unico(SEGREDOS, self.FILA)
+        self.trecho_unico(SEGREDOS, self.OPERADOR_PAPEL)
+        self.assertEqual(self.faltas(), [])
+
+    def test_iam_do_pedido_papel_do_job_largo(self):
+        # O desenho anterior (secretAccessor + secretVersionManager) e o admin: todos recusados na conta do job.
+        for papel in ('roles/secretmanager.secretAccessor', 'roles/secretmanager.secretVersionManager',
+                      'roles/secretmanager.admin', 'projects/${var.projeto_id}/roles/safrionInfraSegredos'):
+            with self.subTest(papel=papel):
+                novo = self.FILA.replace('projects/${var.projeto_id}/roles/safrionVinculoPedido', papel)
+                self.assertEqual(self.iam_pedido(self.FILA, novo), [
+                    'segredos.tf:98 google_secret_manager_secret_iam_member.pedido_fila: papel ou membro fora do '
+                    'desenho no IAM do pedido', self.SO_FILA + '0'])
+
+    def test_iam_do_pedido_vinculo_a_mais(self):
+        extra = self.FILA.replace('"pedido_fila"', '"pedido_extra"').replace(
+            'projects/${var.projeto_id}/roles/safrionVinculoPedido', 'roles/secretmanager.secretVersionManager')
+        self.assertEqual(self.iam_pedido(self.FILA, self.FILA + '\n\n' + extra), [
+            'segredos.tf:104 google_secret_manager_secret_iam_member.pedido_extra: papel ou membro fora do desenho no '
+            'IAM do pedido'])
+        # O mesmo vínculo duas vezes também não passa.
+        repetido = self.FILA.replace('"pedido_fila"', '"pedido_fila_2"')
+        self.assertEqual(self.iam_pedido(self.FILA, self.FILA + '\n\n' + repetido), [self.SO_FILA + '2'])
+
+    def test_iam_do_pedido_vinculo_faltando_ou_membro_trocado(self):
+        self.assertEqual(self.iam_pedido(self.FILA, ''), [self.SO_FILA + '0'])
+        trocado = self.FILA.replace('local.sa.preparo', 'local.sa.web')
+        self.assertEqual(self.iam_pedido(self.FILA, trocado), [
+            'segredos.tf:98 google_secret_manager_secret_iam_member.pedido_fila: papel ou membro fora do desenho no '
+            'IAM do pedido', self.SO_FILA + '0'])
+        largo = '  role      = "roles/secretmanager.secretVersionManager"'
+        self.assertEqual(self.iam_pedido(self.OPERADOR_PAPEL, largo), [
+            'segredos.tf:88 google_secret_manager_secret_iam_member.pedido_operador: papel ou membro fora do desenho '
+            'no IAM do pedido', self.SO_OPERADOR + '0'])
+
+    def test_iam_do_pedido_em_outra_forma(self):
+        # binding ou policy trocam a lista inteira do papel; for_each/count esconderiam quantos vínculos existem.
+        for tipo in ('google_secret_manager_secret_iam_binding', 'google_secret_manager_secret_iam_policy'):
+            with self.subTest(tipo=tipo):
+                novo = self.FILA.replace('google_secret_manager_secret_iam_member', tipo)
+                self.assertEqual(self.iam_pedido(self.FILA, novo), [
+                    f'segredos.tf:98 {tipo}.pedido_fila: {tipo} no pedido; só google_secret_manager_secret_iam_member',
+                    self.SO_FILA + '0'])
+        for meta in ('count = 1', 'for_each = toset(["x"])'):
+            with self.subTest(meta=meta):
+                novo = self.FILA.replace('{\n  secret_id', '{\n  ' + meta + '\n  secret_id')
+                self.assertEqual(self.iam_pedido(self.FILA, novo), [
+                    f'segredos.tf:98 google_secret_manager_secret_iam_member.pedido_fila: {meta.split()[0]} no IAM do '
+                    'pedido; os vínculos são explícitos'])
+
 
 REDE_PLANO = 'https://www.googleapis.com/compute/v1/projects/safrion-hml-exemplo/global/networks/safrion-hml'
 
@@ -491,6 +565,93 @@ def web(egress='PRIVATE_RANGES_ONLY', interfaces=1, desconhecido=None, tipo='goo
         depois = {'template': [depois]}
     return {'address': f'{tipo}.x[0]', 'type': tipo,
             'change': {'actions': ['create'], 'after': {'template': [depois]}, 'after_unknown': desconhecido or {}}}
+
+
+class Bootstrap(unittest.TestCase):
+    """Papel customizado da fila no bootstrap (revisão do Codex de 8537b81): o conjunto exato de 5 permissões, um só
+    papel e nenhum uso dele no projeto."""
+
+    def setUp(self):
+        self.dir = Path(tempfile.mkdtemp())
+        for arq in (AQUI / 'bootstrap').glob('*.tf'):
+            shutil.copy(arq, self.dir / arq.name)
+
+    def tearDown(self):
+        shutil.rmtree(self.dir)
+
+    CONTAS = (AQUI / 'bootstrap' / 'contas.tf').read_text(encoding='utf-8')
+    ACCESS = '    "secretmanager.versions.access",\n'
+
+    def faltas(self, velho=None, novo=None, arquivo='contas.tf', extra=None):
+        if velho is not None:
+            texto = (AQUI / 'bootstrap' / arquivo).read_text(encoding='utf-8')
+            self.assertEqual(texto.count(velho), 1, velho)
+            (self.dir / arquivo).write_text(texto.replace(velho, novo), encoding='utf-8')
+        for nome, texto in (extra or {}).items():
+            (self.dir / nome).write_text(texto, encoding='utf-8')
+        return ct.conferir_bootstrap(self.dir)
+
+    def papel(self):
+        linha = self.CONTAS.count('\n', 0, self.CONTAS.index('resource "google_project_iam_custom_role" "vinculo_pedido"')) + 1
+        return f'contas.tf:{linha} google_project_iam_custom_role.vinculo_pedido'
+
+    def test_controle_positivo(self):
+        self.assertEqual(self.faltas(), [])
+        self.assertEqual(ct.conferir_bootstrap(AQUI / 'bootstrap'), [])
+
+    def test_permissao_a_mais_a_menos_ou_repetida(self):
+        for novo, detalhe in (
+                (self.ACCESS + '    "secretmanager.versions.add",\n', "a mais: ['secretmanager.versions.add']; faltando: []; repetidas: 0"),
+                (self.ACCESS + '    "secretmanager.versions.enable",\n', "a mais: ['secretmanager.versions.enable']; faltando: []; repetidas: 0"),
+                (self.ACCESS + '    "secretmanager.secrets.setIamPolicy",\n',
+                 "a mais: ['secretmanager.secrets.setIamPolicy']; faltando: []; repetidas: 0"),
+                ('', "a mais: []; faltando: ['secretmanager.versions.access']; repetidas: 0"),
+                (self.ACCESS * 2, 'a mais: []; faltando: []; repetidas: 1')):
+            with self.subTest(novo=novo):
+                self.assertEqual(self.faltas(self.ACCESS, novo),
+                                 [f'{self.papel()}: permissions diferente do conjunto da fila ({detalhe})'])
+
+    def test_permissions_fora_da_forma_literal(self):
+        inicio = self.CONTAS.index('resource "google_project_iam_custom_role" "vinculo_pedido"')
+        bloco = self.CONTAS[inicio:self.CONTAS.index('\n  ]\n', inicio) + 4]
+        lista = bloco[bloco.index('permissions = ['):]
+        for novo in ('permissions = var.permissoes\n', 'permissions = concat(["secretmanager.versions.list"], var.x)\n'):
+            with self.subTest(novo=novo):
+                self.assertEqual(self.faltas(lista, novo),
+                                 [f'{self.papel()}: permissions fora da forma de lista de strings literais'])
+
+    def test_papel_repetido_ausente_ou_com_meta(self):
+        inicio = self.CONTAS.index('resource "google_project_iam_custom_role" "vinculo_pedido"')
+        bloco = self.CONTAS[inicio:self.CONTAS.index('\n}\n', inicio) + 2]
+        copia = bloco.replace('"vinculo_pedido"', '"vinculo_pedido_2"')
+        erro = 'contas.tf deve ter exatamente um google_project_iam_custom_role com role_id = "safrionVinculoPedido"; '
+        self.assertTrue(self.faltas(bloco, bloco + '\n' + copia)[0].startswith(erro + 'achados: contas.tf:'))
+        self.assertEqual(self.faltas(bloco, bloco.replace('"safrionVinculoPedido"', '"outroPapel"')), [erro + 'achados: nenhum'])
+        for meta in ('count', 'for_each'):
+            with self.subTest(meta=meta):
+                self.setUp()
+                valor = '1' if meta == 'count' else 'toset(["x"])'
+                novo = bloco.replace('  role_id', f'  {meta} = {valor}\n  role_id')
+                self.assertIn(f'{self.papel()}: {meta} no papel da fila', self.faltas(bloco, novo))
+        self.setUp()
+        ignora = bloco.replace('  depends_on', '  lifecycle {\n    ignore_changes = [permissions]\n  }\n\n  depends_on')
+        self.assertIn(f'{self.papel()}: lifecycle.ignore_changes cobre permissions (ou tem forma não reconhecida)',
+                      self.faltas(bloco, ignora))
+
+    def test_papel_vinculado_no_projeto(self):
+        # No projeto, o papel valeria para todos os segredos, inclusive as senhas do banco.
+        por_referencia = ('resource "google_project_iam_member" "fila_no_projeto" {\n'
+                          '  project = var.projeto_id\n'
+                          '  role    = google_project_iam_custom_role.vinculo_pedido.name\n'
+                          '  member  = local.membro["sa-preparo"]\n}\n')
+        faltas = self.faltas(extra={'extra.tf': por_referencia})
+        self.assertEqual(faltas, ['extra.tf:3: o papel da fila é usado no bootstrap; ele só se vincula no segredo do '
+                                  'pedido, pelo hml'])
+        self.setUp()
+        por_nome = por_referencia.replace('google_project_iam_custom_role.vinculo_pedido.name',
+                                          '"projects/${var.projeto_id}/roles/safrionVinculoPedido"')
+        self.assertEqual(self.faltas(extra={'extra.tf': por_nome}),
+                         ['"safrionVinculoPedido" aparece 2 vezes no bootstrap; só no role_id do papel'])
 
 
 class Plano(unittest.TestCase):
