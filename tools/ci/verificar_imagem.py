@@ -6,6 +6,7 @@ Falhas bloqueiam a CI; a limpeza nunca substitui a primeira falha.
 """
 import json
 import os
+import re
 import subprocess
 import sys
 import uuid
@@ -15,6 +16,20 @@ LIMITES = ["--network", "none", "--read-only", "--cap-drop", "ALL",
            "--security-opt", "no-new-privileges", "--pids-limit", "128",
            "--memory", "512m", "--cpus", "1"]
 CANARIO = "credencial-ficticia-do-teste"
+RAIZ = Path(__file__).resolve().parents[2]
+# Versão e commit que a construção gravou na imagem (E08): versão do pacote da web e commit do checkout construído.
+VERSAO = json.loads((RAIZ / "apps/web/package.json").read_text(encoding="utf-8"))["version"]
+
+
+def commit_do_checkout():
+    """Commit do código construído; na CI, igual ao GITHUB_SHA (em PR, o de composição)."""
+    r = subprocess.run(["git", "rev-parse", "HEAD"], cwd=RAIZ, capture_output=True, text=True, timeout=20)
+    commit = r.stdout.strip() if r.returncode == 0 else ""
+    if not re.fullmatch(r"[0-9a-f]{40}", commit):
+        raise AssertionError("commit do checkout ilegível")
+    if os.environ.get("GITHUB_SHA") and os.environ["GITHUB_SHA"] != commit:
+        raise AssertionError("checkout diferente do GITHUB_SHA")
+    return commit
 
 
 def executar(args, esperado=0, timeout=40):
@@ -28,7 +43,9 @@ def executar(args, esperado=0, timeout=40):
 def verificar(destino):
     prefixo = "safrion-prova-" + uuid.uuid4().hex[:12]
     containers = []
-    evidencia = {"commit": os.environ.get("GITHUB_SHA"), "imagens": {}, "provas": [], "limpeza": False}
+    commit = None
+    evidencia = {"commit": None, "evento": os.environ.get("GITHUB_EVENT_NAME"), "versao": VERSAO, "imagens": {},
+                 "provas": [], "limpeza": False}
     falha = None
 
     def registrar(nome, acao):
@@ -45,10 +62,17 @@ def verificar(destino):
         return executar(["run", "--name", nome, *LIMITES, *args], esperado)
 
     try:
+        commit = evidencia["commit"] = commit_do_checkout()
         for alvo in ("web", "preparo"):
             imagem = "safrion-" + alvo + ":ci"
             info = json.loads(executar(["image", "inspect", imagem]))[0]
             evidencia["imagens"][alvo] = {"id": info["Id"], "usuario": info["Config"]["User"]}
+
+            def na_imagem(env=info["Config"].get("Env") or []):
+                if "SAFRION_COMMIT=" + commit not in env or "SAFRION_VERSAO=" + VERSAO not in env:
+                    raise AssertionError("versão ou commit da construção ausente na imagem")
+
+            registrar(alvo + ": versão e commit da construção na imagem", na_imagem)
             if alvo == "web" and info["Config"].get("Healthcheck", {}).get("Test", [])[:1] != ["CMD"]:
                 raise AssertionError("healthcheck requer forma exec na imagem sem shell")
             registrar(alvo + ": usuário não-root", lambda a=alvo, i=imagem: rodar(
@@ -76,9 +100,10 @@ def verificar(destino):
             executar(["run", "--detach", "--name", nome, *LIMITES,
                       "-e", "DATABASE_URL=postgres://teste:" + CANARIO + "@127.0.0.1:1/prova",
                       "-e", "SAFRION_ORIGEM=https://hml.invalid",
-                      "-e", "SAFRION_AMBIENTE=hml", "-e", "SAFRION_VERSAO=prova-imagem",
-                      "-e", "SAFRION_COMMIT=prova-imagem", "safrion-web:ci"])
-            executar(["exec", nome, "node", "--input-type=module", "-e", """
+                      "-e", "SAFRION_AMBIENTE=hml", "safrion-web:ci"])
+            # Sem -e de versão e commit na execução: o /saude mostra os da imagem.
+            executar(["exec", "-e", "ESPERADO_VERSAO=" + VERSAO, "-e", "ESPERADO_COMMIT=" + commit, nome,
+                      "node", "--input-type=module", "-e", """
               import { setTimeout as esperar } from 'node:timers/promises';
               let resposta;
               for (let i = 0; i < 40; i++) {
@@ -90,7 +115,7 @@ def verificar(destino):
               const campos = ['ambiente', 'commit', 'migracao', 'status', 'verificadoEm', 'versao'];
               if (JSON.stringify(Object.keys(corpo).sort()) !== JSON.stringify(campos)
                 || corpo.status !== 'indisponivel' || corpo.ambiente !== null || corpo.migracao !== null
-                || corpo.versao !== 'prova-imagem' || corpo.commit !== 'prova-imagem'
+                || corpo.versao !== process.env.ESPERADO_VERSAO || corpo.commit !== process.env.ESPERADO_COMMIT
                 || !Number.isFinite(Date.parse(corpo.verificadoEm))) process.exit(1);
             """])
             logs = executar(["logs", nome])
@@ -119,7 +144,7 @@ def verificar(destino):
 if __name__ == "__main__":
     try:
         verificar(Path(sys.argv[1]))
-        print("OK: imagens executadas; cinco provas passaram; containers removidos.")
+        print("OK: imagens executadas; sete provas passaram; containers removidos.")
     except Exception as erro:
         print(f"ERRO: prova de imagem não concluída ({type(erro).__name__}); confira execucao.json.")
         sys.exit(1)
