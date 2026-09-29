@@ -43,7 +43,7 @@ Chaves da configuração, com o nome das variáveis do módulo: `projeto_id`, `p
 
 ## Aplicação da fase 1
 
-No Cloud Shell, com o hash que os pareceres aprovaram: `infra/terraform/cloudshell.sh aplicar-hml <projeto> <execução> <tentativa> <hash>`. Contrato aplicar-hml v3, aprovado pelas três IAs.
+No Cloud Shell, com o hash que os pareceres aprovaram: `infra/terraform/cloudshell.sh aplicar-hml <projeto> <execução> <tentativa> <hash>`. Contrato aplicar-hml v3, aprovado pelas três IAs. O hash digitado vem do resumo do run no GitHub, que os pareceres citam, nunca do bucket.
 
 - **Origem.** Só aplica o plano que o `infra-hml.yml` oficial gravou. Confere:
   - o recibo `planos/<execução>/<tentativa>/recibo.json` do bucket, lido pela geração, com as 12 chaves exatas;
@@ -51,10 +51,10 @@ No Cloud Shell, com o hash que os pareceres aprovaram: `infra/terraform/cloudshe
   - o commit, que tem de ser a `main` atual;
   - o hash digitado, que tem de ser o do recibo e o do plano baixado. Um recibo órfão de job que falhou é recusado.
 - **Travas.** Antes da confirmação, o plano passa pelo `checar_travas.py --plano` e pelo `resumir_plano` do `planejar.py`: recusa destroy, replace, outro projeto e a lista "Nunca no Terraform".
-- **Uso único.** A marca `aplicacao-inicio.json` só é criada depois do `s`, sem sobrescrever e relida byte a byte. Responder outra coisa deixa o plano disponível. Marca existente de outra sessão para o comando.
+- **Uso único.** A marca `aplicacao-inicio.json` só é criada depois do `s`, sem sobrescrever e relida byte a byte. Responder outra coisa, ou 10 minutos sem resposta, deixa o plano disponível. Depois do `s`, a `main` é relida: se andou, nada é aplicado. Marca existente de outra sessão para o comando. A credencial curta é renovada logo antes do apply.
 - **Recuperação.**
   - Lock preso: o comando indica `cloudshell.sh destravar-hml <projeto> <ID>`, que só mexe no `hml/` (bucket `<projeto>-tfstate-hml`, prefixo `hml`), nunca no bootstrap.
-  - Apply com falha: a marca fica, e o caminho é diagnóstico e plano novo.
+  - Apply com falha: a marca fica, e o caminho é diagnóstico e plano novo. Se o Terraform não conseguiu gravar o state no bucket, o `errored.tfstate` sai da cópia do repositório para `~/.safrion/<projeto>/errored-hml.tfstate`: não apagar, e fazer `terraform state push` dele antes de qualquer plano novo.
   - Recibo final indisponível depois do apply: o comando diz isso, sai com código 4 e não repete o apply.
 - **Limites.** É portão de processo, não barreira humana exclusiva: a conta do gcloud diz qual conta agiu, não qual pessoa ou IA. No bucket, os recibos de aplicação expiram com o plano, em 30 dias; o registro permanente é o resumo no checkpoint.
 

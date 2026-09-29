@@ -78,12 +78,17 @@ projeto() {
 }
 
 confirmar() {
-  local r='' resto
+  local r='' resto prazo="${2:-}"
   # No terminal, linhas coladas junto com o comando anterior não viram resposta: o buffer é descartado antes da pergunta.
   if [ -t 0 ]; then
     while read -r -t 0.2 resto; do :; done
   fi
-  read -r -p "$1 [s/n] " r || true
+  # $2 = prazo em segundos; esgotado, a resposta é "não".
+  if [ -n "$prazo" ]; then
+    read -r -t "$prazo" -p "$1 [s/n] " r || true
+  else
+    read -r -p "$1 [s/n] " r || true
+  fi
   case "$r" in
     s | S) return 0 ;;
     *) return 1 ;;
@@ -129,10 +134,21 @@ ambiente_tf() {
 # módulo ($3/$4: destravar-hml e "da HML"; sem eles, o bootstrap).
 lock_preso() {
   local id comando="${3:-destravar}" state="${4:-do bootstrap}"
-  grep -q 'Error acquiring the state lock' "$2" 2>/dev/null || return 0
-  id="$(sed -n 's/^[[:space:]]*ID:[[:space:]]*\([0-9A-Za-z-]\{1,64\}\)[[:space:]]*$/\1/p' "$2" | head -1)"
-  echo "O state $state está travado (ID ${id:-não lido}). Se nenhum outro comando estiver rodando:" >&2
-  echo "  infra/terraform/cloudshell.sh $comando $1 ${id:-<ID>}" >&2
+  id="$(sed -n 's/^[[:space:]]*ID:[[:space:]]*\([0-9A-Za-z-]\{1,64\}\)[[:space:]]*$/\1/p' "$2" 2>/dev/null | head -1)"
+  if grep -q 'Error releasing the state lock' "$2" 2>/dev/null; then
+    echo "O comando terminou, mas o lock do state $state não foi solto (ID ${id:-não lido}); o apply pode ter concluído." >&2
+    echo 'Confira o state antes de qualquer coisa; só então solte o lock:' >&2
+  elif grep -q 'Error acquiring the state lock' "$2" 2>/dev/null; then
+    if [ -z "$id" ]; then
+      echo "Não consegui travar o state $state e não li o ID do lock (credencial ou rede?). Veja o log antes de destravar." >&2
+      return 0
+    fi
+    echo "O state $state está travado (ID $id). Se nenhum outro comando estiver rodando:" >&2
+  else
+    return 0
+  fi
+  [ -n "$id" ] && echo "  infra/terraform/cloudshell.sh $comando $1 $id" >&2
+  return 0
 }
 
 cmd_conferir() {
@@ -765,7 +781,12 @@ cmd_destravar() {
 # .terraform próprio: nunca o do bootstrap.
 preparar_tf_hml() {
   local p="$1"
-  terraform_conferido || ferramentas
+  # "sempre": baixa e confere pelo infra.yml atual; o .sha256 local só prova que o binário não mudou desde o download.
+  if [ "${2:-}" = sempre ]; then
+    ferramentas
+  else
+    terraform_conferido || ferramentas
+  fi
   token
   ambiente_tf hml
   (
@@ -778,10 +799,10 @@ preparar_tf_hml() {
 # O objeto no bucket tem exatamente os bytes do arquivo local? Lido pela geração atual. Serve à marca e ao recibo
 # final: um ACK perdido depois da gravação não vira falha nem sucesso sem prova.
 objeto_confere() {
-  local local_="$1" objeto="$2" ger lido="$DIR/.confere-objeto" r=1
+  local local_="$1" objeto="$2" ger lido r=1
   ger="$(gcloud storage objects describe "$objeto" --format='value(generation)' 2>/dev/null)" || return 1
   [[ "$ger" =~ ^[1-9][0-9]{0,19}$ ]] || return 1
-  rm -f "$lido"
+  lido="$(mktemp "$DIR/.confere-objeto.XXXXXX")"
   if gcloud storage cp "$objeto#$ger" "$lido" >/dev/null 2>&1; then
     cmp -s "$local_" "$lido" && r=0
   fi
@@ -791,8 +812,13 @@ objeto_confere() {
 
 # Grava um objeto só se ele não existir e confirma pela releitura. 0: o objeto é este; 1: não se confirmou.
 gravar_uma_vez() {
-  gcloud storage cp "$1" "$2" --if-generation-match=0 >/dev/null 2>&1 || true
+  gcloud storage cp "$1" "$2" --if-generation-match=0 >/dev/null || true
   objeto_confere "$1" "$2"
+}
+
+# O objeto existe no bucket (qualquer conteúdo)?
+objeto_existe() {
+  gcloud storage objects describe "$1" --format='value(generation)' >/dev/null 2>&1
 }
 
 # Aplica na HML só o plano da fase 1 gerado pelo infra-hml.yml oficial (contrato aplicar-hml v3, aprovado pelas 3 IAs):
@@ -802,7 +828,7 @@ gravar_uma_vez() {
 cmd_aplicar_hml() {
   projeto "${1:-}"
   local p="$1" run="${2:-}" tentativa="${3:-}" esperado="${4:-}" fixo main prefixo ger_recibo ger_plano real resumo conta codigo=0
-  local inicio="$DIR/hml-aplicacao-inicio.json" fim="$DIR/hml-aplicacao-fim.json"
+  local inicio fim agora_main
   [[ "$run" =~ ^[1-9][0-9]{0,19}$ && "$tentativa" =~ ^[1-9][0-9]{0,8}$ ]] ||
     falha 'informe a execução e a tentativa do recibo do infra-hml.yml (números)'
   [[ "$esperado" =~ ^[0-9a-f]{64}$ ]] || falha 'informe o SHA-256 aprovado do plano (64 caracteres hexadecimais)'
@@ -876,6 +902,7 @@ if erros:
 open(saida, 'w', encoding='utf-8').write(r['plan_generation'])
 PY
   ger_plano="$(cat "$DIR/hml-geracao-plano")"
+  [[ "$ger_plano" =~ ^[1-9][0-9]{0,19}$ ]] || falha 'geração do plano ilegível no recibo; nada foi aplicado'
 
   # O plano da geração do recibo, numa cópia privada conferida pelo hash.
   COPIA="$(mktemp "$DIR/aplicar-hml.XXXXXX")"
@@ -885,7 +912,7 @@ PY
   [ "$real" = "$esperado" ] || falha "o plano no bucket tem outro SHA-256 ($real); nada foi aplicado"
 
   # Travas e resumo pelas mesmas fontes do workflow: checar_travas.py --plano e resumir_plano do planejar.py.
-  preparar_tf_hml "$p"
+  preparar_tf_hml "$p" sempre
   (cd "$HML" && terraform show -json "$COPIA" >"$DIR/hml-plano.json" 2>"$DIR/hml-show.log") ||
     falha "terraform show falhou (detalhes só no seu terminal: ~/.safrion/$p/hml-show.log); nada foi aplicado"
   python3 "$AQUI/checar_travas.py" --plano "$DIR/hml-plano.json" >"$DIR/hml-travas.log" 2>&1 ||
@@ -905,12 +932,20 @@ PY
     falha 'o plano tem destroy, replace, outro projeto ou formato inesperado; nada foi aplicado'
   resumo="$(cat "$DIR/hml-resumo.txt")"
 
-  # Confirmação antes da marca: um "não" deixa o plano disponível.
-  confirmar "Aplicar na HML o plano ${esperado:0:12} do commit ${main:0:12}, execução $run/$tentativa: $resumo?" ||
-    falha 'nada foi aplicado; o plano continua disponível'
+  # Confirmação antes da marca: um "não" (ou 10 min sem resposta) deixa o plano disponível. A frase vai também numa
+  # linha própria, visível mesmo quando a entrada não é um terminal.
+  echo "Aplicar na HML o plano ${esperado:0:12} do commit ${main:0:12}, execução $run/$tentativa: $resumo?" >&2
+  confirmar 'Confirma?' 600 || falha 'nada foi aplicado; o plano continua disponível'
+
+  # A main pode ter andado durante a pergunta: relida no GitHub e na cópia antes de consumir o plano.
+  agora_main="$(gh api "repos/$REPO_GH/branches/main" --jq .commit.sha)" || falha 'não reli a main no GitHub; nada foi aplicado'
+  [ "$agora_main" = "$main" ] && [ "$(git -C "$RAIZ" rev-parse HEAD)" = "$main" ] ||
+    falha 'a main andou depois da conferência: planeje de novo; nada foi aplicado'
 
   # Marca de uso único, só depois do "s". O nonce distingue esta marca de uma deixada por outra sessão.
   conta="$(conta_logada)"
+  inicio="$(mktemp "$DIR/hml-aplicacao-inicio.XXXXXX")"
+  fim="$(mktemp "$DIR/hml-aplicacao-fim.XXXXXX")"
   python3 - "$main" "$run" "$tentativa" "$esperado" "$ger_plano" "$conta" >"$inicio" <<'PY'
 import datetime, json, os, sys
 main, run, tentativa, plano, geracao, conta = sys.argv[1:7]
@@ -918,28 +953,41 @@ print(json.dumps({'commit': main, 'run_id': run, 'tentativa': tentativa, 'plan_s
                   'conta_gcloud': conta, 'inicio': datetime.datetime.now(datetime.timezone.utc).isoformat(),
                   'nonce': os.urandom(16).hex()}, sort_keys=True))
 PY
-  gravar_uma_vez "$inicio" "$prefixo/aplicacao-inicio.json" ||
-    falha 'a marca de uso deste plano já existe (plano usado ou apply em andamento) ou não se confirmou; nada foi aplicado'
+  if ! gravar_uma_vez "$inicio" "$prefixo/aplicacao-inicio.json"; then
+    objeto_existe "$prefixo/aplicacao-inicio.json" ||
+      falha 'não gravei a marca de uso (erro acima); nada foi aplicado; o plano continua disponível'
+    falha 'a marca de uso deste plano já existe (plano usado ou apply em andamento); nada foi aplicado'
+  fi
 
+  # Credencial renovada logo antes do apply: a pergunta pode ter levado minutos, e o token do provider não se renova.
+  token
   echo 'Aplicando na HML. Não feche esta aba até o fim.'
   (cd "$HML" && terraform apply -input=false -lock-timeout=60s -no-color "$COPIA" >"$DIR/apply-hml.log" 2>&1) || codigo=$?
   [ "$codigo" = 0 ] || lock_preso "$p" "$DIR/apply-hml.log" destravar-hml 'da HML'
+  # State que o Terraform não conseguiu gravar no bucket: sai da cópia do repositório (o conferir o recusaria) e fica
+  # guardado, só para o dono, para o diagnóstico.
+  if [ -f "$HML/errored.tfstate" ]; then
+    mv "$HML/errored.tfstate" "$DIR/errored-hml.tfstate"
+    chmod 600 "$DIR/errored-hml.tfstate"
+    echo "State não gravado no bucket: guardado em ~/.safrion/$p/errored-hml.tfstate. Não apague; o time faz terraform" >&2
+    echo 'state push dele antes de qualquer plano novo.' >&2
+  fi
 
   # Recibo final, relido pela geração. Se não se confirmar, o apply NÃO se repete e a marca fica.
-  python3 - "$codigo" >"$fim" <<'PY'
+  if ! python3 - "$codigo" >"$fim" <<'PY' || ! gravar_uma_vez "$fim" "$prefixo/aplicacao-fim.json" ||
 import datetime, json, sys
 codigo = int(sys.argv[1])
 print(json.dumps({'resultado': 'aplicado' if codigo == 0 else 'falhou', 'codigo_terraform': codigo,
                   'fim': datetime.datetime.now(datetime.timezone.utc).isoformat()}, sort_keys=True))
 PY
-  if ! gravar_uma_vez "$fim" "$prefixo/aplicacao-fim.json" || ! objeto_confere "$inicio" "$prefixo/aplicacao-inicio.json"; then
+    ! objeto_confere "$inicio" "$prefixo/aplicacao-inicio.json"; then
     echo "Apply executado (código do Terraform: $codigo); recibo final indisponível no bucket. Não repita o apply:" >&2
     echo 'a marca de uso fica, e o time diagnostica o state antes de qualquer plano novo.' >&2
     exit 4
   fi
   [ "$codigo" = 0 ] ||
     falha "terraform apply falhou (código $codigo; detalhes só no seu terminal: ~/.safrion/$p/apply-hml.log). A marca de uso fica: diagnóstico e plano novo"
-  rm -f "$COPIA"
+  rm -f "$COPIA" "$inicio" "$fim"
   echo "Aplicado na HML: commit ${main:0:12}, execução $run/$tentativa, plano $esperado ($resumo)."
   echo "Recibos: $prefixo/aplicacao-inicio.json e aplicacao-fim.json (expiram com o plano, em 30 dias)."
 }
