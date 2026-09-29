@@ -110,6 +110,36 @@ if a[:3] == ['iam', 'service-accounts', 'describe']:
     sai('True' if contas[a[3]]['disabled'] else '')
 if a[:3] == ['iam', 'service-accounts', 'disable']:
     contas[a[3]]['disabled'] = True; salvar(); sai()
+SEGREDOS = ['hml-db-admin-senha', 'hml-db-migrator-senha', 'hml-db-app-runtime-senha', 'hml-oidc-client-secret']
+if a[:3] == ['sql', 'instances', 'describe']:
+    if e.get('sem_instancia'):
+        erro('HTTPError 404: instance does not exist')
+    sai(e.get('sql_estado', 'RUNNABLE'))
+if a[:3] == ['sql', 'operations', 'wait']:
+    if e.get('falha_operacao'):
+        erro('operation failed')
+    sai()
+if a[:2] == ['secrets', 'describe']:
+    if a[2] not in e.get('segredos', SEGREDOS):
+        erro('NOT_FOUND: Secret not found')
+    sai(f'projects/999/secrets/{a[2]}')
+if a[:3] == ['secrets', 'versions', 'list']:
+    versoes = e.setdefault('versoes', {}).get(a[3], [])
+    estados = e.get('estados', {}).get(a[3], {})
+    linhas = [f'projects/999/secrets/{a[3]}/versions/{v}\t{estados.get(str(v), "ENABLED")}' for v in reversed(versoes)
+              if estados.get(str(v), 'ENABLED') != 'DESTROYED']
+    sai('\n'.join(linhas))
+if a[:3] == ['secrets', 'versions', 'add']:
+    s = a[3]
+    valor = sys.stdin.read()
+    if s in e.get('falhar_add', []):
+        e['falhar_add'].remove(s); salvar()
+        erro('UNAVAILABLE')
+    versoes = e.setdefault('versoes', {}).setdefault(s, [])
+    versoes.append(len(versoes) + 1)
+    e.setdefault('valores', {}).setdefault(s, []).append(valor)
+    salvar()
+    sai(f'projects/999/secrets/{s}/versions/{versoes[-1]}')
 if a[:3] == ['compute', 'networks', 'list']:
     sai('default' if e.get('rede_default') else '')
 if a[:3] == ['compute', 'firewall-rules', 'list']:
@@ -172,10 +202,26 @@ sys.exit(0)
 
 TFLINT = '#!/bin/sh\necho "tflint $*" >> "$FALSO/chamadas.log"\n'
 CURL = '''#!/usr/bin/env python3
-import os, shutil, sys
+import json, os, shutil, sys
 a = sys.argv[1:]
-open(os.path.join(os.environ['FALSO'], 'chamadas.log'), 'a').write('curl ' + ' '.join(a) + '\\n')
+d = os.environ['FALSO']
+open(os.path.join(d, 'chamadas.log'), 'a').write('curl ' + ' '.join(a) + '\\n')
 destino = a[a.index('--output') + 1]
+if '-X' in a:
+    e = json.load(open(os.path.join(d, 'gcloud.json'), encoding='utf-8'))
+    cabecalhos = [a[i + 1] for i, x in enumerate(a) if x == '-H']
+    arquivo = next(h[1:] for h in cabecalhos if h.startswith('@'))
+    if open(arquivo, encoding='utf-8').read() != 'Authorization: Bearer token-falso\\n':
+        sys.exit(3)
+    corpo = json.loads(sys.stdin.read())
+    if e.get('falha_sql'):
+        print('curl: (22) The requested URL returned error: 403', file=sys.stderr)
+        sys.exit(22)
+    e.setdefault('postgres', []).append(corpo['password'])
+    e['url_sql'] = a[-1]
+    json.dump(e, open(os.path.join(d, 'gcloud.json'), 'w', encoding='utf-8'))
+    open(destino, 'w', encoding='utf-8').write(json.dumps({'name': 'op-senha-1', 'user': 'dono@example.com'}))
+    sys.exit(0)
 nome = 'terraform' if 'hashicorp' in a[-1] else 'tflint'
 shutil.copy(os.path.join(os.environ['FALSO'], nome + '.zip'), destino)
 '''
@@ -755,6 +801,144 @@ class CloudShell(unittest.TestCase):
         self.assertFalse(self.trabalho.exists())
         self.assertTrue((self.home / '.safrion' / 'outro').exists())
         self.assertIn('gh auth logout --hostname github.com', r.stdout)
+
+    # senhas ----------------------------------------------------------------------------------------------------------
+
+    def senhas(self, entrada='s\n', **env):
+        return self.rodar('senhas', PROJETO, entrada=entrada, extra_env=env or None)
+
+    def valores(self):
+        e = self.estado()
+        return e.get('valores', {}), e.get('postgres', [])
+
+    def assertSemSenha(self, r, chamadas):
+        valores, postgres = self.valores()
+        todos = [v for lista in valores.values() for v in lista] + postgres
+        self.assertTrue(todos)
+        for v in todos:
+            self.assertNotIn(v, r.stdout + r.stderr)
+            self.assertFalse([c for c in chamadas if v in c], 'senha em argumento de comando')
+
+    def test_senhas_gera_grava_e_mostra_so_as_versoes(self):
+        r, chamadas = self.senhas()
+        self.assertEqual(r.returncode, 0, r.stderr)
+        for s in ('hml-db-admin-senha', 'hml-db-migrator-senha', 'hml-db-app-runtime-senha'):
+            self.assertIn(f'{s}: versão 1', r.stdout)
+        valores, postgres = self.valores()
+        self.assertEqual(set(valores), {'hml-db-admin-senha', 'hml-db-migrator-senha', 'hml-db-app-runtime-senha'})
+        senhas = [v[0] for v in valores.values()]
+        self.assertEqual(len(set(senhas)), 3)
+        for v in senhas:
+            self.assertRegex(v, r'^[0-9a-f]{32}$')
+        self.assertEqual(postgres, [valores['hml-db-admin-senha'][0]])
+        self.assertEqual(self.estado()['url_sql'],
+                         f'https://sqladmin.googleapis.com/v1/projects/{PROJETO}/instances/safrion-hml/users?name=postgres')
+        self.assertIn(f'gcloud sql operations wait op-senha-1 --project={PROJETO} --timeout=300', chamadas)
+        self.assertFalse((self.trabalho / 'cabecalho-sql').exists())
+        self.assertFalse([c for c in chamadas if 'versions access' in c or '--password' in c])
+        self.assertSemSenha(r, chamadas)
+        self.assertMascarado(r)
+
+    def test_senhas_mantem_segredo_que_ja_tem_versao(self):
+        self.gcloud({'versoes': {'hml-db-migrator-senha': [1]}})
+        r, chamadas = self.senhas()
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn('hml-db-migrator-senha: já tem a versão 1 ativa; mantida, sem gerar outra.', r.stdout)
+        self.assertFalse([c for c in chamadas if c.startswith('gcloud secrets versions add hml-db-migrator-senha')])
+        self.assertIn('hml-db-app-runtime-senha: versão 1', r.stdout)
+
+    def test_senhas_nao_da_por_pronta_versao_desativada(self):
+        # Achado do Codex (720e910): o filtro state!=DESTROYED contava versão DISABLED como pronta; nos três segredos.
+        # Nada é gerado em nenhum dos três, mesmo quando o desativado não é o primeiro da lista.
+        for s in ('hml-db-admin-senha', 'hml-db-migrator-senha', 'hml-db-app-runtime-senha'):
+            with self.subTest(segredo=s):
+                (self.falso / 'chamadas.log').unlink(missing_ok=True)
+                self.gcloud({'versoes': {s: [1]}, 'estados': {s: {'1': 'DISABLED'}}})
+                r, chamadas = self.senhas()
+                self.assertNotEqual(r.returncode, 0)
+                self.assertIn(f'só com versão desativada: {s} (versão 1)', r.stderr)
+                self.assertIn('nada foi gerado', r.stderr)
+                self.assertFalse([c for c in chamadas if 'versions add' in c or c.startswith('curl')])
+                self.assertFalse([c for c in chamadas if 'secrets versions enable' in c])
+        (self.falso / 'chamadas.log').unlink(missing_ok=True)
+        # Com uma ativa ao lado da desativada, vale a ativa.
+        self.gcloud({'versoes': {'hml-db-admin-senha': [1, 2]}, 'estados': {'hml-db-admin-senha': {'1': 'DISABLED'}}})
+        r, chamadas = self.senhas()
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn('hml-db-admin-senha: já tem a versão 2 ativa', r.stdout)
+        self.assertFalse([c for c in chamadas if c.startswith('curl')])
+        # Só destruída: gera a próxima.
+        (self.falso / 'chamadas.log').unlink(missing_ok=True)
+        self.gcloud({'versoes': {'hml-db-app-runtime-senha': [1]}, 'estados': {'hml-db-app-runtime-senha': {'1': 'DESTROYED'}}})
+        r, _ = self.senhas()
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn('hml-db-app-runtime-senha: versão 2', r.stdout)
+
+    def test_senhas_falha_de_listagem_nao_muda_nada(self):
+        for s in ('hml-db-admin-senha', 'hml-db-migrator-senha', 'hml-db-app-runtime-senha'):
+            with self.subTest(segredo=s):
+                (self.falso / 'chamadas.log').unlink(missing_ok=True)
+                self.gcloud({'falhas': [f'secrets versions list {s}']})
+                r, chamadas = self.senhas()
+                self.assertNotEqual(r.returncode, 0)
+                self.assertIn(f'não li as versões de {s}; nada foi gerado', r.stderr)
+                self.assertFalse([c for c in chamadas if 'versions add' in c or c.startswith('curl')])
+                self.assertMascarado(r)
+
+    def test_senhas_sem_fase1_ou_sem_s_nao_gera_nada(self):
+        casos = [({'sem_instancia': True}, 'aplique a fase 1 do hml/ antes'),
+                 ({'sql_estado': 'PENDING_CREATE'}, "está em 'PENDING_CREATE', não RUNNABLE"),
+                 ({'segredos': ['hml-db-admin-senha']}, 'segredo hml-db-migrator-senha ausente')]
+        for extra, mensagem in casos:
+            with self.subTest(mensagem=mensagem):
+                self.gcloud(extra)
+                r, chamadas = self.senhas()
+                self.assertNotEqual(r.returncode, 0)
+                self.assertIn(mensagem, r.stderr)
+                self.assertFalse([c for c in chamadas if 'versions add' in c or c.startswith('curl')])
+        self.gcloud({})
+        r, chamadas = self.senhas(entrada='sim\n')
+        self.assertIn('nada foi gerado', r.stderr)
+        self.assertFalse([c for c in chamadas if 'versions add' in c or c.startswith('curl')])
+
+    def test_senhas_recusa_rastreamento(self):
+        r, chamadas = self.senhas(SHELLOPTS='xtrace')
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn('rode sem -x', r.stderr)
+        self.assertFalse([c for c in chamadas if 'versions add' in c or c.startswith('curl')])
+
+    def test_senhas_falha_no_banco_nao_grava_o_segredo(self):
+        self.gcloud({'falha_sql': True})
+        r, chamadas = self.senhas()
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn('não confirmei a troca da senha do postgres; o segredo não foi gravado', r.stderr)
+        self.assertFalse([c for c in chamadas if 'versions add' in c])
+        self.assertFalse((self.trabalho / 'cabecalho-sql').exists())
+        self.gcloud({'falha_operacao': True})
+        r, _ = self.senhas()
+        self.assertIn('não confirmei a troca da senha do postgres', r.stderr)
+        self.assertFalse(self.valores()[0])
+
+    def test_senhas_retoma_sem_senha_perdida_no_banco(self):
+        self.gcloud({'falhar_add': ['hml-db-admin-senha']})
+        r, chamadas = self.senhas()
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn('não confirmei a gravação da versão de hml-db-admin-senha; rode senhas de novo', r.stderr)
+        self.assertEqual(len(self.valores()[1]), 1)
+        r, chamadas = self.senhas()
+        self.assertEqual(r.returncode, 0, r.stderr)
+        valores, postgres = self.valores()
+        self.assertEqual(len(postgres), 2)
+        self.assertNotEqual(postgres[0], postgres[1])
+        self.assertEqual(valores['hml-db-admin-senha'][-1], postgres[-1])
+        self.assertIn('hml-db-admin-senha: versão 1', r.stdout)
+        self.assertSemSenha(r, chamadas)
+
+    def test_senhas_fonte_sem_leitura_de_volta_nem_eco(self):
+        codigo = [l for l in (AQUI / 'cloudshell.sh').read_text(encoding='utf-8').splitlines() if not l.lstrip().startswith('#')]
+        for proibido in ('versions access', '--password=', 'set -x', '--prompt-for-password', 'echo "$senha', 'echo $senha'):
+            with self.subTest(proibido=proibido):
+                self.assertFalse([l for l in codigo if proibido in l])
 
     def test_sintaxe(self):
         self.assertEqual(subprocess.run(['bash', '-n', str(AQUI / 'cloudshell.sh')]).returncode, 0)

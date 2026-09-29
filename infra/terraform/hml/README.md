@@ -41,6 +41,15 @@ A configuração não vem de variáveis do GitHub. É um JSON privado, `config/h
 
 Chaves da configuração, com o nome das variáveis do módulo: `projeto_id`, `projeto_numero`, `operador`, `rede_self_link`, `subrede_self_link`, `faixa_psa_nome` e `criar_cloud_run` na fase 1; `versoes_segredos`, `oidc_client_id` e, se usados, `iap_permitidos`, `url_controlada` e `origem` na fase 2, que o workflow ainda recusa. Nenhuma é segredo. `iap_permitidos` só aceita `group:` e `serviceAccount:`: os testadores entram no grupo Google, gerido pelo Adrianus fora do Terraform, e nenhum e-mail de testador vai para o plan, o state ou o log. O `operador` fica no JSON privado, no plan e no state, fora do Git e do log.
 
+## Senhas do banco
+
+Depois da fase 1 (instância e segredos sem versão), no Cloud Shell: `infra/terraform/cloudshell.sh senhas <projeto>`, com `s` para confirmar ([bootstrap](../bootstrap/README.md#como-aplicar) para abrir a sessão).
+
+- Gera `hml-db-admin-senha`, `hml-db-migrator-senha` e `hml-db-app-runtime-senha` com `openssl rand -hex 16`. Cada senha só passa pela entrada padrão: nunca em argumento, eco, arquivo ou log, e nada a lê de volta (sem `secrets versions access`). Com rastreamento ligado (`bash -x`), o comando para antes de gerar.
+- A do admin troca primeiro a senha do `postgres` pela API do Cloud SQL (`users.update`, corpo pela entrada padrão, token num arquivo privado) e só depois vira versão do segredo. Se a troca não se confirmar ou a gravação falhar, o `postgres` pode ficar com uma senha não guardada até rodar `senhas` de novo, que gera outra e troca de novo; antes, conferir a operação no Cloud SQL. O `--prompt-for-password` do `gcloud` não serve aqui, porque lê do terminal, não de um pipe.
+- Segredo com versão ativa fica como está, sem ganhar outra. Segredo só com versão desativada faz o comando parar, sem gerar nem reativar: quem desativou decide se reativa ou destrói.
+- Na tela, só o número da versão de cada segredo: vão para `versoes_segredos` da fase 2, com a versão do `hml-oidc-client-secret` criada no console. Os papéis `migrator` e `app_runtime` nascem depois, no job de preparo.
+
 ## URL controlada
 
 - **`iap` (padrão):** IAP ligado no serviço; `run.invoker` só para o agente de serviço do IAP; `roles/iap.httpsResourceAccessor` para cada item de `iap_permitidos`: o grupo dos testadores e a conta que o pipeline usa no teste de `/saude`. Entrar e sair do teste é mudar o grupo, sem apply.
