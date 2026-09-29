@@ -154,6 +154,13 @@ class LeituraDosWorkflows(unittest.TestCase):
                   t:
                     name: T — ${{ github.ref }}
                 ''',
+            'pull_request com paths': 'on:\n  pull_request:\n    paths: [infra/**]\njobs:\n  t:\n    name: T\n',
+            'pull_request com paths-ignore': 'on:\n  pull_request:\n    paths-ignore:\n      - docs/**\njobs:\n  t:\n    name: T\n',
+            'pull_request com branches': 'on:\n  pull_request:\n    branches: [main]\njobs:\n  t:\n    name: T\n',
+            'pull_request com types': 'on:\n  pull_request:\n    types: [opened]\njobs:\n  t:\n    name: T\n',
+            'on em mapa na linha': 'on: {pull_request: {paths: [x]}}\njobs:\n  t:\n    name: T\n',
+            'job com if': 'on:\n  pull_request:\njobs:\n  t:\n    name: T\n    if: false\n',
+            'job com continue-on-error': 'on:\n  pull_request:\njobs:\n  t:\n    name: T\n    continue-on-error: true\n',
             'nomes repetidos': '''\
                 on:
                   pull_request:
@@ -167,6 +174,11 @@ class LeituraDosWorkflows(unittest.TestCase):
         for nome, texto in casos.items():
             with self.subTest(nome), self.assertRaises(protecao.FormaNaoReconhecida):
                 self.ler(**{'w.yml': texto})
+
+    def test_gatilho_em_lista_e_if_de_passo_sao_aceitos(self):
+        ctx = self.ler(**{'w.yml': 'on:\n  - push\n  - pull_request\njobs:\n  t:\n    name: T\n    steps:\n'
+                                    '      - if: always()\n        run: echo\n'})
+        self.assertEqual(ctx, ['T'])
 
     def test_matrix_inline_expandida(self):
         ctx = self.ler(**{'w.yml': '''\

@@ -45,9 +45,24 @@ def _dispara_em_pr(linhas, arq):
             continue
         resto = _sem_aspas(m.group(2))
         if resto:
+            if resto.startswith('{'):
+                raise FormaNaoReconhecida(f'{arq}: on: em forma de mapa na mesma linha')
             itens = [x.strip() for x in resto.strip('[]').split(',')]
             return 'pull_request' in itens
-        return any(re.match(r'^\s+pull_request:?\s*$', x) for x in _bloco(linhas, i, 0))
+        bloco = _bloco(linhas, i, 0)
+        for k, x in enumerate(bloco):
+            if re.match(r'^\s+-\s*pull_request\s*$', x):
+                return True
+            mp = re.match(r'^(\s+)pull_request:\s*(.*)$', x)
+            if not mp:
+                continue
+            filtros = [y.strip() for y in _bloco(bloco, k, len(mp.group(1)))
+                       if y.strip() and not y.lstrip().startswith('#')]
+            if _sem_aspas(mp.group(2)) or filtros:
+                raise FormaNaoReconhecida(f'{arq}: pull_request com filtro ({(filtros or [mp.group(2)])[0]}); '
+                                          'o check obrigatório poderia não rodar e travar o merge')
+            return True
+        return False
     raise FormaNaoReconhecida(f'{arq}: sem bloco on:')
 
 
@@ -92,6 +107,11 @@ def contextos_dos_workflows(raiz):
                     raise FormaNaoReconhecida(f'{arq}: job fora da forma "  chave:": {l.strip()}')
                 continue
             chave, bloco = m.group(1), _bloco(corpo, i, 2)
+            for x in bloco:
+                mc = re.match(r'^    (if|continue-on-error):', x)
+                if mc:
+                    raise FormaNaoReconhecida(f'{arq}/{chave}: job com {mc.group(1)}:; o check poderia ser pulado '
+                                              'ou falhar e ainda contar como aprovado')
             nome = next((_sem_aspas(x.split(':', 1)[1]) for x in bloco if re.match(r'^    name:', x)), chave)
             exprs = EXPR.findall(nome)
             if not exprs:
