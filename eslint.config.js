@@ -10,7 +10,7 @@ const DOMINIO = [
 ];
 
 export default defineConfig(
-  { ignores: ['**/dist/**', 'coverage/**'] },
+  { ignores: ['**/dist/**', 'coverage/**', '.semgrep/**'] },
   { linterOptions: { reportUnusedDisableDirectives: 'error' } },
   js.configs.recommended,
   tseslint.configs.strictTypeChecked,

@@ -1,6 +1,6 @@
 # Estado do projeto
 
-Atualizado em 27/09/2026 por Codex. Estado desta proposta; PR aberto não significa integrado à `main`.
+Atualizado em 28/09/2026 por Codex. Estado desta proposta; PR aberto não significa integrado à `main`.
 
 ## Onde estamos
 
@@ -10,7 +10,7 @@ Atualizado em 27/09/2026 por Codex. Estado desta proposta; PR aberto não signif
 | Protótipo | Navegável; sem banco ou login reais | https://claude.ai/artifact/WPDgqGvKX6CYTCdPjidBLo |
 | Repositório | Publicado, privado | https://github.com/adrptu/Safrion-Software- |
 | Fundação F0-a | Domínio de decimais, unidades e saldo por lote; proposta de Claude revisada por Codex | PR #5, base `a9e038dc4b4134ea7e6abc08efd7625ee0832137` |
-| Ambiente funcional | Ainda sem banco, API, telas ou homologação acessível | F0-a é fundação técnica, não uma entrega de uso pelo agricultor |
+| Ambiente funcional | Sem homologação hospedada acessível; banco e servidor web em revisão local na cadeia de Claude | Esta base remota contém o domínio; não é uma entrega de uso pelo agricultor |
 
 ## Verificação executada e limite
 
@@ -22,8 +22,18 @@ Atualizado em 27/09/2026 por Codex. Estado desta proposta; PR aberto não signif
 
 ## Próximo passo e responsáveis
 
-1. Codex verifica a CI real desta correção; Claude faz revisão crítica e integra somente após aceite técnico. Codex não aprova nem integra o próprio PR.
-2. Continuar a sequência já aberta: #3 (Gitleaks) → #4 (política Trivy) → #5 (domínio), incorporando FERR-05 antes da liberação. O #2 (contrato CI) permanece separado e requer atualização da base.
+### Segurança estática — FERR-06
+
+Semgrep CE 1.178.0 acrescenta duas regras locais: verificação TLS desabilitada e entrada de requisição usada no texto SQL. O alcance é intraprocedural; não certifica autorização, isolamento, fórmulas, migrações SQL ou todos os caminhos de injeção. Valores parametrizados são o contraexemplo seguro. Testes nativos `ruleid`/`ok` precisam detectar os positivos sem marcar os negativos. O guard rejeita relatório vazio, erro de parser reportado, regra ignorada, timeout de análise e inventário incompleto de JS/TS em `packages/*/src`, `apps/*/src` e na raiz desses pacotes (inclusive `next.config.ts`). Os pré-filtros do scanner podem dispensar o parse de arquivos sem padrões pertinentes: inventário não comprova sintaxe integral. A compilação TypeScript continua obrigatória em outro job.
+
+Local: `python3 tools/ci/check_semgrep.py --semgrep /caminho/semgrep .` (mesma versão). CI: workflow próprio, imagem oficial por digest, código montado somente para leitura e rede desativada no container; sem login, métricas, regras remotas ou envio de achados. Os fixtures sintéticos são excluídos do lint tipado/formatação e verificados pelo scanner nativo. Resultados locais, CI e pareceres por versão ficam no PR e na issue #1; presença de configuração não equivale a gate executado/aprovado nem a proteção aplicada à main.
+
+Dependabot para npm/pnpm 12 permanece sem compatibilidade comprovada; a configuração existente cobre GitHub Actions. Sonar (ENG-018) permanece pendente de consumidor/conta e comprovação do gate. Playwright/axe acompanham as telas do Claude; Terraform/TFLint, testes de carga/ZAP e telemetria exigem seus alvos concretos. Nenhum destes itens pendentes é contado como ativo.
+
+### Sequência de integração
+
+1. A base #6 `82ba9ca` tem CI 36362052077 aprovada e parecer estático final do Claude; o Gemini revisou o mesmo script de produção, inalterado. A composição atual do #2 preserva os dois arquivos de contrato de `d0e7e336` e incorpora essa base. CI e revisão específicas da nova composição são registradas no PR antes da integração. Codex não aprova nem integra o próprio PR.
+2. Continuar a sequência já aberta: #3 (Gitleaks) → #4 (política Trivy) → #5 (domínio) → #6 (cobertura Trivy) → #2 (contrato CI). A nova composição do #2 está alinhada à base #6, sem mudança de comportamento no contrato. Nenhum desses registros equivale a merge ou homologação funcional.
 3. Claude conduz a dependência imediata da F1, com Codex revisando/testando. Critérios e divisão permanecem na issue #1 e nas rodadas; sem abrir módulos paralelos.
 4. Codex e Claude conduzem a homologação técnica e funcional, conforme autorização atual do proprietário. Adrianus recebe a candidata verificada e dá feedback; produção exige seu aceite explícito da versão.
 

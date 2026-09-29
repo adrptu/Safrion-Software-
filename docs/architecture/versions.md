@@ -19,6 +19,7 @@ Fixadas em 27/09/2026 no primeiro commit executável (F0-a), com versões exatas
 | fast-check | 4.10.2 | 19/09/2026 | `registry.npmjs.org/fast-check` | Linha 4 | Testes de propriedade (PRD 23.1) | Mensal |
 | @types/node | 24.13.6 | 19/09/2026 | `registry.npmjs.org/@types/node` | Linha 24, igual ao Node | Tipos do runtime | Junto com o Node |
 | decimal.js | 10.6.0 | 06/07/2025 | `registry.npmjs.org/decimal.js` | Estável | Decimal com 34 algarismos significativos e ROUND_HALF_UP (PRD 10.0, ENG-013) | Anual ou em alerta de segurança |
+| Semgrep CE | 1.178.0 | Consultada em 28/09/2026 | `pypi.org/pypi/semgrep/1.178.0/json` e registro oficial `semgrep/semgrep` | CE local, sem conta | Duas regras locais com fixtures positivas/negativas e inventário obrigatório; imagem fixada pelo digest no workflow, execução sem rede | Mensal ou em alerta de segurança, reexecutando fixtures e provas contra falso verde |
 
 ## A fixar quando entrarem (não instalados e não testados, portanto sem número aqui)
 Next.js e React, Prisma, PostgreSQL e PostGIS (par oferecido pelo Cloud SQL), Playwright, Testcontainers, Zod, Dexie e Workbox, Terraform e provedor Google. Cada um entra no PR que o usa, com fonte e data, sob a mesma quarentena.
