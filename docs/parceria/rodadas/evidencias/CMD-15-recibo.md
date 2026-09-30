@@ -6,7 +6,7 @@ seguem pendentes.
 
 ## Versões
 - Base: main `6882918fab421940d26686838a5a24e8913d9a51`.
-- Candidata: `claude/cmd15-recebimento` em `0c74bade20b10d8202dee76e9de2d8fe1766c310` (código e testes; este recibo e o contrato vêm num commit só de documentação).
+- Candidata: `claude/cmd15-recebimento` em `62f0c23d33c1738273273c333397b52d9fb44405` (código e testes; este recibo e o contrato vêm num commit só de documentação).
 - Contrato vigente: [CMD-15-contrato.md](CMD-15-contrato.md), v3.16, sha256 `70568fbd1a1e9afcdeef2c021d64b89d9e1eda9edf48e741b03c03a287bdb4ab` (a v3.15 acrescenta a §9.1, ensaio de desempenho; a v3.16, a §9.2, prazo de aquisição; a v3.17, a §9.3, prazo por trava do efeito).
 
 ## Commits do incremento (do mais antigo ao mais novo)
@@ -29,6 +29,7 @@ seguem pendentes.
 - `77d8912` fix(db): prazo de aquisição de conexão com erro legível (CMD-15 §9.2, CMD15-P95-01)
 - `e732d1a` test(db): devolução única da conexão segurada nos testes da §9.2
 - `0c74bad` fix(db): prazo para cada espera de trava no efeito do comando (CMD-15 §9.3)
+- `62f0c23` test(db): ROLLBACK que falha depois do 55P03 fica incerto, sem repetirEmMs (§9.3)
 
 ## Bateria completa em `605b9ff` (local, não CI)
 Executada com o `node` e o PostgreSQL 17 do toolchain do time, numa cópia descartável, com PostgreSQL privado só por TCP.
@@ -54,7 +55,7 @@ Executada com o `node` e o PostgreSQL 17 do toolchain do time, numa cópia desca
 ## Gate de cobertura da CI (`vitest run --coverage`)
 Origem do achado: CI do PR #32 no head `c5a1220` (run 36699998664, job "Código"), confirmado pela auditoria do Codex.
 - Reproduzido localmente antes da correção: saída 1, 300/300 testes verdes, ramos abaixo de 95%: `packages/contracts/src/recebimento.ts` 80%; `packages/domain/src/recebimento.ts` 94.61%.
-- Depois de `0c74bad` (só testes de comportamento, sem mudar produto nem limiar): saída 0, 303/303 testes; tsc, eslint e prettier com saída 0.
+- Depois de `62f0c23` (só testes de comportamento, sem mudar produto nem limiar): saída 0, 303/303 testes; tsc, eslint e prettier com saída 0.
 
 ## Ensaio de desempenho delimitado (contrato §9.1)
 Local, em `1f0817a`, `next start` de produção, login DEV, MacBook Air M2 8 GB, PostgreSQL 17 local, pool do app `max: 3`; gerador de chegada aberta com semente fixa, na mesma máquina. Regras de veredito fixadas no contrato antes da carga.
@@ -78,6 +79,7 @@ Na rejeição por prazo do pool (fila cheia ou conexão nova que não abre a tem
 Antes, na primeira tentativa, o envelope voltava o `lock_timeout` ao padrão depois de gravar a chave, e a trava do efeito (o lote, por exemplo) esperava sem prazo segurando a conexão. Agora o efeito herda o mesmo `lock_timeout` da espera pela chave (`esperaChaveMs`, 2 s por padrão). O 55P03 com ROLLBACK confirmado vira `FALHA_TRANSITORIA` com `repetirEmMs`, sem repetição automática. Adendo de 30/09 no ADR 0003.
 - **O limite vale para cada espera por trava, não para o comando.** Reduz a espera indefinida por travas; não limita a espera total. Um teste determinístico com duas travas seguidas, cada uma liberada antes da espera, confirma com duração acima da espera. O valor de 2 s reaproveita um parâmetro existente, sem prova de p95 ou p99.
 - Unit completo com cobertura (gate da CI): 303/303; integração completa: 241/241; arquivo de teste final (depois de um ajuste de lint na vigia): 11/11. Mutações: "trava do efeito volta a esperar sem prazo" em 14 s; "toda falha confirmada vira trava ocupada" em 6.6 s; "55P03 do efeito sem repetirEmMs" em 5.4 s, todas pela asserção e sem timeout de teste. E2E fica para a CI.
+- **ROLLBACK que falha depois do 55P03** (contraprova do Codex, incorporada em `62f0c23`): o resultado fica incerto, sem `repetirEmMs` nem `Retry-After`, com a conexão fora do pool e sem resíduo. A mutação "trava ocupada sem conferir o ROLLBACK (sem !incerto)" foi detectada em 7.3 s, pela asserção.
 
 ## Revisões independentes do Codex
 Recibos em `cons/work/cmd15-review/<sha>/receipt.json`, fora do repositório; o registro dos pareceres está em `cons/outputs/revisao-f0a.md`.
@@ -118,6 +120,7 @@ Cada mutação altera o código de produção numa cópia descartável e roda os
 - `tela-343eacc/mutacoes-unit.json`: 8/8 detectadas.
 - `tela-fix-78409d3/mutacoes-unit.json`: 5/5 detectadas.
 - `trava-0c74bad/mutacoes.json`: 3/3 detectadas.
+- `trava-0c74bad/rollback-62f0c23/mutacoes.json`: 1/1 detectadas.
 - `ui04-9b80d35/mutacoes-unit.json`: 2/2 detectadas.
 - Mutações de tela (E2E): 8/9 detectadas. `tela-fix-78409d3/mutacao-e2e-C.txt` passou verde: declarada equivalente e trocada por mutação fiel na unidade.
 
