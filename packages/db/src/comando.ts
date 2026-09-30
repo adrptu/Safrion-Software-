@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 
 import type { Registrador } from '@safrion/contracts';
 import { ErroDominio } from '@safrion/domain';
-import type { Pool, PoolClient } from 'pg';
+import type { ClientBase, Pool, PoolClient } from 'pg';
 
 import { VERSAO_CANONICA, hashCanonico } from './canonico.js';
 import { ConflitoVersao, ErroComando, RejeicaoNegocio } from './erros.js';
@@ -470,4 +470,32 @@ async function processarComando(
   } finally {
     cliente.release(quebrado);
   }
+}
+
+/**
+ * Consulta sem efeito por (commandType, chave) (IDEM-09; contrato CMD-15 §6.1): o recibo da intenção registrada, isto é,
+ * com resultado terminal gravado por COMMIT (confirmed, rejected ou version_conflict), visível na organização da sessão
+ * (RLS). `processing` nunca aparece: só existe dentro da transação que o insere. null é "recibo ainda não localizado",
+ * nunca "não recebido". Com actorId, só a intenção do próprio autor (quem enviou recupera a resposta perdida); null só
+ * para leitura interna cujo alvo já se mostrou visível. Tipo, chave ou autor fora do formato: null, sem consultar.
+ */
+export async function consultarIntencao(
+  cliente: ClientBase,
+  consulta: {
+    readonly commandType: string;
+    readonly idempotencyKey: string;
+    readonly actorId: string | null;
+  },
+): Promise<Recibo | null> {
+  const { commandType, idempotencyKey, actorId } = consulta;
+  if (!texto(commandType, 64) || !texto(idempotencyKey, 128) || (actorId !== null && !ehUuid(actorId)))
+    return null;
+  const r = await cliente.query<LinhaIntencao>(
+    `SELECT ${COLUNAS_RECIBO} FROM app.intent_record
+      WHERE command_type = $1 AND idempotency_key = $2 AND ($3::uuid IS NULL OR actor_id = $3)
+        AND outcome <> 'processing'`,
+    [commandType, idempotencyKey, actorId],
+  );
+  const linha = r.rows[0];
+  return linha ? recibo(linha, true) : null;
 }

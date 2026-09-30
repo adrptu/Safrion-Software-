@@ -19,14 +19,16 @@ import {
   validadeNoRecebimento,
   type CodigoUnidade,
   type DataCivil,
+  type DestinoOcorrencia,
   type LinhaConferida,
+  type MotivoDivergencia,
   type MovimentoDaParcela,
   type PoliticaValidade,
   type UnidadeDaLinha,
 } from '@safrion/domain';
-import type { PoolClient } from 'pg';
+import type { ClientBase, PoolClient } from 'pg';
 
-import type { Efeito } from './comando.js';
+import { consultarIntencao, type Efeito, type Recibo } from './comando.js';
 import { RejeicaoNegocio } from './erros.js';
 import { saldoDoLote, type SaldoTexto } from './estoque.js';
 import { ehUuid } from './sessao.js';
@@ -594,5 +596,314 @@ export function receberDocumento(dados: Dados): Efeito {
       // Motivo na auditoria, ligado às linhas divergentes (NFR-04; contrato §6).
       ...(motivoAuditoria ? { reason: motivoAuditoria } : {}),
     };
+  };
+}
+
+// Leitura do documento (contrato CMD-15 §6.1) ----------------------------------------------------------------------------
+// Dentro de emOrganizacao (sessão + RLS), sem gravar nada. Quantidades em texto decimal como gravadas, datas civis
+// AAAA-MM-DD, validade ausente como null explícito (nunca data fictícia). Outra organização é igual a inexistente.
+
+export interface Referencia {
+  readonly id: string;
+  readonly nome: string;
+}
+
+export interface DocumentoResumo {
+  readonly id: string;
+  readonly emitente: Referencia & { readonly identificacao: string };
+  readonly tipo: 'nfe' | 'outro';
+  readonly serie: string;
+  readonly numero: string;
+  readonly emissao: string;
+  readonly recebimento: string;
+  readonly fazenda: Referencia;
+  readonly status: 'confirmado' | 'estornado';
+  readonly versao: number;
+  /** Instante ISO 8601 do registro. */
+  readonly registradoEm: string;
+  /** Divergência = linha com motivo gravado (no incremento 1, toda aberta); inspeção = linha com quarentena. */
+  readonly contagens: {
+    readonly linhas: number;
+    readonly divergencias: number;
+    readonly inspecoes: number;
+    readonly ocorrenciasAbertas: number;
+  };
+}
+
+export interface LinhaDoDocumento {
+  readonly id: string;
+  readonly numero: number;
+  readonly produto: Referencia;
+  readonly lote: {
+    readonly id: string;
+    readonly codigo: string;
+    readonly tipo: 'fabricante' | 'agrupamento_interno';
+    readonly validade: string | null;
+  };
+  readonly local: Referencia;
+  readonly documento: string;
+  readonly unidade: string;
+  readonly conversao: { readonly id: string; readonly versao: number } | null;
+  readonly parcelas: {
+    readonly apto: string;
+    readonly quarentena: string;
+    readonly bloqueado: string;
+    readonly recusado: string;
+  };
+  readonly divergencia: { readonly motivo: MotivoDivergencia; readonly texto: string | null } | null;
+  readonly inspecao: { readonly responsavel: Referencia; readonly prazo: string } | null;
+  readonly pedidoLinha: string | null;
+  readonly valorUnitario: string | null;
+  /** Movimentos que a linha gerou, na ordem das versões do lote: o vínculo com o extrato. */
+  readonly movimentos: readonly string[];
+}
+
+export interface OcorrenciaDoDocumento {
+  readonly id: string;
+  readonly linha: { readonly id: string; readonly numero: number };
+  readonly produtoReal: Referencia | { readonly descricao: string };
+  readonly quantidade: string;
+  readonly unidade: string;
+  readonly destino: DestinoOcorrencia;
+  readonly status: 'aberta' | 'registrada';
+  readonly responsavel: Referencia;
+  readonly prazo: string | null;
+  readonly registradaEm: string;
+}
+
+export interface DocumentoDetalhe extends DocumentoResumo {
+  readonly pedido: { readonly sistema: string | null; readonly referencia: string } | null;
+  /** O nome falta quando o autor não é usuário da organização (integração). */
+  readonly autor: { readonly id: string; readonly nome: string | null };
+  /** O recibo do envelope pela chave gravada no documento: pendência e próxima ação vêm dele. */
+  readonly recibo: Recibo | null;
+  readonly linhas: readonly LinhaDoDocumento[];
+  readonly ocorrencias: readonly OcorrenciaDoDocumento[];
+}
+
+interface LinhaDocumentoLido {
+  id: string;
+  doc_type: 'nfe' | 'outro';
+  series: string;
+  number: string;
+  issued_on: string;
+  received_on: string;
+  status: 'confirmado' | 'estornado';
+  version: string;
+  recorded_at: Date;
+  issuer_id: string;
+  issuer_name: string;
+  issuer_identification: string;
+  farm_id: string;
+  farm_name: string;
+  external_system: string | null;
+  external_order_ref: string | null;
+  actor_id: string;
+  actor_name: string | null;
+  intent_command_type: string;
+  intent_key: string;
+  linhas: number;
+  divergencias: number;
+  inspecoes: number;
+  ocorrencias_abertas: number;
+}
+
+interface LinhaDaLinhaLida {
+  id: string;
+  line_number: number;
+  product_id: string;
+  product_name: string;
+  lot_id: string;
+  lot_code: string;
+  lot_kind: 'fabricante' | 'agrupamento_interno';
+  lot_expiry: string | null;
+  location_id: string;
+  location_name: string;
+  document_quantity: string;
+  unit: string;
+  conversion_id: string | null;
+  conversion_version: number | null;
+  qty_apto: string;
+  qty_quarentena: string;
+  qty_bloqueado: string;
+  qty_recusado: string;
+  divergence_reason: MotivoDivergencia | null;
+  divergence_note: string | null;
+  inspection_owner_id: string | null;
+  inspection_owner_name: string | null;
+  inspection_due_on: string | null;
+  external_order_line_ref: string | null;
+  unit_price: string | null;
+  movimentos: string[];
+}
+
+interface LinhaOcorrenciaLida {
+  id: string;
+  line_id: string;
+  line_number: number;
+  real_product_id: string | null;
+  real_product_name: string | null;
+  real_product_description: string | null;
+  counted_quantity: string;
+  counted_unit: string;
+  destination: DestinoOcorrencia;
+  status: 'aberta' | 'registrada';
+  owner_id: string;
+  owner_name: string;
+  due_on: string | null;
+  recorded_at: Date;
+}
+
+// Datas civis como texto: o tipo date do driver viraria instante no fuso local (PRD 10.0).
+const SELECT_DOCUMENTOS = `SELECT d.id, d.doc_type, d.series, d.number, d.issued_on::text AS issued_on,
+    d.received_on::text AS received_on, d.status, d.version::text AS version, d.recorded_at,
+    e.id AS issuer_id, e.name AS issuer_name, e.identification AS issuer_identification, f.id AS farm_id,
+    f.name AS farm_name, d.external_system, d.external_order_ref, d.actor_id, u.name AS actor_name,
+    d.intent_command_type, d.intent_key, l.linhas, l.divergencias, l.inspecoes, o.ocorrencias_abertas
+  FROM app.receipt_document d
+  JOIN app.counterparty e ON e.organization_id = d.organization_id AND e.id = d.issuer_id
+  JOIN app.farm f ON f.organization_id = d.organization_id AND f.id = d.farm_id
+  LEFT JOIN app.app_user u ON u.organization_id = d.organization_id AND u.id = d.actor_id
+  CROSS JOIN LATERAL (
+    SELECT count(*)::int AS linhas,
+           count(*) FILTER (WHERE x.divergence_reason IS NOT NULL)::int AS divergencias,
+           count(*) FILTER (WHERE x.qty_quarentena > 0)::int AS inspecoes
+      FROM app.receipt_line x WHERE x.organization_id = d.organization_id AND x.document_id = d.id) l
+  CROSS JOIN LATERAL (
+    SELECT count(*)::int AS ocorrencias_abertas
+      FROM app.receipt_occurrence y
+     WHERE y.organization_id = d.organization_id AND y.document_id = d.id AND y.status = 'aberta') o
+  WHERE ($1::uuid IS NULL OR d.id = $1)
+  ORDER BY d.received_on DESC, d.recorded_at DESC, d.id`;
+
+const SELECT_LINHAS_DO_DOCUMENTO = `SELECT l.id, l.line_number, l.product_id, p.name AS product_name, l.lot_id,
+    t.code AS lot_code, t.kind AS lot_kind, t.expiry_date::text AS lot_expiry, l.location_id, s.name AS location_name,
+    l.document_quantity::text AS document_quantity, l.unit, l.conversion_id, l.conversion_version,
+    l.qty_apto::text AS qty_apto, l.qty_quarentena::text AS qty_quarentena, l.qty_bloqueado::text AS qty_bloqueado,
+    l.qty_recusado::text AS qty_recusado, l.divergence_reason, l.divergence_note, l.inspection_owner_id,
+    u.name AS inspection_owner_name, l.inspection_due_on::text AS inspection_due_on, l.external_order_line_ref,
+    l.unit_price::text AS unit_price,
+    coalesce((SELECT array_agg(m.id::text ORDER BY m.lot_version, m.intent_item) FROM app.stock_movement m
+               WHERE m.organization_id = l.organization_id AND m.receipt_line_id = l.id), '{}') AS movimentos
+  FROM app.receipt_line l
+  JOIN app.product p ON p.organization_id = l.organization_id AND p.id = l.product_id
+  JOIN app.lot t ON t.organization_id = l.organization_id AND t.id = l.lot_id
+  JOIN app.stock_location s ON s.organization_id = l.organization_id AND s.id = l.location_id
+  LEFT JOIN app.app_user u ON u.organization_id = l.organization_id AND u.id = l.inspection_owner_id
+  WHERE l.document_id = $1
+  ORDER BY l.line_number`;
+
+const SELECT_OCORRENCIAS_DO_DOCUMENTO = `SELECT o.id, o.line_id, l.line_number, o.real_product_id,
+    p.name AS real_product_name, o.real_product_description, o.counted_quantity::text AS counted_quantity,
+    o.counted_unit, o.destination, o.status, o.owner_id, u.name AS owner_name, o.due_on::text AS due_on, o.recorded_at
+  FROM app.receipt_occurrence o
+  JOIN app.receipt_line l ON l.organization_id = o.organization_id AND l.id = o.line_id
+  JOIN app.app_user u ON u.organization_id = o.organization_id AND u.id = o.owner_id
+  LEFT JOIN app.product p ON p.organization_id = o.organization_id AND p.id = o.real_product_id
+  WHERE o.document_id = $1
+  ORDER BY l.line_number, o.recorded_at, o.id`;
+
+function resumoDoDocumento(d: LinhaDocumentoLido): DocumentoResumo {
+  return {
+    id: d.id,
+    emitente: { id: d.issuer_id, nome: d.issuer_name, identificacao: d.issuer_identification },
+    tipo: d.doc_type,
+    serie: d.series,
+    numero: d.number,
+    emissao: d.issued_on,
+    recebimento: d.received_on,
+    fazenda: { id: d.farm_id, nome: d.farm_name },
+    status: d.status,
+    versao: Number(d.version),
+    registradoEm: d.recorded_at.toISOString(),
+    contagens: {
+      linhas: d.linhas,
+      divergencias: d.divergencias,
+      inspecoes: d.inspecoes,
+      ocorrenciasAbertas: d.ocorrencias_abertas,
+    },
+  };
+}
+
+function linhaDoDocumento(l: LinhaDaLinhaLida): LinhaDoDocumento {
+  return {
+    id: l.id,
+    numero: l.line_number,
+    produto: { id: l.product_id, nome: l.product_name },
+    lote: { id: l.lot_id, codigo: l.lot_code, tipo: l.lot_kind, validade: l.lot_expiry },
+    local: { id: l.location_id, nome: l.location_name },
+    documento: l.document_quantity,
+    unidade: l.unit,
+    conversao:
+      l.conversion_id !== null && l.conversion_version !== null
+        ? { id: l.conversion_id, versao: l.conversion_version }
+        : null,
+    parcelas: {
+      apto: l.qty_apto,
+      quarentena: l.qty_quarentena,
+      bloqueado: l.qty_bloqueado,
+      recusado: l.qty_recusado,
+    },
+    divergencia:
+      l.divergence_reason === null ? null : { motivo: l.divergence_reason, texto: l.divergence_note },
+    inspecao:
+      l.inspection_owner_id !== null && l.inspection_owner_name !== null && l.inspection_due_on !== null
+        ? {
+            responsavel: { id: l.inspection_owner_id, nome: l.inspection_owner_name },
+            prazo: l.inspection_due_on,
+          }
+        : null,
+    pedidoLinha: l.external_order_line_ref,
+    valorUnitario: l.unit_price,
+    movimentos: l.movimentos,
+  };
+}
+
+function ocorrenciaDoDocumento(o: LinhaOcorrenciaLida): OcorrenciaDoDocumento {
+  return {
+    id: o.id,
+    linha: { id: o.line_id, numero: o.line_number },
+    produtoReal:
+      o.real_product_id !== null && o.real_product_name !== null
+        ? { id: o.real_product_id, nome: o.real_product_name }
+        : { descricao: o.real_product_description ?? '' },
+    quantidade: o.counted_quantity,
+    unidade: o.counted_unit,
+    destino: o.destination,
+    status: o.status,
+    responsavel: { id: o.owner_id, nome: o.owner_name },
+    prazo: o.due_on,
+    registradaEm: o.recorded_at.toISOString(),
+  };
+}
+
+/** Documentos de entrada visíveis na organização, do recebimento mais recente para o mais antigo. */
+export async function listarDocumentos(cliente: ClientBase): Promise<DocumentoResumo[]> {
+  const r = await cliente.query<LinhaDocumentoLido>(SELECT_DOCUMENTOS, [null]);
+  return r.rows.map(resumoDoDocumento);
+}
+
+/**
+ * Detalhe do documento: origem, linhas com parcelas, divergência, inspeção e vínculos com os movimentos, ocorrências e o
+ * recibo do envelope. Id fora do formato, inexistente ou de outra organização: null, sem distinguir.
+ */
+export async function documento(cliente: ClientBase, id: string): Promise<DocumentoDetalhe | null> {
+  if (!ehUuid(id)) return null;
+  const d = (await cliente.query<LinhaDocumentoLido>(SELECT_DOCUMENTOS, [id])).rows[0];
+  if (!d) return null;
+  const linhas = await cliente.query<LinhaDaLinhaLida>(SELECT_LINHAS_DO_DOCUMENTO, [id]);
+  const ocorrencias = await cliente.query<LinhaOcorrenciaLida>(SELECT_OCORRENCIAS_DO_DOCUMENTO, [id]);
+  return {
+    ...resumoDoDocumento(d),
+    pedido:
+      d.external_order_ref === null ? null : { sistema: d.external_system, referencia: d.external_order_ref },
+    autor: { id: d.actor_id, nome: d.actor_name },
+    recibo: await consultarIntencao(cliente, {
+      commandType: d.intent_command_type,
+      idempotencyKey: d.intent_key,
+      actorId: null,
+    }),
+    linhas: linhas.rows.map(linhaDoDocumento),
+    ocorrencias: ocorrencias.rows.map(ocorrenciaDoDocumento),
   };
 }

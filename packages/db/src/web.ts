@@ -12,7 +12,7 @@ export {
   type Perfil,
   type ProdutoResumo,
 } from './cadastros.js';
-export { executarComando, type Intencao, type Recibo } from './comando.js';
+export { consultarIntencao, executarComando, type Intencao, type Recibo } from './comando.js';
 // Conexão por IP privado na subida do servidor (instrumentation.ts), só com SAFRION_CLOUDSQL_INSTANCIA.
 export { criarConectorGoogle } from './conector-google.js';
 export {
@@ -33,6 +33,16 @@ export {
   type LoteResumo,
   type SaldoTexto,
 } from './estoque.js';
+// Leitura do documento de entrada (contrato CMD-15 §6.1); o comando entra com a rota, na etapa seguinte.
+export {
+  documento,
+  listarDocumentos,
+  type DocumentoDetalhe,
+  type DocumentoResumo,
+  type LinhaDoDocumento,
+  type OcorrenciaDoDocumento,
+  type Referencia,
+} from './recebimento.js';
 export { respostaDeErro } from './resposta.js';
 export { emOrganizacao, ehUuid } from './sessao.js';
 export {
