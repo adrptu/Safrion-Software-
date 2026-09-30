@@ -11,9 +11,12 @@ import {
 } from '../src/autorizacao/matriz';
 
 describe('matriz de autorização (ADR 0004 §4)', () => {
-  it('cada papel × cada comando: só o almoxarife registra entrada', () => {
+  it('cada papel × cada comando: só o almoxarife registra entrada e recebe documento', () => {
     const permitido = Object.fromEntries(PAPEIS.map((p) => [p, COMANDOS.filter((c) => podeExecutar(p, c))]));
-    expect(permitido).toEqual({ almoxarife: ['estoque.registrar-entrada'], gerente: [] });
+    expect(permitido).toEqual({
+      almoxarife: ['estoque.registrar-entrada', 'estoque.receber-documento'],
+      gerente: [],
+    });
   });
 
   it('nega por padrão: papel desconhecido, comando fora da matriz e nome herdado de objeto', () => {

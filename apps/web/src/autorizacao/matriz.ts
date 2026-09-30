@@ -3,7 +3,7 @@
  * fora da lista ou recurso inexistente dão não. A mesma matriz decide a tela (esconder botão é conveniência) e a API
  * (403). O RLS da F0-b é a segunda barreira. Na F1, "receber insumo" (CMD-15) substitui o comando de entrada da F0-c.
  */
-export const COMANDOS = ['estoque.registrar-entrada'] as const;
+export const COMANDOS = ['estoque.registrar-entrada', 'estoque.receber-documento'] as const;
 export type Comando = (typeof COMANDOS)[number];
 
 export const LEITURAS = ['estoque', 'cadastros'] as const;
@@ -12,7 +12,10 @@ export type Leitura = (typeof LEITURAS)[number];
 const MATRIZ: Readonly<
   Record<string, { readonly comandos: readonly Comando[]; readonly leituras: readonly Leitura[] }>
 > = {
-  almoxarife: { comandos: ['estoque.registrar-entrada'], leituras: ['estoque', 'cadastros'] },
+  almoxarife: {
+    comandos: ['estoque.registrar-entrada', 'estoque.receber-documento'],
+    leituras: ['estoque', 'cadastros'],
+  },
   gerente: { comandos: [], leituras: ['estoque', 'cadastros'] },
 };
 
