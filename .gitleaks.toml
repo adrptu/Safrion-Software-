@@ -51,6 +51,16 @@ paths = [
 ]
 regexes = ['''^talhao-os-cenario-v1$''']
 
+# NAV-F1-A: identificadores de intenção das fixtures sintéticas entregues por Grok
+# no commit 64f9a58f61a505282861cdaa3814c7564e504c1c (linhas 553/554 e 675/676).
+# Não são credenciais; a exceção exige este arquivo e um destes dois literais exatos.
+[[rules.allowlists]]
+description = "Identificadores exatos de intenção das fixtures Grok NAV-F1-A; não são credenciais"
+condition = "AND"
+regexTarget = "secret"
+paths = ['''^evidencias/grok/nav-f1-a/nav-f1-offline-adendo-check\.mjs$''']
+regexes = ['''^ap-OS-0420-kempty$''', '''^ap-OS-0420-kstop1$''']
+
 # HML-SECRET-02: nomes de Secret Manager usados por value_source.secret_key_ref.
 # Este identificador não é senha; outros valores/arquivos continuam sujeitos à regra.
 [[rules]]
