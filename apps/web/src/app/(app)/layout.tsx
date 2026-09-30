@@ -2,6 +2,7 @@ import { perfilDaSessao } from '@safrion/db/web';
 import type { ReactNode } from 'react';
 
 import { nomeDoPapel, podeLer } from '../../autorizacao/matriz';
+import { MenuCadastros } from '../../cadastros/MenuCadastros';
 import { BotaoSair } from '../../componentes/BotaoSair';
 import { ItemMenu } from '../../componentes/ItemMenu';
 import { ambienteAtual, consultar, NOME_DO_AMBIENTE, sessaoAtual } from '../../servidor/pagina';
@@ -36,11 +37,7 @@ export default async function Casca({ children }: { readonly children: ReactNode
               </li>
             </>
           ) : null}
-          {podeLer(sessao.papel, 'cadastros') ? (
-            <li>
-              <ItemMenu href="/cadastros/produtos" rotulo="Cadastros" />
-            </li>
-          ) : null}
+          {podeLer(sessao.papel, 'cadastros') ? <MenuCadastros /> : null}
         </ul>
         <div className="menu-pe">
           {selo ? <span className="selo-ambiente">{selo}</span> : null}
