@@ -6,8 +6,8 @@ seguem pendentes.
 
 ## Versões
 - Base: main `6882918fab421940d26686838a5a24e8913d9a51`.
-- Candidata: `claude/cmd15-recebimento` em `f8e66e8fea4fc2c0cb1dafa0f1a5a5c036ddfc4f` (código e testes; este recibo e o contrato vêm num commit só de documentação).
-- Contrato vigente: [CMD-15-contrato.md](CMD-15-contrato.md), v3.15, sha256 `bf4d9882239384f6656b32c3d90850edf30f2b4a64618e3397da771ff13897f6` (a v3.15 só acrescenta a §9.1, o ensaio de desempenho).
+- Candidata: `claude/cmd15-recebimento` em `77d891244a821374027a950728a2f95075411e88` (código e testes; este recibo e o contrato vêm num commit só de documentação).
+- Contrato vigente: [CMD-15-contrato.md](CMD-15-contrato.md), v3.16, sha256 `1e3b7dc500223e47884d0a801a9bcbad837f91733763ac7258f61ce5d3e01193` (a v3.15 acrescenta a §9.1, o ensaio de desempenho; a v3.16, a §9.2, prazo de aquisição).
 
 ## Commits do incremento (do mais antigo ao mais novo)
 - `ce0e2a4` feat(estoque): núcleo do recebimento por documento e inspeção (CMD-15, incremento 1)
@@ -26,6 +26,7 @@ seguem pendentes.
 - `d595285` feat(estoque): aviso antecipado de duplicidade por origem fiscal (CMD-15 §6.3)
 - `605b9ff` feat(estoque): aviso antecipado de duplicidade no formulário (CMD-15 §6.3, v3.14)
 - `9e7b686` test(estoque): ramos do recebimento que o gate de cobertura da CI cobra (CMD-15)
+- `77d8912` fix(db): prazo de aquisição de conexão com erro legível (CMD-15 §9.2, CMD15-P95-01)
 
 ## Bateria completa em `605b9ff` (local, não CI)
 Executada com o `node` e o PostgreSQL 17 do toolchain do time, numa cópia descartável, com PostgreSQL privado só por TCP.
@@ -51,7 +52,7 @@ Executada com o `node` e o PostgreSQL 17 do toolchain do time, numa cópia desca
 ## Gate de cobertura da CI (`vitest run --coverage`)
 Origem do achado: CI do PR #32 no head `c5a1220` (run 36699998664, job "Código"), confirmado pela auditoria do Codex.
 - Reproduzido localmente antes da correção: saída 1, 300/300 testes verdes, ramos abaixo de 95%: `packages/contracts/src/recebimento.ts` 80%; `packages/domain/src/recebimento.ts` 94.61%.
-- Depois de `f8e66e8` (só testes de comportamento, sem mudar produto nem limiar): saída 0, 303/303 testes; tsc, eslint e prettier com saída 0.
+- Depois de `77d8912` (só testes de comportamento, sem mudar produto nem limiar): saída 0, 303/303 testes; tsc, eslint e prettier com saída 0.
 
 ## Ensaio de desempenho delimitado (contrato §9.1)
 Local, em `1f0817a`, `next start` de produção, login DEV, MacBook Air M2 8 GB, PostgreSQL 17 local, pool do app `max: 3`; gerador de chegada aberta com semente fixa, na mesma máquina. Regras de veredito fixadas no contrato antes da carga.
@@ -63,6 +64,12 @@ Local, em `1f0817a`, `next start` de produção, login DEV, MacBook Air M2 8 GB,
 - Reconciliação: OK. Delta pós-pré-carga igual ao esperado em documentos, linhas, movimentos e outbox (1091, 3355, 3355, 4446); 6591 lotes exatos na unidade base; sem `processing`, NF duplicada ou confirmada sem auditoria.
 - Achado CMD15-P95-01 (rajada a 30 req/s): timeouts de 10 s no cliente e envelope de até 20289 ms. Dos 95 comandos incertos, a consulta pela chave achou 73 confirmados e 22 sem recibo localizado na reconciliação. Nenhum efeito divergente ou duplicado foi observado no ensaio, mas ausência de recibo não prova que o comando não rodou: eles seguem incertos, sob a mesma chave. Acima da capacidade não houve espera limitada nem erro legível (PRD §29.2, ENG-076); a causa não foi isolada (fila, travas, execução e commit, ou transporte). Encaminhado ao Codex; não é arquivo do CMD-15.
 - Zero repetições por 40P01 no ensaio inteiro, inclusive na contenção sobre o mesmo lote; isso não é falha nem prova de deadlock.
+
+## Prazo de aquisição com erro legível (contrato §9.2, achado CMD15-P95-01)
+Na rejeição por prazo do pool (fila cheia ou conexão nova que não abre a tempo), comando, leitura e sessão respondiam erro interno 500. Agora respondem `FALHA_TRANSITORIA` 503 com `Retry-After`: nenhum comando SQL da tentativa rodou, e num comando `resultadoIncerto: false` descreve só esta tentativa. DEV e CI passam a ter o mesmo prazo de 10 s por aquisição da HML (adendo de 30/09 no ADR 0006).
+- tsc domain: saída 0, tsc contracts: saída 0, tsc db: saída 0, tsc web: saída 0, eslint: saída 0, prettier: saída 0, vitest unit: domain+contracts+web(estoque, formato, tabela, matriz, recebimento): saída 0, vitest unit COMPLETO com cobertura (pnpm run test da CI): saída 0, initdb: saída 0, vitest integração COMPLETA (db + web, todos os *.int.test.ts): saída 0.
+- Unit completo com cobertura (gate da CI): 303/303; integração completa com PostgreSQL: 237/237. Mutações: 8/8 detectadas. E2E fica para a CI do push.
+- **Limite:** o prazo vale por aquisição, não é prazo HTTP total. As travas do efeito de um comando (por exemplo, a do lote) seguem sem prazo na primeira tentativa: o `lock_timeout` do envelope vale só para a chave da intenção. Isso fica como outra hipótese de causa do P95-01, não tratada.
 
 ## Revisões independentes do Codex
 Recibos em `cons/work/cmd15-review/<sha>/receipt.json`, fora do repositório; o registro dos pareceres está em `cons/outputs/revisao-f0a.md`.
@@ -87,6 +94,7 @@ Recibos em `cons/work/cmd15-review/<sha>/receipt.json`, fora do repositório; o 
 
 ## Contraprovas por mutação
 Cada mutação altera o código de produção numa cópia descartável e roda os testes do bloco; "detectada" = algum teste ficou vermelho.
+- `aquisicao-77d8912/mutacoes.json`: 8/8 detectadas.
 - `cmd15-efeito-mutacoes.json`: 6/6 detectadas.
 - `cmd15-nucleo-cx-mutacoes.json`: 11/11 detectadas.
 - `cmd15-nucleo-mutacoes.json`: 8/8 detectadas.
