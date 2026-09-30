@@ -1,0 +1,71 @@
+--- src/components/os/work-panel.tsx
++++ src/components/os/work-panel.tsx
+@@ -9,5 +9,5 @@
+ import { nextAction, osTitle, phaseLabel, phaseTone } from "@/lib/os";
+ import { PLOTS, PRODUCTS, MACHINES, PEOPLE, PHASES } from "@/lib/seed";
+-import { useApp, classificarFila, novaChaveApontamento, saldoEfetivo } from "@/lib/store";
++import { useApp, classificarFila, novaChaveApontamento, saldoEfetivo, decidirChave, dataDoItem } from "@/lib/store";
+ import type { WorkOrder } from "@/lib/types";
+ 
+@@ -181,27 +181,8 @@
+         remember({ chave });
+         const live = useApp.getState();
+-        const queueAntes = new Set(live.queue.map((item) => item.id));
+-        const apAntes = new Set(live.apontamentos.map((item) => item.id));
+         live.recordProgress(os.id, submitted, submittedHours, chave);
+         const after = useApp.getState();
+         if (after.hydration !== "ready") return;
+-        const recibo = after.offline
+-          ? after.queue.some(
+-              (item) =>
+-                !queueAntes.has(item.id) &&
+-                item.intentionKey === chave &&
+-                item.payload.osId === os.id &&
+-                item.payload.ha === submitted &&
+-                item.payload.hours === submittedHours,
+-            )
+-          : after.apontamentos.some(
+-              (item) =>
+-                !apAntes.has(item.id) &&
+-                item.intentionKey === chave &&
+-                item.osId === os.id &&
+-                item.ha === submitted &&
+-                item.hours === submittedHours,
+-            );
+-        if (recibo) {
++        if (decidirChave(after, os.id, chave, submitted, submittedHours).tipo === "repetida") {
+           dropOsDraft(draftKey);
+           setHa("");
+@@ -446,20 +427,26 @@
+                 </li>
+               ))}
+-              {fila.pendentes.map((item) => (
++              {fila.pendentes.map((item) => {
++                const quando = dataDoItem(item);
++                return (
+                 <li key={item.id} data-sync="aguardando-envio" className="flex items-center justify-between text-[13px]">
+                   <span>
+-                    {String(item.date ?? item.createdAt).slice(8, 10)}/{String(item.date ?? item.createdAt).slice(5, 7)} · {formatArea(Number(item.payload.ha))} · {String(item.payload.hours).replace(".", ",")} h
++                    {quando.slice(8, 10)}/{quando.slice(5, 7)} · {formatArea(Number(item.payload.ha))} · {String(item.payload.hours).replace(".", ",")} h
+                   </span>
+                   <Chip tone="atencao">Aguardando envio</Chip>
+                 </li>
+-              ))}
+-              {fila.retidos.map(({ item, motivo }) => (
++                );
++              })}
++              {fila.retidos.map(({ item, motivo }) => {
++                const quando = dataDoItem(item);
++                return (
+                 <li key={item.id} data-sync="retido" className="flex items-center justify-between gap-2 text-[13px]">
+                   <span>
+-                    {String(item.date ?? item.createdAt).slice(8, 10)}/{String(item.date ?? item.createdAt).slice(5, 7)} · {formatArea(Number(item.payload.ha))} · {String(item.payload.hours).replace(".", ",")} h
++                    {quando.slice(8, 10)}/{quando.slice(5, 7)} · {formatArea(Number(item.payload.ha))} · {String(item.payload.hours).replace(".", ",")} h
+                   </span>
+                   <Chip tone="atencao">Retido · {motivo}</Chip>
+                 </li>
+-              ))}
++                );
++              })}
+             </ul>
+           )}

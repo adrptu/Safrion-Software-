@@ -1,0 +1,77 @@
+{
+  "ok": true,
+  "sources": {
+    "src/lib/store.ts": "073971b4800ad139c739f99e5762c96dae632dee0c39451bea4da3299e3716e3",
+    "src/components/os/work-panel.tsx": "72eae40ed27beaedbe00cdc4397aa663e342a9e1fdb09d49f997b60c79e3261e",
+    "src/lib/types.ts": "bd6c1872f66f53b51402ea50c052b7a8cba9f2d63f62173d298553078db75681",
+    "src/components/layout/shell.tsx": "c960778370314a9c5282e60868d74dbe6e958264590aa5ba64309be1d77cebbc",
+    "src/components/layout/field-shell.tsx": "11b30466b1c792d82c7929da4d6b48cd4af2f4fb8adfdc60e9aa7b90de6bffad"
+  },
+  "log": [
+    {
+      "name": "A(i) K/4,4 conflita com o apontamento e preserva rascunho",
+      "ok": true,
+      "detail": "{\"decisions\":{\"tipo\":\"conflito\"},\"toastFour\":[\"Conflito · esta chave já tem outros valores · nada foi gravado\"],\"draft\":{\"reason\":\"\",\"review\":false,\"ha\":\"4,4\",\"hours\":\"4,4\",\"chave\":\"ap-OS-0420-klegacy\"}}"
+    },
+    {
+      "name": "A(ii) K/3,3 também conflita por causa do retido",
+      "ok": true,
+      "detail": "{\"toastThree\":[\"Conflito · esta chave já tem outros valores · nada foi gravado\"],\"draft\":{\"reason\":\"\",\"review\":false,\"ha\":\"3,3\",\"hours\":\"3,3\",\"chave\":\"ap-OS-0420-klegacy\"}}"
+    },
+    {
+      "name": "B retido sozinho não é recibo nem repetição",
+      "ok": true,
+      "detail": "{\"retidoDecisao\":{\"tipo\":\"retido\",\"motivo\":\"saldo físico insuficiente\",\"id\":\"AP-so-retido\"},\"toastHeld\":[\"Já na fila, retido · saldo físico insuficiente\"],\"draft\":{\"reason\":\"\",\"review\":false,\"ha\":\"4,4\",\"hours\":\"4,4\",\"chave\":\"ap-OS-0420-klegacy\"}}"
+    },
+    {
+      "name": "repetição de pendente consome rascunho sem duplicar",
+      "ok": true,
+      "detail": "{\"before\":{\"queue\":[{\"id\":\"AP-rep\",\"key\":\"ap-OS-0420-klegacy\",\"ha\":1,\"hours\":1}],\"draft\":{\"reason\":\"\",\"review\":false,\"ha\":\"1\",\"hours\":\"1\",\"chave\":\"ap-OS-0420-klegacy\"},\"doneHa\":30},\"after\":{\"queue\":[{\"id\":\"AP-rep\",\"key\":\"ap-OS-0420-klegacy\",\"ha\":1,\"hours\":1}],\"draft\":null,\"doneHa\":30,\"inputs\":{\"ha\":\"\",\"hours\":\"2,4\"}},\"toastRepeat\":[\"Mesma intenção · já aguardando envio\"]}"
+    },
+    {
+      "name": "repetição de apontamento consome rascunho sem duplicar",
+      "ok": true,
+      "detail": "{\"before\":2,\"after\":2,\"doneHa\":31,\"toastOnline\":[\"Mesma intenção · já registrada\"]}"
+    },
+    {
+      "name": "6 resumo e máximo batem com saldo efetivo, inclusive resíduo",
+      "ok": true,
+      "detail": "{\"maxText\":\"Área feita (máx. 60,00 ha)\",\"summaryMax\":\"Realizado 30,00 ha · aguardando envio 10,00 ha · saldo 60,00 ha\",\"saldoMax\":{\"saldo\":60,\"pendente\":10},\"summaryFloat\":\"Realizado 30,00 ha · aguardando envio 10,00 ha · saldo 0,00 ha\",\"floatInfo\":{\"saldo\":0,\"pendente\":10,\"raw\":0},\"blockedOffline\":\"Aguardando envio de 10,00 ha · sincronize quando houver sinal\",\"blockedOnline\":\"Aguardando envio de 10,00 ha · sincronize\"}"
+    },
+    {
+      "name": "6a recusa única com pendente e retido",
+      "ok": true,
+      "detail": "{\"toast\":\"1 aguardando envio · sincronize quando houver sinal · 1 retidos · veja o motivo; a conferência fica presa até restaurar a demonstração\",\"phase\":\"em-execucao\"}"
+    },
+    {
+      "name": "C item já aplicado não bloqueia conferência nem encerramento",
+      "ok": true,
+      "detail": "{\"applied\":{\"ja\":[\"AP-0420-1\"],\"pendentes\":0,\"retidos\":0,\"conferenceToast\":\"OS-0420 · em conferência\",\"closeToast\":\"OS-0420 encerrada · integração ERP segue depois, sem mudar a etapa\",\"phase\":\"encerradas\",\"queue\":[\"AP-0420-1\"]},\"waitingChips\":0}"
+    },
+    {
+      "name": "E chip sem data usa o mesmo fallback do flush",
+      "ok": true,
+      "detail": "[\"24/09 · 1,00 ha · 1 h\\nAguardando envio\",\"21/09 · 1,00 ha · 1 h\\nAguardando envio\"]"
+    },
+    {
+      "name": "D saldo sem pendente não diz pendente",
+      "ok": true,
+      "detail": "{\"empty\":{\"toast\":\"Registrar · recusado · saldo efetivo 70,00 ha\",\"doneHa\":30,\"queue\":0},\"withPending\":{\"toast\":\"Registrar · recusado · saldo efetivo 60,00 ha · aguardando envio 10,00 ha\",\"queue\":1}}"
+    },
+    {
+      "name": "8 repetição com saldo efetivo zero não cria nem fala saldo",
+      "ok": true,
+      "detail": "{\"saldo\":0,\"before\":{\"queue\":[\"AP-zero\"],\"doneHa\":30},\"after\":{\"queue\":[\"AP-zero\"],\"doneHa\":30,\"toast\":\"Mesma intenção · já aguardando envio\"}}"
+    },
+    {
+      "name": "11 flush com fila não vazia em erro não aplica",
+      "ok": true,
+      "detail": "{\"toast\":\"Não gravado neste aparelho · recupere a gravação antes de sincronizar\",\"queue\":[\"AP-blocked\"],\"apSame\":true,\"payloadSame\":true}"
+    },
+    {
+      "name": "F interrupção não diz saíram e conta a fila restante",
+      "ok": true,
+      "detail": "{\"toasts\":[\"Não gravado neste aparelho. A alteração não foi salva.\",\"Sincronização interrompida · 2 itens continuam na fila\"],\"queue\":[\"AP-stop-1\",\"AP-stop-2\"],\"doneHa\":30,\"doneBefore\":30,\"hydration\":\"error\"}"
+    }
+  ]
+}

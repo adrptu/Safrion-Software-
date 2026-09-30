@@ -1,0 +1,157 @@
+--- src/lib/store.ts
++++ src/lib/store.ts
+@@ -13,4 +13,5 @@
+ } from "./seed";
+ import { AUDIT_SEED, DOCS, HARVEST_SEED, currentStep } from "./ledger";
++import { formatNumber } from "./format";
+ import type {
+   Apontamento,
+@@ -349,7 +350,11 @@
+   const pendentes: OfflineItem[] = [];
+   const retidos: { item: OfflineItem; motivo: string }[] = [];
++  const jaAplicados: OfflineItem[] = [];
+   for (const item of estado.queue) {
+     if (item.kind !== "apontamento" || queueOsId(item) !== osId) continue;
+-    if (byId.has(item.id)) continue;
++    if (byId.has(item.id)) {
++      jaAplicados.push(item);
++      continue;
++    }
+     const owner = keyOwner.get(item.intentionKey);
+     if (owner && owner !== item.id) {
+@@ -372,22 +377,53 @@
+     keyOwner.set(item.intentionKey, item.id);
+   }
+-  return { pendentes, retidos };
+-}
+-
+-function filaDaOs(estado: AppState, osId: string) {
+-  return estado.queue.filter((item) => item.kind === "apontamento" && queueOsId(item) === osId);
++  return { pendentes, retidos, jaAplicados };
++}
++
++export type DecisaoChave =
++  | { tipo: "nova" }
++  | { tipo: "repetida"; via: "apontamento" | "pendente"; id: string }
++  | { tipo: "retido"; motivo: string; id: string }
++  | { tipo: "conflito" };
++
++export function decidirChave(estado: AppState, osId: string, chave: string, ha: number, hours: number): DecisaoChave {
++  const registros: { osId: string; ha: number; hours: number; origem: "apontamento" | "fila"; id: string }[] = [];
++  for (const item of estado.apontamentos) {
++    if (item.intentionKey !== chave) continue;
++    registros.push({ osId: item.osId, ha: item.ha, hours: item.hours, origem: "apontamento", id: item.id });
++  }
++  for (const item of estado.queue) {
++    if (item.kind !== "apontamento" || item.intentionKey !== chave) continue;
++    registros.push({
++      osId: queueOsId(item),
++      ha: queueNumber(item, "ha"),
++      hours: queueNumber(item, "hours"),
++      origem: "fila",
++      id: item.id,
++    });
++  }
++  if (registros.length === 0) return { tipo: "nova" };
++  const difere = (item: (typeof registros)[number]) => item.osId !== osId || !mesmaMedida(item.ha, ha) || !mesmaMedida(item.hours, hours);
++  if (registros.some(difere)) return { tipo: "conflito" };
++  const aplicado = registros.find((item) => item.origem === "apontamento");
++  if (aplicado) return { tipo: "repetida", via: "apontamento", id: aplicado.id };
++  const fila = classificarFila(estado, osId);
++  const pendente = fila.pendentes.find((item) => item.intentionKey === chave);
++  if (pendente) return { tipo: "repetida", via: "pendente", id: pendente.id };
++  const retido = fila.retidos.find((item) => item.item.intentionKey === chave);
++  if (retido) return { tipo: "retido", motivo: retido.motivo, id: retido.item.id };
++  const ja = fila.jaAplicados.find((item) => item.intentionKey === chave);
++  if (ja) return { tipo: "repetida", via: "apontamento", id: ja.id };
++  return { tipo: "conflito" };
+ }
+ 
+ function avisoFila(estado: AppState, osId: string) {
+   const fila = classificarFila(estado, osId);
+-  const retidos = new Set(fila.retidos.map((item) => item.item.id));
+-  const aguardando = filaDaOs(estado, osId).filter((item) => !retidos.has(item.id)).length;
+   const parts: string[] = [];
+-  if (aguardando > 0) parts.push(`${aguardando} aguardando envio · sincronize quando houver sinal`);
++  if (fila.pendentes.length > 0) parts.push(`${fila.pendentes.length} aguardando envio · sincronize quando houver sinal`);
+   if (fila.retidos.length > 0) parts.push(`${fila.retidos.length} retidos · veja o motivo; a conferência fica presa até restaurar a demonstração`);
+   return parts.join(" · ");
+ }
+ 
+-function dataDoItem(item: OfflineItem) {
++export function dataDoItem(item: OfflineItem) {
+   if (item.date) return item.date;
+   if (typeof item.payload.date === "string" && item.payload.date) return item.payload.date;
+@@ -652,15 +688,15 @@
+     }
+     const key = chave || novaChaveApontamento(osId);
+-    const apontado = s.apontamentos.find((item) => item.intentionKey === key);
+-    const naFila = s.queue.find((item) => item.intentionKey === key);
+-    if (apontado || naFila) {
+-      const atual = apontado
+-        ? { osId: apontado.osId, ha: apontado.ha, hours: apontado.hours }
+-        : { osId: queueOsId(naFila!), ha: queueNumber(naFila!, "ha"), hours: queueNumber(naFila!, "hours") };
+-      if (atual.osId === osId && mesmaMedida(atual.ha, ha) && mesmaMedida(atual.hours, hours)) {
+-        get().toast(apontado ? "Mesma intenção · já registrada" : "Mesma intenção · já aguardando envio");
+-        return;
+-      }
++    const decisao = decidirChave(s, osId, key, ha, hours);
++    if (decisao.tipo === "conflito") {
+       get().toast("Conflito · esta chave já tem outros valores · nada foi gravado", "alert");
++      return;
++    }
++    if (decisao.tipo === "repetida") {
++      get().toast(decisao.via === "apontamento" ? "Mesma intenção · já registrada" : "Mesma intenção · já aguardando envio");
++      return;
++    }
++    if (decisao.tipo === "retido") {
++      get().toast(`Já na fila, retido · ${decisao.motivo}`, "alert");
+       return;
+     }
+@@ -674,5 +710,7 @@
+     const saldo = saldoEfetivo(os.areaHa, os.doneHa, pendenteHa);
+     if (ha > saldo + 1e-6) {
+-      get().toast(`Registrar · recusado · saldo efetivo ${saldo.toFixed(2)} ha · há pendente`, "alert");
++      const saldoTxt = formatNumber(saldo);
++      const extra = pendenteHa > 1e-6 ? ` · aguardando envio ${formatNumber(pendenteHa)} ha` : "";
++      get().toast(`Registrar · recusado · saldo efetivo ${saldoTxt} ha${extra}`, "alert");
+       return;
+     }
+@@ -1041,12 +1079,19 @@
+     let sairam = 0;
+     const ficaram: string[] = [];
++    let interrompida = false;
+     for (const id of ids) {
+       const live = get();
+-      if (live.hydration !== "ready") break;
++      if (live.hydration !== "ready") {
++        interrompida = true;
++        break;
++      }
+       const q = live.queue.find((item) => item.id === id);
+       if (!q || q.kind !== "apontamento") continue;
+       if (live.apontamentos.some((item) => item.id === q.id)) {
+         set((st) => ({ queue: st.queue.filter((item) => item.id !== q.id) }));
+-        if (get().hydration !== "ready") break;
++        if (get().hydration !== "ready") {
++          interrompida = true;
++          break;
++        }
+         sairam += 1;
+         continue;
+@@ -1094,6 +1139,14 @@
+         }),
+       }));
+-      if (get().hydration !== "ready") break;
++      if (get().hydration !== "ready") {
++        interrompida = true;
++        break;
++      }
+       sairam += 1;
++    }
++    if (interrompida) {
++      const restantes = get().queue.length;
++      get().toast(`Sincronização interrompida · ${restantes} itens continuam na fila`, "alert");
++      return;
+     }
+     get().toast(`${sairam} saíram · ${ficaram.length} ficaram${ficaram.length ? ` (${ficaram.join("; ")})` : ""}`);
