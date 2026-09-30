@@ -6,7 +6,7 @@ seguem pendentes.
 
 ## Versões
 - Base: main `6882918fab421940d26686838a5a24e8913d9a51`.
-- Candidata: `claude/cmd15-recebimento` em `1f0817af21eb9e34f3be98a7bfdc1889bf2c6441` (código e testes; este recibo e o contrato vêm num commit só de documentação).
+- Candidata: `claude/cmd15-recebimento` em `f8e66e8fea4fc2c0cb1dafa0f1a5a5c036ddfc4f` (código e testes; este recibo e o contrato vêm num commit só de documentação).
 - Contrato vigente: [CMD-15-contrato.md](CMD-15-contrato.md), v3.15, sha256 `bf4d9882239384f6656b32c3d90850edf30f2b4a64618e3397da771ff13897f6` (a v3.15 só acrescenta a §9.1, o ensaio de desempenho).
 
 ## Commits do incremento (do mais antigo ao mais novo)
@@ -51,7 +51,7 @@ Executada com o `node` e o PostgreSQL 17 do toolchain do time, numa cópia desca
 ## Gate de cobertura da CI (`vitest run --coverage`)
 Origem do achado: CI do PR #32 no head `c5a1220` (run 36699998664, job "Código"), confirmado pela auditoria do Codex.
 - Reproduzido localmente antes da correção: saída 1, 300/300 testes verdes, ramos abaixo de 95%: `packages/contracts/src/recebimento.ts` 80%; `packages/domain/src/recebimento.ts` 94.61%.
-- Depois de `1f0817a` (só testes de comportamento, sem mudar produto nem limiar): saída 0, 303/303 testes; tsc, eslint e prettier com saída 0.
+- Depois de `f8e66e8` (só testes de comportamento, sem mudar produto nem limiar): saída 0, 303/303 testes; tsc, eslint e prettier com saída 0.
 
 ## Ensaio de desempenho delimitado (contrato §9.1)
 Local, em `1f0817a`, `next start` de produção, login DEV, MacBook Air M2 8 GB, PostgreSQL 17 local, pool do app `max: 3`; gerador de chegada aberta com semente fixa, na mesma máquina. Regras de veredito fixadas no contrato antes da carga.
@@ -61,7 +61,7 @@ Local, em `1f0817a`, `next start` de produção, login DEV, MacBook Air M2 8 GB,
   - recibo: 554/590 no prazo, 0 falhas; latência desde o horário planejado p50/p95/p99 20.1 / 815.3 / 6935.1 ms.
 - Causa provável, não isolada: pressão de memória na máquina (swap quase cheio depois do ensaio; picos isolados e simultâneos no servidor e no gerador). **O p95 válido fica para HML/nuvem**; não se repete neste Mac.
 - Reconciliação: OK. Delta pós-pré-carga igual ao esperado em documentos, linhas, movimentos e outbox (1091, 3355, 3355, 4446); 6591 lotes exatos na unidade base; sem `processing`, NF duplicada ou confirmada sem auditoria.
-- Achado CMD15-P95-01 (rajada a 30 req/s): timeouts de 10 s no cliente e envelope de até 20289 ms. Dos 95 comandos incertos, a consulta pela chave achou 73 confirmados e 22 nunca processados: sem perda nem duplicidade, mas sem espera limitada nem erro legível acima da capacidade (PRD §29.2, ENG-076). Encaminhado ao Codex; não é arquivo do CMD-15.
+- Achado CMD15-P95-01 (rajada a 30 req/s): timeouts de 10 s no cliente e envelope de até 20289 ms. Dos 95 comandos incertos, a consulta pela chave achou 73 confirmados e 22 sem recibo localizado na reconciliação. Nenhum efeito divergente ou duplicado foi observado no ensaio, mas ausência de recibo não prova que o comando não rodou: eles seguem incertos, sob a mesma chave. Acima da capacidade não houve espera limitada nem erro legível (PRD §29.2, ENG-076); a causa não foi isolada (fila, travas, execução e commit, ou transporte). Encaminhado ao Codex; não é arquivo do CMD-15.
 - Zero repetições por 40P01 no ensaio inteiro, inclusive na contenção sobre o mesmo lote; isso não é falha nem prova de deadlock.
 
 ## Revisões independentes do Codex
