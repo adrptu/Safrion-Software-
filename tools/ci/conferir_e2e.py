@@ -2,10 +2,14 @@
 import json
 import os
 from pathlib import Path
+import re
 import sys
 
 
-MINIMOS = {"desktop": 9, "celular": 1}
+MINIMOS = {"desktop": 12, "celular": 1}
+# Provas nomeadas que não podem sumir, mesmo que outra jornada mantenha a contagem: o ID abre o título ("HML-ISO-01: …").
+OBRIGATORIAS = {"desktop": ("HML-ISO-01", "HML-ISO-02", "HML-ISO-03")}
+ID_DO_TITULO = re.compile(r"^([A-Z]+(?:-[A-Z]+)*-\d{2}): ")
 
 
 def conferir(relatorio):
@@ -41,6 +45,10 @@ def conferir(relatorio):
             raise ValueError("TOTAIS_INCONSISTENTES")
     if any(sum(t["projeto"] == p for t in testes) < minimo for p, minimo in MINIMOS.items()):
         raise ValueError("JORNADAS_INCOMPLETAS")
+    for projeto, ids in OBRIGATORIAS.items():
+        presentes = {m.group(1) for t in testes if t["projeto"] == projeto and (m := ID_DO_TITULO.match(t["teste"]))}
+        if not set(ids) <= presentes:
+            raise ValueError("PROVA_OBRIGATORIA_AUSENTE")
     return {"aprovado": True, "quantidade": len(testes), "testes": testes}
 
 

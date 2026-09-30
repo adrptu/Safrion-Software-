@@ -10,16 +10,20 @@ import unittest
 from conferir_e2e import conferir
 
 
+ISOLAMENTO = ["HML-ISO-01: listas", "HML-ISO-02: comando", "HML-ISO-03: API"]
+
+
 def relatorio():
     specs = []
-    for i, projeto in enumerate(["desktop"] * 9 + ["celular"]):
-        specs.append({"id": str(i), "title": f"jornada {i}", "ok": True, "tests": [{
+    titulos = ISOLAMENTO + [f"jornada {i}" for i in range(3, 13)]
+    for i, projeto in enumerate(["desktop"] * 12 + ["celular"]):
+        specs.append({"id": str(i), "title": titulos[i], "ok": True, "tests": [{
             "projectName": projeto, "expectedStatus": "passed", "status": "expected",
             "results": [{"status": "passed", "retry": 0, "errors": [],
                          "stdout": [{"text": "CANARIO_PRIVADO"}], "attachments": [{"body": "CANARIO_PRIVADO"}]}],
         }]})
     return {"errors": [], "suites": [{"specs": [], "suites": [{"specs": specs}]}],
-            "stats": {"expected": 10, "unexpected": 0, "skipped": 0, "flaky": 0}}
+            "stats": {"expected": 13, "unexpected": 0, "skipped": 0, "flaky": 0}}
 
 
 class ConferirE2E(unittest.TestCase):
@@ -30,7 +34,7 @@ class ConferirE2E(unittest.TestCase):
 
     def test_jornadas_aninhadas_e_recibo_sem_canario(self):
         resultado = conferir(self.r)
-        self.assertEqual(resultado["quantidade"], 10)
+        self.assertEqual(resultado["quantidade"], 13)
         self.assertNotIn("CANARIO_PRIVADO", json.dumps(resultado))
 
     def test_vazio_nao_e_verde(self):
@@ -77,6 +81,38 @@ class ConferirE2E(unittest.TestCase):
     def test_resultado_com_erro_nao_passa(self):
         self.t["results"][0]["errors"] = [{"message": "CANARIO_PRIVADO"}]
         with self.assertRaises(ValueError): conferir(self.r)
+
+    def test_jornadas_antigas_omitidas_sem_reposicao_recusadas(self):
+        # As 3 provas de isolamento não compensam jornadas antigas que sumiram (acesso e os dois B2-C02, p. ex.).
+        for omitidas in (1, 3):
+            with self.subTest(omitidas=omitidas):
+                r = relatorio()
+                specs = r["suites"][0]["suites"][0]["specs"]
+                del specs[3:3 + omitidas]
+                r["stats"]["expected"] = 13 - omitidas
+                with self.assertRaises(ValueError) as erro: conferir(r)
+                self.assertEqual(str(erro.exception), "JORNADAS_INCOMPLETAS")
+
+    def test_prova_de_isolamento_trocada_por_outra_jornada_com_os_mesmos_totais(self):
+        # Mesmos 12 desktop + 1 celular, todos verdes, IDs únicos: só falta HML-ISO-02.
+        self.specs[1] = copy.deepcopy(self.specs[3])
+        self.specs[1].update(id="extra", title="jornada extra aprovada")
+        with self.assertRaises(ValueError) as erro: conferir(self.r)
+        self.assertEqual(str(erro.exception), "PROVA_OBRIGATORIA_AUSENTE")
+
+    def test_prova_de_isolamento_so_no_celular_nao_vale(self):
+        self.specs[0]["tests"][0]["projectName"] = "celular"
+        self.specs.append(copy.deepcopy(self.specs[3]))
+        self.specs[-1].update(id="extra", title="jornada extra desktop")
+        self.r["stats"]["expected"] = 14
+        with self.assertRaises(ValueError) as erro: conferir(self.r)
+        self.assertEqual(str(erro.exception), "PROVA_OBRIGATORIA_AUSENTE")
+
+    def test_id_so_no_inicio_do_titulo_e_com_dois_digitos(self):
+        for titulo in ("jornada HML-ISO-03: API", "HML-ISO-030: API", "HML-ISO-03 API"):
+            with self.subTest(titulo=titulo):
+                self.specs[2]["title"] = titulo
+                with self.assertRaises(ValueError): conferir(self.r)
 
     def test_cli_json_invalido_recibo_seguro_e_saida_um(self):
         with tempfile.TemporaryDirectory() as tmp:
