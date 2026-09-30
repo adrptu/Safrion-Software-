@@ -1,0 +1,368 @@
+{
+  "format_version": 1,
+  "created_at": "2026-09-30T01:56:36.035067+00:00",
+  "status": "BACKUP_NAO_APROVADO",
+  "scope": "Copia local delimitada; nao e fonte canonica nem executor remoto pronto",
+  "source_count": 50,
+  "source_bytes": 332570,
+  "files": [
+    {
+      "path": "conteudo/outputs/comando-mestre-equipe.md",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/outputs/comando-mestre-equipe.md",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/outputs/comando-mestre-equipe.md",
+      "bytes": 24415,
+      "sha256": "73430297b60f7e9b50811e04a6dd65ffcf4f58082110d4408e6bd1c2af3fbec9"
+    },
+    {
+      "path": "conteudo/work/grok-equipe-proposta.txt",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-equipe-proposta.txt",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-equipe-proposta.txt",
+      "bytes": 4913,
+      "sha256": "980dcd457667735657060092836893a5d38213a876c5c39c05be44db1bd0b06b"
+    },
+    {
+      "path": "conteudo/work/grok-equipe-gemini-review.json",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-equipe-gemini-review.json",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-equipe-gemini-review.json",
+      "bytes": 3567,
+      "sha256": "1e53fd352c2f681563dc09e99eebacef5d2eec3ddb1c6038f3d2aefa36c4284f"
+    },
+    {
+      "path": "conteudo/work/grok-nav-resposta-9ec18ee3.txt",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-nav-resposta-9ec18ee3.txt",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-nav-resposta-9ec18ee3.txt",
+      "bytes": 8523,
+      "sha256": "a542f3fbbc8abc6e701a5c286403fbdce353d455dd0b1dc95c631733a323a190"
+    },
+    {
+      "path": "conteudo/work/grok-team/grok-design-instructions.md",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/grok-design-instructions.md",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/grok-design-instructions.md",
+      "bytes": 51490,
+      "sha256": "60e8e11901f930af92adea5044348e2bde4ce9cb9273827b394604185d8cf670"
+    },
+    {
+      "path": "conteudo/work/grok-team/transferencia.json",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/transferencia.json",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/transferencia.json",
+      "bytes": 674,
+      "sha256": "1db31771d34f7a6282ed6bbb8369b584c4fd19f298cbc7361dd8797ca94a659b"
+    },
+    {
+      "path": "conteudo/work/gemini-team/gemini-consult.py",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/gemini-team/gemini-consult.py",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/gemini-team/gemini-consult.py",
+      "bytes": 7149,
+      "sha256": "a0c560759569a387675dbd47bb8551e6276c985159063ee3506e02e144a1650e"
+    },
+    {
+      "path": "conteudo/work/gemini-team/gemini-executar-testes.py",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/gemini-team/gemini-executar-testes.py",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/gemini-team/gemini-executar-testes.py",
+      "bytes": 13475,
+      "sha256": "19beb4bd2bbbe72b383cfb8dea04bd4e9c469cf2211585bcd0cecccdf6e4ef40"
+    },
+    {
+      "path": "conteudo/work/gemini-team/gemini-executar-hml.py",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/gemini-team/gemini-executar-hml.py",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/gemini-team/gemini-executar-hml.py",
+      "bytes": 7354,
+      "sha256": "8f4509aabc6049cb5d57bbf7a6b2b4b15996aefb43f827a496a74f5e30015d09"
+    },
+    {
+      "path": "conteudo/work/gemini-team/test_gemini_executor.py",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/gemini-team/test_gemini_executor.py",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/gemini-team/test_gemini_executor.py",
+      "bytes": 11810,
+      "sha256": "2d64d28a4167eedd9f700f5e891beeaec69d9c29ff89cc640a37008932f18208"
+    },
+    {
+      "path": "conteudo/work/grok-team/skills-transfer/LEIA-ME.md",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/LEIA-ME.md",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/LEIA-ME.md",
+      "bytes": 3469,
+      "sha256": "d7ab24a4dea1a73caab6ab9423c23d16340041b45d0c72bb3273fef784d7c874"
+    },
+    {
+      "path": "conteudo/work/grok-team/skills-transfer/manifesto.json",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/manifesto.json",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/manifesto.json",
+      "bytes": 6105,
+      "sha256": "acfdb64c21f17ae521c5f90d77f1883c07d2dbfd96c5596f51764b0a163359f7"
+    },
+    {
+      "path": "conteudo/work/grok-team/skills-transfer/skills/dev-frontend-mobile/SKILL.md",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/dev-frontend-mobile/SKILL.md",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/dev-frontend-mobile/SKILL.md",
+      "bytes": 7820,
+      "sha256": "eb83b188ad071601d5ff438a45e31f59c9df95da4fbd930f4a665e7e8d42425e"
+    },
+    {
+      "path": "conteudo/work/grok-team/skills-transfer/skills/dev-revisao/assets/tsconfig.strict.json",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/dev-revisao/assets/tsconfig.strict.json",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/dev-revisao/assets/tsconfig.strict.json",
+      "bytes": 882,
+      "sha256": "b020156df547d5eba5119c0fe510297f9266d384e699e97b3f5e17b1de54ca6f"
+    },
+    {
+      "path": "conteudo/work/grok-team/skills-transfer/skills/dev-testes/SKILL.md",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/dev-testes/SKILL.md",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/dev-testes/SKILL.md",
+      "bytes": 6642,
+      "sha256": "7a93f851546be1380b3fda8e76c19e7ac04f2c63a4ab802770e0ac880a68cea6"
+    },
+    {
+      "path": "conteudo/work/grok-team/skills-transfer/skills/dev-testes/assets/playwright.config.ts",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/dev-testes/assets/playwright.config.ts",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/dev-testes/assets/playwright.config.ts",
+      "bytes": 1338,
+      "sha256": "e10f9f02280dcc4b5493fe66e720b104cfd8eb13eaa5d0200ba39f605540eac9"
+    },
+    {
+      "path": "conteudo/work/grok-team/skills-transfer/skills/dev-testes/assets/pytest.ini",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/dev-testes/assets/pytest.ini",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/dev-testes/assets/pytest.ini",
+      "bytes": 527,
+      "sha256": "ac2716e1f7a6f323b97b8fbd33390de6396317080181778dddfdfa618363f7c4"
+    },
+    {
+      "path": "conteudo/work/grok-team/skills-transfer/skills/dev-testes/assets/vitest.config.ts",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/dev-testes/assets/vitest.config.ts",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/dev-testes/assets/vitest.config.ts",
+      "bytes": 1245,
+      "sha256": "5733ce45fd3821a0a1bb5b43543d4b450bb144c5ba172af576f0c4f25e50fd11"
+    },
+    {
+      "path": "conteudo/work/grok-team/skills-transfer/skills/master-detail-ux/SKILL.md",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/master-detail-ux/SKILL.md",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/master-detail-ux/SKILL.md",
+      "bytes": 3737,
+      "sha256": "296cbd094e1aa7461a0f3dc95e583e47d6fc737e7e78104f4de9ab1941aa8b52"
+    },
+    {
+      "path": "conteudo/work/grok-team/skills-transfer/skills/master-detail-ux/references/anatomia.md",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/master-detail-ux/references/anatomia.md",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/master-detail-ux/references/anatomia.md",
+      "bytes": 1293,
+      "sha256": "ecdef3ab64b66cb4297850650d38f15111141f582e6fe1faac35d3bf3d33ae1e"
+    },
+    {
+      "path": "conteudo/work/grok-team/skills-transfer/skills/master-detail-ux/references/checklist.md",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/master-detail-ux/references/checklist.md",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/master-detail-ux/references/checklist.md",
+      "bytes": 1032,
+      "sha256": "4b28d6a0ca7d0e47f088f35045456a4bba00dc1ef2aa76d103f66bb1000e6c9a"
+    },
+    {
+      "path": "conteudo/work/grok-team/skills-transfer/skills/minimalismo-essencial/SKILL.md",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/minimalismo-essencial/SKILL.md",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/minimalismo-essencial/SKILL.md",
+      "bytes": 4920,
+      "sha256": "e8edcc15958eb51607a5ddb0ccb6b979060865dc6141da1adc66781a87e69757"
+    },
+    {
+      "path": "conteudo/work/grok-team/skills-transfer/skills/tabelas-interativas/SKILL.md",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/tabelas-interativas/SKILL.md",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/tabelas-interativas/SKILL.md",
+      "bytes": 9504,
+      "sha256": "1ea66fdfe858c5af60e6a7ced9025f4c1483825c5eabc5a96de4c960955df2c7"
+    },
+    {
+      "path": "conteudo/work/grok-team/skills-transfer/skills/tabelas-interativas/assets/exemplo.html",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/tabelas-interativas/assets/exemplo.html",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/tabelas-interativas/assets/exemplo.html",
+      "bytes": 2285,
+      "sha256": "3279a44536c648f02bb3198d3ca09e3f31f19fbd3f605cd564ca57d88b20a154"
+    },
+    {
+      "path": "conteudo/work/grok-team/skills-transfer/skills/tabelas-interativas/assets/tabela.js",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/tabelas-interativas/assets/tabela.js",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/tabelas-interativas/assets/tabela.js",
+      "bytes": 44213,
+      "sha256": "1605033d45dd8f6b040dcedf54269907d21d647f2fdcbd92a65ca9910b345c31"
+    },
+    {
+      "path": "conteudo/work/grok-team/skills-transfer/skills/ux-essencial/SKILL.md",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/ux-essencial/SKILL.md",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/ux-essencial/SKILL.md",
+      "bytes": 14263,
+      "sha256": "10972bdbf98af75313e6c21ebd6586fefc08918972fd792ca83c315b40a5ffe6"
+    },
+    {
+      "path": "conteudo/work/grok-team/skills-transfer/skills/ux-essencial/assets/exemplo.html",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/ux-essencial/assets/exemplo.html",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/ux-essencial/assets/exemplo.html",
+      "bytes": 6501,
+      "sha256": "b15ce0c2cee25ec27fa488d63ddc149a57156b4ba451b107bdb66e3d5d60ebfe"
+    },
+    {
+      "path": "conteudo/work/grok-team/skills-transfer/skills/ux-essencial/assets/m3-kit.js",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/ux-essencial/assets/m3-kit.js",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/ux-essencial/assets/m3-kit.js",
+      "bytes": 6774,
+      "sha256": "035eef47c47ef6016b47edabd2dd80c7b4df4949064edee85bfe9543a4a67efd"
+    },
+    {
+      "path": "conteudo/work/grok-team/skills-transfer/skills/ux-essencial/assets/m3.css",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/ux-essencial/assets/m3.css",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/skills/ux-essencial/assets/m3.css",
+      "bytes": 16418,
+      "sha256": "447779ffcd7a7b98b28b1ce2a3b2ecf1daf5e3af385896cb8e78592c3c4abb26"
+    },
+    {
+      "path": "conteudo/work/grok-team/skills-transfer/validacao.json",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/validacao.json",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/grok-team/skills-transfer/validacao.json",
+      "bytes": 5669,
+      "sha256": "c3136d706b038a4516a4037a4122838963550120f5c0f8dce5dc3e73332e54c9"
+    },
+    {
+      "path": "conteudo/work/gemini-team/skills/gcp-custos/SKILL.md",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/gemini-team/skills/gcp-custos/SKILL.md",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/gemini-team/skills/gcp-custos/SKILL.md",
+      "bytes": 2168,
+      "sha256": "c524c3aa80a7dd3aca3b2c74fa7d10214a3bca70f75ae3133143402e44cbe98c"
+    },
+    {
+      "path": "conteudo/work/gemini-team/skills/gcp-desempenho-incidentes/SKILL.md",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/gemini-team/skills/gcp-desempenho-incidentes/SKILL.md",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/gemini-team/skills/gcp-desempenho-incidentes/SKILL.md",
+      "bytes": 2205,
+      "sha256": "8f5116b72e4efc2787a0d877c53beecca094b7525dbb02f6a84cf0a37c953a0e"
+    },
+    {
+      "path": "conteudo/work/gemini-team/skills/gcp-infra-essencial/SKILL.md",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/gemini-team/skills/gcp-infra-essencial/SKILL.md",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/gemini-team/skills/gcp-infra-essencial/SKILL.md",
+      "bytes": 2410,
+      "sha256": "633e61e82a1be5b1c1da266d0671b2349e8c158987ce0efb1d26b3a3396194f1"
+    },
+    {
+      "path": "conteudo/work/gemini-team/skills/revisao-terceira-opiniao/SKILL.md",
+      "origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/gemini-team/skills/revisao-terceira-opiniao/SKILL.md",
+      "resolved_origin": "/Users/adrianussanders/Documents/Codex/2026-09-27/cons/work/gemini-team/skills/revisao-terceira-opiniao/SKILL.md",
+      "bytes": 2191,
+      "sha256": "995272ed1c13b94c7bb70599c40d835861ee99ee497b8a8279a71bd501695297"
+    },
+    {
+      "path": "skills-locais/dev-infra/SKILL.md",
+      "origin": "/Users/adrianussanders/.agents/skills/dev-infra/SKILL.md",
+      "resolved_origin": "/Users/adrianussanders/.agents/skills/dev-infra/SKILL.md",
+      "bytes": 7742,
+      "sha256": "10f255cdba0a55ea315cea3cee00a83fa835dfb14c4ed839e9fa5c8ffadf5d41"
+    },
+    {
+      "path": "skills-locais/dev-infra/assets/Dockerfile",
+      "origin": "/Users/adrianussanders/.agents/skills/dev-infra/assets/Dockerfile",
+      "resolved_origin": "/Users/adrianussanders/.agents/skills/dev-infra/assets/Dockerfile",
+      "bytes": 1101,
+      "sha256": "eb35106936e385356c79d74799677cc872d631dc4750d1e8b852eacbe18cf033"
+    },
+    {
+      "path": "skills-locais/dev-infra/assets/ci.yml",
+      "origin": "/Users/adrianussanders/.agents/skills/dev-infra/assets/ci.yml",
+      "resolved_origin": "/Users/adrianussanders/.agents/skills/dev-infra/assets/ci.yml",
+      "bytes": 5442,
+      "sha256": "dc8c0029dbc5010aacb145f526a6dc6843409791e2a56467d260732caae69ece"
+    },
+    {
+      "path": "skills-locais/dev-infra/assets/docker-compose.yml",
+      "origin": "/Users/adrianussanders/.agents/skills/dev-infra/assets/docker-compose.yml",
+      "resolved_origin": "/Users/adrianussanders/.agents/skills/dev-infra/assets/docker-compose.yml",
+      "bytes": 1216,
+      "sha256": "e8d560692df6f72d70db18fed067ddaf93c3193fa7b14740f7d1d3f68d17938a"
+    },
+    {
+      "path": "skills-locais/dev-testes/SKILL.md",
+      "origin": "/Users/adrianussanders/.agents/skills/dev-testes/SKILL.md",
+      "resolved_origin": "/Users/adrianussanders/.agents/skills/dev-testes/SKILL.md",
+      "bytes": 6642,
+      "sha256": "7a93f851546be1380b3fda8e76c19e7ac04f2c63a4ab802770e0ac880a68cea6"
+    },
+    {
+      "path": "skills-locais/dev-testes/assets/playwright.config.ts",
+      "origin": "/Users/adrianussanders/.agents/skills/dev-testes/assets/playwright.config.ts",
+      "resolved_origin": "/Users/adrianussanders/.agents/skills/dev-testes/assets/playwright.config.ts",
+      "bytes": 1338,
+      "sha256": "e10f9f02280dcc4b5493fe66e720b104cfd8eb13eaa5d0200ba39f605540eac9"
+    },
+    {
+      "path": "skills-locais/dev-testes/assets/pytest.ini",
+      "origin": "/Users/adrianussanders/.agents/skills/dev-testes/assets/pytest.ini",
+      "resolved_origin": "/Users/adrianussanders/.agents/skills/dev-testes/assets/pytest.ini",
+      "bytes": 527,
+      "sha256": "ac2716e1f7a6f323b97b8fbd33390de6396317080181778dddfdfa618363f7c4"
+    },
+    {
+      "path": "skills-locais/dev-testes/assets/vitest.config.ts",
+      "origin": "/Users/adrianussanders/.agents/skills/dev-testes/assets/vitest.config.ts",
+      "resolved_origin": "/Users/adrianussanders/.agents/skills/dev-testes/assets/vitest.config.ts",
+      "bytes": 1245,
+      "sha256": "5733ce45fd3821a0a1bb5b43543d4b450bb144c5ba172af576f0c4f25e50fd11"
+    },
+    {
+      "path": "skills-locais/dev-revisao/SKILL.md",
+      "origin": "/Users/adrianussanders/.agents/skills/dev-revisao/SKILL.md",
+      "resolved_origin": "/Users/adrianussanders/.agents/skills/dev-revisao/SKILL.md",
+      "bytes": 5637,
+      "sha256": "7ad2ac80af3d907d8dbaf3e7e2539cc63656dfcc0b6545dfb9bae11efcc34a57"
+    },
+    {
+      "path": "skills-locais/dev-revisao/assets/PULL_REQUEST_TEMPLATE.md",
+      "origin": "/Users/adrianussanders/.agents/skills/dev-revisao/assets/PULL_REQUEST_TEMPLATE.md",
+      "resolved_origin": "/Users/adrianussanders/.agents/skills/dev-revisao/assets/PULL_REQUEST_TEMPLATE.md",
+      "bytes": 841,
+      "sha256": "29329fe89f07c25c316b565e36cb5f1b3753bbf88ca0db6e5b11d81023024f33"
+    },
+    {
+      "path": "skills-locais/dev-revisao/assets/checklist-revisao.md",
+      "origin": "/Users/adrianussanders/.agents/skills/dev-revisao/assets/checklist-revisao.md",
+      "resolved_origin": "/Users/adrianussanders/.agents/skills/dev-revisao/assets/checklist-revisao.md",
+      "bytes": 3186,
+      "sha256": "53343a400482f94931fb235bff60fd3a37ac157aa855c8e6d94432b3e4ee0a61"
+    },
+    {
+      "path": "skills-locais/dev-revisao/assets/eslint.config.js",
+      "origin": "/Users/adrianussanders/.agents/skills/dev-revisao/assets/eslint.config.js",
+      "resolved_origin": "/Users/adrianussanders/.agents/skills/dev-revisao/assets/eslint.config.js",
+      "bytes": 2806,
+      "sha256": "7c9ad148b8b4e805eede71eca9ce26893b846320c5feb3974e508977c68e0325"
+    },
+    {
+      "path": "skills-locais/dev-revisao/assets/lint-staged.config.js",
+      "origin": "/Users/adrianussanders/.agents/skills/dev-revisao/assets/lint-staged.config.js",
+      "resolved_origin": "/Users/adrianussanders/.agents/skills/dev-revisao/assets/lint-staged.config.js",
+      "bytes": 453,
+      "sha256": "0ba24530f7686f35dd84343ba33d0bb57bfcbc09798506df0d6632986dcc68d6"
+    },
+    {
+      "path": "skills-locais/dev-revisao/assets/tsconfig.strict.json",
+      "origin": "/Users/adrianussanders/.agents/skills/dev-revisao/assets/tsconfig.strict.json",
+      "resolved_origin": "/Users/adrianussanders/.agents/skills/dev-revisao/assets/tsconfig.strict.json",
+      "bytes": 882,
+      "sha256": "b020156df547d5eba5119c0fe510297f9266d384e699e97b3f5e17b1de54ca6f"
+    },
+    {
+      "path": "skills-locais/negocios-ecossistema/SKILL.md",
+      "origin": "/Users/adrianussanders/.agents/skills/negocios-ecossistema/SKILL.md",
+      "resolved_origin": "/Users/adrianussanders/.agents/skills/negocios-ecossistema/SKILL.md",
+      "bytes": 3452,
+      "sha256": "a43788e323db1c16f501a0c84bf20b2facf807ee8008d2628796efab7a2f1a58"
+    },
+    {
+      "path": "skills-locais/growth-receita-implantacao/SKILL.md",
+      "origin": "/Users/adrianussanders/.agents/skills/growth-receita-implantacao/SKILL.md",
+      "resolved_origin": "/Users/adrianussanders/.agents/skills/growth-receita-implantacao/SKILL.md",
+      "bytes": 3079,
+      "sha256": "2ce9a4db1cd6b2efd10bf9ed16194a0080b6d7dcc8800eb5800790c62dabfa29"
+    }
+  ],
+  "generated_files": [
+    {
+      "path": "README.md",
+      "origin": "Gerado somente para orientar este backup",
+      "bytes": 4203,
+      "sha256": "18eb77f135a4b43ae4f854515a861b7af3b1a8e54fc95440f848de645f87cf0f"
+    }
+  ]
+}
