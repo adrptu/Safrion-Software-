@@ -8,7 +8,7 @@ import type { Dependencias } from '../servidor/ambiente';
 import { erro, json } from './resposta';
 
 /** Chegada de outro site: Origin diferente da aplicação, ou o navegador dizendo que a requisição veio de fora. */
-function deOutroSite(requisicao: Request, origem: string): boolean {
+export function deOutroSite(requisicao: Request, origem: string): boolean {
   const recebida = requisicao.headers.get('origin');
   const sitio = requisicao.headers.get('sec-fetch-site');
   return (

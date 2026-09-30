@@ -66,6 +66,7 @@ export { PASTA_MIGRACOES, aplicarMigracoes, type ResultadoMigracao } from './mig
 export {
   COMANDO_RECEBER_DOCUMENTO,
   documento,
+  documentoPorOrigem,
   listarDocumentos,
   opcoesDoRecebimento,
   receberDocumento,

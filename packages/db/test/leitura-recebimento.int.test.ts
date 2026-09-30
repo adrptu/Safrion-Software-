@@ -8,6 +8,7 @@ import { extratoDoLote, listarLotes } from '../src/estoque.js';
 import {
   COMANDO_RECEBER_DOCUMENTO,
   documento,
+  documentoPorOrigem,
   listarDocumentos,
   opcoesDoRecebimento,
   receberDocumento,
@@ -311,6 +312,27 @@ describe('leitura do documento de entrada', () => {
     const rejeitado = await receber(a, 'leitura-dup', randomUUID(), dados('5001', quatroLinhas()));
     expect(rejeitado).toMatchObject({ outcome: 'rejected', reasonCode: 'DOCUMENTO_JA_RECEBIDO' });
     expect(await consulta(a, 'leitura-dup')).toEqual({ ...rejeitado, alreadyReceived: true });
+  });
+});
+
+describe('documentoPorOrigem: aviso antecipado de duplicidade (contrato CMD-15 §6.3)', () => {
+  it('normaliza como o índice (espaços e zeros à esquerda), só na própria organização, sem erro para entrada inválida', async () => {
+    const [confirmado] = await emOrganizacao(amb.app, a.org, (c) => listarDocumentos(c));
+    const origem = { emitente: ref.fornecedor, tipo: 'nfe', serie: ' 01 ', numero: '0005001' };
+    const achado = await emOrganizacao(amb.app, a.org, (c) => documentoPorOrigem(c, origem));
+    expect(achado).toEqual(confirmado);
+    expect(achado).toMatchObject({ serie: '1', numero: '5001', status: 'confirmado' });
+    await emOrganizacao(amb.app, a.org, async (c) => {
+      expect(await documentoPorOrigem(c, { ...origem, tipo: 'outro' })).toBeNull();
+      expect(await documentoPorOrigem(c, { ...origem, numero: '5002' })).toBeNull();
+      expect(await documentoPorOrigem(c, { ...origem, emitente: randomUUID() })).toBeNull();
+      expect(await documentoPorOrigem(c, { ...origem, emitente: 'nao-e-uuid' })).toBeNull();
+      expect(await documentoPorOrigem(c, { ...origem, numero: '' })).toBeNull();
+      expect(await documentoPorOrigem(c, { ...origem, numero: '1'.repeat(21) })).toBeNull();
+      expect(await documentoPorOrigem(c, { ...origem, tipo: 'cte' })).toBeNull();
+    });
+    // Outra organização, mesmo sabendo o emitente de A, não enxerga nada.
+    expect(await emOrganizacao(amb.app, b.org, (c) => documentoPorOrigem(c, origem))).toBeNull();
   });
 });
 

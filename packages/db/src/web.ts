@@ -38,6 +38,7 @@ export {
 export {
   COMANDO_RECEBER_DOCUMENTO,
   documento,
+  documentoPorOrigem,
   listarDocumentos,
   opcoesDoRecebimento,
   receberDocumento,

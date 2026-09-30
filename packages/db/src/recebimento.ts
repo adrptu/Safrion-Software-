@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 
 import type { DadosRecebimento } from '@safrion/contracts';
 import {
+  ErroDominio,
   aplicar,
   codigoLoteInterno,
   conferirLinha,
@@ -755,7 +756,7 @@ interface LinhaOcorrenciaLida {
 }
 
 // Datas civis como texto: o tipo date do driver viraria instante no fuso local (PRD 10.0).
-const SELECT_DOCUMENTOS = `SELECT d.id, d.doc_type, d.series, d.number, d.issued_on::text AS issued_on,
+const PROJECAO_DOCUMENTOS = `SELECT d.id, d.doc_type, d.series, d.number, d.issued_on::text AS issued_on,
     d.received_on::text AS received_on, d.status, d.version::text AS version, d.recorded_at,
     e.id AS issuer_id, e.name AS issuer_name, e.identification AS issuer_identification, f.id AS farm_id,
     f.name AS farm_name, d.external_system, d.external_order_ref, d.actor_id, u.name AS actor_name,
@@ -772,9 +773,15 @@ const SELECT_DOCUMENTOS = `SELECT d.id, d.doc_type, d.series, d.number, d.issued
   CROSS JOIN LATERAL (
     SELECT count(*)::int AS ocorrencias_abertas
       FROM app.receipt_occurrence y
-     WHERE y.organization_id = d.organization_id AND y.document_id = d.id AND y.status = 'aberta') o
+     WHERE y.organization_id = d.organization_id AND y.document_id = d.id AND y.status = 'aberta') o`;
+
+const SELECT_DOCUMENTOS = `${PROJECAO_DOCUMENTOS}
   WHERE ($1::uuid IS NULL OR d.id = $1)
   ORDER BY d.received_on DESC, d.recorded_at DESC, d.id`;
+
+// A mesma chave do índice parcial receipt_document_origem: só entre os confirmados.
+const SELECT_DOCUMENTO_POR_ORIGEM = `${PROJECAO_DOCUMENTOS}
+  WHERE d.issuer_id = $1 AND d.doc_type = $2 AND d.series = $3 AND d.number = $4 AND d.status = 'confirmado'`;
 
 const SELECT_LINHAS_DO_DOCUMENTO = `SELECT l.id, l.line_number, l.product_id, p.name AS product_name, l.lot_id,
     t.code AS lot_code, t.kind AS lot_kind, t.expiry_date::text AS lot_expiry, l.location_id, s.name AS location_name,
@@ -881,6 +888,39 @@ function ocorrenciaDoDocumento(o: LinhaOcorrenciaLida): OcorrenciaDoDocumento {
 export async function listarDocumentos(cliente: ClientBase): Promise<DocumentoResumo[]> {
   const r = await cliente.query<LinhaDocumentoLido>(SELECT_DOCUMENTOS, [null]);
   return r.rows.map(resumoDoDocumento);
+}
+
+/**
+ * Documento confirmado com a mesma origem fiscal (emitente, tipo, série e número), para avisar antes de confirmar (FO-18,
+ * "Duplicidade"; contrato CMD-15 §6.3). Normaliza como o comando e o índice (identidadeDaOrigem). É auxiliar: o índice e
+ * o recibo continuam a autoridade contra a duplicidade. Emitente fora do formato ou origem inválida: null, sem consultar.
+ */
+export async function documentoPorOrigem(
+  cliente: ClientBase,
+  origem: {
+    readonly emitente: string;
+    readonly tipo: string;
+    readonly serie: string;
+    readonly numero: string;
+  },
+): Promise<DocumentoResumo | null> {
+  if (!ehUuid(origem.emitente)) return null;
+  let id: ReturnType<typeof identidadeDaOrigem>;
+  try {
+    id = identidadeDaOrigem({ tipo: origem.tipo, serie: origem.serie, numero: origem.numero });
+  } catch (erro) {
+    if (erro instanceof ErroDominio) return null;
+    throw erro;
+  }
+  const d = (
+    await cliente.query<LinhaDocumentoLido>(SELECT_DOCUMENTO_POR_ORIGEM, [
+      origem.emitente,
+      id.tipo,
+      id.serie,
+      id.numero,
+    ])
+  ).rows[0];
+  return d ? resumoDoDocumento(d) : null;
 }
 
 /**

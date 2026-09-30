@@ -31,6 +31,7 @@ import {
 import { criarRotaComandos } from '../src/rotas/comandos';
 import { criarRotasEntrar } from '../src/rotas/entrar';
 import { criarRotaIntencoes } from '../src/rotas/intencoes';
+import { criarRotaOrigem } from '../src/rotas/recebimentos';
 import { COOKIE_LOGIN, COOKIE_SESSAO } from '../src/seguranca/cookies';
 
 const ORIGEM = 'http://localhost:3000';
@@ -59,6 +60,15 @@ const deps = () => ({
 const entrar = criarRotasEntrar(deps);
 const comandos = criarRotaComandos(deps);
 const intencoes = criarRotaIntencoes(deps);
+const porOrigem = criarRotaOrigem(deps);
+
+function origem(consulta: string, sessao?: string, extra: Record<string, string> = {}) {
+  return porOrigem(
+    new Request(`${ORIGEM}/api/v1/recebimentos/origem?${consulta}`, {
+      headers: { ...(sessao ? { cookie: `${COOKIE_SESSAO}=${sessao}` } : {}), ...extra },
+    }),
+  );
+}
 
 function cookieDe(resposta: Response, nome: string): string | undefined {
   const linha = resposta.headers.getSetCookie().find((c) => c.startsWith(`${nome}=`));
@@ -413,5 +423,54 @@ describe('GET /api/v1/intencoes/{commandType}/{chave}', () => {
     expect(
       (await get('http-1', almoxarife, { origin: ORIGEM, 'sec-fetch-site': 'same-origin' })).status,
     ).toBe(200);
+  });
+});
+
+// Depois do GET de recibo: a NF 8001 de B (chave-cruzada) já existe quando o aviso a procura por aqui.
+describe('GET /api/v1/recebimentos/origem (aviso antecipado de duplicidade, §6.3)', () => {
+  const consulta = (numero: string, emitente = ids.fornecedor, serie = '01') =>
+    new URLSearchParams({ emitente, tipo: 'nfe', serie, numero }).toString();
+
+  it('encontra a NF já recebida pela origem normalizada; outra NF e outra organização dão "não encontrado"', async () => {
+    const antes = await contagens(amb.app, demo.organizationId);
+    const r = await origem(consulta('0007001'), almoxarife);
+    expect(r.status).toBe(200);
+    expect(r.headers.get('cache-control')).toBe('no-store');
+    expect(await r.json()).toMatchObject({
+      encontrado: true,
+      documento: {
+        tipo: 'nfe',
+        serie: '1',
+        numero: '7001',
+        status: 'confirmado',
+        emitente: { id: ids.fornecedor },
+      },
+    });
+    expect(await (await origem(consulta('9999'), almoxarife)).json()).toEqual({ encontrado: false });
+    // A NF 8001 existe só na organização B; o emitente de B não enumera nada daqui.
+    expect(await (await origem(consulta('8001', ids.fornecedorB), almoxarife)).json()).toEqual({
+      encontrado: false,
+    });
+    expect(await contagens(amb.app, demo.organizationId)).toEqual(antes);
+  });
+
+  it('só quem recebe consulta; sem sessão 401; parâmetro a mais, repetido ou origem inválida 400; outro site 403', async () => {
+    expect((await origem(consulta('7001'), gerente)).status).toBe(403);
+    expect((await origem(consulta('7001'))).status).toBe(401);
+    for (const q of [
+      `${consulta('7001')}&actorId=${randomUUID()}`,
+      `${consulta('7001')}&organizationId=${b.org}`,
+      `${consulta('7001')}&numero=7002`,
+      consulta('7001', 'nao-e-uuid'),
+      consulta(''),
+      consulta('1'.repeat(21)),
+      consulta('7001', ids.fornecedor, '123456789'),
+    ]) {
+      const r = await origem(q, almoxarife);
+      expect(r.status, q).toBe(400);
+      expect((await erroDe(r)).codigo, q).toBe('CONTRATO_INVALIDO');
+    }
+    expect((await origem(consulta('7001'), almoxarife, { origin: 'https://evil.example' })).status).toBe(403);
+    expect((await origem(consulta('7001'), almoxarife, { 'sec-fetch-site': 'cross-site' })).status).toBe(403);
   });
 });
