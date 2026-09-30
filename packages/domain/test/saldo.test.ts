@@ -10,6 +10,7 @@ import {
   ErroDominio,
   estadoInicial,
   lote,
+  ordemFefo,
   paraTexto,
   quantidade,
   saldo,
@@ -295,6 +296,25 @@ describe('saldo por lote (RF-SUP-003, RN-015, ENG-026)', () => {
     expect(dataCivil('2028-02-29')).toBe('2028-02-29');
   });
 
+  it('lote sem validade (RN-032): null explícito, nunca vence; texto vazio continua inválido', () => {
+    const diesel = lote('DIESEL', null, 'L');
+    expect(diesel.validade).toBeNull();
+    const s = calcularSaldo(diesel, [entrada('d1', '500', 'liberado_livre')], '2099-12-31');
+    expect(txt(s)).toMatchObject({ utilizavel: '500.000000', vencido: '0.000000', loteVencido: false });
+    expect(codigo(() => lote('X', '', 'L'))).toBe('DATA_INVALIDA');
+    expect(codigo(() => saldo(estadoInicial(diesel), 'hoje'))).toBe('DATA_INVALIDA');
+  });
+
+  it('regressão: lote com validade vence no dia seguinte ao da validade, como antes', () => {
+    const e = aplicar(estadoInicial(l), entrada('v1', '5', 'liberado_livre'));
+    expect(saldo(e, '2027-06-30').loteVencido).toBe(false);
+    expect(txt(saldo(e, '2027-07-01'))).toMatchObject({
+      utilizavel: '0.000000',
+      vencido: '5.000000',
+      loteVencido: true,
+    });
+  });
+
   it('reconstrução em tempo linear: um acumulador só, sem copiar o estado a cada movimento (achado 3)', () => {
     // Prova determinística: tempo de relógio oscila com a carga da máquina e da CI; a contagem de cópias, não.
     const movs: Movimento[] = [];
@@ -319,6 +339,44 @@ describe('saldo por lote (RF-SUP-003, RN-015, ENG-026)', () => {
     }
     expect(mapasCriados).toBe(1);
     expect(txt(s).utilizavel).toBe('7500.000000');
+  });
+});
+
+describe('ordem FEFO: lote sem validade continua elegível, depois dos datados', () => {
+  const candidato = (
+    chave: string,
+    validade: string | null,
+    primeiraEntrada: string,
+    situacao: Situacao,
+  ) => ({
+    chave,
+    validade,
+    primeiraEntrada,
+    saldo: calcularSaldo(lote(chave, validade, 'L'), [entrada('e', '1', situacao)], HOJE),
+  });
+  const lista = [
+    candidato('sem-2', null, '2026-09-02T10:00:00.000Z', 'liberado_livre'),
+    candidato('dez', '2026-12-31', '2026-09-05T10:00:00.000Z', 'liberado_livre'),
+    candidato('sem-1', null, '2026-09-01T10:00:00.000Z', 'liberado_livre'),
+    candidato('out', '2026-10-31', '2026-09-09T10:00:00.000Z', 'liberado_livre'),
+    candidato('quar', '2026-10-01', '2026-09-01T10:00:00.000Z', 'quarentena_livre'),
+    candidato('bloq', '2026-10-01', '2026-09-01T10:00:00.000Z', 'liberado_bloqueado'),
+    candidato('venc', '2026-09-01', '2026-08-01T10:00:00.000Z', 'liberado_livre'),
+  ];
+
+  it('datados pelo vencimento; sem validade pela primeira entrada; quarentena, bloqueio e vencido fora', () => {
+    expect(ordemFefo(lista)).toEqual(['out', 'dez', 'sem-1', 'sem-2']);
+    expect(ordemFefo([...lista].reverse())).toEqual(['out', 'dez', 'sem-1', 'sem-2']);
+  });
+
+  it('empate de validade e de entrada sai pela chave; entrada ilegível é erro de domínio', () => {
+    const iguais = [
+      candidato('b', '2026-12-31', '2026-09-01T10:00:00.000Z', 'liberado_livre'),
+      candidato('a', '2026-12-31', '2026-09-01T10:00:00.000Z', 'liberado_livre'),
+    ];
+    expect(ordemFefo(iguais)).toEqual(['a', 'b']);
+    const ilegivel = candidato('c', '2026-12-31', 'ontem', 'liberado_livre');
+    expect(codigo(() => ordemFefo([ilegivel]))).toBe('MOVIMENTO_INVALIDO');
   });
 });
 

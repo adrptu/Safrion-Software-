@@ -36,7 +36,8 @@ export type DataCivil = string;
 
 export interface Lote {
   readonly codigo: string;
-  readonly validade: DataCivil;
+  /** Data civil de validade, ou null quando a validade não se aplica ao produto (combustível, por exemplo; RN-032). */
+  readonly validade: DataCivil | null;
   readonly unidadeBase: CodigoUnidade;
 }
 
@@ -106,7 +107,8 @@ export function dataCivil(texto: unknown): DataCivil {
   return t;
 }
 
-export function lote(codigo: string, validade: string, unidadeBase: CodigoUnidade): Lote {
+/** validade null = "não se aplica" (explícito); texto vazio ou fora do formato continua sendo DATA_INVALIDA. */
+export function lote(codigo: string, validade: string | null, unidadeBase: CodigoUnidade): Lote {
   if (typeof codigo !== 'string' || codigo.trim() === '') {
     throw new ErroDominio('LOTE_INVALIDO', 'O lote precisa de código.');
   }
@@ -116,7 +118,7 @@ export function lote(codigo: string, validade: string, unidadeBase: CodigoUnidad
       `O saldo do lote é guardado na unidade-base, não em ${unidadeBase}.`,
     );
   }
-  return { codigo, validade: dataCivil(validade), unidadeBase };
+  return { codigo, validade: validade === null ? null : dataCivil(validade), unidadeBase };
 }
 
 const zeros = (): Record<Situacao, Decimal> => ({
@@ -310,10 +312,14 @@ export function aplicar(estado: EstadoLote, m: Movimento): EstadoLote {
   return acc;
 }
 
-/** Saldo na data informada: o lote vence depois do dia da validade (o próprio dia ainda vale). */
+/**
+ * Saldo na data informada: o lote vence depois do dia da validade (o próprio dia ainda vale). Lote sem validade nunca
+ * vence.
+ */
 export function saldo(estado: EstadoLote, hoje: DataCivil): SaldoLote {
   const p = estado.porSituacao;
-  const loteVencido = dataCivil(hoje) > estado.lote.validade;
+  const dia = dataCivil(hoje);
+  const loteVencido = estado.lote.validade !== null && dia > estado.lote.validade;
   const zero = new Dec(0);
   const utilizavel = loteVencido ? zero : p.liberado_livre;
   const vencido = loteVencido ? p.liberado_livre : zero;
@@ -331,6 +337,48 @@ export function saldo(estado: EstadoLote, hoje: DataCivil): SaldoLote {
     porSituacao: p,
     politica: POLITICA_PRECISAO.id,
   };
+}
+
+/** Um lote candidato ao consumo: validade (ou null), instante da primeira entrada (ISO 8601) e o saldo no dia. */
+export interface CandidatoFefo {
+  readonly chave: string;
+  readonly validade: DataCivil | null;
+  readonly primeiraEntrada: string;
+  readonly saldo: SaldoLote;
+}
+
+/**
+ * Ordem FEFO dos lotes com utilizável maior que zero; quarentena, bloqueio e vencido já estão fora do utilizável.
+ * Primeiro os lotes com validade, do vencimento mais próximo; depois os sem validade, que não saem da fila: ficam
+ * elegíveis pela primeira entrada. Empate pela chave: a ordem é a mesma em qualquer execução.
+ */
+export function ordemFefo(candidatos: readonly CandidatoFefo[]): string[] {
+  const lista: unknown = candidatos;
+  if (!Array.isArray(lista)) {
+    throw new ErroDominio('MOVIMENTO_INVALIDO', 'Os lotes candidatos precisam vir numa lista.');
+  }
+  const itens = candidatos.map((c) => {
+    const entrada = typeof c.primeiraEntrada === 'string' ? Date.parse(c.primeiraEntrada) : Number.NaN;
+    if (typeof c.chave !== 'string' || c.chave === '' || Number.isNaN(entrada)) {
+      throw new ErroDominio(
+        'MOVIMENTO_INVALIDO',
+        'Lote candidato sem chave ou sem instante da primeira entrada.',
+      );
+    }
+    return { ...c, validade: c.validade === null ? null : dataCivil(c.validade), entrada };
+  });
+  return itens
+    .filter((c) => c.saldo.utilizavel.greaterThan(0))
+    .sort((x, y) => {
+      if (x.validade !== y.validade) {
+        if (x.validade === null) return 1;
+        if (y.validade === null) return -1;
+        return x.validade < y.validade ? -1 : 1;
+      }
+      if (x.entrada !== y.entrada) return x.entrada - y.entrada;
+      return x.chave < y.chave ? -1 : x.chave > y.chave ? 1 : 0;
+    })
+    .map((c) => c.chave);
 }
 
 /** Reconstrói o saldo a partir do histórico com um único acumulador: tempo linear no número de movimentos. */

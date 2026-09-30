@@ -107,6 +107,75 @@ describe('isolamento entre organizações (aceite técnico da F1)', () => {
     ).rejects.toMatchObject({ code: '42501' });
   });
 
+  it('recebimento por documento (0007): B não vê fornecedor, documento, linha nem ocorrência de A, nem aponta para eles', async () => {
+    const doc = {
+      fornecedor: randomUUID(),
+      documento: randomUUID(),
+      linha: randomUUID(),
+      ocorrencia: randomUUID(),
+    };
+    await emOrganizacao(amb.app, a.org, async (c) => {
+      await c.query(
+        "INSERT INTO app.counterparty (id, organization_id, name, identification) VALUES ($1, $2, 'Fornecedor A', '11222333000181')",
+        [doc.fornecedor, a.org],
+      );
+      await c.query(
+        `INSERT INTO app.receipt_document (id, organization_id, issuer_id, doc_type, series, number, issued_on, received_on,
+           farm_id, actor_id, intent_command_type, intent_key)
+         VALUES ($1, $2, $3, 'nfe', '1', '123', '2026-09-29', '2026-09-30', $4, $5, 'estoque.receber-documento', 'k-a')`,
+        [doc.documento, a.org, doc.fornecedor, a.fazenda, a.usuario],
+      );
+      await c.query(
+        `INSERT INTO app.receipt_line (id, organization_id, document_id, farm_id, line_number, product_id, lot_id,
+           location_id, document_quantity, unit, qty_apto, qty_quarentena, qty_bloqueado, qty_recusado)
+         VALUES ($1, $2, $3, $4, 1, $5, $6, $7, 20, 'L', 0, 0, 0, 0)`,
+        [doc.linha, a.org, doc.documento, a.fazenda, a.produto, a.lote, a.local],
+      );
+      await c.query(
+        `INSERT INTO app.receipt_occurrence (id, organization_id, document_id, line_id, real_product_description,
+           counted_quantity, counted_unit, destination, owner_id, due_on, status)
+         VALUES ($1, $2, $3, $4, 'Fungicida B', 1, 'tambor 200 L', 'retido_para_decisao', $5, '2026-10-02', 'aberta')`,
+        [doc.ocorrencia, a.org, doc.documento, doc.linha, a.usuario],
+      );
+    });
+    await emOrganizacao(amb.app, b.org, async (c) => {
+      for (const t of ['counterparty', 'receipt_document', 'receipt_line', 'receipt_occurrence']) {
+        const r = await c.query<{ n: string }>(`SELECT count(*)::text n FROM app.${t}`);
+        expect(r.rows[0]?.n, t).toBe('0');
+      }
+    });
+    // A chave composta com a organização barra a referência cruzada, mesmo com o id certo de A.
+    await expect(
+      emOrganizacao(amb.app, b.org, (c) =>
+        c.query(
+          `INSERT INTO app.receipt_document (id, organization_id, issuer_id, doc_type, series, number, issued_on,
+             received_on, farm_id, actor_id, intent_command_type, intent_key)
+           VALUES ($1, $2, $3, 'nfe', '1', '999', '2026-09-29', '2026-09-30', $4, $5, 'estoque.receber-documento', 'k-b')`,
+          [randomUUID(), b.org, doc.fornecedor, b.fazenda, b.usuario],
+        ),
+      ),
+    ).rejects.toMatchObject({ code: '23503' });
+    await expect(
+      emOrganizacao(amb.app, b.org, (c) =>
+        c.query(
+          `INSERT INTO app.receipt_occurrence (id, organization_id, document_id, line_id, real_product_description,
+             counted_quantity, counted_unit, destination, owner_id, status)
+           VALUES ($1, $2, $3, $4, 'x', 1, 'L', 'devolvido_na_entrega', $5, 'registrada')`,
+          [randomUUID(), b.org, doc.documento, doc.linha, b.usuario],
+        ),
+      ),
+    ).rejects.toMatchObject({ code: '23503' });
+    // Nem com a organização de A no conteúdo: a política da sessão recusa.
+    await expect(
+      emOrganizacao(amb.app, b.org, (c) =>
+        c.query(
+          "INSERT INTO app.counterparty (id, organization_id, name, identification) VALUES ($1, $2, 'x', '1')",
+          [randomUUID(), a.org],
+        ),
+      ),
+    ).rejects.toMatchObject({ code: '42501' });
+  });
+
   it('a mesma chave em organizações diferentes não compartilha recibo nem efeito', async () => {
     const ra = await mover(amb.app, a, 'mesma-chave', 2, {
       tipo: 'entrada',
