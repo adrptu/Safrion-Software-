@@ -6,8 +6,8 @@ seguem pendentes.
 
 ## Versões
 - Base: main `6882918fab421940d26686838a5a24e8913d9a51`.
-- Candidata: `claude/cmd15-recebimento` em `e732d1a35ec1f146391ef98f671bb350abb00665` (código e testes; este recibo e o contrato vêm num commit só de documentação).
-- Contrato vigente: [CMD-15-contrato.md](CMD-15-contrato.md), v3.16, sha256 `1e3b7dc500223e47884d0a801a9bcbad837f91733763ac7258f61ce5d3e01193` (a v3.15 acrescenta a §9.1, o ensaio de desempenho; a v3.16, a §9.2, prazo de aquisição).
+- Candidata: `claude/cmd15-recebimento` em `0c74bade20b10d8202dee76e9de2d8fe1766c310` (código e testes; este recibo e o contrato vêm num commit só de documentação).
+- Contrato vigente: [CMD-15-contrato.md](CMD-15-contrato.md), v3.16, sha256 `70568fbd1a1e9afcdeef2c021d64b89d9e1eda9edf48e741b03c03a287bdb4ab` (a v3.15 acrescenta a §9.1, ensaio de desempenho; a v3.16, a §9.2, prazo de aquisição; a v3.17, a §9.3, prazo por trava do efeito).
 
 ## Commits do incremento (do mais antigo ao mais novo)
 - `ce0e2a4` feat(estoque): núcleo do recebimento por documento e inspeção (CMD-15, incremento 1)
@@ -28,6 +28,7 @@ seguem pendentes.
 - `9e7b686` test(estoque): ramos do recebimento que o gate de cobertura da CI cobra (CMD-15)
 - `77d8912` fix(db): prazo de aquisição de conexão com erro legível (CMD-15 §9.2, CMD15-P95-01)
 - `e732d1a` test(db): devolução única da conexão segurada nos testes da §9.2
+- `0c74bad` fix(db): prazo para cada espera de trava no efeito do comando (CMD-15 §9.3)
 
 ## Bateria completa em `605b9ff` (local, não CI)
 Executada com o `node` e o PostgreSQL 17 do toolchain do time, numa cópia descartável, com PostgreSQL privado só por TCP.
@@ -53,7 +54,7 @@ Executada com o `node` e o PostgreSQL 17 do toolchain do time, numa cópia desca
 ## Gate de cobertura da CI (`vitest run --coverage`)
 Origem do achado: CI do PR #32 no head `c5a1220` (run 36699998664, job "Código"), confirmado pela auditoria do Codex.
 - Reproduzido localmente antes da correção: saída 1, 300/300 testes verdes, ramos abaixo de 95%: `packages/contracts/src/recebimento.ts` 80%; `packages/domain/src/recebimento.ts` 94.61%.
-- Depois de `e732d1a` (só testes de comportamento, sem mudar produto nem limiar): saída 0, 303/303 testes; tsc, eslint e prettier com saída 0.
+- Depois de `0c74bad` (só testes de comportamento, sem mudar produto nem limiar): saída 0, 303/303 testes; tsc, eslint e prettier com saída 0.
 
 ## Ensaio de desempenho delimitado (contrato §9.1)
 Local, em `1f0817a`, `next start` de produção, login DEV, MacBook Air M2 8 GB, PostgreSQL 17 local, pool do app `max: 3`; gerador de chegada aberta com semente fixa, na mesma máquina. Regras de veredito fixadas no contrato antes da carga.
@@ -71,7 +72,12 @@ Na rejeição por prazo do pool (fila cheia ou conexão nova que não abre a tem
 - tsc domain: saída 0, tsc contracts: saída 0, tsc db: saída 0, tsc web: saída 0, eslint: saída 0, prettier: saída 0, vitest unit: domain+contracts+web(estoque, formato, tabela, matriz, recebimento): saída 0, vitest unit COMPLETO com cobertura (pnpm run test da CI): saída 0, initdb: saída 0, vitest integração COMPLETA (db + web, todos os *.int.test.ts): saída 0.
 - Unit completo com cobertura (gate da CI): 303/303; integração completa com PostgreSQL: 237/237. Mutações: 8/8 detectadas. E2E fica para a CI do push.
 - **Correção dos testes (`e732d1a`, achado do Codex):** das 8 mutações acima, 2 terminaram por timeout do teste (a conexão segurada não voltava ao pool depois da asserção falhar), e não pela asserção. Com a devolução única no `finally`, as 2 foram refeitas: "leitura sem o helper (pool.connect cru)" detectada em 3.6 s; "leitura afirma resultadoIncerto" detectada em 2.6 s, pela asserção e sem timeout.
-- **Limite:** o prazo vale por aquisição, não é prazo HTTP total. As travas do efeito de um comando (por exemplo, a do lote) seguem sem prazo na primeira tentativa: o `lock_timeout` do envelope vale só para a chave da intenção. Isso fica como outra hipótese de causa do P95-01, não tratada.
+- **Limite:** o prazo vale por aquisição, não é prazo HTTP total. A trava do efeito, que antes esperava sem prazo, é tratada na §9.3 abaixo.
+
+## Prazo para cada espera de trava no efeito (contrato §9.3, commit `0c74bad`)
+Antes, na primeira tentativa, o envelope voltava o `lock_timeout` ao padrão depois de gravar a chave, e a trava do efeito (o lote, por exemplo) esperava sem prazo segurando a conexão. Agora o efeito herda o mesmo `lock_timeout` da espera pela chave (`esperaChaveMs`, 2 s por padrão). O 55P03 com ROLLBACK confirmado vira `FALHA_TRANSITORIA` com `repetirEmMs`, sem repetição automática. Adendo de 30/09 no ADR 0003.
+- **O limite vale para cada espera por trava, não para o comando.** Reduz a espera indefinida por travas; não limita a espera total. Um teste determinístico com duas travas seguidas, cada uma liberada antes da espera, confirma com duração acima da espera. O valor de 2 s reaproveita um parâmetro existente, sem prova de p95 ou p99.
+- Unit completo com cobertura (gate da CI): 303/303; integração completa: 241/241; arquivo de teste final (depois de um ajuste de lint na vigia): 11/11. Mutações: "trava do efeito volta a esperar sem prazo" em 14 s; "toda falha confirmada vira trava ocupada" em 6.6 s; "55P03 do efeito sem repetirEmMs" em 5.4 s, todas pela asserção e sem timeout de teste. E2E fica para a CI.
 
 ## Revisões independentes do Codex
 Recibos em `cons/work/cmd15-review/<sha>/receipt.json`, fora do repositório; o registro dos pareceres está em `cons/outputs/revisao-f0a.md`.
@@ -111,6 +117,7 @@ Cada mutação altera o código de produção numa cópia descartável e roda os
 - `retry-7e79ecc/mutacoes-retry.json`: 9/9 detectadas.
 - `tela-343eacc/mutacoes-unit.json`: 8/8 detectadas.
 - `tela-fix-78409d3/mutacoes-unit.json`: 5/5 detectadas.
+- `trava-0c74bad/mutacoes.json`: 3/3 detectadas.
 - `ui04-9b80d35/mutacoes-unit.json`: 2/2 detectadas.
 - Mutações de tela (E2E): 8/9 detectadas. `tela-fix-78409d3/mutacao-e2e-C.txt` passou verde: declarada equivalente e trocada por mutação fiel na unidade.
 
