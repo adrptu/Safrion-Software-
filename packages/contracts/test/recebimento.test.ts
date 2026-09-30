@@ -102,4 +102,29 @@ describe('dados do recebimento', () => {
     );
     expect(mL.linhas[0]?.unidade).toEqual({ tipo: 'medida', unidade: 'mL' });
   });
+
+  it('forma canônica da ocorrência: "2.50" e "2.5" são o mesmo conteúdo; outra quantidade é outro conteúdo', () => {
+    const comOcorrencia = (quantidade: string) =>
+      canonizarRecebimento(
+        EsquemaDadosRecebimento.parse(
+          dados({
+            linhas: [
+              linha(1, {
+                motivo: 'produto_diferente',
+                ocorrencia: {
+                  produtoReal: { descricao: 'Fungicida B, tambor' },
+                  quantidade,
+                  unidade: 'tambor 200 L',
+                  destino: 'devolvido_na_entrega',
+                  responsavel: U(5),
+                },
+              }),
+            ],
+          }),
+        ),
+      );
+    expect(comOcorrencia('2.50')).toEqual(comOcorrencia('2.5'));
+    expect(comOcorrencia('2.50').linhas[0]?.ocorrencia?.quantidade).toBe('2.5');
+    expect(comOcorrencia('3')).not.toEqual(comOcorrencia('2.5'));
+  });
 });

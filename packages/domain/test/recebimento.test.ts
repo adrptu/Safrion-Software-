@@ -244,6 +244,24 @@ describe('produto diferente: ocorrência de chegada, não estoque', () => {
       codigo(() => ocorrenciaDeChegada({ ...base, destino: 'descartado' as 'devolvido_na_entrega' })),
     ).toBe('RECEBIMENTO_INVALIDO');
   });
+
+  it('unidade contada e responsável vêm legíveis, mesmo de uma entrada fora do contrato', () => {
+    const base = {
+      produtoReal: { descricao: 'Fungicida B, tambor' },
+      quantidade: '1',
+      unidade: 'tambor 200 L',
+      responsavel: 'almoxarife-a',
+      destino: 'devolvido_na_entrega',
+    } as const;
+    const semTipo = (campos: Record<string, unknown>) => ({ ...base, ...campos }) as typeof base;
+    for (const unidade of [' ', 'x'.repeat(41), 200]) {
+      expect(codigo(() => ocorrenciaDeChegada(semTipo({ unidade })))).toBe('RECEBIMENTO_INVALIDO');
+    }
+    expect(ocorrenciaDeChegada({ ...base, unidade: 'x'.repeat(40) }).status).toBe('registrada');
+    for (const responsavel of [' ', 7, null]) {
+      expect(codigo(() => ocorrenciaDeChegada(semTipo({ responsavel })))).toBe('RECEBIMENTO_INVALIDO');
+    }
+  });
 });
 
 describe('validade no recebimento (RN-032): nunca data fictícia', () => {
