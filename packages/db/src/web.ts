@@ -17,6 +17,7 @@ export { consultarIntencao, executarComando, type Efeito, type Intencao, type Re
 export { criarConectorGoogle } from './conector-google.js';
 export {
   ErroConexao,
+  LIMITE_CONEXAO_MS,
   prepararConexao,
   type Conector,
   type Conexao,

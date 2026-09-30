@@ -2,10 +2,26 @@ import { erroContrato, type CodigoErro } from '@safrion/contracts';
 
 const SEM_CACHE = { 'cache-control': 'no-store' };
 
+/** Retry-After só em 503 com `detalhe.repetirEmMs` finito e positivo, em segundos inteiros (contrato CMD-15 §9.2). */
+function repetirDepois(status: number, corpo: unknown): Record<string, string> {
+  if (status !== 503 || typeof corpo !== 'object' || corpo === null) return {};
+  const detalhe: unknown = (corpo as { detalhe?: unknown }).detalhe;
+  if (typeof detalhe !== 'object' || detalhe === null) return {};
+  const ms: unknown = (detalhe as { repetirEmMs?: unknown }).repetirEmMs;
+  return typeof ms === 'number' && Number.isFinite(ms) && ms > 0
+    ? { 'retry-after': String(Math.ceil(ms / 1000)) }
+    : {};
+}
+
 export function json(status: number, corpo: unknown, cabecalhos: Record<string, string> = {}): Response {
   return new Response(JSON.stringify(corpo), {
     status,
-    headers: { 'content-type': 'application/json; charset=utf-8', ...SEM_CACHE, ...cabecalhos },
+    headers: {
+      'content-type': 'application/json; charset=utf-8',
+      ...SEM_CACHE,
+      ...repetirDepois(status, corpo),
+      ...cabecalhos,
+    },
   });
 }
 

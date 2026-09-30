@@ -63,3 +63,8 @@ A comparação, com fontes e custos, está no R-006 (`docs/hml-custo-infra`, `89
   - permissões da `sa-infra-github` para `private_network` e da `sa-deploy-github` para `vpc_access`;
   - `network` e `subnetwork` sem diferença permanente.
 - Antes da 1ª subida, ensaio do conector `PRIVATE` com Direct VPC numa instância descartável, sem dado real (R-006).
+
+## Adendo de 30/09/2026 (contrato CMD-15 §9.2)
+- O prazo de 10 s por aquisição do pool da web passa a valer também em desenvolvimento e na CI, com a URL comum e sem conector. Ele substitui, só nesse ponto, o "esperar sem fim como em desenvolvimento e na CI" da seção Conexão. O resto desta decisão não muda.
+- A rejeição por esse prazo (fila do pool cheio ou conexão nova que não abre a tempo) chega a quem chamou como `FALHA_TRANSITORIA` 503, com `Retry-After`, e não como erro interno. Nenhum comando SQL da tentativa rodou; num comando, `resultadoIncerto: false` descreve só essa tentativa.
+- O prazo vale por aquisição e não é prazo HTTP total. As travas do efeito de um comando continuam sem prazo na primeira tentativa, como achado separado (CMD15-P95-01), fora deste adendo.

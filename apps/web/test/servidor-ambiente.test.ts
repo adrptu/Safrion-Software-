@@ -118,15 +118,20 @@ async function erroDe(promessa: Promise<unknown>): Promise<Error> {
 }
 
 describe('sem SAFRION_CLOUDSQL_INSTANCIA (desenvolvimento e CI)', () => {
-  it('prepararDependencias não faz nada; dependencias() cria o mesmo pool de antes, uma vez só', async () => {
+  it('prepararDependencias não faz nada; dependencias() cria o pool da URL comum, uma vez só', async () => {
     const preparar = vi.fn();
     await prepararDependencias(preparar);
     expect(preparar).not.toHaveBeenCalled();
     expect(guardadas[CHAVE]).toBeUndefined();
     const deps = dependencias();
-    expect(deps.banco.options).toMatchObject({ connectionString: URL_BANCO, max: 3 });
+    // Sem conector: URL comum e máximo 3. O prazo por aquisição é o mesmo da HML desde a §9.2 do contrato CMD-15;
+    // antes, desenvolvimento e CI esperavam sem fim por uma vaga do pool (adendo de 30/09 no ADR 0006).
+    expect(deps.banco.options).toMatchObject({
+      connectionString: URL_BANCO,
+      max: 3,
+      connectionTimeoutMillis: 10_000,
+    });
     expect(deps.banco.options).not.toHaveProperty('stream');
-    expect(deps.banco.options).not.toHaveProperty('connectionTimeoutMillis');
     expect(deps).toMatchObject({
       origem: 'http://localhost:3000',
       versao: '0.0.0-dev',

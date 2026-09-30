@@ -6,7 +6,7 @@ import pg, { type ClientBase, type Pool, type PoolClient } from 'pg';
 
 import { VERSAO_CANONICA, hashCanonico } from './canonico.js';
 import { ConflitoVersao, ErroComando, RejeicaoNegocio } from './erros.js';
-import { ehUuid, organizacaoValida, ouvirConexao } from './sessao.js';
+import { ehUuid, emprestarConexao, organizacaoValida, ouvirConexao } from './sessao.js';
 
 export type TipoIniciador = 'app' | 'web' | 'integracao' | 'ia' | 'job';
 export type ResultadoIntencao = 'confirmed' | 'rejected' | 'version_conflict';
@@ -351,7 +351,7 @@ async function tentarComando(
   espera: number,
   prazo: number | null,
 ): Promise<{ readonly recibo: Recibo } | { readonly deadlock: ErroComando }> {
-  const cliente = await pool.connect();
+  const cliente = await emprestarConexao(pool, 'comando');
   const conexao = ouvirConexao(cliente);
   // Tentativa repetida: todo comando SQL (os do envelope e os do efeito) passa pelo prazo; BEGIN, COMMIT e ROLLBACK não.
   const c = prazo === null ? cliente : comPrazo(cliente, prazo);

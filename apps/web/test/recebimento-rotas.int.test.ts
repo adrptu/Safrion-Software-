@@ -32,6 +32,7 @@ import { criarRotaComandos } from '../src/rotas/comandos';
 import { criarRotasEntrar } from '../src/rotas/entrar';
 import { criarRotaIntencoes } from '../src/rotas/intencoes';
 import { criarRotaOrigem } from '../src/rotas/recebimentos';
+import { json } from '../src/rotas/resposta';
 import { COOKIE_LOGIN, COOKIE_SESSAO } from '../src/seguranca/cookies';
 
 const ORIGEM = 'http://localhost:3000';
@@ -472,5 +473,59 @@ describe('GET /api/v1/recebimentos/origem (aviso antecipado de duplicidade, §6.
     }
     expect((await origem(consulta('7001'), almoxarife, { origin: 'https://evil.example' })).status).toBe(403);
     expect((await origem(consulta('7001'), almoxarife, { 'sec-fetch-site': 'cross-site' })).status).toBe(403);
+  });
+});
+
+describe('espera controlada na aquisição de conexão (§9.2)', () => {
+  it('pool esgotado: POST e GET respondem 503 legível com Retry-After, nunca 500', async () => {
+    const pool = new pg.Pool({
+      connectionString: amb.url('app_runtime'),
+      max: 1,
+      connectionTimeoutMillis: 200,
+    });
+    const segurada = await pool.connect();
+    try {
+      const esgotado = () => ({ ...deps(), banco: pool });
+      const rPost = await criarRotaComandos(esgotado)(
+        new Request(`${ORIGEM}/api/v1/comandos/${TIPO}`, {
+          method: 'POST',
+          body: '{}',
+          headers: {
+            'content-type': 'application/json',
+            origin: ORIGEM,
+            cookie: `${COOKIE_SESSAO}=${almoxarife}`,
+          },
+        }),
+        { params: Promise.resolve({ commandType: TIPO }) },
+      );
+      const q = new URLSearchParams({ emitente: ids.fornecedor, tipo: 'nfe', serie: '1', numero: '7001' });
+      const rGet = await criarRotaOrigem(esgotado)(
+        new Request(`${ORIGEM}/api/v1/recebimentos/origem?${q.toString()}`, {
+          headers: { cookie: `${COOKIE_SESSAO}=${almoxarife}` },
+        }),
+      );
+      for (const r of [rPost, rGet]) {
+        expect(r.status).toBe(503);
+        expect(r.headers.get('retry-after')).toBe('1');
+        const e = await erroDe(r);
+        expect(e.codigo).toBe('FALHA_TRANSITORIA');
+        // A sessão é resolvida antes de qualquer comando: é leitura, sem afirmar nada sobre resultado de comando.
+        expect(e.detalhe).toEqual({ repetirEmMs: 1000 });
+      }
+    } finally {
+      segurada.release();
+      await pool.end();
+    }
+  });
+
+  it('Retry-After só em 503 com repetirEmMs finito e positivo, em segundos inteiros', () => {
+    const corpo = (repetirEmMs: unknown) => ({ codigo: 'FALHA_TRANSITORIA', detalhe: { repetirEmMs } });
+    expect(json(503, corpo(1500)).headers.get('retry-after')).toBe('2');
+    expect(json(503, corpo(1)).headers.get('retry-after')).toBe('1');
+    for (const invalido of [0, -1000, Number.NaN, Number.POSITIVE_INFINITY, '1000', null]) {
+      expect(json(503, corpo(invalido)).headers.get('retry-after'), String(invalido)).toBeNull();
+    }
+    expect(json(503, { codigo: 'FALHA_TRANSITORIA' }).headers.get('retry-after')).toBeNull();
+    expect(json(409, corpo(2000)).headers.get('retry-after')).toBeNull();
   });
 });

@@ -21,7 +21,7 @@ const DESTINO: Readonly<Record<CodigoErroComando, CodigoErro>> = {
 const DETALHE_PUBLICO: Readonly<Partial<Record<CodigoErroComando, readonly string[]>>> = {
   IDEMPOTENCY_KEY_REUSED: ['receiptId'],
   IDEMPOTENCY_IN_PROGRESS: ['repetirEmMs'],
-  FALHA_TRANSITORIA: ['resultadoIncerto'],
+  FALHA_TRANSITORIA: ['resultadoIncerto', 'repetirEmMs'],
 };
 
 /**
