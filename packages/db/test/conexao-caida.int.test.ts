@@ -114,11 +114,27 @@ describe('aquisição de conexão com prazo', () => {
       ),
     );
 
+  /**
+   * Segura a única conexão do pool. A devolução é única: cedo no caminho feliz ou no finally, para uma asserção que falha
+   * antes dela não deixar o pool.end() pendurado nem prender o banco do teste.
+   */
+  async function segurar(pool: pg.Pool): Promise<{ soltar(): void }> {
+    const cliente = await pool.connect();
+    let solta = false;
+    return {
+      soltar() {
+        if (solta) return;
+        solta = true;
+        cliente.release();
+      },
+    };
+  }
+
   it('fila esgotada: comando, leitura e sessão respondem FALHA_TRANSITORIA legível; nada vaza nem roda depois', async () => {
     const pool = poolComPrazo();
     const chave = randomUUID();
+    const segurada = await segurar(pool);
     try {
-      const segurada = await pool.connect();
       const [comando, leitura, sessao] = await Promise.all([
         executarComando(pool, a.org, intencao(chave), semEfeito).catch((e: unknown) => e),
         emOrganizacao(pool, a.org, (c) => c.query('SELECT 1')).catch((e: unknown) => e),
@@ -134,7 +150,7 @@ describe('aquisição de conexão com prazo', () => {
       expect('resultadoIncerto' in (leitura as ErroComando).detalhe).toBe(false);
       expect('resultadoIncerto' in (sessao as ErroComando).detalhe).toBe(false);
       expect(pool.waitingCount).toBe(0);
-      segurada.release();
+      segurada.soltar();
       // Quem esperou demais não recebe a conexão depois: nada da tentativa roda, e a conexão volta ociosa.
       await new Promise((fim) => setTimeout(fim, 2 * PRAZO_MS));
       expect(await intencoesDa(chave)).toBe(0);
@@ -142,6 +158,7 @@ describe('aquisição de conexão com prazo', () => {
       expect((await executarComando(pool, a.org, intencao(chave), semEfeito)).outcome).toBe('confirmed');
       expect(await intencoesDa(chave)).toBe(1);
     } finally {
+      segurada.soltar();
       await pool.end();
     }
   });
@@ -149,20 +166,22 @@ describe('aquisição de conexão com prazo', () => {
   it('resposta perdida, reenvio barrado na aquisição, a mesma chave com o pool livre devolve o recibo original', async () => {
     const pool = poolComPrazo();
     const chave = randomUUID();
+    let segurada: { soltar(): void } | undefined;
     try {
       const original = await executarComando(pool, a.org, intencao(chave), semEfeito);
-      const segurada = await pool.connect();
+      segurada = await segurar(pool);
       const barrado: unknown = await executarComando(pool, a.org, intencao(chave), semEfeito).catch(
         (e: unknown) => e,
       );
       expect(barrado).toBeInstanceOf(ErroComando);
       expect((barrado as ErroComando).detalhe).toMatchObject({ resultadoIncerto: false });
-      segurada.release();
+      segurada.soltar();
       const recuperado = await executarComando(pool, a.org, intencao(chave), semEfeito);
       expect(recuperado.receiptId).toBe(original.receiptId);
       expect(recuperado.alreadyReceived).toBe(true);
       expect(await intencoesDa(chave)).toBe(1);
     } finally {
+      segurada?.soltar();
       await pool.end();
     }
   });
