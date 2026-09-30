@@ -5,7 +5,13 @@ import {
   type DadosRecebimento,
   type ReciboContrato,
 } from '@safrion/contracts';
-import { MOTIVOS, UNIDADES, type CodigoUnidade, type MotivoDivergencia } from '@safrion/domain';
+import {
+  MOTIVOS,
+  UNIDADES,
+  identidadeDaOrigem,
+  type CodigoUnidade,
+  type MotivoDivergencia,
+} from '@safrion/domain';
 
 import { dataDoCampo } from '../formato/data';
 import { compararDecimais, decimalDoCampo, positivo, somarDecimais } from '../formato/numero';
@@ -435,6 +441,28 @@ export function validarRecebimento(
     };
   }
   return { ok: true, dados: conferido.data };
+}
+
+/**
+ * Origem fiscal completa e válida para o aviso antecipado de duplicidade (contrato CMD-15 §6.3), já normalizada como o
+ * comando e o índice (identidadeDaOrigem); null enquanto falta emitente, tipo ou número, ou se a origem é inválida.
+ */
+export function origemParaConsulta(
+  c: Pick<CamposRecebimento, 'emitente' | 'tipo' | 'serie' | 'numero'>,
+  opcoes: Pick<Opcoes, 'emitentes'>,
+): {
+  readonly emitente: string;
+  readonly tipo: string;
+  readonly serie: string;
+  readonly numero: string;
+} | null {
+  if (!opcoes.emitentes.some((e) => e.id === c.emitente)) return null;
+  try {
+    const o = identidadeDaOrigem({ tipo: c.tipo, serie: c.serie, numero: c.numero });
+    return { emitente: c.emitente, tipo: o.tipo, serie: o.serie, numero: o.numero };
+  } catch {
+    return null;
+  }
 }
 
 /** Intenção imutável: a chave, o id do documento e o corpo exato. Reenviar é mandar isto de novo, byte a byte. */

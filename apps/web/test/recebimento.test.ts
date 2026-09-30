@@ -6,6 +6,7 @@ import {
   desfechoDoEnvio,
   linhaVazia,
   novaIntencao,
+  origemParaConsulta,
   parcelaDoCampo,
   recebimentoVazio,
   regraDaValidade,
@@ -309,6 +310,22 @@ describe('formulário: contexto, validação e corpo', () => {
       comparacao: 0,
     });
     expect(situacaoDaLinha(linha('a', { bloqueado: '1', apto: '9' })).divergente).toBe(true);
+  });
+
+  it('origem para o aviso de duplicidade: só completa e válida, já normalizada como o índice', () => {
+    const base = { emitente: U.emitente, tipo: 'nfe', serie: ' 001 ', numero: '0007001' };
+    expect(origemParaConsulta(base, opcoes)).toEqual({
+      emitente: U.emitente,
+      tipo: 'nfe',
+      serie: '1',
+      numero: '7001',
+    });
+    expect(origemParaConsulta({ ...base, numero: '  ' }, opcoes)).toBeNull();
+    expect(origemParaConsulta({ ...base, emitente: '' }, opcoes)).toBeNull();
+    expect(origemParaConsulta({ ...base, emitente: U.doc }, opcoes)).toBeNull();
+    expect(origemParaConsulta({ ...base, tipo: '' }, opcoes)).toBeNull();
+    expect(origemParaConsulta({ ...base, numero: '1'.repeat(21) }, opcoes)).toBeNull();
+    expect(origemParaConsulta({ ...base, serie: '' }, opcoes)).toMatchObject({ serie: '' });
   });
 
   it('intenção imutável: chave, documento e corpo exatos do comando', () => {

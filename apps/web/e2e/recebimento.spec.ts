@@ -411,6 +411,95 @@ test('recusa sem perder o rascunho seguinte (CX-UI04): a recusada vai para Guard
   await expect(page.getByRole('region', { name: 'Guardados para corrigir' })).toHaveCount(0);
 });
 
+const ORIGEM_DA_NF = '**/api/v1/recebimentos/origem**';
+
+test('aviso antecipado de duplicidade (§6.3): consulta ao sair do Número, nunca por tecla, com Ver recebimento', async ({
+  page,
+}) => {
+  await entrarComo(page, 'Almoxarife', '/estoque/recebimentos/novo');
+  const consultas: string[] = [];
+  page.on('request', (r) => {
+    if (r.url().includes('/api/v1/recebimentos/origem')) consultas.push(r.url());
+  });
+  const numero = page.getByRole('region', { name: 'Documento' }).getByRole('textbox', { name: 'Número' });
+  await numero.pressSequentially('TESTE-001');
+  expect(consultas).toHaveLength(0);
+  await numero.press('Tab');
+  const aviso = page.getByText(/Esta NF já foi recebida em 30\/09\/2026\./);
+  await expect(aviso).toBeVisible();
+  expect(consultas).toHaveLength(1);
+  await semViolacoes(page);
+  // Mudou a origem: o aviso some na hora, e a NF nova não ganha aviso nenhum.
+  await numero.fill('TESTE-NOVA-9');
+  await expect(aviso).toHaveCount(0);
+  await numero.press('Tab');
+  await expect.poll(() => consultas.length).toBe(2);
+  await expect(page.getByText(/já foi recebida/)).toHaveCount(0);
+  // O link leva ao recebimento existente; o preenchimento fica no rascunho.
+  await numero.fill('TESTE-001');
+  await numero.press('Tab');
+  await page.getByRole('link', { name: 'Ver recebimento' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'NF TESTE-001' })).toBeVisible();
+  await page.goBack();
+  await expect(
+    page.getByRole('region', { name: 'Documento' }).getByRole('textbox', { name: 'Número' }),
+  ).toHaveValue('TESTE-001');
+});
+
+test('resposta atrasada de uma origem antiga é descartada; indisponível não vira NF nova e a recusa oferece o caminho', async ({
+  page,
+}) => {
+  await entrarComo(page, 'Almoxarife', '/estoque/recebimentos/novo');
+  let primeira = true;
+  await page.route(ORIGEM_DA_NF, async (route) => {
+    if (primeira) {
+      primeira = false;
+      await new Promise((fim) => setTimeout(fim, 1500));
+    }
+    try {
+      await route.continue();
+    } catch {
+      // A tela já cancelou esta consulta.
+    }
+  });
+  const numero = page.getByRole('region', { name: 'Documento' }).getByRole('textbox', { name: 'Número' });
+  await numero.fill('TESTE-001');
+  await numero.press('Tab');
+  await numero.fill('TESTE-NOVA-10');
+  await numero.press('Tab');
+  await page.waitForTimeout(2000);
+  await expect(page.getByText(/já foi recebida/)).toHaveCount(0);
+  await page.unroute(ORIGEM_DA_NF);
+
+  // Consulta indisponível (500): nota neutra, nunca "NF nova"; a confirmação decide e, recusada, oferece o caminho.
+  await page.route(ORIGEM_DA_NF, (route) => route.fulfill({ status: 500, body: '{}' }), { times: 1 });
+  await numero.fill('TESTE-002');
+  await numero.press('Tab');
+  await expect(
+    page.getByText('Não deu para conferir agora se esta NF já entrou; a confirmação confere de novo.'),
+  ).toBeVisible();
+  await page
+    .getByRole('region', { name: 'Documento' })
+    .getByRole('textbox', { name: 'Emissão' })
+    .fill('29/09/2026');
+  await preencherLinha(page, 1, {
+    produto: 'Fungicida A',
+    lote: 'F26-03',
+    unidade: 'galão 5 L',
+    documento: '2',
+    apto: '1',
+    bloqueado: '1',
+    motivo: 'Avaria',
+  });
+  await page.getByRole('button', { name: 'Confirmar recebimento' }).click();
+  await expect(
+    page
+      .getByRole('region', { name: 'Documento' })
+      .getByText('Este documento do emitente já foi recebido. Confira em Recebimentos.'),
+  ).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Ver recebimento' })).toBeVisible();
+});
+
 test('sem armazenamento no navegador, nada é enviado', async ({ page }) => {
   await entrarComo(page, 'Almoxarife', '/estoque/recebimentos');
   await page.addInitScript(() => {

@@ -17,6 +17,7 @@ import {
   motivoDaRejeicao,
   NOMES_DOS_MOTIVOS,
   novaIntencao,
+  origemParaConsulta,
   produtoDe,
   recebimentoVazio,
   regraDaValidade,
@@ -77,6 +78,34 @@ const nomeDoFormulario = (c: CamposRecebimento) =>
     numero: c.numero.trim() === '' ? 'sem número' : c.numero.trim(),
   });
 
+/** Resultado do aviso antecipado de duplicidade, sempre preso à origem consultada (chave). */
+type Duplicidade =
+  | {
+      readonly chave: string;
+      readonly estado: 'encontrado';
+      readonly id: string;
+      readonly recebimento: string;
+    }
+  | { readonly chave: string; readonly estado: 'indisponivel' };
+
+/** 200 com documento: encontrado; 200 sem: nada a mostrar; qualquer outra coisa: indisponível, nunca "NF nova". */
+function duplicidadeDaResposta(status: number, corpo: unknown, chave: string): Duplicidade | null {
+  const c = typeof corpo === 'object' && corpo !== null ? (corpo as Record<string, unknown>) : null;
+  const bruto = c?.['documento'];
+  const d = typeof bruto === 'object' && bruto !== null ? (bruto as Record<string, unknown>) : null;
+  const id = d?.['id'];
+  const recebimento = d?.['recebimento'];
+  if (
+    status === 200 &&
+    c?.['encontrado'] === true &&
+    typeof id === 'string' &&
+    typeof recebimento === 'string'
+  )
+    return { chave, estado: 'encontrado', id, recebimento };
+  if (status === 200 && c?.['encontrado'] === false) return null;
+  return { chave, estado: 'indisponivel' };
+}
+
 const MOTIVOS_NA_ORDEM = ['avaria', 'validade', 'produto_diferente', 'falta', 'sobra', 'outro'] as const;
 
 /**
@@ -107,6 +136,11 @@ export function ReceberDocumento({
   const [campos, setCampos] = useState<CamposRecebimento>(() => recebimentoVazio(opcoes, hoje, 'l1'));
   const [pendente, setPendente] = useState<IntencaoGuardada | null>(null);
   const [guardados, setGuardados] = useState<readonly FormularioGuardado[]>([]);
+  const [duplicidade, setDuplicidade] = useState<Duplicidade | null>(null);
+  // Consulta de duplicidade em andamento (ou a última feita), pela origem normalizada: a nova cancela a anterior.
+  const consultaDaOrigem = useRef<{ readonly chave: string; readonly controle: AbortController } | null>(
+    null,
+  );
   const intencao = pendente?.intencao ?? null;
   const [erros, setErros] = useState<ErrosRecebimento>(SEM_ERROS);
   const [ocupado, setOcupado] = useState<'enviando' | 'consultando' | null>(null);
@@ -192,6 +226,40 @@ export function ReceberDocumento({
     }
     setErros((e) => ({ ...e, origem: { ...e.origem, [campo]: undefined } }));
     atualizar(proximos);
+    // Escolhas de lista já estão completas; texto espera a saída do campo.
+    if (campo === 'tipo' || campo === 'emitente') conferirOrigem(proximos);
+  }
+
+  /**
+   * Aviso antecipado de duplicidade (contrato CMD-15 §6.3): só com a origem fiscal completa e válida, ao sair de Número ou
+   * Série e ao trocar Tipo ou Emitente, nunca por tecla. A resposta de uma origem que já mudou é descartada. É ajuda:
+   * o índice e o recibo continuam decidindo, e indisponível não quer dizer NF nova.
+   */
+  function conferirOrigem(c: CamposRecebimento, forcar = false) {
+    const o = origemParaConsulta(c, opcoes);
+    if (!o) {
+      consultaDaOrigem.current?.controle.abort();
+      consultaDaOrigem.current = null;
+      return;
+    }
+    const chave = JSON.stringify(o);
+    if (!forcar && consultaDaOrigem.current?.chave === chave) return;
+    consultaDaOrigem.current?.controle.abort();
+    const controle = new AbortController();
+    consultaDaOrigem.current = { chave, controle };
+    const vale = () => consultaDaOrigem.current?.chave === chave && !controle.signal.aborted;
+    fetch(`/api/v1/recebimentos/origem?${new URLSearchParams(o).toString()}`, {
+      credentials: 'same-origin',
+      cache: 'no-store',
+      signal: controle.signal,
+    })
+      .then(async (r) => {
+        const corpo: unknown = await r.json().catch(() => null);
+        if (vale()) setDuplicidade(duplicidadeDaResposta(r.status, corpo, chave));
+      })
+      .catch(() => {
+        if (vale()) setDuplicidade({ chave, estado: 'indisponivel' });
+      });
   }
 
   function mudarLinha(id: string, campo: CampoLinha, valor: string) {
@@ -300,6 +368,10 @@ export function ReceberDocumento({
       texto: motivo.mensagem,
       ...(d.tipo === 'nao_gravado' && d.sessao ? { entrar: true } : {}),
     });
+    // Documento já recebido: a mesma consulta oferece o caminho para o recebimento existente, sem reenviar nada.
+    if (!outraPendente && d.tipo === 'resolvido' && d.recibo.reasonCode === 'DOCUMENTO_JA_RECEBIDO') {
+      conferirOrigem(g.campos, true);
+    }
     if (!outraPendente && motivo.campo) {
       const campo = motivo.campo;
       setErros({ ...SEM_ERROS, origem: { [campo]: motivo.mensagem } });
@@ -419,6 +491,10 @@ export function ReceberDocumento({
   const resumo = campos.linhas.map(situacaoDaLinha);
   const divergencias = resumo.filter((s) => s.divergente).length;
   const inspecoes = resumo.filter((s) => s.inspecao).length;
+  // O aviso só vale para a origem que está na tela agora: mudou a origem, some até a nova consulta responder.
+  const origemNaTela = origemParaConsulta(campos, opcoes);
+  const avisoDeDuplicidade =
+    duplicidade && origemNaTela && duplicidade.chave === JSON.stringify(origemNaTela) ? duplicidade : null;
   const destinoLogin = `/entrar?${new URLSearchParams({ destino: '/estoque/recebimentos/novo' }).toString()}`;
 
   return (
@@ -531,6 +607,9 @@ export function ReceberDocumento({
             mudar={(v) => {
               mudarOrigem('serie', v);
             }}
+            sair={() => {
+              if (!travado) conferirOrigem(campos);
+            }}
           />
           <Texto
             id={idDe('numero')}
@@ -541,6 +620,9 @@ export function ReceberDocumento({
             travado={travado}
             mudar={(v) => {
               mudarOrigem('numero', v);
+            }}
+            sair={() => {
+              if (!travado) conferirOrigem(campos);
             }}
           />
           <Texto
@@ -593,6 +675,18 @@ export function ReceberDocumento({
               </select>
             </Campo>
           )}
+        </div>
+        <div className={avisoDeDuplicidade ? 'bloco-corpo' : undefined} aria-live="polite">
+          {avisoDeDuplicidade?.estado === 'encontrado' ? (
+            <p className="aviso" data-papel="atencao">
+              Esta NF já foi recebida em {formatarData(avisoDeDuplicidade.recebimento)}.{' '}
+              <Link href={`/estoque/recebimentos/${avisoDeDuplicidade.id}`}>Ver recebimento</Link>
+            </p>
+          ) : avisoDeDuplicidade?.estado === 'indisponivel' ? (
+            <p className="dica">
+              Não deu para conferir agora se esta NF já entrou; a confirmação confere de novo.
+            </p>
+          ) : null}
         </div>
       </section>
 
@@ -928,6 +1022,7 @@ function Texto({
   dica,
   numerico,
   decimal,
+  sair,
 }: {
   readonly id: string;
   readonly campo: string;
@@ -939,6 +1034,7 @@ function Texto({
   readonly dica?: string;
   readonly numerico?: boolean;
   readonly decimal?: boolean;
+  readonly sair?: () => void;
 }) {
   const descricao = [dica ? `${id}-dica` : '', erro ? `${id}-erro` : ''].filter(Boolean).join(' ');
   return (
@@ -957,6 +1053,7 @@ function Texto({
         onChange={(ev) => {
           mudar(ev.target.value);
         }}
+        onBlur={sair}
       />
       {dica ? (
         <span className="dica" id={`${id}-dica`}>
