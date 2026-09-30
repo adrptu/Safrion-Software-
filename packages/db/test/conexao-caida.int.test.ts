@@ -5,6 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { executarComando } from '../src/comando.js';
 import { ErroComando } from '../src/erros.js';
+import { respostaDeErro } from '../src/resposta.js';
 import { REPETIR_AQUISICAO_MS, emOrganizacao, emprestarConexao } from '../src/sessao.js';
 import { novoToken, resolverSessao } from '../src/sessao-web.js';
 import { criarBanco, semear, type Ambiente, type Semente } from './ambiente.js';
@@ -414,6 +415,66 @@ describe('trava do efeito com prazo', () => {
       await h2.query('SELECT pg_advisory_unlock_all()').catch(() => undefined);
       h1.release();
       h2.release();
+      await pendente;
+      await pool.end();
+    }
+  });
+
+  it('ROLLBACK que falha depois do 55P03: resultado incerto, sem repetirEmMs, conexão fora do pool e sem resíduo', async () => {
+    // Contraprova do Codex (work/hml-review/cmd15-0c74bad-codex, 12:41Z), reduzida: depois do 55P03 real, o backend da
+    // própria tentativa é encerrado antes de o erro voltar ao envelope, e o ROLLBACK não se confirma.
+    const pool = new pg.Pool({ connectionString: amb.url('app_runtime'), max: 1 });
+    const chave = randomUUID();
+    const antes = await residuo(chave);
+    const trava = await travarNoLote();
+    let chamadas = 0;
+    let pendente: Promise<unknown> | undefined;
+    try {
+      const r = await comVigia(
+        executarComando(
+          pool,
+          a.org,
+          intencao(chave),
+          async (c) => {
+            chamadas += 1;
+            const pid = (await c.query<{ pid: number }>('SELECT pg_backend_pid() AS pid')).rows[0]?.pid;
+            try {
+              await c.query('SELECT id FROM app.lot WHERE id = $1 FOR UPDATE', [a.lote]);
+            } catch (falha) {
+              let relogio: ReturnType<typeof setTimeout> | undefined;
+              const caiu = new Promise<void>((fim, falhou) => {
+                c.once('end', () => {
+                  fim();
+                });
+                relogio = setTimeout(() => {
+                  falhou(new Error('o backend não encerrou'));
+                }, 3000);
+              });
+              await amb.app.query('SELECT pg_terminate_backend($1)', [pid]);
+              await caiu.finally(() => {
+                clearTimeout(relogio);
+              });
+              throw falha;
+            }
+            return nada;
+          },
+          { esperaChaveMs: ESPERA_MS },
+        ),
+        10 * ESPERA_MS,
+      );
+      pendente = r.marcado;
+      expect(r.resultado).toMatchObject({ ok: false });
+      const erro = (r.resultado as { erro: unknown }).erro;
+      expect(chamadas).toBe(1);
+      expect(erro).toBeInstanceOf(ErroComando);
+      expect((erro as ErroComando).detalhe).toEqual({ resultadoIncerto: true, codigoPg: '55P03' });
+      // Sem repetirEmMs no detalhe público, a web não põe Retry-After (rotas/resposta.ts).
+      expect(respostaDeErro(erro, 'corr-rollback').corpo.detalhe).toEqual({ resultadoIncerto: true });
+      expect([pool.totalCount, pool.idleCount, pool.waitingCount]).toEqual([0, 0, 0]);
+      expect(await residuo(chave)).toEqual(antes);
+    } finally {
+      await trava.query('ROLLBACK').catch(() => undefined);
+      trava.release();
       await pendente;
       await pool.end();
     }
