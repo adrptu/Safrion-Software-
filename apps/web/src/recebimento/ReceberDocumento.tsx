@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useId, useRef, useState, type ReactNode, type SubmitEvent } from 'react';
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode, type SubmitEvent } from 'react';
 
 import { formatarData } from '../formato/data';
 import { formatarQuantidade } from '../formato/numero';
@@ -30,16 +30,20 @@ import {
   type CamposRecebimento,
   type Desfecho,
   type ErrosRecebimento,
-  type Intencao,
   type Opcoes,
 } from './formulario';
 import { formatarIdentificacao } from './lista';
 import {
+  apagarIntencao,
   apagarRecebimento,
   armazemLocal,
   chaveDoRecebimento,
+  gravarIntencao,
   gravarRecebimento,
+  lerIntencoes,
   lerRecebimento,
+  prefixoDasIntencoes,
+  type IntencaoGuardada,
 } from './rascunho';
 
 interface Aviso {
@@ -53,6 +57,12 @@ const SEM_RASCUNHO =
 const SEM_ARMAZEM =
   'Para confirmar, o navegador precisa guardar o envio antes de mandá-lo (assim ele pode ser conferido se a resposta não voltar). Saia do modo privado ou libere o armazenamento do site; nada foi enviado.';
 
+/** Com mais de um envio pendente (outras abas), cada um é conferido a seu tempo, o mais antigo primeiro. */
+const outrasPendentes = (n: number) =>
+  n > 1
+    ? ` Há ${String(n)} envios pendentes neste navegador; eles são conferidos um de cada vez, o mais antigo primeiro.`
+    : '';
+
 const MOTIVOS_NA_ORDEM = ['avaria', 'validade', 'produto_diferente', 'falta', 'sobra', 'outro'] as const;
 
 /**
@@ -61,9 +71,10 @@ const MOTIVOS_NA_ORDEM = ['avaria', 'validade', 'produto_diferente', 'falta', 's
  *   aplica"; unidade de medida ou embalagem) e pela conferência (motivo com divergência, responsável e prazo com
  *   quarentena, ocorrência com produto diferente). Validação no campo e na linha; o primeiro erro recebe o foco.
  * - O rascunho fica no localStorage por usuário e organização e volta depois de recarregar.
- * - Antes de enviar, a intenção (chave, documento e corpo exatos) é guardada; sem conseguir guardar, nada é enviado.
- * - Sem recibo correspondente, a intenção fica incerta e travada: a ação é consultar o recibo e, se ainda não
- *   localizado, reenviar o mesmo. Nenhuma outra resposta libera editar ou gerar outra chave. A consulta não reenvia.
+ * - Antes de enviar, a intenção (chave, documento e corpo exatos) é guardada na chave dela; sem conseguir guardar, nada
+ *   é enviado. O rascunho nunca toca intenção: uma aba antiga não apaga o envio pendente de outra (CX-UI01).
+ * - Havendo intenção pendente (desta ou de outra aba), ela aparece primeiro, travada: a ação é consultar o recibo e, se
+ *   ainda não localizado, reenviar o mesmo. Só um recibo correspondente a resolve. A consulta não reenvia.
  */
 export function ReceberDocumento({
   opcoes,
@@ -80,34 +91,64 @@ export function ReceberDocumento({
   const router = useRouter();
   const chaveRascunho = chaveDoRecebimento(usuarioId, organizacaoId);
   const [campos, setCampos] = useState<CamposRecebimento>(() => recebimentoVazio(opcoes, hoje, 'l1'));
-  const [intencao, setIntencao] = useState<Intencao | null>(null);
+  const [pendente, setPendente] = useState<IntencaoGuardada | null>(null);
+  const intencao = pendente?.intencao ?? null;
   const [erros, setErros] = useState<ErrosRecebimento>(SEM_ERROS);
   const [ocupado, setOcupado] = useState<'enviando' | 'consultando' | null>(null);
   const [naoLocalizado, setNaoLocalizado] = useState(false);
   const [aviso, setAviso] = useState<Aviso | null>(null);
   const formulario = useRef<HTMLFormElement>(null);
+  // Enviando ou consultando nesta aba: o aviso de outra aba espera a resposta (a resolução recarrega de novo).
+  const ocupadoAgora = useRef(false);
   const travado = ocupado !== null || intencao !== null;
 
-  // Recupera o rascunho desta pessoa e organização depois de recarregar; nunca envia nem consulta sozinho.
-  useEffect(() => {
-    const armazem = armazemLocal();
-    const r = lerRecebimento(armazem, chaveRascunho);
-    /* eslint-disable react-hooks/set-state-in-effect -- localStorage só existe no navegador, depois da hidratação */
-    if (!armazem) setAviso({ papel: 'atencao', texto: SEM_ARMAZEM });
-    if (!r) return;
-    setCampos(r.campos);
-    setIntencao(r.intencao);
-    if (r.intencao) setAviso({ papel: 'atencao', texto: INCERTO });
-    /* eslint-enable react-hooks/set-state-in-effect */
-  }, [chaveRascunho]);
+  /**
+   * Estado vindo do navegador: a intenção pendente mais antiga manda (travada); sem nenhuma, o rascunho. Nunca envia nem
+   * consulta sozinho.
+   */
+  const recarregar = useCallback(
+    (depois: Aviso | null = null) => {
+      const armazem = armazemLocal();
+      const pendentes = lerIntencoes(armazem, usuarioId, organizacaoId);
+      const [primeira] = pendentes;
+      setNaoLocalizado(false);
+      if (primeira) {
+        setPendente(primeira);
+        setCampos(primeira.campos);
+        setAviso({
+          papel: 'atencao',
+          texto: `${depois ? `${depois.texto} ` : ''}${INCERTO}${outrasPendentes(pendentes.length)}`,
+        });
+        return;
+      }
+      setPendente(null);
+      setCampos(lerRecebimento(armazem, chaveRascunho)?.campos ?? recebimentoVazio(opcoes, hoje, 'l1'));
+      setAviso(depois ?? (armazem ? null : { papel: 'atencao', texto: SEM_ARMAZEM }));
+    },
+    [usuarioId, organizacaoId, chaveRascunho, opcoes, hoje],
+  );
 
-  const guardar = (c: CamposRecebimento, i: Intencao | null) =>
-    gravarRecebimento(armazemLocal(), chaveRascunho, { campos: c, intencao: i });
+  useEffect(() => {
+    // localStorage só existe no navegador, depois da hidratação.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- estado inicial lido do navegador
+    recarregar();
+    const prefixo = prefixoDasIntencoes(usuarioId, organizacaoId);
+    // Outra aba criou ou resolveu uma intenção: esta passa a mostrar a pendente mais antiga, ou volta ao rascunho.
+    const ouvir = (ev: StorageEvent) => {
+      if (ocupadoAgora.current) return;
+      if (ev.key === null || ev.key.startsWith(prefixo)) recarregar();
+    };
+    window.addEventListener('storage', ouvir);
+    return () => {
+      window.removeEventListener('storage', ouvir);
+    };
+  }, [recarregar, usuarioId, organizacaoId]);
 
   function atualizar(proximos: CamposRecebimento) {
     setCampos(proximos);
     // Armazenamento cheio ou bloqueado não derruba a tela nem passa em silêncio (Codex 06:56Z).
-    if (!guardar(proximos, null)) setAviso((a) => a ?? { papel: 'atencao', texto: SEM_RASCUNHO });
+    if (!gravarRecebimento(armazemLocal(), chaveRascunho, { campos: proximos }))
+      setAviso((a) => a ?? { papel: 'atencao', texto: SEM_RASCUNHO });
   }
 
   function mudarOrigem(campo: CampoOrigem, valor: string) {
@@ -180,38 +221,50 @@ export function ReceberDocumento({
     formulario.current?.querySelector<HTMLElement>(`[data-campo="${alvo}"]`)?.focus();
   }
 
-  function aplicar(d: Desfecho, i: Intencao) {
-    if (d.tipo === 'resolvido') {
-      setIntencao(null);
-      setNaoLocalizado(false);
-      if (d.recibo.outcome === 'confirmed') {
-        // Recibo confirmado: o próximo documento começa do zero; o detalhe mostra o resultado e a próxima ação.
-        apagarRecebimento(armazemLocal(), chaveRascunho);
-        router.push(`/estoque/recebimentos/${i.documentoId}`);
-        return;
+  function aplicar(d: Desfecho, g: IntencaoGuardada) {
+    const armazem = armazemLocal();
+    if (d.tipo === 'incerto') {
+      // A intenção continua na chave dela, travada; só o recibo correspondente a resolve.
+      setPendente(g);
+      setNaoLocalizado(d.naoLocalizado);
+      setAviso({ papel: 'atencao', texto: d.mensagem, entrar: d.sessao });
+      return;
+    }
+    // Resolvida (recibo correspondente) ou recusa certa do primeiro envio: só esta intenção sai do navegador.
+    apagarIntencao(armazem, usuarioId, organizacaoId, g.intencao.chave);
+    if (d.tipo === 'resolvido' && d.recibo.outcome === 'confirmed') {
+      // O rascunho só é limpo se ainda for o que foi enviado: o que outra aba digitou depois fica.
+      const rascunho = lerRecebimento(armazem, chaveRascunho);
+      if (rascunho && JSON.stringify(rascunho.campos) === JSON.stringify(g.campos)) {
+        apagarRecebimento(armazem, chaveRascunho);
       }
-      guardar(campos, null);
+      router.push(`/estoque/recebimentos/${g.intencao.documentoId}`);
+      return;
+    }
+    // Rejeitado, conflito ou recusa certa: o conteúdo volta para correção, e uma nova confirmação terá outra chave.
+    gravarRecebimento(armazem, chaveRascunho, { campos: g.campos });
+    const aviso: Aviso =
+      d.tipo === 'resolvido'
+        ? { papel: 'erro', texto: motivoDaRejeicao(d.recibo.reasonCode).mensagem }
+        : { papel: 'erro', texto: d.mensagem, entrar: d.sessao };
+    recarregar(aviso);
+    if (d.tipo === 'resolvido') {
       const m = motivoDaRejeicao(d.recibo.reasonCode);
-      setAviso({ papel: 'erro', texto: m.mensagem });
       if (m.campo) {
         const campo = m.campo;
         setErros({ ...SEM_ERROS, origem: { [campo]: m.mensagem } });
       }
-      return;
     }
-    if (d.tipo === 'nao_gravado') {
-      setIntencao(null);
-      guardar(campos, null);
-      setAviso({ papel: 'erro', texto: d.mensagem, entrar: d.sessao });
-      return;
-    }
-    setIntencao(i);
-    setNaoLocalizado(d.naoLocalizado);
-    setAviso({ papel: 'atencao', texto: d.mensagem, entrar: d.sessao });
   }
 
-  async function postar(i: Intencao, reenvio: boolean) {
-    setOcupado('enviando');
+  function ocupar(estado: 'enviando' | 'consultando' | null) {
+    ocupadoAgora.current = estado !== null;
+    setOcupado(estado);
+  }
+
+  async function postar(g: IntencaoGuardada, reenvio: boolean) {
+    const i = g.intencao;
+    ocupar('enviando');
     let d: Desfecho;
     try {
       const resposta = await fetch(`/api/v1/comandos/${COMANDO}`, {
@@ -225,8 +278,8 @@ export function ReceberDocumento({
     } catch {
       d = { tipo: 'incerto', mensagem: INCERTO, sessao: false, naoLocalizado: false };
     }
-    aplicar(d, i);
-    setOcupado(null);
+    aplicar(d, g);
+    ocupar(null);
   }
 
   async function confirmar(evento: SubmitEvent<HTMLFormElement>) {
@@ -240,20 +293,25 @@ export function ReceberDocumento({
       return;
     }
     setErros(SEM_ERROS);
-    const i = novaIntencao(v.dados, crypto.randomUUID(), crypto.randomUUID());
-    // A intenção fica guardada ANTES de sair; sem isso, nada é enviado (Codex 06:56Z).
-    if (!guardar(campos, i)) {
+    const g: IntencaoGuardada = {
+      campos,
+      intencao: novaIntencao(v.dados, crypto.randomUUID(), crypto.randomUUID()),
+      criadaEm: new Date().toISOString(),
+    };
+    // A intenção fica guardada na chave dela ANTES de sair; sem isso, nada é enviado (Codex 06:56Z).
+    if (!gravarIntencao(armazemLocal(), usuarioId, organizacaoId, g)) {
       setAviso({ papel: 'erro', texto: SEM_ARMAZEM });
       return;
     }
-    setIntencao(i);
+    setPendente(g);
     setAviso(null);
-    await postar(i, false);
+    await postar(g, false);
   }
 
   async function consultar() {
-    if (!intencao || ocupado) return;
-    setOcupado('consultando');
+    if (!pendente || ocupado) return;
+    const intencao = pendente.intencao;
+    ocupar('consultando');
     let d: Desfecho;
     try {
       const resposta = await fetch(`/api/v1/intencoes/${COMANDO}/${encodeURIComponent(intencao.chave)}`, {
@@ -265,8 +323,8 @@ export function ReceberDocumento({
     } catch {
       d = desfechoDaConsulta(0, null, intencao);
     }
-    aplicar(d, intencao);
-    setOcupado(null);
+    aplicar(d, pendente);
+    ocupar(null);
   }
 
   const e = (id: string) => (campo: CampoLinha) => erros.linhas[id]?.[campo];
@@ -649,7 +707,9 @@ export function ReceberDocumento({
                 type="button"
                 className="botao"
                 disabled={ocupado !== null}
-                onClick={() => void postar(intencao, true)}
+                onClick={() => {
+                  if (pendente) void postar(pendente, true);
+                }}
               >
                 Reenviar o mesmo
               </button>

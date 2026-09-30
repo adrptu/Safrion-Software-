@@ -273,6 +273,91 @@ test('nada gravado: "ainda não localizado" libera reenviar o mesmo; sessão exp
   ).toHaveValue('');
 });
 
+test('duas abas (CX-UI01): a antiga não apaga o envio pendente da outra; um só POST resolve', async ({
+  context,
+}) => {
+  const aba1 = await context.newPage();
+  await entrarComo(aba1, 'Almoxarife', '/estoque/recebimentos/novo');
+  const aba2 = await context.newPage();
+  await aba2.goto('/estoque/recebimentos/novo');
+  await expect(aba2.getByRole('button', { name: 'Confirmar recebimento' })).toBeVisible();
+  let posts = 0;
+  await aba1.route(COMANDO, async (route) => {
+    posts += 1;
+    await route.fetch();
+    await route.abort('connectionreset');
+  });
+  await preencherOrigem(aba1, 'CX-ABAS');
+  await preencherLinha(aba1, 1, { produto: 'Diesel S10', documento: '30', apto: '30' });
+  await aba1.getByRole('button', { name: 'Confirmar recebimento' }).click();
+  await expect(aba1.getByText(/O envio pode ter chegado ao servidor/)).toBeVisible();
+
+  // A outra aba fica sabendo pelo evento storage e mostra o envio pendente, travado.
+  await expect(aba2.getByRole('button', { name: 'Consultar recibo' })).toBeVisible();
+  await expect(
+    aba2.getByRole('region', { name: 'Documento' }).getByRole('textbox', { name: 'Número' }),
+  ).toHaveValue('CX-ABAS');
+  // Uma aba antiga que ainda gravasse o rascunho (outro número) não toca a intenção: é outra chave.
+  await aba2.evaluate(() => {
+    const k = Object.keys(localStorage).find((x) => x.startsWith('safrion:recebimento:')) ?? '';
+    const r = JSON.parse(localStorage.getItem(k) ?? '{}') as { campos?: Record<string, unknown> };
+    localStorage.setItem(k, JSON.stringify({ campos: { ...r.campos, numero: 'CX-OUTRO' } }));
+  });
+  expect(
+    await aba2.evaluate(
+      () => Object.keys(localStorage).filter((x) => x.startsWith('safrion:recebimento-intencao:')).length,
+    ),
+  ).toBe(1);
+  await aba1.reload();
+  await expect(aba1.getByRole('button', { name: 'Consultar recibo' })).toBeVisible();
+  await expect(
+    aba1.getByRole('region', { name: 'Documento' }).getByRole('textbox', { name: 'Número' }),
+  ).toHaveValue('CX-ABAS');
+  await aba1.close();
+
+  // A aba que sobrou confere: o recibo gravado resolve, sem outro POST.
+  await aba2.reload();
+  await aba2.getByRole('button', { name: 'Consultar recibo' }).click();
+  await expect(aba2.getByRole('heading', { level: 1, name: 'NF CX-ABAS' })).toBeVisible();
+  expect(posts).toBe(1);
+  expect(
+    await aba2.evaluate(
+      () => Object.keys(localStorage).filter((x) => x.startsWith('safrion:recebimento-intencao:')).length,
+    ),
+  ).toBe(0);
+});
+
+test('produto diferente devolvido na entrega (CX-UI03): a ocorrência aparece no detalhe, sem virar pendência', async ({
+  page,
+}) => {
+  await entrarComo(page, 'Almoxarife', '/estoque/recebimentos/novo');
+  await preencherOrigem(page, 'CX-OCORRENCIA');
+  const linha = await preencherLinha(page, 1, {
+    produto: 'Fungicida A',
+    lote: 'F26-02',
+    unidade: 'L',
+    documento: '10',
+    motivo: 'Produto diferente',
+  });
+  await linha.getByRole('combobox', { name: 'Produto cadastrado' }).selectOption({ label: 'Diesel S10' });
+  await linha.getByRole('textbox', { name: 'Quantidade contada' }).fill('10');
+  await linha.getByRole('textbox', { name: 'Unidade contada' }).fill('L');
+  await linha.getByRole('combobox', { name: 'Destino' }).selectOption({ label: 'Devolvido na entrega' });
+  await linha.getByRole('combobox', { name: 'Quem responde' }).selectOption({ label: 'Gerente (fictício)' });
+  await page.getByRole('button', { name: 'Confirmar recebimento' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'NF CX-OCORRENCIA' })).toBeVisible();
+  const ocorrencias = page.getByRole('region', { name: 'Ocorrências de chegada' });
+  const registrada = ocorrencias.getByRole('row', { name: /Diesel S10/ });
+  for (const texto of ['10 L', 'Devolvido na entrega', 'Gerente (fictício)', 'Registrada']) {
+    await expect(registrada).toContainText(texto);
+  }
+  // A pendência é só a divergência da linha; a devolvida não pede decisão.
+  const pendencias = page.getByRole('region', { name: 'Pendências' });
+  await expect(pendencias).toContainText('Divergência aberta · linha 1: Produto diferente');
+  await expect(pendencias).not.toContainText('Ocorrência aberta');
+  await semViolacoes(page);
+});
+
 test('sem armazenamento no navegador, nada é enviado', async ({ page }) => {
   await entrarComo(page, 'Almoxarife', '/estoque/recebimentos');
   await page.addInitScript(() => {

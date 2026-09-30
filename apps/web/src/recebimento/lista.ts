@@ -1,4 +1,10 @@
-import type { DocumentoDetalhe, DocumentoResumo, LinhaDoDocumento, OrigemDocumento } from '@safrion/db/web';
+import type {
+  DocumentoDetalhe,
+  DocumentoResumo,
+  LinhaDoDocumento,
+  OcorrenciaDoDocumento,
+  OrigemDocumento,
+} from '@safrion/db/web';
 
 import type { EstadoExibido } from '../estoque/estado';
 import { formatarData } from '../formato/data';
@@ -126,6 +132,47 @@ export function linhaDaLinhaDoDocumento(
       documento: { texto: noDocumento, valor: noDocumento },
       conferido: { texto: conferido, valor: conferido },
       estado: { texto: estado.palavra, valor: estado.palavra, papel: estado.papel },
+    },
+  };
+}
+
+export const COLUNAS_OCORRENCIA: readonly ColunaG2[] = [
+  { chave: 'linha', rotulo: 'Linha', tipo: 'numero' },
+  { chave: 'chegou', rotulo: 'O que chegou', tipo: 'texto' },
+  { chave: 'quantidade', rotulo: 'Quantidade', tipo: 'texto' },
+  { chave: 'destino', rotulo: 'Destino', tipo: 'texto', agrupavel: true },
+  { chave: 'responsavel', rotulo: 'Quem responde', tipo: 'texto', agrupavel: true },
+  { chave: 'situacao', rotulo: 'Situação', tipo: 'estado', agrupavel: true },
+];
+
+const DESTINOS: Readonly<Record<OcorrenciaDoDocumento['destino'], string>> = {
+  retido_para_decisao: 'Retido para decisão',
+  devolvido_na_entrega: 'Devolvido na entrega',
+};
+
+/**
+ * Toda ocorrência de chegada, aberta ou registrada (CX-UI03): o que chegou, quanto, o destino e quem responde. A
+ * devolvida na entrega fica Registrada e não vira pendência; a retida é Aberta, com prazo.
+ */
+export function linhaDaOcorrencia(o: OcorrenciaDoDocumento): LinhaG2 {
+  const chegou = 'nome' in o.produtoReal ? o.produtoReal.nome : o.produtoReal.descricao;
+  const quantidade = formatarQuantidade(o.quantidade, o.unidade);
+  const destino = DESTINOS[o.destino];
+  const responsavel = `${o.responsavel.nome}${o.prazo ? ` · até ${formatarData(o.prazo)}` : ''}`;
+  const situacao: EstadoExibido =
+    o.status === 'aberta'
+      ? { palavra: 'Aberta', papel: 'atencao' }
+      : { palavra: 'Registrada', papel: 'neutro' };
+  return {
+    id: o.id,
+    href: '',
+    celulas: {
+      linha: { texto: String(o.linha.numero), valor: String(o.linha.numero) },
+      chegou: { texto: chegou, valor: chegou },
+      quantidade: { texto: quantidade, valor: quantidade },
+      destino: { texto: destino, valor: destino },
+      responsavel: { texto: responsavel, valor: responsavel },
+      situacao: { texto: situacao.palavra, valor: situacao.palavra, papel: situacao.papel },
     },
   };
 }

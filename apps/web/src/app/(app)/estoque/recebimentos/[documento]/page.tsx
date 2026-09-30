@@ -7,9 +7,11 @@ import { Cabecalho } from '../../../../../componentes/Cabecalho';
 import { formatarData, formatarInstante } from '../../../../../formato/data';
 import {
   COLUNAS_LINHA_DO_DOCUMENTO,
+  COLUNAS_OCORRENCIA,
   estadoDoDocumento,
   formatarIdentificacao,
   linhaDaLinhaDoDocumento,
+  linhaDaOcorrencia,
   pendenciasDoDocumento,
   rotuloDoDocumento,
 } from '../../../../../recebimento/lista';
@@ -109,6 +111,21 @@ export default async function Documento({
             />
           </div>
         </section>
+        {d.ocorrencias.length > 0 ? (
+          <section className="bloco" aria-labelledby="ocorrencias">
+            <h2 id="ocorrencias">Ocorrências</h2>
+            <div className="bloco-corpo">
+              <Tabela
+                rotulo="Ocorrências de chegada"
+                colunas={COLUNAS_OCORRENCIA}
+                linhas={d.ocorrencias.map(linhaDaOcorrencia)}
+                estadoInicial={ESTADO_VAZIO}
+                nome={{ singular: 'ocorrência', plural: 'ocorrências' }}
+                vazio="Nenhuma ocorrência."
+              />
+            </div>
+          </section>
+        ) : null}
         <section className="bloco" aria-labelledby="origem">
           <h2 id="origem">Origem</h2>
           <div className="bloco-corpo">
@@ -122,8 +139,8 @@ export default async function Documento({
               <div>
                 <dt>Documento</dt>
                 <dd>
-                  {d.tipo === 'nfe' ? 'NF-e' : 'Outro'} · série {d.serie === '' ? 'sem série' : d.serie} ·
-                  número {d.numero}
+                  {d.tipo === 'nfe' ? 'NF-e' : 'Outro'} · {d.serie === '' ? 'sem série' : `série ${d.serie}`}{' '}
+                  · número {d.numero}
                 </dd>
               </div>
               <div>

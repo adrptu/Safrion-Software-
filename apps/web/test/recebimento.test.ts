@@ -20,12 +20,21 @@ import {
 import {
   estadoDoDocumento,
   formatarIdentificacao,
+  linhaDaOcorrencia,
   linhaDoDocumento,
   pendenciasDoDocumento,
   rotuloDoDocumento,
   textoDaConferencia,
 } from '../src/recebimento/lista';
-import { chaveDoRecebimento, gravarRecebimento, lerRecebimento } from '../src/recebimento/rascunho';
+import {
+  apagarIntencao,
+  chaveDoRecebimento,
+  gravarIntencao,
+  gravarRecebimento,
+  lerIntencoes,
+  lerRecebimento,
+  prefixoDasIntencoes,
+} from '../src/recebimento/rascunho';
 
 // Formulário de recebimento (contrato CMD-15 v3.7, §6.2 e §7.1): validação da tela, corpo do comando, a regra da
 // incerteza nas respostas do POST e do GET, o rascunho por usuário e organização e o que a lista e o detalhe mostram.
@@ -398,11 +407,15 @@ describe('incerteza: só recibo terminal correspondente resolve (contrato CMD-15
   });
 });
 
-describe('rascunho no localStorage por usuário e organização', () => {
+describe('rascunho e intenções no localStorage por usuário e organização (CX-UI01)', () => {
   function memoria(falhaAoGravar = false) {
     const dados = new Map<string, string>();
     return {
       dados,
+      get length() {
+        return dados.size;
+      },
+      key: (n: number) => [...dados.keys()][n] ?? null,
       getItem: (k: string) => dados.get(k) ?? null,
       setItem: (k: string, v: string) => {
         if (falhaAoGravar) throw new DOMException('cheio', 'QuotaExceededError');
@@ -414,35 +427,70 @@ describe('rascunho no localStorage por usuário e organização', () => {
     };
   }
   const campos = formulario([linha('a')]);
-  const intencao: Intencao = { chave: U.chave, documentoId: U.doc, corpo: '{"x":1}' };
+  const intencao = (chave: string): Intencao => ({ chave, documentoId: U.doc, corpo: '{"x":1}' });
+  const K1 = 'aaaaaaaa-aaaa-4aaa-8aaa-000000000001';
+  const K2 = 'aaaaaaaa-aaaa-4aaa-8aaa-000000000002';
 
-  it('guarda e devolve campos e intenção; outra pessoa ou organização não vê', () => {
+  it('rascunho: guarda e devolve os campos; outra pessoa ou organização não vê', () => {
     const m = memoria();
     const minha = chaveDoRecebimento('u1', 'o1');
-    expect(gravarRecebimento(m, minha, { campos, intencao })).toBe(true);
-    expect(lerRecebimento(m, minha)).toEqual({ campos, intencao });
+    expect(gravarRecebimento(m, minha, { campos })).toBe(true);
+    expect(lerRecebimento(m, minha)).toEqual({ campos });
     expect(lerRecebimento(m, chaveDoRecebimento('u2', 'o1'))).toBeNull();
     expect(lerRecebimento(m, chaveDoRecebimento('u1', 'o2'))).toBeNull();
     expect(minha.startsWith('safrion:')).toBe(true);
   });
 
-  it('armazenamento cheio: devolve false, não lança e não apaga o que já estava', () => {
+  it('gravar o rascunho (outra aba digitando) nunca apaga nem troca intenção pendente', () => {
     const m = memoria();
-    const k = chaveDoRecebimento('u1', 'o1');
-    gravarRecebimento(m, k, { campos, intencao });
-    const cheio = { ...memoria(true), getItem: m.getItem, removeItem: m.removeItem };
-    expect(gravarRecebimento(cheio, k, { campos, intencao: null })).toBe(false);
-    expect(lerRecebimento(m, k)?.intencao).toEqual(intencao);
-    expect(gravarRecebimento(null, k, { campos, intencao })).toBe(false);
+    expect(
+      gravarIntencao(m, 'u1', 'o1', { campos, intencao: intencao(K1), criadaEm: '2026-09-30T10:00:00.000Z' }),
+    ).toBe(true);
+    const outra = formulario([linha('a')], { numero: 'CX-OUTRO' });
+    gravarRecebimento(m, chaveDoRecebimento('u1', 'o1'), { campos: outra });
+    expect(lerIntencoes(m, 'u1', 'o1')).toEqual([
+      { campos, intencao: intencao(K1), criadaEm: '2026-09-30T10:00:00.000Z' },
+    ]);
+    expect(lerRecebimento(m, chaveDoRecebimento('u1', 'o1'))?.campos.numero).toBe('CX-OUTRO');
   });
 
-  it('formato corrompido ou intenção inválida é ignorado, sem derrubar a tela', () => {
+  it('várias intenções: cada uma na sua chave, a mais antiga primeiro; apagar uma não toca as outras', () => {
     const m = memoria();
-    const k = chaveDoRecebimento('u1', 'o1');
-    m.dados.set(k, '{nao json');
-    expect(lerRecebimento(m, k)).toBeNull();
-    m.dados.set(k, JSON.stringify({ campos, intencao: { chave: 'x', documentoId: U.doc, corpo: '{}' } }));
-    expect(lerRecebimento(m, k)).toBeNull();
+    gravarIntencao(m, 'u1', 'o1', { campos, intencao: intencao(K2), criadaEm: '2026-09-30T10:05:00.000Z' });
+    gravarIntencao(m, 'u1', 'o1', { campos, intencao: intencao(K1), criadaEm: '2026-09-30T10:00:00.000Z' });
+    gravarIntencao(m, 'u2', 'o1', { campos, intencao: intencao(K1), criadaEm: '2026-09-30T09:00:00.000Z' });
+    expect(lerIntencoes(m, 'u1', 'o1').map((g) => g.intencao.chave)).toEqual([K1, K2]);
+    apagarIntencao(m, 'u1', 'o1', K1);
+    expect(lerIntencoes(m, 'u1', 'o1').map((g) => g.intencao.chave)).toEqual([K2]);
+    expect(lerIntencoes(m, 'u2', 'o1').map((g) => g.intencao.chave)).toEqual([K1]);
+    expect(lerIntencoes(m, 'u1', 'o2')).toEqual([]);
+  });
+
+  it('armazenamento cheio: gravar intenção devolve false, sem lançar e sem apagar o que já estava', () => {
+    const m = memoria();
+    gravarIntencao(m, 'u1', 'o1', { campos, intencao: intencao(K1), criadaEm: '2026-09-30T10:00:00.000Z' });
+    const cheio = { ...memoria(true), getItem: m.getItem, removeItem: m.removeItem };
+    expect(gravarIntencao(cheio, 'u1', 'o1', { campos, intencao: intencao(K2), criadaEm: 'x' })).toBe(false);
+    expect(gravarRecebimento(cheio, chaveDoRecebimento('u1', 'o1'), { campos })).toBe(false);
+    expect(lerIntencoes(m, 'u1', 'o1')).toHaveLength(1);
+    expect(gravarIntencao(null, 'u1', 'o1', { campos, intencao: intencao(K2), criadaEm: 'x' })).toBe(false);
+  });
+
+  it('formato corrompido é ignorado sem esconder as outras; intenção fora da própria chave não vale', () => {
+    const m = memoria();
+    const prefixo = prefixoDasIntencoes('u1', 'o1');
+    m.dados.set(chaveDoRecebimento('u1', 'o1'), '{nao json');
+    expect(lerRecebimento(m, chaveDoRecebimento('u1', 'o1'))).toBeNull();
+    m.dados.set(`${prefixo}${K1}`, '{nao json');
+    m.dados.set(`${prefixo}${K2}`, JSON.stringify({ campos, intencao: intencao(K1), criadaEm: 'x' }));
+    gravarIntencao(m, 'u1', 'o1', {
+      campos,
+      intencao: intencao('aaaaaaaa-aaaa-4aaa-8aaa-000000000003'),
+      criadaEm: '2026-09-30T10:00:00.000Z',
+    });
+    expect(lerIntencoes(m, 'u1', 'o1').map((g) => g.intencao.chave)).toEqual([
+      'aaaaaaaa-aaaa-4aaa-8aaa-000000000003',
+    ]);
   });
 });
 
@@ -461,6 +509,41 @@ describe('lista e detalhe', () => {
     registradoEm: '2026-09-30T12:00:00.000Z',
     contagens: { linhas: 2, divergencias: 1, inspecoes: 0, ocorrenciasAbertas: 0 },
   };
+
+  it('ocorrência devolvida aparece registrada, com o que chegou, destino e quem responde; retida é aberta com prazo', () => {
+    const base = {
+      id: 'o1',
+      linha: { id: 'l1', numero: 4 },
+      produtoReal: { id: U.diesel, nome: 'Diesel S10' },
+      quantidade: '10',
+      unidade: 'L',
+      destino: 'devolvido_na_entrega' as const,
+      status: 'registrada' as const,
+      responsavel: { id: U.pessoa, nome: 'Gerente (fictício)' },
+      prazo: null,
+      registradaEm: '2026-09-30T12:00:00.000Z',
+    };
+    expect(linhaDaOcorrencia(base).celulas).toEqual({
+      linha: { texto: '4', valor: '4' },
+      chegou: { texto: 'Diesel S10', valor: 'Diesel S10' },
+      quantidade: { texto: '10 L', valor: '10 L' },
+      destino: { texto: 'Devolvido na entrega', valor: 'Devolvido na entrega' },
+      responsavel: { texto: 'Gerente (fictício)', valor: 'Gerente (fictício)' },
+      situacao: { texto: 'Registrada', valor: 'Registrada', papel: 'neutro' },
+    });
+    const retida = linhaDaOcorrencia({
+      ...base,
+      produtoReal: { descricao: 'Fungicida B, tambor' },
+      unidade: 'tambor 200 L',
+      quantidade: '1',
+      destino: 'retido_para_decisao',
+      status: 'aberta',
+      prazo: '2026-10-02',
+    }).celulas;
+    expect(retida['chegou']?.texto).toBe('Fungicida B, tambor');
+    expect(retida['responsavel']?.texto).toBe('Gerente (fictício) · até 02/10/2026');
+    expect(retida['situacao']).toEqual({ texto: 'Aberta', valor: 'Aberta', papel: 'atencao' });
+  });
 
   it('identificação do emitente com a máscara de costume', () => {
     expect(formatarIdentificacao('11222333000181')).toBe('11.222.333/0001-81');
