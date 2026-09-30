@@ -264,3 +264,172 @@ describe('aquisição de conexão com prazo', () => {
     }
   });
 });
+
+// Trava do efeito com prazo (contrato CMD-15 §9.3): o lock_timeout da espera pela chave segue valendo no efeito. Limita
+// cada espera por trava, não o comando; 55P03 com ROLLBACK confirmado vira FALHA_TRANSITORIA com repetirEmMs, sem
+// repetição automática. Cada teste tem vigia com prazo e solta as travas no finally, para uma regressão falhar pela
+// asserção e não pendurar.
+describe('trava do efeito com prazo', () => {
+  const ESPERA_MS = 800;
+  const TIPO = 'TESTE-TRAVA';
+  const intencao = (chave: string) => ({
+    commandType: TIPO,
+    idempotencyKey: chave,
+    initiatorKind: 'web' as const,
+    actorId: a.usuario,
+    target: { type: 'lot', id: a.lote },
+    data: { chave },
+    correlationId: `corr-${chave}`,
+  });
+  const nada = { resultingVersion: null, effects: {} };
+  const travarLote = async (c: pg.ClientBase) => {
+    await c.query('SELECT id FROM app.lot WHERE id = $1 FOR UPDATE', [a.lote]);
+    return nada;
+  };
+  const contar = (sql: string, parametro: string) =>
+    emOrganizacao(amb.app, a.org, async (c) =>
+      Number((await c.query<{ n: number }>(sql, [parametro])).rows[0]?.n),
+    );
+  const residuo = async (chave: string) => ({
+    intencoes: await contar(
+      'SELECT count(*)::int AS n FROM app.intent_record WHERE idempotency_key = $1',
+      chave,
+    ),
+    auditoria: await contar('SELECT count(*)::int AS n FROM app.audit_log WHERE idempotency_key = $1', chave),
+    outbox: await contar('SELECT count(*)::int AS n FROM app.outbox WHERE causation_command_type = $1', TIPO),
+  });
+  /** Espera a promessa no máximo `ms`; o resultado marcado continua disponível para ser aguardado no finally. */
+  async function comVigia<T>(promessa: Promise<T>, ms: number) {
+    const marcado = promessa.then(
+      (valor) => ({ ok: true as const, valor }),
+      (erro: unknown) => ({ ok: false as const, erro }),
+    );
+    const vigia = new Promise<'sem-prazo'>((fim) => {
+      setTimeout(() => {
+        fim('sem-prazo');
+      }, ms);
+    });
+    return { resultado: await Promise.race([marcado, vigia]), marcado };
+  }
+  async function travarNoLote(): Promise<pg.PoolClient> {
+    const trava = await amb.app.connect();
+    await trava.query('BEGIN');
+    await trava.query("SELECT set_config('app.organization_id', $1, true)", [a.org]);
+    await trava.query('SELECT id FROM app.lot WHERE id = $1 FOR UPDATE', [a.lote]);
+    return trava;
+  }
+
+  it('lote ocupado além da espera: FALHA_TRANSITORIA com repetirEmMs, sem resíduo; liberado, a mesma chave confirma uma vez', async () => {
+    const pool = new pg.Pool({ connectionString: amb.url('app_runtime'), max: 1 });
+    const chave = randomUUID();
+    const antes = await residuo(chave);
+    const trava = await travarNoLote();
+    let pendente: Promise<unknown> | undefined;
+    try {
+      const inicio = performance.now();
+      const r = await comVigia(
+        executarComando(pool, a.org, intencao(chave), travarLote, { esperaChaveMs: ESPERA_MS }),
+        10 * ESPERA_MS,
+      );
+      pendente = r.marcado;
+      expect(r.resultado, 'a trava do efeito esperou sem prazo').not.toBe('sem-prazo');
+      expect(r.resultado).toMatchObject({ ok: false });
+      const erro = (r.resultado as { erro: unknown }).erro;
+      expect(erro).toBeInstanceOf(ErroComando);
+      expect((erro as ErroComando).codigo).toBe('FALHA_TRANSITORIA');
+      expect((erro as ErroComando).detalhe).toEqual({
+        resultadoIncerto: false,
+        codigoPg: '55P03',
+        repetirEmMs: ESPERA_MS,
+      });
+      expect(performance.now() - inicio).toBeGreaterThanOrEqual(0.9 * ESPERA_MS);
+      expect(await residuo(chave)).toEqual(antes);
+      expect([pool.totalCount, pool.idleCount, pool.waitingCount]).toEqual([1, 1, 0]);
+      await trava.query('ROLLBACK');
+      const r2 = await executarComando(pool, a.org, intencao(chave), travarLote, {
+        esperaChaveMs: ESPERA_MS,
+      });
+      expect(r2.outcome).toBe('confirmed');
+      expect((await residuo(chave)).intencoes).toBe(1);
+    } finally {
+      await trava.query('ROLLBACK').catch(() => undefined);
+      trava.release();
+      await pendente;
+      await pool.end();
+    }
+  });
+
+  it('disputa curta no mesmo lote: espera e confirma, sem falha', async () => {
+    const pool = new pg.Pool({ connectionString: amb.url('app_runtime'), max: 1 });
+    const trava = await travarNoLote();
+    let pendente: Promise<unknown> | undefined;
+    try {
+      const solta = setTimeout(() => void trava.query('ROLLBACK'), 0.3 * ESPERA_MS);
+      const r = await comVigia(
+        executarComando(pool, a.org, intencao(randomUUID()), travarLote, { esperaChaveMs: ESPERA_MS }),
+        10 * ESPERA_MS,
+      );
+      clearTimeout(solta);
+      pendente = r.marcado;
+      expect(r.resultado).toMatchObject({ ok: true, valor: { outcome: 'confirmed' } });
+    } finally {
+      await trava.query('ROLLBACK').catch(() => undefined);
+      trava.release();
+      await pendente;
+      await pool.end();
+    }
+  });
+
+  it('duas travas seguidas, cada uma liberada antes da espera: confirma, e a duração passa da espera', async () => {
+    // O limite é por espera de trava, não do comando: duas esperas curtas somadas passam do valor da espera.
+    const pool = new pg.Pool({ connectionString: amb.url('app_runtime'), max: 1 });
+    const [h1, h2] = [await amb.app.connect(), await amb.app.connect()];
+    const [k1, k2] = [Math.floor(Math.random() * 2 ** 30), 2 ** 30 + Math.floor(Math.random() * 2 ** 30)];
+    let pendente: Promise<unknown> | undefined;
+    try {
+      await h1.query('SELECT pg_advisory_lock($1)', [k1]);
+      await h2.query('SELECT pg_advisory_lock($1)', [k2]);
+      const inicio = performance.now();
+      setTimeout(() => void h1.query('SELECT pg_advisory_unlock($1)', [k1]), 0.7 * ESPERA_MS);
+      setTimeout(() => void h2.query('SELECT pg_advisory_unlock($1)', [k2]), 1.4 * ESPERA_MS);
+      const r = await comVigia(
+        executarComando(
+          pool,
+          a.org,
+          intencao(randomUUID()),
+          async (c) => {
+            await c.query('SELECT pg_advisory_xact_lock($1)', [k1]);
+            await c.query('SELECT pg_advisory_xact_lock($1)', [k2]);
+            return nada;
+          },
+          { esperaChaveMs: ESPERA_MS },
+        ),
+        10 * ESPERA_MS,
+      );
+      pendente = r.marcado;
+      expect(r.resultado).toMatchObject({ ok: true, valor: { outcome: 'confirmed' } });
+      expect(performance.now() - inicio).toBeGreaterThan(ESPERA_MS);
+    } finally {
+      await h1.query('SELECT pg_advisory_unlock_all()').catch(() => undefined);
+      await h2.query('SELECT pg_advisory_unlock_all()').catch(() => undefined);
+      h1.release();
+      h2.release();
+      await pendente;
+      await pool.end();
+    }
+  });
+
+  it('outra falha do efeito com ROLLBACK confirmado segue transitória, sem repetirEmMs', async () => {
+    const pool = new pg.Pool({ connectionString: amb.url('app_runtime'), max: 1 });
+    try {
+      const erro: unknown = await executarComando(pool, a.org, intencao(randomUUID()), async (c) => {
+        await c.query('SELECT 1 / 0');
+        return nada;
+      }).catch((e: unknown) => e);
+      expect(erro).toBeInstanceOf(ErroComando);
+      expect((erro as ErroComando).detalhe).toEqual({ resultadoIncerto: false, codigoPg: '22012' });
+    } finally {
+      await pool.end();
+    }
+  });
+});

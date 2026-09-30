@@ -28,3 +28,10 @@ O PRD (cap. 23) cita Prisma no padrão de implementação nova e admite trocar c
 ## Verificação
 - Testes de integração da F0-b verdes na CI, com o papel `app_runtime`, contra PostgreSQL 17 + PostGIS 3.5 fixado por digest.
 - Provas negativas registradas no PR: FORCE removido de uma tabela, organização fixada na sessão inteira, hash não conferido, inserção sem `ON CONFLICT` e savepoint não desfeito; cada uma reprovada pelo teste correspondente.
+
+## Adendo de 30/09/2026 (contrato CMD-15 §9.3)
+- O `lock_timeout` da inserção da chave passa a valer também para o efeito, na mesma transação. Ele substitui, só nesse ponto, o "`lock_timeout` só na inserção da chave" da Decisão. O resto desta ADR não muda.
+- O limite vale para cada espera por trava, não para a duração do efeito, da transação ou da resposta. Reduz a espera indefinida por travas; não limita a espera total.
+- Trava que passa do limite (55P03) com o ROLLBACK confirmado antes do COMMIT vira `FALHA_TRANSITORIA` com `resultadoIncerto: false` e `repetirEmMs`, sem repetição automática. ROLLBACK que falha ou COMMIT já enviado continuam dando resultado incerto. A espera pela chave em outra transação continua `IDEMPOTENCY_IN_PROGRESS`.
+- Nas tentativas repetidas, o `statement_timeout` por comando (CMD-15 §6, v3.9) pode vencer antes e dar 57014, com a semântica de prazo que já existe.
+

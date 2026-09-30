@@ -188,6 +188,8 @@ const COLUNAS_RECIBO = `receipt_id, command_type, idempotency_key, payload_hash,
  *   intenção, até 3 tentativas e pausas de 50 e 150 ms, numa janela de repetição de 2 s desde o início (contrato
  *   CMD-15 §6, v3.9). A janela limita a repetição, não a duração de qualquer comando: a primeira tentativa não tem
  *   prazo novo, e a resposta ainda depende do ROLLBACK e do transporte;
+ * - trava do efeito ocupada além da espera pela chave (55P03, §9.3), com o ROLLBACK confirmado: FALHA_TRANSITORIA
+ *   com `repetirEmMs`, sem repetição automática. O limite vale para cada espera por trava, não para o comando;
  * - qualquer outra falha: FALHA_TRANSITORIA; repetir com a mesma chave e o mesmo conteúdo. Com o ROLLBACK confirmado
  *   antes do COMMIT, nada foi gravado; se a falha chega no COMMIT ou depois dele (conexão perdida), ou se o ROLLBACK
  *   não se confirma, o resultado é incerto (resultadoIncerto) e o reenvio devolve o recibo, se a transação confirmou.
@@ -399,7 +401,8 @@ async function tentarComando(
       }
       throw erro;
     }
-    await c.query('SET LOCAL lock_timeout TO DEFAULT');
+    // O mesmo lock_timeout segue valendo para o efeito (contrato CMD-15 §9.3): limita cada espera por trava, não a
+    // duração do efeito, da transação nem da resposta. Nas tentativas repetidas, o statement_timeout pode vencer antes.
 
     if (inserido.rowCount === 0) {
       const existente = await c.query<LinhaIntencao>(
@@ -543,12 +546,17 @@ async function tentarComando(
     // "Nada gravado" só com o ROLLBACK confirmado antes de qualquer COMMIT; o resto é incerto e nunca repete aqui.
     const incerto = commitEnviado || quebrado !== undefined;
     const sqlstate = codigoPg(erro);
+    // Trava que passou do lock_timeout (§9.3), com o ROLLBACK confirmado antes do COMMIT: nada desta tentativa ficou
+    // gravado. Sugere quando repetir, sem repetir aqui.
+    const travaOcupada = !incerto && sqlstate === '55P03';
     const falha = new ErroComando(
       'FALHA_TRANSITORIA',
       incerto
         ? 'A confirmação não voltou e o resultado é incerto; repita com a mesma chave e o mesmo conteúdo: se já foi gravado, volta o recibo registrado.'
-        : 'A operação não terminou e nada foi gravado; repita com a mesma chave e o mesmo conteúdo.',
-      { resultadoIncerto: incerto, codigoPg: sqlstate },
+        : travaOcupada
+          ? 'Um registro necessário estava em uso por outra operação e nada foi gravado; repita com a mesma chave e o mesmo conteúdo.'
+          : 'A operação não terminou e nada foi gravado; repita com a mesma chave e o mesmo conteúdo.',
+      { resultadoIncerto: incerto, codigoPg: sqlstate, ...(travaOcupada ? { repetirEmMs: espera } : {}) },
       { cause: erro },
     );
     if (!incerto && ehDeadlock(erro)) return { deadlock: falha };
