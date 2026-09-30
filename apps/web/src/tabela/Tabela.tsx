@@ -49,6 +49,9 @@ export interface PropsTabela {
   readonly vazio: string;
   /** Lista principal da tela: o estado vai para a URL e segue no link do detalhe. */
   readonly naUrl?: boolean;
+  /** Composição de cadastros: o pai mantém filtros e retorno na mesma URL. */
+  readonly estado?: EstadoG2;
+  readonly aoMudarEstado?: (novo: EstadoG2) => void;
 }
 
 const VAZIA: CelulaG2 = { texto: '', valor: '' };
@@ -68,14 +71,26 @@ function descreverFiltro(coluna: ColunaG2, f: FiltroColuna): string {
   return `${coluna.rotulo}: ${partes.join(' · ')}`;
 }
 
-export function Tabela({ rotulo, colunas, linhas, estadoInicial, nome, vazio, naUrl = false }: PropsTabela) {
+export function Tabela({
+  rotulo,
+  colunas,
+  linhas,
+  estadoInicial,
+  nome,
+  vazio,
+  naUrl = false,
+  estado: controlado,
+  aoMudarEstado,
+}: PropsTabela) {
   const base = useId();
-  const [estado, setEstado] = useState(estadoInicial);
+  const [interno, setEstado] = useState(estadoInicial);
+  const estado = controlado ?? interno;
   const [recolhidos, setRecolhidos] = useState<ReadonlySet<string>>(new Set());
   const r = useMemo(() => resultado(linhas, colunas, estado), [linhas, colunas, estado]);
 
   function mudar(novo: EstadoG2) {
-    setEstado(novo);
+    if (controlado === undefined) setEstado(novo);
+    aoMudarEstado?.(novo);
     if (naUrl) {
       const consulta = urlDoEstado(novo).toString();
       window.history.replaceState(null, '', consulta === '' ? window.location.pathname : `?${consulta}`);

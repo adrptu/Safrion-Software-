@@ -141,7 +141,9 @@ test('gerente: consulta o lote sem ação de registrar', async ({ page }) => {
 test('cadastros: produto com os seus lotes, que levam ao detalhe do lote', async ({ page }) => {
   await entrarComo(page, 'Almoxarife', '/cadastros/produtos');
   await expect(page.getByRole('heading', { level: 1, name: 'Produtos' })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Cadastros', exact: true })).toHaveAttribute(
+  const cadastros = page.getByRole('list', { name: 'Cadastros', exact: true });
+  await expect(cadastros).toBeVisible();
+  await expect(cadastros.getByRole('link', { name: 'Produtos', exact: true })).toHaveAttribute(
     'aria-current',
     'page',
   );
