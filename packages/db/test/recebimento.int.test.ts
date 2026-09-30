@@ -389,7 +389,7 @@ describe('receber documento: gravação atômica pelo envelope', () => {
     );
     expect(r).toMatchObject({ outcome: 'confirmed', nextAction: 'Ver divergência' });
     expect(r.pending).toEqual([
-      'Divergência aberta: linha 1',
+      `Divergência aberta: linha 1, ${a.usuario}`,
       `Produto divergente retido: linha 1, ${a.usuario} até 2026-10-02`,
       'Sem pedido',
     ]);
@@ -443,6 +443,153 @@ describe('receber documento: gravação atômica pelo envelope', () => {
       { situation: 'liberado_livre', bq: '40' },
       { situation: 'quarentena_livre', bq: '10' },
     ]);
+  });
+
+  it('responsável de outra organização, inexistente ou inativo não recebe pendência; nada é gravado', async () => {
+    const inativo = randomUUID();
+    await emOrganizacao(amb.app, a.org, (c) =>
+      c.query(
+        "INSERT INTO app.app_user (id, organization_id, name, email, active) VALUES ($1, $2, 'Ex', 'ex@a.invalid', false)",
+        [inativo, a.org],
+      ),
+    );
+    const antes = await fatos(a.org);
+    const comInspecao = (responsavel: string, chave: string) =>
+      receber(
+        a,
+        chave,
+        randomUUID(),
+        documento('1020', [
+          linha(1, {
+            lote: { codigo: 'F26-20' },
+            parcelas: { apto: '2', quarentena: '1', bloqueado: '0', recusado: '0' },
+            inspecao: { responsavel, prazo: '2026-10-03' },
+          }),
+        ]),
+      );
+    for (const [responsavel, chave] of [
+      [b.usuario, 'resp-b'],
+      [randomUUID(), 'resp-inexistente'],
+      [inativo, 'resp-inativo'],
+    ] as const) {
+      expect(await comInspecao(responsavel, chave)).toMatchObject({
+        reasonCode: 'RESPONSAVEL_NAO_ENCONTRADO',
+      });
+    }
+    const ocorrenciaDeB = await receber(
+      a,
+      'resp-ocorrencia-b',
+      randomUUID(),
+      documento('1021', [
+        linha(1, {
+          lote: { codigo: 'F26-21' },
+          parcelas: { apto: '0', quarentena: '0', bloqueado: '0', recusado: '0' },
+          motivo: 'produto_diferente',
+          ocorrencia: {
+            produtoReal: { descricao: 'Outro' },
+            quantidade: '1',
+            unidade: 'caixa',
+            destino: 'retido_para_decisao',
+            responsavel: b.usuario,
+            prazo: '2026-10-02',
+          },
+        }),
+      ]),
+    );
+    expect(ocorrenciaDeB).toMatchObject({ reasonCode: 'RESPONSAVEL_NAO_ENCONTRADO' });
+    expect(await fatos(a.org)).toEqual(antes);
+    // No banco, a chave composta com a organização barra o responsável de fora mesmo sem passar pelo efeito.
+    await expect(
+      emOrganizacao(amb.app, a.org, async (c) => {
+        const d = randomUUID();
+        await c.query(
+          `INSERT INTO app.receipt_document (id, organization_id, issuer_id, doc_type, series, number, issued_on, received_on,
+             farm_id, actor_id, intent_command_type, intent_key)
+           VALUES ($1, $2, $3, 'nfe', '9', '1', '2026-09-29', '2026-09-30', $4, $5, 'x', $6)`,
+          [d, a.org, ref.fornecedor, a.fazenda, a.usuario, randomUUID()],
+        );
+        await c.query(
+          `INSERT INTO app.receipt_line (id, organization_id, document_id, farm_id, line_number, product_id, lot_id,
+             location_id, document_quantity, unit, qty_apto, qty_quarentena, qty_bloqueado, qty_recusado,
+             inspection_owner_id, inspection_due_on)
+           VALUES ($1, $2, $3, $4, 1, $5, $6, $7, 1, 'L', 0, 1, 0, 0, $8, '2026-10-03')`,
+          [randomUUID(), a.org, d, a.fazenda, a.produto, a.lote, a.local, b.usuario],
+        );
+      }),
+    ).rejects.toMatchObject({ code: '23503' });
+  });
+
+  it('unidade incompatível com o produto é recusada mesmo com a linha toda recusada', async () => {
+    const antes = await fatos(a.org);
+    const r = await receber(
+      a,
+      'nf-kg-recusado',
+      randomUUID(),
+      documento('1022', [
+        linha(1, {
+          lote: { codigo: 'F26-22' },
+          unidade: { tipo: 'medida', unidade: 'kg' },
+          documento: '5',
+          parcelas: { apto: '0', quarentena: '0', bloqueado: '0', recusado: '5' },
+          motivo: 'avaria',
+        }),
+      ]),
+    );
+    expect(r).toMatchObject({ outcome: 'rejected', reasonCode: 'UNIDADE_INCOMPATIVEL' });
+    expect(await fatos(a.org)).toEqual(antes);
+  });
+
+  it('controle do Codex (revisão de bbf6bade): recusa integral em unidade compatível é confirmada, sem movimento', async () => {
+    const r = await receber(
+      a,
+      'nf-L-recusado',
+      randomUUID(),
+      documento('1024', [
+        linha(1, {
+          lote: { codigo: 'F26-24' },
+          unidade: { tipo: 'medida', unidade: 'L' },
+          documento: '3',
+          parcelas: { apto: '0', quarentena: '0', bloqueado: '0', recusado: '3' },
+          motivo: 'avaria',
+        }),
+      ]),
+    );
+    expect(r).toMatchObject({ outcome: 'confirmed', nextAction: 'Ver divergência' });
+    expect(r.effects['movements']).toEqual([]);
+    expect(r.pending[0]).toBe(`Divergência aberta: linha 1, ${a.usuario}`);
+    // Auditoria com o motivo ligado à linha divergente (CMD15-CX06).
+    const aud = await emOrganizacao(amb.app, a.org, (c) =>
+      c.query<{ reason: string | null; after_state: { lines: { numero: number; motivo: string | null }[] } }>(
+        "SELECT reason, after_state FROM app.audit_log WHERE idempotency_key = 'nf-L-recusado'",
+      ),
+    );
+    expect(aud.rows[0]?.reason).toBe('linha 1: avaria');
+    expect(aud.rows[0]?.after_state.lines).toMatchObject([{ numero: 1, motivo: 'avaria' }]);
+  });
+
+  it('auditoria: autor, correlação e saldo de cada lote afetado antes e depois (NFR-04)', async () => {
+    const doc = randomUUID();
+    await receber(a, 'nf-auditoria', doc, documento('1023', [linha(1, { lote: { codigo: 'F26-23' } })]));
+    const r = await emOrganizacao(amb.app, a.org, (c) =>
+      c.query<{
+        actor_id: string;
+        correlation_id: string;
+        before_state: Record<string, unknown>;
+        after_state: Record<string, unknown>;
+      }>(
+        "SELECT actor_id, correlation_id, before_state, after_state FROM app.audit_log WHERE idempotency_key = 'nf-auditoria'",
+      ),
+    );
+    const linhaAuditoria = r.rows[0];
+    expect(linhaAuditoria).toMatchObject({ actor_id: a.usuario, correlation_id: 'corr-nf-auditoria' });
+    const [lote] = Object.keys(linhaAuditoria?.after_state['lots'] ?? {});
+    expect(linhaAuditoria?.before_state['lots']).toMatchObject({
+      [lote as string]: { version: 0, fisico: '0.000000' },
+    });
+    expect(linhaAuditoria?.after_state).toMatchObject({
+      document: doc,
+      lots: { [lote as string]: { version: 1, fisico: '15.000000', utilizavel: '15.000000' } },
+    });
   });
 
   it('contagem em un recusa fração; alvo que não é documento novo é recusado', async () => {

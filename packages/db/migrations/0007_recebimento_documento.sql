@@ -134,7 +134,9 @@ CREATE TABLE app.receipt_line (
   FOREIGN KEY (organization_id, lot_id, product_id) REFERENCES app.lot (organization_id, id, product_id),
   FOREIGN KEY (organization_id, farm_id, location_id) REFERENCES app.stock_location (organization_id, farm_id, id),
   FOREIGN KEY (organization_id, conversion_id, product_id, conversion_version)
-    REFERENCES app.packaging_conversion (organization_id, id, product_id, version)
+    REFERENCES app.packaging_conversion (organization_id, id, product_id, version),
+  -- O responsável pela inspeção é pessoa da própria organização.
+  FOREIGN KEY (organization_id, inspection_owner_id) REFERENCES app.app_user (organization_id, id)
 );
 CREATE TRIGGER receipt_line_imutavel BEFORE UPDATE OR DELETE ON app.receipt_line
   FOR EACH ROW EXECUTE FUNCTION app.impedir_alteracao();
@@ -162,7 +164,8 @@ CREATE TABLE app.receipt_occurrence (
   CHECK ((destination = 'retido_para_decisao') = (status = 'aberta')),
   CHECK (destination <> 'retido_para_decisao' OR due_on IS NOT NULL),
   FOREIGN KEY (organization_id, line_id, document_id) REFERENCES app.receipt_line (organization_id, id, document_id),
-  FOREIGN KEY (organization_id, real_product_id) REFERENCES app.product (organization_id, id)
+  FOREIGN KEY (organization_id, real_product_id) REFERENCES app.product (organization_id, id),
+  FOREIGN KEY (organization_id, owner_id) REFERENCES app.app_user (organization_id, id)
 );
 CREATE TRIGGER receipt_occurrence_imutavel BEFORE UPDATE OR DELETE ON app.receipt_occurrence
   FOR EACH ROW EXECUTE FUNCTION app.impedir_alteracao();

@@ -6,6 +6,7 @@ import {
   codigoLoteInterno,
   conferirLinha,
   conversaoEmbalagem,
+  converter,
   estadoInicial,
   identidadeDaOrigem,
   lote as loteDoDominio,
@@ -14,6 +15,7 @@ import {
   ocorrenciaDeChegada,
   paraBase,
   proximaAcao,
+  quantidade,
   validadeNoRecebimento,
   type CodigoUnidade,
   type DataCivil,
@@ -26,6 +28,7 @@ import type { PoolClient } from 'pg';
 
 import type { Efeito } from './comando.js';
 import { RejeicaoNegocio } from './erros.js';
+import { saldoDoLote, type SaldoTexto } from './estoque.js';
 import { ehUuid } from './sessao.js';
 
 export const COMANDO_RECEBER_DOCUMENTO = 'estoque.receber-documento';
@@ -106,6 +109,25 @@ export function receberDocumento(dados: Dados): Efeito {
     if (!(await c.query('SELECT 1 FROM app.farm WHERE id = $1', [dados.fazenda])).rowCount) {
       rejeitar('FAZENDA_NAO_ENCONTRADA', 'Fazenda não encontrada.');
     }
+    // Pendência só para pessoa ativa da própria organização: responsável de fora ou inexistente não recebe tarefa.
+    const responsaveis = [
+      ...new Set(
+        dados.linhas
+          .flatMap((l) => [l.inspecao?.responsavel, l.ocorrencia?.responsavel])
+          .filter((x) => x !== undefined),
+      ),
+    ];
+    if (responsaveis.length > 0) {
+      const ativos = await c.query('SELECT 1 FROM app.app_user WHERE id = ANY($1::uuid[]) AND active', [
+        responsaveis,
+      ]);
+      if (ativos.rowCount !== responsaveis.length) {
+        rejeitar(
+          'RESPONSAVEL_NAO_ENCONTRADO',
+          'Responsável pela inspeção ou pela ocorrência não encontrado na organização.',
+        );
+      }
+    }
     const idsProduto = dados.linhas.flatMap((l) => {
       const real = l.ocorrencia?.produtoReal;
       return real && 'produto' in real ? [l.produto, real.produto] : [l.produto];
@@ -159,6 +181,8 @@ export function receberDocumento(dados: Dados): Efeito {
             conversao: conversaoEmbalagem(cv.packaging, cv.factor, produto.base_unit, cv.version),
           };
         } else {
+          // A unidade da linha é da dimensão do produto mesmo sem movimento (linha toda recusada, por exemplo).
+          converter(quantidade('1', l.unidade.unidade), produto.base_unit);
           unidade = { tipo: 'medida', unidade: l.unidade.unidade };
         }
         const dominio: LinhaConferida = {
@@ -369,6 +393,13 @@ export function receberDocumento(dados: Dados): Efeito {
       [idsLote],
     );
     const versaoAntes = new Map(travados.rows.map((l) => [l.id, Number(l.version)]));
+    // Auditoria (NFR-04; contrato §6): saldo de cada lote afetado antes e depois, na data civil do recebimento.
+    const saldos = async () => {
+      const r: Record<string, SaldoTexto | null> = {};
+      for (const id of idsLote) r[id] = await saldoDoLote(c, id, dados.recebimento);
+      return r;
+    };
+    const saldoAntes = await saldos();
 
     // Linhas, movimentos de cada parcela física (validados pelo saldo do domínio na unidade do lote) e ocorrências.
     const idsLinha = new Map<number, string>();
@@ -518,7 +549,8 @@ export function receberDocumento(dados: Dados): Efeito {
           `Inspeção pendente: linha ${n}, ${l.dados.inspecao.responsavel} até ${l.dados.inspecao.prazo}`,
         );
       }
-      if (l.divergente) pendentes.push(`Divergência aberta: linha ${n}`);
+      // Responsável contextual e verificável: quem registrou o recebimento (a sessão), sem campo manual a mais.
+      if (l.divergente) pendentes.push(`Divergência aberta: linha ${n}, ${ctx.intencao.actorId}`);
       if (l.ocorrencia?.status === 'aberta') {
         pendentes.push(
           `Produto divergente retido: linha ${n}, ${l.ocorrencia.responsavel} até ${l.ocorrencia.prazo ?? ''}`,
@@ -531,6 +563,13 @@ export function receberDocumento(dados: Dados): Efeito {
       divergente: linhas.some((l) => l.divergente),
       ocorrenciaAberta: linhas.some((l) => l.ocorrencia?.status === 'aberta'),
     });
+    const motivoAuditoria = linhas
+      .filter((l) => l.divergente)
+      .map((l) => {
+        const texto = l.dados.motivoTexto ? ` (${l.dados.motivoTexto})` : '';
+        return `linha ${String(l.dados.numero)}: ${l.dados.motivo ?? ''}${texto}`;
+      })
+      .join('; ');
     return {
       resultingVersion: 1,
       effects: {
@@ -542,8 +581,18 @@ export function receberDocumento(dados: Dados): Efeito {
       },
       pending: pendentes,
       nextAction,
-      before: { lots: Object.fromEntries(versaoAntes) },
-      after: { document: documentoId, lots: Object.fromEntries(versaoNova) },
+      before: { lots: saldoAntes },
+      after: {
+        document: documentoId,
+        lots: await saldos(),
+        lines: linhas.map((l) => ({
+          id: idsLinha.get(l.dados.numero),
+          numero: l.dados.numero,
+          motivo: l.dados.motivo ?? null,
+        })),
+      },
+      // Motivo na auditoria, ligado às linhas divergentes (NFR-04; contrato §6).
+      ...(motivoAuditoria ? { reason: motivoAuditoria } : {}),
     };
   };
 }
