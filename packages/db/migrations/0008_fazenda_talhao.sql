@@ -28,7 +28,10 @@ ALTER TABLE app.farm
 
 -- Preflight dos nomes legados (decisão do Codex, 30/09 20:11Z): com nome fora do tamanho ou colisão entre fazendas
 -- ativas da mesma organização, a migração para inteira, com os IDs e sem os nomes. Nada é renomeado, mesclado ou
--- excluído da regra, e a migração nunca termina sem a proteção.
+-- excluído da regra, e a migração nunca termina sem a proteção. O FORCE do RLS vale também para o dono: sem
+-- organização na sessão, o migrator não veria nenhuma fazenda. Por isso o FORCE sai só durante a conferência e volta
+-- na mesma transação (se a migração parar, as duas mudanças se desfazem com ela).
+ALTER TABLE app.farm NO FORCE ROW LEVEL SECURITY;
 DO $$
 DECLARE
   fora text;
@@ -50,6 +53,7 @@ BEGIN
             HINT = 'Corrija os nomes pela operação de dados antes de aplicar a 0008; a migração não altera legados.';
   END IF;
 END $$;
+ALTER TABLE app.farm FORCE ROW LEVEL SECURITY;
 
 ALTER TABLE app.farm
   ADD COLUMN name_key text GENERATED ALWAYS AS (lower(app.normalizar_nome(name))) STORED,

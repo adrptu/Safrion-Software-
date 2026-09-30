@@ -32,6 +32,7 @@ describe('migrações (plano R-006, passo 7)', () => {
       '0005_vinculo_hml.sql',
       '0006_vinculo_fila.sql',
       '0007_recebimento_documento.sql',
+      '0008_fazenda_talhao.sql',
     ]);
     expect(r.rows[0]?.sha256).toMatch(/^[0-9a-f]{64}$/);
   });
@@ -145,7 +146,10 @@ describe('migrações (plano R-006, passo 7)', () => {
             [id, s.org, s.produto, codigoLegado],
           ),
         );
-        expect((await aplicarMigracoes(cliente)).aplicadas).toEqual(['0007_recebimento_documento.sql']);
+        expect((await aplicarMigracoes(cliente)).aplicadas).toEqual([
+          '0007_recebimento_documento.sql',
+          '0008_fazenda_talhao.sql',
+        ]);
         const depois = await emOrganizacao(app, s.org, (c) =>
           c.query('SELECT code, kind, expiry_applies FROM app.lot WHERE id = $1', [id]),
         );
@@ -159,6 +163,127 @@ describe('migrações (plano R-006, passo 7)', () => {
       }
     });
   }
+
+  // CAD-01 v3 §3 (decisão do Codex, 30/09 20:11Z): a 0008 confere os nomes das fazendas existentes antes de proteger.
+  // Colisão ou tamanho fora da regra param a migração inteira (SF001, com IDs e sem nomes); nada é renomeado.
+  async function bancoAte0007(teste: (cliente: pg.Client, app: pg.Pool) => Promise<void>) {
+    const pasta = await mkdtemp(join(tmpdir(), 'migracoes-ate-0007-'));
+    const admin = new pg.Client({ connectionString: inject('urlAdmin') });
+    await admin.connect();
+    const banco = `pre8_${randomUUID().replaceAll('-', '')}`;
+    let cliente: pg.Client | undefined;
+    let app: pg.Pool | undefined;
+    try {
+      for (const arquivo of await readdir(PASTA_MIGRACOES)) {
+        if (arquivo.endsWith('.sql') && arquivo < '0008')
+          await cp(join(PASTA_MIGRACOES, arquivo), join(pasta, arquivo));
+      }
+      await admin.query(`CREATE DATABASE ${banco} OWNER migrator`);
+      const url = new URL(inject('urlAdmin'));
+      url.pathname = `/${banco}`;
+      url.username = 'migrator';
+      url.password = inject('senhaMigrator');
+      cliente = new pg.Client({ connectionString: url.toString() });
+      await cliente.connect();
+      expect((await aplicarMigracoes(cliente, pasta)).aplicadas).toHaveLength(7);
+      url.username = 'app_runtime';
+      url.password = inject('senhaApp');
+      app = new pg.Pool({ connectionString: url.toString() });
+      await teste(cliente, app);
+    } finally {
+      await app?.end();
+      await cliente?.end();
+      await admin.query(`DROP DATABASE IF EXISTS ${banco}`);
+      await admin.end();
+      await rm(pasta, { recursive: true, force: true });
+    }
+  }
+
+  const fazendaLegada = (app: pg.Pool, org: string, nome: string) => {
+    const id = randomUUID();
+    return emOrganizacao(app, org, (c) =>
+      c.query('INSERT INTO app.farm (id, organization_id, name) VALUES ($1, $2, $3)', [id, org, nome]),
+    ).then(() => id);
+  };
+
+  async function semProtecao(cliente: pg.Client) {
+    const registro = await cliente.query(
+      "SELECT 1 FROM migracao.registro WHERE versao = '0008_fazenda_talhao.sql'",
+    );
+    const coluna = await cliente.query(
+      "SELECT 1 FROM information_schema.columns WHERE table_schema = 'app' AND table_name = 'farm' AND column_name IN ('name_key', 'timezone')",
+    );
+    const tabela = await cliente.query<{ t: string | null }>("SELECT to_regclass('app.field')::text AS t");
+    // O FORCE do RLS, retirado só durante a conferência, volta com o ROLLBACK.
+    const force = await cliente.query<{ f: boolean }>(
+      "SELECT relforcerowsecurity AS f FROM pg_class WHERE oid = 'app.farm'::regclass",
+    );
+    return {
+      registro: registro.rowCount,
+      colunas: coluna.rowCount,
+      tabela: tabela.rows[0]?.t ?? null,
+      force: force.rows[0]?.f,
+    };
+  }
+
+  it('0008 para com colisão de nome legado (caixa e espaço Unicode) e não deixa nada pela metade', async () => {
+    await bancoAte0007(async (cliente, app) => {
+      const s = await semear(app, 'L8a');
+      const x = await fazendaLegada(app, s.org, 'Boa Vista');
+      const y = await fazendaLegada(app, s.org, ' boa\u00a0 vista');
+      const erro = (await aplicarMigracoes(cliente).catch((e: unknown) => e)) as {
+        code?: string;
+        detail?: string;
+      };
+      expect(erro.code).toBe('SF001');
+      expect(erro.detail).toContain(x);
+      expect(erro.detail).toContain(y);
+      expect(erro.detail).not.toContain('Boa Vista');
+      expect(await semProtecao(cliente)).toEqual({ registro: 0, colunas: 0, tabela: null, force: true });
+    });
+  });
+
+  it('0008 para com nome legado de 81 caracteres', async () => {
+    await bancoAte0007(async (cliente, app) => {
+      const s = await semear(app, 'L8b');
+      const longa = await fazendaLegada(app, s.org, 'x'.repeat(81));
+      const erro = (await aplicarMigracoes(cliente).catch((e: unknown) => e)) as {
+        code?: string;
+        detail?: string;
+      };
+      expect(erro.code).toBe('SF001');
+      expect(erro.detail).toContain(longa);
+      expect(await semProtecao(cliente)).toEqual({ registro: 0, colunas: 0, tabela: null, force: true });
+    });
+  });
+
+  it('0008 migra legados limpos (o mesmo nome em outra organização) e protege as gravações novas', async () => {
+    await bancoAte0007(async (cliente, app) => {
+      const s1 = await semear(app, 'L8c');
+      const s2 = await semear(app, 'L8d');
+      const legada = await fazendaLegada(app, s1.org, 'Boa Vista');
+      await fazendaLegada(app, s2.org, 'Boa Vista');
+      expect((await aplicarMigracoes(cliente)).aplicadas).toEqual(['0008_fazenda_talhao.sql']);
+      const depois = await emOrganizacao(app, s1.org, (c) =>
+        c.query('SELECT name, name_key, timezone, status, version FROM app.farm WHERE id = $1', [legada]),
+      );
+      expect(depois.rows[0]).toEqual({
+        name: 'Boa Vista',
+        name_key: 'boa vista',
+        timezone: 'America/Sao_Paulo',
+        status: 'ativa',
+        version: '1',
+      });
+      await expect(fazendaLegada(app, s1.org, 'BOA VISTA')).rejects.toMatchObject({
+        code: '23505',
+        constraint: 'farm_nome_ativo',
+      });
+      await expect(fazendaLegada(app, s1.org, 'y'.repeat(81))).rejects.toMatchObject({
+        code: '23514',
+        constraint: 'farm_nome_tamanho',
+      });
+    });
+  });
 
   it('reaplicar não muda nada', async () => {
     const c = new pg.Client({ connectionString: amb.url('migrator') });
@@ -174,6 +299,7 @@ describe('migrações (plano R-006, passo 7)', () => {
           '0005_vinculo_hml.sql',
           '0006_vinculo_fila.sql',
           '0007_recebimento_documento.sql',
+          '0008_fazenda_talhao.sql',
         ],
       });
     } finally {

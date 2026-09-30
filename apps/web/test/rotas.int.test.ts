@@ -775,7 +775,7 @@ describe('/saude e log', () => {
     expect(corpo).toMatchObject({
       status: 'ok',
       ambiente: 'dev',
-      migracao: '0007_recebimento_documento.sql',
+      migracao: '0008_fazenda_talhao.sql',
       commit: 'abc1234',
     });
     expect(JSON.stringify(corpo)).not.toContain('postgres');
