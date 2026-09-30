@@ -185,7 +185,9 @@ const COLUNAS_RECIBO = `receipt_id, command_type, idempotency_key, payload_hash,
  * - mesma chave com outro conteúdo: IDEMPOTENCY_KEY_REUSED, nada gravado;
  * - mesma chave em transação em curso por mais que o limite: IDEMPOTENCY_IN_PROGRESS;
  * - deadlock (40P01) com o ROLLBACK confirmado antes de qualquer COMMIT: a transação inteira repete com a mesma
- *   intenção, até 3 tentativas, pausas de 50 e 150 ms e prazo total de 2 s (contrato CMD-15 §6);
+ *   intenção, até 3 tentativas e pausas de 50 e 150 ms, numa janela de repetição de 2 s desde o início (contrato
+ *   CMD-15 §6, v3.9). A janela limita a repetição, não a duração de qualquer comando: a primeira tentativa não tem
+ *   prazo novo, e a resposta ainda depende do ROLLBACK e do transporte;
  * - qualquer outra falha: FALHA_TRANSITORIA; repetir com a mesma chave e o mesmo conteúdo. Com o ROLLBACK confirmado
  *   antes do COMMIT, nada foi gravado; se a falha chega no COMMIT ou depois dele (conexão perdida), ou se o ROLLBACK
  *   não se confirma, o resultado é incerto (resultadoIncerto) e o reenvio devolve o recibo, se a transação confirmou.
@@ -257,7 +259,10 @@ export async function executarComando(
   }
 }
 
-/** Deadlock (40P01): pausas antes da 2ª e da 3ª tentativa e prazo total, contado do início (contrato CMD-15 §6). */
+/**
+ * Deadlock (40P01): pausas antes da 2ª e da 3ª tentativa e a janela de repetição, contada do início do comando; só as
+ * tentativas repetidas ficam sujeitas a ela (contrato CMD-15 §6, v3.9).
+ */
 const PAUSAS_DEADLOCK_MS: readonly number[] = [50, 150];
 const PRAZO_REPETICAO_MS = 2000;
 
