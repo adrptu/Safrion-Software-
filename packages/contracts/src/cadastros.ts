@@ -40,9 +40,16 @@ function caracteres(texto: string): number {
   return Array.from(texto).length;
 }
 
+/**
+ * O PostgreSQL recusa o caractere NUL em texto (22021). Recusar aqui evita que um nome permanentemente inválido chegue ao
+ * efeito e volte como falha transitória (achado do Codex, 30/09). A normalização dos nomes válidos não muda.
+ */
+const NUL = '\u0000';
+
 export const EsquemaNomeCadastro = z
   .string()
   .max(1000)
+  .refine((v) => !v.includes(NUL), { message: 'NOME_COM_NUL' })
   .transform(normalizarNome)
   .refine((v) => caracteres(v) >= 1, { message: 'NOME_VAZIO' })
   .refine((v) => caracteres(v) <= NOME_MAX, { message: 'NOME_LONGO' });

@@ -178,8 +178,12 @@ export async function obterTalhao(cliente: ClientBase, id: string): Promise<Talh
 
 // Efeitos (contrato CAD-01 §3 e §4) --------------------------------------------------------------------------------
 
+/**
+ * Recusa registrada com a chave. O motivo em pt-BR vai também no nextAction do recibo (contrato CAD-01 §4): é o que a tela
+ * mostra, porque o recibo não leva a mensagem do erro.
+ */
 function rejeitar(motivo: string, mensagem: string): never {
-  throw new RejeicaoNegocio(motivo, mensagem);
+  throw new RejeicaoNegocio(motivo, mensagem, mensagem);
 }
 
 function erroPg(erro: unknown): { code?: string; constraint?: string } {
@@ -190,10 +194,20 @@ function erroPg(erro: unknown): { code?: string; constraint?: string } {
  * Traduz a violação que o banco decide (unicidade, tamanho do nome e FK composta) em rejeição registrada; o resto sobe.
  * A concorrência de dois nomes iguais nunca vira 500: o índice parcial recusa o segundo.
  */
-function traduzir(erro: unknown, indiceNome: string, restricaoTamanho: string, entidade: string): never {
+function traduzir(
+  erro: unknown,
+  indiceNome: string,
+  restricaoTamanho: string,
+  entidade: 'fazenda' | 'talhão',
+): never {
   const e = erroPg(erro);
   if (e.code === '23505' && e.constraint === indiceNome) {
-    rejeitar('NOME_EM_USO', `Já existe ${entidade} ativo com este nome.`);
+    rejeitar(
+      'NOME_EM_USO',
+      entidade === 'fazenda'
+        ? 'Já existe uma fazenda ativa com este nome. Use outro nome.'
+        : 'Já existe um talhão ativo com este nome nesta fazenda. Use outro nome ou inative o outro talhão.',
+    );
   }
   if (e.code === '23514' && e.constraint === restricaoTamanho) {
     rejeitar('NOME_INVALIDO', 'Use de 1 a 80 caracteres no nome.');
@@ -232,7 +246,7 @@ function alvoExistente(ctx: ContextoEfeito, tipo: 'farm' | 'field'): { id: strin
 
 async function fazendaExiste(c: PoolClient, id: string): Promise<void> {
   if (!(await c.query("SELECT 1 FROM app.farm WHERE id = $1 AND status = 'ativa'", [id])).rowCount) {
-    rejeitar('FAZENDA_NAO_ENCONTRADA', 'Fazenda não encontrada.');
+    rejeitar('FAZENDA_NAO_ENCONTRADA', 'Fazenda não encontrada. Escolha uma fazenda da lista.');
   }
 }
 
@@ -282,7 +296,8 @@ export function editarFazenda(dados: DadosEditarFazenda): Efeito {
         id,
       ])
     ).rows[0];
-    if (!antes) rejeitar('FAZENDA_NAO_ENCONTRADA', 'Fazenda não encontrada.');
+    if (!antes)
+      rejeitar('FAZENDA_NAO_ENCONTRADA', 'Fazenda não encontrada. Volte à lista de fazendas e talhões.');
     const atual = Number(antes.version);
     if (atual !== esperada) throw new ConflitoVersao(atual);
     const nova = atual + 1;
@@ -327,7 +342,8 @@ const SELECT_TALHAO_TRAVADO =
 
 async function talhaoTravado(c: PoolClient, id: string, esperada: number): Promise<EstadoTalhao> {
   const antes = (await c.query<EstadoTalhao>(SELECT_TALHAO_TRAVADO, [id])).rows[0];
-  if (!antes) rejeitar('TALHAO_NAO_ENCONTRADO', 'Talhão não encontrado.');
+  if (!antes)
+    rejeitar('TALHAO_NAO_ENCONTRADO', 'Talhão não encontrado. Volte à lista de fazendas e talhões.');
   const atual = Number(antes.version);
   if (atual !== esperada) throw new ConflitoVersao(atual);
   return antes;

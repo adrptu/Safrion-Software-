@@ -46,6 +46,12 @@ describe('nome de cadastro (contrato CAD-01 §3)', () => {
     expect(EsquemaNomeCadastro.parse('🌱'.repeat(80))).toBe('🌱'.repeat(80));
     expect(recusa(EsquemaNomeCadastro, 42)).not.toHaveLength(0);
   });
+
+  it('recusa o caractere NUL (o banco não o aceita em texto) sem mudar a normalização dos válidos', () => {
+    expect(recusa(EsquemaNomeCadastro, 'Talhao\u0000Teste')).toContain('NOME_COM_NUL');
+    expect(recusa(EsquemaNomeCadastro, '\u0000')).toContain('NOME_COM_NUL');
+    expect(EsquemaNomeCadastro.parse('Talhao Teste')).toBe('Talhao Teste');
+  });
 });
 
 describe('área declarada no comando', () => {

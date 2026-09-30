@@ -173,6 +173,20 @@ describe('POST cadastros.* (contrato CAD-01 §4)', () => {
       const r = await post(tipo, corpo, gerente);
       expect(r.status, JSON.stringify(corpo)).toBe(400);
     }
+    // Nome com NUL (achado do Codex, 30/09): 400 antes do envelope, sem recibo nem efeito; a mesma chave serve depois
+    // para o pedido válido, porque a recusa de contrato não consome a chave.
+    const nul = pedido('farm', { nome: 'Fazenda\u0000Nula', fuso: 'America/Sao_Paulo' });
+    const recusada = await post(COMANDOS_CADASTRO.criarFazenda, nul, gerente);
+    expect(recusada.status).toBe(400);
+    expect((await erroDe(recusada)).codigo).toBe('CONTRATO_INVALIDO');
+    const valida = await post(
+      COMANDOS_CADASTRO.criarFazenda,
+      { ...nul, data: { nome: 'Fazenda Nula Corrigida', fuso: 'America/Sao_Paulo' } },
+      gerente,
+    );
+    expect(valida.status).toBe(200);
+    expect(await reciboDe(valida)).toMatchObject({ outcome: 'confirmed', alreadyReceived: false });
+
     const grande = await post(COMANDOS_CADASTRO.criarFazenda, `{"x":"${'a'.repeat(17 * 1024)}"}`, gerente);
     expect(grande.status).toBe(413);
   });

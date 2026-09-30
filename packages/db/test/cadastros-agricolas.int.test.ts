@@ -202,7 +202,13 @@ describe('recusas pelo banco, nunca 500 (contrato §3)', () => {
   it('nome ativo repetido na mesma fazenda, inclusive por caixa e espaço Unicode, é NOME_EM_USO; em outra fazenda passa', async () => {
     await novoTalhao(a, a.fazenda, 'Talhão Norte');
     const dup = await novoTalhao(a, a.fazenda, '  TALHÃO norte ');
-    expect(dup.recibo).toMatchObject({ outcome: 'rejected', reasonCode: 'NOME_EM_USO' });
+    expect(dup.recibo).toMatchObject({
+      outcome: 'rejected',
+      reasonCode: 'NOME_EM_USO',
+      // O motivo em pt-BR vai no nextAction: é o que a tela mostra (contrato §4).
+      nextAction:
+        'Já existe um talhão ativo com este nome nesta fazenda. Use outro nome ou inative o outro talhão.',
+    });
     expect(await contar(a, 'SELECT count(*)::text n FROM app.field WHERE id = $1', [dup.id])).toBe(0);
     const outra = await novaFazenda(a, 'Fazenda Sul');
     expect((await novoTalhao(a, outra.id, 'Talhão Norte')).recibo.outcome).toBe('confirmed');
