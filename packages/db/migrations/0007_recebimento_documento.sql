@@ -10,14 +10,15 @@ ALTER TABLE app.product
   ADD COLUMN lot_policy text NOT NULL DEFAULT 'informado' CHECK (lot_policy IN ('informado', 'por_documento'));
 
 -- Lote de fabricante ou agrupamento interno por documento (granel): o interno tem código DOC:<id do documento> e nunca é
--- apresentado como lote do fabricante.
+-- apresentado como lote do fabricante. Só a ida é exigida: lote de fabricante anterior com código parecido continua
+-- fabricante, sem ser reclassificado pela aparência do código (CMD15-CX03, achado do Codex).
 ALTER TABLE app.lot
   ALTER COLUMN expiry_date DROP NOT NULL,
   ADD COLUMN expiry_applies boolean NOT NULL DEFAULT true,
   ADD COLUMN kind text NOT NULL DEFAULT 'fabricante' CHECK (kind IN ('fabricante', 'agrupamento_interno')),
   ADD CONSTRAINT lot_validade_coerente CHECK (expiry_applies = (expiry_date IS NOT NULL)),
   ADD CONSTRAINT lot_interno_por_documento CHECK (
-    (kind = 'agrupamento_interno') = (code ~ '^DOC:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')),
+    kind <> 'agrupamento_interno' OR code ~ '^DOC:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'),
   -- A linha do documento garante que o lote é do produto dela.
   ADD CONSTRAINT lot_org_id_produto UNIQUE (organization_id, id, product_id);
 

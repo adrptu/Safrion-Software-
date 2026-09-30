@@ -178,6 +178,39 @@ describe('conferência da linha', () => {
   });
 });
 
+describe('achados do Codex sobre ce0e2a4 (CMD15-CX01 e CX02)', () => {
+  const emUn = (documento: string, apto: string, recusado: string, unidade = 'un'): LinhaConferida => ({
+    numero: 1,
+    unidade: { tipo: 'medida', unidade },
+    documento,
+    parcelas: parcelas(apto, '0', '0', recusado),
+    motivo: 'falta',
+  });
+
+  it('CX01: contagem indivisível (un) recusa fração no documento e em qualquer parcela, mesmo sem físico', () => {
+    expect(codigo(() => conferirLinha(emUn('1.5', '1', '0')))).toBe('RECEBIMENTO_INVALIDO');
+    expect(codigo(() => movimentosDaLinha({ ...emUn('1', '0', '0.5'), motivo: 'falta' }, ids()))).toBe(
+      'RECEBIMENTO_INVALIDO',
+    );
+  });
+
+  it('CX01 controle: fração em volume continua legítima', () => {
+    const r = conferirLinha(emUn('1', '0.25', '0.25', 'L'));
+    expect([r.fisico.toString(), r.conferido.toString()]).toEqual(['0.25', '0.5']);
+  });
+
+  it('CX02: embalagem sem conversão válida é recusada mesmo com a linha toda recusada', () => {
+    const semConversao = {
+      ...emUn('1', '0', '1'),
+      motivo: 'avaria',
+      unidade: { tipo: 'embalagem', conversao: null },
+    } as unknown as LinhaConferida;
+    expect(codigo(() => movimentosDaLinha(semConversao, ids()))).toBe('CONVERSAO_INVALIDA');
+    const falsa = { ...semConversao, unidade: { tipo: 'embalagem', conversao: { ...galao, fator: '5' } } };
+    expect(codigo(() => conferirLinha(falsa as unknown as LinhaConferida))).toBe('CONVERSAO_INVALIDA');
+  });
+});
+
 describe('produto diferente: ocorrência de chegada, não estoque', () => {
   it('a linha do produto do documento fica com conferido 0 e nenhum movimento', () => {
     const linha = emL('20', parcelas('0'), { motivo: 'produto_diferente' });

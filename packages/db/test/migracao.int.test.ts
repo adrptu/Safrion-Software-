@@ -1,10 +1,10 @@
 import { randomUUID } from 'node:crypto';
-import { cp, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import pg from 'pg';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, inject, it } from 'vitest';
 
 import { ErroComando } from '../src/erros.js';
 import { PASTA_MIGRACOES, aplicarMigracoes } from '../src/migrar.js';
@@ -55,7 +55,8 @@ describe('migrações (plano R-006, passo 7)', () => {
     await expect(lote('NF-1-123', null, false, 'agrupamento_interno')).rejects.toMatchObject({
       code: '23514',
     });
-    await expect(lote(`DOC:${randomUUID()}`, '2027-01-01', true)).rejects.toMatchObject({ code: '23514' });
+    // Só a ida é exigida: lote de fabricante com código parecido continua fabricante (CMD15-CX03, achado do Codex).
+    await expect(lote(`DOC:${randomUUID()}`, '2027-01-01', true)).resolves.toBeDefined();
 
     const fornecedor = randomUUID();
     await naOrg(
@@ -108,6 +109,56 @@ describe('migrações (plano R-006, passo 7)', () => {
       ),
     ).resolves.toBeDefined();
   });
+
+  // CMD15-CX03 (achado e prova do Codex sobre ce0e2a4): a 0007 migra lotes válidos da versão anterior sem renomear nem
+  // reclassificar, inclusive um lote de fabricante cujo código parece o de um lote interno.
+  for (const codigoLegado of ['LOTE-LEGADO-1', 'DOC:aaaaaaaa-1111-4111-8111-bbbbbbbbbbbb']) {
+    it(`0007 migra o lote anterior ${codigoLegado} sem mudar código nem tipo`, async () => {
+      const pasta = await mkdtemp(join(tmpdir(), 'migracoes-ate-0006-'));
+      const admin = new pg.Client({ connectionString: inject('urlAdmin') });
+      await admin.connect();
+      const banco = `pre7_${randomUUID().replaceAll('-', '')}`;
+      let cliente: pg.Client | undefined;
+      let app: pg.Pool | undefined;
+      try {
+        for (const arquivo of await readdir(PASTA_MIGRACOES)) {
+          if (arquivo.endsWith('.sql') && arquivo < '0007')
+            await cp(join(PASTA_MIGRACOES, arquivo), join(pasta, arquivo));
+        }
+        await admin.query(`CREATE DATABASE ${banco} OWNER migrator`);
+        const url = new URL(inject('urlAdmin'));
+        url.pathname = `/${banco}`;
+        url.username = 'migrator';
+        url.password = inject('senhaMigrator');
+        cliente = new pg.Client({ connectionString: url.toString() });
+        await cliente.connect();
+        expect((await aplicarMigracoes(cliente, pasta)).aplicadas).toHaveLength(6);
+        url.username = 'app_runtime';
+        url.password = inject('senhaApp');
+        app = new pg.Pool({ connectionString: url.toString() });
+        const s = await semear(app, 'Legado');
+        const id = randomUUID();
+        await emOrganizacao(app, s.org, (c) =>
+          c.query(
+            `INSERT INTO app.lot (id, organization_id, product_id, code, expiry_date, base_unit)
+             VALUES ($1, $2, $3, $4, '2027-06-30', 'L')`,
+            [id, s.org, s.produto, codigoLegado],
+          ),
+        );
+        expect((await aplicarMigracoes(cliente)).aplicadas).toEqual(['0007_recebimento_documento.sql']);
+        const depois = await emOrganizacao(app, s.org, (c) =>
+          c.query('SELECT code, kind, expiry_applies FROM app.lot WHERE id = $1', [id]),
+        );
+        expect(depois.rows[0]).toEqual({ code: codigoLegado, kind: 'fabricante', expiry_applies: true });
+      } finally {
+        await app?.end();
+        await cliente?.end();
+        await admin.query(`DROP DATABASE IF EXISTS ${banco}`);
+        await admin.end();
+        await rm(pasta, { recursive: true, force: true });
+      }
+    });
+  }
 
   it('reaplicar não muda nada', async () => {
     const c = new pg.Client({ connectionString: amb.url('migrator') });

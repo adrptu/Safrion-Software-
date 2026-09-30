@@ -375,6 +375,12 @@ describe('ordem FEFO: lote sem validade continua elegível, depois dos datados',
       candidato('a', '2026-12-31', '2026-09-01T10:00:00.000Z', 'liberado_livre'),
     ];
     expect(ordemFefo(iguais)).toEqual(['a', 'b']);
+    // Controle do Codex (revisão de ce0e2a4): instantes com fusos diferentes são comparados pelo instante real.
+    const comFuso = [
+      candidato('b', null, '2026-09-30T07:00:00-03:00', 'liberado_livre'),
+      candidato('a', null, '2026-09-30T09:30:00Z', 'liberado_livre'),
+    ];
+    expect(ordemFefo(comFuso)).toEqual(['a', 'b']);
     const ilegivel = candidato('c', '2026-12-31', 'ontem', 'liberado_livre');
     expect(codigo(() => ordemFefo([ilegivel]))).toBe('MOVIMENTO_INVALIDO');
   });

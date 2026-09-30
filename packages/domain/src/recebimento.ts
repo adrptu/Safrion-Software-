@@ -1,9 +1,11 @@
 import type { Decimal } from 'decimal.js';
 
-import { decimal } from './decimal.js';
+import { decimal, ehDecimalDoDominio } from './decimal.js';
 import { ErroDominio } from './erros.js';
 import { dataCivil, type DataCivil, type Movimento, type Situacao } from './saldo.js';
 import {
+  UNIDADES,
+  conversaoEmbalagem,
   embalagensParaBase,
   ehUnidade,
   quantidade,
@@ -70,26 +72,41 @@ function invalido(mensagem: string): never {
   throw new ErroDominio('RECEBIMENTO_INVALIDO', mensagem);
 }
 
-/** Decimal ≥ 0 na unidade da linha; embalagem e unidade de contagem só inteiros. */
-function parcela(valor: unknown, u: UnidadeDaLinha, nome: string): Decimal {
+/**
+ * Decimal ≥ 0 na unidade da linha. Embalagem e unidade de contagem (un) contam itens inteiros (PRD 10.0), inclusive no
+ * recusado e em linha sem físico (CMD15-CX01, achado do Codex).
+ */
+function parcela(valor: unknown, inteira: boolean, nome: string): Decimal {
   const d = decimal(valor);
   if (d.isNegative()) invalido(`A parcela "${nome}" não pode ser negativa.`);
-  if (u.tipo === 'embalagem' && !d.isInteger()) invalido(`A parcela "${nome}" conta embalagens inteiras.`);
+  if (inteira && !d.isInteger()) invalido(`A parcela "${nome}" conta itens inteiros.`);
   return d;
 }
 
-function unidadeValida(u: unknown): UnidadeDaLinha {
-  const x = u as Partial<Record<string, unknown>> | null;
-  if (typeof x === 'object' && x !== null && x['tipo'] === 'medida' && ehUnidade(x['unidade'])) {
-    return { tipo: 'medida', unidade: x['unidade'] };
+/**
+ * Unidade conferida antes de qualquer parcela: medida cadastrada, ou embalagem com conversão versionada válida pelas
+ * mesmas regras de conversaoEmbalagem, mesmo que nenhuma parcela gere movimento (CMD15-CX02, achado do Codex).
+ */
+function unidadeValida(u: unknown): { readonly u: UnidadeDaLinha; readonly inteira: boolean } {
+  const x = typeof u === 'object' && u !== null ? (u as Partial<Record<string, unknown>>) : null;
+  const unidade = x?.['unidade'];
+  if (x?.['tipo'] === 'medida' && ehUnidade(unidade)) {
+    return { u: { tipo: 'medida', unidade }, inteira: UNIDADES[unidade].dimensao === 'contagem' };
   }
-  if (
-    typeof x === 'object' &&
-    x !== null &&
-    x['tipo'] === 'embalagem' &&
-    typeof x['conversao'] === 'object'
-  ) {
-    return { tipo: 'embalagem', conversao: x['conversao'] as ConversaoEmbalagem };
+  if (x?.['tipo'] === 'embalagem') {
+    const bruta = x['conversao'];
+    const c =
+      typeof bruta === 'object' && bruta !== null
+        ? (bruta as Partial<Record<keyof ConversaoEmbalagem, unknown>>)
+        : null;
+    if (c === null || !ehDecimalDoDominio(c.fator)) {
+      throw new ErroDominio(
+        'CONVERSAO_INVALIDA',
+        'A embalagem precisa de conversão criada por conversaoEmbalagem.',
+      );
+    }
+    const conversao = conversaoEmbalagem(c.embalagem, c.fator.toFixed(), c.unidadeBase, c.versao);
+    return { u: { tipo: 'embalagem', conversao }, inteira: true };
   }
   return invalido('A linha precisa de unidade de medida cadastrada ou de embalagem com conversão.');
 }
@@ -106,13 +123,13 @@ export function conferirLinha(l: LinhaConferida): ResultadoLinha {
   if (!Number.isInteger(l.numero) || l.numero < 1 || l.numero > MAX_LINHAS) {
     invalido(`O número da linha vai de 1 a ${String(MAX_LINHAS)}.`);
   }
-  const u = unidadeValida(l.unidade);
+  const { inteira } = unidadeValida(l.unidade);
   const doc = decimal(l.documento);
   if (!doc.greaterThan(0)) invalido('A quantidade do documento deve ser maior que zero.');
-  if (u.tipo === 'embalagem' && !doc.isInteger()) invalido('O documento conta embalagens inteiras.');
+  if (inteira && !doc.isInteger()) invalido('O documento conta itens inteiros nesta unidade.');
   const partes = l.parcelas as Partial<Record<Parcela, unknown>> | null;
   if (typeof partes !== 'object' || partes === null) invalido('A linha precisa das quatro parcelas.');
-  const [apto, quarentena, bloqueado, recusado] = PARCELAS.map((p) => parcela(partes[p], u, p)) as [
+  const [apto, quarentena, bloqueado, recusado] = PARCELAS.map((p) => parcela(partes[p], inteira, p)) as [
     Decimal,
     Decimal,
     Decimal,
@@ -165,10 +182,10 @@ export interface MovimentoDaParcela {
  */
 export function movimentosDaLinha(l: LinhaConferida, ids: () => string): MovimentoDaParcela[] {
   conferirLinha(l);
-  const u = unidadeValida(l.unidade);
+  const { u, inteira } = unidadeValida(l.unidade);
   const saida: MovimentoDaParcela[] = [];
   for (const p of ['apto', 'quarentena', 'bloqueado'] as const) {
-    const v = parcela(l.parcelas[p], u, p);
+    const v = parcela(l.parcelas[p], inteira, p);
     if (v.isZero()) continue;
     const situacao = SITUACAO_DA_PARCELA[p] as Situacao;
     let q: Quantidade;
