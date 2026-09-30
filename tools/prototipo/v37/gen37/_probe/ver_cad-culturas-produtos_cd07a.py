@@ -1,0 +1,27 @@
+# -*- coding: utf-8 -*-
+"""Verificador · CD-07 parte A: árvore, vínculos, formulários (Cultura/Processo só tradução), exclusão, prévia e publicação."""
+import os, importlib.util, time, json
+sp=importlib.util.spec_from_file_location('vlib',os.path.join(os.path.dirname(os.path.abspath(__file__)),'ver_cad-culturas-produtos_lib.py')); L=importlib.util.module_from_spec(sp); sp.loader.exec_module(L)
+v=L.V()
+try:
+    v.goto('CD-07.dc.html')
+    v.info('cabeçalho',v.header()); v.info('botões',v.visible_btns())
+    rows=v.J("[...document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=row]')].map(r=>r.innerText.replace(/\\s+/g,' ').trim())")
+    for r in rows: print('   ',r)
+    v.info('overflow',v.overflow())
+    body=v.J("document.body.innerText")
+    for w in ['PULV','CR-SOJA','CR-MILHO','Como a integração traduz','TOP do ERP','Publicar estrutura v6']: v.info('presente? '+w, w in body)
+    v.clickrow('SOJA'); v.info('form SOJA',[v.title(),v.labels(),{k:v.fdis(k) for k in ['cod','nome','dim','ini','fim','trad']},v.dlg()[:260]])
+    v.fset('trad','Conta do ERP'); v.info('SOJA conta do ERP',v.labels()); v.cancel()
+    v.clickrow('TRAT'); v.info('form TRAT',[v.labels(),v.fv('ops')]); v.cancel()
+    v.clickrow('CC-OFI'); v.info('form CC-OFI',[v.labels(),v.fv('rat'),v.fopts('rat')]); v.cancel()
+    v.clickrow('3.1.02'); v.info('form 3.1.02',[v.labels(),v.fv('grp'),v.fdis('grp'),v.fv('sup')]); v.cancel()
+    v.clk('Cadastrar código'); v.info('novo código',[v.title(),v.labels(),v.fopts('dim')])
+    v.fset('cod','3.1.08'); v.fset('nome','Arrendamento'); v.fset('sup','CR-SR'); v.fset('ini','2026-07-01'); v.fset('conta','4.1.1.08'); v.btn('Salvar'); v.info('superior de outra dimensão',v.alerts())
+    v.fset('sup','3.1'); v.btn('Salvar'); v.info('salvou 3.1.08',[v.isopen(),v.toast(),v.rowtxt('3.1.08'),v.rowtxt('3.1 Custo')])
+    v.info('cabeçalho',v.header())
+    v.clk('Importar do ERP'); time.sleep(.2); v.info('prévia',v.J("(document.querySelector('[aria-label=\"Prévia da importação do ERP\"]')||{}).innerText"))
+    v.info('overflow com prévia',v.overflow()); v.shot('ver_cadc_cd07_previa.png')
+    v.clk('Descartar prévia'); v.info('descartar',[v.toast(),v.J("!!document.querySelector('[aria-label=\"Prévia da importação do ERP\"]')")])
+    v.info('erros (fora g2toast)',[e for e in v.errs() if 'g2toast' not in e])
+finally: v.fim()

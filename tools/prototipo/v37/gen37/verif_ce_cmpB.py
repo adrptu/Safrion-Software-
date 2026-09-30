@@ -1,0 +1,56 @@
+# -*- coding: utf-8 -*-
+"""Verificador independente · Compra (item 02): devolução e recusa da Direção, casos de erro e retomada."""
+import time, json
+from verif_ce_lib import V
+v=V('CMP.dc.html'); J=v.J
+def trail(): return J("(()=>{const x=[...document.querySelectorAll('span')].find(s=>s.innerText==='DOCUMENTOS DA COMPRA'); return x?x.parentElement.innerText.replace(/\\s+/g,' '):'';})()")
+def a5(): return J("(document.querySelector('[role=note]')||{innerText:''}).innerText")
+def btns(): return J("[...document.querySelectorAll('button')].filter(b=>b.offsetParent).map(b=>b.innerText.trim()).filter(Boolean)")
+def mot(t): return v.setv('textarea[aria-label=\"Motivo da decisão\"]',t)
+try:
+    v.open(); v.clk('Abrir compra'); v.clk('Solicitar cotações'); v.clk('Enviar convites (simulado)'); time.sleep(7)
+    v.clk('5 Aprove a compra'); print('  etapa:', v.cur(), '| prim:', v.prim())
+    v.chk('antes do envio: sem devolução/recusa', 'Registrar devolução' not in btns())
+    v.clk('Enviar à Direção'); p=v.prim(); b=btns()
+    v.chk('pendente: primária Registrar aprovação da Direção', 'Registrar aprovação da Direção' in p, p)
+    v.chk('pendente: ações secundárias devolução e recusa', 'Registrar devolução' in b and 'Registrar recusa' in b, b)
+    v.chk('a5 cita aprovação, devolução ou recusa', 'devolução ou recusa' in a5(), a5())
+    # motivo obrigatório (vazio e só espaços)
+    v.clk('Registrar devolução'); v.clk('Confirmar devolução'); e=J("[...document.querySelectorAll('[role=alert]')].map(x=>x.innerText).join(' | ')")
+    v.chk('devolução sem motivo: erro', 'Informe o motivo da devolução' in e, e)
+    mot('   '); v.clk('Confirmar devolução'); e=J("[...document.querySelectorAll('[role=alert]')].map(x=>x.innerText).join(' | ')")
+    v.chk('devolução com só espaços: erro', 'Informe o motivo da devolução' in e, e)
+    v.clk('Voltar'); v.chk('Voltar fecha o painel sem registrar', 'Registrar devolução' in btns() and 'Aguardando Direção' in trail(), trail())
+    v.shot('ce_cmp_e5_pend.png')
+    # recusa
+    v.clk('Registrar recusa'); mot('Sem orçamento nesta safra'); v.clk('Confirmar recusa'); print('  recusa:', v.T())
+    t=trail(); v.chk('trilha: Recusada · motivo e Não contratado', 'Recusada · Sem orçamento nesta safra' in t and 'Não contratado' in t, t)
+    p=v.prim(); v.chk('recusada: primária Conferir demanda aberta', 'Conferir demanda aberta' in p, p)
+    v.chk('recusada: sem botões de decisão', 'Registrar recusa' not in btns() and 'Registrar aprovação' not in p)
+    v.chk('recusada: a5', 'Nada foi contratado' in a5(), a5())
+    v.clk('Conferir demanda aberta'); v.clk('Expandir tudo')
+    t=v.rowtxt('Glifosato 480'); v.chk('etapa 2: Não contratado · necessidade aberta', 'Não contratado' in t and 'necessidade aberta' in t, t)
+    t=v.rowtxt('KCl 60%'); v.chk('etapa 2: coberto continua Coberto', 'Coberto' in t, t)
+    v.clk('6 Acompanhe a entrega'); b=v.body(); v.chk('etapa 6: nenhum pedido novo', 'PC-101' not in b and 'Nenhum pedido da SOL-2026-07 aprovado' in b)
+    v.clk('1 Escolha a safra'); t=v.rowtxt('Safra 2026/27'); v.chk('etapa 1: Recusada · não contratado', 'Recusada · não contratado' in t, t)
+    v.clk('4 Compare propostas'); b=v.body(); v.chk('etapa 4: aviso da recusa no topo', 'Recusada pela Direção (simulado): Sem orçamento nesta safra' in b)
+    # nova proposta de compra depois da recusa: muda escolha e envia de novo
+    v.clk('Expandir tudo')
+    J("""(()=>{const rows=[...document.querySelectorAll('[role=row].g2r')]; const i=rows.findIndex(r=>r.innerText.indexOf('2,4-D 806')>=0); const k=rows.slice(i+1).find(r=>r.innerText.indexOf('Coop. Vale')>=0); (k.querySelector('[role=cell] span')||k).click();})()"""); time.sleep(.5)
+    v.setv('#'+v.fid('just'),'Condição de pagamento à vista negociada'); v.clk('Salvar','aside[role=dialog]'); print('  escolha:', v.T())
+    v.clk('Revisar aprovação'); p=v.prim(); v.chk('depois da recusa e de mudança: Enviar à Direção', p.endswith('Enviar à Direção'), p)
+    v.clk('Enviar à Direção'); t=trail(); v.chk('reenviada: Aguardando Direção', 'Aguardando Direção' in t, t)
+    # devolução
+    v.clk('Registrar devolução'); mot('Negociar prazo de pagamento'); v.clk('Confirmar devolução'); print('  devolução:', v.T())
+    t=trail(); v.chk('trilha: Devolvida · motivo', 'Devolvida · Negociar prazo de pagamento' in t, t)
+    p=v.prim(); v.chk('devolvida: primária Ajustar escolhas', 'Ajustar escolhas' in p, p)
+    v.clk('1 Escolha a safra'); t=v.rowtxt('Safra 2026/27'); v.chk('etapa 1: Devolvida pela Direção · ajustar', 'Devolvida pela Direção' in t, t)
+    v.clk('5 Aprove a compra'); v.clk('Ajustar escolhas'); v.chk('Ajustar escolhas leva à etapa 4', v.cur().startswith('4 '), v.cur())
+    b=v.body(); v.chk('etapa 4: motivo da devolução no topo', 'Devolvida pela Direção (simulado): Negociar prazo de pagamento' in b)
+    v.clk('Expandir tudo'); v.row('MAP 11-52'); v.setv('#'+v.fid('ped'),'60000'); v.clk('Salvar','aside[role=dialog]'); print('  ajuste:', v.T())
+    v.clk('Revisar aprovação'); p=v.prim(); v.chk('depois do ajuste: Reenviar à Direção', 'Reenviar à Direção' in p, p)
+    v.clk('Reenviar à Direção'); v.clk('Registrar aprovação da Direção'); t=trail(); print('  aprovada:', t)
+    v.chk('aprovada depois da devolução: pedidos emitidos', 'Aprovada · Direção' in t and 'Pedidos PC-101' in t, t)
+    v.chk('sem erro JS no fim', J("window.__err||'nenhum'")=='nenhum', J("window.__err||''"))
+finally:
+    v.close()

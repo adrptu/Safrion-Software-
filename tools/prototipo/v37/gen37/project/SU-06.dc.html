@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Recebimentos e divergências</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Sora:wght@600;700&amp;display=swap">
+<style>
+body{margin:0;font-family:'Manrope', system-ui, sans-serif;color:#15201A;background:#F4F6F3}
+a{color:#1E7A4C}a:hover{color:#15603a}
+.g2ed{cursor:pointer}.g2ed:hover{background:#F2F8F4}.g2ed:focus-visible{outline:2px solid #1E7A4C;outline-offset:-2px}.g2flash{background:#E4F3E9}.g2kid{background:#FBFCFA}.g2tot{cursor:pointer}.g2tot:hover{background:#EEF4EF}.g2hb{display:inline-flex;align-items:center;gap:4px;border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#65736A;padding:7px 2px 7px 0;text-align:left;white-space:normal;max-width:104px;line-height:1.2}.g2fb{border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:10px;font-weight:700;padding:4px 3px;border-radius:6px}.g2fb:hover{background:#E4E9E5}.g2car{width:22px;height:22px;border:0;border-radius:6px;background:transparent;cursor:pointer;font-size:13px;color:#15201A;flex-shrink:0;padding:0}.g2car:hover{background:#E4E9E5}.g2del{width:28px;height:28px;border:0;border-radius:8px;background:transparent;cursor:pointer;color:#8A968E;display:inline-flex;align-items:center;justify-content:center}.g2del:hover{background:#FDE8E6;color:#B42318}.g2pw{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0;flex:0 1 auto;justify-content:inherit;text-align:inherit}sc-if,sc-for{display:contents}aside[role="dialog"]>*,aside[role="dialog"]>:is(sc-if,sc-for)>*,aside[role="dialog"]>:is(sc-if,sc-for)>:is(sc-if,sc-for)>*,aside[role="dialog"]>:is(sc-if,sc-for)>:is(sc-if,sc-for)>:is(sc-if,sc-for)>*{flex-shrink:0}
+</style>
+</helmet>
+<div data-root="1" style="position: relative; width: 1440px; height: 850px; box-sizing: border-box; display: flex; background: #F4F6F3; font-family: 'Manrope', system-ui, sans-serif; color: #15201A; overflow: clip;">
+<nav aria-label="Menu" style="width: 232px; flex-shrink: 0; background: #0F241A; display: flex; flex-direction: column; padding: 16px 12px 12px; gap: 2px; box-sizing: border-box; overflow: clip;">
+<a href="Main.dc.html" aria-label="Índice do protótipo" style="display: flex; align-items: center; gap: 10px; padding: 2px 12px 8px; font-family: 'Sora', 'Manrope', system-ui, sans-serif; font-weight: 700; font-size: 15px; letter-spacing: -.01em; color: #fff; text-decoration: none;"><span style="width: 28px; height: 28px; border-radius: 9px; background: #1E7A4C; display: inline-flex; align-items: center; justify-content: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 20 3c1 2 2 4.5 2 8.5S16.8 21 12.5 21zM2 21c0-3 1.85-5.36 5.08-6"/></svg></span>Talhão à O.S.</a>
+<a href="IN-04.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 10px; font-size: 13.5px; font-weight: 700; text-decoration: none; color: #D3E2D8;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D3E2D8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M9 4l6 2 6-2v14l-6 2-6-2-6 2V6zM9 4v14M15 6v14"/></svg>Mapa</a><button type="button" aria-expanded="{{nav0_open}}" onClick="{{nav0_tog}}" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; border: 0; border-radius: 10px; font-family: inherit; font-size: 13.5px; font-weight: 700; text-align: left; cursor: pointer; background: transparent; color: #D3E2D8;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D3E2D8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M12 2l9 5-9 5-9-5 9-5zM3 12l9 5 9-5M3 17l9 5 9-5"/></svg><span style="flex-grow: 1;">Cadastros</span><span aria-hidden="true" style="font-size: 11px; color: #86A08F;">{{nav0_sym}}</span></button><sc-if value="{{nav0_open}}" hint-placeholder-val="{{false}}"><div style="display: flex; flex-direction: column; gap: 1px; margin-bottom: 4px;"><a href="CD-01.dc.html" style="display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; color: #86A08F; font-weight: 500;">Fazendas, áreas e talhões</a><a href="CD-02.dc.html" style="display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; color: #86A08F; font-weight: 500;">Culturas, cultivares e operações</a><a href="CD-03.dc.html" style="display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; color: #86A08F; font-weight: 500;">Máquinas, instalações e setores</a><a href="CD-04.dc.html" style="display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; color: #86A08F; font-weight: 500;">Pessoas e equipes</a><a href="CD-05.dc.html" style="display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; color: #86A08F; font-weight: 500;">Parceiros e fornecedores</a><a href="CD-06.dc.html" style="display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; color: #86A08F; font-weight: 500;">Produtos, unidades e locais</a><a href="CD-07.dc.html" style="display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; color: #86A08F; font-weight: 500;">Estrutura gerencial</a></div></sc-if><button type="button" aria-expanded="{{nav1_open}}" onClick="{{nav1_tog}}" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; border: 0; border-radius: 10px; font-family: inherit; font-size: 13.5px; font-weight: 700; text-align: left; cursor: pointer; background: transparent; color: #D3E2D8;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D3E2D8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 20 3c1 2 2 4.5 2 8.5S16.8 21 12.5 21zM2 21c0-3 1.85-5.36 5.08-6"/></svg><span style="flex-grow: 1;">Agrícola</span><span aria-hidden="true" style="font-size: 11px; color: #86A08F;">{{nav1_sym}}</span></button><sc-if value="{{nav1_open}}" hint-placeholder-val="{{false}}"><div style="display: flex; flex-direction: column; gap: 1px; margin-bottom: 4px;"><a href="PA.dc.html" style="display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; color: #86A08F; font-weight: 500;">Planos agronômicos</a><a href="SAF.dc.html" style="display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; color: #86A08F; font-weight: 500;">Planejar safra</a><a href="OS.dc.html" style="display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; color: #86A08F; font-weight: 500;">Ordem de Serviço</a></div></sc-if><button type="button" aria-expanded="{{nav2_open}}" onClick="{{nav2_tog}}" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; border: 0; border-radius: 10px; font-family: inherit; font-size: 13.5px; font-weight: 700; text-align: left; cursor: pointer; background: transparent; color: #D3E2D8;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D3E2D8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M6 6h15l-1.5 9h-12zM6 6L5 2H2M10 20a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM19 20a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg><span style="flex-grow: 1;">Suprimentos</span><span aria-hidden="true" style="font-size: 11px; color: #86A08F;">{{nav2_sym}}</span></button><sc-if value="{{nav2_open}}" hint-placeholder-val="{{false}}"><div style="display: flex; flex-direction: column; gap: 1px; margin-bottom: 4px;"><a href="CMP.dc.html" style="display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; color: #86A08F; font-weight: 500;">Compra de insumos</a><a href="EST.dc.html" style="display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; color: #86A08F; font-weight: 500;">Estoque</a></div></sc-if>
+<div style="flex-grow: 1;"></div>
+<div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; margin: 4px 0; border-radius: 10px; background: rgba(255,255,255,.06); color: #86A08F; font-size: 11px; font-weight: 700; letter-spacing: .05em;"><span style="width: 7px; height: 7px; border-radius: 999px; background: #8A5A00;"></span>DEMONSTRAÇÃO · dados fictícios</div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; font-size: 12.5px; color: #D3E2D8; border-top: 1px solid rgba(255,255,255,.08);"><span style="width: 26px; height: 26px; border-radius: 999px; background: #1E7A4C; color: #fff; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; justify-content: center;">A</span><span style="display: flex; flex-direction: column; line-height: 1.2;"><span style="font-weight: 700; color: #fff;">Ana · Gestora</span><span style="color: #86A08F; font-size: 11.5px;">Trocar perfil de demonstração ▾</span></span></div>
+</nav>
+<div style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0;">
+<header style="padding: 14px 32px 14px; background: #FFFFFF; border-bottom: 1px solid #E4E9E5; display: flex; flex-direction: column; gap: 10px;">
+<div style="display: flex; align-items: center; gap: 10px; font-size: 12.5px; font-weight: 500;"><span style="font-size: 11.5px; color: #65736A; font-weight: 600;">Fazenda Santa Rita</span><span style="font-size: 11.5px; color: #65736A; font-weight: 600;">Safra 2026/27</span><span style="font-size: 11.5px; color: #65736A; font-weight: 600;">Módulo oculto no menu · preservado</span><span style="width: 1px; height: 18px; background: #E4E9E5;"></span><span><a href="SU-01.dc.html" style="color: #65736A; text-decoration: none;">Suprimentos</a> <span style="color: #65736A;">›</span> <span>Recebimentos e divergências</span></span><span style="flex-grow: 1;"></span><span style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid #E4E9E5; border-radius: 999px; background: #FFFFFF; color: #65736A; font-size: 12.5px; min-width: 220px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#65736A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Buscar ID, talhão, ativo, lote, pessoa…</span></div>
+<div style="display: flex; align-items: center; gap: 12px;">
+<h1 style="margin: 0; font-family: 'Sora', 'Manrope', system-ui, sans-serif; font-size: 23px; font-weight: 700; letter-spacing: -.02em; white-space: nowrap; flex-shrink: 0;">Recebimentos e divergências</h1>
+<span style="flex-shrink: 0; max-width: 300px;"><span style="{{hs_st}}"><span style="{{hs_dot}}"></span>{{hs_t}}</span></span>
+<span style="flex-grow: 1;"></span>
+<sc-if value="{{pend4533}}" hint-placeholder-val="{{true}}"><button type="button" onClick="{{conf4533}}" style="padding: 11px 20px; border-radius: 10px; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; background: #1E7A4C; color: #fff; border: 1px solid #1E7A4C; box-shadow: 0 1px 2px rgba(30,122,76,.25); display: inline-flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M1 3h15v13H1zM16 8h4l3 3v5h-7zM7.5 21a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM18.5 21a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></svg>Conferir NF 4533</button></sc-if><sc-if value="{{done4533}}" hint-placeholder-val="{{false}}"><a href="GE-04.dc.html" style="padding: 11px 20px; border-radius: 10px; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; background: #1E7A4C; color: #fff; border: 1px solid #1E7A4C; box-shadow: 0 1px 2px rgba(30,122,76,.25); text-decoration: none; display: inline-flex; align-items: center;">Encaminhar títulos</a></sc-if>
+</div>
+<div style="font-size: 13px; color: #65736A; line-height: 1.35; max-width: 900px; margin-top: -4px;">Conferência de pedido, documento e material; parcial mantém o saldo aberto e documento duplicado não cria segunda entrada.</div>
+
+
+</header>
+
+<main data-scroll="0" style="flex-grow: 1; padding: 18px 32px 22px;  display: grid; grid-template-columns: minmax(0, 1fr); grid-auto-rows: max-content; align-content: start; gap: 18px; box-sizing: border-box; min-width: 0;">
+<div style="display: flex; gap: 12px;"><div style="flex: 1 1 0; min-width: 0; padding: 12px 16px; background: #FFFFFF; border: 1px solid #E4E9E5; border-radius: 14px; display: flex; flex-direction: column; gap: 4px;"><div style="font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #65736A; font-weight: 700;">Divergências abertas</div><div style="font-family: 'Sora', 'Manrope', system-ui, sans-serif; font-size: 24px; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1.1;">{{k_div}}</div><div style="font-size: 12px; color: #65736A;">{{k_div_s}}</div></div><div style="flex: 1 1 0; min-width: 0; padding: 12px 16px; background: #FFFFFF; border: 1px solid #E4E9E5; border-radius: 14px; display: flex; flex-direction: column; gap: 4px;"><div style="font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #65736A; font-weight: 700;">Em quarentena</div><div style="font-family: 'Sora', 'Manrope', system-ui, sans-serif; font-size: 24px; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1.1;">{{k_quar}}</div><div style="font-size: 12px; color: #65736A;">{{k_quar_s}}</div></div><div style="flex: 1 1 0; min-width: 0; padding: 12px 16px; background: #FFFFFF; border: 1px solid #E4E9E5; border-radius: 14px; display: flex; flex-direction: column; gap: 4px;"><div style="font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #65736A; font-weight: 700;">A receber</div><div style="font-family: 'Sora', 'Manrope', system-ui, sans-serif; font-size: 24px; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1.1;">{{k_pend}}</div><div style="font-size: 12px; color: #65736A;">{{k_pend_s}}</div></div><div style="flex: 1 1 0; min-width: 0; padding: 12px 16px; background: #FFFFFF; border: 1px solid #E4E9E5; border-radius: 14px; display: flex; flex-direction: column; gap: 4px;"><div style="font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #65736A; font-weight: 700;">Pedidos com saldo aberto</div><div style="font-family: 'Sora', 'Manrope', system-ui, sans-serif; font-size: 24px; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1.1;">{{k_ab}}</div><div style="font-size: 12px; color: #65736A;">{{k_ab_s}}</div></div></div><section style="background: #FFFFFF; border: 1px solid #E4E9E5; border-radius: 14px; display: flex; flex-direction: column; min-width: 0;"><div style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px 10px; flex-wrap: wrap;"><div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 260px;"><h3 style="margin: 0; font-size: 15px; font-weight: 800; letter-spacing: -.01em;">Conferência de pedido, documento e material</h3><div style="font-size: 12.8px; color: #65736A;">Confira cada entrega contra o pedido e a NF; clique na linha pendente para registrar o conferido.</div></div><div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;"><button type="button" onClick="{{ler}}" title="Lê a chave da NF e localiza o pedido (simulado)" style="font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid #E4E9E5; background: #FFFFFF; color: #15201A; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>Ler documento/QR</button><button type="button" onClick="{{open_seg}}" title="Retém parte do apto de um lote" style="font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid #E4E9E5; background: #FFFFFF; color: #15201A; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></svg>Segregar lote</button><button type="button" onClick="{{open_div}}" title="Decide a divergência de preço da NF 8812" style="font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid #E4E9E5; background: #FFFFFF; color: #15201A; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M2 7h20v10H2zM12 12m-3 0a3 3 0 1 0 6 0 3 3 0 1 0-6 0M6 12h.01M18 12h.01"/></svg>Resolver diferença</button></div></div><div style="padding: 0 12px 12px;"><div style="background: #FFFFFF; border: 1px solid #E4E9E5; border-radius: 14px; min-width: 0; overflow: hidden;"><div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid #E4E9E5; flex-wrap: wrap;"><label style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid #E4E9E5; border-radius: 999px; background: #F4F6F3; min-width: 160px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#65736A" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input type="search" aria-label="Buscar nesta tabela" placeholder="Buscar…" value="{{g_rec_q}}" onChange="{{g_rec_setq}}" style="font-family: inherit; font-size: 12.5px; border: 0; background: transparent; outline: none; width: 100%;"></label><span style="font-size: 12px; color: #65736A; font-weight: 600; white-space: nowrap;">{{g_rec_count}} de {{g_rec_all}}</span><sc-for list="{{g_rec_fchips}}" as="fc" hint-placeholder-count="0"><span style="display: inline-flex; align-items: center; gap: 2px; padding: 2px 4px 2px 9px; border-radius: 999px; background: #E4F3E9; color: #1E7A4C; font-size: 11.5px; font-weight: 700;">{{fc.t}}<button type="button" aria-label="Remover filtro" onClick="{{fc.rm}}" style="border: 0; background: transparent; color: #1E7A4C; cursor: pointer; font-size: 13px; padding: 0 4px;">×</button></span></sc-for><sc-if value="{{g_rec_filtered}}" hint-placeholder-val="{{false}}"><button type="button" onClick="{{g_rec_clear}}" style="border: 0; background: transparent; color: #1E7A4C; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer;">Limpar filtros</button></sc-if><span style="flex-grow: 1;"></span></div><sc-if value="{{g_rec_fm.open}}" hint-placeholder-val="{{false}}"><div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 12px; background: #F4F6F3; border-bottom: 1px solid #E4E9E5; font-size: 12.5px;"><b>Filtrar {{g_rec_fm.l}}:</b><sc-for list="{{g_rec_fm.vals}}" as="fv" hint-placeholder-count="0"><label style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border: 1px solid #E4E9E5; border-radius: 999px; background: #FFFFFF; cursor: pointer;"><input type="checkbox" checked="{{fv.on}}" onChange="{{fv.tog}}" style="accent-color: #1E7A4C;">{{fv.t}} <span style="color: #65736A;">{{fv.n}}</span></label></sc-for><span style="flex-grow: 1;"></span><button type="button" onClick="{{g_rec_fm.asc}}" style="font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid #E4E9E5; background: #FFFFFF; color: #15201A; cursor: pointer; white-space: nowrap;">▲ Crescente</button><button type="button" onClick="{{g_rec_fm.desc}}" style="font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid #E4E9E5; background: #FFFFFF; color: #15201A; cursor: pointer; white-space: nowrap;">▼ Decrescente</button><button type="button" onClick="{{g_rec_fm.clear}}" style="font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid #E4E9E5; background: #FFFFFF; color: #15201A; cursor: pointer; white-space: nowrap;">Limpar</button><button type="button" onClick="{{g_rec_fm.close}}" style="font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid #E4E9E5; background: #FFFFFF; color: #15201A; cursor: pointer; white-space: nowrap;">Fechar</button></div></sc-if><div style="overflow-x: auto;"><div role="table" style="display: grid; grid-template-columns: repeat(6, auto); min-width: 100%; width: max-content;"><div role="row" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; background: #F4F6F3; border-radius: 0;"><sc-for list="{{g_rec_head}}" as="h" hint-placeholder-count="6"><div role="columnheader" style="{{h.st}} padding: 0 4px 0 8px;"><button type="button" class="g2hb" onClick="{{h.sort}}" aria-label="{{h.sortLabel}}">{{h.l}} <span aria-hidden="true" style="{{h.astyle}} font-size: 9px;">{{h.arrow}}</span></button><button type="button" class="g2fb" onClick="{{h.fmenu}}" aria-label="{{h.flabel}}" title="{{h.flabel}}" style="color: {{h.fcolor}};">▾{{h.fil}}</button></div></sc-for></div><sc-for list="{{g_rec_rows}}" as="r" hint-placeholder-count="3"><div role="row" class="{{r.cls}}" tabIndex="{{r.tab}}" onClick="{{r.open}}" onKeyDown="{{r.key}}" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; border-top: 1px solid #E4E9E5; align-items: center; font-size: 13px;"><sc-for list="{{r.cells}}" as="c" hint-placeholder-count="6"><div role="cell" style="display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; min-width: 0; {{c.st}}"><sc-if value="{{c.isSel}}" hint-placeholder-val="{{false}}"><input type="checkbox" aria-label="{{c.selLabel}}" checked="{{c.on}}" onChange="{{c.tog}}" style="width: 16px; height: 16px; accent-color: #1E7A4C; margin: 0;"></sc-if><sc-if value="{{c.hasCaret}}" hint-placeholder-val="{{false}}"><sc-if value="{{c.caretOk}}" hint-placeholder-val="{{false}}"><button type="button" class="g2car" aria-label="{{c.caretLabel}}" title="{{c.caretLabel}}" onClick="{{c.toggle}}">{{c.caretSym}}</button></sc-if><sc-if value="{{c.caretNo}}" hint-placeholder-val="{{false}}"><span style="width: 22px; flex-shrink: 0;"></span></sc-if></sc-if><sc-if value="{{c.isData}}" hint-placeholder-val="{{true}}"><span class="g2pw" style="{{c.pw}}"><sc-for list="{{c.parts}}" as="p" hint-placeholder-count="1"><sc-if value="{{p.isTxt}}" hint-placeholder-val="{{false}}"><span>{{p.t}}</span></sc-if><sc-if value="{{p.isCn}}" hint-placeholder-val="{{false}}"><span style="{{p.st}}">{{p.t}}</span></sc-if><sc-if value="{{p.isB}}" hint-placeholder-val="{{false}}"><b>{{p.t}}</b></sc-if><sc-if value="{{p.isMut}}" hint-placeholder-val="{{false}}"><span style="color: #65736A; font-size: 12px;">{{p.t}}</span></sc-if><sc-if value="{{p.isChip}}" hint-placeholder-val="{{false}}"><span style="{{p.st}}"><span style="{{p.dot}}"></span>{{p.t}}</span></sc-if><sc-if value="{{p.isTag}}" hint-placeholder-val="{{false}}"><span style="display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; color: #65736A; border: 1px solid #E4E9E5; white-space: nowrap;">{{p.t}}</span></sc-if><sc-if value="{{p.isLink}}" hint-placeholder-val="{{false}}"><a href="{{p.href}}" style="color: #1E7A4C; font-weight: 700; text-decoration: none;">{{p.t}}</a></sc-if><sc-if value="{{p.isCta}}" hint-placeholder-val="{{false}}"><a href="{{p.href}}" style="{{p.st}}">{{p.t}}</a></sc-if><sc-if value="{{p.isAct}}" hint-placeholder-val="{{false}}"><button type="button" onClick="{{p.fn}}" style="{{p.st}}">{{p.t}}</button></sc-if><sc-if value="{{p.isBr}}" hint-placeholder-val="{{false}}"><span style="flex-basis: 100%; height: 0;"></span></sc-if></sc-for></span></sc-if><sc-if value="{{c.isDel}}" hint-placeholder-val="{{false}}"><sc-if value="{{c.notAsking}}" hint-placeholder-val="{{true}}"><button type="button" class="g2del" aria-label="{{c.delLabel}}" title="Excluir" onClick="{{c.ask}}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button></sc-if><sc-if value="{{c.asking}}" hint-placeholder-val="{{false}}"><span style="font-size: 12px; font-weight: 700; color: #B42318;">Excluir?</span><button type="button" onClick="{{c.yes}}" style="font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid #E4E9E5; background: #FFFFFF; color: #15201A; cursor: pointer; white-space: nowrap; color: #B42318; border-color: #B42318;">Excluir</button><button type="button" onClick="{{c.no}}" style="font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid #E4E9E5; background: #FFFFFF; color: #15201A; cursor: pointer; white-space: nowrap;">Manter</button></sc-if></sc-if></div></sc-for></div></sc-for></div></div><sc-if value="{{g_rec_empty}}" hint-placeholder-val="{{false}}"><div style="padding: 16px; font-size: 13px; color: #65736A;">Nenhuma linha corresponde aos filtros · <button type="button" onClick="{{g_rec_clear}}" style="border: 0; background: transparent; color: #1E7A4C; font-family: inherit; font-weight: 700; cursor: pointer;">Limpar filtros</button></div></sc-if></div><div style="font-size: 12px; color: #65736A; padding: 8px 4px 0; line-height: 1.45;">Aceite físico não aprova o título: o título segue para Contas a pagar à parte. O retido em quarentena alimenta só a cobertura condicionada em Necessidades até o laudo, e soma uma única vez.</div></div></section>
+</main>
+<div style="display: flex; align-items: center; gap: 10px; padding: 12px 32px; border-top: 1px solid #E4E9E5; background: #FFFFFF;"><span style="width: 8px; height: 8px; border-radius: 999px; background: #1E7A4C;"></span><div style="font-size: 13px; color: #65736A;">DEMO-02: PC-088 100 t → 60 recebidas (50 aptas + 10 em quarentena) e 40 a entregar; liberar qualidade soma as 10 t uma única vez (SU-06 · FO-18).</div></div>
+</div>
+<sc-if value="{{g_rec_F.open}}" hint-placeholder-val="{{false}}"><div style="position: fixed; inset: 0; z-index: 60; display: flex; justify-content: flex-end;"><button type="button" aria-label="Fechar formulário" onClick="{{g_rec_F.close}}" style="position: absolute; inset: 0; border: 0; background: rgba(21,32,26,.32); cursor: pointer;"></button><aside role="dialog" aria-label="{{g_rec_F.title}}" onKeyDown="{{g_rec_F.key}}" style="position: relative; width: 460px; max-width: 100%; height: 100vh; overflow-y: auto; background: #FFFFFF; box-shadow: -12px 0 40px -12px rgba(21,32,26,.35); padding: 22px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px;"><div style="display: flex; align-items: flex-start; gap: 10px;"><h2 style="margin: 0; font-family: 'Sora', 'Manrope', system-ui, sans-serif; font-size: 19px; font-weight: 700; letter-spacing: -.02em; flex-grow: 1;">{{g_rec_F.title}}</h2><button type="button" aria-label="Fechar" title="Fechar" onClick="{{g_rec_F.close}}" style="border: 0; background: #F4F6F3; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 18px; color: #65736A; flex-shrink: 0;">×</button></div><div style="font-size: 13px; color: #65736A; line-height: 1.45;">{{g_rec_F.sub}}</div><sc-if value="{{g_rec_F.hasErr}}" hint-placeholder-val="{{false}}"><div role="alert" style="padding: 8px 12px; border-radius: 10px; background: #FDE8E6; color: #B42318; font-size: 12.5px; font-weight: 700;">Corrija os campos destacados; o que você preencheu foi mantido.</div></sc-if><sc-for list="{{g_rec_F.fields}}" as="f" hint-placeholder-count="3"><div style="display: flex; flex-direction: column; gap: 4px;"><label for="{{f.fid}}" style="font-size: 12px; font-weight: 600; color: #65736A;">{{f.l}}</label><div style="display: flex; align-items: center; gap: 8px;"><sc-if value="{{f.isSel}}" hint-placeholder-val="{{false}}"><select id="{{f.fid}}" value="{{f.v}}" onChange="{{f.set}}" disabled="{{f.dis}}" style="{{f.ist}}"><sc-for list="{{f.opts}}" as="o" hint-placeholder-count="2"><option value="{{o.v}}">{{o.t}}</option></sc-for></select></sc-if><sc-if value="{{f.isMulti}}" hint-placeholder-val="{{false}}"><div style="display: flex; flex-wrap: wrap; gap: 6px;"><sc-for list="{{f.mopts}}" as="mo" hint-placeholder-count="3"><label style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border: 1px solid #E4E9E5; border-radius: 999px; font-size: 12.5px; cursor: pointer;"><input type="checkbox" checked="{{mo.on}}" disabled="{{mo.dis}}" onChange="{{mo.tog}}" style="accent-color: #1E7A4C;">{{mo.t}}</label></sc-for></div></sc-if><sc-if value="{{f.isTxt}}" hint-placeholder-val="{{true}}"><input id="{{f.fid}}" type="{{f.type}}" value="{{f.v}}" onChange="{{f.set}}" readOnly="{{f.dis}}" style="{{f.ist}}"></sc-if><sc-if value="{{f.isArea}}" hint-placeholder-val="{{false}}"><textarea id="{{f.fid}}" value="{{f.v}}" onChange="{{f.set}}" readOnly="{{f.dis}}" style="{{f.ist}} min-height: 64px; resize: vertical;"></textarea></sc-if><sc-if value="{{f.hasU}}" hint-placeholder-val="{{false}}"><span style="font-size: 12.5px; color: #65736A; white-space: nowrap;">{{f.u}}</span></sc-if></div><sc-if value="{{f.err}}" hint-placeholder-val="{{false}}"><span role="alert" style="font-size: 12px; font-weight: 700; color: #B42318;">{{f.errMsg}}</span></sc-if><sc-if value="{{f.hasHelp}}" hint-placeholder-val="{{false}}"><span style="font-size: 11.5px; color: #65736A;">{{f.help}}</span></sc-if></div></sc-for><sc-if value="{{g_rec_F.isTot}}" hint-placeholder-val="{{false}}"><div style="display: flex; flex-direction: column; gap: 4px;"><sc-for list="{{g_rec_F.items}}" as="it" hint-placeholder-count="3"><div style="display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid #E4E9E5; font-size: 13px;"><b>{{it.t}}</b><span style="color: #65736A; text-align: right;">{{it.v}}</span></div></sc-for></div></sc-if><sc-if value="{{g_rec_F.hasOrigins}}" hint-placeholder-val="{{false}}"><div style="font-size: 12px; font-weight: 700; color: #65736A; letter-spacing: .04em;">ORIGEM</div><sc-for list="{{g_rec_F.origins}}" as="og" hint-placeholder-count="1"><sc-if value="{{og.isLink}}" hint-placeholder-val="{{false}}"><a href="{{og.h}}" style="color: #1E7A4C; font-weight: 700; text-decoration: none; font-size: 13px;">{{og.t}} ›</a></sc-if><sc-if value="{{og.isTxt}}" hint-placeholder-val="{{true}}"><div style="font-size: 12.8px; padding: 5px 0; border-bottom: 1px solid #E4E9E5;">{{og.t}}</div></sc-if></sc-for></sc-if><div style="flex-grow: 1;"></div><sc-if value="{{g_rec_F.warn}}" hint-placeholder-val="{{false}}"><div role="alert" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: #FFF3D6; color: #8A5A00; font-size: 12.5px; font-weight: 700;">Há alterações não salvas.<div style="display: flex; gap: 8px;"><button type="button" onClick="{{g_rec_F.discard}}" style="font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid #E4E9E5; background: #FFFFFF; color: #15201A; cursor: pointer; white-space: nowrap;">Descartar alterações</button><button type="button" onClick="{{g_rec_F.keep}}" style="font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid #1E7A4C; background: #1E7A4C; color: #fff; cursor: pointer; white-space: nowrap;">Continuar editando</button></div></div></sc-if><div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid #E4E9E5;"><sc-if value="{{g_rec_F.edit}}" hint-placeholder-val="{{true}}"><button type="button" onClick="{{g_rec_F.cancel}}" style="padding: 7px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; background: #FFFFFF; color: #15201A; border: 1px solid #E4E9E5;">Cancelar</button><button type="button" onClick="{{g_rec_F.save}}" style="padding: 7px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; background: #1E7A4C; color: #fff; border: 1px solid #1E7A4C; box-shadow: 0 1px 2px rgba(30,122,76,.25);">Salvar</button></sc-if><sc-if value="{{g_rec_F.ro}}" hint-placeholder-val="{{false}}"><button type="button" onClick="{{g_rec_F.discard}}" style="padding: 7px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; background: #FFFFFF; color: #15201A; border: 1px solid #E4E9E5;">Fechar</button></sc-if></div></aside></div></sc-if><sc-if value="{{pn_open}}" hint-placeholder-val="{{false}}"><div style="position: fixed; inset: 0; z-index: 60; display: flex; justify-content: flex-end;"><button type="button" aria-label="Fechar" onClick="{{pn_cancel}}" style="position: absolute; inset: 0; border: 0; background: rgba(21,32,26,.32); cursor: pointer;"></button><aside role="dialog" aria-label="{{pn_title}}" onKeyDown="{{pn_key}}" style="position: relative; width: 460px; max-width: 100%; height: 100vh; overflow-y: auto; background: #FFFFFF; box-shadow: -12px 0 40px -12px rgba(21,32,26,.35); padding: 22px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px;"><div style="display: flex; align-items: flex-start; gap: 10px;"><h2 style="margin: 0; font-family: 'Sora', 'Manrope', system-ui, sans-serif; font-size: 19px; font-weight: 700; letter-spacing: -.02em; flex-grow: 1;">{{pn_title}}</h2><button type="button" aria-label="Fechar" title="Fechar" onClick="{{pn_cancel}}" style="border: 0; background: #F4F6F3; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 18px; color: #65736A; flex-shrink: 0;">×</button></div><div style="font-size: 13px; color: #65736A; line-height: 1.45;">{{pn_sub}}</div><sc-for list="{{pn_lines}}" as="ln" hint-placeholder-count="0"><div style="display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-bottom: 1px solid #E4E9E5; font-size: 13px;"><span style="color: #65736A;">{{ln.t}}</span><b style="text-align: right;">{{ln.v}}</b></div></sc-for><sc-if value="{{pn_haserr}}" hint-placeholder-val="{{false}}"><div role="alert" style="padding: 8px 12px; border-radius: 10px; background: #FDE8E6; color: #B42318; font-size: 12.5px; font-weight: 700;">Corrija os campos destacados; o que você preencheu foi mantido.</div></sc-if><sc-for list="{{pn_fields}}" as="f" hint-placeholder-count="3"><div style="display: flex; flex-direction: column; gap: 4px;"><label for="{{f.fid}}" style="font-size: 12px; font-weight: 600; color: #65736A;">{{f.l}}</label><div style="display: flex; align-items: center; gap: 8px;"><sc-if value="{{f.isSel}}" hint-placeholder-val="{{false}}"><select id="{{f.fid}}" value="{{f.v}}" onChange="{{f.set}}" disabled="{{f.dis}}" style="{{f.ist}}"><sc-for list="{{f.opts}}" as="o" hint-placeholder-count="2"><option value="{{o.v}}">{{o.t}}</option></sc-for></select></sc-if><sc-if value="{{f.isTxt}}" hint-placeholder-val="{{true}}"><input id="{{f.fid}}" type="{{f.type}}" value="{{f.v}}" onChange="{{f.set}}" readOnly="{{f.dis}}" style="{{f.ist}}"></sc-if><sc-if value="{{f.isArea}}" hint-placeholder-val="{{false}}"><textarea id="{{f.fid}}" value="{{f.v}}" onChange="{{f.set}}" style="{{f.ist}} min-height: 64px; resize: vertical;"></textarea></sc-if><sc-if value="{{f.hasU}}" hint-placeholder-val="{{false}}"><span style="font-size: 12.5px; color: #65736A; white-space: nowrap;">{{f.u}}</span></sc-if></div><sc-if value="{{f.err}}" hint-placeholder-val="{{false}}"><span role="alert" style="font-size: 12px; font-weight: 700; color: #B42318;">{{f.errMsg}}</span></sc-if><sc-if value="{{f.hasHelp}}" hint-placeholder-val="{{false}}"><span style="font-size: 11.5px; color: #65736A;">{{f.help}}</span></sc-if></div></sc-for><div style="flex-grow: 1;"></div><sc-if value="{{pn_warn}}" hint-placeholder-val="{{false}}"><div role="alert" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: #FFF3D6; color: #8A5A00; font-size: 12.5px; font-weight: 700;">Há alterações não salvas.<div style="display: flex; gap: 8px;"><button type="button" onClick="{{pn_discard}}" style="font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid #E4E9E5; background: #FFFFFF; color: #15201A; cursor: pointer; white-space: nowrap;">Descartar alterações</button><button type="button" onClick="{{pn_keep}}" style="font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid #1E7A4C; background: #1E7A4C; color: #fff; cursor: pointer; white-space: nowrap;">Continuar editando</button></div></div></sc-if><div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid #E4E9E5;"><button type="button" onClick="{{pn_cancel}}" style="padding: 7px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; background: #FFFFFF; color: #15201A; border: 1px solid #E4E9E5;">Cancelar</button><button type="button" onClick="{{pn_ok}}" style="padding: 7px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; background: #1E7A4C; color: #fff; border: 1px solid #1E7A4C; box-shadow: 0 1px 2px rgba(30,122,76,.25);">{{pn_ok_t}}</button></div></aside></div></sc-if>
+<div role="status" style="position: fixed; left: 50%; transform: translateX(-50%); bottom: 22px; z-index: 70; background: #15201A; color: #fff; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 12px 32px -8px rgba(21,32,26,.4); max-width: 560px; {{g2toastst}}">{{g2toast}}</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":850}}'>
+const SPEC = [];
+const GRIDS = [{"id": "g_rec", "cols": [{"k": "doc", "l": "Documento · pedido", "w": 190}, {"k": "item", "l": "Item · lote", "w": 170}, {"k": "conf", "l": "Conferido", "t": "num", "a": "r"}, {"k": "apto", "l": "Apto · retido", "t": "num", "a": "r"}, {"k": "insp", "l": "Inspeção · divergência", "w": 220}, {"k": "est", "l": "Físico · título · ação", "w": 230}], "rows": [{"id": "r4501", "v": {"doc": "NF 4501", "ped": "PC-088", "forn": "Fertisul", "item": "KCl 60%", "lote": "K26-11", "un": "kg", "nf": 60000, "conf": 60000, "apto": 50000, "quar": 10000, "val": "—", "insp": "Em laudo · quarentena", "dep": "Galpão 2", "div": "Sem divergência", "st": "conf", "aberto": 40000, "chega": "19/09"}, "s": {}, "p": {}, "ro": true, "o": [{"t": "Conferida em 19/09/2026: 60.000 kg contra a NF de 60.000 kg · lote K26-11 no Galpão 2"}, {"t": "10.000 kg em quarentena até o laudo de umidade (prazo 27/09) · fora do disponível e da cobertura firme"}, {"t": "Pedido PC-088: 100.000 kg · recebido 60.000 · a entregar 40.000 kg (carga 3 em 02/10)"}, {"t": "Título encaminhado a Contas a pagar", "h": "GE-04.dc.html"}, {"t": "Ver o saldo do lote", "h": "SU-03.dc.html"}]}, {"id": "dup", "v": {"doc": "NF 4501 · 2ª leitura", "ped": "PC-088", "forn": "Fertisul", "item": "KCl 60%", "lote": "K26-11", "un": "kg", "nf": 60000, "conf": "", "apto": 0, "quar": 0, "val": "", "insp": "", "dep": "", "div": "Sem divergência", "st": "dup", "aberto": 0, "chega": "23/09"}, "s": {}, "p": {}, "ro": true, "o": [{"t": "Mesma chave de acesso da NF 4501, lida de novo às 10:12 de 23/09"}, {"t": "Nenhuma entrada nova: o recibo original REC-4501 foi devolvido"}]}, {"id": "r4533", "v": {"doc": "NF 4533", "ped": "PC-090", "forn": "Coop. Vale", "item": "Semente de soja 58 W", "lote": "S58-0926", "un": "kg", "nf": 20000, "conf": "", "apto": 0, "quar": 0, "val": "", "insp": "", "dep": "Câmara fria", "div": "Sem divergência", "st": "pend", "aberto": 20000, "chega": "24/09"}, "s": {}, "p": {}, "o": [{"t": "Pedido PC-090 · Coop. Vale · 20.000 kg a R$ 9,30/kg"}, {"t": "Uso previsto: plantio T1-A e T2 (Safra 2026/27)"}, {"t": "Ver o pedido", "h": "SU-05.dc.html"}]}, {"id": "r8812", "v": {"doc": "NF 8812", "ped": "PC-093", "forn": "Ipiranga Agro", "item": "Diesel S10", "lote": "tanque", "un": "L", "nf": 15000, "conf": "", "apto": 0, "quar": 0, "val": "", "insp": "", "dep": "Tanque Sede", "div": "Preço", "st": "carga", "aberto": 15000, "chega": "26/09"}, "s": {}, "p": {}, "ro": true, "o": [{"t": "NF antecipada a R$ 5,96/L contra R$ 5,84/L do contrato CT-2026-03"}, {"t": "Diferença de R$ 0,12/L × 15.000 L = R$ 1.800,00"}, {"t": "Ver o contrato", "h": "SU-05.dc.html"}]}, {"id": "r094", "v": {"doc": "sem NF", "ped": "PC-094", "forn": "Casa das Peças", "item": "Kit filtros + óleo 15W40", "lote": "", "un": "kit", "nf": 1, "conf": "", "apto": 0, "quar": 0, "val": "", "insp": "", "dep": "Almox. oficina", "div": "Sem divergência", "st": "aguarda", "aberto": 1, "chega": "26/09"}, "s": {}, "p": {}, "ro": true, "o": [{"t": "Pedido PC-094 · a confirmar pelo fornecedor · uso OM-0234 (preventiva da colhedora)"}, {"t": "Ver o pedido", "h": "SU-05.dc.html"}]}], "edit": {"m": "form", "title": "Recebimento", "sub": "Registre o que foi conferido contra o pedido e a NF. Parcial mantém o saldo do pedido aberto; aceite físico não aprova o título.", "fields": [{"k": "conf", "l": "Quantidade conferida", "t": "num", "req": true, "min": 0, "max": 21000.0, "u": "kg", "help": "NF 20.000 kg · tolerância de +5 %."}, {"k": "lote", "l": "Lote", "t": "txt", "req": true}, {"k": "val", "l": "Validade", "t": "txt", "req": true, "help": "mês/ano, ex.: 09/2027"}, {"k": "insp", "l": "Inspeção", "t": "sel", "opts": ["Visual · aprovada", "Em laudo · quarentena", "Reprovada · segregar"], "req": true, "help": "Em laudo retém tudo em quarentena até o resultado."}, {"k": "dep", "l": "Depósito", "t": "sel", "opts": ["Galpão 1", "Galpão 2", "Câmara fria", "Almox. defensivos", "Tanque Sede", "Almox. oficina"], "req": true}, {"k": "div", "l": "Divergência", "t": "sel", "opts": ["Sem divergência", "Falta", "Sobra", "Avaria", "Item diferente do pedido"], "req": true}]}, "sel": false, "tree": false, "so": {}, "total": false, "x0": {}, "del": false}];
+const NAV = [{"open": false}, {"open": false}, {"open": false}];
+// ===== G2 · grade interativa, formulário lateral e navegação (motor do protótipo v3.7) =====
+const G2C={green:['#1E7A4C','#E4F3E9'],yellow:['#8A5A00','#FFF3D6'],red:['#B42318','#FDE8E6'],gray:['#5B6660','#EEF1EE'],blue:['#1E5F8F','#E3F0FB'],orange:['#9A3F00','#FFE8D6']};
+const G2CTA='display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:9px;font-size:12.5px;font-weight:700;text-decoration:none;white-space:nowrap;background:#FFFFFF;color:#15201A;border:1px solid #E4E9E5;cursor:pointer;font-family:inherit;line-height:1.25;';
+const G2CTAU='display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:9px;font-size:12.5px;font-weight:700;text-decoration:none;white-space:nowrap;background:#FFFFFF;color:#B42318;border:1px solid #B42318;cursor:pointer;font-family:inherit;line-height:1.25;';
+function g2num(s){ if(typeof s==='number') return s; if(s===null||s===undefined) return NaN; let t=String(s).trim(); if(!t) return NaN; t=t.replace(/[^0-9,.\-]/g,''); if(t.indexOf(',')>=0){ t=t.replace(/\./g,'').replace(',','.'); } else if((t.match(/\./g)||[]).length>1 || /^\-?\d{1,3}(\.\d{3})+$/.test(t)){ t=t.replace(/\./g,''); } return parseFloat(t); }
+function g2fmtn(n,d,dmin){ return Number(n).toLocaleString('pt-BR',{minimumFractionDigits:(dmin!==undefined?dmin:(d||0)),maximumFractionDigits:d||0}); }
+function g2fmt(v,c){ if(v===null||v===undefined||v==='') return '—'; if(c&&c.t==='date'&&/^\d{4}-\d{2}-\d{2}$/.test(String(v))){ const a=String(v).split('-'); return a[2]+'/'+a[1]+'/'+a[0]; } if(c&&c.zdash&&Number(v)===0) return '—'; if(c&&c.t==='num'){ const n=Number(v); if(isNaN(n)) return String(v); return (c.pre||'')+g2fmtn(n,c.d,c.dmin)+(c.u?' '+c.u:''); } return String(v); }
+function g2st(self,id){ return ((self.state.g2||{})[id])||{}; }
+function g2set(self,id,patch){ const all=Object.assign({},self.state.g2||{}); all[id]=Object.assign({},all[id]||{},patch); self.setState({g2:all}); }
+function g2rows(self,sp){ const st=g2st(self,sp.id); return st.rows||sp.rows; }
+function g2find(list,id){ for(const r of list){ if(r.id===id) return r; if(r.kids){ const k=g2find(r.kids,id); if(k) return k; } } return null; }
+function g2text(r,c){ if(r.s&&r.s[c.k]!==undefined&&r.s[c.k]!==null) return String(r.s[c.k]); if(r.v&&r.v[c.k]!==undefined&&r.v[c.k]!==null) return g2fmt(r.v[c.k],c); return ''; }
+function g2key(r,c){ if(c.t==='num'){ let n=(r.v&&r.v[c.k]!==undefined&&r.v[c.k]!==null&&r.v[c.k]!=='')?Number(r.v[c.k]):g2num(r.s&&r.s[c.k]); return isNaN(n)?null:n; } const t=g2text(r,c); return (t===''||t==='—')?null:t; }
+function g2match(r,sp,st,mask,added){
+  if(r.sh && !(added||{})[r.sh]) return false;
+  if(mask && r.ri!==undefined && mask[r.ri]===false) return false;
+  const q=(st.q||'').trim().toLowerCase();
+  if(q){ const all=sp.cols.map(c=>g2text(r,c)).join(' ').toLowerCase(); if(all.indexOf(q)<0) return false; }
+  const f=st.f||{}; for(const k in f){ const vals=f[k]; if(!vals||!vals.length) continue; const c=sp.cols.find(x=>x.k===k); if(!c) continue; if(vals.indexOf(g2text(r,c))<0) return false; }
+  return true; }
+function g2sort(arr,sp,st){ const so=st.so||sp.so; if(!so||!so.k) return arr; const c=sp.cols.find(x=>x.k===so.k); if(!c) return arr; const d=so.d?-1:1;
+  return arr.slice().sort((a,b)=>{ const x=g2key(a,c), y=g2key(b,c); if(x===null&&y===null) return 0; if(x===null) return 1; if(y===null) return -1;
+    if(typeof x==='number'&&typeof y==='number') return (x-y)*d; return String(x).localeCompare(String(y),'pt-BR',{numeric:true,sensitivity:'base'})*d; }); }
+function g2filtering(st){ return !!((st.q||'').trim()) || Object.keys(st.f||{}).some(k=>(st.f[k]||[]).length); }
+function g2flat(sp,st,rows,mask,added){
+  const out=[]; const exp=st.x||sp.x0||{}; const filt=g2filtering(st);
+  const deep=(r)=>g2match(r,sp,st,mask,added)||(r.kids||[]).some(deep);
+  const walk=(list,lvl,parentOk)=>{ g2sort(list,sp,st).forEach(r=>{ const kids=r.kids||[]; const selfOk=g2match(r,sp,st,mask,added);
+      const anyKid=kids.some(deep); if(!(selfOk||anyKid||parentOk)) return;
+      out.push({r,lvl,has:kids.length>0});
+      if(kids.length && (exp[r.id] || (filt && anyKid && !selfOk))) walk(kids,lvl+1,selfOk&&!filt); }); };
+  walk(rows,0,false); return out; }
+function g2part(p,v){ const o={isCn:false,isTxt:false,isB:false,isMut:false,isChip:false,isTag:false,isLink:false,isCta:false,isAct:false,isBr:false,t:p.t||'',st:'',dot:'',href:p.h||'#',fn:null,title:p.t||''};
+  switch(p.k){ case 'b': o.isB=true; break; case 'mut': o.isMut=true; break;
+    case 'chip': { const cc=G2C[p.c]||G2C.gray; o.isChip=true; o.st='display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;color:'+cc[0]+';background:'+cc[1]+';'; o.dot='width:6px;height:6px;border-radius:999px;flex-shrink:0;background:'+cc[0]+';'; break; }
+    case 'cn': { const cc=G2C[p.c]||G2C.gray; o.isCn=true; o.st='font-weight:800;white-space:nowrap;color:'+cc[0]+';'; break; }
+    case 'tag': o.isTag=true; break; case 'link': o.isLink=true; break;
+    case 'cta': o.isCta=true; o.st=p.u?G2CTAU:G2CTA; break;
+    case 'act': o.isAct=true; if(p.lk) { o.lk=true; } if(p.fn&&p.fn.indexOf(':')>0){ const nm=p.fn.split(':')[0], ar=p.fn.slice(nm.length+1); o.fn=()=>{ if(v&&v[nm]) v[nm](ar); }; } else o.fn=(v&&p.fn&&v[p.fn])||(()=>{}); o.st=p.lk?'border:0;background:transparent;padding:0;color:#1E7A4C;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;text-decoration:underline;text-underline-offset:3px;text-align:left;':(p.u?G2CTAU:G2CTA); break;
+    case 'br': o.isBr=true; break; default: o.isTxt=true; }
+  return o; }
+function g2sum(sp,flat,c){ let s=0,n=0; flat.forEach(x=>{ if(x.lvl!==0) return; const k=g2key(x.r,c); if(typeof k==='number'){ s+=k; n++; } }); return n? (c.agg==='avg'? s/n : s) : null; }
+function g2open(self,sp,rid,e){
+  if(e&&e.target&&e.target.closest&&e.target.closest('a,button,input,select,textarea,label,[data-noedit]')) return;
+  const ed=sp.edit||{m:'none'}; if(ed.m==='none') return;
+  const r=g2find(g2rows(self,sp),rid); if(!r) return;
+  if(r.dr && self.__v && self.__v[r.dr]){ self.__v[r.dr](); return; }
+  if(ed.m==='pick'){ if(self.g2pick) self.g2pick(sp.id,rid,r); g2set(self,sp.id,{fl:rid}); return; }
+  const draft={}; (ed.fields||[]).forEach(f=>{ let val=''; if(r.v&&r.v[f.k]!==undefined&&r.v[f.k]!==null&&r.v[f.k]!=='') val=(f.t==='num'? String(r.v[f.k]).replace('.',','):String(r.v[f.k])); else if(r.s&&r.s[f.k]!==undefined) val=String(r.s[f.k]); draft[f.k]=val; });
+  g2set(self,sp.id,{fm:{rid,draft,orig:Object.assign({},draft),errs:{},warn:false,ro:(ed.m!=='form'||!!r.ro),isNew:false,mode:ed.m},fl:null,fmc:null}); }
+function g2new(self,sp){ const ed=sp.edit||{}; const draft={}; (ed.fields||[]).forEach(f=>{ draft[f.k]=(f.def!==undefined?String(f.def):''); });
+  g2set(self,sp.id,{fm:{rid:null,draft,orig:Object.assign({},draft),errs:{},warn:false,ro:false,isNew:true,mode:'form'},fl:null,fmc:null}); }
+function g2calc(r,calc){ (calc||[]).forEach(cx=>{ const a=(cx.a||[]).map(k=>Number(r.v[k])||0); let x=null;
+   if(cx.op==='mul') x=a.reduce((p,q)=>p*q,1); else if(cx.op==='div') x=a[1]?a[0]/a[1]:0; else if(cx.op==='sum') x=a.reduce((p,q)=>p+q,0);
+   else if(cx.op==='sub') x=a.slice(1).reduce((p,q)=>p-q,a[0]); else if(cx.op==='max0sub') x=Math.max(0,a.slice(1).reduce((p,q)=>p-q,a[0]));
+   if(x!==null){ r.v[cx.k]=Math.round(x*100)/100; if(r.s) delete r.s[cx.k]; if(r.p) delete r.p[cx.k]; } }); }
+function g2clone(list){ return list.map(r=>Object.assign({},r,{v:Object.assign({},r.v||{}),s:Object.assign({},r.s||{}),p:Object.assign({},r.p||{}),kids:r.kids?g2clone(r.kids):undefined})); }
+function g2save(self,sp){ const st=g2st(self,sp.id); const fm=st.fm; if(!fm) return; const ed=sp.edit||{}; const errs={};
+  const vis=(ed.fields||[]).filter(f=>!f.cond || String(fm.draft[f.cond.k])===String(f.cond.eq));
+  vis.forEach(f=>{ const val=(fm.draft[f.k]||'').trim(); if(f.ro||(f.newOnly&&!fm.isNew)) return;
+    if(f.req && !val) { errs[f.k]='Informe '+f.l.toLowerCase().replace(/ \(.*\)$/,'')+'.'; return; }
+    if(f.t==='email' && val && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val)) { errs[f.k]='E-mail inválido (ex.: compras@empresa.com.br).'; return; }
+    if(f.t==='tel' && val){ const dg=val.replace(/\D/g,''); if(dg.length<10||dg.length>13) { errs[f.k]='Informe DDD e número (ex.: 65 99999-0000).'; return; } }
+    if(f.t==='multi' && f.req && !val) { errs[f.k]='Escolha ao menos uma opção.'; return; }
+    if(f.t==='num' && val){ const n=g2num(val); if(isNaN(n)) { errs[f.k]='Use um número (ex.: 12,5).'; return; } if(f.min!==undefined && n<f.min) { errs[f.k]='Mínimo '+g2fmtn(f.min,(String(f.min).split('.')[1]||'').length)+(f.u?' '+f.u:'')+'.'; return; } if(f.max!==undefined && n>f.max) { errs[f.k]='Máximo '+g2fmtn(f.max,(String(f.max).split('.')[1]||'').length)+(f.u?' '+f.u:'')+'.'; return; } } });
+  if(!Object.keys(errs).length && self.g2check){ const cur=g2rows(self,sp); Object.assign(errs, self.g2check(sp.id,cur,fm.isNew?null:g2find(cur,fm.rid),fm.draft,fm.isNew)||{}); }
+  if(Object.keys(errs).length){ g2set(self,sp.id,{fm:Object.assign({},fm,{errs,warn:false})}); return; }
+  const rows=g2clone(g2rows(self,sp)); let r;
+  if(fm.isNew){ r={id:'n'+(rows.length+1)+'_'+String(Date.now()).slice(-5),v:{},s:{},p:{}}; rows.push(r); } else r=g2find(rows,fm.rid);
+  vis.forEach(f=>{ if(f.ro||(f.newOnly&&!fm.isNew)) return; const val=(fm.draft[f.k]||'').trim(); const col=sp.cols.find(c=>c.k===f.k);
+    if(f.t==='num'){ r.v[f.k]=val===''?'':g2num(val); if(r.s) delete r.s[f.k]; if(r.p) delete r.p[f.k]; }
+    else { r.v[f.k]=val; r.s[f.k]=val; if(col && col.chips && col.chips[val]) r.p[f.k]=[{k:'chip',t:val,c:col.chips[val]}]; else if(r.p) delete r.p[f.k]; } });
+  g2calc(r,ed.calc);
+  const patch={rows,fm:null,fl:r.id};
+  g2set(self,sp.id,patch); self.setState({g2toast:(fm.isNew?'Registro incluído':'Salvo · linha e totais atualizados')});
+  if(self.g2after) self.g2after(sp.id,rows,r,fm.isNew); }
+function g2dirty(fm){ if(!fm) return false; for(const k in fm.draft){ if(String(fm.draft[k])!==String(fm.orig[k])) return true; } return false; }
+function g2close(self,sp){ const fm=g2st(self,sp.id).fm; if(fm && !fm.ro && g2dirty(fm)) { g2set(self,sp.id,{fm:Object.assign({},fm,{warn:true})}); return; } g2set(self,sp.id,{fm:null}); }
+function g2vals(self,sp,v,mask){
+  const id=sp.id, st=g2st(self,id), rows=g2rows(self,sp), added=self.state.added||{};
+  const flat=g2flat(sp,st,rows,mask,added); const ed=sp.edit||{m:'none'}; const editable=ed.m&&ed.m!=='none';
+  const so=st.so||sp.so||{};
+  v[id+'_head']=sp.cols.map((c,ci)=>({l:c.l, st:'display:flex;align-items:center;gap:2px;justify-content:'+(c.a==='r'?'flex-end':'flex-start')+';'+(ci===0?'position:sticky;left:0;z-index:2;background:#F4F6F3;box-shadow:1px 0 0 #E4E9E5;':''),
+     arrow:(so.k===c.k?(so.d?'▼':'▲'):'⇅'), astyle:(so.k===c.k?'color:#1E7A4C;':'color:#B7C1BA;'), sortLabel:'Ordenar por '+c.l,
+     sort:()=>{ const cur=g2st(self,id).so||sp.so||{}; let nx; if(cur.k!==c.k) nx={k:c.k,d:false}; else if(!cur.d) nx={k:c.k,d:true}; else nx={}; g2set(self,id,{so:nx}); },
+     fil:(((st.f||{})[c.k]||[]).length?' · '+((st.f||{})[c.k]||[]).length:''), fcolor:(((st.f||{})[c.k]||[]).length?'#1E7A4C':'#8A968E'),
+     fmenu:()=>{ const cur=g2st(self,id).fmc; g2set(self,id,{fmc:(cur===c.k?null:c.k)}); }, flabel:'Filtrar '+c.l}));
+  // valores do filtro aberto
+  const fmc=st.fmc; const fcol=sp.cols.find(c=>c.k===fmc);
+  if(fcol){ const cnt={}; const leaf=(list)=>list.forEach(r=>{ if(r.kids&&r.kids.length) leaf(r.kids); if(!(r.kids&&r.kids.length)||sp.tree===false||!sp.tree){ const t=g2text(r,fcol)||'(vazio)'; cnt[t]=(cnt[t]||0)+1; } }); leaf(rows);
+    const cur=(st.f||{})[fmc]||[]; const keys=Object.keys(cnt).sort((a,b)=>a.localeCompare(b,'pt-BR',{numeric:true}));
+    v[id+'_fm']={open:true, l:fcol.l, vals:keys.map(k=>({t:k,n:cnt[k],on:cur.indexOf(k)>=0,
+        tog:()=>{ const f=Object.assign({},g2st(self,id).f||{}); const a=(f[fmc]||[]).slice(); const i=a.indexOf(k); if(i>=0) a.splice(i,1); else a.push(k); f[fmc]=a; g2set(self,id,{f}); }})),
+      asc:()=>g2set(self,id,{so:{k:fmc,d:false}}), desc:()=>g2set(self,id,{so:{k:fmc,d:true}}),
+      clear:()=>{ const f=Object.assign({},g2st(self,id).f||{}); delete f[fmc]; g2set(self,id,{f}); }, close:()=>g2set(self,id,{fmc:null})};
+  } else v[id+'_fm']={open:false,vals:[]};
+  const total=(sp.total!==false) && sp.cols.some(c=>c.agg);
+  v[id+'_rows']=flat.map(({r,lvl,has})=>{
+    const cells=[]; const exp=(st.x||sp.x0||{});
+    if(sp.sel) cells.push({isSel:true,isData:false,isDel:false,on:!!(st.sel||{})[r.id],selLabel:'Selecionar '+g2text(r,sp.cols[0]),
+      tog:()=>{ const s2=Object.assign({},g2st(self,id).sel||{}); s2[r.id]=!s2[r.id]; g2set(self,id,{sel:s2}); },st:'padding:6px 4px 6px 12px;'});
+    sp.cols.forEach((c,ci)=>{
+      const empty=(has && ci>0 && !(r.p&&r.p[c.k]) && (!r.v || r.v[c.k]===undefined || r.v[c.k]===''));
+      const raw=empty?[]:((r.p&&r.p[c.k]&&r.p[c.k].length)?r.p[c.k]:[{k:(ci===0&&lvl===0&&has?'b':'txt'),t:g2fmt(r.v?r.v[c.k]:'',c)}]);
+      const cell={isSel:false,isData:true,isDel:false,parts:raw.map(p=>g2part(p,v)),pw:'max-width:'+(c.w||340)+'px;',
+        st:'padding:6px 8px;'+(c.a==='r'?'text-align:right;justify-content:flex-end;white-space:nowrap;font-variant-numeric:tabular-nums;':'')+(ci===0&&sp.tree?'padding-left:'+(8+lvl*20)+'px;':'')+(ci===0?'position:sticky;left:0;z-index:1;background:'+(lvl>0?'#FBFCFA':'#FFFFFF')+';box-shadow:1px 0 0 #E4E9E5;':'')};
+      if(ci===0 && sp.tree){ cell.hasCaret=true; cell.caretOk=has; cell.caretNo=!has; const open=!!exp[r.id]||(g2filtering(st)&&has);
+        cell.caretSym=open?'▾':'▸'; cell.caretLabel=(open?'Recolher ':'Expandir ')+g2text(r,c);
+        cell.toggle=()=>{ const x=Object.assign({},g2st(self,id).x||sp.x0||{}); x[r.id]=!x[r.id]; g2set(self,id,{x}); }; }
+      else { cell.hasCaret=false; }
+      cells.push(cell); });
+    if(sp.del){ const asking=(st.cf===r.id); cells.push({isSel:false,isData:false,isDel:true,asking,notAsking:!asking,st:'padding:4px 10px;white-space:nowrap;',
+        delLabel:'Excluir '+g2text(r,sp.cols[0]), ask:()=>g2set(self,id,{cf:r.id}), no:()=>g2set(self,id,{cf:null}),
+        yes:()=>{ const rs=g2clone(g2rows(self,sp)); const rm=(list)=>{ const i=list.findIndex(x=>x.id===r.id); if(i>=0){ list.splice(i,1); return true; } return list.some(x=>x.kids&&rm(x.kids)); }; rm(rs); g2set(self,id,{rows:rs,cf:null}); self.setState({g2toast:'Excluído: '+g2text(r,sp.cols[0])}); if(self.g2after) self.g2after(id,rs,null); }}); }
+    const canOpen=editable && !(ed.leafOnly && has);
+    return {id:r.id, cls:'g2r'+(canOpen?' g2ed':'')+(st.fl===r.id?' g2flash':'')+(lvl>0?' g2kid':''), tab:canOpen?'0':'-1',
+      open:(e)=>{ if(canOpen) g2open(self,sp,r.id,e); }, key:(e)=>{ if(canOpen && e && (e.key==='Enter'||e.key===' ')){ e.preventDefault(); g2open(self,sp,r.id,null); } }, cells}; });
+  v[id+'_count']=flat.filter(x=>x.lvl===0).length; v[id+'_all']=rows.length;
+  v[id+'_empty']=flat.length===0; v[id+'_some']=flat.length>0;
+  v[id+'_q']=st.q||''; v[id+'_setq']=(e)=>g2set(self,id,{q:e.target.value});
+  v[id+'_filtered']=g2filtering(st); v[id+'_clear']=()=>g2set(self,id,{q:'',f:{}});
+  v[id+'_fchips']=Object.keys(st.f||{}).filter(k=>(st.f[k]||[]).length).map(k=>{ const c=sp.cols.find(x=>x.k===k)||{l:k}; return {t:c.l+': '+st.f[k].join(', '), rm:()=>{ const f=Object.assign({},g2st(self,id).f||{}); delete f[k]; g2set(self,id,{f}); }}; });
+  v[id+'_selcount']=Object.values(st.sel||{}).filter(Boolean).length; v[id+'_hassel']=v[id+'_selcount']>0;
+  v[id+'_selclear']=()=>g2set(self,id,{sel:{}});
+  v[id+'_selall']=()=>{ const s2={}; const allOn=flat.every(x=>(st.sel||{})[x.r.id]); if(!allOn) flat.forEach(x=>{ s2[x.r.id]=true; }); g2set(self,id,{sel:s2}); };
+  v[id+'_new']=()=>g2new(self,sp);
+  v[id+'_expall']=()=>{ const x={}; const w=(l)=>l.forEach(r=>{ if(r.kids&&r.kids.length){ x[r.id]=true; w(r.kids);} }); w(rows); g2set(self,id,{x}); };
+  v[id+'_colall']=()=>g2set(self,id,{x:{}});
+  if(total){ v[id+'_tot']=sp.cols.map((c,ci)=>{ const s=c.agg?g2sum(sp,flat,c):null; return {t:(ci===0?'Total':(s===null?'':g2fmt(s,c))), st:'padding:8px 10px;font-weight:800;'+(ci===0?'position:sticky;left:0;z-index:1;background:#F4F6F3;':'')+(c.a==='r'?'text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;':'')}; });
+    v[id+'_totopen']=()=>g2set(self,id,{fm:{tot:true,ro:true,mode:'total',draft:{},orig:{},errs:{}},fmc:null}); }
+  // formulário lateral
+  const fm=st.fm; const F={open:!!fm};
+  if(fm){ const r=fm.rid?g2find(rows,fm.rid):null;
+    F.isTot=!!fm.tot; F.isRec=!fm.tot;
+    F.title=fm.tot?('Composição do total'):(fm.isNew?(ed.newTitle||'Novo registro'):((ed.title?ed.title+' · ':'')+(r?g2text(r,sp.cols[0]):'')));
+    F.sub=fm.tot?'Linhas que formam o total, com os filtros atuais. Totais são calculados: altere os registros de origem.':(fm.ro?(fm.mode==='origin'?'Valor calculado — consulte a origem abaixo. Para mudar, altere o registro de origem.':(r&&r.ro?'Consulta: você não tem permissão para editar este registro.':'Consulta')):(ed.sub||'Altere os campos e salve. Os cálculos da tabela são refeitos ao salvar.'));
+    F.ro=!!fm.ro; F.edit=!fm.ro; F.warn=!!fm.warn;
+    F.items=fm.tot? flat.filter(x=>x.lvl===0).map(x=>({t:g2text(x.r,sp.cols[0]), v:sp.cols.filter(c=>c.agg).map(c=>c.l+': '+g2text(x.r,c)).join(' · ')})):[];
+    F.origins=(r&&r.o)?r.o.map(o=>({t:o.t,h:o.h||'#',isLink:!!o.h,isTxt:!o.h})):[]; F.hasOrigins=F.origins.length>0;
+    const visf=(ed.fields||[]).filter(f=>!f.cond || String(fm.draft[f.cond.k])===String(f.cond.eq));
+    F.fields=fm.tot?[]:visf.map(f=>{ let val=fm.draft[f.k]; if(f.live&&self.g2live){ const lv=self.g2live(id,f.k,fm.draft); if(lv!==undefined&&lv!==null) val=lv; } const err=(fm.errs||{})[f.k]; const dis=!!fm.ro||!!f.ro||(!!f.newOnly&&!fm.isNew); const mv=(String(val||'').split(';').map(x=>x.trim()).filter(Boolean));
+      return {l:f.l, fid:'fx_'+id+'_'+f.k, isSel:f.t==='sel', isMulti:f.t==='multi', isTxt:(f.t!=='sel'&&f.t!=='area'&&f.t!=='multi'), isArea:f.t==='area', type:(f.t==='date'?'date':(f.t==='email'?'email':(f.t==='tel'?'tel':'text'))),
+        mopts:(f.t==='multi'?(f.opts||[]).map(o=>({t:o,on:mv.indexOf(o)>=0,dis,tog:()=>{ const cur=g2st(self,id).fm; if(!cur||dis) return; let a=String(cur.draft[f.k]||'').split(';').map(x=>x.trim()).filter(Boolean); const i=a.indexOf(o); if(i>=0) a.splice(i,1); else a.push(o); const d=Object.assign({},cur.draft,{[f.k]:a.join('; ')}); const er=Object.assign({},cur.errs||{}); delete er[f.k]; g2set(self,id,{fm:Object.assign({},cur,{draft:d,errs:er,warn:false})}); }})):[]), v:(val===undefined?'':val), u:f.u||'', hasU:!!f.u, help:f.help||'', hasHelp:!!f.help,
+        dis, err:!!err, errMsg:err||'', ist:'font-family:inherit;font-size:14px;padding:9px 11px;border-radius:10px;box-sizing:border-box;width:100%;border:1px solid '+(err?'#B42318':'#E4E9E5')+';background:'+(dis?'#F4F6F3':'#FFFFFF')+';color:#15201A;',
+        opts:(f.opts||[]).map(o=>({v:o,t:o})),
+        set:(e)=>{ const cur=g2st(self,id).fm; if(!cur) return; const d=Object.assign({},cur.draft,{[f.k]:e.target.value}); const er=Object.assign({},cur.errs||{}); delete er[f.k]; g2set(self,id,{fm:Object.assign({},cur,{draft:d,errs:er,warn:false})}); }}; });
+    F.nerr=Object.keys(fm.errs||{}).length; F.hasErr=F.nerr>0;
+    F.save=()=>g2save(self,sp); F.cancel=()=>g2close(self,sp); F.close=()=>g2close(self,sp);
+    F.discard=()=>g2set(self,id,{fm:null}); F.keep=()=>{ const cur=g2st(self,id).fm; g2set(self,id,{fm:Object.assign({},cur,{warn:false})}); };
+    F.key=(e)=>{ if(e && e.key==='Escape'){ e.preventDefault(); g2close(self,sp); } };
+  }
+  v[id+'_F']=F; }
+function g2navvals(self,v,nav){ (nav||[]).forEach((m,i)=>{ const o=(self.state.nav||{}); const open=(o[i]===undefined)?!!m.open:!!o[i];
+  v['nav'+i+'_open']=open; v['nav'+i+'_sym']=open?'▾':'▸'; v['nav'+i+'_tog']=()=>{ const n=Object.assign({},self.state.nav||{}); n[i]=!open; self.setState({nav:n}); }; }); }
+
+// faixa de etapas controlada pelo estado da tela (processos numa só tela de trabalho)
+function g2steps(self,v,pre,n,cur,whys,go){ for(let i=1;i<=n;i++){ const on=(i===cur); const w=(whys&&whys[i])||'';
+  v[pre+i+'_st']='display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:10px;border:0;font-family:inherit;cursor:pointer;text-align:left;min-width:0;color:#15201A;'+(on?'background:#E4F3E9;box-shadow:inset 0 -2px 0 #1E7A4C;':'background:transparent;');
+  v[pre+i+'_bst']='width:22px;height:22px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;flex-shrink:0;'+(on?'background:#1E7A4C;color:#fff;':(w?'background:#FDE8E6;color:#B42318;':'background:#EEF1EE;color:#15201A;'));
+  v[pre+i+'_tst']='font-size:12.5px;line-height:1.2;font-weight:'+(on?'800':'600')+';';
+  v[pre+i+'_why']=w; v[pre+i+'_hasWhy']=!!w; v[pre+i+'_cur']=on?'step':'false';
+  v[pre+i+'_go']=()=>go(i); } }
+
+const PN = {"div": {"title": "Resolver diferença · NF 8812", "sub": "Preço da NF R$ 5,96/L contra R$ 5,84/L do contrato. A decisão não muda o aceite físico da carga.", "ok": "Registrar decisão", "fields": [{"k": "dec", "l": "Decisão", "t": "sel", "opts": ["Aceitar físico e contestar título", "Aceitar diferença por aditivo", "Recusar a NF"], "req": true, "def": "Aceitar físico e contestar título"}, {"k": "resp", "l": "Responsável", "t": "sel", "opts": ["Comprador Léo", "Ana (gestora)"], "req": true, "def": "Comprador Léo"}, {"k": "obs", "l": "Observação", "t": "area"}]}, "seg": {"title": "Segregar lote", "sub": "Move a quantidade do apto para retido; sai do disponível e da cobertura firme até nova liberação.", "ok": "Segregar", "fields": [{"k": "lote", "l": "Lote", "t": "sel", "opts": ["K26-11 · KCl 60% · Galpão 2"], "req": true, "def": "K26-11 · KCl 60% · Galpão 2"}, {"k": "q", "l": "Quantidade", "t": "num", "req": true, "min": 1, "u": "kg", "maxfn": "apto"}, {"k": "mot", "l": "Motivo", "t": "txt", "req": true, "help": "Ex.: sacaria molhada na descarga."}]}};
+const SIMS = {};
+const RUN = {}, CHECK = {}, MAXFN = {}, LINES = {};
+
+function GR(id){ return GRIDS.find(g=>g.id===id); }
+function RW(self,id){ return g2rows(self,GR(id)); }
+function RF(self,gid,rid){ return g2find(RW(self,gid),rid); }
+function nf(n,d){ return Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:d||0,maximumFractionDigits:d||0}); }
+function dm(s){ if(!s) return '—'; const a=String(s).split('-'); return a.length===3? a[2]+'/'+a[1] : String(s); }
+const HOJE='2026-09-23';
+function addd(s,n){ const d=new Date(s+'T12:00:00'); d.setDate(d.getDate()+Number(n||0)); return d.toISOString().slice(0,10); }
+function ddiff(a,b){ return Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/86400000); }
+function chipc(t,c){ return {k:'chip',t:t,c:c}; }
+function T(t){ return {k:'txt',t:t}; } function B(t){ return {k:'b',t:t}; } function M(t){ return {k:'mut',t:t}; } const BRK={k:'br',t:''};
+function CST(c){ const cc=G2C[c]||G2C.gray; return {st:'display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;color:'+cc[0]+';background:'+cc[1]+';',dot:'width:6px;height:6px;border-radius:999px;background:'+cc[0]+';'}; }
+function hstatus(v,t,c){ const s=CST(c); v.hs_t=t; v.hs_st=s.st; v.hs_dot=s.dot; }
+function faixa(iso){ const d=ddiff(HOJE,iso); if(d<0) return chipc(dm(iso)+' · atrasado','red'); if(d===0) return chipc('hoje','red'); if(d<=3) return chipc(dm(iso)+' · até 3 dias','yellow'); return T(dm(iso)); }
+function setRows(self,gid,fn){ const rows=g2clone(RW(self,gid)); fn(rows); g2set(self,gid,{rows:rows}); return rows; }
+function toast(self,t){ self.setState({g2toast:t}); }
+function sims(self,v){ Object.keys(SIMS).forEach(k=>{ v['sim_'+k]=()=>toast(self,SIMS[k]); }); }
+// painel lateral genérico: campos tipados, validação junto ao campo, Salvar/Cancelar e aviso de alteração não salva
+function pnOpen(self,id,init){ const P=PN[id]; const d={}; P.fields.forEach(f=>{ d[f.k]=(init&&init[f.k]!==undefined)?String(init[f.k]):(f.def!==undefined?String(f.def):''); });
+  self.setState({pn:id,pd:d,po:Object.assign({},d),pe:{},pw:false}); }
+function pnVals(self,v){ const st=self.state, id=st.pn, P=id?PN[id]:null; v.pn_open=!!P;
+  Object.keys(PN).forEach(k=>{ v['open_'+k]=()=>pnOpen(self,k); });
+  if(!P){ v.pn_title=''; v.pn_sub=''; v.pn_fields=[]; v.pn_lines=[]; v.pn_ok_t=''; v.pn_warn=false; v.pn_haserr=false; v.pn_cancel=()=>{}; v.pn_ok=()=>{}; v.pn_key=()=>{}; v.pn_discard=()=>{}; v.pn_keep=()=>{}; return; }
+  const d=st.pd||{}, e=st.pe||{};
+  v.pn_title=P.title; v.pn_sub=P.sub||''; v.pn_ok_t=P.ok; v.pn_warn=!!st.pw; v.pn_haserr=Object.keys(e).length>0;
+  v.pn_lines=(LINES[id]?LINES[id](self,d):[]).map(x=>({t:x[0],v:x[1]}));
+  const vis=P.fields.filter(f=>!f.cond||String(d[f.cond.k])===String(f.cond.eq));
+  v.pn_fields=vis.map(f=>({l:f.l+(f.req?' *':''), fid:'pn_'+f.k, isSel:f.t==='sel', isTxt:(f.t!=='sel'&&f.t!=='area'), isArea:f.t==='area', type:(f.t==='date'?'date':'text'),
+     v:(d[f.k]===undefined?'':d[f.k]), opts:(f.opts||[]).map(o=>({v:o,t:o})), u:f.u||'', hasU:!!f.u, help:f.help||'', hasHelp:!!f.help, err:!!e[f.k], errMsg:e[f.k]||'', dis:!!f.ro,
+     ist:'font-family:inherit;font-size:14px;padding:9px 11px;border-radius:10px;box-sizing:border-box;width:100%;border:1px solid '+(e[f.k]?'#B42318':'#E4E9E5')+';background:'+(f.ro?'#F4F6F3':'#FFFFFF')+';color:#15201A;',
+     set:(ev)=>{ const s=self.state; const nd=Object.assign({},s.pd,{[f.k]:ev.target.value}); const ne=Object.assign({},s.pe); delete ne[f.k]; self.setState({pd:nd,pe:ne,pw:false}); }}));
+  const dirty=()=>Object.keys(self.state.pd||{}).some(k=>String(self.state.pd[k])!==String((self.state.po||{})[k]));
+  v.pn_cancel=()=>{ if(dirty()) self.setState({pw:true}); else self.setState({pn:null}); };
+  v.pn_discard=()=>self.setState({pn:null,pw:false}); v.pn_keep=()=>self.setState({pw:false});
+  v.pn_key=(ev)=>{ if(ev&&ev.key==='Escape'){ ev.preventDefault(); v.pn_cancel(); } };
+  v.pn_ok=()=>{ const s=self.state; const dd=s.pd||{}; const er={};
+    vis.forEach(f=>{ if(f.ro) return; const val=String(dd[f.k]||'').trim(); if(f.req&&!val){ er[f.k]='Informe '+f.l.toLowerCase().replace(/ \(.*\)$/,'')+'.'; return; }
+      if(f.t==='num'&&val){ const n=g2num(val); if(isNaN(n)){ er[f.k]='Use um número (ex.: 12,5).'; return; }
+        if(f.min!==undefined&&n<f.min){ er[f.k]='Mínimo '+nf(f.min,f.d||0)+(f.u?' '+f.u:'')+'.'; return; }
+        const mx=(f.maxfn&&MAXFN[f.maxfn])?MAXFN[f.maxfn](self,dd):f.max; if(mx!==undefined&&mx!==null&&n>mx){ er[f.k]='Máximo '+nf(mx,f.d||0)+(f.u?' '+f.u:'')+'.'; return; } } });
+    if(!Object.keys(er).length && CHECK[id]) Object.assign(er,CHECK[id](self,dd)||{});
+    if(Object.keys(er).length){ self.setState({pe:er}); return; }
+    const msg=RUN[id](self,dd); self.setState({pn:null,pw:false,pe:{},g2toast:msg||''}); }; }
+
+const DIESEL_OK=5.84, DIESEL_NF=5.96, DIESEL_Q=15000;
+function qq(n,un){ return nf(n,(n%1)?1:0)+' '+un; }
+MAXFN.apto=(self)=>{ const r=RF(self,'g_rec','r4501'); return r?r.v.apto:0; };
+CHECK.div=(self)=>(self.state.divok?{dec:'Diferença já decidida ('+self.state.divok+') · nada registrado de novo.'}:null);
+RUN.div=(self,d)=>{ setRows(self,'g_rec',rows=>{ const r=rows.find(x=>x.id==='r8812'); r.v.div=d.dec; });
+  self.setState({divok:d.dec}); const dif=(DIESEL_NF-DIESEL_OK)*DIESEL_Q;
+  if(d.dec==='Recusar a NF') return 'NF 8812 recusada · a carga de 26/09 só entra com NF corrigida · '+d.resp+' responde';
+  if(d.dec==='Aceitar diferença por aditivo') return 'Diferença de R$ '+nf(dif,2)+' vai a aditivo do CT-2026-03 · aguarda aceite do gestor · físico segue normal';
+  return 'Físico aceito na chegada · título contestado em R$ '+nf(dif,2)+' (retido até a NF de ajuste) · '+d.resp+' acompanha'; };
+RUN.seg=(self,d)=>{ const q=g2num(d.q); let a=0,b=0; setRows(self,'g_rec',rows=>{ const r=rows.find(x=>x.id==='r4501'); a=r.v.apto; r.v.apto-=q; r.v.quar+=q; b=r.v.apto; r.v.insp='Segregado · '+d.mot; });
+  self.setState({lib:null}); return 'Segregados '+qq(q,'kg')+' do K26-11 · apto '+nf(a)+' → '+nf(b)+' kg · fora da cobertura firme até nova liberação'; };
+function PREVALS(self,v){ const lib=self.state.lib;
+  RW(self,'g_rec').forEach(r=>{ const V=r.v, u=V.un; const c=(V.conf===''||V.conf===null||V.conf===undefined)?null:Number(V.conf);
+    r.p.doc=[B(V.doc),M(V.ped+' · '+V.forn)]; r.s.doc=V.doc+' '+V.ped+' '+V.forn;
+    r.p.item=[T(V.item)].concat(V.lote?[M(V.lote)]:[]); r.s.item=V.item+' '+V.lote;
+    if(V.st==='dup'){ ['conf','apto','insp'].forEach(k=>{ r.p[k]=[M('—')]; }); r.p.est=[chipc('Duplicado · sem nova entrada','gray')]; r.s.est='Duplicado'; return; }
+    r.p.conf=c===null?[M('NF '+qq(V.nf,u))]:[T(qq(c,u))].concat(c!==V.nf?[M('NF '+qq(V.nf,u))]:[]); r.s.conf=c===null?'':c;
+    r.p.apto=c===null?[M('—')]:[V.apto?B(qq(V.apto,u)):M('0 apto')].concat(V.quar?[BRK,chipc(qq(V.quar,u)+' retidos','yellow')]:[]);
+    const ins=String(V.insp||''); r.p.insp=ins?[chipc(ins,ins.indexOf('aprovad')>=0||ins.indexOf('Laudo')===0?'green':(ins.indexOf('Reprov')===0||ins.indexOf('Segreg')===0?'red':'yellow'))]:[M(u==='L'?'isenta':(u==='kit'?'visual na chegada':'—'))]; r.s.insp=ins;
+    const dv=String(V.div||''); if(dv&&dv!=='Sem divergência'){ r.p.insp=r.p.insp.concat([BRK,chipc(dv==='Preço'?'Preço +R$ '+nf(DIESEL_NF-DIESEL_OK,2)+'/L':dv,dv==='Preço'||dv==='Falta'||dv==='Avaria'||dv==='Recusar a NF'?'red':'yellow')]); } r.s.insp=ins+' '+dv;
+    if(V.st==='conf'){ const ab=V.aberto; r.p.est=[chipc(ab?'Parcial · '+qq(ab,u)+' abertos':'Aceito',ab?'yellow':'green'),BRK,
+        r.id==='r4501'?M('título encaminhado'):{k:'link',t:'Encaminhar título',h:'GE-04.dc.html'}]; r.s.est=ab?'Parcial':'Aceito'; }
+    else if(V.st==='pend'){ r.p.est=[chipc('A conferir · chega '+V.chega,'yellow')]; r.s.est='A conferir'; }
+    else { r.p.est=[chipc((V.st==='carga'?'Aguarda carga · ':'Aguarda chegada · ')+V.chega,'gray')]; r.s.est='Aguarda'; }
+    if(r.id==='r4501') r.p.est=r.p.est.concat(V.quar>0?[BRK,{k:'act',t:'Liberar qualidade',fn:'do_lib:K26-11'}]:(lib?[BRK,M('liberado · '+lib.rc)]:[])); }); }
+function EXTRAVALS(self,v){ pnVals(self,v); sims(self,v); const rs=RW(self,'g_rec');
+  const rq=rs.find(x=>x.id==='r4501'), rn=rs.find(x=>x.id==='r4533'), rd=rs.find(x=>x.id==='r8812');
+  const ndiv=rs.filter(x=>x.v.st!=='dup'&&x.v.div&&x.v.div!=='Sem divergência'&&!(x.id==='r8812'&&self.state.divok)).length;
+  const quar=rs.reduce((a,x)=>a+(x.v.un==='kg'&&x.v.st==='conf'?Number(x.v.quar)||0:0),0);
+  const pend=rs.filter(x=>x.v.st==='pend'||x.v.st==='carga'||x.v.st==='aguarda');
+  v.k_div=String(ndiv); v.k_div_s=ndiv?(self.state.divok?'':'preço da NF 8812 · diesel'):'nenhuma aberta';
+  v.k_quar=nf(quar/1000,quar%1000?1:0)+' t'; v.k_quar_s=quar?'K26-11 · laudo até 27/09':(self.state.lib?'laudo aprovado · '+self.state.lib.rc:'nada retido');
+  v.k_pend=String(pend.length); v.k_pend_s=pend.map(x=>x.v.doc==='sem NF'?x.v.ped:x.v.doc).join(' · ')||'nada a receber';
+  const ab=rs.filter(x=>x.v.st!=='dup'&&(x.v.st!=='conf'||x.v.aberto>0)); v.k_ab=String(ab.length); v.k_ab_s=ab.map(x=>x.v.ped).join(' · ')||'todos entregues';
+  const parts=[]; if(ndiv) parts.push(ndiv+(ndiv>1?' divergências':' divergência')); if(quar) parts.push(nf(quar/1000)+' t em quarentena');
+  hstatus(v,parts.length?parts.join(' · '):'Sem divergência aberta · nada em quarentena',ndiv?'red':(quar?'yellow':'green'));
+  v.pend4533=rn.v.st==='pend'; v.done4533=!v.pend4533;
+  v.conf4533=()=>g2open(self,GR('g_rec'),'r4533');
+  v.ler=()=>{ const n=RF(self,'g_rec','r4533'); if(n.v.st==='pend'){ toast(self,'Chave da NF 4533 lida · pedido PC-090 localizado (simulado)'); g2open(self,GR('g_rec'),'r4533'); } else toast(self,'NF 4533 já recebida · nova leitura não cria segunda entrada'); };
+  v.do_lib=()=>{ const s=self.state; if(s.lib) return toast(self,'Já liberado em '+s.lib.em+' · recibo '+s.lib.rc+', nada somado de novo'); let q=0,a=0,b=0;
+    setRows(self,'g_rec',rows=>{ const r=rows.find(x=>x.id==='r4501'); q=r.v.quar; a=r.v.apto; r.v.apto+=q; r.v.quar=0; b=r.v.apto; r.v.insp='Laudo aprovado · LAB-4501'; });
+    self.setState({lib:{em:'23/09',rc:'LQ-2031'},g2toast:'Laudo LAB-4501 aprovado · '+nf(q)+' kg liberados no K26-11: apto '+nf(a)+' → '+nf(b)+' kg, quarentena '+nf(q)+' → 0 · somado uma única vez (recibo LQ-2031)'}); };
+  self.g2after=(gid,rows,r)=>{ if(gid!=='g_rec'||!r||r.id!=='r4533') return; const c=Number(r.v.conf)||0; const ins=String(r.v.insp);
+    const ret=(ins.indexOf('Em laudo')===0||ins.indexOf('Reprov')===0);
+    r.v.apto=ret?0:c; r.v.quar=ret?c:0; r.v.st='conf'; r.v.aberto=Math.max(0,r.v.nf-c); r.ro=true;
+    if(c<r.v.nf&&r.v.div==='Sem divergência') r.v.div='Falta';
+    self.setState({g2toast:'NF 4533 conferida: '+qq(c,'kg')+' · apto '+nf(r.v.apto)+' · retido '+nf(r.v.quar)+' kg · PC-090 a entregar 20.000 → '+nf(r.v.aberto)+' kg · título a encaminhar (aceite físico ≠ aprovação financeira)'}); }; }
+
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { sel: {}, open: null, sort: {}, msg: {}, added: {}, g2: {}, nav: {}, g2toast: '' }; }
+  renderVals() {
+    const st = this.state, v = {}, self = this;
+    const set = (patch) => self.setState(patch);
+    const selOf = (w) => (st.sel[w.id] === undefined ? w.dflt : st.sel[w.id]);
+    v.closeAll = () => set({ open: null });
+    const vis = {};
+    for (const w of SPEC) {
+      const cur = selOf(w);
+      const toggleOpen = () => set({ open: st.open === w.id ? null : w.id });
+      if (w.type === 'seg' || w.type === 'chips') {
+        w.opts.forEach((o, i) => {
+          v[w.id + '_s' + i] = (i === cur ? w.on : w.off);
+          v[w.id + '_v' + i] = (i === cur);
+          v[w.id + '_p' + i] = () => set({ sel: Object.assign({}, st.sel, { [w.id]: i }), open: null });
+        });
+      }
+      if (w.type === 'pick') {
+        v[w.id + '_label'] = (cur >= 0 && w.opts[cur] !== undefined) ? w.opts[cur] : '';
+        v[w.id + '_open'] = toggleOpen;
+        v[w.id + '_st'] = w.mst + (st.open === w.id ? '' : 'display: none;');
+        v[w.id + '_bst'] = (cur !== w.none ? w.bon : w.boff);
+        v[w.id + '_cst'] = (w.cst || '') + (cur !== w.none ? '' : 'display: none;');
+        v[w.id + '_clear'] = () => set({ sel: Object.assign({}, st.sel, { [w.id]: w.none }), open: null });
+        w.opts.forEach((o, i) => {
+          v[w.id + '_p' + i] = () => set({ sel: Object.assign({}, st.sel, { [w.id]: i }), open: null });
+          v[w.id + '_i' + i] = (i === cur ? w.ion : w.ioff);
+        });
+      }
+      if (w.type === 'menu') { v[w.id + '_open'] = toggleOpen; v[w.id + '_st'] = w.mst + (st.open === w.id ? '' : 'display: none;'); }
+      if (w.type === 'sort') {
+        const s = st.sort[w.id] || { c: w.dflt, d: !!w.desc };
+        const om = String(st.open || '');
+        const openCol = (om.indexOf(w.id + 'm') === 0) ? parseInt(om.slice(w.id.length + 1), 10) : -1;
+        for (let i = 0; i < w.n; i++) {
+          v[w.id + '_a' + i] = (i === s.c ? (s.d ? '▼' : '▲') : '⇅');
+          v[w.id + '_h' + i] = (i === s.c ? w.hon[i] : w.hoff[i]);
+          v[w.id + '_p' + i] = () => set({ sort: Object.assign({}, st.sort, { [w.id]: { c: i, d: (i === s.c ? !s.d : false) } }), open: null });
+          v[w.id + '_m' + i] = () => set({ open: (om === w.id + 'm' + i ? null : w.id + 'm' + i) });
+        }
+        v[w.id + '_mst'] = w.mst + (openCol >= 0 ? '' : 'display: none;');
+        v[w.id + '_mcol'] = openCol >= 0 ? w.cols[openCol] : '';
+        for (let i = 0; i < w.n; i++) {
+          v[w.id + '_mv' + i] = (openCol === i);
+          const mw = SPEC.find((x) => x.type === 'multi' && x.tbl === w.id && x.col === i);
+          const cnt = mw ? (st.sel[mw.id] || []).length : 0;
+          v[w.id + '_f' + i] = cnt ? ('· ' + cnt) : '';
+        }
+        v[w.id + '_mclear'] = () => { const s2 = Object.assign({}, st.sel); SPEC.forEach((x) => { if (x.type === 'multi' && x.tbl === w.id && x.col === openCol) s2[x.id] = []; }); set({ sel: s2, open: null }); };
+        v[w.id + '_asc'] = () => set({ sort: Object.assign({}, st.sort, { [w.id]: { c: openCol, d: false } }), open: null });
+        v[w.id + '_desc'] = () => set({ sort: Object.assign({}, st.sort, { [w.id]: { c: openCol, d: true } }), open: null });
+        v[w.id + '_grp'] = () => { const p = {}; if (w.group) { p[w.group] = w.cols.filter((c) => c).indexOf(w.cols[openCol]); } set({ sel: Object.assign({}, st.sel, p), open: null }); };
+      }
+      if (w.type === 'drawer') {
+        v[w.id + '_open'] = () => set({ open: w.id });
+        v[w.id + '_st'] = w.mst + (st.open === w.id ? '' : 'display: none;');
+        v[w.id + '_add'] = () => set({ open: null, added: Object.assign({}, st.added, { [w.id]: true }) });
+        v[w.id + '_row'] = (st.added[w.id] ? '' : 'display: none;');
+        v[w.id + '_btn'] = (st.added[w.id] && w.done) ? w.done : w.label;
+      }
+      if (w.type === 'msg') {
+        w.opts.forEach((o, i) => { v[w.id + '_p' + i] = () => set({ msg: Object.assign({}, st.msg, { [w.id]: w.msgs[i] }), open: null }); });
+        v[w.id + '_text'] = st.msg[w.id] || '';
+        v[w.id + '_tst'] = w.tst + (st.msg[w.id] ? '' : 'display: none;');
+      }
+      if (w.type === 'cards' || w.type === 'rowsel') {
+        w.opts.forEach((o, i) => {
+          v[w.id + '_p' + i] = () => set({ sel: Object.assign({}, st.sel, { [w.id]: i }), open: null });
+          v[w.id + '_s' + i] = (i === cur ? w.on : w.off);
+          v[w.id + '_c' + i] = (i === cur ? '' : 'display: none;');
+          v[w.id + '_b' + i] = (i === cur ? 'display: none;' : '');
+        });
+      }
+      if (w.type === 'multi') {
+        const curm = st.sel[w.id] || [];
+        w.opts.forEach((o, i) => {
+          v[w.id + '_p' + i] = () => { const s = (st.sel[w.id] || []).slice(); const k = s.indexOf(i); if (k >= 0) s.splice(k, 1); else s.push(i); set({ sel: Object.assign({}, st.sel, { [w.id]: s }) }); };
+          v[w.id + '_i' + i] = (curm.indexOf(i) >= 0 ? w.ion : w.ioff);
+          v[w.id + '_c' + i] = (curm.indexOf(i) >= 0 ? '☑' : '☐');
+        });
+        v[w.id + '_n'] = curm.length ? (curm.length + ' de ' + w.opts.length) : 'todos';
+        v[w.id + '_clear'] = () => set({ sel: Object.assign({}, st.sel, { [w.id]: [] }) });
+      }
+      if (w.type === 'toggle') {
+        const on = !!st.sel[w.id];
+        v[w.id + '_p'] = () => set({ sel: Object.assign({}, st.sel, { [w.id]: !on }) });
+        v[w.id + '_s'] = on ? w.on : w.off;
+      }
+      if (w.tbl && w.rows) {
+        const arr = vis[w.tbl] || (vis[w.tbl] = w.rows.map(() => true));
+        let m = null;
+        if (w.type === 'toggle') m = st.sel[w.id] ? w.keep : null;
+        else if (w.type === 'multi') { const cm = st.sel[w.id] || []; m = cm.length ? cm : null; }
+        else if (w.match) m = w.match[cur];
+        w.rows.forEach((r, ri) => {
+          let ok = true;
+          if (m === null || m === undefined) ok = true;
+          else if (w.type === 'toggle') ok = m.indexOf(ri) >= 0;
+          else if (w.type === 'multi') ok = m.some((i) => w.cells[ri] === w.opts[i]);
+          else if (Array.isArray(m)) ok = m.some((x) => r.indexOf(x) >= 0);
+          else ok = r.indexOf(m) >= 0;
+          arr[ri] = arr[ri] && ok;
+        });
+      }
+    }
+    for (const t in vis) {
+      vis[t].forEach((ok, ri) => { v[t + '_r' + ri] = ok ? '' : 'display: none;'; });
+      v[t + '_count'] = vis[t].filter(Boolean).length;
+      v[t + '_clear'] = () => { const s2 = Object.assign({}, st.sel); SPEC.forEach((w) => { if (w.tbl === t && w.type === 'toggle') s2[w.id] = false; else if (w.tbl === t && w.type === 'pick') s2[w.id] = w.none; else if (w.tbl === t && w.type === 'chips') s2[w.id] = 0; else if (w.tbl === t && w.type === 'multi') s2[w.id] = []; }); set({ sel: s2, open: null }); };
+    }
+    v.g2toast = this.state.g2toast || ''; v.g2toastst = this.state.g2toast ? '' : 'display: none;';
+    v.mf_faz = this.state.mf_faz || 'Santa Rita'; v.mf_saf = this.state.mf_saf || 'Todas';
+    v.mf_setfaz = (e) => this.setState({ mf_faz: e.target.value, g2toast: 'Fazenda: ' + e.target.value });
+    v.mf_setsaf = (e) => this.setState({ mf_saf: e.target.value, g2toast: 'Safra: ' + e.target.value });
+    if (!v.mf_trocar) v.mf_trocar = () => this.setState({ step: 1, g2toast: 'Escolha a safra na etapa 1.' });
+    this.__v = v; g2navvals(this, v, NAV);
+    if (typeof PREVALS === 'function') PREVALS(this, v);
+    for (const sp of GRIDS) g2vals(this, sp, v, vis[sp.id]);
+    if (typeof EXTRAVALS === 'function') EXTRAVALS(this, v);
+    return v;
+  }
+  componentDidUpdate(pp, ps) { if (this.state.g2toast && this.state.g2toast !== (ps || {}).g2toast) { clearTimeout(this._g2t); this._g2t = setTimeout(() => this.setState({ g2toast: '' }), 4500); } }
+}
+
+</script>
+</body>
+</html>

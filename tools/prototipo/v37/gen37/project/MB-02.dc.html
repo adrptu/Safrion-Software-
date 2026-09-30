@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Minhas ordens</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Sora:wght@600;700&amp;display=swap">
+<style>
+body{margin:0;font-family:'Manrope', system-ui, sans-serif;color:#15201A;background:#F4F6F3}
+a{color:#1E7A4C}a:hover{color:#15603a}
+.g2ed{cursor:pointer}.g2ed:hover{background:#F2F8F4}.g2ed:focus-visible{outline:2px solid #1E7A4C;outline-offset:-2px}.g2flash{background:#E4F3E9}.g2kid{background:#FBFCFA}.g2tot{cursor:pointer}.g2tot:hover{background:#EEF4EF}.g2hb{display:inline-flex;align-items:center;gap:4px;border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#65736A;padding:7px 2px 7px 0;text-align:left;white-space:normal;max-width:104px;line-height:1.2}.g2fb{border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:10px;font-weight:700;padding:4px 3px;border-radius:6px}.g2fb:hover{background:#E4E9E5}.g2car{width:22px;height:22px;border:0;border-radius:6px;background:transparent;cursor:pointer;font-size:13px;color:#15201A;flex-shrink:0;padding:0}.g2car:hover{background:#E4E9E5}.g2del{width:28px;height:28px;border:0;border-radius:8px;background:transparent;cursor:pointer;color:#8A968E;display:inline-flex;align-items:center;justify-content:center}.g2del:hover{background:#FDE8E6;color:#B42318}.g2pw{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0;flex:0 1 auto;justify-content:inherit;text-align:inherit}sc-if,sc-for{display:contents}aside[role="dialog"]>*,aside[role="dialog"]>:is(sc-if,sc-for)>*,aside[role="dialog"]>:is(sc-if,sc-for)>:is(sc-if,sc-for)>*,aside[role="dialog"]>:is(sc-if,sc-for)>:is(sc-if,sc-for)>:is(sc-if,sc-for)>*{flex-shrink:0}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 2320px; box-sizing: border-box; display: flex; flex-direction: column; background: #F4F6F3; font-family: 'Manrope', system-ui, sans-serif; color: #15201A; overflow: clip;">
+<header style="padding: 54px 20px 14px; background: #FFFFFF; border-bottom: 1px solid #E4E9E5; display: flex; flex-direction: column; gap: 6px;">
+<div style="display: flex; align-items: center; gap: 10px;"><a href="MB-01.dc.html" aria-label="Voltar" style="text-decoration: none; display: inline-flex; align-items: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#65736A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></a><h1 style="margin: 0; font-family: 'Sora', 'Manrope', system-ui, sans-serif; font-size: 20px; font-weight: 700; letter-spacing: -.02em; flex-grow: 1;">Minhas ordens</h1><span style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #B42318; background: #FDE8E6; white-space: nowrap;"><span style="width: 6px; height: 6px; border-radius: 999px; background: #B42318;"></span>1 impedida · 1 revogada</span></div>
+<div style="font-size: 13px; color: #65736A;">suas (Marcos) e da equipe · mesma ordem do escritório</div>
+</header>
+<main style="flex-grow: 1; overflow: hidden; padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; box-sizing: border-box;">
+<div style="display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; border-radius: 12px; background: #FFFFFF; border: 1px solid #E4E9E5;"><div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;"><span role="group" aria-label="Sinal do aparelho (simulação)" style="display: inline-flex; padding: 2px; border-radius: 999px; background: #EEF1EE; gap: 2px;"><button type="button" aria-pressed="{{sg_on}}" onClick="{{sg_com}}" title="Simular aparelho com sinal: envia o que está no aparelho" style="{{sg_st1}}">Com sinal</button><button type="button" aria-pressed="{{sg_off}}" onClick="{{sg_sem}}" title="Simular aparelho sem sinal: registros ficam no aparelho" style="{{sg_st0}}">Sem sinal</button></span><span aria-live="polite" style="{{sg_tst}}">{{sg_t}}</span></div><div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; color: #65736A;"><sc-if value="{{sg_rec}}" hint-placeholder-val="{{false}}"><span>{{sg_rect}}</span></sc-if><a href="MB-03x-recibo.dc.html" title="Abrir envios e recibos do aparelho" style="color: #1E7A4C; font-weight: 700; text-decoration: none;">Ver envios</a></div></div><div><div style="font-family: 'Sora', 'Manrope', system-ui, sans-serif; font-size: 15px; font-weight: 700; letter-spacing: -.01em;">Suas ordens · Marcos</div><div style="font-size: 12.5px; color: #65736A; margin-top: 2px;">Abra a ordem para ver instrução, insumos e apontamentos.</div></div><sc-for list="{{minhas}}" as="q" hint-placeholder-count="3"><div style="background: #FFFFFF; border: 1px solid #E4E9E5; border-radius: 16px; box-shadow: 0 1px 2px rgba(21,32,26,.04), 0 10px 24px -18px rgba(21,32,26,.22); padding: 13px 15px; display: flex; flex-direction: column; gap: 7px; min-width: 0;"><div style="display: flex; align-items: center; gap: 8px;"><span style="{{q.dot}}"></span><div style="font-size: 14.5px; font-weight: 700; flex-grow: 1; min-width: 0;"><b>{{q.id}}</b> · {{q.tipo}}</div></div><div style="font-size: 13px; color: #65736A; line-height: 1.45;">{{q.loc}}</div><div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;"><span style="{{q.e_st}}"><span style="{{q.e_dot}}"></span>{{q.e_t}}</span><span style="{{q.p_st}}"><span style="{{q.p_dot}}"></span>{{q.p_t}}</span></div><div style="font-size: 13px; color: #65736A; line-height: 1.45;">{{q.real}}</div><sc-if value="{{q.hasIns}}" hint-placeholder-val="{{false}}"><div style="display: flex; flex-direction: column; gap: 3px; padding: 7px 10px; border-radius: 10px; background: #F4F6F3;"><sc-for list="{{q.ins}}" as="i" hint-placeholder-count="1"><div style="font-size: 12.5px; line-height: 1.4; color: #15201A;">{{i.t}} <span style="{{i.st}}">· {{i.s}}</span></div></sc-for></div></sc-if><div style="display: flex; flex-wrap: wrap; gap: 8px;"><sc-if value="{{q.nx_isA}}" hint-placeholder-val="{{false}}"><a href="{{q.nx_href}}" onClick="{{q.sel}}" title="{{q.nx_tt}}" style="padding: 7px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; background: #E4F3E9; color: #1E7A4C; border: 1px solid #1E7A4C; display: inline-flex; align-items: center; gap: 6px; text-decoration: none;">{{q.nx_t}}</a></sc-if><sc-if value="{{q.nx_isB}}" hint-placeholder-val="{{false}}"><button type="button" onClick="{{q.nx_fn}}" title="{{q.nx_tt}}" style="padding: 7px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; background: #E4F3E9; color: #1E7A4C; border: 1px solid #1E7A4C; display: inline-flex; align-items: center; gap: 6px;">{{q.nx_t}}</button></sc-if><a href="MB-02det.dc.html" onClick="{{q.sel}}" title="{{q.ab_tt}}" style="padding: 7px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; background: #FFFFFF; color: #15201A; border: 1px solid #E4E9E5; display: inline-flex; align-items: center; gap: 6px; text-decoration: none;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>Abrir ordem</a></div></div></sc-for><div><div style="font-family: 'Sora', 'Manrope', system-ui, sans-serif; font-size: 15px; font-weight: 700; letter-spacing: -.01em;">Da equipe · outros responsáveis</div><div style="font-size: 12.5px; color: #65736A; margin-top: 2px;">Consulte; quem executa é o responsável indicado.</div></div><div style="background: #FFFFFF; border: 1px solid #E4E9E5; border-radius: 16px; box-shadow: 0 1px 2px rgba(21,32,26,.04), 0 10px 24px -18px rgba(21,32,26,.22); padding: 13px 15px; display: flex; flex-direction: column; gap: 7px; min-width: 0;"><div style="display: flex; align-items: center; gap: 8px;"><span style="width: 10px; height: 10px; border-radius: 999px; background: #B42318; flex-shrink: 0;"></span><div style="font-size: 14.5px; font-weight: 700; flex-grow: 1; min-width: 0;"><b>OS-0420</b> · Plantio · Soja 58 W</div></div><div style="font-size: 13px; color: #65736A; line-height: 1.45;"><span style="font-weight: 600; color: #15201A;">Contexto:</span> T4 · Santa Rita · resp. Carlos · <span style="font-weight: 600; color: #15201A;">Realizado:</span> 30/100 ha (18 conferidos + 12 provisórios) · saldo 70 ha pausado</div><div style="font-size: 13px; color: #65736A; line-height: 1.45;"><div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;"><span style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #1E7A4C; background: #E4F3E9; white-space: nowrap;"><span style="width: 6px; height: 6px; border-radius: 999px; background: #1E7A4C;"></span>Em execução</span><span style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #B42318; background: #FDE8E6; white-space: nowrap;"><span style="width: 6px; height: 6px; border-radius: 999px; background: #B42318;"></span>Impedida · ativo bloqueado</span><span style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #8A5A00; background: #FFF3D6; white-space: nowrap;"><span style="width: 6px; height: 6px; border-radius: 999px; background: #8A5A00;"></span>Revisão de saldo pendente · v3</span><span style="display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; color: #65736A; border: 1px solid #E4E9E5; white-space: nowrap;">instrução v2 vigente</span></div></div><div style="font-size: 13px; color: #65736A; line-height: 1.45;"><span style="font-weight: 600; color: #15201A;">Aviso:</span> Fichas do saldo revogadas pela revisão v3 (KCl −12% só nos 70 ha) · 23/09 08:05</div><div style="font-size: 13px; color: #65736A; line-height: 1.45;"><div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;"><span style="{{ack_st}}"><span style="{{ack_dot}}"></span>{{ack_t}}</span></div></div><div style="font-size: 13px; color: #65736A; line-height: 1.45;"><span style="font-weight: 600; color: #15201A;">Impedimento:</span> OM-0233 · Trator T1 bloqueado · substituto Trator 02 · MF 7719 a partir de 24/09 06:00</div><div style="font-size: 13px; color: #65736A; line-height: 1.45;"><div style="display: flex; flex-wrap: wrap; gap: 8px;"><sc-if value="{{noack}}" hint-placeholder-val="{{false}}"><button type="button" onClick="{{ack}}" title="Registrar ciência da revogação das fichas do saldo" style="padding: 7px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; background: #FFFFFF; color: #15201A; border: 1px solid #E4E9E5; display: inline-flex; align-items: center; gap: 6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Reconhecer</button></sc-if><button type="button" onClick="{{say_m0}}" title="Ver por que não pode iniciar" style="padding: 7px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; background: #FFFFFF; color: #15201A; border: 1px solid #E4E9E5; display: inline-flex; align-items: center; gap: 6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></svg>Iniciar · bloqueado</button><a href="MB-04.dc.html" title="Abrir a captura de ocorrência" style="padding: 7px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; background: #FFFFFF; color: #15201A; border: 1px solid #E4E9E5; display: inline-flex; align-items: center; gap: 6px; text-decoration: none;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></svg>Registrar ocorrência</a></div></div></div><div style="background: #FFFFFF; border: 1px solid #E4E9E5; border-radius: 16px; box-shadow: 0 1px 2px rgba(21,32,26,.04), 0 10px 24px -18px rgba(21,32,26,.22); padding: 13px 15px; display: flex; flex-direction: column; gap: 7px; min-width: 0;"><div style="display: flex; align-items: center; gap: 8px;"><span style="width: 10px; height: 10px; border-radius: 999px; background: #B42318; flex-shrink: 0;"></span><div style="font-size: 14.5px; font-weight: 700; flex-grow: 1; min-width: 0;"><b>OS-0418</b> · Fertirrigação · Pivô 1</div></div><div style="font-size: 13px; color: #65736A; line-height: 1.45;"><span style="font-weight: 600; color: #15201A;">Contexto:</span> P1 · 95 ha · resp. João · <span style="font-weight: 600; color: #15201A;">Motivo:</span> água reclassificada para fertirrigação · v2 aguarda Ana (agrônoma)</div><div style="font-size: 13px; color: #65736A; line-height: 1.45;"><div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;"><span style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #5B6660; background: #EEF1EE; white-space: nowrap;"><span style="width: 6px; height: 6px; border-radius: 999px; background: #5B6660;"></span>A liberar</span><span style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #B42318; background: #FDE8E6; white-space: nowrap;"><span style="width: 6px; height: 6px; border-radius: 999px; background: #B42318;"></span>Revogada no servidor · 23/09 07:15</span></div></div><div style="font-size: 13px; color: #65736A; line-height: 1.45;"><span style="font-weight: 600; color: #15201A;">Relato no aparelho:</span> 23/09 07:40 · “pivô 1 ligado 20 min para teste de pressão”</div><div style="font-size: 13px; color: #65736A; line-height: 1.45;"><div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;"><span style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #8A5A00; background: #FFF3D6; white-space: nowrap;"><span style="width: 6px; height: 6px; border-radius: 999px; background: #8A5A00;"></span>Relato fora da autorização atual · aguarda decisão</span></div></div><div style="font-size: 13px; color: #65736A; line-height: 1.45;"><div style="display: flex; flex-wrap: wrap; gap: 8px;"><button type="button" onClick="{{say_m1}}" title="Ver por que não pode iniciar" style="padding: 7px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; background: #FFFFFF; color: #15201A; border: 1px solid #E4E9E5; display: inline-flex; align-items: center; gap: 6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></svg>Iniciar · bloqueado (revogada 07:15)</button></div></div></div><div style="background: #FFFFFF; border: 1px solid #E4E9E5; border-radius: 16px; box-shadow: 0 1px 2px rgba(21,32,26,.04), 0 10px 24px -18px rgba(21,32,26,.22); padding: 13px 15px; display: flex; flex-direction: column; gap: 7px; min-width: 0;"><div style="display: flex; align-items: center; gap: 8px;"><span style="width: 10px; height: 10px; border-radius: 999px; background: #1E88E5; flex-shrink: 0;"></span><div style="font-size: 14.5px; font-weight: 700; flex-grow: 1; min-width: 0;"><b>OS-0419</b> · Irrigação · água</div></div><div style="font-size: 13px; color: #65736A; line-height: 1.45;"><span style="font-weight: 600; color: #15201A;">Contexto:</span> Pivô 2 · Santa Rita · janela hoje 20:00–amanhã 10:31 · resp. João</div><div style="font-size: 13px; color: #65736A; line-height: 1.45;"><div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;"><span style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #1E7A4C; background: #E4F3E9; white-space: nowrap;"><span style="width: 6px; height: 6px; border-radius: 999px; background: #1E7A4C;"></span>Liberadas</span><span style="display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; color: #65736A; border: 1px solid #E4E9E5; white-space: nowrap;">necessidade do balanço</span></div></div><div style="font-size: 13px; color: #65736A; line-height: 1.45;"><div style="font-size: 12px; color: #65736A; line-height: 1.5;">Água simplificada: abre em Irrigação, sem materiais e sem requisição.</div></div><div style="font-size: 13px; color: #65736A; line-height: 1.45;"><div style="display: flex; flex-wrap: wrap; gap: 8px;"><a href="MB-08.dc.html" title="Abrir a volta do Pivô 2" style="padding: 7px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; background: #FFFFFF; color: #15201A; border: 1px solid #E4E9E5; display: inline-flex; align-items: center; gap: 6px; text-decoration: none;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M12 2.7s6 6.3 6 10.3a6 6 0 0 1-12 0c0-4 6-10.3 6-10.3z"/></svg>Abrir água simplificada</a></div></div></div><div style="display: flex; flex-wrap: wrap; gap: 8px;"><button type="button" onClick="{{say_m2}}" title="Ler o QR impresso da ordem" style="padding: 7px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; background: #FFFFFF; color: #15201A; border: 1px solid #E4E9E5; display: inline-flex; align-items: center; gap: 6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg>Ler QR</button></div><div style="font-size: 12px; color: #65736A; line-height: 1.5;">Fechar o turno não encerra a ordem. Encerrar é no escritório, com apontamentos enviados e nada em custódia.</div>
+</main>
+<div style="padding: 12px 20px 28px; background: #FFFFFF; border-top: 1px solid #E4E9E5;"><a href="MB-02det.dc.html" onClick="{{p_sel}}" style="display: block; text-align: center; text-decoration: none; box-sizing: border-box; width: 100%; padding: 18px; border-radius: 16px; box-shadow: 0 1px 2px rgba(30,122,76,.25); font-size: 17px; font-weight: 800; letter-spacing: -.01em; font-family: inherit; background: #1E7A4C; color: #fff; border: 1px solid #1E7A4C; cursor: pointer;">{{p_lab}}</a></div>
+
+
+<div role="status" style="position: fixed; left: 50%; transform: translateX(-50%); bottom: 22px; z-index: 70; background: #15201A; color: #fff; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 12px 32px -8px rgba(21,32,26,.4); max-width: 560px; {{g2toastst}}">{{g2toast}}</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":2320}}'>
+const SPEC = [];
+const GRIDS = [];
+const NAV = [];
+// ===== G2 · grade interativa, formulário lateral e navegação (motor do protótipo v3.7) =====
+const G2C={green:['#1E7A4C','#E4F3E9'],yellow:['#8A5A00','#FFF3D6'],red:['#B42318','#FDE8E6'],gray:['#5B6660','#EEF1EE'],blue:['#1E5F8F','#E3F0FB'],orange:['#9A3F00','#FFE8D6']};
+const G2CTA='display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:9px;font-size:12.5px;font-weight:700;text-decoration:none;white-space:nowrap;background:#FFFFFF;color:#15201A;border:1px solid #E4E9E5;cursor:pointer;font-family:inherit;line-height:1.25;';
+const G2CTAU='display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:9px;font-size:12.5px;font-weight:700;text-decoration:none;white-space:nowrap;background:#FFFFFF;color:#B42318;border:1px solid #B42318;cursor:pointer;font-family:inherit;line-height:1.25;';
+function g2num(s){ if(typeof s==='number') return s; if(s===null||s===undefined) return NaN; let t=String(s).trim(); if(!t) return NaN; t=t.replace(/[^0-9,.\-]/g,''); if(t.indexOf(',')>=0){ t=t.replace(/\./g,'').replace(',','.'); } else if((t.match(/\./g)||[]).length>1 || /^\-?\d{1,3}(\.\d{3})+$/.test(t)){ t=t.replace(/\./g,''); } return parseFloat(t); }
+function g2fmtn(n,d,dmin){ return Number(n).toLocaleString('pt-BR',{minimumFractionDigits:(dmin!==undefined?dmin:(d||0)),maximumFractionDigits:d||0}); }
+function g2fmt(v,c){ if(v===null||v===undefined||v==='') return '—'; if(c&&c.t==='date'&&/^\d{4}-\d{2}-\d{2}$/.test(String(v))){ const a=String(v).split('-'); return a[2]+'/'+a[1]+'/'+a[0]; } if(c&&c.zdash&&Number(v)===0) return '—'; if(c&&c.t==='num'){ const n=Number(v); if(isNaN(n)) return String(v); return (c.pre||'')+g2fmtn(n,c.d,c.dmin)+(c.u?' '+c.u:''); } return String(v); }
+function g2st(self,id){ return ((self.state.g2||{})[id])||{}; }
+function g2set(self,id,patch){ const all=Object.assign({},self.state.g2||{}); all[id]=Object.assign({},all[id]||{},patch); self.setState({g2:all}); }
+function g2rows(self,sp){ const st=g2st(self,sp.id); return st.rows||sp.rows; }
+function g2find(list,id){ for(const r of list){ if(r.id===id) return r; if(r.kids){ const k=g2find(r.kids,id); if(k) return k; } } return null; }
+function g2text(r,c){ if(r.s&&r.s[c.k]!==undefined&&r.s[c.k]!==null) return String(r.s[c.k]); if(r.v&&r.v[c.k]!==undefined&&r.v[c.k]!==null) return g2fmt(r.v[c.k],c); return ''; }
+function g2key(r,c){ if(c.t==='num'){ let n=(r.v&&r.v[c.k]!==undefined&&r.v[c.k]!==null&&r.v[c.k]!=='')?Number(r.v[c.k]):g2num(r.s&&r.s[c.k]); return isNaN(n)?null:n; } const t=g2text(r,c); return (t===''||t==='—')?null:t; }
+function g2match(r,sp,st,mask,added){
+  if(r.sh && !(added||{})[r.sh]) return false;
+  if(mask && r.ri!==undefined && mask[r.ri]===false) return false;
+  const q=(st.q||'').trim().toLowerCase();
+  if(q){ const all=sp.cols.map(c=>g2text(r,c)).join(' ').toLowerCase(); if(all.indexOf(q)<0) return false; }
+  const f=st.f||{}; for(const k in f){ const vals=f[k]; if(!vals||!vals.length) continue; const c=sp.cols.find(x=>x.k===k); if(!c) continue; if(vals.indexOf(g2text(r,c))<0) return false; }
+  return true; }
+function g2sort(arr,sp,st){ const so=st.so||sp.so; if(!so||!so.k) return arr; const c=sp.cols.find(x=>x.k===so.k); if(!c) return arr; const d=so.d?-1:1;
+  return arr.slice().sort((a,b)=>{ const x=g2key(a,c), y=g2key(b,c); if(x===null&&y===null) return 0; if(x===null) return 1; if(y===null) return -1;
+    if(typeof x==='number'&&typeof y==='number') return (x-y)*d; return String(x).localeCompare(String(y),'pt-BR',{numeric:true,sensitivity:'base'})*d; }); }
+function g2filtering(st){ return !!((st.q||'').trim()) || Object.keys(st.f||{}).some(k=>(st.f[k]||[]).length); }
+function g2flat(sp,st,rows,mask,added){
+  const out=[]; const exp=st.x||sp.x0||{}; const filt=g2filtering(st);
+  const deep=(r)=>g2match(r,sp,st,mask,added)||(r.kids||[]).some(deep);
+  const walk=(list,lvl,parentOk)=>{ g2sort(list,sp,st).forEach(r=>{ const kids=r.kids||[]; const selfOk=g2match(r,sp,st,mask,added);
+      const anyKid=kids.some(deep); if(!(selfOk||anyKid||parentOk)) return;
+      out.push({r,lvl,has:kids.length>0});
+      if(kids.length && (exp[r.id] || (filt && anyKid && !selfOk))) walk(kids,lvl+1,selfOk&&!filt); }); };
+  walk(rows,0,false); return out; }
+function g2part(p,v){ const o={isCn:false,isTxt:false,isB:false,isMut:false,isChip:false,isTag:false,isLink:false,isCta:false,isAct:false,isBr:false,t:p.t||'',st:'',dot:'',href:p.h||'#',fn:null,title:p.t||''};
+  switch(p.k){ case 'b': o.isB=true; break; case 'mut': o.isMut=true; break;
+    case 'chip': { const cc=G2C[p.c]||G2C.gray; o.isChip=true; o.st='display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;color:'+cc[0]+';background:'+cc[1]+';'; o.dot='width:6px;height:6px;border-radius:999px;flex-shrink:0;background:'+cc[0]+';'; break; }
+    case 'cn': { const cc=G2C[p.c]||G2C.gray; o.isCn=true; o.st='font-weight:800;white-space:nowrap;color:'+cc[0]+';'; break; }
+    case 'tag': o.isTag=true; break; case 'link': o.isLink=true; break;
+    case 'cta': o.isCta=true; o.st=p.u?G2CTAU:G2CTA; break;
+    case 'act': o.isAct=true; if(p.lk) { o.lk=true; } if(p.fn&&p.fn.indexOf(':')>0){ const nm=p.fn.split(':')[0], ar=p.fn.slice(nm.length+1); o.fn=()=>{ if(v&&v[nm]) v[nm](ar); }; } else o.fn=(v&&p.fn&&v[p.fn])||(()=>{}); o.st=p.lk?'border:0;background:transparent;padding:0;color:#1E7A4C;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;text-decoration:underline;text-underline-offset:3px;text-align:left;':(p.u?G2CTAU:G2CTA); break;
+    case 'br': o.isBr=true; break; default: o.isTxt=true; }
+  return o; }
+function g2sum(sp,flat,c){ let s=0,n=0; flat.forEach(x=>{ if(x.lvl!==0) return; const k=g2key(x.r,c); if(typeof k==='number'){ s+=k; n++; } }); return n? (c.agg==='avg'? s/n : s) : null; }
+function g2open(self,sp,rid,e){
+  if(e&&e.target&&e.target.closest&&e.target.closest('a,button,input,select,textarea,label,[data-noedit]')) return;
+  const ed=sp.edit||{m:'none'}; if(ed.m==='none') return;
+  const r=g2find(g2rows(self,sp),rid); if(!r) return;
+  if(r.dr && self.__v && self.__v[r.dr]){ self.__v[r.dr](); return; }
+  if(ed.m==='pick'){ if(self.g2pick) self.g2pick(sp.id,rid,r); g2set(self,sp.id,{fl:rid}); return; }
+  const draft={}; (ed.fields||[]).forEach(f=>{ let val=''; if(r.v&&r.v[f.k]!==undefined&&r.v[f.k]!==null&&r.v[f.k]!=='') val=(f.t==='num'? String(r.v[f.k]).replace('.',','):String(r.v[f.k])); else if(r.s&&r.s[f.k]!==undefined) val=String(r.s[f.k]); draft[f.k]=val; });
+  g2set(self,sp.id,{fm:{rid,draft,orig:Object.assign({},draft),errs:{},warn:false,ro:(ed.m!=='form'||!!r.ro),isNew:false,mode:ed.m},fl:null,fmc:null}); }
+function g2new(self,sp){ const ed=sp.edit||{}; const draft={}; (ed.fields||[]).forEach(f=>{ draft[f.k]=(f.def!==undefined?String(f.def):''); });
+  g2set(self,sp.id,{fm:{rid:null,draft,orig:Object.assign({},draft),errs:{},warn:false,ro:false,isNew:true,mode:'form'},fl:null,fmc:null}); }
+function g2calc(r,calc){ (calc||[]).forEach(cx=>{ const a=(cx.a||[]).map(k=>Number(r.v[k])||0); let x=null;
+   if(cx.op==='mul') x=a.reduce((p,q)=>p*q,1); else if(cx.op==='div') x=a[1]?a[0]/a[1]:0; else if(cx.op==='sum') x=a.reduce((p,q)=>p+q,0);
+   else if(cx.op==='sub') x=a.slice(1).reduce((p,q)=>p-q,a[0]); else if(cx.op==='max0sub') x=Math.max(0,a.slice(1).reduce((p,q)=>p-q,a[0]));
+   if(x!==null){ r.v[cx.k]=Math.round(x*100)/100; if(r.s) delete r.s[cx.k]; if(r.p) delete r.p[cx.k]; } }); }
+function g2clone(list){ return list.map(r=>Object.assign({},r,{v:Object.assign({},r.v||{}),s:Object.assign({},r.s||{}),p:Object.assign({},r.p||{}),kids:r.kids?g2clone(r.kids):undefined})); }
+function g2save(self,sp){ const st=g2st(self,sp.id); const fm=st.fm; if(!fm) return; const ed=sp.edit||{}; const errs={};
+  const vis=(ed.fields||[]).filter(f=>!f.cond || String(fm.draft[f.cond.k])===String(f.cond.eq));
+  vis.forEach(f=>{ const val=(fm.draft[f.k]||'').trim(); if(f.ro||(f.newOnly&&!fm.isNew)) return;
+    if(f.req && !val) { errs[f.k]='Informe '+f.l.toLowerCase().replace(/ \(.*\)$/,'')+'.'; return; }
+    if(f.t==='email' && val && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val)) { errs[f.k]='E-mail inválido (ex.: compras@empresa.com.br).'; return; }
+    if(f.t==='tel' && val){ const dg=val.replace(/\D/g,''); if(dg.length<10||dg.length>13) { errs[f.k]='Informe DDD e número (ex.: 65 99999-0000).'; return; } }
+    if(f.t==='multi' && f.req && !val) { errs[f.k]='Escolha ao menos uma opção.'; return; }
+    if(f.t==='num' && val){ const n=g2num(val); if(isNaN(n)) { errs[f.k]='Use um número (ex.: 12,5).'; return; } if(f.min!==undefined && n<f.min) { errs[f.k]='Mínimo '+g2fmtn(f.min,(String(f.min).split('.')[1]||'').length)+(f.u?' '+f.u:'')+'.'; return; } if(f.max!==undefined && n>f.max) { errs[f.k]='Máximo '+g2fmtn(f.max,(String(f.max).split('.')[1]||'').length)+(f.u?' '+f.u:'')+'.'; return; } } });
+  if(!Object.keys(errs).length && self.g2check){ const cur=g2rows(self,sp); Object.assign(errs, self.g2check(sp.id,cur,fm.isNew?null:g2find(cur,fm.rid),fm.draft,fm.isNew)||{}); }
+  if(Object.keys(errs).length){ g2set(self,sp.id,{fm:Object.assign({},fm,{errs,warn:false})}); return; }
+  const rows=g2clone(g2rows(self,sp)); let r;
+  if(fm.isNew){ r={id:'n'+(rows.length+1)+'_'+String(Date.now()).slice(-5),v:{},s:{},p:{}}; rows.push(r); } else r=g2find(rows,fm.rid);
+  vis.forEach(f=>{ if(f.ro||(f.newOnly&&!fm.isNew)) return; const val=(fm.draft[f.k]||'').trim(); const col=sp.cols.find(c=>c.k===f.k);
+    if(f.t==='num'){ r.v[f.k]=val===''?'':g2num(val); if(r.s) delete r.s[f.k]; if(r.p) delete r.p[f.k]; }
+    else { r.v[f.k]=val; r.s[f.k]=val; if(col && col.chips && col.chips[val]) r.p[f.k]=[{k:'chip',t:val,c:col.chips[val]}]; else if(r.p) delete r.p[f.k]; } });
+  g2calc(r,ed.calc);
+  const patch={rows,fm:null,fl:r.id};
+  g2set(self,sp.id,patch); self.setState({g2toast:(fm.isNew?'Registro incluído':'Salvo · linha e totais atualizados')});
+  if(self.g2after) self.g2after(sp.id,rows,r,fm.isNew); }
+function g2dirty(fm){ if(!fm) return false; for(const k in fm.draft){ if(String(fm.draft[k])!==String(fm.orig[k])) return true; } return false; }
+function g2close(self,sp){ const fm=g2st(self,sp.id).fm; if(fm && !fm.ro && g2dirty(fm)) { g2set(self,sp.id,{fm:Object.assign({},fm,{warn:true})}); return; } g2set(self,sp.id,{fm:null}); }
+function g2vals(self,sp,v,mask){
+  const id=sp.id, st=g2st(self,id), rows=g2rows(self,sp), added=self.state.added||{};
+  const flat=g2flat(sp,st,rows,mask,added); const ed=sp.edit||{m:'none'}; const editable=ed.m&&ed.m!=='none';
+  const so=st.so||sp.so||{};
+  v[id+'_head']=sp.cols.map((c,ci)=>({l:c.l, st:'display:flex;align-items:center;gap:2px;justify-content:'+(c.a==='r'?'flex-end':'flex-start')+';'+(ci===0?'position:sticky;left:0;z-index:2;background:#F4F6F3;box-shadow:1px 0 0 #E4E9E5;':''),
+     arrow:(so.k===c.k?(so.d?'▼':'▲'):'⇅'), astyle:(so.k===c.k?'color:#1E7A4C;':'color:#B7C1BA;'), sortLabel:'Ordenar por '+c.l,
+     sort:()=>{ const cur=g2st(self,id).so||sp.so||{}; let nx; if(cur.k!==c.k) nx={k:c.k,d:false}; else if(!cur.d) nx={k:c.k,d:true}; else nx={}; g2set(self,id,{so:nx}); },
+     fil:(((st.f||{})[c.k]||[]).length?' · '+((st.f||{})[c.k]||[]).length:''), fcolor:(((st.f||{})[c.k]||[]).length?'#1E7A4C':'#8A968E'),
+     fmenu:()=>{ const cur=g2st(self,id).fmc; g2set(self,id,{fmc:(cur===c.k?null:c.k)}); }, flabel:'Filtrar '+c.l}));
+  // valores do filtro aberto
+  const fmc=st.fmc; const fcol=sp.cols.find(c=>c.k===fmc);
+  if(fcol){ const cnt={}; const leaf=(list)=>list.forEach(r=>{ if(r.kids&&r.kids.length) leaf(r.kids); if(!(r.kids&&r.kids.length)||sp.tree===false||!sp.tree){ const t=g2text(r,fcol)||'(vazio)'; cnt[t]=(cnt[t]||0)+1; } }); leaf(rows);
+    const cur=(st.f||{})[fmc]||[]; const keys=Object.keys(cnt).sort((a,b)=>a.localeCompare(b,'pt-BR',{numeric:true}));
+    v[id+'_fm']={open:true, l:fcol.l, vals:keys.map(k=>({t:k,n:cnt[k],on:cur.indexOf(k)>=0,
+        tog:()=>{ const f=Object.assign({},g2st(self,id).f||{}); const a=(f[fmc]||[]).slice(); const i=a.indexOf(k); if(i>=0) a.splice(i,1); else a.push(k); f[fmc]=a; g2set(self,id,{f}); }})),
+      asc:()=>g2set(self,id,{so:{k:fmc,d:false}}), desc:()=>g2set(self,id,{so:{k:fmc,d:true}}),
+      clear:()=>{ const f=Object.assign({},g2st(self,id).f||{}); delete f[fmc]; g2set(self,id,{f}); }, close:()=>g2set(self,id,{fmc:null})};
+  } else v[id+'_fm']={open:false,vals:[]};
+  const total=(sp.total!==false) && sp.cols.some(c=>c.agg);
+  v[id+'_rows']=flat.map(({r,lvl,has})=>{
+    const cells=[]; const exp=(st.x||sp.x0||{});
+    if(sp.sel) cells.push({isSel:true,isData:false,isDel:false,on:!!(st.sel||{})[r.id],selLabel:'Selecionar '+g2text(r,sp.cols[0]),
+      tog:()=>{ const s2=Object.assign({},g2st(self,id).sel||{}); s2[r.id]=!s2[r.id]; g2set(self,id,{sel:s2}); },st:'padding:6px 4px 6px 12px;'});
+    sp.cols.forEach((c,ci)=>{
+      const empty=(has && ci>0 && !(r.p&&r.p[c.k]) && (!r.v || r.v[c.k]===undefined || r.v[c.k]===''));
+      const raw=empty?[]:((r.p&&r.p[c.k]&&r.p[c.k].length)?r.p[c.k]:[{k:(ci===0&&lvl===0&&has?'b':'txt'),t:g2fmt(r.v?r.v[c.k]:'',c)}]);
+      const cell={isSel:false,isData:true,isDel:false,parts:raw.map(p=>g2part(p,v)),pw:'max-width:'+(c.w||340)+'px;',
+        st:'padding:6px 8px;'+(c.a==='r'?'text-align:right;justify-content:flex-end;white-space:nowrap;font-variant-numeric:tabular-nums;':'')+(ci===0&&sp.tree?'padding-left:'+(8+lvl*20)+'px;':'')+(ci===0?'position:sticky;left:0;z-index:1;background:'+(lvl>0?'#FBFCFA':'#FFFFFF')+';box-shadow:1px 0 0 #E4E9E5;':'')};
+      if(ci===0 && sp.tree){ cell.hasCaret=true; cell.caretOk=has; cell.caretNo=!has; const open=!!exp[r.id]||(g2filtering(st)&&has);
+        cell.caretSym=open?'▾':'▸'; cell.caretLabel=(open?'Recolher ':'Expandir ')+g2text(r,c);
+        cell.toggle=()=>{ const x=Object.assign({},g2st(self,id).x||sp.x0||{}); x[r.id]=!x[r.id]; g2set(self,id,{x}); }; }
+      else { cell.hasCaret=false; }
+      cells.push(cell); });
+    if(sp.del){ const asking=(st.cf===r.id); cells.push({isSel:false,isData:false,isDel:true,asking,notAsking:!asking,st:'padding:4px 10px;white-space:nowrap;',
+        delLabel:'Excluir '+g2text(r,sp.cols[0]), ask:()=>g2set(self,id,{cf:r.id}), no:()=>g2set(self,id,{cf:null}),
+        yes:()=>{ const rs=g2clone(g2rows(self,sp)); const rm=(list)=>{ const i=list.findIndex(x=>x.id===r.id); if(i>=0){ list.splice(i,1); return true; } return list.some(x=>x.kids&&rm(x.kids)); }; rm(rs); g2set(self,id,{rows:rs,cf:null}); self.setState({g2toast:'Excluído: '+g2text(r,sp.cols[0])}); if(self.g2after) self.g2after(id,rs,null); }}); }
+    const canOpen=editable && !(ed.leafOnly && has);
+    return {id:r.id, cls:'g2r'+(canOpen?' g2ed':'')+(st.fl===r.id?' g2flash':'')+(lvl>0?' g2kid':''), tab:canOpen?'0':'-1',
+      open:(e)=>{ if(canOpen) g2open(self,sp,r.id,e); }, key:(e)=>{ if(canOpen && e && (e.key==='Enter'||e.key===' ')){ e.preventDefault(); g2open(self,sp,r.id,null); } }, cells}; });
+  v[id+'_count']=flat.filter(x=>x.lvl===0).length; v[id+'_all']=rows.length;
+  v[id+'_empty']=flat.length===0; v[id+'_some']=flat.length>0;
+  v[id+'_q']=st.q||''; v[id+'_setq']=(e)=>g2set(self,id,{q:e.target.value});
+  v[id+'_filtered']=g2filtering(st); v[id+'_clear']=()=>g2set(self,id,{q:'',f:{}});
+  v[id+'_fchips']=Object.keys(st.f||{}).filter(k=>(st.f[k]||[]).length).map(k=>{ const c=sp.cols.find(x=>x.k===k)||{l:k}; return {t:c.l+': '+st.f[k].join(', '), rm:()=>{ const f=Object.assign({},g2st(self,id).f||{}); delete f[k]; g2set(self,id,{f}); }}; });
+  v[id+'_selcount']=Object.values(st.sel||{}).filter(Boolean).length; v[id+'_hassel']=v[id+'_selcount']>0;
+  v[id+'_selclear']=()=>g2set(self,id,{sel:{}});
+  v[id+'_selall']=()=>{ const s2={}; const allOn=flat.every(x=>(st.sel||{})[x.r.id]); if(!allOn) flat.forEach(x=>{ s2[x.r.id]=true; }); g2set(self,id,{sel:s2}); };
+  v[id+'_new']=()=>g2new(self,sp);
+  v[id+'_expall']=()=>{ const x={}; const w=(l)=>l.forEach(r=>{ if(r.kids&&r.kids.length){ x[r.id]=true; w(r.kids);} }); w(rows); g2set(self,id,{x}); };
+  v[id+'_colall']=()=>g2set(self,id,{x:{}});
+  if(total){ v[id+'_tot']=sp.cols.map((c,ci)=>{ const s=c.agg?g2sum(sp,flat,c):null; return {t:(ci===0?'Total':(s===null?'':g2fmt(s,c))), st:'padding:8px 10px;font-weight:800;'+(ci===0?'position:sticky;left:0;z-index:1;background:#F4F6F3;':'')+(c.a==='r'?'text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;':'')}; });
+    v[id+'_totopen']=()=>g2set(self,id,{fm:{tot:true,ro:true,mode:'total',draft:{},orig:{},errs:{}},fmc:null}); }
+  // formulário lateral
+  const fm=st.fm; const F={open:!!fm};
+  if(fm){ const r=fm.rid?g2find(rows,fm.rid):null;
+    F.isTot=!!fm.tot; F.isRec=!fm.tot;
+    F.title=fm.tot?('Composição do total'):(fm.isNew?(ed.newTitle||'Novo registro'):((ed.title?ed.title+' · ':'')+(r?g2text(r,sp.cols[0]):'')));
+    F.sub=fm.tot?'Linhas que formam o total, com os filtros atuais. Totais são calculados: altere os registros de origem.':(fm.ro?(fm.mode==='origin'?'Valor calculado — consulte a origem abaixo. Para mudar, altere o registro de origem.':(r&&r.ro?'Consulta: você não tem permissão para editar este registro.':'Consulta')):(ed.sub||'Altere os campos e salve. Os cálculos da tabela são refeitos ao salvar.'));
+    F.ro=!!fm.ro; F.edit=!fm.ro; F.warn=!!fm.warn;
+    F.items=fm.tot? flat.filter(x=>x.lvl===0).map(x=>({t:g2text(x.r,sp.cols[0]), v:sp.cols.filter(c=>c.agg).map(c=>c.l+': '+g2text(x.r,c)).join(' · ')})):[];
+    F.origins=(r&&r.o)?r.o.map(o=>({t:o.t,h:o.h||'#',isLink:!!o.h,isTxt:!o.h})):[]; F.hasOrigins=F.origins.length>0;
+    const visf=(ed.fields||[]).filter(f=>!f.cond || String(fm.draft[f.cond.k])===String(f.cond.eq));
+    F.fields=fm.tot?[]:visf.map(f=>{ let val=fm.draft[f.k]; if(f.live&&self.g2live){ const lv=self.g2live(id,f.k,fm.draft); if(lv!==undefined&&lv!==null) val=lv; } const err=(fm.errs||{})[f.k]; const dis=!!fm.ro||!!f.ro||(!!f.newOnly&&!fm.isNew); const mv=(String(val||'').split(';').map(x=>x.trim()).filter(Boolean));
+      return {l:f.l, fid:'fx_'+id+'_'+f.k, isSel:f.t==='sel', isMulti:f.t==='multi', isTxt:(f.t!=='sel'&&f.t!=='area'&&f.t!=='multi'), isArea:f.t==='area', type:(f.t==='date'?'date':(f.t==='email'?'email':(f.t==='tel'?'tel':'text'))),
+        mopts:(f.t==='multi'?(f.opts||[]).map(o=>({t:o,on:mv.indexOf(o)>=0,dis,tog:()=>{ const cur=g2st(self,id).fm; if(!cur||dis) return; let a=String(cur.draft[f.k]||'').split(';').map(x=>x.trim()).filter(Boolean); const i=a.indexOf(o); if(i>=0) a.splice(i,1); else a.push(o); const d=Object.assign({},cur.draft,{[f.k]:a.join('; ')}); const er=Object.assign({},cur.errs||{}); delete er[f.k]; g2set(self,id,{fm:Object.assign({},cur,{draft:d,errs:er,warn:false})}); }})):[]), v:(val===undefined?'':val), u:f.u||'', hasU:!!f.u, help:f.help||'', hasHelp:!!f.help,
+        dis, err:!!err, errMsg:err||'', ist:'font-family:inherit;font-size:14px;padding:9px 11px;border-radius:10px;box-sizing:border-box;width:100%;border:1px solid '+(err?'#B42318':'#E4E9E5')+';background:'+(dis?'#F4F6F3':'#FFFFFF')+';color:#15201A;',
+        opts:(f.opts||[]).map(o=>({v:o,t:o})),
+        set:(e)=>{ const cur=g2st(self,id).fm; if(!cur) return; const d=Object.assign({},cur.draft,{[f.k]:e.target.value}); const er=Object.assign({},cur.errs||{}); delete er[f.k]; g2set(self,id,{fm:Object.assign({},cur,{draft:d,errs:er,warn:false})}); }}; });
+    F.nerr=Object.keys(fm.errs||{}).length; F.hasErr=F.nerr>0;
+    F.save=()=>g2save(self,sp); F.cancel=()=>g2close(self,sp); F.close=()=>g2close(self,sp);
+    F.discard=()=>g2set(self,id,{fm:null}); F.keep=()=>{ const cur=g2st(self,id).fm; g2set(self,id,{fm:Object.assign({},cur,{warn:false})}); };
+    F.key=(e)=>{ if(e && e.key==='Escape'){ e.preventDefault(); g2close(self,sp); } };
+  }
+  v[id+'_F']=F; }
+function g2navvals(self,v,nav){ (nav||[]).forEach((m,i)=>{ const o=(self.state.nav||{}); const open=(o[i]===undefined)?!!m.open:!!o[i];
+  v['nav'+i+'_open']=open; v['nav'+i+'_sym']=open?'▾':'▸'; v['nav'+i+'_tog']=()=>{ const n=Object.assign({},self.state.nav||{}); n[i]=!open; self.setState({nav:n}); }; }); }
+
+// faixa de etapas controlada pelo estado da tela (processos numa só tela de trabalho)
+function g2steps(self,v,pre,n,cur,whys,go){ for(let i=1;i<=n;i++){ const on=(i===cur); const w=(whys&&whys[i])||'';
+  v[pre+i+'_st']='display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:10px;border:0;font-family:inherit;cursor:pointer;text-align:left;min-width:0;color:#15201A;'+(on?'background:#E4F3E9;box-shadow:inset 0 -2px 0 #1E7A4C;':'background:transparent;');
+  v[pre+i+'_bst']='width:22px;height:22px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;flex-shrink:0;'+(on?'background:#1E7A4C;color:#fff;':(w?'background:#FDE8E6;color:#B42318;':'background:#EEF1EE;color:#15201A;'));
+  v[pre+i+'_tst']='font-size:12.5px;line-height:1.2;font-weight:'+(on?'800':'600')+';';
+  v[pre+i+'_why']=w; v[pre+i+'_hasWhy']=!!w; v[pre+i+'_cur']=on?'step':'false';
+  v[pre+i+'_go']=()=>go(i); } }
+
+const CEN0 = {"v": 1, "rev": 0, "ordens": {"OS-0415": {"id": "OS-0415", "tipo": "Dessecação pós-colheita", "talhao": "T3", "area": 96, "etapa": "Encerradas", "versao": "v1 aprovada", "aprov": true, "realizado": 96, "saldo": 0, "resp": "Marcos", "ins": [{"p": "Glifosato 480", "dose": 2.0, "un": "L", "tot": 192.0, "emb": "galão 20 L"}], "req": null, "selos": [], "ap": [{"d": "11/09", "dia": 1, "ha": 48, "st": "Conferido", "sinc": true, "origem": "web"}, {"d": "12/09", "dia": 2, "ha": 48, "st": "Conferido", "sinc": true, "origem": "web"}], "reservado": false}, "OS-0417": {"id": "OS-0417", "tipo": "Adubação de cobertura", "talhao": "P1", "area": 95, "etapa": "Em conferência", "versao": "v1 aprovada", "aprov": true, "realizado": 95, "saldo": 0, "resp": "Paula", "ins": [{"p": "MAP 11-52", "dose": 36.84, "un": "kg", "tot": 3500, "emb": "saco 50 kg"}], "req": "REQ-031", "selos": [{"t": "Sobras a receber", "c": "yellow"}], "ap": [{"d": "19/09", "dia": 1, "ha": 32, "st": "Conferido", "sinc": true, "origem": "web"}, {"d": "20/09", "dia": 2, "ha": 33, "st": "Conferido", "sinc": true, "origem": "web"}, {"d": "21/09", "dia": 3, "ha": 30, "st": "Conferido", "sinc": true, "origem": "web"}], "reservado": true}, "OS-0418": {"id": "OS-0418", "tipo": "Fertirrigação · reclassificada", "talhao": "P1", "area": 95, "etapa": "A liberar", "versao": "v2 em revisão", "aprov": false, "realizado": 0, "saldo": 95, "resp": "João", "ins": [{"p": "Ureia 45%", "dose": 12.0, "un": "kg", "tot": 1140.0, "emb": "saco 50 kg"}], "req": "REQ-038", "selos": [{"t": "Aguardando agrônomo", "c": "yellow"}], "ap": [], "reservado": false}, "OS-0419": {"id": "OS-0419", "tipo": "Irrigação · água", "talhao": "P2", "area": 80, "etapa": "Liberadas", "versao": "v1 · liberada pela prontidão operacional", "aprov": false, "realizado": 0, "saldo": 80, "resp": "João", "ins": [], "req": null, "selos": [], "ap": [], "reservado": false}, "OS-0420": {"id": "OS-0420", "tipo": "Plantio · Soja 58 W", "talhao": "T4", "area": 100, "etapa": "Em execução", "versao": "v2 aprovada · v3 em revisão", "aprov": true, "realizado": 30, "saldo": 70, "resp": "Carlos", "ins": [{"p": "Semente de soja 58 W", "dose": 52.0, "un": "kg", "tot": 5200.0, "emb": "saco 40 kg"}, {"p": "MAP 11-52", "dose": 250.0, "un": "kg", "tot": 25000.0, "emb": "saco 50 kg"}], "req": "REQ-036", "selos": [{"t": "Impedida · ativo bloqueado", "c": "red"}, {"t": "Revisão de saldo pendente · v3", "c": "yellow"}], "ap": [{"d": "21/09", "dia": 1, "ha": 18, "st": "Conferido", "sinc": true, "origem": "web"}, {"d": "22/09", "dia": 2, "ha": 12, "st": "Provisório", "sinc": true, "origem": "web"}], "reservado": true}, "OS-0421": {"id": "OS-0421", "tipo": "Pulverização · Fungicida 1ª aplicação", "talhao": "T1+T2", "area": 350, "etapa": "Em execução", "versao": "v2 aprovada", "aprov": true, "realizado": 190, "saldo": 160, "resp": "Marcos", "ins": [{"p": "Fungicida A", "dose": 0.5, "un": "L", "tot": 175.0, "emb": "galão 5 L"}, {"p": "Adjuvante espalhante", "dose": 0.25, "un": "L", "tot": 87.5, "emb": "galão 5 L"}], "req": "REQ-035", "selos": [{"t": "Parcial · dia 4 de 7", "c": "yellow"}], "ap": [{"d": "20/09", "dia": 1, "ha": 50, "st": "Conferido", "sinc": true, "origem": "web"}, {"d": "21/09", "dia": 2, "ha": 50, "st": "Conferido", "sinc": true, "origem": "web"}, {"d": "22/09", "dia": 3, "ha": 50, "st": "Conferido", "sinc": true, "origem": "web"}, {"d": "23/09", "dia": 4, "ha": 40, "st": "Provisório", "sinc": true, "origem": "web"}, {"d": "24/09", "dia": 5, "ha": 50, "st": "Previsto", "sinc": true, "origem": "web"}, {"d": "25/09", "dia": 6, "ha": 50, "st": "Previsto", "sinc": true, "origem": "web"}, {"d": "26/09", "dia": 7, "ha": 60, "st": "Previsto", "sinc": true, "origem": "web"}], "reservado": true}, "OS-0422": {"id": "OS-0422", "tipo": "Irrigação · água", "talhao": "P2", "area": 80, "etapa": "A liberar", "versao": "v1 · só água · libera pela prontidão", "aprov": false, "realizado": 0, "saldo": 80, "resp": "João", "ins": [], "req": null, "selos": [{"t": "Janela a definir", "c": "yellow"}], "ap": [], "reservado": false}, "OS-0423": {"id": "OS-0423", "tipo": "Irrigação · água por gotejo", "talhao": "T7", "area": 42, "etapa": "A liberar", "versao": "v1 · só água · libera pela prontidão", "aprov": false, "realizado": 0, "saldo": 42, "resp": "João", "ins": [], "req": null, "selos": [{"t": "Conflito · parada da B3", "c": "red"}], "ap": [], "reservado": false}, "OS-0424": {"id": "OS-0424", "tipo": "Pulverização · Fungicida A", "talhao": "P2", "area": 80, "etapa": "Liberadas", "versao": "v1 aprovada", "aprov": true, "realizado": 0, "saldo": 80, "resp": "Marcos", "ins": [{"p": "Fungicida A", "dose": 0.8, "un": "L", "tot": 64.0, "emb": "galão 5 L"}], "req": "REQ-039", "selos": [], "ap": [], "reservado": true}, "OS-0425": {"id": "OS-0425", "tipo": "Adubação 1ª parcela · café", "talhao": "C1", "area": 38, "etapa": "Liberadas", "versao": "plano CAFE-AR · v1 aprovada", "aprov": true, "realizado": 0, "saldo": 38, "resp": "Paula", "ins": [{"p": "NPK 20-05-20", "dose": 300.0, "un": "kg", "tot": 11400.0, "emb": "big bag 1.000 kg"}], "req": "REQ-040", "selos": [{"t": "Entrega sem saldo suficiente", "c": "yellow"}], "ap": [], "reservado": true}, "OS-0430": {"id": "OS-0430", "tipo": "Dessecação pré-plantio", "talhao": "T1-A", "area": 160, "etapa": "A liberar", "versao": "v1 emitida", "aprov": false, "realizado": 0, "saldo": 160, "resp": "Marcos", "ins": [{"p": "Glifosato 480", "dose": 2.0, "un": "L", "tot": 320.0, "emb": "galão 20 L"}, {"p": "2,4-D 806", "dose": 1.0, "un": "L", "tot": 160.0, "emb": "galão 20 L"}, {"p": "Óleo mineral", "dose": 0.5, "un": "L", "tot": 80.0, "emb": "galão 20 L"}], "req": null, "selos": [{"t": "Aguardando agrônomo", "c": "yellow"}], "ap": [], "reservado": false}, "OS-0431": {"id": "OS-0431", "tipo": "Plantio · Soja 58 W", "talhao": "T2", "area": 102, "etapa": "A liberar", "versao": "REC-014 v2 · v1 aprovada", "aprov": true, "realizado": 0, "saldo": 102, "resp": "Carlos", "ins": [{"p": "Semente de soja 58 W", "dose": 52.0, "un": "kg", "tot": 5304.0, "emb": "saco 40 kg"}, {"p": "MAP 11-52", "dose": 250.0, "un": "kg", "tot": 25500.0, "emb": "saco 50 kg"}], "req": null, "selos": [{"t": "Aprovada pelo agrônomo", "c": "green"}, {"t": "Falta máquina · Trator T1 bloqueado", "c": "red"}], "ap": [], "reservado": false}, "OB-0104": {"id": "OB-0104", "tipo": "Beneficiamento · grãos", "talhao": "Armazém Sede", "area": 0, "etapa": "Encerradas", "versao": "rota aprovada", "aprov": true, "realizado": 0, "saldo": 0, "resp": "Rui", "ins": [], "req": null, "selos": [{"t": "Lote bloqueado", "c": "red"}], "ap": [], "reservado": false}}, "reqs": {"REQ-031": {"id": "REQ-031", "os": "OS-0417", "estado": "Em conferência", "itens": [{"prod": "MAP 11-52", "lote": "M26-07", "un": "kg", "emb": "saco 50 kg", "solicitado": 5000, "entregue": 5000, "consumido": 3500, "devolvido": 1000, "custodia": 500, "confirmado": true}]}, "REQ-035": {"id": "REQ-035", "os": "OS-0421", "estado": "Em execução", "itens": [{"prod": "Fungicida A", "lote": "F26-02", "un": "L", "emb": "galão 5 L", "solicitado": 175, "entregue": 160, "consumido": 95, "devolvido": 0, "custodia": 65, "confirmado": true}]}, "REQ-036": {"id": "REQ-036", "os": "OS-0420", "estado": "Impedida · ativo bloqueado", "itens": [{"prod": "Semente de soja 58 W", "lote": "S58-0801", "un": "kg", "emb": "saco 40 kg", "solicitado": 5200, "entregue": 1560, "consumido": 1560, "devolvido": 0, "custodia": 0, "confirmado": false}]}, "REQ-038": {"id": "REQ-038", "os": "OS-0418", "estado": "Aguardando aprovação da O.S.", "itens": [{"prod": "Ureia 45%", "lote": "—", "un": "kg", "emb": "saco 50 kg", "solicitado": 1140, "entregue": 0, "consumido": 0, "devolvido": 0, "custodia": 0, "confirmado": false}]}, "REQ-039": {"id": "REQ-039", "os": "OS-0424", "estado": "Reservada", "itens": [{"prod": "Fungicida A", "lote": "F26-02", "un": "L", "emb": "galão 5 L", "solicitado": 65, "entregue": 0, "consumido": 0, "devolvido": 0, "custodia": 0, "confirmado": false}]}, "REQ-040": {"id": "REQ-040", "os": "OS-0425", "estado": "Reservada", "itens": [{"prod": "NPK 20-05-20", "lote": "N26-03", "un": "kg", "emb": "big bag 1.000 kg", "solicitado": 8000, "entregue": 0, "consumido": 0, "devolvido": 0, "custodia": 0, "confirmado": false}]}}, "lotes": {"KCl 60%|K26-11": {"prod": "KCl 60%", "lote": "K26-11", "local": "Galpão 2", "un": "kg", "fisico": 60000, "quarentena": 10000, "reservado": 0, "validade": "—"}, "MAP 11-52|M26-07": {"prod": "MAP 11-52", "lote": "M26-07", "local": "Galpão 2", "un": "kg", "fisico": 90000, "quarentena": 0, "reservado": 0, "validade": "—"}, "Fungicida A|F26-02": {"prod": "Fungicida A", "lote": "F26-02", "local": "Almox. defensivos", "un": "L", "fisico": 545, "quarentena": 0, "reservado": 65, "validade": "03/2028"}, "Glifosato 480|G26-14": {"prod": "Glifosato 480", "lote": "G26-14", "local": "Almox. defensivos", "un": "L", "fisico": 1200, "quarentena": 0, "reservado": 0, "validade": "11/2027"}, "Semente de soja 58 W|S58-0801": {"prod": "Semente de soja 58 W", "lote": "S58-0801", "local": "Câmara fria", "un": "kg", "fisico": 12000, "quarentena": 0, "reservado": 0, "validade": "06/2027"}, "NPK 20-05-20|N26-03": {"prod": "NPK 20-05-20", "lote": "N26-03", "local": "Galpão 1", "un": "kg", "fisico": 8000, "quarentena": 0, "reservado": 8000, "validade": "—"}, "Óleo mineral|O26-05": {"prod": "Óleo mineral", "lote": "O26-05", "local": "Almox. defensivos", "un": "L", "fisico": 400, "quarentena": 0, "reservado": 0, "validade": "08/2028"}, "2,4-D 806|D26-01": {"prod": "2,4-D 806", "lote": "D26-01", "local": "Almox. defensivos", "un": "L", "fisico": 300, "quarentena": 0, "reservado": 0, "validade": "12/2027"}, "Acaricida D|AD26-02": {"prod": "Acaricida D", "lote": "AD26-02", "local": "Almox. defensivos", "un": "L", "fisico": 10, "quarentena": 0, "reservado": 0, "validade": "12/2027"}, "Adjuvante espalhante|AE26-03": {"prod": "Adjuvante espalhante", "lote": "AE26-03", "local": "Almox. defensivos", "un": "L", "fisico": 150, "quarentena": 0, "reservado": 0, "validade": "12/2027"}, "Cletodim 240|C26-05": {"prod": "Cletodim 240", "lote": "C26-05", "local": "Almox. defensivos", "un": "L", "fisico": 80, "quarentena": 0, "reservado": 0, "validade": "12/2027"}, "Fungicida TS|FT26-09": {"prod": "Fungicida TS", "lote": "FT26-09", "local": "Almox. defensivos", "un": "L", "fisico": 20, "quarentena": 0, "reservado": 0, "validade": "12/2027"}, "Inoculante líquido|IL26-11": {"prod": "Inoculante líquido", "lote": "IL26-11", "local": "Almox. defensivos", "un": "L", "fisico": 50, "quarentena": 0, "reservado": 0, "validade": "12/2027"}, "Inseticida B|IB26-12": {"prod": "Inseticida B", "lote": "IB26-12", "local": "Almox. defensivos", "un": "L", "fisico": 60, "quarentena": 0, "reservado": 0, "validade": "12/2027"}, "Nitrato de cálcio|ND26-16": {"prod": "Nitrato de cálcio", "lote": "ND26-16", "local": "Galpão 1", "un": "kg", "fisico": 1000, "quarentena": 0, "reservado": 0, "validade": "12/2027"}, "Nitrato de potássio|ND26-17": {"prod": "Nitrato de potássio", "lote": "ND26-17", "local": "Galpão 1", "un": "kg", "fisico": 600, "quarentena": 0, "reservado": 0, "validade": "12/2027"}}, "movs": [], "ocorr": [], "app": {"online": true, "fila": [], "turno": null, "operador": "Marcos"}};
+// ===== Cenário compartilhado de demonstração (O.S. ↔ Estoque ↔ App de campo) =====
+// Um único estado gravado no navegador (localStorage), lido e alterado pelas telas O.S., Estoque e App.
+// Sem localStorage (janela privada, pré-visualização) o cenário vale só para a tela aberta.
+// Regras: PRD 41 (liberação e fichas), 42 (almoxarifado: reserva ao liberar, entrega só do saldo elegível, consumo pelo apontamento,
+// sobra devolvida e conferida), 64 (app de campo: fila, turno, apontamento offline sem duplicar), 72 (DEC-2609-04/05/07).
+const CEN_KEY = 'talhao-os-cenario-v1';
+let CEN_MEM = null;
+function cenClone(o) { return JSON.parse(JSON.stringify(o)); }
+function cenLoad() { try { const t = localStorage.getItem(CEN_KEY); return t ? JSON.parse(t) : null; } catch (e) { return null; } }
+function cenSave(c) { CEN_MEM = c; try { localStorage.setItem(CEN_KEY, JSON.stringify(c)); } catch (e) {} }
+function cenGet() { const c = cenLoad() || CEN_MEM; if (c && c.v === CEN0.v) return c; CEN_MEM = cenClone(CEN0); return CEN_MEM; }
+function cenReset() { CEN_MEM = cenClone(CEN0); try { localStorage.removeItem(CEN_KEY); } catch (e) {} }
+function cenAgora() { const d = new Date(); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
+// Mudança atômica: aplica fn numa cópia, grava e devolve a mensagem (ou o erro, sem gravar nada).
+function cenMudar(self, fn) {
+  const c = cenClone(cenGet()); let r;
+  try { r = fn(c) || {}; } catch (e) { r = { erro: String(e.message || e) }; }
+  if (r.erro) { if (self) self.setState({ g2toast: r.erro }); return r; }
+  c.rev = (c.rev || 0) + 1; cenSave(c); if (self) self.setState({ cenrev: c.rev, g2toast: r.msg || '' }); return r;
+}
+// Outras telas (outros quadros do Canvas) atualizam quando o cenário muda.
+function cenOuvir(self) {
+  if (self.__cenOuvindo) return; self.__cenOuvindo = true;
+  try { window.addEventListener('storage', (e) => { if (e.key === CEN_KEY) self.setState({ cenrev: Date.now() }); }); } catch (e) {}
+}
+function cenNum(n, d) { return Number(n || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: d === undefined ? 2 : d }); }
+function cenLote(c, prod) { return Object.values(c.lotes).filter(l => l.prod === prod).sort((a, b) => (b.fisico - b.reservado - b.quarentena) - (a.fisico - a.reservado - a.quarentena))[0] || null; }
+function cenDisp(l) { return Math.max(0, (l.fisico || 0) - (l.quarentena || 0) - (l.reservado || 0)); }
+function cenMov(c, m) { m.id = 'MV-' + (1000 + c.movs.length + 1); m.at = m.at || cenAgora(); c.movs.push(m); return m; }
+
+// ---------- O.S. (web) ----------
+// Liberar: exige versão aprovada; reserva cada insumo no lote com saldo (a reserva nunca passa do disponível).
+function cenLiberar(c, id) {
+  const o = c.ordens[id]; if (!o) throw new Error('Ordem não encontrada.');
+  if (o.etapa !== 'A liberar') throw new Error(id + ' não está em A liberar.');
+  if (!o.aprov) throw new Error('Aprove a versão antes de liberar.');
+  const rid = o.req || ('REQ-' + (41 + Object.keys(c.reqs).length));
+  const req = c.reqs[rid] || (c.reqs[rid] = { id: rid, os: id, itens: [], estado: 'Reservada' });
+  (o.ins || []).forEach(x => {
+    const l = cenLote(c, x.p); if (!l) throw new Error('Sem lote de ' + x.p + ' no Estoque.');
+    if (cenDisp(l) + 1e-9 < x.tot) throw new Error('Saldo insuficiente de ' + x.p + ': ' + cenNum(cenDisp(l)) + ' ' + x.un + ' disponíveis para ' + cenNum(x.tot) + ' ' + x.un + '.');
+    l.reservado += x.tot;
+    req.itens.push({ prod: x.p, lote: l.lote, un: x.un, emb: x.emb || '', solicitado: x.tot, entregue: 0, consumido: 0, devolvido: 0, custodia: 0 });
+    cenMov(c, { tipo: 'reserva', req: rid, os: id, prod: x.p, lote: l.lote, qtd: x.tot, un: x.un, quem: 'Sistema', origem: 'web' });
+  });
+  o.req = rid; o.reservado = true; o.etapa = 'Liberadas'; o.selos = (o.selos || []).filter(s => !/Aguardando|Aprovada/.test(s.t));
+  return { msg: id + ' liberada. ' + rid + ' reservou no Estoque: ' + req.itens.map(i => i.prod + ' ' + cenNum(i.solicitado) + ' ' + i.un).join(', ') + '.' };
+}
+
+// ---------- Estoque (almoxarife) ----------
+// Saldo a entregar = solicitado − consumido − em custódia (PRD 42.1); só para O.S. Liberadas ou Em execução.
+function cenSaldoEntregar(it) { return Math.max(0, it.solicitado - it.consumido - it.custodia); }
+function cenEntregar(c, rid, prod, qtd, quem) {
+  const r = c.reqs[rid]; const o = r && c.ordens[r.os]; if (!r || !o) throw new Error('Requisição não encontrada.');
+  if (['Liberadas', 'Em execução'].indexOf(o.etapa) < 0) throw new Error('Entregue só para O.S. liberada ou em execução (' + r.os + ' está em ' + o.etapa + ').');
+  const it = r.itens.find(i => i.prod === prod); if (!it) throw new Error(prod + ' não está na ' + rid + '.');
+  const l = c.lotes[prod + '|' + it.lote]; if (!l) throw new Error('Lote ' + it.lote + ' de ' + prod + ' não encontrado no Estoque.');
+  if (!(qtd > 0)) throw new Error('Informe a quantidade.');
+  if (qtd > cenSaldoEntregar(it) + 1e-9) throw new Error('Acima do saldo a entregar: ' + cenNum(cenSaldoEntregar(it)) + ' ' + it.un + '.');
+  if (qtd > l.fisico - l.quarentena + 1e-9) throw new Error('O lote ' + it.lote + ' não tem ' + cenNum(qtd) + ' ' + it.un + ' livres.');
+  l.fisico -= qtd; l.reservado = Math.max(0, l.reservado - qtd); it.entregue += qtd; it.custodia += qtd; it.quem = quem || o.resp;
+  r.estado = 'Entregue'; cenMov(c, { tipo: 'entrega', req: rid, os: r.os, prod, lote: it.lote, qtd, un: it.un, quem: 'Rui (almoxarife) → ' + (quem || o.resp), origem: 'web' });
+  return { msg: cenNum(qtd) + ' ' + it.un + ' de ' + prod + ' entregues a ' + (quem || o.resp) + ' (' + r.os + '). Aguarda confirmação no app.' };
+}
+// Devolução conferida: só o recebido e conferido volta ao disponível; material bloqueado não volta.
+function cenDevolver(c, rid, prod, qtd, apto) {
+  const r = c.reqs[rid]; const it = r && r.itens.find(i => i.prod === prod); if (!it) throw new Error('Item não encontrado.');
+  if (!(qtd > 0) || qtd > it.custodia + 1e-9) throw new Error('Devolva até ' + cenNum(it.custodia) + ' ' + it.un + ' em custódia.');
+  const l = c.lotes[prod + '|' + it.lote]; if (!l) throw new Error('Lote ' + it.lote + ' de ' + prod + ' não encontrado no Estoque.');
+  it.custodia -= qtd; it.devolvido += qtd;
+  if (apto) l.fisico += qtd; else { l.fisico += qtd; l.quarentena += qtd; }
+  cenMov(c, { tipo: 'devolucao', req: rid, os: r.os, prod, lote: it.lote, qtd, un: it.un, quem: 'Rui (almoxarife)', origem: 'web', apto: !!apto });
+  return { msg: cenNum(qtd) + ' ' + it.un + ' de ' + prod + ' devolvidos' + (apto ? ' ao disponível.' : ' e bloqueados para inspeção.') };
+}
+
+// Recebimento de fornecedor: conferido entra no lote (novo ou existente); com avaria ou sem laudo entra bloqueado (quarentena).
+function cenReceber(c, prod, lote, qtd, un, local, validade, doc, apto) {
+  if (!prod || !lote) throw new Error('Informe produto e lote.'); if (!(qtd > 0)) throw new Error('Informe a quantidade recebida.');
+  if (!doc) throw new Error('Informe a nota fiscal ou o documento de entrada.');
+  const k = prod + '|' + lote; const l = c.lotes[k] || (c.lotes[k] = { prod, lote, local: local || 'Almox. defensivos', un: un || 'L', fisico: 0, quarentena: 0, reservado: 0, validade: validade || '' });
+  if (l.un !== (un || l.un)) throw new Error('Unidade diferente do lote ' + lote + ' (' + l.un + ').');
+  l.fisico += qtd; if (!apto) l.quarentena += qtd;
+  cenMov(c, { tipo: 'recebimento-nf', prod, lote, qtd, un: l.un, quem: 'Rui (almoxarife)', origem: 'web', doc, apto: !!apto });
+  return { msg: cenNum(qtd) + ' ' + l.un + ' de ' + prod + ' recebidos no lote ' + lote + ' (' + l.local + ')' + (apto ? '.' : ' e bloqueados até a inspeção.') };
+}
+function cenLiberarQuarentena(c, key) { const l = c.lotes[key]; if (!l || !(l.quarentena > 0)) throw new Error('Nada bloqueado neste lote.');
+  const q = l.quarentena; l.quarentena = 0; cenMov(c, { tipo: 'inspecao', prod: l.prod, lote: l.lote, qtd: q, un: l.un, quem: 'Rui (almoxarife)', origem: 'web' });
+  return { msg: cenNum(q) + ' ' + l.un + ' do lote ' + l.lote + ' liberados após inspeção.' }; }
+// Inventário: contagem cega por lote; diferença vira ajuste pendente (o saldo só muda com a aprovação do gestor).
+function cenContar(c, key, contado) { const l = c.lotes[key]; if (!l) throw new Error('Lote não encontrado.');
+  if (!(contado >= 0) || contado === '' || contado === null) throw new Error('Informe a quantidade contada.');
+  const dif = contado - l.fisico; c.ajustes = c.ajustes || [];
+  if (Math.abs(dif) < 1e-9) { cenMov(c, { tipo: 'contagem', prod: l.prod, lote: l.lote, qtd: 0, un: l.un, quem: 'Rui (almoxarife)', origem: 'web' }); return { msg: 'Contagem confere: ' + cenNum(contado) + ' ' + l.un + ' no lote ' + l.lote + '.' }; }
+  if (contado + 1e-9 < l.reservado + l.quarentena) throw new Error('Contagem abaixo do reservado e bloqueado (' + cenNum(l.reservado + l.quarentena) + ' ' + l.un + '). Recontar antes de ajustar.');
+  const aj = { id: 'AJ-' + (70 + c.ajustes.length + 1), key, prod: l.prod, lote: l.lote, un: l.un, sistema: l.fisico, contado, dif, estado: 'Aguardando gestor' }; c.ajustes.push(aj);
+  return { msg: 'Divergência de ' + cenNum(dif) + ' ' + l.un + ' no lote ' + l.lote + ' · ' + aj.id + ' aguarda o gestor. O saldo não muda até a aprovação.' }; }
+function cenAprovarAjuste(c, id, aprovar) { const aj = (c.ajustes || []).find(a => a.id === id); if (!aj || aj.estado !== 'Aguardando gestor') throw new Error('Ajuste não está pendente.');
+  const l = c.lotes[aj.key]; if (aprovar) { l.fisico = aj.contado; aj.estado = 'Aprovado'; cenMov(c, { tipo: 'ajuste', prod: aj.prod, lote: aj.lote, qtd: aj.dif, un: aj.un, quem: 'Ana (gestora)', origem: 'web' }); }
+  else aj.estado = 'Recusado';
+  return { msg: aj.id + (aprovar ? ' aprovado: lote ' + aj.lote + ' passa a ' + cenNum(aj.contado) + ' ' + aj.un + '.' : ' recusado: recontar o lote ' + aj.lote + '.') }; }
+
+// ---------- App de campo ----------
+function cenOnline(c) { return c.app.online !== false; }
+function cenConfirmarRecebimento(c, rid) {
+  const r = c.reqs[rid]; if (!r) throw new Error('Requisição não encontrada.');
+  const pend = r.itens.filter(i => i.custodia > 0 && !i.confirmado); if (!pend.length) throw new Error('Nada entregue para confirmar.');
+  pend.forEach(i => { i.confirmado = true; });
+  const m = cenMov(c, { tipo: 'recebimento', req: rid, os: r.os, qtd: 0, quem: c.app.operador, origem: 'app', sinc: cenOnline(c),
+    itens: pend.map(i => ({ prod: i.prod, lote: i.lote, qtd: i.custodia, un: i.un })) });
+  if (!m.sinc) c.app.fila.push(m.id);
+  return { msg: 'Recebimento confirmado: ' + pend.map(i => i.prod + ' ' + cenNum(i.custodia) + ' ' + i.un).join(', ') + (m.sinc ? '.' : '. Salvo no aparelho; envia quando houver sinal.') };
+}
+function cenIniciarTurno(c, id) {
+  const o = c.ordens[id]; if (!o) throw new Error('Ordem não encontrada.');
+  if (['Liberadas', 'Em execução'].indexOf(o.etapa) < 0) throw new Error(id + ' não está liberada para execução.');
+  if (c.app.turno && !c.app.turno.fim) throw new Error('Feche o turno aberto antes de iniciar outro.');
+  c.app.turno = { os: id, ini: cenAgora(), pausas: [], fim: null };
+  if (o.etapa === 'Liberadas') { o.etapa = 'Em execução'; }
+  return { msg: 'Turno iniciado em ' + id + ' às ' + c.app.turno.ini + '.' };
+}
+function cenPausar(c) { const t = c.app.turno; if (!t || t.fim) throw new Error('Nenhum turno aberto.');
+  const p = t.pausas[t.pausas.length - 1]; if (p && !p.fim) { p.fim = cenAgora(); return { msg: 'Turno retomado.' }; }
+  t.pausas.push({ ini: cenAgora(), fim: null }); return { msg: 'Turno pausado.' }; }
+// Fechar turno: registra hectares, horas e consumo (dose × área, ajustável). Fechar o turno não encerra a O.S.
+function cenFecharTurno(c, ha, horas, consumo, obs) {
+  const t = c.app.turno; if (!t || t.fim) throw new Error('Nenhum turno aberto.');
+  const o = c.ordens[t.os]; if (!(ha > 0)) throw new Error('Informe os hectares feitos.');
+  const haPend = (o.ap || []).filter(a => a.sinc === false).reduce((s, a) => s + (a.ha || 0), 0);   // apontado no aparelho, ainda sem sinal
+  const saldoApp = Math.max(0, o.saldo - haPend);
+  if (ha > saldoApp + 1e-9) throw new Error('Máximo ' + cenNum(saldoApp) + ' ha: é o saldo da ordem' + (haPend ? ' descontando ' + cenNum(haPend) + ' ha ainda no aparelho.' : '.'));
+  if (!(horas > 0)) throw new Error('Informe as horas trabalhadas.');
+  t.fim = cenAgora();
+  const cons = consumo || {}; (o.ins || []).forEach(x => { if (cons[x.p] === undefined) cons[x.p] = x.dose * ha; });
+  const r = o.req && c.reqs[o.req];
+  if (r) for (const it of r.itens) { const q = cons[it.prod] || 0; if (q > it.custodia + 1e-9) throw new Error('Consumo de ' + it.prod + ' (' + cenNum(q) + ' ' + it.un + ') acima do que está com você (' + cenNum(it.custodia) + ' ' + it.un + '). Confira a retirada.'); }
+  if (r) r.itens.forEach(it => { const q = cons[it.prod] || 0; it.consumido += q; it.custodia -= q; });
+  const dia = (o.ap || []).filter(a => a.st !== 'Previsto').length + 1;
+  const ap = { d: new Date().toLocaleDateString('pt-BR').slice(0, 5), dia, ha, h: horas, st: 'Provisório', cons, obs: obs || '', origem: 'app', sinc: cenOnline(c) };
+  o.ap = (o.ap || []).filter(a => a.st !== 'Previsto').concat([ap]);
+  if (ap.sinc) { o.realizado += ha; o.saldo = Math.max(0, o.saldo - ha); } else { c.app.fila.push('AP|' + t.os + '|' + dia); }
+  const m = cenMov(c, { tipo: 'consumo', os: t.os, req: o.req || '', qtd: 0, quem: c.app.operador, origem: 'app', sinc: ap.sinc, det: Object.keys(cons).map(k => k + ' ' + cenNum(cons[k], 1)).join(', ') });
+  ap.mov = m.id;
+  c.app.turno = null;
+  return { msg: 'Turno fechado: ' + cenNum(ha, 1) + ' ha em ' + cenNum(horas, 1) + ' h' + (ap.sinc ? '.' : ' · salvo no aparelho, envia quando houver sinal.') + ' A ordem continua em execução.' };
+}
+function cenOcorrencia(c, id, tipo, texto) { if (!texto) throw new Error('Descreva a ocorrência.');
+  const oc = { id: 'OC-' + (500 + c.ocorr.length + 1), os: id, tipo, texto, at: cenAgora(), sinc: cenOnline(c) }; c.ocorr.push(oc); if (!oc.sinc) c.app.fila.push(oc.id);
+  return { msg: 'Ocorrência ' + oc.id + ' registrada' + (oc.sinc ? '.' : ' no aparelho.') }; }
+// Sinal: sem sinal tudo vai para a fila; ao voltar, a fila é enviada uma vez só (sem duplicar).
+function cenSinal(c, online) {
+  c.app.online = !!online; if (!online) return { msg: 'Sem sinal: o app continua funcionando e guarda os registros.' };
+  let n = 0; c.app.fila.forEach(k => { if (k.indexOf('AP|') === 0) { const [, id, dia] = k.split('|'); const o = c.ordens[id]; const ap = (o.ap || []).find(a => String(a.dia) === dia && !a.sinc);
+      if (ap) { ap.sinc = true; o.realizado += ap.ha; o.saldo = Math.max(0, o.saldo - ap.ha); n++;
+        if (ap.mov) { const mv = c.movs.find(x => x.id === ap.mov); if (mv) mv.sinc = true; } } }
+    else { const m = c.movs.find(x => x.id === k) || c.ocorr.find(x => x.id === k); if (m && !m.sinc) { m.sinc = true; n++; } } });
+  c.app.fila = []; return { msg: n ? (n + (n > 1 ? ' registros enviados' : ' registro enviado') + ' ao voltar o sinal.') : 'Sinal de volta. Nada pendente.' };
+}
+// Encerrar exige apontamentos enviados e nada em custódia (sobra devolvida).
+function cenPodeEncerrar(c, id) { const o = c.ordens[id]; const r = o.req && c.reqs[o.req];
+  if ((o.ap || []).some(a => a.sinc === false)) return 'Há apontamentos no aparelho aguardando sinal.';
+  const cust = r ? r.itens.filter(i => i.custodia > 0.001) : []; if (cust.length) return 'Sobra em custódia: ' + cust.map(i => i.prod + ' ' + cenNum(i.custodia) + ' ' + i.un).join(', ') + '. Receba a devolução no Estoque.';
+  return ''; }
+
+const MBC={green:["#1E7A4C","#E4F3E9"],yellow:["#8A5A00","#FFF3D6"],red:["#B42318","#FDE8E6"],gray:["#5B6660","#EEF1EE"]};
+
+function mbChs(c){ const k=MBC[c]||MBC.gray; return 'display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; color: '+k[0]+'; background: '+k[1]+'; white-space: nowrap;'; }
+function mbDot(c){ const k=MBC[c]||MBC.gray; return 'width: 6px; height: 6px; border-radius: 999px; background: '+k[0]+';'; }
+function DCH(v,k,t,c){ v[k+'_t']=t; v[k+'_st']=mbChs(c); v[k+'_dot']=mbDot(c); }
+function TOAST(self,t){ self.setState({g2toast:t}); }
+function SAY(self,v,M){ Object.keys(M).forEach(k=>{ v['say_'+k]=()=>TOAST(self,M[k]); }); }
+const MBJAN = {"OS-0415": {"j": "10–12/09", "k": 910}, "OS-0417": {"j": "19–21/09", "k": 919}, "OS-0418": {"j": "24/09 21:00–25/09 11:15", "k": 924}, "OS-0419": {"j": "hoje 20:00–amanhã 10:31", "k": 9999}, "OS-0420": {"j": "22–28/09", "k": 922}, "OS-0421": {"j": "20–26/09", "k": 920}, "OS-0422": {"j": "a definir", "k": 9999}, "OS-0423": {"j": "hoje 14:00–16:00", "k": 9999}, "OS-0424": {"j": "24/09", "k": 924}, "OS-0425": {"j": "15/10", "k": 1015}, "OS-0430": {"j": "25/09 (DAP −20)", "k": 925}, "OS-0431": {"j": "amanhã (24/09) 06:00", "k": 924}, "OB-0104": {"j": "15–18/09", "k": 915}};
+const MB_ETAPA_COR = {"A liberar": "gray", "Liberadas": "green", "Em execução": "green", "Em conferência": "yellow", "Encerradas": "gray"};
+const MBTX = {ink:"#15201A",muted:"#65736A",surf:"#FFFFFF",line:"#E4E9E5",acc:"#1E7A4C",accs:"#E4F3E9",yel:"#8A5A00",yels:"#FFF3D6"};
+
+// Gancho de teste/inspeção: o script da tela roda isolado (new Function); os testes app_* usam a mesma API do cenário por aqui.
+try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenConfirmarRecebimento, cenIniciarTurno, cenFecharTurno, cenOcorrencia, cenSinal, cenPodeEncerrar }; window.__mb = { mbIniciar, mbDescartar, mbResta }; } catch (e) {}
+const MB_SEL_KEY = 'talhao-os-mb-os';   // ordem aberta no detalhe (conveniência do aparelho; o cenário não muda)
+function mbSelGet(){ try { return localStorage.getItem(MB_SEL_KEY) || ''; } catch (e) { return ''; } }
+function mbSelSet(id){ try { localStorage.setItem(MB_SEL_KEY, id || ''); } catch (e) {} }
+function mbNum(s){ if (s === null || s === undefined) return NaN; let t = String(s).trim(); if (!t) return NaN; if (t.indexOf(',') >= 0) t = t.replace(/\./g, '').replace(',', '.'); return Number(t); }
+function mbIn(n){ return String(Math.round(n * 100) / 100).replace('.', ','); }
+function mbK(o){ return (MBJAN[o.id] || { k: 9999 }).k; }
+function mbJan(o){ return (MBJAN[o.id] || {}).j || 'a definir'; }
+function mbMinhas(c){ return Object.values(c.ordens).filter(o => o.resp === c.app.operador).sort((a, b) => mbK(a) - mbK(b) || a.id.localeCompare(b.id)); }
+function mbFila(c){ return mbMinhas(c).filter(o => o.etapa === 'Liberadas' || o.etapa === 'Em execução'); }
+function mbReq(c, o){ return (o && o.req && c.reqs[o.req]) || null; }
+function mbProv(o){ return (o.ap || []).filter(a => a.sinc === false).reduce((s, a) => s + (a.ha || 0), 0); }
+function mbTurno(c){ const t = c.app.turno; return t && !t.fim ? t : null; }
+function mbPausado(t){ const p = t && t.pausas[t.pausas.length - 1]; return !!(p && !p.fim); }
+function mbRealTxt(o){ const p = mbProv(o); return 'Realizado ' + cenNum(o.realizado, 1) + ' de ' + cenNum(o.area, 1) + ' ha · saldo ' + cenNum(o.saldo, 1) + ' ha' + (p ? ' · +' + cenNum(p, 1) + ' ha no aparelho, aguardando sinal' : ''); }
+function mbTx(c){ return 'font-weight: 700; color: ' + (MBC[c] || MBC.gray)[0] + ';'; }
+function mbEmb(i, q){ const m = String(i.emb || '').match(/([\d.]+(?:,\d+)?)\s*(L|kg)\b/); if (!m) return i.emb || ''; const sz = Number(m[1].replace(/\./g, '').replace(',', '.')); return sz > 0 ? Math.ceil(q / sz - 1e-9) + ' × ' + i.emb : i.emb; }
+// Área que ainda cabe em turnos: saldo do servidor menos os hectares que já estão no aparelho (aguardando sinal).
+function mbResta(o){ return Math.max(0, (o.saldo || 0) - mbProv(o)); }
+function mbSobra(c, o){ const r = mbReq(c, o); return r ? r.itens.filter(i => i.custodia > 0.001) : []; }
+function mbSobraTxt(l){ return l.map(i => i.prod + ' ' + cenNum(i.custodia) + ' ' + i.un).join(', '); }
+// Iniciar turno só com área a fazer (o cenário não confere o saldo; sem esta guarda o turno abre e não fecha).
+function mbIniciar(c, id){ const o = c.ordens[id]; if (o && mbResta(o) <= 0.001) throw new Error('A ' + id + ' não tem área a fazer (saldo 0 ha). Nada a iniciar.'); return cenIniciarTurno(c, id); }
+// Turno aberto numa ordem sem saldo (estado antigo ou aberto fora do app): descarta sem apontamento para não prender o operador.
+function mbDescartar(c){ const t = c.app.turno; if (!t || t.fim) throw new Error('Nenhum turno aberto.'); c.app.turno = null; return { msg: 'Turno da ' + t.os + ' descartado sem apontamento: a ordem não tem saldo.' }; }
+// Próximo passo da ordem na fila (verbo + objeto) e o selo de estado que o justifica.
+function mbPasso(c, o){
+  if (o.etapa !== 'Liberadas' && o.etapa !== 'Em execução') return { k: 'none', t: '', chip: [o.etapa === 'A liberar' ? 'Aguarda liberação no escritório' : 'Fora da fila', 'gray'], cor: 'gray', tt: '' };
+  const t = mbTurno(c);
+  if (t && t.os === o.id) { const pz = mbPausado(t); return { k: 'fechar', t: 'Fechar turno', chip: [pz ? 'Turno pausado' : 'Turno aberto · desde ' + t.ini, pz ? 'yellow' : 'green'], cor: 'green', href: 'MB-03.dc.html', tt: 'Fechar o turno da ' + o.id + ' com hectares, horas e consumo' }; }
+  const r = mbReq(c, o);
+  if (r && r.itens.some(i => i.custodia > 0 && !i.confirmado)) return { k: 'confirmar', t: 'Confirmar recebimento', chip: ['Entregue por Rui · ' + r.id, 'yellow'], cor: 'yellow', href: 'MB-05.dc.html', tt: 'Conferir itens, lote e embalagem e confirmar o recebimento da ' + r.id };
+  if (mbResta(o) <= 0.001) {
+    if (mbProv(o) > 0) return { k: 'enviar', t: 'Ver envios', chip: ['Área feita · aguardando sinal', 'yellow'], cor: 'yellow', href: 'MB-03x-recibo.dc.html', tt: 'Ver os turnos da ' + o.id + ' que estão no aparelho' };
+    const sb = mbSobra(c, o);
+    if (sb.length) return { k: 'devolver', t: 'Devolver sobra', chip: ['Área feita · sobra com você', 'yellow'], cor: 'yellow', href: 'MB-05.dc.html', tt: 'Levar ao Rui a sobra da ' + o.id + ': ' + mbSobraTxt(sb) };
+    return { k: 'none', t: '', chip: ['Área feita · aguarda encerramento', 'green'], cor: 'green', tt: '', feita: true };
+  }
+  if ((o.ins || []).length && r && !r.itens.some(i => i.custodia > 0)) return { k: 'retirar', t: 'Retirar no almoxarifado', chip: ['Reservado · ' + r.id, 'gray'], cor: 'gray', href: 'MB-05.dc.html', tt: 'Ver o que retirar com Rui no almoxarifado para a ' + o.id };
+  if (t) return { k: 'outro', t: 'Fechar turno · ' + t.os, chip: ['Outro turno aberto · ' + t.os, 'yellow'], cor: 'yellow', href: 'MB-03.dc.html', tt: 'Fechar o turno aberto da ' + t.os + ' antes de iniciar a ' + o.id };
+  return { k: 'iniciar', t: 'Iniciar turno', chip: [o.etapa === 'Em execução' ? 'Pronta para o próximo turno' : 'Pronta para iniciar', 'green'], cor: 'green',
+           fn: (self) => cenMudar(self, c => mbIniciar(c, o.id)), tt: 'Iniciar turno na ' + o.id };
+}
+// Insumos da ordem: a retirar, entregues a confirmar, com o operador (custódia) ou já consumidos.
+function mbIns(c, o){ const r = mbReq(c, o); if (!r) return [];
+  return r.itens.map(i => { const L = i.prod + ' · lote ' + i.lote + (i.emb ? ' · ' + i.emb : '');
+    if (i.custodia > 0 && !i.confirmado) return { t: L, s: 'entregue ' + cenNum(i.custodia) + ' ' + i.un + ' · a confirmar', st: mbTx('yellow') };
+    if (i.custodia > 0) return { t: L, s: 'com você ' + cenNum(i.custodia) + ' ' + i.un, st: mbTx('green') };
+    const sal = cenSaldoEntregar(i); if (sal > 0) return { t: L, s: 'retirar ' + cenNum(sal) + ' ' + i.un, st: mbTx('gray') };
+    return { t: L, s: 'consumido ' + cenNum(i.consumido) + ' ' + i.un, st: mbTx('gray') }; }); }
+function mbCard(self, c, o){ const p = mbPasso(c, o); const ec = MB_ETAPA_COR[o.etapa] || 'gray'; const ins = mbIns(c, o);
+  return { id: o.id, tipo: o.tipo, loc: o.talhao + ' · ' + cenNum(o.area, 1) + ' ha · janela ' + mbJan(o), real: mbRealTxt(o),
+    e_t: o.etapa, e_st: mbChs(ec), e_dot: mbDot(ec), p_t: p.chip[0], p_st: mbChs(p.chip[1]), p_dot: mbDot(p.chip[1]),
+    dot: 'width: 10px; height: 10px; border-radius: 999px; flex-shrink: 0; background: ' + (MBC[p.cor] || MBC.gray)[0] + ';',
+    ins: ins, hasIns: ins.length > 0, nx_isA: !!p.href, nx_isB: !!p.fn, nx_t: p.t, nx_href: p.href || 'MB-01.dc.html', nx_tt: p.tt || '',
+    nx_fn: () => { mbSelSet(o.id); if (p.fn) p.fn(self); }, sel: () => mbSelSet(o.id), ab_tt: 'Abrir a ' + o.id + ' · instrução, insumos e apontamentos' }; }
+// Passo mais urgente de toda a fila (botão do rodapé).
+function mbPrim(c, fila){ const t = mbTurno(c); if (t) return { k: 'fechar', o: c.ordens[t.os], lab: 'Fechar turno · ' + t.os, href: 'MB-03.dc.html' };
+  for (const k of ['confirmar', 'iniciar', 'retirar', 'devolver']) { const o = fila.find(x => mbPasso(c, x).k === k); if (o) { const p = mbPasso(c, o); return { k, o, lab: p.t + ' · ' + o.id, href: p.href || '' }; } }
+  return { k: 'none', o: null, lab: 'Ver minhas ordens' }; }
+function mbDesc(c, k){
+  if (k.indexOf('AP|') === 0) { const [, id, dia] = k.split('|'); const o = c.ordens[id]; const a = o && (o.ap || []).find(x => String(x.dia) === dia);
+    return 'Apontamento ' + id + ' · dia ' + dia + (a ? ' · ' + cenNum(a.ha, 1) + ' ha' + (a.h ? ' em ' + cenNum(a.h, 1) + ' h' : '') : ''); }
+  const oc = (c.ocorr || []).find(x => x.id === k); if (oc) return 'Ocorrência ' + oc.id + ' · ' + oc.os + ' · ' + oc.tipo;
+  const m = (c.movs || []).find(x => x.id === k); if (m) return m.tipo === 'recebimento' ? 'Recebimento confirmado · ' + m.req + ' · ' + m.os : m.tipo + ' · ' + (m.os || '');
+  return k; }
+// Sinal: usa cenSinal (envia a fila uma vez só) e guarda o recibo do envio; o movimento de consumo segue o apontamento enviado.
+function mbSinal(c, on){ const fila = (c.app.fila || []).slice(); const itens = fila.map(k => mbDesc(c, k)); const r = cenSinal(c, on);
+  if (on && fila.length) { (c.movs || []).forEach(m => { if (m.origem === 'app' && m.tipo === 'consumo' && m.sinc === false) m.sinc = true; });
+    c.app.recibos = c.app.recibos || []; const id = 'REC-' + (7742 + c.app.recibos.length); c.app.recibos.push({ id, at: cenAgora(), n: fila.length, itens });
+    r.msg = r.msg.replace(/\.$/, '') + ' · recibo ' + id + ' · cada registro entrou uma vez.'; }
+  return r; }
+function mbSeg(on, warn){ return 'font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 6px 12px; border-radius: 999px; border: 0; cursor: pointer; white-space: nowrap; '
+  + (on ? (warn ? 'background: ' + MBTX.yels + '; color: ' + MBTX.yel + ';' : 'background: ' + MBTX.surf + '; color: ' + MBTX.ink + '; box-shadow: 0 1px 2px rgba(21,32,26,.12);') : 'background: transparent; color: ' + MBTX.muted + ';'); }
+function mbPill(on){ return 'font-family: inherit; font-size: 13px; font-weight: 700; padding: 7px 12px; border-radius: 999px; cursor: pointer; white-space: nowrap; border: 1px solid ' + (on ? MBTX.acc : MBTX.line) + '; background: ' + (on ? MBTX.accs : MBTX.surf) + '; color: ' + (on ? MBTX.acc : MBTX.ink) + ';'; }
+// Barra de sinal (todas as telas do app ligadas ao cenário): alternador, contador e último recibo.
+function mbSig(self, v, c){ const on = cenOnline(c); const n = (c.app.fila || []).length;
+  v.sg_on = on; v.sg_off = !on; v.sg_st1 = mbSeg(on, false); v.sg_st0 = mbSeg(!on, true);
+  v.sg_t = n ? n + (n > 1 ? ' registros aguardando sinal' : ' registro aguardando sinal') : 'Nada aguardando sinal';
+  v.sg_tst = 'font-size: 12.5px; font-weight: 700; color: ' + (n ? MBTX.yel : MBTX.muted) + ';';
+  const rc = (c.app.recibos || []).slice(-1)[0]; v.sg_rec = !!rc; v.sg_rect = rc ? 'Último envio ' + rc.at + ' · ' + rc.n + (rc.n > 1 ? ' registros' : ' registro') + ' · recibo ' + rc.id : '';
+  v.sg_com = () => { if (cenOnline(cenGet())) return TOAST(self, 'Já está com sinal · nada aguardando envio.'); cenMudar(self, c => mbSinal(c, true)); };
+  v.sg_sem = () => { if (!cenOnline(cenGet())) return TOAST(self, 'Já está sem sinal · os registros ficam no aparelho.'); cenMudar(self, c => mbSinal(c, false)); };
+}
+const M={"m0": "Bloqueado: Trator T1 com OM-0233 e saldo de 70 ha pausado pela revisão v3 — aguarde a aprovação da v3 e a reliberação com o substituto (nada foi iniciado).", "m1": "Bloqueado: a OS-0418 foi revogada no servidor em 23/09 07:15 — o pacote offline não autoriza nova execução. O relato das 07:40 segue para decisão de Ana, sem aprovação retroativa.", "m2": "QR da OS-0421 lido · ordem aberta na versão autorizada v2."};
+function EXTRAVALS(self,v){ const s=self.state; SAY(self,v,M); cenOuvir(self); const c=cenGet(); mbSig(self,v,c);
+const mine=mbMinhas(c).filter(o=>o.etapa!=='Encerradas'); v.minhas=mine.map(o=>mbCard(self,c,o));
+const first=mbFila(c)[0]||mine[0]; v.p_lab='Abrir '+(first?first.id:'ordem'); v.p_sel=()=>{ if(first) mbSelSet(first.id); };
+const ack=!!s.ack; v.noack=!ack;
+DCH(v,'ack',ack?'Ciência registrada · CI-0931 · 10:44':'Ciência pendente do operador',ack?'green':'yellow');
+v.ack=()=>{ if(self.state.ack) return; self.setState({ack:true,g2toast:'Ciência registrada (recibo CI-0931) · o saldo de 70 ha fica pausado até Ana aprovar a v3 · os 30 ha realizados seguem na v2.'}); };
+}
+
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { sel: {}, open: null, sort: {}, msg: {}, added: {}, g2: {}, nav: {}, g2toast: '' }; }
+  renderVals() {
+    const st = this.state, v = {}, self = this;
+    const set = (patch) => self.setState(patch);
+    const selOf = (w) => (st.sel[w.id] === undefined ? w.dflt : st.sel[w.id]);
+    v.closeAll = () => set({ open: null });
+    const vis = {};
+    for (const w of SPEC) {
+      const cur = selOf(w);
+      const toggleOpen = () => set({ open: st.open === w.id ? null : w.id });
+      if (w.type === 'seg' || w.type === 'chips') {
+        w.opts.forEach((o, i) => {
+          v[w.id + '_s' + i] = (i === cur ? w.on : w.off);
+          v[w.id + '_v' + i] = (i === cur);
+          v[w.id + '_p' + i] = () => set({ sel: Object.assign({}, st.sel, { [w.id]: i }), open: null });
+        });
+      }
+      if (w.type === 'pick') {
+        v[w.id + '_label'] = (cur >= 0 && w.opts[cur] !== undefined) ? w.opts[cur] : '';
+        v[w.id + '_open'] = toggleOpen;
+        v[w.id + '_st'] = w.mst + (st.open === w.id ? '' : 'display: none;');
+        v[w.id + '_bst'] = (cur !== w.none ? w.bon : w.boff);
+        v[w.id + '_cst'] = (w.cst || '') + (cur !== w.none ? '' : 'display: none;');
+        v[w.id + '_clear'] = () => set({ sel: Object.assign({}, st.sel, { [w.id]: w.none }), open: null });
+        w.opts.forEach((o, i) => {
+          v[w.id + '_p' + i] = () => set({ sel: Object.assign({}, st.sel, { [w.id]: i }), open: null });
+          v[w.id + '_i' + i] = (i === cur ? w.ion : w.ioff);
+        });
+      }
+      if (w.type === 'menu') { v[w.id + '_open'] = toggleOpen; v[w.id + '_st'] = w.mst + (st.open === w.id ? '' : 'display: none;'); }
+      if (w.type === 'sort') {
+        const s = st.sort[w.id] || { c: w.dflt, d: !!w.desc };
+        const om = String(st.open || '');
+        const openCol = (om.indexOf(w.id + 'm') === 0) ? parseInt(om.slice(w.id.length + 1), 10) : -1;
+        for (let i = 0; i < w.n; i++) {
+          v[w.id + '_a' + i] = (i === s.c ? (s.d ? '▼' : '▲') : '⇅');
+          v[w.id + '_h' + i] = (i === s.c ? w.hon[i] : w.hoff[i]);
+          v[w.id + '_p' + i] = () => set({ sort: Object.assign({}, st.sort, { [w.id]: { c: i, d: (i === s.c ? !s.d : false) } }), open: null });
+          v[w.id + '_m' + i] = () => set({ open: (om === w.id + 'm' + i ? null : w.id + 'm' + i) });
+        }
+        v[w.id + '_mst'] = w.mst + (openCol >= 0 ? '' : 'display: none;');
+        v[w.id + '_mcol'] = openCol >= 0 ? w.cols[openCol] : '';
+        for (let i = 0; i < w.n; i++) {
+          v[w.id + '_mv' + i] = (openCol === i);
+          const mw = SPEC.find((x) => x.type === 'multi' && x.tbl === w.id && x.col === i);
+          const cnt = mw ? (st.sel[mw.id] || []).length : 0;
+          v[w.id + '_f' + i] = cnt ? ('· ' + cnt) : '';
+        }
+        v[w.id + '_mclear'] = () => { const s2 = Object.assign({}, st.sel); SPEC.forEach((x) => { if (x.type === 'multi' && x.tbl === w.id && x.col === openCol) s2[x.id] = []; }); set({ sel: s2, open: null }); };
+        v[w.id + '_asc'] = () => set({ sort: Object.assign({}, st.sort, { [w.id]: { c: openCol, d: false } }), open: null });
+        v[w.id + '_desc'] = () => set({ sort: Object.assign({}, st.sort, { [w.id]: { c: openCol, d: true } }), open: null });
+        v[w.id + '_grp'] = () => { const p = {}; if (w.group) { p[w.group] = w.cols.filter((c) => c).indexOf(w.cols[openCol]); } set({ sel: Object.assign({}, st.sel, p), open: null }); };
+      }
+      if (w.type === 'drawer') {
+        v[w.id + '_open'] = () => set({ open: w.id });
+        v[w.id + '_st'] = w.mst + (st.open === w.id ? '' : 'display: none;');
+        v[w.id + '_add'] = () => set({ open: null, added: Object.assign({}, st.added, { [w.id]: true }) });
+        v[w.id + '_row'] = (st.added[w.id] ? '' : 'display: none;');
+        v[w.id + '_btn'] = (st.added[w.id] && w.done) ? w.done : w.label;
+      }
+      if (w.type === 'msg') {
+        w.opts.forEach((o, i) => { v[w.id + '_p' + i] = () => set({ msg: Object.assign({}, st.msg, { [w.id]: w.msgs[i] }), open: null }); });
+        v[w.id + '_text'] = st.msg[w.id] || '';
+        v[w.id + '_tst'] = w.tst + (st.msg[w.id] ? '' : 'display: none;');
+      }
+      if (w.type === 'cards' || w.type === 'rowsel') {
+        w.opts.forEach((o, i) => {
+          v[w.id + '_p' + i] = () => set({ sel: Object.assign({}, st.sel, { [w.id]: i }), open: null });
+          v[w.id + '_s' + i] = (i === cur ? w.on : w.off);
+          v[w.id + '_c' + i] = (i === cur ? '' : 'display: none;');
+          v[w.id + '_b' + i] = (i === cur ? 'display: none;' : '');
+        });
+      }
+      if (w.type === 'multi') {
+        const curm = st.sel[w.id] || [];
+        w.opts.forEach((o, i) => {
+          v[w.id + '_p' + i] = () => { const s = (st.sel[w.id] || []).slice(); const k = s.indexOf(i); if (k >= 0) s.splice(k, 1); else s.push(i); set({ sel: Object.assign({}, st.sel, { [w.id]: s }) }); };
+          v[w.id + '_i' + i] = (curm.indexOf(i) >= 0 ? w.ion : w.ioff);
+          v[w.id + '_c' + i] = (curm.indexOf(i) >= 0 ? '☑' : '☐');
+        });
+        v[w.id + '_n'] = curm.length ? (curm.length + ' de ' + w.opts.length) : 'todos';
+        v[w.id + '_clear'] = () => set({ sel: Object.assign({}, st.sel, { [w.id]: [] }) });
+      }
+      if (w.type === 'toggle') {
+        const on = !!st.sel[w.id];
+        v[w.id + '_p'] = () => set({ sel: Object.assign({}, st.sel, { [w.id]: !on }) });
+        v[w.id + '_s'] = on ? w.on : w.off;
+      }
+      if (w.tbl && w.rows) {
+        const arr = vis[w.tbl] || (vis[w.tbl] = w.rows.map(() => true));
+        let m = null;
+        if (w.type === 'toggle') m = st.sel[w.id] ? w.keep : null;
+        else if (w.type === 'multi') { const cm = st.sel[w.id] || []; m = cm.length ? cm : null; }
+        else if (w.match) m = w.match[cur];
+        w.rows.forEach((r, ri) => {
+          let ok = true;
+          if (m === null || m === undefined) ok = true;
+          else if (w.type === 'toggle') ok = m.indexOf(ri) >= 0;
+          else if (w.type === 'multi') ok = m.some((i) => w.cells[ri] === w.opts[i]);
+          else if (Array.isArray(m)) ok = m.some((x) => r.indexOf(x) >= 0);
+          else ok = r.indexOf(m) >= 0;
+          arr[ri] = arr[ri] && ok;
+        });
+      }
+    }
+    for (const t in vis) {
+      vis[t].forEach((ok, ri) => { v[t + '_r' + ri] = ok ? '' : 'display: none;'; });
+      v[t + '_count'] = vis[t].filter(Boolean).length;
+      v[t + '_clear'] = () => { const s2 = Object.assign({}, st.sel); SPEC.forEach((w) => { if (w.tbl === t && w.type === 'toggle') s2[w.id] = false; else if (w.tbl === t && w.type === 'pick') s2[w.id] = w.none; else if (w.tbl === t && w.type === 'chips') s2[w.id] = 0; else if (w.tbl === t && w.type === 'multi') s2[w.id] = []; }); set({ sel: s2, open: null }); };
+    }
+    v.g2toast = this.state.g2toast || ''; v.g2toastst = this.state.g2toast ? '' : 'display: none;';
+    v.mf_faz = this.state.mf_faz || 'Santa Rita'; v.mf_saf = this.state.mf_saf || 'Todas';
+    v.mf_setfaz = (e) => this.setState({ mf_faz: e.target.value, g2toast: 'Fazenda: ' + e.target.value });
+    v.mf_setsaf = (e) => this.setState({ mf_saf: e.target.value, g2toast: 'Safra: ' + e.target.value });
+    if (!v.mf_trocar) v.mf_trocar = () => this.setState({ step: 1, g2toast: 'Escolha a safra na etapa 1.' });
+    this.__v = v; g2navvals(this, v, NAV);
+    if (typeof PREVALS === 'function') PREVALS(this, v);
+    for (const sp of GRIDS) g2vals(this, sp, v, vis[sp.id]);
+    if (typeof EXTRAVALS === 'function') EXTRAVALS(this, v);
+    return v;
+  }
+  componentDidUpdate(pp, ps) { if (this.state.g2toast && this.state.g2toast !== (ps || {}).g2toast) { clearTimeout(this._g2t); this._g2t = setTimeout(() => this.setState({ g2toast: '' }), 4500); } }
+}
+
+</script>
+</body>
+</html>

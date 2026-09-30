@@ -1,0 +1,25 @@
+# -*- coding: utf-8 -*-
+"""Passo 9e · CD-05: cliente inválido (CNPJ curto, sem produto, limite não numérico) e válido."""
+import sys, os, time, json
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from e2e_lib import B, campos, marcar, alerta_campo
+b = B(); b.size(1440, 1000); b.goto('CD-05.dc.html')
+n0 = b.J("[...document.querySelectorAll('[role=row].g2ed')].length")
+b.clk('Cadastrar parceiro'); marcar(b, 'Cliente')
+b.setv('#fx_g_forn_cnpj', '12.345.678/0001'); b.setv('#fx_g_forn_nome', 'Cerealista Horizonte'); b.setv('#fx_g_forn_lim', 'abc')
+b.clk('Salvar', 'aside[role=dialog]'); al = b.alerts('aside[role=dialog]'); print('   inválido:', al)
+b.ok(b.J("!!document.querySelector('aside[role=dialog]')") and 'CPF (11 dígitos) ou CNPJ (14 dígitos)' in al and b.val('#fx_g_forn_lim') == 'abc', 'CD-05 · cliente inválido: CNPJ curto e limite "abc" barrados no campo; digitado preservado', al)
+b.shot('e2e_09e_cd05_cliente_invalido.png')
+b.setv('#fx_g_forn_cnpj', '45.987.321/0001-60'); b.setv('#fx_g_forn_lim', '250000'); b.setv('#fx_g_forn_limv', '2027-06-30')
+marcar(b, 'Soja em grão'); b.setv('#fx_g_forn_entrega', 'Armazém Sede · 7h às 17h'); b.setv('#fx_g_forn_pag', '14 dias após a entrega comprovada')
+b.setv('#fx_g_forn_contato', 'Lúcia Prado'); b.setv('#fx_g_forn_email', 'compras@horizonte.com.br'); marcar(b, 'E-mail')
+print('   limv tipo:', [f for f in campos(b) if f['id'] == 'fx_g_forn_limv'])
+s = b.clk('Salvar', 'aside[role=dialog]'); t = b.toast(); al = b.alerts('aside[role=dialog]'); aberto = b.J("!!document.querySelector('aside[role=dialog]')")
+print('   válido:', s, '| toast:', t, '| alertas:', al, '| aberto:', aberto)
+lin = b.rowtxt('Cerealista Horizonte'); print('   linha:', lin)
+b.ok(not aberto and 'Cerealista Horizonte' in lin and 'Cliente' in lin, 'CD-05 · cliente válido salvo e na lista', (t, al, lin))
+b.J("[...document.querySelectorAll('[role=group][aria-label=\"Filtrar por papel\"] button')].find(b=>b.innerText.trim().startsWith('Clientes')).click()"); time.sleep(.3)
+cl = b.J("[...document.querySelectorAll('[role=group][aria-label=\"Filtrar por papel\"] button')].map(b=>b.innerText.replace(/\\s+/g,' '))"); print('   filtros:', cl, '| no filtro Clientes:', b.rowtxt('Cerealista Horizonte')[:80])
+b.ok('Clientes 8' in ' '.join(cl) and 'Cerealista' in b.rowtxt('Cerealista Horizonte'), 'filtro Clientes conta e mostra o novo cliente', cl)
+er = b.erros(); b.ok(not er, 'CD-05 sem erro de JS', er)
+b.fim()

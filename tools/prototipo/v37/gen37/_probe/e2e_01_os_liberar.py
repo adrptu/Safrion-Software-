@@ -1,0 +1,35 @@
+# -*- coding: utf-8 -*-
+"""Passo 1 · OS.dc.html: restaurar demonstração, abrir OS-0430, revisar/aprovar, liberar (reserva por lote)."""
+import sys, os, time
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from e2e_lib import B
+b = B(); b.size(1440, 1000); OS = 'OS-0430'
+b.goto('OS.dc.html')
+r = b.clk('Restaurar demonstração'); r2 = b.clk('Restaurar'); t = b.toast()
+st = b.cen(f"[Object.keys(c.reqs).length, c.ordens['{OS}'].etapa, c.ordens['{OS}'].aprov]")
+b.ok(r == 'ok' and r2 == 'ok' and st == [6, 'A liberar', False], 'restaurar demonstração pela tela', (r, r2, t, st))
+print('   toast:', t)
+r = b.row(OS); p = b.aside(); print('   painel:', p[:700])
+b.ok(r == 'ok' and OS in p, 'abrir OS-0430 abre o painel', r)
+print('   botões painel:', b.btns('aside[role=dialog]'))
+r = b.clk('Revisar versão', 'aside[role=dialog]'); p = b.aside(); print('   revisar:', r, '|', p[p.find('PRÓXIMO'):][:300] if 'PRÓXIMO' in p else p[:300])
+print('   botões painel:', b.btns('aside[role=dialog]'))
+r = b.clk('Aprovar versão', 'aside[role=dialog]'); t = b.toast(); p = b.aside()
+st = b.cen(f"[c.ordens['{OS}'].aprov, c.ordens['{OS}'].etapa]")
+b.ok(r == 'ok' and st == [True, 'A liberar'] and 'recibo' in t, 'aprovar a versão grava aprovação com recibo; fase segue A liberar', (r, t, st))
+print('   toast:', t)
+print('   botões painel:', b.btns('aside[role=dialog]'))
+r = b.clk('Liberar para execução', 'aside[role=dialog]'); ct = b.aside(); print('   confirmação:', ct[-450:])
+b.ok('Glifosato 480 320 L' in ct and '2,4-D 806 160 L' in ct and 'Óleo mineral 80 L' in ct, 'confirmação de liberação lista Glifosato 480 320 L, 2,4-D 806 160 L, Óleo mineral 80 L', ct[-400:])
+r = b.clk('Confirmar liberação', 'aside[role=dialog]'); t = b.toast(); print('   toast:', t)
+RQ = b.cen(f"c.ordens['{OS}'].req")
+st = b.cen(f"[c.ordens['{OS}'].etapa, c.reqs['{RQ}'].itens.map(i=>i.prod+' '+i.solicitado+' '+i.lote).join(' | '), c.lotes['Glifosato 480|G26-14'].reservado]")
+print('   cenário:', RQ, st)
+b.ok(st[0] == 'Liberadas' and 'Glifosato 480 320' in st[1] and '2,4-D 806 160' in st[1] and 'Óleo mineral 80' in st[1] and st[2] == 320,
+     f'liberar: {RQ} reserva 320/160/80 L por lote e O.S. passa a Liberadas', st)
+lin = b.rowtxt(OS); print('   linha:', lin)
+b.ok('Liberadas' in lin, 'linha da OS-0430 mostra Liberadas', lin)
+p = b.aside(); print('   painel pós:', p[:900])
+b.shot('e2e_01_os_liberada.png')
+er = b.erros(); b.ok(not er, 'sem erro de JS na O.S.', er)
+b.fim()

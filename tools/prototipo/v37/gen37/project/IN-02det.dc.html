@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Decidir · OS-0418 fertirrigação</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Sora:wght@600;700&amp;display=swap">
+<style>
+body{margin:0;font-family:'Manrope', system-ui, sans-serif;color:#15201A;background:#F4F6F3}
+a{color:#1E7A4C}a:hover{color:#15603a}
+.g2ed{cursor:pointer}.g2ed:hover{background:#F2F8F4}.g2ed:focus-visible{outline:2px solid #1E7A4C;outline-offset:-2px}.g2flash{background:#E4F3E9}.g2kid{background:#FBFCFA}.g2tot{cursor:pointer}.g2tot:hover{background:#EEF4EF}.g2hb{display:inline-flex;align-items:center;gap:4px;border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#65736A;padding:7px 2px 7px 0;text-align:left;white-space:normal;max-width:104px;line-height:1.2}.g2fb{border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:10px;font-weight:700;padding:4px 3px;border-radius:6px}.g2fb:hover{background:#E4E9E5}.g2car{width:22px;height:22px;border:0;border-radius:6px;background:transparent;cursor:pointer;font-size:13px;color:#15201A;flex-shrink:0;padding:0}.g2car:hover{background:#E4E9E5}.g2del{width:28px;height:28px;border:0;border-radius:8px;background:transparent;cursor:pointer;color:#8A968E;display:inline-flex;align-items:center;justify-content:center}.g2del:hover{background:#FDE8E6;color:#B42318}.g2pw{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0;flex:0 1 auto;justify-content:inherit;text-align:inherit}sc-if,sc-for{display:contents}aside[role="dialog"]>*,aside[role="dialog"]>:is(sc-if,sc-for)>*,aside[role="dialog"]>:is(sc-if,sc-for)>:is(sc-if,sc-for)>*,aside[role="dialog"]>:is(sc-if,sc-for)>:is(sc-if,sc-for)>:is(sc-if,sc-for)>*{flex-shrink:0}
+</style>
+</helmet>
+<div data-root="1" style="position: relative; width: 1440px; height: 710px; box-sizing: border-box; display: flex; background: #F4F6F3; font-family: 'Manrope', system-ui, sans-serif; color: #15201A; overflow: clip;">
+<nav aria-label="Menu" style="width: 232px; flex-shrink: 0; background: #0F241A; display: flex; flex-direction: column; padding: 16px 12px 12px; gap: 2px; box-sizing: border-box; overflow: clip;">
+<a href="Main.dc.html" aria-label="Índice do protótipo" style="display: flex; align-items: center; gap: 10px; padding: 2px 12px 8px; font-family: 'Sora', 'Manrope', system-ui, sans-serif; font-weight: 700; font-size: 15px; letter-spacing: -.01em; color: #fff; text-decoration: none;"><span style="width: 28px; height: 28px; border-radius: 9px; background: #1E7A4C; display: inline-flex; align-items: center; justify-content: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 20 3c1 2 2 4.5 2 8.5S16.8 21 12.5 21zM2 21c0-3 1.85-5.36 5.08-6"/></svg></span>Talhão à O.S.</a>
+<a href="IN-04.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 10px; font-size: 13.5px; font-weight: 700; text-decoration: none; color: #D3E2D8;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D3E2D8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M9 4l6 2 6-2v14l-6 2-6-2-6 2V6zM9 4v14M15 6v14"/></svg>Mapa</a><button type="button" aria-expanded="{{nav0_open}}" onClick="{{nav0_tog}}" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; border: 0; border-radius: 10px; font-family: inherit; font-size: 13.5px; font-weight: 700; text-align: left; cursor: pointer; background: transparent; color: #D3E2D8;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D3E2D8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M12 2l9 5-9 5-9-5 9-5zM3 12l9 5 9-5M3 17l9 5 9-5"/></svg><span style="flex-grow: 1;">Cadastros</span><span aria-hidden="true" style="font-size: 11px; color: #86A08F;">{{nav0_sym}}</span></button><sc-if value="{{nav0_open}}" hint-placeholder-val="{{false}}"><div style="display: flex; flex-direction: column; gap: 1px; margin-bottom: 4px;"><a href="CD-01.dc.html" style="display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; color: #86A08F; font-weight: 500;">Fazendas, áreas e talhões</a><a href="CD-02.dc.html" style="display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; color: #86A08F; font-weight: 500;">Culturas, cultivares e operações</a><a href="CD-03.dc.html" style="display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; color: #86A08F; font-weight: 500;">Máquinas, instalações e setores</a><a href="CD-04.dc.html" style="display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; color: #86A08F; font-weight: 500;">Pessoas e equipes</a><a href="CD-05.dc.html" style="display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; color: #86A08F; font-weight: 500;">Parceiros e fornecedores</a><a href="CD-06.dc.html" style="display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; color: #86A08F; font-weight: 500;">Produtos, unidades e locais</a><a href="CD-07.dc.html" style="display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; color: #86A08F; font-weight: 500;">Estrutura gerencial</a></div></sc-if><button type="button" aria-expanded="{{nav1_open}}" onClick="{{nav1_tog}}" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; border: 0; border-radius: 10px; font-family: inherit; font-size: 13.5px; font-weight: 700; text-align: left; cursor: pointer; background: transparent; color: #D3E2D8;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D3E2D8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 20 3c1 2 2 4.5 2 8.5S16.8 21 12.5 21zM2 21c0-3 1.85-5.36 5.08-6"/></svg><span style="flex-grow: 1;">Agrícola</span><span aria-hidden="true" style="font-size: 11px; color: #86A08F;">{{nav1_sym}}</span></button><sc-if value="{{nav1_open}}" hint-placeholder-val="{{false}}"><div style="display: flex; flex-direction: column; gap: 1px; margin-bottom: 4px;"><a href="PA.dc.html" style="display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; color: #86A08F; font-weight: 500;">Planos agronômicos</a><a href="SAF.dc.html" style="display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; color: #86A08F; font-weight: 500;">Planejar safra</a><a href="OS.dc.html" style="display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; color: #86A08F; font-weight: 500;">Ordem de Serviço</a></div></sc-if><button type="button" aria-expanded="{{nav2_open}}" onClick="{{nav2_tog}}" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; border: 0; border-radius: 10px; font-family: inherit; font-size: 13.5px; font-weight: 700; text-align: left; cursor: pointer; background: transparent; color: #D3E2D8;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D3E2D8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M6 6h15l-1.5 9h-12zM6 6L5 2H2M10 20a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM19 20a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg><span style="flex-grow: 1;">Suprimentos</span><span aria-hidden="true" style="font-size: 11px; color: #86A08F;">{{nav2_sym}}</span></button><sc-if value="{{nav2_open}}" hint-placeholder-val="{{false}}"><div style="display: flex; flex-direction: column; gap: 1px; margin-bottom: 4px;"><a href="CMP.dc.html" style="display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; color: #86A08F; font-weight: 500;">Compra de insumos</a><a href="EST.dc.html" style="display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; color: #86A08F; font-weight: 500;">Estoque</a></div></sc-if>
+<div style="flex-grow: 1;"></div>
+<div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; margin: 4px 0; border-radius: 10px; background: rgba(255,255,255,.06); color: #86A08F; font-size: 11px; font-weight: 700; letter-spacing: .05em;"><span style="width: 7px; height: 7px; border-radius: 999px; background: #8A5A00;"></span>DEMONSTRAÇÃO · dados fictícios</div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; font-size: 12.5px; color: #D3E2D8; border-top: 1px solid rgba(255,255,255,.08);"><span style="width: 26px; height: 26px; border-radius: 999px; background: #1E7A4C; color: #fff; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; justify-content: center;">A</span><span style="display: flex; flex-direction: column; line-height: 1.2;"><span style="font-weight: 700; color: #fff;">Ana · Gestora</span><span style="color: #86A08F; font-size: 11.5px;">Trocar perfil de demonstração ▾</span></span></div>
+</nav>
+<div style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0;">
+<header style="padding: 14px 32px 14px; background: #FFFFFF; border-bottom: 1px solid #E4E9E5; display: flex; flex-direction: column; gap: 10px;">
+<div style="display: flex; align-items: center; gap: 10px; font-size: 12.5px; font-weight: 500;"><span style="font-size: 11.5px; color: #65736A; font-weight: 600;">Fazenda Santa Rita</span><span style="font-size: 11.5px; color: #65736A; font-weight: 600;">Safra 2026/27</span><span style="font-size: 11.5px; color: #65736A; font-weight: 600;">Módulo oculto no menu · preservado</span><span style="width: 1px; height: 18px; background: #E4E9E5;"></span><span><a href="IN-01.dc.html" style="color: #65736A; text-decoration: none;">Início</a> <span style="color: #65736A;">›</span> <a href="IN-02.dc.html" style="color: #65736A; text-decoration: none;">Aprovações</a> <span style="color: #65736A;">›</span> <span>OS-0418 · v2</span></span><span style="flex-grow: 1;"></span></div>
+<div style="display: flex; align-items: center; gap: 12px;">
+<a href="IN-02.dc.html" aria-label="Voltar" style="text-decoration: none; display: inline-flex; align-items: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#65736A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></a><h1 style="margin: 0; font-family: 'Sora', 'Manrope', system-ui, sans-serif; font-size: 23px; font-weight: 700; letter-spacing: -.02em; white-space: nowrap; flex-shrink: 0;">Decidir · OS-0418 fertirrigação</h1>
+<span style="flex-shrink: 0; max-width: 300px;"></span>
+<span style="flex-grow: 1;"></span>
+<span style="{{st_st}}">{{st_t}}</span><button type="button" onClick="{{aprovar}}" style="{{prim_st}}">Aprovar versão v2</button>
+</div>
+
+
+
+</header>
+
+<main data-scroll="0" style="flex-grow: 1; padding: 18px 32px 22px;  display: grid; grid-template-columns: minmax(0, 1fr); grid-auto-rows: max-content; align-content: start; gap: 18px; box-sizing: border-box; min-width: 0;">
+<div style="display: flex; align-items: center; gap: 12px; padding: 8px 14px; background: #E4F3E9; border: 1px solid #E4E9E5; border-radius: 12px;"><span style="display: inline-flex; flex-direction: column; gap: 1px; min-width: 0;"><span style="font-size: 10.5px; font-weight: 700; letter-spacing: .06em; color: #65736A;">VEIO DE</span><span style="font-size: 12.5px; font-weight: 600; color: #15201A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Programação da irrigação · reclassificação</span></span><span style="color: #65736A; flex-shrink: 0;">→</span><span style="display: inline-flex; flex-direction: column; gap: 1px; min-width: 0;"><span style="font-size: 10.5px; font-weight: 700; letter-spacing: .06em; color: #65736A;">ESTÁ AQUI</span><span style="font-size: 12.5px; font-weight: 600; color: #15201A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><b>{{ct_aqui}}</b></span></span><span style="color: #65736A; flex-shrink: 0;">→</span><span style="display: inline-flex; flex-direction: column; gap: 1px; min-width: 0;"><span style="font-size: 10.5px; font-weight: 700; letter-spacing: .06em; color: #65736A;">FALTA</span><span style="font-size: 12.5px; font-weight: 600; color: #15201A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ct_falta}}</span></span><span style="color: #65736A; flex-shrink: 0;">→</span><span style="display: inline-flex; flex-direction: column; gap: 1px; min-width: 0;"><span style="font-size: 10.5px; font-weight: 700; letter-spacing: .06em; color: #65736A;">PRÓXIMA AÇÃO</span><span style="font-size: 12.5px; font-weight: 700; color: #1E7A4C; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ct_prox}}</span></span></div><section style="background: #FFFFFF; border: 1px solid #E4E9E5;  border-radius: 14px; display: flex; flex-direction: column; min-width: 0;"><div style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px 10px;"><div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;"><h3 style="margin: 0; font-size: 15px; font-weight: 800; letter-spacing: -.01em;">Diferenças da versão submetida</h3><div style="font-size: 12.8px; color: #65736A;">Compare as versões: produto na água exige a decisão do agrônomo.</div></div><div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;"></div></div><div style="padding: 0 12px 12px;"><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;"><div style="border: 1px solid #E4E9E5; border-radius: 12px; padding: 12px 14px;"><div style="font-size: 11px; font-weight: 800; color: #65736A; letter-spacing: .06em;">VERSÃO v1 · SÓ ÁGUA</div><div style="font-size: 13px; margin-top: 6px; line-height: 1.6;">Lâmina 8 mm · sem produtos<br>Lâmina pela necessidade do balanço · liberada pela prontidão, sem agrônomo<br>Sem requisição, custódia ou sobras</div></div><div style="border: 1px solid #1E7A4C; background: #E4F3E9; border-radius: 12px; padding: 12px 14px;"><div style="font-size: 11px; font-weight: 800; color: #1E7A4C; letter-spacing: .06em;">VERSÃO v2 SUBMETIDA · FERTIRRIGAÇÃO</div><div style="font-size: 13px; margin-top: 6px; line-height: 1.6;"><b>+ Ureia 12 kg/ha</b> na mesma tarefa e mesmo ID (95 ha)<br>Produto na água: <b>passa a exigir o agrônomo</b><br>Após aprovar: requisição REQ-038, custódia e conciliação</div></div></div></div></section><section style="background: #FFFFFF; border: 1px solid #E4E9E5;  border-radius: 14px; display: flex; flex-direction: column; min-width: 0;"><div style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px 10px;"><div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;"><h3 style="margin: 0; font-size: 15px; font-weight: 800; letter-spacing: -.01em;">Produto e compatibilidade</h3><div style="font-size: 12.8px; color: #65736A;">Confira dose, quantidade e compatibilidade; clique na linha para ver a origem.</div></div><div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;"></div></div><div style="padding: 0 12px 12px;"><div style="background: #FFFFFF; border: 1px solid #E4E9E5; border-radius: 14px; min-width: 0; overflow: hidden;"><sc-if value="{{g_d18_fm.open}}" hint-placeholder-val="{{false}}"><div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 12px; background: #F4F6F3; border-bottom: 1px solid #E4E9E5; font-size: 12.5px;"><b>Filtrar {{g_d18_fm.l}}:</b><sc-for list="{{g_d18_fm.vals}}" as="fv" hint-placeholder-count="0"><label style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border: 1px solid #E4E9E5; border-radius: 999px; background: #FFFFFF; cursor: pointer;"><input type="checkbox" checked="{{fv.on}}" onChange="{{fv.tog}}" style="accent-color: #1E7A4C;">{{fv.t}} <span style="color: #65736A;">{{fv.n}}</span></label></sc-for><span style="flex-grow: 1;"></span><button type="button" onClick="{{g_d18_fm.asc}}" style="font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid #E4E9E5; background: #FFFFFF; color: #15201A; cursor: pointer; white-space: nowrap;">▲ Crescente</button><button type="button" onClick="{{g_d18_fm.desc}}" style="font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid #E4E9E5; background: #FFFFFF; color: #15201A; cursor: pointer; white-space: nowrap;">▼ Decrescente</button><button type="button" onClick="{{g_d18_fm.clear}}" style="font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid #E4E9E5; background: #FFFFFF; color: #15201A; cursor: pointer; white-space: nowrap;">Limpar</button><button type="button" onClick="{{g_d18_fm.close}}" style="font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid #E4E9E5; background: #FFFFFF; color: #15201A; cursor: pointer; white-space: nowrap;">Fechar</button></div></sc-if><div style="overflow-x: auto;"><div role="table" style="display: grid; grid-template-columns: repeat(5, auto); min-width: 100%; width: max-content;"><div role="row" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; background: #F4F6F3; border-radius: 0;"><sc-for list="{{g_d18_head}}" as="h" hint-placeholder-count="5"><div role="columnheader" style="{{h.st}} padding: 0 4px 0 8px;"><button type="button" class="g2hb" onClick="{{h.sort}}" aria-label="{{h.sortLabel}}">{{h.l}} <span aria-hidden="true" style="{{h.astyle}} font-size: 9px;">{{h.arrow}}</span></button><button type="button" class="g2fb" onClick="{{h.fmenu}}" aria-label="{{h.flabel}}" title="{{h.flabel}}" style="color: {{h.fcolor}};">▾{{h.fil}}</button></div></sc-for></div><sc-for list="{{g_d18_rows}}" as="r" hint-placeholder-count="3"><div role="row" class="{{r.cls}}" tabIndex="{{r.tab}}" onClick="{{r.open}}" onKeyDown="{{r.key}}" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; border-top: 1px solid #E4E9E5; align-items: center; font-size: 13px;"><sc-for list="{{r.cells}}" as="c" hint-placeholder-count="5"><div role="cell" style="display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; min-width: 0; {{c.st}}"><sc-if value="{{c.isSel}}" hint-placeholder-val="{{false}}"><input type="checkbox" aria-label="{{c.selLabel}}" checked="{{c.on}}" onChange="{{c.tog}}" style="width: 16px; height: 16px; accent-color: #1E7A4C; margin: 0;"></sc-if><sc-if value="{{c.hasCaret}}" hint-placeholder-val="{{false}}"><sc-if value="{{c.caretOk}}" hint-placeholder-val="{{false}}"><button type="button" class="g2car" aria-label="{{c.caretLabel}}" title="{{c.caretLabel}}" onClick="{{c.toggle}}">{{c.caretSym}}</button></sc-if><sc-if value="{{c.caretNo}}" hint-placeholder-val="{{false}}"><span style="width: 22px; flex-shrink: 0;"></span></sc-if></sc-if><sc-if value="{{c.isData}}" hint-placeholder-val="{{true}}"><span class="g2pw" style="{{c.pw}}"><sc-for list="{{c.parts}}" as="p" hint-placeholder-count="1"><sc-if value="{{p.isTxt}}" hint-placeholder-val="{{false}}"><span>{{p.t}}</span></sc-if><sc-if value="{{p.isCn}}" hint-placeholder-val="{{false}}"><span style="{{p.st}}">{{p.t}}</span></sc-if><sc-if value="{{p.isB}}" hint-placeholder-val="{{false}}"><b>{{p.t}}</b></sc-if><sc-if value="{{p.isMut}}" hint-placeholder-val="{{false}}"><span style="color: #65736A; font-size: 12px;">{{p.t}}</span></sc-if><sc-if value="{{p.isChip}}" hint-placeholder-val="{{false}}"><span style="{{p.st}}"><span style="{{p.dot}}"></span>{{p.t}}</span></sc-if><sc-if value="{{p.isTag}}" hint-placeholder-val="{{false}}"><span style="display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; color: #65736A; border: 1px solid #E4E9E5; white-space: nowrap;">{{p.t}}</span></sc-if><sc-if value="{{p.isLink}}" hint-placeholder-val="{{false}}"><a href="{{p.href}}" style="color: #1E7A4C; font-weight: 700; text-decoration: none;">{{p.t}}</a></sc-if><sc-if value="{{p.isCta}}" hint-placeholder-val="{{false}}"><a href="{{p.href}}" style="{{p.st}}">{{p.t}}</a></sc-if><sc-if value="{{p.isAct}}" hint-placeholder-val="{{false}}"><button type="button" onClick="{{p.fn}}" style="{{p.st}}">{{p.t}}</button></sc-if><sc-if value="{{p.isBr}}" hint-placeholder-val="{{false}}"><span style="flex-basis: 100%; height: 0;"></span></sc-if></sc-for></span></sc-if><sc-if value="{{c.isDel}}" hint-placeholder-val="{{false}}"><sc-if value="{{c.notAsking}}" hint-placeholder-val="{{true}}"><button type="button" class="g2del" aria-label="{{c.delLabel}}" title="Excluir" onClick="{{c.ask}}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button></sc-if><sc-if value="{{c.asking}}" hint-placeholder-val="{{false}}"><span style="font-size: 12px; font-weight: 700; color: #B42318;">Excluir?</span><button type="button" onClick="{{c.yes}}" style="font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid #E4E9E5; background: #FFFFFF; color: #15201A; cursor: pointer; white-space: nowrap; color: #B42318; border-color: #B42318;">Excluir</button><button type="button" onClick="{{c.no}}" style="font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid #E4E9E5; background: #FFFFFF; color: #15201A; cursor: pointer; white-space: nowrap;">Manter</button></sc-if></sc-if></div></sc-for></div></sc-for></div></div><sc-if value="{{g_d18_empty}}" hint-placeholder-val="{{false}}"><div style="padding: 16px; font-size: 13px; color: #65736A;">Nenhuma linha corresponde aos filtros · <button type="button" onClick="{{g_d18_clear}}" style="border: 0; background: transparent; color: #1E7A4C; font-family: inherit; font-weight: 700; cursor: pointer;">Limpar filtros</button></div></sc-if></div></div></section><section style="background: #FFFFFF; border: 1px solid #E4E9E5;  border-radius: 14px; display: flex; flex-direction: column; min-width: 0;"><div style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px 10px;"><div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;"><h3 style="margin: 0; font-size: 15px; font-weight: 800; letter-spacing: -.01em;">Decisão</h3><div style="font-size: 12.8px; color: #65736A;">Aprove, devolva ou rejeite só esta versão; aprovar não libera a ordem.</div></div><div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;"></div></div><div style="padding: 0 12px 12px;"><sc-if value="{{dec_none}}" hint-placeholder-val="{{true}}"><div style="display: flex; gap: 8px; flex-wrap: wrap;"><button type="button" onClick="{{p_dev}}" title="Devolver ao emitente para ajuste" aria-label="Devolver ao emitente para ajuste" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; padding: 7px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; background: #FFFFFF; color: #15201A; border: 1px solid #E4E9E5;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>Devolver com motivo</button><button type="button" onClick="{{p_rej}}" title="Rejeitar versão com motivo" aria-label="Rejeitar versão com motivo" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; padding: 7px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; background: #FFFFFF; color: #15201A; border: 1px solid #E4E9E5;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></svg>Rejeitar versão</button></div></sc-if><sc-if value="{{dec_done}}" hint-placeholder-val="{{false}}"><div role="status" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 14px; border-radius: 12px; background: #E4F3E9; font-size: 13px; line-height: 1.5;"><span><b>Recibo</b> · {{rec_t}}</span><a href="{{prox_h}}" style="font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid #E4E9E5; background: #FFFFFF; color: #15201A; cursor: pointer; white-space: nowrap; align-self: flex-start; text-decoration: none; display: inline-flex; gap: 6px; align-items: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>{{prox_t}} ›</a></div></sc-if></div></section>
+</main>
+
+</div>
+<sc-if value="{{g_d18_F.open}}" hint-placeholder-val="{{false}}"><div style="position: fixed; inset: 0; z-index: 60; display: flex; justify-content: flex-end;"><button type="button" aria-label="Fechar formulário" onClick="{{g_d18_F.close}}" style="position: absolute; inset: 0; border: 0; background: rgba(21,32,26,.32); cursor: pointer;"></button><aside role="dialog" aria-label="{{g_d18_F.title}}" onKeyDown="{{g_d18_F.key}}" style="position: relative; width: 460px; max-width: 100%; height: 100vh; overflow-y: auto; background: #FFFFFF; box-shadow: -12px 0 40px -12px rgba(21,32,26,.35); padding: 22px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px;"><div style="display: flex; align-items: flex-start; gap: 10px;"><h2 style="margin: 0; font-family: 'Sora', 'Manrope', system-ui, sans-serif; font-size: 19px; font-weight: 700; letter-spacing: -.02em; flex-grow: 1;">{{g_d18_F.title}}</h2><button type="button" aria-label="Fechar" title="Fechar" onClick="{{g_d18_F.close}}" style="border: 0; background: #F4F6F3; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 18px; color: #65736A; flex-shrink: 0;">×</button></div><div style="font-size: 13px; color: #65736A; line-height: 1.45;">{{g_d18_F.sub}}</div><sc-if value="{{g_d18_F.hasErr}}" hint-placeholder-val="{{false}}"><div role="alert" style="padding: 8px 12px; border-radius: 10px; background: #FDE8E6; color: #B42318; font-size: 12.5px; font-weight: 700;">Corrija os campos destacados; o que você preencheu foi mantido.</div></sc-if><sc-for list="{{g_d18_F.fields}}" as="f" hint-placeholder-count="3"><div style="display: flex; flex-direction: column; gap: 4px;"><label for="{{f.fid}}" style="font-size: 12px; font-weight: 600; color: #65736A;">{{f.l}}</label><div style="display: flex; align-items: center; gap: 8px;"><sc-if value="{{f.isSel}}" hint-placeholder-val="{{false}}"><select id="{{f.fid}}" value="{{f.v}}" onChange="{{f.set}}" disabled="{{f.dis}}" style="{{f.ist}}"><sc-for list="{{f.opts}}" as="o" hint-placeholder-count="2"><option value="{{o.v}}">{{o.t}}</option></sc-for></select></sc-if><sc-if value="{{f.isMulti}}" hint-placeholder-val="{{false}}"><div style="display: flex; flex-wrap: wrap; gap: 6px;"><sc-for list="{{f.mopts}}" as="mo" hint-placeholder-count="3"><label style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border: 1px solid #E4E9E5; border-radius: 999px; font-size: 12.5px; cursor: pointer;"><input type="checkbox" checked="{{mo.on}}" disabled="{{mo.dis}}" onChange="{{mo.tog}}" style="accent-color: #1E7A4C;">{{mo.t}}</label></sc-for></div></sc-if><sc-if value="{{f.isTxt}}" hint-placeholder-val="{{true}}"><input id="{{f.fid}}" type="{{f.type}}" value="{{f.v}}" onChange="{{f.set}}" readOnly="{{f.dis}}" style="{{f.ist}}"></sc-if><sc-if value="{{f.isArea}}" hint-placeholder-val="{{false}}"><textarea id="{{f.fid}}" value="{{f.v}}" onChange="{{f.set}}" readOnly="{{f.dis}}" style="{{f.ist}} min-height: 64px; resize: vertical;"></textarea></sc-if><sc-if value="{{f.hasU}}" hint-placeholder-val="{{false}}"><span style="font-size: 12.5px; color: #65736A; white-space: nowrap;">{{f.u}}</span></sc-if></div><sc-if value="{{f.err}}" hint-placeholder-val="{{false}}"><span role="alert" style="font-size: 12px; font-weight: 700; color: #B42318;">{{f.errMsg}}</span></sc-if><sc-if value="{{f.hasHelp}}" hint-placeholder-val="{{false}}"><span style="font-size: 11.5px; color: #65736A;">{{f.help}}</span></sc-if></div></sc-for><sc-if value="{{g_d18_F.isTot}}" hint-placeholder-val="{{false}}"><div style="display: flex; flex-direction: column; gap: 4px;"><sc-for list="{{g_d18_F.items}}" as="it" hint-placeholder-count="3"><div style="display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid #E4E9E5; font-size: 13px;"><b>{{it.t}}</b><span style="color: #65736A; text-align: right;">{{it.v}}</span></div></sc-for></div></sc-if><sc-if value="{{g_d18_F.hasOrigins}}" hint-placeholder-val="{{false}}"><div style="font-size: 12px; font-weight: 700; color: #65736A; letter-spacing: .04em;">ORIGEM</div><sc-for list="{{g_d18_F.origins}}" as="og" hint-placeholder-count="1"><sc-if value="{{og.isLink}}" hint-placeholder-val="{{false}}"><a href="{{og.h}}" style="color: #1E7A4C; font-weight: 700; text-decoration: none; font-size: 13px;">{{og.t}} ›</a></sc-if><sc-if value="{{og.isTxt}}" hint-placeholder-val="{{true}}"><div style="font-size: 12.8px; padding: 5px 0; border-bottom: 1px solid #E4E9E5;">{{og.t}}</div></sc-if></sc-for></sc-if><div style="flex-grow: 1;"></div><sc-if value="{{g_d18_F.warn}}" hint-placeholder-val="{{false}}"><div role="alert" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: #FFF3D6; color: #8A5A00; font-size: 12.5px; font-weight: 700;">Há alterações não salvas.<div style="display: flex; gap: 8px;"><button type="button" onClick="{{g_d18_F.discard}}" style="font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid #E4E9E5; background: #FFFFFF; color: #15201A; cursor: pointer; white-space: nowrap;">Descartar alterações</button><button type="button" onClick="{{g_d18_F.keep}}" style="font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid #1E7A4C; background: #1E7A4C; color: #fff; cursor: pointer; white-space: nowrap;">Continuar editando</button></div></div></sc-if><div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid #E4E9E5;"><sc-if value="{{g_d18_F.edit}}" hint-placeholder-val="{{true}}"><button type="button" onClick="{{g_d18_F.cancel}}" style="padding: 7px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; background: #FFFFFF; color: #15201A; border: 1px solid #E4E9E5;">Cancelar</button><button type="button" onClick="{{g_d18_F.save}}" style="padding: 7px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; background: #1E7A4C; color: #fff; border: 1px solid #1E7A4C; box-shadow: 0 1px 2px rgba(30,122,76,.25);">Salvar</button></sc-if><sc-if value="{{g_d18_F.ro}}" hint-placeholder-val="{{false}}"><button type="button" onClick="{{g_d18_F.discard}}" style="padding: 7px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; background: #FFFFFF; color: #15201A; border: 1px solid #E4E9E5;">Fechar</button></sc-if></div></aside></div></sc-if><sc-if value="{{mp_open}}" hint-placeholder-val="{{false}}"><div style="position: fixed; inset: 0; z-index: 60; display: flex; justify-content: flex-end;"><button type="button" aria-label="Fechar" onClick="{{mp_cancel}}" style="position: absolute; inset: 0; border: 0; background: rgba(21,32,26,.32); cursor: pointer;"></button><aside role="dialog" aria-label="{{mp_titulo}}" style="position: relative; width: 460px; height: 100vh; background: #FFFFFF; box-shadow: -12px 0 40px -12px rgba(21,32,26,.35); padding: 22px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px;"><h2 style="margin: 0; font-family: 'Sora', 'Manrope', system-ui, sans-serif; font-size: 19px;">{{mp_titulo}}</h2><div style="font-size: 13px; color: #65736A;">{{mp_sub}}</div><label for="mp_mot" style="font-size: 12px; font-weight: 600; color: #65736A;">Motivo</label><textarea id="mp_mot" value="{{mot}}" onChange="{{setmot}}" style="font-family: inherit; font-size: 14px; padding: 9px 11px; border-radius: 10px; border: 1px solid #E4E9E5; min-height: 90px;"></textarea><sc-if value="{{has_moterr}}" hint-placeholder-val="{{false}}"><span role="alert" style="font-size: 12px; font-weight: 700; color: #B42318;">{{moterr}}</span></sc-if><div style="flex-grow: 1;"></div><sc-if value="{{mp_warn}}" hint-placeholder-val="{{false}}"><div role="alert" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: #FFF3D6; color: #8A5A00; font-size: 12.5px; font-weight: 700;">Há alterações não salvas.<div style="display: flex; gap: 8px;"><button type="button" onClick="{{mp_discard}}" style="font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid #E4E9E5; background: #FFFFFF; color: #15201A; cursor: pointer; white-space: nowrap;">Descartar alterações</button><button type="button" onClick="{{mp_keep}}" style="font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid #1E7A4C; background: #1E7A4C; color: #fff; cursor: pointer; white-space: nowrap;">Continuar editando</button></div></div></sc-if><div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid #E4E9E5;"><button type="button" onClick="{{mp_cancel}}" style="padding: 7px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; background: #FFFFFF; color: #15201A; border: 1px solid #E4E9E5;">Cancelar</button><button type="button" onClick="{{mp_ok}}" style="padding: 7px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; background: #1E7A4C; color: #fff; border: 1px solid #1E7A4C; box-shadow: 0 1px 2px rgba(30,122,76,.25);">{{mp_bt}}</button></div></aside></div></sc-if>
+<div role="status" style="position: fixed; left: 50%; transform: translateX(-50%); bottom: 22px; z-index: 70; background: #15201A; color: #fff; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 12px 32px -8px rgba(21,32,26,.4); max-width: 560px; {{g2toastst}}">{{g2toast}}</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":710}}'>
+const SPEC = [];
+const GRIDS = [{"id": "g_d18", "cols": [{"k": "prod", "l": "Produto"}, {"k": "dose", "l": "Dose"}, {"k": "qtd", "l": "Quantidade", "t": "num", "a": "r", "u": "kg"}, {"k": "comp", "l": "Compatibilidade"}, {"k": "fonte", "l": "Fonte"}], "rows": [{"id": "u1", "v": {"prod": "Ureia 45 %", "dose": "12 kg/ha × 95 ha", "qtd": 1140, "fonte": "protocolo do plano técnico"}, "s": {"comp": "Compatível com água de irrigação"}, "p": {"comp": [{"k": "chip", "t": "Compatível com água de irrigação", "c": "green"}]}, "o": [{"t": "Requisição REQ-038 · Ureia 1.140 kg (reserva ao liberar)", "h": "EST.dc.html"}, {"t": "12 kg/ha × 95 ha = 1.140 kg"}]}], "edit": {"m": "origin", "title": "Produto", "fields": [{"k": "prod", "l": "Produto", "ro": true}, {"k": "dose", "l": "Dose", "ro": true}]}, "sel": false, "tree": false, "so": {}, "total": false, "x0": {}, "del": false}];
+const NAV = [{"open": false}, {"open": false}, {"open": false}];
+// ===== G2 · grade interativa, formulário lateral e navegação (motor do protótipo v3.7) =====
+const G2C={green:['#1E7A4C','#E4F3E9'],yellow:['#8A5A00','#FFF3D6'],red:['#B42318','#FDE8E6'],gray:['#5B6660','#EEF1EE'],blue:['#1E5F8F','#E3F0FB'],orange:['#9A3F00','#FFE8D6']};
+const G2CTA='display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:9px;font-size:12.5px;font-weight:700;text-decoration:none;white-space:nowrap;background:#FFFFFF;color:#15201A;border:1px solid #E4E9E5;cursor:pointer;font-family:inherit;line-height:1.25;';
+const G2CTAU='display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:9px;font-size:12.5px;font-weight:700;text-decoration:none;white-space:nowrap;background:#FFFFFF;color:#B42318;border:1px solid #B42318;cursor:pointer;font-family:inherit;line-height:1.25;';
+function g2num(s){ if(typeof s==='number') return s; if(s===null||s===undefined) return NaN; let t=String(s).trim(); if(!t) return NaN; t=t.replace(/[^0-9,.\-]/g,''); if(t.indexOf(',')>=0){ t=t.replace(/\./g,'').replace(',','.'); } else if((t.match(/\./g)||[]).length>1 || /^\-?\d{1,3}(\.\d{3})+$/.test(t)){ t=t.replace(/\./g,''); } return parseFloat(t); }
+function g2fmtn(n,d,dmin){ return Number(n).toLocaleString('pt-BR',{minimumFractionDigits:(dmin!==undefined?dmin:(d||0)),maximumFractionDigits:d||0}); }
+function g2fmt(v,c){ if(v===null||v===undefined||v==='') return '—'; if(c&&c.t==='date'&&/^\d{4}-\d{2}-\d{2}$/.test(String(v))){ const a=String(v).split('-'); return a[2]+'/'+a[1]+'/'+a[0]; } if(c&&c.zdash&&Number(v)===0) return '—'; if(c&&c.t==='num'){ const n=Number(v); if(isNaN(n)) return String(v); return (c.pre||'')+g2fmtn(n,c.d,c.dmin)+(c.u?' '+c.u:''); } return String(v); }
+function g2st(self,id){ return ((self.state.g2||{})[id])||{}; }
+function g2set(self,id,patch){ const all=Object.assign({},self.state.g2||{}); all[id]=Object.assign({},all[id]||{},patch); self.setState({g2:all}); }
+function g2rows(self,sp){ const st=g2st(self,sp.id); return st.rows||sp.rows; }
+function g2find(list,id){ for(const r of list){ if(r.id===id) return r; if(r.kids){ const k=g2find(r.kids,id); if(k) return k; } } return null; }
+function g2text(r,c){ if(r.s&&r.s[c.k]!==undefined&&r.s[c.k]!==null) return String(r.s[c.k]); if(r.v&&r.v[c.k]!==undefined&&r.v[c.k]!==null) return g2fmt(r.v[c.k],c); return ''; }
+function g2key(r,c){ if(c.t==='num'){ let n=(r.v&&r.v[c.k]!==undefined&&r.v[c.k]!==null&&r.v[c.k]!=='')?Number(r.v[c.k]):g2num(r.s&&r.s[c.k]); return isNaN(n)?null:n; } const t=g2text(r,c); return (t===''||t==='—')?null:t; }
+function g2match(r,sp,st,mask,added){
+  if(r.sh && !(added||{})[r.sh]) return false;
+  if(mask && r.ri!==undefined && mask[r.ri]===false) return false;
+  const q=(st.q||'').trim().toLowerCase();
+  if(q){ const all=sp.cols.map(c=>g2text(r,c)).join(' ').toLowerCase(); if(all.indexOf(q)<0) return false; }
+  const f=st.f||{}; for(const k in f){ const vals=f[k]; if(!vals||!vals.length) continue; const c=sp.cols.find(x=>x.k===k); if(!c) continue; if(vals.indexOf(g2text(r,c))<0) return false; }
+  return true; }
+function g2sort(arr,sp,st){ const so=st.so||sp.so; if(!so||!so.k) return arr; const c=sp.cols.find(x=>x.k===so.k); if(!c) return arr; const d=so.d?-1:1;
+  return arr.slice().sort((a,b)=>{ const x=g2key(a,c), y=g2key(b,c); if(x===null&&y===null) return 0; if(x===null) return 1; if(y===null) return -1;
+    if(typeof x==='number'&&typeof y==='number') return (x-y)*d; return String(x).localeCompare(String(y),'pt-BR',{numeric:true,sensitivity:'base'})*d; }); }
+function g2filtering(st){ return !!((st.q||'').trim()) || Object.keys(st.f||{}).some(k=>(st.f[k]||[]).length); }
+function g2flat(sp,st,rows,mask,added){
+  const out=[]; const exp=st.x||sp.x0||{}; const filt=g2filtering(st);
+  const deep=(r)=>g2match(r,sp,st,mask,added)||(r.kids||[]).some(deep);
+  const walk=(list,lvl,parentOk)=>{ g2sort(list,sp,st).forEach(r=>{ const kids=r.kids||[]; const selfOk=g2match(r,sp,st,mask,added);
+      const anyKid=kids.some(deep); if(!(selfOk||anyKid||parentOk)) return;
+      out.push({r,lvl,has:kids.length>0});
+      if(kids.length && (exp[r.id] || (filt && anyKid && !selfOk))) walk(kids,lvl+1,selfOk&&!filt); }); };
+  walk(rows,0,false); return out; }
+function g2part(p,v){ const o={isCn:false,isTxt:false,isB:false,isMut:false,isChip:false,isTag:false,isLink:false,isCta:false,isAct:false,isBr:false,t:p.t||'',st:'',dot:'',href:p.h||'#',fn:null,title:p.t||''};
+  switch(p.k){ case 'b': o.isB=true; break; case 'mut': o.isMut=true; break;
+    case 'chip': { const cc=G2C[p.c]||G2C.gray; o.isChip=true; o.st='display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;color:'+cc[0]+';background:'+cc[1]+';'; o.dot='width:6px;height:6px;border-radius:999px;flex-shrink:0;background:'+cc[0]+';'; break; }
+    case 'cn': { const cc=G2C[p.c]||G2C.gray; o.isCn=true; o.st='font-weight:800;white-space:nowrap;color:'+cc[0]+';'; break; }
+    case 'tag': o.isTag=true; break; case 'link': o.isLink=true; break;
+    case 'cta': o.isCta=true; o.st=p.u?G2CTAU:G2CTA; break;
+    case 'act': o.isAct=true; if(p.lk) { o.lk=true; } if(p.fn&&p.fn.indexOf(':')>0){ const nm=p.fn.split(':')[0], ar=p.fn.slice(nm.length+1); o.fn=()=>{ if(v&&v[nm]) v[nm](ar); }; } else o.fn=(v&&p.fn&&v[p.fn])||(()=>{}); o.st=p.lk?'border:0;background:transparent;padding:0;color:#1E7A4C;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;text-decoration:underline;text-underline-offset:3px;text-align:left;':(p.u?G2CTAU:G2CTA); break;
+    case 'br': o.isBr=true; break; default: o.isTxt=true; }
+  return o; }
+function g2sum(sp,flat,c){ let s=0,n=0; flat.forEach(x=>{ if(x.lvl!==0) return; const k=g2key(x.r,c); if(typeof k==='number'){ s+=k; n++; } }); return n? (c.agg==='avg'? s/n : s) : null; }
+function g2open(self,sp,rid,e){
+  if(e&&e.target&&e.target.closest&&e.target.closest('a,button,input,select,textarea,label,[data-noedit]')) return;
+  const ed=sp.edit||{m:'none'}; if(ed.m==='none') return;
+  const r=g2find(g2rows(self,sp),rid); if(!r) return;
+  if(r.dr && self.__v && self.__v[r.dr]){ self.__v[r.dr](); return; }
+  if(ed.m==='pick'){ if(self.g2pick) self.g2pick(sp.id,rid,r); g2set(self,sp.id,{fl:rid}); return; }
+  const draft={}; (ed.fields||[]).forEach(f=>{ let val=''; if(r.v&&r.v[f.k]!==undefined&&r.v[f.k]!==null&&r.v[f.k]!=='') val=(f.t==='num'? String(r.v[f.k]).replace('.',','):String(r.v[f.k])); else if(r.s&&r.s[f.k]!==undefined) val=String(r.s[f.k]); draft[f.k]=val; });
+  g2set(self,sp.id,{fm:{rid,draft,orig:Object.assign({},draft),errs:{},warn:false,ro:(ed.m!=='form'||!!r.ro),isNew:false,mode:ed.m},fl:null,fmc:null}); }
+function g2new(self,sp){ const ed=sp.edit||{}; const draft={}; (ed.fields||[]).forEach(f=>{ draft[f.k]=(f.def!==undefined?String(f.def):''); });
+  g2set(self,sp.id,{fm:{rid:null,draft,orig:Object.assign({},draft),errs:{},warn:false,ro:false,isNew:true,mode:'form'},fl:null,fmc:null}); }
+function g2calc(r,calc){ (calc||[]).forEach(cx=>{ const a=(cx.a||[]).map(k=>Number(r.v[k])||0); let x=null;
+   if(cx.op==='mul') x=a.reduce((p,q)=>p*q,1); else if(cx.op==='div') x=a[1]?a[0]/a[1]:0; else if(cx.op==='sum') x=a.reduce((p,q)=>p+q,0);
+   else if(cx.op==='sub') x=a.slice(1).reduce((p,q)=>p-q,a[0]); else if(cx.op==='max0sub') x=Math.max(0,a.slice(1).reduce((p,q)=>p-q,a[0]));
+   if(x!==null){ r.v[cx.k]=Math.round(x*100)/100; if(r.s) delete r.s[cx.k]; if(r.p) delete r.p[cx.k]; } }); }
+function g2clone(list){ return list.map(r=>Object.assign({},r,{v:Object.assign({},r.v||{}),s:Object.assign({},r.s||{}),p:Object.assign({},r.p||{}),kids:r.kids?g2clone(r.kids):undefined})); }
+function g2save(self,sp){ const st=g2st(self,sp.id); const fm=st.fm; if(!fm) return; const ed=sp.edit||{}; const errs={};
+  const vis=(ed.fields||[]).filter(f=>!f.cond || String(fm.draft[f.cond.k])===String(f.cond.eq));
+  vis.forEach(f=>{ const val=(fm.draft[f.k]||'').trim(); if(f.ro||(f.newOnly&&!fm.isNew)) return;
+    if(f.req && !val) { errs[f.k]='Informe '+f.l.toLowerCase().replace(/ \(.*\)$/,'')+'.'; return; }
+    if(f.t==='email' && val && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val)) { errs[f.k]='E-mail inválido (ex.: compras@empresa.com.br).'; return; }
+    if(f.t==='tel' && val){ const dg=val.replace(/\D/g,''); if(dg.length<10||dg.length>13) { errs[f.k]='Informe DDD e número (ex.: 65 99999-0000).'; return; } }
+    if(f.t==='multi' && f.req && !val) { errs[f.k]='Escolha ao menos uma opção.'; return; }
+    if(f.t==='num' && val){ const n=g2num(val); if(isNaN(n)) { errs[f.k]='Use um número (ex.: 12,5).'; return; } if(f.min!==undefined && n<f.min) { errs[f.k]='Mínimo '+g2fmtn(f.min,(String(f.min).split('.')[1]||'').length)+(f.u?' '+f.u:'')+'.'; return; } if(f.max!==undefined && n>f.max) { errs[f.k]='Máximo '+g2fmtn(f.max,(String(f.max).split('.')[1]||'').length)+(f.u?' '+f.u:'')+'.'; return; } } });
+  if(!Object.keys(errs).length && self.g2check){ const cur=g2rows(self,sp); Object.assign(errs, self.g2check(sp.id,cur,fm.isNew?null:g2find(cur,fm.rid),fm.draft,fm.isNew)||{}); }
+  if(Object.keys(errs).length){ g2set(self,sp.id,{fm:Object.assign({},fm,{errs,warn:false})}); return; }
+  const rows=g2clone(g2rows(self,sp)); let r;
+  if(fm.isNew){ r={id:'n'+(rows.length+1)+'_'+String(Date.now()).slice(-5),v:{},s:{},p:{}}; rows.push(r); } else r=g2find(rows,fm.rid);
+  vis.forEach(f=>{ if(f.ro||(f.newOnly&&!fm.isNew)) return; const val=(fm.draft[f.k]||'').trim(); const col=sp.cols.find(c=>c.k===f.k);
+    if(f.t==='num'){ r.v[f.k]=val===''?'':g2num(val); if(r.s) delete r.s[f.k]; if(r.p) delete r.p[f.k]; }
+    else { r.v[f.k]=val; r.s[f.k]=val; if(col && col.chips && col.chips[val]) r.p[f.k]=[{k:'chip',t:val,c:col.chips[val]}]; else if(r.p) delete r.p[f.k]; } });
+  g2calc(r,ed.calc);
+  const patch={rows,fm:null,fl:r.id};
+  g2set(self,sp.id,patch); self.setState({g2toast:(fm.isNew?'Registro incluído':'Salvo · linha e totais atualizados')});
+  if(self.g2after) self.g2after(sp.id,rows,r,fm.isNew); }
+function g2dirty(fm){ if(!fm) return false; for(const k in fm.draft){ if(String(fm.draft[k])!==String(fm.orig[k])) return true; } return false; }
+function g2close(self,sp){ const fm=g2st(self,sp.id).fm; if(fm && !fm.ro && g2dirty(fm)) { g2set(self,sp.id,{fm:Object.assign({},fm,{warn:true})}); return; } g2set(self,sp.id,{fm:null}); }
+function g2vals(self,sp,v,mask){
+  const id=sp.id, st=g2st(self,id), rows=g2rows(self,sp), added=self.state.added||{};
+  const flat=g2flat(sp,st,rows,mask,added); const ed=sp.edit||{m:'none'}; const editable=ed.m&&ed.m!=='none';
+  const so=st.so||sp.so||{};
+  v[id+'_head']=sp.cols.map((c,ci)=>({l:c.l, st:'display:flex;align-items:center;gap:2px;justify-content:'+(c.a==='r'?'flex-end':'flex-start')+';'+(ci===0?'position:sticky;left:0;z-index:2;background:#F4F6F3;box-shadow:1px 0 0 #E4E9E5;':''),
+     arrow:(so.k===c.k?(so.d?'▼':'▲'):'⇅'), astyle:(so.k===c.k?'color:#1E7A4C;':'color:#B7C1BA;'), sortLabel:'Ordenar por '+c.l,
+     sort:()=>{ const cur=g2st(self,id).so||sp.so||{}; let nx; if(cur.k!==c.k) nx={k:c.k,d:false}; else if(!cur.d) nx={k:c.k,d:true}; else nx={}; g2set(self,id,{so:nx}); },
+     fil:(((st.f||{})[c.k]||[]).length?' · '+((st.f||{})[c.k]||[]).length:''), fcolor:(((st.f||{})[c.k]||[]).length?'#1E7A4C':'#8A968E'),
+     fmenu:()=>{ const cur=g2st(self,id).fmc; g2set(self,id,{fmc:(cur===c.k?null:c.k)}); }, flabel:'Filtrar '+c.l}));
+  // valores do filtro aberto
+  const fmc=st.fmc; const fcol=sp.cols.find(c=>c.k===fmc);
+  if(fcol){ const cnt={}; const leaf=(list)=>list.forEach(r=>{ if(r.kids&&r.kids.length) leaf(r.kids); if(!(r.kids&&r.kids.length)||sp.tree===false||!sp.tree){ const t=g2text(r,fcol)||'(vazio)'; cnt[t]=(cnt[t]||0)+1; } }); leaf(rows);
+    const cur=(st.f||{})[fmc]||[]; const keys=Object.keys(cnt).sort((a,b)=>a.localeCompare(b,'pt-BR',{numeric:true}));
+    v[id+'_fm']={open:true, l:fcol.l, vals:keys.map(k=>({t:k,n:cnt[k],on:cur.indexOf(k)>=0,
+        tog:()=>{ const f=Object.assign({},g2st(self,id).f||{}); const a=(f[fmc]||[]).slice(); const i=a.indexOf(k); if(i>=0) a.splice(i,1); else a.push(k); f[fmc]=a; g2set(self,id,{f}); }})),
+      asc:()=>g2set(self,id,{so:{k:fmc,d:false}}), desc:()=>g2set(self,id,{so:{k:fmc,d:true}}),
+      clear:()=>{ const f=Object.assign({},g2st(self,id).f||{}); delete f[fmc]; g2set(self,id,{f}); }, close:()=>g2set(self,id,{fmc:null})};
+  } else v[id+'_fm']={open:false,vals:[]};
+  const total=(sp.total!==false) && sp.cols.some(c=>c.agg);
+  v[id+'_rows']=flat.map(({r,lvl,has})=>{
+    const cells=[]; const exp=(st.x||sp.x0||{});
+    if(sp.sel) cells.push({isSel:true,isData:false,isDel:false,on:!!(st.sel||{})[r.id],selLabel:'Selecionar '+g2text(r,sp.cols[0]),
+      tog:()=>{ const s2=Object.assign({},g2st(self,id).sel||{}); s2[r.id]=!s2[r.id]; g2set(self,id,{sel:s2}); },st:'padding:6px 4px 6px 12px;'});
+    sp.cols.forEach((c,ci)=>{
+      const empty=(has && ci>0 && !(r.p&&r.p[c.k]) && (!r.v || r.v[c.k]===undefined || r.v[c.k]===''));
+      const raw=empty?[]:((r.p&&r.p[c.k]&&r.p[c.k].length)?r.p[c.k]:[{k:(ci===0&&lvl===0&&has?'b':'txt'),t:g2fmt(r.v?r.v[c.k]:'',c)}]);
+      const cell={isSel:false,isData:true,isDel:false,parts:raw.map(p=>g2part(p,v)),pw:'max-width:'+(c.w||340)+'px;',
+        st:'padding:6px 8px;'+(c.a==='r'?'text-align:right;justify-content:flex-end;white-space:nowrap;font-variant-numeric:tabular-nums;':'')+(ci===0&&sp.tree?'padding-left:'+(8+lvl*20)+'px;':'')+(ci===0?'position:sticky;left:0;z-index:1;background:'+(lvl>0?'#FBFCFA':'#FFFFFF')+';box-shadow:1px 0 0 #E4E9E5;':'')};
+      if(ci===0 && sp.tree){ cell.hasCaret=true; cell.caretOk=has; cell.caretNo=!has; const open=!!exp[r.id]||(g2filtering(st)&&has);
+        cell.caretSym=open?'▾':'▸'; cell.caretLabel=(open?'Recolher ':'Expandir ')+g2text(r,c);
+        cell.toggle=()=>{ const x=Object.assign({},g2st(self,id).x||sp.x0||{}); x[r.id]=!x[r.id]; g2set(self,id,{x}); }; }
+      else { cell.hasCaret=false; }
+      cells.push(cell); });
+    if(sp.del){ const asking=(st.cf===r.id); cells.push({isSel:false,isData:false,isDel:true,asking,notAsking:!asking,st:'padding:4px 10px;white-space:nowrap;',
+        delLabel:'Excluir '+g2text(r,sp.cols[0]), ask:()=>g2set(self,id,{cf:r.id}), no:()=>g2set(self,id,{cf:null}),
+        yes:()=>{ const rs=g2clone(g2rows(self,sp)); const rm=(list)=>{ const i=list.findIndex(x=>x.id===r.id); if(i>=0){ list.splice(i,1); return true; } return list.some(x=>x.kids&&rm(x.kids)); }; rm(rs); g2set(self,id,{rows:rs,cf:null}); self.setState({g2toast:'Excluído: '+g2text(r,sp.cols[0])}); if(self.g2after) self.g2after(id,rs,null); }}); }
+    const canOpen=editable && !(ed.leafOnly && has);
+    return {id:r.id, cls:'g2r'+(canOpen?' g2ed':'')+(st.fl===r.id?' g2flash':'')+(lvl>0?' g2kid':''), tab:canOpen?'0':'-1',
+      open:(e)=>{ if(canOpen) g2open(self,sp,r.id,e); }, key:(e)=>{ if(canOpen && e && (e.key==='Enter'||e.key===' ')){ e.preventDefault(); g2open(self,sp,r.id,null); } }, cells}; });
+  v[id+'_count']=flat.filter(x=>x.lvl===0).length; v[id+'_all']=rows.length;
+  v[id+'_empty']=flat.length===0; v[id+'_some']=flat.length>0;
+  v[id+'_q']=st.q||''; v[id+'_setq']=(e)=>g2set(self,id,{q:e.target.value});
+  v[id+'_filtered']=g2filtering(st); v[id+'_clear']=()=>g2set(self,id,{q:'',f:{}});
+  v[id+'_fchips']=Object.keys(st.f||{}).filter(k=>(st.f[k]||[]).length).map(k=>{ const c=sp.cols.find(x=>x.k===k)||{l:k}; return {t:c.l+': '+st.f[k].join(', '), rm:()=>{ const f=Object.assign({},g2st(self,id).f||{}); delete f[k]; g2set(self,id,{f}); }}; });
+  v[id+'_selcount']=Object.values(st.sel||{}).filter(Boolean).length; v[id+'_hassel']=v[id+'_selcount']>0;
+  v[id+'_selclear']=()=>g2set(self,id,{sel:{}});
+  v[id+'_selall']=()=>{ const s2={}; const allOn=flat.every(x=>(st.sel||{})[x.r.id]); if(!allOn) flat.forEach(x=>{ s2[x.r.id]=true; }); g2set(self,id,{sel:s2}); };
+  v[id+'_new']=()=>g2new(self,sp);
+  v[id+'_expall']=()=>{ const x={}; const w=(l)=>l.forEach(r=>{ if(r.kids&&r.kids.length){ x[r.id]=true; w(r.kids);} }); w(rows); g2set(self,id,{x}); };
+  v[id+'_colall']=()=>g2set(self,id,{x:{}});
+  if(total){ v[id+'_tot']=sp.cols.map((c,ci)=>{ const s=c.agg?g2sum(sp,flat,c):null; return {t:(ci===0?'Total':(s===null?'':g2fmt(s,c))), st:'padding:8px 10px;font-weight:800;'+(ci===0?'position:sticky;left:0;z-index:1;background:#F4F6F3;':'')+(c.a==='r'?'text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;':'')}; });
+    v[id+'_totopen']=()=>g2set(self,id,{fm:{tot:true,ro:true,mode:'total',draft:{},orig:{},errs:{}},fmc:null}); }
+  // formulário lateral
+  const fm=st.fm; const F={open:!!fm};
+  if(fm){ const r=fm.rid?g2find(rows,fm.rid):null;
+    F.isTot=!!fm.tot; F.isRec=!fm.tot;
+    F.title=fm.tot?('Composição do total'):(fm.isNew?(ed.newTitle||'Novo registro'):((ed.title?ed.title+' · ':'')+(r?g2text(r,sp.cols[0]):'')));
+    F.sub=fm.tot?'Linhas que formam o total, com os filtros atuais. Totais são calculados: altere os registros de origem.':(fm.ro?(fm.mode==='origin'?'Valor calculado — consulte a origem abaixo. Para mudar, altere o registro de origem.':(r&&r.ro?'Consulta: você não tem permissão para editar este registro.':'Consulta')):(ed.sub||'Altere os campos e salve. Os cálculos da tabela são refeitos ao salvar.'));
+    F.ro=!!fm.ro; F.edit=!fm.ro; F.warn=!!fm.warn;
+    F.items=fm.tot? flat.filter(x=>x.lvl===0).map(x=>({t:g2text(x.r,sp.cols[0]), v:sp.cols.filter(c=>c.agg).map(c=>c.l+': '+g2text(x.r,c)).join(' · ')})):[];
+    F.origins=(r&&r.o)?r.o.map(o=>({t:o.t,h:o.h||'#',isLink:!!o.h,isTxt:!o.h})):[]; F.hasOrigins=F.origins.length>0;
+    const visf=(ed.fields||[]).filter(f=>!f.cond || String(fm.draft[f.cond.k])===String(f.cond.eq));
+    F.fields=fm.tot?[]:visf.map(f=>{ let val=fm.draft[f.k]; if(f.live&&self.g2live){ const lv=self.g2live(id,f.k,fm.draft); if(lv!==undefined&&lv!==null) val=lv; } const err=(fm.errs||{})[f.k]; const dis=!!fm.ro||!!f.ro||(!!f.newOnly&&!fm.isNew); const mv=(String(val||'').split(';').map(x=>x.trim()).filter(Boolean));
+      return {l:f.l, fid:'fx_'+id+'_'+f.k, isSel:f.t==='sel', isMulti:f.t==='multi', isTxt:(f.t!=='sel'&&f.t!=='area'&&f.t!=='multi'), isArea:f.t==='area', type:(f.t==='date'?'date':(f.t==='email'?'email':(f.t==='tel'?'tel':'text'))),
+        mopts:(f.t==='multi'?(f.opts||[]).map(o=>({t:o,on:mv.indexOf(o)>=0,dis,tog:()=>{ const cur=g2st(self,id).fm; if(!cur||dis) return; let a=String(cur.draft[f.k]||'').split(';').map(x=>x.trim()).filter(Boolean); const i=a.indexOf(o); if(i>=0) a.splice(i,1); else a.push(o); const d=Object.assign({},cur.draft,{[f.k]:a.join('; ')}); const er=Object.assign({},cur.errs||{}); delete er[f.k]; g2set(self,id,{fm:Object.assign({},cur,{draft:d,errs:er,warn:false})}); }})):[]), v:(val===undefined?'':val), u:f.u||'', hasU:!!f.u, help:f.help||'', hasHelp:!!f.help,
+        dis, err:!!err, errMsg:err||'', ist:'font-family:inherit;font-size:14px;padding:9px 11px;border-radius:10px;box-sizing:border-box;width:100%;border:1px solid '+(err?'#B42318':'#E4E9E5')+';background:'+(dis?'#F4F6F3':'#FFFFFF')+';color:#15201A;',
+        opts:(f.opts||[]).map(o=>({v:o,t:o})),
+        set:(e)=>{ const cur=g2st(self,id).fm; if(!cur) return; const d=Object.assign({},cur.draft,{[f.k]:e.target.value}); const er=Object.assign({},cur.errs||{}); delete er[f.k]; g2set(self,id,{fm:Object.assign({},cur,{draft:d,errs:er,warn:false})}); }}; });
+    F.nerr=Object.keys(fm.errs||{}).length; F.hasErr=F.nerr>0;
+    F.save=()=>g2save(self,sp); F.cancel=()=>g2close(self,sp); F.close=()=>g2close(self,sp);
+    F.discard=()=>g2set(self,id,{fm:null}); F.keep=()=>{ const cur=g2st(self,id).fm; g2set(self,id,{fm:Object.assign({},cur,{warn:false})}); };
+    F.key=(e)=>{ if(e && e.key==='Escape'){ e.preventDefault(); g2close(self,sp); } };
+  }
+  v[id+'_F']=F; }
+function g2navvals(self,v,nav){ (nav||[]).forEach((m,i)=>{ const o=(self.state.nav||{}); const open=(o[i]===undefined)?!!m.open:!!o[i];
+  v['nav'+i+'_open']=open; v['nav'+i+'_sym']=open?'▾':'▸'; v['nav'+i+'_tog']=()=>{ const n=Object.assign({},self.state.nav||{}); n[i]=!open; self.setState({nav:n}); }; }); }
+
+// faixa de etapas controlada pelo estado da tela (processos numa só tela de trabalho)
+function g2steps(self,v,pre,n,cur,whys,go){ for(let i=1;i<=n;i++){ const on=(i===cur); const w=(whys&&whys[i])||'';
+  v[pre+i+'_st']='display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:10px;border:0;font-family:inherit;cursor:pointer;text-align:left;min-width:0;color:#15201A;'+(on?'background:#E4F3E9;box-shadow:inset 0 -2px 0 #1E7A4C;':'background:transparent;');
+  v[pre+i+'_bst']='width:22px;height:22px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;flex-shrink:0;'+(on?'background:#1E7A4C;color:#fff;':(w?'background:#FDE8E6;color:#B42318;':'background:#EEF1EE;color:#15201A;'));
+  v[pre+i+'_tst']='font-size:12.5px;line-height:1.2;font-weight:'+(on?'800':'600')+';';
+  v[pre+i+'_why']=w; v[pre+i+'_hasWhy']=!!w; v[pre+i+'_cur']=on?'step':'false';
+  v[pre+i+'_go']=()=>go(i); } }
+
+const CEN0 = {"v": 1, "rev": 0, "ordens": {"OS-0415": {"id": "OS-0415", "tipo": "Dessecação pós-colheita", "talhao": "T3", "area": 96, "etapa": "Encerradas", "versao": "v1 aprovada", "aprov": true, "realizado": 96, "saldo": 0, "resp": "Marcos", "ins": [{"p": "Glifosato 480", "dose": 2.0, "un": "L", "tot": 192.0, "emb": "galão 20 L"}], "req": null, "selos": [], "ap": [{"d": "11/09", "dia": 1, "ha": 48, "st": "Conferido", "sinc": true, "origem": "web"}, {"d": "12/09", "dia": 2, "ha": 48, "st": "Conferido", "sinc": true, "origem": "web"}], "reservado": false}, "OS-0417": {"id": "OS-0417", "tipo": "Adubação de cobertura", "talhao": "P1", "area": 95, "etapa": "Em conferência", "versao": "v1 aprovada", "aprov": true, "realizado": 95, "saldo": 0, "resp": "Paula", "ins": [{"p": "MAP 11-52", "dose": 36.84, "un": "kg", "tot": 3500, "emb": "saco 50 kg"}], "req": "REQ-031", "selos": [{"t": "Sobras a receber", "c": "yellow"}], "ap": [{"d": "19/09", "dia": 1, "ha": 32, "st": "Conferido", "sinc": true, "origem": "web"}, {"d": "20/09", "dia": 2, "ha": 33, "st": "Conferido", "sinc": true, "origem": "web"}, {"d": "21/09", "dia": 3, "ha": 30, "st": "Conferido", "sinc": true, "origem": "web"}], "reservado": true}, "OS-0418": {"id": "OS-0418", "tipo": "Fertirrigação · reclassificada", "talhao": "P1", "area": 95, "etapa": "A liberar", "versao": "v2 em revisão", "aprov": false, "realizado": 0, "saldo": 95, "resp": "João", "ins": [{"p": "Ureia 45%", "dose": 12.0, "un": "kg", "tot": 1140.0, "emb": "saco 50 kg"}], "req": "REQ-038", "selos": [{"t": "Aguardando agrônomo", "c": "yellow"}], "ap": [], "reservado": false}, "OS-0419": {"id": "OS-0419", "tipo": "Irrigação · água", "talhao": "P2", "area": 80, "etapa": "Liberadas", "versao": "v1 · liberada pela prontidão operacional", "aprov": false, "realizado": 0, "saldo": 80, "resp": "João", "ins": [], "req": null, "selos": [], "ap": [], "reservado": false}, "OS-0420": {"id": "OS-0420", "tipo": "Plantio · Soja 58 W", "talhao": "T4", "area": 100, "etapa": "Em execução", "versao": "v2 aprovada · v3 em revisão", "aprov": true, "realizado": 30, "saldo": 70, "resp": "Carlos", "ins": [{"p": "Semente de soja 58 W", "dose": 52.0, "un": "kg", "tot": 5200.0, "emb": "saco 40 kg"}, {"p": "MAP 11-52", "dose": 250.0, "un": "kg", "tot": 25000.0, "emb": "saco 50 kg"}], "req": "REQ-036", "selos": [{"t": "Impedida · ativo bloqueado", "c": "red"}, {"t": "Revisão de saldo pendente · v3", "c": "yellow"}], "ap": [{"d": "21/09", "dia": 1, "ha": 18, "st": "Conferido", "sinc": true, "origem": "web"}, {"d": "22/09", "dia": 2, "ha": 12, "st": "Provisório", "sinc": true, "origem": "web"}], "reservado": true}, "OS-0421": {"id": "OS-0421", "tipo": "Pulverização · Fungicida 1ª aplicação", "talhao": "T1+T2", "area": 350, "etapa": "Em execução", "versao": "v2 aprovada", "aprov": true, "realizado": 190, "saldo": 160, "resp": "Marcos", "ins": [{"p": "Fungicida A", "dose": 0.5, "un": "L", "tot": 175.0, "emb": "galão 5 L"}, {"p": "Adjuvante espalhante", "dose": 0.25, "un": "L", "tot": 87.5, "emb": "galão 5 L"}], "req": "REQ-035", "selos": [{"t": "Parcial · dia 4 de 7", "c": "yellow"}], "ap": [{"d": "20/09", "dia": 1, "ha": 50, "st": "Conferido", "sinc": true, "origem": "web"}, {"d": "21/09", "dia": 2, "ha": 50, "st": "Conferido", "sinc": true, "origem": "web"}, {"d": "22/09", "dia": 3, "ha": 50, "st": "Conferido", "sinc": true, "origem": "web"}, {"d": "23/09", "dia": 4, "ha": 40, "st": "Provisório", "sinc": true, "origem": "web"}, {"d": "24/09", "dia": 5, "ha": 50, "st": "Previsto", "sinc": true, "origem": "web"}, {"d": "25/09", "dia": 6, "ha": 50, "st": "Previsto", "sinc": true, "origem": "web"}, {"d": "26/09", "dia": 7, "ha": 60, "st": "Previsto", "sinc": true, "origem": "web"}], "reservado": true}, "OS-0422": {"id": "OS-0422", "tipo": "Irrigação · água", "talhao": "P2", "area": 80, "etapa": "A liberar", "versao": "v1 · só água · libera pela prontidão", "aprov": false, "realizado": 0, "saldo": 80, "resp": "João", "ins": [], "req": null, "selos": [{"t": "Janela a definir", "c": "yellow"}], "ap": [], "reservado": false}, "OS-0423": {"id": "OS-0423", "tipo": "Irrigação · água por gotejo", "talhao": "T7", "area": 42, "etapa": "A liberar", "versao": "v1 · só água · libera pela prontidão", "aprov": false, "realizado": 0, "saldo": 42, "resp": "João", "ins": [], "req": null, "selos": [{"t": "Conflito · parada da B3", "c": "red"}], "ap": [], "reservado": false}, "OS-0424": {"id": "OS-0424", "tipo": "Pulverização · Fungicida A", "talhao": "P2", "area": 80, "etapa": "Liberadas", "versao": "v1 aprovada", "aprov": true, "realizado": 0, "saldo": 80, "resp": "Marcos", "ins": [{"p": "Fungicida A", "dose": 0.8, "un": "L", "tot": 64.0, "emb": "galão 5 L"}], "req": "REQ-039", "selos": [], "ap": [], "reservado": true}, "OS-0425": {"id": "OS-0425", "tipo": "Adubação 1ª parcela · café", "talhao": "C1", "area": 38, "etapa": "Liberadas", "versao": "plano CAFE-AR · v1 aprovada", "aprov": true, "realizado": 0, "saldo": 38, "resp": "Paula", "ins": [{"p": "NPK 20-05-20", "dose": 300.0, "un": "kg", "tot": 11400.0, "emb": "big bag 1.000 kg"}], "req": "REQ-040", "selos": [{"t": "Entrega sem saldo suficiente", "c": "yellow"}], "ap": [], "reservado": true}, "OS-0430": {"id": "OS-0430", "tipo": "Dessecação pré-plantio", "talhao": "T1-A", "area": 160, "etapa": "A liberar", "versao": "v1 emitida", "aprov": false, "realizado": 0, "saldo": 160, "resp": "Marcos", "ins": [{"p": "Glifosato 480", "dose": 2.0, "un": "L", "tot": 320.0, "emb": "galão 20 L"}, {"p": "2,4-D 806", "dose": 1.0, "un": "L", "tot": 160.0, "emb": "galão 20 L"}, {"p": "Óleo mineral", "dose": 0.5, "un": "L", "tot": 80.0, "emb": "galão 20 L"}], "req": null, "selos": [{"t": "Aguardando agrônomo", "c": "yellow"}], "ap": [], "reservado": false}, "OS-0431": {"id": "OS-0431", "tipo": "Plantio · Soja 58 W", "talhao": "T2", "area": 102, "etapa": "A liberar", "versao": "REC-014 v2 · v1 aprovada", "aprov": true, "realizado": 0, "saldo": 102, "resp": "Carlos", "ins": [{"p": "Semente de soja 58 W", "dose": 52.0, "un": "kg", "tot": 5304.0, "emb": "saco 40 kg"}, {"p": "MAP 11-52", "dose": 250.0, "un": "kg", "tot": 25500.0, "emb": "saco 50 kg"}], "req": null, "selos": [{"t": "Aprovada pelo agrônomo", "c": "green"}, {"t": "Falta máquina · Trator T1 bloqueado", "c": "red"}], "ap": [], "reservado": false}, "OB-0104": {"id": "OB-0104", "tipo": "Beneficiamento · grãos", "talhao": "Armazém Sede", "area": 0, "etapa": "Encerradas", "versao": "rota aprovada", "aprov": true, "realizado": 0, "saldo": 0, "resp": "Rui", "ins": [], "req": null, "selos": [{"t": "Lote bloqueado", "c": "red"}], "ap": [], "reservado": false}}, "reqs": {"REQ-031": {"id": "REQ-031", "os": "OS-0417", "estado": "Em conferência", "itens": [{"prod": "MAP 11-52", "lote": "M26-07", "un": "kg", "emb": "saco 50 kg", "solicitado": 5000, "entregue": 5000, "consumido": 3500, "devolvido": 1000, "custodia": 500, "confirmado": true}]}, "REQ-035": {"id": "REQ-035", "os": "OS-0421", "estado": "Em execução", "itens": [{"prod": "Fungicida A", "lote": "F26-02", "un": "L", "emb": "galão 5 L", "solicitado": 175, "entregue": 160, "consumido": 95, "devolvido": 0, "custodia": 65, "confirmado": true}]}, "REQ-036": {"id": "REQ-036", "os": "OS-0420", "estado": "Impedida · ativo bloqueado", "itens": [{"prod": "Semente de soja 58 W", "lote": "S58-0801", "un": "kg", "emb": "saco 40 kg", "solicitado": 5200, "entregue": 1560, "consumido": 1560, "devolvido": 0, "custodia": 0, "confirmado": false}]}, "REQ-038": {"id": "REQ-038", "os": "OS-0418", "estado": "Aguardando aprovação da O.S.", "itens": [{"prod": "Ureia 45%", "lote": "—", "un": "kg", "emb": "saco 50 kg", "solicitado": 1140, "entregue": 0, "consumido": 0, "devolvido": 0, "custodia": 0, "confirmado": false}]}, "REQ-039": {"id": "REQ-039", "os": "OS-0424", "estado": "Reservada", "itens": [{"prod": "Fungicida A", "lote": "F26-02", "un": "L", "emb": "galão 5 L", "solicitado": 65, "entregue": 0, "consumido": 0, "devolvido": 0, "custodia": 0, "confirmado": false}]}, "REQ-040": {"id": "REQ-040", "os": "OS-0425", "estado": "Reservada", "itens": [{"prod": "NPK 20-05-20", "lote": "N26-03", "un": "kg", "emb": "big bag 1.000 kg", "solicitado": 8000, "entregue": 0, "consumido": 0, "devolvido": 0, "custodia": 0, "confirmado": false}]}}, "lotes": {"KCl 60%|K26-11": {"prod": "KCl 60%", "lote": "K26-11", "local": "Galpão 2", "un": "kg", "fisico": 60000, "quarentena": 10000, "reservado": 0, "validade": "—"}, "MAP 11-52|M26-07": {"prod": "MAP 11-52", "lote": "M26-07", "local": "Galpão 2", "un": "kg", "fisico": 90000, "quarentena": 0, "reservado": 0, "validade": "—"}, "Fungicida A|F26-02": {"prod": "Fungicida A", "lote": "F26-02", "local": "Almox. defensivos", "un": "L", "fisico": 545, "quarentena": 0, "reservado": 65, "validade": "03/2028"}, "Glifosato 480|G26-14": {"prod": "Glifosato 480", "lote": "G26-14", "local": "Almox. defensivos", "un": "L", "fisico": 1200, "quarentena": 0, "reservado": 0, "validade": "11/2027"}, "Semente de soja 58 W|S58-0801": {"prod": "Semente de soja 58 W", "lote": "S58-0801", "local": "Câmara fria", "un": "kg", "fisico": 12000, "quarentena": 0, "reservado": 0, "validade": "06/2027"}, "NPK 20-05-20|N26-03": {"prod": "NPK 20-05-20", "lote": "N26-03", "local": "Galpão 1", "un": "kg", "fisico": 8000, "quarentena": 0, "reservado": 8000, "validade": "—"}, "Óleo mineral|O26-05": {"prod": "Óleo mineral", "lote": "O26-05", "local": "Almox. defensivos", "un": "L", "fisico": 400, "quarentena": 0, "reservado": 0, "validade": "08/2028"}, "2,4-D 806|D26-01": {"prod": "2,4-D 806", "lote": "D26-01", "local": "Almox. defensivos", "un": "L", "fisico": 300, "quarentena": 0, "reservado": 0, "validade": "12/2027"}, "Acaricida D|AD26-02": {"prod": "Acaricida D", "lote": "AD26-02", "local": "Almox. defensivos", "un": "L", "fisico": 10, "quarentena": 0, "reservado": 0, "validade": "12/2027"}, "Adjuvante espalhante|AE26-03": {"prod": "Adjuvante espalhante", "lote": "AE26-03", "local": "Almox. defensivos", "un": "L", "fisico": 150, "quarentena": 0, "reservado": 0, "validade": "12/2027"}, "Cletodim 240|C26-05": {"prod": "Cletodim 240", "lote": "C26-05", "local": "Almox. defensivos", "un": "L", "fisico": 80, "quarentena": 0, "reservado": 0, "validade": "12/2027"}, "Fungicida TS|FT26-09": {"prod": "Fungicida TS", "lote": "FT26-09", "local": "Almox. defensivos", "un": "L", "fisico": 20, "quarentena": 0, "reservado": 0, "validade": "12/2027"}, "Inoculante líquido|IL26-11": {"prod": "Inoculante líquido", "lote": "IL26-11", "local": "Almox. defensivos", "un": "L", "fisico": 50, "quarentena": 0, "reservado": 0, "validade": "12/2027"}, "Inseticida B|IB26-12": {"prod": "Inseticida B", "lote": "IB26-12", "local": "Almox. defensivos", "un": "L", "fisico": 60, "quarentena": 0, "reservado": 0, "validade": "12/2027"}, "Nitrato de cálcio|ND26-16": {"prod": "Nitrato de cálcio", "lote": "ND26-16", "local": "Galpão 1", "un": "kg", "fisico": 1000, "quarentena": 0, "reservado": 0, "validade": "12/2027"}, "Nitrato de potássio|ND26-17": {"prod": "Nitrato de potássio", "lote": "ND26-17", "local": "Galpão 1", "un": "kg", "fisico": 600, "quarentena": 0, "reservado": 0, "validade": "12/2027"}}, "movs": [], "ocorr": [], "app": {"online": true, "fila": [], "turno": null, "operador": "Marcos"}};
+// ===== Cenário compartilhado de demonstração (O.S. ↔ Estoque ↔ App de campo) =====
+// Um único estado gravado no navegador (localStorage), lido e alterado pelas telas O.S., Estoque e App.
+// Sem localStorage (janela privada, pré-visualização) o cenário vale só para a tela aberta.
+// Regras: PRD 41 (liberação e fichas), 42 (almoxarifado: reserva ao liberar, entrega só do saldo elegível, consumo pelo apontamento,
+// sobra devolvida e conferida), 64 (app de campo: fila, turno, apontamento offline sem duplicar), 72 (DEC-2609-04/05/07).
+const CEN_KEY = 'talhao-os-cenario-v1';
+let CEN_MEM = null;
+function cenClone(o) { return JSON.parse(JSON.stringify(o)); }
+function cenLoad() { try { const t = localStorage.getItem(CEN_KEY); return t ? JSON.parse(t) : null; } catch (e) { return null; } }
+function cenSave(c) { CEN_MEM = c; try { localStorage.setItem(CEN_KEY, JSON.stringify(c)); } catch (e) {} }
+function cenGet() { const c = cenLoad() || CEN_MEM; if (c && c.v === CEN0.v) return c; CEN_MEM = cenClone(CEN0); return CEN_MEM; }
+function cenReset() { CEN_MEM = cenClone(CEN0); try { localStorage.removeItem(CEN_KEY); } catch (e) {} }
+function cenAgora() { const d = new Date(); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
+// Mudança atômica: aplica fn numa cópia, grava e devolve a mensagem (ou o erro, sem gravar nada).
+function cenMudar(self, fn) {
+  const c = cenClone(cenGet()); let r;
+  try { r = fn(c) || {}; } catch (e) { r = { erro: String(e.message || e) }; }
+  if (r.erro) { if (self) self.setState({ g2toast: r.erro }); return r; }
+  c.rev = (c.rev || 0) + 1; cenSave(c); if (self) self.setState({ cenrev: c.rev, g2toast: r.msg || '' }); return r;
+}
+// Outras telas (outros quadros do Canvas) atualizam quando o cenário muda.
+function cenOuvir(self) {
+  if (self.__cenOuvindo) return; self.__cenOuvindo = true;
+  try { window.addEventListener('storage', (e) => { if (e.key === CEN_KEY) self.setState({ cenrev: Date.now() }); }); } catch (e) {}
+}
+function cenNum(n, d) { return Number(n || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: d === undefined ? 2 : d }); }
+function cenLote(c, prod) { return Object.values(c.lotes).filter(l => l.prod === prod).sort((a, b) => (b.fisico - b.reservado - b.quarentena) - (a.fisico - a.reservado - a.quarentena))[0] || null; }
+function cenDisp(l) { return Math.max(0, (l.fisico || 0) - (l.quarentena || 0) - (l.reservado || 0)); }
+function cenMov(c, m) { m.id = 'MV-' + (1000 + c.movs.length + 1); m.at = m.at || cenAgora(); c.movs.push(m); return m; }
+
+// ---------- O.S. (web) ----------
+// Liberar: exige versão aprovada; reserva cada insumo no lote com saldo (a reserva nunca passa do disponível).
+function cenLiberar(c, id) {
+  const o = c.ordens[id]; if (!o) throw new Error('Ordem não encontrada.');
+  if (o.etapa !== 'A liberar') throw new Error(id + ' não está em A liberar.');
+  if (!o.aprov) throw new Error('Aprove a versão antes de liberar.');
+  const rid = o.req || ('REQ-' + (41 + Object.keys(c.reqs).length));
+  const req = c.reqs[rid] || (c.reqs[rid] = { id: rid, os: id, itens: [], estado: 'Reservada' });
+  (o.ins || []).forEach(x => {
+    const l = cenLote(c, x.p); if (!l) throw new Error('Sem lote de ' + x.p + ' no Estoque.');
+    if (cenDisp(l) + 1e-9 < x.tot) throw new Error('Saldo insuficiente de ' + x.p + ': ' + cenNum(cenDisp(l)) + ' ' + x.un + ' disponíveis para ' + cenNum(x.tot) + ' ' + x.un + '.');
+    l.reservado += x.tot;
+    req.itens.push({ prod: x.p, lote: l.lote, un: x.un, emb: x.emb || '', solicitado: x.tot, entregue: 0, consumido: 0, devolvido: 0, custodia: 0 });
+    cenMov(c, { tipo: 'reserva', req: rid, os: id, prod: x.p, lote: l.lote, qtd: x.tot, un: x.un, quem: 'Sistema', origem: 'web' });
+  });
+  o.req = rid; o.reservado = true; o.etapa = 'Liberadas'; o.selos = (o.selos || []).filter(s => !/Aguardando|Aprovada/.test(s.t));
+  return { msg: id + ' liberada. ' + rid + ' reservou no Estoque: ' + req.itens.map(i => i.prod + ' ' + cenNum(i.solicitado) + ' ' + i.un).join(', ') + '.' };
+}
+
+// ---------- Estoque (almoxarife) ----------
+// Saldo a entregar = solicitado − consumido − em custódia (PRD 42.1); só para O.S. Liberadas ou Em execução.
+function cenSaldoEntregar(it) { return Math.max(0, it.solicitado - it.consumido - it.custodia); }
+function cenEntregar(c, rid, prod, qtd, quem) {
+  const r = c.reqs[rid]; const o = r && c.ordens[r.os]; if (!r || !o) throw new Error('Requisição não encontrada.');
+  if (['Liberadas', 'Em execução'].indexOf(o.etapa) < 0) throw new Error('Entregue só para O.S. liberada ou em execução (' + r.os + ' está em ' + o.etapa + ').');
+  const it = r.itens.find(i => i.prod === prod); if (!it) throw new Error(prod + ' não está na ' + rid + '.');
+  const l = c.lotes[prod + '|' + it.lote]; if (!l) throw new Error('Lote ' + it.lote + ' de ' + prod + ' não encontrado no Estoque.');
+  if (!(qtd > 0)) throw new Error('Informe a quantidade.');
+  if (qtd > cenSaldoEntregar(it) + 1e-9) throw new Error('Acima do saldo a entregar: ' + cenNum(cenSaldoEntregar(it)) + ' ' + it.un + '.');
+  if (qtd > l.fisico - l.quarentena + 1e-9) throw new Error('O lote ' + it.lote + ' não tem ' + cenNum(qtd) + ' ' + it.un + ' livres.');
+  l.fisico -= qtd; l.reservado = Math.max(0, l.reservado - qtd); it.entregue += qtd; it.custodia += qtd; it.quem = quem || o.resp;
+  r.estado = 'Entregue'; cenMov(c, { tipo: 'entrega', req: rid, os: r.os, prod, lote: it.lote, qtd, un: it.un, quem: 'Rui (almoxarife) → ' + (quem || o.resp), origem: 'web' });
+  return { msg: cenNum(qtd) + ' ' + it.un + ' de ' + prod + ' entregues a ' + (quem || o.resp) + ' (' + r.os + '). Aguarda confirmação no app.' };
+}
+// Devolução conferida: só o recebido e conferido volta ao disponível; material bloqueado não volta.
+function cenDevolver(c, rid, prod, qtd, apto) {
+  const r = c.reqs[rid]; const it = r && r.itens.find(i => i.prod === prod); if (!it) throw new Error('Item não encontrado.');
+  if (!(qtd > 0) || qtd > it.custodia + 1e-9) throw new Error('Devolva até ' + cenNum(it.custodia) + ' ' + it.un + ' em custódia.');
+  const l = c.lotes[prod + '|' + it.lote]; if (!l) throw new Error('Lote ' + it.lote + ' de ' + prod + ' não encontrado no Estoque.');
+  it.custodia -= qtd; it.devolvido += qtd;
+  if (apto) l.fisico += qtd; else { l.fisico += qtd; l.quarentena += qtd; }
+  cenMov(c, { tipo: 'devolucao', req: rid, os: r.os, prod, lote: it.lote, qtd, un: it.un, quem: 'Rui (almoxarife)', origem: 'web', apto: !!apto });
+  return { msg: cenNum(qtd) + ' ' + it.un + ' de ' + prod + ' devolvidos' + (apto ? ' ao disponível.' : ' e bloqueados para inspeção.') };
+}
+
+// Recebimento de fornecedor: conferido entra no lote (novo ou existente); com avaria ou sem laudo entra bloqueado (quarentena).
+function cenReceber(c, prod, lote, qtd, un, local, validade, doc, apto) {
+  if (!prod || !lote) throw new Error('Informe produto e lote.'); if (!(qtd > 0)) throw new Error('Informe a quantidade recebida.');
+  if (!doc) throw new Error('Informe a nota fiscal ou o documento de entrada.');
+  const k = prod + '|' + lote; const l = c.lotes[k] || (c.lotes[k] = { prod, lote, local: local || 'Almox. defensivos', un: un || 'L', fisico: 0, quarentena: 0, reservado: 0, validade: validade || '' });
+  if (l.un !== (un || l.un)) throw new Error('Unidade diferente do lote ' + lote + ' (' + l.un + ').');
+  l.fisico += qtd; if (!apto) l.quarentena += qtd;
+  cenMov(c, { tipo: 'recebimento-nf', prod, lote, qtd, un: l.un, quem: 'Rui (almoxarife)', origem: 'web', doc, apto: !!apto });
+  return { msg: cenNum(qtd) + ' ' + l.un + ' de ' + prod + ' recebidos no lote ' + lote + ' (' + l.local + ')' + (apto ? '.' : ' e bloqueados até a inspeção.') };
+}
+function cenLiberarQuarentena(c, key) { const l = c.lotes[key]; if (!l || !(l.quarentena > 0)) throw new Error('Nada bloqueado neste lote.');
+  const q = l.quarentena; l.quarentena = 0; cenMov(c, { tipo: 'inspecao', prod: l.prod, lote: l.lote, qtd: q, un: l.un, quem: 'Rui (almoxarife)', origem: 'web' });
+  return { msg: cenNum(q) + ' ' + l.un + ' do lote ' + l.lote + ' liberados após inspeção.' }; }
+// Inventário: contagem cega por lote; diferença vira ajuste pendente (o saldo só muda com a aprovação do gestor).
+function cenContar(c, key, contado) { const l = c.lotes[key]; if (!l) throw new Error('Lote não encontrado.');
+  if (!(contado >= 0) || contado === '' || contado === null) throw new Error('Informe a quantidade contada.');
+  const dif = contado - l.fisico; c.ajustes = c.ajustes || [];
+  if (Math.abs(dif) < 1e-9) { cenMov(c, { tipo: 'contagem', prod: l.prod, lote: l.lote, qtd: 0, un: l.un, quem: 'Rui (almoxarife)', origem: 'web' }); return { msg: 'Contagem confere: ' + cenNum(contado) + ' ' + l.un + ' no lote ' + l.lote + '.' }; }
+  if (contado + 1e-9 < l.reservado + l.quarentena) throw new Error('Contagem abaixo do reservado e bloqueado (' + cenNum(l.reservado + l.quarentena) + ' ' + l.un + '). Recontar antes de ajustar.');
+  const aj = { id: 'AJ-' + (70 + c.ajustes.length + 1), key, prod: l.prod, lote: l.lote, un: l.un, sistema: l.fisico, contado, dif, estado: 'Aguardando gestor' }; c.ajustes.push(aj);
+  return { msg: 'Divergência de ' + cenNum(dif) + ' ' + l.un + ' no lote ' + l.lote + ' · ' + aj.id + ' aguarda o gestor. O saldo não muda até a aprovação.' }; }
+function cenAprovarAjuste(c, id, aprovar) { const aj = (c.ajustes || []).find(a => a.id === id); if (!aj || aj.estado !== 'Aguardando gestor') throw new Error('Ajuste não está pendente.');
+  const l = c.lotes[aj.key]; if (aprovar) { l.fisico = aj.contado; aj.estado = 'Aprovado'; cenMov(c, { tipo: 'ajuste', prod: aj.prod, lote: aj.lote, qtd: aj.dif, un: aj.un, quem: 'Ana (gestora)', origem: 'web' }); }
+  else aj.estado = 'Recusado';
+  return { msg: aj.id + (aprovar ? ' aprovado: lote ' + aj.lote + ' passa a ' + cenNum(aj.contado) + ' ' + aj.un + '.' : ' recusado: recontar o lote ' + aj.lote + '.') }; }
+
+// ---------- App de campo ----------
+function cenOnline(c) { return c.app.online !== false; }
+function cenConfirmarRecebimento(c, rid) {
+  const r = c.reqs[rid]; if (!r) throw new Error('Requisição não encontrada.');
+  const pend = r.itens.filter(i => i.custodia > 0 && !i.confirmado); if (!pend.length) throw new Error('Nada entregue para confirmar.');
+  pend.forEach(i => { i.confirmado = true; });
+  const m = cenMov(c, { tipo: 'recebimento', req: rid, os: r.os, qtd: 0, quem: c.app.operador, origem: 'app', sinc: cenOnline(c),
+    itens: pend.map(i => ({ prod: i.prod, lote: i.lote, qtd: i.custodia, un: i.un })) });
+  if (!m.sinc) c.app.fila.push(m.id);
+  return { msg: 'Recebimento confirmado: ' + pend.map(i => i.prod + ' ' + cenNum(i.custodia) + ' ' + i.un).join(', ') + (m.sinc ? '.' : '. Salvo no aparelho; envia quando houver sinal.') };
+}
+function cenIniciarTurno(c, id) {
+  const o = c.ordens[id]; if (!o) throw new Error('Ordem não encontrada.');
+  if (['Liberadas', 'Em execução'].indexOf(o.etapa) < 0) throw new Error(id + ' não está liberada para execução.');
+  if (c.app.turno && !c.app.turno.fim) throw new Error('Feche o turno aberto antes de iniciar outro.');
+  c.app.turno = { os: id, ini: cenAgora(), pausas: [], fim: null };
+  if (o.etapa === 'Liberadas') { o.etapa = 'Em execução'; }
+  return { msg: 'Turno iniciado em ' + id + ' às ' + c.app.turno.ini + '.' };
+}
+function cenPausar(c) { const t = c.app.turno; if (!t || t.fim) throw new Error('Nenhum turno aberto.');
+  const p = t.pausas[t.pausas.length - 1]; if (p && !p.fim) { p.fim = cenAgora(); return { msg: 'Turno retomado.' }; }
+  t.pausas.push({ ini: cenAgora(), fim: null }); return { msg: 'Turno pausado.' }; }
+// Fechar turno: registra hectares, horas e consumo (dose × área, ajustável). Fechar o turno não encerra a O.S.
+function cenFecharTurno(c, ha, horas, consumo, obs) {
+  const t = c.app.turno; if (!t || t.fim) throw new Error('Nenhum turno aberto.');
+  const o = c.ordens[t.os]; if (!(ha > 0)) throw new Error('Informe os hectares feitos.');
+  const haPend = (o.ap || []).filter(a => a.sinc === false).reduce((s, a) => s + (a.ha || 0), 0);   // apontado no aparelho, ainda sem sinal
+  const saldoApp = Math.max(0, o.saldo - haPend);
+  if (ha > saldoApp + 1e-9) throw new Error('Máximo ' + cenNum(saldoApp) + ' ha: é o saldo da ordem' + (haPend ? ' descontando ' + cenNum(haPend) + ' ha ainda no aparelho.' : '.'));
+  if (!(horas > 0)) throw new Error('Informe as horas trabalhadas.');
+  t.fim = cenAgora();
+  const cons = consumo || {}; (o.ins || []).forEach(x => { if (cons[x.p] === undefined) cons[x.p] = x.dose * ha; });
+  const r = o.req && c.reqs[o.req];
+  if (r) for (const it of r.itens) { const q = cons[it.prod] || 0; if (q > it.custodia + 1e-9) throw new Error('Consumo de ' + it.prod + ' (' + cenNum(q) + ' ' + it.un + ') acima do que está com você (' + cenNum(it.custodia) + ' ' + it.un + '). Confira a retirada.'); }
+  if (r) r.itens.forEach(it => { const q = cons[it.prod] || 0; it.consumido += q; it.custodia -= q; });
+  const dia = (o.ap || []).filter(a => a.st !== 'Previsto').length + 1;
+  const ap = { d: new Date().toLocaleDateString('pt-BR').slice(0, 5), dia, ha, h: horas, st: 'Provisório', cons, obs: obs || '', origem: 'app', sinc: cenOnline(c) };
+  o.ap = (o.ap || []).filter(a => a.st !== 'Previsto').concat([ap]);
+  if (ap.sinc) { o.realizado += ha; o.saldo = Math.max(0, o.saldo - ha); } else { c.app.fila.push('AP|' + t.os + '|' + dia); }
+  const m = cenMov(c, { tipo: 'consumo', os: t.os, req: o.req || '', qtd: 0, quem: c.app.operador, origem: 'app', sinc: ap.sinc, det: Object.keys(cons).map(k => k + ' ' + cenNum(cons[k], 1)).join(', ') });
+  ap.mov = m.id;
+  c.app.turno = null;
+  return { msg: 'Turno fechado: ' + cenNum(ha, 1) + ' ha em ' + cenNum(horas, 1) + ' h' + (ap.sinc ? '.' : ' · salvo no aparelho, envia quando houver sinal.') + ' A ordem continua em execução.' };
+}
+function cenOcorrencia(c, id, tipo, texto) { if (!texto) throw new Error('Descreva a ocorrência.');
+  const oc = { id: 'OC-' + (500 + c.ocorr.length + 1), os: id, tipo, texto, at: cenAgora(), sinc: cenOnline(c) }; c.ocorr.push(oc); if (!oc.sinc) c.app.fila.push(oc.id);
+  return { msg: 'Ocorrência ' + oc.id + ' registrada' + (oc.sinc ? '.' : ' no aparelho.') }; }
+// Sinal: sem sinal tudo vai para a fila; ao voltar, a fila é enviada uma vez só (sem duplicar).
+function cenSinal(c, online) {
+  c.app.online = !!online; if (!online) return { msg: 'Sem sinal: o app continua funcionando e guarda os registros.' };
+  let n = 0; c.app.fila.forEach(k => { if (k.indexOf('AP|') === 0) { const [, id, dia] = k.split('|'); const o = c.ordens[id]; const ap = (o.ap || []).find(a => String(a.dia) === dia && !a.sinc);
+      if (ap) { ap.sinc = true; o.realizado += ap.ha; o.saldo = Math.max(0, o.saldo - ap.ha); n++;
+        if (ap.mov) { const mv = c.movs.find(x => x.id === ap.mov); if (mv) mv.sinc = true; } } }
+    else { const m = c.movs.find(x => x.id === k) || c.ocorr.find(x => x.id === k); if (m && !m.sinc) { m.sinc = true; n++; } } });
+  c.app.fila = []; return { msg: n ? (n + (n > 1 ? ' registros enviados' : ' registro enviado') + ' ao voltar o sinal.') : 'Sinal de volta. Nada pendente.' };
+}
+// Encerrar exige apontamentos enviados e nada em custódia (sobra devolvida).
+function cenPodeEncerrar(c, id) { const o = c.ordens[id]; const r = o.req && c.reqs[o.req];
+  if ((o.ap || []).some(a => a.sinc === false)) return 'Há apontamentos no aparelho aguardando sinal.';
+  const cust = r ? r.itens.filter(i => i.custodia > 0.001) : []; if (cust.length) return 'Sobra em custódia: ' + cust.map(i => i.prod + ' ' + cenNum(i.custodia) + ' ' + i.un).join(', ') + '. Receba a devolução no Estoque.';
+  return ''; }
+
+
+function GRx(id){ return GRIDS.find(g=>g.id===id); }
+function chipSt(c){ const cc=G2C[c]||G2C.gray; return 'display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;color:'+cc[0]+';background:'+cc[1]+';'; }
+function nfx(n,d){ return Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:d||0,maximumFractionDigits:d||0}); }
+
+const IN_AG = [["OS-0418", "v2", "IN-02det.dc.html", "OS-0418 · fertirrigação P1 · v2"], ["OS-0420", "v3", "IN-02x-os0420.dc.html", "OS-0420 · revisão de saldo · v3"], ["OS-0430", "v1", "OS.dc.html", "OS-0430 · dessecação T1-A · v1"]];
+function inPendAg(c,id){ const co=c&&c.ordens?c.ordens[id]:null; if(!co||co.etapa==='Encerradas'||co.etapa==='Canceladas') return false;
+  return (co.selos||[]).some(s=>/^(Aguardando agrônomo|Revisão de saldo pendente)/.test(s.t)); }
+function inDecAg(c,id){ const co=c&&c.ordens?c.ordens[id]:null; if(!co||inPendAg(c,id)) return null; if(co.decAg) return co.decAg;
+  const s=(co.selos||[]).map(x=>x.t).join('|');
+  if(/Rejeitada/.test(s)) return {k:'rejeitada',mot:(co.osc&&co.osc.rej)||''}; if(/Devolvida/.test(s)) return {k:'devolvida',mot:''};
+  return {k:'aprovada',rec:(co.osc&&co.osc.recibo&&co.osc.recibo.id)||''}; }
+function inProx(c,id){ const i=IN_AG.findIndex(a=>a[0]===id);
+  for(let j=1;j<=IN_AG.length;j++){ const a=IN_AG[(i+j+IN_AG.length)%IN_AG.length]; if(a[0]!==id&&inPendAg(c,a[0])) return ['Próxima pendência: '+a[3],a[2]]; }
+  return ['Fila vazia · voltar às Aprovações','IN-02.dc.html']; }
+const CFG = {"oid": "OS-0418", "vn": "v2", "fase": "A liberar", "rec_id": "AP-2201", "aprovar": "Aprovar versão v2", "t_rej": "Rejeitar versão", "devolver": true, "estado0": "Aguardando agrônomo", "est_ap": "Aprovada · A liberar", "est_rej": "Rejeitada · A liberar", "sub_rej": "A tarefa não é cancelada: segue A liberar sem autorização para o saldo até nova versão.", "rec_ap": "AP-2201 · versão v2 aprovada por Ana (agrônoma) · a OS-0418 segue A liberar; ao liberar, a REQ-038 reserva a Ureia no Estoque.", "rec_rej": "Versão v2 rejeitada · a OS-0418 segue A liberar, sem autorização para o saldo, até nova versão ou volta a só água (sem agrônomo) · histórico preservado.", "rec_dev": "Versão v2 devolvida a João com o motivo · a OS-0418 segue A liberar.", "ct_aprovada": ["prontidão · liberação na O.S.", "Liberar para execução"], "ct_rejeitada": ["nova versão ou volta a só água", "Aguardar nova versão de João"], "ct_devolvida": ["ajuste de João", "Aguardar nova versão de João"], "cond_aprovada": "Versão v2 aprovada por Ana (agrônoma) · recibo AP-2201 às {at}. Próximo passo: liberar para execução.", "cond_devolvida": "Devolvida para ajuste · João (irrigante) ajusta e reenvia a v2.", "dono_devolvida": "João (irrigante)", "prazo_devolvida": "ajustar e reenviar", "cond_rejeitada": "Versão v2 rejeitada por Ana (agrônoma). A liberação fica bloqueada; a ordem não foi cancelada.", "dono_rejeitada": "PCP", "prazo_rejeitada": "ajustar ou cancelar", "desc_dec": "Aprove, devolva ou rejeite só esta versão; aprovar não libera a ordem.", "h": 900, "cont": ["Programação da irrigação · reclassificação", "Aguardando agrônomo", "decisão · prontidão · liberação", "Decidir a versão v2"]};
+
+// grava a decisão na ordem do cenário (igual à revisão da tela O.S.: selo, versão e recibo); nunca libera a ordem
+function inDecidir(c,k,mot){ const o=c.ordens[CFG.oid]; if(!o) throw new Error('Ordem '+CFG.oid+' não encontrada no cenário.');
+  if(!inPendAg(c,CFG.oid)) throw new Error('Decisão já registrada · nada foi duplicado.');
+  const at=cenAgora(); o.decAg={v:CFG.vn,k,mot:mot||'',rec:k==='aprovada'?CFG.rec_id:'',at};
+  const sel=(o.selos||[]).filter(s=>!/^(Aguardando agrônomo|Revisão de saldo pendente|Devolvida|Aprovada|Rejeitada|v\d+ devolvida)/.test(s.t));
+  o.osc=o.osc||{};
+  if(CFG.fase==='A liberar'){
+    if(k==='aprovada'){ o.aprov=true; o.versao=String(o.versao).replace('em revisão','aprovada'); o.selos=sel.concat([{t:'Aprovada pelo agrônomo',c:'green'}]); o.osc.recibo={id:CFG.rec_id,at,quem:'Ana (agrônoma)'}; }
+    else { o.selos=sel.concat([k==='rejeitada'?{t:'Rejeitada',c:'red'}:{t:'Devolvida para ajuste',c:'yellow'}]); if(k==='rejeitada') o.osc.rej=mot; } }
+  else { o.versao=CFG['ver_'+k]; o.selos=sel.concat(k==='devolvida'?[{t:CFG.vn+' devolvida para ajuste',c:'yellow'}]:[]); }
+  Object.assign(o.osc,{cond:CFG['cond_'+k].replace('{at}',at)+(mot?' Motivo: '+mot+'.':''),dono:CFG['dono_'+k]||'',prazo:CFG['prazo_'+k]||'',fase:o.etapa});
+  return {msg:k==='aprovada'?CFG.rec_ap:(k==='rejeitada'?CFG.rec_rej:CFG.rec_dev)}; }
+function EXTRAVALS(self,v){ cenOuvir(self); const st=self.state; const c=cenGet(); const dx=inDecAg(c,CFG.oid); const d=dx?dx.k:null;
+  v.dec_none=!d; v.dec_done=!!d;
+  const est={aprovada:[CFG.est_ap,'green'],rejeitada:[CFG.est_rej,'red'],devolvida:['Devolvida ao emitente','yellow']}[d]||[CFG.estado0,'yellow'];
+  v.st_t=est[0]; v.st_st=chipSt(est[1]); const mt=dx&&dx.mot?' Motivo: '+dx.mot+'.':'';
+  const ct=d?[est[0]].concat(CFG['ct_'+d]):CFG.cont.slice(1); v.ct_aqui=ct[0]; v.ct_falta=ct[1]; v.ct_prox=ct[2];  // faixa de continuidade segue a decisão
+  v.rec_t=d==='aprovada'?(dx.rec&&dx.rec!==CFG.rec_id?'Versão '+CFG.vn+' aprovada na tela Ordem de serviço · recibo '+dx.rec+'.':CFG.rec_ap):(d==='rejeitada'?CFG.rec_rej+mt:(d==='devolvida'?CFG.rec_dev+mt:''));
+  const px=inProx(c,CFG.oid); v.prox_t=px[0]; v.prox_h=px[1];
+  v.aprovar=()=>{ cenMudar(self,x=>inDecidir(x,'aprovada','')); };
+  v.pedir=(k)=>()=>self.setState({mp:k,mot:'',moterr:''});
+  v.p_rej=v.pedir('rejeitada'); v.p_dev=v.pedir('devolvida');
+  v.mp_open=!!st.mp; v.mp_titulo=st.mp==='rejeitada'?CFG.t_rej:'Devolver para ajuste'; v.mp_bt=st.mp==='rejeitada'?CFG.t_rej:'Devolver para ajuste';
+  v.mp_sub=st.mp==='rejeitada'?CFG.sub_rej:'O emitente recebe o motivo e envia nova versão; o histórico é preservado.';
+  v.mot=st.mot||''; v.setmot=(e)=>self.setState({mot:e.target.value,moterr:''}); v.moterr=st.moterr||''; v.has_moterr=!!st.moterr;
+  v.mp_cancel=()=>{ if((self.state.mot||'').trim() && !self.state.mpw){ self.setState({mpw:true}); return; } self.setState({mp:null,mpw:false}); };
+  v.mp_warn=!!st.mpw; v.mp_keep=()=>self.setState({mpw:false}); v.mp_discard=()=>self.setState({mp:null,mpw:false,mot:''});
+  v.mp_ok=()=>{ const m=(self.state.mot||'').trim(); if(!m){ self.setState({moterr:'Informe o motivo.'}); return; } const k=self.state.mp;
+    cenMudar(self,x=>inDecidir(x,k,m)); self.setState({mp:null,mpw:false,mot:''}); };
+  v.prim_st='padding:11px 20px;border-radius:10px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap;background:#1E7A4C;color:#fff;border:1px solid #1E7A4C;'+(d?'display:none;':'');
+}
+
+
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { sel: {}, open: null, sort: {}, msg: {}, added: {}, g2: {}, nav: {}, g2toast: '' }; }
+  renderVals() {
+    const st = this.state, v = {}, self = this;
+    const set = (patch) => self.setState(patch);
+    const selOf = (w) => (st.sel[w.id] === undefined ? w.dflt : st.sel[w.id]);
+    v.closeAll = () => set({ open: null });
+    const vis = {};
+    for (const w of SPEC) {
+      const cur = selOf(w);
+      const toggleOpen = () => set({ open: st.open === w.id ? null : w.id });
+      if (w.type === 'seg' || w.type === 'chips') {
+        w.opts.forEach((o, i) => {
+          v[w.id + '_s' + i] = (i === cur ? w.on : w.off);
+          v[w.id + '_v' + i] = (i === cur);
+          v[w.id + '_p' + i] = () => set({ sel: Object.assign({}, st.sel, { [w.id]: i }), open: null });
+        });
+      }
+      if (w.type === 'pick') {
+        v[w.id + '_label'] = (cur >= 0 && w.opts[cur] !== undefined) ? w.opts[cur] : '';
+        v[w.id + '_open'] = toggleOpen;
+        v[w.id + '_st'] = w.mst + (st.open === w.id ? '' : 'display: none;');
+        v[w.id + '_bst'] = (cur !== w.none ? w.bon : w.boff);
+        v[w.id + '_cst'] = (w.cst || '') + (cur !== w.none ? '' : 'display: none;');
+        v[w.id + '_clear'] = () => set({ sel: Object.assign({}, st.sel, { [w.id]: w.none }), open: null });
+        w.opts.forEach((o, i) => {
+          v[w.id + '_p' + i] = () => set({ sel: Object.assign({}, st.sel, { [w.id]: i }), open: null });
+          v[w.id + '_i' + i] = (i === cur ? w.ion : w.ioff);
+        });
+      }
+      if (w.type === 'menu') { v[w.id + '_open'] = toggleOpen; v[w.id + '_st'] = w.mst + (st.open === w.id ? '' : 'display: none;'); }
+      if (w.type === 'sort') {
+        const s = st.sort[w.id] || { c: w.dflt, d: !!w.desc };
+        const om = String(st.open || '');
+        const openCol = (om.indexOf(w.id + 'm') === 0) ? parseInt(om.slice(w.id.length + 1), 10) : -1;
+        for (let i = 0; i < w.n; i++) {
+          v[w.id + '_a' + i] = (i === s.c ? (s.d ? '▼' : '▲') : '⇅');
+          v[w.id + '_h' + i] = (i === s.c ? w.hon[i] : w.hoff[i]);
+          v[w.id + '_p' + i] = () => set({ sort: Object.assign({}, st.sort, { [w.id]: { c: i, d: (i === s.c ? !s.d : false) } }), open: null });
+          v[w.id + '_m' + i] = () => set({ open: (om === w.id + 'm' + i ? null : w.id + 'm' + i) });
+        }
+        v[w.id + '_mst'] = w.mst + (openCol >= 0 ? '' : 'display: none;');
+        v[w.id + '_mcol'] = openCol >= 0 ? w.cols[openCol] : '';
+        for (let i = 0; i < w.n; i++) {
+          v[w.id + '_mv' + i] = (openCol === i);
+          const mw = SPEC.find((x) => x.type === 'multi' && x.tbl === w.id && x.col === i);
+          const cnt = mw ? (st.sel[mw.id] || []).length : 0;
+          v[w.id + '_f' + i] = cnt ? ('· ' + cnt) : '';
+        }
+        v[w.id + '_mclear'] = () => { const s2 = Object.assign({}, st.sel); SPEC.forEach((x) => { if (x.type === 'multi' && x.tbl === w.id && x.col === openCol) s2[x.id] = []; }); set({ sel: s2, open: null }); };
+        v[w.id + '_asc'] = () => set({ sort: Object.assign({}, st.sort, { [w.id]: { c: openCol, d: false } }), open: null });
+        v[w.id + '_desc'] = () => set({ sort: Object.assign({}, st.sort, { [w.id]: { c: openCol, d: true } }), open: null });
+        v[w.id + '_grp'] = () => { const p = {}; if (w.group) { p[w.group] = w.cols.filter((c) => c).indexOf(w.cols[openCol]); } set({ sel: Object.assign({}, st.sel, p), open: null }); };
+      }
+      if (w.type === 'drawer') {
+        v[w.id + '_open'] = () => set({ open: w.id });
+        v[w.id + '_st'] = w.mst + (st.open === w.id ? '' : 'display: none;');
+        v[w.id + '_add'] = () => set({ open: null, added: Object.assign({}, st.added, { [w.id]: true }) });
+        v[w.id + '_row'] = (st.added[w.id] ? '' : 'display: none;');
+        v[w.id + '_btn'] = (st.added[w.id] && w.done) ? w.done : w.label;
+      }
+      if (w.type === 'msg') {
+        w.opts.forEach((o, i) => { v[w.id + '_p' + i] = () => set({ msg: Object.assign({}, st.msg, { [w.id]: w.msgs[i] }), open: null }); });
+        v[w.id + '_text'] = st.msg[w.id] || '';
+        v[w.id + '_tst'] = w.tst + (st.msg[w.id] ? '' : 'display: none;');
+      }
+      if (w.type === 'cards' || w.type === 'rowsel') {
+        w.opts.forEach((o, i) => {
+          v[w.id + '_p' + i] = () => set({ sel: Object.assign({}, st.sel, { [w.id]: i }), open: null });
+          v[w.id + '_s' + i] = (i === cur ? w.on : w.off);
+          v[w.id + '_c' + i] = (i === cur ? '' : 'display: none;');
+          v[w.id + '_b' + i] = (i === cur ? 'display: none;' : '');
+        });
+      }
+      if (w.type === 'multi') {
+        const curm = st.sel[w.id] || [];
+        w.opts.forEach((o, i) => {
+          v[w.id + '_p' + i] = () => { const s = (st.sel[w.id] || []).slice(); const k = s.indexOf(i); if (k >= 0) s.splice(k, 1); else s.push(i); set({ sel: Object.assign({}, st.sel, { [w.id]: s }) }); };
+          v[w.id + '_i' + i] = (curm.indexOf(i) >= 0 ? w.ion : w.ioff);
+          v[w.id + '_c' + i] = (curm.indexOf(i) >= 0 ? '☑' : '☐');
+        });
+        v[w.id + '_n'] = curm.length ? (curm.length + ' de ' + w.opts.length) : 'todos';
+        v[w.id + '_clear'] = () => set({ sel: Object.assign({}, st.sel, { [w.id]: [] }) });
+      }
+      if (w.type === 'toggle') {
+        const on = !!st.sel[w.id];
+        v[w.id + '_p'] = () => set({ sel: Object.assign({}, st.sel, { [w.id]: !on }) });
+        v[w.id + '_s'] = on ? w.on : w.off;
+      }
+      if (w.tbl && w.rows) {
+        const arr = vis[w.tbl] || (vis[w.tbl] = w.rows.map(() => true));
+        let m = null;
+        if (w.type === 'toggle') m = st.sel[w.id] ? w.keep : null;
+        else if (w.type === 'multi') { const cm = st.sel[w.id] || []; m = cm.length ? cm : null; }
+        else if (w.match) m = w.match[cur];
+        w.rows.forEach((r, ri) => {
+          let ok = true;
+          if (m === null || m === undefined) ok = true;
+          else if (w.type === 'toggle') ok = m.indexOf(ri) >= 0;
+          else if (w.type === 'multi') ok = m.some((i) => w.cells[ri] === w.opts[i]);
+          else if (Array.isArray(m)) ok = m.some((x) => r.indexOf(x) >= 0);
+          else ok = r.indexOf(m) >= 0;
+          arr[ri] = arr[ri] && ok;
+        });
+      }
+    }
+    for (const t in vis) {
+      vis[t].forEach((ok, ri) => { v[t + '_r' + ri] = ok ? '' : 'display: none;'; });
+      v[t + '_count'] = vis[t].filter(Boolean).length;
+      v[t + '_clear'] = () => { const s2 = Object.assign({}, st.sel); SPEC.forEach((w) => { if (w.tbl === t && w.type === 'toggle') s2[w.id] = false; else if (w.tbl === t && w.type === 'pick') s2[w.id] = w.none; else if (w.tbl === t && w.type === 'chips') s2[w.id] = 0; else if (w.tbl === t && w.type === 'multi') s2[w.id] = []; }); set({ sel: s2, open: null }); };
+    }
+    v.g2toast = this.state.g2toast || ''; v.g2toastst = this.state.g2toast ? '' : 'display: none;';
+    v.mf_faz = this.state.mf_faz || 'Santa Rita'; v.mf_saf = this.state.mf_saf || 'Todas';
+    v.mf_setfaz = (e) => this.setState({ mf_faz: e.target.value, g2toast: 'Fazenda: ' + e.target.value });
+    v.mf_setsaf = (e) => this.setState({ mf_saf: e.target.value, g2toast: 'Safra: ' + e.target.value });
+    if (!v.mf_trocar) v.mf_trocar = () => this.setState({ step: 1, g2toast: 'Escolha a safra na etapa 1.' });
+    this.__v = v; g2navvals(this, v, NAV);
+    if (typeof PREVALS === 'function') PREVALS(this, v);
+    for (const sp of GRIDS) g2vals(this, sp, v, vis[sp.id]);
+    if (typeof EXTRAVALS === 'function') EXTRAVALS(this, v);
+    return v;
+  }
+  componentDidUpdate(pp, ps) { if (this.state.g2toast && this.state.g2toast !== (ps || {}).g2toast) { clearTimeout(this._g2t); this._g2t = setTimeout(() => this.setState({ g2toast: '' }), 4500); } }
+}
+
+</script>
+</body>
+</html>

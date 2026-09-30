@@ -1,0 +1,40 @@
+# -*- coding: utf-8 -*-
+"""Verificador App 3: MB-05 com duas entregas a confirmar (OS-0430 e OS-0424), sem sinal, botão do cartão; resumo do turno em MB-03."""
+import sys, os, time
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from ver_app_lib import V
+v = V()
+try:
+    v.abrir('MB-01'); v.clk('Restaurar demonstração')
+    print('   liberar:', v.mudar("c.ordens['OS-0430'].aprov=true; return cenLiberar(c,'OS-0430');")[:60])
+    rid = v.cen("c.ordens['OS-0430'].req")
+    for prod, q in (('Glifosato 480', 320), ('2,4-D 806', 160), ('Óleo mineral', 80)):
+        v.mudar(f"return cenEntregar(c,'{rid}','{prod}',{q},'Marcos');")
+    v.mudar("return cenEntregar(c,'REQ-039','Fungicida A',65,'Marcos');")
+    v.abrir('MB-01'); print('   MB-01 hdr:', v.hdr(), '| foot:', v.foot(), '| corte:', v.corte())
+    v.abrir('MB-05'); b = v.J("document.querySelector('main').innerText")
+    print('   MB-05:', b.replace('\n', ' / ')[:1200])
+    print('   hdr:', v.hdr(), '| foot:', v.foot(), '| corte:', v.corte(), '| larg:', v.larg())
+    v.ok(v.corte()['excesso'] <= 0, 'MB-05 com duas entregas cabe na altura: ' + str(v.corte()))
+    v.shot('ver_app3_mb05_duas.png')
+    v.clk('Sem sinal')
+    v.clk_sel('main button[title="Confirmar recebimento da REQ-039"]'); print('   cartão REQ-039 ->', v.toast()[:120])
+    v.ok(v.cen("c.reqs['REQ-039'].itens[0].confirmado") is True and v.cen("c.app.fila.length") == 1, 'botão do cartão confirma a REQ-039 sem sinal (fila 1)')
+    print('   foot agora:', v.foot(), '| hdr:', v.hdr())
+    v.clk(v.foot()); print('   rodapé ->', v.toast()[:120])
+    v.ok(v.cen(f"c.reqs['{rid}'].itens.every(i=>i.confirmado)") and v.cen("c.app.fila.length") == 2, 'rodapé confirma a outra entrega (fila 2)')
+    b = v.J("document.querySelector('main').innerText"); print('   MB-05 depois:', b.replace('\n', ' / ')[:900], '| foot:', v.foot(), '| corte:', v.corte())
+    v.ok(v.corte()['excesso'] <= 0, 'MB-05 com 4 itens com você cabe: ' + str(v.corte()))
+    v.abrir('MB-03x-recibo'); b = v.J("document.querySelector('main').innerText"); print('   recibos:', b.replace('\n', ' / ')[:600])
+    v.abrir('OS-0424-app'); print('   OS-0424-app:', v.J("document.querySelector('main').innerText").split('\n')[:3], '| foot:', v.foot())
+    # resumo do turno fechado (MB-03)
+    v.abrir('MB-03'); v.clk('Com sinal'); v.clk_sel('main button[title="Iniciar turno na OS-0421"]')
+    v.setv('#ft_ha', '20'); v.setv('#ft_h', '3'); v.clk('Fechar turno')
+    card = v.J("(()=>{const e=[...document.querySelectorAll('main div')].find(d=>/^Turno fechado/.test(d.innerText)&&d.children.length<=1); return e?e.parentElement.parentElement.innerText:'';})()")
+    print('   resumo MB-03:', card.replace('\n', ' / '))
+    v.ok('OS-0421' in card and '20 ha' in card, 'resumo do turno mostra ordem, dia e hectares do turno fechado')
+    v.shot('ver_app3_mb03_resumo.png')
+    v.ok(not v.erros(), 'sem erros JS ' + str(v.erros()))
+    v.abrir('MB-01'); v.clk('Restaurar demonstração')
+finally:
+    v.fim()

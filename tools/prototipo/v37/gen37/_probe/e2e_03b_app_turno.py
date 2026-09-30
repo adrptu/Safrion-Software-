@@ -1,0 +1,31 @@
+# -*- coding: utf-8 -*-
+"""Passo 3b · App (MB-01 → MB-03): iniciar turno na OS-0430, Sem sinal, fechar 60 ha, "1 registro aguardando sinal", Com sinal, envio único."""
+import sys, os, time
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from e2e_lib import B
+b = B(); b.size(390, 1500); OS = 'OS-0430'
+b.goto('MB-01.dc.html')
+foot = b.J("[...document.querySelectorAll('a,button')].filter(e=>e.offsetParent!==null&&/font-size: 17px/.test(e.getAttribute('style')||'')).map(e=>e.innerText.trim()+' → '+(e.getAttribute('href')||''))"); print('   MB-01 rodapé após confirmar:', foot)
+card = b.J(f"(()=>{{const t=document.querySelector('main').innerText; const i=t.indexOf('{OS} ·'); return t.slice(i,i+420).replace(/\\s+/g,' ');}})()"); print('   card:', card)
+b.goto('MB-03.dc.html')
+print('   MB-03:', b.main()[:700]); print('   botões:', b.btns())
+r = b.clk_sel(f'button[title="Iniciar turno na {OS}"]'); t = b.toast(); print('   iniciar:', r, '|', t)
+st = b.cen(f"[c.app.turno && c.app.turno.os, c.ordens['{OS}'].etapa]")
+b.ok(st == [OS, 'Em execução'], 'iniciar turno na OS-0430 pelo app: turno aberto e O.S. Em execução', (r, st))
+r = b.clk('Sem sinal'); print('   sem sinal:', r, b.toast())
+b.ok(b.cen("c.app.online") is False, 'alternar Sem sinal grava online=false', r)
+print('   ft:', b.setv('#ft_ha', '60'), b.setv('#ft_h', '5'), 'consumo pré-calculado:', b.J("[...document.querySelectorAll('[id^=ft_c]')].map(i=>i.id+'='+i.value)"))
+r = b.clk('Fechar turno'); t = b.toast(); body = b.body(); print('   fechar:', r, '|', t)
+st = b.cen(f"[c.app.fila.length, c.ordens['{OS}'].realizado, c.ordens['{OS}'].ap.length, c.ordens['{OS}'].etapa]"); print('   cenário:', st)
+b.ok('1 registro aguardando sinal' in body and st == [1, 0, 1, 'Em execução'], 'fechar 60 ha sem sinal: "1 registro aguardando sinal", realizado 0, O.S. Em execução', (st, body[:300]))
+b.shot('e2e_03b_semsinal.png')
+r = b.clk('Com sinal'); t = b.toast(); body = b.body(); print('   com sinal:', r, '|', t)
+st = b.cen(f"[c.app.fila.length, c.ordens['{OS}'].realizado, c.ordens['{OS}'].ap.length, (c.app.recibos||[]).length, c.ordens['{OS}'].saldo]"); print('   cenário:', st)
+b.ok(st[:3] == [0, 60, 1] and 'aguardando sinal' not in body.split('Nada aguardando sinal')[0][-60:], 'sinal volta: fila 0, realizado 60 ha, 1 apontamento', (st, t))
+r = b.clk('Sem sinal'); r2 = b.clk('Com sinal'); t2 = b.toast()
+st2 = b.cen(f"[c.app.fila.length, c.ordens['{OS}'].realizado, c.ordens['{OS}'].ap.length, (c.app.recibos||[]).length]"); print('   de novo:', st2, '|', t2)
+b.ok(st2[:3] == [0, 60, 1] and st2[3] == st[3], 'alternar o sinal de novo não reenvia nem duplica (envio único)', (st2, t2))
+print('   MB-03 após:', b.main()[:500])
+b.shot('e2e_03b_comsinal.png')
+er = b.erros(); b.ok(not er, 'sem erro de JS no app (MB-03)', er)
+b.fim()

@@ -1,0 +1,26 @@
+# -*- coding: utf-8 -*-
+"""Verificador · CD-02 parte A: estado inicial, abas, layout, textos das linhas (exploratório)."""
+import os, importlib.util, time, json
+sp=importlib.util.spec_from_file_location('vlib',os.path.join(os.path.dirname(os.path.abspath(__file__)),'ver_cad-culturas-produtos_lib.py')); L=importlib.util.module_from_spec(sp); sp.loader.exec_module(L)
+v=L.V()
+try:
+    v.goto('CD-02.dc.html')
+    v.J("localStorage.clear()"); v.goto('CD-02.dc.html')
+    v.info('cabeçalho',v.header())
+    v.info('botões visíveis aba 0',v.visible_btns())
+    v.info('tabs',v.J("[...document.querySelectorAll('[role=tab]')].map(t=>t.innerText+'='+t.getAttribute('aria-selected'))"))
+    v.info('linhas aba 0',v.J("[...document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=row]')].map(r=>r.innerText.replace(/\\s+/g,' ').trim())"))
+    v.info('overflow aba 0',v.overflow())
+    v.shot('ver_cadc_cd02_aba0.png')
+    v.clk('Operações e rendimentos')
+    v.info('cabeçalho aba 1',v.header())
+    v.info('botões visíveis aba 1',v.visible_btns())
+    v.info('tabs',v.J("[...document.querySelectorAll('[role=tab]')].map(t=>t.innerText+'='+t.getAttribute('aria-selected'))"))
+    v.info('linhas aba 1',v.J("[...document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=row]')].map(r=>r.innerText.replace(/\\s+/g,' ').trim())"))
+    v.info('overflow aba 1',v.overflow())
+    v.shot('ver_cadc_cd02_aba1.png')
+    v.clk('Comparar com o realizado')
+    v.info('toast comparar',v.toast())
+    v.info('erros',v.errs())
+    v.info('dom linha pai',v.J("(()=>{const r=document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=row].g2ed')[0]; return r.outerHTML.slice(0,1500);})()"))
+finally: v.fim()
