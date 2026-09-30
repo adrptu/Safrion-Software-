@@ -18,6 +18,26 @@ export {
   type Perfil,
   type ProdutoResumo,
 } from './cadastros.js';
+export {
+  alterarSituacaoTalhao,
+  criarFazenda,
+  criarTalhao,
+  editarFazenda,
+  editarTalhao,
+  listarFazendas,
+  listarTalhoes,
+  obterFazenda,
+  obterTalhao,
+  opcoesFazenda,
+  type AreaTexto,
+  type FazendaDetalhe,
+  type FazendaResumo,
+  type FiltroTalhoes,
+  type OpcaoFazenda,
+  type OrigemArea,
+  type TalhaoDetalhe,
+  type TalhaoResumo,
+} from './cadastros-agricolas.js';
 export { VERSAO_CANONICA, canonizar, hashCanonico } from './canonico.js';
 export {
   consultarIntencao,

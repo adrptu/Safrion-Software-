@@ -1,13 +1,26 @@
 import {
+  ALVOS_CADASTRO,
+  COMANDOS_CADASTRO,
+  EsquemaDadosAlterarSituacaoTalhao,
+  EsquemaDadosCriarFazenda,
+  EsquemaDadosCriarTalhao,
+  EsquemaDadosEditarFazenda,
+  EsquemaDadosEditarTalhao,
   EsquemaDadosMovimento,
   EsquemaDadosRecebimento,
   EsquemaPedidoComando,
   canonizarRecebimento,
   erroDeValidacao,
   statusDoRecibo,
+  type ComandoCadastro,
   type PedidoComando,
 } from '@safrion/contracts';
 import {
+  alterarSituacaoTalhao,
+  criarFazenda,
+  criarTalhao,
+  editarFazenda,
+  editarTalhao,
   executarComando,
   pedidoDeMovimento,
   receberDocumento,
@@ -39,6 +52,12 @@ export const LIMITE_CORPO_BYTES = 16 * 1024;
 export const LIMITES_CORPO: Readonly<Record<Comando, number>> = {
   'estoque.registrar-entrada': LIMITE_CORPO_BYTES,
   'estoque.receber-documento': 64 * 1024,
+  // Cadastros agrícolas, incremento 1 (contrato CAD-01 §4): pedidos pequenos, o limite comum.
+  [COMANDOS_CADASTRO.criarFazenda]: LIMITE_CORPO_BYTES,
+  [COMANDOS_CADASTRO.editarFazenda]: LIMITE_CORPO_BYTES,
+  [COMANDOS_CADASTRO.criarTalhao]: LIMITE_CORPO_BYTES,
+  [COMANDOS_CADASTRO.editarTalhao]: LIMITE_CORPO_BYTES,
+  [COMANDOS_CADASTRO.alterarSituacaoTalhao]: LIMITE_CORPO_BYTES,
 };
 
 /** Dados e alvo conferidos pelo comando: o conteúdo que entra no hash e o efeito; ou a recusa de contrato, sem gravar. */
@@ -84,9 +103,80 @@ function prepararRecebimento(pedido: PedidoComando, correlationId: string): Prep
   return { data: canonico, efeito: receberDocumento(canonico) };
 }
 
+/** Esquema de dados de um comando, pela forma que os esquemas de @safrion/contracts já têm. */
+interface EsquemaDados<T> {
+  safeParse(
+    valor: unknown,
+  ): { success: true; data: T } | { success: false; error: Parameters<typeof erroDeValidacao>[0] };
+}
+
+/**
+ * Cadastro agrícola (contrato CAD-01 §4): alvo do tipo do comando, novo na versão 0 ou existente com versão esperada;
+ * dados pelo esquema estrito, na forma canônica que entra no hash (nome normalizado, área sem zeros à direita). Alvo ou
+ * dados fora do contrato são recusa (400), sem gravar.
+ */
+function prepararCadastro<T>(
+  comando: ComandoCadastro,
+  criacao: boolean,
+  esquema: EsquemaDados<T>,
+  efeito: (dados: T) => Efeito,
+) {
+  return (pedido: PedidoComando, correlationId: string): Preparo => {
+    const tipo = ALVOS_CADASTRO[comando];
+    const versao = pedido.target.expectedVersion;
+    if (pedido.target.type !== tipo || (criacao ? versao !== 0 : versao < 1)) {
+      return {
+        recusa: erro(
+          'CONTRATO_INVALIDO',
+          criacao
+            ? `O alvo é ${tipo} novo, na versão 0.`
+            : `O alvo é ${tipo} existente, com a versão esperada.`,
+          correlationId,
+        ),
+      };
+    }
+    const dados = esquema.safeParse(pedido.data);
+    if (!dados.success) {
+      const { status, corpo } = erroDeValidacao(dados.error, correlationId);
+      return { recusa: json(status, corpo, { 'x-correlation-id': correlationId }) };
+    }
+    return { data: dados.data, efeito: efeito(dados.data) };
+  };
+}
+
 const PREPARO: Readonly<Record<Comando, (pedido: PedidoComando, correlationId: string) => Preparo>> = {
   'estoque.registrar-entrada': prepararEntrada,
   'estoque.receber-documento': prepararRecebimento,
+  [COMANDOS_CADASTRO.criarFazenda]: prepararCadastro(
+    COMANDOS_CADASTRO.criarFazenda,
+    true,
+    EsquemaDadosCriarFazenda,
+    criarFazenda,
+  ),
+  [COMANDOS_CADASTRO.editarFazenda]: prepararCadastro(
+    COMANDOS_CADASTRO.editarFazenda,
+    false,
+    EsquemaDadosEditarFazenda,
+    editarFazenda,
+  ),
+  [COMANDOS_CADASTRO.criarTalhao]: prepararCadastro(
+    COMANDOS_CADASTRO.criarTalhao,
+    true,
+    EsquemaDadosCriarTalhao,
+    criarTalhao,
+  ),
+  [COMANDOS_CADASTRO.editarTalhao]: prepararCadastro(
+    COMANDOS_CADASTRO.editarTalhao,
+    false,
+    EsquemaDadosEditarTalhao,
+    editarTalhao,
+  ),
+  [COMANDOS_CADASTRO.alterarSituacaoTalhao]: prepararCadastro(
+    COMANDOS_CADASTRO.alterarSituacaoTalhao,
+    false,
+    EsquemaDadosAlterarSituacaoTalhao,
+    alterarSituacaoTalhao,
+  ),
 };
 
 const MENSAGENS: Record<ErroRequisicao['codigo'], string> = {

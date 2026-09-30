@@ -12,6 +12,27 @@ export {
   type Perfil,
   type ProdutoResumo,
 } from './cadastros.js';
+// Cadastros agrícolas, incremento 1 (contrato CAD-01 §4 e §6): fazenda e talhão, comandos e leituras.
+export {
+  alterarSituacaoTalhao,
+  criarFazenda,
+  criarTalhao,
+  editarFazenda,
+  editarTalhao,
+  listarFazendas,
+  listarTalhoes,
+  obterFazenda,
+  obterTalhao,
+  opcoesFazenda,
+  type AreaTexto,
+  type FazendaDetalhe,
+  type FazendaResumo,
+  type FiltroTalhoes,
+  type OpcaoFazenda,
+  type OrigemArea,
+  type TalhaoDetalhe,
+  type TalhaoResumo,
+} from './cadastros-agricolas.js';
 export { consultarIntencao, executarComando, type Efeito, type Intencao, type Recibo } from './comando.js';
 // Conexão por IP privado na subida do servidor (instrumentation.ts), só com SAFRION_CLOUDSQL_INSTANCIA.
 export { criarConectorGoogle } from './conector-google.js';

@@ -11,11 +11,18 @@ import {
 } from '../src/autorizacao/matriz';
 
 describe('matriz de autorização (ADR 0004 §4)', () => {
-  it('cada papel × cada comando: só o almoxarife registra entrada e recebe documento', () => {
+  it('cada papel × cada comando: o almoxarife registra entrada e recebe documento; o gerente cadastra fazenda e talhão', () => {
     const permitido = Object.fromEntries(PAPEIS.map((p) => [p, COMANDOS.filter((c) => podeExecutar(p, c))]));
     expect(permitido).toEqual({
       almoxarife: ['estoque.registrar-entrada', 'estoque.receber-documento'],
-      gerente: [],
+      // Contrato CAD-01 §2: o gerente executa os cadastros até existir o papel de agronomia.
+      gerente: [
+        'cadastros.criar-fazenda',
+        'cadastros.editar-fazenda',
+        'cadastros.criar-talhao',
+        'cadastros.editar-talhao',
+        'cadastros.alterar-situacao-talhao',
+      ],
     });
   });
 
