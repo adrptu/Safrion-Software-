@@ -5,17 +5,19 @@ import { createHash, generateKeyPairSync, randomUUID, sign } from 'node:crypto';
 
 import { criarRegistrador } from '@safrion/contracts';
 import {
+  abrirContinuacao,
   concederVinculo,
   definirIdentidadeAmbiente,
   emOrganizacao,
   restaurarDemonstracao,
+  resolverSessao,
   type Demonstracao,
 } from '@safrion/db';
 import type { CustomFetch } from 'openid-client';
 import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, inject, it } from 'vitest';
 
-import { contagens, criarBanco, type Ambiente } from '../../../packages/db/test/ambiente';
+import { contagens, criarBanco, semear, type Ambiente } from '../../../packages/db/test/ambiente';
 import { criarRotaComandos } from '../src/rotas/comandos';
 import { criarRotasEntrar } from '../src/rotas/entrar';
 import { criarRotaSaude } from '../src/rotas/saude';
@@ -56,6 +58,24 @@ function cookieDe(resposta: Response, nome: string): string | undefined {
 
 const destinoDe = (r: Response) =>
   new URL(r.headers.get('location') ?? '').pathname + new URL(r.headers.get('location') ?? '').search;
+
+/** Login real de DEV até a escolha; pressupõe mais de um papel atribuído à identidade fictícia. */
+async function continuacaoDev(): Promise<string> {
+  const inicio = await entrar.iniciar(new Request(`${ORIGEM}/entrar/iniciar?destino=/estoque`));
+  const state = new URL(inicio.headers.get('location') ?? '').searchParams.get('state') ?? '';
+  const aut = await entrar.autorizarDesenvolvimento(
+    formulario('/entrar/desenvolvimento/autorizar', { state, usuario: 'demo-almoxarife' }),
+  );
+  const ret = await entrar.retorno(
+    new Request(aut.headers.get('location') ?? '', {
+      headers: { cookie: `${COOKIE_LOGIN}=${cookieDe(inicio, COOKIE_LOGIN) ?? ''}` },
+    }),
+  );
+  expect(destinoDe(ret)).toBe('/entrar/escolher');
+  const ticket = cookieDe(ret, COOKIE_CONTINUACAO);
+  expect(ticket).toBeDefined();
+  return ticket ?? '';
+}
 
 function formulario(
   caminho: string,
@@ -228,25 +248,11 @@ describe('escolha de organização e papel', () => {
         'gerente',
       ]),
     );
-    const continuar = async () => {
-      const inicio = await entrar.iniciar(new Request(`${ORIGEM}/entrar/iniciar?destino=/estoque`));
-      const state = new URL(inicio.headers.get('location') ?? '').searchParams.get('state') ?? '';
-      const aut = await entrar.autorizarDesenvolvimento(
-        formulario('/entrar/desenvolvimento/autorizar', { state, usuario: 'demo-almoxarife' }),
-      );
-      const ret = await entrar.retorno(
-        new Request(aut.headers.get('location') ?? '', {
-          headers: { cookie: `${COOKIE_LOGIN}=${cookieDe(inicio, COOKIE_LOGIN) ?? ''}` },
-        }),
-      );
-      expect(destinoDe(ret)).toBe('/entrar/escolher');
-      return cookieDe(ret, COOKIE_CONTINUACAO) ?? '';
-    };
     const recusada = await entrar.confirmarEscolha(
       formulario(
         '/entrar/escolher/confirmar',
         { organizationId: demo.organizationId, papel: 'gerente', subject: 'demo-gerente' },
-        `${COOKIE_CONTINUACAO}=${await continuar()}`,
+        `${COOKIE_CONTINUACAO}=${await continuacaoDev()}`,
       ),
     );
     expect(destinoDe(recusada)).toBe('/entrar?erro=CONTRATO_INVALIDO');
@@ -254,7 +260,7 @@ describe('escolha de organização e papel', () => {
       formulario(
         '/entrar/escolher/confirmar',
         { organizationId: demo.organizationId, papel: 'gerente' },
-        `${COOKIE_CONTINUACAO}=${await continuar()}`,
+        `${COOKIE_CONTINUACAO}=${await continuacaoDev()}`,
       ),
     );
     expect(destinoDe(aceita)).toBe('/estoque');
@@ -266,6 +272,79 @@ describe('escolha de organização e papel', () => {
         demo.usuarios.find((u) => u.papel === 'almoxarife')?.usuarioId,
       ]),
     );
+  });
+
+  it('organização existente sem vínculo é recusada, não cria sessão e consome a continuação', async () => {
+    const b = await semear(amb.app, 'Escolha B');
+    const identidadeB = { issuer: 'urn:safrion:teste', subject: randomUUID() };
+    await emOrganizacao(amb.migrator, b.org, async (c) => {
+      await c.query('INSERT INTO app.user_role (organization_id, user_id, role_code) VALUES ($1, $2, $3)', [
+        b.org,
+        b.usuario,
+        'gerente',
+      ]);
+      await c.query(
+        'INSERT INTO app.identity_link (issuer, subject, organization_id, user_id) VALUES ($1, $2, $3, $4)',
+        [identidadeB.issuer, identidadeB.subject, b.org, b.usuario],
+      );
+    });
+    const escolher = (ticket: string, organizationId: string) =>
+      entrar.confirmarEscolha(
+        formulario(
+          '/entrar/escolher/confirmar',
+          { organizationId, papel: 'gerente' },
+          `${COOKIE_CONTINUACAO}=${ticket}`,
+        ),
+      );
+    const sessoes = (org: string) =>
+      emOrganizacao(
+        amb.migrator,
+        org,
+        async (c) => (await c.query<{ n: string }>('SELECT count(*)::text n FROM app.session')).rows[0]?.n,
+      );
+
+    // Controle positivo de B: a mesma rota/organização/papel aceita sua identidade vinculada.
+    // Só essa identidade é fixture; a continuação de A abaixo vem do fluxo de login de DEV.
+    const ticketB = await abrirContinuacao(amb.app, identidadeB, '/estoque');
+    const propriaB = await escolher(ticketB.ticket, b.org);
+    expect(destinoDe(propriaB)).toBe('/estoque');
+    expect(await resolverSessao(amb.app, cookieDe(propriaB, COOKIE_SESSAO))).toMatchObject({
+      organizationId: b.org,
+      usuarioId: b.usuario,
+      papel: 'gerente',
+    });
+
+    const almoxarife = demo.usuarios.find((u) => u.papel === 'almoxarife')?.usuarioId;
+    await emOrganizacao(amb.app, demo.organizationId, (c) =>
+      c.query('INSERT INTO app.user_role (organization_id, user_id, role_code) VALUES ($1, $2, $3)', [
+        demo.organizationId,
+        almoxarife,
+        'gerente',
+      ]),
+    );
+    try {
+      const ticketA = await continuacaoDev();
+      const antes = [await sessoes(demo.organizationId), await sessoes(b.org)];
+      const recusada = await escolher(ticketA, b.org);
+      expect(destinoDe(recusada)).toBe('/entrar?erro=VINCULO_AUSENTE');
+      expect(cookieDe(recusada, COOKIE_SESSAO)).toBeUndefined();
+      const reuso = await escolher(ticketA, demo.organizationId);
+      expect(destinoDe(reuso)).toBe('/entrar?erro=CONTINUACAO_INVALIDA');
+      expect(cookieDe(reuso, COOKIE_SESSAO)).toBeUndefined();
+      expect([await sessoes(demo.organizationId), await sessoes(b.org)]).toEqual(antes);
+      const propriaA = await escolher(await continuacaoDev(), demo.organizationId);
+      expect(destinoDe(propriaA)).toBe('/estoque');
+      expect(await resolverSessao(amb.app, cookieDe(propriaA, COOKIE_SESSAO))).toMatchObject({
+        organizationId: demo.organizationId,
+        usuarioId: almoxarife,
+        papel: 'gerente',
+      });
+    } finally {
+      await emOrganizacao(amb.migrator, demo.organizationId, (c) =>
+        c.query("DELETE FROM app.user_role WHERE user_id = $1 AND role_code = 'gerente'", [almoxarife]),
+      );
+    }
+    // O banco inteiro (incluindo B, vínculos e sessões) é descartado em afterAll.
   });
 });
 
