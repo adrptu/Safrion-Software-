@@ -583,6 +583,33 @@ class CloudShell(unittest.TestCase):
                 if papel.startswith('organizations/'):
                     self.assertIn('gcloud iam roles describe org --organization=7 --format=json', chamadas)
 
+    def test_state_reconhece_o_dono_com_outra_caixa_so_em_user_e_ascii(self):
+        # O IAM guarda user:Owner@Example.test e a conta logada é owner@example.test: é o mesmo dono (o gcloud compara
+        # conta e e-mail do token com lower()). Os papéis dele não são expandidos nem viram achado.
+        self.gcloud({'conta': 'owner@example.test', 'politica_projeto': {'bindings': [
+            {'role': 'roles/owner', 'members': ['user:Owner@Example.test']},
+            {'role': 'roles/storage.admin', 'members': ['user:OWNER@example.TEST']}]}})
+        r, chamadas = self.rodar('state', PROJETO)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertFalse([c for c in chamadas if 'roles describe roles/storage.admin' in c])
+        # Continuam negados: dono diferente (mesmo com caixa trocada), o mesmo texto como conta de serviço ou grupo, prefixo
+        # de tipo com outra caixa e diferença de caixa fora de A–Z (sem casefold nem normalização Unicode).
+        casos = [
+            ('owner@example.test', 'user:Outro@Example.test'),
+            ('owner@example.test', 'serviceAccount:owner@example.test'),
+            ('owner@example.test', 'serviceAccount:Owner@Example.test'),
+            ('owner@example.test', 'group:owner@example.test'),
+            ('owner@example.test', 'USER:owner@example.test'),
+            ('öwner@example.test', 'user:Öwner@example.test'),
+        ]
+        for conta, membro in casos:
+            with self.subTest(conta=conta, membro=membro):
+                self.gcloud({'conta': conta, 'politica_projeto': {'bindings': [
+                    {'role': 'roles/owner', 'members': [f'user:{conta}']}, {'role': 'roles/owner', 'members': [membro]}]}})
+                r, _ = self.rodar('state', PROJETO)
+                self.assertNotEqual(r.returncode, 0)
+                self.assertIn(f'{membro.split(":")[0]} com roles/owner alcança o state', r.stderr)
+
     def test_state_aponta_o_depois_para_a_conta_padrao_do_compute(self):
         self.gcloud({'politica_projeto': {'bindings': [
             {'role': 'roles/owner', 'members': [f'user:{DONO}']}, {'role': 'roles/editor', 'members': [f'serviceAccount:{COMPUTE}']}]}})
