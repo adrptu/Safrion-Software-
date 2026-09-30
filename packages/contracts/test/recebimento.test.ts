@@ -27,6 +27,29 @@ const dados = (extra: Record<string, unknown> = {}) => ({
   ...extra,
 });
 
+describe('valor unitário (contrato CMD-15 v3.8, §6.2)', () => {
+  const problemas = (valorUnitario: string) => {
+    const r = EsquemaDadosRecebimento.safeParse(dados({ linhas: [linha(1, { valorUnitario })] }));
+    return r.success ? [] : r.error.issues.map((i) => [i.path.join('.'), i.message]);
+  };
+
+  it('até 8 casas na forma canônica passa; 9 casas e negativo são recusa de contrato com o campo', () => {
+    expect(problemas('152.12345678')).toEqual([]);
+    expect(problemas('0')).toEqual([]);
+    // Zeros à direita não contam: vai ao banco como 152.12345678.
+    expect(problemas('152.123456780')).toEqual([]);
+    const canonico = canonizarRecebimento(
+      EsquemaDadosRecebimento.parse(dados({ linhas: [linha(1, { valorUnitario: '152.123456780' })] })),
+    );
+    expect(canonico.linhas[0]?.valorUnitario).toBe('152.12345678');
+    expect(problemas('152.123456789')).toEqual([
+      ['linhas.0.valorUnitario', 'VALOR_UNITARIO_ACIMA_DE_8_CASAS'],
+    ]);
+    expect(problemas('-1')).toEqual([['linhas.0.valorUnitario', 'VALOR_UNITARIO_NEGATIVO']]);
+    expect(problemas('1,5')).toEqual([['linhas.0.valorUnitario', 'DECIMAL_INVALIDO']]);
+  });
+});
+
 describe('dados do recebimento', () => {
   it('aceita o documento completo e recusa campo a mais, número JSON e data inválida', () => {
     expect(EsquemaDadosRecebimento.safeParse(dados()).success).toBe(true);

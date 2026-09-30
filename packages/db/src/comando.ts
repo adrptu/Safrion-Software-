@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 
 import type { Registrador } from '@safrion/contracts';
 import { ErroDominio } from '@safrion/domain';
-import type { ClientBase, Pool, PoolClient } from 'pg';
+import pg, { type ClientBase, type Pool, type PoolClient } from 'pg';
 
 import { VERSAO_CANONICA, hashCanonico } from './canonico.js';
 import { ConflitoVersao, ErroComando, RejeicaoNegocio } from './erros.js';
@@ -184,9 +184,11 @@ const COLUNAS_RECIBO = `receipt_id, command_type, idempotency_key, payload_hash,
  * - mesma chave e mesmo conteúdo: devolve o recibo registrado, marcado como já recebido, sem reavaliar;
  * - mesma chave com outro conteúdo: IDEMPOTENCY_KEY_REUSED, nada gravado;
  * - mesma chave em transação em curso por mais que o limite: IDEMPOTENCY_IN_PROGRESS;
- * - qualquer outra falha: FALHA_TRANSITORIA; repetir com a mesma chave e o mesmo conteúdo. Antes do COMMIT, nada foi
- *   gravado; se a falha chega no COMMIT ou depois dele (conexão perdida), o resultado é incerto (resultadoIncerto) e o
- *   reenvio devolve o recibo, se a transação chegou a confirmar.
+ * - deadlock (40P01) com o ROLLBACK confirmado antes de qualquer COMMIT: a transação inteira repete com a mesma
+ *   intenção, até 3 tentativas, pausas de 50 e 150 ms e prazo total de 2 s (contrato CMD-15 §6);
+ * - qualquer outra falha: FALHA_TRANSITORIA; repetir com a mesma chave e o mesmo conteúdo. Com o ROLLBACK confirmado
+ *   antes do COMMIT, nada foi gravado; se a falha chega no COMMIT ou depois dele (conexão perdida), ou se o ROLLBACK
+ *   não se confirma, o resultado é incerto (resultadoIncerto) e o reenvio devolve o recibo, se a transação confirmou.
  */
 export async function executarComando(
   pool: Pool,
@@ -196,6 +198,7 @@ export async function executarComando(
   opcoes: OpcoesComando = {},
 ): Promise<Recibo> {
   const inicio = performance.now();
+  const contagem = { tentativas: 0 };
   // A intenção pode chegar fora do contrato: os campos do log são lidos sem confiar no formato.
   const objeto = (v: unknown): Record<string, unknown> =>
     typeof v === 'object' && v !== null ? (v as Record<string, unknown>) : {};
@@ -212,6 +215,7 @@ export async function executarComando(
     target_type: se(alvo['type'], /^[A-Za-z0-9._-]{1,64}$/),
     target_id: ehUuid(alvo['id']) ? alvo['id'] : undefined,
     duracao_ms: Math.round(performance.now() - inicio),
+    tentativas: contagem.tentativas > 0 ? contagem.tentativas : undefined,
   });
   // O registro nunca muda o resultado: falha do log depois de um COMMIT não pode virar erro para quem enviou.
   const registrar = (...args: Parameters<Registrador['registrar']>) => {
@@ -222,7 +226,7 @@ export async function executarComando(
     }
   };
   try {
-    const r = await processarComando(pool, organizationId, intencao, efeito, opcoes);
+    const r = await processarComando(pool, organizationId, intencao, efeito, opcoes, contagem);
     registrar('info', 'comando.processado', correlacao, {
       ...campos(),
       outcome: r.outcome,
@@ -253,12 +257,55 @@ export async function executarComando(
   }
 }
 
+/** Deadlock (40P01): pausas antes da 2ª e da 3ª tentativa e prazo total, contado do início (contrato CMD-15 §6). */
+const PAUSAS_DEADLOCK_MS: readonly number[] = [50, 150];
+const PRAZO_REPETICAO_MS = 2000;
+
+/** Deadlock só pelo erro do próprio PostgreSQL (DatabaseError com SQLSTATE 40P01), nunca por um `code` qualquer. */
+function ehDeadlock(erro: unknown): boolean {
+  return erro instanceof pg.DatabaseError && erro.code === '40P01';
+}
+
+/** Prazo das tentativas repetidas esgotado antes do COMMIT: a tentativa é revertida e o COMMIT não sai. */
+class PrazoEsgotado extends Error {
+  override readonly name = 'PrazoEsgotado';
+}
+
+/**
+ * Conexão que cai com o cliente emprestado: o pg aborta a consulta em curso (a falha chega ao envelope por ela) e ainda
+ * emite 'error' no cliente; sem ouvinte, isso vira exceção não tratada e derruba o processo. O pool só ouve os ociosos.
+ */
+const ignorarErroDaConexao = (): void => undefined;
+
+/**
+ * O cliente da tentativa repetida: antes de cada comando SQL, confere o prazo (depois dele, nenhum comando começa) e
+ * aplica `SET LOCAL statement_timeout` com o tempo que falta, para o servidor cortar o comando no prazo. Um só
+ * statement_timeout por tentativa não limitaria a soma de vários comandos (Codex 07:52Z).
+ */
+function comPrazo(cliente: PoolClient, prazo: number): PoolClient {
+  const original = cliente.query.bind(cliente) as (...args: unknown[]) => Promise<unknown>;
+  const query = async (...args: unknown[]) => {
+    const restante = Math.ceil(prazo - performance.now());
+    if (restante <= 0) throw new PrazoEsgotado('prazo das tentativas esgotado');
+    await original(`SET LOCAL statement_timeout = ${String(restante)}`);
+    return original(...args);
+  };
+  return new Proxy(cliente, {
+    get(alvo, chave) {
+      if (chave === 'query') return query;
+      const valor: unknown = Reflect.get(alvo, chave);
+      return typeof valor === 'function' ? (valor as (...a: unknown[]) => unknown).bind(alvo) : valor;
+    },
+  });
+}
+
 async function processarComando(
   pool: Pool,
   organizationId: string,
   intencao: Intencao,
   efeito: Efeito,
   opcoes: OpcoesComando,
+  contagem: { tentativas: number },
 ): Promise<Recibo> {
   const org = organizacaoValida(organizationId);
   validarIntencao(intencao);
@@ -277,17 +324,47 @@ async function processarComando(
     target: { type: i.target.type, id: i.target.id, expectedVersion: i.target.expectedVersion },
     data: i.data,
   });
+  const prazo = performance.now() + PRAZO_REPETICAO_MS;
+  for (let n = 1; ; n += 1) {
+    contagem.tentativas = n;
+    // A mesma intenção e o mesmo hash em toda tentativa; a primeira segue sem prazo novo, como sempre.
+    const r = await tentarComando(pool, org, i, hash, efeito, espera, n === 1 ? null : prazo);
+    if ('recibo' in r) return r.recibo;
+    const pausa = PAUSAS_DEADLOCK_MS[n - 1];
+    if (pausa === undefined || performance.now() + pausa >= prazo) throw r.deadlock;
+    await new Promise((fim) => setTimeout(fim, pausa));
+  }
+}
 
+/**
+ * Uma tentativa, numa transação. Devolve o recibo, ou `deadlock` quando o PostgreSQL escolheu esta transação como vítima
+ * (SQLSTATE efetivo 40P01) e o ROLLBACK foi confirmado antes de qualquer COMMIT: só assim repetir é seguro. Com `prazo`,
+ * nenhum comando SQL passa do tempo restante (statement_timeout) e o COMMIT não é enviado depois dele: não há efeito
+ * tardio. Uma sequência de comandos, cada um abaixo do restante, ainda pode passar do relógio antes do COMMIT; aí a
+ * tentativa é revertida (limite declarado no contrato).
+ */
+async function tentarComando(
+  pool: Pool,
+  org: string,
+  i: Intencao,
+  hash: string,
+  efeito: Efeito,
+  espera: number,
+  prazo: number | null,
+): Promise<{ readonly recibo: Recibo } | { readonly deadlock: ErroComando }> {
   const cliente = await pool.connect();
+  cliente.on('error', ignorarErroDaConexao);
+  // Tentativa repetida: todo comando SQL (os do envelope e os do efeito) passa pelo prazo; BEGIN, COMMIT e ROLLBACK não.
+  const c = prazo === null ? cliente : comPrazo(cliente, prazo);
   let quebrado: Error | undefined;
   let commitEnviado = false;
   try {
     await cliente.query('BEGIN');
-    await cliente.query("SELECT set_config('app.organization_id', $1, true)", [org]);
-    await cliente.query(`SET LOCAL lock_timeout = ${String(espera)}`);
+    await c.query("SELECT set_config('app.organization_id', $1, true)", [org]);
+    await c.query(`SET LOCAL lock_timeout = ${String(espera)}`);
     let inserido;
     try {
-      inserido = await cliente.query(
+      inserido = await c.query(
         `INSERT INTO app.intent_record (organization_id, command_type, idempotency_key, payload_hash, canonical_version,
            initiator_kind, actor_id, transport_actor_id, device_id, target_type, target_id, expected_version, outcome,
            receipt_id, confirmed_at, correlation_id)
@@ -323,10 +400,10 @@ async function processarComando(
       }
       throw erro;
     }
-    await cliente.query('SET LOCAL lock_timeout TO DEFAULT');
+    await c.query('SET LOCAL lock_timeout TO DEFAULT');
 
     if (inserido.rowCount === 0) {
-      const existente = await cliente.query<LinhaIntencao>(
+      const existente = await c.query<LinhaIntencao>(
         `SELECT ${COLUNAS_RECIBO} FROM app.intent_record
           WHERE organization_id = $1 AND command_type = $2 AND idempotency_key = $3`,
         [org, i.commandType, i.idempotencyKey],
@@ -339,7 +416,7 @@ async function processarComando(
           receiptId: r.receipt_id,
         });
       }
-      return recibo(r, true);
+      return { recibo: recibo(r, true) };
     }
 
     const eventos: (EventoEmitido & { eventId: string })[] = [];
@@ -358,14 +435,14 @@ async function processarComando(
     let nextAction: string | null = null;
     let resultado: ResultadoEfeito | null = null;
     let resultingVersion: number | null = null;
-    await cliente.query('SAVEPOINT efeito');
+    await c.query('SAVEPOINT efeito');
     try {
-      resultado = await efeito(cliente, ctx);
+      resultado = await efeito(c, ctx);
       resultingVersion = resultado.resultingVersion;
       nextAction = resultado.nextAction ?? null;
       const agora = new Date().toISOString();
       for (const e of eventos) {
-        await cliente.query(
+        await c.query(
           `INSERT INTO app.outbox (event_id, organization_id, type, schema_version, entity_type, entity_id,
              entity_version, previous_version, causation_command_type, causation_id, actor_id, occurred_at, payload)
            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
@@ -402,14 +479,14 @@ async function processarComando(
       } else {
         throw erro;
       }
-      await cliente.query('ROLLBACK TO SAVEPOINT efeito');
+      await c.query('ROLLBACK TO SAVEPOINT efeito');
       eventos.length = 0;
       resultado = null;
     }
 
     const efeitos = resultado?.effects ?? {};
     const eventIds = eventos.map((e) => e.eventId);
-    const registrado = await cliente.query<LinhaIntencao>(
+    const registrado = await c.query<LinhaIntencao>(
       `UPDATE app.intent_record
           SET outcome = $4, reason_code = $5, resulting_version = $6, effects = $7, pending = $8, next_action = $9,
               processed_at = clock_timestamp()
@@ -427,7 +504,7 @@ async function processarComando(
         nextAction,
       ],
     );
-    await cliente.query(
+    await c.query(
       `INSERT INTO app.audit_log (id, organization_id, actor_id, command_type, idempotency_key, outcome, target_type,
          target_id, before_state, after_state, resulting_version, reason, correlation_id)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
@@ -447,11 +524,14 @@ async function processarComando(
         i.correlationId,
       ],
     );
+    if (prazo !== null && performance.now() >= prazo) {
+      throw new PrazoEsgotado('prazo das tentativas esgotado antes do COMMIT');
+    }
     commitEnviado = true;
     await cliente.query('COMMIT');
     const r = registrado.rows[0];
     if (!r) throw new Error('registro da intenção não atualizado');
-    return recibo(r, false);
+    return { recibo: recibo(r, false) };
   } catch (erro) {
     try {
       await cliente.query('ROLLBACK');
@@ -459,15 +539,21 @@ async function processarComando(
       quebrado = falhaRollback instanceof Error ? falhaRollback : new Error(String(falhaRollback));
     }
     if (erro instanceof ErroComando) throw erro;
-    throw new ErroComando(
+    // "Nada gravado" só com o ROLLBACK confirmado antes de qualquer COMMIT; o resto é incerto e nunca repete aqui.
+    const incerto = commitEnviado || quebrado !== undefined;
+    const sqlstate = codigoPg(erro);
+    const falha = new ErroComando(
       'FALHA_TRANSITORIA',
-      commitEnviado
+      incerto
         ? 'A confirmação não voltou e o resultado é incerto; repita com a mesma chave e o mesmo conteúdo: se já foi gravado, volta o recibo registrado.'
         : 'A operação não terminou e nada foi gravado; repita com a mesma chave e o mesmo conteúdo.',
-      { resultadoIncerto: commitEnviado, codigoPg: codigoPg(erro) },
+      { resultadoIncerto: incerto, codigoPg: sqlstate },
       { cause: erro },
     );
+    if (!incerto && ehDeadlock(erro)) return { deadlock: falha };
+    throw falha;
   } finally {
+    cliente.off('error', ignorarErroDaConexao);
     cliente.release(quebrado);
   }
 }

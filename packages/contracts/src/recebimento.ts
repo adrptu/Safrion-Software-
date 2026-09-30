@@ -42,6 +42,23 @@ const EsquemaUnidadeDaLinha = z.discriminatedUnion('tipo', [
   }),
 ]);
 
+/**
+ * Valor unitário em BRL, na unidade do documento: o CHECK da 0007 guarda até 8 casas e nada negativo. A escala é contada
+ * na forma canônica, a mesma que vai ao banco ("1.123456780" tem 8). Fora disso é recusa de contrato (400), nunca uma
+ * violação de CHECK no efeito, que viraria falha transitória (contrato CMD-15 §6.2, v3.8).
+ */
+const EsquemaValorUnitario = EsquemaDecimalTexto.superRefine((valor, ctx) => {
+  let d;
+  try {
+    d = decimal(valor);
+  } catch {
+    return; // o formato já foi recusado pelo esquema decimal
+  }
+  if (d.isNegative()) ctx.addIssue({ code: 'custom', message: 'VALOR_UNITARIO_NEGATIVO' });
+  else if (d.decimalPlaces() > 8)
+    ctx.addIssue({ code: 'custom', message: 'VALOR_UNITARIO_ACIMA_DE_8_CASAS' });
+});
+
 const EsquemaParcelas = z.strictObject({
   apto: EsquemaDecimalTexto,
   quarentena: EsquemaDecimalTexto,
@@ -74,7 +91,7 @@ const EsquemaLinha = z.strictObject({
   motivoTexto: texto(200).optional(),
   inspecao: z.strictObject({ responsavel: EsquemaUuid, prazo: EsquemaDataCivil }).optional(),
   pedidoLinha: texto(64).optional(),
-  valorUnitario: EsquemaDecimalTexto.optional(),
+  valorUnitario: EsquemaValorUnitario.optional(),
   ocorrencia: EsquemaOcorrencia.optional(),
 });
 

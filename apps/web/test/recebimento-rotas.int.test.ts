@@ -265,6 +265,12 @@ describe('POST estoque.receber-documento pela fábrica de comandos', () => {
         pedido(randomUUID(), { lote: demo.loteId, local: ids.local, movimento: {} }),
       ],
       ['sem linhas', pedido(randomUUID(), dados('7003', []))],
+      // Antes da v3.8, 9 casas ou negativo passavam do esquema e o CHECK da 0007 virava 503 (23514) no efeito.
+      [
+        'valor unitário com 9 casas',
+        pedido(randomUUID(), dados('7003', [linha(1, { valorUnitario: '1.123456789' })])),
+      ],
+      ['valor unitário negativo', pedido(randomUUID(), dados('7003', [linha(1, { valorUnitario: '-1' })]))],
     ];
     for (const [nome, corpo] of casos) {
       const r = await post(corpo, almoxarife);
