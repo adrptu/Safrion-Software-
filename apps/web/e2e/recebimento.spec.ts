@@ -358,6 +358,59 @@ test('produto diferente devolvido na entrega (CX-UI03): a ocorrência aparece no
   await semViolacoes(page);
 });
 
+test('recusa sem perder o rascunho seguinte (CX-UI04): a recusada vai para Guardados e abre com o erro dela', async ({
+  page,
+}) => {
+  await entrarComo(page, 'Almoxarife', '/estoque/recebimentos/novo');
+  // A NF UI04 já existe; reenviá-la com a resposta perdida deixa uma intenção pendente que o servidor recusou.
+  await preencherOrigem(page, 'UI04');
+  await preencherLinha(page, 1, { produto: 'Diesel S10', documento: '5', apto: '5' });
+  await page.getByRole('button', { name: 'Confirmar recebimento' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'NF UI04' })).toBeVisible();
+  await page.goto('/estoque/recebimentos/novo');
+  let posts = 0;
+  await page.route(COMANDO, async (route) => {
+    posts += 1;
+    await route.fetch();
+    await route.abort('connectionreset');
+  });
+  await preencherOrigem(page, 'UI04');
+  await preencherLinha(page, 1, { produto: 'Diesel S10', documento: '7', apto: '7' });
+  await page.getByRole('button', { name: 'Confirmar recebimento' }).click();
+  await expect(page.getByText(/O envio pode ter chegado ao servidor/)).toBeVisible();
+  // Outra aba (ou a pessoa, depois) começou o documento seguinte: o rascunho agora é CX-PROXIMO.
+  await page.evaluate(() => {
+    const k = Object.keys(localStorage).find((x) => x.startsWith('safrion:recebimento:')) ?? '';
+    const r = JSON.parse(localStorage.getItem(k) ?? '{}') as { campos?: Record<string, unknown> };
+    localStorage.setItem(k, JSON.stringify({ campos: { ...r.campos, numero: 'CX-PROXIMO' } }));
+  });
+  await page.getByRole('button', { name: 'Consultar recibo' }).click();
+
+  // A recusa não toca no rascunho seguinte e não põe o erro da UI04 nos campos dele.
+  const origem = page.getByRole('region', { name: 'Documento' });
+  await expect(origem.getByRole('textbox', { name: 'Número' })).toHaveValue('CX-PROXIMO');
+  await expect(
+    origem.getByText('Este documento do emitente já foi recebido. Confira em Recebimentos.'),
+  ).toHaveCount(0);
+  const guardados = page.getByRole('region', { name: 'Guardados para corrigir' });
+  await expect(guardados).toContainText('NF UI04 · recusado: Este documento do emitente já foi recebido.');
+  await semViolacoes(page);
+
+  // Abrir a recusada mostra o erro nela; o rascunho CX-PROXIMO vira guardado, sem se perder. Nenhum POST a mais.
+  await guardados.getByRole('button', { name: 'Abrir NF UI04 para corrigir' }).click();
+  await expect(origem.getByRole('textbox', { name: 'Número' })).toHaveValue('UI04');
+  await expect(
+    origem.getByText('Este documento do emitente já foi recebido. Confira em Recebimentos.'),
+  ).toBeVisible();
+  await expect(guardados).toContainText('NF CX-PROXIMO · rascunho guardado');
+  expect(posts).toBe(1);
+  await guardados.getByRole('button', { name: 'Abrir NF CX-PROXIMO para corrigir' }).click();
+  await expect(origem.getByRole('textbox', { name: 'Número' })).toHaveValue('CX-PROXIMO');
+  await expect(guardados).toContainText('NF UI04 · rascunho guardado');
+  await guardados.getByRole('button', { name: 'Descartar NF UI04' }).click();
+  await expect(page.getByRole('region', { name: 'Guardados para corrigir' })).toHaveCount(0);
+});
+
 test('sem armazenamento no navegador, nada é enviado', async ({ page }) => {
   await entrarComo(page, 'Almoxarife', '/estoque/recebimentos');
   await page.addInitScript(() => {

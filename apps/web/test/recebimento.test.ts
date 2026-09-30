@@ -27,13 +27,18 @@ import {
   textoDaConferencia,
 } from '../src/recebimento/lista';
 import {
+  apagarGuardado,
   apagarIntencao,
   chaveDoRecebimento,
   gravarIntencao,
   gravarRecebimento,
+  guardarFormulario,
+  lerGuardados,
   lerIntencoes,
   lerRecebimento,
+  prefixoDosGuardados,
   prefixoDasIntencoes,
+  temConteudo,
 } from '../src/recebimento/rascunho';
 
 // Formulário de recebimento (contrato CMD-15 v3.7, §6.2 e §7.1): validação da tela, corpo do comando, a regra da
@@ -474,6 +479,50 @@ describe('rascunho e intenções no localStorage por usuário e organização (C
     expect(gravarRecebimento(cheio, chaveDoRecebimento('u1', 'o1'), { campos })).toBe(false);
     expect(lerIntencoes(m, 'u1', 'o1')).toHaveLength(1);
     expect(gravarIntencao(null, 'u1', 'o1', { campos, intencao: intencao(K2), criadaEm: 'x' })).toBe(false);
+  });
+
+  it('guardados (CX-UI04): um por chave, o mais antigo primeiro, com motivo só quando recusado; apagar tira só o próprio', () => {
+    const m = memoria();
+    const recusada = formulario([linha('a')], { numero: 'CX-MULTI-A' });
+    expect(
+      guardarFormulario(m, 'u1', 'o1', {
+        id: K2,
+        campos: recusada,
+        motivo: { mensagem: 'Este documento do emitente já foi recebido.', campo: 'numero' },
+        guardadoEm: '2026-09-30T10:05:00.000Z',
+      }),
+    ).toBe(true);
+    guardarFormulario(m, 'u1', 'o1', {
+      id: K1,
+      campos,
+      motivo: null,
+      guardadoEm: '2026-09-30T10:00:00.000Z',
+    });
+    // Rascunho e intenções não se misturam com guardados.
+    gravarRecebimento(m, chaveDoRecebimento('u1', 'o1'), { campos });
+    expect(lerGuardados(m, 'u1', 'o1').map((g) => [g.id, g.motivo?.campo ?? null])).toEqual([
+      [K1, null],
+      [K2, 'numero'],
+    ]);
+    expect(lerIntencoes(m, 'u1', 'o1')).toEqual([]);
+    expect(lerGuardados(m, 'u2', 'o1')).toEqual([]);
+    apagarGuardado(m, 'u1', 'o1', K1);
+    expect(lerGuardados(m, 'u1', 'o1').map((g) => g.id)).toEqual([K2]);
+    // Motivo com campo fora da origem é formato inválido: ignorado.
+    m.dados.set(
+      `${prefixoDosGuardados('u1', 'o1')}${K1}`,
+      JSON.stringify({ id: K1, campos, motivo: { mensagem: 'x', campo: 'senha' }, guardadoEm: 'x' }),
+    );
+    expect(lerGuardados(m, 'u1', 'o1').map((g) => g.id)).toEqual([K2]);
+  });
+
+  it('só o contexto (emitente, fazenda, local, hoje) não é conteúdo a preservar; qualquer coisa digitada é', () => {
+    expect(temConteudo(recebimentoVazio(opcoes, '2026-09-30', 'l1'))).toBe(false);
+    expect(
+      temConteudo(formulario([linhaVazia('x', { local: U.local })], { numero: '', serie: '', emissao: '' })),
+    ).toBe(false);
+    expect(temConteudo({ ...recebimentoVazio(opcoes, '2026-09-30', 'l1'), numero: 'CX-PROXIMO' })).toBe(true);
+    expect(temConteudo(formulario([linha('a')], { numero: '', serie: '', emissao: '' }))).toBe(true);
   });
 
   it('formato corrompido é ignorado sem esconder as outras; intenção fora da própria chave não vale', () => {

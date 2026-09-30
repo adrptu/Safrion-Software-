@@ -32,17 +32,23 @@ import {
   type ErrosRecebimento,
   type Opcoes,
 } from './formulario';
-import { formatarIdentificacao } from './lista';
+import { formatarIdentificacao, rotuloDoDocumento } from './lista';
 import {
+  apagarGuardado,
   apagarIntencao,
   apagarRecebimento,
   armazemLocal,
   chaveDoRecebimento,
   gravarIntencao,
   gravarRecebimento,
+  guardarFormulario,
+  lerGuardados,
   lerIntencoes,
   lerRecebimento,
+  prefixoDosGuardados,
   prefixoDasIntencoes,
+  temConteudo,
+  type FormularioGuardado,
   type IntencaoGuardada,
 } from './rascunho';
 
@@ -62,6 +68,14 @@ const outrasPendentes = (n: number) =>
   n > 1
     ? ` Há ${String(n)} envios pendentes neste navegador; eles são conferidos um de cada vez, o mais antigo primeiro.`
     : '';
+
+/** Nome do documento de um formulário ainda não enviado (ou recusado), para a lista de guardados. */
+const nomeDoFormulario = (c: CamposRecebimento) =>
+  rotuloDoDocumento({
+    tipo: c.tipo === 'outro' ? 'outro' : 'nfe',
+    serie: c.serie.trim(),
+    numero: c.numero.trim() === '' ? 'sem número' : c.numero.trim(),
+  });
 
 const MOTIVOS_NA_ORDEM = ['avaria', 'validade', 'produto_diferente', 'falta', 'sobra', 'outro'] as const;
 
@@ -92,6 +106,7 @@ export function ReceberDocumento({
   const chaveRascunho = chaveDoRecebimento(usuarioId, organizacaoId);
   const [campos, setCampos] = useState<CamposRecebimento>(() => recebimentoVazio(opcoes, hoje, 'l1'));
   const [pendente, setPendente] = useState<IntencaoGuardada | null>(null);
+  const [guardados, setGuardados] = useState<readonly FormularioGuardado[]>([]);
   const intencao = pendente?.intencao ?? null;
   const [erros, setErros] = useState<ErrosRecebimento>(SEM_ERROS);
   const [ocupado, setOcupado] = useState<'enviando' | 'consultando' | null>(null);
@@ -106,11 +121,13 @@ export function ReceberDocumento({
    * Estado vindo do navegador: a intenção pendente mais antiga manda (travada); sem nenhuma, o rascunho. Nunca envia nem
    * consulta sozinho.
    */
+  /** Devolve se passou a mostrar uma intenção pendente (então nenhum erro de outro documento vai para os campos). */
   const recarregar = useCallback(
-    (depois: Aviso | null = null) => {
+    (depois: Aviso | null = null): boolean => {
       const armazem = armazemLocal();
       const pendentes = lerIntencoes(armazem, usuarioId, organizacaoId);
       const [primeira] = pendentes;
+      setGuardados(lerGuardados(armazem, usuarioId, organizacaoId));
       setNaoLocalizado(false);
       if (primeira) {
         setPendente(primeira);
@@ -119,11 +136,12 @@ export function ReceberDocumento({
           papel: 'atencao',
           texto: `${depois ? `${depois.texto} ` : ''}${INCERTO}${outrasPendentes(pendentes.length)}`,
         });
-        return;
+        return true;
       }
       setPendente(null);
       setCampos(lerRecebimento(armazem, chaveRascunho)?.campos ?? recebimentoVazio(opcoes, hoje, 'l1'));
       setAviso(depois ?? (armazem ? null : { papel: 'atencao', texto: SEM_ARMAZEM }));
+      return false;
     },
     [usuarioId, organizacaoId, chaveRascunho, opcoes, hoje],
   );
@@ -133,8 +151,14 @@ export function ReceberDocumento({
     // eslint-disable-next-line react-hooks/set-state-in-effect -- estado inicial lido do navegador
     recarregar();
     const prefixo = prefixoDasIntencoes(usuarioId, organizacaoId);
-    // Outra aba criou ou resolveu uma intenção: esta passa a mostrar a pendente mais antiga, ou volta ao rascunho.
+    const prefixoGuardados = prefixoDosGuardados(usuarioId, organizacaoId);
+    // Outra aba criou ou resolveu uma intenção: esta passa a mostrar a pendente mais antiga, ou volta ao rascunho. Um
+    // formulário guardado ou tirado em outra aba só atualiza a lista.
     const ouvir = (ev: StorageEvent) => {
+      if (ev.key?.startsWith(prefixoGuardados)) {
+        setGuardados(lerGuardados(armazemLocal(), usuarioId, organizacaoId));
+        return;
+      }
       if (ocupadoAgora.current) return;
       if (ev.key === null || ev.key.startsWith(prefixo)) recarregar();
     };
@@ -230,9 +254,9 @@ export function ReceberDocumento({
       setAviso({ papel: 'atencao', texto: d.mensagem, entrar: d.sessao });
       return;
     }
-    // Resolvida (recibo correspondente) ou recusa certa do primeiro envio: só esta intenção sai do navegador.
-    apagarIntencao(armazem, usuarioId, organizacaoId, g.intencao.chave);
     if (d.tipo === 'resolvido' && d.recibo.outcome === 'confirmed') {
+      // Confirmada: só esta intenção sai do navegador.
+      apagarIntencao(armazem, usuarioId, organizacaoId, g.intencao.chave);
       // O rascunho só é limpo se ainda for o que foi enviado: o que outra aba digitou depois fica.
       const rascunho = lerRecebimento(armazem, chaveRascunho);
       if (rascunho && JSON.stringify(rascunho.campos) === JSON.stringify(g.campos)) {
@@ -241,20 +265,81 @@ export function ReceberDocumento({
       router.push(`/estoque/recebimentos/${g.intencao.documentoId}`);
       return;
     }
-    // Rejeitado, conflito ou recusa certa: o conteúdo volta para correção, e uma nova confirmação terá outra chave.
-    gravarRecebimento(armazem, chaveRascunho, { campos: g.campos });
-    const aviso: Aviso =
-      d.tipo === 'resolvido'
-        ? { papel: 'erro', texto: motivoDaRejeicao(d.recibo.reasonCode).mensagem }
-        : { papel: 'erro', texto: d.mensagem, entrar: d.sessao };
-    recarregar(aviso);
-    if (d.tipo === 'resolvido') {
-      const m = motivoDaRejeicao(d.recibo.reasonCode);
-      if (m.campo) {
-        const campo = m.campo;
-        setErros({ ...SEM_ERROS, origem: { [campo]: m.mensagem } });
+    // Rejeitado, conflito ou recusa certa: o conteúdo volta para correção, e uma nova confirmação terá outra chave. Os
+    // campos são guardados ANTES de a intenção sair; sem conseguir guardar, ela fica (nada se perde).
+    const motivo: { readonly mensagem: string; readonly campo?: CampoOrigem } =
+      d.tipo === 'resolvido' ? motivoDaRejeicao(d.recibo.reasonCode) : { mensagem: d.mensagem };
+    const atual = lerRecebimento(armazem, chaveRascunho)?.campos;
+    if (atual && temConteudo(atual) && JSON.stringify(atual) !== JSON.stringify(g.campos)) {
+      // CX-UI04: há outro rascunho; ele fica intacto e a recusada vai para os guardados, para corrigir quando escolher.
+      const guardado = guardarFormulario(armazem, usuarioId, organizacaoId, {
+        id: g.intencao.chave,
+        campos: g.campos,
+        motivo,
+        guardadoEm: new Date().toISOString(),
+      });
+      if (!guardado) {
+        setAviso({ papel: 'erro', texto: SEM_RASCUNHO });
+        return;
+      }
+      apagarIntencao(armazem, usuarioId, organizacaoId, g.intencao.chave);
+      recarregar({
+        papel: 'atencao',
+        texto: `${nomeDoFormulario(g.campos)} foi recusado: ${motivo.mensagem} Ele ficou em Guardados para corrigir; o rascunho atual continua como estava.`,
+        ...(d.tipo === 'nao_gravado' && d.sessao ? { entrar: true } : {}),
+      });
+      return;
+    }
+    if (!gravarRecebimento(armazem, chaveRascunho, { campos: g.campos })) {
+      setAviso({ papel: 'erro', texto: SEM_RASCUNHO });
+      return;
+    }
+    apagarIntencao(armazem, usuarioId, organizacaoId, g.intencao.chave);
+    const outraPendente = recarregar({
+      papel: 'erro',
+      texto: motivo.mensagem,
+      ...(d.tipo === 'nao_gravado' && d.sessao ? { entrar: true } : {}),
+    });
+    if (!outraPendente && motivo.campo) {
+      const campo = motivo.campo;
+      setErros({ ...SEM_ERROS, origem: { [campo]: motivo.mensagem } });
+    }
+  }
+
+  /** Abre um guardado para corrigir; o rascunho atual com conteúdo vira guardado antes, para nada se perder (CX-UI04). */
+  function abrirGuardado(f: FormularioGuardado) {
+    if (travado) return;
+    const armazem = armazemLocal();
+    if (temConteudo(campos) && JSON.stringify(campos) !== JSON.stringify(f.campos)) {
+      const ok = guardarFormulario(armazem, usuarioId, organizacaoId, {
+        id: crypto.randomUUID(),
+        campos,
+        motivo: null,
+        guardadoEm: new Date().toISOString(),
+      });
+      if (!ok) {
+        setAviso({ papel: 'erro', texto: SEM_RASCUNHO });
+        return;
       }
     }
+    if (!gravarRecebimento(armazem, chaveRascunho, { campos: f.campos })) {
+      setAviso({ papel: 'erro', texto: SEM_RASCUNHO });
+      return;
+    }
+    apagarGuardado(armazem, usuarioId, organizacaoId, f.id);
+    setCampos(f.campos);
+    setGuardados(lerGuardados(armazem, usuarioId, organizacaoId));
+    const campo = f.motivo?.campo;
+    setErros(f.motivo && campo ? { ...SEM_ERROS, origem: { [campo]: f.motivo.mensagem } } : SEM_ERROS);
+    setAviso(f.motivo ? { papel: 'erro', texto: f.motivo.mensagem } : null);
+  }
+
+  /** Descartar é sempre gesto explícito de quem vê o guardado. */
+  function descartarGuardado(f: FormularioGuardado) {
+    if (travado) return;
+    const armazem = armazemLocal();
+    apagarGuardado(armazem, usuarioId, organizacaoId, f.id);
+    setGuardados(lerGuardados(armazem, usuarioId, organizacaoId));
   }
 
   function ocupar(estado: 'enviando' | 'consultando' | null) {
@@ -344,6 +429,46 @@ export function ReceberDocumento({
       aria-busy={ocupado !== null}
       onSubmit={(ev) => void confirmar(ev)}
     >
+      {guardados.length > 0 ? (
+        <section className="bloco" aria-labelledby={idDe('guardados')}>
+          <h2 id={idDe('guardados')}>Guardados para corrigir</h2>
+          <ul className="bloco-corpo pendencias">
+            {guardados.map((f) => {
+              const nome = nomeDoFormulario(f.campos);
+              return (
+                <li key={f.id}>
+                  <strong>{nome}</strong>
+                  {f.motivo ? ` · recusado: ${f.motivo.mensagem}` : ' · rascunho guardado'}{' '}
+                  <span className="acoes-guardado">
+                    <button
+                      type="button"
+                      className="botao botao-mini"
+                      disabled={travado}
+                      aria-label={`Abrir ${nome} para corrigir`}
+                      onClick={() => {
+                        abrirGuardado(f);
+                      }}
+                    >
+                      Abrir para corrigir
+                    </button>{' '}
+                    <button
+                      type="button"
+                      className="botao botao-mini"
+                      disabled={travado}
+                      aria-label={`Descartar ${nome}`}
+                      onClick={() => {
+                        descartarGuardado(f);
+                      }}
+                    >
+                      Descartar
+                    </button>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
       <section className="bloco" aria-labelledby={idDe('origem')}>
         <h2 id={idDe('origem')}>Documento</h2>
         <div className="bloco-corpo formulario formulario-grade">

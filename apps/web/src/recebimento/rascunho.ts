@@ -1,5 +1,5 @@
 import { PREFIXO } from '../estoque/rascunho';
-import type { CamposLinha, CamposRecebimento, Intencao } from './formulario';
+import type { CampoOrigem, CamposLinha, CamposRecebimento, Intencao } from './formulario';
 
 /**
  * Recebimento guardado no localStorage (contrato CMD-15 §2 e §6.2, v3.10), em duas espécies de chave, as duas com usuário
@@ -168,14 +168,11 @@ export function apagarIntencao(
   apagar(armazem, prefixoDasIntencoes(usuarioId, organizacaoId) + chave);
 }
 
-/** Intenções pendentes desta pessoa e organização, da mais antiga para a mais nova; formato inválido é ignorado. */
-export function lerIntencoes(
+/** Valores das chaves com o prefixo, já lidos como objeto; uma chave corrompida não esconde as outras. */
+function varrer(
   armazem: Varredura | null,
-  usuarioId: string,
-  organizacaoId: string,
-): IntencaoGuardada[] {
-  const prefixo = prefixoDasIntencoes(usuarioId, organizacaoId);
-  const achadas: IntencaoGuardada[] = [];
+  prefixo: string,
+): { chave: string; valor: Record<string, unknown> }[] {
   const chaves: string[] = [];
   try {
     if (!armazem) return [];
@@ -186,24 +183,37 @@ export function lerIntencoes(
   } catch {
     return [];
   }
+  const lidos: { chave: string; valor: Record<string, unknown> }[] = [];
   for (const k of chaves) {
-    // Uma chave corrompida não esconde as outras.
     try {
       const bruto = armazem.getItem(k);
       if (!bruto) continue;
-      const g: unknown = JSON.parse(bruto);
-      if (typeof g !== 'object' || g === null) continue;
-      const { campos, intencao, criadaEm } = g as Record<string, unknown>;
-      if (
-        camposValidos(campos) &&
-        intencaoValida(intencao) &&
-        k === prefixo + intencao.chave &&
-        typeof criadaEm === 'string'
-      ) {
-        achadas.push({ campos, intencao, criadaEm });
-      }
+      const v: unknown = JSON.parse(bruto);
+      if (typeof v === 'object' && v !== null) lidos.push({ chave: k, valor: v as Record<string, unknown> });
     } catch {
       continue;
+    }
+  }
+  return lidos;
+}
+
+/** Intenções pendentes desta pessoa e organização, da mais antiga para a mais nova; formato inválido é ignorado. */
+export function lerIntencoes(
+  armazem: Varredura | null,
+  usuarioId: string,
+  organizacaoId: string,
+): IntencaoGuardada[] {
+  const prefixo = prefixoDasIntencoes(usuarioId, organizacaoId);
+  const achadas: IntencaoGuardada[] = [];
+  for (const { chave: k, valor } of varrer(armazem, prefixo)) {
+    const { campos, intencao, criadaEm } = valor;
+    if (
+      camposValidos(campos) &&
+      intencaoValida(intencao) &&
+      k === prefixo + intencao.chave &&
+      typeof criadaEm === 'string'
+    ) {
+      achadas.push({ campos, intencao, criadaEm });
     }
   }
   return achadas.sort((x, y) =>
@@ -212,5 +222,90 @@ export function lerIntencoes(
       : x.criadaEm < y.criadaEm
         ? -1
         : 1,
+  );
+}
+
+/**
+ * Formulário guardado para corrigir depois (CX-UI04): a intenção resolvida sem confirmar quando já havia outro rascunho,
+ * ou o rascunho que saiu da tela para dar lugar a um guardado. Nenhum preenchimento é descartado sem gesto explícito.
+ */
+export interface FormularioGuardado {
+  readonly id: string;
+  readonly campos: CamposRecebimento;
+  /** Motivo da recusa, mostrado só quando este formulário é aberto; null no rascunho guardado. */
+  readonly motivo: { readonly mensagem: string; readonly campo?: CampoOrigem } | null;
+  readonly guardadoEm: string;
+}
+
+export function prefixoDosGuardados(usuarioId: string, organizacaoId: string): string {
+  return `${PREFIXO}recebimento-guardado:${usuarioId}:${organizacaoId}:`;
+}
+
+const CAMPOS_DE_ORIGEM: readonly string[] = CAMPOS_ORIGEM;
+
+function motivoValido(v: unknown): v is FormularioGuardado['motivo'] {
+  if (v === null) return true;
+  if (typeof v !== 'object') return false;
+  const m = v as Record<string, unknown>;
+  return (
+    texto(m['mensagem'], 300) &&
+    (m['campo'] === undefined || (typeof m['campo'] === 'string' && CAMPOS_DE_ORIGEM.includes(m['campo'])))
+  );
+}
+
+export function guardarFormulario(
+  armazem: Escrita | null,
+  usuarioId: string,
+  organizacaoId: string,
+  f: FormularioGuardado,
+): boolean {
+  return gravar(armazem, prefixoDosGuardados(usuarioId, organizacaoId) + f.id, f);
+}
+
+export function apagarGuardado(
+  armazem: Escrita | null,
+  usuarioId: string,
+  organizacaoId: string,
+  id: string,
+): void {
+  apagar(armazem, prefixoDosGuardados(usuarioId, organizacaoId) + id);
+}
+
+/** Formulários guardados, do mais antigo para o mais novo; formato inválido é ignorado. */
+export function lerGuardados(
+  armazem: Varredura | null,
+  usuarioId: string,
+  organizacaoId: string,
+): FormularioGuardado[] {
+  const prefixo = prefixoDosGuardados(usuarioId, organizacaoId);
+  const achados: FormularioGuardado[] = [];
+  for (const { chave: k, valor } of varrer(armazem, prefixo)) {
+    const { id, campos, motivo, guardadoEm } = valor;
+    if (
+      typeof id === 'string' &&
+      UUID.test(id) &&
+      k === prefixo + id &&
+      camposValidos(campos) &&
+      motivoValido(motivo) &&
+      typeof guardadoEm === 'string'
+    ) {
+      achados.push({ id, campos, motivo, guardadoEm });
+    }
+  }
+  return achados.sort((x, y) =>
+    x.guardadoEm === y.guardadoEm ? x.id.localeCompare(y.id) : x.guardadoEm < y.guardadoEm ? -1 : 1,
+  );
+}
+
+/** Há algo digitado (origem ou alguma linha)? Formulário só com o contexto não conta como rascunho a preservar. */
+export function temConteudo(c: CamposRecebimento): boolean {
+  const cheio = (v: string) => v.trim() !== '';
+  return (
+    cheio(c.serie) ||
+    cheio(c.numero) ||
+    cheio(c.emissao) ||
+    c.linhas.some((l) =>
+      CAMPOS_LINHA.some((k) => k !== 'id' && k !== 'local' && k !== 'unidade' && cheio(l[k])),
+    )
   );
 }
