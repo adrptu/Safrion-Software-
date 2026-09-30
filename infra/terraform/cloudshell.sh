@@ -11,6 +11,8 @@
 #   infra/terraform/cloudshell.sh config-hml <projeto>      JSON privado da fase 1 para o infra-hml.yml (geração e SHA)
 #   infra/terraform/cloudshell.sh senhas <projeto>          as 3 senhas do banco, sem eco; mostra só as versões
 #   infra/terraform/cloudshell.sh destravar <projeto> <ID>  solta o lock do state deixado por uma sessão que caiu
+#   infra/terraform/cloudshell.sh aplicar-hml <projeto> <execução> <tentativa> <hash>  fase 1 da HML, só o plano oficial
+#   infra/terraform/cloudshell.sh destravar-hml <projeto> <ID>  solta o lock do state da HML (nunca o do bootstrap)
 #   infra/terraform/cloudshell.sh limpar <projeto>          apaga os arquivos locais do projeto
 #
 # Arquivos de trabalho (tfvars, plano, .terraform, saídas, logs) ficam em ~/.safrion/<projeto>, fora do checkout, só
@@ -24,6 +26,7 @@ REGIAO='southamerica-east1'
 AQUI="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RAIZ="$(cd "$AQUI/../.." && pwd)"
 BOOT="$AQUI/bootstrap"
+HML="$AQUI/hml"
 BASE="${SAFRION_DIR:-$HOME/.safrion}"
 COPIA=''
 # Agentes de serviço que o próprio Google cria no projeto (docs.cloud.google.com/iam/docs/service-agents), pelo
@@ -75,12 +78,17 @@ projeto() {
 }
 
 confirmar() {
-  local r='' resto
+  local r='' resto prazo="${2:-}"
   # No terminal, linhas coladas junto com o comando anterior não viram resposta: o buffer é descartado antes da pergunta.
   if [ -t 0 ]; then
     while read -r -t 0.2 resto; do :; done
   fi
-  read -r -p "$1 [s/n] " r || true
+  # $2 = prazo em segundos; esgotado, a resposta é "não".
+  if [ -n "$prazo" ]; then
+    read -r -t "$prazo" -p "$1 [s/n] " r || true
+  else
+    read -r -p "$1 [s/n] " r || true
+  fi
   case "$r" in
     s | S) return 0 ;;
     *) return 1 ;;
@@ -108,7 +116,8 @@ token() {
   export GOOGLE_OAUTH_ACCESS_TOKEN
 }
 
-# Nada herdado do shell muda o plano: TF_VAR_*, TF_CLI_ARGS* e ~/.terraformrc ficam de fora.
+# Nada herdado do shell muda o plano: TF_VAR_*, TF_CLI_ARGS* e ~/.terraformrc ficam de fora. $1 = módulo além do
+# bootstrap (hml), para cada state ter o seu .terraform.
 ambiente_tf() {
   local v
   for v in $(compgen -e); do
@@ -117,17 +126,29 @@ ambiente_tf() {
     esac
   done
   : >"$DIR/terraformrc"
-  export TF_CLI_CONFIG_FILE="$DIR/terraformrc" TF_DATA_DIR="$DIR/.terraform" TF_IN_AUTOMATION=1 TF_INPUT=0
+  export TF_CLI_CONFIG_FILE="$DIR/terraformrc" TF_DATA_DIR="$DIR/.terraform${1:+-$1}" TF_IN_AUTOMATION=1 TF_INPUT=0
   PATH="$DIR/bin:$PATH"
 }
 
-# Lock do state preso (sessão do Cloud Shell que caiu no meio): mostra o ID, que não é segredo, e o comando.
+# Lock do state preso (sessão do Cloud Shell que caiu no meio): mostra o ID, que não é segredo, e o comando do MESMO
+# módulo ($3/$4: destravar-hml e "da HML"; sem eles, o bootstrap).
 lock_preso() {
-  local id
-  grep -q 'Error acquiring the state lock' "$2" 2>/dev/null || return 0
-  id="$(sed -n 's/^[[:space:]]*ID:[[:space:]]*\([0-9A-Za-z-]\{1,64\}\)[[:space:]]*$/\1/p' "$2" | head -1)"
-  echo "O state do bootstrap está travado (ID ${id:-não lido}). Se nenhum outro comando estiver rodando:" >&2
-  echo "  infra/terraform/cloudshell.sh destravar $1 ${id:-<ID>}" >&2
+  local id comando="${3:-destravar}" state="${4:-do bootstrap}"
+  id="$(sed -n 's/^[[:space:]]*ID:[[:space:]]*\([0-9A-Za-z-]\{1,64\}\)[[:space:]]*$/\1/p' "$2" 2>/dev/null | head -1)"
+  if grep -q 'Error releasing the state lock' "$2" 2>/dev/null; then
+    echo "O comando terminou, mas o lock do state $state não foi solto (ID ${id:-não lido}); o apply pode ter concluído." >&2
+    echo 'Confira o state antes de qualquer coisa; só então solte o lock:' >&2
+  elif grep -q 'Error acquiring the state lock' "$2" 2>/dev/null; then
+    if [ -z "$id" ]; then
+      echo "Não consegui travar o state $state e não li o ID do lock (credencial ou rede?). Veja o log antes de destravar." >&2
+      return 0
+    fi
+    echo "O state $state está travado (ID $id). Se nenhum outro comando estiver rodando:" >&2
+  else
+    return 0
+  fi
+  [ -n "$id" ] && echo "  infra/terraform/cloudshell.sh $comando $1 $id" >&2
+  return 0
 }
 
 cmd_conferir() {
@@ -756,6 +777,245 @@ cmd_destravar() {
   echo "Lock $id solto. Rode de novo o comando que tinha caído."
 }
 
+# Terraform pronto para o state da HML (infra/terraform/hml, bucket <p>-tfstate-hml, prefixo hml do versions.tf), com um
+# .terraform próprio: nunca o do bootstrap.
+preparar_tf_hml() {
+  local p="$1"
+  # "sempre": baixa e confere pelo infra.yml atual; o .sha256 local só prova que o binário não mudou desde o download.
+  if [ "${2:-}" = sempre ]; then
+    ferramentas
+  else
+    terraform_conferido || ferramentas
+  fi
+  token
+  ambiente_tf hml
+  (
+    cd "$HML"
+    terraform init -input=false -lockfile=readonly -no-color -backend-config="bucket=$p-tfstate-hml" >"$DIR/init-hml.log" 2>&1 ||
+      falha "terraform init da HML falhou (detalhes só no seu terminal: ~/.safrion/$p/init-hml.log)"
+  )
+}
+
+# O objeto no bucket tem exatamente os bytes do arquivo local? Lido pela geração atual. Serve à marca e ao recibo
+# final: um ACK perdido depois da gravação não vira falha nem sucesso sem prova.
+objeto_confere() {
+  local local_="$1" objeto="$2" ger lido r=1
+  ger="$(gcloud storage objects describe "$objeto" --format='value(generation)' 2>/dev/null)" || return 1
+  [[ "$ger" =~ ^[1-9][0-9]{0,19}$ ]] || return 1
+  lido="$(mktemp "$DIR/.confere-objeto.XXXXXX")"
+  if gcloud storage cp "$objeto#$ger" "$lido" >/dev/null 2>&1; then
+    cmp -s "$local_" "$lido" && r=0
+  fi
+  rm -f "$lido"
+  return "$r"
+}
+
+# Grava um objeto só se ele não existir e confirma pela releitura. 0: o objeto é este; 1: não se confirmou.
+gravar_uma_vez() {
+  gcloud storage cp "$1" "$2" --if-generation-match=0 >/dev/null || true
+  objeto_confere "$1" "$2"
+}
+
+# Estado do objeto no bucket: "existe", "ausente" (só com 404 provado) ou "incerto" (rede, permissão, 5xx). O erro do
+# caso incerto vai para a tela, mascarado.
+estado_objeto() {
+  local err
+  if err="$(command gcloud storage objects describe "$1" --format='value(generation)' 2>&1 >/dev/null)"; then
+    echo existe
+  elif printf '%s' "$err" | grep -Eqi '(^|[^0-9])404([^0-9]|$)|No URLs matched|matched no objects'; then
+    echo ausente
+  else
+    printf '%s\n' "$err" | mascarar >&2
+    echo incerto
+  fi
+}
+
+# Aplica na HML só o plano da fase 1 gerado pelo infra-hml.yml oficial (contrato aplicar-hml v3, aprovado pelas 3 IAs):
+# origem pelo recibo de máquina do produtor e pela API do GitHub, hash aprovado, confirmação antes da marca de uso
+# único, apply da cópia privada e recibo final relido. É portão de processo, não barreira humana exclusiva: a conta do
+# gcloud diz qual conta agiu, não qual pessoa ou IA.
+cmd_aplicar_hml() {
+  projeto "${1:-}"
+  local p="$1" run="${2:-}" tentativa="${3:-}" esperado="${4:-}" fixo main prefixo ger_recibo ger_plano real resumo conta codigo=0
+  local inicio fim agora_main
+  [[ "$run" =~ ^[1-9][0-9]{0,19}$ && "$tentativa" =~ ^[1-9][0-9]{0,8}$ ]] ||
+    falha 'informe a execução e a tentativa do recibo do infra-hml.yml (números)'
+  [[ "$esperado" =~ ^[0-9a-f]{64}$ ]] || falha 'informe o SHA-256 aprovado do plano (64 caracteres hexadecimais)'
+  exigir gcloud gh python3 sha256sum cmp
+  [ -f "$RAIZ/tools/hml/planejar.py" ] || falha 'tools/hml/planejar.py ausente nesta cópia: atualize a main'
+  fixo="$(python3 -B -c 'import sys; sys.path.insert(0, sys.argv[1]); import planejar; print(planejar.PROJETO)' "$RAIZ/tools/hml")" ||
+    falha 'não li o projeto fixo do tools/hml/planejar.py'
+  [ "$p" = "$fixo" ] || falha "o infra-hml.yml só planeja o projeto $fixo; este é $p"
+  cmd_conferir
+  main="$(git -C "$RAIZ" rev-parse HEAD)"
+  prefixo="gs://$p-tfstate-hml/planos/$run/$tentativa"
+
+  # Origem: recibo de máquina do produtor, lido pela geração, e a execução oficial pela API do GitHub.
+  ger_recibo="$(gcloud storage objects describe "$prefixo/recibo.json" --format='value(generation)')" ||
+    falha "sem recibo do plano em $prefixo; nada foi aplicado"
+  [[ "$ger_recibo" =~ ^[1-9][0-9]{0,19}$ ]] || falha 'geração do recibo ilegível; nada foi aplicado'
+  rm -f "$DIR/hml-recibo.json" "$DIR/hml-geracao-plano"
+  gcloud storage cp "$prefixo/recibo.json#$ger_recibo" "$DIR/hml-recibo.json" >/dev/null ||
+    falha "não li o recibo em $prefixo; nada foi aplicado"
+  gh api "repos/$REPO_GH/actions/runs/$run/attempts/$tentativa" >"$DIR/hml-execucao.json" ||
+    falha "não li a execução $run/$tentativa no GitHub; nada foi aplicado"
+  python3 -B - "$RAIZ/tools/hml" "$DIR/hml-recibo.json" "$DIR/hml-execucao.json" "$REPO_GH" "$run" "$tentativa" "$main" \
+    "$esperado" "$DIR/hml-geracao-plano" <<'PY' || falha 'a origem do plano não confere; nada foi aplicado'
+import json, re, sys
+sys.path.insert(0, sys.argv[1])
+import planejar
+recibo_arq, execucao_arq, repo, run, tentativa, main, esperado, saida = sys.argv[2:10]
+erros = []
+try:
+    r = planejar.json_estrito(open(recibo_arq, 'rb').read())
+except planejar.Recusa as e:
+    r = None
+    erros.append(f'recibo ilegível ({e})')
+fixos = {'repositorio': repo, 'workflow': '.github/workflows/infra-hml.yml', 'evento': 'workflow_dispatch',
+         'ref': 'refs/heads/main', 'escopo': 'fase1', 'run_id': run, 'tentativa': tentativa}
+formatos = {'head_sha': r'[0-9a-f]{40}', 'config_generation': r'[1-9][0-9]{0,19}', 'config_sha256': r'[0-9a-f]{64}',
+            'plan_sha256': r'[0-9a-f]{64}', 'plan_generation': r'[1-9][0-9]{0,19}'}
+if r is not None:
+    if not isinstance(r, dict) or set(r) != set(fixos) | set(formatos):
+        erros.append('recibo sem o conjunto exato de 12 campos')
+        r = None
+    else:
+        erros += [f'recibo: {k} diferente do esperado' for k, v in fixos.items() if r[k] != v]
+        erros += [f'recibo: {k} fora do formato' for k, f in formatos.items()
+                  if not (isinstance(r[k], str) and re.fullmatch(f, r[k]))]
+        if r['head_sha'] != main:
+            erros.append('o plano não é do commit da main atual: planeje de novo')
+        if r['plan_sha256'] != esperado:
+            erros.append('o SHA-256 informado não é o do recibo')
+try:
+    e = json.load(open(execucao_arq, encoding='utf-8'))
+except ValueError:
+    e = {}
+if not isinstance(e, dict):
+    e = {}
+checar = {
+    'path': lambda v: isinstance(v, str) and v.split('@', 1)[0] == '.github/workflows/infra-hml.yml',
+    'event': lambda v: v == 'workflow_dispatch',
+    'head_branch': lambda v: v == 'main',
+    'status': lambda v: v == 'completed',
+    'conclusion': lambda v: v == 'success',
+    'id': lambda v: str(v) == run,
+    'run_attempt': lambda v: str(v) == tentativa,
+    'head_sha': lambda v: r is not None and v == r.get('head_sha'),
+}
+erros += [f'execução no GitHub: {k} não confere' for k, ok in checar.items() if not ok(e.get(k))]
+for x in erros:
+    print(x, file=sys.stderr)
+if erros:
+    sys.exit(1)
+open(saida, 'w', encoding='utf-8').write(r['plan_generation'])
+PY
+  ger_plano="$(cat "$DIR/hml-geracao-plano")"
+  [[ "$ger_plano" =~ ^[1-9][0-9]{0,19}$ ]] || falha 'geração do plano ilegível no recibo; nada foi aplicado'
+
+  # O plano da geração do recibo, numa cópia privada conferida pelo hash.
+  COPIA="$(mktemp "$DIR/aplicar-hml.XXXXXX")"
+  gcloud storage cp "$prefixo/tfplan#$ger_plano" "$COPIA" >/dev/null ||
+    falha "não li o plano em $prefixo na geração do recibo; nada foi aplicado"
+  real="$(sha256sum "$COPIA" | cut -d' ' -f1)"
+  [ "$real" = "$esperado" ] || falha "o plano no bucket tem outro SHA-256 ($real); nada foi aplicado"
+
+  # Travas e resumo pelas mesmas fontes do workflow: checar_travas.py --plano e resumir_plano do planejar.py.
+  preparar_tf_hml "$p" sempre
+  (cd "$HML" && terraform show -json "$COPIA" >"$DIR/hml-plano.json" 2>"$DIR/hml-show.log") ||
+    falha "terraform show falhou (detalhes só no seu terminal: ~/.safrion/$p/hml-show.log); nada foi aplicado"
+  python3 "$AQUI/checar_travas.py" --plano "$DIR/hml-plano.json" >"$DIR/hml-travas.log" 2>&1 ||
+    falha "checar_travas.py recusou o plano (detalhes só no seu terminal: ~/.safrion/$p/hml-travas.log); nada foi aplicado"
+  python3 -B - "$RAIZ/tools/hml" "$DIR/hml-plano.json" >"$DIR/hml-resumo.txt" <<'PY' ||
+import sys
+sys.path.insert(0, sys.argv[1])
+import planejar
+try:
+    r = planejar.resumir_plano(planejar.json_estrito(open(sys.argv[2], 'rb').read()))
+except planejar.Recusa as e:
+    print(f'plano recusado pelo resumo: {e}', file=sys.stderr)
+    sys.exit(1)
+c = r['contagens']
+print(f"criar {c['adicionar']}, mudar {c['alterar']}")
+PY
+    falha 'o plano tem destroy, replace, outro projeto ou formato inesperado; nada foi aplicado'
+  resumo="$(cat "$DIR/hml-resumo.txt")"
+
+  # Confirmação antes da marca: um "não" (ou 10 min sem resposta) deixa o plano disponível. A frase vai também numa
+  # linha própria, visível mesmo quando a entrada não é um terminal.
+  echo "Aplicar na HML o plano ${esperado:0:12} do commit ${main:0:12}, execução $run/$tentativa: $resumo?" >&2
+  confirmar 'Confirma?' 600 || falha 'nada foi aplicado; o plano continua disponível'
+
+  # A main pode ter andado durante a pergunta: relida no GitHub e na cópia antes de consumir o plano.
+  agora_main="$(gh api "repos/$REPO_GH/branches/main" --jq .commit.sha)" || falha 'não reli a main no GitHub; nada foi aplicado'
+  [ "$agora_main" = "$main" ] && [ "$(git -C "$RAIZ" rev-parse HEAD)" = "$main" ] ||
+    falha 'a main andou depois da conferência: planeje de novo; nada foi aplicado'
+
+  # Marca de uso único, só depois do "s". O nonce distingue esta marca de uma deixada por outra sessão.
+  conta="$(conta_logada)"
+  inicio="$(mktemp "$DIR/hml-aplicacao-inicio.XXXXXX")"
+  fim="$(mktemp "$DIR/hml-aplicacao-fim.XXXXXX")"
+  python3 - "$main" "$run" "$tentativa" "$esperado" "$ger_plano" "$conta" >"$inicio" <<'PY'
+import datetime, json, os, sys
+main, run, tentativa, plano, geracao, conta = sys.argv[1:7]
+print(json.dumps({'commit': main, 'run_id': run, 'tentativa': tentativa, 'plan_sha256': plano, 'plan_generation': geracao,
+                  'conta_gcloud': conta, 'inicio': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                  'nonce': os.urandom(16).hex()}, sort_keys=True))
+PY
+  if ! gravar_uma_vez "$inicio" "$prefixo/aplicacao-inicio.json"; then
+    case "$(estado_objeto "$prefixo/aplicacao-inicio.json")" in
+      ausente) falha 'não gravei a marca de uso (erro acima); nada foi aplicado; o plano continua disponível' ;;
+      existe) falha 'a marca de uso deste plano já existe (plano usado ou apply em andamento); nada foi aplicado' ;;
+      *) falha 'não consegui confirmar se a marca de uso foi gravada (erro acima); nada foi aplicado. Quando o gcloud voltar, rode o mesmo comando: se a marca existir, ele recusa e o caminho é um plano novo' ;;
+    esac
+  fi
+
+  # Credencial renovada logo antes do apply: a pergunta pode ter levado minutos, e o token do provider não se renova.
+  token
+  echo 'Aplicando na HML. Não feche esta aba até o fim.'
+  (cd "$HML" && terraform apply -input=false -lock-timeout=60s -no-color "$COPIA" >"$DIR/apply-hml.log" 2>&1) || codigo=$?
+  [ "$codigo" = 0 ] || lock_preso "$p" "$DIR/apply-hml.log" destravar-hml 'da HML'
+  # State que o Terraform não conseguiu gravar no bucket: sai da cópia do repositório (o conferir o recusaria) e fica
+  # guardado, só para o dono, para o diagnóstico.
+  if [ -f "$HML/errored.tfstate" ]; then
+    mv "$HML/errored.tfstate" "$DIR/errored-hml.tfstate"
+    chmod 600 "$DIR/errored-hml.tfstate"
+    echo "State não gravado no bucket: guardado em ~/.safrion/$p/errored-hml.tfstate. Não apague; o time faz terraform" >&2
+    echo 'state push dele antes de qualquer plano novo.' >&2
+  fi
+
+  # Recibo final, relido pela geração. Se não se confirmar, o apply NÃO se repete e a marca fica.
+  if ! python3 - "$codigo" >"$fim" <<'PY' || ! gravar_uma_vez "$fim" "$prefixo/aplicacao-fim.json" ||
+import datetime, json, sys
+codigo = int(sys.argv[1])
+print(json.dumps({'resultado': 'aplicado' if codigo == 0 else 'falhou', 'codigo_terraform': codigo,
+                  'fim': datetime.datetime.now(datetime.timezone.utc).isoformat()}, sort_keys=True))
+PY
+    ! objeto_confere "$inicio" "$prefixo/aplicacao-inicio.json"; then
+    echo "Apply executado (código do Terraform: $codigo); recibo final indisponível no bucket. Não repita o apply:" >&2
+    echo 'a marca de uso fica, e o time diagnostica o state antes de qualquer plano novo.' >&2
+    exit 4
+  fi
+  [ "$codigo" = 0 ] ||
+    falha "terraform apply falhou (código $codigo; detalhes só no seu terminal: ~/.safrion/$p/apply-hml.log). A marca de uso fica: diagnóstico e plano novo"
+  rm -f "$COPIA" "$inicio" "$fim"
+  echo "Aplicado na HML: commit ${main:0:12}, execução $run/$tentativa, plano $esperado ($resumo)."
+  echo "Recibos: $prefixo/aplicacao-inicio.json e aplicacao-fim.json (expiram com o plano, em 30 dias)."
+}
+
+cmd_destravar_hml() {
+  projeto "${1:-}"
+  local p="$1" id="${2:-}"
+  [[ "$id" =~ ^[0-9A-Za-z-]{1,64}$ ]] || falha 'informe o ID do lock mostrado pelo aplicar-hml'
+  confirmar "Soltar o lock $id do state da HML (infra/terraform/hml, bucket $p-tfstate-hml, prefixo hml)? Só se nenhum outro comando estiver rodando." ||
+    falha 'lock mantido'
+  exigir gcloud
+  preparar_tf_hml "$p"
+  (cd "$HML" && terraform force-unlock -force "$id" >"$DIR/destravar-hml.log" 2>&1) ||
+    falha "não soltei o lock da HML (detalhes só no seu terminal: ~/.safrion/$p/destravar-hml.log)"
+  echo "Lock $id da HML solto. Um apply interrompido pede diagnóstico do state e plano novo antes de aplicar de novo."
+}
+
 cmd_limpar() {
   projeto "${1:-}"
   rm -rf "${DIR:?}"
@@ -764,7 +1024,7 @@ cmd_limpar() {
 }
 
 uso() {
-  sed -n '5,14p' "${BASH_SOURCE[0]}" | sed 's/^#   //'
+  sed -n '5,16p' "${BASH_SOURCE[0]}" | sed 's/^#   //'
   exit 2
 }
 
@@ -778,6 +1038,8 @@ case "${1:-}" in
   config-hml) cmd_config_hml "${2:-}" ;;
   senhas) cmd_senhas "${2:-}" ;;
   destravar) cmd_destravar "${2:-}" "${3:-}" ;;
+  aplicar-hml) cmd_aplicar_hml "${2:-}" "${3:-}" "${4:-}" "${5:-}" ;;
+  destravar-hml) cmd_destravar_hml "${2:-}" "${3:-}" ;;
   limpar) cmd_limpar "${2:-}" ;;
   *) uso ;;
 esac

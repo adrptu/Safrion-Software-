@@ -65,19 +65,31 @@ if a[:3] == ['storage', 'buckets', 'remove-iam-policy-binding']:
 if a[:3] == ['storage', 'managed-folders', 'list']:
     sai('\n'.join(e.get('pastas', [])))
 if a[:3] == ['storage', 'objects', 'describe']:
+    if a[3] in e.get('indisponivel', []):
+        erro('HTTPError 503: Service Unavailable')
     o = e.setdefault('objetos', {}).get(a[3])
     if not o:
         erro('HTTPError 404: No URLs matched')
-    sai(str(o['geracao']))
+    geracao = o['geracao']
+    # Corrida: outro processo regrava o objeto logo depois desta leitura da geração.
+    if a[3] in e.get('trocar_apos_describe', []):
+        e['objetos'][a[3]] = {'geracao': geracao + 100, 'conteudo': 'TROCADO-DEPOIS-DO-DESCRIBE'}
+        salvar()
+    sai(str(geracao))
 if a[:2] == ['storage', 'cp']:
     origem, destino = a[2], a[3]
     objs = e.setdefault('objetos', {})
     if destino.startswith('gs://'):
         if '--if-generation-match=0' in a and destino in objs:
             erro('PreconditionFailed')
-        conteudo = '{}' if e.get('corromper') else open(origem, encoding='utf-8').read()
+        if destino in e.get('falhar_upload', []):
+            erro('HTTPError 503: upload interrompido')
+        conteudo = '{}' if e.get('corromper') or destino in e.get('corromper_objetos', []) else open(origem, encoding='utf-8').read()
         objs[destino] = {'geracao': 1000 + len(objs), 'conteudo': conteudo}
-        salvar(); sai()
+        salvar()
+        if destino in e.get('ack_perdido', []):
+            erro('connection reset: resposta perdida depois da gravação')
+        sai()
     nome, _, geracao = origem.partition('#')
     o = objs.get(nome)
     if not o or (geracao and str(o['geracao']) != geracao):
@@ -164,20 +176,50 @@ with open(os.path.join(d, 'chamadas.log'), 'a', encoding='utf-8') as f:
 if a[0] == 'api' and '/check-runs' in a[1]:
     print(open(os.path.join(d, 'checks.json'), encoding='utf-8').read()); sys.exit(0)
 if a[0] == 'api' and a[1] == 'repos/adrptu/Safrion-Software-/branches/main':
-    print(open(os.path.join(d, 'main.txt'), encoding='utf-8').read().strip()); sys.exit(0)
+    # main-depois.txt, se existir, vale a partir da 2ª leitura: a main anda durante o comando.
+    contador = os.path.join(d, 'main-leituras')
+    n = int(open(contador).read()) if os.path.exists(contador) else 0
+    open(contador, 'w').write(str(n + 1))
+    depois = os.path.join(d, 'main-depois.txt')
+    arquivo = depois if n >= 1 and os.path.exists(depois) else os.path.join(d, 'main.txt')
+    print(open(arquivo, encoding='utf-8').read().strip()); sys.exit(0)
 if a[0] == 'api' and a[1] == 'repos/adrptu/Safrion-Software-':
     print({'.id': '111', '.owner.id': '222'}[a[a.index('--jq') + 1]]); sys.exit(0)
+if a[0] == 'api' and a[1].startswith('repos/adrptu/Safrion-Software-/actions/runs/'):
+    # Uma resposta por execução e tentativa, como a API real; o resto é 404.
+    partes = a[1].split('/')
+    caminho = os.path.join(d, f'execucao-{partes[5]}-{partes[7]}.json') if len(partes) == 8 and partes[6] == 'attempts' else ''
+    if not caminho or not os.path.exists(caminho):
+        print('gh: Not Found (HTTP 404) para dono@example.com', file=sys.stderr); sys.exit(1)
+    print(open(caminho, encoding='utf-8').read()); sys.exit(0)
 sys.exit(9)
 '''
 
 # Registra variáveis TF_VAR_* e TF_CLI_ARGS* que chegarem ao Terraform (não deveriam chegar).
 TERRAFORM = r'''#!/usr/bin/env python3
-import json, os, sys
+import hashlib, json, os, sys
 d = os.environ['FALSO']
 a = sys.argv[1:]
 vazou = sorted(k for k in os.environ if k.startswith(('TF_VAR_', 'TF_CLI_ARGS')))
+# show e apply registram o SHA-256 do arquivo que receberam: prova de que o plano conferido é o aplicado.
+arquivo = a[-1] if a and a[0] in ('show', 'apply') and os.path.isfile(a[-1]) else None
+sha = ' sha=' + hashlib.sha256(open(arquivo, 'rb').read()).hexdigest() if arquivo else ''
 with open(os.path.join(d, 'chamadas.log'), 'a', encoding='utf-8') as f:
-    f.write('terraform ' + ' '.join(a) + (' VAZOU=' + ','.join(vazou) if vazou else '') + '\n')
+    f.write('terraform ' + ' '.join(a) + sha + (' VAZOU=' + ','.join(vazou) if vazou else '') + ' dd=' + os.path.basename(os.environ.get('TF_DATA_DIR', '-')) + ' @' + os.path.basename(os.getcwd()) + '\n')
+if a[0] == 'show' and not arquivo:
+    print('Error: plano não encontrado', file=sys.stderr)
+    sys.exit(1)
+if a[0] == 'apply' and os.environ.get('TRAVADO_SEM_ID'):
+    print('Error: Error acquiring the state lock\n\nError message: 401 Unauthorized', file=sys.stderr)
+    sys.exit(1)
+if a[0] == 'apply' and os.environ.get('GRAVAR_ERRORED'):
+    open('errored.tfstate', 'w').write('{"version": 4}')
+    print('Error: Failed to save state', file=sys.stderr)
+    sys.exit(1)
+if a[0] == 'apply' and os.environ.get('TROCAR_MARCA'):
+    g = json.load(open(os.path.join(d, 'gcloud.json'), encoding='utf-8'))
+    g['objetos'][os.environ['TROCAR_MARCA']]['conteudo'] = 'OUTRA-MARCA'
+    json.dump(g, open(os.path.join(d, 'gcloud.json'), 'w', encoding='utf-8'))
 if a[0] in ('plan', 'apply') and os.environ.get('TRAVADO'):
     print('Error: Error acquiring the state lock\n\nLock Info:\n  ID:        1712345678\n  Path:      x/default.tflock',
           file=sys.stderr)
@@ -188,7 +230,11 @@ if a[0] == 'plan':
     saida = next(x.split('=', 1)[1] for x in a if x.startswith('-out='))
     open(saida, 'wb').write(b'plano-falso ' + os.environ.get('PLANO_EXTRA', '').encode())
 elif a[0] == 'show':
-    print(open(os.path.join(d, 'plano.json'), encoding='utf-8').read())
+    nome = 'plano-hml.json' if os.path.basename(os.getcwd()) == 'hml' else 'plano.json'
+    print(open(os.path.join(d, nome), encoding='utf-8').read())
+elif a[0] == 'apply' and os.environ.get('APLICAR_FALHA'):
+    print('Error: googleapi: Error 409', file=sys.stderr)
+    sys.exit(1)
 elif a[0] == 'output':
     print(json.dumps({k: {'value': v} for k, v in {
         'wif_provider': 'projects/1/locations/global/workloadIdentityPools/github/providers/github',
@@ -939,6 +985,383 @@ class CloudShell(unittest.TestCase):
         for proibido in ('versions access', '--password=', 'set -x', '--prompt-for-password', 'echo "$senha', 'echo $senha'):
             with self.subTest(proibido=proibido):
                 self.assertFalse([l for l in codigo if proibido in l])
+
+    # aplicar-hml ------------------------------------------------------------------------------------------------------
+
+    RUN, TENTATIVA = '555', '1'
+
+    def prefixo_hml(self):
+        return f'gs://{PROJETO}-tfstate-hml/planos/{self.RUN}/{self.TENTATIVA}'
+
+    def plano_hml(self, extra=()):
+        instancia = {
+            'address': 'google_sql_database_instance.hml', 'mode': 'managed', 'type': 'google_sql_database_instance',
+            'change': {'actions': ['create'], 'after_unknown': {}, 'after': {
+                'project': PROJETO,
+                'settings': [{'connector_enforcement': 'REQUIRED', 'data_api_access': 'DISALLOW_DATA_API',
+                              'ip_configuration': [{
+                                  'ssl_mode': 'ENCRYPTED_ONLY', 'authorized_networks': [], 'ipv4_enabled': False,
+                                  'private_network': f'https://www.googleapis.com/compute/v1/projects/{PROJETO}/global/networks/safrion-hml',
+                                  'psc_config': [], 'enable_private_path_for_google_cloud_services': None}]}]}}}
+        return {'format_version': '1.2', 'terraform_version': '1.16.3', 'resource_changes': [instancia, *extra]}
+
+    def preparar_hml(self, recibo=None, execucao=None, plano=None, binario=b'PLANO-HML-SINTETICO', recibo_bruto=None, **gcloud):
+        """Bucket e GitHub falsos com um plano oficial coerente; os argumentos trocam uma peça de cada vez."""
+        digest = hashlib.sha256(binario).hexdigest()
+        base_recibo = {'repositorio': 'adrptu/Safrion-Software-', 'workflow': '.github/workflows/infra-hml.yml',
+                       'evento': 'workflow_dispatch', 'ref': 'refs/heads/main', 'head_sha': self.commit,
+                       'run_id': self.RUN, 'tentativa': self.TENTATIVA, 'config_generation': '1790700000000000',
+                       'config_sha256': 'cd' * 32, 'plan_sha256': digest, 'plan_generation': '2001', 'escopo': 'fase1'}
+        base_recibo.update(recibo or {})
+        base_recibo = {k: v for k, v in base_recibo.items() if v is not None}
+        pre = self.prefixo_hml()
+        self.gcloud({'objetos': {
+            f'{pre}/tfplan': {'geracao': 2001, 'conteudo': binario.decode()},
+            f'{pre}/recibo.json': {'geracao': 2002, 'conteudo': recibo_bruto if recibo_bruto is not None else json.dumps(base_recibo, sort_keys=True, indent=2) + '\n'},
+        }, **gcloud})
+        base_execucao = {'id': int(self.RUN), 'run_attempt': int(self.TENTATIVA), 'path': '.github/workflows/infra-hml.yml',
+                         'event': 'workflow_dispatch', 'head_branch': 'main', 'status': 'completed',
+                         'conclusion': 'success', 'head_sha': self.commit}
+        base_execucao.update(execucao or {})
+        for velho in self.falso.glob('execucao-*.json'):
+            velho.unlink()
+        (self.falso / f'execucao-{self.RUN}-{self.TENTATIVA}.json').write_text(json.dumps(base_execucao), encoding='utf-8')
+        (self.falso / 'plano-hml.json').write_text(json.dumps(plano or self.plano_hml()), encoding='utf-8')
+        return digest
+
+    def aplicar_hml(self, digest, entrada='s\n', **env):
+        (self.falso / 'chamadas.log').unlink(missing_ok=True)
+        (self.falso / 'main-leituras').unlink(missing_ok=True)
+        return self.rodar('aplicar-hml', PROJETO, self.RUN, self.TENTATIVA, digest, entrada=entrada, extra_env=env or None)
+
+    def aplicou(self, chamadas):
+        return [c for c in chamadas if c.startswith('terraform apply')]
+
+    def marca(self, nome='aplicacao-inicio.json'):
+        return self.estado()['objetos'].get(f'{self.prefixo_hml()}/{nome}')
+
+    def test_aplicar_hml_positivo(self):
+        digest = self.preparar_hml()
+        r, chamadas = self.aplicar_hml(digest)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn(f'Aplicado na HML: commit {self.commit[:12]}, execução 555/1, plano {digest}', r.stdout)
+        self.assertIn('criar 1, mudar 0', r.stdout)
+        self.assertIn(f'Aplicar na HML o plano {digest[:12]} do commit {self.commit[:12]}, execução 555/1: criar 1, mudar 0?', r.stderr)
+        # O arquivo conferido pelo show é o mesmo aplicado, e tem os bytes do hash aprovado.
+        shows = [c for c in chamadas if c.startswith('terraform show')]
+        self.assertEqual(len(shows), 1)
+        self.assertIn(f' sha={digest}', shows[0])
+        self.assertIn(f' sha={digest}', self.aplicou(chamadas)[0])
+        self.assertIn('-lock-timeout=', self.aplicou(chamadas)[0])
+        self.assertTrue([c for c in chamadas if c.startswith('terraform init') and '-lockfile=readonly' in c and c.endswith(' @hml')])
+        # Terraform baixado e conferido pelo infra.yml; credencial renovada depois da marca, antes do apply.
+        self.assertTrue([c for c in chamadas if c.startswith('curl') and 'hashicorp' in c])
+        tokens = [i for i, c in enumerate(chamadas) if c == 'gcloud auth print-access-token']
+        marca = next(i for i, c in enumerate(chamadas)
+                     if c.startswith('gcloud storage cp') and 'aplicacao-inicio.json' in c and '--if-generation-match=0' in c)
+        self.assertGreaterEqual(len(tokens), 2)
+        self.assertGreater(tokens[-1], marca)
+        self.assertLess(tokens[-1], chamadas.index(self.aplicou(chamadas)[0]))
+        aplicados = self.aplicou(chamadas)
+        self.assertEqual(len(aplicados), 1)
+        self.assertTrue(aplicados[0].endswith(' @hml'), aplicados[0])
+        self.assertIn(str(self.trabalho / 'aplicar-hml.'), aplicados[0])
+        self.assertTrue([c for c in chamadas if c.startswith('terraform init') and f'bucket={PROJETO}-tfstate-hml' in c and c.endswith(' @hml')])
+        self.assertIn(f'gh api repos/adrptu/Safrion-Software-/actions/runs/{self.RUN}/attempts/{self.TENTATIVA}', chamadas)
+        inicio, fim = json.loads(self.marca()['conteudo']), json.loads(self.marca('aplicacao-fim.json')['conteudo'])
+        self.assertEqual((inicio['commit'], inicio['plan_sha256'], inicio['plan_generation']), (self.commit, digest, '2001'))
+        self.assertEqual(fim['resultado'], 'aplicado')
+        # Estado próprio da HML: nenhuma chamada do terraform usa o .terraform do bootstrap.
+        tf = [c for c in chamadas if c.startswith('terraform ')]
+        self.assertTrue(tf and all(' dd=.terraform-hml @hml' in c for c in tf), tf)
+        self.assertFalse(list(self.trabalho.glob('aplicar-hml.*')))
+        self.assertMascarado(r)
+
+    def test_aplicar_hml_recusa_recibo_fora_do_contrato(self):
+        casos = {
+            'sem recibo': dict(recibo=None),
+            'campo a mais': dict(recibo={'extra': 'x'}),
+            'campo faltando': dict(recibo={'config_sha256': None}),
+            'outra execução': dict(recibo={'run_id': '556'}),
+            'fase 2': dict(recibo={'escopo': 'fase2'}),
+            'outro workflow': dict(recibo={'workflow': '.github/workflows/outro.yml'}),
+            'outro commit': dict(recibo={'head_sha': 'a' * 40}, execucao={'head_sha': 'a' * 40}),
+            'hash do recibo diferente do digitado': dict(recibo={'plan_sha256': 'b' * 64}),
+        }
+        for nome, kw in casos.items():
+            with self.subTest(caso=nome):
+                digest = self.preparar_hml(**kw)
+                if nome == 'sem recibo':
+                    e = self.estado(); e['objetos'].pop(f'{self.prefixo_hml()}/recibo.json'); self.mudar(objetos=e['objetos'])
+                r, chamadas = self.aplicar_hml(digest)
+                self.assertNotEqual(r.returncode, 0)
+                self.assertIn('nada foi aplicado', r.stderr)
+                self.assertFalse(self.aplicou(chamadas))
+                self.assertIsNone(self.marca())
+                self.assertMascarado(r)
+
+    def test_aplicar_hml_recusa_execucao_que_nao_e_a_oficial_com_sucesso(self):
+        casos = {
+            'outro arquivo de workflow': {'path': '.github/workflows/outro.yml'},
+            'evento push': {'event': 'push'},
+            'outro ramo': {'head_branch': 'dev'},
+            'em andamento': {'status': 'in_progress'},
+            # Recibo órfão de um job que falhou depois de gravá-lo (ACK perdido no produtor).
+            'job falhou': {'conclusion': 'failure'},
+            'outra tentativa': {'run_attempt': 2},
+            'outro commit na execução': {'head_sha': 'c' * 40},
+        }
+        for nome, execucao in casos.items():
+            with self.subTest(caso=nome):
+                digest = self.preparar_hml(execucao=execucao)
+                r, chamadas = self.aplicar_hml(digest)
+                self.assertNotEqual(r.returncode, 0)
+                self.assertIn('a origem do plano não confere; nada foi aplicado', r.stderr)
+                self.assertFalse(self.aplicou(chamadas))
+                self.assertIsNone(self.marca())
+        digest = self.preparar_hml()
+        (self.falso / f'execucao-{self.RUN}-{self.TENTATIVA}.json').unlink()
+        r, chamadas = self.aplicar_hml(digest)
+        self.assertIn('não li a execução 555/1 no GitHub', r.stderr)
+        self.assertFalse(self.aplicou(chamadas))
+        self.assertMascarado(r)
+
+    def test_aplicar_hml_plano_com_outro_hash_ou_recusado(self):
+        digest = self.preparar_hml()
+        e = self.estado(); e['objetos'][f'{self.prefixo_hml()}/tfplan']['conteudo'] = 'OUTRO-PLANO'; self.mudar(objetos=e['objetos'])
+        r, chamadas = self.aplicar_hml(digest)
+        self.assertIn('o plano no bucket tem outro SHA-256', r.stderr)
+        self.assertFalse(self.aplicou(chamadas))
+        destroy = {'address': 'google_storage_bucket.x', 'mode': 'managed', 'type': 'google_storage_bucket',
+                   'change': {'actions': ['delete'], 'after': None}}
+        nunca = {'address': 'google_sql_user.postgres', 'mode': 'managed', 'type': 'google_sql_user',
+                 'change': {'actions': ['create'], 'after': {'name': 'postgres'}}}
+        for nome, extra, mensagem in (('destroy', destroy, 'destroy, replace, outro projeto'),
+                                      ('tipo Nunca', nunca, 'checar_travas.py recusou o plano')):
+            with self.subTest(caso=nome):
+                digest = self.preparar_hml(plano=self.plano_hml([extra]))
+                r, chamadas = self.aplicar_hml(digest)
+                self.assertNotEqual(r.returncode, 0)
+                self.assertIn(mensagem, r.stderr)
+                self.assertFalse(self.aplicou(chamadas))
+                self.assertIsNone(self.marca())
+
+    def test_aplicar_hml_sem_s_nao_consome_o_plano(self):
+        digest = self.preparar_hml()
+        r, chamadas = self.aplicar_hml(digest, entrada='sim\n')
+        self.assertIn('nada foi aplicado; o plano continua disponível', r.stderr)
+        self.assertFalse(self.aplicou(chamadas))
+        self.assertIsNone(self.marca())
+        r, chamadas = self.aplicar_hml(digest)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertEqual(len(self.aplicou(chamadas)), 1)
+
+    def test_aplicar_hml_uso_unico_e_ack_perdido_da_marca(self):
+        digest = self.preparar_hml()
+        e = self.estado()
+        e['objetos'][f'{self.prefixo_hml()}/aplicacao-inicio.json'] = {'geracao': 3001, 'conteudo': '{"outra": "sessao"}'}
+        self.mudar(objetos=e['objetos'])
+        r, chamadas = self.aplicar_hml(digest)
+        self.assertIn('a marca de uso deste plano já existe', r.stderr)
+        self.assertFalse(self.aplicou(chamadas))
+        # ACK perdido depois de gravar a nossa marca: a releitura byte a byte prova que é nossa, e o apply segue.
+        digest = self.preparar_hml(ack_perdido=[f'{self.prefixo_hml()}/aplicacao-inicio.json'])
+        r, chamadas = self.aplicar_hml(digest)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertEqual(len(self.aplicou(chamadas)), 1)
+
+    def test_aplicar_hml_lock_preso_e_falha_conservam_a_marca(self):
+        digest = self.preparar_hml()
+        r, chamadas = self.aplicar_hml(digest, TRAVADO='1')
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn('O state da HML está travado (ID 1712345678)', r.stderr)
+        self.assertIn(f'infra/terraform/cloudshell.sh destravar-hml {PROJETO} 1712345678', r.stderr)
+        self.assertNotIn(f'cloudshell.sh destravar {PROJETO}', r.stderr)
+        self.assertIn('A marca de uso fica', r.stderr)
+        self.assertEqual(json.loads(self.marca('aplicacao-fim.json')['conteudo'])['resultado'], 'falhou')
+        r, chamadas = self.aplicar_hml(digest)
+        self.assertIn('a marca de uso deste plano já existe', r.stderr)
+        self.assertFalse(self.aplicou(chamadas))
+        digest = self.preparar_hml()
+        r, _ = self.aplicar_hml(digest, APLICAR_FALHA='1')
+        self.assertIn('terraform apply falhou (código 1', r.stderr)
+        self.assertIsNotNone(self.marca())
+
+    def test_aplicar_hml_recibo_final_indisponivel_nao_repete(self):
+        digest = self.preparar_hml(falhar_upload=[f'{self.prefixo_hml()}/aplicacao-fim.json'])
+        r, chamadas = self.aplicar_hml(digest)
+        self.assertEqual(r.returncode, 4, r.stderr)
+        self.assertIn('Apply executado (código do Terraform: 0); recibo final indisponível no bucket. Não repita o apply', r.stderr)
+        self.assertEqual(len(self.aplicou(chamadas)), 1)
+        self.assertIsNotNone(self.marca())
+        self.assertNotIn('Aplicado na HML', r.stdout)
+
+    def test_aplicar_hml_outra_tentativa_e_path_com_ref(self):
+        self.TENTATIVA = '2'
+        digest = self.preparar_hml(execucao={'path': '.github/workflows/infra-hml.yml@refs/heads/main'})
+        r, chamadas = self.aplicar_hml(digest)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn('execução 555/2', r.stdout)
+        self.assertIn('gh api repos/adrptu/Safrion-Software-/actions/runs/555/attempts/2', chamadas)
+
+    def test_aplicar_hml_recusa_recibo_com_campo_ou_formato_errado(self):
+        casos = {
+            'evento': dict(recibo={'evento': 'push'}),
+            'ref': dict(recibo={'ref': 'refs/heads/dev'}),
+            'repositorio': dict(recibo={'repositorio': 'outro/repo'}),
+            'tentativa': dict(recibo={'tentativa': '2'}),
+            'run_id numérico': dict(recibo={'run_id': 555}),
+            'plan_generation zero': dict(recibo={'plan_generation': '0'}),
+            'plan_generation texto': dict(recibo={'plan_generation': 'abc'}),
+            'chave duplicada': dict(recibo_bruto='{"escopo": "fase1", "escopo": "fase1"}'),
+            'id da execução': dict(execucao={'id': 556}),
+        }
+        for nome, kw in casos.items():
+            with self.subTest(caso=nome):
+                digest = self.preparar_hml(**kw)
+                r, chamadas = self.aplicar_hml(digest)
+                self.assertNotEqual(r.returncode, 0)
+                self.assertIn('a origem do plano não confere; nada foi aplicado', r.stderr)
+                self.assertFalse([c for c in chamadas if c.startswith('terraform')])
+                self.assertIsNone(self.marca())
+
+    def test_aplicar_hml_le_pela_geracao_do_recibo(self):
+        pre = self.prefixo_hml()
+        # O tfplan no bucket não está mais na geração que o recibo cita.
+        digest = self.preparar_hml(recibo={'plan_generation': '2999'})
+        r, chamadas = self.aplicar_hml(digest)
+        self.assertIn('não li o plano em', r.stderr)
+        self.assertIn('na geração do recibo; nada foi aplicado', r.stderr)
+        self.assertFalse(self.aplicou(chamadas))
+        # O recibo é regravado logo depois da leitura da geração: a cópia pela geração lida falha, sem usar o novo.
+        digest = self.preparar_hml(trocar_apos_describe=[f'{pre}/recibo.json'])
+        r, chamadas = self.aplicar_hml(digest)
+        self.assertIn('não li o recibo em', r.stderr)
+        self.assertFalse(self.aplicou(chamadas))
+
+    def test_aplicar_hml_confere_a_main_antes_e_depois_da_pergunta(self):
+        digest = self.preparar_hml()
+        (self.falso / 'main.txt').write_text('f' * 40, encoding='utf-8')
+        r, chamadas = self.aplicar_hml(digest)
+        self.assertIn('não é a main atual', r.stderr)
+        self.assertFalse(self.aplicou(chamadas))
+        self.publicar()
+        self.checks('failure')
+        r, chamadas = self.aplicar_hml(digest)
+        self.assertIn('check sem success', r.stderr)
+        self.assertFalse(self.aplicou(chamadas))
+        self.checks('success')
+        (self.falso / 'main-depois.txt').write_text('e' * 40, encoding='utf-8')
+        r, chamadas = self.aplicar_hml(digest)
+        self.assertIn('a main andou depois da conferência: planeje de novo; nada foi aplicado', r.stderr)
+        self.assertFalse(self.aplicou(chamadas))
+        self.assertIsNone(self.marca())
+
+    def test_aplicar_hml_falhas_da_marca_e_do_fim(self):
+        pre = self.prefixo_hml()
+        digest = self.preparar_hml(falhar_upload=[f'{pre}/aplicacao-inicio.json'])
+        r, chamadas = self.aplicar_hml(digest)
+        self.assertIn('não gravei a marca de uso (erro acima); nada foi aplicado; o plano continua disponível', r.stderr)
+        self.assertFalse(self.aplicou(chamadas))
+        for nome, kw, env in (('fim corrompido', {'corromper_objetos': [f'{pre}/aplicacao-fim.json']}, {}),
+                              ('marca trocada no apply', {}, {'TROCAR_MARCA': f'{pre}/aplicacao-inicio.json'})):
+            with self.subTest(caso=nome):
+                digest = self.preparar_hml(**kw)
+                r, chamadas = self.aplicar_hml(digest, **env)
+                self.assertEqual(r.returncode, 4, r.stderr)
+                self.assertIn('recibo final indisponível no bucket. Não repita o apply', r.stderr)
+                self.assertNotIn('Aplicado na HML', r.stdout)
+                self.assertEqual(len(self.aplicou(chamadas)), 1)
+                # Retomar o mesmo plano não aplica de novo: a marca continua no bucket.
+                r, chamadas = self.aplicar_hml(digest, **env)
+                self.assertIn('a marca de uso deste plano já existe', r.stderr)
+                self.assertFalse(self.aplicou(chamadas))
+
+    def test_aplicar_hml_marca_incerta_nao_promete_plano(self):
+        marca = f'{self.prefixo_hml()}/aplicacao-inicio.json'
+        # A marca foi gravada, mas o ACK se perdeu e a releitura dá 503: não se sabe se o plano foi consumido.
+        digest = self.preparar_hml(ack_perdido=[marca], indisponivel=[marca])
+        r, chamadas = self.aplicar_hml(digest)
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn('não consegui confirmar se a marca de uso foi gravada', r.stderr)
+        self.assertIn('503', r.stderr)
+        self.assertNotIn('o plano continua disponível', r.stderr)
+        self.assertFalse(self.aplicou(chamadas))
+        self.assertIsNotNone(self.marca())
+        # O gcloud volta: o mesmo comando recusa, porque a marca existe; o apply nunca roda.
+        self.mudar(indisponivel=[])
+        r, chamadas = self.aplicar_hml(digest)
+        self.assertIn('a marca de uso deste plano já existe', r.stderr)
+        self.assertFalse(self.aplicou(chamadas))
+
+    def test_aplicar_hml_errored_tfstate_sai_da_copia(self):
+        digest = self.preparar_hml()
+        r, _ = self.aplicar_hml(digest, GRAVAR_ERRORED='1')
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn('State não gravado no bucket: guardado em ~/.safrion/', r.stderr)
+        self.assertFalse((self.repo / 'infra/terraform/hml/errored.tfstate').exists())
+        guardado = self.trabalho / 'errored-hml.tfstate'
+        self.assertTrue(guardado.is_file())
+        self.assertEqual(oct(guardado.stat().st_mode & 0o777), '0o600')
+
+    def test_aplicar_hml_lock_sem_id_nao_manda_destravar(self):
+        digest = self.preparar_hml()
+        r, _ = self.aplicar_hml(digest, TRAVADO_SEM_ID='1')
+        self.assertIn('não li o ID do lock', r.stderr)
+        self.assertNotIn('destravar-hml', r.stderr)
+
+    def test_aplicar_hml_erro_do_gcloud_mascarado(self):
+        pre = self.prefixo_hml()
+        digest = self.preparar_hml(falhas=[f'storage objects describe {pre}/recibo.json'])
+        r, chamadas = self.aplicar_hml(digest)
+        self.assertIn('sem recibo do plano', r.stderr)
+        self.assertIn('***@example.com', r.stderr)
+        self.assertMascarado(r)
+        self.assertFalse(self.aplicou(chamadas))
+
+    def test_aplicar_hml_nao_reusa_terraform_antigo(self):
+        digest = self.preparar_hml()
+        binario = self.trabalho / 'bin' / 'terraform'
+        binario.parent.mkdir(parents=True, exist_ok=True)
+        binario.write_text('#!/bin/sh\necho antigo\n', encoding='utf-8')
+        binario.chmod(0o700)
+        (self.trabalho / 'bin' / 'terraform.sha256').write_text(hashlib.sha256(binario.read_bytes()).hexdigest() + '\n')
+        r, chamadas = self.aplicar_hml(digest)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertTrue([c for c in chamadas if c.startswith('curl') and 'hashicorp' in c])
+
+    def test_aplicar_hml_so_o_projeto_fixo(self):
+        self.projeto_fixo('safrion-hml-outro')
+        r, chamadas = self.rodar('aplicar-hml', PROJETO, self.RUN, self.TENTATIVA, 'a' * 64)
+        self.assertIn('só planeja o projeto safrion-hml-outro', r.stderr)
+        self.assertFalse([c for c in chamadas if c.startswith('terraform')])
+        self.projeto_fixo(PROJETO)
+        for args, mensagem in ((('x', '1', 'a' * 64), 'informe a execução e a tentativa'),
+                               (('555', '0', 'a' * 64), 'informe a execução e a tentativa'),
+                               (('555', '1', 'abc'), 'informe o SHA-256 aprovado'),
+                               (('555', '1', 'A' * 64), 'informe o SHA-256 aprovado')):
+            with self.subTest(args=args):
+                (self.falso / 'chamadas.log').unlink(missing_ok=True)
+                r, chamadas = self.rodar('aplicar-hml', PROJETO, *args)
+                self.assertNotEqual(r.returncode, 0)
+                self.assertIn(mensagem, r.stderr)
+                self.assertFalse([c for c in chamadas if c.startswith(('gcloud', 'gh'))])
+
+    def test_destravar_hml_so_no_modulo_da_hml(self):
+        r, chamadas = self.rodar('destravar-hml', PROJETO, '1;rm', entrada='s\n')
+        self.assertIn('informe o ID do lock', r.stderr)
+        self.assertFalse([c for c in chamadas if c.startswith('terraform')])
+        r, chamadas = self.rodar('destravar-hml', PROJETO, '1712345678', entrada='n\n')
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn('lock mantido', r.stderr)
+        self.assertFalse([c for c in chamadas if 'force-unlock' in c])
+        r, chamadas = self.rodar('destravar-hml', PROJETO, '1712345678', entrada='s\n')
+        self.assertEqual(r.returncode, 0, r.stderr)
+        destravas = [c for c in chamadas if c.startswith('terraform force-unlock')]
+        self.assertEqual(len(destravas), 1)
+        self.assertTrue(destravas[0].endswith(' dd=.terraform-hml @hml'), destravas[0])
+        self.assertTrue([c for c in chamadas if c.startswith('terraform init') and f'bucket={PROJETO}-tfstate-hml' in c])
+        self.assertFalse([c for c in chamadas if 'tfstate-bootstrap' in c])
 
     def test_sintaxe(self):
         self.assertEqual(subprocess.run(['bash', '-n', str(AQUI / 'cloudshell.sh')]).returncode, 0)

@@ -35,11 +35,28 @@ Sem a fase 1 antes, a web nasceria sem as versões dos segredos e a revisão nã
 
 ## Na CI
 
-Workflow [`infra-hml.yml`](../../../.github/workflows/infra-hml.yml): **só o plan da fase 1**, disparado à mão na `main`, no environment `hml-infra`, sem apply (o portão da aplicação vem à parte). Em PR, só as checagens estáticas do `infra.yml`, sem credencial. O `publicar-hml.yml` não consegue a `sa-infra-github` (vínculos do WIF no bootstrap). Como disparar, o que o workflow recusa e o recibo: [tools/hml](../../../tools/hml/README.md).
+Workflow [`infra-hml.yml`](../../../.github/workflows/infra-hml.yml): **só o plan da fase 1**, disparado à mão na `main`, no environment `hml-infra`, sem apply: a aplicação é pelo `cloudshell.sh aplicar-hml` ([abaixo](#aplicação-da-fase-1)). Em PR, só as checagens estáticas do `infra.yml`, sem credencial. O `publicar-hml.yml` não consegue a `sa-infra-github` (vínculos do WIF no bootstrap). Como disparar, o que o workflow recusa e o recibo: [tools/hml](../../../tools/hml/README.md).
 
 A configuração não vem de variáveis do GitHub. É um JSON privado, `config/hml.tfvars.json` no bucket do state da HML, gravado uma vez pelo `cloudshell.sh config-hml` ([bootstrap](../bootstrap/README.md#como-aplicar)) e conferido pelo mesmo `validar_config` do workflow. As entradas do disparo são só a geração e o SHA-256 desse arquivo. No log, só contagens e hashes; endereços, membros e valores ficam no plano privado (ENG-062), que se aprova pelo hash (ENG-063).
 
 Chaves da configuração, com o nome das variáveis do módulo: `projeto_id`, `projeto_numero`, `operador`, `rede_self_link`, `subrede_self_link`, `faixa_psa_nome` e `criar_cloud_run` na fase 1; `versoes_segredos`, `oidc_client_id` e, se usados, `iap_permitidos`, `url_controlada` e `origem` na fase 2, que o workflow ainda recusa. Nenhuma é segredo. `iap_permitidos` só aceita `group:` e `serviceAccount:`: os testadores entram no grupo Google, gerido pelo Adrianus fora do Terraform, e nenhum e-mail de testador vai para o plan, o state ou o log. O `operador` fica no JSON privado, no plan e no state, fora do Git e do log.
+
+## Aplicação da fase 1
+
+No Cloud Shell, com o hash que os pareceres aprovaram: `infra/terraform/cloudshell.sh aplicar-hml <projeto> <execução> <tentativa> <hash>`. Contrato aplicar-hml v3, aprovado pelas três IAs. O hash digitado vem do resumo do run no GitHub, que os pareceres citam, nunca do bucket.
+
+- **Origem.** Só aplica o plano que o `infra-hml.yml` oficial gravou. Confere:
+  - o recibo `planos/<execução>/<tentativa>/recibo.json` do bucket, lido pela geração, com as 12 chaves exatas;
+  - a execução na API do GitHub: esse workflow, `workflow_dispatch`, na `main`, concluída com sucesso, nessa tentativa;
+  - o commit, que tem de ser a `main` atual;
+  - o hash digitado, que tem de ser o do recibo e o do plano baixado. Um recibo órfão de job que falhou é recusado.
+- **Travas.** Antes da confirmação, o plano passa pelo `checar_travas.py --plano` e pelo `resumir_plano` do `planejar.py`: recusa destroy, replace, outro projeto e a lista "Nunca no Terraform".
+- **Uso único.** A marca `aplicacao-inicio.json` só é criada depois do `s`, sem sobrescrever e relida byte a byte. Responder outra coisa, ou 10 minutos sem resposta, deixa o plano disponível. Depois do `s`, a `main` é relida: se andou, nada é aplicado. Marca existente de outra sessão para o comando. A credencial curta é renovada logo antes do apply.
+- **Recuperação.**
+  - Lock preso: o comando indica `cloudshell.sh destravar-hml <projeto> <ID>`, que só mexe no `hml/` (bucket `<projeto>-tfstate-hml`, prefixo `hml`), nunca no bootstrap.
+  - Apply com falha: a marca fica, e o caminho é diagnóstico e plano novo. Se o Terraform não conseguiu gravar o state no bucket, o `errored.tfstate` sai da cópia do repositório para `~/.safrion/<projeto>/errored-hml.tfstate`: não apagar, e fazer `terraform state push` dele antes de qualquer plano novo.
+  - Recibo final indisponível depois do apply: o comando diz isso, sai com código 4 e não repete o apply.
+- **Limites.** É portão de processo, não barreira humana exclusiva: a conta do gcloud diz qual conta agiu, não qual pessoa ou IA. No bucket, os recibos de aplicação expiram com o plano, em 30 dias; o registro permanente é o resumo no checkpoint.
 
 ## Senhas do banco
 
