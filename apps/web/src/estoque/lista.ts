@@ -22,6 +22,16 @@ export const COLUNAS_LOTE: readonly ColunaG2[] = [
 /** Os lotes de um produto: a coluna Produto sai porque é a mesma em todas as linhas. */
 export const COLUNAS_LOTE_DO_PRODUTO: readonly ColunaG2[] = COLUNAS_LOTE.filter((c) => c.chave !== 'produto');
 
+/** Validade na tela: a data em pt-BR, ou "Não se aplica" quando o lote não tem validade (RN-032). */
+function textoDaValidade(validade: string | null): string {
+  return validade === null ? 'Não se aplica' : formatarData(validade);
+}
+
+/** Linha de contexto do cabeçalho do detalhe do lote: produto e validade. */
+export function contextoDoLote(l: Pick<LoteResumo, 'produto' | 'validade'>): string {
+  return `${l.produto} · validade ${l.validade === null ? 'não se aplica' : formatarData(l.validade)}`;
+}
+
 export function linhaDoLote(l: LoteResumo): LinhaG2 {
   const estado = estadoDoLote(l.movimentos, l.saldo);
   const medida = (valor: string) => ({
@@ -35,7 +45,8 @@ export function linhaDoLote(l: LoteResumo): LinhaG2 {
     celulas: {
       lote: { texto: l.codigo, valor: l.codigo },
       produto: { texto: l.produto, valor: l.produto },
-      validade: { texto: formatarData(l.validade), valor: l.validade },
+      // Sem validade o valor é vazio: vai para o fim em qualquer direção e o filtro ∅ o encontra.
+      validade: { texto: textoDaValidade(l.validade), valor: l.validade ?? '' },
       estado: { texto: estado.palavra, valor: estado.palavra, papel: estado.papel },
       utilizavel: medida(l.saldo.utilizavel),
       fisico: medida(l.saldo.fisico),

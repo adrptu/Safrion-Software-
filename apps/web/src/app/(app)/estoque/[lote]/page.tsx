@@ -4,9 +4,9 @@ import { notFound } from 'next/navigation';
 import { podeExecutar, podeLer } from '../../../../autorizacao/matriz';
 import { Cabecalho } from '../../../../componentes/Cabecalho';
 import { estadoDoLote } from '../../../../estoque/estado';
-import { COLUNAS_EXTRATO, linhaDoMovimento, unidadesDoLote } from '../../../../estoque/lista';
+import { COLUNAS_EXTRATO, contextoDoLote, linhaDoMovimento, unidadesDoLote } from '../../../../estoque/lista';
 import { RegistrarEntrada } from '../../../../estoque/RegistrarEntrada';
-import { dataCivil, formatarData } from '../../../../formato/data';
+import { dataCivil } from '../../../../formato/data';
 import { formatarQuantidade, positivo } from '../../../../formato/numero';
 import { consultar, exigirSessao } from '../../../../servidor/pagina';
 import { Tabela } from '../../../../tabela/Tabela';
@@ -55,7 +55,7 @@ export default async function Lote({
         voltar={{ href: volta, rotulo: 'Estoque' }}
         titulo={`Lote ${lote.codigo}`}
         estado={estado}
-        contexto={`${lote.produto} · validade ${formatarData(lote.validade)}`}
+        contexto={contextoDoLote(lote)}
       />
       <div className="conteudo">
         <section

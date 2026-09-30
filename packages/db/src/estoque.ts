@@ -84,7 +84,8 @@ export function conteudoDoMovimento(pedido: PedidoMovimento): Record<string, unk
 interface LinhaLote {
   id: string;
   code: string;
-  expiry_date: string;
+  /** NULL quando a validade não se aplica ao lote (migração 0007, RN-032). */
+  expiry_date: string | null;
   base_unit: string;
   version: string;
 }
@@ -303,8 +304,8 @@ export interface LoteResumo {
   readonly codigo: string;
   readonly produtoId: string;
   readonly produto: string;
-  /** Data civil AAAA-MM-DD. */
-  readonly validade: string;
+  /** Data civil AAAA-MM-DD; null quando a validade não se aplica (nunca data fictícia, RN-032). */
+  readonly validade: string | null;
   readonly unidade: string;
   /** Movimentos registrados em todos os locais: zero é lote ainda sem entrada. */
   readonly movimentos: number;

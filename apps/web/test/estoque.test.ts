@@ -4,7 +4,14 @@ import { describe, expect, it } from 'vitest';
 
 import { desfechoDaResposta, pedidoDeEntrada, SEM_CONEXAO, validarEntrada } from '../src/estoque/entrada';
 import { estadoDoLote, palavraDaSituacao } from '../src/estoque/estado';
-import { linhaDoLote, linhaDoMovimento, linhaDoProduto, unidadesDoLote } from '../src/estoque/lista';
+import {
+  contextoDoLote,
+  linhaDoLote,
+  linhaDoMovimento,
+  linhaDoProduto,
+  unidadesDoLote,
+} from '../src/estoque/lista';
+import { formatarData } from '../src/formato/data';
 
 const LOTE = '0b8c6a52-1f0e-4c7a-9d51-3f2d7e6b9a10';
 const LOCAL = '5d2f0a4e-8c1b-4e3a-b7f6-9a0c1d2e3f40';
@@ -215,6 +222,19 @@ describe('linhas das listas', () => {
         fisico: { texto: '1.250,5 L', valor: '1250.500000', unidade: 'L' },
       },
     });
+  });
+
+  it('lote sem validade: "Não se aplica", valor vazio (fim da ordenação) e o resto da linha igual', () => {
+    const sem = linhaDoLote({ ...lote, validade: null });
+    expect(sem.celulas['validade']).toEqual({ texto: 'Não se aplica', valor: '' });
+    expect({ ...sem.celulas, validade: undefined }).toEqual({
+      ...linhaDoLote(lote).celulas,
+      validade: undefined,
+    });
+    expect(contextoDoLote({ produto: 'Diesel', validade: null })).toBe('Diesel · validade não se aplica');
+    expect(contextoDoLote(lote)).toBe('Herbicida fictício · validade 30/06/2027');
+    // O formatador geral não ganha tolerância a null: quem sabe que não há validade decide o texto.
+    expect(() => formatarData(null as unknown as string)).toThrow();
   });
 
   it('produto e movimento', () => {
