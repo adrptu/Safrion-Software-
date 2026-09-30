@@ -197,6 +197,28 @@ export async function restaurarDemonstracao(
        VALUES ($1, $2, $3, 'DEMO-001', '2027-06-30', 'L')`,
       [lote, org, produto],
     );
+    // Recebimento por documento (contrato CMD-15 §7.1, DEC-2709-01): fornecedor, produto com embalagem e produto a granel
+    // sem validade, somados ao seed acima sem mudá-lo; o local é o mesmo Almoxarifado central.
+    await c.query(
+      `INSERT INTO app.counterparty (id, organization_id, name, identification)
+       VALUES ($1, $2, 'Fornecedor Teste Ltda', '11222333000181')`,
+      [randomUUID(), org],
+    );
+    const fungicida = randomUUID();
+    await c.query(
+      "INSERT INTO app.product (id, organization_id, name, base_unit) VALUES ($1, $2, 'Fungicida A', 'L')",
+      [fungicida, org],
+    );
+    await c.query(
+      `INSERT INTO app.packaging_conversion (id, organization_id, product_id, packaging, factor, version)
+       VALUES ($1, $2, $3, 'galão 5 L', 5, 1)`,
+      [randomUUID(), org, fungicida],
+    );
+    await c.query(
+      `INSERT INTO app.product (id, organization_id, name, base_unit, expiry_policy, lot_policy)
+       VALUES ($1, $2, 'Diesel S10', 'L', 'nao_se_aplica', 'por_documento')`,
+      [randomUUID(), org],
+    );
     // Em hml, acesso real concedido a gerações anteriores cai aqui, com evento e sessões revogadas, na mesma transação;
     // nada passa para a geração nova sem concessão explícita (ADR 0004 §11). Em dev, a função não faz nada.
     await c.query('SELECT app.revogar_vinculos_demonstracao($1)', [org]);

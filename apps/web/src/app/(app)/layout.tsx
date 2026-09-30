@@ -27,9 +27,14 @@ export default async function Casca({ children }: { readonly children: ReactNode
         <span className="marca">Safrion</span>
         <ul>
           {podeLer(sessao.papel, 'estoque') ? (
-            <li>
-              <ItemMenu href="/estoque" rotulo="Estoque" />
-            </li>
+            <>
+              <li>
+                <ItemMenu href="/estoque" rotulo="Estoque" exceto={['/estoque/recebimentos']} />
+              </li>
+              <li>
+                <ItemMenu href="/estoque/recebimentos" rotulo="Recebimentos" />
+              </li>
+            </>
           ) : null}
           {podeLer(sessao.papel, 'cadastros') ? (
             <li>

@@ -7,6 +7,7 @@ import { estadoDoLote, palavraDaSituacao } from '../src/estoque/estado';
 import {
   contextoDoLote,
   linhaDoLote,
+  nomeDoLote,
   linhaDoMovimento,
   linhaDoProduto,
   unidadesDoLote,
@@ -193,6 +194,7 @@ describe('linhas das listas', () => {
   const lote: LoteResumo = {
     id: LOTE,
     codigo: 'DEMO-001',
+    granel: null,
     produtoId: 'p',
     produto: 'Herbicida fictício',
     validade: '2027-06-30',
@@ -257,6 +259,7 @@ describe('linhas das listas', () => {
       originalQuantity: '2500',
       originalUnit: 'mL',
       recordedAt: '2026-09-28T14:05:00.000Z',
+      origem: null,
     };
     const locais = new Map([[LOCAL, 'Almoxarifado central']]);
     expect(linhaDoMovimento(base, locais)).toEqual({
@@ -267,6 +270,7 @@ describe('linhas das listas', () => {
         movimento: { texto: 'Entrada · Em inspeção', valor: 'Entrada · Em inspeção' },
         quantidade: { texto: '2,5 L (2.500 mL)', valor: '2.5', unidade: 'L' },
         local: { texto: 'Almoxarifado central', valor: 'Almoxarifado central' },
+        origem: { texto: 'Entrada manual', valor: 'Entrada manual' },
       },
     });
     const mudanca = linhaDoMovimento(
@@ -296,6 +300,37 @@ describe('linhas das listas', () => {
     );
     expect(estorno.celulas['movimento']?.texto).toBe('Estorno');
     expect(estorno.celulas['quantidade']).toEqual({ texto: '—', valor: '' });
+    // Movimento de um recebimento: a origem nomeia documento e linha, e a linha abre o documento.
+    const doc = '6c1d2e3f-4a5b-4c6d-8e7f-9a0b1c2d3e4f';
+    const recebido = linhaDoMovimento(
+      { ...base, origem: { documentoId: doc, tipo: 'nfe', serie: '1', numero: '7001', linha: 2 } },
+      locais,
+    );
+    expect(recebido.href).toBe(`/estoque/recebimentos/${doc}`);
+    expect(recebido.celulas['origem']).toEqual({
+      texto: 'NF 1/7001 · linha 2',
+      valor: 'NF 1/7001 · linha 2',
+    });
+  });
+
+  it('lote do granel aparece pelo documento e pelo emitente, nunca pelo código interno', () => {
+    const doc = '6c1d2e3f-4a5b-4c6d-8e7f-9a0b1c2d3e4f';
+    const granel = {
+      ...lote,
+      codigo: `DOC:${doc}`,
+      granel: {
+        documentoId: doc,
+        tipo: 'nfe' as const,
+        serie: '',
+        numero: '88',
+        emitente: 'Fornecedor Teste Ltda',
+      },
+    };
+    expect(nomeDoLote(granel)).toBe('Granel · NF 88 · Fornecedor Teste Ltda');
+    expect(linhaDoLote(granel).celulas['lote']?.texto).toBe('Granel · NF 88 · Fornecedor Teste Ltda');
+    expect(JSON.stringify(linhaDoLote(granel).celulas)).not.toContain('DOC:');
+    // Fabricante com código parecido continua com o próprio código.
+    expect(nomeDoLote({ codigo: `DOC:${doc}`, granel: null })).toBe(`DOC:${doc}`);
   });
 
   it('unidades do lote: a base primeiro, só da mesma dimensão', () => {

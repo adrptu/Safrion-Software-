@@ -870,3 +870,109 @@ h1 {
     content: none;
   }
 }
+
+/* Recebimento por documento · FO-18 (contrato CMD-15 §7.1): mesmos blocos e campos, em grade que quebra no celular. */
+.acao-da-lista {
+  margin-left: auto;
+}
+.recebimento {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
+.formulario-grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  align-items: start;
+  gap: var(--space-12) var(--space-16);
+}
+.linha-recebimento .bloco-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-12);
+}
+.linha-recebimento .bloco-cabecalho h2 {
+  margin: 0;
+  font: inherit;
+}
+.parcelas,
+.ocorrencia {
+  grid-column: 1 / -1;
+}
+.parcelas-grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  gap: var(--space-8) var(--space-12);
+}
+.parcelas-grade input {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.situacao-linha {
+  margin: var(--space-4) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--type-body-sm-size);
+}
+.campo .dica {
+  color: var(--color-text-secondary);
+  font-size: var(--type-caption-size);
+}
+.acoes-recebimento {
+  display: flex;
+  gap: var(--space-12);
+}
+.rodape-acao {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-12);
+  padding: var(--space-12) var(--space-18);
+  border: var(--border-1) var(--color-border-divider);
+  border-radius: var(--radius-16);
+  background: var(--color-surface);
+}
+.rodape-acao p {
+  margin: 0 auto 0 0;
+  color: var(--color-text-secondary);
+}
+.pendencias {
+  margin: 0;
+  list-style: none;
+}
+.pendencias .quem {
+  display: block;
+  color: var(--color-text-secondary);
+  font-size: var(--type-body-sm-size);
+}
+.dados {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: var(--space-10) var(--space-16);
+  margin: 0;
+}
+.dados dt {
+  color: var(--color-text-secondary);
+  font-size: var(--type-caption-size);
+  font-weight: 600;
+}
+.dados dd {
+  margin: 0;
+}
+@media (max-width: 767px) {
+  /* No celular o rodapé fixo fica baixo: o resumo numa linha curta e o botão na largura toda. */
+  .rodape-acao {
+    gap: var(--space-8);
+    padding: var(--space-8) var(--space-12);
+  }
+  .rodape-acao p {
+    flex-basis: 100%;
+    font-size: var(--type-caption-size);
+  }
+  .rodape-acao .botao {
+    flex: 1;
+  }
+}

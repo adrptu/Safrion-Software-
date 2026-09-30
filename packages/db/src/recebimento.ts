@@ -907,3 +907,90 @@ export async function documento(cliente: ClientBase, id: string): Promise<Docume
     ocorrencias: ocorrencias.rows.map(ocorrenciaDoDocumento),
   };
 }
+
+// Opções do formulário de recebimento (FO-18; contrato CMD-15 §7.1) --------------------------------------------------
+// O que a tela precisa para conferir sem digitar identificador: emitentes, fazendas com locais, produtos com a política
+// de validade e de lote, embalagens na versão vigente e lotes de fabricante já existentes (a validade deles prevalece), e
+// quem pode responder por inspeção ou ocorrência (usuários ativos). Tudo pela organização da sessão (RLS).
+
+export interface ProdutoDoRecebimento extends Referencia {
+  readonly unidade: string;
+  readonly validade: PoliticaValidade;
+  readonly lote: 'informado' | 'por_documento';
+  /** Embalagens na versão mais recente, com o fator para a unidade-base em texto decimal. */
+  readonly embalagens: readonly {
+    readonly id: string;
+    readonly nome: string;
+    readonly fator: string;
+    readonly versao: number;
+  }[];
+  /** Lotes de fabricante do produto, com a validade que um novo recebimento no mesmo lote tem de repetir. */
+  readonly lotes: readonly { readonly codigo: string; readonly validade: string | null }[];
+}
+
+export interface OpcoesRecebimento {
+  readonly emitentes: readonly (Referencia & { readonly identificacao: string })[];
+  readonly fazendas: readonly (Referencia & { readonly locais: readonly Referencia[] })[];
+  readonly produtos: readonly ProdutoDoRecebimento[];
+  readonly responsaveis: readonly Referencia[];
+}
+
+export async function opcoesDoRecebimento(cliente: ClientBase): Promise<OpcoesRecebimento> {
+  const emitentes = await cliente.query<{ id: string; name: string; identification: string }>(
+    'SELECT id, name, identification FROM app.counterparty ORDER BY name, id',
+  );
+  const locais = await cliente.query<{ farm_id: string; farm_name: string; id: string; name: string }>(
+    `SELECT f.id AS farm_id, f.name AS farm_name, s.id, s.name
+       FROM app.farm f JOIN app.stock_location s ON s.organization_id = f.organization_id AND s.farm_id = f.id
+      ORDER BY f.name, f.id, s.name, s.id`,
+  );
+  const produtos = await cliente.query<{
+    id: string;
+    name: string;
+    base_unit: string;
+    expiry_policy: PoliticaValidade;
+    lot_policy: 'informado' | 'por_documento';
+  }>('SELECT id, name, base_unit, expiry_policy, lot_policy FROM app.product ORDER BY name, id');
+  const embalagens = await cliente.query<{
+    id: string;
+    product_id: string;
+    packaging: string;
+    factor: string;
+    version: number;
+  }>(
+    `SELECT DISTINCT ON (product_id, packaging) id, product_id, packaging, factor::text AS factor, version
+       FROM app.packaging_conversion WHERE valid_from <= now()
+      ORDER BY product_id, packaging, version DESC`,
+  );
+  const lotes = await cliente.query<{ product_id: string; code: string; expiry_date: string | null }>(
+    `SELECT product_id, code, expiry_date::text AS expiry_date FROM app.lot
+      WHERE kind = 'fabricante' ORDER BY product_id, code`,
+  );
+  const responsaveis = await cliente.query<{ id: string; name: string }>(
+    'SELECT id, name FROM app.app_user WHERE active ORDER BY name, id',
+  );
+  const fazendas = new Map<string, { id: string; nome: string; locais: Referencia[] }>();
+  for (const l of locais.rows) {
+    const f = fazendas.get(l.farm_id) ?? { id: l.farm_id, nome: l.farm_name, locais: [] };
+    f.locais.push({ id: l.id, nome: l.name });
+    fazendas.set(l.farm_id, f);
+  }
+  return {
+    emitentes: emitentes.rows.map((e) => ({ id: e.id, nome: e.name, identificacao: e.identification })),
+    fazendas: [...fazendas.values()],
+    produtos: produtos.rows.map((p) => ({
+      id: p.id,
+      nome: p.name,
+      unidade: p.base_unit,
+      validade: p.expiry_policy,
+      lote: p.lot_policy,
+      embalagens: embalagens.rows
+        .filter((c) => c.product_id === p.id)
+        .map((c) => ({ id: c.id, nome: c.packaging, fator: c.factor, versao: c.version })),
+      lotes: lotes.rows
+        .filter((l) => l.product_id === p.id)
+        .map((l) => ({ codigo: l.code, validade: l.expiry_date })),
+    })),
+    responsaveis: responsaveis.rows.map((u) => ({ id: u.id, nome: u.name })),
+  };
+}

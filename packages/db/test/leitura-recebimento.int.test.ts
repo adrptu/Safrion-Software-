@@ -4,14 +4,16 @@ import { canonizarRecebimento, type DadosRecebimento } from '@safrion/contracts'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { consultarIntencao, executarComando, type Efeito, type Recibo } from '../src/comando.js';
+import { extratoDoLote, listarLotes } from '../src/estoque.js';
 import {
   COMANDO_RECEBER_DOCUMENTO,
   documento,
   listarDocumentos,
+  opcoesDoRecebimento,
   receberDocumento,
 } from '../src/recebimento.js';
 import { emOrganizacao } from '../src/sessao.js';
-import { contagens, criarBanco, semear, type Ambiente, type Semente } from './ambiente.js';
+import { contagens, criarBanco, mover, semear, type Ambiente, type Semente } from './ambiente.js';
 
 // Leitura do documento de entrada e consulta do recibo por chave (contrato CMD-15 v3.5, §6.1) em PostgreSQL real, pelo
 // app_runtime sem BYPASSRLS. Os documentos são gravados pelo efeito já fechado; os valores esperados vêm do que foi
@@ -309,6 +311,90 @@ describe('leitura do documento de entrada', () => {
     const rejeitado = await receber(a, 'leitura-dup', randomUUID(), dados('5001', quatroLinhas()));
     expect(rejeitado).toMatchObject({ outcome: 'rejected', reasonCode: 'DOCUMENTO_JA_RECEBIDO' });
     expect(await consulta(a, 'leitura-dup')).toEqual({ ...rejeitado, alreadyReceived: true });
+  });
+});
+
+describe('leituras da tela de recebimento (contrato CMD-15 §7.1)', () => {
+  it('opções do formulário: emitentes, fazenda com locais, produtos com política, embalagem vigente, lotes e ativos', async () => {
+    await emOrganizacao(amb.app, a.org, async (c) => {
+      // Versão nova do galão: a opção é a vigente; e um usuário inativo, que não responde por nada.
+      await c.query(
+        "INSERT INTO app.packaging_conversion (id, organization_id, product_id, packaging, factor, version) VALUES ($1, $2, $3, 'galão 5 L', 5, 2)",
+        [randomUUID(), a.org, ref.fungicida],
+      );
+      await c.query(
+        "INSERT INTO app.app_user (id, organization_id, name, email, active) VALUES ($1, $2, 'Inativo A', 'inativo@a.invalid', false)",
+        [randomUUID(), a.org],
+      );
+    });
+    const o = await emOrganizacao(amb.app, a.org, (c) => opcoesDoRecebimento(c));
+    expect(o.emitentes).toEqual([
+      { id: ref.fornecedor, nome: 'Fornecedor Teste Ltda', identificacao: '11222333000181' },
+    ]);
+    expect(o.fazendas).toEqual([
+      { id: a.fazenda, nome: 'Sede', locais: [{ id: a.local, nome: 'Almoxarifado' }] },
+    ]);
+    expect(o.responsaveis.map((r) => r.nome)).toEqual(['Almoxarife A', 'Colega A']);
+    const fungicida = o.produtos.find((p) => p.id === ref.fungicida);
+    expect(fungicida).toMatchObject({
+      nome: 'Fungicida A',
+      unidade: 'L',
+      validade: 'controla',
+      lote: 'informado',
+    });
+    expect(fungicida?.embalagens.map((e) => [e.nome, e.fator, e.versao])).toEqual([['galão 5 L', '5', 2]]);
+    expect(fungicida?.lotes).toEqual([
+      { codigo: 'F26-L1', validade: '2027-06-30' },
+      { codigo: 'F26-L2', validade: '2027-06-30' },
+      { codigo: 'F26-L4', validade: '2027-06-30' },
+    ]);
+    // O lote interno do diesel não aparece como lote de fabricante para escolher.
+    expect(o.produtos.find((p) => p.id === ref.diesel)).toMatchObject({
+      validade: 'nao_se_aplica',
+      lote: 'por_documento',
+      lotes: [],
+    });
+    const deB = await emOrganizacao(amb.app, b.org, (c) => opcoesDoRecebimento(c));
+    expect(deB.emitentes).toEqual([]);
+    expect(deB.produtos.map((p) => p.id)).toEqual([b.produto]);
+  });
+
+  it('granel ganha a origem legível; fabricante com código DOC: continua sem origem; extrato mostra documento e linha', async () => {
+    const parecido = randomUUID();
+    await emOrganizacao(amb.app, a.org, (c) =>
+      c.query(
+        `INSERT INTO app.lot (id, organization_id, product_id, code, expiry_date, base_unit)
+         VALUES ($1, $2, $3, $4, '2027-06-30', 'L')`,
+        [parecido, a.org, ref.fungicida, `DOC:${randomUUID()}`],
+      ),
+    );
+    await mover(amb.app, a, 'manual-1', 0, {
+      tipo: 'entrada',
+      quantidade: '1',
+      unidade: 'L',
+      situacao: 'liberado_livre',
+    });
+    const lotes = await emOrganizacao(amb.app, a.org, (c) => listarLotes(c, '2026-09-30'));
+    const diesel = lotes.find((l) => l.codigo.startsWith('DOC:') && l.id !== parecido);
+    const docDiesel = diesel?.codigo.slice(4) ?? '';
+    expect(diesel?.granel).toEqual({
+      documentoId: docDiesel,
+      tipo: 'nfe',
+      serie: '1',
+      numero: '5001',
+      emitente: 'Fornecedor Teste Ltda',
+    });
+    expect(lotes.find((l) => l.id === parecido)?.granel).toBeNull();
+    expect(lotes.find((l) => l.codigo === 'F26-L1')?.granel).toBeNull();
+
+    const l1 = lotes.find((l) => l.codigo === 'F26-L1')?.id ?? '';
+    const extrato = await emOrganizacao(amb.app, a.org, (c) => extratoDoLote(c, l1));
+    expect(extrato.map((m) => m.origem)).toEqual([
+      { documentoId: docDiesel, tipo: 'nfe', serie: '1', numero: '5001', linha: 1 },
+      { documentoId: docDiesel, tipo: 'nfe', serie: '1', numero: '5001', linha: 1 },
+    ]);
+    const manual = await emOrganizacao(amb.app, a.org, (c) => extratoDoLote(c, a.lote));
+    expect(manual.map((m) => m.origem)).toEqual([null]);
   });
 });
 

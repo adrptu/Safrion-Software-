@@ -38,7 +38,7 @@ const TIPO = COMANDO_RECEBER_DOCUMENTO;
 let amb: Ambiente;
 let demo: Demonstracao;
 let b: Semente;
-const ids = { produto: '', fazenda: '', local: '', fornecedor: randomUUID(), fornecedorB: randomUUID() };
+const ids = { produto: '', fazenda: '', local: '', fornecedor: '', fornecedorB: randomUUID() };
 let almoxarife: string;
 let gerente: string;
 
@@ -170,10 +170,11 @@ beforeAll(async () => {
     ids.produto = lote.rows[0]?.product_id ?? '';
     ids.local = local.rows[0]?.id ?? '';
     ids.fazenda = local.rows[0]?.farm_id ?? '';
-    await c.query(
-      "INSERT INTO app.counterparty (id, organization_id, name, identification) VALUES ($1, $2, 'Fornecedor fictício', '11222333000181')",
-      [ids.fornecedor, demo.organizationId],
+    // O fornecedor vem da carga fictícia da demonstração (contrato CMD-15 §7.1).
+    const fornecedor = await c.query<{ id: string }>(
+      "SELECT id FROM app.counterparty WHERE name = 'Fornecedor Teste Ltda'",
     );
+    ids.fornecedor = fornecedor.rows[0]?.id ?? '';
   });
   await emOrganizacao(amb.app, b.org, (c) =>
     c.query(

@@ -67,6 +67,7 @@ describe('listarLotes', () => {
     expect(doA).toEqual({
       id: a.lote,
       codigo: 'F26-A',
+      granel: null,
       produtoId: a.produto,
       produto: 'Herbicida',
       validade: '2027-06-30',

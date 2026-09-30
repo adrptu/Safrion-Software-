@@ -4,7 +4,13 @@ import { notFound } from 'next/navigation';
 import { podeExecutar, podeLer } from '../../../../autorizacao/matriz';
 import { Cabecalho } from '../../../../componentes/Cabecalho';
 import { estadoDoLote } from '../../../../estoque/estado';
-import { COLUNAS_EXTRATO, contextoDoLote, linhaDoMovimento, unidadesDoLote } from '../../../../estoque/lista';
+import {
+  COLUNAS_EXTRATO,
+  contextoDoLote,
+  linhaDoMovimento,
+  nomeDoLote,
+  unidadesDoLote,
+} from '../../../../estoque/lista';
 import { RegistrarEntrada } from '../../../../estoque/RegistrarEntrada';
 import { dataCivil } from '../../../../formato/data';
 import { formatarQuantidade, positivo } from '../../../../formato/numero';
@@ -51,9 +57,9 @@ export default async function Lote({
   return (
     <>
       <Cabecalho
-        trilha={[{ rotulo: 'Estoque', href: volta }, { rotulo: lote.codigo }]}
+        trilha={[{ rotulo: 'Estoque', href: volta }, { rotulo: nomeDoLote(lote) }]}
         voltar={{ href: volta, rotulo: 'Estoque' }}
-        titulo={`Lote ${lote.codigo}`}
+        titulo={lote.granel ? nomeDoLote(lote) : `Lote ${lote.codigo}`}
         estado={estado}
         contexto={contextoDoLote(lote)}
       />

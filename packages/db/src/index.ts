@@ -57,6 +57,7 @@ export {
   saldoDoLote,
   type LinhaExtrato,
   type LoteResumo,
+  type OrigemDocumento,
   type NovoMovimento,
   type PedidoMovimento,
   type SaldoTexto,
@@ -66,11 +67,14 @@ export {
   COMANDO_RECEBER_DOCUMENTO,
   documento,
   listarDocumentos,
+  opcoesDoRecebimento,
   receberDocumento,
   type DocumentoDetalhe,
   type DocumentoResumo,
   type LinhaDoDocumento,
   type OcorrenciaDoDocumento,
+  type OpcoesRecebimento,
+  type ProdutoDoRecebimento,
   type Referencia,
 } from './recebimento.js';
 export { respostaDeErro } from './resposta.js';
