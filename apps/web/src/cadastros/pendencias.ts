@@ -5,6 +5,8 @@ import { intencaoValida, type Intencao } from './intencao';
 
 export interface IntencaoGuardada {
   readonly campos: Record<string, string>;
+  /** Fotografia anterior à edição; ausente em intenções legadas. Nunca é reconstruída a partir do pedido. */
+  readonly iniciais?: Record<string, string>;
   readonly intencao: Intencao;
   readonly contexto: {
     readonly tipo: 'fazenda' | 'talhao' | 'situacao';
@@ -34,6 +36,10 @@ function objeto(valor: unknown): valor is Record<string, unknown> {
   return typeof valor === 'object' && valor !== null && !Array.isArray(valor);
 }
 
+function camposValidos(valor: unknown): valor is Record<string, string> {
+  return objeto(valor) && Object.values(valor).every((campo) => typeof campo === 'string');
+}
+
 function contextoValido(valor: unknown): valor is IntencaoGuardada['contexto'] {
   if (!objeto(valor)) return false;
   const { tipo, titulo, volta } = valor;
@@ -49,8 +55,8 @@ function contextoValido(valor: unknown): valor is IntencaoGuardada['contexto'] {
 function lerGuardada(bruto: string): IntencaoGuardada | null {
   try {
     const v: unknown = JSON.parse(bruto);
-    if (!objeto(v) || !objeto(v['campos']) || !Object.values(v['campos']).every((c) => typeof c === 'string'))
-      return null;
+    if (!objeto(v) || !camposValidos(v['campos'])) return null;
+    if (v['iniciais'] !== undefined && !camposValidos(v['iniciais'])) return null;
     if (!intencaoValida(v['intencao']) || !contextoValido(v['contexto'])) return null;
     const { intencao, contexto } = v;
     if ((contexto.tipo === 'fazenda') !== (intencao.targetType === 'farm')) return null;
@@ -58,7 +64,8 @@ function lerGuardada(bruto: string): IntencaoGuardada | null {
       return null;
     if (typeof v['criadaEm'] !== 'string' || !Number.isFinite(Date.parse(v['criadaEm']))) return null;
     return {
-      campos: v['campos'] as Record<string, string>,
+      campos: v['campos'],
+      ...(v['iniciais'] === undefined ? {} : { iniciais: v['iniciais'] }),
       intencao,
       contexto,
       criadaEm: v['criadaEm'],

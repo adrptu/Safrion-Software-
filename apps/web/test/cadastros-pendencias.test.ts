@@ -153,6 +153,42 @@ describe('pendências de cadastro, uma chave por intenção', () => {
     expect(lerIntencoes(a, USUARIO, ORG)).toEqual([fazenda, situacao]);
   });
 
+  it('preserva os campos iniciais separados dos editados e nunca os substitui na mesma intenção', () => {
+    const a = memoria();
+    const g: IntencaoGuardada = {
+      ...guardada(),
+      iniciais: { nome: 'Talhão original', area: '204,000000', fazenda: ID },
+    };
+    expect(gravarIntencao(a, USUARIO, ORG, g)).toBe(true);
+    const [recuperada] = lerIntencoes(a, USUARIO, ORG);
+    expect(recuperada).toEqual(g);
+    expect(recuperada?.campos.nome).toBe('Talhão 1');
+    expect(recuperada?.iniciais?.nome).toBe('Talhão original');
+    expect(gravarIntencao(a, USUARIO, ORG, { ...g, iniciais: { nome: 'Outra aba', area: '210' } })).toBe(
+      true,
+    );
+    expect(lerIntencoes(a, USUARIO, ORG)).toEqual([g]);
+    expect(lerIntencoes(a, USUARIO, ORG)[0]?.intencao).toEqual(g.intencao);
+  });
+
+  it('não recupera baseline inválido, nem inventa um para a intenção legada', () => {
+    const a = memoria();
+    const g = guardada();
+    for (const iniciais of [null, [], '204', { area: 204 }, { nome: null }]) {
+      const invalida = JSON.stringify({ ...g, iniciais });
+      a.dados.set(chaveLocal(g.intencao.chave), invalida);
+      expect(lerIntencoes(a, USUARIO, ORG)).toEqual([]);
+      expect(a.getItem(chaveLocal(g.intencao.chave))).toBe(invalida);
+    }
+    a.dados.delete(chaveLocal(g.intencao.chave));
+    expect(gravarIntencao(a, USUARIO, ORG, g)).toBe(true);
+    const [legada] = lerIntencoes(a, USUARIO, ORG);
+    expect(legada).toEqual(g);
+    expect(legada).not.toHaveProperty('iniciais');
+    expect(legada?.intencao.corpo).toBe(g.intencao.corpo);
+    expect(legada?.intencao.chave).toBe(g.intencao.chave);
+  });
+
   it('falha de armazenamento bloqueia o POST; corrupção existente não é sobrescrita', () => {
     const a = memoria();
     const g = guardada();

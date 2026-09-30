@@ -136,6 +136,23 @@ describe('a resposta só resolve a intenção que ela prova', () => {
     expect(desfechoDoEnvio(401, e.corpo, intencao, true)).toMatchObject({ tipo: 'incerto', sessao: true });
   });
 
+  it('403 no reenvio ou consulta informa a falta de permissão sem resolver o efeito anterior (Gemini)', () => {
+    const e = erroContrato('SEM_PERMISSAO', 'Papel sem acesso.', 'gemini-403');
+    const esperado = {
+      tipo: 'incerto',
+      mensagem:
+        'Seu papel não permite conferir ou reenviar este cadastro. O envio anterior continua sem confirmação. Solicite acesso ao gerente.',
+      sessao: false,
+      naoLocalizado: false,
+    };
+    expect(desfechoDoEnvio(403, e.corpo, intencao, true)).toEqual(esperado);
+    expect(desfechoDaConsulta(403, e.corpo, intencao)).toEqual(esperado);
+    expect(desfechoDoEnvio(403, e.corpo, intencao, false)).toMatchObject({ tipo: 'nao_gravado' });
+    expect(desfechoDoEnvio(403, { ...e.corpo, classe: 'validacao' }, intencao, true)).not.toEqual(esperado);
+    expect(desfechoDaConsulta(500, e.corpo, intencao)).not.toEqual(esperado);
+    expect(desfechoDaConsulta(403, null, intencao)).toMatchObject({ tipo: 'incerto', naoLocalizado: false });
+  });
+
   it('503 transitório, intenção em processamento e respostas inesperadas nunca liberam nova chave', () => {
     for (const codigo of ['FALHA_TRANSITORIA', 'FALHA_INTERNA', 'IDEMPOTENCY_IN_PROGRESS'] as const) {
       const e = erroContrato(codigo, 'Tente consultar.', 'c3', { detalhe: { repetirEmMs: 3000 } });

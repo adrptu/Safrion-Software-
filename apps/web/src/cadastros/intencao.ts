@@ -109,6 +109,9 @@ function erroDaResposta(status: number, corpo: unknown): ErroContrato | null {
 export const INCERTO =
   'Ainda não foi possível confirmar o resultado. Consulte o recibo antes de alterar ou enviar novamente.';
 const SESSAO_INCERTA = 'Sua sessão terminou. Entre de novo para conferir o envio pendente.';
+// Origem: revisão Gemini J3i9…; informar o impedimento não resolve o efeito de um envio anterior.
+const SEM_PERMISSAO_INCERTA =
+  'Seu papel não permite conferir ou reenviar este cadastro. O envio anterior continua sem confirmação. Solicite acesso ao gerente.';
 
 function incerto(status: number, mensagem = INCERTO): Desfecho {
   return {
@@ -155,14 +158,16 @@ export function desfechoDoEnvio(
         };
     }
   }
-  return incerto(status);
+  return incerto(status, erro?.codigo === 'SEM_PERMISSAO' ? SEM_PERMISSAO_INCERTA : INCERTO);
 }
 
 /** Ausência de recibo não prova ausência de efeito; só libera o mesmo reenvio (CMD-15 §6.2). */
 export function desfechoDaConsulta(status: number, corpo: unknown, intencao: Intencao): Desfecho {
   const recibo = reciboDaIntencao(corpo, intencao);
   if (recibo && status === statusDoRecibo(recibo.outcome)) return { tipo: 'resolvido', recibo };
-  if (erroDaResposta(status, corpo)?.codigo === 'RECIBO_NAO_LOCALIZADO') {
+  const erro = erroDaResposta(status, corpo);
+  if (erro?.codigo === 'SEM_PERMISSAO') return incerto(status, SEM_PERMISSAO_INCERTA);
+  if (erro?.codigo === 'RECIBO_NAO_LOCALIZADO') {
     return {
       tipo: 'incerto',
       mensagem: 'Recibo ainda não localizado. Reenvie o mesmo pedido, sem alterar os dados.',

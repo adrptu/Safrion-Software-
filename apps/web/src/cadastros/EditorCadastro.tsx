@@ -2,9 +2,7 @@
 import {
   COMANDOS_CADASTRO as C,
   EsquemaDadosCriarFazenda,
-  EsquemaDadosEditarFazenda,
   EsquemaDadosCriarTalhao,
-  EsquemaDadosEditarTalhao,
   EsquemaDadosAlterarSituacaoTalhao,
   FUSO_PADRAO,
   FUSOS_BRASIL,
@@ -16,6 +14,7 @@ import type { OpcaoFazenda } from '@safrion/db/web';
 import Link from 'next/link';
 import { useId, useRef, useState, type SubmitEvent } from 'react';
 import { novaIntencao } from './intencao';
+import { alteracoesCadastro } from './alteracoes';
 import type { IntencaoGuardada } from './pendencias';
 import { useCadastroComando } from './useCadastroComando';
 import s from './cadastro.module.css';
@@ -54,12 +53,15 @@ export function EditorCadastro(p: Props) {
         situacao: p.edicao.situacao ?? 'ativo',
       },
   );
+  const [iniciais] = useState(() => (p.inicial ? p.inicial.iniciais : { ...campos }));
+  const [avisoLocal, setAvisoLocal] = useState('');
   const [erros, setErros] = useState<Record<string, string>>({});
   const [novaFazenda, setNovaFazenda] = useState(false);
   const [criadas, setCriadas] = useState<OpcaoFazenda[]>([]);
   const comando = useCadastroComando(p.usuarioId, p.organizacaoId, p.confirmado, p.inicial);
   const tipo = p.edicao.tipo;
   const editando = p.edicao.id !== undefined;
+  const semBase = editando && tipo !== 'situacao' && iniciais === undefined;
   const travado = comando.ocupado || comando.pendente !== null;
   const opcoes = [...p.fazendas, ...criadas.filter((f) => !p.fazendas.some((x) => x.id === f.id))];
   const titulo =
@@ -73,11 +75,13 @@ export function EditorCadastro(p: Props) {
   const mudar = (chave: string, valor: string) => {
     if (travado) return;
     setCampos((c) => ({ ...c, [chave]: valor }));
+    setAvisoLocal('');
     setErros((e) => Object.fromEntries(Object.entries(e).filter(([k]) => k !== chave)));
   };
   function enviar(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (travado) return;
+    if (travado || semBase) return;
+    setAvisoLocal('');
     const area = tipo === 'talhao' ? lerAreaPtBr(campos['area'] ?? '') : null;
     if (area && !area.ok) {
       setErros({ area: area.mensagem });
@@ -92,13 +96,9 @@ export function EditorCadastro(p: Props) {
           : { situacao: campos['situacao'] };
     const esquema =
       tipo === 'fazenda'
-        ? editando
-          ? EsquemaDadosEditarFazenda
-          : EsquemaDadosCriarFazenda
+        ? EsquemaDadosCriarFazenda
         : tipo === 'talhao'
-          ? editando
-            ? EsquemaDadosEditarTalhao
-            : EsquemaDadosCriarTalhao
+          ? EsquemaDadosCriarTalhao
           : EsquemaDadosAlterarSituacaoTalhao;
     const v = esquema.safeParse(data);
     if (!v.success) {
@@ -107,7 +107,9 @@ export function EditorCadastro(p: Props) {
         const campo = String(erro.path[0] ?? 'nome');
         mensagens[campo] =
           campo === 'nome'
-            ? 'Informe um nome com 1 a 80 caracteres.'
+            ? erro.message === 'NOME_COM_NUL'
+              ? 'Remova o caractere inválido do nome.'
+              : 'Informe um nome com 1 a 80 caracteres.'
             : campo === 'fazenda'
               ? 'Escolha uma fazenda.'
               : campo === 'fuso'
@@ -116,6 +118,15 @@ export function EditorCadastro(p: Props) {
       }
       setErros(mensagens);
       form.current?.querySelector<HTMLElement>(`[name="${Object.keys(mensagens)[0] ?? 'nome'}"]`)?.focus();
+      return;
+    }
+    const alteracoes = editando && tipo !== 'situacao' ? alteracoesCadastro(tipo, campos, iniciais) : v.data;
+    if (alteracoes === null) {
+      setAvisoLocal('Não foi possível comparar os valores iniciais. Volte e abra o cadastro atualizado.');
+      return;
+    }
+    if (Object.keys(alteracoes).length === 0) {
+      setAvisoLocal('Nada a alterar.');
       return;
     }
     const commandType =
@@ -133,12 +144,13 @@ export function EditorCadastro(p: Props) {
       tipo === 'fazenda' ? 'farm' : 'field',
       p.edicao.id ?? crypto.randomUUID(),
       comando.versaoAtual ?? p.edicao.versao ?? 0,
-      v.data,
+      alteracoes,
       crypto.randomUUID(),
     );
     comando.enviar({
       intencao,
       campos,
+      ...(iniciais ? { iniciais } : {}),
       contexto: { tipo, titulo, volta: p.volta },
       criadaEm: new Date().toISOString(),
     });
@@ -272,6 +284,17 @@ export function EditorCadastro(p: Props) {
             </>
           )}
         </fieldset>
+        {semBase && !comando.pendente ? (
+          <p className={s.aviso} role="status">
+            Este envio antigo não guardou os valores iniciais. Seus campos estão preservados nesta tela. Volte
+            e abra o cadastro atualizado para comparar e editar com segurança.
+          </p>
+        ) : null}
+        {avisoLocal ? (
+          <p className={s.aviso} role="status">
+            {avisoLocal}
+          </p>
+        ) : null}
         {comando.mensagem ? (
           <div className={s.aviso} role="status">
             <p>{comando.mensagem}</p>
@@ -305,7 +328,7 @@ export function EditorCadastro(p: Props) {
             <button
               type="submit"
               className="botao botao-primario"
-              disabled={travado}
+              disabled={travado || semBase}
               aria-busy={comando.ocupado}
             >
               {comando.versaoAtual !== null ? 'Reaplicar minhas alterações' : titulo}

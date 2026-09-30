@@ -205,10 +205,9 @@ test('CAD01: editar apenas o nome preserva a área de mil hectares após reabrir
   );
   const gravouNome = page.waitForResponse((r) => r.url().endsWith('/comandos/cadastros.editar-talhao'));
   await painel.getByRole('button', { name: 'Salvar talhão', exact: true }).click();
-  expect((await pedidoNome).postDataJSON()).toMatchObject({
-    target: { expectedVersion: 2 },
-    data: { areaDeclaradaHa: '1000' },
-  });
+  const corpoNome = (await pedidoNome).postDataJSON() as EdicaoObservada;
+  expect(corpoNome.target.expectedVersion).toBe(2);
+  expect(corpoNome.data).toEqual({ nome: 'T1 Mil hectares preservados' });
   expect((await gravouNome).status()).toBe(200);
   await expect(
     page.getByRole('heading', { level: 1, name: 'T1 Mil hectares preservados', exact: true }),
@@ -331,4 +330,213 @@ test('CAD01: recuperar edição do talhão A no detalhe B navega ao alvo A e pre
       .locator('dd'),
   ).toHaveText('1');
   await expect(page.getByRole('region', { name: 'Envios sem confirmação' })).toHaveCount(0);
+});
+
+interface EdicaoObservada {
+  idempotencyKey: string;
+  target: { expectedVersion: number };
+  data: Record<string, string>;
+}
+
+async function alterarAreaConcorrente(page: import('@playwright/test').Page, id: string) {
+  const resposta = await page.request.post('/api/v1/comandos/cadastros.editar-talhao', {
+    headers: { Origin: new URL(page.url()).origin },
+    data: {
+      idempotencyKey: randomUUID(),
+      target: { type: 'field', id, expectedVersion: 1 },
+      data: { areaDeclaradaHa: '210' },
+    },
+  });
+  expect(resposta.status()).toBe(200);
+  expect(await resposta.json()).toMatchObject({ outcome: 'confirmed', resultingVersion: 2 });
+}
+
+// Origem: P1 Claude, revisão de 30/09/2026 20:58 UTC. Executor: Codex/Playwright + API e banco reais.
+test('CAD01 P1 Claude: reaplicar somente o nome preserva a área concorrente de 210 ha', async ({ page }) => {
+  await entrarComo(page, 'Gerente', LISTA_CADASTROS);
+  const id = await criarTalhao(page, 'CAD P1 Campos distintos', 'T1 Inicial C1');
+  await page.getByRole('button', { name: 'Editar talhão', exact: true }).click();
+  const painel = page.getByRole('dialog', { name: 'Talhão', exact: true });
+  await painel.getByRole('textbox', { name: 'Nome', exact: true }).fill('T1 Nome C1');
+  const areaInicial = await painel
+    .getByRole('textbox', { name: 'Área declarada (ha)', exact: true })
+    .inputValue();
+  await alterarAreaConcorrente(page, id);
+  const pedidos: EdicaoObservada[] = [];
+  page.on('request', (r) => {
+    if (r.method() === 'POST' && r.url().endsWith('/comandos/cadastros.editar-talhao'))
+      pedidos.push(r.postDataJSON() as EdicaoObservada);
+  });
+  const conflito = page.waitForResponse((r) => r.url().endsWith('/comandos/cadastros.editar-talhao'));
+  await painel.getByRole('button', { name: 'Salvar talhão', exact: true }).click();
+  expect((await conflito).status()).toBe(409);
+  await expect(painel.getByText(/Versão atual: 2\. Seus campos foram preservados\./)).toBeVisible();
+  await expect(painel.getByRole('textbox', { name: 'Nome', exact: true })).toHaveValue('T1 Nome C1');
+  await expect(painel.getByRole('textbox', { name: 'Área declarada (ha)', exact: true })).toHaveValue(
+    areaInicial,
+  );
+  expect(pedidos).toHaveLength(1);
+  expect(pedidos[0]?.data).toEqual({ nome: 'T1 Nome C1' });
+  await painel.getByRole('button', { name: 'Reaplicar minhas alterações', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'T1 Nome C1', exact: true })).toBeVisible();
+  expect(pedidos).toHaveLength(2);
+  expect(pedidos.map((p) => p.target.expectedVersion)).toEqual([1, 2]);
+  expect(pedidos[1]?.idempotencyKey).not.toBe(pedidos[0]?.idempotencyKey);
+  expect(pedidos[1]?.data).toEqual({ nome: 'T1 Nome C1' });
+  await page.reload();
+  await expect(page.getByRole('heading', { level: 1, name: 'T1 Nome C1', exact: true })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Identificação' })).toContainText('210,00 ha (declarada)');
+  await expect(
+    page
+      .getByRole('region', { name: 'Identificação' })
+      .locator('dl > div')
+      .filter({ has: page.locator('dt').filter({ hasText: /^Versão$/ }) })
+      .locator('dd'),
+  ).toHaveText('3');
+});
+
+test('CAD01 P1 Claude: salvar sem alterações informa o estado e não envia comando', async ({ page }) => {
+  await entrarComo(page, 'Gerente', LISTA_CADASTROS);
+  await criarTalhao(page, 'CAD P1 Sem alteração', 'T1 Sem alteração');
+  await page.getByRole('button', { name: 'Editar talhão', exact: true }).click();
+  const painel = page.getByRole('dialog', { name: 'Talhão', exact: true });
+  let postagens = 0;
+  page.on('request', (r) => {
+    if (r.method() === 'POST' && r.url().endsWith('/comandos/cadastros.editar-talhao')) postagens += 1;
+  });
+  await painel.getByRole('button', { name: 'Salvar talhão', exact: true }).click();
+  await expect(painel.getByText('Nada a alterar.', { exact: true })).toBeVisible();
+  await expect(painel.getByRole('textbox', { name: 'Nome', exact: true })).toHaveValue('T1 Sem alteração');
+  await painel.getByRole('button', { name: 'Voltar', exact: true }).click();
+  await page.reload();
+  await expect(
+    page
+      .getByRole('region', { name: 'Identificação' })
+      .locator('dl > div')
+      .filter({ has: page.locator('dt').filter({ hasText: /^Versão$/ }) })
+      .locator('dd'),
+  ).toHaveText('1');
+  expect(postagens).toBe(0);
+  await expect(page.getByRole('region', { name: 'Envios sem confirmação' })).toHaveCount(0);
+});
+
+/** Perde só a resposta de um conflito real; o recibo e o cadastro concorrente permanecem no servidor. */
+async function prepararPendenciaDeConflito(page: import('@playwright/test').Page, sufixo: string) {
+  await entrarComo(page, 'Gerente', LISTA_CADASTROS);
+  const id = await criarTalhao(page, `CAD P1 ${sufixo}`, `T1 Inicial ${sufixo}`);
+  await page.getByRole('button', { name: 'Editar talhão', exact: true }).click();
+  const painel = page.getByRole('dialog', { name: 'Talhão', exact: true });
+  const areaInicial = await painel
+    .getByRole('textbox', { name: 'Área declarada (ha)', exact: true })
+    .inputValue();
+  const nome = `T1 Nome ${sufixo}`;
+  await painel.getByRole('textbox', { name: 'Nome', exact: true }).fill(nome);
+  await alterarAreaConcorrente(page, id);
+  const pedidos: EdicaoObservada[] = [];
+  page.on('request', (r) => {
+    if (r.method() === 'POST' && r.url().endsWith('/comandos/cadastros.editar-talhao'))
+      pedidos.push(r.postDataJSON() as EdicaoObservada);
+  });
+  await page.route(
+    EDITAR,
+    async (route) => {
+      const resposta = await route.fetch();
+      expect(resposta.status()).toBe(409);
+      expect(await resposta.json()).toMatchObject({ outcome: 'version_conflict', resultingVersion: 2 });
+      await route.abort('failed');
+    },
+    { times: 1 },
+  );
+  await painel.getByRole('button', { name: 'Salvar talhão', exact: true }).click();
+  await expect(painel.getByRole('button', { name: 'Consultar recibo', exact: true })).toBeEnabled();
+  expect(pedidos).toHaveLength(1);
+  return { painel, nome, areaInicial, pedidos, chave: pedidos[0]?.idempotencyKey ?? '' };
+}
+
+test('CAD01 P1 Claude: recuperar pendência com valores iniciais reaplica só o nome após consultar 409', async ({
+  page,
+}) => {
+  const { painel, nome, areaInicial, pedidos } = await prepararPendenciaDeConflito(page, 'Recuperação');
+  await page.reload();
+  await page
+    .getByRole('region', { name: 'Envios sem confirmação' })
+    .getByRole('button', { name: `Salvar talhão · ${nome}`, exact: true })
+    .click();
+  await expect(painel.getByRole('textbox', { name: 'Nome', exact: true })).toHaveValue(nome);
+  await expect(painel.getByRole('textbox', { name: 'Área declarada (ha)', exact: true })).toHaveValue(
+    areaInicial,
+  );
+  const consulta = page.waitForResponse((r) => r.url().includes('/intencoes/cadastros.editar-talhao/'));
+  await painel.getByRole('button', { name: 'Consultar recibo', exact: true }).click();
+  expect((await consulta).status()).toBe(409);
+  await expect(
+    painel.getByRole('button', { name: 'Reaplicar minhas alterações', exact: true }),
+  ).toBeEnabled();
+  expect(pedidos).toHaveLength(1);
+  await painel.getByRole('button', { name: 'Reaplicar minhas alterações', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1, name: nome, exact: true })).toBeVisible();
+  expect(pedidos).toHaveLength(2);
+  expect(pedidos.map((p) => p.data)).toEqual([{ nome }, { nome }]);
+  expect(pedidos.map((p) => p.target.expectedVersion)).toEqual([1, 2]);
+  expect(pedidos[1]?.idempotencyKey).not.toBe(pedidos[0]?.idempotencyKey);
+  await page.reload();
+  await expect(page.getByRole('region', { name: 'Identificação' })).toContainText('210,00 ha (declarada)');
+  await expect(
+    page
+      .getByRole('region', { name: 'Identificação' })
+      .locator('dl > div')
+      .filter({ has: page.locator('dt').filter({ hasText: /^Versão$/ }) })
+      .locator('dd'),
+  ).toHaveText('3');
+  await expect(page.getByRole('region', { name: 'Envios sem confirmação' })).toHaveCount(0);
+});
+
+test('CAD01 P1 Claude: pendência legada consulta 409 e preserva campos sem permitir reaplicação sem base', async ({
+  page,
+}) => {
+  const { painel, nome, areaInicial, pedidos, chave } = await prepararPendenciaDeConflito(page, 'Legado');
+  // Fixture de migração: somente a fotografia inicial é retirada deste envio sintético identificado por chave.
+  // Corpo, alvo e chave continuam sendo os que o navegador enviou ao servidor real.
+  await page.evaluate((chaveDaIntencao) => {
+    const chaves = Object.keys(localStorage).filter(
+      (k) => k.startsWith('safrion:cadastro-intencao:') && k.endsWith(`:${chaveDaIntencao}`),
+    );
+    if (chaves.length !== 1 || !chaves[0]) throw new Error('Esperada uma única intenção sintética guardada');
+    const k = chaves[0];
+    const guardada = JSON.parse(localStorage.getItem(k) ?? '{}') as Record<string, unknown>;
+    if (!guardada['iniciais']) throw new Error('A intenção nova deveria ter valores iniciais');
+    delete guardada['iniciais'];
+    localStorage.setItem(k, JSON.stringify(guardada));
+  }, chave);
+  await page.reload();
+  await page
+    .getByRole('region', { name: 'Envios sem confirmação' })
+    .getByRole('button', { name: `Salvar talhão · ${nome}`, exact: true })
+    .click();
+  const consulta = page.waitForResponse((r) => r.url().includes('/intencoes/cadastros.editar-talhao/'));
+  await painel.getByRole('button', { name: 'Consultar recibo', exact: true }).click();
+  expect((await consulta).status()).toBe(409);
+  await expect(painel.getByText(/Este envio antigo não guardou os valores iniciais\./)).toBeVisible();
+  await expect(painel.getByRole('textbox', { name: 'Nome', exact: true })).toHaveValue(nome);
+  await expect(painel.getByRole('textbox', { name: 'Área declarada (ha)', exact: true })).toHaveValue(
+    areaInicial,
+  );
+  await expect(
+    painel.getByRole('button', { name: 'Reaplicar minhas alterações', exact: true }),
+  ).toBeDisabled();
+  await painel.getByRole('textbox', { name: 'Nome', exact: true }).press('Enter');
+  await expect(painel.getByText(/Este envio antigo não guardou os valores iniciais\./)).toBeVisible();
+  expect(pedidos).toHaveLength(1);
+  await painel.getByRole('button', { name: 'Voltar', exact: true }).click();
+  await page.reload();
+  await expect(page.getByRole('heading', { level: 1, name: 'T1 Inicial Legado', exact: true })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Identificação' })).toContainText('210,00 ha (declarada)');
+  await expect(
+    page
+      .getByRole('region', { name: 'Identificação' })
+      .locator('dl > div')
+      .filter({ has: page.locator('dt').filter({ hasText: /^Versão$/ }) })
+      .locator('dd'),
+  ).toHaveText('2');
+  expect(pedidos).toHaveLength(1);
 });
