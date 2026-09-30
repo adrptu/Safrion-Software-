@@ -18,6 +18,26 @@ export function organizacaoValida(valor: unknown): string {
 }
 
 /**
+ * Cliente emprestado do pool com ouvinte de 'error' até ser devolvido (CX-R03). Quando a conexão cai, o pg aborta a
+ * consulta em curso (a falha chega a quem chamou por ela) e ainda emite 'error' no cliente; sem ouvinte, isso vira
+ * exceção não tratada e derruba o processo, porque o pool só ouve os clientes ociosos. O erro ouvido não é engolido:
+ * retira a conexão do pool na devolução, para a próxima sessão não receber uma conexão morta.
+ */
+export function ouvirConexao(cliente: PoolClient): { soltar(erro?: Error): void } {
+  let caiu: Error | undefined;
+  const ouvir = (erro: Error) => {
+    caiu ??= erro;
+  };
+  cliente.on('error', ouvir);
+  return {
+    soltar(erro?: Error) {
+      cliente.off('error', ouvir);
+      cliente.release(erro ?? caiu);
+    },
+  };
+}
+
+/**
  * Abre uma transação com a organização fixada só nela (set_config com is_local): ao terminar, a conexão volta ao pool
  * sem organização, e a próxima transação que esquecer de fixá-la não vê nenhuma linha (falha fechada, ENG-025).
  */
@@ -28,6 +48,7 @@ export async function emOrganizacao<T>(
 ): Promise<T> {
   const org = organizacaoValida(organizationId);
   const cliente = await pool.connect();
+  const conexao = ouvirConexao(cliente);
   let quebrado: Error | undefined;
   try {
     await cliente.query('BEGIN');
@@ -43,6 +64,6 @@ export async function emOrganizacao<T>(
     }
     throw erro;
   } finally {
-    cliente.release(quebrado);
+    conexao.soltar(quebrado);
   }
 }

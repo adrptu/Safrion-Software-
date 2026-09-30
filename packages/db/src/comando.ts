@@ -6,7 +6,7 @@ import pg, { type ClientBase, type Pool, type PoolClient } from 'pg';
 
 import { VERSAO_CANONICA, hashCanonico } from './canonico.js';
 import { ConflitoVersao, ErroComando, RejeicaoNegocio } from './erros.js';
-import { ehUuid, organizacaoValida } from './sessao.js';
+import { ehUuid, organizacaoValida, ouvirConexao } from './sessao.js';
 
 export type TipoIniciador = 'app' | 'web' | 'integracao' | 'ia' | 'job';
 export type ResultadoIntencao = 'confirmed' | 'rejected' | 'version_conflict';
@@ -277,12 +277,6 @@ class PrazoEsgotado extends Error {
 }
 
 /**
- * Conexão que cai com o cliente emprestado: o pg aborta a consulta em curso (a falha chega ao envelope por ela) e ainda
- * emite 'error' no cliente; sem ouvinte, isso vira exceção não tratada e derruba o processo. O pool só ouve os ociosos.
- */
-const ignorarErroDaConexao = (): void => undefined;
-
-/**
  * O cliente da tentativa repetida: antes de cada comando SQL, confere o prazo (depois dele, nenhum comando começa) e
  * aplica `SET LOCAL statement_timeout` com o tempo que falta, para o servidor cortar o comando no prazo. Um só
  * statement_timeout por tentativa não limitaria a soma de vários comandos (Codex 07:52Z).
@@ -358,7 +352,7 @@ async function tentarComando(
   prazo: number | null,
 ): Promise<{ readonly recibo: Recibo } | { readonly deadlock: ErroComando }> {
   const cliente = await pool.connect();
-  cliente.on('error', ignorarErroDaConexao);
+  const conexao = ouvirConexao(cliente);
   // Tentativa repetida: todo comando SQL (os do envelope e os do efeito) passa pelo prazo; BEGIN, COMMIT e ROLLBACK não.
   const c = prazo === null ? cliente : comPrazo(cliente, prazo);
   let quebrado: Error | undefined;
@@ -484,7 +478,9 @@ async function tentarComando(
       } else {
         throw erro;
       }
-      await c.query('ROLLBACK TO SAVEPOINT efeito');
+      // Pelo cliente cru: a transação pode estar abortada pelo erro que virou rejeição (23505 da origem, por exemplo),
+      // e nenhum SET cabe antes disso. O prazo volta a ser conferido no comando seguinte e antes do COMMIT (CX-R02).
+      await cliente.query('ROLLBACK TO SAVEPOINT efeito');
       eventos.length = 0;
       resultado = null;
     }
@@ -558,8 +554,7 @@ async function tentarComando(
     if (!incerto && ehDeadlock(erro)) return { deadlock: falha };
     throw falha;
   } finally {
-    cliente.off('error', ignorarErroDaConexao);
-    cliente.release(quebrado);
+    conexao.soltar(quebrado);
   }
 }
 

@@ -47,11 +47,17 @@ afterAll(async () => {
 });
 beforeEach(async () => {
   await amb.migrator.query('DROP TRIGGER IF EXISTS teste_falha ON app.receipt_line');
+  await amb.migrator.query('DROP TRIGGER IF EXISTS teste_falha ON app.receipt_document');
   await amb.migrator.query('ALTER SEQUENCE app.teste_tentativas RESTART WITH 1');
 });
 
 /** Falha sintética na inserção da linha: as `ate` primeiras tentativas lançam `codigo`; depois, espera `dormirMs`. */
-async function injetar(codigo: '40P01' | '23514', ate: number, dormirMs = 0) {
+async function injetar(
+  codigo: '40P01' | '23514',
+  ate: number,
+  dormirMs = 0,
+  tabela: 'receipt_line' | 'receipt_document' = 'receipt_line',
+) {
   await amb.migrator
     .query(`CREATE OR REPLACE FUNCTION app.teste_falha() RETURNS trigger LANGUAGE plpgsql AS $$
     DECLARE n bigint;
@@ -62,7 +68,7 @@ async function injetar(codigo: '40P01' | '23514', ate: number, dormirMs = 0) {
       RETURN NEW;
     END $$`);
   await amb.migrator.query(
-    'CREATE TRIGGER teste_falha BEFORE INSERT ON app.receipt_line FOR EACH ROW EXECUTE FUNCTION app.teste_falha()',
+    `CREATE TRIGGER teste_falha BEFORE INSERT ON app.${tabela} FOR EACH ROW EXECUTE FUNCTION app.teste_falha()`,
   );
 }
 const tentativasNoBanco = async () =>
@@ -123,7 +129,11 @@ const dados = (numero: string, ...lotes: string[]): DadosRecebimento => ({
   })),
 });
 
-async function receber(chave: string, d: DadosRecebimento): Promise<Recibo | ErroComando> {
+async function receber(
+  chave: string,
+  d: DadosRecebimento,
+  documentoId: string = randomUUID(),
+): Promise<Recibo | ErroComando> {
   const canonico = canonizarRecebimento(d);
   try {
     return await executarComando(
@@ -134,7 +144,7 @@ async function receber(chave: string, d: DadosRecebimento): Promise<Recibo | Err
         idempotencyKey: chave,
         initiatorKind: 'web',
         actorId: a.usuario,
-        target: { type: 'receipt_document', id: randomUUID(), expectedVersion: 0 },
+        target: { type: 'receipt_document', id: documentoId, expectedVersion: 0 },
         data: canonico,
         correlationId: `corr-${chave}`,
       },
@@ -226,6 +236,38 @@ describe('deadlock injetado (40P01 por gatilho): os quatro casos da contraprova'
     expect(await transacoesAbertas()).toBe(0);
     expect(await fatos()).toEqual(antes);
   }, 15_000);
+});
+
+describe('rejeição depois de repetir (CX-R02)', () => {
+  it('40P01 na 1ª tentativa e origem já recebida na 2ª: recibo rejeitado, recuperável, idempotente e sem estoque extra', async () => {
+    expect(await receber('dl-origem', dados('9106', 'DL-ORIGEM'))).toMatchObject({ outcome: 'confirmed' });
+    await injetar('40P01', 1, 0, 'receipt_document');
+    const antes = await fatos();
+    const doc = randomUUID();
+    const r = await receber('dl-duplicada', dados('9106', 'DL-ORIGEM'), doc);
+    expect(r).toMatchObject({
+      outcome: 'rejected',
+      reasonCode: 'DOCUMENTO_JA_RECEBIDO',
+      alreadyReceived: false,
+    });
+    expect(await tentativasNoBanco()).toBe(2);
+    const depois = await fatos();
+    // Só o registro da intenção e a auditoria da rejeição; nenhum documento, linha, lote, versão ou movimento.
+    expect(depois).toEqual({ ...antes, intencoes: antes.intencoes + 1, auditoria: antes.auditoria + 1 });
+    const recuperado = await emOrganizacao(amb.app, a.org, (c) =>
+      consultarIntencao(c, {
+        commandType: COMANDO_RECEBER_DOCUMENTO,
+        idempotencyKey: 'dl-duplicada',
+        actorId: a.usuario,
+      }),
+    );
+    expect(recuperado).toEqual({ ...(r as Recibo), alreadyReceived: true });
+    expect(await receber('dl-duplicada', dados('9106', 'DL-ORIGEM'), doc)).toEqual({
+      ...(r as Recibo),
+      alreadyReceived: true,
+    });
+    expect(await fatos()).toEqual(depois);
+  });
 });
 
 describe('prazo da repetição: a soma de comandos não passa dele', () => {
