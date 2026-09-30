@@ -1,6 +1,6 @@
 # Contrato F1/CMD-15: recebimento de insumos por documento e inspeção
 
-**Versão 3.14 (30/09), com os ajustes do Codex de 01:43Z, 01:45Z, 02:46Z, 03:17Z, 03:48Z, 05:52Z, 06:24Z, 06:29Z, 06:50Z, 07:46Z e 07:52Z (CX-UI01, CX-UI03).** As versões anteriores ficam ao lado (v1 6e730024…, v2 8b0a53a2…, v3 205ad36e…, v3.1 b45fc372…, v3.3 9a244564…, v3.4 1f357769…, v3.5 feaca462…, v3.6 a170f747…, v3.7 d359406e…, v3.8 afc701e6…, v3.9 edc0cabd…, v3.10 6a7a8318…, v3.11 6ffb359f…, v3.12 75910766…, v3.13 1ad9c368…). A v3.14 encaixa o aviso antecipado na tela (§6.3). A v3.13 cria a §6.3 (aviso antecipado de duplicidade, só leitura e rota). A v3.12 preserva o rascunho quando uma intenção se resolve sem confirmar (CX-UI04, §6.2). A v3.11 corrige a rejeição depois de repetir (CX-R02) e a conexão que cai com o cliente emprestado (CX-R03), na §6. A v3.10 corrige a tela: intenção por chave própria entre abas (§6.2) e todas as ocorrências no detalhe (§7.1). A v3.8 detalhou a repetição por deadlock (§6) e a escala do valor unitário (§6.2); a v3.9 fecha a garantia de prazo (§6). A v3.5 acrescentou a §6.1 (leitura e consulta por chave) e a v3.6, a §6.2 (borda HTTP). A v3.7 acrescenta à §6.2 a regra da incerteza e cria a §7.1 (a tela, por entidade e estado); ajusta a §8.
+**Versão 3.15 (30/09), com os ajustes do Codex de 01:43Z, 01:45Z, 02:46Z, 03:17Z, 03:48Z, 05:52Z, 06:24Z, 06:29Z, 06:50Z, 07:46Z, 07:52Z (CX-UI01, CX-UI03) e 10:22Z (p95 no fechamento).** As versões anteriores ficam ao lado (v1 6e730024…, v2 8b0a53a2…, v3 205ad36e…, v3.1 b45fc372…, v3.3 9a244564…, v3.4 1f357769…, v3.5 feaca462…, v3.6 a170f747…, v3.7 d359406e…, v3.8 afc701e6…, v3.9 edc0cabd…, v3.10 6a7a8318…, v3.11 6ffb359f…, v3.12 75910766…, v3.13 1ad9c368…, v3.14 b254594f…). A v3.15 propõe a §9.1 (ensaio de desempenho delimitado), sem mudar comportamento. A v3.14 encaixa o aviso antecipado na tela (§6.3). A v3.13 cria a §6.3 (aviso antecipado de duplicidade, só leitura e rota). A v3.12 preserva o rascunho quando uma intenção se resolve sem confirmar (CX-UI04, §6.2). A v3.11 corrige a rejeição depois de repetir (CX-R02) e a conexão que cai com o cliente emprestado (CX-R03), na §6. A v3.10 corrige a tela: intenção por chave própria entre abas (§6.2) e todas as ocorrências no detalhe (§7.1). A v3.8 detalhou a repetição por deadlock (§6) e a escala do valor unitário (§6.2); a v3.9 fecha a garantia de prazo (§6). A v3.5 acrescentou a §6.1 (leitura e consulta por chave) e a v3.6, a §6.2 (borda HTTP). A v3.7 acrescenta à §6.2 a regra da incerteza e cria a §7.1 (a tela, por entidade e estado); ajusta a §8.
 
 Base de código: main `6882918`; `packages` e `apps/web/src` iguais aos de `38b4be3`. V11 é o PRD v3.11; "plano" é `plano-execucao-safrion.md` (29/09). Caminhos relativos à raiz. "Decisão técnica" marca o que não vem de fonte.
 
@@ -360,7 +360,48 @@ Reuso de `Cabecalho`, `Tabela` (G2), `estadoDaUrl`/`caminhoDeVolta`, `Selo` e da
 - As jornadas atuais (B2-C01..C03, HML-ISO-01..03) continuam passando sem mudança.
 - Depois de uma falha, o rascunho é preservado. É a única parte do FLUXUX-16 aceita aqui.
 
-**Não funcional:** p95 ≤ 600 ms e WCAG 2.2 AA, conforme o R-006.
+**Não funcional:** p95 ≤ 600 ms e WCAG 2.2 AA, conforme o R-006. O p95 é medido pelo ensaio delimitado da §9.1.
+
+## 9.1 Ensaio de desempenho delimitado (v3.15; proposta, só roda depois do ACK do Codex)
+**Pergunta:** o comando e as duas consultas novas cabem nos orçamentos do PRD §29.3 (R-006:80) no servidor desta candidata, sem rede? Não é SLO, não mede HML nem a rede de referência, e não substitui o teste P1 da §29.2/§29.4.
+
+- **Versão:** head `1f0817a` (código igual ao de `605b9ff`; depois dele, só testes e documentação). Build de produção do Next e `next start`, `SAFRION_AMBIENTE=dev`, login DEV fictício (Almoxarife); o cookie de sessão é obtido uma vez pelo fluxo real de entrada.
+- **Ambiente:** MacBook Air M2 (Mac14,2), 8 núcleos, 8 GB; Node 24.21.0 e PostgreSQL 17.10 do toolchain; PostgreSQL local por TCP 127.0.0.1 com a configuração padrão do initdb; pool do app `max: 3` (`apps/web/src/servidor/ambiente.ts:52`), sem mudança. Gerador, servidor e banco disputam a mesma máquina; isso fica registrado com o uso de CPU e memória.
+- **Gerador:** script Node (`fetch`) em modelo de chegada aberto: horários de disparo sorteados antes, com semente fixa, sem esperar resposta para disparar a próxima. Registra o atraso de cada disparo; um disparo com mais de 50 ms de atraso conta como "não disparado no horário" e é relatado. Não é k6 (PRD §29.4), limite declarado.
+- **Tempo medido nos dois lados:** no cliente, do envio à resposta completa em loopback (limite superior do tempo de servidor); no servidor, `duracao_ms` e `tentativas` do log estruturado do envelope (só o envelope, sem HTTP e sessão). O orçamento vale para o tempo do cliente; o do servidor explica.
+- **Dados (perfil):** o banco da demo (Fornecedor Teste Ltda, Fungicida A com galão 5 L e validade, Diesel S10 a granel por documento) mais uma pré-carga de 1.000 NFs confirmadas pelo próprio POST, fora da medição. Mistura de NFs: 70% com 3 linhas, 20% com 1 e 10% com 10, alternando lote de fabricante com validade e lote interno de granel. Número de NF, código de lote de fabricante e chave de idempotência únicos por requisição; a demo tem só dois produtos e um local, então todos os comandos já disputam o mesmo produto e local.
+
+| Classe | Operação | Orçamento (PRD §29.3) |
+|---|---|---|
+| Comando | `POST /api/v1/comandos/estoque.receber-documento` | p95 ≤ 600 ms, p99 ≤ 1,5 s |
+| Consulta | `GET /api/v1/recebimentos/origem` (metade NF existente, metade nova) | p95 ≤ 300 ms, p99 ≤ 800 ms |
+| Consulta | `GET /api/v1/intencoes/estoque.receber-documento/<chave>` (recibo existente) | p95 ≤ 300 ms, p99 ≤ 800 ms |
+
+- **Fases (cerca de 10 min no total):**
+  1. Frio: `next start` recém-iniciado, 20 comandos em sequência. Relatado à parte, fora do p95.
+  2. Aquecimento: 60 s a 2 req/s com a mistura abaixo. Descartado.
+  3. **Normal, a que vale para o orçamento:** 5 min a 10 req/s; 60% origem, 20% comando e 20% recibo (≈ 1.800, 600 e 600 amostras).
+  4. Rajada: 60 s a 30 req/s, mesma mistura. Relatada à parte; mostra a espera do pool de 3.
+  5. Contenção: 30 s a 4 comandos/s, todos no mesmo lote de fabricante já existente do Fungicida A. O recebimento trava a linha do lote (`FOR UPDATE`, `packages/db/src/recebimento.ts:395`), então os comandos se enfileiram nela. Relatada à parte; mostra espera e repetição por 40P01.
+- **Resultado:** p50, p95, p99, máximo e contagem por classe e fase; erros inesperados por classe, com limite ≤ 0,1% (validação de negócio esperada é contada à parte); atraso do gerador; CPU e memória de `next` e `postgres` por `ps` a cada 5 s; distribuição de `tentativas`.
+- **Reconciliação (reprova se falhar):** documentos confirmados = recibos aceitos que o gerador recebeu; linhas = movimentos; saldo por lote = soma das linhas aptas; nenhuma intenção em `processing`; nenhuma NF duplicada; auditoria e outbox na proporção do comando.
+- **Reprovação:** qualquer orçamento estourado na fase 3, erro inesperado acima do limite ou reconciliação com diferença. Nada de ajustar pool, índices, amostra ou fase para passar: um estouro vira achado, com causa investigada e registrada.
+- **Regras de veredito, fixadas antes da carga (ACK do Codex, 10:39Z):**
+  - Por fase e classe, relato planejadas, disparadas no prazo (atraso ≤ 50 ms), atrasadas, concluídas e falhas. Nenhuma fica fora do denominador.
+  - Cada requisição tem timeout de 10 s. Timeout, erro de rede, 5xx e 4xx inesperado contam como falha e entram nos quantis como latência infinita, nunca como sucesso rápido. O tempo inclui o corpo completo, e não há reenvio pelo gerador.
+  - Latência relatada de dois jeitos: desde o disparo real e desde o horário planejado. O veredito usa a segunda, que é a mais conservadora. Os quantis (nearest-rank) são por operação, sem misturar GET e POST.
+  - **INCONCLUSIVO** para o orçamento se, na fase normal, menos de 99% das planejadas de alguma classe saírem no prazo, ou se alguma não concluir dentro do prazo de encerramento da fase (timeout + 5 s). Nesse caso não há aprovação por medir só as sobreviventes.
+  - **APROVADO** só se a fase normal for válida, cada classe cumprir o p95 e o p99, o erro inesperado ficar ≤ 0,1% por classe e a reconciliação fechar. Fora disso, **REPROVADO**, com o achado investigado.
+  - Resposta perdida (timeout ou rede) num comando é **incerta**. Depois da carga, fora da medição, consulto a chave pelo GET de recibo: confirmado entra na reconciliação; `RECIBO_NAO_LOCALIZADO` não entra. Nunca trato ausência de 200 como ausência de COMMIT.
+- **Reconciliação por chave, com base no retrato tirado depois da pré-carga:**
+  - Cada chave termina como confirmada, rejeitada ou incerta resolvida; nenhuma intenção fica em `processing`.
+  - Documentos, linhas e movimentos batem com o delta das chaves confirmadas. Linhas = movimentos porque o perfil só tem uma parcela positiva por linha (apto).
+  - O saldo **por lote, na unidade base**, bate com a soma das linhas (galão de 5 L vira L; o lote de granel é `DOC:<id do documento>`).
+  - Outbox = um evento de recebimento mais um por lote afetado, por comando confirmado.
+  - Pelo menos uma auditoria por chave confirmada, sem NF duplicada e sem efeito extra.
+- **Leitura honesta:** os 20 do frio são uma série de primeiras requisições depois da subida, não 20 partidas a frio independentes. A contenção pode terminar com zero 40P01, porque a ordem das travas enfileira os comandos, e isso não é falha nem prova de deadlock real. CPU e memória também são registradas para o processo do gerador.
+- **Fora do ensaio:** HML, Cloud Run e Cloud SQL; rede de referência e de resiliência; aparelho físico; "do toque ao recibo" e abrir lista ou detalhe na tela; o envelope P1 (20 organizações, 50 req/s por 30 min, 8 h, volume de 10 milhões de movimentos); OIDC.
+- **Arquivos:** só novos, fora do repositório: `gerador-p95.mjs` e `rodar-p95.py` no rascunho do Claude, com as saídas exportadas para `fontes-claude/cmd15/p95-1f0817a/`. Nenhuma edição em produto ou teste do repositório.
 
 ## 10. Pergunta aberta
 Nenhuma. O lote de granel foi resolvido na §1 (lote interno por documento, com referência legível à parte). Se o PRD trouxer regra própria para granel, ela prevalece.

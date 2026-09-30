@@ -6,8 +6,8 @@ seguem pendentes.
 
 ## Versões
 - Base: main `6882918fab421940d26686838a5a24e8913d9a51`.
-- Candidata: `claude/cmd15-recebimento` em `9e7b68647ef0ba32c102986d7efba023c9e8f7ce` (código e testes; este recibo e o contrato vêm num commit só de documentação).
-- Contrato vigente: [CMD-15-contrato.md](CMD-15-contrato.md), v3.14, sha256 `b254594fff0e84b1a3b67dc0c3e338c661bed8cf9e84ee4b01876f8295d0cebe`.
+- Candidata: `claude/cmd15-recebimento` em `1f0817af21eb9e34f3be98a7bfdc1889bf2c6441` (código e testes; este recibo e o contrato vêm num commit só de documentação).
+- Contrato vigente: [CMD-15-contrato.md](CMD-15-contrato.md), v3.15, sha256 `bf4d9882239384f6656b32c3d90850edf30f2b4a64618e3397da771ff13897f6` (a v3.15 só acrescenta a §9.1, o ensaio de desempenho).
 
 ## Commits do incremento (do mais antigo ao mais novo)
 - `ce0e2a4` feat(estoque): núcleo do recebimento por documento e inspeção (CMD-15, incremento 1)
@@ -51,7 +51,18 @@ Executada com o `node` e o PostgreSQL 17 do toolchain do time, numa cópia desca
 ## Gate de cobertura da CI (`vitest run --coverage`)
 Origem do achado: CI do PR #32 no head `c5a1220` (run 36699998664, job "Código"), confirmado pela auditoria do Codex.
 - Reproduzido localmente antes da correção: saída 1, 300/300 testes verdes, ramos abaixo de 95%: `packages/contracts/src/recebimento.ts` 80%; `packages/domain/src/recebimento.ts` 94.61%.
-- Depois de `9e7b686` (só testes de comportamento, sem mudar produto nem limiar): saída 0, 303/303 testes; tsc, eslint e prettier com saída 0.
+- Depois de `1f0817a` (só testes de comportamento, sem mudar produto nem limiar): saída 0, 303/303 testes; tsc, eslint e prettier com saída 0.
+
+## Ensaio de desempenho delimitado (contrato §9.1)
+Local, em `1f0817a`, `next start` de produção, login DEV, MacBook Air M2 8 GB, PostgreSQL 17 local, pool do app `max: 3`; gerador de chegada aberta com semente fixa, na mesma máquina. Regras de veredito fixadas no contrato antes da carga.
+- **Veredito: INCONCLUSIVO.** Na fase normal (5 min a 10 req/s), a parcela disparada no prazo ficou abaixo de 99% em todas as classes:
+  - comando: 567/596 no prazo, 0 falhas; latência desde o horário planejado p50/p95/p99 63.6 / 1451.2 / 8871.3 ms; envelope no servidor 42 / 461 / 1718 ms.
+  - origem: 1678/1764 no prazo, 0 falhas; latência desde o horário planejado p50/p95/p99 19.1 / 752.6 / 7450 ms.
+  - recibo: 554/590 no prazo, 0 falhas; latência desde o horário planejado p50/p95/p99 20.1 / 815.3 / 6935.1 ms.
+- Causa provável, não isolada: pressão de memória na máquina (swap quase cheio depois do ensaio; picos isolados e simultâneos no servidor e no gerador). **O p95 válido fica para HML/nuvem**; não se repete neste Mac.
+- Reconciliação: OK. Delta pós-pré-carga igual ao esperado em documentos, linhas, movimentos e outbox (1091, 3355, 3355, 4446); 6591 lotes exatos na unidade base; sem `processing`, NF duplicada ou confirmada sem auditoria.
+- Achado CMD15-P95-01 (rajada a 30 req/s): timeouts de 10 s no cliente e envelope de até 20289 ms. Dos 95 comandos incertos, a consulta pela chave achou 73 confirmados e 22 nunca processados: sem perda nem duplicidade, mas sem espera limitada nem erro legível acima da capacidade (PRD §29.2, ENG-076). Encaminhado ao Codex; não é arquivo do CMD-15.
+- Zero repetições por 40P01 no ensaio inteiro, inclusive na contenção sobre o mesmo lote; isso não é falha nem prova de deadlock.
 
 ## Revisões independentes do Codex
 Recibos em `cons/work/cmd15-review/<sha>/receipt.json`, fora do repositório; o registro dos pareceres está em `cons/outputs/revisao-f0a.md`.
@@ -71,7 +82,8 @@ Recibos em `cons/work/cmd15-review/<sha>/receipt.json`, fora do repositório; o 
 - `d1dceea-retry`: sha256 `0f917110209b990228d7c724d0e011500a5363c2f36b0a60f89538b36ecb6f9f`
 - `d595285`: sha256 `1980aa694d96e096eafd0fd1af61c59a20fc36b252fa371c81fb8be03827558c`
 - Achados tratados no incremento: CX01–CX06, CX-UI01–CX-UI04, CX-R02 e CX-R03. CX-R01 e CX-R04 foram contraprovas do Codex, verdes.
-- Parecer do Codex favorável a todos os deltas de código, até `605b9ff`; o commit de testes de cobertura aguarda a revisão dele.
+- Parecer do Codex favorável a todos os deltas de código, até `605b9ff`, e ao commit de testes de cobertura `9e7b686` (registro de 10:48Z).
+- CI do PR #32 em `1f0817a`, conferida pelo Codex: 8 de 10 checks verdes, inclusive cobertura, integração com PostgreSQL, build e jornadas de navegador; seguem vermelhos Imagens (as 2 HIGH de `libssl3t64`) e Gitleaks (ref gen37, conserto no PR #31).
 
 ## Contraprovas por mutação
 Cada mutação altera o código de produção numa cópia descartável e roda os testes do bloco; "detectada" = algum teste ficou vermelho.
@@ -96,7 +108,7 @@ Cada mutação altera o código de produção numa cópia descartável e roda os
 - O 40P01 dos casos de repetição é injetado por gatilho; só um caso é deadlock natural.
 - O filtro `status = 'confirmado'` da consulta por origem ainda não tem teste de estorno, que chega no incremento 3.
 - Nos formulários guardados, o motivo da recusa se perde depois da segunda troca entre formulários (limite declarado).
-- p95 não medido. A janela de 2 s limita a repetição, não a duração de qualquer comando (contrato §6, v3.9).
+- p95 local INCONCLUSIVO (seção acima); o válido é em HML. A janela de 2 s limita a repetição, não a duração de qualquer comando (contrato §6, v3.9).
 - Imagens: o Trivy da CI acusa 2 HIGH em `libssl3t64` (CVE-2026-75804, CVE-2026-84782) na base distroless `cc-debian13` fixada por digest no `Dockerfile`; a correção Debian é `3.5.7-1~deb13u3`, e a tag oficial ainda não tinha pin corrigido na consulta do Codex. Retomada: candidata oficial com assinatura e digest verificados, pacote corrigido nos metadados, build, smoke e Trivy das duas imagens.
 - Gitleaks: o vermelho do PR #32 vem da ref `claude/prototipo-gen37-fonte` (commit 310844a), alcançada pela varredura de todas as refs; o conserto é o PR #31. Depois de integrado, atualizar a base do #32 e gerar CI nova sobre a combinação.
 - Parecer do Gemini e CI verde do PR pendentes antes de qualquer integração.
