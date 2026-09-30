@@ -6,7 +6,7 @@ seguem pendentes.
 
 ## Versões
 - Base: main `6882918fab421940d26686838a5a24e8913d9a51`.
-- Candidata: `claude/cmd15-recebimento` em `605b9ffe922a271a617f879a24f3dded7be2ca89` (código e testes; este recibo e o contrato vêm num commit só de documentação).
+- Candidata: `claude/cmd15-recebimento` em `9e7b68647ef0ba32c102986d7efba023c9e8f7ce` (código e testes; este recibo e o contrato vêm num commit só de documentação).
 - Contrato vigente: [CMD-15-contrato.md](CMD-15-contrato.md), v3.14, sha256 `b254594fff0e84b1a3b67dc0c3e338c661bed8cf9e84ee4b01876f8295d0cebe`.
 
 ## Commits do incremento (do mais antigo ao mais novo)
@@ -25,6 +25,7 @@ seguem pendentes.
 - `9b80d35` fix(estoque): recusa não sobrescreve o rascunho seguinte; formulários guardados (CX-UI04)
 - `d595285` feat(estoque): aviso antecipado de duplicidade por origem fiscal (CMD-15 §6.3)
 - `605b9ff` feat(estoque): aviso antecipado de duplicidade no formulário (CMD-15 §6.3, v3.14)
+- `9e7b686` test(estoque): ramos do recebimento que o gate de cobertura da CI cobra (CMD-15)
 
 ## Bateria completa em `605b9ff` (local, não CI)
 Executada com o `node` e o PostgreSQL 17 do toolchain do time, numa cópia descartável, com PostgreSQL privado só por TCP.
@@ -45,6 +46,12 @@ Executada com o `node` e o PostgreSQL 17 do toolchain do time, numa cópia desca
 - **integração completa com PostgreSQL real (db + web; inclui a contraprova de repetição do Codex):** 234/234 testes em 23/23 arquivos.
 - **E2E** (build de produção do Next + `next start`, Chrome do sistema, login DEV, projetos desktop e celular Pixel 7 emulado): 25 testes passaram; etapas build pacotes=0, next build=0, initdb=0, pg start=0, playwright (desktop + celular)=0, pg stop=0.
 - Também passaram, nessa cópia: `tools/dev/fronteiras.mjs` e `prettier --check .` do repositório inteiro.
+- **Lacuna desta bateria:** o unit rodou `vitest run` sem `--coverage`; o gate da CI (`pnpm run test` = `vitest run --coverage`, 95% por arquivo em `vitest.config.ts`) não foi reproduzido aqui. Ver a seção seguinte.
+
+## Gate de cobertura da CI (`vitest run --coverage`)
+Origem do achado: CI do PR #32 no head `c5a1220` (run 36699998664, job "Código"), confirmado pela auditoria do Codex.
+- Reproduzido localmente antes da correção: saída 1, 300/300 testes verdes, ramos abaixo de 95%: `packages/contracts/src/recebimento.ts` 80%; `packages/domain/src/recebimento.ts` 94.61%.
+- Depois de `9e7b686` (só testes de comportamento, sem mudar produto nem limiar): saída 0, 303/303 testes; tsc, eslint e prettier com saída 0.
 
 ## Revisões independentes do Codex
 Recibos em `cons/work/cmd15-review/<sha>/receipt.json`, fora do repositório; o registro dos pareceres está em `cons/outputs/revisao-f0a.md`.
@@ -54,6 +61,7 @@ Recibos em `cons/work/cmd15-review/<sha>/receipt.json`, fora do repositório; o 
 - `343eacc`: sha256 `c71b0e47d4d9dead534c016ac8aa364447ac3452513a0ebd31c9df3ba44a73ca`
 - `3e336e1`: sha256 `9db8aff243e5db3159af1e75d03700c68bb30ee2a36f734669d2d8f60d8efbfc`
 - `5dd0df9`: sha256 `8e4906edabc34638c7590f61116091f679752b1d41bdd1caffe68fbf0d246b8c`
+- `605b9ff`: sha256 `dd07c321217c01db1c3b7ca0fca0040f4b9d7c774ab0c206662a3d4852a8c67f`
 - `78409d3`: sha256 `dee63514faeba926fce1ffd81ce6d953de0a3a78d78b0bb51246d4f21a20a0e8`
 - `7e79ecc`: sha256 `dd9745ae4692d3127e6df5412555159625d4803c16bddd27b075e35e9c2d03cb`
 - `9b80d35`: sha256 `815c5a43f26938c5677689d80fe332b70207986532953b1c0aaa9cef79cb1a8b`
@@ -61,15 +69,16 @@ Recibos em `cons/work/cmd15-review/<sha>/receipt.json`, fora do repositório; o 
 - `ce0e2a4`: sha256 `206c7fa19f5873f7f05f0f2d8f67dd78276581bad5b6b2fea069c8114d3629a9`
 - `d1dceea`: sha256 `c5423e7b6df844fcf745a48c5e997016108cba014d1a3c86ecd09c393a5f99fc`
 - `d1dceea-retry`: sha256 `0f917110209b990228d7c724d0e011500a5363c2f36b0a60f89538b36ecb6f9f`
-- `d595285`: sha256 `7edd2fc9ff8b74b6aa326cc68380020a4870890fb2b69f65d7b389c98025f809`
+- `d595285`: sha256 `1980aa694d96e096eafd0fd1af61c59a20fc36b252fa371c81fb8be03827558c`
 - Achados tratados no incremento: CX01–CX06, CX-UI01–CX-UI04, CX-R02 e CX-R03. CX-R01 e CX-R04 foram contraprovas do Codex, verdes.
-- Parecer do Codex favorável até `9b80d35`; `d595285` em revisão pelo Codex; `605b9ff` entregue para revisão.
+- Parecer do Codex favorável a todos os deltas de código, até `605b9ff`; o commit de testes de cobertura aguarda a revisão dele.
 
 ## Contraprovas por mutação
 Cada mutação altera o código de produção numa cópia descartável e roda os testes do bloco; "detectada" = algum teste ficou vermelho.
 - `cmd15-efeito-mutacoes.json`: 6/6 detectadas.
 - `cmd15-nucleo-cx-mutacoes.json`: 11/11 detectadas.
 - `cmd15-nucleo-mutacoes.json`: 8/8 detectadas.
+- `cobertura-9e7b686/mutacoes.json`: 4/4 detectadas.
 - `cxr-28874bd/mutacoes.json`: 2/3 detectadas. Não detectada, declarada como equivalente: erro ouvido não retira a conexão.
 - `mutacoes-efeito-cx04-06.json`: 8/9 detectadas. Não detectada, declarada como equivalente: sem validação da unidade pelo lote.
 - `mutacoes-http.json`: 10/10 detectadas.
@@ -88,7 +97,9 @@ Cada mutação altera o código de produção numa cópia descartável e roda os
 - O filtro `status = 'confirmado'` da consulta por origem ainda não tem teste de estorno, que chega no incremento 3.
 - Nos formulários guardados, o motivo da recusa se perde depois da segunda troca entre formulários (limite declarado).
 - p95 não medido. A janela de 2 s limita a repetição, não a duração de qualquer comando (contrato §6, v3.9).
-- Parecer do Gemini e CI do PR pendentes antes de qualquer integração.
+- Imagens: o Trivy da CI acusa 2 HIGH em `libssl3t64` (CVE-2026-75804, CVE-2026-84782) na base distroless `cc-debian13` fixada por digest no `Dockerfile`; a correção Debian é `3.5.7-1~deb13u3`, e a tag oficial ainda não tinha pin corrigido na consulta do Codex. Retomada: candidata oficial com assinatura e digest verificados, pacote corrigido nos metadados, build, smoke e Trivy das duas imagens.
+- Gitleaks: o vermelho do PR #32 vem da ref `claude/prototipo-gen37-fonte` (commit 310844a), alcançada pela varredura de todas as refs; o conserto é o PR #31. Depois de integrado, atualizar a base do #32 e gerar CI nova sobre a combinação.
+- Parecer do Gemini e CI verde do PR pendentes antes de qualquer integração.
 
 ## Como reproduzir
 Pré-requisitos: Node da `.nvmrc`, pnpm do `packageManager`, um PostgreSQL 17 descartável com usuário administrador, e Chrome.
