@@ -15,6 +15,42 @@ regexTarget = "secret"
 paths = ['''^packages/db/test/preparo\.int\.test\.ts$''', '''^packages/db/test/vinculo\.int\.test\.ts$''']
 regexes = ['''^SenhaQueNaoPodeVazar123$''']
 
+# HML-SECRET-03: nome da chave de localStorage do cenário do protótipo v3.7 (CEN_KEY, cenario.js:6), replicado nas
+# telas e sondas preservadas em tools/prototipo (commit 310844a). Não é credencial. Só este literal e só estes 25
+# arquivos exatos; qualquer outro valor nesses arquivos, ou este valor em outro arquivo, continua reprovando.
+[[rules.allowlists]]
+description = "Nome da chave de localStorage do cenário do protótipo v3.7; não é credencial"
+condition = "AND"
+regexTarget = "secret"
+paths = [
+  '''^tools/prototipo/v37/gen37/_probe/ver_estoque5\.py$''',
+  '''^tools/prototipo/v37/gen37/_probe/ver_estoque8\.py$''',
+  '''^tools/prototipo/v37/gen37/_probe/ver_estoque_r2c\.py$''',
+  '''^tools/prototipo/v37/gen37/_probe/ver_mapa5\.py$''',
+  '''^tools/prototipo/v37/gen37/_probe/ver_mapa_lib\.py$''',
+  '''^tools/prototipo/v37/gen37/cenario\.js$''',
+  '''^tools/prototipo/v37/gen37/est_cenario_test\.py$''',
+  '''^tools/prototipo/v37/gen37/map_irrig_filtro_test\.py$''',
+  '''^tools/prototipo/v37/gen37/os_cenario_test\.py$''',
+  '''^tools/prototipo/v37/gen37/os_lib\.py$''',
+  '''^tools/prototipo/v37/gen37/ostela\.py$''',
+  '''^tools/prototipo/v37/gen37/project/EST\.dc\.html$''',
+  '''^tools/prototipo/v37/gen37/project/IN-02\.dc\.html$''',
+  '''^tools/prototipo/v37/gen37/project/IN-02det\.dc\.html$''',
+  '''^tools/prototipo/v37/gen37/project/IN-02x-os0420\.dc\.html$''',
+  '''^tools/prototipo/v37/gen37/project/IN-04\.dc\.html$''',
+  '''^tools/prototipo/v37/gen37/project/MB-01\.dc\.html$''',
+  '''^tools/prototipo/v37/gen37/project/MB-02\.dc\.html$''',
+  '''^tools/prototipo/v37/gen37/project/MB-02det\.dc\.html$''',
+  '''^tools/prototipo/v37/gen37/project/MB-03\.dc\.html$''',
+  '''^tools/prototipo/v37/gen37/project/MB-03x-recibo\.dc\.html$''',
+  '''^tools/prototipo/v37/gen37/project/MB-04\.dc\.html$''',
+  '''^tools/prototipo/v37/gen37/project/MB-05\.dc\.html$''',
+  '''^tools/prototipo/v37/gen37/project/OS-0424-app\.dc\.html$''',
+  '''^tools/prototipo/v37/gen37/project/OS\.dc\.html$''',
+]
+regexes = ['''^talhao-os-cenario-v1$''']
+
 # HML-SECRET-02: nomes de Secret Manager usados por value_source.secret_key_ref.
 # Este identificador não é senha; outros valores/arquivos continuam sujeitos à regra.
 [[rules]]

@@ -270,7 +270,10 @@ PY
 # O IAM do bucket não mostra o acesso que vem do projeto (revisão do Codex no PR #20). Sem pasta nem organização acima,
 # o projeto é a única herança. Para quem não é o dono nem agente de serviço do Google deste projeto, cada papel é
 # expandido (básico, predefinido ou customizado), e para o que dá objetos, IAM do bucket ou do projeto, ou muda papéis.
-# O dono só pode ser um: outro roles/owner alcançaria o bucket pelos valores de conveniência.
+# O dono só pode ser um: outro roles/owner alcançaria o bucket pelos valores de conveniência. O IAM pode guardar o e-mail
+# do dono com outra caixa que a conta logada (user:Adrptu@… × adrptu@…): o gcloud compara conta e e-mail do token com
+# lower() (googlecloudsdk/command_lib/auth/auth_util.py, ExtractAndValidateAccount). Só para user: e só A–Z/a–z o dono
+# é reconhecido sem diferença de caixa; outros tipos de principal e o agente do Google continuam comparados literalmente.
 iam_efetivo() {
   local p="$1" numero="$2" conta pai politica papeis papel alvo primeiro=1
   conta="$(conta_logada)"
@@ -284,8 +287,11 @@ import json, sys
 dono, numero, dominios = sys.argv[2], sys.argv[3], sys.argv[4].split()
 agentes = {f'serviceAccount:{numero}@cloudservices.gserviceaccount.com'} | \
           {f'serviceAccount:service-{numero}@{d}.iam.gserviceaccount.com' for d in dominios}
+ASCII = str.maketrans('ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')
+def eh_dono(m):
+    return m == dono or (m.startswith('user:') and dono.startswith('user:') and m.translate(ASCII) == dono.translate(ASCII))
 papeis = sorted({b['role'] for b in json.load(open(sys.argv[1], encoding='utf-8')).get('bindings', [])
-                 for m in b.get('members', []) if m != dono and m not in agentes})
+                 for m in b.get('members', []) if not eh_dono(m) and m not in agentes})
 print('\n'.join(papeis))
 PY
   printf '{' >"$papeis"
@@ -322,11 +328,14 @@ perigosas = {'storage.buckets.setIamPolicy', 'resourcemanager.projects.setIamPol
              'iam.serviceAccounts.actAs', 'iam.serviceAccounts.setIamPolicy', 'iam.serviceAccountKeys.create',
              'iam.workloadIdentityPoolProviders.create', 'iam.workloadIdentityPoolProviders.update'}
 compute = f'serviceAccount:{numero}-compute@developer.gserviceaccount.com'
+ASCII = str.maketrans('ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')
+def eh_dono(m):
+    return m == dono or (m.startswith('user:') and dono.startswith('user:') and m.translate(ASCII) == dono.translate(ASCII))
 erros, pulados = 0, set()
 for b in politica.get('bindings', []):
     papel = b['role']
     for m in b.get('members', []):
-        if m == dono:
+        if eh_dono(m):
             continue
         if m in agentes:
             pulados.add(m.split('@', 1)[1])
