@@ -47,6 +47,21 @@ export function erroContrato(
 }
 
 /**
+ * Falha permanente sem gravação (ENV-CAD01-NUL-CL22): o banco recusou um dado desta tentativa (classe 22) com o ROLLBACK
+ * confirmado. Nada desta tentativa foi gravado, e enviar o mesmo conteúdo de novo falha igual. Só vem com FALHA_INTERNA;
+ * qualquer outro 500 continua incerto para o cliente. Não resolve uma tentativa anterior incerta da mesma chave: essa
+ * segue pela consulta da intenção.
+ */
+export const EsquemaDetalheFalhaPermanente = z.strictObject({
+  resultadoIncerto: z.literal(false),
+  repetirMesmoConteudo: z.literal(false),
+});
+
+export function falhaPermanenteSemGravacao(corpo: ErroContrato): boolean {
+  return corpo.codigo === 'FALHA_INTERNA' && EsquemaDetalheFalhaPermanente.safeParse(corpo.detalhe).success;
+}
+
+/**
  * Recusa de contrato a partir da validação: diz o caminho e o problema de cada campo, sem ecoar o valor recebido
  * (pode ser dado pessoal ou segredo colado por engano).
  */

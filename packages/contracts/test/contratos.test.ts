@@ -5,12 +5,14 @@ import {
   ERROS,
   EsquemaDadosMovimento,
   EsquemaErro,
+  EsquemaInstanteConfirmado,
   EsquemaPedidoComando,
   EsquemaQuantidade,
   EsquemaRecibo,
   criarRegistrador,
   erroContrato,
   erroDeValidacao,
+  falhaPermanenteSemGravacao,
   statusDoRecibo,
 } from '../src/index.js';
 
@@ -63,9 +65,47 @@ describe('pedido de comando (8.2.1; ENG-021)', () => {
       { ...pedido, target: { ...pedido.target, expectedVersion: -1 } },
       { ...pedido, target: { ...pedido.target, expectedVersion: 1.5 } },
       { ...pedido, confirmedAt: '2026-09-27T10:00:00' },
+      // Formatos que o PostgreSQL recusaria no INSERT (ENV-CAD01-NUL-CL22).
+      { ...pedido, confirmedAt: '0000-01-01T00:00:00Z' },
+      { ...pedido, confirmedAt: '2026-02-30T10:00:00Z' },
+      { ...pedido, confirmedAt: '2026-09-27T10:00:00Z\u0000' },
+      { ...pedido, confirmedAt: '2026-09-27T10:00:00+16:00' },
+      { ...pedido, confirmedAt: '2026-09-27T10:00:00-23:59' },
+      { ...pedido, confirmedAt: '2026-09-27T10:00:00.1234567891Z' },
     ]) {
       expect(EsquemaPedidoComando.safeParse(p).success).toBe(false);
     }
+  });
+
+  it('recusa U+0000 em todo texto do envelope que vai ao banco; chave de texto livre sem NUL continua aceita', () => {
+    for (const p of [
+      { ...pedido, idempotencyKey: 'chave\u0000x' },
+      { ...pedido, idempotencyKey: '\u0000' },
+      { ...pedido, target: { ...pedido.target, type: 'lot\u0000' } },
+      { ...pedido, deviceId: 'aparelho\u0000' },
+    ]) {
+      const r = EsquemaPedidoComando.safeParse(p);
+      expect(r.success).toBe(false);
+      expect(r.success ? [] : r.error.issues.map((i) => i.message)).toContain('NUL');
+    }
+    // O ano 0001 é o primeiro que o banco aceita; o 0000 é recusado com o motivo.
+    expect(EsquemaInstanteConfirmado.safeParse('0001-01-01T00:00:00Z').success).toBe(true);
+    const anoZero = EsquemaInstanteConfirmado.safeParse('0000-06-01T00:00:00-03:00');
+    expect(anoZero.success ? [] : anoZero.error.issues.map((i) => i.message)).toContain('ano_zero');
+    // Deslocamento até ±15:59, o limite do PostgreSQL.
+    for (const v of [
+      '2026-09-27T10:00:00+15:59',
+      '2026-09-27T10:00:00-15:59',
+      '0001-01-01T00:00:00+03:00',
+      '2026-09-27T10:00:00.123456789Z',
+    ])
+      expect(EsquemaInstanteConfirmado.safeParse(v).success, v).toBe(true);
+    const fuso16 = EsquemaInstanteConfirmado.safeParse('2026-09-27T10:00:00+16:00');
+    expect(fuso16.success ? [] : fuso16.error.issues.map((i) => i.message)).toContain('fuso_fora_da_faixa');
+    // A chave não precisa ser UUID: o contrato aceita texto (até 128), com acento, espaço e barra.
+    expect(EsquemaPedidoComando.safeParse({ ...pedido, idempotencyKey: 'pedido 42/ação' }).success).toBe(
+      true,
+    );
   });
 
   it('dados do movimento: tipo discriminado, quantidade como objeto e situações do domínio', () => {
@@ -187,5 +227,23 @@ describe('registrador (ENG-081)', () => {
     expect(() => {
       reg.registrar('info', 'x', '  ');
     }).toThrow(/correlation_id/);
+  });
+});
+
+describe('falha permanente sem gravação (ENV-CAD01-NUL-CL22)', () => {
+  it('só FALHA_INTERNA com o detalhe exato; qualquer outra forma continua incerta', () => {
+    const sinal = { resultadoIncerto: false, repetirMesmoConteudo: false };
+    expect(
+      falhaPermanenteSemGravacao(erroContrato('FALHA_INTERNA', 'm', 'c', { detalhe: sinal }).corpo),
+    ).toBe(true);
+    for (const corpo of [
+      erroContrato('FALHA_INTERNA', 'm', 'c').corpo,
+      erroContrato('FALHA_INTERNA', 'm', 'c', { detalhe: { resultadoIncerto: false } }).corpo,
+      erroContrato('FALHA_INTERNA', 'm', 'c', { detalhe: { ...sinal, resultadoIncerto: true } }).corpo,
+      erroContrato('FALHA_INTERNA', 'm', 'c', { detalhe: { ...sinal, extra: 1 } }).corpo,
+      erroContrato('FALHA_TRANSITORIA', 'm', 'c', { detalhe: sinal }).corpo,
+    ]) {
+      expect(falhaPermanenteSemGravacao(corpo), JSON.stringify(corpo.detalhe)).toBe(false);
+    }
   });
 });

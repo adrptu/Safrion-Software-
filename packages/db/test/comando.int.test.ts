@@ -1,7 +1,10 @@
+import { EsquemaInstanteConfirmado, falhaPermanenteSemGravacao } from '@safrion/contracts';
+import pg, { type ClientBase } from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { executarComando, type Recibo } from '../src/comando.js';
+import { consultarIntencao, executarComando, type Efeito, type Recibo } from '../src/comando.js';
 import { ErroComando, RejeicaoNegocio } from '../src/erros.js';
+import { respostaDeErro } from '../src/resposta.js';
 import { saldoDoLote } from '../src/estoque.js';
 import { emOrganizacao } from '../src/sessao.js';
 import {
@@ -271,6 +274,17 @@ describe('envelope de comando (73.3; IDEM-12 a IDEM-17; ENG-022)', () => {
       { ...intencao, actorId: 'nao-e-uuid' },
       { ...intencao, data: { quantidade: 10.5 } },
       { ...intencao, target: { ...intencao.target, expectedVersion: -1 } },
+      // U+0000 em texto do envelope (ENV-CAD01-NUL-CL22): recusa de contrato antes de qualquer acesso ao banco.
+      { ...intencao, idempotencyKey: 'k\u0000x' },
+      { ...intencao, commandType: 'TESTE\u0000' },
+      { ...intencao, deviceId: 'aparelho\u0000' },
+      { ...intencao, correlationId: 'corr\u0000' },
+      { ...intencao, target: { ...intencao.target, type: 'lot\u0000' } },
+      // confirmedAt no formato do contrato: o Date.parse aceitava estes três, e o banco os recusava no INSERT.
+      { ...intencao, confirmedAt: 'Sep 30 2026\u0000' },
+      { ...intencao, confirmedAt: '0000-01-01T00:00:00Z' },
+      { ...intencao, confirmedAt: '2026-02-30T10:00:00Z' },
+      { ...intencao, confirmedAt: '2026-09-30T10:00:00+16:00' },
     ];
     for (const caso of casos) {
       const e = await erroDe(executarComando(amb.app, s.org, caso, efeito));
@@ -279,5 +293,102 @@ describe('envelope de comando (73.3; IDEM-12 a IDEM-17; ENG-022)', () => {
     const semOrg = await erroDe(executarComando(amb.app, 'org-falsa', intencao, efeito));
     expect(semOrg.codigo).toBe('ORGANIZACAO_INVALIDA');
     expect(await contagens(amb.app, s.org)).toEqual({ movimentos: 0, intencoes: 0, auditoria: 0, outbox: 0 });
+    // O limite de baixo do formato cabe no banco: ano 0001 com fuso confirma.
+    const limite = await executarComando(
+      amb.app,
+      s.org,
+      { ...intencao, confirmedAt: '0001-01-01T00:00:00Z' },
+      efeito,
+    );
+    expect(limite.outcome).toBe('confirmed');
+  });
+
+  it('confirmedAt: todo valor que o contrato aceita o PostgreSQL aceita como timestamptz', async () => {
+    // [valor, o contrato aceita?]. O contrato pode ser mais estrito que o banco (24:00), nunca mais solto.
+    const casos: [string, boolean][] = [
+      ['0001-01-01T00:00:00Z', true],
+      ['0001-01-01T00:00:00+03:00', true],
+      ['0001-01-01T00:00:00-15:59', true],
+      ['2024-02-29T12:00:00Z', true],
+      ['2026-09-30T10:00:00.123456789-03:00', true],
+      ['2026-09-30T10:00:00+15:59', true],
+      ['9999-12-31T23:59:59.999999-15:59', true],
+      ['0000-01-01T00:00:00Z', false],
+      ['2026-02-29T00:00:00Z', false],
+      ['2026-09-30T10:00:00+16:00', false],
+      ['2026-09-30T10:00:00-23:59', false],
+      ['2026-09-30T24:00:00Z', false],
+      ['2026-09-30T10:00:00.1234567891Z', false],
+      [`2026-09-30T10:00:00.${'1'.repeat(200)}Z`, false],
+    ];
+    for (const [valor, contrato] of casos) {
+      expect(EsquemaInstanteConfirmado.safeParse(valor).success, valor).toBe(contrato);
+      const banco = await amb.app.query('SELECT $1::timestamptz AS t', [valor]).then(
+        () => true,
+        (e: unknown) => {
+          expect(String((e as { code?: unknown }).code), valor).toMatch(/^22/);
+          return false;
+        },
+      );
+      if (contrato) expect(banco, valor).toBe(true);
+    }
+    // As duas regras do contrato além do formato existem porque o banco recusa estes valores.
+    for (const valor of ['0000-01-01T00:00:00Z', '2026-09-30T10:00:00+16:00']) {
+      const codigo = await amb.app.query('SELECT $1::timestamptz', [valor]).then(
+        () => 'aceito',
+        (e: unknown) => String((e as { code?: unknown }).code),
+      );
+      expect(codigo, valor).toMatch(/^22/);
+    }
+  });
+
+  it('dado recusado pelo PostgreSQL (classe 22) com ROLLBACK confirmado: FALHA_INTERNA 500, sem "repita" e nada gravado', async () => {
+    const s = await semear(amb.app, 'Classe22');
+    const { intencao, efeito } = intencaoMovimento(s, 'k-22', 0, ENTRADA);
+    const recusado: typeof efeito = async (c, ctx) => {
+      const r = await efeito(c, ctx);
+      await c.query("SELECT 'nao-e-numero'::int"); // 22P02 real do PostgreSQL, depois do efeito já ter gravado
+      return r;
+    };
+    const e = await erroDe(executarComando(amb.app, s.org, intencao, recusado));
+    expect(e.codigo).toBe('FALHA_INTERNA');
+    expect(e.detalhe).toEqual({ resultadoIncerto: false, codigoPg: '22P02' });
+    expect(e.cause).toBeInstanceOf(pg.DatabaseError);
+    const resposta = respostaDeErro(e, 'corr-22');
+    expect([resposta.status, resposta.corpo.codigo]).toEqual([500, 'FALHA_INTERNA']);
+    // Sinal público de falha permanente sem gravação: a tela para de oferecer o reenvio do mesmo conteúdo.
+    expect(resposta.corpo.detalhe).toEqual({ resultadoIncerto: false, repetirMesmoConteudo: false });
+    expect(falhaPermanenteSemGravacao(resposta.corpo)).toBe(true);
+    expect(JSON.stringify(resposta)).not.toMatch(/22P02|repita/i);
+    expect(await contagens(amb.app, s.org)).toEqual({ movimentos: 0, intencoes: 0, auditoria: 0, outbox: 0 });
+    expect(await versaoDoLote(s)).toBe(0);
+    // Nada ficou registrado: a mesma chave com o efeito correto processa uma vez.
+    expect((await executarComando(amb.app, s.org, intencao, efeito)).outcome).toBe('confirmed');
+  });
+
+  it('um objeto qualquer com code de classe 22 não ganha a confiança do erro real: segue falha transitória', async () => {
+    const s = await semear(amb.app, 'Classe22Falsa');
+    const { intencao } = intencaoMovimento(s, 'k-22f', 0, ENTRADA);
+    const falso: Efeito = () =>
+      Promise.reject(Object.assign(new Error('parece do banco'), { code: '22P02' }));
+    const e = await erroDe(executarComando(amb.app, s.org, intencao, falso));
+    expect(e.codigo).toBe('FALHA_TRANSITORIA');
+    expect(e.detalhe).toMatchObject({ resultadoIncerto: false });
+    expect(await contagens(amb.app, s.org)).toEqual({ movimentos: 0, intencoes: 0, auditoria: 0, outbox: 0 });
+  });
+
+  it('consulta de intenção com U+0000 na chave ou no tipo devolve null sem consultar o banco', async () => {
+    const semBanco = {
+      query: () => {
+        throw new Error('não deveria consultar o banco');
+      },
+    } as unknown as ClientBase;
+    const org = await semear(amb.app, 'ConsultaNul');
+    for (const consulta of [
+      { commandType: 'estoque.registrar-entrada', idempotencyKey: 'k\u0000', actorId: org.usuario },
+      { commandType: 'estoque\u0000', idempotencyKey: 'k', actorId: org.usuario },
+    ]) {
+      expect(await consultarIntencao(semBanco, consulta)).toBeNull();
+    }
   });
 });

@@ -11,6 +11,7 @@ const DESTINO: Readonly<Record<CodigoErroComando, CodigoErro>> = {
   IDEMPOTENCY_KEY_REUSED: 'IDEMPOTENCY_KEY_REUSED',
   IDEMPOTENCY_IN_PROGRESS: 'IDEMPOTENCY_IN_PROGRESS',
   FALHA_TRANSITORIA: 'FALHA_TRANSITORIA',
+  FALHA_INTERNA: 'FALHA_INTERNA',
   MIGRACAO_ALTERADA: 'FALHA_INTERNA',
 };
 
@@ -41,6 +42,16 @@ export function respostaDeErro(
   if (erro instanceof ErroComando) {
     const destino = DESTINO[erro.codigo];
     if (destino === 'FALHA_INTERNA') {
+      // Só a recusa de dado com o ROLLBACK confirmado (classe 22) leva o sinal público de falha permanente sem
+      // gravação; o SQLSTATE fica no log. O resto continua genérico e, para o cliente, incerto (ENV-CAD01-NUL-CL22).
+      if (erro.codigo === 'FALHA_INTERNA' && erro.detalhe['resultadoIncerto'] === false) {
+        return erroContrato(
+          'FALHA_INTERNA',
+          'O servidor recusou um dado deste pedido e nada foi gravado. Enviar o mesmo conteúdo de novo não resolve; guarde esta correlação e fale com o suporte.',
+          correlationId,
+          { detalhe: { resultadoIncerto: false, repetirMesmoConteudo: false } },
+        );
+      }
       return erroContrato(
         'FALHA_INTERNA',
         'Erro inesperado; use esta correlação ao falar com o suporte.',

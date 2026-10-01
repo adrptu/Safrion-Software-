@@ -8,6 +8,7 @@ export type CodigoErroComando =
   | 'IDEMPOTENCY_KEY_REUSED' // mesma chave com outro conteúdo (IDEM-14)
   | 'IDEMPOTENCY_IN_PROGRESS' // mesma chave com transação em curso além do limite (IDEM-15)
   | 'FALHA_TRANSITORIA' // repetir com a mesma chave e o mesmo conteúdo
+  | 'FALHA_INTERNA' // o banco recusou um dado (classe 22) com o ROLLBACK confirmado: nada gravado, repetir não resolve
   | 'MIGRACAO_ALTERADA';
 
 /**

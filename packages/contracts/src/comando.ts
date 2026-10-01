@@ -2,16 +2,33 @@ import { z } from 'zod';
 
 import { EsquemaQuantidade, EsquemaSituacao } from './quantidade.js';
 
+/**
+ * Texto do envelope que vai para o PostgreSQL. O banco recusa U+0000 em texto (22021); aqui isso é recusa de contrato
+ * (400), antes de qualquer acesso, e nunca remoção silenciosa (ENV-CAD01-NUL-CL22).
+ */
 const texto = (max: number) =>
   z
     .string()
     .max(max)
-    .refine((v) => v.trim() !== '', { message: 'vazio' });
+    .refine((v) => v.trim() !== '', { message: 'vazio' })
+    .refine((v) => !v.includes('\u0000'), { message: 'NUL' });
 /** UUID canônico em minúsculas, a mesma regra do envelope (@safrion/db ehUuid). */
 export const EsquemaUuid = z
   .string()
   .regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/, 'uuid_canonico');
 const uuid = EsquemaUuid;
+
+/**
+ * Instante informado pelo iniciador, ISO 8601 com fuso: dado, não autoridade (73.3.5). O envelope (@safrion/db
+ * validarIntencao) usa este mesmo esquema. O ano 0000, o deslocamento de 16 h ou mais e a fração de segundo muito longa
+ * cabem no formato, mas o PostgreSQL os recusa (22008, 22009 e 22007): aqui são recusa de contrato, antes de qualquer
+ * acesso (ENV-CAD01-NUL-CL22). A fração vai até 9 casas; o banco guarda microssegundos.
+ */
+export const EsquemaInstanteConfirmado = z.iso
+  .datetime({ offset: true })
+  .refine((v) => !v.startsWith('0000'), { message: 'ano_zero' })
+  .refine((v) => !/[+-](1[6-9]|2[0-3]):[0-5]\d$/.test(v), { message: 'fuso_fora_da_faixa' })
+  .refine((v) => !/\.\d{10,}/.test(v), { message: 'fracao_longa' });
 
 /**
  * O que o cliente envia num comando (8.2.1; 73.3). Organização, ator e tipo de iniciador NÃO vêm aqui: vêm da sessão ou
@@ -26,8 +43,7 @@ export const EsquemaPedidoComando = z.strictObject({
     expectedVersion: z.int().min(0).max(Number.MAX_SAFE_INTEGER),
   }),
   data: z.unknown(),
-  /** Instante informado pelo iniciador, ISO 8601 com fuso: dado, não autoridade (73.3.5). */
-  confirmedAt: z.iso.datetime({ offset: true }).optional(),
+  confirmedAt: EsquemaInstanteConfirmado.optional(),
   deviceId: texto(128).optional(),
 });
 export type PedidoComando = z.infer<typeof EsquemaPedidoComando>;

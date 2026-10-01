@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
+import { falhaPermanenteSemGravacao } from '@safrion/contracts';
 import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
@@ -480,7 +481,25 @@ describe('trava do efeito com prazo', () => {
     }
   });
 
-  it('outra falha do efeito com ROLLBACK confirmado segue transitória, sem repetirEmMs', async () => {
+  it('outra falha do efeito com ROLLBACK confirmado (fora das classes 22, 40P01 e 55P03) segue transitória, sem repetirEmMs', async () => {
+    const pool = new pg.Pool({ connectionString: amb.url('app_runtime'), max: 1 });
+    try {
+      const erro: unknown = await executarComando(pool, a.org, intencao(randomUUID()), async (c) => {
+        await c.query('SELECT 1 FROM app.tabela_que_nao_existe');
+        return nada;
+      }).catch((e: unknown) => e);
+      expect(erro).toBeInstanceOf(ErroComando);
+      expect((erro as ErroComando).codigo).toBe('FALHA_TRANSITORIA');
+      expect((erro as ErroComando).detalhe).toEqual({ resultadoIncerto: false, codigoPg: '42P01' });
+      const resposta = respostaDeErro(erro, 'corr-42');
+      expect(resposta.corpo.detalhe).toEqual({ resultadoIncerto: false });
+      expect(falhaPermanenteSemGravacao(resposta.corpo)).toBe(false);
+    } finally {
+      await pool.end();
+    }
+  });
+
+  it('classe 22 com ROLLBACK confirmado (1/0, 22012) é falha interna com o sinal, não transitória (CAD-01 §11.1)', async () => {
     const pool = new pg.Pool({ connectionString: amb.url('app_runtime'), max: 1 });
     try {
       const erro: unknown = await executarComando(pool, a.org, intencao(randomUUID()), async (c) => {
@@ -488,8 +507,58 @@ describe('trava do efeito com prazo', () => {
         return nada;
       }).catch((e: unknown) => e);
       expect(erro).toBeInstanceOf(ErroComando);
+      expect((erro as ErroComando).codigo).toBe('FALHA_INTERNA');
       expect((erro as ErroComando).detalhe).toEqual({ resultadoIncerto: false, codigoPg: '22012' });
+      expect(falhaPermanenteSemGravacao(respostaDeErro(erro, 'corr-22012').corpo)).toBe(true);
     } finally {
+      await pool.end();
+    }
+  });
+
+  it('classe 22 com ROLLBACK que não se confirma: resultado incerto, transitória, sem o sinal de falha permanente', async () => {
+    // A guarda !incerto do ramo da classe 22: depois do 22P02 real, o backend da própria tentativa é encerrado antes de
+    // o erro voltar ao envelope, e o ROLLBACK não se confirma. Nada pode ser dito sobre a gravação.
+    const pool = new pg.Pool({ connectionString: amb.url('app_runtime'), max: 1 });
+    const chave = randomUUID();
+    const antes = await residuo(chave);
+    let pendente: Promise<unknown> | undefined;
+    try {
+      const r = await comVigia(
+        executarComando(pool, a.org, intencao(chave), async (c) => {
+          const pid = (await c.query<{ pid: number }>('SELECT pg_backend_pid() AS pid')).rows[0]?.pid;
+          try {
+            await c.query("SELECT 'nao-e-numero'::int");
+          } catch (falha) {
+            let relogio: ReturnType<typeof setTimeout> | undefined;
+            const caiu = new Promise<void>((fim, falhou) => {
+              c.once('end', () => {
+                fim();
+              });
+              relogio = setTimeout(() => {
+                falhou(new Error('o backend não encerrou'));
+              }, 3000);
+            });
+            await amb.app.query('SELECT pg_terminate_backend($1)', [pid]);
+            await caiu.finally(() => {
+              clearTimeout(relogio);
+            });
+            throw falha;
+          }
+          return nada;
+        }),
+        10 * ESPERA_MS,
+      );
+      pendente = r.marcado;
+      expect(r.resultado).toMatchObject({ ok: false });
+      const erro = (r.resultado as { erro: unknown }).erro;
+      expect(erro).toBeInstanceOf(ErroComando);
+      expect((erro as ErroComando).codigo).toBe('FALHA_TRANSITORIA');
+      expect((erro as ErroComando).detalhe).toEqual({ resultadoIncerto: true, codigoPg: '22P02' });
+      expect(falhaPermanenteSemGravacao(respostaDeErro(erro, 'corr-22-incerto').corpo)).toBe(false);
+      expect([pool.totalCount, pool.idleCount, pool.waitingCount]).toEqual([0, 0, 0]);
+      expect(await residuo(chave)).toEqual(antes);
+    } finally {
+      await pendente;
       await pool.end();
     }
   });
