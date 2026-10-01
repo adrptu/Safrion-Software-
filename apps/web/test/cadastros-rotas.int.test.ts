@@ -3,13 +3,19 @@
 import { randomUUID } from 'node:crypto';
 
 import { COMANDOS_CADASTRO, EsquemaErro, EsquemaRecibo, criarRegistrador } from '@safrion/contracts';
-import { definirIdentidadeAmbiente, restaurarDemonstracao, type Demonstracao } from '@safrion/db';
+import {
+  definirIdentidadeAmbiente,
+  emOrganizacao,
+  restaurarDemonstracao,
+  type Demonstracao,
+} from '@safrion/db';
 import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { criarBanco, type Ambiente } from '../../../packages/db/test/ambiente';
 import { criarRotaComandos } from '../src/rotas/comandos';
 import { criarRotasEntrar } from '../src/rotas/entrar';
+import { criarRotaIntencoes } from '../src/rotas/intencoes';
 import { COOKIE_LOGIN, COOKIE_SESSAO } from '../src/seguranca/cookies';
 
 const ORIGEM = 'http://localhost:3000';
@@ -34,6 +40,7 @@ const deps = () => ({
 });
 const entrar = criarRotasEntrar(deps);
 const comandos = criarRotaComandos(deps);
+const intencoes = criarRotaIntencoes(deps);
 
 function cookieDe(resposta: Response, nome: string): string | undefined {
   const linha = resposta.headers.getSetCookie().find((c) => c.startsWith(`${nome}=`));
@@ -186,6 +193,30 @@ describe('POST cadastros.* (contrato CAD-01 §4)', () => {
     );
     expect(valida.status).toBe(200);
     expect(await reciboDe(valida)).toMatchObject({ outcome: 'confirmed', alreadyReceived: false });
+
+    // U+0000 na chave de idempotência (ENV-CAD01-NUL-CL22): 400 de contrato antes do envelope, sem recibo nem efeito.
+    const chaveNul = pedido('farm', { nome: 'Fazenda Chave Nula', fuso: 'America/Sao_Paulo' });
+    const semNul = await post(
+      COMANDOS_CADASTRO.criarFazenda,
+      { ...chaveNul, idempotencyKey: 'chave\u0000nula' },
+      gerente,
+    );
+    expect(semNul.status).toBe(400);
+    expect((await erroDe(semNul)).codigo).toBe('CONTRATO_INVALIDO');
+    const antes = await emOrganizacao(amb.app, demo.organizationId, (c) =>
+      c.query<{ n: string }>("SELECT count(*)::text n FROM app.farm WHERE name = 'Fazenda Chave Nula'"),
+    );
+    expect(antes.rows[0]?.n).toBe('0');
+    // GET do recibo com U+0000 na chave ("%00" na URL): 400 de contrato antes de tocar no banco, não "não localizado".
+    const tipo = COMANDOS_CADASTRO.criarFazenda;
+    const consulta = await intencoes(
+      new Request(`${ORIGEM}/api/v1/intencoes/${tipo}/chave%00nula`, {
+        headers: { cookie: `${COOKIE_SESSAO}=${gerente}` },
+      }),
+      { params: Promise.resolve({ commandType: tipo, chave: 'chave\u0000nula' }) },
+    );
+    expect(consulta.status).toBe(400);
+    expect((await erroDe(consulta)).codigo).toBe('CONTRATO_INVALIDO');
 
     const grande = await post(COMANDOS_CADASTRO.criarFazenda, `{"x":"${'a'.repeat(17 * 1024)}"}`, gerente);
     expect(grande.status).toBe(413);

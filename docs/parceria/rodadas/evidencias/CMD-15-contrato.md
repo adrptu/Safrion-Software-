@@ -449,7 +449,7 @@ Fica declarado que a detecção depende da mensagem do pg-pool fixado; o teste f
 - Disputa curta no mesmo lote (trava segurada por menos que o prazo): os comandos esperam e confirmam, sem 503.
 - Espera pela chave inalterada: segue `IDEMPOTENCY_IN_PROGRESS`.
 - **Duas travas seguidas**, cada uma liberada antes da espera: o comando confirma e a duração total passa da espera. Isso prova que o limite é por trava, não do comando.
-- Outra falha do efeito com ROLLBACK confirmado (não 55P03) segue `FALHA_TRANSITORIA` sem `repetirEmMs`.
+- Outra falha do efeito com ROLLBACK confirmado (não 55P03) segue `FALHA_TRANSITORIA` sem `repetirEmMs`. Exceção desde 01/10: a classe 22 (dado recusado pelo banco) vira `FALHA_INTERNA` com o sinal de falha permanente (CAD-01 §11.1); o teste desta linha usa um erro fora das classes 22, 40P01 e 55P03.
 - Sem resíduo depois do ROLLBACK: nenhuma intenção, auditoria ou outbox da chave, e a conexão devolvida ao pool.
 - Tentativa repetida: sem teste novo; a regressão de prazo da v3.9 fica com os testes de `repeticao-deadlock` existentes.
 - O teste usa vigia com prazo e solta a trava no `finally`, para que a mutação "sem prazo na trava" falhe pela asserção e não por timeout.

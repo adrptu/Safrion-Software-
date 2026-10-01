@@ -106,7 +106,7 @@ describe('contrato e log do envelope (F0-b2)', () => {
     expect(r.outcome).toBe('confirmed');
   });
 
-  it('falha real de transação com canário na mensagem do banco: fora do log e da resposta, preservada em cause', async () => {
+  it('falha real de transação (classe 22) com canário na mensagem do banco: FALHA_INTERNA, fora do log e da resposta, preservada em cause', async () => {
     const canario = 'CANARIO_FICTICIO_TRANSACAO_7f31';
     const { intencao } = comando('c-5', 3, '1');
     const erro: unknown = await executarComando(
@@ -120,13 +120,15 @@ describe('contrato e log do envelope (F0-b2)', () => {
       { registrador },
     ).catch((e: unknown) => e);
     expect(erro).toBeInstanceOf(ErroComando);
-    expect((erro as ErroComando).codigo).toBe('FALHA_TRANSITORIA');
+    // Dado recusado pelo banco (22P02) com o ROLLBACK confirmado: falha interna, não "repita" (ENV-CAD01-NUL-CL22).
+    expect((erro as ErroComando).codigo).toBe('FALHA_INTERNA');
     expect(String((erro as Error).cause instanceof Error ? (erro as Error).cause : '')).toContain(canario);
     expect(JSON.stringify((erro as ErroComando).detalhe)).not.toContain(canario);
     const linha = logs().at(-1);
     expect(linha).toMatchObject({
+      nivel: 'erro',
       correlation_id: 'corr-c-5',
-      erro_codigo: 'FALHA_TRANSITORIA',
+      erro_codigo: 'FALHA_INTERNA',
       codigo_pg: '22P02',
     });
     expect(linhas.join('\n')).not.toContain(canario);

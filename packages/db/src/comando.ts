@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import type { Registrador } from '@safrion/contracts';
+import { EsquemaInstanteConfirmado, type Registrador } from '@safrion/contracts';
 import { ErroDominio } from '@safrion/domain';
 import pg, { type ClientBase, type Pool, type PoolClient } from 'pg';
 
@@ -54,6 +54,11 @@ export interface ResultadoEfeito {
   readonly reason?: string;
 }
 
+/**
+ * Um erro de classe 22 que escape do efeito vira falha permanente sem gravação ("enviar o mesmo conteúdo não
+ * resolve"), o que só é verdade quando o valor recusado veio do pedido. Um efeito que calcule ou converta em SQL sobre
+ * estado gravado traduz essa falha em RejeicaoNegocio dentro dele (contrato CAD-01 §11.1).
+ */
 export type Efeito = (cliente: PoolClient, ctx: ContextoEfeito) => Promise<ResultadoEfeito>;
 
 /** Recibo imutável (IDEM-17): igual no original e no reenvio, exceto alreadyReceived. */
@@ -100,8 +105,9 @@ interface LinhaIntencao {
 
 const INICIADORES: readonly TipoIniciador[] = ['app', 'web', 'integracao', 'ia', 'job'];
 
+/** Texto do envelope que vai para o PostgreSQL: sem U+0000, que o banco recusa em texto (22021; ENV-CAD01-NUL-CL22). */
 function texto(v: unknown, max: number): v is string {
-  return typeof v === 'string' && v.trim() !== '' && v.length <= max;
+  return typeof v === 'string' && v.trim() !== '' && v.length <= max && !v.includes('\u0000');
 }
 
 function versao(v: unknown): v is number {
@@ -133,8 +139,10 @@ function validarIntencao(i: Intencao): void {
     if (t['expectedVersion'] !== undefined && !versao(t['expectedVersion']))
       falhas.push('target.expectedVersion');
   }
+  // O mesmo formato do contrato. O Date.parse aceitava texto que o banco recusa (U+0000 no fim, 30 de fevereiro, ano
+  // 0000), e a recusa vinha do INSERT como 500, não como 400 (ENV-CAD01-NUL-CL22).
   const confirmado = x['confirmedAt'];
-  if (confirmado !== undefined && (typeof confirmado !== 'string' || Number.isNaN(Date.parse(confirmado))))
+  if (confirmado !== undefined && !EsquemaInstanteConfirmado.safeParse(confirmado).success)
     falhas.push('confirmedAt');
   if (!texto(x['correlationId'], 128)) falhas.push('correlationId');
   if (falhas.length > 0) {
@@ -190,6 +198,9 @@ const COLUNAS_RECIBO = `receipt_id, command_type, idempotency_key, payload_hash,
  *   prazo novo, e a resposta ainda depende do ROLLBACK e do transporte;
  * - trava do efeito ocupada além da espera pela chave (55P03, §9.3), com o ROLLBACK confirmado: FALHA_TRANSITORIA
  *   com `repetirEmMs`, sem repetição automática. O limite vale para cada espera por trava, não para o comando;
+ * - dado recusado pelo PostgreSQL (classe 22, erro real do driver) com o ROLLBACK confirmado antes de qualquer COMMIT:
+ *   FALHA_INTERNA com `resultadoIncerto: false`, sem repetição; a resposta pública leva o sinal de falha permanente sem
+ *   gravação (contrato CAD-01 §11.1);
  * - qualquer outra falha: FALHA_TRANSITORIA; repetir com a mesma chave e o mesmo conteúdo. Com o ROLLBACK confirmado
  *   antes do COMMIT, nada foi gravado; se a falha chega no COMMIT ou depois dele (conexão perdida), ou se o ROLLBACK
  *   não se confirma, o resultado é incerto (resultadoIncerto) e o reenvio devolve o recibo, se a transação confirmou.
@@ -246,7 +257,9 @@ export async function executarComando(
     const incerto = erro instanceof ErroComando ? erro.detalhe['resultadoIncerto'] : undefined;
     const sqlstate = erro instanceof ErroComando ? erro.detalhe['codigoPg'] : codigoPg(erro);
     registrar(
-      codigo === 'FALHA_TRANSITORIA' || codigo === 'NAO_CLASSIFICADO' ? 'erro' : 'aviso',
+      codigo === 'FALHA_TRANSITORIA' || codigo === 'FALHA_INTERNA' || codigo === 'NAO_CLASSIFICADO'
+        ? 'erro'
+        : 'aviso',
       'comando.falhou',
       correlacao,
       {
@@ -546,6 +559,23 @@ async function tentarComando(
     // "Nada gravado" só com o ROLLBACK confirmado antes de qualquer COMMIT; o resto é incerto e nunca repete aqui.
     const incerto = commitEnviado || quebrado !== undefined;
     const sqlstate = codigoPg(erro);
+    // Dado recusado pelo PostgreSQL (classe 22, data exception), com o ROLLBACK confirmado antes de qualquer COMMIT: nada
+    // desta tentativa ficou gravado, e repetir o mesmo conteúdo falharia igual. Não é falha transitória nem recusa de
+    // negócio: é falha interna, sem "repita" (ENV-CAD01-NUL-CL22). Só o erro real do driver conta; um objeto qualquer
+    // com `code` não ganha essa confiança. Com COMMIT enviado ou ROLLBACK sem confirmação, segue incerto (abaixo).
+    if (
+      !incerto &&
+      erro instanceof pg.DatabaseError &&
+      typeof erro.code === 'string' &&
+      erro.code.startsWith('22')
+    ) {
+      throw new ErroComando(
+        'FALHA_INTERNA',
+        'O banco recusou um dado desta operação e nada foi gravado; repetir o mesmo conteúdo não resolve.',
+        { resultadoIncerto: false, codigoPg: erro.code },
+        { cause: erro },
+      );
+    }
     // Trava que passou do lock_timeout (§9.3), com o ROLLBACK confirmado antes do COMMIT: nada desta tentativa ficou
     // gravado. Sugere quando repetir, sem repetir aqui.
     const travaOcupada = !incerto && sqlstate === '55P03';

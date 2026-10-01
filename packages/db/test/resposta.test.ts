@@ -1,4 +1,4 @@
-import { EsquemaErro, EsquemaUuid } from '@safrion/contracts';
+import { EsquemaErro, EsquemaUuid, falhaPermanenteSemGravacao } from '@safrion/contracts';
 import { ErroDominio } from '@safrion/domain';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
@@ -21,13 +21,17 @@ describe('resposta de erro do envelope (ENG-015)', () => {
         503,
       ],
       ['MIGRACAO_ALTERADA', { arquivo: '0001.sql' }, 'FALHA_INTERNA', 500],
+      // Classe 22 com o ROLLBACK confirmado (ENV-CAD01-NUL-CL22): 500 com o sinal de falha permanente, sem SQLSTATE nem
+      // "repita".
+      ['FALHA_INTERNA', { resultadoIncerto: false, codigoPg: '22P02' }, 'FALHA_INTERNA', 500],
     ];
     for (const [codigo, detalhe, esperado, status] of casos) {
       const r = respostaDeErro(new ErroComando(codigo, `mensagem ${codigo}`, detalhe), 'corr');
       expect(EsquemaErro.safeParse(r.corpo).success, codigo).toBe(true);
       expect([r.corpo.codigo, r.status]).toEqual([esperado, status]);
       const texto = JSON.stringify(r);
-      for (const interno of ['senha do banco', '57P01', '0001.sql']) expect(texto).not.toContain(interno);
+      for (const interno of ['senha do banco', '57P01', '0001.sql', '22P02', 'repita'])
+        expect(texto).not.toContain(interno);
     }
     expect(
       respostaDeErro(new ErroComando('FALHA_TRANSITORIA', 'm', { resultadoIncerto: true }), 'c').corpo
@@ -38,6 +42,29 @@ describe('resposta de erro do envelope (ENG-015)', () => {
     expect(
       respostaDeErro(new ErroComando('CONTRATO_INVALIDO', 'm', { campos: ['actorId'] }), 'c').corpo.campos,
     ).toEqual([{ caminho: 'actorId', problema: 'invalido' }]);
+  });
+
+  it('falha permanente sem gravação: sinal público só para FALHA_INTERNA com o ROLLBACK confirmado (ENV-CAD01-NUL-CL22)', () => {
+    const permanente = respostaDeErro(
+      new ErroComando('FALHA_INTERNA', 'm', { resultadoIncerto: false, codigoPg: '22021' }),
+      'c',
+    );
+    expect(permanente.status).toBe(500);
+    expect(permanente.corpo.detalhe).toEqual({ resultadoIncerto: false, repetirMesmoConteudo: false });
+    expect(falhaPermanenteSemGravacao(permanente.corpo)).toBe(true);
+    expect(permanente.corpo.mensagem).toContain('nada foi gravado');
+    expect(JSON.stringify(permanente)).not.toMatch(/22021|repita/i);
+    for (const outro of [
+      new ErroComando('FALHA_INTERNA', 'm', { resultadoIncerto: true }),
+      new ErroComando('FALHA_INTERNA', 'm', {}),
+      new ErroComando('MIGRACAO_ALTERADA', 'm', { resultadoIncerto: false }),
+      new ErroComando('FALHA_TRANSITORIA', 'm', { resultadoIncerto: false }),
+      new TypeError('x'),
+    ]) {
+      const r = respostaDeErro(outro, 'c');
+      expect(EsquemaErro.safeParse(r.corpo).success).toBe(true);
+      expect(falhaPermanenteSemGravacao(r.corpo), String(outro)).toBe(false);
+    }
   });
 
   it('validação, domínio e erro inesperado', () => {

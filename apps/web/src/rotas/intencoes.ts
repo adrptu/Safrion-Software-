@@ -47,6 +47,14 @@ export function criarRotaIntencoes(deps: () => Pick<Dependencias, 'banco' | 'ori
       if (chave.trim() === '' || chave.length > 128) {
         return erro('CONTRATO_INVALIDO', 'A chave da intenção tem de 1 a 128 caracteres.', correlationId);
       }
+      // U+0000 ("%00" na URL) nunca é uma chave válida: o banco o recusa em texto. Recusa antes de consultar a intenção.
+      if (chave.includes('\u0000')) {
+        return erro(
+          'CONTRATO_INVALIDO',
+          'A chave da intenção não pode conter o caractere nulo.',
+          correlationId,
+        );
+      }
       const recibo = await emOrganizacao(banco, sessao.organizationId, (c) =>
         consultarIntencao(c, { commandType, idempotencyKey: chave, actorId: sessao.usuarioId }),
       );

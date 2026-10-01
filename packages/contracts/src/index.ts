@@ -27,6 +27,7 @@ export {
 } from './cadastros.js';
 export {
   EsquemaDadosMovimento,
+  EsquemaInstanteConfirmado,
   EsquemaPedidoComando,
   EsquemaRecibo,
   EsquemaSaude,
@@ -42,6 +43,8 @@ export {
   EsquemaErro,
   erroContrato,
   erroDeValidacao,
+  EsquemaDetalheFalhaPermanente,
+  falhaPermanenteSemGravacao,
   type ClasseErro,
   type CodigoErro,
   type ErroContrato,
