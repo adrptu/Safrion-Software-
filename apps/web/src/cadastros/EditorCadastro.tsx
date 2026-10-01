@@ -53,16 +53,23 @@ export function EditorCadastro(p: Props) {
         situacao: p.edicao.situacao ?? 'ativo',
       },
   );
-  const [iniciais] = useState(() => (p.inicial ? p.inicial.iniciais : { ...campos }));
+  const [iniciais, setIniciais] = useState(() => (p.inicial ? p.inicial.iniciais : { ...campos }));
   const [avisoLocal, setAvisoLocal] = useState('');
   const [erros, setErros] = useState<Record<string, string>>({});
   const [novaFazenda, setNovaFazenda] = useState(false);
   const [criadas, setCriadas] = useState<OpcaoFazenda[]>([]);
   const comando = useCadastroComando(p.usuarioId, p.organizacaoId, p.confirmado, p.inicial);
+  const [chaveExibida, setChaveExibida] = useState(p.inicial?.intencao.chave);
+  // Outra aba pode ter preparado a correção: exibir os campos dessa intenção, sem misturá-los ao rascunho anterior.
+  if (comando.pendente && comando.pendente.intencao.chave !== chaveExibida) {
+    setChaveExibida(comando.pendente.intencao.chave);
+    setCampos(comando.pendente.campos);
+    setIniciais(comando.pendente.iniciais);
+  }
   const tipo = p.edicao.tipo;
   const editando = p.edicao.id !== undefined;
   const semBase = editando && tipo !== 'situacao' && iniciais === undefined;
-  const travado = comando.ocupado || comando.pendente !== null;
+  const travado = comando.ocupado || (comando.pendente !== null && !comando.corrigivel);
   const opcoes = [...p.fazendas, ...criadas.filter((f) => !p.fazendas.some((x) => x.id === f.id))];
   const titulo =
     tipo === 'situacao'
@@ -92,7 +99,11 @@ export function EditorCadastro(p: Props) {
       tipo === 'fazenda'
         ? { nome: campos['nome'], fuso: campos['fuso'] }
         : tipo === 'talhao'
-          ? { nome: campos['nome'], fazenda: campos['fazenda'], areaDeclaradaHa: area?.ok ? area.valor : '' }
+          ? {
+              nome: campos['nome'],
+              fazenda: campos['fazenda'],
+              areaDeclaradaHa: area?.ok ? area.valor : '',
+            }
           : { situacao: campos['situacao'] };
     const esquema =
       tipo === 'fazenda'
@@ -142,8 +153,8 @@ export function EditorCadastro(p: Props) {
     const intencao = novaIntencao(
       commandType,
       tipo === 'fazenda' ? 'farm' : 'field',
-      p.edicao.id ?? crypto.randomUUID(),
-      comando.versaoAtual ?? p.edicao.versao ?? 0,
+      comando.pendente?.intencao.targetId ?? p.edicao.id ?? crypto.randomUUID(),
+      comando.pendente?.intencao.expectedVersion ?? comando.versaoAtual ?? p.edicao.versao ?? 0,
       alteracoes,
       crypto.randomUUID(),
     );
@@ -298,6 +309,7 @@ export function EditorCadastro(p: Props) {
         {comando.mensagem ? (
           <div className={s.aviso} role="status">
             <p>{comando.mensagem}</p>
+            {comando.correlacao ? <p>Correlação para suporte: {comando.correlacao}</p> : null}
             {comando.sessao ? (
               <Link href={`/entrar?destino=${encodeURIComponent(p.volta)}`}>Entrar novamente</Link>
             ) : null}
@@ -307,7 +319,7 @@ export function EditorCadastro(p: Props) {
           <button type="button" className="botao" onClick={p.cancelar}>
             Voltar
           </button>
-          {comando.pendente ? (
+          {comando.pendente && !comando.corrigivel ? (
             <button
               type="button"
               className="botao botao-primario"
@@ -320,9 +332,11 @@ export function EditorCadastro(p: Props) {
             >
               {comando.ocupado
                 ? 'Aguarde…'
-                : comando.naoLocalizado
-                  ? 'Reenviar mesmo cadastro'
-                  : 'Consultar recibo'}
+                : comando.falhaDePersistencia
+                  ? 'Guardar recuperação'
+                  : comando.naoLocalizado
+                    ? 'Reenviar mesmo cadastro'
+                    : 'Consultar recibo'}
             </button>
           ) : (
             <button
@@ -331,7 +345,11 @@ export function EditorCadastro(p: Props) {
               disabled={travado || semBase}
               aria-busy={comando.ocupado}
             >
-              {comando.versaoAtual !== null ? 'Reaplicar minhas alterações' : titulo}
+              {comando.corrigivel
+                ? 'Corrigir e enviar novo pedido'
+                : comando.versaoAtual !== null
+                  ? 'Reaplicar minhas alterações'
+                  : titulo}
             </button>
           )}
         </div>

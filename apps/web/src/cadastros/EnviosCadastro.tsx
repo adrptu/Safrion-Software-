@@ -49,9 +49,9 @@ export function EnviosCadastro({
     };
   }, [usuarioId, organizacaoId, revisao]);
   return pendentes.length ? (
-    <section className={s.aviso} aria-label="Envios sem confirmação">
-      <h2>Conferir envios</h2>
-      <p>Consulte os recibos antes de repetir estes cadastros.</p>
+    <section className={s.aviso} aria-label="Retomar cadastros">
+      <h2>Retomar cadastros</h2>
+      <p>Corrija os pedidos recusados ou consulte os envios sem confirmação.</p>
       <ul>
         {pendentes.map((g) => (
           <li key={g.intencao.chave}>
@@ -62,7 +62,8 @@ export function EnviosCadastro({
                 abrir(g);
               }}
             >
-              {g.contexto.titulo} · {g.campos['nome'] || 'Talhão'}
+              {g.falha?.tipo === 'corrigir' ? 'Corrigir cadastro' : 'Consultar envio'} ·{' '}
+              {g.campos['nome'] || 'Talhão'}
             </button>
           </li>
         ))}

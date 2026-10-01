@@ -6,6 +6,14 @@ import {
   EsquemaPedidoComando,
   EsquemaRecibo,
   statusDoRecibo,
+  falhaPermanenteSemGravacao,
+  normalizarNome,
+  EsquemaAreaHa,
+  EsquemaDadosCriarFazenda,
+  EsquemaDadosEditarFazenda,
+  EsquemaDadosCriarTalhao,
+  EsquemaDadosEditarTalhao,
+  EsquemaDadosAlterarSituacaoTalhao,
   type ComandoCadastro,
   type ErroContrato,
   type ReciboContrato,
@@ -76,13 +84,27 @@ export function novaIntencao(
 
 export type Desfecho =
   | { readonly tipo: 'resolvido'; readonly recibo: ReciboContrato }
-  | { readonly tipo: 'nao_gravado'; readonly mensagem: string; readonly sessao: boolean }
+  | {
+      readonly tipo: 'corrigir';
+      readonly mensagem: string;
+      readonly correlacao: string;
+      readonly sessao: false;
+    }
+  | {
+      readonly tipo: 'nao_gravado';
+      readonly mensagem: string;
+      readonly sessao: boolean;
+    }
   | {
       readonly tipo: 'incerto';
       readonly mensagem: string;
       readonly sessao: boolean;
       /** Habilita somente o reenvio do mesmo corpo e chave, nunca uma nova intenção. */
       readonly naoLocalizado: boolean;
+      readonly bloqueioPermanente?: {
+        readonly mensagem: string;
+        readonly correlacao: string;
+      };
     };
 
 /** Um recibo válido de outra intenção ou versão não prova o resultado deste envio. */
@@ -132,6 +154,20 @@ export function desfechoDoEnvio(
   const recibo = reciboDaIntencao(corpo, intencao);
   if (recibo && status === statusDoRecibo(recibo.outcome)) return { tipo: 'resolvido', recibo };
   const erro = erroDaResposta(status, corpo);
+  if (erro && falhaPermanenteSemGravacao(erro)) {
+    const falha = { mensagem: erro.mensagem, correlacao: erro.correlationId };
+    return reenvio
+      ? {
+          ...incerto(status),
+          tipo: 'incerto',
+          naoLocalizado: false,
+          sessao: false,
+          mensagem:
+            'Este conteúdo não pode ser reenviado. O resultado anterior continua incerto; consulte o recibo.',
+          bloqueioPermanente: falha,
+        }
+      : { tipo: 'corrigir', ...falha, sessao: false };
+  }
   if (!reenvio && erro) {
     switch (erro.codigo) {
       case 'NAO_AUTENTICADO':
@@ -176,4 +212,38 @@ export function desfechoDaConsulta(status: number, corpo: unknown, intencao: Int
     };
   }
   return incerto(status, 'Não deu para consultar agora. Consulte o recibo de novo em instantes.');
+}
+
+/** Chave, identificador gerado e versão não são uma correção dos dados recusados. */
+export function mesmoConteudoDeDominio(a: Intencao, b: Intencao): boolean {
+  if (a.commandType !== b.commandType) return false;
+  const dados = (i: Intencao) => {
+    const pedido = EsquemaPedidoComando.parse(JSON.parse(i.corpo) as unknown);
+    const esquemas = {
+      [COMANDOS_CADASTRO.criarFazenda]: EsquemaDadosCriarFazenda,
+      [COMANDOS_CADASTRO.editarFazenda]: EsquemaDadosEditarFazenda,
+      [COMANDOS_CADASTRO.criarTalhao]: EsquemaDadosCriarTalhao,
+      [COMANDOS_CADASTRO.editarTalhao]: EsquemaDadosEditarTalhao,
+      [COMANDOS_CADASTRO.alterarSituacaoTalhao]: EsquemaDadosAlterarSituacaoTalhao,
+    };
+    const lido = esquemas[i.commandType].safeParse(pedido.data);
+    if (typeof pedido.data !== 'object' || pedido.data === null || Array.isArray(pedido.data))
+      return pedido.data;
+    // Um pedido legado inválido também precisa poder ser corrigido. Conservar o campo inválido,
+    // canonizando apenas os campos cuja regra existente consegue interpretar.
+    const canonicos = lido.success
+      ? lido.data
+      : Object.fromEntries(
+          Object.entries(pedido.data).map(([chave, valor]) => {
+            if (chave === 'nome' && typeof valor === 'string') return [chave, normalizarNome(valor)];
+            if (chave === 'areaDeclaradaHa') {
+              const area = EsquemaAreaHa.safeParse(valor);
+              return [chave, area.success ? area.data : valor];
+            }
+            return [chave, valor];
+          }),
+        );
+    return Object.entries(canonicos).sort(([x], [y]) => x.localeCompare(y));
+  };
+  return JSON.stringify(dados(a)) === JSON.stringify(dados(b));
 }
