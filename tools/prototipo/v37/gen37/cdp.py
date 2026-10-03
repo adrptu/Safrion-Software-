@@ -1,7 +1,13 @@
 # -*- coding: utf-8 -*-
 """Cliente mínimo do Chrome DevTools Protocol (websocket RFC 6455 em Python puro) para executar jornadas no protótipo."""
 import os, socket, base64, os, struct, json, subprocess, time, urllib.request, urllib.parse, tempfile, shutil, atexit
-CH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+def _chrome():
+    # portabilidade (CONTINUIDADE-MAC-20261003): CHROME_BIN manda; senão o Chrome do Mac; senão o do PATH (Linux/nuvem)
+    import shutil
+    for c in [os.environ.get('CHROME_BIN'), "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"] + [shutil.which(n) for n in ('google-chrome','google-chrome-stable','chromium','chromium-browser','chrome')]:
+        if c and os.path.exists(c): return c
+    raise RuntimeError('Chrome não encontrado: defina CHROME_BIN')
+CH=_chrome()
 class WS:
     def __init__(self,url):
         u=urllib.parse.urlparse(url); self.s=socket.create_connection((u.hostname,u.port),timeout=60)
