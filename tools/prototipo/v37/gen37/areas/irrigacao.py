@@ -23,7 +23,7 @@ import json
 from engine import (grid,section,esc,icon,chip,btn,Pt,INK,MUTED,LINE,BG,SURF,ACC,ACCS,YEL,YELS,RED,REDS,GRAYS,DISP,
                     BTN_ST,EXTRA,EXTRAJS,_MINI,_MINIP)
 import engine as E
-from ui37 import shell37, HEIGHTS37, PARENT37, MACRO, _com_setas, _SETA
+from ui37 import shell37, HEIGHTS37, PARENT37, MACRO, _com_setas, _SETA, _etp_nav, _etp_abre
 import cenario
 import dados_irrigacao as DI
 
@@ -51,8 +51,8 @@ def faixa(cur):
     seta=lambda j,sim,dica: f'<a href="{ETAPAS[j][1]}" aria-label="{dica}: {esc(ETAPAS[j][0])}" title="{dica}: {esc(ETAPAS[j][0])}" style="{_SETA}">{sim}</a>'
     ant=seta(cur-2,'‹','Etapa anterior') if cur>1 else ''
     prox=seta(cur,'›','Próxima etapa') if cur<len(ETAPAS) else ''
-    return (f'<nav aria-label="Etapas do processo" style="position: sticky; top: 0; z-index: 30; background: {SURF}; border-bottom: 1px solid {LINE}; box-shadow: 0 6px 12px -10px rgba(21,32,26,.25); padding: 6px 24px;">'
-            + _com_setas(items,len(ETAPAS),ant,prox) + '</nav>')
+    # faixa no padrão da casca (_etp_nav): em tela estreita vira "Etapa i de 4 · Nome" e a lista abre como folha (RESPONSIVIDADE)
+    return _etp_nav('Etapas do processo',len(ETAPAS),_com_setas(items,len(ETAPAS),ant,prox,_etp_abre(cur,len(ETAPAS),ETAPAS[cur-1][0])))
 
 def ic(name,size=15):
     P={'play':'M8 5v14l11-7z','pause':'M7 5h3v14H7zM14 5h3v14h-3z','plus':'M12 5v14M5 12h14','flag':'M5 21V4h11l-2 4 2 4H5','gauge':'M12 14l4-5M3 14a9 9 0 1 1 18 0'}

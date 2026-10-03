@@ -678,7 +678,7 @@ function CARVALS(self,v){ cenOuvir(self); const c=cenGet(); const L=carLotes(c);
   const E0=()=>{ v.car_id=''; v.car_tit=''; v.car_rot=''; v.car_chst=''; v.car_dests=[]; v.car_dest=''; v.car_setdest=()=>{}; v.car_save=()=>{}; v.car_save_t=''; v.car_save_st=''; v.car_bls=[]; v.car_prox='';
     v.car_lib_has=false; v.car_lib_btn=false; v.car_lib_t=''; v.car_lib_bt=''; v.car_lib_st=''; v.car_lib_susp=false; v.car_lib_susp_t=''; v.car_lib_go=()=>{}; };
   if(!sel){ E0(); return; }
-  const l=L[sel], a=av[sel]; v.car_id=sel; v.car_rot=a.rot; v.car_chst=co_chipst(a.cor);
+  const l=L[sel], a=av[sel]; v.car_id=sel; v.car_rot=a.rot; v.car_chst=co_chipst(a.cor)+'; white-space: normal; max-width: 100%; box-sizing: border-box;';   /* no celular a situação longa quebra em vez de vazar a seção */
   v.car_tit=(l.tipo==='campo')?('colhido em '+carBr(l.d)+' no '+carNome(l.tal)+(l.parc?' ('+l.parc+')':'')+', fazenda '+((CARD.tal[l.tal]||{}).faz||'—')+' · '+l.q):((l.tipo==='mistura'?'mistura de ':'divisão de ')+l.pais.join(' + ')+' em '+carBr(l.d)+(l.q?' · '+l.q:''));
   v.car_prox={nao_avaliado:'Próximo passo: o Comercial define o destino do lote; a avaliação começa pela regra desse mercado.',pendente:'Próximo passo: resolver o que falta abaixo; até lá o lote não é liberado para este destino.',
     conforme:'Conforme apenas neste destino e neste escopo. Outro destino pede nova avaliação.',nao_conforme:'Não conforme: '+CARD.quem.ag+' e a Qualidade registram a destinação compatível; o fato não é apagado.'}[a.st];

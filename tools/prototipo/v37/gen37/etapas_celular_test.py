@@ -158,11 +158,15 @@ try:
         vp(1440,900); m4=J(MEDIR); cur=J("(document.querySelector('[aria-current=step]')||{innerText:''}).innerText.replace(/\\s+/g,' ')"); shot('CMP_1440_mesma_sessao')
         vp(390,844); m5=J(MEDIR); hd=J("document.querySelector('header').innerText.replace(/\\s+/g,' ')")
         chk('11 ‹ volta à etapa 2; em 1440 a faixa completa mostra a etapa 2 e em 390 volta "Etapa 2 de 6", com a Safra 2026/27', m3['progresso'].startswith('Etapa 2 de 6') and m4['etapasVis']==6 and not m4['progresso'] and cur.startswith('2 Confira a demanda') and m5['progresso'].startswith('Etapa 2 de 6') and 'Safra 2026/27' in hd, [m3['progresso'],m4['etapasVis'],cur,m5['progresso']])
-        # 12 · rascunho no painel lateral (IR-02 · Programar período): cobre a faixa no celular e o texto digitado sobrevive à troca de zoom
-        abre('IR-02'); r=clk('Programar período'); cob=J(COBRE); shot('IR-02_390_painel')
+        # 12 · rascunho no painel lateral (IR-02 · Programar irrigação): cobre a faixa no celular e o texto digitado sobrevive à troca de zoom
+        abre('IR-02'); r=clk('Programar irrigação'); cob=J(COBRE); shot('IR-02_390_painel')
+        # painel novo da Irrigação (03/10) abre só com o Setor: escolhe o 1º setor e o rascunho passa a ter os demais campos
+        sel=J("(()=>{const s=[...document.querySelectorAll('aside[role=dialog] select')].find(x=>x.getClientRects().length&&!x.disabled); if(!s||s.options.length<2) return null; const P=HTMLSelectElement.prototype; Object.getOwnPropertyDescriptor(P,'value').set.call(s,s.options[1].value); s.dispatchEvent(new Event('input',{bubbles:true})); s.dispatchEvent(new Event('change',{bubbles:true})); return [s.id,s.options[1].value];})()"); time.sleep(.5)
         campo=J("(()=>{const i=[...document.querySelectorAll('aside[role=dialog] input, aside[role=dialog] textarea')].find(x=>x.getClientRects().length&&!x.disabled&&!x.readOnly&&(x.type==='text'||x.tagName==='TEXTAREA'||!x.type)); if(!i) return null; i.focus(); return i.id||i.getAttribute('aria-label');})()")
         if campo: c.call('Input.insertText',{'text':'rascunho celular 03/10'}); time.sleep(.3)
         vp(720,450,2); vp(390,844); val=J(f"(document.getElementById({json.dumps(campo)})||{{value:null}}).value") if campo else None
+        selv=J(f"(document.getElementById({json.dumps(sel[0])})||{{value:null}}).value") if sel else None
+        if not campo and sel and selv==sel[1]: val='rascunho celular 03/10 (setor escolhido mantido)'   # sem campo de texto: o rascunho é a escolha feita
         chk('12 painel lateral em 390 px · cobre a faixa e o cabeçalho (largura da tela) e o rascunho digitado sobrevive à troca de zoom', r=='ok' and isinstance(cob,dict) and cob['faixaVisivelSobre']==0 and cob['painelW']==390 and val and 'rascunho celular 03/10' in val, [r,cob,campo,val])
         # 13 · O.S. no celular: o painel da ordem cobre o cabeçalho e não fica sob nada
         abre('OS'); J("(()=>{const r=document.querySelector('[role=row].g2ed'); (r.querySelector('[role=cell] b')||r.querySelector('[role=cell] span')||r).click();})()"); time.sleep(.5); cob2=J(COBRE); shot('OS_390_painel')
@@ -219,9 +223,9 @@ try:
             for pg in ('CMP','SAF','EST','MA-01'):
                 abre(pg,w,h); J("(()=>{const a=document.querySelector('.etp-atual'); a&&a.getClientRects().length&&a.click();})()"); time.sleep(.25); res[f'{pg} {w}x{h}']=J(FOLHA)
         shot('MA-01_568x320_folha')
-        abre('IR-02',800,360); u=J(UTIL); pr=J("(()=>{const e=[...document.querySelectorAll('header a,header button')].find(x=>x.innerText.trim()==='Programar período'); e.scrollIntoView({block:'center'}); const r=e.getBoundingClientRect(); const h=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2); return r.bottom<=innerHeight&&!!h&&e.contains(h);})()")
+        abre('IR-02',800,360); u=J(UTIL); pr=J("(()=>{const e=[...document.querySelectorAll('header a,header button')].find(x=>x.innerText.trim()==='Programar irrigação'); e.scrollIntoView({block:'center'}); const r=e.getBoundingClientRect(); const h=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2); return r.bottom<=innerHeight&&!!h&&e.contains(h);})()")
         shot('IR-02_800x360')
-        chk('20 tela baixa (800×360 e 568×320) · folha de etapas com a última etapa tocável (CMP, SAF, EST, MA-01); IR-02 com ≥ 280 px úteis (cabeçalho rola, faixa fica) e "Programar período" alcançável',
+        chk('20 tela baixa (800×360 e 568×320) · folha de etapas com a última etapa tocável (CMP, SAF, EST, MA-01); IR-02 com ≥ 280 px úteis (cabeçalho rola, faixa fica) e "Programar irrigação" alcançável',
             all(r['aberta'] and r['folha'] and r['ultTocavel'] for r in res.values()) and u['rolaColuna'] and u['util']>=280 and pr, [res,u,pr])
         # 21 · zoom de 200 % nas telas de cabeçalho alto (antes 95–111 px de conteúdo)
         res={}

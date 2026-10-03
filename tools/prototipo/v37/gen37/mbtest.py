@@ -32,7 +32,7 @@ def open_(t):
 def over(): return J("(()=>{const m=document.querySelector('main'); const kids=[...m.children].filter(e=>e.offsetParent!==null||e.tagName==='SC-IF'); let b=0; m.querySelectorAll(':scope > *, :scope > sc-if > *').forEach(e=>{const r=e.getBoundingClientRect(); if(r.height) b=Math.max(b,r.bottom);}); const mr=m.getBoundingClientRect(); return Math.round(b+16-mr.bottom);})()")
 def wide(): return J("(()=>{const m=document.querySelector('main'); return [...m.querySelectorAll('*')].filter(e=>e.getBoundingClientRect().right>392).map(e=>e.tagName+':'+(e.innerText||'').slice(0,30)).slice(0,3);})()")
 try:
-    c.size(390,1800)
+    c.size(390,2400)   # viewport ≥ altura da prancha (MB-02 = 2320): com o teto 100dvh do celular real, abaixo disso o main rola e a medida deixa de ser da prancha
     for t in [x for i,x in enumerate(TELAS) if parte('a' if i<8 else 'b')]:
         open_(t); print(t)
         ok(J("document.body.innerText.indexOf('{{')<0"),'sem buracos {{}} visíveis')

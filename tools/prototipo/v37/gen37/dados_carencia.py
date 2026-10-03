@@ -121,7 +121,7 @@ def _produtos():
     out = {}
     for p in A.PRODUTOS:
         adj = p['classe'] == 'Adjuvante'
-        for n in set(p['nomes_fazenda'] + [p['nome']]):
+        for n in dict.fromkeys(p['nomes_fazenda'] + [p['nome']]):   # ordem estável (set variava com o hash do processo e a página mudava a cada build)
             out[n] = dict(ingr=' + '.join(_ingr(p['ingrediente'])), classe=p['classe'], defn=True, adj=adj, ficha=p['id'],
                           usos={} if adj else _usos(p))
     # insumos que não são agrotóxicos (fertilizante, corretivo, semente, muda): fora da carência

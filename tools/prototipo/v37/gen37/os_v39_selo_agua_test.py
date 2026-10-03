@@ -57,11 +57,11 @@ try:
     # ---- ordens de água na IR-03: cada fato uma vez por linha ----
     T.c.goto(f'http://127.0.0.1:{T.p}/IR-03.dc.html', wait=1.0)
     l3 = T.linha('OS-0423')
-    T.ok(l3.count('Conflito · parada da B3') == 1 and cor('OS-0423', 'Conflito') == VERM and l3.count('estimativa por ET') == 1 and l3.count('4,00 mm') == 1,
-         'IR-03 · OS-0423: selo vermelho Conflito · parada da B3, nota de ET e lâmina 4,00 mm uma vez cada', (l3, cor('OS-0423', 'Conflito')))
+    T.ok(l3.count('Conflito · parada da B3') == 1 and cor('OS-0423', 'Conflito') == VERM and l3.lower().count('estimativa por et') == 1 and l3.count('4,0 mm') == 1,
+         'IR-03 · OS-0423: selo vermelho Conflito · parada da B3, nota de ET e lâmina 4,0 mm uma vez cada (formato irrMm: 2 casas, mínimo 1)', (l3, cor('OS-0423', 'Conflito')))
     l2 = T.linha('OS-0422')
-    T.ok(l2.count('Janela a definir') == 1 and cor('OS-0422', 'Janela a definir') == AMAR and l2.count('13,50 mm') == 1 and l2.count('6,75 mm') == 1,
-         'IR-03 · OS-0422: selo amarelo Janela a definir; 13,50 mm em 2 passadas de 6,75 mm, uma vez cada', (l2, cor('OS-0422', 'Janela a definir')))
+    T.ok(l2.count('Janela a definir') == 1 and cor('OS-0422', 'Janela a definir') == AMAR and l2.count('13,5 mm') == 1 and l2.count('6,75 mm') == 1,
+         'IR-03 · OS-0422: selo amarelo Janela a definir; 13,5 mm em 2 passadas de 6,75 mm, uma vez cada', (l2, cor('OS-0422', 'Janela a definir')))
     l9 = T.linha('OS-0419'); ERR += T.erros()
     T.c.goto(f'http://127.0.0.1:{T.p}/IR-03det.dc.html', wait=1.0); b = J("document.body.innerText") or ''
     T.ok('Liberadas' in l9 and l9.count('10,81 mm') == 1 and J("document.querySelector('h1').innerText.trim()") == 'OS-0419 · Irrigação · Pivô 2' and '10,81 mm' in b

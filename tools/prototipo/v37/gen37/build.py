@@ -82,3 +82,4 @@ canvas={'v':3,'createdOnFiles':{'v':1,'at':datetime.datetime.now(datetime.timezo
  'boards':boards,'order':order,'notes':notes,'designSystems':[]}
 json.dump(canvas,open(os.path.join(E.P,'canvas.json'),'w'),ensure_ascii=False,indent=1)
 print(len(boards),'artboards →',E.P,'· menu vigente:',len(placed),'· ocultos:',len(boards)-len(placed))
+if FALHAS: sys.exit(1)   # build com módulo falho não sai com 0 (portabilidade/CI)

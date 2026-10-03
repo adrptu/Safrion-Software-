@@ -17,3 +17,4 @@ try:
     print(f'RESULTADO: {len(pags)-len(falhas)}/{len(pags)} páginas sem erro')
 finally:
     t.c.close() if hasattr(t.c,'close') else None; t.srv.terminate()
+sys.exit(1 if falhas else 0)   # página com erro não sai com 0 (portabilidade/CI)

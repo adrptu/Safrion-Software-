@@ -441,7 +441,7 @@ v.d_ocs=ocs.slice(-2).reverse().map(x=>({{t:x.id+' · '+x.tipo+' · '+x.at+(x.si
 v.d_isA=!!p.href; v.d_ini=p.k==='iniciar'; v.d_none=!p.href&&p.k!=='iniciar'; v.d_href=p.href||'MB-02.dc.html'; v.d_lab=p.k==='iniciar'?'Iniciar turno · '+o.id:p.t;
 v.d_go=()=>cenMudar(self,c=>mbIniciar(c,o.id));
 }}'''
-    emit('MB-02','Detalhe da ordem','',None,'Abrir ordem',corpo,H_=1590,fname='MB-02det.dc.html',back='MB-02.dc.html',js=js,dyn_status=True,cen=True,
+    emit('MB-02','Detalhe da ordem','',None,'Abrir ordem',corpo,H_=1620,fname='MB-02det.dc.html',back='MB-02.dc.html',js=js,dyn_status=True,cen=True,
          dyn_head='Detalhe da ordem',
          prim=[('d_isA','a',H('d_lab'),H('d_href')),('d_ini','b',H('d_lab'),'d_go'),('d_none','a','Voltar às ordens','MB-02.dc.html')])
 
@@ -836,7 +836,7 @@ v.fecha=()=>TOAST(self,'Parcela T7-B concluída · '+T+' plantas · segue para r
           desc='Veja como fica a próxima lâmina.')
       + note('Área/volume insuficientes? Registra-se o tempo e a estimativa fica pendente — a lâmina não é afirmada como medida. Não existe “Encerrar e apontar”.'))
     emit('MB-08','Irrigação de hoje','OS-0419 · Pivô 2 · água · sem emissão manual',('Em execução · irrigando','green'),
-         'Confirmar término da irrigação',corpo,H_=1410,back='MB-01.dc.html',primary_href='MB-08x-recibo.dc.html')
+         'Confirmar término da irrigação',corpo,H_=1430,back='MB-01.dc.html',primary_href='MB-08x-recibo.dc.html')
 
     # ---- MB-08x-recibo · término confirmado, conferência automática (estado) ----
     corpo=(
@@ -900,7 +900,7 @@ v.fecha=()=>TOAST(self,'Parcela T7-B concluída · '+T+' plantas · segue para r
 DCH(v,'hdr',c?'Em conferência · bloqueado':'Em execução · bloqueado',c?'yellow':'red');
 v.concluir=()=>{ self.setState({conc:true,g2toast:'Serviço concluído · OM-0233 em conferência · o Trator T1 segue bloqueado até teste e liberação técnica por pessoa autorizada.'}); };'''
     emit('MB-09','OM-0233 · Trator T1','corretiva · pressão hidráulica baixa · afeta OS-0420',None,
-         'Concluir serviço',corpo,H_=990,fname='MB-09det.dc.html',back='MB-09.dc.html',primary_href='MB-09.dc.html',js=js,dyn_status=True,
+         'Concluir serviço',corpo,H_=1000,fname='MB-09det.dc.html',back='MB-09.dc.html',primary_href='MB-09.dc.html',js=js,dyn_status=True,
          prim=[('noc','b','Concluir serviço','concluir'),('conc','a','Voltar às tarefas','MB-09.dc.html')])
 
     # ================= MB-10 · Cargas e entregas (lista · papéis) =================
