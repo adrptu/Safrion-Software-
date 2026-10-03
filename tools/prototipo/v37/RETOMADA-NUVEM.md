@@ -80,6 +80,8 @@ Sem a camada sintética (tarefa 1), o build para em `dados_lagoa_fonte`, com uma
     - `gen37/areas/processo_os.py:195`: rótulo do cultivo na O.S.
   - Nenhum hunk da REND (`126899e5`) ou da AÇÃO (`20f25726`) toca essas linhas. Não há mudança de lógica.
   - **Segunda necessidade nomeada antes de editar (C01 · dose × área):** `gen37/areas/processo_os.py:351` (`osc_apontar`) calcula o consumo como dose × área sem arredondar, mas o total do insumo é guardado com 2 casas. Com área decimal, o apontamento da área cheia é recusado (ex. sintético: 0,5 L/ha × 62,79 ha = 31,395 L contra 31,39 L em custódia). A linha fica reservada **só** para arredondar o consumo na mesma precisão do total. Nenhum hunk da AÇÃO toca essa linha.
+    - **Ampliação nomeada antes de editar:** o JS arredonda 31,395 para 31,4 (`Math.round(x*100)/100`), e o Python (`round(x, 2)`), para 31,39. As três contas de dose × área do JS em `processo_os.py` (`:323`, total ao ajustar a área; `:351`, consumo; `:712`, total na ordem nova) passam a usar `Number(x.toFixed(2))`, que dá o mesmo valor do Python. Nenhum hunk da AÇÃO toca essas linhas.
+    - **Mesmo padrão em outros arquivos, não alterado (risco registrado):** `cenario.js:152` e `areas/mobile.py:507/525` (app) calculam dose × área sem arredondar. Nenhum teste da cadeia os exercita com área decimal.
 - REND, AÇÃO, C2 e PR34 não são editados nesta etapa.
 
 ## Tarefas, na ordem
