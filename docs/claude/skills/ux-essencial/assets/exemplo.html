@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tarefas</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,400;8..144,500;8..144,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0..1,0&display=block" rel="stylesheet">
+<link rel="stylesheet" href="m3.css">
+<style>
+  .add { display: flex; gap: var(--sp-2); margin: var(--sp-4) 0; }
+  .add .field { flex: 1; }
+  .chips { display: flex; gap: var(--sp-2); flex-wrap: wrap; margin-bottom: var(--sp-3); }
+  .task { display: flex; align-items: center; gap: var(--sp-3); }
+  .task input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--md-sys-color-primary); }
+  .task .grow { flex: 1; min-width: 0; }
+  .task.done .grow p:first-child { text-decoration: line-through; color: var(--md-sys-color-on-surface-variant); }
+  .task .icon-btn { opacity: 0; }
+  .task:hover .icon-btn, .task:focus-within .icon-btn { opacity: 1; }
+  @media (hover: none) { .task .icon-btn { opacity: 1; } }
+  .empty { text-align: center; padding: var(--sp-7) var(--sp-4); }
+  .empty .icon { font-size: 48px; color: var(--md-sys-color-primary); }
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="rail" aria-label="Principal">
+    <button class="fab" id="novo" aria-label="Nova tarefa (N)" title="Nova tarefa (N)" style="padding:0;width:56px;justify-content:center;margin-bottom:var(--sp-3)"><span class="icon">edit</span></button>
+    <a class="nav-item" href="#" aria-current="page"><span class="nav-ind"><span class="icon">task_alt</span></span>Tarefas</a>
+    <a class="nav-item" href="#"><span class="nav-ind"><span class="icon">calendar_today</span></span>Agenda</a>
+    <a class="nav-item" href="#"><span class="nav-ind"><span class="icon">bar_chart</span></span>Relatórios</a>
+  </nav>
+  <main class="main">
+    <div class="top-bar">
+      <button class="search" id="busca"><span class="icon">search</span><span style="flex:1">Buscar ou executar comando</span><span class="kbd" id="kbd"></span></button>
+    </div>
+    <h1>Tarefas</h1>
+    <form class="add" id="add" autocomplete="off">
+      <div class="field"><input id="titulo" name="titulo" placeholder=" " required><label for="titulo">Adicionar tarefa e pressionar Enter</label></div>
+    </form>
+    <div class="chips" role="group" aria-label="Filtro">
+      <button class="chip" data-f="abertas" aria-pressed="true">Abertas</button>
+      <button class="chip" data-f="concluidas" aria-pressed="false">Concluídas</button>
+      <button class="chip" data-f="todas" aria-pressed="false">Todas</button>
+    </div>
+    <div id="lista" role="list"></div>
+  </main>
+</div>
+<script src="m3-kit.js"></script>
+<script>
+  let tarefas = [
+    { id: 1, titulo: 'Enviar proposta para Cooperativa Sul', quando: 'Hoje', feita: false },
+    { id: 2, titulo: 'Revisar pedido 10174', quando: 'Amanhã', feita: false },
+    { id: 3, titulo: 'Atualizar tabela de preços', quando: 'Sex.', feita: true },
+  ];
+  let filtro = 'abertas', seq = 4;
+  const lista = document.getElementById('lista'), titulo = document.getElementById('titulo');
+
+  function render() {
+    const vis = tarefas.filter((t) => filtro === 'todas' || (filtro === 'abertas' ? !t.feita : t.feita));
+    lista.innerHTML = vis.length ? vis.map((t) => `
+      <div class="list-item task${t.feita ? ' done' : ''}" role="listitem" data-id="${t.id}">
+        <input type="checkbox" ${t.feita ? 'checked' : ''} aria-label="Concluir">
+        <div class="grow"><p>${t.titulo.replace(/</g, '&lt;')}</p><p class="muted" style="font:var(--md-body-medium)">${t.quando}</p></div>
+        <button class="icon-btn" data-del aria-label="Excluir"><span class="icon">delete</span></button>
+      </div>`).join('')
+      : `<div class="empty"><span class="icon">done_all</span><h2 style="margin:var(--sp-3) 0 var(--sp-2)">Tudo em dia</h2><p class="muted">Adicione uma tarefa acima quando precisar.</p></div>`;
+    document.querySelectorAll('[data-f]').forEach((c) => c.setAttribute('aria-pressed', c.dataset.f === filtro));
+  }
+
+  document.getElementById('add').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const v = titulo.value.trim();
+    if (!v) return;
+    tarefas.unshift({ id: seq++, titulo: v, quando: 'Hoje', feita: false });   // UI otimista: aparece na hora
+    titulo.value = ''; filtro = filtro === 'concluidas' ? 'abertas' : filtro; render();
+  });
+  lista.addEventListener('change', (e) => {
+    const t = tarefas.find((x) => x.id === +e.target.closest('[data-id]').dataset.id);
+    Kit.undoable({ message: t.feita ? 'Tarefa reaberta' : 'Tarefa concluída', run: () => { t.feita = !t.feita; render(); }, undo: () => { t.feita = !t.feita; render(); } });
+  });
+  lista.addEventListener('click', (e) => {
+    if (!e.target.closest('[data-del]')) return;
+    const id = +e.target.closest('[data-id]').dataset.id;
+    Kit.undoable({   // sem "Tem certeza?": exclui já e oferece Desfazer
+      message: 'Tarefa excluída',
+      run: () => { const i = tarefas.findIndex((x) => x.id === id), [t] = tarefas.splice(i, 1); render(); return { i, t }; },
+      undo: ({ i, t }) => { tarefas.splice(i, 0, t); render(); },
+    });
+  });
+  document.querySelector('.chips').addEventListener('click', (e) => { const c = e.target.closest('[data-f]'); if (c) { filtro = c.dataset.f; render(); } });
+
+  const cmd = Kit.commands([
+    { title: 'Nova tarefa', icon: 'add', keys: 'n', keywords: 'criar adicionar', run: () => titulo.focus() },
+    { title: 'Ver abertas', icon: 'radio_button_unchecked', keys: 'shift+a', run: () => { filtro = 'abertas'; render(); } },
+    { title: 'Ver concluídas', icon: 'task_alt', keys: 'shift+c', run: () => { filtro = 'concluidas'; render(); } },
+    { title: 'Alternar tema claro/escuro', icon: 'dark_mode', keywords: 'dark escuro', run: () => { const d = document.documentElement; d.dataset.theme = (d.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')) === 'dark' ? 'light' : 'dark'; } },
+  ]);
+  document.getElementById('kbd').textContent = Kit.shortcutLabel('mod+k');
+  document.getElementById('busca').addEventListener('click', cmd.open);
+  document.getElementById('novo').addEventListener('click', () => titulo.focus());
+  render();
+  titulo.focus();
+</script>
+</body>
+</html>

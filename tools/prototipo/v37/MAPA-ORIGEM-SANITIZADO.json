@@ -1,0 +1,55 @@
+{
+ "id": "CONTINUIDADE-MAC-20261003 / CORTE-REMOTO-01",
+ "repo": "git novo; base = commit RAIZ sem pais",
+ "regra": "nenhum valor real da Fazenda Lagoa Grande; a varredura com valores reais e o saneador ficam só no Mac",
+ "redigidos": {
+  "dados_cad.py": "bloco LG_* do KML (pivôs, perímetros/CAR, RL/APP, pontos de água) → import de dados_lagoa_fonte",
+  "dados_lagoa_safra.py": "dicionário PIVOS real → dados_lagoa_fonte.PIVOS_HA; narrativa da imagem real → genérica",
+  "dados_irrigacao.py": "números de outorga → SINT-nnn/0000; nomes dos rios → \"Rio A/Ribeirão B (demonstração)\"; leitura via dados_lagoa_fonte.DIR",
+  "dados_mip.py": "leitura de lagoa_s2_resumo.json via dados_lagoa_fonte.DIR",
+  "areas/inicio.py": "pasta dos dados da fazenda via dados_lagoa_fonte.DIR",
+  "montar_render.py": "assets da fazenda via dados_lagoa_fonte.DIR",
+  "dados_lagoa_fonte.py": "NOVO: real só no Mac (dados_lagoa_kml.py), sintético fora dele"
+ },
+ "fora": {
+  "project/*.dc.html": "páginas geradas (carregam dado do modelo, inclusive áreas reais por pivô)",
+  "dados_lagoa/**": "dado real (KML, CAR, cenas e imagens Sentinel-2, índices por pixel)",
+  "talmapa_test.py": "coordenadas de teste dentro da fazenda real",
+  "talgeo_test.js": "coordenadas de teste dentro da fazenda real",
+  "_render/**, _probe não-.py, *.out, imagens": "saída de build/teste (mesmo filtro da base)"
+ },
+ "snapshots": [
+  {
+   "nome": "base (base_v43m)",
+   "origem": "cópia local base_v43m/gen37 (Mac)",
+   "impressao_origem_sha256": "b547a7a6d315500cec16bba829dc24e01cb6dc395afd832ff0a124d1d818598d",
+   "arquivos_origem_considerados": 240,
+   "ramo": "prototipo-limpo/base",
+   "commit": "e8d780de2a660bb023eb49483878c0d1b04bff0a"
+  },
+  {
+   "nome": "v43 publicada",
+   "origem": "cópia local qm/gen37 (Mac)",
+   "impressao_origem_sha256": "18cdd8c1f331139b0a405f2ea2dc991fa189447bce37addffeca53672068f510",
+   "arquivos_origem_considerados": 398,
+   "ramo": "prototipo-limpo/v43",
+   "commit": "abc00a4b2031b1d62540091c7b8ec427aefd0ce2"
+  },
+  {
+   "nome": "v44 REND (parcial)",
+   "origem": "cópia local qr/gen37 (Mac)",
+   "impressao_origem_sha256": "90c832bfbbc70b00774649d4724ab16bd192977dbea5caeb3519a6a4c1b4b4d2",
+   "arquivos_origem_considerados": 396,
+   "ramo": "prototipo-limpo/v44-rend",
+   "commit": "126899e5b3227327029d5c54e87d7313e1cfff02"
+  },
+  {
+   "nome": "v44 AÇÃO (parcial)",
+   "origem": "cópia local qu/gen37 (Mac)",
+   "impressao_origem_sha256": "d792b011c3876d8815fe70cc49cdeda5702e4f4e70bee051a61e79dfde5cdd6c",
+   "arquivos_origem_considerados": 396,
+   "ramo": "prototipo-limpo/v44-acao",
+   "commit": "20f25726d6318c2e249e38575e5458455a32ec16"
+  }
+ ]
+}

@@ -1,0 +1,116 @@
+# Referência de implementação: cor, contraste, manchas, estado
+
+Exemplos de funções puras, não implementação validada para produção. Conferir nodata, amostra, escala, resolução e limiares contra o SKILL.md e dados conhecidos antes de adaptar. Cores relativas não são diagnóstico; área depende da transformação real do raster. Resoluções do sensor: [Copernicus S2 Mission](https://sentiwiki.copernicus.eu/web/s2-mission).
+
+## Paleta e classes (fonte única)
+
+```ts
+export const CLASSES_VIGOR = [
+  { id: 1, nome: 'Índice muito baixo', cor: '#E4002B', max: 0.30 },
+  { id: 2, nome: 'Fraco',      cor: '#FF6A00', max: 0.45 },
+  { id: 3, nome: 'Atenção',    cor: '#FFD500', max: 0.60 },
+  { id: 4, nome: 'Médio',      cor: '#B5E61D', max: 0.72 },
+  { id: 5, nome: 'Bom',        cor: '#3FBF2A', max: 0.82 },
+  { id: 6, nome: 'Vigor alto', cor: '#0B7A1E', max: 1.00 },
+] as const;
+export const COR_SEM_DADO = '#9E9E9E'; // nuvem, sombra, fora do talhão: hachurado
+```
+
+## Escala: absoluta × relativa
+
+```ts
+export type Escala = { min: number; max: number };            // valores que viram 0 % e 100 % da rampa
+
+export const escalaAbsoluta: Escala = { min: 0.30, max: 0.82 }; // limites da classe 1 e 6
+
+/** Estica o contraste ao próprio talhão (ou à fazenda): percentil 2–98 dos pixels válidos. */
+export function escalaRelativa(valores: Float32Array, p = [0.02, 0.98]): Escala {
+  const v = Array.from(valores).filter(Number.isFinite).sort((a, b) => a - b);
+  const q = (t: number) => v[Math.min(v.length - 1, Math.floor(t * (v.length - 1)))];
+  const min = q(p[0]), max = q(p[1]);
+  return max - min < 0.02 ? { min: min - 0.01, max: max + 0.01 } : { min, max }; // talhão uniforme não vira ruído
+}
+```
+
+## Colorização no cliente (rampa contínua, sem suavização espacial)
+
+```ts
+const STOPS = CLASSES_VIGOR.map(c => c.cor);   // 6 paradas igualmente espaçadas em t ∈ [0,1]
+
+export function corDoIndice(valor: number, escala: Escala): string {
+  if (!Number.isFinite(valor)) return COR_SEM_DADO;
+  const t = Math.min(1, Math.max(0, (valor - escala.min) / (escala.max - escala.min)));
+  const pos = t * (STOPS.length - 1), i = Math.floor(pos), f = pos - i;
+  return i >= STOPS.length - 1 ? STOPS[i] : misturaHex(STOPS[i], STOPS[i + 1], f);
+}
+
+/** Classe para legenda, tabela e histograma: no modo relativo, os limites são os 6 cortes da escala. */
+export function classeDoIndice(valor: number, escala: Escala) {
+  if (!Number.isFinite(valor)) return null;
+  const t = (valor - escala.min) / (escala.max - escala.min);
+  return CLASSES_VIGOR[Math.min(5, Math.max(0, Math.floor(t * 6)))];
+}
+```
+Renderizar em `<canvas>` pixel a pixel (ImageData) ou tile PNG; CSS `image-rendering: pixelated`. Nunca `bilinear`, nunca `blur`. Opacidade 0.85 na visão da fazenda, 1.0 no detalhe do talhão. Rótulo do talhão: fonte 700, 16–28 px conforme zoom, halo 3 px de contraste, camada acima do raster.
+
+## Estatística e manchas
+
+```ts
+export function estatisticas(v: Float32Array) {
+  const s = Array.from(v).filter(Number.isFinite).sort((a, b) => a - b);
+  const q = (t: number) => s[Math.floor(t * (s.length - 1))];
+  const media = s.reduce((a, b) => a + b, 0) / s.length;
+  const dp = Math.sqrt(s.reduce((a, b) => a + (b - media) ** 2, 0) / s.length);
+  return { n: s.length, media, mediana: q(0.5), dp, p2: q(0.02), p10: q(0.10), p90: q(0.90), p98: q(0.98) };
+}
+
+/** Exemplo conservador: abaixo de ambos os cortes (min), não OU; candidatos a vistoria, sem diagnóstico causal. Validar limiares, nodata e amostra. */
+export function mascaraFraco(v: Float32Array, st: ReturnType<typeof estatisticas>) {
+  const corte = Math.min(st.media - 1.5 * st.dp, st.p10);
+  return v.map(x => (Number.isFinite(x) && x < corte ? 1 : 0)) as unknown as Uint8Array;
+}
+
+/** Componentes conexos (8 vizinhos) com área mínima; retorna manchas com área, média e centroide em índice de pixel. */
+export function manchas(mask: Uint8Array, v: Float32Array, largura: number, altura: number, minPixels = 3) {
+  const rotulo = new Int32Array(mask.length); let n = 0; const out = [];
+  for (let i = 0; i < mask.length; i++) {
+    if (!mask[i] || rotulo[i]) continue;
+    const fila = [i]; rotulo[i] = ++n; const px: number[] = [];
+    while (fila.length) {
+      const p = fila.pop()!; px.push(p);
+      const x = p % largura, y = (p / largura) | 0;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        const nx = x + dx, ny = y + dy, q = ny * largura + nx;
+        if (nx < 0 || ny < 0 || nx >= largura || ny >= altura || rotulo[q] || !mask[q]) continue;
+        rotulo[q] = n; fila.push(q);
+      }
+    }
+    if (px.length < minPixels) continue;
+    const media = px.reduce((a, p) => a + v[p], 0) / px.length;
+    const cx = px.reduce((a, p) => a + (p % largura), 0) / px.length;
+    const cy = px.reduce((a, p) => a + ((p / largura) | 0), 0) / px.length;
+    out.push({ pixels: px.length, media, centroide: { x: cx, y: cy }, indices: px });
+  }
+  return out.sort((a, b) => b.pixels - a.pixels);
+}
+```
+Área em ha = pixels × (resolução m)² / 10 000 (Sentinel-2: 0,01 ha/pixel). Converter centroide para lon/lat pelo geotransform do raster. Excluir 1 pixel de borda do polígono antes da estatística. Pivô: além do centroide, calcular ângulo (setor) e raio (distância ao centro do pivô) da mancha.
+
+## Estado do talhão
+
+```ts
+export function estadoTalhao(a: { diasDesdeCena: number | null; nuvemPct: number; areaFracaPct: number; quedaPct: number; maiorManchaNovaHa: number }) {
+  if (a.diasDesdeCena === null || a.diasDesdeCena > 15) return { estado: 'Sem imagem', acao: 'Buscar imagens' };
+  if (a.nuvemPct > 20) return { estado: 'Nuvem', acao: 'Aguardar próxima cena' };
+  if (a.areaFracaPct > 15 || a.quedaPct > 15 || a.maiorManchaNovaHa > 1) return { estado: 'Crítico', acao: 'Criar vistoria' };
+  if (a.areaFracaPct >= 5 || a.quedaPct >= 10) return { estado: 'Atenção', acao: 'Ver manchas' };
+  return { estado: 'Normal', acao: 'Ver histórico' };
+}
+```
+
+## Casos de teste mínimos
+- `corDoIndice(0.30, absoluta)` → `#E4002B`; `corDoIndice(0.82, absoluta)` → `#0B7A1E`; `NaN` → cinza.
+- `escalaRelativa` de um talhão com valores 0,84–0,93 devolve min≈0,84 e max≈0,93 (o mapa usa a rampa inteira).
+- Raster sintético 10×10 com bloco de 3 px fracos → 1 mancha; bloco de 2 px → 0 manchas; dois blocos separados → 2 manchas.
+- `estadoTalhao` cobre os 5 estados e a precedência (Sem imagem > Nuvem > Crítico > Atenção > Normal).
+- Mesma cor na legenda e no pixel para um valor dado (snapshot).
