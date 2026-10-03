@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { EditorCadastro, type EdicaoCadastro } from './EditorCadastro';
 import { EnviosCadastro, edicaoDaIntencao } from './EnviosCadastro';
 import { PainelCadastro } from './PainelCadastro';
-import { armazemLocal, lerIntencoes, type IntencaoGuardada } from './pendencias';
+import { armazemLocal, pendenteDoAlvo, type IntencaoGuardada } from './pendencias';
 import { COLUNAS_TALHAO, linhaDoTalhao, formatarAreaHa } from './lista';
 import { Tabela } from '../tabela/Tabela';
 import { ESTADO_VAZIO } from '../tabela/logica';
@@ -39,8 +39,20 @@ export function DetalheCadastro(p: Props) {
     setEditor({ edicao: edicaoDaIntencao(g), inicial: g, chave: Date.now() });
     setAberto(true);
   }
+  /**
+   * Só a pendência do mesmo registro é reaberta no lugar da edição pedida; a de outro alvo continua em "Retomar
+   * cadastros" e não impede este (DECISAO-RECUPERACAO-C2-20261003 §1). Talhão novo não tem alvo conhecido ainda.
+   */
   function abrir(edicao: EdicaoCadastro) {
-    const [g] = lerIntencoes(armazemLocal(), p.usuarioId, p.organizacaoId);
+    const g = edicao.id
+      ? pendenteDoAlvo(
+          armazemLocal(),
+          p.usuarioId,
+          p.organizacaoId,
+          edicao.tipo === 'fazenda' ? 'farm' : 'field',
+          edicao.id,
+        )
+      : null;
     if (g) {
       abrirPendente(g);
       return;

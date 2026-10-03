@@ -1,7 +1,13 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { COMANDOS_CADASTRO as C } from '@safrion/contracts';
-import { armazemLocal, lerIntencoes, prefixoDasIntencoes, type IntencaoGuardada } from './pendencias';
+import {
+  acaoDoPendente,
+  armazemLocal,
+  lerIntencoes,
+  prefixoDasIntencoes,
+  type IntencaoGuardada,
+} from './pendencias';
 import type { EdicaoCadastro } from './EditorCadastro';
 import s from './cadastro.module.css';
 
@@ -51,7 +57,7 @@ export function EnviosCadastro({
   return pendentes.length ? (
     <section className={s.aviso} aria-label="Retomar cadastros">
       <h2>Retomar cadastros</h2>
-      <p>Corrija os pedidos recusados ou consulte os envios sem confirmação.</p>
+      <p>Corrija ou encerre os pedidos recusados e consulte os envios sem confirmação.</p>
       <ul>
         {pendentes.map((g) => (
           <li key={g.intencao.chave}>
@@ -62,8 +68,7 @@ export function EnviosCadastro({
                 abrir(g);
               }}
             >
-              {g.falha?.tipo === 'corrigir' ? 'Corrigir cadastro' : 'Consultar envio'} ·{' '}
-              {g.campos['nome'] || 'Talhão'}
+              {acaoDoPendente(g)} · {g.campos['nome'] || 'Talhão'}
             </button>
           </li>
         ))}

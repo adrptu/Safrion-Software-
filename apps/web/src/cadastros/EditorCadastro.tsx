@@ -60,6 +60,7 @@ export function EditorCadastro(p: Props) {
   const [criadas, setCriadas] = useState<OpcaoFazenda[]>([]);
   const comando = useCadastroComando(p.usuarioId, p.organizacaoId, p.confirmado, p.inicial);
   const [chaveExibida, setChaveExibida] = useState(p.inicial?.intencao.chave);
+  const [confirmarEncerramento, setConfirmarEncerramento] = useState(false);
   // Outra aba pode ter preparado a correção: exibir os campos dessa intenção, sem misturá-los ao rascunho anterior.
   if (comando.pendente && comando.pendente.intencao.chave !== chaveExibida) {
     setChaveExibida(comando.pendente.intencao.chave);
@@ -69,7 +70,7 @@ export function EditorCadastro(p: Props) {
   const tipo = p.edicao.tipo;
   const editando = p.edicao.id !== undefined;
   const semBase = editando && tipo !== 'situacao' && iniciais === undefined;
-  const travado = comando.ocupado || (comando.pendente !== null && !comando.corrigivel);
+  const travado = comando.ocupado || comando.encerrado || (comando.pendente !== null && !comando.corrigivel);
   const opcoes = [...p.fazendas, ...criadas.filter((f) => !p.fazendas.some((x) => x.id === f.id))];
   const titulo =
     tipo === 'situacao'
@@ -295,7 +296,7 @@ export function EditorCadastro(p: Props) {
             </>
           )}
         </fieldset>
-        {semBase && !comando.pendente ? (
+        {semBase && !comando.pendente && !comando.encerrado ? (
           <p className={s.aviso} role="status">
             Este envio antigo não guardou os valores iniciais. Seus campos estão preservados nesta tela. Volte
             e abra o cadastro atualizado para comparar e editar com segurança.
@@ -315,11 +316,55 @@ export function EditorCadastro(p: Props) {
             ) : null}
           </div>
         ) : null}
+        {confirmarEncerramento && comando.encerravel ? (
+          // Confirmação no próprio painel: diz a consequência e mantém a correlação à vista (DECISAO-RECUPERACAO-C2 §3).
+          <div className={s.aviso} role="group" aria-labelledby={`${id}-encerrar`}>
+            <p id={`${id}-encerrar`}>
+              Encerrar este pedido? O servidor recusou sem gravar nada. Nada será enviado e o pedido sai da
+              lista de retomada. Anote a correlação para suporte: {comando.correlacao}.
+            </p>
+            <div className={s.acoes}>
+              <button
+                type="button"
+                className="botao"
+                autoFocus
+                onClick={() => {
+                  setConfirmarEncerramento(false);
+                }}
+              >
+                Manter pedido
+              </button>
+              <button
+                type="button"
+                className="botao botao-primario"
+                disabled={comando.ocupado}
+                onClick={() => {
+                  setConfirmarEncerramento(false);
+                  void comando.encerrar();
+                }}
+              >
+                Confirmar encerramento
+              </button>
+            </div>
+          </div>
+        ) : null}
         <div className={`rodape-acao ${s.acoes ?? ''}`}>
           <button type="button" className="botao" onClick={p.cancelar}>
             Voltar
           </button>
-          {comando.pendente && !comando.corrigivel ? (
+          {comando.encerrado || confirmarEncerramento ? null : comando.encerravel && !comando.corrigivel ? (
+            <button
+              type="button"
+              className="botao botao-primario"
+              disabled={comando.ocupado}
+              aria-busy={comando.ocupado}
+              onClick={() => {
+                setConfirmarEncerramento(true);
+              }}
+            >
+              {comando.ocupado ? 'Aguarde…' : 'Encerrar pedido'}
+            </button>
+          ) : comando.pendente && !comando.corrigivel ? (
             <button
               type="button"
               className="botao botao-primario"
@@ -352,6 +397,18 @@ export function EditorCadastro(p: Props) {
                   : titulo}
             </button>
           )}
+          {comando.encerravel && comando.corrigivel && !confirmarEncerramento ? (
+            <button
+              type="button"
+              className="botao"
+              disabled={comando.ocupado}
+              onClick={() => {
+                setConfirmarEncerramento(true);
+              }}
+            >
+              Encerrar pedido
+            </button>
+          ) : null}
         </div>
       </form>
     </>

@@ -1,7 +1,7 @@
 import { COMANDOS_CADASTRO } from '@safrion/contracts';
 
 import { PREFIXO } from '../estoque/rascunho';
-import { intencaoValida, mesmoConteudoDeDominio, type Intencao } from './intencao';
+import { intencaoValida, mesmoCadastro, mesmoConteudoDeDominio, type Intencao } from './intencao';
 
 export interface FalhaGuardada {
   readonly tipo: 'corrigir' | 'somente_consulta';
@@ -11,6 +11,12 @@ export interface FalhaGuardada {
 export interface IntencaoGuardada {
   /** Ausência é o formato legado: envio sem confirmação, nunca prova de não gravação. */
   readonly falha?: FalhaGuardada;
+  /**
+   * Todas as tentativas desta chave foram recusadas antes do envelope, com a resposta contratual de sessão (401) de um
+   * envio sem incerteza anterior (DECISAO-RECUPERACAO-C2-20261003 §2). É retirado e conferido antes de cada novo POST:
+   * ausente, o envio volta a ser incerto.
+   */
+  readonly antesDoEnvelope?: true;
   /** A correção não substitui o registro recusado antes de haver recibo do novo pedido. */
   readonly origem?: {
     readonly chave: string;
@@ -91,6 +97,9 @@ function lerGuardada(bruto: string): IntencaoGuardada | null {
     const v: unknown = JSON.parse(bruto);
     if (!objeto(v) || !camposValidos(v['campos'])) return null;
     if (v['falha'] !== undefined && !falhaValida(v['falha'])) return null;
+    // A certeza só vale sozinha; com qualquer outro valor ou junto de uma falha, o registro não é reaberto.
+    if (v['antesDoEnvelope'] !== undefined && (v['antesDoEnvelope'] !== true || v['falha'] !== undefined))
+      return null;
     if (v['origem'] !== undefined && !origemValida(v['origem'])) return null;
     if (v['iniciais'] !== undefined && !camposValidos(v['iniciais'])) return null;
     if (!intencaoValida(v['intencao']) || !contextoValido(v['contexto'])) return null;
@@ -102,6 +111,7 @@ function lerGuardada(bruto: string): IntencaoGuardada | null {
     return {
       campos: v['campos'],
       ...(v['falha'] === undefined ? {} : { falha: v['falha'] }),
+      ...(v['antesDoEnvelope'] === true ? { antesDoEnvelope: true as const } : {}),
       ...(v['origem'] === undefined ? {} : { origem: v['origem'] }),
       ...(v['iniciais'] === undefined ? {} : { iniciais: v['iniciais'] }),
       intencao,
@@ -113,6 +123,13 @@ function lerGuardada(bruto: string): IntencaoGuardada | null {
   }
 }
 
+/** Cópia sem a certeza de recusa anterior ao envelope; o restante do registro não muda. */
+function semCerteza(g: IntencaoGuardada): IntencaoGuardada {
+  const copia: { -readonly [K in keyof IntencaoGuardada]: IntencaoGuardada[K] } = { ...g };
+  delete copia.antesDoEnvelope;
+  return copia;
+}
+
 /** Guarda antes do POST. Falha deixa o envio bloqueado; a mesma chave nunca substitui outro pedido. */
 export function gravarIntencao(
   armazem: Escrita | null,
@@ -120,7 +137,8 @@ export function gravarIntencao(
   organizacaoId: string,
   guardada: IntencaoGuardada,
 ): boolean {
-  if (!armazem) return false;
+  // Guardar antes do POST registra um envio incerto; a certeza de recusa só nasce da resposta.
+  if (!armazem || guardada.antesDoEnvelope) return false;
   try {
     const bruto = JSON.stringify(guardada);
     if (!lerGuardada(bruto)) return false;
@@ -205,6 +223,11 @@ export function lerIntencao(
     return null;
   }
 }
+/** O próximo passo de cada pedido na lista: sem campo alterável (situação), uma recusa só pode ser encerrada. */
+export function acaoDoPendente(g: IntencaoGuardada): string {
+  if (g.falha?.tipo !== 'corrigir') return 'Consultar envio';
+  return g.contexto.tipo === 'situacao' ? 'Encerrar pedido' : 'Corrigir cadastro';
+}
 export function raizDaIntencao(g: IntencaoGuardada): string {
   return g.origem?.raiz ?? g.intencao.chave;
 }
@@ -256,7 +279,8 @@ export function guardarFalha(
     return null;
   if (atual.falha) return atual;
   try {
-    const nova = { ...atual, falha };
+    // Uma falha só chega depois de um POST: a certeza anterior ao envelope já não descreve esta chave.
+    const nova = { ...semCerteza(atual), falha };
     const chave = prefixoDasIntencoes(usuarioId, organizacaoId) + g.intencao.chave;
     const bruto = JSON.stringify(nova);
     armazem.setItem(chave, bruto);
@@ -365,4 +389,198 @@ export async function comTravaCadastro<T>(
       'Este navegador não oferece a trava necessária para enviar com segurança. Use um navegador compatível.',
     );
   return travas.request(prefixoDasIntencoes(usuarioId, organizacaoId) + raizDaIntencao(g), executar);
+}
+
+/**
+ * Trava do cadastro alvo (DECISAO-RECUPERACAO-C2-20261003 §1): serializa entre abas a conferência "já há pedido deste
+ * cadastro?" e a gravação do pedido novo. Edição e situação do mesmo registro dividem a trava; as criações de um tipo
+ * também, porque o alvo delas só se conhece pelo conteúdo. É tomada dentro da trava do fluxo, nunca o contrário.
+ */
+export async function comTravaDoAlvo<T>(
+  travas: Pick<LockManager, 'request'> | undefined,
+  usuarioId: string,
+  organizacaoId: string,
+  intencao: Intencao,
+  executar: () => Promise<T>,
+): Promise<T> {
+  if (!travas)
+    throw new Error(
+      'Este navegador não oferece a trava necessária para enviar com segurança. Use um navegador compatível.',
+    );
+  const alvo =
+    intencao.expectedVersion === 0 ? intencao.commandType : `${intencao.targetType}:${intencao.targetId}`;
+  return travas.request(`${prefixoDasIntencoes(usuarioId, organizacaoId)}alvo:${alvo}`, executar);
+}
+
+/** Pendência do mesmo registro (edição ou situação); a de outro alvo não impede abrir este. */
+export function pendenteDoAlvo(
+  armazem: Varredura | null,
+  usuarioId: string,
+  organizacaoId: string,
+  targetType: Intencao['targetType'],
+  targetId: string,
+): IntencaoGuardada | null {
+  return (
+    lerIntencoes(armazem, usuarioId, organizacaoId).find(
+      (g) => g.intencao.targetType === targetType && g.intencao.targetId === targetId,
+    ) ?? null
+  );
+}
+
+/** Pedido guardado do mesmo cadastro, inclusive uma criação equivalente; deve ser lido dentro de `comTravaDoAlvo`. */
+export function pendenteEquivalente(
+  armazem: Varredura | null,
+  usuarioId: string,
+  organizacaoId: string,
+  intencao: Intencao,
+): IntencaoGuardada | null {
+  return (
+    lerIntencoes(armazem, usuarioId, organizacaoId).find(
+      (g) => g.intencao.chave !== intencao.chave && mesmoCadastro(g.intencao, intencao),
+    ) ?? null
+  );
+}
+
+export type RegistroNovo =
+  | { readonly tipo: 'gravado' }
+  | { readonly tipo: 'pendente'; readonly guardada: IntencaoGuardada }
+  | { readonly tipo: 'falhou' };
+/** Conferência e gravação do pedido novo na trava do alvo; outro pedido do mesmo cadastro impede a gravação. */
+export function registrarNovoPedido(
+  travas: Pick<LockManager, 'request'> | undefined,
+  armazem: (Escrita & Varredura) | null,
+  usuarioId: string,
+  organizacaoId: string,
+  g: IntencaoGuardada,
+): Promise<RegistroNovo> {
+  return comTravaDoAlvo(travas, usuarioId, organizacaoId, g.intencao, (): Promise<RegistroNovo> => {
+    const outro = pendenteEquivalente(armazem, usuarioId, organizacaoId, g.intencao);
+    if (outro) return Promise.resolve({ tipo: 'pendente', guardada: outro });
+    return Promise.resolve({
+      tipo: gravarIntencao(armazem, usuarioId, organizacaoId, g) ? 'gravado' : 'falhou',
+    });
+  });
+}
+
+/**
+ * Deve executar na trava do fluxo, logo após a resposta contratual de sessão (401) a um envio sem incerteza anterior.
+ * Falha de gravação ou leitura deixa o registro como estava: incerto, que é o lado seguro.
+ */
+export function marcarRecusaAntesDoEnvelope(
+  armazem: Escrita | null,
+  usuarioId: string,
+  organizacaoId: string,
+  g: IntencaoGuardada,
+): IntencaoGuardada | null {
+  if (!armazem) return null;
+  const atual = lerIntencao(armazem, usuarioId, organizacaoId, g.intencao.chave);
+  if (
+    !atual ||
+    atual.falha ||
+    atual.intencao.corpo !== g.intencao.corpo ||
+    atual.intencao.commandType !== g.intencao.commandType
+  )
+    return null;
+  if (atual.antesDoEnvelope) return atual;
+  try {
+    const nova: IntencaoGuardada = { ...atual, antesDoEnvelope: true };
+    const chave = prefixoDasIntencoes(usuarioId, organizacaoId) + g.intencao.chave;
+    const bruto = JSON.stringify(nova);
+    armazem.setItem(chave, bruto);
+    return armazem.getItem(chave) === bruto ? nova : null;
+  } catch {
+    return null;
+  }
+}
+
+export type PreparoEnvio =
+  | { readonly tipo: 'primeiro' | 'repeticao'; readonly guardada: IntencaoGuardada }
+  | { readonly tipo: 'impedido'; readonly mensagem: string };
+/**
+ * Antes de cada novo POST da mesma chave, na trava do fluxo. Com a certeza de recusa anterior, ela é retirada e
+ * conferida por releitura ANTES do envio: uma queda durante ou depois do POST reabre incerteza, nunca a recusa antiga.
+ * Se a gravação falha, nada é enviado.
+ */
+export function prepararNovoEnvio(
+  armazem: Escrita | null,
+  usuarioId: string,
+  organizacaoId: string,
+  g: IntencaoGuardada,
+): PreparoEnvio {
+  const atual = armazem ? lerIntencao(armazem, usuarioId, organizacaoId, g.intencao.chave) : null;
+  if (
+    !armazem ||
+    !atual ||
+    atual.intencao.corpo !== g.intencao.corpo ||
+    atual.intencao.commandType !== g.intencao.commandType
+  )
+    return {
+      tipo: 'impedido',
+      mensagem: 'Este envio mudou em outra aba ou não está disponível. Reabra a lista de cadastros.',
+    };
+  if (atual.falha)
+    return { tipo: 'impedido', mensagem: 'Este conteúdo não pode ser reenviado; consulte o recibo.' };
+  if (!atual.antesDoEnvelope) return { tipo: 'repeticao', guardada: atual };
+  const incerta = semCerteza(atual);
+  try {
+    const chave = prefixoDasIntencoes(usuarioId, organizacaoId) + g.intencao.chave;
+    const bruto = JSON.stringify(incerta);
+    armazem.setItem(chave, bruto);
+    if (armazem.getItem(chave) === bruto) return { tipo: 'primeiro', guardada: incerta };
+  } catch {
+    // Cai no impedimento abaixo: sem a certeza retirada, não há POST.
+  }
+  return {
+    tipo: 'impedido',
+    mensagem:
+      'Não foi possível preparar o reenvio com segurança. Nada foi enviado; libere armazenamento e tente de novo.',
+  };
+}
+
+export type Encerramento =
+  | { readonly tipo: 'encerrado'; readonly correlacoes: readonly string[] }
+  | { readonly tipo: 'mudou'; readonly guardada: IntencaoGuardada }
+  | { readonly tipo: 'impedido'; readonly mensagem: string };
+/**
+ * Encerra o pedido local (DECISAO-RECUPERACAO-C2-20261003 §3), na trava do fluxo e sem rede. Só quando a folha relida
+ * é a mesma que a tela mostra e todo o fluxo foi recusado com certeza sem gravação ("corrigir", que só nasce de um envio
+ * sem incerteza anterior). Uma sucessora preparada em outra aba, uma pendência incerta ou "somente_consulta" (§4) nunca
+ * são removidas. A remoção reaproveita a limpeza causal de C2: interrompida, deixa a folha consultável.
+ */
+export function encerrarPedido(
+  armazem: (Varredura & Pick<Storage, 'removeItem'>) | null,
+  usuarioId: string,
+  organizacaoId: string,
+  g: IntencaoGuardada,
+): Encerramento {
+  const atual = atualDoFluxo(armazem, usuarioId, organizacaoId, g);
+  if (!atual)
+    return {
+      tipo: 'impedido',
+      mensagem: 'Não foi possível recuperar este pedido. Reabra a lista de cadastros.',
+    };
+  if (atual.intencao.chave !== g.intencao.chave) return { tipo: 'mudou', guardada: atual };
+  const fluxo = lerTodasIntencoes(armazem, usuarioId, organizacaoId).filter(
+    (x) => raizDaIntencao(x) === raizDaIntencao(atual),
+  );
+  if (atual.falha?.tipo !== 'corrigir' || fluxo.some((x) => x.falha?.tipo !== 'corrigir'))
+    return {
+      tipo: 'impedido',
+      mensagem: 'Só um pedido recusado sem gravação pode ser encerrado. Consulte o recibo deste envio.',
+    };
+  // Raiz → folha, para o suporte; um ciclo corrompido para aqui e a limpeza abaixo o recusa.
+  const correlacoes: string[] = [];
+  const vistas = new Set<string>();
+  for (let x: IntencaoGuardada | undefined = atual; x && !vistas.has(x.intencao.chave);) {
+    vistas.add(x.intencao.chave);
+    if (x.falha) correlacoes.unshift(x.falha.correlacao);
+    const origem: string | undefined = x.origem?.chave;
+    x = origem === undefined ? undefined : fluxo.find((y) => y.intencao.chave === origem);
+  }
+  if (!apagarFluxo(armazem, usuarioId, organizacaoId, atual))
+    return {
+      tipo: 'impedido',
+      mensagem: 'Não foi possível encerrar agora. O pedido continua guardado; tente de novo.',
+    };
+  return { tipo: 'encerrado', correlacoes };
 }

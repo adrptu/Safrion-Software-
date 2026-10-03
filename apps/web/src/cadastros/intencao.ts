@@ -214,6 +214,30 @@ export function desfechoDaConsulta(status: number, corpo: unknown, intencao: Int
   return incerto(status, 'Não deu para consultar agora. Consulte o recibo de novo em instantes.');
 }
 
+function ehCriacao(i: Intencao): boolean {
+  return i.commandType === COMANDOS_CADASTRO.criarFazenda || i.commandType === COMANDOS_CADASTRO.criarTalhao;
+}
+
+/**
+ * Mesmo cadastro (DECISAO-RECUPERACAO-C2-20261003 §1): o mesmo registro, em edição ou situação, ou uma criação
+ * equivalente, com o mesmo nome no mesmo escopo (a fazenda do talhão), comparado como a chave de nome do banco
+ * (minúsculas sobre o nome normalizado). Só guarda a tela contra repetir o pedido; a unicidade continua no banco.
+ */
+export function mesmoCadastro(a: Intencao, b: Intencao): boolean {
+  if (a.targetType === b.targetType && a.targetId === b.targetId) return true;
+  if (!ehCriacao(a) || a.commandType !== b.commandType) return false;
+  const identidade = (i: Intencao) => {
+    const dados = EsquemaPedidoComando.parse(JSON.parse(i.corpo) as unknown).data;
+    if (typeof dados !== 'object' || dados === null) return null;
+    const { nome, fazenda } = dados as Record<string, unknown>;
+    return typeof nome === 'string'
+      ? JSON.stringify([normalizarNome(nome).toLowerCase(), typeof fazenda === 'string' ? fazenda : null])
+      : null;
+  };
+  const x = identidade(a);
+  return x !== null && x === identidade(b);
+}
+
 /** Chave, identificador gerado e versão não são uma correção dos dados recusados. */
 export function mesmoConteudoDeDominio(a: Intencao, b: Intencao): boolean {
   if (a.commandType !== b.commandType) return false;

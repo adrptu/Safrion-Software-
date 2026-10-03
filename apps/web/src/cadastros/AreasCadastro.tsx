@@ -6,7 +6,7 @@ import { EditorCadastro, type EdicaoCadastro } from './EditorCadastro';
 import { EnviosCadastro, edicaoDaIntencao } from './EnviosCadastro';
 import { ListaAreas } from './ListaAreas';
 import { PainelCadastro } from './PainelCadastro';
-import { armazemLocal, lerIntencoes, type IntencaoGuardada } from './pendencias';
+import type { IntencaoGuardada } from './pendencias';
 import { destinoConfirmado } from './retorno';
 import s from './cadastro.module.css';
 
@@ -32,18 +32,15 @@ export function AreasCadastro({
   } | null>(null);
   const [aberto, setAberto] = useState(false);
   const [revisao, setRevisao] = useState(0);
-  const [aviso, setAviso] = useState('');
   function abrir(g: IntencaoGuardada) {
     setPainel({ edicao: edicaoDaIntencao(g), inicial: g, volta: g.contexto.volta, chave: Date.now() });
     setAberto(true);
   }
+  /**
+   * Um talhão novo é independente das pendências guardadas, que continuam em "Retomar cadastros". A criação equivalente
+   * a uma pendente é barrada no envio, quando o conteúdo é conhecido (DECISAO-RECUPERACAO-C2-20261003 §1).
+   */
   function novo(fazenda?: string) {
-    const [g] = lerIntencoes(armazemLocal(), usuarioId, organizacaoId);
-    if (g) {
-      setAviso('Confira o envio pendente antes de começar outro cadastro.');
-      abrir(g);
-      return;
-    }
     // O estado da tabela está na URL; abrir painel não cria uma entrada de histórico.
     const volta = `/cadastros/areas${window.location.search}`;
     setPainel({ edicao: { tipo: 'talhao', ...(fazenda ? { fazenda } : {}) }, volta, chave: Date.now() });
@@ -69,7 +66,6 @@ export function AreasCadastro({
           </button>
         </div>
       ) : null}
-      {aviso ? <p role="status">{aviso}</p> : null}
       {podeEditar ? (
         <EnviosCadastro usuarioId={usuarioId} organizacaoId={organizacaoId} abrir={abrir} revisao={revisao} />
       ) : null}

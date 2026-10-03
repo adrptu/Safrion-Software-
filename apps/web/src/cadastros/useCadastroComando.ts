@@ -8,13 +8,34 @@ import {
   armazemLocal,
   atualDoFluxo,
   comTravaCadastro,
-  gravarIntencao,
+  encerrarPedido,
   guardarFalha,
+  marcarRecusaAntesDoEnvelope,
   prepararCorrecao,
+  prepararNovoEnvio,
+  registrarNovoPedido,
   type IntencaoGuardada,
 } from './pendencias';
 
-/** Uma tentativa só se encerra com recibo correspondente ou recusa certa do primeiro envio. */
+const travasDoNavegador = () => (typeof navigator === 'undefined' ? undefined : navigator.locks);
+
+/** O estado guardado e o próximo passo; a situação do talhão não tem dado a corrigir (DECISAO-RECUPERACAO-C2 §3). */
+function mensagemDaPendencia(g: IntencaoGuardada): string {
+  if (g.falha?.tipo === 'corrigir')
+    return g.contexto.tipo === 'situacao'
+      ? 'Nada deste pedido foi gravado e não há dado a corrigir. Encerre o pedido; a correlação fica à vista para o suporte.'
+      : 'Nada deste pedido foi gravado. Corrija os dados antes de enviar um novo pedido.';
+  if (g.falha?.tipo === 'somente_consulta')
+    return 'O resultado anterior continua incerto. Este conteúdo não pode ser reenviado; consulte o recibo.';
+  return g.antesDoEnvelope
+    ? 'Nada foi gravado: a sessão tinha terminado antes do envio. Entre novamente, se preciso, e consulte o recibo para reenviar o mesmo cadastro.'
+    : 'Há um envio sem confirmação. Consulte o recibo para continuar.';
+}
+
+/**
+ * Uma tentativa só se encerra com recibo correspondente, recusa certa do primeiro envio ou, se todo o fluxo foi recusado
+ * sem gravação, encerramento explícito de quem vê o pedido.
+ */
 export function useCadastroComando(
   usuarioId: string,
   organizacaoId: string,
@@ -25,24 +46,19 @@ export function useCadastroComando(
   const [ocupado, setOcupado] = useState(false);
   const trava = useRef(false);
   const [mensagem, setMensagem] = useState(
-    inicial?.falha?.mensagem ??
-      (inicial ? 'Há um envio sem confirmação. Consulte o recibo para continuar.' : ''),
+    inicial?.falha?.mensagem ?? (inicial ? mensagemDaPendencia(inicial) : ''),
   );
   const [naoLocalizado, setNaoLocalizado] = useState(false);
   const [sessao, setSessao] = useState(false);
   const [versaoAtual, setVersaoAtual] = useState<number | null>(null);
   const [falhaDePersistencia, setFalhaDePersistencia] = useState(false);
+  /** Correlações do pedido encerrado, raiz → folha: continuam na tela para o suporte. */
+  const [encerrado, setEncerrado] = useState<readonly string[] | null>(null);
 
   function recuperar(g: IntencaoGuardada) {
     setPendente(g);
     setNaoLocalizado(false);
-    setMensagem(
-      g.falha?.tipo === 'corrigir'
-        ? 'Nada deste pedido foi gravado. Corrija os dados antes de enviar um novo pedido.'
-        : g.falha?.tipo === 'somente_consulta'
-          ? 'O resultado anterior continua incerto. Este conteúdo não pode ser reenviado; consulte o recibo.'
-          : 'Há um envio sem confirmação. Consulte o recibo para continuar.',
-    );
+    setMensagem(mensagemDaPendencia(g));
   }
   function preservarFalha(g: IntencaoGuardada, falha: NonNullable<IntencaoGuardada['falha']>) {
     const salva = guardarFalha(armazemLocal(), usuarioId, organizacaoId, g, falha);
@@ -78,6 +94,10 @@ export function useCadastroComando(
       return;
     }
     if (d.tipo === 'nao_gravado' && d.sessao) {
+      // desfechoDoEnvio só devolve esta recusa a um envio sem incerteza anterior; falhar ao guardá-la deixa o envio
+      // incerto, o lado seguro (DECISAO-RECUPERACAO-C2-20261003 §2).
+      const marcada = marcarRecusaAntesDoEnvelope(armazemLocal(), usuarioId, organizacaoId, g);
+      if (marcada) setPendente(marcada);
       setMensagem(
         'Sua sessão terminou. Seus dados estão guardados. Entre novamente para conferir e continuar.',
       );
@@ -114,13 +134,7 @@ export function useCadastroComando(
     trava.current = true;
     setOcupado(true);
     try {
-      await comTravaCadastro(
-        typeof navigator === 'undefined' ? undefined : navigator.locks,
-        usuarioId,
-        organizacaoId,
-        g,
-        executar,
-      );
+      await comTravaCadastro(travasDoNavegador(), usuarioId, organizacaoId, g, executar);
     } catch (erro: unknown) {
       setMensagem(
         erro instanceof Error
@@ -150,7 +164,13 @@ export function useCadastroComando(
     aplicar(d, g);
   }
   function enviar(g: IntencaoGuardada) {
-    if (trava.current || falhaDePersistencia || (pendente && pendente.falha?.tipo !== 'corrigir')) return;
+    if (
+      trava.current ||
+      falhaDePersistencia ||
+      encerrado !== null ||
+      (pendente && pendente.falha?.tipo !== 'corrigir')
+    )
+      return;
     const origem = pendente;
     void exclusiva(origem ?? g, async () => {
       if (origem) {
@@ -169,7 +189,22 @@ export function useCadastroComando(
           recuperar(existente);
           return;
         }
-        if (!gravarIntencao(armazemLocal(), usuarioId, organizacaoId, g)) {
+        // Outro pedido do mesmo cadastro, em qualquer aba, impede este; pedidos de outros alvos seguem (§1).
+        const registro = await registrarNovoPedido(
+          travasDoNavegador(),
+          armazemLocal(),
+          usuarioId,
+          organizacaoId,
+          g,
+        );
+        if (registro.tipo === 'pendente') {
+          const nome = registro.guardada.campos['nome'];
+          setMensagem(
+            `Já existe um envio pendente para este cadastro${nome ? ` (${nome})` : ''}. Nada foi enviado. Volte e abra-o em Retomar cadastros.`,
+          );
+          return;
+        }
+        if (registro.tipo === 'falhou') {
           setMensagem(
             'O navegador não conseguiu guardar o envio. Libere espaço ou armazenamento e tente novamente. Nada foi enviado.',
           );
@@ -211,8 +246,19 @@ export function useCadastroComando(
         return;
       }
       if (repetir) {
-        if (!g.falha && naoLocalizado) await postar(g, true);
-        else recuperar(g);
+        if (g.falha || !(naoLocalizado || g.antesDoEnvelope)) {
+          recuperar(g);
+          return;
+        }
+        // A certeza de recusa é retirada e conferida antes do POST; sem gravação, não há envio (§2).
+        const preparo = prepararNovoEnvio(armazemLocal(), usuarioId, organizacaoId, g);
+        if (preparo.tipo === 'impedido') {
+          setMensagem(preparo.mensagem);
+          setNaoLocalizado(false);
+          return;
+        }
+        setPendente(preparo.guardada);
+        await postar(preparo.guardada, preparo.tipo === 'repeticao');
         return;
       }
       setMensagem('Consultando recibo…');
@@ -230,6 +276,27 @@ export function useCadastroComando(
       aplicar(d, g);
     });
   }
+  /** Sem POST nem efeito de domínio; a releitura na trava protege a sucessora incerta de outra aba (§3). */
+  async function encerrar() {
+    if (!pendente) return;
+    const lembrada = pendente;
+    await exclusiva(lembrada, () => {
+      const r = encerrarPedido(armazemLocal(), usuarioId, organizacaoId, lembrada);
+      if (r.tipo === 'mudou') {
+        recuperar(r.guardada);
+        setMensagem('Este pedido mudou em outra aba. Nada foi encerrado; confira o envio atual.');
+      } else if (r.tipo === 'impedido') setMensagem(r.mensagem);
+      else {
+        setPendente(null);
+        setNaoLocalizado(false);
+        setFalhaDePersistencia(false);
+        setEncerrado(r.correlacoes);
+        setMensagem('Pedido encerrado. Nada foi gravado no servidor e nada foi enviado agora.');
+      }
+      return Promise.resolve();
+    });
+  }
+  const recusada = pendente?.falha?.tipo === 'corrigir' && !falhaDePersistencia;
   return {
     pendente,
     ocupado,
@@ -237,10 +304,14 @@ export function useCadastroComando(
     sessao,
     versaoAtual,
     naoLocalizado,
-    corrigivel: pendente?.falha?.tipo === 'corrigir' && !falhaDePersistencia,
-    correlacao: pendente?.falha?.correlacao ?? pendente?.origem?.correlacao,
+    // A situação do talhão não tem campo alterável: não há correção possível a prometer (§3).
+    corrigivel: recusada && pendente.contexto.tipo !== 'situacao',
+    encerravel: recusada,
+    encerrado: encerrado !== null,
+    correlacao: encerrado?.join(', ') ?? pendente?.falha?.correlacao ?? pendente?.origem?.correlacao,
     falhaDePersistencia,
     enviar,
+    encerrar,
     consultar: () => retomar(false),
     repetir: () => {
       void retomar(true);
