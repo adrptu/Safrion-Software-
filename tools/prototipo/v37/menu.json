@@ -1,0 +1,143 @@
+[
+ {
+  "area": "Início",
+  "submenus": [
+   "Meu dia",
+   "Aprovações",
+   "Agenda e pendências",
+   "Mapa da fazenda"
+  ]
+ },
+ {
+  "area": "Agronomia",
+  "submenus": [
+   "Monitoramento e vistorias",
+   "Análises e amostras",
+   "Diagnósticos",
+   "Recomendações",
+   "Protocolos e planos técnicos",
+   "Eficácia e histórico",
+   "Bulas e registros"
+  ]
+ },
+ {
+  "area": "Planejamento",
+  "submenus": [
+   "Safras, ciclos e metas",
+   "Plano operacional",
+   "Capacidade e recursos",
+   "Programação integrada",
+   "Impedimentos e reprogramação",
+   "Parcelas e escalonamento"
+  ]
+ },
+ {
+  "area": "Campo",
+  "submenus": [
+   "Ordens de campo",
+   "Apontamentos e conferência",
+   "Ocorrências",
+   "Minhas requisições"
+  ]
+ },
+ {
+  "area": "Irrigação",
+  "submenus": [
+   "Balanço hídrico",
+   "Programação da irrigação",
+   "Ordens de irrigação",
+   "Clima, sensores e desempenho"
+  ]
+ },
+ {
+  "area": "Máquinas e manutenção",
+  "submenus": [
+   "Ativos e disponibilidade",
+   "Solicitações e inspeções",
+   "Plano de manutenção",
+   "Ordens de manutenção",
+   "Abastecimentos e desempenho"
+  ]
+ },
+ {
+  "area": "Colheita e pós-colheita",
+  "submenus": [
+   "Previsão e maturação",
+   "Programação e ordens de colheita",
+   "Cargas, pesagens e romaneios",
+   "Recebimento da produção",
+   "Beneficiamento",
+   "Qualidade e rastreabilidade",
+   "Estoque de produção"
+  ]
+ },
+ {
+  "area": "Suprimentos",
+  "submenus": [
+   "Necessidades e cobertura",
+   "Políticas de estoque",
+   "Saldos e lotes",
+   "Solicitações e cotações",
+   "Contratos, pedidos e entregas",
+   "Recebimentos e divergências",
+   "Requisições e entregas",
+   "Transferências e movimentos",
+   "Inventários e ajustes"
+  ]
+ },
+ {
+  "area": "Comercial",
+  "submenus": [
+   "Demanda e oferta",
+   "Mercado e preços",
+   "Ofertas e propostas",
+   "Pedidos de venda",
+   "Contratos e compromissos",
+   "Reclamações e devoluções"
+  ]
+ },
+ {
+  "area": "Logística",
+  "submenus": [
+   "Programação de transporte",
+   "Expedições e cargas",
+   "Viagens e entregas",
+   "Fretes e transportadores"
+  ]
+ },
+ {
+  "area": "Gestão e resultados",
+  "submenus": [
+   "Visão gerencial",
+   "Orçamento e previsões",
+   "Custos e fechamento",
+   "Contas a pagar e caixa",
+   "Contas a receber",
+   "Indicadores operacionais",
+   "Planos de ação",
+   "Crédito e garantias"
+  ]
+ },
+ {
+  "area": "Cadastros",
+  "submenus": [
+   "Fazendas, áreas e talhões",
+   "Culturas, cultivares e operações",
+   "Máquinas, instalações e setores",
+   "Pessoas e equipes",
+   "Parceiros",
+   "Produtos, unidades e locais",
+   "Estrutura gerencial"
+  ]
+ },
+ {
+  "area": "Configurações",
+  "submenus": [
+   "Usuários e permissões",
+   "Alçadas e regras",
+   "Integrações e sincronização",
+   "Auditoria e parâmetros",
+   "Assinatura e medição"
+  ]
+ }
+]

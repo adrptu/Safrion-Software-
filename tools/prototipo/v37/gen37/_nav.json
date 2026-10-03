@@ -1,0 +1,8942 @@
+{
+ "AG-01.dc.html": {
+  "arquivo": "AG-01.dc.html",
+  "familia": "AG-01",
+  "titulo": "Monitoramento e vistorias",
+  "rota": "/agronomia/monitoramento",
+  "links": [
+   [
+    "Coletar próximo ponto",
+    "MB-06.dc.html"
+   ],
+   [
+    "Revisar evidências",
+    "AG-01det.dc.html"
+   ],
+   [
+    "Criar diagnóstico",
+    "AG-03.dc.html"
+   ],
+   [
+    "Coletar",
+    "MB-06.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Concluir coleta",
+    "VIS-015 concluída · abaixo do limiar: manejo preventivo do plano técnico permanece; nada é cancelado automaticamente."
+   ],
+   [
+    "Sincronizar agora",
+    "Pacote offline de João aplicado · 6 pontos e 12 fotos entraram na VIS-016 · sem conflito de versão."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Programar vistoria",
+    "campos": [
+     "Talhão",
+     "Alvo",
+     "Protocolo",
+     "Método",
+     "Data",
+     "Responsável"
+    ],
+    "confirmar": "Programar vistoria"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Programar vistoria",
+    "Programada · entrou na rota de 26/09"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "4 pontos acima do NC",
+   "MIP Soja v4",
+   "Evidências em revisão",
+   "MIP Feijão v2",
+   "Acima do NC · 5,1/4,0",
+   "Coleta em campo",
+   "MIP Milho v3",
+   "Abaixo do limiar",
+   "Café v1",
+   "Sincronização pendente",
+   "◆ até 3 dias · 26/09"
+  ]
+ },
+ "AG-01det.dc.html": {
+  "arquivo": "AG-01det.dc.html",
+  "familia": "AG-01",
+  "titulo": "Vistoria · VIS-011 nematoide T4",
+  "rota": "/agronomia/monitoramento",
+  "links": [
+   [
+    "Agronomia",
+    "AG-01.dc.html"
+   ],
+   [
+    "Monitoramento e vistorias",
+    "AG-01.dc.html"
+   ],
+   [
+    "Voltar",
+    "AG-01.dc.html"
+   ],
+   [
+    "Criar diagnóstico",
+    "AG-03.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Marcar ponto 11 para recoleta",
+    "Ponto 11 devolvido à rota de amanhã · contagem dele fica fora da média até nova coleta."
+   ],
+   [
+    "Concluir revisão",
+    "VIS-011 revisada por Ana · 13 pontos válidos, 1 em recoleta · pronta para virar diagnóstico."
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "Evidências em revisão",
+   "OK",
+   "GPS ±42 m · fora do talhão"
+  ]
+ },
+ "AG-02.dc.html": {
+  "arquivo": "AG-02.dc.html",
+  "familia": "AG-02",
+  "titulo": "Análises e amostras",
+  "rota": "/agronomia/analises",
+  "links": [
+   [
+    "Agronomia",
+    "AG-01.dc.html"
+   ],
+   [
+    "Abrir diagnóstico",
+    "AG-03.dc.html"
+   ],
+   [
+    "Coletar",
+    "MB-06.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Corrigir extração",
+    "Coluna K mapeada para g/kg · mapeamento salvo para o Agrolab · laudo volta para validação humana; a recomendação do P1 segue bloqueada até validar."
+   ],
+   [
+    "Validar dados",
+    "LAU-2050 validado por Ana · original preservado ao lado dos valores extraídos · liberado para diagnóstico."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Importar laudo",
+    "campos": [
+     "Laboratório",
+     "Arquivo do laudo (PDF)",
+     "Talhão",
+     "Profundidade",
+     "Mapeamento de colunas"
+    ],
+    "confirmar": "Importar e abrir prévia"
+   },
+   {
+    "titulo": "Planejar coleta",
+    "campos": [
+     "Talhão",
+     "Malha",
+     "Profundidade",
+     "Data",
+     "Laboratório"
+    ],
+    "confirmar": "Planejar coleta"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Importar laudo",
+    "Prévia aberta · 2 erros de linha destacados"
+   ],
+   [
+    "Planejar coleta",
+    "Coleta planejada · pontos enviados ao app"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 laudo inconsistente",
+   "Validado",
+   "Inconsistente · K sem unidade",
+   "Aguardando validação",
+   "◆ até 3 dias · coleta 26/09",
+   "Planejada"
+  ]
+ },
+ "AG-03.dc.html": {
+  "arquivo": "AG-03.dc.html",
+  "familia": "AG-03",
+  "titulo": "Diagnósticos",
+  "rota": "/agronomia/diagnosticos",
+  "links": [
+   [
+    "Agronomia",
+    "AG-01.dc.html"
+   ],
+   [
+    "Preparar recomendação",
+    "AG-04.dc.html"
+   ],
+   [
+    "Solicitar evidência",
+    "AG-02.dc.html"
+   ],
+   [
+    "Comparar cenário",
+    "PL-02.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Registrar decisão",
+    "Decisão registrada no DIA-010: intervenção imediata autorizada tecnicamente · segue para recomendação com dose formalizada."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Criar diagnóstico",
+    "campos": [
+     "Talhão",
+     "Cultura",
+     "Cultivar",
+     "Evidências (vistoria · laudo)",
+     "Hipótese e causa",
+     "Meta",
+     "Risco",
+     "Ação proposta",
+     "Responsável"
+    ],
+    "confirmar": "Criar diagnóstico"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Criar diagnóstico",
+    "Rascunho DIA-011 criado"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 aguardando evidência",
+   "Decisão registrada",
+   "Evidência bloqueada",
+   "Emergência MIP",
+   "Sem intervenção"
+  ]
+ },
+ "AG-04.dc.html": {
+  "arquivo": "AG-04.dc.html",
+  "familia": "AG-04",
+  "titulo": "Recomendações",
+  "rota": "/agronomia/recomendacoes",
+  "links": [
+   [
+    "Agronomia",
+    "AG-01.dc.html"
+   ],
+   [
+    "Ver demanda gerada",
+    "PL-02.dc.html"
+   ],
+   [
+    "Abrir",
+    "AG-04det.dc.html"
+   ],
+   [
+    "Ver execução",
+    "CA-01.dc.html"
+   ],
+   [
+    "Revisar fertirrigação",
+    "IN-02.dc.html"
+   ],
+   [
+    "Corrigir laudo",
+    "AG-02.dc.html"
+   ]
+  ],
+  "acoes": [],
+  "formularios": [
+   {
+    "titulo": "Editar rascunho · REC-018",
+    "campos": [
+     "Operação",
+     "Talhão",
+     "Tabela de referência",
+     "Dose sugerida (t/ha)",
+     "Dose informada (t/ha)",
+     "Janela"
+    ],
+    "confirmar": "Salvar rascunho"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Editar rascunho",
+    "Rascunho salvo · aguardando laudo do T2"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 submetida · 1 bloqueada",
+   "Aprovada · NEC-028 gerada",
+   "Aprovada · OS-0421 190/350 ha",
+   "Submetida · aguardando agrônomo",
+   "Bloqueada · laudo foliar inconsistente",
+   "Rascunho · aguarda laudo"
+  ]
+ },
+ "AG-04det.dc.html": {
+  "arquivo": "AG-04det.dc.html",
+  "familia": "AG-04",
+  "titulo": "Recomendação · REC-014 plantio T4",
+  "rota": "/agronomia/recomendacoes",
+  "links": [
+   [
+    "Agronomia",
+    "AG-01.dc.html"
+   ],
+   [
+    "Recomendações",
+    "AG-04.dc.html"
+   ],
+   [
+    "Voltar",
+    "AG-04.dc.html"
+   ],
+   [
+    "Ver necessidade gerada",
+    "PL-02.dc.html"
+   ],
+   [
+    "Ver em planejamento",
+    "PL-02.dc.html"
+   ],
+   [
+    "Abrir O.S.",
+    "CA-01.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Gerar prescrição espacial",
+    "Prescrição por zona (3 zonas da grade do T4) validada: terminal da plantadeira, unidade kg/ha, coordenadas SIRGAS 2000 e versão v2 conferidos · pronta para exportar."
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "Aprovada · O.S. impedida",
+   "Substituída",
+   "Aprovada · em uso",
+   "Aguardando agrônomo",
+   "Programada",
+   "Impedida · ativo bloqueado"
+  ]
+ },
+ "AG-05.dc.html": {
+  "arquivo": "AG-05.dc.html",
+  "familia": "AG-05",
+  "titulo": "Biblioteca e planos técnicos",
+  "rota": "/agronomia/protocolos",
+  "links": [
+   [
+    "Agronomia",
+    "AG-01.dc.html"
+   ],
+   [
+    "Simular aplicação",
+    "PL-02.dc.html"
+   ],
+   [
+    "Usar no cálculo",
+    "AG-04.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Publicar versão validada",
+    "Ainda não há versão validada para publicar: Feijão pivô v3 está em validação — use Validar na linha. Depois de validada, publicar envia as diferenças às 4 adoções ativas, preserva ajustes locais e não muda planos em execução."
+   ],
+   [
+    "Comparar versões",
+    "v3 → v4: NC do percevejo mantido; incluído nematoide-de-cisto com NC 15 cistos/200 cm³ · diferenças listadas por adoção; ajustes locais intactos."
+   ],
+   [
+    "Validar",
+    "Checagem: fonte ok, escopo ok, unidades ok · v3 apta a publicar; publicação continuará sem reescrever os planos em execução."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Criar versão do modelo",
+    "campos": [
+     "Plano",
+     "Cultura",
+     "Região de validade",
+     "Referência",
+     "Validade",
+     "Gatilho"
+    ],
+    "confirmar": "Criar versão"
+   },
+   {
+    "titulo": "Importar referência",
+    "campos": [
+     "Tabela",
+     "Escopo (cultura · região)",
+     "Arquivo (PDF)",
+     "Validade"
+    ],
+    "confirmar": "Importar referência"
+   },
+   {
+    "titulo": "Anexar referência · limiar mosca-branca em café",
+    "campos": [
+     "Referência técnica",
+     "Escopo (cultura · região)",
+     "Arquivo (PDF)",
+     "Validade"
+    ],
+    "confirmar": "Anexar e enviar para validação"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Criar versão",
+    "v7 em rascunho · publicação não reescreve planos em execução"
+   ],
+   [
+    "Importar referência",
+    "Referência importada · aguardando validação técnica"
+   ],
+   [
+    "Anexar referência",
+    "Referência anexada · limiar em validação (segue inativo até validar)"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 em validação · 1 inativo",
+   "plano-modelo",
+   "Publicado",
+   "protocolo",
+   "tabela",
+   "Vigente",
+   "Em validação",
+   "Inativo · sem fonte validada",
+   "plano perene"
+  ]
+ },
+ "AG-06.dc.html": {
+  "arquivo": "AG-06.dc.html",
+  "familia": "AG-06",
+  "titulo": "Eficácia e histórico",
+  "rota": "/agronomia/eficacia",
+  "links": [
+   [
+    "Agronomia",
+    "AG-01.dc.html"
+   ],
+   [
+    "Programar avaliação",
+    "AG-01.dc.html"
+   ],
+   [
+    "Abrir aplicações",
+    "CA-01.dc.html"
+   ],
+   [
+    "Programar pós",
+    "AG-01.dc.html"
+   ],
+   [
+    "Ver O.S.",
+    "CA-01.dc.html"
+   ],
+   [
+    "Abrir aplicação",
+    "CA-01.dc.html"
+   ],
+   [
+    "Propor revisão",
+    "AG-05.dc.html"
+   ],
+   [
+    "Propor melhoria",
+    "GE-07.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Registrar parecer",
+    "Parecer registrado: redução observada não atribuída ao produto (chuva de 48 mm entre pré e pós) · caso entra no histórico sem crédito de eficácia causal."
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 pós vence em 3 dias",
+   "◆ até 3 dias · pós 27/09",
+   "O.S. impedida · sem leitura pós",
+   "Controle 96 %",
+   "Alta",
+   "Redução 62 % observada",
+   "Baixa · chuva no período",
+   "Alvo recorreu em 12 dias"
+  ]
+ },
+ "AG-07.dc.html": {
+  "arquivo": "AG-07.dc.html",
+  "familia": "AG-07",
+  "titulo": "Bulas e registros",
+  "rota": "/agronomia/bulas",
+  "links": [
+   [
+    "Agronomia",
+    "AG-01.dc.html"
+   ],
+   [
+    "Usar na recomendação",
+    "AG-04.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Atualizar fonte",
+    "Base AGROFIT reconsultada agora · 2 fichas mudaram de situação (1 em reavaliação, 1 cancelada) · idade do cache zerada."
+   ],
+   [
+    "Comparar produtos",
+    "Comparação aberta: Inseticida B × Produto E (mesmo alvo) — dose, carência, modo de ação e nº de aplicações lado a lado; equivalência exige decisão técnica."
+   ],
+   [
+    "Ver documento oficial",
+    "Bula oficial aberta (PDF do AGROFIT) · situação: em reavaliação — uso permitido conforme rótulo vigente; alerta anexado ao receituário."
+   ],
+   [
+    "Comparar com Fungicida A",
+    "Mesmo ingrediente, mas NÃO é substituto automático: formulação (EC × SC) e dose (0,5 × 0,4 L/ha) diferem · a troca exige nova validação técnica na recomendação."
+   ],
+   [
+    "Ver documento oficial",
+    "Bula oficial do Fungicida A aberta (PDF do AGROFIT, consulta de 20/09) · restrições e intervalo de segurança conforme o rótulo vigente."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Preparar receituário agronômico",
+    "campos": [
+     "Produto",
+     "Cultura",
+     "Alvo",
+     "Talhão",
+     "Dose",
+     "Responsável técnico",
+     "Recomendação vinculada"
+    ],
+    "confirmar": "Emitir receituário"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Preparar receituário",
+    "Receituário emitido · assinado pelo RT · anexado à recomendação"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "14 em reavaliação",
+   "Vigente",
+   "Em reavaliação",
+   "Registro cancelado"
+  ]
+ },
+ "BO-01.dc.html": {
+  "arquivo": "BO-01.dc.html",
+  "familia": "BO-01",
+  "titulo": "Planos e contratos da plataforma",
+  "rota": "/plataforma/planos",
+  "links": [
+   [
+    "Abrir versão",
+    "BO-01det.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Simular cobrança",
+    "500 ha · Produtor Piloto v3 → R$ 1.000/mês (R$ 2 × 500 > mínimo R$ 299; piso usa máximo, não soma). Simulação identifica hipótese e nunca movimenta dinheiro real."
+   ],
+   [
+    "Aprovar tabela",
+    "Produtor Piloto v4 não aprovada: franquia de IA sem quantidade definida — oferta não pode ser publicada com direitos ou franquias indefinidos. Para resolver: informe a quantidade da franquia na proposta e registre a decisão comercial do proprietário; depois aprove de novo."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Criar versão de plano",
+    "campos": [
+     "Plano",
+     "Moeda",
+     "Vigência início",
+     "Tarifa"
+    ],
+    "confirmar": "Criar proposta"
+   },
+   {
+    "titulo": "Vincular contrato a contratante",
+    "campos": [
+     "Contratante",
+     "Plano",
+     "Vigência início"
+    ],
+    "confirmar": "Vincular com aceite"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Criar versão",
+    "Produtor Piloto v5 criada como proposta · hipótese rotulada"
+   ],
+   [
+    "Vincular contrato",
+    "Contrato vinculado · aceite registrado · sem cobrança retroativa"
+   ]
+  ],
+  "selos": [
+   "Backoffice da plataforma",
+   "2 hipóteses aguardando decisão",
+   "preço de piloto · hipótese",
+   "Vigente",
+   "Hipótese · não publicável",
+   "Proposta",
+   "Revisada",
+   "Substituída",
+   "Aprovada para piloto",
+   "valores: hipótese",
+   "Hipótese · aprovar por plano"
+  ]
+ },
+ "BO-01det.dc.html": {
+  "arquivo": "BO-01det.dc.html",
+  "familia": "BO-01",
+  "titulo": "Produtor Piloto v3 · versão vigente",
+  "rota": "/plataforma/planos",
+  "links": [
+   [
+    "Backoffice da plataforma",
+    "BO-01.dc.html"
+   ],
+   [
+    "Planos e contratos da plataforma",
+    "BO-01.dc.html"
+   ],
+   [
+    "Voltar",
+    "BO-01.dc.html"
+   ],
+   [
+    "Ver como o cliente vê",
+    "CF-05.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Criar versão a partir desta",
+    "Produtor Piloto v5 criada como proposta, herdando parâmetros da v3 — contratos vigentes intactos; preço segue hipótese até decisão comercial."
+   ],
+   [
+    "Encerrar vigência",
+    "Bloqueado: 9 contratos ativos vinculados. Para resolver: publique a versão substituta e colete o aceite de cada contrato; a vigência encerra quando o último migrar."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Vincular contrato a Produtor Piloto v3",
+    "campos": [
+     "Contratante",
+     "Vigência início"
+    ],
+    "confirmar": "Vincular com aceite"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Vincular contrato",
+    "Contrato vinculado · aceite registrado"
+   ]
+  ],
+  "selos": [
+   "Backoffice da plataforma",
+   "Vigente · 9 contratos",
+   "Preço de piloto · hipótese",
+   "hipótese · decisão pendente",
+   "hipótese de piloto",
+   "Hipótese comercial · não publicável sem decisão"
+  ]
+ },
+ "BO-02.dc.html": {
+  "arquivo": "BO-02.dc.html",
+  "familia": "BO-02",
+  "titulo": "Assinaturas e cobrança",
+  "rota": "/plataforma/assinaturas",
+  "links": [
+   [
+    "Abrir assinatura",
+    "BO-02det.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Reconciliar pagamento",
+    "FAT-2209-016 conciliada: evento evt_1JKT5 validado → paga. Evento repetido do provedor ignorado por idempotência — nenhuma fatura ou cobrança duplicada."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Cancelar assinatura ao fim do ciclo",
+    "campos": [
+     "Contratante",
+     "Fim do ciclo",
+     "Motivo"
+    ],
+    "confirmar": "Agendar cancelamento"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Cancelar ao fim do ciclo",
+    "Cancelamento agendado para 30/09 · execução física em andamento não é interrompida"
+   ]
+  ],
+  "selos": [
+   "Backoffice da plataforma",
+   "1 em recuperação · 3 faturas abertas",
+   "Ativa",
+   "Recuperação por falha",
+   "Trial",
+   "Renovação com aceite",
+   "Cancelamento ao fim do ciclo",
+   "Pago",
+   "Falhou",
+   "Pendente",
+   "Ação necessária",
+   "Estornado",
+   "Cancelado"
+  ]
+ },
+ "BO-02det.dc.html": {
+  "arquivo": "BO-02det.dc.html",
+  "familia": "BO-02",
+  "titulo": "Assinatura · Fazenda Aurora",
+  "rota": "/plataforma/assinaturas",
+  "links": [
+   [
+    "Backoffice da plataforma",
+    "BO-02.dc.html"
+   ],
+   [
+    "Assinaturas e cobrança",
+    "BO-02.dc.html"
+   ],
+   [
+    "Voltar",
+    "BO-02.dc.html"
+   ],
+   [
+    "Ver contrato do cliente",
+    "CF-05.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Reconciliar pagamento",
+    "Sem evento novo do provedor para FAT-2209-015 — nada a conciliar; retorno visual do checkout não confirma pagamento."
+   ],
+   [
+    "Cancelar ao fim do ciclo",
+    "Não disponível: Fazenda Aurora não pediu cancelamento e falha de pagamento não cancela automaticamente. Para resolver: registre o pedido do contratante (canal e data) e então agende o cancelamento ao fim do ciclo."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Acordo de regularização",
+    "campos": [
+     "Contratante",
+     "Forma",
+     "Vencimento"
+    ],
+    "confirmar": "Registrar acordo"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Registrar acordo de regularização",
+    "Acordo registrado · fatura permanece até conciliação do recebimento"
+   ]
+  ],
+  "selos": [
+   "Backoffice da plataforma",
+   "Recuperação · retentativa 2 de 3",
+   "Pendente",
+   "Falhou · cartão recusado",
+   "Enviado",
+   "Aguardando evento"
+  ]
+ },
+ "BO-03.dc.html": {
+  "arquivo": "BO-03.dc.html",
+  "familia": "BO-03",
+  "titulo": "Medição e conciliação comercial",
+  "rota": "/plataforma/medicao",
+  "links": [
+   [
+    "Revisar divergência",
+    "BO-03det.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Comparar contrato",
+    "Fazenda Aurora: contrato usa área contratada (60 ha); a ocupação apurada é 35 ha. Mensalidade igual nas duas bases (mínimo R$ 299 prevalece) · escolha da base segue hipótese, com decisão comercial pendente."
+   ],
+   [
+    "Aprovar ajuste",
+    "AJ-009 (Agro Bela Vista, +13 ha) aprovado após retorno à conciliação · vigência a partir de out/2026 com aceite — medição de set já faturada não foi reescrita; crédito/ajuste vinculado ao período."
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "Backoffice da plataforma",
+   "1 contestação aberta",
+   "Conciliado",
+   "Aberto",
+   "Contestado",
+   "base em contestação",
+   "Ajustado",
+   "+13 ha · aceite pendente",
+   "Aprovado"
+  ]
+ },
+ "BO-03det.dc.html": {
+  "arquivo": "BO-03det.dc.html",
+  "familia": "BO-03",
+  "titulo": "Medição · Fazenda Aurora (set/2026)",
+  "rota": "/plataforma/medicao",
+  "links": [
+   [
+    "Backoffice da plataforma",
+    "BO-03.dc.html"
+   ],
+   [
+    "Medição e conciliação comercial",
+    "BO-03.dc.html"
+   ],
+   [
+    "Voltar",
+    "BO-03.dc.html"
+   ],
+   [
+    "Ver contrato do cliente",
+    "CF-05.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Aprovar ajuste",
+    "Bloqueado: o período está contestado. Para resolver: registre o ajuste com origem — o período volta à conciliação e então pode ser aprovado pela alçada comercial."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Ajuste da medição set/2026",
+    "campos": [
+     "Contratante",
+     "Tipo",
+     "Valor",
+     "Origem"
+    ],
+    "confirmar": "Registrar ajuste"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Registrar ajuste com origem",
+    "Ajuste registrado (R$ 0) · período volta a conciliado · resposta ao contratante com a memória de cálculo · aprovação pendente de alçada"
+   ]
+  ],
+  "selos": [
+   "Backoffice da plataforma",
+   "Contestado desde 18/09",
+   "Sim · base vigente",
+   "Não · base é contratada",
+   "Excluída da soma",
+   "Não conta de novo",
+   "Franquia · sem excedente",
+   "Igual nas duas bases",
+   "Hipótese comercial · não publicável sem decisão"
+  ]
+ },
+ "BO-04.dc.html": {
+  "arquivo": "BO-04.dc.html",
+  "familia": "BO-04",
+  "titulo": "Economia e crescimento da plataforma",
+  "rota": "/plataforma/economia",
+  "links": [
+   [
+    "Ver contrato do produtor",
+    "CF-05.dc.html"
+   ],
+   [
+    "Ver portal do parceiro",
+    "PT-07.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Rastrear receita/custo",
+    "Trilha aberta: MRR de set/2026 decomposto em 14 assinaturas conciliadas (BO-02) e custo direto por conta (nuvem, IA, suporte) — cada valor com evento e período de origem."
+   ],
+   [
+    "Investigar abandono",
+    "Coorte ago/2026 · HF/frutas: 4 de 6 contas pararam na etapa “Importação” da implantação guiada — erros de prévia sem correção; hipótese a testar: assistência de mapeamento."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Criar experimento de ativação",
+    "campos": [
+     "Nome",
+     "Coorte alvo",
+     "Métrica de sucesso",
+     "Período"
+    ],
+    "confirmar": "Criar experimento"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Criar experimento",
+    "EXP-07 criado · medição começa na próxima coorte · métricas passadas intactas"
+   ]
+  ],
+  "selos": [
+   "Backoffice da plataforma",
+   "Período set/2026 · parcial"
+  ]
+ },
+ "CA-01.dc.html": {
+  "arquivo": "CA-01.dc.html",
+  "familia": "CA-01",
+  "titulo": "Ordens de campo",
+  "rota": "/campo/ordens",
+  "links": [
+   [
+    "Revisar versões",
+    "IN-02.dc.html"
+   ],
+   [
+    "Conferir apontamentos",
+    "CA-02.dc.html"
+   ],
+   [
+    "Reprogramar saldo",
+    "PL-05.dc.html"
+   ],
+   [
+    "Abrir ordem",
+    "CA-01det.dc.html"
+   ],
+   [
+    "Ver OM-0233",
+    "MA-04det.dc.html"
+   ],
+   [
+    "Abrir ordem de irrigação",
+    "IR-03det.dc.html"
+   ],
+   [
+    "Liberar",
+    "OS.dc.html#OS-0418"
+   ],
+   [
+    "Ver sobras",
+    "CA-04.dc.html"
+   ],
+   [
+    "Ver apontamentos",
+    "CA-02.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Liberar selecionadas",
+    "Nenhuma liberada · OS-0418 recusada: a versão v2 ainda não tem aprovação agronômica, e ordem sem aprovação não é autorizada para execução. Aprove em \"Revisar versões\" e libere de novo — resultado por item."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Preparar e emitir período",
+    "campos": [
+     "Janela",
+     "Fazenda",
+     "Atividades",
+     "Necessidade agregada"
+    ],
+    "confirmar": "Emitir ordens do período"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Preparar e emitir período",
+    "Emitidas · seguem para revisão agronômica (Aguardando agrônomo) · ainda não autorizadas para execução"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "2 em execução · 1 impedida",
+   "○ no prazo",
+   "Em execução",
+   "Parcial · dia 4 de 7",
+   "▲ atrasada",
+   "Impedida · ativo bloqueado",
+   "● vence hoje",
+   "Liberadas",
+   "◆ até 3 dias",
+   "A liberar",
+   "Aguardando agrônomo",
+   "Em conferência",
+   "Sobras a receber",
+   "Encerradas",
+   "Parcial",
+   "Impedida"
+  ]
+ },
+ "CA-01det.dc.html": {
+  "arquivo": "CA-01det.dc.html",
+  "familia": "CA-01",
+  "titulo": "OS-0421 · Fungicida 1ª aplicação",
+  "rota": "/campo/ordens",
+  "links": [
+   [
+    "Campo",
+    "CA-01.dc.html"
+   ],
+   [
+    "Ordens de campo",
+    "CA-01.dc.html"
+   ],
+   [
+    "Voltar",
+    "CA-01.dc.html"
+   ],
+   [
+    "Registrar avanço",
+    "MB-03.dc.html"
+   ],
+   [
+    "Requisitar material",
+    "SU-07.dc.html"
+   ],
+   [
+    "Ver consumo e devoluções",
+    "CA-04.dc.html"
+   ],
+   [
+    "Reprogramar saldo",
+    "PL-05.dc.html"
+   ],
+   [
+    "Ver recomendação",
+    "AG-04.dc.html"
+   ],
+   [
+    "Conferir apontamentos",
+    "CA-02.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Pausar execução",
+    "Pausada por chuva · a ordem ganha o selo Pausada e continua Em execução; \"Retomar execução\" devolve o saldo de 160 ha sem nova emissão."
+   ],
+   [
+    "Finalizar apontamento do turno",
+    "Turno do dia 4 finalizado · 40 ha provisórios seguem para conferência. A ordem permanece Em execução — finalizar o turno nunca conclui a ordem."
+   ],
+   [
+    "Concluir execução",
+    "Indisponível: faltam 160 ha sem término físico nem dispensa autorizada do saldo. Execute o saldo ou peça a dispensa ao PCP; com o término físico a ordem entra sozinha em Em conferência."
+   ],
+   [
+    "Ver fichas",
+    "Fichas da v2 aprovada · caldeiro: Fungicida A 0,23 un/ha + adjuvante 0,12 L/ha para 160 ha · operador: T1+T2, faixas pendentes · almoxarife: 36 un e 18 L em custódia."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Ajustar produtos e doses do saldo",
+    "campos": [
+     "Ordem",
+     "Área alcançada (ha)",
+     "Ação do ajuste",
+     "Produto",
+     "Nova dose por ha",
+     "Motivo"
+    ],
+    "confirmar": "Enviar v3 para revisão"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Ajustar produtos e doses do saldo",
+    "v3 em revisão agronômica · a v2 segue valendo até a aprovação · realizado preservado"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "Em execução · Parcial · dia 4 de 7",
+   "Conferido",
+   "Provisório · aguardando conferência",
+   "Previsto",
+   "Em custódia da equipe"
+  ]
+ },
+ "CA-02.dc.html": {
+  "arquivo": "CA-02.dc.html",
+  "familia": "CA-02",
+  "titulo": "Apontamentos e conferência",
+  "rota": "/campo/apontamentos",
+  "links": [
+   [
+    "Campo",
+    "CA-01.dc.html"
+   ],
+   [
+    "Abrir O.S.",
+    "CA-01det.dc.html"
+   ],
+   [
+    "Ver histórico",
+    "CA-01det.dc.html"
+   ],
+   [
+    "Ver consumo",
+    "CA-04.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Conferir",
+    "Conferido o dia 4 · 40 ha confirmados (190/350) · o consumo já baixado no apontamento não é repetido. A ordem segue Em execução — conferir um dia não conclui a ordem de 7 dias."
+   ],
+   [
+    "Conferir",
+    "Conferido · 12 ha confirmados (30/100) · consumo acima do previsto registrado como fato. O selo Impedida permanece — conferência não muda impedimento nem etapa."
+   ],
+   [
+    "Conferir 2 apontamentos",
+    "Conferidos 2 de 2 · OS-0421 dia 4: 40 ha confirmados (190/350) · OS-0420 dia 2: 12 ha confirmados (30/100), consumo acima do previsto registrado. Nenhuma ordem muda de etapa; o selo Impedida da OS-0420 permanece."
+   ],
+   [
+    "Devolver para esclarecimento",
+    "Apontamento do dia 2 da OS-0420 devolvido a Carlos com a pergunta registrada — o fato permanece registrado, nada é apagado."
+   ],
+   [
+    "Encerrar OS-0417",
+    "Indisponível: 10 sc de MAP 11-52 sob custódia de Rui · prazo 24/09. Receba a devolução no almoxarifado ou documente a destinação competente para encerrar."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Corrigir apontamento",
+    "campos": [
+     "Apontamento",
+     "Campo corrigido",
+     "Valor correto",
+     "Motivo"
+    ],
+    "confirmar": "Corrigir com histórico"
+   },
+   {
+    "titulo": "Reabrir saldo para execução",
+    "campos": [
+     "Ordem",
+     "Motivo",
+     "Saldo a reabrir",
+     "Programação",
+     "Responsável"
+    ],
+    "confirmar": "Reabrir saldo"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Corrigir com histórico",
+    "Corrigido · versão anterior preservada na trilha"
+   ],
+   [
+    "Reabrir saldo da OS-0417",
+    "Reaberta · Em execução · término anterior e trilha preservados"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "2 a conferir · 1 divergência",
+   "A conferir",
+   "acima do previsto",
+   "Conferido",
+   "sobras 10 sc a receber",
+   "Divergência de sobras"
+  ]
+ },
+ "CA-03.dc.html": {
+  "arquivo": "CA-03.dc.html",
+  "familia": "CA-03",
+  "titulo": "Ocorrências",
+  "rota": "/campo/ocorrencias",
+  "links": [
+   [
+    "Campo",
+    "CA-01.dc.html"
+   ],
+   [
+    "Abrir ocorrência",
+    "CA-03det.dc.html"
+   ],
+   [
+    "Encaminhar à agronomia",
+    "AG-03.dc.html"
+   ],
+   [
+    "Reprogramar saldo",
+    "PL-05.dc.html"
+   ],
+   [
+    "Ver tratamento",
+    "IR-03.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Encerrar tratamento",
+    "OC-116 encerrada: saldo reprogramado para 24/09 (destinação documentada). OC-114 recusada: a OM-0233 ainda está em execução — conclua o reparo ou documente a destinação."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Registrar ocorrência",
+    "campos": [
+     "Tipo",
+     "Local",
+     "Instante",
+     "Relato",
+     "Gravidade",
+     "Evidência",
+     "Destino"
+    ],
+    "confirmar": "Registrar ocorrência"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Registrar ocorrência",
+    "Registrada · encaminhada ao destino com responsável"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "3 em tratamento · 1 grave",
+   "Grave",
+   "OM-0233 já aberta",
+   "Atenção",
+   "Moderada",
+   "Encerrada"
+  ]
+ },
+ "CA-03det.dc.html": {
+  "arquivo": "CA-03det.dc.html",
+  "familia": "CA-03",
+  "titulo": "OC-114 · Quebra do Trator T1",
+  "rota": "/campo/ocorrencias",
+  "links": [
+   [
+    "Campo",
+    "CA-01.dc.html"
+   ],
+   [
+    "Ocorrências",
+    "CA-03.dc.html"
+   ],
+   [
+    "Voltar",
+    "CA-03.dc.html"
+   ],
+   [
+    "Acompanhar OM-0233",
+    "MA-04det.dc.html"
+   ],
+   [
+    "Abrir ordem",
+    "CA-01.dc.html"
+   ],
+   [
+    "Ver ativo",
+    "MA-01.dc.html"
+   ],
+   [
+    "Acompanhar",
+    "MA-04det.dc.html"
+   ],
+   [
+    "Ver impedimento",
+    "PL-05.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Abrir manutenção",
+    "A OM-0233 já está aberta para esta ocorrência — nada foi duplicado; o pedido foi somado ao caso existente."
+   ],
+   [
+    "Encerrar tratamento",
+    "Indisponível: a OM-0233 ainda está em execução. Encerre depois do reparo concluído ou documente a destinação competente."
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "Em tratamento · Grave",
+   "Grave",
+   "Em execução",
+   "Impedida",
+   "Bloqueado",
+   "Apto",
+   "Livre a partir de 24/09 06:00"
+  ]
+ },
+ "CA-04.dc.html": {
+  "arquivo": "CA-04.dc.html",
+  "familia": "CA-04",
+  "titulo": "Minhas requisições",
+  "rota": "/campo/requisicoes",
+  "links": [
+   [
+    "Campo",
+    "CA-01.dc.html"
+   ],
+   [
+    "Ver em Suprimentos",
+    "SU-07.dc.html"
+   ],
+   [
+    "Devolver saldo",
+    "SU-07.dc.html"
+   ],
+   [
+    "Apontar uso",
+    "CA-02.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Confirmar recebimento",
+    "Indisponível: a entrega ainda está em separação no almoxarifado. Confirme quando os 12 L chegarem à equipe — só então a custódia passa para vocês."
+   ],
+   [
+    "Encerrar OS-0417",
+    "Indisponível: 10 sc sob custódia de Rui · prazo 24/09. Declarar devolução não aumenta o utilizável — receba os 10 sc no almoxarifado ou documente a destinação competente para liberar o encerramento."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Solicitar material da ordem",
+    "campos": [
+     "Ordem",
+     "Item",
+     "Quantidade",
+     "Necessário em"
+    ],
+    "confirmar": "Solicitar material"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Solicitar material da ordem",
+    "Requisitada · aguardando separação do almoxarifado"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "10 sc em custódia",
+   "em custódia · Rui",
+   "em custódia da equipe",
+   "Em separação"
+  ]
+ },
+ "CD-01.dc.html": {
+  "arquivo": "CD-01.dc.html",
+  "familia": "CD-01",
+  "titulo": "Fazendas, áreas e talhões",
+  "rota": "/cadastros/areas",
+  "links": [
+   [
+    "Vincular ciclo",
+    "PL-01.dc.html"
+   ],
+   [
+    "Abrir talhão",
+    "CD-01det.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Validar geometrias",
+    "8 de 9 válidas · B1 sem polígono: a área declarada segue no planejamento; exportação de mapa fica pendente"
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Delimitar geometria — B1 (simulação)",
+    "campos": [
+     "Talhão",
+     "Arquivo (KML/SHP/GeoJSON)",
+     "Sistema de referência (CRS)"
+    ],
+    "confirmar": "Validar prévia (simulação)"
+   },
+   {
+    "titulo": "Cadastrar talhão",
+    "campos": [
+     "Fazenda",
+     "Identificação do talhão",
+     "Localização / fuso",
+     "Área declarada (ha)",
+     "Documento de origem",
+     "Vigência início"
+    ],
+    "confirmar": "Salvar cadastro básico"
+   },
+   {
+    "titulo": "Importar geometrias — simulação",
+    "campos": [
+     "Arquivo (KML/SHP/GeoJSON)",
+     "Sistema de referência (CRS)",
+     "Política de conflito"
+    ],
+    "confirmar": "Validar prévia (simulação)"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Delimitar geometria",
+    "Prévia simulada: polígono de B1 com 119,6 ha · diferença de 0,4 ha para o declarado entra na conferência"
+   ],
+   [
+    "Cadastrar talhão",
+    "Talhão criado · geometria e documento pendentes ficam visíveis"
+   ],
+   [
+    "Importar geometrias",
+    "Prévia simulada: 1 geometria criaria B1 · 0 erros — importação fictícia da demonstração"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "2 pendências",
+   "Validada",
+   "Sem polígono",
+   "Documento pendente"
+  ]
+ },
+ "CD-01det.dc.html": {
+  "arquivo": "CD-01det.dc.html",
+  "familia": "CD-01",
+  "titulo": "Talhão T1 · Santa Rita",
+  "rota": "/cadastros/areas",
+  "links": [
+   [
+    "Cadastros",
+    "CD-01.dc.html"
+   ],
+   [
+    "Fazendas, áreas e talhões",
+    "CD-01.dc.html"
+   ],
+   [
+    "Voltar",
+    "CD-01.dc.html"
+   ],
+   [
+    "Vincular ciclo",
+    "PL-01.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Copiar padrões",
+    "Prévia: variedade e data copiadas para 1 parcela selecionada · exceções preservadas — nada aplicado fora da seleção"
+   ],
+   [
+    "Validar geometria",
+    "Geometria v3 válida · sem sobreposição/lacuna · Δ +0,4 ha na tolerância — parcela B segue pendente de polígono"
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Dividir ou unir parcelas — T1",
+    "campos": [
+     "Parcela",
+     "Área (ha)",
+     "Cultura",
+     "Variedade",
+     "Plantio previsto"
+    ],
+    "confirmar": "Salvar parcelas"
+   },
+   {
+    "titulo": "Delimitar parcela B — simulação",
+    "campos": [
+     "Arquivo (KML/SHP)",
+     "Sistema de referência (CRS)"
+    ],
+    "confirmar": "Validar prévia (simulação)"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Dividir ou unir parcelas",
+    "Parcelas salvas · gatilhos recalculados só para a parcela B"
+   ],
+   [
+    "Delimitar parcela B",
+    "Prévia simulada: 1 polígono atualizaria a parcela B · identidade e saldos preservados"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "Parcela B sem polígono",
+   "Validada",
+   "Planejada",
+   "Sem polígono",
+   "Encerrada",
+   "dentro da tolerância",
+   "validada 12/09",
+   "ok",
+   "taxa variável pendente"
+  ]
+ },
+ "CD-02.dc.html": {
+  "arquivo": "CD-02.dc.html",
+  "familia": "CD-02",
+  "titulo": "Culturas, cultivares e operações",
+  "rota": "/cadastros/operacoes",
+  "links": [
+   [
+    "Cadastros",
+    "CD-01.dc.html"
+   ],
+   [
+    "Abrir protocolo",
+    "AG-05.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Publicar versão",
+    "v4 publicada para novos planos · versões anteriores e planos publicados preservados; O.S. aprovadas exigem revisão própria"
+   ],
+   [
+    "Comparar real",
+    "Pulverização soja: padrão 21,6 ha/h × real 19,8 ha/h (OS-0421 · 4 dias apontados · dispersão baixa) — revisão sugerida, não aplicada"
+   ],
+   [
+    "Importar catálogo",
+    "Prévia simulada: 12 operações da biblioteca · 2 duplicidades detectadas · nada importado — carga fictícia da demonstração"
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Editar rendimento",
+    "campos": [
+     "Operação",
+     "Cultura",
+     "Conjunto",
+     "Largura configurada (m)",
+     "Velocidade (km/h)",
+     "Eficiência (%)",
+     "Fonte",
+     "Vigência início"
+    ],
+    "confirmar": "Propor atualização do padrão"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Editar rendimento",
+    "Nova versão v4 proposta · O.S. executadas e orçamento-base preservados"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 premissa a validar",
+   "Selecionada da biblioteca",
+   "Cadastro próprio",
+   "Medição local",
+   "Fabricante",
+   "Referência",
+   "Premissa · validar",
+   "Ensaio da fazenda"
+  ]
+ },
+ "CD-03.dc.html": {
+  "arquivo": "CD-03.dc.html",
+  "familia": "CD-03",
+  "titulo": "Máquinas, instalações e setores",
+  "rota": "/cadastros/ativos",
+  "links": [
+   [
+    "Cadastros",
+    "CD-01.dc.html"
+   ],
+   [
+    "Abrir plano",
+    "MA-03.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Registrar calibração",
+    "Aferição do hidrômetro novo do Pivô 2 registrada · certificado anexado — calibrações em dia: 5 de 5 (intervalo de 90 dias é hipótese a validar)"
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Cadastrar ativo",
+    "campos": [
+     "Classe / tipo",
+     "Fabricante / modelo",
+     "Número de série",
+     "Fazenda / local",
+     "Capacidade e unidade",
+     "Contador inicial (h)",
+     "Início de uso"
+    ],
+    "confirmar": "Salvar ativo"
+   },
+   {
+    "titulo": "Vincular componente",
+    "campos": [
+     "Ativo",
+     "Componente",
+     "Contador do componente (h)",
+     "Custo (R$)"
+    ],
+    "confirmar": "Vincular componente"
+   },
+   {
+    "titulo": "Configurar contador / medidor",
+    "campos": [
+     "Ativo",
+     "Tipo",
+     "Leitura final do medidor antigo",
+     "Leitura inicial do novo"
+    ],
+    "confirmar": "Registrar troca"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Cadastrar ativo",
+    "Ativo criado · elegibilidade por operação herdada da classe"
+   ],
+   [
+    "Vincular componente",
+    "Componente vinculado · histórico próprio iniciado"
+   ],
+   [
+    "Configurar contador",
+    "Troca registrada 12/08 · histórico contínuo, sem lacuna"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 aferição pendente",
+   "Fabricante",
+   "Ensaio da fazenda",
+   "Aferir hidrômetro novo"
+  ]
+ },
+ "CD-04.dc.html": {
+  "arquivo": "CD-04.dc.html",
+  "familia": "CD-04",
+  "titulo": "Pessoas e equipes",
+  "rota": "/cadastros/pessoas",
+  "links": [
+   [
+    "Cadastros",
+    "CD-01.dc.html"
+   ],
+   [
+    "Solicitar acesso",
+    "CF-01.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Renovar NR-31",
+    "NR-31 de Marcos renovada · nova validade 09/2027 anexada — alocações futuras revalidadas"
+   ],
+   [
+    "Atualizar habilitação",
+    "NR-31 de Marcos renovada · nova validade 09/2027 anexada — alocações futuras revalidadas"
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Definir calendário",
+    "campos": [
+     "Pessoa",
+     "Calendário",
+     "Vigência início"
+    ],
+    "confirmar": "Salvar calendário"
+   },
+   {
+    "titulo": "Vincular pessoa a equipe",
+    "campos": [
+     "Pessoa",
+     "Equipe",
+     "Vigência início"
+    ],
+    "confirmar": "Vincular à equipe"
+   },
+   {
+    "titulo": "Cadastrar pessoa",
+    "campos": [
+     "Pessoa",
+     "Função",
+     "Vínculo",
+     "Equipe",
+     "Calendário",
+     "Vigência início"
+    ],
+    "confirmar": "Salvar pessoa"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Definir calendário",
+    "Calendário salvo com vigência · alocações futuras revalidadas"
+   ],
+   [
+    "Vincular equipe",
+    "Vínculo criado com vigência · composição anterior preservada"
+   ],
+   [
+    "Cadastrar pessoa",
+    "Pessoa criada · sem login: acesso é solicitação própria em Configurações"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "2 habilitações pendentes",
+   "CREA ativo",
+   "NR-31 vence 30/09",
+   "NR-31 até 08/2027",
+   "NR-10 até 03/2027",
+   "sem exigência",
+   "empilhadeira válida",
+   "NR-12 até 05/2027",
+   "composição vigente",
+   "NR-31 em curso",
+   "Sem login"
+  ]
+ },
+ "CD-05.dc.html": {
+  "arquivo": "CD-05.dc.html",
+  "familia": "CD-05",
+  "titulo": "Parceiros",
+  "rota": "/cadastros/parceiros",
+  "links": [
+   [
+    "Cadastros",
+    "CD-01.dc.html"
+   ],
+   [
+    "Ver crédito",
+    "GE-04.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Ativar papel",
+    "Papel Transportador ativado no mesmo cadastro — identidade única, sem duplicar parceiro"
+   ],
+   [
+    "Convidar portal",
+    "Convite pronto para o contato autorizado · acesso com finalidade, prazo e documentos escolhidos — envio só após sua confirmação"
+   ],
+   [
+    "Atualizar dados",
+    "Pedido de renovação do seguro registrado · a logística segue usando a apólice vigente até 15/10"
+   ],
+   [
+    "Verificar alteração",
+    "Confirmação por canal independente ainda pendente — pagamentos seguem na conta anterior até concluir. Como resolver: ligue para o contato já cadastrado e registre a confirmação"
+   ],
+   [
+    "Reativar parceiro",
+    "Reativação exige motivo e decisão do responsável de compras — solicitação registrada"
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Cadastrar parceiro",
+    "campos": [
+     "Tipo",
+     "Identificação (CNPJ)",
+     "Papéis",
+     "Grupos / culturas",
+     "Contato autorizado",
+     "Condição de pagamento"
+    ],
+    "confirmar": "Verificar duplicidade e salvar"
+   },
+   {
+    "titulo": "Suspender parceiro",
+    "campos": [
+     "Parceiro",
+     "Motivo",
+     "Vigência início"
+    ],
+    "confirmar": "Suspender parceiro"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Cadastrar parceiro",
+    "Sem duplicidade por CNPJ · parceiro criado com papel Fornecedor"
+   ],
+   [
+    "Suspender com motivo",
+    "Suspenso com motivo registrado · compras novas bloqueadas"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 verificação pendente",
+   "Fornecedor",
+   "Prestador",
+   "Documentos completos",
+   "Cliente",
+   "Credor",
+   "Transportador",
+   "Seguro vence 15/10",
+   "Conta bancária em verificação",
+   "Suspenso · entregas em atraso"
+  ]
+ },
+ "CD-06.dc.html": {
+  "arquivo": "CD-06.dc.html",
+  "familia": "CD-06",
+  "titulo": "Produtos, unidades e locais",
+  "rota": "/cadastros/produtos",
+  "links": [
+   [
+    "Cadastros",
+    "CD-01.dc.html"
+   ],
+   [
+    "Vincular registro",
+    "AG-07.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Validar fator",
+    "Fator L↔kg do Diesel S10 bloqueado até vincular o contrato de fornecimento · como resolver: informe o contrato em Configurar conversão"
+   ],
+   [
+    "Validar fatores",
+    "7 de 8 itens com fatores válidos · Diesel S10 exige fator por contrato (L↔kg) — unidade comercial não determina dose agronômica"
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Cadastrar item",
+    "campos": [
+     "Categoria",
+     "Item / nome",
+     "Unidade-base",
+     "Conversão",
+     "Controle de lote",
+     "Validade (meses)"
+    ],
+    "confirmar": "Salvar item"
+   },
+   {
+    "titulo": "Configurar conversão",
+    "campos": [
+     "Item",
+     "Unidade de origem",
+     "Unidade de destino",
+     "Fator",
+     "Base"
+    ],
+    "confirmar": "Salvar conversão"
+   },
+   {
+    "titulo": "Cadastrar local / capacidade",
+    "campos": [
+     "Local / nome",
+     "Tipo",
+     "Capacidade e unidade",
+     "Controle"
+    ],
+    "confirmar": "Salvar local"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Cadastrar item",
+    "Item criado · sem saldo: estoque nasce de recebimento/movimento"
+   ],
+   [
+    "Configurar conversão",
+    "Conversão salva com vigência · fator por contrato sinalizado no item"
+   ],
+   [
+    "Cadastrar local",
+    "Local criado · disponível para movimentos e políticas de estoque"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 fator por contrato",
+   "Fator por contrato",
+   "L27-013 bloqueado",
+   "Ativo"
+  ]
+ },
+ "CD-07.dc.html": {
+  "arquivo": "CD-07.dc.html",
+  "familia": "CD-07",
+  "titulo": "Estrutura gerencial",
+  "rota": "/cadastros/estrutura",
+  "links": [
+   [
+    "Cadastros",
+    "CD-01.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Confirmar vigência",
+    "Vigência do CC-OFI confirmada para a safra 2027/28 · data de fim registrada — mapeamento 310 mantido"
+   ],
+   [
+    "Importar estrutura",
+    "Prévia simulada do plano Sankhya: 42 contas lidas · 6 sugestões de mapeamento · nada aplicado — importação fictícia da demonstração"
+   ],
+   [
+    "Validar vigência",
+    "7 de 8 vigências válidas · CC-OFI sem data de fim: confirmar continuidade na virada da safra"
+   ],
+   [
+    "Simular relatório",
+    "Simulação: custo de defensivos da soja por talhão fecha com o orçamento usando as dimensões próprias — nenhuma combinação codificada em centro"
+   ],
+   [
+    "Publicar estrutura",
+    "Versão v6 publicada para novos lançamentos · v5 preservada; fatos já gravados mantêm as dimensões da época · PRJ-PIVO3 fica fora até ser mapeado"
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Mapear código externo",
+    "campos": [
+     "Dimensão",
+     "Código interno",
+     "Conta externa (Sankhya)",
+     "TOP",
+     "Vigência início"
+    ],
+    "confirmar": "Salvar mapeamento"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Mapear código",
+    "Mapeamento salvo com vigência · fatos anteriores intactos"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "2 a validar",
+   "Mapeado",
+   "Vigência a validar",
+   "Tradução pendente"
+  ]
+ },
+ "CF-01.dc.html": {
+  "arquivo": "CF-01.dc.html",
+  "familia": "CF-01",
+  "titulo": "Usuários e permissões",
+  "rota": "/configuracoes/acessos",
+  "links": [
+   [
+    "Acompanhar aprovação",
+    "IN-02.dc.html"
+   ],
+   [
+    "Ver trilha",
+    "CF-04.dc.html"
+   ],
+   [
+    "Ver conflito",
+    "CF-03det.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Simular visão",
+    "Visão da Gestora aplicada em demonstração — não representa segurança real; o servidor continua a autoridade das permissões"
+   ],
+   [
+    "Simular visão",
+    "Visão do Operador aplicada em demonstração: só ordens liberadas do seu escopo — não representa segurança real"
+   ],
+   [
+    "Simular visão",
+    "Visão do Operador de irrigação aplicada em demonstração — não representa segurança real"
+   ],
+   [
+    "Revogar delegação",
+    "Delegação de Ana para Paula revogada no servidor · sessões com a delegação encerradas · aprovador e motivo na trilha — conferências já feitas são preservadas"
+   ],
+   [
+    "Revisar acessos",
+    "Campanha de revisão aberta · 12 acessos para reconfirmar até 30/09 · donos notificados — não reconfirmado é suspenso, não apagado"
+   ],
+   [
+    "Encerrar sessão",
+    "Sessão encerrada no servidor · dispositivo offline será suspenso ao expirar o pacote — fatos capturados são preservados"
+   ],
+   [
+    "Encerrar sessão",
+    "Sessão do tablet encerrada · novo login exige credencial e 2º fator"
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Convidar usuário",
+    "campos": [
+     "Nome",
+     "E-mail",
+     "Papel",
+     "Fazenda",
+     "Vigência até"
+    ],
+    "confirmar": "Enviar convite"
+   },
+   {
+    "titulo": "Atribuir escopo · Caio (PCP)",
+    "campos": [
+     "Usuário",
+     "Escopo adicional",
+     "Vigência até",
+     "Motivo"
+    ],
+    "confirmar": "Propor escopo"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Convidar usuário",
+    "Convite enviado · acesso pendente de aprovação do gestor (aparece em Aprovações)"
+   ],
+   [
+    "Atribuir escopo",
+    "Escopo proposto para Caio · pendente de aprovação do gestor · aprovador será registrado na trilha"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 convite pendente",
+   "Ativo",
+   "Offline · pacote válido",
+   "Delegação vence em 5 dias",
+   "Convite pendente · aprovação",
+   "Revogado",
+   "Válido até 25/09 · 2 envios pendentes",
+   "Sincronizado · 1 conflito em reconciliação",
+   "Sincronizado"
+  ]
+ },
+ "CF-02.dc.html": {
+  "arquivo": "CF-02.dc.html",
+  "familia": "CF-02",
+  "titulo": "Alçadas e regras",
+  "rota": "/configuracoes/regras",
+  "links": [
+   [
+    "Configurações",
+    "CF-01.dc.html"
+   ],
+   [
+    "Ver objetos afetados",
+    "CA-01.dc.html"
+   ],
+   [
+    "Abrir",
+    "CF-02det.dc.html"
+   ],
+   [
+    "Ver fila",
+    "LO-02.dc.html"
+   ],
+   [
+    "Ver caixa",
+    "IN-02.dc.html"
+   ],
+   [
+    "Aprovar pendentes",
+    "IN-02.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Simular casos",
+    "Simulados 6 casos de exemplo · 5 conforme · 1 bloqueado: dispensa de 30% do saldo excede o limite de 20% e exigiria Direção — resultado por caso"
+   ],
+   [
+    "Publicar política PE-04",
+    "Publicação bloqueada · PE-04 é classe Obrigatória e ainda não tem aprovação do gestor nem teste de exemplo — a restrição não pode virar exceção livre. Como resolver: simular casos e aprovar em Aprovações; depois publicar."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Propor revisão de política",
+    "campos": [
+     "Política",
+     "Mudança proposta",
+     "Motivo",
+     "Vigência a partir de"
+    ],
+    "confirmar": "Enviar para aprovação"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Propor revisão",
+    "Revisão AL-05 v3 criada em revisão · aguardando aprovação em Aprovações — v2 permanece vigente"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "2 em revisão",
+   "Obrigatória",
+   "Vigente",
+   "Em revisão · Aprovações",
+   "Aguardando aprovação",
+   "Vigente · v3 proposta",
+   "Sem padrão autorizado"
+  ]
+ },
+ "CF-02det.dc.html": {
+  "arquivo": "CF-02det.dc.html",
+  "familia": "CF-02",
+  "titulo": "Alçada AL-05 · Dispensar saldo",
+  "rota": "/configuracoes/regras",
+  "links": [
+   [
+    "Configurações",
+    "CF-01.dc.html"
+   ],
+   [
+    "Alçadas e regras",
+    "CF-02.dc.html"
+   ],
+   [
+    "Voltar",
+    "CF-02.dc.html"
+   ],
+   [
+    "Abrir ordem",
+    "CA-01.dc.html"
+   ],
+   [
+    "Abrir painel",
+    "PL-05.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Aprovar v3",
+    "AL-05 v3 aprovada e publicada · vigência 01/11/2026 · aprovador registrado na trilha de auditoria — v2 segue valendo até lá"
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Devolver proposta v3",
+    "campos": [
+     "Motivo",
+     "Orientação"
+    ],
+    "confirmar": "Devolver para ajuste"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Devolver com motivo",
+    "Proposta v3 devolvida ao proprietário da política · v2 permanece vigente"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "v3 em revisão",
+   "Obrigatória",
+   "Conforme",
+   "Bloqueio correto"
+  ]
+ },
+ "CF-03.dc.html": {
+  "arquivo": "CF-03.dc.html",
+  "familia": "CF-03",
+  "titulo": "Integrações e sincronização",
+  "rota": "/configuracoes/integracoes",
+  "links": [
+   [
+    "Configurações",
+    "CF-01.dc.html"
+   ],
+   [
+    "Conciliar pendências",
+    "CF-03det.dc.html"
+   ],
+   [
+    "Conciliar",
+    "CF-03det.dc.html"
+   ],
+   [
+    "Ver leituras",
+    "IR-04.dc.html"
+   ],
+   [
+    "Decidir ajuste de inventário",
+    "IN-02.dc.html"
+   ],
+   [
+    "Ver conflito",
+    "CF-03det.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Configurar em ambiente autorizado",
+    "Configuração aberta somente no ambiente de homologação autorizado · credenciais de menor privilégio ficam no cofre e nunca aparecem em registros"
+   ],
+   [
+    "Testar conexão",
+    "Teste executado no simulador · resposta em 340 ms · selo Simulado mantido — teste não homologa integração"
+   ],
+   [
+    "Ver escritores",
+    "Escritor oficial: ERP grava fiscal e títulos; plataforma grava ordens e fatos de campo — conector em homologação não recebe escrita até ser homologado"
+   ],
+   [
+    "Exportar diagnóstico sem segredo",
+    "Diagnóstico exportado · 128 eventos · credenciais, tokens e endereços internos omitidos — a exportação entrou na trilha de auditoria"
+   ],
+   [
+    "Consultar por chave",
+    "Consulta por chave/referência: ERP registrou o movimento · estado atualizado para Aceito — sem reenvio (timeout não presume falha)"
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Corrigir mapeamento de unidade",
+    "campos": [
+     "Unidade na plataforma",
+     "Unidade no ERP",
+     "Motivo"
+    ],
+    "confirmar": "Reprocessar item"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Corrigir e reprocessar",
+    "Item reprocessado · aceito pelo ERP · recibo EVT-99182 reutilizado — efeito único"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "2 erros · 1 conflito",
+   "Simulado · demonstração",
+   "Homologação pendente",
+   "Rejeitado · unidade não mapeada",
+   "Enviado · aguardando aceite",
+   "Divergência · −12 sc",
+   "Deduplicado",
+   "Reconciliação pendente"
+  ]
+ },
+ "CF-03det.dc.html": {
+  "arquivo": "CF-03det.dc.html",
+  "familia": "CF-03",
+  "titulo": "Reconciliação · Sankhya (simulado)",
+  "rota": "/configuracoes/integracoes",
+  "links": [
+   [
+    "Configurações",
+    "CF-01.dc.html"
+   ],
+   [
+    "Integrações e sincronização",
+    "CF-03.dc.html"
+   ],
+   [
+    "Voltar",
+    "CF-03.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Reprocessar item corrigido",
+    "Reprocessado com de-para sc 50 kg → SC50 · aceito pelo ERP · correlação EVT-99182 preservada — sem duplicar título"
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Decidir fato sobreposto",
+    "campos": [
+     "Relato mantido",
+     "Relato sobreposto",
+     "Motivo"
+    ],
+    "confirmar": "Registrar decisão"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Decidir conflito",
+    "Conflito decidido · 50 ha permanecem contados uma vez · relato do tablet preservado como duplicidade — decisão na trilha de auditoria"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "Simulado · 2 pendências",
+   "Unidade não mapeada",
+   "Rejeitado",
+   "Sem diferença",
+   "Aceito",
+   "Reenvio deduplicado",
+   "Reconciliado",
+   "Sobreposição · não somar",
+   "Em reconciliação"
+  ]
+ },
+ "CF-04.dc.html": {
+  "arquivo": "CF-04.dc.html",
+  "familia": "CF-04",
+  "titulo": "Auditoria e parâmetros",
+  "rota": "/configuracoes/auditoria",
+  "links": [
+   [
+    "Configurações",
+    "CF-01.dc.html"
+   ],
+   [
+    "Consultar política",
+    "CF-02.dc.html"
+   ],
+   [
+    "Ver exemplo",
+    "CA-01det.dc.html"
+   ],
+   [
+    "Ver exemplo",
+    "IR-03.dc.html"
+   ],
+   [
+    "Ver exemplo",
+    "IR-01.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Exportar autorizado",
+    "Exportação registrada · 1.240 eventos no escopo do seu papel · a própria exportação entrou na trilha"
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Solicitar correção de um fato",
+    "campos": [
+     "Objeto",
+     "Motivo",
+     "Encaminhar para"
+    ],
+    "confirmar": "Enviar solicitação"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Solicitar correção pelo domínio",
+    "Solicitação enviada ao dono do domínio · fato original preservado · correção sairá como ajuste vinculado"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "Trilha íntegra",
+   "Vigente",
+   "Referência a homologar",
+   "FL",
+   "RN",
+   "CAL"
+  ]
+ },
+ "CF-05.dc.html": {
+  "arquivo": "CF-05.dc.html",
+  "familia": "CF-05",
+  "titulo": "Assinatura e medição",
+  "rota": "/configuracoes/assinatura",
+  "links": [
+   [
+    "Configurações",
+    "CF-01.dc.html"
+   ],
+   [
+    "Ver memória de cobrança",
+    "CF-05det.dc.html"
+   ],
+   [
+    "Ver memória",
+    "CF-05det.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Solicitar plano",
+    "Solicitação enviada ao comercial · proposta com vigência explícita virá para aceite — nenhuma cobrança muda antes disso"
+   ],
+   [
+    "Baixar dados",
+    "Exportação completa gerada (área, memória, faturas) · dados permanecem acessíveis mesmo em inadimplência ou cancelamento"
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Simular mudança de plano ou área",
+    "campos": [
+     "Plano",
+     "Hectares contratados",
+     "Vigência da mudança"
+    ],
+    "confirmar": "Simular"
+   },
+   {
+    "titulo": "Contestar medição do período",
+    "campos": [
+     "Talhão",
+     "Motivo",
+     "Evidência"
+    ],
+    "confirmar": "Abrir contestação"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Simular mudança",
+    "Simulação: 1.240 ha → R$ 2.480/mês (HIPÓTESE · R$ 2/ha, acima do mínimo R$ 299) — nada muda até aceite"
+   ],
+   [
+    "Contestar medição",
+    "Contestação CT-012 aberta · fatura set/2026 permanece aberta sem juros até decisão · medição v2 preservada"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "Fatura set/2026 aberta",
+   "HIPÓTESE · 60 dias · encerrado em 31/05",
+   "HIPÓTESE · R$ 2/ha/mês · mínimo R$ 299",
+   "Contratado v2",
+   "Deduplicado",
+   "Excluída",
+   "Aberta · vence 01/10",
+   "Paga · 01/09",
+   "Paga · 01/08"
+  ]
+ },
+ "CF-05det.dc.html": {
+  "arquivo": "CF-05det.dc.html",
+  "familia": "CF-05",
+  "titulo": "Memória de cobrança · set/2026",
+  "rota": "/configuracoes/assinatura",
+  "links": [
+   [
+    "Configurações",
+    "CF-01.dc.html"
+   ],
+   [
+    "Assinatura e medição",
+    "CF-05.dc.html"
+   ],
+   [
+    "Voltar",
+    "CF-05.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Informar pagamento",
+    "Pagamento informado · pendente de confirmação do financeiro — a fatura só muda para Paga com a confirmação oficial, não com a intenção"
+   ],
+   [
+    "Baixar memória",
+    "Memória de cálculo exportada (CSV) · inclui versão da área, regra e exclusões"
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Contestar fatura set/2026",
+    "campos": [
+     "Motivo",
+     "Evidência"
+    ],
+    "confirmar": "Abrir contestação"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Contestar esta fatura",
+    "Contestação CT-012 aberta sobre set/2026 · fatura permanece aberta sem juros até decisão"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "Aberta · vence 01/10",
+   "Aceite 28/05",
+   "Aceite 10/07",
+   "HIPÓTESE · sem aceite"
+  ]
+ },
+ "CO-01.dc.html": {
+  "arquivo": "CO-01.dc.html",
+  "familia": "CO-01",
+  "titulo": "Previsão e maturação",
+  "rota": "/producao/previsao",
+  "links": [
+   [
+    "Programar colheita",
+    "CO-02.dc.html"
+   ],
+   [
+    "Coletar contagem",
+    "MB-07.dc.html"
+   ],
+   [
+    "Comparar pedidos",
+    "VE-01.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Publicar versão",
+    "Não publicada: você não tem autorização de publicação. A agrônoma responsável (Ana) recebe o rascunho v S39-03 para publicar · a v S39-02 segue vigente e congelada para medir erro."
+   ],
+   [
+    "Renegociar saldo do pedido",
+    "Tratativa aberta no Comercial: renegociar 0,4 t do PV-031 ou alocar origem alternativa · nada foi prometido além de 9,6 t."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Revisar previsão · T7 semana 39",
+    "campos": [
+     "Parcela",
+     "Plantas vivas",
+     "Peso médio do fruto",
+     "Faixa prevista",
+     "Justificativa"
+    ],
+    "confirmar": "Salvar revisão"
+   },
+   {
+    "titulo": "Ação de melhoria da previsão",
+    "campos": [
+     "Dono",
+     "Prazo",
+     "Escopo"
+    ],
+    "confirmar": "Criar ação com dono e prazo"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Revisar previsão",
+    "Rascunho v S39-03 salvo · publicar exige autorização"
+   ],
+   [
+    "Revisar amostragem",
+    "Ação registrada · acompanhada em GE-02"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "S39 publicada · falta 0,4 t no PV-031",
+   "PV-031 · classe A",
+   "estoque",
+   "a definir",
+   "Realizado · fora da oferta",
+   "Silo 2",
+   "falta 0,4 t",
+   "Não prometer integralmente",
+   "9,4%",
+   "Hipótese · meta proposta",
+   "4,2%"
+  ]
+ },
+ "CO-02.dc.html": {
+  "arquivo": "CO-02.dc.html",
+  "familia": "CO-02",
+  "titulo": "Programação e ordens de colheita",
+  "rota": "/producao/colheita",
+  "links": [
+   [
+    "Colheita e pós-colheita",
+    "CO-01.dc.html"
+   ],
+   [
+    "Registrar avanço",
+    "CO-02det.dc.html"
+   ],
+   [
+    "Ver cargas",
+    "CO-03.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Iniciar ordem",
+    "OC-0513 iniciada · Em execução · equipe e carretas reservadas na janela 29/09–04/10."
+   ],
+   [
+    "Conferir cargas",
+    "Conferência aberta: 6 cargas · 1 divergência (CG-1103 sem pesagem de destino) — encerrar só após conciliação."
+   ],
+   [
+    "Liberar ordem",
+    "Não liberada: recebimento do packing excede 14 t/d em 01/10. Resolver: mover a frente para 02/10 ou reduzir para 12 t/d — depois liberar de novo."
+   ],
+   [
+    "Liberar selecionadas",
+    "0 de 1 liberada · OC-0514: recebimento excede 14 t/d em 01/10 — mover para 02/10 ou reduzir a frente. Resultado por item."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Preparar ordens · semana 40",
+    "campos": [
+     "Período",
+     "Origem da demanda",
+     "Equipe",
+     "Máquinas",
+     "Capacidade de recebimento"
+    ],
+    "confirmar": "Emitir ordens em A liberar"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Preparar ordens do período",
+    "2 ordens emitidas em A liberar · liberação é ação separada"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 impedida · 1 em conferência",
+   "Em execução",
+   "Parcial · dia 2 de 5",
+   "Liberadas",
+   "Em conferência",
+   "Divergência de carga",
+   "A liberar",
+   "Impedida · recebimento excede 14 t/d",
+   "Encerradas"
+  ]
+ },
+ "CO-02det.dc.html": {
+  "arquivo": "CO-02det.dc.html",
+  "familia": "CO-02",
+  "titulo": "OC-0510 · Colheita de mamão T7",
+  "rota": "/producao/colheita",
+  "links": [
+   [
+    "Colheita e pós-colheita",
+    "CO-01.dc.html"
+   ],
+   [
+    "Programação e ordens de colheita",
+    "CO-02.dc.html"
+   ],
+   [
+    "Voltar",
+    "CO-02.dc.html"
+   ],
+   [
+    "Registrar carga",
+    "CO-03.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Finalizar apontamento do turno",
+    "Turno finalizado · ordem PERMANECE Em execução · apontamentos do dia travados para conferência."
+   ],
+   [
+    "Concluir execução",
+    "Término físico registrado · ordem entra automaticamente em Em conferência — ainda não está encerrada."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Avanço do turno · OC-0510",
+    "campos": [
+     "Ordem",
+     "Data",
+     "Quantidade colhida",
+     "Horas de equipe",
+     "Observação"
+    ],
+    "confirmar": "Registrar avanço"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Registrar avanço",
+    "Avanço registrado na mesma ordem · acumulado 10,5 t · saldo 1,5 t · pesagem vinculada depois"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "Em execução · parcial dia 2 de 5",
+   "Conferido",
+   "Aberto",
+   "Conciliada",
+   "Aguardando recebimento"
+  ]
+ },
+ "CO-03.dc.html": {
+  "arquivo": "CO-03.dc.html",
+  "familia": "CO-03",
+  "titulo": "Cargas, pesagens e romaneios",
+  "rota": "/producao/cargas",
+  "links": [
+   [
+    "Colheita e pós-colheita",
+    "CO-01.dc.html"
+   ],
+   [
+    "Registrar no celular",
+    "MB-10.dc.html"
+   ],
+   [
+    "Confirmar chegada",
+    "CO-04.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Emitir romaneio",
+    "Romaneio ROM-0790 emitido de novo · documento vinculado à carga e à ordem."
+   ],
+   [
+    "Emitir romaneio",
+    "Romaneio ROM-0789 emitido de novo · documento vinculado à carga e à ordem."
+   ],
+   [
+    "Vincular pesagem",
+    "Pesagem de destino vinculada ao MESMO ticket da CG-1103 · líquido recalculado · produção não duplicada."
+   ],
+   [
+    "Emitir romaneio",
+    "Romaneio ROM-0701 emitido de novo · documento vinculado à carga e à ordem."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Nova carga",
+    "campos": [
+     "Ordem",
+     "Veículo",
+     "Peso bruto",
+     "Tara",
+     "Qualidade inicial",
+     "Destino"
+    ],
+    "confirmar": "Registrar carga"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Registrar carga",
+    "Carga registrada · líquido 3.130 kg · romaneio ROM-0791 emitido"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 chegada a confirmar · 1 pesagem pendente",
+   "Pesagem de destino pendente"
+  ]
+ },
+ "CO-04.dc.html": {
+  "arquivo": "CO-04.dc.html",
+  "familia": "CO-04",
+  "titulo": "Recebimento da produção",
+  "rota": "/producao/recebimentos",
+  "links": [
+   [
+    "Colheita e pós-colheita",
+    "CO-01.dc.html"
+   ],
+   [
+    "Solicitar inspeção",
+    "CO-06.dc.html"
+   ],
+   [
+    "Encaminhar processo",
+    "CO-05.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Conferir carga",
+    "Carga CG-1206 conferida · peso recebido substitui a estimativa pela regra de medição, sem duplicação."
+   ],
+   [
+    "Segregar carga",
+    "CG-1207 segregada em área identificada · lote provisório L39-119Q criado · inspeção solicitada."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Divergência de recebimento",
+    "campos": [
+     "Carga",
+     "Tipo",
+     "Valor",
+     "Tratamento"
+    ],
+    "confirmar": "Registrar divergência"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Registrar divergência",
+    "Divergência registrada e aceita · trilha preservada"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 carga a segregar · aguardando inspeção",
+   "−30 kg (0,9% · na tolerância)",
+   "Avaria térmica parcial",
+   "Grão úmido 17,2%"
+  ]
+ },
+ "CO-05.dc.html": {
+  "arquivo": "CO-05.dc.html",
+  "familia": "CO-05",
+  "titulo": "Beneficiamento",
+  "rota": "/producao/beneficiamento",
+  "links": [
+   [
+    "Colheita e pós-colheita",
+    "CO-01.dc.html"
+   ],
+   [
+    "Registrar saídas",
+    "CO-05det.dc.html"
+   ],
+   [
+    "Ver lote",
+    "CO-06det.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Registrar avanço",
+    "Turno registrado: +6,2 t secas base 14% · quebra de secagem apropriada · em processo recalculado · ordem segue Em execução."
+   ],
+   [
+    "Liberar ordem",
+    "Rota Packing frutas v3 autorizada · OB-0112 Liberada — início só com lotes de entrada recebidos (OC-0513)."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Nova ordem de processo",
+    "campos": [
+     "Rota",
+     "Produto",
+     "Janela",
+     "Lotes de entrada",
+     "Responsável de produção"
+    ],
+    "confirmar": "Criar em A liberar"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Criar ordem de processo",
+    "OB-0113 criada em A liberar · autorizar rota é ação separada"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 lote bloqueado após encerramento",
+   "Em execução",
+   "balanço 0,0 t · sem divergência",
+   "Aguardando inspeção",
+   "Encerradas",
+   "Lote bloqueado",
+   "balanço 0 · conciliado",
+   "L27-013 bloqueado · INSP-88",
+   "A liberar"
+  ]
+ },
+ "CO-05det.dc.html": {
+  "arquivo": "CO-05det.dc.html",
+  "familia": "CO-05",
+  "titulo": "OB-0110 · Packing do mamão",
+  "rota": "/producao/beneficiamento",
+  "links": [
+   [
+    "Colheita e pós-colheita",
+    "CO-01.dc.html"
+   ],
+   [
+    "Beneficiamento",
+    "CO-05.dc.html"
+   ],
+   [
+    "Voltar",
+    "CO-05.dc.html"
+   ],
+   [
+    "Encaminhar qualidade",
+    "CO-06.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Finalizar apontamento do turno",
+    "Turno finalizado · ordem PERMANECE Em execução."
+   ],
+   [
+    "Concluir execução",
+    "Término físico · OB-0110 entra em Em conferência para conferir balanço e origens."
+   ],
+   [
+    "Conferir balanço",
+    "Ainda não disponível: a ordem está Em execução. Conclua a execução para abrir a conferência · parcial 12,0 = 9,6 + 1,8 + 0,6, sem divergência."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Saídas do turno",
+    "campos": [
+     "Ordem",
+     "Saída classe A",
+     "Saída classe B",
+     "Descarte",
+     "Lote de destino"
+    ],
+    "confirmar": "Registrar saídas"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Registrar avanço e saídas",
+    "Saídas do turno registradas · balanço recalculado sem divergência"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "Em execução · balanço sem divergência",
+   "Recebida",
+   "Aguardando inspeção",
+   "Registrado"
+  ]
+ },
+ "CO-06.dc.html": {
+  "arquivo": "CO-06.dc.html",
+  "familia": "CO-06",
+  "titulo": "Qualidade e rastreabilidade",
+  "rota": "/producao/qualidade",
+  "links": [
+   [
+    "Colheita e pós-colheita",
+    "CO-01.dc.html"
+   ],
+   [
+    "Decidir lote",
+    "CO-06det.dc.html"
+   ],
+   [
+    "Abrir recolhimento",
+    "VE-06.dc.html"
+   ],
+   [
+    "Ver viagens afetadas",
+    "LO-03.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Registrar resultado",
+    "Resultado da INSP-92 registrado · decidir Liberar ou Bloquear continua com a qualidade — o resultado sozinho não libera o lote."
+   ],
+   [
+    "Rastrear clientes",
+    "Rastreio do L27-013: nenhum cliente atendido — lote nunca foi liberado; para trás: OB-0104 ← bica L27-018/019 ← colheita C1 de jul/26."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Nova inspeção",
+    "campos": [
+     "Lote",
+     "Padrão / método",
+     "Responsável",
+     "Prazo"
+    ],
+    "confirmar": "Abrir inspeção"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Inspecionar lote",
+    "INSP-92 aberta · lote permanece Aguardando inspeção"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 lote bloqueado · decisão até 25/09",
+   "Defeitos acima do tipo 6",
+   "Bloqueado",
+   "◆ até 3 dias · 25/09",
+   "Conforme",
+   "Liberado",
+   "○ no prazo",
+   "14,0% · 0,9% conforme",
+   "Aguardando resultado",
+   "Em inspeção",
+   "● vence hoje"
+  ]
+ },
+ "CO-06det.dc.html": {
+  "arquivo": "CO-06det.dc.html",
+  "familia": "CO-06",
+  "titulo": "INSP-88 · Lote L27-013 bloqueado",
+  "rota": "/producao/qualidade",
+  "links": [
+   [
+    "Colheita e pós-colheita",
+    "CO-01.dc.html"
+   ],
+   [
+    "Qualidade e rastreabilidade",
+    "CO-06.dc.html"
+   ],
+   [
+    "Voltar",
+    "CO-06.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Liberar para destinação compatível",
+    "Liberado para blend/mercado interno tipo 7 · reservas voltam a ser elegíveis só nessas destinações · OB-0104 permanece Encerrada. Recibo QL-1148."
+   ],
+   [
+    "Manter bloqueio",
+    "Bloqueio mantido · pendência INSP-88 segue com dono e prazo · Comercial permanece avisado."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Destinação do lote L27-013",
+    "campos": [
+     "Destinação",
+     "Ordem vinculada",
+     "Justificativa"
+    ],
+    "confirmar": "Definir destinação"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Definir destinação",
+    "Destinação registrada · ordem de reprocesso criada em A liberar"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "Bloqueado · decisão até 25/09",
+   "◆ até 3 dias · 25/09",
+   "Acima do tipo",
+   "Limítrofe",
+   "Conforme",
+   "Falhou · lote bloqueado por INSP-88",
+   "Falhou · lote indisponível"
+  ]
+ },
+ "CO-07.dc.html": {
+  "arquivo": "CO-07.dc.html",
+  "familia": "CO-07",
+  "titulo": "Estoque de produção",
+  "rota": "/producao/estoque",
+  "links": [
+   [
+    "Colheita e pós-colheita",
+    "CO-01.dc.html"
+   ],
+   [
+    "Alocar pedido",
+    "VE-04.dc.html"
+   ],
+   [
+    "Transferir",
+    "SU-08.dc.html"
+   ],
+   [
+    "Inventariar",
+    "SU-09.dc.html"
+   ],
+   [
+    "Abrir lote",
+    "CO-06det.dc.html"
+   ],
+   [
+    "Abrir inspeção",
+    "CO-06.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Ver movimentos",
+    "Movimentos do L38-118: entrada 3.180 kg (CO-04) → consumo integral na OB-0110 · rastreio ativo mesmo sem saldo."
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 lote bloqueado · 2 em inspeção",
+   "Bloqueado · INSP-88",
+   "Apto",
+   "Apto · INSP-85",
+   "Em inspeção · INSP-92",
+   "Liberado · INSP-91"
+  ]
+ },
+ "GE-01.dc.html": {
+  "arquivo": "GE-01.dc.html",
+  "familia": "GE-01",
+  "titulo": "Visão gerencial",
+  "rota": "/gestao/resultados",
+  "links": [
+   [
+    "Abrir composição do resultado",
+    "GE-03.dc.html"
+   ],
+   [
+    "Comparar cenário",
+    "GE-02.dc.html"
+   ],
+   [
+    "Abrir composição",
+    "GE-03.dc.html"
+   ],
+   [
+    "Abrir origem do desvio",
+    "GE-02det.dc.html"
+   ],
+   [
+    "Criar ação",
+    "GE-07.dc.html"
+   ],
+   [
+    "Abrir lote",
+    "CO-06det.dc.html"
+   ]
+  ],
+  "acoes": [],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "Plantio T4 impedido · OM-0233",
+   "Pulverização +R$ 1.808",
+   "Lote L27-013 bloqueado",
+   "apontamentos + preço de compra",
+   "OM-0233 · Trator T1",
+   "INSP-88"
+  ]
+ },
+ "GE-02.dc.html": {
+  "arquivo": "GE-02.dc.html",
+  "familia": "GE-02",
+  "titulo": "Orçamento e previsões",
+  "rota": "/gestao/orcamento",
+  "links": [
+   [
+    "Gestão e resultados",
+    "GE-01.dc.html"
+   ],
+   [
+    "Comparar base × previsão × real",
+    "GE-02det.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Recalcular previsão",
+    "Previsão V2 recalculada com preços de compra e apontamentos até 22/09 · nenhum número da base V1 alterado."
+   ],
+   [
+    "Submeter orçamento revisado",
+    "Submetido à Direção · +R$ 180 mil em defensivos · aparece em Aprovações para decisão."
+   ],
+   [
+    "Publicar previsão V2",
+    "Previsão V2 publicada para planejamento, programação e compras · consumidores passam a ler a nova versão; histórico mantém as anteriores."
+   ],
+   [
+    "Autorizar versão",
+    "Bloqueado · só a alçada Direção autoriza a versão — a submissão já está na caixa de Aprovações."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Novo cenário de orçamento",
+    "campos": [
+     "Base de partida",
+     "Nome do cenário",
+     "Premissa alterada",
+     "Vigência"
+    ],
+    "confirmar": "Criar cenário"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Criar cenário",
+    "Cenário criado · em rascunho"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "V2 publicada · 1 cenário em rascunho",
+   "Aprovada · preservada",
+   "Publicada ao planejamento",
+   "Cenário · rascunho"
+  ]
+ },
+ "GE-02det.dc.html": {
+  "arquivo": "GE-02det.dc.html",
+  "familia": "GE-02",
+  "titulo": "Comparar · V1 × V2 × real",
+  "rota": "/gestao/orcamento",
+  "links": [
+   [
+    "Gestão e resultados",
+    "GE-01.dc.html"
+   ],
+   [
+    "Orçamento e previsões",
+    "GE-02.dc.html"
+   ],
+   [
+    "Voltar",
+    "GE-02.dc.html"
+   ],
+   [
+    "Criar ação do desvio",
+    "GE-07.dc.html"
+   ],
+   [
+    "Abrir documentos de origem",
+    "GE-06det.dc.html"
+   ],
+   [
+    "Ver apontamentos da O.S.",
+    "CA-02.dc.html"
+   ]
+  ],
+  "acoes": [],
+  "formularios": [
+   {
+    "titulo": "Proposta de parâmetro",
+    "campos": [
+     "Plano",
+     "Consumo (L/ha)",
+     "Vigência",
+     "Justificativa"
+    ],
+    "confirmar": "Enviar para revisão agronômica"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Propor novo parâmetro de consumo",
+    "Proposta enviada · revisão agronômica decide"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "Desvio de +R$ 1.808 na operação",
+   "apontamentos",
+   "+10% vs. base",
+   "recebimento NF 8842",
+   "requisições",
+   "+R$ 1.808",
+   "lançamento de custo"
+  ]
+ },
+ "GE-03.dc.html": {
+  "arquivo": "GE-03.dc.html",
+  "familia": "GE-03",
+  "titulo": "Custos e fechamento",
+  "rota": "/gestao/custos",
+  "links": [
+   [
+    "Gestão e resultados",
+    "GE-01.dc.html"
+   ],
+   [
+    "Ver documento",
+    "SU-06.dc.html"
+   ],
+   [
+    "Ver documento",
+    "CA-02.dc.html"
+   ],
+   [
+    "Ver documento",
+    "MA-04.dc.html"
+   ],
+   [
+    "Revisar rateio",
+    "LO-04.dc.html"
+   ],
+   [
+    "Ver documento",
+    "MA-05.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Fechar competência 09/2026",
+    "Bloqueado · 2 pendências obrigatórias: frete sem versão de rateio e diesel sem conciliação de tanque — trate as duas e o fechamento libera."
+   ],
+   [
+    "Conciliar diesel do tanque",
+    "Conciliado · medição 22/09 confere com 410 L apontados (dif. 0,7%, dentro da tolerância de 1% — hipótese a validar) · lançamento vira definitivo."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Reabertura de período fechado",
+    "campos": [
+     "Competência",
+     "Motivo",
+     "Efeito",
+     "Aprovador"
+    ],
+    "confirmar": "Solicitar reabertura"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Solicitar reabertura de 08/2026",
+    "Solicitação enviada · aguardando aprovação"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "2 pendências bloqueiam o fechamento",
+   "NF 8842 · recebimento",
+   "Definitivo",
+   "Apontamento · OS-0421",
+   "OM-0233",
+   "Provisório · aguarda NF",
+   "Romaneio de frete",
+   "Sem versão de rateio",
+   "Bloqueia fechamento",
+   "Abastecimento",
+   "Provisório · conciliar tanque",
+   "Folha 09/26"
+  ]
+ },
+ "GE-04.dc.html": {
+  "arquivo": "GE-04.dc.html",
+  "familia": "GE-04",
+  "titulo": "Contas a pagar e caixa",
+  "rota": "/gestao/pagar-caixa",
+  "links": [
+   [
+    "Gestão e resultados",
+    "GE-01.dc.html"
+   ],
+   [
+    "Abrir origem",
+    "MA-04.dc.html"
+   ],
+   [
+    "Abrir origem",
+    "VE-05.dc.html"
+   ],
+   [
+    "Abrir origem",
+    "GE-08.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Enviar remessa ao banco",
+    "Remessa enviada · NF 9017 (R$ 184.000) fica “Aguardando banco” — nada aparece pago antes do retorno. NF 8790 não entrou: ainda aguarda a alçada."
+   ],
+   [
+    "Importar retorno / registrar liquidação",
+    "Retorno importado · NF 5531 (R$ 62.000) liquidada e conciliada com o extrato; 1 divergência de R$ 12,40 aberta para tratamento."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Proposta de pagamento",
+    "campos": [
+     "Documento",
+     "Valor",
+     "Data de pagamento",
+     "Conta de saída"
+    ],
+    "confirmar": "Propor pagamento"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Propor pagamento",
+    "Na alçada do gestor"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "R$ 158 mil vencem hoje · 1 aguarda alçada",
+   "NF 8790 · 2/3",
+   "● vence hoje",
+   "Proposto · aguarda alçada",
+   "NF 5531",
+   "Remessa enviada · aguardando banco",
+   "NF 9017 · 1/1",
+   "◆ até 3 dias · 26/09",
+   "Aprovado na alçada",
+   "NF 1203",
+   "○ no prazo · 05/10",
+   "Aguardando NF conferida",
+   "Contrato CT-77",
+   "○ no prazo · 30/10",
+   "Crédito vinculado · abate na entrega",
+   "CRE-0102 · parc. 1",
+   "○ no prazo · 15/12",
+   "Conciliado"
+  ]
+ },
+ "GE-05.dc.html": {
+  "arquivo": "GE-05.dc.html",
+  "familia": "GE-05",
+  "titulo": "Contas a receber",
+  "rota": "/gestao/receber",
+  "links": [
+   [
+    "Gestão e resultados",
+    "GE-01.dc.html"
+   ],
+   [
+    "Abrir pedido",
+    "VE-04.dc.html"
+   ],
+   [
+    "Tratar devolução",
+    "VE-06.dc.html"
+   ],
+   [
+    "Tratar crédito",
+    "VE-06.dc.html"
+   ],
+   [
+    "Abrir pedido",
+    "VE-05.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Conciliar recebimentos do extrato",
+    "Conciliados 4 recebimentos · FAT-2115 fechou com diferença de R$ 640 — divergência mantida aberta com vínculo ao pedido, sem editar o original."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Cobrança ao cliente",
+    "campos": [
+     "Cliente",
+     "Título",
+     "Canal",
+     "Acordo proposto"
+    ],
+    "confirmar": "Registrar cobrança"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Registrar cobrança autorizada",
+    "Cobrança registrada no histórico do título"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "R$ 86 mil vencidos · 2 divergências",
+   "FAT-2101 · 1/2",
+   "● vence hoje",
+   "FAT-2088",
+   "▲ atrasada · 8 d",
+   "Cliente alega 0,4 t classe B",
+   "FAT-2115",
+   "◆ até 3 dias · 26/09",
+   "Desconto de R$ 640 sem acordo",
+   "FAT-2093",
+   "○ no prazo · 10/10",
+   "CT-77 · entregas",
+   "○ no prazo · na entrega",
+   "Crédito vinculado"
+  ]
+ },
+ "GE-06.dc.html": {
+  "arquivo": "GE-06.dc.html",
+  "familia": "GE-06",
+  "titulo": "Indicadores operacionais",
+  "rota": "/gestao/indicadores",
+  "links": [
+   [
+    "Gestão e resultados",
+    "GE-01.dc.html"
+   ],
+   [
+    "Abrir plano de ação",
+    "GE-07.dc.html"
+   ],
+   [
+    "Comparar base",
+    "GE-02det.dc.html"
+   ],
+   [
+    "Detalhar",
+    "GE-06det.dc.html"
+   ],
+   [
+    "Filtrar operações",
+    "CA-01.dc.html"
+   ],
+   [
+    "Detalhar",
+    "CO-05.dc.html"
+   ],
+   [
+    "Filtrar operações",
+    "IR-03.dc.html"
+   ],
+   [
+    "Abrir ativo",
+    "MA-01.dc.html"
+   ],
+   [
+    "Abrir ativo",
+    "IR-01.dc.html"
+   ],
+   [
+    "Propor parâmetro agronômico",
+    "AG-05.dc.html"
+   ],
+   [
+    "Propor regra/alçada",
+    "CF-02.dc.html"
+   ]
+  ],
+  "acoes": [],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "4 indicadores fora da meta",
+   "R$ 48,40/ha ↑",
+   "consumo +10% · preço +10%",
+   "em risco ↓",
+   "OS-0420 impedida · OM-0233",
+   "86% ↓",
+   "5% ↑",
+   "10,81 de 12 mm",
+   "62% · bloqueado",
+   "97%",
+   "94%",
+   "99%"
+  ]
+ },
+ "GE-06det.dc.html": {
+  "arquivo": "GE-06det.dc.html",
+  "familia": "GE-06",
+  "titulo": "Detalhar · custo de pulverização",
+  "rota": "/gestao/indicadores",
+  "links": [
+   [
+    "Gestão e resultados",
+    "GE-01.dc.html"
+   ],
+   [
+    "Indicadores operacionais",
+    "GE-06.dc.html"
+   ],
+   [
+    "Voltar",
+    "GE-06.dc.html"
+   ],
+   [
+    "Abrir plano de ação",
+    "GE-07.dc.html"
+   ],
+   [
+    "Abrir ordens",
+    "CA-01.dc.html"
+   ],
+   [
+    "Abrir apontamentos",
+    "CA-02.dc.html"
+   ],
+   [
+    "Abrir requisições",
+    "SU-07.dc.html"
+   ],
+   [
+    "Abrir recebimento",
+    "SU-06.dc.html"
+   ]
+  ],
+  "acoes": [],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "21% acima da meta",
+   "reaplicação de 25 ha após chuva — checar",
+   "calda ajustada pelo agrônomo — validar",
+   "compra fora do contrato? — conferir pedido",
+   "OS-0409 · pulverização",
+   "Apontamentos da O.S.",
+   "Requisições",
+   "Recebimento NF 8842"
+  ]
+ },
+ "GE-07.dc.html": {
+  "arquivo": "GE-07.dc.html",
+  "familia": "GE-07",
+  "titulo": "Planos de ação",
+  "rota": "/gestao/acoes",
+  "links": [
+   [
+    "Gestão e resultados",
+    "GE-01.dc.html"
+   ],
+   [
+    "Propor mudança",
+    "GE-02det.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Verificar resultado do AC-097",
+    "Verificado · descarte caiu de 5% para 3,8% em 2 semanas — caso elegível a encerramento com evidência anexada."
+   ],
+   [
+    "Encerrar AC-097",
+    "Encerrado com evidência: descarte 5% → 3,8% em 2 semanas · reabrir exige motivo e mantém todo o histórico do caso."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Proposta a partir do aprendizado",
+    "campos": [
+     "Cadastro alvo",
+     "Parâmetro",
+     "Vigência",
+     "Evidência"
+    ],
+    "confirmar": "Enviar proposta"
+   },
+   {
+    "titulo": "Novo caso de ação",
+    "campos": [
+     "Origem / indicador",
+     "Causa",
+     "Ação",
+     "Responsável",
+     "Prazo"
+    ],
+    "confirmar": "Criar ação"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Propor mudança de parâmetro",
+    "Proposta na revisão agronômica"
+   ],
+   [
+    "Criar ação",
+    "Caso criado e atribuído"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "3 casos em curso · 1 em verificação",
+   "R$ 48,40/ha · feijão P1",
+   "Em curso",
+   "sensores · salto de 18 p.p.",
+   "OM-0233",
+   "Aguardando peça",
+   "descarte 5%",
+   "Em verificação",
+   "aderência 86%",
+   "Encerrado · meta atingida"
+  ]
+ },
+ "GE-08.dc.html": {
+  "arquivo": "GE-08.dc.html",
+  "familia": "GE-08",
+  "titulo": "Crédito e garantias",
+  "rota": "/gestao/credito",
+  "links": [
+   [
+    "Gestão e resultados",
+    "GE-01.dc.html"
+   ],
+   [
+    "Solicitar proposta a credores",
+    "PT-04.dc.html"
+   ],
+   [
+    "Ver título",
+    "GE-04.dc.html"
+   ],
+   [
+    "Ver compromisso",
+    "VE-05.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Comparar propostas",
+    "Comparadas 2 propostas do CRE-0102 por CET/CETCR e valor presente com premissas declaradas · Banco Terra 14,2% a.a. vs. Coop Crédito 13,8% a.a. + tarifa."
+   ],
+   [
+    "Registrar liberação da 2ª parcela",
+    "Bloqueado · condição documental pendente — liberado até agora: R$ 300 mil de R$ 850 mil; a 1ª parcela já é título real em Contas a pagar. Anexe a certidão para liberar."
+   ],
+   [
+    "Autorizar bloco",
+    "Autorizado pela Direção · Banco Terra acessa “Compromissos e garantias” até 31/12/2026, só para análise do CRE-0102."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Documento exigido pelo credor",
+    "campos": [
+     "Solicitação",
+     "Documento",
+     "Validade",
+     "Arquivo"
+    ],
+    "confirmar": "Enviar ao credor"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Anexar documento condicionante",
+    "Em conferência pelo credor"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "CRE-0102 · condição documental pendente",
+   "Aprovação condicionada a documento",
+   "Contratado · em serviço",
+   "Contratado · entrega na colheita",
+   "Rascunho de solicitação",
+   "Aguardando autorização da Direção"
+  ]
+ },
+ "IN-01.dc.html": {
+  "arquivo": "IN-01.dc.html",
+  "familia": "IN-01",
+  "titulo": "Meu dia",
+  "rota": "/inicio/meu-dia",
+  "links": [
+   [
+    "Registrar ocorrência",
+    "CA-03.dc.html"
+   ],
+   [
+    "Resolver substituição",
+    "PL-05.dc.html"
+   ],
+   [
+    "Liberar",
+    "OS.dc.html#OS-0418"
+   ],
+   [
+    "Receber devolução",
+    "SU-07.dc.html"
+   ],
+   [
+    "Abrir fila",
+    "LO-02.dc.html"
+   ],
+   [
+    "Conferir apontamentos",
+    "CA-02.dc.html"
+   ],
+   [
+    "Abrir inspeção",
+    "CO-06det.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Assumir tarefa",
+    "Tarefa atribuída a você · a fila mantém a posição e a amostragem passa a contar em “Minhas tarefas”."
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "● vence hoje",
+   "Ativo bloqueado · OM-0233",
+   "Aguardando agrônomo",
+   "● vence hoje · agora",
+   "T1 atrasado · prev. 09:10",
+   "◆ até 3 dias · 1 d",
+   "◆ até 3 dias · 2 d",
+   "Lote bloqueado",
+   "◆ até 3 dias · 3 d"
+  ]
+ },
+ "IN-02.dc.html": {
+  "arquivo": "IN-02.dc.html",
+  "familia": "IN-02",
+  "titulo": "Aprovações",
+  "rota": "/inicio/aprovacoes",
+  "links": [
+   [
+    "Início",
+    "IN-01.dc.html"
+   ],
+   [
+    "Revisar",
+    "CA-01.dc.html"
+   ],
+   [
+    "Revisar",
+    "IR-02.dc.html"
+   ],
+   [
+    "Revisar",
+    "SU-09.dc.html"
+   ],
+   [
+    "Revisar",
+    "SU-02.dc.html"
+   ],
+   [
+    "Revisar",
+    "GE-02det.dc.html"
+   ],
+   [
+    "Revisar",
+    "CF-01.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Aprovar selecionados",
+    "Resultado por item dos selecionados: política de estoque Diesel S10 aprovada · acesso de Beto aprovado · ajuste de inventário Galpão 2 exigiu revisão individual (diferença acima da alçada). Próxima pendência: OS-0418."
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "7 pendentes · 2 vencem hoje",
+   "Ordem de serviço",
+   "● vence hoje",
+   "Exige revisão individual",
+   "◆ até 3 dias · 2 d",
+   "Ordem impedida · OM-0233",
+   "Política de água",
+   "◆ até 3 dias · 3 d",
+   "Ajuste de inventário",
+   "Política de estoque",
+   "○ no prazo · 5 d",
+   "Orçamento",
+   "○ no prazo · 7 d",
+   "Acesso e alçada"
+  ]
+ },
+ "IN-03.dc.html": {
+  "arquivo": "IN-03.dc.html",
+  "familia": "IN-03",
+  "titulo": "Agenda e pendências",
+  "rota": "/inicio/agenda",
+  "links": [
+   [
+    "Início",
+    "IN-01.dc.html"
+   ],
+   [
+    "Criar tarefa vinculada",
+    "GE-07.dc.html"
+   ],
+   [
+    "Abrir origem",
+    "CA-02.dc.html"
+   ],
+   [
+    "Abrir origem",
+    "SU-07.dc.html"
+   ],
+   [
+    "Reprogramar",
+    "PL-05.dc.html"
+   ],
+   [
+    "Abrir origem",
+    "CO-06det.dc.html"
+   ],
+   [
+    "Abrir origem",
+    "IR-02.dc.html"
+   ]
+  ],
+  "acoes": [],
+  "formularios": [
+   {
+    "titulo": "Atribuir amostragem de solo · T2",
+    "campos": [
+     "Responsável",
+     "Data"
+    ],
+    "confirmar": "Atribuir tarefa"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Atribuir",
+    "Atribuída a Marcos"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "Alta",
+   "OM-0233 em execução",
+   "Normal",
+   "Lote bloqueado",
+   "Baixa"
+  ]
+ },
+ "IN-04.dc.html": {
+  "arquivo": "IN-04.dc.html",
+  "familia": "IN-04",
+  "titulo": "Mapa da fazenda",
+  "rota": "/inicio/mapa",
+  "links": [
+   [
+    "Início",
+    "IN-01.dc.html"
+   ],
+   [
+    "Criar vistoria",
+    "AG-01.dc.html"
+   ],
+   [
+    "Irrigação de hoje",
+    "IR-03.dc.html"
+   ],
+   [
+    "Ver recomendação",
+    "AG-04.dc.html"
+   ],
+   [
+    "Abrir",
+    "CA-01det.dc.html"
+   ],
+   [
+    "Abrir",
+    "CA-01.dc.html"
+   ],
+   [
+    "Abrir",
+    "IR-03det.dc.html"
+   ],
+   [
+    "Ajustar antes de liberar",
+    "OS.dc.html#OS-0418"
+   ],
+   [
+    "Abrir",
+    "CA-02.dc.html"
+   ],
+   [
+    "Abrir",
+    "CO-06det.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Selecionar área",
+    "Área selecionada: T1+T2 (610 ha) · a tabela abaixo mostra só as ordens dessas áreas."
+   ],
+   [
+    "Medir",
+    "Modo medir ativo: clique no mapa para distância e área (demonstração)."
+   ],
+   [
+    "Filtros",
+    "Filtros de etapa, avanço e janela aplicados só à visualização — nenhuma ordem muda."
+   ],
+   [
+    "Tela cheia",
+    "Tela cheia: mapa ocupa a janela; Esc volta com zoom e seleção preservados."
+   ],
+   [
+    "Usar como tela inicial",
+    "Preferência gravada: o Mapa da fazenda abre ao entrar. Meu dia continua no menu Início."
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "Em execução",
+   "Parcial · dia 4 de 7",
+   "Impedida · ativo bloqueado",
+   "Liberadas",
+   "A liberar",
+   "Aguardando agrônomo",
+   "Em conferência",
+   "Sobras a receber",
+   "Encerradas",
+   "Lote bloqueado"
+  ]
+ },
+ "IR-01.dc.html": {
+  "arquivo": "IR-01.dc.html",
+  "familia": "IR-01",
+  "titulo": "Balanço hídrico",
+  "rota": "/irrigacao/balanco",
+  "links": [
+   [
+    "Programar irrigação",
+    "IR-02.dc.html"
+   ],
+   [
+    "Consultar tarefa existente",
+    "IR-03.dc.html"
+   ],
+   [
+    "Consultar tarefa",
+    "IR-03det.dc.html"
+   ],
+   [
+    "Consultar tarefa",
+    "IR-03.dc.html"
+   ],
+   [
+    "Inspecionar sensor",
+    "IR-04.dc.html"
+   ],
+   [
+    "Revisar exceções",
+    "IN-02.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Recalcular e explicar",
+    "Recalculado 06:12 · ET Penman-Monteith (estação Santa Rita) · chuva efetiva 60% da chuva · memória de cálculo por setor anexada ao evento."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Revisar política de água",
+    "campos": [
+     "Lâmina máxima por evento",
+     "Intervalo mínimo",
+     "Validade",
+     "Dados mínimos exigidos"
+    ],
+    "confirmar": "Publicar nova versão"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Revisar política por agrônomo",
+    "PA-07 v4 publicada · versões anteriores preservadas"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "2 exceções aguardando revisão",
+   "Dentro da política PA-07 v3",
+   "Fertirrigação · aprovação individual",
+   "Estimativa · sonda sem dado 3 d",
+   "Fora da política · sem sonda ativa",
+   "A liberar · aguardando revisão individual"
+  ]
+ },
+ "IR-02.dc.html": {
+  "arquivo": "IR-02.dc.html",
+  "familia": "IR-02",
+  "titulo": "Programação da irrigação",
+  "rota": "/irrigacao/programacao",
+  "links": [
+   [
+    "Irrigação",
+    "IR-01.dc.html"
+   ],
+   [
+    "Ver Irrigação de hoje",
+    "IR-03.dc.html"
+   ],
+   [
+    "Ver ordem",
+    "IR-03det.dc.html"
+   ],
+   [
+    "Liberar",
+    "OS.dc.html#OS-0418"
+   ],
+   [
+    "Ver fila de revisão",
+    "IN-02.dc.html"
+   ],
+   [
+    "Abrir tarefa para reclassificar",
+    "IR-03det.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Resolver conflito",
+    "Janela movida para 15:00–17:00 · sem sobreposição com a parada da B3 · capacidade revalidada · a ordem segue A liberar até a revisão individual (sonda sem dado)."
+   ],
+   [
+    "Simular capacidade",
+    "Simulação hidráulica e elétrica: B2 comporta as janelas de hoje; B3 conflita com a parada de manutenção 14:00–15:00 — 1 ajuste sugerido."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Programar período de irrigação",
+    "campos": [
+     "Setor",
+     "Janela",
+     "Lâmina",
+     "Fonte de energia"
+    ],
+    "confirmar": "Programar"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Programar período",
+    "Tarefa única OS-0419 recuperada · dentro da PA-07 · liberação por prontidão"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 conflito · 3 aguardando agrônomo",
+   "Política PA-07 v3",
+   "Liberadas",
+   "Aguardando agrônomo",
+   "Bloqueada · falta aprovação",
+   "Fora da política",
+   "A liberar",
+   "Conflito · parada da B3 14–15 h",
+   "Fora da política · sem sonda"
+  ]
+ },
+ "IR-03.dc.html": {
+  "arquivo": "IR-03.dc.html",
+  "familia": "IR-03",
+  "titulo": "Ordens de irrigação",
+  "rota": "/irrigacao/ordens",
+  "links": [
+   [
+    "Irrigação",
+    "IR-01.dc.html"
+   ],
+   [
+    "Abrir tarefa de hoje",
+    "IR-03det.dc.html"
+   ],
+   [
+    "Registrar avanço (campo)",
+    "MB-08.dc.html"
+   ],
+   [
+    "Abrir tarefa",
+    "IR-03det.dc.html"
+   ],
+   [
+    "Resolver conflito",
+    "IR-02.dc.html"
+   ],
+   [
+    "Ver revisão",
+    "IN-02.dc.html"
+   ],
+   [
+    "Liberar",
+    "OS.dc.html#OS-0418"
+   ]
+  ],
+  "acoes": [
+   [
+    "Revisar divergência",
+    "Hidrômetro validado prevalece: 10,4 mm confirmados em 11,6 ha (1.206 m³) · balanço atualizado uma vez · conferência concluída."
+   ],
+   [
+    "Requisitar insumo",
+    "Indisponível agora: nenhuma fertirrigação aprovada. OS-0418 aguarda o agrônomo — a requisição da mesma ordem é criada após a aprovação. Água sem produtos não usa requisição."
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 em conferência · 3 a liberar",
+   "Água",
+   "Liberadas",
+   "Em conferência",
+   "Divergência medida",
+   "A liberar",
+   "Conflito · parada da B3",
+   "Aguardando revisão",
+   "Fertirrigação",
+   "Aguardando agrônomo",
+   "Encerradas",
+   "Encerrada automaticamente"
+  ]
+ },
+ "IR-03det.dc.html": {
+  "arquivo": "IR-03det.dc.html",
+  "familia": "IR-03",
+  "titulo": "OS-0419 · Água por política · Pivô 2",
+  "rota": "/irrigacao/ordens",
+  "links": [
+   [
+    "Irrigação",
+    "IR-01.dc.html"
+   ],
+   [
+    "Ordens de irrigação",
+    "IR-03.dc.html"
+   ],
+   [
+    "Voltar",
+    "IR-03.dc.html"
+   ],
+   [
+    "Registrar avanço",
+    "MB-08.dc.html"
+   ],
+   [
+    "Criar versão v2",
+    "OS.dc.html#OS-0418"
+   ]
+  ],
+  "acoes": [
+   [
+    "Iniciar irrigação",
+    "Em execução · início 20:02 registrado · telemetria da B2 ativa · mesma tarefa no mapa, Kanban e app de campo."
+   ],
+   [
+    "Pausar irrigação",
+    "Indisponível: a ordem ainda está Liberada. Inicie a irrigação para pausar — a pausa vira selo, a etapa é preservada."
+   ],
+   [
+    "Confirmar término da irrigação",
+    "Indisponível: nada foi executado ainda. Após iniciar, o término físico leva a ordem a Em conferência com lâmina medida × estimada na área coberta."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Reclassificar para fertirrigação",
+    "campos": [
+     "Produto",
+     "Dose",
+     "Motivo",
+     "Prévia dos efeitos"
+    ],
+    "confirmar": "Criar versão v2"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Adicionar produtos (reclassificar)",
+    "v2 criada · fila do agrônomo · preparos e partidas do saldo bloqueados"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "Liberadas · janela hoje 20:00",
+   "Enquadrada na PA-07 v3 · evento rastreável",
+   "Registrada automaticamente · vigente",
+   "Não aplicável · sem produtos"
+  ]
+ },
+ "IR-04.dc.html": {
+  "arquivo": "IR-04.dc.html",
+  "familia": "IR-04",
+  "titulo": "Clima, sensores e desempenho",
+  "rota": "/irrigacao/desempenho",
+  "links": [
+   [
+    "Irrigação",
+    "IR-01.dc.html"
+   ],
+   [
+    "Abrir ação da sonda P1",
+    "GE-07.dc.html"
+   ],
+   [
+    "Abrir ação",
+    "GE-07.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Agendar calibração",
+    "Inspeção criada para 29/09 · troca/reset exige evento próprio — nunca consumo negativo silencioso."
+   ],
+   [
+    "Importar leitura",
+    "12 leituras importadas da estação · 1 rejeitada por unidade divergente (in → mm) · nada gravado sem origem."
+   ],
+   [
+    "Marcar leitura suspeita",
+    "Leitura da sonda P1 marcada · excluída do balanço até inspeção · ação vinculada na gestão."
+   ],
+   [
+    "Comparar períodos",
+    "Comparativo 26/08–09/09 × 10–24/09 aberto: Pivô 2 +4% de eficiência após ajuste do percentímetro."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Cadastrar ou inspecionar sensor",
+    "campos": [
+     "Tipo",
+     "Setor",
+     "Unidade",
+     "Data da calibração"
+    ],
+    "confirmar": "Cadastrar sensor"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Cadastrar sensor",
+    "Sensor cadastrado · aguardando primeira leitura validada"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 leitura suspeita · 1 sensor sem dado",
+   "Calibrada · 08/2026",
+   "Ativa",
+   "Calibração vence 30/09",
+   "Calibrada · 07/2026",
+   "Suspeita · salto 18 p.p.",
+   "Sem dado · balanço estimado",
+   "modelo externo",
+   "Previsão ≠ chuva realizada",
+   "+4% vs quinzena anterior",
+   "estável",
+   "sem sonda desde 22/09"
+  ]
+ },
+ "LO-01.dc.html": {
+  "arquivo": "LO-01.dc.html",
+  "familia": "LO-01",
+  "titulo": "Programação de transporte",
+  "rota": "/logistica/programacao",
+  "links": [
+   [
+    "Preparar expedição",
+    "LO-02.dc.html"
+   ],
+   [
+    "Cotar frete",
+    "LO-04.dc.html"
+   ],
+   [
+    "Ver fila ao vivo",
+    "LO-02.dc.html"
+   ],
+   [
+    "Conferir carga",
+    "LO-02det.dc.html"
+   ],
+   [
+    "Preparar",
+    "LO-02.dc.html"
+   ],
+   [
+    "Contratar frete",
+    "LO-04.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Agrupar entregas compatíveis",
+    "Nenhum grupo criado · Fungicida A é incompatível com alimento refrigerado; a transferência de KCl segue outra rota. Uma proposta mostraria custo, ocupação e risco antes da decisão."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Reservar slot de doca",
+    "campos": [
+     "Doca",
+     "Carga",
+     "Início",
+     "Duração estimada"
+    ],
+    "confirmar": "Reservar slot"
+   },
+   {
+    "titulo": "Programar viagem de entrega",
+    "campos": [
+     "Carga",
+     "Transportador",
+     "Carregamento",
+     "Janela no destino"
+    ],
+    "confirmar": "Programar viagem"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Reservar doca",
+    "Slot 09:50–10:45 reservado · balança 1 alocada"
+   ],
+   [
+    "Programar viagem",
+    "Viagem VG-119 programada · aguardando expedição"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 carga atrasada · T1",
+   "Retirada · cliente",
+   "Atrasado · prev. 09:10",
+   "Compatível · granel",
+   "Transferência",
+   "Compatível · ensacado",
+   "Entrega · agricultor",
+   "Impedida · NF pendente",
+   "Compatível · refrigerado",
+   "Incompatível · defensivo × alimento",
+   "Rota diferente · não agrupa",
+   "Atrasado · vaga liberada ao próximo elegível",
+   "Em uso",
+   "Reservado"
+  ]
+ },
+ "LO-02.dc.html": {
+  "arquivo": "LO-02.dc.html",
+  "familia": "LO-02",
+  "titulo": "Expedições e cargas",
+  "rota": "/logistica/expedicoes",
+  "links": [
+   [
+    "Logística",
+    "LO-01.dc.html"
+   ],
+   [
+    "Conferir carga do T2",
+    "LO-02det.dc.html"
+   ],
+   [
+    "Conferir carga",
+    "LO-02det.dc.html"
+   ],
+   [
+    "Ver agenda",
+    "LO-01.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Reprocessar erro",
+    "NF reenviada à SEFAZ 09:32 · protocolo 8841 · autorização ainda pendente — solicitar não é obter; a saída continua bloqueada."
+   ],
+   [
+    "Solicitar documento fiscal",
+    "Já solicitado 08:55 · autorização pendente (protocolo 8841) — solicitar NF não é obter autorização; a saída continua bloqueada."
+   ],
+   [
+    "Chamar próximo elegível",
+    "T3 chamado para a doca 1 às 09:52 · motivo: presente e apto (chegou 08:50), janela 09:00 cumprida, 45 min + setup cabem no slot 09:50–10:45. T1 mantém pedido e reserva; ao chegar recebe a próxima oportunidade viável."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Registrar chegada na portaria",
+    "campos": [
+     "Veículo",
+     "Motorista",
+     "Chegada"
+    ],
+    "confirmar": "Registrar chegada"
+   },
+   {
+    "titulo": "Separar lotes da carga",
+    "campos": [
+     "Pedido",
+     "Lote",
+     "Quantidade",
+     "Doca"
+    ],
+    "confirmar": "Separar lotes"
+   },
+   {
+    "titulo": "Reordenar fila",
+    "campos": [
+     "Veículo",
+     "Nova posição",
+     "Motivo"
+    ],
+    "confirmar": "Reordenar fila"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Registrar chegada",
+    "Chegada registrada · T1 entra como próximo elegível na primeira oportunidade viável, sem interromper carga iniciada"
+   ],
+   [
+    "Separar lotes",
+    "Em separação · saldo do pedido preservado"
+   ],
+   [
+    "Reordenar com motivo",
+    "Fila v5 publicada · reordenação registrada com autor e motivo"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "T1 atrasado · Carga 07 impedida",
+   "Em doca · carregada",
+   "Apto",
+   "Pronto para chamada",
+   "Antecipado · aguarda folga",
+   "Atrasado · prev. 09:10",
+   "Ausente · não elegível",
+   "Impedida · NF não autorizada",
+   "Não elegível",
+   "NF 45.812 autorizada",
+   "Carregada",
+   "NF autorizada",
+   "A preparar",
+   "NF pendente · prot. 8841",
+   "Impedida · pronta p/ carregar",
+   "Documento interno OK",
+   "Em separação",
+   "Atrasado 1h52 vs. janela original",
+   "Antecipado 18 min",
+   "Pontual",
+   "Antecipado 1h55"
+  ]
+ },
+ "LO-02det.dc.html": {
+  "arquivo": "LO-02det.dc.html",
+  "familia": "LO-02",
+  "titulo": "Conferir carga · T2 · VD-2101",
+  "rota": "/logistica/expedicoes",
+  "links": [
+   [
+    "Logística",
+    "LO-01.dc.html"
+   ],
+   [
+    "Expedições e cargas",
+    "LO-02.dc.html"
+   ],
+   [
+    "Voltar",
+    "LO-02.dc.html"
+   ],
+   [
+    "Acompanhar viagem",
+    "LO-03.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Autorizar saída",
+    "Aguardando lacre · a autorização de saída (Sandra, fiscal) fica disponível quando o checklist estiver 5/5."
+   ],
+   [
+    "Confirmar saída",
+    "Bloqueado: falta lacre e autorização de saída. Registre o lacre e peça a autorização à Sandra (fiscal). Ao confirmar, o estoque baixa uma única vez e a viagem VG-118 passa a cumprida na retirada — repetir o comando não duplica a baixa."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Registrar lacre da carga",
+    "campos": [
+     "Lacre",
+     "Aplicado por",
+     "Conferido por",
+     "Evidência"
+    ],
+    "confirmar": "Registrar lacre"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Registrar lacre",
+    "Lacre registrado · checklist 5/5 · falta autorização de saída"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "Carregada · lacre pendente",
+   "Conferido",
+   "Conferido · leitura de código",
+   "Pendente · aplicar antes da saída",
+   "Autorizada",
+   "Liberada · condição do pedido",
+   "Confirmar saída bloqueado · falta lacre e autorização"
+  ]
+ },
+ "LO-03.dc.html": {
+  "arquivo": "LO-03.dc.html",
+  "familia": "LO-03",
+  "titulo": "Viagens e entregas",
+  "rota": "/logistica/viagens",
+  "links": [
+   [
+    "Logística",
+    "LO-01.dc.html"
+   ],
+   [
+    "Conciliar frete da VG-117",
+    "LO-04.dc.html"
+   ],
+   [
+    "Ver financeiro",
+    "GE-05.dc.html"
+   ],
+   [
+    "Registrar recusa",
+    "VE-06.dc.html"
+   ],
+   [
+    "Conferir carga",
+    "LO-02det.dc.html"
+   ],
+   [
+    "Resolver na expedição",
+    "LO-02.dc.html"
+   ],
+   [
+    "Ver frete",
+    "LO-04.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Confirmar entrega",
+    "Nenhuma viagem em trânsito — VG-118 e VG-119 ainda sem saída confirmada. Entrega só se confirma com comprovante e quantidades aceitas/recusadas no destino."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Registrar evento da viagem",
+    "campos": [
+     "Viagem",
+     "Evento",
+     "Data",
+     "Evidência"
+    ],
+    "confirmar": "Registrar evento"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Registrar evento",
+    "Evento registrado · previsão de chegada recalculada (estimativa, não nova garantia)"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 divergência aberta",
+   "Entregue · aceite parcial",
+   "Aguardando saída",
+   "Programada · impedida",
+   "Concluída no prazo",
+   "Atrasada 40 min vs. compromisso original",
+   "Confere · 100% do custo da viagem"
+  ]
+ },
+ "LO-04.dc.html": {
+  "arquivo": "LO-04.dc.html",
+  "familia": "LO-04",
+  "titulo": "Fretes e transportadores",
+  "rota": "/logistica/fretes",
+  "links": [
+   [
+    "Logística",
+    "LO-01.dc.html"
+   ],
+   [
+    "Ver programação",
+    "LO-01.dc.html"
+   ],
+   [
+    "Encaminhar pagamento",
+    "GE-04.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Contratar Rota Sul",
+    "Contratada · R$ 1.824 (9,6 t × R$ 190/t) · viagem VG-119 vinculada ao contrato · medição e NF do serviço exigidas na entrega. Recibo CT-0912."
+   ],
+   [
+    "Conferir serviço da VG-117",
+    "Serviço já conferido 08:50: 9,4 t entregues · avaria tratada na divergência de venda, não descontada do frete sem acordo · pronto para encaminhar ao pagamento."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Vincular viagem ao contrato",
+    "campos": [
+     "Prestador",
+     "Viagem",
+     "Base"
+    ],
+    "confirmar": "Vincular viagem"
+   },
+   {
+    "titulo": "Cotar frete",
+    "campos": [
+     "Prestador",
+     "Rota",
+     "Unidade de cobrança",
+     "Carga",
+     "Janela"
+    ],
+    "confirmar": "Enviar cotação"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Vincular viagem",
+    "VG-119 vinculada · custo previsto R$ 1.824"
+   ],
+   [
+    "Cotar frete",
+    "Cotação registrada · comparação atualizada"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 cotação a decidir · até 10:30",
+   "Melhor custo total comparável",
+   "Incompatível · conservação",
+   "Documento vencido · não elegível",
+   "RNTRC + seguro RCTR-C válidos",
+   "Seguro vencido 15/09 · não elegível",
+   "Licenças em dia",
+   "Apropriado à transferência",
+   "A encaminhar ao financeiro"
+  ]
+ },
+ "MA-01.dc.html": {
+  "arquivo": "MA-01.dc.html",
+  "familia": "MA-01",
+  "titulo": "Ativos e disponibilidade",
+  "rota": "/manutencao/ativos",
+  "links": [
+   [
+    "Registrar inspeção",
+    "MA-02.dc.html"
+   ],
+   [
+    "Ver agenda",
+    "PL-04.dc.html"
+   ],
+   [
+    "Trator T1 · JD 6M 155",
+    "CD-03.dc.html"
+   ],
+   [
+    "Abrir ordem",
+    "MA-04det.dc.html"
+   ],
+   [
+    "Trator 02 · MF 7719",
+    "CD-03.dc.html"
+   ],
+   [
+    "Pulverizador · Uniport 3030",
+    "CD-03.dc.html"
+   ],
+   [
+    "Plantadeira 24 linhas",
+    "CD-03.dc.html"
+   ],
+   [
+    "Ver achado",
+    "MA-02.dc.html"
+   ],
+   [
+    "Colhedora · S680",
+    "CD-03.dc.html"
+   ],
+   [
+    "Abrir ficha",
+    "CD-03.dc.html"
+   ],
+   [
+    "Bomba do Pivô 2",
+    "CD-03.dc.html"
+   ],
+   [
+    "Ver caso",
+    "MA-02.dc.html"
+   ],
+   [
+    "Packing linha 1",
+    "CD-03.dc.html"
+   ],
+   [
+    "Silo e secador 1",
+    "CD-03.dc.html"
+   ]
+  ],
+  "acoes": [],
+  "formularios": [
+   {
+    "titulo": "Restringir ou liberar ativo",
+    "campos": [
+     "Ativo",
+     "Ação",
+     "Motivo",
+     "Responsável técnico"
+    ],
+    "confirmar": "Aplicar restrição"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Restringir ou liberar ativo",
+    "Restrito · impedimento avisado às alocações afetadas"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 bloqueado · 1 restrito",
+   "Bloqueado",
+   "Agenda retirada",
+   "Não elegível · bloqueado",
+   "Apto",
+   "Comprometido · OS-0420",
+   "Elegível",
+   "Comprometido · OS-0421",
+   "Não elegível",
+   "Livre",
+   "Restrito · monitorado",
+   "Comprometido · OS-0419"
+  ]
+ },
+ "MA-02.dc.html": {
+  "arquivo": "MA-02.dc.html",
+  "familia": "MA-02",
+  "titulo": "Solicitações e inspeções",
+  "rota": "/manutencao/solicitacoes",
+  "links": [
+   [
+    "Máquinas e manutenção",
+    "MA-01.dc.html"
+   ],
+   [
+    "Criar ordem de manutenção",
+    "MA-04.dc.html"
+   ],
+   [
+    "Abrir ordem",
+    "MA-04det.dc.html"
+   ],
+   [
+    "Ver OM-0228",
+    "MA-04.dc.html"
+   ],
+   [
+    "Criar ordem",
+    "MA-04.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Vincular à OM-0234",
+    "Achado vinculado à OM-0234 (preventiva do MF 7719) · nenhuma ordem nova criada"
+   ],
+   [
+    "Triar achado",
+    "Triado: criticidade Média · reparo entra na preventiva · condição Apto mantida"
+   ],
+   [
+    "Triar solicitação",
+    "Triada: criticidade Baixa · inspeção na próxima parada · colhedora segue Apta"
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Registrar inspeção (checklist)",
+    "campos": [
+     "Ativo",
+     "Checklist",
+     "Achado",
+     "Criticidade",
+     "Evidência",
+     "Condição recomendada"
+    ],
+    "confirmar": "Registrar achado"
+   },
+   {
+    "titulo": "Bloquear ativo",
+    "campos": [
+     "Ativo",
+     "Motivo",
+     "Responsável técnico",
+     "Caso de origem"
+    ],
+    "confirmar": "Bloquear ativo"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Registrar inspeção",
+    "Achado NC-0913 criado · entrou na fila por risco"
+   ],
+   [
+    "Bloquear ativo",
+    "Colhedora bloqueada · nenhuma ordem de campo afetada hoje"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "2 críticas",
+   "Alta",
+   "Bloqueado",
+   "Restrito · monitorado",
+   "Média",
+   "Baixa"
+  ]
+ },
+ "MA-03.dc.html": {
+  "arquivo": "MA-03.dc.html",
+  "familia": "MA-03",
+  "titulo": "Plano de manutenção",
+  "rota": "/manutencao/planos",
+  "links": [
+   [
+    "Máquinas e manutenção",
+    "MA-01.dc.html"
+   ],
+   [
+    "Gerar ordens em rascunho",
+    "MA-04.dc.html"
+   ],
+   [
+    "Abrir ordem",
+    "MA-04det.dc.html"
+   ],
+   [
+    "Ver conflito",
+    "PL-05.dc.html"
+   ],
+   [
+    "Abrir ficha",
+    "CD-03.dc.html"
+   ],
+   [
+    "Ver agenda",
+    "PL-04.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Simular paradas",
+    "Simulação: 3 paradas propostas (Plantadeira 25/09, MF 7719 28/09, Bomba 01/10) · nenhuma reserva firme criada"
+   ],
+   [
+    "Revisar impacto",
+    "Impacto: MF 7719 em 28/09 conflita com OS-0420 (substituto do T1) · demais paradas sem conflito"
+   ],
+   [
+    "Confirmar 2 paradas",
+    "Confirmadas 2 de 3 · Plantadeira (25/09) e Bomba do Pivô 2 (01/10) viram ordens em rascunho · MF 7719 segue proposta: janela em conflito com OS-0420 — resolver em Impedimentos e reprogramação"
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Editar plano (nova versão)",
+    "campos": [
+     "Ativo",
+     "Serviço",
+     "Janela preferida",
+     "Peças",
+     "Gatilho"
+    ],
+    "confirmar": "Salvar versão v3"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Editar versão",
+    "Versão v3 salva · previsão recalculada"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 vencida · 1 conflito",
+   "Suspenso · ativo bloqueado",
+   "Conflito · OS-0420",
+   "Vencida 20/09"
+  ]
+ },
+ "MA-04.dc.html": {
+  "arquivo": "MA-04.dc.html",
+  "familia": "MA-04",
+  "titulo": "Ordens de manutenção",
+  "rota": "/manutencao/ordens",
+  "links": [
+   [
+    "Máquinas e manutenção",
+    "MA-01.dc.html"
+   ],
+   [
+    "Abrir ordem",
+    "MA-04det.dc.html"
+   ],
+   [
+    "Ver conflito",
+    "PL-05.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Iniciar serviço",
+    "OM-0228 Em execução · equipe elétrica apontando · bomba segue restrita até teste"
+   ],
+   [
+    "Ver histórico",
+    "OM-0221 encerrada em 13/09 · custo R$ 3,8 mil (preços de demonstração) · rolamento antigo sucateado com responsável"
+   ],
+   [
+    "Liberar serviço",
+    "Nenhuma ordem liberada: OM-0234 tem janela em conflito com OS-0420 — resolva o conflito em Impedimentos e reprogramação e libere de novo"
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Destinar sobras · OM-0230",
+    "campos": [
+     "Item",
+     "Destinação",
+     "Responsável"
+    ],
+    "confirmar": "Registrar devolução"
+   },
+   {
+    "titulo": "Planejar e autorizar ordem de manutenção",
+    "campos": [
+     "Ordem",
+     "Serviço",
+     "Janela preferida",
+     "Mecânico",
+     "Peças",
+     "Duração estimada (h)"
+    ],
+    "confirmar": "Autorizar ordem"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Resolver sobras",
+    "Sobras devolvidas · OM-0230 elegível para encerrar"
+   ],
+   [
+    "Planejar e autorizar ordem",
+    "OM-0234 autorizada para 29/09 · segue em A liberar até a liberação do serviço"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 bloqueio ativo",
+   "Alta",
+   "Em execução",
+   "Ativo bloqueado",
+   "Reprovado 09:00",
+   "Bloqueado",
+   "Média",
+   "A liberar",
+   "Janela em conflito",
+   "Apto",
+   "Liberadas",
+   "Restrito · monitorado",
+   "Em conferência",
+   "Sobras a resolver",
+   "Aprovado",
+   "Encerradas"
+  ]
+ },
+ "MA-04det.dc.html": {
+  "arquivo": "MA-04det.dc.html",
+  "familia": "MA-04",
+  "titulo": "Ordem OM-0233 · Trator T1",
+  "rota": "/manutencao/ordens",
+  "links": [
+   [
+    "Máquinas e manutenção",
+    "MA-01.dc.html"
+   ],
+   [
+    "Ordens de manutenção",
+    "MA-04.dc.html"
+   ],
+   [
+    "Voltar",
+    "MA-04.dc.html"
+   ],
+   [
+    "Abrir O.S.",
+    "CA-01.dc.html"
+   ],
+   [
+    "Ver impedimentos",
+    "PL-05.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Registrar avanço e peças",
+    "Avanço registrado · mangueira 2 un baixadas da requisição · bomba antiga marcada como recuperável"
+   ],
+   [
+    "Finalizar apontamento do turno",
+    "Turno de Zé fechado (6,5 h) · a ordem continua Em execução — finalizar o turno nunca conclui a ordem"
+   ],
+   [
+    "Registrar teste do reparo",
+    "Teste 2 registrado · pressão dentro da faixa · decisão de aptidão habilitada"
+   ],
+   [
+    "Definir aptidão do ativo",
+    "Indisponível agora: aptidão exige teste aprovado — registre a 2ª tentativa. Ao ficar apto, o Trator T1 volta pela fila de reprogramação, sem reassumir a agenda antiga"
+   ],
+   [
+    "Concluir serviço",
+    "Indisponível agora: o teste de pressão está pendente. Com teste aprovado, concluir leva a ordem a Em conferência — o ativo segue bloqueado até a decisão de aptidão"
+   ],
+   [
+    "Encerrar ordem",
+    "Indisponível agora: serviço ainda Em execução, teste aprovado pendente e bomba usada sem destinação — resolva os três para encerrar"
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Destinar sobras da ordem",
+    "campos": [
+     "Item",
+     "Destinação",
+     "Responsável"
+    ],
+    "confirmar": "Registrar destinação"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Resolver sobras",
+    "Destinação registrada · sobra fora da pendência"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "Em execução · bloqueio ativo",
+   "Impedida · ativo bloqueado",
+   "Retirada",
+   "Concluída",
+   "Refazer · reprovado 09:00",
+   "Reprovado",
+   "Pendente"
+  ]
+ },
+ "MA-05.dc.html": {
+  "arquivo": "MA-05.dc.html",
+  "familia": "MA-05",
+  "titulo": "Abastecimentos e desempenho",
+  "rota": "/manutencao/abastecimentos",
+  "links": [
+   [
+    "Máquinas e manutenção",
+    "MA-01.dc.html"
+   ],
+   [
+    "Abrir no app",
+    "MB-09.dc.html"
+   ],
+   [
+    "Investigar desvio",
+    "MA-02.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Conferir contador",
+    "AB-1042 conferido: 2.988 h coerente com o apontamento de ontem (+11 h)"
+   ],
+   [
+    "Conferir contador",
+    "AB-1041 conferido: 1.542 h coerente com o apontamento da OS-0421 · taxa segue estimada (sem tanque cheio)"
+   ],
+   [
+    "Ver estorno",
+    "Estorno ES-0088 vinculado (23/09) · volume digitado errado · original preservado no histórico"
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Registrar abastecimento",
+    "campos": [
+     "Ativo",
+     "Tanque/lote",
+     "Volume (L)",
+     "Data",
+     "Horímetro",
+     "Nível do tanque após (%)",
+     "Operador",
+     "Evidência"
+    ],
+    "confirmar": "Registrar abastecimento"
+   },
+   {
+    "titulo": "Corrigir lançamento com estorno",
+    "campos": [
+     "Lançamento",
+     "Motivo",
+     "Tanque/lote",
+     "Responsável"
+    ],
+    "confirmar": "Estornar e relançar"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Registrar abastecimento",
+    "Lançamento AB-1043 registrado · saldo do tanque atualizado"
+   ],
+   [
+    "Corrigir com estorno",
+    "Estorno ES-0089 e lançamento AB-1044 vinculados a AB-1041"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 desvio a investigar",
+   "Tanque cheio · 14,2 L/h",
+   "Estimada · 18,9 L/h",
+   "12,1 L/h · +23%",
+   "Estornado",
+   "Em manutenção",
+   "Reconciliado",
+   "Estimado",
+   "+23% · investigar"
+  ]
+ },
+ "MB-01.dc.html": {
+  "arquivo": "MB-01.dc.html",
+  "familia": "MB-01",
+  "titulo": "Hoje no campo",
+  "rota": "/app/hoje",
+  "links": [
+   [
+    "Voltar",
+    "IN-01.dc.html"
+   ],
+   [
+    "Ver pendências",
+    "MB-03x-recibo.dc.html"
+   ],
+   [
+    "Registrar avanço",
+    "MB-03.dc.html"
+   ],
+   [
+    "Finalizar apontamento do turno",
+    "MB-03.dc.html"
+   ],
+   [
+    "Abrir Irrigação de hoje",
+    "MB-08.dc.html"
+   ],
+   [
+    "Minhas ordens lista e detalhe da O.S.",
+    "MB-02.dc.html"
+   ],
+   [
+    "Apontamento realizado do turno",
+    "MB-03.dc.html"
+   ],
+   [
+    "Ocorrência foto e voz · 30 s",
+    "MB-04.dc.html"
+   ],
+   [
+    "Almoxarifado QR · entregar e receber",
+    "MB-05.dc.html"
+   ],
+   [
+    "Vistoria rota por pontos",
+    "MB-06.dc.html"
+   ],
+   [
+    "Contagem de frutos por planta e parcela",
+    "MB-07.dc.html"
+   ],
+   [
+    "Irrigação água e fertirrigação",
+    "MB-08.dc.html"
+   ],
+   [
+    "Manutenção e combustível serviço e abastecimento",
+    "MB-09.dc.html"
+   ],
+   [
+    "Cargas e entregas pesagem e romaneio",
+    "MB-10.dc.html"
+   ],
+   [
+    "Abrir próxima tarefa",
+    "MB-02det.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Sincronizar",
+    "Enviado e confirmado uma vez · recibo REC-7741 · reenvios devolvem o mesmo recibo, sem duplicar os 40 ha"
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "3 tarefas · 1 envio pendente",
+   "Aguardando sincronização",
+   "Em execução",
+   "Parcial · dia 4 de 7",
+   "○ no prazo",
+   "Liberadas",
+   "política PA-07 v3",
+   "Impedida · ativo bloqueado"
+  ]
+ },
+ "MB-02.dc.html": {
+  "arquivo": "MB-02.dc.html",
+  "familia": "MB-02",
+  "titulo": "Minhas ordens",
+  "rota": "/app/ordens",
+  "links": [
+   [
+    "Voltar",
+    "MB-01.dc.html"
+   ],
+   [
+    "Abrir ordem",
+    "MB-02det.dc.html"
+   ],
+   [
+    "Registrar avanço",
+    "MB-03.dc.html"
+   ],
+   [
+    "Registrar ocorrência",
+    "MB-04.dc.html"
+   ],
+   [
+    "Abrir água simplificada",
+    "MB-08.dc.html"
+   ],
+   [
+    "Abrir OS-0421 · fungicida",
+    "MB-02det.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Iniciar · bloqueado",
+    "Bloqueado: ativo com OM-0233 em execução — aguarde a substituição publicada e a reliberação (nada foi iniciado)"
+   ],
+   [
+    "Ler QR",
+    "QR da OS-0421 lido · ordem aberta na versão autorizada v2"
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "1 impedida",
+   "Em execução",
+   "Parcial · dia 4 de 7",
+   "instrução v2 aprovada",
+   "Impedida · ativo bloqueado",
+   "Liberadas",
+   "política PA-07 v3"
+  ]
+ },
+ "MB-02det.dc.html": {
+  "arquivo": "MB-02det.dc.html",
+  "familia": "MB-02",
+  "titulo": "OS-0421 · Pulverização",
+  "rota": "/app/ordens",
+  "links": [
+   [
+    "Voltar",
+    "MB-02.dc.html"
+   ],
+   [
+    "Registrar ocorrência",
+    "MB-04.dc.html"
+   ],
+   [
+    "Finalizar apontamento do turno",
+    "MB-03.dc.html"
+   ],
+   [
+    "Registrar avanço",
+    "MB-03.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Pausar",
+    "Pausada às 10:47 · motivo vento — vira selo na ordem, a etapa continua Em execução"
+   ],
+   [
+    "Retomar",
+    "Retomada · pausa de 25 min registrada no apontamento"
+   ],
+   [
+    "Concluir execução · bloqueado",
+    "Não concluída: saldo de 160 ha sem término físico nem destinação autorizada do saldo — registre o avanço do turno ou peça a dispensa do saldo ao encarregado"
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "Em execução · parcial",
+   "EPI conferido",
+   "Bicos e filtros",
+   "Calibração de vazão",
+   "Clima: atenção à janela"
+  ]
+ },
+ "MB-03.dc.html": {
+  "arquivo": "MB-03.dc.html",
+  "familia": "MB-03",
+  "titulo": "Apontamento do turno",
+  "rota": "/app/apontar",
+  "links": [
+   [
+    "Voltar",
+    "MB-02det.dc.html"
+   ],
+   [
+    "Ver recibo de envio",
+    "MB-03x-recibo.dc.html"
+   ],
+   [
+    "Registrar não conformidade",
+    "MB-04.dc.html"
+   ],
+   [
+    "Próxima tarefa",
+    "MB-01.dc.html"
+   ],
+   [
+    "Registrar avanço de 40 ha",
+    "MB-03x-recibo.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Salvar rascunho",
+    "Rascunho durável salvo no dispositivo · a fila sobrevive a reiniciar o app"
+   ],
+   [
+    "Reenviar registro",
+    "Mesmo recibo REC-7741 devolvido · efeito único — os 40 ha não duplicam consumo nem custo"
+   ],
+   [
+    "Finalizar apontamento do turno",
+    "Turno finalizado · O.S. permanece Em execução com saldo de 160 ha — finalizar o turno nunca conclui a ordem"
+   ],
+   [
+    "Concluir execução · bloqueado",
+    "Indisponível: saldo de 160 ha sem término físico nem dispensa autorizada do saldo — válida só no término físico (→ Em conferência)"
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "dia 4 · pendente de envio",
+   "Aguardando sincronização"
+  ]
+ },
+ "MB-03x-recibo.dc.html": {
+  "arquivo": "MB-03x-recibo.dc.html",
+  "familia": "MB-03",
+  "titulo": "Sincronização do apontamento",
+  "rota": "/app/apontar",
+  "links": [
+   [
+    "Voltar",
+    "MB-03.dc.html"
+   ],
+   [
+    "Sincronizar e ir à próxima tarefa",
+    "MB-01.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Reenviar 2×",
+    "Servidor devolveu o MESMO recibo REC-7741 nas 2 tentativas · efeito único, 40 ha preservados sem duplicar"
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "1 pendente",
+   "Aguardando sincronização"
+  ]
+ },
+ "MB-04.dc.html": {
+  "arquivo": "MB-04.dc.html",
+  "familia": "MB-04",
+  "titulo": "Registrar ocorrência",
+  "rota": "/app/ocorrencia",
+  "links": [
+   [
+    "Voltar",
+    "MB-02det.dc.html"
+   ],
+   [
+    "Voltar à tarefa",
+    "MB-02det.dc.html"
+   ],
+   [
+    "Enviar ao responsável",
+    "MB-02det.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Trocar destino",
+    "Destino alterado para a oficina (manutenção) — a sugestão nunca envia sozinha"
+   ],
+   [
+    "Salvar ocorrência",
+    "Ocorrência OC-0512 salva no dispositivo · envia com a próxima sincronização"
+   ],
+   [
+    "Pausar ordem · não aplicável",
+    "Não aplicável à gravidade média — pausa exige gravidade alta ou decisão do encarregado"
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "rascunho"
+  ]
+ },
+ "MB-05.dc.html": {
+  "arquivo": "MB-05.dc.html",
+  "familia": "MB-05",
+  "titulo": "Almoxarifado móvel",
+  "rota": "/app/almoxarifado",
+  "links": [
+   [
+    "Voltar",
+    "MB-01.dc.html"
+   ],
+   [
+    "Abrir tarefa",
+    "MB-05det.dc.html"
+   ],
+   [
+    "Ler QR da O.S.",
+    "MB-05det.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Conferir e entregar · bloqueado",
+    "Bloqueado: a OS-0418 aguarda a revisão individual do agrônomo — entregue quando a ordem for liberada (nada foi separado)"
+   ],
+   [
+    "Registrar divergência",
+    "Divergência aberta com dono e prazo · reservas congeladas até decisão; após atender uma, restam 20 un — nada foi entregue"
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "1 devolução hoje",
+   "10 sc a receber · OS-0417 em conferência",
+   "Aguardando revisão do agrônomo",
+   "Conflito 80/80 · decide o planejamento"
+  ]
+ },
+ "MB-05det.dc.html": {
+  "arquivo": "MB-05det.dc.html",
+  "familia": "MB-05",
+  "titulo": "Receber devolução",
+  "rota": "/app/almoxarifado",
+  "links": [
+   [
+    "Voltar",
+    "MB-05.dc.html"
+   ],
+   [
+    "Confirmar recebimento de 10 sc",
+    "MB-05.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Registrar divergência",
+    "Recebidas 8 de 10 sc: pendência aberta com dono (Paula) e prazo · 2 sc seguem em custódia — nada foi zerado"
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "custódia 10 sc"
+  ]
+ },
+ "MB-06.dc.html": {
+  "arquivo": "MB-06.dc.html",
+  "familia": "MB-06",
+  "titulo": "Vistoria por pontos",
+  "rota": "/app/vistoria",
+  "links": [
+   [
+    "Voltar",
+    "MB-01.dc.html"
+   ],
+   [
+    "Registrar e ir ao ponto 5",
+    "MB-06.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Adicionar contagem",
+    "Nova contagem aberta no ponto 4 · a anterior (3,2/pano) fica preservada"
+   ],
+   [
+    "Voltar ponto",
+    "Ponto 3 reaberto para correção · histórico preservado"
+   ],
+   [
+    "Ver resumo",
+    "Parcial: 4 de 14 pontos · pior alvo percevejo 3,2/pano (NC 4,5) · mancha na bordadura leste"
+   ],
+   [
+    "Concluir coleta",
+    "Coleta enviada para revisão do agrônomo · o próximo ponto continua no celular — nada abre o desktop"
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "ponto 4 de 14",
+   "GPS ±4 m · dentro da tolerância"
+  ]
+ },
+ "MB-07.dc.html": {
+  "arquivo": "MB-07.dc.html",
+  "familia": "MB-07",
+  "titulo": "Contagem de frutos",
+  "rota": "/app/frutos",
+  "links": [
+   [
+    "Voltar",
+    "MB-01.dc.html"
+   ],
+   [
+    "Enviar para revisão",
+    "CO-01.dc.html"
+   ],
+   [
+    "Registrar e ir à planta 19",
+    "MB-07.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Corrigir contagem",
+    "Última contagem da planta 18 substituída (46→44 verdes) · histórico preservado"
+   ],
+   [
+    "Concluir parcela",
+    "Parcela T7-B concluída · 40 plantas · segue para revisão antes de compor a previsão"
+   ],
+   [
+    "Próxima parcela",
+    "Parcela T7-C aberta · contadores zerados · mesma amostra rastreável"
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "planta 18 de 40"
+  ]
+ },
+ "MB-08.dc.html": {
+  "arquivo": "MB-08.dc.html",
+  "familia": "MB-08",
+  "titulo": "Irrigação de hoje",
+  "rota": "/app/irrigacao",
+  "links": [
+   [
+    "Voltar",
+    "MB-01.dc.html"
+   ],
+   [
+    "Confirmar término da irrigação",
+    "MB-08x-recibo.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Pausar",
+    "Pausada · queda de pressão na bomba · tempo de pausa não conta como lâmina"
+   ],
+   [
+    "Retomar",
+    "Retomada 21:32 · pressão normalizada"
+   ],
+   [
+    "Registrar avanço",
+    "Avanço registrado: 2,1 h · 10,81 mm no setor coberto · balanço hídrico atualizado 1× por aplicação"
+   ],
+   [
+    "Finalizar apontamento do turno",
+    "Turno do irrigante finalizado · a ordem segue Em execução — finalizar o turno nunca conclui"
+   ],
+   [
+    "Próximo setor",
+    "Sem outro setor liberado hoje · próxima janela 24/09 21:00"
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "Em execução · irrigando",
+   "Autorizada pela política",
+   "● irrigando · volta em curso"
+  ]
+ },
+ "MB-08x-recibo.dc.html": {
+  "arquivo": "MB-08x-recibo.dc.html",
+  "familia": "MB-08",
+  "titulo": "Irrigação · recibo do término",
+  "rota": "/app/irrigacao",
+  "links": [
+   [
+    "Voltar",
+    "MB-08.dc.html"
+   ],
+   [
+    "Ir ao próximo setor",
+    "MB-01.dc.html"
+   ]
+  ],
+  "acoes": [],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "Encerradas",
+   "Conferida e encerrada automaticamente"
+  ]
+ },
+ "MB-09.dc.html": {
+  "arquivo": "MB-09.dc.html",
+  "familia": "MB-09",
+  "titulo": "Manutenção e combustível",
+  "rota": "/app/manutencao",
+  "links": [
+   [
+    "Voltar",
+    "MB-01.dc.html"
+   ],
+   [
+    "Abrir serviço",
+    "MB-09det.dc.html"
+   ],
+   [
+    "Reportar falha",
+    "MB-04.dc.html"
+   ],
+   [
+    "Abrir serviço OM-0233",
+    "MB-09det.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Iniciar serviço",
+    "Inspeção iniciada · checklist de 18 itens aberto no dispositivo"
+   ],
+   [
+    "Registrar abastecimento",
+    "Abastecidos 180 L de Diesel S10 · horímetro 4.812 h · documento próprio de combustível — não encerra manutenção nem libera o ativo"
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "1 ativo bloqueado",
+   "Em execução",
+   "Ativo bloqueado",
+   "Liberadas"
+  ]
+ },
+ "MB-09det.dc.html": {
+  "arquivo": "MB-09det.dc.html",
+  "familia": "MB-09",
+  "titulo": "OM-0233 · Trator T1",
+  "rota": "/app/manutencao",
+  "links": [
+   [
+    "Voltar",
+    "MB-09.dc.html"
+   ],
+   [
+    "Concluir serviço",
+    "MB-09.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Registrar avanço e peças",
+    "Peças aplicadas e 2,0 h somadas · requisição de peça conciliada no almoxarifado"
+   ],
+   [
+    "Registrar teste · sem permissão",
+    "Seu perfil não tem competência de liberação técnica — peça ao mecânico autorizado para registrar o teste; nada foi registrado"
+   ],
+   [
+    "Finalizar apontamento do turno",
+    "Turno do mecânico finalizado · o serviço continua Em execução — não conclui o serviço"
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "Em execução · bloqueado",
+   "Bloqueado para operação"
+  ]
+ },
+ "MB-10.dc.html": {
+  "arquivo": "MB-10.dc.html",
+  "familia": "MB-10",
+  "titulo": "Cargas e entregas",
+  "rota": "/app/cargas",
+  "links": [
+   [
+    "Voltar",
+    "MB-01.dc.html"
+   ],
+   [
+    "Abrir pesagem",
+    "MB-10det.dc.html"
+   ],
+   [
+    "Abrir Carga 05 · pesagem",
+    "MB-10det.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Confirmar entrega",
+    "Aceitas 32,1 t na Cooperativa Sede · evento único na logística e na venda · reenvio offline não duplica"
+   ],
+   [
+    "Registrar divergência",
+    "Recusa parcial de 0,3 t · motivo umidade · destinação proposta: reanálise — recusa não recoloca produto em estoque apto"
+   ],
+   [
+    "Registrar carga e vincular à O.S.",
+    "Carga 08 criada e vinculada à OS-0409 · romaneio RM-119 aberto — salvar a carga não conclui a O.S. de colheita"
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "1 na balança · 1 impedida",
+   "Na balança · caminhão T2 apto",
+   "Atrasado · previsão 09:10",
+   "Impedida · NF pendente"
+  ]
+ },
+ "MB-10det.dc.html": {
+  "arquivo": "MB-10det.dc.html",
+  "familia": "MB-10",
+  "titulo": "Carga 05 · pesagem",
+  "rota": "/app/cargas",
+  "links": [
+   [
+    "Voltar",
+    "MB-10.dc.html"
+   ],
+   [
+    "Confirmar pesagem de 32,4 t",
+    "MB-10.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Registrar divergência",
+    "Divergência de 0,4 t entre ticket e balança: pendência aberta com dono · a carga não sai até decisão"
+   ],
+   [
+    "Próxima carga",
+    "Caminhão T3 chamado à balança · T4 antecipado só entra com folga, sem furar janelas cumpridas"
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "na balança"
+  ]
+ },
+ "Main.dc.html": {
+  "arquivo": "Main.dc.html",
+  "familia": "Main.",
+  "titulo": "Do Talhão à O.S. — protótipo navegável v3.7",
+  "rota": "",
+  "links": [
+   [
+    "A Ana Gestora · aprovações e visão gerencial",
+    "IN-01.dc.html"
+   ],
+   [
+    "B Beto Agrônomo(a) · revisão técnica e políticas",
+    "IN-02.dc.html"
+   ],
+   [
+    "C Caio PCP · janelas, programação e liberação",
+    "PL-04.dc.html"
+   ],
+   [
+    "M Marcos Operador(a) de campo · app móvel",
+    "MB-01.dc.html"
+   ],
+   [
+    "R Rui Almoxarife · requisições e custódia",
+    "SU-07.dc.html"
+   ],
+   [
+    "D Dora Comercial e logística",
+    "VE-01.dc.html"
+   ],
+   [
+    "F Fertisul Parceiro credenciado (portal)",
+    "PT-01.dc.html"
+   ],
+   [
+    "P Plataforma Backoffice (admin)",
+    "BO-01.dc.html"
+   ],
+   [
+    "DEMO-13 Uma O.S., sete dias — fechar turno não conclui",
+    "CA-01det.dc.html"
+   ],
+   [
+    "DEMO-14 Dose ajustada só no saldo (60/40)",
+    "OS.dc.html#OS-0420"
+   ],
+   [
+    "DEMO-03 Custódia e devolução parcial (100/70/20/10)",
+    "CA-04.dc.html"
+   ],
+   [
+    "DEMO-15 Água dentro e fora da política",
+    "IR-02.dc.html"
+   ],
+   [
+    "DEMO-16 Água reclassificada em fertirrigação",
+    "OS.dc.html#OS-0418"
+   ],
+   [
+    "DEMO-17 Ativo bloqueado antes do início",
+    "PL-05.dc.html"
+   ],
+   [
+    "DEMO-18 Reserva concorrente do mesmo lote",
+    "SU-07.dc.html"
+   ],
+   [
+    "DEMO-11 Offline reenviado duas vezes",
+    "MB-03.dc.html"
+   ],
+   [
+    "DEMO-19 Processo encerrado, lote não liberado",
+    "CO-06.dc.html"
+   ],
+   [
+    "DEMO-20 Caminhão atrasado e fila explicável",
+    "LO-02.dc.html"
+   ],
+   [
+    "Início",
+    "IN-01.dc.html"
+   ],
+   [
+    "Meu dia",
+    "IN-01.dc.html"
+   ],
+   [
+    "Aprovações",
+    "IN-02.dc.html"
+   ],
+   [
+    "Agenda e pendências",
+    "IN-03.dc.html"
+   ],
+   [
+    "Mapa da fazenda",
+    "IN-04.dc.html"
+   ],
+   [
+    "Agronomia",
+    "AG-01.dc.html"
+   ],
+   [
+    "Monitoramento e vistorias",
+    "AG-01.dc.html"
+   ],
+   [
+    "Análises e amostras",
+    "AG-02.dc.html"
+   ],
+   [
+    "Diagnósticos",
+    "AG-03.dc.html"
+   ],
+   [
+    "Recomendações",
+    "AG-04.dc.html"
+   ],
+   [
+    "Planejamento",
+    "PL-01.dc.html"
+   ],
+   [
+    "Safras, ciclos e metas",
+    "PL-01.dc.html"
+   ],
+   [
+    "Plano operacional",
+    "PL-02.dc.html"
+   ],
+   [
+    "Capacidade e recursos",
+    "PL-03.dc.html"
+   ],
+   [
+    "Programação integrada",
+    "PL-04.dc.html"
+   ],
+   [
+    "Campo",
+    "CA-01.dc.html"
+   ],
+   [
+    "Ordens de campo",
+    "CA-01.dc.html"
+   ],
+   [
+    "Apontamentos e conferência",
+    "CA-02.dc.html"
+   ],
+   [
+    "Ocorrências",
+    "CA-03.dc.html"
+   ],
+   [
+    "Minhas requisições",
+    "CA-04.dc.html"
+   ],
+   [
+    "Irrigação",
+    "IR-01.dc.html"
+   ],
+   [
+    "Balanço hídrico",
+    "IR-01.dc.html"
+   ],
+   [
+    "Programação da irrigação",
+    "IR-02.dc.html"
+   ],
+   [
+    "Ordens de irrigação",
+    "IR-03.dc.html"
+   ],
+   [
+    "Clima, sensores e desempenho",
+    "IR-04.dc.html"
+   ],
+   [
+    "Máquinas e manutenção",
+    "MA-01.dc.html"
+   ],
+   [
+    "Ativos e disponibilidade",
+    "MA-01.dc.html"
+   ],
+   [
+    "Solicitações e inspeções",
+    "MA-02.dc.html"
+   ],
+   [
+    "Plano de manutenção",
+    "MA-03.dc.html"
+   ],
+   [
+    "Ordens de manutenção",
+    "MA-04.dc.html"
+   ],
+   [
+    "Colheita e pós-colheita",
+    "CO-01.dc.html"
+   ],
+   [
+    "Previsão e maturação",
+    "CO-01.dc.html"
+   ],
+   [
+    "Programação e ordens de colheita",
+    "CO-02.dc.html"
+   ],
+   [
+    "Cargas, pesagens e romaneios",
+    "CO-03.dc.html"
+   ],
+   [
+    "Recebimento da produção",
+    "CO-04.dc.html"
+   ],
+   [
+    "Suprimentos",
+    "SU-01.dc.html"
+   ],
+   [
+    "Necessidades e cobertura",
+    "SU-01.dc.html"
+   ],
+   [
+    "Políticas de estoque",
+    "SU-02.dc.html"
+   ],
+   [
+    "Saldos e lotes",
+    "SU-03.dc.html"
+   ],
+   [
+    "Solicitações e cotações",
+    "SU-04.dc.html"
+   ],
+   [
+    "Comercial",
+    "VE-01.dc.html"
+   ],
+   [
+    "Demanda e oferta",
+    "VE-01.dc.html"
+   ],
+   [
+    "Mercado e preços",
+    "VE-02.dc.html"
+   ],
+   [
+    "Ofertas e propostas",
+    "VE-03.dc.html"
+   ],
+   [
+    "Pedidos de venda",
+    "VE-04.dc.html"
+   ],
+   [
+    "Logística",
+    "LO-01.dc.html"
+   ],
+   [
+    "Programação de transporte",
+    "LO-01.dc.html"
+   ],
+   [
+    "Expedições e cargas",
+    "LO-02.dc.html"
+   ],
+   [
+    "Viagens e entregas",
+    "LO-03.dc.html"
+   ],
+   [
+    "Fretes e transportadores",
+    "LO-04.dc.html"
+   ],
+   [
+    "Gestão e resultados",
+    "GE-01.dc.html"
+   ],
+   [
+    "Visão gerencial",
+    "GE-01.dc.html"
+   ],
+   [
+    "Orçamento e previsões",
+    "GE-02.dc.html"
+   ],
+   [
+    "Custos e fechamento",
+    "GE-03.dc.html"
+   ],
+   [
+    "Contas a pagar e caixa",
+    "GE-04.dc.html"
+   ],
+   [
+    "Cadastros",
+    "CD-01.dc.html"
+   ],
+   [
+    "Fazendas, áreas e talhões",
+    "CD-01.dc.html"
+   ],
+   [
+    "Culturas, cultivares e operações",
+    "CD-02.dc.html"
+   ],
+   [
+    "Máquinas, instalações e setores",
+    "CD-03.dc.html"
+   ],
+   [
+    "Pessoas e equipes",
+    "CD-04.dc.html"
+   ],
+   [
+    "Configurações",
+    "CF-01.dc.html"
+   ],
+   [
+    "Usuários e permissões",
+    "CF-01.dc.html"
+   ],
+   [
+    "Alçadas e regras",
+    "CF-02.dc.html"
+   ],
+   [
+    "Integrações e sincronização",
+    "CF-03.dc.html"
+   ],
+   [
+    "Auditoria e parâmetros",
+    "CF-04.dc.html"
+   ],
+   [
+    "App móvel (campo)  10 tela(s) de destino",
+    "MB-01.dc.html"
+   ],
+   [
+    "Portal do parceiro  7 tela(s) de destino",
+    "PT-01.dc.html"
+   ],
+   [
+    "Onboarding  1 tela(s) de destino",
+    "ON-01.dc.html"
+   ],
+   [
+    "Backoffice da plataforma  4 tela(s) de destino",
+    "BO-01.dc.html"
+   ]
+  ],
+  "acoes": [],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "DEMONSTRAÇÃO",
+   "DEMO-13",
+   "DEMO-14",
+   "DEMO-03",
+   "DEMO-15",
+   "DEMO-16",
+   "DEMO-17",
+   "DEMO-18",
+   "DEMO-11",
+   "DEMO-19",
+   "DEMO-20"
+  ]
+ },
+ "ON-01.dc.html": {
+  "arquivo": "ON-01.dc.html",
+  "familia": "ON-01",
+  "titulo": "Entrada e implantação guiada",
+  "rota": "/entrada",
+  "links": [
+   [
+    "Criar primeiro planejamento",
+    "PL-01.dc.html"
+   ],
+   [
+    "Abrir mapa",
+    "IN-04.dc.html"
+   ],
+   [
+    "Ver prévia",
+    "ON-01det.dc.html"
+   ],
+   [
+    "Validar prévia",
+    "ON-01det.dc.html"
+   ],
+   [
+    "Criar planejamento",
+    "PL-01.dc.html"
+   ],
+   [
+    "Gerar prévia",
+    "ON-01det.dc.html"
+   ]
+  ],
+  "acoes": [],
+  "formularios": [
+   {
+    "titulo": "Importar dados (prévia obrigatória)",
+    "campos": [
+     "Arquivo",
+     "Objeto",
+     "Sistema de coordenadas"
+    ],
+    "confirmar": "Gerar prévia"
+   },
+   {
+    "titulo": "Desenhar talhão",
+    "campos": [
+     "Fazenda",
+     "Nome do talhão",
+     "Cultura"
+    ],
+    "confirmar": "Salvar desenho"
+   },
+   {
+    "titulo": "Convidar pessoa",
+    "campos": [
+     "E-mail",
+     "Papel",
+     "Fazenda"
+    ],
+    "confirmar": "Enviar convite"
+   },
+   {
+    "titulo": "Configurar integração (opcional)",
+    "campos": [
+     "Sistema de origem",
+     "Escopo"
+    ],
+    "confirmar": "Solicitar homologação"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Importar planilha/arquivo",
+    "Prévia gerada · revisar em Importação"
+   ],
+   [
+    "Desenhar áreas no mapa",
+    "Talhão salvo · área calculada 48,2 ha"
+   ],
+   [
+    "Convidar equipe",
+    "Convite enviado · pendente de aceite"
+   ],
+   [
+    "Configurar integração",
+    "Solicitação registrada · funcionalidade permanece demonstrativa até homologar"
+   ]
+  ],
+  "selos": [
+   "Organização Boa Esperança",
+   "Trial · termina 18/10/2026",
+   "Etapa 3 de 6 · retomável",
+   "Concluído",
+   "Em andamento",
+   "A fazer",
+   "Prévia com 3 erros",
+   "Valores de piloto · hipótese",
+   "Incluído no trial",
+   "Franquia finita",
+   "Sempre disponível",
+   "Fora do trial"
+  ]
+ },
+ "ON-01det.dc.html": {
+  "arquivo": "ON-01det.dc.html",
+  "familia": "ON-01",
+  "titulo": "Importação · prévia e erros",
+  "rota": "/entrada",
+  "links": [
+   [
+    "Onboarding",
+    "ON-01.dc.html"
+   ],
+   [
+    "Entrada e implantação guiada",
+    "ON-01.dc.html"
+   ],
+   [
+    "Voltar",
+    "ON-01.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Validar prévia",
+    "Gravados 9 de 12 talhões e 6 máquinas · permanecem na prévia, com erro localizado: 1 talhão com sobreposição a justificar, 2 duplicidades (T1, T2) aguardando mesclar/ignorar e o estoque inicial (48 linhas) até mapear a unidade da coluna “qtde”."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Mapear coluna pendente",
+    "campos": [
+     "Coluna de origem",
+     "Unidade"
+    ],
+    "confirmar": "Aplicar mapeamento"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Corrigir mapeamento",
+    "Mapeamento aplicado · prévia recalculada"
+   ]
+  ],
+  "selos": [
+   "Organização Boa Esperança",
+   "Trial · termina 18/10/2026",
+   "3 erros na prévia",
+   "1 sobreposição a justificar",
+   "Prévia",
+   "1 coluna sem mapeamento",
+   "Pronto para validar",
+   "Mesclar ou ignorar — decisão sua"
+  ]
+ },
+ "PL-01.dc.html": {
+  "arquivo": "PL-01.dc.html",
+  "familia": "PL-01",
+  "titulo": "Safras, ciclos e metas",
+  "rota": "/planejamento/safras",
+  "links": [
+   [
+    "Abrir plano",
+    "PL-02.dc.html"
+   ],
+   [
+    "Abrir fechamento",
+    "GE-03.dc.html"
+   ],
+   [
+    "Simular parcelas",
+    "PL-06.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Vincular ciclo",
+    "Ciclo 2026/27 do café vinculado ao pomar C1 (2019) · a ocupação mantém identidade própria · nada é recriado."
+   ],
+   [
+    "Revisar idades",
+    "Idades revisadas: C1 pomar 2019 · 7 anos · T7 mamão · 17 meses — atividades por idade recalculadas só no rascunho."
+   ],
+   [
+    "Encerrar período",
+    "Nenhum período apto a encerrar agora: 2026/27 está em preparação e 2025/26 já foi encerrada em 30/08 com as pendências destinadas."
+   ],
+   [
+    "Autorizar execução 2026/27",
+    "Não autorizado: o orçamento revisado da safra 2026/27 aguarda a Direção. Plano operacional v3 aprovado ✓ · orçamento pendente ✗. Como resolver: cobrar a aprovação em Aprovações; a data de início nunca supre a aprovação."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Novo período de planejamento",
+    "campos": [
+     "Fazenda",
+     "Período",
+     "Culturas",
+     "Meta de produtividade (hipótese)",
+     "Data"
+    ],
+    "confirmar": "Criar rascunho"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Criar planejamento",
+    "Rascunho criado · o cálculo já existe no rascunho"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "2026/27 em preparação",
+   "Em preparação · aguarda orçamento",
+   "Em produção · granação",
+   "Em produção",
+   "Encerrada",
+   "v3 aprovado",
+   "Aguardando Direção",
+   "v2 aprovado",
+   "Aprovado",
+   "v1 aprovado"
+  ]
+ },
+ "PL-02.dc.html": {
+  "arquivo": "PL-02.dc.html",
+  "familia": "PL-02",
+  "titulo": "Plano operacional",
+  "rota": "/planejamento/plano",
+  "links": [
+   [
+    "Planejamento",
+    "PL-01.dc.html"
+   ],
+   [
+    "Gerar sugestões pelas análises",
+    "AG-04.dc.html"
+   ],
+   [
+    "Ajustar talhão",
+    "PL-02det.dc.html"
+   ],
+   [
+    "Editar cultivo/variedade",
+    "PL-01.dc.html"
+   ],
+   [
+    "Comparar com o padrão",
+    "PL-02det.dc.html"
+   ],
+   [
+    "Ver capacidade",
+    "PL-03.dc.html"
+   ],
+   [
+    "Ver cobertura de insumos",
+    "SU-01.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Aplicar modelo",
+    "Modelo “Soja alta tecnologia” aplicado ao rascunho v4 do T2 · 12 operações propostas · exceções locais preservadas · nada publicado."
+   ],
+   [
+    "Simular antecipação do plantio",
+    "Simulação: antecipar o plantio do T1-A para 10/10 move 3 operações dependentes; nenhum documento muda até publicar."
+   ],
+   [
+    "Publicar plano v4",
+    "Plano v4 publicado (alçada da agronomia) · 6 necessidades únicas · nenhuma O.S. emitida — a O.S. nasce na janela de emissão e consome o saldo da mesma necessidade · modelo original preservado."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Nova operação do plano",
+    "campos": [
+     "Talhão/parcela",
+     "Atividade",
+     "Insumo",
+     "Dose",
+     "Janela",
+     "Data",
+     "Gatilho"
+    ],
+    "confirmar": "Adicionar ao plano"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Adicionar operação",
+    "Operação adicionada à versão v4 (rascunho)"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "v4 em rascunho",
+   "Aguardando confirmação do plantio",
+   "Vencida · decidir pendência"
+  ]
+ },
+ "PL-02det.dc.html": {
+  "arquivo": "PL-02det.dc.html",
+  "familia": "PL-02",
+  "titulo": "Plano do talhão T1-A · gatilhos",
+  "rota": "/planejamento/plano",
+  "links": [
+   [
+    "Planejamento",
+    "PL-01.dc.html"
+   ],
+   [
+    "Plano operacional",
+    "PL-02.dc.html"
+   ],
+   [
+    "Voltar",
+    "PL-02.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Publicar ajuste do T1-A",
+    "Ajuste do T1-A publicado na v4 · herbicida pós-emergente 1,6 L/ha só neste talhão · padrão intacto · dessecação de manejo realizada em 05/09 preservada · nenhuma O.S. emitida muda sem revisão do saldo."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Ajuste local do talhão T1-A",
+    "campos": [
+     "Atividade",
+     "Insumo",
+     "Dose",
+     "Motivo",
+     "Comparativo de custo (hipótese de preço)"
+    ],
+    "confirmar": "Salvar ajuste local"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Ajustar este talhão",
+    "Exceção local registrada · padrão preservado"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "Ajuste local em revisão",
+   "Realizada 05/09 · preservada",
+   "O.S. emitida · OS-0422",
+   "Prevista",
+   "Aguardando confirmação do plantio",
+   "hipótese de preço"
+  ]
+ },
+ "PL-03.dc.html": {
+  "arquivo": "PL-03.dc.html",
+  "familia": "PL-03",
+  "titulo": "Capacidade e recursos",
+  "rota": "/planejamento/capacidade",
+  "links": [
+   [
+    "Planejamento",
+    "PL-01.dc.html"
+   ],
+   [
+    "Ver origem da demanda",
+    "PL-02.dc.html"
+   ],
+   [
+    "Ver tabela operacional",
+    "CD-02.dc.html"
+   ],
+   [
+    "Propor contratação/cotação",
+    "SU-04.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Simular turnos/equipe/conjuntos",
+    "Simulação: 2º turno nos tratores (out) cobre 190 h · custo estimado +R$ 26 mil · restrição: contratar 1 operador habilitado. Nada é alterado."
+   ],
+   [
+    "Planejar pessoal",
+    "Necessidade de pessoal: 1 operador de trator para o 2º turno de outubro · entra no plano de pessoas ao publicar o cenário."
+   ],
+   [
+    "Publicar cenário 2º turno + aluguel",
+    "Cenário publicado para a Programação e o Orçamento · não contrata nem compra: a cotação segue em Solicitações e cotações · a agenda real só muda na programação."
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "Déficit 270 h em tratores",
+   "270 h",
+   "0 h",
+   "Ociosa · realocar",
+   "reaproveitamento entre setores",
+   "Recomendado",
+   "Não atende esta safra",
+   "Livres e aptas 1",
+   "Operando 1",
+   "Reservadas 2",
+   "Com restrição 1",
+   "Indisponíveis 1",
+   "A confirmar 1",
+   "Apta",
+   "Indisponível · bloqueado pelo PCM",
+   "Apta com restrição · bico seção 3",
+   "A confirmar"
+  ]
+ },
+ "PL-04.dc.html": {
+  "arquivo": "PL-04.dc.html",
+  "familia": "PL-04",
+  "titulo": "Programação integrada",
+  "rota": "/planejamento/programacao",
+  "links": [
+   [
+    "Planejamento",
+    "PL-01.dc.html"
+   ],
+   [
+    "Abrir O.S.",
+    "CA-01.dc.html"
+   ],
+   [
+    "Resolver impedimento",
+    "PL-05det.dc.html"
+   ],
+   [
+    "Abrir O.S.",
+    "IR-03.dc.html"
+   ],
+   [
+    "Abrir O.M.",
+    "MA-04.dc.html"
+   ],
+   [
+    "Ver quadro completo",
+    "PL-03.dc.html"
+   ],
+   [
+    "Receber devolução",
+    "SU-07.dc.html"
+   ],
+   [
+    "Ver impedimento",
+    "PL-05.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Preparar O.S. do período",
+    "Prévia: 11 ocorrências no período · 6 já com O.S. (recuperadas, sem duplicar) · 5 novas propostas · 2 aguardando dados · itens impedidos não são emitidos como executáveis. Selecionar e confirmar cria ou recupera sem duplicar."
+   ],
+   [
+    "Revisar prontidão",
+    "Prontidão das ordens A liberar: OS-0422 pronta (aprovada, material separado) · OS-0418 aguardando agrônomo · OS-0423 impedida por ativo bloqueado. Material previsto não significa disponível físico."
+   ],
+   [
+    "Enviar ao agrônomo",
+    "OS-0418 enviada à fila Aguardando agrônomo · a fila mostra só ordens emitidas do período."
+   ],
+   [
+    "Liberar selecionadas",
+    "Liberada 1 de 3 — OS-0422 ✓ passou para Liberadas · OS-0418 continua A liberar: falta aprovação agronômica · OS-0423 continua A liberar: ativo bloqueado. Resultado por item; versão e prontidão revalidadas."
+   ],
+   [
+    "Simular mudança",
+    "Arrastar OS-0422 para 26/09: colide com a reserva do Trator 02 para o saldo da OS-0420 e encosta no limite da janela ±5 d. Impacto mostrado antes de confirmar — nada foi alterado."
+   ],
+   [
+    "Reservar recurso",
+    "Trator 02 reservado para 25/09 (OS-0422) · reserva versionada; uma alocação concorrente receberia aviso de conflito."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Programar ordem",
+    "campos": [
+     "Ordem",
+     "Máquina",
+     "Implemento",
+     "Operador",
+     "Data",
+     "Turno"
+    ],
+    "confirmar": "Programar"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Programar",
+    "Programada · liberação continua sendo comando separado"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 pronta · 1 impedida · 1 aguardando agrônomo",
+   "Parcial · dia 4 de 7",
+   "Em execução",
+   "A liberar",
+   "Impedida · ativo bloqueado",
+   "Liberadas",
+   "Aguardando agrônomo",
+   "Apta",
+   "Indisponível · bloqueado pelo PCM",
+   "Apta com restrição",
+   "Em conferência",
+   "Sobras a receber"
+  ]
+ },
+ "PL-05.dc.html": {
+  "arquivo": "PL-05.dc.html",
+  "familia": "PL-05",
+  "titulo": "Impedimentos e reprogramação",
+  "rota": "/planejamento/impedimentos",
+  "links": [
+   [
+    "Planejamento",
+    "PL-01.dc.html"
+   ],
+   [
+    "Simular substituição",
+    "PL-05det.dc.html"
+   ],
+   [
+    "Resolver origem",
+    "SU-02.dc.html"
+   ],
+   [
+    "Ver na programação",
+    "PL-04.dc.html"
+   ],
+   [
+    "Ver cenário",
+    "PL-03.dc.html"
+   ],
+   [
+    "Resolver origem",
+    "CO-06.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Notificar responsáveis",
+    "Notificados 5 donos · alertas do mesmo impedimento agrupados num caso único."
+   ],
+   [
+    "Aprovar proposta",
+    "Proposta de substituição aprovada · a alocação é confirmada na tela do impedimento; nada inicia automaticamente."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Reprogramar saldo",
+    "campos": [
+     "Ordem",
+     "Saldo",
+     "Data",
+     "Máquina",
+     "Motivo"
+    ],
+    "confirmar": "Reprogramar saldo"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Reprogramar saldo",
+    "Saldo reprogramado · aguarda nova liberação"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 vence hoje",
+   "Ativo bloqueado",
+   "● vence hoje",
+   "Falta de insumo",
+   "◆ até 3 dias",
+   "Chuva na janela",
+   "Pessoas",
+   "○ no prazo",
+   "Qualidade",
+   "◆ até 3 dias · 25/09"
+  ]
+ },
+ "PL-05det.dc.html": {
+  "arquivo": "PL-05det.dc.html",
+  "familia": "PL-05",
+  "titulo": "Impedimento · OS-0423 ativo bloqueado",
+  "rota": "/planejamento/impedimentos",
+  "links": [
+   [
+    "Planejamento",
+    "PL-01.dc.html"
+   ],
+   [
+    "Impedimentos e reprogramação",
+    "PL-05.dc.html"
+   ],
+   [
+    "Voltar",
+    "PL-05.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Confirmar substituição pelo Trator 02",
+    "Alocação substituta confirmada · prontidão reavaliada · OS-0423 segue A liberar até nova liberação na Programação. Se o equipamento alterasse a aplicação, exigiria revisão agronômica antes."
+   ],
+   [
+    "Aguardar reparo",
+    "Registrado: aguardar o teste das 14h · o bloqueio permanece até liberação técnica após teste válido · liberar o ativo não reassume a agenda antiga."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Reprogramar",
+    "campos": [
+     "Ordem",
+     "Data",
+     "Responsável",
+     "Motivo"
+    ],
+    "confirmar": "Reprogramar"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Reprogramar saldo",
+    "Reprogramada · responsáveis notificados"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "Decidir hoje",
+   "Ativo bloqueado pelo PCM",
+   "Conservada · v1",
+   "Apta",
+   "Livre 24/09",
+   "Elegível",
+   "Retorno previsto 14h — aguardando teste"
+  ]
+ },
+ "PL-06.dc.html": {
+  "arquivo": "PL-06.dc.html",
+  "familia": "PL-06",
+  "titulo": "Parcelas e escalonamento",
+  "rota": "/planejamento/escalonamento",
+  "links": [
+   [
+    "Planejamento",
+    "PL-01.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Comparar cenários",
+    "v1 (plantio único 15/10): pico de 9.672 sc/semana, acima da secagem de 5.500 · v2 (T1-A 15/10, T1-B 25/10): pico de 4.960 sc/semana, dentro da capacidade."
+   ],
+   [
+    "Ajustar datas",
+    "Plantio do T1-B movido na simulação para 28/10: colheita do T1-B passa a 04–15/02 · picos seguem abaixo da secagem · nada publicado."
+   ],
+   [
+    "Publicar parcelamento e plano",
+    "Parcelamento v2 publicado · a grade da safra e o plano operacional passam a seguir T1-A/T1-B · histórico do T1 preservado · área de cobrança continua 312 ha · nenhuma O.S. emitida."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Simular parcelamento",
+    "campos": [
+     "Talhão",
+     "Parcelas",
+     "Variedade A",
+     "Variedade B",
+     "Data"
+    ],
+    "confirmar": "Simular"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Simular parcelas",
+    "Cenário v2 simulado · área vigente intacta"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "Proposta v2 aguardando aprovação",
+   "Soma 312 ha = talhão ✓",
+   "Sem sobreposição ✓",
+   "Proposta · não divide a área vigente",
+   "Proposta v2",
+   "Liberação física pendente · palhada",
+   "Replantio aguarda liberação",
+   "Vigente",
+   "+1.960 sc → armazém",
+   "+712 sc → armazém"
+  ]
+ },
+ "PT-01.dc.html": {
+  "arquivo": "PT-01.dc.html",
+  "familia": "PT-01",
+  "titulo": "Portal do parceiro",
+  "rota": "/portal/inicio",
+  "links": [
+   [
+    "Responder cotação COT-114",
+    "PT-02det.dc.html"
+   ],
+   [
+    "Abrir cotação",
+    "PT-02.dc.html"
+   ],
+   [
+    "Ver negócios",
+    "PT-05.dc.html"
+   ],
+   [
+    "Responder esclarecimento",
+    "PT-02det.dc.html"
+   ],
+   [
+    "Abrir negócio",
+    "PT-05det.dc.html"
+   ],
+   [
+    "Ver assinatura",
+    "PT-07.dc.html"
+   ],
+   [
+    "Abrir oferta · Frutas Real",
+    "PT-03.dc.html"
+   ],
+   [
+    "Analisar crédito · Banco Terra",
+    "PT-04.dc.html"
+   ]
+  ],
+  "acoes": [],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "Portal do parceiro",
+   "Fertisul",
+   "1 prazo até 26/09",
+   "Fornecedor",
+   "◆ até 3 dias · 26/09 18:00",
+   "Proposta em rascunho",
+   "○ no prazo · carga 1 · 05/10",
+   "NF-e da carga 1 a enviar",
+   "Não selecionada"
+  ]
+ },
+ "PT-02.dc.html": {
+  "arquivo": "PT-02.dc.html",
+  "familia": "PT-02",
+  "titulo": "Cotações concedidas",
+  "rota": "/portal/cotacoes",
+  "links": [
+   [
+    "Elaborar proposta",
+    "PT-02det.dc.html"
+   ],
+   [
+    "Abrir negócio",
+    "PT-05det.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Baixar comprovante",
+    "Comprovante da v2 (PDF) · motivo agregado da não seleção: condição comercial — sem proposta concorrente nem dado reservado."
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "Portal do parceiro",
+   "Fertisul",
+   "1 rascunho · responde até 26/09",
+   "◆ até 3 dias · 26/09",
+   "Esclarecimento aberto",
+   "Selecionada · NEG-2101",
+   "Não selecionada"
+  ]
+ },
+ "PT-02det.dc.html": {
+  "arquivo": "PT-02det.dc.html",
+  "familia": "PT-02",
+  "titulo": "Proposta · COT-114 calcário",
+  "rota": "/portal/cotacoes",
+  "links": [
+   [
+    "Portal do parceiro",
+    "PT-02.dc.html"
+   ],
+   [
+    "Cotação do fornecedor",
+    "PT-02.dc.html"
+   ],
+   [
+    "Voltar",
+    "PT-02.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Submeter proposta",
+    "Proposta v1 submetida às 17:41 · comprovante PR-1142 gerado · você pode revisar até 26/09 18:00 — a v1 fica preservada."
+   ],
+   [
+    "Salvar proposta",
+    "Rascunho v0 salvo · nada é enviado ao comprador até você submeter."
+   ],
+   [
+    "Revisar proposta",
+    "Disponível depois de submeter: revisar até 26/09 18:00 cria a v2 e preserva a v1 — submeta a proposta primeiro."
+   ],
+   [
+    "Baixar comprovante",
+    "Ainda não há versão submetida — o comprovante é gerado quando você submete a proposta."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Esclarecimento da COT-114",
+    "campos": [
+     "Pergunta",
+     "Resposta"
+    ],
+    "confirmar": "Enviar resposta"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Responder esclarecimento",
+    "Resposta registrada na cotação"
+   ]
+  ],
+  "selos": [
+   "Portal do parceiro",
+   "Fertisul",
+   "Rascunho v0 · responde até 26/09 18:00",
+   "Aguardando sua resposta"
+  ]
+ },
+ "PT-03.dc.html": {
+  "arquivo": "PT-03.dc.html",
+  "familia": "PT-03",
+  "titulo": "Ofertas",
+  "rota": "/portal/ofertas",
+  "links": [],
+  "acoes": [
+   [
+    "Acompanhar negociação",
+    "OF-101 · sua aceitação da v1 foi registrada · pedido PV-032 aguarda confirmação do produtor — sem esse aceite nada vira contrato."
+   ],
+   [
+    "Enviar proposta",
+    "Proposta enviada como intenção de pedido · reserva RT-0112 mantida até 24/09 18:00 e convertida sem nova dedução se o produtor aceitar — sem aceite das partes, nada vira contrato."
+   ],
+   [
+    "Salvar proposta",
+    "Rascunho salvo no portal · a reserva continua correndo até 24/09 18:00."
+   ],
+   [
+    "Baixar comprovante",
+    "Comprovante da proposta (PDF) · conteúdo, data e reserva vinculada."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Pedir ajuste da oferta",
+    "campos": [
+     "O que ajustar",
+     "Proposta",
+     "Motivo"
+    ],
+    "confirmar": "Enviar pedido de ajuste"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Solicitar ajuste",
+    "Contraproposta enviada · oferta original preservada"
+   ]
+  ],
+  "selos": [
+   "Portal do parceiro",
+   "Frutas Real",
+   "Reserva RT-0112 vence 24/09 18:00",
+   "Reserva vence 24/09 18:00",
+   "Aceita · aguarda produtor",
+   "Virou pedido PV-031",
+   "Reserva temporária",
+   "Aguardando confirmação"
+  ]
+ },
+ "PT-04.dc.html": {
+  "arquivo": "PT-04.dc.html",
+  "familia": "PT-04",
+  "titulo": "Crédito",
+  "rota": "/portal/credito",
+  "links": [
+   [
+    "Abrir dossiê CRE-0102",
+    "PT-04det.dc.html"
+   ],
+   [
+    "Abrir dossiê",
+    "PT-04det.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Ver decisão registrada",
+    "CRE-0089: sua decisão registrada continua disponível · os blocos do dossiê deixaram de ser acessíveis em 12/08."
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "Portal do parceiro",
+   "Banco Terra",
+   "CRE-0102 · documento condicionante pendente",
+   "Aprovado · documento pendente",
+   "Acesso expirado"
+  ]
+ },
+ "PT-04det.dc.html": {
+  "arquivo": "PT-04det.dc.html",
+  "familia": "PT-04",
+  "titulo": "Dossiê · CRE-0102 custeio",
+  "rota": "/portal/credito",
+  "links": [
+   [
+    "Portal do parceiro",
+    "PT-04.dc.html"
+   ],
+   [
+    "Dossiê de crédito",
+    "PT-04.dc.html"
+   ],
+   [
+    "Voltar",
+    "PT-04.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Conferir documento",
+    "Ainda não recebido: certidão do imóvel atualizada. O produtor anexa pelo painel dele; quando chegar, a conferência abre aqui e destrava a 2ª parcela. Liberado até agora: R$ 300 mil de R$ 850 mil."
+   ],
+   [
+    "Acompanhar liberação",
+    "Parcela 1 · R$ 300 mil liberada · parcelas seguintes aguardam a certidão do imóvel atualizada — aceite não equivale a desembolso."
+   ],
+   [
+    "Recusar crédito",
+    "Recusa registrada com motivo · os blocos do dossiê deixam de ser acessíveis; histórico de acesso preservado."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Pedir complemento ao produtor",
+    "campos": [
+     "Bloco",
+     "O que falta",
+     "Prazo"
+    ],
+    "confirmar": "Enviar pedido"
+   },
+   {
+    "titulo": "Condição precedente",
+    "campos": [
+     "Condição",
+     "Prazo",
+     "Efeito"
+    ],
+    "confirmar": "Registrar condição"
+   },
+   {
+    "titulo": "Contraproposta de condições",
+    "campos": [
+     "Taxa (a.a.)",
+     "Parcelas de liberação",
+     "Garantia"
+    ],
+    "confirmar": "Enviar contraproposta"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Pedir complemento",
+    "Pedido de complemento registrado no dossiê"
+   ],
+   [
+    "Registrar condição",
+    "Condição registrada · aprovação segue condicional"
+   ],
+   [
+    "Contrapropor condições",
+    "Contraproposta v2 enviada · aguarda aceite do produtor"
+   ]
+  ],
+  "selos": [
+   "Portal do parceiro",
+   "Banco Terra",
+   "Aprovação condicionada a documento",
+   "Concedido",
+   "Solicitado · aguarda produtor",
+   "Documento pendente"
+  ]
+ },
+ "PT-05.dc.html": {
+  "arquivo": "PT-05.dc.html",
+  "familia": "PT-05",
+  "titulo": "Negócios e documentos",
+  "rota": "/portal/negocios",
+  "links": [
+   [
+    "Abrir negócio NEG-2101",
+    "PT-05det.dc.html"
+   ],
+   [
+    "Abrir negócio",
+    "PT-05det.dc.html"
+   ],
+   [
+    "Abrir cotação",
+    "PT-02det.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Ver motivo agregado",
+    "Motivo agregado: condição comercial — não revela proposta concorrente nem dado reservado."
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "Portal do parceiro",
+   "Fertisul",
+   "NF-e da carga 1 pendente",
+   "Ganhou",
+   "Em cotação",
+   "Perdeu"
+  ]
+ },
+ "PT-05det.dc.html": {
+  "arquivo": "PT-05det.dc.html",
+  "familia": "PT-05",
+  "titulo": "Negócio · NEG-2101 MAP 11-52",
+  "rota": "/portal/negocios",
+  "links": [
+   [
+    "Portal do parceiro",
+    "PT-05.dc.html"
+   ],
+   [
+    "Negócios e documentos",
+    "PT-05.dc.html"
+   ],
+   [
+    "Voltar",
+    "PT-05.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Confirmar pedido",
+    "Pedido PC-093 v1 já confirmado em 18/09 · comprovante disponível — nova confirmação não é necessária."
+   ],
+   [
+    "Acompanhar situação",
+    "Carga 1 programada 05/10 · aguardando NF-e · conferência e aceite acontecem no recebimento do comprador."
+   ],
+   [
+    "Abrir divergência",
+    "Divergência aberta e vinculada ao pedido · o comprador responde dentro do negócio — nada muda no estoque de ninguém sem tratativa."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Previsão da carga 1",
+    "campos": [
+     "Nova data prevista",
+     "Motivo",
+     "Placa do caminhão"
+    ],
+    "confirmar": "Atualizar previsão"
+   },
+   {
+    "titulo": "Documento da carga 1",
+    "campos": [
+     "Tipo",
+     "Número",
+     "Anexo"
+    ],
+    "confirmar": "Enviar documento"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Atualizar previsão de entrega",
+    "Previsão atualizada · comprador notificado"
+   ],
+   [
+    "Enviar documento",
+    "NF-e vinculada à carga 1 · obrigação atendida"
+   ]
+  ],
+  "selos": [
+   "Portal do parceiro",
+   "Fertisul",
+   "Entrega programada · NF-e pendente",
+   "NF-e a enviar",
+   "Programada"
+  ]
+ },
+ "PT-06.dc.html": {
+  "arquivo": "PT-06.dc.html",
+  "familia": "PT-06",
+  "titulo": "Indicadores",
+  "rota": "/portal/indicadores",
+  "links": [
+   [
+    "Abrir negócio próprio",
+    "PT-05.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Exportar autorizado",
+    "Exportação gerada só com dados próprios e agregados autorizados · o acesso fica registrado."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Ação interna da Fertisul",
+    "campos": [
+     "Tema",
+     "Responsável",
+     "Prazo"
+    ],
+    "confirmar": "Criar ação"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Criar ação interna",
+    "Ação interna criada · visível só para a Fertisul"
+   ]
+  ],
+  "selos": [
+   "Portal do parceiro",
+   "Fertisul",
+   "Região principal",
+   "Sem ganho no período",
+   "Publicado",
+   "Suprimido · amostra pequena"
+  ]
+ },
+ "PT-07.dc.html": {
+  "arquivo": "PT-07.dc.html",
+  "familia": "PT-07",
+  "titulo": "Perfil e assinatura",
+  "rota": "/portal/perfil",
+  "links": [],
+  "acoes": [
+   [
+    "Revogar acesso",
+    "Acesso de Diego revogado imediatamente · sessões encerradas · registro no histórico do parceiro."
+   ],
+   [
+    "Reenviar convite",
+    "Convite reenviado a Sônia · expira em 7 dias."
+   ],
+   [
+    "Ver assinatura e fatura",
+    "Parceiro Profissional v1 · vigência 01/09/2026 – 31/08/2027 · cartão final 3307 · renovação exige seu aceite do novo preço até 30/09 — nada é cobrado sem aceite."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Preferências de notificação",
+    "campos": [
+     "Novos convites",
+     "Prazos a vencer",
+     "Mensagens de negócio"
+    ],
+    "confirmar": "Salvar preferências"
+   },
+   {
+    "titulo": "Atualizar credenciamento",
+    "campos": [
+     "Categorias",
+     "Regiões",
+     "Culturas atendidas"
+    ],
+    "confirmar": "Salvar perfil"
+   },
+   {
+    "titulo": "Convidar usuário",
+    "campos": [
+     "Nome",
+     "E-mail",
+     "Papel"
+    ],
+    "confirmar": "Enviar convite"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Escolher preferências",
+    "Preferências salvas"
+   ],
+   [
+    "Atualizar perfil",
+    "Perfil atualizado · correspondência de convites recalculada"
+   ],
+   [
+    "Gerir usuários",
+    "Convite enviado · usuário aparece como pendente"
+   ]
+  ],
+  "selos": [
+   "Portal do parceiro",
+   "Fertisul",
+   "Aceite do novo preço até 30/09",
+   "Parceiro credenciado",
+   "Ativa",
+   "Ativo",
+   "Convite pendente",
+   "Hipótese de preço · não decidido",
+   "Não contratado"
+  ]
+ },
+ "SU-01.dc.html": {
+  "arquivo": "SU-01.dc.html",
+  "familia": "SU-01",
+  "titulo": "Necessidades e cobertura",
+  "rota": "/suprimentos/necessidades",
+  "links": [
+   [
+    "Comparar propostas de KCl",
+    "SU-04.dc.html"
+   ],
+   [
+    "Comparar propostas",
+    "SU-04.dc.html"
+   ],
+   [
+    "Programar liberação",
+    "SU-05.dc.html"
+   ],
+   [
+    "Preparar cotação",
+    "SU-04.dc.html"
+   ],
+   [
+    "Tratar conflito",
+    "SU-03det.dc.html"
+   ],
+   [
+    "Abrir origem",
+    "IN-02.dc.html"
+   ],
+   [
+    "Receber devolução",
+    "SU-07det.dc.html"
+   ],
+   [
+    "Abrir origem",
+    "PL-02.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Ver memória de cálculo",
+    "Memória aberta · KCl: demanda 140 t = plano de adubação 120 t + PCP 20 t − consumo apontado 0 · fontes e datas por parcela"
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Reprogramar proposta de reposição",
+    "campos": [
+     "Item",
+     "Nova data necessária",
+     "Motivo"
+    ],
+    "confirmar": "Reprogramar proposta"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Reprogramar proposta",
+    "Proposta reprogramada · cobertura e “pedir até” recalculados"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "3 faltas firmes · pedir até 25/09",
+   "+10 t condicionadas",
+   "Firme 40 t",
+   "◆ até 3 dias",
+   "Firme 8 mil L",
+   "○ no prazo",
+   "Firme 3 un",
+   "Conflito",
+   "Aguarda agrônomo",
+   "Sem falta",
+   "Coberta"
+  ]
+ },
+ "SU-02.dc.html": {
+  "arquivo": "SU-02.dc.html",
+  "familia": "SU-02",
+  "titulo": "Políticas de estoque",
+  "rota": "/suprimentos/politicas",
+  "links": [
+   [
+    "Suprimentos",
+    "SU-01.dc.html"
+   ],
+   [
+    "Ver efeito",
+    "SU-01.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Simular cobertura",
+    "Simulação Diesel S10 · mínimo 40% cobre 9 dias do pico de plantio (out/nov) sem ruptura · comparativo por cenário aberto"
+   ],
+   [
+    "Publicar vigência",
+    "Ainda não publicável · a proposta v5 do Diesel S10 aguarda a aprovação do gestor (vence em 5 d). Aprove-a em Aprovações e publique em seguida — a versão vigente não é sobrescrita."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Exceção versionada de política",
+    "campos": [
+     "Item",
+     "Depósito",
+     "Alteração",
+     "Justificativa",
+     "Vigência"
+    ],
+    "confirmar": "Submeter exceção"
+   },
+   {
+    "titulo": "Proposta de política · Diesel S10",
+    "campos": [
+     "Método",
+     "Mínimo do tanque",
+     "Máximo",
+     "Lead time",
+     "Justificativa"
+    ],
+    "confirmar": "Salvar proposta"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Submeter exceção",
+    "Exceção v3.2 submetida · aguardando o gestor"
+   ],
+   [
+    "Editar proposta",
+    "Proposta v5 salva · pendente de aprovação"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 proposta aguardando gestor",
+   "Alta",
+   "Vigente · v4",
+   "Vigente · v2",
+   "Aguarda gestor",
+   "Com exceção",
+   "Média",
+   "Vigente · v1"
+  ]
+ },
+ "SU-03.dc.html": {
+  "arquivo": "SU-03.dc.html",
+  "familia": "SU-03",
+  "titulo": "Saldos e lotes de materiais",
+  "rota": "/suprimentos/saldos",
+  "links": [
+   [
+    "Suprimentos",
+    "SU-01.dc.html"
+   ],
+   [
+    "Ver movimentos",
+    "SU-08.dc.html"
+   ],
+   [
+    "Tratar conflito",
+    "SU-03det.dc.html"
+   ],
+   [
+    "Inspecionar",
+    "SU-06.dc.html"
+   ],
+   [
+    "Receber sobras",
+    "SU-07det.dc.html"
+   ],
+   [
+    "Requisitar",
+    "SU-07.dc.html"
+   ],
+   [
+    "Transferir",
+    "SU-08.dc.html"
+   ]
+  ],
+  "acoes": [],
+  "formularios": [
+   {
+    "titulo": "Reservar saldo para ordem",
+    "campos": [
+     "Ordem",
+     "Item",
+     "Quantidade",
+     "Local"
+    ],
+    "confirmar": "Reservar 20 un"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Reservar para ordem",
+    "Reserva confirmada · disponível do lote 20 → 0"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 conflito de reserva · 2 lotes retidos",
+   "Quarentena",
+   "Bloqueado"
+  ]
+ },
+ "SU-03det.dc.html": {
+  "arquivo": "SU-03det.dc.html",
+  "familia": "SU-03",
+  "titulo": "Lote F26-02 · conflito de reserva",
+  "rota": "/suprimentos/saldos",
+  "links": [
+   [
+    "Suprimentos",
+    "SU-01.dc.html"
+   ],
+   [
+    "Saldos e lotes",
+    "SU-03.dc.html"
+   ],
+   [
+    "Voltar",
+    "SU-03.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Reservar em outro lote apto",
+    "Reservadas 80 un para a OS-0424: lote F26-03 (60 un) + F26-04 (20 un), ambos aptos e válidos para 27/09 · mistura completa garantida"
+   ],
+   [
+    "Reservar 20 un com pendência",
+    "Reservadas 20 un do F26-02 · pendência de 60 un registrada — a tarefa fica retida: mistura incompleta não libera aplicação"
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "Conflito ativo · livre 20 un",
+   "Confirmada · entregue à equipe (REQ-029)",
+   "Conflito · saldo insuficiente"
+  ]
+ },
+ "SU-04.dc.html": {
+  "arquivo": "SU-04.dc.html",
+  "familia": "SU-04",
+  "titulo": "Solicitações e cotações",
+  "rota": "/suprimentos/cotacoes",
+  "links": [
+   [
+    "Suprimentos",
+    "SU-01.dc.html"
+   ],
+   [
+    "Aprovar contratação",
+    "SU-05.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Enviar cotação",
+    "COT-113 enviada a 3 fornecedores convidados · respostas até 26/09 · nada é enviado a parceiro sem convite confirmado"
+   ],
+   [
+    "Selecionar proposta",
+    "Fertimax selecionada (R$ 2.386/t equalizado) · justificativa técnica registrada · segue para aprovação de contratação (alçada Gestor)"
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Nova cotação",
+    "campos": [
+     "Origem",
+     "Especificação",
+     "Quantidade",
+     "Data e local de entrega",
+     "Condição desejada"
+    ],
+    "confirmar": "Criar rascunho"
+   },
+   {
+    "titulo": "Destinatários da COT-113",
+    "campos": [
+     "Sugeridos",
+     "Correspondência",
+     "Acesso concedido"
+    ],
+    "confirmar": "Confirmar convites"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Preparar cotação",
+    "COT-113 criada em rascunho · revisar destinatários antes de enviar"
+   ],
+   [
+    "Revisar destinatários",
+    "3 convites enviados · o fornecedor responde pelo portal externo"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 comparação pronta · 1 rascunho",
+   "Propostas 3/3",
+   "Rascunho",
+   "Aguardando",
+   "Conforme",
+   "Melhor equalizado",
+   "Fora da faixa",
+   "Não conforme"
+  ]
+ },
+ "SU-05.dc.html": {
+  "arquivo": "SU-05.dc.html",
+  "familia": "SU-05",
+  "titulo": "Contratos, pedidos e entregas",
+  "rota": "/suprimentos/pedidos",
+  "links": [
+   [
+    "Suprimentos",
+    "SU-01.dc.html"
+   ],
+   [
+    "Abrir contrato",
+    "SU-05det.dc.html"
+   ],
+   [
+    "Receber",
+    "SU-06.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Emitir pedido",
+    "PC-092 programado · 8 mil L contra CT-2026-03 · emissão automática em 26/09, após o recebimento do PC-090 — exposição fica em R$ 47 mil, dentro do limite de R$ 120 mil"
+   ],
+   [
+    "Confirmar fornecedor",
+    "Fertimax confirmou a carga 3 (40 t) para 02/10 · programação atualizada sem alterar o contratado"
+   ],
+   [
+    "Simular pico de exposição",
+    "Pico projetado R$ 96 mil em 02/10 (carga 3) · dentro do limite R$ 150 mil · ritmo 2 cargas/semana respeita 36 t/dia do Galpão 2 · emitir a carga 4 antes do recebimento da 3 elevaria o pico a R$ 192 mil (conflito)"
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Formalizar contrato",
+    "campos": [
+     "Contraparte",
+     "Item",
+     "Volume líquido preliminar",
+     "Tolerância inferior/superior",
+     "Preço/condição",
+     "Vigência"
+    ],
+    "confirmar": "Formalizar contrato"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Formalizar contrato",
+    "Contrato CT-2026-14 formalizado · aguardando aceite da contraparte"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 conflito de liberação",
+   "Conflito",
+   "hipótese · não aceita",
+   "Vigente",
+   "Parcial",
+   "Confirmado",
+   "Aguardando",
+   "Recebida",
+   "Liberada",
+   "Cronograma pronto",
+   "Dentro",
+   "Classificar limite",
+   "Recebido",
+   "A programar"
+  ]
+ },
+ "SU-05det.dc.html": {
+  "arquivo": "SU-05det.dc.html",
+  "familia": "SU-05",
+  "titulo": "Contrato CT-2026-11 · Fertimax · KCl 60 %",
+  "rota": "/suprimentos/pedidos",
+  "links": [
+   [
+    "Suprimentos",
+    "SU-01.dc.html"
+   ],
+   [
+    "Contratos, pedidos e entregas",
+    "SU-05.dc.html"
+   ],
+   [
+    "Voltar",
+    "SU-05.dc.html"
+   ],
+   [
+    "Receber carga 3",
+    "SU-06.dc.html"
+   ],
+   [
+    "Solicitar crédito",
+    "GE-08.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Emitir liberação da carga 4",
+    "Bloqueado · o pico projetado de R$ 192 mil excede o limite de R$ 150 mil. Para resolver: reprograme a emissão para 10/10, após receber a carga 3 (pico volta a R$ 96 mil), ou solicite ampliação de crédito. Responsável: comprador Léo."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Reprogramar carga 4",
+    "campos": [
+     "Nova emissão",
+     "Chegada prevista",
+     "Motivo"
+    ],
+    "confirmar": "Reprogramar carga 4"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Reprogramar carga 4",
+    "Carga 4 reprogramada · conflito resolvido · fornecedor notificado"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "Conflito · carga 4 acima do limite",
+   "Recebida",
+   "Liberada · pendente",
+   "Conflito · acima do limite"
+  ]
+ },
+ "SU-06.dc.html": {
+  "arquivo": "SU-06.dc.html",
+  "familia": "SU-06",
+  "titulo": "Recebimentos e divergências",
+  "rota": "/suprimentos/recebimentos",
+  "links": [
+   [
+    "Suprimentos",
+    "SU-01.dc.html"
+   ],
+   [
+    "Encaminhar título",
+    "GE-04.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Ler documento/QR",
+    "NF 4501 lida novamente · documento já registrado — nenhuma segunda entrada criada (duplicidade bloqueada)"
+   ],
+   [
+    "Segregar lote",
+    "10 t do lote K26-11 segregadas em quarentena · responsável Qualidade · laudo até 27/09 · vínculo ao lote mantido"
+   ],
+   [
+    "Liberar qualidade",
+    "Laudo aprovado · 10 t liberadas: somadas UMA vez à cobertura firme · nenhuma compra nova disparada"
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Receber material",
+    "campos": [
+     "Pedido",
+     "Documento",
+     "Quantidade conferida",
+     "Lote/validade",
+     "Inspeção",
+     "Depósito"
+    ],
+    "confirmar": "Confirmar recebimento"
+   },
+   {
+    "titulo": "Divergência de preço · NF 8812",
+    "campos": [
+     "Diferença",
+     "Decisão",
+     "Responsável"
+    ],
+    "confirmar": "Registrar decisão"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Receber material",
+    "Recebido 15 mil L no Tanque Sede · saldo do PC-090 zerado · divergência de preço segue ao financeiro"
+   ],
+   [
+    "Resolver diferença",
+    "Físico será aceito na chegada · título contestado segue ao financeiro"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 divergência · 10 t em quarentena",
+   "10 t quarentena",
+   "Parcial",
+   "Duplicado",
+   "Preço",
+   "Aguarda carga",
+   "Aguarda chegada"
+  ]
+ },
+ "SU-07.dc.html": {
+  "arquivo": "SU-07.dc.html",
+  "familia": "SU-07",
+  "titulo": "Requisições e entregas",
+  "rota": "/suprimentos/requisicoes",
+  "links": [
+   [
+    "Suprimentos",
+    "SU-01.dc.html"
+   ],
+   [
+    "Receber devolução REQ-031",
+    "SU-07det.dc.html"
+   ],
+   [
+    "Ler QR no app",
+    "MB-05.dc.html"
+   ],
+   [
+    "Receber devolução",
+    "SU-07det.dc.html"
+   ],
+   [
+    "Ver consumo",
+    "CA-02.dc.html"
+   ],
+   [
+    "Tratar conflito",
+    "SU-03det.dc.html"
+   ],
+   [
+    "Ver aprovação",
+    "IN-02.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Separar FEFO",
+    "Separados 12 L do lote A26-05 (vencimento mais próximo primeiro) · endereço A-03 · aguardando retirada pela equipe"
+   ],
+   [
+    "Confirmar entrega",
+    "Bloqueado · OS-0420 impedida pelo trator em manutenção (OM-0233). As 30 sc entregues já foram plantadas em 30 ha; as 70 sc reservadas saem após a reliberação da ordem (substituto Trator 02 · MF 7719)."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Requisição de materiais",
+    "campos": [
+     "O.S./destino",
+     "Item",
+     "Quantidade",
+     "Local de entrega",
+     "Recebedor"
+    ],
+    "confirmar": "Criar requisição"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Solicitar materiais",
+    "REQ-047 criada · reserva proposta contra o disponível do lote"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 conflito · 1 devolução a receber",
+   "Sobras a receber",
+   "Em uso",
+   "Separar hoje",
+   "Conflito",
+   "Aguarda agrônomo",
+   "Impedida"
+  ]
+ },
+ "SU-07det.dc.html": {
+  "arquivo": "SU-07det.dc.html",
+  "familia": "SU-07",
+  "titulo": "REQ-031 · OS-0417 · MAP 11-52",
+  "rota": "/suprimentos/requisicoes",
+  "links": [
+   [
+    "Suprimentos",
+    "SU-01.dc.html"
+   ],
+   [
+    "Requisições e entregas",
+    "SU-07.dc.html"
+   ],
+   [
+    "Voltar",
+    "SU-07.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Conciliar custódia",
+    "Ainda não · 10 sc seguem sob custódia de Paula (prazo 24/09). Receba a devolução ou registre a destinação formal para conciliar — a ordem continua Em conferência."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Receber devolução · REQ-031",
+    "campos": [
+     "Item",
+     "Quantidade medida",
+     "Condição",
+     "Local de destino",
+     "Recebedor"
+    ],
+    "confirmar": "Confirmar recebimento"
+   },
+   {
+    "titulo": "Destinação competente do saldo",
+    "campos": [
+     "Saldo",
+     "Destinação",
+     "Evidência",
+     "Aprovador"
+    ],
+    "confirmar": "Submeter destinação"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Receber devolução",
+    "Custódia 10 → 0 sc · 10 sc em quarentena até avaliação · OS-0417 pronta para conciliar"
+   ],
+   [
+    "Registrar destinação formal",
+    "Destinação submetida à alçada · conciliação aguarda aprovação"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "Custódia aberta · 10 sc",
+   "Custódia transferida na entrega",
+   "Declaração não transfere custódia",
+   "Recebida · voltou ao Galpão 2",
+   "Impede encerrar a ordem"
+  ]
+ },
+ "SU-08.dc.html": {
+  "arquivo": "SU-08.dc.html",
+  "familia": "SU-08",
+  "titulo": "Transferências e movimentos",
+  "rota": "/suprimentos/movimentos",
+  "links": [
+   [
+    "Suprimentos",
+    "SU-01.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Confirmar recebimento",
+    "TR-0452 confirmada no Galpão Boa Vista · 200 L de Glifosato saem do trânsito e entram no saldo do destino · extrato atualizado"
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Transferência entre locais",
+    "campos": [
+     "Item",
+     "Quantidade",
+     "Origem",
+     "Destino",
+     "Motivo"
+    ],
+    "confirmar": "Iniciar transferência"
+   },
+   {
+    "titulo": "Perda em alçada",
+    "campos": [
+     "Item",
+     "Quantidade",
+     "Causa",
+     "Evidência",
+     "Aprovador"
+    ],
+    "confirmar": "Submeter perda"
+   },
+   {
+    "titulo": "Estorno vinculado",
+    "campos": [
+     "Movimento original",
+     "Motivo",
+     "Efeito"
+    ],
+    "confirmar": "Estornar com vínculo"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Transferir material",
+    "TR-0453 criada · saldo em trânsito até confirmação no destino"
+   ],
+   [
+    "Registrar perda em alçada",
+    "PE-013 submetida · saldo permanece até aprovação"
+   ],
+   [
+    "Estornar com vínculo",
+    "ES-0072 lançado · MV-8817 marcado “estornado · ver ES-0072”"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 trânsito · 1 perda em alçada",
+   "Em trânsito",
+   "Conferida",
+   "Lançado",
+   "Estornado · ver ES-0071",
+   "Confirmada",
+   "Aguarda gestor"
+  ]
+ },
+ "SU-09.dc.html": {
+  "arquivo": "SU-09.dc.html",
+  "familia": "SU-09",
+  "titulo": "Inventários e ajustes",
+  "rota": "/suprimentos/inventarios",
+  "links": [
+   [
+    "Suprimentos",
+    "SU-01.dc.html"
+   ],
+   [
+    "Contar no app",
+    "MB-05.dc.html"
+   ],
+   [
+    "Ver efeito no extrato",
+    "SU-08.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Recontar",
+    "Recontagem da prateleira P-12 solicitada · segundo contador designado (segregação de funções)"
+   ],
+   [
+    "Aprovar ajuste INV-12",
+    "Aprovado · MV-8830 lançado no extrato: −12 sc MAP 11-52 (R$ 4,1 mil) · saldo do sistema 130 → 118 sc · causa e evidência vinculadas ao INV-12"
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Planejar inventário",
+    "campos": [
+     "Escopo",
+     "Data de corte",
+     "Contador",
+     "Recontagem"
+    ],
+    "confirmar": "Planejar contagem"
+   },
+   {
+    "titulo": "Ajuste de inventário",
+    "campos": [
+     "Item",
+     "Diferença",
+     "Causa",
+     "Evidência",
+     "Aprovador"
+    ],
+    "confirmar": "Submeter ajuste"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Planejar contagem",
+    "INV-14 planejado · movimentos do escopo suspensos no corte"
+   ],
+   [
+    "Submeter ajuste",
+    "Ajuste submetido · saldo permanece até aprovação"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 ajuste aguardando gestor",
+   "Aguarda gestor",
+   "Em curso",
+   "Encerrado"
+  ]
+ },
+ "VE-01.dc.html": {
+  "arquivo": "VE-01.dc.html",
+  "familia": "VE-01",
+  "titulo": "Demanda e oferta",
+  "rota": "/comercial/demanda-oferta",
+  "links": [
+   [
+    "Criar oferta",
+    "VE-03.dc.html"
+   ],
+   [
+    "Rever previsão",
+    "CO-01.dc.html"
+   ],
+   [
+    "Propor ajuste",
+    "PL-06.dc.html"
+   ],
+   [
+    "Detalhar demanda",
+    "VE-04det.dc.html"
+   ],
+   [
+    "Ver oferta",
+    "VE-03.dc.html"
+   ],
+   [
+    "Abrir inspeção",
+    "CO-06.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Simular atendimento",
+    "Mamão A · 28/09: máximo factível 9,6 t (origem T7) — o pedido de 10,0 t fica com 0,4 t descobertas; alternativa: semana 05/10 tem 2.000 kg publicáveis."
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "Falta 0,4 t · Mamão A",
+   "Falta 0,4 t",
+   "Saldo 3.000 kg · publicável 2.000 kg",
+   "Excesso 1,8 t · em oferta",
+   "Falta 2.500 sc · L27-013 bloqueado",
+   "Excesso 8.800 sc · incerto",
+   "Reserva temporária",
+   "Aguardando confirmação",
+   "Compromisso firme",
+   "Confirmado",
+   "Reserva expirada",
+   "Expirada"
+  ]
+ },
+ "VE-02.dc.html": {
+  "arquivo": "VE-02.dc.html",
+  "familia": "VE-02",
+  "titulo": "Mercado e preços",
+  "rota": "/comercial/mercado",
+  "links": [
+   [
+    "Comercial",
+    "VE-01.dc.html"
+   ],
+   [
+    "Preparar oferta",
+    "VE-03.dc.html"
+   ],
+   [
+    "Usar premissa",
+    "GE-02.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Comparar janelas",
+    "Soja fev/27 × mai/27: +R$ 4,20/sc no diferido; carrego (armazenagem + juros) estimado R$ 3,10/sc → janela mai/27 ganha R$ 1,10/sc."
+   ],
+   [
+    "Simular preço líquido",
+    "Soja fev/27 a R$ 132,00/sc − frete R$ 6,50 − impostos/taxas R$ 6,60 = R$ 118,90/sc líquido na fazenda · frete e taxas são premissas (hipótese) da gestão."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Alerta de preço",
+    "campos": [
+     "Instrumento",
+     "Condição",
+     "Validade"
+    ],
+    "confirmar": "Criar alerta"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Criar alerta",
+    "Alerta ativo · notificação sem ordem de venda"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "15 min",
+   "D-1",
+   "Sem cotação na fonte",
+   "ausente ≠ zero"
+  ]
+ },
+ "VE-03.dc.html": {
+  "arquivo": "VE-03.dc.html",
+  "familia": "VE-03",
+  "titulo": "Ofertas e propostas",
+  "rota": "/comercial/ofertas",
+  "links": [
+   [
+    "Comercial",
+    "VE-01.dc.html"
+   ],
+   [
+    "Aprovar venda da OF-101",
+    "VE-04.dc.html"
+   ],
+   [
+    "Aprovar venda",
+    "VE-04.dc.html"
+   ],
+   [
+    "Ver pedido",
+    "VE-04det.dc.html"
+   ],
+   [
+    "Abrir inspeção",
+    "CO-06.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Enviar oferta",
+    "OF-103 enviada a 2 clientes com convite confirmado pelo portal do cliente · finalidade, prazo e documentos registrados."
+   ],
+   [
+    "Comparar propostas",
+    "OF-101: Frutas Real v1 rende R$ 2,10/kg líquidos contra R$ 1,99/kg da contraproposta da Rede Hortifrúti BA (frete CIF por conta do produtor) — melhor líquido: Frutas Real."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Nova oferta privada",
+    "campos": [
+     "Produto",
+     "Volume/base",
+     "Janela",
+     "Destino",
+     "Preço/condição",
+     "Validade"
+    ],
+    "confirmar": "Criar oferta"
+   },
+   {
+    "titulo": "Destinatários elegíveis",
+    "campos": [
+     "Cliente",
+     "Cliente",
+     "Finalidade e prazo"
+    ],
+    "confirmar": "Confirmar destinatários"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Preparar oferta",
+    "Rascunho OF-103 criado · privado até envio"
+   ],
+   [
+    "Revisar destinatários",
+    "2 destinatários confirmados — parceiro pagante sem convite NÃO recebe"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "OF-101 aceita · aguarda aprovação",
+   "Aceita · aprovar",
+   "Virou PV-031",
+   "L27-013 bloqueado",
+   "Expirada",
+   "Melhor líquido"
+  ]
+ },
+ "VE-04.dc.html": {
+  "arquivo": "VE-04.dc.html",
+  "familia": "VE-04",
+  "titulo": "Pedidos de venda",
+  "rota": "/comercial/pedidos",
+  "links": [
+   [
+    "Comercial",
+    "VE-01.dc.html"
+   ],
+   [
+    "Resolver alocação do PV-031",
+    "VE-04det.dc.html"
+   ],
+   [
+    "Programar entrega",
+    "LO-01.dc.html"
+   ],
+   [
+    "Ver recebíveis",
+    "GE-05.dc.html"
+   ],
+   [
+    "Tratar devolução",
+    "VE-06.dc.html"
+   ],
+   [
+    "Resolver alocação",
+    "VE-04det.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Confirmar pedido",
+    "PV-032 confirmado numa transação única: preço, crédito, saldo (1,8 t B) e capacidade verificados · 1,8 t alocadas uma única vez."
+   ]
+  ],
+  "formularios": [],
+  "abre_paineis": [],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 pedido em risco",
+   "Aguardando confirmação",
+   "Alocado 9,6 t · falta 0,4 t",
+   "Expedido 8.000 · saldo 4.000 sc",
+   "Entregue · pagamento em aberto",
+   "Devolução parcial · RC-12"
+  ]
+ },
+ "VE-04det.dc.html": {
+  "arquivo": "VE-04det.dc.html",
+  "familia": "VE-04",
+  "titulo": "Pedido PV-031 · Mamão Formosa A",
+  "rota": "/comercial/pedidos",
+  "links": [
+   [
+    "Comercial",
+    "VE-01.dc.html"
+   ],
+   [
+    "Pedidos de venda",
+    "VE-04.dc.html"
+   ],
+   [
+    "Voltar",
+    "VE-04.dc.html"
+   ],
+   [
+    "Programar entrega",
+    "LO-01.dc.html"
+   ],
+   [
+    "Ver recebíveis",
+    "GE-05.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Alocar produção/estoque",
+    "Sem estoque apto de classe A: 0,4 t seguem descobertas — alternativas: reduzir volume com aceite, deslocar 0,4 t para 05/10 ou origem parceira elegível e rastreável."
+   ],
+   [
+    "Emitir solicitação fiscal",
+    "Bloqueada: entrega não programada — programe a entrega em Logística para emitir a solicitação fiscal."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Revisão do pedido (v3)",
+    "campos": [
+     "Quantidade",
+     "Motivo",
+     "Janela"
+    ],
+    "confirmar": "Enviar revisão v3"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Renegociar volume",
+    "Revisão v3 enviada · aguarda aceite do cliente · v2 preservada"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "Alocação parcial · falta 0,4 t",
+   "Alocação futura",
+   "Promessa verificada",
+   "Sem origem",
+   "Falta origem",
+   "Conversão",
+   "Dedução única",
+   "Aguardando entrega",
+   "Condicionado à alocação"
+  ]
+ },
+ "VE-05.dc.html": {
+  "arquivo": "VE-05.dc.html",
+  "familia": "VE-05",
+  "titulo": "Contratos e compromissos",
+  "rota": "/comercial/contratos",
+  "links": [
+   [
+    "Comercial",
+    "VE-01.dc.html"
+   ],
+   [
+    "Programar entrega",
+    "LO-01.dc.html"
+   ],
+   [
+    "Ver pedidos",
+    "VE-04.dc.html"
+   ],
+   [
+    "Ver financeiro",
+    "GE-05.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Vincular compra/crédito",
+    "BT-090 vinculado à compra de insumos PC-088 e CRE-0102 (R$ 850 mil, aprovação condicionada a documento, liberado R$ 300 mil) — garantia não duplica o compromisso físico."
+   ],
+   [
+    "Simular exposição",
+    "Soja 26/27: comprometido 16.000 sc de 24.800 sc previstas (65%) · preço médio travado R$ 131,75/sc · exposição a preço: 8.800 sc."
+   ],
+   [
+    "Liquidar por eventos",
+    "Nada a liquidar agora: liquidação usa somente eventos confirmados — 2 entregas e 1 pagamento aguardam confirmação."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Novo compromisso",
+    "campos": [
+     "Contraparte",
+     "Produto/base",
+     "Volume",
+     "Janela",
+     "Condições"
+    ],
+    "confirmar": "Formalizar compromisso"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Formalizar compromisso",
+    "CT-204 criado · obrigação registrada uma única vez"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "PV-030",
+   "8.000 de 12.000 sc",
+   "Aguarda colheita",
+   "PC-088",
+   "CRE-0102",
+   "Conta uma vez",
+   "CPR garantia",
+   "Garantia não é 2ª venda",
+   "BT-090",
+   "Liberado R$ 300 mil"
+  ]
+ },
+ "VE-06.dc.html": {
+  "arquivo": "VE-06.dc.html",
+  "familia": "VE-06",
+  "titulo": "Reclamações e devoluções",
+  "rota": "/comercial/devolucoes",
+  "links": [
+   [
+    "Comercial",
+    "VE-01.dc.html"
+   ],
+   [
+    "Emitir solicitação de crédito",
+    "GE-05.dc.html"
+   ],
+   [
+    "Receber bloqueado",
+    "CO-04.dc.html"
+   ],
+   [
+    "Decidir destinação",
+    "CO-06.dc.html"
+   ]
+  ],
+  "acoes": [
+   [
+    "Autorizar retorno",
+    "Bloqueado para RC-14: faltam evidências do cliente — cobre as evidências e depois autorize o retorno."
+   ],
+   [
+    "Encerrar caso",
+    "Bloqueado para RC-12: falta destinação física do retorno bloqueado — decida a destinação na Qualidade; encerrar exige destinação física e tratamento financeiro."
+   ]
+  ],
+  "formularios": [
+   {
+    "titulo": "Novo caso",
+    "campos": [
+     "Pedido/entrega",
+     "Motivo",
+     "Lote",
+     "Quantidade",
+     "Evidências"
+    ],
+    "confirmar": "Abrir caso"
+   }
+  ],
+  "abre_paineis": [
+   [
+    "Abrir caso",
+    "Caso RC-15 aberto · genealogia do lote e clientes afetados carregados"
+   ]
+  ],
+  "selos": [
+   "Fazenda Santa Rita",
+   "Safra 2026/27",
+   "1 caso aguardando destinação",
+   "Aguardando evidências",
+   "Retorno autorizado · a caminho",
+   "Recebido bloqueado",
+   "Encerrado"
+  ]
+ }
+}

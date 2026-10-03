@@ -1,0 +1,28 @@
+/* IN-04 · mapa que se ajusta à largura disponível (proposta para areas/inicio.py; só vale no IN-04).
+   Decide pela largura do conteúdo (main) e do próprio mapa (container queries), não pelo aparelho: vale igual no celular,
+   no tablet, no zoom de 200 % e numa janela de computador estreita ou com o menu aberto. Em 1440 px (estado inicial) nada muda. */
+main:has(>.mapa-corpo){container:in04/inline-size}
+.mapa-area{container:in04mapa/inline-size}
+/* conteúdo estreito: a trilha de camadas vira faixa horizontal rolável no alto, e os filtros quebram linha */
+@container in04 (max-width: 760px){
+.mapa-corpo{flex-direction:column!important}
+.mapa-trilha{flex-direction:row!important;overflow-x:auto;border-right:0!important;border-bottom:1px solid #E4E9E5;flex-shrink:0}
+.mapa-trilha>button{flex:0 0 auto;width:84px!important;min-height:56px}
+.mapa-corpo [role=group]{flex-wrap:wrap}
+}
+/* mapa e painel do talhão não cabem lado a lado com o mapa útil (≥ ~440 px): o painel desce para baixo do mapa, na largura
+   toda, e a tela rola (o bloco cresce com o conteúdo em vez de espremer o mapa) */
+@container in04 (max-width: 919px){
+.mapa-corpo{flex:1 0 auto!important}
+.mapa-linha{flex-direction:column}
+.mapa-area{min-height:max(62vh,280px)}
+.mapa-linha aside[aria-label]{width:auto!important;border-left:0!important;border-top:1px solid #E4E9E5}
+}
+/* mapa estreito: dica no alto; ferramentas numa linha própria logo abaixo (rola de lado se não couber; o foco a traz à vista);
+   zoom abaixo delas; legenda limitada a 30 % da altura do mapa e rolável. Nada fica por cima de outro controle. */
+@container in04mapa (max-width: 700px){
+[role=toolbar][aria-label="Ferramentas do mapa"]{left:12px;right:12px!important;top:52px!important;max-width:none!important;flex-wrap:nowrap!important;justify-content:flex-start!important;overflow-x:auto;padding:2px;scrollbar-width:thin}
+[role=toolbar][aria-label="Ferramentas do mapa"] button{flex-shrink:0;white-space:nowrap}
+.mapa-area span[style*="top: 10px"]{max-width:calc(100% - 24px);box-sizing:border-box}
+.mapa-area>div[style*="bottom: 12px"]{max-height:30%;overflow-y:auto;box-sizing:border-box}
+}

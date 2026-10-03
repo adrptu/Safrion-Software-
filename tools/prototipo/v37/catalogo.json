@@ -1,0 +1,2619 @@
+{
+ "IN-01": {
+  "id": "IN-01",
+  "titulo": "Meu dia",
+  "linha": 325,
+  "rota": "/inicio/meu-dia",
+  "responsavel": "Todos, por função",
+  "Conteúdo": "Fila priorizada por prazo, impacto, responsabilidade e prontidão; alternar Minhas tarefas e Minha equipe conforme permissão.",
+  "Campos e informação essencial": "Objeto; fazenda/local; tarefa; prazo; responsável; impedimento; próxima ação. Até quatro contadores abrem filtros.",
+  "Botões e destinos": "Abrir tarefa → registro de origem; Assumir → atribuição permitida; Resolver → ação específica; Registrar ocorrência → CA-03.",
+  "Continuidade e estados": "Resolver atualiza a fila sem perder posição. Não escolher uma O.S. arbitrária como ação global. Alertas repetidos do mesmo caso são agrupados.",
+  "Contrato reconciliado de implementação": "Prioridade, prazo, impacto, responsável e bloqueio. Resolver abre o registro filtrado; retornar mantém a fila.",
+  "Dependências e aceite": "capítulos 55–56, 67–68; critérios IND, RAST, MAPUX, FLUXUX; fluxos FL-01, FL-R10. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-29, FO-38, FO-40, FO-45 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-29",
+   "FO-38",
+   "FO-40",
+   "FO-45"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-01",
+   "FL-R10"
+  ]
+ },
+ "IN-02": {
+  "id": "IN-02",
+  "titulo": "Aprovações",
+  "linha": 344,
+  "rota": "/inicio/aprovacoes",
+  "responsavel": "Aprovadores",
+  "Conteúdo": "Caixa única, agrupada por decisão, alçada e vencimento; painel de diferença da versão submetida.",
+  "Campos e informação essencial": "Solicitante; objeto/versão; efeito; valor/quantidade; prazo; conflito; documentos.",
+  "Botões e destinos": "Revisar → detalhe; Aprovar versão; Devolver com motivo; Rejeitar; Aprovar selecionados quando independentes.",
+  "Continuidade e estados": "Aprovação não encerra execução. Mudança material invalida somente decisão afetada. Exibir resultado por item e voltar à próxima pendência.",
+  "Contrato reconciliado de implementação": "Versão submetida, diferenças, competência exigida e escopo aprovado. Aprovar nunca inclui versões alteradas após a revisão.",
+  "Dependências e aceite": "capítulos 8.4–8.6, 41–42, 47, 55–56, 67–68; critérios OSA, GRUPO, ESTOS, PCM, IND, RAST, FLUXUX; fluxos FL-OS-01, FL-AG-07, FL-PCM-01, FL-R02. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-29 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Despacho de decisões por objeto": "FO-29 aplica-se a ordens/liberações. Orçamento usa FO-36; ajuste de inventário FO-32; políticas de estoque FO-31; política de água FO-43; acessos/alçadas FO-39. A caixa apresenta o formulário e comando do domínio original com diferenças, versão e alçada; aprovar aqui tem o mesmo efeito e recibo de aprovar no módulo. Nunca renderizar campos de ordem para um ajuste de estoque ou criar uma aprovação paralela."
+  },
+  "fo": [
+   "FO-29",
+   "FO-31",
+   "FO-32",
+   "FO-36",
+   "FO-39",
+   "FO-43"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-AG-07",
+   "FL-OS-01",
+   "FL-PCM-01",
+   "FL-R02"
+  ]
+ },
+ "IN-03": {
+  "id": "IN-03",
+  "titulo": "Agenda e pendências",
+  "linha": 365,
+  "rota": "/inicio/agenda",
+  "responsavel": "Gestão e coordenação",
+  "Conteúdo": "Agenda diária/semanal e lista equivalente, com tarefas técnicas, administrativas e dependências.",
+  "Campos e informação essencial": "Data/fuso; objeto; responsável; prioridade; compromisso; bloqueio; prazo limite.",
+  "Botões e destinos": "Abrir origem; Atribuir; Reprogramar → PL-05 quando altera operação; Criar tarefa vinculada → GE-07.",
+  "Continuidade e estados": "Tarefa não duplica O.S.; pendência usa condição de resolução do objeto. Adiar alerta não muda a data da obrigação.",
+  "Contrato reconciliado de implementação": "Calendário de compromissos e recursos com fuso e janela; reagendar mostra efeitos antes da confirmação.",
+  "Dependências e aceite": "capítulos 55–56, 67–68; critérios IND, RAST, MAPUX, FLUXUX; fluxos FL-01, FL-R10. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-05, FO-38 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-05",
+   "FO-38"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-01",
+   "FL-R10"
+  ]
+ },
+ "IN-04": {
+  "id": "IN-04",
+  "titulo": "Mapa da fazenda",
+  "linha": 384,
+  "rota": "/inicio/mapa",
+  "responsavel": "Gestão, agronomia e operação",
+  "Conteúdo": "Mapa e lista equivalentes; camadas canônicas do capítulo 67.2: Integrado, Satélite, Solo, MIP/MID, O.S./prazos, Irrigação, Estádio, Colheita/produtividade e Custos; legenda, fonte e data por camada.",
+  "Campos e informação essencial": "Geometria/localização e sua qualidade; tipo/ID da ordem; etapa canônica; atividade; janela; realizado confirmado/provisório; saldo/unidade; aprovação individual ou política de água; impedimento/responsável; última atualização; legenda, fonte e data da camada.",
+  "Botões e destinos": "Selecionar área → ordens filtradas abaixo; Alternar Lista/Kanban; Abrir O.S./tarefa → detalhe canônico; Criar vistoria → AG-01; Abrir Irrigação de hoje → IR-03; Ver recomendação → AG-04; Tela cheia; filtros por etapa/avanço/janela sem efeito transacional.",
+  "Continuidade e estados": "Mancha de satélite é indício para inspeção, não diagnóstico. Nuvem e dado antigo não recebem cor de condição atual. Preservar zoom e seleção ao voltar.",
+  "Contrato reconciliado de implementação": "Seção 8.4: mapa, lista e Kanban sincronizam fases e avanço da O.S., incluindo execução parcial, pausas e pendências de encerramento. Mapa ocupa largura útil com barrinha lateral de funções; tabela abaixo. Camadas Solo, Satélite, Irrigação e Colheita/produtividade têm unidade, fonte, data, qualidade e legenda próprias; ausência de dado é distinta de valor zero.",
+  "Dependências e aceite": "capítulos 55–56, 67–68; critérios IND, RAST, MAPUX, FLUXUX; fluxos FL-01, FL-R10. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-40, FO-44 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Contrato visual obrigatório": "capítulo 67: mapa em toda a largura útil restante após a barrinha lateral compacta de funcionalidades, que deve ser mantida; tabela complementar abaixo, altura ampliável e tela cheia; sem coluna informativa lateral permanente.",
+   "Contrato obrigatório": "camada Solo conforme capítulo 38, com seletor completo de atributos, método, unidade, profundidade e campanha; camada Estádio (ocupação, cultura e fenologia) conforme capítulo 39, com variedade por ocupação e datas previstas/reais.",
+   "Preferência de entrada": "ação Usar como tela inicial grava preferência por usuário, conforme capítulo 2; mapa permanece acessível diretamente mesmo para perfis cujo padrão é outro painel."
+  },
+  "fo": [
+   "FO-40",
+   "FO-44"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-01",
+   "FL-R10"
+  ]
+ },
+ "AG-01": {
+  "id": "AG-01",
+  "titulo": "Monitoramento e vistorias",
+  "linha": 409,
+  "rota": "/agronomia/monitoramento",
+  "responsavel": "Agrônomo e vistoriador",
+  "Conteúdo": "Lista de rotas, alvos e vistorias; detalhe por pontos e série temporal.",
+  "Campos e informação essencial": "Ciclo/parcela; alvo; estádio; protocolo/versão; método/unidade; amostras e qualidade; evidências.",
+  "Botões e destinos": "Programar vistoria → FO-03; Coletar → MB-06; Concluir coleta; Revisar evidências; Criar diagnóstico → AG-03.",
+  "Continuidade e estados": "Próximo ponto avança dentro da rota. Abaixo de limiar não cancela automaticamente manejo preventivo. Critério por presença não usa divisão por zero.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 33–41, 60–62; critérios AGR, ACAG, TV, ACTV, SOLO, LABMAP, COLMAP; fluxos FL-04, FL-05, FL-R01, FL-R06. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-03, FO-08 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-03",
+   "FO-08"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-04",
+   "FL-05",
+   "FL-R01",
+   "FL-R06"
+  ]
+ },
+ "AG-02": {
+  "id": "AG-02",
+  "titulo": "Análises e amostras",
+  "linha": 428,
+  "rota": "/agronomia/analises",
+  "responsavel": "Agronomia/laboratório autorizado",
+  "Conteúdo": "Planos de amostragem, amostras e laudos; painel do original ao lado dos valores extraídos.",
+  "Campos e informação essencial": "Local/área representada; profundidade; data; laboratório; método/extrator; unidades; validação.",
+  "Botões e destinos": "Planejar coleta; Importar laudo → FO-02; Corrigir extração; Validar dados; Abrir diagnóstico → AG-03.",
+  "Continuidade e estados": "OCR não aprova laudo. Original é preservado. Inconsistência bloqueia recomendação dependente, mas não toda operação da fazenda.",
+  "Contrato reconciliado de implementação": "Tabela configurável completa de atributos químicos, físicos e biológicos do capítulo 38; originais, unidades, método, profundidade, laboratório e limite de detecção. Importar abre prévia com erros por linha e mapeamento reutilizável. Amostra composta não gera resolução espacial inventada.",
+  "Dependências e aceite": "capítulos 33–41, 60–62; critérios AGR, ACAG, TV, ACTV, SOLO, LABMAP, COLMAP; fluxos FL-04, FL-05, FL-R01, FL-R06. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-02, FO-40 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Contrato obrigatório": "capítulo 38 define atributos completos, métodos, unidades, profundidades e paridade com mapa/recomendação; capítulo 36 define representatividade espacial."
+  },
+  "fo": [
+   "FO-02",
+   "FO-40"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-04",
+   "FL-05",
+   "FL-R01",
+   "FL-R06"
+  ]
+ },
+ "AG-03": {
+  "id": "AG-03",
+  "titulo": "Diagnósticos",
+  "linha": 449,
+  "rota": "/agronomia/diagnosticos",
+  "responsavel": "Agrônomo",
+  "Conteúdo": "Decisões técnicas por ciclo/parcela, com solo, folha, vistoria, ensaio, histórico e contexto econômico.",
+  "Campos e informação essencial": "Evidências; hipótese/causa; cultura/cultivar; meta; risco; ação proposta; responsável.",
+  "Botões e destinos": "Criar diagnóstico; Solicitar evidência; Registrar decisão; Preparar recomendação → AG-04; Comparar cenário → PL-02.",
+  "Continuidade e estados": "Diagnóstico descreve interpretação e decisão. Doses são formalizadas na recomendação. Emergência MIP não depende de laudo de solo irrelevante.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 33–41, 60–62; critérios AGR, ACAG, TV, ACTV, SOLO, LABMAP, COLMAP; fluxos FL-04, FL-05, FL-R01, FL-R06. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-04 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-04"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-04",
+   "FL-05",
+   "FL-R01",
+   "FL-R06"
+  ]
+ },
+ "AG-04": {
+  "id": "AG-04",
+  "titulo": "Recomendações",
+  "linha": 468,
+  "rota": "/agronomia/recomendacoes",
+  "responsavel": "Agrônomo/RT",
+  "Conteúdo": "Lista e detalhe técnico com abas Contexto, Itens, Cálculo, Prescrição espacial, Versões e Execução.",
+  "Campos e informação essencial": "Origem; ciclo/parcela; operação/alvo; produto e unidade; dose/quantidade; janela; fonte e aprovador.",
+  "Botões e destinos": "Editar rascunho → FO-04; Ver memória CAL; Gerar prescrição espacial; Submeter; Aprovar recomendação; Ver demanda → PL-02.",
+  "Continuidade e estados": "Cálculo automático. Prescrição variável é subdetalhe /:id/prescricao; usar dose fixa é opção técnica, não aprovação adicional. Alteração pós-aprovação cria versão e proposta para saldo futuro.",
+  "Contrato reconciliado de implementação": "Escolher operação direta, recomendação por análise, dose uniforme, setor ou taxa variável; mostrar fonte/edição/região, memória de cálculo, restrições e aprovação. Exportar prescrição valida terminal, unidade, coordenadas e versão.",
+  "Dependências e aceite": "capítulos 33–41, 60–62; critérios AGR, ACAG, TV, ACTV, SOLO, LABMAP, COLMAP; fluxos FL-04, FL-05, FL-R01, FL-R06. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-04, FO-29, FO-44 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Contrato obrigatório": "capítulos 33–38 definem fonte científica, dados completos de solo, dose informada versus sugerida e prescrição para máquina. Operação direta pode nascer em PL-02 sem criar recomendação fictícia."
+  },
+  "fo": [
+   "FO-04",
+   "FO-29",
+   "FO-44"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-04",
+   "FL-05",
+   "FL-R01",
+   "FL-R06"
+  ]
+ },
+ "AG-05": {
+  "id": "AG-05",
+  "titulo": "Biblioteca agronômica e planos técnicos",
+  "linha": 489,
+  "rota": "/agronomia/protocolos",
+  "responsavel": "Agronomia e mantenedor do catálogo",
+  "Conteúdo": "Biblioteca de operações técnicas por cultura, região e fase; distinguir plano-modelo, tabela e protocolo.",
+  "Campos e informação essencial": "Escopo; referência; unidade; gatilhos; validade; revisão; aprovador técnico.",
+  "Botões e destinos": "Criar versão; Importar referência; Comparar versões; Validar; Publicar; Simular aplicação → PL-02.",
+  "Continuidade e estados": "Modelo publicado não reescreve planos em execução. Limiares sem fonte/escopo validados ficam inativos. Planos perenes suportam idade, fenologia e eventos.",
+  "Contrato reconciliado de implementação": "Modelo por cultura e região versionado; Alterar modelo mostra diferenças para cada adoção. Ajustes locais não são apagados pela atualização.",
+  "Dependências e aceite": "capítulos 33–41, 60–62; critérios AGR, ACAG, TV, ACTV, SOLO, LABMAP, COLMAP; fluxos FL-04, FL-05, FL-R01, FL-R06. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-21 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-21"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-04",
+   "FL-05",
+   "FL-R01",
+   "FL-R06"
+  ]
+ },
+ "AG-06": {
+  "id": "AG-06",
+  "titulo": "Eficácia e histórico agronômico",
+  "linha": 508,
+  "rota": "/agronomia/eficacia",
+  "responsavel": "Agronomia e gestão",
+  "Conteúdo": "Intervenções comparadas com observações posteriores, desvio, recorrência e custo.",
+  "Campos e informação essencial": "Recomendação; execução real; método pré/pós; data; resultado; confiança; custo.",
+  "Botões e destinos": "Programar avaliação → AG-01; Abrir aplicação → CA-01; Registrar parecer; Propor revisão → AG-05/GE-07.",
+  "Continuidade e estados": "Redução observada não equivale automaticamente a eficácia causal. Economia adiada e efetivamente evitada aparecem separadas.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 33–41, 60–62; critérios AGR, ACAG, TV, ACTV, SOLO, LABMAP, COLMAP; fluxos FL-04, FL-05, FL-R01, FL-R06. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-03, FO-04, FO-38 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-03",
+   "FO-04",
+   "FO-38"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-04",
+   "FL-05",
+   "FL-R01",
+   "FL-R06"
+  ]
+ },
+ "AG-07": {
+  "id": "AG-07",
+  "titulo": "Bulas e registros",
+  "linha": 527,
+  "rota": "/agronomia/bulas",
+  "responsavel": "Agronomia/RT",
+  "Conteúdo": "Busca por produto, ingrediente, cultura e alvo; ficha oficial, documentos e restrições.",
+  "Campos e informação essencial": "Registro/situação; cultura/alvo; dose e unidade; formulação; carência/reentrada; aplicações; fonte/data.",
+  "Botões e destinos": "Ver documento oficial; Comparar produtos; Usar na recomendação → AG-04; Preparar receituário → FO-04; Atualizar fonte.",
+  "Continuidade e estados": "Receituário é documento técnico específico, com identificação e assinatura aplicáveis. Produto equivalente por ingrediente não é automaticamente substituível. Cache mostra vigência e idade.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 33–41, 60–62; critérios AGR, ACAG, TV, ACTV, SOLO, LABMAP, COLMAP; fluxos FL-04, FL-05, FL-R01, FL-R06. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-21 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-04",
+   "FO-21"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-04",
+   "FL-05",
+   "FL-R01",
+   "FL-R06"
+  ]
+ },
+ "PL-01": {
+  "id": "PL-01",
+  "titulo": "Safras, ciclos e metas",
+  "linha": 546,
+  "rota": "/planejamento/safras",
+  "responsavel": "Gerência e agronomia",
+  "Conteúdo": "Lista de períodos e detalhe com ciclos vinculados, metas, marcos, prontidão e histórico de encerramento.",
+  "Campos e informação essencial": "Empresa/fazenda; período; ciclos/parcelas; culturas; metas; datas previstas/reais; situação.",
+  "Botões e destinos": "Criar planejamento → FO-01; Vincular ciclo; Revisar idades; Abrir plano → PL-02; Autorizar execução; Encerrar período.",
+  "Continuidade e estados": "Cálculo existe no rascunho. Autorizar exige plano e orçamento aplicáveis aprovados. Pomar não é recriado; pendências antigas recebem destinação explícita.",
+  "Contrato reconciliado de implementação": "Grade fazenda → talhão → parcela/ocupação → cultura → variedade → área → plantio previsto/real → plano → orçamento. Replicar preserva identidade própria de cada ocupação.",
+  "Dependências e aceite": "capítulos 39–44, 51–53, 65; critérios SAFRA, AJUSTE, PARC, DAP, PCP, ALOC, PCMP, ORC; fluxos FL-03, FL-08, FL-R01, FL-R03, FL-R04. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-01, FO-06, FO-27 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Contrato obrigatório": "o Plano de cultivo do capítulo 39 posiciona cultura, variedade e data por fazenda/talhão/parcela antes de detalhar operações, na mesma jornada."
+  },
+  "fo": [
+   "FO-01",
+   "FO-06",
+   "FO-27"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-03",
+   "FL-08",
+   "FL-R01",
+   "FL-R03",
+   "FL-R04"
+  ]
+ },
+ "PL-02": {
+  "id": "PL-02",
+  "titulo": "Plano operacional",
+  "linha": 567,
+  "rota": "/planejamento/plano",
+  "responsavel": "Agronomia e PCP",
+  "Conteúdo": "Operações previstas por parcela e data, visão por talhão/cultura/atividade e memória de quantidades.",
+  "Campos e informação essencial": "Fazenda/talhão/parcela e ciclo herdados; cultura/variedade; origem da decisão; necessidade; atividade/ocorrência; área; dose/quantidade e unidade; gatilho por extenso, âncora e data resultante; janela; versão. Recomendações e análises são vínculos opcionais na operação direta.",
+  "Botões e destinos": "Adicionar operação → FO-04; Gerar sugestões pelas análises → painel contextual AG-04; Aplicar modelo; Editar cultivo/variedade → PL-01 contextual; Ajustar este talhão → FO-04 (capítulo 40); Comparar com o padrão; Simular; Publicar plano conforme alçadas; Ver capacidade → PL-03; Ver cobertura → SU-01. Capítulos 37 e 39 definem o comportamento obrigatório.",
+  "Continuidade e estados": "Publicação cria necessidades únicas; conversão em O.S. consome o saldo da mesma necessidade. Ajustes em vários talhões são revalidados em cada destino. O capítulo 40 rege dose/produtos locais, comparação e atualização do padrão sem sobrescrever exceções.",
+  "Contrato reconciliado de implementação": "Editar apenas este talhão/parcela permite incluir/excluir produto e alterar dose com motivo e comparativo de custos; publicar não altera o modelo original.",
+  "Dependências e aceite": "capítulos 39–44, 51–53, 65; critérios SAFRA, AJUSTE, PARC, DAP, PCP, ALOC, PCMP, ORC; fluxos FL-03, FL-08, FL-R01, FL-R03, FL-R04. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-04, FO-27, FO-29 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-04",
+   "FO-27",
+   "FO-29"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-03",
+   "FL-08",
+   "FL-R01",
+   "FL-R03",
+   "FL-R04"
+  ]
+ },
+ "PL-03": {
+  "id": "PL-03",
+  "titulo": "Capacidade e recursos",
+  "linha": 586,
+  "rota": "/planejamento/capacidade",
+  "responsavel": "PCP e gerência",
+  "Conteúdo": "Carga versus capacidade por janela, dia, semana e mês; frentes completas e cenários de contratação. Aba Alocação e ociosidade com matriz recurso × tempo, demanda sem atendimento e oportunidades de realocação.",
+  "Campos e informação essencial": "Operação; quantidade; rendimento; calendário; conjuntos/equipe; indisponibilidade; déficit.",
+  "Botões e destinos": "Ver origem da demanda → PL-02/CO; Ver tabela operacional → CD-02; Simular turnos/equipe/conjuntos; Comparar remanejamento, terceirização, aluguel e aquisição; Propor contratação/cotação → SU-04; Planejar pessoal; Publicar cenário → PL-04 e GE-02. Publicação não contrata nem compra automaticamente.",
+  "Continuidade e estados": "Uma mesma máquina não ocupa duas frentes no mesmo horário. Não descontar manutenção duas vezes em disponibilidade e eficiência.",
+  "Contrato reconciliado de implementação": "Carga mensal por recurso/classe, capacidade líquida, ocupado, livre, sem alocação, indisponível e déficit. Simular remanejamento, turno, terceirização, aluguel ou aquisição considera custo e restrições.",
+  "Dependências e aceite": "capítulos 39–44, 51–53, 65; critérios SAFRA, AJUSTE, PARC, DAP, PCP, ALOC, PCMP, ORC; fluxos FL-03, FL-08, FL-R01, FL-R03, FL-R04. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-23, FO-28 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Contrato obrigatório": "capítulo 44: demanda herdada automaticamente do plano, dimensionamento de máquinas/implementos/pessoas/turnos, colheita e packing, custo e plano de atendimento dos déficits. Seções 44.9–44.10: central de alocação e ociosidade, sugestões viáveis de reaproveitamento entre setores, responsáveis e conferência da execução.",
+   "Visão compartilhada de recursos": "implementar quadro Máquinas agora e na programação da seção 44.11; condição técnica, ocupação e elegibilidade separadas, com critérios RECURSO-01 a RECURSO-10."
+  },
+  "fo": [
+   "FO-23",
+   "FO-28"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-03",
+   "FL-08",
+   "FL-R01",
+   "FL-R03",
+   "FL-R04"
+  ]
+ },
+ "PL-04": {
+  "id": "PL-04",
+  "titulo": "Programação integrada",
+  "linha": 610,
+  "rota": "/planejamento/programacao",
+  "responsavel": "PCP",
+  "Conteúdo": "Lista e calendário das mesmas ordens, com filtros campo/água/colheita/manutenção e teste de prontidão.",
+  "Campos e informação essencial": "Ordem; janela; recurso/conjunto; operador; duração; material; impedimento.",
+  "Botões e destinos": "Programar → FO-05; Simular mudança; Reservar recurso; Revisar prontidão; Enviar ao agrônomo; Liberar selecionadas já aprovadas; Abrir execução → CA-01/IR-03/CO-02/MA-04.",
+  "Continuidade e estados": "Arrastar mostra impacto antes de confirmar. Material previsto não significa disponível físico. Ordem sem insumo não exige requisição.",
+  "Contrato reconciliado de implementação": "Agenda por conjunto máquina/implemento/equipe/instalação. DAP/DAC/calendário mostram âncora prevista ou real; mudanças recalculam apenas saldo futuro e pedem revisão onde cabível.",
+  "Dependências e aceite": "capítulos 39–44, 51–53, 65; critérios SAFRA, AJUSTE, PARC, DAP, PCP, ALOC, PCMP, ORC; fluxos FL-03, FL-08, FL-R01, FL-R03, FL-R04. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-05, FO-28, FO-29 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Visão compartilhada de recursos": "implementar quadro Máquinas agora e na programação da seção 44.11; condição técnica, ocupação e elegibilidade separadas, com critérios RECURSO-01 a RECURSO-10.",
+   "Janela de trabalho": "seção 8.6; filtrar, preparar/emitir e liberar selecionadas são ações distintas. Mostrar pendências de outros períodos e validar JANELA-01 a JANELA-10."
+  },
+  "fo": [
+   "FO-05",
+   "FO-28",
+   "FO-29"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-03",
+   "FL-08",
+   "FL-R01",
+   "FL-R03",
+   "FL-R04"
+  ]
+ },
+ "PL-05": {
+  "id": "PL-05",
+  "titulo": "Impedimentos e reprogramação",
+  "linha": 634,
+  "rota": "/planejamento/impedimentos",
+  "responsavel": "PCP e donos dos impedimentos",
+  "Conteúdo": "Fila de faltas, chuva, ativo, técnica, pessoas, qualidade e integração; propostas lado a lado.",
+  "Campos e informação essencial": "Causa; ordens afetadas; impacto; responsável; prazo; alternativa; aprovação.",
+  "Botões e destinos": "Resolver origem; Simular substituição; Reprogramar saldo → FO-05; Aprovar proposta; Notificar responsáveis.",
+  "Continuidade e estados": "Resolver compra ou manutenção revalida prontidão; não inicia máquina nem muda agenda automaticamente. Versão executada permanece intacta.",
+  "Contrato reconciliado de implementação": "Fila única de impedimentos com causa, origem, afetados, dono, prazo e ação; resolver reavalia a prontidão sem liberar automaticamente restrição técnica.",
+  "Dependências e aceite": "capítulos 39–44, 51–53, 65; critérios SAFRA, AJUSTE, PARC, DAP, PCP, ALOC, PCMP, ORC; fluxos FL-03, FL-08, FL-R01, FL-R03, FL-R04. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-05, FO-08 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-05",
+   "FO-08"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-03",
+   "FL-08",
+   "FL-R01",
+   "FL-R03",
+   "FL-R04"
+  ]
+ },
+ "PL-06": {
+  "id": "PL-06",
+  "titulo": "Parcelas e escalonamento",
+  "linha": 653,
+  "rota": "/planejamento/escalonamento",
+  "responsavel": "Agronomia, PCP e comercial",
+  "Conteúdo": "Mapa de parcelas e curva semanal de oferta versus demanda por produto/classe, em vários ciclos.",
+  "Campos e informação essencial": "Geometria; ciclo e ocupação; janela de colheita; preparo/limpeza; demanda residual; curva de produção; capacidade.",
+  "Botões e destinos": "Simular parcelas → FO-06; Comparar cenários; Ajustar datas; Publicar parcelamento e plano → PL-01/PL-02.",
+  "Continuidade e estados": "Proposta não divide área vigente até aprovação. Oferta de colheita prolongada não repete a produtividade total em toda semana. Replantio respeita liberação física da parcela.",
+  "Contrato reconciliado de implementação": "Dividir área com geometria e vigência, cultivar e data próprias; validar soma, sobreposição e histórico. Parcelas não duplicam hectares de cobrança.",
+  "Dependências e aceite": "capítulos 39–44, 51–53, 65; critérios SAFRA, AJUSTE, PARC, DAP, PCP, ALOC, PCMP, ORC; fluxos FL-03, FL-08, FL-R01, FL-R03, FL-R04. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-01, FO-06, FO-27, FO-33 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Contrato obrigatório": "capítulo 43: parcelas com variedade/data próprias, mapa e tabela sincronizados, sem duplicar talhão; operações e materiais seguem a parcela correta."
+  },
+  "fo": [
+   "FO-01",
+   "FO-06",
+   "FO-27",
+   "FO-33"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-03",
+   "FL-08",
+   "FL-R01",
+   "FL-R03",
+   "FL-R04"
+  ]
+ },
+ "CA-01": {
+  "id": "CA-01",
+  "titulo": "Ordens de campo",
+  "linha": 674,
+  "rota": "/campo/ordens",
+  "responsavel": "PCP, encarregado e operador",
+  "Conteúdo": "Lista com filtros de estado e detalhe completo da ordem; identificação única em todas as entradas.",
+  "Campos e informação essencial": "ID/tipo; fazenda/talhão/parcela; atividade; janela; etapa canônica; versão/aprovação; equipe/conjunto; total autorizado; realizado confirmado e provisório; saldo/unidade; impedimento e responsável; pendências finais.",
+  "Botões e destinos": "Preparar/emitir período; Revisar e aprovar; Ajustar produtos/doses; Liberar selecionadas; Iniciar/Pausar/Retomar; Registrar avanço → MB-03; Finalizar apontamento do turno; Concluir execução → Em conferência; Conferir → CA-02; Encerrar O.S. somente após reconciliação; Ver fichas; Requisitar → SU-07; Reprogramar saldo → PL-05.",
+  "Continuidade e estados": "Mostrar plano e recomendação de origem, realizado, saldo e documentos seguintes. Trocar data não troca produto ou área autorizados.",
+  "Contrato reconciliado de implementação": "Seção 8.4: Lista/Kanban/Mapa mostram ciclo, avanço parcial, motivos de pausa e saldo. Aprovação agronômica por versão com incluir/excluir produto, dose e justificativa. Agrupar somente ordens compatíveis; fichas de caldeiro, operador e almoxarife derivam da mesma revisão.",
+  "Dependências e aceite": "capítulos 41–42, 64; critérios OSA, GRUPO, ESTOS, CAMPO; fluxos FL-12, FL-13, FL-R02. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-04, FO-05, FO-07, FO-08, FO-09, FO-29 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Contrato obrigatório": "capítulo 41: fila “Aguardando agrônomo”, revisão comparativa de plano/O.S./situação atual, edição e aprovação por versão, fichas para caldeiro e operador. Sem aprovação, ordem emitida é identificada como não autorizada para execução.",
+   "Janela de trabalho": "seção 8.6; filtrar, preparar/emitir e liberar selecionadas são ações distintas. Mostrar pendências de outros períodos e validar JANELA-01 a JANELA-10.",
+   "Ciclo canônico obrigatório": "A liberar → Liberadas → Em execução → Em conferência → Encerradas. Aplicar seção 8.4, FL-OS-01 e OSFASE-01 a OSFASE-18; término físico entra automaticamente em Em conferência."
+  },
+  "fo": [
+   "FO-04",
+   "FO-05",
+   "FO-07",
+   "FO-08",
+   "FO-09",
+   "FO-29"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-12",
+   "FL-13",
+   "FL-OS-01",
+   "FL-R02"
+  ]
+ },
+ "CA-02": {
+  "id": "CA-02",
+  "titulo": "Apontamentos e conferência",
+  "linha": 700,
+  "rota": "/campo/apontamentos",
+  "responsavel": "PCP, agronomia e controladoria",
+  "Conteúdo": "Fila por condição de conferência e painel previsto versus observado, com eventos offline e evidências.",
+  "Campos e informação essencial": "O.S./versão; apontamento/turno; data; parcela; equipe/conjunto; realizado do período; acumulado confirmado/provisório; saldo; horas; consumos; sobras; origem/sincronização; estado da conferência do apontamento separado da etapa da O.S.",
+  "Botões e destinos": "Conferir apontamento; Corrigir com histórico; Ver consumo e devoluções; Devolver para esclarecimento; Abrir O.S.; Encerrar O.S. apenas com término físico e todas as condições satisfeitas. Conferir um dia não conclui a ordem de vários dias.",
+  "Continuidade e estados": "Fato permanece registrável fora da tolerância. Consumo recebe um único evento de efeito; conferência posterior não repete baixa.",
+  "Contrato reconciliado de implementação": "Área/quantidade real, tempo, pessoas, máquina, consumo e sobras. Concluir execução não encerra a O.S. com custódia, divergência ou conferência pendente.",
+  "Dependências e aceite": "capítulos 41–42, 64; critérios OSA, GRUPO, ESTOS, CAMPO; fluxos FL-12, FL-13, FL-R02. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-07, FO-09 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-07",
+   "FO-09"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-12",
+   "FL-13",
+   "FL-R02"
+  ]
+ },
+ "CA-03": {
+  "id": "CA-03",
+  "titulo": "Ocorrências",
+  "linha": 719,
+  "rota": "/campo/ocorrencias",
+  "responsavel": "Qualquer papel no escopo",
+  "Conteúdo": "Lista e detalhe de ocorrência vinculada à operação, talhão, lote ou ativo.",
+  "Campos e informação essencial": "Tipo; local; instante; relato; gravidade; evidência; destino e responsável.",
+  "Botões e destinos": "Registrar → FO-08/MB-04; Abrir manutenção → MA-02; Encaminhar agronomia → AG-03; Reprogramar → PL-05; Encerrar tratamento.",
+  "Continuidade e estados": "Encerrar exige resolução do caso ou destinação documentada. A abertura de manutenção a partir da mesma ocorrência é idempotente.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 41–42, 64; critérios OSA, GRUPO, ESTOS, CAMPO; fluxos FL-12, FL-13, FL-R02. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-08 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-08"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-12",
+   "FL-13",
+   "FL-R02"
+  ]
+ },
+ "CA-04": {
+  "id": "CA-04",
+  "titulo": "Minhas requisições",
+  "linha": 738,
+  "rota": "/campo/requisicoes",
+  "responsavel": "Executor/encarregado",
+  "Conteúdo": "Visão filtrada de SU-07, incluindo custódia do usuário/equipe e saldos por ordem.",
+  "Campos e informação essencial": "Requisição; ordem; item/lote; solicitado; entregue; consumido; saldo.",
+  "Botões e destinos": "Solicitar da ordem → FO-09; Confirmar recebimento; Apontar uso → CA-02; Devolver saldo → SU-07.",
+  "Continuidade e estados": "É o mesmo registro de Suprimentos. Nunca criar almoxarifado paralelo em Campo.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 41–42, 64; critérios OSA, GRUPO, ESTOS, CAMPO; fluxos FL-12, FL-13, FL-R02. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-09 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-09"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-12",
+   "FL-13",
+   "FL-R02"
+  ]
+ },
+ "IR-01": {
+  "id": "IR-01",
+  "titulo": "Balanço hídrico",
+  "linha": 757,
+  "rota": "/irrigacao/balanco",
+  "responsavel": "Agronomia e irrigação",
+  "Conteúdo": "Tabela por setor/parcela e série temporal com necessidade, autorização, aplicado e déficit remanescente.",
+  "Campos e informação essencial": "Setor/cultura/estádio; déficit; fontes/idade/qualidade; necessidade/lâmina/volume; limites; política/versão/validade; enquadramento ou exceção; água sem produtos ou fertirrigação.",
+  "Botões e destinos": "Recalcular e explicar; Revisar política por agrônomo; Revisar exceções; Programar → IR-02; Consultar tarefa existente → IR-03. Dentro da política de água, autorização automática rastreável sem assinatura diária repetitiva.",
+  "Continuidade e estados": "Modelos por setor; água aplicada parcialmente não é creditada ao pivô inteiro. Sem dados suficientes, indicar estimativa e exigir política técnica adequada.",
+  "Contrato reconciliado de implementação": "Déficit, água disponível, precipitação efetiva, ET e lâmina líquida/bruta com método, qualidade e restrições. Aprovar recomendação não liga equipamento.",
+  "Dependências e aceite": "capítulos 41–42, 53, 63–64; critérios OSA, ESTOS, IRCOMP, CAMPO; fluxos FL-14, FL-R03. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-43 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Água sem insumos": "implementar Irrigação de hoje da seção 41.8 e AGUA-01 a AGUA-08: tarefa automática e autorização por política, sem requisição/custódia de produtos; exceções encaminhadas ao responsável. Fertirrigação mantém aprovação individual."
+  },
+  "fo": [
+   "FO-43"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-14",
+   "FL-R03"
+  ]
+ },
+ "IR-02": {
+  "id": "IR-02",
+  "titulo": "Programação da irrigação",
+  "linha": 779,
+  "rota": "/irrigacao/programacao",
+  "responsavel": "Irrigação e PCP",
+  "Conteúdo": "Agenda com captação, bomba, setor, vazão, energia e interferência com outras operações.",
+  "Campos e informação essencial": "Setor/equipamento; tarefa vinculada; modalidade água/produtos; janela; lâmina/volume; duração; rede/energia; conflito; condição PCM; política/autorização; prontidão.",
+  "Botões e destinos": "Programar período; Simular capacidade; Resolver conflito; Ver Irrigação de hoje → IR-03. Gerar/recuperar tarefa única automaticamente; liberar por política somente água elegível e pronta. Produtos exigem aprovação individual.",
+  "Continuidade e estados": "Fracionamento exige viabilidade agronômica. Aprovação não liga equipamento. Setor/gotejo e pivô usam contratos de medição distintos.",
+  "Contrato reconciliado de implementação": "Simulação hidráulica e elétrica por setor e janela, capacidade compartilhada e paradas PCM; ordens agrícolas exigem autorização agronômica; água sem insumos pode usar política explícita da seção 41.8.",
+  "Dependências e aceite": "capítulos 41–42, 53, 63–64; critérios OSA, ESTOS, IRCOMP, CAMPO; fluxos FL-14, FL-R03. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-04, FO-09, FO-29, FO-43 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Água sem insumos": "implementar Irrigação de hoje da seção 41.8 e AGUA-01 a AGUA-08: tarefa automática e autorização por política, sem requisição/custódia de produtos; exceções encaminhadas ao responsável. Fertirrigação mantém aprovação individual.",
+   "Reclassificação controlada": "no detalhe da tarefa, botão **Adicionar produtos (reclassificar para fertirrigação)** → FO-04/FO-29, somente para usuário autorizado a propor/revisar o saldo. Herdar ID, setor, janela e saldo; exigir produtos/doses/unidades, motivo e prévia dos efeitos. Confirmar invoca CMD-32 e cria nova versão da mesma tarefa, invalida autorização exclusiva de água para o saldo e encaminha à fila do agrônomo. Antes do primeiro início volta a A liberar; se já iniciou, mantém Em execução com selo Revisão de saldo pendente. Bloquear novos preparos/partidas do saldo até aprovação individual e nova liberação. Requisição canônica é criada/atualizada após aprovação e usa SU-07/FO-09; não emitir segunda aplicação. Irrigante sem permissão solicita ajuste/ocorrência em MB-08, sem editar dose ou produto. Registrar apontamento já ocorrido nunca concede autorização retroativa."
+  },
+  "fo": [
+   "FO-04",
+   "FO-09",
+   "FO-29",
+   "FO-43"
+  ],
+  "cmd": [
+   "CMD-32"
+  ],
+  "fl": [
+   "FL-14",
+   "FL-R03"
+  ]
+ },
+ "IR-03": {
+  "id": "IR-03",
+  "titulo": "Ordens de irrigação",
+  "linha": 803,
+  "rota": "/irrigacao/ordens",
+  "responsavel": "Irrigante e responsável",
+  "Conteúdo": "Lista e detalhe da ordem; instrução, execução por setores e materiais apenas na fertirrigação.",
+  "Campos e informação essencial": "Tarefa/O.S.; modalidade água ou produtos; setor/pivô; janela; etapa; lâmina/volume alvo e aplicado; área; duração; energia; fonte medida/estimada; política/autorização; impedimento; última atualização.",
+  "Botões e destinos": "Abrir tarefa; Iniciar; Pausar/Retomar; Registrar avanço → MB-08; Confirmar término da irrigação → Em conferência; Revisar divergência. Encerramento automático se elegível. Requisitar insumo → SU-07 (FO-09) e Devolver sobras → SU-07 (FO-09), somente quando houver produtos; reutilizar a requisição da mesma ordem, sem estoque paralelo.",
+  "Continuidade e estados": "Consumo de fertilizante segue custódia normal. Comando remoto, quando habilitado, tem autorização e confirmação física independentes.",
+  "Contrato reconciliado de implementação": "Usar o mesmo ID/versão de tarefa em lista, mapa, Kanban e MB-08. Distinguir autorização por política válida de água e aprovação agronômica individual para produtos/exceções. Água elegível não abre requisição/custódia; confirmar término registra Em conferência e pode acionar conferência/encerramento automáticos somente com fatos consistentes. Produtos exigem requisição e conciliação de materiais. Área, volume/lâmina e tempo permanecem medidos ou estimados com origem; somar aplicações confirmadas uma vez e manter saldo e desvio explícitos (8.4–8.6; 41–42; 63–64). A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 41–42, 53, 63–64; critérios OSA, ESTOS, IRCOMP, CAMPO; fluxos FL-14, FL-R03. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-04, FO-09, FO-10, FO-29 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Janela de trabalho": "seção 8.6; filtrar, preparar/emitir e liberar selecionadas são ações distintas. Mostrar pendências de outros períodos e validar JANELA-01 a JANELA-10.",
+   "Ciclo canônico obrigatório": "A liberar → Liberadas → Em execução → Em conferência → Encerradas. Aplicar seção 8.4, FL-OS-01 e OSFASE-01 a OSFASE-18; término físico entra automaticamente em Em conferência.",
+   "Água sem insumos": "implementar Irrigação de hoje da seção 41.8 e AGUA-01 a AGUA-08: tarefa automática e autorização por política, sem requisição/custódia de produtos; exceções encaminhadas ao responsável. Fertirrigação mantém aprovação individual.",
+   "Reclassificação controlada": "no detalhe da tarefa, botão **Adicionar produtos (reclassificar para fertirrigação)** → FO-04/FO-29, somente para usuário autorizado a propor/revisar o saldo. Herdar ID, setor, janela e saldo; exigir produtos/doses/unidades, motivo e prévia dos efeitos. Confirmar invoca CMD-32 e cria nova versão da mesma tarefa, invalida autorização exclusiva de água para o saldo e encaminha à fila do agrônomo. Antes do primeiro início volta a A liberar; se já iniciou, mantém Em execução com selo Revisão de saldo pendente. Bloquear novos preparos/partidas do saldo até aprovação individual e nova liberação. Requisição canônica é criada/atualizada após aprovação e usa SU-07/FO-09; não emitir segunda aplicação. Irrigante sem permissão solicita ajuste/ocorrência em MB-08, sem editar dose ou produto. Registrar apontamento já ocorrido nunca concede autorização retroativa."
+  },
+  "fo": [
+   "FO-04",
+   "FO-09",
+   "FO-10",
+   "FO-29"
+  ],
+  "cmd": [
+   "CMD-32"
+  ],
+  "fl": [
+   "FL-14",
+   "FL-OS-01",
+   "FL-R03"
+  ]
+ },
+ "IR-04": {
+  "id": "IR-04",
+  "titulo": "Clima, sensores e desempenho",
+  "linha": 831,
+  "rota": "/irrigacao/desempenho",
+  "responsavel": "Agronomia, irrigação e gestão",
+  "Conteúdo": "Observações, qualidade dos sensores, calibração e eficiência por período e setor.",
+  "Campos e informação essencial": "Origem; atualização; unidade; calibração; cobertura espacial; volume/energia; indicador.",
+  "Botões e destinos": "Cadastrar/inspecionar sensor; Importar leitura; Marcar leitura suspeita; Comparar períodos; Abrir ação → GE-07.",
+  "Continuidade e estados": "Dados de previsão meteorológica não são chuva realizada. Troca/reset de medidor exige evento próprio; nunca produzir consumo negativo silencioso.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 41–42, 53, 63–64; critérios OSA, ESTOS, IRCOMP, CAMPO; fluxos FL-14, FL-R03. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-40, FO-43 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-40",
+   "FO-43"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-14",
+   "FL-R03"
+  ]
+ },
+ "MA-01": {
+  "id": "MA-01",
+  "titulo": "Ativos e disponibilidade",
+  "linha": 850,
+  "rota": "/manutencao/ativos",
+  "responsavel": "PCM e operações",
+  "Conteúdo": "Lista de ativos móveis/fixos com condição técnica e agenda compartilhada.",
+  "Campos e informação essencial": "Ativo/categoria; local; horímetro/contador; condição; próxima manutenção; utilização; ordens vinculadas.",
+  "Botões e destinos": "Abrir ficha → CD-03; Ver agenda → PL-04; Registrar inspeção → MA-02; Restringir/liberar com motivo.",
+  "Continuidade e estados": "Bomba, packing e silo também são ativos. Disponibilidade técnica não significa ausência de compromisso de agenda.",
+  "Contrato reconciliado de implementação": "Árvore de ativos móveis/fixos, condição, calendário, disponibilidade, utilização e custo. Agregação por grupo/classe usa horas somadas e denominadores explícitos.",
+  "Dependências e aceite": "capítulos 47, 53–54, 65; critérios PCM, PCMP, ATIV, INSP, PCE; fluxos FL-15, FL-R03, FL-R04. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-22, FO-28 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Contrato obrigatório": "capítulo 47: hierarquia e dependências de frota/implementos/veículos/irrigação/beneficiamento, impactos de capacidade e condição técnica única.",
+   "Visão compartilhada de recursos": "implementar quadro Máquinas agora e na programação da seção 44.11; condição técnica, ocupação e elegibilidade separadas, com critérios RECURSO-01 a RECURSO-10."
+  },
+  "fo": [
+   "FO-22",
+   "FO-28"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-15",
+   "FL-R03",
+   "FL-R04"
+  ]
+ },
+ "MA-02": {
+  "id": "MA-02",
+  "titulo": "Solicitações e inspeções",
+  "linha": 874,
+  "rota": "/manutencao/solicitacoes",
+  "responsavel": "Operação, PCM e mecânico",
+  "Conteúdo": "Fila de falhas, alertas e inspeções, com triagem e vínculo à ocorrência de origem.",
+  "Campos e informação essencial": "Ativo; sintoma; criticidade; contador; evidência; condição recomendada; responsável.",
+  "Botões e destinos": "Registrar inspeção; Triar; Bloquear ativo; Criar ordem → MA-04; Vincular a ordem existente.",
+  "Continuidade e estados": "Sintoma repetido pode ser agregado ao caso; não gerar novas ordens a cada alerta idêntico. Plano de contingência informa ordens afetadas.",
+  "Contrato reconciliado de implementação": "Checklist gera não conformidade rastreável, criticidade, evidência e restrição; Pareto por item/ativo e fila de resposta sem duplicar a mesma falha.",
+  "Dependências e aceite": "capítulos 47, 53–54, 65; critérios PCM, PCMP, ATIV, INSP, PCE; fluxos FL-15, FL-R03, FL-R04. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-08, FO-30 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Contrato obrigatório": "capítulo 54: checklists do operador e da manutenção geram achados rastreáveis, gráficos de não conformidades e fila de ação por risco, prazo e responsável; integração com condição do ativo e ordem de manutenção."
+  },
+  "fo": [
+   "FO-08",
+   "FO-30"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-15",
+   "FL-R03",
+   "FL-R04"
+  ]
+ },
+ "MA-03": {
+  "id": "MA-03",
+  "titulo": "Plano de manutenção",
+  "linha": 895,
+  "rota": "/manutencao/planos",
+  "responsavel": "PCM",
+  "Conteúdo": "Biblioteca por modelo e plano aplicado por ativo, com previsão por horas, tempo e condição.",
+  "Campos e informação essencial": "Modelo/ativo; serviço; fonte; intervalo/calendário; contador; janela; peças e recursos.",
+  "Botões e destinos": "Editar versão → FO-11; Simular paradas; Revisar impacto; Confirmar paradas; Gerar ordens em rascunho → MA-04.",
+  "Continuidade e estados": "Não fixar universalmente 80%, 100% ou 110% de intervalo. Fabricante, criticidade e política validada definem antecipação, vencimento e possibilidade de extensão.",
+  "Contrato reconciliado de implementação": "Contadores, calendário, projeção de vencimento, duração, peças e janela PCP. Previsão é recalculada pela carga projetada e distingue parada planejada de restrição real.",
+  "Dependências e aceite": "capítulos 47, 53–54, 65; critérios PCM, PCMP, ATIV, INSP, PCE; fluxos FL-15, FL-R03, FL-R04. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-11, FO-28 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Contrato obrigatório": "capítulo 47, com planos por calendário/uso/condição, recursos, peças, criticidade e programação integrada ao PCP.",
+   "Visão compartilhada de recursos": "implementar quadro Máquinas agora e na programação da seção 44.11; condição técnica, ocupação e elegibilidade separadas, com critérios RECURSO-01 a RECURSO-10.",
+   "Janela de trabalho": "seção 8.6; filtrar, preparar/emitir e liberar selecionadas são ações distintas. Mostrar pendências de outros períodos e validar JANELA-01 a JANELA-10."
+  },
+  "fo": [
+   "FO-11",
+   "FO-28"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-15",
+   "FL-R03",
+   "FL-R04"
+  ]
+ },
+ "MA-04": {
+  "id": "MA-04",
+  "titulo": "Ordens de manutenção",
+  "linha": 921,
+  "rota": "/manutencao/ordens",
+  "responsavel": "PCM, mecânico e responsável técnico",
+  "Conteúdo": "Visão de programação e de oficina sobre a mesma entidade; serviços, peças, terceiros e testes.",
+  "Campos e informação essencial": "O.S./ativo; serviço/criticidade; janela; etapa; técnico/equipe; tarefas realizadas/pendentes; horas; peças; teste/resultado; condição do ativo; previsão de retorno; sobras/destinações.",
+  "Botões e destinos": "Planejar e autorizar; Liberar serviço; Iniciar; Registrar avanço/peças; Finalizar apontamento do turno; Concluir serviço → Em conferência; Registrar teste; Definir aptidão; Resolver sobras; Encerrar O.S. quando elegível. Teste reprovado mantém bloqueio e permite retorno autorizado ao trabalho.",
+  "Continuidade e estados": "Concluir serviço não equivale automaticamente a liberar ativo. Retrabalho cria ordem vinculada. Custo não migra inteiro para outra safra só por mudança de ano.",
+  "Contrato reconciliado de implementação": "Executar, apontar peças/horas, testar e liberar ativo; encerramento de custo e aptidão operacional são decisões distintas.",
+  "Dependências e aceite": "capítulos 47, 53–54, 65; critérios PCM, PCMP, ATIV, INSP, PCE; fluxos FL-15, FL-R03, FL-R04. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-09, FO-11, FO-29, FO-30 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Contrato obrigatório": "capítulo 47: autorização própria da manutenção, execução segura, teste/liberação técnica distintos da conciliação administrativa e gestão de peças recuperáveis.",
+   "Visão compartilhada de recursos": "implementar quadro Máquinas agora e na programação da seção 44.11; condição técnica, ocupação e elegibilidade separadas, com critérios RECURSO-01 a RECURSO-10.",
+   "Janela de trabalho": "seção 8.6; filtrar, preparar/emitir e liberar selecionadas são ações distintas. Mostrar pendências de outros períodos e validar JANELA-01 a JANELA-10.",
+   "Ciclo canônico obrigatório": "A liberar → Liberadas → Em execução → Em conferência → Encerradas. Aplicar seção 8.4, FL-OS-01 e OSFASE-01 a OSFASE-18; término físico entra automaticamente em Em conferência."
+  },
+  "fo": [
+   "FO-09",
+   "FO-11",
+   "FO-29",
+   "FO-30"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-15",
+   "FL-OS-01",
+   "FL-R03",
+   "FL-R04"
+  ]
+ },
+ "MA-05": {
+  "id": "MA-05",
+  "titulo": "Abastecimentos e desempenho",
+  "linha": 949,
+  "rota": "/manutencao/abastecimentos",
+  "responsavel": "Abastecedor, PCM e controladoria",
+  "Conteúdo": "Lançamentos por ativo/tanque, contadores, consumo reconciliado e desvios.",
+  "Campos e informação essencial": "Ativo; tanque/lote; volume; data/horímetro; nível quando usado; operador; evidência.",
+  "Botões e destinos": "Registrar abastecimento → FO-12/MB-09; Conferir contador; Corrigir com estorno; Investigar desvio → MA-02.",
+  "Continuidade e estados": "Litros abastecidos não são consumo exato do intervalo sem método tanque cheio ou reconciliação de níveis. Taxa estimada é identificada.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 47, 53–54, 65; critérios PCM, PCMP, ATIV, INSP, PCE; fluxos FL-15, FL-R03, FL-R04. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-12, FO-38 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-12",
+   "FO-38"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-15",
+   "FL-R03",
+   "FL-R04"
+  ]
+ },
+ "CO-01": {
+  "id": "CO-01",
+  "titulo": "Previsão e maturação",
+  "linha": 968,
+  "rota": "/producao/previsao",
+  "responsavel": "Agronomia, colheita e comercial",
+  "Conteúdo": "Oferta semanal por ciclo/parcela, classe/calibre e destino; distribuição e incerteza visíveis.",
+  "Campos e informação essencial": "Contagem/estádio; plantas vivas; área; peso/curva; rendimento comercial; perdas; faixa prevista.",
+  "Botões e destinos": "Coletar → MB-07; Revisar previsão; Comparar pedidos → VE-01; Publicar versão; Programar colheita → CO-02.",
+  "Continuidade e estados": "Contagem é observação; publicação é responsabilidade autorizada. Não duplicar volume total em semanas sucessivas nem somar produtos como se fossem substitutos.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 43–45, 49, 62; critérios PARC, PCP, BEN, ATP, COLMAP; fluxos FL-16, FL-17, FL-18, FL-19, FL-R07. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-33 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Qualidade da previsão": "mostrar versão congelada/antecedência, WAPE/viés, amostra e meta proposta ou aprovada conforme 55.5; Revisar amostragem/modelo abre ação com dono e prazo quando abaixo do alvo."
+  },
+  "fo": [
+   "FO-33"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-16",
+   "FL-17",
+   "FL-18",
+   "FL-19",
+   "FL-R07"
+  ]
+ },
+ "CO-02": {
+  "id": "CO-02",
+  "titulo": "Programação e ordens de colheita",
+  "linha": 989,
+  "rota": "/producao/colheita",
+  "responsavel": "PCP e colheita",
+  "Conteúdo": "Recorte da agenda integrada com maturação, pedido, equipe, embalagem, packing e transporte.",
+  "Campos e informação essencial": "O.S.; origem/parcela/cultura; janela; etapa; área/quantidade prevista; realizado do dia/acumulado; saldo; equipe/máquinas; cargas vinculadas; capacidade de recebimento; impedimentos.",
+  "Botões e destinos": "Preparar ordens do período; Aprovar/liberar conforme competência; Iniciar; Registrar avanço/carga; Finalizar apontamento do turno; Concluir execução → Em conferência; Conferir cargas/apontamentos; Encerrar após conciliação.",
+  "Continuidade e estados": "Ordem deriva da mesma necessidade e usa reserva de recursos compartilhada. Capacidade em unidades compatíveis.",
+  "Contrato reconciliado de implementação": "FO-07 registra avanço por área/horas; FO-13 registra carga/pesagem. Os eventos são ligados à mesma ordem e preservam unidade/base, mas hectares concluídos não geram automaticamente quilogramas de estoque nem toda pesagem confirma área colhida. Validar capacidade de equipe/máquinas, transporte e destino na janela, com saldo por parcela e apontamentos de vários dias. Finalizar turno mantém Em execução; término físico vai a Em conferência, com cargas, origens e divergências conciliadas antes de Encerradas. Qualidade do lote permanece separada (8.4–8.6; 43–45; 64). A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 43–45, 49, 62; critérios PARC, PCP, BEN, ATP, COLMAP; fluxos FL-16, FL-17, FL-18, FL-19, FL-R07. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-05, FO-07, FO-13, FO-29 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Janela de trabalho": "seção 8.6; filtrar, preparar/emitir e liberar selecionadas são ações distintas. Mostrar pendências de outros períodos e validar JANELA-01 a JANELA-10.",
+   "Ciclo canônico obrigatório": "A liberar → Liberadas → Em execução → Em conferência → Encerradas. Aplicar seção 8.4, FL-OS-01 e OSFASE-01 a OSFASE-18; término físico entra automaticamente em Em conferência.",
+   "Origem do avanço": "Registrar avanço e Finalizar apontamento do turno usam FO-07; Registrar carga usa FO-13. O avanço de 30 ha em uma ordem de 100 ha pode ser registrado antes da pesagem: mostrar 30 ha realizados e 70 ha de saldo. Área executada não gera massa fictícia, e pesagens não duplicam a produção da mesma carga; vínculo pode ser conciliado posteriormente sem impedir o registro factual do turno."
+  },
+  "fo": [
+   "FO-05",
+   "FO-07",
+   "FO-13",
+   "FO-29"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-16",
+   "FL-17",
+   "FL-18",
+   "FL-19",
+   "FL-OS-01",
+   "FL-R07"
+  ]
+ },
+ "CO-03": {
+  "id": "CO-03",
+  "titulo": "Cargas, pesagens e romaneios",
+  "linha": 1014,
+  "rota": "/producao/cargas",
+  "responsavel": "Colheita, balança e transporte interno",
+  "Conteúdo": "Cargas com pesagens de origem/destino, documentos e atribuição às parcelas.",
+  "Campos e informação essencial": "Carga/ordem; origem; veículo; bruto/tara/líquido; qualidade inicial; horário; destino.",
+  "Botões e destinos": "Registrar carga → FO-13/MB-10; Vincular pesagem; Emitir romaneio; Confirmar chegada → CO-04.",
+  "Continuidade e estados": "Dois tickets da mesma carga não duplicam produção. Mistura entre parcelas informa participação medida ou estimada e mantém rastreio.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 43–45, 49, 62; critérios PARC, PCP, BEN, ATP, COLMAP; fluxos FL-16, FL-17, FL-18, FL-19, FL-R07. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-13 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-13"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-16",
+   "FL-17",
+   "FL-18",
+   "FL-19",
+   "FL-R07"
+  ]
+ },
+ "CO-04": {
+  "id": "CO-04",
+  "titulo": "Recebimento da produção",
+  "linha": 1033,
+  "rota": "/producao/recebimentos",
+  "responsavel": "Armazém/packing e qualidade",
+  "Conteúdo": "Conferência de cargas e lote recebido, incluindo divergências e destino provisório.",
+  "Campos e informação essencial": "Carga; peso recebido; local; condição; amostra; divergência; lote criado.",
+  "Botões e destinos": "Conferir carga; Segregar; Encaminhar processo → CO-05; Solicitar inspeção → CO-06; Registrar divergência.",
+  "Continuidade e estados": "Entrada não equivale a liberação comercial. Produto em processo continua identificado; quantidade recebida substitui estimativa conforme regra de medição, sem duplicação.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 43–45, 49, 62; critérios PARC, PCP, BEN, ATP, COLMAP; fluxos FL-16, FL-17, FL-18, FL-19, FL-R07. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-13, FO-15 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-13",
+   "FO-15"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-16",
+   "FL-17",
+   "FL-18",
+   "FL-19",
+   "FL-R07"
+  ]
+ },
+ "CO-05": {
+  "id": "CO-05",
+  "titulo": "Beneficiamento",
+  "linha": 1052,
+  "rota": "/producao/beneficiamento",
+  "responsavel": "Packing, armazém e qualidade",
+  "Conteúdo": "Ordens de processo e lotes com múltiplas entradas/saídas; campos variam por cultura.",
+  "Campos e informação essencial": "Ordem/rota/versão; produto/cultura; janela; etapa; lotes de entrada; processamento por turno; saídas por classe; produto em processo; perdas; materiais; divergência de balanço; condição de qualidade separada.",
+  "Botões e destinos": "Criar/preparar ordem; Autorizar rota e liberar; Iniciar processo; Registrar avanço e saídas; Finalizar apontamento do turno; Concluir execução → Em conferência; Conferir balanço; Fechar processo → Encerradas quando elegível; Encaminhar qualidade → CO-06 sem liberar lote automaticamente.",
+  "Continuidade e estados": "Secagem para grãos, classificação/embalagem para frutas e processos específicos para café/forragens. Genealogia permanece após mistura e divisão.",
+  "Contrato reconciliado de implementação": "Rota específica para grãos, frutas/HF ou café; entradas/saídas por estado físico, umidade, classes, embalagens, perdas, subprodutos e genealogia. Sem liberação automática por balanço fechar.",
+  "Dependências e aceite": "capítulos 43–45, 49, 62; critérios PARC, PCP, BEN, ATP, COLMAP; fluxos FL-16, FL-17, FL-18, FL-19, FL-R07. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-09, FO-14, FO-15, FO-29 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Contrato obrigatório": "capítulo 45, com rotas e fluxogramas próprios para grãos, frutas/HF e café, controles por etapa, balanço de materiais e integração ao PCP do capítulo 44.",
+   "Ciclo canônico obrigatório": "A liberar → Liberadas → Em execução → Em conferência → Encerradas. Aplicar seção 8.4, FL-OS-01 e OSFASE-01 a OSFASE-18; término físico entra automaticamente em Em conferência.",
+   "Horizonte": "aplicar a janela móvel da seção 8.6 com responsável de produção; projeção de safra não libera todas as ordens industriais."
+  },
+  "fo": [
+   "FO-09",
+   "FO-14",
+   "FO-15",
+   "FO-29"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-16",
+   "FL-17",
+   "FL-18",
+   "FL-19",
+   "FL-OS-01",
+   "FL-R07"
+  ]
+ },
+ "CO-06": {
+  "id": "CO-06",
+  "titulo": "Qualidade e rastreabilidade",
+  "linha": 1078,
+  "rota": "/producao/qualidade",
+  "responsavel": "Qualidade e agronomia conforme competência",
+  "Conteúdo": "Inspeções, bloqueios e árvore de lotes para trás e para frente; simulação de recolhimento.",
+  "Campos e informação essencial": "Lote; padrão/método; amostra; resultado; decisão; origens/destinos; responsável.",
+  "Botões e destinos": "Inspecionar → FO-15; Liberar/Bloquear; Definir destinação; Rastrear clientes; Abrir recolhimento → VE-06/LO-03.",
+  "Continuidade e estados": "Bloqueio invalida elegibilidade das reservas afetadas e avisa Comercial. Rastreio não depende de lote estar com saldo.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 43–45, 49, 62; critérios PARC, PCP, BEN, ATP, COLMAP; fluxos FL-16, FL-17, FL-18, FL-19, FL-R07. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-15 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-15"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-16",
+   "FL-17",
+   "FL-18",
+   "FL-19",
+   "FL-R07"
+  ]
+ },
+ "CO-07": {
+  "id": "CO-07",
+  "titulo": "Estoque de produção",
+  "linha": 1097,
+  "rota": "/producao/estoque",
+  "responsavel": "Armazém, comercial e controladoria",
+  "Conteúdo": "Saldo físico por proprietário, local, produto, lote e classe; visões livres, comprometidas e bloqueadas.",
+  "Campos e informação essencial": "Lote/local; físico; qualidade; reservado; disponível; validade; origem.",
+  "Botões e destinos": "Abrir lote → CO-06; Alocar pedido → VE-04; Transferir → SU-08; Ver movimentos; Inventariar → SU-09.",
+  "Continuidade e estados": "Única tela canônica de produto acabado. Compromisso futuro não subtrai estoque físico já reservado pelo mesmo contrato duas vezes.",
+  "Contrato reconciliado de implementação": "Saldo físico, bloqueado, apto, reservado e disponível por lote/classe/local/proprietário; não somar oferta futura como estoque.",
+  "Dependências e aceite": "capítulos 43–45, 49, 62; critérios PARC, PCP, BEN, ATP, COLMAP; fluxos FL-16, FL-17, FL-18, FL-19, FL-R07. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-15, FO-32 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-15",
+   "FO-32"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-16",
+   "FL-17",
+   "FL-18",
+   "FL-19",
+   "FL-R07"
+  ]
+ },
+ "SU-01": {
+  "id": "SU-01",
+  "titulo": "Necessidades e cobertura",
+  "linha": 1116,
+  "rota": "/suprimentos/necessidades",
+  "responsavel": "PCE/comprador/PCP",
+  "Conteúdo": "Necessidade líquida por data com origem, utilizável (físico apto), recebimentos e propostas de reposição.",
+  "Campos e informação essencial": "Item; data necessária; demanda residual; utilizável (físico apto, incluindo reservado); reservado; disponível para novas reservas; recebimentos firmes; fornecimento condicionado à qualidade; prazo/confiança da decisão; falta firme/condicionada; pedir até.",
+  "Botões e destinos": "Ver memória CAL-01; Abrir origem; Reprogramar proposta; Preparar cotação → SU-04; Programar liberação de contrato → SU-05.",
+  "Continuidade e estados": "Uma revisão da falta não envia automaticamente nova cotação. Mostrar cobertura prevista e estoque físico separadamente.",
+  "Contrato reconciliado de implementação": "Demanda datada única da agronomia, PCP, PCM e produção; mostrar estoque apto, reservas, entregas firmes, faltas e data limite de compra.",
+  "Dependências e aceite": "capítulos 42, 44, 65–66; critérios ESTOS, PCP, PCE, ERP; fluxos FL-09, FL-10, FL-11, FL-12, FL-R04, FL-R09. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-16, FO-31 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-16",
+   "FO-31"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-09",
+   "FL-10",
+   "FL-11",
+   "FL-12",
+   "FL-R04",
+   "FL-R09"
+  ]
+ },
+ "SU-02": {
+  "id": "SU-02",
+  "titulo": "Políticas de estoque",
+  "linha": 1135,
+  "rota": "/suprimentos/politicas",
+  "responsavel": "Suprimentos e gerente",
+  "Conteúdo": "Política por item/grupo e depósito, com exceções versionadas. Capítulo 65: mínimo/máximo, necessidade datada ou planejamento com proteção, usando uma única composição de demanda e reposição.",
+  "Campos e informação essencial": "ABC/criticidade; segurança; lead time; lote/múltiplo; validade; capacidade; limite econômico.",
+  "Botões e destinos": "Editar proposta; Simular cobertura; Submeter exceção; Publicar vigência; Ver efeito → SU-01.",
+  "Continuidade e estados": "Classe ABC financeira não substitui criticidade. Limites do depósito e validade restringem entrega, sem equivaler automaticamente ao tamanho do contrato.",
+  "Contrato reconciliado de implementação": "Política por item/local: mínimo/máximo, necessidade datada ou híbrida; segurança, prazo, lote, múltiplo, validade e justificativa.",
+  "Dependências e aceite": "capítulos 42, 44, 65–66; critérios ESTOS, PCP, PCE, ERP; fluxos FL-09, FL-10, FL-11, FL-12, FL-R04, FL-R09. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-31 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-31"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-09",
+   "FL-10",
+   "FL-11",
+   "FL-12",
+   "FL-R04",
+   "FL-R09"
+  ]
+ },
+ "SU-03": {
+  "id": "SU-03",
+  "titulo": "Saldos e lotes de materiais",
+  "linha": 1154,
+  "rota": "/suprimentos/saldos",
+  "responsavel": "Almoxarifado, compras e operação",
+  "Conteúdo": "Estoque por item/lote/proprietário/local com extrato e custódias.",
+  "Campos e informação essencial": "Item/lote/local/proprietário; físico; bloqueado/quarentena/vencido sem sobreposição; utilizável (apto); reservado; disponível (livre); custódia; validade; valor/origem.",
+  "Botões e destinos": "Ver movimentos; Reservar para ordem; Transferir → SU-08; Requisitar → SU-07; Inspecionar → SU-06.",
+  "Continuidade e estados": "Não somar físico de depósito e custódia duas vezes no consolidado. Consignado aparece identificado e obedece autorização contratual.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 42, 44, 65–66; critérios ESTOS, PCP, PCE, ERP; fluxos FL-09, FL-10, FL-11, FL-12, FL-R04, FL-R09. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-25, FO-32 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-25",
+   "FO-32"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-09",
+   "FL-10",
+   "FL-11",
+   "FL-12",
+   "FL-R04",
+   "FL-R09"
+  ]
+ },
+ "SU-04": {
+  "id": "SU-04",
+  "titulo": "Solicitações e cotações",
+  "linha": 1173,
+  "rota": "/suprimentos/cotacoes",
+  "responsavel": "Comprador e aprovador",
+  "Conteúdo": "Rascunho pré-preenchido da necessidade e comparação equalizada de propostas.",
+  "Campos e informação essencial": "Origem; especificação; quantidade/unidade; data/local; fornecedores; condição; custo comparável.",
+  "Botões e destinos": "Preparar cotação → FO-16; Revisar destinatários; Enviar; Comparar; Selecionar proposta; Aprovar contratação → SU-05.",
+  "Continuidade e estados": "Comparar qualidade/especificação, frete, prazo, tributos conforme política e condições financeiras. Token externo leva a PT-02, não à lista interna.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 42, 44, 65–66; critérios ESTOS, PCP, PCE, ERP; fluxos FL-09, FL-10, FL-11, FL-12, FL-R04, FL-R09. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-16 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Destinatários e oportunidades": "em Revisar destinatários, sugerir parceiros elegíveis por categoria/cultura/região e explicar a correspondência (57.4.2). Somente convite confirmado ou política expressamente autorizada concede acesso, com finalidade, prazo e documentos escolhidos; não enviar automaticamente pelo simples pagamento do parceiro."
+  },
+  "fo": [
+   "FO-16"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-09",
+   "FL-10",
+   "FL-11",
+   "FL-12",
+   "FL-R04",
+   "FL-R09"
+  ]
+ },
+ "SU-05": {
+  "id": "SU-05",
+  "titulo": "Contratos, pedidos e entregas",
+  "linha": 1193,
+  "rota": "/suprimentos/pedidos",
+  "responsavel": "Compras, suprimentos e financeiro",
+  "Conteúdo": "Abas Contratos de fornecimento, Pedidos e Programação de entregas; relações e saldos explícitos.",
+  "Campos e informação essencial": "Contraparte; item/unidade; volume líquido preliminar; tolerância inferior/superior por item/contrato e versão aceita; preço/condição; contratado; liberado pendente; recebido; chegada prevista; uso previsto; depósito; exposição atual/projetada/limite em R$ quando aplicável; origem/vigência da apólice ou limite de crédito; ritmo de cargas e capacidade de recebimento; conflito/responsável.",
+  "Botões e destinos": "Formalizar contrato → FO-17; Emitir pedido/liberação; Confirmar fornecedor; Reprogramar entrega; Solicitar crédito → GE-08; Receber → SU-06.",
+  "Continuidade e estados": "Saldo contratual não subtrai recebido novamente se já incluído nas liberações acumuladas. Antecipação e prazo têm títulos próprios e regras de conciliação.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 42, 44, 65–66; critérios ESTOS, PCP, PCE, ERP; fluxos FL-09, FL-10, FL-11, FL-12, FL-R04, FL-R09. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-17 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Programação de entregas": "capítulo 65.5.1; visões Por item, Por carga (fornecedor), Por depósito (R$) e Por mês; filtros Cronograma pronto, Acima do limite e Acima da cobertura. Simular pico de exposição e ritmo de cargas antes de Emitir liberação; ultrapassagem gera conflito e reprogramação proposta. ±10% é referência do protótipo, não tolerância aceita por padrão. Capacidade do depósito e validade seguem 65.5/PCE-08; proposta não equivale a entrega confirmada."
+  },
+  "fo": [
+   "FO-17"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-09",
+   "FL-10",
+   "FL-11",
+   "FL-12",
+   "FL-R04",
+   "FL-R09"
+  ]
+ },
+ "SU-06": {
+  "id": "SU-06",
+  "titulo": "Recebimentos e divergências",
+  "linha": 1213,
+  "rota": "/suprimentos/recebimentos",
+  "responsavel": "Almoxarife, qualidade e comprador",
+  "Conteúdo": "Conferência de pedido, documento e material, com quantidades aceitas, bloqueadas e recusadas.",
+  "Campos e informação essencial": "Pedido/documento; item/lote; quantidade; unidade; validade; inspeção; divergência.",
+  "Botões e destinos": "Receber → FO-18; Ler documento/QR; Segregar; Liberar qualidade; Resolver diferença; Encaminhar título → GE-04.",
+  "Continuidade e estados": "Recebimento parcial mantém saldo aberto. Documento duplicado não cria segunda entrada. Aceite físico e aprovação financeira são estados distintos.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 42, 44, 65–66; critérios ESTOS, PCP, PCE, ERP; fluxos FL-09, FL-10, FL-11, FL-12, FL-R04, FL-R09. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-18 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Qualidade e cobertura": "parcela recebida em quarentena alimenta a projeção condicionada de SU-01 (65.4), com prazo/responsável e vínculo ao lote. Aceite contra pedido não equivale a disponibilidade para uso."
+  },
+  "fo": [
+   "FO-18"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-09",
+   "FL-10",
+   "FL-11",
+   "FL-12",
+   "FL-R04",
+   "FL-R09"
+  ]
+ },
+ "SU-07": {
+  "id": "SU-07",
+  "titulo": "Requisições e entregas",
+  "linha": 1234,
+  "rota": "/suprimentos/requisicoes",
+  "responsavel": "Almoxarife e recebedor",
+  "Conteúdo": "Fila de separação por ordem; detalhe conserva solicitado, reservado, separado, entregue e conciliado.",
+  "Campos e informação essencial": "O.S./destino; item/lote; quantidades; local; recebedor; custódia; saldo.",
+  "Botões e destinos": "Solicitar → FO-09; Reservar; Separar FEFO; Ler QR → MB-05; Confirmar entrega; Receber devolução; Conciliar.",
+  "Continuidade e estados": "Entrega parcial libera somente a parcela executável da ordem. Material entregue deixa de ser reserva livre do depósito e passa a custódia; consumo não repete saída já contabilizada por adaptador legado.",
+  "Contrato reconciliado de implementação": "Entregar somente saldo elegível da versão autorizada; retirada parcial, custódia, consumo e devolução por produto/lote. Excesso e substituição exigem revisão pertinente.",
+  "Dependências e aceite": "capítulos 42, 44, 65–66; critérios ESTOS, PCP, PCE, ERP; fluxos FL-09, FL-10, FL-11, FL-12, FL-R04, FL-R09. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-09 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Contrato obrigatório": "capítulo 42: entrega de O.S. agrícola somente na versão aprovada pelo agrônomo; autorização por produto/quantidade, saldo em custódia, retorno físico conferido e encerramento conciliado."
+  },
+  "fo": [
+   "FO-09"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-09",
+   "FL-10",
+   "FL-11",
+   "FL-12",
+   "FL-R04",
+   "FL-R09"
+  ]
+ },
+ "SU-08": {
+  "id": "SU-08",
+  "titulo": "Transferências e movimentos",
+  "linha": 1255,
+  "rota": "/suprimentos/movimentos",
+  "responsavel": "Almoxarifado e controladoria",
+  "Conteúdo": "Extrato imutável e transferências entre locais, custódias, armazéns e empresas.",
+  "Campos e informação essencial": "Origem/destino; item/lote; quantidade/unidade; proprietário; motivo; documento; confirmação.",
+  "Botões e destinos": "Transferir; Confirmar recebimento; Devolver; Registrar perda em alçada; Estornar com vínculo.",
+  "Continuidade e estados": "Transferência possui trânsito e confirmação; movimentos entre empresas seguem documentos aplicáveis. Correção não apaga a operação original.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 42, 44, 65–66; critérios ESTOS, PCP, PCE, ERP; fluxos FL-09, FL-10, FL-11, FL-12, FL-R04, FL-R09. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-32 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-32"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-09",
+   "FL-10",
+   "FL-11",
+   "FL-12",
+   "FL-R04",
+   "FL-R09"
+  ]
+ },
+ "SU-09": {
+  "id": "SU-09",
+  "titulo": "Inventários e ajustes",
+  "linha": 1274,
+  "rota": "/suprimentos/inventarios",
+  "responsavel": "Almoxarifado, qualidade e controladoria",
+  "Conteúdo": "Contagens cegas por local/item/lote, corte de movimentos e tratamento de diferenças.",
+  "Campos e informação essencial": "Escopo/data de corte; contador; quantidade observada; recontagem; diferença; causa; aprovador.",
+  "Botões e destinos": "Planejar contagem; Contar → MB-05; Recontar; Submeter ajuste; Aprovar ajuste; Ver efeito no extrato.",
+  "Continuidade e estados": "Não permitir que movimentações durante a contagem produzam diferença fictícia. Limite e segregação seguem CF-02.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 42, 44, 65–66; critérios ESTOS, PCP, PCE, ERP; fluxos FL-09, FL-10, FL-11, FL-12, FL-R04, FL-R09. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-32 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-32"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-09",
+   "FL-10",
+   "FL-11",
+   "FL-12",
+   "FL-R04",
+   "FL-R09"
+  ]
+ },
+ "VE-01": {
+  "id": "VE-01",
+  "titulo": "Demanda e oferta",
+  "linha": 1293,
+  "rota": "/comercial/demanda-oferta",
+  "responsavel": "Comercial, agronomia e PCP",
+  "Conteúdo": "Balanço por produto/classe/local/semana entre pedidos, previsão residual, oferta futura e estoque apto.",
+  "Campos e informação essencial": "Produto/classe; janela; pedidos firmes; previsão residual; estoque livre; oferta futura; falta/excesso.",
+  "Botões e destinos": "Detalhar demanda; Rever previsão → CO-01; Simular atendimento; Criar oferta → VE-03; Propor ajuste → PL-06.",
+  "Continuidade e estados": "Não somar contratos à média histórica que já os contém. Compromissos futuros são alocados por carteira e risco, sem estoque fictício.",
+  "Contrato reconciliado de implementação": "Disponibilidade por dia e classe: estoque elegível mais oferta futura confiável menos compromissos únicos e margem definida. Mostrar incerteza e capacidade de atender.",
+  "Dependências e aceite": "capítulos 46, 48–50, 56; critérios VEN, LOG, ATP, FILA, RAST; fluxos FL-20, FL-21, FL-R07. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-19, FO-33 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Reserva e promessa": "aplicar 49.2–49.3 e ATP-04/05/07. Mostrar tipo de reserva, quantidade, vencimento e estado de confirmação; a conversão em pedido mantém dedução única. Déficit aparece ao produtor; disponibilidade publicada ao comprador nunca é negativa."
+  },
+  "fo": [
+   "FO-19",
+   "FO-33"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-20",
+   "FL-21",
+   "FL-R07"
+  ]
+ },
+ "VE-02": {
+  "id": "VE-02",
+  "titulo": "Mercado e preços",
+  "linha": 1313,
+  "rota": "/comercial/mercado",
+  "responsavel": "Comercial e direção",
+  "Conteúdo": "Preços observados, contratos, câmbio e sazonalidade por instrumento e mercado, com atraso visível.",
+  "Campos e informação essencial": "Fonte/licença; instrumento; praça; unidade; moeda; vencimento/data; preço/basis.",
+  "Botões e destinos": "Comparar janelas; Criar alerta; Simular preço líquido; Preparar oferta → VE-03; Usar premissa → GE-02.",
+  "Continuidade e estados": "Alerta não realiza venda. Cotação ausente não vira zero. Não inventar contrato futuro ou misturar bushel, saca e tonelada sem conversão declarada.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 46, 48–50, 56; critérios VEN, LOG, ATP, FILA, RAST; fluxos FL-20, FL-21, FL-R07. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-38, FO-40 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-38",
+   "FO-40"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-20",
+   "FL-21",
+   "FL-R07"
+  ]
+ },
+ "VE-03": {
+  "id": "VE-03",
+  "titulo": "Ofertas e propostas",
+  "linha": 1332,
+  "rota": "/comercial/ofertas",
+  "responsavel": "Comercial e aprovador",
+  "Conteúdo": "Negociação com propostas privadas por cliente, preço líquido e atendimento possível.",
+  "Campos e informação essencial": "Produto/padrão; volume/base; janela; destino; preço/condição; clientes; validade.",
+  "Botões e destinos": "Preparar oferta → FO-19; Revisar destinatários; Enviar → PT-03; Comparar propostas; Aprovar venda → VE-04.",
+  "Continuidade e estados": "Proposta/solicitação não fecha pedido sozinha. Confirmação automática só sob política prévia explícita do produtor conforme capítulo 49; margem, crédito, exposição, saldo e capacidade são verificados na confirmação.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 46, 48–50, 56; critérios VEN, LOG, ATP, FILA, RAST; fluxos FL-20, FL-21, FL-R07. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-19, FO-42 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Contrato obrigatório": "capítulo 46: relacionamento comercial, oferta privada, contraproposta versionada, comparação de recebimento líquido e aceite das condições por ambas as partes.",
+   "Destinatários e oportunidades": "em Revisar destinatários, sugerir parceiros elegíveis por categoria/cultura/região e explicar a correspondência (57.4.2). Somente convite confirmado ou política expressamente autorizada concede acesso, com finalidade, prazo e documentos escolhidos; não enviar automaticamente pelo simples pagamento do parceiro."
+  },
+  "fo": [
+   "FO-19",
+   "FO-42"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-20",
+   "FL-21",
+   "FL-R07"
+  ]
+ },
+ "VE-04": {
+  "id": "VE-04",
+  "titulo": "Pedidos de venda",
+  "linha": 1354,
+  "rota": "/comercial/pedidos",
+  "responsavel": "Comercial e logística",
+  "Conteúdo": "Detalhe com dimensões Comercial, Atendimento e Financeiro; alocações futuras e físicas separadas.",
+  "Campos e informação essencial": "Cliente; itens/classe; quantidade; preço; janela; condição; alocação.",
+  "Botões e destinos": "Confirmar pedido; Alocar produção/estoque; Programar entrega → LO-01; Emitir solicitação fiscal; Ver recebíveis → GE-05; Tratar devolução → VE-06.",
+  "Continuidade e estados": "Expedição parcial mantém saldo. Recebimento financeiro não é inferido da entrega. Revisão contratual preserva versão e aceitações.",
+  "Contrato reconciliado de implementação": "Preço/unidade, quantidade/classe, janela, local, responsável pelo frete e evento de vencimento integram a versão aceita; aceitar pedido recalcula e reserva atomicamente.",
+  "Dependências e aceite": "capítulos 46, 48–50, 56; critérios VEN, LOG, ATP, FILA, RAST; fluxos FL-20, FL-21, FL-R07. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-17, FO-19, FO-34 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Contrato obrigatório": "capítulo 46: preço/base de medição, entregas e vencimentos ligados ao mesmo acordo; revisão exige novo aceite, promessas verificadas e recebimento conciliado.",
+   "Reserva e promessa": "aplicar 49.2–49.3 e ATP-04/05/07. Mostrar tipo de reserva, quantidade, vencimento e estado de confirmação; a conversão em pedido mantém dedução única. Déficit aparece ao produtor; disponibilidade publicada ao comprador nunca é negativa."
+  },
+  "fo": [
+   "FO-17",
+   "FO-19",
+   "FO-34"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-20",
+   "FL-21",
+   "FL-R07"
+  ]
+ },
+ "VE-05": {
+  "id": "VE-05",
+  "titulo": "Contratos e compromissos",
+  "linha": 1376,
+  "rota": "/comercial/contratos",
+  "responsavel": "Comercial e financeiro",
+  "Conteúdo": "Contratos físicos, barter e compromissos vinculados a compra, venda e garantia.",
+  "Campos e informação essencial": "Obrigação única; contraparte; produto/base; volume; janela; condições; vínculos.",
+  "Botões e destinos": "Formalizar compromisso → FO-17; Vincular compra/crédito; Simular exposição; Programar entrega → VE-04/LO-01; Liquidar por eventos confirmados.",
+  "Continuidade e estados": "Barter conta uma vez como obrigação física. Garantia que cobre a mesma obrigação não vira segunda venda. Derivativos financeiros, se importados, ficam em dimensão separada.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 46, 48–50, 56; critérios VEN, LOG, ATP, FILA, RAST; fluxos FL-20, FL-21, FL-R07. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-17 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-17"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-20",
+   "FL-21",
+   "FL-R07"
+  ]
+ },
+ "VE-06": {
+  "id": "VE-06",
+  "titulo": "Reclamações e devoluções",
+  "linha": 1395,
+  "rota": "/comercial/devolucoes",
+  "responsavel": "Comercial, qualidade e financeiro",
+  "Conteúdo": "Casos por entrega/lote, com retorno, destinação, crédito e ação corretiva.",
+  "Campos e informação essencial": "Pedido/entrega; motivo; lote; quantidade; evidências; decisão; tratamento financeiro.",
+  "Botões e destinos": "Abrir caso; Autorizar retorno; Receber bloqueado → CO-04/CO-06; Emitir solicitação de crédito → GE-05; Encerrar caso.",
+  "Continuidade e estados": "Recolhimento usa genealogia e clientes afetados. Encerrar exige destinação física e financeira aplicável; reclamação não libera estoque automaticamente.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 46, 48–50, 56; critérios VEN, LOG, ATP, FILA, RAST; fluxos FL-20, FL-21, FL-R07. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-35 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-35"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-20",
+   "FL-21",
+   "FL-R07"
+  ]
+ },
+ "LO-01": {
+  "id": "LO-01",
+  "titulo": "Programação de transporte",
+  "linha": 1414,
+  "rota": "/logistica/programacao",
+  "responsavel": "Logística e PCP",
+  "Conteúdo": "Agenda de cargas de venda, transferência, colheita e compras com capacidade e janelas.",
+  "Campos e informação essencial": "Origem/destino; produto/carga; janela; veículo/prestador; capacidade; compatibilidade; custo.",
+  "Botões e destinos": "Agrupar entregas compatíveis; Cotar frete → LO-04; Programar viagem; Reservar doca; Preparar expedição → LO-02.",
+  "Continuidade e estados": "Trânsito interno e comercial compartilham recurso quando aplicável. Não misturar produtos incompatíveis para preencher capacidade.",
+  "Contrato reconciliado de implementação": "Slots de doca com duração, transportador e responsabilidade; atrasado perde prioridade conforme política sem apagar a promessa original.",
+  "Dependências e aceite": "capítulos 48–50; critérios LOG, ATP, FILA; fluxos FL-21, FL-R07. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-24, FO-34 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Contrato obrigatório": "capítulo 48: retirada pelo cliente/entrega organizada pelo agricultor, frete, agendamento, capacidade e janelas herdados do acordo comercial."
+  },
+  "fo": [
+   "FO-24",
+   "FO-34"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-21",
+   "FL-R07"
+  ]
+ },
+ "LO-02": {
+  "id": "LO-02",
+  "titulo": "Expedições e cargas",
+  "linha": 1435,
+  "rota": "/logistica/expedicoes",
+  "responsavel": "Expedição e fiscal autorizado",
+  "Conteúdo": "Preparação da carga, separação, qualidade, pesagem, documentos e liberação de saída.",
+  "Campos e informação essencial": "Pedido/transferência; lotes; quantidade/peso; veículo; checklist; documento autorizado; destino.",
+  "Botões e destinos": "Separar; Conferir carga; Solicitar documento fiscal; Reprocessar erro; Autorizar saída; Confirmar saída → LO-03.",
+  "Continuidade e estados": "Solicitar NF não é obter autorização. Físico sai uma vez na saída efetiva; comando repetido não duplica baixa.",
+  "Contrato reconciliado de implementação": "Fila de presentes aptos, bloqueados e atrasados. Chamar próximo exige doca/carga pronta; reordenação registra motivo, não paralisa por caminhão ausente.",
+  "Dependências e aceite": "capítulos 48–50; critérios LOG, ATP, FILA; fluxos FL-21, FL-R07. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-13, FO-34 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Contrato obrigatório": "capítulo 48: conferência por pedido/lote, quantidade real, prontidão, documentos e saída física única; entrega e pagamento são eventos separados.",
+   "Rateio de frete": "aplicar 48.5; formulário FO-34 registra direcionador/versão, base por item/trecho, componentes diretos/comuns, memória e reconciliação do total. LO-04 mantém padrão; LO-02/LO-03 exibem a versão aplicada à viagem."
+  },
+  "fo": [
+   "FO-13",
+   "FO-34"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-21",
+   "FL-R07"
+  ]
+ },
+ "LO-03": {
+  "id": "LO-03",
+  "titulo": "Viagens e entregas",
+  "linha": 1458,
+  "rota": "/logistica/viagens",
+  "responsavel": "Logística e transportador autorizado",
+  "Conteúdo": "Acompanhamento por etapas, aceite parcial, comprovante e divergências.",
+  "Campos e informação essencial": "Viagem; eventos/data; carga; destinatário; recebido/recusado; evidência; ocorrência.",
+  "Botões e destinos": "Registrar evento; Confirmar entrega; Registrar recusa → VE-06; Conciliar frete → LO-04; Ver financeiro → GE-05.",
+  "Continuidade e estados": "Entrega tardia distingue causa, reprogramação e compromisso original. Cliente receber produto não prova pagamento.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 48–50; critérios LOG, ATP, FILA; fluxos FL-21, FL-R07. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-34, FO-35 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Rateio de frete": "aplicar 48.5; formulário FO-34 registra direcionador/versão, base por item/trecho, componentes diretos/comuns, memória e reconciliação do total. LO-04 mantém padrão; LO-02/LO-03 exibem a versão aplicada à viagem."
+  },
+  "fo": [
+   "FO-34",
+   "FO-35"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-21",
+   "FL-R07"
+  ]
+ },
+ "LO-04": {
+  "id": "LO-04",
+  "titulo": "Fretes e transportadores",
+  "linha": 1479,
+  "rota": "/logistica/fretes",
+  "responsavel": "Logística e financeiro",
+  "Conteúdo": "Cotação, contrato e prestação de frete, com avaliação de desempenho.",
+  "Campos e informação essencial": "Prestador; rota; unidade de cobrança; preço; condição; documentos; viagem.",
+  "Botões e destinos": "Cotar; Comparar; Contratar; Vincular viagem; Conferir serviço; Encaminhar pagamento → GE-04.",
+  "Continuidade e estados": "Frete pode ser próprio ou contratado e pode compor custo/receita conforme política, sem dupla apropriação.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 48–50; critérios LOG, ATP, FILA; fluxos FL-21, FL-R07. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-24, FO-34 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Rateio de frete": "aplicar 48.5; formulário FO-34 registra direcionador/versão, base por item/trecho, componentes diretos/comuns, memória e reconciliação do total. LO-04 mantém padrão; LO-02/LO-03 exibem a versão aplicada à viagem."
+  },
+  "fo": [
+   "FO-24",
+   "FO-34"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-21",
+   "FL-R07"
+  ]
+ },
+ "GE-01": {
+  "id": "GE-01",
+  "titulo": "Visão gerencial",
+  "linha": 1500,
+  "rota": "/gestao/resultados",
+  "responsavel": "Direção e gestores",
+  "Conteúdo": "Painel hierárquico de grupo/empresa/fazenda/cultura com resultado, capital e causas prioritárias.",
+  "Campos e informação essencial": "Período/competência; receita; margem; custo unitário; capital/ROIC; qualidade dos dados; ações.",
+  "Botões e destinos": "Abrir composição → GE-03/GE-06; Comparar cenário → GE-02; Criar ação → GE-07; Abrir origem do desvio.",
+  "Continuidade e estados": "DRE/DFC/ROIC por cultura e consolidado; talhão é detalhamento operacional de custo e produtividade. Visões com/sem terra são nomeadas e reconciliadas.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 51, 53, 55–57, 66; critérios CUSTO, ORC, ATIV, IND, RAST, PRECO, ERP; fluxos FL-22, FL-23, FL-24, FL-R05, FL-R09. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-38 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-38"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-22",
+   "FL-23",
+   "FL-24",
+   "FL-R05",
+   "FL-R09"
+  ]
+ },
+ "GE-02": {
+  "id": "GE-02",
+  "titulo": "Orçamento e previsões",
+  "linha": 1519,
+  "rota": "/gestao/orcamento",
+  "responsavel": "Planejamento e controladoria",
+  "Conteúdo": "Base aprovada, cenário e previsão corrente em paralelo, com impactos técnicos e financeiros.",
+  "Campos e informação essencial": "Versão; premissas; volumes; preços; componentes de custo; cronograma de caixa; aprovadores.",
+  "Botões e destinos": "Criar cenário; Recalcular; Comparar base; Submeter orçamento; Autorizar versão; Publicar previsão → PL-02/PL-04/SU-01.",
+  "Continuidade e estados": "Base original permanece. Juros financeiros, remuneração de capital e depreciação não são somados indistintamente em COE/COT.",
+  "Contrato reconciliado de implementação": "Orçado original, revisado e realizado em quantidade, preço e custo; total, por ha e por unidade, por natureza/centro/cultura/projeto/talhão. Ponte de variações concilia ao total.",
+  "Dependências e aceite": "capítulos 51, 53, 55–57, 66; critérios CUSTO, ORC, ATIV, IND, RAST, PRECO, ERP; fluxos FL-22, FL-23, FL-24, FL-R05, FL-R09. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-26, FO-27, FO-36 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Contrato obrigatório": "capítulo 51: custos multidimensionais e cenários integrados ao PCP/agronomia, margem, caixa e projeção final, preservando base aprovada."
+  },
+  "fo": [
+   "FO-26",
+   "FO-27",
+   "FO-36"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-22",
+   "FL-23",
+   "FL-24",
+   "FL-R05",
+   "FL-R09"
+  ]
+ },
+ "GE-03": {
+  "id": "GE-03",
+  "titulo": "Custos e fechamento",
+  "linha": 1540,
+  "rota": "/gestao/custos",
+  "responsavel": "Controladoria e gestores",
+  "Conteúdo": "Composição por natureza, centro, cultura, ciclo, talhão, operação e ativo; pendências de fechamento.",
+  "Campos e informação essencial": "Competência; origem; componente; quantidade/preço; rateio; provisório/definitivo; conciliação.",
+  "Botões e destinos": "Ver documento; Revisar rateio; Conciliar estimado/real; Fechar período; Solicitar reabertura; Exportar para ERP.",
+  "Continuidade e estados": "Fechamento exige tratar pendências obrigatórias. Parâmetro futuro não recalcula período fechado sem revisão autorizada.",
+  "Contrato reconciliado de implementação": "Lançamento único com dimensões, origem, regra de rateio e versão; rastrear até documento e demonstrar ausência de dupla apropriação.",
+  "Dependências e aceite": "capítulos 51, 53, 55–57, 66; critérios CUSTO, ORC, ATIV, IND, RAST, PRECO, ERP; fluxos FL-22, FL-23, FL-24, FL-R05, FL-R09. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-26, FO-36 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Contrato obrigatório": "capítulo 51: natureza, centro, processo/operação/atividade, cultura/parcela e recurso; total, R$/ha e R$/unidade com denominador e conciliação explícitos."
+  },
+  "fo": [
+   "FO-26",
+   "FO-36"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-22",
+   "FL-23",
+   "FL-24",
+   "FL-R05",
+   "FL-R09"
+  ]
+ },
+ "GE-04": {
+  "id": "GE-04",
+  "titulo": "Contas a pagar e caixa",
+  "linha": 1561,
+  "rota": "/gestao/pagar-caixa",
+  "responsavel": "Financeiro",
+  "Conteúdo": "Títulos e previsões com vencimentos, parcelas, origem, antecipações e saldo de caixa por cenário.",
+  "Campos e informação essencial": "Fonte oficial; credor; documento; vencimento; principal/encargos; pago/saldo; conciliação.",
+  "Botões e destinos": "Abrir origem; Propor pagamento; Aprovar alçada; Enviar ao sistema financeiro; Importar/registrar liquidação; Conciliar.",
+  "Continuidade e estados": "Modo integrado aguarda confirmação do ERP/banco designado. Antecipação aprovada cria crédito vinculado e posterior abatimento; não exige fingir recebimento.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 51, 53, 55–57, 66; critérios CUSTO, ORC, ATIV, IND, RAST, PRECO, ERP; fluxos FL-22, FL-23, FL-24, FL-R05, FL-R09. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-37 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-37"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-22",
+   "FL-23",
+   "FL-24",
+   "FL-R05",
+   "FL-R09"
+  ]
+ },
+ "GE-05": {
+  "id": "GE-05",
+  "titulo": "Contas a receber",
+  "linha": 1580,
+  "rota": "/gestao/receber",
+  "responsavel": "Financeiro e comercial autorizado",
+  "Conteúdo": "Recebíveis por cliente, título e parcela, ligados a pedido, faturamento, entrega e devolução.",
+  "Campos e informação essencial": "Fonte; cliente; origem; vencimento; valor; recebido/saldo; divergência.",
+  "Botões e destinos": "Abrir pedido; Registrar cobrança autorizada; Conciliar recebimento; Tratar crédito/devolução; Ver carteira.",
+  "Continuidade e estados": "Desconto, devolução e baixa financeira deixam vínculo; não editar o pedido original para apagar divergência.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 51, 53, 55–57, 66; critérios CUSTO, ORC, ATIV, IND, RAST, PRECO, ERP; fluxos FL-22, FL-23, FL-24, FL-R05, FL-R09. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-37 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-37"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-22",
+   "FL-23",
+   "FL-24",
+   "FL-R05",
+   "FL-R09"
+  ]
+ },
+ "GE-06": {
+  "id": "GE-06",
+  "titulo": "Indicadores operacionais",
+  "linha": 1599,
+  "rota": "/gestao/indicadores",
+  "responsavel": "Gestores por domínio",
+  "Conteúdo": "Painéis por processo com meta, tendência, composição e diferenças entre previsto e realizado.",
+  "Campos e informação essencial": "Indicador/fórmula; período; unidade; denominador; fonte; cobertura; causa.",
+  "Botões e destinos": "Detalhar; Filtrar operações; Comparar base; Abrir plano de ação → GE-07; Propor parâmetro → CF-02/AG-05.",
+  "Continuidade e estados": "Um índice não substitui decisão. Disponibilidade, utilização, produtividade e eficiência são conceitos distintos.",
+  "Contrato reconciliado de implementação": "Cada KPI tem fórmula, unidade, fonte, período, meta, responsável e ação contextual; MTBF/MTTR/disponibilidade/utilização mantêm bases distintas.",
+  "Dependências e aceite": "capítulos 51, 53, 55–57, 66; critérios CUSTO, ORC, ATIV, IND, RAST, PRECO, ERP; fluxos FL-22, FL-23, FL-24, FL-R05, FL-R09. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-38 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Contrato obrigatório": "capítulo 53, painel Desempenho dos ativos por classe, grupo e ativo, com disponibilidade, utilização, capacidade, custo e ações. PCM/MA-01 abre a mesma visão por contexto."
+  },
+  "fo": [
+   "FO-38"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-22",
+   "FL-23",
+   "FL-24",
+   "FL-R05",
+   "FL-R09"
+  ]
+ },
+ "GE-07": {
+  "id": "GE-07",
+  "titulo": "Planos de ação",
+  "linha": 1620,
+  "rota": "/gestao/acoes",
+  "responsavel": "Gestores e responsáveis",
+  "Conteúdo": "Casos de melhoria e desvios, com causa, ação, dono, prazo e verificação do resultado.",
+  "Campos e informação essencial": "Origem/indicador; causa; hipótese; ação; responsável; prazo; evidência.",
+  "Botões e destinos": "Criar ação; Atribuir; Propor mudança; Verificar resultado; Encerrar; Reabrir caso com motivo.",
+  "Continuidade e estados": "Aprendizado sugere nova versão de parâmetro e mostra diferença; não muda cadastro automaticamente a partir de um único apontamento.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 51, 53, 55–57, 66; critérios CUSTO, ORC, ATIV, IND, RAST, PRECO, ERP; fluxos FL-22, FL-23, FL-24, FL-R05, FL-R09. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-38 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-38"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-22",
+   "FL-23",
+   "FL-24",
+   "FL-R05",
+   "FL-R09"
+  ]
+ },
+ "GE-08": {
+  "id": "GE-08",
+  "titulo": "Crédito e garantias",
+  "linha": 1639,
+  "rota": "/gestao/credito",
+  "responsavel": "Financeiro e direção",
+  "Conteúdo": "Solicitações, dossiês autorizados, propostas, decisões, contratos, liberações e serviço da dívida.",
+  "Campos e informação essencial": "Finalidade; fluxo de caixa; compromissos; garantia; custo/condição; credor; consentimento/acesso.",
+  "Botões e destinos": "Preparar solicitação → FO-20; Autorizar blocos; Solicitar proposta → PT-04; Comparar; Contratar; Acompanhar liberação; Ver título → GE-04.",
+  "Continuidade e estados": "Capacidade usa caixa disponível ao serviço da dívida por período. CET/CETCR e valor presente têm método aplicável e premissas; aprovação do credor não liquida pedido.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 51, 53, 55–57, 66; critérios CUSTO, ORC, ATIV, IND, RAST, PRECO, ERP; fluxos FL-22, FL-23, FL-24, FL-R05, FL-R09. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-20 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Destinatários e oportunidades": "em Revisar destinatários, sugerir parceiros elegíveis por categoria/cultura/região e explicar a correspondência (57.4.2). Somente convite confirmado ou política expressamente autorizada concede acesso, com finalidade, prazo e documentos escolhidos; não enviar automaticamente pelo simples pagamento do parceiro."
+  },
+  "fo": [
+   "FO-20"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-22",
+   "FL-23",
+   "FL-24",
+   "FL-R05",
+   "FL-R09"
+  ]
+ },
+ "CD-01": {
+  "id": "CD-01",
+  "titulo": "Fazendas, áreas e talhões",
+  "linha": 1659,
+  "rota": "/cadastros/areas",
+  "responsavel": "Gestor de dados e agronomia",
+  "Conteúdo": "Hierarquia e mapa com versões, parcelas, ocupação e restrições.",
+  "Campos e informação essencial": "Empresa/fazenda; identificação; localização/fuso; polígono; área útil; documento; vigência.",
+  "Botões e destinos": "Cadastrar → FO-01; Importar geometrias → FO-40, com prévia validada que cria/atualiza FO-01; Desenhar; Dividir/unir; Validar geometria; Vincular ciclo → PL-01.",
+  "Continuidade e estados": "Cadastro básico pode existir pendente de documento; exigência documental bloqueia só o processo aplicável. Divisão preserva parentesco e histórico.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 39, 43, 52, 56, 60; critérios SAFRA, PARC, REND, RAST, CADN; fluxos FL-02, FL-R01, FL-R03. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-01, FO-40 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-01",
+   "FO-40"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-02",
+   "FL-R01",
+   "FL-R03"
+  ]
+ },
+ "CD-02": {
+  "id": "CD-02",
+  "titulo": "Culturas, cultivares e operações",
+  "linha": 1678,
+  "rota": "/cadastros/operacoes",
+  "responsavel": "Agronomia e PCP",
+  "Conteúdo": "Catálogo de operação, capacidade e unidades, com fonte e vigência.",
+  "Campos e informação essencial": "Cultura/cultivar; operação; unidade; rendimento; recursos; condições; fonte.",
+  "Botões e destinos": "Editar rendimento → FO-28 na aba Rendimentos operacionais; Criar versão; Importar catálogo; Comparar real; Publicar; Abrir protocolo → AG-05.",
+  "Continuidade e estados": "Operação descreve como medir e executar; prescrição específica continua em AG-04. Catálogo nativo é ponto inicial validável, não verdade universal.",
+  "Contrato reconciliado de implementação": "Biblioteca nativa de operações/culturas e rendimentos; velocidade, largura e eficiência ou kg/h por máquina/pessoa, fonte e vigência.",
+  "Dependências e aceite": "capítulos 39, 43, 52, 56, 60; critérios SAFRA, PARC, REND, RAST, CADN; fluxos FL-02, FL-R01, FL-R03. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-21, FO-28 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Contrato obrigatório": "capítulo 52: aba canônica Operações e atividades → Rendimentos operacionais, com padrões por operação/cultura/conjunto e acesso contextual pelo PCP/orçamento."
+  },
+  "fo": [
+   "FO-21",
+   "FO-28"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-02",
+   "FL-R01",
+   "FL-R03"
+  ]
+ },
+ "CD-03": {
+  "id": "CD-03",
+  "titulo": "Máquinas, instalações e setores",
+  "linha": 1699,
+  "rota": "/cadastros/ativos",
+  "responsavel": "PCM e gestores de ativos",
+  "Conteúdo": "Cadastro de ativos, conjuntos, componentes, bombas, pivôs, gotejo, packing, silo e medidores.",
+  "Campos e informação essencial": "Identidade/modelo; capacidade; custo/componentes; contador; calibração; localização; fonte.",
+  "Botões e destinos": "Cadastrar ativo; Vincular componente; Configurar contador; Registrar calibração; Abrir plano → MA-03.",
+  "Continuidade e estados": "Dados do fabricante e ensaio da fazenda são distinguíveis. Troca de medidor mantém continuidade do histórico.",
+  "Contrato reconciliado de implementação": "Conjuntos elegíveis máquina/implemento por cultura e operação, capacidades e instalações fixas; vínculo ao rendimento homologado e PCM.",
+  "Dependências e aceite": "capítulos 39, 43, 52, 56, 60; critérios SAFRA, PARC, REND, RAST, CADN; fluxos FL-02, FL-R01, FL-R03. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-22 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-22"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-02",
+   "FL-R01",
+   "FL-R03"
+  ]
+ },
+ "CD-04": {
+  "id": "CD-04",
+  "titulo": "Pessoas e equipes",
+  "linha": 1718,
+  "rota": "/cadastros/pessoas",
+  "responsavel": "Gerência e administrador autorizado",
+  "Conteúdo": "Pessoas, equipes, calendários, habilidades e habilitações necessárias.",
+  "Campos e informação essencial": "Pessoa/equipe; vínculo; disponibilidade; habilidade; vigência; custo autorizado; escopo.",
+  "Botões e destinos": "Cadastrar; Vincular equipe; Definir calendário; Atualizar habilitação; Solicitar acesso → CF-01.",
+  "Continuidade e estados": "Pessoa cadastrada não recebe login por consequência. Valores pessoais/custos são restritos por permissão.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 39, 43, 52, 56, 60; critérios SAFRA, PARC, REND, RAST, CADN; fluxos FL-02, FL-R01, FL-R03. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-23 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-23"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-02",
+   "FL-R01",
+   "FL-R03"
+  ]
+ },
+ "CD-05": {
+  "id": "CD-05",
+  "titulo": "Parceiros",
+  "linha": 1737,
+  "rota": "/cadastros/parceiros",
+  "responsavel": "Compras, comercial e financeiro",
+  "Conteúdo": "Cadastro único com papéis de fornecedor, cliente, transportador, prestador e credor.",
+  "Campos e informação essencial": "Identificação; papel; contatos autorizados; grupos/culturas; condição; avaliação; documentos.",
+  "Botões e destinos": "Cadastrar/verificar duplicidade; Ativar papel; Atualizar dados; Convidar portal; Suspender com motivo.",
+  "Continuidade e estados": "Mesmo parceiro com vários papéis não duplica identidade. Alteração sensível de pagamento exige verificação prevista na política.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 39, 43, 52, 56, 60; critérios SAFRA, PARC, REND, RAST, CADN; fluxos FL-02, FL-R01, FL-R03. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-24 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-24"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-02",
+   "FL-R01",
+   "FL-R03"
+  ]
+ },
+ "CD-06": {
+  "id": "CD-06",
+  "titulo": "Produtos, unidades e locais",
+  "linha": 1756,
+  "rota": "/cadastros/produtos",
+  "responsavel": "Suprimentos e controladoria",
+  "Conteúdo": "Materiais, produtos agrícolas, embalagens, classes, unidades e locais de estoque.",
+  "Campos e informação essencial": "Item/categoria; unidade-base; conversão; rastreio/validade; garantia/densidade quando aplicável; local; proprietário.",
+  "Botões e destinos": "Cadastrar; Configurar conversão; Validar fator; Cadastrar local/capacidade; Vincular registro → AG-07.",
+  "Continuidade e estados": "Fator depende de item/lote/contrato quando necessário. Insumo, produto e componente financeiro não compartilham unidade implícita.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 39, 43, 52, 56, 60; critérios SAFRA, PARC, REND, RAST, CADN; fluxos FL-02, FL-R01, FL-R03. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-25 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-25"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-02",
+   "FL-R01",
+   "FL-R03"
+  ]
+ },
+ "CD-07": {
+  "id": "CD-07",
+  "titulo": "Estrutura gerencial",
+  "linha": 1775,
+  "rota": "/cadastros/estrutura",
+  "responsavel": "Controladoria",
+  "Conteúdo": "Dimensões independentes e mapeamentos com ERP, com vigência.",
+  "Campos e informação essencial": "Empresa; natureza; centro de responsabilidade/resultado; cultura; processo; projeto; conta/TOP externa.",
+  "Botões e destinos": "Mapear código; Importar estrutura; Validar vigência; Simular relatório; Publicar.",
+  "Continuidade e estados": "Não codificar todas as combinações de fazenda/cultura/processo em um único centro. Fato recebe dimensões próprias; integração traduz para a estrutura externa.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 39, 43, 52, 56, 60; critérios SAFRA, PARC, REND, RAST, CADN; fluxos FL-02, FL-R01, FL-R03. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-26 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-26"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-02",
+   "FL-R01",
+   "FL-R03"
+  ]
+ },
+ "CF-01": {
+  "id": "CF-01",
+  "titulo": "Usuários e permissões",
+  "linha": 1794,
+  "rota": "/configuracoes/acessos",
+  "responsavel": "Administrador autorizado",
+  "Conteúdo": "Usuários, papéis, escopos, credenciais e sessões/dispositivos.",
+  "Campos e informação essencial": "Identidade; papel; escopo; ações; vigência; autenticação; delegação.",
+  "Botões e destinos": "Convidar; Atribuir escopo; Simular visão; Revogar; Encerrar sessão; Revisar acessos.",
+  "Continuidade e estados": "Visão de demonstração por persona não representa segurança real. Servidor é autoridade; alteração de perfil registra aprovador.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 23–31, 56–59, 66; critérios ENG, ACE, RAST, PRECO, ONB, IAEXEC, ERP; fluxos FL-26, FL-R08, FL-R09, FL-R10. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-39 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-39"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-26",
+   "FL-R08",
+   "FL-R09",
+   "FL-R10"
+  ]
+ },
+ "CF-02": {
+  "id": "CF-02",
+  "titulo": "Alçadas e regras",
+  "linha": 1813,
+  "rota": "/configuracoes/regras",
+  "responsavel": "Gestor da política e aprovadores",
+  "Conteúdo": "Registro central de políticas com testes de exemplo, versão, proprietário e vigência.",
+  "Campos e informação essencial": "Regra/ID; escopo; classe de bloqueio; limites; aprovadores; fonte; vigência.",
+  "Botões e destinos": "Propor revisão; Simular casos; Aprovar; Publicar; Ver objetos afetados.",
+  "Continuidade e estados": "Não permitir configuração que transforme restrição obrigatória em exceção livre. Exemplo de demo não é política publicada de cliente.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 23–31, 56–59, 66; critérios ENG, ACE, RAST, PRECO, ONB, IAEXEC, ERP; fluxos FL-26, FL-R08, FL-R09, FL-R10. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-39 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-39"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-26",
+   "FL-R08",
+   "FL-R09",
+   "FL-R10"
+  ]
+ },
+ "CF-03": {
+  "id": "CF-03",
+  "titulo": "Integrações e sincronização",
+  "linha": 1832,
+  "rota": "/configuracoes/integracoes",
+  "responsavel": "TI e responsáveis de domínio",
+  "Conteúdo": "Conectores, fonte oficial, filas, falhas, reconciliação e dispositivos offline.",
+  "Campos e informação essencial": "Conector/escopo; fonte; última atualização; evento/correlação; erro; responsável; reconciliação.",
+  "Botões e destinos": "Configurar em ambiente autorizado; Testar; Reprocessar item; Conciliar; Exportar diagnóstico sem segredo.",
+  "Continuidade e estados": "Reprocessamento é idempotente. Credenciais não aparecem em logs. Não apresentar integração simulada como online.",
+  "Contrato reconciliado de implementação": "Escritor oficial por objeto e escopo ERP, credenciais protegidas, fila de erros, deduplicação, conflitos e reconciliação. Reprocessar não duplica efeito.",
+  "Dependências e aceite": "capítulos 23–31, 56–59, 66; critérios ENG, ACE, RAST, PRECO, ONB, IAEXEC, ERP; fluxos FL-26, FL-R08, FL-R09, FL-R10. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-40 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-40"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-26",
+   "FL-R08",
+   "FL-R09",
+   "FL-R10"
+  ]
+ },
+ "CF-04": {
+  "id": "CF-04",
+  "titulo": "Auditoria e parâmetros",
+  "linha": 1851,
+  "rota": "/configuracoes/auditoria",
+  "responsavel": "Administração e auditoria autorizadas",
+  "Conteúdo": "Histórico de decisões, parâmetros globais, retenção, exportação e documentação de processos.",
+  "Campos e informação essencial": "Objeto/versão; autor; antes/depois; motivo; instante/fuso; origem; efeito.",
+  "Botões e destinos": "Filtrar trilha; Exportar autorizado; Ver FL/RN/CAL; Consultar política; Solicitar correção pelo domínio.",
+  "Continuidade e estados": "Consulta não edita fato. A área Documentação mostra os fluxos e o catálogo, com links para exemplos e regras.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 23–31, 56–59, 66; critérios ENG, ACE, RAST, PRECO, ONB, IAEXEC, ERP; fluxos FL-26, FL-R08, FL-R09, FL-R10. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-40 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-40"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-26",
+   "FL-R08",
+   "FL-R09",
+   "FL-R10"
+  ]
+ },
+ "CF-05": {
+  "id": "CF-05",
+  "titulo": "Assinatura e medição",
+  "linha": 1870,
+  "rota": "/configuracoes/assinatura",
+  "responsavel": "Administrador comercial do cliente",
+  "Conteúdo": "Plano de serviço, área contratada/medida, memória de cobrança, faturas e contestação.",
+  "Campos e informação essencial": "Plano/versão; escopo; período; hectares elegíveis; exclusões; preço contratado; cobrança.",
+  "Botões e destinos": "Ver memória; Simular mudança; Solicitar plano; Contestar medição; Baixar dados.",
+  "Continuidade e estados": "Cobrança por hectare não duplica área por safras sobrepostas, parcelas ou consórcio. Regra contratual define arredondamento e proporcionalidade; inadimplência não apaga dados.",
+  "Contrato reconciliado de implementação": "Área contratual deduplicada, plano/versão, trial, renovação, faturas, pagamento confirmado, cancelamento e exportação. Hipótese de preço não é tabela ativa.",
+  "Dependências e aceite": "capítulos 23–31, 56–59, 66; critérios ENG, ACE, RAST, PRECO, ONB, IAEXEC, ERP; fluxos FL-26, FL-R08, FL-R09, FL-R10. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-41 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-41"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-26",
+   "FL-R08",
+   "FL-R09",
+   "FL-R10"
+  ]
+ },
+ "MB-01": {
+  "id": "MB-01",
+  "titulo": "Hoje no campo",
+  "linha": 1889,
+  "rota": "/app/hoje",
+  "responsavel": "Executor conforme função",
+  "Conteúdo": "Fila curta de trabalhos do turno e registros pendentes de envio.",
+  "Campos e informação essencial": "Tarefa/O.S.; tipo; local; prioridade; janela; etapa canônica; realizado/saldo; próxima ação; impedimento/responsável; última atualização; pendências locais de envio.",
+  "Botões e destinos": "Abrir tarefa no formulário específico (campo MB-02/MB-03, água MB-08, manutenção MB-09, cargas MB-10, almoxarifado MB-05, vistoria MB-06, frutos MB-07); Registrar avanço; Finalizar apontamento do turno; Ver pendências; Sincronizar. Irrigante abre Irrigação de hoje sem preencher emissão manual.",
+  "Continuidade e estados": "Sempre retornar à lista de origem. Sem tarefa, explicar o próximo passo permitido.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 41–42, 54, 64; critérios OSA, ESTOS, INSP, CAMPO; fluxos FL-12, FL-13, FL-25, FL-R02. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-03, FO-07, FO-08, FO-09, FO-10, FO-11, FO-12, FO-13, FO-30, FO-33, FO-34, FO-35 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-03",
+   "FO-07",
+   "FO-08",
+   "FO-09",
+   "FO-10",
+   "FO-11",
+   "FO-12",
+   "FO-13",
+   "FO-30",
+   "FO-33",
+   "FO-34",
+   "FO-35"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-12",
+   "FL-13",
+   "FL-25",
+   "FL-R02"
+  ]
+ },
+ "MB-02": {
+  "id": "MB-02",
+  "titulo": "Ordem e execução móvel",
+  "linha": 1908,
+  "rota": "/app/ordens",
+  "responsavel": "Operador/encarregado",
+  "Conteúdo": "Lista e detalhe de ordem, com instrução, checklist, materiais e saldo.",
+  "Campos e informação essencial": "ID/tipo e contexto; etapa; instrução/versão; autorização; janela; quantidade/unidade; acumulado/saldo; equipe/conjunto; checklist; impedimento; validade offline; materiais somente aplicáveis.",
+  "Botões e destinos": "Ler QR; Iniciar; Pausar; Retomar; Registrar avanço → MB-03; Finalizar apontamento do turno → MB-03; Registrar ocorrência → MB-04; Concluir execução somente com término físico/saldo formalmente destinado. Abrir água simplificada → MB-08.",
+  "Continuidade e estados": "Todos os tipos abrem a mesma entidade do desktop com campos específicos; pacote offline tem validade e versão visíveis.",
+  "Contrato reconciliado de implementação": "Instrução liberada e versão, área, produto, dose, volume e preparo por tanque/carga; sem cálculos mentais. Divergência bloqueia preparo novo até revisão aplicável.",
+  "Dependências e aceite": "capítulos 41–42, 54, 64; critérios OSA, ESTOS, INSP, CAMPO; fluxos FL-12, FL-13, FL-25, FL-R02. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-07, FO-08, FO-09, FO-29 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-07",
+   "FO-08",
+   "FO-09",
+   "FO-29"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-12",
+   "FL-13",
+   "FL-25",
+   "FL-R02"
+  ]
+ },
+ "MB-03": {
+  "id": "MB-03",
+  "titulo": "Apontamento móvel",
+  "linha": 1927,
+  "rota": "/app/apontar",
+  "responsavel": "Executor",
+  "Conteúdo": "Registro do realizado em poucos campos, com dados anteriores preenchidos e rascunho durável.",
+  "Campos e informação essencial": "O.S./versão; ID do apontamento; data/turno; parcela; equipe/conjunto; realizado neste apontamento; unidade; acumulado confirmado/provisório; saldo; início/fim/pausas; contadores; consumo/sobras quando aplicáveis; evidência; sincronização e conferência do apontamento.",
+  "Botões e destinos": "Salvar rascunho; Registrar avanço; Finalizar apontamento do turno (mantém O.S. Em execução se há trabalho); Concluir execução da O.S. (entra Em conferência); Registrar não conformidade; Ver recibo de envio; Próxima tarefa → MB-01. Não oferecer Encerrar O.S. como sinônimo de salvar o dia.",
+  "Continuidade e estados": "Salvar offline não diz Conferido. Área duplicada ou dose fora da faixa abre pendência sem apagar o relato.",
+  "Contrato reconciliado de implementação": "FO-07 registra um avanço por ordem/parcela/turno e versão autorizada. Registrar avanço e Finalizar apontamento do turno não mudam a ordem para concluída. Exibir separadamente realizado confirmado, captura local pendente e saldo confirmado; reenvio mantém identidade/recibo e sobreposição gera conferência. Concluir execução é decisão distinta, válida apenas no término físico ou com destinação autorizada do saldo, seguida de Em conferência; não encerrar por alcançar visualmente 100% (8.4–8.6; 12.5; 41–42; 64). A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 41–42, 54, 64; critérios OSA, ESTOS, INSP, CAMPO; fluxos FL-12, FL-13, FL-25, FL-R02. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-07 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-07"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-12",
+   "FL-13",
+   "FL-25",
+   "FL-R02"
+  ]
+ },
+ "MB-04": {
+  "id": "MB-04",
+  "titulo": "Ocorrência móvel",
+  "linha": 1946,
+  "rota": "/app/ocorrencia",
+  "responsavel": "Todos no escopo",
+  "Conteúdo": "Captura curta com foto/voz transcrita para revisão, localização e causa.",
+  "Campos e informação essencial": "Objeto; tipo; gravidade; descrição; instante; evidência; encaminhamento.",
+  "Botões e destinos": "Salvar ocorrência; Pausar ordem quando aplicável; Enviar ao responsável; Voltar à tarefa.",
+  "Continuidade e estados": "É CA-03 na mesma identidade. A sugestão de encaminhamento pode ser corrigida antes de enviar.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 41–42, 54, 64; critérios OSA, ESTOS, INSP, CAMPO; fluxos FL-12, FL-13, FL-25, FL-R02. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-08 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-08"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-12",
+   "FL-13",
+   "FL-25",
+   "FL-R02"
+  ]
+ },
+ "MB-05": {
+  "id": "MB-05",
+  "titulo": "Almoxarifado móvel",
+  "linha": 1965,
+  "rota": "/app/almoxarifado",
+  "responsavel": "Almoxarife/recebedor",
+  "Conteúdo": "QR e conferência por tarefa: receber, separar, entregar, devolver e contar.",
+  "Campos e informação essencial": "O.S./versão; autorização; produto/lote; autorizado; reservado; entregue; consumido; retorno declarado/recebido; perda/destinação; saldo em custódia; responsável.",
+  "Botões e destinos": "Ler QR; Conferir e entregar; Receber devolução; Registrar divergência; Abrir pendência/O.S. Água sem insumos não cria fila nem documento de movimentação de produtos.",
+  "Continuidade e estados": "Reserva central nova requer conexão ou cota previamente delegada. Fato físico offline pode ser registrado pendente, sem fabricar saldo confirmado.",
+  "Contrato reconciliado de implementação": "Ler QR da O.S./lote, entregar saldo autorizado, receber sobra e registrar comprovante. Material preparado não retorna como produto original disponível.",
+  "Dependências e aceite": "capítulos 41–42, 54, 64; critérios OSA, ESTOS, INSP, CAMPO; fluxos FL-12, FL-13, FL-25, FL-R02. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-09 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-09"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-12",
+   "FL-13",
+   "FL-25",
+   "FL-R02"
+  ]
+ },
+ "MB-06": {
+  "id": "MB-06",
+  "titulo": "Vistoria por pontos",
+  "linha": 1984,
+  "rota": "/app/vistoria",
+  "responsavel": "Vistoriador",
+  "Conteúdo": "Rota e coleta por ponto com contadores e unidade do protocolo.",
+  "Campos e informação essencial": "Rota/ponto; alvo; método/unidade; estádio; contagens; foto; qualidade/GPS.",
+  "Botões e destinos": "Adicionar contagem; Voltar ponto; Próximo ponto; Concluir coleta; Ver resumo.",
+  "Continuidade e estados": "Próximo ponto não abre desktop. GPS fora da tolerância aceita justificativa de qualidade quando a política permitir, sem inventar posição.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 33–34, 41, 64; critérios AGR, ACAG, CAMPO; fluxos FL-05, FL-AG-03, FL-25. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-03, FO-08 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-03",
+   "FO-08"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-05",
+   "FL-25",
+   "FL-AG-03"
+  ]
+ },
+ "MB-07": {
+  "id": "MB-07",
+  "titulo": "Contagem de frutos",
+  "linha": 2003,
+  "rota": "/app/frutos",
+  "responsavel": "Coletor/colheita",
+  "Conteúdo": "Coleta por planta e parcela com estádios e amostra rastreável.",
+  "Campos e informação essencial": "Ciclo/parcela; planta/ponto; estádio; quantidade; classe/peso amostral; data; método.",
+  "Botões e destinos": "Próxima planta; Corrigir contagem; Concluir parcela; Próxima parcela; Enviar para revisão → CO-01.",
+  "Continuidade e estados": "Não publicar previsão automaticamente a cada planta. Amostra e estimativa de população ficam explícitas.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 43, 45, 49, 64; critérios PARC, BEN, ATP, CAMPO; fluxos FL-16, FL-25. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-33 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-33"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-16",
+   "FL-25"
+  ]
+ },
+ "MB-08": {
+  "id": "MB-08",
+  "titulo": "Irrigação móvel",
+  "linha": 2022,
+  "rota": "/app/irrigacao",
+  "responsavel": "Irrigante",
+  "Conteúdo": "Registro por ordem/setor com cronômetro, medidores e área efetivamente atendida.",
+  "Campos e informação essencial": "Tarefa automática/setor; água ou fertirrigação; etapa; janela; alvo; política/versão ou aprovação individual; início/fim/pausas; volume/área; método e fonte; pressão/vazão quando disponíveis; energia medida/estimada; ocorrência; sincronização.",
+  "Botões e destinos": "Iniciar; Pausar/Retomar; Registrar avanço; Finalizar apontamento do turno; Confirmar término da irrigação → Em conferência; Próximo setor. Se elegível, conferir/encerrar automaticamente e mostrar recibo; se divergente, mostrar motivo. Nunca usar Encerrar e apontar. Produtos abrem controles específicos; água não exibe requisição/devolução.",
+  "Continuidade e estados": "Se área/volume forem insuficientes, registrar tempo e estimativa pendente, sem afirmar lâmina medida. Corrigir CAL de pivô substitui fórmula anterior.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 41–42, 54, 63–64; critérios OSA, ESTOS, INSP, IRCOMP, CAMPO; fluxos FL-12, FL-13, FL-14, FL-25, FL-R02. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-09, FO-10 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Água sem insumos": "implementar Irrigação de hoje da seção 41.8 e AGUA-01 a AGUA-08: tarefa automática e autorização por política, sem requisição/custódia de produtos; exceções encaminhadas ao responsável. Fertirrigação mantém aprovação individual."
+  },
+  "fo": [
+   "FO-09",
+   "FO-10"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-12",
+   "FL-13",
+   "FL-14",
+   "FL-25",
+   "FL-R02"
+  ]
+ },
+ "MB-09": {
+  "id": "MB-09",
+  "titulo": "Manutenção e combustível móvel",
+  "linha": 2044,
+  "rota": "/app/manutencao",
+  "responsavel": "Mecânico/abastecedor",
+  "Conteúdo": "Tarefas de serviço, inspeção e abastecimento, com campos por contexto.",
+  "Campos e informação essencial": "Ativo/O.S.; etapa; checklist; serviços; horas; peças; teste; condição técnica; combustível em registro próprio; pendências/sincronização.",
+  "Botões e destinos": "Iniciar serviço; Registrar avanço/peças; Finalizar apontamento do turno; Concluir serviço → Em conferência; Registrar teste por pessoa autorizada; Reportar falha; Registrar abastecimento. Abastecimento não encerra manutenção nem libera ativo.",
+  "Continuidade e estados": "Abastecer não leva automaticamente à oficina. A liberação técnica respeita a competência do usuário.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 41–42, 47, 53–54, 64; critérios OSA, ESTOS, PCM, ATIV, INSP, CAMPO; fluxos FL-12, FL-15, FL-25, FL-PCM-01, FL-PCM-02. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-09, FO-11, FO-12, FO-30 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-09",
+   "FO-11",
+   "FO-12",
+   "FO-30"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-12",
+   "FL-15",
+   "FL-25",
+   "FL-PCM-01",
+   "FL-PCM-02"
+  ]
+ },
+ "MB-10": {
+  "id": "MB-10",
+  "titulo": "Cargas e entregas móvel",
+  "linha": 2063,
+  "rota": "/app/cargas",
+  "responsavel": "Colheita/balança/logística",
+  "Conteúdo": "Pesagem, romaneio e confirmação de entrega em tarefas separadas pelo papel.",
+  "Campos e informação essencial": "Carga/romaneio ou viagem; O.S. de colheita de origem quando aplicável; peso/unidade; origem/destino; data; evidência; divergência; sincronização; estados logísticos separados da etapa da O.S.",
+  "Botões e destinos": "Registrar carga e vincular à O.S.; Confirmar pesagem/entrega conforme papel; Registrar divergência; Próxima carga. Salvar carga não conclui automaticamente toda a O.S. de colheita.",
+  "Continuidade e estados": "Transportador externo só vê seus dados autorizados, sem preços/custos internos por padrão. Pesagem não encerra beneficiamento.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 43–45, 48–50, 64; critérios BEN, LOG, ATP, FILA, CAMPO; fluxos FL-17, FL-21, FL-25, FL-LOG-01, FL-LOG-02. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-07, FO-08, FO-13, FO-34, FO-35 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Formulários por tarefa": "FO-07 para avanço da colheita; FO-13 para carga/pesagem; FO-34 para chegada/saída/entrega, destinatário/recebedor, quantidade entregue/aceita, data/local e evidência; FO-35 para recusa total/parcial, motivo, quantidade/unidade e destinação proposta. Geram os mesmos eventos em LO-03 e VE-06, com ID offline/idempotência. Papel, finalidade e autorização restringem campos; recusa não recoloca produto em estoque apto. Validar LOG-07 e FL-21/FL-R07, além dos critérios móveis."
+  },
+  "fo": [
+   "FO-07",
+   "FO-08",
+   "FO-13",
+   "FO-34",
+   "FO-35"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-17",
+   "FL-21",
+   "FL-25",
+   "FL-LOG-01",
+   "FL-LOG-02",
+   "FL-R07"
+  ]
+ },
+ "PT-01": {
+  "id": "PT-01",
+  "titulo": "Portal do parceiro — início",
+  "linha": 2083,
+  "rota": "/portal/inicio",
+  "responsavel": "Parceiro autenticado ou acesso limitado por convite",
+  "Conteúdo": "Oportunidades concedidas, propostas, tarefas e decisões próprias.",
+  "Campos e informação essencial": "Organização do parceiro; papel; convite; prazo; situação; próxima ação; notificações.",
+  "Botões e destinos": "Abrir cotação → PT-02; Abrir oferta → PT-03; Analisar crédito → PT-04; Ver negócios → PT-05.",
+  "Continuidade e estados": "Assinatura e região elegível não dão acesso a todo produtor. Toda oportunidade depende de destinatário autorizado e da política de distribuição definida em 57.4.2; assinatura não é consentimento do produtor.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 46, 48–50, 57–59; critérios VEN, LOG, ATP, FILA, PRECO, ONB, IAEXEC; fluxos FL-20, FL-21, FL-22, FL-26, FL-R07, FL-R08. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-24, FO-41, FO-42 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-24",
+   "FO-41",
+   "FO-42"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-20",
+   "FL-21",
+   "FL-22",
+   "FL-26",
+   "FL-R07",
+   "FL-R08"
+  ]
+ },
+ "PT-02": {
+  "id": "PT-02",
+  "titulo": "Cotação do fornecedor",
+  "linha": 2102,
+  "rota": "/portal/cotacoes",
+  "responsavel": "Fornecedor convidado",
+  "Conteúdo": "Dossiê da solicitação e sua própria proposta, inclusive entregas e condição.",
+  "Campos e informação essencial": "Especificação; volume/unidade; entrega; preço; frete; prazo/pagamento; validade.",
+  "Botões e destinos": "Salvar proposta; Submeter; Revisar antes do prazo; Responder esclarecimento; Baixar comprovante.",
+  "Continuidade e estados": "Retorno ao comprovante/portal, nunca à comparação interna SU-04. Versões submetidas são preservadas e outros fornecedores ficam ocultos.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 46, 48–50, 57–59; critérios VEN, LOG, ATP, FILA, PRECO, ONB, IAEXEC; fluxos FL-20, FL-21, FL-22, FL-26, FL-R07, FL-R08. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-42 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-42"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-20",
+   "FL-21",
+   "FL-22",
+   "FL-26",
+   "FL-R07",
+   "FL-R08"
+  ]
+ },
+ "PT-03": {
+  "id": "PT-03",
+  "titulo": "Oferta ao comprador",
+  "linha": 2121,
+  "rota": "/portal/ofertas",
+  "responsavel": "Cliente convidado",
+  "Conteúdo": "Oferta autorizada e proposta do próprio comprador.",
+  "Campos e informação essencial": "Produto/padrão; volume; janela; local; preço/condição; validade; observações.",
+  "Botões e destinos": "Salvar; Enviar proposta; Solicitar ajuste; Acompanhar negociação; Baixar comprovante.",
+  "Continuidade e estados": "Não acessa carteira comercial interna. Enviar proposta não confirma contrato sem aceite das partes.",
+  "Contrato reconciliado de implementação": "Oferta autorizada e saldo por data/classe; Solicitar pedido gera intenção, não venda irrevogável. Reserva temporária expira segundo política visível.",
+  "Dependências e aceite": "capítulos 46, 48–50, 57–59; critérios VEN, LOG, ATP, FILA, PRECO, ONB, IAEXEC; fluxos FL-20, FL-21, FL-22, FL-26, FL-R07, FL-R08. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-19, FO-34, FO-42 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Contrato obrigatório": "capítulos 46 e 49: catálogo privado com disponibilidade líquida por data, pedido iniciado pelo cliente, reserva e confirmação consistentes, contraproposta, recompra e acompanhamento; dados internos do agricultor permanecem privados.",
+   "Reserva e promessa": "aplicar 49.2–49.3 e ATP-04/05/07. Mostrar tipo de reserva, quantidade, vencimento e estado de confirmação; a conversão em pedido mantém dedução única. Déficit aparece ao produtor; disponibilidade publicada ao comprador nunca é negativa."
+  },
+  "fo": [
+   "FO-19",
+   "FO-34",
+   "FO-42"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-20",
+   "FL-21",
+   "FL-22",
+   "FL-26",
+   "FL-R07",
+   "FL-R08"
+  ]
+ },
+ "PT-04": {
+  "id": "PT-04",
+  "titulo": "Dossiê de crédito",
+  "linha": 2143,
+  "rota": "/portal/credito",
+  "responsavel": "Credor autorizado",
+  "Conteúdo": "Blocos de informação concedidos e proposta/decisão estruturada.",
+  "Campos e informação essencial": "Finalidade; caixa; compromissos; garantias; documentos; condições; vigência do acesso.",
+  "Botões e destinos": "Pedir complemento; Propor condições; Aprovar/contrapropor/recusar; Registrar condição precedente; Acompanhar liberação.",
+  "Continuidade e estados": "Acesso expirável por bloco/finalidade. Não revender dossiê. Aprovação pode ser condicional e não marca compra como paga.",
+  "Contrato reconciliado de implementação": "Dossiê com consentimento, finalidade, validade e histórico de acesso; condição de crédito aceita não equivale a desembolso.",
+  "Dependências e aceite": "capítulos 46, 48–50, 57–59; critérios VEN, LOG, ATP, FILA, PRECO, ONB, IAEXEC; fluxos FL-20, FL-21, FL-22, FL-26, FL-R07, FL-R08. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-20, FO-42 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-20",
+   "FO-42"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-20",
+   "FL-21",
+   "FL-22",
+   "FL-26",
+   "FL-R07",
+   "FL-R08"
+  ]
+ },
+ "PT-05": {
+  "id": "PT-05",
+  "titulo": "Negócios e documentos",
+  "linha": 2162,
+  "rota": "/portal/negocios",
+  "responsavel": "Parceiro",
+  "Conteúdo": "Negócios ganhos/perdidos próprios, pedidos/contratos e execução permitida.",
+  "Campos e informação essencial": "Negociação; resultado; condição aceita; documento; entrega; obrigação; mensagem.",
+  "Botões e destinos": "Confirmar pedido; Atualizar previsão de entrega; Enviar documento; Acompanhar situação; Abrir divergência.",
+  "Continuidade e estados": "Motivos agregados de perda não revelam proposta concorrente ou dado reservado. Mensagem permanece vinculada ao negócio.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 46, 48–50, 57–59; critérios VEN, LOG, ATP, FILA, PRECO, ONB, IAEXEC; fluxos FL-20, FL-21, FL-22, FL-26, FL-R07, FL-R08. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-42 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Reserva e promessa": "aplicar 49.2–49.3 e ATP-04/05/07. Mostrar tipo de reserva, quantidade, vencimento e estado de confirmação; a conversão em pedido mantém dedução única. Déficit aparece ao produtor; disponibilidade publicada ao comprador nunca é negativa."
+  },
+  "fo": [
+   "FO-42"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-20",
+   "FL-21",
+   "FL-22",
+   "FL-26",
+   "FL-R07",
+   "FL-R08"
+  ]
+ },
+ "PT-06": {
+  "id": "PT-06",
+  "titulo": "Inteligência do parceiro",
+  "linha": 2182,
+  "rota": "/portal/indicadores",
+  "responsavel": "Parceiro autorizado",
+  "Conteúdo": "Indicadores próprios e, se contratado e permitido, agregados com proteção contra reidentificação.",
+  "Campos e informação essencial": "Período; funil; taxa de resposta/conversão; entrega; receita própria; origem; cobertura.",
+  "Botões e destinos": "Filtrar; Abrir negócio próprio; Exportar autorizado; Criar ação interna.",
+  "Continuidade e estados": "Não permitir inferir fazenda individual por filtros de amostras pequenas. Benchmark entre clientes exige governança e consentimentos/bases aplicáveis.",
+  "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
+  "Dependências e aceite": "capítulos 46, 48–50, 57–59; critérios VEN, LOG, ATP, FILA, PRECO, ONB, IAEXEC; fluxos FL-20, FL-21, FL-22, FL-26, FL-R07, FL-R08. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-38 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-38"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-20",
+   "FL-21",
+   "FL-22",
+   "FL-26",
+   "FL-R07",
+   "FL-R08"
+  ]
+ },
+ "PT-07": {
+  "id": "PT-07",
+  "titulo": "Perfil e assinatura do parceiro",
+  "linha": 2201,
+  "rota": "/portal/perfil",
+  "responsavel": "Administrador do parceiro",
+  "Conteúdo": "Empresa, usuários, categorias, regiões, preferências e contrato de serviço.",
+  "Campos e informação essencial": "Identidade; papéis; grupos/regiões; canais; plano; vigência; usuários.",
+  "Botões e destinos": "Atualizar perfil; Gerir usuários; Escolher preferências; Ver assinatura/fatura; Revogar acesso.",
+  "Continuidade e estados": "Plano pago não altera ranking técnico de proposta nem autorização de dados; distinguir publicidade, se existir, de comparação econômica.",
+  "Contrato reconciliado de implementação": "Básico gratuito de fornecedor/comprador separado de recursos profissionais. Crédito sem tabela validada usa proposta comercial; nunca cobrança implícita por hectare total da plataforma.",
+  "Dependências e aceite": "capítulos 46, 48–50, 57–59; critérios VEN, LOG, ATP, FILA, PRECO, ONB, IAEXEC; fluxos FL-20, FL-21, FL-22, FL-26, FL-R07, FL-R08. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-24, FO-41 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-24",
+   "FO-41"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-20",
+   "FL-21",
+   "FL-22",
+   "FL-26",
+   "FL-R07",
+   "FL-R08"
+  ]
+ },
+ "ON-01": {
+  "id": "ON-01",
+  "titulo": "Entrada e implantação guiada",
+  "linha": 2220,
+  "rota": "/entrada",
+  "responsavel": "Responsável da organização",
+  "Conteúdo": "Assistente retomável: organização, fazenda/área, cultura/ciclo, recursos, importação e primeiro trabalho.",
+  "Campos e informação essencial": "Organização; escopo; origem dos dados; mapa; responsável; modo integrado/autônomo; pendências.",
+  "Botões e destinos": "Importar → FO-40 (prévia, mapeamento, CRS e erros por objeto); Desenhar → FO-01; Validar prévia; Convidar equipe; Configurar integração; Criar primeiro planejamento → PL-01; Abrir mapa → IN-04.",
+  "Continuidade e estados": "Ver mapa cedo é objetivo de experiência; operar exige os dados e autorizações do processo. Nunca inventar CAR, plantio, estoque ou orçamento para completar o assistente.",
+  "Contrato reconciliado de implementação": "Google/Apple e alternativa segura, perfil e primeiro objetivo; cadastros progressivos, importar com prévia, trial transparente e contratação sem exigir cartão para tarefas gratuitas.",
+  "Dependências e aceite": "capítulos 58, 60; critérios ONB, CADN, PRECO; fluxos FL-02, FL-R08. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-01, FO-24, FO-40, FO-41 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "fo": [
+   "FO-01",
+   "FO-24",
+   "FO-40",
+   "FO-41"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-02",
+   "FL-R08"
+  ]
+ },
+ "BO-01": {
+  "id": "BO-01",
+  "titulo": "Planos e contratos da plataforma",
+  "linha": 2239,
+  "rota": "/plataforma/planos",
+  "responsavel": "administrador autorizado da plataforma; isolado da gestão da fazenda",
+  "Conteúdo": "Plano, moeda, vigência, recursos, franquias, excedentes, descontos e contratante. Preços em hipótese não são publicáveis sem decisão comercial.",
+  "Campos e informação essencial": "Plano, moeda, vigência, recursos, franquias, excedentes, descontos e contratante. Preços em hipótese não são publicáveis sem decisão comercial.",
+  "Botões e destinos": "Criar versão; Simular cobrança; Aprovar tabela; Vincular contrato; consulta contratual ligada a CF-05 ou PT-07 segundo o contratante. Alterações de preço não são retroativas.",
+  "Continuidade e estados": "proposta → revisada → vigente → substituída/encerrada. Confirmação de pagamento segue evento validado do provedor, com idempotência. Nenhum privilégio administrativo concede consulta indiscriminada a dados agronômicos dos clientes.",
+  "Contrato reconciliado de implementação": "",
+  "Dependências e aceite": "capítulos 57–58 e 26–30; PRECO, ONB, ENG e ACE; FL-R08.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-41 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Conteúdo e campos": "Plano, moeda, vigência, recursos, franquias, excedentes, descontos e contratante. Preços em hipótese não são publicáveis sem decisão comercial.",
+   "Trial": "registrar matriz de direitos, coorte, duração, limite de área, franquias finitas de serviços externos, regra de esgotamento e retenção/exportação conforme 58.1. Oferta comercial não pode ser publicada com direitos ou franquias indefinidos; consulta e fechamento seguro de trabalho já iniciado sobrevivem à expiração."
+  },
+  "fo": [
+   "FO-41"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-R08"
+  ]
+ },
+ "BO-02": {
+  "id": "BO-02",
+  "titulo": "Assinaturas e cobrança",
+  "linha": 2256,
+  "rota": "/plataforma/assinaturas",
+  "responsavel": "administrador autorizado da plataforma; isolado da gestão da fazenda",
+  "Conteúdo": "Trial, assinatura, fatura, tentativa de pagamento, confirmação, reembolso, cancelamento e permissões. Token do provedor; sem armazenar cartão completo.",
+  "Campos e informação essencial": "Trial, assinatura, fatura, tentativa de pagamento, confirmação, reembolso, cancelamento e permissões. Token do provedor; sem armazenar cartão completo.",
+  "Botões e destinos": "Abrir assinatura; Ver fatura; Reconciliar pagamento; Cancelar ao fim do ciclo; consulta contratual ligada a CF-05 ou PT-07 segundo o contratante.",
+  "Continuidade e estados": "Assinatura: trial, ativa, renovação com aceite, recuperação por falha e cancelamento conforme capítulo 58. Pagamento/fatura: pendente, ação necessária, pago, falhou, estornado e cancelado; confirmação vem de evento validado do provedor e conciliação idempotente, nunca do retorno visual do checkout. Nenhum privilégio administrativo concede consulta indiscriminada a dados agronômicos dos clientes.",
+  "Contrato reconciliado de implementação": "",
+  "Dependências e aceite": "capítulos 57–58 e 26–30; PRECO, ONB, ENG e ACE; FL-R08.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-41 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Conteúdo e campos": "Trial, assinatura, fatura, tentativa de pagamento, confirmação, reembolso, cancelamento e permissões. Token do provedor; sem armazenar cartão completo."
+  },
+  "fo": [
+   "FO-41"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-R08"
+  ]
+ },
+ "BO-03": {
+  "id": "BO-03",
+  "titulo": "Medição e conciliação comercial",
+  "linha": 2271,
+  "rota": "/plataforma/medicao",
+  "responsavel": "administrador autorizado da plataforma; isolado da gestão da fazenda",
+  "Conteúdo": "Área contratada deduplicada, carteira patrocinada, direitos cobertos, franquia, eventos medidos e ajustes com origem.",
+  "Campos e informação essencial": "Área contratada deduplicada, carteira patrocinada, direitos cobertos, franquia, eventos medidos e ajustes com origem.",
+  "Botões e destinos": "Ver memória de cálculo; Comparar contrato; Revisar divergência; Aprovar ajuste; consulta contratual ligada a CF-05 ou PT-07 segundo o contratante.",
+  "Continuidade e estados": "Período de medição aberto → conciliado → aprovado. Contestação abre revisão, com estado contestado; ajuste documentado retorna à conciliação antes da aprovação. Medição já faturada não é reescrita: gerar ajuste/crédito vinculado no período e com a alçada aplicáveis. Preservar memória de cálculo e origem. Nenhum privilégio administrativo concede consulta indiscriminada a dados agronômicos dos clientes.",
+  "Contrato reconciliado de implementação": "",
+  "Dependências e aceite": "capítulos 57–58 e 26–30; PRECO, ONB, ENG e ACE; FL-R08.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-40, FO-41 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Conteúdo e campos": "Área contratada deduplicada, carteira patrocinada, direitos cobertos, franquia, eventos medidos e ajustes com origem."
+  },
+  "fo": [
+   "FO-40",
+   "FO-41"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-R08"
+  ]
+ },
+ "BO-04": {
+  "id": "BO-04",
+  "titulo": "Economia e crescimento da plataforma",
+  "linha": 2286,
+  "rota": "/plataforma/economia",
+  "responsavel": "administrador autorizado da plataforma; isolado da gestão da fazenda",
+  "Conteúdo": "Receita recorrente, conversão, ativação, churn, CAC, margem e suporte por coorte/perfil; método e período explícitos.",
+  "Campos e informação essencial": "Receita recorrente, conversão, ativação, churn, CAC, margem e suporte por coorte/perfil; método e período explícitos.",
+  "Botões e destinos": "Abrir coorte; Rastrear receita/custo; Investigar abandono; Criar experimento; consulta contratual ligada a CF-05 ou PT-07 segundo o contratante.",
+  "Continuidade e estados": "Painel de leitura sobre eventos confirmados, com período, método e origem; sem máquina de estados própria. Criar experimento abre cadastro separado, sem alterar retroativamente métricas ou contratos. Nenhum privilégio administrativo concede consulta indiscriminada a dados agronômicos dos clientes.",
+  "Contrato reconciliado de implementação": "",
+  "Dependências e aceite": "capítulos 57–58 e 26–30; PRECO, ONB, ENG e ACE; FL-R08.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-38, FO-41 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Conteúdo e campos": "Receita recorrente, conversão, ativação, churn, CAC, margem e suporte por coorte/perfil; método e período explícitos."
+  },
+  "fo": [
+   "FO-38",
+   "FO-41"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-R08"
+  ]
+ }
+}

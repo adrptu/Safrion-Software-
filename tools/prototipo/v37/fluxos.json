@@ -1,0 +1,394 @@
+[
+ {
+  "n": 1,
+  "linha": 2881,
+  "secao": "8.4.1.1 Aplicação uniforme por tipo de ordem",
+  "id": "FL-OS-01",
+  "src": "flowchart TD\n A[\"A liberar\"] --> B{\"Aprovação, escopo econômico e prontidão válidos?\"}\n B -->|Não| C[\"Resolver pendência e manter etapa\"]\n C --> A\n B -->|Sim| L[\"CMD-06: registrar liberação na janela autorizada\"]\n L --> D[\"Liberadas\"]\n D -->|CMD-07: início confirmado| E[\"Em execução\"]\n D -->|Liberação ou prontidão perdeu validade| A\n E --> F{\"Trabalho terminou ou saldo dispensado por CMD-47?\"}\n F -->|Não| G[\"CMD-43: apontar turno; pausar ou reprogramar\"]\n G --> E\n F -->|CMD-08| H[\"Em conferência\"]\n H --> I{\"Conferências e saldos resolvidos?\"}\n I -->|Não| J[\"Tratar pendência final\"]\n J --> H\n I -->|CMD-10| K[\"Encerradas\"]\n H -->|CMD-48: reabrir trabalho adicional| E\n A -->|CMD-46: solicitar sem execução| M[\"Bloquear início e reconciliar custódia\"]\n D -->|CMD-46: solicitar sem execução| M\n M --> N{\"Custódia zero e cancelamento conciliado?\"}\n N -->|Não| M\n N -->|Sim| O[\"Cancelada: visão própria com histórico\"]"
+ },
+ {
+  "n": 2,
+  "linha": 3076,
+  "secao": "FL-01 — Gestão integrada da fazenda",
+  "id": "FL-01",
+  "src": "flowchart TD\n A[\"Direção: metas e capital\"] --> B[\"Plano técnico e econômico\"]\n C[\"Mercado e demanda\"] --> B\n B --> D{\"Recursos e autorizações suficientes?\"}\n D -->|Não| E[\"Revisar cenário e impedimentos\"]\n E --> B\n D -->|Sim| F[\"Programar e executar\"]\n F --> G[\"Produzir e liberar qualidade\"]\n G --> H[\"Atender compromissos e entregar\"]\n H --> I[\"Conciliar resultado e caixa\"]\n F --> I\n I --> J[\"Decidir melhorias\"]\n J --> B"
+ },
+ {
+  "n": 3,
+  "linha": 3096,
+  "secao": "FL-02 — Cadastro, importação e primeira operação",
+  "id": "FL-02",
+  "src": "flowchart TD\n A[\"Criar organização e escopo\"] --> B[\"Importar ou cadastrar base\"]\n B --> C[\"Validar identidade, área e unidades\"]\n C --> D{\"Há inconsistência relevante?\"}\n D -->|Sim| E[\"Corrigir prévia sem duplicar\"]\n E --> C\n D -->|Não| F[\"Vincular ciclos e recursos\"]\n F --> G[\"Definir fonte oficial e acessos\"]\n G --> H[\"Abrir primeiro planejamento\"]"
+ },
+ {
+  "n": 4,
+  "linha": 3112,
+  "secao": "FL-03 — Safra, plano e orçamento sem dependência circular",
+  "id": "FL-03",
+  "src": "flowchart TD\n A[\"Criar safra e vincular ciclos\"] --> B[\"Calcular plano, capacidade e materiais\"]\n B --> C{\"Plano técnico aprovado?\"}\n C -->|Não| B\n C -->|Sim| D[\"Revisar orçamento e riscos\"]\n C -->|Preparação permitida| E[\"CMD-41: emitir janela para revisão técnica\"]\n E --> F[\"CMD-42: revisar versão; planejar recursos\"]\n D --> G{\"Orçamento autorizado?\"}\n G -->|Não| B\n G -->|Sim| H[\"CMD-04: autorizar escopo e horizonte\"]\n F --> I{\"Versão aprovada, escopo autorizado e prontidão válidos?\"}\n H --> I\n I -->|Não| J[\"A liberar: pendência com responsável\"]\n J --> I\n I -->|Sim| K[\"CMD-06: registrar liberação selecionada\"]"
+ },
+ {
+  "n": 5,
+  "linha": 3134,
+  "secao": "FL-04 — Solo e folha até recomendação e execução",
+  "id": "FL-04",
+  "src": "flowchart TD\n A[\"Planejar amostra e receber laudo\"] --> B{\"Dados e representatividade válidos?\"}\n B -->|Não| C[\"Corrigir ou coletar novamente\"]\n C --> A\n B -->|Sim| D[\"Diagnosticar e definir meta\"]\n D --> E[\"Aplicar método regional validado\"]\n E --> F{\"Prescrição espacial justificada?\"}\n F -->|Sim| G[\"Validar mapa e limites da máquina\"]\n F -->|Não| H[\"Preparar dose fixa\"]\n G --> I[\"RT aprova recomendação e versão\"]\n H --> I\n I --> J[\"Atualizar plano e demanda\"]"
+ },
+ {
+  "n": 6,
+  "linha": 3153,
+  "secao": "FL-05 — Monitoramento, decisão e avaliação agronômica",
+  "id": "FL-05",
+  "src": "flowchart TD\n A[\"Coletar pelo protocolo do alvo\"] --> B{\"Amostra suficiente e coerente?\"}\n B -->|Não| C[\"Complementar coleta\"]\n C --> A\n B -->|Sim| D[\"Avaliar estádio, risco e tendência\"]\n D --> E{\"Intervenção tecnicamente indicada?\"}\n E -->|Não| F[\"Registrar decisão e nova vistoria\"]\n F --> A\n E -->|Sim| G[\"Recomendar e validar restrições\"]\n G --> T[\"Agrônomo revisa e aprova a versão da O.S.\"]\n T --> H[\"Verificar prontidão, programar e executar\"]\n H --> I[\"Avaliar resultado e recorrência\"]\n I --> D"
+ },
+ {
+  "n": 7,
+  "linha": 3173,
+  "secao": "FL-06 — Cultura perene, idade e pendências anteriores",
+  "id": "FL-06",
+  "src": "flowchart TD\n A[\"Vincular cultivo existente à safra\"] --> B[\"Conferir plantio e precisão da data\"]\n B --> C{\"Âncora suficiente para a atividade?\"}\n C -->|Não| D[\"Abrir pendência ou estimativa identificada\"]\n D --> B\n C -->|Sim| E[\"Resolver idade, fase e eventos\"]\n E --> F{\"Atividade antiga está comprovada?\"}\n F -->|Sim| G[\"Preservar histórico realizado\"]\n F -->|Não| H[\"Decidir pendência ou não aplicabilidade\"]\n G --> I[\"Planejar saldo e recorrências\"]\n H --> I"
+ },
+ {
+  "n": 8,
+  "linha": 3191,
+  "secao": "FL-07 — Escalonamento de parcelas e continuidade de oferta",
+  "id": "FL-07",
+  "src": "flowchart TD\n A[\"Separar pedidos e demanda residual\"] --> B[\"Informar ciclo, curva e ocupação\"]\n B --> C[\"Simular parcelas e datas\"]\n C --> D{\"Área, retorno e capacidade cabem?\"}\n D -->|Não| E[\"Rever volume, intervalo ou área\"]\n E --> C\n D -->|Sim| F[\"Conferir oferta em vários ciclos\"]\n F --> G{\"Há semana descoberta?\"}\n G -->|Sim| E\n G -->|Não| H[\"Publicar plano e oferta futura\"]"
+ },
+ {
+  "n": 9,
+  "linha": 3208,
+  "secao": "FL-08 — Programação, liberação e reprogramação",
+  "id": "FL-08",
+  "src": "flowchart TD\n A[\"Selecionar necessidade e saldo\"] --> B[\"Alocar janela, conjunto e equipe\"]\n B --> C[\"Checar prontidão aplicável\"]\n C --> D{\"Existe impedimento?\"}\n D -->|Sim| E[\"Atribuir causa, dono e prazo\"]\n E --> F[\"Resolver origem ou simular alternativa\"]\n F --> B\n D -->|Não| G[\"Liberar versão e parcela\"]\n G --> H[\"Executor verifica condição local\"]\n H --> I{\"Condição mudou?\"}\n I -->|Sim| E\n I -->|Não| J[\"Iniciar execução\"]"
+ },
+ {
+  "n": 10,
+  "linha": 3227,
+  "secao": "FL-09 — Necessidade líquida datada",
+  "id": "FL-09",
+  "src": "flowchart TD\n A[\"Reconciliar plano, ordens e consumo\"] --> B[\"Projetar físico apto e recebimentos\"]\n B --> C[\"Calcular saldo por data\"]\n C --> D{\"Há ruptura ou segurança insuficiente?\"}\n D -->|Não| E[\"Manter cobertura monitorada\"]\n D -->|Sim| F{\"Contrato vigente atende?\"}\n F -->|Sim| G[\"Propor liberação por data\"]\n F -->|Não| H[\"Preparar cotação da falta\"]\n G --> I[\"Verificar prazo, validade e depósito\"]\n H --> I\n I --> J[\"Revisar proposta e responsável\"]"
+ },
+ {
+  "n": 11,
+  "linha": 3245,
+  "secao": "FL-10 — Compra, recebimento parcial e obrigação financeira",
+  "id": "FL-10",
+  "src": "flowchart TD\n A[\"Revisar rascunho e destinatários\"] --> B[\"Enviar cotação e receber propostas\"]\n B --> C[\"Equalizar especificação e condição\"]\n C --> D{\"Contratação aprovada?\"}\n D -->|Não| E[\"Ajustar ou encerrar com motivo\"]\n E --> A\n D -->|Sim| F[\"Emitir pedido ou contrato\"]\n F --> G[\"Fornecedor confirma entrega\"]\n G --> H[\"Conferir físico e documento\"]\n H --> I{\"Há parcial ou divergência?\"}\n I -->|Sim| J[\"Liberar apto e tratar saldo\"]\n I -->|Não| K[\"Liberar recebido apto\"]\n J --> L[\"Conciliar título e antecipação\"]\n K --> L"
+ },
+ {
+  "n": 12,
+  "linha": 3266,
+  "secao": "FL-11 — Contrato de safra e liberações programadas",
+  "id": "FL-11",
+  "src": "flowchart TD\n A[\"Estimar volume e negociar condições\"] --> B[\"Aprovar contrato versionado\"]\n B --> C[\"Projetar necessidade e cobertura\"]\n C --> D{\"Precisa liberar entrega?\"}\n D -->|Não| C\n D -->|Sim| E[\"Conferir saldo, capacidade e prazo\"]\n E --> E1{\"Exposição, contrato e ritmo respeitados?\"}\n E1 -->|Não| E2[\"Mostrar conflito e reprogramar\"]\n E2 --> C\n E1 -->|Sim| F[\"Emitir liberação ao fornecedor\"]\n F --> G[\"Receber e conciliar parcela\"]\n G --> H{\"Contrato ainda tem saldo?\"}\n H -->|Sim| C\n H -->|Não| I[\"Encerrar obrigações cumpridas\"]"
+ },
+ {
+  "n": 13,
+  "linha": 3287,
+  "secao": "FL-12 — Reserva, custódia, consumo e devolução",
+  "id": "FL-12",
+  "src": "flowchart TD\n A[\"Requisitar pela ordem\"] --> B[\"Reservar lote apto\"]\n B --> C[\"Separar e conferir quantidade\"]\n C --> D[\"Entregar para custódia identificada\"]\n D --> E[\"Registrar consumo real\"]\n E --> F{\"Há sobra ou diferença?\"}\n F -->|Sobra| G[\"Devolver e conferir ou destinar formalmente\"]\n F -->|Diferença| H[\"Conferir causa e destinação\"]\n F -->|Não| I[\"Conciliar requisição\"]\n G --> I\n H --> I\n I --> J[\"Encerrar quando saldo tratado\"]"
+ },
+ {
+  "n": 14,
+  "linha": 3306,
+  "secao": "FL-13 — Execução de campo e conferência",
+  "id": "FL-13",
+  "src": "flowchart TD\n A[\"Abrir instrução liberada e checklist\"] --> B[\"CMD-07: iniciar ou retomar execução\"]\n B --> C{\"Impedimento?\"}\n C -->|Sim| D[\"Pausar; tratar causa e saldo\"]\n D --> B\n C -->|Não| E[\"CMD-43: salvar apontamento do turno\"]\n E --> F{\"Todo trabalho terminou ou saldo dispensado por CMD-47?\"}\n F -->|Não| B\n F -->|CMD-08| G[\"Em conferência\"]\n G --> H{\"Registros e materiais reconciliados?\"}\n H -->|Não| I{\"Falta trabalho físico?\"}\n I -->|Sim| K[\"CMD-48: reabrir saldo com programação e revalidação\"]\n K --> B\n I -->|Não| L[\"Tratar registros, sobras e diferenças\"]\n L --> G\n H -->|CMD-10| J[\"Encerradas: recibo e histórico\"]"
+ },
+ {
+  "n": 15,
+  "linha": 3329,
+  "secao": "FL-14 — Irrigação, capacidade e medição",
+  "id": "FL-14",
+  "src": "flowchart TD\n A[\"Calcular necessidade com dados válidos\"] --> B{\"Somente água sem insumos?\"}\n B -->|Sim| C{\"Dentro da política agronômica vigente?\"}\n C -->|Sim| D[\"Registrar enquadramento técnico na política\"]\n C -->|Não| E[\"Agrônomo revisa exceção\"]\n B -->|Não| F[\"Aprovação individual e controles de produtos\"]\n E --> P{\"Exceção aprovada?\"}\n P -->|Não| Q[\"A liberar: corrigir; cancelamento só por CMD-46\"]\n P -->|Sim| R[\"Autorizar esta versão individualmente\"]\n R --> G\n D --> G{\"Escopo autorizado, recursos, rede e janela aptos?\"}\n F --> G\n G -->|Não| H[\"A liberar: resolver impedimento\"]\n H --> G\n G -->|Sim| I[\"CMD-06: liberação registrada; Liberadas\"]\n I --> J[\"CMD-07/43: executar e apontar por turno\"]\n J --> K{\"Tarefa terminou ou saldo dispensado por CMD-47?\"}\n K -->|Não| J\n K -->|CMD-08| L[\"Em conferência: validar aplicação\"]\n L --> M{\"Registros e saldos aplicáveis conciliados?\"}\n M -->|Não| N[\"Tratar divergência; manter pendência\"]\n N --> L\n L -->|CMD-48: trabalho adicional autorizado| J\n M -->|CMD-10| O[\"Encerradas: balanço e custo únicos\"]"
+ },
+ {
+  "n": 16,
+  "linha": 3360,
+  "secao": "FL-15 — Manutenção até retorno técnico",
+  "id": "FL-15",
+  "src": "flowchart TD\n A[\"Falha, inspeção ou vencimento\"] --> B[\"Triar e definir condição do ativo\"]\n B --> C[\"Informar impacto na programação\"]\n C --> D[\"Planejar ordem, peças e recursos\"]\n D --> E[\"Executar e registrar serviços\"]\n E --> F[\"Realizar teste requerido\"]\n F --> G{\"Apto para retornar?\"}\n G -->|Não| H[\"Revisar reparo e diagnóstico\"]\n H --> E\n G -->|Sim| I[\"Liberar tecnicamente o ativo\"]\n I --> J[\"Revalidar agenda e conciliar custo\"]"
+ },
+ {
+  "n": 17,
+  "linha": 3378,
+  "secao": "FL-16 — Previsão semanal, demanda e capacidade",
+  "id": "FL-16",
+  "src": "flowchart TD\n A[\"Coletar amostras e maturação\"] --> B[\"Estimar oferta por classe e semana\"]\n B --> C[\"Responsável revisa e publica\"]\n C --> D[\"Comparar pedidos e demanda residual\"]\n D --> E{\"Oferta e capacidade atendem?\"}\n E -->|Não| F[\"Rever promessa, origem ou capacidade\"]\n F --> D\n E -->|Sim| G[\"Programar colheita e atendimento\"]\n G --> H[\"Comparar colhido e previsto\"]\n H --> I[\"Propor recalibração do modelo\"]\n I --> B"
+ },
+ {
+  "n": 18,
+  "linha": 3396,
+  "secao": "FL-17 — Colheita, carga e recebimento",
+  "id": "FL-17",
+  "src": "flowchart TD\n A[\"Liberar colheita apta e recursos\"] --> B[\"Colher e identificar origem\"]\n B --> B1[\"Apontar avanço e horas do turno\"]\n B1 --> C[\"Registrar carga e pesagem quando disponível\"]\n C --> D[\"Emitir romaneio e transportar\"]\n D --> E[\"Receber e comparar medidas\"]\n E --> F{\"Há divergência ou restrição?\"}\n F -->|Sim| G[\"Segregar e abrir conferência\"]\n F -->|Não| H[\"Destinar para venda ou processo\"]\n G --> J{\"Qualidade liberou a destinação?\"}\n J -->|Não| K[\"Manter bloqueio e tratar desvio\"]\n J -->|Sim| H\n H --> I[\"Manter lote e genealogia\"]\n K -->|Tratamento concluído e nova avaliação registrada| J"
+ },
+ {
+  "n": 19,
+  "linha": 3417,
+  "secao": "FL-18 — Beneficiamento e estoque vendável",
+  "id": "FL-18",
+  "src": "flowchart TD\n A[\"Selecionar lotes e rota\"] --> B[\"Reservar recursos e materiais\"]\n B --> C[\"Processar e medir saídas\"]\n C --> D[\"Conciliar massa, perdas e estoque em processo\"]\n D --> E{\"Balanço explicado?\"}\n E -->|Não| J[\"Conferir medições e lançamentos\"]\n J --> D\n E -->|Sim| F[\"Inspecionar lotes resultantes\"]\n F --> G{\"Padrão atendido?\"}\n G -->|Não| H[\"Bloquear, reprocessar ou destinar\"]\n H --> D\n G -->|Sim| I[\"Liberar estoque por classe e local\"]"
+ },
+ {
+  "n": 20,
+  "linha": 3436,
+  "secao": "FL-19 — Qualidade, devolução e recolhimento",
+  "id": "FL-19",
+  "src": "flowchart TD\n A[\"Detectar não conformidade\"] --> B[\"Bloquear saldo e alocações afetadas\"]\n B --> C[\"Rastrear origens e destinos\"]\n C --> D{\"Produto já saiu?\"}\n D -->|Sim| E[\"Abrir caso e coordenar retorno\"]\n E --> F[\"Receber em condição bloqueada\"]\n D -->|Não| J[\"Manter saldo bloqueado no local\"]\n J --> G\n F --> G[\"Inspecionar e decidir destinação\"]\n G --> H[\"Tratar crédito, perda ou reprocessamento\"]\n H --> I[\"Verificar causa e encerrar caso\"]"
+ },
+ {
+  "n": 21,
+  "linha": 3454,
+  "secao": "FL-20 — Oferta, venda e compromisso",
+  "id": "FL-20",
+  "src": "flowchart TD\n A[\"Consultar oferta e mercado\"] --> B[\"Preparar condições e destinatários\"]\n B --> C[\"Receber propostas privadas\"]\n C --> D[\"Comparar preço líquido e condições\"]\n D --> E{\"Crédito, volume e exposição aceitos?\"}\n E -->|Não| F[\"Renegociar ou recusar\"]\n F --> B\n E -->|Sim| G[\"Converter reserva e confirmar pedido atomicamente\"]\n G --> H{\"Há lote físico apto?\"}\n H -->|Sim| I[\"Reservar lote para atendimento\"]\n H -->|Não| J[\"Alocar produção futura com risco visível\"]\n I --> K[\"Programar entrega\"]\n J --> K"
+ },
+ {
+  "n": 22,
+  "linha": 3474,
+  "secao": "FL-21 — Expedição, entrega e divergência",
+  "id": "FL-21",
+  "src": "flowchart TD\n A[\"Programar transporte e carga\"] --> B[\"Separar e conferir lotes e peso\"]\n B --> C[\"Obter documentos exigidos\"]\n C --> D{\"Pronto para saída?\"}\n D -->|Não| E[\"Resolver pendência sem baixar estoque\"]\n E --> C\n D -->|Sim| F[\"Confirmar saída física uma vez\"]\n F --> G[\"Acompanhar viagem e receber comprovante\"]\n G --> H{\"Entrega integral aceita?\"}\n H -->|Não| I[\"Manter saldo e abrir divergência\"]\n H -->|Sim| J[\"Concluir atendimento\"]\n I --> K[\"Conciliar documentos e recebíveis\"]\n J --> K"
+ },
+ {
+  "n": 23,
+  "linha": 3494,
+  "secao": "FL-22 — Crédito, prazo e barter",
+  "id": "FL-22",
+  "src": "flowchart TD\n A[\"Definir necessidade e fluxo de caixa\"] --> B[\"Autorizar dossiê e solicitar propostas\"]\n B --> C[\"Credor analisa e decide\"]\n C --> D{\"Condição aprovada e aceita?\"}\n D -->|Não| E[\"Contrapropor ou escolher alternativa\"]\n E --> B\n D -->|Sim| F[\"Formalizar contrato e condições precedentes\"]\n F --> G{\"Condições de liberação cumpridas?\"}\n G -->|Não| H[\"Tratar documentos e garantias\"]\n H --> G\n G -->|Sim| I[\"Confirmar liberação ou obrigação em produto\"]\n I --> J[\"Vincular títulos e compromissos únicos\"]\n J --> K[\"Acompanhar e confirmar liquidação\"]"
+ },
+ {
+  "n": 24,
+  "linha": 3514,
+  "secao": "FL-23 — Pagar, receber e conciliar",
+  "id": "FL-23",
+  "src": "flowchart TD\n A[\"Receber obrigação ou título de origem\"] --> B[\"Conferir valor, competência e vencimento\"]\n B --> C{\"É antecipação autorizada?\"}\n C -->|Sim| D[\"Registrar crédito vinculado para abatimento\"]\n C -->|Não| E[\"Conciliar documentos e fato devido\"]\n D --> F[\"Solicitar ou acompanhar liquidação\"]\n E --> F\n F --> G{\"Fonte oficial confirmou?\"}\n G -->|Não| H[\"Manter pendente ou reconciliar erro\"]\n H --> F\n G -->|Sim| I[\"Baixar saldo e atualizar caixa uma vez\"]"
+ },
+ {
+  "n": 25,
+  "linha": 3532,
+  "secao": "FL-24 — Custo, resultado e aprendizado",
+  "id": "FL-24",
+  "src": "flowchart TD\n A[\"Conciliar fatos e componentes de custo\"] --> B[\"Comparar base, previsão e realizado\"]\n B --> C{\"Desvio exige ação?\"}\n C -->|Não| D[\"Monitorar resultado e cobertura\"]\n C -->|Sim| E[\"Investigar origem e causa\"]\n E --> F[\"Simular alternativa e impacto\"]\n F --> G{\"Mudança aprovada?\"}\n G -->|Não| E\n G -->|Sim| H[\"Publicar versão futura e plano de ação\"]\n H --> I[\"Medir efeito e fechar aprendizado\"]\n I --> B"
+ },
+ {
+  "n": 26,
+  "linha": 3550,
+  "secao": "FL-25 — Offline, reenvio e conflito",
+  "id": "FL-25",
+  "src": "flowchart TD\n A[\"Baixar pacote autorizado e versionado\"] --> B[\"Capturar fato com ID e persistência local\"]\n B --> C{\"Conexão disponível?\"}\n C -->|Não| D[\"Manter fila e continuar captura permitida\"]\n D --> C\n C -->|Sim| E[\"Enviar com idempotência\"]\n E --> F{\"Já recebido ou conflito?\"}\n F -->|Já recebido| G[\"Retornar confirmação existente\"]\n F -->|Conflito| H[\"Preservar relato e abrir reconciliação\"]\n F -->|Novo válido| I[\"Aplicar fato e efeito transacional\"]\n G --> J[\"Atualizar estado no aparelho\"]\n H --> J\n I --> J"
+ },
+ {
+  "n": 27,
+  "linha": 3570,
+  "secao": "FL-26 — Portal e compartilhamento por finalidade",
+  "id": "FL-26",
+  "src": "flowchart TD\n A[\"Selecionar parceiro e finalidade\"] --> B[\"Revisar blocos e prazo de acesso\"]\n B --> C[\"Enviar convite autorizado\"]\n C --> D[\"Validar identidade ou token limitado\"]\n D --> E{\"Acesso vigente e no escopo?\"}\n E -->|Não| F[\"Negar conteúdo e orientar regularização\"]\n E -->|Sim| G[\"Mostrar somente negociação autorizada\"]\n G --> H[\"Parceiro envia sua resposta\"]\n H --> I[\"Registrar versão e comprovante próprio\"]\n I --> J[\"Produtor decide no módulo interno\"]"
+ },
+ {
+  "n": 28,
+  "linha": 3587,
+  "secao": "FL-27 — Urgência, alteração e encerramento de período",
+  "id": "FL-27",
+  "src": "flowchart TD\n A[\"Receber urgência ou ajuste tardio\"] --> B[\"Identificar fato, período e impacto\"]\n B --> C{\"Há restrição obrigatória?\"}\n C -->|Sim| D[\"Impedir nova execução incompatível\"]\n D --> E[\"Preservar relato e buscar alternativa válida\"]\n C -->|Não| F[\"Aplicar alçada e rito de exceção\"]\n F --> G[\"Registrar motivo, escopo e prazo\"]\n G --> H[\"Executar ajuste vinculado ou plano futuro\"]\n H --> I[\"Reconciliar e encerrar pendências\"]\n E --> I"
+ },
+ {
+  "n": 29,
+  "linha": 4851,
+  "secao": "27.1 Pipeline obrigatório",
+  "id": "ENG-PIPELINE",
+  "src": "flowchart TD\n A[\"PR e mudança de regra\"] --> B[\"CI, análise e revisão\"]\n B --> C{\"Critérios aprovados?\"}\n C -->|Não| D[\"Corrigir e repetir verificações\"]\n D --> B\n C -->|Sim| E[\"Artefato imutável em homologação\"]\n E --> F[\"Aceite, migração e teste de recuperação\"]\n F --> G{\"Pronto para produção?\"}\n G -->|Não| D\n G -->|Sim| H[\"Canário com escopo controlado\"]\n H --> I{\"Saúde e integridade preservadas?\"}\n I -->|Sim| J[\"Ampliar e acompanhar\"]\n I -->|Não| K[\"Interromper e executar contingência\"]\n K --> D"
+ },
+ {
+  "n": 30,
+  "linha": 4917,
+  "secao": "28.1 Topologia de produção de referência",
+  "id": "ENG-TOPOLOGIA",
+  "src": "flowchart TD\n U[\"Web e app offline\"] --> E[\"HTTPS, proteção de borda e limites\"]\n E --> A[\"Aplicação e API autenticada\"]\n A --> D[\"PostgreSQL e PostGIS com HA\"]\n A --> F[\"Arquivos privados e quarentena\"]\n D --> O[\"Outbox e publicador\"]\n O --> Q[\"Fila durável de trabalho\"]\n Q --> W[\"Workers idempotentes\"]\n W --> D\n W --> X[\"Integrações com estado e reconciliação\"]\n A --> M[\"Métricas, logs e rastreamento\"]\n W --> M\n D --> R[\"Backup e recuperação regional\"]"
+ },
+ {
+  "n": 31,
+  "linha": 5396,
+  "secao": "33.5 Curadoria e publicação do conhecimento",
+  "id": "FL-AG-01",
+  "src": "flowchart TD\n A[\"Fonte e contexto identificados\"] --> B[\"Obter documento e conferir extração\"]\n B --> C[\"Revisão agronômica e testes\"]\n C --> D{\"Evidência e regras aprovadas?\"}\n D -->|Não| E[\"Corrigir ou registrar lacuna\"]\n E --> B\n D -->|Sim| F[\"Homologar pacote por cultura e contexto\"]\n F --> G[\"Publicar versão rastreável\"]\n G --> H[\"Usar em recomendações elegíveis\"]\n G --> I[\"Receber errata ou restrição\"]\n I --> J[\"Avaliar impacto e suspender ou revisar\"]\n J --> C"
+ },
+ {
+  "n": 32,
+  "linha": 5452,
+  "secao": "33.7 Correção do solo e inteligência de adubação",
+  "id": "FL-AG-02",
+  "src": "flowchart TD\n A[\"Laudo, cultura e contexto\"] --> B{\"Dados e protocolo elegíveis?\"}\n B -->|Não| C[\"Solicitar dado ou decisão técnica\"]\n C --> A\n B -->|Sim| D[\"Calcular e explicar nutrientes e corretivos\"]\n D --> E[\"Comparar fontes e parcelamento\"]\n E --> F{\"RT aprova versão?\"}\n F -->|Revisar| D\n F -->|Sim| G[\"Gerar demanda e proposta de O.S.\"]\n G --> T[\"Agrônomo aprova a versão da O.S.\"]\n T --> H[\"Programar e liberar com recursos e restrições\"]\n H --> I[\"Executar e conciliar consumo\"]\n I --> J[\"Avaliar resultado e saldo futuro\"]\n J --> A"
+ },
+ {
+  "n": 33,
+  "linha": 5495,
+  "secao": "33.8 Manejo integrado de pragas, doenças e plantas daninhas",
+  "id": "FL-AG-03",
+  "src": "flowchart TD\n A[\"Vistoria e evidências por alvo\"] --> B{\"Amostra e identificação suficientes?\"}\n B -->|Não| C[\"Coletar ou confirmar diagnóstico\"]\n C --> A\n B -->|Sim| D[\"Avaliar protocolo e contexto\"]\n D --> E{\"Intervenção indicada?\"}\n E -->|Não| F[\"Registrar decisão e próxima vistoria\"]\n F --> A\n E -->|Sim| G[\"Selecionar medida integrada elegível\"]\n G --> H[\"Revisão técnica e aprovação\"]\n H --> T[\"Emitir O.S. e obter aprovação de sua versão\"]\n T --> I[\"Programar e liberar O.S.\"]\n I --> J[\"Registrar execução e avaliação\"]\n J --> A"
+ },
+ {
+  "n": 34,
+  "linha": 5783,
+  "secao": "36.8 Telas e fluxo operacional",
+  "id": "FL-AG-04",
+  "src": "flowchart TD\n A[\"Cliente escolhe modalidade\"] --> B[\"Validar amostras e áreas representadas\"]\n B --> C[\"Calcular dose uniforme, por zona ou superfície\"]\n C --> D[\"RT aprova prescrição e versão\"]\n D --> E{\"Perfil e arquivo compatíveis?\"}\n E -->|Não| F[\"Rever perfil ou prescrição\"]\n F --> C\n E -->|Sim| G[\"Gerar e transferir pacote rastreável\"]\n G --> H[\"Conferir importação, aprovação da O.S. e prontidão\"]\n H --> I[\"Máquina executa e devolve registros\"]\n I --> J[\"Conciliar área, dose, material e custo\"]\n J --> K{\"Há saldo ou divergência?\"}\n K -->|Sim| L[\"Conferir e reprogramar somente saldo\"]\n L --> C\n K -->|Não| M[\"Encerrar e avaliar resultado\"]"
+ },
+ {
+  "n": 35,
+  "linha": 5855,
+  "secao": "37.3 Jornada contínua",
+  "id": "FL-AG-05",
+  "src": "flowchart TD\n A[Plano do talhão e ciclo] --> B{Como adicionar?}\n B --> C[Informar operação e dose]\n B --> D[Gerar sugestões pelas análises]\n D --> E[Revisar propostas e evidências]\n C --> F[Operação planejada com origem]\n E --> F\n F --> G[Quantidade, orçamento e cobertura]\n G --> H[Validações e alçadas aplicáveis]\n H --> I[Programação e O.S.]\n I --> J[Realizado e saldo futuro]"
+ },
+ {
+  "n": 36,
+  "linha": 5983,
+  "secao": "39.4 Reprogramação previsível e execução parcial",
+  "id": "FL-AG-06",
+  "src": "flowchart TD\n A[Safra e áreas selecionadas] --> B[Cultura, variedade e ocupação]\n B --> C[Plantio previsto ou ciclo existente]\n C --> D[Operações e gatilhos explícitos]\n D --> E[Calendário, recursos e publicação]\n E --> F{Mudança de marco?}\n F -->|Previsão alterada| G[Recalcular saldo dependente]\n F -->|Real registrado| H[Associar data e área executadas]\n H --> G\n G --> I[Comparar impactos e conflitos]\n I --> J[Aplicar política ou revisar proposta]\n J --> K[Atualizar programação e cobertura]\n F -->|Sem mudança| L[Manter programação e monitorar marcos]\n L -->|Novo evento ou revisão de prazo| F\n K -->|Retomar monitoramento| F"
+ },
+ {
+  "n": 37,
+  "linha": 6189,
+  "secao": "41.7 Fluxo de aprovação e entrega",
+  "id": "FL-AG-07",
+  "src": "flowchart TD\n A[\"CMD-41: emitir versão proposta\"] --> B[\"CMD-42: revisão do agrônomo\"]\n B --> C{\"Decisão técnica\"}\n C -->|Ajustar| D[\"Editar produtos, doses e instruções da versão\"]\n D --> B\n C -->|Devolver para ajuste| E[\"Emitente corrige e submete nova versão\"]\n E --> B\n C -->|Rejeitar com motivo| R[\"Rejeitada: liberação bloqueada\"]\n R -->|Corrigir e submeter nova revisão| E\n R -->|CMD-46 se cancelamento autorizado| X[\"Reconciliar custódia e cancelar sem execução\"]\n C -->|Aprovar versão| F{\"Escopo autorizado e prontidão válidos?\"}\n F -->|Não| S[\"A liberar: resolver impedimento\"]\n S --> F\n F -->|Sim| V[\"CMD-06: registrar liberação\"]\n V --> G[\"Ficha de preparo por carga\"]\n V --> H[\"Ficha de aplicação por destino\"]\n G --> I[\"Conferir carga e versão\"]\n H --> I\n I --> J[\"CMD-07/43: aplicar e registrar avanço\"]\n J --> Y{\"Terminou ou saldo dispensado por CMD-47?\"}\n Y -->|Não| J\n Y -->|CMD-08| K[\"Em conferência\"]\n K --> L[\"Conferir resultado, materiais e saldo\"]\n L --> M{\"Reconciliação concluída?\"}\n M -->|Não| L\n K -->|CMD-48: trabalho adicional autorizado| J\n M -->|CMD-10| N[\"Encerradas\"]"
+ },
+ {
+  "n": 38,
+  "linha": 6477,
+  "secao": "44.8 Fluxo e critérios de aceite — PCP",
+  "id": "FL-AG-08",
+  "src": "flowchart TD\n A[Plano por parcela e ocorrência] --> B[Demanda datada em ha ou kg]\n B --> C[Tabela operacional versionada]\n C --> D[Horas de ativos e pessoas]\n D --> E[Calendários e recursos compartilhados]\n E --> F{Déficit na janela?}\n F -->|Sim| G[Comparar alternativas de atendimento]\n G --> H[Aprovar cenário e solicitar recursos]\n F -->|Não| I[Programar capacidade confirmada]\n H --> I\n D --> J[Orçamento e memória de custo]\n I --> K[Executar e medir rendimento]\n K --> J"
+ },
+ {
+  "n": 39,
+  "linha": 6660,
+  "secao": "45.2 Grãos: recepção, secagem e armazenagem",
+  "id": "FL-BEN-01",
+  "src": "flowchart TD\n A[Receber, pesar e amostrar] --> B{Condição e rota}\n B -->|Exige tratamento| C[Pré-limpar e processar]\n C --> D[Secar ou ajustar condição conforme rota]\n D --> E[Conferir massa e qualidade]\n B -->|Apto sem secagem| E\n E --> F{Liberado?}\n F -->|Sim| G[Armazenar e monitorar]\n F -->|Não| H[Segregar e definir destinação]\n G --> I[Reservar e expedir lote]"
+ },
+ {
+  "n": 40,
+  "linha": 6683,
+  "secao": "45.3 Frutas e HF: packing por produto e mercado",
+  "id": "FL-BEN-02",
+  "src": "flowchart TD\n A[Receber e identificar colheita] --> B[Triar por condição]\n B --> C[Preparar conforme produto e protocolo]\n C --> D[Classificar por atributos]\n D --> E[Embalar e identificar lotes]\n D --> F[Segregar outros destinos e perdas]\n E --> G[Conferir qualidade e conservação]\n G --> H{Liberado ao destino?}\n H -->|Sim| I[Reservar pallet e expedir]\n H -->|Não| J[Bloquear e avaliar]"
+ },
+ {
+  "n": 41,
+  "linha": 6708,
+  "secao": "45.4 Café: rotas, estados físicos e qualidade próprios",
+  "id": "FL-BEN-03",
+  "src": "flowchart TD\n A[Receber e identificar lote] --> B{Rota aprovada}\n B -->|Natural| C[Preparar fruto inteiro]\n B -->|Descascado ou via úmida| D[Remover partes conforme protocolo]\n D --> E[Tratar mucilagem conforme rota]\n C --> F[Secar e registrar medições]\n E --> F\n F --> G[Descansar ou armazenar conforme protocolo]\n G --> H[Beneficiar seco e classificar]\n H --> I[Avaliar qualidade e bebida]\n I --> Q{Qualidade aprovada?}\n Q -->|Sim| J[Formar lote comercial e liberar]\n Q -->|Não| R[Segregar e decidir destinação]"
+ },
+ {
+  "n": 42,
+  "linha": 6810,
+  "secao": "46.6 Fluxo e requisitos de comprovação — VEN",
+  "id": "FL-COM-01",
+  "src": "flowchart TD\n A[Oferta ou pedido de recompra] --> B[Negociar condições versionadas]\n B --> C[Verificar oferta, capacidade e crédito]\n C --> D{Condições viáveis e aceitas?}\n D -->|Não| B\n D -->|Sim| E[Confirmar pedido e calendário]\n E --> F[Preparar e expedir parcela]\n F --> G[Comprovar entrega e quantidade]\n G --> H{Divergência?}\n H -->|Sim| I[Conferir e acordar ajuste]\n H -->|Não| J[Atualizar atendimento comprovado]\n I --> J\n E --> M[Constituir recebível pelo evento contratual]\n M --> K[Conciliar pagamento e saldo]\n J --> K\n K --> L[Relacionamento e recompra]"
+ },
+ {
+  "n": 43,
+  "linha": 6911,
+  "secao": "47.7 Fluxo e critérios — PCM",
+  "id": "FL-PCM-01",
+  "src": "flowchart TD\n A[Plano, inspeção ou falha] --> B[Triar criticidade e impacto]\n B --> C[Definir condição do ativo]\n C --> D[Planejar tarefas, peças e equipe]\n D --> E[Compatibilizar parada com PCP]\n E --> F[Autorizar e executar serviço]\n F --> T[Em conferência após término do serviço]\n T --> G{Teste aprovado?}\n G -->|Não| F\n G -->|Sim| H[Liberar tecnicamente e avisar operação]\n H --> I[Conciliar materiais, horas e custos]\n I --> J[Encerradas: revisar confiabilidade]"
+ },
+ {
+  "n": 44,
+  "linha": 7044,
+  "secao": "48.7 Fluxo e critérios — LOG",
+  "id": "FL-LOG-01",
+  "src": "flowchart TD\n A[Pedido e parcelas de entrega confirmados] --> B{Modalidade}\n B -->|Cliente retira| C[Agendar retirada e autorizar veículo]\n B -->|Agricultor entrega| D[Planejar rota, frota ou frete]\n C --> E[Separar e conferir carga]\n D --> E\n E --> F[Validar documentos e liberação]\n F --> G[Confirmar saída única]\n G --> H{Ponto de cumprimento contratado}\n H -->|Retirada| I[Comprovar retirada e saldo]\n H -->|Destino| J[Acompanhar e comprovar recebimento]\n I --> K[Conciliar divergências, frete e recebíveis]\n J --> K"
+ },
+ {
+  "n": 45,
+  "linha": 7168,
+  "secao": "50.6 Fluxo e critérios — FILA",
+  "id": "FL-LOG-02",
+  "src": "flowchart TD\n A[Janela prevista e prontidão] --> B{Veículo presente e apto?}\n B -->|Sim| C[Avaliar prioridade e doca]\n B -->|Não| D[Registrar ausência e nova previsão]\n D --> E[Buscar próximo elegível]\n E --> C\n C --> F{Encaixe viável?}\n F -->|Sim| G[Chamar e carregar]\n F -->|Não| H[Mostrar impedimento e alternativas]\n G --> I[Conferir, liberar e atualizar fila]\n D --> J[Veículo atrasado chega]\n J --> C\n H -->|Alternativa escolhida ou impedimento resolvido| C"
+ },
+ {
+  "n": 46,
+  "linha": 7505,
+  "secao": "54.7 Fluxo e critérios — INSP",
+  "id": "FL-PCM-02",
+  "src": "flowchart TD\n A[Checklist do operador ou manutenção] --> B{Achado relevante?}\n B -->|Não| C[Registrar cobertura e histórico]\n B -->|Sim| D[Observação e caso rastreável]\n D --> E{Restrição imediata prevista?}\n E -->|Sim| F[Restringir prontidão e avisar]\n E -->|Não| G[Triar e definir prazo]\n F --> G\n G --> H[Programar O.S., peças e equipe]\n H --> I[Executar intervenção]\n I --> J{Verificação aprovada?}\n J -->|Não| G\n J -->|Sim| K[Resolver, liberar quando cabível e acompanhar]"
+ },
+ {
+  "n": 47,
+  "linha": 8611,
+  "secao": "FL-R01 — Plantio, gatilhos e ajustes locais",
+  "id": "FL-R01",
+  "src": "flowchart TD\nA[\"Escolher ocupação, cultura e variedade\"] --> B[\"Adotar plano e ajustar apenas a ocupação\"]\nB --> C{\"Tipo de gatilho\"}\nC -->|DAP negativo| D[\"Usar plantio previsto identificado\"]\nC -->|DAP positivo ou DAC| E[\"Vincular evento definido no protocolo\"]\nC -->|Calendário| F[\"Usar data e janela explícitas\"]\nD --> G[\"Gerar ocorrência única em rascunho\"]\nE --> G\nF --> G\nG --> H{\"Âncora mudou?\"}\nH -->|Sim| I[\"Comparar impactos no saldo futuro\"]\nI --> J[\"Revisar programação e aprovações afetadas\"]\nH -->|Não| J\nJ --> K[\"Agrônomo aprova O.S.; prontidão libera\"]"
+ },
+ {
+  "n": 48,
+  "linha": 8634,
+  "secao": "FL-R02 — Agrupar ordens, preparar, executar e devolver",
+  "id": "FL-R02",
+  "src": "flowchart TD\nA[\"Ordens revisadas pelo agrônomo\"] --> B{\"Produtos, doses e demais restrições compatíveis?\"}\nB -->|Não| C[\"Manter execução separada\"]\nB -->|Sim| D[\"Criar grupo preservando cada O.S.\"]\nD --> E[\"Calcular fichas e reservas por versão\"]\nC --> E\nE --> F[\"Conferir prontidão e entregar saldo autorizado\"]\nF --> G[\"Preparar cargas e executar com instrução\"]\nG --> H[\"Registrar área, tempo, consumo e sobras\"]\nH --> T{\"Terminou o escopo de cada O.S.?\"}\nT -->|Não| G\nT -->|Sim| U[\"Em conferência por O.S.\"]\nU -->|Trabalho físico adicional autorizado em uma O.S.| G\nU --> I{\"Custódia e divergências resolvidas?\"}\nI -->|Não| J[\"Receber retorno ou aprovar destinação\"]\nJ --> I\nI -->|Sim| K[\"Conferir e encerrar cada O.S.\"]"
+ },
+ {
+  "n": 49,
+  "linha": 8660,
+  "secao": "FL-R03 — Capacidade PCP e disponibilidade PCM",
+  "id": "FL-R03",
+  "src": "flowchart TD\nA[\"Demanda datada de todos os setores\"] --> B[\"Calcular horas por rendimento homologado\"]\nC[\"Calendários, restrições e paradas PCM\"] --> D[\"Calcular capacidade líquida por recurso\"]\nB --> E[\"Comparar carga, alocação e capacidade\"]\nD --> E\nE --> F{\"Déficit ou ociosidade evitável?\"}\nF -->|Sim| G[\"Simular remanejamento, turno ou contratação\"]\nG --> H[\"Comparar custo e validar restrições\"]\nH --> E\nF -->|Não| I[\"Publicar agenda e responsáveis\"]\nI --> J[\"Receber execução, falhas e novos contadores\"]\nJ --> C"
+ },
+ {
+  "n": 50,
+  "linha": 8681,
+  "secao": "FL-R04 — Reposição simples por política e origem",
+  "id": "FL-R04",
+  "src": "flowchart TD\nA[\"Item e local com política vigente\"] --> B{\"Política de reposição\"}\nB -->|Regular| C[\"Ponto de pedido e reposição ao máximo\"]\nB -->|Planejada| D[\"Necessidade líquida por data\"]\nB -->|Híbrida| E[\"Demanda firme mais previsão residual\"]\nC --> F[\"Conferir estoque apto e recebimentos firmes\"]\nD --> F\nE --> F\nF --> G[\"Aplicar segurança, prazo e lote\"]\nG --> H{\"Cabe na validade, capacidade e orçamento?\"}\nH -->|Não| I[\"Rever lote, prazo, transferência ou fornecimento\"]\nI --> G\nH -->|Sim| J[\"Propor compra única e acompanhar chegada\"]"
+ },
+ {
+  "n": 51,
+  "linha": 8703,
+  "secao": "FL-R05 — Orçado versus realizado e causas",
+  "id": "FL-R05",
+  "src": "flowchart TD\nA[\"Fixar orçamento, unidade e escopo\"] --> B[\"Receber quantidades e preços reais rastreáveis\"]\nB --> C[\"Separar variação de atividade e consumo\"]\nC --> D[\"Separar preço, mix e escopo\"]\nD --> E{\"Ponte fecha com o desvio total?\"}\nE -->|Não| F[\"Conferir bases, rateios e documentos\"]\nF --> B\nE -->|Sim| G[\"Abrir causas por dimensão e documento\"]\nG --> H[\"Simular ajuste técnico ou de recursos\"]\nH --> I[\"Aprovar previsão revisada preservando original\"]"
+ },
+ {
+  "n": 52,
+  "linha": 8722,
+  "secao": "FL-R06 — Importação técnica e mapa confiável",
+  "id": "FL-R06",
+  "src": "flowchart TD\nA[\"Importar laudo ou arquivo geográfico original\"] --> B[\"Validar formato, unidade, método e coordenadas\"]\nB --> C{\"Dados consistentes e identificados?\"}\nC -->|Não| D[\"Mostrar erros e corrigir mapeamento\"]\nD --> B\nC -->|Sim| E[\"Aprovar prévia e guardar proveniência\"]\nE --> F[\"Publicar camada com legenda e qualidade\"]\nF --> G{\"Há suporte para interpretação espacial?\"}\nG -->|Não| H[\"Mostrar área representada sem interpolação fictícia\"]\nG -->|Sim| I[\"Aplicar método espacial validado\"]\nH --> J[\"Diagnóstico e recomendação revisáveis\"]\nI --> J"
+ },
+ {
+  "n": 53,
+  "linha": 8743,
+  "secao": "FL-R07 — Pedido do cliente, promessa e fila de expedição",
+  "id": "FL-R07",
+  "src": "flowchart TD\nA[\"Cliente consulta oferta autorizada por data\"] --> B[\"Solicita pedido com condições\"]\nB --> C{\"Disponibilidade e condições ainda válidas?\"}\nC -->|Não| D[\"Propor outra janela ou quantidade\"]\nD --> B\nC -->|Sim| E[\"Confirmar e reservar atomicamente\"]\nE --> F[\"Definir frete, slot e documentos\"]\nF --> G{\"Caminhão presente e carga apta?\"}\nG -->|Não| H[\"Manter pendência e chamar próximo apto\"]\nH --> G\nG -->|Sim| I[\"Conferir carga e confirmar saída\"]\nI --> J[\"Comprovar entrega e tratar diferenças\"]"
+ },
+ {
+  "n": 54,
+  "linha": 8764,
+  "secao": "FL-R08 — Cadastro, assinatura e cobrança",
+  "id": "FL-R08",
+  "src": "flowchart TD\nA[\"Entrar por identidade suportada\"] --> B[\"Escolher papel e primeira tarefa\"]\nB --> C{\"Recurso exige plano pago?\"}\nC -->|Não| D[\"Usar escopo gratuito ou trial vigente\"]\nC -->|Sim| E[\"Mostrar preço, contrato, franquia e renovação\"]\nE --> F[\"Contratar e autorizar meio de pagamento\"]\nF --> G[\"Aguardar evento financeiro validado\"]\nG --> H{\"Pagamento confirmado?\"}\nH -->|Não| I[\"Reconciliar ou orientar regularização\"]\nH -->|Sim| J[\"Ativar direitos e emitir comprovante\"]\nJ --> K[\"Acompanhar renovação e cancelamento\"]\n I -->|Novo evento financeiro ou conciliação confirmada| G"
+ },
+ {
+  "n": 55,
+  "linha": 8785,
+  "secao": "FL-R09 — ERP e reconciliação de efeitos",
+  "id": "FL-R09",
+  "src": "flowchart TD\nA[\"Fato local confirmado e evento persistido\"] --> B[\"Adaptador valida contrato e escritor oficial\"]\nB --> C[\"Enviar com chave idempotente\"]\nC --> D{\"Resposta conclusiva?\"}\nD -->|Não| E[\"Consultar destino e reconciliar\"]\nE --> D\nD -->|Sim| F{\"Efeito aceito?\"}\nF -->|Não| G[\"Tratar erro sem perder origem\"]\nG --> B\nF -->|Sim| H[\"Vincular IDs e conferir saldos\"]"
+ },
+ {
+  "n": 56,
+  "linha": 8804,
+  "secao": "FL-R10 — IA com ação autorizada e rastreabilidade",
+  "id": "FL-R10",
+  "src": "flowchart TD\nA[\"Usuário solicita tarefa\"] --> B[\"Ler apenas dados autorizados\"]\nB --> C[\"Preparar intenção estruturada e efeitos\"]\nC --> D{\"Permissão, dados e política suficientes?\"}\nD -->|Não| E[\"Explicar lacuna e solicitar ação competente\"]\nD -->|Sim| F[\"Revisar prévia e obter autorização exigida\"]\nF --> G[\"Executar comando de domínio com versão esperada\"]\nG --> H{\"Execução confirmada?\"}\nH -->|Não| I[\"Mostrar conflito ou estado de reconciliação\"]\nH -->|Sim| J[\"Exibir recibo, documentos e próximos passos\"]"
+ }
+]

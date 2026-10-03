@@ -1,0 +1,306 @@
+{
+ "IN-01": {
+  "area": "Início",
+  "submenu": "Meu dia"
+ },
+ "IN-02": {
+  "area": "Início",
+  "submenu": "Aprovações"
+ },
+ "IN-03": {
+  "area": "Início",
+  "submenu": "Agenda e pendências"
+ },
+ "IN-04": {
+  "area": "Início",
+  "submenu": "Mapa da fazenda"
+ },
+ "AG-01": {
+  "area": "Agronomia",
+  "submenu": "Monitoramento e vistorias"
+ },
+ "AG-02": {
+  "area": "Agronomia",
+  "submenu": "Análises e amostras"
+ },
+ "AG-03": {
+  "area": "Agronomia",
+  "submenu": "Diagnósticos"
+ },
+ "AG-04": {
+  "area": "Agronomia",
+  "submenu": "Recomendações"
+ },
+ "AG-05": {
+  "area": "Agronomia",
+  "submenu": "Protocolos e planos técnicos"
+ },
+ "AG-06": {
+  "area": "Agronomia",
+  "submenu": "Eficácia e histórico"
+ },
+ "AG-07": {
+  "area": "Agronomia",
+  "submenu": "Bulas e registros"
+ },
+ "PL-01": {
+  "area": "Planejamento",
+  "submenu": "Safras, ciclos e metas"
+ },
+ "PL-02": {
+  "area": "Planejamento",
+  "submenu": "Plano operacional"
+ },
+ "PL-03": {
+  "area": "Planejamento",
+  "submenu": "Capacidade e recursos"
+ },
+ "PL-04": {
+  "area": "Planejamento",
+  "submenu": "Programação integrada"
+ },
+ "PL-05": {
+  "area": "Planejamento",
+  "submenu": "Impedimentos e reprogramação"
+ },
+ "PL-06": {
+  "area": "Planejamento",
+  "submenu": "Parcelas e escalonamento"
+ },
+ "CA-01": {
+  "area": "Campo",
+  "submenu": "Ordens de campo"
+ },
+ "CA-02": {
+  "area": "Campo",
+  "submenu": "Apontamentos e conferência"
+ },
+ "CA-03": {
+  "area": "Campo",
+  "submenu": "Ocorrências"
+ },
+ "CA-04": {
+  "area": "Campo",
+  "submenu": "Minhas requisições"
+ },
+ "IR-01": {
+  "area": "Irrigação",
+  "submenu": "Balanço hídrico"
+ },
+ "IR-02": {
+  "area": "Irrigação",
+  "submenu": "Programação da irrigação"
+ },
+ "IR-03": {
+  "area": "Irrigação",
+  "submenu": "Ordens de irrigação"
+ },
+ "IR-04": {
+  "area": "Irrigação",
+  "submenu": "Clima, sensores e desempenho"
+ },
+ "MA-01": {
+  "area": "Máquinas e manutenção",
+  "submenu": "Ativos e disponibilidade"
+ },
+ "MA-02": {
+  "area": "Máquinas e manutenção",
+  "submenu": "Solicitações e inspeções"
+ },
+ "MA-03": {
+  "area": "Máquinas e manutenção",
+  "submenu": "Plano de manutenção"
+ },
+ "MA-04": {
+  "area": "Máquinas e manutenção",
+  "submenu": "Ordens de manutenção"
+ },
+ "MA-05": {
+  "area": "Máquinas e manutenção",
+  "submenu": "Abastecimentos e desempenho"
+ },
+ "CO-01": {
+  "area": "Colheita e pós-colheita",
+  "submenu": "Previsão e maturação"
+ },
+ "CO-02": {
+  "area": "Colheita e pós-colheita",
+  "submenu": "Programação e ordens de colheita"
+ },
+ "CO-03": {
+  "area": "Colheita e pós-colheita",
+  "submenu": "Cargas, pesagens e romaneios"
+ },
+ "CO-04": {
+  "area": "Colheita e pós-colheita",
+  "submenu": "Recebimento da produção"
+ },
+ "CO-05": {
+  "area": "Colheita e pós-colheita",
+  "submenu": "Beneficiamento"
+ },
+ "CO-06": {
+  "area": "Colheita e pós-colheita",
+  "submenu": "Qualidade e rastreabilidade"
+ },
+ "CO-07": {
+  "area": "Colheita e pós-colheita",
+  "submenu": "Estoque de produção"
+ },
+ "SU-01": {
+  "area": "Suprimentos",
+  "submenu": "Necessidades e cobertura"
+ },
+ "SU-02": {
+  "area": "Suprimentos",
+  "submenu": "Políticas de estoque"
+ },
+ "SU-03": {
+  "area": "Suprimentos",
+  "submenu": "Saldos e lotes"
+ },
+ "SU-04": {
+  "area": "Suprimentos",
+  "submenu": "Solicitações e cotações"
+ },
+ "SU-05": {
+  "area": "Suprimentos",
+  "submenu": "Contratos, pedidos e entregas"
+ },
+ "SU-06": {
+  "area": "Suprimentos",
+  "submenu": "Recebimentos e divergências"
+ },
+ "SU-07": {
+  "area": "Suprimentos",
+  "submenu": "Requisições e entregas"
+ },
+ "SU-08": {
+  "area": "Suprimentos",
+  "submenu": "Transferências e movimentos"
+ },
+ "SU-09": {
+  "area": "Suprimentos",
+  "submenu": "Inventários e ajustes"
+ },
+ "VE-01": {
+  "area": "Comercial",
+  "submenu": "Demanda e oferta"
+ },
+ "VE-02": {
+  "area": "Comercial",
+  "submenu": "Mercado e preços"
+ },
+ "VE-03": {
+  "area": "Comercial",
+  "submenu": "Ofertas e propostas"
+ },
+ "VE-04": {
+  "area": "Comercial",
+  "submenu": "Pedidos de venda"
+ },
+ "VE-05": {
+  "area": "Comercial",
+  "submenu": "Contratos e compromissos"
+ },
+ "VE-06": {
+  "area": "Comercial",
+  "submenu": "Reclamações e devoluções"
+ },
+ "LO-01": {
+  "area": "Logística",
+  "submenu": "Programação de transporte"
+ },
+ "LO-02": {
+  "area": "Logística",
+  "submenu": "Expedições e cargas"
+ },
+ "LO-03": {
+  "area": "Logística",
+  "submenu": "Viagens e entregas"
+ },
+ "LO-04": {
+  "area": "Logística",
+  "submenu": "Fretes e transportadores"
+ },
+ "GE-01": {
+  "area": "Gestão e resultados",
+  "submenu": "Visão gerencial"
+ },
+ "GE-02": {
+  "area": "Gestão e resultados",
+  "submenu": "Orçamento e previsões"
+ },
+ "GE-03": {
+  "area": "Gestão e resultados",
+  "submenu": "Custos e fechamento"
+ },
+ "GE-04": {
+  "area": "Gestão e resultados",
+  "submenu": "Contas a pagar e caixa"
+ },
+ "GE-05": {
+  "area": "Gestão e resultados",
+  "submenu": "Contas a receber"
+ },
+ "GE-06": {
+  "area": "Gestão e resultados",
+  "submenu": "Indicadores operacionais"
+ },
+ "GE-07": {
+  "area": "Gestão e resultados",
+  "submenu": "Planos de ação"
+ },
+ "GE-08": {
+  "area": "Gestão e resultados",
+  "submenu": "Crédito e garantias"
+ },
+ "CD-01": {
+  "area": "Cadastros",
+  "submenu": "Fazendas, áreas e talhões"
+ },
+ "CD-02": {
+  "area": "Cadastros",
+  "submenu": "Culturas, cultivares e operações"
+ },
+ "CD-03": {
+  "area": "Cadastros",
+  "submenu": "Máquinas, instalações e setores"
+ },
+ "CD-04": {
+  "area": "Cadastros",
+  "submenu": "Pessoas e equipes"
+ },
+ "CD-05": {
+  "area": "Cadastros",
+  "submenu": "Parceiros"
+ },
+ "CD-06": {
+  "area": "Cadastros",
+  "submenu": "Produtos, unidades e locais"
+ },
+ "CD-07": {
+  "area": "Cadastros",
+  "submenu": "Estrutura gerencial"
+ },
+ "CF-01": {
+  "area": "Configurações",
+  "submenu": "Usuários e permissões"
+ },
+ "CF-02": {
+  "area": "Configurações",
+  "submenu": "Alçadas e regras"
+ },
+ "CF-03": {
+  "area": "Configurações",
+  "submenu": "Integrações e sincronização"
+ },
+ "CF-04": {
+  "area": "Configurações",
+  "submenu": "Auditoria e parâmetros"
+ },
+ "CF-05": {
+  "area": "Configurações",
+  "submenu": "Assinatura e medição"
+ }
+}

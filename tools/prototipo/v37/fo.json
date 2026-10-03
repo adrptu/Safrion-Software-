@@ -1,0 +1,272 @@
+{
+ "FO-01": [
+  [
+   "Fazenda, área, ciclo e safra — CD-01/PL-01/ON-01",
+   "Identidade, localização/fuso, unidade de área; cultura, variedade/cultivar, ocupação/parcela e datas previstas/reais com precisão do ciclo conforme capítulo 39 | Geometria válida; área calculada; sobreposições justificadas; documento pendente visível | Salvar base/planejamento; abrir PL-01. Sem plantio fictício | Organização, fazenda, talhão/parcela, safra, cultura e variedade compatível | ID/vigência da ocupação; data prevista/real e precisão; geometria/fonte; finalidade e fuso"
+  ]
+ ],
+ "FO-02": [
+  [
+   "Amostra e laudo — AG-02",
+   "Local/representatividade, profundidade, data, laboratório, método/extrator, resultados e unidades | Coerência SB/CTC/V/m%; original preservado; revisão da extração | Validar dados; abrir AG-03 ou pendência de coleta | Laboratório, campanha, amostra, método/extrator, profundidade e atributo/unidade | Campanha/data/coleta, representatividade, limite de detecção quando presente, resultado original e normalizado; painel completo do capítulo 38"
+  ]
+ ],
+ "FO-03": [
+  [
+   "Plano de vistoria/coleta — AG-01",
+   "Ciclo/parcela, alvo, método, unidade, protocolo, responsável e janela | Quantidade/posição de amostras conforme protocolo; rota e evidências necessárias | Programar coleta; MB-06 executa | Ocupação, alvo, protocolo/versão, responsável/equipe | Janela, rota, unidade/amostragem e método; evidências e completude"
+  ]
+ ],
+ "FO-04": [
+  [
+   "Operação direta, recomendação, ajuste e receituário — AG-04/PL-02",
+   "Origem, local, operação/alvo, dose/unidade quando aplicável, área, momento e produtos; evidência para sugestão científica; motivo de ajuste quando exigido, conforme capítulo 37 | Registro/bula e restrições por situação; conversão; estoque apenas informativo; assinatura técnica quando exigida | Salvar → validações/alçadas aplicáveis. Rascunho direto não exige laudo; a O.S. agrícola exige aprovação do agrônomo antes de executar (capítulo 41); demanda PL-02 e documento técnico quando aplicável | Origem manual/análise, operação/alvo, produto, unidade, protocolo e modalidade uniforme/zona/taxa variável | Área e base da dose, datas/gatilho, fonte, versão, justificativa e alterações; sem laudo obrigatório para decisão manual"
+  ]
+ ],
+ "FO-05": [
+  [
+   "Programação e reprogramação — PL-04/PL-05",
+   "Ordem/saldo, data/janela, conjunto/equipe, duração e motivo da mudança | Conflitos, prontidão, capacidade, material e versão; diferença entre antes/depois | Confirmar programação; liberar somente ordens aptas | O.S./saldo, máquina/implemento, equipe/turno e motivo | Intervalo/fuso, duração/fonte, impacto, versão e validação de disponibilidade"
+  ]
+ ],
+ "FO-06": [
+  [
+   "Parcelamento e escalonamento — PL-06",
+   "Geometria/área útil, cultura/ciclo, demanda por semana/classe, curva de rendimento, ocupação e retorno ao uso | Simulação de vários ciclos; capacidade e continuidade; cenário não altera área vigente | Publicar proposta aprovada; PL-01/PL-02/CO-01 | Talhão, ocupação, cultura/variedade, modelo de ciclo e classe comercial | Área/geo por parcela, datas próprias, curva/demanda e retorno ao uso; soma e sobreposição"
+  ]
+ ],
+ "FO-07": [
+  [
+   "Apontamento — CA-02/MB-03/CO-02/MB-10",
+   "Ordem e parcela de execução, quantidade/unidade, instante/intervalo, turno/equipe, máquinas, horas e autor; materiais se utilizados. Na colheita, área/quantidade avançada na unidade operacional da O.S., distinta das cargas pesadas em FO-13 | Sobreposição, contadores, tolerâncias, consumos e evidências; registro não conforme aceito como fato | Registrar avanço / Finalizar apontamento do turno; Concluir execução da O.S. somente no término; conferir em CA-02 | O.S., parcela, turno/equipe, conjunto, ocorrência e produtos pertinentes | Data/versão; quantidade do apontamento e unidade; início/fim/pausas; saldo derivado; origem e sincronização"
+  ]
+ ],
+ "FO-08": [
+  [
+   "Ocorrência — CA-03/MB-04",
+   "Objeto/local, tipo, instante, descrição e gravidade | Sugestão de destino; vínculo a caso existente; responsável e prazo | Registrar; abrir MA-02, AG-03 ou PL-05 conforme causa | Tipo de ocorrência, objeto, gravidade, motivo e responsável | Evidência, instante/local, efeito/impedimento, prazo e vínculo ao caso existente"
+  ]
+ ],
+ "FO-09": [
+  [
+   "Requisição/entrega/devolução — SU-07/CA-04",
+   "Ordem/destino autorizado, item, quantidade/unidade; lote/recebedor na entrega | Quantidade autorizada, validade na data de uso, saldo, custódia e retorno | Solicitar, Entregar ou Receber devolução são comandos distintos | O.S., depósito/local, produto/lote e recebedor | Tipo entrega/retorno; quantidade real; condição; comprovante; custódia/origem; item não aplicável para água sem produtos"
+  ]
+ ],
+ "FO-10": [
+  [
+   "Irrigação — IR-03/MB-08",
+   "Ordem/setor, tempos, área atendida, origem da medição; volume ou dados suficientes para estimativa; leituras de energia quando disponíveis | Lâmina por área, setor, vazão/calibração, pausas, reset de medidor; líquido/bruto distintos | Registrar avanço/turno; Confirmar término → Em conferência; água enquadrada segue 41.8 e pode encerrar automaticamente; IR-01/IR-04 recebem fatos | Tarefa/setor, modalidade, motivo de pausa e origem da medição | Água: herdar alvo/política; registrar aplicado medido/estimado, área/tempo e dados de energia disponíveis; produtos ativam controles específicos"
+  ]
+ ],
+ "FO-11": [
+  [
+   "Plano/ordem de manutenção — MA-03/MA-04",
+   "Ativo, serviço, gatilho/fonte, janela, condição técnica e responsável | Próximo vencimento; recursos/peças; conflito de agenda; versão do plano | Confirmar plano; executar mesma ordem; teste/liberação separados | Ativo, plano/serviço, gatilho, equipe e peças | Tipo preventiva/preditiva/corretiva; contador; janela; condição; previsão; teste e conciliação conforme etapa"
+  ]
+ ],
+ "FO-12": [
+  [
+   "Abastecimento — MA-05/MB-09",
+   "Ativo, tanque, volume/unidade, contador/data, autor | Capacidade, contador regressivo, método de consumo e movimento único | Registrar e abrir próxima tarefa; divergência vai a conferência | Ativo, tanque/local, combustível, unidade e operador | Leitura/contador e reinício identificado, volume real, origem, custo derivado; não digitar novo saldo do tanque"
+  ]
+ ],
+ "FO-13": [
+  [
+   "Carga/pesagem — CO-03/MB-10",
+   "Ordem/origem, veículo ou recipiente, ticket, bruto/tara ou líquido medido, destino | Duplicidade de ticket, sequência de pesagens, unidade/base; participação das origens | Registrar carga; romaneio derivado; CO-04 recebe | O.S./origens, veículo/recipiente, balança e destino | Ticket/ID, datas, massa/unidade, tara/bruto/líquido, umidade/base quando pertinente; origens rateadas e duas pesagens sem dupla produção"
+  ]
+ ],
+ "FO-14": [
+  [
+   "Beneficiamento — CO-05",
+   "Lotes/quantidades de entrada, processo, recurso, saídas/classes, perdas e estoque em processo | Balanço de massa, bases de umidade, embalagem e genealogia | Registrar avanço; Concluir execução → Em conferência; Fechar processo após conciliação; qualidade em CO-06 controla liberação do lote separadamente | Rota, equipamento, lotes, classes e embalagens | Etapas físicas por cultura; entradas/saídas e bases; perdas/estoque em processo; turno; genealogia"
+  ]
+ ],
+ "FO-15": [
+  [
+   "Inspeção/liberação de lote — CO-06",
+   "Lote, método/plano, amostra, resultados, padrão e decisão | Limites vigentes e perfil; impacto em pedidos reservados | Liberar, Bloquear ou Destinar; CO-07/VE-04 atualizam | Lote, protocolo/método, atributo, padrão e decisão | Resultados/unidades, amostra/data, responsável e motivo; qualidade separada do encerramento da ordem"
+  ]
+ ],
+ "FO-16": [
+  [
+   "Cotação — SU-04",
+   "Origem, especificação, quantidade/unidade, prazo/local, destinatários e validade | Faltas reconciliadas, grupos elegíveis, dados compartilhados; condição de comparação | Salvar rascunho; Revisar e enviar; PT-02 recebe | Necessidades, itens, unidades, fornecedores e local | Especificação, data necessária, quantidade e validade; destinatários explícitos; condições comparáveis; destinatários concedidos, origem convite/sugestão, consentimento/política, documentos/finalidade e prazo de acesso conforme 57.4.2"
+  ]
+ ],
+ "FO-17": [
+  [
+   "Contrato/pedido/compromisso — SU-05/VE-05",
+   "Partes, itens/base, volume, preço/condição, janela, obrigações e aprovações | Saldo contratual, tolerância aceita, exposição/pico por apólice quando aplicável, ritmo de cargas, capacidade/validade (65.5–65.5.1), crédito/garantia e mudanças materiais | Formalizar versão; documentos e liberações vinculados | Partes, produtos/classes, unidade, condições e modalidade comercial | Preço/moeda/base; entregas/parcelas; frete; evento e prazo de pagamento; obrigações/garantia; versão aceita; tolerância contratual por item; limite/apólice, escopo, vigência e eventos de exposição; ritmo de cargas (65.5.1)"
+  ]
+ ],
+ "FO-18": [
+  [
+   "Recebimento de compra — SU-06",
+   "Pedido/origem, documento, item/lote, quantidade recebida, condição e local | Duplicidade; quantidade aceita/quarentena/recusada; diferenças; títulos/antecipações | Confirmar físico; liberar apenas apto; GE-04 trata financeiro | Pedido/linhas, local, item/lote e condição | Quantidades aceita/bloqueada/recusada, unidade, documento/data, validade quando aplicável, divergência/destinação"
+  ]
+ ],
+ "FO-19": [
+  [
+   "Oferta/pedido de venda — VE-03/VE-04",
+   "Cliente(s), produto/padrão, quantidade, janela/local, preço/condição, validade | Oferta futura versus física; capacidade, margem/exposição, crédito | Submeter oferta; aceitar proposta gera pedido; LO-01 atende | Cliente, produto/classe/embalagem, janela, local e frete | Preço/moeda/unidade; quantidade; validade; evento de vencimento; disponibilidade física/futura; versão da proposta; destinatários concedidos, origem convite/sugestão, consentimento/política, documentos/finalidade e prazo de acesso conforme 57.4.2"
+  ]
+ ],
+ "FO-20": [
+  [
+   "Crédito/garantia — GE-08",
+   "Finalidade, valor e cronograma, dados autorizados, credores, obrigações e garantias | Custo por fluxo; capacidade de caixa; garantia já onerada; acesso por finalidade | Solicitar proposta; contratação e liberação posteriores | Credor, finalidade, modalidade, garantias e documentos autorizados | Fluxos de desembolso/pagamento, moeda/taxas/encargos, consentimento/validade, ônus e condição de contratação; destinatários concedidos, origem convite/sugestão, consentimento/política, documentos/finalidade e prazo de acesso conforme 57.4.2"
+  ]
+ ],
+ "FO-21": [
+  [
+   "Culturas, variedades, operações e biblioteca — CD-02/AG-05/AG-07",
+   "Código/nome; cultura/variedade; finalidade; região/protocolo/fonte/edição; operação/unidade; modelo e vigência; registro de produto quando aplicável | Seleções versionadas e critérios de curadoria; não publicar recomendação sem homologação; alimenta planos/seletores mantendo histórico"
+  ]
+ ],
+ "FO-22": [
+  [
+   "Ativos, componentes e conjuntos — CD-03/MA-01",
+   "Código; classe/tipo; fabricante/modelo; número de série quando existente; fazenda/local; propriedade; capacidade/unidade; contadores; componentes; vínculos máquina/implemento; início de uso e custo conforme escopo | Compatibilidade e unidades por classe; histórico de condição/calendário separados do cadastro; agenda recebe recurso elegível"
+  ]
+ ],
+ "FO-23": [
+  [
+   "Pessoas, equipes e turnos — CD-04/PL-03",
+   "Pessoa/equipe; função; vínculo; calendário; turno/intervalos/fuso; competências e validade; composição/vigência; custo-hora e encargos por acesso autorizado | Não expor remuneração ao operador; alocação valida habilitação e sobreposição; dados pessoais mínimos para finalidade"
+  ]
+ ],
+ "FO-24": [
+  [
+   "Parceiros, contatos e locais — CD-05/PT-07",
+   "Pessoa física/jurídica; identificação conforme país; papéis fornecedor/comprador/credor/transportador; contatos; endereços de entrega/cobrança; unidades; condições autorizadas | Mesmo parceiro pode ter vários papéis; duplicidade por identificador; mudança bancária segue verificação; acesso externo por escopo"
+  ]
+ ],
+ "FO-25": [
+  [
+   "Produtos, unidades, depósitos e embalagens — CD-06",
+   "Código/nome; categoria; unidade base; unidades compra/uso/venda e conversões; controle lote/série/validade; conservação; depósito/local; embalagem; composição/densidade quando tecnicamente aplicáveis | Conversões dimensionais e específicas versionadas; produto não contém saldo editável; lote/estoque nascem de movimentos"
+  ]
+ ],
+ "FO-26": [
+  [
+   "Estrutura gerencial — CD-07",
+   "Código/nome; natureza; centro de custo; cultura/projeto; hierarquia e vigência; regra de apropriação/rateio e contas externas mapeadas | Dimensões separadas, sem árvore circular; mudança não reclassifica passado sem ajuste; alimenta GE-02/GE-03"
+  ]
+ ],
+ "FO-27": [
+  [
+   "Safra, metas, plano e ajuste local — PL-01/PL-02/GE-02",
+   "Safra/ciclo/ocupação; cultura/variedade; área; meta/unidade; modelo/versão; gatilho/evento/deslocamento; datas; itens/doses; override/motivo; cenário | Vincula FO-01/04/06; não reedita laudo ou modelo para ajustar um talhão; demanda única e diferenças de orçamento"
+  ]
+ ],
+ "FO-28": [
+  [
+   "Rendimento, capacidade e alocação — CD-02/PL-03/PL-04",
+   "Operação/cultura; conjunto; largura/velocidade/eficiência ou kg/h; unidade/base; equipe; fonte/vigência; calendário; janela; demanda/versão; cenário | Cálculo de horas e custo; perdas descontadas uma vez; agenda confirma atomicamente; ativa FO-05 para reprogramação"
+  ]
+ ],
+ "FO-29": [
+  [
+   "Aprovação, agrupamento e liberação — IN-02/CA-01/IR-03/CO-02/MA-04/CO-05",
+   "Ordens/versões; decisão/motivo; itens editados quando permitido; escopo/janela; grupo; compatibilidade; aprovação individual ou política de água | Diferenças e efeitos antes de confirmar; só saldo futuro; competência por domínio; não aceita selecionar estado livremente"
+  ]
+ ],
+ "FO-30": [
+  [
+   "Checklist, inspeção de ativo e teste — MA-02/MA-04/MB-09",
+   "Ativo/O.S.; modelo/versão; item; resultado conforme/não conforme/não aplicável; medição/unidade; evidência; criticidade; motivo; restrição; teste/decisão | Resposta sem default positivo; campos condicionais; achado vira caso sem duplicar falha; teste não é apenas checkbox genérico"
+  ]
+ ],
+ "FO-31": [
+  [
+   "Política de estoque — SU-02",
+   "Item/local; método mínimo-máximo/datado/híbrido; prazo; segurança; mínimo/máximo/ponto de pedido; lote/múltiplo; revisão; fonte e vigência | Campos mudam por método; valida intervalos/unidades; quantidade proposta calculada; não duplica previsão e demanda firme"
+  ]
+ ],
+ "FO-32": [
+  [
+   "Transferência, inventário e ajuste — SU-08/SU-09",
+   "Tipo; origem/destino; produto/lote; quantidade/unidade; data; motivo; contagem; condição; responsável; aprovação de ajuste | Movimentos separados de contagem; política de contagem cega; diferença não ajusta saldo automaticamente; sem edição direta de saldo"
+  ]
+ ],
+ "FO-33": [
+  [
+   "Previsão de colheita e contagem — CO-01/MB-07",
+   "Ocupação/cultura; data/amostra/plantas; estádios/classes; quantidades; método; curva/rendimento; janela; responsável; confiança | Campos por cultura, precisão/amostra explícitas; versão publicada e oferta futura; não cria estoque físico"
+  ]
+ ],
+ "FO-34": [
+  [
+   "Agendamento, frete e expedição — LO-01/LO-02/LO-03/LO-04/MB-10",
+   "Pedido/parcelas; retirada ou entrega; pagador/responsável pelo frete; transportador/motorista/veículo quando definidos; rota/local; slot/doca; capacidade; preço/base; direcionador e versão do rateio de frete; bases por item/trecho e memória de cálculo; carga/lotes; documentos exigidos; chegada/saída/entrega e evidências | Obrigatoriedade cresce por evento: cotação não exige placa ainda desconhecida; carga valida capacidade/lotes; ausência/atraso não bloqueia próximo apto"
+  ]
+ ],
+ "FO-35": [
+  [
+   "Divergência comercial, retorno e reclamação — VE-06/MB-10",
+   "Pedido/entrega/lote; tipo; quantidade/unidade; motivo; evidência; parte responsável; ação/destinação; ajuste proposto e aprovação | Retorno não recoloca lote apto automaticamente; crédito financeiro depende de decisão/fonte oficial; histórico ligado à entrega"
+  ]
+ ],
+ "FO-36": [
+  [
+   "Orçamento, rateio e fechamento — GE-02/GE-03",
+   "Cenário/versão; período; natureza/centro/cultura/projeto/talhão; recurso; quantidade/base; preço; regra de rateio; premissas; aprovação | Totais/ha/unidade e variações calculados; preservar baseline; fechamento verifica origens e pendências, sem lançamento duplicado"
+  ]
+ ],
+ "FO-37": [
+  [
+   "Títulos, caixa e conciliação — GE-04/GE-05",
+   "Origem/contraparte; competência; valor/moeda; parcelas/vencimentos; evento contratual; conta autorizada; forma; referência externa; comprovante/estado confirmado | Em modo ERP, campos oficiais somente leitura ou solicitação de alteração; comprovante não equivale a liquidação; dados bancários restritos"
+  ]
+ ],
+ "FO-38": [
+  [
+   "Indicador, meta e plano de ação — GE-06/GE-07/GE-01",
+   "Indicador/fórmula versionada; fonte; unidade; escopo/período; meta; responsável; ação; causa; prazo; evidência e conclusão | Valor realizado vem da fonte, não da edição do gráfico; denominador zero explícito; resultado e ação vinculados"
+  ]
+ ],
+ "FO-39": [
+  [
+   "Usuários, papéis e alçadas — CF-01/CF-02",
+   "Identidade/convidado; papel; escopo; permissões; alçada/unidade; vigência; substituto; segregação | Autorização no servidor; concessão não amplia poder do concedente; sem permissões totais pré-marcadas"
+  ]
+ ],
+ "FO-40": [
+  [
+   "Integração, importação e parâmetros — CF-03/CF-04/AG-02/IN-04/CD-01/ON-01",
+   "Fonte/conector; ambiente; credencial por mecanismo seguro; objeto/escritor; mapeamento; unidade/CRS; parser/versão; arquivo/hash; prévia; política de conflito | Segredos mascarados; dados externos não executam instruções; valida lote/linha; amostra/camada guarda proveniência"
+  ]
+ ],
+ "FO-41": [
+  [
+   "Entrada, assinatura e cobrança — ON-01/CF-05/PT-07/BO-01/BO-02/BO-03",
+   "Perfil; organização; plano/versão; área contratada elegível; período; preço/moeda; franquia; autorização de pagamento; cancelamento e evento do provedor | Entrada progressiva; social login não completa dados fiscais inexistentes; cartão em componente do provedor; não armazenar número/CVV; preço hipotético não ativa cobrança"
+  ]
+ ],
+ "FO-42": [
+  [
+   "Propostas e consentimentos do parceiro — PT-02/PT-03/PT-04/PT-05",
+   "Convite/origem; itens/quantidades; preço/base; prazo/local/frete; pagamento; validade; documentos; finalidade/escopo/prazo de acesso | Herda proposta/identidade; privado por contraparte; enviar não aceita oferta automaticamente; dossiê só dados autorizados"
+  ]
+ ],
+ "FO-43": [
+  [
+   "Política e programação de irrigação — IR-01/IR-02/IR-04",
+   "Setor/rede; cultura/estádio; método; fonte/atualidade; limites de lâmina/volume/intervalo; validade; restrições; responsável técnico; modalidade água/produtos | Aprovação da política e enquadramento rastreáveis; FO-10 só registra execução; adição de produto exige reclassificação e aprovação individual"
+  ]
+ ],
+ "FO-44": [
+  [
+   "Prescrição e pacote para máquina — AG-04/IN-04/CF-03",
+   "Prescrição/versão; zona/geometria/CRS; produto; dose/unidade; terminal/modelo/perfil; limites; formato; destino; hash e confirmação de importação | Só perfil homologado; prévia espacial e validação de unidade; exportar não confirma execução; compatibilidade real obrigatória"
+  ]
+ ],
+ "FO-45": [
+  [
+   "Ação assistida por IA — painel contextual autorizado",
+   "Intenção; registros/versões selecionados; campos propostos; origem/confiança; prévia dos efeitos; autorização exigida | Usa mesmos formulários/esquemas e comandos do domínio; não cria caminho alternativo sem validação; resultado confirmado pelo servidor"
+  ]
+ ]
+}

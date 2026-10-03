@@ -1,0 +1,2183 @@
+{
+"atualizacao": "2026-10-02",
+"extraido": "2026-10-02",
+"fonte": "ANVISA · dados abertos · monografias de agrotóxicos (TA_MONOGRAFIA_AGROTOXICO.csv)",
+"link": "https://www.gov.br/anvisa/pt-br/acessoainformacao/dadosabertos/informacoes-analiticas/monografias-de-agrotoxicos",
+"lmr": {
+"2,4-d": {
+"Café": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "D27",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.1
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO-RE Nº 1.471, DE 2 DE JUNHO DE 2017",
+"aut": "SIM",
+"fim": "",
+"ini": "2017-06-05",
+"mono": "D27",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.2
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO-RE Nº 1.471, DE 2 DE JUNHO DE 2017",
+"aut": "SIM",
+"fim": "",
+"ini": "2017-06-05",
+"mono": "D27",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.1
+}
+]
+},
+"abamectina": {
+"Café": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN Nº 333, DE 30 DE OUTUBRO DE 2024",
+"aut": "SIM",
+"fim": "",
+"ini": "2024-11-01",
+"mono": "A18",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.01
+}
+],
+"Feijão": [
+{
+"ato": "RESOLUÇÃO RE Nº 1.847, DE 6 DE MAIO DE 2021",
+"aut": "SIM",
+"fim": "",
+"ini": "2021-05-10",
+"mono": "A18",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.01
+}
+],
+"Mamão": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN N° 214, DE 1° DE MARÇO DE 2023",
+"aut": "SIM",
+"fim": "",
+"ini": "2023-03-08",
+"mono": "A18",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.06
+}
+],
+"Milho": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN Nº 185, DE 28 DE SETEMBRO DE 2022 - ANVISA",
+"aut": "SIM",
+"fim": "",
+"ini": "2022-10-05",
+"mono": "A18",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.005
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO-RE N° 2.102, DE 03 DE AGOSTO DE 2016",
+"aut": "SIM",
+"fim": "",
+"ini": "2016-08-08",
+"mono": "A18",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.01
+}
+]
+},
+"acefato": {
+"Feijão": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN Nº 346, DE 20 DE FEVEREIRO DE 2025",
+"aut": "SIM",
+"fim": "",
+"ini": "2025-02-24",
+"mono": "A02",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.04
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO-RE Nº 3.083, DE 17 DE NOVEMBRO DE 2016",
+"aut": "SIM",
+"fim": "",
+"ini": "2016-11-21",
+"mono": "A02",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.02
+}
+],
+"Soja": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN Nº 420, DE 19 DE DEZEMBRO DE 2025",
+"aut": "SIM",
+"fim": "",
+"ini": "2025-12-22",
+"mono": "A02",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.05
+}
+]
+},
+"acetamiprido": {
+"Café": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "A29",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.2
+}
+],
+"Feijão": [
+{
+"ato": "RESOLUÇÃO - RE Nº 1.388, DE 4 DE MAIO DE 2020",
+"aut": "SIM",
+"fim": "",
+"ini": "2020-05-06",
+"mono": "A29",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.15
+}
+],
+"Mamão": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN Nº 354, DE 26 DE MARÇO DE 2025",
+"aut": "SIM",
+"fim": "",
+"ini": "2025-03-28",
+"mono": "A29",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.7
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO-RE Nº 144, DE 18 DE JANEIRO DE 2010",
+"aut": "SIM",
+"fim": "",
+"ini": "2010-01-19",
+"mono": "A29",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.05
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO - RE Nº 301, DE 30 DE JANEIRO DE 2020",
+"aut": "SIM",
+"fim": "",
+"ini": "2020-02-03",
+"mono": "A29",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.06
+}
+]
+},
+"atrazina": {
+"Milho": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "A14",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.25
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO-RE N° 3.452, DE 03 DE SETEMBRO DE 2020",
+"aut": "SIM",
+"fim": "",
+"ini": "2020-09-08",
+"mono": "A14",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.01
+}
+]
+},
+"azoxistrobina": {
+"Café": [
+{
+"ato": "INSTRUÇÃO NORMATIVA-IN nº 181, de 02 de setembro de 2022",
+"aut": "SIM",
+"fim": "",
+"ini": "2022-09-08",
+"mono": "A26",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.06
+}
+],
+"Feijão": [
+{
+"ato": "INSTRUÇÃO NORMATIVA IN Nº 126, DE 25 DE MARÇO DE 2022",
+"aut": "SIM",
+"fim": "",
+"ini": "2022-03-30",
+"mono": "A26",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.2
+}
+],
+"Mamão": [
+{
+"ato": "RESOLUÇÃO-RE Nº 4.441, DE 29 DE OUTUBRO DE 2020",
+"aut": "SIM",
+"fim": "",
+"ini": "2020-11-03",
+"mono": "A26",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 6.0
+}
+],
+"Milho": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN Nº 266, DE 29 DE NOVEMBRO DE 2023",
+"aut": "SIM",
+"fim": "",
+"ini": "2023-12-01",
+"mono": "A26",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.4
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO-RE Nº 149, DE 25 DE JUNHO DE 2004",
+"aut": "SIM",
+"fim": "",
+"ini": "2004-06-28",
+"mono": "A26",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.5
+}
+]
+},
+"benzoato de emamectina": {
+"Café": [
+{
+"ato": "INSTRUÇÃO NORMATIVA-IN Nº 126, DE 25 DE MARÇO DE 2022",
+"aut": "SIM",
+"fim": "",
+"ini": "2022-03-30",
+"mono": "B55",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.01
+}
+],
+"Feijão": [
+{
+"ato": "RESOLUÇÃO-RE Nº 2.939, DE 3 DE NOVEMBRO DE 2017",
+"aut": "SIM",
+"fim": "",
+"ini": "2017-11-06",
+"mono": "B55",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.01
+}
+],
+"Mamão": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN N° 268, DE 12 DE DEZEMBRO DE 2023",
+"aut": "SIM",
+"fim": "",
+"ini": "2023-12-13",
+"mono": "B55",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.01
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO-RE Nº 2.939, DE 3 DE NOVEMBRO DE 2017",
+"aut": "SIM",
+"fim": "",
+"ini": "2017-11-06",
+"mono": "B55",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.01
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO-RE Nº 2.939, DE 3 DE NOVEMBRO DE 2017",
+"aut": "SIM",
+"fim": "",
+"ini": "2017-11-06",
+"mono": "B55",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.01
+}
+]
+},
+"boscalida": {
+"Café": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "B41",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.05
+}
+],
+"Feijão": [
+{
+"ato": "RESOLUÇÃO - RE N° 3.530, DE 23 DE DEZEMBRO DE 2015",
+"aut": "SIM",
+"fim": "",
+"ini": "2015-12-24",
+"mono": "B41",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.1
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO - RE N° 3.530, DE 23 DE DEZEMBRO DE 2015",
+"aut": "SIM",
+"fim": "2026-06-07",
+"ini": "2015-12-24",
+"mono": "B41",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.01
+},
+{
+"ato": "INSTRUÇÃO NORMATIVA ANVISA Nº 449, DE 2 DE JUNHO DE 2026",
+"aut": "SIM",
+"fim": "",
+"ini": "2026-06-08",
+"mono": "B41",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.1
+}
+]
+},
+"buprofezina": {
+"Feijão": [
+{
+"ato": "RESOLUÇÃO RE Nº 1.757, DE 29 DE ABRIL DE 2021",
+"aut": "SIM",
+"fim": "",
+"ini": "2021-05-10",
+"mono": "B29",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.015
+}
+],
+"Mamão": [
+{
+"ato": "RESOLUÇÃO - RE N° 3.448, DE 08 DE SETEMBRO DE 2014",
+"aut": "SIM",
+"fim": "",
+"ini": "2014-09-09",
+"mono": "B29",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.3
+}
+],
+"Milho": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN Nº 228, DE 01 DE JUNHO DE 2023",
+"aut": "SIM",
+"fim": "",
+"ini": "2023-06-02",
+"mono": "B29",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.01
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO RE Nº 1.757, DE 29 DE ABRIL DE 2021",
+"aut": "SIM",
+"fim": "",
+"ini": "2021-05-10",
+"mono": "B29",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.01
+}
+]
+},
+"ciantraniliprole": {
+"Café": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN Nº 315, DE 4 DE SETEMBRO DE 2024",
+"aut": "SIM",
+"fim": "",
+"ini": "2024-09-05",
+"mono": "C74",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.3
+}
+],
+"Feijão": [
+{
+"ato": "RESOLUÇÃO - RE Nº 902, DE 26 DE MARÇO DE 2015",
+"aut": "SIM",
+"fim": "",
+"ini": "2015-03-27",
+"mono": "C74",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.01
+}
+],
+"Mamão": [
+{
+"ato": "INSTRUÇÃO NORMATIVA -IN Nº 346, DE 20 DE FEVEREIRO DE 2025",
+"aut": "SIM",
+"fim": "",
+"ini": "2025-02-24",
+"mono": "C74",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.4
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO - RE Nº 902, DE 26 DE MARÇO DE 2015",
+"aut": "SIM",
+"fim": "",
+"ini": "2015-03-27",
+"mono": "C74",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.01
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO - RE Nº 902, DE 26 DE MARÇO DE 2015",
+"aut": "SIM",
+"fim": "",
+"ini": "2015-03-27",
+"mono": "C74",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.01
+}
+]
+},
+"ciproconazol": {
+"Café": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN Nº 315, DE 4 DE SETEMBRO DE 2024",
+"aut": "SIM",
+"fim": "",
+"ini": "2024-09-05",
+"mono": "C36",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.4
+}
+],
+"Feijão": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN Nº 315, DE 4 DE SETEMBRO DE 2024",
+"aut": "SIM",
+"fim": "",
+"ini": "2024-09-05",
+"mono": "C36",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.15
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO N.º 3.103, DE 29 DE NOVEMBRO DE 2005",
+"aut": "SIM",
+"fim": "",
+"ini": "2005-11-30",
+"mono": "C36",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.01
+}
+],
+"Soja": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN Nº 185, DE 28 DE SETEMBRO DE 2022",
+"aut": "SIM",
+"fim": "",
+"ini": "2022-10-05",
+"mono": "C36",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.15
+}
+]
+},
+"cletodim": {
+"Café": [
+{
+"ato": "RESOLUÇÃO - RE N° 1.339, DE 24 DE MARÇO DE 2010",
+"aut": "SIM",
+"fim": "",
+"ini": "2010-03-29",
+"mono": "C32",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.5
+}
+],
+"Feijão": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN Nº 420, DE 19 DE DEZEMBRO DE 2025",
+"aut": "SIM",
+"fim": "",
+"ini": "2025-12-22",
+"mono": "C32",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 1.0
+}
+],
+"Mamão": [
+{
+"ato": "INSTRUÇÃO NORMATIVA IN Nº 126, DE 25 DE MARÇO DE 2022",
+"aut": "SIM",
+"fim": "",
+"ini": "2022-03-30",
+"mono": "C32",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.05
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO-RE Nº 2.839, DE 06 DE AGOSTO DE 2013",
+"aut": "SIM",
+"fim": "",
+"ini": "2013-08-07",
+"mono": "C32",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.5
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "C32",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 1.0
+}
+]
+},
+"clorantraniliprole": {
+"Café": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN N° 126, DE 25 DE MARÇO DE 2022",
+"aut": "SIM",
+"fim": "",
+"ini": "2022-03-30",
+"mono": "C70",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.3
+}
+],
+"Feijão": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN N° 256, DE 28 DE SETEMBRO DE 2023",
+"aut": "SIM",
+"fim": "",
+"ini": "2023-10-02",
+"mono": "C70",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.09
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO - RE Nº 2.262, DE 7 DE AGOSTO DE 2015",
+"aut": "SIM",
+"fim": "",
+"ini": "2015-08-10",
+"mono": "C70",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.07
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO - RE Nº 2.262, DE 7 DE AGOSTO DE 2015",
+"aut": "SIM",
+"fim": "",
+"ini": "2015-08-10",
+"mono": "C70",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.2
+}
+]
+},
+"compostos à base de cobre": {
+"Café": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "C55",
+"tipo": "Não estabelecido",
+"un": "mg/kg",
+"v": 999.0
+}
+],
+"Feijão": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "C55",
+"tipo": "Não estabelecido",
+"un": "mg/kg",
+"v": 999.0
+}
+],
+"Mamão": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "C55",
+"tipo": "Não estabelecido",
+"un": "mg/kg",
+"v": 999.0
+}
+],
+"Milho": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN Nº 146, DE 29 DE ABRIL DE 2022",
+"aut": "SIM",
+"fim": "",
+"ini": "2022-05-04",
+"mono": "C55",
+"tipo": "Não estabelecido",
+"un": "mg/kg",
+"v": 999.0
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO-RE Nº 1.389, DE 28 DE MARÇO DE 2012",
+"aut": "SIM",
+"fim": "",
+"ini": "2012-03-29",
+"mono": "C55",
+"tipo": "Não estabelecido",
+"un": "mg/kg",
+"v": 999.0
+}
+]
+},
+"enxofre": {
+"Café": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "E04",
+"tipo": "Não estabelecido",
+"un": "mg/kg",
+"v": 999.0
+}
+],
+"Feijão": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "E04",
+"tipo": "Não estabelecido",
+"un": "mg/kg",
+"v": 999.0
+}
+],
+"Mamão": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "E04",
+"tipo": "Não estabelecido",
+"un": "mg/kg",
+"v": 999.0
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "E04",
+"tipo": "Não estabelecido",
+"un": "mg/kg",
+"v": 999.0
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "E04",
+"tipo": "Não estabelecido",
+"un": "mg/kg",
+"v": 999.0
+}
+]
+},
+"epoxiconazol": {
+"Café": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "E22",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.1
+}
+],
+"Feijão": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "E22",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.05
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "E22",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.05
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "E22",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.05
+}
+]
+},
+"espinetoram": {
+"Café": [
+{
+"ato": "RESOLUÇÃO-RE Nº 1400 DE 24 DE MAIO DE 2019",
+"aut": "SIM",
+"fim": "",
+"ini": "2019-05-28",
+"mono": "E32",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.01
+}
+],
+"Feijão": [
+{
+"ato": "RESOLUÇÃO-RE N° 3.459, DE 03 DE SETEMBRO DE 2020",
+"aut": "SIM",
+"fim": "",
+"ini": "2020-09-08",
+"mono": "E32",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.02
+}
+],
+"Mamão": [
+{
+"ato": "RESOLUÇÃO-RE N° 3.459, DE 03 DE SETEMBRO DE 2020",
+"aut": "SIM",
+"fim": "",
+"ini": "2020-09-08",
+"mono": "E32",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.07
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO-RE Nº 5.403, DE 18 DE DEZEMBRO DE 2012",
+"aut": "SIM",
+"fim": "",
+"ini": "2012-12-21",
+"mono": "E32",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.01
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO-RE Nº 5.403, DE 18 DE DEZEMBRO DE 2012",
+"aut": "SIM",
+"fim": "",
+"ini": "2012-12-21",
+"mono": "E32",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.02
+}
+]
+},
+"espiromesifeno": {
+"Café": [
+{
+"ato": "RESOLUÇÃO-RE Nº 367, DE 12 DE FEVEREIRO DE 2016",
+"aut": "SIM",
+"fim": "",
+"ini": "2016-02-15",
+"mono": "E26",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.2
+}
+],
+"Feijão": [
+{
+"ato": "RESOLUÇÃO - RE Nº 3.844, DE 24 DE SETEMBRO DE 2020",
+"aut": "SIM",
+"fim": "",
+"ini": "2020-09-28",
+"mono": "E26",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.06
+}
+],
+"Mamão": [
+{
+"ato": "RESOLUÇÃO-RE Nº 3.575, DE 17 DE DEZEMBRO DE 2019",
+"aut": "SIM",
+"fim": "",
+"ini": "2019-12-18",
+"mono": "E26",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.7
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO-RE Nº 367, DE 12 DE FEVEREIRO DE 2016",
+"aut": "SIM",
+"fim": "",
+"ini": "2016-02-15",
+"mono": "E26",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.02
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO - RE Nº 3.309, DE 24 DE OUTUBRO DE 2007",
+"aut": "SIM",
+"fim": "",
+"ini": "2007-10-25",
+"mono": "E26",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.02
+}
+]
+},
+"etiprole": {
+"Café": [
+{
+"ato": "RESOLUÇÃO-RE Nº 2.401, DE 02 DE SETEMBRO DE 2016",
+"aut": "SIM",
+"fim": "",
+"ini": "2016-09-05",
+"mono": "E29",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.1
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO-RE Nº 4.442, DE 29 DE OUTUBRO DE 2020",
+"aut": "SIM",
+"fim": "",
+"ini": "2020-11-03",
+"mono": "E29",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.01
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO - RE Nº 3.418, DE 3 DE DEZEMBRO DE 2019",
+"aut": "SIM",
+"fim": "",
+"ini": "2019-12-09",
+"mono": "E29",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.08
+}
+]
+},
+"fenpiroximato": {
+"Café": [
+{
+"ato": "RESOLUÇÃO - RE Nº 1.960, DE 10 DE AGOSTO DE 2005",
+"aut": "SIM",
+"fim": "",
+"ini": "2005-08-15",
+"mono": "F37",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.05
+}
+],
+"Feijão": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN N° 214, DE 1° DE MARÇO DE 2023",
+"aut": "SIM",
+"fim": "",
+"ini": "2023-03-08",
+"mono": "F37",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.03
+}
+],
+"Mamão": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "F37",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.1
+}
+],
+"Soja": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN N° 214, DE 1° DE MARÇO DE 2023",
+"aut": "SIM",
+"fim": "",
+"ini": "2023-03-08",
+"mono": "F37",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.06
+}
+]
+},
+"fluazinam": {
+"Feijão": [
+{
+"ato": "RESOLUÇÃO - RE Nº 3.437, DE 3 DE SETEMBRO DE 2020",
+"aut": "SIM",
+"fim": "",
+"ini": "2020-09-08",
+"mono": "F47",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.1
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO-RE Nº 1.737, DE 30 DE JUNHO DE 2016",
+"aut": "SIM",
+"fim": "",
+"ini": "2016-07-04",
+"mono": "F47",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.01
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO RE Nº 1.849, DE 6 DE MAIO DE 2021",
+"aut": "SIM",
+"fim": "",
+"ini": "2021-05-10",
+"mono": "F47",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.02
+}
+]
+},
+"fludioxonil": {
+"Feijão": [
+{
+"ato": "RESOLUÇÃO-RE N° 2.363, DE 23 DE AGOSTO DE 2019",
+"aut": "SIM",
+"fim": "",
+"ini": "2019-08-26",
+"mono": "F49",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.5
+}
+],
+"Mamão": [
+{
+"ato": "RESOLUÇÃO - RE Nº 3.836, DE 24 DE SETEMBRO DE 2020",
+"aut": "SIM",
+"fim": "",
+"ini": "2020-09-28",
+"mono": "F49",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 6.0
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "F49",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.04
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO-RE N°2.363, DE 23 DE AGOSTO DE 2019",
+"aut": "SIM",
+"fim": "",
+"ini": "2019-08-26",
+"mono": "F49",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.2
+}
+]
+},
+"fluxapiroxade": {
+"Café": [
+{
+"ato": "RESOLUÇÃO-RE Nº 2.092, DE 03 DE AGOSTO DE 2016",
+"aut": "SIM",
+"fim": "",
+"ini": "2016-08-15",
+"mono": "F68",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.2
+}
+],
+"Feijão": [
+{
+"ato": "INSTRUÇÃO NORMATIVA IN N° 300, DE 17 DE MAIO DE 2024",
+"aut": "SIM",
+"fim": "2026-06-07",
+"ini": "2024-05-20",
+"mono": "F68",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.08
+},
+{
+"ato": "INSTRUÇÃO NORMATIVA ANVISA Nº 449, DE 2 DE JUNHO DE 2026",
+"aut": "SIM",
+"fim": "",
+"ini": "2026-06-08",
+"mono": "F68",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.15
+}
+],
+"Mamão": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN N° 203, DE 26 DE DEZEMBRO DE 2022",
+"aut": "SIM",
+"fim": "",
+"ini": "2023-06-29",
+"mono": "F68",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.7
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO-RE Nº 3.564, DE 23 DE SETEMBRO DE 2013",
+"aut": "SIM",
+"fim": "",
+"ini": "2013-09-24",
+"mono": "F68",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.05
+}
+],
+"Soja": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN Nº 167, DE 12 DE AGOSTO DE 2022",
+"aut": "SIM",
+"fim": "2026-06-07",
+"ini": "2022-08-17",
+"mono": "F68",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.07
+},
+{
+"ato": "INSTRUÇÃO NORMATIVA ANVISA Nº 449, DE 2 DE JUNHO DE 2026",
+"aut": "SIM",
+"fim": "",
+"ini": "2026-06-08",
+"mono": "F68",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.1
+}
+]
+},
+"glifosato": {
+"Café": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "G01",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 1.0
+}
+],
+"Feijão": [
+{
+"ato": "RESOLUÇÃO-RE N° 33, DE 16 DE FEVEREIRO DE 2004",
+"aut": "SIM",
+"fim": "",
+"ini": "2004-02-17",
+"mono": "G01",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.05
+}
+],
+"Mamão": [
+{
+"ato": "RESOLUÇÃO-RE Nº 477, DE 23 DE FEVEREIRO DE 2005",
+"aut": "SIM",
+"fim": "",
+"ini": "2005-02-24",
+"mono": "G01",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.1
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO-RE Nº 4.452, DE 23 DE SETEMBRO DE 2010",
+"aut": "SIM",
+"fim": "",
+"ini": "2010-09-27",
+"mono": "G01",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 1.0
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO-RE N° 33, DE 16 DE FEVEREIRO DE 2004",
+"aut": "SIM",
+"fim": "",
+"ini": "2004-02-17",
+"mono": "G01",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 10.0
+}
+]
+},
+"glufosinato": {
+"Café": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "G05",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.05
+}
+],
+"Feijão": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN Nº 333, DE 30 DE OUTUBRO DE 2024",
+"aut": "SIM",
+"fim": "",
+"ini": "2024-11-01",
+"mono": "G05",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 2.0
+}
+],
+"Mamão": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN N° 399, DE 25 DE SETEMBRO DE 2025",
+"aut": "SIM",
+"fim": "",
+"ini": "2025-09-26",
+"mono": "G05",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.03
+}
+],
+"Milho": [
+{
+"ato": "INSTRUÇÃO NORMATIVA-IN Nº 190, DE 31 DE OUTUBRO DE 2022",
+"aut": "SIM",
+"fim": "",
+"ini": "2022-11-03",
+"mono": "G05",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.1
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO - RE Nº 308, DE 30 DE JANEIRO DE 2020",
+"aut": "SIM",
+"fim": "",
+"ini": "2020-02-03",
+"mono": "G05",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 2.0
+}
+]
+},
+"imazalil": {
+"Mamão": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "I19",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 1.0
+}
+]
+},
+"lambda-cialotrina": {
+"Café": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "C63",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.05
+}
+],
+"Feijão": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "C63",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.05
+}
+],
+"Mamão": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN Nº 354, DE 26 DE MARÇO DE 2025",
+"aut": "SIM",
+"fim": "",
+"ini": "2025-03-28",
+"mono": "C63",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.9
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO - RE Nº 3.407, DE 19 DE JULHO DE 2010",
+"aut": "SIM",
+"fim": "",
+"ini": "2010-07-21",
+"mono": "C63",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 1.0
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO - RE Nº 3.407, DE 19 DE JULHO DE 2010",
+"aut": "SIM",
+"fim": "",
+"ini": "2010-07-21",
+"mono": "C63",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.05
+}
+]
+},
+"lufenurom": {
+"Café": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "L05",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.05
+}
+],
+"Feijão": [
+{
+"ato": "RESOLUÇÃO-RE N° 1.738, DE 30 DE JUNHO DE 2016",
+"aut": "SIM",
+"fim": "",
+"ini": "2016-07-04",
+"mono": "L05",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.01
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "L05",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.05
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "L05",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.05
+}
+]
+},
+"mancozebe": {
+"Café": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "M02",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.3
+}
+],
+"Feijão": [
+{
+"ato": "INSTRUÇÃO NORMATIVA IN Nº 126, DE 25 DE MARÇO DE 2022",
+"aut": "SIM",
+"fim": "",
+"ini": "2022-03-30",
+"mono": "M02",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.6
+}
+],
+"Mamão": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "2026-04-08",
+"ini": "2003-09-02",
+"mono": "M02",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 3.0
+},
+{
+"ato": "INSTRUÇÃO NORMATIVA ANVISA N° 437, DE 8 DE ABRIL DE 2026",
+"aut": "SIM",
+"fim": "",
+"ini": "2026-04-09",
+"mono": "M02",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 4.0
+}
+],
+"Milho": [
+{
+"ato": "INSTRUÇÃO NORMATIVA IN Nº 126, DE 25 DE MARÇO DE 2022",
+"aut": "SIM",
+"fim": "",
+"ini": "2022-03-30",
+"mono": "M02",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.6
+}
+],
+"Soja": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN N° 214, DE 1° DE MARÇO DE 2023",
+"aut": "SIM",
+"fim": "",
+"ini": "2023-03-08",
+"mono": "M02",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.6
+}
+]
+},
+"metalaxil-m": {
+"Feijão": [
+{
+"ato": "RESOLUÇÃO-RE N° 3.888, DE 04 DE SETEMBRO DE 2009",
+"aut": "SIM",
+"fim": "",
+"ini": "2009-09-08",
+"mono": "M31",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.01
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "M31",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.05
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "M31",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.05
+}
+]
+},
+"piraclostrobina": {
+"Café": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "P46",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.5
+}
+],
+"Feijão": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "P46",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.1
+}
+],
+"Mamão": [
+{
+"ato": "RESOLUÇÃO - RE Nº 1.217, DE 12 DE MAIO DE 2016",
+"aut": "SIM",
+"fim": "",
+"ini": "2016-05-13",
+"mono": "P46",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.5
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "P46",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.1
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO - RE Nº 4.866, DE 26 DE DEZEMBRO 2008",
+"aut": "SIM",
+"fim": "",
+"ini": "2008-12-29",
+"mono": "P46",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.1
+}
+]
+},
+"piriproxifem": {
+"Café": [
+{
+"ato": "RESOLUÇÃO-RE N° 575, DE 8 DE MARÇO DE 2005",
+"aut": "SIM",
+"fim": "",
+"ini": "2005-03-09",
+"mono": "P34",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.1
+}
+],
+"Feijão": [
+{
+"ato": "RESOLUÇÃO-RE Nº 181, DE 4 DE AGOSTO DE 2004",
+"aut": "SIM",
+"fim": "",
+"ini": "2004-08-05",
+"mono": "P34",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.01
+}
+],
+"Mamão": [
+{
+"ato": "RESOLUÇÃO-RE Nº 974, DE 15 DE ABRIL DE 2019",
+"aut": "SIM",
+"fim": "",
+"ini": "2019-04-17",
+"mono": "P34",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.05
+}
+],
+"Milho": [
+{
+"ato": "INSTRUÇÃO NORMATIVA ANVISA N° 437, DE 8 DE ABRIL DE 2026",
+"aut": "SIM",
+"fim": "",
+"ini": "2026-04-09",
+"mono": "P34",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.01
+}
+],
+"Soja": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN Nº 238, DE 01 DE AGOSTO DE 2023",
+"aut": "SIM",
+"fim": "",
+"ini": "2023-08-02",
+"mono": "P34",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.08
+}
+]
+},
+"protioconazol": {
+"Feijão": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN N° 214, DE 1° DE MARÇO DE 2023",
+"aut": "SIM",
+"fim": "",
+"ini": "2023-03-08",
+"mono": "P53",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.06
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO - RE N° 4.708, DE 5 DE DEZEMBRO DE 2014",
+"aut": "SIM",
+"fim": "",
+"ini": "2014-12-08",
+"mono": "P53",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.02
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO-RE Nº 2.668, DE 6 DE OUTUBRO DE 2017",
+"aut": "SIM",
+"fim": "",
+"ini": "2017-10-09",
+"mono": "P53",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.2
+}
+]
+},
+"s-metolacloro": {
+"Café": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN Nº 233, DE 01 DE AGOSTO DE 2023",
+"aut": "SIM",
+"fim": "",
+"ini": "2023-08-02",
+"mono": "S13",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.01
+}
+],
+"Feijão": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "S13",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.05
+}
+],
+"Mamão": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN N° 268, DE 12 DE DEZEMBRO DE 2023",
+"aut": "SIM",
+"fim": "",
+"ini": "2023-12-13",
+"mono": "S13",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.01
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO - RE Nº 1.732, DE 30 DE JUNHO DE 2016",
+"aut": "SIM",
+"fim": "",
+"ini": "2016-07-04",
+"mono": "S13",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.1
+}
+],
+"Soja": [
+{
+"ato": "INSTRUÇÃO NORMATIVA IN Nº 126, DE 25 DE MARÇO DE 2022",
+"aut": "SIM",
+"fim": "",
+"ini": "2022-03-30",
+"mono": "S13",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.8
+}
+]
+},
+"saflufenacil": {
+"Café": [
+{
+"ato": "RESOLUÇÃO-RE Nº 666, DE 11 DE MARÇO DE 2016",
+"aut": "SIM",
+"fim": "",
+"ini": "2016-03-14",
+"mono": "S16",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.03
+}
+],
+"Feijão": [
+{
+"ato": "RESOLUÇÃO-RE Nº 3.939, DE 08 DE OUTUBRO DE 2014",
+"aut": "SIM",
+"fim": "",
+"ini": "2014-10-09",
+"mono": "S16",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.03
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO-RE Nº 3.939, DE 08 DE OUTUBRO DE 2014",
+"aut": "SIM",
+"fim": "",
+"ini": "2014-10-09",
+"mono": "S16",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.03
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO-RE Nº 3.939, DE 08 DE OUTUBRO DE 2014",
+"aut": "SIM",
+"fim": "",
+"ini": "2014-10-09",
+"mono": "S16",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.03
+}
+]
+},
+"tebuconazol": {
+"Café": [
+{
+"ato": "RESOLUÇÃO - RE Nº 3.441, DE 3 DE SETEMBRO DE 2020",
+"aut": "SIM",
+"fim": "",
+"ini": "2020-09-08",
+"mono": "T32",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.3
+}
+],
+"Feijão": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "T32",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.1
+}
+],
+"Mamão": [
+{
+"ato": "RESOLUÇÃO-RE Nº 2.722, DE 25 DE OUTUBRO DE 2005",
+"aut": "SIM",
+"fim": "",
+"ini": "2005-10-28",
+"mono": "T32",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 1.0
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "T32",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.1
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "T32",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.1
+}
+]
+},
+"tembotriona": {
+"Milho": [
+{
+"ato": "RESOLUÇÃO-RE Nº 1.263, DE 30 DE ABRIL DE 2008",
+"aut": "SIM",
+"fim": "",
+"ini": "2008-05-05",
+"mono": "T61",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.01
+}
+]
+},
+"tiabendazol": {
+"Feijão": [
+{
+"ato": "RESOLUÇÃO-RE Nº 2.904, DE 05 DE JULHO DE 2011",
+"aut": "SIM",
+"fim": "",
+"ini": "2011-07-07",
+"mono": "T12",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.01
+}
+],
+"Mamão": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "T12",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 6.0
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "T12",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.2
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "T12",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.1
+}
+]
+},
+"tiametoxam": {
+"Café": [
+{
+"ato": "INSTRUÇÃO NORMATIVA IN Nº 126, DE 25 DE MARÇO DE 2022",
+"aut": "SIM",
+"fim": "",
+"ini": "2022-03-30",
+"mono": "T48",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.2
+}
+],
+"Feijão": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "T48",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.02
+}
+],
+"Mamão": [
+{
+"ato": "RESOLUÇÃO - RE N° 5.241, DE 12 DE DEZEMBRO DE 2012",
+"aut": "SIM",
+"fim": "",
+"ini": "2012-12-13",
+"mono": "T48",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.1
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO - RE N° 3.757, DE 22 DE SETEMBRO DE 2014",
+"aut": "SIM",
+"fim": "",
+"ini": "2014-09-23",
+"mono": "T48",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.02
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO-RE Nº 1.898, DE 15 DE JULHO DE 2016",
+"aut": "SIM",
+"fim": "",
+"ini": "2016-07-18",
+"mono": "T48",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.02
+}
+]
+},
+"tiofanato-metílico": {
+"Café": [
+{
+"ato": "RESOLUÇÃO - RE Nº 3.840, DE 24 DE SETEMBRO DE 2020",
+"aut": "SIM",
+"fim": "",
+"ini": "2020-09-28",
+"mono": "T14",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 1.5
+}
+],
+"Feijão": [
+{
+"ato": "RESOLUÇÃO-RE Nº 2.670, DE 6 DE OUTUBRO DE 2017",
+"aut": "SIM",
+"fim": "",
+"ini": "2017-10-09",
+"mono": "T14",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.5
+}
+],
+"Mamão": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "T14",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.5
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO - RE Nº 3.751, DE 04 DE DEZEMBRO DE 2007",
+"aut": "SIM",
+"fim": "",
+"ini": "2007-12-05",
+"mono": "T14",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 2.0
+}
+],
+"Soja": [
+{
+"ato": "RESOLUÇÃO N° 85, DE 23 DE ABRIL DE 2004",
+"aut": "SIM",
+"fim": "",
+"ini": "2004-04-26",
+"mono": "T14",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.5
+}
+]
+},
+"trifloxistrobina": {
+"Café": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "T54",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.05
+}
+],
+"Feijão": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "T54",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.2
+}
+],
+"Mamão": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN Nº 167, DE 12 DE AGOSTO DE 2022",
+"aut": "SIM",
+"fim": "",
+"ini": "2022-08-17",
+"mono": "T54",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.15
+}
+],
+"Milho": [
+{
+"ato": "RESOLUÇÃO-RE Nº 165, DE 29 DE AGOSTO DE 2003",
+"aut": "SIM",
+"fim": "",
+"ini": "2003-09-02",
+"mono": "T54",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.05
+}
+],
+"Soja": [
+{
+"ato": "INSTRUÇÃO NORMATIVA - IN N° 219, DE 20 DE MARÇO DE 2023",
+"aut": "SIM",
+"fim": "",
+"ini": "2023-03-21",
+"mono": "T54",
+"tipo": "Limite máximo",
+"un": "mg/kg",
+"v": 0.06
+}
+]
+}
+},
+"recorte": "ingredientes da base Agrofit demonstrativa × Mamão, Soja, Milho, Feijão e Café; linhas vigentes em 2026 ou sem fim de vigência"
+}
