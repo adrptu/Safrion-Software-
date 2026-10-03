@@ -177,6 +177,13 @@ function g2vals(self,sp,v,mask){
   v[id+'_filtered']=g2filtering(st)||!!(sp.qf&&st.qv); v[id+'_clear']=()=>g2set(self,id,{q:'',f:{},qv:''});
   v[id+'_fchips']=Object.keys(st.f||{}).filter(k=>(st.f[k]||[]).length).map(k=>{ const c=sp.cols.find(x=>x.k===k)||{l:k}; return {t:c.l+': '+st.f[k].join(', '), rm:()=>{ const f=Object.assign({},g2st(self,id).f||{}); delete f[k]; g2set(self,id,{f}); }}; });
   v[id+'_selcount']=Object.values(st.sel||{}).filter(Boolean).length; v[id+'_hassel']=v[id+'_selcount']>0;
+  // barra de seleção (DS-40 · UX-ACAO-UNICA-20261003): seleção por IDs; diz quantos estão fora da vista (filtro ou grupo recolhido),
+  // sem perder nem ampliar a seleção; a prévia do comando de lote lista todos os incluídos
+  { const ids=Object.keys(st.sel||{}).filter(k=>(st.sel||{})[k]); const vis=new Set(flat.map(x=>x.r.id)); const fora=ids.filter(k=>!vis.has(k)).length;
+    v[id+'_selmsg']=ids.length+(ids.length>1?' selecionados':' selecionado')+(fora?' · '+fora+' fora da vista (filtro ou grupo recolhido)':'');
+    // com seleção, a região de ações da barra dá lugar à do lote (o "+ Novo…" volta quando a seleção é limpa); "Selecionar todas" diz o alcance
+    v[id+'_semsel']=!ids.length; const todas=flat.length>0&&flat.every(x=>(st.sel||{})[x.r.id]);
+    v[id+'_selallLab']=todas?('Desmarcar as '+flat.length+' linhas visíveis'):('Selecionar as '+flat.length+' linhas visíveis (filtro e grupos recolhidos ficam de fora)'); }
   v[id+'_selclear']=()=>g2set(self,id,{sel:{}});
   v[id+'_selall']=()=>{ const s2={}; const allOn=flat.every(x=>(st.sel||{})[x.r.id]); if(!allOn) flat.forEach(x=>{ s2[x.r.id]=true; }); g2set(self,id,{sel:s2}); };
   v[id+'_new']=()=>g2new(self,sp);
@@ -260,8 +267,9 @@ function g2navvals(self,v,nav){ const rec=(self.state.menuRec===undefined)?g2men
       const c0='minmax(min-content, '+cap+'px)'; r.setAttribute('data-c0',''); r.style.setProperty('--g2cols',hs.map(x=>x===h?c0:'auto').join(' '));
       const vis=Math.max(96,Math.floor(cw-h.getBoundingClientRect().width-4)); r.style.setProperty('--g2cols',hs.map(x=>x===h?c0:'minmax(min-content, '+vis+'px)').join(' ')); }
     r.__c0w=cw; r.style.setProperty('--g2c0w',Math.round(h.getBoundingClientRect().width)+'px'); r.style.setProperty('--g2hh',Math.round(hr.getBoundingClientRect().height)+'px'); };
-  const faixa=()=>{ const col=document.querySelector('.ml-tog+div'); if(!col) return; const nv=col.querySelector(':scope>nav.etp'); col.style.setProperty('--etp-h',(nv&&nv.getClientRects().length?nv.offsetHeight:0)+'px'); };
-  const mais=()=>{ faixa(); document.querySelectorAll('.g2rola,.rola').forEach(r=>{ if(r.classList.contains('g2rola')) presa(r); if(r.scrollWidth-r.clientWidth-r.scrollLeft>2) r.setAttribute('data-mais',''); else r.removeAttribute('data-mais'); }); };
+  const faixa=()=>{ const col=document.querySelector('.ml-tog+div'); if(!col) return; const nv=col.querySelector(':scope>.etp'); col.style.setProperty('--etp-h',(nv&&nv.getClientRects().length?nv.offsetHeight:0)+'px'); };
+  const acoes=()=>{ const a=[...document.querySelectorAll('main .acoes')].find(vis); const h=(a&&getComputedStyle(a).position==='sticky')?Math.round(a.getBoundingClientRect().height):0; document.documentElement.style.setProperty('--acoes-h',h+'px'); };
+  const mais=()=>{ faixa(); acoes(); document.querySelectorAll('.g2rola,.rola').forEach(r=>{ if(r.classList.contains('g2rola')) presa(r); if(r.scrollWidth-r.clientWidth-r.scrollLeft>2) r.setAttribute('data-mais',''); else r.removeAttribute('data-mais'); }); };
   // o navegador não rola até um controle só em parte visível na caixa da tabela (ex.: botão do cabeçalho rente à borda, ou por
   // trás da coluna presa): ao receber o foco ele vem inteiro para a vista (a linha inteira e a coluna presa não precisam)
   document.addEventListener('focusin',(e)=>{ const t=e.target; const r=t&&t.closest&&t.closest('.g2rola'); if(!r||t===r||t.getAttribute('role')==='row') return;
@@ -275,13 +283,60 @@ function g2navvals(self,v,nav){ const rec=(self.state.menuRec===undefined)?g2men
   // redimensionamento e, se ele sumiu, leva o foco ao equivalente visível
   let tmr=null, pre=null; window.addEventListener('resize',()=>{ const ae=document.activeElement; if(!pre&&ae&&ae!==document.body) pre=ae; clearTimeout(tmr); tmr=setTimeout(()=>{ const at=document.activeElement; const a=(at&&at!==document.body)?at:pre; pre=null; if(!a||vis(a)||!a.closest) return;
     if(at&&at!==document.body&&at!==a) return;
-    if(a.closest('nav.etp')){ const k=rotulo(); if(k) k.focus({preventScroll:true}); else { const c=document.querySelector('nav.etp .etp-itens [aria-current=step]'); if(c&&vis(c)) c.focus({preventScroll:true}); } }
+    if(a.closest('.etp')){ const k=rotulo(); if(k) k.focus({preventScroll:true}); else { const c=document.querySelector('.etp-sec .etp-itens [aria-current=page],.etp-sec .etp-itens [aria-current=true]'); if(c&&vis(c)) c.focus({preventScroll:true}); } }
     else if(a.closest('.menu-lat')){ const b=document.querySelector('.ml-tog'); if(b) b.focus({preventScroll:true}); } },150); });
 })();
-// faixa de etapas controlada pelo estado da tela (processos numa só tela de trabalho)
-function g2steps(self,v,pre,n,cur,whys,go){ for(let i=1;i<=n;i++){ const on=(i===cur); const w=(whys&&whys[i])||'';
-  v[pre+i+'_st']='display:flex;align-items:center;gap:6px;padding:5px 6px;border-radius:10px;border:0;font-family:inherit;cursor:pointer;text-align:left;min-width:0;color:#15201A;'+(on?'background:#E4F3E9;box-shadow:inset 0 -2px 0 #1E7A4C;':'background:transparent;');
-  v[pre+i+'_bst']='width:22px;height:22px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;flex-shrink:0;'+(on?'background:#1E7A4C;color:#fff;':(w?'background:#FDE8E6;color:#B42318;':'background:#EEF1EE;color:#15201A;'));
-  v[pre+i+'_tst']='font-size:12px;line-height:1.2;font-weight:'+(on?'800':'600')+';';
-  v[pre+i+'_why']=w; v[pre+i+'_hasWhy']=!!w; v[pre+i+'_cur']=on?'step':'false';
-  v[pre+i+'_go']=()=>go(i); } }
+// ---- UX-ACAO-UNICA-20261003 (DS-02, DS-31 v2, DS-33 §74.5.7.1, DS-61) ----
+// Painel modal (DS-02 v2 · v3.1 "um modal deixa o fundo inerte e devolve o foco ao fechar"): enquanto um painel lateral sobre véu
+// está aberto, ele assume a tarefa: Tab e Shift+Tab circulam só dentro dele (o véu já bloqueia o ponteiro), o leitor de tela recebe
+// aria-modal e, ao fechar, se o foco ficou perdido, ele volta ao último controle fora do painel (quem o abriu). Não apaga nem
+// desabilita comandos do fundo; foco e cliques feitos pelo próprio código da tela não são afetados.
+(function(){ if(typeof document==='undefined'||window.__g2modal) return; window.__g2modal=1;
+  const vis=e=>!!e&&e.isConnected&&e.getClientRects().length>0&&getComputedStyle(e).visibility!=='hidden';
+  const modal=()=>[...document.querySelectorAll('aside[role=dialog]')].find(d=>vis(d)&&d.parentElement&&getComputedStyle(d.parentElement).position==='fixed');
+  const foc=d=>[...d.querySelectorAll('a[href],button,input,select,textarea,[tabindex]')].filter(x=>!x.disabled&&x.tabIndex>=0&&vis(x));
+  let fora=null, aberto=null;
+  document.addEventListener('focusin',(e)=>{ const t=e.target; if(t&&t.closest&&t!==document.body&&!t.closest('aside[role=dialog]')) fora=t; },true);
+  document.addEventListener('keydown',(e)=>{ if(e.key!=='Tab'||e.defaultPrevented) return; const d=modal(); if(!d) return; const fs=foc(d); if(!fs.length) return;
+    const a=document.activeElement, i=fs.indexOf(a);
+    if(!d.contains(a)){ e.preventDefault(); (e.shiftKey?fs[fs.length-1]:fs[0]).focus(); }
+    else if(e.shiftKey&&i===0){ e.preventDefault(); fs[fs.length-1].focus(); }
+    else if(!e.shiftKey&&i===fs.length-1){ e.preventDefault(); fs[0].focus(); } },true);
+  const olha=()=>{ const d=modal();
+    if(d&&d!==aberto){ aberto=d; d.__volta=fora; if(d.getAttribute('aria-modal')!=='true') d.setAttribute('aria-modal','true'); }
+    else if(!d&&aberto){ const v=aberto.__volta; aberto=null; const ae=document.activeElement; if((!ae||ae===document.body||!ae.isConnected)&&vis(v)) try{ v.focus({preventScroll:true}); }catch(e){} } };
+  try{ new MutationObserver(olha).observe(document.documentElement,{childList:true,subtree:true}); }catch(e){} })();
+// Indicador de progresso do processo guiado: só informa (atual, concluída, pendente, impedida) com a palavra do estado para o leitor
+// de tela; não navega (sem handler, sem foco, sem hover de ação). O argumento go fica por compatibilidade e não é usado.
+function g2steps(self,v,pre,n,cur,whys,go){ for(let i=1;i<=n;i++){ const on=(i===cur); const w=(whys&&whys[i])||''; const feita=(!on&&i<cur&&!w);
+  v[pre+i+'_st']='display:flex;align-items:center;gap:6px;padding:5px 6px;border-radius:10px;min-width:0;color:#15201A;cursor:default;'+(on?'background:#E4F3E9;box-shadow:inset 0 -2px 0 #1E7A4C;':'background:transparent;');
+  v[pre+i+'_bst']='width:22px;height:22px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;flex-shrink:0;'+(on?'background:#1E7A4C;color:#fff;':(w?'background:#FDE8E6;color:#B42318;':(feita?'background:#E3F2E8;color:#1E6B47;':'background:#EEF1EE;color:#15201A;')));
+  v[pre+i+'_tst']='font-size:12px;line-height:1.2;font-weight:'+(on?'800':'600')+';color:'+(on||feita||w?'#15201A':'#4B5A51')+';';
+  v[pre+i+'_num']=feita?'✓':String(i); v[pre+i+'_sr']=on?'etapa atual':(w?'impedida':(feita?'concluída':'pendente'));
+  v[pre+i+'_why']=w; v[pre+i+'_hasWhy']=!!w; v[pre+i+'_cur']=on?'step':'false'; } }
+// Seções de uma tela de trabalho paralelo (Estoque): navegação em qualquer ordem, sem número de etapa; pendência escrita
+function g2secoes(self,v,pre,n,cur,whys,go){ for(let i=1;i<=n;i++){ const on=(i===cur); const w=(whys&&whys[i])||'';
+  v[pre+i+'_st']='display:flex;flex-direction:column;justify-content:center;gap:1px;padding:6px 10px;border-radius:10px;border:0;font-family:inherit;font-size:12.5px;line-height:1.2;cursor:pointer;text-align:left;min-width:0;color:#15201A;'+(on?'background:#E4F3E9;box-shadow:inset 0 -2px 0 #1E7A4C;font-weight:800;':'background:transparent;font-weight:600;');
+  v[pre+i+'_why']=w; v[pre+i+'_hasWhy']=!!w; v[pre+i+'_cur']=on?'true':'false'; v[pre+i+'_go']=()=>go(i); } }
+// Troca de etapa pela área de ações: o conteúdo novo começa no topo e o foco vai ao título do primeiro bloco (não fica no pé da etapa
+// anterior). pos: posição de rolagem a restaurar (volta à revisão) em vez do topo: {top, rolas (caixas roláveis da tela, em ordem), foco}.
+function g2etapa(self,patch,pos){ self.setState(patch); setTimeout(()=>{ try{ const m=document.querySelector('main[data-scroll]'); if(!m) return;
+  const col=document.querySelector('.ml-tog+div'); const rola=(col&&col.scrollHeight>col.clientHeight+1&&getComputedStyle(col).overflowY==='auto')?col:m;
+  if(pos&&pos.top!==undefined){ rola.scrollTop=pos.top; [...m.querySelectorAll('.g2rola,.rola')].forEach((r,i)=>{ if(pos.rolas&&pos.rolas[i]!==undefined) r.scrollTop=pos.rolas[i]; }); }
+  else { rola.scrollTop=0; if(rola!==m) m.scrollTop=0; }
+  const alvo=(pos&&pos.foco)?document.querySelector(pos.foco):null; const h=alvo||[...m.querySelectorAll('h2,h3')].find(e=>e.getClientRects().length);
+  if(h){ if(!h.matches('a,button,input,select,textarea,[tabindex]')) h.setAttribute('tabindex','-1'); h.focus({preventScroll:true}); } }catch(e){} },30); }
+// Área de ações única do processo guiado (engine.area_acoes): nota com a causa da pendência e um atalho contextual, retorno secundário
+// à esquerda (nomeia o destino), avanço secundário quando a primária é outra (resolver a pré-condição ou comando material) e uma
+// primária à direita (botão ou link). Cada item: {t, fn | h, a (data-acao), to (etapa de destino)}. Se o avanço/primária leva ao mesmo
+// destino do retorno, o retorno sai (um caminho por intenção). Sem nada a mostrar, a área não aparece.
+function g2acoes(v,pre,c){ c=c||{}; const nada=()=>{};
+  let volta=c.volta||null, sec=c.sec||null, prim=c.prim||null;
+  if(volta&&volta.to!==undefined&&((prim&&prim.to===volta.to)||(sec&&sec.to===volta.to))) volta=null;
+  if(sec&&prim&&sec.to!==undefined&&sec.to===prim.to) sec=null;
+  v[pre+'_hasNota']=!!c.nota; v[pre+'_nota']=c.nota||''; v[pre+'_hasCtx']=!!c.ctx; v[pre+'_ctxT']=c.ctx?c.ctx.t:''; v[pre+'_ctxFn']=c.ctx?c.ctx.fn:nada;
+  v[pre+'_hasVolta']=!!volta; v[pre+'_voltaT']=volta?volta.t:''; v[pre+'_volta']=volta?volta.fn:nada; v[pre+'_voltaA']=(volta&&volta.a)||'voltar';
+  v[pre+'_hasSec']=!!sec; v[pre+'_secT']=sec?sec.t:''; v[pre+'_secFn']=sec?sec.fn:nada; v[pre+'_secA']=(sec&&sec.a)||'avancar';
+  const lk=!!(prim&&prim.h); v[pre+'_hasPrim']=!!prim&&!lk; v[pre+'_hasLink']=lk; v[pre+'_primT']=prim?prim.t:''; v[pre+'_primFn']=(prim&&prim.fn)||nada; v[pre+'_href']=lk?prim.h:'#';
+  v[pre+'_primA']=(prim&&prim.a)||'avancar'; v[pre+'_desc']=c.nota?(pre+'-nota'):'';
+  v[pre+'_has']=!!(c.nota||volta||sec||prim); }

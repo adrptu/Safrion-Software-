@@ -136,7 +136,7 @@ ITEM_OFF=lambda: f'display: block; width: 100%; text-align: left; padding: 8px 1
 LIST_ST=lambda right=False: f'position: absolute; top: calc(100% + 6px); {"right: 0;" if right else "left: 0;"} z-index: 25; min-width: 200px; background: {SURF}; border: 1px solid {LINE}; border-radius: 12px; box-shadow: 0 12px 32px -8px rgba(21,32,26,.28); padding: 6px; flex-direction: column; gap: 2px; display: flex;'
 CMENU_ST=lambda: f'position: absolute; top: 102px; left: 14px; z-index: 25; width: 270px; background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; box-shadow: 0 12px 32px -8px rgba(21,32,26,.28); padding: 8px; flex-direction: column; gap: 2px; display: flex;'
 GCHIP_ST=lambda: f'display: inline-flex; align-items: center; gap: 6px; padding: 3px 4px 3px 10px; border-radius: 999px; background: {INK}; color: #fff; font-size: 12px; font-weight: 700;'
-CHIP_ON=lambda: f'font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 7px 14px; border-radius: 999px; border: 1px solid {ACC}; background: {ACC}; color: #fff; cursor: pointer;'
+CHIP_ON=lambda: f'font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 7px 14px; border-radius: 999px; border: 1px solid {ACC}; background: {ACCS}; color: {ACC}; cursor: pointer;'   # escolha tonal (DS-36): não imita o primário
 CHIP_OFF=lambda: f'font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 7px 14px; border-radius: 999px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer;'
 SEG_ON=lambda: f'font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 6px 14px; border-radius: 999px; border: 0; cursor: pointer; background: {SURF}; color: {INK}; box-shadow: 0 1px 2px rgba(21,32,26,.12); white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;'
 SEG_OFF=lambda: f'font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 6px 14px; border-radius: 999px; border: 0; cursor: pointer; background: transparent; color: {MUTED}; box-shadow: none; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;'
@@ -171,7 +171,7 @@ def drawer_button(text,d,primary=False,small=True):
 def seg_buttons(opts,active=0,icons=None,on=None,off=None):
     """controle segmentado registrado; devolve (id, [botões]) para compor livremente."""
     s=wid('s'); reg(type='seg',id=s,opts=list(opts),dflt=active,on=on or SEG_ON(),off=off or SEG_OFF())
-    bs=[f'<button type="button" onClick="{HL(s+"_p"+str(i))}" style="{HL(s+"_s"+str(i))}">{(icons[i] if icons else "")}{esc(o)}</button>' for i,o in enumerate(opts)]
+    bs=[f'<button type="button" aria-pressed="{HL(s+"_a"+str(i))}" onClick="{HL(s+"_p"+str(i))}" style="{HL(s+"_s"+str(i))}">{(icons[i] if icons else "")}{esc(o)}</button>' for i,o in enumerate(opts)]
     return s,bs
 def seg(opts,active=0,icons=None):
     s,bs=seg_buttons(opts,active,icons)
@@ -209,6 +209,7 @@ class Component extends DCLogic {
         w.opts.forEach((o, i) => {
           v[w.id + '_s' + i] = (i === cur ? w.on : w.off);
           v[w.id + '_v' + i] = (i === cur);
+          v[w.id + '_a' + i] = (i === cur) ? 'true' : 'false';   // estado acessível da escolha (DS-36: visão/filtro além da cor)
           v[w.id + '_p' + i] = () => set({ sel: Object.assign({}, st.sel, { [w.id]: i }), open: null });
         });
       }
@@ -1037,6 +1038,66 @@ MOBILE_CSS=("[data-mroot]{max-width:var(--mw);max-height:100vh;max-height:100dvh
     "@media (max-width:1279px){[data-mroot]{max-width:720px;margin:0 auto}}"
     "[data-mroot]>main+div{padding-bottom:max(28px,env(safe-area-inset-bottom,0px))!important}"
     "@media (max-height:560px){[data-mroot]>header{padding-top:max(12px,env(safe-area-inset-top,0px))}}")
+# =====================================================================================
+# UX-ACAO-UNICA-20261003 (DS-02, DS-33 §74.5.7.1, DS-61): uma tarefa ativa = uma primária e uma rota de avanço.
+# Área de ações do processo guiado: depois do conteúdo da etapa, retorno secundário à esquerda (nomeia o destino), avanço ou
+# primária contextual à direita. Fica presa ao pé da área que rola reservando o espaço (não cobre a última linha: está no fluxo);
+# em altura curta (celular deitado, teclado virtual aberto, zoom de 200 %) a casca rola inteira e a área volta ao fluxo, no fim
+# do conteúdo, alcançável por rolagem. O foco levado à vista desconta a altura dela (scroll-padding, medido pelo g2lib) e o
+# aviso temporário sobe acima dela. No estreito, empilha mantendo a ordem: nota, retorno, avanço/primária.
+# =====================================================================================
+ACOES_CSS=(".acoes{position:sticky;bottom:0;z-index:6;display:flex;flex-direction:column;gap:6px;margin-top:2px;padding:10px 0 2px;"
+    "background:#F4F6F3;border-top:1px solid #E4E9E5;box-shadow:0 -8px 12px -12px rgba(21,32,26,.35)}"
+    ".acoes-nota{margin:0;font-size:12.8px;line-height:1.4;color:#5B4300;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px}"
+    ".acoes-nota b{color:#15201A}"
+    ".acoes-linha{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.acoes-esp{flex:1 1 auto}"
+    ".acoes :is(.acoes-sec,.acoes-prim){font-family:inherit;font-size:13.5px;font-weight:700;line-height:1.25;padding:9px 16px;border-radius:10px;cursor:pointer;white-space:nowrap;min-height:40px;box-sizing:border-box;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}"
+    ".acoes-sec{background:#FFFFFF;color:#15201A;border:1px solid #E4E9E5}"
+    ".acoes-prim{background:#1E7A4C;color:#FFFFFF;border:1px solid #1E7A4C;box-shadow:0 1px 2px rgba(30,122,76,.25)}"
+    ".acoes-lnk{border:0;background:transparent;padding:0;font-family:inherit;font-size:12.8px;font-weight:700;color:#1E7A4C;text-decoration:underline;text-underline-offset:3px;cursor:pointer}"
+    "main[data-scroll]:has(.acoes){scroll-padding-bottom:calc(var(--acoes-h,64px) + 10px)}"
+    # a área é o último filho do main: não estica (a regra "o último bloco estica até o fim da janela" passa ao bloco da etapa, logo antes dela)
+    "main>div.acoes:last-child{flex:0 0 auto;min-height:auto}main>div:has(+div.acoes:last-child){flex:1 1 auto;min-height:0;display:flex;flex-direction:column}"
+    "@media (max-width:640px),(max-height:560px){main[data-scroll]>div.acoes:last-child{flex:0 0 auto!important}main[data-scroll]>div:has(+div.acoes:last-child){flex:1 0 auto!important}}"
+    "@media (pointer:coarse){.acoes :is(.acoes-sec,.acoes-prim){min-height:44px}}"
+    # estreito: botões na largura disponível, sem comprimir a barra; ordem visual = ordem de leitura/Tab (retorno, avanço, primária)
+    "@media (max-width:640px){.acoes-linha{flex-wrap:wrap}.acoes-esp{display:none}.acoes :is(.acoes-sec,.acoes-prim){flex:1 1 140px;white-space:normal;text-align:center}}"
+    # altura curta: a casca rola inteira (ui37) e a área volta ao fluxo, no fim do conteúdo
+    "@media (max-height:560px){.acoes{position:static;box-shadow:none}}"
+    # painel lateral com rodapé preso: o campo focado (teclado aberto) não fica sob o rodapé
+    "aside[role=dialog]{scroll-padding-bottom:84px}"
+    # leitor de tela: palavra do estado da etapa sem depender da cor
+    ".etp-sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}"
+    # escolha (segmento, chip de filtro, modo de visão) desenhada como o primário cheio passa a tonal: superfície selecionada, texto
+    # e borda de ação (DS-36 v2; DS-33 §74.5.7.1: escolha tem menos ênfase que a primária). Pega só o desenho antigo, por atributo.
+    "main [aria-pressed=true]:is([style*='background: rgb(30, 122, 76)'],[style*='background-color: rgb(30, 122, 76)'],[style*='background: rgb(21, 32, 26)'],[style*='background-color: rgb(21, 32, 26)'],[style*='background:#1E7A4C'],[style*='background:#15201A']){background:#E4F3E9!important;color:#1E6B47!important;border-color:#1E7A4C!important;box-shadow:inset 0 0 0 1px #1E7A4C!important}"
+    "main [aria-pressed=true]:is([style*='background: rgb(30, 122, 76)'],[style*='background-color: rgb(30, 122, 76)'],[style*='background: rgb(21, 32, 26)'],[style*='background-color: rgb(21, 32, 26)'],[style*='background:#1E7A4C'],[style*='background:#15201A']) *{color:inherit}"
+    # rodapé de formulário dentro de painel (Ajustar antes de liberar, apontamento): fica ao alcance com o teclado aberto, sem cobrir o campo
+    ".acoes-form{position:sticky;bottom:-22px;z-index:2;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 -12px -10px;padding:10px 12px 12px;background:#FFFFFF;border-top:1px solid #E4E9E5;border-radius:0 0 10px 10px}"
+    ".acoes-form>.acoes-esp{flex:1 1 auto}"
+    # decisão de saída aberta (DS-61 v2 · v3): "Continuar editando" é a única primária e "Descartar alterações" fica separado;
+    # o rodapé Cancelar/Salvar do painel some enquanto a decisão está aberta (volta ao continuar editando)
+    "aside[role=dialog]:has(.saida) .pe-form,aside[role=dialog]:has(.saida)>div:last-child:not(.saida){display:none!important}"   # o rodapé é o último bloco do painel
+    # expandir/recolher global (v3 · tabela 1): controle discreto de texto na barra da coleção, com menos ênfase que qualquer botão
+    ".g2xtog{border:0;background:transparent;color:#1E7A4C;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;padding:4px 2px;white-space:nowrap}"
+    "@media (hover:hover){.g2xtog:hover{text-decoration:underline;text-underline-offset:3px}}.g2xtog:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px;border-radius:6px}"
+    "@media (pointer:coarse){.g2xtog{min-height:44px}}")
+def area_acoes(pre='aa',rotulo='Ações da etapa'):
+    """Área de ações única do processo guiado (DS-33/DS-61). Buracos vêm de g2acoes(v,pre,cfg) em g2lib.js.
+    Nota opcional (causa da pendência + atalho contextual), retorno secundário à esquerda, avanço secundário quando a primária
+    é outra (resolver a pré-condição ou comando material) e a primária à direita (botão ou link). data-acao identifica a função."""
+    h=lambda s: '{{'+pre+s+'}}'
+    F_='{{false}}'
+    return (f'<sc-if value="{h("_has")}" hint-placeholder-val="{F_}"><div class="acoes" role="group" aria-label="{rotulo}" data-acoes="{pre}">'
+            f'<sc-if value="{h("_hasNota")}" hint-placeholder-val="{F_}"><p class="acoes-nota" id="{pre}-nota"><span>{h("_nota")}</span>'
+            f'<sc-if value="{h("_hasCtx")}" hint-placeholder-val="{F_}"><button type="button" class="acoes-lnk" data-acao="corrigir" onClick="{h("_ctxFn")}">{h("_ctxT")}</button></sc-if></p></sc-if>'
+            f'<div class="acoes-linha">'
+            f'<sc-if value="{h("_hasVolta")}" hint-placeholder-val="{F_}"><button type="button" class="acoes-sec" data-acao="{h("_voltaA")}" onClick="{h("_volta")}">{h("_voltaT")}</button></sc-if>'
+            f'<span class="acoes-esp"></span>'
+            f'<sc-if value="{h("_hasSec")}" hint-placeholder-val="{F_}"><button type="button" class="acoes-sec" data-acao="{h("_secA")}" onClick="{h("_secFn")}">{h("_secT")}</button></sc-if>'
+            f'<sc-if value="{h("_hasPrim")}" hint-placeholder-val="{F_}"><button type="button" class="acoes-prim" data-acao="{h("_primA")}" aria-describedby="{h("_desc")}" onClick="{h("_primFn")}">{h("_primT")}</button></sc-if>'
+            f'<sc-if value="{h("_hasLink")}" hint-placeholder-val="{F_}"><a class="acoes-prim" data-acao="abrir" href="{h("_href")}">{h("_primT")}</a></sc-if>'
+            f'</div></div></sc-if>')
 G2_CSS=(".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outline:2px solid #1E7A4C;outline-offset:-2px}"
         # hover dos controles pequenos da grade só onde existe ponteiro com hover (no toque o fundo não fica "grudado")
         "@media (hover:hover){.g2fi:hover{background:#F2F8F4}.g2fb:hover,.g2car:hover{background:#E4E9E5}.g2del:hover{background:#FDE8E6;color:#B42318}}"
@@ -1071,7 +1132,7 @@ G2_CSS=(".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outlin
         "main section:only-of-type>div:last-child>div>.g2caixa:last-of-type{flex:1 1 0}main section:only-of-type>div:last-child>div>.g2caixa:last-of-type>.g2rola{flex:1 1 0}"
         "main section:only-of-type>div:last-child>div>.rola{flex:1 1 0;min-height:0;overflow:auto}"
         ".g2rola [role=table]>[role=row]:first-child{position:sticky;top:0;z-index:3}"
-        + INTERACAO_CSS)
+        + INTERACAO_CSS + ACOES_CSS)
 _TRASH='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>'
 _MINI=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer; white-space: nowrap;'
 _MINIP=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {ACC}; background: {ACC}; color: #fff; cursor: pointer; white-space: nowrap;'
@@ -1109,9 +1170,9 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
             + f'<sc-for list="{H("_fchips")}" as="fc" hint-placeholder-count="0"><span style="display: inline-flex; align-items: center; gap: 2px; padding: 2px 4px 2px 9px; border-radius: 999px; background: {ACCS}; color: {ACC}; font-size: 11.5px; font-weight: 700;">{_h("fc.t")}<button type="button" aria-label="Remover filtro" onClick="{_h("fc.rm")}" style="border: 0; background: transparent; color: {ACC}; cursor: pointer; font-size: 13px; padding: 0 4px;">×</button></span></sc-for>'
             + f'<sc-if value="{H("_filtered")}" hint-placeholder-val="{{{{false}}}}"><button type="button" onClick="{H("_clear")}" style="border: 0; background: transparent; color: {ACC}; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer;">Limpar filtros</button></sc-if>'
             + '<span style="flex-grow: 1;"></span>' + tools
-            + (f'<sc-if value="{H("_hassel")}" hint-placeholder-val="{{{{false}}}}"><span style="font-size: 12px; font-weight: 700; color: {ACC};">{H("_selcount")} selecionado(s)</span>{bulk}<button type="button" onClick="{H("_selclear")}" style="{_MINI}">Limpar seleção</button></sc-if>' if sel else '')
-            + (f'<button type="button" onClick="{H("_xtog")}" style="{_MINI} display: inline-flex; align-items: center; gap: 5px;">{seta_xtog(H("_xup"),H("_xdown"))}{H("_xlab")}</button>' if tree else '')
-            + (f'<button type="button" onClick="{H("_new")}" style="{_MINI}">+ {esc(add)}</button>' if add else '')
+            + (f'<sc-if value="{H("_hassel")}" hint-placeholder-val="{{{{false}}}}"><span role="status" style="font-size: 12px; font-weight: 700; color: {ACC};">{H("_selmsg")}</span>{bulk}<button type="button" onClick="{H("_selclear")}" style="{_MINI}">Limpar seleção</button></sc-if>' if sel else '')
+            + (f'<button type="button" onClick="{H("_xtog")}" class="g2xtog">{seta_xtog(H("_xup"),H("_xdown"))}{H("_xlab")}</button>' if tree else '')   # visão/apresentação: fim da barra, texto discreto (v3)
+            + (f'<sc-if value="{H("_semsel")}" hint-placeholder-val="{{{{true}}}}"><button type="button" onClick="{H("_new")}" style="{_MINI}">+ {esc(add)}</button></sc-if>' if add else '')   # com seleção, a região de ações dá lugar à do lote (DS-40)
             + '</div>')
     # filtro da coluna no padrão Excel/Google Sheets: menu flutuante sob o cabeçalho, ordenar, pesquisar, marcar valores e aplicar no OK
     FM=lambda s: _h(gid+"_fm."+s)
@@ -1133,7 +1194,7 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
             f'<sc-if value="{FM("semMarca")}" hint-placeholder-val="{{{{false}}}}"><div role="alert" style="padding: 0 8px; font-size: 12px; font-weight: 700; color: {RED};">Marque pelo menos um valor.</div></sc-if>'
             f'<div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 2px;"><button type="button" onClick="{FM("cancel")}" style="{_MINI}">Cancelar</button>'
             f'<button type="button" onClick="{FM("ok")}" disabled="{FM("semMarca")}" style="{_MINIP} {FM("okSt")}">OK</button></div></div></div></sc-if>')
-    hsel=f'<div role="columnheader" style="padding: 6px 4px 6px 12px; display: flex; align-items: center;"><button type="button" aria-label="Selecionar todas as linhas" title="Selecionar todas" onClick="{H("_selall")}" style="border: 1px solid {LINE}; background: {SURF}; width: 16px; height: 16px; border-radius: 4px; cursor: pointer; padding: 0;"></button></div>' if sel else ''
+    hsel=f'<div role="columnheader" style="padding: 6px 4px 6px 12px; display: flex; align-items: center;"><button type="button" aria-label="{H("_selallLab")}" title="{H("_selallLab")}" onClick="{H("_selall")}" style="border: 1px solid {LINE}; background: {SURF}; width: 16px; height: 16px; border-radius: 4px; cursor: pointer; padding: 0;"></button></div>' if sel else ''
     hdel=f'<div role="columnheader"></div>' if dele else ''
     head=(f'<div role="row" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; background: {BG}; border-radius: 0;">{hsel}'
           f'<sc-for list="{H("_head")}" as="h" hint-placeholder-count="{len(cols)}"><div role="columnheader" class="{_h("h.cls")}" style="{_h("h.st")} padding: 0 4px 0 8px;">'
@@ -1141,7 +1202,7 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
              f'<button type="button" class="g2fb" onClick="{_h("h.fmenu")}" aria-label="{_h("h.flabel")}" title="{_h("h.flabel")}" style="color: {_h("h.fcolor")};">▾{_h("h.fil")}</button>' if headtools else
              f'<span class="g2hb" style="cursor: default;">{_h("h.l")}</span>')
           + f'</div></sc-for>{hdel}</div>')
-    body=(f'<sc-for list="{H("_rows")}" as="r" hint-placeholder-count="3"><div role="row" class="{_h("r.cls")}" tabIndex="{_h("r.tab")}" onClick="{_h("r.open")}" onKeyDown="{_h("r.key")}" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; border-top: 1px solid {LINE}; align-items: center; font-size: 13px;">'
+    body=(f'<sc-for list="{H("_rows")}" as="r" hint-placeholder-count="3"><div role="row" data-rid="{_h("r.id")}" class="{_h("r.cls")}" tabIndex="{_h("r.tab")}" onClick="{_h("r.open")}" onKeyDown="{_h("r.key")}" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; border-top: 1px solid {LINE}; align-items: center; font-size: 13px;">'
           f'<sc-for list="{_h("r.cells")}" as="c" hint-placeholder-count="{n}"><div role="cell" class="{_h("c.cls")}" style="display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; min-width: 0; {_h("c.st")}">'
           f'<sc-if value="{_h("c.isSel")}" hint-placeholder-val="{{{{false}}}}"><input type="checkbox" aria-label="{_h("c.selLabel")}" checked="{_h("c.on")}" onChange="{_h("c.tog")}" style="width: 16px; height: 16px; accent-color: {ACC}; margin: 0;"></sc-if>'
           f'<sc-if value="{_h("c.hasCaret")}" hint-placeholder-val="{{{{false}}}}"><sc-if value="{_h("c.caretOk")}" hint-placeholder-val="{{{{false}}}}"><button type="button" class="g2car" aria-label="{_h("c.caretLabel")}" aria-expanded="{_h("c.caretExp")}" title="{_h("c.caretLabel")}" onClick="{_h("c.toggle")}">{_h("c.caretSym")}</button></sc-if><sc-if value="{_h("c.caretNo")}" hint-placeholder-val="{{{{false}}}}"><span style="width: 22px; flex-shrink: 0;"></span></sc-if></sc-if>'
@@ -1196,7 +1257,7 @@ def _g2form(gid):
             f'<sc-if value="{F("isTot")}" hint-placeholder-val="{{{{false}}}}"><div style="display: flex; flex-direction: column; gap: 4px;"><sc-for list="{F("items")}" as="it" hint-placeholder-count="3"><div style="display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid {LINE}; font-size: 13px;"><b>{_h("it.t")}</b><span style="color: {MUTED}; text-align: right;">{_h("it.v")}</span></div></sc-for></div></sc-if>'
             f'<sc-if value="{F("hasOrigins")}" hint-placeholder-val="{{{{false}}}}"><div style="font-size: 12px; font-weight: 700; color: {MUTED}; letter-spacing: .04em;">ORIGEM</div><sc-for list="{F("origins")}" as="og" hint-placeholder-count="1"><sc-if value="{_h("og.isLink")}" hint-placeholder-val="{{{{false}}}}"><a href="{_h("og.h")}" style="color: {ACC}; font-weight: 700; text-decoration: none; font-size: 13px;">{_h("og.t")} ›</a></sc-if><sc-if value="{_h("og.isTxt")}" hint-placeholder-val="{{{{true}}}}"><div style="font-size: 12.8px; padding: 5px 0; border-bottom: 1px solid {LINE};">{_h("og.t")}</div></sc-if></sc-for></sc-if>'
             f'<div style="flex-grow: 1;"></div>'
-            f'<sc-if value="{F("warn")}" hint-placeholder-val="{{{{false}}}}"><div role="alert" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 12.5px; font-weight: 700;">Há alterações não salvas.<div style="display: flex; gap: 8px;"><button type="button" onClick="{F("discard")}" style="{_MINI}">Descartar alterações</button><button type="button" onClick="{F("keep")}" style="{_MINIP}">Continuar editando</button></div></div></sc-if>'
+            f'<sc-if value="{F("warn")}" hint-placeholder-val="{{{{false}}}}"><div role="alert" class="saida" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 12.5px; font-weight: 700;">Há alterações não salvas.<div style="display: flex; gap: 8px;"><button type="button" onClick="{F("discard")}" style="{_MINI}">Descartar alterações</button><button type="button" onClick="{F("keep")}" style="{_MINIP}">Continuar editando</button></div></div></sc-if>'
             f'<div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};">'
             f'<sc-if value="{F("edit")}" hint-placeholder-val="{{{{true}}}}"><button type="button" onClick="{F("cancel")}" style="{BTN_ST(False,True)}">Cancelar</button><button type="button" onClick="{F("save")}" style="{BTN_ST(True,True)}">Salvar</button></sc-if>'
             f'<sc-if value="{F("ro")}" hint-placeholder-val="{{{{false}}}}"><button type="button" onClick="{F("discard")}" style="{BTN_ST(False,True)}">Fechar</button></sc-if></div>'
@@ -1362,4 +1423,4 @@ def engine():
     grids=json.dumps(GRIDS,ensure_ascii=False).replace('</','<\\/')
     nav=json.dumps(NAVSPEC,ensure_ascii=False)
     return 'const SPEC = '+spec+';\nconst GRIDS = '+grids+';\nconst NAV = '+nav+';\n'+G2LIB+'\n'+(EXTRAJS[0] or '')+'\n'+ENGINE_JS2
-G2_TOAST=f'<div role="status" style="position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(22px + env(safe-area-inset-bottom, 0px)); z-index: 70; background: {INK}; color: #fff; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 12px 32px -8px rgba(21,32,26,.4); max-width: min(560px, calc(100vw - 32px)); box-sizing: border-box; {{{{g2toastst}}}}">{{{{g2toast}}}}</div>'
+G2_TOAST=f'<div role="status" style="position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(22px + var(--acoes-h, 0px) + env(safe-area-inset-bottom, 0px)); z-index: 70; background: {INK}; color: #fff; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 12px 32px -8px rgba(21,32,26,.4); max-width: min(560px, calc(100vw - 32px)); box-sizing: border-box; {{{{g2toastst}}}}">{{{{g2toast}}}}</div>'

@@ -10,14 +10,14 @@ from est_lib import Est
 
 
 def parte1(E):
-    print('faixa:', E.J("[...document.querySelectorAll('nav[aria-label=\"Etapas do processo\"] button')].map(b=>b.innerText.replace(/\\s+/g,' ')).join(' | ')"))
-    E.ok(E.J("document.querySelector('[aria-current=step]').innerText").strip().endswith('Confira recebimentos'), 'abre na etapa 1')
+    print('faixa:', E.J("[...document.querySelectorAll('nav[aria-label=\"Seções do estoque\"] button')].map(b=>b.innerText.replace(/\\s+/g,' ')).join(' | ')"))
+    E.ok(E.J("document.querySelector('nav.etp-sec [aria-current=true]').innerText").strip().endswith('Confira recebimentos'), 'abre na seção Confira recebimentos')
     # ---- etapa 4 direta (sem sequência): KCl 60 t físico, 10 t bloqueado, 50 t disponíveis ----
-    E.clk('4 Confira saldos'); t = E.rowtxt('KCl 60%'); print('KCl:', t)
+    E.clk('Confira saldos'); t = E.rowtxt('KCl 60%'); print('KCl:', t)
     E.ok('60.000 kg' in t and '10.000 kg' in t and '50.000 kg' in t, 'etapa 4 abre direto; KCl físico 60 t, quarentena 10 t, disponível 50 t')
     E.shot('est_e4a.png')
     # ---- etapa 1: recebimento com quarentena e validade do lote (compras-estoque-07) ----
-    E.clk('1 Confira recebimentos'); print('k1:', E.k()); print('primário:', E.prim())
+    E.clk('Confira recebimentos'); print('k1:', E.k()); print('primário:', E.prim())
     print('abrir NF 4533:', E.row('NF 4533'), E.J("document.querySelector('aside[role=dialog] h2').innerText"))
     E.ok(E.J("!!document.querySelector('#fx_g_rec_val') && !document.querySelector('#fx_g_rec_val').readOnly"), 'semente: campo Validade do lote editável')
     E.setv('fx_g_rec_conf', '20000'); E.setv('fx_g_rec_apto', '17000'); E.setv('fx_g_rec_quar', '2000'); E.salvar()
@@ -38,7 +38,7 @@ def parte1(E):
     E.setv('fx_g_rec_nf', 'NF 4533'); E.setv('fx_g_rec_qtd_nf', '1'); E.setv('fx_g_rec_conf', '1'); E.setv('fx_g_rec_apto', '1'); E.setv('fx_g_rec_lote', 'X1'); E.salvar()
     e = E.err(); print('duplicado:', e); E.ok('duplicado' in e and 'validade' not in e, 'NF duplicada não cria segunda entrada (sem exigir validade de fertilizante)')
     E.clk('Cancelar', 'aside[role=dialog]'); E.clk('Descartar alterações', 'aside[role=dialog]')
-    E.clk('4 Confira saldos'); t = E.rowtxt('S58-0926'); print('lote novo:', t)
+    E.clk('Confira saldos'); t = E.rowtxt('S58-0926'); print('lote novo:', t)
     E.ok('20.000 kg' in t and '2.000 kg' in t and '18.000 kg' in t, 'saldo: lote S58-0926 20 t físico, 2 t quarentena, 18 t disponível')
     E.ok('03/2027' in t, 'lote novo entra com a validade informada (FEFO usa)')
     t = E.rowtxt('Semente de soja 58 W'); print('item:', t); E.ok('30.000 kg' in t, 'disponível do item 12 t + 18 t = 30 t')
@@ -46,11 +46,11 @@ def parte1(E):
     # ---- liberar quarentena do KCl no lote, após inspeção (DEMO-02: atualiza e não soma duas vezes) ----
     E.rowbtn('K26-11', 'Liberar após inspeção'); print('confirmar:', E.rowbtn('K26-11', 'Confirmar liberação')); print('toast:', E.toast())
     t = E.rowtxt('KCl 60%'); print('KCl após:', t); E.ok(t.count('60.000 kg') >= 2 and 'Liberar após inspeção' not in E.rowtxt('K26-11'), 'KCl disponível 60 t após a inspeção; botão some do lote')
-    E.clk('1 Confira recebimentos'); t = E.rowtxt('NF 4501'); E.ok('Quarentena liberada' in t, 'nota NF 4501 passa a Quarentena liberada', t)
+    E.clk('Confira recebimentos'); t = E.rowtxt('NF 4501'); E.ok('Quarentena liberada' in t, 'nota NF 4501 passa a Quarentena liberada', t)
 
 
 def parte2(E):
-    E.clk('2 Entregue por O.S.'); print('k2:', E.k())
+    E.clk('Entregue por O.S.'); print('k2:', E.k())
     print('REQ-038:', E.row('REQ-038'), E.aside()[:160])
     E.ok('aguarda a liberação' in E.aside() and E.J("document.querySelectorAll('aside[role=dialog] input:not([readonly]), aside[role=dialog] select:not([disabled])').length") == 0, 'REQ-038 bloqueada abre em consulta com motivo')
     E.fechar()
@@ -74,7 +74,7 @@ def parte2(E):
     t = E.rowtxt('REQ-035'); print('REQ-035 antes:', t); E.ok('15 L' in t, 'REQ-035: 175 − 95 − 65 em custódia = 15 L a entregar')
     E.shot('est_e2.png')
     # ---- etapa 3: devolução derruba a custódia ----
-    E.clk('3 Receba devoluções'); print('k3:', E.k())
+    E.clk('Receba devoluções'); print('k3:', E.k())
     t = E.rowtxt('REQ-031'); print('antes:', t); E.ok('Bloqueado' in t and '500 kg em custódia' in t, 'OS-0417 com encerramento bloqueado por 500 kg')
     E.ok('Sem custódia' in E.rowtxt('REQ-036'), 'REQ-036 (bloqueada, já entregue) continua visível em devoluções')
     print('primário:', E.clk('Receber devolução da REQ-031'))
@@ -85,18 +85,18 @@ def parte2(E):
     # compras-estoque-03 · devolver 30 L da REQ-035 reabre saldo para reentrega (175 − 95 − 35 = 45 L)
     E.row('REQ-035'); E.setv('fx_g_dev_qtd', '30'); E.salvar(); print('toast:', E.toast())
     E.shot('est_e3.png')
-    E.clk('2 Entregue por O.S.'); t = E.rowtxt('REQ-035'); print('REQ-035 depois:', t); E.ok('45 L' in t, 'após devolução de 30 L: 45 L a entregar')
+    E.clk('Entregue por O.S.'); t = E.rowtxt('REQ-035'); print('REQ-035 depois:', t); E.ok('45 L' in t, 'após devolução de 30 L: 45 L a entregar')
     E.row('REQ-035'); h = E.aside(); E.ok('A entregar: 45 L = 175 L solicitado − 95 L consumido − 35 L em custódia' in h, 'ajuda da quantidade mostra a conta', h[:300])
     E.setv('fx_g_ent_qtd', '46'); E.salvar(); e = E.err(); E.ok('Acima do saldo a entregar: 45 L' in e, '46 L acima do saldo: erro', e)
     E.setv('fx_g_ent_qtd', '45'); E.salvar(); print('toast:', E.toast())
     t = E.rowtxt('REQ-035'); print('REQ-035 reentrega:', t); E.ok('Entrega completa' in t, 'reentrega legítima de 45 L aceita')
-    E.clk('4 Confira saldos'); t = E.rowtxt('M26-07'); print('MAP lote:', t); E.ok('90.500 kg' in t, 'MAP físico 90.000 + 500 kg devolvidos')
+    E.clk('Confira saldos'); t = E.rowtxt('M26-07'); print('MAP lote:', t); E.ok('90.500 kg' in t, 'MAP físico 90.000 + 500 kg devolvidos')
     t = E.rowtxt('NPK 20-05-20'); print('NPK:', t); E.ok('0 kg' in t and '8.000 kg' in t, 'NPK disponível 0, 8 t em custódia (OS-0425)')
     t = E.rowtxt('F26-02'); print('Fungicida A lote:', t); E.ok('530 L' in t and '65 L' in t, 'Fungicida A: 545 + 30 devolvidos − 45 reentregues = 530 L; reserva da OS-0424 (65 L) preservada')
 
 
 def parte3(E):
-    E.clk('5 Faça contagens'); print('k5:', E.k())
+    E.clk('Faça contagens'); print('k5:', E.k())
     t = E.rowtxt('INV-2611'); print('a contar:', t); E.ok('oculto até contar' in t and '1.200' not in t, 'A contar: saldo do sistema oculto')
     print('primário:', E.clk('Contar INV-2611'))
     E.ok('1.200' not in E.aside(), 'formulário da contagem não mostra o saldo')
@@ -104,10 +104,10 @@ def parte3(E):
     E.ok(not E.aberto(), 'salvar sempre grava (sem exigir causa ao contar)')
     t = E.rowtxt('INV-2611'); print('linha:', t); E.ok('aguardando aprovação' in t and 'informe a causa' in t and '1.200 L' in t, 'diferença vira ajuste aguardando aprovação; pede causa')
     E.ok('Recontar' in t and 'Aprovar ajuste' in t, 'linha oferece Recontar e Aprovar ajuste')
-    E.clk('4 Confira saldos'); t = E.rowtxt('G26-14'); print('glifosato:', t); E.ok('1.200 L' in t, 'saldo NÃO muda sem aprovação')
+    E.clk('Confira saldos'); t = E.rowtxt('G26-14'); print('glifosato:', t); E.ok('1.200 L' in t, 'saldo NÃO muda sem aprovação')
     E.row('G26-14'); og = E.aside(); print('origem:', og[:300]); E.ok('aguardando aprovação' in og, 'origem mostra ajuste pendente não aplicado')
     E.fechar()
-    E.clk('5 Faça contagens'); print('aprovar sem causa:', E.rowbtn('INV-2611', 'Aprovar ajuste'), E.toast())
+    E.clk('Faça contagens'); print('aprovar sem causa:', E.rowbtn('INV-2611', 'Aprovar ajuste'), E.toast())
     E.ok('Informe a causa' in E.toast() and E.aberto(), 'aprovar sem causa pede a causa na contagem')
     E.ok(E.J("document.querySelector('#fx_g_cnt_cont').readOnly && document.querySelector('#fx_g_cnt_contador').disabled"), 'contagem salva: quantidade e contador travados')
     E.setv('fx_g_cnt_causa', '2 bombonas avariadas descartadas sem baixa'); E.salvar(); print('toast:', E.toast()); E.ok('Causa da diferença de INV-2611 registrada' in E.toast(), 'causa registrada sem mudar a contagem')
@@ -121,7 +121,7 @@ def parte3(E):
     E.row('INV-2611'); og = E.aside(); print('origem:', og[:400]); E.ok('Contagem anterior: 1.180 L por Paula (almoxarife) · diferença −20 L · causa: 2 bombonas' in og, 'contagem anterior fica na origem da linha')
     E.setv('fx_g_cnt_causa', 'Bombona com vazamento separada no descarte'); E.salvar()
     print('aprovar:', E.rowbtn('INV-2611', 'Aprovar ajuste'), E.toast())
-    E.clk('4 Confira saldos'); t = E.rowtxt('G26-14'); print('glifosato:', t); E.ok('1.185 L' in t, 'após aprovação o físico vai a 1.185 L')
+    E.clk('Confira saldos'); t = E.rowtxt('G26-14'); print('glifosato:', t); E.ok('1.185 L' in t, 'após aprovação o físico vai a 1.185 L')
     E.shot('est_e4b.png')
 
 

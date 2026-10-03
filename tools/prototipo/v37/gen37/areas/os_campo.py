@@ -37,12 +37,15 @@ def nf(n, d=0):
     return s
 
 
-def _page(fname, title, W, Hh, body, bg=BG):
+def _page(fname, title, W, Hh, body, bg=BG, movel=False):
+    # movel: App de campo (pendência de componentes 03/10) · largura do aparelho (meta viewport) e raiz móvel do engine (MOBILE_CSS):
+    # ocupa a janela, rola por dentro e respeita as áreas seguras; em 1280 px ou mais fica como a prancha de 390 px, igual à base
+    vp = '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">\n' if movel else ''
     html = f'''<!doctype html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<title>{esc(title)}</title>
+{vp}<title>{esc(title)}</title>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -53,6 +56,7 @@ def _page(fname, title, W, Hh, body, bg=BG):
 body{{margin:0;font-family:{FONT};color:{INK};background:{bg}}}
 a{{color:{ACC}}}
 {G2_CSS}
+{E.MOBILE_CSS if movel else ''}
 @media print{{ .noprint{{display:none !important}} body{{background:#fff}} }}
 </style>
 </helmet>
@@ -117,17 +121,17 @@ def app():
                 f'<sc-for list="{H("lista")}" as="l" hint-placeholder-count="3"><div style="display: flex; justify-content: space-between; {H("l.st")}"><span>{H("l.t")}</span><span>{H("l.s")}</span></div></sc-for>')
     opr = card('Operador · aplicação', kv('Vazão', f"{nf(EQ['vazao'])} L/ha") + kv('Velocidade', f"{nf(EQ['vel'])} km/h") + kv('Barra', f"{nf(EQ['barra'])} m")
                + kv('Bicos · pressão', EQ['bicos']) + kv('Área por carga', f"{nf(AREA_CARGA)} ha") + kv('Dose', ' · '.join(f"{x['p']} {nf(x['dose'],2)} {x['un']}/ha" for x in PRODS)))
-    body = (f'<div style="position: relative; width: 390px; height: 1030px; box-sizing: border-box; display: flex; flex-direction: column; background: {BG}; overflow: clip;">'
+    body = (f'<div data-mroot="1" style="position: relative; width: 100%; height: 1030px; --mw: 390px; box-sizing: border-box; display: flex; flex-direction: column; background: {BG}; overflow: clip;">'
             f'<header style="padding: 44px 20px 12px; background: {SURF}; border-bottom: 1px solid {LINE}; display: flex; flex-direction: column; gap: 5px;">'
             f'<div style="display: flex; align-items: center; gap: 8px;"><a href="OS.dc.html" aria-label="Voltar para Ordem de Serviço" style="text-decoration: none; font-size: 20px; color: {INK};">‹</a>'
             f'<h1 style="margin: 0; font-family: {DISP}; font-size: 19px;">{OS["id"]} · {OS["ativ"]}</h1></div>'
             f'<div style="font-size: 13px; color: {MUTED};">{OS["local"]} · {nf(OS["area"])} ha · {OS["janela"]}</div>'
             f'<div role="status" style="display: inline-flex; align-self: flex-start; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: {ACCS}; color: {ACC}; font-size: 12px; font-weight: 700;">● Disponível sem internet · {OS["versao"].split(" em ")[0]}</div></header>'
-            f'<main style="flex-grow: 1; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px;">{ret}{prep}{opr}'
+            f'<main style="flex-grow: 1; min-height: 0; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px;">{ret}{prep}{opr}'
             f'<a href="OS-0424-ficha.dc.html" style="{_MINI} text-decoration: none; text-align: center;">Abrir ficha para imprimir</a></main>'
             f'<div style="padding: 12px 16px 26px; background: {SURF}; border-top: 1px solid {LINE};"><button type="button" onClick="{H("prim")}" style="display: block; width: 100%; padding: 17px; border: 0; border-radius: 16px; background: {ACC}; color: #fff; font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer;">{H("prim_t")}</button></div></div>')
     HEIGHTS37[fname] = 1030
-    return _page(fname, "OS-0424 · ficha de campo", 390, 1030, body)
+    return _page(fname, "OS-0424 · ficha de campo", 390, 1030, body, movel=True)
 
 
 # ---------- ficha impressa (A4): mesma versão, validade e QR ----------

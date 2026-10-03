@@ -68,23 +68,28 @@ try:
         ERRL.extend(errs()); print('     erros JS (matriz):',ERRL[:3])
     elif MODO=='rotacao':
         # 4 · rotação com rascunho: IR-02 · painel "Programar período" com texto digitado; girar 360×800 → 800×360 → 360×800
-        abre('IR-02',360,800,3,True,rec=''); c.js("window.__marca=1; [...document.querySelectorAll('header button,main button')].find(b=>b.innerText.trim()==='Programar período').click()"); time.sleep(.5)
+        abre('IR-02',360,800,3,True,rec=''); c.js("window.__marca=1; [...document.querySelectorAll('header button,main button')].find(b=>b.innerText.trim()==='Programar irrigação').click()   // rótulo atual do comando da IR-02 (o teste procurava o da v41)"); time.sleep(.5)
         campo=c.js("(()=>{const i=[...document.querySelectorAll('aside[role=dialog] input,aside[role=dialog] textarea')].find(x=>x.getClientRects().length&&!x.readOnly&&!x.disabled&&(x.type==='text'||x.tagName==='TEXTAREA')); if(!i) return null; i.focus(); return i.id;})()")
-        c.call('Input.insertText',{'text':'rascunho girando 03/10'}); time.sleep(.3); m1=c.js(MEDE); shot('IR-02_360x800_rascunho')
+        esc=None
+        if campo: c.call('Input.insertText',{'text':'rascunho girando 03/10'})
+        else:   # o painel "Programar irrigação" da v43 não tem campo de texto livre: o rascunho é a escolha feita num seletor do painel
+            esc=c.js("(()=>{const s=[...document.querySelectorAll('aside[role=dialog] select')].find(x=>x.getClientRects().length&&!x.disabled&&x.options.length>1); if(!s) return null; const o=[...s.options].find(x=>x.value&&x.value!==s.value); if(!o) return null; const P=HTMLSelectElement.prototype; Object.getOwnPropertyDescriptor(P,'value').set.call(s,o.value); s.dispatchEvent(new Event('change',{bubbles:true})); if(!s.id) s.id='rot-sel'; s.focus(); return [s.id,o.value];})()")
+            campo=esc[0] if esc else None
+        time.sleep(.3); m1=c.js(MEDE); shot('IR-02_360x800_rascunho')
         c.aparelho(800,360,3,True); time.sleep(.4); m2=c.js(MEDE); shot('IR-02_800x360_rascunho'); c.aparelho(360,800,3,True); time.sleep(.4)
         fim=c.js(f"[(document.getElementById({json.dumps(campo)})||{{value:null}}).value, window.__marca===1, !!document.querySelector('aside[role=dialog]'), document.activeElement&&document.activeElement.id]")
-        chk('4 rotação com rascunho (IR-02) · painel continua aberto com o texto, sem recarregar; Fechar e Salvar alcançáveis em pé e deitado; foco no campo',
-            bool(campo) and fim[0] and 'rascunho girando 03/10' in fim[0] and fim[1] and fim[2] and fim[3]==campo and m1.get('painelFechar') and m1.get('painelPrimOk') and m2.get('painelFechar') and m2.get('painelPrimOk') and not m2.get('painelFora'),
+        chk('4 rotação com rascunho (IR-02 · Programar irrigação) · painel continua aberto com o texto/escolha feita, sem recarregar; Fechar e Salvar alcançáveis em pé e deitado; foco no campo',
+            bool(campo) and fim[0] and ((fim[0]==esc[1]) if esc else ('rascunho girando 03/10' in fim[0])) and fim[1] and fim[2] and fim[3]==campo and m1.get('painelFechar') and m1.get('painelPrimOk') and m2.get('painelFechar') and m2.get('painelPrimOk') and not m2.get('painelFora'),
             [campo,fim,{k:m1.get(k) for k in ('painel','painelFechar','painelPrim','painelPrimOk')},{k:m2.get(k) for k in ('painel','painelFechar','painelPrim','painelPrimOk')}])
         # 5 · rotação com filtro e etapa: O.S. safra escolhida; CMP etapa 2 e foco na etapa atual (faixa completa → compacta)
         abre('OS',768,1024,2,True); c.js("(()=>{const s=document.querySelector('select[aria-label=\"Filtrar por safra\"]'); s.value='2026/27'; s.dispatchEvent(new Event('change',{bubbles:true}));})()"); time.sleep(.4)
         c.aparelho(1024,768,2,True); time.sleep(.4); s1=c.js("document.querySelector('select[aria-label=\"Filtrar por safra\"]').value"); c.aparelho(768,1024,2,True); time.sleep(.3); s2=c.js("document.querySelector('select[aria-label=\"Filtrar por safra\"]').value")
         abre('CMP',1440,900); c.js(f"[...document.querySelectorAll('main button,main a')].find(b=>{N}(b.innerText)==='Abrir compra').click()"); time.sleep(.5)
-        c.js("document.querySelector('.etp-itens [aria-current=step]').focus()"); f1=c.js("document.activeElement.innerText.replace(/\\s+/g,' ').trim()")
-        c.aparelho(390,844,3,True); time.sleep(.6); f2=c.js("[document.activeElement.className, (document.querySelector('.etp-atual:not([style*=none])')||{innerText:''}).innerText.replace(/\\s+/g,' ').trim()]"); shot('CMP_390_foco_apos_girar')
-        c.aparelho(1440,900); time.sleep(.4); f3=c.js("(document.querySelector('.etp-itens [aria-current=step]')||{innerText:''}).innerText.replace(/\\s+/g,' ').trim()")
-        chk('5 rotação/redimensionamento · safra escolhida na O.S. continua; CMP mantém a etapa 2 e o foco passa da etapa (faixa completa) ao rótulo "Etapa 2 de 6" (faixa compacta)',
-            s1=='2026/27' and s2=='2026/27' and f1.startswith('2 ') and f2[0]=='etp-chk' and f2[1].startswith('Etapa 2 de 6') and f3.startswith('2 '), [s1,s2,f1,f2,f3])
+        c.js("document.querySelector('[data-acoes] [data-acao=avancar]').focus()"); f1=c.js("[document.activeElement.innerText.replace(/\\s+/g,' ').trim(), (document.querySelector('.etp-itens [aria-current=step]')||{innerText:''}).innerText.replace(/\\s+/g,' ').trim()]")
+        c.aparelho(390,844,3,True); time.sleep(.6); f2=c.js("[document.activeElement.innerText.replace(/\\s+/g,' ').trim(), (document.querySelector('.etp-atual:not([style*=none])')||{innerText:''}).innerText.replace(/\\s+/g,' ').trim()]"); shot('CMP_390_foco_apos_girar')
+        c.aparelho(1440,900); time.sleep(.4); f3=c.js("[document.activeElement.innerText.replace(/\\s+/g,' ').trim(), (document.querySelector('.etp-itens [aria-current=step]')||{innerText:''}).innerText.replace(/\\s+/g,' ').trim()]")
+        chk('5 rotação/redimensionamento · safra escolhida na O.S. continua; CMP mantém a etapa 2 e o foco no avanço da área de ações ("Solicitar cotações ›") em 1440 → 390 → 1440, com "Etapa 2 de 6" na faixa compacta (UX-ACAO-UNICA)',
+            s1=='2026/27' and s2=='2026/27' and f1[0].startswith('Solicitar cotações') and f1[1].startswith('2 ') and f2[0].startswith('Solicitar cotações') and f2[1].startswith('Etapa 2 de 6') and f3[0].startswith('Solicitar cotações') and f3[1].startswith('2 '), [s1,s2,f1,f2,f3])
         # 6 · O.S.: painel da ordem no celular em pé e deitado (largura, fechar e ação alcançáveis)
         res={}
         for tag,w,h,e,t in (MAT[0],MAT[1],MAT[6]):
@@ -138,9 +143,9 @@ try:
         c.js(f"[...document.querySelectorAll('main .g2card')].find(b=>b.getAttribute('aria-label')==={json.dumps(nome)}).focus()")
         c.tecla('Enter','Enter',13,text='\r'); time.sleep(.5)
         st2=c.js("(document.querySelector('.etp-itens [aria-current=step]')||{innerText:''}).innerText.replace(/\\s+/g,' ').trim()"); toasts=c.js("[...new Set(window.__toasts)]")
-        c.js("document.querySelector('[aria-label=\"Etapa anterior\"]').click()"); time.sleep(.5)
+        c.js("document.querySelector('[data-acoes] [data-acao=voltar]').click()"); time.sleep(.5)
         volta=c.js(f"(()=>{{const f=document.querySelector('[aria-label=\"Filtrar planos por cultura\"] button[aria-pressed=true]'); const cs=[...document.querySelectorAll('main .g2card')]; const a=cs.find(b=>b.getAttribute('aria-current')==='true'); return [f?{N}(f.innerText):'', a?a.getAttribute('aria-label'):'', a?getComputedStyle(a).borderTopColor:'', a?getComputedStyle(a,'::after').content:'', cs.length];}})()"); shot('PA_1440_volta_selecionado')
-        chk('11 PA teclado · Tab chega ao cartão com contorno de 2 px não cortado; pressionado escurece; Enter abre o plano uma vez (etapa 2); ‹ volta com filtro Soja, cartão aberto marcado (borda verde + "Último aberto")',
+        chk('11 PA teclado · Tab chega ao cartão com contorno de 2 px não cortado; pressionado escurece; Enter abre o plano uma vez (etapa 2); "‹ Biblioteca de planos" (área de ações) volta com filtro Soja, cartão aberto marcado (borda verde + "Último aberto")',
             k<30 and ef[0] and ef[1]=='solid' and ef[2]=='2px' and ef[4] and ea[0]=='rgb(228, 243, 233)' and st2.startswith('2 ') and len([t for t in toasts if t.startswith('Plano aberto')])==1
             and volta[0].startswith('Soja') and volta[1]==nome and volta[2]=='rgb(30, 122, 76)' and 'Último aberto' in volta[3] and volta[4]==2, [k,ef,ea,st2,toasts,volta])
         # 12 · toque (sem hover, 390 px): passar o "dedo" não pinta hover; rolar até o último cartão, um toque abre o plano;
@@ -151,9 +156,9 @@ try:
         rol="[...document.querySelectorAll('main[data-scroll],.ml-tog+div')].map(e=>Math.round(e.scrollTop))"
         antes=c.js(rol); nome=c.js(f"{ULT}.getAttribute('aria-label')")
         c.toque(*xy); st=c.js("(document.querySelector('.etp-atual')||{innerText:''}).innerText.replace(/\\s+/g,' ').trim()"); shot('PA_390_toque_aberto')
-        c.js("document.querySelector('[aria-label=\"Etapa anterior\"]').click()"); time.sleep(.5)
+        c.js("document.querySelector('[data-acoes] [data-acao=voltar]').click()"); time.sleep(.5)
         depois=c.js(rol); foco=c.js("document.activeElement&&document.activeElement.getAttribute('aria-label')"); shot('PA_390_volta_posicao')
-        chk('12 toque sem hover (390 px) · sem pintura de hover; um toque no último cartão abre o plano; ‹ volta à mesma posição de rolagem com o foco no cartão aberto',
+        chk('12 toque sem hover (390 px) · sem pintura de hover; um toque no último cartão abre o plano; "‹ Biblioteca de planos" volta à mesma posição de rolagem com o foco no cartão aberto',
             not hv and eh[0]=='rgb(255, 255, 255)' and st.startswith('Etapa 2 de 3') and max(antes)>200 and all(abs(a-b)<=2 for a,b in zip(antes,depois)) and foco==nome, [hv,eh,st,antes,depois,foco,nome])
         # 13 · linha da grade com controle interno (CD-06): Enter/Espaço no expandir só expande/recolhe; Enter na linha abre o detalhe uma vez
         abre('CD-06',1440,900)
@@ -173,7 +178,7 @@ try:
         CHP=f"[...document.querySelectorAll('[aria-label=\"Filtrar planos por cultura\"] button')].find(b=>{N}(b.innerText).startsWith('Milho'))"
         mouse_em(CHP); fam['chip hover']=estilo(CHP,['box-shadow','filter'])
         STP="document.querySelectorAll('.etp-itens>*')[1]"
-        mouse_em(STP); fam['etapa hover']=estilo(STP,['filter'])[0]
+        mouse_em(STP); fam['etapa inerte']=estilo(STP,['filter','cursor','box-shadow'])   # UX-ACAO-UNICA: a faixa só informa
         INE="[...document.querySelectorAll('main div')].find(d=>/^soja\s*·/i.test(d.textContent.trim()))"; mouse_em(INE); fam['texto inerte']=estilo(INE,['cursor','filter','box-shadow'])
         abre('SAF',1440,900); BUS="document.querySelector('main input[type=search]')"
         mouse_em(BUS); fam['busca hover']=estilo(f"{BUS}.closest('label')",['box-shadow'])[0]
@@ -186,9 +191,9 @@ try:
         mouse_em(TB); fam['trilha hover']=estilo(TB,['box-shadow'])[0]
         print('     (informativo) famílias:',fam)
         fam_ok=(fam['texto inerte'][0]!='pointer' and fam['texto inerte'][1]=='none' and fam['texto inerte'][2]=='none'
-                and 'brightness(0.95)' in fam['botão primário hover'] and '255, 255, 255' in fam['menu hover'] and 'inset' in fam['chip hover'][0] and 'brightness' in fam['etapa hover']
+                and 'brightness(0.95)' in fam['botão primário hover'] and '255, 255, 255' in fam['menu hover'] and 'inset' in fam['chip hover'][0] and fam['etapa inerte'][0]=='none' and fam['etapa inerte'][1]!='pointer' and fam['etapa inerte'][2]=='none'
                 and 'rgb(157, 191, 170)' in fam['busca hover'] and fam['busca foco'][0]=='solid' and fam['talhão foco'][0].replace(' ','').replace('px','').startswith('7,4') and 'inset' in fam['trilha hover'])
-        chk('14 famílias · botão, menu, chip, etapa, busca (hover e foco), talhão do mapa (foco tracejado) e trilha do mapa respondem; título de seção (inerte) sem cursor de ação nem hover', fam_ok, fam)
+        chk('14 famílias · botão, menu, chip, busca (hover e foco), talhão do mapa (foco tracejado) e trilha do mapa respondem; título de seção e etapa da faixa (inertes) sem cursor de ação nem hover', fam_ok, fam)
         # 15 · indisponível: OK do filtro sem valor marcado fica diferente, cursor de proibido e motivo em texto (role=alert)
         abre('OS',1440,900); c.js("document.querySelector('.g2fb').click()"); time.sleep(.3)
         c.js("[...document.querySelectorAll('[role=dialog] button')].find(b=>b.innerText.trim()==='Limpar'||b.innerText.trim()==='Nenhum'||/desmarcar/i.test(b.innerText))?.click()"); time.sleep(.25)
@@ -204,11 +209,10 @@ try:
         c.js("[...document.querySelectorAll('.etp-chk')].find(x=>x.getClientRects().length).focus()"); c.tecla('Enter','Enter',13,text='\r'); time.sleep(.25)
         f1=c.js("[...document.querySelectorAll('.etp-chk')].find(x=>x.getClientRects().length).checked"); c.tecla('Escape','Escape',27); time.sleep(.25)
         f2=c.js("(()=>{const k=[...document.querySelectorAll('.etp-chk')].find(x=>x.getClientRects().length); return [k.checked, document.activeElement===k];})()")
-        c.tecla('Enter','Enter',13,text='\r'); time.sleep(.25); c.tab()
-        while not c.js("document.activeElement&&document.activeElement.innerText&&document.activeElement.innerText.trim().startsWith('3')") and c.js("!!(document.activeElement&&document.activeElement.closest('.etp-itens'))"): c.tab()
-        c.tecla('Enter','Enter',13,text='\r'); time.sleep(.5)
-        f3=c.js("(()=>{const k=[...document.querySelectorAll('.etp-chk')].find(x=>x.getClientRects().length); return [document.activeElement===k, (document.querySelector('.etp-atual:not([style*=none])')||{innerText:''}).innerText.replace(/\\s+/g,' ').trim().slice(0,30)];})()"); shot('CMP_390_folha_teclado')
-        chk('17 folha de etapas pelo teclado · Enter abre, Esc fecha e o foco fica no rótulo; escolher a etapa 3 pelo teclado leva a ela e devolve o foco ao rótulo', f1 and f2==[False,True] and f3[0] and f3[1].startswith('Etapa 3 de 6'), [f1,f2,f3])
+        c.tecla('Enter','Enter',13,text='\r'); time.sleep(.25); shot('CMP_390_folha_teclado'); c.tab()
+        dentro=c.js("!!(document.activeElement&&document.activeElement.closest('.etp-itens'))"); c.tecla('Escape','Escape',27); time.sleep(.25)
+        f3=c.js("(()=>{const k=[...document.querySelectorAll('.etp-chk')].find(x=>x.getClientRects().length); return [k.checked, (document.querySelector('.etp-atual:not([style*=none])')||{innerText:''}).innerText.replace(/\\s+/g,' ').trim().slice(0,30), document.querySelectorAll('.etp-itens button,.etp-itens a,.etp-itens [tabindex]').length];})()")
+        chk('17 folha de etapas pelo teclado · Enter abre, Esc fecha e o foco fica no rótulo; a lista só informa: o Tab não entra nela, nenhum item é botão/link e a etapa continua a 2 (UX-ACAO-UNICA)', f1 and f2==[False,True] and not dentro and f3[0]==False and f3[1].startswith('Etapa 2 de 6') and f3[2]==0, [f1,f2,dentro,f3])
         # 18 · menu sobreposto (390 px): Esc fecha e devolve o foco ao botão do menu
         abre('CMP',390,844,3,False,rec=''); c.js("document.querySelector('.ml-tog').click()"); time.sleep(.3); w1=c.js("Math.round(document.querySelector('.menu-lat').getBoundingClientRect().width)")
         c.js("document.querySelector('.menu-lat a').focus()"); c.tecla('Escape','Escape',27); time.sleep(.35)

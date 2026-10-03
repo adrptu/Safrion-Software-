@@ -36,8 +36,8 @@ try:
     # ---------- faixa de etapas (contadores do estado) ----------
     for t, cur in [('IR-01', 1), ('IR-03det', 3), ('IR-04', 4)]:
         goto(f'{t}.dc.html')
-        nav = J("[...document.querySelectorAll('nav[aria-label=\"Etapas do processo\"] a')].filter(a=>!a.getAttribute('aria-label')).map(a=>a.getAttribute('href')+'|'+(a.getAttribute('aria-current')||'')+'|'+a.innerText.replace(/\\s+/g,' '))")
-        chk(f'{t}: faixa com 4 etapas, atual = {cur}, contadores do estado', len(nav) == 4 and nav[cur - 1].split('|')[1] == 'step' and [x.split('|')[0] for x in nav] == ['IR-01.dc.html', 'IR-02.dc.html', 'IR-03.dc.html', 'IR-04.dc.html']
+        nav = J("[...document.querySelectorAll('nav[aria-label=\"Telas da irrigação\"] a')].filter(a=>!a.getAttribute('aria-label')).map(a=>a.getAttribute('href')+'|'+(a.getAttribute('aria-current')||'')+'|'+a.innerText.replace(/\\s+/g,' '))")
+        chk(f'{t}: telas da irrigação (4, sem setas), atual = {cur}, pendências do estado', len(nav) == 4 and nav[cur - 1].split('|')[1] == 'page' and [x.split('|')[0] for x in nav] == ['IR-01.dc.html', 'IR-02.dc.html', 'IR-03.dc.html', 'IR-04.dc.html']
             and '1 conflito · 1 janela a definir' in nav[1] and '1 a conferir' in nav[2] and '1 suspeita · 1 sem dado' in nav[3], nav)
     # ---------- IR-01 ----------
     goto('IR-01.dc.html'); b = J("document.body.innerText")

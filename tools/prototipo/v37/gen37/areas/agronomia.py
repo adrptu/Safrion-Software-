@@ -1745,7 +1745,7 @@ def _agf_pos(fname):
     p=_os.path.join(E.P,fname); s=open(p,encoding='utf-8').read()
     alvo='value="{{'+AGF_ID+'_q}}"'
     pat=re.compile(r'min-width: 160px;(">(?:(?!<label).)*?<input type="search" aria-label=")Buscar nesta tabela(" placeholder=")Buscar…("\s*'+re.escape(alvo)+')',re.S)
-    s,n=pat.subn(r'min-width: 380px;" class="agf-busca\1Buscar produto, registro, ingrediente, titular, cultura ou praga\2Buscar produto, ingrediente, titular, cultura ou praga…\3',s)
+    s,n=pat.subn(r'min-width: min(380px, 100%);" class="agf-busca\1Buscar produto, registro, ingrediente, titular, cultura ou praga\2Buscar produto, ingrediente, titular, cultura ou praga…\3',s)
     assert n==1, 'busca da grade não encontrada em '+fname
     assert s.count('</style>')>=1; s=s.replace('</style>','.agf-busca:focus-within{outline:2px solid #1E7A4C;outline-offset:1px}</style>',1)
     old=_chip(H('agf_stT'),'gray'); assert s.count(old)==1, 'selo do cabeçalho não encontrado em '+fname

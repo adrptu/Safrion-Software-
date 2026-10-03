@@ -45,7 +45,8 @@ try:
         time.sleep(1.0)
     def nav(t,pg): col(); clk(t,w=.2); esperar(pg)
     trail=lambda: (J("(document.body.innerText.match(/DOCUMENTOS DA COMPRA[^\\n]*(\\n[^\\n]+){0,6}/)||[''])[0]") or '').replace('\n',' ')
-    def etapa(i): J(f"document.querySelectorAll('nav[aria-label=\"Etapas do processo\"] button')[{i-1}].click()"); time.sleep(.5)
+    from comp_lib import IR_ETAPA
+    def etapa(i): J(f"({IR_ETAPA})({i})"); time.sleep(.5)   # a faixa só informa: anda pela área de ações (UX-ACAO-UNICA-20261003)
     def foto(nome): c.shot(os.path.join(OUT,f'q_saf-cmp_{nome}.png'))
     def ls(): return json.loads(J("localStorage.getItem('talhao-os-compras-v1')||'null'") or 'null')
     c.size(1440,1000); ir('SAF.dc.html'); J("localStorage.clear()"); ir('SAF.dc.html')
@@ -67,7 +68,7 @@ try:
         and len(s.get('itens') or {})==8 and s.get('estado')=='Enviada · a cotar' and (s.get('origem') or {}).get('h')=='SAF.dc.html#saf=S27SF&etapa=6' and abs((s.get('total') or 0)-1098502.5)<0.01,
         {k:s.get(k) for k in ['id','safra','nome','faz','estado','origem','total']})
     clk('Enviar para cotação') if J("[...document.querySelectorAll('button')].some(b=>b.offsetParent&&b.innerText.trim()==='Enviar para cotação')") else None
-    chk('7 SAF: tudo enviado, a ação principal vira "Abrir Compra de insumos ›" (sem duplicar)',J("[...document.querySelectorAll('button')].filter(b=>b.offsetParent).some(b=>b.innerText.trim()==='Abrir Compra de insumos ›')") and len((ls() or {}).get('sols',{}))==1)
+    chk('7 SAF: tudo enviado, a ação principal vira "Abrir Compra de insumos ›" (sem duplicar)',J("[...document.querySelectorAll('button,a')].filter(b=>b.offsetParent).some(b=>b.innerText.trim()==='Abrir Compra de insumos ›')") and len((ls() or {}).get('sols',{}))==1)
     foto('2_saf_enviado')
     # ---------------- Compra de insumos · a mesma solicitação ----------------
     nav('Abrir Compra de insumos ›','CMP.dc.html')

@@ -76,29 +76,53 @@ def navbar(fid,fname=None):
         out.append(f'<sc-if value="{{{{nav{k}_open}}}}" hint-placeholder-val="{{{{{"true" if on else "false"}}}}}"><div class="ml-sub" style="display: flex; flex-direction: column; gap: 1px; margin-bottom: 4px;">{subs}</div></sc-if>')
     return ''.join(out)
 
-# voltar/avançar do processo: setas ‹ › juntas à direita da faixa de etapas (pedido do Adrianus, 01/10/2026);
-# as etapas continuam clicáveis; cada seta tem lugar fixo para a faixa não pular na primeira e na última etapa
-_SETA=f'width: 28px; height: 28px; border-radius: 999px; border: 1px solid {LINE}; background: #fff; color: {INK}; font-family: inherit; font-size: 17px; font-weight: 700; line-height: 1; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; padding: 0 0 2px;'
-# Faixa estreita (celular, quadro do site, zoom de 200 %; revisão QUALIDADE-ARTEFATO-20261003 item 3): abaixo do limite de largura da
-# própria faixa, ela mostra só "Etapa i de n · Nome" com ‹ ›, e a lista completa abre sob demanda (caixa nativa: toque e teclado, sem JS).
-# Limite por número de etapas, medido no Chrome (soma das etapas em até 2 linhas + setas); acima dele nada muda.
+# ---------------- progresso do processo e telas do módulo (UX-ACAO-UNICA-20261003 · DS-31 v2 · DS-33 §74.5.7.1) ----------------
+# Pedido do Adrianus (03/10/2026): no Planejar safra, clicar nas etapas, usar as setas e clicar em "Definir rendimentos" mudavam a
+# etapa por três caminhos; "com tantas opções o usuário fica perdido". Esta decisão REVOGA as setas ‹ › e a lista de etapas
+# navegável de 01/10 (QUALIDADE…/RESPONSIVIDADE): não há os dois padrões. Dois componentes, cada um com uma função:
+# 1) indicador de progresso do processo guiado (SAF, CMP, PA, PM): lista ordenada que só informa atual/concluída/pendente/impedida,
+#    com a palavra do estado para leitor de tela (cor nunca sozinha); sem clique, sem handler, sem hover de ação e sem parada de Tab.
+#    Avanço e retorno ficam na área de ações ao fim do conteúdo (engine.area_acoes + g2acoes). No estreito: "Etapa i de n · Nome";
+#    a lista completa abre sob demanda e continua só informando (tocar em qualquer lugar fecha).
+# 2) telas irmãs de um módulo de trabalho paralelo (Estoque, Irrigação, Manutenção e módulos ocultos): é navegação (seções/telas,
+#    em qualquer ordem), não progresso; rotulada como tal, sem número de etapa e sem setas, com a pendência de cada tela escrita.
+#    É o único caminho entre as telas irmãs (as do menu também estão no menu lateral, que é o nível Menu do master-detail).
 _ETP_LIM={3:520,4:640,5:740}
 def _etp_lim(n): return _ETP_LIM.get(n,520 if n<3 else 900)
-def _etp_abre(i,n,nome):
-    """Etapa atual em texto + caixa que abre a lista completa (só aparece na faixa estreita); o fundo escurecido fecha ao toque."""
-    t=f'Etapa {i} de {n} · {esc(nome)}' if i else f'{n} etapas'
-    return (f'<input type="checkbox" id="etp-c{i}" class="etp-chk" aria-controls="etp-lista" aria-label="{t} · mostrar todas as etapas">'
-            f'<label for="etp-c{i}" class="etp-atual" title="Mostrar todas as etapas"><span style="flex-grow: 1; min-width: 0;">{t}</span><span class="etp-seta" aria-hidden="true">▾</span></label>'
+def _etp_abre(i,n,nome,secao=False):
+    """Rótulo da faixa estreita + caixa que abre a lista completa (só aparece na faixa estreita); o fundo escurecido fecha ao toque.
+    Progresso: "Etapa i de n · Nome". Telas do módulo: o nome da tela atual (não é etapa)."""
+    if secao:
+        t=esc(nome); aria=f'Tela atual: {esc(nome)} · mostrar todas as telas'; dica='Mostrar todas as telas'
+    else:
+        t=f'Etapa {i} de {n} · {esc(nome)}' if i else f'{n} etapas'; aria=f'{t} · mostrar todas as etapas'; dica='Mostrar todas as etapas'
+    return (f'<input type="checkbox" id="etp-c{i}" class="etp-chk" aria-controls="etp-lista" aria-label="{aria}">'
+            f'<label for="etp-c{i}" class="etp-atual" title="{dica}"><span style="flex-grow: 1; min-width: 0;">{t}</span><span class="etp-seta" aria-hidden="true">▾</span></label>'
             f'<label for="etp-c{i}" class="etp-fundo" aria-hidden="true"></label>')
-def _com_setas(itens,n,ant='',prox='',abre=''):
-    # cada etapa ocupa o tamanho do seu texto (sem colunas iguais); as duas setas ficam juntas à direita, cada uma na sua vaga fixa
-    vaga=lambda x: f'<span class="etp-vaga" style="width: 30px; flex-shrink: 0; display: inline-flex; justify-content: center;">{x}</span>'
+def _etp_lista(abre,itens,tag='div',attrs=''):
     return (f'<div style="display: flex; align-items: center; gap: 6px;">{abre}'
-            f'<div id="etp-lista" class="etp-itens" style="flex-grow: 1; min-width: 0; display: flex; align-items: stretch; gap: 4px;">{itens}</div>'
-            f'<span style="display: inline-flex; align-items: center; gap: 2px; flex-shrink: 0; padding-left: 6px;">{vaga(ant)}{vaga(prox)}</span></div>')
-def _etp_nav(label,n,corpo):
-    return (f'<nav aria-label="{esc(label)}" class="etp etp-l{_etp_lim(n)}" style="position: sticky; top: 0; z-index: 30; background: {SURF}; border-bottom: 1px solid {LINE}; box-shadow: 0 6px 12px -10px rgba(21,32,26,.25); padding: 6px 24px;">'
-            + corpo + '</nav>')   # sem o rótulo visível "Etapas do processo" (01/10, pedido do proprietário); fica no aria-label
+            f'<{tag} id="etp-lista" class="etp-itens"{attrs} style="flex-grow: 1; min-width: 0; display: flex; align-items: stretch; gap: 4px; margin: 0; padding: 0; list-style: none;">{itens}</{tag}></div>')
+_ETP_CX=f'position: sticky; top: 0; z-index: 30; background: {SURF}; border-bottom: 1px solid {LINE}; box-shadow: 0 6px 12px -10px rgba(21,32,26,.25); padding: 6px 24px;'
+def _etp_progresso(n,corpo):
+    # sem nav: indicador não é navegação (DS-31 v2); o nome acessível "Etapas do processo" fica na lista ordenada
+    return f'<div class="etp etp-ind etp-l{_etp_lim(n)}" style="{_ETP_CX}">{corpo}</div>'
+def _etp_telas(label,n,corpo):
+    return f'<nav aria-label="{esc(label)}" class="etp etp-sec etp-l{_etp_lim(n)}" style="{_ETP_CX}">{corpo}</nav>'
+_SEC_IT=('display: flex; flex-direction: column; justify-content: center; gap: 1px; padding: 6px 10px; border-radius: 10px; text-decoration: none; color: '+INK+'; '
+         'font-family: inherit; font-size: 12.5px; line-height: 1.2; border: 0; cursor: pointer; text-align: left; min-width: 0; ')
+def secoes_nav(itens,n,i,nome,label):
+    """Telas irmãs de um módulo (links ou botões já montados): navegação sem número de etapa e sem setas."""
+    return _etp_telas(label,n,_etp_lista(_etp_abre(i,n,nome,secao=True),itens))
+def secao_item(t,cur,href=None,fn=None,why='',why_hole=None):
+    """Um item da navegação de telas: atual em destaque tonal com traço inferior e aria-current; pendência da tela escrita."""
+    st=_SEC_IT+(f'background: {ACCS}; box-shadow: inset 0 -2px 0 {ACC}; font-weight: 800;' if cur else 'background: transparent; font-weight: 600;')
+    w=(f'<sc-if value="{{{{{why_hole}_has}}}}" hint-placeholder-val="{{{{false}}}}"><span style="font-size: 11px; font-weight: 700; color: {RED};">{{{{{why_hole}_why}}}}</span></sc-if>' if why_hole
+       else (f'<span style="font-size: 11px; font-weight: 700; color: {RED};">{esc(why)}</span>' if why else ''))
+    inner=f'<span>{esc(t)}</span>{w}'
+    cur_at=' aria-current="page"' if cur else ''
+    if fn: return f'<button type="button" onClick="{{{{{fn}}}}}"{cur_at} style="{st}">{inner}</button>'
+    return f'<a href="{href or "#"}"{cur_at} style="{st}">{inner}</a>'
+
 # Casca em tela estreita ou baixa (só CSS; em 1280 px ou mais de largura e mais de 560 px de altura nada muda, salvo a linha do
 # título quebrar quando não cabe): título e comando principal nunca saem da tela; menu aberto passa por cima do conteúdo;
 # conteúdo largo demais rola na horizontal em vez de ser cortado; a lista da tela nunca fica espremida.
@@ -137,7 +161,7 @@ _CSS_ESTREITA=(f'{_RAIZ}>div:nth-child(2){{flex-wrap:wrap}}'          # linha do
     f'{_RAIZ}>div>span{{max-width:100%!important;min-width:0}}'
     f'{_RAIZ}>div:nth-child(2)>span[style*="nowrap"],{_RAIZ}>div:nth-child(2)>span>span[style*="nowrap"]{{white-space:normal!important;max-width:100%;box-sizing:border-box}}'   # situação longa quebra em vez de sair da tela
     f'main[data-scroll]{{padding:12px 14px 18px!important;overflow-x:auto!important}}'
-    f'nav.etp{{padding:6px 10px!important}}'
+    f'.etp{{padding:6px 10px!important}}'
     + ','.join(_TIT) + '{flex-wrap:wrap}'                              # título do bloco e sua ação: a ação desce em vez de cobrir o título
     + ','.join(f'{s} :is(label,select)' for s in _TIT) + '{min-width:0;max-width:100%}'
     + f'{_KPI}{{flex-wrap:wrap}}{_KPI}>*{{flex-basis:90px}}{_KPI}>*>div:nth-child(2)>span{{display:block;line-height:1.35;margin-top:4px}}'          # dois indicadores por linha; a lista da tela sobe
@@ -146,49 +170,36 @@ _CSS_ESTREITA=(f'{_RAIZ}>div:nth-child(2){{flex-wrap:wrap}}'          # linha do
     # tela baixa (celular deitado, zoom de 200 %): cabeçalho, faixa e conteúdo rolam juntos; a faixa de etapas fica presa no alto
     '@media (max-height: 560px){.ml-tog+div{overflow-y:auto;scroll-padding-top:calc(var(--etp-h,0px) + 8px)}main[data-scroll]{flex:1 0 auto!important}}')   # foco não fica sob a faixa presa (altura medida pelo g2lib)
 def _etp_css():
-    """Regras da faixa de etapas: base (desktop igual) + modo estreito por container query, um bloco por limite.
-    No modo estreito a lista abre como folha presa à base da janela (cabe em qualquer altura), com fundo que fecha ao toque;
-    tocar na etapa atual também fecha. Alvos de toque de 44 px (PRD, ações de campo)."""
+    """Regras das duas faixas: base (desktop igual) + modo estreito por container query, um bloco por limite.
+    No modo estreito a lista abre como folha presa à base da janela (cabe em qualquer altura), com fundo que fecha ao toque.
+    Progresso: a folha só informa (tocar nela ou fora fecha). Telas do módulo: tocar noutra tela leva a ela; na atual, fecha.
+    Alvos de toque de 44 px (PRD, ações de campo)."""
     def estreita(p):
         r=[('.etp-itens','display:none!important'),
            ('.etp-chk','display:block;position:absolute;opacity:0;width:1px;height:1px;margin:0;pointer-events:none'),
            ('.etp-atual',f'display:flex;align-items:center;gap:8px;flex-grow:1;min-width:0;min-height:44px;box-sizing:border-box;padding:7px 10px;border-radius:10px;background:{ACCS};box-shadow:inset 0 -2px 0 {ACC};color:{INK};font-size:13px;font-weight:800;line-height:1.25;cursor:pointer'),
            ('.etp-chk:focus-visible',f'outline:none'),('.etp-chk:focus-visible+.etp-atual',f'outline:2px solid {ACC};outline-offset:2px'),   # o anel fica no rótulo visível, não na caixa invisível de 1 px
            ('.etp-chk:checked+.etp-atual .etp-seta','transform:rotate(180deg)'),
-           ('.etp-vaga','width:46px!important'),('.etp-vaga:empty','display:none!important'),   # sem seta (1ª/última etapa): o rótulo usa o espaço
-           ('.etp-vaga>:is(a,button)','width:44px!important;height:44px!important;font-size:20px!important'),
            ('.etp-chk:checked~.etp-fundo','display:block;position:fixed;inset:0;z-index:30;background:rgba(21,32,26,.32);cursor:default'),
            ('.etp-chk:checked~.etp-itens',f'display:flex!important;flex-direction:column;position:fixed;left:8px;right:8px;bottom:8px;max-width:560px;margin:0 auto;box-sizing:border-box;gap:2px;padding:6px;background:{SURF};border:1px solid {LINE};border-radius:14px;box-shadow:0 18px 40px -12px rgba(21,32,26,.5);max-height:calc(100% - 16px);overflow-y:auto;z-index:31;pointer-events:none'),
            ('.etp-chk:checked~.etp-itens>*','min-width:0!important;min-height:44px;box-sizing:border-box'),
-           ('.etp-chk:checked~.etp-itens>:not([aria-current=step])','pointer-events:auto')]
+           ('.etp-chk:checked~.etp-itens>a:not([aria-current]),.etp-chk:checked~.etp-itens>button:not([aria-current=true])','pointer-events:auto')]
         return ''.join(f'{p} {s}{{{d}}}' for s,d in r)
     lims=sorted(set(_ETP_LIM.values())|{520,900})
     return ('.etp{container:etp/inline-size}.etp-chk,.etp-atual,.etp-fundo{display:none}.etp-seta{transition:transform .15s ease}'
             '.etp-itens>*{min-width:min-content!important}'   # nenhuma etapa fica mais estreita que a maior palavra: sem texto por cima da vizinha
+            '.etp-ind .etp-itens>li{cursor:default}'          # progresso: inerte (sem cursor de ação, sem hover de ação, sem foco)
+            '@media (hover:hover){.etp-sec .etp-itens>:not([aria-current=page]):not([aria-current=true]):hover{background:#F2F8F4!important;text-decoration:underline;text-underline-offset:3px}}'
             + ''.join(f'@container etp (max-width: {L-1}px){{{estreita(f".etp-l{L}")}}}' for L in lims))
-def steps_bar(steps,current=None,label='Etapas do processo'):
-    """Faixa de etapas por links (módulos sequenciais): colunas iguais que sempre cabem; nome quebra em até 2 linhas.
-    steps: [dict(t, href=None, fn=None, why='', cur=bool, tip)]"""
-    n=len(steps); items=''
-    for i,s in enumerate(steps,1):
-        cur=s.get('cur',False) if current is None else (i==current)
-        why=s.get('why') or ''
-        badge=(f'background: {ACC}; color: #fff;' if cur else (f'background: {REDS}; color: {RED};' if why else f'background: {GRAYS}; color: {INK};'))
-        num=f'<span style="width: 22px; height: 22px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: 11.5px; font-weight: 800; flex-shrink: 0; {badge}">{i}</span>'
-        whyh=(f'<span style="display: block; font-size: 11px; font-weight: 700; color: {RED}; line-height: 1.2;">{why}</span>' if why else '')
-        inner=f'{num}<span style="display: flex; flex-direction: column; min-width: 0;"><span style="font-size: 12px; line-height: 1.2; font-weight: {800 if cur else 600};">{esc(s["t"])}</span>{whyh}</span>'
-        st=('display: flex; align-items: center; gap: 6px; padding: 5px 6px; border-radius: 10px; text-decoration: none; color: '+INK+'; font-family: inherit; border: 0; cursor: pointer; text-align: left; min-width: 0; '
-            + (f'background: {ACCS}; box-shadow: inset 0 -2px 0 {ACC};' if cur else 'background: transparent;'))
-        aria=' aria-current="step"' if cur else ''
-        if s.get('fn'): items+=f'<button type="button" onClick="{{{{{s["fn"]}}}}}" title="{esc(s.get("tip") or s["t"])}"{aria} style="{st}">{inner}</button>'
-        else: items+=f'<a href="{s.get("href","#")}" title="{esc(s.get("tip") or s["t"])}"{aria} style="{st}">{inner}</a>'
-    c=current if current is not None else next((i for i,s in enumerate(steps,1) if s.get('cur')),None)
-    def viz(s,sim,dica):
-        if s.get('fn'): return f'<button type="button" onClick="{{{{{s["fn"]}}}}}" aria-label="{dica}: {esc(s["t"])}" title="{dica}: {esc(s["t"])}" style="{_SETA}">{sim}</button>'
-        return f'<a href="{s.get("href","#")}" aria-label="{dica}: {esc(s["t"])}" title="{dica}: {esc(s["t"])}" style="{_SETA}">{sim}</a>'
-    ant=viz(steps[c-2],'‹','Etapa anterior') if c and c>1 else ''
-    prox=viz(steps[c],'›','Próxima etapa') if c and c<n else ''
-    return _etp_nav(label,n,_com_setas(items,n,ant,prox,_etp_abre(c,n,steps[c-1]['t']) if c else _etp_abre(0,n,'')))
+def steps_bar(steps,current=None,label=None):
+    """Telas irmãs de um módulo de trabalho paralelo, por links (MA-01…05, módulos ocultos): navegação, não progresso.
+    Sem número de etapa e sem setas (UX-ACAO-UNICA-20261003); o atual leva aria-current="page"; a pendência da tela fica escrita.
+    steps: [dict(t, href, why='', cur=bool, tip)]"""
+    n=len(steps)
+    c=current if current is not None else next((i for i,s in enumerate(steps,1) if s.get('cur')),0)
+    itens=''.join(secao_item(s['t'],i==c,href=s.get('href','#'),why=s.get('why') or '') for i,s in enumerate(steps,1))
+    lab=label if label and label not in ('Etapas','Etapas do processo') else 'Telas do módulo'
+    return secoes_nav(itens,n,c,steps[c-1]['t'] if c else '',lab)
 
 def continuity(veio,aqui,falta,proxima):
     """Faixa do cap. 4.2: Veio de → Está aqui → Falta → Próxima ação."""
@@ -449,21 +460,32 @@ def tabs(opts,contents,active=0,label='Visão',chips=False):
         on=f'font-family: inherit; font-size: 11.5px; font-weight: 700; padding: 5px 11px; border-radius: 999px; border: 1px solid {INK}; background: {INK}; color: #fff; cursor: pointer; white-space: nowrap;'
         off=f'font-family: inherit; font-size: 11.5px; font-weight: 700; padding: 5px 11px; border-radius: 999px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer; white-space: nowrap;'
     s,bs=seg_buttons(opts,active,on=on,off=off)
-    bar=(f'<div role="tablist" aria-label="{esc(label)}" style="display: inline-flex; flex-wrap: wrap; gap: {6 if chips else 2}px; '
+    # seletor exclusivo de visão da mesma coleção (DS-33 §74.5.7.1 · DS-36 v2): grupo de botões com aria-pressed, não abas de processo
+    bar=(f'<div role="group" aria-label="{esc(label)}" style="display: inline-flex; flex-wrap: wrap; gap: {6 if chips else 2}px; '
          + ('' if chips else f'padding: 3px; border-radius: 999px; background: {GRAYS};') + '">' + ''.join(bs) + '</div>')
     panes=''.join(f'<sc-if value="{HL(s+"_v"+str(i))}" hint-placeholder-val="{HL("true") if i==active else HL("false")}">{c}</sc-if>' for i,c in enumerate(contents))
     return bar,panes
 
 
 def steps_state(names,pre='stp',label='Etapas do processo'):
-    """Faixa de etapas (estado da tela): colunas iguais que sempre cabem na largura; destaque, impedimento e navegação vêm do JS (g2steps)."""
+    """Indicador de progresso do processo guiado (estado da tela; g2steps preenche): lista ordenada com número ou ✓, nome, palavra do
+    estado para leitor de tela e motivo do impedimento. Não navega: sem botão, sem handler, sem parada de Tab (DS-31 v2)."""
     n=len(names); items=''
     for i,t in enumerate(names,1):
-        items+=(f'<button type="button" onClick="{{{{{pre}{i}_go}}}}" aria-current="{{{{{pre}{i}_cur}}}}" title="{esc(t)}" style="{{{{{pre}{i}_st}}}}">'
-                f'<span style="{{{{{pre}{i}_bst}}}}">{i}</span><span style="display: flex; flex-direction: column; min-width: 0;"><span style="{{{{{pre}{i}_tst}}}}">{esc(t)}</span>'
-                f'<sc-if value="{{{{{pre}{i}_hasWhy}}}}" hint-placeholder-val="{{{{false}}}}"><span style="font-size: 11px; font-weight: 700; color: {RED}; line-height: 1.2;">{{{{{pre}{i}_why}}}}</span></sc-if></span></button>')
+        h=lambda k,i=i: '{{'+f'{pre}{i}_{k}'+'}}'
+        items+=(f'<li aria-current="{h("cur")}" class="etp-it" style="{h("st")}"><span aria-hidden="true" style="{h("bst")}">{h("num")}</span>'
+                f'<span style="display: flex; flex-direction: column; min-width: 0;"><span style="{h("tst")}">{esc(t)}<span class="etp-sr"> · {h("sr")}</span></span>'
+                f'<sc-if value="{h("hasWhy")}" hint-placeholder-val="{{{{false}}}}"><span style="font-size: 11px; font-weight: 700; color: {RED}; line-height: 1.2;">{h("why")}</span></sc-if></span></li>')
     # etapa atual em texto para a faixa estreita: um bloco por etapa, montado só na atual; ao trocar de etapa a caixa nasce fechada
     abre=''.join(f'<sc-if value="{{{{{pre}{i}_cur === \'step\'}}}}" hint-placeholder-val="{{{{false}}}}">{_etp_abre(i,n,t)}</sc-if>' for i,t in enumerate(names,1))
-    return _etp_nav(label,n,_com_setas(items,n,
-                         f'<sc-if value="{{{{has_prev}}}}" hint-placeholder-val="{{{{false}}}}"><button type="button" onClick="{{{{prev}}}}" aria-label="Etapa anterior" title="{{{{prev_t}}}}" style="{_SETA}">‹</button></sc-if>',
-                         f'<sc-if value="{{{{has_next}}}}" hint-placeholder-val="{{{{false}}}}"><button type="button" onClick="{{{{next}}}}" aria-label="Próxima etapa" title="{{{{next_t}}}}" style="{_SETA}">›</button></sc-if>',abre))
+    return _etp_progresso(n,_etp_lista(abre,items,'ol',f' aria-label="{esc(label)}"'))
+def secoes_state(names,pre='stp',label='Seções'):
+    """Seções de uma tela de trabalho paralelo (Estoque): navegação entre visões em qualquer ordem (g2secoes preenche).
+    Sem número de etapa e sem setas; a seção atual leva aria-current="true"; a pendência de cada uma fica escrita."""
+    n=len(names); items=''
+    for i,t in enumerate(names,1):
+        h=lambda k,i=i: '{{'+f'{pre}{i}_{k}'+'}}'
+        items+=(f'<button type="button" onClick="{h("go")}" aria-current="{h("cur")}" style="{h("st")}"><span>{esc(t)}</span>'
+                f'<sc-if value="{h("hasWhy")}" hint-placeholder-val="{{{{false}}}}"><span style="font-size: 11px; font-weight: 700; color: {RED};">{h("why")}</span></sc-if></button>')
+    abre=''.join(f'<sc-if value="{{{{{pre}{i}_cur === \'true\'}}}}" hint-placeholder-val="{{{{false}}}}">{_etp_abre(i,n,t,secao=True)}</sc-if>' for i,t in enumerate(names,1))
+    return _etp_telas(label,n,_etp_lista(abre,items))

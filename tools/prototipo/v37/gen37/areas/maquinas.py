@@ -33,7 +33,7 @@ ETAPAS=[('Confira os ativos','MA-01.dc.html',''),('Registre inspeções','MA-02.
         ('Programe as preventivas','MA-03.dc.html','Conflito de janela'),('Execute as ordens','MA-04.dc.html','T1 bloqueado'),
         ('Acompanhe abastecimentos','MA-05.dc.html','')]
 def faixa(i):
-    return steps_bar([dict(t=t,href=h,why=w,tip=(t+(' · '+w if w else ''))) for t,h,w in ETAPAS],current=i)
+    return steps_bar([dict(t=t,href=h,why=w,tip=(t+(' · '+w if w else ''))) for t,h,w in ETAPAS],current=i,label='Telas da manutenção')   # telas irmãs (trabalho paralelo): navegação, não etapas
 SUBST='Proposto · OS-0420 saldo 70 ha · aguarda PCP'
 OS420=next(o for o in D.OS if o['id']=='OS-0420')
 OS431=D.ORDEM['OS-0431']
@@ -314,8 +314,9 @@ def ma03():
        search=False,gid='g_mi',total=False)
     corpo=(kpis([('VENCIDAS',H('k_ven'),H('k_vend')),('VENCEM EM BREVE',H('k_bre'),H('k_bred')),
                  ('SEM ORDEM',H('k_sem'),H('k_semd')),('CONFLITOS COM A PRODUÇÃO',H('k_conf'),H('k_confd'))])
-      + section('Vencimentos por ativo e serviço','',
-          [ilnk('Planos de manutenção','PM.dc.html','doc','Abrir os planos que geram estes vencimentos')],g_vc+_restaurar())
+      # UX-ACAO-UNICA v3 (uma instância por efeito): o atalho geral "Planos de manutenção" do bloco repetia o destino da trilha
+      # "Manutenção" (PM.dc.html); cada linha já abre o plano que gera aquele vencimento (ação do registro) e o menu traz a lista
+      + section('Vencimentos por ativo e serviço','',[],g_vc+_restaurar())
       + section('Manutenções e impacto na produção','',
           [IF('mi_podeMover',sbtn(H('mi_movt'),'mi_mover','calendar','Mover a preventiva do MF 7719 para depois da OS-0420, dentro da tolerância do plano')),
            IF('mi_podeProp',sbtn('Propor substituição','mi_prop','truck','Registrar proposta de substituto para as ordens afetadas pelo Trator T1'),True),
@@ -754,7 +755,8 @@ function pmSit(c,p){ if(p.estado==='Inativo') return {t:'Inativo · não gera ve
   const T={'Vencida':['vencida','vencidas'],'Vence em breve':['vence em breve','vencem em breve'],'Em dia':['em dia','em dia']}; const ord=['Vencida','Vence em breve','Em dia'];
   const w=ord.find(k=>n[k]); return {t:ord.filter(k=>n[k]).map(k=>n[k]+' '+T[k][n[k]>1?1:0]).join(' · '),c:MAN_SITC[w]||'gray'}; }
 function pmOpen(self,id){ self.setState({pid:id,step:2,del:null,disc:false,inat:false,xs:{},tkd:{},pcd:{},sv:null,np:null,vk:null}); manHash(id); }
-function pmStep(self,i){ self.setState({step:i,del:null,disc:false,inat:false}); manHash(i>1&&self.state.pid?self.state.pid:''); }
+function pmStep(self,i){ g2etapa(self,{step:i,del:null,disc:false,inat:false});   // conteúdo novo começa no topo, foco no título (UX-ACAO-UNICA)
+  manHash(i>1&&self.state.pid?self.state.pid:''); }
 // edição grava no rascunho v(n+1); plano ainda sem versão publicada edita a própria v1
 function pmEdit(self,pid,fn){ return manMudar(self,c=>{ const p=c.planos[pid]; const novo=!!p.versao&&!p.rasc; if(novo) p.rasc={v:p.versao+1,servicos:manClone(p.servicos)};
   const r=fn(c,p,manWork(p))||{}; const fim=novo?(' Rascunho v'+p.rasc.v+' criado; a v'+p.versao+' publicada e as ordens abertas não mudam.'):(p.versao?' Gravado no rascunho v'+p.rasc.v+'.':' Gravado na v1 (rascunho).');
@@ -967,7 +969,7 @@ function EXTRAVALS(self,v){ const c=manGet(); const st=self.state; const step=st
   for(let i=1;i<=3;i++) v['s'+i]=(step===i);
   const nv=p?(p.versao?(p.rasc?p.rasc.v:null):1):null;
   const whys={}; if(!p){ whys[2]='Escolha um plano'; whys[3]='Escolha um plano'; } else if(!nv) whys[3]='Nada a publicar';
-  g2steps(self,v,'stp',3,step,whys,(i)=>{ if(i>1&&!self.state.pid){ self.setState({step:1,g2toast:'Escolha um plano para abrir esta etapa.'}); return; } pmStep(self,i); });
+  g2steps(self,v,'stp',3,step,whys);   // só informa (UX-ACAO-UNICA-20261003): avanço e retorno na área de ações
   const ps=pmPlans(c); const gs=PM_GR.filter(g=>ps.some(x=>x.grupo===g)); ps.forEach(x=>{ if(gs.indexOf(x.grupo)<0) gs.push(x.grupo); });
   const gf=gs.indexOf(st.gf)>=0?st.gf:'';
   const ch=(t,n,on,go,lab)=>({t,n:String(n),on:String(!!on),go,lab,st:PM_QCH+(on?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;')});
@@ -977,11 +979,15 @@ function EXTRAVALS(self,v){ const c=manGet(); const st=self.state; const step=st
   if(p){ pmS2(self,v,c,p); pmS3(self,v,c,p); } else { v.svs=[]; v.dif=[]; v.hist=[]; v.oab=[]; }
   v.pvinc=(aid)=>{ const cc=manGet(); const pp=cc.planos[self.state.pid]; if(pp) pmVkOpen(self,cc,pp,aid); };
   pmSvP(self,v,c); pmNpP(self,v,c); pmVkP(self,v,c);
-  const prim={1:['Novo plano',()=>pmNovo(self,manGet(),null)],2:['Incluir serviço',()=>{ const cc=manGet(); const pp=cc.planos[self.state.pid]; if(pp) pmSvOpen(self,cc,pp,null); }],3:[nv?('Publicar v'+nv):'Publicar versão',()=>pmPub(self)]}[step];
-  v.prim_t=prim[0]; v.prim_fn=prim[1]; const hide=(step>1&&!p)||(step===3&&!nv);
-  v.prim_st='padding:7px 14px;border-radius:9px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap;background:#1E7A4C;color:#fff;border:1px solid #1E7A4C;flex-shrink:0;'+(hide?'display:none;':'');
-  v.prev_t=step>1?('‹ '+PM_N[step-2]):''; v.next_t=step<3?(PM_N[step]+' ›'):''; v.has_prev=step>1; v.has_next=step<3&&!!p;
-  v.prev=()=>pmStep(self,Math.max(1,step-1)); v.next=()=>{ if(!self.state.pid){ self.setState({g2toast:'Escolha um plano para avançar.'}); return; } pmStep(self,Math.min(3,step+1)); };
+  // ---- área de ações (UX-ACAO-UNICA-20261003 · DS-02, DS-33 §74.5.7.1, DS-61): uma primária e uma rota de avanço por etapa ----
+  v.pm_novo=()=>pmNovo(self,manGet(),null); v.pm_incl=()=>{ const cc=manGet(); const pp=cc.planos[self.state.pid]; if(pp) pmSvOpen(self,cc,pp,null); };
+  const ir=(i,t)=>({t:'‹ '+t,fn:()=>pmStep(self,i),to:i,a:'voltar'});
+  let A={};
+  if(step>1&&!p) A={nota:'Nenhum plano aberto: abra um plano da biblioteca.',prim:{t:'‹ Biblioteca de planos',fn:()=>pmStep(self,1),to:1,a:'voltar'}};
+  else if(step===2) A={volta:ir(1,'Biblioteca de planos'),prim:{t:(nv?'Revisar e publicar':'Ver versões e ordens')+' ›',fn:()=>pmStep(self,3),to:3,a:'avancar'}};
+  else if(step===3) A=nv?{volta:ir(2,'Serviços do plano'),prim:{t:'Publicar v'+nv,fn:()=>pmPub(self),a:'comando'}}
+                       :{volta:ir(2,'Serviços do plano'),nota:'Nada a publicar: salvar uma alteração nos serviços cria o rascunho da próxima versão.'};
+  g2acoes(v,'aa',A);
   v.go2=()=>pmStep(self,2); }
 '''
 PM_CSS=('.pm-sv{border:1px solid #E4E9E5;border-radius:12px;background:#fff}'
@@ -1013,9 +1019,9 @@ def _aside(pre,corpo,w=520):
         f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.45; margin-top: -6px;">{H(pre+"_sub")}</div>'
         + IF(f'{pre}_nerr',f'<div role="alert" style="padding: 8px 12px; border-radius: 10px; background: {REDS}; color: {RED}; font-size: 12.5px; font-weight: 700;">Corrija os campos destacados; o que você preencheu foi mantido.</div>')
         + corpo + '<div style="flex-grow: 1;"></div>'
-        + IF(f'{pre}_warn',f'<div role="alert" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 12.5px; font-weight: 700;">Há alterações não salvas.'
+        + IF(f'{pre}_warn',f'<div role="alert" class="saida" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 12.5px; font-weight: 700;">Há alterações não salvas.'
              f'<div style="display: flex; gap: 8px;"><button type="button" onClick="{H(pre+"_discard")}" style="{_MINI}">Descartar alterações</button><button type="button" onClick="{H(pre+"_keep")}" style="{_MINIP}">Continuar editando</button></div></div>')
-        + f'<div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 8px; border-top: 1px solid {LINE};">'
+        + f'<div class="pe-form" style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 8px; border-top: 1px solid {LINE};">'
           f'<button type="button" onClick="{H(pre+"_close")}" style="{BTN_ST(False,True)}">Cancelar</button><button type="button" onClick="{H(pre+"_save")}" style="{BTN_ST(True,True)}">Salvar</button></div>'
         f'</aside></div>')
 
@@ -1037,7 +1043,11 @@ def _checks(lst,rotulo):
 def pm():
     fname='PM.dc.html'; E._reset_screen(fname)
     EXTRA.append('<style>'+PM_CSS+'</style>')
-    acao=f'<button type="button" onClick="{H("prim_fn")}" style="{H("prim_st")}">{H("prim_t")}</button>'
+    # UX-ACAO-UNICA-20261003: Novo plano e Incluir serviço são secundários junto da lista/seção (primário só na lista vazia); avançar,
+    # voltar e publicar ficam na área de ações única ao fim do conteúdo (engine.area_acoes + g2acoes)
+    acao=f'<button type="button" onClick="{H("pm_novo")}" style="{E.BTN_ST(False,True)}">Novo plano</button>'
+    incl=(IF('sv_tem',f'<button type="button" data-acao="adicionar" onClick="{H("pm_incl")}" style="{E.BTN_ST(False,True)}">Incluir serviço</button>')
+          + IF('sv_vazio',f'<button type="button" data-acao="adicionar" onClick="{H("pm_incl")}" style="{E.BTN_ST(True,True)}">Incluir serviço</button>'))
     # ---------- etapa 1 · biblioteca por classe (cards) + ativos sem plano ----------
     card=(f'<button type="button" onClick="{H("c.open")}" aria-label="{H("c.lab")}" style="{H("c.st")}">'
           f'<span style="display: flex; align-items: flex-start; gap: 8px; width: 100%;"><b style="font-size: 14.5px; flex-grow: 1; line-height: 1.3;">{H("c.nome")}</b>'
@@ -1100,22 +1110,22 @@ def pm():
                 f'<button type="button" onClick="{H("inat_no")}" style="{_MINI}">Manter ativo</button></div>'))
     ban=(IF('ban_r',f'<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 14px; border-radius: 12px; background: {YELS}; color: {YEL}; font-size: 13px; font-weight: 700;">'
             f'<span style="flex-grow: 1; min-width: 0;">{H("ban_t")}</span>'
-            + IF('nodisc',f'<button type="button" onClick="{H("disc_ask")}" style="{_MINI}">Descartar rascunho</button><button type="button" onClick="{H("ban_pub")}" style="{_MINI}">Revisar e publicar ›</button>',True)
+            + IF('nodisc',f'<button type="button" onClick="{H("disc_ask")}" style="{_MINI}">Descartar rascunho</button>',True)
             + IF('disc',f'<span role="alert" style="flex-basis: 100%; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; color: {RED};"><span style="flex-grow: 1;">{H("disc_t")}</span>'
                  f'<button type="button" onClick="{H("disc_yes")}" style="{_MINI} color: {RED}; border-color: {RED};">Descartar rascunho</button><button type="button" onClick="{H("disc_no")}" style="{_MINI}">Manter</button></span>')
             + '</div>')
          + IF('ban_n',f'<div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 12px; background: {YELS}; color: {YEL}; font-size: 13px; font-weight: 700;">'
-              f'<span style="flex-grow: 1;">Rascunho v1 · publique para o plano gerar vencimentos.</span><button type="button" onClick="{H("ban_pub")}" style="{_MINI}">Revisar e publicar ›</button></div>')
+              f'<span style="flex-grow: 1;">Rascunho v1 · publique para o plano gerar vencimentos.</span></div>')
          + IF('ban_i',f'<div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 12px; background: {GRAYS}; color: {INK}; font-size: 13px; font-weight: 700;">'
               f'<span style="flex-grow: 1;">Plano inativo · não gera vencimentos; as ordens abertas seguem.</span><button type="button" onClick="{H("ban_reat")}" style="{_MINI}">Reativar plano</button></div>'))
-    xbtn=f'<button type="button" onClick="{H("x_tog")}" style="{_MINI} display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0;">{E.seta_xtog(H("x_up"),H("x_down"))}{H("x_lab")}</button>'
+    xbtn=f'<button type="button" class="g2xtog" onClick="{H("x_tog")}" style="flex-shrink: 0;">{E.seta_xtog(H("x_up"),H("x_down"))}{H("x_lab")}</button>'
     svs=(IF('sv_tem',f'<div style="display: flex; flex-direction: column; gap: 8px;">' + FOR('svs','s',svrow,2) + '</div>')
          + IF('sv_vazio',f'<div style="display: flex; align-items: center; gap: 10px; padding: 14px; border: 1px dashed {LINE}; border-radius: 12px; font-size: 13px;">'
               f'<span style="flex-grow: 1;">Nenhum serviço ainda.</span></div>'))
     g_pv=grid(VENC_COLS,[],edit=dict(m='none'),gid='g_pv',total=False,so=dict(k='prox',d=False),qf=dict(k='sit',l='situação'))
     s2=(head2 + ban
         + _bloco('Serviços do plano','',svs,
-                 acao=f'<span style="display: inline-flex; gap: 8px; align-items: center;">{IF("sv_tem",xbtn)}{acao}</span>')
+                 acao=f'<span style="display: inline-flex; gap: 8px; align-items: center;">{IF("sv_tem",xbtn)}{incl}</span>')
         + _bloco('Ativos vinculados e vencimentos','',g_pv,
                  acao=IF('vk_pode',f'<button type="button" onClick="{H("vk_go")}" style="{_MINI} font-size: 13px; padding: 7px 12px;">Vincular ativo</button>')))
     # ---------- etapa 3 · publicar ----------
@@ -1124,15 +1134,14 @@ def pm():
          + IF('dif_vazio',f'<div style="font-size: 13px; color: {MUTED};">O rascunho está igual à versão publicada.</div>'))
     oab=(FOR('oab','o',f'<div style="display: grid; grid-template-columns: 90px minmax(0, 1fr) 120px minmax(0, 1fr); gap: 10px; align-items: center; padding: 7px 0; border-top: 1px solid {LINE}; font-size: 13px;">'
                      f'<a href="{H("o.h")}" style="color: {ACC}; font-weight: 800; text-decoration: none;">{H("o.id")}</a><span>{H("o.t")}</span><span><span style="{H("o.fst")}">{H("o.f")}</span></span><span style="color: {MUTED};">{H("o.ver")}</span></div>',1))
-    s3=(IF('s3_has',_bloco(H('dif_tit'),H('imp'),dif,acao=acao,hole=True))
-        + IF('s3_none',_bloco('Nada a publicar','',
-                              f'<div><button type="button" onClick="{H("go2")}" style="{_MINI} font-size: 13px; padding: 8px 12px;">‹ Edite os serviços</button></div>'))
+    s3=(IF('s3_has',_bloco(H('dif_tit'),H('imp'),dif,hole=True))
+        + IF('s3_none',_bloco('Nada a publicar','',f'<div style="font-size: 13px; color: {MUTED};">Salvar uma alteração nos serviços cria o rascunho da próxima versão.</div>'))
         + IF('tem_oab',_bloco('Ordens abertas · seguem a versão em que nasceram','',oab))
         + _bloco('Versões','',
                  FOR('hist','h',f'<div style="display: grid; grid-template-columns: 48px 200px 110px; gap: 10px; align-items: center; padding: 6px 0; border-top: 1px solid {LINE}; font-size: 13px;">'
                                 f'<b>{H("h.t")}</b><span style="color: {MUTED};">{H("h.at")}</span><span><span style="{H("h.stst")}">{H("h.st")}</span></span></div>',2)))
     corpo=''.join(f'<sc-if value="{H("s"+str(i))}" hint-placeholder-val="{T() if i==1 else F()}"><div style="display: flex; flex-direction: column; gap: 14px;">{s}</div></sc-if>'
-                  for i,s in enumerate([s1,s2,s3],1))
+                  for i,s in enumerate([s1,s2,s3],1)) + E.area_acoes('aa','Ações da etapa')
     # ---------- painéis: serviço · novo plano · vincular ativo ----------
     tri=lambda a,b,c: f'<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px;">{a}{b}{c}</div>'
     sv_body=(_inp('sv','nome','Nome do serviço')
@@ -1162,7 +1171,7 @@ def pm():
     EXTRAJS[0]=DM.js_prefixo()+JSBASE+JSVENC+JSRST+PM_JS
     HEIGHTS37[fname]=1500
     shell37('PM','Planos de manutenção',corpo,fname=fname,
-            steps=steps_state(PM_N),primary_html=None,search=False)   # a ação principal mora no bloco onde age (Novo plano, Incluir serviço, Publicar)
+            steps=steps_state(PM_N),primary_html=None,search=False)   # faixa só informa; avanço/retorno/publicar na área de ações (UX-ACAO-UNICA-20261003)
     return fname
 
 def build():

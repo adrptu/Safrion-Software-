@@ -168,11 +168,15 @@ function _safhooks(self){ self.g2after=(gid,rows,r,isNew)=>{ if(gid==='g_saf' &&
   self.g2pick=(gid,rid,r)=>{ if(gid==='g_op'){ const pid=String(rid).split('_')[0]; self.setState({atv:pid,opv:'mes'}); } if(gid==='g_res'){ const k=String(rid).replace('R_','').replace(/_(d|c|n|u)$/,''); self.setState({rec:(self.state.rec===k?null:k)}); } }; }
 const _EV=EXTRAVALS; EXTRAVALS=function(self,v){ _safhooks(self); _EV(self,v); v.ap_bulk=()=>openApply(self,null); };'''
     # ---------- corpo ----------
-    acao_bloco=f'<button type="button" onClick="{H("prim_fn")}" style="{H("prim_st")}">{H("prim_t")}</button>'
-    acao_sec=f'<sc-if value="{H("sec_show")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("sec_fn")}" style="{_MINI} padding: 7px 14px; font-size: 13px;">{H("sec_t")}</button></sc-if>'
-    acoes=lambda extra='': f'<span style="display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">{extra}{acao_sec}{acao_bloco}</span>'
-    s1=bloco('Escolha a safra','Clique na safra para continuar de onde parou.',g_saf,acao=acao_bloco)
-    s2=bloco('Cultivos e planos',H('k2'),cult_html,acao=acoes(),desc_hole=True)
+    # UX-ACAO-UNICA-20261003: o cabeçalho do bloco só tem comandos do próprio conteúdo (criar, adicionar, modo de visão); avanço,
+    # retorno e a primária da etapa ficam na área de ações única ao fim do conteúdo (engine.area_acoes, preenchida em safra.js)
+    acoes=lambda extra='': f'<span style="display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">{extra}</span>'
+    nova_safra=f'<button type="button" onClick="{H("g_saf_new")}" style="{E.BTN_ST(False,True)}">Nova safra</button>'   # criar é secundário: a tarefa da etapa é escolher
+    # Adicionar cultivo: uma instância, junto da lista; secundário, e primário só na lista vazia (aí é a única ação da etapa)
+    add_cult=(f'<sc-if value="{H("add_sec")}" hint-placeholder-val="{F()}"><button type="button" data-acao="adicionar" onClick="{H("add_fn")}" style="{E.BTN_ST(False,True)}">Adicionar cultivo</button></sc-if>'
+              f'<sc-if value="{H("add_prim")}" hint-placeholder-val="{F()}"><button type="button" data-acao="adicionar" onClick="{H("add_fn")}" style="{E.BTN_ST(True,True)}">Adicionar cultivo</button></sc-if>')
+    s1=bloco('Escolha a safra','Clique na safra para continuar de onde parou.',g_saf,acao=nova_safra)
+    s2=bloco('Cultivos e planos',H('k2'),cult_html,acao=acoes(add_cult),desc_hole=True)
     s3=bloco('Rendimentos por operação e atividade','Clique numa atividade para ajustar conjunto e rendimento; o ajuste pode valer para a operação inteira.',rend_html,acao=acoes())
     # uma visão por vez, no mesmo lugar: por operação (operação → atividade → cultivo) ou por mês (indicadores × meses)
     seg=(f'<div role="group" aria-label="Modo de visão" style="display: inline-flex; flex-shrink: 0; padding: 3px; gap: 2px; border-radius: 999px; background: {BG}; border: 1px solid {LINE};">'
@@ -201,9 +205,9 @@ const _EV=EXTRAVALS; EXTRAVALS=function(self,v){ _safhooks(self); _EV(self,v); v
                 f'<span style="font-size: 12.8px; color: {MUTED};">Atividades que consomem as horas deste recurso em cada mês.</span></div>{g_resd}</sc-if></sc-if>',
                 acao=acoes(rec_ctl),tit_hole=True,desc_hole=True))
     s6=bloco('Demanda de insumos por grupo',H('k6'),g_dem,desc_hole=True,
-                acao=f'<span style="display: inline-flex; align-items: center; gap: 8px;"><sc-if value="{H("sol_link")}" hint-placeholder-val="{F()}"><a href="{H("sol_href")}" style="{_MINI} text-decoration: none;">Abrir em Compra de insumos ›</a></sc-if>{acao_bloco}</span>')
+                acao=f'<span style="display: inline-flex; align-items: center; gap: 8px;"><sc-if value="{H("sol_link")}" hint-placeholder-val="{F()}"><a href="{H("sol_href")}" style="{_MINI} text-decoration: none;">Abrir em Compra de insumos ›</a></sc-if></span>')
     corpo=''.join(f'<sc-if value="{H("s"+str(i))}" hint-placeholder-val="{H("true") if i==1 else F()}"><div style="display: flex; flex-direction: column; gap: 14px;">{s}</div></sc-if>'
-                  for i,s in enumerate([s1,s2,s3,s4,s5,s6],1))
+                  for i,s in enumerate([s1,s2,s3,s4,s5,s6],1)) + E.area_acoes('aa','Ações da etapa')
     # ---------- painel: aplicar plano ----------
     EXTRA.append(
       f'<sc-if value="{H("ap_open")}" hint-placeholder-val="{F()}"><div style="position: fixed; inset: 0; z-index: 60; display: flex; justify-content: flex-end;">'
@@ -256,8 +260,8 @@ const _EV=EXTRAVALS; EXTRAVALS=function(self,v){ _safhooks(self); _EV(self,v); v
       f'<span style="flex-basis: 100%; font-size: 11.5px; color: {MUTED};">Depois de incluir, informe a dose por hectare na nova linha.</span></div></sc-if>'
       f'</div></sc-if></div></sc-for></div></sc-if></div></sc-for></sc-for>'
       f'<div style="flex-grow: 1;"></div>'
-      f'<sc-if value="{H("lp_warn")}" hint-placeholder-val="{F()}"><div role="alert" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 12.5px; font-weight: 700;">Há alterações não salvas.<div style="display: flex; gap: 8px;"><button type="button" onClick="{H("lp_discard")}" style="{_MINI}">Descartar alterações</button><button type="button" onClick="{H("lp_keep")}" style="{_MINIP}">Continuar editando</button></div></div></sc-if>'
-      f'<div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};"><sc-if value="{H("lp_edit")}" hint-placeholder-val="{H("true")}"><button type="button" onClick="{H("lp_close")}" style="{BTN_ST(False,True)}">Cancelar</button><button type="button" onClick="{H("lp_save")}" style="{BTN_ST(True,True)}">Salvar</button></sc-if>'
+      f'<sc-if value="{H("lp_warn")}" hint-placeholder-val="{F()}"><div role="alert" class="saida" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 12.5px; font-weight: 700;">Há alterações não salvas.<div style="display: flex; gap: 8px;"><button type="button" onClick="{H("lp_discard")}" style="{_MINI}">Descartar alterações</button><button type="button" onClick="{H("lp_keep")}" style="{_MINIP}">Continuar editando</button></div></div></sc-if>'
+      f'<div class="pe-form" style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};"><sc-if value="{H("lp_edit")}" hint-placeholder-val="{H("true")}"><button type="button" onClick="{H("lp_close")}" style="{BTN_ST(False,True)}">Cancelar</button><button type="button" onClick="{H("lp_save")}" style="{BTN_ST(True,True)}">Salvar</button></sc-if>'
       f'<sc-if value="{H("lp_ro")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("lp_discard")}" style="{BTN_ST(False,True)}">Fechar</button></sc-if></div></aside></div></sc-if>')
     # ---------- painel: dividir o talhão em parcelas (sem limite de quantidade) ----------
     DV_COLS='92px 86px 124px minmax(110px,1fr) 138px 70px 90px minmax(140px,1.2fr) 32px'
@@ -288,11 +292,10 @@ const _EV=EXTRAVALS; EXTRAVALS=function(self,v){ _safhooks(self); _EV(self,v); v
       f'<sc-for list="{H("dv_rows")}" as="r" hint-placeholder-count="2">{dv_row}</sc-for></div></div>'
       f'<sc-if value="{H("dv_edit")}" hint-placeholder-val="{H("true")}"><div style="display: flex; gap: 8px; flex-wrap: wrap;"><button type="button" onClick="{H("dv_add")}" style="{_MINI}">+ Adicionar parcela</button><button type="button" onClick="{H("dv_dist")}" style="{_MINI}">Distribuir área igualmente</button></div></sc-if>'
       f'<div style="flex-grow: 1;"></div>'
-      f'<sc-if value="{H("dv_warn")}" hint-placeholder-val="{F()}"><div role="alert" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 12.5px; font-weight: 700;">Há alterações não salvas.<div style="display: flex; gap: 8px;"><button type="button" onClick="{H("dv_discard")}" style="{_MINI}">Descartar alterações</button><button type="button" onClick="{H("dv_keep")}" style="{_MINIP}">Continuar editando</button></div></div></sc-if>'
-      f'<div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};"><sc-if value="{H("dv_edit")}" hint-placeholder-val="{H("true")}"><button type="button" onClick="{H("dv_close")}" style="{BTN_ST(False,True)}">Cancelar</button><button type="button" onClick="{H("dv_save")}" style="{BTN_ST(True,True)}">Salvar divisão</button></sc-if>'
+      f'<sc-if value="{H("dv_warn")}" hint-placeholder-val="{F()}"><div role="alert" class="saida" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 12.5px; font-weight: 700;">Há alterações não salvas.<div style="display: flex; gap: 8px;"><button type="button" onClick="{H("dv_discard")}" style="{_MINI}">Descartar alterações</button><button type="button" onClick="{H("dv_keep")}" style="{_MINIP}">Continuar editando</button></div></div></sc-if>'
+      f'<div class="pe-form" style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};"><sc-if value="{H("dv_edit")}" hint-placeholder-val="{H("true")}"><button type="button" onClick="{H("dv_close")}" style="{BTN_ST(False,True)}">Cancelar</button><button type="button" onClick="{H("dv_save")}" style="{BTN_ST(True,True)}">Salvar divisão</button></sc-if>'
       f'<sc-if value="{H("dv_ro")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("dv_discard")}" style="{BTN_ST(False,True)}">Fechar</button></sc-if></div></aside></div></sc-if>')
-    prim=f'<button type="button" onClick="{H("prim_fn")}" style="{H("prim_st")}">{H("prim_t")}</button>'
     HEIGHTS37[fname]=1500
     shell37('SAF','Planejar safra',corpo,fname=fname,subtitle='',
-            steps=steps_state(NOMES),primary_html=None,  # ações nos blocos: Nova safra, Novo cultivo, Enviar para cotação
+            steps=steps_state(NOMES),primary_html=None,  # faixa só informa; avanço/retorno/primária na área de ações (UX-ACAO-UNICA-20261003)
             ctx=(H('ctx_faz'),H('ctx_saf'),None),search=False)
