@@ -3,12 +3,12 @@
 
 **Quem é quem**
 - **Adrianus** é o proprietário. Ele delegou as decisões técnicas e de produto ao Claude e ao Codex (DECISOES-DELEGADAS-20261003). Ficam com ele custo, contas e acessos, dados reais, contratos, publicação para usuários reais e aceite.
-- **Claude** é o autor do produto: protótipo e software real.
-- **Codex** coordena, revisa e publica no GitHub.
-- **Gemini** faz contraprova focal.
+- **Claude** é o autor: protótipo e software real. A autoria delimitada do protótipo passou do Claude local para o **Claude nuvem** (despacho CORTE-REMOTO-01 / CAMADA-SINTETICA-01, 03/10).
+- **Codex** coordena, lidera produto, design e UX, revisa e publica no GitHub.
+- **Gemini** real faz contraprova focal, sem simulação de modelo.
 
 **Mac e canal**
-- O Mac agora é só console.
+- **Correção da coordenação (03/10):** o Mac ainda **não** é só console. Coordenação/GPT e outras fontes continuam pendentes lá. Nenhum trabalho pesado novo roda no Mac.
 - O canal passa a ser a **issue 1 e os PRs** do repositório privado; o canal de arquivos do Mac vira espelho.
 - Leia também `docs/claude/CLAUDE-proprietario.md` (como o Adrianus quer trabalhar) e `docs/claude/skills/` (master-detail-ux, ux-essencial, tabelas-interativas, minimalismo-essencial, agro-gestao-conhecimento, dev-* etc.). Elas valem sem precisar perguntar.
 
@@ -37,14 +37,14 @@ O pacote vem de um `.git` novo. A base é um **commit raiz sem pais**, e nenhum 
 |---|---|---|
 | `prototipo-limpo/base` | `e8d780de2a660bb023eb49483878c0d1b04bff0a` | base_v43m saneada, raiz sem pais; base de merge das trilhas v44 |
 | `prototipo-limpo/v43` | `abc00a4b2031b1d62540091c7b8ec427aefd0ce2` + commit de passagem (este arquivo) | v43 publicada saneada, com portabilidade, mais documentos da passagem |
-| `prototipo-limpo/v44-rend` | `126899e5b3227327029d5c54e87d7313e1cfff02` | trilha REND, **parcial** (S5 corrigido sem verificação; o teste de telas não rodou) |
-| `prototipo-limpo/v44-acao` | `20f25726d6318c2e249e38575e5458455a32ec16` | trilha AÇÃO + padrão v3.1, **parcial** (`impl` cortado no meio; sem verificação) |
+| `prototipo-limpo/v44-rend` | `126899e5b3227327029d5c54e87d7313e1cfff02` | trilha REND, **parcial** (S5 corrigido sem verificação; o teste de telas não rodou). Os números citados são relato: os brutos ficaram no Mac e não valem como teste desta candidata |
+| `prototipo-limpo/v44-acao` | `20f25726d6318c2e249e38575e5458455a32ec16` | trilha AÇÃO + padrão v3.1, **parcial** (`impl` cortado no meio; sem verificação). Os números citados são relato, como na REND |
 
 **Não use:**
 - `prototipo/v43` (c9d61266/d22da69), que contém dado real; a remediação é do Codex;
 - os commits locais d7a2411b e f7967369, que nunca foram transportados.
 
-**Merge:** `git merge prototipo-limpo/v44-rend prototipo-limpo/v44-acao` sobre `prototipo-limpo/v43`. A base de merge é `prototipo-limpo/base`. Conflito provável só em `areas/irrigacao.py` (faixa de etapas): vale a decisão da AÇÃO (indicador informativo) aplicada sobre o `_etp_nav` da v43.
+**Merge:** sequencial e revisado, **não octopus**. Cada trilha entra num merge próprio (CAMADA-SINTETICA, depois REND, depois AÇÃO) sobre `prototipo-limpo/v43`, com revisão do Codex antes de cada um. Não iniciar auditoria integral da v44 antes disso. A base de merge é `prototipo-limpo/base`. Conflito provável só em `areas/irrigacao.py` (faixa de etapas): vale a decisão da AÇÃO (indicador informativo) aplicada sobre o `_etp_nav` da v43.
 
 **Origem de cada snapshot:** `MAPA-ORIGEM-SANITIZADO.json`, com a impressão sha256 das fontes de origem no Mac. A política de exclusão e redação está em `MANIFESTO-CORTE-REMOTO-01.md`.
 
@@ -57,10 +57,14 @@ O pacote vem de um `.git` novo. A base é um **commit raiz sem pais**, e nenhum 
 cd tools/prototipo/v37/gen37
 python3 build.py            # sai com 1 se algum módulo falhar
 python3 montar_render.py    # monta _render/ com project/, support.js e os JSONs do AGROFIT
-CHROME_BIN=$(which chromium || which google-chrome) python3 varredura.py   # "RESULTADO: 145/145 páginas sem erro"
+CHROME_BIN=$(which chromium || which google-chrome) python3 varredura.py   # build limpo na nuvem: "RESULTADO: 144/144 páginas sem erro" (ver tarefa 1)
 python3 <teste>.py          # Chrome headless via cdp.py (CHROME_BIN)
 ```
 Sem a camada sintética (tarefa 1), o build para em `dados_lagoa_fonte`, com uma mensagem clara.
+
+**Executor da nuvem** (contêiner Linux como root, saída pelo proxy da sessão):
+- O Chromium exige `--no-sandbox`. O `CHROME_BIN` aponta para um wrapper local, fora do repositório, que acrescenta essa opção e `--proxy-server` para o proxy oficial. O `cdp.py` não muda.
+- O MapLibre vem do CDN e precisa da CA oficial do proxy na NSS do navegador: `certutil -A -n ccr-agent-proxy -t C,, -i /root/.ccr/agent-proxy-ca.crt`. A verificação TLS continua ligada.
 
 ## Reserva ativa (Claude nuvem · CAMADA-SINTETICA-01 · branch `claude/camada-sintetica-01`)
 - Reservados pelo despacho: `gen37/dados_lagoa_sintetico/**`, `gen37/dados_lagoa_fonte.py`, `gen37/talmapa_test.py`, `gen37/talgeo_test.js` e este arquivo.
@@ -89,6 +93,11 @@ Sem a camada sintética (tarefa 1), o build para em `dados_lagoa_fonte`, com uma
      - build 0 e varredura 145/145;
      - testes que dependem da Lagoa Grande (map_decisoes, map_irrig_filtro, talmapa, carencia_test, mip_*, irr_*, os_v39_*, rend telas) passam, ou ficam listados com a nova linha de base e o motivo;
      - `ferramentas/varrer_categorias.py` dá TOTAL 0 (a varredura com valores reais é feita no Mac pelo proprietário/Codex).
+   - **Estado (Claude nuvem, branch `claude/camada-sintetica-01`): implementado e testado, aguardando revisão do Codex e contraprova focal do Gemini.**
+     - **Executado na nuvem:** build 0; montar_render ok; varredura 144/144; `dados_lagoa_sintetico/camada_test.py` 11/11; `talgeo_test.js` 8/8; `talmapa_test.py` 8/8; `varrer_categorias.py` TOTAL 0. Recibo, brutos e testes Lagoa com nova linha de base estão na issue 1.
+     - **144 e não 145:** o build limpo gera 144 páginas. Hipótese não verificada: a 145ª era a `IN-02x-os0422`, que deixou de ser gerada e ficou de sobra no `project/` do Mac.
+     - **Saída gerada:** `saida/` não é versionada. O `dados_lagoa_fonte` a gera sozinho, igual byte a byte; o carimbo fica em `saida/_carimbo.json`.
+     - **Achado para o Codex:** o círculo do `talgeo.js` (110 540 m/grau de latitude + esfera de 6 378 137 m + 72 lados) mede ≈ +0,58 % da área declarada. Está abaixo do limite de 1 % do `tmValida`.
    - **Atenção:** o artefato publicado hoje mostra a fazenda real; publicar da nuvem troca pelos dados sintéticos. Combine com o Codex e o Adrianus antes da primeira publicação a partir da nuvem.
 2. **V44-REND** (REND-MULTICONJUNTOS `082884f3`; REND-RETORNO-1818 `7ae753dc`)
    - **Já feito:** implementação, verificação e correção. Unit 35/35, fluxo 16/16, telas 4/4, varredura 145/145. Brutos em `checkpoint-20261003/rend_fix_logs/` no Mac.
@@ -117,6 +126,9 @@ Sem a camada sintética (tarefa 1), o build para em `dados_lagoa_fonte`, com uma
    7. VEN v2 (`25d0882a`)
 
    Os pacotes estão em `work/prototipo-fase1/revisoes/qualidade-20261003/`; o Codex os transporta para o GitHub.
+9. **Registrados para gatilho, sem iniciar:**
+   - **PCP-ALOC-DESEMPENHO-20261003** (issue 1, comentário 5973928269; contrato SHA-256 `98ac1c49fe0d06799dfac46e9d1a8d365a23f4e39f1bf1c7b1fdeffd657aae66`): depois do aceite da CAMADA-SINTETICA, no fluxo existente (PL03/04, REND-config + D4/ALOC `058eb147`), sem sobrescrever REND/AÇÃO.
+   - **QUALIDADE-ARTEFATO-20261003-FLUXO, adendo v2** (comentário 5974025581, SHA-256 `3000d8d3fa8e16630b373f2af756a8ba9ebc8e9b8c1db68a8469d57808bfaf3d`): jornada completa por IA só depois de **todas** as melhorias concluídas. A camada sintética e uma publicação parcial não contam como conclusão.
 
 ## Reservas locais soltas
 Assim que este pacote for entregue, nenhum autor local roda e nenhuma reserva do Mac continua valendo. Cada tarefa acima passa a ter autoria remota única. Os originais com dado real ficam só no Mac, em `~/Safrion-recuperacao-local/corte-remoto-01/` (fora do iCloud), para eventual recuperação pelo proprietário.

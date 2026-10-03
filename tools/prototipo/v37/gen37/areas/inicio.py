@@ -426,6 +426,7 @@ PX=_pixels()
 # pivô (dados_lagoa/processar.py). Reserva legal, APP, perímetros e outorgas ficam no cadastro da fazenda, fora do mapa.
 import os as _os
 _LGD=__import__('dados_lagoa_fonte').DIR   # real só no Mac; sintético fora dele
+_LGROT=__import__('dados_lagoa_fonte').ROTULO   # '' com dado real; 'Demonstração sintética' fora do Mac (rótulo visível no mapa)
 LG=json.load(open(_os.path.join(_LGD,'lagoa_s2_resumo.json'),encoding='utf-8'))
 LG_GEO=json.load(open(_os.path.join(_LGD,'lagoa_pivos.geojson'),encoding='utf-8'))
 LG_IDS=[p['id'] for p in LG['pivos']]
@@ -433,7 +434,7 @@ def _lg_key(c): y,m,d=c['dt'].split('-'); return f'{d}/{m}'
 def _lg_hora(c): h,mi=map(int,c['hora_utc'].split(':')); return f'{(h-3)%24:02d}:{mi:02d}'
 for _c in LG['cenas']:   # cenas reais entram no mesmo registro de cenas do mapa (chaves dd/mm), depois das demonstrativas
     _y,_m,_d=_c['dt'].split('-')
-    SAT[_lg_key(_c)]=dict(nuvem=_c['nuvem'],aq=f"{_d}/{_m}/{_y} {_lg_hora(_c)} (Brasília)",proc='processamento L2A da ESA (Copernicus) · catálogo Earth Search',
+    SAT[_lg_key(_c)]=dict(nuvem=_c['nuvem'],aq=f"{_d}/{_m}/{_y} {_lg_hora(_c)} (Brasília)",proc=(_LGROT+' · imagem e índices gerados, sem dado real') if _LGROT else 'processamento L2A da ESA (Copernicus) · catálogo Earth Search',
         v={p:[_c['est'][p][n]['med'] for n in IDXN] for p in LG_IDS},nt={p:_c['est'][p]['nuvem'] for p in LG_IDS},manchas=[],png=_c['png'],real=True)
 _LGC={DLS.PID_DE[c['local']]:c for c in DLS.CULTIVOS}
 def _lav_lg(p,c):
@@ -465,7 +466,7 @@ for _p in LG['pivos']:
 FAZST=_fazst()   # situação da fazenda com as necessidades da Lagoa Grande
 _RGB=json.load(open(_os.path.join(_LGD,'lagoa_rgb.json'),encoding='utf-8'))
 _RGBK={'25/09':'lagoa_rgb_20260925.png','10/09':'lagoa_rgb_20260910.png'}
-LG_DADOS=dict(ids=LG_IDS,rgb=dict(cantos=_RGB['lagoa_rgb_20260925.png']['cantos'],png=_RGBK),pivos=LG['pivos'],cantos=LG['cantos'],geo=LG_GEO,H=LG['H'],W=LG['W'],
+LG_DADOS=dict(rot=_LGROT,ids=LG_IDS,rgb=dict(cantos=_RGB['lagoa_rgb_20260925.png']['cantos'],png=_RGBK),pivos=LG['pivos'],cantos=LG['cantos'],geo=LG_GEO,H=LG['H'],W=LG['W'],
               cenas=[dict(k=_lg_key(c),png=c['png']) for c in LG['cenas']],
               bbox=[[min(p['lon'] for p in LG['pivos'])-0.006,min(p['lat'] for p in LG['pivos'])-0.006],[max(p['lon'] for p in LG['pivos'])+0.006,max(p['lat'] for p in LG['pivos'])+0.006]],
               ha=round(sum(p['ha'] for p in LG['pivos'])))
@@ -758,8 +759,8 @@ function legend(self,l,f,sel){
   return []; }
 function fonte(l,f){
   if(l===CAR_L) return carFonte(f);   // MAPA-CARENCIA-LMR-20261003
-  if(l==='Integrado') return FAZ==='Lagoa Grande'?('Pivôs do KML do proprietário · O.S. e safra do cenário · imagem Sentinel-2 de '+M.lg.cenas[0].k):('O.S. do PCP e cenário de execução · satélite 21/09 · hoje '+M.hoje);
-  if(l==='Satélite'){ const s=M.sat[f.dt]; return 'Sentinel-2 L2A'+(s.real?' · imagem real (Copernicus/ESA)':'')+' · 10 m · aquisição '+s.aq+' · '+f.idx+': '+M.idx[f.idx].o+' · contraste '+f.ctr.toLowerCase(); }
+  if(l==='Integrado') return FAZ==='Lagoa Grande'?(M.lg.rot?(M.lg.rot+' · pivôs e imagem fictícios · O.S. e safra do cenário · cena de '+M.lg.cenas[0].k):('Pivôs do KML do proprietário · O.S. e safra do cenário · imagem Sentinel-2 de '+M.lg.cenas[0].k)):('O.S. do PCP e cenário de execução · satélite 21/09 · hoje '+M.hoje);
+  if(l==='Satélite'){ const s=M.sat[f.dt]; return (s.real&&M.lg.rot?M.lg.rot+' · imagem e índices fictícios':'Sentinel-2 L2A'+(s.real?' · imagem real (Copernicus/ESA)':''))+' · 10 m · aquisição '+s.aq+' · '+f.idx+': '+M.idx[f.idx].o+' · contraste '+f.ctr.toLowerCase(); }
   if(l==='Lavoura') return 'ocupação atual e cultivos da safra 2026/27 · DAP e idade pela data real de plantio · hoje '+M.hoje;
   if(l==='O.S./prazos') return 'O.S. do PCP · prazo pela janela de cada ordem · fase do cenário de execução';
   if(l==='MIP/MID') return 'vistorias de Pragas e doenças · NC por alvo e fase · '+(FAZ==='Lagoa Grande'?'pivôs reais, vistorias demonstrativas':'talhões desenhados')+' · hoje '+M.hoje;
@@ -871,7 +872,7 @@ function panelTal(self,l,f,t){ const T=M.tal[t]; const c=cls(l,f,t); const lv=M.
     kv:M.geo[t]?[{l:'Geometria',t:M.geo[t]}]:[],lk:'SAF.dc.html',lkt:'Abrir no Planejar safra'}));
   // satélite (índice e cena do filtro da camada Satélite)
   { const fs=flt(self,'Satélite'); const v=satVal(fs.dt,t,fs.idx); const s=M.sat[fs.dt]; const nt=(s.nt||{})[t]||0; const es=satEstado(t,fs);
-    const kv=[{l:'Cena',t:'Sentinel-2 L2A · aquisição '+s.aq+' · '+(s.real?s.proc:'processado '+s.proc)},{l:'Nuvem',t:nfx(nt,1)+' % no talhão · '+nfx(s.nuvem,2)+' % na cena'},{l:'Estado',t:es[0]}];
+    const kv=[{l:'Cena',t:(s.real&&M.lg.rot?'Imagem sintética':'Sentinel-2 L2A')+' · aquisição '+s.aq+' · '+(s.real?s.proc:'processado '+s.proc)},{l:'Nuvem',t:nfx(nt,1)+' % no talhão · '+nfx(s.nuvem,2)+' % na cena'},{l:'Estado',t:es[0]}];
     let items=[], sum='', note='', acts=[];
     if(v===null){ sum=(M.semcult[t]||'sem cultura')+' · o índice não indica vigor'; note='Sem cultura com dossel: o índice não mede vigor aqui e não aciona compra nem prescrição.'; }
     else if(v==='cloud'){ sum='Nuvem na cena '+fs.dt+' · sem leitura'; note='Nuvem não recebe cor de condição. Escolha outra cena no filtro da camada Satélite.'; }
@@ -880,7 +881,7 @@ function panelTal(self,l,f,t){ const T=M.tal[t]; const c=cls(l,f,t); const lv=M.
         const dif=(ix==='NDMI'||Math.abs(pv?pv[1]:1)<0.1)?(pv?' · '+(x-pv[1]>=0?'+':'−')+nfx(Math.abs(x-pv[1]),2)+' vs '+pv[0]:''):(pv?' · '+(dv>=0?'+':'−')+nfx(Math.abs(dv),0)+' % vs '+pv[0]:'');
         return {t:ix+' '+nfx(x,2),sub:M.idx[ix].o+(pv?dif:' · sem cena anterior válida'),ch:[CHs(satNome(ix,kk),satChipSt(ix,kk))],acts:[],on:ix===fs.idx}; });
       const pxs=self.state.px; if(pxs&&pxs.t===t&&pxs.lg!==undefined&&LGI.px){ const q=(LGI.px.cen[fs.dt]||{})[fs.idx]; if(q&&q[pxs.lg]!==255){ const val=lgDeq(q[pxs.lg]); const kk=kOf(val,M.idx[fs.idx].lim);
-        items.unshift({t:'Pixel selecionado · '+fs.idx+' '+nfx(val,2),sub:fmtLL(pxs.ll)+' · 10 m · cena '+fs.dt+' (Sentinel-2 real)',ch:[CHs(satNome(fs.idx,kk),satChipSt(fs.idx,kk))],acts:[]}); } }
+        items.unshift({t:'Pixel selecionado · '+fs.idx+' '+nfx(val,2),sub:fmtLL(pxs.ll)+' · 10 m · cena '+fs.dt+(M.lg.rot?' ('+M.lg.rot+')':' (Sentinel-2 real)'),ch:[CHs(satNome(fs.idx,kk),satChipSt(fs.idx,kk))],acts:[]}); } }
       if(!s.manchas.some(m=>m.t===t)&&es[1]!=='green'){ const pq=satPrev(fs.dt,t,fs.idx); if(pq){ const dq=(v-pq[1])/Math.abs(pq[1])*100; if(dq<-10){ const vis0=mapVisAb(t,true);
         items.push({t:'Queda de '+nfx(Math.abs(dq),0)+' % no '+fs.idx+' desde '+pq[0],sub:'média do talhão '+nfx(pq[1],2)+' → '+nfx(v,2)+' · indício para inspeção, não diagnóstico',ch:[CH(es[0],es[1])],acts:[vis0?A('Abrir '+vis0,{h:'AG-01.dc.html#'+vis0,ic:'alert'}):A('Programar vistoria',{fn:()=>criarVis(self,[t]),ic:'alert',prim:es[1]==='red',tt:'Inspeção com ponto de GPS no centro do talhão; aparece no AG-01 e no app'})]}); } } }
       const px=self.state.px; if(px&&px.t===t&&M.px[t]&&M.px[t][px.i]){ const pvv=pxVals(fs.dt,fs.idx)[t]; if(pvv){ const val=pvv[px.i]; const kk=kOf(val,M.idx[fs.idx].lim);
@@ -1025,7 +1026,7 @@ function MAPVALS(self,v){
   // Lagoa Grande: mapa real (MapLibre GL + Sentinel-2) · Santa Rita (e Todas): desenho demonstrativo
   v.map_lg=(FAZ==='Lagoa Grande')&&!semGeo; v.map_sr=!v.map_lg; v.has_full=!v.map_lg; v.lg_err=!!(v.map_lg&&LGI.erro); v.lg_errt=LGI.erro?('Mapa real indisponível: '+LGI.erro+'. Recarregue a página.'):'';
   const cena0=M.sat[(l==='Satélite')?f.dt:M.lg.cenas[0].k]||{};
-  v.leg_nota=v.map_lg?('Pivôs do KML do proprietário · imagem Copernicus Sentinel-2 · '+(cena0.aq||'').split(' ')[0]+' · cor natural'):'Geometria e valores demonstrativos.';
+  v.leg_nota=v.map_lg?(M.lg.rot?(M.lg.rot+' · pivôs, imagem e índices fictícios · '+(cena0.aq||'').split(' ')[0]+' · cor natural'):('Pivôs do KML do proprietário · imagem Copernicus Sentinel-2 · '+(cena0.aq||'').split(' ')[0]+' · cor natural')):'Geometria e valores demonstrativos.';
   if(v.map_lg) setTimeout(()=>{ lgEnsure(self); lgSync(self); },0);
   if(semGeo){ v.nums=[]; v.flt=[]; v.leg=[]; v.fonte='Fazenda Boa Vista · nenhum talhão com geometria'; v.hasFlink=false; v.pan_open=false; v.has_modo=false; v.sem_modo=false; }
   const ordF=M.ord.filter(o=>o.tal.some(t=>TIDS().indexOf(t)>=0));
@@ -1216,7 +1217,7 @@ def _mapcard(h,full=False):
       f'<sc-if value="{H("map_on")}" hint-placeholder-val="{T()}">'
       f'<div style="flex-grow: 1; min-width: 0; position: relative; background: #E3EADB; overflow: hidden;">'
       f'<sc-if value="{H("map_sr")}" hint-placeholder-val="{T()}"><div style="{H("zst")}">{_mapsvg(defs=not full)}</div></sc-if>'
-      + ('' if full else f'<sc-if value="{H("map_lg")}" hint-placeholder-val="{F()}"><div id="mapa-real" aria-label="Mapa real da Fazenda Lagoa Grande" style="position: absolute; inset: 0;"></div>'
+      + ('' if full else f'<sc-if value="{H("map_lg")}" hint-placeholder-val="{F()}"><div id="mapa-real" aria-label="{("Mapa da Fazenda Lagoa Grande · "+_LGROT) if _LGROT else "Mapa real da Fazenda Lagoa Grande"}" style="position: absolute; inset: 0;"></div>'
          f'<sc-if value="{H("lg_err")}" hint-placeholder-val="{F()}"><div role="alert" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); padding: 10px 14px; border-radius: 10px; background: #fff; color: {RED}; font-size: 13px; font-weight: 700;">{H("lg_errt")}</div></sc-if></sc-if>')
       + f'{tools}{zoom}{_tm_barra()}'
       f'<sc-if value="{H("sem_modo")}" hint-placeholder-val="{T()}"><span style="position: absolute; left: 12px; top: 10px; padding: 7px 12px; border-radius: 10px; background: #FFFFFF; box-shadow: 0 1px 4px rgba(21,32,26,.18); font-size: 12.5px;"><b>{H("lay_t")}</b> <span style="color: {MUTED};">{H("hint_t")}</span></span></sc-if>'

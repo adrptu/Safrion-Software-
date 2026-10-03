@@ -110,7 +110,7 @@ CAMPOS_FAZ=[txt('nome','Nome da fazenda'),
             txt('car','CAR',req=False,help='Recibo do CAR. Em branco fica pendente: bloqueia só o crédito rural.'),
             txt('matr','Matrícula e cartório',req=False,help='Ex.: 12.401 · CRI de Rio Verde.'),
             txt('pend','Pendência nos documentos',req=False,help='Ex.: contrato sem registro em cartório. Não bloqueia o planejamento.'),
-            dict(k='perim',l='Perímetros',t='area',ro=True,req=False,cond=dict(k='kml',eq='Sim'),help='Do KML do proprietário; perímetro não vira talhão.'),
+            dict(k='perim',l='Perímetros',t='area',ro=True,req=False,cond=dict(k='kml',eq='Sim'),help=('Demonstração sintética (fictício)' if __import__('dados_lagoa_fonte').ROTULO else 'Do KML do proprietário')+'; perímetro não vira talhão.'),
             dict(k='ambs',l='Restrição ambiental',t='area',ro=True,req=False,cond=dict(k='kml',eq='Sim')),
             dict(k='aguas',l='Recursos hídricos',t='area',ro=True,req=False,cond=dict(k='kml',eq='Sim')),
             dict(k='kml',l='kml',t='txt',req=False,cond=dict(k='_nunca',eq='1')),
@@ -288,7 +288,7 @@ def cd01():
     js({},
        TALJS+'const FUSO_UF='+json.dumps(DC.FUSO_UF,ensure_ascii=False)+', FUSO_PAD='+json.dumps(DC.FUSOS[0],ensure_ascii=False)
        +', ALOC='+json.dumps(_aloc(),ensure_ascii=False)+', NPARC='+json.dumps(_nparc())+', MAPA='+json.dumps([g[0] for g in GEO_MAPA])
-       +', MAPA_FID='+json.dumps(MAPA_FID)+', MAPA_LG='+json.dumps([p[0] for p in DC.LG_PIVOS])+';\n'+r'''
+       +', MAPA_FID='+json.dumps(MAPA_FID)+', MAPA_LG='+json.dumps([p[0] for p in DC.LG_PIVOS])+', LG_SINT='+json.dumps(__import__('dados_lagoa_fonte').ROTULO,ensure_ascii=False)+';\n'+r'''
 function tals(rows){ const o=[]; rows.forEach(g=>{ if(g.kids) g.kids.forEach(k=>o.push(k)); else o.push(g); }); return o; }
 function arvore(fz,ts){ const gs=fz.map(f=>({id:'F_'+f.id,ro:true,v:{t:f.v.nome,fid:f.id},s:{},p:{},kids:[]}));
   ts.forEach(t=>{ let g=gs.find(x=>x.v.t===t.v.faz); if(!g){ g={id:'F_'+t.v.faz,ro:true,v:{t:t.v.faz,fid:''},s:{},p:{},kids:[]}; gs.push(g); } g.kids.push(t); }); return gs; }
@@ -406,8 +406,8 @@ function EXTRAVALS(self,v){ simv(self,v); const fz=RW(self,'g_faz'), ts=tals(RW(
   const flg=fz.find(f=>f.id==='LG'); MAPA_LG.forEach(id=>{ v['mc_'+id]=()=>{ const r=g2find(RW(self,'g_tal'),id); if(r&&flg&&r.v.faz===flg.v.nome) g2open(self,GR('g_tal'),id,null); }; });
   // painéis de consulta do que veio do KML (não é valor calculado): dizem a origem e, no ponto de água, a situação
   const FA=v.g_agua_F, fa=g2st(self,'g_agua').fm; if(FA&&FA.open&&fa&&fa.rid){ const r=g2find(RW(self,'g_agua'),fa.rid); if(r){ const S=aguaSit(r.v);
-    FA.sub='Consulta do KML do proprietário · '+S.t+(r.v.venc?' · vencimento '+br(r.v.venc):'')+'. Para mudar, atualize o KML ou o documento no órgão.'; } }
-  const FB=v.g_amb_F; if(FB&&FB.open) FB.sub='Consulta do CAR (KML do proprietário): restrição ambiental da fazenda, não vira talhão. As categorias de APP se sobrepõem; o total é o tema "APP Total".';
+    FA.sub=(LG_SINT?'Consulta · '+LG_SINT+', sem dado real · ':'Consulta do KML do proprietário · ')+S.t+(r.v.venc?' · vencimento '+br(r.v.venc):'')+'. Para mudar, atualize o KML ou o documento no órgão.'; } }
+  const FB=v.g_amb_F; if(FB&&FB.open) FB.sub='Consulta do CAR ('+(LG_SINT?LG_SINT+', sem dado real':'KML do proprietário')+'): restrição ambiental da fazenda, não vira talhão. As categorias de APP se sobrepõem; o total é o tema "APP Total".';
   // linha da fazenda na árvore é agrupador: não abre formulário
   (v.g_tal_rows||[]).forEach(x=>{ if(String(x.id).indexOf('F_')===0){ x.cls='g2r'; x.tab='-1'; x.open=()=>{}; x.key=()=>{}; } });
   // ---- fazenda ----
