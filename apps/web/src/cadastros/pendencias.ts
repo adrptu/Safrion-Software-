@@ -17,6 +17,12 @@ export interface IntencaoGuardada {
    * ausente, o envio volta a ser incerto.
    */
   readonly antesDoEnvelope?: true;
+  /**
+   * Número da tentativa desta chave; ausente é a primeira, gravada junto com o pedido. Cada novo POST grava o número
+   * seguinte antes de sair, na trava do fluxo. Uma falha lembrada de uma tentativa que já não é a última não descreve
+   * mais o pedido (DECISAO-RECUPERACAO-C2-20261003 §3).
+   */
+  readonly tentativas?: number;
   /** A correção não substitui o registro recusado antes de haver recibo do novo pedido. */
   readonly origem?: {
     readonly chave: string;
@@ -100,6 +106,12 @@ function lerGuardada(bruto: string): IntencaoGuardada | null {
     // A certeza só vale sozinha; com qualquer outro valor ou junto de uma falha, o registro não é reaberto.
     if (v['antesDoEnvelope'] !== undefined && (v['antesDoEnvelope'] !== true || v['falha'] !== undefined))
       return null;
+    const tentativas = v['tentativas'];
+    if (
+      tentativas !== undefined &&
+      !(typeof tentativas === 'number' && Number.isSafeInteger(tentativas) && tentativas >= 2)
+    )
+      return null;
     if (v['origem'] !== undefined && !origemValida(v['origem'])) return null;
     if (v['iniciais'] !== undefined && !camposValidos(v['iniciais'])) return null;
     if (!intencaoValida(v['intencao']) || !contextoValido(v['contexto'])) return null;
@@ -112,6 +124,7 @@ function lerGuardada(bruto: string): IntencaoGuardada | null {
       campos: v['campos'],
       ...(v['falha'] === undefined ? {} : { falha: v['falha'] }),
       ...(v['antesDoEnvelope'] === true ? { antesDoEnvelope: true as const } : {}),
+      ...(typeof tentativas === 'number' ? { tentativas } : {}),
       ...(v['origem'] === undefined ? {} : { origem: v['origem'] }),
       ...(v['iniciais'] === undefined ? {} : { iniciais: v['iniciais'] }),
       intencao,
@@ -130,6 +143,10 @@ function semCerteza(g: IntencaoGuardada): IntencaoGuardada {
   return copia;
 }
 
+function tentativaDe(g: IntencaoGuardada): number {
+  return g.tentativas ?? 1;
+}
+
 /** Guarda antes do POST. Falha deixa o envio bloqueado; a mesma chave nunca substitui outro pedido. */
 export function gravarIntencao(
   armazem: Escrita | null,
@@ -137,8 +154,9 @@ export function gravarIntencao(
   organizacaoId: string,
   guardada: IntencaoGuardada,
 ): boolean {
-  // Guardar antes do POST registra um envio incerto; a certeza de recusa só nasce da resposta.
-  if (!armazem || guardada.antesDoEnvelope) return false;
+  // Guardar antes do POST registra a primeira tentativa, incerta; a certeza de recusa só nasce da resposta e as
+  // tentativas seguintes, de prepararNovoEnvio.
+  if (!armazem || guardada.antesDoEnvelope || guardada.tentativas !== undefined) return false;
   try {
     const bruto = JSON.stringify(guardada);
     if (!lerGuardada(bruto)) return false;
@@ -261,7 +279,10 @@ export function atualDoFluxo(
   return atuais.length === 1 ? (atuais[0] ?? null) : null;
 }
 
-/** Deve executar na trava desta intenção. Nunca altera corpo, rascunho, base ou correlação já registrados. */
+/**
+ * Deve executar na trava desta intenção. Nunca altera corpo, rascunho, base ou correlação já registrados. `g` é o
+ * registro da tentativa que recebeu a falha. Devolve o registro como ficou guardado, ou null se não deu para gravar.
+ */
 export function guardarFalha(
   armazem: Escrita | null,
   usuarioId: string,
@@ -278,9 +299,13 @@ export function guardarFalha(
   )
     return null;
   if (atual.falha) return atual;
+  // A falha fala só da tentativa que a recebeu (§11.1). Se outra aba já preparou uma tentativa depois dela, o resultado
+  // dessa última é incerto: a recusa volta só como bloqueio do conteúdo, nunca como "corrigir" (§3).
+  const desta: FalhaGuardada =
+    tentativaDe(atual) === tentativaDe(g) ? falha : { ...falha, tipo: 'somente_consulta' };
   try {
     // Uma falha só chega depois de um POST: a certeza anterior ao envelope já não descreve esta chave.
-    const nova = { ...semCerteza(atual), falha };
+    const nova = { ...semCerteza(atual), falha: desta };
     const chave = prefixoDasIntencoes(usuarioId, organizacaoId) + g.intencao.chave;
     const bruto = JSON.stringify(nova);
     armazem.setItem(chave, bruto);
@@ -292,8 +317,13 @@ export function guardarFalha(
 
 export type PreparoCorrecao =
   | { readonly tipo: 'nova' | 'existente'; readonly guardada: IntencaoGuardada }
+  /** Outro fluxo do mesmo cadastro, inclusive uma criação equivalente, está pendente: nada foi gravado. */
+  | { readonly tipo: 'pendente'; readonly guardada: IntencaoGuardada }
   | { readonly tipo: 'impedido'; readonly mensagem: string };
-/** Trava por origem protege duas abas que tentem criar chaves diferentes para a mesma correção. */
+/**
+ * Trava por origem protege duas abas que tentem criar chaves diferentes para a mesma correção. Para a conferência do
+ * cadastro equivalente valer entre abas, use `registrarCorrecao`, que também toma a trava do alvo.
+ */
 export function prepararCorrecao(
   armazem: (Escrita & Varredura) | null,
   usuarioId: string,
@@ -322,14 +352,18 @@ export function prepararCorrecao(
     return impedido(
       'Altere os dados recusados antes de enviar a correção. Uma chave nova não corrige o conteúdo.',
     );
+  const raiz = raizDaIntencao(atual);
   const guardada: IntencaoGuardada = {
     ...candidata,
     origem: {
       chave: atual.intencao.chave,
-      raiz: raizDaIntencao(atual),
+      raiz,
       correlacao: atual.falha.correlacao,
     },
   };
+  // A correção é um pedido novo do mesmo cadastro: outro fluxo dele, inclusive uma criação equivalente, a impede (§1).
+  const outro = pendenteEquivalente(armazem, usuarioId, organizacaoId, guardada.intencao, raiz);
+  if (outro) return { tipo: 'pendente', guardada: outro };
   if (
     lerIntencao(armazem, usuarioId, organizacaoId, guardada.intencao.chave) ||
     !gravarIntencao(armazem, usuarioId, organizacaoId, guardada)
@@ -427,16 +461,23 @@ export function pendenteDoAlvo(
   );
 }
 
-/** Pedido guardado do mesmo cadastro, inclusive uma criação equivalente; deve ser lido dentro de `comTravaDoAlvo`. */
+/**
+ * Pedido guardado do mesmo cadastro em outro fluxo, inclusive uma criação equivalente; deve ser lido dentro de
+ * `comTravaDoAlvo`. `raiz` é o fluxo de quem pergunta: uma correção não é barrada pelo próprio pedido recusado.
+ */
 export function pendenteEquivalente(
   armazem: Varredura | null,
   usuarioId: string,
   organizacaoId: string,
   intencao: Intencao,
+  raiz = intencao.chave,
 ): IntencaoGuardada | null {
   return (
     lerIntencoes(armazem, usuarioId, organizacaoId).find(
-      (g) => g.intencao.chave !== intencao.chave && mesmoCadastro(g.intencao, intencao),
+      (g) =>
+        g.intencao.chave !== intencao.chave &&
+        raizDaIntencao(g) !== raiz &&
+        mesmoCadastro(g.intencao, intencao),
     ) ?? null
   );
 }
@@ -463,6 +504,23 @@ export function registrarNovoPedido(
 }
 
 /**
+ * A correção, na trava do alvo como um pedido novo: a conferência do cadastro equivalente e a gravação não se
+ * intercalam com as de outra aba. Chamada dentro da trava do fluxo de `origem`.
+ */
+export function registrarCorrecao(
+  travas: Pick<LockManager, 'request'> | undefined,
+  armazem: (Escrita & Varredura) | null,
+  usuarioId: string,
+  organizacaoId: string,
+  origem: IntencaoGuardada,
+  candidata: IntencaoGuardada,
+): Promise<PreparoCorrecao> {
+  return comTravaDoAlvo(travas, usuarioId, organizacaoId, candidata.intencao, () =>
+    Promise.resolve(prepararCorrecao(armazem, usuarioId, organizacaoId, origem, candidata)),
+  );
+}
+
+/**
  * Deve executar na trava do fluxo, logo após a resposta contratual de sessão (401) a um envio sem incerteza anterior.
  * Falha de gravação ou leitura deixa o registro como estava: incerto, que é o lado seguro.
  */
@@ -474,9 +532,11 @@ export function marcarRecusaAntesDoEnvelope(
 ): IntencaoGuardada | null {
   if (!armazem) return null;
   const atual = lerIntencao(armazem, usuarioId, organizacaoId, g.intencao.chave);
+  // A resposta é da tentativa `g`; a de uma tentativa que já não é a última não prova nada sobre a chave.
   if (
     !atual ||
     atual.falha ||
+    tentativaDe(atual) !== tentativaDe(g) ||
     atual.intencao.corpo !== g.intencao.corpo ||
     atual.intencao.commandType !== g.intencao.commandType
   )
@@ -497,9 +557,10 @@ export type PreparoEnvio =
   | { readonly tipo: 'primeiro' | 'repeticao'; readonly guardada: IntencaoGuardada }
   | { readonly tipo: 'impedido'; readonly mensagem: string };
 /**
- * Antes de cada novo POST da mesma chave, na trava do fluxo. Com a certeza de recusa anterior, ela é retirada e
- * conferida por releitura ANTES do envio: uma queda durante ou depois do POST reabre incerteza, nunca a recusa antiga.
- * Se a gravação falha, nada é enviado.
+ * Antes de cada novo POST da mesma chave, na trava do fluxo. Grava o número da nova tentativa e, com a certeza de recusa
+ * anterior, a retira na mesma gravação, conferida por releitura ANTES do envio: uma queda durante ou depois do POST
+ * reabre incerteza, nunca a recusa antiga, e uma falha lembrada em outra aba fica superada. Se a gravação falha, nada é
+ * enviado.
  */
 export function prepararNovoEnvio(
   armazem: Escrita | null,
@@ -520,15 +581,15 @@ export function prepararNovoEnvio(
     };
   if (atual.falha)
     return { tipo: 'impedido', mensagem: 'Este conteúdo não pode ser reenviado; consulte o recibo.' };
-  if (!atual.antesDoEnvelope) return { tipo: 'repeticao', guardada: atual };
-  const incerta = semCerteza(atual);
+  const nova: IntencaoGuardada = { ...semCerteza(atual), tentativas: tentativaDe(atual) + 1 };
   try {
     const chave = prefixoDasIntencoes(usuarioId, organizacaoId) + g.intencao.chave;
-    const bruto = JSON.stringify(incerta);
+    const bruto = JSON.stringify(nova);
     armazem.setItem(chave, bruto);
-    if (armazem.getItem(chave) === bruto) return { tipo: 'primeiro', guardada: incerta };
+    if (armazem.getItem(chave) === bruto)
+      return { tipo: atual.antesDoEnvelope ? 'primeiro' : 'repeticao', guardada: nova };
   } catch {
-    // Cai no impedimento abaixo: sem a certeza retirada, não há POST.
+    // Cai no impedimento abaixo: sem a tentativa gravada (e a certeza retirada), não há POST.
   }
   return {
     tipo: 'impedido',
@@ -544,7 +605,7 @@ export type Encerramento =
 /**
  * Encerra o pedido local (DECISAO-RECUPERACAO-C2-20261003 §3), na trava do fluxo e sem rede. Só quando a folha relida
  * é a mesma que a tela mostra e todo o fluxo foi recusado com certeza sem gravação ("corrigir", que só nasce de um envio
- * sem incerteza anterior). Uma sucessora preparada em outra aba, uma pendência incerta ou "somente_consulta" (§4) nunca
+ * sem incerteza anterior e só é guardado se nenhuma tentativa veio depois). Uma sucessora preparada em outra aba, uma pendência incerta ou "somente_consulta" (§4) nunca
  * são removidas. A remoção reaproveita a limpeza causal de C2: interrompida, deixa a folha consultável.
  */
 export function encerrarPedido(

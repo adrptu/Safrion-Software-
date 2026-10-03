@@ -11,8 +11,8 @@ import {
   encerrarPedido,
   guardarFalha,
   marcarRecusaAntesDoEnvelope,
-  prepararCorrecao,
   prepararNovoEnvio,
+  registrarCorrecao,
   registrarNovoPedido,
   type IntencaoGuardada,
 } from './pendencias';
@@ -68,6 +68,13 @@ export function useCadastroComando(
       setMensagem(
         'Não foi possível guardar a recuperação. Nenhum novo envio está liberado. Mantenha esta aba aberta e tente guardar novamente.',
       );
+  }
+  /** Outro pedido do mesmo cadastro, em qualquer aba, impede este; nada foi gravado nem enviado (§1). */
+  function avisarPendente(outro: IntencaoGuardada) {
+    const nome = outro.campos['nome'];
+    setMensagem(
+      `Já existe um envio pendente para este cadastro${nome ? ` (${nome})` : ''}. Nada foi enviado. Volte e abra-o em Retomar cadastros.`,
+    );
   }
   function aplicar(d: Desfecho, g: IntencaoGuardada) {
     setSessao(d.tipo !== 'resolvido' && d.sessao);
@@ -174,9 +181,21 @@ export function useCadastroComando(
     const origem = pendente;
     void exclusiva(origem ?? g, async () => {
       if (origem) {
-        const preparo = prepararCorrecao(armazemLocal(), usuarioId, organizacaoId, origem, g);
+        // A correção passa pela mesma guarda do cadastro que um pedido novo (§1).
+        const preparo = await registrarCorrecao(
+          travasDoNavegador(),
+          armazemLocal(),
+          usuarioId,
+          organizacaoId,
+          origem,
+          g,
+        );
         if (preparo.tipo === 'impedido') {
           setMensagem(preparo.mensagem);
+          return;
+        }
+        if (preparo.tipo === 'pendente') {
+          avisarPendente(preparo.guardada);
           return;
         }
         recuperar(preparo.guardada);
@@ -198,10 +217,7 @@ export function useCadastroComando(
           g,
         );
         if (registro.tipo === 'pendente') {
-          const nome = registro.guardada.campos['nome'];
-          setMensagem(
-            `Já existe um envio pendente para este cadastro${nome ? ` (${nome})` : ''}. Nada foi enviado. Volte e abra-o em Retomar cadastros.`,
-          );
+          avisarPendente(registro.guardada);
           return;
         }
         if (registro.tipo === 'falhou') {
@@ -229,11 +245,12 @@ export function useCadastroComando(
         recuperar(g);
         return;
       }
-      // Uma falha de gravação do sinal deve ser recuperada antes de qualquer nova operação.
+      // Uma falha de gravação do sinal deve ser recuperada antes de qualquer nova operação. Ela é a da tentativa
+      // lembrada: se outra aba tentou depois, guardarFalha a devolve só como bloqueio, nunca como "corrigir" (§3).
       if (lembrada.falha && !g.falha) {
-        const salva = guardarFalha(armazemLocal(), usuarioId, organizacaoId, g, lembrada.falha);
+        const salva = guardarFalha(armazemLocal(), usuarioId, organizacaoId, lembrada, lembrada.falha);
         if (!salva) {
-          preservarFalha(g, lembrada.falha);
+          preservarFalha(lembrada, lembrada.falha);
           return;
         }
         g = salva;

@@ -1,5 +1,6 @@
 // DECISAO-RECUPERACAO-C2-20261003 (Codex/Claude/Gemini): uma regressão por decisão, só com Storage e LockManager
-// simulados. Sem relógio, rede ou navegador; a jornada com React e Web Locks reais fica na contraprova de navegador.
+// simulados. Sem relógio, rede ou navegador. O gancho e as telas que chamam estas funções têm as suas regressões em
+// cadastros-gancho.test.ts.
 import { COMANDOS_CADASTRO as C, erroContrato, type ReciboContrato } from '@safrion/contracts';
 import { describe, expect, it } from 'vitest';
 
@@ -24,6 +25,7 @@ import {
   prefixoDasIntencoes,
   prepararCorrecao,
   prepararNovoEnvio,
+  registrarCorrecao,
   registrarNovoPedido,
   type FalhaGuardada,
   type IntencaoGuardada,
@@ -269,8 +271,8 @@ describe('DECISAO-RECUPERACAO-C2-20261003 §2: recusa antes do envelope sem reba
     const g = guardar(a, fazenda('f1', 'Primeira'));
     marcarRecusaAntesDoEnvelope(a, u, o, g);
     const preparo = prepararNovoEnvio(a, u, o, g);
-    expect(preparo).toEqual({ tipo: 'primeiro', guardada: g });
-    expect(lerIntencao(a, u, o, 'f1')).toEqual(g);
+    expect(preparo).toEqual({ tipo: 'primeiro', guardada: { ...g, tentativas: 2 } });
+    expect(lerIntencao(a, u, o, 'f1')).toEqual({ ...g, tentativas: 2 });
     expect(desfechoDoEnvio(PERMANENTE.status, PERMANENTE.corpo, g.intencao, false)).toMatchObject({
       tipo: 'corrigir',
       correlacao: 'cl22',
@@ -287,7 +289,10 @@ describe('DECISAO-RECUPERACAO-C2-20261003 §2: recusa antes do envelope sem reba
     if (!reaberta) throw new Error('pendência perdida');
     expect(reaberta).not.toHaveProperty('antesDoEnvelope');
     expect(reaberta).not.toHaveProperty('falha');
-    expect(prepararNovoEnvio(a, u, o, reaberta)).toEqual({ tipo: 'repeticao', guardada: reaberta });
+    expect(prepararNovoEnvio(a, u, o, reaberta)).toEqual({
+      tipo: 'repeticao',
+      guardada: { ...reaberta, tentativas: 3 },
+    });
     expect(desfechoDoEnvio(PERMANENTE.status, PERMANENTE.corpo, reaberta.intencao, true)).toMatchObject({
       tipo: 'incerto',
       bloqueioPermanente: { correlacao: 'cl22' },
@@ -314,7 +319,7 @@ describe('DECISAO-RECUPERACAO-C2-20261003 §2: recusa antes do envelope sem reba
     const a = memoria();
     const g = guardar(a, fazenda('f1', 'Primeira'));
     // Sem certeza guardada, o envio seguinte é repetição: a primeira tentativa pode ter gravado.
-    expect(prepararNovoEnvio(a, u, o, g)).toEqual({ tipo: 'repeticao', guardada: g });
+    expect(prepararNovoEnvio(a, u, o, g)).toEqual({ tipo: 'repeticao', guardada: { ...g, tentativas: 2 } });
     expect(desfechoDoEnvio(SEM_SESSAO.status, SEM_SESSAO.corpo, g.intencao, true)).toMatchObject({
       tipo: 'incerto',
       sessao: true,
@@ -462,5 +467,141 @@ describe('DECISAO-RECUPERACAO-C2-20261003 §4: somente_consulta só sai com prov
     expect(lerIntencoes(a, u, o)).toEqual([bloqueada]);
     const r = recibo(g.intencao);
     expect(desfechoDaConsulta(200, r, g.intencao)).toEqual({ tipo: 'resolvido', recibo: r });
+  });
+});
+
+/** Correção de uma criação: mesmo alvo novo e mesma base do pedido recusado, outra chave e outro nome. */
+function correcaoDe(origem: IntencaoGuardada, chave: string, nome: string): IntencaoGuardada {
+  return {
+    ...talhao(chave, nome),
+    intencao: novaIntencao(
+      C.criarTalhao,
+      'field',
+      origem.intencao.targetId,
+      0,
+      { nome, fazenda: F1, areaDeclaradaHa: '10' },
+      chave,
+    ),
+  };
+}
+
+describe('DECISAO-RECUPERACAO-C2-20261003, verificação: tentativas e guarda da correção', () => {
+  it('formato: tentativas só como inteiro a partir de 2; o pedido novo nunca nasce com elas', () => {
+    const a = memoria();
+    const g = fazenda('f1', 'Primeira');
+    const k = prefixoDasIntencoes(u, o) + 'f1';
+    for (const invalido of [
+      { ...g, tentativas: 1 },
+      { ...g, tentativas: 2.5 },
+      { ...g, tentativas: '2' },
+    ]) {
+      a.m.set(k, JSON.stringify(invalido));
+      expect(lerIntencoes(a, u, o)).toEqual([]);
+    }
+    a.m.set(k, JSON.stringify({ ...g, tentativas: 3 }));
+    expect(lerIntencoes(a, u, o)).toEqual([{ ...g, tentativas: 3 }]);
+    a.m.clear();
+    expect(gravarIntencao(a, u, o, { ...g, tentativas: 2 })).toBe(false);
+    expect(a.m.size).toBe(0);
+  });
+
+  it('cada novo POST grava antes a tentativa seguinte; sem essa gravação, nem a repetição sai', () => {
+    const a = memoria();
+    const g = guardar(a, fazenda('f1', 'Primeira'));
+    expect(prepararNovoEnvio(a, u, o, g)).toMatchObject({ tipo: 'repeticao', guardada: { tentativas: 2 } });
+    expect(prepararNovoEnvio(a, u, o, g)).toMatchObject({ tipo: 'repeticao', guardada: { tentativas: 3 } });
+    const quota = {
+      ...a,
+      setItem: () => {
+        throw new Error('quota');
+      },
+    };
+    expect(prepararNovoEnvio(quota, u, o, g)).toMatchObject({ tipo: 'impedido' });
+    expect(lerIntencao(a, u, o, 'f1')).toEqual({ ...g, tentativas: 3 });
+  });
+
+  it('a falha lembrada de uma tentativa superada por outra aba volta só como somente_consulta', () => {
+    for (const outraAbaTentou of [false, true]) {
+      const a = memoria();
+      const g = guardar(a, fazenda('f1', 'Quinta'));
+      marcarRecusaAntesDoEnvelope(a, u, o, g);
+      const preparo = prepararNovoEnvio(a, u, o, g);
+      if (preparo.tipo !== 'primeiro') throw new Error(preparo.tipo);
+      const d = desfechoDoEnvio(PERMANENTE.status, PERMANENTE.corpo, g.intencao, false);
+      if (d.tipo !== 'corrigir') throw new Error(d.tipo);
+      const falha: FalhaGuardada = { tipo: 'corrigir', mensagem: d.mensagem, correlacao: d.correlacao };
+      const quota = {
+        ...a,
+        setItem: () => {
+          throw new Error('quota');
+        },
+      };
+      // A aba que recebeu a recusa não consegue guardá-la: o registro continua incerto, sem marca nem falha.
+      expect(guardarFalha(quota, u, o, preparo.guardada, falha)).toBeNull();
+      // Outra aba vê o envio sem confirmação e repete (a resposta não chega).
+      if (outraAbaTentou) expect(prepararNovoEnvio(a, u, o, g).tipo).toBe('repeticao');
+      const reaplicada = guardarFalha(a, u, o, preparo.guardada, falha);
+      if (!reaplicada) throw new Error('falha não persistida');
+      expect(reaplicada.falha).toEqual({ ...falha, tipo: outraAbaTentou ? 'somente_consulta' : 'corrigir' });
+      expect(encerrarPedido(a, u, o, reaplicada).tipo).toBe(outraAbaTentou ? 'impedido' : 'encerrado');
+      expect(a.m.size).toBe(outraAbaTentou ? 1 : 0);
+    }
+  });
+
+  it('a marca de sessão só vale para a tentativa que recebeu o 401, e sem gravação não nasce', () => {
+    const a = memoria();
+    const g = guardar(a, fazenda('f1', 'Primeira'));
+    prepararNovoEnvio(a, u, o, g);
+    expect(marcarRecusaAntesDoEnvelope(a, u, o, g)).toBeNull();
+    const atual = lerIntencao(a, u, o, 'f1');
+    if (!atual) throw new Error('perdida');
+    const quota = {
+      ...a,
+      setItem: () => {
+        throw new Error('quota');
+      },
+    };
+    expect(marcarRecusaAntesDoEnvelope(quota, u, o, atual)).toBeNull();
+    expect(lerIntencao(a, u, o, 'f1')).toEqual({ ...g, tentativas: 2 });
+  });
+
+  it('a correção para uma criação equivalente de outro fluxo é barrada na trava do alvo; outro nome segue', async () => {
+    const a = memoria();
+    const { lock, nomes } = travas();
+    const azul = guardar(a, talhao('b', 'Talhão Azul'));
+    const verde = guardar(a, talhao('c', 'Talhão Verde'), recusa('c-verde'));
+    expect(prepararCorrecao(a, u, o, verde, correcaoDe(verde, 'c2', '  talhão   AZUL '))).toEqual({
+      tipo: 'pendente',
+      guardada: azul,
+    });
+    expect(await registrarCorrecao(lock, a, u, o, verde, correcaoDe(verde, 'c2', 'Talhão Azul'))).toEqual({
+      tipo: 'pendente',
+      guardada: azul,
+    });
+    expect(nomes).toEqual([`${prefixoDasIntencoes(u, o)}alvo:${C.criarTalhao}`]);
+    expect(chaves(a)).toEqual(['b', 'c']);
+    // O próprio pedido recusado (mesmo fluxo) não barra a correção dele.
+    const roxo = await registrarCorrecao(lock, a, u, o, verde, correcaoDe(verde, 'c3', 'Talhão Roxo'));
+    expect(roxo).toMatchObject({ tipo: 'nova', guardada: { origem: { chave: 'c', raiz: 'c' } } });
+    expect(chaves(a)).toEqual(['b', 'c', 'c3']);
+    // Edição de X recusada enquanto outro fluxo de X está pendente: a correção também é barrada.
+    const b = memoria();
+    const sit = guardar(b, situacao('s1', X));
+    const ed = guardar(b, edicao('e1', X, 'Um'), recusa('c-e1'));
+    expect(prepararCorrecao(b, u, o, ed, edicao('e2', X, 'Dois'))).toEqual({
+      tipo: 'pendente',
+      guardada: sit,
+    });
+    await expect(
+      registrarCorrecao(undefined, a, u, o, verde, correcaoDe(verde, 'c4', 'Cinza')),
+    ).rejects.toThrow('trava');
+  });
+
+  it('encerrar um pedido que não está mais guardado não apaga nada', () => {
+    const a = memoria();
+    const fora = fazenda('f9', 'Fora');
+    const outro = guardar(a, situacao('s1'), recusa());
+    expect(encerrarPedido(a, u, o, fora)).toMatchObject({ tipo: 'impedido' });
+    expect(lerIntencoes(a, u, o)).toEqual([outro]);
   });
 });
