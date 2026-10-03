@@ -1,8 +1,8 @@
 # Imagem da F0-c: a aplicação web (alvo padrão) e o preparo do banco (alvo "preparo"), da mesma construção.
 # Construção: node:24.21.0-bookworm-slim oficial, fixada pelo digest do índice multiplataforma consultado em
 # registry-1.docker.io em 28/09/2026. Execução (HML-IMG-01): distroless cc-debian13 nonroot, fixada pelo digest do
-# índice multiplataforma consultado em gcr.io em 28/09/2026: glibc, libstdc++ e certificados, mais o binário node da
-# construção. Sem shell, sem gerenciador de pacotes e sem npm, corepack ou yarn, que o runtime não usa.
+# índice multiplataforma consultado em gcr.io em 03/10/2026 00:18Z (antes 54df941e…, de 28/09; a troca só vale com o
+# Trivy da CI sobre esta imagem): glibc, libstdc++ e certificados, mais o binário node da construção. Sem shell, sem gerenciador de pacotes e sem npm, corepack ou yarn, que o runtime não usa.
 # Para o Cloud Run: docker build --platform linux/amd64.
 # Nenhum segredo entra na imagem: banco, origem, ambiente e credenciais chegam por variáveis na execução.
 # Versão e commit, ao contrário, entram na construção (--build-arg SAFRION_VERSAO e SAFRION_COMMIT) e ficam na imagem:
@@ -10,7 +10,7 @@
 # desenvolvimento, os mesmos do servidor (apps/web/src/servidor/ambiente.ts).
 # Sem diretiva syntax: o frontend do Dockerfile embutido no BuildKit basta, e nada é baixado por etiqueta móvel.
 ARG NODE_IMAGEM=node:24.21.0-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6
-ARG EXECUCAO_IMAGEM=gcr.io/distroless/cc-debian13:nonroot@sha256:54df941ed0d06a1bd95ef5e0ce391fd8d9f94b64782dc9a60062727849ee3f97
+ARG EXECUCAO_IMAGEM=gcr.io/distroless/cc-debian13:nonroot@sha256:e792ab3d241a468a4fd7519ddbbebe66b49b5f365771716ea688ad40b6c6f1c2
 
 FROM ${NODE_IMAGEM} AS construir
 ENV CI=1 NEXT_TELEMETRY_DISABLED=1 COREPACK_ENABLE_DOWNLOAD_PROMPT=0
