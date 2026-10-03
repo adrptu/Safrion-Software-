@@ -101,7 +101,7 @@ test('CAD01 Gemini: 404 anterior não libera repetir depois de nova tentativa of
   const grupo = page.getByRole('region', { name: 'CAD E2E Reenvio Gemini', exact: true });
   await expect(grupo).toContainText('1 talhão ativo');
   await expect(grupo.getByRole('link', { name: 'T1 Reenvio Gemini', exact: true })).toHaveCount(1);
-  await expect(page.getByRole('region', { name: 'Envios sem confirmação' })).toHaveCount(0);
+  await expect(page.getByRole('region', { name: 'Retomar cadastros' })).toHaveCount(0);
 
   // Contadores de observação não são apresentados como contagem total de recebimentos HTTP pelo servidor.
   const path = testInfo.outputPath('recibo-contraprova-reenvio.json');

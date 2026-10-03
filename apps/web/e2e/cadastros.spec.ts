@@ -167,8 +167,8 @@ test('CAD01: resposta perdida após gravar recupera recibo ao reabrir, sem criar
   await expect(painel.getByRole('button', { name: 'Consultar recibo', exact: true })).toBeEnabled();
   await expect(painel.getByRole('textbox', { name: 'Nome', exact: true })).toBeDisabled();
   await page.reload();
-  const enviosPendentes = page.getByRole('region', { name: 'Envios sem confirmação' });
-  await enviosPendentes.getByRole('button', { name: 'Criar talhão · T1 Recibo', exact: true }).click();
+  const enviosPendentes = page.getByRole('region', { name: 'Retomar cadastros' });
+  await enviosPendentes.getByRole('button', { name: 'Consultar envio · T1 Recibo', exact: true }).click();
   await expect(painel.getByRole('textbox', { name: 'Nome', exact: true })).toHaveValue('T1 Recibo');
   expect(consultas).toBe(0);
   expect(envios).toBe(1);
@@ -177,7 +177,7 @@ test('CAD01: resposta perdida após gravar recupera recibo ao reabrir, sem criar
   expect(consultas).toBe(1);
   expect(envios).toBe(1);
   await page.getByRole('link', { name: 'Voltar para Fazendas e talhões', exact: true }).click();
-  await expect(page.getByRole('region', { name: 'Envios sem confirmação' })).toHaveCount(0);
+  await expect(page.getByRole('region', { name: 'Retomar cadastros' })).toHaveCount(0);
   const grupo = page.getByRole('region', { name: 'CAD E2E Recibo', exact: true });
   await expect(grupo).toContainText('1 talhão ativo');
   await expect(grupo.getByRole('link', { name: 'T1 Recibo', exact: true })).toHaveCount(1);
@@ -244,8 +244,8 @@ test('CAD01: primeiro envio sem sessão conserva dados e retoma após login com 
   await expect(page).toHaveURL(LISTA_CADASTROS);
   await page.reload();
   await page
-    .getByRole('region', { name: 'Envios sem confirmação' })
-    .getByRole('button', { name: 'Criar talhão · T1 Sessão', exact: true })
+    .getByRole('region', { name: 'Retomar cadastros' })
+    .getByRole('button', { name: 'Consultar envio · T1 Sessão', exact: true })
     .click();
   await expect(painel.getByRole('textbox', { name: 'Nome', exact: true })).toHaveValue('T1 Sessão');
   await expect(painel.getByRole('textbox', { name: 'Área declarada (ha)', exact: true })).toHaveValue('204');
@@ -269,7 +269,7 @@ test('CAD01: primeiro envio sem sessão conserva dados e retoma após login com 
   await expect(page.getByRole('region', { name: 'CAD E2E Sessão', exact: true })).toContainText(
     '1 talhão ativo',
   );
-  await expect(page.getByRole('region', { name: 'Envios sem confirmação' })).toHaveCount(0);
+  await expect(page.getByRole('region', { name: 'Retomar cadastros' })).toHaveCount(0);
 });
 
 test('CAD01: recuperar edição do talhão A no detalhe B navega ao alvo A e preserva B', async ({ page }) => {
@@ -308,8 +308,8 @@ test('CAD01: recuperar edição do talhão A no detalhe B navega ao alvo A e pre
     page.getByRole('heading', { level: 1, name: 'Talhão B preservado', exact: true }),
   ).toBeVisible();
   await page
-    .getByRole('region', { name: 'Envios sem confirmação' })
-    .getByRole('button', { name: 'Salvar talhão · Talhão A recuperado', exact: true })
+    .getByRole('region', { name: 'Retomar cadastros' })
+    .getByRole('button', { name: 'Consultar envio · Talhão A recuperado', exact: true })
     .click();
   await expect(painel.getByRole('textbox', { name: 'Nome', exact: true })).toHaveValue('Talhão A recuperado');
   await painel.getByRole('button', { name: 'Consultar recibo', exact: true }).click();
@@ -329,7 +329,7 @@ test('CAD01: recuperar edição do talhão A no detalhe B navega ao alvo A e pre
       .filter({ has: page.locator('dt').filter({ hasText: /^Versão$/ }) })
       .locator('dd'),
   ).toHaveText('1');
-  await expect(page.getByRole('region', { name: 'Envios sem confirmação' })).toHaveCount(0);
+  await expect(page.getByRole('region', { name: 'Retomar cadastros' })).toHaveCount(0);
 });
 
 interface EdicaoObservada {
@@ -417,7 +417,7 @@ test('CAD01 P1 Claude: salvar sem alterações informa o estado e não envia com
       .locator('dd'),
   ).toHaveText('1');
   expect(postagens).toBe(0);
-  await expect(page.getByRole('region', { name: 'Envios sem confirmação' })).toHaveCount(0);
+  await expect(page.getByRole('region', { name: 'Retomar cadastros' })).toHaveCount(0);
 });
 
 /** Perde só a resposta de um conflito real; o recibo e o cadastro concorrente permanecem no servidor. */
@@ -459,8 +459,8 @@ test('CAD01 P1 Claude: recuperar pendência com valores iniciais reaplica só o 
   const { painel, nome, areaInicial, pedidos } = await prepararPendenciaDeConflito(page, 'Recuperação');
   await page.reload();
   await page
-    .getByRole('region', { name: 'Envios sem confirmação' })
-    .getByRole('button', { name: `Salvar talhão · ${nome}`, exact: true })
+    .getByRole('region', { name: 'Retomar cadastros' })
+    .getByRole('button', { name: `Consultar envio · ${nome}`, exact: true })
     .click();
   await expect(painel.getByRole('textbox', { name: 'Nome', exact: true })).toHaveValue(nome);
   await expect(painel.getByRole('textbox', { name: 'Área declarada (ha)', exact: true })).toHaveValue(
@@ -488,7 +488,7 @@ test('CAD01 P1 Claude: recuperar pendência com valores iniciais reaplica só o 
       .filter({ has: page.locator('dt').filter({ hasText: /^Versão$/ }) })
       .locator('dd'),
   ).toHaveText('3');
-  await expect(page.getByRole('region', { name: 'Envios sem confirmação' })).toHaveCount(0);
+  await expect(page.getByRole('region', { name: 'Retomar cadastros' })).toHaveCount(0);
 });
 
 test('CAD01 P1 Claude: pendência legada consulta 409 e preserva campos sem permitir reaplicação sem base', async ({
@@ -510,8 +510,8 @@ test('CAD01 P1 Claude: pendência legada consulta 409 e preserva campos sem perm
   }, chave);
   await page.reload();
   await page
-    .getByRole('region', { name: 'Envios sem confirmação' })
-    .getByRole('button', { name: `Salvar talhão · ${nome}`, exact: true })
+    .getByRole('region', { name: 'Retomar cadastros' })
+    .getByRole('button', { name: `Consultar envio · ${nome}`, exact: true })
     .click();
   const consulta = page.waitForResponse((r) => r.url().includes('/intencoes/cadastros.editar-talhao/'));
   await painel.getByRole('button', { name: 'Consultar recibo', exact: true }).click();
