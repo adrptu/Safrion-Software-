@@ -74,6 +74,11 @@ Sem a camada sintética (tarefa 1), o build para em `dados_lagoa_fonte`, com uma
 
   Os dois passam a ser reservados só para essa troca de texto.
 - A trilha AÇÃO também altera `areas/inicio.py`. O merge depois deve ser sequencial e revisado.
+- **SINT-REV-20261003-2300 (issue 1, comentário 5974392800):** reserva das correções C01, C02, G01 e T01 nos arquivos que o retorno lista.
+  - **Necessidade nomeada antes de editar:** com a área de 2 casas da fonte única (C01), duas exibições passam a mostrar decimal com ponto ("29.92 ha"). As duas linhas ficam reservadas **só** para trocar o ponto por vírgula:
+    - `gen37/areas/processo_safra.py:39`: ajuda "Áreas" do formulário do SAF;
+    - `gen37/areas/processo_os.py:195`: rótulo do cultivo na O.S.
+  - Nenhum hunk da REND (`126899e5`) ou da AÇÃO (`20f25726`) toca essas linhas. Não há mudança de lógica.
 - REND, AÇÃO, C2 e PR34 não são editados nesta etapa.
 
 ## Tarefas, na ordem
