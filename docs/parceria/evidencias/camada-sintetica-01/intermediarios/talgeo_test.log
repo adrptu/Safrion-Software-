@@ -1,0 +1,9 @@
+OK    1 23 pivôs: área do círculo ≈ ha declarado (< 1 %) e = círculo refeito (< 0,01 ha)
+OK    2 perímetro do círculo ≈ 2πr (< 1 %)
+OK    3 centro de cada pivô dentro do próprio círculo e fora dos outros
+OK    4 nenhum par de pivôs se sobrepõe (soma 0 ha)
+OK    5 quadrado de 200 m: 4 ha (< 1 %, mesma escala do item 1); dentro de PV05 sobrepõe ≈ 4 ha; longe, 0
+OK    6 tgAutoCruza: gravata sim, círculo do pivô não
+OK    7 tgLerGeoJSON: 23 polígonos (ha ≈ declarado), ponto + area_ha = pivô de 50 ha, JSON inválido explica
+OK    8 tgDestino e KMZ: "Reserva legal" e "Outorga" → cadastro da fazenda; "Pivô 3" → talhão; .kmz recusado
+RESULTADO: 8/8

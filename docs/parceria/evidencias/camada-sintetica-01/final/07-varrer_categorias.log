@@ -1,0 +1,7 @@
+$ python3 ferramentas/varrer_categorias.py <cópia dos arquivos rastreados + novos, sem saida/>
+TOTAL 0
+[exit 0]
+
+$ python3 ferramentas/varrer_categorias.py gen37 (árvore de trabalho com project/ gerado; _render e dados_lagoa_sintetico excluídos pela regra)
+TOTAL 0
+[exit 0]

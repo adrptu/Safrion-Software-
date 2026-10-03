@@ -1,0 +1,1030 @@
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 11, in <module>
+    from dados_lagoa_kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+ModuleNotFoundError: No module named 'dados_lagoa_kml'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 14, in <module>
+    try: from dados_lagoa_sintetico.kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'dados_lagoa_sintetico'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/build.py", line 17, in <module>
+    m=importlib.import_module(f'areas.{a}')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/areas/inicio.py", line 48, in <module>
+    import dados as D
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados.py", line 127, in <module>
+    import dados_lagoa_safra as _DL
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_safra.py", line 13, in <module>
+    from dados_lagoa_fonte import PIVOS_HA as PIVOS   # real só no Mac; sintético fora dele
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 16, in <module>
+    raise ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ '
+ImportError: Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 11, in <module>
+    from dados_lagoa_kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+ModuleNotFoundError: No module named 'dados_lagoa_kml'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 14, in <module>
+    try: from dados_lagoa_sintetico.kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'dados_lagoa_sintetico'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/build.py", line 17, in <module>
+    m=importlib.import_module(f'areas.{a}')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/areas/agronomia.py", line 28, in <module>
+    import dados as D
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados.py", line 127, in <module>
+    import dados_lagoa_safra as _DL
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_safra.py", line 13, in <module>
+    from dados_lagoa_fonte import PIVOS_HA as PIVOS   # real só no Mac; sintético fora dele
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 16, in <module>
+    raise ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ '
+ImportError: Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 11, in <module>
+    from dados_lagoa_kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+ModuleNotFoundError: No module named 'dados_lagoa_kml'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 14, in <module>
+    try: from dados_lagoa_sintetico.kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'dados_lagoa_sintetico'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/build.py", line 17, in <module>
+    m=importlib.import_module(f'areas.{a}')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/areas/cad_ativos_pessoas.py", line 18, in <module>
+    import dados2 as D2
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados2.py", line 158, in <module>
+    import dados_lagoa_safra as _DL
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_safra.py", line 13, in <module>
+    from dados_lagoa_fonte import PIVOS_HA as PIVOS   # real só no Mac; sintético fora dele
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 16, in <module>
+    raise ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ '
+ImportError: Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 11, in <module>
+    from dados_lagoa_kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+ModuleNotFoundError: No module named 'dados_lagoa_kml'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 14, in <module>
+    try: from dados_lagoa_sintetico.kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'dados_lagoa_sintetico'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/build.py", line 17, in <module>
+    m=importlib.import_module(f'areas.{a}')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/areas/cad_culturas.py", line 15, in <module>
+    import dados2 as D2
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados2.py", line 158, in <module>
+    import dados_lagoa_safra as _DL
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_safra.py", line 13, in <module>
+    from dados_lagoa_fonte import PIVOS_HA as PIVOS   # real só no Mac; sintético fora dele
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 16, in <module>
+    raise ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ '
+ImportError: Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 11, in <module>
+    from dados_lagoa_kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+ModuleNotFoundError: No module named 'dados_lagoa_kml'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 14, in <module>
+    try: from dados_lagoa_sintetico.kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'dados_lagoa_sintetico'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/build.py", line 17, in <module>
+    m=importlib.import_module(f'areas.{a}')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/areas/cad_fazendas.py", line 21, in <module>
+    import dados as D
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados.py", line 127, in <module>
+    import dados_lagoa_safra as _DL
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_safra.py", line 13, in <module>
+    from dados_lagoa_fonte import PIVOS_HA as PIVOS   # real só no Mac; sintético fora dele
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 16, in <module>
+    raise ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ '
+ImportError: Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 11, in <module>
+    from dados_lagoa_kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+ModuleNotFoundError: No module named 'dados_lagoa_kml'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 14, in <module>
+    try: from dados_lagoa_sintetico.kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'dados_lagoa_sintetico'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/build.py", line 17, in <module>
+    m=importlib.import_module(f'areas.{a}')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/areas/cad_parceiros.py", line 21, in <module>
+    import dados2 as D2
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados2.py", line 158, in <module>
+    import dados_lagoa_safra as _DL
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_safra.py", line 13, in <module>
+    from dados_lagoa_fonte import PIVOS_HA as PIVOS   # real só no Mac; sintético fora dele
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 16, in <module>
+    raise ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ '
+ImportError: Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 11, in <module>
+    from dados_lagoa_kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+ModuleNotFoundError: No module named 'dados_lagoa_kml'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 14, in <module>
+    try: from dados_lagoa_sintetico.kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'dados_lagoa_sintetico'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/build.py", line 17, in <module>
+    m=importlib.import_module(f'areas.{a}')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/areas/cad_produtos_estrutura.py", line 15, in <module>
+    import dados as D
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados.py", line 127, in <module>
+    import dados_lagoa_safra as _DL
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_safra.py", line 13, in <module>
+    from dados_lagoa_fonte import PIVOS_HA as PIVOS   # real só no Mac; sintético fora dele
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 16, in <module>
+    raise ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ '
+ImportError: Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 11, in <module>
+    from dados_lagoa_kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+ModuleNotFoundError: No module named 'dados_lagoa_kml'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 14, in <module>
+    try: from dados_lagoa_sintetico.kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'dados_lagoa_sintetico'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/build.py", line 17, in <module>
+    m=importlib.import_module(f'areas.{a}')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/areas/cadastros.py", line 13, in <module>
+    import dados as D
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados.py", line 127, in <module>
+    import dados_lagoa_safra as _DL
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_safra.py", line 13, in <module>
+    from dados_lagoa_fonte import PIVOS_HA as PIVOS   # real só no Mac; sintético fora dele
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 16, in <module>
+    raise ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ '
+ImportError: Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 11, in <module>
+    from dados_lagoa_kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+ModuleNotFoundError: No module named 'dados_lagoa_kml'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 14, in <module>
+    try: from dados_lagoa_sintetico.kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'dados_lagoa_sintetico'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/build.py", line 17, in <module>
+    m=importlib.import_module(f'areas.{a}')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/areas/campo.py", line 31, in <module>
+    import dados as D
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados.py", line 127, in <module>
+    import dados_lagoa_safra as _DL
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_safra.py", line 13, in <module>
+    from dados_lagoa_fonte import PIVOS_HA as PIVOS   # real só no Mac; sintético fora dele
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 16, in <module>
+    raise ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ '
+ImportError: Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 11, in <module>
+    from dados_lagoa_kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+ModuleNotFoundError: No module named 'dados_lagoa_kml'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 14, in <module>
+    try: from dados_lagoa_sintetico.kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'dados_lagoa_sintetico'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/build.py", line 17, in <module>
+    m=importlib.import_module(f'areas.{a}')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/areas/colheita.py", line 22, in <module>
+    import dados as D
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados.py", line 127, in <module>
+    import dados_lagoa_safra as _DL
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_safra.py", line 13, in <module>
+    from dados_lagoa_fonte import PIVOS_HA as PIVOS   # real só no Mac; sintético fora dele
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 16, in <module>
+    raise ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ '
+ImportError: Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 11, in <module>
+    from dados_lagoa_kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+ModuleNotFoundError: No module named 'dados_lagoa_kml'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 14, in <module>
+    try: from dados_lagoa_sintetico.kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'dados_lagoa_sintetico'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/build.py", line 17, in <module>
+    m=importlib.import_module(f'areas.{a}')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/areas/comercial.py", line 14, in <module>
+    import dados as D
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados.py", line 127, in <module>
+    import dados_lagoa_safra as _DL
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_safra.py", line 13, in <module>
+    from dados_lagoa_fonte import PIVOS_HA as PIVOS   # real só no Mac; sintético fora dele
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 16, in <module>
+    raise ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ '
+ImportError: Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 11, in <module>
+    from dados_lagoa_kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+ModuleNotFoundError: No module named 'dados_lagoa_kml'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 14, in <module>
+    try: from dados_lagoa_sintetico.kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'dados_lagoa_sintetico'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/build.py", line 17, in <module>
+    m=importlib.import_module(f'areas.{a}')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/areas/configuracoes.py", line 20, in <module>
+    import dados as D
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados.py", line 127, in <module>
+    import dados_lagoa_safra as _DL
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_safra.py", line 13, in <module>
+    from dados_lagoa_fonte import PIVOS_HA as PIVOS   # real só no Mac; sintético fora dele
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 16, in <module>
+    raise ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ '
+ImportError: Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 11, in <module>
+    from dados_lagoa_kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+ModuleNotFoundError: No module named 'dados_lagoa_kml'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 14, in <module>
+    try: from dados_lagoa_sintetico.kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'dados_lagoa_sintetico'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/build.py", line 17, in <module>
+    m=importlib.import_module(f'areas.{a}')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/areas/gestao.py", line 36, in <module>
+    import dados as D
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados.py", line 127, in <module>
+    import dados_lagoa_safra as _DL
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_safra.py", line 13, in <module>
+    from dados_lagoa_fonte import PIVOS_HA as PIVOS   # real só no Mac; sintético fora dele
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 16, in <module>
+    raise ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ '
+ImportError: Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 11, in <module>
+    from dados_lagoa_kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+ModuleNotFoundError: No module named 'dados_lagoa_kml'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 14, in <module>
+    try: from dados_lagoa_sintetico.kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'dados_lagoa_sintetico'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/build.py", line 17, in <module>
+    m=importlib.import_module(f'areas.{a}')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/areas/irrigacao.py", line 27, in <module>
+    import cenario
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/cenario.py", line 5, in <module>
+    import dados2 as D2
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados2.py", line 158, in <module>
+    import dados_lagoa_safra as _DL
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_safra.py", line 13, in <module>
+    from dados_lagoa_fonte import PIVOS_HA as PIVOS   # real só no Mac; sintético fora dele
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 16, in <module>
+    raise ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ '
+ImportError: Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 11, in <module>
+    from dados_lagoa_kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+ModuleNotFoundError: No module named 'dados_lagoa_kml'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 14, in <module>
+    try: from dados_lagoa_sintetico.kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'dados_lagoa_sintetico'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/build.py", line 17, in <module>
+    m=importlib.import_module(f'areas.{a}')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/areas/logistica.py", line 12, in <module>
+    import dados as D
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados.py", line 127, in <module>
+    import dados_lagoa_safra as _DL
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_safra.py", line 13, in <module>
+    from dados_lagoa_fonte import PIVOS_HA as PIVOS   # real só no Mac; sintético fora dele
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 16, in <module>
+    raise ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ '
+ImportError: Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 11, in <module>
+    from dados_lagoa_kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+ModuleNotFoundError: No module named 'dados_lagoa_kml'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 14, in <module>
+    try: from dados_lagoa_sintetico.kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'dados_lagoa_sintetico'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/build.py", line 17, in <module>
+    m=importlib.import_module(f'areas.{a}')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/areas/maquinas.py", line 23, in <module>
+    import dados as D
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados.py", line 127, in <module>
+    import dados_lagoa_safra as _DL
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_safra.py", line 13, in <module>
+    from dados_lagoa_fonte import PIVOS_HA as PIVOS   # real só no Mac; sintético fora dele
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 16, in <module>
+    raise ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ '
+ImportError: Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 11, in <module>
+    from dados_lagoa_kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+ModuleNotFoundError: No module named 'dados_lagoa_kml'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 14, in <module>
+    try: from dados_lagoa_sintetico.kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'dados_lagoa_sintetico'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/build.py", line 17, in <module>
+    m=importlib.import_module(f'areas.{a}')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/areas/mobile.py", line 49, in <module>
+    import dados as D
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados.py", line 127, in <module>
+    import dados_lagoa_safra as _DL
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_safra.py", line 13, in <module>
+    from dados_lagoa_fonte import PIVOS_HA as PIVOS   # real só no Mac; sintético fora dele
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 16, in <module>
+    raise ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ '
+ImportError: Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 11, in <module>
+    from dados_lagoa_kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+ModuleNotFoundError: No module named 'dados_lagoa_kml'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 14, in <module>
+    try: from dados_lagoa_sintetico.kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'dados_lagoa_sintetico'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/build.py", line 17, in <module>
+    m=importlib.import_module(f'areas.{a}')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/areas/onboarding_backoffice.py", line 19, in <module>
+    import dados as D
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados.py", line 127, in <module>
+    import dados_lagoa_safra as _DL
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_safra.py", line 13, in <module>
+    from dados_lagoa_fonte import PIVOS_HA as PIVOS   # real só no Mac; sintético fora dele
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 16, in <module>
+    raise ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ '
+ImportError: Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 11, in <module>
+    from dados_lagoa_kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+ModuleNotFoundError: No module named 'dados_lagoa_kml'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 14, in <module>
+    try: from dados_lagoa_sintetico.kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'dados_lagoa_sintetico'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/build.py", line 17, in <module>
+    m=importlib.import_module(f'areas.{a}')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/areas/os_campo.py", line 11, in <module>
+    import dados2 as D2
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados2.py", line 158, in <module>
+    import dados_lagoa_safra as _DL
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_safra.py", line 13, in <module>
+    from dados_lagoa_fonte import PIVOS_HA as PIVOS   # real só no Mac; sintético fora dele
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 16, in <module>
+    raise ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ '
+ImportError: Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 11, in <module>
+    from dados_lagoa_kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+ModuleNotFoundError: No module named 'dados_lagoa_kml'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 14, in <module>
+    try: from dados_lagoa_sintetico.kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'dados_lagoa_sintetico'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/build.py", line 17, in <module>
+    m=importlib.import_module(f'areas.{a}')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/areas/parceiros.py", line 34, in <module>
+    import dados as D
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados.py", line 127, in <module>
+    import dados_lagoa_safra as _DL
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_safra.py", line 13, in <module>
+    from dados_lagoa_fonte import PIVOS_HA as PIVOS   # real só no Mac; sintético fora dele
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 16, in <module>
+    raise ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ '
+ImportError: Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 11, in <module>
+    from dados_lagoa_kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+ModuleNotFoundError: No module named 'dados_lagoa_kml'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 14, in <module>
+    try: from dados_lagoa_sintetico.kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'dados_lagoa_sintetico'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/build.py", line 17, in <module>
+    m=importlib.import_module(f'areas.{a}')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/areas/planejamento.py", line 25, in <module>
+    import dados as D
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados.py", line 127, in <module>
+    import dados_lagoa_safra as _DL
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_safra.py", line 13, in <module>
+    from dados_lagoa_fonte import PIVOS_HA as PIVOS   # real só no Mac; sintético fora dele
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 16, in <module>
+    raise ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ '
+ImportError: Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 11, in <module>
+    from dados_lagoa_kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+ModuleNotFoundError: No module named 'dados_lagoa_kml'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 14, in <module>
+    try: from dados_lagoa_sintetico.kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'dados_lagoa_sintetico'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/build.py", line 17, in <module>
+    m=importlib.import_module(f'areas.{a}')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/areas/processo_compras.py", line 12, in <module>
+    import dados2 as D2
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados2.py", line 158, in <module>
+    import dados_lagoa_safra as _DL
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_safra.py", line 13, in <module>
+    from dados_lagoa_fonte import PIVOS_HA as PIVOS   # real só no Mac; sintético fora dele
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 16, in <module>
+    raise ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ '
+ImportError: Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 11, in <module>
+    from dados_lagoa_kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+ModuleNotFoundError: No module named 'dados_lagoa_kml'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 14, in <module>
+    try: from dados_lagoa_sintetico.kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'dados_lagoa_sintetico'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/build.py", line 17, in <module>
+    m=importlib.import_module(f'areas.{a}')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/areas/processo_estoque.py", line 11, in <module>
+    import dados2 as D2
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados2.py", line 158, in <module>
+    import dados_lagoa_safra as _DL
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_safra.py", line 13, in <module>
+    from dados_lagoa_fonte import PIVOS_HA as PIVOS   # real só no Mac; sintético fora dele
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 16, in <module>
+    raise ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ '
+ImportError: Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 11, in <module>
+    from dados_lagoa_kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+ModuleNotFoundError: No module named 'dados_lagoa_kml'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 14, in <module>
+    try: from dados_lagoa_sintetico.kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'dados_lagoa_sintetico'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/build.py", line 17, in <module>
+    m=importlib.import_module(f'areas.{a}')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/areas/processo_os.py", line 55, in <module>
+    import dados as D
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados.py", line 127, in <module>
+    import dados_lagoa_safra as _DL
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_safra.py", line 13, in <module>
+    from dados_lagoa_fonte import PIVOS_HA as PIVOS   # real só no Mac; sintético fora dele
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 16, in <module>
+    raise ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ '
+ImportError: Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 11, in <module>
+    from dados_lagoa_kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+ModuleNotFoundError: No module named 'dados_lagoa_kml'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 14, in <module>
+    try: from dados_lagoa_sintetico.kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'dados_lagoa_sintetico'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/build.py", line 17, in <module>
+    m=importlib.import_module(f'areas.{a}')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/areas/processo_planos.py", line 10, in <module>
+    import dados2 as D2
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados2.py", line 158, in <module>
+    import dados_lagoa_safra as _DL
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_safra.py", line 13, in <module>
+    from dados_lagoa_fonte import PIVOS_HA as PIVOS   # real só no Mac; sintético fora dele
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 16, in <module>
+    raise ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ '
+ImportError: Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 11, in <module>
+    from dados_lagoa_kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+ModuleNotFoundError: No module named 'dados_lagoa_kml'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 14, in <module>
+    try: from dados_lagoa_sintetico.kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'dados_lagoa_sintetico'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/build.py", line 17, in <module>
+    m=importlib.import_module(f'areas.{a}')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/areas/processo_safra.py", line 7, in <module>
+    import dados2 as D2
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados2.py", line 158, in <module>
+    import dados_lagoa_safra as _DL
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_safra.py", line 13, in <module>
+    from dados_lagoa_fonte import PIVOS_HA as PIVOS   # real só no Mac; sintético fora dele
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 16, in <module>
+    raise ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ '
+ImportError: Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 11, in <module>
+    from dados_lagoa_kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+ModuleNotFoundError: No module named 'dados_lagoa_kml'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 14, in <module>
+    try: from dados_lagoa_sintetico.kml import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'dados_lagoa_sintetico'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/build.py", line 17, in <module>
+    m=importlib.import_module(f'areas.{a}')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/areas/suprimentos.py", line 36, in <module>
+    import dados as D
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados.py", line 127, in <module>
+    import dados_lagoa_safra as _DL
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_safra.py", line 13, in <module>
+    from dados_lagoa_fonte import PIVOS_HA as PIVOS   # real só no Mac; sintético fora dele
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/dados_lagoa_fonte.py", line 16, in <module>
+    raise ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ '
+ImportError: Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)
+MÓDULOS COM FALHA: [('inicio', "ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)')"), ('agronomia', "ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)')"), ('cad_ativos_pessoas', "ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)')"), ('cad_culturas', "ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)')"), ('cad_fazendas', "ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)')"), ('cad_parceiros', "ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)')"), ('cad_produtos_estrutura', "ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)')"), ('cadastros', "ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)')"), ('campo', "ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)')"), ('colheita', "ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)')"), ('comercial', "ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)')"), ('configuracoes', "ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)')"), ('gestao', "ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)')"), ('irrigacao', "ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)')"), ('logistica', "ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)')"), ('maquinas', "ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)')"), ('mobile', "ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)')"), ('onboarding_backoffice', "ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)')"), ('os_campo', "ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)')"), ('parceiros', "ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)')"), ('planejamento', "ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)')"), ('processo_compras', "ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)')"), ('processo_estoque', "ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)')"), ('processo_os', "ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)')"), ('processo_planos', "ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)')"), ('processo_safra', "ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)')"), ('suprimentos', "ImportError('Sem dados da Lagoa Grande: no Mac, dados_lagoa_kml.py (real); fora dele, gere dados_lagoa_sintetico/ (contrato em RETOMADA-NUVEM.md)')")]
+1 artboards → /home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/project · menu vigente: 1 · ocultos: 0

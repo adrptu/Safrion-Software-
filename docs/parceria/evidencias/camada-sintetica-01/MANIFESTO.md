@@ -1,0 +1,49 @@
+# Evidências · CAMADA-SINTETICA-01 (CORTE-REMOTO-01)
+
+- **Base testada:** `claude/camada-sintetica-01` @ `d415c08f677f9043828b63448d84f00f3e12a11a` (pai `12c2a449`, sobre `prototipo-limpo/v43` `21ca97ed`). A cadeia `final/` rodou de 22:17:29Z a 22:24:45Z de 03/10/2026, com o mesmo conteúdo do commit `d415c08f` (o commit veio depois, só com estes arquivos). `lagoa/` rodou de 22:25 a 22:30Z.
+- **Executor:** Claude Code remoto, sessão https://claude.ai/code/session_01Div8EjesSwVnpSUvYjZ7kh, Linux 6.18 x86_64, Python 3.11, Node 22.22, Chromium 141 (Playwright), como root. **Solicitante:** Adrianus/Codex. **Revisores:** Codex e Gemini focal.
+- **Ambiente:** `CHROME_BIN` aponta para um wrapper local (fora do repositório) que acrescenta `--no-sandbox` e `--proxy-server` (proxy oficial da sessão). A CA oficial do proxy foi importada na NSS com `certutil`, e a verificação TLS continua ligada. `CDP_GL=1` nos testes Lagoa e no `talmapa`.
+- **Transporte:** os logs vieram de `/tmp/evid` e `/tmp` do contêiner; nenhum teste foi refeito para este transporte. `sha256_original` é o arquivo do contêiner; `sha256_publicado` é este arquivo depois da redação.
+- **Redação:** 3 valores literais de área de pivô da Lagoa, presentes em testes ou dados legados (`mip_correcoes_test.py:101`, `mip_test.js:61` e `dados_lagoa_safra.py:117` e `:122`), podem ser reais. Toda ocorrência deles seguida de "ha" virou `<área redigida>`: 5 ocorrências em 3 logs. As 3 dos logs de irrigação estão no contexto da Santa Rita (P2) e provavelmente são coincidência numérica. A redação foi conservadora; o resultado OK/FALHA de cada linha não mudou.
+- **Não preservados:** as execuções falhas de `talmapa_test.py` antes dos ajustes (MapLibre sem CA, área passada em formato errado) e da varredura sem `--no-sandbox` foram sobrescritas no contêiner. O motivo e a correção estão descritos no recibo 5974176616.
+
+| Arquivo | Comando | Exit · resultado | Redações | sha256 publicado | sha256 original |
+|---|---|---|---|---|---|
+| `final/01-build.log` | `python3 build.py` | 0 | 0 | `5c61c70f44980491d8a245ddfa312e9af9b514ca18553a47c957cde722fbc0ad` | `5c61c70f44980491d8a245ddfa312e9af9b514ca18553a47c957cde722fbc0ad` |
+| `final/02-montar_render.log` | `python3 montar_render.py` | 0 | 0 | `69cdd56ef9df122f4d536f343ff3ac512b39fdd621c1aec6d5f44fee2001ca55` | `69cdd56ef9df122f4d536f343ff3ac512b39fdd621c1aec6d5f44fee2001ca55` |
+| `final/03-camada_test.log` | `python3 dados_lagoa_sintetico/camada_test.py` | 0 · RESULTADO: 11/11 | 0 | `3834d954d05c241f34c9654c455a11b670e3dcd45f5d49d71004bb6664734345` | `3834d954d05c241f34c9654c455a11b670e3dcd45f5d49d71004bb6664734345` |
+| `final/04-talgeo_test.log` | `node talgeo_test.js` | 0 · RESULTADO: 8/8 | 0 | `81d604fc0cc9833a9e74a2bd21d3999ae9439f7f03e0cacd0fc6e3e47d0afd21` | `81d604fc0cc9833a9e74a2bd21d3999ae9439f7f03e0cacd0fc6e3e47d0afd21` |
+| `final/05-talmapa_test.log` | `python3 talmapa_test.py /tmp/evid/capturas` | 0 · RESULTADO: 8/8 | 0 | `2f6049383bfa6ef1194b59ffcbacd37b0303d0d2fa8cbbfc59debc7ea6bf6995` | `2f6049383bfa6ef1194b59ffcbacd37b0303d0d2fa8cbbfc59debc7ea6bf6995` |
+| `final/06-varredura.log` | `python3 varredura.py` | 0 · RESULTADO: 144/144 páginas sem erro | 0 | `b1f637c2526410a3816f7737396093a68e56c5fc18b6c87d8ffd84fe7a42e75e` | `b1f637c2526410a3816f7737396093a68e56c5fc18b6c87d8ffd84fe7a42e75e` |
+| `final/07-varrer_categorias.log` | `python3 ferramentas/varrer_categorias.py <cópia dos arquivos rastreados + novos, sem saida/>` | 0 / 0 · TOTAL 0 | 0 | `8bd44815d9c58aac6c08de9d807e80a9ac911f22e198f8442458cfe7548ca245` | `8bd44815d9c58aac6c08de9d807e80a9ac911f22e198f8442458cfe7548ca245` |
+| `final/08-lagoa-resumo.txt` | `resumo da execução dos testes Lagoa` | — | 0 | `6c47b26a2da50de236ece8cf4ac187cb181bd35c529d3e389edbdc04fbf51328` | `6c47b26a2da50de236ece8cf4ac187cb181bd35c529d3e389edbdc04fbf51328` |
+| `final/inicio.txt` | `marca de tempo (date -u)` | — | 0 | `ba7934fa0906c56d7f681e1f64aaa0d3b5bc539bae02d8af0e51655bfcf8e03f` | `ba7934fa0906c56d7f681e1f64aaa0d3b5bc539bae02d8af0e51655bfcf8e03f` |
+| `final/fim.txt` | `marca de tempo (date -u)` | — | 0 | `0847e4bb96bb1d343e0483637ca15ce03e85670144a506cbf5632db60b660d7f` | `0847e4bb96bb1d343e0483637ca15ce03e85670144a506cbf5632db60b660d7f` |
+| `lagoa/carencia_test.py.log` | `python3 carencia_test.py` | 1 | 0 | `1e569c4877938a1924a535f3266f9d839f89ba848cd9a3b2e87d931fd5afc086` | `1e569c4877938a1924a535f3266f9d839f89ba848cd9a3b2e87d931fd5afc086` |
+| `lagoa/irr_estado_test.py.log` | `python3 irr_estado_test.py` | 0 · 37 ok · 1 falhas ['18 sem leitura do hidrômetro: Em conferên | 2 | `a93cc5c89b6ed97de1c96132ccc4f5f8edd42b8080f367999bd50cda04bca813` | `eb04d35fc2def1ca57c3ebb4b203470f8836e5757ce998900b8e81916d132862` |
+| `lagoa/irr_fluxo_test.py.log` | `python3 irr_fluxo_test.py` | 0 · 33 ok · 0 falhas [] | 1 | `03fc60c4c67dc99bbf1be80f464d320f3d1338c6d79451a7bf2313ab9ea0d2c6` | `f0ca89ea5af1789f44d483fdd98f9ffa56e96793db7c360a688bbf7a9f14b748` |
+| `lagoa/map_decisoes_test.py.log` | `python3 map_decisoes_test.py` | 0 · 13 ok · 0 falhas [] | 0 | `1e4385b9138be0b66b4a4bf369cd0b0f9967366cd68de3b3e69f88c0af077c4a` | `1e4385b9138be0b66b4a4bf369cd0b0f9967366cd68de3b3e69f88c0af077c4a` |
+| `lagoa/map_irrig_filtro_test.py.log` | `python3 map_irrig_filtro_test.py` | 0 · 15 ok · 0 falhas [] | 0 | `4678a7c22f7ddbc959b39ccd862d51bf144aa89c85f56f31610a96816b4e3e52` | `4678a7c22f7ddbc959b39ccd862d51bf144aa89c85f56f31610a96816b4e3e52` |
+| `lagoa/mip_correcoes_test.py.log` | `python3 mip_correcoes_test.py` | 1 · RESULTADO 13/14 | 2 | `0cc36eafb4013d5266f1e6d7d5ca03013c585d80c32832adfcdbc321e59ccd1b` | `588870b3876cf7833c275eaa09428cff84e8bdc9462b38414f509832a971e9a3` |
+| `lagoa/mip_fluxo_test.py.log` | `python3 mip_fluxo_test.py` | 0 · RESULTADO 15/15 | 0 | `f41104d2e3dbc139a1c272d01893680101ef12ac84aab334d2cba6ff8fc1cb64` | `f41104d2e3dbc139a1c272d01893680101ef12ac84aab334d2cba6ff8fc1cb64` |
+| `lagoa/mip_test.js.log` | `node mip_test.js` | 1 | 0 | `bb837fd31683d6499ba16472eeecd39486d247f7e4356614452fad3d7c59c091` | `bb837fd31683d6499ba16472eeecd39486d247f7e4356614452fad3d7c59c091` |
+| `lagoa/mip_unit_test.py.log` | `python3 mip_unit_test.py` | 1 | 0 | `ccda464d8850b1b237c22600679bc5a750ba928df6d1328598893dde22568d7b` | `ccda464d8850b1b237c22600679bc5a750ba928df6d1328598893dde22568d7b` |
+| `lagoa/os_v39_bloq_test.py.log` | `python3 os_v39_bloq_test.py` | 0 · RESULTADO: 11/11 ok | 0 | `2c420a1d3291148d8deee8eac1d9f09478ca50077a1e5c04743b93ef03e0caa7` | `2c420a1d3291148d8deee8eac1d9f09478ca50077a1e5c04743b93ef03e0caa7` |
+| `lagoa/os_v39_liberar_test.py.log` | `python3 os_v39_liberar_test.py` | 1 · RESULTADO: 10/13 ok · FALHAS: confirmação diz que não há ins | 0 | `07ab0f953c0829a63691f171c2589ec5e2ce5eb3187e8a8060e351cd1b83457a` | `07ab0f953c0829a63691f171c2589ec5e2ce5eb3187e8a8060e351cd1b83457a` |
+| `lagoa/os_v39_selo_agua_test.py.log` | `python3 os_v39_selo_agua_test.py` | 0 · RESULTADO: 12/12 ok | 0 | `55d76568bfc42c347cc3f618d0f313d7aa8b1818b3b36a961a3822688426d0da` | `55d76568bfc42c347cc3f618d0f313d7aa8b1818b3b36a961a3822688426d0da` |
+| `capturas/talmapa_celular.png` | `python3 talmapa_test.py <pasta> (captura do mesmo run de final/05)` | — | 0 | `8aecb099662515c64de9a757abb3b652ca3e4c2c62ba2e2682be6cbfa00f961a` | `8aecb099662515c64de9a757abb3b652ca3e4c2c62ba2e2682be6cbfa00f961a` |
+| `capturas/talmapa_desktop.png` | `python3 talmapa_test.py <pasta> (captura do mesmo run de final/05)` | — | 0 | `8aa9ec8a538d3a30843cc9d943af901bbab64cd142fede3f2442127ebf392128` | `8aa9ec8a538d3a30843cc9d943af901bbab64cd142fede3f2442127ebf392128` |
+| `intermediarios/build-sem-camada.log` | `python3 build.py (antes de existir a camada; base 21ca97ed + nada)` | 1 (resultado: MÓDULOS COM FALHA, ImportError "Sem dados da Lagoa Grande…") | 0 | `d6110fe65537aa000381da099cbe7b263e4a20c216de6dac42024e55522b2c93` | `d6110fe65537aa000381da099cbe7b263e4a20c216de6dac42024e55522b2c93` |
+| `intermediarios/build1.log` | `time python3 build.py (gerador versão 1)` | 0 | 0 | `79ae0eb2930f5d37c362bc23fb67d438992a2e3d537fe7799c607dee72601522` | `79ae0eb2930f5d37c362bc23fb67d438992a2e3d537fe7799c607dee72601522` |
+| `intermediarios/render1.log` | `time python3 montar_render.py (gerador v1)` | 0 | 0 | `f17f0646e4b431b14442c0141b0d2420ce01bf65de34b7b69010517016e3b96d` | `f17f0646e4b431b14442c0141b0d2420ce01bf65de34b7b69010517016e3b96d` |
+| `intermediarios/varredura1.log` | `python3 varredura.py (gerador v1, wrapper --no-sandbox)` | 0 · 144/144 | 0 | `f488e6e8112e93e34f46704fa907bbc1f2cafcea407ec5069a7a53a5245d4d84` | `f488e6e8112e93e34f46704fa907bbc1f2cafcea407ec5069a7a53a5245d4d84` |
+| `intermediarios/camada_test.log` | `python3 dados_lagoa_sintetico/camada_test.py (gerador v2, tolerância 1 %)` | 0 · 11/11 | 0 | `9c2b565ee19e074288c71d56b169d49116f4b3a3731d9b4827db2c702f25123f` | `9c2b565ee19e074288c71d56b169d49116f4b3a3731d9b4827db2c702f25123f` |
+| `intermediarios/talgeo_test.log` | `node talgeo_test.js (tolerância ajustada)` | 0 · 8/8 | 0 | `eefc1fe22ba608bf273b90680ab265ec46a21b2fbc80c5bb56c6daa1b12857a5` | `eefc1fe22ba608bf273b90680ab265ec46a21b2fbc80c5bb56c6daa1b12857a5` |
+| `intermediarios/talmapa_test.log` | `python3 talmapa_test.py (gerador v2, CA na NSS)` | 0 · 8/8 | 0 | `09c6b6f083d2ab590fb553b31a8c7c0184a072ae4ab1e11542820bd1654e6142` | `09c6b6f083d2ab590fb553b31a8c7c0184a072ae4ab1e11542820bd1654e6142` |
+
+**Limites:**
+- Isto é protótipo com dados fictícios. Não é HML, backend, concorrência real, publicação nem a v44 integrada.
+- `lagoa/`: `carencia_test`, `mip_unit_test` e `mip_test.js` não rodam no Linux (dependem do `jsc` do macOS).
+- `irr_estado_test` sai com exit 0 mesmo com 1 falha (defeito do teste).
+- `os_v39_liberar` 10/13: falhas na Santa Rita, sem dependência comprovada da camada.
+- As capturas mostram a Lagoa sintética; não há valor real nelas.

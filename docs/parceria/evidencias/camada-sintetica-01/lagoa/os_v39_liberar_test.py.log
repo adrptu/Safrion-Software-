@@ -1,0 +1,16 @@
+$ python3 os_v39_liberar_test.py
+  OK  nova ordem de colheita nasce sem insumos
+  FALHA confirmação diz que não há insumo a reservar · PRÓXIMO PASSO O agrônomo confere atividade e área abaixo e libera; se precisar, inclui produto ou ajusta a área antes. Sem insumos a reservar. Liberar bloqueado: carência em curso em T1 (T1-A) até 22/10 · Fungicida A (OS-0421, aplicado em 23/09, 30 dias). A colheita começaria em 05/10. Quem resolve:
+  FALHA toast sem requisição vazia · OS-0440 emitida em A liberar. Não foi liberada: o agrônomo libera para execução e pode ajustar antes.
+  OK  cenário: nenhuma requisição vazia
+  FALHA situação atual sem reserva que não houve · SITUAÇÃO ATUAL Ana (agrônoma) confere, ajusta se precisar e libera; liberar exige a prontidão de máquina, equipe e insumos. Próximo passo: liberar para execução. ORIGEM Safra 2026/27 · cultivo T1-A (1
+  OK  título sem repetir operação e atividade
+  OK  insumos do plano com dose e total da ordem
+  OK  atividade preenchida pelo plano
+  OK  confirmação lista a reserva por lote
+  OK  requisição nova com três dígitos: REQ-041
+  OK  reserva no lote e situação do insumo com REQ-041
+  OK  sequência contínua: OS-0430 recebe REQ-042
+  OK  sem erro JS
+RESULTADO: 10/13 ok · FALHAS: confirmação diz que não há insumo a reservar; toast sem requisição vazia; situação atual sem reserva que não houve
+[exit 1]

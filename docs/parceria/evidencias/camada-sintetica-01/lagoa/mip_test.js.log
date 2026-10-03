@@ -1,0 +1,19 @@
+$ node mip_test.js
+/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/mip_test.js:3
+const S0=()=>mipGet(); const R=(id)=>mipRes(S0().vis[id],S0());
+                                     ^
+
+ReferenceError: mipRes is not defined
+    at R (/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/mip_test.js:3:38)
+    at Object.<anonymous> (/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/mip_test.js:4:82)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49
+
+Node.js v22.22.0
+[exit 1]

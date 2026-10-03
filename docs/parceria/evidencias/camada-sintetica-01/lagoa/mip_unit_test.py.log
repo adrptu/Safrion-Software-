@@ -1,0 +1,15 @@
+$ python3 mip_unit_test.py
+OK   dados_mip.verificar (datas, pontos × protocolo, médias citadas)
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/mip_unit_test.py", line 10, in <module>
+    r=subprocess.run([JSC,f.name],capture_output=True,text=True,timeout=60); os.unlink(f.name)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.11/subprocess.py", line 1955, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: '/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Helpers/jsc'
+[exit 1]
