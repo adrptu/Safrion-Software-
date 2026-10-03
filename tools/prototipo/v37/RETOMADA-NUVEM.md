@@ -117,15 +117,16 @@ Sem a camada sintética (tarefa 1), o build para em `dados_lagoa_fonte`, com uma
    - **Base:** `a2ffe24`. A CI deu 28 achados sem detalhe.
    - **Fazer:** emissão segura só de regra, arquivo, linha, commit e ID sanitizado, nunca Secret nem Match. Entregar o diff ao Codex **antes** de qualquer execução diagnóstica. Não iniciado.
 8. **Fila D7, depois disso:**
-   1. CAT-ATV (`abc41b07`)
+   1. CAT-ATV. Correção de 03/10: `abc41b07` é **MAPA-ICONES**, não CAT. O CAT transportado tem `e47021d5`, e esse hash é do trecho, não do arquivo de origem.
    2. REND-config 15–18 + D4 + ALOC `058eb147`
-   3. Monitoramento agrícola + MAPA-VISOES (`f46b2e19`)
+   3. Monitoramento agrícola + MAPA-VISOES (`f46b2e19`) e MAPA-ICONES (`abc41b07`)
    4. SUP v2 (`e643eec7`)
    5. ORC-CUSTOS (`7915f874`)
-   6. SOLO-MAPA-TV (`0b10392f`)
-   7. VEN v2 (`25d0882a`)
+   6. SOLO-MAPA-TV (`0b10392f` nesta lista; a cópia transportada tem `8c83b04e`)
+   7. VEN v2 (`25d0882a` nesta lista; a cópia transportada tem `df64ef85`)
 
-   Os pacotes estão em `work/prototipo-fase1/revisoes/qualidade-20261003/`; o Codex os transporta para o GitHub.
+   **Textos transportados para a nuvem** (issue 1, comentários 5974199895, 5974202396 e 5974203077): os 9 blocos foram lidos e o sha256 de cada um confere com o declarado. **Divergência para o Codex decidir:** SOLO e VEN têm hashes diferentes nesta lista e na cópia transportada. Até a decisão, vale a cópia transportada, por ser a única recuperável na nuvem; nenhuma das duas foi aplicada. REND usa o patch cumulativo v2 (`11ccf1f0`), nunca junto do delta incremental.
+   **Estado de implementação:** só o MAPA-ICONES foi conferido no código. Não está aplicado e o patch não se aplica mais à base (o `agronomia.py` mudou). Os demais itens estão "não iniciados" pelo registro de passagem, sem conferência arquivo por arquivo.
 9. **Registrados para gatilho, sem iniciar:**
    - **PCP-ALOC-DESEMPENHO-20261003** (issue 1, comentário 5973928269; contrato SHA-256 `98ac1c49fe0d06799dfac46e9d1a8d365a23f4e39f1bf1c7b1fdeffd657aae66`): depois do aceite da CAMADA-SINTETICA, no fluxo existente (PL03/04, REND-config + D4/ALOC `058eb147`), sem sobrescrever REND/AÇÃO.
    - **QUALIDADE-ARTEFATO-20261003-FLUXO, adendo v2** (comentário 5974025581, SHA-256 `3000d8d3fa8e16630b373f2af756a8ba9ebc8e9b8c1db68a8469d57808bfaf3d`): jornada completa por IA só depois de **todas** as melhorias concluídas. A camada sintética e uma publicação parcial não contam como conclusão.
