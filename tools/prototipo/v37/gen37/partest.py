@@ -32,7 +32,7 @@ def etapa(i): J(f"document.querySelectorAll('nav[aria-label=\"Etapas do processo
 try:
     c.size(1440,1000); c.goto(f'http://127.0.0.1:{p}/SAF.dc.html',wait=1.3)
     chk('sem erro de JS ao abrir', (J("window.__err||''") or '')=='', J("window.__err||''"))
-    clk('Abrir safra'); time.sleep(.3)
+    clk('Continuar'); time.sleep(.3)   # 01/10: a ação da safra nomeia o próximo passo (2026/27: aplicar plano, etapa 2)
     rs=rows(); print('   linhas:', rs[:4])
     chk('T1 aparece como linha do talhão com 2 parcelas', any(r.startswith('T1 2 parcelas · área toda alocada Dividir') for r in rs), [r for r in rs if r.startswith('T1')][:3])
     chk('T1-A e T1-B são sublinhas', any(r.startswith('T1-A parcela') for r in rs) and any(r.startswith('T1-B parcela') for r in rs))
@@ -115,7 +115,7 @@ try:
     J("""(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Cancelar'); b&&b.click();})()"""); time.sleep(.3)
     if panel(): clk('Descartar alterações','aside[role=dialog]')
     # --- Safrinha: novo cultivo em talhão livre e em talhão já planejado
-    etapa(1); J("(()=>{const rs=[...document.querySelectorAll('[role=row]')]; const r=rs.find(x=>/Safrinha/.test(x.innerText)); const b=[...r.querySelectorAll('button')].find(b=>/Abrir safra/.test(b.innerText)); b.click();})()"); time.sleep(.5)
+    etapa(1); J("(()=>{const rs=[...document.querySelectorAll('[role=row]')]; const r=rs.find(x=>/Safrinha/.test(x.innerText)); const b=[...r.querySelectorAll('button')].find(b=>/^Continuar/.test(b.innerText.trim())); b.click();})()"); time.sleep(.5); etapa(2)   # a Safrinha pode abrir noutra etapa
     rs=rows(); chk('Safrinha: T1 com 1 parcela e 152 ha livres', any(r.startswith('T1 1 parcela · 152 ha livres') for r in rs), [r for r in rs if r.startswith('T1')])
     clk('Novo cultivo'); time.sleep(.3)
     def fset(label,val,sel=False):

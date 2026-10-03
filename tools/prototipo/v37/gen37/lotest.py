@@ -36,7 +36,7 @@ try:
         open_(tela); print(tela)
         a=J("(document.querySelector('[aria-current=step]')||{}).innerText||''").replace('\n',' ')
         ok(a.startswith(cur),f'etapa atual destacada: {a}')
-        ok(J("[...document.querySelectorAll('nav[aria-label=\"Etapas do processo\"] a')].map(a=>a.getAttribute('href')).join(',')")=='LO-01.dc.html,LO-02.dc.html,LO-03.dc.html,LO-04.dc.html','faixa por links LO-01..04')
+        ok(J("[...document.querySelectorAll('nav[aria-label=\"Etapas do processo\"] a')].filter(a=>!a.getAttribute('aria-label')).filter(a=>!a.getAttribute('aria-label')).map(a=>a.getAttribute('href')).join(',')")=='LO-01.dc.html,LO-02.dc.html,LO-03.dc.html,LO-04.dc.html','faixa por links LO-01..04')
         ok(J("document.body.innerText.indexOf('{{')<0"),'sem buracos {{}} visíveis')
         ok(J("![...document.querySelectorAll('[role=row] button, [role=row] a')].some(b=>/^(Editar|Alterar)/.test(b.innerText.trim()))"),'sem botões Editar nas linhas')
         ov=J("[...document.querySelectorAll('[role=table]')].map((t,i)=>{const w=t.parentElement; return w.scrollWidth-w.clientWidth>2?('grade '+i+' +'+(w.scrollWidth-w.clientWidth)+'px'):null;}).filter(Boolean)")

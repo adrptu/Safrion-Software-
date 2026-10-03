@@ -425,7 +425,7 @@ function EXTRAVALS(self,v){
     # ================= CF-04 · Auditoria e parâmetros =================
     fname='CF-04.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1380
     trail=[
-      ('23/09 06:40',[Pt.link(OS2['id'],'OS.dc.html'),Pt.txt(' · irrigação')],'Serviço · balanço hídrico','A liberar → Liberadas','água sem produto pela necessidade da cultura','liberação automática pela prontidão, sem aprovação'),
+      ('23/09 06:40',[Pt.link(OS2['id'],'IR-03det.dc.html'),Pt.txt(' · irrigação')],'Serviço · balanço hídrico','A liberar → Liberadas','água sem produto pela necessidade da cultura','liberação automática pela prontidão, sem aprovação'),
       ('22/09 17:12',[Pt.link(OS3['id'],'OS.dc.html'),Pt.txt(' · v1 → v2')],'João · app','só água → fertirrigação (+ Ureia 12 kg/ha)','produto adicionado na mesma tarefa','liberação da água não vale para o saldo com produto · revisão individual do agrônomo'),
       ('22/09 16:05',[Pt.link(f'Contagem {INV["id"]}','EST.dc.html'),Pt.txt(f' · {INV["local"]}')],'Rui · contagem cega',f'{n0(INV["sistema"])} kg → {n0(INV["contado"])} kg {INV["item"]} ({n0(INV_DIF_KG)} kg · {INV_DIF_SC} sc)','divergência de contagem','ajuste aguardando aprovação do gestor · saldo não alterado'),
       ('22/09 09:20',[Pt.b('Fila de expedição · 23/09')],'Rui · alçada AL-08','T2 2º → 1º da fila','T1 atrasado · T2 presente e apto','promessa original de T1 preservada · T4 antecipado mantém a vez'),

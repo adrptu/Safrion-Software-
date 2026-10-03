@@ -29,13 +29,18 @@ PRIMHREF={}   # fid -> destino do botão primário
 PARENT37={}   # fname -> fname de volta
 
 # Menu vigente por decisão do proprietário (25/09/2026): Mapa · Cadastros · Agrícola · Suprimentos.
+# 01/10/2026: Consulta Agrofit (antes de Planos), Pragas e doenças (MIP/MID) e Irrigação voltam dentro de Agrícola; Manutenção volta logo abaixo de Agrícola (pedidos do proprietário).
+# 02/10/2026: Manutenção ganha "Planos de manutenção" (PM) como 1º item; MA-03 vira "Vencimentos e paradas" (sem dois itens com o mesmo nome).
 # Os demais módulos ficam ocultos do menu, preservados no canvas (página "Módulos ocultos").
 MENU2=[('Mapa','map',[('Mapa','IN-04.dc.html')]),
  ('Cadastros','layers',[('Fazendas, áreas e talhões','CD-01.dc.html'),('Culturas, cultivares e operações','CD-02.dc.html'),('Máquinas, instalações e setores','CD-03.dc.html'),
    ('Pessoas e equipes','CD-04.dc.html'),('Parceiros e fornecedores','CD-05.dc.html'),('Produtos, unidades e locais','CD-06.dc.html'),('Estrutura gerencial','CD-07.dc.html')]),
- ('Agrícola','leaf',[('Planos agronômicos','PA.dc.html'),('Planejar safra','SAF.dc.html'),('Ordem de Serviço','OS.dc.html')]),
+ ('Agrícola','leaf',[('Consulta Agrofit','AG-07.dc.html'),('Planos agronômicos','PA.dc.html'),('Planejar safra','SAF.dc.html'),('Ordem de Serviço','OS.dc.html'),('Pragas e doenças (MIP/MID)','AG-01.dc.html'),('Irrigação','IR-01.dc.html')]),
+ ('Manutenção','wrench',[('Planos de manutenção','PM.dc.html'),('Ativos e disponibilidade','MA-01.dc.html'),('Solicitações e inspeções','MA-02.dc.html'),
+   ('Vencimentos e paradas','MA-03.dc.html'),('Ordens de manutenção','MA-04.dc.html'),('Abastecimentos e desempenho','MA-05.dc.html')]),
  ('Suprimentos','cart',[('Compra de insumos','CMP.dc.html'),('Estoque','EST.dc.html')])]
-MENU_OF={'CA-01det.dc.html':'OS.dc.html','CA-02.dc.html':'OS.dc.html','CA-01x-os0420.dc.html':'OS.dc.html'}  # detalhes que pertencem a um item do menu
+MENU_OF={'CA-01det.dc.html':'OS.dc.html','CA-02.dc.html':'OS.dc.html','CA-01x-os0420.dc.html':'OS.dc.html',
+ 'IR-02.dc.html':'IR-01.dc.html','IR-03.dc.html':'IR-01.dc.html','IR-03det.dc.html':'IR-01.dc.html','IR-04.dc.html':'IR-01.dc.html'}  # detalhes que pertencem a um item do menu
 def menu_item(fname):
     f=MENU_OF.get(fname,fname)
     for i,(nome,ic,items) in enumerate(MENU2):
@@ -56,21 +61,111 @@ def navbar(fid,fname=None):
             h=items[0][1]
             st=(f'display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 10px; font-size: 13.5px; font-weight: 700; text-decoration: none; '
                 + (f'background: {ACC}; color: #fff;' if on else f'color: {SIDE_TX};'))
-            out.append(f'<a href="{h}" style="{st}">{icon(ic,16,"#fff" if on else SIDE_TX)}{esc(nome)}</a>')
+            out.append(f'<a href="{h}" title="{esc(nome)}" style="{st}">{icon(ic,16,"#fff" if on else SIDE_TX)}<span class="ml-txt">{esc(nome)}</span></a>')
             continue
         _E.NAVSPEC.append({'open':on})
         k=len(_E.NAVSPEC)-1
-        out.append(f'<button type="button" aria-expanded="{{{{nav{k}_open}}}}" onClick="{{{{nav{k}_tog}}}}" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; border: 0; border-radius: 10px; font-family: inherit; font-size: 13.5px; font-weight: 700; text-align: left; cursor: pointer; background: {"rgba(255,255,255,.10)" if on else "transparent"}; color: {"#fff" if on else SIDE_TX};">'
-                   f'{icon(ic,16,"#fff" if on else SIDE_TX)}<span style="flex-grow: 1;">{esc(nome)}</span><span aria-hidden="true" style="font-size: 11px; color: {SIDE_MUTED};">{{{{nav{k}_sym}}}}</span></button>')
+        out.append(f'<button type="button" aria-expanded="{{{{nav{k}_open}}}}" onClick="{{{{nav{k}_tog}}}}" title="{esc(nome)}" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; border: 0; border-radius: 10px; font-family: inherit; font-size: 13.5px; font-weight: 700; text-align: left; cursor: pointer; background: {"rgba(255,255,255,.10)" if on else "transparent"}; color: {"#fff" if on else SIDE_TX};">'
+                   f'{icon(ic,16,"#fff" if on else SIDE_TX)}<span class="ml-txt" style="flex-grow: 1;">{esc(nome)}</span><span class="ml-txt" aria-hidden="true" style="font-size: 11px; color: {SIDE_MUTED};">{{{{nav{k}_sym}}}}</span></button>')
         subs=''
         for lab,h in items:
             cur=(h==act_h)
             s2=('display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; '
                 + (f'background: {ACC}; color: #fff; font-weight: 700;' if cur else f'color: {SIDE_MUTED}; font-weight: 500;'))
             subs+=f'<a href="{h}" style="{s2}">{esc(lab)}</a>'
-        out.append(f'<sc-if value="{{{{nav{k}_open}}}}" hint-placeholder-val="{{{{{"true" if on else "false"}}}}}"><div style="display: flex; flex-direction: column; gap: 1px; margin-bottom: 4px;">{subs}</div></sc-if>')
+        out.append(f'<sc-if value="{{{{nav{k}_open}}}}" hint-placeholder-val="{{{{{"true" if on else "false"}}}}}"><div class="ml-sub" style="display: flex; flex-direction: column; gap: 1px; margin-bottom: 4px;">{subs}</div></sc-if>')
     return ''.join(out)
 
+# voltar/avançar do processo: setas ‹ › juntas à direita da faixa de etapas (pedido do Adrianus, 01/10/2026);
+# as etapas continuam clicáveis; cada seta tem lugar fixo para a faixa não pular na primeira e na última etapa
+_SETA=f'width: 28px; height: 28px; border-radius: 999px; border: 1px solid {LINE}; background: #fff; color: {INK}; font-family: inherit; font-size: 17px; font-weight: 700; line-height: 1; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; padding: 0 0 2px;'
+# Faixa estreita (celular, quadro do site, zoom de 200 %; revisão QUALIDADE-ARTEFATO-20261003 item 3): abaixo do limite de largura da
+# própria faixa, ela mostra só "Etapa i de n · Nome" com ‹ ›, e a lista completa abre sob demanda (caixa nativa: toque e teclado, sem JS).
+# Limite por número de etapas, medido no Chrome (soma das etapas em até 2 linhas + setas); acima dele nada muda.
+_ETP_LIM={3:520,4:640,5:740}
+def _etp_lim(n): return _ETP_LIM.get(n,520 if n<3 else 900)
+def _etp_abre(i,n,nome):
+    """Etapa atual em texto + caixa que abre a lista completa (só aparece na faixa estreita); o fundo escurecido fecha ao toque."""
+    t=f'Etapa {i} de {n} · {esc(nome)}' if i else f'{n} etapas'
+    return (f'<input type="checkbox" id="etp-c{i}" class="etp-chk" aria-controls="etp-lista" aria-label="{t} · mostrar todas as etapas">'
+            f'<label for="etp-c{i}" class="etp-atual" title="Mostrar todas as etapas"><span style="flex-grow: 1; min-width: 0;">{t}</span><span class="etp-seta" aria-hidden="true">▾</span></label>'
+            f'<label for="etp-c{i}" class="etp-fundo" aria-hidden="true"></label>')
+def _com_setas(itens,n,ant='',prox='',abre=''):
+    # cada etapa ocupa o tamanho do seu texto (sem colunas iguais); as duas setas ficam juntas à direita, cada uma na sua vaga fixa
+    vaga=lambda x: f'<span class="etp-vaga" style="width: 30px; flex-shrink: 0; display: inline-flex; justify-content: center;">{x}</span>'
+    return (f'<div style="display: flex; align-items: center; gap: 6px;">{abre}'
+            f'<div id="etp-lista" class="etp-itens" style="flex-grow: 1; min-width: 0; display: flex; align-items: stretch; gap: 4px;">{itens}</div>'
+            f'<span style="display: inline-flex; align-items: center; gap: 2px; flex-shrink: 0; padding-left: 6px;">{vaga(ant)}{vaga(prox)}</span></div>')
+def _etp_nav(label,n,corpo):
+    return (f'<nav aria-label="{esc(label)}" class="etp etp-l{_etp_lim(n)}" style="position: sticky; top: 0; z-index: 30; background: {SURF}; border-bottom: 1px solid {LINE}; box-shadow: 0 6px 12px -10px rgba(21,32,26,.25); padding: 6px 24px;">'
+            + corpo + '</nav>')   # sem o rótulo visível "Etapas do processo" (01/10, pedido do proprietário); fica no aria-label
+# Casca em tela estreita ou baixa (só CSS; em 1280 px ou mais de largura e mais de 560 px de altura nada muda, salvo a linha do
+# título quebrar quando não cabe): título e comando principal nunca saem da tela; menu aberto passa por cima do conteúdo;
+# conteúdo largo demais rola na horizontal em vez de ser cortado; a lista da tela nunca fica espremida.
+_RAIZ='[data-root]>div>header'
+# linha de título de bloco + ação: <section> dos módulos e section() do engine (DIV). Só linhas: CD-07 (.cadx-dados) é coluna e
+# quebrar uma coluna a joga para o lado, onde a seção corta (revisão do item 3, achado alto)
+_TIT=('main[data-scroll] section>div:first-child:not([class]):not([style*="column"])',
+      'main[data-scroll] div[style*="border-radius: 16px"]>div:first-child[style*="column"]>div:first-child:not([style*="column"])')
+_KPI='main[data-scroll] div[style="display: flex; gap: 14px;"]'   # fileira de indicadores do engine (kpis)
+# lista única que estica até o fim da janela (G2_CSS e cadastros): em tela estreita ou baixa fica com a altura natural e a tela rola
+_S1='main section:only-of-type'
+_ESTICA=(f'{_S1}:has(.g2caixa,.rola)',f'{_S1}:has(.g2caixa,.rola)>div:last-child',
+         f'{_S1}>div:last-child>:is(.g2caixa,.rola,div:has(>.g2caixa,>.rola))',f'{_S1}>div:last-child>div>:is(.g2caixa,.rola)',
+         f'{_S1} .g2caixa>.g2rola','main .cadx','main .cadx-dados','main .cadx-dados .g2caixa','main .cadx-dados .g2rola',
+         'main[data-scroll]>div:last-child')
+# RESPONSIVIDADE (QUALIDADE-ARTEFATO-20261003): a casca acompanha largura E altura, sem identificar aparelho. Altura = janela visível
+# (dvh: a barra do navegador do celular não corta o pé); áreas seguras (entalhe, barra de gestos) por env(); até 1023 px (celular,
+# tablet em pé, zoom de 200 %) o menu aberto passa por cima do conteúdo com fundo que fecha ao toque (Esc também: g2lib), o
+# conteúdo fica com a trilha de 68 px e o título quebra linha; com ponteiro grosso (toque) os itens do menu têm 44 px.
+# O botão do menu e o menu sobreposto (absolutos) também descontam as áreas seguras: não ficam sob o entalhe nem sobre o logo.
+_CSS_RESP=('[data-root]{height:100vh;height:100dvh;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}'
+    '.ml-fundo{display:none}'
+    'main[data-scroll]{scroll-padding-block:8px}'   # o foco levado à vista pela rolagem fica com o contorno inteiro (não rente à borda)
+    '@media (max-width: 1023px){'
+    '.menu-lat:not(.rec){position:absolute;top:env(safe-area-inset-top,0px);bottom:env(safe-area-inset-bottom,0px);left:env(safe-area-inset-left,0px);z-index:35;box-shadow:12px 0 32px -12px rgba(21,32,26,.45)}'
+    '.menu-lat:not(.rec)+.ml-tog+div{margin-left:68px}'
+    '.menu-lat:not(.rec)~.ml-fundo{display:block;position:absolute;inset:0;z-index:34;background:rgba(21,32,26,.32);cursor:default}'
+    f'{_RAIZ} h1{{white-space:normal!important;flex-shrink:1!important;min-width:0;overflow-wrap:anywhere}}'
+    '}'
+    '@media (pointer: coarse){.menu-lat a,.menu-lat>button{min-height:44px;box-sizing:border-box;display:flex!important;align-items:center}'
+    '.ml-tog{width:32px;height:32px}.menu-lat.rec+.ml-tog{left:calc(52px + env(safe-area-inset-left,0px))}.ml-tog{left:calc(216px + env(safe-area-inset-left,0px))}}')
+_CSS_ESTREITA=(f'{_RAIZ}>div:nth-child(2){{flex-wrap:wrap}}'          # linha do título: o comando principal desce em vez de sair da tela
+    f'@media (max-width: 1279px){{{_RAIZ}>div{{flex-wrap:wrap}}}}'    # demais linhas do cabeçalho; em 1440 px igual à base
+    f'@media (max-width: 640px){{{_RAIZ}{{padding:10px 14px!important;gap:8px!important}}'
+    f'{_RAIZ} h1{{white-space:normal!important;flex-shrink:1!important;min-width:0;font-size:20px!important}}'
+    f'{_RAIZ}>div>span{{max-width:100%!important;min-width:0}}'
+    f'{_RAIZ}>div:nth-child(2)>span[style*="nowrap"],{_RAIZ}>div:nth-child(2)>span>span[style*="nowrap"]{{white-space:normal!important;max-width:100%;box-sizing:border-box}}'   # situação longa quebra em vez de sair da tela
+    f'main[data-scroll]{{padding:12px 14px 18px!important;overflow-x:auto!important}}'
+    f'nav.etp{{padding:6px 10px!important}}'
+    + ','.join(_TIT) + '{flex-wrap:wrap}'                              # título do bloco e sua ação: a ação desce em vez de cobrir o título
+    + ','.join(f'{s} :is(label,select)' for s in _TIT) + '{min-width:0;max-width:100%}'
+    + f'{_KPI}{{flex-wrap:wrap}}{_KPI}>*{{flex-basis:90px}}{_KPI}>*>div:nth-child(2)>span{{display:block;line-height:1.35;margin-top:4px}}'          # dois indicadores por linha; a lista da tela sobe
+    '}'
+    '@media (max-width: 640px),(max-height: 560px){' + ','.join(_ESTICA) + '{flex:1 0 auto!important}}'
+    # tela baixa (celular deitado, zoom de 200 %): cabeçalho, faixa e conteúdo rolam juntos; a faixa de etapas fica presa no alto
+    '@media (max-height: 560px){.ml-tog+div{overflow-y:auto;scroll-padding-top:calc(var(--etp-h,0px) + 8px)}main[data-scroll]{flex:1 0 auto!important}}')   # foco não fica sob a faixa presa (altura medida pelo g2lib)
+def _etp_css():
+    """Regras da faixa de etapas: base (desktop igual) + modo estreito por container query, um bloco por limite.
+    No modo estreito a lista abre como folha presa à base da janela (cabe em qualquer altura), com fundo que fecha ao toque;
+    tocar na etapa atual também fecha. Alvos de toque de 44 px (PRD, ações de campo)."""
+    def estreita(p):
+        r=[('.etp-itens','display:none!important'),
+           ('.etp-chk','display:block;position:absolute;opacity:0;width:1px;height:1px;margin:0;pointer-events:none'),
+           ('.etp-atual',f'display:flex;align-items:center;gap:8px;flex-grow:1;min-width:0;min-height:44px;box-sizing:border-box;padding:7px 10px;border-radius:10px;background:{ACCS};box-shadow:inset 0 -2px 0 {ACC};color:{INK};font-size:13px;font-weight:800;line-height:1.25;cursor:pointer'),
+           ('.etp-chk:focus-visible',f'outline:none'),('.etp-chk:focus-visible+.etp-atual',f'outline:2px solid {ACC};outline-offset:2px'),   # o anel fica no rótulo visível, não na caixa invisível de 1 px
+           ('.etp-chk:checked+.etp-atual .etp-seta','transform:rotate(180deg)'),
+           ('.etp-vaga','width:46px!important'),('.etp-vaga:empty','display:none!important'),   # sem seta (1ª/última etapa): o rótulo usa o espaço
+           ('.etp-vaga>:is(a,button)','width:44px!important;height:44px!important;font-size:20px!important'),
+           ('.etp-chk:checked~.etp-fundo','display:block;position:fixed;inset:0;z-index:30;background:rgba(21,32,26,.32);cursor:default'),
+           ('.etp-chk:checked~.etp-itens',f'display:flex!important;flex-direction:column;position:fixed;left:8px;right:8px;bottom:8px;max-width:560px;margin:0 auto;box-sizing:border-box;gap:2px;padding:6px;background:{SURF};border:1px solid {LINE};border-radius:14px;box-shadow:0 18px 40px -12px rgba(21,32,26,.5);max-height:calc(100% - 16px);overflow-y:auto;z-index:31;pointer-events:none'),
+           ('.etp-chk:checked~.etp-itens>*','min-width:0!important;min-height:44px;box-sizing:border-box'),
+           ('.etp-chk:checked~.etp-itens>:not([aria-current=step])','pointer-events:auto')]
+        return ''.join(f'{p} {s}{{{d}}}' for s,d in r)
+    lims=sorted(set(_ETP_LIM.values())|{520,900})
+    return ('.etp{container:etp/inline-size}.etp-chk,.etp-atual,.etp-fundo{display:none}.etp-seta{transition:transform .15s ease}'
+            '.etp-itens>*{min-width:min-content!important}'   # nenhuma etapa fica mais estreita que a maior palavra: sem texto por cima da vizinha
+            + ''.join(f'@container etp (max-width: {L-1}px){{{estreita(f".etp-l{L}")}}}' for L in lims))
 def steps_bar(steps,current=None,label='Etapas do processo'):
     """Faixa de etapas por links (módulos sequenciais): colunas iguais que sempre cabem; nome quebra em até 2 linhas.
     steps: [dict(t, href=None, fn=None, why='', cur=bool, tip)]"""
@@ -81,15 +176,19 @@ def steps_bar(steps,current=None,label='Etapas do processo'):
         badge=(f'background: {ACC}; color: #fff;' if cur else (f'background: {REDS}; color: {RED};' if why else f'background: {GRAYS}; color: {INK};'))
         num=f'<span style="width: 22px; height: 22px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: 11.5px; font-weight: 800; flex-shrink: 0; {badge}">{i}</span>'
         whyh=(f'<span style="display: block; font-size: 11px; font-weight: 700; color: {RED}; line-height: 1.2;">{why}</span>' if why else '')
-        inner=f'{num}<span style="display: flex; flex-direction: column; min-width: 0;"><span style="font-size: 12.5px; line-height: 1.2; font-weight: {800 if cur else 600};">{esc(s["t"])}</span>{whyh}</span>'
-        st=('display: flex; align-items: center; gap: 7px; padding: 5px 8px; border-radius: 10px; text-decoration: none; color: '+INK+'; font-family: inherit; border: 0; cursor: pointer; text-align: left; min-width: 0; '
+        inner=f'{num}<span style="display: flex; flex-direction: column; min-width: 0;"><span style="font-size: 12px; line-height: 1.2; font-weight: {800 if cur else 600};">{esc(s["t"])}</span>{whyh}</span>'
+        st=('display: flex; align-items: center; gap: 6px; padding: 5px 6px; border-radius: 10px; text-decoration: none; color: '+INK+'; font-family: inherit; border: 0; cursor: pointer; text-align: left; min-width: 0; '
             + (f'background: {ACCS}; box-shadow: inset 0 -2px 0 {ACC};' if cur else 'background: transparent;'))
         aria=' aria-current="step"' if cur else ''
         if s.get('fn'): items+=f'<button type="button" onClick="{{{{{s["fn"]}}}}}" title="{esc(s.get("tip") or s["t"])}"{aria} style="{st}">{inner}</button>'
         else: items+=f'<a href="{s.get("href","#")}" title="{esc(s.get("tip") or s["t"])}"{aria} style="{st}">{inner}</a>'
-    return (f'<nav aria-label="{esc(label)}" style="position: sticky; top: 0; z-index: 30; background: {SURF}; border-bottom: 1px solid {LINE}; box-shadow: 0 6px 12px -10px rgba(21,32,26,.25); padding: 5px 24px 6px;">'
-            f'<div style="font-size: 10px; font-weight: 800; letter-spacing: .08em; color: {MUTED}; text-transform: uppercase; padding: 0 8px 3px;">{esc(label)}</div>'
-            f'<div style="display: grid; grid-template-columns: repeat({n}, minmax(0, 1fr)); gap: 4px;">{items}</div></nav>')
+    c=current if current is not None else next((i for i,s in enumerate(steps,1) if s.get('cur')),None)
+    def viz(s,sim,dica):
+        if s.get('fn'): return f'<button type="button" onClick="{{{{{s["fn"]}}}}}" aria-label="{dica}: {esc(s["t"])}" title="{dica}: {esc(s["t"])}" style="{_SETA}">{sim}</button>'
+        return f'<a href="{s.get("href","#")}" aria-label="{dica}: {esc(s["t"])}" title="{dica}: {esc(s["t"])}" style="{_SETA}">{sim}</a>'
+    ant=viz(steps[c-2],'‹','Etapa anterior') if c and c>1 else ''
+    prox=viz(steps[c],'›','Próxima etapa') if c and c<n else ''
+    return _etp_nav(label,n,_com_setas(items,n,ant,prox,_etp_abre(c,n,steps[c-1]['t']) if c else _etp_abre(0,n,'')))
 
 def continuity(veio,aqui,falta,proxima):
     """Faixa do cap. 4.2: Veio de → Está aqui → Falta → Próxima ação."""
@@ -103,13 +202,13 @@ def continuity(veio,aqui,falta,proxima):
 
 def demo_badge():
     return (f'<div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; margin: 4px 0; border-radius: 10px; background: rgba(255,255,255,.06); color: {SIDE_MUTED}; font-size: 11px; font-weight: 700; letter-spacing: .05em;">'
-            f'<span style="width: 7px; height: 7px; border-radius: 999px; background: {YEL};"></span>DEMONSTRAÇÃO · dados fictícios</div>')
+            f'<span style="width: 7px; height: 7px; border-radius: 999px; background: {YEL}; flex-shrink: 0;"></span><span class="ml-txt">DEMONSTRAÇÃO · dados fictícios</span></div>')
 
 def perfil_pill(perfil):
     ini=perfil[0].upper()
     return (f'<div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; font-size: 12.5px; color: {SIDE_TX}; border-top: 1px solid rgba(255,255,255,.08);">'
             f'<span style="width: 26px; height: 26px; border-radius: 999px; background: {ACC}; color: #fff; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; justify-content: center;">{ini}</span>'
-            f'<span style="display: flex; flex-direction: column; line-height: 1.2;"><span style="font-weight: 700; color: #fff;">{esc(perfil)}</span><span style="color: {SIDE_MUTED}; font-size: 11.5px;">Trocar perfil de demonstração ▾</span></span></div>')
+            f'<span class="ml-txt" style="display: flex; flex-direction: column; line-height: 1.2;"><span style="font-weight: 700; color: #fff;">{esc(perfil)}</span><span style="color: {SIDE_MUTED}; font-size: 11.5px;">Trocar perfil de demonstração ▾</span></span></div>')
 
 # Filtros do topo por tela: 'filtro' = seletor que muda os dados da tela; 'contexto' = só leitura (escolhido no próprio processo).
 MACRO = {
@@ -119,7 +218,7 @@ MACRO = {
     'CMP.dc.html': dict(faz='contexto', saf='contexto'),
     'EST.dc.html': dict(faz='filtro'),
 }
-FAZENDAS = ['Santa Rita', 'Boa Vista']
+FAZENDAS = ['Lagoa Grande', 'Santa Rita', 'Boa Vista']
 SAFRAS_MF = ['2026/27', 'Safrinha 2027', '2025/26']
 def _macro_html(fname, ctx):
     cfg = MACRO.get(fname)
@@ -182,6 +281,7 @@ def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=Non
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <title>{esc(title)}</title>
 <script src="./support.js"></script>
 </head>
@@ -190,19 +290,26 @@ def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=Non
 <helmet>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Sora:wght@600;700&amp;display=swap">
 <style>
-body{{margin:0;font-family:{FONT};color:{INK};background:{BG}}}
-a{{color:{ACC}}}a:hover{{color:#15603a}}
+html,body{{height:100%;overflow:hidden}}
+.menu-lat{{width:232px;transition:width .18s ease}}.menu-lat.rec{{width:68px}}.menu-lat.rec .ml-txt,.menu-lat.rec .ml-sub{{display:none!important}}
+.menu-lat.rec a,.menu-lat.rec button{{justify-content:center}}.menu-lat.rec .ml-topo{{flex-direction:column;gap:8px;padding:2px 0 8px}}.menu-lat.rec .ml-topo>a{{padding:0;flex-grow:0}}
+.ml-tog{{position:absolute;top:calc(22px + env(safe-area-inset-top,0px));left:calc(219px + env(safe-area-inset-left,0px));z-index:40;width:26px;height:26px;border:1px solid {LINE};border-radius:999px;background:#fff;color:{INK};cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;box-shadow:0 1px 4px rgba(21,32,26,.22);transition:left .18s ease}}
+.menu-lat.rec+.ml-tog{{left:calc(55px + env(safe-area-inset-left,0px))}}@media (hover:hover){{.ml-tog:hover{{background:{ACCS};color:{ACC}}}}}.ml-tog:focus-visible{{outline:2px solid {ACC};outline-offset:2px}}body{{margin:0;font-family:{FONT};color:{INK};background:{BG}}}
+a{{color:{ACC}}}@media (hover:hover){{a:hover{{color:#15603a}}}}
 {E.G2_CSS}
+{_etp_css()}{_CSS_ESTREITA}{_CSS_RESP}
 </style>
 </helmet>
-<div data-root="1" style="position: relative; width: {W}px; height: {H}px; box-sizing: border-box; display: flex; background: {BG}; font-family: {FONT}; color: {INK}; overflow: clip;">
-<nav aria-label="Menu" style="width: 232px; flex-shrink: 0; background: {SIDE}; display: flex; flex-direction: column; padding: 16px 12px 12px; gap: 2px; box-sizing: border-box; overflow: clip;">
-<a href="Main.dc.html" aria-label="Índice do protótipo" style="display: flex; align-items: center; gap: 10px; padding: 2px 12px 8px; font-family: {DISP}; font-weight: 700; font-size: 15px; letter-spacing: -.01em; color: #fff; text-decoration: none;"><span style="width: 28px; height: 28px; border-radius: 9px; background: {ACC}; display: inline-flex; align-items: center; justify-content: center;">{icon("Agronomia",16,"#fff")}</span>Talhão à O.S.</a>
+<div data-root="1" style="position: relative; width: 100%; box-sizing: border-box; display: flex; background: {BG}; font-family: {FONT}; color: {INK}; overflow: clip;">
+<nav aria-label="Menu" class="menu-lat {{{{menu_cls}}}}" style="flex-shrink: 0; background: {SIDE}; display: flex; flex-direction: column; padding: 16px 12px 12px; gap: 2px; box-sizing: border-box; overflow-x: clip; overflow-y: auto;">
+<div class="ml-topo" style="display: flex; align-items: center; gap: 6px; padding: 2px 4px 8px 0;"><a href="Main.dc.html" aria-label="Índice do protótipo" style="display: flex; align-items: center; gap: 10px; padding: 0 0 0 12px; font-family: {DISP}; font-weight: 700; font-size: 15px; letter-spacing: -.01em; color: #fff; text-decoration: none; flex-grow: 1; min-width: 0;"><span style="width: 28px; height: 28px; border-radius: 9px; background: {ACC}; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;">{icon("Agronomia",16,"#fff")}</span><span class="ml-txt" style="white-space: nowrap;">Talhão à O.S.</span></a>
+</div>
 {navbar(fid,fname)}
 <div style="flex-grow: 1;"></div>
 {demo_badge()}
 {perfil_pill(perfil)}
 </nav>
+<button type="button" class="ml-tog" onClick="{{{{menu_tog}}}}" aria-label="{{{{menu_tog_lab}}}}" title="{{{{menu_tog_lab}}}}" aria-expanded="{{{{menu_aberto}}}}"><sc-if value="{{{{menu_aberto}}}}" hint-placeholder-val="{{{{true}}}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></sc-if><sc-if value="{{{{menu_rec}}}}" hint-placeholder-val="{{{{false}}}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></sc-if></button>
 <div style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0;">
 <header style="padding: 14px 32px 14px; background: {SURF}; border-bottom: 1px solid {LINE}; display: flex; flex-direction: column; gap: 10px;">
 <div style="display: flex; align-items: center; gap: 10px; font-size: 12.5px; font-weight: 500;">{ctxp}<span>{crumb}</span>{srch}</div>
@@ -217,11 +324,12 @@ a{{color:{ACC}}}a:hover{{color:#15603a}}
 {chipsrow}
 </header>
 {steps or ''}
-<main data-scroll="{"1" if steps else "0"}" style="flex-grow: 1; padding: 18px 32px 22px; {"overflow-y: auto; min-height: 0;" if steps else ""} display: grid; grid-template-columns: minmax(0, 1fr); grid-auto-rows: max-content; align-content: start; gap: 18px; box-sizing: border-box; min-width: 0;">
+<main data-scroll="1" style="flex-grow: 1; padding: 18px 32px 22px; overflow-y: auto; overflow-x: hidden; min-height: 0; display: flex; flex-direction: column; gap: 18px; box-sizing: border-box; min-width: 0;">
 {body}
 </main>
 {foot}
 </div>
+<div class="ml-fundo" aria-hidden="true" onClick="{{{{menu_tog}}}}"></div>
 {extra_html()}
 {E.G2_TOAST}
 </div>
@@ -354,6 +462,8 @@ def steps_state(names,pre='stp',label='Etapas do processo'):
         items+=(f'<button type="button" onClick="{{{{{pre}{i}_go}}}}" aria-current="{{{{{pre}{i}_cur}}}}" title="{esc(t)}" style="{{{{{pre}{i}_st}}}}">'
                 f'<span style="{{{{{pre}{i}_bst}}}}">{i}</span><span style="display: flex; flex-direction: column; min-width: 0;"><span style="{{{{{pre}{i}_tst}}}}">{esc(t)}</span>'
                 f'<sc-if value="{{{{{pre}{i}_hasWhy}}}}" hint-placeholder-val="{{{{false}}}}"><span style="font-size: 11px; font-weight: 700; color: {RED}; line-height: 1.2;">{{{{{pre}{i}_why}}}}</span></sc-if></span></button>')
-    return (f'<nav aria-label="{esc(label)}" style="position: sticky; top: 0; z-index: 30; background: {SURF}; border-bottom: 1px solid {LINE}; box-shadow: 0 6px 12px -10px rgba(21,32,26,.25); padding: 5px 24px 6px;">'
-            f'<div style="font-size: 10px; font-weight: 800; letter-spacing: .08em; color: {MUTED}; text-transform: uppercase; padding: 0 8px 3px;">{esc(label)}</div>'
-            f'<div style="display: grid; grid-template-columns: repeat({n}, minmax(0, 1fr)); gap: 4px;">{items}</div></nav>')
+    # etapa atual em texto para a faixa estreita: um bloco por etapa, montado só na atual; ao trocar de etapa a caixa nasce fechada
+    abre=''.join(f'<sc-if value="{{{{{pre}{i}_cur === \'step\'}}}}" hint-placeholder-val="{{{{false}}}}">{_etp_abre(i,n,t)}</sc-if>' for i,t in enumerate(names,1))
+    return _etp_nav(label,n,_com_setas(items,n,
+                         f'<sc-if value="{{{{has_prev}}}}" hint-placeholder-val="{{{{false}}}}"><button type="button" onClick="{{{{prev}}}}" aria-label="Etapa anterior" title="{{{{prev_t}}}}" style="{_SETA}">‹</button></sc-if>',
+                         f'<sc-if value="{{{{has_next}}}}" hint-placeholder-val="{{{{false}}}}"><button type="button" onClick="{{{{next}}}}" aria-label="Próxima etapa" title="{{{{next_t}}}}" style="{_SETA}">›</button></sc-if>',abre))

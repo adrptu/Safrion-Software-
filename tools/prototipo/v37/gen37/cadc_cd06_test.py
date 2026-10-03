@@ -8,10 +8,10 @@ t=T(); J=t.J
 try:
     t.goto('CD-06.dc.html'); body=J("document.body.innerText")
     t.chk('abre com a pendência do cadastro no cabeçalho e sem fatos do Estoque (quarentena, pedido)',
-          '1 item sem preço' in t.header() and 'Cadastrar item' in t.header() and 'quarentena' not in body and 'PC-088' not in body and not t.errs(), t.header())
-    r=t.rowtxt(0,'KCl 60%')
-    t.chk('item mostra unidade + embalagem, controle, preço com data e saldo só como número com link ao Estoque',
-          all(x in r for x in ['kg big bag de 1.000 kg','Só lote','R$ 2,40/kg','15/09/2026','50.000 kg ›']) and J("[...document.querySelectorAll('[role=table]')[0].querySelectorAll('a')].some(a=>a.getAttribute('href')==='EST.dc.html')"), r)
+          '1 item sem preço' in t.header() and 'Cadastrar item' in t.bloco() and 'quarentena' not in body and 'PC-088' not in body and not t.errs(), t.header())
+    r=t.rowtxt(0,'KCl 60%'); t.openrow(0,'KCl 60%'); dk=t.dlg(); t.cancel()
+    t.chk('item mostra unidade + embalagem, controle e preço com data; o saldo fica no painel com "Ver saldo no Estoque"',
+          all(x in r for x in ['kg big bag de 1.000 kg','Só lote','R$ 2,40/kg','15/09/2026']) and 'Ver saldo no Estoque' in dk and 'Saldo: 50.000 kg' in dk, [r,dk[-200:]])
     t.openrow(0,'Herbicidas 5 itens'); ti=t.title(); nat=t.fv('nat')
     t.fset('nat','3.1.01 · Fertilizantes e corretivos'); t.btn('Salvar')
     t.chk('linha do grupo abre nome e natureza; a natureza salva aparece no grupo',
@@ -44,13 +44,14 @@ try:
     t.clk('Cadastrar item'); t.fset('item','MAP 11-52'); t.fset('cont','50'); t.btn('Salvar')
     t.chk('item repetido é barrado', 'Já existe o item MAP 11-52 em Fertilizantes.' in t.alerts(), t.alerts())
     t.cancel()
-    hd=J("[...document.querySelectorAll('[role=table]')[1].querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/\\s+/g,' ').trim())")
+    t.aba('Locais')   # 01/10: locais numa aba própria do mesmo bloco (tabela 0 da aba); cabeçalho em caixa normal
+    hd=J("[...document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/\\s+/g,' ').trim().toUpperCase())")
     t.chk('locais: fazenda na tabela, sem coluna Controle; capacidade só no tanque e no silo (do ativo)',
-          any('FAZENDA' in h for h in hd) and not any('CONTROLE' in h for h in hd) and '15.000 L' in (t.rowtxt(1,'Tanque Sede') or '') and '60.000 sc 60 kg · ativo Silo 01' in (t.rowtxt(1,'Silo 01') or '')
-          and '—' in (t.rowtxt(1,'Galpão 1') or ''), [hd,t.rowtxt(1,'Silo 01'),t.rowtxt(1,'Galpão 1')])
-    t.chk('"Cadastrar local" é secundária (sem "+ Novo local")', J("document.body.innerText.indexOf('Novo local')<0") and t.clk('Cadastrar local')=='ok' and t.title()=='Cadastrar local', t.title())
+          any('FAZENDA' in h for h in hd) and not any('CONTROLE' in h for h in hd) and '15.000 L' in (t.rowtxt(0,'Tanque Sede') or '') and '60.000 sc 60 kg · ativo Silo 01' in (t.rowtxt(0,'Silo 01') or '')
+          and '—' in (t.rowtxt(0,'Galpão 1') or ''), [hd,t.rowtxt(0,'Silo 01'),t.rowtxt(0,'Galpão 1')])
+    t.chk('"Cadastrar local" é a ação da aba Locais (sem "+ Novo local")', J("document.body.innerText.indexOf('Novo local')<0") and t.clk('Cadastrar local')=='ok' and t.title()=='Cadastrar local', t.title())
     t.fset('nome','Galpão BV 2'); t.fset('faz','Boa Vista'); t.fset('tipo','Galpão'); t.btn('Salvar'); time.sleep(.2)
-    t.chk('local novo na Boa Vista', 'Boa Vista' in (t.rowtxt(1,'Galpão BV 2') or '') and not t.errs(), [t.rowtxt(1,'Galpão BV 2'),t.errs()])
+    t.chk('local novo na Boa Vista', 'Boa Vista' in (t.rowtxt(0,'Galpão BV 2') or '') and not t.errs(), [t.rowtxt(0,'Galpão BV 2'),t.errs()])
     t.shot('cadc_cd06.png')
 finally:
     t.fim()

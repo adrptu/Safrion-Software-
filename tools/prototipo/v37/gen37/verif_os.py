@@ -63,7 +63,7 @@ try:
     cs=chips(); print('   chips:', cs)
     chk('Todas não conta canceladas (13 - 3 + 1 nova = 11)', cs[0]=='Todas 11' and cs[-1]=='Canceladas 3', cs)
     chip_fase('Canceladas'); chk('chip Canceladas lista as 3', sorted(ids())==['OS-0424','OS-0425','OS-0430'], ids())
-    abrir('OS-0430'); t=pan(); chk('canceladas: painel sem ações', not temb('Cancelar sem execução') and not temb('Revisar versão') and not temb('Dispensar saldo'), t[:200])
+    abrir('OS-0430'); t=pan(); chk('canceladas: painel sem ações', not temb('Cancelar sem execução') and not temb('Liberar para execução') and not temb('Dispensar saldo'), t[:200])
     fechar(); chip_fase('Todas')
     # 5) OS-0431 cancelável; após cancelar, cabeçalho de impedidas?
     hdr0=J("document.body.innerText.match(/\\d+ em execução · \\d+ impedidas/)?.[0]||''")
@@ -103,11 +103,11 @@ try:
     reload(); chip_fase('Encerradas'); nova('S2627','c1','a1','2026-09-28'); e=alerts(); btn('Abrir OS-0430'); t=pan()
     chk('Abrir OS-0430 com filtro Encerradas: painel abre a ordem', t.startswith('OS-0430'), t[:120])
     fechar()
-    # 10) liberar OS-0430 (sem aprovar? não) -> OS-0419 Liberadas (água): cancelar
+    # 10) liberar OS-0430 -> OS-0419 Liberadas (água): cancelar
     reload(); abrir('OS-0419'); chk('OS-0419 (irrigação por política, Liberadas): Cancelar sem execução', temb('Cancelar sem execução'))
     btn('Cancelar sem execução'); print('   OS-0419 conf:', pan()[pan().find('Cancelar OS-0419'):][:200]); btn('Voltar'); fechar()
     # 11) Kanban OS-0431 selos
-    kanban(); k=cartao('OS-0431'); chk('Kanban OS-0431 com os dois selos', 'Aprovada pelo agrônomo' in k and 'Falta máquina · Trator T1 bloqueado' in k, k)
+    kanban(); k=cartao('OS-0431'); chk('Kanban OS-0431 com o selo Falta máquina', 'Falta máquina · Trator T1 bloqueado' in k and 'Aprovada' not in k, k)
     c.shot(os.path.join(HERE,'_probe','verif_os_kanban.png')); lista()
     chk('sem erro JS no fim', (J("window.__err||''") or '')=='')
 finally:

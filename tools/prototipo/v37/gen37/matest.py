@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""Teste CDP do módulo Máquinas (MA-01..MA-05 + MA-04det): faixa de etapas, largura das grades, edição pela linha e jornadas DEMO-04/DEMO-17."""
+"""Teste CDP do módulo Manutenção (MA-01..MA-05 + MA-04det): faixa de etapas, largura das grades, edição pela linha e jornadas DEMO-04/DEMO-17.
+Planos de manutenção (PM) e o giro das preventivas ficam em ma_planos_test.py; aqui o cenário da manutenção é zerado no início."""
 import sys, os, time, subprocess, json
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
 from cdp import Chrome
@@ -24,7 +25,7 @@ def ok(cond,msg):
 def comum(tela,cur):
     c.goto(f'http://127.0.0.1:{p}/{tela}'); time.sleep(.4)
     ok(J("window.__err||null") is None, f'{tela}: sem erro JS')
-    st=J("[...document.querySelectorAll('nav[aria-label=\"Etapas do processo\"] a')].map(a=>a.getAttribute('href')+'|'+(a.getAttribute('aria-current')||''))")
+    st=J("[...document.querySelectorAll('nav[aria-label=\"Etapas do processo\"] a')].filter(a=>!a.getAttribute('aria-label')).filter(a=>!a.getAttribute('aria-label')).map(a=>a.getAttribute('href')+'|'+(a.getAttribute('aria-current')||''))")
     ok(len(st)==5 and st[cur-1].endswith('|step') and [s.split('|')[0] for s in st]==['MA-01.dc.html','MA-02.dc.html','MA-03.dc.html','MA-04.dc.html','MA-05.dc.html'], f'{tela}: faixa com 5 links e etapa {cur} atual')
     ov=J("[...document.querySelectorAll('[role=table]')].map(t=>{const w=t.parentElement; return w.scrollWidth-w.clientWidth;})")
     ok(all(x<=2 for x in ov), f'{tela}: grades sem rolagem horizontal a 1440 px {ov}')
@@ -32,9 +33,13 @@ def comum(tela,cur):
     ok(ed==0, f'{tela}: sem botões Editar')
 try:
     c.size(1440,1000)
+    c.goto(f'http://127.0.0.1:{p}/MA-01.dc.html'); time.sleep(.3); J("localStorage.removeItem('talhao-os-manutencao-v1')")
     # ---------- MA-01 ----------
     print('MA-01'); comum('MA-01.dc.html',1)
-    t=body(); ok('Proposto · OS-0420 saldo 70 ha · aguarda PCP' in t and 'Comprometido · OS-0420' not in t, 'MA-01: substituto com rótulo único antes do PCP')
+    ag=J("(()=>{const r=[...document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.indexOf('Trator 02')>=0); return r?r.innerText.replace(/\\s+/g,' '):'';})()")
+    t=body(); ok('Proposto' in ag and 'OS-0420 saldo 70 ha · aguarda PCP' in ag and 'Comprometido · OS-0420' not in t, 'MA-01: substituto com rótulo único antes do PCP · '+ag[:120])
+    ok('Colhedora Axial-Flow 7250' in t and 'S680' not in t and 'Comboio CB-01' in t and J("document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=row].g2ed').length")==16, 'MA-01: 16 ativos com a identidade do CD-03 + comboio')
+    ok('Sem plano' in t and 'Criar plano' in t and 'Vence em breve' in t and 'Vencida' in t, 'MA-01: próxima manutenção vem dos planos (Vencida · Vence em breve · Sem plano)')
     rowclick(0,'Colhedora',1); ok(dlgis('Ativo'), 'MA-01: clique na linha abre formulário do ativo')
     setv('aside[role=dialog] select[id$=_cond]','Restrito · monitorado'); clk('Salvar','aside[role=dialog]')
     ok('Motivo' in (J("(document.querySelector('aside[role=dialog]')||{}).innerText")or''), 'MA-01: restrição exige motivo')
@@ -48,22 +53,24 @@ try:
     t=body(); ok('INSP-105' in t and 'OS-0431' in t, 'MA-02: inspeção INSP-105 e OS-0431 na contingência')
     clk('Registrar inspeção'); ok(dlg()=='Registrar inspeção (checklist)', 'MA-02: registrar inspeção abre formulário')
     clk('Salvar','aside[role=dialog]'); ok('Informe ativo' in (J("document.querySelector('aside[role=dialog]').innerText") or ''), 'MA-02: novo achado exige escolher o ativo')
-    setv('aside[role=dialog] select[id$=_ativo]','Colhedora · S680'); setv('aside[role=dialog] textarea[id$=_sint]','Folga na direção'); setv('aside[role=dialog] input[id$=_evid]','foto'); clk('Salvar','aside[role=dialog]')
+    setv('aside[role=dialog] select[id$=_ativo]','Colhedora Axial-Flow 7250'); setv('aside[role=dialog] textarea[id$=_sint]','Folga na direção'); setv('aside[role=dialog] input[id$=_evid]','foto'); clk('Salvar','aside[role=dialog]')
     ok('registrado' in T(), 'MA-02: novo achado registrado '+T()[:80])
     ok(J("document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=row].g2ed').length")==7, 'MA-02: fila com 7 casos')
     clk('Vincular à OM-0234'); ok('vinculado' in T(), 'MA-02: vincular achado não cria ordem nova')
     # ---------- MA-03 ----------
     print('MA-03'); comum('MA-03.dc.html',3)
-    t=body(); ok('Simular janela' in t and 'Propor substituição' in t and 'Manutenções e impacto na produção' in t, 'MA-03: painel com Simular janela e Propor substituição')
-    clk('Simular janela'); ok('29–30/09' in T(), 'MA-03: simular janela')
-    clk('Propor substituição'); ok('aguarda PCP' in T(), 'MA-03: propor substituição registra proposta')
+    t=body(); ok('Mover OM-0234 para 29/09' in t and 'Propor substituição' in t and 'Manutenções e impacto na produção' in t, 'MA-03: painel com Mover OM-0234 e Propor substituição')
+    ok(J("document.querySelector('h1').innerText")=='Vencimentos e paradas' and 'Gerar 3 ordens preventivas' in t and 'Simular paradas' not in t and 'Confirmar 2 paradas' not in t, 'MA-03: Vencimentos e paradas com a primária pelo estado; ações sem efeito cortadas')
+    clk('Mover OM-0234 para 29/09'); ok('movida para 29/09' in T() and 'Mover OM-0234' not in body(), 'MA-03: mover a OM-0234 para 29/09 tira o conflito · '+T()[:100])
+    clk('Propor substituição'); ok('aguarda PCP' in T() and 'Propor substituição' not in body(), 'MA-03: propor substituição registra proposta (uma vez)')
     ok(clk('Abrir impedimentos')=='ok', 'MA-03: link para impedimentos aparece')
     # ---------- MA-04 ----------
     print('MA-04'); comum('MA-04.dc.html',4)
     clk('Iniciar serviço'); ok('Em execução' in T(), 'MA-04: iniciar serviço da OM-0228')
     clk('Resolver sobras'); ok('devolvidas' in T(), 'MA-04: resolver sobras da OM-0230')
     clk('Encerrar ordem'); ok('encerrada' in T(), 'MA-04: encerrar OM-0230')
-    rowclick(0,'OM-0234',2); ok(dlgis('Ordem'), 'MA-04: clique na linha abre ordem')
+    rowclick(0,'OM-0234',2); ok((dlg() or '').startswith('OM-0234 · Trator 02') and 'Liberar serviço' in J("document.querySelector('aside[role=dialog]').innerText"), 'MA-04: clique na linha abre o painel da ordem com o próximo passo')
+    ok('Planejar e autorizar ordem' not in body(), 'MA-04: painel cravado Planejar e autorizar ordem removido')
     # ---------- MA-04det ----------
     print('MA-04det'); comum('MA-04det.dc.html',4)
     t=body(); ok('OS-0431' in t and 'publicado pelo PCP' not in t, 'MA-04det: OS-0431 no impacto e substituto só proposto')

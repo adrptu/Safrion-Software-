@@ -19,19 +19,19 @@ TALHOES=[  # (nome, ha, cultura, estádio/fase, obs)
 # DEMO-13: O.S. 350 ha, 7 dias (50,50,50,40,50,50,60) — hoje = dia 4 ao abrir a demo (realizado 190, saldo 160)
 OS=[
  dict(id='OS-0421', tipo='Pulverização · Fungicida 1ª aplicação', talhao='T1+T2', area=350, etapa='Em execução',
-      selo='Parcial · dia 4 de 7', realizado=190, saldo=160, resp='Marcos', versao='v2 aprovada',
+      selo='Parcial · dia 4 de 7', realizado=190, saldo=160, resp='Marcos', versao='v2',
       demo='DEMO-13', dias=[50,50,50,40,50,50,60]),
  dict(id='OS-0420', tipo='Plantio · Soja 58 W', talhao='T4', area=100, etapa='Em execução',
-      selo='Impedida · ativo bloqueado', realizado=30, saldo=70, resp='Carlos', versao='v1 aprovada',
+      selo='Impedida · ativo bloqueado', realizado=30, saldo=70, resp='Carlos', versao='v1',
       demo='DEMO-04/14', om='OM-0233'),
  dict(id='OS-0419', tipo='Irrigação · água por política', talhao='P2', area=80, etapa='Liberadas',
       selo=None, realizado=0, saldo=80, resp='João', versao='política PA-07 v3', demo='DEMO-15'),
  dict(id='OS-0418', tipo='Fertirrigação · reclassificada', talhao='P1', area=95, etapa='A liberar',
-      selo='Aguardando agrônomo', realizado=0, saldo=95, resp='João', versao='v2 em revisão', demo='DEMO-16'),
+      selo=None, realizado=0, saldo=95, resp='João', versao='v2', demo='DEMO-16'),
  dict(id='OS-0417', tipo='Adubação de cobertura', talhao='P1', area=95, etapa='Em conferência',
-      selo='Sobras a receber', realizado=95, saldo=0, resp='Paula', versao='v1 aprovada', demo='DEMO-03'),
+      selo='Sobras a receber', realizado=95, saldo=0, resp='Paula', versao='v1', demo='DEMO-03'),
  dict(id='OS-0415', tipo='Dessecação pós-colheita', talhao='T3', area=96, etapa='Encerradas',
-      selo=None, realizado=96, saldo=0, resp='Marcos', versao='v1 aprovada'),
+      selo=None, realizado=96, saldo=0, resp='Marcos', versao='v1'),
  dict(id='OB-0104', tipo='Beneficiamento · grãos', talhao='Armazém Sede', area=None, etapa='Encerradas',
       selo='Lote bloqueado', realizado=None, saldo=None, resp='Rui', versao='rota aprovada', demo='DEMO-19', lote='L27-013'),
 ]
@@ -69,10 +69,8 @@ FILA=[('T1','08:00','atrasado · prev. 09:10'),('T2','08:30','presente · apto')
 CRE=dict(id='CRE-0102', valor='R$ 850 mil', estado='Aprovação condicionada a documento', liberado='R$ 300 mil')
 DISPON=dict(base_kg=3000, atendivel_kg=2000)
 
-# ---- Aprovações pendentes (IN-02): uma por domínio, despacho por objeto ----
+# ---- Aprovações pendentes (IN-02): uma por domínio, despacho por objeto · O.S. não entra (o agrônomo libera na própria O.S.) ----
 APROV=[
- ('O.S. OS-0418 · fertirrigação P1','FO-29','Agrônomo','vence hoje','dose + compatibilidade da mistura'),
- ('Revisão de saldo OS-0420 · dose −12%','FO-29','Agrônomo','até 2 dias','só saldo de 70 ha; realizado preservado'),
  ('Política de água PA-08 (nova)','FO-43','Agrônomo','até 3 dias','lâmina máx. 14 mm · validade 60 d'),
  ('Ajuste de inventário Galpão 2','FO-32','Gestor','vence hoje','−12 sc MAP · contagem cega'),
  ('Política de estoque · Diesel S10','FO-31','Gestor','até 5 dias','mínimo do tanque 40%'),
@@ -86,14 +84,13 @@ APROV=[
 # Campos opcionais: selos_extra = condições além do selo principal (mesma lista na O.S., no Mapa e no detalhe);
 # chave = cultivo|atividade do plano que gerou a ordem, ou lista delas quando a ordem cobre vários cultivos
 # (a "Nova ordem" não emite outra para a mesma chave): OS-0421 = T1-A, T1-B e T2 · a6; OS-0425 = c9|k1; OS-0430 = c1|a1; OS-0431 = c3|a3.
-# Selo com "Impedida" ou "Falta máquina" conta como ordem impedida em todas as telas; "Aprovada…" é verde.
+# Selo com "Impedida" ou "Falta máquina" conta como ordem impedida em todas as telas.
 ORDENS=[
  dict(id='OS-0415',tipo='Dessecação pós-colheita',talhao='T3',area=96,etapa='Encerradas',selo=None,realizado=96,saldo=0,janela='10–12/09',resp='Marcos',detalhe=None),
  dict(id='OS-0417',tipo='Adubação de cobertura',talhao='P1',area=95,etapa='Em conferência',selo='Sobras a receber',realizado=95,saldo=0,janela='19–21/09',resp='Paula',detalhe=None),
- dict(id='OS-0418',tipo='Fertirrigação · reclassificada',talhao='P1',area=95,etapa='A liberar',selo='Aguardando agrônomo',realizado=0,saldo=95,janela='24/09 21:00–25/09 11:15',resp='João',detalhe='IN-02det.dc.html'),
+ dict(id='OS-0418',tipo='Fertirrigação · reclassificada',talhao='P1',area=95,etapa='A liberar',selo=None,realizado=0,saldo=95,janela='24/09 21:00–25/09 11:15',resp='João',detalhe=None),
  dict(id='OS-0419',tipo='Irrigação · água por política',talhao='P2',area=80,etapa='Liberadas',selo=None,realizado=0,saldo=80,janela='hoje 20:00–amanhã 10:31',resp='João',detalhe='IR-03det.dc.html'),
- dict(id='OS-0420',tipo='Plantio · Soja 58 W',talhao='T4',area=100,etapa='Em execução',selo='Impedida · ativo bloqueado',realizado=30,saldo=70,janela='22–28/09',resp='Carlos',detalhe='CA-01x-os0420.dc.html',
-      selos_extra=['Revisão de saldo pendente · v3']),
+ dict(id='OS-0420',tipo='Plantio · Soja 58 W',talhao='T4',area=100,etapa='Em execução',selo='Impedida · ativo bloqueado',realizado=30,saldo=70,janela='22–28/09',resp='Carlos',detalhe='CA-01x-os0420.dc.html'),
  dict(id='OS-0421',tipo='Pulverização · Fungicida 1ª aplicação',talhao='T1+T2',area=350,etapa='Em execução',selo='Parcial · dia 4 de 7',realizado=190,saldo=160,janela='20–26/09',resp='Marcos',detalhe='CA-01det.dc.html',
       chave=['c1|a6','c2|a6','c3|a6']),
  dict(id='OS-0422',tipo='Irrigação · água',talhao='P2',area=80,etapa='A liberar',selo='Janela a definir',realizado=0,saldo=80,janela='a definir',resp='João',detalhe='IR-02.dc.html'),
@@ -101,9 +98,9 @@ ORDENS=[
  dict(id='OS-0424',tipo='Pulverização · Fungicida A',talhao='P2',area=80,etapa='Liberadas',selo=None,realizado=0,saldo=80,janela='24/09',resp='Marcos',detalhe=None),
  dict(id='OS-0425',tipo='Adubação 1ª parcela · café',talhao='C1',area=38,etapa='Liberadas',selo='Entrega sem saldo suficiente',realizado=0,saldo=38,janela='15/10',resp='Paula',detalhe=None,
       chave='c9|k1'),
- dict(id='OS-0430',tipo='Dessecação pré-plantio',talhao='T1-A',area=160,etapa='A liberar',selo='Aguardando agrônomo',realizado=0,saldo=160,janela='25/09 (DAP −20)',resp='Marcos',detalhe=None,
+ dict(id='OS-0430',tipo='Dessecação pré-plantio',talhao='T1-A',area=160,etapa='A liberar',selo=None,realizado=0,saldo=160,janela='25/09 (DAP −20)',resp='Marcos',detalhe=None,
       chave='c1|a1'),
- dict(id='OS-0431',tipo='Plantio · Soja 58 W',talhao='T2',area=102,etapa='A liberar',selo='Aprovada pelo agrônomo',realizado=0,saldo=102,janela='amanhã (24/09) 06:00',resp='Carlos',detalhe=None,
+ dict(id='OS-0431',tipo='Plantio · Soja 58 W',talhao='T2',area=102,etapa='A liberar',selo=None,realizado=0,saldo=102,janela='amanhã (24/09) 06:00',resp='Carlos',detalhe=None,
       selos_extra=['Falta máquina · Trator T1 bloqueado'],chave='c3|a3'),
  dict(id='OB-0104',tipo='Beneficiamento · grãos',talhao='Armazém Sede',area=None,etapa='Encerradas',selo='Lote bloqueado',realizado=None,saldo=None,janela='15–18/09',resp='Rui',detalhe='CO-06det.dc.html'),
 ]
@@ -125,3 +122,8 @@ CANON=dict(
  CARGA07='Carga 07 · impedida · NF pendente · dono Sandra (fiscal) · prazo 10:00',
  OF103='OF-103 · enviada à Frutas Real · reservada pela RT-0112',
 )
+# ---- Fazenda Lagoa Grande: O.S. em todas as fases (dados_lagoa_safra.py). Ficam fora de ORDENS (Meu dia e Agenda
+# continuam só com a Santa Rita); a tela O.S. (filtro Fazenda), o Mapa e o cenário compartilhado as incluem.
+import dados_lagoa_safra as _DL
+ORDENS_LG=_DL.ORDENS
+ORDEM.update({o['id']:o for o in ORDENS_LG})

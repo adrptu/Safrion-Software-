@@ -19,7 +19,10 @@ ok=[]
 def chk(nome,cond,extra=''):
     ok.append(bool(cond)); print(('OK  ' if cond else 'FALHOU ')+nome+(' · '+str(extra) if extra else ''))
 FIL=lambda t: J(f"[...document.querySelectorAll('[role=group][aria-label=\"Filtrar por papel\"] button')].find(b=>b.innerText.trim().startsWith({json.dumps(t)})).click()") or time.sleep(.3)
-def cob(g): return J(f"(()=>{{const r=[...document.querySelectorAll('[role=table]')[1].querySelectorAll('[role=row]')].find(r=>r.innerText.split('\\n')[0].trim()==={json.dumps(g)}); return r?r.innerText.replace(/\\s+/g,' '):null;}})()")
+def _aba(t): J(f"(()=>{{const b=[...document.querySelectorAll('[role=tab]')].find(b=>b.innerText.replace(/\\s+/g,' ').trim().startsWith({json.dumps(t)})); if(b) b.click();}})()"); time.sleep(.35)
+def cob(g):
+    """cobertura por grupo (layout de 01/10: aba "Cobertura de cotação" no mesmo bloco); lê e volta à aba Parceiros."""
+    _aba('Cobertura'); r=J(f"(()=>{{const t=document.querySelectorAll('[role=table]')[0]; if(!t) return null; const r=[...t.querySelectorAll('[role=row]')].find(r=>r.innerText.split('\\n')[0].trim()==={json.dumps(g)}); return r?r.innerText.replace(/\\s+/g,' '):null;}})()"); _aba('Parceiros'); return r
 try:
     c.size(1440,1100); c.goto(f'http://127.0.0.1:{p}/CD-05.dc.html'); time.sleep(.6)
     chk('sem erro JS', J("window.__err||''")=='', J("window.__err||''"))
@@ -47,7 +50,9 @@ try:
     J(f"({SETV})('#{em}','vendas@agronorte.com.br')"); J(f"({SETV})('#{wa}','65 99888-1122')"); time.sleep(.2); J(f"({BTN})('Salvar')"); time.sleep(.5)
     chk('salvou e fechou', J("!document.querySelector('aside[role=dialog]')"))
     chk('aviso de salvo', J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).join(' ')"))
-    linha=J(f"{ROW('Agro Norte')}.innerText.replace(/\\s+/g,' ')"); chk('linha atualizada', 'vendas@agronorte.com.br' in linha and 'Combustível' in linha, linha)
+    linha=J(f"{ROW('Agro Norte')}.innerText.replace(/\\s+/g,' ')"); J(f"(()=>{{const r={ROW('Agro Norte')}; (r.querySelector('[role=cell] span')||r).click();}})()"); time.sleep(.4)
+    em2=J(f"(document.getElementById('{FID('email')}')||{{}}).value"); J(f"({BTN})('Cancelar')"); time.sleep(.2)
+    chk('linha atualizada (grupos na linha; e-mail salvo no painel)', em2=='vendas@agronorte.com.br' and 'Combustível' in linha, [linha,em2])
     depois=cob('Combustível'); chk('cobertura de Combustível recalculada', depois and 'Só 1' in depois, depois)
     # 5 · desomologar: fornecedor sai da cobertura
     J(f"(()=>{{const r={ROW('Agro Norte')}; (r.querySelector('[role=cell] span')||r).click();}})()"); time.sleep(.4)

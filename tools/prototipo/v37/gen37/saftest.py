@@ -15,7 +15,7 @@ try:
     print('impedimentos:', J("[...document.querySelectorAll('nav[aria-label=\"Etapas do processo\"] button')].map(b=>b.innerText.replace(/\\s+/g,' ')).join(' | ')"))
     print('safras:', J("[...document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=row]')].slice(1).map(r=>r.innerText.split('\\n')[0])"))
     print('clicar etapa 4 sem safra:', clk('4 Confira o plano operacional'), T())
-    print('abrir safra:', clk('Abrir safra'), T())
+    print('abrir safra:', clk('Continuar'), T())
     print('etapa agora:', J("document.querySelector('[aria-current=step]').innerText.replace(/\\s+/g,' ')"))
     print('k2:', J("document.body.innerText.match(/\\d+ cultivos · [^\\n]+/)[0]"))
     # selecionar T4,T3,P1,P2
@@ -23,6 +23,8 @@ try:
     time.sleep(.4); print('selecionados:', sel, '· form aberto?', J("!!document.querySelector('aside[role=dialog]')"))
     print('aplicar em lote:', clk('Aplicar plano'), '· painel:', J("document.querySelector('aside[role=dialog] h2') && document.querySelector('aside[role=dialog] h2').innerText"))
     print('opções:', J("[...document.querySelectorAll('#ap_sel option')].map(o=>o.innerText)"))
+    print('plano sugerido:', J("(()=>{const i=document.querySelector('#ap_sel'); return i?i.options[i.selectedIndex].text:null;})()"))   # 01/10: o plano mais usado da cultura vem sugerido
+    J("""(()=>{const i=document.querySelector('#ap_sel'); Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(i,''); i.dispatchEvent(new Event('change',{bubbles:true}));})()"""); time.sleep(.3)
     print('aplicar sem plano:', clk('Aplicar plano','aside[role=dialog]'), J("(document.querySelector('aside [role=alert]')||{}).innerText"))
     J("""(()=>{const i=document.querySelector('#ap_sel'); Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(i,'SOJA-AT'); i.dispatchEvent(new Event('change',{bubbles:true}));})()"""); time.sleep(.3)
     print('aplicar:', clk('Aplicar plano','aside[role=dialog]'), T())
@@ -35,7 +37,7 @@ try:
     print('confirmação:', J("(document.querySelector('aside [role=alert]')||{}).innerText"))
     print('voltar/cancelar:', clk('Voltar','aside[role=dialog]'), clk('Cancelar','aside[role=dialog]'))
     # atividades locais do T1-B: clicar no nome do plano
-    r=J("""(()=>{const row=[...document.querySelectorAll('[role=row].g2ed')].find(r=>/T1-B/.test(r.innerText)); const b=[...row.querySelectorAll('button')].find(b=>/Soja alta tecnologia/.test(b.innerText)); b.click(); return 'ok';})()"""); time.sleep(.5)
+    r=J("""(()=>{const row=[...document.querySelectorAll('[role=row].g2ed')].find(r=>/T1-B/.test(r.innerText)); const b=[...row.querySelectorAll('button')].find(b=>/^Ajustar insumos|Soja alta tecnologia/.test(b.innerText.trim())); b.click(); return 'ok';})()"""); time.sleep(.5)
     print('painel local:', J("document.querySelector('aside[role=dialog] h2').innerText"))
     print('grupos/gatilhos:', J("[...document.querySelectorAll('aside[role=dialog] b')].map(b=>b.innerText).slice(0,10)"))
     print('ajuste local existente:', J("document.querySelector('aside[role=dialog]').innerText.indexOf('ajuste local')>=0"))
@@ -54,11 +56,14 @@ try:
     clk('4 Confira o plano operacional'); print('k4:', J("document.body.innerText.match(/[\\d.]+ ha trabalhados[^\\n]+/)[0]"))
     J("""(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>/Colheita/.test(r.innerText)); r.click();})()"""); time.sleep(.4)
     print('matriz:', J("[...document.querySelectorAll('h3')].map(h=>h.innerText).filter(t=>/Detalhamento/.test(t))"))
-    clk('5 Dimensione os recursos'); print('k5:', J("document.body.innerText.match(/(\\d+ mês\\(es\\) com falta[^\\n]+|Capacidade atende[^\\n]+)/)[0]"))
+    clk('5 Dimensione os recursos'); print('k5:', J("(document.body.innerText.match(/([^\\n]*em vermelho na visão por mês|Capacidade atende[^\\n]+)/)||[''])[0]"))
     c.shot('_probe/saf_e5.png')
     clk('6 Confira a demanda de insumos'); print('k6:', J("document.body.innerText.match(/Valor da necessidade[^\\n]+/)[0]"))
     print('enviar:', clk('Enviar para cotação'), T())
     print('enviar de novo:', clk('Enviar para cotação'), T())
+    print('registro compartilhado:', J("(()=>{const o=JSON.parse(localStorage.getItem('talhao-os-compras-v1')||'null'); const s=o&&o.sols&&o.sols.S2627; return s?[s.id,s.comp,Object.keys(s.itens).length]:null;})()"))
     c.shot('_probe/saf_e6.png')
+    print('abrir compra:', clk('Abrir Compra de insumos ›'), (time.sleep(2.5), J("location.pathname+location.hash"))[1], J("(document.querySelector('[aria-current=step]')||{innerText:''}).innerText.replace(/\\s+/g,' ')"))
+    print('compra mostra o complemento:', J("(document.body.innerText.match(/SOL-2026-07 · Safra 2026\\/27[^\\n]+/)||[''])[0]"))
 finally:
     c.close(); srv.terminate()

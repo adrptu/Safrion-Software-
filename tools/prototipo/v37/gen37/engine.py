@@ -52,6 +52,10 @@ ICONS.update({'Indicadores':ICONS['Controle'],'PCE':ICONS['PCP'],'Estoque':ICONS
  'leaf':'M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 20 3c1 2 2 4.5 2 8.5S16.8 21 12.5 21zM2 21c0-3 1.85-5.36 5.08-6',
  'calendar':'M3 5h18v16H3zM16 3v4M8 3v4M3 10h18',
  'layers':'M12 2l9 5-9 5-9-5 9-5zM3 12l9 5 9-5M3 17l9 5 9-5',
+ # MAPA-ICONES-20261003: satélite com corpo, dois painéis solares lisos (sem divisões: legível em 20 px, escala 1) e antena (camada Satélite); lupa sobre folha = vistoria/monitoramento
+ # (camada Pragas e doenças), distinto da folha da Lavoura. O triângulo 'alert' continua só para alerta/impedimento real.
+ 'satelite':'M7.69 11.51L11.51 7.69L15.61 11.79L11.79 15.61zM1.89 17.44L5.92 13.41L10.59 18.08L6.56 22.11zM13.41 5.92L17.44 1.89L22.11 6.56L18.08 10.59zM8.25 15.75L10.09 13.91M13.91 10.09L15.75 8.25M13.7 13.7L14.97 14.97M13.98 17.66A3.4 3.4 0 0 0 17.66 13.98',
+ 'monitoramento':'M3.5 20.5C3.5 14.2 6.8 10.8 12.6 10.6C12.6 16.6 9.4 20.5 3.5 20.5zM3.5 20.5L9.2 14.8M20.2 9.2a5.2 5.2 0 1 1-10.4 0a5.2 5.2 0 0 1 10.4 0zM18.8 12.9L22 16.1',
 })
 def icon(name,size=16,color='currentColor'):
     if name=='Mapa': name='map' if 'map' in ICONS else 'Início'
@@ -136,7 +140,7 @@ CHIP_ON=lambda: f'font-family: inherit; font-size: 12.5px; font-weight: 700; pad
 CHIP_OFF=lambda: f'font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 7px 14px; border-radius: 999px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer;'
 SEG_ON=lambda: f'font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 6px 14px; border-radius: 999px; border: 0; cursor: pointer; background: {SURF}; color: {INK}; box-shadow: 0 1px 2px rgba(21,32,26,.12); white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;'
 SEG_OFF=lambda: f'font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 6px 14px; border-radius: 999px; border: 0; cursor: pointer; background: transparent; color: {MUTED}; box-shadow: none; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;'
-TOAST_ST=lambda: f'position: absolute; left: 248px; bottom: 22px; z-index: 40; background: {INK}; color: #fff; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 12px 32px -8px rgba(21,32,26,.4); max-width: 520px;'
+TOAST_ST=lambda: f'position: absolute; left: max(16px, min(248px, calc(100% - 536px))); bottom: calc(22px + env(safe-area-inset-bottom, 0px)); z-index: 40; background: {INK}; color: #fff; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 12px 32px -8px rgba(21,32,26,.4); max-width: min(520px, calc(100% - 32px)); box-sizing: border-box;'
 DRAWER_ST=lambda: 'position: absolute; inset: 0; z-index: 30; display: flex; justify-content: flex-end;'
 BTN_ST=lambda primary=False,small=False: (f"padding: {'7px 14px' if small else '11px 20px'}; border-radius: 10px; font-size: {'13px' if small else '14px'}; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; "
         + (f"background: {ACC}; color: #fff; border: 1px solid {ACC}; box-shadow: 0 1px 2px rgba(30,122,76,.25);" if primary else f"background: {SURF}; color: {INK}; border: 1px solid {LINE};"))
@@ -159,7 +163,7 @@ def drawer_button(text,d,primary=False,small=True):
         else:
             ok=f'<button type="button" onClick="{HL(did+"_add")}" style="{BTN_ST(True)}">{esc(d["confirm"])}</button>'
         EXTRA.append(f'<div style="{HL(did+"_st")}"><button type="button" aria-label="Fechar" onClick="{HL("closeAll")}" style="position: absolute; inset: 0; border: 0; background: rgba(21,32,26,.35); cursor: pointer;"></button>'
-                     f'<aside style="position: relative; width: 440px; height: 100%; background: {SURF}; box-shadow: -12px 0 40px -12px rgba(21,32,26,.35); padding: 24px 26px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px;">'
+                     f'<aside style="position: relative; width: min(440px, 100%); height: 100%; overflow-y: auto; background: {SURF}; box-shadow: -12px 0 40px -12px rgba(21,32,26,.35); padding: 24px 26px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px;">'
                      f'<div style="display: flex; align-items: center; gap: 10px;"><h2 style="margin: 0; font-family: {DISP}; font-size: 20px; font-weight: 700; letter-spacing: -.02em; flex-grow: 1;">{esc(d["title"])}</h2><button type="button" aria-label="Fechar" onClick="{HL("closeAll")}" style="border: 0; background: {BG}; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 18px; color: {MUTED};">×</button></div>'
                      + (f'<div style="font-size: 13px; color: {MUTED};">{esc(d["sub"])}</div>' if d.get('sub') else '')
                      + f'<div style="display: flex; flex-direction: column; gap: 12px;">{body}</div><div style="flex-grow: 1;"></div><div style="display: flex; justify-content: flex-end;">{ok}</div></aside></div>')
@@ -866,7 +870,7 @@ def shell(fname,title,module,crumbs,subtitle,status,primary,body,footer=None,W=1
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Sora:wght@600;700&amp;display=swap">
 <style>
 body{{margin:0;font-family:{FONT};color:{INK};background:{BG}}}
-a{{color:{ACC}}}a:hover{{color:#15603a}}
+a{{color:{ACC}}}@media (hover:hover){{a:hover{{color:#15603a}}}}
 </style>
 </helmet>
 <div style="position: relative; width: {W}px; height: {H}px; box-sizing: border-box; display: flex; background: {BG}; font-family: {FONT}; color: {INK}; overflow: hidden;">
@@ -915,6 +919,7 @@ def mobile(fname,title,sub,status,primary,body,W=390,H=844,module=None):
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <title>{esc(title)}</title>
 <script src="./support.js"></script>
 </head>
@@ -924,21 +929,22 @@ def mobile(fname,title,sub,status,primary,body,W=390,H=844,module=None):
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Sora:wght@600;700&amp;display=swap">
 <style>
 body{{margin:0;font-family:{FONT};color:{INK};background:{BG}}}
-a{{color:{ACC}}}a:hover{{color:#15603a}}
+a{{color:{ACC}}}@media (hover:hover){{a:hover{{color:#15603a}}}}
 {G2_CSS}
+{MOBILE_CSS}
 </style>
 </helmet>
-<div style="position: relative; width: {W}px; height: {H}px; box-sizing: border-box; display: flex; flex-direction: column; background: {BG}; font-family: {FONT}; color: {INK}; overflow: clip;">
-<header style="padding: 54px 20px 14px; background: {SURF}; border-bottom: 1px solid {LINE}; display: flex; flex-direction: column; gap: 6px;">
+<div data-mroot="1" style="position: relative; width: 100%; height: {H}px; --mw: {W}px; box-sizing: border-box; display: flex; flex-direction: column; background: {BG}; font-family: {FONT}; color: {INK}; overflow: clip;">
+<header style="padding-right: 20px; padding-bottom: 14px; padding-left: 20px; background: {SURF}; border-bottom: 1px solid {LINE}; display: flex; flex-direction: column; gap: 6px;">
 <div style="display: flex; align-items: center; gap: 10px;"><a href="{back}" aria-label="Voltar" style="text-decoration: none; display: inline-flex; align-items: center;">{chev()}</a><h1 style="margin: 0; font-family: {DISP}; font-size: 20px; font-weight: 700; letter-spacing: -.02em; flex-grow: 1;">{esc(title)}</h1>{chip(status[0],status[1]) if status else ''}</div>
 <div style="font-size: 13px; color: {MUTED};">{esc(sub)}</div>
 </header>
-<main style="flex-grow: 1; overflow: hidden; padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; box-sizing: border-box;">
+<main style="flex-grow: 1; min-height: 0; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; box-sizing: border-box;">
 {body}
 </main>
 <div style="padding: 12px 20px 28px; background: {SURF}; border-top: 1px solid {LINE};"><a href="{PHREF.get(fname,'#')}" style="display: block; text-align: center; text-decoration: none; box-sizing: border-box; width: 100%; padding: 18px; border-radius: 16px; box-shadow: 0 1px 2px rgba(30,122,76,.25); font-size: 17px; font-weight: 800; letter-spacing: -.01em; font-family: inherit; background: {ACC}; color: #fff; border: 1px solid {ACC};">{esc(primary)}</a></div>
 {_nav}
-{extra_html().replace('left: 248px;','left: 16px; right: 16px;')}
+{extra_html().replace('left: max(16px, min(248px, calc(100% - 536px)));','left: 16px; right: 16px;')}
 {G2_TOAST}
 </div>
 </x-dc>
@@ -978,15 +984,94 @@ def _reset_screen(f):
     _old_reset(f); GRIDS.clear(); NAVSPEC.clear()
     try: EXTRAJS[0]=''
     except NameError: pass
-G2_CSS=(".g2ed{cursor:pointer}.g2ed:hover{background:#F2F8F4}.g2ed:focus-visible{outline:2px solid #1E7A4C;outline-offset:-2px}"
-        ".g2flash{background:#E4F3E9}.g2kid{background:#FBFCFA}.g2tot{cursor:pointer}.g2tot:hover{background:#EEF4EF}"
+# =====================================================================================
+# UX-FEEDBACK-INTERACAO-20261003 · estados de interação por família de componente (vale em todas as telas que carregam G2_CSS)
+# Repouso → hover (só onde existe ponteiro com hover) → foco de teclado → pressionado; selecionado/atual/expandido são
+# persistentes e vêm do próprio componente (fundo, borda, aria-current/aria-expanded), diferentes destes estados passageiros.
+# Os componentes usam estilo inline; por isso o retorno usa propriedades que o inline não define (filter, contorno, sombra
+# interna, outline), sem !important e sem mudar tamanho ou posição (nenhum salto de layout). Conteúdo inerte (texto,
+# selos, valores, cartões informativos) não recebe nada: só button, link, aba, opção, linha que abre detalhe e talhão.
+# =====================================================================================
+_ACAO=':is(button,a[href],summary,[role=tab],[role=option]):not(:disabled):not([aria-disabled=true]):not(.g2card)'
+INTERACAO_CSS=(
+    # hover: escurece de leve e acende uma camada interna (botões e links com cara de botão); menu escuro clareia
+    "@media (hover:hover){"
+    f"{_ACAO}:not(.menu-lat *):hover{{filter:brightness(.95)}}"
+    ":is(button,a[href][style*=\"padding\"],[role=tab],[role=option]):not(:disabled):not([aria-disabled=true]):not(.g2card):not(.menu-lat *):hover{box-shadow:inset 0 0 0 999px rgba(21,32,26,.05)}"
+    ".menu-lat :is(a,button):hover{box-shadow:inset 0 0 0 999px rgba(255,255,255,.09)}"
+    ".g2ed:hover,.g2tot:hover{background:#F2F8F4}"
+    ":is(input:not([type=checkbox]):not([type=radio]),select,textarea):not(:disabled):not([readonly]):hover{box-shadow:0 0 0 1px #9DBFAA}"
+    "label:has(>input[type=search]):hover{box-shadow:0 0 0 1px #9DBFAA}"
+    "svg [role=button]:hover{filter:brightness(.92)}"
+    "}"
+    # pressionado: retorno imediato no toque e no clique (o iOS só aplica :active com um ouvinte de toque: g2lib)
+    f"{_ACAO}:active{{filter:brightness(.88)}}"
+    ".g2ed:active{background:#E4F3E9}"
+    # foco de teclado: contorno nítido de 2 px fora do controle (dentro na linha da grade e no menu escuro em verde-claro)
+    ":is(button,a[href],summary,input,select,textarea,[role=tab],[role=option],[tabindex]:not([tabindex=\"-1\"])):focus-visible{outline:2px solid #1E7A4C;outline-offset:2px}"
+    ".menu-lat :focus-visible{outline-color:#8FD6AE}"
+    "[role=row]:focus-visible{outline-offset:-2px}"
+    "label:has(>input[type=search]):focus-within{outline:2px solid #1E7A4C;outline-offset:1px}"
+    "aside[role=dialog]>div[style*=\"justify-content: flex-end; gap: 8px; padding-top: 6px; border-top\"]{position:sticky;bottom:0;z-index:2;background:#FFFFFF;padding-bottom:2px}"
+    "svg [role=button]:focus-visible{outline:none;stroke:#15201A;stroke-width:4px;stroke-dasharray:7 4}"
+    # indisponível: aparência diferente e cursor de proibido; o motivo fica no texto/rótulo do próprio componente
+    "button:disabled{opacity:.55;cursor:not-allowed;filter:none;box-shadow:none}"
+    "[aria-disabled=true]{cursor:not-allowed}"
+    # cartão navegável (variante .g2card, ex.: planos agronômicos): pista permanente "Abrir … →" no próprio botão
+    ".g2card{background:#FFFFFF;border:1px solid #E4E9E5;position:relative}"
+    ".g2card-cta{display:inline-flex;align-items:center;gap:4px;color:#1E7A4C;font-weight:700;font-size:12.5px;white-space:nowrap}"
+    "@media (hover:hover){.g2card:hover{background:#F2F8F4;border-color:#9DBFAA}.g2card:hover .g2card-cta{text-decoration:underline;text-underline-offset:3px}}"
+    ".g2card:active{background:#E4F3E9;border-color:#1E7A4C}"
+    ".g2card[aria-current=true]{border-color:#1E7A4C;box-shadow:0 0 0 1px #1E7A4C}"
+    ".g2card[aria-current=true]::after{content:'Último aberto';position:absolute;top:-9px;right:12px;padding:0 6px;border-radius:999px;background:#1E7A4C;color:#fff;font-size:10.5px;font-weight:800;line-height:18px}"
+    # tabela/lista com rolagem lateral: a borda direita esmaece enquanto houver colunas fora da vista (g2lib marca data-mais)
+    ":is(.g2rola,.rola)[data-mais]{-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 40px),rgba(0,0,0,.18));mask-image:linear-gradient(to right,#000 calc(100% - 40px),rgba(0,0,0,.18))}"
+    # menos movimento quando o sistema pede (transições curtas do menu, da seta da faixa e do zoom do mapa)
+    "@media (prefers-reduced-motion:reduce){*,::before,::after{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}"
+)
+# raiz móvel (App de campo): ocupa a janela do aparelho, rola por dentro, respeita as áreas seguras; em 1280 px ou mais fica
+# como a prancha (390 × H, à esquerda), igual à base
+MOBILE_CSS=("[data-mroot]{max-width:var(--mw);max-height:100vh;max-height:100dvh}"
+    "[data-mroot]>header{padding-top:max(54px,env(safe-area-inset-top,0px))}"
+    "[data-mroot]>main>*,[data-mroot]>main>div:last-child{flex-shrink:0}"   # o conteúdo rola por inteiro; nenhum bloco é espremido pela altura da janela
+    "@media (max-width:1279px){[data-mroot]{max-width:720px;margin:0 auto}}"
+    "[data-mroot]>main+div{padding-bottom:max(28px,env(safe-area-inset-bottom,0px))!important}"
+    "@media (max-height:560px){[data-mroot]>header{padding-top:max(12px,env(safe-area-inset-top,0px))}}")
+G2_CSS=(".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outline:2px solid #1E7A4C;outline-offset:-2px}"
+        # hover dos controles pequenos da grade só onde existe ponteiro com hover (no toque o fundo não fica "grudado")
+        "@media (hover:hover){.g2fi:hover{background:#F2F8F4}.g2fb:hover,.g2car:hover{background:#E4E9E5}.g2del:hover{background:#FDE8E6;color:#B42318}}"
+        ".g2kid{background:#FBFCFA}.g2flash{background:#E4F3E9}.g2tot{cursor:pointer}"
         ".g2hb{display:inline-flex;align-items:center;gap:4px;border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#65736A;padding:7px 2px 7px 0;text-align:left;white-space:normal;max-width:104px;line-height:1.2}"
-        ".g2fb{border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:10px;font-weight:700;padding:4px 3px;border-radius:6px}.g2fb:hover{background:#E4E9E5}"
-        ".g2car{width:22px;height:22px;border:0;border-radius:6px;background:transparent;cursor:pointer;font-size:13px;color:#15201A;flex-shrink:0;padding:0}.g2car:hover{background:#E4E9E5}"
-        ".g2del{width:28px;height:28px;border:0;border-radius:8px;background:transparent;cursor:pointer;color:#8A968E;display:inline-flex;align-items:center;justify-content:center}.g2del:hover{background:#FDE8E6;color:#B42318}"
+        ".g2fb{border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:10px;font-weight:700;padding:4px 3px;border-radius:6px}"
+        ".g2car{width:22px;height:22px;border:0;border-radius:6px;background:transparent;cursor:pointer;font-size:13px;color:#15201A;flex-shrink:0;padding:0}"
+        ".g2del{width:28px;height:28px;border:0;border-radius:8px;background:transparent;cursor:pointer;color:#8A968E;display:inline-flex;align-items:center;justify-content:center}"
         ".g2pw{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0;flex:0 1 auto;justify-content:inherit;text-align:inherit}"
         "sc-if,sc-for{display:contents}"
-        "aside[role=\"dialog\"]>*,aside[role=\"dialog\"]>:is(sc-if,sc-for)>*,aside[role=\"dialog\"]>:is(sc-if,sc-for)>:is(sc-if,sc-for)>*,aside[role=\"dialog\"]>:is(sc-if,sc-for)>:is(sc-if,sc-for)>:is(sc-if,sc-for)>*{flex-shrink:0}")
+        "aside[role=\"dialog\"]>*,aside[role=\"dialog\"]>:is(sc-if,sc-for)>*,aside[role=\"dialog\"]>:is(sc-if,sc-for)>:is(sc-if,sc-for)>*,aside[role=\"dialog\"]>:is(sc-if,sc-for)>:is(sc-if,sc-for)>:is(sc-if,sc-for)>*{flex-shrink:0}"
+        # tela sem rolagem de página (pedido do Adrianus, 01/10/2026): título, filtros rápidos e expandir/recolher ficam parados;
+        # o último bloco com dados estica até o fim da janela e só a área de dados rola, com o cabeçalho da tabela fixo
+        "main>div:last-child{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}"
+        # só estica quando é o único bloco da tela (vários blocos empilhados: a área rola, sem rolagem dupla)
+        # e só a tabela/lista que está direto no corpo do bloco (aninhada mais fundo fica na altura natural)
+        "main section:only-of-type:has(.g2caixa,.rola){flex:1 1 0;min-height:240px;display:flex;flex-direction:column}"
+        "main section:only-of-type:has(.g2caixa,.rola)>div:last-child{flex:1 1 0;min-height:0;display:flex;flex-direction:column}"
+        ".g2caixa{display:flex;flex-direction:column;min-height:0}.g2rola{min-height:0;overflow:auto}"
+        # 1ª coluna presa limitada no estreito (g2lib: --g2cols só na caixa que precisa; grade aninhada não herda) e rolagem do
+        # foco que desconta a coluna e o cabeçalho presos
+        ".g2rola{--g2cols:initial;scroll-padding:calc(var(--g2hh,0px) + 6px) 6px 6px calc(var(--g2c0w,0px) + 6px)}"
+        ".g2rola [role=columnheader] button:focus-visible{outline-offset:-2px}"   # cabeçalho rente à borda da caixa: o anel fica por dentro, inteiro
+        ".g2cta{white-space:nowrap}"
+        # tabela com a 1ª coluna limitada (g2lib, data-c0): textos, cabeçalhos e ações quebram linha dentro da largura visível
+        # (vale também onde a área trunca com reticências), para cada célula caber inteira ao rolar
+        ".g2rola[data-c0] :is(.g2pw,.g2hb,.g2cta){white-space:normal}.g2rola[data-c0] .g2pw{flex-wrap:wrap}.g2rola[data-c0] .g2pw :is(b,a,button,span){flex-shrink:1}.g2rola[data-c0] [role=cell]{align-self:stretch}"   # linha mais alta: a célula acompanha (fundo inteiro)
+        "main section:only-of-type>div:last-child>.g2caixa:last-of-type{flex:1 1 0}main section:only-of-type>div:last-child>.g2caixa:last-of-type>.g2rola{flex:1 1 0}"
+        "main section:only-of-type>div:last-child>.rola{flex:1 1 0;min-height:0;overflow:auto}"
+        # tabela um nível abaixo, junto com chips ou legenda (ex.: Ordem de Serviço): o contêiner direto também estica
+        "main section:only-of-type>div:last-child>div:has(>.g2caixa,>.rola){flex:1 1 0;min-height:0;display:flex;flex-direction:column}"
+        "main section:only-of-type>div:last-child>div>.g2caixa:last-of-type{flex:1 1 0}main section:only-of-type>div:last-child>div>.g2caixa:last-of-type>.g2rola{flex:1 1 0}"
+        "main section:only-of-type>div:last-child>div>.rola{flex:1 1 0;min-height:0;overflow:auto}"
+        ".g2rola [role=table]>[role=row]:first-child{position:sticky;top:0;z-index:3}"
+        + INTERACAO_CSS)
 _TRASH='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>'
 _MINI=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer; white-space: nowrap;'
 _MINIP=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {ACC}; background: {ACC}; color: #fff; cursor: pointer; white-space: nowrap;'
@@ -997,49 +1082,69 @@ _PARTS=(f'<sc-if value="{{{{p.isTxt}}}}" hint-placeholder-val="{{{{false}}}}"><s
         f'<sc-if value="{{{{p.isChip}}}}" hint-placeholder-val="{{{{false}}}}"><span style="{{{{p.st}}}}"><span style="{{{{p.dot}}}}"></span>{{{{p.t}}}}</span></sc-if>'
         f'<sc-if value="{{{{p.isTag}}}}" hint-placeholder-val="{{{{false}}}}"><span style="display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; color: {MUTED}; border: 1px solid {LINE}; white-space: nowrap;">{{{{p.t}}}}</span></sc-if>'
         f'<sc-if value="{{{{p.isLink}}}}" hint-placeholder-val="{{{{false}}}}"><a href="{{{{p.href}}}}" style="color: {ACC}; font-weight: 700; text-decoration: none;">{{{{p.t}}}}</a></sc-if>'
-        f'<sc-if value="{{{{p.isCta}}}}" hint-placeholder-val="{{{{false}}}}"><a href="{{{{p.href}}}}" style="{{{{p.st}}}}">{{{{p.t}}}}</a></sc-if>'
-        f'<sc-if value="{{{{p.isAct}}}}" hint-placeholder-val="{{{{false}}}}"><button type="button" onClick="{{{{p.fn}}}}" style="{{{{p.st}}}}">{{{{p.t}}}}</button></sc-if>'
+        f'<sc-if value="{{{{p.isCta}}}}" hint-placeholder-val="{{{{false}}}}"><a class="{{{{p.cls}}}}" href="{{{{p.href}}}}" style="{{{{p.st}}}}">{{{{p.t}}}}</a></sc-if>'
+        f'<sc-if value="{{{{p.isAct}}}}" hint-placeholder-val="{{{{false}}}}"><button type="button" class="{{{{p.cls}}}}" onClick="{{{{p.fn}}}}" style="{{{{p.st}}}}">{{{{p.t}}}}</button></sc-if>'
         f'<sc-if value="{{{{p.isBr}}}}" hint-placeholder-val="{{{{false}}}}"><span style="flex-basis: 100%; height: 0;"></span></sc-if>')
 def _h(x): return '{{'+x+'}}'
-def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=True,so=None,add=None,bulk='',gid=None,x0=None,frame=True,tools='',headtools=True):
+def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=True,so=None,add=None,bulk='',gid=None,x0=None,frame=True,tools='',headtools=True,qf=None):
     """Grade interativa. cols: [dict(k,l,t='txt'|'num',a='r',u,d,agg='sum'|'avg',chips={valor:cor},w,pre)];
     rows: [dict(id,v={},s={},p={k:[partes]},ro=False,kids=[...],o=[dict(t,h)],dr='d3_open',sh='d2')];
     edit: dict(m='form'|'ro'|'origin'|'none', title, sub, fields=[dict(k,l,t='txt'|'num'|'sel'|'date'|'area',opts,req,min,max,u,cond=dict(k,eq),help,def,ro)], calc, newTitle, leafOnly)."""
     gid=gid or wid('g'); edit=edit or {'m':'none'}
     if FIRST_TBL[0] is None: FIRST_TBL[0]=gid
     n=len(cols)+(1 if sel else 0)+(1 if dele else 0)
-    spec=dict(id=gid,cols=cols,rows=rows,edit=edit,sel=sel,del_=dele,tree=tree,so=so or {},total=total,x0=x0 or {})
+    # qf: filtro rápido por uma coluna, k (chave), cut (fica o texto antes do separador), sep (vários valores na célula), todas ('Todas'|'Todos')
+    qf=(dict(k=qf) if isinstance(qf,str) else qf) or None
+    spec=dict(id=gid,cols=cols,rows=rows,edit=edit,sel=sel,del_=dele,tree=tree,so=so or {},total=total,x0=x0 or {},qf=qf)
     spec['del']=spec.pop('del_'); GRIDS.append(spec)
     H=lambda s: _h(gid+s)
     sicon=f'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="{MUTED}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>'
     tb=''
-    if search or add or tree or sel or tools:
+    if search or add or tree or sel or tools or qf:
         tb=(f'<div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid {LINE}; flex-wrap: wrap;">'
             + (f'<label style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid {LINE}; border-radius: 999px; background: {BG}; min-width: 160px;">{sicon}<input type="search" aria-label="Buscar nesta tabela" placeholder="Buscar…" value="{H("_q")}" onChange="{H("_setq")}" style="font-family: inherit; font-size: 12.5px; border: 0; background: transparent; outline: none; width: 100%;"></label>'
                f'<span style="font-size: 12px; color: {MUTED}; font-weight: 600; white-space: nowrap;">{H("_count")} de {H("_all")}</span>' if search else '')
+            + (f'<sc-if value="{H("_hasqf")}" hint-placeholder-val="{{{{false}}}}"><div role="group" aria-label="{H("_qfl")}" style="display: flex; flex-wrap: wrap; gap: 6px;">'
+               f'<sc-for list="{H("_qf")}" as="qc" hint-placeholder-count="4"><button type="button" aria-pressed="{_h("qc.on")}" title="{_h("qc.lab")}" onClick="{_h("qc.go")}" style="{_h("qc.st")}">{_h("qc.t")} <span style="opacity: .75;">{_h("qc.n")}</span></button></sc-for></div></sc-if>' if qf else '')
             + f'<sc-for list="{H("_fchips")}" as="fc" hint-placeholder-count="0"><span style="display: inline-flex; align-items: center; gap: 2px; padding: 2px 4px 2px 9px; border-radius: 999px; background: {ACCS}; color: {ACC}; font-size: 11.5px; font-weight: 700;">{_h("fc.t")}<button type="button" aria-label="Remover filtro" onClick="{_h("fc.rm")}" style="border: 0; background: transparent; color: {ACC}; cursor: pointer; font-size: 13px; padding: 0 4px;">×</button></span></sc-for>'
             + f'<sc-if value="{H("_filtered")}" hint-placeholder-val="{{{{false}}}}"><button type="button" onClick="{H("_clear")}" style="border: 0; background: transparent; color: {ACC}; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer;">Limpar filtros</button></sc-if>'
             + '<span style="flex-grow: 1;"></span>' + tools
             + (f'<sc-if value="{H("_hassel")}" hint-placeholder-val="{{{{false}}}}"><span style="font-size: 12px; font-weight: 700; color: {ACC};">{H("_selcount")} selecionado(s)</span>{bulk}<button type="button" onClick="{H("_selclear")}" style="{_MINI}">Limpar seleção</button></sc-if>' if sel else '')
-            + (f'<button type="button" onClick="{H("_expall")}" title="Expandir tudo" style="{_MINI}">Expandir tudo</button><button type="button" onClick="{H("_colall")}" title="Recolher tudo" style="{_MINI}">Recolher</button>' if tree else '')
+            + (f'<button type="button" onClick="{H("_xtog")}" style="{_MINI} display: inline-flex; align-items: center; gap: 5px;">{seta_xtog(H("_xup"),H("_xdown"))}{H("_xlab")}</button>' if tree else '')
             + (f'<button type="button" onClick="{H("_new")}" style="{_MINI}">+ {esc(add)}</button>' if add else '')
             + '</div>')
-    fpanel=(f'<sc-if value="{_h(gid+"_fm.open")}" hint-placeholder-val="{{{{false}}}}"><div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 12px; background: {BG}; border-bottom: 1px solid {LINE}; font-size: 12.5px;">'
-            f'<b>Filtrar {_h(gid+"_fm.l")}:</b><sc-for list="{_h(gid+"_fm.vals")}" as="fv" hint-placeholder-count="0"><label style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border: 1px solid {LINE}; border-radius: 999px; background: {SURF}; cursor: pointer;"><input type="checkbox" checked="{_h("fv.on")}" onChange="{_h("fv.tog")}" style="accent-color: {ACC};">{_h("fv.t")} <span style="color: {MUTED};">{_h("fv.n")}</span></label></sc-for>'
-            f'<span style="flex-grow: 1;"></span><button type="button" onClick="{_h(gid+"_fm.asc")}" style="{_MINI}">▲ Crescente</button><button type="button" onClick="{_h(gid+"_fm.desc")}" style="{_MINI}">▼ Decrescente</button>'
-            f'<button type="button" onClick="{_h(gid+"_fm.clear")}" style="{_MINI}">Limpar</button><button type="button" onClick="{_h(gid+"_fm.close")}" style="{_MINI}">Fechar</button></div></sc-if>')
+    # filtro da coluna no padrão Excel/Google Sheets: menu flutuante sob o cabeçalho, ordenar, pesquisar, marcar valores e aplicar no OK
+    FM=lambda s: _h(gid+"_fm."+s)
+    lk=f'border: 0; background: transparent; padding: 0; color: {ACC}; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer;'
+    it=f'display: flex; align-items: center; gap: 8px; width: 100%; padding: 7px 8px; border: 0; border-radius: 8px; background: transparent; font-family: inherit; font-size: 13px; color: {INK}; text-align: left; cursor: pointer;'
+    fpanel=(f'<sc-if value="{FM("open")}" hint-placeholder-val="{{{{false}}}}"><div style="position: fixed; inset: 0; z-index: 70;">'
+            f'<button type="button" aria-label="Fechar filtro" tabIndex="-1" onClick="{FM("cancel")}" style="position: absolute; inset: 0; border: 0; background: transparent; cursor: default;"></button>'
+            f'<div role="dialog" aria-label="{FM("titulo")}" onKeyDown="{FM("key")}" style="{FM("pos")} position: fixed; width: 280px; background: #fff; border: 1px solid {LINE}; border-radius: 12px; box-shadow: 0 14px 34px -14px rgba(21,32,26,.4); padding: 8px; display: flex; flex-direction: column; gap: 6px; z-index: 71;">'
+            f'<button type="button" class="g2fi" onClick="{FM("asc")}" style="{it}">{FM("ascT")}</button><button type="button" class="g2fi" onClick="{FM("desc")}" style="{it}">{FM("descT")}</button>'
+            f'<div style="height: 1px; background: {LINE}; margin: 2px 0;"></div>'
+            f'<div style="padding: 2px 8px 0; font-size: 11.5px; font-weight: 800; letter-spacing: .04em; color: {MUTED}; text-transform: uppercase;">Filtrar por valores</div>'
+            f'<div style="display: flex; align-items: center; gap: 12px; padding: 0 8px;"><button type="button" onClick="{FM("todos")}" style="{lk}">Selecionar tudo</button><button type="button" onClick="{FM("nenhum")}" style="{lk}">Limpar</button>'
+            f'<span style="flex-grow: 1;"></span><span style="font-size: 11.5px; color: {MUTED};">{FM("conta")}</span></div>'
+            f'<input id="{FM("qid")}" type="search" aria-label="Pesquisar valores" placeholder="Pesquisar" value="{FM("q")}" onChange="{FM("setq")}" style="margin: 0 2px; font-family: inherit; font-size: 13px; padding: 7px 10px; border: 1px solid {LINE}; border-radius: 9px;">'
+            f'<div style="max-height: 230px; overflow-y: auto; border: 1px solid {LINE}; border-radius: 9px; padding: 4px;">'
+            f'<sc-for list="{FM("vals")}" as="fv" hint-placeholder-count="0"><label style="display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-radius: 7px; font-size: 13px; cursor: pointer;">'
+            f'<input type="checkbox" checked="{_h("fv.on")}" onChange="{_h("fv.tog")}" style="width: 15px; height: 15px; accent-color: {ACC}; margin: 0;"><span style="flex-grow: 1; min-width: 0; overflow-wrap: anywhere;">{_h("fv.t")}</span><span style="font-size: 11.5px; color: {MUTED};">{_h("fv.n")}</span></label></sc-for>'
+            f'<sc-if value="{FM("semRes")}" hint-placeholder-val="{{{{false}}}}"><div style="padding: 8px; font-size: 12.5px; color: {MUTED};">Nenhum valor com “{FM("q")}”.</div></sc-if></div>'
+            f'<sc-if value="{FM("semMarca")}" hint-placeholder-val="{{{{false}}}}"><div role="alert" style="padding: 0 8px; font-size: 12px; font-weight: 700; color: {RED};">Marque pelo menos um valor.</div></sc-if>'
+            f'<div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 2px;"><button type="button" onClick="{FM("cancel")}" style="{_MINI}">Cancelar</button>'
+            f'<button type="button" onClick="{FM("ok")}" disabled="{FM("semMarca")}" style="{_MINIP} {FM("okSt")}">OK</button></div></div></div></sc-if>')
     hsel=f'<div role="columnheader" style="padding: 6px 4px 6px 12px; display: flex; align-items: center;"><button type="button" aria-label="Selecionar todas as linhas" title="Selecionar todas" onClick="{H("_selall")}" style="border: 1px solid {LINE}; background: {SURF}; width: 16px; height: 16px; border-radius: 4px; cursor: pointer; padding: 0;"></button></div>' if sel else ''
     hdel=f'<div role="columnheader"></div>' if dele else ''
     head=(f'<div role="row" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; background: {BG}; border-radius: 0;">{hsel}'
-          f'<sc-for list="{H("_head")}" as="h" hint-placeholder-count="{len(cols)}"><div role="columnheader" style="{_h("h.st")} padding: 0 4px 0 8px;">'
+          f'<sc-for list="{H("_head")}" as="h" hint-placeholder-count="{len(cols)}"><div role="columnheader" class="{_h("h.cls")}" style="{_h("h.st")} padding: 0 4px 0 8px;">'
           + (f'<button type="button" class="g2hb" onClick="{_h("h.sort")}" aria-label="{_h("h.sortLabel")}">{_h("h.l")} <span aria-hidden="true" style="{_h("h.astyle")} font-size: 9px;">{_h("h.arrow")}</span></button>'
              f'<button type="button" class="g2fb" onClick="{_h("h.fmenu")}" aria-label="{_h("h.flabel")}" title="{_h("h.flabel")}" style="color: {_h("h.fcolor")};">▾{_h("h.fil")}</button>' if headtools else
              f'<span class="g2hb" style="cursor: default;">{_h("h.l")}</span>')
           + f'</div></sc-for>{hdel}</div>')
     body=(f'<sc-for list="{H("_rows")}" as="r" hint-placeholder-count="3"><div role="row" class="{_h("r.cls")}" tabIndex="{_h("r.tab")}" onClick="{_h("r.open")}" onKeyDown="{_h("r.key")}" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; border-top: 1px solid {LINE}; align-items: center; font-size: 13px;">'
-          f'<sc-for list="{_h("r.cells")}" as="c" hint-placeholder-count="{n}"><div role="cell" style="display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; min-width: 0; {_h("c.st")}">'
+          f'<sc-for list="{_h("r.cells")}" as="c" hint-placeholder-count="{n}"><div role="cell" class="{_h("c.cls")}" style="display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; min-width: 0; {_h("c.st")}">'
           f'<sc-if value="{_h("c.isSel")}" hint-placeholder-val="{{{{false}}}}"><input type="checkbox" aria-label="{_h("c.selLabel")}" checked="{_h("c.on")}" onChange="{_h("c.tog")}" style="width: 16px; height: 16px; accent-color: {ACC}; margin: 0;"></sc-if>'
-          f'<sc-if value="{_h("c.hasCaret")}" hint-placeholder-val="{{{{false}}}}"><sc-if value="{_h("c.caretOk")}" hint-placeholder-val="{{{{false}}}}"><button type="button" class="g2car" aria-label="{_h("c.caretLabel")}" title="{_h("c.caretLabel")}" onClick="{_h("c.toggle")}">{_h("c.caretSym")}</button></sc-if><sc-if value="{_h("c.caretNo")}" hint-placeholder-val="{{{{false}}}}"><span style="width: 22px; flex-shrink: 0;"></span></sc-if></sc-if>'
+          f'<sc-if value="{_h("c.hasCaret")}" hint-placeholder-val="{{{{false}}}}"><sc-if value="{_h("c.caretOk")}" hint-placeholder-val="{{{{false}}}}"><button type="button" class="g2car" aria-label="{_h("c.caretLabel")}" aria-expanded="{_h("c.caretExp")}" title="{_h("c.caretLabel")}" onClick="{_h("c.toggle")}">{_h("c.caretSym")}</button></sc-if><sc-if value="{_h("c.caretNo")}" hint-placeholder-val="{{{{false}}}}"><span style="width: 22px; flex-shrink: 0;"></span></sc-if></sc-if>'
           f'<sc-if value="{_h("c.isData")}" hint-placeholder-val="{{{{true}}}}"><span class="g2pw" style="{_h("c.pw")}"><sc-for list="{_h("c.parts")}" as="p" hint-placeholder-count="1">{_PARTS}</sc-for></span></sc-if>'
           f'<sc-if value="{_h("c.isDel")}" hint-placeholder-val="{{{{false}}}}"><sc-if value="{_h("c.notAsking")}" hint-placeholder-val="{{{{true}}}}"><button type="button" class="g2del" aria-label="{_h("c.delLabel")}" title="Excluir" onClick="{_h("c.ask")}">{_TRASH}</button></sc-if>'
           f'<sc-if value="{_h("c.asking")}" hint-placeholder-val="{{{{false}}}}"><span style="font-size: 12px; font-weight: 700; color: {RED};">Excluir?</span><button type="button" onClick="{_h("c.yes")}" style="{_MINI} color: {RED}; border-color: {RED};">Excluir</button><button type="button" onClick="{_h("c.no")}" style="{_MINI}">Manter</button></sc-if></sc-if>'
@@ -1047,17 +1152,33 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     tot=''
     if total and any(c.get('agg') for c in cols):
         tot=(f'<div role="row" class="g2tot" tabIndex="0" onClick="{H("_totopen")}" title="Ver a composição do total" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; border-top: 2px solid {INK}; background: {BG}; font-size: 13px;">'
-             + ('<div role="cell"></div>' if sel else '') + f'<sc-for list="{H("_tot")}" as="t" hint-placeholder-count="{len(cols)}"><div role="cell" style="{_h("t.st")}">{_h("t.t")}</div></sc-for>' + ('<div role="cell"></div>' if dele else '') + '</div>')
+             + ('<div role="cell"></div>' if sel else '') + f'<sc-for list="{H("_tot")}" as="t" hint-placeholder-count="{len(cols)}"><div role="cell" class="{_h("t.cls")}" style="{_h("t.st")}">{_h("t.t")}</div></sc-for>' + ('<div role="cell"></div>' if dele else '') + '</div>')
     empty=f'<sc-if value="{H("_empty")}" hint-placeholder-val="{{{{false}}}}"><div style="padding: 16px; font-size: 13px; color: {MUTED};">Nenhuma linha corresponde aos filtros · <button type="button" onClick="{H("_clear")}" style="border: 0; background: transparent; color: {ACC}; font-family: inherit; font-weight: 700; cursor: pointer;">Limpar filtros</button></div></sc-if>'
-    tbl=(f'<div style="overflow-x: auto;"><div role="table" style="display: grid; grid-template-columns: repeat({n}, auto); min-width: 100%; width: max-content;">{head}{body}{tot}</div></div>{empty}')
+    tbl=(f'<div class="g2rola"><div role="table" style="display: grid; grid-template-columns: var(--g2cols, repeat({n}, auto)); min-width: 100%; width: max-content;">{head}{body}{tot}</div></div>{empty}')
     EXTRA.append(_g2form(gid))
     box=f'background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; min-width: 0; overflow: hidden;' if frame else 'min-width: 0;'
-    return f'<div style="{box}">{tb}{fpanel}{tbl}</div>'
+    return f'<div class="g2caixa" style="{box}">{tb}{fpanel}{tbl}</div>'
+def seta_xtog(sobe,desce):
+    """Seta à esquerda de "Expandir tudo"/"Recolher tudo": ícone SVG (não entra no texto nem é lido); sobe/desce = buracos booleanos."""
+    ic=lambda d: f'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="{d}"/></svg>'
+    return (f'<sc-if value="{sobe}" hint-placeholder-val="{{{{false}}}}">{ic("M6 15l6-6 6 6")}</sc-if>'
+            f'<sc-if value="{desce}" hint-placeholder-val="{{{{true}}}}">{ic("M6 9l6 6 6-6")}</sc-if>')
+def ac_campo(p,rotulo='Produto',largura='300px'):
+    """Autocompletar do cadastro: campo de busca + lista (role=listbox). Os buracos vêm de g2ac() em g2lib.js (acId, acQ, acItens...)."""
+    h=lambda s: '{{'+p+s+'}}'
+    # a lista abre no fluxo, logo abaixo do campo: não é cortada por blocos com borda arredondada ou rolagem própria
+    caixa=f'margin-top: 4px; padding: 4px; background: #fff; border: 1px solid {LINE}; border-radius: 10px; box-shadow: 0 10px 24px -12px rgba(21,32,26,.35);'
+    return (f'<span style="display: inline-flex; flex-direction: column; align-self: flex-start; width: {largura}; max-width: 100%;">'
+            f'<input id="{h("acId")}" type="text" role="combobox" aria-label="{rotulo}" aria-autocomplete="list" aria-expanded="{h("acExp")}" aria-controls="{h("acLid")}" aria-activedescendant="{h("acAtivo")}" autoComplete="off" placeholder="{h("acPh")}" value="{h("acQ")}" onChange="{h("acSet")}" onFocus="{h("acFoco")}" onBlur="{h("acSai")}" onKeyDown="{h("acTecla")}" style="{h("acSt")}">'
+            f'<sc-if value="{h("acAberto")}" hint-placeholder-val="{{{{false}}}}"><div id="{h("acLid")}" role="listbox" aria-label="{rotulo}" style="{caixa} max-height: 280px; overflow-y: auto;">'
+            '<sc-for list="'+h('acItens')+'" as="ai" hint-placeholder-count="3"><button type="button" role="option" id="{{ai.id}}" aria-selected="{{ai.on}}" tabIndex="-1" onMouseDown="{{ai.segura}}" onClick="{{ai.pick}}" style="{{ai.st}}">'
+            f'<b style="font-weight: 600;">{{{{ai.t}}}}</b><span style="font-size: 11.5px; color: {MUTED};">{{{{ai.sub}}}}</span></button></sc-for></div></sc-if>'
+            f'<sc-if value="{h("acVazio")}" hint-placeholder-val="{{{{false}}}}"><div role="status" style="{caixa} padding: 8px 10px; font-size: 12.5px; color: {MUTED};">{h("acVazioT")}</div></sc-if></span>')
 def _g2form(gid):
     F=lambda s: _h(gid+'_F.'+s)
     return (f'<sc-if value="{F("open")}" hint-placeholder-val="{{{{false}}}}"><div style="position: fixed; inset: 0; z-index: 60; display: flex; justify-content: flex-end;">'
             f'<button type="button" aria-label="Fechar formulário" onClick="{F("close")}" style="position: absolute; inset: 0; border: 0; background: rgba(21,32,26,.32); cursor: pointer;"></button>'
-            f'<aside role="dialog" aria-label="{F("title")}" onKeyDown="{F("key")}" style="position: relative; width: 460px; max-width: 100%; height: 100vh; overflow-y: auto; background: {SURF}; box-shadow: -12px 0 40px -12px rgba(21,32,26,.35); padding: 22px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px;">'
+            f'<aside role="dialog" aria-label="{F("title")}" onKeyDown="{F("key")}" style="position: relative; width: 460px; max-width: 100%; height: 100%; overflow-y: auto; background: {SURF}; box-shadow: -12px 0 40px -12px rgba(21,32,26,.35); padding: 22px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px;">'
             f'<div style="display: flex; align-items: flex-start; gap: 10px;"><h2 style="margin: 0; font-family: {DISP}; font-size: 19px; font-weight: 700; letter-spacing: -.02em; flex-grow: 1;">{F("title")}</h2>'
             f'<button type="button" aria-label="Fechar" title="Fechar" onClick="{F("close")}" style="border: 0; background: {BG}; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 18px; color: {MUTED}; flex-shrink: 0;">×</button></div>'
             f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.45;">{F("sub")}</div>'
@@ -1071,6 +1192,7 @@ def _g2form(gid):
             f'<sc-if value="{_h("f.hasU")}" hint-placeholder-val="{{{{false}}}}"><span style="font-size: 12.5px; color: {MUTED}; white-space: nowrap;">{_h("f.u")}</span></sc-if></div>'
             f'<sc-if value="{_h("f.err")}" hint-placeholder-val="{{{{false}}}}"><span role="alert" style="font-size: 12px; font-weight: 700; color: {RED};">{_h("f.errMsg")}</span></sc-if>'
             f'<sc-if value="{_h("f.hasHelp")}" hint-placeholder-val="{{{{false}}}}"><span style="font-size: 11.5px; color: {MUTED};">{_h("f.help")}</span></sc-if></div></sc-for>'
+            f'<sc-if value="{F("hasActs")}" hint-placeholder-val="{{{{false}}}}"><div style="display: flex; flex-direction: column; gap: 6px; padding-top: 10px; border-top: 1px solid {LINE};"><sc-for list="{F("acts")}" as="fa" hint-placeholder-count="1"><div style="display: flex;"><button type="button" onClick="{_h("fa.go")}" style="{BTN_ST(False,True)}">{_h("fa.t")}</button></div><span style="font-size: 11.5px; color: {MUTED};">{_h("fa.h")}</span></sc-for></div></sc-if>'
             f'<sc-if value="{F("isTot")}" hint-placeholder-val="{{{{false}}}}"><div style="display: flex; flex-direction: column; gap: 4px;"><sc-for list="{F("items")}" as="it" hint-placeholder-count="3"><div style="display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid {LINE}; font-size: 13px;"><b>{_h("it.t")}</b><span style="color: {MUTED}; text-align: right;">{_h("it.v")}</span></div></sc-for></div></sc-if>'
             f'<sc-if value="{F("hasOrigins")}" hint-placeholder-val="{{{{false}}}}"><div style="font-size: 12px; font-weight: 700; color: {MUTED}; letter-spacing: .04em;">ORIGEM</div><sc-for list="{F("origins")}" as="og" hint-placeholder-count="1"><sc-if value="{_h("og.isLink")}" hint-placeholder-val="{{{{false}}}}"><a href="{_h("og.h")}" style="color: {ACC}; font-weight: 700; text-decoration: none; font-size: 13px;">{_h("og.t")} ›</a></sc-if><sc-if value="{_h("og.isTxt")}" hint-placeholder-val="{{{{true}}}}"><div style="font-size: 12.8px; padding: 5px 0; border-bottom: 1px solid {LINE};">{_h("og.t")}</div></sc-if></sc-for></sc-if>'
             f'<div style="flex-grow: 1;"></div>'
@@ -1240,4 +1362,4 @@ def engine():
     grids=json.dumps(GRIDS,ensure_ascii=False).replace('</','<\\/')
     nav=json.dumps(NAVSPEC,ensure_ascii=False)
     return 'const SPEC = '+spec+';\nconst GRIDS = '+grids+';\nconst NAV = '+nav+';\n'+G2LIB+'\n'+(EXTRAJS[0] or '')+'\n'+ENGINE_JS2
-G2_TOAST=f'<div role="status" style="position: fixed; left: 50%; transform: translateX(-50%); bottom: 22px; z-index: 70; background: {INK}; color: #fff; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 12px 32px -8px rgba(21,32,26,.4); max-width: 560px; {{{{g2toastst}}}}">{{{{g2toast}}}}</div>'
+G2_TOAST=f'<div role="status" style="position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(22px + env(safe-area-inset-bottom, 0px)); z-index: 70; background: {INK}; color: #fff; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 12px 32px -8px rgba(21,32,26,.4); max-width: min(560px, calc(100vw - 32px)); box-sizing: border-box; {{{{g2toastst}}}}">{{{{g2toast}}}}</div>'

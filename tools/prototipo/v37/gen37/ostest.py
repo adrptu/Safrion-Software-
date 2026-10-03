@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
-"""Teste CDP de OS.dc.html: Lista/Kanban, chips de fase, painel lateral, Nova ordem e fase igual ao mapa (IN-04) e ao app (MB-02)."""
+"""Teste CDP de OS.dc.html: Lista/Kanban, chips de fase, painel lateral, Nova ordem e fase igual ao app (MB-02).
+01/10/2026 (decisão do proprietário): ordens só de água (OS-0419, OS-0422, OS-0423) saem da página O.S. e vivem na Irrigação;
+a lista, o Kanban, os chips e os contadores contam só as ordens agrícolas (10 em Santa Rita · 2026/27, lidas na própria página);
+a fertirrigação OS-0418 continua na O.S. O app de campo (MB-02) ainda mostra a água ao irrigante: a fase app × O.S. é comparada
+só nas ordens que estão na página O.S."""
 import sys, os, time, subprocess, json, re, shutil
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
 from cdp import Chrome
@@ -14,8 +18,12 @@ def clk(t,root=None): r=J(f"({CLK})({json.dumps(t)},{json.dumps(root)})"); time.
 def setv(sel,val): J(f"({SETV})({json.dumps(sel)},{json.dumps(val)})"); time.sleep(.3)
 toast=lambda: J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')")
 rows=lambda: J("[...document.querySelectorAll('[role=table] [role=row].g2ed')].map(r=>r.innerText.split('\\n')[0].trim())")
-pan=lambda: J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText")
+def pan():   # 01/10: abre as seções recolhidas do painel antes de ler
+    if J('(()=>{const bs=[...document.querySelectorAll(\'aside[role=dialog] section[aria-label] > button[aria-expanded="false"]\')]; bs.forEach(b=>b.click()); return bs.length;})()'): time.sleep(.3)
+    return J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText")
 FASES=['A liberar','Liberadas','Em execução','Em conferência','Encerradas']
+AGUA=['OS-0419','OS-0422','OS-0423']   # 01/10: ordens só de água, fora da página O.S.
+chips=lambda: J("[...document.querySelectorAll('[aria-label=\"Filtrar por fase\"] button')].map(b=>b.innerText.replace(/\\s+/g,' ').trim())") or []
 def fase_de(txt):
     for f in FASES:
         if f in txt: return f
@@ -27,14 +35,17 @@ try:
     c.size(1440,1000); c.goto(f'http://127.0.0.1:{p}/OS.dc.html')
     check('sem erro JS', J("window.__err||''")=='', J("window.__err||''"))
     check('abre na Lista', J("document.querySelectorAll('[role=table]').length")==1)
-    r0=rows(); check('13 ordens na lista (registro canônico)', len(r0)==13, r0)
+    r0=rows(); N=len(r0); cs0=chips()
+    check('10 ordens agrícolas na lista (registro canônico, igual ao chip Todas)', N==10 and cs0[:1]==[f'Todas {N}'] and len(set(r0))==N, (r0,cs0[:1]))
+    corpo=J("document.body.innerText")
+    check('ordens só de água fora da página O.S. (lista e texto)', not any(x in r0 or x in corpo for x in AGUA), [x for x in AGUA if x in corpo])
     ov=J("(()=>{const t=document.querySelector('[role=table]').parentElement; return [t.scrollWidth,t.clientWidth];})()"); check('lista cabe sem rolagem horizontal', ov[0]<=ov[1]+1, ov)
     # chips de fase
     clk('Em execução'); r=rows(); check('chip Em execução filtra', r==['OS-0421','OS-0420'] or sorted(r)==['OS-0420','OS-0421'], r)
     check('chip marcado', J("[...document.querySelectorAll('[aria-label=\"Filtrar por fase\"] button')].filter(b=>b.getAttribute('aria-pressed')==='true').map(b=>b.innerText.replace(/\\s+/g,' '))")==['Em execução 2'])
-    clk('A liberar'); r=rows(); check('chip A liberar = 5', len(r)==5 and 'OS-0418' in r and 'OS-0431' in r, r)
+    clk('A liberar'); r=rows(); check('chip A liberar = 3 (fertirrigação OS-0418 fica; água OS-0422/OS-0423 não)', sorted(r)==['OS-0418','OS-0430','OS-0431'] and 'A liberar 3' in chips(), r)
     check('filtro aparece na grade', 'Fase: A liberar' in J("document.body.innerText"))
-    clk('Todas'); check('Todas volta a 13', len(rows())==13)
+    clk('Todas'); check(f'Todas volta a {N}', rows()==r0)
     # painel OS-0421
     J("[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.indexOf('OS-0421')===0).click()"); time.sleep(.5)
     t=pan(); check('painel abre', 'OS-0421' in t, t[:80])
@@ -57,10 +68,10 @@ try:
     for i,f in enumerate(FASES):
         ids=J(f"[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] > div')[{i}].querySelectorAll('[role=button]')].map(b=>b.innerText.split('\\n')[0].trim())")
         for x in ids: kb[x]=f
-    check('Kanban 13 cartões', len(kb)==13, kb)
+    check(f'Kanban {N} cartões, sem ordens de água', len(kb)==N and sorted(kb)==sorted(r0) and not any(x in kb for x in AGUA), kb)
     c.shot(os.path.join(HERE,'_probe','os_kanban.png'))
     J("[...document.querySelectorAll('[role=button]')].find(b=>b.innerText.indexOf('OS-0420')===0).click()"); time.sleep(.4)
-    t=pan(); check('cartão abre painel OS-0420 com link da ordem completa', 'OS-0420' in t and J("(document.querySelector('aside[role=dialog] a')||{}).getAttribute('href')")=='CA-01x-os0420.dc.html' and 'v3 em revisão' in t, t[:60])
+    t=pan(); check('cartão abre painel OS-0420 com link da ordem completa', 'OS-0420' in t and J("(document.querySelector('aside[role=dialog] a')||{}).getAttribute('href')")=='CA-01x-os0420.dc.html' and 'v3 no saldo de 70 ha' in t and 'em revisão' not in t, t[:60])
     clk('Fechar','aside[role=dialog]')
     # lista × Kanban
     clk('Lista'); lista={}
@@ -75,9 +86,9 @@ try:
     clk('Cancelar','aside[role=dialog]'); check('aviso não salvo', 'Há alterações não salvas' in pan())
     clk('Continuar editando','aside[role=dialog]'); clk('Emitir ordem','aside[role=dialog]')
     tt=toast(); check('emite em A liberar', 'OS-0440' in tt and 'A liberar' in tt and 'Não foi liberada' in tt, tt)
-    t=pan(); check('painel da nova ordem A liberar', 'OS-0440' in t and 'Aguardando agrônomo' in t, t[:120])
-    J("document.querySelector('aside[role=dialog] button[aria-label=Fechar]').click()"); time.sleep(.3); check('14 ordens', len(rows())==14)
-    check('contador A liberar 6', J("[...document.querySelectorAll('[aria-label=\"Filtrar por fase\"] button')].map(b=>b.innerText.replace(/\\s+/g,' '))")[1]=='A liberar 6')
+    t=pan(); check('painel da nova ordem A liberar: Liberar para execução e Ajustar antes de liberar, sem selo de agrônomo', 'OS-0440' in t and 'Liberar para execução' in t and 'Ajustar antes de liberar' in t and 'Aguardando agrônomo' not in t and 'Revisar versão' not in t, t[:120])
+    J("document.querySelector('aside[role=dialog] button[aria-label=Fechar]').click()"); time.sleep(.3); check(f'{N+1} ordens', len(rows())==N+1)
+    cs=chips(); check('contador A liberar 4 e Todas sobe junto', cs[1]=='A liberar 4' and cs[0]==f'Todas {N+1}', cs)
     clk('Nova ordem'); setv('#nv_saf','S2627'); setv('#nv_cult','c1'); setv('#nv_atv','a7'); setv('#nv_jan','2026-12-02'); clk('Emitir ordem','aside[role=dialog]')
     e=J("[...document.querySelectorAll('aside [role=alert]')].map(x=>x.innerText).join(' | ')"); check('não duplica', 'Já existe OS-0440' in e, e)
     clk('Cancelar','aside[role=dialog]'); clk('Descartar alterações','aside[role=dialog]')
@@ -97,7 +108,9 @@ try:
         seg=txt[m.end():m.end()+220]; nxt=re.search(r'(?:OS|OB)-\d{4}',seg); seg=seg[:nxt.start()] if nxt else seg
         f=fase_de(seg)
         if f: app[k]=f
-    check('fase igual ao app MB-02', app and all(app[k]==lista.get(k) for k in app), {k:(app[k],lista.get(k)) for k in app})
+    comuns_app=[k for k in app if k in lista]   # 01/10: o app ainda mostra a água ao irrigante; compara só o que está na página O.S.
+    check('fase igual ao app MB-02 (ordens da página O.S.)', len(comuns_app)>=3 and all(app[k]==lista[k] for k in comuns_app), {k:(app[k],lista.get(k)) for k in app})
+    check('app MB-02 ainda mostra a água OS-0419 ao irrigante, fora da página O.S.', 'OS-0419' in app and 'OS-0419' not in lista and 'resp. João' in txt[txt.find('OS-0419'):][:200], txt[txt.find('OS-0419'):][:200])
 finally:
     c.close(); srv.terminate()
 print(f'\n{len(ok)} ok · {len(falhas)} falhas', falhas)

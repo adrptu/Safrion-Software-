@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Bateria dos 12 testes pedidos pelo proprietário em 25/09/2026 — executados no protótipo servido localmente (Chrome headless)."""
+"""Bateria dos 12 testes pedidos pelo proprietário em 25/09/2026 — executados no protótipo servido localmente (Chrome headless).
+Atualizado em 01/10/2026 (decisões do proprietário): o T12 lê o mapa da Santa Rita na camada Ordens de serviço e compara app e mapa
+só nas ordens que a tela O.S. mostra (as ordens só de água OS-0419/0422/0423 saíram da O.S. e seguem no app do irrigante)."""
 import sys, os, time, subprocess, json, re
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
 from cdp import Chrome
@@ -28,7 +30,7 @@ class T:
 def row_click(t,texto,sel="[role=row].g2ed"):
     return t.js(f"""(()=>{{const r=[...document.querySelectorAll('{sel}')].find(r=>r.innerText.indexOf({json.dumps(texto)})>=0); if(!r) return 'sem linha'; const c=r.querySelector('[role=cell] span')||r.querySelector('[role=cell]'); c.click(); return 'ok';}})()""")
 def abrir_safra(t):
-    t.abrir('SAF.dc.html'); t.js("(()=>{const b=[...document.querySelectorAll('button')].find(b=>/^Abrir safra/.test(b.innerText.trim())); if(b) b.click();})()"); time.sleep(.5)
+    t.abrir('SAF.dc.html'); t.js("(()=>{const b=[...document.querySelectorAll('button')].find(b=>/^Continuar/.test(b.innerText.trim())); if(b) b.click();})()"); time.sleep(.5)
 def etapa(t,i): t.js(f"document.querySelectorAll('nav[aria-label=\"Etapas do processo\"] button')[{i-1}].click()"); time.sleep(.5)
 # ---------------------------------------------------------------- testes
 def t01(t):
@@ -40,7 +42,7 @@ def t01(t):
     t.setv('#'+ids[0],'Safra 2027/28'); t.setv('#'+ids[1],'set/2027 – ago/2028')
     t.clk('Salvar','aside[role=dialog]'); t.check('Safra criada e aberta na etapa 2',t.js("document.querySelector('[aria-current=step]').innerText.indexOf('Defina cultivos')>=0"),t.aviso())
     t.foto('nova-safra')
-    t.clk('1'); t.clk('Abrir safra')  # abre a 2026/27
+    t.clk('1'); t.clk('Continuar')  # abre a 2026/27 no próximo passo (etapa 2)
     for i in range(2,7):
         etapa(t,i); cur=t.js("document.querySelector('[aria-current=step]').innerText.replace(/\\s+/g,' ')")
         t.check(f'Etapa {i} aberta pela faixa',cur.startswith(str(i)),cur)
@@ -73,9 +75,12 @@ def t03(t):
     t.check('Demanda: grupos expandidos mostram insumos',t.js("document.body.innerText.indexOf('Glifosato 480')>=0"))
 def t04(t):
     """Encaminhar demanda para compras mantendo a origem."""
-    abrir_safra(t); etapa(t,6); t.clk('Enviar para cotação')
-    t.check('Envio não duplica solicitação existente',('Nenhuma solicitação duplicada' in t.aviso()) or ('enviada' in t.aviso()),t.aviso())
-    t.clk('Abrir em Compra de insumos'); time.sleep(1.2)
+    abrir_safra(t); etapa(t,6)
+    # 01/10: com tudo já enviado, a etapa 6 não oferece novo envio (não há como duplicar) e a ação principal abre a Compra
+    tem_env=t.js("[...document.querySelectorAll('button')].some(b=>b.innerText.trim()==='Enviar para cotação')")
+    if tem_env: t.clk('Enviar para cotação'); t.check('Envio não duplica solicitação existente',('Nenhuma solicitação duplicada' in t.aviso()) or ('enviada' in t.aviso()),t.aviso())
+    else: t.check('Envio não duplica solicitação existente (nada a enviar: só "Abrir Compra de insumos")',t.js("[...document.querySelectorAll('button')].some(b=>/^Abrir Compra de insumos/.test(b.innerText.trim()))"),'')
+    t.clk('Abrir Compra de insumos'); time.sleep(1.2)
     t.check('Abriu Compra de insumos',t.js("location.pathname").endswith('CMP.dc.html'))
     t.check('Compras mostra a SOL-2026-07',t.js("document.body.innerText.indexOf('SOL-2026-07')>=0"))
     t.check('Compras mostra a origem (Planejar safra · Safra 2026/27)',t.js("/Planejar safra/.test(document.body.innerText) && /2026\\/27/.test(document.body.innerText)"))
@@ -136,10 +141,14 @@ def t10(t):
     t.js("document.querySelector('.g2tot').click()"); time.sleep(.4)
     t.check('Total abre a composição (sem edição)',t.form() and t.js("document.querySelector('aside[role=dialog]').innerText.indexOf('Composição do total')>=0 && ![...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==='Salvar')"))
 def t12(t):
-    """Conferir a consistência das fases das O.S. entre as diferentes visualizações."""
+    """Conferir a consistência das fases das O.S. entre as diferentes visualizações.
+    Decisões de 01/10/2026: as ordens só de água (OS-0419/0422/0423) não são O.S. agrícolas, saem da tela O.S. e da camada Ordens de serviço
+    do mapa e seguem no app do irrigante; por isso app e mapa são comparados só nas ordens que a tela O.S. mostra, e o mapa (Santa Rita) é lido
+    na camada Ordens de serviço, a única cujo painel do talhão traz os cartões das O.S."""
     import dados as D
     FASES='A liberar|Liberadas|Em execução|Em conferência|Encerradas'
     esperado={o['id']:o['etapa'] for o in D.ORDENS if o['id'].startswith('OS-')}
+    agua={o['id'] for o in D.ORDENS if o['id'].startswith('OS-') and str(o.get('tipo','')).startswith('Irrigação')}
     def blocos(txt):
         out={}
         ids=[(m.start(),m.group(0)) for m in re.finditer(r'OS-04\d\d',txt)]
@@ -155,20 +164,27 @@ def t12(t):
     vistas['Kanban (OS)']=kb
     t.abrir('MB-02.dc.html'); vistas['App (MB-02)']=blocos(t.js("document.body.innerText"))
     t.abrir('CA-01det.dc.html'); vistas['Detalhe (CA-01det)']=blocos(t.js("document.body.innerText"))
-    t.abrir('IN-04.dc.html'); mp={}
-    n=t.js("document.querySelectorAll('svg polygon, svg circle').length")
+    # mapa da Santa Rita na camada Ordens de serviço (01/10: o mapa abre na Lagoa Grande e só essa camada mostra as O.S. no painel do talhão)
+    t.js("sessionStorage.setItem('mapa-ctx',JSON.stringify({mf_faz:'Santa Rita',lay:'O.S./prazos'}))"); t.abrir('IN-04.dc.html'); mp={}
+    TAL="document.querySelectorAll('svg [role=button]')"
+    n=t.js(f"{TAL}.length")
     for i in range(n or 0):
-        t.js(f"(()=>{{const e=document.querySelectorAll('svg polygon, svg circle')[{i}]; e.dispatchEvent(new MouseEvent('click',{{bubbles:true}}));}})()"); time.sleep(.35)
+        t.js(f"{TAL}[{i}].dispatchEvent(new MouseEvent('click',{{bubbles:true}}))"); time.sleep(.35)
         pan=t.js("(()=>{const a=[...document.querySelectorAll('aside')].map(x=>x.innerText).join('\\n'); return a;})()") or ''
         for k,v in blocos(pan).items(): mp.setdefault(k,v)
+        t.js(f"{TAL}[{i}].dispatchEvent(new MouseEvent('click',{{bubbles:true}}))"); time.sleep(.2)
     vistas['Mapa (IN-04, painel do talhão)']=mp
+    na_os=set(vistas['Lista (OS)'])
+    t.check('Tela O.S. sem as ordens só de água; as demais O.S. do registro aparecem',na_os.isdisjoint(agua) and na_os==set(esperado)-agua,f'tela O.S.: {sorted(na_os)} · só de água no registro: {sorted(agua)}')
+    t.check('Mapa (camada Ordens de serviço) só com ordens da tela O.S. (sem as de água)',set(mp)<=na_os,sorted(set(mp)-na_os))
     difs=[]; total=0
     for vn,d in vistas.items():
-        for oid,f in d.items():
-            if oid in esperado:
-                total+=1
-                if f!=esperado[oid]: difs.append(f'{vn}: {oid} mostra "{f}", registro diz "{esperado[oid]}"')
-        t.log(f'{vn}: {len([o for o in d if o in esperado])} ordens lidas',len([o for o in d if o in esperado])>0,json.dumps(d,ensure_ascii=False)[:280])
+        lidas=[o for o in d if o in esperado and o in na_os]  # app e mapa: só as ordens que a tela O.S. mostra
+        for oid in lidas:
+            total+=1
+            if d[oid]!=esperado[oid]: difs.append(f'{vn}: {oid} mostra "{d[oid]}", registro diz "{esperado[oid]}"')
+        fora=sorted(o for o in d if o not in na_os)
+        t.log(f'{vn}: {len(lidas)} ordens lidas'+(f' (fora da tela O.S., não comparadas: {", ".join(fora)})' if fora else ''),len(lidas)>0,json.dumps(d,ensure_ascii=False)[:280])
     t.check(f'Mesma fase em todas as visualizações ({total} leituras de fase comparadas)',not difs and total>=20,'; '.join(difs)[:600] if difs else f'{total} leituras, 0 divergências')
 TESTES=[('T01','Escolher/criar safra e percorrer as seis etapas',t01),('T02','Aplicar um plano a vários cultivos e ajustar somente um',t02),
  ('T03','Expandir gatilhos, atividades e insumos',t03),('T04','Encaminhar demanda para compras mantendo a origem',t04),('T05','Navegar entre etapas sem perder dados',t05),

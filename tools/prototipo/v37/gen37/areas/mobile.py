@@ -17,21 +17,24 @@ App de campo ligado ao cenário compartilhado (v3.9, 26/09/2026) — MB-01, MB-0
   do MB-03 desconta os turnos no aparelho; insumo fora da requisição não é pré-calculado nem baixado. Listas com teto (quadro de altura fixa).
 - Sem sinal (cenSinal): tudo vai para a fila do aparelho; ao voltar o sinal a fila é enviada uma vez só e o app guarda o recibo
   (mbSinal: c.app.recibos, REC-7742 em diante; REC-7741 = APT-1187, dia 4 da OS-0421, já confirmado).
-- Fechar o turno (cenFecharTurno) não encerra a O.S.; erros junto ao campo (acima do saldo; consumo acima do que está com você).
+- Fechar o turno (cenFecharTurno) não encerra a O.S.; erro junto ao campo só para área acima do saldo. Consumo informado acima do que está
+  com você não é recusado (RN-018; CONC-07): aviso no campo, o fato fica Em conferência sem baixa e Rui (almoxarife) concilia no Estoque.
+  A sugestão dose × área não editada é estimativa (CONC-13): acima do que está com você, o campo pede quanto foi usado (nada abre sozinho).
 - MB-05det..MB-10det seguem com dados locais (abaixo) e a regra de irrigação já aplicada (MB-08).
 
 observacoes (dados locais coerentes com dados.py / dados2.py / telas vizinhas):
 - OS-0421: equipe Marcos · Pulverizador PJ-3030 + Trator 03 (campo.py); janela da ordem 20–26/09 (processo_os.JANELA).
-- OS-0420: 30/100 ha (18 conferidos + 12 provisórios), saldo 70 ha pausado; v2 vigente, v3 (KCl −12 % só no saldo) em revisão com
-  Ana (agrônoma) — mesmo recorte de campo.py/processo_os.py (não 60/40). Fichas do saldo revogadas em 23/09 08:05; ciência CI-0931.
-- OS-0418 no pacote offline: autorização de água revogada no servidor em 23/09 07:15 (reclassificada para fertirrigação, v2 com Ana);
+- OS-0420: 30/100 ha (18 conferidos + 12 provisórios) na v2; saldo de 70 ha na v3 (KCl −12 % só no saldo), ajustada por Ana (agrônoma)
+  em 23/09 e já em vigor; o saldo está parado só pelo Trator T1 (OM-0233) — mesmo recorte de campo.py/processo_os.py (não 60/40).
+  Fichas do saldo revogadas em 23/09 08:05 pelo ajuste da v3; ciência CI-0931.
+- OS-0418 no pacote offline: autorização de água revogada no servidor em 23/09 07:15 (reclassificada para fertirrigação, v2 a liberar por Ana);
   relato local de 07:40 ("pivô 1 ligado 20 min para teste de pressão") fica como relato fora da autorização, aguardando decisão.
 - OS-0419 = irrigacao.py: 1 volta a 62 % ≈ 14,5 h · janela hoje 20:00–amanhã 10:31, início 20:02, término amanhã 10:33; andamento
   de 2,1 h ≈ 14,47 % (≈11,6 ha). Recibos AU-3098 · LIB-2287 · EX-5120; conferência 10,6 mm medidos × 10,81 mm estimados nos 80 ha
   (−1,9 %, tolerância 3 %). Bomba B2 166 L/s.
   Próximo ciclo = OS-0422 (13,5 mm em 2 passadas de 6,75 mm · janela a definir), sem aprovação do agrônomo.
 - Almoxarife (aba de MB-05) = dados2: REQ-031 (MAP 100/70/20/10 sc, custódia de Paula; sobras vão ao lote M26-05 de suprimentos.py),
-  REQ-038 (OS-0418, Ureia 45 % 1.140 kg, aguardando aprovação; estoque apto 0 kg), conflito F26-02 rebaseado como em suprimentos.py
+  REQ-038 (OS-0418, Ureia 45 % 1.140 kg, aguardando liberação; estoque apto 0 kg), conflito F26-02 rebaseado como em suprimentos.py
   (545 L físicos, 65 L reservados à OS-0424, 480 L livres; reserva planejada da safra 625,2 L em conflito, pendência 145,2 L).
 - DEMO-20: Balança/Recebedor usam a carga CG-1207 da colheita.py (OC-0510 · talhão T7 · Carreta 03 · 4.310 − 1.180 = 3.130 kg ·
   ROM-0791 · Packing Sede · chegada a confirmar). Motorista = caminhão T1 da logistica.py (VD-2101 1ª de 3, janela 08:00,
@@ -153,7 +156,7 @@ MBJAN={k:dict(j=o.get('janela') or 'a definir',k=_jk(o.get('janela'))) for k,o i
 MBAPP_JS=('const MBJAN = '+json.dumps(MBJAN,ensure_ascii=False)+';\nconst MB_ETAPA_COR = '+json.dumps(ETAPA_COR,ensure_ascii=False)
           +';\nconst MBTX = {ink:"%s",muted:"%s",surf:"%s",line:"%s",acc:"%s",accs:"%s",yel:"%s",yels:"%s"};\n' % (INK,MUTED,SURF,LINE,ACC,ACCS,YEL,YELS)) + r'''
 // Gancho de teste/inspeção: o script da tela roda isolado (new Function); os testes app_* usam a mesma API do cenário por aqui.
-try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenConfirmarRecebimento, cenIniciarTurno, cenFecharTurno, cenOcorrencia, cenSinal, cenPodeEncerrar }; window.__mb = { mbIniciar, mbDescartar, mbResta }; } catch (e) {}
+try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenConfirmarRecebimento, cenIniciarTurno, cenFecharTurno, cenOcorrencia, cenSinal, cenPodeEncerrar, cenConciliar }; window.__mb = { mbIniciar, mbDescartar, mbResta }; } catch (e) {}
 const MB_SEL_KEY = 'talhao-os-mb-os';   // ordem aberta no detalhe (conveniência do aparelho; o cenário não muda)
 function mbSelGet(){ try { return localStorage.getItem(MB_SEL_KEY) || ''; } catch (e) { return ''; } }
 function mbSelSet(id){ try { localStorage.setItem(MB_SEL_KEY, id || ''); } catch (e) {} }
@@ -172,7 +175,9 @@ function mbTx(c){ return 'font-weight: 700; color: ' + (MBC[c] || MBC.gray)[0] +
 function mbEmb(i, q){ const m = String(i.emb || '').match(/([\d.]+(?:,\d+)?)\s*(L|kg)\b/); if (!m) return i.emb || ''; const sz = Number(m[1].replace(/\./g, '').replace(',', '.')); return sz > 0 ? Math.ceil(q / sz - 1e-9) + ' × ' + i.emb : i.emb; }
 // Área que ainda cabe em turnos: saldo do servidor menos os hectares que já estão no aparelho (aguardando sinal).
 function mbResta(o){ return Math.max(0, (o.saldo || 0) - mbProv(o)); }
-function mbSobra(c, o){ const r = mbReq(c, o); return r ? r.itens.filter(i => i.custodia > 0.001) : []; }
+// consumo relatado em conferência (CONC-07): o item não é sobra a devolver enquanto o almoxarife não concilia
+function mbConf(c, os, prod){ return cenConfAbertas(c, os).find(k => !prod || k.prod === prod) || null; }
+function mbSobra(c, o){ const r = mbReq(c, o); return r ? r.itens.filter(i => i.custodia > 0.001 && !mbConf(c, o.id, i.prod)) : []; }
 function mbSobraTxt(l){ return l.map(i => i.prod + ' ' + cenNum(i.custodia) + ' ' + i.un).join(', '); }
 // Iniciar turno só com área a fazer (o cenário não confere o saldo; sem esta guarda o turno abre e não fecha).
 function mbIniciar(c, id){ const o = c.ordens[id]; if (o && mbResta(o) <= 0.001) throw new Error('A ' + id + ' não tem área a fazer (saldo 0 ha). Nada a iniciar.'); return cenIniciarTurno(c, id); }
@@ -189,6 +194,7 @@ function mbPasso(c, o){
     if (mbProv(o) > 0) return { k: 'enviar', t: 'Ver envios', chip: ['Área feita · aguardando sinal', 'yellow'], cor: 'yellow', href: 'MB-03x-recibo.dc.html', tt: 'Ver os turnos da ' + o.id + ' que estão no aparelho' };
     const sb = mbSobra(c, o);
     if (sb.length) return { k: 'devolver', t: 'Devolver sobra', chip: ['Área feita · sobra com você', 'yellow'], cor: 'yellow', href: 'MB-05.dc.html', tt: 'Levar ao Rui a sobra da ' + o.id + ': ' + mbSobraTxt(sb) };
+    if (mbConf(c, o.id)) return { k: 'none', t: '', chip: ['Consumo em conferência · ' + CEN_CONC_RESP, 'yellow'], cor: 'yellow', tt: '', feita: true };
     return { k: 'none', t: '', chip: ['Área feita · aguarda encerramento', 'green'], cor: 'green', tt: '', feita: true };
   }
   if ((o.ins || []).length && r && !r.itens.some(i => i.custodia > 0)) return { k: 'retirar', t: 'Retirar no almoxarifado', chip: ['Reservado · ' + r.id, 'gray'], cor: 'gray', href: 'MB-05.dc.html', tt: 'Ver o que retirar com Rui no almoxarifado para a ' + o.id };
@@ -198,7 +204,8 @@ function mbPasso(c, o){
 }
 // Insumos da ordem: a retirar, entregues a confirmar, com o operador (custódia) ou já consumidos.
 function mbIns(c, o){ const r = mbReq(c, o); if (!r) return [];
-  return r.itens.map(i => { const L = i.prod + ' · lote ' + i.lote + (i.emb ? ' · ' + i.emb : '');
+  return r.itens.map(i => { const L = i.prod + ' · lote ' + i.lote + (i.emb ? ' · ' + i.emb : ''); const k = mbConf(c, o.id, i.prod);
+    if (k) return { t: L, s: 'em conferência · relatado ' + cenNum(k.relatado) + ' ' + k.un + ' · com você ' + cenNum(i.custodia) + ' ' + i.un, st: mbTx('yellow') };
     if (i.custodia > 0 && !i.confirmado) return { t: L, s: 'entregue ' + cenNum(i.custodia) + ' ' + i.un + ' · a confirmar', st: mbTx('yellow') };
     if (i.custodia > 0) return { t: L, s: 'com você ' + cenNum(i.custodia) + ' ' + i.un, st: mbTx('green') };
     const sal = cenSaldoEntregar(i); if (sal > 0) return { t: L, s: 'retirar ' + cenNum(sal) + ' ' + i.un, st: mbTx('gray') };
@@ -215,7 +222,7 @@ function mbPrim(c, fila){ const t = mbTurno(c); if (t) return { k: 'fechar', o: 
   return { k: 'none', o: null, lab: 'Ver minhas ordens' }; }
 function mbDesc(c, k){
   if (k.indexOf('AP|') === 0) { const [, id, dia] = k.split('|'); const o = c.ordens[id]; const a = o && (o.ap || []).find(x => String(x.dia) === dia);
-    return 'Apontamento ' + id + ' · dia ' + dia + (a ? ' · ' + cenNum(a.ha, 1) + ' ha' + (a.h ? ' em ' + cenNum(a.h, 1) + ' h' : '') : ''); }
+    return 'Apontamento ' + id + ' · dia ' + dia + (a ? ' · ' + cenNum(a.ha, 1) + ' ha' + (a.h ? ' em ' + cenNum(a.h, 1) + ' h' : '') + (a.conf ? ' · consumo em conferência' : '') : ''); }
   const oc = (c.ocorr || []).find(x => x.id === k); if (oc) return 'Ocorrência ' + oc.id + ' · ' + oc.os + ' · ' + oc.tipo;
   const m = (c.movs || []).find(x => x.id === k); if (m) return m.tipo === 'recebimento' ? 'Recebimento confirmado · ' + m.req + ' · ' + m.os : m.tipo + ' · ' + (m.os || '');
   return k; }
@@ -346,16 +353,16 @@ v.restaurar=()=>{ cenReset(); cenSave(cenGet()); mbSelSet(''); self.setState({ce
       + qcards('minhas',count=3)
       + h2('Da equipe · outros responsáveis','Consulte; quem executa é o responsável indicado.')
       + card(f'<b>{O420["id"]}</b> · Plantio · Soja 58 W',[
-          kv('Contexto',f'T4 · Santa Rita · resp. {O420["resp"]}')+' · '+kv('Realizado',f'{O420["realizado"]}/{O420["area"]} ha (18 conferidos + 12 provisórios) · saldo {O420["saldo"]} ha pausado'),
-          chips(etapa('Em execução'),selo(O420['selo']),sel420,tag('instrução v2 vigente')),
-          kv('Aviso','Fichas do saldo revogadas pela revisão v3 (KCl −12% só nos 70 ha) · 23/09 08:05'),
+          kv('Contexto',f'T4 · Santa Rita · resp. {O420["resp"]}')+' · '+kv('Realizado',f'{O420["realizado"]}/{O420["area"]} ha (18 conferidos + 12 provisórios) · saldo {O420["saldo"]} ha parado'),
+          chips(etapa('Em execução'),selo(O420['selo']),sel420,tag('v2 no realizado · v3 no saldo')),
+          kv('Aviso','Fichas do saldo revogadas pelo ajuste da v3 (KCl −12 % só nos 70 ha, por Ana) · 23/09 08:05'),
           chips(dchip('ack')),
           kv('Impedimento',f'{D.OM["id"]} · Trator T1 bloqueado · substituto {esc(D.OM["substituto"])} a partir de 24/09 06:00'),
           btns(IF('noack',fnb('Reconhecer','ack','check','Registrar ciência da revogação das fichas do saldo')),
-               say('Iniciar · bloqueado','Bloqueado: Trator T1 com OM-0233 e saldo de 70 ha pausado pela revisão v3 — aguarde a aprovação da v3 e a reliberação com o substituto (nada foi iniciado).','alert','Ver por que não pode iniciar'),
+               say('Iniciar · bloqueado','Bloqueado: Trator T1 com OM-0233 — saldo de 70 ha parado; aguarde o reparo ou o substituto Trator 02 (a partir de 24/09) confirmado pelo PCP (nada foi iniciado).','alert','Ver por que não pode iniciar'),
                lnk('Registrar ocorrência','MB-04.dc.html','alert','Abrir a captura de ocorrência'))],state='red')
       + card('<b>OS-0418</b> · Fertirrigação · Pivô 1',[
-          kv('Contexto',f'P1 · 95 ha · resp. {D.ORDEM["OS-0418"]["resp"]}')+' · '+kv('Motivo','água reclassificada para fertirrigação · v2 aguarda Ana (agrônoma)'),
+          kv('Contexto',f'P1 · 95 ha · resp. {D.ORDEM["OS-0418"]["resp"]}')+' · '+kv('Motivo','água reclassificada para fertirrigação · v2 a liberar por Ana (agrônoma)'),
           chips(etapa('A liberar'),chip('Revogada no servidor · 23/09 07:15','red')),
           kv('Relato no aparelho','23/09 07:40 · “pivô 1 ligado 20 min para teste de pressão”'),
           chips(chip('Relato fora da autorização atual · aguarda decisão','yellow')),
@@ -371,7 +378,7 @@ v.restaurar=()=>{ cenReset(); cenSave(cenGet()); mbSelSet(''); self.setState({ce
 const first=mbFila(c)[0]||mine[0]; v.p_lab='Abrir '+(first?first.id:'ordem'); v.p_sel=()=>{ if(first) mbSelSet(first.id); };
 const ack=!!s.ack; v.noack=!ack;
 DCH(v,'ack',ack?'Ciência registrada · CI-0931 · 10:44':'Ciência pendente do operador',ack?'green':'yellow');
-v.ack=()=>{ if(self.state.ack) return; self.setState({ack:true,g2toast:'Ciência registrada (recibo CI-0931) · o saldo de 70 ha fica pausado até Ana aprovar a v3 · os 30 ha realizados seguem na v2.'}); };'''
+v.ack=()=>{ if(self.state.ack) return; self.setState({ack:true,g2toast:'Ciência registrada (recibo CI-0931) · o saldo de 70 ha segue na v3 e fica parado até o Trator T1 voltar ou o substituto ser confirmado · os 30 ha realizados seguem na v2.'}); };'''
     emit('MB-02','Minhas ordens','suas (Marcos) e da equipe · mesma ordem do escritório',('1 impedida · 1 revogada','red'),
          'Abrir ordem',corpo,H_=2320,back='MB-01.dc.html',js=js,cen=True,prim=[(None,'ac',H('p_lab'),('MB-02det.dc.html','p_sel'))])
 
@@ -421,7 +428,8 @@ v.d_kv=kv; v.d_424=o.id==='OS-0424';
 v.d_req=r?r.id:'sem requisição'; v.d_hasins=(o.ins||[]).length>0;
 v.d_ins=(o.ins||[]).map(x=>{{ const it=r&&r.itens.find(i=>i.prod===x.p);
   let cst='gray', ct=r?'Peça ao escritório antes de usar':'Reserva ao liberar a ordem';
-  if(it){{ if(it.custodia>0&&!it.confirmado){{cst='yellow'; ct='Entregue '+cenNum(it.custodia)+' '+it.un+' · confirme a retirada';}} else if(it.custodia>0){{cst='green'; ct='Com você '+cenNum(it.custodia)+' '+it.un;}} else if(cenSaldoEntregar(it)>0){{cst='gray'; ct='Retirar '+cenNum(cenSaldoEntregar(it))+' '+it.un+' com Rui';}} else {{cst='gray'; ct='Nada em custódia';}} }}
+  const kc=mbConf(c,o.id,x.p); if(kc){{cst='yellow'; ct='Em conferência · '+cenConfTxt(kc,c)+' · '+kc.resp+' concilia';}}
+  else if(it){{ if(it.custodia>0&&!it.confirmado){{cst='yellow'; ct='Entregue '+cenNum(it.custodia)+' '+it.un+' · confirme a retirada';}} else if(it.custodia>0){{cst='green'; ct='Com você '+cenNum(it.custodia)+' '+it.un;}} else if(cenSaldoEntregar(it)>0){{cst='gray'; ct='Retirar '+cenNum(cenSaldoEntregar(it))+' '+it.un+' com Rui';}} else {{cst='gray'; ct='Nada em custódia';}} }}
   return {{t:x.p+' · '+cenNum(x.dose,2)+' '+x.un+'/ha × '+cenNum(o.area,1)+' ha = '+cenNum(x.tot)+' '+x.un,
           s:it?('lote '+it.lote+(it.emb?' · '+it.emb:'')+' · entregue '+cenNum(it.entregue)+' '+it.un+' · consumido '+cenNum(it.consumido)+' '+it.un):(r?'fora da '+r.id+' · nada com você':'sem requisição'),
           c:ct, st:mbTx(cst)}}; }});
@@ -433,7 +441,7 @@ v.d_ocs=ocs.slice(-2).reverse().map(x=>({{t:x.id+' · '+x.tipo+' · '+x.at+(x.si
 v.d_isA=!!p.href; v.d_ini=p.k==='iniciar'; v.d_none=!p.href&&p.k!=='iniciar'; v.d_href=p.href||'MB-02.dc.html'; v.d_lab=p.k==='iniciar'?'Iniciar turno · '+o.id:p.t;
 v.d_go=()=>cenMudar(self,c=>mbIniciar(c,o.id));
 }}'''
-    emit('MB-02','Detalhe da ordem','',None,'Abrir ordem',corpo,H_=1590,fname='MB-02det.dc.html',back='MB-02.dc.html',js=js,dyn_status=True,cen=True,
+    emit('MB-02','Detalhe da ordem','',None,'Abrir ordem',corpo,H_=1620,fname='MB-02det.dc.html',back='MB-02.dc.html',js=js,dyn_status=True,cen=True,
          dyn_head='Detalhe da ordem',
          prim=[('d_isA','a',H('d_lab'),H('d_href')),('d_ini','b',H('d_lab'),'d_go'),('d_none','a','Voltar às ordens','MB-02.dc.html')])
 
@@ -456,15 +464,17 @@ v.d_go=()=>cenMudar(self,c=>mbIniciar(c,o.id));
              f'<label for="{H("k.id")}" style="font-size: 12px; font-weight: 600; color: {MUTED};">{H("k.l")}</label>'
              f'<input id="{H("k.id")}" type="text" inputMode="decimal" value="{H("k.val")}" onChange="{H("k.set")}" style="{INP}">'
              f'<span style="font-size: 12px; color: {MUTED};">{H("k.hint")}</span>'
+             f'<sc-if value="{H("k.has_warn")}" hint-placeholder-val="{H("false")}"><span aria-live="polite" style="font-size: 12px; font-weight: 700; color: {YEL};">{H("k.warn")}</span></sc-if>'
              f'<sc-if value="{H("k.has_err")}" hint-placeholder-val="{H("false")}"><span role="alert" style="font-size: 12px; font-weight: 700; color: {RED};">{H("k.err")}</span></sc-if></div></sc-for></div>')
       + ffield('Observação','ft_obs','ft_obs','set_obs','',area=True,ph='Ex.: vento subiu às 10:30; parei a barra 20 min.')
       + note('Fechar o turno guarda o dia; a ordem continua aberta até o escritório encerrar.')))
     turno_off=(
       IF('has_last',f'<div style="{CARD_ST}"><div style="display: flex; align-items: center; gap: 8px;"><span style="width: 10px; height: 10px; border-radius: 999px; background: {ACC}; flex-shrink: 0;"></span>'
          f'<div style="font-size: 14.5px; font-weight: 700; flex-grow: 1;">Turno fechado · {H("last_t")}</div></div>'
-         f'<div style="display: flex; flex-wrap: wrap; gap: 6px;">{hchip("lst")}</div>'
+         f'<div style="display: flex; flex-wrap: wrap; gap: 6px;">{hchip("lst")}'+IF('last_hasConf',hchip('lcf'))+'</div>'
          f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.45;">Consumo: {H("last_cons")}</div>'
-         f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.45;">{H("last_real")}</div></div>')
+         + IF('last_hasConf',f'<div style="font-size: 13px; color: {INK}; line-height: 1.45;">{H("last_conf")}</div>')
+         + f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.45;">{H("last_real")}</div></div>')
       + h2('Nenhum turno aberto','Inicie o turno na ordem em que vai trabalhar.')
       + qcards('lista',a='l',count=2))
     corpo=sigbar()+IF('t_on',turno_on)+IF('t_off',turno_off)
@@ -476,7 +486,10 @@ v.lista=fila.map(x=>mbCard(self,c,x));
 const L=s.ft_last; v.has_last=!t&&!!L;
 if(L){ const oo=c.ordens[L.os]; const ap=oo&&(oo.ap||[]).find(a=>a.dia===L.dia); const env=ap?ap.sinc!==false:true;
   v.last_t=L.os+' · dia '+L.dia+' · '+cenNum(L.ha,1)+' ha em '+cenNum(L.h,1)+' h'; v.last_cons=L.cons||'nenhum'; v.last_real=oo?mbRealTxt(oo):'';
-  DCH(v,'lst',env?'Enviado · a ordem continua aberta':'No aparelho · aguardando sinal',env?'green':'yellow'); }
+  DCH(v,'lst',env?'Enviado · a ordem continua aberta':'No aparelho · aguardando sinal',env?'green':'yellow');
+  const cf=(c.confs||[]).filter(k=>k.os===L.os&&k.dia===L.dia); const ab=cf.some(k=>k.estado==='Em conferência'); v.last_hasConf=cf.length>0;
+  v.last_conf=cf.map(k=>k.estado==='Em conferência'?'Em conferência · '+cenConfTxt(k,c)+' · '+k.resp+' concilia':k.estado+' por '+k.por+' · '+cenConfTxt(k)).join(' | ');
+  DCH(v,'lcf',ab?'Consumo em conferência':'Conferência resolvida',ab?'yellow':'green'); if(!L.cons&&cf.length) v.last_cons='nada baixado neste turno'; }
 DCH(v,'hdr',t?(mbPausado(t)?'turno pausado':'turno aberto'):'sem turno aberto',t?(mbPausado(t)?'yellow':'green'):'gray');
 v.t_fe=false; v.t_zero=false;
 if(t){ const pz=mbPausado(t);
@@ -491,7 +504,10 @@ if(t){ const pz=mbPausado(t);
   v.ft_ha=f.ha||''; v.ft_h=f.h||''; v.ft_obs=f.obs||'';
   v.ha_hint=!v.t_fe?'Saldo 0 ha: nada a apontar nesta ordem. Descarte o turno.':(pv?'Máximo '+cenNum(mx,1)+' ha: saldo '+cenNum(o.saldo,1)+' ha menos '+cenNum(pv,1)+' ha no aparelho':'Máximo '+cenNum(mx,1)+' ha (saldo da ordem)');
   v.cons=(o.ins||[]).map((x,i)=>{ const it=r&&r.itens.find(y=>y.prod===x.p); const ed=(f.ced||{})[x.p]; const e2=(er.cons||{})[x.p]||'';
-    return {id:'ft_c'+i, l:x.p+' ('+x.un+')', val:ed!==undefined?ed:(ha>0&&it?mbIn(x.dose*ha):''), err:e2, has_err:!!e2,
+    const qv=(ed!==undefined&&String(ed).trim()!=='')?mbNum(ed):(ha>0&&it&&ed===undefined?x.dose*ha:NaN); const tem=it?it.custodia:0;
+    const warn=(!e2&&qv>tem+1e-9)?(ed===undefined?'Sugestão acima do que está com você ('+cenNum(tem)+' '+x.un+'): informe quanto usou.'
+      :'Acima do que está com você ('+cenNum(tem)+' '+x.un+'): fecha em conferência com '+CEN_CONC_RESP+'.'):'';
+    return {id:'ft_c'+i, l:x.p+' ('+x.un+')', val:ed!==undefined?ed:(ha>0&&it?mbIn(x.dose*ha):''), err:e2, has_err:!!e2, warn, has_warn:!!warn,
       hint:it?cenNum(x.dose,2)+' '+x.un+'/ha × hectares · com você '+cenNum(it.custodia)+' '+it.un:(r?'Fora da '+r.id+' · nada com você':'Sem requisição · nada com você'),
       set:(e)=>{ const st=self.state; const ff=Object.assign({},st.ft||{}); ff.ced=Object.assign({},ff.ced||{},{[x.p]:e.target.value}); const ee=Object.assign({},st.ft_err||{}); ee.cons=Object.assign({},ee.cons||{}); delete ee.cons[x.p]; self.setState({ft:ff,ft_err:ee}); } }; });
   v.has_cons=v.cons.length>0;
@@ -502,24 +518,26 @@ if(t){ const pz=mbPausado(t);
     const e={}; const h2=mbNum(f2.ha), hh=mbNum(f2.h); const pv2=mbProv(o2); const mx2=mbResta(o2);
     if(!(h2>0)) e.ha='Informe os hectares feitos (maior que zero).'; else if(h2>mx2+1e-9) e.ha='Máximo '+cenNum(mx2,1)+' ha: é o saldo da ordem'+(pv2?' menos '+cenNum(pv2,1)+' ha no aparelho':'')+'.';
     if(!(hh>0)) e.h='Informe as horas trabalhadas.'; else if(hh>24) e.h='Máximo 24 h por turno.';
-    const r2=mbReq(c2,o2); const cons={}; const ec={};
+    const r2=mbReq(c2,o2); const cons={}; const ec={}; const est=[];
     (o2.ins||[]).forEach(x=>{ const ed=(f2.ced||{})[x.p]; const it=r2&&r2.itens.find(y=>y.prod===x.p);
       // fora da requisição nada está com o operador: sem pré-cálculo e 0 explícito (o cenário completaria com dose × área)
       const vazio=ed===undefined||String(ed).trim()==='';
       const q=!vazio?mbNum(ed):(it?(ed===undefined&&h2>0?x.dose*h2:NaN):0);
       if(isNaN(q)||q<0){ if(ed!==undefined) ec[x.p]='Informe o consumo em '+x.un+' (0 se não usou).'; return; }
-      const tem=it?it.custodia:0;
-      if(q>tem+1e-9) ec[x.p]='Acima do que está com você: '+cenNum(tem)+' '+x.un+'.'+(it?' Confira a retirada.':' Peça ao escritório.'); cons[x.p]=q; });
+      // sugestão (dose × área) não editada é estimativa (CONC-13): acima do que está com o operador, ele informa quanto usou
+      if(ed===undefined&&it&&q>it.custodia+1e-9){ ec[x.p]='Informe quanto usou: a sugestão de '+cenNum(q)+' '+x.un+' passa do que está com você ('+cenNum(it.custodia)+' '+x.un+').'; return; }
+      if(ed===undefined) est.push(x.p);
+      cons[x.p]=q; });   // informado acima do que está com o operador: o cenário grava o fato Em conferência (CONC-07), sem baixa
     if(Object.keys(ec).length) e.cons=ec;
     if(Object.keys(e).length){ self.setState({ft_err:e,g2toast:'Corrija os campos destacados; nada foi gravado.'}); return; }
     const dia=(o2.ap||[]).filter(a=>a.st!=='Previsto').length+1; const obs=String(f2.obs||'').trim();
-    const usado=Object.keys(cons).filter(k=>cons[k]>0);
-    // o movimento e o apontamento guardam só o que foi consumido (sem linha 0 de insumo fora da requisição)
-    const res=cenMudar(self,c=>{ const rr=cenFecharTurno(c,h2,hh,Object.assign({},cons),obs); const m=c.movs[c.movs.length-1];
-      if(m&&m.tipo==='consumo'&&m.origem==='app') m.det=usado.map(k=>k+' '+cenNum(cons[k],1)).join(', ');
+    // o movimento e o apontamento guardam só o que foi baixado (sem linha 0 de insumo fora da requisição); o relatado em conferência fica no caso
+    const res=cenMudar(self,c=>{ const rr=cenFecharTurno(c,h2,hh,Object.assign({},cons),obs,est);
       const oo=c.ordens[o2.id]; const ap=(oo.ap||[])[oo.ap.length-1]; if(ap&&ap.cons) Object.keys(ap.cons).forEach(k=>{ if(!(ap.cons[k]>0)) delete ap.cons[k]; });
+      const m=ap&&c.movs.find(x=>x.id===ap.mov); if(m&&m.tipo==='consumo'&&m.origem==='app') m.det=Object.keys(ap.cons||{}).map(k=>k+' '+cenNum(ap.cons[k],1)).join(', ');
       return rr; });
-    if(res&&!res.erro) self.setState({ft:{},ft_err:{},ft_last:{os:o2.id,dia,ha:h2,h:hh,cons:usado.map(k=>k+' '+cenNum(cons[k],1)+' '+((o2.ins.find(x=>x.p===k)||{}).un||'')).join(' · ')}});
+    if(res&&!res.erro){ const ap3=(cenGet().ordens[o2.id].ap||[]).find(a=>a.dia===dia)||{}; const cc=ap3.cons||{};
+      self.setState({ft:{},ft_err:{},ft_last:{os:o2.id,dia,ha:h2,h:hh,cons:Object.keys(cc).map(k=>k+' '+cenNum(cc[k],1)+' '+((o2.ins.find(x=>x.p===k)||{}).un||'')).join(' · ')}}); }
   };
 }'''
     emit('MB-03','Apontamento do turno','iniciar, pausar e fechar · hectares, horas e consumo',None,
@@ -642,8 +660,8 @@ const ocd=done&&(c.ocorr||[]).find(x=>x.id===done); DCH(v,'hdr',done?(ocd&&!ocd.
           btns(lnk('Abrir tarefa','MB-05det.dc.html','box','Conferir a devolução contra o QR'))],state='yellow')
       + card(f'Conferir e entregar · <b>{R38["id"]}</b> · {R38["os"]} fertirrigação',[
           kv('Produto',f'{R38["item"]} · {nf(R38["solicitado"])} kg (12 kg/ha × 95 ha)'),
-          chips(chip('Aguardando aprovação da O.S.','yellow'),chip('Saldo apto 0 kg','red')),
-          btns(say('Conferir e entregar · bloqueado',f'Bloqueado: a {R38["os"]} aguarda a revisão individual de Ana e a {R38["item"]} não tem saldo apto (0 kg) — nada foi separado.','alert','Ver por que não pode entregar'))],state='yellow')
+          chips(chip('Aguardando liberação da O.S.','yellow'),chip('Saldo apto 0 kg','red')),
+          btns(say('Conferir e entregar · bloqueado',f'Bloqueado: a {R38["os"]} aguarda a liberação por Ana (agrônoma) e a {R38["item"]} não tem saldo apto (0 kg) — nada foi separado.','alert','Ver por que não pode entregar'))],state='yellow')
       + card(f'Conflito de reserva · lote {F02["lote"]} · {F02["item"]}',[
           kv('Saldo',f'{nf(F02["fisico"])} L físicos · {F02["reservado"]} L reservados (OS-0424) · <b>{nf(F02_LIVRE)} L livres</b>'),
           kv('Conflito',f'reserva planejada da safra pediu {nf(PLAN_FA,1)} L → nada reservado · pendência de {nf(PEND_FA,1)} L na SOL-2026-07'),
@@ -662,7 +680,7 @@ v.conf=pend.map((r,ix)=>({{t:r.id+' · '+r.os+' · '+c.ordens[r.os].tipo,
   btn:ix>0,fn:()=>cenMudar(self,c=>cenConfirmarRecebimento(c,r.id)),tt:'Confirmar recebimento da '+r.id}}));
 v.has_conf=pend.length>0;
 const cust=[]; const res=[];
-reqs.forEach(r=>r.itens.forEach(i=>{{ if(i.custodia>0&&i.confirmado) cust.push({{p:i.prod,q:cenNum(i.custodia)+' '+i.un,l:lot(i)+' · '+r.os+' · consumido '+cenNum(i.consumido)+' '+i.un+(mbResta(c.ordens[r.os])<=0.001?' · área feita: devolva a sobra ao Rui':'')}});
+reqs.forEach(r=>r.itens.forEach(i=>{{ if(i.custodia>0&&i.confirmado) cust.push({{p:i.prod,q:cenNum(i.custodia)+' '+i.un,l:lot(i)+' · '+r.os+' · consumido '+cenNum(i.consumido)+' '+i.un+(mbConf(c,r.os,i.prod)?' · consumo em conferência com '+CEN_CONC_RESP:(mbResta(c.ordens[r.os])<=0.001?' · área feita: devolva a sobra ao Rui':''))}});
   else if(!(i.custodia>0)&&cenSaldoEntregar(i)>0) res.push({{p:i.prod,q:cenNum(cenSaldoEntregar(i))+' '+i.un,l:lot(i)+' · '+mbEmb(i,cenSaldoEntregar(i))+' · '+r.id+' · '+r.os}}); }}));
 v.cust=cust; v.has_cust=cust.length>0; v.res=res; v.has_res=res.length>0; v.nada=!pend.length&&!cust.length&&!res.length;
 v.p_conf=r0&&pend.length>0; v.p_back=r0&&!pend.length; v.p_qr=!r0;
@@ -678,7 +696,7 @@ else DCH(v,'hdr','1 devolução hoje','yellow');'''
     corpo=(
       mcont('Almoxarifado · fila',f'Devolução {REQ["id"]} · {REQ["os"]}',H('ct_f'),H('ct_p'))
       + card('Autorização e conta do material',[
-          kv('O.S./versão','OS-0417 · v1 aprovada · adubação de cobertura P1'),
+          kv('O.S./versão','OS-0417 · v1 · adubação de cobertura P1'),
           kv('Produto',f'{REQ["item"]} · {REQ["un"]}'),
           kv('Solicitado/entregue',f'{REQ["solicitado"]} sc / {REQ["entregue"]} sc'),
           kv('Consumo apontado',f'{REQ["consumido"]} sc'),
@@ -699,28 +717,73 @@ v.receber=()=>{{ self.setState({{rc:true,g2toast:'Recebidas {REQ["custodia"]} sc
          'Confirmar recebimento de 10 sc',corpo,H_=890,fname='MB-05det.dc.html',back='MB-05.dc.html',primary_href='MB-05.dc.html',js=js,dyn_status=True,
          prim=[('norc','b',f'Confirmar recebimento de {REQ["custodia"]} sc','receber'),('rc','a','Voltar ao almoxarifado','MB-05.dc.html')])
 
-    # ================= MB-06 · Vistoria por pontos (detalhe/coleta) =================
+    # ================= MB-06 · Vistoria por pontos (coleta no app · estado compartilhado do MIP) =================
+    # MB-06.dc.html#VIS-xxx abre a vistoria do estado 'talhao-os-mip-v1' (dados_mip.py + mip.js, a mesma do Mapa e do AG-01); sem hash,
+    # a vistoria aberta de Marcos. Alvo, método, unidade, NC e pontos vêm do protocolo; registrar grava o ponto e concluir fecha a coleta
+    # (completa ou incompleta). O resultado e a decisão ficam com o agrônomo no AG-01.
+    import dados_mip as DM
+    inp=(f'font-family: {DISP}; font-size: 22px; font-weight: 700; padding: 10px 12px; border-radius: 12px; border: 1px solid {LINE}; width: 100%; box-sizing: border-box; background: {SURF}; color: {INK};')
+    # pontos coletados viram botão enquanto não há decisão: tocar carrega a contagem para corrigir (erro de digitação)
+    pts=(f'<div style="display: flex; flex-wrap: wrap; gap: 5px;"><sc-for list="{H("mb_pts")}" as="q" hint-placeholder-count="12">'
+         f'<button type="button" onClick="{H("q.go")}" disabled="{H("q.dis")}" title="{H("q.tt")}" aria-label="{H("q.tt")}" style="{H("q.st")}">{H("q.t")}</button></sc-for></div>')
     corpo=(
-      mcont('Rota da vistoria · P1',VIST['rota']+' · ponto '+H('pt'),H('falta'),'Registrar e avançar')
-      + note(kv('Alvo',VIST['alvo'])+' · '+kv('Método/unidade',VIST['metodo'])+' · '+kv('Estádio','R5'))
-      + mfield('Contagem neste ponto (insetos/pano)',VIST['contagem'],big=True)
-      + '<div style="display: flex; gap: 8px;">'+counter('PONTO',H('ptt'))+counter('NC DO ALVO',VIST['nc'])+counter('FOTOS','1')+'</div>'
-      + card('Qualidade da coleta',[
-          chips(chip('GPS ±4 m · dentro da tolerância','green')),
-          note('No ponto 10 o GPS ficou fora da tolerância: a política aceita <b>justificativa de qualidade</b>, sem inventar posição.')],state='green',
-          desc='Confira a posição antes de registrar o ponto.')
-      + btns(say('Adicionar contagem','Nova contagem aberta no ponto · a anterior (3,2/pano) fica preservada.','leaf','Somar outra contagem no mesmo ponto'),
-             say('Voltar ponto','Ponto anterior reaberto para correção · histórico preservado.','clock','Corrigir o ponto anterior'),
-             say('Ver resumo','Parcial da rota · pior alvo percevejo 3,2/pano (NC 4,5) · mancha na bordadura leste.','lista','Ver o resumo parcial da rota'))
-      + btns(say('Concluir coleta','Coleta enviada para revisão do agrônomo · o próximo ponto continua no celular — nada abre o desktop.','check','Enviar a coleta para revisão'))
-      + note('Unidade e alvo vêm do protocolo da rota; a contagem nunca é convertida no campo.'))
-    js=f'''const pt=s.pt||4, T={VIST["total"]}; v.pt=pt+' de '+T; v.ptt=pt+'/'+T; v.falta=(T-pt)+' pontos'; v.nxt='Registrar e ir ao ponto '+(pt+1); v.fim=pt>=T; v.nfim=pt<T;
-DCH(v,'hdr','ponto '+pt+' de '+T,'green');
-v.reg=()=>{{ const p=self.state.pt||4; if(p>=T) return; self.setState({{pt:p+1,g2toast:'Ponto '+p+' registrado · ponto '+(p+1)+' aberto com o mesmo alvo e unidade.'}}); }};
-v.fecha=()=>TOAST(self,'Rota completa: '+T+' de '+T+' pontos · coleta enviada para revisão do agrônomo.');'''
-    emit('MB-06','Vistoria por pontos','rota em W · contadores e unidade do protocolo',None,
-         'Registrar e ir ao ponto 5',corpo,H_=940,back='MB-01.dc.html',primary_href='MB-06.dc.html',js=js,dyn_status=True,
-         prim=[('nfim','b',H('nxt'),'reg'),('fim','b','Enviar rota para revisão','fecha')])
+      mcont(H('mb_veio'),H('mb_aqui'),H('mb_falta'),H('mb_prox'))
+      + note(H('mb_proto'))
+      + IF('mb_aberta',
+          f'<div style="display: flex; flex-direction: column; gap: 4px;"><label for="mb_cont" style="font-size: 12px; font-weight: 600; color: {MUTED};">{H("mb_lbl")}</label>'
+          f'<input id="mb_cont" type="text" inputMode="decimal" value="{H("mb_v")}" onChange="{H("mb_setv")}" placeholder="0" style="{inp}">'
+          + IF('mb_err_has',f'<span role="alert" style="font-size: 12px; font-weight: 700; color: {RED};">{H("mb_err")}</span>') + '</div>'
+          f'<label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: {INK};"><input type="checkbox" checked="{H("mb_gpsfora")}" onChange="{H("mb_toggps")}" style="width: 18px; height: 18px; accent-color: {RED}; margin: 0;">GPS fora da tolerância (ponto vai para recoleta)</label>'
+          + IF('mb_ed',btns(f'<button type="button" onClick="{H("mb_edx")}" style="{_BST}">Cancelar correção</button>'))
+          + '<div style="display: flex; gap: 8px;">'+counter('PONTO',H('mb_pt'))+counter('NC DO ALVO',H('mb_nc'))+counter('PARCIAL',H('mb_par'))+'</div>')
+      + IF('mb_done',card('Coleta concluída',[note(H('mb_res'))],state='green'))
+      + card(H('mb_ptsT'),[pts],state='gray')
+      + IF('mb_podeConc',btns(f'<button type="button" onClick="{H("mb_conc")}" title="Fechar a coleta com os pontos registrados; os que faltam ficam como coleta incompleta" style="{_BST}">{icon("check",14)}{H("mb_concT")}</button>'))
+      + IF('mb_temOutras',h2('Outras vistorias abertas')+f'<div style="display: flex; flex-direction: column; gap: 6px;"><sc-for list="{H("mb_outras")}" as="o" hint-placeholder-count="2">'
+          f'<a href="{H("o.h")}" title="{H("o.tt")}" style="display: flex; justify-content: space-between; gap: 8px; padding: 10px 12px; border: 1px solid {LINE}; border-radius: 12px; background: {SURF}; color: {INK}; text-decoration: none; font-size: 13px;">'
+          f'<b>{H("o.t")}</b><span style="color: {MUTED};">{H("o.s")}</span></a></sc-for></div>'))
+    # coleta: ponto da vez = o primeiro sem contagem, depois os de recoleta (mipAlvoPt); vistoria concluída com falta ou recoleta e sem
+    # decisão reabre a coleta ("Completar coleta" do AG-01); a contagem é validada pelo protocolo (percentual até 100) e pode ser corrigida.
+    js=r"""mipOuvir(self); const sm=mipGet(); let hh=''; try{ hh=decodeURIComponent(location.hash||''); }catch(e){ hh=''; }
+if(!self.__mbh){ self.__mbh=1; try{ window.addEventListener('hashchange',()=>self.setState({mbv:'',mberr:'',mbgps:false,mbed:0,mbrev:Date.now()})); }catch(e){} }
+const mh=/^#(VIS-\d+)$/.exec(hh); const ab=Object.values(sm.vis).filter(x=>x.est!=='concluida'||mipColetavel(x)).sort((a,b)=>((a.est==='coleta'?0:1)-(b.est==='coleta'?0:1))||(a.data<b.data?-1:1));
+const vid=(mh&&sm.vis[mh[1]])?mh[1]:((ab.find(x=>x.resp==='Marcos')||ab[0]||{id:'VIS-014'}).id); const vv=sm.vis[vid];
+const p=mipP(vv), t=mipT(vv), R=mipRes(vv,sm), nc=R.nc; const col=mipColetavel(vv); const alvo=col?mipAlvoPt(vv):null; const n=alvo?alvo.n:vv.npts; const done=!col;
+const depois=col?(vv.pts.find(x=>x.n!==n&&(x.v===null||x.v===undefined))||vv.pts.find(x=>x.n!==n&&x.rec)):null; const reab=col&&vv.est==='concluida';
+const ed=Number(s.mbed||0); const edq=(ed&&!vv.dec)?vv.pts.find(x=>x.n===ed&&x.v!==null&&x.v!==undefined):null; const edit=!!edq;
+v.hdr_ttl='Vistoria '+vid; v.hdr_sub=t.rot+' · '+p.alvo.toLowerCase()+' · '+(edit?'corrigir ponto '+ed:(done?'coleta concluída':(reab?'completar coleta · ponto '+n:'ponto '+n+' de '+vv.npts)));
+DCH(v,'hdr',done?'coleta concluída':(reab?'coleta incompleta':(vv.est==='programada'?'programada para '+mipBr(vv.data):'em coleta')),done?'gray':(reab?'yellow':'green'));
+v.mb_veio='Pragas e doenças · '+vid; v.mb_aqui=t.rot+' · '+(edit?'corrigindo ponto '+ed:(done?(R.falt?'coleta fechada':'rota completa'):'ponto '+n+(alvo&&alvo.rec?' (recoleta)':'')+' de '+vv.npts));
+v.mb_falta=R.falt?(R.falt+(R.falt===1?' ponto':' pontos')):(R.rec?(R.rec+' em recoleta'):'nada');
+v.mb_prox=edit?'Corrigir ponto '+ed:(done?'Voltar ao início':(depois?'Registrar e ir ao ponto '+depois.n:'Registrar e concluir'));
+v.mb_proto=p.alvo+' · '+p.met+' · '+p.un+(nc?' · NC '+mipN(nc)+' ('+t.fase+')':' · critério presença')+' · '+vv.resp;
+v.mb_aberta=!done||edit; v.mb_done=done&&!edit; v.mb_ed=edit;
+v.mb_lbl=edit?('Corrigir o ponto '+ed+' ('+p.un+')'):('Contagem no ponto '+n+(alvo&&alvo.rec?' · recoleta':'')+' ('+p.un+')'); v.mb_v=s.mbv||''; v.mb_setv=(e)=>self.setState({mbv:e.target.value,mberr:''});
+v.mb_err=s.mberr||''; v.mb_err_has=!!s.mberr; v.mb_gpsfora=!!s.mbgps; v.mb_toggps=()=>self.setState({mbgps:!self.state.mbgps});
+v.mb_edx=()=>self.setState({mbed:0,mbv:'',mbgps:false,mberr:''});
+v.mb_pt=(edit?ed:n)+'/'+vv.npts; v.mb_nc=nc?mipN(nc):'presença'; v.mb_par=R.crit==='presenca'?(R.pres+' c/ sintoma'):(R.media===null?'—':mipN(R.media));
+v.mb_res=R.col+' de '+R.tot+' pontos · '+(R.crit==='presenca'?R.pres+' com sintoma':(R.media===null?'—':'média '+mipN(R.media)+' '+p.un))+'. O agrônomo decide no escritório (Pragas e doenças).';
+const podeEd=!vv.dec&&!(vv.pend||[]).length; v.mb_ptsT='Pontos da rota'+(podeEd&&R.col?' · toque para corrigir':'');
+v.mb_pts=vv.pts.map(q=>{ const nul=q.v===null||q.v===undefined; const k=q.rec?['#EEF1EE','#5B6660']:(nul?['#FFFFFF','#8A968E']:(R.crit==='presenca'?(q.v>0?['#FFE8D6','#9A3F00']:['#E4F3E9','#1E7A4C']):(q.v>=nc?['#FDE8E6','#B42318']:(q.v>=0.8*nc?['#FFF3D6','#8A5A00']:['#E4F3E9','#1E7A4C']))));
+  const pode=podeEd&&!nul; const foco=edit?q.n===ed:(q.n===n&&!done);
+  return {t:String(q.n).padStart(2,'0')+(nul?'':' · '+mipN(q.v)),tt:'Ponto '+q.n+(nul?': não coletado':': '+mipN(q.v)+' '+p.un+(q.rec?' · recoleta':''))+(pode?' · tocar para corrigir':''),dis:!pode,
+    go:()=>{ if(pode) self.setState({mbed:q.n,mbv:String(q.v).replace('.',','),mbgps:!!q.rec,mberr:''}); },
+    st:'display:inline-flex;padding:3px 8px;border-radius:7px;font-family:inherit;font-size:12px;font-weight:700;color:'+k[1]+';background:'+k[0]+';border:1px solid '+(nul?'#E4E9E5':k[0])+';'+(pode?'cursor:pointer;':'cursor:default;')+(foco?'box-shadow:0 0 0 2px #1E7A4C;':'')}; });
+const reg=(fim)=>{ const cur=self.state; const ec=Number(cur.mbed||0);
+  const r=mipMudar(null,s2=>{ if(ec) return mipCorrigir(s2,vid,ec,cur.mbv,!cur.mbgps); const a=mipColetar(s2,vid,cur.mbv,!cur.mbgps); if(fim){ const b=mipConcluir(s2,vid); return {msg:a.msg+' '+b.msg}; } return a; });
+  if(r.erro){ self.setState({mberr:r.erro}); return; } self.setState({mbv:'',mbgps:false,mberr:'',mbed:0,g2toast:r.msg,miprev:Date.now()}); setTimeout(()=>{ const el=document.getElementById('mb_cont'); if(el) el.focus(); },60); };
+v.mb_mid=!done&&!edit&&!!depois; v.mb_last=!done&&!edit&&!depois; v.mb_nxt='Registrar e ir ao ponto '+(depois?depois.n:''); v.mb_reg=()=>reg(false); v.mb_regfim=()=>reg(true);
+v.mb_edt='Corrigir ponto '+ed; v.mb_corr=()=>reg(false);
+v.mb_podeConc=!done&&!edit&&R.col>0&&vv.est!=='concluida'; v.mb_concT='Concluir com '+R.col+' de '+vv.npts+' pontos'; v.mb_conc=()=>mipMudar(self,s2=>mipConcluir(s2,vid));
+v.mb_outras=ab.filter(x=>x.id!==vid&&x.faz===vv.faz).slice(0,4).map(x=>{ const t2=mipT(x), p2=mipP(x), r2=mipRes(x,sm); return {h:'MB-06.dc.html#'+x.id,t:x.id+' · '+t2.rot+' · '+p2.alvo,s:(x.est==='programada'?mipBr(x.data):r2.col+'/'+r2.tot),tt:'Abrir a vistoria '+x.id}; });
+v.mb_temOutras=v.mb_outras.length>0;"""
+    global JS_BASE
+    _jb=JS_BASE; JS_BASE=DM.js_prefixo()+_jb
+    try:
+        emit('MB-06','Vistoria por pontos','',None,'Registrar e ir ao ponto',corpo,H_=940,back='MB-01.dc.html',primary_href='MB-06.dc.html',js=js,dyn_status=True,dyn_head='Vistoria por pontos',
+             prim=[('mb_ed','b',H('mb_edt'),'mb_corr'),('mb_mid','b',H('mb_nxt'),'mb_reg'),('mb_last','b','Registrar e concluir coleta','mb_regfim'),('mb_done','a','Voltar ao início','MB-01.dc.html')])
+    finally:
+        JS_BASE=_jb
 
     # ================= MB-07 · Contagem de frutos (detalhe/coleta) =================
     pv=D.PREVISAO
@@ -769,11 +832,11 @@ v.fecha=()=>TOAST(self,'Parcela T7-B concluída · '+T+' plantas · segue para r
              say('Próximo setor','Sem outro setor liberado hoje · a OS-0422 (13,5 mm em 2 passadas) libera quando a janela for definida.','pivot','Ver o próximo setor liberado'))
       + card('Próximo ciclo',[
           note(f'<b>13,5 mm (OS-0422)</b> passam do máximo de {br(POL["lamina_max"])} mm por passada: o sistema divide em <b>2 passadas de 6,75 mm</b>. Sem aprovação; libera quando a janela for definida.'),
-          note('Só a fertirrigação (OS-0418) vai ao agrônomo, com materiais e requisição próprios.')],state='gray',
+          note('Só a fertirrigação (OS-0418) é liberada pelo agrônomo, com materiais e requisição próprios.')],state='gray',
           desc='Veja como fica a próxima lâmina.')
       + note('Área/volume insuficientes? Registra-se o tempo e a estimativa fica pendente — a lâmina não é afirmada como medida. Não existe “Encerrar e apontar”.'))
     emit('MB-08','Irrigação de hoje','OS-0419 · Pivô 2 · água · sem emissão manual',('Em execução · irrigando','green'),
-         'Confirmar término da irrigação',corpo,H_=1410,back='MB-01.dc.html',primary_href='MB-08x-recibo.dc.html')
+         'Confirmar término da irrigação',corpo,H_=1430,back='MB-01.dc.html',primary_href='MB-08x-recibo.dc.html')
 
     # ---- MB-08x-recibo · término confirmado, conferência automática (estado) ----
     corpo=(
@@ -837,7 +900,7 @@ v.fecha=()=>TOAST(self,'Parcela T7-B concluída · '+T+' plantas · segue para r
 DCH(v,'hdr',c?'Em conferência · bloqueado':'Em execução · bloqueado',c?'yellow':'red');
 v.concluir=()=>{ self.setState({conc:true,g2toast:'Serviço concluído · OM-0233 em conferência · o Trator T1 segue bloqueado até teste e liberação técnica por pessoa autorizada.'}); };'''
     emit('MB-09','OM-0233 · Trator T1','corretiva · pressão hidráulica baixa · afeta OS-0420',None,
-         'Concluir serviço',corpo,H_=990,fname='MB-09det.dc.html',back='MB-09.dc.html',primary_href='MB-09.dc.html',js=js,dyn_status=True,
+         'Concluir serviço',corpo,H_=1000,fname='MB-09det.dc.html',back='MB-09.dc.html',primary_href='MB-09.dc.html',js=js,dyn_status=True,
          prim=[('noc','b','Concluir serviço','concluir'),('conc','a','Voltar às tarefas','MB-09.dc.html')])
 
     # ================= MB-10 · Cargas e entregas (lista · papéis) =================
@@ -907,3 +970,17 @@ v.pesar=()=>{{ self.setState({{ps:true,g2toast:'Pesagem confirmada · romaneio {
     emit('MB-10',f'{CG["id"]} · pesagem',f'papel Balança · romaneio {CG["rom"]} · vínculo à {CG["oc"]}',None,
          f'Confirmar pesagem de {CG["liq"]}',corpo,H_=870,fname='MB-10det.dc.html',back='MB-10.dc.html',primary_href='MB-10.dc.html',js=js,dyn_status=True,
          prim=[('nops','b',f'Confirmar pesagem de {CG["liq"]}','pesar'),('ps','a','Voltar às cargas','MB-10.dc.html')])
+
+
+# ===================== Carência e destino no app de campo (MAPA-CARENCIA-LMR-20261003) =====================
+# A colheita no campo segue o mesmo impedimento do escritório (osc_iniciar): iniciar turno de O.S. de colheita com carência em curso, ou
+# sem prazo conhecido, é recusado com motivo e dono, e o cartão mostra o selo. Registrar o que já foi colhido nunca é impedido.
+# Bloco só acrescentado: envolve mbIniciar/mbPasso sem mudar as demais ordens. Motor e regras: dados_carencia.py (versão leve do app).
+import dados_carencia as _DCAR
+MBAPP_JS += _DCAR.js_nucleo(app=True) + r'''
+const mbIniciarSemCar = mbIniciar, mbPassoSemCar = mbPasso;
+mbIniciar = function (c, id) { const o = c.ordens[id]; const cb = o ? carBloqColheita(c, o, 'iniciar') : null; if (cb) throw new Error(cb.t + ' ' + cb.q); return mbIniciarSemCar(c, id); };
+mbPasso = function (c, o) { const p = mbPassoSemCar(c, o); if (p.k !== 'iniciar') return p; const cb = carBloqColheita(c, o, 'iniciar'); if (!cb) return p;
+  return { k: 'none', t: '', chip: [cb.fim ? 'Carência até ' + carAte(cb.fim) + ' · colheita impedida' : 'Carência sem dados · colheita impedida', 'red'], cor: 'red', tt: cb.t }; };
+try { window.__mb = { mbIniciar, mbDescartar, mbResta }; } catch (e) {}
+'''

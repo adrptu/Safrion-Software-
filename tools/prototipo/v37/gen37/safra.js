@@ -1,8 +1,14 @@
 // ===== Processo · Planejar safra (6 etapas numa só tela de trabalho) =====
-const SAFKEYS={S2627:1,S27SF:1,S2526:1};
+const SAFKEYS={S2627:1,S27SF:1,S2526:1,LG2627:1};
 function GR(id){ return GRIDS.find(g=>g.id===id); }
 function sk(s){ return SAFKEYS[s]?s:'NOVA'; }
 function planById(id){ return D2.planos.find(p=>p.id===id)||null; }
+// Opções do campo Plano agronômico no formulário do cultivo: planos publicados da cultura do formulário; o plano atual de
+// outra cultura continua visível, marcado como incompatível, para o usuário trocar.
+function planOpts(d){ const cult=String(d.cult||''); const cur=planById(String(d.plano||''));
+  const out=[{v:'',t:'Sem plano'}].concat(D2.planos.filter(p=>p.cultura===cult).map(p=>({v:p.id,t:p.nome+' v'+p.versao+' · '+p.atividades.length+' atividades'})));
+  if(cur&&cur.cultura!==cult) out.push({v:cur.id,t:cur.nome+' v'+cur.versao+' · plano de '+cur.cultura+', incompatível'});
+  return out; }
 function nf(n,d){ return Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:d||0,maximumFractionDigits:d||0}); }
 function rs(n){ return 'R$ '+nf(n,2); }
 function iso(d){ return d.toISOString().slice(0,10); }
@@ -20,8 +26,24 @@ const GLABEL={DAP:'DAP · dias após o plantio',DAC:'DAC · dias em relação à
 function mesIdx(s){ return D2.meses.findIndex(m=>m[0]===String(s).slice(0,7)); }
 // rendimentos: uma grade por safra (g_rend_S2627, g_rend_S27SF, g_rend_S2526, g_rend_NOVA)
 function rendGid(saf){ return 'g_rend_'+sk(saf); }
-function conjOf(self,saf,op){ const rows=g2rows(self,GR(rendGid(saf))); for(const p of rows){ for(const k of (p.kids||[])){ if(k.v.op===op) return k; } } return null; }
-function leaves(rows){ const o=[]; (rows||[]).forEach(r=>{ if(r.grp) (r.kids||[]).forEach(k=>o.push(k)); else o.push(r); }); return o; }
+function conjOf(self,saf,op,atv){ const ls=leaves(g2rows(self,GR(rendGid(saf)))); return ls.find(k=>k.v.op===op&&k.v.atv===atv)||ls.find(k=>k.v.op===op)||null; }
+function leaves(rows){ const o=[]; (rows||[]).forEach(r=>{ if(r.livre) return; if(r.grp) (r.kids||[]).forEach(k=>o.push(k)); else o.push(r); }); return o; }
+// etapa 2: todos os talhões da fazenda aparecem; o que ainda não tem cultivo nesta safra vira linha livre "sem cultivo · Planejar talhão"
+// (calculada a cada exibição; não entra em área, contagem, demanda nem aplicação de plano)
+function syncLivres(self,k,v){ const sp=GR('g_cult_'+k); if(!sp) return; const rows=g2rows(self,sp);
+  for(let i=rows.length-1;i>=0;i--){ if(rows[i].livre) rows.splice(i,1); }
+  if(k==='S2526') return;   // safra encerrada: só consulta
+  const usados={}; leaves(rows).forEach(c=>{ usados[c.v.talhao]=1; });
+  // só os talhões da fazenda da safra (a safra nova ainda sem fazenda usa a Santa Rita)
+  const sr=g2rows(self,GR('g_saf')).find(r=>r.id===k); const faz=(sr&&sr.v.faz)||'Santa Rita';
+  Object.keys(D2.talhoes||{}).forEach(t=>{ if(usados[t]) return; if(((D2.talfaz||{})[t]||'Santa Rita')!==faz) return; const ha=talhaoArea(t); const fn='livre_'+k+'_'+t;
+    v[fn]=()=>cultNovoTalhao(self,k,t);
+    rows.push({id:'livre_'+t, livre:true, ro:true, dr:fn, v:{talhao:t,local:t,faz}, s:{local:t,faz},
+      p:{local:[{k:'b',t:t},{k:'mut',t:'sem cultivo · '+nf(ha)+' ha'}], faz:[{k:'mut',t:faz}], cult:[{k:'act',t:'Planejar talhão ›',fn:fn,lk:true}]}}); }); }
+// abre "Novo cultivo" já com o talhão e a área toda dele
+function cultNovoTalhao(self,k,t){ const sp=GR('g_cult_'+k); const ed=sp.edit||{}; const draft={}; (ed.fields||[]).forEach(f=>{ draft[f.k]=(f.def!==undefined?String(f.def):''); });
+  draft.talhao=t; draft.area=String(talhaoArea(t)).replace('.',',');
+  g2set(self,sp.id,{fm:{rid:null,draft,orig:Object.assign({},draft),errs:{},warn:false,ro:false,isNew:true,mode:'form'},fl:null,fmc:null}); }
 function cultRows(self,saf){ return saf? leaves(g2rows(self,GR('g_cult_'+sk(saf)))):[]; }
 function talhaoArea(t){ return Number((D2.talhoes||{})[t])||0; }
 function nfa(n){ return Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:2}); }
@@ -38,17 +60,34 @@ function copyAdj(self,id){ const a=adjOf(self)[id]; return a?JSON.parse(JSON.str
 function adjOf(self){ return self.state.adj||D2.ajustes; }
 function ocorr(self,saf){ const out=[]; const adj=adjOf(self);
   cultRows(self,saf).forEach(c=>{ const pl=planById(c.v.plano); if(!pl||pl.cultura!==c.v.cult) return; const area=Number(c.v.area)||0;
-    pl.atividades.forEach(a=>{ const dt=dataAtv(c,a,pl); const cj=conjOf(self,saf,a.op); const rend=cj?Number(cj.v.rend)||0:0; const ch=cj?Number(cj.v.custo_h)||0:0;
-      const horas=rend?area/rend:0; const prods=a.prods.map((p,i)=>{ const key=a.id+'|'+i; const dose=((adj[c.id]||{})[key]!==undefined)?Number(adj[c.id][key]):p.dose;
-        return {nome:prodNome(p.prod,c),grupo:p.grupo,un:p.un,preco:p.preco,dose,q:dose*area}; });
+    pl.atividades.forEach(a=>{ const dt=dataAtv(c,a,pl); const cj=conjOf(self,saf,a.op,a.nome); const rend=cj?Number(cj.v.rend)||0:0; const ch=cj?Number(cj.v.custo_h)||0:0;
+      const horas=rend?area/rend:0; const aj=adj[c.id]||{}; const A=String(a.id);
+      const prods=a.prods.map((p,i)=>{ const key=A+'|'+i; if(aj[key]==='-') return null; const dose=(aj[key]!==undefined)?Number(aj[key]):p.dose;
+        return {nome:prodNome(p.prod,c),grupo:p.grupo,un:p.un,preco:p.preco,dose,q:dose*area}; }).filter(Boolean)
+        .concat(Object.keys(aj).filter(k=>k.indexOf(A+'|+')===0).map(k=>{ const x=aj[k]; return {nome:prodNome(x.prod,c),grupo:x.grupo,un:x.un,preco:x.preco,dose:Number(x.dose),q:Number(x.dose)*area}; }));
       out.push({c,a,pl,dt,mi:mesIdx(dt),area,horas,cop:horas*ch,cins:prods.reduce((s,p)=>s+p.q*p.preco,0),prods,rec:cj?cj.rec:{}}); }); });
   return out; }
-// demanda por produto; uso = data da primeira ocorrência (vem de ocorr: data do gatilho no cultivo); origem em ordem de data
-function demanda(self,saf){ const m={}; ocorr(self,saf).forEach(o=>o.prods.forEach(p=>{ const d=m[p.nome]||(m[p.nome]={nome:p.nome,grupo:p.grupo,un:p.un,preco:p.preco,bruta:0,uso:'',orig:[]});
-   d.bruta+=p.q; if(o.dt&&(!d.uso||o.dt<d.uso)) d.uso=o.dt;
-   d.orig.push({dt:o.dt||'',t:o.c.v.local+' · '+o.a.nome+' · '+br(o.dt)+' · '+nf(p.dose,2)+' '+p.un+'/ha × '+nf(o.area)+' ha = '+nf(p.q,1)+' '+p.un}); }));
-  Object.values(m).forEach(d=>{ d.orig=d.orig.sort((a,b)=>a.dt<b.dt?-1:(a.dt>b.dt?1:0)).map(x=>x.t);
-    d.est=D2.estoque[d.nome]||0; d.rec=D2.receb[d.nome]||0; d.liq=Math.max(0,d.bruta-d.est-d.rec); d.valor=d.liq*d.preco; }); return m; }
+// demanda por produto (CAL-01, cal01.js): uso = 1º uso de hoje em diante; a necessidade sai da projeção datada do insumo com as outras
+// origens do mesmo estoque — safras abertas da mesma fazenda (agregadas por data), reservas para outros destinos e recebimentos com data.
+// Uso planejado antes de hoje já foi realizado (sai da demanda residual: bruta = residual, real = realizado); compra nova só chega na data viável.
+function demanda(self,saf){ const m={}; const safRows=g2rows(self,GR('g_saf')); const me=safRows.find(r=>r.id===saf); const faz=(me&&me.v.faz)||'Santa Rita';
+  const ordem=(id)=>{ const i=safRows.findIndex(r=>r.id===id); return i<0?99:i; };
+  ocorr(self,saf).forEach(o=>o.prods.forEach(p=>{ const d=m[p.nome]||(m[p.nome]={nome:p.nome,grupo:p.grupo,un:p.un,preco:p.preco,bruta:0,uso:'',evs:[]});
+   d.bruta+=p.q; if(o.dt&&o.dt>=(D2.hoje||'')&&(!d.uso||o.dt<d.uso)) d.uso=o.dt;
+   d.evs.push({dt:o.dt||'',q:p.q,tipo:'dem',own:true,ord:ordem(saf),chave:o.c.id+'|'+o.a.id,t:o.c.v.local+' · '+o.a.nome,calc:nf(p.dose,2)+' '+p.un+'/ha × '+nf(o.area)+' ha'}); }));
+  const vistos={}; vistos[sk(saf)]=1;
+  safRows.forEach(r=>{ if(r.id===saf||r.ro||(r.v.faz||'Santa Rita')!==faz||vistos[sk(r.id)]) return; vistos[sk(r.id)]=1; const ag={}, ks=[];
+    ocorr(self,r.id).forEach(o=>o.prods.forEach(p=>{ if(!m[p.nome]) return; const k=p.nome+'|'+o.dt; if(!ag[k]){ ag[k]={nome:p.nome,dt:o.dt||'',q:0,n:0,chaves:[]}; ks.push(k); }
+      ag[k].q+=p.q; ag[k].n++; ag[k].chaves.push(o.c.id+'|'+o.a.id); }));
+    ks.forEach(k=>{ const x=ag[k]; m[x.nome].evs.push({dt:x.dt,q:x.q,tipo:'dem',own:false,ord:ordem(r.id),chaves:x.chaves,t:r.v.nome+' · '+x.n+(x.n>1?' usos':' uso')}); }); });
+  Object.values(m).forEach(d=>{
+    (D2.reservas||[]).forEach(x=>{ if(x.item===d.nome&&x.faz===faz) d.evs.push({dt:x.dt,q:x.q,tipo:'res',own:false,ord:0,chave:x.chave,t:x.t}); });
+    (D2.recebDt||[]).forEach(x=>{ if(x.item===d.nome) d.evs.push({dt:x.dt,q:x.q,tipo:'rec',own:false,ord:0,ref:x.ref,t:x.t}); });
+    d.res=(D2.reservas||[]).filter(x=>x.item===d.nome&&x.faz===faz).reduce((a,x)=>a+x.q,0);
+    d.est=(D2.fisico||{})[d.nome]!==undefined?D2.fisico[d.nome]:(D2.estoque[d.nome]||0); d.rec=D2.receb[d.nome]||0;
+    const c=cal01(d.est,d.evs,0,{hoje:D2.hoje,viavel:D2.viavel}); d.liq=c.liq; d.falta=c.falta; d.antes=c.antes; d.tarde=c.tarde; d.valor=d.liq*d.preco;
+    d.plano=d.bruta; d.bruta=c.bruta; d.real=c.real; d.rup=c.rupRec; d.cob=c.cob;
+    d.quar=(D2.quar||{})[d.nome]||0; d.memo=cal01Memo(c,{un:d.un,res:d.res,quar:d.quar}); }); return m; }
 // produtividade da colheita (kg/ha) por cultura, a partir dos cultivos da safra aberta cujo plano (compatível) usa a operação; média ponderada pela área
 const KG_UN={'sc/ha':60,'t/ha/ano':1000,'kg/ha':1};
 function prodColheita(self,saf,op){ const by={};
@@ -56,28 +95,43 @@ function prodColheita(self,saf,op){ const by={};
     const a=Number(c.v.area)||0, kg=(Number(c.v.meta)||0)*(KG_UN[c.v.unm]||0); if(a<=0||kg<=0) return;
     const b=by[c.v.cult]||(by[c.v.cult]={a:0,s:0}); b.a+=a; b.s+=kg*a; });
   return Object.keys(by).map(cu=>({cult:cu,kg:by[cu].s/by[cu].a})); }
-function compRend(self,saf){ if(!saf) return; g2rows(self,GR(rendGid(saf))).forEach(p=>{ const n=(p.kids||[]).length; p.p.nome=[{k:'b',t:p.v.nome},{k:'mut',t:n+(n>1?' conjuntos':' conjunto')}];
-  (p.kids||[]).forEach(k=>{ const x=k.v; const inf=(x.modo==='Informado');
-    k.v.param=inf?'':(nfa(x.larg)+' m · '+nfa(x.vel)+' km/h · '+nfa(x.efic)+' %'); k.p.param=inf?[{k:'mut',t:'rendimento informado'}]:[{k:'txt',t:k.v.param}]; k.s.param=inf?'rendimento informado':k.v.param;
+// rendimentos em árvore: operação (grupo) → atividade · conjunto (linha editável)
+function compRend(self,saf){ if(!saf) return; g2rows(self,GR(rendGid(saf))).forEach(g=>{
+  if(g.grp){ const ks=g.kids||[]; const cj=ks.map(k=>k.v.nome).filter((n,i,a)=>a.indexOf(n)===i);
+    g.p.atv=[{k:'b',t:g.v.op},{k:'mut',t:ks.length+(ks.length>1?' atividades':' atividade')}].concat(g.v.aj?[{k:'chip',t:'ajustado nesta safra',c:'blue'}]:[]); g.s.atv=g.v.op;
+    g.p.nome=[{k:'mut',t:cj.length===1?cj[0]:cj.length+' conjuntos'}]; g.s.nome=cj.join(' '); }
+  const cj0=g.grp&&g.kids&&g.kids.length?g.kids[0].v.nome:'';
+  (g.grp?(g.kids||[]):[g]).forEach(k=>{ const x=k.v; const inf=(x.modo==='Informado');
+    // conjunto igual ao da operação fica discreto; o diferente aparece em destaque
+    k.p.nome=[{k:(cj0&&x.nome===cj0?'mut':'b'),t:x.nome}]; k.s.nome=x.nome;
+    k.p.atv=[{k:'txt',t:x.atv}].concat(x.aj?[{k:'chip',t:'ajustado nesta safra',c:'blue'}]:[]).concat(x.planos?[{k:'mut',t:x.planos}]:[]); k.s.atv=x.atv+' '+x.op;
+    k.v.param=inf?'':(nfa(x.larg)+' m × '+nfa(x.vel)+' km/h × '+nfa(x.efic)+' %'); k.p.param=inf?[{k:'mut',t:'informado'}]:[{k:'txt',t:k.v.param}]; k.s.param=inf?'informado':k.v.param;
     k.p.rend=[{k:'b',t:nf(x.rend,2)}]; k.s.rend=nf(x.rend,2);
-    // composição e total na mesma linha, com os mesmos centavos do total (a conta mostrada fecha)
-    k.p.custo_h=[{k:'mut',t:'máq. '+nm(x.maq)+' · impl. '+nm(x.impl)+' · '+nf(x.pess)+' × '+nm(x.pess_rs)+' ='},{k:'txt',t:nf(x.custo_h,2)}]; k.s.custo_h=nf(x.custo_h,2);
-    // custo por kg: só colheita, com a produtividade das culturas da safra (sem média entre culturas)
-    delete k.p.custo_kg; delete k.s.custo_kg;
-    if(String(x.op||'').indexOf('Colheita')!==0){ x.custo_kg=0; return; }
+    // custo por hora: só o número; a composição (máquina, implemento, pessoas) fica no formulário da linha
+    delete k.p.custo_h; delete k.s.custo_h;
+    k.p.custo_ha=[{k:'txt',t:nf(x.custo_ha,2)}]; k.s.custo_ha=nf(x.custo_ha,2);
+    // custo por quilo só na colheita, abaixo do custo por hectare, com a produtividade das culturas da safra (sem média entre culturas)
+    if(String(x.op||'').indexOf('Colheita')!==0) return;
     const pc=prodColheita(self,saf,x.op); const cha=Number(x.custo_ha)||0;
-    if(!pc.length||!cha){ x.custo_kg=''; k.p.custo_kg=[{k:'mut',t:'não calculável'}]; k.s.custo_kg='não calculável'; return; }
-    if(pc.length===1){ x.custo_kg=Math.round(cha/pc[0].kg*10000)/10000; return; }
-    // mais de uma cultura: "por cultura" e, esmaecido, o valor de cada uma; busca e filtro usam o mesmo texto visível
-    const vals=pc.map(q=>q.cult+' '+nf(Math.round(cha/q.kg*10000)/10000,4));
-    x.custo_kg=''; k.p.custo_kg=[{k:'txt',t:'por cultura'}].concat(...vals.map(t=>[{k:'br'},{k:'mut',t}])); k.s.custo_kg='por cultura · '+vals.join(' · '); }); }); }
+    const kg=(!pc.length||!cha)?'R$/kg não calculável':pc.map(q=>(pc.length>1?q.cult+' ':'')+nf(Math.round(cha/q.kg*10000)/10000,4)+' R$/kg').join(' · ');
+    k.p.custo_ha=k.p.custo_ha.concat([{k:'br'},{k:'mut',t:kg}]); k.s.custo_ha+=' · '+kg; }); }); }
 // equipe em pessoas inteiras: a demanda de Operadores é horas × pessoas (etapa 5)
+// safra: início e fim por calendário; o período curto da lista sai das datas
+const SAF_MES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+function safPeriodo(ini,fim){ if(!/^\d{4}-\d{2}-\d{2}$/.test(String(ini||''))||!/^\d{4}-\d{2}-\d{2}$/.test(String(fim||''))) return ''; const a=ini.split('-'), b=fim.split('-'); const mi=SAF_MES[Number(a[1])-1], mf=SAF_MES[Number(b[1])-1];
+  return a[0]===b[0]?(mi+' – '+mf+'/'+b[0]):(mi+'/'+a[0]+' – '+mf+'/'+b[0]); }
+function safCheck(d){ const e={}; if(d.ini&&d.fim&&String(d.fim)<=String(d.ini)) e.fim='O fim precisa ser depois do início.'; return e; }
 function rendCheck(d){ const e={}; const n=g2num(d.pess); if(!isNaN(n)&&Math.round(n)!==n) e.pess='Use um número inteiro de pessoas.'; return e; }
 function rendLive(k,d){ const n=(f)=>{ const x=g2num(d[f]); return isNaN(x)?0:x; };
   if(k==='rend_c'){ const L=n('larg'),V=n('vel'),E=n('efic'); return (L&&V&&E)?nf(r2(L*V/10*E/100),2):'—'; }
   if(k==='custo_c') return nf(n('maq')+n('impl')+n('pess')*n('pess_rs'),2);
   return null; }
-function rendAfter(self,gid,rows,r){ const x=r.v;
+// conjuntos possíveis para um rendimento: tratores com potência para o implemento, ou o equipamento único da operação
+function conjOpts(rid){ const c=(D2.conj_opts||{})[String(rid).split('.')[0]]; if(!c) return [];
+  return c.opts.map(o=>({v:o.id,t:o.nome+(o.pot?' · '+o.pot+' cv':'')+' · máquina '+nm(o.maq)+' + implemento '+nm(o.impl)+' R$/h'})); }
+function rendAfter(self,gid,rows,r){ const x=r.v; let trocou='';
+  const co=(D2.conj_opts||{})[String(r.id).split('.')[0]]; const antes=self._conjAntes; self._conjAntes=undefined;
+  if(co&&antes!=null&&antes!==String(x.conj_id||'')){ const o=co.opts.find(q=>q.id===x.conj_id); if(o){ x.nome=o.nome; if(r.s) r.s.nome=o.nome; if(r.p) delete r.p.nome; x.maq=o.maq; x.impl=o.impl; trocou=' Conjunto trocado: custos por hora do cadastro (máquina '+nm(o.maq)+', implemento '+nm(o.impl)+').'; } }
   if(x.modo!=='Informado'){ x.rend=r2((Number(x.larg)||0)*(Number(x.vel)||0)/10*(Number(x.efic)||0)/100); } else { x.larg=''; x.vel=''; x.efic=''; }
   ['maq','impl','pess_rs'].forEach(f=>{ if(x[f]!==''&&x[f]!==undefined&&x[f]!==null) x[f]=r2(x[f]); }); // R$/h em centavos
   x.pes_h=(Number(x.pess)||0)*(Number(x.pess_rs)||0);
@@ -85,14 +139,19 @@ function rendAfter(self,gid,rows,r){ const x=r.v;
   r.rec=Object.assign({},r.rec||{}); if(Number(x.pess)>0) r.rec.oper=Number(x.pess); else delete r.rec.oper;
   x.custo_h=r2((Number(x.maq)||0)+(Number(x.impl)||0)+x.pes_h);
   x.custo_ha=x.rend?r2(x.custo_h/x.rend):0;
-  g2set(self,gid,{rows:g2clone(rows)}); self.setState({g2toast:'Rendimento de '+x.nome+': '+nf(x.rend,2)+' ha/h · '+rs(x.custo_ha)+'/ha. Plano operacional e recursos recalculados.'}); }
+  // Aplicar em: todas as atividades da operação (padrão) ou só esta
+  // o selo fica na operação quando o ajuste vale para todas; na atividade, só quando ela difere da operação
+  let n=0; const todas=(x.esc!=='Só esta atividade'); delete x.esc; const g=rows.find(q=>q.grp&&(q.kids||[]).some(k=>k.id===r.id));
+  x.aj=!todas; if(todas&&g){ g.v.aj=true;
+    g.kids.forEach(k=>{ if(k.id===r.id) return; ['conj_id','nome','modo','larg','vel','efic','rend','maq','impl','pess','pess_rs','pes_h','custo_h','custo_ha'].forEach(f=>{ k.v[f]=x[f]; }); k.v.aj=false; k.rec=Object.assign({},r.rec); if(k.s) delete k.s.nome; n++; }); }
+  g2set(self,gid,{rows:g2clone(rows)}); self.setState({g2toast:'Rendimento de '+(n?x.op+' ('+(n+1)+' atividades)':x.atv)+' · '+x.nome+': '+nf(x.rend,2)+' ha/h · '+rs(x.custo_ha)+'/ha.'+trocou+' Plano operacional e recursos recalculados.'}); }
 function leafParts(r,adj,kid){ const pl=planById(r.v.plano); const na=Object.keys(adj[r.id]||{}).length; const t=r.v.talhao||r.v.local;
   r.p.local=[{k:'b',t:r.v.local||'—'},{k:'mut',t:(kid?'parcela':'talhão inteiro')+(r.decl?' · sem polígono':'')}].concat((!kid&&!r.ro)?[{k:'act',t:'Dividir',fn:'divide:'+t,lk:true}]:[]); r.s.local=r.v.local;
   r.p.meta=[{k:'txt',t:nf(r.v.meta)+' '+(r.v.unm||'')}]; r.s.meta=String(r.v.meta); dcol(r,'dt_plantio',r.v.plantio);
-  if(pl && pl.cultura===r.v.cult){ r.p.plano=[{k:'act',t:pl.nome+' v'+pl.versao,fn:'openlp:'+r.id,lk:true}]; r.s.plano=pl.nome; }
+  if(pl && pl.cultura===r.v.cult){ r.p.plano=[{k:'txt',t:pl.nome+' v'+pl.versao},{k:'br'},{k:'act',t:(r.ro?'Ver insumos':'Ajustar insumos'),fn:'openlp:'+r.id,lk:true}]; r.s.plano=pl.nome; }
   else if(pl){ r.p.plano=[{k:'chip',t:'Plano de '+pl.cultura+' incompatível',c:'red'},{k:'act',t:'Reaplicar',fn:'applyone:'+r.id}]; r.s.plano='incompatível'; }
   else { r.p.plano=r.ro?[{k:'mut',t:'sem plano'}]:[{k:'act',t:'Aplicar plano',fn:'applyone:'+r.id}]; r.s.plano=''; }
-  if(na) r.p.plano=r.p.plano.concat([{k:'br'},{k:'chip',t:na+(na>1?' ajustes locais':' ajuste local'),c:'yellow'}]); r.s.aj=String(na); }
+  if(na) r.p.plano=r.p.plano.concat([{k:'br'},{k:'chip',t:na+(na>1?' ajustes deste talhão':' ajuste deste talhão'),c:'yellow'}]); r.s.aj=String(na); }
 function grpParts(r,adj){ const ks=r.kids||[]; const t=r.v.talhao; const T=talhaoArea(t); const A=ks.reduce((a,c)=>a+(Number(c.v.area)||0),0); const L=T-A;
   const uniq=(f)=>[...new Set(ks.map(c=>c.v[f]).filter(x=>x!==''&&x!==undefined&&x!==null))];
   r.v.area=r2(A); r.v.faz=(ks[0]&&ks[0].v.faz)||r.v.faz; r.v.cult=uniq('cult').join(', '); r.v.var=uniq('var').join(', ');
@@ -120,14 +179,21 @@ function cultCheck(self,gid,rows,r,d,isNew){ const e={}; const t=isNew?String(d.
   if(!isNew&&r&&r.v.tipo!=='Parcela'&&nm&&nm!==t) e.local='Talhão inteiro usa o nome do talhão ('+t+'). Para criar parcelas, use Dividir em parcelas.';
   else if(!isNew&&r&&r.v.tipo==='Parcela'&&!nm) e.local='Informe o nome da parcela.';
   if(nm&&!e.local&&outros.some(c=>c.v.local===nm)) e.local='Já existe '+nm+' nesta safra.';
+  const pl=planById(String(d.plano||'')); if(pl&&pl.cultura!==String(d.cult||'')) e.plano='Este plano é de '+pl.cultura+'. Escolha um plano de '+d.cult+' ou deixe sem plano.';
+  self._planoAntes=(!Object.keys(e).length&&!isNew&&r)?{id:r.id,plano:String(r.v.plano||'')}:null;
   return e; }
-function cultAfter(self,gid,rows,r,isNew){ let all=g2clone(rows); let msg='';
+function cultAfter(self,gid,rows,r,isNew){ let all=g2clone(rows.filter(x=>!x.livre)); let msg='';  // linhas livres são recalculadas a cada exibição
   if(r&&isNew){ const t=r.v.talhao; const x=g2find(all,r.id); all=all.filter(y=>y.id!==r.id);
-    x.v.faz=x.v.faz||'Santa Rita'; x.v.plano=''; x.v.colheita='';
+    x.v.faz=x.v.faz||'Santa Rita'; x.v.plano=x.v.plano||''; x.v.colheita='';
     if(leaves(all).some(c=>c.v.talhao===t)){ g2set(self,gid,{rows:all,fl:null}); openDiv(self,t,x); self.setState({g2toast:t+' já está nesta safra: confira a divisão em parcelas e salve.'}); return; }
     const T=talhaoArea(t); const a=Number(x.v.area)||0;
     if(a>=T-0.005){ x.v.local=t; x.v.tipo='Talhão inteiro'; x.decl=false; } else { x.v.local=x.v.local||(t+'-A'); x.v.tipo='Parcela'; x.decl=true; }
-    x.s.local=x.v.local; all.push(x); msg=(x.v.tipo==='Parcela')?('Cultivo incluído como parcela '+x.v.local+' · '+nfa(T-a)+' ha livres em '+t+'. Aplique um plano.'):('Cultivo incluído: '+t+' inteiro. Aplique um plano.'); }
+    x.s.local=x.v.local; all.push(x); const fim=planById(x.v.plano)?(' · plano '+planById(x.v.plano).nome+'.'):'. Escolha o plano agronômico na linha.';
+    msg=(x.v.tipo==='Parcela')?('Cultivo incluído como parcela '+x.v.local+' · '+nfa(T-a)+' ha livres em '+t+fim):('Cultivo incluído: '+t+' inteiro'+fim); }
+  const pa=self._planoAntes; self._planoAntes=null;
+  if(r&&!isNew&&pa&&pa.id===r.id&&pa.plano!==String(r.v.plano||'')){ const adj=JSON.parse(JSON.stringify(adjOf(self))); const n=Object.keys(adj[r.id]||{}).length; const pl=planById(r.v.plano);
+    if(n){ delete adj[r.id]; self.setState({adj}); }
+    msg=(pl?('Plano de '+r.v.local+': '+pl.nome+' v'+pl.versao):('Plano retirado de '+r.v.local))+(n?(' · '+n+(n>1?' ajustes de dose descartados':' ajuste de dose descartado')):'')+'. Plano operacional, recursos e demanda recalculados.'; }
   const norm=normCult(all); const st=g2st(self,gid); const x0=Object.assign({},GR(gid).x0||{},st.x||{}); norm.forEach(y=>{ if(y.grp&&x0[y.id]!==false) x0[y.id]=true; });
   g2set(self,gid,{rows:norm,x:x0}); if(msg) self.setState({g2toast:msg}); }
 // ---- painel: dividir o talhão em quantas parcelas precisar ----
@@ -152,12 +218,14 @@ function dvSave(self){ const dv=self.state.dv; if(!dv||dv.ro) return; const t=dv
     if(!x.cult) e.cult='Escolha a cultura'; if(!String(x.var||'').trim()) e.var='Informe a variedade';
     if(!/^\d{4}-\d{2}-\d{2}$/.test(String(x.plantio||''))) e.plantio='Informe o plantio';
     if(String(x.meta).trim()===''||isNaN(m)||m<0) e.meta='Informe a meta (≥ 0)';
+    const plx=planById(x.plano); if(plx&&plx.cultura!==x.cult) e.plano='Plano de '+plx.cultura+' não serve para '+x.cult+': escolha outro ou deixe sem plano';
     if(Object.keys(e).length) err[i]=e; });
   const exc=A>T+0.005;
   if(Object.keys(err).length||exc){ self.setState({dv:Object.assign({},dv,{err,gerr:(exc?('As parcelas somam '+nfa(A)+' ha; o talhão tem '+nfa(T)+' ha. Reduza '+nfa(A-T)+' ha.'):'Corrija os campos destacados; o que você digitou foi mantido.'),warn:false})}); return; }
-  const all=g2clone(rows); const adj=JSON.parse(JSON.stringify(adjOf(self))); const old=leaves(all).filter(c=>c.v.talhao===t); const byId={}; old.forEach(c=>{ byId[c.id]=c; });
+  const all=g2clone(rows.filter(x=>!x.livre)); const adj=JSON.parse(JSON.stringify(adjOf(self))); const old=leaves(all).filter(c=>c.v.talhao===t); const byId={}; old.forEach(c=>{ byId[c.id]=c; });
   const stamp=String(Date.now()).slice(-6);
   const kids=dv.rows.map((x,i)=>{ const b=(x.id&&byId[x.id])||null; const c=b||{id:'p'+t+'_'+stamp+'_'+i,v:{},s:{},p:{},decl:true};
+    if(b&&String(b.v.plano||'')!==String(x.plano||'')) delete adj[b.id];
     Object.assign(c.v,{talhao:t,faz:(b?b.v.faz:(old[0]?old[0].v.faz:'Santa Rita')),local:String(x.local).trim(),cult:x.cult,var:String(x.var).trim(),area:r2(g2num(x.area)),plantio:x.plantio,meta:g2num(x.meta),unm:x.unm,plano:x.plano||'',colheita:x.colheita||''});
     if(b&&b.v.tipo!=='Parcela') c.decl=true;
     c.s={}; c.p={}; if(!b&&x.adj&&Object.keys(x.adj).length) adj[c.id]=JSON.parse(JSON.stringify(x.adj)); return c; });
@@ -182,9 +250,10 @@ function divVals(self,v){ const dv=self.state.dv; v.dv_open=!!dv; if(!dv){ v.dv_
     const set=(f)=>(ev)=>{ const cur=self.state.dv; const rs=cur.rows.slice(); rs[i]=Object.assign({},rs[i],{[f]:ev.target.value}); const er=Object.assign({},cur.err||{}); if(er[i]){ er[i]=Object.assign({},er[i]); delete er[i][f]; if(!Object.keys(er[i]).length) delete er[i]; }
       self.setState({dv:Object.assign({},cur,{rows:rs,err:er,warn:false,gerr:(Object.keys(er).length?cur.gerr:'')})}); };
     const ist=(f,x2)=>'font-family:inherit;font-size:13px;padding:6px 8px;border-radius:8px;box-sizing:border-box;width:100%;min-width:0;color:#15201A;border:1px solid '+(e[f]?'#B42318':'#E4E9E5')+';background:'+(dv.ro?'#F4F6F3':'#FFFFFF')+';'+(x2||'');
-    let pt; if(!pl) pt='sem plano'; else if(pl.cultura!==x.cult) pt='Plano de '+pl.cultura+' incompatível: reaplique depois'; else pt=pl.nome+' v'+pl.versao+(na?' · '+na+(na>1?' ajustes':' ajuste'):'')+(x.from?' · copiado de '+x.from:'');
+    let pt; if(!pl) pt=''; else if(pl.cultura!==x.cult) pt='Plano de '+pl.cultura+': escolha um plano de '+x.cult; else pt=(na?na+(na>1?' ajustes deste talhão':' ajuste deste talhão'):'')+(x.from?((na?' · ':'')+'copiado de '+x.from):'');
     const lab=x.local||('parcela '+(i+1)); const errs=Object.keys(e).map(k=>e[k]);
-    return {i,local:x.local,area:x.area,cult:x.cult,var:x.var,plantio:x.plantio,meta:x.meta,unm:x.unm,plano:pt,pwarn:!!(pl&&pl.cultura!==x.cult),dis:!!dv.ro,lab,
+    return {i,local:x.local,area:x.area,cult:x.cult,var:x.var,plantio:x.plantio,meta:x.meta,unm:x.unm,plano:pt,temNota:!!pt,pwarn:!!(pl&&pl.cultura!==x.cult),dis:!!dv.ro,lab,
+      planoId:x.plano||'', op:planOpts({cult:x.cult,plano:x.plano}), s_plano:set('plano'), st_plano:ist('plano'),
       oc:CULT.map(o=>({v:o,t:o})), ou:UNM.map(o=>({v:o,t:o})),
       s_local:set('local'),s_area:set('area'),s_cult:set('cult'),s_var:set('var'),s_plantio:set('plantio'),s_meta:set('meta'),s_unm:set('unm'),
       st_local:ist('local','font-weight:700;'),st_area:ist('area','text-align:right;'),st_cult:ist('cult'),st_var:ist('var'),st_plantio:ist('plantio'),st_meta:ist('meta','text-align:right;'),st_unm:ist('unm'),
@@ -207,66 +276,132 @@ function divVals(self,v){ const dv=self.state.dv; v.dv_open=!!dv; if(!dv){ v.dv_
   v.dv_discard=()=>self.setState({dv:null}); v.dv_keep=()=>self.setState({dv:Object.assign({},self.state.dv,{warn:false})});
   v.dv_key=(e)=>{ if(e&&e.key==='Escape'){ e.preventDefault(); v.dv_close(); } };
   v.dv_save=()=>dvSave(self); }
+// próximo passo de uma safra (etapa 1): o que falta primeiro, com o verbo; encerrada só consulta
+function semPlano(cs){ return cs.filter(c=>{ const pl=planById(c.v.plano); return !(pl&&pl.cultura===c.v.cult); }); }
+// CAL-01 na etapa 6, 2ª linha do estoque apto: quanto dele outras origens usam antes (safra anterior, reserva de outro destino) ou, sem isso, o reservado
+function notaEst(d,dec){ return (d.liq>0.001&&d.antes>0.001)?[{k:'br'},{k:'mut',t:'usado antes: '+nf(d.antes,dec)}]:(d.res>0.001?[{k:'br'},{k:'mut',t:'res. '+nf(d.res,dec)}]:[]); }
+// solicitações enviadas: as iniciais (D2.sol) + as gravadas no navegador (mesmo registro que a Compra de insumos lê)
+const SOL_KEY='talhao-os-compras-v1';
+function solLer(){ try{ const o=JSON.parse(localStorage.getItem(SOL_KEY)||'null'); return (o&&o.sols)||{}; }catch(e){ return {}; } }
+function solGravar(rec){ try{ const o=JSON.parse(localStorage.getItem(SOL_KEY)||'null')||{v:1,sols:{}}; o.sols=o.sols||{}; o.sols[rec.safra]=rec; localStorage.setItem(SOL_KEY,JSON.stringify(o)); return true; }catch(e){ return false; } }
+function solMap(self){ if(self.state.sol) return self.state.sol; if(!self._sol0) self._sol0=Object.assign({},D2.sol,solLer()); return self._sol0; }
+// andamento gravado pela Compra de insumos (talhao-os-compras-v1 · proc): o planejamento vê em que pé está a compra da mesma solicitação
+function solEstado(saf,sol){ try{ const o=JSON.parse(localStorage.getItem(SOL_KEY)||'null'); const p=o&&o.proc&&o.proc[saf];
+  return (p&&sol&&p.sol===sol.id&&(p.comp||0)===(sol.comp||0)&&p.estado&&p.estado!=='A cotar')?p.estado:''; }catch(e){ return ''; } }
+function solHref(saf,sol){ return 'CMP.dc.html#sol='+encodeURIComponent(sol.id)+'&saf='+encodeURIComponent(saf); }
+function proxSaf(self,r){ if(r.ro) return ['Consultar safra',2];
+  const cs=leaves(g2rows(self,GR('g_cult_'+sk(r.id)))); if(!cs.length) return ['Continuar: cadastrar cultivos',2];
+  const sp=semPlano(cs).length; if(sp) return ['Continuar: aplicar plano em '+sp+(sp>1?' cultivos':' cultivo'),2];
+  if(!solMap(self)[r.id]) return ['Continuar: enviar demanda para cotação',6];
+  return ['Continuar: conferir plano operacional',4]; }
 function PREVALS(self,v){ compRend(self,self.state.saf||null);
   const st=self.state; const saf=st.saf||null; const safObj=saf?(g2rows(self,GR('g_saf')).find(r=>r.id===saf)):null; const ro=!!(safObj&&safObj.ro);
   // ---- etapa 1: contagens por safra ----
   g2rows(self,GR('g_saf')).forEach(r=>{ const cs=leaves(g2rows(self,GR('g_cult_'+sk(r.id)))); r.v.n=cs.length; r.v.area=cs.reduce((s,c)=>s+(Number(c.v.area)||0),0);
     const est=r.v.estado||'Rascunho'; r.p.estado=[{k:'chip',t:est,c:(est==='Encerrada'?'gray':(est==='Em planejamento'?'green':'yellow'))}].concat(r.id===saf?[{k:'chip',t:'Selecionada',c:'blue'}]:[]);
-    r.p.nome=[{k:'b',t:r.v.nome},{k:'mut',t:r.v.periodo||''}]; r.s.nome=r.v.nome;
-    r.p.acao=[{k:'act',t:(r.ro?'Consultar safra':'Abrir safra'),fn:'pick:'+r.id,u:false}]; r.s.acao=''; });
+    r.v.periodo=safPeriodo(r.v.ini,r.v.fim)||r.v.periodo||''; r.p.nome=[{k:'b',t:r.v.nome},{k:'mut',t:r.v.periodo}].concat(r.ro?[]:[{k:'act',t:'Editar',fn:'safedit:'+r.id,lk:true}]); r.s.nome=r.v.nome;
+    const px=proxSaf(self,r); r._prox=px[1]; r.dr='open_'+r.id;
+    r.p.acao=[{k:'act',t:px[0],fn:'pickat:'+r.id+'|'+px[1],u:false}]; r.s.acao=px[0]; });
   // ---- etapa 2: partes calculadas do cultivo (plano aplicado, ajustes) ----
   const adj=adjOf(self);
-  ['S2627','S27SF','S2526','NOVA'].forEach(k=>{ g2rows(self,GR('g_cult_'+k)).forEach(r=>{ if(r.grp){ grpParts(r,adj); (r.kids||[]).forEach(c=>leafParts(c,adj,true)); } else leafParts(r,adj,false); }); });
+  ['S2627','S27SF','S2526','LG2627','NOVA'].forEach(k=>syncLivres(self,k,v));
+  ['S2627','S27SF','S2526','LG2627','NOVA'].forEach(k=>{ g2rows(self,GR('g_cult_'+k)).forEach(r=>{ if(r.livre) return; if(r.grp){ grpParts(r,adj); (r.kids||[]).forEach(c=>leafParts(c,adj,true)); } else leafParts(r,adj,false); }); });
   if(!saf) return;
   // ---- etapa 4: plano operacional ----
   const oc=ocorr(self,saf); const byA={};
   oc.forEach(o=>{ const key=o.a.nome+'|'+o.a.op; const g=byA[key]||(byA[key]={id:'A'+Object.keys(byA).length,nome:o.a.nome,op:o.a.op,items:[],mis:{}}); g.items.push(o); g.mis[o.mi]=1; });
-  const acts=Object.values(byA);
-  acts.sort((x,y)=>{ const a=x.items.map(i=>i.dt).sort()[0], b=y.items.map(i=>i.dt).sort()[0]; return a<b?-1:(a>b?1:0); });
+  const acts=Object.values(byA); const ini=(its)=>its.map(i=>i.dt).sort()[0]||'';
+  acts.sort((x,y)=>{ const a=ini(x.items), b=ini(y.items); return a<b?-1:(a>b?1:0); });
+  // operação → atividades → cultivos; operações na ordem da primeira atividade
+  const byO={}; acts.forEach(g=>{ const o=byO[g.op]||(byO[g.op]={id:'OP'+Object.keys(byO).length,op:g.op,acts:[],items:[],mis:{}}); o.acts.push(g); o.items=o.items.concat(g.items); Object.assign(o.mis,g.mis); });
+  const opsL=Object.values(byO).sort((x,y)=>{ const a=ini(x.items), b=ini(y.items); return a<b?-1:(a>b?1:0); });
   const mlab=(mis)=>{ const ks=Object.keys(mis).map(Number).filter(i=>i>=0).sort((a,b)=>a-b); if(!ks.length) return 'fora do período'; const a=D2.meses[ks[0]][1], b=D2.meses[ks[ks.length-1]][1]; return a===b?a:a+' – '+b; };
-  GR('g_op').rows=acts.map(g=>{ const s=(f)=>g.items.reduce((t,i)=>t+i[f],0); const area=s('area');
-    return {id:g.id,v:{nome:g.nome,op:g.op,mes:mlab(g.mis),area,horas:s('horas'),cop:s('cop'),cins:s('cins'),ctot:s('cop')+s('cins'),rha:area?(s('cop')+s('cins'))/area:0},s:{},p:{nome:[{k:'b',t:g.nome}]},
-      kids:g.items.sort((a,b)=>a.dt<b.dt?-1:1).map((i,ix)=>({id:g.id+'_'+ix,ro:true,v:{nome:i.c.v.local+' · '+i.c.v.cult+' '+i.c.v.var,op:br(i.dt)+' · '+gatLabel(i.a.g),mes:(i.mi>=0?D2.meses[i.mi][1]:'fora do período'),area:i.area,horas:i.horas,cop:i.cop,cins:i.cins,ctot:i.cop+i.cins,rha:i.area?(i.cop+i.cins)/i.area:0},s:{},p:{}}))}; });
-  const selA=st.atv&&byA? acts.find(a=>a.id===st.atv):null; const base=selA?selA.items:oc;
-  const M=D2.meses.length; const z=()=>new Array(M).fill(0); const mat={area:z(),horas:z(),cop:z(),cins:z()};
+  const soma=(its)=>{ const s=(f)=>its.reduce((t,i)=>t+i[f],0); const area=s('area'); return {area,horas:s('horas'),cop:s('cop'),cins:s('cins'),ctot:s('cop')+s('cins'),rha:area?(s('cop')+s('cins'))/area:0}; };
+  const linhaAtv=(g)=>{ const gs=[...new Set(g.items.map(i=>gatLabel(i.a.g)))];
+    return {id:g.id,v:Object.assign({nome:g.nome,op:gs.join(' · '),mes:mlab(g.mis)},soma(g.items)),s:{},p:{nome:[{k:'txt',t:g.nome}]},
+      kids:g.items.slice().sort((a,b)=>a.dt<b.dt?-1:1).map((i,ix)=>({id:g.id+'_'+ix,ro:true,v:{nome:i.c.v.local+' · '+i.c.v.cult+' '+i.c.v.var,op:br(i.dt),mes:(i.mi>=0?D2.meses[i.mi][1]:'fora do período'),area:i.area,horas:i.horas,cop:i.cop,cins:i.cins,ctot:i.cop+i.cins,rha:i.area?(i.cop+i.cins)/i.area:0},s:{},p:{}}))}; };
+  GR('g_op').rows=opsL.map(o=>{ const n=o.acts.length;
+    return {id:o.id,v:Object.assign({nome:o.op,op:'',mes:mlab(o.mis)},soma(o.items)),s:{nome:o.op},p:{nome:[{k:'b',t:o.op},{k:'mut',t:n+(n>1?' atividades':' atividade')}],op:[{k:'mut',t:''}]},kids:o.acts.map(linhaAtv)}; });
+  const selO=st.atv? opsL.find(o=>o.id===st.atv):null; const selA=(!selO&&st.atv)? acts.find(a=>a.id===st.atv):null; const base=selO?selO.items:(selA?selA.items:oc);
+  const vis0=st.opv==='mes'?'mes':'op'; const M=D2.meses.length; const z=()=>new Array(M).fill(0); const mat={area:z(),horas:z(),cop:z(),cins:z()};
   base.forEach(i=>{ if(i.mi<0) return; mat.area[i.mi]+=i.area; mat.horas[i.mi]+=i.horas; mat.cop[i.mi]+=i.cop; mat.cins[i.mi]+=i.cins; });
   const mrow=(id,l,arr,d)=>{ const r={id,v:{ind:l,tot:arr.reduce((a,b)=>a+b,0)},s:{},p:{}}; arr.forEach((x,ix)=>{ r.v['m'+ix]=x; }); return r; };
   const ctot=mat.cop.map((x,i)=>x+mat.cins[i]);
   GR('g_mat').rows=[mrow('ma','Área trabalhada (ha)',mat.area),mrow('mh','Horas de operação (h)',mat.horas),mrow('mo','Custo de operação (R$)',mat.cop),mrow('mi','Custo de insumos (R$)',mat.cins),mrow('mt','Custo total (R$)',ctot)];
-  v.mat_titulo=selA?('Detalhamento mensal · '+selA.nome):'Detalhamento mensal · todas as atividades da safra'; v.mat_sel=!!selA; v.mat_todas=()=>self.setState({atv:null});
+  v.mat_titulo=selO?('Detalhamento mensal · '+selO.op):(selA?('Detalhamento mensal · '+selA.nome):'Detalhamento mensal · todas as operações da safra'); v.mat_sel=!!(selO||selA);
+  v.mat_nome=selO?selO.op:(selA?selA.nome+' ('+selA.op+')':'');
+  const vis=st.opv==='mes'?'mes':'op'; v.vis_op=vis==='op'; v.vis_mes=vis==='mes';
+  const segSt=(on)=>'font-family:inherit;font-size:12.5px;font-weight:700;padding:6px 14px;border-radius:999px;border:0;cursor:pointer;'+(on?'background:#1E7A4C;color:#fff;':'background:transparent;color:#15201A;');
+  v.vis_op_st=segSt(v.vis_op); v.vis_mes_st=segSt(v.vis_mes); v.ver_op=()=>self.setState({opv:'op'}); v.ver_mes=()=>self.setState({opv:'mes'});
+  v.op_titulo=v.vis_op?'Plano operacional por operação':('Plano operacional por mês · '+(v.mat_sel?v.mat_nome:'todas as operações')); v.mat_todas=()=>self.setState({atv:null});
   const TA=oc.reduce((a,i)=>a+i.area,0), TH=oc.reduce((a,i)=>a+i.horas,0), TC=oc.reduce((a,i)=>a+i.cop+i.cins,0);
   const areaSaf=cultRows(self,saf).reduce((a,c)=>a+(Number(c.v.area)||0),0);
-  v.k4=nf(TA)+' ha trabalhados · '+nf(TH)+' h de operação · '+rs(TC)+' · '+rs(areaSaf?TC/areaSaf:0)+'/ha da safra';
+  v.k4=nf(TA)+' ha trabalhados · '+nf(TH)+' h de operação · '+rs(TC)+' · '+rs(areaSaf?TC/areaSaf:0)+'/ha da safra'+(vis0==='mes'?'':' · clique numa linha para ver os meses dela');
   // ---- etapa 5: recursos ----
-  const recp=g2rows(self,GR('g_recp'));
+  const recpM=g2rows(self,GR('g_recp_maq')), recpP=g2rows(self,GR('g_recp_pes')); const recp=recpM.concat(recpP);
+  const cls=st.rcl==='pes'?'pes':'maq'; const daClasse=(id)=>(cls==='pes')===recpP.some(r=>r.id===id);
   const dem={}; recp.forEach(r=>{ dem[r.id]=z(); });
   const demA={}; oc.forEach(i=>{ if(i.mi<0) return; Object.keys(i.rec||{}).forEach(k=>{ if(!dem[k]) return; const h=i.horas*i.rec[k]; dem[k][i.mi]+=h; const dk=k+'|'+i.a.nome; (demA[dk]||(demA[dk]=z()))[i.mi]+=h; }); });
   let faltas=0;
-  GR('g_res').rows=recp.map(r=>{ const cap=D2.meses.map((m,ix)=>{ const un=Number(r.v.un)||0; return un? Math.max(0,un*(D2.dias[m[0]]||0)*(Number(r.v.jornada)||0)*(Number(r.v.turnos)||0)-(Number(r.v.manut)||0)) : 0; });
-    const d=dem[r.id]; const sal=cap.map((c,i)=>c-d[i]); const row={id:'R_'+r.id,v:{ind:r.v.nome},s:{ind:r.v.nome},p:{ind:[{k:'b',t:r.v.nome},{k:'mut',t:'saldo (h)'}]},kids:[]};
-    sal.forEach((x,i)=>{ row.v['m'+i]=x; const neg=x< -0.5; if(neg) faltas++; row.p['m'+i]=[{k:'cn',t:(x>=0?'+':'−')+nf(Math.abs(x)),c:(neg?'red':(d[i]>0?'green':'gray'))}]; row.s['m'+i]=x; });
+  GR('g_res').rows=recp.map(r=>{
+    // horas de uma unidade no mês = dias úteis × jornada × turnos × fator; capacidade = unidades × esse valor
+    // fator: máquinas = disponibilidade (%); pessoas = 1 − absenteísmo (%)
+    const pes=recpP.some(x=>x.id===r.id); const ul=pes?'pessoas':'unidades';
+    const pc=k=>Math.min(100,Math.max(0,Number(r.v[k])||0))/100;
+    const un=Number(r.v.un)||0, J=Number(r.v.jornada)||0, T=pes?1:(Number(r.v.turnos)||0), DP=pes?1-pc('abs'):pc('disp');
+    const porUn=D2.meses.map(m=>(D2.dias[m[0]]||0)*J*T*DP); const cap=porUn.map(p=>un*p);
+    const d=dem[r.id]; const sal=cap.map((c,i)=>c-d[i]);
+    // horas → quantidade: necessárias = demanda ÷ horas de uma unidade, arredondado para cima (−1 = sem horas no mês)
+    const nec=d.map((h,i)=>h>0.0001?(porUn[i]>0?Math.ceil(h/porUn[i]-1e-9):-1):0); const row={id:'R_'+r.id,v:{ind:r.v.nome},s:{ind:r.v.nome},p:{ind:[{k:'b',t:r.v.nome},{k:'mut',t:'saldo (h)'}]},kids:[],_f:0};
+    sal.forEach((x,i)=>{ row.v['m'+i]=x; const neg=nec[i]<0||nec[i]>un; if(neg){ faltas++; row._f++; } row.p['m'+i]=[{k:'cn',t:(x>=0?'+':'−')+nf(Math.abs(x),(neg&&Math.abs(x)<1)?1:0),c:(neg?'red':(d[i]>0?'green':'gray'))}]; row.s['m'+i]=x; });
     const tS=sal.reduce((a,b)=>a+b,0); row.v.tot=tS; row.p.tot=[{k:'b',t:(tS>=0?'+':'−')+nf(Math.abs(tS))+' h'}];
     const kid=(id,l,arr)=>{ const k={id,ro:true,v:{ind:l,tot:arr.reduce((a,b)=>a+b,0)},s:{},p:{}}; arr.forEach((x,i)=>{ k.v['m'+i]=x; }); return k; };
-    row.kids=[kid(r.id+'_d','Demanda (h)',d),kid(r.id+'_c','Capacidade (h)',cap)]; return row; });
-  v.k5=faltas?(faltas+' mês(es) com falta de capacidade — em vermelho'):'Capacidade atende a demanda em todos os meses';
+    const kn={id:r.id+'_n',ro:true,v:{ind:'Necessárias ('+ul+')'},s:{},p:{}}; let pico=0, mp=-1;
+    nec.forEach((n,i)=>{ kn.v['m'+i]=n<0?'':n; if(n<0){ kn.p['m'+i]=[{k:'cn',t:'sem horas',c:'red'}]; } else if(n>un){ kn.p['m'+i]=[{k:'cn',t:String(n),c:'red'}]; } if(n>pico){ pico=n; mp=i; } });
+    kn.v.tot=pico; kn.p.tot=[{k:'b',t:'pico '+pico}];
+    const ku={id:r.id+'_u',ro:true,v:{ind:'Você tem ('+ul+')',tot:un},s:{},p:{tot:[{k:'txt',t:String(un)}]}}; D2.meses.forEach((m,i)=>{ ku.v['m'+i]=un; });
+    row.kids=[kid(r.id+'_d','Demanda (h)',d),kid(r.id+'_c','Capacidade (h)',cap),kn,ku];
+    // parâmetros: pico de necessidade e o mês em que acontece, ao lado do que existe
+    r.v.pico=pico; r.p.pico=[pico>un?{k:'cn',t:String(pico),c:'red'}:{k:'b',t:String(pico)}]; r.s.pico=String(pico);
+    r.v.mpico=mp>=0?D2.meses[mp][1]:'—'; r.p.mpico=[{k:mp>=0?'txt':'mut',t:r.v.mpico}]; r.s.mpico=r.v.mpico;
+    return row; });
+  const todas=GR('g_res').rows; const fM=todas.filter(r=>recpM.some(x=>'R_'+x.id===r.id)).reduce((a,r)=>a+r._f,0), fP=faltas-fM;
+  GR('g_res').rows=todas.filter(r=>daClasse(String(r.id).replace('R_','')));
+  // o aviso diz quanto falta em quantidade, não só em meses
+  const curtos=recp.filter(r=>(Number(r.v.pico)||0)>(Number(r.v.un)||0)).map(r=>r.v.nome+': precisa de '+r.v.pico+', tem '+(Number(r.v.un)||0)+' em '+r.v.mpico);
+  v.k5=faltas?((curtos.length?curtos.join(' · '):(fM+fP)+' mês(es) com falta')+' — em vermelho na visão por mês'):'Capacidade atende a demanda em todos os meses';
+  const rv=st.rv==='mes'?'mes':'par'; v.vis_par=rv==='par'; v.vis_rmes=rv==='mes'; v.cl_maq=cls==='maq'; v.cl_pes=cls==='pes';
+  const sg=(on)=>'font-family:inherit;font-size:12.5px;font-weight:700;padding:6px 14px;border-radius:999px;border:0;cursor:pointer;white-space:nowrap;'+(on?'background:#1E7A4C;color:#fff;':'background:transparent;color:#15201A;');
+  v.vis_par_st=sg(v.vis_par); v.vis_rmes_st=sg(v.vis_rmes); v.cl_maq_st=sg(v.cl_maq); v.cl_pes_st=sg(v.cl_pes);
+  v.ver_par=()=>self.setState({rv:'par'}); v.ver_rmes=()=>self.setState({rv:'mes'}); v.ver_maq=()=>self.setState({rcl:'maq',rec:null}); v.ver_pes=()=>self.setState({rcl:'pes',rec:null});
+  v.rec_titulo=(cls==='pes'?'Pessoas':'Máquinas e implementos')+(rv==='mes'?' · demanda × capacidade por mês':' · parâmetros');
+  v.rec_sub=rv==='mes'?'Faltas em vermelho; clique num recurso para ver de onde vem a demanda.':('Clique num recurso para ajustar o que você tem; necessárias = horas da demanda ÷ horas de '+(cls==='pes'?'uma pessoa':'uma unidade')+' no mês.');
   v.k5st=faltas?'color:#B42318;font-weight:700;':'color:#1E7A4C;font-weight:700;';
-  const selR=st.rec||null; v.resd_sel=!!selR; v.resd_titulo=selR?('Origem da demanda · '+((recp.find(r=>r.id===selR)||{v:{}}).v.nome||'')):'';
+  const selR=(st.rec&&daClasse(st.rec))?st.rec:null; v.resd_sel=!!selR; v.resd_titulo=selR?('Origem da demanda · '+((recp.find(r=>r.id===selR)||{v:{}}).v.nome||'')):'';
   GR('g_resd').rows=selR?Object.keys(demA).filter(k=>k.indexOf(selR+'|')===0).map((k,ix)=>{ const r={id:'D'+ix,v:{ind:k.split('|')[1],tot:demA[k].reduce((a,b)=>a+b,0)},s:{},p:{}}; demA[k].forEach((x,i)=>{ r.v['m'+i]=x; }); return r; }):[];
   // ---- etapa 6: demanda de insumos ----
-  const dm=demanda(self,saf); const sol=(st.sol||D2.sol)[saf]; const grupos={};
+  const dm=demanda(self,saf); const sol=solMap(self)[saf]; const grupos={};
   Object.values(dm).forEach(d=>{ (grupos[d.grupo]||(grupos[d.grupo]=[])).push(d); });
   let tot=0, nliq=0, npend=0;
   GR('g_dem').rows=Object.keys(grupos).sort((a,b)=>a.localeCompare(b,'pt-BR')).map((g,gi)=>{ const its=grupos[g].sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
     const val=its.reduce((a,d)=>a+d.valor,0); tot+=val; const uso=its.map(d=>d.uso).filter(Boolean).sort()[0]||'';
     const gr={id:'G'+gi,v:{ins:g,valor:val},s:{ins:g},p:{ins:[{k:'b',t:g},{k:'mut',t:its.length+(its.length>1?' insumos':' insumo')}]},
       kids:its.map((d,ix)=>{ const dec=(d.un==='L')?1:0; const sent=sol&&sol.itens?(sol.itens[d.nome]||0):0; if(d.liq>0) nliq++;
-        let sit; if(d.liq<=0.001) sit={k:'chip',t:'Coberto pelo estoque',c:'green'}; else if(sol && sent>=d.liq-0.01) sit={k:'chip',t:'Em cotação · '+sol.id,c:'blue'}; else if(sol){ sit={k:'chip',t:'Complemento: +'+nf(d.liq-sent,dec)+' '+d.un,c:'yellow'}; npend++; } else { sit={k:'chip',t:'A enviar',c:'gray'}; npend++; }
+        let sit; if(d.liq<=0.001&&d.rup>0.001) sit={k:'chip',t:'Coberto pelo recebimento',c:'yellow'}; else if(d.liq<=0.001) sit={k:'chip',t:'Coberto pelo estoque',c:'green'}; else if(sol && sent>=d.liq-0.01) sit={k:'chip',t:'Em cotação · '+sol.id,c:'blue'}; else if(sol){ sit={k:'chip',t:'Complemento: +'+nf(d.liq-sent,dec)+' '+d.un,c:'yellow'}; npend++; } else { sit={k:'chip',t:'A enviar',c:'gray'}; npend++; }
         const kr={id:'G'+gi+'_'+ix,ro:true,v:{ins:d.nome,bruta:d.bruta,est:d.est,rec:d.rec,liq:d.liq,un:d.un,preco:d.preco,valor:d.valor},s:{sit:sit.t},
-          p:{bruta:[{k:'txt',t:nf(d.bruta,dec)+' '+d.un}],est:[{k:'txt',t:nf(d.est,dec)+' '+d.un}],rec:[{k:'txt',t:nf(d.rec,dec)+' '+d.un}],liq:[{k:'b',t:nf(d.liq,dec)+' '+d.un}],sit:[sit]},
-          o:d.orig.map(t=>({t})) }; dcol(kr,'uso',d.uso); return kr; })};
+          p:{bruta:[{k:'txt',t:nf(d.bruta,dec)+' '+d.un}].concat(d.real>0.001?[{k:'br'},{k:'mut',t:'realizado: '+nf(d.real,dec)}]:[]),est:[{k:'txt',t:nf(d.est,dec)+' '+d.un}].concat(notaEst(d,dec)),
+             rec:[{k:'txt',t:nf(d.rec,dec)+' '+d.un}].concat((d.liq>0.001||d.rup>0.001)&&d.tarde>0.001?[{k:'br'},{k:'mut',t:nf(d.tarde,dec)+' após a falta'}]:[]),
+             liq:[{k:'b',t:nf(d.liq,dec)+' '+d.un}].concat(d.liq>0.001&&d.falta?[{k:'br'},{k:'cn',t:'falta em '+br(d.falta),c:'red'}]
+               :(d.rup>0.001&&d.falta?[{k:'br'},{k:'cn',t:'ruptura '+br(d.falta).slice(0,5)+'–'+br(d.cob).slice(0,5),c:'red'}]:[])),sit:[sit]},
+          o:d.memo.map(t=>({t})).concat(sol?[{t:'Ver '+sol.id+' na Compra de insumos',h:solHref(saf,sol)}]:[]) }; dcol(kr,'uso',d.uso); return kr; })};
+    // situação do grupo: contagem por situação dos insumos (o que falta enviar primeiro)
+    const cnt={}; gr.kids.forEach(k=>{ const t=String(k.s.sit||'').replace(/ · .*/,'').replace(/^Complemento.*/,'Complemento'); cnt[t]=(cnt[t]||0)+1; });
+    const ord=['A enviar','Complemento','Em cotação','Coberto pelo recebimento','Coberto pelo estoque']; const cor={'A enviar':'gray','Complemento':'yellow','Em cotação':'blue','Coberto pelo recebimento':'yellow','Coberto pelo estoque':'green'};
+    gr.p.sit=ord.filter(t=>cnt[t]).map(t=>({k:'chip',t:cnt[t]+' '+(t==='Coberto pelo estoque'?'coberto'+(cnt[t]>1?'s':''):(t==='Coberto pelo recebimento'?'coberto'+(cnt[t]>1?'s':'')+' pelo recebimento':t.toLowerCase())),c:cor[t]})); gr.s.sit='';
     dcol(gr,'uso',uso); return gr; });
-  v.k6='Valor da necessidade líquida '+rs(tot)+' · '+nliq+' insumos a comprar'+(sol?(' · solicitação '+sol.id+' em cotação'+(sol.comp?' (+'+sol.comp+' complemento'+(sol.comp>1?'s':'')+')':'')):' · ainda não enviada');
-  v.k6pend=npend; v.sol_link=!!sol; v.sol_id=sol?sol.id:'';
+  const est=sol?solEstado(saf,sol):'';
+  v.k6='Valor da necessidade líquida '+rs(tot)+' · '+nliq+' insumos a comprar'+(sol?(' · solicitação '+sol.id+(est?' · '+est:' em cotação')+(sol.comp?' (+'+sol.comp+' complemento'+(sol.comp>1?'s':'')+')':'')):' · ainda não enviada');
+  v.k6pend=npend; v.sol_link=!!sol; v.sol_id=sol?sol.id:''; v.sol_href=sol?solHref(saf,sol):'CMP.dc.html';
 }
 function EXTRAVALS(self,v){
   const st=self.state; const step=st.step||1; const saf=st.saf||null;
@@ -278,31 +413,48 @@ function EXTRAVALS(self,v){
   const go=(i)=>()=>self.setState({step:i});
   v.saf_nome=safObj?safObj.v.nome:'nenhuma safra escolhida'; v.saf_ro=ro; v.saf_ok=!!saf; v.saf_none=!saf;
   v.ctx_saf=safObj?(safObj.v.nome+(ro?' · consulta':'')):'Nenhuma safra escolhida';
-  for(const k of ['S2627','S27SF','S2526','NOVA']){ v['cult_'+k]=(saf&&sk(saf)===k); v['rend_'+k]=(saf&&sk(saf)===k); }
+  v.ctx_faz='Fazenda '+((safObj&&safObj.v.faz)||'Santa Rita');
+  for(const k of ['S2627','S27SF','S2526','LG2627','NOVA']){ v['cult_'+k]=(saf&&sk(saf)===k); v['rend_'+k]=(saf&&sk(saf)===k); }
   const cs=cultRows(self,saf); const area=cs.reduce((a,c)=>a+(Number(c.v.area)||0),0); const comp=cs.filter(c=>{ const pl=planById(c.v.plano); return pl&&pl.cultura===c.v.cult; }).length;
   const adj=adjOf(self); const naj=cs.reduce((a,c)=>a+Object.keys(adj[c.id]||{}).length,0);
-  v.k2=cs.length+' cultivos · '+nf(area)+' ha · '+comp+' com plano · '+naj+(naj===1?' ajuste local':' ajustes locais');
-  // ação primária por etapa
-  const prim={1:['Nova safra',()=>v.g_saf_new&&v.g_saf_new()],2:['Novo cultivo',()=>{ const f=v['g_cult_'+sk(saf)+'_new']; if(f) f(); }],3:['Conferir plano operacional',go(4)],4:['Dimensionar recursos',go(5)],5:['Conferir demanda de insumos',go(6)],6:['Enviar para cotação',()=>enviar(self)]}[step];
-  v.prim_t=prim[0]; v.prim_fn=prim[1]; v.prim_hide=(ro&&(step===2||step===6))||(step===2&&!saf);
-  v.prim_st='padding:11px 20px;border-radius:10px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap;background:#1E7A4C;color:#fff;border:1px solid #1E7A4C;'+(v.prim_hide?'display:none;':'');
+  const sp=semPlano(cs);
+  v.k2=cs.length+' cultivos · '+nf(area)+' ha · '+comp+' com plano'+(sp.length?' · '+sp.length+' sem plano':'')+' · '+naj+(naj===1?' ajuste local':' ajustes locais');
+  // ação primária por etapa: nomeia o próximo passo (na etapa 2, o que falta: aplicar plano; depois, avançar)
+  const cultSp={}; sp.forEach(c=>{ (cultSp[c.v.cult]||(cultSp[c.v.cult]=[])).push(c.id); }); const cuK=Object.keys(cultSp).sort((a,b)=>cultSp[b].length-cultSp[a].length)[0];
+  const apIds=cuK?cultSp[cuK]:[]; const apT='Aplicar plano em '+apIds.length+(apIds.length>1?' cultivos':' cultivo')+(Object.keys(cultSp).length>1?' de '+cuK.toLowerCase():'');
+  const solA=saf?solMap(self)[saf]:null; const enviado=!!solA; const p6=(enviado&&!v.k6pend)?['Abrir Compra de insumos ›',()=>{ location.href=solHref(saf,solA); }]:['Enviar para cotação',()=>enviar(self)];
+  const prim={1:['Nova safra',()=>v.g_saf_new&&v.g_saf_new()],2:(apIds.length&&!ro?[apT,()=>openApply(self,apIds)]:['Definir rendimentos ›',go(3)]),3:['Conferir plano operacional ›',go(4)],4:['Dimensionar recursos ›',go(5)],5:['Conferir demanda de insumos ›',go(6)],6:p6}[step];
+  v.prim_t=prim[0]; v.prim_fn=prim[1]; v.prim_hide=(ro&&step===6)||(step>1&&!saf);
+  v.sec_show=(step===2&&!!saf&&!ro); v.sec_t='Novo cultivo'; v.sec_fn=()=>{ const f=v['g_cult_'+sk(saf)+'_new']; if(f) f(); }; v.sol_link=v.sol_link&&p6[0]==='Enviar para cotação';
+  v.prim_st='padding:7px 14px;border-radius:9px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap;background:#1E7A4C;color:#fff;border:1px solid #1E7A4C;flex-shrink:0;'+(v.prim_hide?'display:none;':'');
   const names=['Escolha a safra','Defina cultivos e planos','Defina os rendimentos','Confira o plano operacional','Dimensione os recursos','Confira a demanda de insumos'];
   v.prev_t=step>1?('‹ '+names[step-2]):''; v.next_t=step<6?(names[step]+' ›'):''; v.has_prev=step>1; v.has_next=step<6;
   v.prev=()=>self.setState({step:Math.max(1,step-1)}); v.next=()=>{ if(!self.state.saf){ self.setState({g2toast:'Escolha a safra para avançar.'}); return; } self.setState({step:Math.min(6,step+1)}); };
   // escolher safra (botão da linha)
   v.pick=(id)=>{ self.setState({saf:id,step:2,atv:null,rec:null,g2toast:'Safra aberta: '+((safRows.find(r=>r.id===id)||{v:{}}).v.nome||'')}); };
+  v.pickat=(arg)=>{ const a=String(arg).split('|'); const id=a[0], s=Number(a[1])||2; self.setState({saf:id,step:s,atv:null,rec:null,g2toast:'Safra aberta: '+((safRows.find(r=>r.id===id)||{v:{}}).v.nome||'')+' · etapa '+s}); };
+  safRows.forEach(r=>{ v['open_'+r.id]=()=>v.pickat(r.id+'|'+(r._prox||2)); });
+  v.safedit=(id)=>{ const sp=GR('g_saf'); const r=g2rows(self,sp).find(x=>x.id===id); if(!r) return; const dr=r.dr; r.dr=null; g2open(self,sp,id,null); r.dr=dr; };
   v.applyone=(cid)=>openApply(self,[cid]); v.openlp=(cid)=>openLP(self,cid);
   Object.keys(D2.talhoes||{}).forEach(t=>{ v['div_'+t]=()=>openDiv(self,t); }); v.divide=(t)=>openDiv(self,t);
   // painéis
   apVals(self,v); lpVals(self,v); divVals(self,v);
-  v.sol_href='CMP.dc.html';
+  // SAF.dc.html#saf=S27SF&etapa=6 (vindo da Compra de insumos): abre a safra na etapa pedida, uma vez e a cada troca de endereço
+  const abrirHash=()=>{ let h=''; try{ h=decodeURIComponent(location.hash||''); }catch(e){ h=''; } const ms=/[#&]saf=([^&]+)/.exec(h), me=/[#&]etapa=(\d)/.exec(h); if(!ms) return;
+    const r=g2rows(self,GR('g_saf')).find(x=>x.id===ms[1]); if(!r) return; const e=Math.min(6,Math.max(1,Number(me&&me[1])||6));
+    setTimeout(()=>self.setState({saf:r.id,step:e,atv:null,rec:null,g2toast:'Safra aberta: '+r.v.nome+' · etapa '+e}),0); };
+  if(!self.__hashIni){ self.__hashIni=1; abrirHash(); try{ window.addEventListener('hashchange',abrirHash); }catch(e){} }
 }
 function openApply(self,ids){ const saf=self.state.saf; if(!saf){ self.setState({g2toast:'Escolha a safra primeiro.'}); return; }
   const safObj=g2rows(self,GR('g_saf')).find(r=>r.id===saf); if(safObj&&safObj.ro){ self.setState({g2toast:'Safra encerrada: somente consulta.'}); return; }
   const gsel=(g2st(self,'g_cult_'+sk(saf)).sel)||{}; const all=g2rows(self,GR('g_cult_'+sk(saf)));
-  const sel=[...new Set([].concat(...(ids||Object.keys(gsel).filter(k=>gsel[k])).map(id=>{ const r=g2find(all,id); return (r&&r.grp)?(r.kids||[]).map(k=>k.id):[id]; })))];
+  const sel=[...new Set([].concat(...(ids||Object.keys(gsel).filter(k=>gsel[k]&&k.indexOf('livre_')!==0)).map(id=>{ const r=g2find(all,id); return (r&&r.grp)?(r.kids||[]).map(k=>k.id):[id]; })))];
   if(!sel.length){ self.setState({g2toast:'Selecione cultivos na caixa à esquerda de cada linha para aplicar um plano em lote.'}); return; }
-  self.setState({ap:{ids:sel,plan:'',confirm:false}}); }
+  // sugestão: o plano mais usado pela mesma cultura nesta safra (a pessoa pode trocar)
+  const cs=cultRows(self,saf); const cu=(cs.find(c=>c.id===sel[0])||{v:{}}).v.cult; const uso={};
+  cs.forEach(c=>{ const pl=planById(c.v.plano); if(pl&&pl.cultura===cu&&c.v.cult===cu) uso[c.v.plano]=(uso[c.v.plano]||0)+1; });
+  const sug=Object.keys(uso).sort((a,b)=>uso[b]-uso[a])[0]||'';
+  self.setState({ap:{ids:sel,plan:sug,confirm:false}}); }
 function apVals(self,v){ const ap=self.state.ap; v.ap_open=!!ap; if(!ap) return; const saf=self.state.saf; const rows=cultRows(self,saf).filter(r=>ap.ids.indexOf(r.id)>=0);
   const culturas=[...new Set(rows.map(r=>r.v.cult))]; v.ap_itens=rows.map(r=>({t:r.v.local+' · '+r.v.cult+' '+r.v.var+' · '+nf(r.v.area)+' ha'+(planById(r.v.plano)?' · plano atual: '+planById(r.v.plano).nome:'')}));
   v.ap_titulo='Aplicar plano a '+rows.length+(rows.length>1?' cultivos':' cultivo'); v.ap_mix=culturas.length>1; v.ap_mixmsg='Culturas diferentes na seleção ('+culturas.join(', ')+'). Selecione cultivos de uma só cultura: o plano precisa respeitar a cultura.';
@@ -316,44 +468,104 @@ function apVals(self,v){ const ap=self.state.ap; v.ap_open=!!ap; if(!ap) return;
   v.ap_apply=()=>{ const a=self.state.ap; if(culturas.length>1) return; if(!a.plan){ self.setState({ap:Object.assign({},a,{err:'Escolha o plano a aplicar.'})}); return; }
     if(subst.length && !a.confirm){ self.setState({ap:Object.assign({},a,{confirm:true})}); return; } doApply(self,rows,a.plan); };
   v.ap_yes=()=>doApply(self,rows,self.state.ap.plan); v.ap_back=()=>self.setState({ap:Object.assign({},self.state.ap,{confirm:false})}); }
-function doApply(self,rows,pid){ const saf=self.state.saf; const gid='g_cult_'+sk(saf); const all=g2clone(g2rows(self,GR(gid))); const adj=JSON.parse(JSON.stringify(adjOf(self)));
+function doApply(self,rows,pid){ const saf=self.state.saf; const gid='g_cult_'+sk(saf); const all=g2clone(g2rows(self,GR(gid)).filter(x=>!x.livre)); const adj=JSON.parse(JSON.stringify(adjOf(self)));
   rows.forEach(r=>{ const x=g2find(all,r.id); if(x){ x.v.plano=pid; delete adj[r.id]; } });
   const pl=planById(pid); g2set(self,gid,{rows:all,sel:{}}); self.setState({adj,ap:null,g2toast:pl.nome+' v'+pl.versao+' aplicado a '+rows.length+(rows.length>1?' cultivos':' cultivo')+'. Plano operacional, recursos e demanda recalculados.'}); }
-function openLP(self,cid){ const saf=self.state.saf; const c=cultRows(self,saf).find(r=>r.id===cid); if(!c) return; const a=adjOf(self)[cid]||{}; const d={}; Object.keys(a).forEach(k=>{ d[k]=String(a[k]).replace('.',','); });
-  self.setState({lp:{cid,draft:d,orig:Object.assign({},d),warn:false,err:{}},lpx:{}}); }
+// Insumos e doses de um cultivo, sem mudar o plano padrão. adj[cultivo] guarda só o que difere do padrão:
+// 'atividade|i' = dose nova (número) ou '-' (insumo retirado deste talhão); 'atividade|+n' = insumo incluído {prod,grupo,un,preco,dose}.
+// autocompletar do cadastro no "+ Incluir insumo nesta atividade": nome (semente com a variedade do cultivo), grupo, unidade e preço
+function lpAc(self,A,cat,pk,upd,ERR,c,o){ const itens=cat.map(p=>({v:p.prod, t:prodNome(p.prod,c), sub:p.grupo+' · '+p.un+' · R$ '+nf(p.preco,2)+'/'+p.un}));
+  return g2ac(self,'saf-lp-'+A,itens,pk||'',(val)=>{ const cur=self.state.lp; const er=Object.assign({},cur.err||{}); delete er['pick'+A]; upd({pick:Object.assign({},cur.pick||{},{[A]:val}),err:er}); },
+    {ph:'Buscar insumo no cadastro', err:!!ERR('pick'+A), enter:()=>o.pkOk(), esc:()=>o.pkNo()}); }
+function catalogo(){ if(catalogo._c) return catalogo._c; const m={}; D2.planos.forEach(pl=>pl.atividades.forEach(a=>a.prods.forEach(p=>{ if(!m[p.prod]) m[p.prod]={prod:p.prod,grupo:p.grupo,un:p.un,preco:p.preco}; })));
+  catalogo._c=Object.values(m).sort((a,b)=>(a.grupo+' '+a.prod).localeCompare(b.grupo+' '+b.prod,'pt-BR')); return catalogo._c; }
+function cultActs(self,gid,r){ if(!r||r.grp) return []; const pl=planById(r.v.plano); const na=Object.keys(adjOf(self)[r.id]||{}).length; const ro=!!r.ro;
+  const t=(ro?'Ver insumos e doses de ':'Ajustar insumos e doses de ')+r.v.local;
+  if(!pl||pl.cultura!==r.v.cult) return [{t, h:'Escolha um plano agronômico de '+r.v.cult+' e salve; depois ajuste os insumos só deste talhão.',
+    go:()=>self.setState({g2toast:'Escolha e salve um plano agronômico de '+r.v.cult+' antes de ajustar os insumos.'})}];
+  return [{t, h:(na?(na+(na>1?' ajustes deste talhão':' ajuste deste talhão')+' · '):'')+'Mude dose, retire ou inclua insumos só neste talhão; o plano padrão não muda.',
+    go:()=>{ const cur=g2st(self,gid).fm; if(cur&&!cur.ro&&g2dirty(cur)){ self.setState({g2toast:'Salve ou descarte as alterações do cultivo antes de ajustar os insumos.'}); return; } g2set(self,gid,{fm:null}); openLP(self,r.id); }}]; }
+function openLP(self,cid){ const saf=self.state.saf; const c=cultRows(self,saf).find(r=>r.id===cid); if(!c) return; const a=adjOf(self)[cid]||{}; const d={}, rm={}, add={};
+  Object.keys(a).forEach(k=>{ const val=a[k]; const parts=k.split('|'); const A=parts[0], pi=parts[1]||'';
+    if(pi.charAt(0)==='+'){ (add[A]||(add[A]=[])).push({prod:val.prod,grupo:val.grupo,un:val.un,preco:val.preco,dose:String(val.dose).replace('.',',')}); }
+    else if(val==='-') rm[k]=true; else d[k]=String(val).replace('.',','); });
+  self.setState({lp:{cid,draft:d,rm,add,pick:{},orig:JSON.stringify({d,rm,add}),warn:false,err:{}},lpx:{}}); }
 function lpVals(self,v){ const lp=self.state.lp; v.lp_open=!!lp; if(!lp) return; const saf=self.state.saf; const c=cultRows(self,saf).find(r=>r.id===lp.cid); if(!c){ v.lp_open=false; return; }
   const pl=planById(c.v.plano); const safObj=g2rows(self,GR('g_saf')).find(r=>r.id===saf); const ro=!!(c.ro||(safObj&&safObj.ro));
-  v.lp_titulo='Atividades locais · '+c.v.local+' ('+c.v.cult+' '+c.v.var+', '+nf(c.v.area)+' ha)'; v.lp_sub='Plano padrão: '+pl.nome+' v'+pl.versao+' · plantio '+br(c.v.plantio)+'. Ajuste doses só para este cultivo; o plano padrão e os demais cultivos continuam iguais.';
+  v.lp_titulo='Insumos e doses de '+c.v.local+' · '+c.v.cult+' '+c.v.var+', '+nf(c.v.area)+' ha';
+  v.lp_sub='Plano padrão: '+pl.nome+' v'+pl.versao+' · plantio '+br(c.v.plantio)+'. '+(ro?'Safra encerrada: somente consulta.':'Mude a dose, retire ou inclua insumos só neste talhão. O plano padrão e os outros talhões não mudam.');
   v.lp_ro=ro; v.lp_edit=!ro; const ex=self.state.lpx||{};
+  const upd=(patch)=>{ const cur=self.state.lp; self.setState({lp:Object.assign({},cur,patch,{warn:false})}); };
+  const ERR=(k)=>(lp.err||{})[k]||'';
+  const doseSt=(k,aj,dis)=>'width:84px;font-family:inherit;font-size:13px;padding:5px 7px;border-radius:8px;border:1px solid '+(ERR(k)?'#B42318':(aj?'#8A5A00':'#E4E9E5'))+';background:'+(dis?'#F4F6F3':(aj?'#FFF8E6':'#fff'))+';text-align:right;';
   const grupos={}; pl.atividades.forEach(a=>{ const g=grupoGat(a.g.tipo); ((grupos[g]||(grupos[g]={}))[gatLabel(a.g)+'||'+gatOrder(a.g)]||(grupos[g][gatLabel(a.g)+'||'+gatOrder(a.g)]=[])).push(a); });
   const order=['DAP','DAC','DATA'].filter(g=>grupos[g]);
   v.lp_grupos=order.map(g=>({t:GLABEL[g],gats:Object.keys(grupos[g]).sort((x,y)=>{ const a=x.split('||')[1], b=y.split('||')[1]; return g==='DATA'? (a<b?-1:1) : (Number(a)-Number(b)); }).map(key=>{
       const atvs=grupos[g][key]; const gid=g+key; const open=ex[gid]!==false;
       return {t:key.split('||')[0], dt:br(dataAtv(c,atvs[0],pl)), sym:open?'▾':'▸', open, lab:(open?'Recolher ':'Expandir ')+key.split('||')[0], tog:()=>{ const x=Object.assign({},self.state.lpx||{}); x[gid]=!open; self.setState({lpx:x}); },
-        atvs:atvs.map(a=>{ const aid='a'+a.id; const ao=ex[aid]!==false; return {t:a.nome, op:a.op, sym:ao?'▾':'▸', open:ao, lab:(ao?'Recolher ':'Expandir ')+a.nome, tog:()=>{ const x=Object.assign({},self.state.lpx||{}); x[aid]=!ao; self.setState({lpx:x}); },
-          semProd:!a.prods.length, prods:a.prods.map((p,i)=>{ const key=a.id+'|'+i; const dv=lp.draft[key]; const local=(dv!==undefined&&dv!=='')?g2num(dv):p.dose; const aj=(dv!==undefined&&dv!==''&&Math.abs(local-p.dose)>1e-9);
-            return {grupo:p.grupo, nome:prodNome(p.prod,c), padrao:nf(p.dose,2)+' '+p.un+'/ha', v:(dv!==undefined?dv:String(p.dose).replace('.',',')), un:p.un+'/ha', preco:rs(p.preco)+'/'+p.un, custo:rs((isNaN(local)?0:local)*p.preco)+'/ha', aj, err:(lp.err||{})[key]||'', hasErr:!!(lp.err||{})[key], dis:ro, fid:'lp_'+key.replace('|','_'),
-              ist:'width:84px;font-family:inherit;font-size:13px;padding:5px 7px;border-radius:8px;border:1px solid '+((lp.err||{})[key]?'#B42318':(aj?'#8A5A00':'#E4E9E5'))+';background:'+(ro?'#F4F6F3':(aj?'#FFF8E6':'#fff'))+';text-align:right;',
-              set:(e)=>{ const cur=self.state.lp; const d=Object.assign({},cur.draft,{[key]:e.target.value}); const er=Object.assign({},cur.err||{}); delete er[key]; self.setState({lp:Object.assign({},cur,{draft:d,err:er,warn:false})}); },
-              reset:()=>{ const cur=self.state.lp; const d=Object.assign({},cur.draft); delete d[key]; self.setState({lp:Object.assign({},cur,{draft:d,warn:false})}); } }; }) }; }) }; }) }));
-  const dirty=()=>{ const cur=self.state.lp; const ks=new Set(Object.keys(cur.draft).concat(Object.keys(cur.orig))); for(const k of ks){ if(String(cur.draft[k]||'')!==String(cur.orig[k]||'')) return true; } return false; };
+        atvs:atvs.map(a=>{ const aid='a'+a.id; const ao=ex[aid]!==false; const A=String(a.id); const rmMap=lp.rm||{}; const adds=((lp.add||{})[A])||[];
+          const prods=a.prods.map((p,i)=>{ const key=A+'|'+i; const removed=!!rmMap[key]; const dv=lp.draft[key]; const local=removed?0:((dv!==undefined&&dv!=='')?g2num(dv):p.dose);
+              const aj=!removed&&dv!==undefined&&dv!==''&&Math.abs(local-p.dose)>1e-9;
+              return {grupo:p.grupo, nome:prodNome(p.prod,c), padrao:nf(p.dose,2)+' '+p.un+'/ha', v:removed?'':(dv!==undefined?dv:String(p.dose).replace('.',',')), un:p.un+'/ha', preco:rs(p.preco)+'/'+p.un,
+                custo:removed?'—':(rs((isNaN(local)?0:local)*p.preco)+'/ha'), aj, rmv:removed, novo:false, err:ERR(key), hasErr:!!ERR(key), dis:ro||removed, fid:'lp_'+key.replace('|','_'), ist:doseSt(key,aj,ro||removed),
+                podeRet:!ro&&!removed, podeDesf:!ro&&removed, podeRest:!ro&&aj,
+                set:(e)=>{ const cur=self.state.lp; const d=Object.assign({},cur.draft,{[key]:e.target.value}); const er=Object.assign({},cur.err||{}); delete er[key]; upd({draft:d,err:er}); },
+                reset:()=>{ const cur=self.state.lp; const d=Object.assign({},cur.draft); delete d[key]; upd({draft:d}); },
+                ret:()=>{ const cur=self.state.lp; const rr=Object.assign({},cur.rm||{},{[key]:true}); const d=Object.assign({},cur.draft); delete d[key]; const er=Object.assign({},cur.err||{}); delete er[key]; upd({rm:rr,draft:d,err:er}); },
+                desf:()=>{ const cur=self.state.lp; const rr=Object.assign({},cur.rm||{}); delete rr[key]; upd({rm:rr}); } }; })
+            .concat(adds.map((x,j)=>{ const key=A+'|+'+j; const n=g2num(x.dose);
+              return {grupo:x.grupo, nome:prodNome(x.prod,c), padrao:'—', v:x.dose, un:x.un+'/ha', preco:rs(x.preco)+'/'+x.un, custo:(x.dose===''||isNaN(n))?'—':(rs(n*x.preco)+'/ha'), aj:false, rmv:false, novo:true,
+                err:ERR(key), hasErr:!!ERR(key), dis:ro, fid:'lp_'+A+'_n'+j, ist:doseSt(key,true,ro), podeRet:!ro, podeDesf:false, podeRest:false,
+                set:(e)=>{ const cur=self.state.lp; const ad=Object.assign({},cur.add||{}); ad[A]=(ad[A]||[]).slice(); ad[A][j]=Object.assign({},ad[A][j],{dose:e.target.value}); const er=Object.assign({},cur.err||{}); delete er[key]; upd({add:ad,err:er}); },
+                reset:()=>{}, desf:()=>{},
+                ret:()=>{ const cur=self.state.lp; const ad=Object.assign({},cur.add||{}); ad[A]=(ad[A]||[]).filter((_,q)=>q!==j); if(!ad[A].length) delete ad[A]; upd({add:ad,err:{}}); } }; }));
+          const usados=a.prods.filter((p,i)=>!rmMap[A+'|'+i]).map(p=>p.prod).concat(adds.map(x=>x.prod));
+          const pk=(lp.pick||{})[A]; const pkOpen=pk!==undefined; const cat=catalogo().filter(p=>usados.indexOf(p.prod)<0);
+          return (o=>Object.assign(o,lpAc(self,A,cat,pk,upd,ERR,c,o)))({t:a.nome, op:a.op, sym:ao?'▾':'▸', open:ao, lab:(ao?'Recolher ':'Expandir ')+a.nome, tog:()=>{ const x=Object.assign({},self.state.lpx||{}); x[aid]=!ao; self.setState({lpx:x}); },
+            semProd:!prods.length, prods, podeIncl:!ro&&!pkOpen, pkOpen:!ro&&pkOpen,
+            pkOpts:[{v:'',t:'Escolha o insumo'}].concat(cat.map(p=>({v:p.prod,t:p.grupo+' · '+prodNome(p.prod,c)+' ('+p.un+')'}))), pkV:pk||'', pkErr:ERR('pick'+A), pkHasErr:!!ERR('pick'+A), pkFid:'lp_pick_'+A,
+            incl:()=>{ const cur=self.state.lp; self.setState({g2ac:null}); upd({pick:Object.assign({},cur.pick||{},{[A]:''})}); setTimeout(()=>{ const el=document.getElementById(('ac-saf-lp-'+A).replace(/[^A-Za-z0-9_-]/g,'_')+'-in'); if(el) el.focus(); },0); },
+            pkSet:(e)=>{ const cur=self.state.lp; const er=Object.assign({},cur.err||{}); delete er['pick'+A]; upd({pick:Object.assign({},cur.pick||{},{[A]:e.target.value}),err:er}); },
+            pkOk:()=>{ const cur=self.state.lp; const val=(cur.pick||{})[A]; const p=catalogo().find(q=>q.prod===val);
+              if(!p){ upd({err:Object.assign({},cur.err||{},{['pick'+A]:'Escolha o insumo a incluir.'})}); return; }
+              const ad=Object.assign({},cur.add||{}); ad[A]=(ad[A]||[]).concat([{prod:p.prod,grupo:p.grupo,un:p.un,preco:p.preco,dose:''}]); const pkm=Object.assign({},cur.pick||{}); delete pkm[A]; upd({add:ad,pick:pkm}); },
+            pkNo:()=>{ const cur=self.state.lp; const pkm=Object.assign({},cur.pick||{}); delete pkm[A]; const er=Object.assign({},cur.err||{}); delete er['pick'+A]; upd({pick:pkm,err:er}); } }); }) }; }) }));
+  const dirty=()=>{ const cur=self.state.lp; return JSON.stringify({d:cur.draft,rm:cur.rm||{},add:cur.add||{}})!==cur.orig; };
   v.lp_warn=!!lp.warn; v.lp_nerr=Object.keys(lp.err||{}).length>0;
   v.lp_close=()=>{ if(!ro && dirty()){ self.setState({lp:Object.assign({},self.state.lp,{warn:true})}); return; } self.setState({lp:null}); };
   v.lp_discard=()=>self.setState({lp:null}); v.lp_keep=()=>self.setState({lp:Object.assign({},self.state.lp,{warn:false})});
-  v.lp_save=()=>{ const cur=self.state.lp; const er={}; const out={}; pl.atividades.forEach(a=>a.prods.forEach((p,i)=>{ const key=a.id+'|'+i; const dv=cur.draft[key]; if(dv===undefined||dv==='') return; const n=g2num(dv);
-        if(isNaN(n)||n<0){ er[key]='Use um número ≥ 0'; return; } if(Math.abs(n-p.dose)>1e-9) out[key]=n; }));
+  v.lp_save=()=>{ const cur=self.state.lp; const er={}; const out={};
+    pl.atividades.forEach(a=>{ const A=String(a.id);
+      a.prods.forEach((p,i)=>{ const key=A+'|'+i; if((cur.rm||{})[key]){ out[key]='-'; return; } const dv=cur.draft[key]; if(dv===undefined||dv==='') return; const n=g2num(dv);
+        if(isNaN(n)||n<0){ er[key]='Use um número ≥ 0'; return; } if(Math.abs(n-p.dose)>1e-9) out[key]=n; });
+      (((cur.add||{})[A])||[]).forEach((x,j)=>{ const key=A+'|+'+j; const n=g2num(x.dose); if(String(x.dose).trim()===''||isNaN(n)||n<=0){ er[key]='Informe a dose por hectare (maior que zero)'; return; }
+        out[key]={prod:x.prod,grupo:x.grupo,un:x.un,preco:x.preco,dose:n}; }); });
     if(Object.keys(er).length){ self.setState({lp:Object.assign({},cur,{err:er})}); return; }
     const adj=JSON.parse(JSON.stringify(adjOf(self))); if(Object.keys(out).length) adj[cur.cid]=out; else delete adj[cur.cid];
-    self.setState({adj,lp:null,g2toast:'Ajustes salvos só para '+c.v.local+'. O plano padrão e os demais cultivos não mudaram.'}); };
+    const vals=Object.values(out); const nr=vals.filter(x=>x==='-').length, ni=vals.filter(x=>x&&typeof x==='object').length, nd=vals.length-nr-ni;
+    const partes=[nd?nd+(nd>1?' doses alteradas':' dose alterada'):'', nr?nr+(nr>1?' insumos retirados':' insumo retirado'):'', ni?ni+(ni>1?' insumos incluídos':' insumo incluído'):''].filter(Boolean);
+    self.setState({adj,lp:null,g2toast:(partes.length?partes.join(' · ')+' em '+c.v.local:'Sem ajustes em '+c.v.local+': vale o plano padrão')+'. Plano operacional, recursos e demanda recalculados; o plano padrão e os outros talhões não mudaram.'}); };
 }
 function enviar(self){ const saf=self.state.saf; const safObj=g2rows(self,GR('g_saf')).find(r=>r.id===saf); if(safObj&&safObj.ro){ self.setState({g2toast:'Safra encerrada: não gera solicitações.'}); return; }
-  const dm=demanda(self,saf); const sols=Object.assign({},self.state.sol||D2.sol); const sol=sols[saf];
+  const dm=demanda(self,saf); const sols=Object.assign({},solMap(self)); const sol=sols[saf];
   const itens=Object.values(dm).filter(d=>d.liq>0.001);
   if(!itens.length){ self.setState({g2toast:'Nada a cotar: o estoque e os recebimentos cobrem a demanda.'}); return; }
-  if(!sol){ const id=(saf==='S27SF'?'SOL-2027-02':(saf==='S2627'?'SOL-2026-07':'SOL-2026-09')); const it={}; itens.forEach(d=>{ it[d.nome]=d.liq; });
-    sols[saf]={id,at:'23/09/2026',itens:it,comp:0}; self.setState({sol:sols,g2toast:'Solicitação '+id+' enviada a Compras: '+itens.length+' insumos, '+rs(itens.reduce((a,d)=>a+d.valor,0))+'. Origem: '+safObj.v.nome+' · Planejar safra, etapa 6.'}); return; }
+  // registro único da solicitação: o que a Compra de insumos mostra (mesmos itens, quantidades, valores e memória CAL-01)
+  const det=Object.values(dm).map(d=>({nome:d.nome,grupo:d.grupo,un:d.un,preco:d.preco,bruta:d.bruta,est:d.est,res:d.res,rec:d.rec,liq:d.liq,valor:d.valor,falta:d.falta,uso:d.uso,quar:d.quar,evs:d.evs}));
+  const EM='23/09/2026 11:05';   // horário do cenário de demonstração (a SOL-2026-07 inicial é de 10:40)
+  const base={safra:saf,nome:safObj.v.nome,faz:safObj.v.faz||'Santa Rita',estado:'Enviada · a cotar',por:'Ana (gestora)',
+    origem:{t:'Planejar safra · '+safObj.v.nome+' · etapa 6',h:'SAF.dc.html#saf='+encodeURIComponent(saf)+'&etapa=6'},det};
+  const grava=(rec)=>{ const ok=solGravar(rec); return ok?'':' Atenção: este navegador não guarda dados; a Compra de insumos não verá a solicitação.'; };
+  if(!sol){ const ids={S27SF:'SOL-2027-02',S2627:'SOL-2026-07',LG2627:'SOL-2026-09'}; const usados=Object.values(sols).map(x=>x.id); let id=ids[saf];
+    for(let k=10;!id||usados.indexOf(id)>=0;k++) id='SOL-2026-'+k;
+    const it={}; itens.forEach(d=>{ it[d.nome]=d.liq; }); const tot=itens.reduce((a,d)=>a+d.valor,0);
+    sols[saf]=Object.assign({},base,{id,at:'23/09/2026',em:EM,itens:it,comp:0,total:tot});
+    const av=grava(sols[saf]);
+    self.setState({sol:sols,g2toast:'Solicitação '+id+' enviada a Compras: '+itens.length+' insumos, '+rs(tot)+'. Origem: '+safObj.v.nome+' · Planejar safra, etapa 6.'+av}); return; }
   const novos=itens.filter(d=>d.liq>(sol.itens[d.nome]||0)+0.01);
   if(!novos.length){ self.setState({g2toast:'Nada novo para cotar: tudo já está na '+sol.id+'. Nenhuma solicitação duplicada foi criada.'}); return; }
   const it=Object.assign({},sol.itens); novos.forEach(d=>{ it[d.nome]=d.liq; }); const comp=(sol.comp||0)+1;
   const val=novos.reduce((a,d)=>a+(d.liq-(sol.itens[d.nome]||0))*d.preco,0);
-  sols[saf]=Object.assign({},sol,{itens:it,comp}); self.setState({sol:sols,g2toast:'Complemento '+sol.id+'-C'+comp+' enviado com só a diferença: '+novos.length+' insumos, '+rs(val)+'. A solicitação original não foi duplicada.'}); }
+  sols[saf]=Object.assign({},base,sol,{estado:'Enviada · a cotar',itens:it,comp,det,total:Object.keys(it).reduce((a,n)=>a+it[n]*((dm[n]||{}).preco||0),0),em:sol.em||(saf==='S2627'?'23/09/2026 10:40':EM)});
+  const av=grava(sols[saf]);
+  self.setState({sol:sols,g2toast:'Complemento '+sol.id+'-C'+comp+' enviado com só a diferença: '+novos.length+' insumos, '+rs(val)+'. A solicitação original não foi duplicada.'+av}); }

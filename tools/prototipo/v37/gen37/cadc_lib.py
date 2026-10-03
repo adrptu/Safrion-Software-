@@ -38,6 +38,12 @@ class T:
     def alerts(s): return s.J("[...document.querySelectorAll('aside [role=alert]')].map(x=>x.innerText).join(' | ')")
     def toast(s): return s.J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')")
     def header(s): return s.J("document.querySelector('header').innerText.replace(/\\s+/g,' ')")
+    def bloco(s): return s.J("document.querySelector('main').innerText.replace(/\\s+/g,' ')")
+    def aba(s,t): r=s.J(f"(()=>{{const b=[...document.querySelectorAll('[role=tab]')].find(b=>b.innerText.replace(/\\s+/g,' ').trim().startsWith({json.dumps(t)})); if(!b) return false; b.click(); return true;}})()"); time.sleep(.35); return r
+    # layout de 01/10 (um bloco por tela, abas por entidade, ações no bloco, cartões para fazendas, equipes e conjuntos)
+    def card(s,t): return s.J(f"(()=>{{const c=[...document.querySelectorAll('.cadx-cartao')].find(c=>c.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(t)})>=0); return c?c.innerText.replace(/\\s+/g,' '):null;}})()")
+    def opencard(s,t): r=s.J(f"(()=>{{const c=[...document.querySelectorAll('.cadx-cartao')].find(c=>c.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(t)})>=0); if(!c) return false; c.click(); return true;}})()"); time.sleep(.35); return r
+    def mainsel(s,val): r=s.J(f"({SETV})('main select',{json.dumps(val)})"); time.sleep(.35); return r
     def cancel(s):
         s.btn('Cancelar'); s.btn('Descartar alterações'); s.btn('Fechar')
     def shot(s,nome): s.c.shot(os.path.join(HERE,'_probe',nome))
@@ -45,17 +51,21 @@ class T:
     def chipcor(s):
         c=s.J("(()=>{const h=document.querySelector('header h1'); const e=h&&h.nextElementSibling&&h.nextElementSibling.firstElementChild; return e?getComputedStyle(e).color:'';})()")
         return {'rgb(30, 122, 76)':'green','rgb(138, 90, 0)':'yellow','rgb(91, 102, 96)':'gray','rgb(180, 35, 24)':'red'}.get(c,c)
-    # lixeira da linha → confirmar 'Excluir'
+    # exclusão no painel do registro (01/10: a lixeira saiu da linha): abre a linha → "Excluir …" → "Confirmar exclusão"
     def delrow(s,ti,txt):
-        r=s.J(f"(()=>{{const r={s.ROW(ti,txt)}; const b=r&&r.querySelector('button.g2del'); if(!b) return false; b.click(); return true;}})()"); time.sleep(.3)
-        if not r: return False
-        r2=s.J(f"(()=>{{const r={s.ROW(ti,txt)}; const b=r&&[...r.querySelectorAll('button')].find(b=>b.innerText.trim()==='Excluir'); if(!b) return false; b.click(); return true;}})()"); time.sleep(.35); return r2
+        if not s.openrow(ti,txt): return False
+        r=s.J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>/^Excluir /.test(b.innerText.trim())); if(!b) return false; b.click(); return true;})()"); time.sleep(.3)
+        if not r: s.cancel(); return False
+        return s.btn('Confirmar exclusão')
+    # cartão da faixa "precisa de atenção" pelo texto (ex.: o verbo "Publicar estrutura")
+    def aviso(s,t): r=s.J(f"(()=>{{const c=[...document.querySelectorAll('.cadx-aviso')].find(c=>c.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(t)})>=0); if(!c) return false; c.click(); return true;}})()"); time.sleep(.35); return r
     # folga entre o fim da linha e o limite do artboard (px); negativa = linha cortada
     def folga(s,ti,txt=None):
         """txt=None mede a última linha da tabela ti."""
         pick=(f"{s.ROW(ti,txt)}||[...document.querySelectorAll('[role=table]')[{ti}].querySelectorAll('[role=row]')].find(r=>r.innerText.indexOf({json.dumps(txt)})>=0)" if txt
               else f"[...document.querySelectorAll('[role=table]')[{ti}].querySelectorAll('[role=row]')].pop()")
-        return s.J(f"(()=>{{const root=document.querySelector('[data-root]'); const r={pick}; if(!root||!r) return null; return Math.round(root.getBoundingClientRect().bottom-r.getBoundingClientRect().bottom);}})()")
+        # sem rolagem de página (pedido de 01/10): a linha é trazida à vista dentro da área de dados que rola, e então medida
+        return s.J(f"(()=>{{const root=document.querySelector('[data-root]'); const r={pick}; if(!root||!r) return null; r.scrollIntoView({{block:'nearest'}}); return Math.round(root.getBoundingClientRect().bottom-r.getBoundingClientRect().bottom);}})()")
     def fim(s):
         try: s.c.close()
         finally: s.srv.terminate()

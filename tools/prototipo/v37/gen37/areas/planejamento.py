@@ -137,7 +137,7 @@ def build():
     E.MSGS['Publicar plano v4']=('Plano v4 publicado (alçada da agronomia) · 7 necessidades únicas · nenhuma O.S. nova emitida — a O.S. nasce na janela de emissão '
                                  'e consome o saldo da mesma necessidade · NEC-019 continua aguardando a decisão da pendência.')
     E.MSGS['Publicar ajuste do T1-A']=('Ajuste do T1-A publicado na v4 · Cletodim 240 a 0,36 L/ha só neste talhão · padrão 0,45 L/ha intacto · '
-                                       f'dessecação de manejo de 05/09 preservada · a {OS_DES["id"]} já emitida não muda sem revisão do saldo.')
+                                       f'dessecação de manejo de 05/09 preservada · a {OS_DES["id"]} já emitida (A liberar) só muda se o agrônomo ajustar ao liberar.')
     E.MSGS['Publicar parcelamento e plano']=('Parcelamento v2 publicado · a grade da safra e o plano operacional passam a seguir T1-A/T1-B · histórico do T1 preservado · '
                                              'área de cobrança continua 312 ha · nenhuma O.S. emitida.')
 
@@ -150,7 +150,7 @@ def build():
          'S2526':(CH('Encerrada','gray'),LK('Abrir fechamento','GE-03.dc.html'))}
     g_saf=grid([dict(k='nome',l='Safra',w=170),dict(k='per',l='Período',w=160),dict(k='faz',l='Fazenda'),dict(k='cult',l='Cultivos · área',w=150),dict(k='sit',l='Situação',w=280),dict(k='ab',l='Abrir')],
        [R(s['id'],dict(nome=s['nome'],per=s['periodo'],faz=s['fazenda'],cult=f'{ncult(s["id"])[0]} cultivos · {_n(ncult(s["id"])[1])} ha'),
-          p=dict(nome=[B(s['nome'])],sit=[SIT[s['id']][0]],ab=[SIT[s['id']][1]]),ro=s['ro']) for s in D2.SAFRAS],
+          p=dict(nome=[B(s['nome'])],sit=[SIT.get(s['id'],(CH(s['estado'],'yellow'),))[0]],ab=[SIT.get(s['id'],(None,LK('Abrir no Planejar safra','SAF.dc.html')))[1]]),ro=s['ro']) for s in D2.SAFRAS],
        edit=dict(m='form',title='Safra',newTitle='Nova safra',sub='Altere nome, período e fazenda. Cultivos e metas ficam na grade de cultivo.',
                  fields=[dict(k='nome',l='Nome da safra',req=True),dict(k='per',l='Período',req=True,help='Ex.: set/2027 – ago/2028'),
                          dict(k='faz',l='Fazenda',t='sel',opts=['Santa Rita','Boa Vista'],req=True,**{'def':'Santa Rita'}),dict(k='cult',l='Cultivos · área',ro=True)]),
@@ -226,7 +226,7 @@ function EXTRAVALS(self,v){
         pc=r['p']['parc']; pc[-1]=MU(pc[-1]['t']+f" · {r['v']['area']} ha")
     g_op=grid([dict(k='parc',l='Parcela · cultivo',w=120),dict(k='atv',l='Atividade · necessidade',w=170),dict(k='dose',l='Dose/quantidade',w=160),
                dict(k='gat',l='Gatilho por extenso → data',w=210),dict(k='sit',l='Situação',w=200),dict(k='ab',l='Abrir',w=150)],ops,
-       edit=dict(m='form',title='Operação',sub='Ajuste dose, gatilho e janela no rascunho v4. Publicar recalcula as necessidades; O.S. emitida só muda com revisão do saldo.',
+       edit=dict(m='form',title='Operação',sub='Ajuste dose, gatilho e janela no rascunho v4. Publicar recalcula as necessidades; O.S. emitida só muda pelo ajuste do agrônomo ao liberar (ou ao ajustar o saldo em execução).',
                  fields=[dict(k='parc',l='Parcela',ro=True),dict(k='atv',l='Atividade',ro=True),dict(k='area',l='Área',t='num',u='ha',ro=True),
                          dict(k='dose',l='Dose/quantidade',req=True),dict(k='gat',l='Gatilho por extenso',req=True,help='Ex.: 20 dias antes do plantio · DAP −20. Não digite sinal negativo.'),
                          dict(k='jan',l='Janela',req=True),
@@ -248,7 +248,7 @@ function EXTRAVALS(self,v){
         g_op)
       + section('Regras do gatilho','Leia o gatilho por extenso; a data prevista nunca vira plantio realizado.',
         _acoes(ilnk('Ver grade de cultivo','PL-01.dc.html','grid','Abrir a grade de cultivo da safra'),
-               imsg('Simular antecipação do plantio',f'Simulação: antecipar o plantio do T1-A para 10/10 move 7 operações dependentes · a {OS_DES["id"]} (DAP −20) já emitida pede revisão · nada muda até publicar.','calendar','Simular antecipação sem alterar o plano'),
+               imsg('Simular antecipação do plantio',f'Simulação: antecipar o plantio do T1-A para 10/10 move 7 operações dependentes · a {OS_DES["id"]} (DAP −20) já emitida é ajustada pelo agrônomo ao liberar · nada muda até publicar.','calendar','Simular antecipação sem alterar o plano'),
                ilnk('Ver capacidade','PL-03.dc.html','trend','Abrir Capacidade e recursos'),
                ilnk('Ver compra de insumos','CMP.dc.html','cart','Abrir Compra de insumos (SOL-2026-07)')),
         _nota(f'“20 dias antes do plantio · DAP −20 · previsto para {d_des}” — o produtor não digita sinal negativo. '
@@ -301,12 +301,12 @@ function EXTRAVALS(self,v){
       + section('Ajuste local × padrão','Compare o custo do ajuste antes de publicar; o realizado e as aprovações ficam intactos.','',
         _nota(f'Herbicida pós-emergente local <b style="color:{INK};">Cletodim 240 0,36 L/ha</b> (padrão 0,45) · motivo: solo arenoso, menor pressão de plantas daninhas · efeito estimado: '
               f'<b style="color:{INK};">−R$ 0,9 mil</b> no talhão ({T1A["area"]} ha × 0,09 L × R$ 62/L) {tag("hipótese de preço")}. Atualizar o padrão depois <b style="color:{INK};">não sobrescreve</b> esta exceção. '
-              f'A dessecação de manejo de 05/09 permanece intacta; a {OS_DES["id"]} já emitida não muda de dose sem revisão do saldo.',state='yellow'),state='yellow')
+              f'A dessecação de manejo de 05/09 permanece intacta; a {OS_DES["id"]} já emitida só muda de dose se o agrônomo ajustar ao liberar.',state='yellow'),state='yellow')
     )
     shell37('PL-02','Plano do talhão T1-A · gatilhos',corpo,fname='PL-02det.dc.html',crumbs_extra=['T1-A · Soja 58 W'],
       subtitle='Plano por talhão com gatilhos antes, no dia e depois do plantio, resolvidos contra a âncora prevista.',
       status=('Ajuste local em revisão','yellow'),primary='Publicar ajuste do T1-A',
-      footer='DAP −20 gera O.S. para aprovação com base prevista antes de existir plantio real (DAP-03); previsão nunca vira plantio realizado.')
+      footer='DAP −20 gera O.S. A liberar (o agrônomo libera) com base prevista antes de existir plantio real (DAP-03); previsão nunca vira plantio realizado.')
 
     # ================= PL-03 · Capacidade e recursos =================
     HEIGHTS37['PL-03.dc.html']=1900
@@ -389,13 +389,13 @@ function EXTRAVALS(self,v){
       R('o431',dict(os=OS_DEMO17['id'],jan='24/09 06:00',rec='Trator T1 + Plantadeira 24 linhas',oper='Carlos',dur='2 turnos',mat='sementes previstas',etp='A liberar'),
         p=dict(os=O(OS_DEMO17['id'],'plantio T2'),sel=[CH('Impedida · ativo bloqueado','red')],etp=[CH('A liberar','gray')],ab=[CT('Resolver impedimento','PL-05det.dc.html',True)])),
       R('o419',dict(os='OS-0419',jan='hoje 20:00–amanhã 10:31',rec='Pivô 2',oper='João',dur='14,5 h (1 volta a 62 %)',mat='sem insumo · sem requisição',etp='Liberadas',sel='—'),
-        p=dict(os=O('OS-0419','água Pivô 2'),etp=[CH('Liberadas','green')],ab=[LK('Abrir O.S.','OS.dc.html')])),
-      R('o418',dict(os='OS-0418',jan='24/09 21:00–25/09 11:15',rec='Pivô 1',oper='João',dur='14,3 h',mat='requisição após aprovação',etp='A liberar'),
-        p=dict(os=O('OS-0418','fertirrigação P1'),sel=[CH('Aguardando agrônomo','yellow')],etp=[CH('A liberar','gray')],ab=[LK('Abrir O.S.','OS.dc.html')])),
+        p=dict(os=O('OS-0419','água Pivô 2'),etp=[CH('Liberadas','green')],ab=[LK('Abrir na Irrigação','IR-03det.dc.html')])),
+      R('o418',dict(os='OS-0418',jan='24/09 21:00–25/09 11:15',rec='Pivô 1',oper='João',dur='14,3 h',mat='requisição na liberação',etp='A liberar'),
+        p=dict(os=O('OS-0418','fertirrigação P1'),sel=[CH('Falta insumo · Ureia 45%','red')],etp=[CH('A liberar','gray')],ab=[LK('Abrir O.S.','OS.dc.html#OS-0418')])),
       R('o422',dict(os='OS-0422',jan='a definir',rec='Pivô 2',oper='João',dur='2 passadas · 18,1 h',mat='sem insumo',etp='A liberar'),
-        p=dict(os=O('OS-0422','água Pivô 2 · próximo ciclo'),sel=[CH('Janela a definir','yellow')],etp=[CH('A liberar','gray')],ab=[LK('Abrir O.S.','OS.dc.html')])),
+        p=dict(os=O('OS-0422','água Pivô 2 · próximo ciclo'),sel=[CH('Janela a definir','yellow')],etp=[CH('A liberar','gray')],ab=[LK('Abrir na Irrigação','IR-03.dc.html')])),
       R('o423',dict(os='OS-0423',jan='hoje 14:00–16:00',rec='Gotejo T7',oper='João',dur='2 h',mat='sem insumo',etp='A liberar'),
-        p=dict(os=O('OS-0423','água gotejo T7'),sel=[CH('Conflito · parada da B3','red')],etp=[CH('A liberar','gray')],ab=[LK('Abrir O.S.','OS.dc.html')])),
+        p=dict(os=O('OS-0423','água gotejo T7'),sel=[CH('Conflito · parada da B3','red')],etp=[CH('A liberar','gray')],ab=[LK('Abrir na Irrigação','IR-03.dc.html')])),
       R('om233',dict(os='OM-0233',jan='hoje',rec='Oficina Sede',oper='Nilton',dur='8 h',mat='peça entregue ✓',etp='Em execução',sel='—'),
         p=dict(os=O('OM-0233','reparo Trator T1'),jan=[TX('hoje'),BR(),MU('oficina')],etp=[CH('Em execução','green')],ab=[LK('Abrir O.M.','MA-04det.dc.html')])),
     ]
@@ -432,9 +432,8 @@ function EXTRAVALS(self,v){
       + kpis([('JÁ EMITIDAS','8','7 O.S. + 1 O.M.'),('NOVAS ELEGÍVEIS','5','prévia de emissão'),('AGUARDANDO DADOS','2','sem previsão confirmada'),('FORA DO PERÍODO','1','não entra na fila')])
       + section('Ordens do período 23–29/09','Prepare, programe e libere em passos separados; clique na ordem para ajustar janela, conjunto e operador.',
         [imsg('Preparar O.S. do período','Prévia: 13 ocorrências no período · 8 já com ordem (recuperadas, sem duplicar) · 5 novas propostas · 2 aguardando dados · itens impedidos não são emitidos como executáveis.','doc','Montar a prévia de emissão do período'),
-         imsg('Revisar prontidão',f'Prontidão A liberar: {OS_DES["id"]} pronta (aprovada, material separado) · OS-0418 aguardando agrônomo · {OS_DEMO17["id"]} impedida por ativo bloqueado · OS-0422 sem janela e OS-0423 em conflito com a parada da B3 (água não passa pelo agrônomo). Material previsto não significa disponível físico.','check','Revisar prontidão das ordens A liberar'),
-         imsg('Enviar ao agrônomo','OS-0418 (fertirrigação) na fila de Ana (agrônoma) · água sem produto não vai à fila · a fila mostra só ordens emitidas do período (simulado · nenhuma mensagem real enviada).','leaf','Enviar as ordens que dependem de revisão agronômica'),
-         msgbtn('Liberar prontas',f'Liberada 1 de 5 A liberar — {OS_DES["id"]} ✓ passou para Liberadas · OS-0418 continua: falta aprovação agronômica · {OS_DEMO17["id"]} continua: ativo bloqueado · OS-0422 continua: janela a definir · OS-0423 continua: conflito com a parada da B3. Resultado por item; versão e prontidão revalidadas.',primary=True)],
+         imsg('Conferir prontidão',f'Prontidão A liberar: {OS_DES["id"]} pronta (material separado) · Ana (agrônoma) libera · OS-0418 a liberar pelo agrônomo · Ureia sem saldo apto · {OS_DEMO17["id"]} impedida por ativo bloqueado · OS-0422 sem janela e OS-0423 em conflito com a parada da B3 (água não passa pelo agrônomo). Material previsto não significa disponível físico.','check','Conferir prontidão das ordens A liberar'),
+         msgbtn('Liberar prontas',f'Liberada 1 de 5 A liberar — {OS_DES["id"]} ✓ liberada por Ana (agrônoma) · OS-0418 continua: Ureia 45 % sem saldo apto (0 kg) · {OS_DEMO17["id"]} continua: ativo bloqueado · OS-0422 continua: janela a definir · OS-0423 continua: conflito com a parada da B3. Resultado por item; versão e prontidão revalidadas.',primary=True)],
         g_ord)
       + section('Máquinas na programação','Confira condição, ocupação e elegibilidade separadas antes de programar.',
         [ilnk('Ver quadro completo','PL-03.dc.html','grid','Abrir Capacidade e recursos')],g_maq,state='gray')
@@ -451,7 +450,7 @@ function EXTRAVALS(self,v){
     shell37('PL-04','Programação integrada',corpo,
       subtitle='Janela móvel de emissão e liberação: o plano projeta tudo, a janela emite pouco e libera menos.',
       status=('1 pronta · 4 com impedimento','yellow'),
-      footer='DAP/DAC/calendário mostram âncora prevista ou real; mudança recalcula apenas saldo futuro e pede revisão onde cabível (JANELA-01 a 10).')
+      footer='DAP/DAC/calendário mostram âncora prevista ou real; mudança recalcula apenas saldo futuro e o agrônomo ajusta ao liberar, onde cabível (JANELA-01 a 10).')
 
     # ================= PL-05 · Impedimentos e reprogramação =================
     HEIGHTS37['PL-05.dc.html']=1080
@@ -519,7 +518,7 @@ function EXTRAVALS(self,v){
       f'<div style="border: 1px solid {ACC}; background: {ACCS}; border-radius: 12px; padding: 12px 14px;">'
       f'<div style="font-size: 11px; font-weight: 700; color: {ACC}; letter-spacing: .06em;">A · SUBSTITUIR POR TRATOR 02 · MF 7719</div>'
       f'<div style="font-size: 13px; margin-top: 6px; line-height: 1.6;">{chip("Apta","green")} {chip("Livre 24/09","green")} {chip("Proposto · aguarda PCP","yellow")}<br>'
-      f'Mesma classe e implemento compatível → <b>sem nova revisão agronômica</b><br>Início mantido: 24/09 06:00 · custo estimado +R$ 0,9 mil (deslocamento)<br>'
+      f'Mesma classe e implemento compatível → <b>sem ajuste técnico</b>; o agrônomo só libera de novo<br>Início mantido: 24/09 06:00 · custo estimado +R$ 0,9 mil (deslocamento)<br>'
       f'Uso limitado até 27/09: preventiva 250 h em 28/09 (OM-0234)</div></div>'
       f'<div style="border: 1px solid {LINE}; border-radius: 12px; padding: 12px 14px;">'
       f'<div style="font-size: 11px; font-weight: 700; color: {MUTED}; letter-spacing: .06em;">B · AGUARDAR REPARO DO TRATOR T1</div>'
@@ -535,13 +534,13 @@ function EXTRAVALS(self,v){
           ('Ordem afetada',f'<b>{OS_DEMO17["id"]}</b> · {esc(OS_DEMO17["tipo"])} · {OS_DEMO17["talhao"]} · {OS_DEMO17["area"]} ha · janela {OS_DEMO17["janela"]}'),
           ('Causa',f'{chip("Ativo bloqueado pelo PCM","red")} Pressão hidráulica baixa · inspeção de manutenção · caso OM-0233'),
           ('Efeito na etapa','Retirada de <b>Liberadas</b> para <b>A liberar</b> · nenhum início registrado'),
-          ('Aprovação agronômica',chip('Conservada · v1','green')+' conteúdo técnico não afetado pelo ativo'),
+          ('Instrução técnica',chip('Conservada · v1','green')+' Ana (agrônoma) libera de novo, sem mudar o conteúdo'),
           ('Dono e prazo','PCP (alocação) + PCM (reparo, Nilton) · decidir hoje'),
           ('Outra ordem no mesmo ativo',f'OS-0420 · plantio T4 · em execução · saldo {OS420["saldo"]} ha · substituto Trator 02 proposto, aguarda PCP'),
         ]))
       + section('Propostas lado a lado','Compare as três saídas; a simulação não bloqueia a agenda real até confirmar.','',prop)
       + section('Decisão','Confirme a substituição; a nova liberação é um passo separado, na Programação.','',
-        _acoes(msgbtn('Confirmar substituição pelo Trator 02',f'Alocação substituta confirmada · Trator 02 passa a Comprometido · {OS_DEMO17["id"]} · prontidão reavaliada · a ordem segue A liberar até nova liberação na Programação. Se o equipamento alterasse a aplicação, exigiria revisão agronômica antes.',primary=True),
+        _acoes(msgbtn('Confirmar substituição pelo Trator 02',f'Alocação substituta confirmada · Trator 02 passa a Comprometido · {OS_DEMO17["id"]} · prontidão reavaliada · a ordem segue A liberar até Ana (agrônoma) liberar de novo. Se o equipamento alterasse a aplicação, ela ajusta ao liberar.',primary=True),
                imsg('Aguardar reparo','Registrado: aguardar o teste das 14h · o bloqueio permanece até liberação técnica após teste válido · liberar o ativo não reassume a agenda antiga.','clock','Manter a ordem aguardando o reparo do Trator T1'),
                idrw('Terceirizar',dict(title='Reprogramar com prestador',sub='apenas a agenda; versão executada permanece intacta',
                    fields=[('Ordem',OS_DEMO17['id']),('Data','26/09/2026'),('Responsável','Prestador · plantio terceirizado'),('Motivo','Ativo bloqueado sem substituto interno')],

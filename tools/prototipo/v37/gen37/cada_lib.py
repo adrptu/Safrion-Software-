@@ -38,6 +38,12 @@ class T:
     def alerts(s): return s.J("[...document.querySelectorAll('aside [role=alert]')].map(x=>x.innerText).join(' | ')")
     def toast(s): return s.J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')")
     def header(s): return s.J("document.querySelector('header').innerText.replace(/\\s+/g,' ')")
+    # layout de 01/10 (um bloco por tela, abas por entidade, ações no bloco, cartões para fazendas, equipes e conjuntos)
+    def bloco(s): return s.J("document.querySelector('main').innerText.replace(/\\s+/g,' ')")
+    def aba(s,t): r=s.J(f"(()=>{{const b=[...document.querySelectorAll('[role=tab]')].find(b=>b.innerText.replace(/\\s+/g,' ').trim().startsWith({json.dumps(t)})); if(!b) return false; b.click(); return true;}})()"); time.sleep(.35); return r
+    def card(s,t): return s.J(f"(()=>{{const c=[...document.querySelectorAll('.cadx-cartao')].find(c=>c.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(t)})>=0); return c?c.innerText.replace(/\\s+/g,' '):null;}})()")
+    def opencard(s,t): r=s.J(f"(()=>{{const c=[...document.querySelectorAll('.cadx-cartao')].find(c=>c.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(t)})>=0); if(!c) return false; c.click(); return true;}})()"); time.sleep(.35); return r
+    def mainsel(s,val): r=s.J(f"({SETV})('main select',{json.dumps(val)})"); time.sleep(.35); return r
     def cancel(s):
         s.btn('Cancelar'); s.btn('Descartar alterações'); s.btn('Fechar')
     def shot(s,nome): s.c.shot(os.path.join(HERE,'_probe',nome))

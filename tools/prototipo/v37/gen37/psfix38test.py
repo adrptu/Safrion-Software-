@@ -18,7 +18,7 @@ CLK = """((t,root)=>{const r=root?document.querySelector(root):document; if(!r) 
 def clk(t, root=None): r = J(f"({CLK})({json.dumps(t)},{json.dumps(root)})"); time.sleep(.45); return r
 def etapa(i): J(f"document.querySelectorAll('nav[aria-label=\"Etapas do processo\"] button')[{i-1}].click()"); time.sleep(.55)
 def abrir(nome):
-    etapa(1); J(f"""(()=>{{const r=[...document.querySelectorAll('[role=row]')].find(x=>x.innerText.indexOf({json.dumps(nome)})>=0); [...r.querySelectorAll('button')].find(b=>/safra/.test(b.innerText)).click();}})()"""); time.sleep(.55)
+    etapa(1); J(f"""(()=>{{const r=[...document.querySelectorAll('[role=row]')].find(x=>x.innerText.indexOf({json.dumps(nome)})>=0); [...r.querySelectorAll('button')].find(b=>/safra|^Continuar/.test(b.innerText.trim())).click();}})()"""); time.sleep(.55); etapa(2)
 def panel(): return J("(()=>{const a=document.querySelector('aside[role=dialog]'); return a?a.innerText.replace(/\\s+/g,' '):'';})()") or ''
 def row(txt): return J(f"(()=>{{const r=[...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent).flatMap(t=>[...t.querySelectorAll('[role=row]')]).find(r=>r.innerText.indexOf({json.dumps(txt)})>=0); return r?r.innerText.replace(/\\s+/g,' ').trim().replace(/^[▾▸] /,''):'';}})()") or ''
 def rowclick(txt): J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].filter(x=>x.offsetParent).find(r=>r.innerText.indexOf({json.dumps(txt)})>=0); (r.querySelector('[role=cell] span')||r).click();}})()"); time.sleep(.45)

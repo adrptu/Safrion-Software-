@@ -7,15 +7,16 @@ Duas abas, uma primária por aba:
    processo (etapa de custo da Estrutura gerencial) e atividades usuais; a do conjunto abre o rendimento, agora com a cultura
    (Todas ou uma). O formulário de rendimento mantém largura × velocidade × eficiência e custo/h do Planejar safra (REND_CAMPOS).
 Culturas e processos daqui são a fonte das dimensões Cultura e Processo do CD-07; o item de semente é o do CD-06."""
-import json, os
-from engine import grid, esc, chip, BTN_ST, SEG_ON, SEG_OFF, GRAYS, SURF, LINE, MUTED
+import json
+from engine import grid, SEG_ON, SEG_OFF
 import engine as E
 import ui37
 from ui37 import shell37, HEIGHTS37
 import dados2 as D2
 import dados_cad as DC
-from areas.cadastros import (novo, mini, sel, num, txt, dat, cond, R, js,
+from areas.cadastros import (sel, num, txt, dat, cond, R, js,
                              CULTIVARES, MODO, FONTE, REND_CAMPOS, REND_JS, _uso_cultivar)
+from areas.cadastros import (cadx_css, abas, pane, faixa, prim, secbtn, qf_chips, bloco_cad, estado_cab, acoes_form, arv)
 
 H=lambda s: '{{'+s+'}}'
 ui37.H_OVR.pop('CD-02.dc.html',None)   # layout novo: a altura vem de HEIGHTS37
@@ -34,15 +35,8 @@ ATV_OPERACAO={
 PROC_NOMES=[n for _,n in DC.PROCESSOS]
 SEMENTES_BASE=sorted(set(DC.SEMENTES.values()))
 
-# ---- auxiliares desta frente (CD-02, CD-06, CD-07 importam daqui) ----
-def selo_dinamico(fname,key):
-    """troca o selo fixo do cabeçalho (amarelo) por um selo cuja cor vem do estado (v[key+'_st'] e v[key+'_dot'], ver cadcSelo)."""
-    p=os.path.join(E.P,fname); s=open(p).read(); fixo=chip(H(key),'yellow')
-    assert fixo in s, 'selo do cabeçalho não encontrado em '+fname
-    open(p,'w').write(s.replace(fixo,f'<span style="{H(key+"_st")}"><span style="{H(key+"_dot")}"></span>{H(key)}</span>'))
+# ---- auxiliares desta frente (CD-02, CD-06, CD-07 importam daqui; o estado do cabeçalho fica em areas/cadastros.estado_cab) ----
 CADC_JS=r'''
-// selo do cabeçalho na cor do estado: amarelo = há pendência; verde = concluído
-function cadcSelo(v,key,cor){ const c=G2C[cor]||G2C.gray; v[key+'_st']='display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; color: '+c[0]+'; background: '+c[1]+'; white-space: nowrap;'; v[key+'_dot']='width: 6px; height: 6px; border-radius: 999px; background: '+c[0]+';'; }
 // lista sem valor escolhido mostra "Escolha…" (sem isto o navegador exibe a 1ª opção e o rascunho continua vazio)
 function cadcEscolha(v,gid){ const F=v[gid+'_F']; if(!F||!F.open||!F.fields) return; F.fields.forEach(f=>{ if(f.isSel&&!f.dis&&f.v==='') f.opts=[{v:'',t:'Escolha…'}].concat(f.opts); }); }
 // abre a linha só com os valores gravados (r.v): o texto de exibição da tabela (r.s, ex.: 'Sem preço') não entra no rascunho
@@ -52,14 +46,6 @@ function cadcAbrir(self,gid,rid){ const sp=GR(gid); const r=g2find(RW(self,gid),
 // valor-padrão que acompanha o registro de origem pelo id: renomear a cultura, o grupo ou o local não deixa o padrão órfão
 function cadcPadrao(gid,k,val){ const f=(GR(gid).edit.fields||[]).find(x=>x.k===k); if(f) f.def=val; }
 '''
-
-def _abas(nomes,pre):
-    """barra de abas controlada pelo estado da tela (pre+i+'_st' / '_go' / '_sel')."""
-    bs=''.join(f'<button type="button" role="tab" aria-selected="{H(pre+str(i)+"_sel")}" onClick="{H(pre+str(i)+"_go")}" style="{H(pre+str(i)+"_st")}">{esc(n)}</button>'
-               for i,n in enumerate(nomes))
-    return f'<div role="tablist" aria-label="Cadastros desta tela" style="display: inline-flex; flex-wrap: wrap; padding: 3px; border-radius: 999px; background: {GRAYS}; gap: 2px;">{bs}</div>'
-def _pane(pre,i,html,ativo=0):
-    return f'<sc-if value="{H(pre+str(i)+"_on")}" hint-placeholder-val="{H("true" if i==ativo else "false")}">{html}</sc-if>'
 
 def cd02():
     fname='CD-02.dc.html'; E._reset_screen(fname)
@@ -75,9 +61,10 @@ def cd02():
             sem=DC.SEMENTES.get((c,vr),CRIAR if tipo=='Anual' else '')
             kids.append(R(kid,dict(nome=vr,cult=c,tipo=tipo,dias=dd,reg=rg,sit='Ativa',uso=uso.get((c,vr),0),sem=sem)))
         tree.append(dict(id=cid,v=dict(nome=nome),s={},p={},kids=kids))
-    cv=grid([dict(k='nome',l='Cultura · cultivar',w=260),dict(k='ciclo',l='Ciclo'),dict(k='sem',l='Item de semente',w=260),
-             dict(k='uso',l='Uso nos cultivos'),dict(k='sit',l='Situação')],
-        tree,gid='g_cv',tree=True,dele=True,total=False,x0={r['id']:True for r in tree},
+    cv=grid([dict(k='nome',l='Cultura · cultivar',w=300),dict(k='ciclo',l='Ciclo'),dict(k='sem',l='Item de semente',w=260),
+             dict(k='uso',l='Cultivos'),dict(k='est',l='Situação',w=320)],
+        tree,gid='g_cv',tree=True,dele=False,total=False,frame=False,x0={r['id']:True for r in tree},
+        tools=qf_chips('g_cv')+prim('g_cv_new','Cadastrar cultivar'),
         edit=dict(m='form',title='Cultivar',newTitle='Cadastrar cultivar',sub='Registro no RNC é referência, não prova de adaptação local; cultivar em uso não se exclui, inative.',
             fields=[txt('nome','Cultivar ou híbrido'),
                     sel('cult','Cultura',[n for n,*_ in DC.CULTURAS]+[OUTRA_C],**{'def':'Soja'}),
@@ -107,15 +94,16 @@ def cd02():
         kids=[]
         for c in D2.CONJ:
             if c['op']!=op: continue
-            v=dict(op=op,conj=c['conj'],nome=c['conj'],cult='Todas',maq=c['maq'],impl=c['impl'],pess=c['pess'],pess_rs=c['pess_rs'],fonte=FONTE[c['id']],vig='2027-06-30',rend=c['rend'])
+            v=dict(op=op,conj=c['conj'],nome=c['conj'],cult='Todas',maq=c['maq'],impl=c['impl'],pess=c['pess'],pess_rs=c['pess_rs'],fonte=FONTE.get(c['id'],'Equipe da fazenda'),vig='2027-06-30',rend=c['rend'])
             if c['id'] in MODO: v.update(modo='Largura × velocidade',larg=MODO[c['id']][0],vel=MODO[c['id']][1],efic=MODO[c['id']][2])
             else: v.update(modo='Informado',larg='',vel='',efic='')
             ch=D2.custo_h(c); v.update(custo_h=round(ch,2),custo_ha=round(ch/c['rend'],2))
             kids.append(R(c['id'],v))
         rtree.append(dict(id=oid,v=dict(nome=op),s={},p={},kids=kids))
-    rend=grid([dict(k='nome',l='Operação · conjunto',w=270),dict(k='cult',l='Cultura'),dict(k='rend',l='Rendimento efetivo',t='num',a='r',u='ha/h',d=2),
-               dict(k='custo_h',l='Custo por hora',t='num',a='r',pre='R$ ',d=2,w=175),dict(k='custo_ha',l='Custo por hectare',t='num',a='r',pre='R$ ',d=2),
-               dict(k='fonte',l='Fonte · vigência',w=150)],rtree,gid='g_rend',tree=True,dele=False,total=False,x0={r['id']:True for r in rtree},
+    rend=grid([dict(k='nome',l='Operação · conjunto',w=390),dict(k='cult',l='Cultura'),dict(k='rend',l='Rendimento',t='num',a='r',u='ha/h',d=2),
+               dict(k='custo_h',l='Custo por hora',t='num',a='r',pre='R$ ',d=2),dict(k='custo_ha',l='Custo por hectare',t='num',a='r',pre='R$ ',d=2),
+               dict(k='fonte',l='Fonte',w=240)],rtree,gid='g_rend',tree=True,dele=False,total=False,frame=False,x0={r['id']:True for r in rtree},
+        tools=qf_chips('g_rend')+secbtn('sim_cmp','Comparar com o realizado','Compara o padrão com os apontamentos de campo')+prim('g_rend_new','Cadastrar rendimento'),
         edit=dict(m='form',title='Rendimento',newTitle='Cadastrar rendimento',
             sub='Informe como o conjunto trabalha e quanto custa por hora; rendimento e custo por hectare são recalculados. Planejar safra parte deste padrão.',
             fields=[sel('op','Operação',ops+[OUTRA_O],**{'def':ops[0]}),
@@ -132,16 +120,10 @@ def cd02():
              fields=[txt('nome','Nome da operação'),
                      sel('proc','Processo',PROC_NOMES,help='Etapa de custo: o custo da O.S. e do orçamento desta operação vai para este processo.'),
                      dict(k='atvs',l='Atividades usuais',t='area',req=False,help='Separe por ponto e vírgula; no plano, a operação vem primeiro e filtra estas atividades.')]))
-    # ---- corpo: um painel com abas; cada aba tem sua descrição, sua ação secundária e sua primária no cabeçalho ----
-    desc=lambda t: f'<div style="font-size: 12.8px; color: {MUTED};">{esc(t)}</div>'
-    cab=(f'<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">{_abas(["Culturas e cultivares","Operações e rendimentos"],"c2t")}'
-         f'<span style="flex-grow: 1;"></span>'
-         + _pane('c2t',1,mini('sim_cmp','Comparar com o realizado','Compara o padrão com os apontamentos de campo')) + '</div>')
-    corpo=(f'<section style="background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; display: flex; flex-direction: column; gap: 10px; padding: 12px; min-width: 0;">'
-           + cab
-           + _pane('c2t',0,desc('Clique na cultura para ajustar ciclo e unidade; na cultivar, para ciclo, semente e situação.')+cv)
-           + _pane('c2t',1,desc('Clique na operação para definir processo e atividades; no conjunto, para ajustar rendimento e custo.')+rend)
-           + '</section>')
+    # ---- corpo: um bloco com abas; cada aba tem a sua faixa de atenção, o seu filtro rápido e as suas ações (primária por último) ----
+    acoes_form('g_cv'); cadx_css()
+    corpo=bloco_cad(abas('c2t',['Culturas e cultivares','Operações e rendimentos'],'Cadastros de culturas e operações'),
+                    pane('c2t',0,faixa('c2_fx0')+arv(cv))+pane('c2t',1,faixa('c2_fx1')+arv(rend)),'Culturas, cultivares e operações')
     dados=json.dumps(dict(unid=DC.UNID_PROD,sem=SEMENTES_BASE,son=SEG_ON(),soff=SEG_OFF(),
                       defc=next(r['id'] for r in cul_rows if r['v']['nome']=='Soja'),defo='OP1'),ensure_ascii=False)
     js(dict(cmp='Pulverização: padrão 21,6 ha/h × realizado 19,8 ha/h (OS-0421, 4 dias) · revisão sugerida, nada alterado.'),REND_JS
@@ -154,46 +136,56 @@ function c2opts(gid,k,opts){ const f=(GR(gid).edit.fields||[]).find(x=>x.k===k);
 function c2sem(cult,cv){ return 'Semente de '+String(cult).toLowerCase()+' '+String(cv).replace(/^Híbrido /,''); }
 function c2cod(n){ return String(n).normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase().replace(/[^A-Z0-9]+/g,'').slice(0,8); }
 function c2pais(self,gid){ return RW(self,gid).filter(p=>/^(CU|OP)/.test(p.id)); }
-function PREVALS(self,v){
+// situação da cultivar e do rendimento: um só cálculo para a linha, o filtro "A resolver", a faixa, o ponto da aba e o cabeçalho
+function cvFalta(V){ return V.tipo==='Anual'&&V.sit!=='Inativa'&&(!V.sem||V.sem===CRIAR); }
+function cvSit(V){ if(V.sit==='Inativa') return {t:'Inativa',p:[chipc('Inativa','gray')]}; if(cvFalta(V)) return {t:'Sem semente',p:sitX('Sem semente','yellow','Vincular semente'),res:true};
+  return {t:'Em dia',p:sitOk('Em dia')}; }
+function rdSit(V){ if(V.fonte==='Premissa a validar') return {t:'Premissa a validar',p:sitX('Premissa a validar','yellow','Validar'),res:true}; return {t:V.fonte||'—',p:sitOk(V.fonte||'—')}; }
+CAD_ACTS.g_cv=(self,r)=>{ const n=Number(r.v.uso)||0; return [cadExcluir(self,'g_cv',r,'cultivar',n?('usada em '+n+(n>1?' cultivos':' cultivo')+'; inative em vez de excluir'):'')]; };
+function PREVALS(self,v){ cadActsIni(self);
   const cul=RW(self,'g_cult'); const dc=cul.find(c=>c.id===C2.defc); cadcPadrao('g_cv','cult',dc?dc.v.nome:'');
   RW(self,'g_cv').forEach(p=>{ const c=cul.find(x=>x.id===p.id); if(!c) return; const C=c.v; const ks=p.kids||[]; p.dr='c2oc_'+p.id; p.v.nome=C.nome;
     p.p.nome=[{k:'b',t:C.nome},{k:'mut',t:ks.length+(ks.length===1?' cultivar':' cultivares')+' · '+C.unid}]; p.s.nome=C.nome;
-    p.p.ciclo=[{k:'tag',t:C.tipo}]; p.s.ciclo=C.tipo;
+    p.p.ciclo=[{k:'mut',t:C.tipo}]; p.s.ciclo=C.tipo; ['sem','uso','est'].forEach(k=>{ p.p[k]=[{k:'mut',t:''}]; p.s[k]=''; });
     ks.forEach(r=>{ const V=r.v; V.cult=C.nome; V.tipo=C.tipo; const an=C.tipo==='Anual'; r.dr='c2ab_'+r.id;
-      r.p.nome=[{k:'txt',t:V.nome||''}]; r.s.nome=V.nome||'';
+      r.p.nome=[{k:'b',t:V.nome||''}]; r.s.nome=V.nome||'';
       const cic=an&&isnum(V.dias)?nf(V.dias)+' dias':''; r.p.ciclo=[cic?{k:'txt',t:cic}:{k:'mut',t:'—'}]; r.s.ciclo=cic;
       const falta=an&&(!V.sem||V.sem===CRIAR);
-      r.p.sem=!an?[{k:'mut',t:'—'}]:(falta?[chipc('Sem item de semente','yellow')]:[{k:'link',t:V.sem+' ›',h:'CD-06.dc.html'}]); r.s.sem=!an?'':(falta?'Sem item de semente':V.sem);
-      const n=Number(V.uso)||0; r.p.uso=[{k:(n?'txt':'mut'),t:n?(n+(n>1?' cultivos':' cultivo')):'sem uso'}]; r.s.uso=String(n); r.nd=n?'em uso':'';
-      r.p.sit=[chipc(V.sit||'Ativa',V.sit==='Inativa'?'gray':'green')]; r.s.sit=V.sit||''; }); });
+      r.p.sem=(!an||falta)?[{k:'mut',t:'—'}]:[{k:'link',t:V.sem+' ›',h:'CD-06.dc.html'}]; r.s.sem=(!an||falta)?'':V.sem;
+      const n=Number(V.uso)||0; r.p.uso=[{k:(n?'txt':'mut'),t:n?(n+(n>1?' cultivos':' cultivo')):'Sem uso'}]; r.s.uso=String(n); r.nd=n?'em uso':'';
+      const S=cvSit(V); r.p.est=S.p; r.s.est=S.t; }); });
   c2opts('g_cv','cult',cul.map(c=>c.v.nome).concat([OUTRA_C]));
   const sems=C2.sem.slice(); leaves(RW(self,'g_cv')).forEach(r=>{ if(r.v.sem&&r.v.sem!==CRIAR&&sems.indexOf(r.v.sem)<0) sems.push(r.v.sem); });
   c2opts('g_cv','sem',sems.sort((a,b)=>a.localeCompare(b,'pt-BR')).concat([CRIAR]));
   const ops=RW(self,'g_op'); const dop=ops.find(o=>o.id===C2.defo); cadcPadrao('g_rend','op',dop?dop.v.nome:'');
   RW(self,'g_rend').forEach(p=>{ const o=ops.find(x=>x.id===p.id); if(!o) return; const O=o.v; const ks=p.kids||[]; p.dr='c2oo_'+p.id; p.v.nome=O.nome;
     p.p.nome=[{k:'b',t:O.nome},{k:'mut',t:(O.proc||'sem processo')+' · '+ks.length+(ks.length===1?' conjunto':' conjuntos')}]; p.s.nome=O.nome;
+    ['cult','rend','custo_h','custo_ha','fonte'].forEach(k=>{ p.p[k]=[{k:'mut',t:''}]; p.s[k]=''; });
     ks.forEach(r=>{ const V=r.v; V.op=O.nome; V.nome=V.conj;
-      r.p.nome=[{k:'txt',t:V.conj||''},{k:'br'},{k:'mut',t:rendParam(V)}]; r.s.nome=V.conj||'';
+      r.p.nome=[{k:'b',t:V.conj||''},{k:'mut',t:rendParam(V)}]; r.s.nome=V.conj||'';
       const cu=V.cult||'Todas'; r.p.cult=[cu==='Todas'?{k:'mut',t:'Todas'}:{k:'txt',t:cu}]; r.s.cult=cu;
-      r.p.custo_h=[{k:'txt',t:'R$ '+nf(V.custo_h,2)},{k:'br'},{k:'mut',t:'máq. '+nfa(V.maq)+' + impl. '+nfa(V.impl)+' + '+nfa(V.pess)+' × '+nfa(V.pess_rs)}]; r.s.custo_h='R$ '+nf(V.custo_h,2);
-      r.p.fonte=[V.fonte==='Premissa a validar'?chipc('Premissa a validar','yellow'):{k:'tag',t:V.fonte||'—'},{k:'br'},{k:'mut',t:V.vig?'até '+br(V.vig):'sem vigência'}]; r.s.fonte=V.fonte||''; }); });
+      r.p.custo_h=[{k:'txt',t:'R$ '+nf(V.custo_h,2)}]; r.s.custo_h='R$ '+nf(V.custo_h,2);
+      const S=rdSit(V); r.p.fonte=S.p; r.s.fonte=V.fonte||''; }); });
   c2opts('g_rend','op',ops.map(o=>o.v.nome).concat([OUTRA_O]));
-  c2opts('g_rend','cult',['Todas'].concat(cul.map(c=>c.v.nome))); }
+  c2opts('g_rend','cult',['Todas'].concat(cul.map(c=>c.v.nome)));
+  // filtro rápido de cada aba (dentro do bloco)
+  cadQf(self,v,'g_cv','c2qf0',[{k:'res',t:'A resolver',f:r=>!!cvSit(r.v).res},{k:'inat',t:'Inativas',f:r=>r.v.sit==='Inativa',oz:true}]);
+  cadQf(self,v,'g_rend','c2qf1',[{k:'res',t:'A resolver',f:r=>!!rdSit(r.v).res}]); }
 function EXTRAVALS(self,v){ simv(self,v);
-  const aba=self.state.c2aba||0;
-  [0,1].forEach(i=>{ v['c2t'+i+'_on']=aba===i; v['c2t'+i+'_st']=aba===i?C2.son:C2.soff; v['c2t'+i+'_sel']=aba===i?'true':'false'; v['c2t'+i+'_go']=()=>self.setState({c2aba:i}); });
-  v.c2_primt=aba===0?'Cadastrar cultivar':'Cadastrar rendimento'; v.c2_prim=aba===0?v.g_cv_new:v.g_rend_new;
-  const semF=leaves(RW(self,'g_cv')).filter(r=>r.v.tipo==='Anual'&&r.v.sit!=='Inativa'&&(!r.v.sem||r.v.sem===CRIAR)).length;
-  const prem=leaves(RW(self,'g_rend')).filter(r=>r.v.fonte==='Premissa a validar').length;
-  v.c2_st=[semF?semF+(semF>1?' cultivares':' cultivar')+' sem semente':'',prem?prem+(prem>1?' premissas':' premissa')+' a validar':''].filter(Boolean).join(' · ')||'Sem pendências';
-  cadcSelo(v,'c2_st',(semF||prem)?'yellow':'green');
+  const cvs=cadRegs(RW(self,'g_cv')), rds=cadRegs(RW(self,'g_rend'));
+  const semL=cvs.filter(r=>cvFalta(r.v)), premL=rds.filter(r=>r.v.fonte==='Premissa a validar'); const semF=semL.length, prem=premL.length;
+  v.c2e=[semF?semF+(semF>1?' cultivares':' cultivar')+' sem semente':'',prem?prem+(prem>1?' premissas':' premissa')+' a validar':''].filter(Boolean).join(' · ')||'Sem pendências';
+  cadEstado(v,'c2e',v.c2e,(semF||prem)?'yellow':'green');
+  cadAbas(self,v,'c2t','c2aba',[{slug:'culturas',n:cvs.length,cor:semF?'yellow':''},{slug:'operacoes',n:rds.length,cor:prem?'yellow':''}]);
+  cadQfPos(self,v,'g_cv','c2qf0'); cadQfPos(self,v,'g_rend','c2qf1'); cadConta(self,v,'g_cv'); cadConta(self,v,'g_rend');
+  cadFaixa(v,'c2_fx0',[semF?{n:semF,rot:semF>1?'cultivares anuais sem item de semente':'cultivar anual sem item de semente',reg:semL.map(r=>r.v.cult+' '+r.v.nome).join(', '),verbo:'Vincular semente',
+    go:semF===1?()=>cadcAbrir(self,'g_cv',semL[0].id):()=>self.setState({c2qf0:'res'})}:null]);
+  cadFaixa(v,'c2_fx1',[prem?{n:prem,rot:prem>1?'rendimentos como premissa':'rendimento como premissa',reg:premL.map(r=>r.v.op+' · '+r.v.conj).join(', '),verbo:'Validar rendimento',
+    go:prem===1?()=>g2open(self,GR('g_rend'),premL[0].id,null):()=>self.setState({c2qf1:'res'})}:null]);
   // linha da cultura / da operação abre o formulário próprio
   c2pais(self,'g_cv').forEach(p=>{ v['c2oc_'+p.id]=()=>g2open(self,GR('g_cult'),p.id,null); (p.kids||[]).forEach(r=>{ v['c2ab_'+r.id]=()=>cadcAbrir(self,'g_cv',r.id); }); });
   c2pais(self,'g_rend').forEach(p=>{ v['c2oo_'+p.id]=()=>g2open(self,GR('g_op'),p.id,null); });
-  // exclusão: cultivar em uso mostra o motivo; linha da cultura não se exclui
-  const pais=new Set(c2pais(self,'g_cv').map(p=>p.id)); const cvr=leaves(RW(self,'g_cv'));
-  (v.g_cv_rows||[]).forEach(rr=>{ const r=cvr.find(x=>x.id===rr.id); const why=pais.has(rr.id)?null:(r&&r.nd?r.nd:''); if(why==='') return;
-    rr.cells.forEach(c=>{ if(c.isDel){ c.isDel=false; c.isData=true; c.hasCaret=false; c.parts=why?[g2part({k:'mut',t:why},v)]:[]; } }); });
+ // exclusão sai da linha: fica no painel da cultivar (Excluir cultivar, com a causa quando está em uso)
   // trocar a cultura no formulário da cultivar traz o tipo de ciclo dela (mostra ou esconde ciclo e semente)
   const F=v.g_cv_F; if(F&&F.open&&F.fields){ const f=F.fields.find(x=>x.fid==='fx_g_cv_cult');
     if(f&&!f.dis) f.set=(e)=>{ const cur=g2st(self,'g_cv').fm; if(!cur) return; const val=e.target.value; const c=RW(self,'g_cult').find(x=>x.v.nome===val);
@@ -245,8 +237,6 @@ function EXTRAVALS(self,v){ simv(self,v);
       soPai('g_rend',rows,r,o.id);
       self.setState({g2toast:pre+'Salvo: '+V.op+' rende '+nf(V.rend,2)+' ha/h a R$ '+nf(V.custo_h,2)+'/h e R$ '+nf(V.custo_ha,2)+'/ha. Novos planejamentos usam este padrão.'}); } }; }
 ''')
-    HEIGHTS37[fname]=1400   # aba Operações (a mais alta) com folga para uma operação nova e dois conjuntos
-    prim=f'<button type="button" onClick="{H("c2_prim")}" style="{BTN_ST(True)}">{H("c2_primt")}</button>'
-    shell37('CD-02','Culturas, cultivares e operações',corpo,fname=fname,subtitle='Cadastre culturas, cultivares e o rendimento de cada conjunto por operação, com fonte e vigência.',
-            status=(H('c2_st'),'yellow'),primary_html=prim,search=False)
-    selo_dinamico(fname,'c2_st')
+    HEIGHTS37[fname]=1000   # sem rolagem de página: só a tabela da aba rola
+    shell37('CD-02','Culturas, cultivares e operações',corpo,fname=fname,status=None,primary_html=None,search=False)
+    estado_cab(fname,'Culturas, cultivares e operações','c2e')

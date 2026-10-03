@@ -11,13 +11,14 @@ def conta(): return J("(document.body.innerText.match(/(\\d+) de 15/)||[])[1]||'
 try:
     t.goto('CD-03.dc.html')
     t.chk('cabeçalho: estado calculado "1 máquina em manutenção · 2 calibrações a resolver" e primária "Cadastrar máquina ou instalação"',
-          '1 máquina em manutenção · 2 calibrações a resolver' in t.header() and 'Cadastrar máquina ou instalação' in t.header() and not t.errs(), t.header()+' '+t.errs())
+          '1 máquina em manutenção · 2 calibrações a resolver' in t.header() and 'Cadastrar máquina ou instalação' in t.bloco() and not t.errs(), t.header()+' '+t.errs())
     r=t.rowtxt(0,'Trator T1') or ''; href=J(f"(()=>{{const r={t.ROW(0,'Trator T1')}; const a=r&&[...r.querySelectorAll('a')].find(a=>a.innerText.indexOf('Ver ordens afetadas')>=0); return a?a.getAttribute('href'):null;}})()")
-    t.chk('Trator T1: "Em manutenção · OM-0233 · retorno previsto 24/09" e link "Ver ordens afetadas" → OS.dc.html',
-          'Em manutenção' in r and 'OM-0233' in r and 'retorno previsto 24/09' in r and href=='OS.dc.html', [r,href])
-    t.clk('1 máquina em manutenção'); time.sleep(.2); n1=conta(); vis=[x for x in ('Trator T1','Máquina TSI','Bomba do Pivô 2','Trator 02') if t.rowtxt(0,x)]
+    fx=J("(document.querySelector('.cadx-faixa')||{innerText:''}).innerText.replace(/\\s+/g,' ')")
+    t.chk('Trator T1: linha "Em manutenção" com "Ver ordens afetadas" → OS.dc.html; faixa de atenção com "OM-0233 · retorno previsto 24/09"',
+          'Em manutenção' in r and 'OM-0233' in fx and 'retorno previsto 24/09' in fx and href=='OS.dc.html', [r,fx,href])
+    t.clk('A resolver'); time.sleep(.2); n1=conta(); vis=[x for x in ('Trator T1','Máquina TSI','Bomba do Pivô 2','Trator 02') if t.rowtxt(0,x)]
     t.clk('Limpar filtros'); n2=conta()
-    t.chk('clicar no estado filtra as exceções (T1, TSI vencida, bomba a aferir) e "Limpar filtros" volta às 15',
+    t.chk('filtro rápido "A resolver" (no bloco) filtra as exceções (T1, TSI vencida, bomba a aferir) e "Limpar filtros" volta às 15',
           n1=='3' and vis==['Trator T1','Máquina TSI','Bomba do Pivô 2'] and n2=='15', [n1,vis,n2])
     t.openrow(0,'Trator T1'); L=t.labels(); orig=J("[...document.querySelectorAll('aside[role=dialog] a')].map(a=>a.innerText.trim()+'|'+a.getAttribute('href'))")
     t.chk('formulário do T1: condição técnica só leitura vinda da OM-0233, classe fixa, origem "Ver ordens afetadas" e sem "Valor do ativo"',
@@ -40,20 +41,20 @@ try:
     for k,v in [('nome','Pulverizador PJ-2500'),('barra_pv','30'),('tanque_pv','2500'),('preq_pv','90'),('cont_pv','0'),('interv','90')]: t.fset(k,v)
     t.btn('Salvar'); a=t.alerts()
     t.fset('custo_h','90'); t.fset('custo_f','Tabela de referência'); t.btn('Salvar'); time.sleep(.2)
-    r=t.rowtxt(0,'Pulverizador PJ-2500') or ''
-    t.chk('sem custo por hora o cadastro é barrado no campo; com custo e fonte grava e mostra barra, tanque e R$/h',
-          'Informe o custo por hora' in a and not t.isopen() and 'barra 30 m · tanque 2.500 L' in r and 'R$ 90,00/h' in r and 'Tabela de referência' in r, [a,r,t.alerts()])
+    r=t.rowtxt(0,'Pulverizador PJ-2500') or ''; op=t.isopen(); t.openrow(0,'Pulverizador PJ-2500'); cf=t.fv('custo_f'); t.cancel()
+    t.chk('sem custo por hora o cadastro é barrado no campo; com custo e fonte grava, a linha mostra barra, tanque e R$/h e o painel a fonte',
+          'Informe o custo por hora' in a and not op and 'barra 30 m · tanque 2.500 L' in r and 'R$ 90,00/h' in r and cf=='Tabela de referência', [a,r,cf,t.alerts()])
     t.chk('estado do cabeçalho é recalculado (nova máquina sem calibração: 3 a resolver)', '1 máquina em manutenção · 3 calibrações a resolver' in t.header(), t.header())
     # conjuntos
-    k2=t.rowtxt(1,'Trator T1 + Plantadeira 24 linhas') or ''
+    t.aba('Conjuntos'); k2=t.card('Trator T1 + Plantadeira 24 linhas') or ''
     t.chk('conjunto do T1 fica Indisponível pela manutenção e sugere o substituto Trator 02 (190 cv)',
           'Indisponível' in k2 and 'Trator T1 em manutenção' in k2 and 'substituto: Trator 02 (190 cv)' in k2 and 'Carlos' in k2, k2)
     t.clk('Montar conjunto'); t.fset('maq','Trator 03'); t.fset('impl','Plantadeira 24 linhas'); marca('Plantio'); pc=t.fv('pot_c'); t.btn('Salvar'); a=t.alerts()
     t.chk('Montar conjunto: Trator 03 (110 cv) com a plantadeira (exige 140 cv) dá erro no campo da máquina',
           'Trator 03 tem 110 cv; Plantadeira 24 linhas exige 140 cv' in a and 'abaixo dos 140 cv' in (pc or ''), [a,pc])
-    t.fset('maq','Trator 02'); t.btn('Salvar'); time.sleep(.2); r=t.rowtxt(1,'Trator 02 + Plantadeira 24 linhas') or ''
+    t.fset('maq','Trator 02'); t.btn('Salvar'); time.sleep(.2); r=t.card('Trator 02 + Plantadeira 24 linhas') or ''
     t.chk('com o Trator 02 o conjunto é montado: largura 12 m herdada, Disponível, Carlos alocável e sem rendimento',
-          not t.isopen() and '12 m' in r and 'Disponível' in r and 'Carlos' in r and 'sem rendimento' in r and 'Conjunto montado' in t.toast(), [r,t.toast(),t.alerts()])
+          not t.isopen() and '12 m' in r and 'Disponível' in r and 'Carlos' in r and 'sem rendimento' in r.lower() and 'Conjunto montado' in t.toast(), [r,t.toast(),t.alerts()])
     t.shot('cada_cd03.png')
     t.chk('nenhum erro de JS na jornada', not t.errs(), t.errs())
 finally:

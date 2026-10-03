@@ -16,8 +16,8 @@ H = lambda s: '{{' + s + '}}'
 F = lambda: H('false')
 T = lambda: H('true')
 
-# ---------- dados da ordem e do equipamento (versão v1 aprovada) ----------
-OS = dict(id='OS-0424', ativ='Fungicida', op='Pulverização', local='Pivô 2 · Milho V10', area=80.0, versao='v1 aprovada por Ana (agrônoma) em 23/09 17:40',
+# ---------- dados da ordem e do equipamento (versão v1 liberada) ----------
+OS = dict(id='OS-0424', ativ='Fungicida', op='Pulverização', local='Pivô 2 · Milho V10', area=80.0, versao='v1 liberada por Ana (agrônoma) em 23/09 17:40',
           janela='24/09 · 06:00–11:00', valida='24/09 18:00', resp='Marcos', req='REQ-039', almox='Rui')
 CJ = next(c for c in D2.CONJ if c['id'] == 'r1')
 EQ = dict(conj=CJ['conj'], tanque=3000, vazao=100, vel=CJ['vel'], barra=CJ['larg'], bicos='leque 110-015 · 3 bar')
@@ -111,7 +111,7 @@ def app():
                 f'<div style="{H("cg_st")}"><b style="font-size: 16px;">{H("cg_t")}</b>'
                 f'<div style="display: flex; gap: 14px; font-size: 13px;"><span>Tanque: <b>{H("cg_vol")}</b></span><span>Área: <b>{H("cg_area")}</b></span></div>'
                 f'<sc-for list="{H("cg_prods")}" as="p" hint-placeholder-count="1"><div style="display: flex; justify-content: space-between; font-size: 15px; padding: 6px 0; border-top: 1px solid {LINE};"><span>{H("p.p")}</span><b>{H("p.q")}</b></div></sc-for>'
-                f'<div style="font-size: 12.5px; color: {MUTED};">Complete com água até o volume do tanque, na ordem da instrução aprovada.</div></div>'
+                f'<div style="font-size: 12.5px; color: {MUTED};">Complete com água até o volume do tanque, na ordem da instrução liberada.</div></div>'
                 f'<span style="display: block; height: 6px; border-radius: 999px; background: {GRAYS}; overflow: hidden;"><span style="{H("bar_st")}"></span></span>'
                 f'<div style="font-size: 12px; color: {MUTED};">{H("feitas_t")}</div>'
                 f'<sc-for list="{H("lista")}" as="l" hint-placeholder-count="3"><div style="display: flex; justify-content: space-between; {H("l.st")}"><span>{H("l.t")}</span><span>{H("l.s")}</span></div></sc-for>')
@@ -170,13 +170,13 @@ def ficha():
             + f'<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">' + ''.join(kv('Produto', x['p']) + kv('Quantidade', f"{nf(x['reserv'])} {x['un']} · {nf(math.ceil(x['reserv']/5))} × {x['emb']}") + kv('Lote · validade', f"{x['lote']} · {x['val']}") + kv('Requisição', OS['req']) for x in PRODS) + '</div>'
             + f'<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 4px;">{linha("Entregue por (almoxarife)")}{linha("Recebido por (caldeiro)")}</div>'
             + sec('Caldeiro · preparo por carga')
-            + f'<div style="font-size: 12.5px;">Tanque útil {nf(EQ["tanque"])} L · vazão {nf(EQ["vazao"])} L/ha · área por carga {nf(AREA_CARGA)} ha. Coloque o produto indicado e complete com água até o volume da carga, na ordem da instrução aprovada. A última carga é proporcional à área que falta.</div>'
+            + f'<div style="font-size: 12.5px;">Tanque útil {nf(EQ["tanque"])} L · vazão {nf(EQ["vazao"])} L/ha · área por carga {nf(AREA_CARGA)} ha. Coloque o produto indicado e complete com água até o volume da carga, na ordem da instrução liberada. A última carga é proporcional à área que falta.</div>'
             + f'<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="{th}">Carga</th><th style="{th}">Calda</th><th style="{th}">Área</th>' + ''.join(f'<th style="{th}">{x["p"]} ({nf(x["dose"],2)} {x["un"]}/ha)</th>' for x in PRODS) + f'<th style="{th}">Feito</th><th style="{th}">Hora</th></tr></thead><tbody>{rows}{tot}</tbody></table>'
             + sec('Operador · aplicação')
             + f'<div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">{kv("Vazão", nf(EQ["vazao"])+" L/ha")}{kv("Velocidade", nf(EQ["vel"])+" km/h")}{kv("Barra", nf(EQ["barra"])+" m")}{kv("Bicos · pressão", EQ["bicos"])}{kv("Conjunto", "Trator 04 + PJ-3030")}</div>'
             + sec('Apontamento (lance no app quando houver sinal)')
             + f'<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px;">{linha("Data")}{linha("Início")}{linha("Fim")}{linha("Área feita (ha)")}{linha("Sobra (L)")}{linha("Ocorrência")}</div>'
-            + f'<div style="margin-top: auto; padding-top: 14px; border-top: 1px solid {LINE}; font-size: 11px; color: {MUTED};">Ficha impressa em 24/09 06:10 a partir da versão aprovada. Se a versão mudar, esta ficha perde a validade: o app avisa e o QR mostra a versão vigente. Calda preparada não é área aplicada.</div></div>')
+            + f'<div style="margin-top: auto; padding-top: 14px; border-top: 1px solid {LINE}; font-size: 11px; color: {MUTED};">Ficha impressa em 24/09 06:10 a partir da versão liberada. Se a versão mudar, esta ficha perde a validade: o app avisa e o QR mostra a versão vigente. Calda preparada não é área aplicada.</div></div>')
     HEIGHTS37[fname] = 1123
     return _page(fname, 'OS-0424 · ficha impressa', 794, 1123, body, bg='#fff')
 

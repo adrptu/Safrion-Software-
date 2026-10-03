@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """MB-03 · fechar turno (Chrome real, ≤ 15 verificações): limite de hectares desconta os turnos no aparelho (sem sinal);
-insumo fora da requisição (Adjuvante na OS-0421) sem pré-cálculo e sem baixa; resumo do turno fechado com ordem, dia, ha e horas;
+insumo fora da requisição (Adjuvante na OS-0421) sem pré-cálculo e sem baixa (informado, avisa que fecha em conferência); resumo do turno fechado com ordem, dia, ha e horas;
 um único acesso a Envios e recibos. Uso: python3 app_mb03_turno_test.py   (compile antes: areas.mobile.build())"""
 from app_lib import App
 
@@ -11,15 +11,16 @@ CORTE = """(()=>{const m=document.querySelector('main'); const mr=m.getBoundingC
 HINT = "(()=>{const i=document.querySelector('#ft_c1'); return i?i.parentElement.innerText.replace(/\\n/g,' / '):'-';})()"
 try:
     a.abrir('MB-01'); a.clk('Restaurar demonstração')
-    a.mudar("c.ordens['OS-0430'].aprov=true; return cenLiberar(c,'OS-0430');")   # 3 ordens na fila (pior caso de altura)
+    a.mudar("return cenLiberar(c,'OS-0430');")   # 3 ordens na fila (pior caso de altura)
     a.abrir('MB-03')
     a.ok(a.J("document.querySelectorAll('main a[href=\"MB-03x-recibo.dc.html\"]').length") == 1, 'MB-03: um único link para Envios e recibos')
     a.clk_sel('main button[title="Iniciar turno na OS-0421"]'); a.setv('#ft_ha', '20'); a.setv('#ft_h', '3')
     h = a.J(HINT)
     a.ok(a.J("document.querySelector('#ft_c0').value") == '10' and a.J("document.querySelector('#ft_c1').value") == '' and 'Fora da REQ-035 · nada com você' in h,
          'consumo: Fungicida A pré-calculado 10 L; Adjuvante (fora da REQ-035) vazio com dica: ' + h[:80])
-    a.setv('#ft_c1', '5'); a.clk('Fechar turno')
-    a.ok('Acima do que está com você: 0 L' in a.J(ALR) and a.cen("!!c.app.turno"), 'Adjuvante 5 L: erro junto ao campo e nada gravado')
+    a.setv('#ft_c1', '5'); w = a.J(HINT)   # CONC-07: acima do que está com você não é recusado; o turno fecha com o fato Em conferência
+    a.ok('Acima do que está com você (0 L): fecha em conferência com Rui (almoxarife).' in w and a.J(ALR) == '' and a.cen("!!c.app.turno"),
+         'Adjuvante 5 L: aviso de conferência junto ao campo, sem erro e nada gravado antes de fechar: ' + w[-90:])
     a.setv('#ft_c1', ''); a.clk('Fechar turno')
     det = a.cen("c.movs.filter(m=>m.tipo==='consumo').slice(-1)[0].det")
     a.ok(a.cen("!c.app.turno") and det == 'Fungicida A 10' and a.cen("Object.keys(c.ordens['OS-0421'].ap.slice(-1)[0].cons).join()") == 'Fungicida A',

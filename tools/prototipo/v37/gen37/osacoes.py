@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """Teste real (Chrome) — O.S. 26/09: cancelar sem execução e dispensar saldo (os-04), Nova ordem sem duplicar (os-05),
-OS-0431 aprovada com falta de máquina (os-06), selos e percentual (os-07)."""
+OS-0431 A liberar com falta de máquina (os-06), selos e percentual (os-07).
+01/10/2026 (decisão do proprietário): ordens só de água (OS-0419, OS-0422, OS-0423) saem da página O.S.; a contagem de
+Todas/Kanban é lida na própria página no início (10 em Santa Rita · 2026/27) e o cancelamento tira 1 dela."""
 import sys, os, time, subprocess, json
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
 from cdp import Chrome
@@ -9,7 +11,10 @@ HERE=os.path.dirname(os.path.abspath(__file__)); R=sys.argv[1] if len(sys.argv)>
 p=free(); srv=subprocess.Popen(['python3','-m','http.server',str(p),'--bind','127.0.0.1','--directory',R],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL); time.sleep(.8)
 c=Chrome(port=free()); J=c.js; OK=[]; FAIL=[]
 def chk(n,cond,info=''): (OK if cond else FAIL).append(n); print(('  ok  ' if cond else '  FALHOU ')+n+(' · '+str(info)[:240] if info!='' else ''))
-def pan(): return J("(()=>{const a=document.querySelector('aside[role=dialog]'); return a?a.innerText.replace(/\\s+/g,' '):'';})()") or ''
+# 01/10: o painel recolhe o que não faz a ordem andar na fase; o teste abre tudo antes de ler
+def pan():
+    if J('(()=>{const bs=[...document.querySelectorAll(\'aside[role=dialog] section[aria-label] > button[aria-expanded="false"]\')]; bs.forEach(b=>b.click()); return bs.length;})()'): time.sleep(.3)
+    return J("(()=>{const a=document.querySelector('aside[role=dialog]'); return a?a.innerText.replace(/\\s+/g,' '):'';})()") or ''
 def temb(t): return bool(J(f"[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==={json.dumps(t)})"))
 def btn(t,root='aside[role=dialog]'):
     r=J(f"(()=>{{const b=[...document.querySelectorAll({json.dumps(root+' button')})].find(b=>b.innerText.trim()==={json.dumps(t)}); if(!b) return false; b.click(); return true;}})()"); time.sleep(.35); return r
@@ -30,24 +35,26 @@ def cartao(id_): return J(f"(()=>{{const k=[...document.querySelectorAll('[aria-
 try:
     c.size(1440,1000); c.goto(f'http://127.0.0.1:{p}/OS.dc.html',wait=1.3)
     chk('sem erro JS', (J("window.__err||''") or '')=='')
+    N0=len(ids())   # 01/10: só ordens agrícolas; as de água vivem na Irrigação
+    chk('lista inicial: 10 ordens agrícolas = chip Todas, sem OS-0419/OS-0422/OS-0423', N0==10 and chips()[:1]==[f'Todas {N0}'] and not any(x in ids() for x in ('OS-0419','OS-0422','OS-0423')), (ids(), chips()[:1]))
     # ---------- os-07: selos e percentual ----------
     l=linha('OS-0421'); chk('lista mostra percentual: 190 / 350 ha · 54 % · saldo 160 ha', '190 / 350 ha · 54 %' in l and 'saldo 160 ha' in l, l)
-    chk('OS-0430 com selo Aguardando agrônomo', 'Aguardando agrônomo' in linha('OS-0430'), linha('OS-0430'))
-    l=linha('OS-0420'); chk('OS-0420 com os dois selos (impedida + revisão de saldo)', 'Impedida · ativo bloqueado' in l and 'Revisão de saldo pendente · v3' in l, l)
+    l=linha('OS-0430'); chk('OS-0430 A liberar com dono Ana (agrônoma), sem selo de agrônomo', 'A liberar' in l and 'Ana (agrônoma) · ' in l and 'Aguardando agrônomo' not in l, l)
+    l=linha('OS-0420'); chk('OS-0420 impedida, sem selo de revisão', 'Impedida · ativo bloqueado' in l and 'Revisão de saldo' not in l, l)
     kanban(); k=cartao('OS-0421'); chk('cartão do Kanban: 190/350 ha · 54 % · saldo 160 ha', '190/350 ha · 54 % · saldo 160 ha' in k, k)
-    chk('cartão da OS-0420 com Revisão de saldo pendente · v3', 'Revisão de saldo pendente · v3' in cartao('OS-0420'), cartao('OS-0420'))
+    k=cartao('OS-0420'); chk('cartão da OS-0420 sem selo de revisão', 'Impedida · ativo bloqueado' in k and 'Revisão de saldo' not in k, k)
     lista()
-    # ---------- os-06: OS-0431 aprovada, falta máquina ----------
-    l=linha('OS-0431'); chk('OS-0431 com selos Aprovada pelo agrônomo e Falta máquina · Trator T1 bloqueado', 'Aprovada pelo agrônomo' in l and 'Falta máquina · Trator T1 bloqueado' in l, l)
+    # ---------- os-06: OS-0431 A liberar, falta máquina ----------
+    l=linha('OS-0431'); chk('OS-0431 com o selo Falta máquina · Trator T1 bloqueado, sem selo de aprovação', 'Falta máquina · Trator T1 bloqueado' in l and 'Aprovada' not in l, l)
     cor=J("""(()=>{const c=(id,t)=>{ const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith(id)); const s=[...r.querySelectorAll('span')].filter(x=>x.innerText.trim().startsWith(t)).pop(); return getComputedStyle(s).color; };
-      return [c('OS-0431','Falta máquina'), c('OS-0420','Impedida'), c('OS-0430','Aguardando')];})()""")
+      return [c('OS-0431','Falta máquina'), c('OS-0420','Impedida'), c('OS-0421','Parcial')];})()""")
     chk('falta de máquina da OS-0431 continua vermelha (mesma cor de Impedida)', cor and cor[0]==cor[1] and cor[0]!=cor[2], cor)
     ov=J("(()=>{const t=document.querySelector('[role=table]').parentElement; return [t.scrollWidth,t.clientWidth];})()"); chk('lista cabe sem rolagem horizontal', ov[0]<=ov[1]+1, ov)
-    chk('cabeçalho conta 2 impedidas (OS-0420 e OS-0431)', '2 em execução · 2 impedidas' in J("document.body.innerText"))
+    chk('cabeçalho conta 3 impedidas (OS-0418, OS-0420 e OS-0431)', '2 em execução · 3 impedidas' in J("document.body.innerText"))
     abrir('OS-0431'); t=pan()
-    chk('OS-0431: versão v1 aprovada, sem pedir nova revisão', 'REC-014 v2 · v1 aprovada' in t and not temb('Revisar versão'), t[:300])
+    chk('OS-0431: versão v1 da REC-014 v2, sem revisão', 'REC-014 v2 · v1' in t and 'v1 aprovada' not in t and not temb('Revisar versão'), t[:300])
     chk('OS-0431: liberar bloqueado por falta de máquina, dono PCP', 'Liberar bloqueado: Trator T1' in t and 'Quem resolve: PCP' in t and not temb('Liberar para execução'))
-    chk('OS-0431: situação cita a retirada de Liberadas e a aprovação preservada, sem citar o Trator 02', 'Retirada de Liberadas em 23/09' in t and 'Aprovação da v1 preservada' in t and 'Confirmar substituto' in t and 'Trator 02' not in t.split('SITUAÇÃO ATUAL')[-1].split('ORIGEM')[0], t[-500:])
+    chk('OS-0431: situação cita a retirada de Liberadas, sem citar o Trator 02', 'Retirada de Liberadas em 23/09' in t and 'Confirmar substituto' in t and 'Trator 02' not in t.split('SITUAÇÃO ATUAL')[-1].split('ORIGEM')[0], t[-500:])
     chk('OS-0431: origem mostra liberada e retirada pela INSP-105', 'Liberada e retirada em 23/09 pela INSP-105' in t)
     chk('OS-0431: pode ser cancelada (sem realizado)', temb('Cancelar sem execução') and not temb('Dispensar saldo'))
     fechar()
@@ -61,10 +68,11 @@ try:
     chk('toast: cancelada e reserva de 65 L do F26-02 liberada', 'OS-0424 cancelada sem execução' in tt and 'Reserva de 65 L do lote F26-02 liberada' in tt, tt)
     t=pan(); chk('painel: Canceladas, somente consulta, sem ações', 'Canceladas' in t and 'somente consulta' in t and not temb('Cancelar sem execução') and not temb('Iniciar execução'), t[:300])
     fechar()
-    chk('sai da lista (Todas)', 'OS-0424' not in ids() and len(ids())==12, ids())
-    cs=chips(); chk('chip Canceladas depois de Encerradas, com 1', cs[-1]=='Canceladas 1' and cs[-2].startswith('Encerradas') and cs[0]=='Todas 12', cs)
+    chk('sai da lista (Todas)', 'OS-0424' not in ids() and len(ids())==N0-1, ids())
+    cs=chips(); chk('chip Canceladas depois de Encerradas, com 1', cs[-1]=='Canceladas 1' and cs[-2].startswith('Encerradas') and cs[0]==f'Todas {N0-1}', cs)
     chip_fase('Canceladas'); chk('chip Canceladas mostra a OS-0424', ids()==['OS-0424'] and 'Canceladas' in linha('OS-0424'), (ids(),linha('OS-0424')))
-    chip_fase('Todas'); kanban(); chk('sai do quadro (Kanban)', cartao('OS-0424')=='' and J("document.querySelectorAll('[aria-label=\"Kanban das ordens\"] [role=button]').length")==12)
+    chip_fase('Todas'); kanban(); nk=J("document.querySelectorAll('[aria-label=\"Kanban das ordens\"] [role=button]').length")
+    chk('sai do quadro (Kanban)', cartao('OS-0424')=='' and nk==N0-1, nk)
     lista()
     # ---------- os-04: dispensar saldo ----------
     abrir('OS-0420'); chk('OS-0420 (com realizado): Dispensar saldo, nunca Cancelar', temb('Dispensar saldo') and not temb('Cancelar sem execução'))

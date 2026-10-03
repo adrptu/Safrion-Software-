@@ -536,13 +536,15 @@ def co06():
         [idrw('Inspecionar lote',dict(title='Nova inspeção',sub='amostra e método do padrão do produto',
            fields=[('Lote','L39-120 · Mamão classe A'),('Padrão / método','calibre e firmeza · amostra 2%'),('Responsável','Equipe qualidade · Marta'),('Prazo','24/09/2026')],
            confirm='Abrir inspeção',done='INSP-94 aberta · lote permanece Aguardando inspeção'),'lab','Abrir nova inspeção pelo padrão do produto',primary=True)],g_in)
+      + _car_sec()   # carência e destino dos lotes de mamão (MAPA-CARENCIA-LMR-20261003)
       + sec('Árvore de lotes e recolhimento','Rastreie para trás e para frente, mesmo sem saldo no lote.',
         [imsg('Rastrear clientes','Rastreio do L27-013: nenhum cliente atendido — lote nunca saiu para venda; para trás: OB-0104 ← bica L27-018/019 ← colheita C1 de jul/26.','layers','Rastrear clientes e origem do lote L27-013'),
          ilnk('Abrir recolhimento','VE-06.dc.html','alert','Abrir o caso de recolhimento no Comercial'),ilnk('Ver viagens afetadas','LO-03.dc.html','truck','Ver viagens que levaram lotes afetados')],
         nota(f'Bloqueio {B("invalida a elegibilidade das reservas afetadas")} e avisa o Comercial automaticamente — '
              f'tentativas de reservar ou expedir o lote falham com motivo (ver CO-07). A simulação de recolhimento usa a mesma árvore, mesmo com saldo zero.'),state='gray'))
-    EXTRAJS[0]=JSBASE+r'''
-function EXTRAVALS(self,v){ self.g2after=(gid,rows,r)=>{ if(gid==='g_in'&&r&&r.p.przo){ r.p.przo=[{k:'txt',t:r.v.resp}].concat(r.p.przo.slice(1)); r.s.przo=r.v.resp; } }; }
+    # + carência e destino dos lotes (MAPA-CARENCIA-LMR-20261003): cenário, motor e CARVALS
+    EXTRAJS[0]=JSBASE+_car_js()+r'''
+function EXTRAVALS(self,v){ CARVALS(self,v); self.g2after=(gid,rows,r)=>{ if(gid==='g_in'&&r&&r.p.przo){ r.p.przo=[{k:'txt',t:r.v.resp}].concat(r.p.przo.slice(1)); r.s.przo=r.v.resp; } }; }
 '''
     shell37('CO-06','Qualidade e rastreabilidade',corpo,
       subtitle='Inspeções, bloqueios e árvore de lotes; liberar e bloquear são decisões da qualidade, independentes do encerramento da produção.',
@@ -646,3 +648,93 @@ function EXTRAVALS(self,v){ C7VIS.forEach((k,i)=>{ v['c7v'+i]=()=>self.setState(
 
 def build():
     co01(); co02(); co02det(); co03(); co04(); co05(); co05det(); co06(); co06det(); co07()
+
+
+# ===================== Carência e destino dos lotes (MAPA-CARENCIA-LMR-20261003) =====================
+# Lote → avaliação do destino: origem (parcela + data de colheita), aplicações até a colheita, pós-colheita, genealogia, regra do mercado,
+# evidência (laudo) e o que falta com quem resolve. Motor e regras em dados_carencia.py (o mesmo do Mapa e da O.S.), lotes do cenário.
+def _car_js():
+    import cenario, dados_carencia as DCAR
+    return cenario.js_prefixo()+DCAR.js_nucleo()+r"""
+function carBl(t,itens,vazio){ return {t,itens,vazio:vazio||'',temItens:itens.length>0,semItens:!itens.length}; }
+function carIt(t,sub,cor){ const b={red:'#C8553D',yellow:'#D4B25A',green:'#5F8F55',gray:'#C9CFCB'}[cor||'gray'];
+  return {t,sub:sub||'',hasSub:!!sub,st:'border-left:3px solid '+b+';padding:5px 9px;background:#FFFFFF;border-radius:6px;display:flex;flex-direction:column;gap:2px;'}; }
+function CARVALS(self,v){ cenOuvir(self); const c=cenGet(); const L=carLotes(c); const ids=Object.keys(L); const av={}; ids.forEach(k=>{ av[k]=carAvaliar(c,k); });
+  const ORD={nao_conforme:0,pendente:1,nao_avaliado:2,conforme:3}; ids.sort((a,b)=>(ORD[av[a].st]-ORD[av[b].st])||((L[a].d||'')<(L[b].d||'')?1:-1)||(a<b?-1:1));
+  if(!self.__carh){ self.__carh=1; let h=''; try{ h=decodeURIComponent(location.hash.slice(1)); }catch(e){}
+    if(L[h]) setTimeout(()=>{ self.setState({carsel:h}); setTimeout(()=>{ const el=document.getElementById('car-det'); if(el) el.scrollIntoView({block:'start'}); },80); },0); }
+  const sel=(self.state.carsel&&L[self.state.carsel])?self.state.carsel:'';
+  const orig=(l)=>carAncestrais(L,l.id).filter(x=>x.tipo==='campo').map(x=>carNome(x.tal)+' ('+((CARD.tal[x.tal]||{}).faz||'')+') · '+carBr(x.d)).join(' + ');
+  const nomeD=(d)=>d?((CARD.dest[d]||{}).nome||d):'sem destino';
+  v.car_fonte='Lotes de campo vêm dos apontamentos das O.S. de colheita (parcela + data). Pós-colheita, mistura, divisão, laudo e destinos iniciais são registros demonstrativos. '
+    +'LMR Brasil: ANVISA (monografias, extração '+carBr(CARD.lmrf.extraido)+'/'+CARD.lmrf.extraido.slice(0,4)+'). Regras de exportação não carregadas; o "Mercado sintético" usa valores sintéticos.';
+  const Nn=(st,u,p)=>{ const n=ids.filter(k=>av[k].st===st).length; return n+' '+(n===1?u:p); };
+  v.car_n=ids.length+' lotes · '+Nn('nao_conforme','não conforme','não conformes')+' · '+Nn('pendente','pendente','pendentes')+' · '+Nn('nao_avaliado','sem destino','sem destino')+' · '+Nn('conforme','conforme no escopo','conformes no escopo');
+  v.car_lotes=ids.map(k=>{ const l=L[k], a=av[k]; const on=k===sel;
+    return {id:k,orig:(l.tipo==='campo'?'colhido · ':(l.tipo==='mistura'?'mistura · ':'divisão · '))+orig(l)+(l.tipo!=='campo'&&l.q?' · '+l.q:''),dest:'destino: '+nomeD(a.dest)+(a.lib&&a.lib.valida?' · liberado':'')+(a.libSusp?' · liberação suspensa':''),rot:a.rot,chst:co_chipst(a.cor),acao:a.acao+(on?' ▾':' ›'),on:on?'true':'false',
+      go:()=>self.setState({carsel:on?'':k,cardest:null,carerr:''}),
+      st:'display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;width:100%;box-sizing:border-box;text-align:left;padding:9px 12px;border-radius:10px;cursor:pointer;font-family:inherit;color:#15201A;font-size:13px;'+(on?'border:2px solid #1E7A4C;background:#F4FAF6;':'border:1px solid #E4E9E5;background:#FFFFFF;')}; });
+  v.car_has=!!sel; v.car_err=self.state.carerr||''; v.car_hasErr=!!v.car_err;
+  const E0=()=>{ v.car_id=''; v.car_tit=''; v.car_rot=''; v.car_chst=''; v.car_dests=[]; v.car_dest=''; v.car_setdest=()=>{}; v.car_save=()=>{}; v.car_save_t=''; v.car_save_st=''; v.car_bls=[]; v.car_prox='';
+    v.car_lib_has=false; v.car_lib_btn=false; v.car_lib_t=''; v.car_lib_bt=''; v.car_lib_st=''; v.car_lib_susp=false; v.car_lib_susp_t=''; v.car_lib_go=()=>{}; };
+  if(!sel){ E0(); return; }
+  const l=L[sel], a=av[sel]; v.car_id=sel; v.car_rot=a.rot; v.car_chst=co_chipst(a.cor)+'; white-space: normal; max-width: 100%; box-sizing: border-box;';   /* no celular a situação longa quebra em vez de vazar a seção */
+  v.car_tit=(l.tipo==='campo')?('colhido em '+carBr(l.d)+' no '+carNome(l.tal)+(l.parc?' ('+l.parc+')':'')+', fazenda '+((CARD.tal[l.tal]||{}).faz||'—')+' · '+l.q):((l.tipo==='mistura'?'mistura de ':'divisão de ')+l.pais.join(' + ')+' em '+carBr(l.d)+(l.q?' · '+l.q:''));
+  v.car_prox={nao_avaliado:'Próximo passo: o Comercial define o destino do lote; a avaliação começa pela regra desse mercado.',pendente:'Próximo passo: resolver o que falta abaixo; até lá o lote não é liberado para este destino.',
+    conforme:'Conforme apenas neste destino e neste escopo. Outro destino pede nova avaliação.',nao_conforme:'Não conforme: '+CARD.quem.ag+' e a Qualidade registram a destinação compatível; o fato não é apagado.'}[a.st];
+  const cur=(self.state.cardest&&self.state.cardest.id===sel)?self.state.cardest.v:a.dest; const muda=cur!==a.dest;
+  v.car_dests=[{v:'',t:'— sem destino —'}].concat(Object.keys(CARD.dest).map(k=>{ const D=CARD.dest[k]; return {v:k,t:D.nome+(D.sint?' (valores sintéticos)':(D.indef?'':(D.carregada?'':' · regra não carregada')))}; }));
+  v.car_dest=cur; v.car_setdest=(e)=>self.setState({cardest:{id:sel,v:e.target.value},carerr:''});
+  v.car_save_t=a.dest?'Trocar destino e reavaliar':'Definir destino';
+  const BT='font-family:inherit;font-size:13px;font-weight:700;padding:8px 14px;border-radius:9px;cursor:pointer;white-space:nowrap;';
+  v.car_save_st=BT+((muda||a.st==='nao_avaliado')?'background:#1E7A4C;color:#FFFFFF;border:1px solid #1E7A4C;':'background:#FFFFFF;color:#15201A;border:1px solid #E4E9E5;');
+  v.car_save=()=>{ const s=self.state; const d=(s.cardest&&s.cardest.id===sel)?s.cardest.v:a.dest; if(d===a.dest){ self.setState({carerr:'Escolha um destino diferente do atual para reavaliar.'}); return; }
+    const r=cenMudar(self,c0=>carc_destino(c0,sel,d)); if(r.erro) self.setState({carerr:r.erro}); else self.setState({cardest:null,carerr:''}); };
+  // liberação comercial do lote para o destino: comando impedido fora de "conforme no escopo"; dado novo ou outro destino a suspende
+  const lb=a.lib, dn=nomeD(a.dest); v.car_lib_has=(!!a.dest&&!muda)||!!a.libSusp; v.car_lib_btn=!!a.dest&&!muda&&a.st==='conforme'&&!(lb&&lb.valida);
+  v.car_lib_t=(lb&&lb.valida)?('Liberado para '+dn+(lb.at?' às '+lb.at:'')+' por '+lb.por+' · só neste destino e escopo.'):(a.st==='conforme'?'Conforme no escopo: registre a liberação comercial para '+dn+'.'
+    :'Liberação comercial impedida enquanto o lote estiver '+a.rot.split(' · ')[0].toLowerCase()+': resolva o que falta abaixo.');
+  v.car_lib_bt='Liberar para '+dn; v.car_lib_st=BT+'background:#1E7A4C;color:#FFFFFF;border:1px solid #1E7A4C;';
+  v.car_lib_susp=!!a.libSusp; v.car_lib_susp_t=a.libSusp?(a.libSusp.t+' · '+a.libSusp.q):'';
+  v.car_lib_go=()=>{ const r=cenMudar(self,c0=>carc_liberar_lote(c0,sel)); if(r.erro) self.setState({carerr:r.erro}); else self.setState({carerr:''}); };
+  const bl=[];
+  bl.push(carBl('O que impede ou falta · quem resolve',a.motivos.map(x=>carIt(x.t,'Quem resolve: '+x.q,'red')).concat(a.faltas.map(x=>carIt(x.t,'Quem resolve: '+x.q,'yellow'))),'Nada pendente no escopo avaliado.'));
+  bl.push(carBl('Escopo da avaliação',a.dest&&(CARD.dest[a.dest]||{}).carregada?[carIt((a.sint?'Valores sintéticos de demonstração · ':'')+'Regra: '+a.regra,a.escopo,a.sint?'yellow':'gray')]:[],a.dest?'Regra do destino ainda não avaliável (veja o que falta).':'Sem destino: nada foi avaliado.'));
+  bl.push(carBl('Origem e genealogia',carAncestrais(L,sel).map(x=>carIt(x.id+' · '+(x.tipo==='campo'?('colheita '+x.os+' dia '+x.q.split(' dia ')[1]+' · '+carNome(x.tal)+(x.parc?' ('+x.parc+')':'')+' · '+carBr(x.d)+' · '+carNum(x.ha)+' ha'+(x.st==='Provisório'?' · apontamento provisório':'')):((x.tipo==='mistura'?'mistura de ':'divisão de ')+x.pais.join(' + ')+' em '+carBr(x.d)+(x.q?' · '+x.q:''))),x.fonte||'','gray'))));
+  bl.push(carBl('Aplicações de defensivo até a colheita',a.apl.map(r=>carIt(r.p+' · '+r.os+' dia '+r.dia+' · aplicado em '+carBr(r.d)+' · origem '+r.lote,'carência '+(r.na?'não se aplica ('+r.txt+')':r.txt)+(r.fim?' · até '+carAte(r.fim):''),'gray')),
+    'Nenhuma aplicação apontada na parcela até a colheita. Aplicação posterior à colheita não conta para este lote.'));
+  bl.push(carBl('Pós-colheita',a.pos.map(t=>carIt(t.p+' · '+carBr(t.d)+' · lote '+t.lote,(t.reg?'uso pós-colheita conferido':'uso pós-colheita não conferido no registro')+(t.fonte?' · '+t.fonte:''),t.reg?'gray':'yellow')),'Nenhum tratamento pós-colheita registrado.'));
+  bl.push(carBl('Limites do destino e resíduos',a.ings.map(g=>carIt(g.ingr+' · '+(g.lim||'sem limite carregado'),'origem: '+g.de+(g.res?' · resultado: '+g.res:''),g.st==='ok'?'gray':(g.st==='acima'?'red':'yellow'))),
+    a.dest&&(CARD.dest[a.dest]||{}).carregada?'Nenhum ingrediente aplicado na origem do lote.':'Limites não avaliados: destino sem regra carregada ou indefinido.'));
+  const hs=(((c.car||{}).hist||{})[sel]||[]); bl.push(carBl('Histórico de avaliações',hs.slice().reverse().map(h=>carIt((h.at?h.at+' · ':'')+'destino '+nomeD(h.de)+' → '+nomeD(h.para),'antes: '+h.rot0+' · depois: '+h.rot1,'gray')),'Nenhuma troca de destino registrada.'));
+  v.car_bls=bl; }
+"""
+
+def _car_sec():
+    cap=f'font-size: 10.5px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: {MUTED};'
+    sel=f'font-family: inherit; font-size: 13px; padding: 8px 10px; border: 1px solid {LINE}; border-radius: 9px; background: #fff; max-width: 100%; box-sizing: border-box;'
+    lista=(f'<div role="list" aria-label="Lotes de mamão por avaliação" style="display: flex; flex-direction: column; gap: 6px;"><sc-for list="{H("car_lotes")}" as="l" hint-placeholder-count="3">'
+           f'<div role="listitem"><button type="button" onClick="{H("l.go")}" aria-expanded="{H("l.on")}" aria-controls="car-det" style="{H("l.st")}">'
+           f'<b style="font-weight: 800;">{H("l.id")}</b><span style="color: {MUTED}; min-width: 0;">{H("l.orig")}</span><span style="color: {MUTED};">{H("l.dest")}</span>'
+           f'<span style="{H("l.chst")}">{H("l.rot")}</span><span style="margin-left: auto; font-weight: 700; text-decoration: underline; text-underline-offset: 3px;">{H("l.acao")}</span></button></div></sc-for></div>')
+    blocos=(f'<sc-for list="{H("car_bls")}" as="b" hint-placeholder-count="3"><div style="display: flex; flex-direction: column; gap: 5px;"><div style="{cap}">{H("b.t")}</div>'
+            f'<sc-if value="{H("b.temItens")}" hint-placeholder-val="{T()}"><sc-for list="{H("b.itens")}" as="i" hint-placeholder-count="2"><div style="{H("i.st")}"><span style="font-size: 12.8px; font-weight: 700; line-height: 1.35;">{H("i.t")}</span>'
+            f'<sc-if value="{H("i.hasSub")}" hint-placeholder-val="{T()}"><span style="font-size: 12px; color: {MUTED}; line-height: 1.35;">{H("i.sub")}</span></sc-if></div></sc-for></sc-if>'
+            f'<sc-if value="{H("b.semItens")}" hint-placeholder-val="{F()}"><div style="font-size: 12.5px; color: {MUTED};">{H("b.vazio")}</div></sc-if></div></sc-for>')
+    det=(f'<sc-if value="{H("car_has")}" hint-placeholder-val="{F()}"><section id="car-det" aria-label="Avaliação do lote {H("car_id")}" style="display: flex; flex-direction: column; gap: 12px; padding: 14px; border: 1px solid {LINE}; border-radius: 12px; background: {BG};">'
+         f'<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px;"><h3 style="margin: 0; font-size: 16px; font-weight: 800;">Lote {H("car_id")}</h3><span style="{H("car_chst")}">{H("car_rot")}</span></div>'
+         f'<div style="font-size: 13px; color: {MUTED}; margin-top: -6px;">{H("car_tit")}</div>'
+         f'<div role="status" style="font-size: 13px; font-weight: 700; line-height: 1.45;">{H("car_prox")}</div>'
+         f'<div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px;"><label style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 700; min-width: 0; max-width: 100%;">Destino do lote'
+         f'<select value="{H("car_dest")}" onChange="{H("car_setdest")}" style="{sel}"><sc-for list="{H("car_dests")}" as="d" hint-placeholder-count="3"><option value="{H("d.v")}">{H("d.t")}</option></sc-for></select></label>'
+         f'<button type="button" onClick="{H("car_save")}" style="{H("car_save_st")}">{H("car_save_t")}</button></div>'
+         f'<sc-if value="{H("car_hasErr")}" hint-placeholder-val="{F()}"><div role="alert" style="font-size: 12.5px; font-weight: 700; color: {RED};">{H("car_err")}</div></sc-if>'
+         f'<sc-if value="{H("car_lib_has")}" hint-placeholder-val="{F()}"><div role="group" aria-label="Liberação comercial do lote" style="display: flex; flex-direction: column; gap: 6px;"><div style="{cap}">Liberação comercial</div>'
+         f'<div style="font-size: 13px; line-height: 1.45;">{H("car_lib_t")}</div>'
+         f'<sc-if value="{H("car_lib_btn")}" hint-placeholder-val="{F()}"><div><button type="button" onClick="{H("car_lib_go")}" style="{H("car_lib_st")}">{H("car_lib_bt")}</button></div></sc-if>'
+         f'<sc-if value="{H("car_lib_susp")}" hint-placeholder-val="{F()}"><div role="alert" style="font-size: 12.5px; font-weight: 700; color: {RED};">{H("car_lib_susp_t")}</div></sc-if></div></sc-if>'
+         f'{blocos}</section></sc-if>')
+    corpo=(f'<div style="display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 12.5px; color: {MUTED}; line-height: 1.5;">{H("car_fonte")}</div>'
+           f'<div style="font-size: 13px; font-weight: 700;">{H("car_n")}</div>{lista}{det}</div>')
+    return sec('Carência e destino dos lotes de mamão','Avalie cada lote para o destino: origem, aplicações até a colheita, pós-colheita, limite do mercado e evidência. Carência cumprida não é conformidade.',
+               [ilnk('Ver carência no mapa','IN-04.dc.html#car','clock','Abrir a camada Carência e destino do mapa')],corpo,state='yellow')

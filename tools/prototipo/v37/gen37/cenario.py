@@ -3,11 +3,14 @@
 Uso nas áreas: EXTRAJS[0] = cenario.js_prefixo() + <js da tela>; a tela chama cenOuvir(self) e lê cenGet()."""
 import json, os
 import dados2 as D2
+import dados_lagoa_safra as DL
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REQ_DA_OS = {'OS-0417': 'REQ-031', 'OS-0421': 'REQ-035', 'OS-0420': 'REQ-036', 'OS-0418': 'REQ-038', 'OS-0424': 'REQ-039', 'OS-0425': 'REQ-040'}
 EMB = {'Fungicida A': 'galão 5 L', 'Glifosato 480': 'galão 20 L', '2,4-D 806': 'galão 20 L', 'Óleo mineral': 'galão 20 L', 'Adjuvante espalhante': 'galão 5 L',
        'NPK 20-05-20': 'big bag 1.000 kg', 'MAP 11-52': 'saco 50 kg', 'Semente de soja 58 W': 'saco 40 kg', 'Ureia 45%': 'saco 50 kg'}
+EMB.update(DL.EMB)
+REQ_DA_OS.update({oid: r[0] for oid, r in DL.REQS.items()})
 
 
 def seed():
@@ -21,12 +24,19 @@ def seed():
     for k, l in lotes.items(): lote_de.setdefault(l['prod'], l['lote'])
     # saldos do estoque sem lote registrado ganham um lote com o mesmo total (entrega e devolução são por lote)
     UN = {x['prod']: x['un'] for p in D2.PLANOS for a in p['atividades'] for x in a['prods']}
-    for i, (item, q) in enumerate(sorted(D2.ESTOQUE.items())):
+    # numeração dos lotes automáticos da Santa Rita preservada; a Lagoa Grande tem numeração e almoxarifado próprios
+    base = sorted((k, v) for k, v in D2.ESTOQUE.items() if k not in DL.ESTOQUE)
+    for i, (item, q) in enumerate(base):
         if q <= 0 or item in lote_de: continue
         un = UN.get(item, 'L' if any(w in item for w in ('Fungicida', 'Inseticida', 'Acaricida', 'Adjuvante', 'Óleo', '2,4-D', 'Cletodim', 'Inoculante', 'Atrazina', 'Diquat')) else 'kg')
         cod = (''.join(w[0] for w in item.replace(',', ' ').split() if w[0].isalpha()) or ''.join(ch for ch in item if ch.isalpha()))[:2].upper() + f'26-{i + 1:02d}'
         local = 'Almox. defensivos' if un == 'L' else 'Galpão 1'
         lotes[item + '|' + cod] = dict(prod=item, lote=cod, local=local, un=un, fisico=q, quarentena=0, reservado=0, validade='12/2027')
+        lote_de[item] = cod
+    for i, (item, q) in enumerate(sorted(DL.ESTOQUE.items())):
+        if q <= 0 or item in lote_de: continue
+        un = UN.get(item, 'kg'); cod = f'LG26-{i + 1:02d}'
+        lotes[item + '|' + cod] = dict(prod=item, lote=cod, local='Almox. Lagoa Grande', un=un, fisico=q, quarentena=0, reservado=0, validade='12/2027')
         lote_de[item] = cod
     reqs = {}
     for r in D2.REQUISICOES:
@@ -37,9 +47,8 @@ def seed():
     ordens = {}
     for o in ords:
         v = str(o.get('versao', ''))
-        aprov = ('aprovada' in v) and ('em revisão' not in v.split('·')[-1] or o['id'] == 'OS-0420')
         ins = [dict(p=x['p'], dose=x['dose'], un=x['un'], tot=x['tot'], emb=EMB.get(x['p'], '')) for x in o.get('ins', [])]
-        ordens[o['id']] = dict(id=o['id'], tipo=o['tipo'], talhao=o['talhao'], area=o.get('area') or 0, etapa=o['etapa'], versao=v, aprov=aprov,
+        ordens[o['id']] = dict(id=o['id'], tipo=o['tipo'], talhao=o['talhao'], area=o.get('area') or 0, etapa=o['etapa'], versao=v,
                                realizado=o.get('realizado') or 0, saldo=o.get('saldo') if o.get('saldo') is not None else (o.get('area') or 0),
                                resp=o['resp'], ins=ins, req=REQ_DA_OS.get(o['id']), selos=o.get('selos', []),
                                ap=[dict(d=a['d'], dia=a['dia'], ha=a['ha'], st=a['st'], sinc=True, origem='web') for a in o.get('ap', [])],
@@ -55,7 +64,18 @@ def seed():
             if key in lotes: lotes[key]['reservado'] += res
             itens.append(dict(prod=x['p'], lote=lt, un=x['un'], emb=x.get('emb', ''), solicitado=res, entregue=0, consumido=0, devolvido=0, custodia=0, confirmado=False))
         reqs[rid] = dict(id=rid, os=oid, estado='Reservada', itens=itens)
-    return dict(v=1, rev=0, ordens=ordens, reqs=reqs, lotes=lotes, movs=[], ocorr=[],
+    # Lagoa Grande: entregue e consumido pela fração de cada requisição; o que não foi entregue fica reservado no lote
+    for oid, (rid, fe, fc) in DL.REQS.items():
+        o = ordens.get(oid)
+        if not o: continue
+        itens = []
+        for x in o['ins']:
+            lt = lote_de.get(x['p'], '—'); key = x['p'] + '|' + lt; sol = x['tot']; ent = round(sol * fe, 3); con = round(sol * fc, 3)
+            if key in lotes and sol - ent > 0: lotes[key]['reservado'] += sol - ent
+            itens.append(dict(prod=x['p'], lote=lt, un=x['un'], emb=x.get('emb', ''), solicitado=sol, entregue=ent, consumido=con, devolvido=0, custodia=round(ent - con, 3), confirmado=ent > 0))
+        reqs[rid] = dict(id=rid, os=oid, estado=('Reservada' if fe == 0 else 'Entregue'), itens=itens)
+    # v=2 (01/10, O.S. sem revisão): descarta o cenário salvo no navegador que ainda tinha aprov, selos de aprovação e recibo APV-
+    return dict(v=2, rev=0, ordens=ordens, reqs=reqs, lotes=lotes, movs=[], ocorr=[],
                 app=dict(online=True, fila=[], turno=None, operador='Marcos'))
 
 
@@ -66,5 +86,5 @@ def js_prefixo():
 if __name__ == '__main__':
     import sys; sys.path.insert(0, HERE)
     s = seed()
-    for k, o in s['ordens'].items(): print(k, o['etapa'], 'aprov' if o['aprov'] else '-', o['req'], o['realizado'], '/', o['area'], [i['p'] for i in o['ins']])
+    for k, o in s['ordens'].items(): print(k, o['etapa'], o['versao'], o['req'], o['realizado'], '/', o['area'], [i['p'] for i in o['ins']])
     for k, r in s['reqs'].items(): print(k, r['os'], r['estado'], [(i['prod'], i['lote'], i['solicitado'], i['entregue'], i['custodia']) for i in r['itens']])

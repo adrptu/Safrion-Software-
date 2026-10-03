@@ -23,8 +23,11 @@ LIN=lambda n: J(f"(()=>{{const r={ROWS}.find(r=>r.innerText.indexOf({json.dumps(
 ABRE=lambda n: J(f"(()=>{{const r={ROWS}.find(r=>r.innerText.indexOf({json.dumps(n)})>=0); (r.querySelector('[role=cell] span')||r).click();}})()") or time.sleep(.4)
 FILS=lambda: J("[...document.querySelectorAll('[role=group][aria-label=\"Filtrar por papel\"] button')].map(b=>b.innerText.replace(/\\s+/g,' ').trim()).join(' | ')")
 FIL=lambda t: J(f"[...document.querySelectorAll('[role=group][aria-label=\"Filtrar por papel\"] button')].find(b=>b.innerText.trim().startsWith({json.dumps(t)})).click()") or time.sleep(.3)
-NOVO=lambda: J("[...document.querySelectorAll('header button')].find(b=>b.innerText.trim()==='Cadastrar parceiro').click()") or time.sleep(.4)
-def cob(g): return J(f"(()=>{{const t=document.querySelectorAll('[role=table]')[1]; if(!t) return null; const r=[...t.querySelectorAll('[role=row]')].find(r=>r.innerText.split('\\n')[0].trim()==={json.dumps(g)}); return r?r.innerText.replace(/\\s+/g,' '):null;}})()")
+NOVO=lambda: J("[...document.querySelectorAll('main button')].find(b=>b.innerText.trim()==='Cadastrar parceiro').click()") or time.sleep(.4)   # a ação fica no bloco (01/10)
+def _aba(t): J(f"(()=>{{const b=[...document.querySelectorAll('[role=tab]')].find(b=>b.innerText.replace(/\\s+/g,' ').trim().startsWith({json.dumps(t)})); if(b) b.click();}})()"); time.sleep(.35)
+def cob(g):
+    """cobertura por grupo (layout de 01/10: aba "Cobertura de cotação" no mesmo bloco); lê e volta à aba Parceiros."""
+    _aba('Cobertura'); r=J(f"(()=>{{const t=document.querySelectorAll('[role=table]')[0]; if(!t) return null; const r=[...t.querySelectorAll('[role=row]')].find(r=>r.innerText.split('\\n')[0].trim()==={json.dumps(g)}); return r?r.innerText.replace(/\\s+/g,' '):null;}})()"); _aba('Parceiros'); return r
 ok=[]
 def chk(nome,cond,extra=''):
     ok.append(bool(cond)); print(('OK  ' if cond else 'FALHOU ')+nome+(' · '+str(extra) if extra else ''))

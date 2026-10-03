@@ -7,8 +7,8 @@ import time
 t=T(); J=t.J
 try:
     t.goto('CD-02.dc.html')
-    t.chk('abre na aba Culturas com a primária "Cadastrar cultivar" e o estado das pendências',
-          'Cadastrar cultivar' in t.header() and '1 cultivar sem semente · 1 premissa a validar' in t.header() and not t.errs(), t.header()+' '+t.errs())
+    t.chk('abre na aba Culturas com a primária "Cadastrar cultivar" (no bloco) e o estado das pendências',
+          'Cadastrar cultivar' in t.bloco() and '1 cultivar sem semente · 1 premissa a validar' in t.header() and not t.errs(), t.header()+' '+t.errs())
     soja=t.rowtxt(0,'Soja 3 cultivares')
     t.chk('árvore Cultura → cultivar: Soja com unidade de produtividade e ciclo anual; coluna Registro saiu da tabela',
           soja and 'sc de 60 kg/ha' in soja and 'Anual' in soja and J("document.querySelector('[role=table]').innerText.indexOf('REGISTRO')<0"), soja)
@@ -41,7 +41,7 @@ try:
     # ---- aba Operações e rendimentos ----
     t.clk('Operações e rendimentos'); time.sleep(.2)
     t.chk('aba Operações: primária "Cadastrar rendimento" e secundária "Comparar com o realizado"',
-          'Cadastrar rendimento' in t.header() and J("document.body.innerText.indexOf('Comparar com o realizado')>=0 && document.body.innerText.indexOf('apontado')<0"), t.header())
+          'Cadastrar rendimento' in t.bloco() and J("document.body.innerText.indexOf('Comparar com o realizado')>=0 && document.body.innerText.indexOf('apontado')<0"), t.header())
     t.openrow(0,'Pulverização Tratos culturais')
     t.chk('linha da operação abre processo (etapa de custo) e atividades usuais',
           t.title()=='Operação · Pulverização' and t.fv('proc')=='Tratos culturais' and 'Dessecação pré-plantio' in (t.fv('atvs') or ''), [t.title(),t.fv('proc'),t.fv('atvs')])
@@ -63,7 +63,7 @@ try:
     t.shot('cadc_cd02.png')
     t.goto('CD-06.dc.html'); r=t.rowtxt(0,'Semente de soja 64 Z') or ''
     t.chk('os itens criados pelas cultivares (64 Z e BRS 373) aparecem em Produtos › Sementes, pendentes de preço e embalagem',
-          'Sem embalagem' in r and 'Sem preço' in r and t.rowtxt(0,'Semente de sorgo BRS 373') and 'Sementes 6 itens' in (t.anyrow(0,'Sementes 6') or '')
+          'sem embalagem' in r.lower() and 'sem preço' in r.lower() and t.rowtxt(0,'Semente de sorgo BRS 373') and 'Sementes 6 itens' in (t.anyrow(0,'Sementes 6') or '')
           and '3 itens sem preço · 2 itens sem embalagem' in t.header(), [r,t.anyrow(0,'Sementes'),t.header()])
     t.chk('nenhum erro de JS na jornada', not t.errs(), t.errs())
 finally:

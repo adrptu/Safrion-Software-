@@ -12,7 +12,7 @@ LONGO = ['Bico entupido na seção 2 da barra; limpei com escova, conferi a vaz�
 a = App(['MB-01', 'MB-04'])
 try:
     a.abrir('MB-01'); a.clk('Restaurar demonstração')
-    a.mudar("c.ordens['OS-0430'].aprov=true; return cenLiberar(c,'OS-0430');")
+    a.mudar("return cenLiberar(c,'OS-0430');")
     a.abrir('MB-04')
     a.ok(a.J("document.querySelectorAll('main [aria-label=\"Ordem da ocorrência\"] button').length") == 3, 'pré-carga: 3 ordens na fila de Marcos')
     for t in LONGO:

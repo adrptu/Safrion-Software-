@@ -19,6 +19,8 @@ def chk(nome,cond,extra=''):
     if not cond: FAL.append(nome)
 try:
     c=Chrome(port=free()); J=c.js
+    # ouvinte de erros instalado antes de cada documento (window.__err não existe sem ele)
+    c.call('Page.addScriptToEvaluateOnNewDocument',{'source':"window.__err=[];addEventListener('error',e=>window.__err.push(String(e.message)));addEventListener('unhandledrejection',e=>window.__err.push(String(e.reason)));"})
     T=lambda: J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')")
     def clk(t,root=None,w=.45): r=J(f"({CLK})({json.dumps(t)},{json.dumps(root)})"); time.sleep(w); return r
     def setv(sel,val): r=J(f"({SETV})({json.dumps(sel)},{json.dumps(val)})"); time.sleep(.25); return r
@@ -33,13 +35,13 @@ try:
     aside=lambda: J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText")
     def fid(k): return J(f"(document.querySelector('[id$=_{k}]')||{{id:''}}).id")
     c.size(1440,1000); c.goto(f'http://127.0.0.1:{p}/CMP.dc.html'); time.sleep(.6)
-    chk('sem erro JS', J("window.__err||'nenhum'")=='nenhum', J("window.__err||''"))
+    chk('sem erro JS', J("(window.__err&&window.__err.length)?window.__err:'nenhum'")=='nenhum', J("window.__err||''"))
     chk('abre na etapa 1', cur().startswith('1 Escolha a safra'), cur())
     chk('nenhuma safra escolhida sozinha', 'Nenhuma safra escolhida' in body())
     chk('impedimentos visíveis', J("[...document.querySelectorAll('nav[aria-label=\"Etapas do processo\"] button')].filter(b=>/Escolha a safra/.test(b.innerText)).length")>=5)
     b=body(); chk('Safrinha sem solicitação', 'Solicitação ainda não enviada pelo planejamento' in b)
-    chk('link Ver origem para SAF', J("[...document.querySelectorAll('a')].some(a=>a.innerText.trim()==='Ver origem'&&a.getAttribute('href')==='SAF.dc.html')"))
-    chk('link Planejar safra na Safrinha', J("[...document.querySelectorAll('a')].some(a=>/Abrir Planejar safra/.test(a.innerText)&&a.getAttribute('href')==='SAF.dc.html')"))
+    chk('link Ver origem para SAF (etapa 6 da Safra 2026/27)', J("[...document.querySelectorAll('a')].some(a=>a.innerText.trim()==='Ver origem'&&a.getAttribute('href')==='SAF.dc.html#saf=S2627&etapa=6')"))
+    chk('link Planejar safra na Safrinha (etapa 6 da Safrinha)', J("[...document.querySelectorAll('a')].some(a=>/Abrir Planejar safra/.test(a.innerText)&&a.getAttribute('href')==='SAF.dc.html#saf=S27SF&etapa=6')"))
     print('  etapa 4 sem safra:', clk('4 Compare propostas'), T()); chk('etapa bloqueada sem safra', cur().startswith('1 '))
     # Safrinha: fica na etapa 1, etapas impedidas
     row('Safrinha 2027'); chk('Safrinha selecionada fica na etapa 1', cur().startswith('1 ') and 'Sem solicitação' in J("document.querySelector('nav[aria-label=\"Etapas do processo\"]').innerText"), T())
@@ -146,8 +148,8 @@ try:
     clk('2 Confira a demanda'); b=body(); clk('Expandir tudo'); b=body(); chk('demanda mostra pedidos', 'Parcial · PC-101' in b and 'Pedido PC-' in b)
     t=rowtxt('Semente de soja 58 W'); chk('58 W passa a faltar em 18/10/2026 com o PC-090 reprogramado', '18/10/2026' in t and 'chega depois da falta' in t, t)
     clk('1 Escolha a safra'); chk('safra mostra pedidos emitidos', 'Pedidos emitidos' in body())
-    # caminho Direção numa página nova
-    c.goto(f'http://127.0.0.1:{p}/CMP.dc.html'); time.sleep(.6)
+    # caminho Direção numa página nova (sem o andamento gravado: talhao-os-compras-v1 guarda a compra entre recargas)
+    J("localStorage.removeItem('talhao-os-compras-v1')"); c.goto(f'http://127.0.0.1:{p}/CMP.dc.html'); time.sleep(.6)
     clk('Abrir compra'); clk('3 Solicite cotações'); clk('Enviar convites (simulado)'); time.sleep(6.5)
     clk('Comparar propostas'); clk('Revisar aprovação'); clk('Enviar à Direção')
     chk('pendente: ações secundárias de devolução e recusa', 'Registrar devolução' in body() and 'Registrar recusa' in body())
@@ -156,7 +158,7 @@ try:
     chk('aprovada: sem devolução/recusa', 'Registrar devolução' not in b)
     c.shot('_probe/cmp_e5.png')
     # ---- compras-estoque-05 · convite adicional depois do envio · compras-estoque-02 · devolução e recusa da Direção ----
-    c.goto(f'http://127.0.0.1:{p}/CMP.dc.html'); time.sleep(.6)
+    J("localStorage.removeItem('talhao-os-compras-v1')"); c.goto(f'http://127.0.0.1:{p}/CMP.dc.html'); time.sleep(.6)
     clk('Abrir compra'); clk('3 Solicite cotações')
     for f in ['Agro Norte','Santa Rita Insumos']:
         kid('Fungicidas',f,True); setv('#'+fid('conv'),'Não convidar'); clk('Salvar','aside[role=dialog]')
@@ -193,7 +195,7 @@ try:
     clk('Conferir demanda aberta'); clk('Expandir tudo'); t=rowtxt('MAP 11-52'); chk('etapa 2: insumos Não contratado, necessidade aberta', cur().startswith('2 ') and 'Não contratado' in t and 'necessidade aberta' in t, t)
     clk('1 Escolha a safra'); chk('etapa 1: Recusada · não contratado', 'Recusada · não contratado' in body())
     c.shot('_probe/cmp_recusa.png')
-    chk('sem erro JS no fim', J("window.__err||'nenhum'")=='nenhum', J("window.__err||''"))
+    chk('sem erro JS no fim', J("(window.__err&&window.__err.length)?window.__err:'nenhum'")=='nenhum', J("window.__err||''"))
 finally:
     if c: c.close()
     srv.terminate()

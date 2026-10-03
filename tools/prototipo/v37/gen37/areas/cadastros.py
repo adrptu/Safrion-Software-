@@ -72,7 +72,216 @@ function simv(self,v){ Object.keys(SIMS).forEach(k=>{ v['sim_'+k]=()=>self.setSt
 function chipc(t,c){ return {k:'chip',t:t,c:c}; }
 '''
 def js(sims,code):
-    EXTRAJS[0]='const SIMS = '+json.dumps(sims,ensure_ascii=False)+';\n'+CDJS+code
+    EXTRAJS[0]='const SIMS = '+json.dumps(sims,ensure_ascii=False)+';\n'+CDJS+CADXJS+code
+
+# =====================================================================================
+# Padrão visual dos cadastros (redesenho de 01/10/2026, pedido do Adrianus: "mais moderno, organizado, bonito e intuitivo").
+# Um bloco por tela (section.cadx): abas por entidade na 1ª linha; em cada aba, a faixa "precisa de atenção" (cartões com
+# verbo), a barra da grade (busca, contagem, filtro rápido Todos · A resolver, ações da aba com a primária por último) e os
+# dados. Só a área de dados rola (cabeçalho da tabela fixo); título, abas, filtros e ações ficam parados.
+# Estado do cabeçalho em uma linha (ponto + texto na cor do estado), sem botão de ação de entidade no cabeçalho da página.
+CADX_CSS=(
+    "main:has(>.cadx){gap:0}"
+    ".cadx{flex:1 1 0;min-height:0;display:flex;flex-direction:column;min-width:0;background:#FFFFFF;border:1px solid #E4E9E5;border-radius:14px;overflow:hidden}"
+    ".cadx-topo{display:flex;align-items:center;gap:12px;padding:12px 16px 0;flex-wrap:wrap}"
+    ".cadx-abas{display:inline-flex;gap:2px;padding:3px;border-radius:999px;background:#EEF1EE;max-width:100%;overflow-x:auto}"
+    ".cadx-dados{flex:1 1 0;min-height:0;display:flex;flex-direction:column}.cadx-ident{border-bottom:1px solid #E4E9E5}"
+    ".cadx-dados .g2caixa{flex:1 1 0;min-height:0}.cadx-dados .g2rola{flex:1 1 0;min-height:0;overflow:auto}"
+    ".cadx-rola{flex:1 1 0;min-height:0;overflow:auto}"
+    # barra da grade: busca e contagem, filtro rápido, filtros ativos ... ações da aba, expandir/recolher, primária por último
+    ".cadx .g2caixa>div:first-child:has(>span),.cadx-barra{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid #E4E9E5}"
+    ".cadx .g2caixa>div:first-child>label:has(input[type=search]),.cadx .g2caixa>div:first-child>label:has(input[type=search])+span{order:-2}"
+    ".cadx-qf{order:-1;display:flex;flex-wrap:wrap;gap:6px}.cadx-prim{order:1;display:inline-flex;margin-left:auto}"
+    ".cadx-seg{display:inline-flex;gap:2px;padding:3px;border-radius:999px;background:#EEF1EE}"
+    # cabeçalho da coluna em caixa normal, numa linha; ordenação sempre visível
+    ".cadx .g2hb{text-transform:none;letter-spacing:0;font-size:12px;white-space:nowrap;max-width:none;line-height:1.2;padding:10px 2px 10px 0}"
+    # linhas de uma altura (44 px), texto 13,5 px; links e ações da célula em tinta, não em verde
+    ".cadx .g2rola [role=row]{font-size:13.5px!important}.cadx [role=cell]{min-height:44px;box-sizing:border-box}"
+    ".cadx .g2pw{flex-wrap:nowrap;white-space:nowrap;overflow:hidden}"
+    # texto que não cabe na largura da coluna termina em reticências (o complemento apagado encolhe primeiro; nome, chip e verbo não;
+    # o motor envolve cada texto num span.sc-interp, por isso o chip é o span com outro span dentro)
+    ".cadx .g2pw span{min-width:0;overflow:hidden;text-overflow:ellipsis}.cadx .g2pw b,.cadx .g2pw span:has(>span:not(.sc-interp)),.cadx .g2pw a,.cadx .g2pw button{flex-shrink:0}"
+    ".cadx .g2pw a,.cadx .g2pw button{color:#15201A!important;font-weight:700}.cadx .g2pw a:hover,.cadx .g2pw button:hover{text-decoration:underline!important}"
+    ".cadx .g2kid{background:#FFFFFF}.cadx .g2ed:hover{background:#F4F6F3}"
+    # árvore: a linha do grupo ganha faixa clara (hierarquia sem precisar de caixa)
+    ".cadx-arv .g2r:not(.g2kid) [role=cell]{background:#F7F9F6!important}.cadx-arv .g2r.g2ed:not(.g2kid):hover [role=cell]{background:#EEF3EE!important}"
+    # faixa "precisa de atenção": cartões brancos com borda esquerda na cor do estado
+    ".cadx-faixa{display:flex;gap:12px;flex-wrap:wrap;padding:12px 16px 2px}"
+    ".cadx-aviso{flex:0 1 330px;min-width:240px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;background:#FFFFFF;"
+    "border:1px solid #E4E9E5;border-radius:12px;padding:10px 14px;cursor:pointer;font-family:inherit;color:#15201A}"
+    ".cadx-aviso:hover{background:#F9FBF8}.cadx-aviso:hover .cadx-verbo{text-decoration:underline}.cadx-aviso:focus-visible,.cadx-cartao:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px}"
+    ".cadx-verbo{font-weight:700;color:#15201A;white-space:nowrap}"
+    # cartões de entidade contêiner (fazendas, equipes, conjuntos)
+    ".cadx-cartoes{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;padding:16px;align-content:start}"
+    ".cadx-cartao{display:flex;flex-direction:column;align-items:stretch;gap:10px;text-align:left;background:#FFFFFF;border:1px solid #E4E9E5;border-radius:14px;"
+    "padding:16px;cursor:pointer;font-family:inherit;color:#15201A;min-width:0}"
+    ".cadx-cartao:hover{border-color:#1E7A4C}.cadx-cartao:hover .cadx-verbo{text-decoration:underline}"
+    ".cc-num{font-family:'Sora','Manrope',sans-serif;font-size:20px;font-weight:800;letter-spacing:-.01em}"
+    "@media (max-width:767px){.cadx-faixa,.cadx-cartoes{grid-template-columns:1fr}.cadx-aviso{flex:1 1 100%}}"
+)
+TAB_ON=E.SEG_ON().replace('font-size: 12.5px','font-size: 13px')
+TAB_OFF=E.SEG_OFF().replace('font-size: 12.5px','font-size: 13px')
+def cadx_css():
+    """estilo do padrão dos cadastros (vale só dentro de .cadx e da faixa; demais telas não mudam)."""
+    E.EXTRA.append('<style>'+CADX_CSS+'</style>')
+def abas(pre,nomes,rotulo='Cadastros desta tela'):
+    """abas por entidade: rótulo + contagem + ponto de pendência (buracos pre+i+'_st|_go|_sel|_n|_dot', ver cadAbas)."""
+    bs=''.join(f'<button type="button" role="tab" aria-selected="{H(pre+str(i)+"_sel")}" onClick="{H(pre+str(i)+"_go")}" style="{H(pre+str(i)+"_st")}">{esc(n)}'
+               f'<span style="font-size: 12px; font-weight: 600; color: {MUTED};">{H(pre+str(i)+"_n")}</span>'
+               f'<span aria-hidden="true" style="{H(pre+str(i)+"_dot")}"></span></button>' for i,n in enumerate(nomes))
+    return f'<div role="tablist" aria-label="{esc(rotulo)}" class="cadx-abas">{bs}</div>'
+def pane(pre,i,html,ativo=0):
+    return f'<sc-if value="{H(pre+str(i)+"_on")}" hint-placeholder-val="{H("true" if i==ativo else "false")}">{html}</sc-if>'
+def se(hole,html,dflt=False):
+    return f'<sc-if value="{H(hole)}" hint-placeholder-val="{H("true" if dflt else "false")}">{html}</sc-if>'
+def faixa(key):
+    """faixa "precisa de atenção" da aba: cartões com número, o que falta, o registro e o verbo (buracos de cadFaixa)."""
+    return se(key+'_tem',
+        f'<div class="cadx-faixa" role="group" aria-label="Precisa de atenção"><sc-for list="{H(key)}" as="fx" hint-placeholder-count="1">'
+        f'<button type="button" class="cadx-aviso" onClick="{H("fx.go")}" style="{H("fx.st")}">'
+        f'<span style="display: flex; align-items: baseline; gap: 8px;"><span style="{H("fx.nst")}">{H("fx.n")}</span><span style="font-size: 13px; font-weight: 600;">{H("fx.rot")}</span></span>'
+        f'<span style="display: flex; align-items: baseline; flex-wrap: wrap; column-gap: 8px; row-gap: 2px; font-size: 12.5px; min-width: 0;"><span style="color: {MUTED}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px;">{H("fx.reg")}</span>'
+        f'<span class="cadx-verbo">{H("fx.verbo")} ›</span></span></button></sc-for></div>')
+PRIM_ST=('padding: 7px 14px; border-radius: 9px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; white-space: nowrap; line-height: 1.25; '
+         f'background: {E.ACC}; color: #fff; border: 1px solid {E.ACC}; box-shadow: 0 1px 2px rgba(30,122,76,.25);')
+SEC_ST=('padding: 7px 12px; border-radius: 9px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; white-space: nowrap; line-height: 1.25; '
+        f'background: {SURF}; color: {INK}; border: 1px solid {LINE};')
+def prim(fn,rotulo,hole=False):
+    """primária da aba (uma por aba), dentro do bloco onde age; fica por último na barra."""
+    t=H(rotulo) if hole else esc(rotulo)
+    return f'<span class="cadx-prim"><button type="button" onClick="{H(fn)}" style="{PRIM_ST}">{t}</button></span>'
+def secbtn(fn,rotulo,dica='',hole=False):
+    t=H(rotulo) if hole else esc(rotulo); d=f' title="{esc(dica)}"' if dica else ''
+    return f'<button type="button" onClick="{H(fn)}"{d} style="{SEC_ST}">{t}</button>'
+def qf_chips(gid):
+    """filtro rápido do bloco (Todos · A resolver · ...), à esquerda da barra (buraco gid+'_cqf', ver cadQf)."""
+    return (f'<div class="cadx-qf" role="group" aria-label="Filtro rápido"><sc-for list="{H(gid+"_cqf")}" as="qc" hint-placeholder-count="2">'
+            f'<button type="button" aria-pressed="{H("qc.on")}" onClick="{H("qc.go")}" style="{H("qc.st")}">{H("qc.t")} <span style="opacity: .75;">{H("qc.n")}</span></button></sc-for></div>')
+def filtro_sel(key,rotulo):
+    """filtro de classificação do bloco (lista com contagem), ao lado do filtro rápido de estado; buracos key, key_set, key_opts."""
+    return (f'<label class="cadx-qf" style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: {MUTED};">{esc(rotulo)}'
+            f'<select aria-label="{esc(rotulo)}" value="{H(key)}" onChange="{H(key+"_set")}" style="{H(key+"_st")}">'
+            f'<sc-for list="{H(key+"_opts")}" as="o" hint-placeholder-count="3"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select></label>')
+def seg(pre,opcoes,rotulo):
+    """alternância de visão dentro da aba (ex.: Lista | Mapa); buracos pre+i+'_st' e pre+i+'_go'."""
+    bs=''.join(f'<button type="button" aria-pressed="{H(pre+str(i)+"_on")}" onClick="{H(pre+str(i)+"_go")}" style="{H(pre+str(i)+"_st")}">{esc(o)}</button>' for i,o in enumerate(opcoes))
+    return f'<div role="group" aria-label="{esc(rotulo)}" class="cadx-seg">{bs}</div>'
+def barra(esq,dir=''):
+    """barra de uma aba sem grade (cartões, mapa): mesmo desenho da barra da grade."""
+    return f'<div class="cadx-barra">{esq}<span style="flex-grow: 1;"></span>{dir}</div>'
+def cartoes(key,rotulo):
+    """cartões de entidade contêiner: nome, chip só com exceção, identificação, 2-3 números e rodapé com a situação (buracos de cadCartoes)."""
+    num=(f'<sc-for list="{H("c.nums")}" as="n" hint-placeholder-count="3"><span style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">'
+         f'<span style="white-space: nowrap;"><span class="cc-num">{H("n.v")}</span> <span style="font-size: 12px; color: {MUTED};">{H("n.u")}</span></span>'
+         f'<span style="font-size: 11.5px; font-weight: 600; color: {MUTED};">{H("n.l")}</span></span></sc-for>')
+    return (f'<div class="cadx-rola"><div class="cadx-cartoes" role="list" aria-label="{esc(rotulo)}"><sc-for list="{H(key)}" as="c" hint-placeholder-count="2">'
+            f'<button type="button" role="listitem" class="cadx-cartao" aria-label="{H("c.lab")}" onClick="{H("c.open")}">'
+            f'<span style="display: flex; align-items: flex-start; gap: 8px;"><b style="font-size: 15px; font-weight: 800; flex-grow: 1; min-width: 0; line-height: 1.3;">{H("c.nome")}</b>'
+            + se('c.temChip',f'<span style="{H("c.chSt")}"><span style="{H("c.chDot")}"></span>{H("c.chT")}</span>') + '</span>'
+            f'<span style="font-size: 12.5px; color: {MUTED}; margin-top: -6px;">{H("c.sub")}</span>'
+            f'<span style="display: flex; gap: 24px; flex-wrap: wrap;">{num}</span>'
+            f'<span style="display: flex; align-items: center; gap: 8px; border-top: 1px solid {LINE}; padding-top: 10px; font-size: 12.5px;">'
+            f'<span style="color: {MUTED}; flex-grow: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{H("c.rod")}</span>'
+            + se('c.ok',f'<span style="display: inline-flex; align-items: center; gap: 6px; color: {MUTED};"><span style="width: 8px; height: 8px; border-radius: 999px; background: {E.ACC};"></span>{H("c.sitT")}</span>')
+            + se('c.neutro',f'<span style="color: {MUTED};">{H("c.sitT")}</span>')
+            + se('c.exc',f'<span class="cadx-verbo">{H("c.verbo")} ›</span>')
+            + '</span></button></sc-for></div></div>')
+def arv(html):
+    """marca uma grade em árvore (linhas de grupo com faixa clara) sem criar caixa nova."""
+    return f'<div class="cadx-arv" style="display: contents;">{html}</div>'
+def bloco_cad(topo,dados,rotulo):
+    """o único bloco da tela: 1ª linha (abas) e a área de dados que estica até o fim da janela."""
+    return (f'<section class="cadx" aria-label="{esc(rotulo)}">' + (f'<div class="cadx-topo">{topo}</div>' if topo else '')
+            + f'<div class="cadx-dados">{dados}</div></section>')
+def estado_cab(fname,titulo,key):
+    """estado da tela ao lado do título, em uma linha (ponto + texto na cor do estado; buracos key, key_stst, key_stdot via cadEstado)."""
+    import os
+    p=os.path.join(E.P,fname); s=open(p).read(); alvo=f'>{esc(titulo)}</h1>'
+    assert s.count(alvo)==1, (fname,alvo)
+    open(p,'w').write(s.replace(alvo,alvo+estado_html(key),1))
+def estado_html(key):
+    return f'<span class="cadx-estado" style="{H(key+"_stst")}"><span style="{H(key+"_stdot")}"></span>{H(key)}</span>'
+def acoes_form(gid):
+    """ações do painel lateral (Excluir, Abrir talhão…) com estilo vindo do estado (fa.st): destrutiva em vermelho, bloqueada esmaecida."""
+    old=f'onClick="{{{{fa.go}}}}" style="{BTN_ST(False,True)}"'
+    for i,x in enumerate(E.EXTRA):
+        if f'{gid}_F.open' in x and old in x:
+            E.EXTRA[i]=x.replace(old,'onClick="{{fa.go}}" style="{{fa.st}}"'); return
+    raise AssertionError('formulário sem bloco de ações: '+gid)
+
+CADXJS=r'''
+// ===== padrão visual dos cadastros =====
+const CADT={yellow:['#8A5A00','#FFF3D6'],red:['#B42318','#FDE8E6'],gray:['#5B6660','#EEF1EE'],green:['#1E7A4C','#E4F3E9']};
+const CAD_TAB=[__TABOFF__,__TABON__];
+// situação da linha: estado OK sem pílula (ponto verde + texto apagado); exceção em chip com o próximo passo
+function sitOk(t){ return [{k:'cn',t:'●',c:'green'},{k:'mut',t:t}]; }
+function sitInfo(t){ return [{k:'cn',t:'●',c:'gray'},{k:'mut',t:t}]; }   // estado neutro (nem ok nem pendência): ponto cinza
+function sitX(t,c,verbo,h){ return [chipc(t,c)].concat(verbo?[h?{k:'link',t:verbo+' ›',h:h}:{k:'b',t:verbo+' ›'}]:[]); }
+// estado da tela ao lado do título
+function cadEstado(v,key,t,cor){ const c=(CADT[cor]||CADT.gray)[0]; v[key]=t;
+  v[key+'_stst']='display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;white-space:nowrap;color:'+c+';';
+  v[key+'_stdot']='width:8px;height:8px;border-radius:999px;flex-shrink:0;background:'+c+';'; }
+// abas: a ativa fica no estado (self.state[key]) e no endereço (#aba=slug), para voltar do detalhe na mesma aba
+function cadAbas(self,v,pre,key,info){ let a=self.state[key];
+  if(a===undefined){ a=0; try{ const m=/[#&]aba=([^&]+)/.exec(location.hash||''); if(m){ const i=info.findIndex(x=>x.slug===decodeURIComponent(m[1])); if(i>=0) a=i; } }catch(e){} }
+  info.forEach((x,i)=>{ const on=a===i; v[pre+i+'_on']=on; v[pre+i+'_sel']=on?'true':'false'; v[pre+i+'_st']=CAD_TAB[on?1:0];
+    v[pre+i+'_n']=(x.n===undefined||x.n===null)?'':String(x.n);
+    v[pre+i+'_dot']=x.cor?('width:7px;height:7px;border-radius:999px;flex-shrink:0;background:'+(CADT[x.cor]||CADT.gray)[0]+';'):'display:none;';
+    v[pre+i+'_go']=()=>{ cadHash(x.slug); self.setState({[key]:i}); }; });
+  return a; }
+// guarda a aba no endereço sem perder os outros parâmetros (ex.: #talhao=T1&aba=geometria)
+function cadHash(slug){ try{ const h=String(location.hash||'').replace(/^#/,''); const ps=h?h.split('&').filter(x=>x&&x.indexOf('aba=')!==0):[]; ps.push('aba='+slug); history.replaceState(null,'','#'+ps.join('&')); }catch(e){} }
+function cadIrAba(self,key,i,slug,extra){ cadHash(slug); self.setState(Object.assign({[key]:i},extra||{})); }
+// alternância de visão (Lista | Mapa)
+function cadSeg(v,pre,n,cur,go){ for(let i=0;i<n;i++){ const on=i===cur; v[pre+i+'_on']=on?'true':'false'; v[pre+i+'_go']=()=>go(i);
+  v[pre+i+'_st']='font-family:inherit;font-size:12.5px;font-weight:700;padding:5px 12px;border-radius:999px;border:0;cursor:pointer;'+(on?'background:#FFFFFF;color:#15201A;box-shadow:0 1px 2px rgba(21,32,26,.12);':'background:transparent;color:#65736A;'); } }
+// registros de uma grade (em árvore, só as folhas; o grupo tem kids)
+function cadRegs(rows){ const o=[]; const w=l=>l.forEach(r=>{ if(Array.isArray(r.kids)) w(r.kids); else o.push(r); }); w(rows); return o; }
+// filtro rápido do bloco: Todos · A resolver · (Inativos só com N>0). Chama no PREVALS (esconde pelo r.sh) e cadQfPos no EXTRAVALS.
+// opc.extra: outro filtro do bloco (ex.: Função) que vale junto; as contagens dos chips respeitam ele
+function cadQf(self,v,gid,key,defs,opc){ const q=self.state[key]||''; const rows=RW(self,gid); const regs=cadRegs(rows); const d=defs.find(x=>x.k===q); const SH='cadqf_'+gid;
+  const ex=(opc&&opc.extra)||null; const passa=r=>(!d||d.f(r))&&(!ex||ex(r));
+  regs.forEach(r=>{ if(r.sh===SH) delete r.sh; if(!passa(r)&&!r.sh) r.sh=SH; });
+  const grp=l=>l.forEach(r=>{ if(Array.isArray(r.kids)){ if(r.sh===SH) delete r.sh; if((d||ex)&&!r.sh) r.sh=SH; grp(r.kids); } }); grp(rows);
+  const vis=regs.filter(r=>(!r.sh||r.sh===SH)&&(!ex||ex(r)));
+  const ch=[{k:'',t:defs.todos||'Todos',n:vis.length}].concat(defs.map(x=>({k:x.k,t:x.t,n:vis.filter(x.f).length,oz:x.oz}))).filter(c=>!(c.oz&&!c.n&&q!==c.k));
+  v[gid+'_cqf']=ch.map(c=>{ const on=q===c.k; return {t:c.t,n:String(c.n),on:on?'true':'false',go:()=>self.setState({[key]:(on&&c.k)?'':c.k}),
+    st:'font-family:inherit;font-size:12px;font-weight:700;padding:4px 11px;border-radius:999px;cursor:pointer;'+(on?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;')}; });
+  return q; }
+// "X de Y" da árvore conta registros (folhas) que passam na busca e nos filtros, não grupos
+function cadConta(self,v,gid){ const sp=GR(gid), st=g2st(self,gid), ad=self.state.added||{}; const regs=cadRegs(RW(self,gid));
+  v[gid+'_all']=regs.filter(r=>!r.sh||String(r.sh).indexOf('cadqf_')===0).length; v[gid+'_count']=regs.filter(r=>g2match(r,sp,st,null,ad)).length; }
+function cadSel(self,v,key,opts){ const cur=self.state[key]||''; v[key]=cur; v[key+'_opts']=opts; v[key+'_set']=(e)=>self.setState({[key]:e.target.value});
+  v[key+'_st']='font-family:inherit;font-size:12.5px;font-weight:700;padding:4px 8px;border-radius:999px;cursor:pointer;color:#15201A;'+(cur?'border:1px solid #1E7A4C;background:#E4F3E9;':'border:1px solid #E4E9E5;background:#FFFFFF;'); return cur; }
+function cadQfPos(self,v,gid,key){ if(!(self.state[key]||'')) return; v[gid+'_filtered']=true; v[gid+'_clear']=()=>{ g2set(self,gid,{q:'',f:{}}); self.setState({[key]:''}); }; }
+// faixa "precisa de atenção": até 3 cartões; com mais, o 3º vira "Mais N pendências"
+function cadFaixa(v,key,itens,mais){ let it=(itens||[]).filter(Boolean);
+  if(it.length>3){ const resto=it.slice(2).reduce((s,x)=>s+(Number(x.n)||1),0); it=it.slice(0,2).concat([{n:resto,rot:resto>1?'outras pendências':'outra pendência',reg:'',verbo:'Ver todas',cor:'yellow',go:mais}]); }
+  v[key]=it.map(x=>{ const c=(CADT[x.cor]||CADT.yellow)[0]; return {n:String(x.n),rot:x.rot,reg:x.reg||'',verbo:x.verbo,go:x.go||(()=>{}),
+    st:'border-left:3px solid '+c+';', nst:"font-family:'Sora','Manrope',sans-serif;font-size:20px;font-weight:800;line-height:1;color:"+c+';'}; });
+  v[key+'_tem']=it.length>0; }
+// cartões de entidade contêiner; clicar (ou Enter) abre o mesmo painel da grade
+function cadCartoes(self,v,key,gid,itens){ v[key]=itens.map(x=>{ const c=x.chip?(CADT[x.chip.c]||CADT.gray):null;
+  return {nome:x.nome,sub:x.sub||'',lab:'Abrir '+x.nome,nums:x.nums||[],rod:x.rod||'',ok:!x.verbo&&!x.neutro,neutro:!x.verbo&&!!x.neutro,exc:!!x.verbo,sitT:x.sitT||'Em dia',verbo:x.verbo||'',
+    temChip:!!c,chT:x.chip?x.chip.t:'',chSt:c?'display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;flex-shrink:0;color:'+c[0]+';background:'+c[1]+';':'',
+    chDot:c?'width:6px;height:6px;border-radius:999px;background:'+c[0]+';':'',open:()=>g2open(self,GR(gid),x.id,null)}; }); }
+// ações do painel lateral (Excluir com confirmação; bloqueada mostra a causa)
+const CAD_ACTS={};
+const CAD_BTN='padding:7px 14px;border-radius:10px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;line-height:1.25;white-space:nowrap;';
+const CAD_BTN_SEC=CAD_BTN+'background:#FFFFFF;color:#15201A;border:1px solid #E4E9E5;';
+const CAD_BTN_DEL=CAD_BTN+'background:#FFFFFF;color:#B42318;border:1px solid #B42318;';
+const CAD_BTN_DEL2=CAD_BTN+'background:#B42318;color:#FFFFFF;border:1px solid #B42318;';
+const CAD_BTN_OFF=CAD_BTN+'background:#F4F6F3;color:#8A968E;border:1px solid #E4E9E5;cursor:not-allowed;';
+function cadActsIni(self){ self.g2formActs=(gid,r,fm)=>{ const f=CAD_ACTS[gid]; return f?(f(self,r,fm)||[]).filter(Boolean).map(a=>Object.assign({st:CAD_BTN_SEC,h:''},a)):[]; }; }
+function cadApaga(self,gid,id){ const sp=GR(gid); const r0=g2find(RW(self,gid),id); const nome=r0?g2text(r0,sp.cols[0]):''; const rs=g2clone(RW(self,gid));
+  const rm=(l)=>{ const i=l.findIndex(x=>x.id===id); if(i>=0){ l.splice(i,1); return true; } return l.some(x=>x.kids&&rm(x.kids)); }; rm(rs);
+  g2set(self,gid,{rows:rs,fm:null,cfp:null}); self.setState({g2toast:'Excluído: '+nome}); if(self.g2after) self.g2after(gid,rs,null); }
+// ent: 'cultivar'; motivo: por que não pode (vazio = pode); fazer: exclusão própria da tela (ex.: rascunho da estrutura)
+function cadExcluir(self,gid,r,ent,motivo,fazer){
+  if(motivo) return {t:'Excluir '+ent,h:'Não dá para excluir: '+motivo+'.',st:CAD_BTN_OFF,go:()=>self.setState({g2toast:'Não dá para excluir: '+motivo+'.'})};
+  if(g2st(self,gid).cfp!==r.id) return {t:'Excluir '+ent,h:'Pede confirmação antes de tirar do cadastro.',st:CAD_BTN_DEL,go:()=>g2set(self,gid,{cfp:r.id})};
+  return {t:'Confirmar exclusão',h:'Não dá para desfazer.',st:CAD_BTN_DEL2,go:()=>{ if(fazer){ g2set(self,gid,{fm:null,cfp:null}); fazer(); } else cadApaga(self,gid,r.id); }}; }
+'''.replace('__TABOFF__',json.dumps(TAB_OFF)).replace('__TABON__',json.dumps(TAB_ON))
 
 # =====================================================================================
 # Cada tela pode ser reescrita num módulo próprio (areas/cad_*.py, que importa os auxiliares daqui); se ele existir, é o que vale.
@@ -207,7 +416,7 @@ REND_CALC=cond('modo','Largura × velocidade'); REND_INF=cond('modo','Informado'
 REND_CAMPOS=[sel('modo','Como obter o rendimento',['Largura × velocidade','Informado'],**{'def':'Largura × velocidade'}),
              num('larg','Largura de trabalho','m',min=0.5,max=60,cond=REND_CALC),
              num('vel','Velocidade de trabalho','km/h',min=0.5,max=30,cond=REND_CALC),
-             num('efic','Eficiência de campo','%',min=10,max=100,cond=REND_CALC,help='Descontadas manobras, abastecimento e paradas.'),
+             num('efic','Eficiência de campo','%',min=10,max=100,cond=REND_CALC,help='Descontadas manobras, abastecimento e paradas no campo. Manutenção e quebras entram na disponibilidade da máquina.'),
              dict(k='rend_c',l='Rendimento efetivo',ro=True,live=True,u='ha/h',cond=REND_CALC,help='Largura × velocidade ÷ 10 × eficiência.'),
              num('rend','Rendimento efetivo','ha/h',min=0.01,cond=REND_INF,help='Use quando não há largura de trabalho (ex.: tratamento de sementes, colheita manual, gotejo).'),
              num('maq','Máquina','R$/h',min=0,help='Inclua combustível, manutenção e depreciação; o operador entra em Pessoas.'),num('impl','Implemento','R$/h',req=False,min=0),
@@ -239,7 +448,7 @@ def cd02():
                     sel('reg','Registro',['RNC · referência','Cadastro próprio'],**{'def':'RNC · referência'}),sel('sit','Situação',['Ativa','Inativa'],**{'def':'Ativa'})]))
     rrows=[]
     for c in D2.CONJ:
-        v=dict(op=c['op'],conj=c['conj'],maq=c['maq'],impl=c['impl'],pess=c['pess'],pess_rs=c['pess_rs'],fonte=FONTE[c['id']],vig='2027-06-30',rend=c['rend'])
+        v=dict(op=c['op'],conj=c['conj'],maq=c['maq'],impl=c['impl'],pess=c['pess'],pess_rs=c['pess_rs'],fonte=FONTE.get(c['id'],'Equipe da fazenda'),vig='2027-06-30',rend=c['rend'])
         if c['id'] in MODO: v.update(modo='Largura × velocidade',larg=MODO[c['id']][0],vel=MODO[c['id']][1],efic=MODO[c['id']][2])
         else: v.update(modo='Informado',larg='',vel='',efic='')
         ch=D2.custo_h(c); v.update(custo_h=round(ch,2),custo_ha=round(ch/c['rend'],2))

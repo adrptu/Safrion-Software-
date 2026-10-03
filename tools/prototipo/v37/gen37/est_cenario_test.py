@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Estoque × cenário compartilhado (EST.dc.html no Chrome headless), 15 verificações.
-Pré-carga: OS-0430 aprovada e liberada por cenMudar (reserva a requisição nova). Depois, pela tela: entregar os 3 itens,
+Pré-carga: OS-0430 liberada por cenMudar (reserva a requisição nova). Depois, pela tela: entregar os 3 itens,
 recusar entrega acima do saldo, receber devolução apta e bloqueada, liberar a quarentena, contar lote com divergência e aprovar
 o ajuste; o app confirma e aponta sem sinal. A O.S. e o estoque são conferidos lendo cenGet() na própria página."""
 import sys, os, time
@@ -10,7 +10,7 @@ from est_lib import Est
 E = Est()
 try:
     E.abrir()
-    msg = E.mudar("c.ordens['OS-0430'].aprov=true; return cenLiberar(c,'OS-0430');"); print('pré-carga:', msg)
+    msg = E.mudar("return cenLiberar(c,'OS-0430');"); print('pré-carga:', msg)
     RQ = E.cen("Object.keys(c.reqs).find(k=>c.reqs[k].os==='OS-0430')"); print('requisição nova:', RQ)
     E.abrir()
     # 1 · a requisição nova aparece com fase, lote sugerido, embalagem e saldo a entregar
@@ -96,7 +96,7 @@ try:
     # 15 · restaurar demonstração volta o cenário ao início; sem erro de script
     E.clk('Restaurar demonstração'); E.clk('Restaurar'); print('toast:', E.toast())
     st = E.cen("[Object.keys(c.reqs).length, c.movs.length, c.ordens['OS-0430'].etapa, c.lotes['Glifosato 480|G26-14'].fisico]"); er = E.erros(); print(' ', st, er)
-    E.ok(st == [6, 0, 'A liberar', 1200] and not er, 'Restaurar demonstração: 6 requisições, nenhum movimento, OS-0430 A liberar, G26-14 1.200 L; sem erro de script', er)
+    E.ok(st == [11, 0, 'A liberar', 1200] and not er, 'Restaurar demonstração: 11 requisições (6 da Santa Rita + 5 da Lagoa Grande), nenhum movimento, OS-0430 A liberar, G26-14 1.200 L; sem erro de script', er)
 finally:
     ok = E.fim()
 sys.exit(0 if ok else 1)

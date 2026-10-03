@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Cliente mínimo do Chrome DevTools Protocol (websocket RFC 6455 em Python puro) para executar jornadas no protótipo."""
-import socket, base64, os, struct, json, subprocess, time, urllib.request, urllib.parse, tempfile, shutil
+import os, socket, base64, os, struct, json, subprocess, time, urllib.request, urllib.parse, tempfile, shutil, atexit
 CH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 class WS:
     def __init__(self,url):
@@ -58,12 +58,20 @@ class WS:
 class Chrome:
     def __init__(self,port=9333,w=1440,h=1100):
         self.dir=tempfile.mkdtemp(prefix='cdp_'); self.port=port
-        self.p=subprocess.Popen([CH,'--headless=new','--disable-gpu','--hide-scrollbars',f'--remote-debugging-port={port}',f'--user-data-dir={self.dir}',f'--window-size={w},{h}','about:blank'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
-        for _ in range(100):
-            try: tabs=json.load(urllib.request.urlopen(f'http://127.0.0.1:{port}/json')); break
-            except Exception: time.sleep(0.2)
-        t=[x for x in tabs if x.get('type')=='page'][0]
-        self.ws=WS(t['webSocketDebuggerUrl']); self.i=0
+        # CDP_GL=1: WebGL por software (SwiftShader) para o mapa real (MapLibre); sem a variável, o de sempre (sem GPU)
+        gl=(['--use-angle=swiftshader','--enable-unsafe-swiftshader'] if os.environ.get('CDP_GL')=='1' else ['--disable-gpu'])
+        self.p=subprocess.Popen([CH,'--headless=new']+gl+['--hide-scrollbars',f'--remote-debugging-port={port}',f'--user-data-dir={self.dir}',f'--window-size={w},{h}','about:blank'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+        # 03/10: com a máquina carregada o Chrome pode demorar; espera até 60 s e, se não subir, encerra o processo e apaga o perfil
+        # (antes ficava um Chrome órfão por falha e o erro era UnboundLocalError: tabs). atexit fecha o Chrome se o teste cair.
+        atexit.register(self.close)
+        tabs=None; fim=time.monotonic()+60
+        while time.monotonic()<fim:
+            try: tabs=json.load(urllib.request.urlopen(f'http://127.0.0.1:{port}/json',timeout=5)); break
+            except Exception: time.sleep(0.3)
+        pages=[x for x in (tabs or []) if x.get('type')=='page']
+        if not pages:
+            self.close(); raise RuntimeError(f'Chrome headless não respondeu em 60 s na porta {port} (máquina carregada?)')
+        self.ws=WS(pages[0]['webSocketDebuggerUrl']); self.i=0
         self.call('Page.enable'); self.call('Runtime.enable')
     def call(self,method,params=None,timeout=60):
         self.i+=1; mid=self.i; self.ws.send(json.dumps({'id':mid,'method':method,'params':params or {}}))
@@ -92,6 +100,10 @@ class Chrome:
         d=self.call('Page.captureScreenshot',{'format':'png','captureBeyondViewport':False})
         open(path,'wb').write(base64.b64decode(d['data']))
     def close(self):
+        if getattr(self,'_fechado',False): return
+        self._fechado=True
         try: self.p.terminate(); self.p.wait(5)
-        except Exception: pass
+        except Exception:
+            try: self.p.kill(); self.p.wait(5)   # Chrome travado ignora o SIGTERM
+            except Exception: pass
         shutil.rmtree(self.dir,ignore_errors=True)

@@ -35,7 +35,7 @@ try:
     E.ok(len(c0) == 1 and 'INV-2611' in c0[0] and 'Paula (almoxarife)' in c0[0], 'contagem sem diferença na trilha com INV-2611 e o contador', c0)
     E.ok(len(a0) == 1 and 'INV-2609' in a0[0] and 'AJ-71' in a0[0] and '−600 kg' in a0[0], 'ajuste de inventário na trilha com INV-2609 · AJ-71 e −600 kg', a0)
     # 3 · OS-0430 liberada; só Glifosato entregue pela tela; o app confirma: a trilha mostra só o Glifosato
-    E.mudar("c.ordens['OS-0430'].aprov=true; return cenLiberar(c,'OS-0430');"); RQ = E.cen("Object.keys(c.reqs).find(k=>c.reqs[k].os==='OS-0430')")
+    E.mudar("return cenLiberar(c,'OS-0430');"); RQ = E.cen("Object.keys(c.reqs).find(k=>c.reqs[k].os==='OS-0430')")
     E.abrir(); E.etapa(2); E.row(RQ, 'Glifosato 480'); E.salvar(); print('toast:', E.toast())
     print('app:', E.mudar(f"return cenConfirmarRecebimento(c,'{RQ}');"))
     E.abrir(); E.etapa(6); r = movs(E, 'Recebimento confirmado no app'); print(' ', r)

@@ -52,7 +52,7 @@ def parte1(E):
 def parte2(E):
     E.clk('2 Entregue por O.S.'); print('k2:', E.k())
     print('REQ-038:', E.row('REQ-038'), E.aside()[:160])
-    E.ok('aguarda aprovação' in E.aside() and E.J("document.querySelectorAll('aside[role=dialog] input:not([readonly]), aside[role=dialog] select:not([disabled])').length") == 0, 'REQ-038 bloqueada abre em consulta com motivo')
+    E.ok('aguarda a liberação' in E.aside() and E.J("document.querySelectorAll('aside[role=dialog] input:not([readonly]), aside[role=dialog] select:not([disabled])').length") == 0, 'REQ-038 bloqueada abre em consulta com motivo')
     E.fechar()
     # compras-estoque-04 · O.S. impedida pela manutenção não recebe material; o já entregue continua registrado
     t = E.rowtxt('REQ-036'); print('REQ-036:', t); E.ok('Bloqueada' in t and 'O.S. impedida · OM-0233' in t and 'Trator T1 bloqueado' in t, 'REQ-036 (OS-0420 impedida) bloqueada com selo e motivo')

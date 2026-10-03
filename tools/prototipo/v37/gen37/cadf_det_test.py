@@ -23,6 +23,7 @@ def toast(): return J("[...document.querySelectorAll('[role=status]')].map(x=>x.
 def head(): return J("document.querySelector('header').innerText.replace(/\\s+/g,' ')")
 def main(): return J("document.querySelector('main').innerText.replace(/\\s+/g,' ')")
 def erro_js(): return J("[...document.querySelectorAll('.sc-logic-error')].map(e=>e.innerText).join(' | ')")
+def aba(t): J(f"(()=>{{const b=[...document.querySelectorAll('[role=tab]')].find(b=>b.innerText.replace(/\\s+/g,' ').trim().startsWith({json.dumps(t)})); if(b) b.click();}})()"); time.sleep(.35)
 ok=[]
 def chk(nome,cond,extra=''):
     ok.append(bool(cond)); print(('OK  ' if cond else 'FALHOU ')+nome+(' · '+str(extra)[:300] if extra else ''))
@@ -37,13 +38,13 @@ try:
     ed=J("document.querySelectorAll('aside[role=dialog] input:not([readonly]), aside[role=dialog] select:not([disabled])').length")
     chk('4 parcela sem campo editável e sem Salvar (muda só no Planejar safra)', ed==0 and 'Salvar' not in d and 'mudam no Planejar safra' in d, [ed,d])
     J(f"({BTN})('Fechar')"); time.sleep(.25)
-    dv=J("(()=>{const a=[...document.querySelectorAll('main a')].find(a=>a.innerText.trim()==='Dividir em parcelas'); return a?a.getAttribute('href'):null;})()")
-    chk('5 "Dividir em parcelas" leva ao SAF e "Cadastrar parcela" saiu', dv=='SAF.dc.html' and 'Cadastrar parcela' not in head()+main(), dv)
+    dv=J("(()=>{const a=[...document.querySelectorAll('main a')].find(a=>a.innerText.trim()==='Planejar T1 na safra'); return a?a.getAttribute('href'):null;})()")
+    chk('5 "Planejar T1 na safra" (aba Parcelas) leva ao SAF e "Cadastrar parcela" saiu', dv=='SAF.dc.html' and 'Cadastrar parcela' not in head()+main(), dv)
     openrow(0,'Santa Rita'); fset('decl','300'); J(f"({BTN})('Salvar')"); time.sleep(.35); al=alerts()
     chk('6 área cultivável abaixo do alocado é barrada (regra da área cultivável)', 'As parcelas da Safra 2026/27 somam 312 ha; reduza-as no Planejar safra antes.' in al, al)
     J(f"({BTN})('Cancelar')"); time.sleep(.2); J(f"({BTN})('Descartar alterações')"); time.sleep(.2)
     # ---------- Definir polígono da T1-B ----------
-    J(f"({CLK})('Definir polígono da T1-B','header button')"); time.sleep(.3); J(f"({BTN})('Salvar polígono')"); time.sleep(.25)
+    aba('Geometria'); J(f"({CLK})('Definir polígono da T1-B','main button')"); time.sleep(.3); J(f"({BTN})('Salvar polígono')"); time.sleep(.25)
     chk('7 painel abre e não salva sem prévia', 'Definir polígono da T1-B' in dlg() and 'Gere a prévia antes de salvar.' in alerts(), dlg())
     J(f"({BTN})('Desenhar no mapa')"); time.sleep(.2); J(f"({BTN})('Gerar prévia')"); time.sleep(.25); d=dlg()
     J(f"({BTN})('Salvar polígono')"); time.sleep(.25); al=alerts()
@@ -51,13 +52,13 @@ try:
     J(f"({SETV})('#pg_mot','Carreador ou estrada')"); time.sleep(.2); J(f"({BTN})('Salvar polígono')"); time.sleep(.4)
     ts=toast(); vs=main()
     chk('9 nova versão v4 atual e v3 em consulta para as O.S. já emitidas', 'v4 do T1 é a atual; a v3 fica em consulta' in ts and 'Atual v4 · 312,4 ha' in vs and 'Consulta v3 · 312,4 ha' in vs and 'Carreador ou estrada' in vs, [ts,vs[-600:]])
-    t1b=rowtxt(1,'T1-B'); hd=head()
-    chk('10 T1-B validada; estado e primária passam a "Planejar T1 na safra"', 'Validada' in t1b and 'Polígono validado' in hd and 'Planejar T1 na safra' in hd
-        and J("(()=>{const a=[...document.querySelectorAll('header a')].find(a=>a.innerText.trim()==='Planejar T1 na safra'); return a&&a.getAttribute('href');})()")=='SAF.dc.html', [t1b,hd])
+    aba('Parcelas'); t1b=rowtxt(1,'T1-B'); hd=head()
+    chk('10 T1-B validada; estado validado e a primária da aba Parcelas é "Planejar T1 na safra"', 'Validada' in t1b and 'Polígono validado' in hd and 'Planejar T1 na safra' in main()
+        and J("(()=>{const a=[...document.querySelectorAll('main a')].find(a=>a.innerText.trim()==='Planejar T1 na safra'); return a&&a.getAttribute('href');})()")=='SAF.dc.html', [t1b,hd])
     # ---------- seletor: outro talhão, sem misturar linhas ----------
     J(f"({SETV})('header select','T4')"); time.sleep(.35); m=main()
-    chk('11 seletor troca para T4: só as safras do T4 e a primária do T4', 'T1-A' not in m and '204 de 204 ha' in m and '0 de 204 ha' in m and '204 ha livres' in m and 'T4 · 204 ha' in head() and 'Planejar T4 na safra' in head(), [m[:400],head()])
-    J(f"({SETV})('header select','B1')"); time.sleep(.35); J(f"({CLK})('Definir polígono do B1','header button')"); time.sleep(.3)
+    chk('11 seletor troca para T4: só as safras do T4 e a primária do T4', 'T1-A' not in m and '204 de 204 ha' in m and '0 de 204 ha' in m and '204 ha livres' in m and 'T4 · 204 ha' in head() and 'Planejar T4 na safra' in m, [m[:400],head()])
+    J(f"({SETV})('header select','B1')"); time.sleep(.35); aba('Geometria'); J(f"({CLK})('Definir polígono do B1','main button')"); time.sleep(.3)
     J(f"({BTN})('Gerar prévia')"); time.sleep(.2); J(f"({BTN})('Cancelar')"); time.sleep(.2); w=alerts()
     J(f"({BTN})('Continuar editando')"); time.sleep(.2); J(f"({BTN})('Salvar polígono')"); time.sleep(.4)
     b1=rowtxt(0,'Boa Vista')

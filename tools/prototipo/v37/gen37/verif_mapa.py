@@ -16,22 +16,25 @@ try:
     tap=lambda t,root='': J(f"(()=>{{const e=[...document.querySelectorAll('{root} svg [role=button]')].find(x=>(x.getAttribute('aria-label')||'').startsWith('{t}:')); if(!e) return 'sem'; e.dispatchEvent(new MouseEvent('click',{{bubbles:true}})); return 'ok';}})()")
     T=lambda: J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')") or ''
     panof=lambda t: J(f"(document.querySelector('aside[aria-label^=\"{t}\"]')||{{}}).innerText||''") or ''
-    VB="(()=>{return [...document.querySelectorAll('button')].filter(b=>b.innerText.trim()==='Criar vistoria' && b.title==='Clique no talhão para criar a vistoria');})()"
+    VB="(()=>{return [...document.querySelectorAll('button')].filter(b=>b.innerText.trim()==='Programar vistoria' && b.title==='Clique no talhão para programar a vistoria');})()"
     vbar=lambda: J(f"(()=>{{const b={VB}; return b.map(x=>x.getAttribute('aria-pressed'));}})()")
     vclk=lambda: (J(f"{VB}[{VB}.length-1].click()"), time.sleep(.4))
-    c.size(1440,900); c.goto(f'http://127.0.0.1:{p}/IN-04.dc.html'); time.sleep(.6)
+    c.size(1440,900); c.goto(f'http://127.0.0.1:{p}/Main.dc.html')
+    # vistorias do mapa ficam no estado do MIP (persistem): começa da semente; o mapa abre na Lagoa Grande (01/10): talhões desenhados = Santa Rita
+    J("localStorage.removeItem('talhao-os-mip-v1'); sessionStorage.setItem('mapa-ctx',JSON.stringify({mf_faz:'Santa Rita'}))")
+    c.goto(f'http://127.0.0.1:{p}/IN-04.dc.html'); time.sleep(.6)
     chk('sem erro JS', (J("window.__err||''") or '')=='' and 'renderVals' not in J("document.body.innerText"))
     rail=J("[...document.querySelectorAll('nav[aria-label=\"Funcionalidades do mapa\"] [role=tab]')].map(x=>x.innerText.trim())")
     chk('barra vertical = só as 9 funcionalidades', len(rail)==9, rail)
-    # ---- modo Criar vistoria: troca de funcionalidade desliga; clique depois não cria ----
-    clk('MIP/MID'); vclk(); print('   modo:', vbar(), T())
+    # ---- modo Programar vistoria (mesma base do AG-01): troca de funcionalidade desliga; clique depois não cria ----
+    clk('Pragas e doenças'); vclk(); print('   modo:', vbar(), T())
     clk('Satélite'); print('   após trocar p/ Satélite:', vbar(), T())
     tap('T4'); time.sleep(.4); t=T(); chk('troca de funcionalidade desliga o modo (clique no T4 no Satélite não cria vistoria)', 'VIS-0' not in t, t)
     tap('T4'); time.sleep(.2)
     # modo + T7 (tem mancha) -> centroide
-    clk('MIP/MID'); vclk(); tap('T7'); time.sleep(.4); t=T(); chk('modo no T7 (com mancha): centroide da mancha', 'VIS-018 criada para T7 · ponto de vistoria no centroide da mancha' in t, t)
+    clk('Pragas e doenças'); vclk(); tap('T7'); time.sleep(.4); t=T(); chk('modo no T7: programa VIS-018 do alvo da última vistoria (ácaro-rajado)', 'VIS-018 programada para T7 × ácaro-rajado' in t, t)
     chk('modo cria e seleciona o talhão (painel do T7 aberto)', 'Abrir VIS-018' in panof('T7'), panof('T7')[:160])
-    tap('P2'); time.sleep(.4); t=T(); chk('modo continua ligado: 2º talhão (P2) cria VIS-019', 'VIS-019 criada para P2' in t, t)
+    tap('P2'); time.sleep(.4); t=T(); chk('modo continua ligado: 2º talhão (P2) programa VIS-019', 'VIS-019 programada para P2' in t, t)
     vclk(); tap('P2'); time.sleep(.2)
     # modo ligado e depois Tela cheia
     vclk(); clk('Tela cheia'); time.sleep(.4)
@@ -43,7 +46,7 @@ try:
     hb=J(f"(document.querySelector('{DLG} [role=group][aria-label^=\"Indicadores de\"]')||{{}}).innerText||''")
     chk('tela cheia: indicadores da funcionalidade', len(hb)>5, hb.replace('\n',' '))
     r=tap('P1',DLG); time.sleep(.4); t=T(); print('   tap P1 em tela cheia:', r, t)
-    chk('tela cheia: modo Criar vistoria funciona no mapa da tela cheia', 'VIS-020 criada para P1' in t, t)
+    chk('tela cheia: modo Programar vistoria funciona no mapa da tela cheia (P1 já tem a VIS-014 aberta)', 'VIS-014 já está aberta para P1' in t, t)
     # trocar funcionalidade dentro da tela cheia pela barra vertical
     J(f"(()=>{{const e=[...document.querySelectorAll('{DLG} nav[aria-label=\"Funcionalidades do mapa\"] [role=tab]')].find(x=>x.innerText.trim()==='Solo'); e&&e.click();}})()"); time.sleep(.4)
     hb2=J(f"(document.querySelector('{DLG} [role=group][aria-label^=\"Indicadores de\"]')||{{}}).getAttribute?.('aria-label')||''")
@@ -60,9 +63,9 @@ try:
     tap('T1'); clk('Satélite'); tap('T1'); time.sleep(.3); chk('Satélite T1: sem linha Geometria', 'Geometria' not in panof('T1'), panof('T1')[:200].replace('\n',' / ')); tap('T1')
     # ---- mapa O.S./prazos: OS-0430 e OS-0431 ----
     clk('O.S./prazos'); tap('T1'); time.sleep(.3); pn=panof('T1'); print('   T1 O.S.:', pn[:600].replace('\n',' / '))
-    chk('mapa: OS-0430 com Aguardando agrônomo', 'Aguardando agrônomo' in pn, pn[:600].replace('\n',' / '))
+    chk('mapa: OS-0430 A liberar com Liberar para execução (sem selo do agrônomo)', 'A liberar' in pn and 'Liberar para execução' in pn and 'Aguardando agrônomo' not in pn, pn[:600].replace('\n',' / '))
     tap('T1'); tap('T2'); time.sleep(.3); pn=panof('T2'); print('   T2 O.S.:', pn[:700].replace('\n',' / '))
-    cores=J("(()=>{const a=document.querySelector('aside[aria-label^=\"T2\"]'); return [...a.querySelectorAll('span')].filter(s=>/^(Aprovada pelo agrônomo|Falta máquina)/.test(s.innerText.trim())).map(s=>s.innerText.trim()+'='+getComputedStyle(s).color);})()")
+    cores=J("(()=>{const a=document.querySelector('aside[aria-label^=\"T2\"]'); return [...a.querySelectorAll('span')].filter(s=>/^Falta máquina/.test(s.innerText.trim())).map(s=>s.innerText.trim()+'='+getComputedStyle(s).color);})()")
     print('   cores:', cores)
     tap('T2')
     c.shot(os.path.join(HERE,'_probe','verif_mapa_T2.png'))
@@ -73,8 +76,8 @@ try:
     r431=J("(()=>{const r=[...document.querySelectorAll('[role=row]')].find(r=>r.innerText.indexOf('OS-0431')>=0); return r?r.innerText.replace(/\\s+/g,' '):'';})()")
     r430=J("(()=>{const r=[...document.querySelectorAll('[role=row]')].find(r=>r.innerText.indexOf('OS-0430')>=0); return r?r.innerText.replace(/\\s+/g,' '):'';})()")
     print('   CA-01 OS-0431:', r431); print('   CA-01 OS-0430:', r430)
-    chk('CA-01 OS-0431 aprovada + falta máquina', 'Aprovada pelo agrônomo' in r431 and 'Falta máquina' in r431 and 'v1 aprovada' in r431, r431)
-    chk('CA-01 OS-0430 não aparece como v1 aprovada', 'v1 aprovada' not in r430, r430)
+    chk('CA-01 OS-0431 com falta máquina (sem selo nem versão "aprovada")', 'Falta máquina' in r431 and 'Aprovada pelo agrônomo' not in r431 and 'v1 aprovada' not in r431, r431)
+    chk('CA-01 OS-0430 A liberar, sem Aguardando agrônomo', 'Aguardando agrônomo' not in r430 and 'A liberar' in r430, r430)
     import re
     m=re.findall(r'[^\n]*impedid[^\n]*', body); print('   CA-01 impedidas:', m[:4])
     # ---- os-08: Voltar ----

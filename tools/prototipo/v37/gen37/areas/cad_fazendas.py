@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 """CD-01 Fazendas, áreas e talhões · CD-01det Detalhe do talhão (módulo próprio; areas.cadastros.build usa este se existir).
 
-CD-01 (listagem): entidade Fazenda (cadastrar, editar pela linha, inativar sem excluir) e talhões em árvore por fazenda,
+Layout de 01/10/2026 (padrão dos cadastros em areas/cadastros.py): um bloco com abas Talhões | Fazendas | Ambiental | Água; cada aba com a
+sua faixa "precisa de atenção", o filtro rápido e a sua ação (Cadastrar talhão / Cadastrar fazenda); Lista | Mapa na aba Talhões (Santa Rita
+desenhada; Lagoa Grande com os pivôs do KML). Fazenda Lagoa Grande (KML do proprietário): 23 pivôs viram talhões com geometria "Círculo do
+KML" (centro + área declarada, não polígono validado); perímetros, Reserva Legal, APP e pontos de água ficam no cadastro da fazenda.
+CD-01 (listagem): entidade Fazenda (cadastrar, editar pelo cartão, inativar sem excluir) e talhões em árvore por fazenda,
 com subtotal por fazenda (sem total que some fazendas). Formulário do talhão: fazenda da lista cadastrada + "Cadastrar fazenda…"
 (volta ao talhão sem perder o preenchido), área cultivável × polígono com motivo acima de 1 %, sistema e pivô/setor, situação.
 CD-01det (detalhe): qualquer talhão, escolhido no seletor do cabeçalho (ou por #talhao=ID vindo da lista); resumo por safra
-(cultivável · alocado · livre), parcelas em consulta com origem no Planejar safra, "Dividir em parcelas" leva ao SAF,
-versões do polígono e primária "Definir polígono" (importar ou desenhar, simulados).
+(cultivável · alocado · livre), parcelas em consulta com origem no Planejar safra, abas Parcelas por safra ("Planejar Tn na safra"
+leva ao SAF) | Geometria (versões do polígono e "Definir polígono", importar ou desenhar, simulados); "Reativar" na linha do talhão.
 Geometria das parcelas: dados.GEO_PARC (fonte única com o Mapa). Fazendas, sistemas e versões: dados_cad.
 As duas telas gravam fazendas e talhões em localStorage (talhao-os-cd01-v1) para que o detalhe abra o talhão salvo na lista."""
 import json, os
@@ -17,7 +21,8 @@ from ui37 import shell37, HEIGHTS37, PARENT37
 import dados as D
 import dados2 as D2
 import dados_cad as DC
-from areas.cadastros import H, bloco, mini, novo, sel, num, txt, dat, R, js
+from areas.cadastros import H, sel, num, txt, dat, R, js
+from areas.cadastros import (cadx_css, abas, pane, se, faixa, prim, secbtn, qf_chips, seg, barra, cartoes, bloco_cad, estado_cab, estado_html, acoes_form, PRIM_ST, arv)
 
 F_=H('false'); T_=H('true')
 UFS=['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO']
@@ -29,12 +34,24 @@ def _br(n): return f'{n:,.2f}'.replace(',','X').replace('.',',').replace('X','.'
 def _tal_de(local): return local.split('-')[0]
 
 # ---------------- dados ----------------
+def _br2(n): return f'{n:,.2f}'.replace(',','X').replace('.',',').replace('X','.')
+def _lg_textos():
+    """perímetros, restrição ambiental e água da Lagoa Grande resumidos para o painel da fazenda (o detalhe fica nas abas Ambiental e Água)."""
+    per='; '.join((f"{p['nome']}: {_br2(p['area'])} ha · {p['mun']} · {str(p['mf']).replace('.',',')} módulos fiscais · recibo do CAR {p['car']}" if p['area'] else
+                   f"{p['nome']}: área não informada no KML") for p in DC.LG_PERIMETROS)
+    tot={g:a for g,t,a,tt in DC.LG_AMBIENTAL if tt}
+    amb=f"Reserva legal {_br2(tot.get('Reserva legal',0))} ha · APP total {_br2(tot.get('APP',0))} ha (categorias na aba Ambiental)"
+    agua=f"{len(DC.LG_AGUA)} pontos de outorga ou certidão (detalhe na aba Água)"
+    return per,amb,agua
 def _faz_rows():
     out=[]
     for f in DC.FAZENDAS:
         mun,uf=f['mun'].rsplit('/',1)
-        out.append(R(f['id'],dict(nome=f['nome'],empresa=f['empresa'],mun=mun,uf=uf,fuso=f['fuso'],area=f['area'],posse=f['posse'],arrend=f['arrend'],
-                                  fim=f['fim'],custo=f['custo'],car=f['car'],matr=f['matr'],pend=f['pend'],sit=f['sit'])))
+        v=dict(nome=f['nome'],empresa=f['empresa'],mun=mun,uf=uf,fuso=f['fuso'],area=f['area'],posse=f['posse'],arrend=f['arrend'],
+               fim=f['fim'],custo=f['custo'],car=f['car'],matr=f['matr'],pend=f['pend'],sit=f['sit'],mf=f.get('mf',''),kml='')
+        if f['id']=='LG':
+            per,amb,agua=_lg_textos(); v.update(kml='Sim',perim=per,ambs=amb,aguas=agua)
+        out.append(R(f['id'],v))
     return out
 def _tal_rows():
     out=[]
@@ -42,6 +59,10 @@ def _tal_rows():
         sis,setor=DC.SISTEMA.get(obs,('Sequeiro',''))
         out.append(R(t,dict(t=t,faz='Santa Rita',sis=sis,setor=setor,decl=float(ha),calc=DC.CALC[t],motivo='',sit='Ativo',inat='',ver=DC.geo_vers(t)[-1][0])))
     out.append(R('B1',dict(t='B1',faz='Boa Vista',sis='Sequeiro',setor='',decl=120.0,calc='',motivo='',sit='Ativo',inat='',ver='')))
+    # Lagoa Grande: só os pivôs centrais viram talhão; a geometria é o círculo do KML (centro + área declarada), não polígono validado
+    for pid,nm,ha,lon,lat,raio in DC.LG_PIVOS:
+        out.append(R(pid,dict(t=pid,faz='Lagoa Grande',sis='Pivô central',setor='',decl=ha,calc='',motivo='',sit='Ativo',inat='',ver='',geo='circ',
+                              geo_t=f"{DC.LG_GEO} · {nm} · raio {_br2(raio)} m · centro {lat:.5f}; {lon:.5f}".replace('.',','))))
     return out
 def _aloc():
     """área alocada em parcelas por talhão e safra aberta (a área cultivável não pode ficar abaixo dela)."""
@@ -53,6 +74,9 @@ def _aloc():
 def _nparc():
     n={}
     for c in D2.CULTIVOS[SAF_ATUAL['id']]: n[_tal_de(c['local'])]=n.get(_tal_de(c['local']),0)+1
+    # Lagoa Grande: pivôs (PVxx) com o cultivo da Safra Mamão 2026/27 (dados_lagoa_safra.py)
+    import dados_lagoa_safra as DL
+    for c in D2.CULTIVOS.get(DL.SAFRA['id'],[]): k=DL.PID_DE[c['local']]; n[k]=n.get(k,0)+1
     return n
 
 # ---------------- campos ----------------
@@ -69,6 +93,8 @@ def campos_tal(fazs):
             sel('setor','Pivô ou setor de irrigação',DC.SETORES,req=False,help='Ativo de irrigação de Máquinas, instalações e setores; o balanço hídrico usa este vínculo.'),
             num('decl','Área cultivável','ha',min=0.1,max=5000,help='Área plantável, sem carreador, APP e sede. Parcelas, doses e custo por hectare partem dela.'),
             num('calc','Área do polígono','ha',req=False,ro=True,help='Da versão atual do polígono; em branco enquanto não houver polígono.'),
+            dict(k='geo_t',l='Geometria',t='area',ro=True,req=False,cond=dict(k='geo',eq='circ'),help='Não é polígono validado; defina o polígono no detalhe do talhão.'),
+            dict(k='geo',l='geo',t='txt',req=False,cond=dict(k='_nunca',eq='1')),
             sel('motivo','Motivo da diferença',DC.MOTIVOS_DIF,req=False,help='Pedido quando a área cultivável difere mais de 1 % do polígono.'),
             sel('sit','Situação',['Ativo','Inativo'],**{'def':'Ativo'},help='Inativo sai do Planejar safra e do Mapa; safras e O.S. antigas seguem consultáveis.')]
 CAMPOS_FAZ=[txt('nome','Nome da fazenda'),
@@ -80,9 +106,14 @@ CAMPOS_FAZ=[txt('nome','Nome da fazenda'),
             txt('arrend','Arrendador ou parceiro',req=False),
             dat('fim','Fim do contrato',req=False),
             num('custo','Custo da terra','sc/ha/ano',req=False,min=0,help='Entra no custo por hectare de cada talhão.'),
+            num('mf','Módulos fiscais',req=False,min=0,help='Do recibo do CAR.'),
             txt('car','CAR',req=False,help='Recibo do CAR. Em branco fica pendente: bloqueia só o crédito rural.'),
             txt('matr','Matrícula e cartório',req=False,help='Ex.: 12.401 · CRI de Rio Verde.'),
             txt('pend','Pendência nos documentos',req=False,help='Ex.: contrato sem registro em cartório. Não bloqueia o planejamento.'),
+            dict(k='perim',l='Perímetros',t='area',ro=True,req=False,cond=dict(k='kml',eq='Sim'),help='Do KML do proprietário; perímetro não vira talhão.'),
+            dict(k='ambs',l='Restrição ambiental',t='area',ro=True,req=False,cond=dict(k='kml',eq='Sim')),
+            dict(k='aguas',l='Recursos hídricos',t='area',ro=True,req=False,cond=dict(k='kml',eq='Sim')),
+            dict(k='kml',l='kml',t='txt',req=False,cond=dict(k='_nunca',eq='1')),
             sel('sit','Situação',['Ativa','Inativa'],**{'def':'Ativa'})]
 
 # ---------------- JS comum às duas telas (regras do talhão, campos condicionais, cenário salvo) ----------------
@@ -94,10 +125,15 @@ function precisaMotivo(d){ const a=g2num(d.decl), c=g2num(d.calc); return !isNaN
 function difInfo(V){ const a=Number(V.decl)||0; if(!isnum(V.calc)||!a) return null; const c=Number(V.calc); return {d:r1(c-a),pct:Math.abs(c-a)/a,fora:Math.abs(c-a)/a>TOL}; }
 function difParts(V){ const di=difInfo(V); if(!di) return [{k:'mut',t:'—'}]; const t=sgn(di.d,1)+' ha';
   if(!di.fora) return [{k:'txt',t:t},{k:'mut',t:nf(di.pct*100,1)+' %'}]; return V.motivo?[{k:'txt',t:t},{k:'mut',t:V.motivo}]:[chipc(t+' · informe o motivo','yellow')]; }
-function geoParts(V){ return isnum(V.calc)?[{k:'txt',t:nf(V.calc,1)+' ha'}].concat(V.ver?[{k:'mut',t:V.ver}]:[]):[chipc('Sem polígono','yellow')]; }
+// geometria do KML (Lagoa Grande): círculo calculado pelo centro e pela área declarada; não é polígono validado nem pendência
+function circ(V){ return V.geo==='circ'&&!isnum(V.calc); }
+// sem polígono: a coluna fica com "—" (a pendência aparece uma vez só, na Situação)
+function geoParts(V){ return isnum(V.calc)?[{k:'txt',t:nf(V.calc,1)+' ha'}].concat(V.ver?[{k:'mut',t:V.ver}]:[]):(circ(V)?[{k:'mut',t:'Círculo do KML'}]:[{k:'mut',t:'—'}]); }
 function sisTxt(V){ return V.sis==='Sequeiro'||!V.sis?'Sequeiro':(V.sis+(V.setor?' · '+V.setor.replace('Bomba do ',''):'')); }
 // campos que só aparecem sob condição diferente de igualdade (a cond do motor aceita só "igual a")
-const CXF={posse3:d=>!!d.posse&&d.posse!=='Própria', irrig:d=>!!d.sis&&d.sis!=='Sequeiro', motivo:d=>precisaMotivo(d)};
+// fazenda cujos pivôs ainda não estão em Máquinas, instalações e setores: o campo do setor não aparece (nem é exigido)
+const SEM_SETOR=['Lagoa Grande'];
+const CXF={posse3:d=>!!d.posse&&d.posse!=='Própria', irrig:d=>!!d.sis&&d.sis!=='Sequeiro'&&SEM_SETOR.indexOf(d.faz)<0, motivo:d=>precisaMotivo(d)};
 const CX={g_faz:{arrend:'posse3',fim:'posse3',custo:'posse3'},g_tal:{setor:'irrig',motivo:'motivo'},g_idt:{setor:'irrig',motivo:'motivo'}};
 const CXMSG={arrend:'Informe o arrendador ou parceiro.',fim:'Informe o fim do contrato.',custo:'Informe o custo da terra.',setor:'Escolha o pivô ou setor que irriga o talhão.'};
 function cxVis(gid,k,d){ const c=(CX[gid]||{})[k]; return !c||CXF[c](d||{}); }
@@ -159,6 +195,7 @@ def _rolagem(fname):
     """o conteúdo cresce com cada fazenda, talhão ou versão cadastrada: o corpo rola dentro do artboard em vez de ser cortado
     pelo overflow: clip da altura fixa (mesmo padrão das telas de processo; pack37 expande main[data-scroll="1"] no PDF)."""
     p=os.path.join(E.P,fname); s=open(p).read()
+    if '<main data-scroll="1"' in s: return   # a casca (ui37) já trava a tela na janela e rola só os dados em todas as telas
     alvo='<main data-scroll="0" style="flex-grow: 1; padding: 18px 32px 22px;  display: grid;'
     assert s.count(alvo)==1, (fname,'main')
     open(p,'w').write(s.replace(alvo,'<main data-scroll="1" style="flex-grow: 1; padding: 18px 32px 22px; overflow-y: auto; min-height: 0; display: grid;',1))
@@ -188,70 +225,172 @@ def _mapa(h=250):
     leg=' · '.join(f'<span style="color: {c}; font-weight: 700;">■ {esc(t)}</span>' for c,t in [('#1E7A4C','polígono validado'),('#8A5A00','diferença sem motivo'),('#5B6660','inativo')])
     return svg+f'<div style="font-size: 11.5px; color: {MUTED}; padding: 8px 4px 0;">{leg} · talhão sem polígono não aparece no mapa</div>'
 
+def _mapa_lg(h=520):
+    """pivôs da Lagoa Grande na posição do KML: círculo pelo centro e pelo raio da área declarada (projeção local em metros)."""
+    import math
+    pv=DC.LG_PIVOS; lat0=sum(p[4] for p in pv)/len(pv); kx=111320*math.cos(math.radians(lat0)); ky=110540
+    pts=[(p[0],p[3]*kx,-p[4]*ky,p[5]) for p in pv]
+    x0=min(x-r for _,x,y,r in pts); x1=max(x+r for _,x,y,r in pts); y0=min(y-r for _,x,y,r in pts); y1=max(y+r for _,x,y,r in pts)
+    pad=120; VW=1000; sc=VW/(x1-x0+2*pad); VH=round((y1-y0+2*pad)*sc)
+    g=[]
+    for pid,x,y,r in pts:
+        cx=round((x-x0+pad)*sc,1); cy=round((y-y0+pad)*sc,1); rr=round(r*sc,1)
+        g.append(f'<circle cx="{cx}" cy="{cy}" r="{rr}" fill="{H("mf_"+pid)}" stroke="{H("ms_"+pid)}" stroke-width="2" onClick="{H("mc_"+pid)}" style="cursor: pointer;"/>')
+        g.append(f'<text x="{cx}" y="{round(cy+7,1)}" text-anchor="middle" pointer-events="none" font-family="Sora, Manrope, sans-serif" font-size="{20 if rr>30 else 15}" font-weight="700" fill="#15201A" stroke="#fff" stroke-width="4" paint-order="stroke">{pid}</text>')
+    svg=(f'<svg viewBox="0 0 {VW} {VH}" width="100%" height="{h}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Mapa dos pivôs da Lagoa Grande" style="display: block; background: #DDE5D4; border-radius: 14px;">'
+         f'<rect x="0" y="0" width="{VW}" height="{VH}" fill="#DDE5D4"/>'+''.join(g)+'</svg>')
+    leg=' · '.join(f'<span style="color: {c}; font-weight: 700;">■ {esc(t)}</span>' for c,t in [('#4F7A55','círculo do KML (centro e área declarada)'),('#1E7A4C','polígono validado'),('#5B6660','inativo')])
+    return svg+f'<div style="font-size: 11.5px; color: {MUTED}; padding: 8px 4px 0;">{leg} · reservas, APP e pontos de água ficam nas abas Ambiental e Água</div>'
+
 def cd01():
     fname='CD-01.dc.html'; E._reset_screen(fname)
     fr=_faz_rows(); tr=_tal_rows(); nome={r['id']:r['v']['nome'] for r in fr}
     grupos=[dict(id='F_'+fid,ro=True,v=dict(t=n,fid=fid),s={},p={},kids=[t for t in tr if t['v']['faz']==n]) for fid,n in nome.items()]
-    gf=grid([dict(k='nome',l='Fazenda',w=220),dict(k='area',l='Área total',t='num',a='r',u='ha',d=0),dict(k='cult',l='Área cultivável',t='num',a='r',u='ha',d=1),
-             dict(k='posse',l='Posse',w=210),dict(k='docs',l='Documentos',w=230),dict(k='nt',l='Talhões ativos',t='num',a='r')],
-        fr,gid='g_faz',total=False,search=False,add='Cadastrar fazenda',
+    # fazendas: entidade contêiner com poucos registros → cartões (a grade fica só como fonte do painel e dos dados)
+    grid([dict(k='nome',l='Fazenda',w=220),dict(k='area',l='Área total',t='num',a='r',u='ha',d=0)],
+        fr,gid='g_faz',total=False,search=False,
         edit=dict(m='form',title='Fazenda',newTitle='Cadastrar fazenda',sub=SUB_FAZ,fields=CAMPOS_FAZ))
-    gt=grid([dict(k='t',l='Fazenda · talhão',w=260),dict(k='decl',l='Área cultivável',t='num',a='r',u='ha',d=1),dict(k='geo',l='Polígono',w=180),
-             dict(k='dif',l='Diferença',w=230),dict(k='parc',l=SAF_ATUAL['nome'])],
-        grupos,gid='g_tal',tree=True,search=False,total=False,x0={g['id']:True for g in grupos},
+    # talhões: árvore fazenda › talhão, uma linha por talhão (≤ 6 colunas); o resto vai para o painel e o detalhe
+    gt=grid([dict(k='t',l='Talhão',w=250),dict(k='decl',l='Área cultivável',t='num',a='r',u='ha',d=1),dict(k='calc',l='Polígono',t='num',a='r',u='ha',d=1),
+             dict(k='difp',l='Diferença',t='num',a='r',u='%',d=1),dict(k='parc',l=SAF_ATUAL['nome'],w=150),dict(k='est',l='Situação',w=320)],
+        grupos,gid='g_tal',tree=True,search=True,total=False,frame=False,x0={g['id']:True for g in grupos},
+        tools=qf_chips('g_tal')+seg('cdv',['Lista','Mapa'],'Visualização dos talhões')+prim('g_tal_new','Cadastrar talhão'),
         edit=dict(m='form',title='Talhão',newTitle='Cadastrar talhão',leafOnly=True,sub=SUB_TAL,fields=campos_tal(list(nome.values())+[NOVA_FAZ])))
-    corpo=(bloco('Fazendas','Cadastre cada fazenda com empresa, município, posse e documentos; clique na linha para editar.',gf)
-           # "Importar geometrias" saiu: mostrava uma prévia fixa e não mudava nada; importar ou desenhar o polígono é o
-           # "Definir polígono" do detalhe de cada talhão (o toast do talhão novo já nomeia esse próximo passo)
-           + bloco('Talhões por fazenda','Confira área cultivável, polígono e diferença de cada talhão; clique na linha para editar.',gt)
-           + bloco('Mapa · Santa Rita','Confira a posição dos talhões com polígono; clique no talhão para editar.',_mapa()))
+    acoes_form('g_tal'); acoes_form('g_faz'); cadx_css()
+    # aba Talhões: atenção + lista ou mapa (a mesma alternância no mesmo lugar); aba Fazendas: cartões
+    mapa=(barra(seg('cdm',['Santa Rita','Lagoa Grande'],'Fazenda do mapa'),seg('cdv',['Lista','Mapa'],'Visualização dos talhões')+prim('g_tal_new','Cadastrar talhão'))
+          + f'<div class="cadx-rola" style="padding: 16px;">'+se('cd_mapa_sr',_mapa(430),True)+se('cd_mapa_lg',_mapa_lg())+'</div>')
+    p0=faixa('cd_fx0')+se('cd_lista',arv(gt),True)+se('cd_mapa',mapa)
+    p1=(barra(f'<span style="font-size: 12px; font-weight: 600; color: {MUTED};">{H("cd_nfaz")}</span>',prim('g_faz_new','Cadastrar fazenda'))
+        + cartoes('cd_faz','Fazendas'))
+    # restrição ambiental e recursos hídricos da fazenda (vieram do KML): consulta com a origem; não viram talhão
+    tot={g:a for g,t,a,tt in DC.LG_AMBIENTAL if tt}
+    amb_rows=[R(f'am{i}',dict(tema=t,faz='Lagoa Grande',tipo=g,area=a,total='Sim' if tt else '',car=DC.LG_PERIMETROS[0]['car']))
+              for i,(g,t,a,tt) in enumerate(sorted(DC.LG_AMBIENTAL,key=lambda x:(x[0]!='Reserva legal',not x[3],-x[2])),1)]
+    for r in amb_rows: r['o']=[dict(t=f"CAR {r['v']['car']} · {DC.LG_FONTE}")]
+    ga=grid([dict(k='tema',l='Área ambiental',w=520),dict(k='faz',l='Fazenda'),dict(k='tipo',l='Tipo'),dict(k='area',l='Área',t='num',a='r',u='ha',d=2)],
+        amb_rows,gid='g_amb',total=False,frame=False,qf=dict(k='tipo',todas='Todos'),
+        tools=f'<span style="font-size: 12px; font-weight: 600; color: {MUTED};">Reserva legal {_br2(tot.get("Reserva legal",0))} ha · APP total {_br2(tot.get("APP",0))} ha · categorias de APP se sobrepõem (não somar)</span>',
+        edit=dict(m='origin',title='Área ambiental',fields=[txt('tema','Tema do CAR',ro=True),txt('faz','Fazenda',ro=True),txt('tipo','Tipo',ro=True),
+                                                           num('area','Área','ha',ro=True),txt('car','Recibo do CAR',ro=True)]))
+    ag_rows=[R(a['id'],dict(nome=a['nome'],faz='Lagoa Grande',tipo=a['tipo'],num=a['num'],proc=a['proc'],modo=a['modo'],curso=a['curso'],vazao=a['vazao'],
+                           regime=a['regime'],fin=a['fin'],venc=a['venc'],renov=a['renov'],desc=a['desc'],coord=f"{a['lat']:.6f}; {a['lon']:.6f}".replace('.',','))) for a in DC.LG_AGUA]
+    for r in ag_rows: r['o']=[dict(t=DC.LG_FONTE)]
+    gw=grid([dict(k='nome',l='Ponto de água',w=280),dict(k='faz',l='Fazenda'),dict(k='uso',l='Uso',w=280),dict(k='vaz',l='Vazão',w=170),dict(k='est',l='Situação',w=300)],
+        ag_rows,gid='g_agua',total=False,frame=False,tools=qf_chips('g_agua'),
+        edit=dict(m='origin',title='Ponto de água',fields=[txt('nome','Nome no KML',ro=True),txt('tipo','Documento',ro=True),txt('num','Número',ro=True),
+            txt('proc','Processo',ro=True),txt('modo','Modo de uso',ro=True),txt('curso','Curso d’água',ro=True),txt('vazao','Vazão',ro=True),txt('regime','Regime',ro=True),
+            txt('fin','Finalidade',ro=True),dat('venc','Vencimento',ro=True),txt('renov','Processo de renovação',ro=True),txt('coord','Coordenadas (latitude; longitude)',ro=True),
+            dict(k='desc',l='Descrição no KML',t='area',ro=True)]))
+    p2=ga; p3=faixa('cd_fx3')+gw
+    corpo=bloco_cad(abas('cdt',['Talhões','Fazendas','Ambiental','Água'],'Cadastros da fazenda'),
+                    pane('cdt',0,p0)+pane('cdt',1,p1)+pane('cdt',2,p2)+pane('cdt',3,p3),'Fazendas, áreas e talhões')
     js({},
        TALJS+'const FUSO_UF='+json.dumps(DC.FUSO_UF,ensure_ascii=False)+', FUSO_PAD='+json.dumps(DC.FUSOS[0],ensure_ascii=False)
        +', ALOC='+json.dumps(_aloc(),ensure_ascii=False)+', NPARC='+json.dumps(_nparc())+', MAPA='+json.dumps([g[0] for g in GEO_MAPA])
-       +', MAPA_FID='+json.dumps(MAPA_FID)+';\n'+r'''
+       +', MAPA_FID='+json.dumps(MAPA_FID)+', MAPA_LG='+json.dumps([p[0] for p in DC.LG_PIVOS])+';\n'+r'''
 function tals(rows){ const o=[]; rows.forEach(g=>{ if(g.kids) g.kids.forEach(k=>o.push(k)); else o.push(g); }); return o; }
 function arvore(fz,ts){ const gs=fz.map(f=>({id:'F_'+f.id,ro:true,v:{t:f.v.nome,fid:f.id},s:{},p:{},kids:[]}));
   ts.forEach(t=>{ let g=gs.find(x=>x.v.t===t.v.faz); if(!g){ g={id:'F_'+t.v.faz,ro:true,v:{t:t.v.faz,fid:''},s:{},p:{},kids:[]}; gs.push(g); } g.kids.push(t); }); return gs; }
 // fazendas e talhões salvos (nesta ou na tela do detalhe) voltam ao abrir a tela
 function cadIni(self){ if(self._ini) return; self._ini=1; const st=cadLer(); if(!st||!st.faz||!st.tal) return;
-  const fz=st.faz.map(x=>({id:x.id,v:Object.assign({},x.v),s:{},p:{}})); const gs=arvore(fz,st.tal.map(x=>({id:x.id,v:Object.assign({},x.v),s:{},p:{}})));
+  const fz=st.faz.map(x=>({id:x.id,v:Object.assign({},x.v),s:{},p:{}})); const tl=st.tal.map(x=>({id:x.id,v:Object.assign({},x.v),s:{},p:{}}));
+  // registro novo do cadastro (ex.: Lagoa Grande, do KML) entra mesmo quando o navegador guardou um estado de antes dele
+  GR('g_faz').rows.forEach(r=>{ if(!fz.some(x=>x.id===r.id)) fz.push({id:r.id,v:Object.assign({},r.v),s:{},p:{}}); });
+  tals(GR('g_tal').rows).forEach(r=>{ if(!tl.some(x=>x.id===r.id)) tl.push({id:r.id,v:Object.assign({},r.v),s:{},p:{}}); });
+  const gs=arvore(fz,tl);
   GR('g_faz').rows=fz; GR('g_tal').rows=gs; const x0={}; gs.forEach(g=>{ x0[g.id]=true; }); GR('g_tal').x0=x0; }
 function cadSalvar(self){ cadGravar({faz:RW(self,'g_faz').map(linhaPk),tal:tals(RW(self,'g_tal')).map(linhaPk)}); }
-function PREVALS(self,v){ cadIni(self); const fz=RW(self,'g_faz'), tr=RW(self,'g_tal'), ts=tals(tr);
+// situação do talhão: um só cálculo para a linha, o filtro "A resolver", a faixa, o ponto da aba e o estado do cabeçalho
+function talSit(r){ const V=r.v; const det='CD-01det.dc.html#talhao='+encodeURIComponent(r.id);
+  if(V.sit==='Inativo') return {t:'Inativo',p:[chipc('Inativo','gray')]};
+  if(circ(V)) return {t:'Círculo do KML',p:sitInfo('Círculo do KML')};
+  if(!isnum(V.calc)) return {t:'Sem polígono',p:sitX('Sem polígono','yellow','Definir polígono',det),res:'sem'};
+  const di=difInfo(V); if(di&&di.fora&&!V.motivo) return {t:'Diferença sem motivo',p:sitX('Diferença sem motivo','yellow','Informar motivo'),res:'mot'};
+  return {t:'Em dia',p:sitOk('Em dia')}; }
+function fazDocs(V){ return [!V.car?'CAR':'',!V.matr?'matrícula':'',!V.posse?'posse':'',!V.empresa?'empresa':''].filter(Boolean); }
+const FALTA_CHIP={CAR:'CAR pendente','matrícula':'Matrícula pendente',posse:'Posse a informar',empresa:'Empresa a informar'};
+// ponto de água (outorga ou certidão): vigente, a vencer em 90 dias, vencido ou em renovação; sem descrição no KML não tem situação
+function aguaSit(V){ if(!V.tipo) return {t:'Sem descrição no KML',p:sitInfo('Sem descrição no KML')};
+  if(V.renov) return {t:'Em renovação',p:[chipc('Em renovação','yellow'),{k:'mut',t:'venceu '+br(V.venc)+' · processo '+V.renov}],res:'ren'};
+  if(V.venc&&V.venc<HOJE) return {t:'Vencida',p:sitX('Vencida em '+br(V.venc),'red','Renovar'),res:'venc'};
+  if(V.venc&&ddiff(HOJE,V.venc)<=90) return {t:'Vence em 90 dias',p:sitX('Vence '+br(V.venc),'yellow','Renovar'),res:'avenc'};
+  return {t:'Vigente',p:sitOk('Vigente até '+br(V.venc))}; }
+function aguaNome(V){ return /^\d+$/.test(String(V.nome))?'Ponto '+V.nome:V.nome; }
+function aguaDoc(V){ return V.tipo==='Outorga estadual'?'Outorga '+V.num:(V.tipo?'Certidão '+V.num:''); }
+function fazPend(V){ return V.sit!=='Inativa'&&(fazDocs(V).length>0||!!V.pend); }
+function irDet(id){ location.href='CD-01det.dc.html#talhao='+encodeURIComponent(id); }
+CAD_ACTS.g_tal=(self,r,fm)=>{ const sem=r.v.sit!=='Inativo'&&!isnum(r.v.calc)&&!circ(r.v); const t=sem?'Definir polígono ›':'Abrir talhão ›';
+  if(g2dirty(fm)) return [{t:t,h:'Salve ou cancele as alterações antes de abrir o detalhe.',st:CAD_BTN_OFF,go:()=>self.setState({g2toast:'Salve ou cancele as alterações do '+r.v.t+' antes de abrir o detalhe.'})}];
+  return [{t:t,h:sem?'Sem polígono: o planejamento usa a área cultivável e o mapa de taxa variável fica bloqueado.':'Parcelas por safra, polígono e versões.',go:()=>irDet(r.id)}]; };
+CAD_ACTS.g_faz=(self,r,fm)=>{ if(r.v.sit==='Inativa'||g2dirty(fm)) return [];
+  return [{t:'Cadastrar talhão nesta fazenda',h:'',go:()=>{ g2set(self,'g_faz',{fm:null}); cadIrAba(self,'cd_aba',0,'talhoes',{cd_vis:0}); if(self.__v&&self.__v.tal_new) self.__v.tal_new(r.id); }}]; };
+function PREVALS(self,v){ cadIni(self); cadActsIni(self); const fz=RW(self,'g_faz'), tr=RW(self,'g_tal'), ts=tals(tr);
   fz.forEach(r=>{ const V=r.v; const at=ts.filter(t=>t.v.faz===V.nome&&t.v.sit!=='Inativo');
-    V.cult=r1(at.reduce((s,t)=>s+(Number(t.v.decl)||0),0)); V.nt=at.length;
-    r.p.nome=[{k:'b',t:V.nome||''}].concat(V.sit==='Inativa'?[chipc('Inativa','gray')]:[]).concat([{k:'br'},{k:'mut',t:(V.empresa||'')+' · '+(V.mun||'')+'/'+(V.uf||'')}]);
-    r.s.nome=V.nome||'';
-    r.p.posse=V.posse==='Própria'||!V.posse?[{k:'txt',t:'Própria'}]:[{k:'txt',t:V.posse+(V.fim?' até '+br(V.fim):'')},{k:'br'},{k:'mut',t:(V.arrend||'')+(isnum(V.custo)?' · '+nfa(V.custo)+' sc/ha/ano':'')}];
-    r.s.posse=V.posse||'';
-    const d=[]; if(!V.car) d.push(chipc('CAR pendente','yellow')); if(!V.matr) d.push(chipc('Matrícula pendente','yellow'));
-    if(V.pend) d.push(chipc('Documento pendente','yellow'),{k:'br'},{k:'mut',t:V.pend});
-    r.p.docs=d.length?d:[{k:'txt',t:'CAR e matrícula'},{k:'br'},{k:'mut',t:V.matr}]; r.s.docs=d.length?'pendente':'em dia'; });
+    V.cult=r1(at.reduce((s,t)=>s+(Number(t.v.decl)||0),0)); V.nt=at.length; r.s.nome=V.nome||''; });
   tr.forEach(g=>{ if(!g.kids) return; const f=fz.find(x=>x.id===g.v.fid)||fz.find(x=>x.v.nome===g.v.t); if(f) g.v.t=f.v.nome;
     const at=g.kids.filter(k=>k.v.sit!=='Inativo'); const sub=r1(at.reduce((s,k)=>s+(Number(k.v.decl)||0),0)); g.v.decl=sub;
     g.p.t=[{k:'b',t:g.v.t}].concat(f&&f.v.sit==='Inativa'?[chipc('Inativa','gray')]:[]).concat([{k:'mut',t:at.length?(at.length+(at.length>1?' talhões ativos':' talhão ativo')):'sem talhão ativo'}])
       .concat(!g.kids.length&&(!f||f.v.sit!=='Inativa')?[{k:'act',t:'Cadastrar talhão',fn:'tal_new:'+(f?f.id:''),lk:true}]:[]); g.s.t=g.v.t;
     g.p.decl=[{k:'b',t:nf(sub,1)+' ha'}]; g.s.decl=String(sub);
-    const sem=at.filter(k=>!isnum(k.v.calc)).length; g.p.geo=[{k:'mut',t:sem?(sem+' sem polígono'):''}]; g.p.dif=[{k:'mut',t:''}]; g.p.parc=[{k:'mut',t:''}];
-    g.kids.forEach(r=>{ const V=r.v; const ina=V.sit==='Inativo';
-      r.p.t=[{k:'b',t:V.t||''}].concat(ina?[chipc('Inativo','gray')]:[]).concat([{k:'mut',t:sisTxt(V)},{k:'link',t:'Abrir ›',h:'CD-01det.dc.html#talhao='+encodeURIComponent(r.id)}]);
-      r.s.t=V.t||'';
-      r.p.decl=ina?[{k:'mut',t:nf(V.decl,1)+' ha'}]:[{k:'txt',t:nf(V.decl,1)+' ha'}];
-      r.p.geo=geoParts(V); r.s.geo=isnum(V.calc)?'Validado':'Sem polígono';
-      r.p.dif=difParts(V); const di=difInfo(V); r.s.dif=di?String(di.d):'';
-      const n=ina?0:(NPARC[r.id]||0); r.p.parc=n?[{k:'link',t:(n>1?n+' parcelas':'talhão inteiro')+' ›',h:'SAF.dc.html'}]:[{k:'mut',t:'sem cultivo'}]; r.s.parc=String(n); }); });
+    ['calc','difp','parc','est'].forEach(k=>{ g.p[k]=[{k:'mut',t:''}]; g.s[k]=''; });
+    g.kids.forEach(r=>{ const V=r.v; const ina=V.sit==='Inativo'; const di=difInfo(V); const tem=isnum(V.calc);
+      r.p.t=[{k:'b',t:V.t||''},{k:'mut',t:sisTxt(V)}]; r.s.t=V.t||'';
+      r.p.decl=[{k:ina?'mut':'txt',t:nf(V.decl,1)+' ha'}];
+      r.p.calc=tem?[{k:'txt',t:nf(V.calc,1)+' ha'}]:[{k:'mut',t:circ(V)?'Círculo do KML':'—'}]; r.s.calc=tem?nf(V.calc,1)+' ha':(circ(V)?'Círculo do KML':'');
+      V.difp=di?Math.round(di.d/(Number(V.decl)||1)*1000)/10:''; r.p.difp=di?[{k:(di.fora&&!V.motivo?'b':'txt'),t:sgn(V.difp,1)+' %'}]:[{k:'mut',t:'—'}]; r.s.difp=di?sgn(V.difp,1)+' %':'';
+      const n=ina?0:(NPARC[r.id]||0); r.p.parc=[{k:(n?'txt':'mut'),t:n?(n>1?n+' parcelas':'Talhão inteiro'):'Sem cultivo'}]; r.s.parc=n?(n>1?n+' parcelas':'Talhão inteiro'):'Sem cultivo';
+      const S=talSit(r); r.p.est=S.p; r.s.est=S.t; }); });
+  // filtro rápido do bloco (dentro da aba Talhões)
+  cadQf(self,v,'g_tal','cd_qf',[{k:'res',t:'A resolver',f:r=>!!talSit(r).res},{k:'inat',t:'Inativos',f:r=>r.v.sit==='Inativo',oz:true}]);
   // mapa: cor pela situação do polígono; talhão que não é da fazenda do mapa não aparece nele
-  const fm0=fz.find(f=>f.id===MAPA_FID); const nm=fm0?fm0.v.nome:'';
+  const fm0=fz.find(f=>f.id===MAPA_FID); const nm=fm0?fm0.v.nome:''; v.cd_mapa_faz=nm;
   MAPA.forEach(id=>{ const r0=g2find(tr,id); const r=r0&&r0.v.faz===nm?r0:null; const V=r?r.v:null; const tem=V&&isnum(V.calc); const ina=V&&V.sit==='Inativo'; const di=V&&difInfo(V);
     const cor=!tem?['#E9EEE6','#8A968E']:(ina?['#C9CFCB','#5B6660']:((di&&di.fora&&!V.motivo)?['#FFD500','#8A5A00']:['#8FD67F','#1E7A4C']));
     v['mf_'+id]=cor[0]; v['ms_'+id]=cor[1]; });
-  // estado do cadastro no cabeçalho
-  const sem=ts.filter(t=>t.v.sit!=='Inativo'&&!isnum(t.v.calc)), mot=ts.filter(t=>t.v.sit!=='Inativo'&&(difInfo(t.v)||{}).fora&&!t.v.motivo);
-  const docs=fz.filter(f=>f.v.sit!=='Inativa'&&(!f.v.car||!f.v.matr||f.v.pend)); const ps=[];
+  // estado do cadastro: cabeçalho (uma linha), pontos das abas e faixa "precisa de atenção"
+  const sem=ts.filter(t=>talSit(t).res==='sem'), mot=ts.filter(t=>talSit(t).res==='mot');
+  const docs=fz.filter(f=>fazPend(f.v)); const ps=[];
+  // restrição ambiental e água (da fazenda que veio do KML)
+  const am=RW(self,'g_amb'), ag=RW(self,'g_agua');
+  am.forEach(r=>{ const V=r.v; r.p.tema=[{k:V.total?'b':'txt',t:V.tema}]; r.s.tema=V.tema; });
+  ag.forEach(r=>{ const V=r.v; const S=aguaSit(V); r.p.nome=[{k:'b',t:aguaNome(V)}].concat(aguaDoc(V)?[{k:'mut',t:aguaDoc(V)}]:[]); r.s.nome=aguaNome(V);
+    r.p.uso=V.modo?[{k:'txt',t:V.modo}].concat(V.curso?[{k:'mut',t:V.curso}]:[]):[{k:'mut',t:'—'}]; r.s.uso=V.modo||'';
+    r.p.vaz=V.vazao?[{k:'txt',t:V.vazao}].concat(V.regime?[{k:'mut',t:V.regime}]:[]):[{k:'mut',t:'—'}]; r.s.vaz=V.vazao||'';
+    r.p.est=S.p; r.s.est=S.t; });
+  cadQf(self,v,'g_agua','cd_qfa',[{k:'res',t:'A resolver',f:r=>!!aguaSit(r.v).res}]);
+  const agV=ag.filter(r=>aguaSit(r.v).res==='venc'), agA=ag.filter(r=>aguaSit(r.v).res==='avenc'), agR=ag.filter(r=>aguaSit(r.v).res==='ren'); const nAg=agV.length+agA.length+agR.length;
   if(sem.length) ps.push(sem.length===1?(sem[0].v.t+' sem polígono'):(sem.length+' talhões sem polígono'));
-  if(docs.length) ps.push(docs.length===1?('documentos da '+docs[0].v.nome+' pendentes'):(docs.length+' fazendas com documento pendente'));
+  if(docs.length) ps.push(docs.length===1?('cadastro da '+docs[0].v.nome+' pendente'):(docs.length+' fazendas com cadastro pendente'));
   if(mot.length) ps.push(mot.length+(mot.length>1?' diferenças sem motivo':' diferença sem motivo'));
-  const cs=chipSt(ps.length?'yellow':'green'); v.cd_st=ps.length?ps.join(' · '):'Cadastro em dia'; v.cd_stst=cs[0]; v.cd_stdot=cs[1]; }
+  if(nAg) ps.push(nAg+(nAg>1?' outorgas a renovar':' outorga a renovar'));
+  cadEstado(v,'cd',ps.length?ps.join(' · '):'Cadastro em dia',agV.length?'red':(ps.length?'yellow':'green'));
+  const aba=cadAbas(self,v,'cdt','cd_aba',[{slug:'talhoes',n:ts.length,cor:(sem.length||mot.length)?'yellow':''},{slug:'fazendas',n:fz.length,cor:docs.length?'yellow':''},
+    {slug:'ambiental',n:am.length,cor:''},{slug:'agua',n:ag.length,cor:agV.length?'red':((agA.length||agR.length)?'yellow':'')}]);
+  const resA=()=>self.setState({cd_qfa:'res'}); const um=(l)=>()=>g2open(self,GR('g_agua'),l[0].id,null);
+  cadFaixa(v,'cd_fx3',[agV.length?{n:agV.length,rot:agV.length>1?'outorgas vencidas':'outorga vencida',reg:agV.map(r=>aguaDoc(r.v)+' · '+(r.v.curso||r.v.modo)).join(', '),verbo:'Renovar outorga',cor:'red',go:agV.length===1?um(agV):resA}:null,
+                       agR.length?{n:agR.length,rot:agR.length>1?'outorgas em renovação':'outorga em renovação',reg:agR.map(r=>aguaDoc(r.v)+' · '+(r.v.curso||r.v.modo)).join(', '),verbo:'Acompanhar renovação',cor:'yellow',go:agR.length===1?um(agR):resA}:null,
+                       agA.length?{n:agA.length,rot:agA.length>1?'documentos vencem em 90 dias':'documento vence em 90 dias',reg:agA.map(r=>aguaDoc(r.v)+' · '+br(r.v.venc)).join(', '),verbo:'Renovar',cor:'yellow',go:agA.length===1?um(agA):resA}:null],resA);
+  // mapa: Santa Rita (desenho) ou Lagoa Grande (pivôs do KML)
+  const mf=self.state.cd_mapf||0; v.cd_mapa_sr=mf===0; v.cd_mapa_lg=mf===1; cadSeg(v,'cdm',2,mf,i=>self.setState({cd_mapf:i}));
+  const flg=fz.find(f=>f.id==='LG'); const nlg=flg?flg.v.nome:'';
+  MAPA_LG.forEach(id=>{ const r0=g2find(tr,id); const V=r0&&r0.v.faz===nlg?r0.v:null;
+    const cor=!V?['#E9EEE6','#8A968E']:(V.sit==='Inativo'?['#C9CFCB','#5B6660']:(isnum(V.calc)?['#8FD67F','#1E7A4C']:(circ(V)?['#CFE3C2','#4F7A55']:['#E9EEE6','#8A968E'])));
+    v['mf_'+id]=cor[0]; v['ms_'+id]=cor[1]; });
+  const vis=self.state.cd_vis||0; v.cd_lista=vis===0; v.cd_mapa=vis===1; cadSeg(v,'cdv',2,vis,i=>self.setState({cd_vis:i}));
+  const res=()=>self.setState({cd_qf:'res',cd_vis:0});
+  cadFaixa(v,'cd_fx0',[sem.length?{n:sem.length,rot:sem.length>1?'talhões sem polígono':'talhão sem polígono',reg:sem.map(t=>t.v.t+' · '+t.v.faz).join(', '),verbo:'Definir polígono',
+                                   go:sem.length===1?()=>irDet(sem[0].id):res}:null,
+                        mot.length?{n:mot.length,rot:mot.length>1?'diferenças sem motivo':'diferença sem motivo',reg:mot.map(t=>t.v.t).join(', '),verbo:'Informar motivo',
+                                   go:mot.length===1?()=>g2open(self,GR('g_tal'),mot[0].id,null):res}:null],res);
+  // fazendas em cartões: área total, cultivável e talhões ativos; posse no rodapé; exceção com o próximo passo
+  v.cd_nfaz=fz.length+(fz.length===1?' fazenda':' fazendas');
+  cadCartoes(self,v,'cd_faz','g_faz',fz.map(f=>{ const V=f.v; const ina=V.sit==='Inativa'; const falta=fazDocs(V); const pend=fazPend(V);
+    return {id:f.id,nome:V.nome||'',sub:(V.empresa||'Empresa a informar')+' · '+(V.mun||'')+'/'+(V.uf||''),
+      chip:ina?{t:'Inativa',c:'gray'}:(pend?{t:falta.length>1?'Cadastro incompleto':(falta.length?FALTA_CHIP[falta[0]]:'Documento pendente'),c:'yellow'}:null),
+      nums:[{v:nf(V.area,0),u:'ha',l:'Área total'},{v:nf(V.cult,1),u:'ha',l:'Cultivável'},{v:String(V.nt||0),u:'',l:V.nt===1?'Talhão ativo':'Talhões ativos'}],
+      rod:!V.posse?'Posse a informar':(V.posse==='Própria'?'Própria':(V.posse+(V.fim?' até '+br(V.fim):''))),
+      verbo:pend?(falta.length>1?'Completar cadastro':(falta.length?'Informar '+falta[0]:'Resolver documento')):'',neutro:ina,sitT:ina?'Inativa':'Em dia'}; })); }
 function retoma(self,nome){ const s=self._stash; if(!s) return; self._stash=null; const d=Object.assign({},s.draft); if(nome) d.faz=nome; const er=Object.assign({},s.errs||{}); delete er.faz;
   g2set(self,'g_tal',{fm:Object.assign({},s,{draft:d,errs:er,warn:false})}); }
 function fazErros(self,d,fm){ const e={}; const fz=RW(self,'g_faz'); const antes=fm.rid?(g2find(fz,fm.rid)||{v:{}}).v.nome:null; self._fazOld=antes;
@@ -263,7 +402,12 @@ function fazErros(self,d,fm){ const e={}; const fz=RW(self,'g_faz'); const antes
   if(d.sit==='Inativa'&&at.length) e.sit='Há '+at.length+(at.length>1?' talhões ativos':' talhão ativo')+' ('+at.map(t=>t.v.t).join(', ')+'). Inative-os antes da fazenda.';
   if(d.posse!=='Própria'&&d.fim&&d.fim<HOJE&&d.sit!=='Inativa') e.fim='Contrato vencido em '+br(d.fim)+': informe a renovação ou marque a fazenda como inativa.';
   return e; }
-function EXTRAVALS(self,v){ simv(self,v); const fz=RW(self,'g_faz'), ts=tals(RW(self,'g_tal'));
+function EXTRAVALS(self,v){ simv(self,v); const fz=RW(self,'g_faz'), ts=tals(RW(self,'g_tal')); cadQfPos(self,v,'g_tal','cd_qf'); cadConta(self,v,'g_tal'); cadQfPos(self,v,'g_agua','cd_qfa');
+  const flg=fz.find(f=>f.id==='LG'); MAPA_LG.forEach(id=>{ v['mc_'+id]=()=>{ const r=g2find(RW(self,'g_tal'),id); if(r&&flg&&r.v.faz===flg.v.nome) g2open(self,GR('g_tal'),id,null); }; });
+  // painéis de consulta do que veio do KML (não é valor calculado): dizem a origem e, no ponto de água, a situação
+  const FA=v.g_agua_F, fa=g2st(self,'g_agua').fm; if(FA&&FA.open&&fa&&fa.rid){ const r=g2find(RW(self,'g_agua'),fa.rid); if(r){ const S=aguaSit(r.v);
+    FA.sub='Consulta do KML do proprietário · '+S.t+(r.v.venc?' · vencimento '+br(r.v.venc):'')+'. Para mudar, atualize o KML ou o documento no órgão.'; } }
+  const FB=v.g_amb_F; if(FB&&FB.open) FB.sub='Consulta do CAR (KML do proprietário): restrição ambiental da fazenda, não vira talhão. As categorias de APP se sobrepõem; o total é o tema "APP Total".';
   // linha da fazenda na árvore é agrupador: não abre formulário
   (v.g_tal_rows||[]).forEach(x=>{ if(String(x.id).indexOf('F_')===0){ x.cls='g2r'; x.tab='-1'; x.open=()=>{}; x.key=()=>{}; } });
   // ---- fazenda ----
@@ -297,12 +441,10 @@ function EXTRAVALS(self,v){ simv(self,v); const fz=RW(self,'g_faz'), ts=tals(RW(
       self.setState({g2toast:isNew?(r.v.t+' cadastrado na '+r.v.faz+'. Próximo passo: definir o polígono no detalhe do talhão.'):talToast(r,self._sit0)}); }
     cadSalvar(self); }; }
 ''')
-    # folga para uma fazenda e um talhão novos sem rolar; além disso o corpo rola dentro do artboard (_rolagem)
-    ui37.H_OVR.pop(fname,None); HEIGHTS37[fname]=1540
-    shell37('CD-01','Fazendas, áreas e talhões',corpo,fname=fname,
-            subtitle='Cadastre fazendas e talhões com área cultivável, polígono e documentos; pendências não bloqueiam o planejamento.',
-            status=None,primary_html=novo('g_tal','Cadastrar talhão'),search=False)
-    _injeta(fname,'Fazendas, áreas e talhões',_chip_dyn('cd')); _rolagem(fname)
+    # tela sem rolagem de página: só a área de dados da aba rola (a prancheta tem a altura da janela)
+    ui37.H_OVR.pop(fname,None); HEIGHTS37[fname]=1000
+    shell37('CD-01','Fazendas, áreas e talhões',corpo,fname=fname,status=None,primary_html=None,search=False)
+    estado_cab(fname,'Fazendas, áreas e talhões','cd'); _rolagem(fname)
 
 # ================= CD-01det · detalhe de qualquer talhão =================
 def _parc_rows(tal_ids):
@@ -352,35 +494,37 @@ def cd01det():
     fname='CD-01det.dc.html'; E._reset_screen(fname); PARENT37[fname]='CD-01.dc.html'
     fr=_faz_rows(); tr=_tal_rows(); fazs=[r['v']['nome'] for r in fr]
     prow,px0=_parc_rows([r['id'] for r in tr if r['v']['faz']=='Santa Rita'])
-    gi=grid([dict(k='faz',l='Fazenda',w=230),dict(k='sis',l='Sistema',w=190),dict(k='decl',l='Área cultivável',t='num',a='r',u='ha',d=1),
-             dict(k='geo',l='Polígono',w=170),dict(k='dif',l='Diferença',w=220),dict(k='sit',l='Situação')],
-        tr,gid='g_idt',search=False,total=False,headtools=False,
+    gi=grid([dict(k='faz',l='Fazenda',w=260),dict(k='sis',l='Sistema',w=220),dict(k='decl',l='Área cultivável',t='num',a='r',u='ha',d=1),
+             dict(k='geo',l='Polígono',w=170),dict(k='dif',l='Diferença',w=240),dict(k='est',l='Situação',w=320)],
+        tr,gid='g_idt',search=False,total=False,headtools=False,frame=False,
         edit=dict(m='form',title='Talhão',newTitle='Cadastrar talhão',sub=SUB_TAL,fields=campos_tal(fazs)))
+    plan=se('det_ativo',f'<span class="cadx-prim"><a href="SAF.dc.html" style="{PRIM_ST} text-decoration: none; display: inline-block;">{H("det_plan")}</a></span>')
     gp=grid([dict(k='parc',l='Safra · parcela',w=250),dict(k='cult',l='Cultura · variedade'),dict(k='area',l='Área',t='num',a='r',u='ha',d=1),
              dict(k='livre',l='Livre'),dict(k='plantio',l='Plantio',t='date'),dict(k='geo',l='Polígono')],
-        prow,gid='g_parc',tree=True,search=False,total=False,x0=px0,
+        prow,gid='g_parc',tree=True,search=False,total=False,x0=px0,frame=False,tools=plan,
         edit=dict(m='origin',title='Parcela',leafOnly=True,
             fields=[txt('parc','Parcela',ro=True),txt('safra','Safra',ro=True),txt('cv','Cultura e variedade',ro=True),num('area','Área','ha',ro=True),
                     dat('plantio','Plantio',ro=True),txt('meta','Meta de produtividade',ro=True),txt('plano','Plano agronômico',ro=True),txt('geo','Polígono',ro=True)]))
     link_mini=f'{_MINI} text-decoration: none; display: inline-block;'
     geo_html=(f'<div style="display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 18px; align-items: start;">'
-              f'<div style="display: flex; flex-direction: column; gap: 6px;"><div style="font-size: 12px; font-weight: 700; color: {MUTED};">{H("geo_leg")}</div>'
+              f'<div style="display: flex; flex-direction: column; gap: 6px;">'
               f'<div role="img" aria-label="{H("geo_aria")}" style="display: flex; height: 190px; background: #DDE5D4; clip-path: polygon(2% 5%, 97% 0, 100% 95%, 0 100%);">'
               f'<sc-for list="{H("geo_parts")}" as="g" hint-placeholder-count="2"><div style="{H("g.st")}"><span style="font-family: {DISP}; font-size: 22px; font-weight: 700;">{H("g.t")}</span><span style="font-size: 12px; font-weight: 700;">{H("g.s")}</span></div></sc-for></div></div>'
               f'<div style="display: flex; flex-direction: column;"><div style="font-size: 11px; font-weight: 700; color: {MUTED}; letter-spacing: .06em; padding-bottom: 4px;">VERSÕES DO POLÍGONO</div>'
               f'<sc-for list="{H("geo_vers")}" as="x" hint-placeholder-count="2"><div style="display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-top: 1px solid {LINE};">'
               f'<span style="{H("x.cst")}"><span style="{H("x.cdot")}"></span>{H("x.chip")}</span><div style="display: flex; flex-direction: column; gap: 1px; min-width: 0;"><b style="font-size: 13px;">{H("x.tit")}</b><span style="font-size: 12px; color: {MUTED};">{H("x.sub")}</span></div></div></sc-for>'
               f'<sc-if value="{H("geo_novers")}" hint-placeholder-val="{F_}"><div style="font-size: 12.5px; color: {MUTED}; padding: 8px 0; border-top: 1px solid {LINE};">Sem polígono: o planejamento usa a área cultivável; mapa de taxa variável fica bloqueado.</div></sc-if></div></div>')
-    parc_html=(f'<sc-if value="{H("det_parc_tem")}" hint-placeholder-val="{T_}">{gp}</sc-if>'
-               f'<sc-if value="{H("det_parc_vazio")}" hint-placeholder-val="{F_}"><div style="font-size: 13px; color: {MUTED}; padding: 4px 4px 2px;">{H("det_parc_msg")}</div></sc-if>')
-    corpo=(f'<sc-if value="{H("det_nf")}" hint-placeholder-val="{F_}">'+bloco('Talhão não encontrado','Escolha um talhão no seletor do cabeçalho.','')+'</sc-if>'
-           + f'<sc-if value="{H("det_ok")}" hint-placeholder-val="{T_}">'
-           + bloco('Talhão','Confira fazenda, sistema, áreas e situação; clique na linha para editar.',gi)
-           + bloco('Parcelas por safra','Confira a área cultivável, alocada e livre de cada safra; as parcelas mudam no Planejar safra.',parc_html,
-                   acao=f'<sc-if value="{H("det_ativo")}" hint-placeholder-val="{T_}"><a href="SAF.dc.html" style="{link_mini}">Dividir em parcelas</a></sc-if>')
-           + bloco('Geometria','Confira o polígono atual e as versões mantidas para as O.S. já emitidas.',geo_html,
-                   acao=f'<sc-if value="{H("det_planok")}" hint-placeholder-val="{F_}"><button type="button" onClick="{H("pg_nova")}" style="{_MINI}">Nova versão do polígono</button></sc-if>')
-           + '</sc-if>')
+    # um só bloco: identificação do talhão (linha que abre o formulário) e abas Parcelas por safra | Geometria, cada uma com a sua ação
+    p0=(faixa('det_fx')+se('det_parc_tem',arv(gp),True)
+        +se('det_parc_vazio',barra(f'<span style="font-size: 13px; color: {MUTED};">{H("det_parc_msg")}</span>',plan)))
+    mapa_lk=(f'<a href="{H("geo_ver")}" style="{link_mini}">Ver no mapa ›</a><a href="IN-04.dc.html#importar" style="{link_mini}">Importar KML ou GeoJSON ›</a>'
+             f'<span class="cadx-prim"><a href="{H("geo_des")}" style="{PRIM_ST} text-decoration: none; display: inline-block;">{H("geo_dest")}</a></span>')
+    p1=(barra(f'<b style="font-size: 13px;">{H("geo_leg")}</b>',se('det_pend',prim('pg_abrir','det_prim',hole=True))+se('det_planok',secbtn('pg_nova','Nova versão do polígono'))+se('geo_mapa',mapa_lk))
+        + f'<div class="cadx-rola" style="padding: 16px;">{geo_html}</div>')
+    corpo=(se('det_nf',f'<section class="cadx" aria-label="Talhão não encontrado"><div class="cadx-barra"><b style="font-size: 14px;">Talhão não encontrado</b>'
+                       f'<span style="font-size: 13px; color: {MUTED};">Escolha um talhão no seletor do cabeçalho.</span></div></section>')
+           + se('det_ok',f'<section class="cadx" aria-label="Talhão"><div class="cadx-ident">{gi}</div><div class="cadx-topo">{abas("dtt",["Parcelas por safra","Geometria"],"Detalhe do talhão")}</div>'
+                         f'<div class="cadx-dados">{pane("dtt",0,p0)+pane("dtt",1,p1)}</div></section>',True))
     E.EXTRA.append(_painel_poligono())
     fazjs=[dict(id=r['id'],v=r['v']) for r in fr]
     vers={t:[list(x) for x in DC.geo_vers(t)] for t in DC.CALC}
@@ -391,8 +535,9 @@ def cd01det():
        +', CULT_EP='+json.dumps({s['id']:{t:float(ha) for t,ha,*_ in D.TALHOES} for s in D2.SAFRAS if s['ro']})+';\nlet FAZL=FAZ0;\n'+r'''
 const HATCH='repeating-linear-gradient(45deg,#C9CFCB 0 7px,#EEF1EE 7px 14px)';
 function detIni(self){ if(self._ini) return; self._ini=1; const st=cadLer();
-  if(st&&st.faz) FAZL=st.faz.map(x=>({id:x.id,v:Object.assign({},x.v)}));
-  if(st&&st.tal) GR('g_idt').rows=st.tal.map(x=>({id:x.id,v:Object.assign({},x.v),s:{},p:{}}));
+  if(st&&st.faz){ const f0=FAZ0; FAZL=st.faz.map(x=>({id:x.id,v:Object.assign({},x.v)})); f0.forEach(f=>{ if(!FAZL.some(x=>x.id===f.id)) FAZL.push({id:f.id,v:Object.assign({},f.v)}); }); }
+  if(st&&st.tal){ const t0=GR('g_idt').rows; const tl=st.tal.map(x=>({id:x.id,v:Object.assign({},x.v),s:{},p:{}}));
+    t0.forEach(r=>{ if(!tl.some(x=>x.id===r.id)) tl.push({id:r.id,v:Object.assign({},r.v),s:{},p:{}}); }); GR('g_idt').rows=tl; }
   self._vers0=(st&&st.vers)||{}; self._pgeo0=(st&&st.pgeo)||{};
   const pr=GR('g_parc').rows; const x0=Object.assign({},GR('g_parc').x0||{});
   GR('g_idt').rows.forEach(t=>{ if(pr.some(g=>g.v.tal===t.id)) return;
@@ -416,7 +561,8 @@ function PREVALS(self,v){ detIni(self); const t=curT(self); const T=g2find(RW(se
     r.p.faz=[{k:'b',t:V.faz||''}].concat(F?[{k:'br'},{k:'mut',t:F.v.mun+'/'+F.v.uf+(fu?' · fuso '+fu:'')}]:[]); r.s.faz=V.faz||'';
     r.p.sis=[{k:'txt',t:V.sis||'Sequeiro'}].concat(V.setor&&V.sis!=='Sequeiro'?[{k:'br'},{k:'mut',t:V.setor}]:[]); r.s.sis=V.sis||'';
     r.p.geo=geoParts(V); r.s.geo=isnum(V.calc)?'Validado':'Sem polígono'; r.p.dif=difParts(V); r.s.dif='';
-    r.p.sit=[V.sit==='Inativo'?chipc('Inativo desde '+br(V.inat||HOJE),'gray'):chipc('Ativo','green')]; r.s.sit=V.sit||''; });
+    r.p.est=V.sit==='Inativo'?[chipc('Inativo desde '+br(V.inat||HOJE),'gray'),{k:'act',t:'Reativar '+(V.t||''),fn:'det_reativar:'+r.id}]
+      :(circ(V)?sitInfo('Círculo do KML'):(!isnum(V.calc)?sitX('Sem polígono','yellow'):sitOk('Ativo'))); r.s.est=V.sit==='Inativo'?'Inativo':(isnum(V.calc)?'Ativo':(circ(V)?'Círculo do KML':'Sem polígono')); });
   RW(self,'g_parc').forEach(g=>{ if(!g.grp) return; const Tg=g2find(RW(self,'g_idt'),g.v.tal); const ks=g.kids||[];
     const A=r1(ks.reduce((s,k)=>s+(Number(k.v.area)||0),0)); const ab=aberta(g.v.sid); const ep=(CULT_EP[g.v.sid]||{})[g.v.tal];
     const cult=ab?(Tg?Number(Tg.v.decl)||0:0):(ep!==undefined?ep:A); const L=r1(cult-A);
@@ -437,13 +583,16 @@ function geoVals(self,v,T){ const ina=T.v.sit==='Inativo'; const cal=isnum(T.v.c
   if(ks.length&&cal){ const tot=ks.reduce((a,k)=>a+(Number(k.v.area)||0),0); const base=Math.max(tot,dec)||1;
     parts=ks.map(k=>{ const gs=pgeoOf(self,k,T); return cell(k.v.parc,nfa(k.v.area)+' ha · '+(gs==='Validada'?'validada':'sem polígono'),r1(k.v.area/base*100),gs==='Validada'); });
     if(tot<dec-0.005) parts.push(cell('Livre',nfa(r1(dec-tot))+' ha',r1((dec-tot)/base*100),true)); }
-  else parts=[cell(T.v.t,cal?(nf(T.v.calc,1)+' ha · '+(T.v.ver||'')):'sem polígono',100,cal)];
-  v.geo_parts=parts; v.geo_leg=ks.length&&cal?('Divisão da '+SAFOPEN[0].nome):(cal?'Polígono do talhão':'Talhão sem polígono');
+  else parts=[cell(T.v.t,cal?(nf(T.v.calc,1)+' ha · '+(T.v.ver||'')):(circ(T.v)?nfa(dec)+' ha · círculo do KML':'sem polígono'),100,cal)];
+  if(!ks.length&&circ(T.v)&&!ina) parts[0].st=parts[0].st.replace(HATCH,'#CFE3C2');
+  v.geo_parts=parts; v.geo_leg=ks.length&&cal?('Divisão da '+SAFOPEN[0].nome):(cal?'Polígono do talhão':(circ(T.v)?'Círculo do KML (centro e área declarada)':'Talhão sem polígono'));
   v.geo_aria=v.geo_leg+': '+parts.map(p=>p.t+' '+p.s).join('; ');
   const vs=versOf(self,T.id); const rv=vs.slice().reverse();
   v.geo_vers=rv.map((x,i)=>{ const c=chipSt(i?'gray':'green'); return {chip:i?'Consulta':'Atual',cst:c[0],cdot:c[1],tit:x[0]+' · '+nf(x[3],1)+' ha',
     sub:br(x[1])+' · '+x[2]+(i?' · O.S. emitidas antes de '+br(rv[i-1][1]):'')}; });
-  v.geo_novers=!vs.length; }
+  v.geo_novers=!vs.length;
+  // Lagoa Grande: a geometria vem do KML como círculo (centro + área declarada); aparece como estimada, sem inventar polígono
+  if(!vs.length&&circ(T.v)){ const c=chipSt('gray'); v.geo_vers=[{chip:'Estimado',cst:c[0],cdot:c[1],tit:'Círculo do KML · '+nfa(dec)+' ha',sub:T.v.geo_t||''}]; v.geo_novers=false; } }
 function pgVals(self,v,T){ const pg=self.state.pg; v.pg_open=!!pg; const set=(p)=>self.setState({pg:Object.assign({},self.state.pg,p)});
   const abrir=(p,nova)=>{ const slug=String(p.alvo).toLowerCase().replace(/[^a-z0-9]+/g,'_');
     self.setState({pg:{t:T.id,alvo:p.alvo,art:p.art,cid:p.cid,ref:p.ref,safra:p.safra||'',nova:!!nova,modo:'imp',arq:'poligono_'+slug+'.kml',prev:null,mot:'',err:'',warn:false}}); };
@@ -488,13 +637,23 @@ function EXTRAVALS(self,v){ const t=curT(self); const T=g2find(RW(self,'g_idt'),
     g2set(self,'g_idt',{fm:null}); g2set(self,'g_parc',{fm:null}); self.setState({det_t:id,pg:null}); };
   v.det_ok=!!T; v.det_nf=!T; v.det_ativo=!!T&&!ina; v.det_crumb=T?(T.v.t+' · '+nfa(T.v.decl)+' ha'):'Talhão';
   const p=T&&!ina?pendDe(self,T):null; v.det_pend=!!p; v.det_planok=!!T&&!ina&&!p;
+  // Lagoa Grande tem mapa real: desenhar e importar o contorno acontecem no Mapa e voltam para este cadastro
+  v.geo_mapa=!!T&&!ina&&T.v.faz==='Lagoa Grande'; if(v.geo_mapa){ v.det_pend=false; v.det_planok=false; }
+  v.geo_ver='IN-04.dc.html#talhao='+encodeURIComponent(T?T.id:''); v.geo_des='IN-04.dc.html#desenhar='+encodeURIComponent(T?T.id:'');
+  v.geo_dest=T&&isnum(T.v.calc)?'Redesenhar no mapa ›':'Desenhar no mapa ›';
   v.det_prim=p?('Definir polígono '+p.art+' '+p.alvo):''; v.det_plan='Planejar '+(T?T.v.t:'')+' na safra';
   // talhão inativo: a primária é reativar (abre o formulário do talhão com a Situação em Ativo, focada)
   v.det_inat=ina; v.det_reat='Reativar '+(T?T.v.t:'');
   v.det_reativar=()=>{ if(!T) return; g2open(self,GR('g_idt'),T.id,null); draftSet(self,'g_idt',{sit:'Ativo'});
     setTimeout(()=>{ try{ const s=document.getElementById('fx_g_idt_sit'); if(s) s.focus(); }catch(e){} },60); };
-  const st=!T?['Escolha um talhão','gray']:(ina?['Inativo desde '+br(T.v.inat||HOJE),'gray']:(p?[p.alvo+' sem polígono','yellow']:['Polígono validado','green']));
-  const cs=chipSt(st[1]); v.det_st=st[0]; v.det_stst=cs[0]; v.det_stdot=cs[1];
+  const ci=!!T&&!ina&&circ(T.v)&&!!p&&!p.cid;
+  const st=!T?['Escolha um talhão','gray']:(ina?['Inativo desde '+br(T.v.inat||HOJE),'gray']:(ci?['Círculo do KML · sem polígono validado','gray']:(p?[p.alvo+' sem polígono','yellow']:['Polígono validado','green'])));
+  cadEstado(v,'det',st[0],st[1]);
+  // abas do detalhe (a ativa vai para o endereço junto com o talhão) e faixa "precisa de atenção" na aba das parcelas
+  const nparc=RW(self,'g_parc').filter(g=>g.v.tal===t).reduce((s,g)=>s+(g.kids||[]).length,0);
+  const vs=T?versOf(self,T.id):[];
+  cadAbas(self,v,'dtt','det_aba',[{slug:'parcelas',n:nparc,cor:''},{slug:'geometria',n:vs.length?vs[vs.length-1][0]:'',cor:p&&!ci?'yellow':''}]);
+  cadFaixa(v,'det_fx',[p&&!ci?{n:1,rot:p.cid?'parcela sem polígono':'talhão sem polígono',reg:p.alvo+(p.safra?' · '+p.safra:''),verbo:'Definir polígono',go:()=>{ if(self.__v&&self.__v.pg_abrir) self.__v.pg_abrir(); }}:null]);
   // só as linhas do talhão escolhido
   v.g_idt_rows=(v.g_idt_rows||[]).filter(x=>x.id===t);
   v.g_parc_rows=(v.g_parc_rows||[]).filter(x=>self._rowt[x.id]===t);
@@ -511,13 +670,9 @@ function EXTRAVALS(self,v){ const t=curT(self); const T=g2find(RW(self,'g_idt'),
   if(T) geoVals(self,v,T); else { v.geo_parts=[]; v.geo_vers=[]; v.geo_novers=false; }
   pgVals(self,v,T||{id:'',v:{}}); }
 ''')
-    # folga para duas versões novas do polígono com tudo expandido; além disso o corpo rola dentro do artboard (_rolagem)
-    ui37.H_OVR.pop(fname,None); HEIGHTS37[fname]=1140
-    prim=(f'<sc-if value="{H("det_pend")}" hint-placeholder-val="{T_}"><button type="button" onClick="{H("pg_abrir")}" style="{BTN_ST(True)}">{H("det_prim")}</button></sc-if>'
-          f'<sc-if value="{H("det_planok")}" hint-placeholder-val="{F_}"><a href="SAF.dc.html" style="{BTN_ST(True)} text-decoration: none; display: inline-block;">{H("det_plan")}</a></sc-if>'
-          f'<sc-if value="{H("det_inat")}" hint-placeholder-val="{F_}"><button type="button" onClick="{H("det_reativar")}" style="{BTN_ST(True)}">{H("det_reat")}</button></sc-if>')
-    shell37('CD-01','Talhão',corpo,fname=fname,crumbs_extra=[H('det_crumb')],
-            subtitle='Confira área, polígono e parcelas do talhão em cada safra.',status=None,primary_html=prim,search=False)
+    # tela sem rolagem de página: só a área de dados da aba rola; as ações ficam no bloco e na aba onde agem
+    ui37.H_OVR.pop(fname,None); HEIGHTS37[fname]=1000; cadx_css()
+    shell37('CD-01','Talhão',corpo,fname=fname,crumbs_extra=[H('det_crumb')],status=None,primary_html=None,search=False)
     seletor=(f'<select aria-label="Talhão" value="{H("det_t")}" onChange="{H("det_set")}" style="font-family: inherit; font-size: 15px; font-weight: 800; color: {INK}; padding: 6px 30px 6px 12px; border-radius: 10px; border: 1px solid {LINE}; background: {SURF}; cursor: pointer;">'
              f'<sc-for list="{H("det_opts")}" as="o" hint-placeholder-count="2"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select>')
-    _injeta(fname,'Talhão',seletor+_chip_dyn('det')); _rolagem(fname)
+    _injeta(fname,'Talhão',seletor+estado_html('det')); _rolagem(fname)

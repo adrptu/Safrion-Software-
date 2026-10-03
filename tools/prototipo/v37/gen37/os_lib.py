@@ -2,7 +2,7 @@
 """Apoio dos testes da O.S. com o cenário compartilhado (os_*.py): servidor local de _render/, Chrome headless (cdp.py) e ações curtas
 na OS.dc.html. Cada execução usa um perfil novo do Chrome (cenário limpo). O Estoque e o App são simulados por cenMudar na própria
 página (window.__cen) seguido do aviso de mudança (StorageEvent), como faria outro quadro do Canvas."""
-import sys, os, time, subprocess, json
+import time, sys, os, time, subprocess, json
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from cdp import Chrome
 from journeys import free
@@ -27,7 +27,9 @@ class Os:
         return self.J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith({json.dumps(id_)})); return r?r.innerText.replace(/\\s+/g,' '):'';}})()") or ''
     def ordem(self, id_):
         self.J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith({json.dumps(id_)})); r&&r.click();}})()"); time.sleep(.4)
-    def pan(self): return self.J("(()=>{const a=document.querySelector('aside[role=dialog]'); return a?a.innerText.replace(/\\s+/g,' '):'';})()") or ''
+    def pan(self):   # 01/10: abre as seções recolhidas do painel antes de ler
+        if self.J('(()=>{const bs=[...document.querySelectorAll(\'aside[role=dialog] section[aria-label] > button[aria-expanded="false"]\')]; bs.forEach(b=>b.click()); return bs.length;})()'): time.sleep(.3)
+        return self.J("(()=>{const a=document.querySelector('aside[role=dialog]'); return a?a.innerText.replace(/\\s+/g,' '):'';})()") or ''
     def ins(self): return self.J("(()=>{const a=document.querySelector('aside[role=dialog]'); if(!a) return ''; const t=a.innerText; return t.slice(t.indexOf('INSUMOS'),t.indexOf('APONTAMENTOS')).replace(/\\s+/g,' ');})()") or ''
     def aps(self): return self.J("[...document.querySelectorAll('aside[role=dialog] [style*=\"grid-template-columns: 64px\"]')].slice(1).map(r=>r.innerText.replace(/\\s+/g,' '))") or []
     def temb(self, t): return bool(self.J(f"[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==={json.dumps(t)})"))

@@ -17,15 +17,15 @@ try:
     T.ok('Rui (almoxarife) · 24/09' in l and 'Rui (almoxarife) · 24/09' in k and 'almoxarifado)' not in l + k, 'OS-0417: lista e Kanban com "Rui (almoxarife)"', (l, k))
     h0 = hdr()
     # ---- liberação bloqueada pelo Estoque (OS-0418 sem lote de Ureia) ----
-    T.ordem('OS-0418'); T.btn('Revisar versão'); T.btn('Aprovar versão'); p = T.pan(); T.fechar(); l = T.linha('OS-0418')
+    T.ordem('OS-0418'); p = T.pan(); T.fechar(); l = T.linha('OS-0418')   # sem etapa de revisão: o Estoque segura desde a abertura
     T.ok('Liberar bloqueado: sem lote de Ureia 45%' in p, 'painel da OS-0418 aponta o bloqueio', p[p.find('PRÓXIMO'):][:200])
     T.ok('Falta insumo · Ureia 45%' in l and cor('OS-0418', 'Falta insumo') == VERM and 'Suprimentos · ' in l, 'lista da OS-0418: selo vermelho Falta insumo e dono Suprimentos', (l, cor('OS-0418', 'Falta insumo')))
     tab('Kanban'); k = card('OS-0418'); tab('Lista')
     T.ok('Falta insumo · Ureia 45%' in k and 'Suprimentos · ' in k, 'Kanban da OS-0418 com o mesmo selo e dono', k)
-    T.ok(h0.endswith('2 impedidas') and hdr().endswith('3 impedidas'), 'cabeçalho conta a OS-0418 como impedida', (h0, hdr()))
+    T.ok(h0.endswith('3 impedidas') and hdr().endswith('3 impedidas'), 'cabeçalho conta a OS-0418 como impedida desde a abertura', (h0, hdr()))
     T.ok('Próximo passo: liberar para execução' not in p[p.find('SITUAÇÃO ATUAL'):], 'situação atual não manda liberar o que está bloqueado', p[p.find('SITUAÇÃO ATUAL'):][:220])
     # ---- encerramento bloqueado pela sobra (OS-0430) ----
-    T.ordem(OS); T.btn('Revisar versão'); T.btn('Aprovar versão'); T.btn('Liberar para execução'); T.btn('Confirmar liberação'); T.fechar()
+    T.ordem(OS); T.btn('Liberar para execução'); T.btn('Confirmar liberação'); T.fechar()
     RQ = T.cen(f"c.ordens['{OS}'].req")
     for prod, q in (('Glifosato 480', 320), ('2,4-D 806', 160), ('Óleo mineral', 80)): T.mudar(f"return cenEntregar(c,'{RQ}','{prod}',{q},'Marcos');", avisar=False)
     T.mudar(f"cenConfirmarRecebimento(c,'{RQ}'); cenIniciarTurno(c,'{OS}'); return cenFecharTurno(c,160,12,{{'Glifosato 480':300}});")

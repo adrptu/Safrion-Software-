@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """App de campo × cenário compartilhado (Chrome real, 15 verificações). Pré-carga na própria página por cenMudar:
-aprovar e liberar a OS-0430 (Marcos) e entregar os 3 itens da requisição. Depois, pelas telas do app:
+liberar a OS-0430 (Marcos) e entregar os 3 itens da requisição. Depois, pelas telas do app:
 confirmar recebimento (MB-05) → iniciar turno (MB-03) → sem sinal → fechar turno 60 ha (fila 1, realizado não muda) →
 sinal volta (realizado 60, sem duplicar) → novo turno (pausar/retomar) de 110 ha recusado junto ao campo → ocorrência registrada (MB-04)
 → Restaurar demonstração (MB-01).
@@ -12,7 +12,7 @@ a = App(['MB-01', 'MB-02det', 'MB-03', 'MB-04', 'MB-05'])
 OS = 'OS-0430'
 try:
     a.abrir('MB-01')
-    r1 = a.mudar(f"c.ordens['{OS}'].aprov=true; return cenLiberar(c,'{OS}');")
+    r1 = a.mudar(f"return cenLiberar(c,'{OS}');")
     rid = a.cen(f"c.ordens['{OS}'].req")
     for prod, q in (('Glifosato 480', 320), ('2,4-D 806', 160), ('Óleo mineral', 80)):
         a.mudar(f"return cenEntregar(c,'{rid}','{prod}',{q},'Marcos');")

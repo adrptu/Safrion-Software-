@@ -9,7 +9,7 @@ OVF = "[...document.querySelectorAll('[role=table]')].filter(x=>x.offsetParent).
 
 
 def liberar_0430(E):
-    E.mudar("c.ordens['OS-0430'].aprov=true; return cenLiberar(c,'OS-0430');")
+    E.mudar("return cenLiberar(c,'OS-0430');")
     return E.cen("Object.keys(c.reqs).find(k=>c.reqs[k].os==='OS-0430')")
 
 

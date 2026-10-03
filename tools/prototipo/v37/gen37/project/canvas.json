@@ -1,8 +1,8 @@
 {
  "v": 3,
  "createdOnFiles": {
-  "at": "2026-09-25T17:24:00.931Z",
-  "v": 1
+  "v": 1,
+  "at": "2026-10-03T16:43:53Z"
  },
  "title": "Do Talhão à O.S. · protótipo (PRD v3.9)",
  "launch": {
@@ -42,7 +42,7 @@
    "x": 0,
    "y": 3160,
    "w": 1440,
-   "h": 1540,
+   "h": 1000,
    "title": "Cadastros › Fazendas, áreas e talhões",
    "is_interactive": true,
    "page": "menu"
@@ -51,7 +51,7 @@
    "x": 1520,
    "y": 3160,
    "w": 1440,
-   "h": 1400,
+   "h": 1000,
    "title": "Cadastros › Culturas, cultivares e operações",
    "is_interactive": true,
    "page": "menu"
@@ -60,7 +60,7 @@
    "x": 3040,
    "y": 3160,
    "w": 1440,
-   "h": 1880,
+   "h": 1000,
    "title": "Cadastros › Máquinas, instalações e setores",
    "is_interactive": true,
    "page": "menu"
@@ -69,7 +69,7 @@
    "x": 4560,
    "y": 3160,
    "w": 1440,
-   "h": 1100,
+   "h": 1000,
    "title": "Cadastros › Pessoas e equipes",
    "is_interactive": true,
    "page": "menu"
@@ -78,7 +78,7 @@
    "x": 6080,
    "y": 3160,
    "w": 1440,
-   "h": 1660,
+   "h": 1000,
    "title": "Cadastros › Parceiros e fornecedores",
    "is_interactive": true,
    "page": "menu"
@@ -87,7 +87,7 @@
    "x": 7600,
    "y": 3160,
    "w": 1440,
-   "h": 3100,
+   "h": 1000,
    "title": "Cadastros › Produtos, unidades e locais",
    "is_interactive": true,
    "page": "menu"
@@ -96,7 +96,7 @@
    "x": 9120,
    "y": 3160,
    "w": 1440,
-   "h": 1880,
+   "h": 1000,
    "title": "Cadastros › Estrutura gerencial",
    "is_interactive": true,
    "page": "menu"
@@ -105,14 +105,23 @@
    "x": 10640,
    "y": 3160,
    "w": 1440,
-   "h": 1140,
+   "h": 1000,
    "title": "Fazendas, áreas e talhões",
    "is_interactive": true,
    "page": "menu"
   },
-  "PA.dc.html": {
+  "AG-07.dc.html": {
    "x": 0,
-   "y": 6640,
+   "y": 4540,
+   "w": 1440,
+   "h": 900,
+   "title": "Agrícola › Consulta Agrofit",
+   "is_interactive": true,
+   "page": "menu"
+  },
+  "PA.dc.html": {
+   "x": 1520,
+   "y": 4540,
    "w": 1440,
    "h": 1000,
    "title": "Agrícola › Planos agronômicos",
@@ -120,8 +129,8 @@
    "page": "menu"
   },
   "SAF.dc.html": {
-   "x": 1520,
-   "y": 6640,
+   "x": 3040,
+   "y": 4540,
    "w": 1440,
    "h": 1000,
    "title": "Agrícola › Planejar safra",
@@ -129,17 +138,35 @@
    "page": "menu"
   },
   "OS.dc.html": {
-   "x": 3040,
-   "y": 6640,
+   "x": 4560,
+   "y": 4540,
    "w": 1440,
    "h": 1240,
    "title": "Agrícola › Ordem de Serviço",
    "is_interactive": true,
    "page": "menu"
   },
+  "AG-01.dc.html": {
+   "x": 6080,
+   "y": 4540,
+   "w": 1440,
+   "h": 850,
+   "title": "Agrícola › Pragas e doenças (MIP/MID)",
+   "is_interactive": true,
+   "page": "menu"
+  },
+  "IR-01.dc.html": {
+   "x": 7600,
+   "y": 4540,
+   "w": 1440,
+   "h": 1000,
+   "title": "Agrícola › Irrigação",
+   "is_interactive": true,
+   "page": "menu"
+  },
   "CA-01det.dc.html": {
-   "x": 4560,
-   "y": 6640,
+   "x": 9120,
+   "y": 4540,
    "w": 1440,
    "h": 1230,
    "title": "Ordens de campo",
@@ -147,8 +174,8 @@
    "page": "menu"
   },
   "CA-01x-os0420.dc.html": {
-   "x": 6080,
-   "y": 6640,
+   "x": 10640,
+   "y": 4540,
    "w": 1440,
    "h": 1520,
    "title": "Ordens de campo",
@@ -156,8 +183,8 @@
    "page": "menu"
   },
   "OS-0424-app.dc.html": {
-   "x": 7600,
-   "y": 6640,
+   "x": 12160,
+   "y": 4540,
    "w": 390,
    "h": 1030,
    "title": "Agrícola › Ordem de Serviço › OS-0424 · ficha no app (funciona sem internet)",
@@ -165,17 +192,125 @@
    "page": "menu"
   },
   "OS-0424-ficha.dc.html": {
-   "x": 8070,
-   "y": 6640,
+   "x": 12630,
+   "y": 4540,
    "w": 794,
    "h": 1123,
    "title": "Agrícola › Ordem de Serviço › OS-0424 · ficha impressa",
    "is_interactive": true,
    "page": "menu"
   },
+  "AG-01det.dc.html": {
+   "x": 13504,
+   "y": 4540,
+   "w": 1440,
+   "h": 1970,
+   "title": "Monitoramento e vistorias",
+   "is_interactive": true,
+   "page": "menu"
+  },
+  "IR-02.dc.html": {
+   "x": 15024,
+   "y": 4540,
+   "w": 1440,
+   "h": 1000,
+   "title": "Programação da irrigação",
+   "is_interactive": true,
+   "page": "menu"
+  },
+  "IR-03.dc.html": {
+   "x": 16544,
+   "y": 4540,
+   "w": 1440,
+   "h": 1000,
+   "title": "Ordens de irrigação",
+   "is_interactive": true,
+   "page": "menu"
+  },
+  "IR-03det.dc.html": {
+   "x": 18064,
+   "y": 4540,
+   "w": 1440,
+   "h": 1000,
+   "title": "Ordens de irrigação",
+   "is_interactive": true,
+   "page": "menu"
+  },
+  "IR-04.dc.html": {
+   "x": 19584,
+   "y": 4540,
+   "w": 1440,
+   "h": 1000,
+   "title": "Clima, sensores e desempenho",
+   "is_interactive": true,
+   "page": "menu"
+  },
+  "PM.dc.html": {
+   "x": 0,
+   "y": 6890,
+   "w": 1440,
+   "h": 1000,
+   "title": "Manutenção › Planos de manutenção",
+   "is_interactive": true,
+   "page": "menu"
+  },
+  "MA-01.dc.html": {
+   "x": 1520,
+   "y": 6890,
+   "w": 1440,
+   "h": 1000,
+   "title": "Manutenção › Ativos e disponibilidade",
+   "is_interactive": true,
+   "page": "menu"
+  },
+  "MA-02.dc.html": {
+   "x": 3040,
+   "y": 6890,
+   "w": 1440,
+   "h": 1000,
+   "title": "Manutenção › Solicitações e inspeções",
+   "is_interactive": true,
+   "page": "menu"
+  },
+  "MA-03.dc.html": {
+   "x": 4560,
+   "y": 6890,
+   "w": 1440,
+   "h": 1000,
+   "title": "Manutenção › Vencimentos e paradas",
+   "is_interactive": true,
+   "page": "menu"
+  },
+  "MA-04.dc.html": {
+   "x": 6080,
+   "y": 6890,
+   "w": 1440,
+   "h": 1000,
+   "title": "Manutenção › Ordens de manutenção",
+   "is_interactive": true,
+   "page": "menu"
+  },
+  "MA-05.dc.html": {
+   "x": 7600,
+   "y": 6890,
+   "w": 1440,
+   "h": 1000,
+   "title": "Manutenção › Abastecimentos e desempenho",
+   "is_interactive": true,
+   "page": "menu"
+  },
+  "MA-04det.dc.html": {
+   "x": 9120,
+   "y": 6890,
+   "w": 1440,
+   "h": 1000,
+   "title": "Ordens de manutenção",
+   "is_interactive": true,
+   "page": "menu"
+  },
   "CMP.dc.html": {
    "x": 0,
-   "y": 8540,
+   "y": 8270,
    "w": 1440,
    "h": 1000,
    "title": "Suprimentos › Compra de insumos",
@@ -184,7 +319,7 @@
   },
   "EST.dc.html": {
    "x": 1520,
-   "y": 8540,
+   "y": 8270,
    "w": 1440,
    "h": 1000,
    "title": "Suprimentos › Estoque",
@@ -193,7 +328,7 @@
   },
   "MB-01.dc.html": {
    "x": 0,
-   "y": 9920,
+   "y": 9650,
    "w": 390,
    "h": 1740,
    "title": "App de campo › Hoje no campo",
@@ -202,7 +337,7 @@
   },
   "MB-02.dc.html": {
    "x": 470,
-   "y": 9920,
+   "y": 9650,
    "w": 390,
    "h": 2320,
    "title": "App de campo › Ordem e execução móvel",
@@ -211,7 +346,7 @@
   },
   "MB-03.dc.html": {
    "x": 940,
-   "y": 9920,
+   "y": 9650,
    "w": 390,
    "h": 1530,
    "title": "App de campo › Apontamento móvel",
@@ -220,7 +355,7 @@
   },
   "MB-04.dc.html": {
    "x": 1410,
-   "y": 9920,
+   "y": 9650,
    "w": 390,
    "h": 1180,
    "title": "App de campo › Ocorrência móvel",
@@ -229,7 +364,7 @@
   },
   "MB-05.dc.html": {
    "x": 1880,
-   "y": 9920,
+   "y": 9650,
    "w": 390,
    "h": 1220,
    "title": "App de campo › Almoxarifado móvel",
@@ -254,26 +389,8 @@
    "is_interactive": true,
    "page": "ocultos"
   },
-  "IN-02det.dc.html": {
-   "x": 3040,
-   "y": 0,
-   "w": 1440,
-   "h": 710,
-   "title": "IN-02 · det · Aprovações",
-   "is_interactive": true,
-   "page": "ocultos"
-  },
-  "IN-02x-os0420.dc.html": {
-   "x": 4560,
-   "y": 0,
-   "w": 1440,
-   "h": 820,
-   "title": "IN-02 · x-os0420 · Aprovações",
-   "is_interactive": true,
-   "page": "ocultos"
-  },
   "IN-03.dc.html": {
-   "x": 6080,
+   "x": 3040,
    "y": 0,
    "w": 1440,
    "h": 1100,
@@ -281,26 +398,8 @@
    "is_interactive": true,
    "page": "ocultos"
   },
-  "AG-01.dc.html": {
-   "x": 0,
-   "y": 1480,
-   "w": 1440,
-   "h": 850,
-   "title": "AG-01 · Monitoramento e vistorias",
-   "is_interactive": true,
-   "page": "ocultos"
-  },
-  "AG-01det.dc.html": {
-   "x": 1520,
-   "y": 1480,
-   "w": 1440,
-   "h": 1970,
-   "title": "AG-01 · det · Monitoramento e vistorias",
-   "is_interactive": true,
-   "page": "ocultos"
-  },
   "AG-02.dc.html": {
-   "x": 3040,
+   "x": 0,
    "y": 1480,
    "w": 1440,
    "h": 980,
@@ -309,7 +408,7 @@
    "page": "ocultos"
   },
   "AG-03.dc.html": {
-   "x": 4560,
+   "x": 1520,
    "y": 1480,
    "w": 1440,
    "h": 640,
@@ -318,7 +417,7 @@
    "page": "ocultos"
   },
   "AG-03det.dc.html": {
-   "x": 6080,
+   "x": 3040,
    "y": 1480,
    "w": 1440,
    "h": 830,
@@ -327,16 +426,16 @@
    "page": "ocultos"
   },
   "AG-04.dc.html": {
-   "x": 7600,
+   "x": 4560,
    "y": 1480,
    "w": 1440,
-   "h": 760,
+   "h": 700,
    "title": "AG-04 · Recomendações",
    "is_interactive": true,
    "page": "ocultos"
   },
   "AG-04det.dc.html": {
-   "x": 9120,
+   "x": 6080,
    "y": 1480,
    "w": 1440,
    "h": 2060,
@@ -345,7 +444,7 @@
    "page": "ocultos"
   },
   "AG-05.dc.html": {
-   "x": 10640,
+   "x": 7600,
    "y": 1480,
    "w": 1440,
    "h": 810,
@@ -354,20 +453,11 @@
    "page": "ocultos"
   },
   "AG-06.dc.html": {
-   "x": 12160,
+   "x": 9120,
    "y": 1480,
    "w": 1440,
    "h": 950,
    "title": "AG-06 · Eficácia e histórico agronômico",
-   "is_interactive": true,
-   "page": "ocultos"
-  },
-  "AG-07.dc.html": {
-   "x": 13680,
-   "y": 1480,
-   "w": 1440,
-   "h": 900,
-   "title": "AG-07 · Bulas e registros",
    "is_interactive": true,
    "page": "ocultos"
   },
@@ -488,108 +578,9 @@
    "is_interactive": true,
    "page": "ocultos"
   },
-  "IR-01.dc.html": {
-   "x": 0,
-   "y": 8550,
-   "w": 1440,
-   "h": 1000,
-   "title": "IR-01 · Balanço hídrico",
-   "is_interactive": true,
-   "page": "ocultos"
-  },
-  "IR-02.dc.html": {
-   "x": 1520,
-   "y": 8550,
-   "w": 1440,
-   "h": 1000,
-   "title": "IR-02 · Programação da irrigação",
-   "is_interactive": true,
-   "page": "ocultos"
-  },
-  "IR-03.dc.html": {
-   "x": 3040,
-   "y": 8550,
-   "w": 1440,
-   "h": 1000,
-   "title": "IR-03 · Ordens de irrigação",
-   "is_interactive": true,
-   "page": "ocultos"
-  },
-  "IR-03det.dc.html": {
-   "x": 4560,
-   "y": 8550,
-   "w": 1440,
-   "h": 1000,
-   "title": "IR-03 · det · Ordens de irrigação",
-   "is_interactive": true,
-   "page": "ocultos"
-  },
-  "IR-04.dc.html": {
-   "x": 6080,
-   "y": 8550,
-   "w": 1440,
-   "h": 1000,
-   "title": "IR-04 · Clima, sensores e desempenho",
-   "is_interactive": true,
-   "page": "ocultos"
-  },
-  "MA-01.dc.html": {
-   "x": 0,
-   "y": 9930,
-   "w": 1440,
-   "h": 1000,
-   "title": "MA-01 · Ativos e disponibilidade",
-   "is_interactive": true,
-   "page": "ocultos"
-  },
-  "MA-02.dc.html": {
-   "x": 1520,
-   "y": 9930,
-   "w": 1440,
-   "h": 1000,
-   "title": "MA-02 · Solicitações e inspeções",
-   "is_interactive": true,
-   "page": "ocultos"
-  },
-  "MA-03.dc.html": {
-   "x": 3040,
-   "y": 9930,
-   "w": 1440,
-   "h": 1000,
-   "title": "MA-03 · Plano de manutenção",
-   "is_interactive": true,
-   "page": "ocultos"
-  },
-  "MA-04.dc.html": {
-   "x": 4560,
-   "y": 9930,
-   "w": 1440,
-   "h": 1000,
-   "title": "MA-04 · Ordens de manutenção",
-   "is_interactive": true,
-   "page": "ocultos"
-  },
-  "MA-04det.dc.html": {
-   "x": 6080,
-   "y": 9930,
-   "w": 1440,
-   "h": 1000,
-   "title": "MA-04 · det · Ordens de manutenção",
-   "is_interactive": true,
-   "page": "ocultos"
-  },
-  "MA-05.dc.html": {
-   "x": 7600,
-   "y": 9930,
-   "w": 1440,
-   "h": 1000,
-   "title": "MA-05 · Abastecimentos e desempenho",
-   "is_interactive": true,
-   "page": "ocultos"
-  },
   "CO-01.dc.html": {
    "x": 0,
-   "y": 11310,
+   "y": 8550,
    "w": 1440,
    "h": 1000,
    "title": "CO-01 · Previsão e maturação",
@@ -598,7 +589,7 @@
   },
   "CO-02.dc.html": {
    "x": 1520,
-   "y": 11310,
+   "y": 8550,
    "w": 1440,
    "h": 1000,
    "title": "CO-02 · Programação e ordens de colheita",
@@ -607,7 +598,7 @@
   },
   "CO-02det.dc.html": {
    "x": 3040,
-   "y": 11310,
+   "y": 8550,
    "w": 1440,
    "h": 1000,
    "title": "CO-02 · det · Programação e ordens de colheita",
@@ -616,7 +607,7 @@
   },
   "CO-03.dc.html": {
    "x": 4560,
-   "y": 11310,
+   "y": 8550,
    "w": 1440,
    "h": 1000,
    "title": "CO-03 · Cargas, pesagens e romaneios",
@@ -625,7 +616,7 @@
   },
   "CO-04.dc.html": {
    "x": 6080,
-   "y": 11310,
+   "y": 8550,
    "w": 1440,
    "h": 1000,
    "title": "CO-04 · Recebimento da produção",
@@ -634,7 +625,7 @@
   },
   "CO-05.dc.html": {
    "x": 7600,
-   "y": 11310,
+   "y": 8550,
    "w": 1440,
    "h": 1000,
    "title": "CO-05 · Beneficiamento",
@@ -643,7 +634,7 @@
   },
   "CO-05det.dc.html": {
    "x": 9120,
-   "y": 11310,
+   "y": 8550,
    "w": 1440,
    "h": 1000,
    "title": "CO-05 · det · Beneficiamento",
@@ -652,7 +643,7 @@
   },
   "CO-06.dc.html": {
    "x": 10640,
-   "y": 11310,
+   "y": 8550,
    "w": 1440,
    "h": 1000,
    "title": "CO-06 · Qualidade e rastreabilidade",
@@ -661,7 +652,7 @@
   },
   "CO-06det.dc.html": {
    "x": 12160,
-   "y": 11310,
+   "y": 8550,
    "w": 1440,
    "h": 1000,
    "title": "CO-06 · det · Qualidade e rastreabilidade",
@@ -670,7 +661,7 @@
   },
   "CO-07.dc.html": {
    "x": 13680,
-   "y": 11310,
+   "y": 8550,
    "w": 1440,
    "h": 1000,
    "title": "CO-07 · Estoque de produção",
@@ -679,7 +670,7 @@
   },
   "SU-01.dc.html": {
    "x": 0,
-   "y": 12690,
+   "y": 9930,
    "w": 1440,
    "h": 1760,
    "title": "SU-01 · Necessidades e cobertura",
@@ -688,7 +679,7 @@
   },
   "SU-02.dc.html": {
    "x": 1520,
-   "y": 12690,
+   "y": 9930,
    "w": 1440,
    "h": 930,
    "title": "SU-02 · Políticas de estoque",
@@ -697,7 +688,7 @@
   },
   "SU-03.dc.html": {
    "x": 3040,
-   "y": 12690,
+   "y": 9930,
    "w": 1440,
    "h": 940,
    "title": "SU-03 · Saldos e lotes de materiais",
@@ -706,7 +697,7 @@
   },
   "SU-03det.dc.html": {
    "x": 4560,
-   "y": 12690,
+   "y": 9930,
    "w": 1440,
    "h": 850,
    "title": "SU-03 · det · Saldos e lotes de materiais",
@@ -715,7 +706,7 @@
   },
   "SU-04.dc.html": {
    "x": 6080,
-   "y": 12690,
+   "y": 9930,
    "w": 1440,
    "h": 1120,
    "title": "SU-04 · Solicitações e cotações",
@@ -724,7 +715,7 @@
   },
   "SU-05.dc.html": {
    "x": 7600,
-   "y": 12690,
+   "y": 9930,
    "w": 1440,
    "h": 1580,
    "title": "SU-05 · Contratos, pedidos e entregas",
@@ -733,7 +724,7 @@
   },
   "SU-05det.dc.html": {
    "x": 9120,
-   "y": 12690,
+   "y": 9930,
    "w": 1440,
    "h": 1180,
    "title": "SU-05 · det · Contratos, pedidos e entregas",
@@ -742,7 +733,7 @@
   },
   "SU-06.dc.html": {
    "x": 10640,
-   "y": 12690,
+   "y": 9930,
    "w": 1440,
    "h": 850,
    "title": "SU-06 · Recebimentos e divergências",
@@ -751,7 +742,7 @@
   },
   "SU-07.dc.html": {
    "x": 12160,
-   "y": 12690,
+   "y": 9930,
    "w": 1440,
    "h": 1040,
    "title": "SU-07 · Requisições e entregas",
@@ -760,7 +751,7 @@
   },
   "SU-07det.dc.html": {
    "x": 13680,
-   "y": 12690,
+   "y": 9930,
    "w": 1440,
    "h": 760,
    "title": "SU-07 · det · Requisições e entregas",
@@ -769,7 +760,7 @@
   },
   "SU-08.dc.html": {
    "x": 15200,
-   "y": 12690,
+   "y": 9930,
    "w": 1440,
    "h": 1180,
    "title": "SU-08 · Transferências e movimentos",
@@ -778,7 +769,7 @@
   },
   "SU-09.dc.html": {
    "x": 16720,
-   "y": 12690,
+   "y": 9930,
    "w": 1440,
    "h": 880,
    "title": "SU-09 · Inventários e ajustes",
@@ -787,7 +778,7 @@
   },
   "VE-01.dc.html": {
    "x": 0,
-   "y": 14830,
+   "y": 12070,
    "w": 1440,
    "h": 1000,
    "title": "VE-01 · Demanda e oferta",
@@ -796,7 +787,7 @@
   },
   "VE-02.dc.html": {
    "x": 1520,
-   "y": 14830,
+   "y": 12070,
    "w": 1440,
    "h": 1000,
    "title": "VE-02 · Mercado e preços",
@@ -805,7 +796,7 @@
   },
   "VE-03.dc.html": {
    "x": 3040,
-   "y": 14830,
+   "y": 12070,
    "w": 1440,
    "h": 1000,
    "title": "VE-03 · Ofertas e propostas",
@@ -814,7 +805,7 @@
   },
   "VE-04.dc.html": {
    "x": 4560,
-   "y": 14830,
+   "y": 12070,
    "w": 1440,
    "h": 1000,
    "title": "VE-04 · Pedidos de venda",
@@ -823,7 +814,7 @@
   },
   "VE-04det.dc.html": {
    "x": 6080,
-   "y": 14830,
+   "y": 12070,
    "w": 1440,
    "h": 1000,
    "title": "VE-04 · det · Pedidos de venda",
@@ -832,7 +823,7 @@
   },
   "VE-05.dc.html": {
    "x": 7600,
-   "y": 14830,
+   "y": 12070,
    "w": 1440,
    "h": 1000,
    "title": "VE-05 · Contratos e compromissos",
@@ -841,7 +832,7 @@
   },
   "VE-06.dc.html": {
    "x": 9120,
-   "y": 14830,
+   "y": 12070,
    "w": 1440,
    "h": 1000,
    "title": "VE-06 · Reclamações e devoluções",
@@ -850,7 +841,7 @@
   },
   "LO-01.dc.html": {
    "x": 0,
-   "y": 16210,
+   "y": 13450,
    "w": 1440,
    "h": 1000,
    "title": "LO-01 · Programação de transporte",
@@ -859,7 +850,7 @@
   },
   "LO-02.dc.html": {
    "x": 1520,
-   "y": 16210,
+   "y": 13450,
    "w": 1440,
    "h": 1000,
    "title": "LO-02 · Expedições e cargas",
@@ -868,7 +859,7 @@
   },
   "LO-02det.dc.html": {
    "x": 3040,
-   "y": 16210,
+   "y": 13450,
    "w": 1440,
    "h": 1000,
    "title": "LO-02 · det · Expedições e cargas",
@@ -877,7 +868,7 @@
   },
   "LO-03.dc.html": {
    "x": 4560,
-   "y": 16210,
+   "y": 13450,
    "w": 1440,
    "h": 1000,
    "title": "LO-03 · Viagens e entregas",
@@ -886,7 +877,7 @@
   },
   "LO-04.dc.html": {
    "x": 6080,
-   "y": 16210,
+   "y": 13450,
    "w": 1440,
    "h": 1000,
    "title": "LO-04 · Fretes e transportadores",
@@ -895,7 +886,7 @@
   },
   "GE-01.dc.html": {
    "x": 0,
-   "y": 17590,
+   "y": 14830,
    "w": 1440,
    "h": 1180,
    "title": "GE-01 · Visão gerencial",
@@ -904,7 +895,7 @@
   },
   "GE-02.dc.html": {
    "x": 1520,
-   "y": 17590,
+   "y": 14830,
    "w": 1440,
    "h": 990,
    "title": "GE-02 · Orçamento e previsões",
@@ -913,7 +904,7 @@
   },
   "GE-02det.dc.html": {
    "x": 3040,
-   "y": 17590,
+   "y": 14830,
    "w": 1440,
    "h": 1000,
    "title": "GE-02 · det · Orçamento e previsões",
@@ -922,7 +913,7 @@
   },
   "GE-03.dc.html": {
    "x": 4560,
-   "y": 17590,
+   "y": 14830,
    "w": 1440,
    "h": 1070,
    "title": "GE-03 · Custos e fechamento",
@@ -931,7 +922,7 @@
   },
   "GE-04.dc.html": {
    "x": 6080,
-   "y": 17590,
+   "y": 14830,
    "w": 1440,
    "h": 1200,
    "title": "GE-04 · Contas a pagar e caixa",
@@ -940,7 +931,7 @@
   },
   "GE-05.dc.html": {
    "x": 7600,
-   "y": 17590,
+   "y": 14830,
    "w": 1440,
    "h": 1250,
    "title": "GE-05 · Contas a receber",
@@ -949,7 +940,7 @@
   },
   "GE-06.dc.html": {
    "x": 9120,
-   "y": 17590,
+   "y": 14830,
    "w": 1440,
    "h": 1110,
    "title": "GE-06 · Indicadores operacionais",
@@ -958,7 +949,7 @@
   },
   "GE-06det.dc.html": {
    "x": 10640,
-   "y": 17590,
+   "y": 14830,
    "w": 1440,
    "h": 1120,
    "title": "GE-06 · det · Indicadores operacionais",
@@ -967,7 +958,7 @@
   },
   "GE-07.dc.html": {
    "x": 12160,
-   "y": 17590,
+   "y": 14830,
    "w": 1440,
    "h": 810,
    "title": "GE-07 · Planos de ação",
@@ -976,7 +967,7 @@
   },
   "GE-08.dc.html": {
    "x": 13680,
-   "y": 17590,
+   "y": 14830,
    "w": 1440,
    "h": 1190,
    "title": "GE-08 · Crédito e garantias",
@@ -985,7 +976,7 @@
   },
   "CF-01.dc.html": {
    "x": 0,
-   "y": 19220,
+   "y": 16460,
    "w": 1440,
    "h": 1460,
    "title": "CF-01 · Usuários e permissões",
@@ -994,7 +985,7 @@
   },
   "CF-02.dc.html": {
    "x": 1520,
-   "y": 19220,
+   "y": 16460,
    "w": 1440,
    "h": 1580,
    "title": "CF-02 · Alçadas e regras",
@@ -1003,7 +994,7 @@
   },
   "CF-02det.dc.html": {
    "x": 3040,
-   "y": 19220,
+   "y": 16460,
    "w": 1440,
    "h": 1420,
    "title": "CF-02 · det · Alçadas e regras",
@@ -1012,7 +1003,7 @@
   },
   "CF-03.dc.html": {
    "x": 4560,
-   "y": 19220,
+   "y": 16460,
    "w": 1440,
    "h": 1380,
    "title": "CF-03 · Integrações e sincronização",
@@ -1021,7 +1012,7 @@
   },
   "CF-03det.dc.html": {
    "x": 6080,
-   "y": 19220,
+   "y": 16460,
    "w": 1440,
    "h": 940,
    "title": "CF-03 · det · Integrações e sincronização",
@@ -1030,7 +1021,7 @@
   },
   "CF-04.dc.html": {
    "x": 7600,
-   "y": 19220,
+   "y": 16460,
    "w": 1440,
    "h": 1380,
    "title": "CF-04 · Auditoria e parâmetros",
@@ -1039,7 +1030,7 @@
   },
   "CF-05.dc.html": {
    "x": 9120,
-   "y": 19220,
+   "y": 16460,
    "w": 1440,
    "h": 1840,
    "title": "CF-05 · Assinatura e medição",
@@ -1048,7 +1039,7 @@
   },
   "CF-05det.dc.html": {
    "x": 10640,
-   "y": 19220,
+   "y": 16460,
    "w": 1440,
    "h": 1010,
    "title": "CF-05 · det · Assinatura e medição",
@@ -1057,16 +1048,16 @@
   },
   "MB-02det.dc.html": {
    "x": 0,
-   "y": 21440,
+   "y": 18680,
    "w": 390,
-   "h": 1590,
+   "h": 1620,
    "title": "MB-02 · det · Ordem e execução móvel",
    "is_interactive": true,
    "page": "ocultos"
   },
   "MB-03x-recibo.dc.html": {
    "x": 470,
-   "y": 21440,
+   "y": 18680,
    "w": 390,
    "h": 1300,
    "title": "MB-03 · x-recibo · Apontamento móvel",
@@ -1075,7 +1066,7 @@
   },
   "MB-05det.dc.html": {
    "x": 940,
-   "y": 21440,
+   "y": 18680,
    "w": 390,
    "h": 890,
    "title": "MB-05 · det · Almoxarifado móvel",
@@ -1084,7 +1075,7 @@
   },
   "MB-06.dc.html": {
    "x": 1410,
-   "y": 21440,
+   "y": 18680,
    "w": 390,
    "h": 940,
    "title": "MB-06 · Vistoria por pontos",
@@ -1093,7 +1084,7 @@
   },
   "MB-07.dc.html": {
    "x": 1880,
-   "y": 21440,
+   "y": 18680,
    "w": 390,
    "h": 920,
    "title": "MB-07 · Contagem de frutos",
@@ -1102,16 +1093,16 @@
   },
   "MB-08.dc.html": {
    "x": 2350,
-   "y": 21440,
+   "y": 18680,
    "w": 390,
-   "h": 1410,
+   "h": 1430,
    "title": "MB-08 · Irrigação móvel",
    "is_interactive": true,
    "page": "ocultos"
   },
   "MB-08x-recibo.dc.html": {
    "x": 2820,
-   "y": 21440,
+   "y": 18680,
    "w": 390,
    "h": 1120,
    "title": "MB-08 · x-recibo · Irrigação móvel",
@@ -1120,7 +1111,7 @@
   },
   "MB-09.dc.html": {
    "x": 3290,
-   "y": 21440,
+   "y": 18680,
    "w": 390,
    "h": 900,
    "title": "MB-09 · Manutenção e combustível móvel",
@@ -1129,16 +1120,16 @@
   },
   "MB-09det.dc.html": {
    "x": 3760,
-   "y": 21440,
+   "y": 18680,
    "w": 390,
-   "h": 990,
+   "h": 1000,
    "title": "MB-09 · det · Manutenção e combustível móvel",
    "is_interactive": true,
    "page": "ocultos"
   },
   "MB-10.dc.html": {
    "x": 4230,
-   "y": 21440,
+   "y": 18680,
    "w": 390,
    "h": 780,
    "title": "MB-10 · Cargas e entregas móvel",
@@ -1147,7 +1138,7 @@
   },
   "MB-10det.dc.html": {
    "x": 4700,
-   "y": 21440,
+   "y": 18680,
    "w": 390,
    "h": 870,
    "title": "MB-10 · det · Cargas e entregas móvel",
@@ -1156,7 +1147,7 @@
   },
   "PT-01.dc.html": {
    "x": 0,
-   "y": 23410,
+   "y": 20680,
    "w": 1440,
    "h": 1030,
    "title": "PT-01 · Portal do parceiro — início",
@@ -1165,7 +1156,7 @@
   },
   "PT-02.dc.html": {
    "x": 1520,
-   "y": 23410,
+   "y": 20680,
    "w": 1440,
    "h": 600,
    "title": "PT-02 · Cotação do fornecedor",
@@ -1174,7 +1165,7 @@
   },
   "PT-02det.dc.html": {
    "x": 3040,
-   "y": 23410,
+   "y": 20680,
    "w": 1440,
    "h": 1370,
    "title": "PT-02 · det · Cotação do fornecedor",
@@ -1183,7 +1174,7 @@
   },
   "PT-03.dc.html": {
    "x": 4560,
-   "y": 23410,
+   "y": 20680,
    "w": 1440,
    "h": 1010,
    "title": "PT-03 · Oferta ao comprador",
@@ -1192,7 +1183,7 @@
   },
   "PT-04.dc.html": {
    "x": 6080,
-   "y": 23410,
+   "y": 20680,
    "w": 1440,
    "h": 770,
    "title": "PT-04 · Dossiê de crédito",
@@ -1201,7 +1192,7 @@
   },
   "PT-04det.dc.html": {
    "x": 7600,
-   "y": 23410,
+   "y": 20680,
    "w": 1440,
    "h": 1070,
    "title": "PT-04 · det · Dossiê de crédito",
@@ -1210,7 +1201,7 @@
   },
   "PT-05.dc.html": {
    "x": 9120,
-   "y": 23410,
+   "y": 20680,
    "w": 1440,
    "h": 890,
    "title": "PT-05 · Negócios e documentos",
@@ -1219,7 +1210,7 @@
   },
   "PT-05det.dc.html": {
    "x": 10640,
-   "y": 23410,
+   "y": 20680,
    "w": 1440,
    "h": 1180,
    "title": "PT-05 · det · Negócios e documentos",
@@ -1228,7 +1219,7 @@
   },
   "PT-06.dc.html": {
    "x": 12160,
-   "y": 23410,
+   "y": 20680,
    "w": 1440,
    "h": 1080,
    "title": "PT-06 · Inteligência do parceiro",
@@ -1237,7 +1228,7 @@
   },
   "PT-07.dc.html": {
    "x": 13680,
-   "y": 23410,
+   "y": 20680,
    "w": 1440,
    "h": 1320,
    "title": "PT-07 · Perfil e assinatura do parceiro",
@@ -1246,7 +1237,7 @@
   },
   "BO-01.dc.html": {
    "x": 0,
-   "y": 25160,
+   "y": 22430,
    "w": 1440,
    "h": 1280,
    "title": "BO-01 · Planos e contratos da plataforma",
@@ -1255,7 +1246,7 @@
   },
   "BO-01det.dc.html": {
    "x": 1520,
-   "y": 25160,
+   "y": 22430,
    "w": 1440,
    "h": 1320,
    "title": "BO-01 · det · Planos e contratos da plataforma",
@@ -1264,7 +1255,7 @@
   },
   "BO-02.dc.html": {
    "x": 3040,
-   "y": 25160,
+   "y": 22430,
    "w": 1440,
    "h": 1160,
    "title": "BO-02 · Assinaturas e cobrança",
@@ -1273,7 +1264,7 @@
   },
   "BO-02det.dc.html": {
    "x": 4560,
-   "y": 25160,
+   "y": 22430,
    "w": 1440,
    "h": 950,
    "title": "BO-02 · det · Assinaturas e cobrança",
@@ -1282,7 +1273,7 @@
   },
   "BO-03.dc.html": {
    "x": 6080,
-   "y": 25160,
+   "y": 22430,
    "w": 1440,
    "h": 990,
    "title": "BO-03 · Medição e conciliação comercial",
@@ -1291,7 +1282,7 @@
   },
   "BO-03det.dc.html": {
    "x": 7600,
-   "y": 25160,
+   "y": 22430,
    "w": 1440,
    "h": 1180,
    "title": "BO-03 · det · Medição e conciliação comercial",
@@ -1300,7 +1291,7 @@
   },
   "BO-04.dc.html": {
    "x": 9120,
-   "y": 25160,
+   "y": 22430,
    "w": 1440,
    "h": 900,
    "title": "BO-04 · Economia e crescimento da plataforma",
@@ -1309,7 +1300,7 @@
   },
   "ON-01.dc.html": {
    "x": 10640,
-   "y": 25160,
+   "y": 22430,
    "w": 1440,
    "h": 1180,
    "title": "ON-01 · Entrada e implantação guiada",
@@ -1318,7 +1309,7 @@
   },
   "ON-01det.dc.html": {
    "x": 12160,
-   "y": 25160,
+   "y": 22430,
    "w": 1440,
    "h": 770,
    "title": "ON-01 · det · Entrada e implantação guiada",
@@ -1337,13 +1328,28 @@
   "CD-06.dc.html",
   "CD-07.dc.html",
   "CD-01det.dc.html",
+  "AG-07.dc.html",
   "PA.dc.html",
   "SAF.dc.html",
   "OS.dc.html",
+  "AG-01.dc.html",
+  "IR-01.dc.html",
   "CA-01det.dc.html",
   "CA-01x-os0420.dc.html",
   "OS-0424-app.dc.html",
   "OS-0424-ficha.dc.html",
+  "AG-01det.dc.html",
+  "IR-02.dc.html",
+  "IR-03.dc.html",
+  "IR-03det.dc.html",
+  "IR-04.dc.html",
+  "PM.dc.html",
+  "MA-01.dc.html",
+  "MA-02.dc.html",
+  "MA-03.dc.html",
+  "MA-04.dc.html",
+  "MA-05.dc.html",
+  "MA-04det.dc.html",
   "CMP.dc.html",
   "EST.dc.html",
   "MB-01.dc.html",
@@ -1353,11 +1359,7 @@
   "MB-05.dc.html",
   "IN-01.dc.html",
   "IN-02.dc.html",
-  "IN-02det.dc.html",
-  "IN-02x-os0420.dc.html",
   "IN-03.dc.html",
-  "AG-01.dc.html",
-  "AG-01det.dc.html",
   "AG-02.dc.html",
   "AG-03.dc.html",
   "AG-03det.dc.html",
@@ -1365,7 +1367,6 @@
   "AG-04det.dc.html",
   "AG-05.dc.html",
   "AG-06.dc.html",
-  "AG-07.dc.html",
   "PL-01.dc.html",
   "PL-02.dc.html",
   "PL-02det.dc.html",
@@ -1379,17 +1380,6 @@
   "CA-03.dc.html",
   "CA-03det.dc.html",
   "CA-04.dc.html",
-  "IR-01.dc.html",
-  "IR-02.dc.html",
-  "IR-03.dc.html",
-  "IR-03det.dc.html",
-  "IR-04.dc.html",
-  "MA-01.dc.html",
-  "MA-02.dc.html",
-  "MA-03.dc.html",
-  "MA-04.dc.html",
-  "MA-04det.dc.html",
-  "MA-05.dc.html",
   "CO-01.dc.html",
   "CO-02.dc.html",
   "CO-02det.dc.html",
@@ -1500,7 +1490,7 @@
   },
   "v_3": {
    "x": 0,
-   "y": 6400,
+   "y": 4300,
    "text": "Agrícola",
    "kind": "title1",
    "maxW": 1840,
@@ -1508,15 +1498,23 @@
   },
   "v_4": {
    "x": 0,
-   "y": 8300,
-   "text": "Suprimentos",
+   "y": 6650,
+   "text": "Manutenção",
    "kind": "title1",
    "maxW": 1840,
    "page": "menu"
   },
   "v_5": {
    "x": 0,
-   "y": 9680,
+   "y": 8030,
+   "text": "Suprimentos",
+   "kind": "title1",
+   "maxW": 1840,
+   "page": "menu"
+  },
+  "v_6": {
+   "x": 0,
+   "y": 9410,
    "text": "App de campo",
    "kind": "title1",
    "maxW": 1840,
@@ -1527,7 +1525,7 @@
    "y": -240,
    "text": "Início · oculto no menu",
    "kind": "title1",
-   "maxW": 7520,
+   "maxW": 4480,
    "page": "ocultos"
   },
   "o_1": {
@@ -1535,7 +1533,7 @@
    "y": 1240,
    "text": "Agronomia · oculto no menu",
    "kind": "title1",
-   "maxW": 15120,
+   "maxW": 10560,
    "page": "ocultos"
   },
   "o_2": {
@@ -1554,25 +1552,9 @@
    "maxW": 7520,
    "page": "ocultos"
   },
-  "o_4": {
-   "x": 0,
-   "y": 8310,
-   "text": "Irrigação · oculto no menu",
-   "kind": "title1",
-   "maxW": 7520,
-   "page": "ocultos"
-  },
-  "o_5": {
-   "x": 0,
-   "y": 9690,
-   "text": "Máquinas e manutenção · oculto no menu",
-   "kind": "title1",
-   "maxW": 9040,
-   "page": "ocultos"
-  },
   "o_6": {
    "x": 0,
-   "y": 11070,
+   "y": 8310,
    "text": "Colheita e pós-colheita · oculto no menu",
    "kind": "title1",
    "maxW": 15120,
@@ -1580,7 +1562,7 @@
   },
   "o_7": {
    "x": 0,
-   "y": 12450,
+   "y": 9690,
    "text": "Suprimentos · oculto no menu",
    "kind": "title1",
    "maxW": 18160,
@@ -1588,7 +1570,7 @@
   },
   "o_8": {
    "x": 0,
-   "y": 14590,
+   "y": 11830,
    "text": "Comercial · oculto no menu",
    "kind": "title1",
    "maxW": 10560,
@@ -1596,7 +1578,7 @@
   },
   "o_9": {
    "x": 0,
-   "y": 15970,
+   "y": 13210,
    "text": "Logística · oculto no menu",
    "kind": "title1",
    "maxW": 7520,
@@ -1604,7 +1586,7 @@
   },
   "o_10": {
    "x": 0,
-   "y": 17350,
+   "y": 14590,
    "text": "Gestão e resultados · oculto no menu",
    "kind": "title1",
    "maxW": 15120,
@@ -1612,7 +1594,7 @@
   },
   "o_12": {
    "x": 0,
-   "y": 18980,
+   "y": 16220,
    "text": "Configurações · oculto no menu",
    "kind": "title1",
    "maxW": 12080,
@@ -1620,7 +1602,7 @@
   },
   "o_13": {
    "x": 0,
-   "y": 21200,
+   "y": 18440,
    "text": "App móvel · oculto no menu",
    "kind": "title1",
    "maxW": 5090,
@@ -1628,7 +1610,7 @@
   },
   "o_14": {
    "x": 0,
-   "y": 23170,
+   "y": 20440,
    "text": "Portal do parceiro · oculto no menu",
    "kind": "title1",
    "maxW": 15120,
@@ -1636,13 +1618,12 @@
   },
   "o_15": {
    "x": 0,
-   "y": 24920,
+   "y": 22190,
    "text": "Onboarding e Backoffice · oculto no menu",
    "kind": "title1",
    "maxW": 13600,
    "page": "ocultos"
   }
  },
- "designSystems": [],
- "attachments": {}
+ "designSystems": []
 }

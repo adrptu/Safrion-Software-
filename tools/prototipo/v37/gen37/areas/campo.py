@@ -7,16 +7,17 @@ sem faixa de etapas (módulo não sequencial).
 observacoes (dados locais coerentes com dados.py / dados2.py / processo_os.py):
 - Ordens = dados.ORDENS (registro canônico, só OS-*): ids, fases, selos (selo + selos_extra), saldos e janelas vêm dali;
   versão vem de processo_os.VERSAO (a mesma da tela Ordem de Serviço). "Voltar" dos detalhes CA-01det e CA-01x-os0420 → OS.dc.html.
-- OS-0420: versão vigente v2 (como AG-04det e OS.dc.html), v3 (KCl −12 % só no saldo de 70 ha) aguardando Ana (agrônoma): saldo pausado,
-  fichas futuras revogadas, 30 ha realizados preservados na v2 (18 ha conferidos em 21/09 + 12 ha provisórios em 22/09).
+- OS-0420: 30 ha realizados preservados na v2 (18 ha conferidos em 21/09 + 12 ha provisórios em 22/09); saldo de 70 ha na v3
+  (KCl −12 % só no saldo), ajustada por Ana (agrônoma) em 23/09 e já em vigor. O saldo está parado só pelo Trator T1 (OM-0233), substituto
+  Trator 02 a partir de 24/09; não há pendência do agrônomo na OS-0420.
   Mantido 30/100 ha (e não 60/40) porque dados.py, OS.dc.html e AG-04det usam 30/70; ver "prd".
 - Instrução da OS-0420 herdada da REC-014 v2 (agronomia.py): KCl 60 % 120 kg/ha (zonas 140/120/95), TS nematicida 100 mL/100 kg de semente,
   semente de soja 58 W 52 kg/ha (plano SOJA-AT) · janela da recomendação 20/09–05/10; janela da ordem 22–28/09.
 - Materiais = dados2.REQUISICOES: REQ-031 (OS-0417, MAP 100/70/20/10 sc, custódia de Paula), REQ-035 (OS-0421, Fungicida A 175/160/95 L,
-  custódia 65 L com Marcos), REQ-036 (OS-0420, semente 5.200/1.560/1.560 kg), REQ-038 (OS-0418, Ureia 1.140 kg, aguardando aprovação).
+  custódia 65 L com Marcos), REQ-036 (OS-0420, semente 5.200/1.560/1.560 kg), REQ-038 (OS-0418, Ureia 1.140 kg, aguardando liberação).
   Consumo diário de Fungicida A na OS-0421: 25, 25, 25, 20 L (0,50 L/ha da v2).
 - Horas do turno do dia 2 da OS-0420: 3,1 h (03:30–06:40) contra 1,8 h previstas (12 ha ÷ 6,8 ha/h, rendimento de plantio em dados2.CONJ).
-- Roteiro projetado da OS-0418 após a aprovação (DEMO-16): Ureia 45 % 1.140 kg entregues, 1.100 kg consumidos, 40 kg devolvidos;
+- Roteiro projetado da OS-0418 após a liberação (DEMO-16): Ureia 45 % 1.140 kg entregues, 1.100 kg consumidos, 40 kg devolvidos;
   lâmina de 6,7 mm já aplicada como água antes da reclassificação fica no balanço hídrico e não é reapontada.
 - Nova ocorrência recebe OC-117 em diante.
 - Irrigação só com água (26/09, igual à O.S. e a areas/irrigacao.py): sem agrônomo, libera pela prontidão operacional.
@@ -49,17 +50,17 @@ EQUIPE={'OS-0421':'Marcos · Pulverizador PJ-3030 + Trator 03','OS-0420':'Carlos
 EQ_OPTS=['Marcos · Pulverizador PJ-3030 + Trator 03','Carlos · Plantadeira PD-12 + Trator T1 (bloqueado)','Carlos · Plantadeira PD-12 + Trator 02 (substituto)',
          'João · Pivô 1','João · Pivô 2','João · Gotejo T7','Paula · Distribuidor DA-08']
 QUEM={'OS-0421':'Turno do dia 4 aguardando conferência · Paula',
-      'OS-0420':'OM-0233 · Manutenção · substituto a partir de 24/09 · saldo de 70 ha pausado até Ana (agrônoma) aprovar a v3',
+      'OS-0420':'OM-0233 · Manutenção · substituto a partir de 24/09 · saldo de 70 ha parado (já na v3)',
       'OS-0419':'Pronta para iniciar hoje às 20:00 · João',
-      'OS-0418':'Ana (agrônoma) · revisão da v2 vence hoje',
+      'OS-0418':'Ana (agrônoma) · liberar (pode ajustar a dose antes) · Ureia 45 % sem saldo apto',
       'OS-0417':'Paula (equipe de campo) devolve 10 sc até 24/09 · Rui recebe no almoxarifado',
       'OS-0422':'João (irrigante) define a janela das 2 passadas',
       'OS-0423':'Caio (PCP) resolve a parada da B3 (14:00–15:00) · estimativa por ET · sonda sem dado'}
 PROX={'OS-0421':('Conferir dia 4','CA-02.dc.html'),'OS-0420':('Ver OM-0233','MA-04det.dc.html'),
-      'OS-0419':('Abrir em Irrigação','IR-03det.dc.html'),'OS-0418':('Revisar versão v2','IN-02det.dc.html'),
+      'OS-0419':('Abrir em Irrigação','IR-03det.dc.html'),'OS-0418':('Liberar','OS.dc.html#OS-0418'),
       'OS-0417':('Ver custódia','CA-04.dc.html'),'OS-0422':('Definir janela','IR-02.dc.html'),'OS-0423':('Resolver conflito','IR-02.dc.html')}
 DETALHE={'OS-0421':'CA-01det.dc.html','OS-0420':DET0420}
-REALIZ={'OS-0421':'150 conf. + 40 prov. · saldo 160 ha','OS-0420':'18 conf. + 12 prov. · saldo 70 ha pausado'}
+REALIZ={'OS-0421':'150 conf. + 40 prov. · saldo 160 ha','OS-0420':'18 conf. + 12 prov. · saldo 70 ha parado'}
 _RED=('impedid','bloquead','atrasad','conflito','vencid')
 
 def nf(n,d=0):
@@ -67,17 +68,17 @@ def nf(n,d=0):
     return s.replace(',','X').replace('.',',').replace('X','.')
 def _selos(o):  # selo principal + selos_extra do registro (mesma lista da O.S. e do Mapa)
     ts=([o['selo']] if o.get('selo') else [])+list(o.get('selos_extra') or [])
-    return [(t,'red' if any(w in t.lower() for w in _RED) else ('green' if t.startswith('Aprovada') else 'yellow')) for t in ts]
+    return [(t,'red' if any(w in t.lower() for w in _RED) else 'yellow') for t in ts]
 def _impedida(o): return any('impedida' in t.lower() or 'falta máquina' in t.lower() for t,_ in _selos(o))
 def _eqp(eq):
     pes,_,conj=eq.partition(' · ')
     return [Pt.txt(pes),Pt.br(),Pt.mut(conj)]
 _VER={o['id']:o.get('versao') for o in D.OS}
-try:  # versão = a mesma da tela Ordem de Serviço (OS-0430 emitida, OS-0431 v1 aprovada)
+try:  # versão = a mesma da tela Ordem de Serviço (rótulo só "vN", sem "aprovada" nem "emitida")
     from areas.processo_os import VERSAO as _VOS
     _VER.update(_VOS)
 except Exception: pass
-def _versao(o): return 'v2 aprovada · v3 em revisão' if o['id']=='OS-0420' else (_VER.get(o['id']) or 'v1 aprovada')
+def _versao(o): return 'v2 · v3 no saldo' if o['id']=='OS-0420' else (_VER.get(o['id']) or 'v1')
 def _ordens():  # registro canônico dados.ORDENS (fase, selo, saldo, janela); tipo de água igual ao da O.S.
     os_=[dict(o,tipo=_TIPO.get(o['id'],o['tipo'])) for o in D.ORDENS if o['id'].startswith('OS')]
     return sorted(os_,key=lambda o:(FASES.index(o['etapa']),o['id']))
@@ -154,7 +155,7 @@ def _mapa():
     s+=box(14,320,ACCS,ACC,False,'T1 + T2 · OS-0421','Em execução · 190/350 ha','selo Parcial · dia 4 de 7')
     s+=f'<rect x="16" y="130" width="{wr}" height="38" fill="{ACC}" fill-opacity=".28"/><text x="26" y="154" font-size="11.5" font-weight="700" fill="{ACC}">realizado 190 ha</text><text x="{16+wr+8}" y="154" font-size="11.5" fill="{MUTED}">saldo 160 ha</text>'
     wr2=int(216*30/100)
-    s+=box(346,220,REDS,RED,True,'T4 · OS-0420','Em execução · 30/100 ha','Impedida · OM-0233','Revisão de saldo pendente · v3')
+    s+=box(346,220,REDS,RED,True,'T4 · OS-0420','Em execução · 30/100 ha','Impedida · OM-0233')
     s+=f'<rect x="348" y="130" width="{wr2}" height="38" fill="{RED}" fill-opacity=".18"/><text x="{348+wr2+8}" y="154" font-size="11.5" fill="{MUTED}">saldo 70 ha</text>'
     s+=box(578,112,GRAYS,'#9AA59E',False,'T3 · OS-0415','Encerrada','96/96 ha')
     s+=box(702,130,REDS,RED,True,'T7 · OS-0423','A liberar · 42 ha','Conflito · parada B3','estimativa por ET')
@@ -187,35 +188,34 @@ def _ca01():
                dict(k='cond',l='Condição · próxima ação',w=225),dict(k='real',l='Realizado · saldo',t='num',w=125),dict(k='eq',l='Equipe · conjunto',w=130)],
         rows,edit=dict(m='form',title='Ordem',sub='Ajuste a janela e a equipe da ordem. Trocar a data não troca produto nem área autorizados; ordem encerrada abre só em consulta.',
             fields=[dict(k='id',l='O.S.',ro=True),dict(k='ativ',l='Atividade · local',ro=True),dict(k='fase',l='Fase',ro=True),
-                    dict(k='jan',l='Janela',t='txt',req=True,help='Ex.: 24–26/09. A ordem mantém produto, dose e área da versão aprovada.'),
+                    dict(k='jan',l='Janela',t='txt',req=True,help='Ex.: 24–26/09. A ordem mantém produto, dose e área da versão liberada.'),
                     dict(k='eq',l='Equipe · conjunto',t='sel',opts=EQ_OPTS,req=True,help='Conjunto bloqueado só volta a ser elegível com a manutenção liberada.')]),
         sel=True,gid='g_os',total=False,
-        bulk=imsg('Liberar selecionadas','Resultado por item · OS-0418 recusada: a v2 ainda não tem aprovação agronômica · OS-0431 recusada: Trator T1 bloqueado · OS-0422 recusada: janela a definir (João, irrigante) · OS-0423 recusada: conflito com a parada da B3 (Caio, PCP) · ordens de outras fases foram ignoradas. Com produto, só libera com versão aprovada; só água, com prontidão operacional.',
+        bulk=imsg('Liberar selecionadas','Resultado por item · OS-0418 recusada: Ureia 45 % sem saldo apto (0 kg) · OS-0431 recusada: Trator T1 bloqueado · OS-0422 recusada: janela a definir (João, irrigante) · OS-0423 recusada: conflito com a parada da B3 (Caio, PCP) · ordens de outras fases foram ignoradas. Com produto, quem libera é o agrônomo (pode ajustar antes); só água, com prontidão operacional.',
                   'check','Liberar para execução as ordens selecionadas (resultado por item)'))
     kan=_kanban(ordens)
     mapa=_mapa()+f'<div style="margin-top: 8px;">{legend([(ACC,"Em execução ou liberada"),(YEL,"Em conferência ou a liberar"),(RED,"Impedida ou em conflito (tracejado)"),("#9AA59E","Encerrada")])}</div>'
     bar,panes=tabs(['Lista','Kanban','Mapa'],[g_os,kan,mapa],active=0,label='Visão das ordens')
     n_lib=sum(1 for o in ordens if o['etapa']=='A liberar'); n_fp=sum(1 for o in ordens if o['etapa']=='A liberar' and o['id'] in _LAM)
-    n_ag=sum(1 for o in ordens if o['etapa']=='A liberar' and o.get('selo')=='Aguardando agrônomo')
+    n_ag=sum(1 for o in ordens if o['etapa']=='A liberar' and o['id'] not in _LAM)   # com produto: o agrônomo libera
     n_imp=sum(1 for o in ordens if _impedida(o))
     abertas=[o for o in ordens if o['etapa']!='Encerradas' and o.get('area') and o.get('saldo')]
     saldo=sum(o['saldo'] for o in abertas)
-    acoes=(ilink('Revisar versões','IN-02.dc.html','doc','Abrir as versões aguardando aprovação agronômica')
-           + ilink('Conferir apontamentos','CA-02.dc.html','check','Abrir a fila de conferência dos turnos')
+    acoes=(ilink('Conferir apontamentos','CA-02.dc.html','check','Abrir a fila de conferência dos turnos')
            + ilink('Reprogramar saldo','PL-05.dc.html','calendar','Reprogramar o saldo das ordens no PCP'))
     n_out=n_lib-n_ag-n_fp
-    corpo=(kpis([('A LIBERAR',str(n_lib),f'{n_ag} aguardando agrônomo · {n_fp} só água · {n_out} {"outra" if n_out==1 else "outras"}'),('EM CONFERÊNCIA','1','sobras a receber'),
-                 ('REVISÃO DE SALDO','1','OS-0420 · 70 ha pausados'),('SALDO ABERTO',f'{nf(saldo)} ha',f'{len(abertas)} ordens')])
+    corpo=(kpis([('A LIBERAR',str(n_lib),f'{n_ag} com produto (o agrônomo libera) · {n_fp} só água'+(f' · {n_out} {"outra" if n_out==1 else "outras"}' if n_out else '')),('EM CONFERÊNCIA','1','sobras a receber'),
+                 ('SALDO PARADO','70 ha','OS-0420 · Trator T1 (OM-0233)'),('SALDO ABERTO',f'{nf(saldo)} ha',f'{len(abertas)} ordens')])
            + bloco('Ordens da janela de trabalho','Clique numa ordem para ajustar janela e equipe; use o link da condição para resolver a pendência.',
                    f'<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">{bar}<span style="flex-grow: 1;"></span>{acoes}</div>{panes}'))
     prim=idrawer('Preparar e emitir período',dict(title='Preparar e emitir período',sub='Emita a necessidade agregada da janela uma única vez, sem duplicar pendências de períodos anteriores.',
              fields=[('Janela','Próximos 7 dias'),('Fazenda','Santa Rita'),('Atividades','Pulverização, plantio, adubação'),('Necessidade agregada','545 ha em 3 ordens')],
-             confirm='Emitir ordens do período',done='Emitidas · aguardando agrônomo'),'calendar','Emitir as ordens da janela para revisão agronômica',primary=True,small=False)
+             confirm='Emitir ordens do período',done='Emitidas · A liberar (o agrônomo libera)'),'calendar','Emitir as ordens da janela para o agrônomo liberar',primary=True,small=False)
     HEIGHTS37[fname]=1500
     shell37('CA-01','Ordens de campo',corpo,
-      subtitle='A liberar → Liberadas → Em execução → Em conferência → Encerradas. Parcial, pausa, impedimento e revisão de saldo aparecem como selos.',
+      subtitle='A liberar → Liberadas → Em execução → Em conferência → Encerradas. Parcial, pausa e impedimento aparecem como selos.',
       status=(f"{sum(1 for o in ordens if o['etapa']=='Em execução')} em execução · {n_imp} impedidas",'red'),primary_html=prim,
-      footer='Emitir não autoriza: a ordem só é liberada com versão aprovada. Término físico entra automaticamente em Em conferência.')
+      footer='Emitir não autoriza: com produto, o agrônomo libera a ordem e pode ajustar antes; só água libera pela prontidão. Término físico entra automaticamente em Em conferência.')
 
 # ---------------- CA-01det · OS-0421 (350 ha em 7 dias, hoje = dia 4) ----------------
 TURNOS=[('20/09',1,50,'Conferido','app · sincronizado'),('21/09',2,50,'Conferido','app · sincronizado'),('22/09',3,50,'Conferido','app · sincronizado'),
@@ -233,9 +233,8 @@ function EXTRAVALS(self,v){
     const msg='Salvo · acumulado refeito: '+t.real.toLocaleString('pt-BR')+' / '+AREA+' ha · saldo '+saldo.toLocaleString('pt-BR')+' ha'
       +(dif===0?' · os turnos previstos cobrem o saldo.':(dif>0?' · faltam '+dif.toLocaleString('pt-BR')+' ha nos turnos previstos.':' · os previstos excedem o saldo em '+(-dif).toLocaleString('pt-BR')+' ha.'));
     self.setState({g2toast:msg}); };
-  const on=!!((self.state.added||{})[DID]); v.v3_on=on; v.v3_off=!on;
+  const on=!!((self.state.added||{})[DID]); v.v3_on=on;
   v.fichas=()=>self.setState({g2toast:on?FICHAS_REV:FICHAS_V2});
-  v.prim_block=()=>self.setState({g2toast:'Indisponível: o saldo está pausado até Ana (agrônoma) aprovar a v3. O avanço registrado antes continua preservado na v2.'});
 }
 '''
 def _ca01det():
@@ -269,24 +268,23 @@ def _ca01det():
         edit=dict(m='origin',title='Custódia',fields=[dict(k='item',l='Item · lote',ro=True),dict(k='ent',l='Entregue',ro=True,u='L'),dict(k='cons',l='Consumido',ro=True,u='L'),dict(k='cust',l='Em custódia',ro=True,u='L')]),
         search=False,gid='g_mat',total=False)
     ajuste=idrawer('Ajustar produtos e doses do saldo',dict(title='Ajustar produtos e doses do saldo',
-             sub='Gera a v3 só para o saldo de 160 ha; os 190 ha realizados ficam preservados na v2. Ao enviar, o saldo é pausado e as fichas futuras são revogadas até a aprovação do agrônomo.',
-             fields=[('Ordem','OS-0421 · v2 aprovada'),('Área alcançada (ha)','160 · saldo'),('Ação do ajuste','Reduzir dose'),('Produto','Fungicida A'),('Nova dose por ha','0,45 L'),('Motivo','')],
-             confirm='Enviar v3 para revisão',done='v3 enviada · saldo pausado'),'leaf','Propor nova versão só para o saldo (exige revisão agronômica)')
+             sub='Gera a v3 só para o saldo de 160 ha; os 190 ha realizados ficam preservados na v2. Ao liberar, as fichas do saldo passam à v3.',
+             fields=[('Ordem','OS-0421 · v2'),('Área alcançada (ha)','160 · saldo'),('Ação do ajuste','Reduzir dose'),('Produto','Fungicida A'),('Nova dose por ha','0,45 L'),('Motivo','')],
+             confirm='Ajustar e liberar saldo',done='v3 liberada · saldo de 160 ha'),'leaf','Ajustar e liberar o saldo (agrônomo)')
     DID=E.DRAWN['Ajustar produtos e doses do saldo']
     fichas=(f'<button type="button" onClick="{H("fichas")}" title="Consultar as fichas do caldeiro, do operador e do almoxarife" style="{BTN_ST(False,True)} display: inline-flex; align-items: center; gap: 6px;">{icon("doc",14)}Ver fichas</button>')
-    FV2=(f'Fichas da v2 aprovada para o saldo de 160 ha · caldeiro: Fungicida A 0,50 L/ha = 80 L · operador: T1+T2, faixas pendentes dos dias 5 a 7 · '
+    FV2=(f'Fichas da v2 liberada para o saldo de 160 ha · caldeiro: Fungicida A 0,50 L/ha = 80 L · operador: T1+T2, faixas pendentes dos dias 5 a 7 · '
          f'almoxarife: 65 L em custódia de Marcos + 15 L a entregar da REQ-035.')
-    FREV=('Fichas revogadas para o saldo de 160 ha até a nova liberação (v3 aguardando Ana, agrônoma) · as fichas dos 190 ha realizados permanecem no histórico da v2 · '
-          'nenhuma ficha nova é emitida enquanto o saldo estiver pausado.')
+    FREV=('Fichas do saldo de 160 ha reemitidas na v3 liberada por Ana (agrônoma) · as fichas dos 190 ha realizados permanecem no histórico da v2.')
     banner=(f'<sc-if value="{H("v3_on")}" hint-placeholder-val="{H("false")}">'
-            + alerta(f'{chip("Pausada","yellow")} {chip("Aguardando revisão · v3","yellow")} &nbsp;Saldo de 160 ha pausado · fichas futuras revogadas · dono: Ana (agrônoma). '
+            + alerta(f'{chip("v3 liberada no saldo","green")} &nbsp;Saldo de 160 ha na v3 · liberada por Ana (agrônoma). '
                      f'Os 190 ha realizados continuam preservados na v2.') + '</sc-if>')
     corpo=(
       continuity('Plano de safra · janela 20–26/09','Em execução · 190/350 ha','160 ha em 3 turnos','Registrar avanço')
       + banner
       + stepper([('A liberar','done'),('Liberadas','done'),('Em execução','now'),('Em conferência','todo'),('Encerradas','todo')],
           'término físico do escopo (ou dispensa autorizada do saldo) entra automaticamente em Em conferência — nenhum botão pula etapa')
-      + kpis([('AUTORIZADO','350 ha','v2 aprovada'),('REALIZADO','190 ha','150 conf. + 40 prov.'),('SALDO','160 ha','3 turnos'),('HOJE','Dia 4 de 7','40 ha · chuva')])
+      + kpis([('AUTORIZADO','350 ha','v2'),('REALIZADO','190 ha','150 conf. + 40 prov.'),('SALDO','160 ha','3 turnos'),('HOJE','Dia 4 de 7','40 ha · chuva')])
       + bloco('Apontamentos de turno','Confira um apontamento por dia na mesma ordem; clique no turno para corrigir com motivo ou redistribuir os previstos.',g_ap,
           imsg('Pausar execução','Pausada por chuva · a ordem ganha o selo Pausada e continua Em execução; "Retomar execução" devolve o saldo de 160 ha sem nova emissão.','clock','Pausar a execução sem mudar a fase')
           + imsg('Finalizar apontamento do turno','Turno do dia 4 finalizado · 40 ha provisórios seguem para conferência. A ordem permanece Em execução — finalizar o turno nunca conclui a ordem.','check','Finalizar o turno de hoje (não conclui a ordem)')
@@ -295,11 +293,10 @@ def _ca01det():
           ilink('Requisitar material','SU-07.dc.html','box','Abrir requisições e entregas em Suprimentos') + ilink('Ver consumo e devoluções','CA-04.dc.html','layers','Abrir as requisições da equipe'))
       + bloco('Plano, versão e fichas','Ajuste produtos e doses só no saldo; as fichas do caldeiro, do operador e do almoxarife derivam da versão vigente.',
           nota(f'Recomendação de origem: <b style="color:{INK};">fungicida 1ª aplicação · protocolo do plano técnico · v2 aprovada</b>. '
-               f'Ajuste gera a v3 só para o saldo, pausa o saldo e revoga as fichas futuras até a aprovação.'),
+               f'O agrônomo ajusta e libera a v3 só para o saldo; as fichas do saldo passam à v3.'),
           ajuste + fichas + ilink('Ver recomendação','AG-04.dc.html','leaf','Abrir a recomendação de origem') + ilink('Reprogramar saldo','PL-05.dc.html','calendar','Reprogramar o saldo no PCP')))
     EXTRAJS[0]=(f'const AREA={area}; const DID={json.dumps(DID)}; const FICHAS_V2={json.dumps(FV2,ensure_ascii=False)}; const FICHAS_REV={json.dumps(FREV,ensure_ascii=False)};\n'+APJS)
-    prim=(f'<sc-if value="{H("v3_off")}" hint-placeholder-val="{H("true")}"><a href="MB-03.dc.html" style="{BTN_ST(True)} text-decoration: none; display: inline-flex; align-items: center;">Registrar avanço</a></sc-if>'
-          f'<sc-if value="{H("v3_on")}" hint-placeholder-val="{H("false")}"><button type="button" onClick="{H("prim_block")}" title="Saldo pausado até a aprovação da v3" style="{BTN_ST(True)} opacity: .55;">Registrar avanço</button></sc-if>')
+    prim=f'<a href="MB-03.dc.html" style="{BTN_ST(True)} text-decoration: none; display: inline-flex; align-items: center;">Registrar avanço</a>'
     HEIGHTS37[fname]=1480; PARENT37[fname]='OS.dc.html'  # "Voltar" leva à tela de O.S. do menu, não ao CA-01 oculto
     shell37('CA-01','OS-0421 · Fungicida 1ª aplicação',corpo,fname=fname,crumbs_extra=['OS-0421'],primary_html=prim,
       status=('Em execução · Parcial · dia 4 de 7','yellow'),
@@ -314,8 +311,8 @@ def _ca01x_0420():
          ('KCl 60 %','120 kg/ha · zonas 140 / 120 / 95',area*120,'kg','REC-014 v2 · IAC Boletim 100 · prescrição por zona'),
          ('TS nematicida (abamectina)','100 mL/100 kg de semente',round(area*52/100*0.1,1),'L','REC-014 v2 · bula AGROFIT')]
     g_ins=grid([dict(k='prod',l='Produto',w=230),dict(k='dose',l='Dose da v2',w=200),dict(k='qtd',l='Quantidade para 100 ha',t='num',a='r'),dict(k='v3',l='Saldo de 70 ha na v3',w=220),dict(k='fonte',l='Fonte',w=260)],
-        [dict(id=f'i{i}',v=dict(prod=p,dose=d,qtd=q,fonte=f,v3=('KCl −12 % → 105,6 kg/ha · aguardando Ana' if 'KCl' in p else 'sem mudança')),s={},
-              p=dict(qtd=[Pt.txt(f'{nf(q,1 if u=="L" else 0)} {u}')],v3=([Pt.chip('−12 % · 105,6 kg/ha','yellow'),Pt.br(),Pt.mut('aguardando Ana (agrônoma)')] if 'KCl' in p else [Pt.mut('sem mudança')])),
+        [dict(id=f'i{i}',v=dict(prod=p,dose=d,qtd=q,fonte=f,v3=('KCl −12 % → 105,6 kg/ha · em vigor no saldo' if 'KCl' in p else 'sem mudança')),s={},
+              p=dict(qtd=[Pt.txt(f'{nf(q,1 if u=="L" else 0)} {u}')],v3=([Pt.chip('−12 % · 105,6 kg/ha','green'),Pt.br(),Pt.mut('ajustada por Ana (agrônoma) em 23/09')] if 'KCl' in p else [Pt.mut('sem mudança')])),
               o=[dict(t=f'Recomendação REC-014 v2 · {d}',h='AG-04det.dc.html'),dict(t=f'{nf(area)} ha da 1ª onda da necessidade NEC-028 × dose = {nf(q,1 if u=="L" else 0)} {u}'),dict(t=f'Fonte: {f}')])
          for i,(p,d,q,u,f) in enumerate(ins)],
         edit=dict(m='origin',title='Instrução',fields=[dict(k='prod',l='Produto',ro=True),dict(k='dose',l='Dose da v2',ro=True),dict(k='v3',l='Saldo na v3',ro=True)]),
@@ -341,12 +338,12 @@ def _ca01x_0420():
         edit=dict(m='origin',title='Requisição',fields=[dict(k='req',l='Requisição',ro=True),dict(k='item',l='Item',ro=True),dict(k='cons',l='Consumido',ro=True,u='kg')]),
         search=False,gid='g_req0420',total=False)
     corpo=(
-      continuity('REC-014 v2 · necessidade NEC-028','Em execução · Impedida · 30/100 ha','reparo da OM-0233 ou substituto + aprovação da v3','Acompanhar OM-0233')
-      + alerta(f'{chip("Impedida · ativo bloqueado","red")} {chip("Revisão de saldo pendente · v3","yellow")} &nbsp;Saldo de {saldo} ha pausado · fichas futuras revogadas · dono: Ana (agrônoma). '
-               f'Os {real} ha realizados ficam preservados na v2.')
+      continuity('REC-014 v2 · necessidade NEC-028','Em execução · Impedida · 30/100 ha','reparo da OM-0233 ou substituto (Trator 02 a partir de 24/09)','Acompanhar OM-0233')
+      + alerta(f'{chip("Impedida · ativo bloqueado","red")} &nbsp;Saldo de {saldo} ha parado pelo Trator T1 (OM-0233) · substituto Trator 02 a partir de 24/09. '
+               f'O saldo segue na v3 (KCl −12 %), ajustada por Ana (agrônoma) em 23/09; os {real} ha realizados ficam preservados na v2.',tone='red')
       + stepper([('A liberar','done'),('Liberadas','done'),('Em execução','now'),('Em conferência','todo'),('Encerradas','todo')],
-          'impedimento e revisão de saldo são selos: a ordem segue Em execução e nenhum botão pula etapa')
-      + kpis([('AUTORIZADO',f'{area} ha','v2 aprovada'),('REALIZADO',f'{real} ha','18 conf. + 12 prov.'),('SALDO',f'{saldo} ha','pausado · v3 em revisão'),('IMPEDIMENTO','OM-0233','Trator T1 bloqueado')])
+          'impedimento é selo: a ordem segue Em execução e nenhum botão pula etapa')
+      + kpis([('AUTORIZADO',f'{area} ha','v2 no realizado · v3 no saldo'),('REALIZADO',f'{real} ha','18 conf. + 12 prov.'),('SALDO',f'{saldo} ha','parado · Trator T1'),('IMPEDIMENTO','OM-0233','Trator T1 bloqueado')])
       + bloco('Instrução herdada da REC-014 v2','Confira produto, dose e janela que a ordem herdou da recomendação; clique no produto para ver a origem.',
           g_ins+nota(f'Janela da recomendação 20/09 a 05/10 · janela da ordem 22–28/09 · T4, 1ª onda de {area} ha dos 204 ha da necessidade NEC-028.'),
           ilink('Ver recomendação','AG-04det.dc.html','leaf','Abrir a REC-014 com versões e memória de cálculo'))
@@ -354,19 +351,19 @@ def _ca01x_0420():
           ilink('Conferir apontamentos','CA-02.dc.html','check','Abrir a fila de conferência'))
       + bloco('Impedimento e substituto','Acompanhe o reparo do Trator T1 ou confirme o substituto no PCP para retomar o saldo.',
           nota(f'OC-114 · pressão hidráulica baixa no Trator T1 em 22/09 06:40 → <b style="color:{INK};">OM-0233 em execução</b> (Zé · mecânico). '
-               f'Substituto proposto: <b style="color:{INK};">{D.OM["substituto"]}</b>, apto e livre a partir de 24/09 06:00 — elegível só após confirmação do PCP e aprovação da v3.'),
+               f'Substituto proposto: <b style="color:{INK};">{D.OM["substituto"]}</b>, apto e livre a partir de 24/09 06:00 — elegível só após confirmação do PCP.'),
           ilink('Ver ocorrência','CA-03det.dc.html','alert','Abrir a ocorrência OC-114') + ilink('Reprogramar saldo','PL-05.dc.html','calendar','Confirmar substituto e reprogramar o saldo no PCP'),tone='red')
-      + bloco('Revisão de saldo · v3','Aguarde a decisão do agrônomo; até lá o saldo fica pausado e as fichas futuras revogadas.',
-          nota(f'v3 enviada em 23/09: KCl −12 % só no saldo de {saldo} ha (105,6 kg/ha). A v2 continua valendo apenas para os {real} ha já realizados.'),
-          imsg('Ver fichas',f'Fichas revogadas para o saldo de {saldo} ha até a nova liberação (v3 aguardando Ana, agrônoma) · as fichas dos {real} ha realizados permanecem no histórico da v2.','doc','Consultar as fichas do caldeiro, do operador e do almoxarife')
-          + ilink('Ver versões','AG-04det.dc.html','layers','Abrir as versões da recomendação'),tone='yellow')
+      + bloco('Ajuste do saldo · v3','Confira o ajuste que Ana (agrônoma) fez no saldo; o realizado continua na v2.',
+          nota(f'v3 em vigor desde 23/09, ajustada por Ana (agrônoma): KCl −12 % só no saldo de {saldo} ha (105,6 kg/ha). A v2 continua valendo apenas para os {real} ha já realizados.'),
+          imsg('Ver fichas',f'Fichas do saldo de {saldo} ha na v3 (KCl 105,6 kg/ha) · as fichas dos {real} ha realizados permanecem no histórico da v2.','doc','Consultar as fichas do caldeiro, do operador e do almoxarife')
+          + ilink('Ver versões','AG-04det.dc.html','layers','Abrir as versões da recomendação'))
       + bloco('Materiais e custo','Confira a requisição da ordem e o custo dos hectares realizados; clique na linha para ver a origem.',g_req))
     HEIGHTS37[fname]=1900; PARENT37[fname]='OS.dc.html'  # "Voltar" leva à tela de O.S. do menu, não ao CA-01 oculto
     shell37('CA-01','OS-0420 · Plantio Soja 58 W',corpo,fname=fname,crumbs_extra=['OS-0420'],
       primary='Acompanhar OM-0233',primary_href='MA-04det.dc.html',
-      status=('Em execução · Impedida · v3 em revisão','red'),
-      subtitle=f'{area} ha no T4 · {real} ha realizados · saldo de {saldo} ha pausado até o ativo ser liberado ou substituído e a v3 ser aprovada.',
-      footer='Instrução, versão e realizado vêm da mesma recomendação; a revisão alcança só o saldo e nunca reescreve o realizado.')
+      status=('Em execução · Impedida','red'),
+      subtitle=f'{area} ha no T4 · {real} ha realizados · saldo de {saldo} ha parado até o ativo ser liberado ou substituído.',
+      footer='Instrução, versão e realizado vêm da mesma recomendação; o ajuste alcança só o saldo e nunca reescreve o realizado.')
 
 # ---------------- CA-02 · Apontamentos e conferência ----------------
 FILAJS=r'''
@@ -388,9 +385,9 @@ def _ca02():
      row(1,'OS-0421 · v2','CA-01det.dc.html','Dia 4 · 23/09 · T1','Marcos · PJ-3030 + Trator 03',40,'150 conf. + 40 prov. · saldo 160 ha',7.2,
          [Pt.txt('Fungicida A 20 L'),Pt.br(),Pt.mut('sem sobras')],[Pt.mut('app · sincronizado 17:40')],'A conferir','yellow',
          [Pt.act('Conferir','Conferido o dia 4 · 40 ha confirmados (190/350) · o consumo de 20 L já baixado no apontamento não é repetido. A ordem segue Em execução — conferir um dia não conclui a ordem de 7 dias.')]),
-     row(2,'OS-0420 · v2',DET0420,'Dia 2 · 22/09 · T4','Carlos · PD-12 + Trator T1',12,'18 conf. + 12 prov. · saldo 70 ha pausado',3.1,
+     row(2,'OS-0420 · v2',DET0420,'Dia 2 · 22/09 · T4','Carlos · PD-12 + Trator T1',12,'18 conf. + 12 prov. · saldo 70 ha parado',3.1,
          [Pt.txt('Semente 58 W 624 kg'),Pt.br(),Pt.chip('horas acima do previsto · 1,8 h','yellow')],[Pt.mut('offline · sincronizado 12:10 · sem conflito'),Pt.br(),Pt.mut('turno parado pela quebra do Trator T1')],'A conferir','yellow',
-         [Pt.act('Conferir','Conferido · 12 ha confirmados (30/100) · horas acima do previsto registradas como fato. Os selos Impedida e Revisão de saldo permanecem — conferência não muda impedimento nem etapa.')]),
+         [Pt.act('Conferir','Conferido · 12 ha confirmados (30/100) · horas acima do previsto registradas como fato. O selo Impedida permanece — conferência não muda impedimento nem etapa.')]),
      row(3,'OS-0421 · v2','CA-01det.dc.html','Dia 3 · 22/09 · T1','Marcos · PJ-3030 + Trator 03',50,'150 conf. · saldo 160 ha',8.4,
          [Pt.txt('Fungicida A 25 L')],[Pt.mut('app · sincronizado')],'Conferido','green',[Pt.link('Ver histórico ›','CA-01det.dc.html')]),
      row(4,'OS-0417 · v1',None,'Final · 21/09 · P1','Paula · Distribuidor DA-08',95,'95 conf. · saldo 0 ha',None,
@@ -405,9 +402,9 @@ def _ca02():
                     dict(k='motivo',l='Motivo da correção',t='area',req=True,help='Ex.: horímetro lido no fim do turno.')]),
         gid='g_fila',total=False)
     proj=[('23/09 06:00','Água aplicada antes da reclassificação · 6,7 mm no Pivô 1','fica no balanço hídrico; não é reapontada na fertirrigação','João (irrigante) · balanço hídrico'),
-          ('após a aprovação','Liberação da OS-0418 (v2 aprovada)','passa a Liberadas; a REQ-038 fica disponível para entrega','Ana (agrônoma) · PCP'),
+          ('liberação','Ana (agrônoma) libera a OS-0418 (v2, com ajuste opcional)','passa a Liberadas; a REQ-038 fica disponível para entrega','Ana (agrônoma)'),
           ('entrega','REQ-038 · Ureia 45 % 1.140 kg com conferência de carga','sai do físico do depósito e passa à custódia de João','Rui (almoxarife) → João'),
-          ('início','Início da fertirrigação no Pivô 1','Em execução · selo Revisão de saldo: a lâmina já aplicada é descontada, sem duplicar apontamentos','João'),
+          ('início','Início da fertirrigação no Pivô 1','Em execução: a lâmina já aplicada é descontada, sem duplicar apontamentos','João'),
           ('turnos','Consumo apontado 1.100 kg em 95 ha','uma única baixa no apontamento; a conferência não repete a baixa','João · conferência de Paula'),
           ('devolução','40 kg declarados · 40 kg medidos e recebidos','custódia zero','João → Rui (almoxarife)'),
           ('conciliação','1.140 entregues = 1.100 consumidos + 40 devolvidos','Em conferência · pode encerrar','Paula'),
@@ -430,10 +427,10 @@ def _ca02():
       + bloco('Encerramento','Encerre a ordem só com término físico e todas as condições satisfeitas.',
           nota('Concluir execução não encerra a ordem com custódia, divergência ou conferência pendente.'),
           imsg('Encerrar OS-0417','Indisponível: 10 sc de MAP 11-52 sob custódia de Paula (equipe de campo) · prazo 24/09. Rui recebe a devolução no almoxarifado; ou documente a destinação competente para encerrar.','check','Encerrar a ordem (exige custódia zero e conferência concluída)'))
-      + bloco('Roteiro da OS-0418 após a aprovação','Confira como a fertirrigação será liberada, entregue, apontada e conciliada; cenário projetado, a ordem atual segue A liberar.',g_proj,
-          ilink('Ver revisão da v2','IN-02det.dc.html','doc','Abrir a revisão agronômica da OS-0418'),tone='yellow'))
+      + bloco('Roteiro da OS-0418 após a liberação','Confira como a fertirrigação será liberada, entregue, apontada e conciliada; cenário projetado, a ordem atual segue A liberar.',g_proj,
+          ilink('Liberar OS-0418','OS.dc.html#OS-0418','check','Abrir a OS-0418 para o agrônomo liberar (pode ajustar)'),tone='yellow'))
     EXTRAJS[0]=FILAJS
-    prim=imsg('Conferir 2 apontamentos','Conferidos 2 de 2 · OS-0421 dia 4: 40 ha confirmados (190/350) · OS-0420 dia 2: 12 ha confirmados (30/100), horas acima do previsto registradas. Nenhuma ordem muda de etapa; os selos da OS-0420 permanecem.',
+    prim=imsg('Conferir 2 apontamentos','Conferidos 2 de 2 · OS-0421 dia 4: 40 ha confirmados (190/350) · OS-0420 dia 2: 12 ha confirmados (30/100), horas acima do previsto registradas. Nenhuma ordem muda de etapa; o selo Impedida da OS-0420 permanece.',
               'check','Conferir os apontamentos provisórios da fila',primary=True,small=False)
     HEIGHTS37[fname]=1560
     shell37('CA-02','Apontamentos e conferência',corpo,primary_html=prim,
@@ -491,7 +488,7 @@ def _ca03():
 # ---------------- CA-03det · OC-114 ----------------
 def _ca03det():
     fname='CA-03det.dc.html'; E._reset_screen(fname)
-    vinc=[('OS-0420',DET0420,'Plantio Soja 58 W','Ordem de campo',[Pt.chip('Em execução','green'),Pt.chip('Impedida','red')],'30/100 ha · saldo de 70 ha preservado e pausado'),
+    vinc=[('OS-0420',DET0420,'Plantio Soja 58 W','Ordem de campo',[Pt.chip('Em execução','green'),Pt.chip('Impedida','red')],'30/100 ha · saldo de 70 ha preservado e parado'),
           ('Trator T1','MA-01.dc.html','JD 6M 155','Ativo',[Pt.chip('Bloqueado','red')],'não pode ser alocado até a OM-0233 liberar'),
           ('OM-0233','MA-04det.dc.html','corretiva hidráulica','Manutenção',[Pt.chip('Em execução','green')],'caso único · 2 registros somados'),
           (D.OM['substituto'],'PL-05.dc.html','substituto proposto','Ativo substituto',[Pt.chip('Apto','green'),Pt.chip('Livre a partir de 24/09 06:00','yellow')],'elegível para a OS-0420 só após confirmação do PCP')]
@@ -536,7 +533,7 @@ def _ca04():
     ACAO={'REQ-031':[Pt.cta('Devolver saldo','SU-07det.dc.html',u=True)],
           'REQ-035':[Pt.link('Apontar uso ›','CA-02.dc.html')],
           'REQ-036':[Pt.link('Ver impedimento ›',DET0420)],
-          'REQ-038':[Pt.act('Confirmar recebimento','Indisponível: nada foi entregue — a OS-0418 aguarda a aprovação do agrônomo e a REQ-038 só é separada depois da liberação. Confirme quando os 1.140 kg chegarem à equipe; só então a custódia passa para vocês.')]}
+          'REQ-038':[Pt.act('Confirmar recebimento','Indisponível: nada foi entregue — a OS-0418 aguarda a liberação pelo agrônomo; a REQ-038 só é separada depois dela. Confirme quando os 1.140 kg chegarem à equipe; só então a custódia passa para vocês.')]}
     rows=[]
     for r in D2.REQUISICOES:
         u=r['un']; uu='sc' if u.startswith('sc') else u
@@ -567,9 +564,9 @@ def _ca04():
                f'Declarar o retorno <b style="color:{INK};">não</b> aumenta o estoque utilizável: só a quantidade medida e recebida entra no local e na condição registrados. Sem ajuste automático pela diferença.'),
           imsg('Encerrar OS-0417',f'Indisponível: {R["custodia"]} sc de MAP 11-52 sob custódia de Paula (equipe de campo) · prazo 24/09. Declarar devolução não aumenta o utilizável — Rui recebe as {R["custodia"]} sc no almoxarifado, ou documente a destinação competente para liberar o encerramento.',
                'check','Encerrar a ordem (exige custódia zero)'),tone='yellow'))
-    prim=idrawer('Solicitar material da ordem',dict(title='Solicitar material da ordem',sub='A requisição nasce da ordem aprovada; itens e doses vêm da versão vigente.',
+    prim=idrawer('Solicitar material da ordem',dict(title='Solicitar material da ordem',sub='A requisição nasce da ordem liberada; itens e doses vêm da versão vigente.',
              fields=[('Ordem','OS-0421 · Fungicida 1ª aplicação · v2'),('Item','Fungicida A'),('Quantidade',''),('Necessário em','24/09/2026')],
-             confirm='Solicitar material',done='Requisitada · em separação'),'box','Solicitar material para uma ordem aprovada',primary=True,small=False)
+             confirm='Solicitar material',done='Requisitada · em separação'),'box','Solicitar material para uma ordem liberada',primary=True,small=False)
     HEIGHTS37[fname]=900
     shell37('CA-04','Minhas requisições',corpo,primary_html=prim,
       status=('10 sc e 65 L em custódia','yellow'),

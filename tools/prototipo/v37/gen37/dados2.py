@@ -6,11 +6,17 @@ HOJE='23/09/2026'
 MESES=[('2026-09','set/26'),('2026-10','out/26'),('2026-11','nov/26'),('2026-12','dez/26'),('2027-01','jan/27'),('2027-02','fev/27'),
        ('2027-03','mar/27'),('2027-04','abr/27'),('2027-05','mai/27'),('2027-06','jun/27'),('2027-07','jul/27'),('2027-08','ago/27')]
 DIAS_UTEIS={'2026-09':24,'2026-10':22,'2026-11':23,'2026-12':21,'2027-01':21,'2027-02':19,'2027-03':22,'2027-04':23,'2027-05':24,'2027-06':24,'2027-07':25,'2027-08':25}
+# período da safra por data de início e fim (o texto curto 'set/2026 – ago/2027' sai das datas)
+_MES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']
+def periodo_txt(ini,fim):
+    a,b=ini.split('-'),fim.split('-'); mi,mf=_MES[int(a[1])-1],_MES[int(b[1])-1]
+    return f'{mi} – {mf}/{b[0]}' if a[0]==b[0] else f'{mi}/{a[0]} – {mf}/{b[0]}'
 SAFRAS=[
- dict(id='S2627',nome='Safra 2026/27',periodo='set/2026 – ago/2027',fazenda='Santa Rita',estado='Em planejamento',ro=False),
- dict(id='S27SF',nome='Safrinha 2027',periodo='fev – jul/2027',fazenda='Santa Rita',estado='Rascunho',ro=False),
- dict(id='S2526',nome='Safra 2025/26',periodo='set/2025 – ago/2026',fazenda='Santa Rita',estado='Encerrada',ro=True),
+ dict(id='S2627',nome='Safra 2026/27',ini='2026-09-01',fim='2027-08-31',fazenda='Santa Rita',estado='Em planejamento',ro=False),
+ dict(id='S27SF',nome='Safrinha 2027',ini='2027-02-01',fim='2027-07-31',fazenda='Santa Rita',estado='Rascunho',ro=False),
+ dict(id='S2526',nome='Safra 2025/26',ini='2025-09-01',fim='2026-08-31',fazenda='Santa Rita',estado='Encerrada',ro=True),
 ]
+for _s in SAFRAS: _s['periodo']=periodo_txt(_s['ini'],_s['fim'])
 # gatilho: tipo DAP (dias após o plantio) · DAPC (dias após a colheita) · DANC (dias antes da colheita) · DATA (data do calendário)
 TIPOS={'DAP':'DAP · dias após o plantio','DANC':'Dias antes da colheita','DAPC':'DAC · dias após a colheita','DATA':'Data do calendário'}
 def A(id,nome,op,tipo,dias=None,data=None,prods=()):
@@ -87,14 +93,17 @@ CONJ=[
  dict(id='r8',op='Fertirrigação',conj='Sistema de gotejo T7 · 1 irrigante',rend=10.0,maq=25,impl=0,pess=1,pess_rs=32,prod=0,rec={'oper':1}),
 ]
 def custo_h(c): return c['maq']+c['impl']+c['pess']*c['pess_rs']
-# recursos (etapa 5): capacidade = unidades × dias úteis × jornada × turnos − manutenção
+# recursos (etapa 5): máquinas → capacidade = unidades × dias úteis × jornada × turnos × disponibilidade (%)
+#                     pessoas  → capacidade = pessoas × dias úteis × jornada × (1 − absenteísmo %) — cada pessoa trabalha um turno
+# disponibilidade mecânica: parte do tempo em que a máquina fica apta (referência ≥ 90 %); a eficiência de campo já está no rendimento
+# absenteísmo: horas perdidas com faltas, atestados, afastamentos e férias
 RECURSOS=[
- dict(id='trator',nome='Tratores',un=4,jornada=10,turnos=1,manut=24),
- dict(id='pulv',nome='Pulverizadores',un=1,jornada=10,turnos=1,manut=16),
- dict(id='plant',nome='Plantadeiras',un=1,jornada=10,turnos=1,manut=16),
- dict(id='dist',nome='Distribuidores',un=1,jornada=10,turnos=1,manut=8),
- dict(id='colh',nome='Colhedoras',un=1,jornada=9,turnos=1,manut=16),
- dict(id='oper',nome='Operadores e equipe',un=8,jornada=9,turnos=1,manut=0),
+ dict(id='trator',nome='Tratores',un=4,jornada=10,turnos=1,disp=92),
+ dict(id='pulv',nome='Pulverizadores',un=1,jornada=10,turnos=1,disp=90),
+ dict(id='plant',nome='Plantadeiras',un=1,jornada=10,turnos=1,disp=90),
+ dict(id='dist',nome='Distribuidores',un=1,jornada=10,turnos=1,disp=95),
+ dict(id='colh',nome='Colhedoras',un=1,jornada=9,turnos=1,disp=88),
+ dict(id='oper',nome='Operadores e equipe',un=8,jornada=9,abs=10),
 ]
 # estoque disponível (apto) e recebimentos previstos (pedidos em aberto) por produto — espelhados em Estoque/Compras
 ESTOQUE={'Glifosato 480':1200,'2,4-D 806':300,'Óleo mineral':400,'Fungicida TS':20,'Inoculante líquido':50,
@@ -118,32 +127,41 @@ def data_atividade(cult,atv):
         pl=PLANO[cult['plano']]; ca=next((a for a in pl['atividades'] if a['op'].startswith('Colheita')),None)
         col=ddate(cult['plantio'])+_dt.timedelta(days=ca['g']['dias']) if ca and ca['g']['tipo']=='DAP' else ddate(cult['plantio'])
     return col+_dt.timedelta(days=(g['dias'] if g['tipo']=='DAPC' else -g['dias']))
-def demanda(safra,ajustes=None,planos_extra=None):
-    """Demanda bruta por produto (unidade, preço, origens) — igual ao cálculo da etapa 6 no JS."""
-    ajustes=AJUSTES if ajustes is None else ajustes
-    out={}
+def _ocorr_py(safra,ajustes,planos_extra):
+    """Ocorrências de insumo da safra na ordem do JS (cultivo → atividade → produto): (cultivo, atividade, produto, dose, quantidade)."""
     for c in CULTIVOS[safra]:
         pid=(planos_extra or {}).get(c['id'],c['plano'])
         if not pid: continue
         for a in PLANO[pid]['atividades']:
             for i,p in enumerate(a['prods']):
                 dose=ajustes.get(c['id'],{}).get(f"{a['id']}|{i}",p['dose'])
-                nm=prod_nome(p['prod'],c); q=dose*c['area']
-                o=out.setdefault(nm,dict(grupo=p['grupo'],un=p['un'],preco=p['preco'],bruta=0.0,orig=[]))
-                o['bruta']+=q; o['orig'].append((c['local'],a['nome'],dose,c['area'],q))
+                yield c,a,p,dose,dose*c['area']
+def demanda(safra,ajustes=None,planos_extra=None):
+    """Demanda por produto (unidade, preço, origens) e necessidade líquida por data (CAL-01) — igual ao cálculo da etapa 6 no JS (safra.js + cal01.js).
+    estoque = físico apto (inclui reservas); receb = recebimentos previstos (total); liq/falta saem da projeção datada com as outras origens do mesmo estoque.
+    bruta = demanda residual (usos de hoje em diante); real = usos planejados antes de hoje (já realizados); plano = total do plano."""
+    ajustes=AJUSTES if ajustes is None else ajustes
+    out={}; ordem={s['id']:i for i,s in enumerate(SAFRAS)}
+    for c,a,p,dose,q in _ocorr_py(safra,ajustes,planos_extra):
+        nm=prod_nome(p['prod'],c)
+        o=out.setdefault(nm,dict(grupo=p['grupo'],un=p['un'],preco=p['preco'],bruta=0.0,orig=[],evs=[]))
+        o['bruta']+=q; o['orig'].append((c['local'],a['nome'],dose,c['area'],q))
+        o['evs'].append(dict(dt=data_atividade(c,a).isoformat(),q=q,tipo='dem',own=True,ord=ordem.get(safra,99),chave=f"{c['id']}|{a['id']}",
+                             t=f"{c['local']} · {a['nome']}",calc=f"{_nf(dose,2)} {p['un']}/ha × {_nf(c['area'])} ha"))
     for nm,o in out.items():
-        o['estoque']=ESTOQUE.get(nm,0); o['receb']=RECEB.get(nm,0)
-        o['liq']=max(0.0,o['bruta']-o['estoque']-o['receb']); o['valor']=o['liq']*o['preco']
+        o['evs']+=_outras_origens(safra,nm)
+        o['estoque']=fisico_apto(nm); o['reservado']=sum(r['q'] for r in RESERVAS if r['item']==nm); o['receb']=RECEB.get(nm,0)
+        r=cal01(o['estoque'],o['evs'],0.0,HOJE_ISO,VIAVEL); o['liq']=r['liq']; o['falta']=r['falta']; o['valor']=o['liq']*o['preco']
+        o['plano']=o['bruta']; o['bruta']=r['bruta']; o['real']=r['real']; o['rup']=r['rupRec']; o['cob']=r['cob']
     return out
+# ---- Fazenda Lagoa Grande (dados_lagoa_safra.py): safra de mamão nos 23 pivôs reais, planos, conjuntos e estoque ----
+import dados_lagoa_safra as _DL
+_DL.SAFRA['periodo']=periodo_txt(_DL.SAFRA['ini'],_DL.SAFRA['fim']); SAFRAS.append(_DL.SAFRA); CULTIVOS[_DL.SAFRA['id']]=_DL.CULTIVOS; PLANOS.extend(_DL.PLANOS); PLANO.update({p['id']:p for p in _DL.PLANOS}); CONJ.extend(_DL.CONJ)
+ESTOQUE.update(_DL.ESTOQUE); RECEB.update(_DL.RECEB)
 def js_data():
-    return dict(meses=MESES,dias=DIAS_UTEIS,safras=SAFRAS,tipos=TIPOS,planos=PLANOS,cultivos=CULTIVOS,ajustes=AJUSTES,conj=CONJ,recursos=RECURSOS,estoque=ESTOQUE,receb=RECEB)
-if __name__=='__main__':
-    d=demanda('S2627'); tot=sum(o['valor'] for o in d.values())
-    for nm,o in sorted(d.items(),key=lambda x:(x[1]['grupo'],x[0])): print(f"{o['grupo']:12} {nm:32} bruta {o['bruta']:>10.1f} {o['un']} est {o['estoque']:>7} rec {o['receb']:>6} líq {o['liq']:>9.1f} valor R$ {o['valor']:>11,.2f}")
-    print('TOTAL líquido R$', f'{tot:,.2f}')
-    full=demanda('S2627',planos_extra={'c4':'SOJA-AT','c5':'SOJA-AT','c6':'SOJA-AT','c7':'SOJA-AT'})
-    print('após aplicar SOJA-AT em T4,T3,P1,P2 → R$', f"{sum(o['valor'] for o in full.values()):,.2f}")
-
+    return dict(meses=MESES,dias=DIAS_UTEIS,safras=SAFRAS,tipos=TIPOS,planos=PLANOS,cultivos=CULTIVOS,ajustes=AJUSTES,conj=CONJ,recursos=RECURSOS,estoque=ESTOQUE,receb=RECEB,
+                fisico={k:fisico_apto(k) for k in ESTOQUE},reservas=RESERVAS,recebDt=RECEB_DT,
+                quar={l['item']:l['quarentena'] for l in LOTES if l['quarentena']})
 # =================== Suprimentos: fornecedores, cotações, pedidos, estoque (ligam Compras ↔ Estoque ↔ Cadastros) ===================
 GRUPOS=['Sementes','Fertilizantes','Herbicidas','Fungicidas','Inseticidas','Adjuvantes','Inoculantes','Combustível','Peças']
 FORNECEDORES=[  # cadastro de parceiros (CD-05): grupos homologados, e-mail e WhatsApp — cotações só vão a homologados do grupo
@@ -179,11 +197,11 @@ RECEBIMENTOS=[  # conferência de recebimento (Estoque · etapa 1)
  dict(id='NF 4501',pedido='PC-088',f='F01',item='KCl 60%',un='kg',qtd_nf=60000,qtd_conf=60000,apto=50000,quarentena=10000,lote='K26-11',data='19/09/2026',estado='Conferido · 10 t em quarentena'),
  dict(id='NF 4533',pedido='PC-090',f='F06',item='Semente de soja 58 W',un='kg',qtd_nf=20000,qtd_conf=None,apto=None,quarentena=None,lote='S58-0926',data='24/09/2026 (previsto)',estado='A conferir'),
 ]
-REQUISICOES=[  # entregas por O.S. aprovada (Estoque · etapa 2) — só O.S. aprovada/liberada tem requisição
+REQUISICOES=[  # entregas por O.S. liberada (Estoque · etapa 2) — só O.S. liberada tem requisição
  dict(id='REQ-031',os='OS-0417',item='MAP 11-52',un='sc 50 kg',solicitado=100,entregue=100,consumido=70,dev_declarada=20,dev_recebida=20,custodia=10,estado='Em conferência'),
  dict(id='REQ-035',os='OS-0421',item='Fungicida A',un='L',solicitado=175,entregue=160,consumido=95,dev_declarada=0,dev_recebida=0,custodia=65,estado='Em execução'),
  dict(id='REQ-036',os='OS-0420',item='Semente de soja 58 W',un='kg',solicitado=5200,entregue=1560,consumido=1560,dev_declarada=0,dev_recebida=0,custodia=0,estado='Impedida · ativo bloqueado'),
- dict(id='REQ-038',os='OS-0418',item='Ureia 45%',un='kg',solicitado=1140,entregue=0,consumido=0,dev_declarada=0,dev_recebida=0,custodia=0,estado='Aguardando aprovação da O.S.'),
+ dict(id='REQ-038',os='OS-0418',item='Ureia 45%',un='kg',solicitado=1140,entregue=0,consumido=0,dev_declarada=0,dev_recebida=0,custodia=0,estado='Aguardando liberação da O.S.'),
 ]
 LOTES=[  # saldos por lote (Estoque · etapa 4): utilizável = físico − quarentena/bloqueio; disponível = utilizável − reservado
  dict(item='KCl 60%',lote='K26-11',local='Galpão 2',un='kg',fisico=60000,quarentena=10000,reservado=0,validade='—'),
@@ -253,3 +271,99 @@ def faltas(safra='S2627',sem_pedido=None):
     return {nm:falta_a_partir([(o['data'],o['q']) for o in occ],ESTOQUE.get(nm,0),
                               [(iso_br(p['previsao']),p['a_entregar']) for p in PEDIDOS if p['item']==nm and p['id']!=sem_pedido and p['a_entregar']])
             for nm,occ in demanda_datada(safra).items()}
+
+# =================== CAL-01 (PRD v3.9) · necessidade líquida por data — espelho de cal01.js (mesma ordem, mesmos números) ===================
+def _nf(n,d=0):
+    t=f"{n:,.{d}f}"; return t.replace(',','X').replace('.',',').replace('X','.')
+# reservas ativas por destino (o físico apto as inclui; LOTES.reservado = soma delas por insumo). chave = cultivo|atividade quando a reserva é da
+# mesma demanda do plano (conta uma vez); sem chave = outro destino, entra como demanda na data da reserva.
+RESERVAS=[dict(item='Fungicida A',q=65,dt='2026-09-24',t='Reserva REQ-039 · OS-0424 (P2)',chave=None,faz='Santa Rita')]
+def fisico_apto(item):
+    """Físico apto (fora quarentena) = disponível + reservado. ESTOQUE guarda o disponível por item (checa_coerencia)."""
+    return ESTOQUE.get(item,0)+sum(l['reservado'] for l in LOTES if l['item']==item)
+# recebimentos previstos com data (pedidos em aberto; o calcário da Lagoa Grande não tem PC no protótipo: pedido de 30/09)
+RECEB_DT=[dict(item=p['item'],q=p['a_entregar'],dt=iso_br(p['previsao']),ref=p['id'],t=f"Recebimento {p['id']} ({next(f['nome'] for f in FORNECEDORES if f['id']==p['f'])})")
+          for p in PEDIDOS if p['a_entregar']]+[dict(item='Calcário dolomítico filler',q=50000,dt='2026-09-30',ref=None,t='Recebimento previsto (pedido de 30/09)')]
+def _outras_origens(safra,nm):
+    """Outras origens do mesmo estoque para o insumo nm: safras abertas da mesma fazenda (agregadas por data), reservas e recebimentos datados."""
+    me=next((s for s in SAFRAS if s['id']==safra),None); faz=(me or {}).get('fazenda','Santa Rita'); evs=[]
+    for i,s in enumerate(SAFRAS):
+        if s['id']==safra or s['ro'] or s['fazenda']!=faz: continue
+        ag={}
+        for c,a,p,dose,q in _ocorr_py(s['id'],AJUSTES,None):
+            if prod_nome(p['prod'],c)!=nm: continue
+            dt=data_atividade(c,a).isoformat(); x=ag.setdefault(dt,dict(q=0.0,n=0,chaves=[])); x['q']+=q; x['n']+=1; x['chaves'].append(f"{c['id']}|{a['id']}")
+        for dt,x in ag.items():
+            evs.append(dict(dt=dt,q=x['q'],tipo='dem',own=False,ord=i,chaves=x['chaves'],t=f"{s['nome']} · {x['n']} {'usos' if x['n']>1 else 'uso'}"))
+    evs+=[dict(dt=r['dt'],q=r['q'],tipo='res',own=False,ord=0,chave=r['chave'],t=r['t']) for r in RESERVAS if r['item']==nm and r['faz']==faz]
+    evs+=[dict(dt=r['dt'],q=r['q'],tipo='rec',own=False,ord=0,ref=r['ref'],t=r['t']) for r in RECEB_DT if r['item']==nm]
+    return evs
+# chegada viável de uma compra nova (CAL-01 · reposicao_proposta_com_chegada_viavel): hoje + prazo mínimo de reposição (parâmetro de demonstração)
+PRAZO_REPOSICAO=7
+HOJE_ISO=iso_br(HOJE)
+VIAVEL=(_dt.date.fromisoformat(HOJE_ISO)+_dt.timedelta(days=PRAZO_REPOSICAO)).isoformat()
+def cal01(fis,evs,seg=0.0,hoje='',viavel=''):
+    """Mesmo algoritmo de cal01.js: físico apto com reservas, demanda única por data, recebimento só cobre uso na data dele ou depois,
+    reposição proposta entra no saldo. hoje: uso planejado antes de hoje já foi realizado (sai do físico e da demanda residual).
+    viavel: falta antes dessa data é ruptura — recebimentos até lá a cobrem (a mais antiga primeiro) e o resto vira reposição na data viável.
+    Devolve liq (da solicitação: eventos own), falta (1ª data com falta ou ruptura dela) e totais."""
+    ks=set()
+    for e in evs:
+        if e['tipo']!='dem': continue
+        if e.get('chave'): ks.add(e['chave'])
+        ks.update(e.get('chaves') or [])
+    real=0.0; nreal=0; E0=[]
+    for i,e in enumerate(evs):
+        if e['tipo']=='dem' and hoje and e['dt'] and e['dt']<hoje:
+            if e.get('own'): real+=float(e['q']); nreal+=1
+            continue
+        E0.append((i,e))
+    if viavel: E0.append((10**9,dict(dt=viavel,q=0,tipo='via',ord=0)))
+    pri=lambda e: {'rec':0,'via':1,'res':2}.get(e['tipo'],3)
+    E=[e for _,e in sorted(E0,key=lambda x:(x[1]['dt'],pri(x[1]),x[1].get('ord',0) or 0,x[0]))]
+    ult=max([e['dt'] for e in E if e['tipo']=='dem' and e.get('own')] or [''])
+    saldo=float(fis); bruta=rec=liq=tot=antes=rup=rup_via=0.0; falta=falta_tot=cob=None; bk=[]
+    deficit=lambda: max(0.0,seg-saldo)
+    for e in E:
+        q=float(e['q'])
+        if e['tipo']=='via':
+            d=deficit()
+            if d<=1e-9: continue
+            own=sum(b['q'] for b in bk if b['own']); bk.clear(); liq+=own; rup_via+=own; tot+=d; saldo=seg
+            if own>1e-9: cob=e['dt']
+            continue
+        if e['tipo']=='rec':
+            d0=deficit(); saldo+=q; rec+=q; c=d0-deficit(); dono=False
+            while c>1e-9 and bk:
+                b=bk[0]; x=min(b['q'],c); b['q']-=x; c-=x
+                if b['own']: dono=True
+                if b['q']<=1e-9: bk.pop(0)
+            if dono and not any(b['own'] for b in bk): cob=e['dt']
+            continue
+        if e['tipo']=='res' and e.get('chave') and e['chave'] in ks: continue
+        own=(e['tipo']=='dem' and bool(e.get('own'))); d0=deficit(); saldo-=q; nec=rp=0.0
+        if saldo<seg-1e-9:
+            if not viavel or e['dt']>=viavel: nec=seg-saldo; saldo=seg
+            else: rp=deficit()-d0; bk.append(dict(own=own,q=rp))
+        if own:
+            bruta+=q; liq+=nec; rup+=rp
+            if (nec>1e-9 or rp>1e-9) and not falta: falta=e['dt']
+        elif e['dt']<=ult: antes+=q-nec-rp
+        tot+=nec
+        if (nec>1e-9 or rp>1e-9) and not falta_tot: falta_tot=e['dt']
+    tarde=sum(float(e['q']) for e in E if e['tipo']=='rec' and falta and e['dt']>falta)
+    return dict(fis=float(fis),bruta=bruta,rec=rec,liq=liq,tot=tot,falta=falta,faltaTot=falta_tot,antes=antes,tarde=tarde,saldo=saldo,
+                real=real,nreal=nreal,rup=rup,rupRec=max(0.0,rup-rup_via),cob=cob)
+def checa_reservas():
+    """RESERVAS fecham com LOTES.reservado por insumo."""
+    return [(i,sum(r['q'] for r in RESERVAS if r['item']==i),sum(l['reservado'] for l in LOTES if l['item']==i))
+            for i in {l['item'] for l in LOTES}|{r['item'] for r in RESERVAS}
+            if abs(sum(r['q'] for r in RESERVAS if r['item']==i)-sum(l['reservado'] for l in LOTES if l['item']==i))>1e-9]
+
+if __name__=='__main__':
+    d=demanda('S2627'); tot=sum(o['valor'] for o in d.values())
+    for nm,o in sorted(d.items(),key=lambda x:(x[1]['grupo'],x[0])): print(f"{o['grupo']:12} {nm:32} bruta {o['bruta']:>10.1f} {o['un']} est {o['estoque']:>7} rec {o['receb']:>6} líq {o['liq']:>9.1f} valor R$ {o['valor']:>11,.2f}")
+    print('TOTAL líquido R$', f'{tot:,.2f}')
+    full=demanda('S2627',planos_extra={'c4':'SOJA-AT','c5':'SOJA-AT','c6':'SOJA-AT','c7':'SOJA-AT'})
+    print('após aplicar SOJA-AT em T4,T3,P1,P2 → R$', f"{sum(o['valor'] for o in full.values()):,.2f}")
+

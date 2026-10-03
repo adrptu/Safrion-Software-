@@ -9,8 +9,13 @@ MULTI="""((t)=>{const l=[...document.querySelectorAll('aside[role=dialog] label'
 def marca(txt): r=J(f"({MULTI})({json.dumps(txt)})"); time.sleep(.2); return r
 # linha da 1ª grade pelo nome em negrito (o texto da linha também traz nomes de outras máquinas na coluna Conjuntos)
 LIN="(n=>[...document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=row].g2ed')].find(r=>(r.querySelector('b')||{}).innerText===n))"
-def cjlinks(nome): return J(f"(()=>{{const r={LIN}({json.dumps(nome)}); if(!r) return null; const c=r.querySelectorAll('[role=cell]'); return [...c[c.length-1].querySelectorAll('button,a')].map(b=>b.innerText.trim());}})()")
-def cjclick(nome,txt): r=J(f"(()=>{{const r={LIN}({json.dumps(nome)}); const b=r&&[...r.querySelectorAll('button')].find(b=>b.innerText.trim()==={json.dumps(txt)}); if(!b) return false; b.click(); return true;}})()"); time.sleep(.35); return r
+def cjlinks(nome):
+    """conjuntos da máquina listados no painel dela (antes eram links na coluna Conjuntos)."""
+    if not abre(nome): return None
+    r=J("[...document.querySelectorAll('aside[role=dialog] button')].map(b=>b.innerText.trim()).filter(t=>t.endsWith('›')).map(t=>t.replace(/\\s*›$/,''))"); t.cancel(); return r
+def cjclick(nome,txt):
+    if not abre(nome): return False
+    r=J(f"(()=>{{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==={json.dumps(txt+' ›')}); if(!b) return false; b.click(); return true;}})()"); time.sleep(.35); return r
 def seltxt(k): return J(f"(()=>{{const i=document.querySelector('aside[role=dialog] select[id$=\"_{k}\"]'); return i?i.options[i.selectedIndex].text:null;}})()")
 def abre(nome): r=J(f"(()=>{{const r={LIN}({json.dumps(nome)}); if(!r) return false; (r.querySelector('.g2pw')||r).click(); return true;}})()"); time.sleep(.35); return r
 try:
@@ -28,15 +33,15 @@ try:
     t.chk('Silo 01 sem custo: "Fonte do custo" mostra "Escolha…" (valor vazio), não uma fonte que não foi gravada', sv==['','Escolha…'], sv)
     di=cjlinks('Distribuidor 3 t')
     t.chk('Distribuidor 3 t: o link identifica o conjunto pelo trator', di==['Trator 03 · Adubação a lanço'], di)
-    t.clk('Montar conjunto'); mt=seltxt('maq'); t.fset('impl','Plantadeira 24 linhas'); marca('Plantio'); t.btn('Salvar'); a=t.alerts()
+    t.aba('Conjuntos'); t.clk('Montar conjunto'); mt=seltxt('maq'); t.fset('impl','Plantadeira 24 linhas'); marca('Plantio'); t.btn('Salvar'); a=t.alerts()
     t.chk('Montar conjunto: Máquina começa em "Escolha…" e salvar sem ela pede a máquina no campo', mt=='Escolha…' and 'Informe máquina' in a, [mt,a])
-    t.fset('maq','Trator 02'); t.btn('Salvar'); time.sleep(.2)
+    t.fset('maq','Trator 02'); t.btn('Salvar'); time.sleep(.2); t.aba('Máquinas')
     pl=cjlinks('Plantadeira 24 linhas'); t1=cjlinks('Trator T1')
     t.chk('Plantadeira 24 linhas: links "Trator T1 · Plantio" e "Trator 02 · Plantio"; Trator T1 mostra "Plantadeira 24 linhas · Plantio"',
           pl==['Trator T1 · Plantio','Trator 02 · Plantio'] and t1==['Plantadeira 24 linhas · Plantio'], [pl,t1])
     cjclick('Plantadeira 24 linhas','Trator 02 · Plantio'); ti=t.title(); t.cancel()
     t.chk('o link "Trator 02 · Plantio" abre o conjunto Trator 02 + Plantadeira 24 linhas', 'Trator 02 + Plantadeira 24 linhas' in ti, ti)
-    k1=t.rowtxt(1,'Trator 03 + Distribuidor 3 t') or ''; k2=t.rowtxt(1,'Trator 04 + Esqueletadeira') or ''
+    t.aba('Conjuntos'); k1=t.card('Trator 03 + Distribuidor 3 t') or ''; k2=t.card('Trator 04 + Esqueletadeira') or ''
     t.chk('operadores: "Lucas, Beto não alocáveis" no plural', 'Lucas, Beto não alocáveis' in k1 and 'Lucas, Beto não alocáveis' in k2, [k1,k2])
     t.shot('cada_fix03.png')
     t.chk('nenhum erro de JS', not t.errs(), t.errs())

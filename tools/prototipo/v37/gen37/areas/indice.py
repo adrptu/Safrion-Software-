@@ -19,10 +19,10 @@ CENARIOS=[('Safra','Planejar safra: aplicar plano em lote, ajustar um cultivo e 
  ('Planos','Planos agronômicos: gatilho → atividades → produtos e doses','PA.dc.html'),
  ('Mapa','Mapa: trocar camada, filtrar e clicar no talhão','IN-04.dc.html'),
  ('DEMO-13','Uma O.S., sete dias — fechar turno não conclui','CA-01det.dc.html'),
- ('DEMO-14','Dose revista só no saldo (60/40)','IN-02.dc.html'),
+ ('DEMO-14','Dose ajustada só no saldo (60/40)','OS.dc.html#OS-0420'),
  ('DEMO-03','Custódia e devolução parcial (100/70/20/10)','CA-04.dc.html'),
  ('DEMO-15','Água sem agrônomo, liberada pela prontidão','IR-02.dc.html'),
- ('DEMO-16','Água reclassificada em fertirrigação','IN-02det.dc.html'),
+ ('DEMO-16','Água reclassificada em fertirrigação','OS.dc.html#OS-0418'),
  ('DEMO-17','Ativo bloqueado antes do início','PL-05.dc.html'),
  ('DEMO-18','Reserva concorrente do mesmo lote','SU-07.dc.html'),
  ('DEMO-11','Offline reenviado duas vezes','MB-03.dc.html'),
@@ -47,7 +47,8 @@ def build():
                      f'<a href="{items[0][1]}" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px;"><span style="width: 34px; height: 34px; border-radius: 10px; background: {ACCS}; display: inline-flex; align-items: center; justify-content: center;">{icon(ic,18,ACC)}</span>'
                      f'<span style="font-size: 15px; font-weight: 800; flex-grow: 1;">{esc(nome)}</span><span style="color:{MUTED};">›</span></a>{lis}</div>')
     ocultos=[(a['area'],[f for f,m in MAPA.items() if m['area']==a['area']]) for a in MENU]
-    ocultos=[(n,fs) for n,fs in ocultos if n not in ('Cadastros',)]
+    from ui37 import menu_item
+    ocultos=[(n,[f for f in fs if menu_item(ffile(f))[0] is None]) for n,fs in ocultos if n not in ('Cadastros',)]   # só as telas que continuam fora do menu (01/10)
     oc_html=''.join(f'<a href="{ffile(fs[0])}" style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid {LINE}; border-radius: 999px; font-size: 12.3px; color: {INK}; text-decoration: none; background: {SURF};">{esc(n)} <span style="color: {MUTED};">{len(fs)}</span></a>' for n,fs in ocultos if fs)
     oc_html+=''.join(f'<a href="{fid}.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid {LINE}; border-radius: 999px; font-size: 12.3px; color: {INK}; text-decoration: none; background: {SURF};">{esc(nome)} <span style="color: {MUTED};">{n}</span></a>' for nome,fid,n,ic in [('App móvel','MB-01',10,''),('Portal do parceiro','PT-01',7,''),('Onboarding','ON-01',1,''),('Backoffice','BO-01',4,'')])
     grid='<div style="display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px;">'+''.join(cards)+'</div>'

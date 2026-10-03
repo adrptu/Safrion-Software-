@@ -1,22 +1,24 @@
 # -*- coding: utf-8 -*-
-"""Área Agronomia (módulo OCULTO do menu, preservado) — AG-01 Monitoramento e vistorias (+ AG-01det VIS-011) · AG-02 Análises e amostras ·
-AG-03 Diagnósticos (+ AG-03det DIA-007) · AG-04 Recomendações (+ AG-04det REC-014 com a decisão da v3) · AG-05 Biblioteca e planos técnicos ·
-AG-06 Eficácia e histórico · AG-07 Bulas e registros (AGROFIT).
-Padrão novo (25/09/2026): descrição imperativa sob cada bloco, edição pela linha (G2), ações secundárias com ícone + rótulo + title,
-sem faixa de etapas (módulo não sequencial). Cadeia DEMO-01 navegável nos dois sentidos: VIS-011 → DIA-007 → REC-014 → NEC-028 → OS-0420 → EF-020.
+"""Área Agronomia — no menu: AG-01 Pragas e doenças (MIP/MID) e AG-07 Consulta Agrofit (Agrícola). Ligados ao item Pragas e doenças:
+AG-01det Rota e evidências (#VIS-xxx) · AG-03 Diagnósticos (+ AG-03det DIA-007) · AG-04 Recomendações (+ AG-04det REC-014).
+Módulos ocultos, preservados: AG-02 Análises e amostras · AG-05 Biblioteca e planos técnicos · AG-06 Eficácia e histórico.
+
+Pragas e doenças (02/10/2026, pedido do proprietário: autoanálise do MIP/MID): UMA base para o Mapa, o AG-01, o AG-01det, o AG-03/AG-04
+e o app (MB-06) — dados_mip.py (protocolos, talhões das duas fazendas, vistorias VIS-006…017 e VIS-051…060, DIA/REC, aplicações) +
+mip.js (estado 'talhao-os-mip-v1', resultado contagem × NC, próximo passo, conferência do receituário, O.S. no cenário). AG-01 é lista →
+painel da vistoria (#VIS-xxx) → sub-detalhe AG-01det; decidir controle mostra só produtos registrados para cultura × alvo (agrofit_dados,
+só leitura) com travas legais (registro, cancelado, dose, nº de aplicações, carência × colheita) e alertas (rotação, reavaliação, estoque,
+uso não conferido, coleta incompleta); emitir grava DIA + REC/RA + O.S. em A liberar (OS-0440 em diante; Ana libera na O.S.).
+Laudo de solo ou folha não bloqueia o controle de pragas (DIA-009/REC-015 deixaram de ser "bloqueados"). A v3 da REC-014 já vale no saldo
+(igual ao Mapa e à O.S.); o TS da REC-014 não tem registro para nematoide-de-cisto: alerta com a ficha e a alternativa (AG-07).
 
 observacoes (dados locais coerentes com dados.py / dados2.py / campo.py / gestao.py):
-- OS-0420 = dados.OS: 100 ha, 30 realizados (18 conf. + 12 prov.), saldo 70 ha, impedida por OM-0233. Mantido 30/70 (não 60/40) porque
-  dados.py, campo.py (CA-01x-os0420), gestao.py e OS.dc.html usam 30/70.
-- REC-014 v2 (versão vigente da OS-0420): KCl 60 % 120 kg/ha (zonas 140/120/95), TS nematicida 100 mL/100 kg sem., semente 58 W 52 kg/ha
-  (REQ-036: 5.200 kg para 100 ha). v3 proposta em 23/09: KCl −12 % só no saldo de 70 ha (105,6 kg/ha; zonas 123/106/84).
-- Custo apontado dos 30 ha (igual a gestao.py GE-03): semente 1.560 kg × R$ 9,50; KCl 3.600 kg × R$ 2,40; máquina e equipe 6,0 h × R$ 396;
-  diesel 84 L × R$ 5,92 → R$ 26.333,28.
-- Datas da cadeia: laudos LAU-2043/2044 12/09 · VIS-011 15/09 · DIA-007 17/09 · REC-014 v1 18/09, v2 aprovada 21/09 · v3 proposta 23/09.
-- VIS-011 com os 14 pontos (reboleiras 04/07/10 = 34/41/29 cistos/200 cm³; 11 fora do talhão em recoleta); 2 fotos por ponto = 28.
-- DIA-008 passa a citar VIS-012 (vistoria anterior do P2); VIS-015 é a nova coleta do P2, abaixo do limiar.
-- EF-019 (dessecação T3, OS-0415 em 10–12/09): pré 08/09 · pós 22/09. EF-020 custo da intervenção R$ 328/ha (KCl 288 + TS 40).
-- Novos registros recebem VIS-018, DIA-011, PLA-106 e v1 em diante.
+- OS-0420 = dados.OS: 100 ha, 30 realizados (18 conf. + 12 prov.), saldo 70 ha, impedida por OM-0233.
+- REC-014 v2 (30 ha realizados): KCl por zona 140/120/95 kg/ha, TS nematicida 100 mL/100 kg sem., semente 58 W 52 kg/ha; v3 aprovada por Ana
+  em 23/09 só no saldo de 70 ha (KCl −12 %: 123/106/84 kg/ha).
+- Custo apontado dos 30 ha (igual a gestao.py GE-03): R$ 26.333,28.
+- VIS-011: 14 pontos, ponto 11 em recoleta (GPS ±42 m); média válida 13,0 cistos/200 cm³ (NC 15) com reboleiras 04/07/10 → foco.
+- Novos registros: VIS-018, DIA-011, REC-019, RA-0142 e PLA-106 em diante.
 """
 import json
 from engine import (grid,Pt,kpis,chip,tag,icon,esc,msgbtn,drawer_button,legend,linechart,BTN_ST,EXTRA,EXTRAJS,_MINI,_MINIP,
@@ -31,6 +33,7 @@ DET0420='CA-01x-os0420.dc.html'   # detalhe da OS-0420 gerado por campo.py
 OS20=next(o for o in D.OS if o['id']=='OS-0420'); OS21=next(o for o in D.OS if o['id']=='OS-0421')
 AREA20,REAL20,SALDO20=OS20['area'],OS20['realizado'],OS20['saldo']
 LAUDOS=('LAU-2043','LAU-2044')
+PARC=['T4 · Soja 58 W','T2 · Soja','T1 · Soja','P1 · Feijão','P2 · Milho','C1 · Café (ano-safra)','T7 · Mamão Formosa']
 
 def nf(n,d=0):
     s=f'{n:,.{d}f}'
@@ -44,7 +47,7 @@ def bloco(titulo,desc,corpo,acao='',tone=None):
             f'<span style="width: 9px; height: 9px; border-radius: 999px; background: {dot}; flex-shrink: 0; align-self: flex-start; margin-top: 6px;"></span>'
             f'<div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">'
             f'<h3 style="margin: 0; font-size: 15px; font-weight: 800; letter-spacing: -.01em;">{esc(titulo)}</h3>'
-            f'<div style="font-size: 12.8px; color: {MUTED};">{esc(desc)}</div></div>'
+            + (f'<div style="font-size: 12.8px; color: {MUTED};">{esc(desc)}</div>' if desc else '') + '</div>'
             f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">{acao}</div></div>'
             f'<div style="padding: 0 12px 12px; display: flex; flex-direction: column; gap: 10px;">{corpo}</div></section>')
 def _iconize(html_,text,ic,title):
@@ -88,11 +91,11 @@ def consulta(cols,title,sub='',m='ro',skip=()):
     return dict(m=m,title=title,sub=sub,fields=[dict(k=c['k'],l=c['l'],ro=True) for c in cols if c['k'] not in skip])
 
 # ---------- cadeia da demonstração (DEMO-01), navegável nos dois sentidos ----------
-CADEIA=[('Vistoria','VIS-011','AG-01det.dc.html','Revisada'),
+CADEIA=[('Vistoria','VIS-011','AG-01.dc.html#VIS-011','Foco · reboleiras'),
         ('Diagnóstico','DIA-007','AG-03det.dc.html','Decisão registrada'),
-        ('Recomendação','REC-014 v2','AG-04det.dc.html','Aprovada · v3 em decisão'),
+        ('Recomendação','REC-014 v2','AG-04det.dc.html','TS sem registro · saldo travado'),
         ('Necessidade','NEC-028','PL-02.dc.html','Programada · 1ª onda 100 ha'),
-        ('O.S.','OS-0420',DET0420,f'Em execução · Impedida · {REAL20}/{AREA20} ha'),
+        ('O.S.','OS-0420','OS.dc.html#OS-0420',f'Em execução · Impedida · {REAL20}/{AREA20} ha'),
         ('Avaliação','EF-020','AG-06.dc.html','Aguarda leitura pós')]
 def cadeia(atual,prox_t,prox_h):
     cells=[]
@@ -105,10 +108,9 @@ def cadeia(atual,prox_t,prox_h):
         if cur: cells.append(f'<div aria-current="step" style="{box} background: {SURF}; border: 2px solid {ACC};">{inner}</div>')
         else: cells.append(f'<a href="{href}" title="Abrir {esc(lbl.lower())} {esc(rid)}" style="{box} background: {SURF}; border: 1px solid {LINE};">{inner}</a>')
         if i<len(CADEIA)-1: cells.append(f'<span aria-hidden="true" style="color: {MUTED}; align-self: center;">→</span>')
+    # sem "Próxima ação" aqui: o primário da tela já nomeia o próximo passo (um destino, um lugar)
     return (f'<nav aria-label="Cadeia da demonstração" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; background: {ACCS}; border: 1px solid {LINE}; border-radius: 12px;">'
-            f'<div style="display: flex; align-items: stretch; gap: 6px;">{"".join(cells)}</div>'
-            f'<div style="font-size: 12.5px; color: {MUTED};">Cada elo abre o registro · <b style="color: {INK};">Próxima ação:</b> '
-            f'<a href="{prox_h}" style="color: {ACC}; font-weight: 700; text-decoration: none;">{esc(prox_t)} ›</a></div></nav>')
+            f'<div style="display: flex; align-items: stretch; gap: 6px;">{"".join(cells)}</div></nav>')
 
 def mapa_vis011(h=300):
     """Rota em W da VIS-011 (T4): reboleiras de nematoide nos pontos 04, 07 e 10; ponto 11 fora do talhão (recoleta)."""
@@ -134,99 +136,7 @@ function agNovo(self,rows,r,idk,pref,base,parts,msg){
 '''
 
 def build():
-    # ================= AG-01 · Monitoramento e vistorias =================
-    fname='AG-01.dc.html'; E._reset_screen(fname)
-    PARC=['T4 · Soja 58 W','T2 · Soja','T1 · Soja','P1 · Feijão','P2 · Milho','C1 · Café (ano-safra)','T7 · Mamão Formosa']
-    ALVOS=['Nematoide-de-cisto','Mosca-branca','Ácaro','Lagarta-do-cartucho','Mancha-de-phoma','Daninhas pré-plantio','Percevejo-marrom','Ferrugem asiática']
-    PROT=['MIP Soja v4','MIP Feijão v2','MIP Milho v3','Café v1']
-    MET=['trincheira · cistos/200 cm³','pano-de-batida · adultos/batida','contagem direta · % folíolos','contagem direta · % plantas','contagem direta · % ramos','caminhamento · plantas/m²']
-    c1=[dict(k='id',l='Vistoria'),dict(k='parc',l='Ciclo · parcela',w=110),dict(k='alvo',l='Alvo · estádio',w=140),dict(k='prot',l='Protocolo · método',w=150),
-        dict(k='data',l='Data',t='date'),dict(k='amos',l='Amostras · qualidade',w=140),dict(k='sit',l='Situação',w=150),dict(k='acao',l='Próxima ação')]
-    rows1=[
-      R('VIS-011',ro=True,id=[Pt.link('VIS-011','AG-01det.dc.html')],parc='T4 · Soja 58 W',alvo=('Nematoide-de-cisto',[Pt.txt('Nematoide-de-cisto'),Pt.br(),Pt.mut('pré-plantio')]),est='pré-plantio',prot=('MIP Soja v4',[Pt.tag('MIP Soja v4'),Pt.br(),Pt.mut('trincheira · cistos/200 cm³')]),
-        met='trincheira · cistos/200 cm³',resp='Marcos',data='2026-09-15',amos=[Pt.txt('14/14 pontos · 28 fotos'),Pt.br(),Pt.mut('ponto 11 em recoleta')],
-        sit=[Pt.chip('Revisada','green'),Pt.br(),Pt.mut('virou DIA-007')],acao=[Pt.cta('Abrir vistoria','AG-01det.dc.html')]),
-      R('VIS-013',ro=True,id=[Pt.b('VIS-013')],parc='P1 · Feijão',alvo=('Mosca-branca',[Pt.txt('Mosca-branca'),Pt.br(),Pt.mut('R5')]),est='R5',prot=('MIP Feijão v2',[Pt.tag('MIP Feijão v2'),Pt.br(),Pt.mut('pano-de-batida · adultos/batida')]),
-        met='pano-de-batida · adultos/batida',resp='Marcos',data='2026-09-18',amos=[Pt.txt('12/12 pontos · GPS ok')],
-        sit=[Pt.chip('Acima do NC','red'),Pt.br(),Pt.mut('5,1/4,0 · em DIA-009')],acao=[Pt.cta('Abrir diagnóstico','AG-03.dc.html',u=True)]),
-      R('VIS-014',id=[Pt.b('VIS-014')],parc='P1 · Feijão',alvo=('Ácaro',[Pt.txt('Ácaro'),Pt.br(),Pt.mut('R5')]),est='R5',prot=('MIP Feijão v2',[Pt.tag('MIP Feijão v2'),Pt.br(),Pt.mut('contagem direta · % folíolos')]),
-        met='contagem direta · % folíolos',resp='Marcos',data='2026-09-25',amos=[Pt.txt('9/14 pontos'),Pt.br(),Pt.mut('próximo: ponto 10')],
-        sit=[Pt.chip('Coleta em campo','green')],acao=[Pt.cta('Coletar ponto 10','MB-06.dc.html')]),
-      R('VIS-015',id=[Pt.b('VIS-015')],parc='P2 · Milho',alvo=('Lagarta-do-cartucho',[Pt.txt('Lagarta-do-cartucho'),Pt.br(),Pt.mut('V10')]),est='V10',prot=('MIP Milho v3',[Pt.tag('MIP Milho v3'),Pt.br(),Pt.mut('contagem direta · % plantas')]),
-        met='contagem direta · % plantas',resp='Marcos',data='2026-09-22',amos=[Pt.txt('14/14 pontos · GPS ok')],
-        sit=[Pt.chip('Coleta completa','green'),Pt.br(),Pt.mut('abaixo do limiar')],
-        acao=[Pt.act('Concluir coleta','VIS-015 concluída · abaixo do limiar: o manejo preventivo do plano técnico permanece; nada é cancelado automaticamente.')]),
-      R('VIS-016',id=[Pt.b('VIS-016')],parc='C1 · Café (ano-safra)',alvo=('Mancha-de-phoma',[Pt.txt('Mancha-de-phoma'),Pt.br(),Pt.mut('granação')]),est='granação',prot=('Café v1',[Pt.tag('Café v1'),Pt.br(),Pt.mut('contagem direta · % ramos')]),
-        met='contagem direta · % ramos',resp='João',data='2026-09-24',amos=[Pt.txt('6/12 pontos'),Pt.br(),Pt.mut('no dispositivo de João')],
-        sit=[Pt.chip('Sincronizar','yellow'),Pt.br(),Pt.mut('pacote offline pendente')],
-        acao=[Pt.act('Sincronizar agora','Pacote offline de João aplicado · 6 pontos e 12 fotos entraram na VIS-016 · sem conflito de versão.')]),
-      R('VIS-017',id=[Pt.b('VIS-017')],parc='T2 · Soja',alvo=('Daninhas pré-plantio',[Pt.txt('Daninhas pré-plantio'),Pt.br(),Pt.mut('—')]),est='—',prot=('MIP Soja v4',[Pt.tag('MIP Soja v4'),Pt.br(),Pt.mut('caminhamento · plantas/m²')]),
-        met='caminhamento · plantas/m²',resp='Marcos',data='2026-09-26',amos=[Pt.txt('0/16 pontos')],
-        sit=[Pt.chip('Programada','yellow'),Pt.br(),Pt.mut('coleta até 26/09')],acao=[Pt.cta('Coletar','MB-06.dc.html')]),
-    ]
-    g1=grid(c1,rows1,edit=dict(m='form',title='Vistoria',newTitle='Programar vistoria',
-             sub='Programe ou ajuste a vistoria; ela entra na rota do vistoriador e o app coleta ponto a ponto com GPS e fotos. Vistoria revisada fica em consulta.',
-             fields=[F('parc','Ciclo · parcela','sel',opts=PARC,req=True,def_='T2 · Soja'),F('alvo','Alvo','sel',opts=ALVOS,req=True,def_='Percevejo-marrom'),
-                     F('est','Estádio','sel',opts=['—','pré-plantio','V4','V10','R1','R3','R5','granação'],req=True,def_='—'),
-                     F('prot','Protocolo','sel',opts=PROT,req=True,def_='MIP Soja v4'),F('met','Método · unidade','sel',opts=MET,req=True,def_='pano-de-batida · adultos/batida'),
-                     F('data','Data','date',req=True),F('resp','Responsável','sel',opts=['Marcos','João','Ana','Paula'],req=True,def_='Marcos')]),
-             add='Programar vistoria',gid='g_vis',so=dict(k='data',d=True),total=False)
-    EXTRAJS[0]=JS_NOVO+'''
-function EXTRAVALS(self,v){ self.g2after=(gid,rows,r)=>{ if(gid!=='g_vis') return;
-  r.p.alvo=[{k:'txt',t:r.v.alvo},{k:'br'},{k:'mut',t:r.v.est||'—'}]; r.s.alvo=r.v.alvo+' '+(r.v.est||'');
-  r.p.prot=[{k:'tag',t:r.v.prot},{k:'br'},{k:'mut',t:r.v.met||''}]; r.s.prot=r.v.prot+' '+(r.v.met||'');
-  if(!agNovo(self,rows,r,'id','VIS-0',18,
-  {sit:[{k:'chip',t:'Programada',c:'gray'}],amos:[{k:'mut',t:'0 pontos · aguarda coleta'}],acao:[{k:'cta',t:'Coletar',h:'MB-06.dc.html'}]},
-  '{id} programada · entrou na rota do vistoriador; o app coleta ponto a ponto.')) self.setState({g2toast:'Vistoria salva · rota atualizada.'}); }; }'''
-    corpo=bloco('Vistorias por ciclo e parcela','Acompanhe as coletas e siga a próxima ação; clique na linha para ajustar a vistoria.',g1)
-    HEIGHTS37[fname]=780
-    shell37('AG-01','Monitoramento e vistorias',corpo,fname=fname,
-      subtitle='Rotas, alvos e vistorias por ciclo e parcela; o detalhe mostra pontos, evidências e série temporal.',
-      status=('1 sincronização pendente','yellow'),
-      primary_html=ilink('Coletar próximo ponto','MB-06.dc.html','map','Abrir o app na VIS-014, ponto 10',primary=True,small=False),
-      footer='O próximo ponto avança dentro da rota; abaixo do limiar não cancela o manejo preventivo; critério por presença não divide por zero.')
-
-    # ---- AG-01det · VIS-011 ----
-    fname='AG-01det.dc.html'; E._reset_screen(fname)
-    PTS=[(1,'−17,840 · −50,615','07:28',4),(2,'−17,841 · −50,614','07:35',6),(3,'−17,842 · −50,613','07:42',12),(4,'−17,843 · −50,611','07:55',34),
-         (5,'−17,843 · −50,610','08:02',5),(6,'−17,844 · −50,610','08:08',7),(7,'−17,845 · −50,609','08:15',41),(8,'−17,846 · −50,608','08:26',3),
-         (9,'−17,847 · −50,607','08:37',13),(10,'−17,848 · −50,606','08:48',29),(11,'−17,849 · −50,604','09:02',9),(12,'−17,850 · −50,603','09:10',5),
-         (13,'−17,850 · −50,602','09:20',4),(14,'−17,851 · −50,601','09:30',6)]
-    reb=[c for n,_,_,c in PTS if c>15]; media=sum(reb)/len(reb)
-    def _cor(c): return 'red' if c>15 else ('yellow' if c>=10 else 'green')
-    prow=[]
-    for n,gps,hr,c in PTS:
-        q=[Pt.chip('GPS ±42 m · fora do talhão','red')] if n==11 else [Pt.chip('OK','green')]
-        ac=[Pt.act('Marcar recoleta','Ponto 11 devolvido à rota de amanhã · a contagem dele fica fora da média até a nova coleta; o original é preservado.')] if n==11 else []
-        prow.append(R(f'p{n}',pt=f'{n:02d}',gps=gps,hora=hr,cont=(c,[{'k':'cn','t':str(c),'c':('gray' if n==11 else _cor(c))}]),nc=('recoleta' if n==11 else ('acima do NC' if c>15 else ('atenção' if c>=10 else 'abaixo do NC'))),
-                      fotos=2,qual=q,acao=ac))
-    cp=[dict(k='pt',l='Ponto'),dict(k='gps',l='GPS'),dict(k='hora',l='Hora'),dict(k='cont',l='Cistos/200 cm³',t='num',a='r'),
-        dict(k='nc',l='× NC 15',chips={'acima do NC':'red','atenção':'yellow','abaixo do NC':'green','recoleta':'gray'}),dict(k='fotos',l='Fotos',t='num',a='r'),dict(k='qual',l='Qualidade'),dict(k='acao',l='Ação')]
-    for r in prow: r['p']['nc']=[Pt.chip(r['v']['nc'],{'acima do NC':'red','atenção':'yellow','abaixo do NC':'green','recoleta':'gray'}[r['v']['nc']])]; r['s']['nc']=r['v']['nc']
-    gp=grid(cp,prow,edit=consulta(cp,'Ponto da vistoria','Evidência de campo: o original não se altera; posição fora do talhão volta para recoleta.',skip=('acao',)),
-            search=False,gid='g_pts',total=False)
-    fotos=''.join(
-      f'<div style="flex: 1 1 0; min-width: 0; border: 1px solid {LINE}; border-radius: 12px; overflow: hidden; background: {BG};">'
-      f'<div style="height: 84px; background: linear-gradient(135deg, {ACCS}, {GRAYS}); display: flex; align-items: center; justify-content: center;">{icon("map",26,MUTED)}</div>'
-      f'<div style="padding: 8px 10px; font-size: 11.5px; color: {MUTED};"><b style="color:{INK};">{p}</b> · {h}<br>GPS {g}</div></div>'
-      for p,h,g in [('Ponto 04','07:55','−17,843 · −50,611 (±4 m)'),('Ponto 07','08:15','−17,845 · −50,609 (±3 m)'),
-                    ('Ponto 07 · raiz','08:17','−17,845 · −50,609 (±3 m)'),('Ponto 11','09:02','−17,849 · −50,604 (±42 m · fora do talhão)')])
-    serie=linechart([5,8,14,22,round(media)],w=1100,h=210,labels=[(0,'mai'),(1,'jun'),(2,'jul'),(3,'ago'),(4,'set')],unit='cistos/200 cm³').replace('Série de preços','Série de cistos nas reboleiras do T4')
-    corpo=(
-      cadeia('VIS-011','Abrir diagnóstico DIA-007','AG-03det.dc.html')
-      + kpis([('PONTOS','14/14','1 em recoleta'),('MÉDIA NAS REBOLEIRAS',f'{round(media)}','cistos/200 cm³ · NC 15'),('REBOLEIRAS',str(len(reb)),'pontos 04, 07, 10'),('EVIDÊNCIAS','28 fotos','GPS e hora')])
-      + bloco('Rota em W e pontos','Confira cada ponto contra o nível de controle; clique na linha para ver a evidência completa.',
-          mapa_vis011()+gp,legend([(ACC,'abaixo do NC'),(YEL,'atenção'),(RED,'acima do NC'),(GRAY,'recoleta')]))
-      + bloco('Série temporal do alvo','Compare com as vistorias anteriores no mesmo método e unidade; a decisão fica no diagnóstico.',
-          serie + nota(f'Média dos pontos de reboleira (04, 07, 10) em cada vistoria · NC 15 cistos/200 cm³ (MIP Soja v4).'))
-      + bloco('Evidências com GPS e hora','Confira as fotos originais; o ponto 11 volta para recoleta pela linha da tabela.',
-          f'<div style="display: flex; gap: 10px;">{fotos}</div>'))
-    HEIGHTS37[fname]=1700; PARENT37[fname]='AG-01.dc.html'
-    shell37('AG-01','Vistoria · VIS-011 nematoide T4',corpo,fname=fname,crumbs_extra=['VIS-011'],
-      subtitle='T4 · Soja 58 W · pré-plantio · MIP Soja v4 · trincheira · coleta de 15/09 por Marcos, revisada por Ana.',
-      status=('Revisada · 1 ponto em recoleta','yellow'),
-      primary_html=ilink('Abrir diagnóstico DIA-007','AG-03det.dc.html','leaf','Abrir a decisão técnica que nasceu desta vistoria',primary=True,small=False),
-      footer='Contagem acima do NC sugere diagnóstico; a decisão técnica é registrada no DIA-007, nunca na vistoria.')
+    ag01(); ag01det()   # Pragas e doenças (MIP/MID): funções próprias, abaixo
 
     # ================= AG-02 · Análises e amostras =================
     fname='AG-02.dc.html'; E._reset_screen(fname)
@@ -265,7 +175,7 @@ function EXTRAVALS(self,v){ self.g2after=(gid,rows,r)=>{
   if(gid==='g_ext' && r.id==='K' && r.v.un && r.v.un!=='sem unidade'){
     const sp=GRIDS.find(g=>g.id==='g_lau'); const x=g2find(g2rows(self,sp),'LAU-2048');
     if(x){ x.p.val=[{k:'chip',t:'Aguardando validação',c:'yellow'}]; x.s.val='Aguardando validação'; x.p.acao=[{k:'mut',t:'mapeamento salvo · aguarda validação humana'}]; x.s.acao=''; }
-    self.setState({g2toast:'K corrigido para '+r.v.un+' · mapeamento salvo para o Agrolab · LAU-2048 volta à validação humana; a REC-015 segue bloqueada até validar.'}); } }; }'''
+    self.setState({g2toast:'K corrigido para '+r.v.un+' · mapeamento salvo para o Agrolab · LAU-2048 volta à validação humana.'}); } }; }'''
     orig=(f'<div style="border: 1px solid {LINE}; border-radius: 12px; padding: 12px 14px; background: {BG};"><div style="font-size: 11px; font-weight: 700; color: {MUTED}; letter-spacing: .06em;">ORIGINAL · PDF DO LABORATÓRIO</div>'
           f'<div style="height: 150px; margin-top: 8px; border: 1px dashed {LINE}; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 6px; color: {MUTED}; font-size: 12.5px;">{icon("doc",18,MUTED)}laudo_agrolab_P1_folha.pdf · pág. 1/2</div></div>')
     corpo=(
@@ -279,119 +189,150 @@ function EXTRAVALS(self,v){ self.g2after=(gid,rows,r)=>{
     shell37('AG-02','Análises e amostras',corpo,fname=fname,
       subtitle='Planos de amostragem, amostras e laudos com método, extrator, profundidade e limite de detecção.',
       status=('1 laudo inconsistente','yellow'),
-      footer='OCR não aprova laudo; o original é preservado; inconsistência bloqueia só a recomendação dependente (REC-015), não a fazenda.')
+      footer='OCR não aprova laudo; o original é preservado; laudo inconsistente não bloqueia o controle de pragas.')
 
-    # ================= AG-03 · Diagnósticos =================
+    # ================= AG-03 · Diagnósticos (MIP do estado compartilhado: DIA-007…010 e os novos, DIA-011 em diante) =================
+    import cenario, dados_mip as DM
+    _menu_mip()
     fname='AG-03.dc.html'; E._reset_screen(fname)
-    c3=[dict(k='id',l='Diagnóstico',w=120),dict(k='parc',l='Ciclo · parcela',w=110),dict(k='evid',l='Evidências',w=140),dict(k='hip',l='Hipótese · causa',w=160),
-        dict(k='risco',l='Risco',chips={'alto':'red','médio':'yellow','baixo':'green'}),dict(k='acp',l='Ação proposta',w=150),
-        dict(k='sit',l='Situação',w=120),dict(k='acao',l='Próxima ação')]
-    rk=lambda t:(t,[Pt.chip(t,{'alto':'red','médio':'yellow','baixo':'green'}[t])])
-    rows3=[
-      R('DIA-007',ro=True,id=[Pt.link('DIA-007','AG-03det.dc.html')],parc='T4 · Soja 58 W',evid=[Pt.link('VIS-011','AG-01det.dc.html'),Pt.br(),Pt.mut('+ LAU-2043/2044')],
-        hip='Reboleiras de nematoide + K baixo no perfil (0–20)',meta='plantio na janela 20/09–05/10',risco=rk('alto'),acp='Cultivar resistente + TS nematicida + K na base',resp='Ana',
-        sit=[Pt.chip('Registrada','green')],acao=[Pt.cta('Abrir REC-014','AG-04det.dc.html')]),
-      R('DIA-009',id=[Pt.b('DIA-009')],parc='P1 · Feijão',evid=[Pt.txt('VIS-013 +'),Pt.link('LAU-2048','AG-02.dc.html'),Pt.br(),Pt.mut('laudo inconsistente')],
-        hip='Mosca-branca acima do NC; nutrição a confirmar',meta='segurar produtividade no R5',risco=rk('alto'),acp='Inseticida seletivo após laudo foliar válido',resp='Ana',
-        sit=[Pt.chip('Bloqueado','red'),Pt.br(),Pt.mut('falta evidência válida')],acao=[Pt.cta('Solicitar evidência','AG-02.dc.html',u=True)]),
-      R('DIA-010',id=[Pt.b('DIA-010'),Pt.br(),Pt.tag('Emergência MIP')],parc='C1 · Café (ano-safra)',evid=[Pt.txt('VIS-016'),Pt.br(),Pt.mut('parcial · 6 pontos')],
-        hip='Mancha-de-phoma em expansão na granação',meta='proteger a carga pendente',risco=rk('alto'),acp='Intervir já; não depende de laudo de solo',resp='Ana',
-        sit=[Pt.chip('A decidir','yellow')],
-        acao=[Pt.act('Registrar decisão','Decisão registrada no DIA-010: intervenção imediata autorizada tecnicamente · segue para recomendação com dose formalizada.')]),
-      R('DIA-008',ro=True,id=[Pt.b('DIA-008')],parc='P2 · Milho',evid=[Pt.txt('VIS-012'),Pt.br(),Pt.mut('abaixo do limiar · 08/09')],
-        hip='Lagarta-do-cartucho abaixo do NC',meta='manter o custo do plano',risco=rk('baixo'),acp='Manter monitoramento semanal',resp='Marcos',
-        sit=[Pt.chip('Sem intervenção','gray')],acao=[Pt.cta('Comparar cenário','PL-02.dc.html')]),
-    ]
-    g3=grid(c3,rows3,edit=dict(m='form',title='Diagnóstico',newTitle='Criar diagnóstico',
-             sub='Reúna as evidências e registre a interpretação e a decisão; dose e produto são formalizados na recomendação. Decisão registrada fica em consulta (alterar cria nova versão).',
-             fields=[F('parc','Ciclo · parcela','sel',opts=PARC,req=True,def_='T2 · Soja'),F('evid','Evidências (vistoria · laudo)','txt',req=True,help='Ex.: VIS-017 · PLA-104'),
+    # a decisão fica na linha de baixo da situação (a grade cabe em 1280 × 800)
+    c3=[dict(k='id',l='Diagnóstico',w=90),dict(k='parc',l='Talhão · cultura',w=110),dict(k='evid',l='Evidências',w=140),dict(k='hip',l='Hipótese · causa',w=150),
+        dict(k='risco',l='Risco',chips={'alto':'red','médio':'yellow','baixo':'green'}),
+        dict(k='sit',l='Situação · decisão',w=150),dict(k='acao',l='Próximo passo',w=160)]
+    g3=grid(c3,[],edit=dict(m='form',title='Diagnóstico',newTitle='Criar diagnóstico',
+             fields=[F('parc','Talhão · cultura','sel',opts=PARC,req=True,def_='T2 · Soja'),F('evid','Evidências (vistoria · laudo)','txt',req=True,help='Ex.: VIS-017 · PLA-104'),
                      F('hip','Hipótese · causa','area',req=True),F('meta','Meta','txt',req=True),F('risco','Risco','sel',opts=['baixo','médio','alto'],req=True,def_='médio'),
                      F('acp','Ação proposta','area',req=True),F('resp','Responsável','sel',opts=['Ana','Marcos'],req=True,def_='Ana')]),
              add='Criar diagnóstico',gid='g_dia',total=False)
-    EXTRAJS[0]=JS_NOVO+'''
-function EXTRAVALS(self,v){ self.g2after=(gid,rows,r)=>{ if(gid==='g_dia') agNovo(self,rows,r,'id','DIA-0',11,
-  {sit:[{k:'chip',t:'Rascunho',c:'gray'}],acao:[{k:'mut',t:'registre a decisão na linha'}]},'{id} criado em rascunho · a decisão é registrada pelo agrônomo responsável.'); }; }'''
-    corpo=bloco('Decisões técnicas por ciclo e parcela','Registre interpretação e decisão com evidência vinculada; clique na linha para completar um diagnóstico.',g3)
-    HEIGHTS37[fname]=680
-    shell37('AG-03','Diagnósticos',corpo,fname=fname,
-      subtitle='Decisões técnicas por ciclo e parcela com solo, folha, vistoria, histórico e contexto econômico.',
-      status=('1 aguardando evidência','yellow'),
-      footer='Diagnóstico descreve interpretação e decisão; doses ficam na recomendação; emergência MIP não espera laudo de solo irrelevante.')
+    EXTRAJS[0]=cenario.js_prefixo()+DM.js_prefixo()+JS_AG01.split('function agRow(')[0]+r'''
+const AG3X={'DIA-007':{meta:'plantio na janela 20/09–05/10',evx:'+ LAU-2043/2044'},'DIA-008':{meta:'manter o custo do plano',evx:'abaixo do NC · 08/09'},
+  'DIA-009':{meta:'segurar a produtividade no R5',evx:'LAU-2048 (folha) não decide o controle'},'DIA-010':{meta:'proteger a carga pendente',evx:'6 de 12 pontos'}};
+const RK={'alto':'red','médio':'yellow','baixo':'green'}; const SC={'Registrada':'green','A decidir':'yellow','Rascunho':'gray'};
+function a3Rows(self,v){ const s=mipGet(), c=agC();
+  return Object.values(s.dia).sort((a,b)=>(a.id<b.id?-1:1)).map(d=>{ const vv=d.vis?s.vis[d.vis]:null; const t=MIPD.tal[d.tal]||{rot:d.tal||'—',cultura:''}; const x=AG3X[d.id]||{};
+    let ac, go=''; const rc=d.rec&&s.rec[d.rec]; const osId=(rc&&rc.os)||((vv&&vv.dec&&vv.dec.dia===d.id&&vv.dec.os)||''); const canc=!!osId&&mipOsFora(c,osId);
+    if(d.sit==='A decidir'&&vv){ ac=[{k:'cta',t:'Decidir controle',h:'AG-01.dc.html#'+vv.id+':decidir',u:true}]; go='AG-01.dc.html#'+vv.id; }
+    else if(d.id==='DIA-007'){ ac=[{k:'cta',t:'Abrir REC-014',h:'AG-04det.dc.html'}]; go='AG-03det.dc.html'; }
+    else if(canc&&vv){ ac=[{k:'cta',t:'Decidir controle',h:'AG-01.dc.html#'+vv.id+':decidir',u:true}]; go='AG-01.dc.html#'+vv.id; }
+    else if(osId){ ac=[{k:'cta',t:'Abrir '+osId,h:'OS.dc.html#'+osId}]; go=vv?'AG-01.dc.html#'+vv.id:''; }
+    else if(vv){ ac=[{k:'cta',t:'Abrir vistoria',h:'AG-01.dc.html#'+vv.id}]; go='AG-01.dc.html#'+vv.id; }
+    else ac=[{k:'mut',t:'complete pela linha'}];
+    const dr=go?('a3go_'+d.id):''; if(dr) v[dr]=()=>{ location.href=go; };
+    const acp=d.dec||d.acp||(d.sit==='A decidir'?'a decidir':'');
+    return Object.assign({id:d.id,ro:d.sit!=='Rascunho',v:{id:d.id,parc:(d.parc||(t.rot+(t.cultura?' · '+t.cultura:''))),evid:d.evid||(vv?vv.id:''),hip:d.hip||'',meta:d.meta||x.meta||'',risco:d.risco||'médio',acp:d.acp||acp,resp:d.por||'Ana'},
+      s:{sit:d.sit+' '+(acp||''),acp:acp,evid:(vv?vv.id:(d.evid||''))+' '+(x.evx||'')},
+      p:{id:[d.id==='DIA-007'?{k:'link',t:'DIA-007',h:'AG-03det.dc.html'}:{k:'b',t:d.id}],parc:[{k:'txt',t:d.parc||(t.rot+(t.cultura?' · '+t.cultura:''))}],
+         evid:vv?[{k:'link',t:vv.id,h:'AG-01.dc.html#'+vv.id}].concat(x.evx?[{k:'br'},{k:'mut',t:x.evx}]:[]):[{k:'txt',t:d.evid||'—'}],
+         risco:[{k:'chip',t:d.risco||'médio',c:RK[d.risco||'médio']}],acp:[{k:'txt',t:acp||'—'}],
+         sit:[{k:'chip',t:d.sit,c:SC[d.sit]||'gray'}].concat(canc?[{k:'br'},{k:'mut',t:osId+' cancelada · decidir de novo'}]:[{k:'br'},{k:'mut',t:(acp||'—')+(d.em?' · '+mipBr(d.em)+' · '+(d.por||'Ana'):'')}]),acao:ac}},dr?{dr}:{}); }); }
+function PREVALS(self,v){ cenOuvir(self); mipOuvir(self); const sp=GRIDS.find(g=>g.id==='g_dia'); sp.rows=a3Rows(self,v); }
+function EXTRAVALS(self,v){ const s=mipGet(), c=agC(); const osDe=(d)=>{ const rc=d.rec&&s.rec[d.rec]; const vv=d.vis&&s.vis[d.vis]; return (rc&&rc.os)||((vv&&vv.dec&&vv.dec.dia===d.id&&vv.dec.os)||''); };
+  const n=Object.values(s.dia).filter(d=>d.sit==='A decidir'||(d.sit==='Registrada'&&mipOsFora(c,osDe(d)))).length, nr=Object.values(s.dia).filter(d=>d.sit==='Rascunho').length;
+  v.a3_st=n?(n+' a decidir'):(nr?nr+' em rascunho':'Em dia'); const cs=agCh(n?'yellow':'green'); v.a3_stst=cs.st; v.a3_stdot=cs.dot;
+  // novo diagnóstico (ou rascunho editado): vai para o mesmo estado do MIP, com a numeração única (DIA-011 em diante)
+  self.g2after=(gid,rows,r,isNew)=>{ if(gid!=='g_dia') return;
+    const r2=mipMudar(self,s=>{ const id=isNew?'DIA-'+String(s.seq.dia++).padStart(3,'0'):r.id; const tal=String(r.v.parc||'').split(' · ')[0];
+      s.dia[id]=Object.assign(s.dia[id]||{id,vis:'',tal,sit:'Rascunho',em:MIPD.hoje},{parc:r.v.parc,evid:r.v.evid,hip:r.v.hip,meta:r.v.meta,risco:r.v.risco,acp:r.v.acp,por:r.v.resp});
+      return {msg:isNew?(id+' criado em rascunho · a decisão é registrada pelo agrônomo responsável.'):(id+' salvo em rascunho.'),id}; });
+    g2set(self,'g_dia',{rows:null,fl:r2.id||null}); }; }
+'''
+    corpo=bloco('Diagnósticos','',g3)
+    HEIGHTS37[fname]=720; PARENT37[fname]='AG-01.dc.html'
+    shell37('AG-03','Diagnósticos',corpo,fname=fname,crumbs_extra=['Diagnósticos'],search=False,status=(H('a3_st'),'red'))
+    _status_dinamico(fname,'a3')
 
     # ---- AG-03det · DIA-007 (elo 2 da cadeia) ----
     fname='AG-03det.dc.html'; E._reset_screen(fname)
     cev=[dict(k='reg',l='Evidência'),dict(k='tipo',l='Tipo'),dict(k='data',l='Data',t='date'),dict(k='achado',l='O que mostra',w=380),dict(k='fonte',l='Fonte')]
     gev=grid(cev,[
-        R('e1',reg=[Pt.link('VIS-011','AG-01det.dc.html')],tipo='Vistoria · trincheira',data='2026-09-15',achado='3 reboleiras (pontos 04, 07, 10) com 34, 41 e 29 cistos/200 cm³ · NC 15',fonte='MIP Soja v4'),
+        R('e1',reg=[Pt.link('VIS-011','AG-01.dc.html#VIS-011')],tipo='Vistoria · trincheira',data='2026-09-15',achado='Média válida 13,0 cistos/200 cm³ (13 pontos; NC 15) com reboleiras nos pontos 04, 07 e 10 (34, 41 e 29) · foco',fonte='MIP Soja v4'),
         R('e2',reg=[Pt.link('LAU-2043','AG-02.dc.html')],tipo='Laudo de solo · 0–20 cm',data='2026-09-12',achado='K trocável 0,08 cmolc/dm³ · CTC 9,2 · participação de K 0,9 % (alvo 3 %)',fonte='Lab Solo Vale · Mehlich-1'),
         R('e3',reg=[Pt.link('LAU-2044','AG-02.dc.html')],tipo='Laudo de solo · 20–40 cm',data='2026-09-12',achado='K trocável 0,06 cmolc/dm³ · sem barreira química',fonte='Lab Solo Vale · Mehlich-1'),
       ],edit=consulta(cev,'Evidência','Evidência vinculada ao diagnóstico; abra o registro de origem pelo link.'),search=False,gid='g_ev',total=False)
     corpo=(
       cadeia('DIA-007','Abrir recomendação REC-014','AG-04det.dc.html')
-      + bloco('Decisão técnica','Confira a interpretação registrada; dose e produto estão na recomendação.',
-          _kv([('Ciclo · parcela','Safra 2026/27 · T4 · 204 ha'),('Cultura · cultivar','Soja · 58 W (resistente)'),('Meta','plantio na janela 20/09–05/10'),('Risco',chip('alto','red')),
-               ('Hipótese · causa','Reboleiras de nematoide-de-cisto + K baixo no perfil (0–20 cm)'),('Ação proposta','Cultivar resistente + TS nematicida + K na base'),
-               ('Responsável','Ana (RT) · registrada em 17/09'),('Destino','<a href="AG-04det.dc.html" style="color: '+ACC+'; font-weight: 700; text-decoration: none;">REC-014 v2 ›</a>')]))
-      + bloco('Evidências vinculadas','Abra cada evidência na origem; clique na linha para ver o resumo.',gev))
+      + bloco('Decisão técnica','',
+          _kv([('Ciclo · talhão','Safra 2026/27 · T4 · 204 ha'),('Cultura · cultivar','Soja · 58 W (resistente)'),('Meta','plantio na janela 20/09–05/10'),('Risco',chip('alto','red')),
+               ('Hipótese · causa','Foco de nematoide-de-cisto em reboleiras + K baixo no perfil (0–20 cm)'),('Decisão','Cultivar resistente + TS + K na base (controlar no plantio)'),
+               ('Responsável','Ana (RT) · registrada em 17/09'),('Destino','REC-014 v2 · NEC-028')]))
+      + bloco('Evidências vinculadas','',gev))
     HEIGHTS37[fname]=900; PARENT37[fname]='AG-03.dc.html'
-    shell37('AG-03','Diagnóstico · DIA-007 nematoide T4',corpo,fname=fname,crumbs_extra=['DIA-007'],
-      subtitle='Interpretação da VIS-011 com os laudos do T4; a decisão virou a recomendação REC-014.',
+    shell37('AG-03','Diagnóstico · DIA-007 nematoide T4',corpo,fname=fname,crumbs_extra=['Diagnósticos','DIA-007'],search=False,
       status=('Decisão registrada','green'),
-      primary_html=ilink('Abrir recomendação REC-014','AG-04det.dc.html','leaf','Abrir a recomendação que formalizou esta decisão',primary=True,small=False),
-      footer='Alterar uma decisão registrada cria nova versão do diagnóstico; a recomendação aprovada não muda sozinha.')
+      primary_html=ilink('Abrir recomendação REC-014','AG-04det.dc.html','leaf','Abrir a recomendação que formalizou esta decisão',primary=True,small=False))
 
-    # ================= AG-04 · Recomendações =================
+    # ================= AG-04 · Recomendações (REC-015 e as do MIP vêm do estado compartilhado) =================
     fname='AG-04.dc.html'; E._reset_screen(fname)
-    c4=[dict(k='id',l='Recomendação'),dict(k='parc',l='Parcela',w=100),dict(k='orig',l='Origem',w=130),dict(k='op',l='Operação · alvo',w=120),
-        dict(k='prod',l='Produto · dose · janela',w=150),dict(k='fonte',l='Fonte · aprovador',w=110),dict(k='sit',l='Situação',w=140),dict(k='acao',l='Ação')]
+    # talhão na linha de baixo da operação; fonte e RT no detalhe da linha (a grade cabe em 1280 × 800)
+    c4=[dict(k='id',l='Recomendação',w=110),dict(k='orig',l='Origem',w=130),dict(k='op',l='Operação · talhão',w=150),
+        dict(k='prod',l='Produto · dose · janela',w=170),dict(k='sit',l='Situação',w=160),dict(k='acao',l='Próximo passo')]
     rows4=[
-      R('REC-014',ro=True,id=[Pt.link('REC-014','AG-04det.dc.html'),Pt.mut('v2')],parc='T4 · Soja 58 W',orig=[Pt.link('DIA-007','AG-03det.dc.html'),Pt.mut('VIS-011')],
-        op='Plantio · nematoide + K',prod=('KCl 60 % 120 kg/ha + TS nematicida',[Pt.txt('KCl 60 % 120 kg/ha + TS nematicida'),Pt.br(),Pt.mut('janela: 20/09–05/10')]),jan='20/09–05/10',fonte='IAC Boletim 100 · Ana (RT)',
-        sit=[Pt.chip('Aprovada','green'),Pt.br(),Pt.chip('v3 em decisão','yellow')],acao=[Pt.cta('Decidir v3','AG-04det.dc.html',u=True)]),
+      R('REC-014',ro=True,id=[Pt.link('REC-014','AG-04det.dc.html'),Pt.mut('v2 · v3 no saldo')],parc='T4 · Soja 58 W',orig=[Pt.link('DIA-007','AG-03det.dc.html'),Pt.mut('VIS-011')],
+        op='Plantio · nematoide + K',prod=('KCl 60 % por zona + TS nematicida',[Pt.txt('KCl 60 % por zona + TS nematicida'),Pt.br(),Pt.mut('janela: 20/09–05/10')]),jan='20/09–05/10',fonte='IAC Boletim 100 · Ana (RT)',
+        sit=[Pt.chip('TS sem registro p/ cisto','red'),Pt.br(),Pt.mut(f'saldo de {SALDO20} ha travado até a v4')],acao=[Pt.cta('Abrir REC-014','AG-04det.dc.html',u=True)]),
       R('REC-016',ro=True,id=[Pt.b('REC-016'),Pt.mut('v1')],parc='T1+T2 · Soja',orig='Protocolo Soja alta tecnologia v6',op='Pulverização · ferrugem asiática',
         prod=('Fungicida A 0,4 L/ha',[Pt.txt('Fungicida A 0,4 L/ha'),Pt.br(),Pt.mut('janela: em execução')]),jan='em execução',fonte='bula AGROFIT · Ana (RT)',
-        sit=[Pt.chip('Aprovada','green'),Pt.br(),Pt.mut(f'OS-0421 · {OS21["realizado"]}/{OS21["area"]} ha')],acao=[Pt.cta('Ver execução','CA-01det.dc.html')]),
+        sit=[Pt.chip('Aprovada','green'),Pt.br(),Pt.mut(f'OS-0421 · {OS21["realizado"]}/{OS21["area"]} ha')],acao=[Pt.cta('Abrir OS-0421','OS.dc.html#OS-0421')]),
       R('REC-017',ro=True,id=[Pt.b('REC-017'),Pt.mut('v2')],parc='P1 · Feijão',orig='OS-0418 reclassificada (água → fertirrigação)',op='Fertirrigação · ureia',
         prod=('Ureia 45 % 12 kg/ha',[Pt.txt('Ureia 45 % 12 kg/ha'),Pt.br(),Pt.mut('janela: esta semana')]),jan='esta semana',fonte='protocolo do plano técnico',
-        sit=[Pt.chip('Submetida','yellow'),Pt.br(),Pt.mut('aguarda agrônomo')],acao=[Pt.cta('Revisar v2','IN-02det.dc.html')]),
-      R('REC-015',ro=True,id=[Pt.b('REC-015'),Pt.mut('v1')],parc='P1 · Feijão',orig=[Pt.txt('DIA-009 (VIS-013)')],op='Inseticida · mosca-branca',
-        prod=('a definir após laudo',[Pt.txt('a definir após laudo'),Pt.br(),Pt.mut('janela: —')]),jan='—',fonte='— · pendente',
-        sit=[Pt.chip('Bloqueada','red'),Pt.br(),Pt.mut('laudo foliar inconsistente')],acao=[Pt.cta('Corrigir laudo','AG-02.dc.html',u=True)]),
+        sit=[Pt.chip('Submetida','yellow'),Pt.br(),Pt.mut('liberação na OS-0418')],acao=[Pt.cta('Liberar OS-0418','OS.dc.html#OS-0418')]),
       R('REC-018',id=[Pt.b('REC-018'),Pt.mut('rascunho')],parc='T2 · Soja',orig='PLA-104 · coleta do T2 em 26/09',op='Calagem · saturação por bases',
         prod=('Calcário PRNT 80 · dose por zona',[Pt.txt('Calcário PRNT 80 · dose por zona'),Pt.br(),Pt.mut('janela: pré-plantio · até 20/10')]),dose='',jan='pré-plantio · até 20/10',fonte='CQFS-RS/SC',
         sit=[Pt.chip('Rascunho','gray'),Pt.br(),Pt.mut('aguarda laudo do T2')],acao=[]),
     ]
+    for r_ in rows4:   # operação + talhão (linha de baixo); a versão vai para baixo do número
+        r_['p']['op']=[Pt.txt(r_['v']['op']),Pt.br(),Pt.mut(r_['v']['parc'])]; r_['s']['op']=r_['v']['op']+' '+r_['v']['parc']
+        if len(r_['p'].get('id',[]))==2: r_['p']['id']=[r_['p']['id'][0],Pt.br(),r_['p']['id'][1]]
+    rows4[0]['dr']='a4go_REC-014'
     g4=grid(c4,rows4,edit=dict(m='form',title='Recomendação',
-             sub='Edite o rascunho; o cálculo sugere a dose e registra a memória. Recomendação submetida ou aprovada fica em consulta: alterar cria nova versão só para o saldo.',
-             fields=[F('op','Operação · alvo','sel',opts=['Calagem · saturação por bases','Gessagem','Plantio · nematoide + K','Pulverização · ferrugem asiática','Inseticida · mosca-branca','Fertirrigação · ureia'],req=True),
-                     F('parc','Parcela','sel',opts=PARC,req=True),F('prod','Produto · dose','txt',req=True),
+             fields=[F('op','Operação · alvo','sel',opts=['Calagem · saturação por bases','Gessagem','Plantio · nematoide + K','Pulverização · ferrugem asiática','Fertirrigação · ureia'],req=True),
+                     F('parc','Talhão','sel',opts=PARC,req=True),F('prod','Produto · dose','txt',req=True),
                      F('dose','Dose informada','num',min=0,max=10,u='t/ha',help='Sugerida 2,1 t/ha (aguarda laudo); o desvio fica registrado.'),
                      F('jan','Janela','txt',req=True),F('fonte','Fonte','sel',opts=['CQFS-RS/SC','IAC Boletim 100','Embrapa Cerrados','CFSEMG 5ª aproximação'],req=True)]),
              gid='g_rec',total=False)
-    EXTRAJS[0]='''
-function EXTRAVALS(self,v){ self.g2after=(gid,rows,r)=>{ if(gid!=='g_rec') return; r.p.prod=[{k:'txt',t:r.v.prod},{k:'br'},{k:'mut',t:'janela: '+(r.v.jan||'—')}]; r.s.prod=r.v.prod+' '+(r.v.jan||''); }; }'''
-    corpo=bloco('Recomendações por origem e destino','Siga a origem de cada recomendação e decida as pendentes; aprovar gera uma única necessidade no planejamento.',g4,
-        ilink('Ver demanda gerada','PL-02.dc.html','layers','Abrir as necessidades geradas no planejamento'))
-    HEIGHTS37[fname]=760
-    shell37('AG-04','Recomendações',corpo,fname=fname,
-      subtitle='Origem, produto, dose, janela, fonte e aprovador; o detalhe traz cálculo, prescrição, versões e execução.',
-      status=('2 aguardam decisão · 1 bloqueada','yellow'),
-      footer='Submeter congela a versão; alteração pós-aprovação cria versão só para o saldo futuro; dose fixa em vez de taxa variável é opção técnica.')
+    EXTRAJS[0]=cenario.js_prefixo()+DM.js_prefixo()+JS_AG01.split('function agRow(')[0]+r'''
+// receituários do MIP (REC-015 e os novos) do estado compartilhado; a linha abre a vistoria de origem (o receituário fica no painel dela)
+function a4Rec(r,s,c,v){ const vv=s.vis[r.vis]; const t=MIPD.tal[r.tal]||{rot:r.tal,cultura:''}; const p=vv?mipP(vv):{alvo:''}; const canc=r.sit==='Cancelado'; const emit=r.sit==='Receituário emitido'||canc;
+  const osc=r.sit==='Receituário emitido'&&mipOsFora(c,r.os);
+  const et=r.os?(mipOsEt(c,r.os)||'—'):''; const dr='a4go_'+r.id; v[dr]=()=>{ location.href='AG-01.dc.html#'+r.vis; };
+  const prod=emit?(r.nome+' '+mipN(r.dose,3)+' '+r.un+'/ha · '+mipN(r.area)+' ha'):'a definir na decisão'; const jan=emit?('a partir de '+mipBr(r.data)):'—';
+  return {id:r.id,ro:true,dr,v:{id:r.id,parc:t.rot+' · '+t.cultura,op:'Pulverização · '+p.alvo.toLowerCase(),jan,fonte:emit?('bula AGROFIT · Ana (RT) · '+r.ra):'— · pendente'},
+    s:{orig:r.dia+' '+r.vis,op:'Pulverização · '+p.alvo.toLowerCase()+' '+t.rot,prod:prod+' '+jan,sit:canc?'Cancelado':(osc?'O.S. cancelada':(emit?'Receituário emitido':'Rascunho'))},
+    p:{id:[{k:'b',t:r.id},{k:'br'},{k:'mut',t:emit?r.ra:'rascunho'}],orig:[{k:'txt',t:r.dia},{k:'br'},{k:'link',t:r.vis,h:'AG-01.dc.html#'+r.vis}],
+       op:[{k:'txt',t:'Pulverização · '+p.alvo.toLowerCase()},{k:'br'},{k:'mut',t:t.rot+' · '+t.cultura}],
+       prod:[{k:'txt',t:prod},{k:'br'},{k:'mut',t:'janela: '+jan}],
+       sit:canc?[{k:'chip',t:'Cancelado',c:'gray'},{k:'br'},{k:'mut',t:(r.motivo||r.os+' cancelada')+(r.subst?' · substituído pelo '+r.subst:'')}]
+          :(osc?[{k:'chip',t:'O.S. cancelada',c:'red'},{k:'br'},{k:'mut',t:r.os+' · decidir de novo'}]
+          :(emit?[{k:'chip',t:'Receituário emitido',c:'green'},{k:'br'},{k:'mut',t:r.os+' · '+et}]:[{k:'chip',t:'Rascunho',c:'gray'},{k:'br'},{k:'mut',t:'aguarda a decisão do '+r.dia}])),
+       acao:canc?[{k:'mut',t:r.subst?'ver '+r.subst:'—'}]:((osc||!emit)?[{k:'cta',t:'Decidir controle',h:'AG-01.dc.html#'+r.vis+':decidir',u:true}]:[{k:'cta',t:'Abrir '+r.os,h:'OS.dc.html#'+r.os}])}}; }
+function PREVALS(self,v){ cenOuvir(self); mipOuvir(self); const sp=GRIDS.find(g=>g.id==='g_rec'); if(!sp.base) sp.base=sp.rows.slice();
+  const s=mipGet(), c=agC(); const mip=Object.values(s.rec).sort((a,b)=>(a.id<b.id?-1:1)).map(r=>a4Rec(r,s,c,v));
+  sp.rows=[sp.base[0]].concat(mip.filter(r=>r.id<'REC-016')).concat(sp.base.slice(1)).concat(mip.filter(r=>r.id>='REC-016')); }
+function EXTRAVALS(self,v){ v['a4go_REC-014']=()=>{ location.href='AG-04det.dc.html'; };
+  self.g2after=(gid,rows,r)=>{ if(gid!=='g_rec') return; r.p.prod=[{k:'txt',t:r.v.prod},{k:'br'},{k:'mut',t:'janela: '+(r.v.jan||'—')}]; r.s.prod=r.v.prod+' '+(r.v.jan||'');
+    r.p.op=[{k:'txt',t:r.v.op||'—'},{k:'br'},{k:'mut',t:r.v.parc||''}]; r.s.op=(r.v.op||'')+' '+(r.v.parc||''); }; }
+'''
+    corpo=bloco('Recomendações e receituários','',g4,ilink('Ver demanda gerada','PL-02.dc.html','layers','Abrir as necessidades geradas no planejamento'))
+    HEIGHTS37[fname]=700; PARENT37[fname]='AG-01.dc.html'
+    shell37('AG-04','Recomendações',corpo,fname=fname,crumbs_extra=['Recomendações'],search=False,status=('1 uso sem registro (REC-014)','red'))
 
-    # ---- AG-04det · REC-014 (elo 3 + decisão da v3 do saldo · DEMO-14) ----
+    # ---- AG-04det · REC-014 (elo 3): v3 já aprovada no saldo (igual ao Mapa e à O.S.) e conferência Agrofit do TS ----
     fname='AG-04det.dc.html'; E._reset_screen(fname)
-    cver=[dict(k='ver',l='Versão'),dict(k='mud',l='O que muda',w=320),dict(k='alc',l='Alcance',w=200),dict(k='sit',l='Situação',w=210),dict(k='data',l='Quando',t='date')]
+    cver=[dict(k='ver',l='Versão'),dict(k='mud',l='O que muda',w=320),dict(k='alc',l='Alcance',w=200),dict(k='sit',l='Situação',w=230),dict(k='data',l='Quando',t='date')]
     gver=grid(cver,[
         R('v1',ver='v1',mud='KCl 100 kg/ha em dose única',alc='—',sit=[Pt.chip('Substituída','gray')],data='2026-09-18'),
-        R('v2',ver='v2',mud='Dose por zona (140/120/95 kg/ha) + TS nematicida',alc=f'{REAL20} ha realizados na OS-0420',sit=[Pt.chip('Aprovada · em uso','green')],data='2026-09-21'),
-        R('v3',ver='v3 (proposta)',mud='KCl −12 % → 105,6 kg/ha (zonas 123/106/84)',alc=f'só o saldo de {SALDO20} ha',sit=[Pt.chip('Aguardando decisão','yellow')],data='2026-09-23'),
-      ],edit=consulta(cver,'Versão da recomendação','Histórico de versões: o realizado nunca muda; a proposta vale só para o saldo.'),search=False,gid='g_ver',total=False)
-    cit=[dict(k='prod',l='Produto',w=200),dict(k='un',l='Unidade'),dict(k='sug',l='Dose sugerida',a='r'),dict(k='inf',l='Dose informada',a='r'),dict(k='desv',l='Desvio',a='r'),dict(k='fonte',l='Fonte',w=280)]
+        R('v2',ver='v2',mud='Dose por zona (140/120/95 kg/ha) + TS nematicida',alc=f'{REAL20} ha realizados na OS-0420',sit=[Pt.chip(f'Em uso nos {REAL20} ha realizados','green')],data='2026-09-21'),
+        R('v3',ver='v3',mud='KCl −12 % → 105,6 kg/ha (zonas 123/106/84)',alc=f'só o saldo de {SALDO20} ha',sit=[Pt.chip('KCl aprovado por Ana','green'),Pt.br(),Pt.chip('TS travado · sem registro','red')],data='2026-09-23'),
+      ],edit=consulta(cver,'Versão da recomendação','Histórico de versões: o realizado nunca muda; a versão nova vale só para o saldo.'),search=False,gid='g_ver',total=False)
+    cit=[dict(k='prod',l='Produto',w=200),dict(k='un',l='Unidade'),dict(k='sug',l='Dose sugerida',a='r'),dict(k='inf',l='Dose informada',a='r'),dict(k='bula',l='Registro Agrofit',w=260)]
     git=grid(cit,[
-        R('i1',prod='KCl 60 %',un='kg/ha',sug='118',inf=[Pt.b('120')],desv='+1,7 %',fonte='IAC Boletim 100 · K trocável 0,08 cmolc/dm³'),
-        R('i2',prod='TS nematicida (abamectina)',un='mL/100 kg sem.',sug='100',inf=[Pt.b('100')],desv='0 %',fonte='bula AGROFIT · reboleiras da VIS-011'),
-        R('i3',prod='Semente 58 W (resistente)',un='kg/ha',sug='52',inf=[Pt.b('52')],desv='0 %',fonte='plano Soja alta tecnologia · decisão do DIA-007'),
-      ],edit=consulta(cit,'Item da recomendação','Versão aprovada: altere por nova versão, que vale só para o saldo.'),search=False,gid='g_it',total=False)
+        R('i1',prod='KCl 60 %',un='kg/ha',sug='118',inf=[Pt.b('120')],bula=[Pt.mut('fertilizante · fora do Agrofit')],o=[('IAC Boletim 100 · K trocável 0,08 cmolc/dm³','AG-02.dc.html')]),
+        R('i2',prod='TS nematicida (abamectina)',un='mL/100 kg sem.',sug='100',inf=[Pt.b('100')],
+          bula=[Pt.chip('Sem registro p/ nematoide-de-cisto','red'),Pt.br(),Pt.mut('bula: galhas e lesões · 125 mL/100 kg')],
+          o=[('Ficha Abamectina 500 FS · registro só para nematoide-das-galhas e das-lesões',None),
+             ('Alternativa registrada para cisto: Pasteuria nishizawae FS · 0,3 L/100 kg de sementes',None)]),
+        R('i3',prod='Semente 58 W (resistente)',un='kg/ha',sug='52',inf=[Pt.b('52')],bula=[Pt.mut('semente · fora do Agrofit')],o=[('Decisão do DIA-007 · cultivar resistente','AG-03det.dc.html')]),
+      ],edit=dict(m='origin',title='Item da recomendação',sub='Versão aprovada: confira a origem; alteração por nova versão, só para o saldo.',fields=[F('prod','Produto',ro=True),F('inf','Dose informada',ro=True)]),search=False,gid='g_it',total=False)
     cz=[dict(k='zona',l='Zona'),dict(k='area',l='Área',t='num',a='r',u='ha',agg='sum'),dict(k='k',l='K trocável'),dict(k='dose',l='KCl 60 % (v2)',t='num',a='r',u='kg/ha'),dict(k='v3',l='Saldo na v3',t='num',a='r',d=1,u='kg/ha')]
     gz=grid(cz,[
         R('z1',zona='Z1 (reboleiras)',area=62,k='0,05 cmolc/dm³',dose=140,v3=123.2,o=[('LAU-2043 · zona 1 · K 0,05 cmolc/dm³','AG-02.dc.html'),('IAC Boletim 100 · classe muito baixa → 140 kg/ha',None),('v3: 140 × 0,88 = 123,2 kg/ha',None)]),
@@ -399,86 +340,50 @@ function EXTRAVALS(self,v){ self.g2after=(gid,rows,r)=>{ if(gid!=='g_rec') retur
         R('z3',zona='Z3',area=44,k='0,12 cmolc/dm³',dose=95,v3=83.6,o=[('LAU-2043 · zona 3 · K 0,12 cmolc/dm³','AG-02.dc.html'),('IAC Boletim 100 · classe média → 95 kg/ha',None),('v3: 95 × 0,88 = 83,6 kg/ha',None)]),
       ],edit=dict(m='origin',title='Dose da zona',sub='Dose calculada: confira a origem; para mudar, crie nova versão.',fields=[F('zona','Zona',ro=True),F('dose','KCl 60 % (v2)',ro=True,u='kg/ha'),F('v3','Saldo na v3',ro=True,u='kg/ha')]),
       search=False,gid='g_zon',total=True)
-    cex=[dict(k='reg',l='Registro'),dict(k='oque',l='O que é',w=300),dict(k='sit',l='Situação',w=300)]
+    cex=[dict(k='reg',l='Registro'),dict(k='oque',l='O que é',w=300),dict(k='sit',l='Situação',w=320)]
     gex=grid(cex,[
         R('nec',reg=[Pt.link('NEC-028','PL-02.dc.html')],oque='Necessidade de plantio do T4 · 204 ha · 1ª onda de 100 ha',sit=[Pt.chip('Programada','green')]),
-        R('os',reg=[Pt.link('OS-0420',DET0420)],oque=f'{OS20["tipo"]} · {REAL20}/{AREA20} ha · saldo {SALDO20} ha',
-          sit=[Pt.chip('Em execução','green'),Pt.chip('Impedida · OM-0233','red'),Pt.chip('v3 em revisão · saldo pausado','yellow')]),
+        R('os',reg=[Pt.link('OS-0420','OS.dc.html#OS-0420')],oque=f'{OS20["tipo"]} · {REAL20}/{AREA20} ha · saldo {SALDO20} ha na v3',
+          sit=[Pt.chip('Em execução','green'),Pt.chip('Impedida · OM-0233','red')]),
       ],edit=consulta(cex,'Registro vinculado','Destino da recomendação: demanda única, sem duplicar; abra o registro pelo link.'),search=False,gid='g_exe',total=False)
     CUSTO=[('c1','Semente de soja 58 W','REQ-036','SU-07.dc.html','1.560 kg × R$ 9,50',1560*9.5,'Definitivo','green'),
            ('c2','KCl 60 %','REQ-037','SU-07.dc.html','3.600 kg × R$ 2,40',3600*2.4,'Definitivo','green'),
            ('c3','Máquina e equipe · plantio','Apontamentos dias 1 e 2','CA-02.dc.html','6,0 h × R$ 396,00',6*396,'Provisório · 12 ha a conferir','yellow'),
            ('c4','Diesel S10 · Trator T1','Abastecimento','MA-05.dc.html','84 L × R$ 5,92',84*5.92,'Provisório · conciliar tanque','yellow')]
-    tot_custo=sum(c[5] for c in CUSTO)
     ccu=[dict(k='item',l='Recurso',w=200),dict(k='orig',l='Origem'),dict(k='qtd',l='Quantidade × preço',w=170),dict(k='custo',l='Custo',t='num',a='r',d=2,pre='R$ ',agg='sum'),dict(k='sit',l='Situação',w=200)]
-    gcu=grid(ccu,[R(i,item=it,orig=[Pt.link(o,h)],qtd=q,custo=round(v,2),sit=[Pt.chip(s,c)],o=[(f'{o} · {q}',h),(f'{REAL20} ha realizados na v2 · preservados se a v3 for aprovada',None)])
+    gcu=grid(ccu,[R(i,item=it,orig=[Pt.link(o,h)],qtd=q,custo=round(v,2),sit=[Pt.chip(s,c)],o=[(f'{o} · {q}',h),(f'{REAL20} ha realizados na v2 · preservados na v3',None)])
                   for i,it,o,h,q,v,s,c in CUSTO],
-        edit=dict(m='origin',title='Custo realizado',sub='Custo apontado nos hectares já plantados; nenhuma decisão sobre a v3 altera este valor.',
+        edit=dict(m='origin',title='Custo realizado',sub='Custo apontado nos hectares já plantados; versão nova não altera este valor.',
                   fields=[F('item','Recurso',ro=True),F('qtd','Quantidade × preço',ro=True),F('custo','Custo',ro=True,u='R$')]),
         search=False,gid='g_cus',total=True)
-    DEC_MSG={
-      'aprovada':('v3 aprovada por Ana (RT)',f'Vale só para o saldo de {SALDO20} ha (KCl 105,6 kg/ha; zonas 123/106/84). Os {REAL20} ha realizados ficam na v2 com custo apontado de R$ {nf(tot_custo,2)}. '
-                  f'A OS-0420 continua Em execução com o selo Impedida: o saldo de {SALDO20} ha só é liberado depois de revalidar a prontidão (OM-0233 ou Trator 02 substituto).',
-                  'Revalidar prontidão no PCP','PL-05.dc.html','green'),
-      'devolvida':('v3 devolvida ao PCP com pergunta',f'O saldo de {SALDO20} ha segue pausado e as fichas futuras continuam revogadas. A v2 vale só para os {REAL20} ha realizados até a nova proposta.',
-                  'Acompanhar resposta no PCP','PL-05.dc.html','yellow'),
-      'rejeitada':('v3 rejeitada por Ana (RT)',f'O saldo de {SALDO20} ha volta para a v2 (KCl 120 kg/ha). O selo de revisão sai da OS-0420; o saldo só é liberado depois de revalidar a prontidão (OM-0233 ou substituto).',
-                  'Revalidar prontidão no PCP','PL-05.dc.html','yellow')}
-    EXTRAJS[0]='const AGDEC='+json.dumps({k:dict(t=a,x=b,pt=c,ph=d,c=e) for k,(a,b,c,d,e) in DEC_MSG.items()},ensure_ascii=False)+''';
-const AGCHIP={aprovada:[{k:'chip',t:'Aprovada · vale para o saldo de 70 ha',c:'green'}],devolvida:[{k:'chip',t:'Devolvida ao PCP',c:'yellow'}],rejeitada:[{k:'chip',t:'Rejeitada',c:'gray'}]};
-function PREVALS(self,v){ const d=self.state.dec||'';
-  const gv=GRIDS.find(g=>g.id==='g_ver'); const r3=gv.rows.find(r=>r.id==='v3'); const r2=gv.rows.find(r=>r.id==='v2');
-  r3.p.sit = d ? AGCHIP[d] : [{k:'chip',t:'Aguardando decisão',c:'yellow'}]; r3.s.sit=r3.p.sit[0].t; r3.v.ver = d==='aprovada' ? 'v3' : 'v3 (proposta)';
-  r2.p.sit = d==='aprovada' ? [{k:'chip',t:'Em uso nos 30 ha realizados',c:'green'}] : [{k:'chip',t:'Aprovada · em uso',c:'green'}]; r2.s.sit=r2.p.sit[0].t;
-  const ge=GRIDS.find(g=>g.id==='g_exe'); const ro=ge.rows.find(r=>r.id==='os');
-  ro.p.sit=[{k:'chip',t:'Em execução',c:'green'},{k:'chip',t:'Impedida · OM-0233',c:'red'}].concat(d==='devolvida'||!d ? [{k:'chip',t:'v3 em revisão · saldo pausado',c:'yellow'}] : [{k:'chip',t:'Saldo aguarda prontidão',c:'yellow'}]);
-  ro.s.sit=ro.p.sit.map(x=>x.t).join(' '); }
-function EXTRAVALS(self,v){ const d=self.state.dec||''; const ask=self.state.decAsk||'';
-  v.dv_pend=!d; v.dv_done=!!d; v.dv_ask_rej=(ask==='rej'); v.dv_ask_dev=(ask==='dev'); v.dv_noask=!d && !ask;
-  const m=d?AGDEC[d]:null; v.dv_rt=m?m.t:''; v.dv_rx=m?m.x:''; v.dv_pt=m?m.pt:''; v.dv_ph=m?m.ph:'#';
-  v.dv_rst='display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border-radius: 12px; font-size: 13px; line-height: 1.5; '+(m&&m.c==='green'?'background: #E4F3E9; color: #15201A; border: 1px solid #1E7A4C;':'background: #FFF3D6; color: #15201A; border: 1px solid #8A5A00;');
-  const dec=(k,msg)=>{ if(self.state.dec) return; self.setState({dec:k,decAsk:null,g2toast:msg}); };
-  v.dv_aprovar=()=>dec('aprovada','v3 aprovada · vale só para o saldo de 70 ha · recibo registrado.');
-  v.dv_rej=()=>self.setState({decAsk:'rej'}); v.dv_dev=()=>self.setState({decAsk:'dev'}); v.dv_cancel=()=>self.setState({decAsk:null});
-  v.dv_rej_ok=()=>dec('rejeitada','v3 rejeitada · o saldo volta para a v2 · recibo registrado.');
-  v.dv_dev_ok=()=>dec('devolvida','v3 devolvida ao PCP · pergunta registrada · saldo segue pausado.'); }'''
-    confirm=lambda hole,txt,ok,okfn: (f'<sc-if value="{H(hole)}" hint-placeholder-val="{F_()}"><div role="alert" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 12.8px; font-weight: 700;">{esc(txt)}'
-                                      f'<span style="flex-grow: 1;"></span><button type="button" onClick="{H("dv_cancel")}" style="{_MINI}">Voltar</button><button type="button" onClick="{H(okfn)}" style="{_MINIP}">{esc(ok)}</button></div></sc-if>')
-    acoes_dec=(f'<sc-if value="{H("dv_noask")}" hint-placeholder-val="{T_()}"><div style="display: flex; gap: 8px; flex-wrap: wrap;">'
-               f'<button type="button" onClick="{H("dv_dev")}" title="Devolver a v3 ao PCP com uma pergunta; o saldo segue pausado" style="{BTN_ST(False,True)} display: inline-flex; align-items: center; gap: 6px;">{icon("clock",14)}Devolver com pergunta</button>'
-               f'<button type="button" onClick="{H("dv_rej")}" title="Rejeitar a v3; o saldo volta para a v2" style="{BTN_ST(False,True)} display: inline-flex; align-items: center; gap: 6px; color: {RED};">{icon("alert",14)}Rejeitar v3</button></div></sc-if>')
-    recibo=(f'<sc-if value="{H("dv_done")}" hint-placeholder-val="{F_()}"><div role="status" style="{H("dv_rst")}"><b>Recibo · {H("dv_rt")}</b><span>{H("dv_rx")}</span>'
-            f'<span><b>Próxima pendência:</b> <a href="{H("dv_ph")}" style="color: {ACC}; font-weight: 700; text-decoration: none;">{H("dv_pt")} ›</a></span></div></sc-if>')
-    decisao=(nota(f'A v3 muda só o saldo de <b style="color:{INK};">{SALDO20} ha</b>; os <b style="color:{INK};">{REAL20} ha</b> já plantados ficam na v2. Aprove pelo botão principal, ou devolva ou rejeite aqui.')
-             + gver
-             + f'<sc-if value="{H("dv_pend")}" hint-placeholder-val="{T_()}">{acoes_dec}'
-             + confirm('dv_ask_dev','Devolver a v3 ao PCP com a pergunta "confirmar custo do KCl no saldo"? O saldo segue pausado.','Confirmar devolução','dv_dev_ok')
-             + confirm('dv_ask_rej',f'Rejeitar a v3? O saldo de {SALDO20} ha volta para a v2 (KCl 120 kg/ha).','Confirmar rejeição','dv_rej_ok')
-             + '</sc-if>' + recibo)
+    alerta=(f'<div role="alert" style="display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: 10px; background: {REDS}; border: 1px solid #F4C7C1; color: {RED}; font-size: 13px; font-weight: 700; line-height: 1.45;">'
+            f'<span>Trava legal: TS nematicida (abamectina) sem registro para soja × nematoide-de-cisto. O saldo de {SALDO20} ha só usa TS registrado: crie a v4.</span>'
+            f'<span style="display: flex; gap: 14px; flex-wrap: wrap;"><a href="AG-07.dc.html#abamectina-500-fs" style="color: {RED};">Ficha da abamectina 500 FS ›</a>'
+            f'<a href="AG-07.dc.html#pasteuria-nishizawae-fs" style="color: {RED};">Pasteuria nishizawae FS (registrada para cisto) ›</a></span></div>')
     memoria=(f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.7; background: {BG}; border: 1px solid {LINE}; border-radius: 12px; padding: 12px 14px;">'
              f'K trocável 0,08 cmolc/dm³ ({LAUDOS[0]} · Mehlich-1 · 0–20 cm) · CTC 9,2 → participação de K 0,9 % (alvo 3 %)<br>'
              f'IAC Boletim 100 · soja &gt; 3 t/ha esperadas → <b style="color:{INK};">70 kg/ha de K₂O</b> na base ≈ 118 kg/ha de KCl 60 %<br>'
              f'Informado 120 kg/ha (arredondamento do regulador da plantadeira) · desvio +1,7 % registrado</div>')
     corpo=(
-      cadeia('REC-014','Revalidar prontidão no PCP (depois de decidir a v3)','PL-05.dc.html')
-      + bloco('Versões e decisão da v3','Decida a proposta para o saldo; o realizado nunca muda.',decisao,tone='yellow')
-      + bloco('Contexto da versão aprovada','Confira origem, janela, fonte e destino da v2.',
-          _kv([('Origem','<a href="AG-03det.dc.html" style="color: '+ACC+'; font-weight: 700; text-decoration: none;">DIA-007 ›</a> nematoide + K baixo'),('Ciclo · parcela','Safra 2026/27 · T4 · 204 ha'),
-               ('Operação','Plantio'),('Janela','20/09 a 05/10'),('Fonte científica','IAC Boletim 100'),('Aprovador (RT)','Ana'),('Aprovada em','21/09/2026'),('Destino','NEC-028 · demanda única')]))
-      + bloco('Itens · dose informada × sugerida','Confira a dose que o cálculo sugeriu e a que o agrônomo informou; o desvio fica registrado.',git)
-      + bloco('Memória de cálculo','Reproduza o cálculo pela entrada, tabela e resultado.',memoria)
-      + bloco('Prescrição espacial por zona','Confira a dose de cada zona e exporte para o terminal; dose fixa é opção técnica, não aprovação adicional.',gz,
-          imsg('Gerar prescrição','Prescrição por zona (3 zonas do T4) validada: terminal da plantadeira, unidade kg/ha, coordenadas SIRGAS 2000 e versão v2 conferidos · pronta para exportar.',
+      cadeia('REC-014','','')
+      + bloco('Itens e registro Agrofit','',alerta+git,tone='red')
+      + bloco('Versões','',gver)
+      + bloco('Contexto da versão aprovada','',
+          _kv([('Origem','<a href="AG-03det.dc.html" style="color: '+ACC+'; font-weight: 700; text-decoration: none;">DIA-007 ›</a> nematoide + K baixo'),('Ciclo · talhão','Safra 2026/27 · T4 · 204 ha'),
+               ('Operação','Plantio'),('Janela','20/09 a 05/10'),('Fonte científica','IAC Boletim 100'),('Aprovador (RT)','Ana'),('Aprovada em','21/09/2026 · v3 (KCl) em 23/09'),('Destino','NEC-028 · demanda única')]))
+      + bloco('Memória de cálculo','',memoria)
+      + bloco('Prescrição espacial por zona','',gz,
+          imsg('Gerar prescrição','Prescrição por zona (3 zonas do T4) validada: terminal da plantadeira, unidade kg/ha, coordenadas SIRGAS 2000 e versão v3 do saldo conferidos · pronta para exportar.',
                'map','Validar terminal, unidade, coordenadas e versão e gerar o arquivo da prescrição'))
-      + bloco('Execução vinculada','Abra a necessidade e a ordem geradas por esta recomendação.',gex)
-      + bloco(f'Custo realizado dos {REAL20} ha','Confira o custo apontado nos hectares já plantados; clique na linha para ver a origem.',gcu))
-    prim=(f'<sc-if value="{H("dv_pend")}" hint-placeholder-val="{T_()}"><button type="button" onClick="{H("dv_aprovar")}" title="Aprovar a v3 só para o saldo de {SALDO20} ha" style="{BTN_ST(True)} display: inline-flex; align-items: center; gap: 6px;">{icon("check",15)}Aprovar v3 do saldo</button></sc-if>'
-          f'<sc-if value="{H("dv_done")}" hint-placeholder-val="{F_()}"><a href="{H("dv_ph")}" style="{BTN_ST(True)} display: inline-flex; align-items: center; gap: 6px; text-decoration: none;">{icon("calendar",15)}{H("dv_pt")}</a></sc-if>')
-    HEIGHTS37[fname]=2640; PARENT37[fname]='AG-04.dc.html'
-    shell37('AG-04','Recomendação · REC-014 plantio T4',corpo,fname=fname,crumbs_extra=['REC-014 · v2'],
-      subtitle='Origem no DIA-007, memória de cálculo, prescrição por zona e destino na NEC-028 e na OS-0420.',
-      status=('Aprovada · OS-0420 impedida','red'),primary_html=prim,
-      footer='A instrução da OS-0420 herda produto, dose e janela desta versão; alteração pós-aprovação vale só para o saldo.')
+      + bloco('Execução vinculada','',gex)
+      + bloco(f'Custo realizado dos {REAL20} ha','',gcu))
+    HEIGHTS37[fname]=2300; PARENT37[fname]='AG-04.dc.html'
+    shell37('AG-04','Recomendação · REC-014 plantio T4',corpo,fname=fname,crumbs_extra=['Recomendações','REC-014 · v2'],search=False,
+      status=(f'Saldo de {SALDO20} ha travado · TS sem registro','red'),
+      primary_html=idrawer('Criar v4 com TS registrado',dict(title='Criar v4 · saldo de 70 ha',sub='Troca o TS sem registro por um produto registrado para soja × nematoide-de-cisto; o realizado na v2 não muda.',
+           fields=[('TS registrado para cisto','Pasteuria nishizawae FS'),('Dose','0,3 L/100 kg de sementes'),('KCl','mantém a v3 (105,6 kg/ha)'),('Alcance',f'saldo de {SALDO20} ha'),('Aprovador (RT)','Ana')],
+           confirm='Criar v4 para aprovação',done=f'v4 em rascunho com Pasteuria nishizawae FS · Ana aprova; até lá o TS do saldo segue travado.'),
+           'leaf','Criar a versão 4 só para o saldo, com TS registrado para nematoide-de-cisto',primary=True,small=False))
 
     # ================= AG-05 · Biblioteca agronômica e planos técnicos =================
     fname='AG-05.dc.html'; E._reset_screen(fname)
@@ -572,39 +477,1277 @@ function EXTRAVALS(self,v){ self.g2after=(gid,rows,r)=>{ if(gid!=='g_bib') retur
       primary_html=ilink('Programar avaliação','AG-01.dc.html','calendar','Programar a vistoria de leitura pós',primary=True,small=False),
       footer='Redução observada não equivale a eficácia causal; a EF-020 fecha a cadeia da demonstração quando a OS-0420 tiver leitura pós.')
 
-    # ================= AG-07 · Bulas e registros (AGROFIT) =================
+    ag07()   # AG-07 · Consulta Agrofit (função própria, abaixo)
+
+# ================= Pragas e doenças (MIP/MID) · AG-01 lista + painel + decisão · AG-01det rota e evidências =================
+# Uma base só (dados_mip.py + mip.js, estado 'talhao-os-mip-v1'): o Mapa, o AG-01, o AG-01det, o AG-03/AG-04 e o app (MB-06) leem e gravam
+# as mesmas vistorias. A decisão do agrônomo (RT) gera DIA + REC/RA + O.S. em A liberar no cenário das O.S. (Ana libera em OS.dc.html).
+# AG-01.dc.html#VIS-xxx abre o painel da vistoria e troca a fazenda do filtro; sem hash, a fazenda vem do contexto do Mapa (mapa-ctx).
+_LAB=lambda t: f'<div style="font-size: 11px; font-weight: 800; letter-spacing: .06em; color: {MUTED}; text-transform: uppercase;">{t}</div>'
+def _ch(t,st,dot): return f'<span style="{H(st)}"><span style="{H(dot)}"></span>{H(t)}</span>'
+_BOX_RED=f'font-size: 12.8px; font-weight: 700; line-height: 1.45; color: {RED}; background: {REDS}; padding: 7px 10px; border-radius: 8px;'
+_BOX_YEL=f'font-size: 12.8px; font-weight: 600; line-height: 1.45; color: {YEL}; background: {YELS}; padding: 7px 10px; border-radius: 8px;'
+_BOX_INF=f'font-size: 12.5px; line-height: 1.45; color: {MUTED};'
+_INP=f'font-family: inherit; font-size: 14px; padding: 8px 10px; border-radius: 9px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; box-sizing: border-box;'
+_FLD=f'display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 700; color: {MUTED};'
+_LNKA=f'font-size: 12.5px; font-weight: 700; color: {ACC}; text-decoration: none; white-space: nowrap;'
+
+def _ag01_painel():
+    sec=lambda k,titulo,corpo: (f'<sc-if value="{H("ps_"+k)}" hint-placeholder-val="{T_()}"><section aria-label="{titulo}" style="border: 1px solid {LINE}; border-radius: 12px; padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 8px;">'
+                                f'{_LAB(titulo)}{corpo}</section></sc-if>')
+    steps=(f'<div role="list" aria-label="Etapas da vistoria" style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px;">'
+           f'<sc-for list="{H("pan_steps")}" as="p" hint-placeholder-count="5"><div role="listitem" aria-current="{H("p.cur")}" style="{H("p.st")}"><span style="{H("p.bst")}"></span>{H("p.t")}</div></sc-for></div>')
+    msgs=lambda lst,st,role: f'<sc-for list="{H(lst)}" as="m" hint-placeholder-count="0"><div role="{role}" style="{st}">{H("m.t")}</div></sc-for>'
+    # formulário de decisão (dentro do Próximo passo): tipo de decisão · produtos registrados com a conferência · dose, área e data · RT
+    prod=(f'<sc-for list="{H("dc_prods")}" as="x" hint-placeholder-count="3"><div style="{H("x.st")}">'
+          f'<label style="display: flex; align-items: flex-start; gap: 8px; flex-grow: 1; min-width: 0; cursor: pointer;">'
+          f'<input type="radio" name="dc_prod" checked="{H("x.on")}" onChange="{H("x.pick")}" aria-label="{H("x.nome")}" style="margin: 3px 0 0; width: 16px; height: 16px; accent-color: {ACC}; flex-shrink: 0;">'
+          f'<span style="display: flex; flex-direction: column; gap: 1px; min-width: 0;"><b style="font-size: 13.5px;">{H("x.nome")}</b><span style="font-size: 12px; color: {MUTED}; line-height: 1.35;">{H("x.sub")}</span></span></label>'
+          f'{_ch("x.cht","x.chst","x.chdot")}<a href="{H("x.h")}" target="_blank" rel="noopener" title="Abrir a ficha na Consulta Agrofit (nova aba)" style="{_LNKA}">Ficha ›</a></div></sc-for>')
+    campos=(f'<div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;">'
+            f'<sc-if value="{H("dc_temProd")}" hint-placeholder-val="{F_()}"><label style="{_FLD}"><span>Dose ({H("dc_un")}/ha)</span><input id="dc_dose" inputMode="decimal" aria-label="Dose por hectare" value="{H("dc_dose")}" onChange="{H("dc_setdose")}" style="{_INP} width: 110px; text-align: right;"></label></sc-if>'
+            f'<label style="{_FLD}"><span>{H("dc_areaL")}</span><input inputMode="decimal" aria-label="Área em hectares" value="{H("dc_area")}" onChange="{H("dc_setarea")}" style="{_INP} width: 100px; text-align: right;"></label>'
+            f'<label style="{_FLD}"><span>A partir de</span><input type="date" aria-label="Data da aplicação" value="{H("dc_data")}" onChange="{H("dc_setdata")}" style="{_INP}"></label></div>')
+    form=(f'<sc-if value="{H("pan_dec")}" hint-placeholder-val="{F_()}"><div role="group" aria-label="Decisão do agrônomo" style="display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 10px; background: {SURF}; border: 1px solid {LINE};">'
+          f'<div role="radiogroup" aria-label="Decisão" style="display: flex; gap: 6px; flex-wrap: wrap;"><sc-for list="{H("dc_kinds")}" as="o" hint-placeholder-count="3">'
+          f'<button type="button" role="radio" aria-checked="{H("o.on")}" onClick="{H("o.go")}" style="{H("o.st")}">{H("o.t")}</button></sc-for></div>'
+          f'<sc-if value="{H("dc_ctl")}" hint-placeholder-val="{F_()}">'
+          f'<sc-if value="{H("dc_semProd")}" hint-placeholder-val="{F_()}"><div role="alert" style="{_BOX_RED}">{H("dc_semT")} <a href="AG-07.dc.html" style="{_LNKA}">Abrir Consulta Agrofit ›</a></div></sc-if>'
+          f'<sc-if value="{H("dc_temProd")}" hint-placeholder-val="{F_()}"><div style="display: flex; flex-direction: column; gap: 4px;">{_LAB(H("dc_uso"))}'
+          f'<div role="radiogroup" aria-label="Produto registrado" style="display: flex; flex-direction: column; border: 1px solid {LINE}; border-radius: 10px; overflow: hidden;">{prod}</div></div></sc-if>'
+          f'{campos}</sc-if>'
+          f'<sc-if value="{H("dc_err")}" hint-placeholder-val="{F_()}"><div style="{_BOX_INF}">{H("dc_errT")}</div>{campos.replace(H("dc_temProd"),H("dc_nunca"))}</sc-if>'
+          f'<sc-if value="{H("dc_mon")}" hint-placeholder-val="{F_()}"><div style="{_BOX_INF}">{H("dc_monT")}</div>'
+          f'<sc-if value="{H("dc_pedeMot")}" hint-placeholder-val="{F_()}"><label style="{_FLD}"><span>{H("dc_motL")}</span><textarea id="dc_mot" aria-label="{H("dc_motL")}" value="{H("dc_mot")}" onChange="{H("dc_setmot")}" placeholder="{H("dc_motPh")}" style="{_INP} min-height: 56px; resize: vertical; width: 100%;"></textarea></label></sc-if></sc-if>'
+          + msgs('dc_tr',_BOX_RED,'alert') + msgs('dc_al',_BOX_YEL,'note') + msgs('dc_inf',_BOX_INF,'note')
+          + f'<div style="font-size: 12px; color: {MUTED};">{H("dc_rt")}</div>'
+          f'<div style="display: flex; gap: 8px; flex-wrap: wrap;"><button type="button" onClick="{H("dc_cancel")}" style="{_MINI}">Cancelar</button>'
+          f'<button type="button" onClick="{H("dc_ok")}" disabled="{H("dc_bloq")}" title="{H("dc_okTitle")}" style="{H("dc_okst")}">{H("dc_okt")}</button></div></div></sc-if>')
+    passo=(f'<div role="region" aria-label="Próximo passo" style="{H("pan_pst")}">{_LAB("Próximo passo")}'
+           f'<div style="font-size: 13.5px; line-height: 1.45;">{H("pan_pt")}</div>' + msgs('pan_al',_BOX_YEL,'note')
+           + f'<sc-if value="{H("pan_idle")}" hint-placeholder-val="{T_()}"><div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">'
+           f'<sc-if value="{H("pan_hasBtn")}" hint-placeholder-val="{F_()}"><button type="button" id="pan_prim" onClick="{H("pan_go")}" style="{BTN_ST(True,True)}">{H("pan_btn")}</button></sc-if>'
+           f'<sc-if value="{H("pan_hasLnk")}" hint-placeholder-val="{F_()}"><a href="{H("pan_lnk")}" id="pan_prim_a" style="{BTN_ST(True,True)} text-decoration: none; display: inline-flex;">{H("pan_lnkt")}</a></sc-if>'
+           f'<sc-if value="{H("pan_hasSec")}" hint-placeholder-val="{F_()}"><button type="button" onClick="{H("pan_secgo")}" style="{_MINI}">{H("pan_sect")}</button></sc-if></div></sc-if>'
+           + form + '</div>')
+    pontos=(f'<div style="display: flex; flex-wrap: wrap; gap: 5px;"><sc-for list="{H("pan_pts")}" as="q" hint-placeholder-count="12"><span title="{H("q.tt")}" style="{H("q.st")}">{H("q.t")}</span></sc-for></div>'
+            f'<div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 12px; color: {MUTED};"><sc-for list="{H("pan_leg")}" as="l" hint-placeholder-count="4"><span style="display: inline-flex; align-items: center; gap: 5px;"><span style="{H("l.st")}"></span>{H("l.t")}</span></sc-for>'
+            f'<span style="flex-grow: 1;"></span><a href="{H("pan_det")}" style="{_LNKA}">Ver rota e evidências ›</a></div>')
+    kv=(f'<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 16px;"><sc-for list="{H("pan_kv")}" as="x" hint-placeholder-count="4"><div style="min-width: 0;">'
+        f'<div style="font-size: 10.5px; font-weight: 700; letter-spacing: .05em; color: {MUTED}; text-transform: uppercase;">{H("x.l")}</div><div style="font-size: 13.5px; font-weight: 700; margin-top: 2px;">{H("x.v")}</div></div></sc-for></div>'
+        f'<sc-if value="{H("pan_hasBar")}" hint-placeholder-val="{F_()}"><div aria-hidden="true" style="position: relative; height: 8px; border-radius: 999px; background: #E4E9E5; margin-top: 4px;"><div style="{H("pan_barst")}"></div>'
+        f'<div style="position: absolute; left: 50%; top: -4px; width: 2px; height: 16px; background: {INK};"></div></div>'
+        f'<div style="display: flex; justify-content: space-between; font-size: 11px; color: {MUTED};"><span>0</span><span>NC {H("pan_nc")}</span><span>2 × NC</span></div></sc-if>')
+    reg=(f'<sc-for list="{H("pan_reg")}" as="r" hint-placeholder-count="2"><div style="display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-top: 1px solid {LINE};">'
+         f'<div style="display: flex; flex-direction: column; gap: 1px; flex-grow: 1; min-width: 0;"><span style="font-size: 13px; font-weight: 700;">{H("r.t")}</span><span style="font-size: 12px; color: {MUTED}; line-height: 1.4;">{H("r.sub")}</span></div>'
+         f'<sc-if value="{H("r.hasH")}" hint-placeholder-val="{F_()}"><a href="{H("r.h")}" style="{_LNKA}">{H("r.hl")} ›</a></sc-if></div></sc-for>' + msgs('pan_regal',_BOX_YEL,'note') + msgs('pan_regtr',_BOX_RED,'alert'))
+    hist=(f'<sc-for list="{H("pan_hist")}" as="x" hint-placeholder-count="3"><div style="display: grid; grid-template-columns: 54px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 5px 0; border-top: 1px solid {LINE}; font-size: 12.8px;">'
+          f'<span style="color: {MUTED}; font-variant-numeric: tabular-nums;">{H("x.d")}</span><span style="min-width: 0;"><sc-if value="{H("x.hasH")}" hint-placeholder-val="{F_()}"><a href="{H("x.h")}" style="color: {ACC}; font-weight: 700; text-decoration: none;">{H("x.t")}</a></sc-if>'
+          f'<sc-if value="{H("x.noH")}" hint-placeholder-val="{T_()}"><b>{H("x.t")}</b></sc-if><span style="color: {MUTED};"> · {H("x.sub")}</span></span>{_ch("x.ch","x.chst","x.chdot")}</div></sc-for>')
+    return (f'<sc-if value="{H("pan_open")}" hint-placeholder-val="{F_()}"><div style="position: fixed; inset: 0; z-index: 60; display: flex; justify-content: flex-end;">'
+      f'<button type="button" aria-label="Fechar painel" tabIndex="-1" onClick="{H("pan_close")}" style="position: absolute; inset: 0; border: 0; background: rgba(21,32,26,.32); cursor: pointer;"></button>'
+      f'<aside role="dialog" aria-modal="true" aria-label="{H("pan_t")}" onKeyDown="{H("pan_key")}" style="position: relative; width: 780px; max-width: 100%; height: 100vh; overflow-y: auto; background: {SURF}; box-shadow: -12px 0 40px -12px rgba(21,32,26,.35); padding: 20px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px;">'
+      f'<div style="display: flex; align-items: flex-start; gap: 10px;"><h2 style="margin: 0; font-family: {DISP}; font-size: 19px; font-weight: 700; letter-spacing: -.02em; flex-grow: 1; line-height: 1.3;">{H("pan_t")}</h2>'
+      f'<button type="button" id="pan_x" aria-label="Fechar" title="Fechar" onClick="{H("pan_close")}" style="border: 0; background: {BG}; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 18px; color: {MUTED}; flex-shrink: 0;">×</button></div>'
+      f'<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">{_ch("pan_sit","pan_sst","pan_sdot")}<span style="font-size: 12.5px; color: {MUTED};">{H("pan_ssub")}</span></div>'
+      f'<div style="font-size: 13px; font-weight: 600; line-height: 1.45;">{H("pan_res")}</div>'
+      + steps + passo
+      + sec('res','Resultado por alvo',kv)
+      + sec('pts','Pontos',pontos)
+      + sec('reg','Decisão e receituário',reg)
+      + sec('hist','Histórico no talhão',hist)
+      + '</aside></div></sc-if>')
+
+def _ag01_programar():
+    sel=lambda lab,val,fn,lst,dis=None,idn='': (f'<label style="{_FLD}">{lab}<select{(" id=" + chr(34) + idn + chr(34)) if idn else ""} aria-label="{lab}" value="{H(val)}" onChange="{H(fn)}"'
+                                                + (f' disabled="{H(dis)}"' if dis else '') + f' style="{_INP} width: 100%;"><sc-for list="{H(lst)}" as="o" hint-placeholder-count="3"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select></label>')
+    return (f'<sc-if value="{H("pv_open")}" hint-placeholder-val="{F_()}"><div style="position: fixed; inset: 0; z-index: 62; display: flex; justify-content: flex-end;">'
+      f'<button type="button" aria-label="Fechar" tabIndex="-1" onClick="{H("pv_close")}" style="position: absolute; inset: 0; border: 0; background: rgba(21,32,26,.32); cursor: pointer;"></button>'
+      f'<aside role="dialog" aria-modal="true" aria-label="Programar vistoria" onKeyDown="{H("pv_key")}" style="position: relative; width: 460px; max-width: 100%; height: 100vh; overflow-y: auto; background: {SURF}; box-shadow: -12px 0 40px -12px rgba(21,32,26,.35); padding: 22px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px;">'
+      f'<div style="display: flex; align-items: center; gap: 10px;"><h2 style="margin: 0; font-family: {DISP}; font-size: 19px; font-weight: 700; flex-grow: 1;">Programar vistoria</h2>'
+      f'<button type="button" aria-label="Fechar" onClick="{H("pv_close")}" style="border: 0; background: {BG}; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 18px; color: {MUTED};">×</button></div>'
+      f'<sc-if value="{H("pv_escFaz")}" hint-placeholder-val="{F_()}">{sel("Fazenda","pv_faz","pv_setfaz","pv_fazs")}</sc-if>'
+      + sel('Talhão','pv_tal','pv_settal','pv_tals',idn='pv_tal') + sel('Alvo','pv_prot','pv_setprot','pv_prots','pv_semTal')
+      + f'<div style="font-size: 12.8px; line-height: 1.5; padding: 9px 11px; border-radius: 10px; background: {BG};">{H("pv_resumo")}</div>'
+      f'<label style="{_FLD}">Data<input type="date" aria-label="Data da vistoria" value="{H("pv_data")}" onChange="{H("pv_setdata")}" style="{_INP} width: 100%;"></label>'
+      + sel('Responsável','pv_resp','pv_setresp','pv_resps')
+      + f'<sc-if value="{H("pv_hasErr")}" hint-placeholder-val="{F_()}"><div role="alert" style="{_BOX_RED}">{H("pv_err")}'
+      f'<sc-if value="{H("pv_hasAb")}" hint-placeholder-val="{F_()}"> <button type="button" onClick="{H("pv_abrir")}" style="border: 0; background: transparent; color: {RED}; font-family: inherit; font-weight: 800; text-decoration: underline; cursor: pointer; padding: 0;">Abrir {H("pv_ab")}</button></sc-if></div></sc-if>'
+      f'<div style="display: flex; gap: 8px; justify-content: flex-end;"><button type="button" onClick="{H("pv_close")}" style="{_MINI}">Cancelar</button>'
+      f'<button type="button" onClick="{H("pv_save")}" style="{_MINIP}">Programar vistoria</button></div></aside></div></sc-if>')
+
+def _ag01_restaurar():
+    lk=f'border: 0; background: transparent; color: {MUTED}; font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; padding: 4px;'
+    return (f'<div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px; flex-wrap: wrap;">'
+            f'<sc-if value="{H("rs_no")}" hint-placeholder-val="{T_()}"><button type="button" onClick="{H("rs_ask")}" style="{lk}">Restaurar demonstração</button></sc-if>'
+            f'<sc-if value="{H("rs_yes")}" hint-placeholder-val="{F_()}"><span style="font-size: 12px; color: {MUTED};">Volta vistorias, O.S., estoque e app ao início.</span>'
+            f'<button type="button" onClick="{H("rs_ok")}" style="{_MINI} color: {RED}; border-color: {RED};">Restaurar</button><button type="button" onClick="{H("rs_cancel")}" style="{_MINI}">Manter</button></sc-if></div>')
+
+JS_AG01=r'''
+// ===== AG-01 · Pragas e doenças: lista (estado MIP) → painel da vistoria → decisão/receituário → O.S. em A liberar =====
+const AG_STEPS=['Coleta','Resultado','Decisão','Controle','Avaliação'];
+function agCh(c){ const cc=G2C[c]||G2C.gray; return {st:'display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;color:'+cc[0]+';background:'+cc[1]+';',dot:'width:6px;height:6px;border-radius:999px;flex-shrink:0;background:'+cc[0]+';'}; }
+// fazenda: a do contexto do Mapa (mapa-ctx); sem contexto, Lagoa Grande (o mesmo padrão do Mapa). Trocar aqui grava no contexto.
+function agCtx(){ try{ return JSON.parse(sessionStorage.getItem('mapa-ctx')||'null')||{}; }catch(e){ return {}; } }
+function agFaz(self){ if(self.state.mf_faz) return self.state.mf_faz; if(self.__fz0===undefined) self.__fz0=agCtx().mf_faz||''; return self.__fz0||'Lagoa Grande'; }
+function agFazSalvar(self){ const f=self.state.mf_faz; if(!f) return; const x=agCtx(); if(x.mf_faz===f) return;
+  const y=Object.assign({},x,{mf_faz:f}); if(x.mf_faz){ y.tsel=[]; y.px=null; } try{ sessionStorage.setItem('mapa-ctx',JSON.stringify(y)); }catch(e){} }
+function agC(){ return (typeof cenGet==='function')?cenGet():null; }
+function agCor(R,x){ const val=(x===undefined)?R.media:x; if(val===null||val===undefined) return 'gray'; if(R.crit==='presenca') return Number(val)>0?'orange':'green'; return val>=R.nc?'red':(val>=0.8*R.nc?'yellow':'green'); }
+function agRow(s,v,c,S){ const R=S.R, p=mipP(v), t=mipT(v), P=mipProx(s,v,c);
+  const nx=P.t?(P.h?[{k:'cta',t:P.t,h:P.h,u:S.k==='acima'}]:[{k:'act',t:P.t,fn:'ag_go:'+v.id+'|'+P.fn,u:S.k==='acima'||S.k==='foco'}]):[{k:'mut',t:'—'}];
+  const cont=R.crit==='presenca'?(R.val?R.pres:null):(R.pct===null?null:Math.round(R.pct*100));
+  return {id:v.id, gk:{tal:t.rot+' · '+t.faz,alvo:p.alvo,sit:S.t,faz:t.faz},
+    v:{id:v.id,tal:t.rot,alvo:p.alvo,cont,data:v.data,sit:S.t,prox:P.t||'—'},
+    s:{id:v.id,tal:t.rot+' '+(t.cultura+' '+t.fase).trim()+' '+t.faz,alvo:p.alvo+' '+p.met,cont:R.ctxt+(R.crit==='presenca'?' presença':' '+p.un)+' '+R.ptxt,data:mipBrA(v.data)+' '+v.resp,sit:S.t,prox:P.t||'—'},
+    p:{id:[{k:'b',t:v.id}],tal:[{k:'b',t:t.rot},{k:'br'},{k:'mut',t:((t.cultura+' '+t.fase).trim()||'sem cultura')+' · '+t.faz}],alvo:[{k:'txt',t:p.alvo},{k:'br'},{k:'mut',t:p.tipo}],
+       cont:(R.ctxt==='—'?[{k:'mut',t:'—'}]:[{k:'cn',t:R.ctxt,c:agCor(R)},{k:'br'},{k:'mut',t:R.crit==='presenca'?'presença':p.un}])
+         .concat([{k:'br'},{k:'mut',t:R.col+'/'+R.tot+' pontos'+(R.rec?' · '+R.rec+' recoleta':(R.pend?' · '+R.pend+' no aparelho':''))}]),
+       data:[{k:'txt',t:mipBrA(v.data)},{k:'br'},{k:'mut',t:v.resp}],
+       sit:[{k:'chip',t:S.t,c:S.c}].concat(S.sub?[{k:'br'},{k:'mut',t:S.sub}]:[]),prox:nx}}; }
+function agRows(self,v){ const s=mipGet(), c=agC(), f=agFaz(self); const sk=self.state.ag_sit||'';
+  const all=Object.values(s.vis).filter(x=>f==='Todas'||x.faz===f).map(x=>({v:x,S:mipSit(s,x,c)})).sort((a,b)=>(a.S.ord-b.S.ord)||(a.v.data<b.v.data?1:-1));
+  if(v){ const cnt={}; all.forEach(x=>{ cnt[x.S.k]=(cnt[x.S.k]||0)+1; }); const ST='font-family:inherit;font-size:12px;font-weight:700;padding:4px 11px;border-radius:999px;cursor:pointer;';
+    const ch=(k,t,n)=>({t,n:String(n),on:String(sk===k),go:()=>self.setState({ag_sit:(sk===k&&k)?'':k}),st:ST+(sk===k?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;')});
+    v.ag_chips=[ch('','Todas',all.length)].concat(MIP_ORD.filter(k=>cnt[k]).map(k=>ch(k,MIP_SIT[k][0],cnt[k]))); }
+  const rows=all.filter(x=>!sk||x.S.k===sk).map(x=>agRow(s,x.v,c,x.S));
+  const g=self.state.ag_grp||''; if(!g) return rows;
+  const gs={}, ord=[]; rows.forEach(r=>{ const k=r.gk[g]; if(!gs[k]){ gs[k]=[]; ord.push(k); } gs[k].push(r); });
+  return ord.map(k=>({id:'g:'+k,v:{id:k},s:{id:k},p:{id:[{k:'b',t:k},{k:'mut',t:'· '+gs[k].length+(gs[k].length>1?' vistorias':' vistoria')}]},kids:gs[k]})); }
+// abrir a vistoria pelo hash (#VIS-xxx): painel aberto e fazenda do filtro trocada para a da vistoria
+function agHash(self){ let h=''; try{ h=decodeURIComponent(location.hash||''); }catch(e){ h=''; } const m=/^#(VIS-\d+)(?::(decidir|programar))?$/.exec(h); if(!m) return;
+  const v=mipGet().vis[m[1]]; if(!v){ self.setState({g2toast:m[1]+' não encontrada.'}); return; }
+  // miprev: a navegação por hash na mesma página sempre redesenha com o estado atual (MIP e O.S. podem ter mudado em outra tela)
+  const f=agFaz(self); self.setState({pan:v.id,dec:null,pv:null,mf_faz:(f==='Todas'||f===v.faz)?f:v.faz,miprev:Date.now()});
+  // "#VIS-xxx:decidir" (vindo do Mapa) abre direto o formulário da decisão, sem registrar nada
+  // "#VIS-xxx:programar" (vistoria atrasada, vindo do sub-detalhe) abre o formulário da próxima vistoria do mesmo talhão × alvo
+  const fn=m[2]?mipProx(mipGet(),v,agC()).fn:'';
+  if(m[2]==='decidir'&&fn==='decidir'){ agSetHash(v.id); agDecIni(self,v.id); } else if(m[2]==='programar'&&fn==='programar'){ agSetHash(v.id); agPvOpen(self,v.tal,v.prot); } else agFoco(); }
+function agIni(self){ if(self.__agIni) return; self.__agIni=1;
+  setTimeout(()=>agHash(self),0);
+  try{ window.addEventListener('hashchange',()=>agHash(self)); }catch(e){} }
+function agFoco(id){ setTimeout(()=>{ const el=document.getElementById(id||'pan_x'); if(el) el.focus(); },60); }
+function agGuarda(self){ try{ const a=document.activeElement; if(a&&a!==document.body&&!a.closest('[role=dialog]')) self.__ret=a; }catch(e){} }
+function agVolta(self,id){ const el=self.__ret; self.__ret=null; setTimeout(()=>{ try{
+    if(el&&el.isConnected){ el.focus(); return; }
+    const row=id?[...document.querySelectorAll('[role=row]')].find(r=>(r.innerText||'').trim().indexOf(id)===0):null;
+    const alvo=row?(row.getAttribute('tabindex')!==null?row:row.querySelector('[tabindex]')):null; if(alvo){ alvo.focus(); return; }
+    const pv=[...document.querySelectorAll('header button')].find(b=>(b.innerText||'').trim()==='Programar vistoria'); if(pv) pv.focus(); }catch(e){} },60); }
+function agTrap(e){ if(!e||e.key!=='Tab') return; const box=e.target&&e.target.closest?e.target.closest('[role=dialog]'):null; if(!box) return;
+  const f=[...box.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled])')].filter(x=>x.offsetParent!==null&&x.getAttribute('tabindex')!=='-1');
+  if(!f.length) return; const a=f[0], z=f[f.length-1];
+  if(e.shiftKey&&document.activeElement===a){ e.preventDefault(); z.focus(); } else if(!e.shiftKey&&document.activeElement===z){ e.preventDefault(); a.focus(); } }
+function agSetHash(id){ try{ history.replaceState(null,'',location.pathname+location.search+(id?'#'+id:'')); }catch(e){} }
+function agOpen(self,id,fn){ agGuarda(self); agSetHash(id); const st={pan:id,dec:null};
+  if(fn==='decidir'){ self.setState(st); agDecIni(self,id); return; }
+  self.setState(st); agFoco();
+  if(fn) agRun(self,id,fn); }
+// comandos sem formulário (sincronizar, decidir com parcial, seguir monitorando abaixo do NC, leitura pós)
+function agRun(self,id,fn){
+  if(fn==='sinc') return mipMudar(self,s=>mipSinc(s,id));
+  if(fn==='parcial') return mipMudar(self,s=>mipParcial(s,id));
+  if(fn==='monitorar') return mipMudar(self,s=>mipMonitorar(s,id,''));
+  if(fn==='pos') return mipMudar(self,s=>mipPos(s,id));
+  if(fn==='programar'){ const v=mipGet().vis[id]; return agPvOpen(self,v.tal,v.prot); }
+  if(fn==='decidir') return agDecIni(self,id); }
+// ---------- formulário de decisão ----------
+function agKinds(R,p){ const k=R.k==='incompleta'||R.k==='cancelada'?R.kr:R.k;
+  if(p.id==='inspecao') return [['monitorar','Registrar a causa']];
+  if(k==='foco'&&R.crit==='presenca') return [['erradicar','Erradicar plantas'],['monitorar','Seguir monitorando']];
+  if(k==='foco'&&R.larga) return [['controlar','Controlar o talhão'],['localizado','Controle localizado'],['monitorar','Seguir monitorando']];
+  if(k==='foco') return [['localizado','Controle localizado'],['controlar','Controlar o talhão'],['monitorar','Seguir monitorando']];
+  return [['controlar','Controlar o talhão'],['localizado','Controle localizado'],['monitorar','Não controlar']]; }
+function agDecIni(self,id){ const s=mipGet(), v=s.vis[id], c=agC(); const R=mipRes(v,s), t=mipT(v), p=mipP(v); const K=agKinds(Object.assign({},R,{k:mipSit(s,v,c).k}),p);
+  const kind=K[0][0]; const area=kind==='localizado'?Math.max(1,Math.round((R.reb||1)*t.area/v.npts)):(kind==='erradicar'?1:t.area);
+  const L=mipElig(v); const data=mipAmanha();
+  const ok=L.find(u=>!mipChecks(s,v,{kind,prod:u.id,dose:u.dmin,area,data},c).tr.length)||L[0];
+  self.setState({pan:id,dec:{vid:id,kind,prod:ok?ok.id:'',dose:ok?mipN(ok.dmin,3):'',area:mipN(area,1),data,mot:'',err:''}}); agFoco(ok?'dc_dose':'pan_x'); }
+function agDec(self,v){ const st=self.state; const d=st.dec; const s=mipGet(); const vv=s.vis[d.vid]; const c=agC(); const R=mipRes(vv,s), t=mipT(vv), p=mipP(vv);
+  const up=(patch)=>self.setState({dec:Object.assign({},self.state.dec,patch,{err:''})});
+  const K=agKinds(Object.assign({},R,{k:mipSit(s,vv,c).k}),p);
+  v.dc_kinds=K.map(k=>({t:k[1],on:String(d.kind===k[0]),go:()=>{ const area=k[0]==='localizado'?Math.max(1,Math.round((R.reb||1)*t.area/vv.npts)):(k[0]==='erradicar'?1:t.area); up({kind:k[0],area:mipN(area,1)}); },
+    st:'font-family:inherit;font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer;'+(d.kind===k[0]?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;')}));
+  const ctl=d.kind==='controlar'||d.kind==='localizado'; v.dc_ctl=ctl; v.dc_err=d.kind==='erradicar'; v.dc_mon=d.kind==='monitorar'; v.dc_nunca=false;
+  const L=mipElig(vv); v.dc_temProd=ctl&&L.length>0; v.dc_semProd=ctl&&!L.length; v.dc_semT=(p.sem||('Sem produto registrado para '+mipCult(t)+' × '+p.alvo.toLowerCase()+' nesta base.'))+' A decisão fica pendente.';
+  // registro cancelado continua à vista (trava legal), mas no fim da lista e fora da contagem de registrados
+  const nCanc=L.filter(u=>u.sit==='Cancelado').length; v.dc_uso='Registrados para '+mipCult(t)+' × '+p.alvo.toLowerCase()+' · '+(L.length-nCanc)+(nCanc?' · '+nCanc+' cancelado':'');
+  const a={kind:d.kind,prod:d.prod,dose:d.dose,area:d.area,data:d.data}; const num=(x)=>Number(String(x).replace(',','.'));
+  v.dc_prods=L.slice().sort((a0,b0)=>(a0.sit==='Cancelado'?1:0)-(b0.sit==='Cancelado'?1:0)).map(u=>{ const sel=u.id===d.prod; const k=mipChecks(s,vv,{kind:d.kind,prod:u.id,dose:sel?d.dose:u.dmin,area:d.area,data:d.data},c);
+    const TAGS=[[/^Carência/,'Carência × colheita'],[/^Nº máximo/,'Máx. aplicações'],[/^Dose/,'Dose fora da bula'],[/^Registro cancelado/,'Cancelado'],[/^Rotação/,'Rotação'],[/^Estoque/,'Sem estoque'],[/^Colheita/,'Colheita suspensa'],[/reavaliação/,'Reavaliação'],[/não conferido/,'Não conferido']];
+    const tag=(x)=>{ const m=TAGS.find(q=>q[0].test(x)); return m?m[1]:''; };
+    const tt=k.tr.map(tag).filter(Boolean), ta=k.al.map(tag).filter(Boolean); const cc=tt.length?[tt[0],'red']:(ta.length?[ta.slice(0,2).join(' · '),'yellow']:['Conferido','green']); const cs=agCh(cc[1]);
+    return {nome:u.nome,on:sel,pick:()=>up({prod:u.id,dose:mipN(u.dmin,3)}),h:'AG-07.dc.html#'+u.id,cht:cc[0],chst:cs.st,chdot:cs.dot,
+      sub:u.g+' · '+u.dose+(u.calda?' (calda 1.000 L/ha)':'')+' · carência '+u.cart+(u.mx?' · máx. '+u.mx+' por ciclo':'')+(u.sit!=='Vigente'?' · '+u.sit:''),
+      st:'display:flex;align-items:center;gap:10px;padding:8px 10px;border-top:1px solid #E4E9E5;'+(sel?'background:#F4FAF6;box-shadow:inset 3px 0 0 #1E7A4C;':'')}; });
+  const u=L.find(x=>x.id===d.prod); v.dc_un=u?u.un:''; v.dc_dose=d.dose; v.dc_area=d.area; v.dc_data=d.data; v.dc_mot=d.mot||'';
+  v.dc_areaL=d.kind==='localizado'?'Área do foco (ha)':(d.kind==='erradicar'?'Área do foco (ha)':'Área (ha)');
+  v.dc_setdose=(e)=>up({dose:e.target.value}); v.dc_setarea=(e)=>up({area:e.target.value}); v.dc_setdata=(e)=>up({data:e.target.value}); v.dc_setmot=(e)=>up({mot:e.target.value});
+  v.dc_errT='O.S. de tratos culturais sem produto: arrancar e destruir as plantas com sintoma e o entorno. Liberação pelo agrônomo na O.S.';
+  const prox=mipAdd(vv.data,R.kr==='perto'?3:p.inter); const px=prox<=MIPD.hoje?mipAmanha():prox;
+  v.dc_pedeMot=(R.k==='acima'||R.k==='foco'||(R.k==='incompleta'&&(R.kr==='acima'||R.kr==='foco'))||mipSit(s,vv,c).k==='cancelada');
+  v.dc_monT='Registra a decisão e programa a próxima vistoria de '+p.alvo.toLowerCase()+' para '+mipBr(px)+(mipAberta(s,vv.tal,vv.prot)?' (já há vistoria aberta).':'.');
+  const insp=p.id==='inspecao'; v.dc_motL=insp?'Causa observada':'Motivo para não controlar'; v.dc_motPh=insp?'Ex.: falha de irrigação na linha 4; sem praga':'Ex.: colheita em 10 dias; predadores em alta';
+  if(insp) v.dc_monT='Registra a causa e programa nova inspeção para '+mipBr(px)+'. Se for praga ou doença do protocolo, programe a vistoria do alvo.';
+  const ck=mipChecks(s,vv,a,c); const extra=[];
+  if(d.kind==='monitorar'&&v.dc_pedeMot&&!String(d.mot||'').trim()) extra.push({t:insp?'Informe a causa observada.':'Informe o motivo para não controlar.'});
+  v.dc_tr=ck.tr.map(t0=>({t:t0})).concat(extra).concat(d.err?[{t:d.err}]:[]); v.dc_al=ck.al.map(t0=>({t:t0})); v.dc_inf=ck.inf.map(t0=>({t:t0}));
+  const bloq=ck.tr.length>0||extra.length>0||(ctl&&!L.length); v.dc_bloq=bloq;
+  v.dc_okt=ctl?'Emitir receituário e gerar O.S.':(d.kind==='erradicar'?'Gerar O.S. de erradicação':'Registrar e programar próxima');
+  v.dc_okTitle=bloq?'Resolva a trava acima para continuar':v.dc_okt;
+  v.dc_okst='font-family:inherit;font-size:12.5px;font-weight:700;padding:7px 14px;border-radius:9px;border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;'+(bloq?'opacity:.45;cursor:not-allowed;':'cursor:pointer;');
+  v.dc_rt=ctl?('Responsável técnico: Ana · receituário RA-'+String(s.seq.ra).padStart(4,'0')+' · a O.S. nasce em A liberar; o estoque é reservado ao liberar.'):(d.kind==='erradicar'?'Decisão de Ana (RT) · O.S. em A liberar.':'Decisão de Ana (RT).');
+  v.dc_cancel=()=>self.setState({dec:null});
+  v.dc_ok=()=>{ const cur=self.state.dec; if(bloq||!cur||self.__emitindo) return; self.__emitindo=true; setTimeout(()=>{ self.__emitindo=false; },400);
+    if(cur.kind==='monitorar'){ const r=mipMudar(self,s2=>mipMonitorar(s2,cur.vid,cur.mot)); if(!r.erro) self.setState({dec:null}); else self.setState({dec:Object.assign({},cur,{err:r.erro})}); agFoco(); return; }
+    const r=mipEmitir(self,cur.vid,{kind:cur.kind,prod:cur.prod,dose:cur.dose,area:cur.area,data:cur.data});
+    if(r.erro){ self.setState({dec:Object.assign({},cur,{err:r.erro}),g2toast:r.erro}); return; } self.setState({dec:null}); agFoco('pan_prim_a'); }; }
+// ---------- painel da vistoria ----------
+function agPanel(self,v){ const st=self.state; const s=mipGet(), c=agC(); const vv=st.pan?s.vis[st.pan]:null; v.pan_open=!!vv;
+  const close=()=>{ const id=self.state.pan; agSetHash(''); self.setState({pan:null,dec:null}); agVolta(self,id); };
+  v.pan_close=close; v.pan_key=(e)=>{ if(e&&e.key==='Escape'){ e.preventDefault(); if(self.state.dec){ self.setState({dec:null}); agFoco(); } else close(); return; } agTrap(e); };
+  ['res','pts','reg','hist'].forEach(k=>{ v['ps_'+k]=false; }); v.pan_dec=false; v.pan_idle=true;
+  if(!vv) return;
+  const P=mipProx(s,vv,c), S=P.S, R=P.R, p=mipP(vv), t=mipT(vv);
+  v.pan_t=vv.id+' · '+p.alvo+' · '+t.rot; const cs=agCh(S.c); v.pan_sit=S.t; v.pan_sst=cs.st; v.pan_sdot=cs.dot; v.pan_ssub=S.sub||'';
+  v.pan_res=[t.faz,t.rot,((t.cultura+' '+t.fase).trim()||'sem cultura'),mipN(t.area)+' ha',(vv.est==='programada'?'programada para ':'coleta de ')+mipBrA(vv.data),vv.resp,p.ver+(vv.pos_de?' · leitura pós da '+vv.pos_de:'')].join(' · ');
+  // etapas: coleta › resultado › decisão › controle › avaliação (só aria-label, sem rótulo visível)
+  const cur={programada:0,coleta:0,sinc:0,incompleta:0,acima:2,foco:2,perto:2,abaixo:2,cancelada:2,controle:3,pos:4,avaliacao:4,encerrada:5,atrasada:5}[S.k];
+  const pula=vv.dec&&vv.dec.t==='monitorar';
+  v.pan_steps=AG_STEPS.map((n,i)=>{ const done=i<cur, now=i===cur, skip=pula&&i>=3;
+    return {t:n+(skip?' · não se aplica':''),cur:now?'step':'false',st:'display:flex;flex-direction:column;gap:5px;font-size:11.5px;font-weight:'+(now?'800':'600')+';color:'+((done||now)&&!skip?'#15201A':'#8A968E')+';',
+      bst:'height:5px;border-radius:999px;background:'+(skip?'#E4E9E5':(done?'#9CCBB0':(now?'#1E7A4C':'#E4E9E5')))+';'}; });
+  // próximo passo (mesma função do Mapa e do app)
+  v.pan_pt=P.txt; const al=[];
+  if(['acima','foco','perto','abaixo'].indexOf(S.k)>=0&&!vv.dec&&mipDif(vv.data,MIPD.hoje)>=3) al.push({t:'Resultado de '+mipBr(vv.data)+' sem decisão há '+mipDif(vv.data,MIPD.hoje)+' dias.'});
+  if(vv.parcial&&!vv.dec) al.push({t:'Decisão com '+R.val+' de '+R.tot+' pontos (coleta incompleta).'});
+  if(R.rec&&!vv.dec) al.push({t:R.rec+(R.rec>1?' pontos':' ponto')+' em recoleta (GPS fora da tolerância): fora da média.'});
+  const dz=vv.dia&&s.dia[vv.dia]; if(dz&&dz.laudo&&!vv.dec) al.push({t:dz.laudo+' (folha) inconsistente: não decide o controle de pragas; segue no AG-02.'});
+  v.pan_al=al;
+  const isH=!!P.h, isF=!!P.fn; v.pan_hasBtn=isF; v.pan_hasLnk=isH; v.pan_btn=P.t; v.pan_lnk=P.h||'#'; v.pan_lnkt=P.t;
+  v.pan_go=()=>agRun(self,vv.id,P.fn); v.pan_hasSec=!!P.sec; v.pan_sect=P.sec?P.sec.t:''; v.pan_secgo=()=>{ if(P.sec) agRun(self,vv.id,P.sec.fn); };
+  const dec=!!(st.dec&&st.dec.vid===vv.id); v.pan_dec=dec; v.pan_idle=!dec;
+  v.pan_pst='display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:12px;'+({red:'background:#FDE8E6;border:1px solid #F4C7C1;',orange:'background:#FFF0E3;border:1px solid #F3CFAE;',yellow:'background:#FFF8E6;border:1px solid #F0D9A0;'}[S.c]||'background:#E4F3E9;border:1px solid #BFE0CB;');
+  if(dec) agDec(self,v);
+  // resultado por alvo
+  v.ps_res=vv.est!=='programada'; const nc=R.nc;
+  v.pan_kv=(R.crit==='presenca')?[{l:'Critério',v:'presença'},{l:'Pontos com sintoma',v:R.pres+' de '+R.val},{l:'Pontos coletados',v:R.col+' de '+R.tot},{l:'Unidade',v:p.un}]
+    :[{l:'Média válida',v:R.media===null?'—':mipN(R.media)+' '+p.un},{l:'Nível de controle',v:mipN(nc)+' '+p.un+' ('+t.fase+')'},{l:'% do NC',v:R.pct===null?'—':mipPct(R.pct)+' %'},{l:'Pontos válidos',v:R.val+' de '+R.tot+(R.rec?' · '+R.rec+' recoleta':'')}];
+  if(R.red!==null) v.pan_kv=v.pan_kv.concat([{l:'Redução observada',v:Math.round(R.red*100)+' %'}]);
+  v.pan_hasBar=R.crit!=='presenca'&&R.pct!==null; v.pan_nc=mipN(nc)+' '+p.un;
+  v.pan_barst='position:absolute;left:0;top:0;bottom:0;border-radius:999px;width:'+Math.min(100,Math.round((R.pct||0)*50))+'%;background:'+({red:'#B42318',yellow:'#C99A2E',green:'#1E7A4C'}[agCor(R)]||'#8A968E')+';';
+  // pontos (média só com válidos; recoleta à vista; não coletado vazio)
+  v.ps_pts=true; v.pan_det='AG-01det.dc.html#'+vv.id;
+  const pend=(vv.pend||[]);
+  v.pan_pts=vv.pts.map((q,i)=>{ const nul=q.v===null||q.v===undefined; const pv=nul&&pend.length?pend[vv.pts.filter((x,j)=>j<i&&(x.v===null||x.v===undefined)).length]:undefined;
+    const val=nul?pv:q.v; const cor=q.rec?'gray':(val===undefined?'none':agCor(R,val));
+    const bg={red:['#FDE8E6','#B42318'],orange:['#FFE8D6','#9A3F00'],yellow:['#FFF3D6','#8A5A00'],green:['#E4F3E9','#1E7A4C'],gray:['#EEF1EE','#5B6660'],none:['#FFFFFF','#8A968E']}[cor];
+    return {t:String(q.n).padStart(2,'0')+(val===undefined?'':' · '+mipN(val)),tt:'Ponto '+q.n+(val===undefined?': não coletado':(': '+mipN(val)+' '+p.un+(q.rec?' · recoleta (fora da média)':'')+(nul?' · no aparelho, sem sinal':''))),
+      st:'display:inline-flex;align-items:center;padding:3px 8px;border-radius:7px;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;color:'+bg[1]+';background:'+bg[0]+';border:1px '+(nul&&pv!==undefined?'dashed':'solid')+' '+(cor==='none'?'#E4E9E5':bg[0])+';'+(q.rec?'text-decoration:line-through;':'')}; });
+  const sw=(c0,b)=>({st:'width:11px;height:11px;border-radius:3px;background:'+c0+';'+(b?'border:1px solid '+b+';':''),t:''});
+  v.pan_leg=R.crit==='presenca'?[Object.assign(sw('#FFE8D6'),{t:'com sintoma'}),Object.assign(sw('#E4F3E9'),{t:'sem sintoma'}),Object.assign(sw('#fff','#E4E9E5'),{t:'não coletado'})]
+    :[Object.assign(sw('#FDE8E6'),{t:'≥ NC'}),Object.assign(sw('#FFF3D6'),{t:'≥ 80 % do NC'}),Object.assign(sw('#E4F3E9'),{t:'abaixo'}),Object.assign(sw('#EEF1EE'),{t:'recoleta'}),Object.assign(sw('#fff','#E4E9E5'),{t:'não coletado'})];
+  // decisão e receituário (DIA · REC/RA · O.S.) com a conferência do produto usado
+  const reg=[], ral=[], rtr=[]; const d=vv.dec;
+  if(dz) reg.push({t:dz.id+' · '+dz.sit+(dz.dec?' · '+dz.dec:''),sub:(dz.hip||'')+(dz.em?' · '+mipBrA(dz.em)+' · '+dz.por:'')+(dz.motivo?' · motivo: '+dz.motivo:''),h:dz.id==='DIA-007'?'AG-03det.dc.html':'AG-03.dc.html',hl:'Diagnósticos'});
+  if(d&&d.rec==='REC-014'){ reg.push({t:'REC-014 v2 · em uso nos 30 ha realizados · saldo de 70 ha travado',sub:'KCl por zona + TS nematicida (abamectina) + semente 58 W resistente',h:'AG-04det.dc.html',hl:'Abrir REC-014'});
+    rtr.push({t:'Trava legal: TS nematicida (abamectina) sem registro para soja × nematoide-de-cisto. O saldo de 70 ha aguarda a v4 com TS registrado (ex.: Pasteuria nishizawae FS).'}); }
+  else if(d&&d.rec&&s.rec[d.rec]){ const r=s.rec[d.rec]; reg.push({t:r.id+' · receituário '+r.ra+' · '+r.sit,sub:r.nome+' '+mipN(r.dose,3)+' '+r.un+'/ha · '+mipN(r.area)+' ha · a partir de '+mipBr(r.data)+' · Ana (RT)',h:'AG-07.dc.html#'+r.prod,hl:'Ficha do produto'}); }
+  else if(d&&d.ra&&d.prod){ const G=MIPD.grupo[d.prod]||{nome:d.prod,g:''}; reg.push({t:'Receituário '+d.ra+' · '+G.nome,sub:G.g+' · decisão de '+mipBrA(d.em)+' · '+d.por+(d.nota?' · '+d.nota:''),h:'AG-07.dc.html#'+d.prod,hl:'Ficha do produto'}); }
+  if(d&&d.os){ const et=mipOsEt(c,d.os)||'—'; const dup=P.h==='OS.dc.html#'+d.os;   // o primário já abre a O.S.: o registro não repete o destino
+    reg.push({t:d.os+' · '+et,sub:(d.t==='erradicar'?'erradicação de plantas':'controle')+' · '+mipN(d.area||t.area)+' ha',h:dup?'':'OS.dc.html#'+d.os,hl:'Abrir '+d.os}); }
+  if(d&&d.prod&&d.os){ const k=mipChecks(s,vv,{kind:'controlar',prod:d.prod,dose:(MIPD.agf[t.cultura+'|'+p.chave]||[]).filter(x=>x.id===d.prod).map(x=>d.dose||x.dmin)[0]||1,area:d.area||t.area,data:d.data||mipAmanha(),os:d.os},c);
+    k.al.filter(x=>/^Rotação|^Colheita/.test(x)).forEach(x=>ral.push({t:x})); }
+  if(d&&d.t==='monitorar') reg.push({t:'Seguir monitorando · '+mipBrA(d.em)+' · '+d.por,sub:(d.prox?'próxima vistoria '+mipBr(d.prox):'')+(d.nota?' · motivo: '+d.nota:''),h:'',hl:''});
+  v.pan_reg=reg.map(r=>Object.assign({hasH:!!r.h},r)); v.pan_regal=ral; v.pan_regtr=rtr; v.ps_reg=reg.length>0;
+  // histórico do talhão (vistorias e aplicações com o grupo de modo de ação)
+  v.pan_hist=mipHist(s,vv.tal,c).filter(x=>x.t.indexOf(vv.id+' ')!==0).slice(0,8).map(x=>{ const cs2=agCh(x.c); return Object.assign({},x,{d:mipBr(x.d),hasH:!!x.h,noH:!x.h,chst:cs2.st,chdot:cs2.dot}); });
+  v.ps_hist=v.pan_hist.length>0; }
+// ---------- programar vistoria (talhão → alvo do protocolo → data → responsável) ----------
+function agPvOpen(self,tal,prot){ if(!self.state.pan) agGuarda(self); const s=mipGet(); const f=agFaz(self); const faz=tal?MIPD.tal[tal].faz:(f==='Todas'||f==='Boa Vista'?'Santa Rita':f);
+  const tals=Object.keys(MIPD.tal).filter(k=>MIPD.tal[k].faz===faz&&(MIPD.prots[k]||[]).length); const t0=tal||tals[0]||'';
+  self.setState({pv:{faz,tal:t0,prot:prot||(t0?mipProtPadrao(s,t0):''),data:mipAmanha(),resp:(MIPD.resp[faz]||[''])[0],err:'',ab:''},pan:null,dec:null}); agFoco('pv_tal'); }
+function agPv(self,v){ const pv=self.state.pv; v.pv_open=!!pv; const fecha=()=>{ self.setState({pv:null}); agVolta(self,''); };
+  v.pv_close=fecha; v.pv_key=(e)=>{ if(e&&e.key==='Escape'){ e.preventDefault(); fecha(); return; } agTrap(e); };
+  if(!pv) return; const s=mipGet(); const up=(p)=>self.setState({pv:Object.assign({},self.state.pv,p,{err:'',ab:''})});
+  v.pv_escFaz=agFaz(self)==='Todas'||agFaz(self)==='Boa Vista'; v.pv_faz=pv.faz; v.pv_fazs=['Santa Rita','Lagoa Grande'].map(x=>({v:x,t:x}));
+  v.pv_setfaz=(e)=>{ const faz=e.target.value; const t0=Object.keys(MIPD.tal).find(k=>MIPD.tal[k].faz===faz&&(MIPD.prots[k]||[]).length)||''; up({faz,tal:t0,prot:t0?mipProtPadrao(s,t0):'',resp:(MIPD.resp[faz]||[''])[0]}); };
+  v.pv_tals=Object.keys(MIPD.tal).filter(k=>MIPD.tal[k].faz===pv.faz&&(MIPD.prots[k]||[]).length).map(k=>{ const t=MIPD.tal[k]; return {v:k,t:t.rot+' · '+t.cultura+' '+t.fase+' · '+mipN(t.area)+' ha'}; });
+  v.pv_tal=pv.tal; v.pv_settal=(e)=>{ const t=e.target.value; up({tal:t,prot:mipProtPadrao(s,t)}); };
+  v.pv_semTal=!pv.tal; v.pv_prots=(MIPD.prots[pv.tal]||[]).map(k=>({v:k,t:MIPD.prot[k].alvo+' · '+MIPD.prot[k].tipo.toLowerCase()})); v.pv_prot=pv.prot; v.pv_setprot=(e)=>up({prot:e.target.value});
+  const p=MIPD.prot[pv.prot], t=MIPD.tal[pv.tal];
+  v.pv_resumo=(p&&t)?(p.ver+' · '+p.met+' · '+p.un+' · '+(p.crit==='nc'?'NC '+mipN(mipNC(p,t))+' '+p.un:'critério presença')+' · '+mipPontos(pv.prot,t.area)+' pontos · a cada '+p.inter+' dias'):'Escolha o talhão.';
+  v.pv_data=pv.data; v.pv_setdata=(e)=>up({data:e.target.value}); v.pv_resps=(MIPD.resp[pv.faz]||[]).map(x=>({v:x,t:x})); v.pv_resp=pv.resp; v.pv_setresp=(e)=>up({resp:e.target.value});
+  v.pv_hasErr=!!pv.err; v.pv_err=pv.err; v.pv_hasAb=!!pv.ab; v.pv_ab=pv.ab; v.pv_abrir=()=>{ const id=self.state.pv.ab; self.setState({pv:null}); agOpen(self,id); };
+  v.pv_save=()=>{ const cur=self.state.pv; if(cur.data&&cur.data<MIPD.hoje){ self.setState({pv:Object.assign({},cur,{err:'Data no passado: programe a partir de hoje ('+mipBr(MIPD.hoje)+').'})}); return; }
+    const r=mipMudar(null,s2=>mipNovaVis(s2,cur.tal,cur.prot,cur.data,cur.resp,'ag01'));
+    if(r.erro){ const m=/^(VIS-\d+) já está aberta/.exec(r.erro); self.setState({pv:Object.assign({},cur,{err:r.erro,ab:m?m[1]:''})}); return; }
+    agSetHash(r.id); self.setState({pv:null,pan:r.id,miprev:Date.now(),g2toast:r.msg,mf_faz:(agFaz(self)==='Todas'?'Todas':MIPD.tal[cur.tal].faz)}); agFoco(); }; }
+function PREVALS(self,v){ cenOuvir(self); mipOuvir(self); agIni(self); v.mf_faz=agFaz(self); agFazSalvar(self);
+  const sp=GRIDS.find(g=>g.id==='g_vis'); sp.rows=agRows(self,v);
+  const x0={}; sp.rows.forEach(r=>{ if(r.kids) x0[r.id]=true; }); sp.x0=x0; }
+function EXTRAVALS(self,v){ const st=self.state; const s=mipGet(), c=agC(), f=agFaz(self);
+  self.g2pick=(gid,rid)=>{ if(gid==='g_vis'&&/^VIS-/.test(rid)) agOpen(self,rid); };
+  v.ag_go=(arg)=>{ const a=String(arg).split('|'); agOpen(self,a[0],a[1]); };
+  v.ag_grp=st.ag_grp||''; v.ag_grpOn=!!st.ag_grp; v.ag_setgrp=(e)=>{ self.setState({ag_grp:e.target.value}); g2set(self,'g_vis',{x:null}); };
+  v.pv_new=()=>agPvOpen(self);
+  agPanel(self,v); agPv(self,v);
+  // selo do cabeçalho: acima do NC sem decisão e focos a confirmar na fazenda do filtro
+  const vs=Object.values(s.vis).filter(x=>f==='Todas'||x.faz===f).map(x=>mipSit(s,x,c).k);
+  const na=vs.filter(k=>k==='acima').length, nf=vs.filter(k=>k==='foco').length, ns=vs.filter(k=>k==='sinc'||k==='incompleta').length;
+  v.ag_st=[na?na+' acima do NC sem decisão':'',nf?nf+(nf>1?' focos a confirmar':' foco a confirmar'):'',(!na&&!nf&&ns)?ns+' coleta a completar':''].filter(Boolean).join(' · ')||'Em dia';
+  const cs=agCh(na?'red':((nf||ns)?'yellow':'green')); v.ag_stst=cs.st; v.ag_stdot=cs.dot;
+  // restaurar a demonstração (vistorias + O.S., estoque e app)
+  v.rs_no=!st.rs; v.rs_yes=!!st.rs; v.rs_ask=()=>self.setState({rs:true}); v.rs_cancel=()=>self.setState({rs:false});
+  v.rs_ok=()=>{ mipReset(); if(typeof cenReset==='function') cenReset(); agSetHash(''); self.setState({rs:false,pan:null,dec:null,pv:null,miprev:Date.now(),cenrev:Date.now(),g2toast:'Demonstração restaurada: vistorias, O.S., estoque e app voltaram ao início.'}); }; }
+'''
+
+def _status_dinamico(fname,pref):
+    """troca o selo fixo do cabeçalho por um selo com cor calculada na tela (<pref>_st / _stst / _stdot)."""
+    import os, ui37
+    p=os.path.join(E.P,fname); s=open(p,encoding='utf-8').read(); old=ui37.chip(H(pref+'_st'),'red')
+    assert s.count(old)==1, 'selo do cabeçalho não encontrado em '+fname
+    open(p,'w',encoding='utf-8').write(s.replace(old,f'<span style="{H(pref+"_stst")}"><span style="{H(pref+"_stdot")}"></span>{H(pref+"_st")}</span>'))
+
+def _menu_mip():
+    """AG-01det, AG-03 e AG-04 (+ detalhes) pertencem ao item Pragas e doenças (MIP/MID) do menu; AG-01 tem o filtro Fazenda no topo."""
+    import ui37
+    for f in ('AG-03.dc.html','AG-03det.dc.html','AG-04.dc.html','AG-04det.dc.html'): ui37.MENU_OF.setdefault(f,'AG-01.dc.html')
+    ui37.MACRO.setdefault('AG-01.dc.html',dict(faz='filtro'))
+
+def ag01():
+    import cenario, dados_mip as DM
+    DM.verificar()
+    _menu_mip()
+    fname='AG-01.dc.html'; E._reset_screen(fname)
+    # "Pontos" fica na linha de baixo da contagem (coletados/total e recoleta): a grade cabe em 1280 × 800 sem cortar o Próximo passo
+    cols=[dict(k='id',l='Vistoria',w=80),dict(k='tal',l='Talhão · cultura',w=130),dict(k='alvo',l='Alvo',w=124),dict(k='cont',l='Contagem × NC',t='num',w=130),
+          dict(k='data',l='Data',t='date',w=90),dict(k='sit',l='Situação',w=140),dict(k='prox',l='Próximo passo',w=170)]
+    grp=(f'<label style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: {MUTED};">Agrupar'
+         f'<select aria-label="Agrupar vistorias por" value="{H("ag_grp")}" onChange="{H("ag_setgrp")}" style="font-family: inherit; font-size: 12px; font-weight: 700; padding: 4px 8px; border-radius: 8px; border: 1px solid {LINE}; background: {SURF}; color: {INK};">'
+         + ''.join(f'<option value="{k}">{t}</option>' for k,t in (('','Nenhum'),('tal','Talhão'),('alvo','Alvo'),('sit','Situação'),('faz','Fazenda'))) + '</select></label>')
+    g=grid(cols,[],edit=dict(m='pick',leafOnly=True),tree=True,gid='g_vis',total=False,tools=grp)
+    # filtro rápido por situação, na ordem de gravidade (acima do NC primeiro), com a contagem da fazenda do filtro
+    chips=(f'<div role="group" aria-label="Filtrar por situação" style="display: flex; flex-wrap: wrap; gap: 6px;"><sc-for list="{H("ag_chips")}" as="q" hint-placeholder-count="5">'
+           f'<button type="button" aria-pressed="{H("q.on")}" onClick="{H("q.go")}" style="{H("q.st")}">{H("q.t")} <span style="opacity: .75;">{H("q.n")}</span></button></sc-for></div>')
+    corpo=bloco('Vistorias','',f'<div style="display: flex; flex-direction: column; gap: 10px; min-height: 0; flex: 1 1 auto;">{chips}{g}</div>'+_ag01_restaurar())
+    EXTRA.append(_ag01_painel()); EXTRA.append(_ag01_programar())
+    EXTRAJS[0]=cenario.js_prefixo()+DM.js_prefixo()+JS_AG01
+    prim=f'<button type="button" onClick="{H("pv_new")}" style="{BTN_ST(True)} display: inline-flex; align-items: center; gap: 6px;">{icon("calendar",15)}Programar vistoria</button>'
+    HEIGHTS37[fname]=1000
+    shell37('AG-01','Pragas e doenças',corpo,fname=fname,status=(H('ag_st'),'red'),primary_html=prim,search=False)
+    _status_dinamico(fname,'ag')
+    # "Expandir tudo" da grade só aparece com as vistorias agrupadas
+    import os, re
+    p=os.path.join(E.P,fname); s=open(p,encoding='utf-8').read()
+    m=re.search(r'<button type="button" onClick="\{\{g_vis_xtog\}\}".*?</button>',s,re.S); assert m, 'botão Expandir tudo não encontrado'
+    s=s[:m.start()]+f'<sc-if value="{H("ag_grpOn")}" hint-placeholder-val="{F_()}">'+m.group(0)+'</sc-if>'+s[m.end():]
+    open(p,'w',encoding='utf-8').write(s)
+
+JS_AG01DET=r'''
+// ===== AG-01det · Rota e evidências da vistoria (#VIS-xxx; padrão VIS-011): rota em W, pontos, série do alvo e fotos =====
+function dtVid(self){ let h=''; try{ h=decodeURIComponent(location.hash||''); }catch(e){ h=''; } const m=/^#(VIS-\d+)$/.exec(h); const s=mipGet();
+  return (m&&s.vis[m[1]])?m[1]:'VIS-011'; }
+function dtIni(self){ if(self.__dt) return; self.__dt=1; try{ window.addEventListener('hashchange',()=>self.setState({dtrev:Date.now()})); }catch(e){} }
+function dtCor(R,x,rec){ if(rec) return ['#C9CFCB','#5B6660']; if(x===null||x===undefined) return ['#FFFFFF','#8A968E']; if(R.crit==='presenca') return Number(x)>0?['#D98A4E','#FFFFFF']:['#7FAE68','#FFFFFF'];
+  return x>=R.nc?['#C8553D','#FFFFFF']:(x>=0.8*R.nc?['#D4B25A','#FFFFFF']:['#7FAE68','#FFFFFF']); }
+function dtGps(t,i,n){ const fr=n>1?i/(n-1):0.5; const dx=(-0.6+1.2*fr)*t.r, dy=((i%2)?-0.35:0.35)*t.r; const lat=t.ll[0]+dy/111320, lon=t.ll[1]+dx/(111320*Math.cos(t.ll[0]*Math.PI/180));
+  const f=(x)=>(x<0?'−':'')+Math.abs(x).toFixed(4).replace('.',','); return f(lat)+' · '+f(lon); }
+function PREVALS(self,v){ mipOuvir(self); cenOuvir(self); dtIni(self); const s=mipGet(), c=(typeof cenGet==='function')?cenGet():null; const vid=dtVid(self); const vv=s.vis[vid];
+  const R=mipRes(vv,s), p=mipP(vv), t=mipT(vv), S=mipSit(s,vv,c), P=mipProx(s,vv,c); const n=vv.npts;
+  v.dt_t=vid+' · '+p.alvo+' · '+t.rot; v.dt_res=[t.faz,t.rot,((t.cultura+' '+t.fase).trim()||'sem cultura'),mipN(t.area)+' ha',p.ver,p.met,(vv.est==='programada'?'programada para ':'coleta de ')+mipBrA(vv.data)+' · '+vv.resp].join(' · ');
+  const cs=agCh(S.c); v.dt_sit=S.t; v.dt_sst=cs.st; v.dt_sdot=cs.dot; v.dt_ssub=S.sub||''; v.dt_back='AG-01.dc.html#'+vid; v.dt_isDemo=vid==='VIS-011';
+  v.dt_kpi=[{l:'Pontos válidos',v:R.val+' de '+R.tot,s:R.rec?R.rec+' em recoleta':(R.falt?R.falt+' sem coleta':'GPS e hora')},
+    R.crit==='presenca'?{l:'Pontos com sintoma',v:String(R.pres),s:'critério presença'}:{l:'Média válida',v:R.media===null?'—':mipN(R.media),s:p.un+' · NC '+mipN(R.nc)},
+    R.crit==='presenca'?{l:'Plantas com sintoma',v:String(vv.pts.reduce((a,x)=>a+(Number(x.v)||0),0)),s:p.un}:{l:'Pontos ≥ NC',v:String(vv.pts.filter(x=>x.v!==null&&!x.rec&&x.v>=R.nc).length),s:R.reb?R.reb+' de reboleira (≥ 2 × NC)':'nenhuma reboleira'},
+    {l:'Evidências',v:(R.col*2)+' fotos',s:'2 por ponto coletado'}];
+  // rota em W: pontos alternam as duas metades do talhão, da esquerda para a direita
+  const pos=vv.pts.map((q,i)=>{ const x=60+(n>1?i*(880/(n-1)):440); const y=(i%2)?70:230; return [x,y]; });
+  v.dt_line=pos.map(q=>q[0]+','+q[1]).join(' ');
+  v.dt_dots=vv.pts.map((q,i)=>{ const k=dtCor(R,q.v,q.rec); return {t:String(q.n).padStart(2,'0'),tt:'Ponto '+q.n+(q.v===null||q.v===undefined?': não coletado':': '+mipN(q.v)+' '+p.un+(q.rec?' · recoleta':'')),
+    st:'position:absolute;left:'+(pos[i][0]/10)+'%;top:'+(pos[i][1]/3)+'%;transform:translate(-50%,-50%);width:26px;height:26px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;background:'+k[0]+';color:'+k[1]+';border:2.5px solid #fff;box-shadow:0 1px 3px rgba(21,32,26,.3);'+((q.v===null||q.v===undefined)?'border:2px dashed #8A968E;':'')}; });
+  // tabela de pontos
+  const sp=GRIDS.find(g=>g.id==='g_pts'); const ncl=(x,rec)=>rec?'recoleta':(x===null||x===undefined?'não coletado':(R.crit==='presenca'?(Number(x)>0?'com sintoma':'sem sintoma'):(x>=R.nc?'acima do NC':(x>=0.8*R.nc?'perto do NC':'abaixo do NC'))));
+  const NCC={'acima do NC':'red','perto do NC':'yellow','abaixo do NC':'green','recoleta':'gray','não coletado':'gray','com sintoma':'orange','sem sintoma':'green'};
+  sp.rows=vv.pts.map((q,i)=>{ const col=!(q.v===null||q.v===undefined); const k=ncl(q.v,q.rec); const gm=q.gm||(col?3+(i%4):null);
+    return {id:'p'+q.n,v:{pt:String(q.n).padStart(2,'0'),gps:col?(q.gps||dtGps(t,i,n)):'—',hora:col?(q.h||('0'+(7+Math.floor((28+i*8)/60))).slice(-2)+':'+('0'+((28+i*8)%60)).slice(-2)):'—',cont:col?q.v:null,nc:k,fotos:col?2:0},
+      s:{nc:k,qual:col?(q.rec?'GPS ±'+gm+' m · fora do talhão':'GPS ±'+gm+' m'):'aguarda coleta'},
+      p:{cont:col?[{k:'cn',t:mipN(q.v),c:q.rec?'gray':NCC[k]}]:[{k:'mut',t:'—'}],nc:[{k:'chip',t:k,c:NCC[k]}],qual:[{k:'chip',t:col?(q.rec?'GPS ±'+gm+' m · fora do talhão':'GPS ±'+gm+' m · ok'):'aguarda coleta',c:col?(q.rec?'red':'green'):'gray'}]}}; });
+  v.dt_un=p.un; v.dt_nct=R.crit==='presenca'?'Critério presença':'× NC '+mipN(R.nc);
+  // série do alvo no talhão (mesmo método e unidade)
+  v.dt_serie=Object.values(s.vis).filter(x=>x.tal===vv.tal&&x.prot===vv.prot&&x.est==='concluida').sort((a,b)=>(a.data<b.data?-1:1)).map(x=>{ const r=mipRes(x,s);
+    const w=r.crit==='presenca'?(r.val?Math.round(100*r.pres/r.val):0):Math.min(100,Math.round((r.pct||0)*50)); const k=dtCor(r,r.crit==='presenca'?r.pres:r.media,false);
+    return {d:mipBrA(x.data),id:x.id,on:x.id===vid?'true':'false',t:r.ctxt+(r.crit==='presenca'?'':' '+p.un),bst:'display:block;height:10px;border-radius:999px;background:'+k[0]+';width:'+Math.max(2,w)+'%;',h:'AG-01det.dc.html#'+x.id,fw:x.id===vid?'800':'600'}; });
+  v.dt_hasSerie=v.dt_serie.length>0;
+  // fotos: pontos acima do NC (ou com sintoma) e os de recoleta
+  v.dt_fotos=vv.pts.filter(q=>q.v!==null&&q.v!==undefined&&(q.rec||(R.crit==='presenca'?q.v>0:q.v>=R.nc))).slice(0,6).map(q=>({t:'Ponto '+String(q.n).padStart(2,'0'),s:mipN(q.v)+' '+p.un+(q.rec?' · recoleta':''),g:q.gps||dtGps(t,q.n-1,n)}));
+  v.dt_hasFotos=v.dt_fotos.length>0; v.dt_semFotos=!v.dt_hasFotos;
+  // próximo passo: comando sem formulário roda aqui; decidir e programar abrem o formulário no AG-01; link vai ao destino (nunca igual ao Voltar)
+  const run={sinc:x=>mipSinc(x,vid),parcial:x=>mipParcial(x,vid),monitorar:x=>mipMonitorar(x,vid,''),pos:x=>mipPos(x,vid)}[P.fn];
+  v.dt_pt=P.t; v.dt_ptxt=P.txt; v.dt_hasBtn=!!(P.t&&run); v.dt_go=()=>{ if(run) mipMudar(self,run); };
+  v.dt_hasLnk=!!(P.t&&!run); v.dt_ph=P.h||('AG-01.dc.html#'+vid+(P.fn?':'+P.fn:'')); }
+'''
+
+def ag01det():
+    import cenario, dados_mip as DM
+    _menu_mip()
+    fname='AG-01det.dc.html'; E._reset_screen(fname)
+    cp=[dict(k='pt',l='Ponto'),dict(k='gps',l='GPS'),dict(k='hora',l='Hora'),dict(k='cont',l='Contagem',t='num',a='r'),dict(k='nc',l='× NC'),dict(k='fotos',l='Fotos',t='num',a='r'),dict(k='qual',l='Qualidade',w=220)]
+    gp=grid(cp,[],edit=dict(m='none'),search=False,gid='g_pts',total=False)
+    kpi=(f'<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;"><sc-for list="{H("dt_kpi")}" as="k" hint-placeholder-count="4">'
+         f'<div style="background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; padding: 12px 14px;"><div style="font-size: 10.5px; font-weight: 700; letter-spacing: .06em; color: {MUTED}; text-transform: uppercase;">{H("k.l")}</div>'
+         f'<div style="font-family: {DISP}; font-size: 22px; font-weight: 700; margin-top: 2px;">{H("k.v")}</div><div style="font-size: 12px; color: {MUTED};">{H("k.s")}</div></div></sc-for></div>')
+    rota=(f'<div style="position: relative; width: 100%; height: 300px; border-radius: 10px; overflow: hidden; background: #E3EBDD;" role="img" aria-label="Rota em W da vistoria">'
+          f'<svg viewBox="0 0 1000 300" preserveAspectRatio="none" style="position: absolute; inset: 0; width: 100%; height: 100%;"><rect x="14" y="14" width="972" height="272" rx="18" fill="#B5E61D" fill-opacity=".45" stroke="#fff" stroke-width="3"/>'
+          f'<polyline points="{H("dt_line")}" fill="none" stroke="{INK}" stroke-width="2" stroke-dasharray="6 5" opacity=".55"/></svg>'
+          f'<sc-for list="{H("dt_dots")}" as="d" hint-placeholder-count="14"><span title="{H("d.tt")}" style="{H("d.st")}">{H("d.t")}</span></sc-for></div>')
+    leg=legend([('#7FAE68','abaixo do NC'),('#D4B25A','perto do NC'),('#C8553D','acima do NC'),('#D98A4E','com sintoma'),('#C9CFCB','recoleta')])
+    serie=(f'<sc-if value="{H("dt_hasSerie")}" hint-placeholder-val="{T_()}"><div style="display: flex; flex-direction: column; gap: 6px;"><sc-for list="{H("dt_serie")}" as="x" hint-placeholder-count="2">'
+           f'<div aria-current="{H("x.on")}" style="display: grid; grid-template-columns: 90px 80px minmax(0, 1fr) 150px; gap: 10px; align-items: center; font-size: 13px;">'
+           f'<span style="color: {MUTED};">{H("x.d")}</span><a href="{H("x.h")}" style="color: {ACC}; font-weight: {H("x.fw")}; text-decoration: none;">{H("x.id")}</a>'
+           f'<span style="display: block; background: #EEF1EE; border-radius: 999px;"><span style="{H("x.bst")}"></span></span><span style="font-weight: 700; text-align: right; font-variant-numeric: tabular-nums;">{H("x.t")}</span></div></sc-for></div></sc-if>')
+    fotos=(f'<sc-if value="{H("dt_hasFotos")}" hint-placeholder-val="{T_()}"><div style="display: flex; gap: 10px; flex-wrap: wrap;"><sc-for list="{H("dt_fotos")}" as="f" hint-placeholder-count="3">'
+           f'<div style="flex: 1 1 160px; max-width: 220px; border: 1px solid {LINE}; border-radius: 12px; overflow: hidden; background: {BG};">'
+           f'<div style="height: 84px; background: linear-gradient(135deg, {ACCS}, {GRAYS}); display: flex; align-items: center; justify-content: center;">{icon("map",26,MUTED)}</div>'
+           f'<div style="padding: 8px 10px; font-size: 11.5px; color: {MUTED};"><b style="color: {INK};">{H("f.t")}</b> · {H("f.s")}<br>GPS {H("f.g")}</div></div></sc-for></div></sc-if>'
+           f'<sc-if value="{H("dt_semFotos")}" hint-placeholder-val="{F_()}"><div style="font-size: 13px; color: {MUTED};">Sem ponto acima do NC ou em recoleta.</div></sc-if>')
+    cab=(f'<div style="display: flex; flex-direction: column; gap: 6px;"><div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">'
+         f'<h2 style="margin: 0; font-family: {DISP}; font-size: 18px; font-weight: 700;">{H("dt_t")}</h2>{_ch("dt_sit","dt_sst","dt_sdot")}<span style="font-size: 12.5px; color: {MUTED};">{H("dt_ssub")}</span></div>'
+         f'<div style="font-size: 13px; color: {MUTED};">{H("dt_res")}</div><div style="font-size: 13px; line-height: 1.45;"><b>Próximo passo:</b> {H("dt_ptxt")}</div></div>')
+    corpo=(cab + f'<sc-if value="{H("dt_isDemo")}" hint-placeholder-val="{F_()}">' + cadeia('VIS-011','Abrir diagnóstico DIA-007','AG-03det.dc.html') + '</sc-if>'
+      + kpi
+      + bloco('Rota em W e pontos','',rota+leg+gp)
+      + bloco('Série do alvo no talhão','',serie)
+      + bloco('Evidências com GPS e hora','',fotos))
+    EXTRAJS[0]=cenario.js_prefixo()+DM.js_prefixo()+JS_AG01.split('// ---------- formulário de decisão')[0].split('function agRow(')[0]+JS_AG01DET
+    prim=(f'<sc-if value="{H("dt_hasLnk")}" hint-placeholder-val="{T_()}"><a href="{H("dt_ph")}" style="{BTN_ST(True)} display: inline-flex; align-items: center; gap: 6px; text-decoration: none;">{icon("leaf",15)}{H("dt_pt")}</a></sc-if>'
+          f'<sc-if value="{H("dt_hasBtn")}" hint-placeholder-val="{F_()}"><button type="button" onClick="{H("dt_go")}" style="{BTN_ST(True)} display: inline-flex; align-items: center; gap: 6px;">{icon("leaf",15)}{H("dt_pt")}</button></sc-if>')
+    HEIGHTS37[fname]=1500; PARENT37[fname]='AG-01.dc.html'
+    shell37('AG-01','Rota e evidências',corpo,fname=fname,crumbs_extra=['Rota e evidências'],primary_html=prim,search=False)
+    import os
+    p=os.path.join(E.P,fname); s=open(p,encoding='utf-8').read()
+    old='<a href="AG-01.dc.html" aria-label="Voltar"'; assert s.count(old)==1, 'voltar do AG-01det não encontrado'
+    open(p,'w',encoding='utf-8').write(s.replace(old,f'<a href="{H("dt_back")}" aria-label="Voltar"'))
+
+# ================= AG-07 · Consulta Agrofit (menu Agrícola, antes de Planos agronômicos) =================
+# Base REAL (02/10/2026): os 4.409 produtos formulados com registro ativo nos dados abertos do AGROFIT/MAPA (CC-BY), processados por
+# dados_agrofit/processar.py em JSON servidos ao lado da página (a página busca './agrofit_*.json'; funciona sem internet externa).
+# Carga: meta → índice (lista pronta) → 6 fatias de usos por cultura em segundo plano (busca por praga, filtro de alvo, usos da ficha,
+# rotação) → LMR da ANVISA ao abrir a primeira ficha. Todos os arquivos têm o mesmo "versao"; divergência = base em troca no servidor
+# (recarrega uma vez, depois erro com "Tentar de novo").
+# Listagem: grade G2 (ordenar e filtrar no cabeçalho, agrupar) com render incremental (50 linhas + "Mostrar mais"); busca sem acento
+# em produto, registro, ingrediente, grupo químico, titular, classe e modo de ação, e — palavra a palavra — num MESMO uso (cultura e
+# alvo juntos). Filtros: Cultura (combobox, culturas da fazenda primeiro; "Todas as culturas" do AGROFIT vale para qualquer cultura),
+# Praga ou alvo (aparece com a cultura), Classe por componente (+ Biológico) e Orgânicos.
+# Ficha (painel lateral): uso (cultura × alvo) → "Preparar receituário" (registro em "Todas as culturas" pede a cultura do talhão);
+# usos registrados; rotação (mesma cultura × alvo, OUTRO MODO DE AÇÃO pelo código IRAC/FRAC/HRAC de referência de cada ingrediente,
+# agrofit_dados.GRUPO_RESIST; multissítio já presente não conta como rotação); LMR ANVISA da cultura (vermelho só se NÃO autorizado);
+# na fazenda (ao vivo, pelo cenário); referência conferida em bula (agrofit_dados, mesma combinação de ingredientes); registro; link oficial.
+# Links: AG-07.dc.html#reg-<NR_REGISTRO> abre a ficha; os antigos AG-07.dc.html#<id da ficha da fazenda> (O.S., MIP) abrem a lista
+# filtrada pelo mesmo ingrediente (ou a ficha, quando só há um registro) com a faixa "Da fazenda" e a referência conferida (dose,
+# carência, alertas) logo abaixo dela.
+import os as _os, shutil as _sh
+AGF_ID='g_agf'
+AGF_CULTURAS=['Soja','Milho','Feijão','Café','Mamão']
+AGF_DIR=_os.path.join(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))),'dados_agrofit','site')
+# arquivos que a página busca (publicar ao lado de AG-07.dc.html); os de produto e de técnicos ficam só no servidor
+def agf_arquivos():
+    meta=json.load(open(_os.path.join(AGF_DIR,'agrofit_meta.json'),encoding='utf-8'))
+    n=meta['contagens']['fatias_cultura']
+    return ['agrofit_meta.json','agrofit_indice.json','agrofit_lmr.json']+[f'agrofit_usos_cultura_{i}.json' for i in range(n)]
+
+def _nd(x):
+    s=('%.3f'%float(x)).rstrip('0').rstrip('.')
+    return s.replace('.',',')
+
+def agf_dados():
+    """Dados embutidos: fichas da fazenda (referência conferida em bula + elo Na fazenda), grupos de resistência por ingrediente,
+    planos que usam cada ficha e talhões por cultura. A base real vem dos JSON (fetch)."""
+    import agrofit_dados as A
+    import dados2 as D2
+    ind=json.load(open(_os.path.join(AGF_DIR,'agrofit_indice.json'),encoding='utf-8'))
+    falta=A.confere_agrofit(ind)
+    assert not falta, f'AGROFIT_INGREDIENTES com nome ausente do índice real: {falta}'
+    nome2id={n:p['id'] for p in A.PRODUTOS for n in p['nomes_fazenda']}
+    planos={}
+    for pl in D2.PLANOS:
+        for a in pl['atividades']:
+            for x in a['prods']:
+                pid=nome2id.get(x['prod'])
+                if pid: planos.setdefault(pid,[]).append(dict(id=pl['id'],nome=pl['nome'],atv=a['nome'],dose=f"{_nd(x['dose'])} {x['un']}/ha"))
+    safn={s['id']:s['nome'] for s in D2.SAFRAS if not s['ro']}
+    tal={}
+    for sid,cs in D2.CULTIVOS.items():
+        if sid not in safn: continue
+        for c in cs:
+            tal.setdefault(c['cultura'].split()[0],[]).append(f"{c['local']} · {_nd(c['area'])} ha · {c['fazenda']} · {safn[sid]}")
+    K=('id','nome','nomes_fazenda','ingrediente','concentracao','formulacao','classe','grupos','grupo','grupo_nome','situacao','situacao_nota',
+       'avisos','alertas_fazenda','refs_fazenda')
+    ref=[]
+    for p in A.PRODUTOS:
+        d={k:p[k] for k in K}
+        d['usos']=[{k:u[k] for k in ('cultura','alvo','dose','carencia','max_aplic','intervalo','conferido')} for u in p['usos']]
+        d['agrofit']=A.AGROFIT_INGREDIENTES[p['id']]; d['conc']=A.conc_num(p); d['sem']=A.SEM_REGISTRO.get(p['id'],'')
+        ref.append(d)
+    # grupo de resistência (IRAC/FRAC/HRAC) de TODOS os ingredientes químicos: a rotação compara o código, não o rótulo do AGROFIT
+    gref=[[[_agf_norm(n) for n in ns],c] for ns,c in A.GRUPO_RESIST]
+    lac=A.lacunas_resist(ind)
+    if lac: print(f'AVISO AG-07: {len(lac)} ingrediente(s) químico(s) sem código IRAC/FRAC/HRAC (rotação cai no grupo químico): {lac[:12]}')
+    return dict(ref=ref,grupos={k:list(v) for k,v in A.GRUPOS_RESIST.items()},grupo_ref=gref,gq_gen=[_agf_norm(g) for g in A.GQ_GENERICOS],
+                planos=planos,tal=tal,culturas=AGF_CULTURAS,consulta=A.CONSULTA['data'],oficial=A.CONSULTA['link'])
+
+def _agf_norm(s):
+    import unicodedata
+    return ''.join(c for c in unicodedata.normalize('NFD',s.lower()) if not unicodedata.combining(c)).strip()
+
+_LAB=lambda t: f'<span style="font-size: 11px; font-weight: 800; letter-spacing: .06em; color: {MUTED}; text-transform: uppercase;">{t}</span>'
+
+def _agf_fonte(link):
+    return (f'<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 12.8px; color: {MUTED}; margin-top: -4px;">'
+            f'<span>{H("agf_fonte")}</span>'
+            f'<a href="{link}" target="_blank" rel="noopener" style="color: {ACC}; font-weight: 700; text-decoration: none;">Abrir no AGROFIT oficial ›</a></div>')
+
+def _agf_filtros():
+    chips=(f'<div role="group" aria-label="Filtrar por classe" style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px;">'
+           f'<span style="font-size: 11px; font-weight: 800; letter-spacing: .06em; color: {MUTED}; text-transform: uppercase; min-width: 58px;">Classe</span>'
+           f'<sc-for list="{H("agf_clsL")}" as="qc" hint-placeholder-count="6"><button type="button" aria-pressed="{H("qc.on")}" title="{H("qc.lab")}" onClick="{H("qc.go")}" style="{H("qc.st")}">'
+           f'{H("qc.t")} <span style="opacity: .75;">{H("qc.n")}</span></button></sc-for>'
+           f'<sc-if value="{H("agf_temClsO")}" hint-placeholder-val="{T_()}"><select aria-label="Outras classes" value="{H("agf_clsO")}" onChange="{H("agf_setClsO")}" style="{H("agf_clsOSt")}">'
+           f'<sc-for list="{H("agf_clsOs")}" as="o" hint-placeholder-count="4"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select></sc-if></div>')
+    cul=f'<div style="display: flex; flex-direction: column; gap: 4px;">{_LAB("Cultura")}{E.ac_campo("agc.","Cultura","250px")}</div>'
+    alvo=(f'<sc-if value="{H("agf_temCul")}" hint-placeholder-val="{F_()}"><div style="display: flex; flex-direction: column; gap: 4px;">{_LAB("Praga ou alvo")}'
+          f'{E.ac_campo("aga.","Praga ou alvo","330px")}</div></sc-if>')
+    org=(f'<div style="display: flex; flex-direction: column; gap: 4px;">{_LAB("Orgânicos")}<button type="button" aria-pressed="{H("agf_orgOn")}" onClick="{H("agf_orgTog")}" '
+         f'title="Mostrar só produtos marcados como aprovados para agricultura orgânica no AGROFIT" style="{H("agf_orgSt")}">Aprovados para orgânicos <span style="opacity: .75;">{H("agf_orgN")}</span></button></div>')
+    faixa=lambda cond,bg,t,d,bt,go: (f'<sc-if value="{H(cond)}" hint-placeholder-val="{F_()}"><div role="status" style="display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; '
+         f'padding: 9px 12px; border-radius: 10px; font-size: 13px; line-height: 1.45; {H(bg)}"><b>{H(t)}</b><span style="flex: 1 1 320px;">{H(d)}</span>'
+         f'<button type="button" onClick="{H(go)}" style="{_MINI}">{bt}</button></div></sc-if>')
+    uso=(f'<sc-if value="{H("agf_uLoad")}" hint-placeholder-val="{F_()}"><div role="status" style="font-size: 12.5px; color: {MUTED};">Carregando culturas e alvos dos usos registrados… '
+         f'a busca por praga e o filtro de alvo entram em instantes.</div></sc-if>'
+         f'<sc-if value="{H("agf_uErro")}" hint-placeholder-val="{F_()}"><div role="alert" style="display: flex; flex-direction: row; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 12.8px; font-weight: 600; color: {RED};">'
+         f'Os usos registrados (culturas e alvos) não carregaram: {H("agf_uErrT")}<button type="button" onClick="{H("agf_uRetry")}" style="{_MINI}">Tentar de novo</button></div></sc-if>')
+    td=(f'<sc-if value="{H("agf_hasTD")}" hint-placeholder-val="{F_()}"><div role="status" style="display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; font-size: 12.8px; line-height: 1.45; color: {MUTED};">'
+        f'<span>{H("agf_tdT")}</span><button type="button" onClick="{H("agf_tdTog")}" style="border: 0; background: transparent; padding: 0; font-family: inherit; font-size: 12.8px; font-weight: 700; color: {ACC}; cursor: pointer;">{H("agf_tdBt")} ›</button></div></sc-if>')
+    # link antigo da O.S./MIP (#<ficha da fazenda>): quem chega quer conferir dose, carência e alertas do produto da fazenda → a referência
+    # conferida aparece aqui, antes da lista dos registros com o mesmo ingrediente
+    refc=(f'<sc-if value="{H("agf_hasRefC")}" hint-placeholder-val="{F_()}"><div role="region" aria-label="Referência conferida em bula" style="display: flex; flex-direction: column; gap: 8px;">'
+          f'{_LAB("Referência conferida em bula · dose, carência e alertas da fazenda")}'
+          f'<span style="font-size: 12.8px; color: {MUTED}; line-height: 1.45;">Conferida em bula pública de produto com os mesmos ingredientes ativos; a bula de cada registro abaixo está no AGROFIT oficial.</span>'
+          + _agf_cref('agf_rc') + '</div></sc-if>')
+    return (f'<div style="display: flex; flex-direction: column; gap: 10px;">'
+            f'<div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 10px 16px;">{cul}{alvo}{org}</div>{td}{chips}{uso}'
+            + faixa('agf_hasRef','agf_refSt','agf_refT','agf_refD','Mostrar todos os produtos','agf_refX') + refc
+            + faixa('agf_hasMiss','agf_missSt','agf_missT','agf_missD','Fechar aviso','agf_missX') + '</div>')
+
+def _agf_tools():
+    sel=(f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 4px 8px; border-radius: 999px; border: 1px solid {LINE}; '
+         f'background: {SURF}; color: {INK}; cursor: pointer;')
+    return (f'<label style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: {MUTED};">Agrupar por'
+            f'<select aria-label="Agrupar por" value="{H("agf_gb")}" onChange="{H("agf_setgb")}" style="{sel}">'
+            f'<sc-for list="{H("agf_gbs")}" as="o" hint-placeholder-count="3"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select></label>'
+            f'<sc-if value="{H("agf_grouped")}" hint-placeholder-val="{F_()}"><button type="button" onClick="{H(AGF_ID+"_xtog")}" '
+            f'style="{_MINI} display: inline-flex; align-items: center; gap: 5px;">{E.seta_xtog(H(AGF_ID+"_xup"),H(AGF_ID+"_xdown"))}{H(AGF_ID+"_xlab")}</button></sc-if>')
+
+def _agf_estados():
+    """carregando (com o tamanho da base) e erro com "Tentar de novo"; a lista só aparece com o índice carregado."""
+    return (f'<sc-if value="{H("agf_loading")}" hint-placeholder-val="{T_()}"><div role="status" aria-live="polite" style="flex: 0 0 auto; display: flex; flex-direction: column; gap: 10px; padding: 18px; '
+            f'background: {SURF}; border: 1px solid {LINE}; border-radius: 14px;"><b style="font-size: 14px;">{H("agf_loadT")}</b>'
+            f'<span style="font-size: 12.8px; color: {MUTED};">Os arquivos ficam no próprio site e são lidos uma vez por sessão.</span>'
+            f'<div style="height: 6px; border-radius: 999px; background: {BG}; overflow: hidden;"><div style="width: 40%; height: 100%; background: {ACC}; opacity: .55;"></div></div></div></sc-if>'
+            f'<sc-if value="{H("agf_erro")}" hint-placeholder-val="{F_()}"><div role="alert" style="flex: 0 0 auto; display: flex; flex-direction: row; align-items: center; gap: 12px; flex-wrap: wrap; padding: 16px 18px; '
+            f'background: {REDS}; border: 1px solid #F4C7C1; border-radius: 14px; color: {RED}; font-size: 13.5px; font-weight: 600;">'
+            f'<span style="flex: 1 1 auto; min-width: 280px;">Não foi possível carregar a base do AGROFIT: {H("agf_errT")}.</span>'
+            f'<button type="button" onClick="{H("agf_retry")}" style="{BTN_ST(True,True)}">Tentar de novo</button></div></sc-if>')
+
+def _agf_mais():
+    return (f'<sc-if value="{H("agf_temMais")}" hint-placeholder-val="{F_()}"><div style="display: flex; align-items: center; justify-content: center; gap: 12px; padding: 2px 0 6px;">'
+            f'<span style="font-size: 12.5px; color: {MUTED}; font-variant-numeric: tabular-nums;">{H("agf_maisT")}</span>'
+            f'<button type="button" onClick="{H("agf_mais")}" style="{_MINI}">Mostrar mais {H("agf_maisN")}</button></div></sc-if>')
+
+def _agf_cref(lst):
+    """Cartões da referência conferida em bula (usos com dose e carência, avisos, alertas da fazenda): ficha e faixa \"Da fazenda\"."""
+    chp=lambda t,st,dot: f'<span style="{H(st)}"><span style="{H(dot)}"></span>{H(t)}</span>'
+    MUT=f'font-size: 12.8px; color: {MUTED}; line-height: 1.45;'
+    TH=f'font-size: 10.5px; font-weight: 700; letter-spacing: .04em; color: {MUTED}; text-transform: uppercase;'
+    UT='minmax(0,.7fr) minmax(0,1.6fr) minmax(0,1.1fr) minmax(0,.9fr) 64px minmax(0,.8fr)'
+    return (f'<sc-for list="{H(lst)}" as="c" hint-placeholder-count="1"><div style="display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border: 1px solid {LINE}; border-radius: 12px;">'
+          f'<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px;"><b style="font-size: 13.5px;">{H("c.t")}</b><span style="{MUT}">{H("c.sub")}</span>'
+          f'<sc-for list="{H("c.chips")}" as="k" hint-placeholder-count="1">{chp("k.t","k.st","k.dot")}</sc-for></div>'
+          f'<div style="font-size: 12.8px;"><b>{H("c.g")}</b> <span style="color: {MUTED};">{H("c.gn")}</span></div>'
+          f'<div role="table" aria-label="Usos conferidos" style="display: flex; flex-direction: column;"><div role="row" style="display: grid; grid-template-columns: {UT}; gap: 10px; padding: 4px 0; {TH}">'
+          f'<span role="columnheader">Cultura</span><span role="columnheader">Alvo</span><span role="columnheader">Dose</span><span role="columnheader">Carência</span><span role="columnheader" style="text-align: right;">Máx.</span><span role="columnheader">Intervalo</span></div>'
+          f'<sc-for list="{H("c.usos")}" as="u" hint-placeholder-count="2"><div role="row" style="display: grid; grid-template-columns: {UT}; gap: 10px; align-items: start; padding: 6px 0; border-top: 1px solid {LINE}; font-size: 12.5px; line-height: 1.4;">'
+          f'<span role="cell"><b>{H("u.c")}</b></span><span role="cell">{H("u.a")}<sc-if value="{H("u.nc")}" hint-placeholder-val="{F_()}"> <span style="padding: 0 6px; border-radius: 999px; font-size: 11px; font-weight: 700; color: {YEL}; background: {YELS};">não conferido</span></sc-if></span>'
+          f'<span role="cell">{H("u.d")}</span><span role="cell">{H("u.car")}</span><span role="cell" style="text-align: right;">{H("u.max")}</span><span role="cell">{H("u.int")}</span></div></sc-for></div>'
+          f'<sc-for list="{H("c.avisos")}" as="w" hint-placeholder-count="0"><div style="font-size: 12.5px; line-height: 1.45;">• {H("w.t")}</div></sc-for>'
+          f'<sc-for list="{H("c.alertas")}" as="al" hint-placeholder-count="0"><div style="padding: 6px 10px; border-radius: 8px; background: {YELS}; color: {YEL}; font-size: 12.5px; font-weight: 600; line-height: 1.45;"><b>{H("al.ref")}</b> {H("al.t")}</div></sc-for>'
+          f'</div></sc-for>')
+
+def _agf_painel(link):
+    lab=lambda t: f'<div style="font-size: 11px; font-weight: 800; letter-spacing: .06em; color: {MUTED}; text-transform: uppercase;">{t}</div>'
+    sub=lambda t: f'<div style="font-size: 12.5px; font-weight: 800; color: {INK}; padding-top: 4px;">{t}</div>'
+    chp=lambda t,st,dot: f'<span style="{H(st)}"><span style="{H(dot)}"></span>{H(t)}</span>'
+    def sec(titulo,corpo,rot=None):
+        return (f'<section aria-label="{titulo}" style="display: flex; flex-direction: column; gap: 8px; padding-top: 14px; border-top: 1px solid {LINE};">'
+                f'{lab(rot or titulo)}{corpo}</section>')
+    LK=f'color: {ACC}; font-weight: 700; text-decoration: none; font-size: 13px; white-space: nowrap;'
+    BL=f'border: 0; background: transparent; padding: 0; font-family: inherit; font-size: 13px; font-weight: 700; color: {ACC}; cursor: pointer; text-align: left;'
+    MUT=f'font-size: 12.8px; color: {MUTED}; line-height: 1.45;'
+    TH=f'font-size: 10.5px; font-weight: 700; letter-spacing: .04em; color: {MUTED}; text-transform: uppercase;'
+    SEL=f'font-family: inherit; font-size: 13px; padding: 7px 10px; border-radius: 9px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; min-width: 0; max-width: 100%;'
+    def tabela(rot,tpl,cab,lst,var,celulas,n=2):
+        head=''.join(f'<span role="columnheader" style="{"text-align: right;" if r else ""}">{c}</span>' for c,r in cab)
+        return (f'<div role="table" aria-label="{rot}" style="display: flex; flex-direction: column;">'
+                f'<div role="row" style="display: grid; grid-template-columns: {tpl}; gap: 10px; padding: 4px 0; {TH}">{head}</div>'
+                f'<sc-for list="{H(lst)}" as="{var}" hint-placeholder-count="{n}"><div role="row" style="display: grid; grid-template-columns: {tpl}; gap: 10px; '
+                f'align-items: start; padding: 7px 0; border-top: 1px solid {LINE}; font-size: 12.8px; line-height: 1.4; font-variant-numeric: tabular-nums;">{celulas}</div></sc-for></div>')
+    cel=lambda x,r=False,b=False: (f'<span role="cell" style="min-width: 0;{" text-align: right;" if r else ""}">' + (f'<b>{x}</b>' if b else x) + '</span>')
+    se=lambda c,corpo,ph='false': f'<sc-if value="{H(c)}" hint-placeholder-val="{{{{{ph}}}}}">{corpo}</sc-if>'
+    # próximo passo: uso (cultura × alvo) e o primário "Preparar receituário"
+    passo=(f'<div role="region" aria-label="Próximo passo" style="display: flex; flex-direction: column; gap: 10px; padding: 12px 14px; background: {BG}; border-radius: 12px;">'
+           f'<div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 12px;">'
+           f'<label style="display: flex; flex-direction: column; gap: 4px; flex: 1 1 200px; min-width: 0; font-size: 12px; font-weight: 600; color: {MUTED};">Cultura'
+           f'<select aria-label="Cultura do uso" value="{H("af_cul")}" onChange="{H("af_setcul")}" style="{SEL}"><sc-for list="{H("af_culs")}" as="o" hint-placeholder-count="3"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select></label>'
+           f'<label style="display: flex; flex-direction: column; gap: 4px; flex: 2 1 260px; min-width: 0; font-size: 12px; font-weight: 600; color: {MUTED};">Praga ou alvo'
+           f'<select aria-label="Alvo do uso" value="{H("af_alvo")}" onChange="{H("af_setalvo")}" disabled="{H("af_alvoDis")}" style="{SEL}"><sc-for list="{H("af_alvos")}" as="o" hint-placeholder-count="3"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select></label>'
+           f'<button type="button" onClick="{H("af_rxgo")}" disabled="{H("af_rxDis")}" title="Preparar o receituário agronômico deste registro para a cultura e o alvo escolhidos" style="{BTN_ST(True,True)} {H("af_rxSt")}">Preparar receituário</button></div>'
+           + se('af_hasDica',f'<div style="{MUT}">{H("af_dica")}</div>')
+           + se('af_hasDone',f'<span role="status" style="font-size: 12.5px; font-weight: 700; color: {ACC};">{H("af_done")}</span>') + '</div>')
+    # usos registrados (por cultura; com a cultura escolhida, os alvos dela)
+    usos=(f'<input type="search" aria-label="Filtrar usos por cultura ou alvo" placeholder="Filtrar cultura ou alvo…" value="{H("af_q")}" onChange="{H("af_setq")}" '
+          f'style="font-family: inherit; font-size: 13px; padding: 7px 10px; border: 1px solid {LINE}; border-radius: 9px; max-width: 340px;">'
+          + se('af_usosLoad',f'<div role="status" style="{MUT}">Carregando os usos registrados…</div>')
+          + f'<div role="list" aria-label="{H("af_usosL")}" style="display: flex; flex-direction: column;">'
+          f'<sc-for list="{H("af_usos")}" as="u" hint-placeholder-count="3"><div role="listitem" style="display: grid; grid-template-columns: minmax(0,1.1fr) minmax(0,2fr) auto; gap: 10px; align-items: baseline; padding: 7px 8px; border-top: 1px solid {LINE}; font-size: 12.8px; line-height: 1.4; {H("u.st")}">'
+          f'<b style="min-width: 0;">{H("u.t")}</b><span style="min-width: 0; color: {MUTED};">{H("u.sub")}</span>'
+          f'<button type="button" onClick="{H("u.go")}" aria-label="{H("u.lab")}" style="{BL} font-size: 12.5px;">{H("u.bt")} ›</button></div></sc-for></div>'
+          + se('af_usosVazio',f'<div style="{MUT}">Nenhum uso com “{H("af_q")}”.</div>')
+          + se('af_usosMais',f'<button type="button" onClick="{H("af_usosTodos")}" style="{BL}">Mostrar todos ({H("af_usosN")}) ›</button>'))
+    # rotação: mesma cultura × alvo, outro grupo químico (e outro grupo de resistência quando conhecido)
+    rot=(se('af_rotHint',f'<div style="{MUT}">{H("af_rotHintT")}</div>','true')
+         + se('af_hasRot',f'<div style="font-size: 13px; line-height: 1.45;">{H("af_rotRes")}</div>'
+              f'<div role="list" aria-label="Alternativas de outro modo de ação" style="display: flex; flex-direction: column;">'
+              f'<sc-for list="{H("af_rotG")}" as="r" hint-placeholder-count="2"><div role="listitem" style="display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.6fr); gap: 10px; padding: 7px 0; border-top: 1px solid {LINE}; font-size: 12.8px; line-height: 1.4;">'
+              f'<span style="min-width: 0;"><b>{H("r.t")}</b><br><span style="color: {MUTED};">{H("r.n")}</span></span><span style="display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline;">'
+              f'<sc-for list="{H("r.ps")}" as="a" hint-placeholder-count="2"><button type="button" onClick="{H("a.go")}" title="{H("a.lab")}" style="{BL} font-size: 12.8px;">{H("a.t")} ›</button></sc-for>'
+              f'<span style="color: {MUTED};">{H("r.mais")}</span></span></div></sc-for></div>'
+              f'<div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;"><button type="button" onClick="{H("af_rotVer")}" style="{BL}">Ver todos para este alvo na lista ›</button>'
+              f'<span style="{MUT}">{H("af_rotNota")}</span></div>'))
+    # LMR ANVISA da cultura escolhida
+    LT='minmax(0,1.1fr) minmax(0,2fr)'
+    lmr=(se('af_lmrHint',f'<div style="{MUT}">{H("af_lmrHintT")}</div>','true')
+         + se('af_lmrErro',f'<div role="alert" style="display: flex; flex-direction: row; align-items: center; gap: 10px; font-size: 12.8px; font-weight: 600; color: {RED};">{H("af_lmrErrT")}<button type="button" onClick="{H("af_lmrRetry")}" style="{_MINI}">Tentar de novo</button></div>')
+         + se('af_hasLmr',tabela('LMR ANVISA',LT,[('Ingrediente ativo',0),('Limite máximo de resíduo',0)],'af_lmr','m',
+              cel(H('m.t'),b=True)+f'<span role="cell" style="min-width: 0; {H("m.st")}">{H("m.v")}</span>',1)
+              + f'<div style="{MUT}">Fonte: monografias da ANVISA (dados abertos), LMR vigente em {H("af_lmrRef")}.</div>'))
+    # na fazenda (ao vivo): mesmo ingrediente ativo de produtos da fazenda
+    LTF='minmax(0,1.3fr) minmax(0,.8fr) minmax(0,1.2fr) repeat(3, minmax(0,.9fr))'
+    lotes=tabela('Estoque por lote',LTF,[('Produto da fazenda',0),('Lote',0),('Local',0),('Físico',1),('Reservado',1),('Disponível',1)],'af_lotes','l',
+        cel(H('l.prod'),b=True)+cel(H('l.lote'))+cel(H('l.local'))+cel(H('l.fis'),r=True)+cel(H('l.res'),r=True)+cel(H('l.disp'),r=True,b=True),1)
+    faz=(se('af_fora',f'<div style="{MUT}">Nenhum produto da fazenda tem este ingrediente ativo (estoque, planos e ordens de serviço).</div>')
+         + se('af_hasFaz',f'<div style="font-size: 13px; line-height: 1.45;">{H("af_fazT")}</div>'
+           + se('af_hasLotes',f'{sub("Estoque por lote")}{lotes}<div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 13px; font-weight: 800;">{H("af_lotTot")}'
+                f'<a href="EST.dc.html" style="{LK}">Abrir no Estoque ›</a></div>')
+           + se('af_semLotes',f'{sub("Estoque por lote")}<div style="{MUT}">Sem lote no Estoque.</div>')
+           + se('af_hasPlanos',f'{sub("Planos agronômicos")}<sc-for list="{H("af_planos")}" as="pl" hint-placeholder-count="1"><div style="display: grid; grid-template-columns: 110px minmax(0,1fr) auto; gap: 10px; padding: 6px 0; border-top: 1px solid {LINE}; font-size: 12.8px; align-items: baseline;">'
+                f'<a href="PA.dc.html" title="Abrir Planos agronômicos" style="{LK}">{H("pl.id")} ›</a><span>{H("pl.t")}</span><span style="white-space: nowrap; font-variant-numeric: tabular-nums;">{H("pl.dose")}</span></div></sc-for>')
+           + se('af_hasOs',f'{sub("Ordens de serviço em andamento")}<sc-for list="{H("af_os")}" as="o" hint-placeholder-count="1"><div style="display: grid; grid-template-columns: 110px minmax(0,1fr) auto auto; gap: 10px; padding: 6px 0; border-top: 1px solid {LINE}; font-size: 12.8px; align-items: center;">'
+                f'<a href="{H("o.h")}" title="Abrir {H("o.id")} na Ordem de Serviço" style="{LK}">{H("o.id")} ›</a><span>{H("o.t")}</span>{chp("o.et","o.st","o.dot")}'
+                f'<span style="white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums;">{H("o.dose")}</span></div></sc-for>')
+           + se('af_hasRefs',f'{sub("Recomendação e ordem registradas")}<sc-for list="{H("af_refsF")}" as="rf" hint-placeholder-count="1"><div style="display: grid; grid-template-columns: 110px minmax(0,1fr); gap: 10px; padding: 6px 0; border-top: 1px solid {LINE}; font-size: 12.8px; align-items: baseline;">'
+                f'<a href="{H("rf.h")}" style="{LK}">{H("rf.ref")} ›</a><span>{H("rf.t")}</span></div></sc-for>')))
+    # referência conferida em bula (agrofit_dados): mesma combinação de ingredientes
+    refb=(f'<div style="{MUT}">Doses e carências conferidas em bula pública de produto com os mesmos ingredientes ativos: não são a bula deste registro. '
+          f'Use para comparar; o receituário segue a bula do produto escolhido.</div>'+_agf_cref('af_cref'))
+    # registro e composição (como no AGROFIT) + link oficial e a nota da bula
+    IT='minmax(0,1.3fr) minmax(0,1.1fr) minmax(0,.8fr) minmax(0,1fr)'
+    reg_=(f'<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 18px; padding: 12px 14px; background: {BG}; border-radius: 12px;">'
+          f'<sc-for list="{H("af_kv")}" as="x" hint-placeholder-count="6"><div style="min-width: 0;"><div style="{TH}">{H("x.l")}</div>'
+          f'<div style="font-size: 13.2px; font-weight: 600; margin-top: 2px; line-height: 1.4; overflow-wrap: anywhere;">{H("x.v")}</div></div></sc-for></div>'
+          + tabela('Ingredientes ativos',IT,[('Ingrediente ativo',0),('Grupo químico (AGROFIT)',0),('Concentração',0),('Grupo de resistência (referência)',0)],'af_ings','g',
+                   cel(H('g.t'),b=True)+cel(H('g.g'))+cel(H('g.c'))+cel(H('g.r')),1)
+          + f'<div style="{MUT}">{H("af_resNota")}</div>'
+          f'<div style="display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 12.8px; font-weight: 600; line-height: 1.45;">'
+          f'<span>{H("af_bula")}</span><a href="{link}" target="_blank" rel="noopener" style="{LK}">Abrir no AGROFIT oficial ›</a></div>')
+    NAV=(f'width: 30px; height: 30px; border-radius: 8px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer; font-size: 16px; line-height: 1; padding: 0;')
+    return (f'<sc-if value="{H("af_open")}" hint-placeholder-val="{F_()}"><div style="position: fixed; inset: 0; z-index: 60; display: flex; justify-content: flex-end;">'
+      f'<button type="button" tabIndex="-1" aria-label="Fechar ficha" onClick="{H("af_close")}" style="position: absolute; inset: 0; border: 0; background: rgba(21,32,26,.32); cursor: pointer;"></button>'
+      f'<aside role="dialog" aria-modal="true" aria-label="Ficha · {H("af_t")}" style="position: relative; width: 860px; max-width: 100%; height: 100vh; overflow-y: auto; background: {SURF}; '
+      f'box-shadow: -12px 0 40px -12px rgba(21,32,26,.35); padding: 22px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px;">'
+      f'<div style="display: flex; align-items: flex-start; gap: 10px;"><div style="display: flex; flex-direction: column; gap: 3px; flex-grow: 1; min-width: 0;">'
+      f'<h2 style="margin: 0; font-family: {DISP}; font-size: 19px; font-weight: 700; letter-spacing: -.02em; line-height: 1.3;">{H("af_t")}</h2>'
+      f'<div style="{MUT}">{H("af_sub")}</div>' + se('af_hasMarcas',f'<div style="{MUT}">{H("af_marcas")}</div>') + '</div>'
+      f'<sc-if value="{H("af_hasNav")}" hint-placeholder-val="{F_()}"><div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">'
+      f'<button type="button" aria-label="Produto anterior" title="Produto anterior" disabled="{H("af_prevDis")}" onClick="{H("af_prev")}" style="{NAV} {H("af_prevSt")}">‹</button>'
+      f'<span style="font-size: 12px; font-weight: 600; color: {MUTED}; white-space: nowrap; font-variant-numeric: tabular-nums;">{H("af_pos")}</span>'
+      f'<button type="button" aria-label="Próximo produto" title="Próximo produto" disabled="{H("af_nextDis")}" onClick="{H("af_next")}" style="{NAV} {H("af_nextSt")}">›</button></div></sc-if>'
+      f'<button type="button" aria-label="Fechar" title="Fechar" onClick="{H("af_close")}" style="border: 0; background: {BG}; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 18px; color: {MUTED}; flex-shrink: 0;">×</button></div>'
+      f'<div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;"><sc-for list="{H("af_chips")}" as="c" hint-placeholder-count="3">{chp("c.t","c.st","c.dot")}</sc-for></div>'
+      + passo + sec('Usos registrados',usos,H('af_usosT')) + sec('Rotação',rot,H('af_rotT')) + sec('LMR ANVISA',lmr,H('af_lmrT'))
+      + sec('Na fazenda',faz) + se('af_hasCref',sec('Referência conferida em bula',refb)) + sec('Registro e composição',reg_)
+      + '</aside></div></sc-if>')
+
+def _agf_receituario():
+    """Receituário agronômico do registro, da cultura e do alvo escolhidos na ficha (painel sobre a ficha)."""
+    lab=lambda f,t: f'<label for="{f}" style="font-size: 12px; font-weight: 600; color: {MUTED};">{t}</label>'
+    err=lambda c,t: f'<sc-if value="{H(c)}" hint-placeholder-val="{F_()}"><span role="alert" style="font-size: 12px; font-weight: 700; color: {RED};">{H(t)}</span></sc-if>'
+    campo=lambda f,t,ctrl,extra='': f'<div style="display: flex; flex-direction: column; gap: 4px;">{lab(f,t)}{ctrl}{extra}</div>'
+    ro=lambda i,hole: f'<input id="{i}" type="text" readOnly="{H("rx_ro")}" value="{H(hole)}" style="{H("rx_rost")}">'
+    return (f'<sc-if value="{H("rx_open")}" hint-placeholder-val="{F_()}"><div style="position: fixed; inset: 0; z-index: 66; display: flex; justify-content: flex-end;">'
+      f'<button type="button" tabIndex="-1" aria-label="Fechar receituário" onClick="{H("rx_cancel")}" style="position: absolute; inset: 0; border: 0; background: rgba(21,32,26,.35); cursor: pointer;"></button>'
+      f'<aside role="dialog" aria-modal="true" aria-label="Preparar receituário agronômico" style="position: relative; width: 460px; max-width: 100%; height: 100vh; overflow-y: auto; background: {SURF}; '
+      f'box-shadow: -12px 0 40px -12px rgba(21,32,26,.35); padding: 24px 26px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px;">'
+      f'<div style="display: flex; align-items: center; gap: 10px;"><h2 style="margin: 0; font-family: {DISP}; font-size: 20px; font-weight: 700; letter-spacing: -.02em; flex-grow: 1;">Preparar receituário agronômico</h2>'
+      f'<button type="button" aria-label="Fechar" title="Fechar" onClick="{H("rx_cancel")}" style="border: 0; background: {BG}; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 18px; color: {MUTED};">×</button></div>'
+      + campo('rx_prod','Produto registrado',ro('rx_prod','rx_prod'))
+      + campo('rx_cul','Cultura',ro('rx_cul','rx_cul'))
+      + campo('rx_alvo','Praga ou alvo',ro('rx_alvo','rx_alvo'))
+      + campo('rx_tal','Talhão',f'<sc-if value="{H("rx_hasTals")}" hint-placeholder-val="{T_()}"><select id="rx_tal" value="{H("rx_tal")}" onChange="{H("rx_settal")}" style="{H("rx_tst")}"><sc-for list="{H("rx_tals")}" as="o" hint-placeholder-count="2"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select></sc-if>'
+              f'<sc-if value="{H("rx_semTal")}" hint-placeholder-val="{F_()}"><span id="rx_tal" style="font-size: 13px; color: {YEL}; font-weight: 700;">{H("rx_semTalT")}</span></sc-if>',err('rx_hasET','rx_eT'))
+      + campo('rx_dose','Dose (com a unidade)',f'<input id="rx_dose" type="text" placeholder="ex.: 1,5 L/ha" aria-invalid="{H("rx_dinv")}" aria-describedby="rx_dose_bula" value="{H("rx_dose")}" '
+              f'onChange="{H("rx_setdose")}" onBlur="{H("rx_doseok")}" style="{H("rx_dst")}">',
+              err('rx_hasED','rx_eD')+f'<span id="rx_dose_bula" style="font-size: 12px; line-height: 1.45; color: {MUTED};">{H("rx_bula")}</span>')
+      + campo('rx_rt','Responsável técnico',ro('rx_rt','rx_rt'))
+      + campo('rx_rec','Recomendação vinculada',f'<input id="rx_rec" type="text" placeholder="REC-… (opcional)" value="{H("rx_rec")}" onChange="{H("rx_setrec")}" style="{H("rx_ist")}">')
+      + f'<sc-for list="{H("rx_warns")}" as="w" hint-placeholder-count="0"><div role="alert" style="font-size: 12.5px; font-weight: 700; line-height: 1.45; color: {YEL}; background: {YELS}; padding: 8px 12px; border-radius: 10px;">{H("w.t")}</div></sc-for>'
+      + f'<div style="flex-grow: 1;"></div><div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};">'
+      f'<button type="button" onClick="{H("rx_cancel")}" style="{BTN_ST(False,True)}">Cancelar</button>'
+      f'<button type="button" onClick="{H("rx_emit")}" style="{BTN_ST(True,True)}">Emitir receituário</button></div>'
+      f'</aside></div></sc-if>')
+
+AGF_JS=r'''
+// ===== AG-07 · Consulta Agrofit: registros reais (dados abertos AGROFIT/MAPA) =====
+function GR(id){ return GRIDS.find(g=>g.id===id); }
+const AGC=new Intl.Collator('pt-BR',{numeric:true,sensitivity:'base'});
+const AGX={st:'',err:'',tries:0,meta:null,I:null,P:[],reg:{},ord:[],uSt:'',uErr:'',U:null,PU:null,pairs:null,UA:{},lSt:'',lErr:'',L:null,rev:0,
+  vk:null,vis:null,gk:null,grows:null,leaf:{},FK:{},fazCul:[],culItems:[]};
+const AG_REF={}; AGF.ref.forEach(r=>{ AG_REF[r.id]=r; });
+const AG_RT='Ana Souza · agrônoma RT', AG_RT_NOME='Ana Souza (RT)';   // perfil de demonstração: Ana é gestora e agrônoma RT (Configurações)
+const AG_FAZ=['Com saldo disponível','Sem saldo disponível','Fora da fazenda'];
+const AG_FASE={'A liberar':'gray','Liberadas':'green','Em execução':'green','Em conferência':'yellow'};
+const AG_QST='font-family:inherit;font-size:12px;font-weight:700;padding:4px 11px;border-radius:999px;cursor:pointer;';
+const AG_GB=[{v:'',t:'Nenhum'},{v:'cls',t:'Classe'},{v:'moa',t:'Modo de ação (IRAC/FRAC/HRAC)'},{v:'gq',t:'Grupo químico'},{v:'ing',t:'Ingrediente ativo'},{v:'tit',t:'Titular'},
+  {v:'tox',t:'Classificação toxicológica'},{v:'faz',t:'Na fazenda'}];
+const AG_TIPO={D:'planta daninha',P:'praga',O:'doença'};
+const AG_TOXC={vermelha:'red',amarela:'yellow',azul:'blue',verde:'green'};
+const AG_LIM=50, AG_PASSO=100;
+const AG_CLS_PRI=['Herbicida','Inseticida','Fungicida','Acaricida','Nematicida','Biológico'];
+function agNf(n,d){ return Number(n||0).toLocaleString('pt-BR',{maximumFractionDigits:d===undefined?2:d}); }
+function agUni(a){ const s=new Set(); return a.filter(x=>{ if(s.has(x)) return false; s.add(x); return true; }); }
+function agChip(t,c){ const cc=G2C[c]||G2C.gray; return {t:t, st:'display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;color:'+cc[0]+';background:'+cc[1]+';',
+  dot:'width:6px;height:6px;border-radius:999px;flex-shrink:0;background:'+cc[0]+';'}; }
+function agTick(self){ AGX.rev++; self.setState({agf_rev:AGX.rev}); }
+function agDataArq(){ const f=((AGX.meta||{}).fontes||{}).formulados||{}; const d=new Date(f.last_modified||AGX.meta.processado_em); if(isNaN(d)) return '';
+  try{ return d.toLocaleDateString('pt-BR',{timeZone:'America/Sao_Paulo'}); }catch(e){ return d.toLocaleDateString('pt-BR'); } }
+function agDiasArq(){ const f=((AGX.meta||{}).fontes||{}).formulados||{}; const d=new Date(f.last_modified||''); return isNaN(d)?0:Math.floor((Date.now()-d.getTime())/864e5); }
+function agMB(n){ return agNf(n/1048576,1)+' MB'; }
+// LMR: valor + tipo + ato; 999 é código da tabela da ANVISA, não limite (11 entradas no arquivo de 02/10/2026)
+function agLmrT(e,L,curto){ const tp=(L.tipos||{})[e[1]]||e[1], x=e[0], tem=x!==null&&x!==undefined, s999=tem&&Number(x)>=999;
+  const v=s999?'Valor 999 na tabela da ANVISA: código, não é limite numérico; confira a monografia':(tem?(agNf(x,4)+' mg/kg · '+tp):tp);
+  if(curto) return (s999?'valor 999 (código, sem limite numérico)':v)+(e[2]?'':' · não autorizado');
+  return v+(e[2]?'':' · NÃO autorizado na monografia')+' · '+((L.atos||[])[e[3]]||'')+(e[4]?(' · desde '+String(e[4]).split('-').reverse().join('/')):''); }
+function agCulK(x){ return g2norm(x).replace(/[-\s]+/g,' ').trim(); }          // 'Pinhão manso' = 'Pinhão-manso'
+function agCulT(x){ return g2norm(x).split(/[-\s(]+/)[0]; }                     // 'Feijão-caupi' ~ 'Feijão'; 'Tomate (Rasteiro)' ~ 'Tomate'
+// ---------- carga: meta → índice (lista pronta) → usos por cultura (segundo plano) → LMR (na 1ª ficha) ----------
+function agJ(nome,v){ return fetch(nome+(v?('?v='+encodeURIComponent(v)):''),{cache:v?'default':'no-cache'})
+  .then(r=>{ if(!r.ok) throw new Error(nome+' respondeu HTTP '+r.status); return r.json(); })
+  .then(j=>{ if(v&&j.versao!==v){ const e=new Error('versão diferente em '+nome); e.versao=true; throw e; } return j; }); }
+function agCarregar(self){ if(AGX.st==='carregando'||AGX.st==='ok') return; AGX.st='carregando'; AGX.err=''; agTick(self);
+  agJ('agrofit_meta.json').then(m=>{ AGX.meta=m; agTick(self); return agJ('agrofit_indice.json',m.versao); })
+    .then(I=>{ agPrep(I); AGX.st='ok'; agTick(self); agHashAplica(self); agUsosCarregar(self); })
+    .catch(e=>{ if(e&&e.versao&&AGX.tries<1){ AGX.tries++; AGX.st=''; agCarregar(self); return; }
+      AGX.st='erro'; AGX.err=(e&&e.versao)?'a base foi trocada no servidor durante o carregamento':((e&&e.message)||String(e)); agTick(self); }); }
+function agUsosCarregar(self){ if(AGX.uSt==='carregando'||AGX.uSt==='ok') return; AGX.uSt='carregando'; AGX.uErr=''; agTick(self);
+  const m=AGX.meta, n=((m.contagens||{}).fatias_cultura)||0, fs=[]; for(let i=0;i<n;i++) fs.push(agJ('agrofit_usos_cultura_'+i+'.json',m.versao));
+  Promise.all(fs).then(arr=>{ if(!arr.length) throw new Error('meta sem fatias de usos'); agPrepUsos(arr); AGX.uSt='ok'; agTick(self); })
+    .catch(e=>{ AGX.uSt='erro'; AGX.uErr=(e&&e.versao)?'a base foi trocada no servidor durante o carregamento':((e&&e.message)||String(e)); agTick(self); }); }
+function agLmrCarregar(self){ if(AGX.lSt==='carregando'||AGX.lSt==='ok'||!AGX.meta) return; AGX.lSt='carregando'; AGX.lErr='';
+  agJ('agrofit_lmr.json',AGX.meta.versao).then(L=>{ AGX.L=L; AGX.lSt='ok'; agTick(self); })
+    .catch(e=>{ AGX.lSt='erro'; AGX.lErr=(e&&e.message)||String(e); agTick(self); }); }
+// ---------- preparo do índice ----------
+function agPrep(I){ AGX.I=I; const F={}; I.campos.forEach((c,i)=>{ F[c]=i; });
+  const IG=I.ingredientes, GQ=I.gruposQuimicos, CL=I.classes, TD=I.todasCulturas;
+  // grupo de resistência (referência da base conferida, agrofit_dados): nome exato ou nome seguido de sal/éster/cepa
+  const casa=(n,pt)=>n===pt||(n.indexOf(pt)===0&&!/[a-z0-9]/.test(n.charAt(pt.length)));
+  AGX.REFC=IG.map(x=>{ const n=g2norm(x[0]).trim(); return AGF.grupo_ref.filter(g=>g[0].some(pt=>casa(n,pt))).map(g=>g[1]); });
+  const gen=new Set(AGF.gq_gen||[]); AGX.GQG=GQ.map(g=>gen.has(g2norm(g).trim()));
+  AGX.P=I.produtos.map((r,i)=>{ const ing=r[F.ingredientes]||[], ids=ing.map(x=>x[0]), cls=r[F.classes]||[], marcas=r[F.marcas]||[];
+    const gq=agUni(ids.map(id=>IG[id]?IG[id][1]:null).filter(g=>g!==null&&g!==undefined));
+    const codes=agUni([].concat.apply([],ids.map(id=>AGX.REFC[id]||[]))).sort(AGC.compare);   // ordem canônica: FRAC 3 < FRAC 7 < FRAC 11 < FRAC M1
+    const p={i:i,reg:String(r[F.registro]),marcas:marcas,nome:marcas[0]||('Registro '+r[F.registro]),form:r[F.formulacao],ing:ing,ids:ids,
+      key:ids.slice().sort((a,b)=>a-b).join(','),tit:r[F.titular],cls:cls,modo:r[F.modo],tox:r[F.tox],amb:r[F.amb],org:r[F.organico],
+      cul:r[F.culturas]||[],nUsos:r[F.nUsos]||0,nAlvos:r[F.nAlvos]||0,gq:gq,codes:codes};
+    p.rot=agRotKeys(ids);
+    p.comp=agUni(cls.map(c=>CL[c][1])); p.bio=cls.some(c=>CL[c][2]===1);
+    p.ingT=ids.map(id=>IG[id]?IG[id][0]:'?').join(' + '); p.gqT=gq.map(g=>GQ[g]).join(' + ');
+    p.moaT=codes.join(' + '); p.moaN=codes.map(k=>(AGF.grupos[k]||[k])[0]).join(' + ');
+    p.titT=I.titulares[p.tit]||''; p.titC=p.titT.replace(/\s*[-–]\s*[^-–]*\/\s*[A-Z]{2}\s*$/,'').trim()||p.titT;
+    p.modoT=(p.modo!==null&&p.modo>=0)?(I.modos[p.modo]||''):''; p.clsT=agUni(cls.map(c=>CL[c][0])).join(', ');
+    p.todas=p.cul.indexOf(TD)>=0; p.culSet=new Set(p.cul);
+    const fo=I.formulacoes[p.form]||['',''];
+    p.hay=g2norm([p.reg,marcas.join(' '),p.ingT,p.gqT,p.moaT,p.moaN,p.titT,p.clsT,p.comp.join(' '),p.bio?'biologico':'',p.modoT,fo[0],fo[1]].join(' '));
+    return p; });
+  AGX.reg={}; AGX.P.forEach(p=>{ AGX.reg[p.reg]=p.i; });
+  AGX.ord=AGX.P.map(p=>p.i).sort((a,b)=>AGC.compare(AGX.P[a].nome,AGX.P[b].nome)||AGC.compare(AGX.P[a].reg,AGX.P[b].reg));
+  // culturas da fazenda primeiro, depois A–Z; as especiais ("não informada" etc.) no fim
+  const cn={}; I.culturas.forEach((c,id)=>{ cn[g2norm(c[0])]=id; }); AGX.fazCul=AGF.culturas.map(n=>cn[g2norm(n)]).filter(x=>x!==undefined);
+  AGX.culCmp=(a,b)=>{ const fa=AGX.fazCul.indexOf(a), fb=AGX.fazCul.indexOf(b); if(fa!==fb) return (fa<0?99:fa)-(fb<0?99:fb);
+    const ea=I.culturas[a][6]?1:0, eb=I.culturas[b][6]?1:0; if(ea!==eb) return ea-eb; return AGC.compare(I.culturas[a][0],I.culturas[b][0]); };
+  AGX.culItems=I.culturas.map((c,id)=>id).sort(AGX.culCmp).map(id=>{ const c=I.culturas[id], faz=AGX.fazCul.indexOf(id)>=0;
+    return {v:String(id),t:c[0],sub:(faz?'Cultura da fazenda · ':'')+(id===TD?'vale para qualquer cultura · ':'')+agNf(c[3])+' produtos · '+agNf(c[4])+' usos',k:c[1]||''}; });
+  // fichas da fazenda (agrofit_dados) pela combinação exata de ingredientes, casada pelo NOME (sem acento e sem caixa)
+  const inm={}; IG.forEach((x,id)=>{ inm[g2norm(x[0]).trim()]=id; }); AGX.FK={};
+  AGF.ref.forEach(r=>{ const ids=r.agrofit.map(n=>inm[g2norm(n).trim()]); r.ids=ids.filter(x=>x!==undefined);
+    r.key=(r.ids.length&&r.ids.length===r.agrofit.length)?r.ids.slice().sort((a,b)=>a-b).join(','):''; if(r.key) (AGX.FK[r.key]=AGX.FK[r.key]||[]).push(r); });
+  AGX.leaf={}; AGX.vk=null; AGX.gk=null; }
+// rotação por MODO DE AÇÃO: código IRAC/FRAC/HRAC de referência de cada ingrediente (AGF.grupo_ref cobre todos os químicos do arquivo).
+// Sem código, vale o grupo químico do AGROFIT; rótulo que não indica modo de ação (biológico, extrato, inorgânico) → o próprio ingrediente.
+// Código "UN" (modo de ação desconhecido) não une produtos. s = chaves de sítio específico; m = multissítio (FRAC M).
+function agRotKeys(ids){ const IG=AGX.I.ingredientes, s=new Set(), m=new Set();
+  ids.forEach(id=>{ const cs=(AGX.REFC[id]||[]).filter(k=>!/\bUN|N-UN/.test(k));
+    if(cs.length){ cs.forEach(k=>(/^FRAC M/.test(k)?m:s).add('c'+k)); return; }
+    const g=IG[id]?IG[id][1]:null; s.add((g!==null&&g!==undefined&&!AGX.GQG[g])?('q'+g):('i'+id)); });
+  return {s:s,m:m}; }
+// q NÃO é rotação de p quando repete um modo de ação de sítio específico de p, ou quando só traz multissítio que p já tem
+// (Armero = protioconazol + mancozebe → mancozebe sozinho não é rotação; clorotalonil, ou azoxistrobina + mancozebe, é).
+function agMesmo(p,q){ const P=p.rot, Q=q.rot; for(const k of Q.s) if(P.s.has(k)) return true;
+  if(!Q.s.size){ if(!P.s.size){ for(const k of Q.m) if(P.m.has(k)) return true; return false; } for(const k of Q.m) if(!P.m.has(k)) return false; return Q.m.size>0; }
+  return false; }
+function agPrepUsos(arr){ const U={}; arr.forEach(s=>{ Object.keys(s.culturas).forEach(k=>{ U[k]=s.culturas[k]; }); });
+  const PU=AGX.P.map(()=>[]), pairs=[];
+  Object.keys(U).forEach(k=>{ const c=Number(k); U[k].forEach(x=>{ pairs.push({c:c,a:x[0],ps:x[1],h:null}); x[1].forEach(pi=>{ if(PU[pi]) PU[pi].push([c,x[0]]); }); }); });
+  AGX.U=U; AGX.PU=PU; AGX.pairs=pairs; AGX.UA={}; AGX.vk=null; AGX.gk=null; agPrepH(pairs); }
+// texto pesquisável dos ~280 mil usos montado em fatias de ~12 ms logo após a carga (a 1ª busca não paga a montagem)
+function agPrepH(pairs){ let i=0; const passo=()=>{ if(AGX.pairs!==pairs) return; const t0=Date.now();
+    while(i<pairs.length){ agPairH(pairs[i++]); if((i&511)===0&&Date.now()-t0>12) break; } if(i<pairs.length) setTimeout(passo,0); };
+  setTimeout(passo,0); }
+function agUA(c){ c=Number(c); if(AGX.UA[c]) return AGX.UA[c]; const m=new Map(); ((AGX.U||{})[String(c)]||[]).forEach(x=>{ m.set(x[0],x[1]); }); return (AGX.UA[c]=m); }
+function agPairH(pr){ if(pr.h===null){ const I=AGX.I, al=I.alvos[pr.a]||['',[]]; pr.h=g2norm(I.culturas[pr.c][0]+' '+al[0]+' '+(al[1]||[]).join(' ')); } return pr.h; }
+function agAlvoT(a,curto){ const al=AGX.I.alvos[a]||['',[],'',0]; const cs=al[1]||[]; if(!al[0]&&!cs.length) return '(alvo não informado)';
+  if(curto) return cs.length?cs[0]:al[0]; return (cs.length?cs.slice(0,3).join(', ')+' · ':'')+al[0]; }
+function agToxT(p,longo){ const t=AGX.I.tox[p.tox]; if(!t) return '—'; const s=t[0].split(' – '); if(longo) return t[0];
+  const h=s[0].replace(/^Categoria /,'Cat. ').replace(/^Não classificado$/,'Não classificado'); const r=s[1]?s[1].replace(/ \(classificação anterior\)$/,''):'';
+  return r?(h+(/anterior/.test(t[0])?' (ant.)':'')+' · '+r.charAt(0).toLowerCase()+r.slice(1)):h; }
+function agAmbT(p,longo){ const a=AGX.I.amb[p.amb]; if(!a) return 'Amb. não informada'; if(longo) return a[0]; const s=a[0].split(' – ');
+  return s.length>1?('Amb. '+a[1]+' · '+s[1].replace(/ ao meio ambiente$/,'').toLowerCase()):('Amb. · '+a[0].replace(/ ao meio ambiente$/,'').toLowerCase()); }
+// ---------- filtros (cache pela chave dos filtros) ----------
+function agVis(st){ const q=st.agf_q||'', cul=st.agf_cul||'', al=st.agf_alvo||'', cls=st.agf_cls||'', org=!!st.agf_org, ref=st.agf_ref||'', semTD=!!st.agf_semTD;
+  const k=[q,cul,al,cls,org,ref,semTD,AGX.uSt].join('|'); if(AGX.vk===k) return AGX.vis;
+  const P=AGX.P, TD=AGX.I.todasCulturas, uOk=AGX.uSt==='ok', r=ref?AG_REF[ref]:null;
+  const ws=g2norm(q).split(/\s+/).filter(Boolean).slice(0,30), ALL=ws.length?(Math.pow(2,ws.length)-1):0;
+  // "Todas as culturas" (em geral biológicos, registrados por alvo) vale para qualquer cultura, salvo se a pessoa pedir só os específicos
+  let S=null; if(cul!==''&&al!==''&&uOk){ S=new Set((agUA(cul).get(Number(al))||[]).concat(semTD?[]:(agUA(TD).get(Number(al))||[]))); }
+  const pre=[], pm={}; let incomp=false;
+  AGX.ord.forEach(i=>{ const p=P[i];
+    if(r&&p.key!==r.key) return; if(cul!==''&&!(p.culSet.has(Number(cul))||(p.todas&&!semTD))) return; if(S&&!S.has(i)) return;
+    if(!ws.length){ pre.push(i); return; }
+    let m=0; ws.forEach((w,b)=>{ if(p.hay.indexOf(w)>=0) m+=Math.pow(2,b); });
+    if(m===ALL) pre.push(i); else { pm[i]=m; incomp=true; } });
+  // palavras que não estão no produto têm de estar TODAS num mesmo uso (cultura e alvo juntos), dentro dos filtros de cultura/alvo
+  if(incomp&&uOk){ const ok=new Set(); AGX.pairs.forEach(pr=>{ if(cul!==''&&pr.c!==Number(cul)&&(semTD||pr.c!==TD)) return; if(al!==''&&pr.a!==Number(al)) return;
+      const h=agPairH(pr); let m=0; ws.forEach((w,b)=>{ if(h.indexOf(w)>=0) m+=Math.pow(2,b); }); if(!m) return;
+      pr.ps.forEach(i=>{ const x=pm[i]; if(x!==undefined&&!ok.has(i)&&((x|m)===ALL)) ok.add(i); }); });
+    if(ok.size){ const inPre=new Set(pre); AGX.ord.forEach(i=>{ if(ok.has(i)&&!inPre.has(i)) pre.push(i); }); const pos={}; AGX.ord.forEach((i,j)=>{ pos[i]=j; }); pre.sort((a,b)=>pos[a]-pos[b]); } }
+  const okCls=(p)=>!cls||(cls==='Biológico'?p.bio:p.comp.indexOf(cls)>=0);
+  const ids=pre.filter(i=>okCls(P[i])&&(!org||P[i].org==='S'));
+  const cnt={}; let bio=0; pre.forEach(i=>{ const p=P[i]; if(org&&p.org!=='S') return; p.comp.forEach(c=>{ cnt[c]=(cnt[c]||0)+1; }); if(p.bio) bio++; });
+  const orgN=pre.filter(i=>okCls(P[i])&&P[i].org==='S').length;
+  const semCls=pre.filter(i=>!org||P[i].org==='S').length;
+  const nTD=cul!==''?ids.filter(i=>!P[i].culSet.has(Number(cul))).length:0;
+  AGX.vis={ids:ids,cnt:cnt,bio:bio,orgN:orgN,semCls:semCls,nTD:nTD,semUsos:incomp&&!uOk}; AGX.vk=k; return AGX.vis; }
+// ---------- na fazenda (ao vivo): mesmo ingrediente ativo das fichas da fazenda ----------
+function agFaz(p,c){ const refs=AGX.FK[p.key]||[]; if(!refs.length) return null;
+  const nf=agUni([].concat.apply([],refs.map(r=>r.nomes_fazenda)));
+  const L=Object.values(c.lotes||{}).filter(l=>nf.indexOf(l.prod)>=0);
+  const por=nf.map(n=>{ const ls=L.filter(l=>l.prod===n); return {n:n,L:ls,disp:ls.reduce((a,l)=>a+cenDisp(l),0),un:ls.length?ls[0].un:''}; });
+  const os=Object.values(c.ordens||{}).filter(o=>o.etapa!=='Encerradas'&&o.etapa!=='Canceladas'&&(o.ins||[]).some(x=>nf.indexOf(x.p)>=0));
+  const pl=[].concat.apply([],refs.map(r=>AGF.planos[r.id]||[])); const rf=[].concat.apply([],refs.map(r=>r.refs_fazenda||[]));
+  const disp=por.reduce((a,x)=>a+x.disp,0);
+  return {refs:refs,nf:nf,L:L,por:por,disp:disp,os:os,pl:pl,rf:rf,cat:disp>0?AG_FAZ[0]:AG_FAZ[1]}; }
+function agLeaf(p){ let L=AGX.leaf[p.i]; if(L) return L; const I=AGX.I;
+  const cs=p.cul.slice().sort(AGX.culCmp).map(c=>I.culturas[c][0]); const n=p.cul.length;
+  const cT=n===1?cs[0]:(agNf(n)+' culturas'), cM=n===1?(agNf(p.nAlvos)+(p.nAlvos===1?' alvo':' alvos')):(cs.slice(0,3).join(', ')+(n>3?' +'+(n-3):''));
+  const tox=agToxT(p), amb=agAmbT(p);
+  const gm=(p.gqT||'grupo químico não informado')+(p.moaT?(' · '+p.moaT):'');
+  L={id:p.reg, dr:'agf_op_'+p.reg, v:{cult:n,faz:null}, s:{prod:p.nome+' · '+p.reg, ing:p.ingT+' · '+gm, cls:p.clsT+' · '+(p.modoT||'—'), tox:tox+' · '+amb, faz:AG_FAZ[2]},
+    p:{prod:[{k:'b',t:p.nome},{k:'br'},{k:'mut',t:'Reg. '+p.reg+' · '+p.titC}], ing:[{k:'txt',t:p.ingT},{k:'br'},{k:'mut',t:gm}],
+       cls:[{k:'txt',t:p.clsT},{k:'br'},{k:'mut',t:p.modoT||'modo de ação não informado'}], cult:[{k:'txt',t:cT},{k:'br'},{k:'mut',t:cM}],
+       tox:[{k:'txt',t:tox},{k:'br'},{k:'mut',t:amb}], faz:[{k:'mut',t:'—'}]}};
+  return (AGX.leaf[p.i]=L); }
+function agLeafFaz(L,F){ if(!F){ L.v.faz=null; L.s.faz=AG_FAZ[2]; L.p.faz=[{k:'mut',t:'—'}]; return; }
+  const com=F.por.filter(x=>x.L.length), x0=com[0]||F.por[0]; L.v.faz=F.disp; L.s.faz=F.cat;
+  const fz=[{k:'txt',t:x0.n+(F.por.length>1?' +'+(F.por.length-1):'')},{k:'br'}];
+  fz.push(x0.L.length?{k:'mut',t:agNf(x0.disp)+' '+x0.un+' disponíveis'}:{k:'mut',t:'sem lote'}); L.p.faz=fz; }
+function agGKeys(p,gb,F){ const I=AGX.I; switch(gb){
+  case 'cls': return p.comp.length?p.comp:['(classe não informada)'];
+  case 'gq': return p.gq.length?p.gq.map(g=>I.gruposQuimicos[g]):['(grupo químico não informado)'];
+  case 'moa': return p.codes.length?p.codes.map(k=>k+' · '+((AGF.grupos[k]||[''])[0])):['(sem código de referência: biológico, extrato, óleo…)'];
+  case 'ing': return agUni(p.ids.map(id=>I.ingredientes[id]?I.ingredientes[id][0]:'?'));
+  case 'tit': return [p.titT||'(titular não informado)'];
+  case 'tox': return [agToxT(p,true)];
+  case 'faz': return [F?F.cat:AG_FAZ[2]]; } return []; }
+function agGOrd(gb){ const I=AGX.I; if(gb==='faz') return (a,b)=>AG_FAZ.indexOf(a)-AG_FAZ.indexOf(b);
+  if(gb==='tox'){ const o=I.tox.map(t=>t[0]); return (a,b)=>o.indexOf(a)-o.indexOf(b); } return (a,b)=>AGC.compare(a,b); }
+// ---------- combobox (cultura e alvo): lista na ordem dada sem digitar; digitando, começa-com primeiro ----------
+function agAc(self,chave,itens,escolhido,pick,o){ o=o||{}; const ac=self.state.g2ac||{}; const meu=ac.k===chave; const sel=itens.find(x=>x.v===escolhido);
+  const q=meu?(ac.q||''):(sel?sel.t:''); const ws=g2norm(q).split(/\s+/).filter(Boolean); const aberto=meu&&!!ac.open; const dig=meu&&!!ac.dig&&ws.length>0;
+  let res=[]; if(aberto){ res=dig?itens.filter(x=>{ const t=x.h||(x.h=g2norm(x.t+' '+(x.sub||'')+' '+(x.k||''))); return ws.every(w=>t.indexOf(w)>=0); }):itens.slice();
+    if(dig){ const ini=(x)=>g2norm(x.t).indexOf(ws[0])===0?0:1; res=res.map((x,j)=>[x,j]).sort((a,b)=>(ini(a[0])-ini(b[0]))||(a[1]-b[1])).map(x=>x[0]); }
+    res=res.slice(0,o.max||80); }
+  const i=Math.min(Math.max(meu?(ac.i||0):0,0),Math.max(res.length-1,0)); const id=('ac-'+chave).replace(/[^A-Za-z0-9_-]/g,'_');
+  const escolher=(x)=>{ self.setState({g2ac:{k:chave,q:x.t,open:false,i:0}}); pick(x.v); };
+  return {acId:id+'-in', acLid:id+'-lista', acQ:q, acPh:o.ph||'Buscar', acAberto:aberto&&res.length>0, acVazio:aberto&&dig&&!res.length,
+    acVazioT:'Nada com “'+q+'”.', acExp:String(aberto&&res.length>0), acAtivo:(aberto&&res.length)?(id+'-o'+i):'',
+    acSt:'font-family:inherit;font-size:13px;padding:7px 10px;border-radius:9px;box-sizing:border-box;width:100%;background:#fff;color:#15201A;border:1px solid '+(escolhido?'#1E7A4C':'#E4E9E5')+';',
+    acItens:res.map((x,j)=>({t:x.t, sub:x.sub||'', id:id+'-o'+j, on:String(j===i), segura:(e)=>e.preventDefault(), pick:()=>escolher(x),
+      st:'display:flex;flex-direction:column;align-items:flex-start;gap:1px;width:100%;text-align:left;padding:7px 10px;border:0;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;color:#15201A;background:'+(j===i?'#E4F3E9':'transparent')+';'})),
+    acSet:(e)=>{ self.setState({g2ac:{k:chave,q:e.target.value,open:true,i:0,dig:true}}); if(escolhido) pick(''); },
+    acFoco:()=>{ const cur=self.state.g2ac||{}; if(cur.k!==chave||!cur.open) self.setState({g2ac:{k:chave,q:q,open:true,i:0,dig:false}}); },
+    acSai:()=>{ setTimeout(()=>{ const cur=self.state.g2ac||{}; if(cur.k===chave&&cur.open) self.setState({g2ac:Object.assign({},cur,{open:false})}); },150); },
+    acTecla:(e)=>{ if(e.key==='ArrowDown'||e.key==='ArrowUp'){ e.preventDefault(); if(!aberto){ self.setState({g2ac:{k:chave,q:q,open:true,i:0,dig:false}}); return; } if(!res.length) return;
+        const n=(i+(e.key==='ArrowDown'?1:-1)+res.length)%res.length; self.setState({g2ac:Object.assign({},ac,{i:n})});
+        setTimeout(()=>{ try{ const el=document.getElementById(id+'-o'+n); if(el&&el.scrollIntoView) el.scrollIntoView({block:'nearest'}); }catch(er){} },0); }
+      else if(e.key==='Enter'){ if(aberto&&res.length){ e.preventDefault(); e.stopPropagation(); escolher(res[i]); } }
+      else if(e.key==='Escape'){ if(aberto){ e.preventDefault(); e.stopPropagation(); self.setState({g2ac:Object.assign({},ac,{open:false})}); } } } }; }
+// filtros da lista: qualquer troca volta às primeiras linhas
+function agSetF(self,o){ self.setState(Object.assign({agf_lim:AG_LIM},o)); }
+// ---------- ficha, foco e hash ----------
+let AG_RET=null;
+function agHash(){ try{ return decodeURIComponent((location.hash||'').slice(1)); }catch(e){ return ''; } }
+function agSetHash(h){ try{ if(h){ if(location.hash!=='#'+h) history.replaceState(null,'','#'+h); } else if(location.hash) history.replaceState(null,'',location.pathname+location.search); }catch(e){} }
+function agFoc(el){ return Array.prototype.slice.call(el.querySelectorAll('a[href],button,input,select,textarea,[tabindex]'))
+  .filter(x=>!x.disabled&&x.tabIndex>=0&&x.getClientRects().length>0); }
+function agOpen(self,reg){ const pi=AGX.reg[reg]; if(pi===undefined) return; const st=self.state, p=AGX.P[pi];
+  if(!st.agf){ try{ AG_RET=document.activeElement; }catch(e){ AG_RET=null; } }
+  // cultura e alvo da ficha: os da lista quando o registro os tem. Uso em "Todas as culturas" vale para a cultura da lista (ex.: Mamão),
+  // que fica escolhida: o receituário precisa da cultura real do talhão.
+  let cul='', al=''; const lc=st.agf_cul||'', TD=AGX.I.todasCulturas;
+  if(lc!==''){ if(p.culSet.has(Number(lc))||p.todas) cul=lc; }
+  else if(p.cul.length===1) cul=String(p.cul[0]);
+  const la=st.agf_alvo||''; if(cul!==''&&la!==''&&AGX.PU&&AGX.PU[pi].some(x=>(String(x[0])===cul||(p.todas&&x[0]===TD))&&String(x[1])===la)) al=la;
+  self.setState({agf:reg,af_cul:cul,af_alvo:al,af_q:'',af_all:false,rx:null,agf_miss:''}); agSetHash('reg-'+reg);
+  setTimeout(()=>{ try{ const a=document.querySelector('aside[aria-label^="Ficha"]'); if(a){ a.scrollTop=0; const b=a.querySelector('button[aria-label="Fechar"]'); if(b&&!a.contains(document.activeElement)) b.focus(); } }catch(e){} },30); }
+function agClose(self){ const reg=self.state.agf; self.setState({agf:null,rx:null}); agSetHash(self.state.agf_ref||'');
+  setTimeout(()=>{ try{ const p=AGX.P[AGX.reg[reg]]; const lin=p&&Array.prototype.slice.call(document.querySelectorAll('main [role=row].g2ed')).find(r=>{ const c=r.querySelector('[role=cell]'); return c&&c.innerText.split('\n')[0].trim()===p.nome; });
+    const alvo=lin||((AG_RET&&AG_RET.isConnected&&AG_RET!==document.body)?AG_RET:document.querySelector('main input[type=search]')); AG_RET=null; if(alvo) alvo.focus(); }catch(e){} },30); }
+function agRxFechar(self){ self.setState({rx:null});
+  setTimeout(()=>{ try{ const a=document.querySelector('aside[aria-label^="Ficha"]'); if(!a) return; const b=Array.prototype.slice.call(a.querySelectorAll('button')).find(x=>x.innerText.trim()==='Preparar receituário')||a.querySelector('button[aria-label="Fechar"]'); if(b) b.focus(); }catch(e){} },30); }
+function agTeclas(self,e){ const st=self.state; if(!st.agf&&!st.rx) return;
+  if(e.key==='Escape'){ if(e.defaultPrevented) return; e.preventDefault(); if(st.rx) agRxFechar(self); else agClose(self); return; }
+  if(e.key!=='Tab') return; const dlg=document.querySelector(st.rx?'aside[aria-label="Preparar receituário agronômico"]':'aside[aria-label^="Ficha"]'); if(!dlg) return;
+  const f=agFoc(dlg); if(!f.length) return; const a=document.activeElement, i=f.indexOf(a);
+  if(!dlg.contains(a)){ e.preventDefault(); (e.shiftKey?f[f.length-1]:f[0]).focus(); }
+  else if(e.shiftKey&&i<=0){ e.preventDefault(); f[f.length-1].focus(); }
+  else if(!e.shiftKey&&i===f.length-1){ e.preventDefault(); f[0].focus(); } }
+// #reg-<registro> abre a ficha; #<id da ficha da fazenda> (links antigos da O.S. e do MIP) filtra pelo mesmo ingrediente
+function agHashAplica(self){ if(AGX.st!=='ok') return; const h=agHash(), st=self.state;
+  if(!h){ if(st.agf) self.setState({agf:null,rx:null}); return; }
+  if(h.indexOf('reg-')===0){ const reg=h.slice(4); if(AGX.reg[reg]!==undefined){ if(st.agf!==reg) agOpen(self,reg); } else self.setState({agf:null,rx:null,agf_miss:reg}); return; }
+  const r=AG_REF[h]; if(!r) return;
+  g2set(self,AGF_G,{f:{},aq:'',x:null,so:null});
+  agSetF(self,{agf_ref:h,agf_cul:'',agf_alvo:'',agf_cls:'',agf_org:false,agf_q:'',agf_miss:'',agf:null,rx:null});
+  const ps=r.key?AGX.P.filter(p=>p.key===r.key):[]; if(ps.length===1) setTimeout(()=>agOpen(self,ps[0].reg),0); }
+// ---------- receituário ----------
+function agTal(cn){ if(cn==='Todas as culturas') return [].concat.apply([],Object.keys(AGF.tal).map(k=>AGF.tal[k])); return AGF.tal[cn]||AGF.tal[String(cn).split(' ')[0]]||[]; }
+function agUn(u){ return String(u||'').toLowerCase().replace(/\s+/g,''); }
+function agFaixa(dose){ const s=String(dose||'').replace(/\([^)]*\)/g,' ').split(' · ')[0].split(' + ')[0].replace(/\s+/g,' ').trim();
+  const m=/^([\d.,]+)\s*(?:[–-]\s*([\d.,]+)\s*)?(.*)$/.exec(s); if(!m) return null; let a=g2num(m[1]), b=m[2]?g2num(m[2]):a, un=m[3].trim();
+  const m2=/^(.+?)\s*[–-]\s*([\d.,]+)\s*(.+)$/.exec(un); if(m2&&agUn(m2[1])===agUn(m2[3])){ b=g2num(m2[2]); un=m2[1].trim(); }
+  if(isNaN(a)||isNaN(b)||!un) return null; return {a:Math.min(a,b),b:Math.max(a,b),un:un}; }
+function agConv(x,de,para){ const A=agUn(de).split('/'), B=agUn(para).split('/'); if(A.join('/')===B.join('/')) return x;
+  if(A.slice(1).join('/')!==B.slice(1).join('/')) return null; const F={l:['v',1],ml:['v',.001],kg:['m',1],g:['m',.001]}, a=F[A[0]], b=F[B[0]];
+  return (a&&b&&a[0]===b[0])?x*a[1]/b[1]:null; }
+function agFaixaT(f){ return (f.a===f.b?agNf(f.a):(agNf(f.a)+'–'+agNf(f.b)))+' '+f.un; }
+function agValDose(s){ const t=String(s||'').trim(); if(!t) return {e:'Informe a dose com a unidade (ex.: 1,5 L/ha).'};
+  if(/^[\d.,]+\s*[–-]\s*[\d.,]/.test(t)) return {e:'Informe uma dose só (ex.: 1,5 L/ha).'};
+  const m=/^([\d.,]+)\s*(.*)$/.exec(t), x=m?g2num(m[1]):NaN; if(isNaN(x)) return {e:'Dose em número com a unidade (ex.: 1,5 L/ha).'};
+  if(!(x>0)) return {e:'A dose precisa ser maior que zero.'}; const un=m[2].trim();
+  if(!/[a-zA-Zµ%]/.test(un)) return {e:'Informe a unidade da dose (ex.: L/ha, kg/ha, mL/100 kg de sementes, % v/v).'};
+  // unidade com base: por área, por volume de calda ou de semente, por planta… ("3 litros" sozinho não diz a quê); % v/v vale (óleo, adjuvante)
+  if(!/^%/.test(un)&&un.indexOf('/')<0&&!/(^|\s)por\s/i.test(un)) return {e:'Informe a base da dose (ex.: L/ha, mL/100 kg de sementes, g/100 L de água ou % v/v).'};
+  return {x:x,un:un,t:agNf(x,3)+' '+un}; }
+// referência conferida da fazenda para a cultura (mesma combinação de ingredientes): faixa na unidade da bula
+// cartão da referência conferida (ficha e faixa "Da fazenda"); p = registro aberto (marca "mesma concentração"), cn = cultura escolhida primeiro
+function agCref(r,p,cn){ const mc=!!p&&r.conc.length===r.ids.length&&r.ids.every((id,j)=>{ const x=p.ing.find(y=>y[0]===id); return x&&Math.abs(Number(x[1])-r.conc[j])<1e-6; });
+  const chips=[agChip(r.situacao,r.situacao==='Vigente'?'green':(r.situacao==='Cancelado'?'red':'yellow'))].concat(mc?[agChip('mesma concentração','blue')]:[]);
+  const us=r.usos.slice().sort((a,b)=>((b.cultura===cn)-(a.cultura===cn)));
+  return {t:r.nome,sub:r.ingrediente+' · '+r.concentracao+' · '+r.formulacao,chips:chips,g:r.grupos.length?r.grupo:'Sem grupo',gn:r.grupo_nome,
+    usos:us.map(u=>({c:u.cultura,a:u.alvo,nc:!u.conferido,d:u.dose,car:u.carencia,max:String(u.max_aplic),int:u.intervalo||'—'})),
+    avisos:(r.avisos||[]).map(t=>({t:t})),alertas:(r.alertas_fazenda||[]).map(a=>({ref:a.ref,t:a.texto}))}; }
+function agRefFaixa(p,cn){ const refs=AGX.FK[p.key]||[]; const out=[];
+  refs.forEach(r=>r.usos.forEach(u=>{ if(u.cultura!==cn) return; const f=agFaixa(u.dose); if(f) out.push({r:r,u:u,f:f}); })); return out; }
+function agRxAbrir(self,p){ const st=self.state; if(st.af_cul===''||st.af_cul===undefined||st.af_alvo===''||st.af_alvo===undefined) return;
+  if(Number(st.af_cul)===AGX.I.todasCulturas) return;   // o receituário nomeia a cultura real do talhão
+  const cn=AGX.I.culturas[Number(st.af_cul)][0], ts=agTal(cn);
+  self.setState({rx:{reg:p.reg,cul:st.af_cul,al:st.af_alvo,t:ts[0]||'',d:'',rec:'',errs:{},dv:null}});
+  setTimeout(()=>{ try{ const s=document.getElementById(ts.length?'rx_tal':'rx_dose'); if(s) s.focus(); }catch(e){} },30); }
+// ---------- render ----------
+function PREVALS(self,v){
+  cenOuvir(self);
+  if(!self.__agIni){ self.__agIni=1; setTimeout(()=>agCarregar(self),0);
+    try{ document.addEventListener('keydown',(e)=>agTeclas(self,e)); }catch(e){}
+    try{ window.addEventListener('hashchange',()=>agHashAplica(self)); }catch(e){} }
+  const st=self.state, sp=GR(AGF_G), gs=g2st(self,AGF_G), c=cenGet(), ok=AGX.st==='ok';
+  // estado da base: cabeçalho, fonte, carregando, erro
+  const m=AGX.meta; const nP=m?((m.contagens||{}).registros||0):0, dt=m?agDataArq():'';
+  v.agf_ok=ok; v.agf_loading=AGX.st===''||AGX.st==='carregando'; v.agf_erro=AGX.st==='erro'; v.agf_errT=AGX.err||'';
+  v.agf_retry=()=>{ AGX.st=''; AGX.tries=0; agCarregar(self); };
+  const tam=m?Object.keys(m.arquivos||{}).filter(f=>/^agrofit_(meta|indice)/.test(f)).reduce((a,f)=>a+m.arquivos[f],0):0;
+  v.agf_loadT='Carregando a base do AGROFIT'+(m?(' · '+agNf(nP)+' produtos com registro · '+agMB(tam)):'')+'…';
+  v.agf_fonte='Fonte: AGROFIT/MAPA · dados abertos (CC-BY) · '+(m?('arquivo de '+dt+' · '+agNf(nP)+' produtos com registro'):(AGX.st==='erro'?'base indisponível':'carregando…'));
+  const sc=AGX.st==='erro'?agChip('Base indisponível','red'):(!ok?agChip('Carregando a base','gray'):(agDiasArq()>7?agChip('Base de '+dt+' · desatualizada','yellow'):agChip('Base atualizada · '+dt,'green')));
+  v.agf_stT=sc.t; v.agf_stSt=sc.st; v.agf_stDot=sc.dot;
+  v.agf_clsL=[]; v.agf_clsOs=[]; v.agf_temClsO=false; v.agf_hasTD=false; v.agf_gbs=AG_GB; v.agf_gb=st.agf_gb||''; v.agf_grouped=!!st.agf_gb; v.agf_temCul=false; v.agf_hasRef=false; v.agf_hasMiss=false; v.agf_hasRefC=false; v.agf_rc=[];
+  v.agf_uLoad=ok&&AGX.uSt==='carregando'; v.agf_uErro=ok&&AGX.uSt==='erro'; v.agf_uErrT=AGX.uErr||''; v.agf_uRetry=()=>{ AGX.uSt=''; agUsosCarregar(self); };
+  v.agf_setgb=(e)=>{ self.setState({agf_gb:e.target.value,agf_lim:AG_LIM}); g2set(self,AGF_G,{x:null}); };
+  sp.lim=st.agf_lim||AG_LIM;
+  if(!ok){ sp.rows=[]; sp.tree=false; v.agc=agAc(self,'agf_cul',[],'',()=>{}); v.aga=agAc(self,'agf_alvo',[],'',()=>{}); v.agf_orgOn='false'; v.agf_orgN=''; v.agf_orgSt=''; return; }
+  const I=AGX.I, TD=I.todasCulturas, cul=st.agf_cul||'', al=st.agf_alvo||'', cls=st.agf_cls||'', gb=st.agf_gb||'';
+  const V=agVis(st);
+  // filtros: cultura (combobox), praga ou alvo (com a cultura), classe por componente (+ Biológico), orgânicos
+  v.agc=agAc(self,'agf_cul',AGX.culItems,cul,(x)=>{ agSetF(self,{agf_cul:x,agf_alvo:''}); },{ph:'Todas as culturas · digite para buscar'});
+  v.agf_temCul=cul!=='';
+  const semTD=!!st.agf_semTD, cn0=cul!==''?I.culturas[Number(cul)][0]:''; v.agf_hasTD=cul!==''&&Number(cul)!==TD&&(V.nTD>0||semTD);
+  v.agf_tdT=semTD?('Só registros específicos de '+cn0+'; os com uso em "Todas as culturas" (em geral biológicos, registrados por alvo) estão fora.')
+    :(agNf(V.ids.length-V.nTD)+' com registro em '+cn0+' + '+agNf(V.nTD)+' com uso em "Todas as culturas" (em geral biológicos, registrados por alvo; valem para qualquer cultura).');
+  v.agf_tdBt=semTD?'Incluir "Todas as culturas"':('Ver só os de '+cn0); v.agf_tdTog=()=>agSetF(self,{agf_semTD:!semTD});
+  let alItems=[]; if(cul!==''&&AGX.uSt==='ok'){ const mm=new Map(); agUA(cul).forEach((ps,a)=>{ mm.set(a,{n:ps.length,todas:false}); });
+      if(Number(cul)!==TD&&!st.agf_semTD) agUA(TD).forEach((ps,a)=>{ const x=mm.get(a); if(x) x.n+=ps.length; else mm.set(a,{n:ps.length,todas:true}); });
+      alItems=Array.from(mm.keys()).sort((a,b)=>(mm.get(b).n-mm.get(a).n)||AGC.compare(agAlvoT(a,true),agAlvoT(b,true))).map(a=>{ const x=mm.get(a), ali=I.alvos[a]||['',[],'',0];
+        return {v:String(a),t:agAlvoT(a,true),sub:(ali[0]||'—')+' · '+(AG_TIPO[ali[2]]||'alvo')+' · '+agNf(x.n)+(x.n===1?' produto':' produtos')+(x.todas?' · registro em "Todas as culturas"':''),k:(ali[1]||[]).join(' ')}; }); }
+  v.aga=agAc(self,'agf_alvo',alItems,al,(x)=>{ agSetF(self,{agf_alvo:x}); },{ph:AGX.uSt==='ok'?('Todos os alvos de '+(cul!==''?I.culturas[Number(cul)][0]:'')+' · digite para buscar'):'Carregando alvos…'});
+  const chip=(t,n,on,go,lab)=>({t:t,n:agNf(n),on:String(!!on),go:go,lab:lab,st:AG_QST+(on?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;')});
+  // classes principais em chips (contagem com os demais filtros); as outras num seletor compacto
+  const nCls=(k)=>k==='Biológico'?V.bio:(V.cnt[k]||0);
+  v.agf_clsL=[chip('Todas',V.semCls,!cls,()=>agSetF(self,{agf_cls:''}),'Mostrar todas as classes')]
+    .concat(AG_CLS_PRI.map(k=>chip(k,nCls(k),cls===k,()=>agSetF(self,{agf_cls:cls===k?'':k}),cls===k?'Mostrar todas as classes':'Mostrar só '+k)));
+  const outras=Object.keys(V.cnt).filter(k=>AG_CLS_PRI.indexOf(k)<0).sort((a,b)=>(V.cnt[b]-V.cnt[a])||AGC.compare(a,b)); if(cls&&AG_CLS_PRI.indexOf(cls)<0&&outras.indexOf(cls)<0) outras.push(cls);
+  const oOn=cls&&AG_CLS_PRI.indexOf(cls)<0; v.agf_temClsO=outras.length>0; v.agf_clsO=oOn?cls:'';
+  v.agf_clsOs=[{v:'',t:'Outras classes'}].concat(outras.map(k=>({v:k,t:k+' · '+agNf(nCls(k))})));
+  v.agf_setClsO=(e)=>agSetF(self,{agf_cls:e.target.value});
+  v.agf_clsOSt=AG_QST+'padding:4px 8px;'+(oOn?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;');
+  const org=!!st.agf_org; v.agf_orgOn=String(org); v.agf_orgN=agNf(V.orgN); v.agf_orgTog=()=>agSetF(self,{agf_org:!org});
+  v.agf_orgSt=AG_QST+(org?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;')+'padding:6px 12px;';
+  // faixa "Da fazenda" (link antigo #<id da ficha>) e aviso de registro fora do arquivo (#reg-<n>)
+  const r=st.agf_ref?AG_REF[st.agf_ref]:null;
+  if(r){ const n=V.ids.length, tot=r.key?AGX.P.filter(p=>p.key===r.key).length:0; v.agf_hasRef=true; v.agf_refT='Da fazenda: '+r.nome;
+    v.agf_refD=tot?(r.ingrediente+' → '+agNf(tot)+(tot===1?' produto registrado':' produtos registrados')+' com '+(r.ids.length>1?'os mesmos ingredientes ativos':'o mesmo ingrediente ativo')+(n!==tot?(' ('+agNf(n)+' com os filtros)'):'')+'. Dose, carência e alertas: na referência conferida logo abaixo.')
+      :(r.situacao==='Cancelado'?('Nenhum registro ativo no AGROFIT com '+r.ingrediente+'. '+(r.situacao_nota||'')):(r.sem?(r.ingrediente+': '+r.sem):('Nenhum produto com exatamente '+r.ingrediente+' no arquivo de '+dt+'.')));
+    v.agf_refSt=tot?'background:#E4F3E9;color:#15201A;':'background:#FFF3D6;color:#8A5A00;';
+    v.agf_refX=()=>{ agSetF(self,{agf_ref:''}); agSetHash(''); };
+    v.agf_hasRefC=(r.usos||[]).length>0; v.agf_rc=v.agf_hasRefC?[agCref(r,null,'')]:[]; }
+  if(st.agf_miss){ v.agf_hasMiss=true; v.agf_missT='Registro nº '+st.agf_miss+' não está no arquivo de '+dt;
+    v.agf_missD='O AGROFIT publica só registros ativos: o produto pode ter sido cancelado ou suspenso. Confira no AGROFIT oficial.';
+    v.agf_missSt='background:#FFF3D6;color:#8A5A00;'; v.agf_missX=()=>{ self.setState({agf_miss:''}); agSetHash(''); }; }
+  // linhas da grade: folhas em cache; "Na fazenda" ao vivo só nos registros com ingrediente de produto da fazenda
+  const P=AGX.P, Fz={}; V.ids.forEach(i=>{ const p=P[i]; if(AGX.FK[p.key]){ Fz[i]=agFaz(p,c); agLeafFaz(agLeaf(p),Fz[i]); } });
+  if(!gb){ sp.tree=false; sp.x0={}; sp.rows=V.ids.map(i=>agLeaf(P[i])); }
+  else { const gk=AGX.vk+'#'+gb+'#'+(gb==='faz'?(c.rev||0):''); if(AGX.gk!==gk){ const G={};
+      V.ids.forEach(i=>{ const p=P[i]; agGKeys(p,gb,Fz[i]).forEach(k=>{ (G[k]=G[k]||[]).push(i); }); });
+      const ks2=Object.keys(G).sort(agGOrd(gb));
+      AGX.grows=ks2.map((k,j)=>{ const its=G[k], n=its.length; return {id:'G~'+j, dr:'agf_gx_'+j, v:{}, s:{prod:k}, p:{prod:[{k:'b',t:k},{k:'mut',t:agNf(n)+(n>1?' produtos':' produto')}]},
+          kids:its.map(i=>Object.assign({},agLeaf(P[i]),{id:P[i].reg+'~'+j}))}; }); AGX.gk=gk; }
+    sp.tree=true; sp.x0={}; sp.rows=AGX.grows; }
+}
+// render incremental: a grade ordena e filtra o conjunto inteiro; só as primeiras linhas viram DOM ("Mostrar mais" amplia)
+if(typeof g2flat==='function'){ const AG_FLAT0=g2flat; g2flat=function(sp,st,rows,mask,added){ const out=AG_FLAT0(sp,st,rows,mask,added);
+  if(sp.id===AGF_G){ sp.nflat=out.length; sp.nfolhas=out.filter(x=>!x.has).length; if(sp.lim&&out.length>sp.lim) return out.slice(0,sp.lim); } return out; }; }
+// ordenação da grade com Collator e chaves em cache (4.409 linhas)
+if(typeof g2sort==='function'){ const AG_SORT0=g2sort; g2sort=function(arr,sp,st){ if(sp.id!==AGF_G) return AG_SORT0(arr,sp,st);
+  const so=st.so||sp.so; if(!so||!so.k) return arr; const cc=sp.cols.find(x=>x.k===so.k); if(!cc) return arr; const d=so.d?-1:1;
+  const kx=(r)=>{ if(so.k==='faz') return g2key(r,cc); const ck='__k_'+so.k; if(r[ck]===undefined){ r[ck]=g2key(r,cc); } return r[ck]; };   // "Na fazenda" muda ao vivo
+  return arr.slice().sort((a,b)=>{ const x=kx(a), y=kx(b); if(x===null&&y===null) return 0; if(x===null) return 1; if(y===null) return -1;
+    if(typeof x==='number'&&typeof y==='number') return (x-y)*d; return AGC.compare(String(x),String(y))*d; }); }; }
+function EXTRAVALS(self,v){
+  const st=self.state, sp=GR(AGF_G), gs=g2st(self,AGF_G), G=AGF_G, ok=AGX.st==='ok';
+  // busca própria (sem acento; cultura e alvo no mesmo uso) no lugar da busca da grade
+  v[G+'_q']=st.agf_q||''; v[G+'_setq']=(e)=>agSetF(self,{agf_q:e.target.value});
+  v[G+'_all']=agNf(ok?AGX.P.length:0)+' produtos';
+  const fil=Object.keys(gs.f||{}).some(k=>(gs.f[k]||[]).length);
+  if(ok){ const V=agVis(st); if(!fil) v[G+'_count']=agNf(V.ids.length);
+    else { const added=st.added||{}, ids=new Set(); const walk=(l)=>l.forEach(r=>{ if(r.kids) walk(r.kids); else if(g2match(r,sp,gs,null,added)) ids.add(String(r.id).split('~')[0]); }); walk(sp.rows||[]); v[G+'_count']=agNf(ids.size); } }
+  else v[G+'_count']='0';
+  v[G+'_filtered']=fil||!!(st.agf_q||st.agf_cul||st.agf_alvo||st.agf_cls||st.agf_org||st.agf_ref||st.agf_semTD);
+  v[G+'_clear']=()=>{ g2set(self,G,{q:'',f:{},qv:'',aq:''}); agSetF(self,{agf_q:'',agf_cul:'',agf_alvo:'',agf_cls:'',agf_org:false,agf_ref:'',agf_semTD:false}); if(st.agf_ref) agSetHash(''); };
+  // mais linhas
+  const lim=sp.lim||AG_LIM, nf=sp.nflat||0; v.agf_temMais=ok&&nf>lim; v.agf_maisN=agNf(Math.min(AG_PASSO,nf-lim));
+  v.agf_maisT='Mostrando '+agNf(Math.min(lim,nf))+' de '+agNf(nf)+(st.agf_gb?' linhas':' produtos'); v.agf_mais=()=>self.setState({agf_lim:lim+AG_PASSO});
+  // abrir ficha e abrir/fechar grupo só nas linhas desenhadas
+  (v[G+'_rows']||[]).forEach(rw=>{ const s=String(rw.id); if(s.indexOf('G~')===0){ const j=s.slice(2); v['agf_gx_'+j]=()=>{ const x=Object.assign({},g2st(self,G).x||sp.x0||{}); x[s]=!x[s]; g2set(self,G,{x:x}); }; }
+    else { const reg=s.split('~')[0]; v['agf_op_'+reg]=()=>agOpen(self,reg); } });
+  // menu ▾ da coluna: no máximo 300 valores (a busca do menu acha os demais)
+  const fm=v[G+'_fm']; if(fm&&fm.open&&fm.vals&&fm.vals.length>300) fm.vals=fm.vals.slice(0,300);
+  agFichaVals(self,v); agRxVals(self,v);
+}
+function agFichaVals(self,v){ const st=self.state; const pi=(st.agf&&AGX.st==='ok')?AGX.reg[st.agf]:undefined; const p=pi!==undefined?AGX.P[pi]:null;
+  ['af_chips','af_culs','af_alvos','af_usos','af_rotG','af_lmr','af_lotes','af_planos','af_os','af_refsF','af_cref','af_kv','af_ings'].forEach(k=>{ v[k]=[]; });
+  v.af_open=!!p; v.af_close=()=>agClose(self); if(!p) return;
+  if(!AGX.lSt) setTimeout(()=>agLmrCarregar(self),0);
+  const I=AGX.I, TD=I.todasCulturas, c=cenGet(), uOk=AGX.uSt==='ok', cul=st.af_cul||'', al=st.af_alvo||'', dt=agDataArq();
+  const cn=cul!==''?I.culturas[Number(cul)][0]:'', an=al!==''?agAlvoT(Number(al),true):'';
+  v.af_t=p.nome; v.af_sub='Registro MAPA nº '+p.reg+' · '+(p.titT||'titular não informado');
+  v.af_hasMarcas=p.marcas.length>1; v.af_marcas='Também comercializado como '+p.marcas.slice(1).join(', ');
+  const tx=I.tox[p.tox]; v.af_chips=[agChip('Registro ativo','green')].concat(p.comp.map(k=>agChip(k,'gray')))
+    .concat(tx?[agChip(agToxT(p),AG_TOXC[tx[2]]||'gray')]:[]).concat([agChip(agAmbT(p),'gray')]).concat(p.org==='S'?[agChip('Aprovado para orgânicos','green')]:[]);
+  // posição na lista filtrada e navegação
+  const ids=agVis(st).ids, i=ids.indexOf(pi); v.af_hasNav=i>=0&&ids.length>1; v.af_pos=agNf(i+1)+' de '+agNf(ids.length);
+  v.af_prevDis=i<=0; v.af_nextDis=i<0||i>=ids.length-1; v.af_prevSt=v.af_prevDis?'opacity:.4;cursor:default;':''; v.af_nextSt=v.af_nextDis?'opacity:.4;cursor:default;':'';
+  v.af_prev=()=>{ if(i>0) agOpen(self,AGX.P[ids[i-1]].reg); }; v.af_next=()=>{ if(i>=0&&i<ids.length-1) agOpen(self,AGX.P[ids[i+1]].reg); };
+  // uso: cultura × alvo → receituário. Registro em "Todas as culturas": a ficha oferece as culturas da fazenda (e a da lista), porque o
+  // receituário nomeia a cultura real do talhão; os alvos vêm do uso em "Todas as culturas".
+  const cs=p.cul.slice().sort(AGX.culCmp), isTD=cul!==''&&Number(cul)===TD, viaTD=cul!==''&&!isTD&&!p.culSet.has(Number(cul));
+  const extra=p.todas?agUni(AGX.fazCul.concat(cul!==''?[Number(cul)]:[])).filter(id=>id!==TD&&!p.culSet.has(id)):[];
+  const opC=[]; cs.forEach(id=>{ opC.push({v:String(id),t:I.culturas[id][0]+(id===TD?' (escolha abaixo a cultura do talhão)':'')});
+    if(id===TD) extra.forEach(x=>opC.push({v:String(x),t:I.culturas[x][0]+' · pelo uso em “Todas as culturas”'})); });
+  v.af_cul=cul; v.af_culs=[{v:'',t:'Escolha a cultura ('+agNf(cs.length)+')'}].concat(opC);
+  v.af_setcul=(e)=>self.setState({af_cul:e.target.value,af_alvo:'',af_all:false});
+  const PU=uOk?AGX.PU[pi]:[]; const meus=cul!==''?agUni(PU.filter(x=>x[0]===Number(cul)||(p.todas&&!isTD&&x[0]===TD)).map(x=>x[1])):[];
+  const alSort=(a,b)=>AGC.compare(agAlvoT(a,true),agAlvoT(b,true)); meus.sort(alSort);
+  v.af_alvo=al; v.af_alvoDis=cul===''||!uOk; v.af_setalvo=(e)=>self.setState({af_alvo:e.target.value});
+  v.af_alvos=[{v:'',t:!uOk?'Carregando alvos…':(cul===''?'Escolha a cultura primeiro':('Escolha o alvo ('+agNf(meus.length)+')'))}]
+    .concat(meus.map(a=>({v:String(a),t:agAlvoT(a,true)+' · '+((I.alvos[a]||[''])[0]||'—')})));
+  const pode=cul!==''&&!isTD&&al!==''&&uOk; v.af_rxDis=!pode; v.af_rxSt=pode?'':'opacity:.45;cursor:not-allowed;'; v.af_rxgo=()=>{ if(pode) agRxAbrir(self,p); };
+  v.af_hasDica=!pode||viaTD; v.af_dica=!uOk?'Carregando os usos registrados…':(cul===''?'Escolha a cultura e o alvo do uso registrado para preparar o receituário.'
+    :(isTD?'Uso registrado em “Todas as culturas”: escolha no campo Cultura a cultura do talhão (ex.: '+(extra.slice(0,2).map(x=>I.culturas[x][0]).join(', ')||'Soja')+') para preparar o receituário.'
+    :(viaTD?('Registro sem uso específico em '+cn+': vale o uso em “Todas as culturas”.'+(al===''?' Escolha o alvo para preparar o receituário.':''))
+    :'Escolha o alvo para preparar o receituário.')));
+  const dn=(st.agf_rx||{})[p.reg]; v.af_hasDone=!!dn; v.af_done=dn?('Receituário emitido · '+dn):'';
+  // usos registrados
+  const fq=g2norm(st.af_q||'').split(/\s+/).filter(Boolean), casa=(t)=>fq.every(w=>t.indexOf(w)>=0);
+  v.af_q=st.af_q||''; v.af_setq=(e)=>self.setState({af_q:e.target.value,af_all:false}); v.af_usosLoad=!uOk;
+  v.af_usosT='Usos registrados · '+agNf(cs.length)+(cs.length===1?' cultura':' culturas')+' · '+agNf(p.nUsos)+(p.nUsos===1?' uso':' usos');
+  let rows=[];
+  if(uOk&&cul!==''){ v.af_usosL='Alvos em '+cn;
+    rows=meus.filter(a=>!fq.length||casa(g2norm(cn+' '+agAlvoT(a)))).map(a=>{ const ali=I.alvos[a]||['',[],'',0], on=String(a)===al;
+      return {t:agAlvoT(a,true),sub:(ali[0]||'—')+' · '+(AG_TIPO[ali[2]]||'alvo')+((ali[1]||[]).length>1?' · também '+ali[1].slice(1,4).join(', '):''),bt:on?'Escolhido':'Escolher',lab:'Escolher o alvo '+agAlvoT(a,true),
+        st:on?'background:#E4F3E9;border-radius:8px;':'',go:()=>self.setState({af_alvo:String(a)})}; }); }
+  else if(uOk){ v.af_usosL='Culturas do registro'; const por={}; PU.forEach(x=>{ (por[x[0]]=por[x[0]]||[]).push(x[1]); });
+    rows=cs.map(cid=>{ const as=(por[cid]||[]).slice().sort(alSort), nm=I.culturas[cid][0]; let mt=as;
+        if(fq.length){ if(casa(g2norm(nm))) mt=as; else { mt=as.filter(a=>casa(g2norm(nm+' '+agAlvoT(a)))); if(!mt.length) return null; } }
+        return {t:nm,sub:agNf(as.length)+(as.length===1?' alvo: ':' alvos: ')+mt.slice(0,4).map(a=>agAlvoT(a,true)).join(', ')+(mt.length>4?' +'+(mt.length-4):''),bt:'Escolher',lab:'Escolher a cultura '+nm,st:'',
+          go:()=>self.setState({af_cul:String(cid),af_alvo:(fq.length&&mt.length===1)?String(mt[0]):'',af_q:'',af_all:false})}; }).filter(Boolean); }
+  v.af_usosN=agNf(rows.length); v.af_usosMais=!st.af_all&&rows.length>40; v.af_usosTodos=()=>self.setState({af_all:true});
+  v.af_usos=st.af_all?rows:rows.slice(0,40); v.af_usosVazio=uOk&&fq.length>0&&!rows.length;
+  // rotação: mesma cultura × alvo, OUTRO MODO DE AÇÃO (código IRAC/FRAC/HRAC de referência por ingrediente; ver agRotKeys)
+  const podeRot=cul!==''&&al!==''&&uOk;
+  v.af_rotT=podeRot?('Rotação · '+cn+' × '+an):'Rotação'; v.af_rotHint=!podeRot; v.af_rotHintT=!uOk?'Carregando os usos registrados…':'Escolha a cultura e o alvo para ver os registros de outro modo de ação para o mesmo alvo.';
+  v.af_hasRot=false;
+  if(podeRot){ const cand=new Set((agUA(cul).get(Number(al))||[]).concat(Number(cul)!==TD?(agUA(TD).get(Number(al))||[]):[])); cand.delete(pi);
+    const alt=[], mesmo=[]; cand.forEach(q=>{ const Q=AGX.P[q]; (agMesmo(p,Q)?mesmo:alt).push(Q); });
+    const gr={}; alt.forEach(Q=>{ const k=Q.codes.length?(Q.moaT+' · '+Q.moaN):((Q.gqT||'grupo químico não informado')+' · sem código de referência'); (gr[k]=gr[k]||[]).push(Q); });
+    const gks=Object.keys(gr).sort((a,b)=>(gr[b].length-gr[a].length)||AGC.compare(a,b));
+    v.af_hasRot=true; const ms=mesmo.length?(' · '+agNf(mesmo.length)+' do mesmo modo de ação (não é rotação)'):'';
+    v.af_rotRes=alt.length?(agNf(alt.length)+(alt.length===1?' registro':' registros')+' de outro modo de ação em '+agNf(gks.length)+(gks.length===1?' grupo':' grupos')+' para '+cn+' × '+an+ms+'.')
+      :('Nenhum registro de outro modo de ação para '+cn+' × '+an+ms+'.');
+    v.af_rotG=gks.slice(0,12).map(k=>{ const L=gr[k].slice().sort((a,b)=>AGC.compare(a.nome,b.nome)); return {t:k,n:agNf(L.length)+(L.length===1?' produto':' produtos'),
+      ps:L.slice(0,4).map(Q=>({t:Q.nome,lab:'Abrir a ficha de '+Q.nome+' (registro '+Q.reg+')',go:()=>agOpen(self,Q.reg)})),mais:L.length>4?('+'+agNf(L.length-4)):''}; });
+    if(gks.length>12) v.af_rotG.push({t:'+ '+agNf(gks.length-12)+' grupos',n:'na lista',ps:[],mais:''});
+    v.af_rotNota='Modo de ação pelo código IRAC/FRAC/HRAC de referência de cada ingrediente (o AGROFIT publica só o grupo químico); sem código, vale o grupo químico. Multissítio (FRAC M) que o produto já tem não conta como rotação; multissítio novo conta.';
+    v.af_rotVer=()=>{ g2set(self,AGF_G,{f:{},x:null}); agSetF(self,{agf_cul:cul,agf_alvo:al,agf_q:'',agf_cls:'',agf_org:false,agf_ref:'',agf_gb:'moa',agf:null,rx:null}); agSetHash(''); }; }
+  // LMR ANVISA da cultura
+  v.af_lmrT=cul!==''?('LMR ANVISA · '+cn):'LMR ANVISA'; v.af_lmrHint=cul===''||AGX.lSt!=='ok'; v.af_hasLmr=false; v.af_lmrErro=AGX.lSt==='erro'&&cul!=='';
+  v.af_lmrErrT='O LMR da ANVISA não carregou: '+(AGX.lErr||''); v.af_lmrRetry=()=>{ AGX.lSt=''; agLmrCarregar(self); };
+  v.af_lmrHintT=cul===''?'Escolha a cultura para ver o limite máximo de resíduo de cada ingrediente.':(AGX.lSt==='erro'?'':'Carregando o LMR da ANVISA…');
+  if(cul!==''&&AGX.lSt==='ok'){ const L=AGX.L, can=I.culturas[Number(cul)][2]; v.af_hasLmr=true; v.af_lmrRef=(L.referencia||'').split('-').reverse().join('/');
+    // vermelho só quando a monografia diz NÃO autorizado; ausência da cultura nos dados abertos é texto neutro (o uso é registrado no MAPA)
+    v.af_lmr=p.ids.map(id=>{ const ig=I.ingredientes[id]||['?',null,null], mono=ig[2]?L.monografias[ig[2]]:null; let t='', bad=false;
+      if(Number(cul)===TD) t='Uso em "Todas as culturas": o LMR é por cultura; escolha a cultura do talhão.';
+      else if(!ig[2]) t='Sem monografia da ANVISA nos dados abertos.';
+      else if(!can) t='Cultura sem correspondência na tabela da ANVISA; confira a monografia.';
+      else if(!mono) t='Monografia '+ig[2]+' sem LMR vigente nos dados abertos.';
+      else { const ks=Object.keys(mono[2]), nk=agCulK(can); let k=mono[2][can]?can:ks.find(x=>agCulK(x)===nk); const e=k?mono[2][k]:null;
+        if(!e){ const rel=ks.filter(x=>agCulT(x)===agCulT(can));
+          t='Sem LMR de '+can+' nos dados abertos da ANVISA (monografia '+ig[2]+'); confira a monografia.'
+            +(rel.length?(' A monografia traz '+rel.slice(0,2).map(x=>x+': '+agLmrT(mono[2][x],L,true)).join('; ')+'.'):''); }
+        else { t=agLmrT(e,L)+(k!==can?(' · registrado como “'+k+'”'):''); bad=!e[2]; } }
+      return {t:ig[0],v:t,st:bad?'color:#B42318;font-weight:700;':''}; }); }
+  // na fazenda (ao vivo)
+  const F=agFaz(p,c); v.af_fora=!F; v.af_hasFaz=!!F;
+  if(F){ v.af_fazT='Mesmo ingrediente ativo de '+F.nf.join(', ')+' (a fazenda registra o produto pelo nome, sem a marca).';
+    v.af_lotes=F.L.slice().sort((a,b)=>cenDisp(b)-cenDisp(a)).map(l=>({prod:l.prod,lote:l.lote,local:l.local,fis:agNf(l.fisico)+' '+l.un,res:agNf(l.reservado)+' '+l.un,disp:agNf(cenDisp(l))+' '+l.un}));
+    v.af_hasLotes=F.L.length>0; v.af_semLotes=!F.L.length; v.af_lotTot='Disponível: '+F.por.filter(x=>x.L.length).map(x=>x.n+' '+agNf(x.disp)+' '+x.un).join(' · ');
+    v.af_planos=F.pl.map(x=>({id:x.id,t:x.nome+' · '+x.atv,dose:x.dose})); v.af_hasPlanos=F.pl.length>0;
+    v.af_os=F.os.map(o=>{ const x=(o.ins||[]).find(y=>F.nf.indexOf(y.p)>=0)||{}; const ch=agChip(o.etapa,AG_FASE[o.etapa]||'gray');
+      return {id:o.id,h:'OS.dc.html#'+o.id,t:o.tipo+' · '+o.talhao+' · '+x.p,et:ch.t,st:ch.st,dot:ch.dot,dose:agNf(x.dose)+' '+(x.un||'')+'/ha'}; }); v.af_hasOs=F.os.length>0;
+    v.af_refsF=F.rf.map(x=>({ref:x.ref,h:x.href,t:x.texto})); v.af_hasRefs=F.rf.length>0; }
+  else { v.af_hasLotes=false; v.af_semLotes=false; v.af_hasPlanos=false; v.af_hasOs=false; v.af_hasRefs=false; }
+  // referência conferida em bula (mesma combinação de ingredientes)
+  const refs=AGX.FK[p.key]||[]; v.af_hasCref=refs.length>0;
+  v.af_cref=refs.map(r=>agCref(r,p,cn));
+  // registro e composição
+  const fo=I.formulacoes[p.form]||['','']; const og=(I.organicos||{})[p.org]||p.org;
+  v.af_kv=[{l:'Registro MAPA',v:p.reg},{l:'Marca comercial',v:p.marcas.join(', ')||'—'},{l:'Titular do registro',v:p.titT||'—'},
+    {l:'Formulação',v:(fo[0]?fo[0]+' · ':'')+(fo[1]||'—')},{l:'Classe',v:p.clsT||'—'},{l:'Modo de ação (texto do AGROFIT)',v:p.modoT||'não informado'},
+    {l:'Classificação toxicológica',v:agToxT(p,true)},{l:'Classe ambiental',v:agAmbT(p,true)},
+    {l:'Agricultura orgânica (AGROFIT)',v:og+(p.org==='O'?' (valor sem significado documentado na fonte)':'')},{l:'Situação',v:'Registro ativo no arquivo de '+dt}];
+  v.af_ings=p.ing.map(x=>{ const ig=I.ingredientes[x[0]]||['?',null]; const cds=AGX.REFC[x[0]]||[];
+    return {t:ig[0],g:(ig[1]!==null&&ig[1]!==undefined)?I.gruposQuimicos[ig[1]]:'—',c:(x[1]!==null&&x[1]!==undefined?agNf(x[1],3):'—')+' '+(x[2]||''),
+      r:cds.length?cds.map(k=>k+' · '+((AGF.grupos[k]||[''])[0])).join(' + '):'—'}; });
+  v.af_resNota='O AGROFIT informa o grupo químico, não o grupo de resistência; o código IRAC/FRAC/HRAC acima é referência das classificações públicas, por ingrediente ativo (sem código: biológico, extrato, óleo ou modo de ação desconhecido).';
+  v.af_bula='Dose, carência, intervalo de reentrada e nº de aplicações: na bula do produto (não estão nos dados abertos). No AGROFIT oficial, consulte o registro nº '+p.reg+'.';
+}
+function agRxVals(self,v){ const st=self.state, rx=st.rx, pi=(rx&&AGX.st==='ok')?AGX.reg[rx.reg]:undefined, p=pi!==undefined?AGX.P[pi]:null;
+  v.rx_open=!!p; ['rx_tals','rx_warns'].forEach(k=>{ v[k]=[]; }); v.rx_cancel=()=>agRxFechar(self); if(!p) return;
+  const I=AGX.I, cn=I.culturas[Number(rx.cul)][0], an=agAlvoT(Number(rx.al),true), sci=(I.alvos[Number(rx.al)]||[''])[0], ts=agTal(cn), er=rx.errs||{};
+  const upd=(o)=>self.setState({rx:Object.assign({},self.state.rx,o)});
+  v.rx_prod=p.nome+' · registro '+p.reg; v.rx_cul=cn+(p.culSet.has(Number(rx.cul))?'':' (uso registrado em “Todas as culturas”)'); v.rx_alvo=an+(sci&&sci!==an?' ('+sci+')':''); v.rx_rt=AG_RT; v.rx_ro=true;
+  v.rx_tals=ts.map(t=>({v:t,t:t})); v.rx_tal=rx.t; v.rx_hasTals=ts.length>0; v.rx_semTal=!ts.length; v.rx_semTalT='Nenhum cultivo de '+cn.toLowerCase()+' nas safras abertas.';
+  v.rx_settal=(e)=>upd({t:e.target.value,errs:Object.assign({},self.state.rx.errs,{t:''})});
+  // referência conferida (mesma combinação de ingredientes, mesma cultura): só AVISA fora da faixa; a bula do registro manda
+  const RF=agRefFaixa(p,cn);
+  const fora=(vd)=>{ if(!vd||vd.e||!RF.length) return ''; const f0=RF[0].f; let a=Infinity,b=-Infinity,un=f0.un; RF.forEach(x=>{ const fa=agConv(x.f.a,x.f.un,un), fb=agConv(x.f.b,x.f.un,un); if(fa!==null){ a=Math.min(a,fa); b=Math.max(b,fb); } });
+    const x=agConv(vd.x,vd.un,un); if(x===null||a===Infinity) return ''; if(x<a-1e-9||x>b+1e-9) return 'Fora da referência conferida em bula ('+RF[0].r.nome+': '+agFaixaT({a:a,b:b,un:un})+' em '+cn+'). Confira a bula deste registro antes de emitir.'; return ''; };
+  v.rx_dose=rx.d; v.rx_setdose=(e)=>{ const d=e.target.value, cur=self.state.rx; upd({d:d,errs:Object.assign({},cur.errs,{d:(cur.errs||{}).d?(agValDose(d).e||''):''})}); };
+  v.rx_doseok=()=>{ const cur=self.state.rx; if(!cur||!String(cur.d||'').trim()) return; upd({errs:Object.assign({},cur.errs,{d:agValDose(cur.d).e||''})}); };
+  v.rx_bula='Confira dose e carência na bula (AGROFIT oficial · registro '+p.reg+').'+(RF.length?(' Referência conferida: '+agUni(RF.map(x=>x.r.nome+' '+agFaixaT(x.f)+' ('+x.u.alvo+')')).slice(0,3).join('; ')+' em '+cn+'.'):'');
+  v.rx_rec=rx.rec; v.rx_setrec=(e)=>upd({rec:e.target.value});
+  const w=[]; const vd=String(rx.d||'').trim()?agValDose(rx.d):null; const fw=fora(vd); if(fw) w.push(fw);
+  v.rx_warns=w.map(t=>({t:t}));
+  v.rx_eT=er.t||''; v.rx_hasET=!!er.t; v.rx_eD=er.d||''; v.rx_hasED=!!er.d; v.rx_dinv=String(!!er.d);
+  const IST=(bad,ro)=>'font-family:inherit;font-size:14px;padding:9px 11px;border-radius:10px;box-sizing:border-box;width:100%;color:#15201A;border:1px solid '+(bad?'#B42318':'#E4E9E5')+';background:'+(ro?'#F4F6F3':'#FFFFFF')+';';
+  v.rx_ist=IST(false,false); v.rx_rost=IST(false,true); v.rx_tst=IST(!!er.t,false); v.rx_dst=IST(!!er.d,false);
+  v.rx_emit=()=>{ const cur=self.state.rx, e2={}, vd2=agValDose(cur.d); if(!cur.t) e2.t=ts.length?'Escolha o talhão.':'Sem cultivo desta cultura nas safras abertas: escolha outra cultura na ficha.'; if(vd2.e) e2.d=vd2.e;
+    if(Object.keys(e2).length){ upd({errs:e2}); setTimeout(()=>{ try{ const el=document.getElementById(e2.t?'rx_tal':'rx_dose'); if(el&&el.focus) el.focus(); }catch(e){} },30); return; }
+    const lbl=cn+' · '+an+' · '+cur.t.split(' · ')[0]+' · '+vd2.t, rec=String(cur.rec||'').trim();
+    const okx=Object.assign({},self.state.agf_rx||{}); okx[p.reg]=lbl;
+    self.setState({agf_rx:okx,g2toast:'Receituário emitido · '+p.nome+' (reg. '+p.reg+') · '+lbl+' · assinado por '+AG_RT_NOME+(rec?' · vinculado a '+rec:'')}); agRxFechar(self); };
+}
+'''
+
+def ag07():
+    import cenario  # aqui dentro: cenario.seed importa areas.processo_os
+    import agrofit_dados as A
     fname='AG-07.dc.html'; E._reset_screen(fname)
-    c7=[dict(k='prod',l='Produto · ingrediente',w=170),dict(k='reg',l='Registro MAPA · situação',w=150),dict(k='moa',l='Modo de ação',w=130),dict(k='alvo',l='Cultura · alvo',w=130),
-        dict(k='dose',l='Dose · formulação',w=120),dict(k='car',l='Carência · reentrada · aplic. máx.',w=120),dict(k='acao',l='Ação')]
-    rows7=[
-      R('fa',prod=[Pt.b('Fungicida A'),Pt.br(),Pt.mut('protioconazol + trifloxistrobina')],reg=[Pt.txt('8412'),Pt.br(),Pt.chip('Vigente','green')],moa='Triazol + estrobilurina (G1+C3)',
-        alvo='Soja · ferrugem asiática',dose=[Pt.txt('0,4 L/ha'),Pt.br(),Pt.mut('SC')],car=[Pt.txt('30 d · 24 h'),Pt.br(),Pt.mut('máx. 2/safra')],acao=[Pt.cta('Recomendar','AG-04.dc.html')]),
-      R('ts',prod=[Pt.b('TS Nemat'),Pt.br(),Pt.mut('abamectina')],reg=[Pt.txt('11207'),Pt.br(),Pt.chip('Vigente','green')],moa='Avermectina (6)',
-        alvo='Soja · nematoide-de-cisto',dose=[Pt.txt('100 mL/100 kg sem.'),Pt.br(),Pt.mut('TS')],car=[Pt.txt('— · 24 h'),Pt.br(),Pt.mut('máx. 1/safra (TS)')],acao=[Pt.cta('Ver na REC-014','AG-04det.dc.html')]),
-      R('ib',prod=[Pt.b('Inseticida B'),Pt.br(),Pt.mut('acefato')],reg=[Pt.txt('6120'),Pt.br(),Pt.chip('Vigente','green')],moa='Organofosforado (1B)',
-        alvo='Feijão · mosca-branca',dose=[Pt.txt('1,0 kg/ha'),Pt.br(),Pt.mut('SP')],car=[Pt.txt('14 d · 24 h'),Pt.br(),Pt.mut('máx. 2/ciclo')],
-        acao=[Pt.act('Comparar','Comparação: Inseticida B × outro produto registrado para mosca-branca no feijão — dose, carência, modo de ação e nº de aplicações lado a lado; equivalência exige decisão técnica.')]),
-      R('hc',prod=[Pt.b('Herbicida C'),Pt.br(),Pt.mut('glifosato 480')],reg=[Pt.txt('3327'),Pt.br(),Pt.chip('Em reavaliação','yellow')],moa='EPSPS (G9)',
-        alvo='Soja · daninhas folha larga',dose=[Pt.txt('2,0 L/ha'),Pt.br(),Pt.mut('SL')],car=[Pt.txt('— · 6 h'),Pt.br(),Pt.mut('máx. 2/safra')],
-        acao=[Pt.act('Ver bula','Bula oficial aberta (PDF do AGROFIT) · situação: em reavaliação — uso permitido conforme o rótulo vigente; alerta anexado ao receituário.')]),
-      R('pe',prod=[Pt.b('Produto E'),Pt.br(),Pt.mut('protioconazol + trifloxistrobina')],reg=[Pt.txt('9834'),Pt.br(),Pt.chip('Vigente','green')],moa='Triazol + estrobilurina (G1+C3)',
-        alvo='Soja · ferrugem asiática',dose=[Pt.txt('0,5 L/ha'),Pt.br(),Pt.mut('EC')],car=[Pt.txt('30 d · 24 h'),Pt.br(),Pt.mut('máx. 2/safra')],
-        acao=[Pt.act('Comparar','Mesmo ingrediente, mas NÃO é substituto automático: formulação (EC × SC) e dose (0,5 × 0,4 L/ha) diferem · a troca exige nova validação técnica na recomendação.')]),
-      R('if',prod=[Pt.b('Inseticida F'),Pt.br(),Pt.mut('paration metílico')],reg=[Pt.txt('2201'),Pt.br(),Pt.chip('Registro cancelado','red')],moa='Organofosforado (1B)',
-        alvo='—',dose=[Pt.txt('—'),Pt.br(),Pt.mut('EC')],car=[Pt.txt('—'),Pt.br(),Pt.mut('máx. —')],acao=[Pt.chip('Uso bloqueado','red')]),
-    ]
-    g7=grid(c7,rows7,edit=consulta(c7,'Ficha oficial',f'Dados do AGROFIT (consulta de 20/09, cache de 3 dias): consulta apenas; a situação é conferida de novo no uso.',skip=('acao',)),
-            gid='g_bula',total=False)
-    corpo=(
-      kpis([('PRODUTOS NA BASE','412','sincronizados do AGROFIT'),('REGISTROS VIGENTES','396','situação conferida no uso'),
-            ('EM REAVALIAÇÃO','14','uso permitido com alerta'),('CACHE','3 dias','consulta 20/09 · vigente')])
-      + bloco('Produtos por ingrediente, cultura e alvo','Busque e filtre pelas colunas; clique na linha para abrir a ficha oficial.',g7,
-          imsg('Atualizar fonte','Base AGROFIT reconsultada agora · 2 fichas mudaram de situação (1 em reavaliação, 1 cancelada) · idade do cache zerada.','clock','Reconsultar o AGROFIT e zerar a idade do cache')))
-    prim=idrawer('Preparar receituário',dict(title='Preparar receituário agronômico',sub='Documento técnico específico da aplicação, com identificação e assinatura do RT.',
-           fields=[('Produto','Fungicida A · protioconazol + trifloxistrobina'),('Cultura','Soja'),('Alvo','Ferrugem asiática'),('Talhão','T1 · 312 ha'),('Dose','0,4 L/ha'),('Responsável técnico','Ana'),('Recomendação vinculada','REC-016')],
-           confirm='Emitir receituário',done='Receituário emitido · assinado pelo RT · anexado à recomendação'),'doc','Preparar o receituário da aplicação com assinatura do RT',primary=True,small=False)
+    dados=agf_dados(); link=A.CONSULTA['link']
+    # 6 colunas; larguras máximas (texto quebra) para a grade inteira caber em 1280 px com o menu aberto (contêiner de ~956 px)
+    cols=[dict(k='prod',l='Produto · registro',w=180),dict(k='ing',l='Ingrediente ativo · grupo químico',w=190),dict(k='cls',l='Classe · modo de ação',w=130),
+          dict(k='cult',l='Culturas',t='num',w=115),dict(k='tox',l='Tox · amb',w=120),dict(k='faz',l='Na fazenda',t='num',w=125)]
+    g=grid(cols,[],edit=dict(m='ro',title='',fields=[]),gid=AGF_ID,total=False,tools=_agf_tools())
+    corpo=_agf_estados()+f'<sc-if value="{H("agf_ok")}" hint-placeholder-val="{F_()}">'+bloco('Produtos fitossanitários com registro','',_agf_filtros()+g+_agf_mais())+'</sc-if>'
+    EXTRA.append(_agf_painel(link)); EXTRA.append(_agf_receituario())
+    EXTRAJS[0]=(cenario.js_prefixo()+'const AGF = '+json.dumps(dados,ensure_ascii=False).replace('</','<\\/')+';\nconst AGF_G = '+json.dumps(AGF_ID)+';\n'+AGF_JS)
     HEIGHTS37[fname]=900
-    shell37('AG-07','Bulas e registros',corpo,fname=fname,
-      subtitle='Base AGROFIT por produto, ingrediente, modo de ação, cultura e alvo: ficha oficial, restrições e situação do registro.',
-      status=('14 em reavaliação','yellow'),primary_html=prim,
-      footer='Produto equivalente por ingrediente não é substituto automático; o uso nasce de um diagnóstico e de uma recomendação aprovada.')
+    shell37('AG-07','Consulta Agrofit',corpo,fname=fname,status=(H('agf_stT'),'gray'),cont=_agf_fonte(link),search=False)
+    _agf_pos(fname)
+    _agf_copia()
+    return fname
+
+def _agf_copia():
+    """JSON da base ao lado da página: project/ (publicação) e _render/ (servidor local dos testes)."""
+    raiz=_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
+    for dst in (E.P,_os.path.join(raiz,'_render')):
+        if not _os.path.isdir(dst): continue
+        for f in agf_arquivos(): _sh.copyfile(_os.path.join(AGF_DIR,f),_os.path.join(dst,f))
+
+def _agf_pos(fname):
+    """placeholder da busca (procura também cultura e alvo), anel de foco e selo do cabeçalho com a cor calculada na tela."""
+    import re
+    from engine import chip as _chip
+    p=_os.path.join(E.P,fname); s=open(p,encoding='utf-8').read()
+    alvo='value="{{'+AGF_ID+'_q}}"'
+    pat=re.compile(r'min-width: 160px;(">(?:(?!<label).)*?<input type="search" aria-label=")Buscar nesta tabela(" placeholder=")Buscar…("\s*'+re.escape(alvo)+')',re.S)
+    s,n=pat.subn(r'min-width: 380px;" class="agf-busca\1Buscar produto, registro, ingrediente, titular, cultura ou praga\2Buscar produto, ingrediente, titular, cultura ou praga…\3',s)
+    assert n==1, 'busca da grade não encontrada em '+fname
+    assert s.count('</style>')>=1; s=s.replace('</style>','.agf-busca:focus-within{outline:2px solid #1E7A4C;outline-offset:1px}</style>',1)
+    old=_chip(H('agf_stT'),'gray'); assert s.count(old)==1, 'selo do cabeçalho não encontrado em '+fname
+    s=s.replace(old,f'<span role="status" style="{H("agf_stSt")}"><span style="{H("agf_stDot")}"></span>{H("agf_stT")}</span>')
+    open(p,'w',encoding='utf-8').write(s)

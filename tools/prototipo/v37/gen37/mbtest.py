@@ -32,7 +32,7 @@ def open_(t):
 def over(): return J("(()=>{const m=document.querySelector('main'); const kids=[...m.children].filter(e=>e.offsetParent!==null||e.tagName==='SC-IF'); let b=0; m.querySelectorAll(':scope > *, :scope > sc-if > *').forEach(e=>{const r=e.getBoundingClientRect(); if(r.height) b=Math.max(b,r.bottom);}); const mr=m.getBoundingClientRect(); return Math.round(b+16-mr.bottom);})()")
 def wide(): return J("(()=>{const m=document.querySelector('main'); return [...m.querySelectorAll('*')].filter(e=>e.getBoundingClientRect().right>392).map(e=>e.tagName+':'+(e.innerText||'').slice(0,30)).slice(0,3);})()")
 try:
-    c.size(390,1800)
+    c.size(390,2400)   # viewport ≥ altura da prancha (MB-02 = 2320): com o teto 100dvh do celular real, abaixo disso o main rola e a medida deixa de ser da prancha
     for t in [x for i,x in enumerate(TELAS) if parte('a' if i<8 else 'b')]:
         open_(t); print(t)
         ok(J("document.body.innerText.indexOf('{{')<0"),'sem buracos {{}} visíveis')
@@ -55,7 +55,7 @@ try:
       ok('Revogada no servidor' in b and 'Relato fora da autorização atual · aguarda decisão' in b,'ordem revogada e relato fora da autorização')
       clk('Iniciar · bloqueado (revogada'); ok('revogada no servidor' in T(),'iniciar ordem revogada bloqueia com motivo')
       print('DEMO-14 · MB-02 reconhecer')
-      ok('Revisão de saldo pendente · v3' in b and 'Fichas do saldo revogadas' in b,'selo v3 (texto canônico de dados.py) e aviso de revogação')
+      ok('Fichas do saldo revogadas' in b and 'Revisão de saldo' not in b and 'aprovar a v3' not in b,'aviso de revogação das fichas do saldo (sem selo de revisão da v3)')
       clk('Reconhecer'); ok('CI-0931' in T() and 'Ciência registrada · CI-0931' in BODY(),'reconhecer registra ciência')
       ok(clk('Reconhecer').startswith('NÃO ACHEI'),'botão Reconhecer some após ciência')
       print('DEMO-11 · sem sinal → fila do aparelho → reenviar sem duplicar')

@@ -988,8 +988,8 @@
     "IR-03det.dc.html"
    ],
    [
-    "Revisar versão v2",
-    "IN-02det.dc.html"
+    "Liberar",
+    "OS.dc.html#OS-0418"
    ],
    [
     "Ver sobras",
@@ -3876,8 +3876,8 @@
     "PL-05.dc.html"
    ],
    [
-    "Revisar e decidir",
-    "IN-02det.dc.html"
+    "Liberar",
+    "OS.dc.html#OS-0418"
    ],
    [
     "Receber devolução",
@@ -3930,10 +3930,6 @@
    ],
    [
     "Revisar",
-    "IN-02det.dc.html"
-   ],
-   [
-    "Revisar",
     "CA-01.dc.html"
    ],
    [
@@ -3982,58 +3978,6 @@
    "Orçamento",
    "○ no prazo · 7 d",
    "Acesso e alçada"
-  ]
- },
- "IN-02det.dc.html": {
-  "arquivo": "IN-02det.dc.html",
-  "familia": "IN-02",
-  "titulo": "Decidir · OS-0418 fertirrigação",
-  "rota": "/inicio/aprovacoes",
-  "links": [
-   [
-    "Início",
-    "IN-01.dc.html"
-   ],
-   [
-    "Aprovações",
-    "IN-02.dc.html"
-   ],
-   [
-    "Voltar",
-    "IN-02.dc.html"
-   ]
-  ],
-  "acoes": [
-   [
-    "Aprovar versão v2",
-    "Versão v2 aprovada · recibo AP-2201 · requisição REQ-044 criada · ordem segue A liberar até prontidão e liberação. Próxima pendência: revisão de saldo OS-0420."
-   ],
-   [
-    "Rejeitar versão",
-    "Versão v2 rejeitada · a tarefa não é cancelada: segue A liberar sem autorização para o saldo até o emitente enviar nova versão ou voltar a só água com nova autorização pela política. Histórico preservado."
-   ]
-  ],
-  "formularios": [
-   {
-    "titulo": "Devolver para ajuste",
-    "campos": [
-     "Motivo",
-     "Orientação"
-    ],
-    "confirmar": "Devolver para ajuste"
-   }
-  ],
-  "abre_paineis": [
-   [
-    "Devolver com motivo",
-    "Devolvida ao emitente"
-   ]
-  ],
-  "selos": [
-   "Fazenda Santa Rita",
-   "Safra 2026/27",
-   "Aguardando agrônomo",
-   "Compatível com água de irrigação"
   ]
  },
  "IN-03.dc.html": {
@@ -4133,8 +4077,8 @@
     "IR-03det.dc.html"
    ],
    [
-    "Abrir",
-    "IN-02det.dc.html"
+    "Ajustar antes de liberar",
+    "OS.dc.html#OS-0418"
    ],
    [
     "Abrir",
@@ -4269,8 +4213,8 @@
     "IR-03det.dc.html"
    ],
    [
-    "Ver decisão",
-    "IN-02det.dc.html"
+    "Liberar",
+    "OS.dc.html#OS-0418"
    ],
    [
     "Ver fila de revisão",
@@ -4354,8 +4298,8 @@
     "IN-02.dc.html"
    ],
    [
-    "Ver decisão",
-    "IN-02det.dc.html"
+    "Liberar",
+    "OS.dc.html#OS-0418"
    ]
   ],
   "acoes": [
@@ -4411,7 +4355,7 @@
    ],
    [
     "Criar versão v2",
-    "IN-02det.dc.html"
+    "OS.dc.html#OS-0418"
    ]
   ],
   "acoes": [
@@ -6152,8 +6096,8 @@
     "CA-01det.dc.html"
    ],
    [
-    "DEMO-14 Dose revista só no saldo (60/40)",
-    "IN-02.dc.html"
+    "DEMO-14 Dose ajustada só no saldo (60/40)",
+    "OS.dc.html#OS-0420"
    ],
    [
     "DEMO-03 Custódia e devolução parcial (100/70/20/10)",
@@ -6165,7 +6109,7 @@
    ],
    [
     "DEMO-16 Água reclassificada em fertirrigação",
-    "IN-02det.dc.html"
+    "OS.dc.html#OS-0418"
    ],
    [
     "DEMO-17 Ativo bloqueado antes do início",

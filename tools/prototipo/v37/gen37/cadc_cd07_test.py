@@ -8,7 +8,7 @@ t=T(); J=t.J
 try:
     t.goto('CD-07.dc.html'); body=J("document.body.innerText")
     t.chk('cabeçalho com versão em vigor, rascunho e pendência; primária "Cadastrar código"; secundárias Importar e Publicar',
-          'v5 em vigor · rascunho v6 com 3 alterações · 1 tradução pendente' in t.header() and 'Cadastrar código' in t.header()
+          'v5 em vigor · rascunho v6 com 3 alterações · 1 tradução pendente' in t.header() and 'Cadastrar código' in t.bloco()
           and 'Importar do ERP' in body and 'Publicar estrutura' in body and 'Publicar estrutura v6' not in body and not t.errs(), t.header())
     t.chk('Cultura vem do CD-02 (5 culturas, com milho) e Processo é etapa (TRAT), sem PULV nem CR-SOJA',
           '5 códigos · de Culturas e cultivares' in (t.anyrow(0,'Cultura 5') or '') and t.rowtxt(0,'MILHO') and 'operações Pulverização' in (t.rowtxt(0,'TRAT') or '')
@@ -16,8 +16,9 @@ try:
     t.chk('natureza mostra grupos do CD-06 e hierarquia; centro de responsabilidade mostra o rateio',
           'grupos Fertilizantes, Corretivos' in (t.rowtxt(0,'3.1.01') or '') and 'em 3.1' in (t.rowtxt(0,'3.1.01') or '') and 'soma 6 naturezas' in (t.rowtxt(0,'Custo direto') or '')
           and 'rateio por horas de máquina' in (t.rowtxt(0,'CC-OFI') or ''), [t.rowtxt(0,'3.1.01'),t.rowtxt(0,'CC-OFI')])
-    t.chk('exclusão bloqueada com motivo: cultura do CD-02 e natureza usada em grupos',
-          'vem de Culturas' in (t.rowtxt(0,'SOJA') or '') and 'usada em grupos' in (t.rowtxt(0,'3.1.05') or ''), [t.rowtxt(0,'SOJA'),t.rowtxt(0,'3.1.05')])
+    t.openrow(0,'SOJA'); d1=t.dlg(); t.cancel(); t.openrow(0,'3.1.05'); d2=t.dlg(); t.cancel()
+    t.chk('exclusão bloqueada com motivo (no painel): cultura do CD-02 e natureza usada em grupos',
+          'vem de Culturas, cultivares e operações' in d1 and 'natureza de grupos de insumo' in d2, [d1[-160:],d2[-160:]])
     t.openrow(0,'SOJA'); d=t.dlg()
     t.chk('código do CD-02 abre só com a tradução editável', all(t.fdis(k) for k in ('cod','nome','dim','ini')) and not t.fdis('trad') and 'só a tradução' in d, d[:200])
     t.fset('trad','Conta do ERP'); t.fset('conta','cultura 01'); t.btn('Salvar'); time.sleep(.2)
@@ -45,11 +46,11 @@ try:
           [t.header(),t.toast()])
     t.clk('Importar do ERP')
     t.chk('segunda importação não repete as mudanças', 'não tem mudanças novas' in t.toast(), t.toast())
-    t.clk('Publicar estrutura'); time.sleep(.2); ts=t.toast()
+    t.aviso('Publicar estrutura'); time.sleep(.2); ts=t.toast()
     t.chk('publicar: v6 em vigor, v5 preservada, código sem conta fica fora',
           'estrutura v6 publicada' in ts and 'v5 preservada' in ts and 'PRJ-PIVO3' in ts and 'v6 em vigor · 1 tradução pendente' in t.header() and 'rascunho' not in t.header(), [ts,t.header()])
-    t.clk('Publicar estrutura')
-    t.chk('publicar sem alterações avisa que não há nada a publicar; sem erros de JS', 'Nada a publicar' in t.toast() and not t.errs(), [t.toast(),t.errs()])
+    sem=J("![...document.querySelectorAll('main button')].some(b=>b.innerText.indexOf('Publicar estrutura')>=0)")
+    t.chk('sem alterações no rascunho não aparece "Publicar estrutura"; sem erros de JS', sem and not t.errs(), [sem,t.errs()])
     t.shot('cadc_cd07.png')
 finally:
     t.fim()
