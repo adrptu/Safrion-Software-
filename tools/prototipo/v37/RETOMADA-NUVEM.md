@@ -62,6 +62,16 @@ python3 <teste>.py          # Chrome headless via cdp.py (CHROME_BIN)
 ```
 Sem a camada sintética (tarefa 1), o build para em `dados_lagoa_fonte`, com uma mensagem clara.
 
+## Reserva ativa (Claude nuvem · CAMADA-SINTETICA-01 · branch `claude/camada-sintetica-01`)
+- Reservados pelo despacho: `gen37/dados_lagoa_sintetico/**`, `gen37/dados_lagoa_fonte.py`, `gen37/talmapa_test.py`, `gen37/talgeo_test.js` e este arquivo.
+- **Necessidade nomeada antes de editar:** o rótulo "Demonstração sintética" precisa substituir os textos que afirmam dado real ("imagem real (Copernicus/ESA)", "Sentinel-2 real", "KML do proprietário"). Esses textos estão em:
+  - `gen37/areas/inicio.py`: mapa IN-04, legenda, cena e pixel;
+  - `gen37/areas/cad_fazendas.py`: ajuda e consulta do cadastro.
+
+  Os dois passam a ser reservados só para essa troca de texto.
+- A trilha AÇÃO também altera `areas/inicio.py`. O merge depois deve ser sequencial e revisado.
+- REND, AÇÃO, C2 e PR34 não são editados nesta etapa.
+
 ## Tarefas, na ordem
 1. **CAMADA-SINTETICA (CORTE-REMOTO-01)**
    - **Arquivos novos:** `dados_lagoa_sintetico/{__init__.py, kml.py, gerar.py, saida/}`.
