@@ -242,9 +242,9 @@ function mipChecks(s, v, a, c) {
   if (!u.conf) al.push('Uso não conferido na bula: confira antes de emitir.');
   const dose = Number(String(a.dose).replace(',', '.')), area = Number(String(a.area).replace(',', '.'));
   const fx = mipN(u.dmin, 3) + (u.dmax !== u.dmin ? '–' + mipN(u.dmax, 3) : '') + ' ' + u.un + '/ha';
-  if (!(dose > 0)) tr.push('Informe a dose.'); else if (dose < u.dmin - 1e-9 || dose > u.dmax + 1e-9) tr.push('Dose fora da bula: ' + fx + (u.calda ? ' (calda de 1.000 L/ha)' : '') + '.');
-  if (!(area > 0)) tr.push('Informe a área.'); else if (area > t.area + 1e-9) tr.push('Área maior que o talhão (' + mipN(t.area, 2) + ' ha).');
-  else if (dose > 0 && !(cenQtd(dose, area) > 0)) tr.push('Dose × área dá 0 ' + u.un + ': aumente a área.');   // a liberação recusaria (PRE-REV Y2)
+  if (!(dose > 0 && isFinite(dose))) tr.push('Informe a dose.'); else if (dose < u.dmin - 1e-9 || dose > u.dmax + 1e-9) tr.push('Dose fora da bula: ' + fx + (u.calda ? ' (calda de 1.000 L/ha)' : '') + '.');
+  if (!(area > 0 && isFinite(area))) tr.push('Informe a área.'); else if (area > t.area + 1e-9) tr.push('Área maior que o talhão (' + mipN(t.area, 2) + ' ha).');
+  else if (dose > 0 && isFinite(dose) && !(cenQtd(dose, area) > 0)) tr.push('Dose × área dá 0 ' + u.un + ': aumente a área.');   // a liberação recusaria (PRE-REV Y2)
   if (!a.data) tr.push('Informe a data da aplicação.'); else if (a.data < MIPD.hoje) tr.push('Data da aplicação no passado.');
   const hist = mipApl(s, c).filter(x => x.tal === v.tal && (!a.os || x.os !== a.os));   // aplicação de O.S. cancelada não conta
   const nap = hist.filter(x => x.prod === u.id).length; if (u.mx && nap >= u.mx) tr.push('Nº máximo de aplicações no ciclo atingido: ' + nap + ' de ' + u.mx + '.');
@@ -258,7 +258,7 @@ function mipChecks(s, v, a, c) {
       if (fim > t.colheita) tr.push('Carência de ' + car + ' dias passa da colheita prevista (' + mipBr(t.colheita) + '): aplicar até ' + mipBr(lim) + '.');
       else inf.push('Carência de ' + car + ' dias: colheita liberada a partir de ' + mipBr(fim) + ' · prevista ' + mipBr(t.colheita) + ' · aplicar até ' + mipBr(lim) + '.'); } }
   else if (car === 0) inf.push('Carência: ' + (u.cart || 'sem restrição') + '.');
-  if (c && c.lotes && dose > 0 && area > 0) { const need = cenQtd(dose, area);   // regra única (PRE-REV Q4)
+  if (c && c.lotes && dose > 0 && area > 0 && isFinite(dose) && isFinite(area)) { const need = cenQtd(dose, area);   // regra única (PRE-REV Q4); número não finito já travou (U3)
     const lt = cenLote(c, u.nome), disp = lt ? cenDisp(lt) : 0;   // o mesmo lote que a liberação reserva (PRE-REV Z2)
     if (disp + 1e-9 < need) al.push('Estoque: ' + mipN(disp, 2) + ' de ' + mipN(need, 2) + ' ' + u.un + ' · a liberação na O.S. aguarda a compra.');
     else inf.push('Estoque cobre: ' + mipN(need, 2) + ' ' + u.un + ' (' + mipN(disp, 2) + ' disponíveis).'); }

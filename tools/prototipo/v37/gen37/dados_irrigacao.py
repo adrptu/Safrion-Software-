@@ -72,11 +72,13 @@ def _gov(aps, ha):
     gov = 0.0; grp = {}
     for a in aps:
         cob = a['cob'] if a.get('cob') is not None else a['ha']
-        if cob <= 0 or a['vol'] <= 0: continue
+        parc = cob < ha - 1e-9
+        if cob <= 0 or (a['vol'] <= 0 and not parc): continue   # parcial com 0 m³ ainda conta a área coberta (PRE-REV U1)
         net = a['vol'] / (10 * cob) * a['ef'] / 100
-        if cob >= ha - 1e-9: gov += net; continue
-        g = grp.setdefault(a['os'], [0.0, 1e9]); g[0] += cob; g[1] = min(g[1], net)
-    return gov + sum(g[1] for g in grp.values() if g[0] >= ha - 1e-6)
+        if not parc: gov += net; continue
+        g = grp.setdefault(a['os'], [0.0, 1e9]); g[0] += cob
+        if a['vol'] > 0: g[1] = min(g[1], net)
+    return gov + sum(g[1] for g in grp.values() if g[1] < 1e9 and g[0] >= ha - 1e-6)
 
 
 def _sr():

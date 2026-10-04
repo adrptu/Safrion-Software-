@@ -313,7 +313,8 @@ function osc_liberar(c,id,agua,jan){ const o=osc_o(c,id);
 // linha de histórico, recalcula o total (dose × área) e libera no mesmo comando. Erro de saldo/lote desfaz tudo (cenMudar não grava).
 // rem = produtos que saem; add = [{p,dose,un,g}] produtos incluídos (do catálogo).
 // trava do "Salvar e liberar" do ajuste, a mesma regra da liberação: total pela regra única, 0 recusado, estoque do lote que a liberação reserva
-function osc_ajFalta(c,p,un,d,ar){ const l=cenLote(c,p), dp=l?cenDisp(l):0, need=cenQtd(d,ar);
+function osc_ajFalta(c,p,un,d,ar){ if(!isFinite(d)||!isFinite(ar)) return 'Dose ou área inválida: informe um número.';   /* não finito antes da conta (PRE-REV U3) */
+  const l=cenLote(c,p), dp=l?cenDisp(l):0, need=cenQtd(d,ar);
   if(!(need>0)) return 'Dose × área dá 0 '+un+': aumente a dose ou a área.';
   return need>dp+1e-9?('Estoque: '+cenNum(dp)+' '+un+' disponíveis'+(l?' no lote '+l.lote:'')+' para '+cenNum(need)+' '+un+'. Baixe a dose ou a área, ou troque o produto.'):''; }
 function osc_ajustar(c,id,area,doses,jan,rem,add,lib){ const o=osc_o(c,id); if(o.etapa!=='A liberar') throw new Error(id+' não está em A liberar.');
@@ -555,7 +556,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{};
     setTimeout(()=>{ const el=document.getElementById('aj_n'+ni); if(el) el.focus(); },60); };
   v.pan_ajqkey=(e)=>{ if(e&&e.key==='Enter'){ e.preventDefault(); v.pan_ajinc(); } };
   v.pan_ajadd=ajAdd.map((a,i)=>{ const d=g2num(a.dose); const e=ajE['+'+a.p]||'';
-    return {p:a.p,agf:agfH(a.p),hasAgf:!!agf(a.p),fid:'aj_n'+i,lab:'Dose de '+a.p+' ('+a.un+'/ha)',un:a.un+'/ha',v:a.dose,st:ajSt(e),err:e,hasErr:!!e,tot:((d>0&&ajA>0)?'na ordem '+nd(cenQtd(d,ajA))+' '+a.un+' · ':'')+(ajLib?'disponível '+nd(disp(a.p))+' '+a.un:''),
+    return {p:a.p,agf:agfH(a.p),hasAgf:!!agf(a.p),fid:'aj_n'+i,lab:'Dose de '+a.p+' ('+a.un+'/ha)',un:a.un+'/ha',v:a.dose,st:ajSt(e),err:e,hasErr:!!e,tot:((d>0&&ajA>0&&isFinite(d)&&isFinite(ajA))?'na ordem '+nd(cenQtd(d,ajA))+' '+a.un+' · ':'')+(ajLib?'disponível '+nd(disp(a.p))+' '+a.un:''),
       set:(ev)=>{ const cur=self.state.pa; const er=Object.assign({},cur.errs); delete er['+'+a.p]; const ad=cur.add.map(y=>y.p===a.p?Object.assign({},y,{dose:ev.target.value}):y); self.setState({pa:ajPa({add:ad,errs:er})}); },
       rm:()=>{ const cur=self.state.pa; self.setState({pa:ajPa({add:cur.add.filter(y=>y.p!==a.p)})}); }}; });
   v.pan_hasAjadd=ajAdd.length>0;
@@ -564,7 +565,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{};
   v.pan_ajins=(o.ins||[]).map((x,i)=>{ const s=(pa&&pa.doses&&pa.doses[x.p])||''; const d=g2num(s); const e=ajE[x.p]||''; const out=!!ajRem[x.p];
     const rz=(d>0&&x.dose>0)?d/x.dose:1; const warn=(!out&&!e&&(rz>1.5||rz<0.5))?('Dose '+nd(rz,1)+'× a da '+vcur+' ('+nd(x.dose)+' '+x.un+'/ha). Confira antes de salvar.'):'';
     return {p:x.p,agf:agfH(x.p),hasAgf:!!agf(x.p),fid:'aj_d'+i,lab:'Dose de '+x.p+' ('+x.un+'/ha)',un:x.un+'/ha',v:s,st:ajSt(e),err:e,hasErr:!!e&&!out,warn,hasWarn:!!warn,
-      tot:out?'sai da ordem':(((d>0&&ajA>0)?'na ordem '+nd(cenQtd(d,ajA))+' '+x.un+' · ':'')+(ajLib?'disponível '+nd(disp(x.p))+' '+x.un:'')),
+      tot:out?'sai da ordem':(((d>0&&ajA>0&&isFinite(d)&&isFinite(ajA))?'na ordem '+nd(cenQtd(d,ajA))+' '+x.un+' · ':'')+(ajLib?'disponível '+nd(disp(x.p))+' '+x.un:'')),
       out,keep:!out,pst:out?'text-decoration:line-through;color:#6B7A71;':'',tirT:out?'Desfazer':'Tirar',tirTt:out?'Manter '+x.p+' na ordem':'Tirar '+x.p+' da ordem',
       tir:()=>{ const cur=self.state.pa; const r=Object.assign({},cur.rem); if(r[x.p]) delete r[x.p]; else r[x.p]=true; const er=Object.assign({},cur.errs); delete er[x.p]; self.setState({pa:ajPa({rem:r,errs:er})}); },
       set:(ev)=>{ const cur=self.state.pa; const er=Object.assign({},cur.errs); delete er[x.p]; const ds=Object.assign({},cur.doses); ds[x.p]=ev.target.value;
@@ -572,8 +573,8 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{};
   v.pan_ajsave=()=>{ const cur=self.state.pa; const errs={}; const ar=g2num(cur.area); const ds={};
     if(isNaN(ar)||ar<=0) errs._area='Informe a área maior que 0 ha.'; else if(ar>(o.area||0)+1e-9) errs._area='Máximo '+nf(o.area)+' ha: é a área da ordem. Informe até '+nf(o.area)+' ha.';
     const rem=Object.keys(cur.rem||{}).filter(p=>cur.rem[p]); const add=[];
-    (o.ins||[]).forEach(x=>{ if(rem.indexOf(x.p)>=0) return; const d=g2num((cur.doses||{})[x.p]); if(isNaN(d)||d<=0) errs[x.p]='Informe a dose maior que 0 '+x.un+'/ha.'; else ds[x.p]=d; });
-    (cur.add||[]).forEach(a=>{ const d=g2num(a.dose); if(isNaN(d)||d<=0) errs['+'+a.p]='Informe a dose maior que 0 '+a.un+'/ha.'; else add.push({p:a.p,dose:d,un:a.un,g:a.g}); });
+    (o.ins||[]).forEach(x=>{ if(rem.indexOf(x.p)>=0) return; const d=g2num((cur.doses||{})[x.p]); if(!(d>0&&isFinite(d))) errs[x.p]='Informe a dose maior que 0 '+x.un+'/ha.'; else ds[x.p]=d; });
+    (cur.add||[]).forEach(a=>{ const d=g2num(a.dose); if(!(d>0&&isFinite(d))) errs['+'+a.p]='Informe a dose maior que 0 '+a.un+'/ha.'; else add.push({p:a.p,dose:d,un:a.un,g:a.g}); });
     if(prodN(cur.q)){ self.setState({pa:Object.assign({},cur,{errs,err:'',qerr:'Clique em Incluir para adicionar "'+cur.q.trim()+'" ou apague o texto.'})}); return; }
     if(ajLib&&!isNaN(ar)&&ar>0){ const ck=(p,un,d,k)=>{ if(errs[k]) return; const m=osc_ajFalta(cenC,p,un,d,ar); if(m) errs[k]=m; };   /* o mesmo do núcleo (PRE-REV Y6) */
       (o.ins||[]).forEach(x=>{ if(ds[x.p]!==undefined) ck(x.p,x.un,ds[x.p],x.p); }); add.forEach(a=>ck(a.p,a.un,a.dose,'+'+a.p)); }
