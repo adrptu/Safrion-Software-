@@ -1,0 +1,9 @@
+$ python3 quantidade_test.py
+OK    1 regra única: Python qtd = JS cenQtd em 7771 casos (774 com empate no 3º decimal); 0,5 × 62,25 = 31,13 (meio para cima)
+OK    2 SINT-C03: apontamento cheio de 62,25 ha e de 62,79 ha passa; custódia 0; consumido = total; saldo 0
+OK    3 apontamentos parciais (2 e 3 trechos, inclusive 0,05 ha) conservam o total: soma dos consumos = total, custódia 0, realizado = área
+OK    4 turno do app (cenFecharTurno), inteiro e em 2 trechos: consumo padrão pela mesma regra, custódia 0, saldo 0
+OK    5 sementes da Lagoa (OS-0506 e OS-0507): apontar o saldo restante consome exatamente a custódia (0 em cada item), sem erro
+OK    6 controle de custódia preservado: consumo acima do que está em custódia continua recusado (sem tolerância nova)
+RESULTADO: 6/6
+[exit 0]
