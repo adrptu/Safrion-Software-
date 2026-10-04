@@ -65,9 +65,11 @@ try:
     r = M("irrConferir(s,'OS-0423',null)")
     chk('17 conferir medição: hidrômetro prevalece e encerra sem novo crédito (T7 10,0 · faixa 6,4)', E("s.ordens['OS-0423'].etapa") == 'Encerradas' and E("irrN(irrDef(s,'T7'),1)") == '10,0' and 'faixa de 21,0 ha: 6,4 mm' in r, r)
     # sem leitura
-    r = M("irrIniciar(s,'OS-0602')"); r = M("irrTerminar(s,'OS-0602',86,null)")
+    # cobertura = área do pivô na fonte única (dados_lagoa_fonte → semente) e leitura = volume da lâmina aplicada (SINT-T01: sem área fixa)
+    r = M("irrIniciar(s,'OS-0602')"); r = M("irrTerminar(s,'OS-0602',s.setores.PV08.ha,null)")
+    vol = E("Math.round(s.ordens['OS-0602'].passadas.filter(p=>p.st==='Feita'||p.st==='Parcial').reduce((q,p)=>q+p.lam*p.cob*10,0))")
     chk('18 sem leitura do hidrômetro: Em conferência, nada creditado; informar leitura encerra e credita', E("s.ordens['OS-0602'].etapa") == 'Em conferência' and E("irrN(irrDef(s,'PV08'),1)") == '6,4'
-        and 'encerrada' in M("irrConferir(s,'OS-0602',6400)") and E("irrDef(s,'PV08')<6.4"), r)
+        and isinstance(vol, int) and vol > 0 and 'encerrada' in M(f"irrConferir(s,'OS-0602',{vol})") and E("irrDef(s,'PV08')<6.4"), [r, vol])
     r = M("irrLimites(s,'P2',{lmax:4.5,imin:18,efic:90})")
     chk('19 limites valem só para as próximas: OS-0422 liberada mantém 2 passadas', E("s.ordens['OS-0422'].passadas.length") == 2 and 'OS-0422 não muda' in r, r)
     r = M("irrSondaMarcar(s,'SO-P2','Suspeita','salto')")
@@ -131,3 +133,4 @@ finally:
         if c: c.close()
     finally: srv.terminate()
 print(f'\n{len(OK)} ok · {len(FAIL)} falhas', FAIL)
+sys.exit(1 if FAIL or not OK else 0)   # SINT-T01: falha não sai com 0

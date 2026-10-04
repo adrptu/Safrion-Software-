@@ -226,6 +226,7 @@ def gerar(destino=SAIDA):
     os.makedirs(destino, exist_ok=True)
     for n, b in arq.items():
         with open(os.path.join(destino, n), 'wb') as f: f.write(b)
+    assert set(arq) == ESPERADOS, sorted(set(arq) ^ ESPERADOS)
     car = _carimbo({n: hashlib.sha256(b).hexdigest() for n, b in arq.items()})
     with open(os.path.join(destino, '_carimbo.json'), 'w', encoding='utf-8') as f: json.dump(car, f, ensure_ascii=False, indent=1, sort_keys=True)
     return car
@@ -237,14 +238,20 @@ def _entrada():
     h.update(_literais_safra()[2].encode()); return h.hexdigest()
 def _carimbo(arqs): return dict(versao=VERSAO, rotulo=ROTULO, semente=K.SEMENTE, entrada=_entrada(), arquivos=arqs)
 
+# conjunto exato de saídas (specs/esquema_lagoa.md): carimbo parcial, com arquivo a mais ou fora do formato não vale (SINT-G01)
+ESPERADOS = frozenset(['lagoa_s2_resumo.json', 'lagoa_s2.json', 'lagoa_pivos.geojson', 'lagoa_cadastro.json', 'lagoa_rgb.json', 'lagoa_analise.json',
+                       'cenas.json'] + [f'lagoa_{d.replace("-", "")}.png' for d, _, _ in CENAS] + [f'lagoa_rgb_{d.replace("-", "")}.png' for d, _, _ in CENAS])
+
 def em_dia(destino=SAIDA):
     try: car = json.load(open(os.path.join(destino, '_carimbo.json'), encoding='utf-8'))
     except (OSError, ValueError): return False
-    if car.get('versao') != VERSAO or car.get('entrada') != _entrada(): return False
-    for n, h in car.get('arquivos', {}).items():
+    if not isinstance(car, dict) or car.get('versao') != VERSAO or car.get('entrada') != _entrada(): return False
+    arqs = car.get('arquivos')
+    if not isinstance(arqs, dict) or set(arqs) != ESPERADOS: return False
+    for n, h in arqs.items():
         p = os.path.join(destino, n)
-        if not os.path.exists(p) or hashlib.sha256(open(p, 'rb').read()).hexdigest() != h: return False
-    return bool(car.get('arquivos'))
+        if not isinstance(h, str) or not os.path.isfile(p) or hashlib.sha256(open(p, 'rb').read()).hexdigest() != h: return False
+    return True
 
 def garantir(destino=SAIDA):
     if not em_dia(destino): gerar(destino)

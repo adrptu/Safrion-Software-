@@ -192,7 +192,7 @@ def _gatilho(g):  # gatilho da atividade do plano no formato das ordens do regis
 def _nova_ordem_dados():
     safs=[s for s in D2.SAFRAS if not s['ro']]
     import cenario
-    cult={s['id']:[dict(id=c['id'],t=f"{c['local']} · {c['cultura']} {c['variedade']} · {c['area']:g} ha",local=c['local'],area=c['area'],plano=c['plano'],var=c['variedade'])
+    cult={s['id']:[dict(id=c['id'],t=f"{c['local']} · {c['cultura']} {c['variedade']} · "+format(c['area'],'g').replace('.',',')+" ha",local=c['local'],area=c['area'],plano=c['plano'],var=c['variedade'])
                    for c in D2.CULTIVOS.get(s['id'],[])] for s in safs}
     # atividade do plano com seus insumos (grupo, produto, dose/ha): a ordem nova leva dose × área, como as ordens do registro
     planos={p['id']:dict(nome=p['nome'],versao=p['versao'],atv=[dict(id=a['id'],nome=a['nome'],op=a['op'],gat=_gatilho(a.get('g') or {}),
@@ -320,7 +320,7 @@ function osc_ajustar(c,id,area,doses,jan,rem,add,lib){ const o=osc_o(c,id); if(o
     if(Math.abs(d-x.dose)>1e-9){ ch.push(x.p+' '+cenNum(x.dose)+' → '+cenNum(d)+' '+x.un+'/ha'); x.dose=d; } });
   add.forEach(a=>{ o.ins.push({g:a.g||'',p:a.p,dose:a.dose,un:a.un,tot:0,emb:(typeof OSD!=='undefined'&&OSD.nova&&(OSD.nova.emb||{})[a.p])||''}); ch.push('incluído '+a.p+' '+cenNum(a.dose)+' '+a.un+'/ha'); });
   if(!ch.length){ if(!lib) throw new Error('Nada foi ajustado.'); const r=osc_liberar(c,id,false,jan); return {msg:'Nada foi ajustado; '+r.msg}; }
-  o.area=area; o.saldo=Math.max(0,area-(o.realizado||0)); o.ins.forEach(x=>{ x.tot=Math.round(x.dose*area*100)/100; });
+  o.area=area; o.saldo=Math.max(0,area-(o.realizado||0)); o.ins.forEach(x=>{ x.tot=Number((x.dose*area).toFixed(2)); });
   const s=String(o.versao||''); const re=/\bv(\d+)\b/g; let m=null, k; while((k=re.exec(s))) m=k;
   const vn=m?'v'+(Number(m[1])+1):'v2'; o.versao=m?s.slice(0,m.index)+vn+s.slice(m.index+m[0].length):(s?s+' · ':'')+vn;
   const hr=cenAgora(); o.osc.aj=(o.osc.aj||[]).concat([{v:vn,at:hr,t:vn+' ajustada por Ana (agrônoma) às '+hr+(lib?' ao liberar':'')+': '+ch.join('; ')}]);
@@ -348,7 +348,7 @@ function osc_iniciar(c,id){ const o=osc_o(c,id); if(o.etapa!=='Liberadas') throw
 function osc_apontar(c,id,d,ha){ const o=osc_o(c,id); if(o.etapa!=='Em execução') throw new Error(id+' não está em execução.');
   if(!(ha>0)) throw new Error('Informe a área feita (maior que 0 ha).'); if(ha>o.saldo+1e-9) throw new Error('Máximo '+cenNum(o.saldo)+' ha: é o saldo da ordem.');
   const pap=osApPend(o); if(ha>o.saldo-pap+1e-9) throw new Error('Máximo '+cenNum(o.saldo-pap)+' ha: '+cenNum(pap)+' ha do app aguardam sinal.');
-  const cons={}; (o.ins||[]).forEach(x=>{ cons[x.p]=x.dose*ha; }); const r=o.req&&c.reqs[o.req];
+  const cons={}; (o.ins||[]).forEach(x=>{ cons[x.p]=Number((x.dose*ha).toFixed(2)); /* mesma precisão e arredondamento do total do insumo, round(dose×área, 2) do Python (SINT-C01) */ }); const r=o.req&&c.reqs[o.req];
   if(r) for(const it of r.itens){ const q=cons[it.prod]||0; if(q>it.custodia+1e-9) throw new Error('Consumo de '+it.prod+' ('+cenNum(q)+' '+it.un+') acima do que está em custódia ('+cenNum(it.custodia)+' '+it.un+'). Confira a entrega no Estoque.'); }
   if(r) r.itens.forEach(it=>{ const q=cons[it.prod]||0; it.consumido+=q; it.custodia-=q; });
   const feitos=(o.ap||[]).filter(a=>a.st!=='Previsto'); const prev=(o.ap||[]).filter(a=>a.st==='Previsto').slice(1).map((x,i)=>Object.assign({},x,{dia:feitos.length+2+i}));
@@ -709,7 +709,7 @@ function EXTRAVALS(self,v){
       const a=pl.atv.find(x=>x.id===cur.atv); const s=OSD.nova.safs.find(x=>x.id===cur.saf);
       const num=440+all.filter(x=>x.novo).length; const id='OS-0'+num;
       // insumos da atividade do plano: dose × área do cultivo (a semente leva a variedade do cultivo); nada é reservado antes de liberar
-      const ins=(a.ins||[]).map(x=>({g:x.g,p:x.p.replace(/ · (variedade|híbrido) do cultivo$/,' '+c.var),dose:x.dose,un:x.un,tot:Math.round(x.dose*c.area*100)/100,sit:'Reserva ao liberar'}));
+      const ins=(a.ins||[]).map(x=>({g:x.g,p:x.p.replace(/ · (variedade|híbrido) do cultivo$/,' '+c.var),dose:x.dose,un:x.un,tot:Number((x.dose*c.area).toFixed(2)),sit:'Reserva ao liberar'}));
       const cj=(OSD.nova.conj||{})[a.op]||null;
       const no={id,novo:true,keys:[cur.cult+'|'+cur.atv],tipo:(a.op===a.nome?a.nome:a.op+' · '+a.nome),talhao:c.local,area:c.area,etapa:'A liberar',selos:[],
         faz:'Santa Rita',saf:s.mf,lam:'',obs:'',agua:false,ins,semins:'',bloq:null,aviso:'',dono:'Ana (agrônoma)',prazo:'liberar',

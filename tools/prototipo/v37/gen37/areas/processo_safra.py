@@ -36,7 +36,7 @@ def build():
                dict(k='area',l='Área',t='num',a='r',u='ha',agg='sum',d=2,dmin=0),dict(k='dt_plantio',l='Plantio',t='num'),dict(k='meta',l='Meta',a='r'),
                dict(k='plano',l='Plano e ajustes',w=170)]
     CULT_FIELDS=[dict(k='talhao',l='Talhão',t='sel',opts=list(TALH),req=True,newOnly=True,**{'def':'T1'},
-                      help='Áreas: '+' · '.join(f'{t} {ha} ha' for t,ha in TALH.items())),
+                      help='Áreas: '+' · '.join(f'{t} '+format(ha,'g').replace('.',',')+' ha' for t,ha in TALH.items())),
                  dict(k='local',l='Parcela',t='txt',help='Em branco: o sistema usa o nome do talhão ou a próxima parcela (ex.: T3-A).'),
                  dict(k='faz',l='Fazenda',ro=True,**{'def':'Santa Rita'}),
                  dict(k='cult',l='Cultura',t='sel',opts=['Soja','Milho','Feijão','Café','Mamão Formosa'],req=True,**{'def':'Soja'}),

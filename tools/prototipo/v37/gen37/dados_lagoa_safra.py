@@ -78,10 +78,38 @@ EMB = {'Calcário dolomítico filler': 'granel', 'Gesso agrícola': 'granel', 'M
        'Sulfato de potássio': 'saco 25 kg', 'Nitrato de amônio': 'saco 25 kg', 'Ácido bórico': 'saco 25 kg', 'Abamectina 18 EC': 'galão 5 L',
        'Tebuconazol 200 EC': 'galão 5 L', 'Acetamiprido 200 SP': 'pacote 1 kg'}
 
+# ---------- progresso das O.S. derivado da área do pivô (SINT-C02, SINT-REV-20261003-2300) ----------
+# Fonte única: PIVOS (mesma precisão do mapa) e as doses dos PLANOS. Frações do cenário, não valores de área: com a área real
+# reproduzem os números de antes; com a sintética continuam coerentes (realizado ≤ área, soma dos apontamentos = realizado,
+# saldo = área − realizado, insumo = dose × área). Nenhum literal de área por pivô.
+def _r(x): return round(x + 0.0, 2)
+def _br(x):
+    x = _r(x); t = f'{x:,.2f}'.replace(',', 'X').replace('.', ',').replace('X', '.')
+    return t.rstrip('0').rstrip(',') if ',' in t else t
+def _dose(plano, atv, prod):
+    return next(x['dose'] for p in PLANOS if p['id'] == plano for a in p['atividades'] if a['id'] == atv for x in a['prods'] if x['prod'] == prod)
+_A = PIVOS
+_COL19 = int(_A[19] / 3)                                   # OS-0505: colheita em 3 dias, dois apontados
+_AP0505 = [_COL19, _COL19, _r(_A[19] - 2 * _COL19)]
+_T04 = int(_A[4] / 2)                                      # OS-0506: fertirrigação em 2 turnos, o 1º apontado
+_AP0506 = [_T04, _r(_A[4] - _T04)]
+_FR0507 = 5 / 14                                           # OS-0507: fração aplicada antes da bomba parar
+_R0507 = _r(_A[5] * _FR0507)
+def _metades(a): b = int(a / 2); return [_r(a - b), b]     # dois dias: o 2º em hectares inteiros, o 1º com o resto
+_AP0508, _AP0509, _AP0510 = _metades(_A[23]), _metades(_A[12]), _metades(_A[6])
+_CALC = _r(_dose('MAMAO-IMP', 'i1', 'Calcário dolomítico filler') * _A[12])     # OS-0502 · reserva ao liberar
+_MUDA = int(round(_dose('MAMAO-IMP', 'i4', 'Muda de mamão Formosa') * _A[11]))    # OS-0503 · REQ-021 reservada
+_SFS = _r(_dose('MAMAO-IMP', 'i4', 'Superfosfato simples') * _A[11])
+_ABA = _r(_dose('MAMAO-PROD', 'q2', 'Abamectina 18 EC') * _A[6])                  # OS-0504 · REQ-022
+_TEB = _r(_dose('MAMAO-PROD', 'q4', 'Tebuconazol 200 EC') * _A[23])               # OS-0508 · REQ-025 consumida
+# estoque apto cobre as reservas abertas (REQ-021 sem entrega); no modo real o saldo literal já cobre e fica igual
+for _it, _q in (('Muda de mamão Formosa', _MUDA), ('Superfosfato simples', _SFS)):
+    ESTOQUE[_it] = max(ESTOQUE[_it], int(-(-_q * 1.03 // 1)))   # folga de 3 %
+
 # ---------- O.S. da Lagoa Grande (todas as fases) ----------
 def _o(i, tipo, n, etapa, selo, real, janela, resp, chave, extra=None):
     ha = PIVOS[n]; area = ha
-    d = dict(id=i, tipo=tipo, talhao=nome(n), area=area, etapa=etapa, selo=selo, realizado=real, saldo=max(0, area - real), janela=janela, resp=resp,
+    d = dict(id=i, tipo=tipo, talhao=nome(n), area=area, etapa=etapa, selo=selo, realizado=real, saldo=_r(max(0, area - real)), janela=janela, resp=resp,
              detalhe=None, faz=FAZ, saf='2026/27', chave=chave)
     if extra: d['selos_extra'] = extra
     return d
@@ -90,42 +118,42 @@ ORDENS = [
  _o('OS-0502', 'Calagem', 12, 'A liberar', None, 0, '25–27/09 (DAP −60)', 'Lúcia', 'lg12|i1'),
  _o('OS-0503', 'Plantio de mudas · Tainung 1', 11, 'Liberadas', None, 0, '06–08/10', 'Renato', 'lg11|i4'),
  _o('OS-0504', 'Controle de ácaro e cochonilha', 6, 'Liberadas', None, 0, '24–25/09', 'Wesley', 'lg06|q2'),
- _o('OS-0505', 'Colheita · semana 39', 19, 'Em execução', 'Parcial · dia 2 de 3', 28, '21–24/09', 'Sérgio', None),
- _o('OS-0506', 'Fertirrigação NK', 4, 'Em execução', 'Parcial · turno 1 de 2', 34, '22–24/09', 'Joaquim', None),
- _o('OS-0507', 'Fertirrigação de arranque', 5, 'Em execução', 'Impedida · bomba em manutenção', 20, '21–23/09', 'Joaquim', 'lg05|i5'),
- _o('OS-0508', 'Fungicida para antracnose', 23, 'Em conferência', None, 60, '19–20/09', 'Wesley', None),
- _o('OS-0509', 'Erradicação da lavoura velha', 12, 'Encerradas', None, 55, '12–13/09', 'Wesley', None),
- _o('OS-0510', 'Colheita · semana 38', 6, 'Encerradas', None, 86, '16–18/09', 'Sérgio', None),
+ _o('OS-0505', 'Colheita · semana 39', 19, 'Em execução', 'Parcial · dia 2 de 3', _r(sum(_AP0505[:2])), '21–24/09', 'Sérgio', None),
+ _o('OS-0506', 'Fertirrigação NK', 4, 'Em execução', 'Parcial · turno 1 de 2', _AP0506[0], '22–24/09', 'Joaquim', None),
+ _o('OS-0507', 'Fertirrigação de arranque', 5, 'Em execução', 'Impedida · bomba em manutenção', _R0507, '21–23/09', 'Joaquim', 'lg05|i5'),
+ _o('OS-0508', 'Fungicida para antracnose', 23, 'Em conferência', None, _A[23], '19–20/09', 'Wesley', None),
+ _o('OS-0509', 'Erradicação da lavoura velha', 12, 'Encerradas', None, _A[12], '12–13/09', 'Wesley', None),
+ _o('OS-0510', 'Colheita · semana 38', 6, 'Encerradas', None, _A[6], '16–18/09', 'Sérgio', None),
  _o('OS-0511', 'Sexagem e desbaste', 15, 'A liberar', None, 0, '12–14/10 (DAP +90)', 'Sérgio', 'lg15|i8'),
 ]
 for _x in ORDENS:
     if not _x['chave']: del _x['chave']
 VERSAO = {'OS-0501': 'v1', 'OS-0502': 'v1', 'OS-0503': 'v1', 'OS-0504': 'v1', 'OS-0505': 'v1', 'OS-0506': 'v1',
           'OS-0507': 'v1', 'OS-0508': 'v1', 'OS-0509': 'v1', 'OS-0510': 'v1', 'OS-0511': 'v1'}
-AP = {'OS-0505': [('21/09', 1, 14, 'Conferido'), ('22/09', 2, 14, 'Provisório'), ('24/09', 3, 14, 'Previsto')],
-      'OS-0506': [('22/09', 1, 34, 'Provisório'), ('24/09', 2, 34, 'Previsto')],
-      'OS-0507': [('21/09', 1, 20, 'Conferido')],
-      'OS-0508': [('19/09', 1, 30, 'Conferido'), ('20/09', 2, 30, 'Conferido')],
-      'OS-0509': [('12/09', 1, 28, 'Conferido'), ('13/09', 2, 27, 'Conferido')],
-      'OS-0510': [('16/09', 1, 43, 'Conferido'), ('18/09', 2, 43, 'Conferido')]}
+AP = {'OS-0505': [('21/09', 1, _AP0505[0], 'Conferido'), ('22/09', 2, _AP0505[1], 'Provisório'), ('24/09', 3, _AP0505[2], 'Previsto')],
+      'OS-0506': [('22/09', 1, _AP0506[0], 'Provisório'), ('24/09', 2, _AP0506[1], 'Previsto')],
+      'OS-0507': [('21/09', 1, _R0507, 'Conferido')],
+      'OS-0508': [('19/09', 1, _AP0508[0], 'Conferido'), ('20/09', 2, _AP0508[1], 'Conferido')],
+      'OS-0509': [('12/09', 1, _AP0509[0], 'Conferido'), ('13/09', 2, _AP0509[1], 'Conferido')],
+      'OS-0510': [('16/09', 1, _AP0510[0], 'Conferido'), ('18/09', 2, _AP0510[1], 'Conferido')]}
 COND = {'OS-0501': 'Liberação · Ana (agrônoma), que pode ajustar antes. Dessecação a 20 dias do plantio das mudas (DAP −20).',
-        'OS-0502': 'Ana (agrônoma) libera e reserva 110.000 kg de calcário; o estoque tem 60.000 kg e o pedido de 50.000 kg chega em 30/09.',
-        'OS-0503': 'Liberada · REQ-021 reservou 44.400 mudas e 9.600 kg de superfosfato simples. Próximo passo: Edson entrega no almoxarifado e Renato confirma no app.',
+        'OS-0502': f"Ana (agrônoma) libera e reserva {_br(_CALC)} kg de calcário; o estoque tem {_br(ESTOQUE['Calcário dolomítico filler'])} kg e o pedido de {_br(RECEB['Calcário dolomítico filler'])} kg chega em 30/09.",
+        'OS-0503': f'Liberada · REQ-021 reservou {_br(_MUDA)} mudas e {_br(_SFS)} kg de superfosfato simples. Próximo passo: Edson entrega no almoxarifado e Renato confirma no app.',
         'OS-0504': 'Abamectina entregue a Wesley e confirmada no app. Próximo passo: iniciar na janela 24–25/09.',
-        'OS-0505': 'Dia 2 da colheita em conferência · 28 de 42 ha colhidos; 14 ha no dia 3 (24/09).',
-        'OS-0506': 'Turno 1 com 34 ha fertirrigados (provisório); turno 2 previsto para 24/09.',
-        'OS-0507': 'Bomba do Pivô 5 em manutenção (OM-0251): 20 de 56 ha fertirrigados; saldo parado até a troca do selo mecânico.',
-        'OS-0508': 'Apontamentos conferidos (60 ha) e nada em custódia. Próximo passo: conferir e encerrar.',
+        'OS-0505': f'Dia 2 da colheita em conferência · {_br(sum(_AP0505[:2]))} de {_br(_A[19])} ha colhidos; {_br(_AP0505[2])} ha no dia 3 (24/09).',
+        'OS-0506': f'Turno 1 com {_br(_AP0506[0])} ha fertirrigados (provisório); turno 2 previsto para 24/09.',
+        'OS-0507': f'Bomba do Pivô 5 em manutenção (OM-0251): {_br(_R0507)} de {_br(_A[5])} ha fertirrigados; saldo parado até a troca do selo mecânico.',
+        'OS-0508': f'Apontamentos conferidos ({_br(_A[23])} ha) e nada em custódia. Próximo passo: conferir e encerrar.',
         'OS-0509': 'Nenhuma · ordem encerrada, somente consulta.',
         'OS-0510': 'Nenhuma · ordem encerrada, somente consulta.',
         'OS-0511': 'Operação manual sem insumos. Próximo passo: Ana (agrônoma) libera para execução.'}
-ORIG = {'OS-0501': ['Safra Mamão 2026/27 · Pivô 13 · plano MAMAO-IMP', 'Dessecação pré-plantio · 30 ha'],
+ORIG = {'OS-0501': ['Safra Mamão 2026/27 · Pivô 13 · plano MAMAO-IMP', f'Dessecação pré-plantio · {_br(_A[13])} ha'],
         'OS-0502': ['Safra Mamão 2026/27 · Pivô 12 (renovação) · plano MAMAO-IMP', 'Calagem pela análise de solo · 2 t/ha'],
         'OS-0503': ['Safra Mamão 2026/27 · Pivô 11 · plano MAMAO-IMP', 'Requisição REQ-021 · mudas e superfosfato simples'],
-        'OS-0504': ['Safra Mamão 2026/27 · Pivô 6 · plano MAMAO-PROD', 'Requisição REQ-022 · Abamectina 18 EC, 43 L'],
+        'OS-0504': ['Safra Mamão 2026/27 · Pivô 6 · plano MAMAO-PROD', f'Requisição REQ-022 · Abamectina 18 EC, {_br(_ABA)} L'],
         'OS-0505': ['Safra Mamão 2026/27 · Pivô 19 · colheita semanal'], 'OS-0506': ['Safra Mamão 2026/27 · Pivô 4 · plano MAMAO-PROD', 'Requisição REQ-023'],
         'OS-0507': ['Safra Mamão 2026/27 · Pivô 5 · plano MAMAO-IMP', 'Requisição REQ-024'], 'OS-0508': ['Safra Mamão 2026/27 · Pivô 23 · plano MAMAO-PROD', 'Requisição REQ-025'],
-        'OS-0509': ['Renovação do Pivô 12 · lavoura com 3 anos', 'Dessecação para erradicação · 55 ha'], 'OS-0510': ['Safra Mamão 2026/27 · Pivô 6 · colheita semanal'],
+        'OS-0509': ['Renovação do Pivô 12 · lavoura com 3 anos', f'Dessecação para erradicação · {_br(_A[12])} ha'], 'OS-0510': ['Safra Mamão 2026/27 · Pivô 6 · colheita semanal'],
         'OS-0511': ['Safra Mamão 2026/27 · Pivô 15 · plano MAMAO-IMP', 'Sexagem: mantém plantas hermafroditas, 1 por cova']}
 ATV = {'OS-0501': ('Pulverização', 'Dessecação pré-plantio', 'DAP −20 · 30/09', 'Mamão Formosa · implantação irrigada v1', 'Pulverização'),
        'OS-0502': ('Adubação a lanço', 'Calagem', 'DAP −60 · 25/09', 'Mamão Formosa · implantação irrigada v1', 'Adubação a lanço'),
@@ -143,8 +171,8 @@ INS = {'OS-0501': [('Herbicidas', 'Glifosato 480', 3.0, 'L', None, 'Reserva ao l
        'OS-0503': [('Mudas', 'Muda de mamão Formosa', 1850.0, 'un', None, 'Reservado · REQ-021'), ('Fertilizantes', 'Superfosfato simples', 400.0, 'kg', None, 'Reservado · REQ-021')],
        'OS-0504': [('Inseticidas', 'Abamectina 18 EC', 0.5, 'L', None, 'Entregue a Wesley · confirmado no app')],
        'OS-0506': [('Fertilizantes', 'Sulfato de potássio', 45.0, 'kg', None, 'Entregue · metade em custódia'), ('Fertilizantes', 'Nitrato de amônio', 20.0, 'kg', None, 'Entregue · metade em custódia')],
-       'OS-0507': [('Fertilizantes', 'Nitrato de amônio', 25.0, 'kg', None, 'Entregue · 20 ha aplicados'), ('Fertilizantes', 'Ácido bórico', 1.0, 'kg', None, 'Entregue · 20 ha aplicados')],
-       'OS-0508': [('Fungicidas', 'Tebuconazol 200 EC', 1.0, 'L', None, 'Consumido 60 L')],
+       'OS-0507': [('Fertilizantes', 'Nitrato de amônio', 25.0, 'kg', None, f'Entregue · {_br(_R0507)} ha aplicados'), ('Fertilizantes', 'Ácido bórico', 1.0, 'kg', None, f'Entregue · {_br(_R0507)} ha aplicados')],
+       'OS-0508': [('Fungicidas', 'Tebuconazol 200 EC', 1.0, 'L', None, f'Consumido {_br(_TEB)} L')],
        'OS-0509': [('Herbicidas', 'Glifosato 480', 3.0, 'L', None, 'Consumo conferido')]}
 SEM_INS = {'OS-0505': 'Colheita: sem insumos do almoxarifado; caixas e carreta da equipe.', 'OS-0510': 'Colheita: sem insumos do almoxarifado; caixas e carreta da equipe.',
            'OS-0511': 'Operação manual: sem insumos.'}
@@ -152,7 +180,7 @@ BLOQ = {'OS-0507': dict(acao='apontar', t='Apontamento parado: bomba do Pivô 5 
 DONO = {'OS-0501': ('Ana (agrônoma)', 'antes de 30/09'), 'OS-0502': ('Suprimentos', 'calcário chega em 30/09'), 'OS-0503': ('Rui (almoxarife)', 'entregar até 05/10'),
         'OS-0505': ('Lúcia', 'conferir o dia 2'), 'OS-0507': ('Manutenção', 'bomba até 25/09'), 'OS-0508': ('Lúcia', 'conferir e encerrar hoje')}
 # requisições no cenário compartilhado: (requisição, fração entregue, fração consumida)
-REQS = {'OS-0503': ('REQ-021', 0.0, 0.0), 'OS-0504': ('REQ-022', 1.0, 0.0), 'OS-0506': ('REQ-023', 1.0, 0.5), 'OS-0507': ('REQ-024', 1.0, 20 / 56), 'OS-0508': ('REQ-025', 1.0, 1.0)}
+REQS = {'OS-0503': ('REQ-021', 0.0, 0.0), 'OS-0504': ('REQ-022', 1.0, 0.0), 'OS-0506': ('REQ-023', 1.0, _AP0506[0] / _A[4]), 'OS-0507': ('REQ-024', 1.0, _FR0507), 'OS-0508': ('REQ-025', 1.0, 1.0)}
 # no mapa: talhão (id do mapa), complemento do realizado, prazo e próxima ação
 ORD_MAPA = [('OS-0501', ['PV13'], '', 'até 3 dias', ('Ajustar antes de liberar', 'OS.dc.html#OS-0501', 'lib', 'ag')), ('OS-0502', ['PV12'], '', 'vence hoje', ('Ajustar antes de liberar', 'OS.dc.html#OS-0502', 'lib', 'ag')),
             ('OS-0503', ['PV11'], '', 'no prazo', None), ('OS-0504', ['PV06'], '', 'até 3 dias', None), ('OS-0505', ['PV19'], '', 'até 3 dias', None),

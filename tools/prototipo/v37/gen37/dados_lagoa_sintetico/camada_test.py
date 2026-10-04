@@ -55,7 +55,7 @@ chk('4 IDs PV01–PV24 sem PV16, mesma ordem e mesmos valores no KML, resumo, pi
     [p[0] for p in K.LG_PIVOS] == ids and R['pivos'] == S2['pivos'] and [(p['id'], p['ha'], p['lon'], p['lat'], p['r_m']) for p in R['pivos']] == lp
     and [f['properties']['id'] for f in GJ['features']] == ids and [(p['id'], p['area_ha'], p['centro'][0], p['centro'][1], p['raio_m']) for p in CAD['pivos']] == lp
     and all(p['rot'] == 'P' + str(int(p['id'][2:])) and p['nome'] == 'Pivô ' + str(int(p['id'][2:])) for p in R['pivos'])
-    and F.PIVOS_HA == {int(p[0][2:]): int(round(p[2])) for p in K.LG_PIVOS}, [p[0] for p in K.LG_PIVOS][:5])
+    and F.PIVOS_HA == {int(p[0][2:]): round(p[2], 2) for p in K.LG_PIVOS}, [p[0] for p in K.LG_PIVOS][:5])   # SINT-C01: sem arredondar a inteiro
 
 # 5 · áreas: raio pela área, círculo do GeoJSON pela área (excesso esférico, como talgeo.js), sem sobreposição, perímetro do imóvel
 def area_anel(r):
@@ -134,6 +134,69 @@ finally:
 chk('10 sem a camada: o import falha com "Sem dados da Lagoa Grande … gere dados_lagoa_sintetico/"',
     sem.returncode != 0 and 'Sem dados da Lagoa Grande' in sem.stderr and 'dados_lagoa_sintetico' in sem.stderr, sem.stderr[-300:])
 chk('11 saída adulterada: em_dia() acusa e garantir() refaz com os mesmos bytes', antes is False and depois, [antes, depois])
+
+# 12 · SINT-G01: carimbo parcial, com arquivo a mais ou fora do formato não vale; garantir() refaz o conjunto inteiro
+tmp = tempfile.mkdtemp()
+try:
+    car0 = G.gerar(tmp); cp = os.path.join(tmp, '_carimbo.json')
+    def carimbo(c): json.dump(c, open(cp, 'w', encoding='utf-8'))
+    um = next(iter(sorted(car0['arquivos'])))
+    for n in car0['arquivos']:
+        if n != um: os.remove(os.path.join(tmp, n))
+    carimbo(dict(car0, arquivos={um: car0['arquivos'][um]})); parcial = G.em_dia(tmp)
+    G.garantir(tmp); refeito = G.em_dia(tmp) and sorted(os.listdir(tmp)) == sorted(list(car0['arquivos']) + ['_carimbo.json'])
+    open(os.path.join(tmp, 'extra.json'), 'w').write('{}')
+    carimbo(dict(car0, arquivos=dict(car0['arquivos'], **{'extra.json': sha(os.path.join(tmp, 'extra.json'))}))); a_mais = G.em_dia(tmp)
+    carimbo(dict(car0, arquivos=list(car0['arquivos']))); formato = G.em_dia(tmp)
+    carimbo(car0); valido = G.em_dia(tmp)
+finally:
+    shutil.rmtree(tmp, ignore_errors=True)
+chk('12 SINT-G01: carimbo com 1 arquivo, com arquivo a mais ou com "arquivos" fora do formato → em_dia False; garantir() refaz as 11 saídas; carimbo íntegro → True',
+    parcial is False and refeito and a_mais is False and formato is False and valido is True, [parcial, refeito, a_mais, formato, valido])
+
+# 13 · SINT-C01: a mesma área (2 casas) no mapa, no cadastro, na safra, nos cultivos e nas O.S.
+import dados_lagoa_safra as DLS
+mapa = {int(p['id'][2:]): p['ha'] for p in R['pivos']}
+cad = {int(p['id'][2:]): p['area_ha'] for p in CAD['pivos']}
+cult = {int(c['local'].split()[-1]): c['area'] for c in DLS.CULTIVOS}
+tal = {int(t.split()[-1]): ha for t, ha in DLS.TALHOES.items()}
+ords = {o['id']: (o['area'], mapa[int(o['talhao'].split()[-1])]) for o in DLS.ORDENS}
+chk('13 SINT-C01: PIVOS_HA = área do mapa = cadastro = TALHOES = CULTIVOS = área de cada O.S. (igualdade exata, sem tolerância); 22+ áreas com decimais',
+    F.PIVOS_HA == mapa == cad == tal == cult and all(a == m for a, m in ords.values()) and sum(1 for v in mapa.values() if v != int(v)) >= 20,
+    [k for k in mapa if not (F.PIVOS_HA.get(k) == mapa[k] == cad.get(k) == tal.get(k))][:5])
+
+# 14 · SINT-C02: sementes de ordens/apontamentos/saldos/frações/textos/insumos coerentes com a área, também com áreas trocadas
+def invariantes(L):
+    e = []; br = L._br
+    for o in L.ORDENS:
+        ap = [a for a in L.AP.get(o['id'], []) if a[3] != 'Previsto']
+        if not (0 <= o['realizado'] <= o['area'] + 1e-9): e.append((o['id'], 'realizado > área'))
+        if abs(o['saldo'] - round(max(0, o['area'] - o['realizado']), 2)) > 1e-9: e.append((o['id'], 'saldo'))
+        if o['id'] in L.AP and abs(sum(a[2] for a in ap) - o['realizado']) > 1e-6: e.append((o['id'], 'apontamentos ≠ realizado'))
+        if o['id'] in L.AP and abs(sum(a[2] for a in L.AP[o['id']]) - o['area']) > 1e-6 and o['etapa'] != 'Em execução' or (o['etapa'] == 'Em execução' and o['id'] != 'OS-0507' and abs(sum(a[2] for a in L.AP[o['id']]) - o['area']) > 1e-6):
+            e.append((o['id'], 'apontamentos previstos ≠ área'))
+        if o['etapa'] in ('Encerradas', 'Em conferência') and (o['realizado'] != o['area'] or o['saldo'] != 0): e.append((o['id'], 'fechada com saldo'))
+    for oid in ('OS-0506', 'OS-0507'):   # fração consumida da requisição = realizado/área da O.S.
+        ox = next(o for o in L.ORDENS if o['id'] == oid)
+        if abs(L.REQS[oid][2] - ox['realizado'] / ox['area']) > 0.005: e.append((oid, 'fração consumida ≠ realizado/área'))
+    o7 = next(o for o in L.ORDENS if o['id'] == 'OS-0507')
+    if br(o7['realizado']) + ' de ' + br(o7['area']) + ' ha' not in L.COND['OS-0507']: e.append(('OS-0507', 'texto'))
+    a = L.PIVOS; d = L._dose
+    if L._MUDA != int(round(d('MAMAO-IMP', 'i4', 'Muda de mamão Formosa') * a[11])) or L.ESTOQUE['Muda de mamão Formosa'] < L._MUDA or L.ESTOQUE['Superfosfato simples'] < L._SFS:
+        e.append(('OS-0503', 'reserva maior que o estoque apto'))
+    if br(L._MUDA) + ' mudas' not in L.COND['OS-0503'] or br(a[13]) + ' ha' not in L.ORIG['OS-0501'][1] or br(a[12]) + ' ha' not in L.ORIG['OS-0509'][1]: e.append(('textos', 'área'))
+    if not (L.ESTOQUE['Calcário dolomítico filler'] < L._CALC <= L.ESTOQUE['Calcário dolomítico filler'] + L.RECEB['Calcário dolomítico filler']): e.append(('OS-0502', 'cenário falta+pedido'))
+    return e
+def com_areas(fator):
+    import importlib.util, types
+    salvo = sys.modules['dados_lagoa_fonte']
+    sys.modules['dados_lagoa_fonte'] = types.SimpleNamespace(PIVOS_HA={n: round(v * fator, 2) for n, v in F.PIVOS_HA.items()})
+    try:
+        sp = importlib.util.spec_from_file_location(f'dls_{fator}', os.path.join(GEN, 'dados_lagoa_safra.py')); m = importlib.util.module_from_spec(sp); sp.loader.exec_module(m); return m
+    finally: sys.modules['dados_lagoa_fonte'] = salvo
+e0, e1 = invariantes(DLS), invariantes(com_areas(1.13))
+chk('14 SINT-C02: realizado ≤ área, saldo = área − realizado, apontamentos = realizado, fechadas 100 %, fração/texto/reserva/estoque/calcário coerentes — com a área sintética e com áreas ×1,13',
+    not e0 and not e1, [e0[:4], e1[:4]])
 
 print(f'RESULTADO: {sum(OK)}/{len(OK)}')
 sys.exit(0 if all(OK) else 1)

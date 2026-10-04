@@ -19,7 +19,9 @@ try:
     T.abrir(wait=1.3)
     n0 = T.cen("Object.keys(c.reqs).length")
     # ---- 1) ordem sem insumos (colheita): libera sem requisição ----
-    oid = nova('c1', 'a8'); p = T.pan()
+    # SINT-T01: colheita sem pendência de carência (café C1 · k4). A soja do T1 tem a OS-0421 (fungicida) em execução: a colheita lá
+    # fica bloqueada pela carência em qualquer janela, o que é proteção do produto; a prova negativa está no item 4
+    oid = nova('c9', 'k4'); p = T.pan()
     T.ok(oid == 'OS-0440' and 'Sem insumos' in p, 'nova ordem de colheita nasce sem insumos', (oid, p[:200]))
     pedir_liberar(); p = T.pan()
     T.ok('sem insumos a reservar' in p and 'nenhum insumo' not in p and 'por lote:' not in p, 'confirmação diz que não há insumo a reservar', p[p.find('PRÓXIMO'):][:300])
@@ -44,6 +46,10 @@ try:
     # ---- 3) a próxima liberação segue a sequência (OS-0430 → REQ-042) ----
     T.ordem('OS-0430'); pedir_liberar(); T.btn('Confirmar liberação'); t = T.toast()
     T.ok('REQ-042 reservou' in t and T.cen("c.ordens['OS-0430'].req") == 'REQ-042', 'sequência contínua: OS-0430 recebe REQ-042', t)
+    T.fechar()
+    # ---- 4) prova negativa: colheita da soja no T1 (OS-0421 de fungicida em execução) continua impedida de liberar ----
+    oid = nova('c1', 'a8'); pedir_liberar(); p = T.pan(); T.btn('Confirmar liberação')
+    T.ok(oid == 'OS-0442' and 'Liberar bloqueado: carência' in p and 'T1' in p and T.cen("c.ordens['OS-0442'].etapa") == 'A liberar', 'colheita da soja no T1 com aplicação de fungicida pendente: liberar segue bloqueado pela carência', (oid, p[p.find('PRÓXIMO'):][:300]))
     T.fechar()
     T.ok(not T.erros(), 'sem erro JS', T.erros())
 finally:

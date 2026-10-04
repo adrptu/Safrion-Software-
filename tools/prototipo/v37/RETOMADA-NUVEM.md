@@ -105,6 +105,13 @@ Sem a camada sintética (tarefa 1), o build para em `dados_lagoa_fonte`, com uma
      - **Executado na nuvem:** build 0; montar_render ok; varredura 144/144; `dados_lagoa_sintetico/camada_test.py` 11/11; `talgeo_test.js` 8/8; `talmapa_test.py` 8/8; `varrer_categorias.py` TOTAL 0. Recibo, brutos e testes Lagoa com nova linha de base estão na issue 1.
      - **144 e não 145:** o build limpo gera 144 páginas. Hipótese não verificada: a 145ª era a `IN-02x-os0422`, que deixou de ser gerada e ficou de sobra no `project/` do Mac.
      - **Saída gerada:** `saida/` não é versionada. O `dados_lagoa_fonte` a gera sozinho, igual byte a byte; o carimbo fica em `saida/_carimbo.json`.
+     - **SINT-REV-20261003-2300 (comentário 5974392800), correções aplicadas, aguardando nova revisão:**
+       - **C01:** `PIVOS_HA` com 2 casas, igual ao mapa. O ponto decimal virou vírgula em `processo_safra.py:39` e `processo_os.py:195`. Dose × área tem um único arredondamento, no JS igual ao Python (`processo_os.py:323/351/712`).
+       - **C02:** realizado, apontamentos, saldos, frações, textos, reservas e estoque das O.S. da Lagoa saem da área do pivô e das doses dos PLANOS. No modo real, com as áreas inteiras implícitas nos literais antigos, os 17 dicionários e as ordens ficam idênticos.
+       - **G01:** o carimbo exige o conjunto exato das 11 saídas.
+       - **T01:** `irr_estado_test` sai com 1 quando falha; expectativas de área vêm da fonte; `mip_unit_test` e `carencia_test` rodam no node fora do macOS; `os_v39_liberar` usa uma colheita sem carência pendente e mantém a prova negativa da carência.
+       - **Executado na nuvem:** build 0; varredura 144/144; camada 14/14; talgeo 8/8; talmapa 8/8; decimais crus 0; mip_unit 34/34; carência 91/91; mip_correcoes 14/14; mip_fluxo 15/15; irr_estado 38/38; irr_fluxo 33/33; os_v39 liberar 14/14, bloq 11/11, selo_agua 12/12; map_decisoes 13/13; map_irrig_filtro 15/15. Contraprova do exit do T01: exit 1 com falha forçada.
+       - **Risco registrado, não alterado:** dose × área sem arredondar em `cenario.js:152` e `areas/mobile.py:507/525` (app).
      - **Achado para o Codex:** o círculo do `talgeo.js` (110 540 m/grau de latitude + esfera de 6 378 137 m + 72 lados) mede ≈ +0,58 % da área declarada. Está abaixo do limite de 1 % do `tmValida`.
    - **Atenção:** o artefato publicado hoje mostra a fazenda real; publicar da nuvem troca pelos dados sintéticos. Combine com o Codex e o Adrianus antes da primeira publicação a partir da nuvem.
 2. **V44-REND** (REND-MULTICONJUNTOS `082884f3`; REND-RETORNO-1818 `7ae753dc`)

@@ -23,4 +23,6 @@ except ImportError:
 DIR = _REAL_DIR if REAL else _SINT_DIR
 ROTULO = '' if REAL else 'Demonstração sintética'
 if not REAL: _gerar.garantir(DIR)
-PIVOS_HA = {int(p[0][2:]): int(round(p[2])) for p in LG_PIVOS}     # número do pivô → hectares (como dados_lagoa_safra.PIVOS)
+# número do pivô → hectares, com a MESMA precisão do mapa (2 casas): mapa, safra, O.S., doses e custos usam o mesmo valor;
+# arredondar só na exibição (SINT-C01, SINT-REV-20261003-2300)
+PIVOS_HA = {int(p[0][2:]): round(p[2], 2) for p in LG_PIVOS}

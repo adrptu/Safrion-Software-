@@ -9,6 +9,8 @@ import os, sys, time, json, subprocess
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 JSC = '/System/Library/Frameworks/JavaScriptCore.framework/Versions/Current/Helpers/jsc'
 PARTE = sys.argv[1] if len(sys.argv) > 1 else 'tudo'
+# SINT-T01: jsc no macOS; fora dele (Linux/nuvem) o node, com print → console.log; o mesmo JS nos dois
+MOTOR, PRELUDIO = ([JSC], '') if os.path.exists(JSC) else (['node'], 'globalThis.print=(...a)=>console.log(...a);\n')
 FAIL = []; N = [0]
 def ok(cond, msg, extra=''):
     N[0] += 1; print(('OK    ' if cond else 'FALHA ') + msg + ('' if cond else ' · ' + str(extra)[:400]), flush=True)
@@ -18,18 +20,18 @@ def ok(cond, msg, extra=''):
 def unit():
     import cenario
     from areas.processo_os import JS_NUCLEO
-    src = cenario.js_prefixo() + JS_NUCLEO + open(os.path.join(HERE, 'carencia_unit.js'), encoding='utf-8').read()
+    src = PRELUDIO + cenario.js_prefixo() + JS_NUCLEO + open(os.path.join(HERE, 'carencia_unit.js'), encoding='utf-8').read()
     p = os.path.join(HERE, '_probe', 'carencia_unit_all.js'); open(p, 'w', encoding='utf-8').write(src)
-    r = subprocess.run([JSC, p], capture_output=True, text=True, timeout=60)
+    r = subprocess.run(MOTOR + [p], capture_output=True, text=True, timeout=60)
     out = r.stdout.strip().splitlines()
-    ok(r.returncode == 0 and out, 'jsc executou o motor sem erro', r.stderr[:400])
+    ok(r.returncode == 0 and out, 'motor JS (jsc/node) executou sem erro', r.stderr[:400])
     for x in (json.loads(out[-1]) if out else []): ok(x['ok'], 'unit ' + x['n'], x['info'])
     # app de campo: a mesma guarda no início do turno de colheita (JS do app com o motor leve)
     from areas import mobile
-    src = cenario.js_prefixo() + mobile.JS_BASE + mobile.MBAPP_JS + open(os.path.join(HERE, 'carencia_app_unit.js'), encoding='utf-8').read()
+    src = PRELUDIO + cenario.js_prefixo() + mobile.JS_BASE + mobile.MBAPP_JS + open(os.path.join(HERE, 'carencia_app_unit.js'), encoding='utf-8').read()
     p = os.path.join(HERE, '_probe', 'carencia_app_all.js'); open(p, 'w', encoding='utf-8').write(src)
-    r = subprocess.run([JSC, p], capture_output=True, text=True, timeout=60); out = r.stdout.strip().splitlines()
-    ok(r.returncode == 0 and out, 'jsc executou o JS do app sem erro', r.stderr[:400])
+    r = subprocess.run(MOTOR + [p], capture_output=True, text=True, timeout=60); out = r.stdout.strip().splitlines()
+    ok(r.returncode == 0 and out, 'motor JS (jsc/node) executou o JS do app sem erro', r.stderr[:400])
     for x in (json.loads(out[-1]) if out else []): ok(x['ok'], 'app ' + x['n'], x['info'])
 
 
@@ -136,15 +138,17 @@ def fluxo():
            'recuperação: carência conferida (10 dias, até 14/09) registrada no cenário e a colheita pode ser liberada', [bts, p[:300]])
         shot('carencia_os_bula_conferida.png')
         # ---------- 6 · aviso preventivo na aplicação e aplicação efetiva da OS-0504 (Pivô 6) ----------
+        # SINT-T01: a área feita é a do Pivô 6 na fonte única (dados_lagoa_fonte), na forma digitada (vírgula), sem literal de área
+        import dados_lagoa_fonte as _F; A06 = format(_F.PIVOS_HA[6], 'g').replace('.', ',')
         t.goto('OS.dc.html#OS-0504'); time.sleep(.8); p = ospan()
         ok('Conflito com a colheita em Pivô 6' in p and 'impedida até 07/10' in p and 'Conflito com colheita até 07/10' in p and J("[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==='Iniciar execução')"),
            'OS-0504 liberada: aviso preventivo do conflito com a colheita do mamão (até 07/10) sem bloquear o início', p[:700])
         shot('carencia_os_conflito_aplicacao.png')
         btn('Iniciar execução', 'aside[role=dialog]'); btn('Confirmar início', 'aside[role=dialog]'); time.sleep(.4)
         btn('Registrar apontamento', 'aside[role=dialog]'); time.sleep(.3)
-        setv('aside[role=dialog] input[type=date]', '2026-09-24'); setv('aside[role=dialog] input[aria-label="Área feita em hectares"]', '86'); time.sleep(.2)
+        setv('aside[role=dialog] input[type=date]', '2026-09-24'); setv('aside[role=dialog] input[aria-label="Área feita em hectares"]', A06); time.sleep(.2)
         btn('Salvar apontamento', 'aside[role=dialog]'); time.sleep(.5)
-        ok(cen("c.ordens['OS-0504'].ap.filter(a=>a.st!=='Previsto').length") == 1 and cen("c.ordens['OS-0504'].etapa") == 'Em execução', 'OS-0504 executada: apontamento de 24/09 em 86 ha', cen("JSON.stringify(c.ordens['OS-0504'].ap)"))
+        ok(cen("c.ordens['OS-0504'].ap.filter(a=>a.st!=='Previsto').length") == 1 and cen("c.ordens['OS-0504'].etapa") == 'Em execução', f'OS-0504 executada: apontamento de 24/09 em {A06} ha', cen("JSON.stringify(c.ordens['OS-0504'].ap)"))
         # a colheita da semana 39 no Pivô 19 é registrada (fato) depois de uma aplicação: nunca impedida, vai para conferência
         r = J("""(()=>{const X=window.__car; const r=X.cenMudar(null,c=>{ c.ordens['OS-0441']={id:'OS-0441',tipo:'Pulverização · Controle de ácaro e cochonilha',talhao:'Pivô 19',area:42,etapa:'Em conferência',versao:'v1',realizado:42,saldo:0,resp:'Wesley',
              ins:[{p:'Abamectina 18 EC',dose:0.5,un:'L',tot:21}],req:null,selos:[],ap:[{d:'22/09',dia:1,ha:42,st:'Conferido',sinc:true,origem:'app'}],reservado:false,osc:{}};
