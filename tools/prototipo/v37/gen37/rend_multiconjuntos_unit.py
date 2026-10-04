@@ -19,6 +19,9 @@ Rodada 2 da revisão: uma restrição de janela por recurso físico (sequência 
 o fecho finito; configuração fora do plano não liga ninguém (T1a–T1c), ponte por outro grupo ou ativo não relaxa janela finita (T2a–T2b),
 a troca reservada é a que o decorrido cobra (N1), motivo sem 'dividem a mesma janela' com a outra em janela 0 (M1), fração final no corte
 aninhado (M2); nas entradas aleatórias, cada ativo cabe na janela dele e uma configuração ociosa (janela 0, fora do plano) não muda nada.
+Rodada 3: sem restrição do fecho (só recurso físico); grupo de recursos decidido pelo maior uso simultâneo real e, com 1 unidade, como um
+ativo (P1, P2); janela 0 conta no grupo do plano (P3); empate de troca independe da ordem das linhas (P4); 1 ou 2 unidades: mesma divisão
+quando o grupo não limita (P5).
 Uso: python3 rend_multiconjuntos_unit.py"""
 import sys, os, json, re, subprocess, tempfile
 from fractions import Fraction as F
@@ -119,9 +122,27 @@ CASOS=[
  ('N1 troca_reservada_e_cobrada','rodada 2 · A e B em sequência (janela 10 h, troca 2 h cada) e C com a plantadeira de A (1 na fazenda): C começa o fecho, A e B pagam a troca; A+B com as trocas cabem nos 10 h (3 + 2 + 3 + 2)',
    200,[dict(id='A',nome='A',rend=5,seq=True,jan=10,troca=2,rec={'plant':1},custo_h=1),dict(id='B',nome='B',rend=5,seq=True,jan=10,troca=2,custo_h=1),dict(id='C',nome='C',rend=5,rec={'plant':1},custo_h=1)],
    {'plant':{'un':1,'nome':'Plantadeiras'}},dict(q=['15','15','170'],decorrido='44',conflito=True,deficit='62/3',motivo='precisam de 30,67 h para 133,33 ha; a janela tem 10 h')),
- ('M2 fracao_final_no_corte_aninhado','rodada 2 · A e B (30 % cada, sequência, janela 4 h) e C (40 %, janela 10 h) com a plantadeira de A: três cortes (sequência, plantadeira, fecho de 10 h); A+B = 55/18 ≤ 4 h, A+C e A+B+C ≤ 10 h; o motivo diz a fração final de cada uma',
+ ('M2 fracao_final_no_corte_aninhado','rodada 2 · A e B (30 % cada, sequência, janela 4 h) e C (40 %, janela 10 h) com a plantadeira de A: dois cortes (sequência e plantadeira); A+B ≤ 4 h e A+C ≤ 10 h; o motivo diz a fração final de cada uma',
    1000,[dict(id='A',nome='A',rend=1,part=30,seq=True,jan=4,rec={'plant':1},custo_h=1),dict(id='B',nome='B',rend=1,part=30,seq=True,jan=4,custo_h=1),dict(id='C',nome='C',rend=1,part=40,jan=10,rec={'plant':1},custo_h=1)],
-   {'plant':{'un':1,'nome':'Plantadeiras'}},dict(q=['25/18','5/3','125/18'],motivo=['janela de 4 h: fazem de 34,72 % a 41,67 %','janela de 10 h: fazem de 34,72 % a 69,44 %'])),
+   {'plant':{'un':1,'nome':'Plantadeiras'}},dict(q=['5/3','2','25/3'],motivo=['janela de 4 h: fazem de 41,67 % a 50 %','janela de 10 h: fazem de 41,67 % a 83,33 %'])),
+ ('P1 grupo_ja_no_fecho_por_outro_grupo','rodada 3 · B e C usam trator e o único operador (janelas de 2 h); A sem janela usa 2 tratores: o fecho pelos tratores não apaga a restrição do operador (5 + 5 ha)',
+   100,[dict(id='A',nome='A',rend=5,rec={'trat':2},custo_h=1),dict(id='B',nome='B',rend=5,jan=2,rec={'trat':1,'oper':1},custo_h=1),dict(id='C',nome='C',rend=5,jan=2,rec={'trat':1,'oper':1},custo_h=1)],
+   {'trat':{'un':2,'nome':'Tratores'},'oper':{'un':1,'nome':'Operadores'}},dict(q=['90','5','5'],conflito=True,deficit='34/3',motivo='Operadores')),
+ ('P2a uma_plantadeira_como_grupo','rodada 3 · A e B em sequência com a única plantadeira (janelas de 3 h) e C na sequência sem janela: A+B dividem os 3 h da plantadeira',
+   200,[dict(id='A',nome='A',rend=5,seq=True,jan=3,rec={'plant':1},custo_h=1),dict(id='B',nome='B',rend=5,seq=True,jan=3,rec={'plant':1},custo_h=1),dict(id='C',nome='C',rend=5,seq=True,custo_h=1)],
+   {'plant':{'un':1,'nome':'Plantadeiras'}},dict(q=['15/2','15/2','185'],conflito=True,deficit='71/3',motivo='Plantadeiras: a fazenda tem 1; quem a usa divide a janela dela')),
+ ('P2b uma_plantadeira_como_ativo','rodada 3 · o mesmo com a plantadeira como ativo p01 do cadastro: a mesma divisão',
+   200,[dict(id='A',nome='A',rend=5,seq=True,jan=3,ativos=['p01'],custo_h=1),dict(id='B',nome='B',rend=5,seq=True,jan=3,ativos=['p01'],custo_h=1),dict(id='C',nome='C',rend=5,seq=True,custo_h=1)],
+   None,dict(q=['15/2','15/2','185'],conflito=True,deficit='71/3')),
+ ('P3 grupo_com_janela_0_no_plano','rodada 3 · o S5 com a plantadeira (1 na fazenda) no lugar da sequência e a janela de A = 0: o grupo do plano conta A; conflito, déficit 12,5 h, necessário 22,5 h',
+   108,[cf(A,part=50,jan=0,rec={'plant':1}),cf(B,part=50,jan=10,rec={'plant':1})],{'plant':{'un':1,'nome':'Plantadeiras'}},
+   dict(q=['0','54'],conflito=True,deficit='25/2',**{'nec.decorrido':'45/2'})),
+ ('P5a fecho_nao_e_restricao_1','rodada 3 · A (a01), B (a01 e a02), C (a02 e plantadeira), D sem janela (plantadeira): cada ativo cabe nos 10 h dele; com 1 plantadeira',
+   1000,[dict(id='A',nome='A',rend=5,jan=10,ativos=['a01'],custo_h=1),dict(id='B',nome='B',rend=5,jan=10,ativos=['a01','a02'],custo_h=1),dict(id='C',nome='C',rend=5,jan=10,ativos=['a02'],rec={'plant':1},custo_h=1),dict(id='D',nome='D',rend=5,rec={'plant':1},custo_h=1)],
+   {'plant':{'un':1,'nome':'Plantadeiras'}},dict(q=['25','25','25','925'],conflito=True,deficit='90')),
+ ('P5b fecho_nao_e_restricao_2','rodada 3 · o mesmo com 2 plantadeiras: a mesma divisão (menos recurso não dá plano mais otimista)',
+   1000,[dict(id='A',nome='A',rend=5,jan=10,ativos=['a01'],custo_h=1),dict(id='B',nome='B',rend=5,jan=10,ativos=['a01','a02'],custo_h=1),dict(id='C',nome='C',rend=5,jan=10,ativos=['a02'],rec={'plant':1},custo_h=1),dict(id='D',nome='D',rend=5,rec={'plant':1},custo_h=1)],
+   {'plant':{'un':2,'nome':'Plantadeiras'}},dict(q=['25','25','25','925'],conflito=True,deficit='90')),
  ('R2b grupo_de_recursos_nao_relaxa_janela_2','PRE-REV R2 · o mesmo com 2 plantadeiras: a mesma divisão (menos recurso nunca dá plano mais otimista); C ao mesmo tempo: 30 h',
    200,[dict(id='A',nome='A',rend=5,seq=True,jan=10,rec={'plant':1},custo_h=100),dict(id='B',nome='B',rend=5,seq=True,jan=10,custo_h=100),dict(id='C',nome='C',rend=5,rec={'plant':1},custo_h=100)],
    {'plant':{'un':2,'nome':'Plantadeiras'}},dict(q=['25','25','150'],saldo='0',decorrido='30',conflito=True,deficit='50/3')),
@@ -151,6 +172,7 @@ js.append("OUT['02']=[repartir(1,[{rend:rendCalc(6,8,75)}]).hconj,repartir(1,[{r
 js.append("(()=>{ const r=repartir(108,[{rend:rendCalc(6,8,75)},{rend:rendCalc(12,8,75)}]); OUT['09']=[108*2,r.itens.reduce((a,x)=>a+x.q*2,0)+r.saldo*2]; })();")
 js.append("OUT['11']=(()=>{ const t=[repartir(48,[{rend:6},{rend:4}]).decorrido,repartir(48,[{rend:6}]).decorrido,repartir(48,[{rend:8}]).decorrido]; const T=Math.max.apply(null,t); return [48/T,T,t]; })();")
 js.append("OUT['R3']=(()=>{ const r=repartir(2882.53,[48.7,17.6,21.9,5.4,6.4].map((p,i)=>({nome:'P'+i,rend:5,part:p,seq:true})).concat([{nome:'L',rend:5,seq:true,troca:2}])); return [r.itens[5].q,r.motivos.filter(m=>/não cobrem/.test(m)).length,r.decorrido]; })();")
+js.append("OUT['P4']=['ABC','CAB','BCA'].map(o=>{ const d={A:{id:'A',nome:'A',rend:5,seq:true,ativos:['a01'],jan:3,troca:1,custo_h:1},B:{id:'B',nome:'B',rend:5,seq:true,jan:3,troca:1,custo_h:1},C:{id:'C',nome:'C',rend:5,ativos:['a01'],troca:1,custo_h:1}}; const r=repartir(11.25,o.split('').map(k=>d[k])); const q={}; r.itens.forEach(x=>{ q[x.id]=x.q; }); return [q.A,q.B,q.C,r.conflito,r.deficit,r.decorrido]; });")
 js.append("OUT['M1']=repartir(100,[{nome:'A',rend:3.6,seq:true,jan:0,custo_h:1},{nome:'B',rend:7.2,seq:true,jan:10,custo_h:1}]).motivos;")
 js.append("OUT['12']=[repartir(1,[{rend:rendCalc(1.1,3.7,63)}]).hconj, 1/(Math.round(rendCalc(1.1,3.7,63)*100)/100)];")
 js.append('print(JSON.stringify(OUT));')
@@ -217,6 +239,14 @@ chk('R3 resto_relativo_area_grande','PRE-REV R3 · 2.882,53 ha com partes 48,7 +
     '[0, 0 avisos "não cobrem", decorrido 2882,53/5]',OUT['R3'],(p3f['itens'][5]['q'],str(p3['itens'][5]['q']),str(p3['decorrido'])),
     OUT['R3'][0]==0 and OUT['R3'][1]==0 and near(OUT['R3'][2],F('2882.53')/5) and p3f['itens'][5]['q']==0 and p3['itens'][5]['q']==0 and p3['decorrido']==F('2882.53')/5
     and not any('não cobrem' in m for m in p3f['motivos']+p3['motivos']))
+p4=[]
+for o in ('ABC','CAB','BCA'):
+    d=dict(A=dict(id='A',nome='A',rend=F(5),seq=True,ativos=['a01'],jan=F(3),troca=F(1),custo_h=F(1)),B=dict(id='B',nome='B',rend=F(5),seq=True,jan=F(3),troca=F(1),custo_h=F(1)),C=dict(id='C',nome='C',rend=F(5),ativos=['a01'],troca=F(1),custo_h=F(1)))
+    r=D2.repartir(F('11.25'),[d[k] for k in o]); q={x['id']:x['q'] for x in r['itens']}; p4.append([q['A'],q['B'],q['C'],r['conflito'],r['deficit'],r['decorrido']])
+chk('P4 empate_de_troca_independe_da_ordem','rodada 3 · A e B em sequência (janela 3 h, troca 1 h), C no a01 de A sem janela (troca 1 h), nas ordens ABC, CAB e BCA: a mesma divisão (3,75 ha cada), sem conflito, decorrido 4,25 h',
+    '3 × [15/4, 15/4, 15/4, False, 0, 17/4]',OUT['P4'],[[str(v) for v in x] for x in p4],
+    all(near(a,F(15,4)) and near(b,F(15,4)) and near(c,F(15,4)) and cf_ is False and near(df,0) and near(dc,F(17,4)) for a,b,c,cf_,df,dc in OUT['P4'])
+    and all(x==[F(15,4),F(15,4),F(15,4),False,0,F(17,4)] for x in p4))
 pm1=D2.repartir(F(100),[dict(nome='A',rend=F('3.6'),seq=True,jan=F(0),custo_h=F(1)),dict(nome='B',rend=F('7.2'),seq=True,jan=F(10),custo_h=F(1))])['motivos']
 chk('M1 motivo_sem_sequencia_falsa','rodada 2 · A (janela 0) e B (janela 10 h) em sequência declarada, pelo rendimento: B faz 72 ha na janela dela; o motivo é só "as janelas não comportam", sem "sequência declarada" nem "dividem a mesma janela"',
     "['as janelas não comportam toda a área']",OUT['M1'],pm1,OUT['M1']==pm1==['as janelas não comportam toda a área'])
@@ -241,7 +271,7 @@ SELR="r=>({Q:r.Q,alocado:r.alocado,saldo:r.saldo,pendente:r.pendente,causa:r.cau
 jr=['function nfa(n){ return String(n); }',BLOCO,'const SELR='+SELR+';','const R=[];']+[f"R.push(SELR(repartir({json.dumps(Q)},{json.dumps(c)},{json.dumps(pl)})));" for Q,c,pl in RND]+['print(JSON.stringify(R));']
 with tempfile.NamedTemporaryFile('w',suffix='.js',delete=False) as f: f.write(PRELUDIO+'\n'+'\n'.join(jr)); jsf=f.name
 pr=subprocess.run(MOTOR+[jsf],capture_output=True,text=True,timeout=60); os.unlink(jsf); JR=json.loads(pr.stdout.strip().splitlines()[-1])
-def inv(r,Q,cfs):   # invariantes de um resultado (JS ou Python no mesmo formato)
+def inv(r,Q,cfs,pl=None):   # invariantes de um resultado (JS ou Python no mesmo formato)
     e=[]; its=r['it']; sq=sum(x['q'] for x in its)
     ds=[x for x,c in zip(its,cfs) if c.get('seq') and x['nq']>1e-12]   # sequência declarada no plano: as horas dela cabem na maior janela dela (PRE-REV R2)
     if len(ds)>1 and all(x['H']>=0 for x in ds) and sum(x['h'] for x in ds)>max(x['H'] for x in ds)+1e-9: e.append('sequência declarada passa da janela')
@@ -251,11 +281,13 @@ def inv(r,Q,cfs):   # invariantes de um resultado (JS ou Python no mesmo formato
     if abs(sq+r['saldo']-Q)>1e-7*max(1,Q): e.append('Σq+saldo≠Q')
     if any(x['q']<-1e-12 for x in its) or r['saldo']<-1e-12: e.append('negativo')
     if any(x['H']>=0 and x['h']>x['H']+1e-9 for x in its): e.append('h>janela própria')
-    gs={}
-    for x in its: gs.setdefault(x['g'],[]).append(x)
-    for g,xs in gs.items():
-        at=[x for x in xs if x['q']>1e-12]; Ws=[x['H'] for x in xs]
-        if len(at)>1 and min(Ws)>=0 and sum(x['ht'] for x in at)>max(Ws)+1e-9: e.append('sequência passa da janela')
+    # grupo de recursos com 1 unidade: se dois usuários poderiam trabalhar juntos, todos dividem a maior janela deles (rodada 3: restrição por
+    # recurso físico; o fecho inteiro não é restrição, o decorrido o trata como uma sequência só)
+    if pl and (pl.get('plant') or {}).get('un')==1:
+        up=[(x,c) for x,c in zip(its,cfs) if (c.get('rec') or {}).get('plant') and x['nq']>1e-12]
+        junto=lambda a,b: (a.get('seq') and b.get('seq')) or bool(set(a.get('ativos') or [])&set(b.get('ativos') or []))
+        if any(not junto(a[1],b[1]) for i,a in enumerate(up) for b in up[i+1:]) and all(x['H']>=0 for x,_ in up) and sum(x['h'] for x,_ in up)>max(x['H'] for x,_ in up)+1e-9:
+            e.append('grupo de recursos passa da janela')
     if r['pendente'] and (r['hconj'] is not None or not r['causa']): e.append('pendente sem causa ou com horas')
     if not r['pendente'] and r['causa']: e.append('causa sem pendência')
     if r['hconj'] is not None and abs(r['hconj']-sum(x['h'] for x in its))>1e-9*max(1,r['hconj']): e.append('horas-conjunto≠Σh')
@@ -301,7 +333,7 @@ for (n,Q,c,pl),j in zip(OCI,JO):
     elif len(exo)<2: exo.append((n,d))
 npar=0; ninv=0; ex=[]; nseq=0; nconf=0; npend=0
 for (Q,c,pl),j in zip(RND,JR):
-    py=pyr(Q,c,pl); d=igual(j,py); ij=inv(j,float(Q),c); ip=inv(py,float(Q),c)
+    py=pyr(Q,c,pl); d=igual(j,py); ij=inv(j,float(Q),c,pl); ip=inv(py,float(Q),c,pl)
     if d is None: npar+=1
     elif len(ex)<3: ex.append(('paridade',d,Q,c,pl,j.get(d),py.get(d)))
     if not ij and not ip: ninv+=1
@@ -310,7 +342,7 @@ for (Q,c,pl),j in zip(RND,JR):
 assert nseq>=100 and nconf>=20, (nseq,nconf)   # a amostra precisa exercitar sequência e conflito
 chk('R1 paridade_js_python_400','400 entradas aleatórias (rendimento vazio/0/vírgula, partes, janelas 0–20 h, sequência, troca, mesmo ativo, grupo da fazenda): JS = Python',
     '400/400',f'{npar}/400 iguais',f'com sequência {nseq} · conflito {nconf} · pendentes {npend} · exemplos {ex[:2]}',npar==400)
-chk('R2 invariantes_400','Σ q + sem conjunto = Q, sem negativos, h ≤ janela própria, sequência ≤ janela da sequência, sequência declarada ≤ a janela dela, pendente com causa e sem horas, horas-conjunto = Σ h, necessário = atendido + saldo (ha e horas-conjunto)',
+chk('R2 invariantes_400','Σ q + sem conjunto = Q, sem negativos, h ≤ janela própria, sequência declarada, cada ativo e o grupo de 1 plantadeira ≤ a janela deles, pendente com causa e sem horas, horas-conjunto = Σ h, necessário = atendido + saldo (ha e horas-conjunto)',
     '400/400',f'{ninv}/400 sem violação',f'exemplos {ex[:2]}',ninv==400)
 chk('R4 ociosa_nao_muda_400',f'rodada 2 · {len(OCI)} entradas aleatórias com uma configuração ociosa a mais (janela 0, sem %, fora do plano; na sequência, nos ativos a01 e a02 e na plantadeira): atendido, saldo, decorrido, déficit, conflito e divisão iguais',
     f'{len(OCI)}/{len(OCI)}',f'{noci}/{len(OCI)} iguais',f'exemplos {exo}',noci==len(OCI) and len(OCI)>=150)

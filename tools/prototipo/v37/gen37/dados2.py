@@ -247,44 +247,55 @@ def repartir(Q,cfgs,pools=None):
     if any(any(z in y['ativos'] for z in x['ativos']) for a,x in enumerate(cand) for y in cand[a+1:]): add('configurações com a mesma máquina do cadastro trabalham em sequência')
     if len([x for x in cand if x['seq']])>1: add('sequência declarada: dividem trator, implemento ou operador')
     RS=[]; sq_p=[x for x in cand_p if x['seq']]
-    if len(sq_p)>1: RS.append(('sq',sq_p))
+    if len(sq_p)>1: RS.append(('sq',sq_p,[x for x in sq_p if x['H']>0]))
     ats=[]
     for x in cand_p:
         for z in x['ativos']:
             if z not in ats: ats.append(z)
     for z in ats:
         xs=[x for x in cand_p if z in x['ativos']]
-        if len(xs)>1: RS.append(('at:'+str(z),xs))
+        if len(xs)>1: RS.append(('at:'+str(z),xs,[x for x in xs if x['H']>0]))
+    def junto(x,y): return (x['seq'] and y['seq']) or any(z in y['ativos'] for z in x['ativos'])   # nunca ao mesmo tempo
+    def simul(us,k):   # maior uso simultâneo do grupo k entre usuários que podem trabalhar juntos
+        n=len(us)
+        if n>14: return sum(((_rp_num(x['rec'].get(k)) or 0) for x in us),0)
+        mx=0
+        for m in range(1,1<<n):
+            ok=True; s_=0
+            for i in range(n):
+                if not ok: break
+                if not m&(1<<i): continue
+                s_+=_rp_num(us[i]['rec'].get(k)) or 0
+                for j in range(i+1,n):
+                    if m&(1<<j) and junto(us[i],us[j]): ok=False; break
+            if ok and s_>mx: mx=s_
+        return mx
     for k,pv in (pools or {}).items():
         un=_rp_num((pv or {}).get('un'))
         if not _ok(un): continue
-        us=[x for x in cand if (_rp_num(x['rec'].get(k)) or 0)>0]
-        if len(us)<2: continue
-        g={}
-        for x in us: rr=raiz(x['i']); g[rr]=max(g.get(rr,0),_rp_num(x['rec'][k]))
-        sim=sum(g.values())
-        if sim>un+1e-9:
-            for x in us: U.une(us[0]['i'],x['i']); UP.une(us[0]['i'],x['i'])
-            RS.append(('pl:'+str(k),[x for x in cand_p if (_rp_num(x['rec'].get(k)) or 0)>0]))
-            add(f"{pv.get('nome') or k}: ao mesmo tempo precisariam de {_rp_f(sim)}, a fazenda tem {_rp_f(un)}; trabalham em sequência")
-    fc={}   # o fecho de quem recebe área também divide a maior janela dele, se finita
-    for x in cand: fc.setdefault(U.raiz(x['i']),[]).append(x)
-    for g in sorted(fc):
-        if len(fc[g])>1: RS.append(('fc:'+str(g),fc[g]))
+        u_p=[x for x in cand_p if (_rp_num(x['rec'].get(k)) or 0)>0]; u_a=[x for x in u_p if x['H']>0]
+        s_a=simul(u_a,k) if len(u_a)>1 else 0; s_p=simul(u_p,k) if len(u_p)>1 else 0
+        ea=len(u_a)>1 and (un<=1 or s_a>un+1e-9); ep=len(u_p)>1 and (un<=1 or s_p>un+1e-9)   # 1 unidade: uma máquina só, como um ativo
+        if ea:
+            for x in u_a: U.une(u_a[0]['i'],x['i'])
+        if ep:
+            for x in u_p: UP.une(u_p[0]['i'],x['i'])
+        if ea or ep:
+            RS.append(('pl:'+str(k),u_p if ep else [],u_a if ea else [])); sm=s_a if ea else s_p
+            add(f"{pv.get('nome') or k}"+(f": ao mesmo tempo precisariam de {_rp_f(sm)}, a fazenda tem {_rp_f(un)}; trabalham em sequência" if sm>un+1e-9 else f": a fazenda tem {_rp_f(un)}; quem a usa divide a janela dela"))
     def troca_de(xs):
         if len(xs)<2: return 0
         return sum((x['troca'] for x in xs),0)-min(x['troca'] for x in xs)
-    def troca_r(xs,P,V):   # a troca que o decorrido cobra: a de cada membro, menos a de quem começa o fecho (a menor troca), se for membro
+    def troca_r(xs,P,V):   # a troca que o decorrido cobra: a de cada membro, menos a menor troca do fecho se um membro a tem
         if len(xs)<2: return 0
-        g=V.raiz(xs[0]['i']); f=None
-        for y in P:
-            if V.raiz(y['i'])==g and (f is None or y['troca']<f['troca']): f=y
-        return sum((x['troca'] for x in xs),0)-(f['troca'] if f is not None and any(y is f for y in xs) else 0)
+        g=V.raiz(xs[0]['i']); mn=min((y['troca'] for y in P if V.raiz(y['i'])==g),default=_math.inf)
+        return sum((x['troca'] for x in xs),0)-(mn if any(x['troca']==mn for x in xs) else 0)
     W={}; jan={}; pista={}; pista_a={}
-    for k,xs in RS:
-        w=max(x['H'] for x in xs)
-        if w==_math.inf: continue
-        W[k]=w; pista[k]=xs; xa=[x for x in xs if x['H']>0]
+    for k,xs,xa in RS:
+        w=max((x['H'] for x in xs+xa),default=-_math.inf)
+        if w==_math.inf or w==-_math.inf: continue
+        W[k]=w
+        if len(xs)>1: pista[k]=xs
         if len(xa)>1: pista_a[k]=xa; jan[k]=w-troca_r(xa,cand,U)
     def pl(x): return [g for g in jan if any(y is x for y in pista_a[g])]   # restrições de janela da divisão de uma configuração
     def aloca(ad):
@@ -355,7 +366,7 @@ def repartir(Q,cfgs,pools=None):
         for x in plan_liv: q1[x['i']]=x['r']*R/sr
     conflito=False; deficit=0
     P1=[x for x in cand_p if q1[x['i']]>1e-12]
-    for g in W:
+    for g in pista:
         xs=[x for x in pista[g] if q1[x['i']]>1e-12]
         if len(xs)<2: continue
         nec=sum((q1[x['i']]/x['r'] for x in xs),0)+troca_r(xs,P1,UP)
@@ -365,12 +376,12 @@ def repartir(Q,cfgs,pools=None):
         if x['q']>1e-12: grp.setdefault(raiz(x['i']),[]).append(x)
     decorrido=0; troca_t=0
     for g in sorted(grp):
-        xs=grp[g]; soma=0; mn=min(x['troca'] for x in xs); primeira=True
+        xs=grp[g]; soma=0; mn=min(x['troca'] for x in xs)
+        em_r=lambda x: any(any(y is x for y in pista_a[k]) for k in jan)
+        ini=next((x for x in xs if x['troca']==mn and em_r(x)),None) or next(x for x in xs if x['troca']==mn)   # no empate, a que divide janela
         for x in xs:
             x['h']=x['q']/x['r']; tr=0
-            if len(xs)>1:
-                if primeira and x['troca']==mn: primeira=False
-                else: tr=x['troca']
+            if len(xs)>1 and x is not ini: tr=x['troca']
             x['ht']=x['h']+tr; troca_t+=tr; x['emSeq']=len(xs)>1; x['grupo']=g; soma+=x['ht']
         if soma>decorrido: decorrido=soma
     for x in it:
