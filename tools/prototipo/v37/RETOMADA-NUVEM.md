@@ -120,6 +120,14 @@ Sem a camada sintética (tarefa 1), o build para em `dados_lagoa_fonte`, com uma
   - REND telas: fluxo 16/16, telas 4/4, bordas 10/10, bordas2 5/5;
   - build 0, varredura 144/144, camada 14/14, talgeo 8/8, talmapa 8/8, quantidade 6/6 e regressão da Lagoa verde;
   - aguarda a revisão do Codex e a contraprova do Gemini.
+- **PRE-REV-20261004 na REND (pré-revisão adversarial do autor; reserva registrada antes de editar):** a camada/SINT corrigida entrou por merge `4b75731`. Achados executados por sondas (bloco REPARTIR no node + `dados2.repartir` em float e Fraction):
+  - **R1 · S2 · `safra.js:66` e `dados2.py:228`:** configuração com janela 0 sai das uniões de sequência, e a necessidade e o déficit da sequência declarada somem (S5 com a janela de A = 0 dá déficit 0; com 0,01 h dá 12,5 h). As uniões passam a ser montadas sobre toda configuração com rendimento válido e parte no plano; a janela 0 continua sem receber área, e a troca dela não reduz a janela de quem trabalha.
+  - **R2 · S2 · `safra.js:74–77` e `dados2.py:250–262`:** a união imposta por falta de recurso (grupo de recursos) junta uma sequência declarada com uma configuração sem janela, e a janela da sequência vira infinita: com MENOS plantadeiras o plano fica mais otimista (A+B fazem 20 h numa janela de 10 h, sem conflito). Passa a valer cada restrição: a de cada sequência declarada/mesmo ativo (a maior janela dela) e a do grupo de recursos (a maior janela do grupo, se finita), ao mesmo tempo, na divisão, no plano e no déficit.
+  - **R3 · S3 · `safra.js:63` e `dados2.py:226`:** resto das partes fixas com tolerância absoluta 1e-12; acima de ~2 000 ha, partes que somam 100 % deixam resíduo que ativa configuração fantasma. Passa a tolerância relativa à área.
+  - **R4 · S4 · `areas/processo_safra.py:148` e `safra.js:576–577`:** a etapa 4 mostra a área sem casas (Pivô 21 de 80,82 ha como 81; configurações 40 + 40). Passa a 2 casas, sem zeros à direita; o item 10 do `rend_multiconjuntos_test.py` passa a comparar com 2 casas.
+  - **R5 · S3 · `safra.js:200` e `dados2.py:150`:** a memória CAL-01 mostra a área inteira (2.000 kg/ha × 48 ha = 96.940 kg). Passa a 2 casas nos dois lados.
+  - **R6 · S3 · `gen37/saf_cmp_continuidade_test.py:142–145` (arquivo novo nesta reserva):** os itens 28/29 da Lagoa comparam números fixos da área antiga e falham na base e na composição (29 ok · 2 falhas); passam a calcular a expectativa por `dados2`. A AÇÃO toca esse arquivo nas linhas 48 e 70, fora destas. A suíte entra na cadeia.
+  - **Abertos para regra do dono do oráculo (Codex), S3, sem mudança aqui:** (a) troca de configuração que não recebe área continua reservada na janela da sequência (conservador); (b) grupo de recursos com `un` frentes serializa todos quando faltam unidades (3 configurações com 2 plantadeiras fazem o de 1).
 
 ## Tarefas, na ordem
 1. **CAMADA-SINTETICA (CORTE-REMOTO-01)**
