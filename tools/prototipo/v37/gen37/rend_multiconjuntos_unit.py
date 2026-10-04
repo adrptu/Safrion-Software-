@@ -29,6 +29,8 @@ Rodada 5: o grupo inteiro de quem se exclui duas a duas (clique maximal) divide 
 grupos de 1 unidade); componente não cordal divide a maior janela finita (V4: ciclo de 5); cadeia simples só por pares (V5); busca por
 componente (V6: 24 configurações em pares); o motivo diz o pico real (V7); unidades negativas ignoradas (V8); nas entradas aleatórias, todo
 conjunto de configurações que se excluem duas a duas cabe na maior janela delas.
+B5a (rodada 5): no pico de um grupo, o próprio grupo não separa os usuários dele; o motivo de um grupo de 1 unidade diz "precisariam de 2" quando
+os usuários são independentes (Q1, V9) e "quem a usa divide a janela dela" quando já estão em sequência (P2a).
 Uso: python3 rend_multiconjuntos_unit.py"""
 import sys, os, json, re, subprocess, tempfile
 from fractions import Fraction as F
@@ -152,7 +154,7 @@ CASOS=[
    {'plant':{'un':2,'nome':'Plantadeiras'}},dict(q=['25','25','25','925'],conflito=True,deficit='90')),
  ('Q1 cafe_colhedora_como_grupo','rodada 4 · colheita de café, 60 ha, janelas de 80 h: A e B com a única colhedora, trator e 2 operadores; C com equipe de 6; 8 operadores: A e B nunca juntas, então cabem 2 + 6 = 8; 20 + 20 + 20 ha, déficit 80/9 h só da colhedora',
    60,[dict(id='A',nome='A',rend='1/2',jan=80,rec={'colh':1,'trator':1,'oper':2},custo_h=1),dict(id='B',nome='B',rend='1/2',jan=80,rec={'colh':1,'trator':1,'oper':2},custo_h=1),dict(id='C',nome='C',rend='7/20',jan=80,rec={'oper':6},custo_h=1)],
-   {'colh':{'un':1,'nome':'Colhedoras'},'trator':{'un':4,'nome':'Tratores'},'oper':{'un':8,'nome':'Operadores e equipe'}},dict(q=['20','20','20'],saldo='0',conflito=True,deficit='80/9',motivo='Colhedoras: a fazenda tem 1; quem a usa divide a janela dela')),
+   {'colh':{'un':1,'nome':'Colhedoras'},'trator':{'un':4,'nome':'Tratores'},'oper':{'un':8,'nome':'Operadores e equipe'}},dict(q=['20','20','20'],saldo='0',conflito=True,deficit='80/9',motivo='Colhedoras: ao mesmo tempo precisariam de 2, a fazenda tem 1')),   # B5a: o pico da colhedora não se separa por ela mesma
  ('Q2 cafe_colhedora_como_ativo','rodada 4 · o mesmo com a colhedora como ativo colh01 do cadastro: a mesma divisão',
    60,[dict(id='A',nome='A',rend='1/2',jan=80,ativos=['colh01'],rec={'trator':1,'oper':2},custo_h=1),dict(id='B',nome='B',rend='1/2',jan=80,ativos=['colh01'],rec={'trator':1,'oper':2},custo_h=1),dict(id='C',nome='C',rend='7/20',jan=80,rec={'oper':6},custo_h=1)],
    {'colh':{'un':1,'nome':'Colhedoras'},'trator':{'un':4,'nome':'Tratores'},'oper':{'un':8,'nome':'Operadores e equipe'}},dict(q=['20','20','20'],saldo='0',conflito=True,deficit='80/9')),
@@ -181,6 +183,9 @@ CASOS=[
    dict(motivo='Operadores e equipe: ao mesmo tempo precisariam de 18, a fazenda tem 8')),
  ('V8 unidades_negativas','rodada 5 · grupo com unidades negativas (fora da tela) é ignorado: A, que nem usa o grupo, faz os 30 ha',
    30,[dict(id='A',nome='A',rend=1,jan=30,rec={'oper':1},custo_h=1)],{'plant':{'un':-1},'oper':{'un':8}},dict(q=['30'],saldo='0',pendente=False)),
+ ('V9 b5a_pico_do_grupo_de_1','B5a · A e B ao mesmo tempo, cada uma com o único distribuidor: o motivo diz "Distribuidores: ao mesmo tempo precisariam de 2, a fazenda tem 1" (o grupo não se separa por ele mesmo)',
+   100,[dict(id='A',nome='A',rend=5,jan=20,rec={'dist':1},custo_h=1),dict(id='B',nome='B',rend=5,jan=20,rec={'dist':1},custo_h=1)],{'dist':{'un':1,'nome':'Distribuidores'}},
+   dict(motivo='Distribuidores: ao mesmo tempo precisariam de 2, a fazenda tem 1; trabalham em sequência')),
  ('R2b grupo_de_recursos_nao_relaxa_janela_2','PRE-REV R2 · o mesmo com 2 plantadeiras: a mesma divisão (menos recurso nunca dá plano mais otimista); C ao mesmo tempo: 30 h',
    200,[dict(id='A',nome='A',rend=5,seq=True,jan=10,rec={'plant':1},custo_h=100),dict(id='B',nome='B',rend=5,seq=True,jan=10,custo_h=100),dict(id='C',nome='C',rend=5,rec={'plant':1},custo_h=100)],
    {'plant':{'un':2,'nome':'Plantadeiras'}},dict(q=['25','25','150'],saldo='0',decorrido='30',conflito=True,deficit='50/3')),

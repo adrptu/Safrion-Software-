@@ -88,16 +88,16 @@ function repartir(Q,cfgs,pools){ const mot=[]; const add=(m)=>{ if(mot.indexOf(m
   const ats=[]; candP.forEach(x=>x.ativos.forEach(z=>{ if(ats.indexOf(z)<0) ats.push(z); }));
   ats.forEach(z=>{ const xs=candP.filter(x=>x.ativos.indexOf(z)>=0); if(xs.length>1) RS.push(['at:'+z,xs,xs.filter(x=>x.H>0)]); });
   const um=PV.filter(z=>z[2]<=1).map(z=>z[0]); const SER=[];   // grupo de 1 unidade: uma máquina só; SER: grupos de 2+ que serializam
-  const junto=(x,y)=>(x.seq&&y.seq)||x.ativos.some(z=>y.ativos.indexOf(z)>=0)||um.some(k=>(rpNum(x.rec[k])||0)>0&&(rpNum(y.rec[k])||0)>0);   // nunca ao mesmo tempo
+  const junto=(x,y,fora)=>(x.seq&&y.seq)||x.ativos.some(z=>y.ativos.indexOf(z)>=0)||um.some(k=>k!==fora&&(rpNum(x.rec[k])||0)>0&&(rpNum(y.rec[k])||0)>0);   // nunca ao mesmo tempo (fora: o grupo cujo pico se mede, B5a)
   // maior uso simultâneo do grupo entre quem pode trabalhar junto; para assim que passa de un (só importa se passa), com poda
   //    teto de 65 536 passos: acima disso devolve a soma (conservador: serializa); pare=false dá o máximo para o texto do motivo
   //    por componente do grafo "junto" (quem é independente soma), cada um com busca exata e poda
   const simul=(us,k,un,pare)=>{ const W0=us.map(x=>rpNum(x.rec[k])||0), n=us.length; const tot=W0.reduce((a,b)=>a+b,0); if(tot<=un+1e-9) return tot;
     const vis=us.map(()=>false); let soma=0;
-    for(let s0=0;s0<n;s0++){ if(vis[s0]) continue; const cp=[]; const pl0=[s0]; vis[s0]=true; while(pl0.length){ const a=pl0.pop(); cp.push(a); for(let b=0;b<n;b++) if(!vis[b]&&junto(us[a],us[b])){ vis[b]=true; pl0.push(b); } }
+    for(let s0=0;s0<n;s0++){ if(vis[s0]) continue; const cp=[]; const pl0=[s0]; vis[s0]=true; while(pl0.length){ const a=pl0.pop(); cp.push(a); for(let b=0;b<n;b++) if(!vis[b]&&junto(us[a],us[b],k)){ vis[b]=true; pl0.push(b); } }
       cp.sort((a,b)=>a-b); const w=cp.map(i=>W0[i]), m=cp.length; let best=0, passos=0, estouro=false;
       const vai=(i,s,sel)=>{ if(++passos>65536){ estouro=true; return; } if(s>best) best=s; let rest=0; for(let j=i;j<m;j++) rest+=w[j]; if(s+rest<=best) return;
-        for(let j=i;j<m;j++){ if(sel.some(t=>junto(us[cp[t]],us[cp[j]]))) continue; sel.push(j); vai(j+1,s+w[j],sel); sel.pop(); if(estouro) return; } };
+        for(let j=i;j<m;j++){ if(sel.some(t=>junto(us[cp[t]],us[cp[j]],k))) continue; sel.push(j); vai(j+1,s+w[j],sel); sel.pop(); if(estouro) return; } };
       vai(0,0,[]); soma+=estouro?w.reduce((a,b)=>a+b,0):best; if(pare&&soma>un+1e-9) return soma; }
     return soma; };
   Object.keys(pools||{}).forEach(k=>{ const pv=pools[k]||{}; const un=rpNum(pv.un); if(un===null||isNaN(un)||un<0) return;

@@ -259,7 +259,7 @@ def repartir(Q,cfgs,pools=None):
         xs=[x for x in cand_p if z in x['ativos']]
         if len(xs)>1: RS.append(('at:'+str(z),xs,[x for x in xs if x['H']>0]))
     um=[z[0] for z in PV if z[2]<=1]; SER=[]   # grupo de 1 unidade: uma máquina só; SER: grupos de 2+ que serializam
-    def junto(x,y): return (x['seq'] and y['seq']) or any(z in y['ativos'] for z in x['ativos']) or any((_rp_num(x['rec'].get(k)) or 0)>0 and (_rp_num(y['rec'].get(k)) or 0)>0 for k in um)
+    def junto(x,y,fora=None): return (x['seq'] and y['seq']) or any(z in y['ativos'] for z in x['ativos']) or any(k!=fora and (_rp_num(x['rec'].get(k)) or 0)>0 and (_rp_num(y['rec'].get(k)) or 0)>0 for k in um)   # fora: o grupo cujo pico se mede (B5a)
     def simul(us,k,un,pare):   # maior uso simultâneo por componente do grafo junto, busca exata com poda e teto (como no safra.js)
         W0=[_rp_num(x['rec'].get(k)) or 0 for x in us]; n=len(us); tot=sum(W0,0)
         if tot<=un+1e-9: return tot
@@ -270,7 +270,7 @@ def repartir(Q,cfgs,pools=None):
             while pl0:
                 a=pl0.pop(); cp.append(a)
                 for b in range(n):
-                    if not vis[b] and junto(us[a],us[b]): vis[b]=True; pl0.append(b)
+                    if not vis[b] and junto(us[a],us[b],k): vis[b]=True; pl0.append(b)
             cp.sort(); w=[W0[i] for i in cp]; m=len(cp); st=dict(best=0,passos=0,estouro=False)
             def vai(i,s_,sel):
                 st['passos']+=1
@@ -278,7 +278,7 @@ def repartir(Q,cfgs,pools=None):
                 if s_>st['best']: st['best']=s_
                 if s_+sum(w[i:],0)<=st['best']: return
                 for j in range(i,m):
-                    if any(junto(us[cp[t]],us[cp[j]]) for t in sel): continue
+                    if any(junto(us[cp[t]],us[cp[j]],k) for t in sel): continue
                     sel.append(j); vai(j+1,s_+w[j],sel); sel.pop()
                     if st['estouro']: return
             vai(0,0,[]); soma+=sum(w,0) if st['estouro'] else st['best']
