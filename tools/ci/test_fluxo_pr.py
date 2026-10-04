@@ -229,15 +229,50 @@ class GateTests(unittest.TestCase):
         self.snapshot['comments_complete'] = False
         self.blocked()
 
-    def test_valid_receipt_for_other_head_or_base_does_not_revoke(self):
+    def test_related_valid_json_with_ambiguous_identity_or_candidate_blocks(self):
         previous = self.snapshot['receipts']['101']
-        for changed in ({'head_sha': 'e' * 40}, {'base_sha': 'e' * 40}):
+        for changed in ({'agent': 'Claude'}, {'agent': None}, {'repo': flow.REPO + '/'},
+                        {'base_sha': 'e' * 40}, {'head_sha': 'e' * 40}, {'pr': 92}):
             snapshot = copy.deepcopy(self.snapshot)
             body = json.loads(previous['body'])
             body.update(changed, verdict='blocked')
             snapshot['comments'].append(dict(previous, id=103, body=json.dumps(body)))
             with self.subTest(changed=changed):
-                self.assertEqual(flow.avaliar(self.request, snapshot, NOW)['state'], 'eligible')
+                result = self.blocked(snapshot=snapshot)
+                self.assertIn('ambíguo', result['reasons'][0])
+
+    def test_related_receipt_without_agent_blocks(self):
+        previous = self.snapshot['receipts']['101']
+        body = json.loads(previous['body'])
+        del body['agent']
+        self.snapshot['comments'].append(dict(previous, id=103, body=json.dumps(body)))
+        result = self.blocked()
+        self.assertIn('ambíguo', result['reasons'][0])
+
+    def test_receipt_for_other_pr_and_other_head_is_irrelevant(self):
+        previous = self.snapshot['receipts']['101']
+        body = json.loads(previous['body'])
+        body.update(pr=92, head_sha='e' * 40, verdict='blocked')
+        self.snapshot['comments'].append(dict(previous, id=103, body=json.dumps(body)))
+        self.assertEqual(flow.avaliar(self.request, self.snapshot, NOW)['state'], 'eligible')
+
+    def test_clarification_and_all_new_receipt_ids_close_previous_ambiguity(self):
+        previous = self.snapshot['receipts']['101']
+        body = json.loads(previous['body'])
+        body.update(agent='Claude', verdict='blocked')
+        self.snapshot['comments'].append(dict(previous, id=103, body=json.dumps(body)))
+        self.snapshot['comments'].append(dict(previous, id=104,
+            body='Esclarecimento registrado; os três pareceres a seguir substituem a rodada anterior.'))
+        self.blocked()
+        latest_refs = []
+        for reference, new_id in zip(self.request['receipts'], (105, 106, 107)):
+            old = self.snapshot['receipts'][str(reference['comment_id'])]
+            latest = dict(old, id=new_id)
+            self.snapshot['comments'].append(latest)
+            self.snapshot['receipts'][str(new_id)] = latest
+            latest_refs.append({'comment_id': new_id, 'sha256': checksum(latest['body'])})
+        self.request['receipts'] = latest_refs
+        self.assertEqual(flow.avaliar(self.request, self.snapshot, NOW)['state'], 'eligible')
 
     def test_unrelated_comment_and_unauthorized_revocation_do_not_grant_new_authority(self):
         previous = self.snapshot['receipts']['101']

@@ -88,6 +88,12 @@ formato bloqueia como possível revogação; o integrador precisa resolver o tex
 obter os recibos atuais depois da consolidação. Outras narrativas continuam
 exigindo leitura humana/do agente integrador. CONTRIBUTOR não recebe autorização
 de relator por esta regra. PR nos recibos é um inteiro, não texto ou decimal.
+Mesmo com JSON válido, um comentário posterior desse schema que cite o PR ou
+HEAD atual e tenha agente desconhecido/ausente ou campos de candidata divergentes
+bloqueia como recibo/revogação ambíguo. Isso inclui outra base ou HEAD no mesmo PR:
+o integrador esclarece se é histórico ou revogação e reúne recibos atuais depois.
+Uma referência a outro PR e outro HEAD não interfere. A regra conservadora evita
+interpretar um erro de preenchimento como ausência de revogação.
 Uma mudança de HEAD/base ou edição do recibo invalida o pedido; reaproveitar
 provas pertinentes exige novo parecer explícito sobre a composição atual.
 
@@ -122,7 +128,9 @@ contrato/completude demonstrados e não foi adotada. Não substituir por coment�
 REST, que não comprovam resolução. No fluxo por conector oficial, o integrador
 obtém leituras autenticadas equivalentes, completas e recentes, podendo delegar
 a leitura de threads ao Codex e analisar seu bruto; um arquivo isolado não serve
-de aceite. Erro, truncamento ou falta de prova de completude bloqueiam. Depois,
+de aceite. A coleta completa e a leitura delegada vencem em 120 segundos;
+recomeçar se o repasse exceder esse prazo, sem usar dez minutos como tolerância.
+Erro, truncamento ou falta de prova de completude bloqueiam. Depois,
 o próprio integrador independente faz a chamada autorizada com SHA esperado e
 confere o readback abaixo. Isso é uma operação do executor, não ativação do CLI
 nesse ambiente nem prova de independência do Mac.

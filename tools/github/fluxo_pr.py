@@ -144,9 +144,12 @@ def avaliar(pedido, s, agora_utc=None):
                 exigir(not (comentario['id'] > primeiro_recibo and possivel),
                        'possível revogação fora do formato: comentário ' + str(comentario['id']))
                 continue
-            if (isinstance(r, dict) and r.get('schema') == 'safrion-review-v1'
-                    and r.get('agent') in AGENTES
-                    and all(r.get(k) == pedido[k] for k in ('repo', 'pr', 'head_sha', 'base_sha'))):
+            da_candidata = (r.get('agent') in AGENTES and
+                            all(r.get(k) == pedido[k] for k in ('repo', 'pr', 'head_sha', 'base_sha')))
+            relacionado = r.get('pr') == pedido['pr'] or r.get('head_sha') == pedido['head_sha']
+            exigir(not (comentario['id'] > primeiro_recibo and relacionado and not da_candidata),
+                   'recibo/revogação ambíguo: comentário ' + str(comentario['id']))
+            if da_candidata:
                 recentes[r['agent']] = comentario['id']
         vistos, papeis = set(), set()
         for referencia in pedido['receipts']:
