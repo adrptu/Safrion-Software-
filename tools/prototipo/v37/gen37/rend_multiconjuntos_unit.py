@@ -22,6 +22,9 @@ aninhado (M2); nas entradas aleatórias, cada ativo cabe na janela dele e uma co
 Rodada 3: sem restrição do fecho (só recurso físico); grupo de recursos decidido pelo maior uso simultâneo real e, com 1 unidade, como um
 ativo (P1, P2); janela 0 conta no grupo do plano (P3); empate de troca independe da ordem das linhas (P4); 1 ou 2 unidades: mesma divisão
 quando o grupo não limita (P5).
+Rodada 4: grupo de 1 unidade conta como "nunca ao mesmo tempo" para os outros grupos (Q1/Q2: colheita de café, colhedora como grupo = como
+ativo); configuração que sozinha precisa de mais unidades do que a fazenda tem não trabalha, com motivo e causa (Q3, Q4); busca do uso
+simultâneo com poda (Q5: 20 configurações em menos de 1 s).
 Uso: python3 rend_multiconjuntos_unit.py"""
 import sys, os, json, re, subprocess, tempfile
 from fractions import Fraction as F
@@ -143,6 +146,18 @@ CASOS=[
  ('P5b fecho_nao_e_restricao_2','rodada 3 · o mesmo com 2 plantadeiras: a mesma divisão (menos recurso não dá plano mais otimista)',
    1000,[dict(id='A',nome='A',rend=5,jan=10,ativos=['a01'],custo_h=1),dict(id='B',nome='B',rend=5,jan=10,ativos=['a01','a02'],custo_h=1),dict(id='C',nome='C',rend=5,jan=10,ativos=['a02'],rec={'plant':1},custo_h=1),dict(id='D',nome='D',rend=5,rec={'plant':1},custo_h=1)],
    {'plant':{'un':2,'nome':'Plantadeiras'}},dict(q=['25','25','25','925'],conflito=True,deficit='90')),
+ ('Q1 cafe_colhedora_como_grupo','rodada 4 · colheita de café, 60 ha, janelas de 80 h: A e B com a única colhedora, trator e 2 operadores; C com equipe de 6; 8 operadores: A e B nunca juntas, então cabem 2 + 6 = 8; 20 + 20 + 20 ha, déficit 80/9 h só da colhedora',
+   60,[dict(id='A',nome='A',rend='1/2',jan=80,rec={'colh':1,'trator':1,'oper':2},custo_h=1),dict(id='B',nome='B',rend='1/2',jan=80,rec={'colh':1,'trator':1,'oper':2},custo_h=1),dict(id='C',nome='C',rend='7/20',jan=80,rec={'oper':6},custo_h=1)],
+   {'colh':{'un':1,'nome':'Colhedoras'},'trator':{'un':4,'nome':'Tratores'},'oper':{'un':8,'nome':'Operadores e equipe'}},dict(q=['20','20','20'],saldo='0',conflito=True,deficit='80/9',motivo='Colhedoras: a fazenda tem 1; quem a usa divide a janela dela')),
+ ('Q2 cafe_colhedora_como_ativo','rodada 4 · o mesmo com a colhedora como ativo colh01 do cadastro: a mesma divisão',
+   60,[dict(id='A',nome='A',rend='1/2',jan=80,ativos=['colh01'],rec={'trator':1,'oper':2},custo_h=1),dict(id='B',nome='B',rend='1/2',jan=80,ativos=['colh01'],rec={'trator':1,'oper':2},custo_h=1),dict(id='C',nome='C',rend='7/20',jan=80,rec={'oper':6},custo_h=1)],
+   {'colh':{'un':1,'nome':'Colhedoras'},'trator':{'un':4,'nome':'Tratores'},'oper':{'un':8,'nome':'Operadores e equipe'}},dict(q=['20','20','20'],saldo='0',conflito=True,deficit='80/9')),
+ ('Q3 equipe_maior_que_o_quadro','rodada 4 · equipe de 10 com 8 operadores na fazenda: não trabalha, pendente com a causa "sem recurso na fazenda" e o motivo',
+   10,[dict(id='E',nome='E',rend=1,jan=20,rec={'oper':10},custo_h=1)],{'colh':{'un':1,'nome':'Colhedoras'},'trator':{'un':4,'nome':'Tratores'},'oper':{'un':8,'nome':'Operadores e equipe'}},
+   dict(q=['0'],pendente=True,causa='sem recurso na fazenda',saldo='10',motivo='E: precisa de 10 em Operadores e equipe, a fazenda tem 8; não trabalha nesta ocorrência')),
+ ('Q4 equipe_maior_com_parte_fixa','rodada 4 · E (equipe de 10, 50 %) e F (1 operador, 50 %): E fica sem conjunto com o motivo; F faz a parte dela',
+   100,[dict(id='E',nome='E',rend=1,part=50,jan=100,rec={'oper':10},custo_h=1),dict(id='F',nome='F',rend=1,part=50,jan=100,rec={'oper':1},custo_h=1)],{'colh':{'un':1,'nome':'Colhedoras'},'trator':{'un':4,'nome':'Tratores'},'oper':{'un':8,'nome':'Operadores e equipe'}},
+   dict(q=['0','50'],saldo='50',pendente=False,motivo='E: precisa de 10 em Operadores e equipe')),
  ('R2b grupo_de_recursos_nao_relaxa_janela_2','PRE-REV R2 · o mesmo com 2 plantadeiras: a mesma divisão (menos recurso nunca dá plano mais otimista); C ao mesmo tempo: 30 h',
    200,[dict(id='A',nome='A',rend=5,seq=True,jan=10,rec={'plant':1},custo_h=100),dict(id='B',nome='B',rend=5,seq=True,jan=10,custo_h=100),dict(id='C',nome='C',rend=5,rec={'plant':1},custo_h=100)],
    {'plant':{'un':2,'nome':'Plantadeiras'}},dict(q=['25','25','150'],saldo='0',decorrido='30',conflito=True,deficit='50/3')),
@@ -173,6 +188,8 @@ js.append("(()=>{ const r=repartir(108,[{rend:rendCalc(6,8,75)},{rend:rendCalc(1
 js.append("OUT['11']=(()=>{ const t=[repartir(48,[{rend:6},{rend:4}]).decorrido,repartir(48,[{rend:6}]).decorrido,repartir(48,[{rend:8}]).decorrido]; const T=Math.max.apply(null,t); return [48/T,T,t]; })();")
 js.append("OUT['R3']=(()=>{ const r=repartir(2882.53,[48.7,17.6,21.9,5.4,6.4].map((p,i)=>({nome:'P'+i,rend:5,part:p,seq:true})).concat([{nome:'L',rend:5,seq:true,troca:2}])); return [r.itens[5].q,r.motivos.filter(m=>/não cobrem/.test(m)).length,r.decorrido]; })();")
 js.append("OUT['P4']=['ABC','CAB','BCA'].map(o=>{ const d={A:{id:'A',nome:'A',rend:5,seq:true,ativos:['a01'],jan:3,troca:1,custo_h:1},B:{id:'B',nome:'B',rend:5,seq:true,jan:3,troca:1,custo_h:1},C:{id:'C',nome:'C',rend:5,ativos:['a01'],troca:1,custo_h:1}}; const r=repartir(11.25,o.split('').map(k=>d[k])); const q={}; r.itens.forEach(x=>{ q[x.id]=x.q; }); return [q.A,q.B,q.C,r.conflito,r.deficit,r.decorrido]; });")
+js.append("OUT['Q4m']=repartir(100,[{id:'E',nome:'E',rend:1,part:50,jan:100,rec:{oper:10},custo_h:1},{id:'F',nome:'F',rend:1,part:50,jan:100,rec:{oper:1},custo_h:1}],{oper:{un:8,nome:'Operadores e equipe'}}).motivos;")
+js.append("OUT['Q5']=(()=>{ const cs=[]; for(let i=0;i<20;i++) cs.push({id:'K'+i,nome:'K'+i,rend:2+i%3,jan:30,rec:{trator:1,plant:1,oper:2},custo_h:1}); const t0=Date.now(); const r=repartir(800,cs,{trator:{un:4},plant:{un:1},oper:{un:8}}); return [Date.now()-t0,r.alocado+r.saldo]; })();")
 js.append("OUT['M1']=repartir(100,[{nome:'A',rend:3.6,seq:true,jan:0,custo_h:1},{nome:'B',rend:7.2,seq:true,jan:10,custo_h:1}]).motivos;")
 js.append("OUT['12']=[repartir(1,[{rend:rendCalc(1.1,3.7,63)}]).hconj, 1/(Math.round(rendCalc(1.1,3.7,63)*100)/100)];")
 js.append('print(JSON.stringify(OUT));')
@@ -239,6 +256,12 @@ chk('R3 resto_relativo_area_grande','PRE-REV R3 · 2.882,53 ha com partes 48,7 +
     '[0, 0 avisos "não cobrem", decorrido 2882,53/5]',OUT['R3'],(p3f['itens'][5]['q'],str(p3['itens'][5]['q']),str(p3['decorrido'])),
     OUT['R3'][0]==0 and OUT['R3'][1]==0 and near(OUT['R3'][2],F('2882.53')/5) and p3f['itens'][5]['q']==0 and p3['itens'][5]['q']==0 and p3['decorrido']==F('2882.53')/5
     and not any('não cobrem' in m for m in p3f['motivos']+p3['motivos']))
+chk('Q4b sem_sequencia_falsa','rodada 4 · E não trabalha (equipe maior que o quadro): o grupo não diz "trabalham em sequência" por causa dela','sem "trabalham em sequência"',OUT['Q4m'],'',
+    not any('trabalham em sequência' in m for m in OUT['Q4m']))
+import time as _t
+_t0=_t.time(); _p5=D2.repartir(800,[dict(id=f'K{i}',nome=f'K{i}',rend=2+i%3,jan=30,rec={'trator':1,'plant':1,'oper':2},custo_h=1) for i in range(20)],{'trator':{'un':4},'plant':{'un':1},'oper':{'un':8}}); _dt=_t.time()-_t0
+chk('Q5 vinte_configuracoes_rapido','rodada 4 · 20 configurações com 3 grupos de recursos: a busca do uso simultâneo com poda responde em menos de 1 s (JS e Python) e conserva a área',
+    '< 1000 ms',f"JS {OUT['Q5'][0]} ms · Σ = {OUT['Q5'][1]}",f'Py {round(_dt*1000)} ms',OUT['Q5'][0]<1000 and _dt<1 and near(OUT['Q5'][1],800) and abs(float(_p5['alocado']+_p5['saldo'])-800)<1e-6)
 p4=[]
 for o in ('ABC','CAB','BCA'):
     d=dict(A=dict(id='A',nome='A',rend=F(5),seq=True,ativos=['a01'],jan=F(3),troca=F(1),custo_h=F(1)),B=dict(id='B',nome='B',rend=F(5),seq=True,jan=F(3),troca=F(1),custo_h=F(1)),C=dict(id='C',nome='C',rend=F(5),ativos=['a01'],troca=F(1),custo_h=F(1)))

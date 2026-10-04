@@ -210,6 +210,7 @@ def repartir(Q,cfgs,pools=None):
         if m not in mot: mot.append(m)
     Q=_rp_num(Q)
     if not _ok(Q) or Q<0: add('área inválida'); Q=0
+    PV=[(k,pv or {},_rp_num((pv or {}).get('un'))) for k,pv in (pools or {}).items()]; PV=[z for z in PV if _ok(z[2])]   # grupos com unidades válidas
     it=[]
     for i,c in enumerate(cfgs or []):
         r,p,H,ch,d,tr,pe=(_rp_num(c.get(k)) for k in ('rend','part','jan','custo_h','diesel','troca','pess'))
@@ -218,6 +219,8 @@ def repartir(Q,cfgs,pools=None):
                troca=tr if _ok(tr) and tr>0 else 0,pess=pe if _ok(pe) and pe>0 else 0,seq=bool(c.get('seq')),ativos=[a for a in (c.get('ativos') or []) if a],
                rec=c.get('rec') or {},t=0,q=0,h=0,ht=0,custo=None,diesel=None,emSeq=False,grupo=i)
         if H is not None and (not _ok(H) or H<0): add(x['nome']+': janela inválida, considerada sem limite')
+        x['Hin']=x['H']; fr=next((z for z in PV if (_rp_num(x['rec'].get(z[0])) or 0)>z[2]+1e-9),None)   # sozinha precisa de mais unidades: não trabalha
+        if fr: x['H']=0; x['semRec']=True; add(f"{x['nome']}: precisa de {_rp_f(_rp_num(x['rec'][fr[0]]))} em {fr[1].get('nome') or fr[0]}, a fazenda tem {_rp_f(fr[2])}; não trabalha nesta ocorrência")
         it.append(x)
     fx=[x for x in it if x['p'] is not None]; sp=sum((x['p'] for x in fx),0); esc=100/sp if sp>100 else 1
     if sp>100+1e-9: add(f'partes fixas somam {_rp_f(sp)} %: reduzidas na proporção para fechar 100 %')
@@ -255,26 +258,26 @@ def repartir(Q,cfgs,pools=None):
     for z in ats:
         xs=[x for x in cand_p if z in x['ativos']]
         if len(xs)>1: RS.append(('at:'+str(z),xs,[x for x in xs if x['H']>0]))
-    def junto(x,y): return (x['seq'] and y['seq']) or any(z in y['ativos'] for z in x['ativos'])   # nunca ao mesmo tempo
-    def simul(us,k):   # maior uso simultâneo do grupo k entre usuários que podem trabalhar juntos
-        n=len(us)
-        if n>14: return sum(((_rp_num(x['rec'].get(k)) or 0) for x in us),0)
-        mx=0
-        for m in range(1,1<<n):
-            ok=True; s_=0
-            for i in range(n):
-                if not ok: break
-                if not m&(1<<i): continue
-                s_+=_rp_num(us[i]['rec'].get(k)) or 0
-                for j in range(i+1,n):
-                    if m&(1<<j) and junto(us[i],us[j]): ok=False; break
-            if ok and s_>mx: mx=s_
-        return mx
+    um=[z[0] for z in PV if z[2]<=1]   # grupo de 1 unidade: uma máquina só
+    def junto(x,y): return (x['seq'] and y['seq']) or any(z in y['ativos'] for z in x['ativos']) or any((_rp_num(x['rec'].get(k)) or 0)>0 and (_rp_num(y['rec'].get(k)) or 0)>0 for k in um)
+    def simul(us,k,un):   # maior uso simultâneo entre quem pode trabalhar junto; para assim que passa de un, com poda (como no safra.js)
+        w=[_rp_num(x['rec'].get(k)) or 0 for x in us]; n=len(us); tot=sum(w,0)
+        if tot<=un+1e-9: return tot
+        best=[0]
+        def vai(i,s_,sel):
+            if s_>best[0]: best[0]=s_
+            if best[0]>un+1e-9: return
+            if s_+sum(w[i:],0)<=best[0]: return
+            for j in range(i,n):
+                if any(junto(us[t],us[j]) for t in sel): continue
+                sel.append(j); vai(j+1,s_+w[j],sel); sel.pop()
+                if best[0]>un+1e-9: return
+        vai(0,0,[]); return best[0]
     for k,pv in (pools or {}).items():
         un=_rp_num((pv or {}).get('un'))
         if not _ok(un): continue
-        u_p=[x for x in cand_p if (_rp_num(x['rec'].get(k)) or 0)>0]; u_a=[x for x in u_p if x['H']>0]
-        s_a=simul(u_a,k) if len(u_a)>1 else 0; s_p=simul(u_p,k) if len(u_p)>1 else 0
+        u_p=[x for x in cand_p if not x.get('semRec') and (_rp_num(x['rec'].get(k)) or 0)>0]; u_a=[x for x in u_p if x['H']>0]   # sem recurso já tem o motivo
+        s_a=simul(u_a,k,un) if len(u_a)>1 else 0; s_p=simul(u_p,k,un) if len(u_p)>1 else 0
         ea=len(u_a)>1 and (un<=1 or s_a>un+1e-9); ep=len(u_p)>1 and (un<=1 or s_p>un+1e-9)   # 1 unidade: uma máquina só, como um ativo
         if ea:
             for x in u_a: U.une(u_a[0]['i'],x['i'])
@@ -305,7 +308,10 @@ def repartir(Q,cfgs,pools=None):
             if t<=1e-12: continue
             if x['r'] is None: saldo+=t; cz['rend']=1; ad(x['nome']+': sem rendimento válido (ha/h), a parte dela fica sem conjunto'); continue
             q[x['i']]=min(t,x['r']*x['H'])
-            if t-q[x['i']]>1e-9: saldo+=t-q[x['i']]; cz['jan']=1; ad(f"{x['nome']}: a parte fixa não cabe na janela de {_rp_f(x['H'])} h")
+            if t-q[x['i']]>1e-9:
+                saldo+=t-q[x['i']]
+                if x.get('semRec'): cz['rec']=1
+                else: cz['jan']=1; ad(f"{x['nome']}: a parte fixa não cabe na janela de {_rp_f(x['H'])} h")
         cab=q[:]; cortes=[]   # o que cabia na própria janela; o motivo diz a fração final, depois de todas as restrições
         for g in jan:
             xs=[x for x in pista_a[g] if x['p'] is not None and q[x['i']]>0]; hf=sum((q[x['i']]/x['r'] for x in xs),0); B=max(0,jan[g])
@@ -328,7 +334,7 @@ def repartir(Q,cfgs,pools=None):
                 for x in livres:
                     if x['r'] is None: ad(x['nome']+': sem rendimento válido (ha/h); '+('a divisão pelo rendimento fica pendente' if len(livres)>1 else 'horas pendentes'))
             else:
-                rest=R; at=livres[:]; bj=False; bs=False
+                rest=R; at=livres[:]; bj=False; bs=False; br=False
                 while at:
                     sr=sum(x['r'] for x in at); T=rest/sr; e=T
                     for x in at:
@@ -348,12 +354,15 @@ def repartir(Q,cfgs,pools=None):
                         for g in pl(x):
                             uso[g]=uso.get(g,0)+e
                             if tl[g]<=e: bs=True
-                        if x['H']<=e: bj=True
+                        if x['H']<=e:
+                            if x.get('semRec'): br=True
+                            else: bj=True
                     fzi={x['i'] for x in fz}; at=[x for x in at if x['i'] not in fzi]
                 if rest>1e-9:
                     saldo+=rest
                     if bs: cz['seq']=1; ad('em sequência dividem a mesma janela: a área que não cabe fica sem conjunto')
-                    if bj or not bs: cz['jan']=1; ad('as janelas não comportam toda a área')
+                    if bj or (not bs and not br): cz['jan']=1; ad('as janelas não comportam toda a área')
+                    if br: cz['rec']=1
         return q,saldo,cz
     q2,saldo,cz=aloca(add)
     for x in it: x['q']=q2[x['i']]
@@ -398,7 +407,7 @@ def repartir(Q,cfgs,pools=None):
     alocado=sum((x['q'] for x in it),0)
     if saldo<1e-9: saldo=0
     pend=Q>1e-12 and alocado<=1e-12
-    causa='' if not pend else ('sem conjunto' if cz.get('cfg') else ('sem rendimento' if cz.get('rend') else ('sem horas na janela' if (cz.get('jan') or cz.get('seq')) else 'partes fixas abaixo de 100 %')))
+    causa='' if not pend else ('sem conjunto' if cz.get('cfg') else ('sem rendimento' if cz.get('rend') else ('sem horas na janela' if (cz.get('jan') or cz.get('seq')) else ('sem recurso na fazenda' if cz.get('rec') else 'partes fixas abaixo de 100 %'))))
     # 3) saldo em horas pelas premissas do plano; necessário = atendido + saldo (ha e horas-conjunto); decorrido necessário por sequência inteira
     sem_h=0; fq=[0]*len(it)
     for x in fx:
