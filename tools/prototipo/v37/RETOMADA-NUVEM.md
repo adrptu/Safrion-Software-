@@ -96,6 +96,11 @@ Sem a camada sintética (tarefa 1), o build para em `dados_lagoa_fonte`, com uma
     - `gen37/dados_lagoa_safra.py` (textos de quantidade).
   - Nenhum hunk da REND toca esses arquivos. Na AÇÃO, só `processo_os.py` é tocado, em `645/851/981/987`, fora das linhas acima.
 
+## Reserva ativa · V44-REND (contrato no comentário 5974952517; liberada pelo 5974993475) · branch `claude/v44-rend-01`
+- **Base:** `0fcc2dc` (candidata CAMADA + SINT-REV + SINT-C03), mais o merge **sequencial** (não octopus) de `prototipo-limpo/v44-rend` `126899e5`.
+- **Arquivos:** `gen37/dados2.py`, `gen37/safra.js`, `gen37/areas/processo_safra.py` (preservar a formatação SINT da linha 39), `gen37/rend_multiconjuntos_test.py` e `gen37/rend_multiconjuntos_unit.py`. `gen37/cdp.py` entra só para resolver o conflito do merge.
+- A correção SINT-C03 fica separada (`45b34c7`, na branch `claude/camada-sintetica-01`). A AÇÃO vem depois. A composição não é aceite nem publicação.
+
 ## Tarefas, na ordem
 1. **CAMADA-SINTETICA (CORTE-REMOTO-01)**
    - **Arquivos novos:** `dados_lagoa_sintetico/{__init__.py, kml.py, gerar.py, saida/}`.
