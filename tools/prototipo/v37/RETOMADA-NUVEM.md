@@ -128,6 +128,13 @@ Sem a camada sintética (tarefa 1), o build para em `dados_lagoa_fonte`, com uma
     - **Y4 · S3 · `gen37/irrigacao_estado.js:344/362` e `gen37/areas/irrigacao.py:491/510`:** o arredondamento a 2 casas vinha depois da validação (término com 0,004 ha virava 0 e encerrava com conferência falsa). Arredonda antes de validar, no estado e na tela.
     - **Y5 · S4 · `gen37/areas/irrigacao.py:427/436` e `gen37/irrigacao_estado.js:107/557`:** cobertura e faixa com 1 casa ao lado do saldo da v2 com 2 casas. Passa a até 2 casas (mínimo 1, como antes).
     - **Y6 · S4 · `gen37/areas/processo_os.py` (trava do ajuste) e `gen37/quantidade_test.py`:** a trava vira a função `osc_ajFalta` do núcleo (a tela chama a mesma), com teste de comportamento; testes do término com 20,275 e 0,004 ha, da v2 com 0 ha e do MIP com total 0.
+  - **Revisão adversarial da rodada 4 (rodada 5), reserva antes de editar:**
+    - **X1 · S3 · `gen37/areas/processo_os.py:248` (osMerge), `:413` (osProx) e `:526` (ajLib):** com total 0, o painel da O.S. e o do Mapa ainda mandavam resolver no Suprimentos e o dono podia não ser o agrônomo. O impedimento diz o agrônomo, sem o link do Estoque; o ajuste continua "Salvar e liberar".
+    - **X2 · S4 · `gen37/areas/processo_os.py:312` (osc_ajustar):** "Salvar ajuste" sem liberar gravava versão com total 0. Recusa sempre.
+    - **X3 · S4 · `gen37/areas/irrigacao.py:483/492/510` e `gen37/irrigacao_estado.js:562–564` (irrSituacao):** área do setor com 0 ou 1 casa ao lado da cobertura com 2 casas (a mensagem recusava o próprio limite). Passa a até 2 casas.
+    - **X4 · S4 · `gen37/areas/agronomia.py:676` (TAGS):** a trava de total 0 do MIP aparecia como "Dose fora da bula". Chip próprio.
+    - **X5 · S4 · `gen37/irrigacao_estado.js:54` (irrV2Zero):** com outra passada programada, a recusa manda confirmar o término e adicionar os produtos às próximas passadas (não criar nova ordem).
+    - **X6 · `gen37/quantidade_test.py`:** proteção de regressão de X1, X2 e X5.
   - **Separação:** nenhum hunk da REND (`126899e5`) toca esses arquivos. A AÇÃO (`20f25726`) toca `agronomia.py:1748` e `irrigacao.py:26–86`, fora das linhas acima. Depois do commit aqui, a `claude/v44-rend-01` recebe esta branch por merge.
 
 ## Reserva ativa · V44-REND (contrato no comentário 5974952517; liberada pelo 5974993475) · branch `claude/v44-rend-01`

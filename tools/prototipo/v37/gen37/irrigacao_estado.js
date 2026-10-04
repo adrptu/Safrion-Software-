@@ -51,7 +51,7 @@ const IRR_D0 = Date.UTC(2026, 8, 23);
 function irr2(n) { const t = String(n); return /e/i.test(t) ? Math.round(n * 100) / 100 : Number(Math.round(Number(t + 'e2')) + 'e-2'); }
 function irrAreaV2(x, p) { return p ? Math.round((x.ha - Math.min(x.ha, p.cob || 0)) * 100) / 100 : x.ha; }
 // v2 que daria total 0 pela regra única: a liberação recusaria e a ordem ficaria sem saída; diz a causa (mesmo texto na prévia)
-function irrV2Zero(x, p, dose) { const a = irrAreaV2(x, p); if (!(a > 0)) return 'A passada já cobriu o setor: confirme o término e programe uma nova fertirrigação na O.S.';
+function irrV2Zero(o, x, p, dose) { const a = irrAreaV2(x, p); if (!(a > 0)) return irrPassProx(o) ? 'A passada ' + p.n + ' já cobriu o setor: confirme o término dela e adicione os produtos para as próximas passadas.' : 'A passada já cobriu o setor: confirme o término e programe uma nova fertirrigação na O.S.';
   return (dose > 0 && !(cenQtd(dose, a) > 0)) ? 'Dose × área dá 0 kg: aumente a dose.' : ''; }
 function irrN(n, d, dmin) { return Number(n || 0).toLocaleString('pt-BR', { minimumFractionDigits: (dmin === undefined ? (d || 0) : dmin), maximumFractionDigits: d || 0 }); }
 function irrHa(n) { return irrN(n, Math.abs(n % 1) > 1e-9 ? 1 : 0); }
@@ -439,7 +439,7 @@ function irrReclassificar(s, id, d) {
     p.st = 'Parcial'; p.cob = v1; p.fimReal = q; p.vol = v1 > 0 ? irrTele(s, o, p, v1) : 0; irrCredito(s, o, p);
     vol += area * p.lam * 10; sw = { ini: q, fim: Math.max(q + 15, fim0) }; }
   o.passadas.filter(z => z.st === 'Programada').forEach(z => { vol += x.ha * z.lam * 10; });
-  { const m = irrV2Zero(x, p, d.dose); if (m) throw new Error(m); }   // nunca seria liberada nem entregue (PRE-REV Y1)
+  { const m = irrV2Zero(o, x, p, d.dose); if (m) throw new Error(m); }   // nunca seria liberada nem entregue (PRE-REV Y1)
   o.fert = { prod: d.prod, dose: d.dose, mot: d.mot, exec: iniciou, q, area, v1, vol: Math.round(vol), lamHa: area > 0 ? vol / (10 * area) : 0, tot: cenQtd(d.dose, area), sw };   // regra única de quantidade (cenario.js, sempre carregado antes)
   o.versao = 'v2';
   if (!iniciou) { if (o.lib) { o.libRes = o.lib; irrTr(o, q, o.lib, 'Liberação da água revogada: com produto, a liberação é do agrônomo', 'sistema'); } o.lib = null; o.etapa = 'A liberar'; }
@@ -559,9 +559,9 @@ function irrSituacao(s, sid) {
   it.sort((a, b) => a.r - b.r);
   const fon = est ? ((irrSonda(s, x) || {}).st === 'Suspeita' ? 'sonda suspeita (' + (irrSonda(s, x).motivo || '') + ') · estimativa por ET' : 'sonda sem dado desde ' + irrQuando(irrSonda(s, x).desde) + ' · estimativa por ET') : (F.demo ? 'balanço demonstrativo · hoje 06:00' : 'estação Santa Rita + sonda · hoje 06:00');
   const aps = irrApsSetor(s, sid); const ultA = aps.slice().sort((a, b) => b.q - a.q)[0]; const fx = irrFaixaCob(s, sid);
-  const ult = ultA ? irrDdmm(irrDiaN(ultA.q)) + ' · ' + ultA.os + ' · ' + irrMm(irrApBr(ultA)) + ' mm em ' + (irrApParc(ultA, x.ha) ? irrN(irrApCob(ultA), 1) + ' de ' + irrN(x.ha) + ' ha' : irrN(x.ha) + ' ha') + (ultA.prov ? ' · provisório' : '')
+  const ult = ultA ? irrDdmm(irrDiaN(ultA.q)) + ' · ' + ultA.os + ' · ' + irrMm(irrApBr(ultA)) + ' mm em ' + (irrApParc(ultA, x.ha) ? irrN(irrApCob(ultA), 2, 1) + ' de ' + irrN(x.ha, 2, 0) + ' ha' : irrN(x.ha, 2, 0) + ' ha') + (ultA.prov ? ' · provisório' : '')
     : (x.bal.repos !== undefined ? irrDdmm(irrDiaN(x.bal.repos)) + ' · reposição completa (há ' + (-irrDiaN(x.bal.repos)) + (irrDiaN(x.bal.repos) === -1 ? ' dia' : ' dias') + ')' : '—');
-  const base = { d, est, n, fon, eq: (x.tipo === 'gotejo' ? 'Gotejo' : 'Pivô central') + ' · ' + irrN(x.ha) + ' ha · ' + irrN(x.vazao) + ' L/s · ' + x.bnome + (cp ? ' · ' + cp.nome : ''), ult, ords: ab,
+  const base = { d, est, n, fon, eq: (x.tipo === 'gotejo' ? 'Gotejo' : 'Pivô central') + ' · ' + irrN(x.ha, 2, 0) + ' ha · ' + irrN(x.vazao) + ' L/s · ' + x.bnome + (cp ? ' · ' + cp.nome : ''), ult, ords: ab,
     faixa: fx ? 'faixa de ' + irrN(fx.cob, 2, 1) + ' ha (' + fx.os + '): ' + irrN(fx.d, 1) + ' mm · resto do ' + (x.tipo === 'gotejo' ? 'setor' : 'pivô') + ': ' + irrN(d, 1) + ' mm' : '' };
   if (it.length) { const t = it[0]; const o = (t.o && irrEt(t.o) === 'Em conferência') ? (ab.find(z => irrEt(z) !== 'Em conferência') || null) : t.o; let limt = 'Lâmina programada', lam = '';
     if (o) { lam = irrMm(o.lam) + ' mm' + (o.passadas.length > 1 ? ' em ' + o.passadas.length + ' passadas' : '') + ' · ' + irrJanO(o); const cb = irrCobre(s, o); if (cb && cb.cob !== null) lam += ' · cobre ' + irrN(cb.cob, 0) + ' %' + (cb.resta > 0.05 ? ' · resta ' + irrN(cb.resta, 1) + ' mm' : ''); }

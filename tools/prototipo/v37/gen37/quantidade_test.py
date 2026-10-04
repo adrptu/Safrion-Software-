@@ -114,7 +114,12 @@ R.r4.term=[term(20.275),term(0.004)];
 { cenReset(); mipReset(); const k=mipChecks(mipGet(),vb,{kind:'localizado',prod:ub.id,dose:String(ub.dmin),area:'0,01',data:'2026-10-20'},cenGet()); R.r4.mip0=k.tr.filter(x=>/dá 0/.test(x)).length; }
 { cenReset(); const c=cenGet(); c.ordens.Z0={id:'Z0',etapa:'A liberar',area:10,saldo:10,realizado:0,ap:[],ins:[{p:ub.nome,dose:0.0001,un:ub.un,tot:0}]};
   const o=osMerge({id:'Z0',etapa:'A liberar',area:10,ins:[],selos:[],agua:false,dono:'Ana (agrônoma)',cond:'Pronta. Próximo passo: liberar para execução.'},c.ordens.Z0,c);
-  R.r4.rotulo=[o.selos.map(x=>x.t).join(','),o.dono,o.prazo]; }
+  R.r4.rotulo=[o.selos.map(x=>x.t).join(','),o.dono,o.prazo];
+  // 13 · rodada 5 (PRE-REV X1/X2/X5): o painel diz o agrônomo e não o Estoque; ajuste sem liberar recusa total 0; v2 com outra passada
+  let px=null; try{ px=osProx(o); }catch(e){ px={erro:e.message}; } R.r5={prox:JSON.stringify(px||{})};
+  try{ osc_ajustar(c,'Z0',9,{[ub.nome]:0.0001},'',[],[],false); /* muda a área: grava versão nova */ R.r5.ajSemLib='gravou'; }catch(e){ R.r5.ajSemLib=e.message; } }
+{ irrReset(); const s=irrGet(); const id2=Object.keys(s.ordens).find(k=>s.ordens[k].passadas.length>1&&['Liberadas'].indexOf(s.ordens[k].etapa)>=0);
+  if(id2){ irrIniciar(s,id2); const o2=s.ordens[id2], x2=s.setores[o2.setor], p2=irrPassAtual(o2); p2.cob=x2.ha; R.r5.multi=irrV2Zero(o2,x2,p2,12); } else R.r5.multi='sem ordem de 2 passadas'; }
 print(JSON.stringify(R));
 })();
 """
@@ -185,6 +190,11 @@ chk('12 rodada 4: a trava do ajuste do núcleo libera no limite e recusa 0,01 a 
     r4['aj'][0] == '' and 'Estoque' in r4['aj'][1] and 'dá 0' in r4['aj'][2] and 'dá 0' in r4['aj'][3] and r4['aj'][4] == ''
     and r4['term'][0] == 20.28 and str(r4['term'][1]).startswith('ERRO') and 'já cobriu o setor' in r4['v2cheia'] and r4['mip0'] == 1
     and r4['rotulo'][0].startswith('Total 0 · ') and 'Falta insumo' not in r4['rotulo'][0] and r4['rotulo'][1] == 'Ana (agrônoma)' and r4['rotulo'][2] == 'ajustar dose ou área', r4)
+r5 = F['r5']
+chk('13 rodada 5: com total 0, o painel da O.S. aponta o agrônomo (sem Suprimentos nem link do Estoque); "Salvar ajuste" sem liberar recusa total 0; '
+    'com outra passada programada, a v2 recusada manda adicionar os produtos às próximas passadas',
+    'Ana (agrônoma)' in r5['prox'] and 'Suprimentos' not in r5['prox'] and 'EST.dc.html' not in r5['prox'] and 'dá 0' in r5['ajSemLib']
+    and 'próximas passadas' in r5['multi'], r5)
 crus = []
 for fn in sorted(glob.glob(os.path.join(HERE, '*.js')) + glob.glob(os.path.join(HERE, '*.py')) + glob.glob(os.path.join(HERE, 'areas', '*.py'))):
     rel = os.path.relpath(fn, HERE)
