@@ -26,14 +26,15 @@ function cenOuvir(self) {
 // Regra única de quantidade de insumo (SINT-C03; mesma de quantidade.py): dose × área em DECIMAL exato (forma decimal mais curta
 // de cada número), 2 casas, meio para cima. Consumo de um apontamento = quantidade(acumulado depois) − quantidade(acumulado antes):
 // a soma dos apontamentos fecha no total da ordem e a custódia zera, sem tolerância.
-function cenDec(x) { const s = String(Number(x)); if (!/^-?\d+(\.\d+)?$/.test(s)) return null; const p = s.split('.'); const f = p[1] || '';
-  return { n: BigInt(p[0] + f), e: f.length }; }
+function cenDec(x) { const m = /^(-?)(\d+)(?:\.(\d+))?(?:e([+-]\d+))?$/.exec(String(Number(x))); if (!m) return null;   // NaN/Infinity: fora
+  const f = m[3] || ''; let n = BigInt(m[1] + m[2] + f), e = f.length - Number(m[4] || 0); if (e < 0) { n *= 10n ** BigInt(-e); e = 0; }   // 1e-7, 1e+21
+  return { n, e }; }
 function cenQtd(dose, area) {
   const a = cenDec(dose), b = cenDec(area); if (!a || !b) throw new Error('Quantidade fora da faixa: ' + dose + ' × ' + area + '.');
   let n = a.n * b.n; const e = a.e + b.e; const neg = n < 0n; if (neg) n = -n;
   let c;   // centésimos, meio para cima
   if (e <= 2) c = n * (10n ** BigInt(2 - e)); else { const d = 10n ** BigInt(e - 2); c = (n * 2n + d) / (2n * d); }
-  return (neg ? -1 : 1) * Number(c) / 100; }
+  const t = c.toString().padStart(3, '0'); return (neg ? -1 : 1) * Number(t.slice(0, -2) + '.' + t.slice(-2)); }   // decimal exato → número mais próximo (= float(Decimal))
 function cenQtdTrecho(dose, antes, ha) {
   const a0 = Number((antes || 0).toFixed(6)), a1 = Number(((antes || 0) + ha).toFixed(6));
   return Math.round((cenQtd(dose, a1) - cenQtd(dose, a0)) * 100) / 100; }

@@ -295,7 +295,7 @@ function EXTRAVALS(self,v){ const s=mipGet(), c=agC(); const osDe=(d)=>{ const r
 function a4Rec(r,s,c,v){ const vv=s.vis[r.vis]; const t=MIPD.tal[r.tal]||{rot:r.tal,cultura:''}; const p=vv?mipP(vv):{alvo:''}; const canc=r.sit==='Cancelado'; const emit=r.sit==='Receituário emitido'||canc;
   const osc=r.sit==='Receituário emitido'&&mipOsFora(c,r.os);
   const et=r.os?(mipOsEt(c,r.os)||'—'):''; const dr='a4go_'+r.id; v[dr]=()=>{ location.href='AG-01.dc.html#'+r.vis; };
-  const prod=emit?(r.nome+' '+mipN(r.dose,3)+' '+r.un+'/ha · '+mipN(r.area)+' ha'):'a definir na decisão'; const jan=emit?('a partir de '+mipBr(r.data)):'—';
+  const prod=emit?(r.nome+' '+mipN(r.dose,3)+' '+r.un+'/ha · '+mipN(r.area,2)+' ha'):'a definir na decisão'; const jan=emit?('a partir de '+mipBr(r.data)):'—';
   return {id:r.id,ro:true,dr,v:{id:r.id,parc:t.rot+' · '+t.cultura,op:'Pulverização · '+p.alvo.toLowerCase(),jan,fonte:emit?('bula AGROFIT · Ana (RT) · '+r.ra):'— · pendente'},
     s:{orig:r.dia+' '+r.vis,op:'Pulverização · '+p.alvo.toLowerCase()+' '+t.rot,prod:prod+' '+jan,sit:canc?'Cancelado':(osc?'O.S. cancelada':(emit?'Receituário emitido':'Rascunho'))},
     p:{id:[{k:'b',t:r.id},{k:'br'},{k:'mut',t:emit?r.ra:'rascunho'}],orig:[{k:'txt',t:r.dia},{k:'br'},{k:'link',t:r.vis,h:'AG-01.dc.html#'+r.vis}],
@@ -751,10 +751,10 @@ function agPanel(self,v){ const st=self.state; const s=mipGet(), c=agC(); const 
   if(dz) reg.push({t:dz.id+' · '+dz.sit+(dz.dec?' · '+dz.dec:''),sub:(dz.hip||'')+(dz.em?' · '+mipBrA(dz.em)+' · '+dz.por:'')+(dz.motivo?' · motivo: '+dz.motivo:''),h:dz.id==='DIA-007'?'AG-03det.dc.html':'AG-03.dc.html',hl:'Diagnósticos'});
   if(d&&d.rec==='REC-014'){ reg.push({t:'REC-014 v2 · em uso nos 30 ha realizados · saldo de 70 ha travado',sub:'KCl por zona + TS nematicida (abamectina) + semente 58 W resistente',h:'AG-04det.dc.html',hl:'Abrir REC-014'});
     rtr.push({t:'Trava legal: TS nematicida (abamectina) sem registro para soja × nematoide-de-cisto. O saldo de 70 ha aguarda a v4 com TS registrado (ex.: Pasteuria nishizawae FS).'}); }
-  else if(d&&d.rec&&s.rec[d.rec]){ const r=s.rec[d.rec]; reg.push({t:r.id+' · receituário '+r.ra+' · '+r.sit,sub:r.nome+' '+mipN(r.dose,3)+' '+r.un+'/ha · '+mipN(r.area)+' ha · a partir de '+mipBr(r.data)+' · Ana (RT)',h:'AG-07.dc.html#'+r.prod,hl:'Ficha do produto'}); }
+  else if(d&&d.rec&&s.rec[d.rec]){ const r=s.rec[d.rec]; reg.push({t:r.id+' · receituário '+r.ra+' · '+r.sit,sub:r.nome+' '+mipN(r.dose,3)+' '+r.un+'/ha · '+mipN(r.area,2)+' ha · a partir de '+mipBr(r.data)+' · Ana (RT)',h:'AG-07.dc.html#'+r.prod,hl:'Ficha do produto'}); }
   else if(d&&d.ra&&d.prod){ const G=MIPD.grupo[d.prod]||{nome:d.prod,g:''}; reg.push({t:'Receituário '+d.ra+' · '+G.nome,sub:G.g+' · decisão de '+mipBrA(d.em)+' · '+d.por+(d.nota?' · '+d.nota:''),h:'AG-07.dc.html#'+d.prod,hl:'Ficha do produto'}); }
   if(d&&d.os){ const et=mipOsEt(c,d.os)||'—'; const dup=P.h==='OS.dc.html#'+d.os;   // o primário já abre a O.S.: o registro não repete o destino
-    reg.push({t:d.os+' · '+et,sub:(d.t==='erradicar'?'erradicação de plantas':'controle')+' · '+mipN(d.area||t.area)+' ha',h:dup?'':'OS.dc.html#'+d.os,hl:'Abrir '+d.os}); }
+    reg.push({t:d.os+' · '+et,sub:(d.t==='erradicar'?'erradicação de plantas':'controle')+' · '+mipN(d.area||t.area,2)+' ha',h:dup?'':'OS.dc.html#'+d.os,hl:'Abrir '+d.os}); }
   if(d&&d.prod&&d.os){ const k=mipChecks(s,vv,{kind:'controlar',prod:d.prod,dose:(MIPD.agf[t.cultura+'|'+p.chave]||[]).filter(x=>x.id===d.prod).map(x=>d.dose||x.dmin)[0]||1,area:d.area||t.area,data:d.data||mipAmanha(),os:d.os},c);
     k.al.filter(x=>/^Rotação|^Colheita/.test(x)).forEach(x=>ral.push({t:x})); }
   if(d&&d.t==='monitorar') reg.push({t:'Seguir monitorando · '+mipBrA(d.em)+' · '+d.por,sub:(d.prox?'próxima vistoria '+mipBr(d.prox):'')+(d.nota?' · motivo: '+d.nota:''),h:'',hl:''});

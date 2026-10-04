@@ -17,13 +17,13 @@ def chk(nome, cond, info=''):
 r = random.Random(20261004)
 doses = [0.1, 0.25, 0.3, 0.4, 0.5, 1, 1.5, 2.5, 3, 20, 25, 30, 40, 45, 50, 150, 400, 1850, 2000]
 areas = [62.25, 62.79, 30.55, 31.7, 0.01, 0.05, 48.47, 50.63, 73.18] + [round(r.uniform(0.01, 200), 2) for _ in range(400)]
-casos = [(d, a) for d in doses for a in areas]
+casos = [(d, a) for d in doses for a in areas] + [(1e-7, 28.7), (2.5e-7, 62.25), (1e21, 2), (123456789.123, 98765.43), (0.005, 1), (0.004, 1)]
 py = [Q.qtd(d, a) for d, a in casos]
 
 JS = r"""
 const R={};
 // 1 · igualdade com o Python
-R.grade=CASOS.map(([d,a])=>cenQtd(d,a));
+R.grade=CASOS.map(([d,a])=>{ try{ return cenQtd(d,a); }catch(e){ return 'ERRO '+e.message; } });
 // 2 · osc_apontar EXATO do núcleo da O.S., com custódia = total (quantidade da área da ordem)
 function fixture(area){ const tot=cenQtd(0.5,area); return {tot,c:{ordens:{DEMO:{id:'DEMO',etapa:'Em execução',area,saldo:area,realizado:0,ap:[],req:'REQ-DEMO',
   ins:[{p:'Produto sintético',dose:0.5,un:'L',tot}]}},reqs:{'REQ-DEMO':{itens:[{prod:'Produto sintético',un:'L',custodia:tot,consumido:0}]}}}}; }
@@ -89,6 +89,12 @@ const i0=irrGet(); const ords=Object.keys(i0.ordens).filter(k=>['A liberar','Lib
 for(const id of ords){ for(const dose of [1,7,12,50]){ cenReset(); irrReset(); const res={id,dose};
   const r=irrReclassTudo(null,id,{prod:'Nitrato de cálcio',dose,mot:'teste'}); if(r.erro){ res.recusa=r.erro; R.fert.push(res); continue; }
   res.msg=r.msg; R.fert.push(fluxo(cenGet(),id,res)); } }
+// v2 com passada em curso (avanço com 2 casas): a O.S. recebe o que falta (2 casas, irrAreaV2, a mesma conta da prévia) e v1 + v2 = área do setor
+R.parc=[]; for(const id of ords.filter(k=>i0.ordens[k].etapa==='Liberadas')){ for(const cob of [20.27,0.05]){ cenReset(); irrReset(); const res={id,cob};
+  try{ const s=irrGet(); irrIniciar(s,id); irrAvanco(s,id,Math.min(cob,s.setores[s.ordens[id].setor].ha)); irrSave(s); }catch(e){ res.recusa=e.message; R.parc.push(res); continue; }
+  const r=irrReclassTudo(null,id,{prod:'Nitrato de cálcio',dose:12,mot:'teste'}); if(r.erro){ res.recusa=r.erro; R.parc.push(res); continue; }
+  const s1=irrGet(), o1=s1.ordens[id], x1=s1.setores[o1.setor]; res.ha=x1.ha; res.v1=o1.fert.v1; res.prev=irrAreaV2(x1,{cob:o1.fert.v1});
+  R.parc.push(fluxo(cenGet(),id,res)); } }
 print(JSON.stringify(R));
 })();
 """
@@ -105,7 +111,7 @@ F = roda(PRELUDIO + LS + DOM + cenario.js_prefixo() + JS_NUCLEO + dados_mip.js_p
 
 dif = [(c, a, b) for c, a, b in zip(casos, py, R['grade']) if a != b]
 empates = [c for c in casos if (round(c[0] * c[1] * 1000) % 10 == 5)]
-chk(f'1 regra única: Python qtd = JS cenQtd em {len(casos)} casos ({len(empates)} com empate no 3º decimal); 0,5 × 62,25 = 31,13 (meio para cima)',
+chk(f'1 regra única: Python qtd = JS cenQtd em {len(casos)} casos ({len(empates)} com empate no 3º decimal; notação exponencial e valores extremos sem erro); 0,5 × 62,25 = 31,13 (meio para cima)',
     not dif and Q.qtd(0.5, 62.25) == 31.13 and Q.qtd(0.5, 62.79) == 31.4, dif[:5])
 a = R['apontar']
 chk('2 SINT-C03: apontamento cheio de 62,25 ha e de 62,79 ha passa; custódia 0; consumido = total; saldo 0',
@@ -129,16 +135,34 @@ chk(f'7 MIP → O.S. ({len(m)} emissões nos pivôs da Lagoa, doses da bula; {ne
     f'{F.get("semLote", 0)} sem lote no Estoque, fora): total = regra única; liberar, entregar, iniciar e apontar o saldo zeram a custódia e levam à '
     'conferência', len(m) >= 6 and ne >= 2 and all(map(ok, m)), [x for x in m if not ok(x)][:4])
 fe = F['fert']; fa = [x for x in fe if 'recusa' not in x]
-chk(f'8 fertirrigação → O.S. ({len(fa)} v2 de {len(fe)} tentativas, 1 a 50 kg/ha): total = regra única, com 2 casas na mensagem; o saldo apontado zera a '
-    'custódia', len(fa) >= 8 and all(map(ok, fa)) and all(re.search(r'requisição de [0-9.]+(,[0-9]{1,2})? kg', x['msg']) for x in fa),
-    [x for x in fa if not ok(x)][:4] or [x['msg'][-90:] for x in fa][:2])
+pc = [x for x in F['parc'] if 'recusa' not in x]
+PREV = open(os.path.join(HERE, 'areas', 'irrigacao.py'), encoding='utf-8').read()   # a prévia da tela usa a mesma função e a mesma regra
+prev_ok = 'const area=irrAreaV2(x,pa);' in PREV and "irrN(cenQtd(n,area),2)" in PREV
+okp = lambda x: prev_ok and ok(x) and abs(x['v1'] + x['area'] - x['ha']) < 1e-9 and x['area'] == x['prev'] and round(x['area'], 2) == x['area']
+chk(f'8 fertirrigação → O.S. ({len(fa)} v2 de {len(fe)} tentativas, 1 a 50 kg/ha; {len(pc)} com passada em curso): total = regra única, com 2 casas na '
+    'mensagem; com passada em curso, a O.S. recebe o que falta com 2 casas (= prévia) e v1 + v2 = área do setor; o saldo apontado zera a custódia',
+    len(fa) >= 8 and all(map(ok, fa)) and all(re.search(r'requisição de [0-9.]+(,[0-9]{1,2})? kg', x['msg']) for x in fa) and len(pc) >= 2 and all(map(okp, pc)),
+    [x for x in fa if not ok(x)][:4] or [x for x in pc if not okp(x)][:4] or [x['msg'][-90:] for x in fa][:2])
 ar = F['area']
 na = sum(1 for x in ar if x['antes'])
 chk(f'9 "Decidir controle" (agDecIni em {len(ar)} vistorias da Lagoa): a área que o formulário preenche nunca passa do talhão '
     f'(com 1 casa, {na} travariam)', len(ar) >= 8 and na >= 1 and not any(x['trava'] for x in ar), [x for x in ar if x['trava']])
-fontes = {n: open(os.path.join(HERE, n), encoding='utf-8').read() for n in ('mip.js', 'irrigacao_estado.js', 'cenario.js')}
-fontes['processo_os (JS)'] = JS_NUCLEO
-crus = {n: re.findall(r'tot\s*:\s*(?:Math\.round|Number\(|[^,}]*toFixed)', s) for n, s in fontes.items()}
-chk('10 nenhum produtor de total de insumo no JS arredonda por conta própria (Math.round/Number/toFixed em tot:)', not any(crus.values()), crus)
+# 10 · varredura de todo o gen37 (JS e JS embutido nos .py, sem testes): produto dose × área fora da regra única. Exceções nomeadas, que não
+#      são quantidade de custódia: custo (dose × preço), carga do tanque e demanda do planejamento (CAL-01, exata por desenho).
+import glob
+PROD = re.compile(r'(?:\b[\w.]*dose\s*\*\s*[\w.(\[\'\]]+|[\w.)\]]+\s*\*\s*[\w.]*\.dose\b|\bd\s*\*\s*(?:ar|ajA)\b)')
+EXC = {('areas/inicio.py', 'x.dose*p'): 'custo por ha', ('areas/processo_os.py', 'x.dose*ac'): 'carga do tanque', ('areas/processo_planos.py', 'x.dose*x.preco'): 'custo',
+       ('areas/suprimentos.py', "dose*c['area']"): 'demanda do planejamento', ('dados2.py', "dose*c['area']"): 'demanda do planejamento',
+       ('safra.js', 'dose*area'): 'demanda do planejamento (CAL-01)'}
+crus = []
+for fn in sorted(glob.glob(os.path.join(HERE, '*.js')) + glob.glob(os.path.join(HERE, '*.py')) + glob.glob(os.path.join(HERE, 'areas', '*.py'))):
+    rel = os.path.relpath(fn, HERE)
+    if re.search(r'(_test|test|_unit|verif_)', os.path.basename(fn)): continue
+    for i, ln in enumerate(open(fn, encoding='utf-8'), 1):
+        for mm in PROD.finditer(ln):
+            if (rel, mm.group(0)) not in EXC: crus.append((rel, i, mm.group(0)))
+tots = re.findall(r'tot\s*:\s*(?:Math\.round|Number\(|[^,}]*toFixed)', ''.join(open(os.path.join(HERE, n), encoding='utf-8').read() for n in ('mip.js', 'irrigacao_estado.js', 'cenario.js')) + JS_NUCLEO)
+chk(f'10 varredura de todo o gen37: nenhum dose × área fora da regra única (exceções nomeadas: {len(EXC)}) e nenhum tot: arredondado por conta própria',
+    not crus and not tots, [crus[:6], tots])
 print(f'RESULTADO: {sum(OK)}/{len(OK)}')
 sys.exit(0 if all(OK) else 1)

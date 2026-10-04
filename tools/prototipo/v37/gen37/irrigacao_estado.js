@@ -46,6 +46,8 @@ function irrOrfa(o) { if (!o) return false; const c = irrCen(); if (!c) return f
 
 // ---------- formatos ----------
 const IRR_D0 = Date.UTC(2026, 8, 23);
+// área da v2 (Adicionar produtos): com passada em curso, o que falta dela (2 casas); a área já coberta fica na v1. Mesma conta na prévia.
+function irrAreaV2(x, p) { return p ? Math.round((x.ha - Math.min(x.ha, p.cob || 0)) * 100) / 100 : x.ha; }
 function irrN(n, d, dmin) { return Number(n || 0).toLocaleString('pt-BR', { minimumFractionDigits: (dmin === undefined ? (d || 0) : dmin), maximumFractionDigits: d || 0 }); }
 function irrHa(n) { return irrN(n, Math.abs(n % 1) > 1e-9 ? 1 : 0); }
 function irrMm(n) { return irrN(n, 2, 1); }      // 10,81 · 4,0 · 13,5 · 6,75 (o mesmo formato em todas as telas)
@@ -426,7 +428,7 @@ function irrReclassificar(s, id, d) {
   if (irrPausada(o)) { const pz = o.exec.pausas.find(z => z.fim === null || z.fim === undefined); pz.fim = pz.ini + 8; }
   const q = iniciou ? irrUlt(o) + 30 : s.agora; let v1 = 0, area = x.ha, vol = 0, sw = null;
   if (p) {   // a passada em curso para na área já coberta: essa água fica na v1 (crédito só na faixa); o saldo vai para a v2
-    v1 = Math.min(x.ha, p.cob || 0); area = Math.round((x.ha - v1) * 10) / 10; const fim0 = irrFimP(o, p);
+    v1 = Math.min(x.ha, p.cob || 0); area = irrAreaV2(x, p); const fim0 = irrFimP(o, p);
     p.st = 'Parcial'; p.cob = v1; p.fimReal = q; p.vol = v1 > 0 ? irrTele(s, o, p, v1) : 0; irrCredito(s, o, p);
     vol += area * p.lam * 10; sw = { ini: q, fim: Math.max(q + 15, fim0) }; }
   o.passadas.filter(z => z.st === 'Programada').forEach(z => { vol += x.ha * z.lam * 10; });
