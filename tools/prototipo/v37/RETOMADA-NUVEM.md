@@ -108,6 +108,13 @@ Sem a camada sintética (tarefa 1), o build para em `dados_lagoa_fonte`, com uma
     - **P8 · S4 · `gen37/quantidade.py`:** `qtd_trecho` não é usado e arredonda a 6 casas de outro jeito que o JS. Sai.
   - Testes que podem mudar de linha de base: `irr_estado_test.py`, `mip_unit_test.py`, `mip_correcoes_test.py`, `dados_lagoa_sintetico/camada_test.py`.
     - **Nomeado depois da cadeia, antes de editar:** a mensagem "Área maior que o talhão" passou a 2 casas (P3). O `mip_unit_test.py` roda `gen37/mip_test.js:62–63`, e o `mip_correcoes_test.py:102` monta o texto esperado com 1 casa; os dois passam a 2 casas. O `carencia_test.py` falhou só porque a worktree nova não tem a pasta não rastreada `_probe/`; não muda (a cadeia cria a pasta).
+  - **Revisão adversarial das correções (rodada 2), reserva antes de editar:**
+    - **Q1 · S3 · `gen37/irrigacao_estado.js:429` e `gen37/areas/irrigacao.py:515`:** com passada em curso, a v2 arredonda o saldo de área para 1 casa (v1 + v2 ≠ área do setor; reserva de outra área). Uma função única com 2 casas serve à v2 e à prévia.
+    - **Q2 · S3 · `gen37/areas/irrigacao.py:517` (introduzido pela P2):** a prévia chama `cenQtd` com a dose digitada; dose em notação exponencial derruba a tela. Só calcula com dose válida (0 < dose ≤ 50) e sem lançar exceção (`cenQtdOu` em `gen37/cenario.js`).
+    - **Q3 · S3 · `gen37/areas/processo_os.py:569` (trava do ajuste), `:549/:558` (prévias) e `:483` (usado sem requisição):** dose × área cru; a trava recusa o que a regra única libera. Passam à regra única.
+    - **Q4 · S4 · `gen37/mip.js:260`:** aviso de estoque do MIP com dose × área cru. Passa à regra única.
+    - **Q5 · S4 · `gen37/areas/mobile.py:433` e `gen37/areas/agronomia.py:298/754/757`:** área com 1 casa ao lado da dose ou do total (a conta escrita não fecha). Passa a 2 casas.
+    - **Q6 · S4 · `gen37/quantidade_test.py`:** o item 8 passa a cobrir a v2 com passada em curso (prévia = O.S.; v1 + v2 = área do setor) e o item 10 passa a varrer todo produto dose × área do JS (inclusive o embutido nos .py), com exceções nomeadas (planejamento, custo, carga do tanque).
   - **Separação:** nenhum hunk da REND (`126899e5`) toca esses arquivos. A AÇÃO (`20f25726`) toca `agronomia.py:1748` e `irrigacao.py:26–86`, fora das linhas acima. Depois do commit aqui, a `claude/v44-rend-01` recebe esta branch por merge.
 
 ## Tarefas, na ordem
