@@ -120,6 +120,22 @@ R.r4.term=[term(20.275),term(0.004)];
   try{ osc_ajustar(c,'Z0',9,{[ub.nome]:0.0001},'',[],[],false); /* muda a área: grava versão nova */ R.r5.ajSemLib='gravou'; }catch(e){ R.r5.ajSemLib=e.message; } }
 { irrReset(); const s=irrGet(); const id2=Object.keys(s.ordens).find(k=>s.ordens[k].passadas.length>1&&['Liberadas'].indexOf(s.ordens[k].etapa)>=0);
   if(id2){ irrIniciar(s,id2); const o2=s.ordens[id2], x2=s.setores[o2.setor], p2=irrPassAtual(o2); p2.cob=x2.ha; R.r5.multi=irrV2Zero(o2,x2,p2,12); } else R.r5.multi='sem ordem de 2 passadas'; }
+// 14 · rodada 6 (PRE-REV U1–U5): crédito de avanço pequeno; v2 com passada em curso e outra programada; número não finito; dose da v2
+R.r6={};
+{ const fim=(c,id)=>{ fluxo(c,id,{}); osc_encerrar(c,id); return c.ordens[id].etapa; };
+  const def=(av)=>{ cenReset(); irrReset(); let s=irrGet(); irrIniciar(s,'OS-0602'); if(av>0) irrAvanco(s,'OS-0602',av); irrSave(s);
+    const k=irrReclassTudo(null,'OS-0602',{prod:'Nitrato de cálcio',dose:12,mot:'teste'}); if(k.erro) return 'ERRO '+k.erro; const c=cenGet(); const et=fim(c,'OS-0602'); cenSave(c);
+    s=irrGet(); return [et,irrDef(s,'PV08'),!!irrFaixaCob(s,'PV08')]; };
+  R.r6.u1=[def(0),def(0.03),def(0.06)];
+  cenReset(); irrReset(); let s=irrGet(); irrIniciar(s,'OS-0604'); irrAvanco(s,'OS-0604',24.47); irrSave(s);
+  R.r6.u2=irrReclassTudo(null,'OS-0604',{prod:'Nitrato de cálcio',dose:12,mot:'teste'}).erro||'criada';
+  cenReset(); irrReset(); s=irrGet(); const d0=irrDef(s,'PV18'); irrIniciar(s,'OS-0604'); irrTerminar(s,'OS-0604',24.47,null); irrSave(s);
+  const k=irrReclassTudo(null,'OS-0604',{prod:'Nitrato de cálcio',dose:12.25,mot:'teste'}); s=irrGet(); const f=s.ordens['OS-0604'].fert;
+  R.r6.u5=k.msg||k.erro; R.r6.guia={erro:k.erro||'',area:f&&f.area,ha:s.setores.PV18.ha,lamHa:f&&f.lamHa,lam2:s.ordens['OS-0604'].passadas[1].lam,d0};
+  if(!k.erro){ const c=cenGet(); R.r6.guia.et=fim(c,'OS-0604'); cenSave(c); R.r6.guia.d1=irrDef(irrGet(),'PV18'); } }
+{ cenReset(); mipReset(); const sem=(d,a)=>{ try{ return mipChecks(mipGet(),vb,{kind:'controlar',prod:ub.id,dose:d,area:a,data:'2026-10-20'},cenGet()).tr.join(' | '); }catch(e){ return 'LANÇOU '+e.message; } };
+  R.r6.u3={dose:sem('1e999',String(tb.area)),area:sem(String(ub.dmin),'1e999'),inf:sem('Infinity','1'),
+    aj:(()=>{ try{ return osc_ajFalta({lotes:{}},'P','L',Infinity,10); }catch(e){ return 'LANÇOU '+e.message; } })()}; }
 print(JSON.stringify(R));
 })();
 """
@@ -195,6 +211,17 @@ chk('13 rodada 5: com total 0, o painel da O.S. aponta o agrônomo (sem Suprimen
     'com outra passada programada, a v2 recusada manda adicionar os produtos às próximas passadas',
     'Ana (agrônoma)' in r5['prox'] and 'Suprimentos' not in r5['prox'] and 'EST.dc.html' not in r5['prox'] and 'dá 0' in r5['ajSemLib']
     and 'próximas passadas' in r5['multi'], r5)
+r6 = F['r6']; IRP = open(os.path.join(HERE, 'areas', 'irrigacao.py'), encoding='utf-8').read(); IRJ = open(os.path.join(HERE, 'irrigacao_estado.js'), encoding='utf-8').read()
+u1 = r6['u1']; g = r6['guia']
+chk('14 rodada 6: avanço de 0,03 e 0,06 ha seguido da v2 encerrada credita o pivô como o avanço 0 (U1); v2 com passada em curso e outra programada é '
+    'recusada com a orientação (U2), e pelo término a v2 cobre o setor com a lâmina da passada seguinte e credita; dose ou área 1e999/Infinity vira trava '
+    'sem lançar, no MIP e no ajuste (U3); textos com 2 casas no IR-03det e na trilha (U4) e dose da v2 com até 3 casas (U5)',
+    all(isinstance(x, list) and x[0] == 'Encerradas' for x in u1) and abs(u1[1][1] - u1[0][1]) < 0.01 and abs(u1[2][1] - u1[0][1]) < 0.01 and not u1[1][2] and not u1[2][2]
+    and 'está em curso e há outra programada' in r6['u2'] and 'próximas passadas' in r6['u2']
+    and not g['erro'] and abs(g['area'] - g['ha']) < 1e-9 and abs(g['lamHa'] - g['lam2']) < 1e-6 and g.get('et') == 'Encerradas' and g['d1'] < g['d0'] - 1
+    and 'Informe a dose' in r6['u3']['dose'] and 'Informe a área' in r6['u3']['area'] and 'Informe a dose' in r6['u3']['inf'] and 'LANÇOU' not in json.dumps(r6['u3'])
+    and 'inválida' in r6['u3']['aj']
+    and "irrN(pa.cob,1)" not in IRP and "irrN(cob,1)" not in IRP and "' nos ' + irrN(x.ha, 2, 0)" in IRJ and '12,25 kg/ha' in r6['u5'], r6)
 crus = []
 for fn in sorted(glob.glob(os.path.join(HERE, '*.js')) + glob.glob(os.path.join(HERE, '*.py')) + glob.glob(os.path.join(HERE, 'areas', '*.py'))):
     rel = os.path.relpath(fn, HERE)

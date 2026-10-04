@@ -52,6 +52,7 @@ function irr2(n) { const t = String(n); return /e/i.test(t) ? Math.round(n * 100
 function irrAreaV2(x, p) { return p ? Math.round((x.ha - Math.min(x.ha, p.cob || 0)) * 100) / 100 : x.ha; }
 // v2 que daria total 0 pela regra única: a liberação recusaria e a ordem ficaria sem saída; diz a causa (mesmo texto na prévia)
 function irrV2Zero(o, x, p, dose) { const a = irrAreaV2(x, p); if (!(a > 0)) return irrPassProx(o) ? 'A passada ' + p.n + ' já cobriu o setor: confirme o término dela e adicione os produtos para as próximas passadas.' : 'A passada já cobriu o setor: confirme o término e programe uma nova fertirrigação na O.S.';
+  if (p && irrPassProx(o)) return 'A passada ' + p.n + ' está em curso e há outra programada: confirme o término dela e adicione os produtos para as próximas passadas.';   // a v2 cobriria só o saldo desta passada com a água das seguintes (PRE-REV U2)
   return (dose > 0 && !(cenQtd(dose, a) > 0)) ? 'Dose × área dá 0 kg: aumente a dose.' : ''; }
 function irrN(n, d, dmin) { return Number(n || 0).toLocaleString('pt-BR', { minimumFractionDigits: (dmin === undefined ? (d || 0) : dmin), maximumFractionDigits: d || 0 }); }
 function irrHa(n) { return irrN(n, Math.abs(n % 1) > 1e-9 ? 1 : 0); }
@@ -93,13 +94,14 @@ function irrApsSetor(s, sid) {
 // crédito no déficit do pivô: volta/turno completo credita o pivô inteiro; passagem parcial fica na faixa coberta e não baixa o déficit
 // do pivô, salvo quando as parciais da MESMA ordem completam a área (v1 + saldo da v2) — aí vale a menor lâmina líquida entre elas.
 function irrCreditos(s, sid, ate) {
-  const x = s.setores[sid]; const aps = irrApsSetor(s, sid).filter(a => (ate === undefined || a.q < ate) && irrApCob(a) > 0 && a.vol > 0);
+  // parcial com 0 m³ (avanço pequeno que a telemetria arredonda a 0) ainda conta a área coberta da ordem; a lâmina vem só de quem tem volume (PRE-REV U1)
+  const x = s.setores[sid]; const aps = irrApsSetor(s, sid).filter(a => (ate === undefined || a.q < ate) && irrApCob(a) > 0 && (a.vol > 0 || irrApParc(a, x.ha)));
   let gov = 0, ultCheia = -1e9; const grp = {}; let faixa = null;
   aps.forEach(a => { if (!irrApParc(a, x.ha)) { gov += irrApNet(a); ultCheia = Math.max(ultCheia, a.q); return; }
-    const g = grp[a.os] || (grp[a.os] = { cob: 0, net: 1e9, q: a.q }); g.cob += irrApCob(a); g.net = Math.min(g.net, irrApNet(a)); g.q = Math.max(g.q, a.q); });
-  Object.keys(grp).forEach(k => { const g = grp[k]; if (g.cob >= x.ha - 1e-6) { gov += g.net; ultCheia = Math.max(ultCheia, g.q); } });
+    const g = grp[a.os] || (grp[a.os] = { cob: 0, net: 1e9, q: a.q }); g.cob += irrApCob(a); if (a.vol > 0) g.net = Math.min(g.net, irrApNet(a)); g.q = Math.max(g.q, a.q); });
+  Object.keys(grp).forEach(k => { const g = grp[k]; if (g.net < 1e9 && g.cob >= x.ha - 1e-6) { gov += g.net; ultCheia = Math.max(ultCheia, g.q); } });
   // faixa pendente: a parcial mais recente que nenhuma volta completa cobriu depois
-  Object.keys(grp).forEach(k => { const g = grp[k]; if (g.cob < x.ha - 1e-6 && g.q > ultCheia && (!faixa || g.q > faixa.q)) faixa = { os: k, q: g.q, cob: g.cob, net: g.net }; });
+  Object.keys(grp).forEach(k => { const g = grp[k]; if (g.net < 1e9 && g.cob < x.ha - 1e-6 && g.q > ultCheia && (!faixa || g.q > faixa.q)) faixa = { os: k, q: g.q, cob: g.cob, net: g.net }; });
   return { gov, faixa, aps };
 }
 function irrBase(b) { return b.d0 + b.etc - b.pef; }
@@ -371,7 +373,7 @@ function irrTerminar(s, id, cob, vol) {
   const parc = cob < x.ha - 1e-9; p.cob = cob; p.st = parc ? 'Parcial' : 'Feita';   // 2 casas (PRE-REV Z4)
   p.fimReal = p.iniReal + Math.round(p.dur * cob / x.ha) + irrPausaMin(o, p.n); p.vol = (vol === null || vol === undefined || vol === '') ? null : vol;
   irrCredito(s, o, p);
-  irrTr(o, p.fimReal, o.ex, 'Término' + (o.passadas.length > 1 ? ' da passada ' + p.n : '') + ' · ' + irrH(p.fimReal - p.iniReal) + ' de bombeamento · ' + (parc ? 'parou antes: ' + irrN(cob, 2, 0) + ' de ' + irrN(x.ha, 2, 0) + ' ha' : (x.tipo === 'gotejo' ? 'turno completo' : 'volta completa') + ' nos ' + irrN(x.ha) + ' ha') + (p.vol === null ? ' · sem leitura do hidrômetro' : ' · hidrômetro ' + irrN(p.vol) + ' m³'), s.faz[o.faz].irrig);
+  irrTr(o, p.fimReal, o.ex, 'Término' + (o.passadas.length > 1 ? ' da passada ' + p.n : '') + ' · ' + irrH(p.fimReal - p.iniReal) + ' de bombeamento · ' + (parc ? 'parou antes: ' + irrN(cob, 2, 0) + ' de ' + irrN(x.ha, 2, 0) + ' ha' : (x.tipo === 'gotejo' ? 'turno completo' : 'volta completa') + ' nos ' + irrN(x.ha, 2, 0) + ' ha') + (p.vol === null ? ' · sem leitura do hidrômetro' : ' · hidrômetro ' + irrN(p.vol) + ' m³'), s.faz[o.faz].irrig);
   const prox = irrPassProx(o);
   if (prox) return { msg: 'Passada ' + p.n + ' encerrada · ' + id + ' segue Em execução · próxima passada ' + (prox.ini === null ? 'a definir' : irrQuando(prox.ini)) + '.' };
   o.etapa = 'Em conferência'; o.exec.fim = p.fimReal;
@@ -443,8 +445,8 @@ function irrReclassificar(s, id, d) {
   o.fert = { prod: d.prod, dose: d.dose, mot: d.mot, exec: iniciou, q, area, v1, vol: Math.round(vol), lamHa: area > 0 ? vol / (10 * area) : 0, tot: cenQtd(d.dose, area), sw };   // regra única de quantidade (cenario.js, sempre carregado antes)
   o.versao = 'v2';
   if (!iniciou) { if (o.lib) { o.libRes = o.lib; irrTr(o, q, o.lib, 'Liberação da água revogada: com produto, a liberação é do agrônomo', 'sistema'); } o.lib = null; o.etapa = 'A liberar'; }
-  irrTr(o, q, 'RC-' + id.slice(3) + '-2', 'Versão v2 · ' + d.prod + ' ' + irrN(d.dose, 1) + ' kg/ha · ' + d.mot + ' · ' + (iniciou ? (p ? 'passada ' + p.n + ' parada em ' + irrN(v1, 2, 0) + ' de ' + irrN(x.ha, 2, 0) + ' ha (fica na v1); saldo de ' + irrN(area, 2, 0) + ' ha' : 'passadas seguintes') + ' aguardam a liberação' : 'voltou a A liberar') + ' · requisição de ' + irrN(o.fert.tot, 2) + ' kg na liberação', s.faz[o.faz].gestor);
-  return { msg: id + ' v2 criada (' + d.prod + ' ' + irrN(d.dose, 1) + ' kg/ha) · para o agrônomo liberar na O.S. · ' + (iniciou ? 'segue Em execução com selo Revisão de saldo pendente' + (p ? ' · ' + irrN(v1, 2, 0) + ' ha já irrigados ficam na v1' : '') : 'voltou a A liberar') + ' · requisição de ' + irrN(o.fert.tot, 2) + ' kg na liberação.' };
+  irrTr(o, q, 'RC-' + id.slice(3) + '-2', 'Versão v2 · ' + d.prod + ' ' + irrN(d.dose, 3, 1) + ' kg/ha · ' + d.mot + ' · ' + (iniciou ? (p ? 'passada ' + p.n + ' parada em ' + irrN(v1, 2, 0) + ' de ' + irrN(x.ha, 2, 0) + ' ha (fica na v1); saldo de ' + irrN(area, 2, 0) + ' ha' : 'passadas seguintes') + ' aguardam a liberação' : 'voltou a A liberar') + ' · requisição de ' + irrN(o.fert.tot, 2) + ' kg na liberação', s.faz[o.faz].gestor);
+  return { msg: id + ' v2 criada (' + d.prod + ' ' + irrN(d.dose, 3, 1) + ' kg/ha) · para o agrônomo liberar na O.S. · ' + (iniciou ? 'segue Em execução com selo Revisão de saldo pendente' + (p ? ' · ' + irrN(v1, 2, 0) + ' ha já irrigados ficam na v1' : '') : 'voltou a A liberar') + ' · requisição de ' + irrN(o.fert.tot, 2) + ' kg na liberação.' };
 }
 // Adicionar produtos de uma vez: v2 na irrigação e no cenário da O.S.; se um lado falhar, nada é gravado
 function irrReclassTudo(self, id, d) {

@@ -428,7 +428,7 @@ function PREVALS(self,v){ irrOuvir(self);
   // execução e conferência
   const pa=irrPassAtual(o); const pz=(o.exec.pausas||[]); const pzm=pz.filter(z=>z.fim!==null&&z.fim!==undefined).reduce((a,z)=>a+(z.fim-z.ini),0);
   const ex=[{l:'Início',t:o.exec.ini!==undefined?irrQuando(o.exec.ini):'—'},{l:'Pausas',t:pz.length?pz.length+' · '+irrN(pzm)+' min'+(irrPausada(o)?' · pausada agora':''):'nenhuma'}];
-  if(pa) ex.push({l:'Avanço',t:(pa.cob?irrN(pa.cob,1)+' de '+irrN(x.ha,1)+' ha ('+irrN(pa.cob/x.ha*100,0)+' %)':'sem leitura de área')+' · término previsto '+irrQuando(irrFimP(o,pa))});
+  if(pa) ex.push({l:'Avanço',t:(pa.cob?irrN(pa.cob,2,1)+' de '+irrN(x.ha,2,0)+' ha ('+irrN(pa.cob/x.ha*100,0)+' %)':'sem leitura de área')+' · término previsto '+irrQuando(irrFimP(o,pa))});
   else ex.push({l:'Término',t:o.exec.fim!==undefined?irrQuando(o.exec.fim):(o.passadas.some(p=>p.ini!==null)?'previsto '+irrQuando(Math.max.apply(null,o.passadas.filter(p=>p.ini!==null).map(p=>irrFimP(o,p)))):'—')});
   const cf=o.conf; ex.push({l:'Hidrômetro',t:cf&&cf.med?irrN(cf.med)+' m³ medidos':(cf&&cf.st==='Sem leitura'?'sem leitura':'telemetria ao terminar')},
     {l:'Conferência',t:cf?(cf.med?irrN(cf.med)+' × '+irrN(cf.est)+' m³ estimados na área coberta · '+irrPct(cf.dv!==undefined?cf.dv:(cf.med-cf.est)/cf.est*100)+' (tolerância '+s.tol+' %)':'aguardando a leitura'):'automática até '+s.tol+' % de desvio'});
@@ -497,8 +497,8 @@ function EXTRAVALS(self,v){ const s=irrGet(); const id=detId(self); const o=s.or
   const cm=self.state.cm;
   if(cm){ const c=o.conf||{}; v.cm_open=true; v.cm_titulo=(c.st==='Sem leitura'?'Informar leitura · ':'Conferir medição · ')+id; v.cm_sub=x.nome+' · hidrômetro × estimativa na área coberta · tolerância '+s.tol+' %';
     const ps=o.passadas.filter(p=>p.st==='Feita'||p.st==='Parcial'); const cob=ps.reduce((a,p)=>Math.max(a,p.cob||0),0);
-    v.cm_kv=[{l:'Estimado',t:irrN(c.est||0)+' m³ · '+irrMm(o.passadas[0].lam)+' mm em '+irrN(cob,1)+' ha'},{l:'Medido',t:c.med?irrN(c.med)+' m³ · '+irrPct((c.med-c.est)/c.est*100):'sem leitura'},
-             {l:'Crédito',t:'volume medido ÷ área coberta × '+(o.ef||x.efic)+' %'+(cob<x.ha-1e-9?' · só na faixa coberta':'')},{l:'Área coberta',t:irrN(cob,1)+' de '+irrN(x.ha,1)+' ha'}];
+    v.cm_kv=[{l:'Estimado',t:irrN(c.est||0)+' m³ · '+irrMm(o.passadas[0].lam)+' mm em '+irrN(cob,2,1)+' ha'},{l:'Medido',t:c.med?irrN(c.med)+' m³ · '+irrPct((c.med-c.est)/c.est*100):'sem leitura'},
+             {l:'Crédito',t:'volume medido ÷ área coberta × '+(o.ef||x.efic)+' %'+(cob<x.ha-1e-9?' · só na faixa coberta':'')},{l:'Área coberta',t:irrN(cob,2,1)+' de '+irrN(x.ha,2,0)+' ha'}];
     v.cm_vol=cm.vol; v.cm_evol=(cm.err||''); v.cm_evol_has=!!cm.err; v.cm_setvol=(e)=>self.setState({cm:{vol:e.target.value,err:''}});
     v.cm_ok=()=>{ const vs=String(self.state.cm.vol||'').trim(); const vol=g2num(vs); if(!(vol>0)){ self.setState({cm:{vol:vs,err:'Informe a leitura em m³ (ex.: 1.206).'}}); return; }
       run(s0=>irrConferir(s0,id,vol),()=>fechar(self,'cm')); }; }
