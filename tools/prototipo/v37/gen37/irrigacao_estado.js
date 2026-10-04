@@ -102,7 +102,7 @@ function irrDef(s, sid) { const x = s.setores[sid]; if (!x || !x.bal) return nul
 // faixa coberta por passagem parcial (ainda sem o resto da volta): área e déficit dela
 function irrFaixaCob(s, sid) { const x = s.setores[sid]; if (!x || !x.bal) return null; const cr = irrCreditos(s, sid); if (!cr.faixa) return null;
   return { os: cr.faixa.os, cob: cr.faixa.cob, d: Math.max(0, irrBase(x.bal) - cr.gov - cr.faixa.net) }; }
-function irrLamTxt(vol, cob, ha) { return cob < ha - 1e-9 ? irrMm(vol / (10 * cob)) + ' mm na faixa de ' + irrN(cob, 1) + ' ha' : irrMm(vol / (10 * ha)) + ' mm no setor'; }
+function irrLamTxt(vol, cob, ha) { return cob < ha - 1e-9 ? irrMm(vol / (10 * cob)) + ' mm na faixa de ' + irrN(cob, 2, 0) + ' ha' : irrMm(vol / (10 * ha)) + ' mm no setor'; }
 function irrCobO(o) { return o.passadas.filter(p => p.st === 'Feita' || p.st === 'Parcial').reduce((q, p) => Math.max(q, p.cob || 0), 0); }
 function irrDefTxt(s, sid, pre) { const x = s.setores[sid]; const fx = irrFaixaCob(s, sid); return 'déficit do ' + x.nome + ' ' + (pre || '') + irrN(irrDef(s, sid), 1) + ' mm' + (fx ? ' (faixa de ' + irrN(fx.cob, 1) + ' ha: ' + irrN(fx.d, 1) + ' mm)' : ''); }
 function irrDur(x, lam) { return Math.round(lam * x.ha * 10 / (x.vazao * 3.6) * 60); }
@@ -341,9 +341,9 @@ function irrRetomar(s, id) {
 }
 function irrAvanco(s, id, cob) {
   const o = irrO(s, id); const p = irrPassAtual(o); const x = s.setores[o.setor]; if (!p) throw new Error('Nenhuma passada em execução.');
-  if (!(cob >= 0) || cob > x.ha) throw new Error('Informe a área coberta entre 0 e ' + irrN(x.ha, 1) + ' ha.');
-  p.cob = cob; const q = irrUlt(o) + 30; const tr = o.trilha.find(t => t.av === p.n);
-  const ev = 'Avanço da passada ' + p.n + ' · ' + irrN(cob, 1) + ' de ' + irrN(x.ha, 1) + ' ha (' + irrN(cob / x.ha * 100, 0) + ' %)';
+  if (!(cob >= 0) || cob > x.ha) throw new Error('Informe a área coberta entre 0 e ' + irrN(x.ha, 2, 0) + ' ha.');
+  cob = Math.round(cob * 100) / 100; p.cob = cob; const q = irrUlt(o) + 30; const tr = o.trilha.find(t => t.av === p.n);   // 2 casas (PRE-REV Z4)
+  const ev = 'Avanço da passada ' + p.n + ' · ' + irrN(cob, 2, 0) + ' de ' + irrN(x.ha, 2, 0) + ' ha (' + irrN(cob / x.ha * 100, 0) + ' %)';
   if (tr) { tr.ev = ev; tr.q = q; } else { o.trilha.push({ q, rec: o.ex, ev, quem: s.faz[o.faz].irrig, av: p.n }); }   // telemetria e manual do mesmo evento: um registro
   return { msg: ev + ' · mesmo registro da telemetria, sem duplicar.' };
 }
@@ -359,12 +359,12 @@ function irrTerminar(s, id, cob, vol) {
   if (!p) throw new Error(o.etapa === 'Liberadas' ? 'Nada foi executado ainda: inicie a irrigação.' : 'Nenhuma passada em execução.');
   if (irrPausada(o)) throw new Error('Retome a irrigação antes de confirmar o término.');
   if (o.fert && o.fert.exec) throw new Error('Saldo parado pela v2: aguarde o agrônomo liberar na O.S.');
-  if (!(cob > 0) || cob > x.ha + 1e-9) throw new Error('Área coberta entre 0 e ' + irrN(x.ha, 1) + ' ha.');
+  if (!(cob > 0) || cob > x.ha + 1e-9) throw new Error('Área coberta entre 0 e ' + irrN(x.ha, 2, 0) + ' ha.');
   if (vol !== null && vol !== undefined && !(vol >= 0)) throw new Error('Leitura do hidrômetro inválida.');
-  const parc = cob < x.ha - 1e-9; p.cob = cob; p.st = parc ? 'Parcial' : 'Feita';
+  cob = Math.round(cob * 100) / 100; const parc = cob < x.ha - 1e-9; p.cob = cob; p.st = parc ? 'Parcial' : 'Feita';   // 2 casas (PRE-REV Z4)
   p.fimReal = p.iniReal + Math.round(p.dur * cob / x.ha) + irrPausaMin(o, p.n); p.vol = (vol === null || vol === undefined || vol === '') ? null : vol;
   irrCredito(s, o, p);
-  irrTr(o, p.fimReal, o.ex, 'Término' + (o.passadas.length > 1 ? ' da passada ' + p.n : '') + ' · ' + irrH(p.fimReal - p.iniReal) + ' de bombeamento · ' + (parc ? 'parou antes: ' + irrN(cob, 1) + ' de ' + irrN(x.ha, 1) + ' ha' : (x.tipo === 'gotejo' ? 'turno completo' : 'volta completa') + ' nos ' + irrN(x.ha) + ' ha') + (p.vol === null ? ' · sem leitura do hidrômetro' : ' · hidrômetro ' + irrN(p.vol) + ' m³'), s.faz[o.faz].irrig);
+  irrTr(o, p.fimReal, o.ex, 'Término' + (o.passadas.length > 1 ? ' da passada ' + p.n : '') + ' · ' + irrH(p.fimReal - p.iniReal) + ' de bombeamento · ' + (parc ? 'parou antes: ' + irrN(cob, 2, 0) + ' de ' + irrN(x.ha, 2, 0) + ' ha' : (x.tipo === 'gotejo' ? 'turno completo' : 'volta completa') + ' nos ' + irrN(x.ha) + ' ha') + (p.vol === null ? ' · sem leitura do hidrômetro' : ' · hidrômetro ' + irrN(p.vol) + ' m³'), s.faz[o.faz].irrig);
   const prox = irrPassProx(o);
   if (prox) return { msg: 'Passada ' + p.n + ' encerrada · ' + id + ' segue Em execução · próxima passada ' + (prox.ini === null ? 'a definir' : irrQuando(prox.ini)) + '.' };
   o.etapa = 'Em conferência'; o.exec.fim = p.fimReal;
@@ -435,8 +435,8 @@ function irrReclassificar(s, id, d) {
   o.fert = { prod: d.prod, dose: d.dose, mot: d.mot, exec: iniciou, q, area, v1, vol: Math.round(vol), lamHa: area > 0 ? vol / (10 * area) : 0, tot: cenQtd(d.dose, area), sw };   // regra única de quantidade (cenario.js, sempre carregado antes)
   o.versao = 'v2';
   if (!iniciou) { if (o.lib) { o.libRes = o.lib; irrTr(o, q, o.lib, 'Liberação da água revogada: com produto, a liberação é do agrônomo', 'sistema'); } o.lib = null; o.etapa = 'A liberar'; }
-  irrTr(o, q, 'RC-' + id.slice(3) + '-2', 'Versão v2 · ' + d.prod + ' ' + irrN(d.dose, 1) + ' kg/ha · ' + d.mot + ' · ' + (iniciou ? (p ? 'passada ' + p.n + ' parada em ' + irrN(v1, 1) + ' de ' + irrN(x.ha, 1) + ' ha (fica na v1); saldo de ' + irrN(area, 1) + ' ha' : 'passadas seguintes') + ' aguardam a liberação' : 'voltou a A liberar') + ' · requisição de ' + irrN(o.fert.tot, 2) + ' kg na liberação', s.faz[o.faz].gestor);
-  return { msg: id + ' v2 criada (' + d.prod + ' ' + irrN(d.dose, 1) + ' kg/ha) · para o agrônomo liberar na O.S. · ' + (iniciou ? 'segue Em execução com selo Revisão de saldo pendente' + (p ? ' · ' + irrN(v1, 1) + ' ha já irrigados ficam na v1' : '') : 'voltou a A liberar') + ' · requisição de ' + irrN(o.fert.tot, 2) + ' kg na liberação.' };
+  irrTr(o, q, 'RC-' + id.slice(3) + '-2', 'Versão v2 · ' + d.prod + ' ' + irrN(d.dose, 1) + ' kg/ha · ' + d.mot + ' · ' + (iniciou ? (p ? 'passada ' + p.n + ' parada em ' + irrN(v1, 2, 0) + ' de ' + irrN(x.ha, 2, 0) + ' ha (fica na v1); saldo de ' + irrN(area, 2, 0) + ' ha' : 'passadas seguintes') + ' aguardam a liberação' : 'voltou a A liberar') + ' · requisição de ' + irrN(o.fert.tot, 2) + ' kg na liberação', s.faz[o.faz].gestor);
+  return { msg: id + ' v2 criada (' + d.prod + ' ' + irrN(d.dose, 1) + ' kg/ha) · para o agrônomo liberar na O.S. · ' + (iniciou ? 'segue Em execução com selo Revisão de saldo pendente' + (p ? ' · ' + irrN(v1, 2, 0) + ' ha já irrigados ficam na v1' : '') : 'voltou a A liberar') + ' · requisição de ' + irrN(o.fert.tot, 2) + ' kg na liberação.' };
 }
 // Adicionar produtos de uma vez: v2 na irrigação e no cenário da O.S.; se um lado falhar, nada é gravado
 function irrReclassTudo(self, id, d) {
@@ -457,7 +457,7 @@ function irrReclassCen(c, s, id) {
     atv: { op: 'Fertirrigação', nome: 'Fertirrigação · ' + f.prod, gat: '', orig: 'Irrigação ' + id + ' v1 → v2', conj: x.bnome, rend: 0 },
     realizado: 0, saldo: f.area, resp: s.faz[x.faz].irrig, versao: 'v2', janela: irrJanO(o), ap: [], nota: '',
     cond: 'Produto na água: o agrônomo confere, ajusta se precisar e libera; a liberação reserva o estoque. Próximo passo: liberar para execução.',
-    orig: ['Irrigação ' + id + ' (água) · ' + x.nome, 'Adicionar produtos · ' + f.mot, f.exec ? irrN(f.v1, 1) + ' ha já irrigados ficam na v1' : 'antes do início'], link: 'IR-03det.dc.html#' + id };
+    orig: ['Irrigação ' + id + ' (água) · ' + x.nome, 'Adicionar produtos · ' + f.mot, f.exec ? irrN(f.v1, 2, 0) + ' ha já irrigados ficam na v1' : 'antes do início'], link: 'IR-03det.dc.html#' + id };
   c.ordens[id] = { id, tipo: no.tipo, talhao: no.talhao, area: f.area, etapa: 'A liberar', versao: 'v2', realizado: 0, saldo: f.area, resp: no.resp,
     ins: ins.map(z => ({ p: z.p, dose: z.dose, un: z.un, tot: z.tot, emb: '' })), req: null, selos: no.selos, ap: [], reservado: false, osc: { novo: no } };
   return { msg: '' };

@@ -423,7 +423,7 @@ function PREVALS(self,v){ irrOuvir(self);
   v.avs=av.map(a=>({t:a.t,st:tagSt()}));
   // passadas (sub-detalhe)
   IRG('g_pas').rows=o.passadas.map(p=>({id:'p'+p.n,v:{n:p.n+'ª',lam:p.lam,dur:irrH(p.dur)},s:{},p:{jan:[{k:'txt',t:p.ini===null?'a definir':irrJan(p.iniReal!==undefined&&p.iniReal!==null?p.iniReal:p.ini,irrFimP(o,p))}],
-    st:(o.fert&&p.st==='Programada')?[{k:'chip',t:'Na O.S. · v2',c:'yellow'}]:(p.st==='Parcial'&&o.fert&&o.fert.exec&&o.fert.v1===p.cob?[{k:'chip',t:'Parcial · v1',c:'yellow'},{k:'br',t:''},{k:'mut',t:'saldo de '+irrN(o.fert.area,1)+' ha na v2'}]:[{k:'chip',t:p.st,c:{'Programada':'gray','Em execução':'green','Feita':'gray','Parcial':'yellow'}[p.st]||'gray'}]),
+    st:(o.fert&&p.st==='Programada')?[{k:'chip',t:'Na O.S. · v2',c:'yellow'}]:(p.st==='Parcial'&&o.fert&&o.fert.exec&&o.fert.v1===p.cob?[{k:'chip',t:'Parcial · v1',c:'yellow'},{k:'br',t:''},{k:'mut',t:'saldo de '+irrN(o.fert.area,2,0)+' ha na v2'}]:[{k:'chip',t:p.st,c:{'Programada':'gray','Em execução':'green','Feita':'gray','Parcial':'yellow'}[p.st]||'gray'}]),
     cob:p.cob===null||p.cob===undefined?[{k:'mut',t:'—'}]:[{k:'txt',t:irrN(p.cob,1)+' de '+irrN(x.ha,1)+' ha'},{k:'br',t:''},{k:'mut',t:p.vol!==null&&p.vol!==undefined?irrN(p.vol)+' m³ medidos':(p.st==='Em execução'?'em andamento':'sem leitura')}]}}));
   // execução e conferência
   const pa=irrPassAtual(o); const pz=(o.exec.pausas||[]); const pzm=pz.filter(z=>z.fim!==null&&z.fim!==undefined).reduce((a,z)=>a+(z.fim-z.ini),0);
@@ -514,7 +514,7 @@ function EXTRAVALS(self,v){ const s=irrGet(); const id=detId(self); const o=s.or
   if(rc){ const exec=(o.etapa==='Em execução'); v.rc_open=true; v.rc_titulo='Adicionar produtos · '+id; v.rc_sub=x.nome+' · versão v2 (fertirrigação) · mesmo setor, janela e saldo';
     v.rc_prod=rc.d.prod; v.rc_dose=rc.d.dose; v.rc_mot=rc.d.mot; const n=g2num(rc.d.dose); const pa=irrPassAtual(o); const area=irrAreaV2(x,pa);   /* a mesma área da v2 (irrReclassificar) */
     const bq=pa?[]:irrChecar(s,o).bloq;
-    v.rc_prev=bq.length?('Resolva antes: '+bq.map(b=>b.t+(b.h?' '+b.h:'')).join(', ')+'.'):((exec?'A ordem continua Em execução com selo Revisão de saldo pendente; '+(pa?irrN(pa.cob||0,1)+' ha já cobertos ficam na v1 e o saldo de '+irrN(area,1)+' ha para até a liberação.':'as próximas passadas esperam a liberação.'):'A ordem volta a A liberar e a liberação da água é revogada.')+' Ana (agrônoma) libera na O.S.; a liberação reserva '+((n>0&&n<=50)?irrN(cenQtd(n,area),2):'—')+' kg no estoque (falta bloqueia).');
+    v.rc_prev=bq.length?('Resolva antes: '+bq.map(b=>b.t+(b.h?' '+b.h:'')).join(', ')+'.'):((exec?'A ordem continua Em execução com selo Revisão de saldo pendente; '+(pa?irrN(pa.cob||0,2,0)+' ha já cobertos ficam na v1 e o saldo de '+irrN(area,2,0)+' ha para até a liberação.':'as próximas passadas esperam a liberação.'):'A ordem volta a A liberar e a liberação da água é revogada.')+' Ana (agrônoma) libera na O.S.; a liberação reserva '+((n>0&&n<=50)?irrN(cenQtd(n,area),2):'—')+' kg no estoque (falta bloqueia).');
     const set=(k)=>(e)=>{ const cur=self.state.rc; const d=Object.assign({},cur.d,{[k]:e.target.value}); const er=Object.assign({},cur.err); delete er[k]; self.setState({rc:Object.assign({},cur,{d,err:er,warn:false})}); };
     v.rc_setprod=set('prod'); v.rc_setdose=set('dose'); v.rc_setmot=set('mot');
     ['prod','dose','mot'].forEach(k=>{ v['rc_e'+k]=(rc.err||{})[k]||''; v['rc_e'+k+'_has']=!!(rc.err||{})[k]; });

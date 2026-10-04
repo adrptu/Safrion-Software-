@@ -51,6 +51,7 @@ function cenLiberar(c, id) {
   const rid = o.req || ('REQ-' + (41 + Object.keys(c.reqs).length));
   const req = c.reqs[rid] || (c.reqs[rid] = { id: rid, os: id, itens: [], estado: 'Reservada' });
   (o.ins || []).forEach(x => {
+    if (x.dose > 0 && !(x.tot > 0)) throw new Error('Dose × área de ' + x.p + ' dá 0 ' + x.un + ': aumente a dose ou a área.');   // nunca entregaria nada
     const l = cenLote(c, x.p); if (!l) throw new Error('Sem lote de ' + x.p + ' no Estoque.');
     if (cenDisp(l) + 1e-9 < x.tot) throw new Error('Saldo insuficiente de ' + x.p + ': ' + cenNum(cenDisp(l)) + ' ' + x.un + ' disponíveis para ' + cenNum(x.tot) + ' ' + x.un + '.');
     l.reservado += x.tot;
