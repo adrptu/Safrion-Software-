@@ -63,6 +63,12 @@ try:
     # ---- AG-01det e AG-03det: caminho de volta
     c.goto(f'http://127.0.0.1:{p}/AG-03det.dc.html'); time.sleep(.5)
     chk('DIA-007 aponta para VIS-011 e REC-014', J("['AG-01.dc.html#VIS-011','AG-04det.dc.html'].every(h=>!!document.querySelector('a[href=\"'+h+'\"]'))"))
+    # AÇÃO v3.1 (G2): o próximo passo fica só no primário; o elo da cadeia que o repete fica informativo (sem link)
+    n04=J("[...document.querySelectorAll('a[href=\"AG-04det.dc.html\"]')].filter(a=>a.getClientRects().length).map(a=>a.closest('header')?'cabeçalho':'conteúdo')")
+    chk('DIA-007: um só link visível para a REC-014, o primário do cabeçalho', n04==['cabeçalho'], n04)
+    c.goto(f'http://127.0.0.1:{p}/AG-01det.dc.html'); time.sleep(.6)
+    nos=J("[...document.querySelectorAll('a[href=\"OS.dc.html#OS-0420\"]')].filter(a=>a.getClientRects().length).map(a=>a.closest('header')?'cabeçalho':'conteúdo')")
+    chk('VIS-011 com o controle em OS-0420: um só link visível para a O.S., o primário do cabeçalho; o elo O.S. da cadeia fica informativo', nos==['cabeçalho'], nos)
     J("localStorage.removeItem('talhao-os-mip-v1'); localStorage.removeItem('talhao-os-cenario-v1')")
 finally:
     try:

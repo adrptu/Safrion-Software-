@@ -245,7 +245,7 @@
   "responsavel": "Agronomia e gestão",
   "Conteúdo": "Intervenções comparadas com observações posteriores, desvio, recorrência e custo.",
   "Campos e informação essencial": "Recomendação; execução real; método pré/pós; data; resultado; confiança; custo.",
-  "Botões e destinos": "Programar avaliação → AG-01; Abrir aplicação → CA-01; Registrar parecer; Propor revisão → AG-05/GE-07.",
+  "Botões e destinos": "Programar pós (na linha da avaliação) → AG-01; Abrir aplicação → CA-01; Registrar parecer; Propor revisão → AG-05/GE-07.",
   "Continuidade e estados": "Redução observada não equivale automaticamente a eficácia causal. Economia adiada e efetivamente evitada aparecem separadas.",
   "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
   "Dependências e aceite": "capítulos 33–41, 60–62; critérios AGR, ACAG, TV, ACTV, SOLO, LABMAP, COLMAP; fluxos FL-04, FL-05, FL-R01, FL-R06. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",

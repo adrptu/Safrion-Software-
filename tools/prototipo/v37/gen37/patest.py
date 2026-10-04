@@ -28,7 +28,8 @@ try:
     steps = J("[...document.querySelectorAll('.etp-ind .etp-itens>li')].map(b=>b.innerText.replace(/\\s+/g,' '))")
     check('etapas 2 e 3 mostram impedimento', all('Escolha um plano' in s for s in steps[1:]), steps)
     cards = J("[...document.querySelectorAll('button[aria-label^=\"Abrir plano\"]')].map(b=>b.innerText.replace(/\\s+/g,' '))")
-    check('biblioteca com 6 cards', len(cards) == 6, len(cards))
+    import dados2 as _D2   # um card por plano da fonte (a camada sintética acrescentou os 2 planos irrigados do mamão)
+    check(f'biblioteca com um card por plano ({len(_D2.PLANOS)})', len(cards) == len(_D2.PLANOS), (len(cards), [p['nome'] for p in _D2.PLANOS]))
     soja = [x for x in cards if x.startswith('Soja alta tecnologia')][0]
     check('card mostra versão, estado, atividades, gatilhos, custo e cultivos', all(k in soja for k in ['v6', 'Publicado', '8 atividades', 'DAP', 'R$ 2.099,90', 'Aplicado em 5 cultivos', '3 na v6 · 2 na v5']), soja)
     cafe = [x for x in cards if x.startswith('Café')][0]

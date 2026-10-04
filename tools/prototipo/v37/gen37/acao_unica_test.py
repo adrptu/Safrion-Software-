@@ -296,7 +296,7 @@ try:
         ERRL.extend(errs()); info('erros de JS (gemini)',ERRL[:5])
     elif MODO=='v3':
         import re as _re
-        DUPF=os.environ.get('DUP_PY') or os.path.normpath(os.path.join(HERE,'..','..','dup','acoes_duplicadas.py'))
+        DUPF=os.environ.get('DUP_PY') or os.path.normpath(os.path.join(HERE,'..','ferramentas','acoes_duplicadas.py'))   # o verificador versionado
         DUPJS=_re.search(r'JS=r"""(.*?)"""',open(DUPF,encoding='utf-8').read(),_re.S).group(1)   # mesma medida da varredura, sem cópia
         # primárias visíveis: no painel modal aberto conta só o painel (o véu deixa o fundo inerte; v3.1); senão cabeçalho + conteúdo
         PRIM=r"""(()=>{const vis=e=>{const r=e.getBoundingClientRect(); const cs=getComputedStyle(e); return r.width>1&&r.height>1&&cs.visibility!=='hidden'&&cs.display!=='none';};
@@ -388,6 +388,27 @@ try:
         chk('29b controle negativo da verificação: SAF etapa 3 limpa (0 duplicata, 1 primária, 0 avanço fora da área, 0 controle no indicador); com uma cópia do avanço injetada no cabeçalho a medida acusa duplicata, 2 primárias e avanço fora da área',
             limpo['dup']==0 and len(limpo['prims'])==1 and limpo['fora']==0 and limpo['foc']==0 and sujo['dup']>=1 and len(sujo['prims'])==2 and sujo['fora']==1, [limpo,sujo])
         info('duplicatas e primárias por estado',[(m['estado'],m['dup'],m['prims']) for m in M])
+        # 31 · v3.1 em repouso nas 20 páginas que tinham ação repetida no merge (e91a7f4): trilha sem link no nível de área, cadeia sem elo que
+        #      repete o primário, índice sem destino repetido, app sem rodapé/cartão em dobro; e estados: AG-01det com a OS-0420 encerrada (o elo
+        #      volta a ser link e o primário muda), MB-01 → MB-05 pela âncora da ordem (o selo nomeia a ordem) e o MB-05 sem âncora igual
+        P20=['AG-01det','AG-03det','AG-04det','AG-06','BO-01det','BO-02det','BO-03det','CA-01x-os0420','CD-01det','MB-01','MB-02','MB-09','MB-10','Main',
+             'ON-01det','PL-02','PT-02det','PT-04det','PT-05det','SU-02']
+        d20={}
+        for pg in P20:
+            abre(pg); d=J(DUPJS); d20[pg]=len(d.get('mesmoRotulo',[]))+len(d.get('mesmoDestino',[]))
+        abre('AG-01det'); os0=J("[...document.querySelectorAll('a[href=\"OS.dc.html#OS-0420\"]')].filter(a=>a.getClientRects().length).length")
+        fechou=J("(()=>{ try{ const c=cenGet(); const o=c.ordens['OS-0420']; if(!o) return 'sem OS-0420'; o.etapa='Encerradas'; cenSave(c); return 'ok'; }catch(e){ return 'erro '+e.message; } })()")
+        abre('AG-01det',limpa=False); d=J(DUPJS); os1=J("[...document.querySelectorAll('a[href=\"OS.dc.html#OS-0420\"]')].filter(a=>a.getClientRects().length).map(a=>a.closest('header')?'cabeçalho':'conteúdo')")
+        dupE=len(d.get('mesmoRotulo',[]))+len(d.get('mesmoDestino',[])); J("localStorage.clear()")
+        abre('MB-01'); h5=J("(()=>{ const a=[...document.querySelectorAll('a[href^=\"MB-05.dc.html#OS-\"]')].find(a=>a.getClientRects().length); return a?a.getAttribute('href'):''; })()")
+        sel=''; sel0=''
+        if h5:
+            abre('MB-05',hash=h5.split('MB-05.dc.html')[1],limpa=False); sel=J("(document.querySelector('header')||{innerText:''}).innerText.replace(/\\s+/g,' ')")
+        abre('MB-05'); sel0=J("(document.querySelector('header')||{innerText:''}).innerText.replace(/\\s+/g,' ')")
+        oid=h5.split('#')[1] if h5 else '?'
+        chk('31 v3.1 · 0 ação repetida nas 20 páginas do merge; AG-01det: 1 link para a OS-0420 em repouso e, com ela encerrada, o elo volta a ser link sem repetir; MB-01 → MB-05#ordem nomeia a ordem e o MB-05 sem âncora não',
+            all(v==0 for v in d20.values()) and os0==1 and fechou=='ok' and dupE==0 and os1==['conteúdo'] and bool(h5) and oid in sel and oid not in sel0,
+            [{k:v for k,v in d20.items() if v},os0,fechou,dupE,os1,h5,sel[:120],sel0[:120]])
         ERRL.extend(errs()); chk('30 sem erro de JS (v3)', not ERRL, ERRL[:5])
 finally:
     if c: c.close()

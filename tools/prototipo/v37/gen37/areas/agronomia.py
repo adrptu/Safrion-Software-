@@ -97,16 +97,20 @@ CADEIA=[('Vistoria','VIS-011','AG-01.dc.html#VIS-011','Foco · reboleiras'),
         ('Necessidade','NEC-028','PL-02.dc.html','Programada · 1ª onda 100 ha'),
         ('O.S.','OS-0420','OS.dc.html#OS-0420',f'Em execução · Impedida · {REAL20}/{AREA20} ha'),
         ('Avaliação','EF-020','AG-06.dc.html','Aguarda leitura pós')]
-def cadeia(atual,prox_t,prox_h):
+def cadeia(atual,prox_t,prox_h,vivo=None):
     cells=[]
     for i,(lbl,rid,href,st) in enumerate(CADEIA):
         cur=(rid.split()[0]==atual)
-        inner=(f'<span style="font-size: 10.5px; font-weight: 700; letter-spacing: .06em; color: {MUTED};">{esc(lbl.upper())}</span>'
-               f'<span style="font-size: 13px; font-weight: 800; color: {ACC if not cur else INK};">{esc(rid)}{"" if cur else " ›"}</span>'
+        def _in(seta): return (f'<span style="font-size: 10.5px; font-weight: 700; letter-spacing: .06em; color: {MUTED};">{esc(lbl.upper())}</span>'
+               f'<span style="font-size: 13px; font-weight: 800; color: {ACC if seta else INK};">{esc(rid)}{" ›" if seta else ""}</span>'
                f'<span style="font-size: 11.5px; color: {MUTED}; line-height: 1.3;">{esc(st)}</span>')
         box='display: flex; flex-direction: column; gap: 2px; flex: 1 1 0; min-width: 0; padding: 8px 10px; border-radius: 10px; text-decoration: none;'
-        if cur: cells.append(f'<div aria-current="step" style="{box} background: {SURF}; border: 2px solid {ACC};">{inner}</div>')
-        else: cells.append(f'<a href="{href}" title="Abrir {esc(lbl.lower())} {esc(rid)}" style="{box} background: {SURF}; border: 1px solid {LINE};">{inner}</a>')
+        lk=f'<a href="{href}" title="Abrir {esc(lbl.lower())} {esc(rid)}" style="{box} background: {SURF}; border: 1px solid {LINE};">{_in(True)}</a>'
+        tx=f'<div style="{box} background: {SURF}; border: 1px solid {LINE};">{_in(False)}</div>'
+        if cur: cells.append(f'<div aria-current="step" style="{box} background: {SURF}; border: 2px solid {ACC};">{_in(False)}</div>')
+        elif prox_h and href==prox_h: cells.append(tx)
+        elif vivo and href in vivo: cells.append(f'<sc-if value="{H(vivo[href])}" hint-placeholder-val="{F_()}">{lk}</sc-if><sc-if value="{H(vivo[href]+"Txt")}" hint-placeholder-val="{T_()}">{tx}</sc-if>')
+        else: cells.append(lk)
         if i<len(CADEIA)-1: cells.append(f'<span aria-hidden="true" style="color: {MUTED}; align-self: center;">→</span>')
     # sem "Próxima ação" aqui: o primário da tela já nomeia o próximo passo (um destino, um lugar)
     return (f'<nav aria-label="Cadeia da demonstração" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; background: {ACCS}; border: 1px solid {LINE}; border-radius: 12px;">'
@@ -369,7 +373,7 @@ function EXTRAVALS(self,v){ v['a4go_REC-014']=()=>{ location.href='AG-04det.dc.h
       + bloco('Itens e registro Agrofit','',alerta+git,tone='red')
       + bloco('Versões','',gver)
       + bloco('Contexto da versão aprovada','',
-          _kv([('Origem','<a href="AG-03det.dc.html" style="color: '+ACC+'; font-weight: 700; text-decoration: none;">DIA-007 ›</a> nematoide + K baixo'),('Ciclo · talhão','Safra 2026/27 · T4 · 204 ha'),
+          _kv([('Origem','DIA-007 · nematoide + K baixo'),('Ciclo · talhão','Safra 2026/27 · T4 · 204 ha'),
                ('Operação','Plantio'),('Janela','20/09 a 05/10'),('Fonte científica','IAC Boletim 100'),('Aprovador (RT)','Ana'),('Aprovada em','21/09/2026 · v3 (KCl) em 23/09'),('Destino','NEC-028 · demanda única')]))
       + bloco('Memória de cálculo','',memoria)
       + bloco('Prescrição espacial por zona','',gz,
@@ -474,7 +478,6 @@ function EXTRAVALS(self,v){ self.g2after=(gid,rows,r)=>{ if(gid!=='g_bib') retur
     shell37('AG-06','Eficácia e histórico',corpo,fname=fname,
       subtitle='Intervenções comparadas com observações posteriores: desvio, recorrência, confiança e custo por hectare.',
       status=('1 pós vence em 27/09','yellow'),
-      primary_html=ilink('Programar avaliação','AG-01.dc.html','calendar','Programar a vistoria de leitura pós',primary=True,small=False),
       footer='Redução observada não equivale a eficácia causal; a EF-020 fecha a cadeia da demonstração quando a OS-0420 tiver leitura pós.')
 
     ag07()   # AG-07 · Consulta Agrofit (função própria, abaixo)
@@ -884,7 +887,8 @@ function PREVALS(self,v){ mipOuvir(self); cenOuvir(self); dtIni(self); const s=m
   // próximo passo: comando sem formulário roda aqui; decidir e programar abrem o formulário no AG-01; link vai ao destino (nunca igual ao Voltar)
   const run={sinc:x=>mipSinc(x,vid),parcial:x=>mipParcial(x,vid),monitorar:x=>mipMonitorar(x,vid,''),pos:x=>mipPos(x,vid)}[P.fn];
   v.dt_pt=P.t; v.dt_ptxt=P.txt; v.dt_hasBtn=!!(P.t&&run); v.dt_go=()=>{ if(run) mipMudar(self,run); };
-  v.dt_hasLnk=!!(P.t&&!run); v.dt_ph=P.h||('AG-01.dc.html#'+vid+(P.fn?':'+P.fn:'')); }
+  v.dt_hasLnk=!!(P.t&&!run); v.dt_ph=P.h||('AG-01.dc.html#'+vid+(P.fn?':'+P.fn:''));
+  v.dt_cadOsTxt=!!(v.dt_hasLnk&&v.dt_ph==='OS.dc.html#OS-0420'); v.dt_cadOs=!v.dt_cadOsTxt; }
 '''
 
 def ag01det():
@@ -913,7 +917,7 @@ def ag01det():
     cab=(f'<div style="display: flex; flex-direction: column; gap: 6px;"><div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">'
          f'<h2 style="margin: 0; font-family: {DISP}; font-size: 18px; font-weight: 700;">{H("dt_t")}</h2>{_ch("dt_sit","dt_sst","dt_sdot")}<span style="font-size: 12.5px; color: {MUTED};">{H("dt_ssub")}</span></div>'
          f'<div style="font-size: 13px; color: {MUTED};">{H("dt_res")}</div><div style="font-size: 13px; line-height: 1.45;"><b>Próximo passo:</b> {H("dt_ptxt")}</div></div>')
-    corpo=(cab + f'<sc-if value="{H("dt_isDemo")}" hint-placeholder-val="{F_()}">' + cadeia('VIS-011','Abrir diagnóstico DIA-007','AG-03det.dc.html') + '</sc-if>'
+    corpo=(cab + f'<sc-if value="{H("dt_isDemo")}" hint-placeholder-val="{F_()}">' + cadeia('VIS-011','','',vivo={'OS.dc.html#OS-0420':'dt_cadOs'}) + '</sc-if>'
       + kpi
       + bloco('Rota em W e pontos','',rota+leg+gp)
       + bloco('Série do alvo no talhão','',serie)
@@ -1040,12 +1044,12 @@ def _agf_filtros():
 
 def _agf_tools():
     sel=(f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 4px 8px; border-radius: 999px; border: 1px solid {LINE}; '
-         f'background: {SURF}; color: {INK}; cursor: pointer;')
-    return (f'<label style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: {MUTED};">Agrupar por'
+         f'background: {SURF}; color: {INK}; cursor: pointer; max-width: 100%; min-width: 0; text-overflow: ellipsis;')   # encolhe no estreito (390 px)
+    return (f'<label style="display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; max-width: 100%; min-width: 0; font-size: 12px; font-weight: 700; color: {MUTED};">Agrupar por'
             f'<select aria-label="Agrupar por" value="{H("agf_gb")}" onChange="{H("agf_setgb")}" style="{sel}">'
             f'<sc-for list="{H("agf_gbs")}" as="o" hint-placeholder-count="3"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select></label>'
-            f'<sc-if value="{H("agf_grouped")}" hint-placeholder-val="{F_()}"><button type="button" onClick="{H(AGF_ID+"_xtog")}" '
-            f'style="{_MINI} display: inline-flex; align-items: center; gap: 5px;">{E.seta_xtog(H(AGF_ID+"_xup"),H(AGF_ID+"_xdown"))}{H(AGF_ID+"_xlab")}</button></sc-if>')
+            f'<sc-if value="{H("agf_grouped")}" hint-placeholder-val="{F_()}"><button type="button" class="g2xtog" onClick="{H(AGF_ID+"_xtog")}">'   # expandir/recolher global: texto discreto (v3.1)
+            f'{E.seta_xtog(H(AGF_ID+"_xup"),H(AGF_ID+"_xdown"))}{H(AGF_ID+"_xlab")}</button></sc-if>')
 
 def _agf_estados():
     """carregando (com o tamanho da base) e erro com "Tentar de novo"; a lista só aparece com o índice carregado."""

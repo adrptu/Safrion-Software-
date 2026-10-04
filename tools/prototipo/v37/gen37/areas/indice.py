@@ -44,23 +44,31 @@ def build():
     for nome,ic,items in MENU2:
         lis=''.join(f'<a href="{h}" style="display: block; font-size: 12.8px; color: {INK}; text-decoration: none; padding: 3px 0; font-weight: 600;">{esc(l)} ›</a>' for l,h in items) if len(items)>1 else ''
         cards.append(f'<div style="background: {SURF}; border: 1px solid {LINE}; border-radius: 16px; box-shadow: {SH}; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0;">'
-                     f'<a href="{items[0][1]}" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px;"><span style="width: 34px; height: 34px; border-radius: 10px; background: {ACCS}; display: inline-flex; align-items: center; justify-content: center;">{icon(ic,18,ACC)}</span>'
-                     f'<span style="font-size: 15px; font-weight: 800; flex-grow: 1;">{esc(nome)}</span><span style="color:{MUTED};">›</span></a>{lis}</div>')
+                     + (f'<a href="{items[0][1]}" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px;">' if len(items)==1 else '<div style="display: flex; align-items: center; gap: 10px;">')
+                     + f'<span style="width: 34px; height: 34px; border-radius: 10px; background: {ACCS}; display: inline-flex; align-items: center; justify-content: center;">{icon(ic,18,ACC)}</span>'
+                     + f'<span style="font-size: 15px; font-weight: 800; flex-grow: 1;">{esc(nome)}</span>' + (f'<span style="color:{MUTED};">›</span></a>' if len(items)==1 else '</div>') + f'{lis}</div>')
     ocultos=[(a['area'],[f for f,m in MAPA.items() if m['area']==a['area']]) for a in MENU]
     from ui37 import menu_item
     ocultos=[(n,[f for f in fs if menu_item(ffile(f))[0] is None]) for n,fs in ocultos if n not in ('Cadastros',)]   # só as telas que continuam fora do menu (01/10)
     oc_html=''.join(f'<a href="{ffile(fs[0])}" style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid {LINE}; border-radius: 999px; font-size: 12.3px; color: {INK}; text-decoration: none; background: {SURF};">{esc(n)} <span style="color: {MUTED};">{len(fs)}</span></a>' for n,fs in ocultos if fs)
-    oc_html+=''.join(f'<a href="{fid}.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid {LINE}; border-radius: 999px; font-size: 12.3px; color: {INK}; text-decoration: none; background: {SURF};">{esc(nome)} <span style="color: {MUTED};">{n}</span></a>' for nome,fid,n,ic in [('App móvel','MB-01',10,''),('Portal do parceiro','PT-01',7,''),('Onboarding','ON-01',1,''),('Backoffice','BO-01',4,'')])
+    EXT=[('App móvel','MB-01',10,''),('Portal do parceiro','PT-01',7,''),('Onboarding','ON-01',1,''),('Backoffice','BO-01',4,'')]
+    oc_html+=''.join(f'<a href="{fid}.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid {LINE}; border-radius: 999px; font-size: 12.3px; color: {INK}; text-decoration: none; background: {SURF};">{esc(nome)} <span style="color: {MUTED};">{n}</span></a>' for nome,fid,n,ic in EXT)
+    NOMENU={h:(nome if len(items)==1 else f'{nome} › {l}') for nome,ic,items in MENU2 for l,h in items}
+    NOMENU.update({ffile(fs[0]):f'Módulos ocultos › {n}' for n,fs in ocultos if fs}); NOMENU.update({f'{fid}.dc.html':f'Módulos ocultos › {nome}' for nome,fid,n,ic in EXT})
     grid='<div style="display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px;">'+''.join(cards)+'</div>'
     grid+=(f'<div style="font-size: 13px; font-weight: 800; letter-spacing: .04em; color: {MUTED}; margin-top: 6px;">MÓDULOS OCULTOS DO MENU (PRESERVADOS)</div>'
            f'<div style="font-size: 12.5px; color: {MUTED};">Fora do menu por decisão de 25/09/2026; seguem no protótipo com os mesmos padrões e são alcançados por links dos processos.</div>'
            f'<div style="display: flex; flex-wrap: wrap; gap: 8px;">{oc_html}</div>')
 
-    perfis=''.join(f'<a href="{h}" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px; background: {SURF}; border: 1px solid {LINE}; border-radius: 12px; padding: 10px 12px;">'
-        f'<span style="width: 30px; height: 30px; border-radius: 999px; background: {ACC}; color: #fff; font-weight: 800; font-size: 13px; display: inline-flex; align-items: center; justify-content: center;">{n[0]}</span>'
-        f'<span style="display: flex; flex-direction: column; line-height: 1.25;"><b style="font-size: 13px;">{esc(n)}</b><span style="font-size: 11.5px; color: {MUTED};">{esc(d)}</span></span></a>' for n,d,h in PERFIS)
-    cen=''.join(f'<a href="{h}" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px; background: {SURF}; border: 1px solid {LINE}; border-radius: 12px; padding: 9px 12px;">'
-        f'{tag(c)}<span style="font-size: 12.6px; flex-grow: 1;">{esc(t)}</span><span style="color:{MUTED};">›</span></a>' for c,t,h in CENARIOS)
+    def _ab(h,st): return f'<div style="{st}">' if h in NOMENU else f'<a href="{h}" style="text-decoration: none; color: inherit; {st}">'
+    def _fe(h): return '</div>' if h in NOMENU else '</a>'
+    perfis=''.join(_ab(h,f'display: flex; align-items: center; gap: 10px; background: {SURF}; border: 1px solid {LINE}; border-radius: 12px; padding: 10px 12px;')
+        + f'<span style="width: 30px; height: 30px; border-radius: 999px; background: {ACC}; color: #fff; font-weight: 800; font-size: 13px; display: inline-flex; align-items: center; justify-content: center;">{n[0]}</span>'
+        + f'<span style="display: flex; flex-direction: column; line-height: 1.25;"><b style="font-size: 13px;">{esc(n)}</b><span style="font-size: 11.5px; color: {MUTED};">{esc(d)}</span>'
+        + (f'<span style="font-size: 11.5px; color: {MUTED};">começa em: {esc(NOMENU[h])}</span>' if h in NOMENU else '') + '</span>' + _fe(h) for n,d,h in PERFIS)
+    cen=''.join(_ab(h,f'display: flex; align-items: center; gap: 10px; background: {SURF}; border: 1px solid {LINE}; border-radius: 12px; padding: 9px 12px;')
+        + f'{tag(c)}<span style="font-size: 12.6px; flex-grow: 1;">{esc(t)}</span>'
+        + (f'<span style="font-size: 11.5px; color: {MUTED}; white-space: nowrap;">no menu: {esc(NOMENU[h])}</span>' if h in NOMENU else f'<span style="color:{MUTED};">›</span>') + _fe(h) for c,t,h in CENARIOS)
     html=f'''<!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><title>Do Talhão à O.S. · protótipo v3.7</title><script src="./support.js"></script></head><body><x-dc><helmet>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Sora:wght@600;700&amp;display=swap">
@@ -76,7 +84,7 @@ def build():
 <div style="font-size: 11.5px; color: {MUTED}; margin-top: 8px;">A troca de perfil demonstra a experiência esperada; não comprova segurança real de acesso.</div>
 <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid {LINE}; display: flex; flex-direction: column; gap: 8px;">
 <div style="font-size: 13px; font-weight: 800; letter-spacing: .04em; color: {MUTED};">COMO VALIDAR</div>
-<div style="font-size: 13px; line-height: 1.5;"><b>1.</b> Entre com um perfil e percorra a sua rotina pelo menu.</div>
+<div style="font-size: 13px; line-height: 1.5;"><b>1.</b> Escolha um perfil e abra pelo menu abaixo a tela em que ele começa.</div>
 <div style="font-size: 13px; line-height: 1.5;"><b>2.</b> Rode os cenários prontos: cada processo mostra a faixa de etapas no topo; clique nas linhas das tabelas para editar.</div>
 <div style="font-size: 13px; line-height: 1.5;"><b>3.</b> Para pedir ajuste, comente no próprio quadro citando o código da tela no título (ex.: <b>IN-04</b>) e o que esperava ver.</div>
 </div></div>

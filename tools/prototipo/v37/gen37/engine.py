@@ -1036,7 +1036,7 @@ MOBILE_CSS=("[data-mroot]{max-width:var(--mw);max-height:100vh;max-height:100dvh
     "[data-mroot]>header{padding-top:max(54px,env(safe-area-inset-top,0px))}"
     "[data-mroot]>main>*,[data-mroot]>main>div:last-child{flex-shrink:0}"   # o conteúdo rola por inteiro; nenhum bloco é espremido pela altura da janela
     "@media (max-width:1279px){[data-mroot]{max-width:720px;margin:0 auto}}"
-    "[data-mroot]>main+div{padding-bottom:max(28px,env(safe-area-inset-bottom,0px))!important}"
+    "[data-mroot]>main+div:not([role=status]){padding-bottom:max(28px,env(safe-area-inset-bottom,0px))!important}"
     "@media (max-height:560px){[data-mroot]>header{padding-top:max(12px,env(safe-area-inset-top,0px))}}")
 # =====================================================================================
 # UX-ACAO-UNICA-20261003 (DS-02, DS-33 §74.5.7.1, DS-61): uma tarefa ativa = uma primária e uma rota de avanço.

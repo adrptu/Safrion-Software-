@@ -226,6 +226,7 @@ function paS2(self,v,p){ const todas=paWork(p); const ops=paOps(todas); const of
   v.k2=p.cultura+' · '+todas.length+(todas.length===1?' atividade':' atividades')+' · '+paRS(paCt(todas))+'/ha de insumos'+(tp.length?' · gatilhos: '+tp.join(', '):'');
   const apl=paApl(p.id); const nd=paDiff(p).length; const nv=p.rasc?p.rasc.v:p.versao+1;
   v.ban_r=!!p.rasc;
+  v.ed_show=p.versao>0&&!p.rasc; v.ed_t='Editar cria o rascunho v'+(p.versao+1)+'; a v'+p.versao+' publicada e os cultivos que a usam não mudam.';   // estado sempre visível (PRD 4.2)
   if(p.versao===0) v.ban_t='Rascunho v1 · ainda não publicado. Publique na etapa 3 para poder aplicar em Planejar safra.';
   else if(p.rasc) v.ban_t='Rascunho v'+p.rasc.v+' · '+nd+(nd===1?' alteração não publicada. ':' alterações não publicadas. ')+(apl?'Aplicado em '+apl+' — não serão alterados.':'Nenhum cultivo usa este plano.');
   v.disc=!!self.state.disc&&!!p.rasc; v.nodisc=!v.disc;
@@ -487,7 +488,8 @@ def build():
                           f'<span style="font-size: 12px; color: {MUTED}; white-space: nowrap;">{H("g.n")}</span></div>'
                           + FOR('g.gats', 't', gat, 2) + '</div>', 1)
     head2 = (f'<div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;"><h2 style="margin: 0; font-family: {DISP}; font-size: 20px; letter-spacing: -.02em;">{H("p_nome")}</h2>'
-             f'<span style="{H("p_est_st")}">{H("p_est")}</span><span style="font-size: 13px; color: {MUTED};">{H("k2")}</span></div>')
+             f'<span style="{H("p_est_st")}">{H("p_est")}</span><span style="font-size: 13px; color: {MUTED};">{H("k2")}</span></div>'
+             + IF('ed_show', f'<p style="margin: 4px 0 0; font-size: 12.5px; color: {MUTED};">{H("ed_t")}</p>'))
     banner = (IF('ban_r', f'<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 14px; border-radius: 12px; background: {YELS}; color: {YEL}; font-size: 13px; font-weight: 700;">'
                  f'<span style="flex-grow: 1; min-width: 0;">{H("ban_t")}</span>'
                  + IF('nodisc', f'<button type="button" onClick="{H("disc_ask")}" style="{_MINI}">Descartar rascunho</button>', True)

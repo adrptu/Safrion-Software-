@@ -189,15 +189,15 @@ function mbPasso(c, o){
   const t = mbTurno(c);
   if (t && t.os === o.id) { const pz = mbPausado(t); return { k: 'fechar', t: 'Fechar turno', chip: [pz ? 'Turno pausado' : 'Turno aberto · desde ' + t.ini, pz ? 'yellow' : 'green'], cor: 'green', href: 'MB-03.dc.html', tt: 'Fechar o turno da ' + o.id + ' com hectares, horas e consumo' }; }
   const r = mbReq(c, o);
-  if (r && r.itens.some(i => i.custodia > 0 && !i.confirmado)) return { k: 'confirmar', t: 'Confirmar recebimento', chip: ['Entregue por Rui · ' + r.id, 'yellow'], cor: 'yellow', href: 'MB-05.dc.html', tt: 'Conferir itens, lote e embalagem e confirmar o recebimento da ' + r.id };
+  if (r && r.itens.some(i => i.custodia > 0 && !i.confirmado)) return { k: 'confirmar', t: 'Confirmar recebimento', chip: ['Entregue por Rui · ' + r.id, 'yellow'], cor: 'yellow', href: 'MB-05.dc.html#' + o.id, tt: 'Conferir itens, lote e embalagem e confirmar o recebimento da ' + r.id };
   if (mbResta(o) <= 0.001) {
     if (mbProv(o) > 0) return { k: 'enviar', t: 'Ver envios', chip: ['Área feita · aguardando sinal', 'yellow'], cor: 'yellow', href: 'MB-03x-recibo.dc.html', tt: 'Ver os turnos da ' + o.id + ' que estão no aparelho' };
     const sb = mbSobra(c, o);
-    if (sb.length) return { k: 'devolver', t: 'Devolver sobra', chip: ['Área feita · sobra com você', 'yellow'], cor: 'yellow', href: 'MB-05.dc.html', tt: 'Levar ao Rui a sobra da ' + o.id + ': ' + mbSobraTxt(sb) };
+    if (sb.length) return { k: 'devolver', t: 'Devolver sobra', chip: ['Área feita · sobra com você', 'yellow'], cor: 'yellow', href: 'MB-05.dc.html#' + o.id, tt: 'Levar ao Rui a sobra da ' + o.id + ': ' + mbSobraTxt(sb) };
     if (mbConf(c, o.id)) return { k: 'none', t: '', chip: ['Consumo em conferência · ' + CEN_CONC_RESP, 'yellow'], cor: 'yellow', tt: '', feita: true };
     return { k: 'none', t: '', chip: ['Área feita · aguarda encerramento', 'green'], cor: 'green', tt: '', feita: true };
   }
-  if ((o.ins || []).length && r && !r.itens.some(i => i.custodia > 0)) return { k: 'retirar', t: 'Retirar no almoxarifado', chip: ['Reservado · ' + r.id, 'gray'], cor: 'gray', href: 'MB-05.dc.html', tt: 'Ver o que retirar com Rui no almoxarifado para a ' + o.id };
+  if ((o.ins || []).length && r && !r.itens.some(i => i.custodia > 0)) return { k: 'retirar', t: 'Retirar no almoxarifado', chip: ['Reservado · ' + r.id, 'gray'], cor: 'gray', href: 'MB-05.dc.html#' + o.id, tt: 'Ver o que retirar com Rui no almoxarifado para a ' + o.id };
   if (t) return { k: 'outro', t: 'Fechar turno · ' + t.os, chip: ['Outro turno aberto · ' + t.os, 'yellow'], cor: 'yellow', href: 'MB-03.dc.html', tt: 'Fechar o turno aberto da ' + t.os + ' antes de iniciar a ' + o.id };
   return { k: 'iniciar', t: 'Iniciar turno', chip: [o.etapa === 'Em execução' ? 'Pronta para o próximo turno' : 'Pronta para iniciar', 'green'], cor: 'green',
            fn: (self) => cenMudar(self, c => mbIniciar(c, o.id)), tt: 'Iniciar turno na ' + o.id };
@@ -284,7 +284,7 @@ def ffield(label,fid,val,setfn,err,hint='',big=False,area=False,ph=''):
             + (IF(err+'_has',f'<span role="alert" style="font-size: 12px; font-weight: 700; color: {RED};">{H(err)}</span>') if err else '') + '</div>')
 
 _PRIM_RE=re.compile(r'(<div style="padding: 12px 20px 28px;[^"]*">)<a href="[^"]*" style="([^"]*)">.*?</a>(</div>)',re.S)
-def emit(fid,title,sub,status,primary,body,H_=900,fname=None,back='MB-01.dc.html',primary_href=None,js='',dyn_status=False,prim=None,cen=False,dyn_head=None):
+def emit(fid,title,sub,status,primary,body,H_=900,fname=None,back='MB-01.dc.html',primary_href=None,js='',dyn_status=False,prim=None,cen=False,dyn_head=None,sem_prim=False):
     """Gera a tela. dyn_status: selo do cabeçalho vem de v.hdr_* (JS). prim: variantes do botão primário
     [(condição|None,'a'|'b'|'ac',rótulo,href|função|(href,função))] — link navega, botão executa na própria tela, 'ac' = link que também
     executa (ex.: escolher a ordem antes de abrir o detalhe). cen: tela ligada ao cenário compartilhado (cenario.js_prefixo() + JS do app).
@@ -296,8 +296,9 @@ def emit(fid,title,sub,status,primary,body,H_=900,fname=None,back='MB-01.dc.html
     st=('§ST§','yellow') if dyn_status else status
     if dyn_head: title,sub='§TT§','§SB§'
     f=mobile37(fid,title,sub,st,primary,body,fname=fname,H=H_,back=back,primary_href=primary_href)
-    if dyn_status or prim or dyn_head:
+    if dyn_status or prim or dyn_head or sem_prim:
         path=os.path.join(E.P,f); s=open(path).read()
+        if sem_prim: n0=len(s); s=_PRIM_RE.sub('',s,count=1); assert len(s)<n0, 'rodapé não encontrado'
         if dyn_status: s=s.replace(chip('§ST§','yellow'),dchip('hdr'))
         if dyn_head: s=s.replace('<title>§TT§</title>',f'<title>{esc(dyn_head)}</title>').replace('§TT§',H('hdr_ttl')).replace('§SB§',H('hdr_sub'))
         if prim:
@@ -375,12 +376,11 @@ v.restaurar=()=>{ cenReset(); cenSave(cenGet()); mbSelSet(''); self.setState({ce
       + btns(say('Ler QR','QR da OS-0421 lido · ordem aberta na versão autorizada v2.','grid','Ler o QR impresso da ordem'))
       + note('Fechar o turno não encerra a ordem. Encerrar é no escritório, com apontamentos enviados e nada em custódia.'))
     js='''const mine=mbMinhas(c).filter(o=>o.etapa!=='Encerradas'); v.minhas=mine.map(o=>mbCard(self,c,o));
-const first=mbFila(c)[0]||mine[0]; v.p_lab='Abrir '+(first?first.id:'ordem'); v.p_sel=()=>{ if(first) mbSelSet(first.id); };
 const ack=!!s.ack; v.noack=!ack;
 DCH(v,'ack',ack?'Ciência registrada · CI-0931 · 10:44':'Ciência pendente do operador',ack?'green':'yellow');
 v.ack=()=>{ if(self.state.ack) return; self.setState({ack:true,g2toast:'Ciência registrada (recibo CI-0931) · o saldo de 70 ha segue na v3 e fica parado até o Trator T1 voltar ou o substituto ser confirmado · os 30 ha realizados seguem na v2.'}); };'''
     emit('MB-02','Minhas ordens','suas (Marcos) e da equipe · mesma ordem do escritório',('1 impedida · 1 revogada','red'),
-         'Abrir ordem',corpo,H_=2320,back='MB-01.dc.html',js=js,cen=True,prim=[(None,'ac',H('p_lab'),('MB-02det.dc.html','p_sel'))])
+         'Abrir ordem',corpo,H_=2320,back='MB-01.dc.html',js=js,cen=True,sem_prim=True)
 
     # ---- MB-02det · detalhe da ordem escolhida (cenário) ----
     PREP421=f"{CALDA['litros']} L de calda · {CALDA['vazao']} · cobre {CALDA['cobre']} · {CALDA['por_tanque']} de Fungicida A ({CALDA['dose']})"
@@ -672,7 +672,9 @@ const ocd=done&&(c.ocorr||[]).find(x=>x.id===done); DCH(v,'hdr',done?(ocd&&!ocd.
     corpo=tabs+IF('r0',operador)+IF('r1',almox)
     js=f'''const r0=(s.role||0)===0; v.r0=r0; v.r1=!r0;
 [0,1].forEach(i=>{{ v['role'+i]=()=>self.setState({{role:i}}); v['rs'+i]='font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 6px 14px; border-radius: 999px; border: 0; cursor: pointer; white-space: nowrap; '+(((s.role||0)===i)?'background: {SURF}; color: {INK}; box-shadow: 0 1px 2px rgba(21,32,26,.12);':'background: transparent; color: {MUTED};'); }});
-const fila=mbFila(c); const reqs=fila.map(o=>mbReq(c,o)).filter(Boolean);
+// vindo do passo de uma ordem (MB-01 · MB-05.dc.html#OS-…): essa ordem vem primeiro e o selo a nomeia; sem âncora, a fila de sempre (AÇÃO v3.1)
+const foco=(typeof location!=='undefined'&&/^#OS-[0-9]+$/.test(location.hash||''))?location.hash.slice(1):''; const fila0=mbFila(c);
+const fila=foco?fila0.filter(o=>o.id===foco).concat(fila0.filter(o=>o.id!==foco)):fila0; const reqs=fila.map(o=>mbReq(c,o)).filter(Boolean);
 const pend=reqs.filter(r=>r.itens.some(i=>i.custodia>0&&!i.confirmado));
 const lot=(i)=>{{ const l=c.lotes[i.prod+'|'+i.lote]; return 'lote '+i.lote+(l&&l.validade&&l.validade!=='—'?' · val. '+l.validade:'')+(l?' · '+l.local:''); }};
 v.conf=pend.map((r,ix)=>({{t:r.id+' · '+r.os+' · '+c.ordens[r.os].tipo,
@@ -686,7 +688,7 @@ v.cust=cust; v.has_cust=cust.length>0; v.res=res; v.has_res=res.length>0; v.nada
 v.p_conf=r0&&pend.length>0; v.p_back=r0&&!pend.length; v.p_qr=!r0;
 v.pc_lab='Confirmar recebimento'+(pend.length>1?' · '+pend[0].id:'');
 v.pc_go=()=>{{ if(pend[0]) cenMudar(self,c=>cenConfirmarRecebimento(c,pend[0].id)); }};
-if(r0) DCH(v,'hdr',pend.length?pend.length+(pend.length>1?' entregas a confirmar':' entrega a confirmar'):(cust.length?'insumos com você':'nada a confirmar'),pend.length?'yellow':'green');
+if(r0) DCH(v,'hdr',(foco&&c.ordens[foco]?foco+' · ':'')+(pend.length?pend.length+(pend.length>1?' entregas a confirmar':' entrega a confirmar'):(cust.length?'insumos com você':'nada a confirmar')),pend.length?'yellow':'green');
 else DCH(v,'hdr','1 devolução hoje','yellow');'''
     emit('MB-05','Almoxarifado móvel','retiradas do operador e tarefas do almoxarife · por lote e embalagem',None,
          'Confirmar recebimento',corpo,H_=1220,back='MB-01.dc.html',js=js,dyn_status=True,cen=True,
@@ -865,8 +867,7 @@ v.fecha=()=>TOAST(self,'Parcela T7-B concluída · '+T+' plantas · segue para r
       card(f'<b>{om["id"]}</b> · corretiva · {esc(om["ativo"])}',[
           kv('Causa',esc(om['causa'])),
           chips(etapa('Em execução'),chip('Ativo bloqueado','red')),
-          kv('Afeta',f'{om["os_afetada"]} (plantio T4) · substituto: {esc(om["substituto"])} a partir de 24/09 06:00'),
-          btns(lnk('Abrir serviço','MB-09det.dc.html','wrench','Abrir o serviço da OM-0233'))],state='red')
+          kv('Afeta',f'{om["os_afetada"]} (plantio T4) · substituto: {esc(om["substituto"])} a partir de 24/09 06:00')],state='red')
       + card('Inspeção preventiva · Colhedora CH-01',[
           kv('Checklist','250 h · 18 itens · vence 26/09'),
           chips(etapa('Liberadas')),
@@ -909,8 +910,7 @@ v.concluir=()=>{ self.setState({conc:true,g2toast:'Serviço concluído · OM-023
     balanca=(
       card(f'<b>{CG["id"]}</b> · {CG["oc"]} · Mamão Formosa',[
           kv('Veículo',f'{CG["veic"]} · chegou {CG["hora"]}')+' · '+kv('Rota',f'{CG["origem"]} → {CG["destino"]}'),
-          chips(chip(f'Na balança · {CG["veic"]}','yellow')),
-          btns(lnk('Abrir pesagem','MB-10det.dc.html','scale','Abrir a pesagem desta carga'))],state='yellow')
+          chips(chip(f'Na balança · {CG["veic"]}','yellow'))],state='yellow')
       + card(f'{C07["id"]} · expedição · {C07["pedido"]}',[
           kv('Carga',f'{C07["cliente"]} · {C07["produto"]}'),
           chips(chip('Impedida · NF pendente','red')),

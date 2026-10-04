@@ -266,12 +266,10 @@ def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=Non
         m=MAPA.get(fid) or {'area':area_of(fid) or 'Módulo oculto','submenu':CAT.get(fid,{}).get('titulo',fid)}
     crumbs=[m['area'],m['submenu']]+(crumbs_extra or [])
     back=PARENT37.get(fname) or ffile(fid) if crumbs_extra else (PARENT37.get(fname) or fname)
-    first=(MENU2[mi][2][0][1].replace('.dc.html','') if mi is not None else next((f for f in MAPA if MAPA[f]['area']==m['area']),fid))
     _sep=f' <span style="color: {MUTED};">›</span> '
     parts=[]
     for i,c in enumerate(crumbs):
-        if i==0 and ffile(first)!=fname: parts.append(f'<a href="{ffile(first)}" style="color: {MUTED}; text-decoration: none;">{esc(c)}</a>')
-        elif i==1 and crumbs_extra: parts.append(f'<a href="{(mh or ffile(fid))}" style="color: {MUTED}; text-decoration: none;">{esc(c)}</a>')
+        if i==1 and crumbs_extra: parts.append(f'<a href="{(mh or ffile(fid))}" style="color: {MUTED}; text-decoration: none;">{esc(c)}</a>')
         elif i<len(crumbs)-1: parts.append(f'<span style="color: {MUTED};">{esc(c)}</span>')
         else: parts.append(f'<span>{esc(c)}</span>')
     crumb=_sep.join(parts)

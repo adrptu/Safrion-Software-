@@ -117,10 +117,10 @@ try:
         # 12 · REC-014 sem contradição e sem destino repetido; textos de bastidor fora
         ir('AG-04det.dc.html'); b=J("document.body.innerText"); np=J("document.querySelectorAll('a[href=\"AG-07.dc.html#pasteuria-nishizawae-fs\"]').length")
         hd=J("document.querySelector('header').innerText")
-        ir('AG-03det.dc.html'); b3=J("document.body.innerText"); n14=J("document.querySelectorAll('a[href=\"AG-04det.dc.html\"]').length")
-        chk('12 AG-04det: "Saldo de 70 ha travado · TS sem registro", v3 "TS travado · sem registro", primário "Criar v4 com TS registrado", 1 link para a Pasteuria · AG-03det sem "Cada elo" e com 2 links para o REC-014',
+        ir('AG-03det.dc.html'); b3=J("document.body.innerText"); n14=J("document.querySelectorAll('a[href=\"AG-04det.dc.html\"]').length"); h14=J("document.querySelectorAll('header a[href=\"AG-04det.dc.html\"]').length")   # AÇÃO v3.1 (G2): o elo da cadeia que repete o próximo passo fica informativo
+        chk('12 AG-04det: "Saldo de 70 ha travado · TS sem registro", v3 "TS travado · sem registro", primário "Criar v4 com TS registrado", 1 link para a Pasteuria · AG-03det sem "Cada elo" e com 1 link para o REC-014 (o primário do cabeçalho; AÇÃO v3.1)',
             'Saldo de 70 ha travado · TS sem registro' in hd and 'Criar v4 com TS registrado' in hd and 'TS travado · sem registro' in b and 'Aprovada por Ana · saldo' not in b and np==1
-            and 'Cada elo abre o registro' not in b3 and n14==2, [hd[:300],np,n14])
+            and 'Cada elo abre o registro' not in b3 and n14==1 and h14==1, [hd[:300],np,n14,h14])
     J("localStorage.removeItem('talhao-os-mip-v1'); localStorage.removeItem('talhao-os-cenario-v1'); sessionStorage.clear()")
 finally:
     try:
