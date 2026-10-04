@@ -258,37 +258,49 @@ def repartir(Q,cfgs,pools=None):
     for z in ats:
         xs=[x for x in cand_p if z in x['ativos']]
         if len(xs)>1: RS.append(('at:'+str(z),xs,[x for x in xs if x['H']>0]))
-    um=[z[0] for z in PV if z[2]<=1]; SER=[]   # grupo de 1 unidade: uma máquina só; SER: grupos de 2+ que serializam
+    um=[z[0] for z in PV if z[2]<=1]; SERp=[]; SERa=[]   # grupo de 1 unidade: uma máquina só; SERp/SERa: grupos de 2+ que serializam no plano / na divisão (W2)
     def junto(x,y,fora=None): return (x['seq'] and y['seq']) or any(z in y['ativos'] for z in x['ativos']) or any(k!=fora and (_rp_num(x['rec'].get(k)) or 0)>0 and (_rp_num(y['rec'].get(k)) or 0)>0 for k in um)   # fora: o grupo cujo pico se mede (B5a)
-    def simul(us,k,un,pare):   # maior uso simultâneo por componente do grafo junto, busca exata com poda e teto (como no safra.js)
+    def simul(us,k,un,pare):   # maior uso simultâneo: conjunto independente de peso máximo por componente, cota por cobertura de cliques, teto; (valor, estouro) como no safra.js (W3)
         W0=[_rp_num(x['rec'].get(k)) or 0 for x in us]; n=len(us); tot=sum(W0,0)
-        if tot<=un+1e-9: return tot
-        vis=[False]*n; soma=0
+        if tot<=un+1e-9: return tot,False
+        J=[[a!=b and junto(us[a],us[b],k) for b in range(n)] for a in range(n)]; vis=[False]*n; soma=0; est=False
+        def cota(P):   # P em peso decrescente: o 1º de cada clique é o maior
+            ub=0; r=list(P)
+            while r:
+                c=[r.pop(0)]; j=0
+                while j<len(r):
+                    if all(J[u][r[j]] for u in c): c.append(r.pop(j))
+                    else: j+=1
+                ub+=W0[c[0]]
+            return ub
         for s0 in range(n):
             if vis[s0]: continue
             cp=[]; pl0=[s0]; vis[s0]=True
             while pl0:
                 a=pl0.pop(); cp.append(a)
                 for b in range(n):
-                    if not vis[b] and junto(us[a],us[b],k): vis[b]=True; pl0.append(b)
-            cp.sort(); w=[W0[i] for i in cp]; m=len(cp); st=dict(best=0,passos=0,estouro=False)
-            def vai(i,s_,sel):
+                    if not vis[b] and J[a][b]: vis[b]=True; pl0.append(b)
+            cp.sort(key=lambda i:(-W0[i],i)); st=dict(best=0,passos=0,estouro=False,passou=False)
+            def vai(P,s_):
                 st['passos']+=1
                 if st['passos']>65536: st['estouro']=True; return
                 if s_>st['best']: st['best']=s_
-                if s_+sum(w[i:],0)<=st['best']: return
-                for j in range(i,m):
-                    if any(junto(us[cp[t]],us[cp[j]],k) for t in sel): continue
-                    sel.append(j); vai(j+1,s_+w[j],sel); sel.pop()
-                    if st['estouro']: return
-            vai(0,0,[]); soma+=sum(w,0) if st['estouro'] else st['best']
-            if pare and soma>un+1e-9: return soma
-        return soma
+                if pare and soma+st['best']>un+1e-9: st['passou']=True; return
+                if not P or s_+cota(P)<=st['best']: return
+                v=P[0]
+                vai([u for u in P if u!=v and not J[v][u]],s_+W0[v])
+                if st['estouro'] or st['passou']: return
+                vai(P[1:],s_)
+            vai(cp,0)
+            if st['estouro']: est=True; soma+=sum((W0[i] for i in cp),0)
+            else: soma+=st['best']
+            if pare and soma>un+1e-9: return soma,est
+        return soma,est
     for k,pv in (pools or {}).items():
         un=_rp_num((pv or {}).get('un'))
         if not _ok(un) or un<0: continue
         u_p=[x for x in cand_p if not x.get('semRec') and (_rp_num(x['rec'].get(k)) or 0)>0]; u_a=[x for x in u_p if x['H']>0]   # sem recurso já tem o motivo
-        s_a=simul(u_a,k,un,True) if len(u_a)>1 else 0; s_p=simul(u_p,k,un,True) if len(u_p)>1 else 0
+        s_a,e_a=simul(u_a,k,un,True) if len(u_a)>1 else (0,False); s_p,e_p=simul(u_p,k,un,True) if len(u_p)>1 else (0,False)
         ea=len(u_a)>1 and (un<=1 or s_a>un+1e-9); ep=len(u_p)>1 and (un<=1 or s_p>un+1e-9)   # 1 unidade: uma máquina só, como um ativo
         if ea:
             for x in u_a: U.une(u_a[0]['i'],x['i'])
@@ -296,25 +308,39 @@ def repartir(Q,cfgs,pools=None):
             for x in u_p: UP.une(u_p[0]['i'],x['i'])
         if ea or ep:
             RS.append(('pl:'+str(k),u_p if ep else [],u_a if ea else []))
-            if not un<=1 and k not in SER: SER.append(k)
-            sm=simul(u_a if ea else u_p,k,un,False)
-            add(f"{pv.get('nome') or k}"+(f": ao mesmo tempo precisariam de {_rp_f(sm)}, a fazenda tem {_rp_f(un)}; trabalham em sequência" if sm>un+1e-9 else f": a fazenda tem {_rp_f(un)}; quem a usa divide a janela dela"))
-    # clique maximal do grafo "nunca ao mesmo tempo" divide a maior janela dele; componente não cordal divide a maior janela finita (como no safra.js)
-    def exclui(x,y): return junto(x,y) or any((_rp_num(x['rec'].get(k)) or 0)>0 and (_rp_num(y['rec'].get(k)) or 0)>0 for k in SER)
-    def grafo(V,pref):
+            if not un<=1:
+                if ep and k not in SERp: SERp.append(k)
+                if ea and k not in SERa: SERa.append(k)
+            sm,es=simul(u_a if ea else u_p,k,un,False); dp=(s_a>un+1e-9 and not e_a) if ea else (s_p>un+1e-9 and not e_p)   # dp: a decisão achou mais do que un sem estourar
+            nome=f"{pv.get('nome') or k}"
+            if es: add(nome+(f": ao mesmo tempo precisariam de mais do que as {_rp_f(un)} da fazenda; trabalham em sequência" if dp else ": combinações demais para conferir quantas trabalham ao mesmo tempo; trabalham em sequência (conservador)"))
+            else: add(nome+(f": ao mesmo tempo precisariam de {_rp_f(sm)}, a fazenda tem {_rp_f(un)}; trabalham em sequência" if sm>un+1e-9 else f": a fazenda tem {_rp_f(un)}; quem a usa divide a janela dela"))
+    # clique maximal do grafo "nunca ao mesmo tempo" divide a maior janela dele; grafo não perfeito (buraco ímpar de 5+ no grafo ou no
+    # complemento), cliques demais ou busca acima do teto: o componente divide a maior janela dos membros (como no safra.js, W1/W2/W4)
+    def exclui(x,y,S): return junto(x,y) or any((_rp_num(x['rec'].get(k)) or 0)>0 and (_rp_num(y['rec'].get(k)) or 0)>0 for k in S)
+    def buraco(cs,A):   # ciclo induzido com número ímpar (5+) de vértices: True, False ou None (passou do teto)
+        st=dict(passos=0)
+        def ext(c,v0):
+            st['passos']+=1
+            if st['passos']>65536: return None
+            u=c[-1]
+            for w in cs:
+                if w<=v0 or not A[u][w] or w in c: continue
+                if any(A[c[i]][w] for i in range(1,len(c)-1)): continue
+                if len(c)>1 and A[v0][w]:
+                    if len(c)>=4 and len(c)%2==0: return True
+                    continue
+                c.append(w); r=ext(c,v0); c.pop()
+                if r is not False: return r
+            return False
+        for v0 in cs:
+            r=ext([v0],v0)
+            if r is not False: return r
+        return False
+    def grafo(V,pref,S):
         n=len(V)
         if n<2: return
-        adj=[[a!=b and exclui(V[a],V[b]) for b in range(n)] for a in range(n)]; cl=[]
-        def bk(R_,P,X):
-            if not P and not X:
-                if len(R_)>1: cl.append(sorted(R_))
-                return
-            u=(P+X)[0]
-            for v in [v for v in P if not adj[u][v]]:
-                bk(R_+[v],[w for w in P if adj[v][w]],[w for w in X if adj[v][w]]); P=[w for w in P if w!=v]; X=X+[v]
-        bk([],list(range(n)),[]); cl.sort()
-        for c in cl:
-            xs=[V[i] for i in c]; RS.append((pref+'cq:'+','.join(str(x['i']) for x in xs),xs if pref=='p' else [],xs if pref=='a' else []))
+        adj=[[a!=b and exclui(V[a],V[b],S) for b in range(n)] for a in range(n)]; cl=[]; fc=[]
         vis=[False]*n
         for s0 in range(n):
             if vis[s0]: continue
@@ -323,14 +349,35 @@ def repartir(Q,cfgs,pools=None):
                 a=pilha.pop(); comp.append(a)
                 for b in range(n):
                     if adj[a][b] and not vis[b]: vis[b]=True; pilha.append(b)
-            comp.sort(); rest=comp[:]; cordal=True
-            while rest:
-                sv=next((v for v in rest if all(i==j or adj[a][b] for i,a in enumerate([w for w in rest if adj[v][w]]) for j,b in enumerate([w for w in rest if adj[v][w]]))),None)
-                if sv is None: cordal=False; break
-                rest=[v for v in rest if v!=sv]
-            if not cordal:
-                xs=[V[i] for i in comp]; RS.append((pref+'fc:'+str(xs[0]['i']),xs if pref=='p' else [],xs if pref=='a' else [],True))
-    grafo([x for x in cand_p if not x.get('semRec')],'p'); grafo(cand,'a')
+            comp.sort()
+            if len(comp)<2: continue
+            cc=[]; st=dict(passos=0,est=False)
+            def bk(R_,P,X):
+                if st['est']: return
+                st['passos']+=1
+                if st['passos']>65536 or len(cc)>4096: st['est']=True; return
+                if not P and not X:
+                    if len(R_)>1: cc.append(sorted(R_))
+                    return
+                u=(P+X)[0]
+                for v in [v for v in P if not adj[u][v]]:
+                    bk(R_+[v],[w for w in P if adj[v][w]],[w for w in X if adj[v][w]])
+                    if st['est']: return
+                    P=[w for w in P if w!=v]; X=X+[v]
+            bk([],list(comp),[]); est=st['est']; imp=est
+            if not est:
+                cl.extend(cc); h=buraco(comp,adj)
+                if h is False: h=buraco(comp,[[a!=b and not adj[a][b] for b in range(n)] for a in range(n)])
+                if h is not False: imp=True
+                if h is None: est=True
+            if est: add('combinações demais para conferir quem trabalha ao mesmo tempo: as configurações ligadas dividem a maior janela delas (conservador)')
+            if imp: fc.append(comp)
+        cl.sort()
+        for c in cl:
+            xs=[V[i] for i in c]; RS.append((pref+'cq:'+','.join(str(x['i']) for x in xs),xs if pref=='p' else [],xs if pref=='a' else []))
+        for c in fc:
+            xs=[V[i] for i in c]; RS.append((pref+'fc:'+str(xs[0]['i']),xs if pref=='p' else [],xs if pref=='a' else []))
+    grafo([x for x in cand_p if not x.get('semRec')],'p',SERp); grafo(cand,'a',SERa)
     def troca_de(xs):
         if len(xs)<2: return 0
         return sum((x['troca'] for x in xs),0)-min(x['troca'] for x in xs)
@@ -340,13 +387,16 @@ def repartir(Q,cfgs,pools=None):
         return sum((x['troca'] for x in xs),0)-(mn if any(x['troca']==mn for x in xs) else 0)
     W={}; jan={}; pista={}; pista_a={}
     for r_ in RS:
-        k,xs,xa=r_[:3]; fin=len(r_)>3 and r_[3]
-        w=max((x['H'] for x in xs+xa if not fin or x['H']!=_math.inf),default=-_math.inf)
+        k,xs,xa=r_[:3]
+        w=max((x['H'] for x in xs+xa),default=-_math.inf)
         if w==_math.inf or w==-_math.inf: continue
         W[k]=w
         if len(xs)>1: pista[k]=xs
         if len(xa)>1: pista_a[k]=xa; jan[k]=w-troca_r(xa,cand,U)
-    def pl(x): return [g for g in jan if any(y is x for y in pista_a[g])]   # restrições de janela da divisão de uma configuração
+    PL={}
+    for g in jan:
+        for y in pista_a[g]: PL.setdefault(y['i'],[]).append(g)
+    def pl(x): return PL.get(x['i'],[])   # restrições de janela da divisão de uma configuração (indexadas, W4)
     def aloca(ad):
         q=[0]*len(it); saldo=0; cz={}; uso={}
         for x in fx:

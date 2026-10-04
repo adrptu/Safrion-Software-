@@ -31,6 +31,9 @@ componente (V6: 24 configurações em pares); o motivo diz o pico real (V7); uni
 conjunto de configurações que se excluem duas a duas cabe na maior janela delas.
 B5a (rodada 5): no pico de um grupo, o próprio grupo não separa os usuários dele; o motivo de um grupo de 1 unidade diz "precisariam de 2" quando
 os usuários são independentes (Q1, V9) e "quem a usa divide a janela dela" quando já estão em sequência (P2a).
+Rodada 6: trator × implemento (2×2, 3×10, 4×5) é grafo perfeito: só as cliques valem, sem o conservador do componente (W1a–W1d); o grupo que só
+passa das unidades no plano não serializa a divisão (W2); cadeia de 28 configurações com 14 operadores não serializa e o motivo diz o pico
+real (W3a, W3b); 30 configurações em trios respondem em menos de 1 s, com o conservador e o motivo (W4).
 Uso: python3 rend_multiconjuntos_unit.py"""
 import sys, os, json, re, subprocess, tempfile
 from fractions import Fraction as F
@@ -186,6 +189,27 @@ CASOS=[
  ('V9 b5a_pico_do_grupo_de_1','B5a · A e B ao mesmo tempo, cada uma com o único distribuidor: o motivo diz "Distribuidores: ao mesmo tempo precisariam de 2, a fazenda tem 1" (o grupo não se separa por ele mesmo)',
    100,[dict(id='A',nome='A',rend=5,jan=20,rec={'dist':1},custo_h=1),dict(id='B',nome='B',rend=5,jan=20,rec={'dist':1},custo_h=1)],{'dist':{'un':1,'nome':'Distribuidores'}},
    dict(motivo='Distribuidores: ao mesmo tempo precisariam de 2, a fazenda tem 1; trabalham em sequência')),
+ ('W1a dois_tratores_duas_plantadeiras','rodada 6 · T1+P1, T1+P2, T2+P1 e T2+P2 (2 ha/h, janelas de 10 h, 80 ha): ciclo de 4 é grafo perfeito; T1+P1 com T2+P2 e depois T1+P2 com T2+P1: 10 ha cada, 40 ha, déficit 10 h',
+   80,[dict(id=f'T{t}P{p}',nome=f'T{t}+P{p}',rend=2,jan=10,ativos=[f't{t}',f'p{p}'],custo_h=1) for t in (1,2) for p in (1,2)],None,
+   dict(q=['10','10','10','10'],alocado='40',saldo='40',conflito=True,deficit='10',motivo='em sequência precisam de 20 h para 40 ha; a janela tem 10 h')),
+ ('W1b dois_por_dois_janela_de_1h','rodada 6 · o mesmo com 200 ha, só T1+P1 com janela de 1 h e as outras sem janela: atende os 200 ha, sem conflito (T1+P1 faz 2 ha)',
+   200,[dict(id=f'T{t}P{p}',nome=f'T{t}+P{p}',rend=2,jan=(1 if (t,p)==(1,1) else ''),ativos=[f't{t}',f'p{p}'],custo_h=1) for t in (1,2) for p in (1,2)],None,
+   dict(q=['2','66','66','66'],alocado='200',saldo='0',conflito=False)),
+ ('W1c dois_por_dois_parte_fixa_janela_0','rodada 6 · T1+P1 com 10 % fixos e janela 0, as outras sem janela, 200 ha: 180 ha atendidos, sem conflito falso de "janela 0 h"',
+   200,[dict(id=f'T{t}P{p}',nome=f'T{t}+P{p}',rend=2,jan=(0 if (t,p)==(1,1) else ''),part=(10 if (t,p)==(1,1) else ''),ativos=[f't{t}',f'p{p}'],custo_h=1) for t in (1,2) for p in (1,2)],None,
+   dict(q=['0','60','60','60'],alocado='180',saldo='20',conflito=False)),
+ ('W1d tres_tratores_dez_implementos','rodada 6 · 3 tratores × 10 implementos (30 configurações, 1 ha/h, janelas de 10 h, 100 ha): cada trator trabalha 10 h, 30 ha (o conservador do componente daria 10)',
+   100,[dict(id=f'T{t}P{p}',nome=f'T{t}+P{p}',rend=1,jan=10,ativos=[f't{t}',f'p{p}'],custo_h=1) for t in range(3) for p in range(10)],None,
+   dict(alocado='30',saldo='70',conflito=True)),
+ ('W2 grupo_so_do_plano_nao_serializa_divisao','rodada 6 · 2 tratores; A e B (janela 10 h, 1 trator cada) e C (20 % fixos, janela 0, 1 trator), 30 ha: no plano 3 > 2, na divisão só A e B, que cabem juntas: 10 + 10 ha, 10 h decorridas',
+   30,[dict(id='A',nome='A',rend=1,jan=10,rec={'trat':1},custo_h=1),dict(id='B',nome='B',rend=1,jan=10,rec={'trat':1},custo_h=1),dict(id='C',nome='C',rend=1,part=20,jan=0,rec={'trat':1},custo_h=1)],
+   {'trat':{'un':2,'nome':'Tratores'}},dict(q=['10','10','0'],alocado='20',saldo='10',decorrido='10')),
+ ('W3a cadeia_de_28_com_14_operadores','rodada 6 · 28 configurações em cadeia (cada uma divide um ativo com a seguinte), 1 operador cada, 14 na fazenda, janelas de 100 h, 2.000 ha: o pico real é 14 (cabe); cada par vizinho divide 100 h: 50 ha cada, 1.400 ha',
+   2000,[dict(id=f'K{i}',nome=f'K{i}',rend=1,jan=100,ativos=[f'a{i}',f'a{i+1}'],rec={'op':1},custo_h=1) for i in range(28)],{'op':{'un':14,'nome':'Operadores'}},
+   dict(alocado='1400',saldo='600')),
+ ('W3b cadeia_de_30_com_10_operadores','rodada 6 · a mesma cadeia com 30 configurações e 10 operadores: o motivo diz o pico real (15), não a soma (30)',
+   2000,[dict(id=f'K{i}',nome=f'K{i}',rend=1,jan=100,ativos=[f'a{i}',f'a{i+1}'],rec={'op':1},custo_h=1) for i in range(30)],{'op':{'un':10,'nome':'Operadores'}},
+   dict(motivo='Operadores: ao mesmo tempo precisariam de 15, a fazenda tem 10; trabalham em sequência')),
  ('R2b grupo_de_recursos_nao_relaxa_janela_2','PRE-REV R2 · o mesmo com 2 plantadeiras: a mesma divisão (menos recurso nunca dá plano mais otimista); C ao mesmo tempo: 30 h',
    200,[dict(id='A',nome='A',rend=5,seq=True,jan=10,rec={'plant':1},custo_h=100),dict(id='B',nome='B',rend=5,seq=True,jan=10,custo_h=100),dict(id='C',nome='C',rend=5,rec={'plant':1},custo_h=100)],
    {'plant':{'un':2,'nome':'Plantadeiras'}},dict(q=['25','25','150'],saldo='0',decorrido='30',conflito=True,deficit='50/3')),
@@ -219,6 +243,9 @@ js.append("OUT['P4']=['ABC','CAB','BCA'].map(o=>{ const d={A:{id:'A',nome:'A',re
 js.append("OUT['Q4m']=repartir(100,[{id:'E',nome:'E',rend:1,part:50,jan:100,rec:{oper:10},custo_h:1},{id:'F',nome:'F',rend:1,part:50,jan:100,rec:{oper:1},custo_h:1}],{oper:{un:8,nome:'Operadores e equipe'}}).motivos;")
 js.append("OUT['Q5']=(()=>{ const cs=[]; for(let i=0;i<20;i++) cs.push({id:'K'+i,nome:'K'+i,rend:2+i%3,jan:30,rec:{trator:1,plant:1,oper:2},custo_h:1}); const t0=Date.now(); const r=repartir(800,cs,{trator:{un:4},plant:{un:1},oper:{un:8}}); return [Date.now()-t0,r.alocado+r.saldo]; })();")
 js.append("OUT['V6']=(()=>{ const cs=Array.from({length:24},(_,i)=>({id:'K'+i,nome:'K'+i,rend:1,jan:100,ativos:['a'+Math.floor(i/2)],rec:{oper:1},custo_h:1})); const t0=Date.now(); const r=repartir(2400,cs,{oper:{un:12}}); return [Date.now()-t0,r.alocado,r.motivos.some(m=>/ao mesmo tempo precisariam/.test(m))]; })();")
+js.append("OUT['W3m']=repartir(2000,Array.from({length:28},(_,i)=>({id:'K'+i,nome:'K'+i,rend:1,jan:100,ativos:['a'+i,'a'+(i+1)],rec:{op:1},custo_h:1})),{op:{un:14,nome:'Operadores'}}).motivos;")
+js.append("OUT['W1t']=(()=>{ const cs=[]; for(let t=0;t<4;t++) for(let p=0;p<5;p++) cs.push({id:'T'+t+'P'+p,nome:'T'+t+'+P'+p,rend:2,jan:(t===0&&p===0)?50:'',ativos:['t'+t,'p'+p],custo_h:1}); const t0=Date.now(); const r=repartir(4000,cs); return [Date.now()-t0,r.alocado,r.conflito]; })();")
+js.append("OUT['W4']=(()=>{ const cs=[]; for(let a=0;a<30;a++){ const at=[]; for(let b=0;b<30;b++) if(Math.floor(a/3)!==Math.floor(b/3)) at.push('e'+Math.min(a,b)+'_'+Math.max(a,b)); cs.push({id:'K'+a,nome:'K'+a,rend:1,jan:100,ativos:at,custo_h:1}); } const t0=Date.now(); const r=repartir(3000,cs); return [Date.now()-t0,r.alocado+r.saldo,r.motivos.some(m=>/combinações demais/.test(m))]; })();")
 js.append("OUT['M1']=repartir(100,[{nome:'A',rend:3.6,seq:true,jan:0,custo_h:1},{nome:'B',rend:7.2,seq:true,jan:10,custo_h:1}]).motivos;")
 js.append("OUT['12']=[repartir(1,[{rend:rendCalc(1.1,3.7,63)}]).hconj, 1/(Math.round(rendCalc(1.1,3.7,63)*100)/100)];")
 js.append('print(JSON.stringify(OUT));')
@@ -295,6 +322,19 @@ _t0=_t.time(); _p6=D2.repartir(2400,[dict(id=f'K{i}',nome=f'K{i}',rend=1,jan=100
 chk('V6 pares_por_componente','rodada 5 · 24 configurações em pares no mesmo ativo, 12 operadores: o pico real é 12 (cabe), sem serializar todas; cada par divide os 100 h: 1.200 ha em menos de 1 s (JS e Python)',
     '1200 ha, sem "ao mesmo tempo precisariam", < 1 s',f"JS {OUT['V6'][0]} ms · {OUT['V6'][1]} ha · sequência={OUT['V6'][2]}",f"Py {round(_dt6*1000)} ms · {float(_p6['alocado'])} ha",
     OUT['V6'][0]<1000 and near(OUT['V6'][1],1200) and not OUT['V6'][2] and _dt6<1 and abs(float(_p6['alocado'])-1200)<1e-6)
+chk('W3c cadeia_sem_pico_inventado','rodada 6 · cadeia de 28 com 14 operadores: nenhum motivo "ao mesmo tempo precisariam" (o pico real cabe)','sem "precisariam"',OUT['W3m'],
+    D2.repartir(2000,[dict(id=f'K{i}',nome=f'K{i}',rend=1,jan=100,ativos=[f'a{i}',f'a{i+1}'],rec={'op':1},custo_h=1) for i in range(28)],{'op':{'un':14,'nome':'Operadores'}})['motivos'],
+    not any('precisariam' in m for m in OUT['W3m']) and not any('precisariam' in m for m in D2.repartir(2000,[dict(id=f'K{i}',nome=f'K{i}',rend=1,jan=100,ativos=[f'a{i}',f'a{i+1}'],rec={'op':1},custo_h=1) for i in range(28)],{'op':{'un':14,'nome':'Operadores'}})['motivos']))
+_t0=_t.time(); _w1=D2.repartir(4000,[dict(id=f'T{a}P{b}',nome=f'T{a}+P{b}',rend=2,jan=(50 if (a,b)==(0,0) else ''),ativos=[f't{a}',f'p{b}'],custo_h=1) for a in range(4) for b in range(5)]); _dw1=_t.time()-_t0
+chk('W1e quatro_tratores_cinco_implementos','rodada 6 · 4 tratores × 5 implementos (20 configurações, 2 ha/h), só T0+P0 com janela de 50 h, 4.000 ha: atende tudo, sem conflito, em menos de 1 s (JS e Python)',
+    '4000 ha, sem conflito, < 1 s',f"JS {OUT['W1t'][0]} ms · {OUT['W1t'][1]} ha · conflito={OUT['W1t'][2]}",f"Py {round(_dw1*1000)} ms · {float(_w1['alocado'])} ha · conflito={_w1['conflito']}",
+    OUT['W1t'][0]<1000 and near(OUT['W1t'][1],4000) and not OUT['W1t'][2] and _dw1<1 and abs(float(_w1['alocado'])-4000)<1e-6 and not _w1['conflito'])
+_cs4=[]
+for _a in range(30): _cs4.append(dict(id=f'K{_a}',nome=f'K{_a}',rend=1,jan=100,ativos=[f'e{min(_a,_b)}_{max(_a,_b)}' for _b in range(30) if _a//3!=_b//3],custo_h=1))
+_t0=_t.time(); _p4=D2.repartir(3000,_cs4); _d4=_t.time()-_t0
+chk('W4 trios_rapido','rodada 6 · 30 configurações em trios (juntas dentro do trio, nunca com outro trio: 3^10 cliques): passa do teto de cliques, o componente divide a janela (conservador), com o motivo, em menos de 1 s (JS e Python), conservando a área',
+    '< 1000 ms, motivo "combinações demais"',f"JS {OUT['W4'][0]} ms · Σ = {OUT['W4'][1]} · motivo={OUT['W4'][2]}",f"Py {round(_d4*1000)} ms · motivo={any('combinações demais' in m for m in _p4['motivos'])}",
+    OUT['W4'][0]<1000 and near(OUT['W4'][1],3000) and OUT['W4'][2] and _d4<1 and abs(float(_p4['alocado']+_p4['saldo'])-3000)<1e-6 and any('combinações demais' in m for m in _p4['motivos']))
 p4=[]
 for o in ('ABC','CAB','BCA'):
     d=dict(A=dict(id='A',nome='A',rend=F(5),seq=True,ativos=['a01'],jan=F(3),troca=F(1),custo_h=F(1)),B=dict(id='B',nome='B',rend=F(5),seq=True,jan=F(3),troca=F(1),custo_h=F(1)),C=dict(id='C',nome='C',rend=F(5),ativos=['a01'],troca=F(1),custo_h=F(1)))

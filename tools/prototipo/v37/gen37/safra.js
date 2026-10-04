@@ -87,48 +87,68 @@ function repartir(Q,cfgs,pools){ const mot=[]; const add=(m)=>{ if(mot.indexOf(m
   const RS=[]; const sqP=candP.filter(x=>x.seq); if(sqP.length>1) RS.push(['sq',sqP,sqP.filter(x=>x.H>0)]);
   const ats=[]; candP.forEach(x=>x.ativos.forEach(z=>{ if(ats.indexOf(z)<0) ats.push(z); }));
   ats.forEach(z=>{ const xs=candP.filter(x=>x.ativos.indexOf(z)>=0); if(xs.length>1) RS.push(['at:'+z,xs,xs.filter(x=>x.H>0)]); });
-  const um=PV.filter(z=>z[2]<=1).map(z=>z[0]); const SER=[];   // grupo de 1 unidade: uma máquina só; SER: grupos de 2+ que serializam
+  const um=PV.filter(z=>z[2]<=1).map(z=>z[0]); const SERp=[], SERa=[];   // grupo de 1 unidade: uma máquina só; SERp/SERa: grupos de 2+ que serializam no plano / na divisão (W2)
   const junto=(x,y,fora)=>(x.seq&&y.seq)||x.ativos.some(z=>y.ativos.indexOf(z)>=0)||um.some(k=>k!==fora&&(rpNum(x.rec[k])||0)>0&&(rpNum(y.rec[k])||0)>0);   // nunca ao mesmo tempo (fora: o grupo cujo pico se mede, B5a)
-  // maior uso simultâneo do grupo entre quem pode trabalhar junto; para assim que passa de un (só importa se passa), com poda
-  //    teto de 65 536 passos: acima disso devolve a soma (conservador: serializa); pare=false dá o máximo para o texto do motivo
-  //    por componente do grafo "junto" (quem é independente soma), cada um com busca exata e poda
-  const simul=(us,k,un,pare)=>{ const W0=us.map(x=>rpNum(x.rec[k])||0), n=us.length; const tot=W0.reduce((a,b)=>a+b,0); if(tot<=un+1e-9) return tot;
-    const vis=us.map(()=>false); let soma=0;
-    for(let s0=0;s0<n;s0++){ if(vis[s0]) continue; const cp=[]; const pl0=[s0]; vis[s0]=true; while(pl0.length){ const a=pl0.pop(); cp.push(a); for(let b=0;b<n;b++) if(!vis[b]&&junto(us[a],us[b],k)){ vis[b]=true; pl0.push(b); } }
-      cp.sort((a,b)=>a-b); const w=cp.map(i=>W0[i]), m=cp.length; let best=0, passos=0, estouro=false;
-      const vai=(i,s,sel)=>{ if(++passos>65536){ estouro=true; return; } if(s>best) best=s; let rest=0; for(let j=i;j<m;j++) rest+=w[j]; if(s+rest<=best) return;
-        for(let j=i;j<m;j++){ if(sel.some(t=>junto(us[cp[t]],us[cp[j]],k))) continue; sel.push(j); vai(j+1,s+w[j],sel); sel.pop(); if(estouro) return; } };
-      vai(0,0,[]); soma+=estouro?w.reduce((a,b)=>a+b,0):best; if(pare&&soma>un+1e-9) return soma; }
-    return soma; };
+  // maior uso simultâneo do grupo k entre quem pode trabalhar junto: conjunto independente de peso máximo do grafo "junto", por componente
+  //    (quem é independente soma), busca exata com cota por cobertura de cliques (W3). pare=true para assim que passa de un (só importa se
+  //    passa). Teto de 65 536 passos por componente: acima disso conta a soma do componente (conservador: serializa) e devolve o estouro,
+  //    para o motivo não afirmar um pico que não conferiu. Devolve [valor, estouro].
+  const simul=(us,k,un,pare)=>{ const W0=us.map(x=>rpNum(x.rec[k])||0), n=us.length; const tot=W0.reduce((a,b)=>a+b,0); if(tot<=un+1e-9) return [tot,false];
+    const J=us.map((x,a)=>us.map((y,b)=>a!==b&&junto(x,y,k))); const vis=us.map(()=>false); let soma=0, est=false;
+    const cota=(P)=>{ let ub=0; const r=P.slice(); while(r.length){ const c=[r.shift()]; for(let j=0;j<r.length;){ if(c.every(u=>J[u][r[j]])){ c.push(r[j]); r.splice(j,1); } else j++; } ub+=W0[c[0]]; } return ub; };   // P em peso decrescente: o 1º de cada clique é o maior
+    for(let s0=0;s0<n;s0++){ if(vis[s0]) continue; const cp=[]; const pl0=[s0]; vis[s0]=true; while(pl0.length){ const a=pl0.pop(); cp.push(a); for(let b=0;b<n;b++) if(!vis[b]&&J[a][b]){ vis[b]=true; pl0.push(b); } }
+      cp.sort((a,b)=>(W0[b]-W0[a])||(a-b)); let best=0, passos=0, estouro=false, passou=false;
+      const vai=(P,s)=>{ if(++passos>65536){ estouro=true; return; } if(s>best) best=s; if(pare&&soma+best>un+1e-9){ passou=true; return; }
+        if(!P.length||s+cota(P)<=best) return; const v=P[0];
+        vai(P.filter(u=>u!==v&&!J[v][u]),s+W0[v]); if(estouro||passou) return; vai(P.slice(1),s); };
+      vai(cp,0); if(estouro){ est=true; soma+=cp.reduce((a,i)=>a+W0[i],0); } else soma+=best;
+      if(pare&&soma>un+1e-9) return [soma,est]; }
+    return [soma,est]; };
   Object.keys(pools||{}).forEach(k=>{ const pv=pools[k]||{}; const un=rpNum(pv.un); if(un===null||isNaN(un)||un<0) return;
     const uP=candP.filter(x=>!x.semRec&&(rpNum(x.rec[k])||0)>0), uA=uP.filter(x=>x.H>0);   // quem não trabalha por falta de recurso já tem o motivo
-    const sA=uA.length>1?simul(uA,k,un,true):0, sP=uP.length>1?simul(uP,k,un,true):0;
+    const [sA,eA]=uA.length>1?simul(uA,k,un,true):[0,false], [sP,eP]=uP.length>1?simul(uP,k,un,true):[0,false];
     const ea=uA.length>1&&(un<=1||sA>un+1e-9), ep=uP.length>1&&(un<=1||sP>un+1e-9);   // 1 unidade: uma máquina só, como um ativo do cadastro
     if(ea) uA.forEach(x=>U.une(uA[0].i,x.i)); if(ep) uP.forEach(x=>UP.une(uP[0].i,x.i));
-    if(ea||ep){ RS.push(['pl:'+k,ep?uP:[],ea?uA:[]]); if(!(un<=1)&&SER.indexOf(k)<0) SER.push(k); const sm=simul(ea?uA:uP,k,un,false);
-      add((pv.nome||k)+(sm>un+1e-9?': ao mesmo tempo precisariam de '+rpF(sm)+', a fazenda tem '+rpF(un)+'; trabalham em sequência':': a fazenda tem '+rpF(un)+'; quem a usa divide a janela dela')); } });
+    if(ea||ep){ RS.push(['pl:'+k,ep?uP:[],ea?uA:[]]); if(!(un<=1)){ if(ep&&SERp.indexOf(k)<0) SERp.push(k); if(ea&&SERa.indexOf(k)<0) SERa.push(k); }
+      const [sm,es]=simul(ea?uA:uP,k,un,false); const dp=ea?(sA>un+1e-9&&!eA):(sP>un+1e-9&&!eP);   // dp: a decisão achou mais do que un sem estourar
+      add((pv.nome||k)+(es?(dp?': ao mesmo tempo precisariam de mais do que as '+rpF(un)+' da fazenda; trabalham em sequência':': combinações demais para conferir quantas trabalham ao mesmo tempo; trabalham em sequência (conservador)')
+        :(sm>un+1e-9?': ao mesmo tempo precisariam de '+rpF(sm)+', a fazenda tem '+rpF(un)+'; trabalham em sequência':': a fazenda tem '+rpF(un)+'; quem a usa divide a janela dela'))); } });
   // grupo inteiro de quem se exclui duas a duas (clique maximal do grafo "nunca ao mesmo tempo": sequência, ativo, grupo de 1 unidade ou que
-  // serializa) divide a maior janela dele; componente não cordal (ciclo de 4 ou mais sem corda): o componente divide a maior janela finita
-  // dele (conservador). No plano (com janela 0) e na divisão (só com horas), cada um com o seu grafo.
-  const exclui=(x,y)=>junto(x,y)||SER.some(k=>(rpNum(x.rec[k])||0)>0&&(rpNum(y.rec[k])||0)>0);
-  const grafo=(V,pref)=>{ const n=V.length; if(n<2) return; const adj=V.map((x,a)=>V.map((y,b)=>a!==b&&exclui(x,y))); const cl=[];
-    const bk=(R,P,X)=>{ if(!P.length&&!X.length){ if(R.length>1) cl.push(R.slice().sort((a,b)=>a-b)); return; } const u=P.concat(X)[0];
-      for(const v of P.filter(v=>!adj[u][v])){ bk(R.concat([v]),P.filter(w=>adj[v][w]),X.filter(w=>adj[v][w])); P=P.filter(w=>w!==v); X=X.concat([v]); } };
-    bk([],V.map((_,i)=>i),[]); cl.sort((a,b)=>{ for(let i=0;i<Math.min(a.length,b.length);i++) if(a[i]!==b[i]) return a[i]-b[i]; return a.length-b.length; });
-    cl.forEach(c=>{ const xs=c.map(i=>V[i]); RS.push([pref+'cq:'+xs.map(x=>x.i).join(','),pref==='p'?xs:[],pref==='a'?xs:[]]); });
+  // serializa) divide a maior janela dele (sem limite se um membro não tem). Em grafo perfeito (sem buraco ímpar de 5+ vértices no grafo nem
+  // no complemento: cordal, ciclo de 4, trator × implemento) as cliques bastam (W1). Nos outros (ex.: ciclo de 5) o componente inteiro divide
+  // a maior janela dos membros (conservador). Cliques demais (> 4 096) ou busca acima do teto: o componente fica no conservador, com motivo
+  // (W4). No plano (com janela 0) e na divisão (só com horas), cada um com o seu grafo e a sua lista de grupos que serializam (W2).
+  const exclui=(x,y,S)=>junto(x,y)||S.some(k=>(rpNum(x.rec[k])||0)>0&&(rpNum(y.rec[k])||0)>0);
+  // ciclo induzido com número ímpar (5+) de vértices em cs (adjacência A): true, false ou null (passou do teto, não conferiu)
+  const buraco=(cs,A)=>{ let passos=0;
+    const ext=(c,v0)=>{ if(++passos>65536) return null; const u=c[c.length-1];
+      for(const w of cs){ if(w<=v0||!A[u][w]||c.indexOf(w)>=0) continue; let corda=false; for(let i=1;i<c.length-1;i++) if(A[c[i]][w]){ corda=true; break; } if(corda) continue;
+        if(c.length>1&&A[v0][w]){ if(c.length>=4&&c.length%2===0) return true; continue; }   // fecha o ciclo c + w (c.length + 1 vértices)
+        c.push(w); const r=ext(c,v0); c.pop(); if(r!==false) return r; }
+      return false; };
+    for(const v0 of cs){ const r=ext([v0],v0); if(r!==false) return r; } return false; };
+  const grafo=(V,pref,S)=>{ const n=V.length; if(n<2) return; const adj=V.map((x,a)=>V.map((y,b)=>a!==b&&exclui(x,y,S))); const cl=[], fc=[];
     const vis=V.map(()=>false); for(let s0=0;s0<n;s0++){ if(vis[s0]) continue; const comp=[]; const pilha=[s0]; vis[s0]=true;
       while(pilha.length){ const a=pilha.pop(); comp.push(a); for(let b=0;b<n;b++) if(adj[a][b]&&!vis[b]){ vis[b]=true; pilha.push(b); } } comp.sort((a,b)=>a-b);
-      let rest=comp.slice(), cordal=true; while(rest.length){ const sv=rest.find(v=>{ const nb=rest.filter(w=>adj[v][w]); return nb.every((a,i)=>nb.every((b,j)=>i===j||adj[a][b])); });
-        if(sv===undefined){ cordal=false; break; } rest=rest.filter(v=>v!==sv); }
-      if(!cordal){ const xs=comp.map(i=>V[i]); RS.push([pref+'fc:'+xs[0].i,pref==='p'?xs:[],pref==='a'?xs:[],true]); } } };
-  grafo(candP.filter(x=>!x.semRec),'p'); grafo(cand,'a');
+      if(comp.length<2) continue; const cc=[]; let passos=0, est=false;
+      const bk=(R,P,X)=>{ if(est) return; if(++passos>65536||cc.length>4096){ est=true; return; } if(!P.length&&!X.length){ if(R.length>1) cc.push(R.slice().sort((a,b)=>a-b)); return; } const u=P.concat(X)[0];
+        for(const v of P.filter(v=>!adj[u][v])){ bk(R.concat([v]),P.filter(w=>adj[v][w]),X.filter(w=>adj[v][w])); if(est) return; P=P.filter(w=>w!==v); X=X.concat([v]); } };
+      bk([],comp.slice(),[]); let imp=est;
+      if(!est){ cc.forEach(c=>cl.push(c)); let h=buraco(comp,adj); if(h===false) h=buraco(comp,adj.map((r,a)=>r.map((e,b)=>a!==b&&!e))); if(h!==false) imp=true; if(h===null) est=true; }
+      if(est) add('combinações demais para conferir quem trabalha ao mesmo tempo: as configurações ligadas dividem a maior janela delas (conservador)');
+      if(imp) fc.push(comp); }
+    cl.sort((a,b)=>{ for(let i=0;i<Math.min(a.length,b.length);i++) if(a[i]!==b[i]) return a[i]-b[i]; return a.length-b.length; });
+    cl.forEach(c=>{ const xs=c.map(i=>V[i]); RS.push([pref+'cq:'+xs.map(x=>x.i).join(','),pref==='p'?xs:[],pref==='a'?xs:[]]); });
+    fc.forEach(c=>{ const xs=c.map(i=>V[i]); RS.push([pref+'fc:'+xs[0].i,pref==='p'?xs:[],pref==='a'?xs:[]]); }); };
+  grafo(candP.filter(x=>!x.semRec),'p',SERp); grafo(cand,'a',SERa);
   const trocaDe=(xs)=>{ if(xs.length<2) return 0; let s=0, mn=Infinity; xs.forEach(x=>{ s+=x.troca; if(x.troca<mn) mn=x.troca; }); return s-mn; };
   const trocaR=(xs,P,V)=>{ if(xs.length<2) return 0; const g=V.raiz(xs[0].i); let mn=Infinity; P.forEach(y=>{ if(V.raiz(y.i)===g&&y.troca<mn) mn=y.troca; });
     return xs.reduce((a,x)=>a+x.troca,0)-(xs.some(x=>x.troca===mn)?mn:0); };
   const W={}, jan={}, pista={}, pistaA={};
-  RS.forEach(([k,xs,xa,fin])=>{ const w=Math.max.apply(null,xs.concat(xa).map(x=>x.H).filter(h=>!fin||isFinite(h))); if(!isFinite(w)) return; W[k]=w;
+  RS.forEach(([k,xs,xa])=>{ const w=Math.max.apply(null,xs.concat(xa).map(x=>x.H)); if(!isFinite(w)) return; W[k]=w;
     if(xs.length>1) pista[k]=xs; if(xa.length>1){ pistaA[k]=xa; jan[k]=w-trocaR(xa,cand,U); } });
-  const pl=(x)=>Object.keys(jan).filter(g=>pistaA[g].indexOf(x)>=0);   // restrições de janela da divisão de uma configuração
+  const PL={}; Object.keys(jan).forEach(g=>pistaA[g].forEach(x=>{ (PL[x.i]||(PL[x.i]=[])).push(g); }));
+  const pl=(x)=>PL[x.i]||[];   // restrições de janela da divisão de uma configuração (indexadas, W4)
   // 2) divide a área respeitando as janelas (a própria e a da sequência): é o que cabe, o atendido
   const aloca=(ad)=>{ const q=it.map(()=>0); let saldo=0; const cz={}; const uso={};
     fx.forEach(x=>{ const t=x.t; if(t<=1e-12) return;
