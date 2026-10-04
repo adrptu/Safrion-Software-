@@ -180,6 +180,13 @@ Sem a camada sintética (tarefa 1), o build para em `dados_lagoa_fonte`, com uma
     (c) a divisão "terminam juntas" não é monótona em recurso: mais uma unidade num grupo, ou uma janela maior, pode reduzir o atendido (conservador; ex.: Q=100, A 1 ha/h janela 6 h a01+plantadeira, B 10 ha/h janela 10 h a01, C 1 ha/h janela 3 h plantadeira: 76 ha com 1 plantadeira, 58 com 2).
     (d) regra da janela do grupo (rodada 6, S2 refutado): o grupo que nunca trabalha junto divide a maior janela de todos os membros, sem limite se um não tem; um membro de janela maior empresta a janela aos outros (triângulo + 4ª configuração sem janela: 11,25 h em janelas de 10 h; com um recurso só, A + B fazem 16 h em 10 h desde `1688f97`). Trocar por limite por subconjunto (cada subconjunto na maior janela dele) é decisão do dono do oráculo.
 
+## Reserva ativa · V44-ACAO (UX-ACAO-UNICA v2 `c691c431` + PADRAO-COMANDOS v3/v3.1) · branch `claude/v44-acao-01`
+- **Base:** `ee4f954` (composição V44-REND `6afb511` + evidências `9bdb61e` + SINT rodada 6 `2ce5a43`/`b181bbe`), mais o merge **sequencial** de `prototipo-limpo/v44-acao` `20f25726` (trilha parcial, sem verificação; base própria `e8d780d`). Pedido: 5982724904/5982995985 ("AÇÃO permanece próxima autoria pelo contrato existente").
+- **Arquivos (os 30 do diff `e8d780d..20f25726`):** `gen37/acao_unica_test.py` (novo), `gen37/_probe/antes_probe.py` (novo), `gen37/areas/{agronomia,cadastros,inicio,irrigacao,maquinas,os_campo,processo_compras,processo_estoque,processo_os,processo_planos,processo_safra}.py`, `gen37/{cdp,cmptest,comp_lib,componentes_test,consumo_divergente_test,engine,esttest,etapas_celular_test,irtest,map_decisoes_test,matest,patest,saf_cmp_continuidade_test,saftest,ui37}.py`, `gen37/g2lib.js`, `gen37/safra.js`; mais `ferramentas/acoes_duplicadas.py` (varredura v3.1 por estado, citada pelo modo `v3`).
+- **Conflitos já vistos no ensaio de merge (sem commit):** `areas/irrigacao.py` (import e faixa das telas), `areas/processo_safra.py`, `cdp.py` (manter o `CHROME_BIN` portátil), `etapas_celular_test.py`. `safra.js` mescla sem conflito; o bloco REPARTIR da REND não é tocado pela AÇÃO.
+- **Aceite:** `acao_unica_test.py` nos modos saf, familias, responsivo, gemini e v3; `acoes_duplicadas.py` com meta 0 nas páginas e estados (linha de base v43: 23 de 145 páginas com ação repetida); máximo de 1 primária por tarefa ativa (0 em consulta); cadeia completa e regressões da REND e da Lagoa verdes.
+- **Depois, no mesmo bloco de UI:** TABELAS-FOCO-20261004 v2 (5983172395), com a O.S. primeiro; reserva própria antes de editar.
+
 ## Tarefas, na ordem
 1. **CAMADA-SINTETICA (CORTE-REMOTO-01)**
    - **Arquivos novos:** `dados_lagoa_sintetico/{__init__.py, kml.py, gerar.py, saida/}`.
