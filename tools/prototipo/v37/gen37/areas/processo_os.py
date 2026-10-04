@@ -567,6 +567,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{};
     (cur.add||[]).forEach(a=>{ const d=g2num(a.dose); if(isNaN(d)||d<=0) errs['+'+a.p]='Informe a dose maior que 0 '+a.un+'/ha.'; else add.push({p:a.p,dose:d,un:a.un,g:a.g}); });
     if(prodN(cur.q)){ self.setState({pa:Object.assign({},cur,{errs,err:'',qerr:'Clique em Incluir para adicionar "'+cur.q.trim()+'" ou apague o texto.'})}); return; }
     if(ajLib&&!isNaN(ar)&&ar>0){ const ck=(p,un,d,k)=>{ if(errs[k]) return; const l=lote(p), dp=l?cenDisp(l):0, need=cenQtd(d,ar);   /* regra única (PRE-REV Q3) */
+        if(!(need>0)){ errs[k]='Dose × área dá 0 '+un+': aumente a dose ou a área.'; return; }   /* a liberação recusaria (PRE-REV Z1) */
         if(need>dp+1e-9) errs[k]='Estoque: '+nd(dp)+' '+un+' disponíveis'+(l?' no lote '+l.lote:'')+' para '+nd(need)+' '+un+'. Baixe a dose ou a área, ou troque o produto.'; };
       (o.ins||[]).forEach(x=>{ if(ds[x.p]!==undefined) ck(x.p,x.un,ds[x.p],x.p); }); add.forEach(a=>ck(a.p,a.un,a.dose,'+'+a.p)); }
     if(Object.keys(errs).length){ self.setState({pa:Object.assign({},cur,{errs,err:''})}); return; }

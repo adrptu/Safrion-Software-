@@ -258,7 +258,7 @@ function mipChecks(s, v, a, c) {
       else inf.push('Carência de ' + car + ' dias: colheita liberada a partir de ' + mipBr(fim) + ' · prevista ' + mipBr(t.colheita) + ' · aplicar até ' + mipBr(lim) + '.'); } }
   else if (car === 0) inf.push('Carência: ' + (u.cart || 'sem restrição') + '.');
   if (c && c.lotes && dose > 0 && area > 0) { const need = cenQtd(dose, area);   // regra única (PRE-REV Q4)
-    const disp = Object.values(c.lotes).filter(l => l.prod === u.nome).reduce((q, l) => q + Math.max(0, (l.fisico || 0) - (l.quarentena || 0) - (l.reservado || 0)), 0);
+    const lt = cenLote(c, u.nome), disp = lt ? cenDisp(lt) : 0;   // o mesmo lote que a liberação reserva (PRE-REV Z2)
     if (disp + 1e-9 < need) al.push('Estoque: ' + mipN(disp, 2) + ' de ' + mipN(need, 2) + ' ' + u.un + ' · a liberação na O.S. aguarda a compra.');
     else inf.push('Estoque cobre: ' + mipN(need, 2) + ' ' + u.un + ' (' + mipN(disp, 2) + ' disponíveis).'); }
   return out();

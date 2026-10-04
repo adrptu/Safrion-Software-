@@ -90,11 +90,19 @@ for(const id of ords){ for(const dose of [1,7,12,50]){ cenReset(); irrReset(); c
   const r=irrReclassTudo(null,id,{prod:'Nitrato de cálcio',dose,mot:'teste'}); if(r.erro){ res.recusa=r.erro; R.fert.push(res); continue; }
   res.msg=r.msg; R.fert.push(fluxo(cenGet(),id,res)); } }
 // v2 com passada em curso (avanço com 2 casas): a O.S. recebe o que falta (2 casas, irrAreaV2, a mesma conta da prévia) e v1 + v2 = área do setor
-R.parc=[]; for(const id of ords.filter(k=>i0.ordens[k].etapa==='Liberadas')){ for(const cob of [20.27,0.05]){ cenReset(); irrReset(); const res={id,cob};
+R.parc=[]; for(const id of ords.filter(k=>i0.ordens[k].etapa==='Liberadas')){ for(const cob of [20.27,0.05,20.275]){ cenReset(); irrReset(); const res={id,cob};   // 20,275: avanço digitado com 3 casas (PRE-REV Z4)
   try{ const s=irrGet(); irrIniciar(s,id); irrAvanco(s,id,Math.min(cob,s.setores[s.ordens[id].setor].ha)); irrSave(s); }catch(e){ res.recusa=e.message; R.parc.push(res); continue; }
   const r=irrReclassTudo(null,id,{prod:'Nitrato de cálcio',dose:12,mot:'teste'}); if(r.erro){ res.recusa=r.erro; R.parc.push(res); continue; }
   const s1=irrGet(), o1=s1.ordens[id], x1=s1.setores[o1.setor]; res.ha=x1.ha; res.v1=o1.fert.v1; res.prev=irrAreaV2(x1,{cob:o1.fert.v1});
   R.parc.push(fluxo(cenGet(),id,res)); } }
+// 11 · borda (PRE-REV Z1/Z2/Z5): a liberação reserva exatamente a regra única; total 0 com dose > 0 é recusado; o aviso do MIP usa o lote da liberação
+const lib=(dose,area,fis)=>{ const c={ordens:{X:{id:'X',etapa:'A liberar',area,saldo:area,realizado:0,ap:[],ins:[{p:'P',dose,un:'L',tot:cenQtd(dose,area)}]}},reqs:{},
+    lotes:{'P|L1':{prod:'P',lote:'L1',fisico:fis,reservado:0,quarentena:0}},movs:[]}; try{ cenLiberar(c,'X'); return 'ok'; }catch(e){ return e.message; } };
+R.borda={exato:lib(0.5,49.31,cenQtd(0.5,49.31)),falta:lib(0.5,49.31,cenQtd(0.5,49.31)-0.01),zero:lib(0.0001,49.31,100),zero2:lib(1e-7,49.31,100)};
+const vb=Object.values(s0.vis).find(v=>/^PV/.test(v.tal)&&!v.dec&&mipElig(v).length); const ub=mipElig(vb)[0], tb=mipT(vb), nb=cenQtd(ub.dmin,tb.area);
+const avi=(lotes)=>{ cenReset(); const c=cenGet(); Object.keys(c.lotes).forEach(k=>{ if(c.lotes[k].prod===ub.nome) delete c.lotes[k]; }); lotes.forEach((q,i)=>{ c.lotes[ub.nome+'|B'+i]={prod:ub.nome,lote:'B'+i,fisico:q,reservado:0,quarentena:0}; });
+  return mipChecks(mipGet(),vb,{kind:'controlar',prod:ub.id,dose:String(ub.dmin),area:String(tb.area),data:'2026-10-20'},c).al.filter(x=>/aguarda a compra/.test(x)).length; };
+R.borda.mip={um_lote_exato:avi([nb]),dois_lotes_sem_um_que_cubra:avi([Math.round(nb*60)/100,Math.round(nb*60)/100])};
 print(JSON.stringify(R));
 })();
 """
@@ -150,10 +158,15 @@ chk(f'9 "Decidir controle" (agDecIni em {len(ar)} vistorias da Lagoa): a área q
 # 10 · varredura de todo o gen37 (JS e JS embutido nos .py, sem testes): produto dose × área fora da regra única. Exceções nomeadas, que não
 #      são quantidade de custódia: custo (dose × preço), carga do tanque e demanda do planejamento (CAL-01, exata por desenho).
 import glob
-PROD = re.compile(r'(?:\b[\w.]*dose\s*\*\s*[\w.(\[\'\]]+|[\w.)\]]+\s*\*\s*[\w.]*\.dose\b|\bd\s*\*\s*(?:ar|ajA)\b)')
+PROD = re.compile(r'(?:\b[\w.]*dose\s*\*\s*[\w.(\[\'\]]+|[\w.)\]]+\s*\*\s*[\w.]*\.dose\b|\bd\s*\*\s*(?:ar|ajA)\b'
+                  r'|\b(?:[\w.]*area|ar|ajA)\s*\*\s*(?:[\w.]*dose|d)\b|c\[\'area\'\]\s*\*\s*\w*dose)')   # nos dois sentidos (PRE-REV Z5)
 EXC = {('areas/inicio.py', 'x.dose*p'): 'custo por ha', ('areas/processo_os.py', 'x.dose*ac'): 'carga do tanque', ('areas/processo_planos.py', 'x.dose*x.preco'): 'custo',
        ('areas/suprimentos.py', "dose*c['area']"): 'demanda do planejamento', ('dados2.py', "dose*c['area']"): 'demanda do planejamento',
        ('safra.js', 'dose*area'): 'demanda do planejamento (CAL-01)'}
+bd = F['borda']
+chk('11 borda: a liberação reserva com estoque igual à regra única e recusa com 0,01 a menos; dose > 0 com total 0 é recusada; o aviso de compra do MIP usa o lote da liberação',
+    bd['exato'] == 'ok' and 'Saldo insuficiente' in bd['falta'] and 'dá 0' in bd['zero'] and 'dá 0' in bd['zero2']
+    and bd['mip']['um_lote_exato'] == 0 and bd['mip']['dois_lotes_sem_um_que_cubra'] == 1, bd)
 crus = []
 for fn in sorted(glob.glob(os.path.join(HERE, '*.js')) + glob.glob(os.path.join(HERE, '*.py')) + glob.glob(os.path.join(HERE, 'areas', '*.py'))):
     rel = os.path.relpath(fn, HERE)
