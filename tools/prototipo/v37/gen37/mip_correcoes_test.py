@@ -99,7 +99,7 @@ try:
         ir('AG-01.dc.html#VIS-055:decidir'); setv('aside input[aria-label="Área em hectares"]','999'); a=aside()
         dis=J("[...document.querySelectorAll('aside button')].find(b=>b.innerText.trim()==='Gerar O.S. de erradicação').disabled")
         # SINT-T01: área do Pivô 22 da fonte única (dados_lagoa_fonte), no formato do mipN (até 1 casa, vírgula)
-        import dados_lagoa_fonte as _F; a22=_F.PIVOS_HA[22]; t22=f'{a22:.1f}'.rstrip('0').rstrip('.').replace('.',',')
+        import dados_lagoa_fonte as _F; a22=_F.PIVOS_HA[22]; t22=f'{a22:.2f}'.rstrip('0').rstrip('.').replace('.',',')   # mesma forma do mipN(área, 2) da mensagem
         chk(f'9 Erradicação com 999 ha no Pivô 22 ({t22} ha): trava "Área maior que o talhão ({t22} ha)" e botão bloqueado', a22 < 999 and f'Área maior que o talhão ({t22} ha).' in a and dis is True, [a[-300:],dis])
         # 10 · AG-01det: o primário executa (não repete o destino do Voltar)
         ir('AG-01det.dc.html#VIS-016'); b=J("(()=>{const x=[...document.querySelectorAll('header a, header button')].find(e=>e.innerText.trim()==='Sincronizar agora'); return x?[x.tagName,x.getAttribute('href')]:null;})()")
