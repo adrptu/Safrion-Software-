@@ -83,6 +83,7 @@ EMB = {'Calcário dolomítico filler': 'granel', 'Gesso agrícola': 'granel', 'M
 # reproduzem os números de antes; com a sintética continuam coerentes (realizado ≤ área, soma dos apontamentos = realizado,
 # saldo = área − realizado, insumo = dose × área). Nenhum literal de área por pivô.
 def _r(x): return round(x + 0.0, 2)
+import quantidade as _QTD   # quantidades de insumo: regra única (SINT-C03)
 def _br(x):
     x = _r(x); t = f'{x:,.2f}'.replace(',', 'X').replace('.', ',').replace('X', '.')
     return t.rstrip('0').rstrip(',') if ',' in t else t
@@ -97,11 +98,11 @@ _FR0507 = 5 / 14                                           # OS-0507: fração a
 _R0507 = _r(_A[5] * _FR0507)
 def _metades(a): b = int(a / 2); return [_r(a - b), b]     # dois dias: o 2º em hectares inteiros, o 1º com o resto
 _AP0508, _AP0509, _AP0510 = _metades(_A[23]), _metades(_A[12]), _metades(_A[6])
-_CALC = _r(_dose('MAMAO-IMP', 'i1', 'Calcário dolomítico filler') * _A[12])     # OS-0502 · reserva ao liberar
-_MUDA = int(round(_dose('MAMAO-IMP', 'i4', 'Muda de mamão Formosa') * _A[11]))    # OS-0503 · REQ-021 reservada
-_SFS = _r(_dose('MAMAO-IMP', 'i4', 'Superfosfato simples') * _A[11])
-_ABA = _r(_dose('MAMAO-PROD', 'q2', 'Abamectina 18 EC') * _A[6])                  # OS-0504 · REQ-022
-_TEB = _r(_dose('MAMAO-PROD', 'q4', 'Tebuconazol 200 EC') * _A[23])               # OS-0508 · REQ-025 consumida
+_CALC = _QTD.qtd(_dose('MAMAO-IMP', 'i1', 'Calcário dolomítico filler'), _A[12])     # OS-0502 · reserva ao liberar
+_MUDA = int(round(_QTD.qtd(_dose('MAMAO-IMP', 'i4', 'Muda de mamão Formosa'), _A[11])))    # OS-0503 · REQ-021 reservada
+_SFS = _QTD.qtd(_dose('MAMAO-IMP', 'i4', 'Superfosfato simples'), _A[11])
+_ABA = _QTD.qtd(_dose('MAMAO-PROD', 'q2', 'Abamectina 18 EC'), _A[6])                  # OS-0504 · REQ-022
+_TEB = _QTD.qtd(_dose('MAMAO-PROD', 'q4', 'Tebuconazol 200 EC'), _A[23])               # OS-0508 · REQ-025 consumida
 # estoque apto cobre as reservas abertas (REQ-021 sem entrega); no modo real o saldo literal já cobre e fica igual
 for _it, _q in (('Muda de mamão Formosa', _MUDA), ('Superfosfato simples', _SFS)):
     ESTOQUE[_it] = max(ESTOQUE[_it], int(-(-_q * 1.03 // 1)))   # folga de 3 %
@@ -180,7 +181,7 @@ BLOQ = {'OS-0507': dict(acao='apontar', t='Apontamento parado: bomba do Pivô 5 
 DONO = {'OS-0501': ('Ana (agrônoma)', 'antes de 30/09'), 'OS-0502': ('Suprimentos', 'calcário chega em 30/09'), 'OS-0503': ('Rui (almoxarife)', 'entregar até 05/10'),
         'OS-0505': ('Lúcia', 'conferir o dia 2'), 'OS-0507': ('Manutenção', 'bomba até 25/09'), 'OS-0508': ('Lúcia', 'conferir e encerrar hoje')}
 # requisições no cenário compartilhado: (requisição, fração entregue, fração consumida)
-REQS = {'OS-0503': ('REQ-021', 0.0, 0.0), 'OS-0504': ('REQ-022', 1.0, 0.0), 'OS-0506': ('REQ-023', 1.0, _AP0506[0] / _A[4]), 'OS-0507': ('REQ-024', 1.0, _FR0507), 'OS-0508': ('REQ-025', 1.0, 1.0)}
+REQS = {'OS-0503': ('REQ-021', 0.0, 0.0), 'OS-0504': ('REQ-022', 1.0, 0.0), 'OS-0506': ('REQ-023', 1.0, _AP0506[0] / _A[4]), 'OS-0507': ('REQ-024', 1.0, _R0507 / _A[5]), 'OS-0508': ('REQ-025', 1.0, 1.0)}
 # no mapa: talhão (id do mapa), complemento do realizado, prazo e próxima ação
 ORD_MAPA = [('OS-0501', ['PV13'], '', 'até 3 dias', ('Ajustar antes de liberar', 'OS.dc.html#OS-0501', 'lib', 'ag')), ('OS-0502', ['PV12'], '', 'vence hoje', ('Ajustar antes de liberar', 'OS.dc.html#OS-0502', 'lib', 'ag')),
             ('OS-0503', ['PV11'], '', 'no prazo', None), ('OS-0504', ['PV06'], '', 'até 3 dias', None), ('OS-0505', ['PV19'], '', 'até 3 dias', None),

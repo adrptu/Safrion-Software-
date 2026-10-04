@@ -123,7 +123,9 @@ Sem a camada sintética (tarefa 1), o build para em `dados_lagoa_fonte`, com uma
        - **G01:** o carimbo exige o conjunto exato das 11 saídas.
        - **T01:** `irr_estado_test` sai com 1 quando falha; expectativas de área vêm da fonte; `mip_unit_test` e `carencia_test` rodam no node fora do macOS; `os_v39_liberar` usa uma colheita sem carência pendente e mantém a prova negativa da carência.
        - **Executado na nuvem:** build 0; varredura 144/144; camada 14/14; talgeo 8/8; talmapa 8/8; decimais crus 0; mip_unit 34/34; carência 91/91; mip_correcoes 14/14; mip_fluxo 15/15; irr_estado 38/38; irr_fluxo 33/33; os_v39 liberar 14/14, bloq 11/11, selo_agua 12/12; map_decisoes 13/13; map_irrig_filtro 15/15. Contraprova do exit do T01: exit 1 com falha forçada.
-       - **Risco registrado, não alterado:** dose × área sem arredondar em `cenario.js:152` e `areas/mobile.py:507/525` (app).
+     - **SINT-C03 (comentário 5974993475), corrigido:** regra única de quantidade (`quantidade.py` ⇄ `cenQtd`/`cenQtdTrecho`), em decimal exato, 2 casas, meio para cima, com consumo por trecho acumulado. Aplicada à O.S. (produtor e consumidores), ao app (que deixa de ser só risco), à semente da custódia e aos textos.
+       - **Executado:** `quantidade_test` 6/6 (Python = JS em 7 771 casos, 774 com empate; 62,25 ha e 62,79 ha passam; trechos conservam o total; turno do app; sementes da Lagoa zeram a custódia).
+       - **Cadeia completa verde:** build 0, varredura 144/144, camada 14/14, talgeo 8/8, talmapa 8/8, carência 91/91 e os demais testes da Lagoa.
      - **Achado para o Codex:** o círculo do `talgeo.js` (110 540 m/grau de latitude + esfera de 6 378 137 m + 72 lados) mede ≈ +0,58 % da área declarada. Está abaixo do limite de 1 % do `tmValida`.
    - **Atenção:** o artefato publicado hoje mostra a fazenda real; publicar da nuvem troca pelos dados sintéticos. Combine com o Codex e o Adrianus antes da primeira publicação a partir da nuvem.
 2. **V44-REND** (REND-MULTICONJUNTOS `082884f3`; REND-RETORNO-1818 `7ae753dc`)

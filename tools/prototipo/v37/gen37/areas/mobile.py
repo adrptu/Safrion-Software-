@@ -504,10 +504,10 @@ if(t){ const pz=mbPausado(t);
   v.ft_ha=f.ha||''; v.ft_h=f.h||''; v.ft_obs=f.obs||'';
   v.ha_hint=!v.t_fe?'Saldo 0 ha: nada a apontar nesta ordem. Descarte o turno.':(pv?'Máximo '+cenNum(mx,1)+' ha: saldo '+cenNum(o.saldo,1)+' ha menos '+cenNum(pv,1)+' ha no aparelho':'Máximo '+cenNum(mx,1)+' ha (saldo da ordem)');
   v.cons=(o.ins||[]).map((x,i)=>{ const it=r&&r.itens.find(y=>y.prod===x.p); const ed=(f.ced||{})[x.p]; const e2=(er.cons||{})[x.p]||'';
-    const qv=(ed!==undefined&&String(ed).trim()!=='')?mbNum(ed):(ha>0&&it&&ed===undefined?x.dose*ha:NaN); const tem=it?it.custodia:0;
+    const qv=(ed!==undefined&&String(ed).trim()!=='')?mbNum(ed):(ha>0&&it&&ed===undefined?cenQtdTrecho(x.dose,(o.realizado||0)+pv,ha):NaN); const tem=it?it.custodia:0;
     const warn=(!e2&&qv>tem+1e-9)?(ed===undefined?'Sugestão acima do que está com você ('+cenNum(tem)+' '+x.un+'): informe quanto usou.'
       :'Acima do que está com você ('+cenNum(tem)+' '+x.un+'): fecha em conferência com '+CEN_CONC_RESP+'.'):'';
-    return {id:'ft_c'+i, l:x.p+' ('+x.un+')', val:ed!==undefined?ed:(ha>0&&it?mbIn(x.dose*ha):''), err:e2, has_err:!!e2, warn, has_warn:!!warn,
+    return {id:'ft_c'+i, l:x.p+' ('+x.un+')', val:ed!==undefined?ed:(ha>0&&it?mbIn(cenQtdTrecho(x.dose,(o.realizado||0)+pv,ha)):''), err:e2, has_err:!!e2, warn, has_warn:!!warn,
       hint:it?cenNum(x.dose,2)+' '+x.un+'/ha × hectares · com você '+cenNum(it.custodia)+' '+it.un:(r?'Fora da '+r.id+' · nada com você':'Sem requisição · nada com você'),
       set:(e)=>{ const st=self.state; const ff=Object.assign({},st.ft||{}); ff.ced=Object.assign({},ff.ced||{},{[x.p]:e.target.value}); const ee=Object.assign({},st.ft_err||{}); ee.cons=Object.assign({},ee.cons||{}); delete ee.cons[x.p]; self.setState({ft:ff,ft_err:ee}); } }; });
   v.has_cons=v.cons.length>0;
@@ -522,7 +522,7 @@ if(t){ const pz=mbPausado(t);
     (o2.ins||[]).forEach(x=>{ const ed=(f2.ced||{})[x.p]; const it=r2&&r2.itens.find(y=>y.prod===x.p);
       // fora da requisição nada está com o operador: sem pré-cálculo e 0 explícito (o cenário completaria com dose × área)
       const vazio=ed===undefined||String(ed).trim()==='';
-      const q=!vazio?mbNum(ed):(it?(ed===undefined&&h2>0?x.dose*h2:NaN):0);
+      const q=!vazio?mbNum(ed):(it?(ed===undefined&&h2>0?cenQtdTrecho(x.dose,(o2.realizado||0)+pv2,h2):NaN):0);   // regra única (SINT-C03)
       if(isNaN(q)||q<0){ if(ed!==undefined) ec[x.p]='Informe o consumo em '+x.un+' (0 se não usou).'; return; }
       // sugestão (dose × área) não editada é estimativa (CONC-13): acima do que está com o operador, ele informa quanto usou
       if(ed===undefined&&it&&q>it.custodia+1e-9){ ec[x.p]='Informe quanto usou: a sugestão de '+cenNum(q)+' '+x.un+' passa do que está com você ('+cenNum(it.custodia)+' '+x.un+').'; return; }

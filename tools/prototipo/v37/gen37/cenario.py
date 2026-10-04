@@ -4,6 +4,7 @@ Uso nas áreas: EXTRAJS[0] = cenario.js_prefixo() + <js da tela>; a tela chama c
 import json, os
 import dados2 as D2
 import dados_lagoa_safra as DL
+import quantidade as _QTD   # regra única de quantidade (SINT-C03)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REQ_DA_OS = {'OS-0417': 'REQ-031', 'OS-0421': 'REQ-035', 'OS-0420': 'REQ-036', 'OS-0418': 'REQ-038', 'OS-0424': 'REQ-039', 'OS-0425': 'REQ-040'}
@@ -70,7 +71,7 @@ def seed():
         if not o: continue
         itens = []
         for x in o['ins']:
-            lt = lote_de.get(x['p'], '—'); key = x['p'] + '|' + lt; sol = x['tot']; ent = round(sol * fe, 3); con = round(sol * fc, 3)
+            lt = lote_de.get(x['p'], '—'); key = x['p'] + '|' + lt; sol = x['tot']; ent = round(sol * fe, 3); con = _QTD.qtd(x['dose'], o['realizado']) if fc == 1.0 or abs(fc * o['area'] - o['realizado']) < 1e-6 else round(sol * fc, 3)
             if key in lotes and sol - ent > 0: lotes[key]['reservado'] += sol - ent
             itens.append(dict(prod=x['p'], lote=lt, un=x['un'], emb=x.get('emb', ''), solicitado=sol, entregue=ent, consumido=con, devolvido=0, custodia=round(ent - con, 3), confirmado=ent > 0))
         reqs[rid] = dict(id=rid, os=oid, estado=('Reservada' if fe == 0 else 'Entregue'), itens=itens)

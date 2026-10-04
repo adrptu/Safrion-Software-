@@ -23,6 +23,20 @@ function cenOuvir(self) {
   if (self.__cenOuvindo) return; self.__cenOuvindo = true;
   try { window.addEventListener('storage', (e) => { if (e.key === CEN_KEY) self.setState({ cenrev: Date.now() }); }); } catch (e) {}
 }
+// Regra única de quantidade de insumo (SINT-C03; mesma de quantidade.py): dose × área em DECIMAL exato (forma decimal mais curta
+// de cada número), 2 casas, meio para cima. Consumo de um apontamento = quantidade(acumulado depois) − quantidade(acumulado antes):
+// a soma dos apontamentos fecha no total da ordem e a custódia zera, sem tolerância.
+function cenDec(x) { const s = String(Number(x)); if (!/^-?\d+(\.\d+)?$/.test(s)) return null; const p = s.split('.'); const f = p[1] || '';
+  return { n: BigInt(p[0] + f), e: f.length }; }
+function cenQtd(dose, area) {
+  const a = cenDec(dose), b = cenDec(area); if (!a || !b) throw new Error('Quantidade fora da faixa: ' + dose + ' × ' + area + '.');
+  let n = a.n * b.n; const e = a.e + b.e; const neg = n < 0n; if (neg) n = -n;
+  let c;   // centésimos, meio para cima
+  if (e <= 2) c = n * (10n ** BigInt(2 - e)); else { const d = 10n ** BigInt(e - 2); c = (n * 2n + d) / (2n * d); }
+  return (neg ? -1 : 1) * Number(c) / 100; }
+function cenQtdTrecho(dose, antes, ha) {
+  const a0 = Number((antes || 0).toFixed(6)), a1 = Number(((antes || 0) + ha).toFixed(6));
+  return Math.round((cenQtd(dose, a1) - cenQtd(dose, a0)) * 100) / 100; }
 function cenNum(n, d) { return Number(n || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: d === undefined ? 2 : d }); }
 function cenLote(c, prod) { return Object.values(c.lotes).filter(l => l.prod === prod).sort((a, b) => (b.fisico - b.reservado - b.quarentena) - (a.fisico - a.reservado - a.quarentena))[0] || null; }
 function cenDisp(l) { return Math.max(0, (l.fisico || 0) - (l.quarentena || 0) - (l.reservado || 0)); }
@@ -149,7 +163,7 @@ function cenFecharTurno(c, ha, horas, consumo, obs, est) {
   t.fim = cenAgora();
   const cons = consumo || {}; const es = est || []; const inf = {};   // informado pelo executor (a estimativa não editada não conta como informada)
   Object.keys(cons).forEach(k => { if (cons[k] !== undefined && cons[k] !== null && es.indexOf(k) < 0) inf[k] = true; });
-  (o.ins || []).forEach(x => { if (cons[x.p] === undefined) cons[x.p] = x.dose * ha; });
+  (o.ins || []).forEach(x => { if (cons[x.p] === undefined) cons[x.p] = cenQtdTrecho(x.dose, (o.realizado || 0) + haPend, ha); });   // regra única (SINT-C03)
   const r = o.req && c.reqs[o.req]; const conf = {};
   if (r) for (const it of r.itens) { const q = cons[it.prod] || 0; if (q > it.custodia + 1e-9) {
     if (!inf[it.prod]) throw new Error('Consumo de ' + it.prod + ' (' + cenNum(q) + ' ' + it.un + ') acima do que está com você (' + cenNum(it.custodia) + ' ' + it.un + '). Confira a retirada.');

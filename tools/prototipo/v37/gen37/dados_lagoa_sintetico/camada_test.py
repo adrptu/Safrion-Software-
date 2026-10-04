@@ -182,7 +182,8 @@ def invariantes(L):
     o7 = next(o for o in L.ORDENS if o['id'] == 'OS-0507')
     if br(o7['realizado']) + ' de ' + br(o7['area']) + ' ha' not in L.COND['OS-0507']: e.append(('OS-0507', 'texto'))
     a = L.PIVOS; d = L._dose
-    if L._MUDA != int(round(d('MAMAO-IMP', 'i4', 'Muda de mamão Formosa') * a[11])) or L.ESTOQUE['Muda de mamão Formosa'] < L._MUDA or L.ESTOQUE['Superfosfato simples'] < L._SFS:
+    import quantidade as _Q
+    if L._MUDA != int(round(_Q.qtd(d('MAMAO-IMP', 'i4', 'Muda de mamão Formosa'), a[11]))) or L.ESTOQUE['Muda de mamão Formosa'] < L._MUDA or L.ESTOQUE['Superfosfato simples'] < L._SFS:
         e.append(('OS-0503', 'reserva maior que o estoque apto'))
     if br(L._MUDA) + ' mudas' not in L.COND['OS-0503'] or br(a[13]) + ' ha' not in L.ORIG['OS-0501'][1] or br(a[12]) + ' ha' not in L.ORIG['OS-0509'][1]: e.append(('textos', 'área'))
     if not (L.ESTOQUE['Calcário dolomítico filler'] < L._CALC <= L.ESTOQUE['Calcário dolomítico filler'] + L.RECEB['Calcário dolomítico filler']): e.append(('OS-0502', 'cenário falta+pedido'))
