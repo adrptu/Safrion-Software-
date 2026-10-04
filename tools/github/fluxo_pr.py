@@ -1,0 +1,319 @@
+#!/usr/bin/env python3
+"""PR idempotente e preflight de integração. Não produz pareceres nem habilita auto-merge.
+
+Transporte: gh já autenticado; snapshot permite usar o mesmo avaliador com o conector
+oficial. Execute a cópia revisada da base, nunca código não revisado com credencial.
+"""
+import argparse
+import datetime as dt
+import hashlib
+import json
+import re
+import subprocess
+import sys
+from pathlib import Path
+from urllib.parse import urlencode
+
+REPO = 'adrptu/Safrion-Software-'
+AGENTES = {'codex', 'claude', 'gemini'}
+SHA = re.compile(r'[0-9a-f]{40}')
+POLITICA = Path(__file__).with_name('protecao-main.json')
+
+
+class Bloqueado(Exception):
+    pass
+
+
+def exigir(ok, motivo):
+    if not ok:
+        raise Bloqueado(motivo)
+
+
+def digest(texto):
+    return hashlib.sha256(texto.encode('utf-8')).hexdigest()
+
+
+def agora():
+    return dt.datetime.now(dt.timezone.utc)
+
+
+def validar_pedido(pedido):
+    exigir(pedido['repo'] == REPO, 'repositório fora do escopo')
+    exigir(type(pedido['pr']) is int and pedido['pr'] > 0, 'PR inválido')
+    exigir(all(isinstance(pedido[k], str) and SHA.fullmatch(pedido[k])
+               for k in ('head_sha', 'base_sha')), 'SHA completo obrigatório')
+    exigir(len(pedido['receipts']) == 3, 'exigir três recibos reais')
+    for r in pedido['receipts']:
+        exigir(type(r['comment_id']) is int and r['comment_id'] > 0, 'id de recibo inválido')
+
+
+def avaliar(pedido, s, agora_utc=None):
+    """Snapshot autenticado completo; nenhuma chamada de rede ou execução de texto."""
+    erros = []
+    try:
+        validar_pedido(pedido)
+        exigir(pedido['author'] in AGENTES and pedido['integrator'] in AGENTES,
+               'agentes desconhecidos')
+        exigir(pedido['author'] != pedido['integrator'], 'autor não pode integrar')
+        exigir(s['identity']['login'] == 'adrptu' and s['identity']['type'] == 'User',
+               'executor precisa usar a identidade de usuário já autorizada')
+        exigir(all(SHA.fullmatch(pedido[k]) for k in ('head_sha', 'base_sha')), 'SHA completo obrigatório')
+        idade = ((agora_utc or agora()) - dt.datetime.fromisoformat(s['collected_at'])).total_seconds()
+        exigir(0 <= idade <= 120, 'snapshot vencido ou com horário futuro')
+        pr = s['pr']
+        exigir(pr['number'] == pedido['pr'] and pr['state'] == 'open', 'PR diferente ou fechado')
+        exigir(pr['draft'] is False, 'PR ainda é rascunho')
+        exigir(pr['head']['repo']['full_name'] == REPO and pr['base']['repo']['full_name'] == REPO,
+               'fork ou repositório diferente')
+        exigir(pr['base']['ref'] == 'main', 'base precisa ser main')
+        exigir(pr['head']['sha'] == pedido['head_sha'], 'HEAD mudou: invalidar aceite')
+        exigir(s['base_sha'] == pedido['base_sha'] == pr['base']['sha'], 'base mudou: revalidar composição')
+        exigir(s['compare']['merge_base_commit']['sha'] == pedido['base_sha']
+               and s['compare']['behind_by'] == 0 and s['compare']['ahead_by'] > 0,
+               'branch precisa incorporar a base vigente')
+        exigir(pr['mergeable'] is True and pr['mergeable_state'] == 'clean', 'merge não está apto no servidor')
+        exigir(pr.get('auto_merge') is None, 'auto-merge nativo armado; cancelar antes do fluxo por SHA')
+        with POLITICA.open(encoding='utf-8') as f:
+            politica = json.load(f)
+        import protecao
+        exigir(protecao.normalizar(s['ruleset']) == protecao.normalizar(politica), 'proteção divergente')
+        exigir(s['ruleset']['current_user_can_bypass'] == 'never', 'executor com bypass não aceito')
+        checks = next(r['parameters']['required_status_checks'] for r in politica['rules']
+                      if r['type'] == 'required_status_checks')
+        for check in checks:
+            encontrados = [c for c in s['checks'] if c['name'] == check['context']
+                           and c['app']['id'] == check['integration_id']]
+            exigir(len(encontrados) == 1, 'check ausente ou ambíguo: ' + check['context'])
+            c = encontrados[0]
+            exigir(c['head_sha'] == pedido['head_sha'] and c['status'] == 'completed'
+                   and c['conclusion'] == 'success', 'check não executado com sucesso: ' + check['context'])
+        exigir(s['threads_complete'] is True and all(t['isResolved'] for t in s['threads']),
+               'discussões não resolvidas ou paginação incompleta')
+        ultimas = {}
+        for r in sorted(s['reviews'], key=lambda r: r['id']):
+            if r['state'] in ('APPROVED', 'CHANGES_REQUESTED', 'DISMISSED'):
+                ultimas[r['user']['login']] = r['state']
+        exigir('CHANGES_REQUESTED' not in ultimas.values(), 'revisão nativa solicita mudanças')
+        exigir(len(pedido['receipts']) == 3, 'exigir três recibos reais')
+        exigir(s['comments_complete'] is True, 'conversa incompleta: recibos podem ter sido revogados')
+        recentes = {}
+        for comentario in sorted(s['comments'], key=lambda c: c['id']):
+            if comentario['author_association'] not in ('OWNER', 'MEMBER', 'COLLABORATOR'):
+                continue
+            try:
+                r = json.loads(comentario['body'])
+            except (TypeError, ValueError):
+                continue
+            if (isinstance(r, dict) and r.get('schema') == 'safrion-review-v1'
+                    and r.get('agent') in AGENTES
+                    and all(r.get(k) == pedido[k] for k in ('repo', 'pr', 'head_sha', 'base_sha'))):
+                recentes[r['agent']] = comentario['id']
+        vistos, papeis = set(), set()
+        for referencia in pedido['receipts']:
+            c = s['receipts'][str(referencia['comment_id'])]
+            exigir(c['issue_url'] == f'https://api.github.com/repos/{REPO}/issues/{pedido["pr"]}',
+                   'recibo precisa estar na conversa deste PR')
+            exigir(c['author_association'] in ('OWNER', 'MEMBER', 'COLLABORATOR'), 'relator não autorizado')
+            exigir(digest(c['body']) == referencia['sha256'], 'recibo alterado: reler parecer')
+            r = json.loads(c['body'])
+            exigir(r['schema'] == 'safrion-review-v1', 'formato de recibo desconhecido')
+            for k in ('repo', 'pr', 'head_sha', 'base_sha', 'author'):
+                exigir(r[k] == pedido[k], 'recibo de outra candidata: ' + k)
+            exigir(r['agent'] in AGENTES and r['agent'] not in vistos, 'agente ausente/repetido')
+            exigir(recentes.get(r['agent']) == c['id'], 'parecer substituído: ler recibo mais recente')
+            vistos.add(r['agent'])
+            exigir(r['role'] in ('author', 'reviewer', 'counterproof') and r['role'] not in papeis,
+                   'papel ausente/repetido')
+            papeis.add(r['role'])
+            exigir((r['role'] == 'author') == (r['agent'] == pedido['author']), 'papel de autor incorreto')
+            exigir(r['verdict'] == 'pass' and r['blocking_findings'] == [], 'parecer pendente ou impeditivo')
+            exigir(r['raw_evidence_analyzed'] is True, 'brutos não analisados')
+            exigir(isinstance(r['limits'], list) and bool(r['model']), 'modelo/limites ausentes')
+            exigir(bool(r['executions']), 'teste proposto não é execução')
+            for e in r['executions']:
+                exigir(all(isinstance(e[k], str) and e[k].strip() for k in
+                           ('requester', 'executor', 'result', 'evidence_url')), 'execução sem rastreio')
+                exigir(e['evidence_url'].startswith('https://github.com/adrptu/Safrion-Software-/'),
+                       'evidência deve estar recuperável no repositório')
+                exigir(re.fullmatch(r'[0-9a-f]{64}', e['sha256']), 'hash da evidência ausente')
+        exigir(vistos == AGENTES, 'pareceres incompletos')
+    except (Bloqueado, KeyError, TypeError, ValueError, StopIteration) as erro:
+        erros.append(str(erro) or 'dados incompletos')
+    resultado = {'state': 'blocked' if erros else 'eligible', 'reasons': erros,
+                 'limitation': 'Valida recibos; identidade da IA, leitura e veracidade das provas dependem do executor autorizado.'}
+    if not erros:
+        resultado['merge_arguments'] = {'repository_full_name': REPO, 'pr_number': pedido['pr'],
+                                       'expected_head_sha': pedido['head_sha'], 'merge_method': 'merge'}
+    return resultado
+
+
+class GitHub:
+    """gh cuida da credencial existente; nada é interpolado no shell ou gravado em disco."""
+    def api(self, endpoint, method='GET', data=None):
+        cmd = ['gh', 'api', '--hostname', 'github.com', '--method', method, endpoint]
+        entrada = None
+        if data is not None:
+            cmd += ['--input', '-']
+            entrada = json.dumps(data)
+        try:
+            p = subprocess.run(cmd, input=entrada, text=True, capture_output=True, timeout=60)
+        except (OSError, subprocess.TimeoutExpired) as e:
+            raise Bloqueado('transporte indisponível ou resultado incerto; reler antes de repetir') from e
+        exigir(p.returncode == 0, 'API recusou ou resultado incerto; reler antes de repetir')
+        try:
+            return json.loads(p.stdout)
+        except ValueError as e:
+            raise Bloqueado('resposta inválida ou incerta; reler antes de repetir') from e
+
+    def paginas(self, endpoint, key=None):
+        resultado = []
+        for page in range(1, 101):
+            separador = '&' if '?' in endpoint else '?'
+            r = self.api(f'{endpoint}{separador}per_page=100&page={page}')
+            itens = r[key] if key else r
+            resultado.extend(itens)
+            if len(itens) < 100:
+                return resultado
+        raise Bloqueado('paginação acima do limite; não usar resultado parcial')
+
+
+def coletar(api, pedido):
+    validar_pedido(pedido)
+    raiz = f'repos/{REPO}'
+    n, head, base = pedido['pr'], pedido['head_sha'], pedido['base_sha']
+    # Tempo do início: uma coleta demorada não renova artificialmente a validade.
+    s = {'collected_at': agora().isoformat()}
+    s['identity'] = api.api('user')
+    s['pr'] = api.api(f'{raiz}/pulls/{n}')
+    s['base_sha'] = api.api(f'{raiz}/git/ref/heads/main')['object']['sha']
+    s['compare'] = api.api(f'{raiz}/compare/{base}...{head}')
+    s['ruleset'] = api.api(f'{raiz}/rulesets/24154464')
+    s['checks'] = api.paginas(f'{raiz}/commits/{head}/check-runs?filter=latest', 'check_runs')
+    s['reviews'] = api.paginas(f'{raiz}/pulls/{n}/reviews')
+    s['comments'] = api.paginas(f'{raiz}/issues/{n}/comments')
+    s['comments_complete'] = True
+    s['receipts'] = {str(c['id']): c for c in s['comments']}
+    s['threads'] = []
+    cursor = None
+    for _ in range(100):
+        query = '''query($n:Int!,$cursor:String){repository(owner:"adrptu",name:"Safrion-Software-"){
+          pullRequest(number:$n){reviewThreads(first:100,after:$cursor){nodes{isResolved}
+          pageInfo{hasNextPage endCursor}}}}}'''
+        r = api.api('graphql', 'POST', {'query': query, 'variables': {'n': n, 'cursor': cursor}})
+        exigir(not r.get('errors'), 'GraphQL incompleto')
+        threads = r['data']['repository']['pullRequest']['reviewThreads']
+        s['threads'].extend(threads['nodes'])
+        if not threads['pageInfo']['hasNextPage']:
+            s['threads_complete'] = True
+            break
+        cursor = threads['pageInfo']['endCursor']
+    exigir(s.get('threads_complete') is True, 'discussões truncadas')
+    return s
+
+
+def abrir(api, branch, title, body, head_sha):
+    exigir(SHA.fullmatch(head_sha), 'SHA completo obrigatório')
+    exigir(re.fullmatch(r'(codex|claude)/[A-Za-z0-9._/-]+', branch) and '..' not in branch,
+           'branch precisa pertencer ao fluxo da equipe')
+    raiz = f'repos/{REPO}'
+    def localizar():
+        q = urlencode({'state': 'all', 'base': 'main', 'head': 'adrptu:' + branch})
+        prs = api.paginas(f'{raiz}/pulls?{q}')
+        exigir(len(prs) <= 1, 'branch com múltiplos PRs; resolver explicitamente')
+        return prs[0] if prs else None
+    def conferir(pr):
+        exigir(pr['head']['sha'] == head_sha, 'HEAD mudou durante abertura')
+        exigir(pr['state'] == 'open', 'branch já usada em PR fechado; não reabrir automaticamente')
+        return {'state': 'draft' if pr['draft'] else 'open', 'number': pr['number'], 'url': pr['html_url'],
+                'head_sha': pr['head']['sha']}
+    existente = localizar()
+    if existente:
+        return conferir(existente)  # Não sobrescreve edição concorrente de título/corpo.
+    exigir(api.api(f'{raiz}/git/ref/heads/{branch}')['object']['sha'] == head_sha, 'branch divergente')
+    try:
+        api.api(f'{raiz}/pulls', 'POST', {'head': branch, 'base': 'main', 'title': title,
+                                       'body': body, 'draft': True, 'maintainer_can_modify': False})
+    except Bloqueado:
+        recuperado = localizar()
+        if recuperado:
+            return conferir(recuperado)
+        raise
+    recuperado = localizar()
+    exigir(recuperado is not None, 'envio sem readback: não reenviar automaticamente')
+    return conferir(recuperado)
+
+
+def recibo_merge(api, pedido, pr):
+    raiz = f'repos/{REPO}'
+    exigir(pr.get('merged') is True and pr['head']['sha'] == pedido['head_sha'],
+           'merge não comprovado; reler/diagnosticar sem reenvio automático')
+    commit = api.api(f'{raiz}/git/commits/{pr["merge_commit_sha"]}')
+    exigir([p['sha'] for p in commit['parents']] == [pedido['base_sha'], pedido['head_sha']],
+           'merge observado com composição diferente; investigar e não declarar aceite')
+    compare = api.api(f'{raiz}/compare/{commit["sha"]}...main')
+    exigir(compare['merge_base_commit']['sha'] == commit['sha'], 'main não contém o merge observado')
+    runs = api.paginas(f'{raiz}/actions/runs?head_sha={commit["sha"]}', 'workflow_runs')
+    return {'state': 'merged', 'merge_sha': commit['sha'], 'main_ci': [
+        {'id': r['id'], 'url': r['html_url'], 'actor': r['actor']['login'],
+         'status': r['status'], 'conclusion': r['conclusion']}
+        for r in runs if r['event'] == 'push' and r['head_branch'] == 'main'],
+        'next': 'Conferir CI pós-merge; nenhum resultado vazio/pending autoriza HML/produção.'}
+
+
+def integrar(api, pedido):
+    # Integração é online; snapshot em arquivo nunca autoriza esta mutação.
+    validar_pedido(pedido)
+    exigir(pedido['author'] in AGENTES and pedido['integrator'] in AGENTES
+           and pedido['author'] != pedido['integrator'], 'autor não pode integrar')
+    raiz = f'repos/{REPO}'
+    pr = api.api(f'{raiz}/pulls/{pedido["pr"]}')
+    if pr.get('merged') is True:
+        return recibo_merge(api, pedido, pr)  # Readback idempotente, sem novo PUT.
+    s = coletar(api, pedido)
+    resultado = avaliar(pedido, s)
+    exigir(resultado['state'] == 'eligible', '; '.join(resultado['reasons']))
+    exigir(api.api(f'{raiz}/git/ref/heads/main')['object']['sha'] == pedido['base_sha'], 'base mudou no repasse')
+    try:
+        api.api(f'{raiz}/pulls/{pedido["pr"]}/merge', 'PUT',
+                {'sha': pedido['head_sha'], 'merge_method': 'merge'})
+    except Bloqueado:
+        pass  # Uma única leitura de volta; jamais repetir um PUT incerto.
+    pr = api.api(f'{raiz}/pulls/{pedido["pr"]}')
+    return recibo_merge(api, pedido, pr)
+
+
+def main():
+    p = argparse.ArgumentParser(description=__doc__)
+    sub = p.add_subparsers(dest='cmd', required=True)
+    a = sub.add_parser('abrir'); a.add_argument('--branch', required=True)
+    a.add_argument('--head-sha', required=True); a.add_argument('--title', required=True)
+    a.add_argument('--body-file', type=Path, required=True)
+    for cmd in ('verificar', 'integrar'):
+        a = sub.add_parser(cmd); a.add_argument('--pedido', type=Path, required=True)
+        if cmd == 'verificar':
+            a.add_argument('--snapshot', type=Path)
+        else:
+            a.add_argument('--executar', action='store_true')
+            a.add_argument('--head', required=True)
+    args = p.parse_args()
+    try:
+        api = GitHub()
+        if args.cmd == 'abrir':
+            resultado = abrir(api, args.branch, args.title, args.body_file.read_text(encoding='utf-8'), args.head_sha)
+        else:
+            pedido = json.loads(args.pedido.read_text(encoding='utf-8'))
+            if args.cmd == 'integrar':
+                exigir(args.head == pedido['head_sha'], '--head difere do pedido revisado')
+                resultado = integrar(api, pedido) if args.executar else avaliar(pedido, coletar(api, pedido))
+            else:
+                snapshot = json.loads(args.snapshot.read_text(encoding='utf-8')) if args.snapshot else coletar(api, pedido)
+                resultado = avaliar(pedido, snapshot)
+        print(json.dumps(resultado, ensure_ascii=False, indent=2))
+        return 1 if resultado['state'] == 'blocked' else 0
+    except (Bloqueado, KeyError, ValueError, TypeError) as e:
+        print(json.dumps({'state': 'blocked', 'reasons': [str(e)]}, ensure_ascii=False))
+        return 1
+
+
+if __name__ == '__main__':
+    sys.exit(main())

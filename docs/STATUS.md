@@ -54,3 +54,7 @@ Referências consultadas em 28/09/2026: [Playwright na CI](https://playwright.de
 - Conta, gastos, dados de clientes e produção dependem da autorização concreta do proprietário.
 - Os agentes usam a mesma identidade GitHub; parecer independente precisa identificar agente, versão, testes e limites. Proteção efetiva da `main` deve ser comprovada pelo servidor; um arquivo de configuração não prova aplicação.
 - Versões da fundação: `docs/architecture/versions.md`. Decisões materiais pendentes: `docs/DECISIONS.md`.
+
+## Automação de PRs e merge — candidata de 04/10/2026
+
+`tools/github/fluxo_pr.py` e seu [procedimento](../tools/github/README.md) automatizam o trabalho mecânico por agente autorizado: draft idempotente, conferência de checks e recibos reais por SHA, merge por integrador diferente do autor e leitura de volta. A configuração de proteção e o auto-merge nativo permanecem como estavam. Autoria Codex; revisão/integração Claude; contraprova Gemini. Pedido/reserva: issue #1, comentário 5985332590. Implementação candidata não significa ativação ou merge comprovado; testes, CI e pareceres por versão ficam no PR. A dependência de integração das correções já preservadas não é removida por esta ferramenta.

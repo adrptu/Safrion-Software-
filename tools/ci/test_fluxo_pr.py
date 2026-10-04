@@ -1,0 +1,537 @@
+"""Contraprovas independentes Codex: fixtures sintéticas, nenhum acesso à rede."""
+import copy
+import datetime as dt
+import hashlib
+import importlib.util
+import json
+from pathlib import Path
+import subprocess
+import sys
+import unittest
+from unittest import mock
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / 'tools/github'))
+SPEC = importlib.util.spec_from_file_location('fluxo_pr_testado', ROOT / 'tools/github/fluxo_pr.py')
+flow = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(flow)
+NOW = dt.datetime(2026, 10, 4, 23, 0, tzinfo=dt.timezone.utc)
+HEAD, BASE, MERGE = 'a' * 40, 'b' * 40, 'c' * 40
+API_ROOT = 'repos/' + flow.REPO
+
+
+def checksum(text):
+    return hashlib.sha256(text.encode()).hexdigest()
+
+
+def fixture():
+    policy = json.loads(flow.POLITICA.read_text())
+    policy['current_user_can_bypass'] = 'never'
+    required = next(r['parameters']['required_status_checks'] for r in policy['rules']
+                    if r['type'] == 'required_status_checks')
+    request = {'repo': flow.REPO, 'pr': 91, 'author': 'codex', 'integrator': 'claude',
+               'head_sha': HEAD, 'base_sha': BASE, 'receipts': []}
+    receipts = {}
+    for number, agent in enumerate(('codex', 'claude', 'gemini'), 100):
+        body = json.dumps({
+            'schema': 'safrion-review-v1', 'repo': flow.REPO, 'pr': 91, 'author': 'codex',
+            'head_sha': HEAD, 'base_sha': BASE, 'agent': agent, 'verdict': 'pass',
+            'role': {'codex': 'author', 'claude': 'reviewer', 'gemini': 'counterproof'}[agent],
+            'blocking_findings': [], 'raw_evidence_analyzed': True,
+            'model': 'synthetic-fixture-no-real-review', 'limits': ['Synthetic test data'],
+            'executions': [{'requester': agent, 'executor': 'synthetic-executor',
+                            'result': 'synthetic expected result',
+                            'evidence_url': 'https://github.com/' + flow.REPO + '/blob/' + HEAD + '/proof.txt',
+                            'sha256': 'd' * 64}]})
+        receipts[str(number)] = {'id': number, 'body': body, 'author_association': 'OWNER',
+            'issue_url': 'https://api.github.com/repos/' + flow.REPO + '/issues/91'}
+        request['receipts'].append({'comment_id': number, 'sha256': checksum(body)})
+    pr = {'number': 91, 'state': 'open', 'draft': False, 'mergeable': True,
+          'mergeable_state': 'clean', 'auto_merge': None, 'merged': False,
+          'html_url': 'https://github.com/' + flow.REPO + '/pull/91',
+          'head': {'sha': HEAD, 'repo': {'full_name': flow.REPO}},
+          'base': {'sha': BASE, 'ref': 'main', 'repo': {'full_name': flow.REPO}}}
+    snapshot = {'collected_at': NOW.isoformat(), 'pr': pr, 'base_sha': BASE,
+                'compare': {'merge_base_commit': {'sha': BASE}, 'behind_by': 0, 'ahead_by': 1},
+                'ruleset': policy, 'checks': [
+                    {'name': c['context'], 'app': {'id': c['integration_id']},
+                     'head_sha': HEAD, 'status': 'completed', 'conclusion': 'success'} for c in required],
+                'identity': {'login': 'adrptu', 'type': 'User'},
+                'threads_complete': True, 'threads': [], 'reviews': [], 'receipts': receipts,
+                'comments_complete': True, 'comments': list(receipts.values())}
+    return request, snapshot
+
+
+def rewrite_receipt(request, snapshot, changes, index=0):
+    reference = request['receipts'][index]
+    comment = snapshot['receipts'][str(reference['comment_id'])]
+    receipt = json.loads(comment['body'])
+    receipt.update(changes)
+    comment['body'] = json.dumps(receipt)
+    reference['sha256'] = checksum(comment['body'])
+
+
+class GateTests(unittest.TestCase):
+    def setUp(self):
+        self.request, self.snapshot = fixture()
+
+    def blocked(self, request=None, snapshot=None):
+        result = flow.avaliar(request or self.request, snapshot or self.snapshot, NOW)
+        self.assertEqual(result['state'], 'blocked', result)
+        self.assertTrue(result['reasons'])
+        self.assertNotIn('merge_arguments', result)
+        return result
+
+    def test_complete_fixture_emits_exact_sha_arguments(self):
+        result = flow.avaliar(self.request, self.snapshot, NOW)
+        self.assertEqual(result['state'], 'eligible', result)
+        self.assertEqual(result['merge_arguments'], {'repository_full_name': flow.REPO,
+            'pr_number': 91, 'expected_head_sha': HEAD, 'merge_method': 'merge'})
+        self.assertIn('executor autorizado', result['limitation'])
+
+    def test_missing_or_malformed_input_cannot_yield_eligible(self):
+        for field in ('pr', 'checks', 'reviews', 'receipts', 'threads_complete', 'ruleset', 'identity', 'comments', 'comments_complete'):
+            with self.subTest(field=field):
+                candidate = copy.deepcopy(self.snapshot)
+                del candidate[field]
+                self.blocked(snapshot=candidate)
+        for date in ('not-a-date', '2026-10-04T23:00:00', (NOW - dt.timedelta(seconds=121)).isoformat(),
+                     (NOW + dt.timedelta(seconds=1)).isoformat()):
+            with self.subTest(date=date):
+                candidate = copy.deepcopy(self.snapshot)
+                candidate['collected_at'] = date
+                self.blocked(snapshot=candidate)
+
+    def test_same_author_integrator_or_wrong_scope(self):
+        for field, value in [('integrator', 'codex'), ('integrator', 'other'),
+                             ('repo', 'other/repo'), ('head_sha', 'aaaa'), ('pr', 92)]:
+            with self.subTest(field=field):
+                candidate = copy.deepcopy(self.request)
+                candidate[field] = value
+                self.blocked(request=candidate)
+
+    def test_draft_closed_conflicted_unknown_or_native_auto_merge(self):
+        for field, value in [('draft', True), ('state', 'closed'), ('mergeable', False),
+                             ('mergeable', None), ('mergeable_state', 'blocked'),
+                             ('auto_merge', {'enabled_by': 'someone'})]:
+            with self.subTest(field=field):
+                candidate = copy.deepcopy(self.snapshot)
+                candidate['pr'][field] = value
+                self.blocked(snapshot=candidate)
+
+    def test_changed_head_fork_wrong_base_and_stale_composition(self):
+        for mutation in (
+            lambda s: s['pr']['head'].update(sha='e' * 40),
+            lambda s: s['pr']['head']['repo'].update(full_name='fork/repo'),
+            lambda s: s['pr']['base'].update(ref='dev'),
+            lambda s: s['pr']['base'].update(sha='e' * 40),
+            lambda s: s.update(base_sha='e' * 40),
+            lambda s: s['compare'].update(behind_by=1),
+            lambda s: s['compare'].update(ahead_by=0),
+            lambda s: s['compare']['merge_base_commit'].update(sha='e' * 40),
+        ):
+            candidate = copy.deepcopy(self.snapshot)
+            mutation(candidate)
+            self.blocked(snapshot=candidate)
+
+    def test_unexpected_or_bot_github_identity_blocks(self):
+        for identity in ({'login': 'other', 'type': 'User'},
+                         {'login': 'adrptu', 'type': 'Bot'}, {}):
+            snapshot = copy.deepcopy(self.snapshot)
+            snapshot['identity'] = identity
+            self.blocked(snapshot=snapshot)
+
+    def test_weakened_rules_or_executor_bypass(self):
+        for mutation in (
+            lambda s: s['ruleset'].update(current_user_can_bypass='always'),
+            lambda s: s['ruleset'].update(bypass_actors=[{'actor_id': 1}]),
+            lambda s: s['ruleset'].update(enforcement='disabled'),
+            lambda s: s['ruleset']['rules'].pop(),
+        ):
+            candidate = copy.deepcopy(self.snapshot)
+            mutation(candidate)
+            self.blocked(snapshot=candidate)
+
+    def test_check_must_really_succeed_from_expected_app_at_head(self):
+        for conclusion in ('skipped', 'neutral', 'failure', 'cancelled', None):
+            with self.subTest(conclusion=conclusion):
+                candidate = copy.deepcopy(self.snapshot)
+                candidate['checks'][0]['conclusion'] = conclusion
+                self.blocked(snapshot=candidate)
+        for mutation in (
+            lambda s: s['checks'][0].update(status='in_progress'),
+            lambda s: s['checks'][0].update(head_sha='e' * 40),
+            lambda s: s['checks'][0]['app'].update(id=99),
+            lambda s: s['checks'].pop(),
+            lambda s: s['checks'].append(copy.deepcopy(s['checks'][0])),
+        ):
+            candidate = copy.deepcopy(self.snapshot)
+            mutation(candidate)
+            self.blocked(snapshot=candidate)
+
+    def test_unresolved_or_incomplete_threads(self):
+        for complete, threads in [(False, []), (True, [{'isResolved': False}])]:
+            candidate = copy.deepcopy(self.snapshot)
+            candidate.update(threads_complete=complete, threads=threads)
+            self.blocked(snapshot=candidate)
+
+    def test_latest_native_review_decision_wins_not_transport_order(self):
+        self.snapshot['reviews'] = [
+            {'id': 2, 'user': {'login': 'reviewer'}, 'state': 'CHANGES_REQUESTED'},
+            {'id': 1, 'user': {'login': 'reviewer'}, 'state': 'APPROVED'}]
+        self.blocked()
+        self.snapshot['reviews'].append({'id': 3, 'user': {'login': 'reviewer'}, 'state': 'APPROVED'})
+        self.assertEqual(flow.avaliar(self.request, self.snapshot, NOW)['state'], 'eligible')
+
+    def test_changed_comment_hash_rejected(self):
+        self.snapshot['receipts']['100']['body'] += ' '
+        self.blocked()
+
+    def test_old_candidate_duplicate_or_absent_receipt_rejected(self):
+        for changes in ({'head_sha': 'e' * 40}, {'base_sha': 'e' * 40}, {'pr': 92},
+                        {'author': 'gemini'}, {'agent': 'claude'}, {'schema': 'unknown'},
+                        {'role': 'reviewer'}, {'role': 'unknown'}):
+            with self.subTest(changes=changes):
+                request, snapshot = fixture()
+                rewrite_receipt(request, snapshot, changes)
+                self.blocked(request, snapshot)
+        self.request['receipts'] = self.request['receipts'][:2]
+        self.blocked()
+
+    def test_foreign_pr_unauthorized_reporter_and_duplicate_reference(self):
+        for changes in ({'issue_url': 'https://api.github.com/repos/' + flow.REPO + '/issues/92'},
+                        {'author_association': 'NONE'}):
+            snapshot = copy.deepcopy(self.snapshot)
+            snapshot['receipts']['100'].update(changes)
+            self.blocked(snapshot=snapshot)
+        self.request['receipts'][2] = copy.deepcopy(self.request['receipts'][0])
+        self.blocked()
+
+    def test_new_authorized_receipt_revokes_old_pass_even_without_selected_id(self):
+        for verdict in ('blocked', 'pending', 'pass'):
+            with self.subTest(verdict=verdict):
+                request, snapshot = fixture()
+                previous = snapshot['receipts']['101']
+                receipt = json.loads(previous['body'])
+                receipt['verdict'] = verdict
+                snapshot['comments'].insert(0, dict(previous, id=103, body=json.dumps(receipt)))
+                result = self.blocked(request, snapshot)
+                self.assertIn('substituído', result['reasons'][0])
+
+    def test_latest_pass_receipt_can_be_selected_and_incomplete_comments_block(self):
+        previous = self.snapshot['receipts']['101']
+        latest = dict(previous, id=103)
+        self.snapshot['comments'].insert(0, latest)
+        self.snapshot['receipts']['103'] = latest
+        self.request['receipts'][1] = {'comment_id': 103, 'sha256': checksum(latest['body'])}
+        self.assertEqual(flow.avaliar(self.request, self.snapshot, NOW)['state'], 'eligible')
+        self.snapshot['comments_complete'] = False
+        self.blocked()
+
+    def test_narrative_and_unrelated_or_unauthorized_receipts_are_not_machine_revocations(self):
+        previous = self.snapshot['receipts']['101']
+        for kind in ('narrative', 'other-head', 'unauthorized', 'non-object-json'):
+            snapshot = copy.deepcopy(self.snapshot)
+            latest = dict(previous, id=103)
+            if kind == 'narrative':
+                latest['body'] = 'Narrative STOP requires integrator judgment, not parsed as receipt.'
+            elif kind == 'non-object-json':
+                latest['body'] = '[]'
+            elif kind == 'other-head':
+                body = json.loads(latest['body'])
+                body.update(head_sha='e' * 40, verdict='blocked')
+                latest['body'] = json.dumps(body)
+            else:
+                latest['author_association'] = 'NONE'
+            snapshot['comments'].append(latest)
+            with self.subTest(kind=kind):
+                self.assertEqual(flow.avaliar(self.request, snapshot, NOW)['state'], 'eligible')
+
+    def test_pending_findings_unanalyzed_or_proposed_tests_rejected(self):
+        for changes in ({'verdict': 'pending'}, {'blocking_findings': ['S2']},
+                        {'raw_evidence_analyzed': False}, {'executions': []},
+                        {'model': ''}, {'limits': None}):
+            with self.subTest(changes=changes):
+                request, snapshot = fixture()
+                rewrite_receipt(request, snapshot, changes)
+                self.blocked(request, snapshot)
+        for field, value in [('executor', ''), ('requester', ''), ('result', ''),
+                             ('evidence_url', 'https://example.com/fake'), ('sha256', 'd' * 63)]:
+            with self.subTest(field=field):
+                request, snapshot = fixture()
+                execution = json.loads(snapshot['receipts']['100']['body'])['executions'][0]
+                execution[field] = value
+                rewrite_receipt(request, snapshot, {'executions': [execution]})
+                self.blocked(request, snapshot)
+
+
+class OpeningTests(unittest.TestCase):
+    def setUp(self):
+        self.request, self.snapshot = fixture()
+        self.pr = self.snapshot['pr']
+        self.pr['draft'] = True
+        self.api = mock.Mock()
+        self.api.api.return_value = {'object': {'sha': HEAD}}
+
+    def open(self):
+        return flow.abrir(self.api, 'codex/automation', 'Literal $(never-run)', 'Body `literal`', HEAD)
+
+    def test_existing_pr_reused_without_writing_metadata(self):
+        self.api.paginas.return_value = [self.pr]
+        result = self.open()
+        self.assertEqual(result['number'], 91)
+        self.api.api.assert_not_called()
+
+    def test_create_draft_readback_and_repeat_does_not_duplicate(self):
+        self.api.paginas.side_effect = [[], [self.pr], [self.pr]]
+        self.assertEqual(self.open()['state'], 'draft')
+        self.assertEqual(self.open()['number'], 91)
+        writes = [c for c in self.api.api.call_args_list if len(c.args) > 1 and c.args[1] == 'POST']
+        self.assertEqual(len(writes), 1)
+        self.assertEqual(writes[0].args[2]['draft'], True)
+        self.assertEqual(writes[0].args[2]['title'], 'Literal $(never-run)')
+        self.assertEqual(writes[0].args[2]['maintainer_can_modify'], False)
+
+    def test_timeout_with_successful_readback_does_not_retry_post(self):
+        self.api.paginas.side_effect = [[], [self.pr]]
+        self.api.api.side_effect = [{'object': {'sha': HEAD}}, flow.Bloqueado('timeout')]
+        self.assertEqual(self.open()['number'], 91)
+        self.assertEqual(self.api.api.call_count, 2)
+
+    def test_timeout_without_readback_or_missing_readback_blocks(self):
+        for uncertain in (True, False):
+            with self.subTest(uncertain=uncertain):
+                self.api.reset_mock()
+                self.api.paginas.side_effect = [[], []]
+                self.api.api.side_effect = [{'object': {'sha': HEAD}},
+                                            flow.Bloqueado('timeout') if uncertain else {}]
+                with self.assertRaises(flow.Bloqueado):
+                    self.open()
+                self.assertEqual(self.api.api.call_count, 2)
+
+    def test_conflicting_duplicate_closed_or_moved_branch_rejected(self):
+        for prs in ([self.pr, self.pr], [dict(self.pr, state='closed')],
+                    [dict(self.pr, head={'sha': 'e' * 40})]):
+            self.api.paginas.side_effect = None
+            self.api.paginas.return_value = prs
+            with self.assertRaises(flow.Bloqueado):
+                self.open()
+            self.api.api.assert_not_called()
+        self.api.paginas.return_value = []
+        self.api.api.return_value = {'object': {'sha': 'e' * 40}}
+        with self.assertRaises(flow.Bloqueado):
+            self.open()
+        self.assertEqual(self.api.api.call_count, 1)
+
+    def test_invalid_or_injected_branch_rejected_before_transport(self):
+        for branch in ('main', 'codex/a;touch x', 'codex/../main', 'claude/$(id)'):
+            with self.subTest(branch=branch), self.assertRaises(flow.Bloqueado):
+                flow.abrir(self.api, branch, 'title', 'body', HEAD)
+        self.api.api.assert_not_called()
+        self.api.paginas.assert_not_called()
+
+
+class MergeTests(unittest.TestCase):
+    def setUp(self):
+        self.request, self.snapshot = fixture()
+        self.api = mock.Mock()
+        self.merged = dict(self.snapshot['pr'], merged=True, merge_commit_sha=MERGE, state='closed')
+        self.commit = {'sha': MERGE, 'parents': [{'sha': BASE}, {'sha': HEAD}]}
+        self.contains = {'merge_base_commit': {'sha': MERGE}}
+        self.api.paginas.return_value = []
+
+    def merge(self):
+        with mock.patch.object(flow, 'coletar', return_value=self.snapshot), mock.patch.object(flow, 'agora', return_value=NOW):
+            return flow.integrar(self.api, self.request)
+
+    def replies(self, mutation=None, readback=None, commit=None):
+        return [self.snapshot['pr'], {'object': {'sha': BASE}}, mutation or {},
+                readback or self.merged, commit or self.commit, self.contains]
+
+    def test_merge_uses_sha_then_readback_and_requires_post_merge_ci_separately(self):
+        self.api.api.side_effect = self.replies()
+        result = self.merge()
+        self.assertEqual(result['state'], 'merged')
+        self.assertEqual(result['merge_sha'], MERGE)
+        self.assertEqual(result['main_ci'], [])
+        self.assertIn('nenhum resultado vazio/pending', result['next'])
+        self.assertEqual(self.api.api.call_args_list[2], mock.call(
+            API_ROOT + '/pulls/91/merge', 'PUT', {'sha': HEAD, 'merge_method': 'merge'}))
+
+    def test_uncertain_merge_is_read_back_without_second_put(self):
+        self.api.api.side_effect = self.replies(mutation=flow.Bloqueado('uncertain'))
+        self.assertEqual(self.merge()['state'], 'merged')
+        self.assertEqual(sum(len(c.args) > 1 and c.args[1] == 'PUT' for c in self.api.api.call_args_list), 1)
+
+    def test_failed_or_uncertain_merge_without_commit_blocks(self):
+        self.api.api.side_effect = self.replies(mutation=flow.Bloqueado('uncertain'), readback=self.snapshot['pr'])
+        with self.assertRaisesRegex(flow.Bloqueado, 'merge não comprovado'):
+            self.merge()
+        self.assertEqual(self.api.api.call_count, 4)
+
+    def test_server_success_without_readback_is_not_success(self):
+        self.api.api.side_effect = self.replies(mutation={'merged': True}, readback=flow.Bloqueado('readback unavailable'))
+        with self.assertRaises(flow.Bloqueado):
+            self.merge()
+
+    def test_new_base_prevents_put(self):
+        self.api.api.side_effect = [self.snapshot['pr'], {'object': {'sha': 'e' * 40}}]
+        with self.assertRaisesRegex(flow.Bloqueado, 'base mudou'):
+            self.merge()
+        self.assertEqual(self.api.api.call_count, 2)
+
+    def test_changed_head_readback_or_unexpected_parents_is_not_accepted(self):
+        for pr, commit in [(dict(self.merged, head={'sha': 'e' * 40}), self.commit),
+                           (self.merged, dict(self.commit, parents=[{'sha': 'e' * 40}, {'sha': HEAD}]))]:
+            self.api.api.side_effect = self.replies(readback=pr, commit=commit)
+            with self.assertRaises(flow.Bloqueado):
+                self.merge()
+
+    def test_draft_gate_does_not_write(self):
+        self.snapshot['pr']['draft'] = True
+        self.api.api.return_value = self.snapshot['pr']
+        with self.assertRaises(flow.Bloqueado):
+            self.merge()
+        self.assertEqual(self.api.api.call_args_list, [mock.call(API_ROOT + '/pulls/91')])
+
+    def test_already_merged_is_idempotent_readback_without_another_put(self):
+        self.api.api.side_effect = [self.merged, self.commit, self.contains]
+        result = self.merge()
+        self.assertEqual(result['state'], 'merged')
+        self.assertTrue(all(len(call.args) == 1 for call in self.api.api.call_args_list))
+
+    def test_observed_merge_must_still_be_in_main(self):
+        self.api.api.side_effect = self.replies()[:-1] + [{'merge_base_commit': {'sha': BASE}}]
+        with self.assertRaisesRegex(flow.Bloqueado, 'main não contém'):
+            self.merge()
+
+    def test_same_author_or_bad_pr_id_blocks_before_network(self):
+        for updates in ({'integrator': 'codex'}, {'pr': True}, {'pr': '../other'}):
+            request = copy.deepcopy(self.request)
+            request.update(updates)
+            with self.assertRaises(flow.Bloqueado):
+                flow.integrar(self.api, request)
+            self.api.api.assert_not_called()
+
+    def test_only_push_main_runs_are_reported(self):
+        self.api.api.side_effect = self.replies()
+        run = {'id': 1, 'html_url': 'https://github.com/synthetic/run/1', 'status': 'queued',
+               'conclusion': None, 'event': 'push', 'head_branch': 'main', 'actor': {'login': 'adrptu'}}
+        self.api.paginas.return_value = [run, dict(run, id=2, event='workflow_dispatch'),
+                                       dict(run, id=3, head_branch='feature')]
+        result = self.merge()
+        self.assertEqual([r['id'] for r in result['main_ci']], [1])
+        self.assertEqual(result['main_ci'][0]['actor'], 'adrptu')
+
+
+class CollectionAndTransportTests(unittest.TestCase):
+    def test_rest_pagination_fetches_every_page_and_rejects_limit(self):
+        api = flow.GitHub()
+        api.api = mock.Mock(side_effect=[[{}] * 100, [{}]])
+        self.assertEqual(len(api.paginas('repos/x/pulls?state=all')), 101)
+        self.assertTrue(api.api.call_args.args[0].endswith('&per_page=100&page=2'))
+        api.api = mock.Mock(return_value=[{}] * 100)
+        with self.assertRaisesRegex(flow.Bloqueado, 'paginação'):
+            api.paginas('repos/x/pulls')
+        self.assertEqual(api.api.call_count, 100)
+
+    def test_invalid_receipt_ids_or_shas_block_before_collection_network(self):
+        for field, value in [('pr', 0), ('pr', True), ('head_sha', '../malformed')]:
+            request, _ = fixture()
+            request[field] = value
+            api = mock.Mock()
+            with self.subTest(field=field, value=value), self.assertRaises(flow.Bloqueado):
+                flow.coletar(api, request)
+            api.api.assert_not_called()
+        for value in ('100', '../secrets', True, -1):
+            request, _ = fixture()
+            request['receipts'][0]['comment_id'] = value
+            api = mock.Mock()
+            with self.subTest(comment_id=value), self.assertRaises(flow.Bloqueado):
+                flow.coletar(api, request)
+            api.api.assert_not_called()
+
+    def test_threads_pagination_and_truncation_or_graphql_errors(self):
+        request, snapshot = fixture()
+        for mode in ('complete', 'truncated', 'errors'):
+            api = mock.Mock()
+            pages = []
+            def read(endpoint, method='GET', data=None):
+                if endpoint == 'graphql':
+                    pages.append(data['variables']['cursor'])
+                    if mode == 'errors':
+                        return {'errors': [{'message': 'incomplete'}]}
+                    has_next = mode == 'truncated' or len(pages) == 1
+                    return {'data': {'repository': {'pullRequest': {'reviewThreads': {
+                        'nodes': [{'isResolved': True}], 'pageInfo': {
+                            'hasNextPage': has_next, 'endCursor': 'cursor-' + str(len(pages))}}}}}}
+                values = {'user': snapshot['identity'], API_ROOT + '/pulls/91': snapshot['pr'],
+                          API_ROOT + '/git/ref/heads/main': {'object': {'sha': BASE}},
+                          API_ROOT + '/compare/' + BASE + '...' + HEAD: snapshot['compare'],
+                          API_ROOT + '/rulesets/24154464': snapshot['ruleset']}
+                return values[endpoint]
+            api.api.side_effect = read
+            api.paginas.side_effect = [snapshot['checks'], [], snapshot['comments']]
+            with self.subTest(mode=mode):
+                if mode == 'complete':
+                    result = flow.coletar(api, request)
+                    self.assertTrue(result['threads_complete'])
+                    self.assertEqual(len(result['threads']), 2)
+                    self.assertEqual(pages, [None, 'cursor-1'])
+                else:
+                    with self.assertRaises(flow.Bloqueado):
+                        flow.coletar(api, request)
+                    self.assertEqual(len(pages), 100 if mode == 'truncated' else 1)
+
+    def test_transport_uses_argv_and_json_stdin_without_shell(self):
+        payload = {'title': '$(touch never); `id`', 'body': 'one\ntwo'}
+        process = subprocess.CompletedProcess([], 0, '{"ok": true}', '')
+        with mock.patch.object(flow.subprocess, 'run', return_value=process) as run:
+            self.assertEqual(flow.GitHub().api('repos/test/pulls', 'POST', payload), {'ok': True})
+        args, kwargs = run.call_args
+        self.assertIsInstance(args[0], list)
+        self.assertNotIn('shell', kwargs)
+        self.assertEqual(json.loads(kwargs['input']), payload)
+        self.assertEqual(args[0][-2:], ['--input', '-'])
+
+    def test_malformed_json_after_write_is_uncertain_for_callers_readback(self):
+        process = subprocess.CompletedProcess([], 0, 'truncated response {', '')
+        with mock.patch.object(flow.subprocess, 'run', return_value=process) as run:
+            with self.assertRaises(flow.Bloqueado):
+                flow.GitHub().api('repos/test/pulls', 'POST', {'draft': True})
+            run.assert_called_once()
+
+    def test_timeout_missing_cli_and_api_failure_block_without_retry(self):
+        for failure in (FileNotFoundError('no gh'), subprocess.TimeoutExpired(['gh'], 60)):
+            with mock.patch.object(flow.subprocess, 'run', side_effect=failure) as run:
+                with self.assertRaises(flow.Bloqueado):
+                    flow.GitHub().api('repos/test/pulls')
+                run.assert_called_once()
+        with mock.patch.object(flow.subprocess, 'run', return_value=subprocess.CompletedProcess([], 1, '', 'denied')):
+            with self.assertRaises(flow.Bloqueado):
+                flow.GitHub().api('repos/test/pulls')
+
+
+class CliTests(unittest.TestCase):
+    def test_integrate_cli_without_execute_only_runs_preflight(self):
+        request, snapshot = fixture()
+        argv = ['fluxo_pr.py', 'integrar', '--pedido', '/synthetic/request.json', '--head', HEAD]
+        with mock.patch.object(sys, 'argv', argv), mock.patch.object(Path, 'read_text', return_value=json.dumps(request)), \
+                mock.patch.object(flow, 'GitHub'), mock.patch.object(flow, 'coletar', return_value=snapshot), \
+                mock.patch.object(flow, 'agora', return_value=NOW), mock.patch.object(flow, 'integrar') as integrate, \
+                mock.patch('builtins.print'):
+            self.assertEqual(flow.main(), 0)
+            integrate.assert_not_called()
+
+    def test_wrong_explicit_head_cannot_execute_merge(self):
+        request, _ = fixture()
+        argv = ['fluxo_pr.py', 'integrar', '--pedido', '/synthetic/request.json', '--head', 'e' * 40, '--executar']
+        with mock.patch.object(sys, 'argv', argv), mock.patch.object(Path, 'read_text', return_value=json.dumps(request)), \
+                mock.patch.object(flow, 'GitHub'), mock.patch.object(flow, 'integrar') as integrate, \
+                mock.patch('builtins.print'):
+            self.assertEqual(flow.main(), 1)
+            integrate.assert_not_called()
+
+
+if __name__ == '__main__':
+    unittest.main()
