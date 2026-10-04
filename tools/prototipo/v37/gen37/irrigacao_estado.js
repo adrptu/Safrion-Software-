@@ -47,7 +47,12 @@ function irrOrfa(o) { if (!o) return false; const c = irrCen(); if (!c) return f
 // ---------- formatos ----------
 const IRR_D0 = Date.UTC(2026, 8, 23);
 // área da v2 (Adicionar produtos): com passada em curso, o que falta dela (2 casas); a área já coberta fica na v1. Mesma conta na prévia.
+// área digitada com 2 casas, meio para cima no decimal (20,275 → 20,28; o binário de 20,275 × 100 daria 20,27)
+function irr2(n) { const t = String(n); return /e/i.test(t) ? Math.round(n * 100) / 100 : Number(Math.round(Number(t + 'e2')) + 'e-2'); }
 function irrAreaV2(x, p) { return p ? Math.round((x.ha - Math.min(x.ha, p.cob || 0)) * 100) / 100 : x.ha; }
+// v2 que daria total 0 pela regra única: a liberação recusaria e a ordem ficaria sem saída; diz a causa (mesmo texto na prévia)
+function irrV2Zero(x, p, dose) { const a = irrAreaV2(x, p); if (!(a > 0)) return 'A passada já cobriu o setor: confirme o término e programe uma nova fertirrigação na O.S.';
+  return (dose > 0 && !(cenQtd(dose, a) > 0)) ? 'Dose × área dá 0 kg: aumente a dose.' : ''; }
 function irrN(n, d, dmin) { return Number(n || 0).toLocaleString('pt-BR', { minimumFractionDigits: (dmin === undefined ? (d || 0) : dmin), maximumFractionDigits: d || 0 }); }
 function irrHa(n) { return irrN(n, Math.abs(n % 1) > 1e-9 ? 1 : 0); }
 function irrMm(n) { return irrN(n, 2, 1); }      // 10,81 · 4,0 · 13,5 · 6,75 (o mesmo formato em todas as telas)
@@ -104,7 +109,7 @@ function irrFaixaCob(s, sid) { const x = s.setores[sid]; if (!x || !x.bal) retur
   return { os: cr.faixa.os, cob: cr.faixa.cob, d: Math.max(0, irrBase(x.bal) - cr.gov - cr.faixa.net) }; }
 function irrLamTxt(vol, cob, ha) { return cob < ha - 1e-9 ? irrMm(vol / (10 * cob)) + ' mm na faixa de ' + irrN(cob, 2, 0) + ' ha' : irrMm(vol / (10 * ha)) + ' mm no setor'; }
 function irrCobO(o) { return o.passadas.filter(p => p.st === 'Feita' || p.st === 'Parcial').reduce((q, p) => Math.max(q, p.cob || 0), 0); }
-function irrDefTxt(s, sid, pre) { const x = s.setores[sid]; const fx = irrFaixaCob(s, sid); return 'déficit do ' + x.nome + ' ' + (pre || '') + irrN(irrDef(s, sid), 1) + ' mm' + (fx ? ' (faixa de ' + irrN(fx.cob, 1) + ' ha: ' + irrN(fx.d, 1) + ' mm)' : ''); }
+function irrDefTxt(s, sid, pre) { const x = s.setores[sid]; const fx = irrFaixaCob(s, sid); return 'déficit do ' + x.nome + ' ' + (pre || '') + irrN(irrDef(s, sid), 1) + ' mm' + (fx ? ' (faixa de ' + irrN(fx.cob, 2, 1) + ' ha: ' + irrN(fx.d, 1) + ' mm)' : ''); }
 function irrDur(x, lam) { return Math.round(lam * x.ha * 10 / (x.vazao * 3.6) * 60); }
 function irrNec(s, sid) {
   const x = s.setores[sid]; const d = irrDef(s, sid); if (d === null) return null;
@@ -341,8 +346,9 @@ function irrRetomar(s, id) {
 }
 function irrAvanco(s, id, cob) {
   const o = irrO(s, id); const p = irrPassAtual(o); const x = s.setores[o.setor]; if (!p) throw new Error('Nenhuma passada em execução.');
+  cob = irr2(cob);   // 2 casas, antes de validar (PRE-REV Z4/Y4)
   if (!(cob >= 0) || cob > x.ha) throw new Error('Informe a área coberta entre 0 e ' + irrN(x.ha, 2, 0) + ' ha.');
-  cob = Math.round(cob * 100) / 100; p.cob = cob; const q = irrUlt(o) + 30; const tr = o.trilha.find(t => t.av === p.n);   // 2 casas (PRE-REV Z4)
+  p.cob = cob; const q = irrUlt(o) + 30; const tr = o.trilha.find(t => t.av === p.n);   // 2 casas (PRE-REV Z4)
   const ev = 'Avanço da passada ' + p.n + ' · ' + irrN(cob, 2, 0) + ' de ' + irrN(x.ha, 2, 0) + ' ha (' + irrN(cob / x.ha * 100, 0) + ' %)';
   if (tr) { tr.ev = ev; tr.q = q; } else { o.trilha.push({ q, rec: o.ex, ev, quem: s.faz[o.faz].irrig, av: p.n }); }   // telemetria e manual do mesmo evento: um registro
   return { msg: ev + ' · mesmo registro da telemetria, sem duplicar.' };
@@ -359,9 +365,10 @@ function irrTerminar(s, id, cob, vol) {
   if (!p) throw new Error(o.etapa === 'Liberadas' ? 'Nada foi executado ainda: inicie a irrigação.' : 'Nenhuma passada em execução.');
   if (irrPausada(o)) throw new Error('Retome a irrigação antes de confirmar o término.');
   if (o.fert && o.fert.exec) throw new Error('Saldo parado pela v2: aguarde o agrônomo liberar na O.S.');
+  cob = irr2(cob);   // 2 casas, antes de validar (PRE-REV Z4/Y4)
   if (!(cob > 0) || cob > x.ha + 1e-9) throw new Error('Área coberta entre 0 e ' + irrN(x.ha, 2, 0) + ' ha.');
   if (vol !== null && vol !== undefined && !(vol >= 0)) throw new Error('Leitura do hidrômetro inválida.');
-  cob = Math.round(cob * 100) / 100; const parc = cob < x.ha - 1e-9; p.cob = cob; p.st = parc ? 'Parcial' : 'Feita';   // 2 casas (PRE-REV Z4)
+  const parc = cob < x.ha - 1e-9; p.cob = cob; p.st = parc ? 'Parcial' : 'Feita';   // 2 casas (PRE-REV Z4)
   p.fimReal = p.iniReal + Math.round(p.dur * cob / x.ha) + irrPausaMin(o, p.n); p.vol = (vol === null || vol === undefined || vol === '') ? null : vol;
   irrCredito(s, o, p);
   irrTr(o, p.fimReal, o.ex, 'Término' + (o.passadas.length > 1 ? ' da passada ' + p.n : '') + ' · ' + irrH(p.fimReal - p.iniReal) + ' de bombeamento · ' + (parc ? 'parou antes: ' + irrN(cob, 2, 0) + ' de ' + irrN(x.ha, 2, 0) + ' ha' : (x.tipo === 'gotejo' ? 'turno completo' : 'volta completa') + ' nos ' + irrN(x.ha) + ' ha') + (p.vol === null ? ' · sem leitura do hidrômetro' : ' · hidrômetro ' + irrN(p.vol) + ' m³'), s.faz[o.faz].irrig);
@@ -432,6 +439,7 @@ function irrReclassificar(s, id, d) {
     p.st = 'Parcial'; p.cob = v1; p.fimReal = q; p.vol = v1 > 0 ? irrTele(s, o, p, v1) : 0; irrCredito(s, o, p);
     vol += area * p.lam * 10; sw = { ini: q, fim: Math.max(q + 15, fim0) }; }
   o.passadas.filter(z => z.st === 'Programada').forEach(z => { vol += x.ha * z.lam * 10; });
+  { const m = irrV2Zero(x, p, d.dose); if (m) throw new Error(m); }   // nunca seria liberada nem entregue (PRE-REV Y1)
   o.fert = { prod: d.prod, dose: d.dose, mot: d.mot, exec: iniciou, q, area, v1, vol: Math.round(vol), lamHa: area > 0 ? vol / (10 * area) : 0, tot: cenQtd(d.dose, area), sw };   // regra única de quantidade (cenario.js, sempre carregado antes)
   o.versao = 'v2';
   if (!iniciou) { if (o.lib) { o.libRes = o.lib; irrTr(o, q, o.lib, 'Liberação da água revogada: com produto, a liberação é do agrônomo', 'sistema'); } o.lib = null; o.etapa = 'A liberar'; }
@@ -554,7 +562,7 @@ function irrSituacao(s, sid) {
   const ult = ultA ? irrDdmm(irrDiaN(ultA.q)) + ' · ' + ultA.os + ' · ' + irrMm(irrApBr(ultA)) + ' mm em ' + (irrApParc(ultA, x.ha) ? irrN(irrApCob(ultA), 1) + ' de ' + irrN(x.ha) + ' ha' : irrN(x.ha) + ' ha') + (ultA.prov ? ' · provisório' : '')
     : (x.bal.repos !== undefined ? irrDdmm(irrDiaN(x.bal.repos)) + ' · reposição completa (há ' + (-irrDiaN(x.bal.repos)) + (irrDiaN(x.bal.repos) === -1 ? ' dia' : ' dias') + ')' : '—');
   const base = { d, est, n, fon, eq: (x.tipo === 'gotejo' ? 'Gotejo' : 'Pivô central') + ' · ' + irrN(x.ha) + ' ha · ' + irrN(x.vazao) + ' L/s · ' + x.bnome + (cp ? ' · ' + cp.nome : ''), ult, ords: ab,
-    faixa: fx ? 'faixa de ' + irrN(fx.cob, 1) + ' ha (' + fx.os + '): ' + irrN(fx.d, 1) + ' mm · resto do ' + (x.tipo === 'gotejo' ? 'setor' : 'pivô') + ': ' + irrN(d, 1) + ' mm' : '' };
+    faixa: fx ? 'faixa de ' + irrN(fx.cob, 2, 1) + ' ha (' + fx.os + '): ' + irrN(fx.d, 1) + ' mm · resto do ' + (x.tipo === 'gotejo' ? 'setor' : 'pivô') + ': ' + irrN(d, 1) + ' mm' : '' };
   if (it.length) { const t = it[0]; const o = (t.o && irrEt(t.o) === 'Em conferência') ? (ab.find(z => irrEt(z) !== 'Em conferência') || null) : t.o; let limt = 'Lâmina programada', lam = '';
     if (o) { lam = irrMm(o.lam) + ' mm' + (o.passadas.length > 1 ? ' em ' + o.passadas.length + ' passadas' : '') + ' · ' + irrJanO(o); const cb = irrCobre(s, o); if (cb && cb.cob !== null) lam += ' · cobre ' + irrN(cb.cob, 0) + ' %' + (cb.resta > 0.05 ? ' · resta ' + irrN(cb.resta, 1) + ' mm' : ''); }
     else if (t.fert) { const f = s.fert[t.fert]; lam = f.lam ? irrMm(f.lam) + ' mm · ' + irrJan(f.ini, f.fim) : (f.ini ? irrJan(f.ini, f.fim) : 'parada'); limt = 'Fertirrigação'; }

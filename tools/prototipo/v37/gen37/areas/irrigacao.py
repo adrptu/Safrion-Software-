@@ -424,7 +424,7 @@ function PREVALS(self,v){ irrOuvir(self);
   // passadas (sub-detalhe)
   IRG('g_pas').rows=o.passadas.map(p=>({id:'p'+p.n,v:{n:p.n+'ª',lam:p.lam,dur:irrH(p.dur)},s:{},p:{jan:[{k:'txt',t:p.ini===null?'a definir':irrJan(p.iniReal!==undefined&&p.iniReal!==null?p.iniReal:p.ini,irrFimP(o,p))}],
     st:(o.fert&&p.st==='Programada')?[{k:'chip',t:'Na O.S. · v2',c:'yellow'}]:(p.st==='Parcial'&&o.fert&&o.fert.exec&&o.fert.v1===p.cob?[{k:'chip',t:'Parcial · v1',c:'yellow'},{k:'br',t:''},{k:'mut',t:'saldo de '+irrN(o.fert.area,2,0)+' ha na v2'}]:[{k:'chip',t:p.st,c:{'Programada':'gray','Em execução':'green','Feita':'gray','Parcial':'yellow'}[p.st]||'gray'}]),
-    cob:p.cob===null||p.cob===undefined?[{k:'mut',t:'—'}]:[{k:'txt',t:irrN(p.cob,1)+' de '+irrN(x.ha,1)+' ha'},{k:'br',t:''},{k:'mut',t:p.vol!==null&&p.vol!==undefined?irrN(p.vol)+' m³ medidos':(p.st==='Em execução'?'em andamento':'sem leitura')}]}}));
+    cob:p.cob===null||p.cob===undefined?[{k:'mut',t:'—'}]:[{k:'txt',t:irrN(p.cob,2,1)+' de '+irrN(x.ha,2,1)+' ha'},{k:'br',t:''},{k:'mut',t:p.vol!==null&&p.vol!==undefined?irrN(p.vol)+' m³ medidos':(p.st==='Em execução'?'em andamento':'sem leitura')}]}}));
   // execução e conferência
   const pa=irrPassAtual(o); const pz=(o.exec.pausas||[]); const pzm=pz.filter(z=>z.fim!==null&&z.fim!==undefined).reduce((a,z)=>a+(z.fim-z.ini),0);
   const ex=[{l:'Início',t:o.exec.ini!==undefined?irrQuando(o.exec.ini):'—'},{l:'Pausas',t:pz.length?pz.length+' · '+irrN(pzm)+' min'+(irrPausada(o)?' · pausada agora':''):'nenhuma'}];
@@ -433,7 +433,7 @@ function PREVALS(self,v){ irrOuvir(self);
   const cf=o.conf; ex.push({l:'Hidrômetro',t:cf&&cf.med?irrN(cf.med)+' m³ medidos':(cf&&cf.st==='Sem leitura'?'sem leitura':'telemetria ao terminar')},
     {l:'Conferência',t:cf?(cf.med?irrN(cf.med)+' × '+irrN(cf.est)+' m³ estimados na área coberta · '+irrPct(cf.dv!==undefined?cf.dv:(cf.med-cf.est)/cf.est*100)+' (tolerância '+s.tol+' %)':'aguardando a leitura'):'automática até '+s.tol+' % de desvio'});
   const aps=x.bal?irrApsSetor(s,o.setor).filter(a=>a.os===id):[];
-  ex.push({l:'Crédito no balanço',t:aps.length?aps.map(a=>irrMm(irrApNet(a))+' mm líquidos '+(irrApParc(a,x.ha)?'na faixa de '+irrN(irrApCob(a),1)+' ha':'no '+x.nome)+(a.osc?' (O.S.)':'')).join(' + ')+(aps.some(a=>a.prov)?' · provisório':' · definitivo'):(o.fert?'quando a O.S. apontar a área':'só com leitura do hidrômetro')});
+  ex.push({l:'Crédito no balanço',t:aps.length?aps.map(a=>irrMm(irrApNet(a))+' mm líquidos '+(irrApParc(a,x.ha)?'na faixa de '+irrN(irrApCob(a),2,1)+' ha':'no '+x.nome)+(a.osc?' (O.S.)':'')).join(' + ')+(aps.some(a=>a.prov)?' · provisório':' · definitivo'):(o.fert?'quando a O.S. apontar a área':'só com leitura do hidrômetro')});
   v.ex_kv=ex;
   IRG('g_trl').rows=o.trilha.slice().sort((a,b)=>a.q-b.q).map((t,i)=>({id:'e'+i,v:{hora:irrQuando(t.q),rec:t.rec,ev:t.ev,quem:t.quem},s:{},p:{}}));
 }
@@ -488,7 +488,7 @@ function EXTRAVALS(self,v){ const s=irrGet(); const id=detId(self); const o=s.or
       if(k==='cob'&&pa){ const c2=g2num(e.target.value); if(c2>0) d.vol=String(irrTele(s,o,pa,c2)); }
       self.setState({tm:d}); };
     v.tm_setfull=set('full',true); v.tm_setparc=set('full',false); v.tm_setcob=set('cob'); v.tm_setvol=set('vol');
-    v.tm_ok=()=>{ const cur=self.state.tm; const er={}; const cob=cur.full?x.ha:g2num(cur.cob); const vs=String(cur.vol||'').trim(); const vol=vs?g2num(vs):null;
+    v.tm_ok=()=>{ const cur=self.state.tm; const er={}; const cob=cur.full?x.ha:irr2(g2num(cur.cob)); const vs=String(cur.vol||'').trim(); const vol=vs?g2num(vs):null;
       if(!cur.full&&!(cob>0&&cob<=x.ha)) er.cob='Área entre 0 e '+irrN(x.ha,1)+' ha (ex.: 11,6).'; if(vs&&!(vol>0)) er.vol='Use um número em m³ (ex.: 8.480) ou deixe vazio.';
       if(Object.keys(er).length){ self.setState({tm:Object.assign({},cur,{err:er})}); return; }
       run(s0=>irrTerminar(s0,id,cob,vol),()=>fechar(self,'tm')); }; }
@@ -507,14 +507,14 @@ function EXTRAVALS(self,v){ const s=irrGet(); const id=detId(self); const o=s.or
   const avs=self.state.av;
   if(avs){ v.av_open=true; v.av_titulo='Registrar avanço · '+id; v.av_sub=x.nome+' · passada '+((irrPassAtual(o)||{}).n||'')+' em execução · área pelo ângulo do pivô ou app de campo';
     v.av_cob=avs.cob; v.av_ecob=avs.err||''; v.av_ecob_has=!!avs.err; v.av_setcob=(e)=>self.setState({av:{cob:e.target.value,err:''}});
-    v.av_ok=()=>{ const c2=g2num(self.state.av.cob); if(!(c2>=0&&c2<=x.ha)){ self.setState({av:{cob:self.state.av.cob,err:'Área entre 0 e '+irrN(x.ha,1)+' ha.'}}); return; } run(s0=>irrAvanco(s0,id,c2),()=>fechar(self,'av')); }; }
+    v.av_ok=()=>{ const c2=irr2(g2num(self.state.av.cob)); if(!(c2>=0&&c2<=x.ha)){ self.setState({av:{cob:self.state.av.cob,err:'Área entre 0 e '+irrN(x.ha,1)+' ha.'}}); return; } run(s0=>irrAvanco(s0,id,c2),()=>fechar(self,'av')); }; }
   else { v.av_cob=''; v.av_ecob=''; v.av_ecob_has=false; v.av_setcob=()=>{}; v.av_ok=()=>{}; v.av_titulo=''; v.av_sub=''; }
   // ---- painel: adicionar produtos (v2 da mesma ordem, liberada pelo agrônomo na O.S.) ----
   const rc=self.state.rc;
   if(rc){ const exec=(o.etapa==='Em execução'); v.rc_open=true; v.rc_titulo='Adicionar produtos · '+id; v.rc_sub=x.nome+' · versão v2 (fertirrigação) · mesmo setor, janela e saldo';
     v.rc_prod=rc.d.prod; v.rc_dose=rc.d.dose; v.rc_mot=rc.d.mot; const n=g2num(rc.d.dose); const pa=irrPassAtual(o); const area=irrAreaV2(x,pa);   /* a mesma área da v2 (irrReclassificar) */
     const bq=pa?[]:irrChecar(s,o).bloq;
-    v.rc_prev=bq.length?('Resolva antes: '+bq.map(b=>b.t+(b.h?' '+b.h:'')).join(', ')+'.'):((exec?'A ordem continua Em execução com selo Revisão de saldo pendente; '+(pa?irrN(pa.cob||0,2,0)+' ha já cobertos ficam na v1 e o saldo de '+irrN(area,2,0)+' ha para até a liberação.':'as próximas passadas esperam a liberação.'):'A ordem volta a A liberar e a liberação da água é revogada.')+' Ana (agrônoma) libera na O.S.; a liberação reserva '+((n>0&&n<=50)?irrN(cenQtd(n,area),2):'—')+' kg no estoque (falta bloqueia).');
+    const zv=(n>0&&n<=50)?irrV2Zero(x,pa,n):''; v.rc_prev=zv?zv:bq.length?('Resolva antes: '+bq.map(b=>b.t+(b.h?' '+b.h:'')).join(', ')+'.'):((exec?'A ordem continua Em execução com selo Revisão de saldo pendente; '+(pa?irrN(pa.cob||0,2,0)+' ha já cobertos ficam na v1 e o saldo de '+irrN(area,2,0)+' ha para até a liberação.':'as próximas passadas esperam a liberação.'):'A ordem volta a A liberar e a liberação da água é revogada.')+' Ana (agrônoma) libera na O.S.; a liberação reserva '+((n>0&&n<=50)?irrN(cenQtd(n,area),2):'—')+' kg no estoque (falta bloqueia).');
     const set=(k)=>(e)=>{ const cur=self.state.rc; const d=Object.assign({},cur.d,{[k]:e.target.value}); const er=Object.assign({},cur.err); delete er[k]; self.setState({rc:Object.assign({},cur,{d,err:er,warn:false})}); };
     v.rc_setprod=set('prod'); v.rc_setdose=set('dose'); v.rc_setmot=set('mot');
     ['prod','dose','mot'].forEach(k=>{ v['rc_e'+k]=(rc.err||{})[k]||''; v['rc_e'+k+'_has']=!!(rc.err||{})[k]; });

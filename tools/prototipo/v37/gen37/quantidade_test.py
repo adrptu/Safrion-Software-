@@ -103,6 +103,18 @@ const vb=Object.values(s0.vis).find(v=>/^PV/.test(v.tal)&&!v.dec&&mipElig(v).len
 const avi=(lotes)=>{ cenReset(); const c=cenGet(); Object.keys(c.lotes).forEach(k=>{ if(c.lotes[k].prod===ub.nome) delete c.lotes[k]; }); lotes.forEach((q,i)=>{ c.lotes[ub.nome+'|B'+i]={prod:ub.nome,lote:'B'+i,fisico:q,reservado:0,quarentena:0}; });
   return mipChecks(mipGet(),vb,{kind:'controlar',prod:ub.id,dose:String(ub.dmin),area:String(tb.area),data:'2026-10-20'},c).al.filter(x=>/aguarda a compra/.test(x)).length; };
 R.borda.mip={um_lote_exato:avi([nb]),dois_lotes_sem_um_que_cubra:avi([Math.round(nb*60)/100,Math.round(nb*60)/100])};
+// 12 · rodada 4 (PRE-REV Y1–Y6): trava do ajuste do núcleo, término com 2 casas, v2 de 0 ha, MIP com total 0, rótulo "Total 0"
+const aj=(fis,d,ar)=>osc_ajFalta({lotes:{'P|L1':{prod:'P',lote:'L1',fisico:fis,reservado:0,quarentena:0}}},'P','L',d,ar);
+R.r4={aj:[aj(cenQtd(0.5,49.31),0.5,49.31),aj(cenQtd(0.5,49.31)-0.01,0.5,49.31),aj(100,0.0001,49.31),aj(100,0.4,0.01),aj(100,0.5,0.01)]};
+const idL=ords.find(k=>i0.ordens[k].etapa==='Liberadas'); const term=(cob)=>{ irrReset(); const s=irrGet(); irrIniciar(s,idL); try{ irrTerminar(s,idL,cob,null); }catch(e){ return 'ERRO '+e.message; }
+  return irrO(s,idL).passadas.find(p=>p.st==='Parcial'||p.st==='Feita').cob; };
+R.r4.term=[term(20.275),term(0.004)];
+{ cenReset(); irrReset(); const s=irrGet(); irrIniciar(s,idL); irrAvanco(s,idL,s.setores[s.ordens[idL].setor].ha); irrSave(s);
+  R.r4.v2cheia=irrReclassTudo(null,idL,{prod:'Nitrato de cálcio',dose:12,mot:'teste'}).erro||'criada'; }
+{ cenReset(); mipReset(); const k=mipChecks(mipGet(),vb,{kind:'localizado',prod:ub.id,dose:String(ub.dmin),area:'0,01',data:'2026-10-20'},cenGet()); R.r4.mip0=k.tr.filter(x=>/dá 0/.test(x)).length; }
+{ cenReset(); const c=cenGet(); c.ordens.Z0={id:'Z0',etapa:'A liberar',area:10,saldo:10,realizado:0,ap:[],ins:[{p:ub.nome,dose:0.0001,un:ub.un,tot:0}]};
+  const o=osMerge({id:'Z0',etapa:'A liberar',area:10,ins:[],selos:[],agua:false,dono:'Ana (agrônoma)',cond:'Pronta. Próximo passo: liberar para execução.'},c.ordens.Z0,c);
+  R.r4.rotulo=[o.selos.map(x=>x.t).join(','),o.dono,o.prazo]; }
 print(JSON.stringify(R));
 })();
 """
@@ -167,6 +179,12 @@ bd = F['borda']
 chk('11 borda: a liberação reserva com estoque igual à regra única e recusa com 0,01 a menos; dose > 0 com total 0 é recusada; o aviso de compra do MIP usa o lote da liberação',
     bd['exato'] == 'ok' and 'Saldo insuficiente' in bd['falta'] and 'dá 0' in bd['zero'] and 'dá 0' in bd['zero2']
     and bd['mip']['um_lote_exato'] == 0 and bd['mip']['dois_lotes_sem_um_que_cubra'] == 1, bd)
+r4 = F['r4']
+chk('12 rodada 4: a trava do ajuste do núcleo libera no limite e recusa 0,01 a menos e total 0; o término guarda 20,275 como 20,28 e recusa 0,004; '
+    'a v2 com o setor já coberto é recusada com a causa; o MIP trava total 0; a O.S. com total 0 diz "Total 0" e fica com o agrônomo',
+    r4['aj'][0] == '' and 'Estoque' in r4['aj'][1] and 'dá 0' in r4['aj'][2] and 'dá 0' in r4['aj'][3] and r4['aj'][4] == ''
+    and r4['term'][0] == 20.28 and str(r4['term'][1]).startswith('ERRO') and 'já cobriu o setor' in r4['v2cheia'] and r4['mip0'] == 1
+    and r4['rotulo'][0].startswith('Total 0 · ') and 'Falta insumo' not in r4['rotulo'][0] and r4['rotulo'][1] == 'Ana (agrônoma)' and r4['rotulo'][2] == 'ajustar dose ou área', r4)
 crus = []
 for fn in sorted(glob.glob(os.path.join(HERE, '*.js')) + glob.glob(os.path.join(HERE, '*.py')) + glob.glob(os.path.join(HERE, 'areas', '*.py'))):
     rel = os.path.relpath(fn, HERE)

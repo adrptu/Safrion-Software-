@@ -244,7 +244,10 @@ function osMerge(b,co,c){ if(!co) return b;
       if(sin){ o.dono=o.resp; o.prazo='reconectar o app'; } else if(!/almoxarife/.test(o.dono||'')){ o.dono='Rui (almoxarife)'; o.prazo='receber a devolução'; } } }
   // A liberar: o Estoque (reserva por lote) pode segurar a liberação desde a abertura → selo vermelho e dono na lista, no Kanban e no painel
   if(co.etapa==='A liberar'&&!o.agua&&(co.ins||[]).length){ const e=osLibErro(o,c);
-    if(e){ const pr=(/ de (.+?)(?: no Estoque|:)/.exec(e)||[])[1]||''; o.libErr=e;
+    const z=e&&/Dose × área de (.+?) dá 0/.exec(e);   // total 0: quem resolve é o agrônomo, não o Estoque (PRE-REV Y3)
+    if(z){ o.libErr=e; o.selos=o.selos.filter(s=>!/^Falta insumo|^Total 0/.test(s.t)).concat([{t:'Total 0 · '+z[1],c:'red'}]); o.prazo='ajustar dose ou área';
+      o.cond=String(o.cond||'').replace('Próximo passo: liberar para execução.','Dose × área de '+z[1]+' dá 0. Próximo passo: ajustar antes de liberar.'); }
+    else if(e){ const pr=(/ de (.+?)(?: no Estoque|:)/.exec(e)||[])[1]||''; o.libErr=e;
       o.selos=o.selos.filter(s=>!/^Falta insumo/.test(s.t)).concat([{t:'Falta insumo'+(pr?' · '+pr:''),c:'red'}]);
       o.dono='Suprimentos'; o.prazo='receber o insumo no Estoque';
       o.cond=String(o.cond||'').replace('Próximo passo: liberar para execução.','A liberação aguarda '+(pr||'o insumo')+' no Estoque.'); } }
@@ -309,6 +312,10 @@ function osc_liberar(c,id,agua,jan){ const o=osc_o(c,id);
 // ajustar antes de liberar (agrônomo): tirar produto, incluir produto, mudar dose e área; grava a versão seguinte (vN → vN+1) com a
 // linha de histórico, recalcula o total (dose × área) e libera no mesmo comando. Erro de saldo/lote desfaz tudo (cenMudar não grava).
 // rem = produtos que saem; add = [{p,dose,un,g}] produtos incluídos (do catálogo).
+// trava do "Salvar e liberar" do ajuste, a mesma regra da liberação: total pela regra única, 0 recusado, estoque do lote que a liberação reserva
+function osc_ajFalta(c,p,un,d,ar){ const l=cenLote(c,p), dp=l?cenDisp(l):0, need=cenQtd(d,ar);
+  if(!(need>0)) return 'Dose × área dá 0 '+un+': aumente a dose ou a área.';
+  return need>dp+1e-9?('Estoque: '+cenNum(dp)+' '+un+' disponíveis'+(l?' no lote '+l.lote:'')+' para '+cenNum(need)+' '+un+'. Baixe a dose ou a área, ou troque o produto.'):''; }
 function osc_ajustar(c,id,area,doses,jan,rem,add,lib){ const o=osc_o(c,id); if(o.etapa!=='A liberar') throw new Error(id+' não está em A liberar.');
   rem=rem||[]; add=add||[]; o.ins=o.ins||[]; lib=lib!==false;   // lib=false: grava a versão sem liberar (liberação impedida por outro motivo)
   if(!(area>0)) throw new Error('Informe a área maior que 0 ha.'); if(area>o.area+1e-9) throw new Error('Máximo '+cenNum(o.area)+' ha: é a área da ordem.');
@@ -566,9 +573,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{};
     (o.ins||[]).forEach(x=>{ if(rem.indexOf(x.p)>=0) return; const d=g2num((cur.doses||{})[x.p]); if(isNaN(d)||d<=0) errs[x.p]='Informe a dose maior que 0 '+x.un+'/ha.'; else ds[x.p]=d; });
     (cur.add||[]).forEach(a=>{ const d=g2num(a.dose); if(isNaN(d)||d<=0) errs['+'+a.p]='Informe a dose maior que 0 '+a.un+'/ha.'; else add.push({p:a.p,dose:d,un:a.un,g:a.g}); });
     if(prodN(cur.q)){ self.setState({pa:Object.assign({},cur,{errs,err:'',qerr:'Clique em Incluir para adicionar "'+cur.q.trim()+'" ou apague o texto.'})}); return; }
-    if(ajLib&&!isNaN(ar)&&ar>0){ const ck=(p,un,d,k)=>{ if(errs[k]) return; const l=lote(p), dp=l?cenDisp(l):0, need=cenQtd(d,ar);   /* regra única (PRE-REV Q3) */
-        if(!(need>0)){ errs[k]='Dose × área dá 0 '+un+': aumente a dose ou a área.'; return; }   /* a liberação recusaria (PRE-REV Z1) */
-        if(need>dp+1e-9) errs[k]='Estoque: '+nd(dp)+' '+un+' disponíveis'+(l?' no lote '+l.lote:'')+' para '+nd(need)+' '+un+'. Baixe a dose ou a área, ou troque o produto.'; };
+    if(ajLib&&!isNaN(ar)&&ar>0){ const ck=(p,un,d,k)=>{ if(errs[k]) return; const m=osc_ajFalta(cenC,p,un,d,ar); if(m) errs[k]=m; };   /* o mesmo do núcleo (PRE-REV Y6) */
       (o.ins||[]).forEach(x=>{ if(ds[x.p]!==undefined) ck(x.p,x.un,ds[x.p],x.p); }); add.forEach(a=>ck(a.p,a.un,a.dose,'+'+a.p)); }
     if(Object.keys(errs).length){ self.setState({pa:Object.assign({},cur,{errs,err:''})}); return; }
     if((o.ins||[]).length&&rem.length===(o.ins||[]).length&&!add.length&&!cur.confVazio){
