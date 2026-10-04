@@ -84,6 +84,18 @@ Sem a camada sintética (tarefa 1), o build para em `dados_lagoa_fonte`, com uma
     - **Mesmo padrão em outros arquivos, não alterado (risco registrado):** `cenario.js:152` e `areas/mobile.py:507/525` (app) calculam dose × área sem arredondar. Nenhum teste da cadeia os exercita com área decimal.
 - REND, AÇÃO, C2 e PR34 não são editados nesta etapa.
 
+- **SINT-C03 (comentário 5974993475), reserva registrada antes de editar:**
+  - **Regra explícita de quantidade:** dose × área em decimal exato, 2 casas, meio para cima. O consumo de cada apontamento é quantidade(acumulado depois) − quantidade(acumulado antes), então a soma fecha no total e a custódia zera, sem tolerância nova.
+  - **Arquivos:**
+    - `gen37/quantidade.py` (novo, regra em Python);
+    - `gen37/quantidade_test.py` (novo, regressão focal);
+    - `gen37/cenario.js`: `cenQtd`/`cenQtdTrecho` e o consumo padrão do turno (`cenFecharTurno`);
+    - `gen37/cenario.py:73`: consumido da semente da custódia da Lagoa pela mesma regra;
+    - `gen37/areas/processo_os.py:176` (produtor Python do total) e `:323/:351/:357/:712` (consumidores JS);
+    - `gen37/areas/mobile.py:507/510/525` (sugestão de consumo do app);
+    - `gen37/dados_lagoa_safra.py` (textos de quantidade).
+  - Nenhum hunk da REND toca esses arquivos. Na AÇÃO, só `processo_os.py` é tocado, em `645/851/981/987`, fora das linhas acima.
+
 ## Tarefas, na ordem
 1. **CAMADA-SINTETICA (CORTE-REMOTO-01)**
    - **Arquivos novos:** `dados_lagoa_sintetico/{__init__.py, kml.py, gerar.py, saida/}`.
