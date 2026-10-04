@@ -169,6 +169,7 @@ def V(id, tal, prot, data, resp, vals, est='concluida', rec=(), npts=None, pend=
     return dict(id=id, faz=TAL[tal]['faz'], tal=tal, prot=prot, data=data, resp=resp, est=est, npts=n, pts=_pts(vals, rec, n),
                 pend=pend or [], dec=dec, dia=dia, nota=nota, orig='seed', parcial=False, pos_de='')
 def D(t, por, em, **kw): return dict(t=t, por=por, em=em, **kw)
+_OSA = {o['id']: o['area'] for o in DLS.ORDENS}   # área decidida = área da O.S. ligada (mesma fonte das ordens)
 VIS = [
     # ---- Santa Rita
     V('VIS-006', 'P1', 'feijao-percevejo', '2026-09-04', 'Marcos', [1, 0, 1, 1, 0, 1, 1, 0, 1, 2, 0, 2],
@@ -187,10 +188,10 @@ VIS = [
     V('VIS-017', 'T2', 'soja-daninhas', '2026-09-26', 'Marcos', [], est='programada'),
     # ---- Lagoa Grande (pivôs reais do KML; vistorias demonstrativas · monitora Lúcia)
     V('VIS-051', 'PV06', 'mamao-acaro', '2026-09-19', 'Lúcia', [20, 10, 30, 20, 10, 20, 30, 10, 20, 20, 10, 20, 10, 30, 20, 10, 20, 20, 10, 20],
-      dec=D('controlar', 'Ana', '2026-09-20', os='OS-0504', ra='RA-0141', prod='abamectina-18-ec', area=86,
+      dec=D('controlar', 'Ana', '2026-09-20', os='OS-0504', ra='RA-0141', prod='abamectina-18-ec', area=_OSA['OS-0504'],
             nota='Antecipa a atividade do plano (controle de ácaro e cochonilha)')),
     V('VIS-052', 'PV23', 'mamao-antracnose', '2026-09-17', 'Lúcia', [20, 0, 20, 0, 20, 0, 0, 20, 0, 20, 20, 0, 0, 20, 0, 20, 0, 0, 20, 0],
-      dec=D('controlar', 'Ana', '2026-09-18', os='OS-0508', ra='RA-0140', prod='tebuconazol-200-ec', area=60)),
+      dec=D('controlar', 'Ana', '2026-09-18', os='OS-0508', ra='RA-0140', prod='tebuconazol-200-ec', area=_OSA['OS-0508'])),
     V('VIS-053', 'PV09', 'mamao-meleira', '2026-09-21', 'Lúcia', [0] * 11 + [1, 1, 1] + [0] * 6,
       nota='Plantas com sintoma nas linhas 12 a 14'),
     V('VIS-054', 'PV02', 'mamao-mosca', '2026-09-22', 'Lúcia', [8, 9, 7, 10, 8, 9, 8, 11, 7, 8, 9, 8, 10, 7, 9, 8, 9, 8, 7, 8]),
@@ -241,7 +242,8 @@ for _v in VIS:
         for _x, _g, _h in zip(_v['pts'], _GPS11, _HORA11): _x.update(gps=_g, h=_h, gm=(42 if _x['n'] == 11 else 4))
 
 def seed():
-    return dict(v=1, rev=0, vis={v['id']: v for v in VIS}, dia=DIA, rec=REC, apl=APL, seq=dict(vis=18, dia=11, rec=19, ra=142))
+    # v=2 (04/10, PRE-REV-20261004): área das decisões ligadas = área da O.S.; descarta o estado salvo com a área antiga
+    return dict(v=2, rev=0, vis={v['id']: v for v in VIS}, dia=DIA, rec=REC, apl=APL, seq=dict(vis=18, dia=11, rec=19, ra=142))
 
 def estatico():
     return dict(hoje=HOJE, key=KEY, prot=PROT, tal=TAL, agf=AGF, grupo=GRUPO, conj=CONJ, resp=RESP, rt='Ana',

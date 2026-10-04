@@ -232,7 +232,7 @@ function mipChecks(s, v, a, c) {
   let u = null;
   if (v.parcial) { const R = mipRes(v); al.push('Decisão com ' + R.val + ' de ' + R.tot + ' pontos (coleta incompleta).'); }
   if (a.kind === 'monitorar' || a.kind === 'erradicar') { if (a.kind === 'erradicar') { const ar = Number(String(a.area).replace(',', '.'));
-    if (!(ar > 0)) tr.push('Informe a área do foco.'); else if (ar > t.area + 1e-9) tr.push('Área maior que o talhão (' + mipN(t.area) + ' ha).'); } return out(); }
+    if (!(ar > 0)) tr.push('Informe a área do foco.'); else if (ar > t.area + 1e-9) tr.push('Área maior que o talhão (' + mipN(t.area, 2) + ' ha).'); } return out(); }
   const L = mipElig(v); u = L.find(x => x.id === a.prod) || null;
   if (!L.length) { tr.push('Sem produto registrado para ' + mipCult(t) + ' × ' + p.alvo.toLowerCase() + ' nesta base.'); return out(); }
   if (!a.prod) { tr.push('Escolha um produto registrado.'); return out(); }
@@ -243,7 +243,7 @@ function mipChecks(s, v, a, c) {
   const dose = Number(String(a.dose).replace(',', '.')), area = Number(String(a.area).replace(',', '.'));
   const fx = mipN(u.dmin, 3) + (u.dmax !== u.dmin ? '–' + mipN(u.dmax, 3) : '') + ' ' + u.un + '/ha';
   if (!(dose > 0)) tr.push('Informe a dose.'); else if (dose < u.dmin - 1e-9 || dose > u.dmax + 1e-9) tr.push('Dose fora da bula: ' + fx + (u.calda ? ' (calda de 1.000 L/ha)' : '') + '.');
-  if (!(area > 0)) tr.push('Informe a área.'); else if (area > t.area + 1e-9) tr.push('Área maior que o talhão (' + mipN(t.area) + ' ha).');
+  if (!(area > 0)) tr.push('Informe a área.'); else if (area > t.area + 1e-9) tr.push('Área maior que o talhão (' + mipN(t.area, 2) + ' ha).');
   if (!a.data) tr.push('Informe a data da aplicação.'); else if (a.data < MIPD.hoje) tr.push('Data da aplicação no passado.');
   const hist = mipApl(s, c).filter(x => x.tal === v.tal && (!a.os || x.os !== a.os));   // aplicação de O.S. cancelada não conta
   const nap = hist.filter(x => x.prod === u.id).length; if (u.mx && nap >= u.mx) tr.push('Nº máximo de aplicações no ciclo atingido: ' + nap + ' de ' + u.mx + '.');
@@ -292,7 +292,7 @@ function mipNo(c, s, v, a, ck, ids) {
   const op = er ? 'Tratos culturais' : 'Pulverização'; const cj = MIPD.conj[er ? 'Tratos culturais' : (t.cultura === 'Mamão' ? 'Pulverização · mamão' : 'Pulverização')];
   const nome = er ? 'Erradicação de plantas · ' + p.alvo.toLowerCase() : 'Controle de ' + p.alvo.toLowerCase() + (a.kind === 'localizado' ? ' · foco' : '');
   const g = u ? (/^Fungicida/.test(u.cls) ? 'Fungicidas' : (/^Herbicida/.test(u.cls) ? 'Herbicidas' : 'Inseticidas')) : '';
-  const ins = er ? [] : [{ g, p: u.nome, dose, un: u.un, tot: Math.round(dose * area * 1000) / 1000, sit: 'Reserva ao liberar' }];
+  const ins = er ? [] : [{ g, p: u.nome, dose, un: u.un, tot: cenQtd(dose, area), sit: 'Reserva ao liberar' }];
   return { id, novo: true, keys: [key], tipo: (er ? 'Tratos culturais · ' : 'Pulverização · ') + nome, talhao: t.rot, area, etapa: 'A liberar',
     selos: ck.cond ? [{ t: 'Colheita suspensa até ' + mipBr(ck.fim), c: 'yellow' }] : [], faz: t.faz, saf: '2026/27', lam: '', obs: '', agua: false, ins,
     semins: er ? 'Sem insumo: arrancar e destruir as plantas com sintoma (roguing).' : '', bloq: null, aviso: ck.cond || '', dono: 'Ana (agrônoma)', prazo: 'liberar',

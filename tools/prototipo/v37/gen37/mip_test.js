@@ -59,8 +59,8 @@ chk('decidir de novo: mesmo DIA-009 → REC-019/RA-0143/OS-0441; REC-015 "Cancel
 // erradicação: área do foco não passa do talhão
 k=mipChecks(S0(),S0().vis['VIS-055'],{kind:'erradicar',area:999,data:'2026-09-24'},C());
 // SINT-T01: a área vem da semente (MIPD.tal ← dados_lagoa_fonte), sem literal de área
-const A22=MIPD.tal['PV22'].area, MSG22='Área maior que o talhão ('+mipN(A22)+' ha).';
-chk('erradicação com 999 ha no Pivô 22 ('+mipN(A22)+' ha) trava', A22>0 && A22<999 && k.tr.indexOf(MSG22)>=0, k.tr);
+const A22=MIPD.tal['PV22'].area, MSG22='Área maior que o talhão ('+mipN(A22,2)+' ha).';
+chk('erradicação com 999 ha no Pivô 22 ('+mipN(A22,2)+' ha) trava', A22>0 && A22<999 && k.tr.indexOf(MSG22)>=0, k.tr);
 // app: contagem impossível, correção, recoleta e reabertura da coleta incompleta
 r=mipMudar(null,s=>mipColetar(s,'VIS-014','500',true));
 chk('500 em "% folíolos com ácaro" é recusado', !!r.erro && /passa de 100/.test(r.erro), r);

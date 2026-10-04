@@ -199,5 +199,29 @@ e0, e1 = invariantes(DLS), invariantes(com_areas(1.13))
 chk('14 SINT-C02: realizado ≤ área, saldo = área − realizado, apontamentos = realizado, fechadas 100 %, fração/texto/reserva/estoque/calcário coerentes — com a área sintética e com áreas ×1,13',
     not e0 and not e1, [e0[:4], e1[:4]])
 
+# PRE-REV-20261004 · P5/P6: o que outras sementes dizem de uma O.S. da Lagoa vem da própria O.S.
+import dados_irrigacao as DI, dados_mip as DM
+_O = {o['id']: o for o in DLS.ORDENS}
+fb = {k: (DI.FERT[k]['base'], _O[k]['realizado']) for k in DI.FERT if k in _O}
+dm = [(v['id'], v['dec']['os'], v['dec']['area'], _O[v['dec']['os']]['area'], DM.TAL[v['tal']]['area']) for v in DM.VIS
+      if v.get('dec') and v['dec'].get('os') in _O and v['dec'].get('area') is not None]
+chk('15 PRE-REV P5/P6: base das fertirrigações = realizado semeado da O.S.; área das decisões do MIP ligadas = área da O.S. e ≤ área do talhão',
+    len(fb) >= 2 and all(a == b for a, b in fb.values()) and len(dm) >= 2 and all(a == b and a <= t + 1e-9 for _, _, a, b, t in dm),
+    [fb, [(x[0], x[1]) for x in dm if not (x[2] == x[3] and x[2] <= x[4] + 1e-9)]])
+# PRE-REV P4: semente mudou → versão nova; o estado salvo com a versão anterior é descartado (cenário da O.S., irrigação e MIP)
+import json as _json, subprocess as _sp, tempfile as _tf, cenario as _CEN
+_JS = r"""
+const __LS={};globalThis.localStorage={getItem:k=>(k in __LS?__LS[k]:null),setItem:(k,v)=>{__LS[k]=String(v)},removeItem:k=>{delete __LS[k]}};
+""" + _CEN.js_prefixo() + DM.js_prefixo() + DI.js_prefixo() + r"""
+(()=>{ const velho=(o,k)=>{ const x=JSON.parse(JSON.stringify(o)); x.v=o.v-1; x.MARCA=1; localStorage.setItem(k,JSON.stringify(x)); };
+velho(CEN0,CEN_KEY); velho(MIP0,MIP_KEY); velho(IRR0,IRR_KEY); CEN_MEM=null; MIP_MEM=null; irrReset&&0;
+console.log(JSON.stringify({cen:[CEN0.v,!cenGet().MARCA],mip:[MIP0.v,!mipGet().MARCA],irr:[IRR0.v,!irrGet().MARCA]})); })();
+"""
+_f = _tf.NamedTemporaryFile('w', suffix='.js', delete=False, encoding='utf-8'); _f.write(_JS); _f.close()
+_p = _sp.run(['node', _f.name], capture_output=True, text=True, timeout=120); os.unlink(_f.name)
+try: _r = _json.loads(_p.stdout.strip().splitlines()[-1])
+except Exception: _r = {'erro': _p.stderr[-600:]}
+chk('16 PRE-REV P4: versões cenário 3, MIP 2, irrigação 2; o estado salvo com a versão anterior é descartado nas três bases',
+    _r.get('cen') == [3, True] and _r.get('mip') == [2, True] and _r.get('irr') == [2, True], _r)
 print(f'RESULTADO: {sum(OK)}/{len(OK)}')
 sys.exit(0 if all(OK) else 1)

@@ -167,16 +167,18 @@ def _ordens():
 # fertirrigações (O.S. agrícola): a etapa vem do cenário da O.S.; aqui só a janela na bomba (para conflito) e o texto do mapa
 # lam = lâmina bruta por ha que a O.S. aplica com o produto; base = área já apontada na semente (fora do balanço demonstrativo):
 # o que a O.S. apontar além da base entra no balanço do setor (irrApsOS)
+_REAL = {o['id']: o['realizado'] for o in DLS.ORDENS}   # base = realizado semeado da própria O.S. (mesma fonte das ordens)
 FERT = {'OS-0418': dict(setor='P1', ini=m(1, '21:00'), fim=m(2, '11:15'), lam=8.1, base=0, nome='fertirrigação · Ureia'),
-        'OS-0506': dict(setor='PV04', ini=m(1, '06:00'), fim=m(1, '17:00'), lam=6.0, base=34, nome='fertirrigação NK · turno 2 em 24/09'),
-        'OS-0507': dict(setor='PV05', ini=None, fim=None, lam=6.0, base=20, nome='fertirrigação de arranque · bomba parada')}
+        'OS-0506': dict(setor='PV04', ini=m(1, '06:00'), fim=m(1, '17:00'), lam=6.0, base=_REAL['OS-0506'], nome='fertirrigação NK · turno 2 em 24/09'),
+        'OS-0507': dict(setor='PV05', ini=None, fim=None, lam=6.0, base=_REAL['OS-0507'], nome='fertirrigação de arranque · bomba parada')}
 # paradas do PCM na bomba (bloqueiam a janela)
 PARADAS = [dict(bomba='B3', ini=m(0, '14:00'), fim=m(0, '15:00'), txt='parada da B3', ref='manutenção preventiva', dono='Caio · PCP'),
            dict(bomba='B-PV05', ini=m(-2, '08:00'), fim=m(2, '12:00'), txt='bomba do Pivô 5 em manutenção', ref='OM-0251', dono='Manutenção')]
 
 
 def seed():
-    st = dict(v=1, rev=0, hoje='2026-09-23', agora=AGORA, ponta=[18 * 60, 21 * 60], tol=3, faz=FAZ, capt=CAPT, fontes=FONTES,
+    # v=2 (04/10, PRE-REV-20261004): base das fertirrigações = realizado semeado; descarta o estado salvo com a base antiga
+    st = dict(v=2, rev=0, hoje='2026-09-23', agora=AGORA, ponta=[18 * 60, 21 * 60], tol=3, faz=FAZ, capt=CAPT, fontes=FONTES,
               setores=dict(_sr(), **_lg()), ordens=_ordens(), fert=FERT, paradas=PARADAS, ger=False,
               seq=dict(os=600, lib=2300, ex=5121, au=3101))
     return st
