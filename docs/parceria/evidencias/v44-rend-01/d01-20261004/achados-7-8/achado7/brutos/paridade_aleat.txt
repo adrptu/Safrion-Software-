@@ -1,0 +1,6 @@
+{"variante": "P0", "entradas_python": 3300, "com_diferenca": 0, "exemplos": [], "py_ms_max": 2969.34, "py_k_max": 2502}
+{"variante": "P2", "entradas_python": 3300, "com_diferenca": 0, "exemplos": [], "py_ms_max": 191.37, "py_k_max": 3298}
+{"variante": "P2u", "entradas_python": 3300, "com_diferenca": 0, "exemplos": [], "py_ms_max": 2220.29, "py_k_max": 2909}
+{"variante": "P1_2e18", "entradas_python": 40, "com_diferenca": 0, "exemplos": [], "py_ms_max": 7762.66, "py_k_max": 2800}
+{"variante": "P1_2e20", "entradas_python": 40, "com_diferenca": 0, "exemplos": [], "py_ms_max": 9114.63, "py_k_max": 2800}
+{"variante": "P1_2e22", "entradas_python": 40, "com_diferenca": 0, "exemplos": [], "py_ms_max": 7523.29, "py_k_max": 2800}

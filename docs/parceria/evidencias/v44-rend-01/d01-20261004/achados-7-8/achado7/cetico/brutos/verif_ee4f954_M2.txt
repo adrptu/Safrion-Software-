@@ -1,0 +1,1 @@
+{"i": 0, "nome": "M2 fracao_final_no_corte_aninhado (oráculo, linhas 142–144)", "cat": null, "alocado": 12, "saldo": 988, "deficit": 690, "conflito": true, "est": false, "viol": [], "n": 3, "thetaE": 1.0, "colsE": 3, "theta": 1.0, "inexec": false}

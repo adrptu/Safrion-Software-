@@ -1,0 +1,22 @@
+== 04bf6f2
+q [1.6666666666666667, 2, 8.333333333333334]
+1 sequência declarada: dividem trator, implemento ou operador
+2 Plantadeiras: ao mesmo tempo precisariam de 2, a fazenda tem 1; configurações consideradas em sequência nesta estimativa
+3 A: a parte fixa não cabe na janela de 4 h
+4 B: a parte fixa não cabe na janela de 4 h
+5 C: a parte fixa não cabe na janela de 10 h
+6 as partes fixas em sequência não cabem na janela de 4 h: fazem de 41,67 % a 50 % do que cabia na própria janela
+7 as partes fixas em sequência não cabem na janela de 10 h: fazem de 41,67 % a 83,33 % do que cabia na própria janela
+8 em sequência precisam de 600 h para 600 ha; a janela tem 4 h
+9 em sequência precisam de 700 h para 700 ha; a janela tem 10 h
+== ee4f954
+q [1.6666666666666667, 2, 8.333333333333334]
+1 sequência declarada: dividem trator, implemento ou operador
+2 Plantadeiras: ao mesmo tempo precisariam de 2, a fazenda tem 1; trabalham em sequência
+3 A: a parte fixa não cabe na janela de 4 h
+4 B: a parte fixa não cabe na janela de 4 h
+5 C: a parte fixa não cabe na janela de 10 h
+6 as partes fixas em sequência não cabem na janela de 4 h: fazem de 41,67 % a 50 % do que cabia na própria janela
+7 as partes fixas em sequência não cabem na janela de 10 h: fazem de 41,67 % a 83,33 % do que cabia na própria janela
+8 em sequência precisam de 600 h para 600 ha; a janela tem 4 h
+9 em sequência precisam de 700 h para 700 ha; a janela tem 10 h

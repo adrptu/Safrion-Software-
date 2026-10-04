@@ -1,0 +1,64 @@
+== F5
+ee4f954  aloc=242.8571 q=[214.2857, 14.2857, 14.2857] saldo=757.1429 confl=True def=500 decor=100 viav=EDF falha em C: fim 200/7 > 20 parJSPy=True
+04bf6f2  aloc=234.2857 q=[214.2857, 10.0, 10.0] saldo=765.7143 confl=True def=500 decor=640/7 viav=viavel(EDF) parJSPy=True
+2e31588  aloc=234.2857 q=[214.2857, 10.0, 10.0] saldo=765.7143 confl=True def=500 decor=640/7 viav=viavel(EDF) parJSPy=True
+P1       aloc=260.0000 q=[240.0, 10.0, 10.0] saldo=740.0000 confl=True def=500 decor=100 viav=viavel(EDF) parJSPy=True
+P2       aloc=234.2857 q=[214.2857, 10.0, 10.0] saldo=765.7143 confl=True def=500 decor=640/7 viav=viavel(EDF) parJSPy=True
+P0nR23   aloc=234.2857 q=[214.2857, 10.0, 10.0] saldo=765.7143 confl=True def=500 decor=640/7 viav=viavel(EDF) parJSPy=True
+P2nR23   aloc=266.6667 q=[250.0, 8.3333, 8.3333] saldo=733.3333 confl=True def=500 decor=100 viav=viavel(EDF) parJSPy=True
+== F5seq
+ee4f954  aloc=242.8571 q=[214.2857, 14.2857, 14.2857] saldo=757.1429 confl=True def=500 decor=100 viav=EDF falha em C: fim 200/7 > 20 parJSPy=True
+04bf6f2  aloc=234.2857 q=[214.2857, 10.0, 10.0] saldo=765.7143 confl=True def=500 decor=640/7 viav=viavel(EDF) parJSPy=True
+2e31588  aloc=234.2857 q=[214.2857, 10.0, 10.0] saldo=765.7143 confl=True def=500 decor=640/7 viav=viavel(EDF) parJSPy=True
+P1       aloc=260.0000 q=[240.0, 10.0, 10.0] saldo=740.0000 confl=True def=500 decor=100 viav=viavel(EDF) parJSPy=True
+P2       aloc=234.2857 q=[214.2857, 10.0, 10.0] saldo=765.7143 confl=True def=500 decor=640/7 viav=viavel(EDF) parJSPy=True
+P0nR23   aloc=234.2857 q=[214.2857, 10.0, 10.0] saldo=765.7143 confl=True def=500 decor=640/7 viav=viavel(EDF) parJSPy=True
+P2nR23   aloc=266.6667 q=[250.0, 8.3333, 8.3333] saldo=733.3333 confl=True def=500 decor=100 viav=viavel(EDF) parJSPy=True
+== F1
+ee4f954  aloc=100.0000 q=[66.6667, 6.6667, 6.6667, 6.6667, 6.6667, 6.6667] saldo=900.0000 confl=True def=900 decor=100 viav=EDF falha em B2: fim 40/3 > 10 parJSPy=True
+04bf6f2  aloc=76.6667 q=[66.6667, 2.0, 2.0, 2.0, 2.0, 2.0] saldo=923.3333 confl=True def=900 decor=230/3 viav=viavel(EDF) parJSPy=True
+2e31588  aloc=76.6667 q=[66.6667, 2.0, 2.0, 2.0, 2.0, 2.0] saldo=923.3333 confl=True def=900 decor=230/3 viav=viavel(EDF) parJSPy=True
+P1       aloc=100.0000 q=[90.0, 2.0, 2.0, 2.0, 2.0, 2.0] saldo=900.0000 confl=True def=900 decor=100 viav=viavel(EDF) parJSPy=True
+P2       aloc=76.6667 q=[66.6667, 2.0, 2.0, 2.0, 2.0, 2.0] saldo=923.3333 confl=True def=900 decor=230/3 viav=viavel(EDF) parJSPy=True
+P0nR23   aloc=76.6667 q=[66.6667, 2.0, 2.0, 2.0, 2.0, 2.0] saldo=923.3333 confl=True def=900 decor=230/3 viav=viavel(EDF) parJSPy=True
+P2nR23   aloc=100.0000 q=[90.9091, 1.8182, 1.8182, 1.8182, 1.8182, 1.8182] saldo=900.0000 confl=True def=900 decor=100 viav=viavel(EDF) parJSPy=True
+== F1b
+ee4f954  aloc=160.0000 q=[100.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0] saldo=840.0000 confl=False def=0 decor=160 viav=EDF falha em B2: fim 20 > 10 parJSPy=True
+04bf6f2  aloc=110.0000 q=[90.9091, 1.8182, 1.8182, 1.8182, 1.8182, 1.8182, 10.0] saldo=890.0000 confl=True def=890 decor=110 viav=viavel(EDF) parJSPy=True
+2e31588  aloc=110.0000 q=[90.9091, 1.8182, 1.8182, 1.8182, 1.8182, 1.8182, 10.0] saldo=890.0000 confl=True def=890 decor=110 viav=viavel(EDF) parJSPy=True
+P1       aloc=110.0000 q=[90.9091, 1.8182, 1.8182, 1.8182, 1.8182, 1.8182, 10.0] saldo=890.0000 confl=True def=890 decor=110 viav=viavel(EDF) parJSPy=True
+P2       aloc=110.0000 q=[90.9091, 1.8182, 1.8182, 1.8182, 1.8182, 1.8182, 10.0] saldo=890.0000 confl=True def=890 decor=110 viav=viavel(EDF) parJSPy=True
+P0nR23   aloc=110.0000 q=[90.9091, 1.8182, 1.8182, 1.8182, 1.8182, 1.8182, 10.0] saldo=890.0000 confl=True def=890 decor=110 viav=viavel(EDF) parJSPy=True
+P2nR23   aloc=110.0000 q=[90.9091, 1.8182, 1.8182, 1.8182, 1.8182, 1.8182, 10.0] saldo=890.0000 confl=True def=890 decor=110 viav=viavel(EDF) parJSPy=True
+== F1c
+ee4f954  aloc=160.0000 q=[100.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0] saldo=840.0000 confl=False def=0 decor=160 viav=EDF falha em B2: fim 20 > 10 parJSPy=True
+04bf6f2  aloc=110.0000 q=[90.9091, 1.8182, 1.8182, 1.8182, 1.8182, 1.8182, 10.0] saldo=890.0000 confl=True def=890 decor=110 viav=viavel(EDF) parJSPy=True
+2e31588  aloc=110.0000 q=[90.9091, 1.8182, 1.8182, 1.8182, 1.8182, 1.8182, 10.0] saldo=890.0000 confl=True def=890 decor=110 viav=viavel(EDF) parJSPy=True
+P1       aloc=110.0000 q=[90.9091, 1.8182, 1.8182, 1.8182, 1.8182, 1.8182, 10.0] saldo=890.0000 confl=True def=890 decor=110 viav=viavel(EDF) parJSPy=True
+P2       aloc=110.0000 q=[90.9091, 1.8182, 1.8182, 1.8182, 1.8182, 1.8182, 10.0] saldo=890.0000 confl=True def=890 decor=110 viav=viavel(EDF) parJSPy=True
+P0nR23   aloc=110.0000 q=[90.9091, 1.8182, 1.8182, 1.8182, 1.8182, 1.8182, 10.0] saldo=890.0000 confl=True def=890 decor=110 viav=viavel(EDF) parJSPy=True
+P2nR23   aloc=110.0000 q=[90.9091, 1.8182, 1.8182, 1.8182, 1.8182, 1.8182, 10.0] saldo=890.0000 confl=True def=890 decor=110 viav=viavel(EDF) parJSPy=True
+== F3
+ee4f954  aloc=100.0000 q=[83.3333, 8.3333, 8.3333] saldo=900.0000 confl=True def=900 decor=100 viav=EDF falha em C: fim 50/3 > 10 parJSPy=True
+04bf6f2  aloc=93.3333 q=[83.3333, 5.0, 5.0] saldo=906.6667 confl=True def=900 decor=280/3 viav=viavel(EDF) parJSPy=True
+2e31588  aloc=93.3333 q=[83.3333, 5.0, 5.0] saldo=906.6667 confl=True def=900 decor=280/3 viav=viavel(EDF) parJSPy=True
+P1       aloc=100.0000 q=[90.0, 5.0, 5.0] saldo=900.0000 confl=True def=900 decor=100 viav=viavel(EDF) parJSPy=True
+P2       aloc=93.3333 q=[83.3333, 5.0, 5.0] saldo=906.6667 confl=True def=900 decor=280/3 viav=viavel(EDF) parJSPy=True
+P0nR23   aloc=93.3333 q=[83.3333, 5.0, 5.0] saldo=906.6667 confl=True def=900 decor=280/3 viav=viavel(EDF) parJSPy=True
+P2nR23   aloc=100.0000 q=[90.9091, 4.5455, 4.5455] saldo=900.0000 confl=True def=900 decor=100 viav=viavel(EDF) parJSPy=True
+== F4
+ee4f954  aloc=100.0000 q=[66.6667, 6.6667, 6.6667, 6.6667, 6.6667, 6.6667] saldo=50.0000 confl=True def=50 decor=100 viav=EDF falha em B2: fim 13333333333360/1000000000001 > 10 parJSPy=True
+04bf6f2  aloc=76.6667 q=[66.6667, 2.0, 2.0, 2.0, 2.0, 2.0] saldo=73.3333 confl=True def=50 decor=76666666666710/1000000000001 viav=viavel(EDF) parJSPy=True
+2e31588  aloc=76.6667 q=[66.6667, 2.0, 2.0, 2.0, 2.0, 2.0] saldo=73.3333 confl=True def=50 decor=76666666666710/1000000000001 viav=viavel(EDF) parJSPy=True
+P1       aloc=100.0000 q=[90.0, 2.0, 2.0, 2.0, 2.0, 2.0] saldo=50.0000 confl=True def=50 decor=100 viav=viavel(EDF) parJSPy=True
+P2       aloc=76.6667 q=[66.6667, 2.0, 2.0, 2.0, 2.0, 2.0] saldo=73.3333 confl=True def=50 decor=76666666666710/1000000000001 viav=viavel(EDF) parJSPy=True
+P0nR23   aloc=76.6667 q=[66.6667, 2.0, 2.0, 2.0, 2.0, 2.0] saldo=73.3333 confl=True def=50 decor=76666666666710/1000000000001 viav=viavel(EDF) parJSPy=True
+P2nR23   aloc=100.0000 q=[90.9091, 1.8182, 1.8182, 1.8182, 1.8182, 1.8182] saldo=50.0000 confl=True def=50 decor=100 viav=viavel(EDF) parJSPy=True
+== M2
+ee4f954  aloc=12.0000 q=[1.6667, 2.0, 8.3333] saldo=988.0000 confl=True def=690 decor=12 viav=viavel(caminho) parJSPy=True
+04bf6f2  aloc=12.0000 q=[1.6667, 2.0, 8.3333] saldo=988.0000 confl=True def=690 decor=12 viav=viavel(caminho) parJSPy=True
+2e31588  aloc=12.0000 q=[1.6667, 2.0, 8.3333] saldo=988.0000 confl=True def=690 decor=12 viav=viavel(caminho) parJSPy=True
+P1       aloc=12.3333 q=[1.6667, 2.3333, 8.3333] saldo=987.6667 confl=True def=690 decor=37/3 viav=viavel(caminho) parJSPy=True
+P2       aloc=12.0000 q=[1.6667, 2.0, 8.3333] saldo=988.0000 confl=True def=690 decor=12 viav=viavel(caminho) parJSPy=True
+P0nR23   aloc=12.0000 q=[1.6667, 2.0, 8.3333] saldo=988.0000 confl=True def=690 decor=12 viav=viavel(caminho) parJSPy=True
+P2nR23   aloc=12.0000 q=[1.6667, 2.0, 8.3333] saldo=988.0000 confl=True def=690 decor=12 viav=viavel(caminho) parJSPy=True

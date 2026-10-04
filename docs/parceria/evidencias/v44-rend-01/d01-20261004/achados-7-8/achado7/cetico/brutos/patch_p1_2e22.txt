@@ -1,0 +1,2 @@
+patching file tools/prototipo/v37/gen37/safra.js
+patching file tools/prototipo/v37/gen37/dados2.py

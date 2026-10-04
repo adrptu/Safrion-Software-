@@ -1,0 +1,420 @@
+{
+ "out": [
+  {
+   "lente": "corretude-paridade",
+   "cobertura": "Trabalhei só em cópias feitas com git archive em /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev8/corr/{new=2e31588, old=04bf6f2, pre=ee4f954}. Nada foi editado em /home/user. Os scripts estão em .../prerev8/corr/v: verif.py, gen.py, gen2.py, gen_rook.py, runjs.js, runpy.py, parity.py, parity2.py, run_verif.py, classif.py, stat.py, est_chk.py, fase.py, repro.py, est.js e mot.js.\n\n**Oráculo (executado com node):** 2e31588 deu 101/101 OK; 04bf6f2 deu 91/91.\n\n**Verificador independente (verif.py, não importa nada do repositório):**\n- V0: Σq + saldo = Q, sem valor negativo.\n- V1: cada h ≤ própria janela; nenhuma área para janela 0, sem rendimento ou sem recurso.\n- V2: os cortes como pedidos. Para todo subconjunto com área cujos membros se excluem dois a dois (sequência declarada, ativo em comum, grupo de 1 unidade, ou grupo de 2+ que serializa, decidido por força bruta) e para cada prazo t: Σh dos membros com janela ≤ t, mais as trocas menos a maior, cabe em t.\n- V3: PL exato (scipy/HiGHS) com a física real. Fases por prazo, preempção, conjuntos que podem trabalhar juntos e capacidade cumulativa de cada grupo; a troca é ignorada, então é relaxação e um PL inviável é inviabilidade de fato.\n- V4: o plano sem conflito não viola corte e cabe no PL.\n- V5: se o plano inteiro cabe no PL, não pode haver conflito nem saldo sem motivo conservador.\n\n**Entradas geradas (20.000 no total):**\n- 6.000 casos (semente 11) e 8.000 (semente 23, 10% com números em texto com vírgula). Até 9 configurações; janelas 0, vazias e repetidas; trocas; partes fixas, inclusive somando mais de 100%; ativos; grupos de 1 e de 2+ unidades; anéis C5 e C7 com e sem janela; trator × implemento; caminhos.\n- Mais 3.000 casos só de trator × implemento e 3.000 de anéis C5/C7 com um membro sem janela.\n\n**Paridade 2e31588:**\n- JS × Python float: 0 diferenças em 20.000 casos (valores, motivos, causa, emSeq, seqEst, conflitoEst, nec/falta).\n- JS × Python Fraction: 2 diferenças em 20.000, só no texto do motivo: 84,37 % × 84,38 % (84,375 exato contra 84,37499… em float, arredondamento de .5). É cosmético e não é divergência do espelho.\n\n**Resultado do verificador em 2e31588 e 04bf6f2:**\n- V0, V1, V2 e V4 (cortes): 0 violações. R2-2 e R2-3 nunca violam corte.\n- V3 (atendido fisicamente inviável): 19 + 7 nos dois lotes gerais, 13 em trator × implemento e 8 nos anéis. Todos têm um P4 induzido entre quem tem prazo (achados 1 e 2).\n- V5 sem motivo conservador: 0 em 2e31588; 04bf6f2 tinha 5, que a R2-2 corrigiu com o motivo do ciclo.\n\n**2e31588 × 04bf6f2 (alocado, saldo, conflito, déficit, q), 14.000 casos gerais:**\n- 13.653 iguais.\n- 330 diferenças por R2-2 (128 com mais atendido, 202 com o mesmo atendido).\n- 17 diferenças por R2-3 (9 melhoram, 8 pioram).\n- 0 diferenças do tipo (ii). Conferi com variantes de 2e31588 que revertem só a R2-2 (cf0=comp), só a R2-3 (ordem gs) ou as duas. A dupla reversão reproduz 04bf6f2 em 100% dos casos. Não há diferença de causa, emSeq ou decorrido sem diferença de q.\n- Lote trator × implemento: 3.000 iguais. Lote de anéis: 713 diferenças por R2-2, nenhuma (ii).\n- R2-1 não aparece com até 9 configurações; ficou coberto pelo caso R2-1 do oráculo.\n\n**R2-3:** não viola corte. As 8 pioras estão todas em componentes de anel já declarados conservadores: −13,7% (cases.json nº 2564), −6,6%, −5,6% e as demais abaixo de 1,1%. No K4 de pares de máquinas a perda é de −1,9%. Com uma máquina só, 04bf6f2 e 2e31588 dão o mesmo resultado. O mecanismo é o do achado 8 (folga não devolvida), fora do escopo, por isso não reporto à parte.\n\n**R2-2:** não viola corte, mas aceita plano fisicamente inviável (achado 1).\n\n**Fundamento da correção proposta:** o PL por fase com cortes de clique bateu com o PL exato em 2.940 grafos perfeitos (0 diferenças). Em 1.716 cografos com vários prazos não apareceu contraexemplo.",
+   "achados": [
+    {
+     "titulo": "R2-2 aceita plano fisicamente inviável sem conflito: anel C5 com um membro sem janela deixa um P4 entre os que têm prazo, e os cortes de clique não bastam com prazos diferentes",
+     "severidade": "S2",
+     "arquivo": "tools/prototipo/v37/gen37/safra.js",
+     "linha": 146,
+     "cenario_de_falha": "Anel de máquinas compartilhadas, todas com rend 1 ha/h, exceto E com rend 6:\n- A (e0+e1), janela 1 h;\n- B (e1+e2), janela 2 h;\n- C (e2+e3), janela 2 h;\n- D (e3+e4), janela 1 h;\n- E (e4+e0), sem janela.\n\nCom Q = 10 ha, a 2e31588 dá atendido 10, saldo 0, conflito=false e q = [1, 1, 1, 1, 6]: diz que cabe tudo.\n\nNa prática não cabe. A ocupa e1 e D ocupa e3 durante toda a primeira hora, então B e C só começam em 1 h. Como B e C dividem e2, precisam de 2 h em 1 h. Falta 1 h, ou seja, 25% das horas com prazo são fictícias.\n\nA 04bf6f2 marcava conflito e atendia q = [0,5; 0,5; 0,5; 0,5; 8], que é viável pelo PL.\n\nCausa: a R2-2 tirou do teste de buraco quem não tem janela. O argumento está certo (quem não tem prazo vai por último), mas o que sobra é um P4, grafo perfeito, em que só os cortes de clique valem. Eles são insuficientes com vários prazos (achado 2). Assim a R2-2 devolveu, nesse caso, as inviabilidades de antes do D-01.",
+     "evidencia": "Executado em .../prerev8/corr/v.\n\n1) `python3 repro.py <corr>`:\n- caso 'C5 com E sem janela (R2-2)', 2e31588: JS alocado=10 saldo=0 conflito=False q=[1,1,1,1,6]; Py(Fraction) alocado=10 conflito=False; cortes violados=0; PL falta=1.0000 h.\n- 04bf6f2: JS alocado=10 saldo=0 conflito=True q=[0.5,0.5,0.5,0.5,8]; Py(Fraction) conflito=True; PL falta=0.0000 h.\n\n2) Lote de anéis: `python3 gen_rook.py 3000 43 cases_anel.json anel; node runjs.js <corr> cases_anel.json res_anel.json; python3 stat.py cases_anel.json res_anel.json`:\n- new: 8 atendidos inviáveis (PL); 3 deles sem conflito e com saldo 0; pior falta = 14,3% das horas com prazo.\n- old: 0.\n- pre (ee4f954): 8.\n\n3) No lote geral, cases.json nº 3031 (anel, conflito=true): new tem PL falta 0,846 h e old é viável. A variante noR22 reproduz o old.",
+     "introduzido_pela_rodada2": true,
+     "correcao_proposta": "Manter a exclusão de quem não tem janela, mas não tratar \"perfeito entre os que têm prazo\" como suficiente quando há 2 ou mais prazos finitos distintos. Duas saídas:\n\n(a) Teste exato por fase: variáveis z[x][fase]; para cada fase p e cada clique maximal C, Σ z[x][p] (x em C) ≤ duração da fase; e Σ das fases até o prazo de x = h_x. Isso é exato em grafo perfeito pelo teorema do grafo perfeito aplicado em cada fase: 0 diferenças contra o PL exato em 2.940 grafos.\n\n(b) Se o subgrafo dos que têm prazo tiver P4 induzido e 2 ou mais prazos distintos, usar os cortes do componente (fc), que são conservadores e já levam motivo. Em cografos não achei contraexemplo.\n\nEm qualquer caso, incluir no oráculo o C5 com E sem janela e o P4 (achado 2), com o valor esperado de um PL independente."
+    },
+    {
+     "titulo": "Cortes por prazo das cliques não garantem viabilidade com prazos diferentes em grafo perfeito (P4 de trator × implemento): plano inviável aceito sem conflito",
+     "severidade": "S2",
+     "arquivo": "tools/prototipo/v37/gen37/safra.js",
+     "linha": 136,
+     "cenario_de_falha": "Quatro configurações, todas com rend 1 ha/h:\n- A = T1+I1, janela 1 h;\n- B = T1+I2, janela 2 h;\n- C = T2+I2, janela 2 h;\n- D = T2+I3, janela 1 h.\n\nO grafo é um caminho A-B-C-D (P4), perfeito; é o arranjo comum de trator × implemento.\n\nCom Q = 4 ha, o resultado é atendido 4, saldo 0, conflito=false, e todos os cortes por clique e prazo se cumprem.\n\nNa prática, A prende T1 e D prende T2 durante toda a primeira hora. B e C (I2) só trabalham em [1, 2] e precisam de 2 h em 1 h, então 1 ha (25%) não se faz.\n\nO comentário W1 da linha 120 (\"Em grafo perfeito as cliques bastam\") só vale para um prazo único. Os cortes agregados por prazo são uma projeção da condição por fase.\n\nO mesmo vale para o espelho dados2.repartir.",
+     "evidencia": "Executado.\n\n1) `python3 repro.py <corr>`, caso P4 trator×implemento: 2e31588 e 04bf6f2 dão os dois JS alocado=4 saldo=0 conflito=False q=[1,1,1,1]; Py(Fraction) alocado=4 conflito=False; cortes violados=0; PL falta=1.0000 h. `node p4.js <corr>` mostra o mesmo em ee4f954.\n\n2) Caso aleatório cases2.json nº 756 (3 tratores × 2 implementos, uma em sequência declarada, partes 50%): alocado=50, saldo=0, conflito=False, PL falta=0,2 h. Mesmo resultado em 04bf6f2.\n\n3) Lote trator × implemento: `python3 gen_rook.py 3000 41 cases_rook.json rook; node runjs.js ...; python3 stat.py cases_rook.json res_rook.json`:\n- new = old: 13 atendidos inviáveis; 1 sem conflito e saldo 0; pior 11,1%.\n- pre: 145.\n\n4) No lote geral, os 26 casos V3 têm todos P4 induzido. Exemplo: cases.json nº 1760, onde o P4 se forma por sequência declarada + ativo I2 + Plantadeiras (2 unidades) que serializa.",
+     "introduzido_pela_rodada2": false,
+     "correcao_proposta": "A mesma do achado 1, que é a raiz comum:\n- verificar o resultado (e o plano, para o conflito) com o teste por fase com cortes de clique, exato em grafo perfeito;\n- ou cair nos cortes do componente (fc, conservador, com motivo) quando houver 2 ou mais prazos finitos distintos e P4 induzido entre os que têm prazo.\n\nTambém corrigir o comentário W1 e a ajuda de 'jan' em areas/processo_safra.py, que hoje promete \"cada configuração termina dentro da própria janela\". Por fim, levar o P4 e o caso nº 756 ao oráculo como casos de regressão."
+    },
+    {
+     "titulo": "Conflito certo (sequência de fato) aparece como \"nesta estimativa\" ou some do motivo: conflitoEst e o motivo único por grupo olham só os cortes gerados (R2-4/R2-5)",
+     "severidade": "S3",
+     "arquivo": "tools/prototipo/v37/gen37/safra.js",
+     "linha": 227,
+     "cenario_de_falha": "(a) A e B em sequência declarada, janela 6 h cada; Z em sequência declarada, sem janela; C com janela 3 h. Os quatro usam Tratores (a fazenda tem 2; C precisa de 2; os outros, de 1). Todos com rend 1; Q = 20.\n\nSaída: conflitoEst=true, chip \"não cabe na janela nesta estimativa\", e o único motivo de conflito é \"A, B e C: consideradas em sequência nesta estimativa, precisam de 15 h...\".\n\nMas A e B precisam de 10 h em 6 h por sequência declarada, com ou sem trator a mais. O corte de fato {A, B} a 6 h não é gerado: está dentro da clique maior por Tratores, e 'sq' tem W = ∞ por causa de Z.\n\n(b) A e B com a mesma máquina m, janela 10 h; C com janela 10 h; Tratores 2 (A e B precisam de 1, C de 2); Q = 18.\n\nSaída: conflitoEst=false, mas o único motivo é o da estimativa de A, B e C, com 18 h. O conflito certo (A e B, 12 h em 10 h) não é citado.\n\nNos dois casos, quem segue o motivo e compra trator continua com o conflito. A 04bf6f2 dizia \"sequência não cabe na janela\" e listava todos os conflitos.",
+     "evidencia": "Executado.\n\n1) `node est.js <corr>`:\n- new: conflito=true, conflitoEst=true, chip='não cabe na janela nesta estimativa'; motivos: [..., 'A, B e C: consideradas em sequência nesta estimativa, precisam de 15 h para 15 ha; a janela tem 6 h'].\n- old: chip='sequência não cabe na janela'.\n- Py Fraction 2e31588: conflitoEst=True, com o mesmo motivo.\n\n2) `node mot.js <corr>`:\n- new: conflitoEst=false, mas o único motivo de conflito é 'A, B e C: consideradas em sequência nesta estimativa, precisam de 18 h para 18 ha; a janela tem 10 h'.\n- old: 'em sequência precisam de 12 h para 12 ha; a janela tem 10 h' e o de 18 h.\n\n3) `python3 est_chk.py` (violação de fato calculada à parte, só com sequência, ativo e grupo de 1 unidade) nos 14.000 casos: 1 com 'fato violado mas conflitoEst=true' (cases2.json nº 7072: K7+K8 em sequência declarada, 6,09 h em 6 h). Os outros 532 casos de conflito sem violação de fato se explicam por troca reservada (regra a, 440) ou janela 0/sem recurso no plano (R1, 92).",
+     "introduzido_pela_rodada2": true,
+     "correcao_proposta": "Calcular o conflito de fato à parte: cliques maximais do grafo JM (sequência declarada, ativo, grupo de 1 unidade) com os cortes por prazo no plano.\n- conflitoEst = conflito e nenhum corte de fato violado.\n- Por grupo UP, manter o motivo de maior déficit de fato (\"em sequência precisam de...\") e acrescentar o de estimativa só se o déficit dele for maior.\n- Espelhar em dados2 e incluir os casos (a) e (b) no oráculo."
+    },
+    {
+     "titulo": "Paridade JS × Python ao ler número em texto: espaço vira 0 no JS (janela 0, parte 0%) e \"inválido\" no Python; '0x10' e '1_000' também divergem",
+     "severidade": "S4",
+     "arquivo": "tools/prototipo/v37/gen37/safra.js",
+     "linha": 52,
+     "cenario_de_falha": "Com jan = ' ' (só espaço), Q = 10 e rend 1:\n- JS (rpNum): Number('') = 0, então janela 0; atendido 0, saldo 10, causa \"sem horas na janela\".\n- Python (_rp_num): float('') falha, a janela vira inválida e fica sem limite; atendido 10 com o motivo \"janela inválida\".\n\nCom part = ' ' em A, mais B livre: o JS trata como parte fixa de 0% (q = [0, 10]); o Python, como livre (q = [5, 5]).\n\n'0x10' vale 16 no JS e é inválido no Python; '1_000' é inválido no JS e vale 1000 no Python.\n\nSó afeta texto fora do padrão. As chaves dos grupos ('trator', 'plant') não são numéricas, então a ordem de Object.keys não diverge na prática.",
+     "evidencia": "Executado:\n- `node ws.js <corr>`: \" \" JS {alocado:0, saldo:10, causa:'sem horas na janela'}; '0x10' JS alocado 10 sem motivo; '1_000' JS com 'janela inválida'.\n- Python dados2 de 2e31588: ' ' Py alocado 10.0 com 'A: janela inválida, considerada sem limite'; '1_000' Py sem motivo; '0x10' Py com 'janela inválida'.\n- Para part ' ': JS q=[0,10]; Py [5.0, 5.0].\n\nA função não mudou desde antes do D-01. Nos 20.000 casos com números e vírgula, JS × Py float deu 0 diferenças.",
+     "introduzido_pela_rodada2": false,
+     "correcao_proposta": "Nos dois espelhos:\n- aplicar trim primeiro e tratar texto vazio depois do trim como ausente (null/None);\n- aceitar só /^-?\\d+([.,]\\d+)?$/ (o resto é inválido, com o motivo);\n- incluir os casos ' ', '0x10' e '1_000' no oráculo."
+    }
+   ],
+   "vereditos": [
+    {
+     "indice": 0,
+     "refutado": false,
+     "reproduzido": true,
+     "severidade": "S2",
+     "introduzido_pela_rodada2": true,
+     "comando": "Em D=/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev8/verif-corretude-paridade, com cópias new=2e31588, old=04bf6f2 e pre=ee4f954 (git archive):\n- `python3 chk.py casos1.json $D/new $D/old $D/pre`: roda o bloco REPARTIR no node e confere o q com um PL próprio (lp.py, scipy/HiGHS). O PL é preemptivo, com fases por prazo e conjuntos simultâneos viáveis por ativo, sequência e unidades do grupo.\n- `python3 py.py casos1.json $D/new $D/old`: dados2.repartir com Fraction.\n- `python3 chk.py casos1b.json $D/new`: E com janela '', 100 e 2.",
+     "saida": "C5, E sem janela (A e0+e1 jan 1; B e1+e2 jan 2; C e2+e3 jan 2; D e3+e4 jan 1; E e4+e0 rend 6 sem janela; Q=10):\n- new: alocado=10, saldo=0, conflito=False, q=[1,1,1,1,6], PL falta=1.0000 h. Py(Fraction) igual: conflito=False.\n- old: alocado=10, conflito=True, q=[0.5,0.5,0.5,0.5,8], PL falta=0.0000 h (motivos 'em sequência precisam de 2 h ... janela tem 1 h').\n- pre: igual ao new (falta 1 h).\n\nMesmo anel no new, mudando só a janela de E:\n- E jan=100: conflito=True, q=[0.5,0.5,0.5,0.5,8], falta 0.\n- E jan=2: conflito=True, falta 0.\n\nSó tirar a janela de E faz o resultado aceitar o plano inviável. O PL foi conferido à mão no P4: [1,1,1,1] falta 1; [0.5,1,1,0.5] falta 0.",
+     "fundamento": "Reproduzi o achado e não consegui refutar.\n\nA R2-2 tira do teste de buraco (cf0) quem não tem janela. Sem E, o C5 vira um P4 entre os que têm prazo; o componente sai do caminho conservador (fc) e fica só com os cortes de clique por prazo. Esses cortes não bastam com prazos diferentes (achado 1).\n\nResultado: o plano fisicamente inviável é aceito sem conflito e com saldo 0, e faltam 25% das horas com prazo. A 04bf6f2 marcava conflito e devolvia um atendido viável, então é regressão da rodada 2 para esta entrada.\n\nNão é a decisão do Codex: ela dispensa capacidade máxima e monotonicidade, não viabilidade. Também não está na lista de fora do escopo.\n\nSeveridade S2 pela régua: plano inviável aceito sem conflito. A raiz é a mesma do achado 1, mas a exposição neste caso é nova."
+    },
+    {
+     "indice": 1,
+     "refutado": false,
+     "reproduzido": true,
+     "severidade": "S2",
+     "introduzido_pela_rodada2": false,
+     "comando": "- `python3 chk.py casos1.json $D/new $D/old $D/pre`: caso P4, A=T1+I1 jan 1; B=T1+I2 jan 2; C=T2+I2 jan 2; D=T2+I3 jan 1; rend 1; Q=4.\n- `python3 py.py casos1.json $D/new $D/old`.\n- Lote aleatório trator×implemento: `python3 gen.py 600 7 rook.json && python3 lote.py rook.json $D/new $D/old $D/pre`.",
+     "saida": "P4:\n- new: alocado=4, saldo=0, conflito=False, q=[1,1,1,1], PL falta=1.0000 h.\n- old: o mesmo.\n- pre: o mesmo.\n- Py(Fraction) new/old: alocado=4, conflito=False.\n\nLote de 600:\n- new: 7 atendidos inviáveis, 0 sem conflito com saldo 0, pior falta 0,5 h.\n- old: igual ao new.\n- pre: 34 inviáveis, 15 sem conflito, pior 1,0 h.\n\nO comentário W1 (safra.js perto da linha 120: 'Em grafo perfeito ... as cliques bastam') e a ajuda de 'jan' (areas/processo_safra.py:137: 'em sequência, cada configuração termina dentro da própria janela') estão presentes em 2e31588.",
+     "fundamento": "Reproduzi o achado e não consegui refutar.\n\nNo P4 de trator × implemento, A e D ocupam T1 e T2 durante toda a primeira hora. B e C (I2) ficam com 1 h para 2 h de trabalho, e o código aceita sem conflito e com saldo 0. O PL independente confirma que falta 1 h.\n\nOs cortes de clique por prazo só são exatos em grafo perfeito com prazo único. Com vários prazos, falta a condição por fase.\n\nNo lote aleatório, o new não teve nenhum caso sem conflito; o caso mínimo à mão basta para provar o defeito. É um arranjo comum, e o plano inviável é aceito sem aviso: S2.\n\nNão é da rodada 2: 04bf6f2 e ee4f954 dão o mesmo resultado. Não está na lista de fora do escopo nem é coberto pela decisão do Codex, que trata de capacidade máxima e não de viabilidade."
+    },
+    {
+     "indice": 2,
+     "refutado": false,
+     "reproduzido": true,
+     "severidade": "S3",
+     "introduzido_pela_rodada2": true,
+     "comando": "- `node rp.js $D/new casos2.json` e `node rp.js $D/old casos2.json`.\n- `python3 py.py casos2.json $D/new`.\n- O chip da tela, com a função `avisos` extraída de safra.js:648 e executada no node sobre o resultado de repartir.\n- `node rp.js $D/new casos2b.json`: Tratores un=3 e un=4.",
+     "saida": "Caso (a): A, B e Z com seq; A e B jan 6, Z sem janela; C jan 3 com trator 2; os outros com trator 1; Tratores un=2; Q=20.\n- new: conflito=True, conflitoEst=True, deficit=9.\n- Único motivo de conflito: 'A, B e C: consideradas em sequência nesta estimativa, precisam de 15 h para 15 ha; a janela tem 6 h'.\n- Chip: 'não cabe na janela nesta estimativa'.\n- old: chip/motivo 'em sequência precisam de 15 h ...'.\n- Py(Fraction) new: conflitoEst=True, mesmo motivo.\n\nCaso (b): A e B com ativo m, jan 10; C jan 10 com trator 2; un=2; Q=18.\n- new: conflitoEst=False, chip 'sequência não cabe na janela'.\n- Único motivo de conflito: 'A, B e C: consideradas em sequência nesta estimativa, precisam de 18 h ...'.\n- old: listava também 'em sequência precisam de 12 h para 12 ha; a janela tem 10 h'.\n\nCom un=3 ou 4 (seguindo o motivo e tendo mais tratores), o conflito continua:\n- (a): conflitoEst=False, 'A e B: em sequência precisam de 10 h para 10 ha; a janela tem 6 h';\n- (b): 'A e B: em sequência precisam de 12 h ...'.",
+     "fundamento": "Reproduzi o achado e não consegui refutar.\n\nconflitoEst e o motivo único por grupo UP (maior déficit) só olham os cortes gerados. No caso (a), o corte de fato {A,B}@6 não existe: está dentro da clique {A,B,C,Z} por Tratores, e 'sq' tem W=∞ por causa de Z. Por isso um conflito certo, de sequência declarada, sai rotulado como 'nesta estimativa'. No caso (b), o motivo do conflito de fato some, substituído pelo de estimativa.\n\nQuem segue a indicação (mais tratores) continua em conflito; o teste com un=3 e un=4 prova isso.\n\nO conflito continua sinalizado (conflito=true) e o próprio sistema mostra a causa real depois da mudança: é problema limitado com alternativa segura, S3. Não é o caso de regra conservadora fora do escopo; o problema é o rótulo e a omissão, criados pela R2-4/R2-5 (conflitoEst, chip e dedupe são novos; a 04bf6f2 não rotulava como estimativa e listava os dois conflitos)."
+    },
+    {
+     "indice": 3,
+     "refutado": false,
+     "reproduzido": true,
+     "severidade": "S4",
+     "introduzido_pela_rodada2": false,
+     "comando": "- `node rp.js $D/new casos3.json` e `node rp.js $D/pre casos3.json`.\n- python3 com dados2 de 2e31588: jan ' ', '0x10', '1_000'; part ' ' com B livre; Q=10, rend 1.\n- Igualdade de rpNum e _rp_num por md5 em ee4f954, 04bf6f2 e 2e31588.",
+     "saida": "JS new (igual ao pre):\n- jan ' ': alocado=0, saldo=10, causa 'sem horas na janela';\n- '0x10': alocado=10, sem motivo;\n- '1_000': 'A: janela inválida, considerada sem limite';\n- part ' ': q=[0,10].\n\nPy new:\n- jan ' ': alocado=10.0, 'A: janela inválida, considerada sem limite';\n- '0x10': 'janela inválida';\n- '1_000': sem motivo;\n- part ' ': q=[5.0, 5.0].\n\nrpNum md5 cdc2c9ce e _rp_num md5 4e4bfd68, iguais nos três commits.",
+     "fundamento": "Reproduzi a divergência de paridade entre JS e Python ao ler texto numérico fora do padrão.\n\nNo JS, Number('') dá 0: espaço vira janela 0 ou parte 0%. No Python, float('') falha e o valor vira inválido. '0x10' e '1_000' divergem no sentido oposto.\n\nSó afeta entrada fora do padrão; o campo da tela é numérico. A função não mudou desde antes do D-01, então não foi introduzido pela rodada 2. Não está na lista de fora do escopo.\n\nSeveridade S4: o impacto é de paridade e robustez do oráculo, sem cálculo errado num fluxo normal."
+    }
+   ]
+  },
+  {
+   "lente": "desempenho-teto",
+   "cobertura": "Lente: desempenho, tetos e regressão. Todo o trabalho foi feito em cópias de /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev8/perf/{new=2e31588, old=04bf6f2, pre=ee4f954}. Os arquivos new.js, old.js e pre.js são o bloco REPARTIR de cada commit com module.exports no fim. As versões *_i, *_c, *_p e *_g têm só contadores de tempo e passos. Nada foi editado em /home/user. Tudo abaixo foi EXECUTADO.\n\n(1) Oráculo e regressão\n- `python3 rend_multiconjuntos_unit.py` dá 101/101 OK em 2e31588 (15,3 s) e 91/91 OK em 04bf6f2 (13,9 s).\n- reg_casos.py roda os 77 CASOS de 2e31588 em old.js e new.js. Os 72 casos antigos têm os mesmos números (alocado, saldo, q, h, nq, fq, conflito, déficit, decorrido, nec, falta). Só mudam os novos R2-2a e R2-3, como esperado.\n- Das 14 entradas especiais do oráculo antigo, 13 são idênticas. W3m só muda o texto do motivo.\n- Nas 752 entradas aleatórias do oráculo (400 + 352 com configuração ociosa), os números são iguais nas 752 e os motivos idênticos em 643. A diferença nos motivos vem do R2-4 e do R2-5.\n- Diferencial aleatório de 90 mil entradas (randdiff.js com 2–7 e 4–9 configurações): 121 diferenças, todas explicadas.\n  - Partes fixas por ordem de redução (R2-3): razão novo/antigo do alocado entre 0,848 e 1,429, mediana 0,993. É o mesmo mecanismo do achado 8, fora do escopo.\n  - Buraco de 5 passando por configuração sem janela (R2-2): o novo é viável e atende mais.\n\n(2) Desempenho (node 22; Python 3.11)\n- Suíte adversarial com 50 casos (gen.js): pares 11–15, trios10 (59 049 cliques), multipartidos mistos, trator×implemento 2×15 a 6×5, cadeia 30, ciclos 29/30, anti-ciclos 7–29, aleatórios densos n=30 com p de 0,15 a 0,9, grupos de recursos, sequência declarada, partes fixas e trocas.\n- Maior tempo em JS com até 30 configurações: 12 pares + 3 avulsas, janelas invertidas, partes e trocas (16 723 restrições). Frio, em processo novo: 433–607 ms; quente: 340–394 ms. O 04bf6f2 levava 890–1 051 ms no mesmo caso. Busca aleatória em 250 multipartidos: máximo de 258 ms, razão novo/antigo com máximo 1,47 e mediana 0,61.\n- Contagem de cortes por componente: no pior caso exato (pares12, 8 188 cortes por grafo, p e a), a contagem custa 84 ms e a geração final 73 ms. A fase do grafo é cerca de 2,7× a do antigo (232 vs 84 ms), mas a chamada inteira continua abaixo de 1 s e em geral mais rápida que antes, porque há menos motivos.\n- Com teto por componente, o total cresce com o número de componentes. Só passa de 1 s acima de 30 configurações: 3×pares12 (72) leva 0,9–1,07 s e 4× (96) leva 1,5 s.\n- Pico do grupo (simul): em mais de 1 000 instâncias (aleatórios, sem triângulo, circulantes, grades), o máximo foi 435 passos, longe do teto. JM e motivos em 30 configurações com 29 ativos cada: menos de 30 ms.\n- Python com float: pior caso 0,82 s (trator×implemento 5×6). Com Fraction, ver o achado 3.\n\n(3) Caminhos de teto\n- Mais de 4 096 cliques: pares13–15, trios10, 3^7·2, 2^11·3.\n- Mais de 8 192 cortes: anti-ciclo 29 (3 480 cliques), pares11/12 nas janelas do R2-1, pares12 com 6 avulsas.\n- Buraco com h===null: 5×6 e 6×5, com 65 537 passos nos dois grafos.\n- Nos três caminhos, só o componente afetado vai para o conservador, com o motivo \"combinações demais…\". Um trio independente somado ao caso fica intacto em 48 de 50 combinações; as 2 restantes recebem 0 porque as partes fixas cobrem 100 % da área (R=0), não por contaminação.\n- Um verificador independente em Python (cliques maximais sem teto do grafo físico; cortes por prazo com h) conferiu 7 052 670 cortes em 150 resultados: nenhuma violação.\n- Paridade JS × Python (float) nos 150 resultados: números e motivos idênticos.\n- Comparação: 2×pares12 no 04bf6f2 ia inteiro para o conservador (68 ha); agora atende 134 ha.\n\n(4) Motivos no pior caso encontrado\n- MM, 10 trios: 112 motivos (3,7 por configuração), 82 sem as 30 de tarifa.\n- MT, um clique de 30: 34 motivos, mas 57 981 caracteres numa única linha da tela.\n- O 04bf6f2 chegava a 879 motivos e 163 mil caracteres. O R2-4 reduziu muito a contagem, mas a lista continua ilegível no pior caso (achado 1).\n\nFora do escopo e não reportado: troca reservada, serialização de grupo, achado 7 (o 5×6 aparece só como caminho null) e achado 8 (ordem das partes fixas).",
+   "achados": [
+    {
+     "titulo": "Lista de motivos ilegível no pior caso: um motivo de troca por janela, cada um repetindo até 30 nomes três vezes (texto maior que em 04bf6f2)",
+     "severidade": "S4",
+     "arquivo": "tools/prototipo/v37/gen37/safra.js",
+     "linha": 214,
+     "cenario_de_falha": "Uma ocorrência com 30 configurações que têm máquina em comum duas a duas (um clique), nomes de cadastro ('Trator j + Plantadeira j (talhão j)'), janelas 2 + 1,5·j h, trocas 0,5 + (3j mod 4) h e só a primeira com 50 % fixo. Saem 34 motivos com 57 981 caracteres; 29 deles são de troca, um por janela do mesmo grupo U, e somam 56 417 caracteres. Cada um lista até 30 nomes em 'quem', de novo em 'de A, B … e Z' e uma terceira vez no ajuste 'separe … das outras'. A tela junta tudo com ' · ' na linha da ocorrência (safra.js:673): são 58 080 caracteres numa célula. No caso MM (10 trios com 3 % fixo, trocas e sem tarifa) saem 112 motivos para 30 configurações (3,7 por configuração), acima do critério de no máximo 3 por configuração que o próprio R2-4 adota.",
+     "evidencia": "EXECUTADO: node /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev8/perf/mot_repro.js <perf> new|old|pre\nnew MT motivos=34 caracteres=57981 maior=3623 linha da tela=58080\nold MT motivos=155 caracteres=45270 maior=2386 linha da tela=45732\npre MT motivos=99 caracteres=6625 maior=106\nnew MM motivos=112 caracteres=15775 (old 162 / 17438)\nDecomposição de MT no novo: {troca: 29 motivos / 56417 caracteres, conflito 1 / 1241, partes fixas 1, outros 3}.\nDecomposição de MM: parte fixa por configuração 30, tarifa 30, partes fixas por grupo 21, troca 20, conflito 10, outros 1.\nO R2-4 reduziu a contagem (155 → 34), mas o R2-5 (nomes do grupo e origem no motivo de troca) aumentou o tamanho: o maior motivo passou de 2 386 para 3 623 caracteres e a linha da tela de 45,7 mil para 58,1 mil.",
+     "introduzido_pela_rodada2": true,
+     "correcao_proposta": "No motivo de troca, um por grupo U (o que ocupa a janela ou, senão, a maior reserva), citando as janelas afetadas e não um motivo por janela. Limitar as listas de nomes a 3 seguidos de 'e mais N'. Não repetir 'quem' no ajuste ('use outro conjunto para estas'). Na tela (linha 673), mostrar os primeiros motivos com 'mais N' expansível. Incluir MT e MM no oráculo com teto de caracteres por ocorrência (por exemplo, ≤ 2 000) e de motivos por configuração."
+    },
+    {
+     "titulo": "Motivo de conflito por grupo nomeia só o primeiro par em empate e esconde os outros 26 pares que não cabem",
+     "severidade": "S4",
+     "arquivo": "tools/prototipo/v37/gen37/safra.js",
+     "linha": 228,
+     "cenario_de_falha": "Cadeia de 28 configurações (caso W3m do oráculo: ativos a_i e a_{i+1}, 1 operador cada, 14 operadores, janela 100 h, 2 000 ha). Os 27 pares vizinhos precisam cada um de 142,86 h numa janela de 100 h. O agrupamento por raiz UP guarda só o primeiro corte de maior déficit, e o motivo diz 'K0 e K1: em sequência precisam de 142,86 h para 142,86 ha; a janela tem 100 h'. Quem lê ajusta K0 e K1 e continua em conflito em K1–K2 … K26–K27. Antes o motivo não nomeava ninguém; agora nomeia um único par como se fosse o único.",
+     "evidencia": "EXECUTADO: com new_cf.js, que só registra cada restrição com nec > W, em repartir(2000, 28 em cadeia, {op:{un:14}}):\nrestrições em conflito: 54 (K0+K1@100 | K1+K2@100 | K2+K3@100 | K3+K4@100 …)\nmotivos de conflito: ['K0 e K1: em sequência precisam de 142,86 h para 142,86 ha; a janela tem 100 h']\nEntrada W3m do oráculo antigo, rodada em old.js e em new.js: o antigo dá 'em sequência precisam de 142,86 h …' e o novo dá 'K0 e K1: em sequência precisam de 142,86 h …'.",
+     "introduzido_pela_rodada2": true,
+     "correcao_proposta": "Quando mais de uma restrição do mesmo grupo UP passa da janela, dizer quantas e quem, por exemplo 'K0 e K1 (e mais 26 grupos em conflito, de K1 a K27): …', ou nomear a união dos membros em conflito com o limite de nomes do achado 1. Incluir no oráculo a verificação de que o W3m menciona os demais pares."
+    },
+    {
+     "titulo": "Espelho Python em modo Fraction leva 36,9 s em 30 configurações com partes fixas (denominadores de cerca de 47 mil dígitos)",
+     "severidade": "S4",
+     "arquivo": "tools/prototipo/v37/gen37/dados2.py",
+     "linha": 461,
+     "cenario_de_falha": "Quinze pares (30 configurações, máquina por par entre partes diferentes), janelas de 10+a h, 100/30 % fixo cada, trocas (a mod 4)·0,5 h, 1 500 ha. O componente vai para o conservador (mais de 4 096 cliques). As reduções proporcionais em sequência (q *= B/hf em cada restrição que aperta) multiplicam denominadores. Em float leva 0,05 s; com Fraction, que é o modo exato que o oráculo usa, leva 36,9 s. Os denominadores de q chegam a cerca de 46 907 dígitos, e str() de um deles já estoura o limite de 4 300 dígitos do Python (ValueError). O produto (JS) não é afetado; o impacto é no oráculo e espelho, se alguém acrescentar um caso grande em modo exato.",
+     "evidencia": "EXECUTADO: timeout 900 python3 /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev8/perf/f3.py <cópia>\n== new  float 0.05 s · alocado 51.9657 · motivos 59 | Fraction 36.94 s · maior denominador de q: 155825 bits (~46907 dígitos)\n== old  float 0.05 s · alocado 67.8587 · motivos 530 | Fraction 99.26 s · 199654 bits (~60101 dígitos)\ncProfile (novo): 31,6 s de 38,3 s em math.gcd, dentro de aloca (Fraction._add).",
+     "introduzido_pela_rodada2": false,
+     "correcao_proposta": "Documentar no espelho e no oráculo que o modo Fraction serve para casos pequenos e pôr teto de tempo no oráculo. Se o exato for necessário em casos grandes, aplicar a cada configuração um único fator acumulado sobre cab (sem reescrever q a cada restrição) ou reduzir as reduções sequenciais às restrições que de fato apertam. A mudança de ordem fica com o achado 8."
+    }
+   ],
+   "vereditos": [
+    {
+     "indice": 0,
+     "refutado": false,
+     "reproduzido": true,
+     "severidade": "S4",
+     "introduzido_pela_rodada2": true,
+     "comando": "node verif-desempenho-teto/mot.js x new|old|pre det (cópia própria de mot_repro.js, com o bloco REPARTIR extraído de safra.js de cada commit via git archive; safra.js 2e31588 linhas 665-680 lidas)",
+     "saida": "new MT motivos=34 caracteres=57981 maior=3623 linha da tela=58080 | troca 29/56417, conflito 1/1241\nold MT motivos=155 caracteres=45270 maior=2386 linha da tela=45732 | troca 29/36817, conflito 122/8130\npre MT motivos=99 caracteres=6625 maior=106\nnew MM 112 motivos/15775 car.; old MM 162/17438; pre MM 132/10976\nÚltimo motivo de troca (new) lista os 29 nomes e termina em '... Trator 30 + Plantadeira 30 (talhão 30) das outras (sequência declarada, mesma máquina ou recurso da fazenda)'. A linha 673 junta rp.motivos com ' · ' numa única célula.",
+     "fundamento": "Reproduz com os números exatos. 04bf6f2 já tinha 29 motivos de troca, um por janela. Então o 'um motivo por janela' não é novo. O que é novo é o tamanho: o R2-5 pôs no motivo de troca os nomes do grupo, a origem e o ajuste 'separe ... das outras'. Com isso o texto de troca passou de 36,8 mil para 56,4 mil caracteres, o maior motivo de 2 386 para 3 623 e a linha da tela de 45,7 mil para 58,1 mil. O R2-4 reduziu a contagem de 155 para 34, mas o texto total cresceu. Por isso a regressão de tamanho é da rodada 2. O cálculo não muda (alocado e conflito são iguais), e o caso é patológico: um clique de 30 configurações. É só legibilidade, portanto S4. Não verifiquei o critério de 'no máximo 3 motivos por configuração' atribuído ao R2-4. O MM tem 3,7 motivos por configuração, mas caiu em relação a 04bf6f2 (162 para 112)."
+    },
+    {
+     "indice": 1,
+     "refutado": false,
+     "reproduzido": true,
+     "severidade": "S4",
+     "introduzido_pela_rodada2": true,
+     "comando": "node -e (cadeia de 28 configurações K_i com ativos a_i, a_{i+1}, rec op:1, jan 100, repartir(2000, cs, {op:{un:14}})) nos blocos new/old/pre",
+     "saida": "new conflito=true alocado=1400.00 motivo: 'K0 e K1: em sequência precisam de 142,86 h para 142,86 ha; a janela tem 100 h'\nold conflito=true alocado=1400.00 motivo: 'em sequência precisam de 142,86 h para 142,86 ha; a janela tem 100 h'\npre: igual a old",
+     "fundamento": "Reproduz. Os 27 pares vizinhos estão empatados e o motivo de conflito do grupo nomeia só K0 e K1. Em 04bf6f2 não nomeava ninguém, logo a mudança veio do R2-4 ('um motivo por grupo UP com o corte de maior déficit, com os nomes'). O código faz o que o R2-4 descreve. Mas, no empate, o nome único leva a pessoa a crer que só K0–K1 está em conflito. A flag conflito, o alocado e o déficit continuam certos, e a tela segue mostrando conflito depois do ajuste. Não aceita plano inviável: é só mensagem incompleta, portanto S4. Não é decisão de janela do Codex nem item fora do escopo, por isso não refuto."
+    },
+    {
+     "indice": 2,
+     "refutado": false,
+     "reproduzido": true,
+     "severidade": "S4",
+     "introduzido_pela_rodada2": false,
+     "comando": "timeout 600 python3 verif-desempenho-teto/f3.py verif-desempenho-teto/{new,old} (15 pares, 30 configurações, part 100/30, janelas 10+a, trocas (a mod 4)/2, 1500 ha; dados2.repartir em float e em Fraction)",
+     "saida": "new: float 0.07 s · alocado 51.9657 · motivos 59 | Fraction 37.09 s · maior denominador de q: 155825 bits (~46907 dígitos)\nold: float 0.05 s · alocado 67.8587 · motivos 530 | Fraction 101.28 s · 199654 bits (~60101 dígitos)\nOráculo em 2e31588: 101/101 OK.",
+     "fundamento": "Reproduz: 37 s em Fraction e denominadores de cerca de 47 mil dígitos (dados2.py, perto da linha 461, reduções q*=B/hf em sequência). Não foi introduzido pela rodada 2: 04bf6f2 é pior (101 s, ~60 mil dígitos), e a rodada 2 reduziu o tempo. O problema fica só no espelho e no oráculo em modo exato. O produto em JS e o float levam 0,07 s, e nenhum caso do oráculo atual chega a esse tamanho (101/101 roda normalmente). É um custo de ferramenta de teste com alternativa trivial (casos pequenos, ou float), portanto S4, anterior ao delta."
+    }
+   ]
+  },
+  {
+   "lente": "textos-tela",
+   "cobertura": "Lente: textos e tela. Trabalhei só em cópias (git archive de 2e31588, 04bf6f2 e ee4f954) em /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev8/textos/{c2,c1,c0}. Nada foi editado em /home/user.\n\nExecutado:\n1) O oráculo `python3 rend_multiconjuntos_unit.py` em c2 deu \"RESULTADO: 101/101 OK\".\n2) Harness em .../textos/h:\n   - run.js extrai o bloco REPARTIR com new Function;\n   - run.py importa dados2.repartir;\n   - tela.js extrai e executa os trechos reais da tela em safra.js: causas, avisos, linhaCfg (p.nome e p.dec) e a expressão do NC no k4, aplicados ao resultado de repartir.\n3) Rodei 27 casos (casos1 a casos11.json) em c2 e, para atribuir a origem, em c1:\n   - troca por origem: sequência declarada, ativo, grupo de 1 unidade, grupo de 2+ e mista;\n   - mistos fato + estimativa;\n   - par que sozinho excede o grupo;\n   - ciclo de 5 por ativos, por grupos de 1 unidade e por pessoas;\n   - anti-buraco de 7;\n   - Moon-Moser 3^8 (mais de 4096 cliques);\n   - partes fixas mistas;\n   - ordem da troca × prazo;\n   - empate float da troca;\n   - chip agregado com 2 causas.\n4) JS e Python deram os mesmos motivos, causa, conflitoEst, chips por configuração e saldo nos 27 casos (0 divergências).\n\nConfirmado sem defeito:\n- a origem e o ajuste da troca nos casos puros (declarada → \"tire X da sequência declarada\"; ativo → \"use outro conjunto para X\"; grupo → \"tenha mais <grupo> na fazenda\"; mista → \"separe X das outras ...\");\n- o motivo de troca some no empate float;\n- a causa \"troca reservada ocupa a janela\" é coerente quando a ocorrência fica pendente;\n- o chip agregado \"troca reservada ocupa a janela · 2 pendentes | sem horas na janela · 1 pendente\" está certo;\n- o texto de \"combinações demais\" é verdadeiro.\n\nFora do escopo, não reportado: as regras (a), (b) e (c) e os achados 7 e 8.",
+   "achados": [
+    {
+     "titulo": "Conflito de fato fica escondido atrás do conflito de estimativa (um motivo por grupo UP, o de maior déficit), e chip e motivo se contradizem",
+     "severidade": "S3",
+     "arquivo": "tools/prototipo/v37/gen37/safra.js",
+     "linha": 229,
+     "cenario_de_falha": "A e B usam o mesmo ativo t1 (fato). C e D só se excluem de A e B pelo grupo Operadores (un=2, 1 cada, que serializa: estimativa). Todas com janela de 10 h, rend 1, Q=50. O plano tem um conflito físico certo, A e B precisando de 25 h numa janela de 10 h. O único motivo de conflito exibido, porém, é o de estimativa (A, B, C e D, 50 h). Já o chip diz fato. O usuário segue o motivo, põe mais operadores e o conflito continua.",
+     "evidencia": "node tela.js c2 casos2.json (caso B1) →\n- chip: '40 ha sem conjunto | sequência não cabe na janela';\n- cfg A, B: 'em sequência'; cfg C, D: 'em sequência nesta estimativa';\n- o único motivo de conflito: 'A, B, C e D: consideradas em sequência nesta estimativa, precisam de 50 h para 50 ha; a janela tem 10 h'.\n\nContrafactual, casos10.json 'B1 com 4 operadores': continua 'A e B: em sequência precisam de 25 h para 25 ha; a janela tem 10 h'.\n\nO mesmo padrão aparece no ciclo de 5 por ativos com Q=30 (casos5): chip de fato, motivo só de estimativa.\n\nEm 04bf6f2 (node tela.js c1 casos2.json) as duas linhas apareciam: 'em sequência precisam de 25 h para 25 ha…' e '…50 h para 50 ha…'.\n\nJS = Python.",
+     "introduzido_pela_rodada2": true,
+     "correcao_proposta": "No cfG, guardar por grupo UP o maior déficit de fato e o maior de estimativa, e emitir os dois quando forem restrições diferentes (o de fato primeiro). Outra saída é emitir o de estimativa só quando não houver conflito de fato no grupo. Fazer o mesmo no espelho dados2.py (cf_g, perto da linha 542) e incluir um caso no oráculo: misto fato + estimativa com os dois motivos e o chip coerente."
+    },
+    {
+     "titulo": "Na tela, a ordem 'começa a de menor troca' contradiz a ajuda da janela ('cada configuração termina dentro da própria janela'): a ordem que a tela mostra estoura o prazo da configuração",
+     "severidade": "S3",
+     "arquivo": "tools/prototipo/v37/gen37/areas/processo_safra.py",
+     "linha": 140,
+     "cenario_de_falha": "Sequência declarada: A com rend 1, janela 4 h e troca 1 h; B com rend 1, janela 10 h e troca 0; Q=20. A divisão dá A=4 ha (4 h) e B=5 ha, o que é viável pela ordem EDF: A de 0 a 4 h, depois B sem troca até 9 h. A tela, porém, mostra A com '5,0 · com 1 h de troca' e decorrido de 10 h. Isso segue a ajuda da troca ('começa a de menor troca'): B começa (5 h), A entra com 1 h de troca e termina às 10 h, fora do prazo de 4 h. A ajuda nova da janela afirma o contrário ('cada configuração termina dentro da própria janela'). Quem seguir a ordem da tela perde o prazo de A, e o decorrido sai 1 h acima do da ordem viável.",
+     "evidencia": "node tela.js c2 casos4.json (caso C1) →\n- 'cfg A q= 4 : A | em sequência  · dec: 5,0  com 1 h de troca';\n- decorrido 10 (node run.js c2 casos3.json: [('A',4,4,5),('B',5,5,5)]).\n\nAjuda 'jan' (linha 137 em 2e31588): '…em sequência, cada configuração termina dentro da própria janela, e a janela maior de outra não amplia a dela'.\nAjuda 'troca' (linha 140): '…quando trabalham em sequência (começa a de menor troca); entra no tempo decorrido…'.\nsafra.js linha 235: ini = a de menor troca.\n\nOs números em 04bf6f2 são idênticos (node run.js c1 casos3.json). Lá a ajuda dizia 'dividem a maior janela'.\n\nJS = Python.",
+     "introduzido_pela_rodada2": false,
+     "correcao_proposta": "Duas saídas:\n- escolher quem começa pela menor janela (EDF) quando as janelas diferem, e a troca no empate, em safra.js (linha 235, ini) e em dados2.py (linha 567), com o decorrido nessa ordem;\n- ou mudar a ajuda da troca para 'começa a de menor prazo (janela); no empate, a de menor troca'.\n\nIncluir no oráculo o caso A(4 h, troca 1) × B(10 h, troca 0): decorrido de 9 h, sem troca em A."
+    },
+    {
+     "titulo": "Grupo de 1 unidade (fato) é chamado de estimativa no motivo do grupo e na ajuda 'seq', contradizendo os chips e o conflito",
+     "severidade": "S4",
+     "arquivo": "tools/prototipo/v37/gen37/safra.js",
+     "linha": 116,
+     "cenario_de_falha": "Trator com un=1, usado por A e B (fato: uma máquina só). Na mesma ocorrência a tela diz duas coisas:\n- motivo do grupo: 'Trator: ao mesmo tempo precisariam de 2, a fazenda tem 1; configurações consideradas em sequência nesta estimativa';\n- chips 'em sequência', conflito 'A e B: em sequência precisam de 30 h…' e origem da troca '(Trator da fazenda)', todos como fato.\n\nA ajuda 'seq' (processo_safra.py:139) também chama de estimativa a 'falta de máquina ou pessoa na fazenda', mesmo com 1 unidade. Quando o par já se exclui por outro motivo, o motivo cai no texto antigo 'quem a usa divide a janela dela', que é do modelo de janela dividida, anterior ao D-01.",
+     "evidencia": "node tela.js c2 casos4.json (caso B5): os motivos começam com 'Trator: … configurações consideradas em sequência nesta estimativa', e os chips de A e B são 'em sequência'.\n\nCiclo de 5 por grupos de 1 unidade (casos5) e por operadores (casos6): 5 motivos 'Máq0..4/Operador 0..4: … nesta estimativa', todos os chips 'em sequência' e 'sequência não cabe na janela'.\n\ncasos8 T2: 'Operador: a fazenda tem 1; quem a usa divide a janela dela'.\n\nO texto 'nesta estimativa' do grupo já existia em 04bf6f2 (c1, igual). A contradição aparece porque a rodada 2 passou a separar fato de estimativa nos chips, no conflito e na troca.",
+     "introduzido_pela_rodada2": false,
+     "correcao_proposta": "Na linha 115-116 (e em dados2.py, linhas 316-317): com un<=1, usar 'Trator: a fazenda tem 1; quem o usa trabalha em sequência' e manter 'nesta estimativa' só para un>1. Na ajuda 'seq': 'Mesmo trator do cadastro ou grupo com 1 unidade obriga a sequência; grupo com mais unidades que não atende todas ao mesmo tempo faz a estimativa considerar as configurações em sequência'."
+    },
+    {
+     "titulo": "Par que sozinho excede o grupo de 2+ unidades (impossível trabalhar junto) é rotulado como estimativa",
+     "severidade": "S4",
+     "arquivo": "tools/prototipo/v37/gen37/safra.js",
+     "linha": 168,
+     "cenario_de_falha": "Operadores com un=2; A precisa de 2 e B precisa de 2. Os dois nunca trabalham juntos, o que é fato físico. Mesmo assim a tela diz:\n- chips 'em sequência nesta estimativa' em A e B;\n- chip da ocorrência 'não cabe na janela nesta estimativa';\n- conflito 'A e B: consideradas em sequência nesta estimativa, precisam de 30 h…'.\n\nO usuário lê como suposição pessimista uma inviabilidade certa.",
+     "evidencia": "node tela.js c2 casos4.json (caso B4) → '20 ha sem conjunto | não cabe na janela nesta estimativa', 'cfg A q= 5 : A | em sequência nesta estimativa', conflitoEst=true (run.js/run.py: True e True).\n\nJM/junto (linhas 92 e 168) só tratam como fato o grupo com un<=1.\n\nEm 04bf6f2 os chips eram 'em sequência' e 'sequência não cabe na janela'.",
+     "introduzido_pela_rodada2": true,
+     "correcao_proposta": "Só para classificar (JM, usado em estDe e seqEst, sem mexer na decisão nem no grafo): contar como fato o par x,y quando, em algum grupo k, rec_x[k] + rec_y[k] > un. Espelhar em dados2.py (JM, linha 418) e incluir o caso B4 no oráculo, com conflitoEst=false e chips 'em sequência'."
+    },
+    {
+     "titulo": "Resumo da etapa 4 (k4) afirma 'N sequência(s) não cabe(m) na janela' também para conflito só de estimativa",
+     "severidade": "S4",
+     "arquivo": "tools/prototipo/v37/gen37/safra.js",
+     "linha": 703,
+     "cenario_de_falha": "Ocorrência só com conflito de estimativa: a linha mostra o chip 'não cabe na janela nesta estimativa', mas o resumo do topo da etapa 4 diz '1 sequência não cabe na janela', que é a redação de fato. NC conta i.rp.conflito sem olhar conflitoEst.",
+     "evidencia": "node tela.js c2 casos4.json (B4): avisos = 'não cabe na janela nesta estimativa', e k4 (expressão real extraída da linha 703) = ' · 1 sequência não cabe na janela'.\n\nO mesmo vale para o ciclo de 5 com Q=20 e para o Moon-Moser (casos5 e casos10).\n\nA distinção de estimativa nos chips é da rodada 2. Em 04bf6f2 o chip e o k4 eram iguais.",
+     "introduzido_pela_rodada2": true,
+     "correcao_proposta": "Separar NC em fato (conflito && !conflitoEst) e estimativa, e escrever, por exemplo, ' · 1 sequência não cabe na janela · 2 não cabem na janela nesta estimativa'."
+    },
+    {
+     "titulo": "Motivo das partes fixas (um por grupo e janela) mostra uma fração falsa para parte das configurações e esconde o corte de estimativa",
+     "severidade": "S4",
+     "arquivo": "tools/prototipo/v37/gen37/safra.js",
+     "linha": 193,
+     "cenario_de_falha": "Quatro partes fixas de 25 % (Q=40, janela de 10 h). A e B usam o mesmo ativo (fato). C e D só entram pelo grupo Operadores (un=2, estimativa). C e D ficam com 33,33 % do que cabia; A e B com 16,67 %. O único motivo diz 'as partes fixas em sequência não cabem na janela de 10 h: cada uma faz 16,67 % do que cabia na própria janela'. A fração é falsa para C e D, e o rótulo é de fato, embora o corte de C e D venha da estimativa. Quando há empate no mínimo, fica a primeira restrição (at:t1, de mn==mx).",
+     "evidencia": "node tela.js c2 casos7.json (F1 e F2): 'cfg C q= 3.3333 … em sequência nesta estimativa', 'cfg D q= 3.3333', e o único motivo 'as partes fixas em sequência … cada uma faz 16,67 %…'.\n\nEm 04bf6f2 (node tela.js c1 casos7.json) também saía 'fazem de 16,67 % a 33,33 %…'.\n\nJS = Python.",
+     "introduzido_pela_rodada2": true,
+     "correcao_proposta": "Por grupo e janela, calcular mn e mx sobre a união das configurações de todas as restrições cortadas (não só da escolhida). Usar o rótulo de estimativa apenas se todas forem estimativa; se houver as duas naturezas, citar as duas. Espelhar em dados2.py (pf_g, perto da linha 464)."
+    },
+    {
+     "titulo": "Origem da troca escolhe uma só origem quando a restrição tem duas, e o ajuste sugerido não libera horas",
+     "severidade": "S4",
+     "arquivo": "tools/prototipo/v37/gen37/safra.js",
+     "linha": 165,
+     "cenario_de_falha": "A e B estão na sequência declarada e também usam o mesmo ativo t1; B tem troca de 2 h. O motivo diz '(sequência declarada); … tire B da sequência declarada'. Tirar B da sequência declarada não muda nada, porque o mesmo trator do cadastro continua obrigando a sequência e a troca reservada continua. O mesmo acontece com ativo + grupo de 1 unidade (T2: 'use outro conjunto para B', enquanto continuam dividindo o único Operador). orgDe devolve a própria chave (sq, at: ou pl:) sem verificar se existe outra causa.",
+     "evidencia": "node tela.js c2 casos8.json T1 → 'configurações com a mesma máquina do cadastro trabalham em sequência · sequência declarada: … · B: troca de 2 h reservada na janela de 10 h de A e B (sequência declarada); para liberar horas, reduza a troca ou tire B da sequência declarada'.\n\nT2 → '(mesma máquina do cadastro) … use outro conjunto para B' junto com 'Operador: a fazenda tem 1…'.\n\nEm 04bf6f2 o texto era genérico ('tire B da sequência'). A classificação por origem é da rodada 2 (R2-5).",
+     "introduzido_pela_rodada2": true,
+     "correcao_proposta": "Em orgDe/org_de, mesmo com chave sq, at: ou pl:, verificar se todos os pares se excluem também por outra origem (seq, ativo comum, grupo um/SER). Se sim, devolver '' (mista) ou a lista das origens, e o ajuste deve citar as duas (por exemplo 'tire B da sequência declarada e use outro trator para B')."
+    },
+    {
+     "titulo": "Motivo do caminho conservador diz 'máquinas compartilhadas em ciclo' também quando não há ciclo (anti-buraco) e quando o recurso é pessoa",
+     "severidade": "S4",
+     "arquivo": "tools/prototipo/v37/gen37/safra.js",
+     "linha": 148,
+     "cenario_de_falha": "Anti-buraco de 7: as configurações que podem trabalhar juntas formam o ciclo, e o compartilhamento de máquinas é o complemento dele. Mesmo assim o motivo diz 'máquinas compartilhadas em ciclo', e o usuário procura um ciclo de máquinas que não existe. No ciclo de 5 por operadores (pessoas), o texto também fala em 'máquinas'. Além disso, 'consideradas juntas em cada janela' pode ser lido como 'trabalham ao mesmo tempo', o contrário do que o cálculo faz (soma as horas em sequência), e no mesmo quadro o conflito diz 'consideradas em sequência'.",
+     "evidencia": "node tela.js c2 casos6.json → anti-buraco 7: 'máquinas compartilhadas em ciclo: as configurações ligadas são consideradas juntas em cada janela nesta estimativa (conservador) · … A, B, C, D, E, F e G: consideradas em sequência nesta estimativa…'. 'C5 por operadores (pessoas)': o mesmo texto.\n\nEm 04bf6f2 esse motivo não existia (node tela.js c1 casos6.json). Ele entrou com a R2-2.",
+     "introduzido_pela_rodada2": true,
+     "correcao_proposta": "Usar um texto neutro e fiel ao cálculo, por exemplo: 'recursos compartilhados em arranjo que esta estimativa não confere exatamente: as configurações ligadas são consideradas em sequência em cada janela (conservador)'. Aplicar em safra.js:148 e em dados2.py:386."
+    }
+   ],
+   "vereditos": [
+    {
+     "indice": 0,
+     "refutado": false,
+     "reproduzido": true,
+     "severidade": "S3",
+     "introduzido_pela_rodada2": true,
+     "comando": "cd /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev8/verif-textos-tela && node tela.js c2 casos.json B1 && node tela.js c2 casos.json B1-4op && node tela.js c1 casos.json B1 && python3 run.py c2 casos.json B1. O tela.js extrai do safra.js real o bloco REPARTIR e as funções causas, avisos e linhaCfg, além da expressão NC do k4. Caso B1: A e B com ativo t1; A, B, C e D com rec op:1; Operadores un=2; janela de 10 h; rend 1; Q=50.",
+     "saida": "c2, B1:\n- chips: '40 ha sem conjunto | sequência não cabe na janela'\n- configurações: A e B 'em sequência'; C e D 'em sequência nesta estimativa'\n- conflitoEst=false\n- único motivo de conflito: 'A, B, C e D: consideradas em sequência nesta estimativa, precisam de 50 h para 50 ha; a janela tem 10 h'\n\nc2, B1 com 4 operadores: 'A e B: em sequência precisam de 25 h para 25 ha; a janela tem 10 h', com o conflito mantido (déficit de 15).\n\nc1, B1: as duas linhas aparecem, 'em sequência precisam de 25 h para 25 ha…' e '…50 h para 50 ha…'.\n\nPython (c2): motivos idênticos, conflitoEst=False.",
+     "fundamento": "Reproduz em JS e em Python. O cfG fica só com o corte de maior déficit por raiz UP (safra.js:225-229). Quando o corte de estimativa (pl:Operadores, 40 h de déficit) vence o de fato (at:t1, 15 h), o conflito certo de A e B some, e o chip, que segue cfF, continua dizendo fato. É o efeito do R2-4 na tela. A decisão do Codex trata da semântica da janela, não desta deduplicação, então o achado não está fora do escopo. O cálculo continua conservador: o conflito aparece e o déficit não é subestimado. Mas o motivo induz uma ação errada (mais operadores), e o conflito de fato só aparece depois. Problema limitado com alternativa segura: S3. Em 04bf6f2 os dois motivos apareciam, então foi a rodada 2 que introduziu."
+    },
+    {
+     "indice": 1,
+     "refutado": false,
+     "reproduzido": true,
+     "severidade": "S3",
+     "introduzido_pela_rodada2": false,
+     "comando": "cd /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev8/verif-textos-tela && for c in c2 c1 c0; do node tela.js $c casos.json C1; done && node tela.js c2 casos.json C1-Q9 && python3 run.py c2 casos.json C1-Q9. Casos: A (seq, rend 1, janela 4, troca 1) e B (seq, rend 1, janela 10, troca 0), com Q=20 no C1 e Q=9 no C1-Q9.",
+     "saida": "c2, C1: 'cfg A q= 4 h= 4 ht= 5 | chip: em sequência | dec: 5,0 com 1 h de troca'; 'cfg B q= 5 ht= 5'; decorrido=10.\n\nc2, C1-Q9:\n- conflito=false, saldo=0, decorrido=10\n- A: 'dec: 5,0 com 1 h de troca'\n- motivos só 'sequência declarada…' e as tarifas\n\nc1 e c0: números idênticos.\nPython c2: A ht=5.0, decorrido 10.0.\n\nAjudas em 2e31588:\n- processo_safra.py:137 (jan): 'cada configuração termina dentro da própria janela';\n- :140 (troca): '(começa a de menor troca)'.\nsafra.js:235: ini = a de menor troca.",
+     "fundamento": "Reproduzido. Mesmo sem conflito (Q=9), o plano é aceito com A mostrada entrando depois de B, com a troca. Na ordem da ajuda da troca, B vai de 0 a 5 h, a troca de 5 a 6 h e A de 6 a 10 h, fora do prazo de 4 h de A. A ordem viável (EDF) seria A de 0 a 4 h e B de 4 a 9 h, sem troca, com decorrido de 9 h.\n\nNão é a regra (a): segundo o RETOMADA-NUVEM.md:193, ela trata da troca de configuração sem área continuar reservada. Também não é a decisão do Codex: a decisão define o prazo, e a ordem exibida o contradiz.\n\nA divisão é viável e o decorrido sai 1 h acima, do lado conservador. O defeito está na ordem e na troca que a tela atribui, que levam o usuário a perder o prazo de A: S3.\n\nOs números são iguais em 04bf6f2. A incoerência com a janela-prazo já vem da rodada 1 do D-01, então não foi introduzida pela rodada 2. A rodada 2 só a deixou explícita, ao reescrever a ajuda 'jan'."
+    },
+    {
+     "indice": 2,
+     "refutado": false,
+     "reproduzido": true,
+     "severidade": "S4",
+     "introduzido_pela_rodada2": true,
+     "comando": "cd /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev8/verif-textos-tela && node tela.js c2 casos.json B5 && node tela.js c2 casos.json T2 && node tela.js c1 casos.json B5 && python3 run.py c2 casos.json B5 && git -C /home/user/sp-camada-sintetica diff 04bf6f2 2e31588 -- tools/prototipo/v37/gen37/areas/processo_safra.py. Casos: B5 é Trator un=1 usado por A e B (janela de 10 h, Q=30); T2 é A e B com ativo t1 mais Operador un=1.",
+     "saida": "c2, B5:\n- motivo 'Trator: ao mesmo tempo precisariam de 2, a fazenda tem 1; configurações consideradas em sequência nesta estimativa'\n- chips de A e B: 'em sequência' (fato)\n- conflito 'A e B: em sequência precisam de 30 h…', conflitoEst=false\n\nc2, T2: 'Operador: a fazenda tem 1; quem a usa divide a janela dela'.\n\nPython igual.\n\nO diff da ajuda 'seq' passa de 'Mesmo trator do cadastro ou falta de máquina/pessoa na fazenda já obrigam a sequência' (04bf6f2) para 'falta de máquina ou pessoa na fazenda faz a estimativa considerar as configurações em sequência' (2e31588).",
+     "fundamento": "Reproduzido. Com un<=1, o grupo fica fora de SERp e SERa, e estDe o trata como fato. Por isso os chips e o conflito dizem fato, enquanto o motivo do grupo (safra.js:116) diz 'nesta estimativa'.\n\nQuanto à origem: o texto do motivo do grupo já existia em 04bf6f2. A rodada 2, porém, fez duas coisas que criam a contradição:\n- criou o vocabulário fato × estimativa nos chips;\n- trocou a ajuda 'seq', que estava certa para 1 unidade ('já obrigam a sequência'), por um texto que chama de estimativa toda falta de máquina ou pessoa.\nPor isso marco como introduzido pela rodada 2.\n\nSó texto, sem efeito no cálculo: S4."
+    },
+    {
+     "indice": 3,
+     "refutado": false,
+     "reproduzido": true,
+     "severidade": "S4",
+     "introduzido_pela_rodada2": true,
+     "comando": "cd /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev8/verif-textos-tela && node tela.js c2 casos.json B4 && node tela.js c1 casos.json B4 && python3 run.py c2 casos.json B4. Caso B4: Operadores un=2; A com rec op:2 e B com rec op:2; janela de 10 h; Q=30.",
+     "saida": "c2:\n- chips: '20 ha sem conjunto | não cabe na janela nesta estimativa'\n- A e B: 'em sequência nesta estimativa'\n- conflitoEst=true\n- motivos: 'Operadores: ao mesmo tempo precisariam de 4, a fazenda tem 2; …nesta estimativa' e 'A e B: consideradas em sequência nesta estimativa, precisam de 30 h…'\n\nPython c2: conflitoEst=True, seqEst=True.\n\nc1: chips 'sequência não cabe na janela' e 'em sequência'.",
+     "fundamento": "Reproduzido. Como 2+2 > 2, A e B nunca trabalham juntas: é fato físico. Mas JM (safra.js:168) e junto só tratam como fato grupo com un<=1, e a tela rotula a situação como suposição de estimativa.\n\nA regra 'estimativa = par que só se exclui por grupo de 2+ unidades que serializa' é do próprio R2-5, não decisão do Codex. Ela erra a classificação neste caso. O conflito aparece em vermelho e o cálculo não muda: S4.\n\nEm 04bf6f2 os chips eram de fato, então foi introduzido pela rodada 2."
+    },
+    {
+     "indice": 4,
+     "refutado": false,
+     "reproduzido": true,
+     "severidade": "S4",
+     "introduzido_pela_rodada2": true,
+     "comando": "cd /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev8/verif-textos-tela && node tela.js c2 casos.json B4 && node tela.js c1 casos.json B4. O k4 é avaliado com a expressão (NC?…) extraída por regex de safra.js:703, com NC=1 porque rp.conflito=true.",
+     "saida": "c2, B4:\n- chips: '… | não cabe na janela nesta estimativa'\n- k4: ' · 1 sequência não cabe na janela'\n\nc1, B4: chip 'sequência não cabe na janela', igual ao k4.\n\nNa linha 697 de 2e31588: NC=oc.filter(i=>i.rp.conflito).length, sem olhar conflitoEst.",
+     "fundamento": "Reproduzido. Para conflito só de estimativa, o resumo da etapa 4 usa a redação de fato, enquanto o chip da linha diz 'nesta estimativa'. A rodada 2 criou o chip de estimativa sem ajustar o k4, então a divergência é dela (em 04bf6f2 os dois coincidiam). Só texto: S4."
+    },
+    {
+     "indice": 5,
+     "refutado": false,
+     "reproduzido": true,
+     "severidade": "S4",
+     "introduzido_pela_rodada2": true,
+     "comando": "cd /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev8/verif-textos-tela && node tela.js c2 casos.json F1 && node tela.js c1 casos.json F1 && python3 run.py c2 casos.json F1. Caso F1: quatro partes de 25 %; Q=40; janela de 10 h; A e B com ativo t1; todas com rec op:1; Operadores un=2.",
+     "saida": "c2: A e B q=1,6667; C e D q=3,3333 'em sequência nesta estimativa'. Único motivo das partes fixas: 'as partes fixas em sequência não cabem na janela de 10 h: cada uma faz 16,67 % do que cabia na própria janela'.\n\nPython c2: igual.\n\nc1: dois motivos, '…cada uma faz 16,67 %…' e '…fazem de 16,67 % a 33,33 %…'.",
+     "fundamento": "Reproduzido. Para C e D, a frase 'cada uma faz 16,67 %' é falsa: elas fazem 33,33 %. Além disso, o rótulo é de fato, embora o corte de C e D venha do grupo que serializa, que é estimativa.\n\nA deduplicação do R2-4 (safra.js:186-193) guarda a restrição de menor mn. No empate (at:t1 com mn=mx=1/6 e pl:op com mn=1/6), fica a primeira, e o mx das outras se perde.\n\nNão é o achado 8 (folga não devolvida): o cálculo é o mesmo de 04bf6f2, e o problema está só no texto. S4, introduzido pela rodada 2."
+    },
+    {
+     "indice": 6,
+     "refutado": false,
+     "reproduzido": true,
+     "severidade": "S4",
+     "introduzido_pela_rodada2": true,
+     "comando": "cd /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev8/verif-textos-tela && node tela.js c2 casos.json T1 && node tela.js c2 casos.json T1-ajuste && node tela.js c2 casos.json T2 && node tela.js c2 casos.json T2-ajuste && node tela.js c1 casos.json T1 && python3 run.py c2 casos.json T1. Casos:\n- T1: A e B com seq e ativo t1, B com troca de 2 h, janela de 10 h, Q=30;\n- T1-ajuste: o mesmo com B fora da sequência declarada;\n- T2-ajuste: B com outro trator (t2), mantendo o único Operador.",
+     "saida": "c2, T1: 'B: troca de 2 h reservada na janela de 10 h de A e B (sequência declarada); para liberar horas, reduza a troca ou tire B da sequência declarada'. Resultado: 22 ha sem conjunto, decorrido 10.\n\nc2, T1-ajuste (seguindo o conselho): os mesmos 22 ha sem conjunto, a mesma troca de 2 h reservada; o motivo passa a '(mesma máquina do cadastro) … use outro conjunto para B'.\n\nc2, T2: '(mesma máquina do cadastro) … use outro conjunto para B', ao lado de 'Operador: a fazenda tem 1…'.\n\nc2, T2-ajuste: continuam os 22 ha sem conjunto, agora '(Operador da fazenda)'.\n\nc1, T1: texto genérico, 'tire B da sequência'.\n\nPython c2, T1: igual.",
+     "fundamento": "Reproduzido. orgDe (safra.js:165) devolve a própria chave sq/at:/pl: sem verificar se o par também se exclui por outra origem. Seguir o ajuste proposto não libera nenhuma hora (contraprova T1-ajuste).\n\nO texto específico por origem é do R2-5. O 04bf6f2 usava o genérico 'tire B da sequência', então foi introduzido pela rodada 2.\n\nNo T2, 'outro conjunto' pode significar um prestador com operador próprio, o que torna esse caso ambíguo. O T1 basta para sustentar o achado.\n\nA troca reservada em si (regra a) está fora do escopo. Aqui o defeito é só o texto do ajuste: S4."
+    },
+    {
+     "indice": 7,
+     "refutado": false,
+     "reproduzido": true,
+     "severidade": "S4",
+     "introduzido_pela_rodada2": true,
+     "comando": "cd /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev8/verif-textos-tela && node tela.js c2 casos.json AH7 && node tela.js c1 casos.json AH7 && node tela.js c2 casos.json C5op && node tela.js c1 casos.json C5op && python3 run.py c2 casos.json AH7. Casos:\n- AH7: 7 configurações; cada par a distância de 2 ou mais no ciclo C7 compartilha um ativo (a exclusão é o complemento de C7); janela de 10 h; Q=70;\n- C5op: 5 grupos 'Operador i' com un=1, e a configuração i usa os operadores i e i+1; Q=30.",
+     "saida": "c2, AH7 e C5op: o motivo é 'máquinas compartilhadas em ciclo: as configurações ligadas são consideradas juntas em cada janela nesta estimativa (conservador)'. Logo depois vem 'A, B, C, D, E, F e G: consideradas em sequência nesta estimativa, precisam de 70 h…' (no C5op, '… D e E: … 30 h').\n\nPython c2, AH7: igual.\n\nc1: esse motivo não existe.",
+     "fundamento": "Reproduzido. No anti-buraco, o ciclo é o de quem pode trabalhar junto; o compartilhamento de máquinas é o complemento e não é um ciclo. No C5op, o recurso são pessoas e o texto diz 'máquinas'. 'Consideradas juntas' convive com 'consideradas em sequência' no mesmo quadro.\n\nO oráculo R2-2b só fixa a substring num anel real de máquinas, então reescrever o texto não contraria nenhuma decisão. O motivo entrou com a R2-2 (safra.js:148) e não existe em 04bf6f2. Só texto: S4."
+    }
+   ]
+  }
+ ],
+ "confirmados": [
+  {
+   "lente": "corretude-paridade",
+   "titulo": "R2-2 aceita plano fisicamente inviável sem conflito: anel C5 com um membro sem janela deixa um P4 entre os que têm prazo, e os cortes de clique não bastam com prazos diferentes",
+   "sev": "S2",
+   "intro": true
+  },
+  {
+   "lente": "corretude-paridade",
+   "titulo": "Cortes por prazo das cliques não garantem viabilidade com prazos diferentes em grafo perfeito (P4 de trator × implemento): plano inviável aceito sem conflito",
+   "sev": "S2",
+   "intro": false
+  },
+  {
+   "lente": "corretude-paridade",
+   "titulo": "Conflito certo (sequência de fato) aparece como \"nesta estimativa\" ou some do motivo: conflitoEst e o motivo único por grupo olham só os cortes gerados (R2-4/R2-5)",
+   "sev": "S3",
+   "intro": true
+  },
+  {
+   "lente": "corretude-paridade",
+   "titulo": "Paridade JS × Python ao ler número em texto: espaço vira 0 no JS (janela 0, parte 0%) e \"inválido\" no Python; '0x10' e '1_000' também divergem",
+   "sev": "S4",
+   "intro": false
+  },
+  {
+   "lente": "desempenho-teto",
+   "titulo": "Lista de motivos ilegível no pior caso: um motivo de troca por janela, cada um repetindo até 30 nomes três vezes (texto maior que em 04bf6f2)",
+   "sev": "S4",
+   "intro": true
+  },
+  {
+   "lente": "desempenho-teto",
+   "titulo": "Motivo de conflito por grupo nomeia só o primeiro par em empate e esconde os outros 26 pares que não cabem",
+   "sev": "S4",
+   "intro": true
+  },
+  {
+   "lente": "desempenho-teto",
+   "titulo": "Espelho Python em modo Fraction leva 36,9 s em 30 configurações com partes fixas (denominadores de cerca de 47 mil dígitos)",
+   "sev": "S4",
+   "intro": false
+  },
+  {
+   "lente": "textos-tela",
+   "titulo": "Conflito de fato fica escondido atrás do conflito de estimativa (um motivo por grupo UP, o de maior déficit), e chip e motivo se contradizem",
+   "sev": "S3",
+   "intro": true
+  },
+  {
+   "lente": "textos-tela",
+   "titulo": "Na tela, a ordem 'começa a de menor troca' contradiz a ajuda da janela ('cada configuração termina dentro da própria janela'): a ordem que a tela mostra estoura o prazo da configuração",
+   "sev": "S3",
+   "intro": false
+  },
+  {
+   "lente": "textos-tela",
+   "titulo": "Grupo de 1 unidade (fato) é chamado de estimativa no motivo do grupo e na ajuda 'seq', contradizendo os chips e o conflito",
+   "sev": "S4",
+   "intro": true
+  },
+  {
+   "lente": "textos-tela",
+   "titulo": "Par que sozinho excede o grupo de 2+ unidades (impossível trabalhar junto) é rotulado como estimativa",
+   "sev": "S4",
+   "intro": true
+  },
+  {
+   "lente": "textos-tela",
+   "titulo": "Resumo da etapa 4 (k4) afirma 'N sequência(s) não cabe(m) na janela' também para conflito só de estimativa",
+   "sev": "S4",
+   "intro": true
+  },
+  {
+   "lente": "textos-tela",
+   "titulo": "Motivo das partes fixas (um por grupo e janela) mostra uma fração falsa para parte das configurações e esconde o corte de estimativa",
+   "sev": "S4",
+   "intro": true
+  },
+  {
+   "lente": "textos-tela",
+   "titulo": "Origem da troca escolhe uma só origem quando a restrição tem duas, e o ajuste sugerido não libera horas",
+   "sev": "S4",
+   "intro": true
+  },
+  {
+   "lente": "textos-tela",
+   "titulo": "Motivo do caminho conservador diz 'máquinas compartilhadas em ciclo' também quando não há ciclo (anti-buraco) e quando o recurso é pessoa",
+   "sev": "S4",
+   "intro": true
+  }
+ ]
+}

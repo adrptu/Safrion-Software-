@@ -1,0 +1,37 @@
+$ CDP_GL=1 timeout 900 flock /tmp/cdp9333.lock python3 irr_fluxo_test.py
+OK    1 IR-03det#OS-0423:conflito abre "Resolver conflito" com a parada da B3 e as opções 15:00–17:00 e 21:00–23:00 
+OK    2 aplicar a janela libera pela prontidão (LIB-2292), sem aprovação 
+OK    3 recarregar: a OS-0423 continua Liberadas (estado gravado) com janela 15:00–17:00 
+OK    4 IR-03 lê o mesmo estado: OS-0423 Liberadas, sem conflito 
+OK    5 Mapa Integrado: T7 sem "irrigação em conflito" (amarelo pela mancha do satélite) 
+OK    6 Mapa camada Irrigação: T7 "programada · hoje 15:00" e P2 "conferir medição · OS-0394" 
+OK    7 IR-03det#OS-0394:conferir abre a conferência com 1.206 m³ medidos × 1.254 m³ estimados 
+OK    8 OS-0394 encerrada · hidrômetro prevalece, sem novo crédito (P2 segue 11,2 mm) 
+OK    9 OS-0419 Iniciar → Em execução (início hoje 20:02, EX-5120) 
+OK    10 recarregar: segue Em execução e o primário é Confirmar término (Pausar só agora) 
+OK    11 Confirmar término: volta completa e hidrômetro preenchido pela telemetria (8480 m³) 
+OK    12 término → conferência automática (−1,9 %) → Encerradas; P2 agora 1,7 mm 
+OK    13 trilha com início, término (amanhã 10:33) e conferência automática 
+OK    14 IR-01: Pivô 2 com 1,7 mm e próximo passo da OS-0422 (Definir janela) 
+OK    15 painel do setor: aplicação da OS-0419 creditada uma vez (8.480 m³ = 10,6 mm × 90 % = 9,54 mm líquidos) 
+OK    16 Mapa (Balanço hídrico): P2 com déficit 1,7 mm (verde) 
+OK    17 IR-02#programar=PV02: fazenda Lagoa Grande e "Tarefa única OS-0601 já existe" (Abrir OS-0601, sem Programar) 
+OK    18 PV02 continua com uma só ordem 
+OK    19 IR-01 na Lagoa Grande: 23 pivôs; Pivô 2 programado (OS-0601 hoje 21:00), balanço demonstrativo 
+OK    22 IR-01 Santa Rita: o primário é o passo mais urgente (Resolver conflito · OS-0423 → IR-03det#OS-0423:conflito) 
+OK    23 painel Definir janela: foco entra no painel, aria-modal e Esc fecha (foco volta à tela) 
+OK    24 link direto inválido (OS-0392 Encerradas:janela) não abre o painel e explica o motivo 
+OK    25 Adicionar produtos na OS-0423 (conflito com a parada da B3) é recusado: a v2 não fura o bloqueio 
+OK    26 Agenda (IN-03) lê o estado: OS-0423 resolvida vira Iniciar irrigação · João, prioridade Normal, sem selo de conflito 
+OK    27 IR-01 Pivô 1: falta insumo · OS-0418 (como na O.S.) e próximo passo Programar só água · João 
+OK    28 IR-02#programar=P1: Programar só água cria e libera a ordem de água; OS-0418 segue parada 
+OK    29 v2 em execução: Revisão de saldo pendente; depois da liberação na O.S. a ordem segue a etapa da O.S. (Liberadas · Iniciar execução na O.S.) e a v1 fica creditada só na faixa de <área redigida> ha 
+OK    30 Restaurar demonstração (Estoque) volta a irrigação à semente: OS-0419 Liberadas sem v2 órfã 
+OK    31 parada em 40 de 80 ha (3.800 m³): o Pivô 2 segue 11,2 mm e a faixa coberta (40 ha) é mostrada à parte 
+OK    32 fazenda acompanha: escolhida na Irrigação abre o Mapa nela; trocada no Mapa, a Irrigação abre na do Mapa 
+OK    33 IR-03: filtro rápido (A liberar) continua ao voltar do registro 
+OK    20 sem rolagem lateral nas grades IR a 1280 e 1440 px (Lagoa Grande, 23 pivôs) 
+OK    21 nenhuma tela com erro de execução 
+
+33 ok · 0 falhas []
+[exit 0]

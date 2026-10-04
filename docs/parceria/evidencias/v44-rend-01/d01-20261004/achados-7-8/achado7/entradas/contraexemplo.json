@@ -1,0 +1,177 @@
+[
+{
+"nome": "contraexemplo 7 configurações, prazos 2/3/10, partes fixas (rend 1)",
+"Q": 15.5,
+"cfgs": [
+{
+"id": "A",
+"nome": "A (t2+p0)",
+"rend": 1,
+"jan": 2,
+"part": 12.903225806451612,
+"ativos": [
+"t2",
+"p0"
+],
+"custo_h": 1
+},
+{
+"id": "B",
+"nome": "B (t0+p0)",
+"rend": 1,
+"jan": 10,
+"part": 25.806451612903224,
+"ativos": [
+"t0",
+"p0"
+],
+"custo_h": 1
+},
+{
+"id": "C",
+"nome": "C (t0+p1)",
+"rend": 1,
+"jan": 10,
+"part": 19.35483870967742,
+"ativos": [
+"t0",
+"p1"
+],
+"custo_h": 1
+},
+{
+"id": "D",
+"nome": "D (t0+p2)",
+"rend": 1,
+"jan": 10,
+"part": 19.35483870967742,
+"ativos": [
+"t0",
+"p2"
+],
+"custo_h": 1
+},
+{
+"id": "E",
+"nome": "E (t1+p1)",
+"rend": 1,
+"jan": 2,
+"part": 6.451612903225806,
+"ativos": [
+"t1",
+"p1"
+],
+"custo_h": 1
+},
+{
+"id": "F",
+"nome": "F (t1+p2)",
+"rend": 1,
+"jan": 2,
+"part": 6.451612903225806,
+"ativos": [
+"t1",
+"p2"
+],
+"custo_h": 1
+},
+{
+"id": "G",
+"nome": "G (t4+p2)",
+"rend": 1,
+"jan": 3,
+"part": 9.67741935483871,
+"ativos": [
+"t4",
+"p2"
+],
+"custo_h": 1
+}
+],
+"pools": {}
+},
+{
+"nome": "contraexemplo 7 configurações, sem %, Q=15,5",
+"Q": 15.5,
+"cfgs": [
+{
+"id": "A",
+"nome": "A (t2+p0)",
+"rend": 1,
+"jan": 2,
+"ativos": [
+"t2",
+"p0"
+],
+"custo_h": 1
+},
+{
+"id": "B",
+"nome": "B (t0+p0)",
+"rend": 1,
+"jan": 10,
+"ativos": [
+"t0",
+"p0"
+],
+"custo_h": 1
+},
+{
+"id": "C",
+"nome": "C (t0+p1)",
+"rend": 1,
+"jan": 10,
+"ativos": [
+"t0",
+"p1"
+],
+"custo_h": 1
+},
+{
+"id": "D",
+"nome": "D (t0+p2)",
+"rend": 1,
+"jan": 10,
+"ativos": [
+"t0",
+"p2"
+],
+"custo_h": 1
+},
+{
+"id": "E",
+"nome": "E (t1+p1)",
+"rend": 1,
+"jan": 2,
+"ativos": [
+"t1",
+"p1"
+],
+"custo_h": 1
+},
+{
+"id": "F",
+"nome": "F (t1+p2)",
+"rend": 1,
+"jan": 2,
+"ativos": [
+"t1",
+"p2"
+],
+"custo_h": 1
+},
+{
+"id": "G",
+"nome": "G (t4+p2)",
+"rend": 1,
+"jan": 3,
+"ativos": [
+"t4",
+"p2"
+],
+"custo_h": 1
+}
+],
+"pools": {}
+}
+]

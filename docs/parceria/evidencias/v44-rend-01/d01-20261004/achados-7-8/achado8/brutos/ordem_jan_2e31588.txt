@@ -1,0 +1,25 @@
+## M2
+ordem: sq [A,B] jan=4 → pl:plant [A,C] jan=10 → acq:0,1@4 [A,B] jan=4 → acq:0,2@10 [A,C] jan=10
+  depois de sq: A=2 ha/2 h B=2 ha/2 h C=10 ha/10 h
+  depois de pl:plant: A=1.666667 ha/1.666667 h B=2 ha/2 h C=8.333333 ha/8.333333 h
+  depois de acq:0,1@4: A=1.666667 ha/1.666667 h B=2 ha/2 h C=8.333333 ha/8.333333 h
+  depois de acq:0,2@10: A=1.666667 ha/1.666667 h B=2 ha/2 h C=8.333333 ha/8.333333 h
+  final: alocado 12; decorrido 12
+## F5
+ordem: at:a01 [A,B,C] jan=100 → acq:0,1,2@100 [A,B,C] jan=100 → acq:1,2@20 [B,C] jan=20 (sub)
+  depois de at:a01: A=214.285714 ha/71.428571 h B=14.285714 ha/14.285714 h C=14.285714 ha/14.285714 h
+  depois de acq:0,1,2@100: A=214.285714 ha/71.428571 h B=14.285714 ha/14.285714 h C=14.285714 ha/14.285714 h
+  depois de acq:1,2@20: A=214.285714 ha/71.428571 h B=10 ha/10 h C=10 ha/10 h
+  final: alocado 234.28571428571428; decorrido 91.42857142857143
+## F1
+ordem: sq [A,B1,B2,B3,B4,B5] jan=100 → acq:0,1,2,3,4,5@100 [A,B1,B2,B3,B4,B5] jan=100 → acq:1,2,3,4,5@10 [B1,B2,B3,B4,B5] jan=10 (sub)
+  depois de sq: A=66.666667 ha/66.666667 h B1=6.666667 ha/6.666667 h B2=6.666667 ha/6.666667 h B3=6.666667 ha/6.666667 h B4=6.666667 ha/6.666667 h B5=6.666667 ha/6.666667 h
+  depois de acq:0,1,2,3,4,5@100: A=66.666667 ha/66.666667 h B1=6.666667 ha/6.666667 h B2=6.666667 ha/6.666667 h B3=6.666667 ha/6.666667 h B4=6.666667 ha/6.666667 h B5=6.666667 ha/6.666667 h
+  depois de acq:1,2,3,4,5@10: A=66.666667 ha/66.666667 h B1=2 ha/2 h B2=2 ha/2 h B3=2 ha/2 h B4=2 ha/2 h B5=2 ha/2 h
+  final: alocado 76.66666666666666; decorrido 76.66666666666666
+## F3
+ordem: sq [A,B,C] jan=100 → acq:0,1,2@100 [A,B,C] jan=100 → acq:1,2@10 [B,C] jan=10 (sub)
+  depois de sq: A=83.333333 ha/83.333333 h B=8.333333 ha/8.333333 h C=8.333333 ha/8.333333 h
+  depois de acq:0,1,2@100: A=83.333333 ha/83.333333 h B=8.333333 ha/8.333333 h C=8.333333 ha/8.333333 h
+  depois de acq:1,2@10: A=83.333333 ha/83.333333 h B=5 ha/5 h C=5 ha/5 h
+  final: alocado 93.33333333333334; decorrido 93.33333333333334

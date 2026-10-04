@@ -1,0 +1,405 @@
+OK    03 paralelo_proporcional_tempo_horas_conjunto · 108 ha, 3,6 e 7,2 ha/h, divide pelo rendimento → 36/72 ha, 10 h decorridas, 20 horas-conjunto
+        esperado={"q": ["36", "72"], "decorrido": "10", "hconj": "20", "saldo": "0"}
+        JS={"q": [36, 72], "decorrido": 10, "hconj": 20, "saldo": 0} · conserva=True
+        Py={"q": ["36", "72"], "decorrido": "10", "hconj": "20", "saldo": "0"} · conserva=True
+OK    04 particao_fixa_tempo_horas_conjunto · 54/54 ha fixos → 15 h decorridas, 22,5 horas-conjunto
+        esperado={"q": ["54", "54"], "decorrido": "15", "hconj": "45/2"}
+        JS={"q": [54, 54], "decorrido": 15, "hconj": 22.5} · conserva=True
+        Py={"q": ["54", "54"], "decorrido": "15", "hconj": "45/2"} · conserva=True
+OK    05a recurso_compartilhado_troca · 36/72 ha com o mesmo operador (sequência) e 1 h de troca → 21 h decorridas, 20 horas-conjunto
+        esperado={"decorrido": "21", "hconj": "20", "troca": "1", "conflito": false, "nec.decorrido": "21", "nec.hconj": "20", "falta.hconj": "0"}
+        JS={"decorrido": 21, "hconj": 20, "troca": 1, "conflito": false, "nec.decorrido": 21, "nec.hconj": 20, "falta.hconj": 0} · conserva=True
+        Py={"decorrido": "21", "hconj": "20", "troca": "1", "conflito": false, "nec.decorrido": "21", "nec.hconj": "20", "falta.hconj": "0"} · conserva=True
+OK    05b mesmo_trator_do_cadastro · mesmo trator a01 nas duas (sem marcar sequência) → em sequência: 20 h decorridas
+        esperado={"decorrido": "20", "hconj": "20"}
+        JS={"decorrido": 20, "hconj": 20} · conserva=True
+        Py={"decorrido": "20", "hconj": "20"} · conserva=True
+OK    05c sequencia_nao_cabe_na_janela · a mesma sequência precisaria de 21 h numa janela de 12 h → conflito (faltam 9 h) e a área que não cabe fica sem conjunto: 2 × 5,5 h + 1 h de troca = 12 h; 19,8 + 39,6 = 59,4 ha; 48,6 ha sem conjunto
+        esperado={"conflito": true, "deficit": "9", "decorrido": "12", "hconj": "11", "q": ["99/5", "198/5"], "alocado": "297/5", "saldo": "243/5", "nq": ["36", "72"], "motivo": "precisam de 21 h para 108 ha; a janela tem 12 h", "nec.hconj": "20", "nec.decorrido": "21", "falta.hconj": "9", "falta.decorrido": "9"}
+        JS={"conflito": true, "deficit": 9, "decorrido": 12, "hconj": 11, "q": [19.8, 39.6], "alocado": 59.400000000000006, "saldo": 48.6, "nq": [36, 72], "motivo": ["sequência declarada: dividem trator, implemento ou operador", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "B 12 m: troca de 1 h reservada na janela de 12 h de A 6 m e B 12 m (sequência declarada); para liberar horas, reduza a troca ou tire B 12 m da sequência declarada", "A 6 m e B 12 m: em sequência precisam de 21 h para 108 ha; a janela tem 12 h"], "nec.hconj": 20, "nec.decorrido": 21, "falta.hconj": 8.999999999999998, "falta.decorrido": 9} · conserva=True
+        Py={"conflito": true, "deficit": "9", "decorrido": "12", "hconj": "11", "q": ["99/5", "198/5"], "alocado": "297/5", "saldo": "243/5", "nq": ["36", "72"], "motivo": ["sequência declarada: dividem trator, implemento ou operador", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "B 12 m: troca de 1 h reservada na janela de 12 h de A 6 m e B 12 m (sequência declarada); para liberar horas, reduza a troca ou tire B 12 m da sequência declarada", "A 6 m e B 12 m: em sequência precisam de 21 h para 108 ha; a janela tem 12 h"], "nec.hconj": "20", "nec.decorrido": "21", "falta.hconj": "9", "falta.decorrido": "9"} · conserva=True
+OK    S1 sequencia_janela_3h_B4.3 · 42 ha, 3,6 e 7,2 ha/h em sequência, janela de 3 h → 1,5 h cada: 5,4 + 10,8 = 16,2 ha (≤ 21,6 possíveis), 25,8 ha sem conjunto (≥ 20,4), decorrido 3 h; necessário 42 ÷ 10,8 × 2 = 70/9 h (não 6 h: o plano não corta na janela), déficit 43/9 h
+        esperado={"q": ["27/5", "54/5"], "alocado": "81/5", "saldo": "129/5", "decorrido": "3", "hconj": "3", "conflito": true, "deficit": "43/9", "motivo": ["mesma janela", "precisam de 7,78 h para 42 ha; a janela tem 3 h"], "nec.decorrido": "70/9", "falta.hconj": "43/9", "falta.decorrido": "43/9"}
+        JS={"q": [5.4, 10.8], "alocado": 16.200000000000003, "saldo": 25.8, "decorrido": 3, "hconj": 3, "conflito": true, "deficit": 4.777777777777778, "motivo": ["sequência declarada: dividem trator, implemento ou operador", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "A 6 m e B 12 m: em sequência precisam de 7,78 h para 42 ha; a janela tem 3 h"], "nec.decorrido": 7.777777777777778, "falta.hconj": 4.777777777777778, "falta.decorrido": 4.777777777777778} · conserva=True
+        Py={"q": ["27/5", "54/5"], "alocado": "81/5", "saldo": "129/5", "decorrido": "3", "hconj": "3", "conflito": true, "deficit": "43/9", "motivo": ["sequência declarada: dividem trator, implemento ou operador", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "A 6 m e B 12 m: em sequência precisam de 7,78 h para 42 ha; a janela tem 3 h"], "nec.decorrido": "70/9", "falta.hconj": "43/9", "falta.decorrido": "43/9"} · conserva=True
+OK    S2 sequencia_e_paralela · A e B em sequência (janela 3 h) e C 6 ha/h ao mesmo tempo, sem janela, 42 ha → A e B param em 1,5 h; C faz o resto: 5,4 + 10,8 + 25,8 ha, nada sem conjunto, decorrido 4,3 h
+        esperado={"q": ["27/5", "54/5", "129/5"], "saldo": "0", "decorrido": "43/10", "hconj": "73/10", "conflito": true, "deficit": "2", "motivo": "precisam de 5 h para 27 ha; a janela tem 3 h", "nec.hconj": "73/10", "falta.hconj": "0", "falta.decorrido": "0"}
+        JS={"q": [5.4, 10.8, 25.799999999999997], "saldo": 0, "decorrido": 4.3, "hconj": 7.3, "conflito": true, "deficit": 2, "motivo": ["sequência declarada: dividem trator, implemento ou operador", "A 6 m e B 12 m: em sequência precisam de 5 h para 27 ha; a janela tem 3 h"], "nec.hconj": 7.3, "falta.hconj": 0, "falta.decorrido": 0} · conserva=True
+        Py={"q": ["27/5", "54/5", "129/5"], "saldo": "0", "decorrido": "43/10", "hconj": "73/10", "conflito": true, "deficit": "2", "motivo": ["sequência declarada: dividem trator, implemento ou operador", "A 6 m e B 12 m: em sequência precisam de 5 h para 27 ha; a janela tem 3 h"], "nec.hconj": "73/10", "falta.hconj": "0", "falta.decorrido": "0"} · conserva=True
+OK    S3 troca_na_primeira_P10b · troca de 2 h só na 1ª configuração: começa a de menor troca (B, 0 h) e A entra com 2 h → 22 h decorridas, 20 horas-conjunto
+        esperado={"decorrido": "22", "hconj": "20", "troca": "2"}
+        JS={"decorrido": 22, "hconj": 20, "troca": 2} · conserva=True
+        Py={"decorrido": "22", "hconj": "20", "troca": "2"} · conserva=True
+OK    S4 grupo_da_fazenda_com_janela · 1 plantadeira na fazenda e janela de 12 h → em sequência, 6 h cada: 21,6 + 43,2 ha; 43,2 ha sem conjunto; precisaria de 20 h
+        esperado={"q": ["108/5", "216/5"], "saldo": "216/5", "decorrido": "12", "conflito": true, "deficit": "8", "motivo": "Plantadeiras", "nec.decorrido": "20", "falta.hconj": "8"}
+        JS={"q": [21.6, 43.2], "saldo": 43.2, "decorrido": 12, "conflito": true, "deficit": 8, "motivo": ["Plantadeiras: ao mesmo tempo precisariam de 2, a fazenda tem 1; configurações consideradas em sequência nesta estimativa", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "A 6 m e B 12 m: em sequência precisam de 20 h para 108 ha; a janela tem 12 h"], "nec.decorrido": 19.999999999999996, "falta.hconj": 7.999999999999997} · conserva=True
+        Py={"q": ["108/5", "216/5"], "saldo": "216/5", "decorrido": "12", "conflito": true, "deficit": "8", "motivo": ["Plantadeiras: ao mesmo tempo precisariam de 2, a fazenda tem 1; configurações consideradas em sequência nesta estimativa", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "A 6 m e B 12 m: em sequência precisam de 20 h para 108 ha; a janela tem 12 h"], "nec.decorrido": "20", "falta.hconj": "8"} · conserva=True
+OK    S5 partes_fixas_em_sequencia · PRD 22.1 · 50 % + 50 % em sequência, janela de 10 h. Necessário (demanda inteira, partilha do usuário): 54/3,6 + 54/7,2 = 22,5 h; janela 10 h; déficit 12,5 h (a saída antiga, 17,5 h / 7,5 h, cortava A em 36 ha antes de somar). Atendido (sem mudar a distribuição): A 36 ha na própria janela, a sequência reduz as duas a 4/7 → 144/7 + 216/7 ha em 10 h; saldo 396/7 ha = faltam 12,5 horas-conjunto; necessário 54 + 54 ha = atendido + saldo
+        esperado={"q": ["144/7", "216/7"], "alocado": "360/7", "saldo": "396/7", "hconj": "10", "decorrido": "10", "conflito": true, "deficit": "25/2", "nq": ["54", "54"], "motivo": ["partes fixas em sequência não cabem na janela de 10 h: cada uma faz 57,14 %", "precisam de 22,5 h para 108 ha; a janela tem 10 h"], "nec.area": "108", "nec.hconj": "45/2", "nec.decorrido": "45/2", "falta.area": "396/7", "falta.hconj": "25/2", "falta.decorrido": "25/2", "falta.semHoras": "0"}
+        JS={"q": [20.57142857142857, 30.857142857142854], "alocado": 51.42857142857142, "saldo": 56.57142857142858, "hconj": 10, "decorrido": 10, "conflito": true, "deficit": 12.5, "nq": [54, 54], "motivo": ["sequência declarada: dividem trator, implemento ou operador", "A 6 m: a parte fixa não cabe na janela de 10 h", "as partes fixas em sequência não cabem na janela de 10 h: cada uma faz 57,14 % do que cabia na própria janela", "A 6 m e B 12 m: em sequência precisam de 22,5 h para 108 ha; a janela tem 10 h"], "nec.area": 108, "nec.hconj": 22.5, "nec.decorrido": 22.5, "falta.area": 56.57142857142858, "falta.hconj": 12.5, "falta.decorrido": 12.5, "falta.semHoras": 0} · conserva=True
+        Py={"q": ["144/7", "216/7"], "alocado": "360/7", "saldo": "396/7", "hconj": "10", "decorrido": "10", "conflito": true, "deficit": "25/2", "nq": ["54", "54"], "motivo": ["sequência declarada: dividem trator, implemento ou operador", "A 6 m: a parte fixa não cabe na janela de 10 h", "as partes fixas em sequência não cabem na janela de 10 h: cada uma faz 57,14 % do que cabia na própria janela", "A 6 m e B 12 m: em sequência precisam de 22,5 h para 108 ha; a janela tem 10 h"], "nec.area": "108", "nec.hconj": "45/2", "nec.decorrido": "45/2", "falta.area": "396/7", "falta.hconj": "25/2", "falta.decorrido": "25/2", "falta.semHoras": "0"} · conserva=True
+OK    S6 partes_fixas_ao_mesmo_tempo · 50 % + 50 % ao mesmo tempo (recursos próprios), janela de 10 h cada: A precisa de 15 h para 54 ha e faz 36 ha; B faz 54 ha em 7,5 h → atendido 90 ha, saldo 18 ha = faltam 5 h (de A); necessário 22,5 horas-conjunto e 15 h decorridas; sem sequência, sem conflito
+        esperado={"q": ["36", "54"], "alocado": "90", "saldo": "18", "hconj": "35/2", "decorrido": "10", "conflito": false, "deficit": "0", "nq": ["54", "54"], "motivo": "parte fixa não cabe na janela", "nec.hconj": "45/2", "nec.decorrido": "15", "falta.hconj": "5", "falta.decorrido": "5"}
+        JS={"q": [36, 54], "alocado": 90, "saldo": 18, "hconj": 17.5, "decorrido": 10, "conflito": false, "deficit": 0, "nq": [54, 54], "motivo": ["A 6 m: a parte fixa não cabe na janela de 10 h"], "nec.hconj": 22.5, "nec.decorrido": 15, "falta.hconj": 5, "falta.decorrido": 5} · conserva=True
+        Py={"q": ["36", "54"], "alocado": "90", "saldo": "18", "hconj": "35/2", "decorrido": "10", "conflito": false, "deficit": "0", "nq": ["54", "54"], "motivo": ["A 6 m: a parte fixa não cabe na janela de 10 h"], "nec.hconj": "45/2", "nec.decorrido": "15", "falta.hconj": "5", "falta.decorrido": "5"} · conserva=True
+OK    06 capacidade_janela_saldo · 36 ha, A 4 h e B 2 h disponíveis → 28,8 ha atendidos, 7,2 ha sem conjunto
+        esperado={"alocado": "144/5", "saldo": "36/5", "pendente": false, "nec.hconj": "22/3", "falta.hconj": "4/3", "falta.decorrido": "2/3"}
+        JS={"alocado": 28.8, "saldo": 7.200000000000001, "pendente": false, "nec.hconj": 7.333333333333332, "falta.hconj": 1.333333333333333, "falta.decorrido": 0.6666666666666661} · conserva=True
+        Py={"alocado": "144/5", "saldo": "36/5", "pendente": false, "nec.hconj": "22/3", "falta.hconj": "4/3", "falta.decorrido": "2/3"} · conserva=True
+OK    07a custos_proporcional · tarifas 180 e 300 R$/h, 36/72 ha → R$ 4.800
+        esperado={"custo": "4800", "custoOk": true}
+        JS={"custo": 4800, "custoOk": true} · conserva=True
+        Py={"custo": "4800", "custoOk": true} · conserva=True
+OK    07b custos_fixo · 54/54 ha → R$ 4.950
+        esperado={"custo": "4950"}
+        JS={"custo": 4950} · conserva=True
+        Py={"custo": "4950"} · conserva=True
+OK    08 custo_unitario_proporcional · custo por ha = custo total ÷ área atendida = 400/9 (R$ 44,44…/ha), não média de custos
+        esperado={"custoHa": "400/9"}
+        JS={"custoHa": 44.44444444444444} · conserva=True
+        Py={"custoHa": "400/9"} · conserva=True
+OK    10a diesel_recalculado_por_hora · 12 e 20 L/h, 36/72 ha → 320 L
+        esperado={"diesel": "320"}
+        JS={"diesel": 320} · conserva=True
+        Py={"diesel": "320"} · conserva=True
+OK    10b diesel_fixo · 54/54 ha → 330 L
+        esperado={"diesel": "330"}
+        JS={"diesel": 330} · conserva=True
+        Py={"diesel": "330"} · conserva=True
+OK    G1 gemini_tres_conjuntos · 150 ha; 4,5/6/7,5 ha/h; janelas 10/8/5 h; 200/250/320 R$/h → 45/48/37,5 ha; 130,5 atendidos; 19,5 sem conjunto; 23 horas-conjunto; 10 h; R$ 5.600
+        esperado={"q": ["45", "48", "75/2"], "alocado": "261/2", "saldo": "39/2", "hconj": "23", "decorrido": "10", "custo": "5600", "custoHa": "11200/261", "nec.hconj": "105/4", "nec.decorrido": "133/12", "falta.hconj": "13/4", "falta.decorrido": "13/12"}
+        JS={"q": [45, 48, 37.5], "alocado": 130.5, "saldo": 19.5, "hconj": 23, "decorrido": 10, "custo": 5600, "custoHa": 42.911877394636015, "nec.hconj": 26.25, "nec.decorrido": 11.083333333333334, "falta.hconj": 3.25, "falta.decorrido": 1.083333333333334} · conserva=True
+        Py={"q": ["45", "48", "75/2"], "alocado": "261/2", "saldo": "39/2", "hconj": "23", "decorrido": "10", "custo": "5600", "custoHa": "11200/261", "nec.hconj": "105/4", "nec.decorrido": "133/12", "falta.hconj": "13/4", "falta.decorrido": "13/12"} · conserva=True
+OK    E1 rendimento_ausente · rendimento vazio não divide 50 ha: pendente, sem horas (nunca 0 h), área sem conjunto, causa "sem rendimento"
+        esperado={"pendente": true, "hconj": null, "decorrido": null, "saldo": "50", "motivo": "sem rendimento", "causa": "sem rendimento", "nec.hconj": null, "falta.hconj": null, "falta.semHoras": "50"}
+        JS={"pendente": true, "hconj": null, "decorrido": null, "saldo": 50, "motivo": ["S: sem rendimento válido (ha/h); horas pendentes"], "causa": "sem rendimento", "nec.hconj": null, "falta.hconj": null, "falta.semHoras": 50} · conserva=True
+        Py={"pendente": true, "hconj": null, "decorrido": null, "saldo": "50", "motivo": ["S: sem rendimento válido (ha/h); horas pendentes"], "causa": "sem rendimento", "nec.hconj": null, "falta.hconj": null, "falta.semHoras": "50"} · conserva=True
+OK    E2 rendimento_zero · rendimento 0 não divide: pendente
+        esperado={"pendente": true, "hconj": null, "saldo": "50"}
+        JS={"pendente": true, "hconj": null, "saldo": 50} · conserva=True
+        Py={"pendente": true, "hconj": null, "saldo": "50"} · conserva=True
+OK    E3 area_zero · área 0 é válida: 0 horas-conjunto, nada pendente
+        esperado={"pendente": false, "hconj": "0", "decorrido": "0", "saldo": "0", "nec.hconj": "0", "falta.hconj": "0"}
+        JS={"pendente": false, "hconj": 0, "decorrido": 0, "saldo": 0, "nec.hconj": 0, "falta.hconj": 0} · conserva=True
+        Py={"pendente": false, "hconj": "0", "decorrido": "0", "saldo": "0", "nec.hconj": "0", "falta.hconj": "0"} · conserva=True
+OK    E4 janela_zero · janela 0 h com rendimento válido: sem capacidade, os 10 ha ficam sem conjunto; pendente com a causa "sem horas na janela" (não "sem rendimento")
+        esperado={"alocado": "0", "saldo": "10", "motivo": "janelas não comportam", "pendente": true, "hconj": null, "causa": "sem horas na janela", "nec.hconj": "2", "falta.hconj": "2", "falta.decorrido": "2"}
+        JS={"alocado": 0, "saldo": 10, "motivo": ["as janelas não comportam toda a área"], "pendente": true, "hconj": null, "causa": "sem horas na janela", "nec.hconj": 2, "falta.hconj": 2, "falta.decorrido": 2} · conserva=True
+        Py={"alocado": "0", "saldo": "10", "motivo": ["as janelas não comportam toda a área"], "pendente": true, "hconj": null, "causa": "sem horas na janela", "nec.hconj": "2", "falta.hconj": "2", "falta.decorrido": "2"} · conserva=True
+OK    E9 sem_configuracao · atividade sem configuração: pendente com a causa "sem conjunto"
+        esperado={"pendente": true, "hconj": null, "saldo": "10", "causa": "sem conjunto"}
+        JS={"pendente": true, "hconj": null, "saldo": 10, "causa": "sem conjunto"} · conserva=True
+        Py={"pendente": true, "hconj": null, "saldo": "10", "causa": "sem conjunto"} · conserva=True
+OK    E10 janela_zero_na_sequencia · a troca (3 h) passa a janela da sequência (2 h): nada cabe, pendente com a causa da troca (regra a, 5983640246)
+        esperado={"pendente": true, "hconj": null, "saldo": "20", "causa": "troca reservada ocupa a janela"}
+        JS={"pendente": true, "hconj": null, "saldo": 20, "causa": "troca reservada ocupa a janela"} · conserva=True
+        Py={"pendente": true, "hconj": null, "saldo": "20.0", "causa": "troca reservada ocupa a janela"} · conserva=True
+OK    E5 tarifa_desconhecida · tarifa vazia não vira R$ 0: custo não calculável, R$/ha vazio
+        esperado={"custoOk": false, "custoHa": null, "motivo": "tarifa desconhecida"}
+        JS={"custoOk": false, "custoHa": null, "motivo": ["B 12 m: tarifa desconhecida (R$/h), custo não calculado"]} · conserva=True
+        Py={"custoOk": false, "custoHa": null, "motivo": ["B 12 m: tarifa desconhecida (R$/h), custo não calculado"]} · conserva=True
+OK    E6 partes_acima_de_100 · 70 % + 50 % → aviso e conservação (Σ q + sem conjunto = Q)
+        esperado={"motivo": "partes fixas somam 120", "conserva": true}
+        JS={"motivo": ["partes fixas somam 120 %: reduzidas na proporção para fechar 100 %"], "conserva": "Σq+saldo=100.00000000000001"} · conserva=True
+        Py={"motivo": ["partes fixas somam 120 %: reduzidas na proporção para fechar 100 %"], "conserva": "Σq+saldo=100"} · conserva=True
+OK    E7 invalida_na_divisao_pelo_rendimento · uma configuração sem rendimento na divisão pelo rendimento: a divisão fica pendente (não joga tudo na outra)
+        esperado={"pendente": true, "saldo": "108", "motivo": "divisão pelo rendimento fica pendente"}
+        JS={"pendente": true, "saldo": 108, "motivo": ["B 12 m: sem rendimento válido (ha/h); a divisão pelo rendimento fica pendente"]} · conserva=True
+        Py={"pendente": true, "saldo": "108", "motivo": ["B 12 m: sem rendimento válido (ha/h); a divisão pelo rendimento fica pendente"]} · conserva=True
+OK    E8a grupo_da_fazenda_1_plantadeira · duas configurações com plantadeira e a fazenda tem 1 → em sequência: decorrido = horas-conjunto
+        esperado={"decorrido": "20", "hconj": "20", "motivo": "Plantadeiras"}
+        JS={"decorrido": 20, "hconj": 20, "motivo": ["Plantadeiras: ao mesmo tempo precisariam de 2, a fazenda tem 1; configurações consideradas em sequência nesta estimativa"]} · conserva=True
+        Py={"decorrido": "20", "hconj": "20", "motivo": ["Plantadeiras: ao mesmo tempo precisariam de 2, a fazenda tem 1; configurações consideradas em sequência nesta estimativa"]} · conserva=True
+OK    E8b grupo_da_fazenda_2_plantadeiras · com 2 plantadeiras trabalham ao mesmo tempo: 10 h
+        esperado={"decorrido": "10"}
+        JS={"decorrido": 10} · conserva=True
+        Py={"decorrido": "10"} · conserva=True
+OK    R1 janela_zero_na_sequencia_declarada · PRE-REV R1 · o S5 com a janela de A = 0: A não recebe área, mas a sequência declarada continua precisando de 54/3,6 + 54/7,2 = 22,5 h numa janela de 10 h (déficit 12,5 h, como com 0,01 h); B faz 54 ha em 7,5 h
+        esperado={"q": ["0", "54"], "alocado": "54", "saldo": "54", "hconj": "15/2", "decorrido": "15/2", "conflito": true, "deficit": "25/2", "nq": ["54", "54"], "motivo": ["parte fixa não cabe na janela de 0 h", "precisam de 22,5 h para 108 ha; a janela tem 10 h"], "nec.decorrido": "45/2", "falta.decorrido": "15"}
+        JS={"q": [0, 54], "alocado": 54, "saldo": 54, "hconj": 7.5, "decorrido": 7.5, "conflito": true, "deficit": 12.5, "nq": [54, 54], "motivo": ["A 6 m: a parte fixa não cabe na janela de 0 h", "A 6 m e B 12 m: em sequência precisam de 22,5 h para 108 ha; a janela tem 10 h"], "nec.decorrido": 22.5, "falta.decorrido": 15} · conserva=True
+        Py={"q": ["0", "54"], "alocado": "54", "saldo": "54", "hconj": "15/2", "decorrido": "15/2", "conflito": true, "deficit": "25/2", "nq": ["54", "54"], "motivo": ["A 6 m: a parte fixa não cabe na janela de 0 h", "A 6 m e B 12 m: em sequência precisam de 22,5 h para 108 ha; a janela tem 10 h"], "nec.decorrido": "45/2", "falta.decorrido": "15"} · conserva=True
+OK    R2a grupo_de_recursos_nao_relaxa_janela_1 · PRE-REV R2 · A e B em sequência declarada (janela 10 h), C sem janela; A e C usam plantadeira e a fazenda tem 1: a união por falta de plantadeira não tira a janela de A+B (5 h cada, 25 + 25 ha); C faz 150 ha; tudo em sequência: 40 h
+        esperado={"q": ["25", "25", "150"], "saldo": "0", "decorrido": "40", "conflito": true, "deficit": "50/3", "motivo": ["Plantadeiras", "precisam de 26,67 h para 133,33 ha; a janela tem 10 h"]}
+        JS={"q": [25, 25, 150], "saldo": 0, "decorrido": 40, "conflito": true, "deficit": 16.666666666666668, "motivo": ["sequência declarada: dividem trator, implemento ou operador", "Plantadeiras: ao mesmo tempo precisariam de 2, a fazenda tem 1; configurações consideradas em sequência nesta estimativa", "A e B: em sequência precisam de 26,67 h para 133,33 ha; a janela tem 10 h"]} · conserva=True
+        Py={"q": ["25", "25", "150"], "saldo": "0", "decorrido": "40", "conflito": true, "deficit": "50/3", "motivo": ["sequência declarada: dividem trator, implemento ou operador", "Plantadeiras: ao mesmo tempo precisariam de 2, a fazenda tem 1; configurações consideradas em sequência nesta estimativa", "A e B: em sequência precisam de 26,67 h para 133,33 ha; a janela tem 10 h"]} · conserva=True
+OK    T1a ociosa_nao_liga_ativo · rodada 2 · Z (janela 0, sem %, fora do plano) no trator a01 e na sequência declarada com D (sem janela) não junta B+C a D: B e C dividem os 10 h do a01 (25 + 25 ha), conflito de 30 h; D faz 250 ha
+        esperado={"q": ["25", "25", "0", "250"], "conflito": true, "deficit": "30", "decorrido": "50", "motivo": "precisam de 40 h para 200 ha; a janela tem 10 h"}
+        JS={"q": [25, 25, 0, 250], "conflito": true, "deficit": 30, "decorrido": 50, "motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "B e C: em sequência precisam de 40 h para 200 ha; a janela tem 10 h"]} · conserva=True
+        Py={"q": ["25", "25", "0", "250"], "conflito": true, "deficit": "30", "decorrido": "50", "motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "B e C: em sequência precisam de 40 h para 200 ha; a janela tem 10 h"]} · conserva=True
+OK    T1b ociosa_nao_serializa · rodada 2 · A (janela 0, sem %) com os ativos a01 e a02 não põe B (a01) e C (a02) em sequência: 30 + <área redigida> ha em 6 h, sem conflito
+        esperado={"q": ["0", "30", "30"], "conflito": false, "decorrido": "6", "saldo": "0"}
+        JS={"q": [0, 30, 30], "conflito": false, "decorrido": 6, "saldo": 0} · conserva=True
+        Py={"q": ["0", "30", "30"], "conflito": false, "decorrido": "6", "saldo": "0"} · conserva=True
+OK    T1c ociosa_nao_estica_sequencia · rodada 2 · A e B em sequência declarada (janela 3 h); Z (janela 0) na sequência e no a01 de C (janela 20 h) não estica a janela de A+B: 7,5 + 7,5 ha, déficit 71/3 h
+        esperado={"q": ["15/2", "15/2", "0", "100"], "conflito": true, "deficit": "71/3", "decorrido": "20"}
+        JS={"q": [7.5, 7.5, 0, 100], "conflito": true, "deficit": 23.666666666666668, "decorrido": 20} · conserva=True
+        Py={"q": ["15/2", "15/2", "0", "100"], "conflito": true, "deficit": "71/3", "decorrido": "20"} · conserva=True
+OK    T2a ponte_por_outro_grupo_2 · rodada 2 · A sem janela usa 2 tratores, B (janela 2 h) usa trator e operador, C (janela 2 h) usa operador; 2 tratores e 1 operador: B+C dividem os 2 h do operador (5 + 5 ha)
+        esperado={"q": ["90", "5", "5"], "conflito": true, "deficit": "34/3", "decorrido": "20"}
+        JS={"q": [90, 5, 5], "conflito": true, "deficit": 11.333333333333334, "decorrido": 20} · conserva=True
+        Py={"q": ["90", "5", "5"], "conflito": true, "deficit": "34/3", "decorrido": "20"} · conserva=True
+OK    T2b ponte_por_outro_grupo_3 · rodada 2 · o mesmo com 3 tratores (mais recurso): a mesma divisão, nunca mais otimista com menos; decorrido 18 h
+        esperado={"q": ["90", "5", "5"], "conflito": true, "deficit": "34/3", "decorrido": "18"}
+        JS={"q": [90, 5, 5], "conflito": true, "deficit": 11.333333333333334, "decorrido": 18} · conserva=True
+        Py={"q": ["90", "5", "5"], "conflito": true, "deficit": "34/3", "decorrido": "18"} · conserva=True
+OK    T2c ponte_por_sequencia · rodada 2 · B e C no a01 (janela 10 h) e Z (janela 0,01 h) no a01 e na sequência declarada com D (sem janela): B+C+Z dividem os 10 h do a01
+        esperado={"q": ["999/40", "999/40", "1/20", "250"], "conflito": true, "deficit": "35", "decorrido": "60"}
+        JS={"q": [24.975, 24.975, 0.05, 249.99999999999997], "conflito": true, "deficit": 35, "decorrido": 59.99999999999999} · conserva=True
+        Py={"q": ["999/40", "999/40", "1/20", "250"], "conflito": true, "deficit": "35", "decorrido": "60"} · conserva=True
+OK    N1 troca_reservada_e_cobrada · rodada 2 · A e B em sequência (janela 10 h, troca 2 h cada) e C com a plantadeira de A (1 na fazenda): C começa o fecho, A e B pagam a troca; A+B com as trocas cabem nos 10 h (3 + 2 + 3 + 2)
+        esperado={"q": ["15", "15", "170"], "decorrido": "44", "conflito": true, "deficit": "62/3", "motivo": "precisam de 30,67 h para 133,33 ha; a janela tem 10 h"}
+        JS={"q": [15, 15, 170], "decorrido": 44, "conflito": true, "deficit": 20.666666666666668, "motivo": ["sequência declarada: dividem trator, implemento ou operador", "Plantadeiras: ao mesmo tempo precisariam de 2, a fazenda tem 1; configurações consideradas em sequência nesta estimativa", "A e B: em sequência precisam de 30,67 h para 133,33 ha; a janela tem 10 h"]} · conserva=True
+        Py={"q": ["15", "15", "170"], "decorrido": "44", "conflito": true, "deficit": "62/3", "motivo": ["sequência declarada: dividem trator, implemento ou operador", "Plantadeiras: ao mesmo tempo precisariam de 2, a fazenda tem 1; configurações consideradas em sequência nesta estimativa", "A e B: em sequência precisam de 30,67 h para 133,33 ha; a janela tem 10 h"]} · conserva=True
+OK    M2 fracao_final_no_corte_aninhado · rodada 2 · A e B (30 % cada, sequência, janela 4 h) e C (40 %, janela 10 h) com a plantadeira de A: dois cortes (sequência e plantadeira); A+B ≤ 4 h e A+C ≤ 10 h; o motivo diz a fração final de cada uma
+        esperado={"q": ["5/3", "2", "25/3"], "motivo": ["janela de 4 h: fazem de 41,67 % a 50 %", "janela de 10 h: fazem de 41,67 % a 83,33 %"]}
+        JS={"q": [1.6666666666666667, 2, 8.333333333333334], "motivo": ["sequência declarada: dividem trator, implemento ou operador", "Plantadeiras: ao mesmo tempo precisariam de 2, a fazenda tem 1; configurações consideradas em sequência nesta estimativa", "A: a parte fixa não cabe na janela de 4 h", "B: a parte fixa não cabe na janela de 4 h", "C: a parte fixa não cabe na janela de 10 h", "as partes fixas em sequência não cabem na janela de 4 h: fazem de 41,67 % a 50 % do que cabia na própria janela", "as partes fixas em sequência não cabem na janela de 10 h: fazem de 41,67 % a 83,33 % do que cabia na própria janela", "A e C: em sequência precisam de 700 h para 700 ha; a janela tem 10 h"]} · conserva=True
+        Py={"q": ["5/3", "2", "25/3"], "motivo": ["sequência declarada: dividem trator, implemento ou operador", "Plantadeiras: ao mesmo tempo precisariam de 2, a fazenda tem 1; configurações consideradas em sequência nesta estimativa", "A: a parte fixa não cabe na janela de 4 h", "B: a parte fixa não cabe na janela de 4 h", "C: a parte fixa não cabe na janela de 10 h", "as partes fixas em sequência não cabem na janela de 4 h: fazem de 41,67 % a 50 % do que cabia na própria janela", "as partes fixas em sequência não cabem na janela de 10 h: fazem de 41,67 % a 83,33 % do que cabia na própria janela", "A e C: em sequência precisam de 700 h para 700 ha; a janela tem 10 h"]} · conserva=True
+OK    P1 grupo_ja_no_fecho_por_outro_grupo · rodada 3 · B e C usam trator e o único operador (janelas de 2 h); A sem janela usa 2 tratores: o fecho pelos tratores não apaga a restrição do operador (5 + 5 ha)
+        esperado={"q": ["90", "5", "5"], "conflito": true, "deficit": "34/3", "motivo": "Operadores"}
+        JS={"q": [90, 5, 5], "conflito": true, "deficit": 11.333333333333334, "motivo": ["Tratores: ao mesmo tempo precisariam de 3, a fazenda tem 2; configurações consideradas em sequência nesta estimativa", "Operadores: ao mesmo tempo precisariam de 2, a fazenda tem 1; configurações consideradas em sequência nesta estimativa", "B e C: em sequência precisam de 13,33 h para 66,67 ha; a janela tem 2 h"]} · conserva=True
+        Py={"q": ["90", "5", "5"], "conflito": true, "deficit": "34/3", "motivo": ["Tratores: ao mesmo tempo precisariam de 3, a fazenda tem 2; configurações consideradas em sequência nesta estimativa", "Operadores: ao mesmo tempo precisariam de 2, a fazenda tem 1; configurações consideradas em sequência nesta estimativa", "B e C: em sequência precisam de 13,33 h para 66,67 ha; a janela tem 2 h"]} · conserva=True
+OK    P2a uma_plantadeira_como_grupo · rodada 3 · A e B em sequência com a única plantadeira (janelas de 3 h) e C na sequência sem janela: A+B dividem os 3 h da plantadeira
+        esperado={"q": ["15/2", "15/2", "185"], "conflito": true, "deficit": "71/3", "motivo": "Plantadeiras: a fazenda tem 1; quem a usa divide a janela dela"}
+        JS={"q": [7.5, 7.5, 185], "conflito": true, "deficit": 23.666666666666668, "motivo": ["sequência declarada: dividem trator, implemento ou operador", "Plantadeiras: a fazenda tem 1; quem a usa divide a janela dela", "A e B: em sequência precisam de 26,67 h para 133,33 ha; a janela tem 3 h"]} · conserva=True
+        Py={"q": ["15/2", "15/2", "185"], "conflito": true, "deficit": "71/3", "motivo": ["sequência declarada: dividem trator, implemento ou operador", "Plantadeiras: a fazenda tem 1; quem a usa divide a janela dela", "A e B: em sequência precisam de 26,67 h para 133,33 ha; a janela tem 3 h"]} · conserva=True
+OK    P2b uma_plantadeira_como_ativo · rodada 3 · o mesmo com a plantadeira como ativo p01 do cadastro: a mesma divisão
+        esperado={"q": ["15/2", "15/2", "185"], "conflito": true, "deficit": "71/3"}
+        JS={"q": [7.5, 7.5, 185], "conflito": true, "deficit": 23.666666666666668} · conserva=True
+        Py={"q": ["15/2", "15/2", "185"], "conflito": true, "deficit": "71/3"} · conserva=True
+OK    P3 grupo_com_janela_0_no_plano · rodada 3 · o S5 com a plantadeira (1 na fazenda) no lugar da sequência e a janela de A = 0: o grupo do plano conta A; conflito, déficit 12,5 h, necessário 22,5 h
+        esperado={"q": ["0", "54"], "conflito": true, "deficit": "25/2", "nec.decorrido": "45/2"}
+        JS={"q": [0, 54], "conflito": true, "deficit": 12.5, "nec.decorrido": 22.5} · conserva=True
+        Py={"q": ["0", "54"], "conflito": true, "deficit": "25/2", "nec.decorrido": "45/2"} · conserva=True
+OK    P5a fecho_nao_e_restricao_1 · rodada 3 · A (a01), B (a01 e a02), C (a02 e plantadeira), D sem janela (plantadeira): cada ativo cabe nos 10 h dele; com 1 plantadeira
+        esperado={"q": ["25", "25", "25", "925"], "conflito": true, "deficit": "90"}
+        JS={"q": [25, 25, 25, 925], "conflito": true, "deficit": 90} · conserva=True
+        Py={"q": ["25", "25", "25", "925"], "conflito": true, "deficit": "90"} · conserva=True
+OK    P5b fecho_nao_e_restricao_2 · rodada 3 · o mesmo com 2 plantadeiras: a mesma divisão (menos recurso não dá plano mais otimista)
+        esperado={"q": ["25", "25", "25", "925"], "conflito": true, "deficit": "90"}
+        JS={"q": [25, 25, 25, 925], "conflito": true, "deficit": 90} · conserva=True
+        Py={"q": ["25", "25", "25", "925"], "conflito": true, "deficit": "90"} · conserva=True
+OK    Q1 cafe_colhedora_como_grupo · rodada 4 · colheita de café, 60 ha, janelas de 80 h: A e B com a única colhedora, trator e 2 operadores; C com equipe de 6; 8 operadores: A e B nunca juntas, então cabem 2 + 6 = 8; 20 + 20 + 20 ha, déficit 80/9 h só da colhedora
+        esperado={"q": ["20", "20", "20"], "saldo": "0", "conflito": true, "deficit": "80/9", "motivo": "Colhedoras: ao mesmo tempo precisariam de 2, a fazenda tem 1"}
+        JS={"q": [20, 20, 20], "saldo": 0, "conflito": true, "deficit": 8.888888888888886, "motivo": ["Colhedoras: ao mesmo tempo precisariam de 2, a fazenda tem 1; configurações consideradas em sequência nesta estimativa", "A e B: em sequência precisam de 88,89 h para 44,44 ha; a janela tem 80 h"]} · conserva=True
+        Py={"q": ["20", "20", "20"], "saldo": "0", "conflito": true, "deficit": "80/9", "motivo": ["Colhedoras: ao mesmo tempo precisariam de 2, a fazenda tem 1; configurações consideradas em sequência nesta estimativa", "A e B: em sequência precisam de 88,89 h para 44,44 ha; a janela tem 80 h"]} · conserva=True
+OK    Q2 cafe_colhedora_como_ativo · rodada 4 · o mesmo com a colhedora como ativo colh01 do cadastro: a mesma divisão
+        esperado={"q": ["20", "20", "20"], "saldo": "0", "conflito": true, "deficit": "80/9"}
+        JS={"q": [20, 20, 20], "saldo": 0, "conflito": true, "deficit": 8.888888888888886} · conserva=True
+        Py={"q": ["20", "20", "20"], "saldo": "0", "conflito": true, "deficit": "80/9"} · conserva=True
+OK    Q3 equipe_maior_que_o_quadro · rodada 4 · equipe de 10 com 8 operadores na fazenda: não trabalha, pendente com a causa "sem recurso na fazenda" e o motivo
+        esperado={"q": ["0"], "pendente": true, "causa": "sem recurso na fazenda", "saldo": "10", "motivo": "E: precisa de 10 em Operadores e equipe, a fazenda tem 8; não trabalha nesta ocorrência"}
+        JS={"q": [0], "pendente": true, "causa": "sem recurso na fazenda", "saldo": 10, "motivo": ["E: precisa de 10 em Operadores e equipe, a fazenda tem 8; não trabalha nesta ocorrência"]} · conserva=True
+        Py={"q": ["0"], "pendente": true, "causa": "sem recurso na fazenda", "saldo": "10", "motivo": ["E: precisa de 10 em Operadores e equipe, a fazenda tem 8; não trabalha nesta ocorrência"]} · conserva=True
+OK    Q4 equipe_maior_com_parte_fixa · rodada 4 · E (equipe de 10, 50 %) e F (1 operador, 50 %): E fica sem conjunto com o motivo; F faz a parte dela
+        esperado={"q": ["0", "50"], "saldo": "50", "pendente": false, "motivo": "E: precisa de 10 em Operadores e equipe"}
+        JS={"q": [0, 50], "saldo": 50, "pendente": false, "motivo": ["E: precisa de 10 em Operadores e equipe, a fazenda tem 8; não trabalha nesta ocorrência"]} · conserva=True
+        Py={"q": ["0", "50"], "saldo": "50", "pendente": false, "motivo": ["E: precisa de 10 em Operadores e equipe, a fazenda tem 8; não trabalha nesta ocorrência"]} · conserva=True
+OK    V1 triangulo_sequencia_ativo_grupo · rodada 5 · A e B em sequência, A e C no a01, B e C na única plantadeira (janelas de 10 h, 1 ha/h, 15 ha): nunca juntas, dividem 10 h: 10/3 ha cada, 5 sem conjunto, déficit 5 h
+        esperado={"q": ["10/3", "10/3", "10/3"], "saldo": "5", "conflito": true, "deficit": "5"}
+        JS={"q": [3.3333333333333335, 3.3333333333333335, 3.3333333333333335], "saldo": 4.999999999999998, "conflito": true, "deficit": 5} · conserva=True
+        Py={"q": ["10/3", "10/3", "10/3"], "saldo": "5", "conflito": true, "deficit": "5"} · conserva=True
+OK    V2 triangulo_de_grupos_de_1 · rodada 5 · pulverizador, plantadeira e distribuidor (1 de cada) em triângulo: 10/3 ha cada, déficit 5 h
+        esperado={"q": ["10/3", "10/3", "10/3"], "saldo": "5", "conflito": true, "deficit": "5"}
+        JS={"q": [3.3333333333333335, 3.3333333333333335, 3.3333333333333335], "saldo": 4.999999999999998, "conflito": true, "deficit": 5} · conserva=True
+        Py={"q": ["10/3", "10/3", "10/3"], "saldo": "5", "conflito": true, "deficit": "5"} · conserva=True
+OK    V3 triangulo_puro · rodada 5 · A e B em sequência, B e C no a02, A e C no a01: 10/3 ha cada, déficit 5 h
+        esperado={"q": ["10/3", "10/3", "10/3"], "saldo": "5", "conflito": true, "deficit": "5"}
+        JS={"q": [3.3333333333333335, 3.3333333333333335, 3.3333333333333335], "saldo": 4.999999999999998, "conflito": true, "deficit": 5} · conserva=True
+        Py={"q": ["10/3", "10/3", "10/3"], "saldo": "5", "conflito": true, "deficit": "5"} · conserva=True
+OK    V4 ciclo_de_5_sem_corda · rodada 5 · 5 configurações em ciclo de ativos (cada uma divide um com a vizinha): não cordal, o componente divide os 10 h (conservador): 2 ha cada
+        esperado={"q": ["2", "2", "2", "2", "2"], "saldo": "15", "conflito": true, "deficit": "15"}
+        JS={"q": [2, 2, 2, 2, 2], "saldo": 15, "conflito": true, "deficit": 15} · conserva=True
+        Py={"q": ["2", "2", "2", "2", "2"], "saldo": "15", "conflito": true, "deficit": "15"} · conserva=True
+OK    V5 cadeia_so_por_pares · rodada 5 · A–B no a01 e B–C no a02 (cordal): só os pares dividem janela; B primeiro e A com C ao mesmo tempo: 5 + 5 + 5 ha em 10 h
+        esperado={"q": ["5", "5", "5"], "saldo": "15", "conflito": true, "deficit": "10"}
+        JS={"q": [5, 5, 5], "saldo": 15, "conflito": true, "deficit": 10} · conserva=True
+        Py={"q": ["5", "5", "5"], "saldo": "15", "conflito": true, "deficit": "10"} · conserva=True
+OK    V7 pico_real_no_motivo · rodada 5 · três equipes de 6 operadores com 8 na fazenda: o motivo diz o pico real (18), não o primeiro valor acima de 8
+        esperado={"motivo": "Operadores e equipe: ao mesmo tempo precisariam de 18, a fazenda tem 8"}
+        JS={"motivo": ["Operadores e equipe: ao mesmo tempo precisariam de 18, a fazenda tem 8; configurações consideradas em sequência nesta estimativa", "consideradas em sequência nesta estimativa, dividem a mesma janela: a área que não cabe fica sem conjunto", "E0, E1 e E2: consideradas em sequência nesta estimativa, precisam de 171,43 h para 60 ha; a janela tem 80 h"]} · conserva=True
+        Py={"motivo": ["Operadores e equipe: ao mesmo tempo precisariam de 18, a fazenda tem 8; configurações consideradas em sequência nesta estimativa", "consideradas em sequência nesta estimativa, dividem a mesma janela: a área que não cabe fica sem conjunto", "E0, E1 e E2: consideradas em sequência nesta estimativa, precisam de 171,43 h para 60 ha; a janela tem 80 h"]} · conserva=True
+OK    V8 unidades_negativas · rodada 5 · grupo com unidades negativas (fora da tela) é ignorado: A, que nem usa o grupo, faz os <área redigida> ha
+        esperado={"q": ["30"], "saldo": "0", "pendente": false}
+        JS={"q": [30], "saldo": 0, "pendente": false} · conserva=True
+        Py={"q": ["30"], "saldo": "0", "pendente": false} · conserva=True
+OK    V9 b5a_pico_do_grupo_de_1 · B5a · A e B ao mesmo tempo, cada uma com o único distribuidor: o motivo diz "Distribuidores: ao mesmo tempo precisariam de 2, a fazenda tem 1" (o grupo não se separa por ele mesmo)
+        esperado={"motivo": "Distribuidores: ao mesmo tempo precisariam de 2, a fazenda tem 1; configurações consideradas em sequência nesta estimativa"}
+        JS={"motivo": ["Distribuidores: ao mesmo tempo precisariam de 2, a fazenda tem 1; configurações consideradas em sequência nesta estimativa"]} · conserva=True
+        Py={"motivo": ["Distribuidores: ao mesmo tempo precisariam de 2, a fazenda tem 1; configurações consideradas em sequência nesta estimativa"]} · conserva=True
+OK    W1a dois_tratores_duas_plantadeiras · rodada 6 · T1+P1, T1+P2, T2+P1 e T2+P2 (2 ha/h, janelas de 10 h, 80 ha): ciclo de 4 é grafo perfeito; T1+P1 com T2+P2 e depois T1+P2 com T2+P1: 10 ha cada, 40 ha, déficit 10 h
+        esperado={"q": ["10", "10", "10", "10"], "alocado": "40", "saldo": "40", "conflito": true, "deficit": "10", "motivo": "em sequência precisam de 20 h para 40 ha; a janela tem 10 h"}
+        JS={"q": [10, 10, 10, 10], "alocado": 40, "saldo": 40, "conflito": true, "deficit": 10, "motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "T1+P1 e T1+P2: em sequência precisam de 20 h para 40 ha; a janela tem 10 h"]} · conserva=True
+        Py={"q": ["10", "10", "10", "10"], "alocado": "40", "saldo": "40", "conflito": true, "deficit": "10", "motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "T1+P1 e T1+P2: em sequência precisam de 20 h para 40 ha; a janela tem 10 h"]} · conserva=True
+OK    W1b dois_por_dois_janela_de_1h · rodada 6 · o mesmo com 200 ha, só T1+P1 com janela de 1 h e as outras sem janela: atende os 200 ha, sem conflito (T1+P1 faz 2 ha)
+        esperado={"q": ["2", "66", "66", "66"], "alocado": "200", "saldo": "0", "conflito": false}
+        JS={"q": [2, 66, 66, 66], "alocado": 200, "saldo": 0, "conflito": false} · conserva=True
+        Py={"q": ["2", "66", "66", "66"], "alocado": "200", "saldo": "0", "conflito": false} · conserva=True
+OK    W1c dois_por_dois_parte_fixa_janela_0 · rodada 6 · T1+P1 com 10 % fixos e janela 0, as outras sem janela, 200 ha: 180 ha atendidos, sem conflito falso de "janela 0 h"
+        esperado={"q": ["0", "60", "60", "60"], "alocado": "180", "saldo": "20", "conflito": false}
+        JS={"q": [0, 60, 60, 60], "alocado": 180, "saldo": 20, "conflito": false} · conserva=True
+        Py={"q": ["0", "60", "60", "60"], "alocado": "180", "saldo": "20", "conflito": false} · conserva=True
+OK    W1d tres_tratores_dez_implementos · rodada 6 · 3 tratores × 10 implementos (30 configurações, 1 ha/h, janelas de 10 h, 100 ha): cada trator trabalha 10 h, <área redigida> ha (o conservador do componente daria 10)
+        esperado={"alocado": "30", "saldo": "70", "conflito": true}
+        JS={"alocado": 30, "saldo": 70, "conflito": true} · conserva=True
+        Py={"alocado": "30", "saldo": "70", "conflito": true} · conserva=True
+OK    W2 grupo_so_do_plano_nao_serializa_divisao · rodada 6 · 2 tratores; A e B (janela 10 h, 1 trator cada) e C (20 % fixos, janela 0, 1 trator), <área redigida> ha: no plano 3 > 2, na divisão só A e B, que cabem juntas: 10 + 10 ha, 10 h decorridas
+        esperado={"q": ["10", "10", "0"], "alocado": "20", "saldo": "10", "decorrido": "10"}
+        JS={"q": [10, 10, 0], "alocado": 20, "saldo": 10, "decorrido": 10} · conserva=True
+        Py={"q": ["10", "10", "0"], "alocado": "20", "saldo": "10", "decorrido": "10"} · conserva=True
+OK    W3a cadeia_de_28_com_14_operadores · rodada 6 · 28 configurações em cadeia (cada uma divide um ativo com a seguinte), 1 operador cada, 14 na fazenda, janelas de 100 h, 2.000 ha: o pico real é 14 (cabe); cada par vizinho divide 100 h: 50 ha cada, 1.400 ha
+        esperado={"alocado": "1400", "saldo": "600"}
+        JS={"alocado": 1400, "saldo": 600} · conserva=True
+        Py={"alocado": "1400", "saldo": "600"} · conserva=True
+OK    W3b cadeia_de_30_com_10_operadores · rodada 6 · a mesma cadeia com 30 configurações e 10 operadores: o motivo diz o pico real (15), não a soma (30)
+        esperado={"motivo": "Operadores: ao mesmo tempo precisariam de 15, a fazenda tem 10; configurações consideradas em sequência nesta estimativa"}
+        JS={"motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "Operadores: ao mesmo tempo precisariam de 15, a fazenda tem 10; configurações consideradas em sequência nesta estimativa", "consideradas em sequência nesta estimativa, dividem a mesma janela: a área que não cabe fica sem conjunto", "K0, K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12, K13, K14, K15, K16, K17, K18, K19, K20, K21, K22, K23, K24, K25, K26, K27, K28 e K29: consideradas em sequência nesta estimativa, precisam de 2000 h para 2000 ha; a janela tem 100 h"]} · conserva=True
+        Py={"motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "Operadores: ao mesmo tempo precisariam de 15, a fazenda tem 10; configurações consideradas em sequência nesta estimativa", "consideradas em sequência nesta estimativa, dividem a mesma janela: a área que não cabe fica sem conjunto", "K0, K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12, K13, K14, K15, K16, K17, K18, K19, K20, K21, K22, K23, K24, K25, K26, K27, K28 e K29: consideradas em sequência nesta estimativa, precisam de 2000 h para 2000 ha; a janela tem 100 h"]} · conserva=True
+OK    D01a subgrupo_finito_com_vizinho_de_100h · D-01 (5983640246) · A, B e C (janelas de 10 h) e D (100 h) se excluem duas a duas, 25 % cada de 16 ha: A+B+C precisariam de 12 h em 10 h; cada uma faz 10/3 ha, D faz 4, 2 ha sem conjunto, déficit 2 h
+        esperado={"q": ["10/3", "10/3", "10/3", "4"], "alocado": "14", "saldo": "2", "conflito": true, "deficit": "2", "motivo": "em sequência precisam de 12 h para 12 ha; a janela tem 10 h"}
+        JS={"q": [3.3333333333333335, 3.3333333333333335, 3.3333333333333335, 4], "alocado": 14, "saldo": 1.9999999999999996, "conflito": true, "deficit": 2, "motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "as partes fixas em sequência não cabem na janela de 10 h: cada uma faz 83,33 % do que cabia na própria janela", "A, B e C: em sequência precisam de 12 h para 12 ha; a janela tem 10 h"]} · conserva=True
+        Py={"q": ["10/3", "10/3", "10/3", "4"], "alocado": "14", "saldo": "2", "conflito": true, "deficit": "2", "motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "as partes fixas em sequência não cabem na janela de 10 h: cada uma faz 83,33 % do que cabia na própria janela", "A, B e C: em sequência precisam de 12 h para 12 ha; a janela tem 10 h"]} · conserva=True
+OK    D01b subgrupo_finito_com_vizinho_sem_janela · D-01 · o mesmo com D sem janela: a mesma divisão (um vizinho sem prazo não amplia o dos outros)
+        esperado={"q": ["10/3", "10/3", "10/3", "4"], "alocado": "14", "saldo": "2", "conflito": true, "deficit": "2"}
+        JS={"q": [3.3333333333333335, 3.3333333333333335, 3.3333333333333335, 4], "alocado": 14, "saldo": 1.9999999999999996, "conflito": true, "deficit": 2} · conserva=True
+        Py={"q": ["10/3", "10/3", "10/3", "4"], "alocado": "14", "saldo": "2", "conflito": true, "deficit": "2"} · conserva=True
+OK    D01c controle_positivo_sem_restricao_falsa · D-01 · controle: as mesmas quatro com 8 ha (2 h cada; A+B+C = 6 h em 10 h): tudo atendido, sem conflito
+        esperado={"q": ["2", "2", "2", "2"], "alocado": "8", "saldo": "0", "conflito": false, "deficit": "0"}
+        JS={"q": [2, 2, 2, 2], "alocado": 8, "saldo": 0, "conflito": false, "deficit": 0} · conserva=True
+        Py={"q": ["2", "2", "2", "2"], "alocado": "8", "saldo": "0", "conflito": false, "deficit": "0"} · conserva=True
+OK    D01d recurso_unico_com_vizinho_sem_janela · D-01 · A e B (janela de 10 h) e D (sem janela) no mesmo a01, 24 ha pelo rendimento: A e B param em 5 h cada (A+B = 10 h), D faz o resto; a partilha do plano (8 + 8) não cabe: déficit 6 h
+        esperado={"q": ["5", "5", "14"], "alocado": "24", "saldo": "0", "conflito": true, "deficit": "6"}
+        JS={"q": [5, 5, 14], "alocado": 24, "saldo": 0, "conflito": true, "deficit": 6} · conserva=True
+        Py={"q": ["5", "5", "14"], "alocado": "24", "saldo": "0", "conflito": true, "deficit": "6"} · conserva=True
+OK    D01e prazos_aninhados · D-01 · três no mesmo a01 com prazos 2, 5 e 10 h, <área redigida> ha pelo rendimento (1 ha/h): cortes 2 · 5 · 10 (EDF): A 2, B 3, C 5 ha; déficit pela partilha do plano
+        esperado={"q": ["2", "3", "5"], "alocado": "10", "saldo": "20", "conflito": true}
+        JS={"q": [2, 3, 5], "alocado": 10, "saldo": 20, "conflito": true} · conserva=True
+        Py={"q": ["2", "3", "5"], "alocado": "10", "saldo": "20", "conflito": true} · conserva=True
+OK    Da troca_reservada_ocupa_a_janela · regra (a) · A (50 %, janela 10 h) e B (sem %, troca 10 h) em sequência, 10 ha: a troca reservada de B ocupa a janela; pendente com a causa e o motivo da troca
+        esperado={"q": ["0", "0"], "pendente": true, "causa": "troca reservada ocupa a janela", "motivo": ["B: troca de 10 h reservada na janela de 10 h de A e B (sequência declarada)", "reduza a troca ou tire B da sequência declarada"]}
+        JS={"q": [0, 0], "pendente": true, "causa": "troca reservada ocupa a janela", "motivo": ["sequência declarada: dividem trator, implemento ou operador", "as partes fixas em sequência não cabem na janela de 10 h: cada uma faz 0 % do que cabia na própria janela", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "B: troca de 10 h reservada na janela de 10 h de A e B (sequência declarada); para liberar horas, reduza a troca ou tire B da sequência declarada", "A e B: em sequência precisam de 20 h para 10 ha; a janela tem 10 h"]} · conserva=True
+        Py={"q": ["0", "0"], "pendente": true, "causa": "troca reservada ocupa a janela", "motivo": ["sequência declarada: dividem trator, implemento ou operador", "as partes fixas em sequência não cabem na janela de 10 h: cada uma faz 0 % do que cabia na própria janela", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "B: troca de 10 h reservada na janela de 10 h de A e B (sequência declarada); para liberar horas, reduza a troca ou tire B da sequência declarada", "A e B: em sequência precisam de 20 h para 10 ha; a janela tem 10 h"]} · conserva=True
+OK    Db consideradas_em_sequencia · regra (b) · 3 configurações com 1 trator cada e 2 tratores: o motivo diz "consideradas em sequência nesta estimativa" (não afirma que trabalham em sequência)
+        esperado={"motivo": "Tratores: ao mesmo tempo precisariam de 3, a fazenda tem 2; configurações consideradas em sequência nesta estimativa"}
+        JS={"motivo": ["Tratores: ao mesmo tempo precisariam de 3, a fazenda tem 2; configurações consideradas em sequência nesta estimativa", "as partes fixas consideradas em sequência nesta estimativa não cabem na janela de 10 h: cada uma faz 50 % do que cabia na própria janela", "A, B e C: consideradas em sequência nesta estimativa, precisam de 20 h para 20 ha; a janela tem 10 h"]} · conserva=True
+        Py={"motivo": ["Tratores: ao mesmo tempo precisariam de 3, a fazenda tem 2; configurações consideradas em sequência nesta estimativa", "as partes fixas consideradas em sequência nesta estimativa não cabem na janela de 10 h: cada uma faz 50 % do que cabia na própria janela", "A, B e C: consideradas em sequência nesta estimativa, precisam de 20 h para 20 ha; a janela tem 10 h"]} · conserva=True
+OK    R2-2a buraco_por_configuracao_sem_janela · rodada 2 do D-01 · anel de 5 (T1, P2, O3, T3, P1) em que só K0 e K2 têm janela (30 h) e não dividem nada: o buraco passa por configurações sem prazo, que vão por último; K0 e K2 juntas de 0 a 20 h, 20 ha cada, sem conflito
+        esperado={"q": ["20", "20", "20", "20", "20"], "saldo": "0", "conflito": false}
+        JS={"q": [20, 20, 20, 20, 20], "saldo": 0, "conflito": false} · conserva=True
+        Py={"q": ["20", "20", "20", "20", "20"], "saldo": "0", "conflito": false} · conserva=True
+OK    R2-2b buraco_entre_quem_tem_janela · rodada 2 do D-01 · controle positivo: o mesmo anel com as cinco em 30 h continua no conservador e diz isso no motivo (estimativa)
+        esperado={"q": ["6", "6", "6", "6", "6"], "conflito": true, "motivo": ["máquinas compartilhadas em ciclo", "consideradas em sequência nesta estimativa, precisam de"]}
+        JS={"q": [6, 6, 6, 6, 6], "conflito": true, "motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "máquinas compartilhadas em ciclo: as configurações ligadas são consideradas juntas em cada janela nesta estimativa (conservador)", "consideradas em sequência nesta estimativa, dividem a mesma janela: a área que não cabe fica sem conjunto", "K0, K1, K2, K3 e K4: consideradas em sequência nesta estimativa, precisam de 100 h para 100 ha; a janela tem 30 h"]} · conserva=True
+        Py={"q": ["6", "6", "6", "6", "6"], "conflito": true, "motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "máquinas compartilhadas em ciclo: as configurações ligadas são consideradas juntas em cada janela nesta estimativa (conservador)", "consideradas em sequência nesta estimativa, dividem a mesma janela: a área que não cabe fica sem conjunto", "K0, K1, K2, K3 e K4: consideradas em sequência nesta estimativa, precisam de 100 h para 100 ha; a janela tem 30 h"]} · conserva=True
+OK    R2-3 partes_fixas_grupo_inteiro_primeiro · rodada 2 do D-01 · A, B e C (3 ha/h, 12 %, 10 h) e D (4 ha/h, 64 %, 20 h), todas com máquina em comum duas a duas: o grupo inteiro (20 h) reduz as quatro na mesma fração (5/7); A+B+C = 8,57 h ≤ 10 h, então o subgrupo de 10 h não reduz de novo
+        esperado={"q": ["60/7", "60/7", "60/7", "320/7"], "motivo": "cada uma faz 71,43 %"}
+        JS={"q": [8.571428571428571, 8.571428571428571, 8.571428571428571, 45.714285714285715], "motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "as partes fixas em sequência não cabem na janela de 20 h: cada uma faz 71,43 % do que cabia na própria janela", "A, B, C e D: em sequência precisam de 28 h para 100 ha; a janela tem 20 h"]} · conserva=True
+        Py={"q": ["60/7", "60/7", "60/7", "320/7"], "motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "as partes fixas em sequência não cabem na janela de 20 h: cada uma faz 71,43 % do que cabia na própria janela", "A, B, C e D: em sequência precisam de 28 h para 100 ha; a janela tem 20 h"]} · conserva=True
+OK    R2-5b troca_na_mesma_maquina · rodada 2 do D-01 · A e B no mesmo a01 (10 h cada), B com troca de 10 h, sem sequência declarada: o motivo nomeia o grupo e a origem e propõe outro conjunto, não "tirar da sequência"
+        esperado={"motivo": ["B: troca de 10 h reservada na janela de 10 h de A e B (mesma máquina do cadastro)", "reduza a troca ou use outro conjunto para B"]}
+        JS={"motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "B: troca de 10 h reservada na janela de 10 h de A e B (mesma máquina do cadastro); para liberar horas, reduza a troca ou use outro conjunto para B", "A e B: em sequência precisam de 30 h para 20 ha; a janela tem 10 h"]} · conserva=True
+        Py={"motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "B: troca de 10 h reservada na janela de 10 h de A e B (mesma máquina do cadastro); para liberar horas, reduza a troca ou use outro conjunto para B", "A e B: em sequência precisam de 30 h para 20 ha; a janela tem 10 h"]} · conserva=True
+OK    R2-5c troca_nomeia_o_grupo · rodada 2 do D-01 · A–B na máquina x e B–C na máquina y, B troca 3 h e C troca 1 h, mesma janela de 10 h: um motivo de troca por grupo e janela, o da maior troca, dizendo de quais configurações é (antes, "B" com 3 h e "B, C" com 4 h na mesma janela, sem dizer o grupo)
+        esperado={"motivo": ["B, C: troca de 4 h reservada na janela de 10 h de B e C (mesma máquina do cadastro)"]}
+        JS={"motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "B, C: troca de 4 h reservada na janela de 10 h de B e C (mesma máquina do cadastro); para liberar horas, reduza a troca ou use outro conjunto para B, C", "B e C: em sequência precisam de 24 h para 20 ha; a janela tem 10 h"]} · conserva=True
+        Py={"motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "B, C: troca de 4 h reservada na janela de 10 h de B e C (mesma máquina do cadastro); para liberar horas, reduza a troca ou use outro conjunto para B, C", "B e C: em sequência precisam de 24 h para 20 ha; a janela tem 10 h"]} · conserva=True
+OK    R2b grupo_de_recursos_nao_relaxa_janela_2 · PRE-REV R2 · o mesmo com 2 plantadeiras: a mesma divisão (menos recurso nunca dá plano mais otimista); C ao mesmo tempo: 30 h
+        esperado={"q": ["25", "25", "150"], "saldo": "0", "decorrido": "30", "conflito": true, "deficit": "50/3"}
+        JS={"q": [25, 25, 150], "saldo": 0, "decorrido": 30, "conflito": true, "deficit": 16.666666666666668} · conserva=True
+        Py={"q": ["25", "25", "150"], "saldo": "0", "decorrido": "30", "conflito": true, "deficit": "50/3"} · conserva=True
+OK    01 capacidades_ha_h · A 6 m × 8 km/h × 75 % e B 12 m × 8 km/h × 75 %
+        esperado=(18/5, 36/5)
+        JS=[3.6, 7.2]
+        Py=('18/5', '36/5')
+OK    02 reciproco_h_ha · horas por hectare = 1 ÷ rendimento
+        esperado=(5/18, 5/36)
+        JS=[0.2777777777777778, 0.1388888888888889]
+        Py=('5/18', '5/36')
+OK    09 insumos_conservados · dose 2 un/ha em 108 ha: 216 antes e depois da divisão (dose × área não muda com os conjuntos)
+        esperado=(216, 216)
+        JS=[216, 216]
+        Py=(216, '216')
+OK    11 gargalo_serie_limite_inferior · etapas em série: 6+4 ha/h em paralelo, 6 e 8 ha/h; 48 ha → gargalo 6 ha/h, limite inferior 8 h (paralelo soma, série não)
+        esperado=(6, 8)
+        JS=[6, 8, [4.8, 8, 6]]
+        Py=('6', '8', ['24/5', '8', '6'])
+OK    12 sem_arredondamento_intermediario · 1,1 m × 3,7 km/h × 63 %: h/ha = 100000/25641 (≈ 3,9000039); arredondar o rendimento para 0,26 daria 3,846
+        esperado=100000/25641
+        JS=[3.9000039000038997, 3.846153846153846]
+        Py=100000/25641
+OK    R3 resto_relativo_area_grande · PRE-REV R3 · 2.882,53 ha com partes 48,7 + 17,6 + 21,9 + 5,4 + 6,4 = 100 % e uma configuração sem % em sequência (troca 2 h): ela não recebe área nem soma troca, em ponto flutuante (JS e Python) e exato
+        esperado=[0, 0 avisos "não cobrem", decorrido 2882,53/5]
+        JS=[0, 0, 576.5059999999999]
+        Py=(0, '0', '288253/500')
+OK    Q4b sem_sequencia_falsa · rodada 4 · E não trabalha (equipe maior que o quadro): o grupo não diz "trabalham em sequência" por causa dela
+        esperado=sem "trabalham em sequência"
+        JS=['E: precisa de 10 em Operadores e equipe, a fazenda tem 8; não trabalha nesta ocorrência']
+        Py=
+OK    Q5 vinte_configuracoes_rapido · rodada 4 · 20 configurações com 3 grupos de recursos: a busca do uso simultâneo com poda responde em menos de 1 s (JS e Python) e conserva a área
+        esperado=< 1000 ms
+        JS=JS 1 ms · Σ = 800
+        Py=Py 21 ms
+OK    V6 pares_por_componente · rodada 5 · 24 configurações em pares no mesmo ativo, 12 operadores: o pico real é 12 (cabe), sem serializar todas; cada par divide os 100 h: 1.200 ha em menos de 1 s (JS e Python)
+        esperado=1200 ha, sem "ao mesmo tempo precisariam", < 1 s
+        JS=JS 10 ms · 1200 ha · sequência=False
+        Py=Py 10 ms · 1200.0 ha
+OK    W3c cadeia_sem_pico_inventado · rodada 6 · cadeia de 28 com 14 operadores: nenhum motivo "ao mesmo tempo precisariam" (o pico real cabe)
+        esperado=sem "precisariam"
+        JS=['configurações com a mesma máquina do cadastro trabalham em sequência', 'em sequência dividem a mesma janela: a área que não cabe fica sem conjunto', 'K0 e K1: em sequência precisam de 142,86 h para 142,86 ha; a janela tem 100 h']
+        Py=['configurações com a mesma máquina do cadastro trabalham em sequência', 'em sequência dividem a mesma janela: a área que não cabe fica sem conjunto', 'K0 e K1: em sequência precisam de 142,86 h para 142,86 ha; a janela tem 100 h']
+OK    W1e quatro_tratores_cinco_implementos · rodada 6 · 4 tratores × 5 implementos (20 configurações, 2 ha/h), só T0+P0 com janela de 50 h, 4.000 ha: atende tudo, sem conflito, em menos de 1 s (JS e Python)
+        esperado=4000 ha, sem conflito, < 1 s
+        JS=JS 0 ms · 3999.9999999999986 ha · conflito=False
+        Py=Py 6 ms · 3999.9999999999986 ha · conflito=False
+OK    W4 trios_rapido · rodada 6 · 30 configurações em trios (juntas dentro do trio, nunca com outro trio: 3^10 cliques): passa do teto de cliques, o componente divide a janela (conservador), com o motivo, em menos de 1 s (JS e Python), conservando a área
+        esperado=< 1000 ms, motivo "combinações demais"
+        JS=JS 82 ms · Σ = 2999.9999999999955 · motivo=True
+        Py=Py 145 ms · motivo=True
+OK    D01f triangulo_mais_vizinho_sem_janela · D-01 · o S2 refutado na rodada 5 (triângulo A–B–C de 10 h + D sem janela ligado às três): A+B+C cabem nos 10 h e há conflito (Python com Fraction; JS no R1/R2)
+        esperado=h(A+B+C) ≤ 10, conflito
+        JS=JS [10, True]
+        Py=Py h=10 conflito=True
+OK    Dc ajuda_sem_promessa · regra (c) · a ajuda de "Parte da área" não promete término no mesmo horário nem capacidade máxima
+        esperado=sem "terminam juntas"
+        JS=
+        Py=
+OK    R2-5e ajudas_e_motivos_sem_regra_antiga · rodada 2 do D-01 · ajudas da janela, da parte e da sequência e motivos do conservador sem "dividem a maior janela" nem "as mesmas horas produtivas"; a ajuda da janela fala em prazo
+        esperado=ausentes; "Prazo" na ajuda
+        JS=
+        Py=
+OK    R2-1 teto_de_cortes_por_componente · rodada 2 do D-01 · 11 pares que passam de 8 192 cortes ficam no conservador (com motivo), mas o A–B–C independente continua com 5 ha cada (antes 3,33 ha cada, com conflito falso)
+        esperado=A, B, C = 5 · motivo "combinações demais" · < 1 s
+        JS=JS q=[5, 5, 5] motivo=True 207 ms
+        Py=Py q=[5.0, 5.0, 5.0] 284 ms
+OK    R2-4 motivos_por_grupo_e_janela · rodada 2 do D-01 · 26 configurações em 13 partes (máquina por par), partes fixas e trocas: no máximo 3 motivos por configuração (04bf6f2: 176; ee4f954: 1.672), JS = Python, < 1 s; A–B/B–C na mesma janela: um motivo de troca
+        esperado=≤ 78 motivos · JS = Py · < 1 s · 1 motivo de troca
+        JS=JS 32 motivos 148 ms · troca 1
+        Py=Py 32 motivos 180 ms · troca 1
+OK    R2-5a empate_sem_motivo_de_troca · rodada 2 do D-01 · tudo cabe (empate de ponto flutuante em A: 1,2 h para 1,2 h): sem o motivo "para liberar horas" da troca, em JS, Python float e Python Fraction
+        esperado=8 ha, nenhum motivo de troca
+        JS=[8, []]
+        Py=[8.0, [], '8', []]
+OK    R2-5d sequencia_de_estimativa_na_tela · rodada 2 do D-01 · regra (b) nos chips: 3 com 1 trator cada e 2 tratores → "em sequência nesta estimativa" e "não cabe na janela nesta estimativa"; sequência declarada e mesma máquina continuam como fato
+        esperado=[[True, True, [[True, True], [True, True], [True, True]]], [True, False, [[False, False], [False, False]]], [True, False, [[True, False], [True, False]]]]
+        JS=[[True, True, [[True, True], [True, True], [True, True]]], [True, False, [[False, False], [False, False]]], [True, False, [[True, False], [True, False]]]]
+        Py=[[True, True, [[True, True], [True, True], [True, True]]], [True, False, [[False, False], [False, False]]], [True, False, [[True, False], [True, False]]]]
+OK    P4 empate_de_troca_independe_da_ordem · rodada 3 · A e B em sequência (janela 3 h, troca 1 h), C no a01 de A sem janela (troca 1 h), nas ordens ABC, CAB e BCA: a mesma divisão (3,75 ha cada), sem conflito, decorrido 4,25 h
+        esperado=3 × [15/4, 15/4, 15/4, False, 0, 17/4]
+        JS=[[3.75, 3.75, 3.75, False, 0, 4.25], [3.75, 3.75, 3.75, False, 0, 4.25], [3.75, 3.75, 3.75, False, 0, 4.25]]
+        Py=[['15/4', '15/4', '15/4', 'False', '0', '17/4'], ['15/4', '15/4', '15/4', 'False', '0', '17/4'], ['15/4', '15/4', '15/4', 'False', '0', '17/4']]
+OK    M1 motivo_sem_sequencia_falsa · rodada 2 · A (janela 0) e B (janela 10 h) em sequência declarada, pelo rendimento: B faz 72 ha na janela dela; o motivo é só "as janelas não comportam", sem "sequência declarada" nem "dividem a mesma janela"
+        esperado=['as janelas não comportam toda a área']
+        JS=['as janelas não comportam toda a área']
+        Py=['as janelas não comportam toda a área']
+OK    R1 paridade_js_python_400 · 400 entradas aleatórias (rendimento vazio/0/vírgula, partes, janelas 0–20 h, sequência, troca, mesmo ativo, grupo da fazenda): JS = Python
+        esperado=400/400
+        JS=400/400 iguais
+        Py=com sequência 101 · conflito 56 · pendentes 45 · exemplos []
+OK    R2 invariantes_400 · Σ q + sem conjunto = Q, sem negativos, h ≤ janela própria, sequência declarada, cada ativo e o grupo de 1 plantadeira ≤ a janela deles, pendente com causa e sem horas, horas-conjunto = Σ h, necessário = atendido + saldo (ha e horas-conjunto)
+        esperado=400/400
+        JS=400/400 sem violação
+        Py=exemplos []
+OK    R4 ociosa_nao_muda_400 · rodada 2 · 352 entradas aleatórias com uma configuração ociosa a mais (janela 0, sem %, fora do plano; na sequência, nos ativos a01 e a02 e na plantadeira): atendido, saldo, decorrido, déficit, conflito e divisão iguais
+        esperado=352/352
+        JS=352/352 iguais
+        Py=exemplos []
+RESULTADO: 101/101 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction

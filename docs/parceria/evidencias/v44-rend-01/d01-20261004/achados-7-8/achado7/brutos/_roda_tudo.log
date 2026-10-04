@@ -1,0 +1,61 @@
+23:15:24 inicio · loadavg 2.04 1.59 0.74 3/217 5489
+23:15:43 autoteste 0 · loadavg 9.62 3.37 1.34 18/232 5656
+23:15:45 repro js c2e3 casos_principais 0 · loadavg 9.62 3.37 1.34 13/234 5674
+23:15:59 repro py c2e3 casos_principais 0 · loadavg 10.80 3.94 1.56 12/235 5949
+23:16:06 repro pyfrac c2e3 casos_principais 0 · loadavg 10.90 4.08 1.62 8/235 5963
+23:16:08 repro js c2e3 contraexemplo 0 · loadavg 10.50 4.11 1.64 11/229 6005
+23:16:08 repro py c2e3 contraexemplo 0 · loadavg 10.50 4.11 1.64 3/229 6008
+23:16:09 repro pyfrac c2e3 contraexemplo 0 · loadavg 10.50 4.11 1.64 3/229 6011
+23:16:11 repro js c2e3 M2 0 · loadavg 10.50 4.11 1.64 7/229 6047
+23:16:11 repro py c2e3 M2 0 · loadavg 10.50 4.11 1.64 7/229 6050
+23:16:11 repro pyfrac c2e3 M2 0 · loadavg 10.50 4.11 1.64 3/229 6053
+23:16:15 repro js c04b casos_principais 0 · loadavg 10.22 4.16 1.67 5/231 6129
+23:16:25 repro py c04b casos_principais 0 · loadavg 9.74 4.25 1.73 4/228 6241
+23:16:30 repro pyfrac c04b casos_principais 0 · loadavg 9.20 4.23 1.74 3/228 6247
+23:16:32 repro js c04b contraexemplo 0 · loadavg 9.20 4.23 1.74 3/228 6291
+23:16:32 repro py c04b contraexemplo 0 · loadavg 9.20 4.23 1.74 3/228 6296
+23:16:33 repro pyfrac c04b contraexemplo 0 · loadavg 9.20 4.23 1.74 3/228 6299
+23:16:35 repro js c04b M2 0 · loadavg 8.94 4.26 1.76 3/229 6338
+23:16:35 repro py c04b M2 0 · loadavg 8.94 4.26 1.76 8/229 6341
+23:16:35 repro pyfrac c04b M2 0 · loadavg 8.94 4.26 1.76 3/229 6344
+23:16:38 repro js cee4 casos_principais 0 · loadavg 8.55 4.26 1.77 6/231 6394
+23:16:51 repro py cee4 casos_principais 0 · loadavg 8.09 4.30 1.81 11/230 6453
+23:16:56 repro pyfrac cee4 casos_principais 0 · loadavg 7.68 4.28 1.82 5/245 6517
+23:16:58 repro js cee4 contraexemplo 0 · loadavg 7.79 4.36 1.86 3/228 6611
+23:16:58 repro py cee4 contraexemplo 0 · loadavg 7.79 4.36 1.86 3/228 6614
+23:16:59 repro pyfrac cee4 contraexemplo 0 · loadavg 7.79 4.36 1.86 3/228 6617
+23:17:01 repro js cee4 M2 0 · loadavg 7.79 4.36 1.86 5/230 6677
+23:17:01 repro py cee4 M2 0 · loadavg 7.79 4.36 1.86 5/230 6680
+23:17:01 repro pyfrac cee4 M2 0 · loadavg 7.79 4.36 1.86 5/230 6683
+23:17:04 repro fim · loadavg 7.88 4.43 1.90 4/230 6727
+23:17:07 esperado fim · loadavg 7.88 4.43 1.90 4/226 6821
+23:17:07 oraculo P0 127 · loadavg 7.88 4.43 1.90 4/226 6824
+23:17:07 oraculo P1_2e18 127 · loadavg 7.88 4.43 1.90 3/226 6827
+23:17:07 oraculo P1_2e20 127 · loadavg 7.88 4.43 1.90 3/226 6830
+23:17:07 oraculo P1_2e22 127 · loadavg 7.88 4.43 1.90 4/226 6833
+23:17:07 oraculo P2 127 · loadavg 7.88 4.43 1.90 3/226 6836
+23:17:07 oraculo P2u 127 · loadavg 7.88 4.43 1.90 3/226 6839
+fim
+23:20:25 props js fim · loadavg 5.06 4.58 2.44 2/220 8880
+fim
+23:30:09 props py fim · loadavg 2.17 3.71 3.22 2/223 12015
+23:30:21 props verif fim · loadavg 2.15 3.66 3.21 2/226 12217
+P0 ok 23:30:26
+P2 ok 23:30:30
+P2u ok 23:30:34
+P1_2e18 ok 23:30:41
+P1_2e20 ok 23:30:48
+P1_2e22 ok 23:30:56
+fim
+23:30:56 adv js fim · loadavg 2.60 3.60 3.21 2/223 12365
+P0 saída 0 3300 linhas · 3.53 3.75 3.27 3/223 12433
+P2 saída 0 3300 linhas · 3.49 3.74 3.26 5/230 12471
+P2u saída 0 3300 linhas · 3.85 3.81 3.29 2/233 12686
+P1_2e18 saída 0 3300 linhas · 4.49 3.98 3.37 2/230 12767
+P1_2e20 saída 0 3300 linhas · 3.54 3.79 3.33 5/224 12926
+P1_2e22 saída 0 3300 linhas · 3.59 3.76 3.34 2/232 13100
+fim
+23:33:26 aleat js fim · loadavg 3.59 3.76 3.34 2/231 13102
+23:33:36 verif aleat fim · loadavg 3.74 3.78 3.35 2/210 13212
+23:33:37 resumo aleat fim · loadavg 3.74 3.78 3.35 2/210 13215
+23:33:37 fim · loadavg 3.74 3.78 3.35 3/210 13217

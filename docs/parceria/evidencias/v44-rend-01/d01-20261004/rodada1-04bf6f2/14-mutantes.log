@@ -1,0 +1,194 @@
+== sem mutante
+RESULTADO: 91/91 OK · JS = bloco REPART
+== mutante R1-R3: bloco REPARTIR e espelho anteriores (4c90f31)
+FALHA E10 janela_zero_na_sequencia · a troca (3 h) passa a janela da sequência (2 h): nada cabe, pendente com a causa 
+FALHA R1 janela_zero_na_sequencia_declarada · PRE-REV R1 · o S5 com a janela de A = 0: A não recebe área, mas a sequ
+FALHA R2a grupo_de_recursos_nao_relaxa_janela_1 · PRE-REV R2 · A e B em sequência declarada (janela 10 h), C sem jane
+FALHA T2a ponte_por_outro_grupo_2 · rodada 2 · A sem janela usa 2 tratores, B (janela 2 h) usa trator e operador, C (j
+FALHA T2c ponte_por_sequencia · rodada 2 · B e C no a01 (janela 10 h) e Z (janela 0,01 h) no a01 e na sequência decla
+FALHA N1 troca_reservada_e_cobrada · rodada 2 · A e B em sequência (janela 10 h, troca 2 h cada) e C com a plantadeir
+FALHA M2 fracao_final_no_corte_aninhado · rodada 2 · A e B (30 % cada, sequência, janela 4 h) e C (40 %, janela 10 h)
+FALHA P1 grupo_ja_no_fecho_por_outro_grupo · rodada 3 · B e C usam trator e o único operador (janelas de 2 h); A sem 
+FALHA P2a uma_plantadeira_como_grupo · rodada 3 · A e B em sequência com a única plantadeira (janelas de 3 h) e C na
+FALHA P2b uma_plantadeira_como_ativo · rodada 3 · o mesmo com a plantadeira como ativo p01 do cadastro: a mesma divis�
+FALHA P3 grupo_com_janela_0_no_plano · rodada 3 · o S5 com a plantadeira (1 na fazenda) no lugar da sequência e a jan
+FALHA P5a fecho_nao_e_restricao_1 · rodada 3 · A (a01), B (a01 e a02), C (a02 e plantadeira), D sem janela (plantadeir
+FALHA P5b fecho_nao_e_restricao_2 · rodada 3 · o mesmo com 2 plantadeiras: a mesma divisão (menos recurso não dá pl
+FALHA Q3 equipe_maior_que_o_quadro · rodada 4 · equipe de 10 com 8 operadores na fazenda: não trabalha, pendente com 
+FALHA Q4 equipe_maior_com_parte_fixa · rodada 4 · E (equipe de 10, 50 %) e F (1 operador, 50 %): E fica sem conjunto c
+FALHA V5 cadeia_so_por_pares · rodada 5 · A–B no a01 e B–C no a02 (cordal): só os pares dividem janela; B primeir
+FALHA V9 b5a_pico_do_grupo_de_1 · B5a · A e B ao mesmo tempo, cada uma com o único distribuidor: o motivo diz "Distri
+FALHA W1a dois_tratores_duas_plantadeiras · rodada 6 · T1+P1, T1+P2, T2+P1 e T2+P2 (2 ha/h, janelas de 10 h, 80 ha): c
+FALHA W1d tres_tratores_dez_implementos · rodada 6 · 3 tratores × 10 implementos (30 configurações, 1 ha/h, janelas
+FALHA W3a cadeia_de_28_com_14_operadores · rodada 6 · 28 configurações em cadeia (cada uma divide um ativo com a seg
+FALHA W3b cadeia_de_30_com_10_operadores · rodada 6 · a mesma cadeia com 30 configurações e 10 operadores: o motivo 
+FALHA D01a subgrupo_finito_com_vizinho_de_100h · D-01 (5983640246) · A, B e C (janelas de 10 h) e D (100 h) se excluem
+FALHA D01b subgrupo_finito_com_vizinho_sem_janela · D-01 · o mesmo com D sem janela: a mesma divisão (um vizinho sem 
+FALHA D01d recurso_unico_com_vizinho_sem_janela · D-01 · A e B (janela de 10 h) e D (sem janela) no mesmo a01, 24 ha p
+FALHA D01e prazos_aninhados · D-01 · três no mesmo a01 com prazos 2, 5 e 10 h, <área redigida> ha pelo rendimento (1 ha/h): cortes
+FALHA Da troca_reservada_ocupa_a_janela · regra (a) · A (50 %, janela 10 h) e B (sem %, troca 10 h) em sequência, 10 
+FALHA Db consideradas_em_sequencia · regra (b) · 3 configurações com 1 trator cada e 2 tratores: o motivo diz "consi
+FALHA R3 resto_relativo_area_grande · PRE-REV R3 · 2.882,53 ha com partes 48,7 + 17,6 + 21,9 + 5,4 + 6,4 = 100 % e uma
+FALHA Q4b sem_sequencia_falsa · rodada 4 · E não trabalha (equipe maior que o quadro): o grupo não diz "trabalham em
+FALHA W4 trios_rapido · rodada 6 · 30 configurações em trios (juntas dentro do trio, nunca com outro trio: 3^10 cliq
+FALHA D01f triangulo_mais_vizinho_sem_janela · D-01 · o S2 refutado na rodada 5 (triângulo A–B–C de 10 h + D sem 
+FALHA R2 invariantes_400 · Σ q + sem conjunto = Q, sem negativos, h ≤ janela própria, sequência declarada, cada at
+RESULTADO: 59/91 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+== mutante rodada 1: bloco REPARTIR e espelho de 6e157c6 (antes do modelo por recurso físico)
+FALHA E10 janela_zero_na_sequencia · a troca (3 h) passa a janela da sequência (2 h): nada cabe, pendente com a causa 
+FALHA T1a ociosa_nao_liga_ativo · rodada 2 · Z (janela 0, sem %, fora do plano) no trator a01 e na sequência declarad
+FALHA T1b ociosa_nao_serializa · rodada 2 · A (janela 0, sem %) com os ativos a01 e a02 não põe B (a01) e C (a02) em
+FALHA T1c ociosa_nao_estica_sequencia · rodada 2 · A e B em sequência declarada (janela 3 h); Z (janela 0) na sequên
+FALHA T2a ponte_por_outro_grupo_2 · rodada 2 · A sem janela usa 2 tratores, B (janela 2 h) usa trator e operador, C (j
+FALHA T2c ponte_por_sequencia · rodada 2 · B e C no a01 (janela 10 h) e Z (janela 0,01 h) no a01 e na sequência decla
+FALHA N1 troca_reservada_e_cobrada · rodada 2 · A e B em sequência (janela 10 h, troca 2 h cada) e C com a plantadeir
+FALHA M2 fracao_final_no_corte_aninhado · rodada 2 · A e B (30 % cada, sequência, janela 4 h) e C (40 %, janela 10 h)
+FALHA P1 grupo_ja_no_fecho_por_outro_grupo · rodada 3 · B e C usam trator e o único operador (janelas de 2 h); A sem 
+FALHA P2a uma_plantadeira_como_grupo · rodada 3 · A e B em sequência com a única plantadeira (janelas de 3 h) e C na
+FALHA P2b uma_plantadeira_como_ativo · rodada 3 · o mesmo com a plantadeira como ativo p01 do cadastro: a mesma divis�
+FALHA P3 grupo_com_janela_0_no_plano · rodada 3 · o S5 com a plantadeira (1 na fazenda) no lugar da sequência e a jan
+FALHA P5a fecho_nao_e_restricao_1 · rodada 3 · A (a01), B (a01 e a02), C (a02 e plantadeira), D sem janela (plantadeir
+FALHA P5b fecho_nao_e_restricao_2 · rodada 3 · o mesmo com 2 plantadeiras: a mesma divisão (menos recurso não dá pl
+FALHA Q3 equipe_maior_que_o_quadro · rodada 4 · equipe de 10 com 8 operadores na fazenda: não trabalha, pendente com 
+FALHA Q4 equipe_maior_com_parte_fixa · rodada 4 · E (equipe de 10, 50 %) e F (1 operador, 50 %): E fica sem conjunto c
+FALHA V5 cadeia_so_por_pares · rodada 5 · A–B no a01 e B–C no a02 (cordal): só os pares dividem janela; B primeir
+FALHA V9 b5a_pico_do_grupo_de_1 · B5a · A e B ao mesmo tempo, cada uma com o único distribuidor: o motivo diz "Distri
+FALHA W1a dois_tratores_duas_plantadeiras · rodada 6 · T1+P1, T1+P2, T2+P1 e T2+P2 (2 ha/h, janelas de 10 h, 80 ha): c
+FALHA W1d tres_tratores_dez_implementos · rodada 6 · 3 tratores × 10 implementos (30 configurações, 1 ha/h, janelas
+FALHA W3a cadeia_de_28_com_14_operadores · rodada 6 · 28 configurações em cadeia (cada uma divide um ativo com a seg
+FALHA W3b cadeia_de_30_com_10_operadores · rodada 6 · a mesma cadeia com 30 configurações e 10 operadores: o motivo 
+FALHA D01a subgrupo_finito_com_vizinho_de_100h · D-01 (5983640246) · A, B e C (janelas de 10 h) e D (100 h) se excluem
+FALHA D01b subgrupo_finito_com_vizinho_sem_janela · D-01 · o mesmo com D sem janela: a mesma divisão (um vizinho sem 
+FALHA D01d recurso_unico_com_vizinho_sem_janela · D-01 · A e B (janela de 10 h) e D (sem janela) no mesmo a01, 24 ha p
+FALHA D01e prazos_aninhados · D-01 · três no mesmo a01 com prazos 2, 5 e 10 h, <área redigida> ha pelo rendimento (1 ha/h): cortes
+FALHA Da troca_reservada_ocupa_a_janela · regra (a) · A (50 %, janela 10 h) e B (sem %, troca 10 h) em sequência, 10 
+FALHA Db consideradas_em_sequencia · regra (b) · 3 configurações com 1 trator cada e 2 tratores: o motivo diz "consi
+FALHA Q4b sem_sequencia_falsa · rodada 4 · E não trabalha (equipe maior que o quadro): o grupo não diz "trabalham em
+FALHA W4 trios_rapido · rodada 6 · 30 configurações em trios (juntas dentro do trio, nunca com outro trio: 3^10 cliq
+FALHA D01f triangulo_mais_vizinho_sem_janela · D-01 · o S2 refutado na rodada 5 (triângulo A–B–C de 10 h + D sem 
+FALHA M1 motivo_sem_sequencia_falsa · rodada 2 · A (janela 0) e B (janela 10 h) em sequência declarada, pelo rendimen
+FALHA R2 invariantes_400 · Σ q + sem conjunto = Q, sem negativos, h ≤ janela própria, sequência declarada, cada at
+FALHA R4 ociosa_nao_muda_400 · rodada 2 · 352 entradas aleatórias com uma configuração ociosa a mais (janela 0, sem
+RESULTADO: 57/91 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+== mutante rodada 2: bloco REPARTIR e espelho de 1688f97 (com o fecho como restrição)
+FALHA E10 janela_zero_na_sequencia · a troca (3 h) passa a janela da sequência (2 h): nada cabe, pendente com a causa 
+FALHA M2 fracao_final_no_corte_aninhado · rodada 2 · A e B (30 % cada, sequência, janela 4 h) e C (40 %, janela 10 h)
+FALHA P1 grupo_ja_no_fecho_por_outro_grupo · rodada 3 · B e C usam trator e o único operador (janelas de 2 h); A sem 
+FALHA P2a uma_plantadeira_como_grupo · rodada 3 · A e B em sequência com a única plantadeira (janelas de 3 h) e C na
+FALHA P3 grupo_com_janela_0_no_plano · rodada 3 · o S5 com a plantadeira (1 na fazenda) no lugar da sequência e a jan
+FALHA P5b fecho_nao_e_restricao_2 · rodada 3 · o mesmo com 2 plantadeiras: a mesma divisão (menos recurso não dá pl
+FALHA Q3 equipe_maior_que_o_quadro · rodada 4 · equipe de 10 com 8 operadores na fazenda: não trabalha, pendente com 
+FALHA Q4 equipe_maior_com_parte_fixa · rodada 4 · E (equipe de 10, 50 %) e F (1 operador, 50 %): E fica sem conjunto c
+FALHA V5 cadeia_so_por_pares · rodada 5 · A–B no a01 e B–C no a02 (cordal): só os pares dividem janela; B primeir
+FALHA V9 b5a_pico_do_grupo_de_1 · B5a · A e B ao mesmo tempo, cada uma com o único distribuidor: o motivo diz "Distri
+FALHA W1a dois_tratores_duas_plantadeiras · rodada 6 · T1+P1, T1+P2, T2+P1 e T2+P2 (2 ha/h, janelas de 10 h, 80 ha): c
+FALHA W1d tres_tratores_dez_implementos · rodada 6 · 3 tratores × 10 implementos (30 configurações, 1 ha/h, janelas
+FALHA W3a cadeia_de_28_com_14_operadores · rodada 6 · 28 configurações em cadeia (cada uma divide um ativo com a seg
+FALHA W3b cadeia_de_30_com_10_operadores · rodada 6 · a mesma cadeia com 30 configurações e 10 operadores: o motivo 
+FALHA D01a subgrupo_finito_com_vizinho_de_100h · D-01 (5983640246) · A, B e C (janelas de 10 h) e D (100 h) se excluem
+FALHA D01b subgrupo_finito_com_vizinho_sem_janela · D-01 · o mesmo com D sem janela: a mesma divisão (um vizinho sem 
+FALHA D01d recurso_unico_com_vizinho_sem_janela · D-01 · A e B (janela de 10 h) e D (sem janela) no mesmo a01, 24 ha p
+FALHA D01e prazos_aninhados · D-01 · três no mesmo a01 com prazos 2, 5 e 10 h, <área redigida> ha pelo rendimento (1 ha/h): cortes
+FALHA Da troca_reservada_ocupa_a_janela · regra (a) · A (50 %, janela 10 h) e B (sem %, troca 10 h) em sequência, 10 
+FALHA Db consideradas_em_sequencia · regra (b) · 3 configurações com 1 trator cada e 2 tratores: o motivo diz "consi
+FALHA Q4b sem_sequencia_falsa · rodada 4 · E não trabalha (equipe maior que o quadro): o grupo não diz "trabalham em
+FALHA W4 trios_rapido · rodada 6 · 30 configurações em trios (juntas dentro do trio, nunca com outro trio: 3^10 cliq
+FALHA D01f triangulo_mais_vizinho_sem_janela · D-01 · o S2 refutado na rodada 5 (triângulo A–B–C de 10 h + D sem 
+FALHA P4 empate_de_troca_independe_da_ordem · rodada 3 · A e B em sequência (janela 3 h, troca 1 h), C no a01 de A se
+FALHA R2 invariantes_400 · Σ q + sem conjunto = Q, sem negativos, h ≤ janela própria, sequência declarada, cada at
+RESULTADO: 66/91 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+== mutante rodada 3: bloco REPARTIR e espelho de 1f88bf3
+FALHA E10 janela_zero_na_sequencia · a troca (3 h) passa a janela da sequência (2 h): nada cabe, pendente com a causa 
+FALHA Q1 cafe_colhedora_como_grupo · rodada 4 · colheita de café, 60 ha, janelas de 80 h: A e B com a única colhedor
+FALHA Q3 equipe_maior_que_o_quadro · rodada 4 · equipe de 10 com 8 operadores na fazenda: não trabalha, pendente com 
+FALHA Q4 equipe_maior_com_parte_fixa · rodada 4 · E (equipe de 10, 50 %) e F (1 operador, 50 %): E fica sem conjunto c
+FALHA V3 triangulo_puro · rodada 5 · A e B em sequência, B e C no a02, A e C no a01: 10/3 ha cada, déficit 5 h
+FALHA V4 ciclo_de_5_sem_corda · rodada 5 · 5 configurações em ciclo de ativos (cada uma divide um com a vizinha): n�
+FALHA V9 b5a_pico_do_grupo_de_1 · B5a · A e B ao mesmo tempo, cada uma com o único distribuidor: o motivo diz "Distri
+FALHA W3a cadeia_de_28_com_14_operadores · rodada 6 · 28 configurações em cadeia (cada uma divide um ativo com a seg
+FALHA W3b cadeia_de_30_com_10_operadores · rodada 6 · a mesma cadeia com 30 configurações e 10 operadores: o motivo 
+FALHA D01a subgrupo_finito_com_vizinho_de_100h · D-01 (5983640246) · A, B e C (janelas de 10 h) e D (100 h) se excluem
+FALHA D01b subgrupo_finito_com_vizinho_sem_janela · D-01 · o mesmo com D sem janela: a mesma divisão (um vizinho sem 
+FALHA D01d recurso_unico_com_vizinho_sem_janela · D-01 · A e B (janela de 10 h) e D (sem janela) no mesmo a01, 24 ha p
+FALHA D01e prazos_aninhados · D-01 · três no mesmo a01 com prazos 2, 5 e 10 h, <área redigida> ha pelo rendimento (1 ha/h): cortes
+FALHA Da troca_reservada_ocupa_a_janela · regra (a) · A (50 %, janela 10 h) e B (sem %, troca 10 h) em sequência, 10 
+FALHA Db consideradas_em_sequencia · regra (b) · 3 configurações com 1 trator cada e 2 tratores: o motivo diz "consi
+FALHA Q4b sem_sequencia_falsa · rodada 4 · E não trabalha (equipe maior que o quadro): o grupo não diz "trabalham em
+FALHA V6 pares_por_componente · rodada 5 · 24 configurações em pares no mesmo ativo, 12 operadores: o pico real é 1
+FALHA W3c cadeia_sem_pico_inventado · rodada 6 · cadeia de 28 com 14 operadores: nenhum motivo "ao mesmo tempo precisa
+FALHA W4 trios_rapido · rodada 6 · 30 configurações em trios (juntas dentro do trio, nunca com outro trio: 3^10 cliq
+FALHA R2 invariantes_400 · Σ q + sem conjunto = Q, sem negativos, h ≤ janela própria, sequência declarada, cada at
+RESULTADO: 71/91 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+== mutante rodada 4: bloco REPARTIR e espelho de 9e9cf73 (sem os grupos que se excluem)
+FALHA E10 janela_zero_na_sequencia · a troca (3 h) passa a janela da sequência (2 h): nada cabe, pendente com a causa 
+FALHA Q1 cafe_colhedora_como_grupo · rodada 4 · colheita de café, 60 ha, janelas de 80 h: A e B com a única colhedor
+FALHA V1 triangulo_sequencia_ativo_grupo · rodada 5 · A e B em sequência, A e C no a01, B e C na única plantadeira (
+FALHA V2 triangulo_de_grupos_de_1 · rodada 5 · pulverizador, plantadeira e distribuidor (1 de cada) em triângulo: 10/
+FALHA V3 triangulo_puro · rodada 5 · A e B em sequência, B e C no a02, A e C no a01: 10/3 ha cada, déficit 5 h
+FALHA V4 ciclo_de_5_sem_corda · rodada 5 · 5 configurações em ciclo de ativos (cada uma divide um com a vizinha): n�
+FALHA V7 pico_real_no_motivo · rodada 5 · três equipes de 6 operadores com 8 na fazenda: o motivo diz o pico real (18
+KeyError: 'plant'
+== mutante rodada 5 sem B5a: bloco REPARTIR e espelho de 2eeb2e3
+FALHA E10 janela_zero_na_sequencia · a troca (3 h) passa a janela da sequência (2 h): nada cabe, pendente com a causa 
+FALHA Q1 cafe_colhedora_como_grupo · rodada 4 · colheita de café, 60 ha, janelas de 80 h: A e B com a única colhedor
+FALHA V9 b5a_pico_do_grupo_de_1 · B5a · A e B ao mesmo tempo, cada uma com o único distribuidor: o motivo diz "Distri
+FALHA W1a dois_tratores_duas_plantadeiras · rodada 6 · T1+P1, T1+P2, T2+P1 e T2+P2 (2 ha/h, janelas de 10 h, 80 ha): c
+FALHA W1b dois_por_dois_janela_de_1h · rodada 6 · o mesmo com 200 ha, só T1+P1 com janela de 1 h e as outras sem jane
+FALHA W1c dois_por_dois_parte_fixa_janela_0 · rodada 6 · T1+P1 com 10 % fixos e janela 0, as outras sem janela, 200 ha
+FALHA W1d tres_tratores_dez_implementos · rodada 6 · 3 tratores × 10 implementos (30 configurações, 1 ha/h, janelas
+FALHA W2 grupo_so_do_plano_nao_serializa_divisao · rodada 6 · 2 tratores; A e B (janela 10 h, 1 trator cada) e C (20 %
+FALHA W3a cadeia_de_28_com_14_operadores · rodada 6 · 28 configurações em cadeia (cada uma divide um ativo com a seg
+FALHA W3b cadeia_de_30_com_10_operadores · rodada 6 · a mesma cadeia com 30 configurações e 10 operadores: o motivo 
+FALHA D01a subgrupo_finito_com_vizinho_de_100h · D-01 (5983640246) · A, B e C (janelas de 10 h) e D (100 h) se excluem
+FALHA D01b subgrupo_finito_com_vizinho_sem_janela · D-01 · o mesmo com D sem janela: a mesma divisão (um vizinho sem 
+FALHA D01d recurso_unico_com_vizinho_sem_janela · D-01 · A e B (janela de 10 h) e D (sem janela) no mesmo a01, 24 ha p
+FALHA D01e prazos_aninhados · D-01 · três no mesmo a01 com prazos 2, 5 e 10 h, <área redigida> ha pelo rendimento (1 ha/h): cortes
+FALHA Da troca_reservada_ocupa_a_janela · regra (a) · A (50 %, janela 10 h) e B (sem %, troca 10 h) em sequência, 10 
+FALHA Db consideradas_em_sequencia · regra (b) · 3 configurações com 1 trator cada e 2 tratores: o motivo diz "consi
+FALHA W3c cadeia_sem_pico_inventado · rodada 6 · cadeia de 28 com 14 operadores: nenhum motivo "ao mesmo tempo precisa
+FALHA W1e quatro_tratores_cinco_implementos · rodada 6 · 4 tratores × 5 implementos (20 configurações, 2 ha/h), só
+FALHA W4 trios_rapido · rodada 6 · 30 configurações em trios (juntas dentro do trio, nunca com outro trio: 3^10 cliq
+FALHA D01f triangulo_mais_vizinho_sem_janela · D-01 · o S2 refutado na rodada 5 (triângulo A–B–C de 10 h + D sem 
+FALHA R2 invariantes_400 · Σ q + sem conjunto = Q, sem negativos, h ≤ janela própria, sequência declarada, cada at
+RESULTADO: 70/91 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+== mutante rodada 5 com B5a: bloco REPARTIR e espelho de dba9ff0 (sem W1-W4)
+FALHA E10 janela_zero_na_sequencia · a troca (3 h) passa a janela da sequência (2 h): nada cabe, pendente com a causa 
+FALHA V9 b5a_pico_do_grupo_de_1 · B5a · A e B ao mesmo tempo, cada uma com o único distribuidor: o motivo diz "Distri
+FALHA W1a dois_tratores_duas_plantadeiras · rodada 6 · T1+P1, T1+P2, T2+P1 e T2+P2 (2 ha/h, janelas de 10 h, 80 ha): c
+FALHA W1b dois_por_dois_janela_de_1h · rodada 6 · o mesmo com 200 ha, só T1+P1 com janela de 1 h e as outras sem jane
+FALHA W1c dois_por_dois_parte_fixa_janela_0 · rodada 6 · T1+P1 com 10 % fixos e janela 0, as outras sem janela, 200 ha
+FALHA W1d tres_tratores_dez_implementos · rodada 6 · 3 tratores × 10 implementos (30 configurações, 1 ha/h, janelas
+FALHA W2 grupo_so_do_plano_nao_serializa_divisao · rodada 6 · 2 tratores; A e B (janela 10 h, 1 trator cada) e C (20 %
+FALHA W3a cadeia_de_28_com_14_operadores · rodada 6 · 28 configurações em cadeia (cada uma divide um ativo com a seg
+FALHA W3b cadeia_de_30_com_10_operadores · rodada 6 · a mesma cadeia com 30 configurações e 10 operadores: o motivo 
+FALHA D01a subgrupo_finito_com_vizinho_de_100h · D-01 (5983640246) · A, B e C (janelas de 10 h) e D (100 h) se excluem
+FALHA D01b subgrupo_finito_com_vizinho_sem_janela · D-01 · o mesmo com D sem janela: a mesma divisão (um vizinho sem 
+FALHA D01d recurso_unico_com_vizinho_sem_janela · D-01 · A e B (janela de 10 h) e D (sem janela) no mesmo a01, 24 ha p
+FALHA D01e prazos_aninhados · D-01 · três no mesmo a01 com prazos 2, 5 e 10 h, <área redigida> ha pelo rendimento (1 ha/h): cortes
+FALHA Da troca_reservada_ocupa_a_janela · regra (a) · A (50 %, janela 10 h) e B (sem %, troca 10 h) em sequência, 10 
+FALHA Db consideradas_em_sequencia · regra (b) · 3 configurações com 1 trator cada e 2 tratores: o motivo diz "consi
+FALHA W3c cadeia_sem_pico_inventado · rodada 6 · cadeia de 28 com 14 operadores: nenhum motivo "ao mesmo tempo precisa
+FALHA W1e quatro_tratores_cinco_implementos · rodada 6 · 4 tratores × 5 implementos (20 configurações, 2 ha/h), só
+FALHA W4 trios_rapido · rodada 6 · 30 configurações em trios (juntas dentro do trio, nunca com outro trio: 3^10 cliq
+FALHA D01f triangulo_mais_vizinho_sem_janela · D-01 · o S2 refutado na rodada 5 (triângulo A–B–C de 10 h + D sem 
+FALHA R2 invariantes_400 · Σ q + sem conjunto = Q, sem negativos, h ≤ janela própria, sequência declarada, cada at
+RESULTADO: 71/91 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+== mutante D-01: bloco REPARTIR e espelho de ee4f954 (sem os cortes por prazo)
+FALHA E10 janela_zero_na_sequencia · a troca (3 h) passa a janela da sequência (2 h): nada cabe, pendente com a causa 
+FALHA V9 b5a_pico_do_grupo_de_1 · B5a · A e B ao mesmo tempo, cada uma com o único distribuidor: o motivo diz "Distri
+FALHA W3b cadeia_de_30_com_10_operadores · rodada 6 · a mesma cadeia com 30 configurações e 10 operadores: o motivo 
+FALHA D01a subgrupo_finito_com_vizinho_de_100h · D-01 (5983640246) · A, B e C (janelas de 10 h) e D (100 h) se excluem
+FALHA D01b subgrupo_finito_com_vizinho_sem_janela · D-01 · o mesmo com D sem janela: a mesma divisão (um vizinho sem 
+FALHA D01d recurso_unico_com_vizinho_sem_janela · D-01 · A e B (janela de 10 h) e D (sem janela) no mesmo a01, 24 ha p
+FALHA D01e prazos_aninhados · D-01 · três no mesmo a01 com prazos 2, 5 e 10 h, <área redigida> ha pelo rendimento (1 ha/h): cortes
+FALHA Da troca_reservada_ocupa_a_janela · regra (a) · A (50 %, janela 10 h) e B (sem %, troca 10 h) em sequência, 10 
+FALHA Db consideradas_em_sequencia · regra (b) · 3 configurações com 1 trator cada e 2 tratores: o motivo diz "consi
+FALHA D01f triangulo_mais_vizinho_sem_janela · D-01 · o S2 refutado na rodada 5 (triângulo A–B–C de 10 h + D sem 
+FALHA R2 invariantes_400 · Σ q + sem conjunto = Q, sem negativos, h ≤ janela própria, sequência declarada, cada at
+RESULTADO: 80/91 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+== mutante R5: memória CAL-01 com a área inteira (nf no lugar de nfa)
+FALHA · 29 memória do calcário: realizado antes de hoje, ruptura na calagem de 25/09, recebimento de 30/09 cobre, sem
+RESULTADO: 30 ok · 1 falhas
+== mutante R7: Por mês com a área inteira
+FALHA · 10b LG2627 por mês: área trabalhada com até 2 casas e meses = total do período · [['Área trabalhada (ha)'
+RESULTADO: 4/5 OK · falhas: 10b LG2627 por mês: área trabalhada com até 2 casas e meses = total do período

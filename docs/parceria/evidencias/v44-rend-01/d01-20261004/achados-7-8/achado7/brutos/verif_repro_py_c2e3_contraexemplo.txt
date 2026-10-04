@@ -1,0 +1,2 @@
+{"nome": "contraexemplo 7 configurações, prazos 2/3/10, partes fixas (rend 1)", "violacoes": ["V3 cronograma inexistente: θ*=0.967741935 (V3b)"], "theta": 0.967741935483871, "motor": "V3b"}
+{"nome": "contraexemplo 7 configurações, sem %, Q=15,5", "violacoes": ["V3 cronograma inexistente: θ*=0.967741935 (V3b)"], "theta": 0.9677419354838711, "motor": "V3b"}

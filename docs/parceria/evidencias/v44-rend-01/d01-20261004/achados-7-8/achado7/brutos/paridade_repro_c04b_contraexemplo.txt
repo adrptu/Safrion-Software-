@@ -1,0 +1,3 @@
+IGUAL contraexemplo 7 configurações, prazos 2/3/10, partes fixas (rend 1) | JS ms [3.6, 1.54, 0.41] | Py ms [0.7]
+IGUAL contraexemplo 7 configurações, sem %, Q=15,5 | JS ms [1.57, 4.07, 0.44] | Py ms [0.71]
+# 2 casos, 0 com diferença

@@ -1,0 +1,2 @@
+{"variante": "P0", "entradas": 274, "maior_excesso_ha": 13.802325491956395, "k": 3023, "maior_rel_area_com_prazo": 0.1111111111111111, "k_rel": 1526, "maior_rel_Q": 0.1, "mediana_ha": 1.75}
+{"variante": "P2", "entradas": 318, "maior_excesso_ha": 13.802325491956395, "k": 3023, "maior_rel_area_com_prazo": 0.1111111111111111, "k_rel": 1526, "maior_rel_Q": 0.1, "mediana_ha": 1.8562132207414948}

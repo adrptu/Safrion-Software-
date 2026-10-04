@@ -1,0 +1,3 @@
+P0 recusadas com tolerância 0: 8 · maior excesso exato = 4.333333333333333e-15 h (2644, ['c2', 'c3', 'c4', 'c5'], Fraction(100, 1))
+P1 recusadas com tolerância 0: 4 · maior excesso exato = 4e-15 h (681, ['c1', 'c2', 'c3', 'c4'], Fraction(100, 1))
+P2 recusadas com tolerância 0: 9 · maior excesso exato = 4.333333333333333e-15 h (2644, ['c2', 'c3', 'c4', 'c5'], Fraction(100, 1))

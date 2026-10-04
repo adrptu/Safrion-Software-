@@ -1,0 +1,60 @@
+$ bash 00-mutantes10.sh
+== sem mutante
+RESULTADO: 101/101 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+== mutante rodada 1 inteira: bloco REPARTIR, espelho e ajudas de 04bf6f2
+FALHA Da troca_reservada_ocupa_a_janela · regra (a) · A (50 %, janela 10 h) e B (sem %, troca 10 h) em sequ�
+FALHA R2-2a buraco_por_configuracao_sem_janela · rodada 2 do D-01 · anel de 5 (T1, P2, O3, T3, P1) em que s�
+FALHA R2-2b buraco_entre_quem_tem_janela · rodada 2 do D-01 · controle positivo: o mesmo anel com as cinco e
+FALHA R2-3 partes_fixas_grupo_inteiro_primeiro · rodada 2 do D-01 · A, B e C (3 ha/h, 12 %, 10 h) e D (4 ha/
+FALHA R2-5b troca_na_mesma_maquina · rodada 2 do D-01 · A e B no mesmo a01 (10 h cada), B com troca de 10 h,
+FALHA R2-5c troca_nomeia_o_grupo · rodada 2 do D-01 · A–B na máquina x e B–C na máquina y, B troca 3 h
+FALHA R2-5e ajudas_e_motivos_sem_regra_antiga · rodada 2 do D-01 · ajudas da janela, da parte e da sequênci
+FALHA R2-1 teto_de_cortes_por_componente · rodada 2 do D-01 · 11 pares que passam de 8 192 cortes ficam no c
+FALHA R2-4 motivos_por_grupo_e_janela · rodada 2 do D-01 · 26 configurações em 13 partes (máquina por par
+FALHA R2-5a empate_sem_motivo_de_troca · rodada 2 do D-01 · tudo cabe (empate de ponto flutuante em A: 1,2 h
+KeyError: 'conflitoEst'
+== mutante R2-1: sem o teto de cortes por componente (JS)
+FALHA R2-1 teto_de_cortes_por_componente · rodada 2 do D-01 · 11 pares que passam de 8 192 cortes ficam no c
+FALHA R2-4 motivos_por_grupo_e_janela · rodada 2 do D-01 · 26 configurações em 13 partes (máquina por par
+RESULTADO: 99/101 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+== mutante R2-2: buraco no componente inteiro, com quem não tem janela (JS)
+FALHA R2-2a buraco_por_configuracao_sem_janela · rodada 2 do D-01 · anel de 5 (T1, P2, O3, T3, P1) em que s�
+RESULTADO: 100/101 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+== mutante R2-3: partes fixas na ordem de chegada das restrições (JS)
+FALHA R2-3 partes_fixas_grupo_inteiro_primeiro · rodada 2 do D-01 · A, B e C (3 ha/h, 12 %, 10 h) e D (4 ha/
+FALHA R2-4 motivos_por_grupo_e_janela · rodada 2 do D-01 · 26 configurações em 13 partes (máquina por par
+RESULTADO: 99/101 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+== mutante R2-4: um motivo de troca por restrição (JS)
+FALHA R2-4 motivos_por_grupo_e_janela · rodada 2 do D-01 · 26 configurações em 13 partes (máquina por par
+RESULTADO: 100/101 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+== mutante R2-4b: conflito com um motivo por restrição (JS)
+FALHA R2-4 motivos_por_grupo_e_janela · rodada 2 do D-01 · 26 configurações em 13 partes (máquina por par
+FALHA R1 paridade_js_python_400 · 400 entradas aleatórias (rendimento vazio/0/vírgula, partes, janelas 0–
+RESULTADO: 99/101 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+== mutante R2-5a: motivo da troca mesmo quando tudo cabe (JS)
+FALHA R2-5a empate_sem_motivo_de_troca · rodada 2 do D-01 · tudo cabe (empate de ponto flutuante em A: 1,2 h
+FALHA R1 paridade_js_python_400 · 400 entradas aleatórias (rendimento vazio/0/vírgula, partes, janelas 0–
+RESULTADO: 99/101 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+== mutante R2-5b: ajuste da troca sempre 'tire da sequência' (JS)
+FALHA R2-5b troca_na_mesma_maquina · rodada 2 do D-01 · A e B no mesmo a01 (10 h cada), B com troca de 10 h,
+FALHA R2-4 motivos_por_grupo_e_janela · rodada 2 do D-01 · 26 configurações em 13 partes (máquina por par
+FALHA R1 paridade_js_python_400 · 400 entradas aleatórias (rendimento vazio/0/vírgula, partes, janelas 0–
+RESULTADO: 98/101 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+== mutante R2-5c: motivo da troca sem o grupo (JS)
+FALHA Da troca_reservada_ocupa_a_janela · regra (a) · A (50 %, janela 10 h) e B (sem %, troca 10 h) em sequ�
+FALHA R2-5b troca_na_mesma_maquina · rodada 2 do D-01 · A e B no mesmo a01 (10 h cada), B com troca de 10 h,
+FALHA R2-5c troca_nomeia_o_grupo · rodada 2 do D-01 · A–B na máquina x e B–C na máquina y, B troca 3 h
+FALHA R2-4 motivos_por_grupo_e_janela · rodada 2 do D-01 · 26 configurações em 13 partes (máquina por par
+FALHA R1 paridade_js_python_400 · 400 entradas aleatórias (rendimento vazio/0/vírgula, partes, janelas 0–
+RESULTADO: 96/101 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+== mutante R2-5d: sequência de estimativa como fato (JS)
+FALHA R2-5d sequencia_de_estimativa_na_tela · rodada 2 do D-01 · regra (b) nos chips: 3 com 1 trator cada e 
+RESULTADO: 100/101 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+== mutante R2-5e: ajuda da janela antiga
+FALHA R2-5e ajudas_e_motivos_sem_regra_antiga · rodada 2 do D-01 · ajudas da janela, da parte e da sequênci
+RESULTADO: 100/101 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+== mutante R2-5f (tela): chip agregado antigo '3 sem horas na janela · pendente'
+FALHA · B1b linhas de operação e atividade com todas as ocorrências pendentes não mostram 0,0 h nem R$ 0 · ['Tratamento de sementes 1 
+RESULTADO: 9/10 OK · falhas: B1b linhas de operação e atividade com todas as ocorrências pendentes não mostram 0,0 h nem R$ 0
+== fim
+[exit 0]

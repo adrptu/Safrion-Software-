@@ -1,0 +1,2 @@
+0 contraexemplo 7 configurações, prazos 2/3/10, part área com prazo 15.5 máx executável 15.0 excesso 0.5 Q 15.5
+1 contraexemplo 7 configurações, sem %, Q=15,5 área com prazo 15.5 máx executável 15.0 excesso 0.5 Q 15.5
