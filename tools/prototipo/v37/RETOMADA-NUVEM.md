@@ -107,6 +107,7 @@ Sem a camada sintética (tarefa 1), o build para em `dados_lagoa_fonte`, com uma
     - **P7 · S3 · `gen37/quantidade_test.py`:** o item 6 não executa a recusa por custódia (passa com a trava desligada). Passa a executar a recusa na web e no app, e ganha os fluxos MIP → O.S. e fertirrigação → O.S. com custódia 0.
     - **P8 · S4 · `gen37/quantidade.py`:** `qtd_trecho` não é usado e arredonda a 6 casas de outro jeito que o JS. Sai.
   - Testes que podem mudar de linha de base: `irr_estado_test.py`, `mip_unit_test.py`, `mip_correcoes_test.py`, `dados_lagoa_sintetico/camada_test.py`.
+    - **Nomeado depois da cadeia, antes de editar:** a mensagem "Área maior que o talhão" passou a 2 casas (P3). O `mip_unit_test.py` roda `gen37/mip_test.js:62–63`, e o `mip_correcoes_test.py:102` monta o texto esperado com 1 casa; os dois passam a 2 casas. O `carencia_test.py` falhou só porque a worktree nova não tem a pasta não rastreada `_probe/`; não muda (a cadeia cria a pasta).
   - **Separação:** nenhum hunk da REND (`126899e5`) toca esses arquivos. A AÇÃO (`20f25726`) toca `agronomia.py:1748` e `irrigacao.py:26–86`, fora das linhas acima. Depois do commit aqui, a `claude/v44-rend-01` recebe esta branch por merge.
 
 ## Tarefas, na ordem
