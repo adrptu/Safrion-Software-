@@ -210,7 +210,7 @@ def repartir(Q,cfgs,pools=None):
         if m not in mot: mot.append(m)
     Q=_rp_num(Q)
     if not _ok(Q) or Q<0: add('área inválida'); Q=0
-    PV=[(k,pv or {},_rp_num((pv or {}).get('un'))) for k,pv in (pools or {}).items()]; PV=[z for z in PV if _ok(z[2])]   # grupos com unidades válidas
+    PV=[(k,pv or {},_rp_num((pv or {}).get('un'))) for k,pv in (pools or {}).items()]; PV=[z for z in PV if _ok(z[2]) and z[2]>=0]   # grupos com unidades válidas
     it=[]
     for i,c in enumerate(cfgs or []):
         r,p,H,ch,d,tr,pe=(_rp_num(c.get(k)) for k in ('rend','part','jan','custo_h','diesel','troca','pess'))
@@ -219,8 +219,8 @@ def repartir(Q,cfgs,pools=None):
                troca=tr if _ok(tr) and tr>0 else 0,pess=pe if _ok(pe) and pe>0 else 0,seq=bool(c.get('seq')),ativos=[a for a in (c.get('ativos') or []) if a],
                rec=c.get('rec') or {},t=0,q=0,h=0,ht=0,custo=None,diesel=None,emSeq=False,grupo=i)
         if H is not None and (not _ok(H) or H<0): add(x['nome']+': janela inválida, considerada sem limite')
-        x['Hin']=x['H']; fr=next((z for z in PV if (_rp_num(x['rec'].get(z[0])) or 0)>z[2]+1e-9),None)   # sozinha precisa de mais unidades: não trabalha
-        if fr: x['H']=0; x['semRec']=True; add(f"{x['nome']}: precisa de {_rp_f(_rp_num(x['rec'][fr[0]]))} em {fr[1].get('nome') or fr[0]}, a fazenda tem {_rp_f(fr[2])}; não trabalha nesta ocorrência")
+        x['Hin']=x['H']; fr=next((z for z in PV if 0<(_rp_num(x['rec'].get(z[0])) or 0) and (_rp_num(x['rec'].get(z[0])) or 0)>z[2]+1e-9),None)   # sozinha precisa de mais unidades: não trabalha
+        if fr: x['H']=0; x['semRec']=True; add(f"{x['nome']}: precisa de {_rp_f(_rp_num(x['rec'].get(fr[0])))} em {fr[1].get('nome') or fr[0]}, a fazenda tem {_rp_f(fr[2])}; não trabalha nesta ocorrência")
         it.append(x)
     fx=[x for x in it if x['p'] is not None]; sp=sum((x['p'] for x in fx),0); esc=100/sp if sp>100 else 1
     if sp>100+1e-9: add(f'partes fixas somam {_rp_f(sp)} %: reduzidas na proporção para fechar 100 %')
@@ -258,34 +258,79 @@ def repartir(Q,cfgs,pools=None):
     for z in ats:
         xs=[x for x in cand_p if z in x['ativos']]
         if len(xs)>1: RS.append(('at:'+str(z),xs,[x for x in xs if x['H']>0]))
-    um=[z[0] for z in PV if z[2]<=1]   # grupo de 1 unidade: uma máquina só
+    um=[z[0] for z in PV if z[2]<=1]; SER=[]   # grupo de 1 unidade: uma máquina só; SER: grupos de 2+ que serializam
     def junto(x,y): return (x['seq'] and y['seq']) or any(z in y['ativos'] for z in x['ativos']) or any((_rp_num(x['rec'].get(k)) or 0)>0 and (_rp_num(y['rec'].get(k)) or 0)>0 for k in um)
-    def simul(us,k,un):   # maior uso simultâneo entre quem pode trabalhar junto; para assim que passa de un, com poda (como no safra.js)
-        w=[_rp_num(x['rec'].get(k)) or 0 for x in us]; n=len(us); tot=sum(w,0)
+    def simul(us,k,un,pare):   # maior uso simultâneo por componente do grafo junto, busca exata com poda e teto (como no safra.js)
+        W0=[_rp_num(x['rec'].get(k)) or 0 for x in us]; n=len(us); tot=sum(W0,0)
         if tot<=un+1e-9: return tot
-        best=[0]
-        def vai(i,s_,sel):
-            if s_>best[0]: best[0]=s_
-            if best[0]>un+1e-9: return
-            if s_+sum(w[i:],0)<=best[0]: return
-            for j in range(i,n):
-                if any(junto(us[t],us[j]) for t in sel): continue
-                sel.append(j); vai(j+1,s_+w[j],sel); sel.pop()
-                if best[0]>un+1e-9: return
-        vai(0,0,[]); return best[0]
+        vis=[False]*n; soma=0
+        for s0 in range(n):
+            if vis[s0]: continue
+            cp=[]; pl0=[s0]; vis[s0]=True
+            while pl0:
+                a=pl0.pop(); cp.append(a)
+                for b in range(n):
+                    if not vis[b] and junto(us[a],us[b]): vis[b]=True; pl0.append(b)
+            cp.sort(); w=[W0[i] for i in cp]; m=len(cp); st=dict(best=0,passos=0,estouro=False)
+            def vai(i,s_,sel):
+                st['passos']+=1
+                if st['passos']>65536: st['estouro']=True; return
+                if s_>st['best']: st['best']=s_
+                if s_+sum(w[i:],0)<=st['best']: return
+                for j in range(i,m):
+                    if any(junto(us[cp[t]],us[cp[j]]) for t in sel): continue
+                    sel.append(j); vai(j+1,s_+w[j],sel); sel.pop()
+                    if st['estouro']: return
+            vai(0,0,[]); soma+=sum(w,0) if st['estouro'] else st['best']
+            if pare and soma>un+1e-9: return soma
+        return soma
     for k,pv in (pools or {}).items():
         un=_rp_num((pv or {}).get('un'))
-        if not _ok(un): continue
+        if not _ok(un) or un<0: continue
         u_p=[x for x in cand_p if not x.get('semRec') and (_rp_num(x['rec'].get(k)) or 0)>0]; u_a=[x for x in u_p if x['H']>0]   # sem recurso já tem o motivo
-        s_a=simul(u_a,k,un) if len(u_a)>1 else 0; s_p=simul(u_p,k,un) if len(u_p)>1 else 0
+        s_a=simul(u_a,k,un,True) if len(u_a)>1 else 0; s_p=simul(u_p,k,un,True) if len(u_p)>1 else 0
         ea=len(u_a)>1 and (un<=1 or s_a>un+1e-9); ep=len(u_p)>1 and (un<=1 or s_p>un+1e-9)   # 1 unidade: uma máquina só, como um ativo
         if ea:
             for x in u_a: U.une(u_a[0]['i'],x['i'])
         if ep:
             for x in u_p: UP.une(u_p[0]['i'],x['i'])
         if ea or ep:
-            RS.append(('pl:'+str(k),u_p if ep else [],u_a if ea else [])); sm=s_a if ea else s_p
+            RS.append(('pl:'+str(k),u_p if ep else [],u_a if ea else []))
+            if not un<=1 and k not in SER: SER.append(k)
+            sm=simul(u_a if ea else u_p,k,un,False)
             add(f"{pv.get('nome') or k}"+(f": ao mesmo tempo precisariam de {_rp_f(sm)}, a fazenda tem {_rp_f(un)}; trabalham em sequência" if sm>un+1e-9 else f": a fazenda tem {_rp_f(un)}; quem a usa divide a janela dela"))
+    # clique maximal do grafo "nunca ao mesmo tempo" divide a maior janela dele; componente não cordal divide a maior janela finita (como no safra.js)
+    def exclui(x,y): return junto(x,y) or any((_rp_num(x['rec'].get(k)) or 0)>0 and (_rp_num(y['rec'].get(k)) or 0)>0 for k in SER)
+    def grafo(V,pref):
+        n=len(V)
+        if n<2: return
+        adj=[[a!=b and exclui(V[a],V[b]) for b in range(n)] for a in range(n)]; cl=[]
+        def bk(R_,P,X):
+            if not P and not X:
+                if len(R_)>1: cl.append(sorted(R_))
+                return
+            u=(P+X)[0]
+            for v in [v for v in P if not adj[u][v]]:
+                bk(R_+[v],[w for w in P if adj[v][w]],[w for w in X if adj[v][w]]); P=[w for w in P if w!=v]; X=X+[v]
+        bk([],list(range(n)),[]); cl.sort()
+        for c in cl:
+            xs=[V[i] for i in c]; RS.append((pref+'cq:'+','.join(str(x['i']) for x in xs),xs if pref=='p' else [],xs if pref=='a' else []))
+        vis=[False]*n
+        for s0 in range(n):
+            if vis[s0]: continue
+            comp=[]; pilha=[s0]; vis[s0]=True
+            while pilha:
+                a=pilha.pop(); comp.append(a)
+                for b in range(n):
+                    if adj[a][b] and not vis[b]: vis[b]=True; pilha.append(b)
+            comp.sort(); rest=comp[:]; cordal=True
+            while rest:
+                sv=next((v for v in rest if all(i==j or adj[a][b] for i,a in enumerate([w for w in rest if adj[v][w]]) for j,b in enumerate([w for w in rest if adj[v][w]]))),None)
+                if sv is None: cordal=False; break
+                rest=[v for v in rest if v!=sv]
+            if not cordal:
+                xs=[V[i] for i in comp]; RS.append((pref+'fc:'+str(xs[0]['i']),xs if pref=='p' else [],xs if pref=='a' else [],True))
+    grafo([x for x in cand_p if not x.get('semRec')],'p'); grafo(cand,'a')
     def troca_de(xs):
         if len(xs)<2: return 0
         return sum((x['troca'] for x in xs),0)-min(x['troca'] for x in xs)
@@ -294,8 +339,9 @@ def repartir(Q,cfgs,pools=None):
         g=V.raiz(xs[0]['i']); mn=min((y['troca'] for y in P if V.raiz(y['i'])==g),default=_math.inf)
         return sum((x['troca'] for x in xs),0)-(mn if any(x['troca']==mn for x in xs) else 0)
     W={}; jan={}; pista={}; pista_a={}
-    for k,xs,xa in RS:
-        w=max((x['H'] for x in xs+xa),default=-_math.inf)
+    for r_ in RS:
+        k,xs,xa=r_[:3]; fin=len(r_)>3 and r_[3]
+        w=max((x['H'] for x in xs+xa if not fin or x['H']!=_math.inf),default=-_math.inf)
         if w==_math.inf or w==-_math.inf: continue
         W[k]=w
         if len(xs)>1: pista[k]=xs

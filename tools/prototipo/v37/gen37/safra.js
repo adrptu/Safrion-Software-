@@ -53,13 +53,13 @@ function rpF(n){ return String(Math.round(Number(n)*100)/100).replace('.',','); 
 function rendCalc(larg,vel,efic){ return (Number(larg)||0)*(Number(vel)||0)/10*(Number(efic)||0)/100; }   // ha/h = m × km/h ÷ 10 × eficiência
 function repartir(Q,cfgs,pools){ const mot=[]; const add=(m)=>{ if(mot.indexOf(m)<0) mot.push(m); };
   Q=rpNum(Q); if(Q===null||isNaN(Q)||Q<0){ add('área inválida'); Q=0; }
-  const PV=Object.keys(pools||{}).map(k=>[k,pools[k]||{},rpNum((pools[k]||{}).un)]).filter(z=>z[2]!==null&&!isNaN(z[2]));   // grupos com unidades válidas
+  const PV=Object.keys(pools||{}).map(k=>[k,pools[k]||{},rpNum((pools[k]||{}).un)]).filter(z=>z[2]!==null&&!isNaN(z[2])&&z[2]>=0);   // grupos com unidades válidas
   const it=(cfgs||[]).map((c,i)=>{ const r=rpNum(c.rend), p=rpNum(c.part), H=rpNum(c.jan), ch=rpNum(c.custo_h), d=rpNum(c.diesel), tr=rpNum(c.troca), pe=rpNum(c.pess);
     const x={i,id:c.id,nome:c.nome||('Configuração '+(i+1)),r:(r!==null&&r>0)?r:null,p:(p!==null&&p>=0)?p:null,H:(H===null||isNaN(H)||H<0)?Infinity:H,
       ch:(ch!==null&&ch>=0)?ch:null,d:(d!==null&&d>=0)?d:null,troca:(tr!==null&&tr>0)?tr:0,pess:(pe!==null&&pe>0)?pe:0,seq:!!c.seq,
       ativos:(c.ativos||[]).filter(Boolean),rec:c.rec||{},t:0,q:0,h:0,ht:0,custo:null,diesel:null,emSeq:false,grupo:i};
     if(H!==null&&(isNaN(H)||H<0)) add(x.nome+': janela inválida, considerada sem limite');
-    x.Hin=x.H; const fr=PV.find(z=>(rpNum(x.rec[z[0]])||0)>z[2]+1e-9);   // sozinha precisa de mais unidades que a fazenda tem: não trabalha (PRE-REV)
+    x.Hin=x.H; const fr=PV.find(z=>{ const u=rpNum(x.rec[z[0]])||0; return u>0&&u>z[2]+1e-9; });   // sozinha precisa de mais unidades que a fazenda tem: não trabalha (PRE-REV)
     if(fr){ x.H=0; x.semRec=true; add(x.nome+': precisa de '+rpF(rpNum(x.rec[fr[0]]))+' em '+(fr[1].nome||fr[0])+', a fazenda tem '+rpF(fr[2])+'; não trabalha nesta ocorrência'); }
     return x; });
   const fx=it.filter(x=>x.p!==null); const sp=fx.reduce((a,x)=>a+x.p,0); const esc=sp>100?100/sp:1;
@@ -87,25 +87,46 @@ function repartir(Q,cfgs,pools){ const mot=[]; const add=(m)=>{ if(mot.indexOf(m
   const RS=[]; const sqP=candP.filter(x=>x.seq); if(sqP.length>1) RS.push(['sq',sqP,sqP.filter(x=>x.H>0)]);
   const ats=[]; candP.forEach(x=>x.ativos.forEach(z=>{ if(ats.indexOf(z)<0) ats.push(z); }));
   ats.forEach(z=>{ const xs=candP.filter(x=>x.ativos.indexOf(z)>=0); if(xs.length>1) RS.push(['at:'+z,xs,xs.filter(x=>x.H>0)]); });
-  const um=PV.filter(z=>z[2]<=1).map(z=>z[0]);   // grupo de 1 unidade: uma máquina só
+  const um=PV.filter(z=>z[2]<=1).map(z=>z[0]); const SER=[];   // grupo de 1 unidade: uma máquina só; SER: grupos de 2+ que serializam
   const junto=(x,y)=>(x.seq&&y.seq)||x.ativos.some(z=>y.ativos.indexOf(z)>=0)||um.some(k=>(rpNum(x.rec[k])||0)>0&&(rpNum(y.rec[k])||0)>0);   // nunca ao mesmo tempo
   // maior uso simultâneo do grupo entre quem pode trabalhar junto; para assim que passa de un (só importa se passa), com poda
-  const simul=(us,k,un)=>{ const w=us.map(x=>rpNum(x.rec[k])||0), n=us.length; const tot=w.reduce((a,b)=>a+b,0); if(tot<=un+1e-9) return tot; let best=0;
-    const vai=(i,s,sel)=>{ if(s>best) best=s; if(best>un+1e-9) return; let rest=0; for(let j=i;j<n;j++) rest+=w[j]; if(s+rest<=best) return;
-      for(let j=i;j<n;j++){ if(sel.some(t=>junto(us[t],us[j]))) continue; sel.push(j); vai(j+1,s+w[j],sel); sel.pop(); if(best>un+1e-9) return; } };
-    vai(0,0,[]); return best; };
-  Object.keys(pools||{}).forEach(k=>{ const pv=pools[k]||{}; const un=rpNum(pv.un); if(un===null||isNaN(un)) return;
+  //    teto de 65 536 passos: acima disso devolve a soma (conservador: serializa); pare=false dá o máximo para o texto do motivo
+  //    por componente do grafo "junto" (quem é independente soma), cada um com busca exata e poda
+  const simul=(us,k,un,pare)=>{ const W0=us.map(x=>rpNum(x.rec[k])||0), n=us.length; const tot=W0.reduce((a,b)=>a+b,0); if(tot<=un+1e-9) return tot;
+    const vis=us.map(()=>false); let soma=0;
+    for(let s0=0;s0<n;s0++){ if(vis[s0]) continue; const cp=[]; const pl0=[s0]; vis[s0]=true; while(pl0.length){ const a=pl0.pop(); cp.push(a); for(let b=0;b<n;b++) if(!vis[b]&&junto(us[a],us[b])){ vis[b]=true; pl0.push(b); } }
+      cp.sort((a,b)=>a-b); const w=cp.map(i=>W0[i]), m=cp.length; let best=0, passos=0, estouro=false;
+      const vai=(i,s,sel)=>{ if(++passos>65536){ estouro=true; return; } if(s>best) best=s; let rest=0; for(let j=i;j<m;j++) rest+=w[j]; if(s+rest<=best) return;
+        for(let j=i;j<m;j++){ if(sel.some(t=>junto(us[cp[t]],us[cp[j]]))) continue; sel.push(j); vai(j+1,s+w[j],sel); sel.pop(); if(estouro) return; } };
+      vai(0,0,[]); soma+=estouro?w.reduce((a,b)=>a+b,0):best; if(pare&&soma>un+1e-9) return soma; }
+    return soma; };
+  Object.keys(pools||{}).forEach(k=>{ const pv=pools[k]||{}; const un=rpNum(pv.un); if(un===null||isNaN(un)||un<0) return;
     const uP=candP.filter(x=>!x.semRec&&(rpNum(x.rec[k])||0)>0), uA=uP.filter(x=>x.H>0);   // quem não trabalha por falta de recurso já tem o motivo
-    const sA=uA.length>1?simul(uA,k,un):0, sP=uP.length>1?simul(uP,k,un):0;
+    const sA=uA.length>1?simul(uA,k,un,true):0, sP=uP.length>1?simul(uP,k,un,true):0;
     const ea=uA.length>1&&(un<=1||sA>un+1e-9), ep=uP.length>1&&(un<=1||sP>un+1e-9);   // 1 unidade: uma máquina só, como um ativo do cadastro
     if(ea) uA.forEach(x=>U.une(uA[0].i,x.i)); if(ep) uP.forEach(x=>UP.une(uP[0].i,x.i));
-    if(ea||ep){ RS.push(['pl:'+k,ep?uP:[],ea?uA:[]]); const sm=ea?sA:sP;
+    if(ea||ep){ RS.push(['pl:'+k,ep?uP:[],ea?uA:[]]); if(!(un<=1)&&SER.indexOf(k)<0) SER.push(k); const sm=simul(ea?uA:uP,k,un,false);
       add((pv.nome||k)+(sm>un+1e-9?': ao mesmo tempo precisariam de '+rpF(sm)+', a fazenda tem '+rpF(un)+'; trabalham em sequência':': a fazenda tem '+rpF(un)+'; quem a usa divide a janela dela')); } });
+  // grupo inteiro de quem se exclui duas a duas (clique maximal do grafo "nunca ao mesmo tempo": sequência, ativo, grupo de 1 unidade ou que
+  // serializa) divide a maior janela dele; componente não cordal (ciclo de 4 ou mais sem corda): o componente divide a maior janela finita
+  // dele (conservador). No plano (com janela 0) e na divisão (só com horas), cada um com o seu grafo.
+  const exclui=(x,y)=>junto(x,y)||SER.some(k=>(rpNum(x.rec[k])||0)>0&&(rpNum(y.rec[k])||0)>0);
+  const grafo=(V,pref)=>{ const n=V.length; if(n<2) return; const adj=V.map((x,a)=>V.map((y,b)=>a!==b&&exclui(x,y))); const cl=[];
+    const bk=(R,P,X)=>{ if(!P.length&&!X.length){ if(R.length>1) cl.push(R.slice().sort((a,b)=>a-b)); return; } const u=P.concat(X)[0];
+      for(const v of P.filter(v=>!adj[u][v])){ bk(R.concat([v]),P.filter(w=>adj[v][w]),X.filter(w=>adj[v][w])); P=P.filter(w=>w!==v); X=X.concat([v]); } };
+    bk([],V.map((_,i)=>i),[]); cl.sort((a,b)=>{ for(let i=0;i<Math.min(a.length,b.length);i++) if(a[i]!==b[i]) return a[i]-b[i]; return a.length-b.length; });
+    cl.forEach(c=>{ const xs=c.map(i=>V[i]); RS.push([pref+'cq:'+xs.map(x=>x.i).join(','),pref==='p'?xs:[],pref==='a'?xs:[]]); });
+    const vis=V.map(()=>false); for(let s0=0;s0<n;s0++){ if(vis[s0]) continue; const comp=[]; const pilha=[s0]; vis[s0]=true;
+      while(pilha.length){ const a=pilha.pop(); comp.push(a); for(let b=0;b<n;b++) if(adj[a][b]&&!vis[b]){ vis[b]=true; pilha.push(b); } } comp.sort((a,b)=>a-b);
+      let rest=comp.slice(), cordal=true; while(rest.length){ const sv=rest.find(v=>{ const nb=rest.filter(w=>adj[v][w]); return nb.every((a,i)=>nb.every((b,j)=>i===j||adj[a][b])); });
+        if(sv===undefined){ cordal=false; break; } rest=rest.filter(v=>v!==sv); }
+      if(!cordal){ const xs=comp.map(i=>V[i]); RS.push([pref+'fc:'+xs[0].i,pref==='p'?xs:[],pref==='a'?xs:[],true]); } } };
+  grafo(candP.filter(x=>!x.semRec),'p'); grafo(cand,'a');
   const trocaDe=(xs)=>{ if(xs.length<2) return 0; let s=0, mn=Infinity; xs.forEach(x=>{ s+=x.troca; if(x.troca<mn) mn=x.troca; }); return s-mn; };
   const trocaR=(xs,P,V)=>{ if(xs.length<2) return 0; const g=V.raiz(xs[0].i); let mn=Infinity; P.forEach(y=>{ if(V.raiz(y.i)===g&&y.troca<mn) mn=y.troca; });
     return xs.reduce((a,x)=>a+x.troca,0)-(xs.some(x=>x.troca===mn)?mn:0); };
   const W={}, jan={}, pista={}, pistaA={};
-  RS.forEach(([k,xs,xa])=>{ const w=Math.max.apply(null,xs.concat(xa).map(x=>x.H)); if(!isFinite(w)) return; W[k]=w;
+  RS.forEach(([k,xs,xa,fin])=>{ const w=Math.max.apply(null,xs.concat(xa).map(x=>x.H).filter(h=>!fin||isFinite(h))); if(!isFinite(w)) return; W[k]=w;
     if(xs.length>1) pista[k]=xs; if(xa.length>1){ pistaA[k]=xa; jan[k]=w-trocaR(xa,cand,U); } });
   const pl=(x)=>Object.keys(jan).filter(g=>pistaA[g].indexOf(x)>=0);   // restrições de janela da divisão de uma configuração
   // 2) divide a área respeitando as janelas (a própria e a da sequência): é o que cabe, o atendido
