@@ -135,7 +135,7 @@ def build():
                     dict(k='custo_c',l='Custo por hora',ro=True,live=True,u='R$/h',help='Máquina + implemento + pessoas × custo por pessoa.'),
                     dict(k='diesel',l='Consumo de diesel',t='num',min=0,max=200,u='L/h',help='Opcional. Estima os litros pelas horas do conjunto; o custo do combustível já está no custo da máquina.'),
                     dict(k='jan',l='Horas disponíveis na janela',t='num',min=0,max=2000,u='h por talhão',help='Opcional. Quanto este conjunto pode trabalhar em cada talhão ou parcela; em sequência, as configurações dividem a maior janela entre elas. A área que não couber fica sem conjunto, à vista no plano operacional.'),
-                    dict(k='part',l='Parte da área',t='num',min=0,max=100,u='%',cond=MULTI,help='Vazio = divide pelo rendimento: as configurações sem % terminam juntas. Com %, a parte fica fixa.'),
+                    dict(k='part',l='Parte da área',t='num',min=0,max=100,u='%',cond=MULTI,help='Vazio = divide pelo rendimento, com as mesmas horas produtivas para as sem % (estimativa: não garante término no mesmo horário com recurso em sequência nem a capacidade máxima). Com %, a parte fica fixa.'),
                     dict(k='seq',l='Trabalha com as outras configurações',t='sel',opts=[PAR_T,SEQ_T],cond=MULTI,**{'def':PAR_T},help='Mesmo trator do cadastro ou falta de máquina/pessoa na fazenda já obrigam a sequência.'),
                     dict(k='troca',l='Troca entre configurações',t='num',min=0,max=24,u='h',cond=MULTI,help='Opcional. Tempo para trocar para esta configuração quando trabalham em sequência (começa a de menor troca); entra no tempo decorrido e ocupa a janela.')])
     rend_html=''

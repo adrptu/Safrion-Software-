@@ -313,8 +313,8 @@ def repartir(Q,cfgs,pools=None):
                 if ea and k not in SERa: SERa.append(k)
             sm,es=simul(u_a if ea else u_p,k,un,False); dp=(s_a>un+1e-9 and not e_a) if ea else (s_p>un+1e-9 and not e_p)   # dp: a decisão achou mais do que un sem estourar
             nome=f"{pv.get('nome') or k}"
-            if es: add(nome+(f": ao mesmo tempo precisariam de mais do que as {_rp_f(un)} da fazenda; trabalham em sequência" if dp else ": combinações demais para conferir quantas trabalham ao mesmo tempo; trabalham em sequência (conservador)"))
-            else: add(nome+(f": ao mesmo tempo precisariam de {_rp_f(sm)}, a fazenda tem {_rp_f(un)}; trabalham em sequência" if sm>un+1e-9 else f": a fazenda tem {_rp_f(un)}; quem a usa divide a janela dela"))
+            if es: add(nome+(f": ao mesmo tempo precisariam de mais do que as {_rp_f(un)} da fazenda; configurações consideradas em sequência nesta estimativa" if dp else ": combinações demais para conferir quantas trabalham ao mesmo tempo; configurações consideradas em sequência nesta estimativa (conservador)"))
+            else: add(nome+(f": ao mesmo tempo precisariam de {_rp_f(sm)}, a fazenda tem {_rp_f(un)}; configurações consideradas em sequência nesta estimativa" if sm>un+1e-9 else f": a fazenda tem {_rp_f(un)}; quem a usa divide a janela dela"))
     # clique maximal do grafo "nunca ao mesmo tempo" divide a maior janela dele; grafo não perfeito (buraco ímpar de 5+ no grafo ou no
     # complemento), cliques demais ou busca acima do teto: o componente divide a maior janela dos membros (como no safra.js, W1/W2/W4)
     def exclui(x,y,S): return junto(x,y) or any((_rp_num(x['rec'].get(k)) or 0)>0 and (_rp_num(y['rec'].get(k)) or 0)>0 for k in S)
@@ -340,7 +340,7 @@ def repartir(Q,cfgs,pools=None):
     def grafo(V,pref,S):
         n=len(V)
         if n<2: return
-        adj=[[a!=b and exclui(V[a],V[b],S) for b in range(n)] for a in range(n)]; cl=[]; fc=[]
+        adj=[[a!=b and exclui(V[a],V[b],S) for b in range(n)] for a in range(n)]; cl=[]; fc=[]; comps=[]
         vis=[False]*n
         for s0 in range(n):
             if vis[s0]: continue
@@ -372,11 +372,25 @@ def repartir(Q,cfgs,pools=None):
                 if h is None: est=True
             if est: add('combinações demais para conferir quem trabalha ao mesmo tempo: as configurações ligadas dividem a maior janela delas (conservador)')
             if imp: fc.append(comp)
+            comps.append(comp)
         cl.sort()
-        for c in cl:
-            xs=[V[i] for i in c]; RS.append((pref+'cq:'+','.join(str(x['i']) for x in xs),xs if pref=='p' else [],xs if pref=='a' else []))
-        for c in fc:
-            xs=[V[i] for i in c]; RS.append((pref+'fc:'+str(xs[0]['i']),xs if pref=='p' else [],xs if pref=='a' else []))
+        def cortes(xs,tipo,out,visto):   # cortes por prazo de um grupo (D-01, 5983640246): quem tem janela ≤ t cabe em t; sem repetir
+            for t_ in sorted({x['H'] for x in xs if x['H']!=_math.inf}):
+                st=[x for x in xs if x['H']<=t_]
+                if len(st)<2: continue
+                k=pref+tipo+':'+','.join(str(x['i']) for x in st)+'@'+str(t_)
+                if k in visto: continue
+                visto.add(k); out.append((k,st,t_))
+        cc=[]; vc=set()
+        for c in cl: cortes([V[i] for i in c],'cq',cc,vc)
+        if len(cc)>8192:   # cortes demais: o componente inteiro nos cortes por prazo (conservador), sem declarar viabilidade exata
+            cc=[]; v2=set()
+            for c in comps: cortes([V[i] for i in c],'fc',cc,v2)
+            fc=[]
+            add('combinações demais para conferir quem trabalha ao mesmo tempo: as configurações ligadas dividem a maior janela delas (conservador)')
+        cf=[]; vf=set()
+        for c in fc: cortes([V[i] for i in c],'fc',cf,vf)
+        for k,st,t_ in cc+cf: RS.append((k,st if pref=='p' else [],st if pref=='a' else [],t_))
     grafo([x for x in cand_p if not x.get('semRec')],'p',SERp); grafo(cand,'a',SERa)
     def troca_de(xs):
         if len(xs)<2: return 0
@@ -385,20 +399,28 @@ def repartir(Q,cfgs,pools=None):
         if len(xs)<2: return 0
         g=V.raiz(xs[0]['i']); mn=min((y['troca'] for y in P if V.raiz(y['i'])==g),default=_math.inf)
         return sum((x['troca'] for x in xs),0)-(mn if any(x['troca']==mn for x in xs) else 0)
-    W={}; jan={}; pista={}; pista_a={}
+    def troca_quem(xs,P,V):   # quem tem a troca reservada: todos com troca, menos uma com a menor troca do fecho (a que começa) — regra (a)
+        g=V.raiz(xs[0]['i']); mn=min((y['troca'] for y in P if V.raiz(y['i'])==g),default=_math.inf); out=[]; tirou=False
+        for x in xs:
+            if not tirou and x['troca']==mn: tirou=True; continue
+            if x['troca']>0: out.append(x['nome'])
+        return out
+    W={}; jan={}; pista={}; pista_a={}; TRC={}
     for r_ in RS:
         k,xs,xa=r_[:3]
-        w=max((x['H'] for x in xs+xa),default=-_math.inf)
+        w=r_[3] if len(r_)>3 else max((x['H'] for x in xs+xa),default=-_math.inf)   # corte por prazo: janela t
         if w==_math.inf or w==-_math.inf: continue
         W[k]=w
         if len(xs)>1: pista[k]=xs
-        if len(xa)>1: pista_a[k]=xa; jan[k]=w-troca_r(xa,cand,U)
+        if len(xa)>1:
+            pista_a[k]=xa; tr=troca_r(xa,cand,U); jan[k]=w-tr
+            if tr>1e-12: TRC[k]=troca_quem(xa,cand,U)
     PL={}
     for g in jan:
         for y in pista_a[g]: PL.setdefault(y['i'],[]).append(g)
     def pl(x): return PL.get(x['i'],[])   # restrições de janela da divisão de uma configuração (indexadas, W4)
     def aloca(ad):
-        q=[0]*len(it); saldo=0; cz={}; uso={}
+        q=[0]*len(it); saldo=0; cz={}; uso={}; liga={}
         for x in fx:
             t=x['t']
             if t<=1e-12: continue
@@ -414,7 +436,7 @@ def repartir(Q,cfgs,pools=None):
             if hf>B+1e-9:
                 f=B/hf
                 for x in xs: n=q[x['i']]*f; saldo+=q[x['i']]-n; q[x['i']]=n
-                cz['seq']=1; cortes.append(g)
+                cz['seq']=1; cortes.append(g); liga[g]=1
         for g in cortes:
             fs=[q[x['i']]/cab[x['i']] for x in pista_a[g] if x['p'] is not None and cab[x['i']]>0]; mn,mx=min(fs),max(fs)
             ad(f"as partes fixas em sequência não cabem na janela de {_rp_f(W[g])} h: "+(f'cada uma faz {_rp_f(mn*100)} %' if mx-mn<=1e-9 else f'fazem de {_rp_f(mn*100)} % a {_rp_f(mx*100)} %')+' do que cabia na própria janela')
@@ -449,7 +471,7 @@ def repartir(Q,cfgs,pools=None):
                         q[x['i']]=x['r']*e; rest-=q[x['i']]
                         for g in pl(x):
                             uso[g]=uso.get(g,0)+e
-                            if tl[g]<=e: bs=True
+                            if tl[g]<=e: bs=True; liga[g]=1
                         if x['H']<=e:
                             if x.get('semRec'): br=True
                             else: bj=True
@@ -459,6 +481,12 @@ def repartir(Q,cfgs,pools=None):
                     if bs: cz['seq']=1; ad('em sequência dividem a mesma janela: a área que não cabe fica sem conjunto')
                     if bj or (not bs and not br): cz['jan']=1; ad('as janelas não comportam toda a área')
                     if br: cz['rec']=1
+        for g in liga:   # regra (a): a troca reservada fica (conservadora), mas o motivo diz de quem é e o próximo ajuste
+            ns=TRC.get(g)
+            if not ns: continue
+            quem=', '.join(ns)
+            ad(f"{quem}: troca de {_rp_f(W[g]-jan[g])} h reservada na janela de {_rp_f(W[g])} h da sequência; para liberar horas, reduza a troca ou tire {quem} da sequência")
+            if jan[g]<=1e-9: cz['troca']=1
         return q,saldo,cz
     q2,saldo,cz=aloca(add)
     for x in it: x['q']=q2[x['i']]
@@ -503,7 +531,7 @@ def repartir(Q,cfgs,pools=None):
     alocado=sum((x['q'] for x in it),0)
     if saldo<1e-9: saldo=0
     pend=Q>1e-12 and alocado<=1e-12
-    causa='' if not pend else ('sem conjunto' if cz.get('cfg') else ('sem rendimento' if cz.get('rend') else ('sem horas na janela' if (cz.get('jan') or cz.get('seq')) else ('sem recurso na fazenda' if cz.get('rec') else 'partes fixas abaixo de 100 %'))))
+    causa='' if not pend else ('sem conjunto' if cz.get('cfg') else ('sem rendimento' if cz.get('rend') else (('troca reservada ocupa a janela' if cz.get('troca') else 'sem horas na janela') if (cz.get('jan') or cz.get('seq')) else ('sem recurso na fazenda' if cz.get('rec') else 'partes fixas abaixo de 100 %'))))
     # 3) saldo em horas pelas premissas do plano; necessário = atendido + saldo (ha e horas-conjunto); decorrido necessário por sequência inteira
     sem_h=0; fq=[0]*len(it)
     for x in fx:
