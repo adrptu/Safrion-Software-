@@ -166,6 +166,11 @@ try:
             c.goto('about:blank',wait=.1); c.goto(B+f'SAF.dc.html#saf={sf}&etapa=4',wait=1.6); ms=D2.plano_op(sf); tk=k4()
             ex=f"{nfa(ms['area'])} ha trabalhados · {fmt(ms['hconj'])} horas-conjunto · {fmt(ms['hh'])} horas-homem · {fmt(ms['diesel'])} L de diesel"
             chk(f'10 {sf}: totais da etapa 4 = espelho dados2.plano_op (uma configuração por atividade)',tk.startswith(ex) and ms['multi']==0,[tk,ex,ms['multi']])
+            if sf=='LG2627':   # PRE-REV R7: 'Por mês' com área de até 2 casas; os meses somam o total do período
+                clk('Por mês'); ar=next((r for r in rows() if r and r[0]=='Área trabalhada (ha)'),None)
+                num=lambda t: float(t.replace('.','').replace(',','.')) if t and t not in ('—','') else 0.0
+                vs=[num(x) for x in (ar or [])[1:-1]]; tt=num((ar or [''])[-1])
+                chk('10b LG2627 por mês: área trabalhada com até 2 casas e meses = total do período',bool(ar) and any(',' in x for x in ar[1:]) and abs(sum(vs)-tt)<=0.006*max(1,len(vs)),[ar,round(sum(vs),2),tt])
         c.goto('about:blank',wait=.1); c.goto(B+'SAF.dc.html#saf=S2526&etapa=3',wait=1.6)
         lk=J("[...document.querySelectorAll('main button,main a')].filter(b=>b.offsetParent&&/Outra configuração/.test(b.innerText)).length")
         abrir('Colheita'); fa=J("[...document.querySelectorAll('aside[role=dialog] button')].map(b=>b.innerText.trim()).filter(t=>/configuração/.test(t))"); ro=J("(()=>{const i=document.querySelector('aside [id$=\"_larg\"]'); return i?i.readOnly:null;})()")

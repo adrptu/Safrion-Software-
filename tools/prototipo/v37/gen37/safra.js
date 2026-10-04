@@ -62,38 +62,51 @@ function repartir(Q,cfgs,pools){ const mot=[]; const add=(m)=>{ if(mot.indexOf(m
   if(sp>100+1e-9) add('partes fixas somam '+rpF(sp)+' %: reduzidas na proporção para fechar 100 %');
   let R=Q; fx.forEach(x=>{ x.t=Q*x.p*esc/100; R-=x.t; }); if(R<=1e-9*Math.max(1,Q)) R=0;   // tolerância relativa à área (PRE-REV R3)
   const livres=it.filter(x=>x.p===null); const livOk=livres.length>0&&!livres.some(x=>x.r===null);
-  // 1) sequência, antes de dividir, entre as que estão no plano (rendimento válido, parte > 0), mesmo com janela 0: ela não recebe área,
-  //    mas a sequência declarada continua precisando das horas dela (PRE-REV R1). Restrições de janela, todas ao mesmo tempo (PRE-REV R2):
-  //    a sequência declarada ou de mesmo ativo divide a maior janela dela; o grupo de recursos da fazenda que junta sequências divide a
-  //    maior janela do grupo (sem limite se alguma não tem janela), sem desfazer a de dentro. A troca de quem não tem horas não gasta janela.
-  const candP=it.filter(x=>x.r!==null&&(x.p!==null?x.t>1e-12:(livOk&&R>0))); const cand=candP.filter(x=>x.H>0);
+  // 1) No plano: rendimento válido e parte > 0 (sem % só as que entram na divisão pelo rendimento); recebem área: janela > 0.
+  //    Fecho de quem trabalha em sequência (mesmo ativo, sequência declarada, grupo de recursos que não cobre todas ao mesmo tempo): dá o
+  //    decorrido e a simultaneidade. Janela (PRE-REV): uma restrição por recurso físico (a sequência declarada, cada ativo do cadastro e cada
+  //    grupo de recursos que serializa); cada uma divide a maior janela dos SEUS membros (sem limite se um deles não tem janela) e todas valem
+  //    ao mesmo tempo. Janela 0 não recebe área nem divide janela, mas a sequência continua precisando das horas dela no plano (R1). A troca
+  //    reservada é a que o decorrido cobra: a de cada membro, menos a de quem começa o fecho (a menor troca dele). O fecho inteiro também
+  //    divide a maior janela dele quando todas são finitas (como antes); sem limite em alguém, valem as restrições de cada recurso.
+  // sem % que entram no plano e no saldo: as que têm horas (janela > 0); se nenhuma tem, todas (premissa: com janela)
+  const livH=livres.filter(x=>x.H>0); const planLiv=livH.length?livH:livres;
+  const candP=it.filter(x=>x.r!==null&&(x.p!==null?x.t>1e-12:(livOk&&R>0&&planLiv.indexOf(x)>=0))); const cand=candP.filter(x=>x.H>0);
   const uf=()=>{ const pai=it.map((_,i)=>i); const raiz=(i)=>{ while(pai[i]!==i){ pai[i]=pai[pai[i]]; i=pai[i]; } return i; };
     return {raiz,une:(a,b)=>{ a=raiz(a); b=raiz(b); if(a!==b) pai[Math.max(a,b)]=Math.min(a,b); }}; };
-  const U1=uf();
-  candP.forEach((x,a)=>candP.slice(a+1).forEach(y=>{ if(x.ativos.some(z=>y.ativos.indexOf(z)>=0)){ U1.une(x.i,y.i); add('configurações com a mesma máquina do cadastro trabalham em sequência'); } }));
-  const sq=candP.filter(x=>x.seq); sq.forEach(x=>U1.une(sq[0].i,x.i)); if(sq.length>1) add('sequência declarada: dividem trator, implemento ou operador');
-  const U2=uf(); it.forEach(x=>U2.une(x.i,U1.raiz(x.i))); const raiz=U2.raiz;
+  const U=uf(), UP=uf(); const raiz=U.raiz;   // U: quem recebe área; UP: o plano
+  [[cand,U],[candP,UP]].forEach(([xs,V])=>{ xs.forEach((x,a)=>xs.slice(a+1).forEach(y=>{ if(x.ativos.some(z=>y.ativos.indexOf(z)>=0)) V.une(x.i,y.i); }));
+    const sq=xs.filter(x=>x.seq); sq.forEach(x=>V.une(sq[0].i,x.i)); });
+  if(cand.some((x,a)=>cand.slice(a+1).some(y=>x.ativos.some(z=>y.ativos.indexOf(z)>=0)))) add('configurações com a mesma máquina do cadastro trabalham em sequência');
+  if(cand.filter(x=>x.seq).length>1) add('sequência declarada: dividem trator, implemento ou operador');
+  const RS=[]; const sqP=candP.filter(x=>x.seq); if(sqP.length>1) RS.push(['sq',sqP]);
+  const ats=[]; candP.forEach(x=>x.ativos.forEach(z=>{ if(ats.indexOf(z)<0) ats.push(z); }));
+  ats.forEach(z=>{ const xs=candP.filter(x=>x.ativos.indexOf(z)>=0); if(xs.length>1) RS.push(['at:'+z,xs]); });
   Object.keys(pools||{}).forEach(k=>{ const pv=pools[k]||{}; const un=rpNum(pv.un); if(un===null||isNaN(un)) return;
     const us=cand.filter(x=>(rpNum(x.rec[k])||0)>0); if(us.length<2) return;
     const g={}; us.forEach(x=>{ const r=raiz(x.i); g[r]=Math.max(g[r]||0,rpNum(x.rec[k])); }); const sim=Object.keys(g).reduce((a,r)=>a+g[r],0);
-    if(sim>un+1e-9){ us.forEach(x=>U2.une(us[0].i,x.i)); add((pv.nome||k)+': ao mesmo tempo precisariam de '+rpF(sim)+', a fazenda tem '+rpF(un)+'; trabalham em sequência'); } });
+    if(sim>un+1e-9){ us.forEach(x=>{ U.une(us[0].i,x.i); UP.une(us[0].i,x.i); }); RS.push(['pl:'+k,candP.filter(x=>(rpNum(x.rec[k])||0)>0)]);
+      add((pv.nome||k)+': ao mesmo tempo precisariam de '+rpF(sim)+', a fazenda tem '+rpF(un)+'; trabalham em sequência'); } });
+  // o fecho de quem recebe área também divide a maior janela dele, se finita (o decorrido o trata como uma sequência só)
+  const FC={}; cand.forEach(x=>{ const g=U.raiz(x.i); (FC[g]||(FC[g]=[])).push(x); }); Object.keys(FC).forEach(g=>{ if(FC[g].length>1) RS.push(['fc:'+g,FC[g]]); });
   const trocaDe=(xs)=>{ if(xs.length<2) return 0; let s=0, mn=Infinity; xs.forEach(x=>{ s+=x.troca; if(x.troca<mn) mn=x.troca; }); return s-mn; };
-  const grupos=(U)=>{ const o={}; candP.forEach(x=>{ const g=U.raiz(x.i); (o[g]||(o[g]=[])).push(x); }); return o; };
-  const G1=grupos(U1), G2=grupos(U2); const RS=[];
-  Object.keys(G1).forEach(g=>{ if(G1[g].length>1) RS.push(['a'+g,G1[g]]); });
-  Object.keys(G2).forEach(g=>{ const xs=G2[g]; if(xs.length>1&&xs.some(x=>U1.raiz(x.i)!==U1.raiz(xs[0].i))) RS.push(['b'+g,xs]); });
-  const W={}, jan={}, pista={}; RS.forEach(([k,xs])=>{ const w=Math.max.apply(null,xs.map(x=>x.H)); if(isFinite(w)){ W[k]=w; pista[k]=xs; jan[k]=w-trocaDe(xs.filter(x=>x.H>0)); } });
-  const pl=(x)=>Object.keys(jan).filter(g=>pista[g].indexOf(x)>=0);   // restrições de janela de uma configuração
-  // sem % que entram no plano e no saldo: as que têm horas (janela > 0); se nenhuma tem, todas (premissa: com janela)
-  const livH=livres.filter(x=>x.H>0); const planLiv=livH.length?livH:livres;
+  const trocaR=(xs,P,V)=>{ if(xs.length<2) return 0; const g=V.raiz(xs[0].i); let f=null; P.forEach(y=>{ if(V.raiz(y.i)===g&&(f===null||y.troca<f.troca)) f=y; });
+    return xs.reduce((a,x)=>a+x.troca,0)-((f&&xs.indexOf(f)>=0)?f.troca:0); };
+  const W={}, jan={}, pista={}, pistaA={};
+  RS.forEach(([k,xs])=>{ const w=Math.max.apply(null,xs.map(x=>x.H)); if(!isFinite(w)) return; W[k]=w; pista[k]=xs;
+    const xa=xs.filter(x=>x.H>0); if(xa.length>1){ pistaA[k]=xa; jan[k]=w-trocaR(xa,cand,U); } });
+  const pl=(x)=>Object.keys(jan).filter(g=>pistaA[g].indexOf(x)>=0);   // restrições de janela da divisão de uma configuração
   // 2) divide a área respeitando as janelas (a própria e a da sequência): é o que cabe, o atendido
   const aloca=(ad)=>{ const q=it.map(()=>0); let saldo=0; const cz={}; const uso={};
     fx.forEach(x=>{ const t=x.t; if(t<=1e-12) return;
       if(x.r===null){ saldo+=t; cz.rend=1; ad(x.nome+': sem rendimento válido (ha/h), a parte dela fica sem conjunto'); return; }
       q[x.i]=Math.min(t,x.r*x.H); if(t-q[x.i]>1e-9){ saldo+=t-q[x.i]; cz.jan=1; ad(x.nome+': a parte fixa não cabe na janela de '+rpF(x.H)+' h'); } });
-    Object.keys(jan).forEach(g=>{ const xs=pista[g].filter(x=>x.p!==null&&q[x.i]>0); const hf=xs.reduce((a,x)=>a+q[x.i]/x.r,0); const B=Math.max(0,jan[g]);
-      if(hf>B+1e-9){ const f=B/hf; xs.forEach(x=>{ const n=q[x.i]*f; saldo+=q[x.i]-n; q[x.i]=n; }); cz.seq=1; ad('as partes fixas em sequência não cabem na janela de '+rpF(W[g])+' h: cada uma faz '+rpF(f*100)+' % do que cabia na própria janela'); } });
-    Object.keys(jan).forEach(g=>{ uso[g]=pista[g].filter(x=>x.p!==null).reduce((a,x)=>a+q[x.i]/x.r,0); });   // depois de todas as restrições
+    const cab=q.slice(), cortes=[];   // o que cabia na própria janela; o motivo diz a fração final, depois de todas as restrições
+    Object.keys(jan).forEach(g=>{ const xs=pistaA[g].filter(x=>x.p!==null&&q[x.i]>0); const hf=xs.reduce((a,x)=>a+q[x.i]/x.r,0); const B=Math.max(0,jan[g]);
+      if(hf>B+1e-9){ const f=B/hf; xs.forEach(x=>{ const n=q[x.i]*f; saldo+=q[x.i]-n; q[x.i]=n; }); cz.seq=1; cortes.push(g); } });
+    cortes.forEach(g=>{ const fs=pistaA[g].filter(x=>x.p!==null&&cab[x.i]>0).map(x=>q[x.i]/cab[x.i]); const mn=Math.min.apply(null,fs), mx=Math.max.apply(null,fs);
+      ad('as partes fixas em sequência não cabem na janela de '+rpF(W[g])+' h: '+(mx-mn<=1e-9?'cada uma faz '+rpF(mn*100)+' %':'fazem de '+rpF(mn*100)+' % a '+rpF(mx*100)+' %')+' do que cabia na própria janela'); });
+    Object.keys(jan).forEach(g=>{ uso[g]=pistaA[g].filter(x=>x.p!==null).reduce((a,x)=>a+q[x.i]/x.r,0); });   // depois de todas as restrições
     if(R>0){
       if(!livres.length){ saldo+=R; if(it.length) cz.part=1; else cz.cfg=1; ad(it.length?'as partes fixas não cobrem toda a área':'atividade sem conjunto'); }
       else if(!livOk){ saldo+=R; cz.rend=1; livres.filter(x=>x.r===null).forEach(x=>ad(x.nome+': sem rendimento válido (ha/h); '+(livres.length>1?'a divisão pelo rendimento fica pendente':'horas pendentes'))); }
@@ -113,7 +126,8 @@ function repartir(Q,cfgs,pools){ const mot=[]; const add=(m)=>{ if(mot.indexOf(m
   const q1=it.map(()=>0); fx.forEach(x=>{ if(x.r!==null&&x.t>1e-12) q1[x.i]=x.t; });
   if(R>0&&livOk){ const sr=planLiv.reduce((a,x)=>a+x.r,0); planLiv.forEach(x=>{ q1[x.i]=x.r*R/sr; }); }
   let conflito=false, deficit=0;
-  Object.keys(jan).forEach(g=>{ const xs=pista[g].filter(x=>q1[x.i]>1e-12); if(xs.length<2) return; const nec=xs.reduce((a,x)=>a+q1[x.i]/x.r,0)+trocaDe(xs);
+  const P1=candP.filter(x=>q1[x.i]>1e-12);
+  Object.keys(W).forEach(g=>{ const xs=pista[g].filter(x=>q1[x.i]>1e-12); if(xs.length<2) return; const nec=xs.reduce((a,x)=>a+q1[x.i]/x.r,0)+trocaR(xs,P1,UP);
     if(nec>W[g]+1e-9){ conflito=true; deficit=Math.max(deficit,nec-W[g]); add('em sequência precisam de '+rpF(nec)+' h para '+rpF(xs.reduce((a,x)=>a+q1[x.i],0))+' ha; a janela tem '+rpF(W[g])+' h'); } });
   const ativ=it.filter(x=>x.q>1e-12); const grp={}; ativ.forEach(x=>{ const g=raiz(x.i); (grp[g]||(grp[g]=[])).push(x); });
   let decorrido=0, trocaT=0;
@@ -137,7 +151,7 @@ function repartir(Q,cfgs,pools){ const mot=[]; const add=(m)=>{ if(mot.indexOf(m
   fx.forEach(x=>{ if(x.t<=1e-12) return; if(x.r===null){ semH+=x.t; return; } const u=x.t-x.q; if(u>1e-9) fq[x.i]=u; });
   if(R>0){ if(!livOk) semH+=R; else { const rest=R-livres.reduce((a,x)=>a+x.q,0); if(rest>1e-9){ const sr=planLiv.reduce((a,x)=>a+x.r,0); planLiv.forEach(x=>{ fq[x.i]+=x.r*rest/sr; }); } } }
   let nhc=0, fhc=0, necDec=0; const pis={};
-  it.forEach(x=>{ x.fq=fq[x.i]; x.fh=x.fq>0?x.fq/x.r:0; x.nq=x.q+x.fq; x.nh=x.h+x.fh; nhc+=x.nh; fhc+=x.fh; if(x.nq>1e-12){ const g=raiz(x.i); (pis[g]||(pis[g]=[])).push(x); } });
+  it.forEach(x=>{ x.fq=fq[x.i]; x.fh=x.fq>0?x.fq/x.r:0; x.nq=x.q+x.fq; x.nh=x.h+x.fh; nhc+=x.nh; fhc+=x.fh; if(x.nq>1e-12){ const g=UP.raiz(x.i); (pis[g]||(pis[g]=[])).push(x); } });
   Object.keys(pis).forEach(g=>{ const xs=pis[g]; const s=xs.reduce((a,x)=>a+x.nh,0)+trocaDe(xs); if(s>necDec) necDec=s; });
   const semNada=Q>1e-12&&Q-semH<=1e-9;   // nenhuma hora calculável: a necessidade também fica pendente
   const nec={area:Q,hconj:semNada?null:nhc,decorrido:semNada?null:necDec,semHoras:semH};
@@ -568,9 +582,11 @@ function PREVALS(self,v){ compRend(self,self.state.saf||null);
   const selO=st.atv? opsL.find(o=>o.id===st.atv):null; const selA=(!selO&&st.atv)? acts.find(a=>a.id===st.atv):null; const base=selO?selO.items:(selA?selA.items:oc);
   const vis0=st.opv==='mes'?'mes':'op'; const M=D2.meses.length; const z=()=>new Array(M).fill(0); const mat={area:z(),horas:z(),cop:z(),cins:z(),diesel:z()};
   base.forEach(i=>{ if(i.mi<0) return; mat.area[i.mi]+=i.area; mat.horas[i.mi]+=i.horas; mat.cop[i.mi]+=(i.cop||0); mat.cins[i.mi]+=i.cins; mat.diesel[i.mi]+=(i.diesel||0); });
-  const mrow=(id,l,arr,d)=>{ const r={id,v:{ind:l,tot:arr.reduce((a,b)=>a+b,0)},s:{},p:{}}; arr.forEach((x,ix)=>{ r.v['m'+ix]=x; }); return r; };
+  const mrow=(id,l,arr,d)=>{ const r={id,v:{ind:l,tot:arr.reduce((a,b)=>a+b,0)},s:{},p:{}}; arr.forEach((x,ix)=>{ r.v['m'+ix]=x; });
+    if(d==='ha'){ arr.forEach((x,ix)=>{ if(x) r.p['m'+ix]=[{k:'txt',t:nfa(x)}]; }); if(r.v.tot) r.p.tot=[{k:'txt',t:nfa(r.v.tot)}]; }   // área com até 2 casas (PRE-REV R7)
+    return r; };
   const ctot=mat.cop.map((x,i)=>x+mat.cins[i]);
-  GR('g_mat').rows=[mrow('ma','Área trabalhada (ha)',mat.area),mrow('mh','Horas-conjunto (h)',mat.horas),mrow('mo','Custo de operação (R$)',mat.cop),mrow('mi','Custo de insumos (R$)',mat.cins),mrow('mt','Custo total (R$)',ctot),mrow('md','Diesel estimado (L)',mat.diesel)];
+  GR('g_mat').rows=[mrow('ma','Área trabalhada (ha)',mat.area,'ha'),mrow('mh','Horas-conjunto (h)',mat.horas),mrow('mo','Custo de operação (R$)',mat.cop),mrow('mi','Custo de insumos (R$)',mat.cins),mrow('mt','Custo total (R$)',ctot),mrow('md','Diesel estimado (L)',mat.diesel)];
   v.mat_titulo=selO?('Detalhamento mensal · '+selO.op):(selA?('Detalhamento mensal · '+selA.nome):'Detalhamento mensal · todas as operações da safra'); v.mat_sel=!!(selO||selA);
   v.mat_nome=selO?selO.op:(selA?selA.nome+' ('+selA.op+')':'');
   const vis=st.opv==='mes'?'mes':'op'; v.vis_op=vis==='op'; v.vis_mes=vis==='mes';

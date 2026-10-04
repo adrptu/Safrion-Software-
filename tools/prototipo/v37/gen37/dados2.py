@@ -225,8 +225,9 @@ def repartir(Q,cfgs,pools=None):
     for x in fx: x['t']=Q*x['p']*esc/100; R-=x['t']
     if R<=1e-9*max(1,Q): R=0   # tolerância relativa à área (PRE-REV R3)
     livres=[x for x in it if x['p'] is None]; liv_ok=len(livres)>0 and not any(x['r'] is None for x in livres)
-    # sequência entre as que estão no plano, mesmo com janela 0 (PRE-REV R1); restrições de janela da sequência e do grupo de recursos (R2)
-    cand_p=[x for x in it if x['r'] is not None and ((x['t']>1e-12) if x['p'] is not None else (liv_ok and R>0))]
+    # no plano / recebem área; fecho de quem trabalha em sequência (decorrido); uma restrição de janela por recurso físico (PRE-REV), como no safra.js
+    liv_h=[x for x in livres if x['H']>0]; plan_liv=liv_h if liv_h else livres
+    cand_p=[x for x in it if x['r'] is not None and ((x['t']>1e-12) if x['p'] is not None else (liv_ok and R>0 and any(y is x for y in plan_liv)))]
     cand=[x for x in cand_p if x['H']>0]
     class _UF:
         def __init__(s): s.pai=list(range(len(it)))
@@ -236,16 +237,24 @@ def repartir(Q,cfgs,pools=None):
         def une(s,a,b):
             a,b=s.raiz(a),s.raiz(b)
             if a!=b: s.pai[max(a,b)]=min(a,b)
-    U1=_UF()
-    for a,x in enumerate(cand_p):
-        for y in cand_p[a+1:]:
-            if any(z in y['ativos'] for z in x['ativos']): U1.une(x['i'],y['i']); add('configurações com a mesma máquina do cadastro trabalham em sequência')
-    sq=[x for x in cand_p if x['seq']]
-    for x in sq: U1.une(sq[0]['i'],x['i'])
-    if len(sq)>1: add('sequência declarada: dividem trator, implemento ou operador')
-    U2=_UF()
-    for x in it: U2.une(x['i'],U1.raiz(x['i']))
-    raiz=U2.raiz; une=U2.une
+    U=_UF(); UP=_UF(); raiz=U.raiz   # U: quem recebe área; UP: o plano
+    for xs,V in ((cand,U),(cand_p,UP)):
+        for a,x in enumerate(xs):
+            for y in xs[a+1:]:
+                if any(z in y['ativos'] for z in x['ativos']): V.une(x['i'],y['i'])
+        sq=[x for x in xs if x['seq']]
+        for x in sq: V.une(sq[0]['i'],x['i'])
+    if any(any(z in y['ativos'] for z in x['ativos']) for a,x in enumerate(cand) for y in cand[a+1:]): add('configurações com a mesma máquina do cadastro trabalham em sequência')
+    if len([x for x in cand if x['seq']])>1: add('sequência declarada: dividem trator, implemento ou operador')
+    RS=[]; sq_p=[x for x in cand_p if x['seq']]
+    if len(sq_p)>1: RS.append(('sq',sq_p))
+    ats=[]
+    for x in cand_p:
+        for z in x['ativos']:
+            if z not in ats: ats.append(z)
+    for z in ats:
+        xs=[x for x in cand_p if z in x['ativos']]
+        if len(xs)>1: RS.append(('at:'+str(z),xs))
     for k,pv in (pools or {}).items():
         un=_rp_num((pv or {}).get('un'))
         if not _ok(un): continue
@@ -255,27 +264,29 @@ def repartir(Q,cfgs,pools=None):
         for x in us: rr=raiz(x['i']); g[rr]=max(g.get(rr,0),_rp_num(x['rec'][k]))
         sim=sum(g.values())
         if sim>un+1e-9:
-            for x in us: une(us[0]['i'],x['i'])
+            for x in us: U.une(us[0]['i'],x['i']); UP.une(us[0]['i'],x['i'])
+            RS.append(('pl:'+str(k),[x for x in cand_p if (_rp_num(x['rec'].get(k)) or 0)>0]))
             add(f"{pv.get('nome') or k}: ao mesmo tempo precisariam de {_rp_f(sim)}, a fazenda tem {_rp_f(un)}; trabalham em sequência")
+    fc={}   # o fecho de quem recebe área também divide a maior janela dele, se finita
+    for x in cand: fc.setdefault(U.raiz(x['i']),[]).append(x)
+    for g in sorted(fc):
+        if len(fc[g])>1: RS.append(('fc:'+str(g),fc[g]))
     def troca_de(xs):
         if len(xs)<2: return 0
         return sum((x['troca'] for x in xs),0)-min(x['troca'] for x in xs)
-    def grupos(U):
-        o={}
-        for x in cand_p: o.setdefault(U.raiz(x['i']),[]).append(x)
-        return o
-    G1,G2=grupos(U1),grupos(U2); RS=[]
-    for g in sorted(G1):
-        if len(G1[g])>1: RS.append(('a'+str(g),G1[g]))
-    for g in sorted(G2):
-        xs=G2[g]
-        if len(xs)>1 and any(U1.raiz(x['i'])!=U1.raiz(xs[0]['i']) for x in xs): RS.append(('b'+str(g),xs))
-    W={}; jan={}; pista={}
+    def troca_r(xs,P,V):   # a troca que o decorrido cobra: a de cada membro, menos a de quem começa o fecho (a menor troca), se for membro
+        if len(xs)<2: return 0
+        g=V.raiz(xs[0]['i']); f=None
+        for y in P:
+            if V.raiz(y['i'])==g and (f is None or y['troca']<f['troca']): f=y
+        return sum((x['troca'] for x in xs),0)-(f['troca'] if f is not None and any(y is f for y in xs) else 0)
+    W={}; jan={}; pista={}; pista_a={}
     for k,xs in RS:
         w=max(x['H'] for x in xs)
-        if w!=_math.inf: W[k]=w; pista[k]=xs; jan[k]=w-troca_de([x for x in xs if x['H']>0])
-    def pl(x): return [g for g in jan if any(y is x for y in pista[g])]   # restrições de janela de uma configuração
-    liv_h=[x for x in livres if x['H']>0]; plan_liv=liv_h if liv_h else livres
+        if w==_math.inf: continue
+        W[k]=w; pista[k]=xs; xa=[x for x in xs if x['H']>0]
+        if len(xa)>1: pista_a[k]=xa; jan[k]=w-troca_r(xa,cand,U)
+    def pl(x): return [g for g in jan if any(y is x for y in pista_a[g])]   # restrições de janela da divisão de uma configuração
     def aloca(ad):
         q=[0]*len(it); saldo=0; cz={}; uso={}
         for x in fx:
@@ -284,13 +295,17 @@ def repartir(Q,cfgs,pools=None):
             if x['r'] is None: saldo+=t; cz['rend']=1; ad(x['nome']+': sem rendimento válido (ha/h), a parte dela fica sem conjunto'); continue
             q[x['i']]=min(t,x['r']*x['H'])
             if t-q[x['i']]>1e-9: saldo+=t-q[x['i']]; cz['jan']=1; ad(f"{x['nome']}: a parte fixa não cabe na janela de {_rp_f(x['H'])} h")
+        cab=q[:]; cortes=[]   # o que cabia na própria janela; o motivo diz a fração final, depois de todas as restrições
         for g in jan:
-            xs=[x for x in pista[g] if x['p'] is not None and q[x['i']]>0]; hf=sum((q[x['i']]/x['r'] for x in xs),0); B=max(0,jan[g])
+            xs=[x for x in pista_a[g] if x['p'] is not None and q[x['i']]>0]; hf=sum((q[x['i']]/x['r'] for x in xs),0); B=max(0,jan[g])
             if hf>B+1e-9:
                 f=B/hf
                 for x in xs: n=q[x['i']]*f; saldo+=q[x['i']]-n; q[x['i']]=n
-                cz['seq']=1; ad(f'as partes fixas em sequência não cabem na janela de {_rp_f(W[g])} h: cada uma faz {_rp_f(f*100)} % do que cabia na própria janela')
-        for g in jan: uso[g]=sum((q[x['i']]/x['r'] for x in pista[g] if x['p'] is not None),0)   # depois de todas as restrições
+                cz['seq']=1; cortes.append(g)
+        for g in cortes:
+            fs=[q[x['i']]/cab[x['i']] for x in pista_a[g] if x['p'] is not None and cab[x['i']]>0]; mn,mx=min(fs),max(fs)
+            ad(f"as partes fixas em sequência não cabem na janela de {_rp_f(W[g])} h: "+(f'cada uma faz {_rp_f(mn*100)} %' if mx-mn<=1e-9 else f'fazem de {_rp_f(mn*100)} % a {_rp_f(mx*100)} %')+' do que cabia na própria janela')
+        for g in jan: uso[g]=sum((q[x['i']]/x['r'] for x in pista_a[g] if x['p'] is not None),0)   # depois de todas as restrições
         if R>0:
             if not livres:
                 saldo+=R
@@ -339,10 +354,11 @@ def repartir(Q,cfgs,pools=None):
         sr=sum(x['r'] for x in plan_liv)
         for x in plan_liv: q1[x['i']]=x['r']*R/sr
     conflito=False; deficit=0
-    for g in jan:
+    P1=[x for x in cand_p if q1[x['i']]>1e-12]
+    for g in W:
         xs=[x for x in pista[g] if q1[x['i']]>1e-12]
         if len(xs)<2: continue
-        nec=sum((q1[x['i']]/x['r'] for x in xs),0)+troca_de(xs)
+        nec=sum((q1[x['i']]/x['r'] for x in xs),0)+troca_r(xs,P1,UP)
         if nec>W[g]+1e-9: conflito=True; deficit=max(deficit,nec-W[g]); add(f"em sequência precisam de {_rp_f(nec)} h para {_rp_f(sum((q1[x['i']] for x in xs),0))} ha; a janela tem {_rp_f(W[g])} h")
     grp={}
     for x in it:
@@ -389,7 +405,7 @@ def repartir(Q,cfgs,pools=None):
     nhc=0; fhc=0; nec_dec=0; pis={}
     for x in it:
         x['fq']=fq[x['i']]; x['fh']=x['fq']/x['r'] if x['fq']>0 else 0; x['nq']=x['q']+x['fq']; x['nh']=x['h']+x['fh']; nhc+=x['nh']; fhc+=x['fh']
-        if x['nq']>1e-12: pis.setdefault(raiz(x['i']),[]).append(x)
+        if x['nq']>1e-12: pis.setdefault(UP.raiz(x['i']),[]).append(x)
     for g in sorted(pis):
         xs=pis[g]; s_=sum((x['nh'] for x in xs),0)+troca_de(xs)
         if s_>nec_dec: nec_dec=s_
