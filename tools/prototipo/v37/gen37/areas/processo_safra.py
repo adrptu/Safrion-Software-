@@ -87,24 +87,43 @@ def build():
     ATV={}
     for _pl in D2.PLANOS:
         for _a in _pl['atividades']: ATV.setdefault(_a['op'],{}).setdefault(_a['nome'],[]).append(_pl['nome'])
-    def rend_rows():
-        # árvore: operação → atividade · conjunto; o rendimento e o custo ficam na atividade (cada uma pode usar outro conjunto)
+    def rend_v(c,atv,pls,op,base_id):
+        # rendimento pelos parâmetros, com a precisão toda (12 m × 7 km/h × 81 % = 6,804 ha/h; o cadastro guarda 6,8): salvar sem mudar não altera horas
+        ch=D2.custo_h(c); calc=bool(c.get('larg')); cid=conj_opts.get(c['id'],{}).get('atual',c['id']) if c.get('conj_id') is None else c['conj_id']; rend=D2.rend_efetivo(c)
+        return dict(atv=atv,opatv=op+' · '+atv,planos=', '.join(pls),nome=c['conj'],conj_id=cid,op=op,base=base_id,
+                    modo=('Largura × velocidade' if calc else 'Informado'),larg=c.get('larg',''),vel=c.get('vel',''),efic=c.get('efic',''),
+                    rend=rend,maq=c['maq'],impl=c['impl'],pess=c['pess'],pess_rs=c['pess_rs'],pes_h=c['pess']*c['pess_rs'],
+                    custo_h=round(ch,2),custo_ha=ch/rend,diesel=c.get('diesel',''),jan='',part='',seq='',troca='',multi='não')
+    def rend_rows(k):
+        # árvore: operação → atividade · conjunto; o rendimento e o custo ficam na atividade (cada uma pode usar outro conjunto).
+        # Atividade com duas ou mais configurações (D2.cfgs_rend) vira grupo atividade → configurações; com uma só fica linha.
         out=[]
         for op,cs in ops.items():
-            c=cs[0]; ch=D2.custo_h(c); cha=ch/c['rend']; calc=bool(c.get('larg')); kids=[]
+            c=cs[0]; kids=[]
             for i,(atv,pls) in enumerate((ATV.get(op) or {op:[]}).items()):
-                kids.append(dict(id=f"{c['id']}.{i+1}",v=dict(atv=atv,opatv=op+' · '+atv,planos=', '.join(pls),nome=c['conj'],conj_id=conj_opts[c['id']]['atual'],op=op,
-                     modo=('Largura × velocidade' if calc else 'Informado'),larg=c.get('larg',''),vel=c.get('vel',''),efic=c.get('efic',''),
-                     rend=c['rend'],maq=c['maq'],impl=c['impl'],pess=c['pess'],pess_rs=c['pess_rs'],pes_h=c['pess']*c['pess_rs'],
-                     custo_h=round(ch,2),custo_ha=round(cha,2)),s={},p={},rec=dict(c['rec'])))
+                cfs=D2.cfgs_rend(k,op,atv); aid=f"{c['id']}.{i+1}"
+                if len(cfs)==1:
+                    kids.append(dict(id=aid,v=rend_v(cfs[0],atv,pls,op,c['id']),s={},p={},rec=dict(cfs[0]['rec']))); continue
+                ks=[]
+                for j,cf in enumerate(cfs):
+                    v=rend_v(cf,atv,pls,op,c['id']); v['multi']='sim'; v['seq']='Ao mesmo tempo, com recursos próprios'
+                    ks.append(dict(id=f'{aid}.{j+1}',v=v,s={},p={},rec=dict(cf.get('rec') or {})))
+                kids.append(dict(id='atv_'+aid,grp=True,ro=True,v=dict(atv=atv,op=op,opatv=op+' · '+atv,planos=', '.join(pls)),s={},p={},kids=ks))
             out.append(dict(id='op_'+c['id'],grp=True,ro=True,v=dict(atv=op,op=op),s={},p={},kids=kids))
         return out
     MODO_CALC=dict(k='modo',eq='Largura × velocidade'); MODO_INF=dict(k='modo',eq='Informado')
     REND_COLS=[dict(k='atv',l='Operação · atividade',w=250),dict(k='nome',l='Conjunto',w=330),dict(k='param',l='Como se obtém',w=180),
                dict(k='rend',l='Rendimento (ha/h)',t='num',a='r',d=2),dict(k='custo_h',l='Custo (R$/h)',t='num',a='r',d=2),dict(k='custo_ha',l='Custo (R$/ha)',t='num',a='r',d=2,w=170)]
-    REND_EDIT=dict(m='form',title='Rendimento',leafOnly=True,sub='Informe como o conjunto trabalha e quanto custa por hora; rendimento e custo por hectare são recalculados (na colheita, também por quilo). Vale só para esta safra.',
-            fields=[dict(k='esc',l='Aplicar em',t='sel',opts=['Todas as atividades da operação','Só esta atividade'],help='Todas: conjunto, rendimento e custos vão para as outras atividades da mesma operação nesta safra.'),
-                    dict(k='conj_id',l='Conjunto',t='sel',dyn=True,opts=[],help='Só aparecem tratores com a potência que o implemento exige. Trocar o conjunto usa os custos por hora do cadastro de máquinas.'),
+    NUNCA=dict(k='multi',eq='__nunca')   # campo só de rascunho: guarda contexto do formulário e não aparece
+    MULTI=dict(k='multi',eq='sim'); UMA=dict(k='multi',eq='não')
+    SEQ_T='Em sequência: divide trator, implemento ou operador'; PAR_T='Ao mesmo tempo, com recursos próprios'
+    REND_EDIT=dict(m='form',title='Rendimento',newTitle='Nova configuração',leafOnly=True,sub='Informe como o conjunto trabalha e quanto custa por hora; rendimento e custo por hectare são recalculados (na colheita, também por quilo). Vale só para esta safra.',
+            fields=[dict(k='multi',l='',t='txt',cond=NUNCA),dict(k='base',l='',t='txt',cond=NUNCA),
+                    dict(k='opatv',l='Operação · atividade',t='txt',ro=True),
+                    dict(k='esc',l='Aplicar em',t='sel',opts=['Todas as atividades da operação','Só esta atividade'],cond=UMA,help='Todas: conjunto, rendimento e custos vão para as outras atividades da mesma operação nesta safra (as divididas entre conjuntos ficam como estão).'),
+                    dict(k='conj_id',l='Conjunto',t='sel',dyn=True,opts=[],help='Do cadastro, só tratores com a potência que o implemento exige (trocar usa os custos por hora do cadastro). Por classe ou prestador: planeja sem escolher patrimônio; o prestador traz máquina, operador e diesel.'),
+                    dict(k='nome',l='Descrição do conjunto',t='txt',req=True,cond=dict(k='conj_id',eq='classe'),help='Ex.: Trator 100–140 cv + plantadeira 12 linhas. A O.S. escolhe a máquina depois.'),
+                    dict(k='nome',l='Prestador e equipamento',t='txt',req=True,cond=dict(k='conj_id',eq='prestador'),help='Ex.: Prestador · plantadeira 12 linhas. A tarifa por hora do prestador vai em Máquina; não usa máquinas nem pessoas da fazenda.'),
                     dict(k='modo',l='Como obter o rendimento',t='sel',opts=['Largura × velocidade','Informado'],req=True,**{'def':'Largura × velocidade'}),
                     dict(k='larg',l='Largura de trabalho',t='num',req=True,min=0.5,max=60,u='m',cond=MODO_CALC),
                     dict(k='vel',l='Velocidade de trabalho',t='num',req=True,min=0.5,max=30,u='km/h',cond=MODO_CALC),
@@ -113,16 +132,23 @@ def build():
                     dict(k='rend',l='Rendimento efetivo',t='num',req=True,min=0.01,u='ha/h',cond=MODO_INF,help='Use quando não há largura de trabalho (ex.: tratamento de sementes, colheita manual, gotejo).'),
                     dict(k='maq',l='Máquina',t='num',req=True,min=0,u='R$/h',help='Inclua combustível, manutenção e depreciação; o operador entra em Pessoas.'),dict(k='impl',l='Implemento',t='num',min=0,u='R$/h'),
                     dict(k='pess',l='Pessoas na equipe',t='num',req=True,min=0,u='pessoas'),dict(k='pess_rs',l='Custo por pessoa',t='num',min=0,u='R$/h'),
-                    dict(k='custo_c',l='Custo por hora',ro=True,live=True,u='R$/h',help='Máquina + implemento + pessoas × custo por pessoa.')])
+                    dict(k='custo_c',l='Custo por hora',ro=True,live=True,u='R$/h',help='Máquina + implemento + pessoas × custo por pessoa.'),
+                    dict(k='diesel',l='Consumo de diesel',t='num',min=0,max=200,u='L/h',help='Opcional. Estima os litros pelas horas do conjunto; o custo do combustível já está no custo da máquina.'),
+                    dict(k='jan',l='Horas disponíveis na janela',t='num',min=0,max=2000,u='h por talhão',help='Opcional. Quanto este conjunto pode trabalhar em cada talhão ou parcela; em sequência, as configurações dividem a maior janela entre elas. A área que não couber fica sem conjunto, à vista no plano operacional.'),
+                    dict(k='part',l='Parte da área',t='num',min=0,max=100,u='%',cond=MULTI,help='Vazio = divide pelo rendimento: as configurações sem % terminam juntas. Com %, a parte fica fixa.'),
+                    dict(k='seq',l='Trabalha com as outras configurações',t='sel',opts=[PAR_T,SEQ_T],cond=MULTI,**{'def':PAR_T},help='Mesmo trator do cadastro ou falta de máquina/pessoa na fazenda já obrigam a sequência.'),
+                    dict(k='troca',l='Troca entre configurações',t='num',min=0,max=24,u='h',cond=MULTI,help='Opcional. Tempo para trocar para esta configuração quando trabalham em sequência (começa a de menor troca); entra no tempo decorrido e ocupa a janela.')])
     rend_html=''
     for k in ['S2627','S27SF','S2526','LG2627','NOVA']:
-        rrows=rend_rows()
-        g=grid(REND_COLS,rrows,edit=(dict(REND_EDIT,m='ro') if k=='S2526' else REND_EDIT),gid=f'g_rend_{k}',total=False,tree=True,x0={r['id']:True for r in rrows})
+        rrows=rend_rows(k)
+        x0={r['id']:True for r in rrows}; x0.update({a['id']:True for r in rrows for a in r['kids'] if a.get('grp')})
+        g=grid(REND_COLS,rrows,edit=(dict(REND_EDIT,m='ro') if k=='S2526' else REND_EDIT),gid=f'g_rend_{k}',total=False,tree=True,x0=x0)
         rend_html+=f'<sc-if value="{H("rend_"+k)}" hint-placeholder-val="{F()}">{g}</sc-if>'
     # ---------- etapa 4 · plano operacional ----------
-    g_op=grid([dict(k='nome',l='Operação · atividade · cultivo',w=260),dict(k='op',l='Gatilho · data',w=150),dict(k='mes',l='Mês'),dict(k='area',l='Área (ha)',t='num',a='r',agg='sum'),
-               dict(k='horas',l='Horas (h)',t='num',a='r',d=1,agg='sum'),dict(k='cop',l='Operação (R$)',t='num',a='r',agg='sum'),dict(k='cins',l='Insumos (R$)',t='num',a='r',agg='sum'),
-               dict(k='ctot',l='Total (R$)',t='num',a='r',agg='sum'),dict(k='rha',l='R$/ha',t='num',a='r',d=2)],
+    g_op=grid([dict(k='nome',l='Operação · atividade · cultivo · conjunto',w=280),dict(k='op',l='Gatilho · data',w=150),dict(k='mes',l='Mês'),dict(k='area',l='Área (ha)',t='num',a='r',agg='sum'),
+               dict(k='horas',l='Horas-conjunto (h)',t='num',a='r',d=1,agg='sum'),dict(k='dec',l='Decorrido (h)',t='num',a='r',d=1),
+               dict(k='cop',l='Operação (R$)',t='num',a='r',agg='sum'),dict(k='cins',l='Insumos (R$)',t='num',a='r',agg='sum'),
+               dict(k='ctot',l='Total (R$)',t='num',a='r',agg='sum'),dict(k='rha',l='R$/ha',t='num',a='r',d=2),dict(k='diesel',l='Diesel (L)',t='num',a='r',agg='sum')],
        [],edit=dict(m='pick',leafOnly=False),tree=True,gid='g_op',total=True)
     MCOLS=[dict(k='ind',l='Indicador',w=190)]+[dict(k=f'm{i}',l=lab,t='num',a='r') for i,(_,lab) in enumerate(meses)]+[dict(k='tot',l='Total do período',t='num',a='r')]
     g_mat=grid(MCOLS,[],edit=dict(m='none'),search=False,gid='g_mat',total=False,headtools=False)
@@ -160,20 +186,21 @@ def build():
     EXTRAJS[0]='const D2 = '+json.dumps(d2,ensure_ascii=False)+';\n'+open(os.path.join(ROOT,'cal01.js')).read()+'\n'+open(os.path.join(ROOT,'safra.js')).read()+'''
 function _safhooks(self){ self.g2after=(gid,rows,r,isNew)=>{ if(gid==='g_saf' && r && String(r.id).indexOf('n')===0 && !self.state.saf){ if(!r.v.estado) r.v.estado='Rascunho'; self.setState({saf:r.id,step:2,g2toast:'Safra criada: '+r.v.nome+'. Defina os cultivos.'}); }
     if(String(gid).indexOf('g_cult_')===0) cultAfter(self,gid,rows,r,isNew);
-    if(String(gid).indexOf('g_rend_')===0&&r) rendAfter(self,gid,rows,r); };
+    if(String(gid).indexOf('g_rend_')===0&&r) rendAfter(self,gid,rows,r,isNew); };
   self.g2live=(gid,k,d)=>(String(gid).indexOf('g_rend_')===0?rendLive(k,d):null);
-  self.g2opts=(gid,k,d,rid)=>(String(gid).indexOf('g_cult_')===0&&k==='plano'?planOpts(d):(String(gid).indexOf('g_rend_')===0&&k==='conj_id'?conjOpts(rid):null));
-  self.g2formActs=(gid,r,fm)=>(String(gid).indexOf('g_cult_')===0?cultActs(self,gid,r):null);
-  self.g2check=(gid,rows,r,d,isNew)=>(String(gid).indexOf('g_cult_')===0?cultCheck(self,gid,rows,r,d,isNew):(String(gid).indexOf('g_rend_')===0?(self._conjAntes=(r?String(r.v.conj_id||''):null),rendCheck(d)):(gid==='g_saf'?safCheck(d):null)));
+  self.g2opts=(gid,k,d,rid)=>(String(gid).indexOf('g_cult_')===0&&k==='plano'?planOpts(d):(String(gid).indexOf('g_rend_')===0&&k==='conj_id'?conjOpts(rid||d.base):null));
+  self.g2formActs=(gid,r,fm)=>(String(gid).indexOf('g_cult_')===0?cultActs(self,gid,r):(String(gid).indexOf('g_rend_')===0?rendActs(self,gid,r):null));
+  self.g2check=(gid,rows,r,d,isNew)=>(String(gid).indexOf('g_cult_')===0?cultCheck(self,gid,rows,r,d,isNew):(String(gid).indexOf('g_rend_')===0?(self._conjAntes=(r?String(r.v.conj_id||''):null),rendCheck(self,rows,r,d,isNew)):(gid==='g_saf'?safCheck(d):null)));
   self.g2pick=(gid,rid,r)=>{ if(gid==='g_op'){ const pid=String(rid).split('_')[0]; self.setState({atv:pid,opv:'mes'}); } if(gid==='g_res'){ const k=String(rid).replace('R_','').replace(/_(d|c|n|u)$/,''); self.setState({rec:(self.state.rec===k?null:k)}); } }; }
-const _EV=EXTRAVALS; EXTRAVALS=function(self,v){ _safhooks(self); _EV(self,v); v.ap_bulk=()=>openApply(self,null); };'''
+const _EV=EXTRAVALS; EXTRAVALS=function(self,v){ _safhooks(self); _EV(self,v); v.ap_bulk=()=>openApply(self,null); };
+const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)=>rendNova(self,rid); };   // + Outra configuração (etapa 3)'''
     # ---------- corpo ----------
     acao_bloco=f'<button type="button" onClick="{H("prim_fn")}" style="{H("prim_st")}">{H("prim_t")}</button>'
     acao_sec=f'<sc-if value="{H("sec_show")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("sec_fn")}" style="{_MINI} padding: 7px 14px; font-size: 13px;">{H("sec_t")}</button></sc-if>'
     acoes=lambda extra='': f'<span style="display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">{extra}{acao_sec}{acao_bloco}</span>'
     s1=bloco('Escolha a safra','Clique na safra para continuar de onde parou.',g_saf,acao=acao_bloco)
     s2=bloco('Cultivos e planos',H('k2'),cult_html,acao=acoes(),desc_hole=True)
-    s3=bloco('Rendimentos por operação e atividade','Clique numa atividade para ajustar conjunto e rendimento; o ajuste pode valer para a operação inteira.',rend_html,acao=acoes())
+    s3=bloco('Rendimentos por operação e atividade','Clique numa atividade para ajustar conjunto e rendimento; no formulário, “+ Outra configuração” divide a área dela entre conjuntos diferentes.',rend_html,acao=acoes())
     # uma visão por vez, no mesmo lugar: por operação (operação → atividade → cultivo) ou por mês (indicadores × meses)
     seg=(f'<div role="group" aria-label="Modo de visão" style="display: inline-flex; flex-shrink: 0; padding: 3px; gap: 2px; border-radius: 999px; background: {BG}; border: 1px solid {LINE};">'
          f'<button type="button" aria-pressed="{H("vis_op")}" onClick="{H("ver_op")}" style="{H("vis_op_st")}">Por operação</button>'

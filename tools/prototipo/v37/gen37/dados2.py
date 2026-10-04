@@ -158,6 +158,250 @@ def demanda(safra,ajustes=None,planos_extra=None):
 import dados_lagoa_safra as _DL
 _DL.SAFRA['periodo']=periodo_txt(_DL.SAFRA['ini'],_DL.SAFRA['fim']); SAFRAS.append(_DL.SAFRA); CULTIVOS[_DL.SAFRA['id']]=_DL.CULTIVOS; PLANOS.extend(_DL.PLANOS); PLANO.update({p['id']:p for p in _DL.PLANOS}); CONJ.extend(_DL.CONJ)
 ESTOQUE.update(_DL.ESTOQUE); RECEB.update(_DL.RECEB)
+# ---- REND-MULTICONJUNTOS-20261003 · configurações por atividade (etapa 3 · Defina os rendimentos) e espelho do cálculo da etapa 4 ----
+# diesel por hora de conjunto (L/h, estimativa da fazenda; vazio = não informado). Só estima litros pelas horas: o custo do combustível
+# já está no custo por hora da máquina e não é cobrado de novo.
+DIESEL_LH={'r1':14,'r2':16,'r3':10,'r5':30,'r7':7,'r9':8,'r11':6}
+for _c in CONJ: _c.setdefault('diesel',DIESEL_LH.get(_c['id'],''))
+# configurações extras por safra: a mesma atividade divide a área entre conjuntos de tamanhos, rendimentos e tarifas diferentes.
+# Safra 2026/27: o plantio da fazenda (plantadeira 24 linhas, 6,8 ha/h) mais um prestador com plantadeira de 12 linhas (6 m × 6,5 km/h × 75 %
+# = 2,925 ha/h) a R$ 320/h com trator, operador e diesel; o prestador não usa máquinas nem pessoas da fazenda (rec vazio).
+CFG_EXTRA={'S2627':[dict(id='x1',op='Plantio',conj='Prestador · plantadeira 12 linhas (6 m)',conj_id='prestador',larg=6,vel=6.5,efic=75,
+                         maq=320,impl=0,pess=0,pess_rs=0,diesel='',prod=0,rec={})]}
+def rend_calc(larg,vel,efic): return larg*vel/10*efic/100      # ha/h = m × km/h ÷ 10 × eficiência; sem arredondar
+for _l in CFG_EXTRA.values():
+    for _e in _l:
+        if _e.get('larg'): _e['rend']=rend_calc(_e['larg'],_e['vel'],_e['efic'])   # informativo; a etapa 3 usa rend_efetivo
+def cfgs_rend(safra,op,atv=None):
+    """Configurações de uma atividade numa safra: o conjunto padrão da operação (primeiro de CONJ) + as extras da safra (todas as atividades
+    da operação, ou só a atividade indicada em 'atv')."""
+    base=next((c for c in CONJ if c['op']==op),None)
+    return ([dict(base)] if base else [])+[dict(e) for e in CFG_EXTRA.get(safra,[]) if e['op']==op and e.get('atv') in (None,atv)]
+def rend_efetivo(c):
+    """Rendimento da configuração na etapa 3: pelos parâmetros (largura × velocidade × eficiência) quando há largura; senão o informado."""
+    return rend_calc(c['larg'],c['vel'],c['efic']) if c.get('larg') else c.get('rend')
+def cfg_in(c):
+    """Configuração no formato de repartir (o mesmo de cfgIn em safra.js). O prestador traz a equipe dele: não conta horas-homem da fazenda."""
+    return dict(id=c.get('id'),nome=c.get('conj'),rend=rend_efetivo(c),part=c.get('part',''),jan=c.get('jan',''),custo_h=custo_h(c),diesel=c.get('diesel',''),
+                pess=0 if c.get('conj_id')=='prestador' else c.get('pess'),seq=c.get('seq')=='Em sequência: divide trator, implemento ou operador',troca=c.get('troca',''),ativos=c.get('ativos',[]),rec=c.get('rec') or {})
+# >>> REPARTIR (espelho de safra.js · repartir; mesmas regras e mesma ordem; aceita Fraction para conferir sem arredondamento)
+# 1) junta quem trabalha em sequência antes de dividir a área; a sequência divide a janela da ocorrência (a maior entre as dela), começa a
+#    de menor troca e cada outra entra com a sua troca (PRD 44.3: capacidade depois de respeitar simultaneidade e conflitos)
+# 2) % fixos primeiro; o resto às sem % na proporção do rendimento (as mesmas horas); cada uma para na própria janela e a sequência para
+#    quando as horas dela com as trocas enchem a janela; o que não cabe fica sem conjunto. Pendente diz a causa.
+# 3) REND-RETORNO-1818 (S5): PLANO (demanda inteira pela partilha, sem janela) → necessidade da sequência e déficit; ATENDIDO (janelas);
+#    SALDO (área sem conjunto + horas que faltam pelas premissas do plano). nec = atendido + saldo em ha e em horas-conjunto.
+import math as _math
+from fractions import Fraction as _Fr
+def _rp_num(x):
+    if x is None or x=='': return None
+    if isinstance(x,bool): return _math.nan
+    if isinstance(x,(int,float,_Fr)): return x if not (isinstance(x,float) and (_math.isnan(x) or _math.isinf(x))) else _math.nan
+    try:
+        n=float(str(x).strip().replace(',','.')); return n if not (_math.isnan(n) or _math.isinf(n)) else _math.nan
+    except ValueError: return _math.nan
+def _ok(n): return n is not None and not (isinstance(n,float) and _math.isnan(n))
+def _rp_f(n):
+    v=_math.floor(float(n)*100+0.5)/100
+    return (str(int(v)) if v==int(v) else repr(v)).replace('.',',')
+def repartir(Q,cfgs,pools=None):
+    mot=[]
+    def add(m):
+        if m not in mot: mot.append(m)
+    Q=_rp_num(Q)
+    if not _ok(Q) or Q<0: add('área inválida'); Q=0
+    it=[]
+    for i,c in enumerate(cfgs or []):
+        r,p,H,ch,d,tr,pe=(_rp_num(c.get(k)) for k in ('rend','part','jan','custo_h','diesel','troca','pess'))
+        x=dict(i=i,id=c.get('id'),nome=c.get('nome') or f'Configuração {i+1}',r=r if _ok(r) and r>0 else None,p=p if _ok(p) and p>=0 else None,
+               H=_math.inf if (H is None or not _ok(H) or H<0) else H,ch=ch if _ok(ch) and ch>=0 else None,d=d if _ok(d) and d>=0 else None,
+               troca=tr if _ok(tr) and tr>0 else 0,pess=pe if _ok(pe) and pe>0 else 0,seq=bool(c.get('seq')),ativos=[a for a in (c.get('ativos') or []) if a],
+               rec=c.get('rec') or {},t=0,q=0,h=0,ht=0,custo=None,diesel=None,emSeq=False,grupo=i)
+        if H is not None and (not _ok(H) or H<0): add(x['nome']+': janela inválida, considerada sem limite')
+        it.append(x)
+    fx=[x for x in it if x['p'] is not None]; sp=sum((x['p'] for x in fx),0); esc=100/sp if sp>100 else 1
+    if sp>100+1e-9: add(f'partes fixas somam {_rp_f(sp)} %: reduzidas na proporção para fechar 100 %')
+    R=Q
+    for x in fx: x['t']=Q*x['p']*esc/100; R-=x['t']
+    if R<1e-12: R=0
+    livres=[x for x in it if x['p'] is None]; liv_ok=len(livres)>0 and not any(x['r'] is None for x in livres)
+    cand=[x for x in it if x['r'] is not None and x['H']>0 and ((x['t']>1e-12) if x['p'] is not None else (liv_ok and R>0))]
+    pai=list(range(len(it)))
+    def raiz(i):
+        while pai[i]!=i: pai[i]=pai[pai[i]]; i=pai[i]
+        return i
+    def une(a,b):
+        a,b=raiz(a),raiz(b)
+        if a!=b: pai[max(a,b)]=min(a,b)
+    for a,x in enumerate(cand):
+        for y in cand[a+1:]:
+            if any(z in y['ativos'] for z in x['ativos']): une(x['i'],y['i']); add('configurações com a mesma máquina do cadastro trabalham em sequência')
+    sq=[x for x in cand if x['seq']]
+    for x in sq: une(sq[0]['i'],x['i'])
+    if len(sq)>1: add('sequência declarada: dividem trator, implemento ou operador')
+    for k,pv in (pools or {}).items():
+        un=_rp_num((pv or {}).get('un'))
+        if not _ok(un): continue
+        us=[x for x in cand if (_rp_num(x['rec'].get(k)) or 0)>0]
+        if len(us)<2: continue
+        g={}
+        for x in us: rr=raiz(x['i']); g[rr]=max(g.get(rr,0),_rp_num(x['rec'][k]))
+        sim=sum(g.values())
+        if sim>un+1e-9:
+            for x in us: une(us[0]['i'],x['i'])
+            add(f"{pv.get('nome') or k}: ao mesmo tempo precisariam de {_rp_f(sim)}, a fazenda tem {_rp_f(un)}; trabalham em sequência")
+    pista={}
+    for x in cand: pista.setdefault(raiz(x['i']),[]).append(x)
+    def troca_de(xs):
+        if len(xs)<2: return 0
+        return sum((x['troca'] for x in xs),0)-min(x['troca'] for x in xs)
+    W={}; jan={}
+    for g,xs in pista.items():
+        if len(xs)<2: continue
+        w=max(x['H'] for x in xs)
+        if w!=_math.inf: W[g]=w; jan[g]=w-troca_de(xs)
+    liv_h=[x for x in livres if x['H']>0]; plan_liv=liv_h if liv_h else livres
+    def aloca(ad):
+        q=[0]*len(it); saldo=0; cz={}; uso={}
+        for x in fx:
+            t=x['t']
+            if t<=1e-12: continue
+            if x['r'] is None: saldo+=t; cz['rend']=1; ad(x['nome']+': sem rendimento válido (ha/h), a parte dela fica sem conjunto'); continue
+            q[x['i']]=min(t,x['r']*x['H'])
+            if t-q[x['i']]>1e-9: saldo+=t-q[x['i']]; cz['jan']=1; ad(f"{x['nome']}: a parte fixa não cabe na janela de {_rp_f(x['H'])} h")
+        for g in sorted(jan):
+            xs=[x for x in pista[g] if x['p'] is not None and q[x['i']]>0]; hf=sum((q[x['i']]/x['r'] for x in xs),0); B=max(0,jan[g])
+            if hf>B+1e-9:
+                f=B/hf
+                for x in xs: n=q[x['i']]*f; saldo+=q[x['i']]-n; q[x['i']]=n
+                cz['seq']=1; uso[g]=B; ad(f'as partes fixas em sequência não cabem na janela de {_rp_f(W[g])} h: cada uma faz {_rp_f(f*100)} % do que cabia na própria janela')
+            else: uso[g]=hf
+        if R>0:
+            if not livres:
+                saldo+=R
+                if it: cz['part']=1
+                else: cz['cfg']=1
+                ad('as partes fixas não cobrem toda a área' if it else 'atividade sem conjunto')
+            elif not liv_ok:
+                saldo+=R; cz['rend']=1
+                for x in livres:
+                    if x['r'] is None: ad(x['nome']+': sem rendimento válido (ha/h); '+('a divisão pelo rendimento fica pendente' if len(livres)>1 else 'horas pendentes'))
+            else:
+                rest=R; at=livres[:]; bj=False; bs=False
+                def pl(x):
+                    g=raiz(x['i']); return g if g in jan else None
+                while at:
+                    sr=sum(x['r'] for x in at); T=rest/sr; e=T
+                    for x in at:
+                        if x['H']<e: e=x['H']
+                    na={}; tl={}
+                    for x in at:
+                        g=pl(x)
+                        if g is not None: na[g]=na.get(g,0)+1
+                    for g in na:
+                        tl[g]=max(0,jan[g]-uso.get(g,0))/na[g]
+                        if tl[g]<e: e=tl[g]
+                    if not e<T:
+                        for x in at: q[x['i']]=x['r']*T
+                        rest=0; break
+                    fz=[x for x in at if x['H']<=e or (pl(x) is not None and tl[pl(x)]<=e)]
+                    for x in fz:
+                        g=pl(x); q[x['i']]=x['r']*e; rest-=q[x['i']]
+                        if g is not None:
+                            uso[g]=uso.get(g,0)+e
+                            if tl[g]<=e: bs=True
+                        if x['H']<=e: bj=True
+                    fzi={x['i'] for x in fz}; at=[x for x in at if x['i'] not in fzi]
+                if rest>1e-9:
+                    saldo+=rest
+                    if bs: cz['seq']=1; ad('em sequência dividem a mesma janela: a área que não cabe fica sem conjunto')
+                    if bj or not bs: cz['jan']=1; ad('as janelas não comportam toda a área')
+        return q,saldo,cz
+    q2,saldo,cz=aloca(add)
+    for x in it: x['q']=q2[x['i']]
+    # PLANO: demanda inteira pela partilha do usuário, sem janela (parte fixa inteira; resto pelo rendimento) → necessidade da sequência e déficit
+    q1=[0]*len(it)
+    for x in fx:
+        if x['r'] is not None and x['t']>1e-12: q1[x['i']]=x['t']
+    if R>0 and liv_ok:
+        sr=sum(x['r'] for x in plan_liv)
+        for x in plan_liv: q1[x['i']]=x['r']*R/sr
+    conflito=False; deficit=0
+    for g in sorted(jan):
+        xs=[x for x in pista[g] if q1[x['i']]>1e-12]
+        if len(xs)<2: continue
+        nec=sum((q1[x['i']]/x['r'] for x in xs),0)+troca_de(xs)
+        if nec>W[g]+1e-9: conflito=True; deficit=max(deficit,nec-W[g]); add(f"em sequência precisam de {_rp_f(nec)} h para {_rp_f(sum((q1[x['i']] for x in xs),0))} ha; a janela tem {_rp_f(W[g])} h")
+    grp={}
+    for x in it:
+        if x['q']>1e-12: grp.setdefault(raiz(x['i']),[]).append(x)
+    decorrido=0; troca_t=0
+    for g in sorted(grp):
+        xs=grp[g]; soma=0; mn=min(x['troca'] for x in xs); primeira=True
+        for x in xs:
+            x['h']=x['q']/x['r']; tr=0
+            if len(xs)>1:
+                if primeira and x['troca']==mn: primeira=False
+                else: tr=x['troca']
+            x['ht']=x['h']+tr; troca_t+=tr; x['emSeq']=len(xs)>1; x['grupo']=g; soma+=x['ht']
+        if soma>decorrido: decorrido=soma
+    for x in it:
+        if x['q']<=1e-12: x['grupo']=raiz(x['i'])
+    hc=0; custo=0; custo_ok=True; diesel=0; diesel_ok=True; hh=0
+    for x in it:
+        if x['q']<=1e-12:
+            x['q']=0; x['h']=0; x['ht']=0; x['custo']=None if x['ch'] is None else 0; x['diesel']=None if x['d'] is None else 0; continue
+        hc+=x['h']; hh+=x['h']*x['pess']
+        if x['ch'] is None: custo_ok=False; add(x['nome']+': tarifa desconhecida (R$/h), custo não calculado')
+        else: x['custo']=x['h']*x['ch']; custo+=x['custo']
+        if x['d'] is None: diesel_ok=False
+        else: x['diesel']=x['h']*x['d']; diesel+=x['diesel']
+    alocado=sum((x['q'] for x in it),0)
+    if saldo<1e-9: saldo=0
+    pend=Q>1e-12 and alocado<=1e-12
+    causa='' if not pend else ('sem conjunto' if cz.get('cfg') else ('sem rendimento' if cz.get('rend') else ('sem horas na janela' if (cz.get('jan') or cz.get('seq')) else 'partes fixas abaixo de 100 %')))
+    # 3) saldo em horas pelas premissas do plano; necessário = atendido + saldo (ha e horas-conjunto); decorrido necessário por sequência inteira
+    sem_h=0; fq=[0]*len(it)
+    for x in fx:
+        if x['t']<=1e-12: continue
+        if x['r'] is None: sem_h+=x['t']; continue
+        u=x['t']-x['q']
+        if u>1e-9: fq[x['i']]=u
+    if R>0:
+        if not liv_ok: sem_h+=R
+        else:
+            rest=R-sum((x['q'] for x in livres),0)
+            if rest>1e-9:
+                sr=sum(x['r'] for x in plan_liv)
+                for x in plan_liv: fq[x['i']]+=x['r']*rest/sr
+    nhc=0; fhc=0; nec_dec=0; pis={}
+    for x in it:
+        x['fq']=fq[x['i']]; x['fh']=x['fq']/x['r'] if x['fq']>0 else 0; x['nq']=x['q']+x['fq']; x['nh']=x['h']+x['fh']; nhc+=x['nh']; fhc+=x['fh']
+        if x['nq']>1e-12: pis.setdefault(raiz(x['i']),[]).append(x)
+    for g in sorted(pis):
+        xs=pis[g]; s_=sum((x['nh'] for x in xs),0)+troca_de(xs)
+        if s_>nec_dec: nec_dec=s_
+    sem_nada=Q>1e-12 and Q-sem_h<=1e-9
+    nec=dict(area=Q,hconj=None if sem_nada else nhc,decorrido=None if sem_nada else nec_dec,semHoras=sem_h)
+    falta=dict(area=saldo,hconj=None if sem_nada else fhc,decorrido=None if sem_nada else max(0,nec_dec-(0 if pend else decorrido)),semHoras=sem_h)
+    return dict(Q=Q,alocado=alocado,saldo=saldo,pendente=pend,causa=causa,hconj=None if pend else hc,decorrido=None if pend else decorrido,troca=troca_t,custo=custo,custoOk=custo_ok,
+                custoHa=(custo/alocado) if (custo_ok and alocado>1e-12) else None,diesel=diesel,dieselOk=diesel_ok,hh=hh,conflito=conflito,deficit=deficit,nec=nec,falta=falta,motivos=mot,itens=it)
+# <<< REPARTIR
+def plano_op(safra):
+    """Espelho dos totais da etapa 4 (Confira o plano operacional) com os dados iniciais: área, horas-conjunto, custo de operação,
+    diesel, horas-homem, área sem conjunto e ocorrências pendentes; as configurações vêm de cfgs_rend e os grupos de recursos de RECURSOS.
+    REND-RETORNO-1818: também as horas-conjunto necessárias (nec_h = hconj + falta_h) e a área sem horas calculáveis (sem_h) das etapas 4 e 5."""
+    pools={r['id']:dict(un=r['un'],nome=r['nome']) for r in RECURSOS}
+    t=dict(area=0,hconj=0,cop=0,diesel=0,hh=0,saldo=0,pend=0,conflito=0,ocorr=0,multi=0,nec_h=0,falta_h=0,sem_h=0)
+    for c in CULTIVOS[safra]:
+        pl=PLANO.get(c['plano']) if c['plano'] else None
+        if not pl or pl['cultura']!=c['cultura']: continue
+        for a in pl['atividades']:
+            cfs=cfgs_rend(safra,a['op'],a['nome']); rp=repartir(c['area'],[cfg_in(x) for x in cfs],pools)
+            t['ocorr']+=1; t['area']+=c['area']; t['hconj']+=rp['hconj'] or 0; t['cop']+=rp['custo']; t['diesel']+=rp['diesel']; t['hh']+=rp['hh']; t['saldo']+=rp['saldo']
+            t['pend']+=1 if rp['pendente'] else 0; t['conflito']+=1 if rp['conflito'] else 0; t['multi']+=1 if len(cfs)>1 else 0
+            t['nec_h']+=rp['nec']['hconj'] or 0; t['falta_h']+=rp['falta']['hconj'] or 0; t['sem_h']+=rp['falta']['semHoras']
+    return t
 def js_data():
     return dict(meses=MESES,dias=DIAS_UTEIS,safras=SAFRAS,tipos=TIPOS,planos=PLANOS,cultivos=CULTIVOS,ajustes=AJUSTES,conj=CONJ,recursos=RECURSOS,estoque=ESTOQUE,receb=RECEB,
                 fisico={k:fisico_apto(k) for k in ESTOQUE},reservas=RESERVAS,recebDt=RECEB_DT,
