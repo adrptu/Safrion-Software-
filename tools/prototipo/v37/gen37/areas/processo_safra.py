@@ -137,7 +137,7 @@ def build():
                     dict(k='jan',l='Horas disponíveis na janela',t='num',min=0,max=2000,u='h por talhão',help='Opcional. Prazo, contado do início da ocorrência, para este conjunto terminar em cada talhão ou parcela; em sequência, cada configuração termina dentro da própria janela, e a janela maior de outra não amplia a dela. A área que não couber fica sem conjunto, à vista no plano operacional.'),
                     dict(k='part',l='Parte da área',t='num',min=0,max=100,u='%',cond=MULTI,help='Vazio = divide pelo rendimento, partindo das mesmas horas para as sem %; a que para na própria janela ou na da sequência passa o resto às outras. Estimativa: não garante término no mesmo horário nem a capacidade máxima. Com %, a parte fica fixa.'),
                     dict(k='seq',l='Trabalha com as outras configurações',t='sel',opts=[PAR_T,SEQ_T],cond=MULTI,**{'def':PAR_T},help='Mesmo trator do cadastro obriga a sequência; falta de máquina ou pessoa na fazenda faz a estimativa considerar as configurações em sequência.'),
-                    dict(k='troca',l='Troca entre configurações',t='num',min=0,max=24,u='h',cond=MULTI,help='Opcional. Tempo para trocar para esta configuração quando trabalham em sequência (começa a de menor troca); entra no tempo decorrido e ocupa a janela.')])
+                    dict(k='troca',l='Troca entre configurações',t='num',min=0,max=24,u='h',cond=MULTI,help='Opcional. Tempo para trocar para esta configuração quando trabalham em sequência; entra no tempo decorrido e ocupa a janela. O decorrido estimado começa pela de menor troca; para cumprir os prazos, a de janela menor pode precisar ir antes.')])
     rend_html=''
     for k in ['S2627','S27SF','S2526','LG2627','NOVA']:
         rrows=rend_rows(k)
