@@ -96,6 +96,19 @@ Sem a camada sintética (tarefa 1), o build para em `dados_lagoa_fonte`, com uma
     - `gen37/dados_lagoa_safra.py` (textos de quantidade).
   - Nenhum hunk da REND toca esses arquivos. Na AÇÃO, só `processo_os.py` é tocado, em `645/851/981/987`, fora das linhas acima.
 
+- **PRE-REV-20261004 (pré-revisão adversarial do autor sobre `0fcc2dc`/`74893ad`, antes do PR pedido pelo Adrianus), reserva registrada antes de editar:**
+  - **Achados de 3 revisores independentes, cada um reproduzido em node com o JS real; correção nesta branch:**
+    - **P1 · S2 · `gen37/mip.js:295`:** a O.S. emitida pelo MIP grava o total como `Math.round(dose×área×1000)/1000`, fora da regra única. Ex. sintético: 0,25 kg/ha × 37,75 ha → 9,438 contra 9,44 do consumo; o apontamento da área toda é recusado. Passa a `cenQtd(dose, área)`.
+    - **P2 · S2 · `gen37/irrigacao_estado.js:433/452`:** a v2 de fertirrigação grava o total em kg inteiros (`Math.round(dose×área)`). Ex. sintético: 12 kg/ha × 48,93 ha → 587 contra 587,16; o apontamento do saldo é recusado. Passa à mesma regra, e a mensagem mostra 2 casas. A prévia em `gen37/areas/irrigacao.py:516` mostra o mesmo número.
+    - **P3 · S3 · `gen37/areas/agronomia.py:664/668` e `gen37/mip.js:235/246`:** "Decidir controle" preenche a área do talhão com 1 casa; com área de 2 casas, ela passa do talhão e trava a emissão com mensagem que mostra o mesmo número. Passa a 2 casas no formulário e na mensagem.
+    - **P4 · S3 · `gen37/cenario.py:79`:** a semente mudou sem subir `v`; o estado salvo de antes volta a travar o apontamento. Sobe para `v=3`.
+    - **P5 · S3 · `gen37/dados_irrigacao.py:171/172`:** a `base` das fertirrigações OS-0506/OS-0507 é literal, não o realizado da semente; aparece aplicação fantasma. Passa a derivar de `dados_lagoa_safra.ORDENS`.
+    - **P6 · S3 · `gen37/dados_mip.py:190/193`:** a área das decisões ligadas a OS-0504/OS-0508 é literal (maior que o talhão em PV06). Passa a derivar da mesma fonte.
+    - **P7 · S3 · `gen37/quantidade_test.py`:** o item 6 não executa a recusa por custódia (passa com a trava desligada). Passa a executar a recusa na web e no app, e ganha os fluxos MIP → O.S. e fertirrigação → O.S. com custódia 0.
+    - **P8 · S4 · `gen37/quantidade.py`:** `qtd_trecho` não é usado e arredonda a 6 casas de outro jeito que o JS. Sai.
+  - Testes que podem mudar de linha de base: `irr_estado_test.py`, `mip_unit_test.py`, `mip_correcoes_test.py`, `dados_lagoa_sintetico/camada_test.py`.
+  - **Separação:** nenhum hunk da REND (`126899e5`) toca esses arquivos. A AÇÃO (`20f25726`) toca `agronomia.py:1748` e `irrigacao.py:26–86`, fora das linhas acima. Depois do commit aqui, a `claude/v44-rend-01` recebe esta branch por merge.
+
 ## Tarefas, na ordem
 1. **CAMADA-SINTETICA (CORTE-REMOTO-01)**
    - **Arquivos novos:** `dados_lagoa_sintetico/{__init__.py, kml.py, gerar.py, saida/}`.
