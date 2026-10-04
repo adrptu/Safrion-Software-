@@ -147,7 +147,7 @@ def demanda(safra,ajustes=None,planos_extra=None):
         o=out.setdefault(nm,dict(grupo=p['grupo'],un=p['un'],preco=p['preco'],bruta=0.0,orig=[],evs=[]))
         o['bruta']+=q; o['orig'].append((c['local'],a['nome'],dose,c['area'],q))
         o['evs'].append(dict(dt=data_atividade(c,a).isoformat(),q=q,tipo='dem',own=True,ord=ordem.get(safra,99),chave=f"{c['id']}|{a['id']}",
-                             t=f"{c['local']} · {a['nome']}",calc=f"{_nf(dose,2)} {p['un']}/ha × {_nf(c['area'])} ha"))
+                             t=f"{c['local']} · {a['nome']}",calc=f"{_nf(dose,2)} {p['un']}/ha × {_nfa(c['area'])} ha"))   # área com até 2 casas (PRE-REV R5)
     for nm,o in out.items():
         o['evs']+=_outras_origens(safra,nm)
         o['estoque']=fisico_apto(nm); o['reservado']=sum(r['q'] for r in RESERVAS if r['item']==nm); o['receb']=RECEB.get(nm,0)
@@ -223,22 +223,29 @@ def repartir(Q,cfgs,pools=None):
     if sp>100+1e-9: add(f'partes fixas somam {_rp_f(sp)} %: reduzidas na proporção para fechar 100 %')
     R=Q
     for x in fx: x['t']=Q*x['p']*esc/100; R-=x['t']
-    if R<1e-12: R=0
+    if R<=1e-9*max(1,Q): R=0   # tolerância relativa à área (PRE-REV R3)
     livres=[x for x in it if x['p'] is None]; liv_ok=len(livres)>0 and not any(x['r'] is None for x in livres)
-    cand=[x for x in it if x['r'] is not None and x['H']>0 and ((x['t']>1e-12) if x['p'] is not None else (liv_ok and R>0))]
-    pai=list(range(len(it)))
-    def raiz(i):
-        while pai[i]!=i: pai[i]=pai[pai[i]]; i=pai[i]
-        return i
-    def une(a,b):
-        a,b=raiz(a),raiz(b)
-        if a!=b: pai[max(a,b)]=min(a,b)
-    for a,x in enumerate(cand):
-        for y in cand[a+1:]:
-            if any(z in y['ativos'] for z in x['ativos']): une(x['i'],y['i']); add('configurações com a mesma máquina do cadastro trabalham em sequência')
-    sq=[x for x in cand if x['seq']]
-    for x in sq: une(sq[0]['i'],x['i'])
+    # sequência entre as que estão no plano, mesmo com janela 0 (PRE-REV R1); restrições de janela da sequência e do grupo de recursos (R2)
+    cand_p=[x for x in it if x['r'] is not None and ((x['t']>1e-12) if x['p'] is not None else (liv_ok and R>0))]
+    cand=[x for x in cand_p if x['H']>0]
+    class _UF:
+        def __init__(s): s.pai=list(range(len(it)))
+        def raiz(s,i):
+            while s.pai[i]!=i: s.pai[i]=s.pai[s.pai[i]]; i=s.pai[i]
+            return i
+        def une(s,a,b):
+            a,b=s.raiz(a),s.raiz(b)
+            if a!=b: s.pai[max(a,b)]=min(a,b)
+    U1=_UF()
+    for a,x in enumerate(cand_p):
+        for y in cand_p[a+1:]:
+            if any(z in y['ativos'] for z in x['ativos']): U1.une(x['i'],y['i']); add('configurações com a mesma máquina do cadastro trabalham em sequência')
+    sq=[x for x in cand_p if x['seq']]
+    for x in sq: U1.une(sq[0]['i'],x['i'])
     if len(sq)>1: add('sequência declarada: dividem trator, implemento ou operador')
+    U2=_UF()
+    for x in it: U2.une(x['i'],U1.raiz(x['i']))
+    raiz=U2.raiz; une=U2.une
     for k,pv in (pools or {}).items():
         un=_rp_num((pv or {}).get('un'))
         if not _ok(un): continue
@@ -250,16 +257,24 @@ def repartir(Q,cfgs,pools=None):
         if sim>un+1e-9:
             for x in us: une(us[0]['i'],x['i'])
             add(f"{pv.get('nome') or k}: ao mesmo tempo precisariam de {_rp_f(sim)}, a fazenda tem {_rp_f(un)}; trabalham em sequência")
-    pista={}
-    for x in cand: pista.setdefault(raiz(x['i']),[]).append(x)
     def troca_de(xs):
         if len(xs)<2: return 0
         return sum((x['troca'] for x in xs),0)-min(x['troca'] for x in xs)
-    W={}; jan={}
-    for g,xs in pista.items():
-        if len(xs)<2: continue
+    def grupos(U):
+        o={}
+        for x in cand_p: o.setdefault(U.raiz(x['i']),[]).append(x)
+        return o
+    G1,G2=grupos(U1),grupos(U2); RS=[]
+    for g in sorted(G1):
+        if len(G1[g])>1: RS.append(('a'+str(g),G1[g]))
+    for g in sorted(G2):
+        xs=G2[g]
+        if len(xs)>1 and any(U1.raiz(x['i'])!=U1.raiz(xs[0]['i']) for x in xs): RS.append(('b'+str(g),xs))
+    W={}; jan={}; pista={}
+    for k,xs in RS:
         w=max(x['H'] for x in xs)
-        if w!=_math.inf: W[g]=w; jan[g]=w-troca_de(xs)
+        if w!=_math.inf: W[k]=w; pista[k]=xs; jan[k]=w-troca_de([x for x in xs if x['H']>0])
+    def pl(x): return [g for g in jan if any(y is x for y in pista[g])]   # restrições de janela de uma configuração
     liv_h=[x for x in livres if x['H']>0]; plan_liv=liv_h if liv_h else livres
     def aloca(ad):
         q=[0]*len(it); saldo=0; cz={}; uso={}
@@ -269,13 +284,13 @@ def repartir(Q,cfgs,pools=None):
             if x['r'] is None: saldo+=t; cz['rend']=1; ad(x['nome']+': sem rendimento válido (ha/h), a parte dela fica sem conjunto'); continue
             q[x['i']]=min(t,x['r']*x['H'])
             if t-q[x['i']]>1e-9: saldo+=t-q[x['i']]; cz['jan']=1; ad(f"{x['nome']}: a parte fixa não cabe na janela de {_rp_f(x['H'])} h")
-        for g in sorted(jan):
+        for g in jan:
             xs=[x for x in pista[g] if x['p'] is not None and q[x['i']]>0]; hf=sum((q[x['i']]/x['r'] for x in xs),0); B=max(0,jan[g])
             if hf>B+1e-9:
                 f=B/hf
                 for x in xs: n=q[x['i']]*f; saldo+=q[x['i']]-n; q[x['i']]=n
-                cz['seq']=1; uso[g]=B; ad(f'as partes fixas em sequência não cabem na janela de {_rp_f(W[g])} h: cada uma faz {_rp_f(f*100)} % do que cabia na própria janela')
-            else: uso[g]=hf
+                cz['seq']=1; ad(f'as partes fixas em sequência não cabem na janela de {_rp_f(W[g])} h: cada uma faz {_rp_f(f*100)} % do que cabia na própria janela')
+        for g in jan: uso[g]=sum((q[x['i']]/x['r'] for x in pista[g] if x['p'] is not None),0)   # depois de todas as restrições
         if R>0:
             if not livres:
                 saldo+=R
@@ -288,26 +303,23 @@ def repartir(Q,cfgs,pools=None):
                     if x['r'] is None: ad(x['nome']+': sem rendimento válido (ha/h); '+('a divisão pelo rendimento fica pendente' if len(livres)>1 else 'horas pendentes'))
             else:
                 rest=R; at=livres[:]; bj=False; bs=False
-                def pl(x):
-                    g=raiz(x['i']); return g if g in jan else None
                 while at:
                     sr=sum(x['r'] for x in at); T=rest/sr; e=T
                     for x in at:
                         if x['H']<e: e=x['H']
                     na={}; tl={}
                     for x in at:
-                        g=pl(x)
-                        if g is not None: na[g]=na.get(g,0)+1
+                        for g in pl(x): na[g]=na.get(g,0)+1
                     for g in na:
                         tl[g]=max(0,jan[g]-uso.get(g,0))/na[g]
                         if tl[g]<e: e=tl[g]
                     if not e<T:
                         for x in at: q[x['i']]=x['r']*T
                         rest=0; break
-                    fz=[x for x in at if x['H']<=e or (pl(x) is not None and tl[pl(x)]<=e)]
+                    fz=[x for x in at if x['H']<=e or any(tl[g]<=e for g in pl(x))]
                     for x in fz:
-                        g=pl(x); q[x['i']]=x['r']*e; rest-=q[x['i']]
-                        if g is not None:
+                        q[x['i']]=x['r']*e; rest-=q[x['i']]
+                        for g in pl(x):
                             uso[g]=uso.get(g,0)+e
                             if tl[g]<=e: bs=True
                         if x['H']<=e: bj=True
@@ -327,7 +339,7 @@ def repartir(Q,cfgs,pools=None):
         sr=sum(x['r'] for x in plan_liv)
         for x in plan_liv: q1[x['i']]=x['r']*R/sr
     conflito=False; deficit=0
-    for g in sorted(jan):
+    for g in jan:
         xs=[x for x in pista[g] if q1[x['i']]>1e-12]
         if len(xs)<2: continue
         nec=sum((q1[x['i']]/x['r'] for x in xs),0)+troca_de(xs)
@@ -519,6 +531,8 @@ def faltas(safra='S2627',sem_pedido=None):
 # =================== CAL-01 (PRD v3.9) · necessidade líquida por data — espelho de cal01.js (mesma ordem, mesmos números) ===================
 def _nf(n,d=0):
     t=f"{n:,.{d}f}"; return t.replace(',','X').replace('.',',').replace('X','.')
+def _nfa(n):   # como nfa do safra.js: até 2 casas, sem zeros à direita
+    return _nf(n,2).rstrip('0').rstrip(',')
 # reservas ativas por destino (o físico apto as inclui; LOTES.reservado = soma delas por insumo). chave = cultivo|atividade quando a reserva é da
 # mesma demanda do plano (conta uma vez); sem chave = outro destino, entra como demanda na data da reserva.
 RESERVAS=[dict(item='Fungicida A',q=65,dt='2026-09-24',t='Reserva REQ-039 · OS-0424 (P2)',chave=None,faz='Santa Rita')]

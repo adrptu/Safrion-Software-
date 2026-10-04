@@ -12,6 +12,9 @@ REND-RETORNO-1818 (decisão Codex 7ae753dc): necessidade da demanda inteira, ate
 contrato (54/3,6 + 54/7,2 = 22,5 h necessárias, janela 10 h, déficit 12,5 h), não da saída antiga (17,5 h / 7,5 h, que cortava a parte A na
 janela antes de somar); S1 tinha o mesmo corte (6 h → 70/9 h). Novos: S6 (partes fixas ao mesmo tempo, janela própria) e, em todo caso e nas
 400 entradas, necessário = atendido + saldo em ha e em horas-conjunto.
+PRE-REV-20261004 (pré-revisão do autor): R1 janela 0 numa sequência declarada mantém a necessidade e o déficit (S5 com a janela de A = 0);
+R2 o grupo de recursos que junta uma sequência declarada com uma configuração sem janela não relaxa a janela da sequência (1 e 2
+plantadeiras); R3 partes que somam 100 % em área grande não deixam resíduo; nas 400 entradas, a sequência declarada cabe na janela dela.
 Uso: python3 rend_multiconjuntos_unit.py"""
 import sys, os, json, re, subprocess, tempfile
 from fractions import Fraction as F
@@ -85,6 +88,15 @@ CASOS=[
    108,[cf(A,rec={'plant':1}),cf(B,rec={'plant':1})],{'plant':{'un':1,'nome':'Plantadeiras'}},dict(decorrido='20',hconj='20',motivo='Plantadeiras')),
  ('E8b grupo_da_fazenda_2_plantadeiras','com 2 plantadeiras trabalham ao mesmo tempo: 10 h',
    108,[cf(A,rec={'plant':1}),cf(B,rec={'plant':1})],{'plant':{'un':2,'nome':'Plantadeiras'}},dict(decorrido='10')),
+ ('R1 janela_zero_na_sequencia_declarada','PRE-REV R1 · o S5 com a janela de A = 0: A não recebe área, mas a sequência declarada continua precisando de 54/3,6 + 54/7,2 = 22,5 h numa janela de 10 h (déficit 12,5 h, como com 0,01 h); B faz 54 ha em 7,5 h',
+   108,[cf(A,part=50,seq=True,jan=0),cf(B,part=50,seq=True,jan=10)],None,dict(q=['0','54'],alocado='54',saldo='54',hconj='15/2',decorrido='15/2',conflito=True,deficit='25/2',nq=['54','54'],
+   motivo=['parte fixa não cabe na janela de 0 h','precisam de 22,5 h para 108 ha; a janela tem 10 h'],**{'nec.decorrido':'45/2','falta.decorrido':'15'})),
+ ('R2a grupo_de_recursos_nao_relaxa_janela_1','PRE-REV R2 · A e B em sequência declarada (janela 10 h), C sem janela; A e C usam plantadeira e a fazenda tem 1: a união por falta de plantadeira não tira a janela de A+B (5 h cada, 25 + 25 ha); C faz 150 ha; tudo em sequência: 40 h',
+   200,[dict(id='A',nome='A',rend=5,seq=True,jan=10,rec={'plant':1},custo_h=100),dict(id='B',nome='B',rend=5,seq=True,jan=10,custo_h=100),dict(id='C',nome='C',rend=5,rec={'plant':1},custo_h=100)],
+   {'plant':{'un':1,'nome':'Plantadeiras'}},dict(q=['25','25','150'],saldo='0',decorrido='40',conflito=True,deficit='50/3',motivo=['Plantadeiras','precisam de 26,67 h para 133,33 ha; a janela tem 10 h'])),
+ ('R2b grupo_de_recursos_nao_relaxa_janela_2','PRE-REV R2 · o mesmo com 2 plantadeiras: a mesma divisão (menos recurso nunca dá plano mais otimista); C ao mesmo tempo: 30 h',
+   200,[dict(id='A',nome='A',rend=5,seq=True,jan=10,rec={'plant':1},custo_h=100),dict(id='B',nome='B',rend=5,seq=True,jan=10,custo_h=100),dict(id='C',nome='C',rend=5,rec={'plant':1},custo_h=100)],
+   {'plant':{'un':2,'nome':'Plantadeiras'}},dict(q=['25','25','150'],saldo='0',decorrido='30',conflito=True,deficit='50/3')),
 ]
 RA='rendCalc(6,8,75)'; RB='rendCalc(12,8,75)'
 def js_val(x):
@@ -110,6 +122,7 @@ js.append("OUT['01']=[rendCalc(6,8,75),rendCalc(12,8,75)];")
 js.append("OUT['02']=[repartir(1,[{rend:rendCalc(6,8,75)}]).hconj,repartir(1,[{rend:rendCalc(12,8,75)}]).hconj];")
 js.append("(()=>{ const r=repartir(108,[{rend:rendCalc(6,8,75)},{rend:rendCalc(12,8,75)}]); OUT['09']=[108*2,r.itens.reduce((a,x)=>a+x.q*2,0)+r.saldo*2]; })();")
 js.append("OUT['11']=(()=>{ const t=[repartir(48,[{rend:6},{rend:4}]).decorrido,repartir(48,[{rend:6}]).decorrido,repartir(48,[{rend:8}]).decorrido]; const T=Math.max.apply(null,t); return [48/T,T,t]; })();")
+js.append("OUT['R3']=(()=>{ const r=repartir(2882.53,[48.7,17.6,21.9,5.4,6.4].map((p,i)=>({nome:'P'+i,rend:5,part:p,seq:true})).concat([{nome:'L',rend:5,seq:true,troca:2}])); return [r.itens[5].q,r.motivos.filter(m=>/não cobrem/.test(m)).length,r.decorrido]; })();")
 js.append("OUT['12']=[repartir(1,[{rend:rendCalc(1.1,3.7,63)}]).hconj, 1/(Math.round(rendCalc(1.1,3.7,63)*100)/100)];")
 js.append('print(JSON.stringify(OUT));')
 with tempfile.NamedTemporaryFile('w',suffix='.js',delete=False) as f: f.write(PRELUDIO+'\n'+'\n'.join(js)); jsf=f.name
@@ -169,6 +182,12 @@ chk('11 gargalo_serie_limite_inferior','etapas em série: 6+4 ha/h em paralelo, 
 p12=D2.repartir(F(1),[dict(rend=D2.rend_calc(F('1.1'),F('3.7'),F(63)))])['hconj']
 chk('12 sem_arredondamento_intermediario','1,1 m × 3,7 km/h × 63 %: h/ha = 100000/25641 (≈ 3,9000039); arredondar o rendimento para 0,26 daria 3,846','100000/25641',
     OUT['12'],str(p12),near(OUT['12'][0],F(100000,25641)) and p12==F(100000,25641) and abs(OUT['12'][1]-OUT['12'][0])>0.05)
+r3c=[dict(nome=f'P{i}',rend=5,part=p,seq=True) for i,p in enumerate([48.7,17.6,21.9,5.4,6.4])]+[dict(nome='L',rend=5,seq=True,troca=2)]
+p3f=D2.repartir(2882.53,r3c); p3=D2.repartir(F('2882.53'),[py_cfg(c) for c in r3c])
+chk('R3 resto_relativo_area_grande','PRE-REV R3 · 2.882,53 ha com partes 48,7 + 17,6 + 21,9 + 5,4 + 6,4 = 100 % e uma configuração sem % em sequência (troca 2 h): ela não recebe área nem soma troca, em ponto flutuante (JS e Python) e exato',
+    '[0, 0 avisos "não cobrem", decorrido 2882,53/5]',OUT['R3'],(p3f['itens'][5]['q'],str(p3['itens'][5]['q']),str(p3['decorrido'])),
+    OUT['R3'][0]==0 and OUT['R3'][1]==0 and near(OUT['R3'][2],F('2882.53')/5) and p3f['itens'][5]['q']==0 and p3['itens'][5]['q']==0 and p3['decorrido']==F('2882.53')/5
+    and not any('não cobrem' in m for m in p3f['motivos']+p3['motivos']))
 # ---------- 400 entradas aleatórias (semente fixa): paridade JS × Python (float) e invariantes nos dois ----------
 import random
 rng=random.Random(20261003); RND=[]
@@ -190,8 +209,10 @@ SELR="r=>({Q:r.Q,alocado:r.alocado,saldo:r.saldo,pendente:r.pendente,causa:r.cau
 jr=['function nfa(n){ return String(n); }',BLOCO,'const SELR='+SELR+';','const R=[];']+[f"R.push(SELR(repartir({json.dumps(Q)},{json.dumps(c)},{json.dumps(pl)})));" for Q,c,pl in RND]+['print(JSON.stringify(R));']
 with tempfile.NamedTemporaryFile('w',suffix='.js',delete=False) as f: f.write(PRELUDIO+'\n'+'\n'.join(jr)); jsf=f.name
 pr=subprocess.run(MOTOR+[jsf],capture_output=True,text=True,timeout=60); os.unlink(jsf); JR=json.loads(pr.stdout.strip().splitlines()[-1])
-def inv(r,Q):   # invariantes de um resultado (JS ou Python no mesmo formato)
+def inv(r,Q,cfs):   # invariantes de um resultado (JS ou Python no mesmo formato)
     e=[]; its=r['it']; sq=sum(x['q'] for x in its)
+    ds=[x for x,c in zip(its,cfs) if c.get('seq') and x['nq']>1e-12]   # sequência declarada no plano: as horas dela cabem na maior janela dela (PRE-REV R2)
+    if len(ds)>1 and all(x['H']>=0 for x in ds) and sum(x['h'] for x in ds)>max(x['H'] for x in ds)+1e-9: e.append('sequência declarada passa da janela')
     if abs(sq+r['saldo']-Q)>1e-7*max(1,Q): e.append('Σq+saldo≠Q')
     if any(x['q']<-1e-12 for x in its) or r['saldo']<-1e-12: e.append('negativo')
     if any(x['H']>=0 and x['h']>x['H']+1e-9 for x in its): e.append('h>janela própria')
@@ -226,7 +247,7 @@ def igual(a,b):
     return None
 npar=0; ninv=0; ex=[]; nseq=0; nconf=0; npend=0
 for (Q,c,pl),j in zip(RND,JR):
-    py=pyr(Q,c,pl); d=igual(j,py); ij=inv(j,float(Q)); ip=inv(py,float(Q))
+    py=pyr(Q,c,pl); d=igual(j,py); ij=inv(j,float(Q),c); ip=inv(py,float(Q),c)
     if d is None: npar+=1
     elif len(ex)<3: ex.append(('paridade',d,Q,c,pl,j.get(d),py.get(d)))
     if not ij and not ip: ninv+=1
@@ -235,7 +256,7 @@ for (Q,c,pl),j in zip(RND,JR):
 assert nseq>=100 and nconf>=20, (nseq,nconf)   # a amostra precisa exercitar sequência e conflito
 chk('R1 paridade_js_python_400','400 entradas aleatórias (rendimento vazio/0/vírgula, partes, janelas 0–20 h, sequência, troca, mesmo ativo, grupo da fazenda): JS = Python',
     '400/400',f'{npar}/400 iguais',f'com sequência {nseq} · conflito {nconf} · pendentes {npend} · exemplos {ex[:2]}',npar==400)
-chk('R2 invariantes_400','Σ q + sem conjunto = Q, sem negativos, h ≤ janela própria, sequência ≤ janela da sequência, pendente com causa e sem horas, horas-conjunto = Σ h, necessário = atendido + saldo (ha e horas-conjunto)',
+chk('R2 invariantes_400','Σ q + sem conjunto = Q, sem negativos, h ≤ janela própria, sequência ≤ janela da sequência, sequência declarada ≤ a janela dela, pendente com causa e sem horas, horas-conjunto = Σ h, necessário = atendido + saldo (ha e horas-conjunto)',
     '400/400',f'{ninv}/400 sem violação',f'exemplos {ex[:2]}',ninv==400)
 print(f'RESULTADO: {OK}/{N} OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction',flush=True)
 sys.exit(0 if OK==N else 1)

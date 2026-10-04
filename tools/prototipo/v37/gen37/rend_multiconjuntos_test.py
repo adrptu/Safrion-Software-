@@ -43,7 +43,7 @@ try:
     c.call('Page.addScriptToEvaluateOnNewDocument',{'source':"window.__err=[];addEventListener('error',e=>window.__err.push(String(e.message)));"})
     clk=lambda t,root=None,w=.45: (J(f"({CLK})({json.dumps(t)},{json.dumps(root)})"),time.sleep(w))[0]
     T=lambda: J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')") or ''
-    k4=lambda: J("(document.body.innerText.match(/[\\d.]+ ha trabalhados[^\\n]+/)||[''])[0]") or ''
+    k4=lambda: J("(document.body.innerText.match(/[\\d.,]+ ha trabalhados[^\\n]+/)||[''])[0]") or ''
     k6=lambda: J("(document.body.innerText.match(/Valor da necessidade[^\\n]+/)||[''])[0]") or ''
     def etapa(n): J(f"(()=>{{const b=[...document.querySelectorAll('nav[aria-label^=\"Etapas\"] button')].find(b=>b.innerText.replace(/\\s+/g,' ').trim().startsWith('{n} ')); if(b) b.click();}})()"); time.sleep(.5)
     # células visíveis de cada linha; o triângulo de abrir/recolher (▸ ▾) sai do texto da 1ª célula
@@ -71,7 +71,7 @@ try:
         c.goto(B+'SAF.dc.html#saf=S2627&etapa=4',wait=1.6)
         # ---------- 1 · totais iniciais × espelho ----------
         m=D2.plano_op('S2627'); t0=k4()
-        exp_t=f"{fmt(m['area'])} ha trabalhados · {fmt(m['hconj'])} horas-conjunto · {fmt(m['hh'])} horas-homem · {fmt(m['diesel'])} L de diesel"
+        exp_t=f"{nfa(m['area'])} ha trabalhados · {fmt(m['hconj'])} horas-conjunto · {fmt(m['hh'])} horas-homem · {fmt(m['diesel'])} L de diesel"
         print('k4 inicial:',t0); print('espelho   :',exp_t,'· custo op.',round(m['cop'],2),'· multi',m['multi'],'· sem conjunto',m['saldo'],'· pendentes',m['pend'])
         chk('1 totais iniciais da etapa 4 = espelho dados2.plano_op (área, horas-conjunto, horas-homem, diesel)',t0.startswith(exp_t),[t0,exp_t])
         tot=next((r for r in rows() if r and r[0]=='Total'),None); chk('1b total da coluna Operação (R$) = espelho',tot and fmt(m['cop']) in tot,[tot,fmt(m['cop'])])
@@ -87,8 +87,8 @@ try:
             oc=rowAfter('Plantio e adubação de base','T2 · Soja 58 W'); ks=[r for r in rows() if r and (r[0].startswith('Trator T1 JD 6M 155') or r[0].startswith('Prestador'))]
             print(f'   {rotulo} · tela T2:',oc); [print('      ',k) for k in ks]
             print(f'   {rotulo} · espelho: q',[round(x["q"],4) for x in e['itens']],'h',[round(x["h"],4) for x in e['itens']],'hconj',round(e['hconj'],4),'dec',round(e['decorrido'],4),'custo',round(e['custo'],2),'diesel',round(e['diesel'],2))
-            okv=bool(oc) and oc[3]==fmt(298) and oc[4]==fmt(e['hconj'],1) and oc[5].startswith(fmt(e['decorrido'],1)) and oc[6]==fmt(e['custo']) and oc[10]==fmt(e['diesel'])
-            okk=len(ks)==2 and all(k[3]==fmt(x['q']) and k[4]==fmt(x['h'],1) and k[6]==fmt(x['custo']) for k,x in zip(ks,e['itens']))
+            okv=bool(oc) and oc[3]==nfa(298) and oc[4]==fmt(e['hconj'],1) and oc[5].startswith(fmt(e['decorrido'],1)) and oc[6]==fmt(e['custo']) and oc[10]==fmt(e['diesel'])
+            okk=len(ks)==2 and all(k[3]==nfa(x['q']) and k[4]==fmt(x['h'],1) and k[6]==fmt(x['custo']) for k,x in zip(ks,e['itens']))
             soma=sum(x['q'] for x in e['itens'])+e['saldo']
             if shot: c.shot(os.path.join(PROBE,shot))
             return okv and okk and abs(soma-298)<1e-9, [oc,ks]
@@ -164,7 +164,7 @@ try:
         # ---------- 10 · outras safras: totais = espelho; safra encerrada só consulta ----------
         for sf in ('S27SF','LG2627'):
             c.goto('about:blank',wait=.1); c.goto(B+f'SAF.dc.html#saf={sf}&etapa=4',wait=1.6); ms=D2.plano_op(sf); tk=k4()
-            ex=f"{fmt(ms['area'])} ha trabalhados · {fmt(ms['hconj'])} horas-conjunto · {fmt(ms['hh'])} horas-homem · {fmt(ms['diesel'])} L de diesel"
+            ex=f"{nfa(ms['area'])} ha trabalhados · {fmt(ms['hconj'])} horas-conjunto · {fmt(ms['hh'])} horas-homem · {fmt(ms['diesel'])} L de diesel"
             chk(f'10 {sf}: totais da etapa 4 = espelho dados2.plano_op (uma configuração por atividade)',tk.startswith(ex) and ms['multi']==0,[tk,ex,ms['multi']])
         c.goto('about:blank',wait=.1); c.goto(B+'SAF.dc.html#saf=S2526&etapa=3',wait=1.6)
         lk=J("[...document.querySelectorAll('main button,main a')].filter(b=>b.offsetParent&&/Outra configuração/.test(b.innerText)).length")

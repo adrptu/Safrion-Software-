@@ -60,21 +60,30 @@ function repartir(Q,cfgs,pools){ const mot=[]; const add=(m)=>{ if(mot.indexOf(m
     if(H!==null&&(isNaN(H)||H<0)) add(x.nome+': janela inválida, considerada sem limite'); return x; });
   const fx=it.filter(x=>x.p!==null); const sp=fx.reduce((a,x)=>a+x.p,0); const esc=sp>100?100/sp:1;
   if(sp>100+1e-9) add('partes fixas somam '+rpF(sp)+' %: reduzidas na proporção para fechar 100 %');
-  let R=Q; fx.forEach(x=>{ x.t=Q*x.p*esc/100; R-=x.t; }); if(R<1e-12) R=0;
+  let R=Q; fx.forEach(x=>{ x.t=Q*x.p*esc/100; R-=x.t; }); if(R<=1e-9*Math.max(1,Q)) R=0;   // tolerância relativa à área (PRE-REV R3)
   const livres=it.filter(x=>x.p===null); const livOk=livres.length>0&&!livres.some(x=>x.r===null);
-  // 1) sequência, antes de dividir: só entre as que podem receber área (rendimento válido, janela > 0, parte > 0)
-  const cand=it.filter(x=>x.r!==null&&x.H>0&&(x.p!==null?x.t>1e-12:(livOk&&R>0)));
-  const pai=it.map((_,i)=>i); const raiz=(i)=>{ while(pai[i]!==i){ pai[i]=pai[pai[i]]; i=pai[i]; } return i; };
-  const une=(a,b)=>{ a=raiz(a); b=raiz(b); if(a!==b) pai[Math.max(a,b)]=Math.min(a,b); };
-  cand.forEach((x,a)=>cand.slice(a+1).forEach(y=>{ if(x.ativos.some(z=>y.ativos.indexOf(z)>=0)){ une(x.i,y.i); add('configurações com a mesma máquina do cadastro trabalham em sequência'); } }));
-  const sq=cand.filter(x=>x.seq); sq.forEach(x=>une(sq[0].i,x.i)); if(sq.length>1) add('sequência declarada: dividem trator, implemento ou operador');
+  // 1) sequência, antes de dividir, entre as que estão no plano (rendimento válido, parte > 0), mesmo com janela 0: ela não recebe área,
+  //    mas a sequência declarada continua precisando das horas dela (PRE-REV R1). Restrições de janela, todas ao mesmo tempo (PRE-REV R2):
+  //    a sequência declarada ou de mesmo ativo divide a maior janela dela; o grupo de recursos da fazenda que junta sequências divide a
+  //    maior janela do grupo (sem limite se alguma não tem janela), sem desfazer a de dentro. A troca de quem não tem horas não gasta janela.
+  const candP=it.filter(x=>x.r!==null&&(x.p!==null?x.t>1e-12:(livOk&&R>0))); const cand=candP.filter(x=>x.H>0);
+  const uf=()=>{ const pai=it.map((_,i)=>i); const raiz=(i)=>{ while(pai[i]!==i){ pai[i]=pai[pai[i]]; i=pai[i]; } return i; };
+    return {raiz,une:(a,b)=>{ a=raiz(a); b=raiz(b); if(a!==b) pai[Math.max(a,b)]=Math.min(a,b); }}; };
+  const U1=uf();
+  candP.forEach((x,a)=>candP.slice(a+1).forEach(y=>{ if(x.ativos.some(z=>y.ativos.indexOf(z)>=0)){ U1.une(x.i,y.i); add('configurações com a mesma máquina do cadastro trabalham em sequência'); } }));
+  const sq=candP.filter(x=>x.seq); sq.forEach(x=>U1.une(sq[0].i,x.i)); if(sq.length>1) add('sequência declarada: dividem trator, implemento ou operador');
+  const U2=uf(); it.forEach(x=>U2.une(x.i,U1.raiz(x.i))); const raiz=U2.raiz;
   Object.keys(pools||{}).forEach(k=>{ const pv=pools[k]||{}; const un=rpNum(pv.un); if(un===null||isNaN(un)) return;
     const us=cand.filter(x=>(rpNum(x.rec[k])||0)>0); if(us.length<2) return;
     const g={}; us.forEach(x=>{ const r=raiz(x.i); g[r]=Math.max(g[r]||0,rpNum(x.rec[k])); }); const sim=Object.keys(g).reduce((a,r)=>a+g[r],0);
-    if(sim>un+1e-9){ us.forEach(x=>une(us[0].i,x.i)); add((pv.nome||k)+': ao mesmo tempo precisariam de '+rpF(sim)+', a fazenda tem '+rpF(un)+'; trabalham em sequência'); } });
-  const pista={}; cand.forEach(x=>{ const g=raiz(x.i); (pista[g]||(pista[g]=[])).push(x); });
+    if(sim>un+1e-9){ us.forEach(x=>U2.une(us[0].i,x.i)); add((pv.nome||k)+': ao mesmo tempo precisariam de '+rpF(sim)+', a fazenda tem '+rpF(un)+'; trabalham em sequência'); } });
   const trocaDe=(xs)=>{ if(xs.length<2) return 0; let s=0, mn=Infinity; xs.forEach(x=>{ s+=x.troca; if(x.troca<mn) mn=x.troca; }); return s-mn; };
-  const W={}, jan={}; Object.keys(pista).forEach(g=>{ const xs=pista[g]; if(xs.length<2) return; const w=Math.max.apply(null,xs.map(x=>x.H)); if(isFinite(w)){ W[g]=w; jan[g]=w-trocaDe(xs); } });
+  const grupos=(U)=>{ const o={}; candP.forEach(x=>{ const g=U.raiz(x.i); (o[g]||(o[g]=[])).push(x); }); return o; };
+  const G1=grupos(U1), G2=grupos(U2); const RS=[];
+  Object.keys(G1).forEach(g=>{ if(G1[g].length>1) RS.push(['a'+g,G1[g]]); });
+  Object.keys(G2).forEach(g=>{ const xs=G2[g]; if(xs.length>1&&xs.some(x=>U1.raiz(x.i)!==U1.raiz(xs[0].i))) RS.push(['b'+g,xs]); });
+  const W={}, jan={}, pista={}; RS.forEach(([k,xs])=>{ const w=Math.max.apply(null,xs.map(x=>x.H)); if(isFinite(w)){ W[k]=w; pista[k]=xs; jan[k]=w-trocaDe(xs.filter(x=>x.H>0)); } });
+  const pl=(x)=>Object.keys(jan).filter(g=>pista[g].indexOf(x)>=0);   // restrições de janela de uma configuração
   // sem % que entram no plano e no saldo: as que têm horas (janela > 0); se nenhuma tem, todas (premissa: com janela)
   const livH=livres.filter(x=>x.H>0); const planLiv=livH.length?livH:livres;
   // 2) divide a área respeitando as janelas (a própria e a da sequência): é o que cabe, o atendido
@@ -83,18 +92,18 @@ function repartir(Q,cfgs,pools){ const mot=[]; const add=(m)=>{ if(mot.indexOf(m
       if(x.r===null){ saldo+=t; cz.rend=1; ad(x.nome+': sem rendimento válido (ha/h), a parte dela fica sem conjunto'); return; }
       q[x.i]=Math.min(t,x.r*x.H); if(t-q[x.i]>1e-9){ saldo+=t-q[x.i]; cz.jan=1; ad(x.nome+': a parte fixa não cabe na janela de '+rpF(x.H)+' h'); } });
     Object.keys(jan).forEach(g=>{ const xs=pista[g].filter(x=>x.p!==null&&q[x.i]>0); const hf=xs.reduce((a,x)=>a+q[x.i]/x.r,0); const B=Math.max(0,jan[g]);
-      if(hf>B+1e-9){ const f=B/hf; xs.forEach(x=>{ const n=q[x.i]*f; saldo+=q[x.i]-n; q[x.i]=n; }); cz.seq=1; uso[g]=B; ad('as partes fixas em sequência não cabem na janela de '+rpF(W[g])+' h: cada uma faz '+rpF(f*100)+' % do que cabia na própria janela'); }
-      else uso[g]=hf; });
+      if(hf>B+1e-9){ const f=B/hf; xs.forEach(x=>{ const n=q[x.i]*f; saldo+=q[x.i]-n; q[x.i]=n; }); cz.seq=1; ad('as partes fixas em sequência não cabem na janela de '+rpF(W[g])+' h: cada uma faz '+rpF(f*100)+' % do que cabia na própria janela'); } });
+    Object.keys(jan).forEach(g=>{ uso[g]=pista[g].filter(x=>x.p!==null).reduce((a,x)=>a+q[x.i]/x.r,0); });   // depois de todas as restrições
     if(R>0){
       if(!livres.length){ saldo+=R; if(it.length) cz.part=1; else cz.cfg=1; ad(it.length?'as partes fixas não cobrem toda a área':'atividade sem conjunto'); }
       else if(!livOk){ saldo+=R; cz.rend=1; livres.filter(x=>x.r===null).forEach(x=>ad(x.nome+': sem rendimento válido (ha/h); '+(livres.length>1?'a divisão pelo rendimento fica pendente':'horas pendentes'))); }
-      else { let rest=R, at=livres.slice(), bj=false, bs=false; const pl=(x)=>{ const g=raiz(x.i); return (jan[g]!==undefined)?g:null; };
+      else { let rest=R, at=livres.slice(), bj=false, bs=false;
         while(at.length){ const sr=at.reduce((a,x)=>a+x.r,0); const T=rest/sr; let e=T; at.forEach(x=>{ if(x.H<e) e=x.H; });
-          const na={}, tl={}; at.forEach(x=>{ const g=pl(x); if(g!==null) na[g]=(na[g]||0)+1; });
+          const na={}, tl={}; at.forEach(x=>pl(x).forEach(g=>{ na[g]=(na[g]||0)+1; }));
           Object.keys(na).forEach(g=>{ tl[g]=Math.max(0,jan[g]-(uso[g]||0))/na[g]; if(tl[g]<e) e=tl[g]; });
           if(!(e<T)){ at.forEach(x=>{ q[x.i]=x.r*T; }); rest=0; break; }
-          const fz=at.filter(x=>{ const g=pl(x); return x.H<=e||(g!==null&&tl[g]<=e); });
-          fz.forEach(x=>{ const g=pl(x); q[x.i]=x.r*e; rest-=q[x.i]; if(g!==null){ uso[g]=(uso[g]||0)+e; if(tl[g]<=e) bs=true; } if(x.H<=e) bj=true; });
+          const fz=at.filter(x=>x.H<=e||pl(x).some(g=>tl[g]<=e));
+          fz.forEach(x=>{ q[x.i]=x.r*e; rest-=q[x.i]; pl(x).forEach(g=>{ uso[g]=(uso[g]||0)+e; if(tl[g]<=e) bs=true; }); if(x.H<=e) bj=true; });
           at=at.filter(x=>fz.indexOf(x)<0); }
         if(rest>1e-9){ saldo+=rest; if(bs){ cz.seq=1; ad('em sequência dividem a mesma janela: a área que não cabe fica sem conjunto'); } if(bj||!bs){ cz.jan=1; ad('as janelas não comportam toda a área'); } } } }
     return {q,saldo,cz}; };
@@ -197,7 +206,7 @@ function demanda(self,saf){ const m={}; const safRows=g2rows(self,GR('g_saf')); 
   const ordem=(id)=>{ const i=safRows.findIndex(r=>r.id===id); return i<0?99:i; };
   ocorr(self,saf).forEach(o=>o.prods.forEach(p=>{ const d=m[p.nome]||(m[p.nome]={nome:p.nome,grupo:p.grupo,un:p.un,preco:p.preco,bruta:0,uso:'',evs:[]});
    d.bruta+=p.q; if(o.dt&&o.dt>=(D2.hoje||'')&&(!d.uso||o.dt<d.uso)) d.uso=o.dt;
-   d.evs.push({dt:o.dt||'',q:p.q,tipo:'dem',own:true,ord:ordem(saf),chave:o.c.id+'|'+o.a.id,t:o.c.v.local+' · '+o.a.nome,calc:nf(p.dose,2)+' '+p.un+'/ha × '+nf(o.area)+' ha'}); }));
+   d.evs.push({dt:o.dt||'',q:p.q,tipo:'dem',own:true,ord:ordem(saf),chave:o.c.id+'|'+o.a.id,t:o.c.v.local+' · '+o.a.nome,calc:nf(p.dose,2)+' '+p.un+'/ha × '+nfa(o.area)+' ha'}); }));   // área com até 2 casas (PRE-REV R5)
   const vistos={}; vistos[sk(saf)]=1;
   safRows.forEach(r=>{ if(r.id===saf||r.ro||(r.v.faz||'Santa Rita')!==faz||vistos[sk(r.id)]) return; vistos[sk(r.id)]=1; const ag={}, ks=[];
     ocorr(self,r.id).forEach(o=>o.prods.forEach(p=>{ if(!m[p.nome]) return; const k=p.nome+'|'+o.dt; if(!ag[k]){ ag[k]={nome:p.nome,dt:o.dt||'',q:0,n:0,chaves:[]}; ks.push(k); }
@@ -573,8 +582,8 @@ function PREVALS(self,v){ compRend(self,self.state.saf||null);
   const TF=oc.reduce((a,i)=>a+(i.rp.falta.hconj||0),0), TN=oc.reduce((a,i)=>a+(i.rp.nec.hconj||0),0), TSH=oc.reduce((a,i)=>a+i.rp.falta.semHoras,0);
   const semHtxt=TSH>1e-9?' ('+nfa(TSH)+' ha sem horas calculáveis)':'';
   const areaSaf=cultRows(self,saf).reduce((a,c)=>a+(Number(c.v.area)||0),0);
-  v.k4=nf(TA)+' ha trabalhados · '+nf(TH)+' horas-conjunto · '+nf(THH)+' horas-homem · '+nf(TD)+' L de diesel · '+rs(TC)+' · '+rs(areaSaf?TC/areaSaf:0)+'/ha da safra'
-    +(TS>1e-9?' · dos '+nf(TA)+' ha, '+nfa(TS)+' ha sem conjunto, fora das horas-conjunto: faltam '+nf(TF,1)+' horas-conjunto'+semHtxt:'')+(NP?' · '+NP+(NP>1?' ocorrências pendentes':' ocorrência pendente')+' ('+(()=>{ const pc=causas(oc); const ks=Object.keys(pc); return ks.length===1?ks[0]:ks.map(c=>pc[c]+' '+c).join(', '); })()+')':'')+(NC?' · '+NC+(NC>1?' sequências não cabem na janela':' sequência não cabe na janela'):'')
+  v.k4=nfa(TA)+' ha trabalhados · '+nf(TH)+' horas-conjunto · '+nf(THH)+' horas-homem · '+nf(TD)+' L de diesel · '+rs(TC)+' · '+rs(areaSaf?TC/areaSaf:0)+'/ha da safra'
+    +(TS>1e-9?' · dos '+nfa(TA)+' ha, '+nfa(TS)+' ha sem conjunto, fora das horas-conjunto: faltam '+nf(TF,1)+' horas-conjunto'+semHtxt:'')+(NP?' · '+NP+(NP>1?' ocorrências pendentes':' ocorrência pendente')+' ('+(()=>{ const pc=causas(oc); const ks=Object.keys(pc); return ks.length===1?ks[0]:ks.map(c=>pc[c]+' '+c).join(', '); })()+')':'')+(NC?' · '+NC+(NC>1?' sequências não cabem na janela':' sequência não cabe na janela'):'')
     +(vis0==='mes'?'':' · clique numa linha para ver os meses dela');
   // ---- etapa 5: recursos ----
   const recpM=g2rows(self,GR('g_recp_maq')), recpP=g2rows(self,GR('g_recp_pes')); const recp=recpM.concat(recpP);

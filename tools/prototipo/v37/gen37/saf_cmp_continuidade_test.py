@@ -139,12 +139,21 @@ try:
     # ---------------- Lagoa Grande: realizado fora da demanda, fazenda certa, convites sem trava ----------------
     ir('SAF.dc.html#saf=LG2627&etapa=6',w=1.6); clk('Expandir tudo'); cal=rowtxt('Calcário dolomítico filler'); fz=J("[...document.querySelectorAll('span')].filter(s=>s.children.length===0&&/^Fazenda /.test(s.innerText.trim())).map(s=>s.innerText.trim())")
     passadas=J("(document.body.innerText.match(/falta em \\d\\d\\/\\d\\d\\/\\d{4}/g)||[]).filter(s=>{const m=s.match(/(\\d\\d)\\/(\\d\\d)\\/(\\d{4})/); return (m[3]+m[2]+m[1])<'20260923';})")
-    chk('28 SAF Mamão 2026/27: Fazenda Lagoa Grande; nenhuma falta antes de hoje; calcário com 1.118.000 realizados, ruptura 25/09–30/09 coberta pelo recebimento, 0 a comprar',
-        fz==['Fazenda Lagoa Grande'] and not passadas and all(x in cal for x in ['realizado: 1.118.000','ruptura 25/09–30/09','Coberto pelo recebimento','110.000 kg']),(fz,passadas,cal))
+    # números do calcário pelo espelho dados2.demanda (área da fonte da Lagoa; PRE-REV R6: antes eram fixos da área antiga)
+    cdm=D2.demanda('LG2627')['Calcário dolomítico filler']; nk=lambda v: f"{v:,.0f}".replace(',','.'); dm_=lambda iso: iso[8:10]+'/'+iso[5:7]
+    rup_=f"ruptura {dm_(cdm['falta'])}–{dm_(cdm['cob'])}"
+    def calagem_ok(mc):   # a linha da calagem que rompe mostra a área do pivô com até 2 casas (PRE-REV R5: antes, inteira)
+        import re as _re, dados_lagoa_fonte as _F
+        ln=next((l for l in mc if l.startswith(f"{dm_(cdm['falta'])}/{cdm['falta'][:4]} · Pivô ")),''); m=_re.search(r'Pivô (\d+)',ln)
+        return bool(m) and f"× {D2._nfa(_F.PIVOS_HA[int(m.group(1))])} ha" in ln
+    chk(f"28 SAF Mamão 2026/27: Fazenda Lagoa Grande; nenhuma falta antes de hoje; calcário com {nk(cdm['real'])} realizados, {rup_} coberta pelo recebimento, 0 a comprar (= dados2.demanda)",
+        fz==['Fazenda Lagoa Grande'] and not passadas and cdm['liq']==0 and cdm['rup']>0
+        and all(x in cal for x in [f"realizado: {nk(cdm['real'])}",rup_,'Coberto pelo recebimento',f"{nk(cdm['bruta'])} kg"]),(fz,passadas,cal))
     rowclick('Calcário dolomítico filler'); mc=memo(); fechar(); foto('7_saf_lg_etapa6')
     chk('29 memória do calcário: realizado antes de hoje, ruptura na calagem de 25/09, recebimento de 30/09 cobre, sem compra nova',
         len(mc)>2 and mc[1].startswith('Realizado antes de 23/09/2026 · ') and any(l.startswith('30/09/2026 · ') and l.endswith('cobre a ruptura') for l in mc)
-        and mc[-1]=='Sem compra nova · ruptura de 50.000 kg de 25/09/2026 a 30/09/2026, coberta pelo recebimento',mc)
+        and mc[-1]==f"Sem compra nova · ruptura de {nk(cdm['rup'])} kg de {dm_(cdm['falta'])}/{cdm['falta'][:4]} a {dm_(cdm['cob'])}/{cdm['cob'][:4]}, coberta pelo recebimento"
+        and calagem_ok(mc),mc)
     clk('Enviar para cotação'); tl=T(); nav('Abrir Compra de insumos ›','CMP.dc.html')
     fz2=J("[...document.querySelectorAll('span')].filter(s=>s.children.length===0&&/^Fazenda /.test(s.innerText.trim())).map(s=>s.innerText.trim())")
     etapa(3); cg=[rowtxt('Corretivos'),rowtxt('Mudas')]; clk('Enviar convites (simulado)'); tc=T(); time.sleep(3.5); trl=trail(); foto('8_cmp_lg_etapa3')

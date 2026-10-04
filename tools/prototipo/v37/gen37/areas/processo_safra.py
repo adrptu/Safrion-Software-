@@ -145,7 +145,7 @@ def build():
         g=grid(REND_COLS,rrows,edit=(dict(REND_EDIT,m='ro') if k=='S2526' else REND_EDIT),gid=f'g_rend_{k}',total=False,tree=True,x0=x0)
         rend_html+=f'<sc-if value="{H("rend_"+k)}" hint-placeholder-val="{F()}">{g}</sc-if>'
     # ---------- etapa 4 · plano operacional ----------
-    g_op=grid([dict(k='nome',l='Operação · atividade · cultivo · conjunto',w=280),dict(k='op',l='Gatilho · data',w=150),dict(k='mes',l='Mês'),dict(k='area',l='Área (ha)',t='num',a='r',agg='sum'),
+    g_op=grid([dict(k='nome',l='Operação · atividade · cultivo · conjunto',w=280),dict(k='op',l='Gatilho · data',w=150),dict(k='mes',l='Mês'),dict(k='area',l='Área (ha)',t='num',a='r',agg='sum',d=2,dmin=0),
                dict(k='horas',l='Horas-conjunto (h)',t='num',a='r',d=1,agg='sum'),dict(k='dec',l='Decorrido (h)',t='num',a='r',d=1),
                dict(k='cop',l='Operação (R$)',t='num',a='r',agg='sum'),dict(k='cins',l='Insumos (R$)',t='num',a='r',agg='sum'),
                dict(k='ctot',l='Total (R$)',t='num',a='r',agg='sum'),dict(k='rha',l='R$/ha',t='num',a='r',d=2),dict(k='diesel',l='Diesel (L)',t='num',a='r',agg='sum')],
