@@ -23,7 +23,7 @@ import json
 from engine import (grid,section,esc,icon,chip,btn,Pt,INK,MUTED,LINE,BG,SURF,ACC,ACCS,YEL,YELS,RED,REDS,GRAYS,DISP,
                     BTN_ST,EXTRA,EXTRAJS,_MINI,_MINIP)
 import engine as E
-from ui37 import shell37, HEIGHTS37, PARENT37, MACRO, _com_setas, _SETA, _etp_nav, _etp_abre
+from ui37 import shell37, HEIGHTS37, PARENT37, MACRO, secoes_nav, secao_item
 import cenario
 import dados_irrigacao as DI
 
@@ -34,25 +34,13 @@ for _f in ('IR-01.dc.html','IR-02.dc.html','IR-03.dc.html','IR-04.dc.html'): MAC
 for _f in ('IR-02.dc.html','IR-03.dc.html','IR-04.dc.html'): PARENT37[_f]='IR-01.dc.html'
 PARENT37['IR-03det.dc.html']='IR-03.dc.html'
 
-# ---------------- faixa de etapas: contador e cor calculados do estado ----------------
+# ---------------- telas da Irrigação: navegação entre telas irmãs, com a pendência de cada uma calculada do estado ----------------
+# UX-ACAO-UNICA-20261003: as quatro telas são trabalho paralelo (qualquer ordem), não etapas de um processo guiado: a faixa é a
+# navegação entre elas (único caminho; IR-02…04 não estão no menu), sem número de etapa e sem setas ‹ ›; a pendência fica escrita.
 ETAPAS=[('Confira a necessidade','IR-01.dc.html'),('Programe a irrigação','IR-02.dc.html'),('Execute e confira','IR-03.dc.html'),('Acompanhe clima e sensores','IR-04.dc.html')]
 def faixa(cur):
-    items=''
-    for i,(t,h) in enumerate(ETAPAS,1):
-        on=(i==cur)
-        badge=(f'width: 22px; height: 22px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: 11.5px; font-weight: 800; flex-shrink: 0; background: {ACC}; color: #fff;'
-               if on else H(f'st{i}_bst'))
-        inner=(f'<span style="{badge}">{i}</span><span style="display: flex; flex-direction: column; min-width: 0;"><span style="font-size: 12px; line-height: 1.2; font-weight: {800 if on else 600};">{esc(t)}</span>'
-               f'<sc-if value="{H(f"st{i}_has")}" hint-placeholder-val="{F()}"><span style="display: block; font-size: 11px; font-weight: 700; color: {RED}; line-height: 1.2;">{H(f"st{i}_why")}</span></sc-if></span>')
-        st=('display: flex; align-items: center; gap: 6px; padding: 5px 6px; border-radius: 10px; text-decoration: none; color: '+INK+'; font-family: inherit; min-width: 0; '
-            +(f'background: {ACCS}; box-shadow: inset 0 -2px 0 {ACC};' if on else 'background: transparent;'))
-        cur_at=' aria-current="step"' if on else ''
-        items+=f'<a href="{h}" title="{esc(t)}"{cur_at} style="{st}">{inner}</a>'
-    seta=lambda j,sim,dica: f'<a href="{ETAPAS[j][1]}" aria-label="{dica}: {esc(ETAPAS[j][0])}" title="{dica}: {esc(ETAPAS[j][0])}" style="{_SETA}">{sim}</a>'
-    ant=seta(cur-2,'‹','Etapa anterior') if cur>1 else ''
-    prox=seta(cur,'›','Próxima etapa') if cur<len(ETAPAS) else ''
-    # faixa no padrão da casca (_etp_nav): em tela estreita vira "Etapa i de 4 · Nome" e a lista abre como folha (RESPONSIVIDADE)
-    return _etp_nav('Etapas do processo',len(ETAPAS),_com_setas(items,len(ETAPAS),ant,prox,_etp_abre(cur,len(ETAPAS),ETAPAS[cur-1][0])))
+    itens=''.join(secao_item(t,i==cur,href=h,why_hole=f'st{i}') for i,(t,h) in enumerate(ETAPAS,1))
+    return secoes_nav(itens,len(ETAPAS),cur,ETAPAS[cur-1][0],'Telas da irrigação')
 
 def ic(name,size=15):
     P={'play':'M8 5v14l11-7z','pause':'M7 5h3v14H7zM14 5h3v14h-3z','plus':'M12 5v14M5 12h14','flag':'M5 21V4h11l-2 4 2 4H5','gauge':'M12 14l4-5M3 14a9 9 0 1 1 18 0'}
@@ -81,9 +69,9 @@ def painel(pre,corpo,rodape,w=480):
             f'<div style="display: flex; gap: 10px; align-items: flex-start;"><h2 style="margin: 0; font-family: {DISP}; font-size: 19px; flex-grow: 1;">{H(pre+"_titulo")}</h2>'
             f'<button type="button" aria-label="Fechar" title="Fechar" onClick="{H(pre+"_cancel")}" style="border: 0; background: {BG}; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 18px; color: {MUTED};">×</button></div>'
             f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.45;">{H(pre+"_sub")}</div>{corpo}<div style="flex-grow: 1;"></div>'
-            f'<sc-if value="{H(pre+"_warn")}" hint-placeholder-val="{F()}"><div role="alert" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 12.5px; font-weight: 700;">Há alterações não salvas.'
+            f'<sc-if value="{H(pre+"_warn")}" hint-placeholder-val="{F()}"><div role="alert" class="saida" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 12.5px; font-weight: 700;">Há alterações não salvas.'
             f'<div style="display: flex; gap: 8px;"><button type="button" onClick="{H(pre+"_discard")}" style="{_MINI}">Descartar alterações</button><button type="button" onClick="{H(pre+"_keep")}" style="{_MINIP}">Continuar editando</button></div></div></sc-if>'
-            f'<div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};">{rodape}</div></aside></div></sc-if>')
+            f'<div class="pe-form" style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};">{rodape}</div></aside></div></sc-if>')
 def campo(lbl,fid,inner,err_pre):
     return (f'<div style="display: flex; flex-direction: column; gap: 4px;"><label for="{fid}" style="font-size: 12px; font-weight: 600; color: {MUTED};">{lbl}</label>{inner}'
             f'<sc-if value="{H(err_pre+"_has")}" hint-placeholder-val="{F()}"><span role="alert" style="font-size: 12px; font-weight: 700; color: {RED};">{H(err_pre)}</span></sc-if></div>')

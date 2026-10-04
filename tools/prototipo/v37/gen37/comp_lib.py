@@ -8,6 +8,14 @@ HERE=os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0,HERE)
 from cdp import WS, CH
 from journeys import free
 from cadc_lib import ERRS
+# Caminho único entre as etapas de um processo guiado (UX-ACAO-UNICA-20261003): a faixa só informa; o teste anda pela área de ações,
+# como a pessoa: avanço (data-acao=avancar) ou retorno (data-acao=voltar); para a etapa 1 sem retorno, o "Trocar safra" do topo.
+IR_ETAPA=r"""(async (n)=>{ const num=()=>{ const c=document.querySelector('.etp-ind [aria-current=step]'); return c?Number((c.innerText.match(/\d+/)||[0])[0]):0; };
+  for(let k=0;k<10;k++){ const i=num(); if(i===n) return i;
+    let b=document.querySelector(i<n?'[data-acoes] [data-acao=avancar]':'[data-acoes] [data-acao=voltar]');
+    if(!b&&i>n&&n===1) b=[...document.querySelectorAll('header button')].find(x=>x.innerText.trim()==='Trocar safra');
+    if(!b) return 'sem caminho de '+i+' para '+n; b.click(); await new Promise(r=>setTimeout(r,450)); }
+  return 'não chegou: '+num(); })"""
 
 class Chrome:
     """Abre um Chrome próprio (CDP_GL=1: WebGL por software para o mapa real) ou anexa a um já aberto (CDP_PORT)."""
@@ -96,7 +104,7 @@ MEDE=r"""(()=>{
  const h1=document.querySelector('h1'); if(h1){ const r=h1.getBoundingClientRect(); out.h1=n(h1.innerText).slice(0,50); out.h1ok=vis(h1)&&r.left>=-1&&r.right<=vw+1&&h1.scrollWidth<=h1.clientWidth+1&&alcanca(h1); }
  const prims=[...document.querySelectorAll('header button,header a,main button,main a')].filter(e=>vis(e)&&verde(e));
  out.prim=prims.slice(0,4).map(e=>n(e.innerText).slice(0,30)); out.primRuim=prims.filter(e=>!alcanca(e)).map(e=>n(e.innerText).slice(0,30)).slice(0,4);
- const nav=document.querySelector('nav.etp'); if(nav&&vis(nav)){ const at=nav.querySelector('.etp-atual'); const comp=!!(at&&vis(at)); const cur=nav.querySelector('.etp-itens [aria-current=step]');
+ const nav=document.querySelector('.etp'); if(nav&&vis(nav)){ const at=nav.querySelector('.etp-atual'); const comp=!!(at&&vis(at)); const cur=nav.querySelector('.etp-itens [aria-current=step],.etp-itens [aria-current=page],.etp-itens [aria-current=true]');
    out.etapa=comp?n(at.innerText):(cur?n(cur.innerText):''); out.etapaOk=comp?topo(at):(!!cur&&topo(cur)); out.etapaCompacta=comp;
    const its=[...nav.querySelectorAll('.etp-itens>*')].filter(vis); let sob=0; for(let i=0;i<its.length;i++) for(let j=i+1;j<its.length;j++){ const a=its[i].getBoundingClientRect(), b=its[j].getBoundingClientRect(); if(Math.min(a.right,b.right)-Math.max(a.left,b.left)>1&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>1) sob++; } out.etapaSob=sob; }
  const tog=document.querySelector('.ml-tog'); if(tog) out.menuBtnOk=topo(tog);

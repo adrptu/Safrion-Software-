@@ -129,9 +129,9 @@ def build():
          f'<textarea aria-label="Motivo da decisão" placeholder="Motivo informado pela alçada" value="{H("d5_mot")}" onChange="{H("d5_set")}" style="font-family: inherit; font-size: 13px; padding: 7px 9px; border-radius: 8px; border: 1px solid {LINE}; min-height: 54px; resize: vertical;"></textarea>'
          f'<sc-if value="{H("d5_hasErr")}" hint-placeholder-val="{F()}"><span role="alert" style="font-size: 12px; font-weight: 700; color: {RED};">{H("d5_err")}</span></sc-if>'
          f'<div style="display: flex; gap: 8px;"><button type="button" onClick="{H("d5_no")}" style="{_MINI}">Voltar</button><button type="button" onClick="{H("d5_yes")}" style="{_MINIP}">{H("d5_btn")}</button></div></div></sc-if></div>')
-    # ação principal de cada etapa no cabeçalho do bloco onde ela age (botão ou link para o Estoque)
-    acao_bloco=(f'<sc-if value="{H("prim_btn")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("prim_fn")}" style="{H("prim_st")}">{H("prim_t")}</button></sc-if>'
-                f'<sc-if value="{H("prim_lnk")}" hint-placeholder-val="{F()}"><a href="{H("prim_h")}" style="{H("prim_st")} text-decoration: none; display: inline-block;">{H("prim_t")}</a></sc-if>')
+    # UX-ACAO-UNICA-20261003: a ação da etapa (avanço, envio, aprovação, link para o Estoque) sai do cabeçalho do bloco e vai para a
+    # área de ações única ao fim do conteúdo (engine.area_acoes + g2acoes); o cabeçalho do bloco fica com os comandos do conteúdo
+    acao_bloco=''
     s1=bloco('Safras e solicitações','Abra a compra da safra: clique na linha ou em Abrir compra.',g_saf,acao=acao_bloco)
     s2=kline('k2')+bloco('Demanda da solicitação por grupo','Confira a necessidade por data (estoque apto com reservas e recebimentos na data de uso), quando o insumo começa a faltar e o valor a preço de referência (R$/un); clique num insumo para ver a memória do cálculo.',g_dem,acao=acao_bloco)
     s3=kline('k3')+bloco('Fornecedores homologados por grupo','Escolha quem convidar, o canal e o prazo; clique no fornecedor para alterar.',g_conv,acao=acao_bloco)
@@ -141,9 +141,7 @@ def build():
         +bloco(H('apr_tit'),'Confira fornecedores, insumos e valores de cada pedido; clique para ver a origem.',g_apr,acao=acao_bloco,tit_hole=True))
     s6=kline('k6')+bloco('Pedidos e entregas','Acompanhe recebido, quarentena e saldo a entregar; clique no pedido para reprogramar a entrega.',g_ent,acao=acao_bloco)
     corpo=trail+''.join(f'<sc-if value="{H("s"+str(i))}" hint-placeholder-val="{H("true") if i==1 else F()}"><div style="display: flex; flex-direction: column; gap: 14px;">{s}</div></sc-if>'
-                        for i,s in enumerate([s1,s2,s3,s4,s5,s6],1))
-    prim=(f'<sc-if value="{H("prim_btn")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("prim_fn")}" style="{H("prim_st")}">{H("prim_t")}</button></sc-if>'
-          f'<sc-if value="{H("prim_lnk")}" hint-placeholder-val="{F()}"><a href="{H("prim_h")}" style="{H("prim_st")} text-decoration: none; display: inline-block;">{H("prim_t")}</a></sc-if>')
+                        for i,s in enumerate([s1,s2,s3,s4,s5,s6],1)) + E.area_acoes('aa','Ações da etapa')
     HEIGHTS37[fname]=1200
     shell37('CMP','Compra de insumos',corpo,fname=fname,subtitle='Da solicitação do planejamento ao pedido entregue: cote, compare, aprove e acompanhe na mesma tela.',
             steps=steps_state(NOMES),primary_html=None,ctx=(H('ctx_faz'),H('ctx_saf'),None),search=False)
@@ -495,10 +493,8 @@ function EXTRAVALS(self,v){ hooks(self);
   for(let i=1;i<=6;i++) v['s'+i]=(step===i);
   const whys={}; for(let i=2;i<=6;i++){ if(!saf) whys[i]='Escolha a safra'; else if(saf==='S2526'){ if(i<6) whys[i]='Safra encerrada'; } else if(!SX) whys[i]='Sem solicitação'; }
   if(SX){ if(!m.env){ whys[4]='Envie os convites'; whys[5]='Envie os convites'; } else if(!m.nresp){ whys[4]='Aguarde propostas'; whys[5]='Aguarde propostas'; } }
-  const go=(i)=>{ const w=whys[i]; if(w){ toast(self,w==='Sem solicitação'?(safNome(saf)+' ainda não tem solicitação: envie a demanda em Planejar safra › etapa 6.'):WHYMSG[w]); return; } self.setState({step:i,conf5:false}); };
-  g2steps(self,v,'stp',6,step,whys,go);
-  v.prev_t=step>1?('‹ '+NOMES_[step-2]):''; v.next_t=step<6?(NOMES_[step]+' ›'):''; v.has_prev=step>1&&!(saf==='S2526'); v.has_next=step<6&&!whys[step+1];
-  v.prev=()=>go(Math.max(1,step-1)); v.next=()=>go(Math.min(6,step+1));
+  const go=(i)=>{ const w=whys[i]; if(w){ toast(self,w==='Sem solicitação'?(safNome(saf)+' ainda não tem solicitação: envie a demanda em Planejar safra › etapa 6.'):WHYMSG[w]); return; } g2etapa(self,{step:i,conf5:false}); };
+  g2steps(self,v,'stp',6,step,whys);   // só informa (UX-ACAO-UNICA-20261003): avanço e retorno na área de ações
   v.pick=(id)=>pick(self,id);
   const safObj=safras().find(s=>s.id===saf);
   v.ctx_saf=safObj?(safObj.nome+(SX?' · '+SX.sol.id:(saf==='S2526'?' · consulta':' · sem solicitação'))):'Nenhuma safra escolhida';
@@ -571,21 +567,30 @@ function EXTRAVALS(self,v){ hooks(self);
     const its=m.items.filter(x=>x.gi===c.gi).map(x=>x.nome+' · '+qt(x.nec,x.un)).join('; ');
     const dest=d.conv==='Convidar'?((d.canal==='WhatsApp'?('WhatsApp '+c.f.whats):('e-mail '+c.f.email))+(c.f.contato?' ('+c.f.contato+')':'')):'não será convidado';
     Fv.sub=(m.env&&!c.enviado?'Convite adicional: os demais já receberam em '+m.env.em+'. ':'')+'Destinatário: '+dest+'. Itens do convite ('+c.g+'): '+its+'. O envio é simulado.'; }
-  // ação primária por etapa
-  let P=null;
-  if(step===1){ if(SX) P=['Conferir demanda',()=>go(2)]; else if(saf==='S2526') P=['Consultar pedidos',()=>go(6)]; else if(saf) P={t:'Abrir Planejar safra',h:safHref(saf)}; }
-  if(SX){
-    if(step===2) P=['Solicitar cotações',()=>go(3)];
-    if(step===3) P=!m.env?['Enviar convites (simulado)',()=>enviar(self)]
-      :(m.nadic?['Enviar '+m.nadic+(m.nadic>1?' convites adicionais':' convite adicional')+' (simulado)',()=>enviarAdic(self)]:['Comparar propostas',()=>go(4)]);
-    if(step===4) P=['Revisar aprovação',()=>go(5)];
-    if(step===5) P=apr?['Acompanhar entrega',()=>go(6)]:(m.podeAna?['Aprovar compra',()=>aprovar(self)]:(pendOk?['Registrar aprovação da '+m.quem,()=>aprovar(self)]
-      :(devA&&!mud?['Ajustar escolhas',()=>go(4)]:(recA&&!mud?['Conferir demanda aberta',()=>go(2)]:[(stale||devA?'Reenviar à ':'Enviar à ')+m.quem,()=>aprovar(self)]))));
-    if(step===6) P={t:'Conferir recebimentos',h:'EST.dc.html'};
+  // ---- área de ações (UX-ACAO-UNICA-20261003 · DS-02, DS-33 §74.5.7.1, DS-61): uma primária e uma rota de avanço por etapa ----
+  // Retorno secundário nomeia a etapa anterior (na etapa 2 voltar à escolha é o "Trocar safra" do topo). Avançar só troca de etapa:
+  // não envia convite nem aprova; envio e aprovação são comandos com verbo próprio. Confirmação aberta assume a tarefa (sem outra primária).
+  const CUR=['Escolha da safra','Demanda','Cotações','Propostas','Aprovação','Entregas'];
+  const ir=(i)=>({t:'‹ '+CUR[i-1],fn:()=>go(i),to:i,a:'voltar'}), av=(i,t)=>({t:t+' ›',fn:()=>go(i),to:i,a:'avancar'}), cmd=(t,fn)=>({t,fn,a:'comando'});
+  let A={};
+  if(step===1){ if(saf&&!SX&&saf!=='S2526') A={nota:safNome(saf)+' ainda não tem solicitação de compra: a demanda é enviada no Planejar safra (etapa 6).',prim:{t:'Abrir Planejar safra ›',h:safHref(saf),a:'abrir'}}; }
+  else if(SX){
+    if(step===2) A={prim:av(3,'Solicitar cotações')};
+    if(step===3) A=!m.env?{volta:ir(2),nota:'Comparar propostas fica disponível depois do envio dos convites.',prim:cmd('Enviar convites (simulado)',()=>enviar(self))}
+      :(m.nadic?{volta:ir(2),prim:cmd('Enviar '+m.nadic+(m.nadic>1?' convites adicionais':' convite adicional')+' (simulado)',()=>enviarAdic(self)),sec:whys[4]?null:av(4,'Comparar propostas'),nota:whys[4]?WHYMSG[whys[4]]:''}
+        :(whys[4]?{volta:ir(2),nota:WHYMSG[whys[4]]}:{volta:ir(2),prim:av(4,'Comparar propostas')}));
+    if(step===4) A=whys[5]?{volta:ir(3),nota:WHYMSG[whys[5]]}:{volta:ir(3),prim:av(5,'Revisar aprovação')};
+    if(step===5){ A={volta:ir(4)};
+      if(apr) A.prim=av(6,'Acompanhar entrega');
+      else if(v.conf5||v.d5_open) A.nota='Conclua ou cancele a decisão acima.';
+      else if(m.podeAna){ A.prim=cmd('Aprovar compra',()=>aprovar(self)); A.sec=av(6,'Acompanhar entregas'); }
+      else if(pendOk){ A.prim=cmd('Registrar aprovação da '+m.quem,()=>aprovar(self)); A.sec=av(6,'Acompanhar entregas'); }
+      else if(devA&&!mud) A.prim={t:'Ajustar escolhas ›',fn:()=>go(4),to:4,a:'resolver'};
+      else if(recA&&!mud) A.prim={t:'Conferir demanda aberta ›',fn:()=>go(2),to:2,a:'resolver'};
+      else { A.prim=cmd((stale||devA?'Reenviar à ':'Enviar à ')+m.quem,()=>aprovar(self)); A.sec=av(6,'Acompanhar entregas'); } }
+    if(step===6) A={volta:ir(5),prim:{t:'Conferir recebimentos ›',h:'EST.dc.html',a:'abrir'}};
   }
-  const PST='padding:7px 14px;border-radius:9px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap;background:#1E7A4C;color:#fff;border:1px solid #1E7A4C;flex-shrink:0;';  // compacto: a ação mora no cabeçalho do bloco da etapa
-  v.prim_st=PST; v.prim_btn=!!(P&&Array.isArray(P)); v.prim_lnk=!!(P&&!Array.isArray(P));
-  v.prim_t=P?(Array.isArray(P)?P[0]:P.t):''; v.prim_fn=(P&&Array.isArray(P))?P[1]:(()=>{}); v.prim_h=(P&&!Array.isArray(P))?P.h:'#';
+  g2acoes(v,'aa',A);
   procGravar(self,m);
 }
 const NOMES_=['Escolha a safra','Confira a demanda','Solicite cotações','Compare propostas','Aprove a compra','Acompanhe a entrega'];

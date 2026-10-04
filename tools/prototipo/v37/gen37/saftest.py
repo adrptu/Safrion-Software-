@@ -8,13 +8,15 @@ c=Chrome(port=free()); J=c.js
 CLK="""((t,root)=>{const r=root?document.querySelector(root):document; const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...r.querySelectorAll('button,a')]; const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok';})"""
 T=lambda: J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')")
 def clk(t,root=None): r=J(f"({CLK})({json.dumps(t)},{json.dumps(root)})"); time.sleep(.45); return r
+from comp_lib import IR_ETAPA
+def ir_etapa(n): r=J(f"({IR_ETAPA})({n})"); time.sleep(.45); return r   # a faixa só informa: anda pela área de ações
 try:
     c.size(1440,1000); c.goto(f'http://127.0.0.1:{p}/SAF.dc.html'); time.sleep(.5)
     print('erros JS?', J("window.__err||'nenhum'"))
     print('etapa inicial:', J("document.querySelector('[aria-current=step]') && document.querySelector('[aria-current=step]').innerText.replace(/\\s+/g,' ')"))
-    print('impedimentos:', J("[...document.querySelectorAll('nav[aria-label=\"Etapas do processo\"] button')].map(b=>b.innerText.replace(/\\s+/g,' ')).join(' | ')"))
+    print('impedimentos:', J("[...document.querySelectorAll('.etp-ind .etp-itens>li')].map(b=>b.innerText.replace(/\\s+/g,' ')).join(' | ')"))
     print('safras:', J("[...document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=row]')].slice(1).map(r=>r.innerText.split('\\n')[0])"))
-    print('clicar etapa 4 sem safra:', clk('4 Confira o plano operacional'), T())
+    print('clicar etapa 4 sem safra:', ir_etapa(4), T())
     print('abrir safra:', clk('Continuar'), T())
     print('etapa agora:', J("document.querySelector('[aria-current=step]').innerText.replace(/\\s+/g,' ')"))
     print('k2:', J("document.body.innerText.match(/\\d+ cultivos · [^\\n]+/)[0]"))
@@ -47,18 +49,18 @@ try:
     print('k2 ajustes:', J("document.body.innerText.match(/\\d+ cultivos · [^\\n]+/)[0]"))
     c.shot('_probe/saf_e2.png')
     # etapa 3
-    clk('3 Defina os rendimentos'); time.sleep(.3)
+    ir_etapa(3); time.sleep(.3)
     print('rendimentos linhas:', J("[...document.querySelectorAll('[role=row].g2ed')].length"))
     J("""(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>/Colhedora/.test(r.innerText)); r.querySelector('[role=cell] span').click();})()"""); time.sleep(.4)
     J("""(()=>{const i=document.querySelector('[id$=_vel]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,'5,625'); i.dispatchEvent(new Event('input',{bubbles:true}));})()"""); time.sleep(.2)
     print('rendimento calculado no formulário:', J("document.querySelector('[id$=_rend_c]').value"))
     clk('Salvar','aside[role=dialog]'); print('rend salvo:', T(), '· linha:', J("[...document.querySelectorAll('[role=row].g2ed')].find(r=>/Colhedora/.test(r.innerText)).innerText.replace(/\\s+/g,' ')"))
-    clk('4 Confira o plano operacional'); print('k4:', J("document.body.innerText.match(/[\\d.]+ ha trabalhados[^\\n]+/)[0]"))
+    ir_etapa(4); print('k4:', J("document.body.innerText.match(/[\\d.]+ ha trabalhados[^\\n]+/)[0]"))
     J("""(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>/Colheita/.test(r.innerText)); r.click();})()"""); time.sleep(.4)
     print('matriz:', J("[...document.querySelectorAll('h3')].map(h=>h.innerText).filter(t=>/Detalhamento/.test(t))"))
-    clk('5 Dimensione os recursos'); print('k5:', J("(document.body.innerText.match(/([^\\n]*em vermelho na visão por mês|Capacidade atende[^\\n]+)/)||[''])[0]"))
+    ir_etapa(5); print('k5:', J("(document.body.innerText.match(/([^\\n]*em vermelho na visão por mês|Capacidade atende[^\\n]+)/)||[''])[0]"))
     c.shot('_probe/saf_e5.png')
-    clk('6 Confira a demanda de insumos'); print('k6:', J("document.body.innerText.match(/Valor da necessidade[^\\n]+/)[0]"))
+    ir_etapa(6); print('k6:', J("document.body.innerText.match(/Valor da necessidade[^\\n]+/)[0]"))
     print('enviar:', clk('Enviar para cotação'), T())
     print('enviar de novo:', clk('Enviar para cotação'), T())
     print('registro compartilhado:', J("(()=>{const o=JSON.parse(localStorage.getItem('talhao-os-compras-v1')||'null'); const s=o&&o.sols&&o.sols.S2627; return s?[s.id,s.comp,Object.keys(s.itens).length]:null;})()"))

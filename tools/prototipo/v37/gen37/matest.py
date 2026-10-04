@@ -25,8 +25,8 @@ def ok(cond,msg):
 def comum(tela,cur):
     c.goto(f'http://127.0.0.1:{p}/{tela}'); time.sleep(.4)
     ok(J("window.__err||null") is None, f'{tela}: sem erro JS')
-    st=J("[...document.querySelectorAll('nav[aria-label=\"Etapas do processo\"] a')].filter(a=>!a.getAttribute('aria-label')).filter(a=>!a.getAttribute('aria-label')).map(a=>a.getAttribute('href')+'|'+(a.getAttribute('aria-current')||''))")
-    ok(len(st)==5 and st[cur-1].endswith('|step') and [s.split('|')[0] for s in st]==['MA-01.dc.html','MA-02.dc.html','MA-03.dc.html','MA-04.dc.html','MA-05.dc.html'], f'{tela}: faixa com 5 links e etapa {cur} atual')
+    st=J("[...document.querySelectorAll('nav[aria-label=\"Telas da manutenção\"] a')].filter(a=>!a.getAttribute('aria-label')).filter(a=>!a.getAttribute('aria-label')).map(a=>a.getAttribute('href')+'|'+(a.getAttribute('aria-current')||''))")
+    ok(len(st)==5 and st[cur-1].endswith('|page') and [s.split('|')[0] for s in st]==['MA-01.dc.html','MA-02.dc.html','MA-03.dc.html','MA-04.dc.html','MA-05.dc.html'], f'{tela}: faixa com 5 links e etapa {cur} atual')
     ov=J("[...document.querySelectorAll('[role=table]')].map(t=>{const w=t.parentElement; return w.scrollWidth-w.clientWidth;})")
     ok(all(x<=2 for x in ov), f'{tela}: grades sem rolagem horizontal a 1440 px {ov}')
     ed=J("[...document.querySelectorAll('button')].filter(b=>/^Editar/.test(b.innerText.trim())).length")

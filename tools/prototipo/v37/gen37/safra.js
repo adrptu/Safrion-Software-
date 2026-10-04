@@ -539,7 +539,9 @@ function divVals(self,v){ const dv=self.state.dv; v.dv_open=!!dv; if(!dv){ v.dv_
     const A2=rs.reduce((a,x)=>{ const n=g2num(x.area); return a+(isNaN(n)?0:n); },0); const livre=r2(T-A2); const area=livre>0.005?String(livre).replace('.',','):'';
     const nw=last?Object.assign({},last,{id:null,local:nextNome(t,usados),area,from:last.local,decl:true,ask:false,adj:(last.id?copyAdj(self,last.id):(last.adj?JSON.parse(JSON.stringify(last.adj)):null))})
                  :{id:null,local:nextNome(t,usados),area,cult:'Soja',var:'',plantio:'',meta:'',unm:'sc/ha',plano:'',colheita:'',adj:null,from:'',decl:true,ask:false};
-    rs.push(nw); self.setState({dv:Object.assign({},cur,{rows:rs,warn:false,gerr:''})}); };
+    rs.push(nw); self.setState({dv:Object.assign({},cur,{rows:rs,warn:false,gerr:''})});
+    // inserção repetitiva (UX-ACAO-UNICA-20261003 · DS-33): o foco vai ao nome da parcela nova, à vista e fora do rodapé do painel
+    setTimeout(()=>{ try{ const ins=[...document.querySelectorAll('aside[role=dialog] input[aria-label^="Nome da parcela"]')]; const el=ins[ins.length-1]; if(el){ el.focus({preventScroll:true}); el.scrollIntoView({block:'nearest',inline:'nearest'}); } }catch(e){} },60); };
   v.dv_dist=()=>{ const cur=self.state.dv; self.setState({dv:Object.assign({},cur,{rows:dvDist(cur.rows,T),err:{},gerr:'',warn:false})}); };
   v.dv_gerr=dv.gerr||''; v.dv_hasg=!!dv.gerr; v.dv_warn=!!dv.warn;
   const clean=(l)=>JSON.stringify(l.map(x=>Object.assign({},x,{ask:false})));
@@ -730,8 +732,7 @@ function EXTRAVALS(self,v){
   for(let i=1;i<=6;i++) v['s'+i]=(step===i);
   const temPlano=saf && cultRows(self,saf).some(c=>{ const pl=planById(c.v.plano); return pl&&pl.cultura===c.v.cult; });
   const whys={}; for(let i=2;i<=6;i++){ if(!saf) whys[i]='Escolha a safra'; else if(i>=4 && !temPlano) whys[i]='Aplique um plano'; }
-  g2steps(self,v,'stp',6,step,whys,(i)=>{ if(i>1 && !self.state.saf){ self.setState({step:1,g2toast:'Escolha a safra para abrir esta etapa.'}); return; } self.setState({step:i}); });
-  const go=(i)=>()=>self.setState({step:i});
+  g2steps(self,v,'stp',6,step,whys);   // só informa (UX-ACAO-UNICA-20261003): avanço e retorno na área de ações
   v.saf_nome=safObj?safObj.v.nome:'nenhuma safra escolhida'; v.saf_ro=ro; v.saf_ok=!!saf; v.saf_none=!saf;
   v.ctx_saf=safObj?(safObj.v.nome+(ro?' · consulta':'')):'Nenhuma safra escolhida';
   v.ctx_faz='Fazenda '+((safObj&&safObj.v.faz)||'Santa Rita');
@@ -743,17 +744,13 @@ function EXTRAVALS(self,v){
   // ação primária por etapa: nomeia o próximo passo (na etapa 2, o que falta: aplicar plano; depois, avançar)
   const cultSp={}; sp.forEach(c=>{ (cultSp[c.v.cult]||(cultSp[c.v.cult]=[])).push(c.id); }); const cuK=Object.keys(cultSp).sort((a,b)=>cultSp[b].length-cultSp[a].length)[0];
   const apIds=cuK?cultSp[cuK]:[]; const apT='Aplicar plano em '+apIds.length+(apIds.length>1?' cultivos':' cultivo')+(Object.keys(cultSp).length>1?' de '+cuK.toLowerCase():'');
-  const solA=saf?solMap(self)[saf]:null; const enviado=!!solA; const p6=(enviado&&!v.k6pend)?['Abrir Compra de insumos ›',()=>{ location.href=solHref(saf,solA); }]:['Enviar para cotação',()=>enviar(self)];
-  const prim={1:['Nova safra',()=>v.g_saf_new&&v.g_saf_new()],2:(apIds.length&&!ro?[apT,()=>openApply(self,apIds)]:['Definir rendimentos ›',go(3)]),3:['Conferir plano operacional ›',go(4)],4:['Dimensionar recursos ›',go(5)],5:['Conferir demanda de insumos ›',go(6)],6:p6}[step];
-  v.prim_t=prim[0]; v.prim_fn=prim[1]; v.prim_hide=(ro&&step===6)||(step>1&&!saf);
-  v.sec_show=(step===2&&!!saf&&!ro); v.sec_t='Novo cultivo'; v.sec_fn=()=>{ const f=v['g_cult_'+sk(saf)+'_new']; if(f) f(); }; v.sol_link=v.sol_link&&p6[0]==='Enviar para cotação';
-  v.prim_st='padding:7px 14px;border-radius:9px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap;background:#1E7A4C;color:#fff;border:1px solid #1E7A4C;flex-shrink:0;'+(v.prim_hide?'display:none;':'');
-  const names=['Escolha a safra','Defina cultivos e planos','Defina os rendimentos','Confira o plano operacional','Dimensione os recursos','Confira a demanda de insumos'];
-  v.prev_t=step>1?('‹ '+names[step-2]):''; v.next_t=step<6?(names[step]+' ›'):''; v.has_prev=step>1; v.has_next=step<6;
-  v.prev=()=>self.setState({step:Math.max(1,step-1)}); v.next=()=>{ if(!self.state.saf){ self.setState({g2toast:'Escolha a safra para avançar.'}); return; } self.setState({step:Math.min(6,step+1)}); };
+  const solA=saf?solMap(self)[saf]:null; const enviado=!!solA;
+  const p6=(enviado&&!v.k6pend)?{t:'Abrir Compra de insumos ›',h:solHref(saf,solA),a:'abrir'}:{t:'Enviar para cotação',fn:()=>enviar(self),a:'comando'};
+  v.sol_link=v.sol_link&&!p6.h;   // "Abrir em Compra de insumos ›" do bloco só quando a primária é enviar (complemento pendente): sem cópia do mesmo link
+  safAcoes(self,v,{step,saf,ro,cs,sp,apIds,apT,cultSp,temPlano,p6});
   // escolher safra (botão da linha)
-  v.pick=(id)=>{ self.setState({saf:id,step:2,atv:null,rec:null,g2toast:'Safra aberta: '+((safRows.find(r=>r.id===id)||{v:{}}).v.nome||'')}); };
-  v.pickat=(arg)=>{ const a=String(arg).split('|'); const id=a[0], s=Number(a[1])||2; self.setState({saf:id,step:s,atv:null,rec:null,g2toast:'Safra aberta: '+((safRows.find(r=>r.id===id)||{v:{}}).v.nome||'')+' · etapa '+s}); };
+  v.pick=(id)=>{ g2etapa(self,{saf:id,step:2,atv:null,rec:null,corr:null,g2toast:'Safra aberta: '+((safRows.find(r=>r.id===id)||{v:{}}).v.nome||'')}); };
+  v.pickat=(arg)=>{ const a=String(arg).split('|'); const id=a[0], s=Number(a[1])||2; g2etapa(self,{saf:id,step:s,atv:null,rec:null,corr:null,g2toast:'Safra aberta: '+((safRows.find(r=>r.id===id)||{v:{}}).v.nome||'')+' · etapa '+s}); };
   safRows.forEach(r=>{ v['open_'+r.id]=()=>v.pickat(r.id+'|'+(r._prox||2)); });
   v.safedit=(id)=>{ const sp=GR('g_saf'); const r=g2rows(self,sp).find(x=>x.id===id); if(!r) return; const dr=r.dr; r.dr=null; g2open(self,sp,id,null); r.dr=dr; };
   v.applyone=(cid)=>openApply(self,[cid]); v.openlp=(cid)=>openLP(self,cid);
@@ -766,6 +763,50 @@ function EXTRAVALS(self,v){
     setTimeout(()=>self.setState({saf:r.id,step:e,atv:null,rec:null,g2toast:'Safra aberta: '+r.v.nome+' · etapa '+e}),0); };
   if(!self.__hashIni){ self.__hashIni=1; abrirHash(); try{ window.addEventListener('hashchange',abrirHash); }catch(e){} }
 }
+// ---- UX-ACAO-UNICA-20261003 · área de ações do Planejar safra (DS-02, DS-33 §74.5.7.1, DS-61) ----
+// Uma primária e uma rota de avanço por etapa; a faixa só informa. Retorno secundário nomeia a etapa anterior (na etapa 2, voltar à
+// escolha é o "Trocar safra" do topo: sem cópia aqui). Pendência mostra a causa e um passo que resolve (Aplicar plano), sem aplicar e
+// avançar em silêncio. Avançar só troca de etapa: não envia cotação, não publica, não aprova. Na revisão (etapa 6), "Corrigir cultivos"
+// leva aos cultivos sem plano e "Voltar à revisão" devolve à mesma posição, com filtros e rascunho da tela preservados (estado).
+const SAF_CURTO=['Escolha da safra','Cultivos e planos','Rendimentos','Plano operacional','Recursos','Demanda de insumos'];
+function safMaior(cs){ const by={}; cs.forEach(c=>{ (by[c.v.cult]||(by[c.v.cult]=[])).push(c.id); }); const k=Object.keys(by).sort((a,b)=>by[b].length-by[a].length)[0]; return k?{ids:by[k],cult:k,mix:Object.keys(by).length>1}:{ids:[],cult:'',mix:false}; }
+function safAplicarT(m){ return 'Aplicar plano em '+m.ids.length+(m.ids.length>1?' cultivos':' cultivo')+(m.mix?' de '+m.cult.toLowerCase():''); }
+function safLocs(cs){ return cs.slice(0,4).map(c=>c.v.local).join(', ')+(cs.length>4?' e mais '+(cs.length-4):''); }
+function safRolagem(){ const m=document.querySelector('main[data-scroll]'); const col=document.querySelector('.ml-tog+div');
+  return (col&&col.scrollHeight>col.clientHeight+1&&getComputedStyle(col).overflowY==='auto')?col:m; }
+function safCorrigir(self,ids){ const r=safRolagem(); const m=document.querySelector('main[data-scroll]');
+  self.__revPos={top:r?r.scrollTop:0,rolas:m?[...m.querySelectorAll('.g2rola,.rola')].map(x=>x.scrollTop):[],foco:'[data-acoes] [data-acao=corrigir]'};
+  g2etapa(self,{step:2,corr:{ids:ids.slice()}});
+  setTimeout(()=>{ try{ const row=document.querySelector('[role=row][data-rid="'+ids[0]+'"]'); if(row){ row.scrollIntoView({block:'center'}); row.focus({preventScroll:true}); } }catch(e){} },120); }
+function nSel(self,saf){ return Object.values((g2st(self,'g_cult_'+sk(saf)).sel)||{}).filter(Boolean).length; }
+function safAcoes(self,v,x){ const st=self.state, step=x.step, ro=x.ro, corr=st.corr||null;
+  const ir=(i)=>({t:'‹ '+SAF_CURTO[i-1],fn:()=>g2etapa(self,{step:i,corr:null}),to:i,a:'voltar'});
+  const av=(i,t)=>({t:t+' ›',fn:()=>g2etapa(self,{step:i,corr:null}),to:i,a:'avancar'});
+  const aplicar={t:x.apT,fn:()=>openApply(self,x.apIds),a:'resolver'};
+  const nSp=x.sp.length; const semTxt=nSp+(nSp>1?' cultivos sem plano agronômico':' cultivo sem plano agronômico')+' ('+safLocs(x.sp)+')';
+  // Adicionar cultivo: uma instância junto da lista; primária só com a lista vazia (é a única ação da etapa)
+  v.add_fn=()=>{ const f=v['g_cult_'+sk(x.saf)+'_new']; if(f) f(); };
+  v.add_prim=step===2&&!!x.saf&&!ro&&!x.cs.length; v.add_sec=step===2&&!!x.saf&&!ro&&x.cs.length>0;
+  let c={};
+  if(step===1) c={};   // escolher é a ação da linha ("Próximo passo"); criar fica junto do título da lista
+  else if(!x.saf) c={nota:'Nenhuma safra escolhida: escolha a safra para seguir.',prim:{t:'‹ Escolher a safra',fn:()=>g2etapa(self,{step:1}),to:1,a:'voltar'}};
+  else if(step===2){
+    if(corr){ const pend=x.sp.filter(c=>corr.ids.indexOf(c.id)>=0); const m=safMaior(pend);
+      const volta={t:'Voltar à revisão ›',fn:()=>{ const pos=self.__revPos||null; self.__revPos=null; g2etapa(self,{step:6,corr:null},pos); },to:6,a:'avancar'};
+      c=pend.length?{nota:'Correção pedida pela revisão: '+pend.length+(pend.length>1?' cultivos sem plano':' cultivo sem plano')+' ('+safLocs(pend)+').',prim:{t:safAplicarT(m),fn:()=>openApply(self,m.ids),a:'resolver'},sec:volta}
+                   :{nota:'Cultivos corrigidos: volte à revisão para conferir a demanda.',prim:volta}; }
+    else if(ro) c={prim:av(3,'Ver rendimentos')};
+    else if(!x.cs.length) c={nota:'Nenhum cultivo nesta safra: adicione o primeiro para definir rendimentos e o plano operacional.'};
+    else if(nSel(self,x.saf)) c={nota:(nSp?semTxt+'. ':'')+'Seleção ativa: o plano dos selecionados é aplicado pela barra da lista.',sec:av(3,'Definir rendimentos')};   // lote = comando da tarefa ativa (DS-02/DS-40): sem 2ª primária de "aplicar"
+    else if(x.apIds.length) c={nota:semTxt+': sem plano não entram operações nem insumos.',prim:aplicar,sec:av(3,'Definir rendimentos')};
+    else c={prim:av(3,'Definir rendimentos')}; }
+  else if(!ro&&step>=3&&!x.temPlano&&step<6) c={volta:ir(step-1),nota:'Nenhum cultivo tem plano agronômico: o plano operacional, os recursos e a demanda dependem dele.',prim:x.apIds.length?aplicar:null};
+  else if(step===3) c={volta:ir(2),prim:av(4,ro?'Ver plano operacional':'Conferir plano operacional')};
+  else if(step===4) c={volta:ir(3),prim:av(5,ro?'Ver recursos':'Dimensionar recursos')};
+  else if(step===5) c={volta:ir(4),prim:av(6,ro?'Ver demanda de insumos':'Conferir demanda de insumos')};
+  else if(step===6){ c={volta:ir(5)};
+    if(!ro){ c.prim=x.p6; if(nSp){ c.nota=semTxt+' ficam fora desta demanda.'; c.ctx={t:'Corrigir cultivos',fn:()=>safCorrigir(self,x.sp.map(r=>r.id))}; } } }
+  g2acoes(v,'aa',c); }
 function openApply(self,ids){ const saf=self.state.saf; if(!saf){ self.setState({g2toast:'Escolha a safra primeiro.'}); return; }
   const safObj=g2rows(self,GR('g_saf')).find(r=>r.id===saf); if(safObj&&safObj.ro){ self.setState({g2toast:'Safra encerrada: somente consulta.'}); return; }
   const gsel=(g2st(self,'g_cult_'+sk(saf)).sel)||{}; const all=g2rows(self,GR('g_cult_'+sk(saf)));

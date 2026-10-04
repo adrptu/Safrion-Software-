@@ -7,7 +7,7 @@ Funções próprias da tela que mexem no cenário têm prefixo est (estReceber, 
 import json
 from engine import (grid,esc,INK,MUTED,LINE,BG,SURF,ACC,ACCS,YEL,YELS,RED,REDS,DISP,BTN_ST,EXTRA,EXTRAJS,_MINI,_MINIP)
 import engine as E
-from ui37 import shell37, steps_state, HEIGHTS37
+from ui37 import shell37, secoes_state, HEIGHTS37
 import dados2 as D2
 import cenario
 
@@ -138,7 +138,7 @@ def build():
     prim=f'<button type="button" onClick="{H("prim_fn")}" style="{H("prim_st")}">{H("prim_t")}</button>'
     HEIGHTS37[fname]=1180
     shell37('EST','Estoque',corpo,fname=fname,subtitle='Receba, entregue por O.S., receba devoluções e conte; cada movimento atualiza saldos, O.S. e app.',
-            steps=steps_state(NOMES),primary_html=None,ctx=('Fazenda Santa Rita','Todos os depósitos',None),search=False)
+            steps=secoes_state(NOMES,label='Seções do estoque'),primary_html=None,ctx=('Fazenda Santa Rita','Todos os depósitos',None),search=False)   # trabalho paralelo: seções em qualquer ordem, não etapas (UX-ACAO-UNICA-20261003)
 
 JS=r'''
 // ===== Processo · Estoque (6 etapas numa só tela; lê e muda o cenário compartilhado com O.S. e App) =====
@@ -498,22 +498,20 @@ function EXTRAVALS(self,v){
   const st=self.state; const step=st.step||1; const N=6; const C=self._cen||cenGet();
   self.g2live=(gid,k,d)=>{ if(gid==='g_rec'&&k==='val'&&efert(d.ped)) return 'Sem validade'; return undefined; };
   for(let i=1;i<=N;i++) v['s'+i]=(step===i);
-  g2steps(self,v,'stp',N,step,{},(i)=>self.setState({step:i}));
-  const go=(i)=>()=>self.setState({step:i});
-  const names=['Confira recebimentos','Entregue por O.S.','Receba devoluções','Confira saldos','Faça contagens','Acompanhe movimentos'];
-  v.prev_t=step>1?('‹ '+names[step-2]):''; v.next_t=step<N?(names[step]+' ›'):''; v.has_prev=step>1; v.has_next=step<N;
-  v.prev=()=>self.setState({step:Math.max(1,step-1)}); v.next=()=>self.setState({step:Math.min(N,step+1)});
+  // seções do Estoque (UX-ACAO-UNICA-20261003): trabalho paralelo, navegação em qualquer ordem pela faixa de seções (único caminho);
+  // sem setas e sem "ir para a próxima seção" como ação principal: a ação do bloco é o próximo trabalho da própria seção, ou nenhuma
+  g2secoes(self,v,'stp',N,step,{},(i)=>g2etapa(self,{step:i}));
   const IT=eitens(C); let prim;
   if(v.est_vazio) prim=['Ver Santa Rita',v.est_versr];
   else if(step===1){ const r=GR('g_rec').rows.find(x=>!x.ro); prim=r?['Conferir '+r.v.nf,()=>g2open(self,GR('g_rec'),r.id,null)]:['Registrar recebimento',()=>v.g_rec_new&&v.g_rec_new()]; }
-  else if(step===2){ const r=GR('g_ent').rows.find(x=>!x.ro); prim=r?['Entregar '+r.v.req+' · '+r.v.item,()=>g2open(self,GR('g_ent'),r.id,null)]:['Receber devoluções',go(3)]; }
+  else if(step===2){ const r=GR('g_ent').rows.find(x=>!x.ro); prim=r?['Entregar '+r.v.req+' · '+r.v.item,()=>g2open(self,GR('g_ent'),r.id,null)]:null; }
   else if(step===3){ const xs=IT.filter(y=>y.it.custodia>1e-9&&!y.sinal&&!y.cf).sort((a,b)=>((a.o.etapa==='Em conferência'?0:1)-(b.o.etapa==='Em conferência'?0:1))||(ereqN(a.rid)-ereqN(b.rid))); const x=xs[0];
-    prim=x?['Receber devolução da '+x.rid,()=>g2open(self,GR('g_dev'),x.id,null)]:['Conferir saldos',go(4)]; }
-  else if(step===4) prim=['Fazer contagens',go(5)];
+    prim=x?['Receber devolução da '+x.rid,()=>g2open(self,GR('g_dev'),x.id,null)]:null; }
+  else if(step===4) prim=null;   // saldos: consulta (sem primária)
   else if(step===5){ const r=GR('g_cnt').rows.find(x=>eblank(x.v.cont)); prim=r?['Contar '+r.v.inv,()=>g2open(self,GR('g_cnt'),r.id,null)]:['Nova contagem',()=>v.g_cnt_new&&v.g_cnt_new()]; v.cnt_add=!!r; }
-  else prim=['Conferir saldos',go(4)];
-  v.prim_t=prim[0]; v.prim_fn=prim[1];
-  v.prim_st='padding:7px 14px;border-radius:9px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap;background:#1E7A4C;color:#fff;border:1px solid #1E7A4C;flex-shrink:0;'+(v.est_vazio?'display:none;':'');   // sem estoque: o próximo passo é o link do estado vazio
+  else prim=null;   // movimentos: consulta
+  v.prim_t=prim?prim[0]:''; v.prim_fn=prim?prim[1]:(()=>{});
+  v.prim_st='padding:7px 14px;border-radius:9px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap;background:#1E7A4C;color:#fff;border:1px solid #1E7A4C;flex-shrink:0;'+((v.est_vazio||!prim)?'display:none;':'');   // sem estoque: o próximo passo é o link do estado vazio
   // filtro por local (etapa 4)
   const loc=st.est_loc||''; const CH='font-family:inherit;font-size:12px;font-weight:700;padding:4px 11px;border-radius:999px;cursor:pointer;';
   v.est_locs=[''].concat(E2.locais).map(lc=>({t:lc||'Todos os locais',on:String(loc===lc),st:CH+(loc===lc?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;'),go:()=>self.setState({est_loc:lc})}));

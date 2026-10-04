@@ -18,7 +18,7 @@ LOT = f"c.lotes['{P}|F26-02']"
 ALR = "[...document.querySelectorAll('main [role=alert]')].map(x=>x.innerText).join(' | ')"
 shot = lambda n: a.c.shot(os.path.join(HERE, '_probe', n))
 def etapa(i):
-    a.c.size(1440, 1100); a.abrir('EST'); a.J("document.querySelectorAll('nav[aria-label=\"Etapas do processo\"] button')[%d].click()" % i); time.sleep(.5)
+    a.c.size(1440, 1100); a.abrir('EST'); a.J("document.querySelectorAll('nav[aria-label=\"Seções do estoque\"] button')[%d].click()" % i); time.sleep(.5)
 est3 = lambda: etapa(2)
 def linha(*ts):
     return a.J("(()=>{const ts=%s; const r=[...document.querySelectorAll('[role=row]')].find(r=>ts.every(t=>r.innerText.indexOf(t)>=0)); return r?r.innerText.replace(/\\s+/g,' '):'';})()" % repr(list(ts)).replace("'", '"')) or ''

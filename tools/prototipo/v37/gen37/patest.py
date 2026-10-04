@@ -14,6 +14,8 @@ T = lambda: J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerTex
 DLG = lambda: J("!!document.querySelector('aside[role=dialog]')")
 FAIL = []
 def clk(t, root=None): r = J(f"({CLK})({json.dumps(t)},{json.dumps(root)})"); time.sleep(.4); return r
+from comp_lib import IR_ETAPA
+def ir_etapa(n): r = J(f"({IR_ETAPA})({n})"); time.sleep(.4); return r   # a faixa só informa: anda pela área de ações
 def setv(sel, val): r = J(f"({SETV})({json.dumps(sel)},{json.dumps(val)})"); time.sleep(.25); return r
 def check(nome, ok, info=''):
     print(('PASSOU ' if ok else 'FALHOU ') + nome, info if info else '')
@@ -23,7 +25,7 @@ try:
     J("window.__errs=[]; window.addEventListener('error',e=>window.__errs.push(String(e.message)));")
     cur = lambda: J("(document.querySelector('[aria-current=step]')||{innerText:''}).innerText.replace(/\\s+/g,' ')")
     check('começa na etapa 1 sem plano escolhido', '1' in cur() and 'Escolha o plano' in cur(), cur())
-    steps = J("[...document.querySelectorAll('nav[aria-label=\"Etapas do processo\"] button')].map(b=>b.innerText.replace(/\\s+/g,' '))")
+    steps = J("[...document.querySelectorAll('.etp-ind .etp-itens>li')].map(b=>b.innerText.replace(/\\s+/g,' '))")
     check('etapas 2 e 3 mostram impedimento', all('Escolha um plano' in s for s in steps[1:]), steps)
     cards = J("[...document.querySelectorAll('button[aria-label^=\"Abrir plano\"]')].map(b=>b.innerText.replace(/\\s+/g,' '))")
     check('biblioteca com 6 cards', len(cards) == 6, len(cards))
@@ -31,7 +33,7 @@ try:
     check('card mostra versão, estado, atividades, gatilhos, custo e cultivos', all(k in soja for k in ['v6', 'Publicado', '8 atividades', 'DAP', 'R$ 2.099,90', 'Aplicado em 5 cultivos', '3 na v6 · 2 na v5']), soja)
     cafe = [x for x in cards if x.startswith('Café')][0]
     check('card do café com gatilhos Data e Após a colheita', 'Após a colheita' in cafe and 'Data' in cafe, cafe)
-    clk('3 Publique a versão'); check('etapa 3 sem plano é bloqueada', '1' in cur(), T())
+    ir_etapa(3); check('etapa 3 sem plano é bloqueada', '1' in cur(), T())
     # abrir plano
     J("document.querySelector('button[aria-label=\"Abrir plano Soja alta tecnologia\"]').click()"); time.sleep(.5)
     check('abrir plano leva à etapa 2', '2' in cur() and 'Edite' in cur(), cur())
@@ -134,7 +136,7 @@ try:
     body = J("document.querySelector('main').innerText")
     check('após publicar: v7 em vigor, v6 substituída com 3 cultivos, decidir em Planejar safra', 'Em vigor' in body and 'Substituída' in body and 'Na v6 · decidir adoção da v7' in body and 'Decidir em Planejar safra' in body)
     check('nada mais a publicar', 'Nada a publicar' in body)
-    clk('1 Escolha o plano')
+    ir_etapa(1)
     soja = J("[...document.querySelectorAll('button[aria-label^=\"Abrir plano\"]')].map(b=>b.innerText.replace(/\\s+/g,' ')).find(t=>t.startsWith('Soja alta'))")
     check('card atualizado para v7 publicada, cultivos na v6', 'v7' in soja and 'Publicado' in soja and '3 na v6 · 2 na v5' in soja and '8 atividades' in soja, soja)
     # novo plano
