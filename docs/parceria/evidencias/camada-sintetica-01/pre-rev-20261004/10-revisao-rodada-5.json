@@ -1,0 +1,517 @@
+{
+  "summary": "Adversarial review of round-5 fixes (REND exclusive-group cliques, SINT X1-X6)",
+  "agentCount": 12,
+  "logs": [],
+  "result": {
+    "coberturas": [
+      {
+        "lente": "rend-r5",
+        "cobertura": "Revisão da rodada 5 da REND (2eeb2e3 contra 9e9cf73 e 1688f97), feita em cópias por git archive em scratchpad/prerev6/w-rend-r5-{2eeb2e3,9e9cf73,1688f97,1f88bf3}. Nada foi alterado em /home/user/sp-camada-sintetica. Scripts em scratchpad/prerev6/rev: jsrun.js roda o bloco REPARTIR no node; common.py roda dados2.repartir em float e em Fraction; indep.py tem a invariante independente (grafo físico próprio com sequência, ativo, grupo de 1 unidade e par que passa das unidades; todas as cliques, não só as maximais; q1 do plano calculado à parte; classificação 'recurso único', que é semântica declarada, contra 'clique').\n\nExecutado:\n1. Oráculo rend_multiconjuntos_unit.py em 2eeb2e3: 71/71 OK. Ele não pega o S2 porque só verifica grupos maximais.\n2. Paridade JS × Python, em float e em Fraction, com a ordem dos motivos e chaves cq:/fc:. fuzz.py seed 1: 400/400 e 400/400. fuzz_weird.py (vazio, negativos, 'abc', 'Infinity', '1,5', bool, NaN): 1495/1500. As 5 diferenças vêm de chaves de grupo numéricas ('9', '10'): o Object.keys do JS e o dict do Python ordenam diferente, e só o nome do grupo no motivo de 'sem recurso' muda. O problema vem da rodada 4 e não acontece com os ids reais (trator, pulv, plant, dist, colh, oper). teto_frac.py: 60 cadeias perto do teto com unidades decimais, 0 divergências.\n3. Invariante independente (inv_cmp.py, seeds 21 e 33, 3000 entradas de até 8 configurações): o único padrão novo na r5 é a ponte do S2. A r4 tinha as violações de clique maximal que a r5 corrigiu. Violações cobertas por um recurso único com membro de janela maior foram tratadas como semântica declarada ('sem limite se um não tem'; ex.: A e B na sequência com D sem janela já faziam 20 h desde 1688f97, caso_sq.py).\n4. Metamórficos (meta2.py, seeds 7 e 11, cerca de 1400 entradas e 7200 variantes): permutação das linhas e escala ×3 sem diferença. '+1 unidade cria conflito' só aparece quando muda quem fica sem recurso, o que é legítimo; no caso construído (S2) a nova unidade cria conflito. 'Janela maior esconde conflito': todos os casos aleatórios são da semântica declarada por recurso. Configuração ociosa (ociosa.py): 54 de 800 mudam, as MESMAS 54 em 9e9cf73. É anterior, da rodada 4: quando todas as configurações com janela ficam sem recurso, a ociosa de janela 0 entra no plano e cria o conflito 'janela 0 h'. Não é da rodada 5.\n5. Regressões (regr.py, 2000 entradas): no aleatório, só as correções legítimas do triângulo. Nos casos construídos: fc no C4/torre (S3), SER compartilhado (S3) e teto (S3), todos com o valor certo na r4.\n6. Desempenho com 20–30 configurações (perf.py, perf2.py): números no achado S4.\n7. Dados do projeto: plano_op igual em 2eeb2e3 e 9e9cf73 nas safras S2627, S27SF, S2526 e LG2627.\n\nNão reportei nada da lista de conhecidos. Não revisei a SINT (3ba5f14) nem abri navegador."
+      },
+      {
+        "lente": "sint-r5",
+        "cobertura": "Lente: SINT da rodada 5 (git diff a1f653e 3ba5f14, X1–X6), mais o que ainda faltava de Y1–Y6 e Z1–Z5. Cópia de 3ba5f14 em scratchpad/prerev6/w-sint-r5, sem tocar em /home/user/sp-camada-sintetica. Os arquivos de sonda que gravei na cópia foram apagados depois do uso.\n\nTestes executados:\n- quantidade_test.py: 13/13.\n- dados_lagoa_sintetico/camada_test.py: 16/16.\n- build.py exit 0, 144 artboards; montar_render.py exit 0.\n- irr_estado_test.py: 38 ok, 0 falhas.\n- irr_fluxo_test.py: 33 ok, 0 falhas.\n- mip_unit_test.py: 34/34.\n- mip_correcoes_test.py: 14/14.\n- os_v39_liberar_test.py: 14/14.\n- os_v39_bloq_test.py: 11/11.\n- Os testes de navegador rodaram com CHROME_BIN=/tmp/cloudchrome/chrome e flock /tmp/cdp9333.lock.\n\nVerificado sem achado:\n- **Recusa de total 0 em todos os caminhos que criam ou liberam O.S.:**\n  - cenLiberar, chamado por osc_liberar, osc_ajustar, painel da O.S., Mapa e osLibErro, sempre sobre cópia do cenário (atômico).\n  - osc_ajustar com lib=false (X2), inclusive o 'Salvar ajuste' que não passa pela trava do formulário.\n  - O.S. do MIP: mipChecks e mipEmitir usam a mesma leitura de área.\n  - v2 de fertirrigação: irrV2Zero na criação e na prévia.\n  - Nova ordem: não recusa, mas os planos estáticos × áreas dos cultivos não dão nenhum total 0 (varredura em dados2: zeros []), e a ordem nasce em A liberar com o ajuste disponível.\n  - Nenhuma semente com dose ou total 0.\n  - Não achei recusa de caso válido.\n- **X1 no navegador**, com estado injetado em OS-0501:\n  - O painel da O.S. mostra 'Quem resolve: Ana (agrônoma)', sem link do Estoque, e 'Salvar e liberar' libera a v2.\n  - O painel do Mapa (PV13) mostra o mesmo impedimento e o link 'Ajustar antes de liberar' para OS.dc.html#OS-0501:ajustar.\n- **X4:** chip 'Área pequena · total 0' no agDec.\n- **X5:** o caminho recomendado funciona nas 5 ordens de 2 passadas (término e depois 'Adicionar produtos' cria a v2 com a área do setor).\n- **irr2 antes de validar:** está em todos os pontos que recebem área digitada da irrigação (av_ok, tm_ok, irrAvanco, irrTerminar; nenhum outro chamador). Testado com 20,275 → 20,28, 0,004 → 0 (recusado no término), 0,005 → 0,01 e 1,005 → 1,01.\n- **Aviso de estoque do MIP:** cenLote e cenDisp são as mesmas funções da liberação, então 1 lote, 2 lotes, quarentena e reservado batem.\n\nAchados:\n- O crédito com cobertura de 2 casas quebra em dois casos: avanço pequeno seguido de v2 (o déficit não é creditado), e v2 com passada parcial mais outra passada programada (a passada some e o texto de crédito fica absurdo).\n- Sobram textos com 1 ou 0 casa: área e cobertura no IR-03det e dose da v2.\n\nFora da lente: não revisei o diff da REND (9e9cf73..2eeb2e3)."
+      }
+    ],
+    "itens": [
+      {
+        "lente": "rend-r5",
+        "achado": {
+          "branch": "REND",
+          "arquivo": "tools/prototipo/v37/gen37/safra.js",
+          "linha": 118,
+          "titulo": "Triângulo de configurações que se excluem perde a janela quando uma 4ª, com janela maior ou sem janela, se exclui das três: com menos máquinas o plano fica mais otimista",
+          "severidade": "S2",
+          "cenario_de_falha": "Usei o caso V1 do oráculo: A–B em sequência declarada, A–C no ativo a01, B–C na única plantadeira; janela de 10 h; 1 ha/h; Q=15. Acrescentei D, sem janela. (a) D tem as próprias máquinas: o grupo {A,B,C} divide 10 h, há conflito e o déficit é 1,25 h. (b) D divide uma máquina diferente com cada uma (t1 com A, t2 com B, t3 com C), ou seja, a fazenda tem MENOS máquinas: a clique maximal passa a ser {A,B,C,D}, cuja janela é infinita por causa de D. O triângulo deixa de ser maximal, perde a restrição e faz 11,25 h na janela de 10 h, sem conflito. A sequência, o a01 e a plantadeira são todos finitos, e nenhum recurso único cobre A, B e C: é uma ponte que relaxa uma janela finita, a classe T2 da rodada 2, agora na clique. O mesmo acontece com um grupo 'Tratores' usado pelas quatro: com 2 tratores há conflito (déficit 1,25 h); com 1 não há (+1 unidade cria conflito). Também acontece com D de janela 50 h. O S2 da rodada 4 (triângulo de 15 h em 10 h) continua aberto sempre que um membro de janela maior se liga às três. A busca aleatória achou o mesmo padrão sozinha. A invariante do oráculo só olha grupos maximais e não pega o caso; o oráculo segue 71/71.",
+          "evidencia": "Executado (S=scratchpad/prerev6/rev): `python3 $S/caso_tri2.py`. Saída em 2eeb2e3: 'D com máquinas próprias, janD=None h(A)+h(B)+h(C)=10.0000 conflito=True déficit=1.2500'; 'D divide t1/t2/t3 com A/B/C, janD=None h(A)+h(B)+h(C)=11.2500 (janelas 10 h) conflito=False déficit=0.0000 q=[3.75, 3.75, 3.75, 3.75] | Py Fraction igual: True'; o mesmo com janD=50. Em 9e9cf73, os dois casos dão 11,25 h e nenhum conflito (o S2 original). `python3 $S/caso_tri.py`: 'trator=2 janD=None h(A,B,C)=10.0000 conflito=True deficit=1.2500' contra 'trator=1 janD=None h(A,B,C)=11.2500 conflito=False'; Python Fraction igual. `python3 $S/inv_cmp.py 21 1500 6`: '2eeb2e3 atendido/sub': 1, com C3 sem janela ligado por p3, p2 e a4 a um triângulo C0–C1–C2 de janela 10 h que faz 15,35 h.",
+          "correcao_proposta": "Um membro só pode levar a janela de uma clique acima da janela dos outros se dividir com TODOS eles um mesmo recurso físico (a regra por recurso já declarada). Caso contrário, a sub-clique sem ele divide a maior janela dela. Uma forma: para cada clique maximal M e cada limiar t entre as janelas finitas de M, restringir M_t = {x ∈ M : H_x ≤ t} a Σh ≤ t, a menos que M_t e o membro de janela maior estejam num único recurso. A regra fica para o Codex, dono do oráculo. No oráculo: invariante sobre toda sub-clique sem recurso único e o metamórfico 'mais máquinas não criam conflito' com este caso (V1 + D)."
+        },
+        "veredicto": {
+          "refutado": true,
+          "reproduzido": true,
+          "severidade": "nenhuma",
+          "introduzido_pela_rodada_5": false,
+          "comando": "B=/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev6; cópias novas com `git archive 2eeb2e3|9e9cf73 tools/prototipo/v37` em $B/w-rend-r5-v0-<commit>; `node $B/v0/sonda.js $B` (bloco REPARTIR real: V1 + D, D com máquina própria ou dividindo t1/t2/t3); `node $B/v0/sonda2.js $B` (o mesmo com rend de D = 0,01); `node $B/v0/sonda4.js $B` (controle com UM recurso só: A e B no a01 com janela de 10 h, D sem janela no a02 ou no mesmo a01, Q=24, em 2eeb2e3, 9e9cf73 e 1688f97); espelho Python com Fraction via `dados2.repartir` na cópia 2eeb2e3.",
+          "saida": "Achado, em 2eeb2e3: 'D proprio, sem janela: h(A+B+C)=10.0000 conflito=true deficit=1.2500'; 'D divide t1/t2/t3, sem janela: h(A+B+C)=11.2500 conflito=false deficit=0'; o mesmo com jan D 50. Com rend D 0,01: 'tri + D ponte: h(primeiras 3)=14.9502 conflito=false'. Em 9e9cf73 os dois casos dão 11,25 h, sem conflito. Python Fraction: (a) soma3=10.0 conflito=True deficit=1.25; (b) soma3=11.25 conflito=False.\nControle com um recurso só, igual em 2eeb2e3, 9e9cf73 e 1688f97: 'D com trator proprio a02 (mais maquinas): h(A+B)=10.0000 conflito=true deficit=6.0000'; 'D divide o a01 com A e B (menos maquinas): h(A+B)=16.0000 conflito=false deficit=0.0000'. Com o grupo plant de 1 unidade no lugar do a01, o resultado é o mesmo. Python Fraction: soma2=10.0 conflito=True contra soma2=16.0 conflito=False.",
+          "fundamento": "Os números do achado se reproduzem: 11,25 h (14,95 h com rend D 0,01) de A+B+C em janelas de 10 h, sem conflito, iguais em JS e em Python. Mesmo assim, ele não é defeito da rodada 5. O código cumpre a regra declarada do modelo: o grupo que nunca trabalha junto divide a maior janela de TODOS os membros, sem limite se um não tem janela. É a mesma regra que vale para cada recurso desde as rodadas 2 e 3 ('cada uma com a maior janela dos seus membros'; a invariante por ativo do oráculo pula o recurso quando um membro não tem janela).\n\nO controle mostra que a física e a não monotonicidade são as mesmas com UM recurso só. A e B dividem o trator a01 com janelas de 10 h. Se D, sem janela, tem trator próprio, há conflito e déficit de 6 h. Se D usa o mesmo a01, ou seja, a fazenda tem menos máquinas, A+B fazem 16 h em 10 h sem conflito. Isso acontece em 1688f97, em 9e9cf73 e em 2eeb2e3, em JS e em Python.\n\nLogo, 'um membro sem janela ou com janela maior empresta a janela dele aos outros do grupo' é a semântica de máxima janela aceita. Não é uma ponte nova da classe T2. As restrições de cada recurso continuam valendo no caso (b): A+B, A+C e B+C dão 7,5 h ≤ 10 h. A distinção 'nenhum recurso único cobre A, B e C' não tem base física, e a própria correção proposta mantém a exceção do recurso único, que tem o mesmo plano impossível.\n\nNo caso dos tratores (1 contra 2), com 1 trator o grupo é exatamente um recurso único usado por A, B, C e D, e o resultado é o da regra declarada. Com 2 tratores a rodada 5 só ficou mais estrita.\n\nNão foi introduzido pela rodada 5: em 9e9cf73 o caso (b) dá os mesmos 11,25 h sem conflito. A rodada 5 só tornou o caso (a) conservador.\n\nSe o Codex decidir trocar a máxima janela por limites por janela (todo subconjunto que nunca trabalha junto cabendo na maior janela dele, como no EDF), o problema é anterior e mais amplo: inclui o recurso único desde 1688f97. Isso entra como mudança de regra do modelo, não como S2 de implementação da rodada 5.\n\nArquivos das sondas: /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev6/v0/sonda.js, sonda2.js e sonda4.js."
+        }
+      },
+      {
+        "lente": "rend-r5",
+        "achado": {
+          "branch": "REND",
+          "arquivo": "tools/prototipo/v37/gen37/safra.js",
+          "linha": 121,
+          "titulo": "Componente não cordal (2 tratores × 2 plantadeiras) divide a maior janela finita: atendido cai à metade, ou a 1 % com uma janela de 1 h, e surge conflito falso de 'janela 0 h'",
+          "severidade": "S3",
+          "cenario_de_falha": "Os conjuntos vêm de tratores e implementos (ativosDe separa conj_id por '+'). Testei 4 configurações T1+P1, T1+P2, T2+P1 e T2+P2, a 2 ha/h. Elas formam um C4 induzido, que não é cordal, e caem na restrição 'fc'. (1) Janela de 10 h em todas, Q=80: r5 atende 20 ha, r4 atendia 40 ha. O valor de r4 é fisicamente correto: T1+P1 com T2+P2 e depois T1+P2 com T2+P1, 5 h cada. (2) Só T1+P1 com janela de 1 h e as outras sem janela, Q=200: r5 atende 2 ha, deixa 198 ha sem conjunto e cria déficit de 99 h ('a janela tem 1 h'); r4 atendia 200 ha. Três configurações sem limite ficam presas à janela finita de outra. (3) T1+P1 com 10 % fixos e janela 0 e as outras sem janela: r5 acusa 'em sequência precisam de 100 h para 200 ha; a janela tem 0 h' (déficit 100 h), mas o atendido é o mesmo da r4, que não tinha conflito. O mesmo vale para trator×implemento 4×5, 5×6 e 3×10: atendido de 100 em vez de 400, 500 e 300 ha. C4 e grafos de torre são perfeitos, e neles as cliques bastam. Conservador, mas é regressão sobre 9e9cf73 no arranjo de frota mais comum.",
+          "evidencia": "Executado: `python3 $S/caso_fc.py`. 2eeb2e3: 'janela 10 h em todas Q=80 atendido=20.0 ... déficit=30.0'; 'só T1+P1 com janela 1 h ... Q=200 atendido=2.0 saldo=198.0 ... déficit=99.0'; 'T1+P1 com 10 % fixos e janela 0 ... conflito=True déficit=100.0 motivos ... a janela tem 0 h'. 9e9cf73: 'atendido=40.0 ... déficit=10.0'; 'atendido=200.0 ... conflito=False'; 'atendido=180.0 ... conflito=False'. Python Fraction: '2eeb2e3 2×2 com 1 h: Py Fraction alocado 2.0 conflito True déficit 99.0' contra '9e9cf73 ... alocado 200.0'. `python3 $S/teto.py`: 'trator×implemento 4×5 un=4 r5: alocado=100 | r4: alocado=400', e 5×6 dá 100 contra 500.",
+          "correcao_proposta": "Usar o fc conservador só onde as cliques não bastam: grafo não perfeito, com buraco ímpar de 5 ou mais vértices ou antiburaco ímpar. Basta procurar ciclo induzido ímpar ≥5 no componente e no complemento, viável para n ≤ 30. C4, grafos bipartidos e torres (trator×implemento) ficam só com as cliques. Se mantiver o fc, não use a menor janela finita quando há membro sem janela: preferir não restringir o componente (as cliques já restringem). Incluir os casos 2×2 no oráculo."
+        },
+        "veredicto": {
+          "refutado": false,
+          "reproduzido": true,
+          "severidade": "S3",
+          "introduzido_pela_rodada_5": true,
+          "comando": "B=/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev6; cópias w-rend-r5-v1 (git archive 2eeb2e3) e w-rend-r5-v1-r4 (git archive 9e9cf73). Rodei node $B/sonda_fc.js $B e node $B/sonda_fc2.js $B; as duas sondas extraem o bloco '// >>> REPARTIR … // <<< REPARTIR' de safra.js de cada commit e chamam repartir(Q,cfgs,{}) com 4 configurações a 2 ha/h e ativos T1+P1, T1+P2, T2+P1 e T2+P2 (o mesmo que ativosDe(conj_id) produz). Para o espelho, rodei python3 -c '... dados2.repartir(F(200),[...jan=1 só em T1+P1...],None)' nas duas cópias.",
+          "saida": "r5 C1 2x2 jan 10 em todas Q=80 | alocado=20 saldo=60 conflito=true deficit=30 | q=5 cada | motivos: \"em sequência precisam de 40 h para 80 ha; a janela tem 10 h\"\nr4 C1 ... | alocado=40 saldo=40 conflito=true deficit=10 | q=10 cada | \"em sequência precisam de 20 h para 40 ha; a janela tem 10 h\"\nr5 C2 só T1+P1 jan 1 Q=200 | alocado=2 saldo=198 conflito=true deficit=99 | q=0.5 cada | \"em sequência precisam de 100 h para 200 ha; a janela tem 1 h\"\nr4 C2 ... | alocado=200 saldo=0 conflito=false deficit=0 | q=T1+P1:2, as outras 66 cada\nr5 C3 T1+P1 10% jan 0 Q=200 | alocado=180 conflito=true deficit=100 | \"a janela tem 0 h\"\nr4 C3 ... | alocado=180 conflito=false deficit=0\nVarredura da janela de T1+P1 (Q=200, as outras sem janela), r5 contra r4: sem=200/200; 0 h=200/200; 1 h=2/200 (déficit 99); 10 h=20/200 (déficit 90); 99 h=198/200; 100 h=200/200.\nTrator×implemento, só T0+P0 com 50 h, Q=4000: r5 4x5=100, 5x6=100, 3x10=100 (déficit 1950); r4=4000 nos três, sem conflito.\nPy r5 2x2 jan1 Q=200: alocado 2.0, conflito True, déficit 99.0 | Py r4: alocado 200.0, conflito False, déficit 0.0",
+          "fundamento": "O achado se reproduz em JS e no espelho Python (Fraction) e foi introduzido pela rodada 5: em 9e9cf73 os mesmos cenários dão os valores corretos.\n\n**Causa.** As 4 combinações de 2 tratores com 2 implementos formam um C4 induzido. O teste de cordalidade de grafo() (safra.js:~121–125) falha e empurra a restrição 'pfc:'/'afc:' com fin=true. No RS.forEach, essa restrição pega a maior janela só entre os membros com janela finita. Assim, configurações sem janela ficam presas à janela de outra.\n\n**Os resultados de r4 são fisicamente viáveis:**\n- C1: T1+P1 com T2+P2 durante 5 h e depois T1+P2 com T2+P1 durante 5 h dão 40 ha em 10 h.\n- C2: T1+P2 com T2+P1 durante 33 h, depois T2+P2 durante 33 h com T1+P1 durante 1 h.\n\n**Erros de r5:**\n- Atende 2 ha em vez de 200.\n- Acusa um conflito falso de 99 h.\n- Diz \"precisam de 40 h\" para 80 ha, quando a necessidade real é 20 h.\n- A resposta é um degrau não monótono na janela de um único membro: 0 h dá 200 ha, 1 h dá 2 ha, 100 h dá 200 ha.\n\nO filtro fin é mais restritivo até que serializar o componente inteiro (o \"fecho antigo\" que o comentário cita). Nesse modelo, um membro sem janela deixa o componente sem limite e daria 200 ha no C2. Um membro sem janela pode trabalhar fora da janela dos outros, então o filtro não protege nenhum caso.\n\n**Severidade: mantenho S3.** O erro vai sempre para o lado conservador. Fica só no aviso e no saldo do plano: conflito e saldo só alimentam texto e chips, em safra.js:582/594/607, sem bloquear fluxo. Não gera plano fisicamente impossível nem perde dados, e há alternativa: tirar a janela ou cadastrar só pares fixos. A rubrica classifica incoerência conservadora como S3. Ainda assim, o tamanho do erro é grande (99 % da área como \"sem conjunto\" e déficit falso), num arranjo plausível de trator × implemento. Por isso é a primeira coisa a corrigir.\n\n**Correção mínima.** Com fin, ignorar o componente fc quando algum membro tem janela infinita, ou aplicar o fc só ao subgrafo dos membros com janela finita. Outra opção, como propõe o achado, é usar o fc só quando houver buraco ou antiburaco ímpar de 5 ou mais. Incluir os casos 2×2 (C1, C2 e a varredura) no oráculo rend_multiconjuntos_unit.py.\n\n**Arquivos:**\n- /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev6/sonda_fc.js\n- /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev6/sonda_fc2.js"
+        }
+      },
+      {
+        "lente": "rend-r5",
+        "achado": {
+          "branch": "REND",
+          "arquivo": "tools/prototipo/v37/gen37/safra.js",
+          "linha": 113,
+          "titulo": "SER é único para plano e divisão: grupo que só passa das unidades no plano, por causa de uma janela 0, serializa a divisão",
+          "severidade": "S3",
+          "cenario_de_falha": "Dois tratores. A e B com janela de 10 h e 1 trator cada; C com parte fixa de 20 % e janela 0, também com 1 trator; Q=30. No plano, 3 > 2, então ep=true e 'Tratores' entra em SER. Na divisão, só A e B têm horas e 2 ≤ 2 (ea=false); mesmo assim, exclui() usa o mesmo SER e grafo(cand,'a') cria a clique 'acq' {A,B}. A e B passam a dividir 10 h: 5 + 5 ha em vez de 10 + 10. O decorrido continua 5 h, porque U não uniu A e B, o que mostra a incoerência interna, e o motivo diz 'em sequência dividem a mesma janela'. Contraria a regra declarada ('No plano (com janela 0) e na divisão (só com horas), cada um com o seu grafo'; P3: janela 0 só no plano). É regressão sobre 9e9cf73, que atendia 20 ha.",
+          "evidencia": "Executado: `python3 $S/caso_ser.py`. 2eeb2e3: 'C janela=0 Q=30 q=[5, 5, 0] ... alocado=10.00 saldo=20.00 decorrido=5', com os motivos 'Tratores: ao mesmo tempo precisariam de 3, a fazenda tem 2; trabalham em sequência' e 'em sequência dividem a mesma janela: ...'. 9e9cf73: 'q=[10, 10, 0] ... alocado=20.00 decorrido=10'. Controle sem C: 20 ha nos dois commits. No espelho Python Fraction: '2eeb2e3 ... q [5.0, 5.0, 0.0] alocado 10.0 decorrido 5.0 | JS = Py: True' contra '9e9cf73 ... alocado 20.0'.",
+          "correcao_proposta": "Separar SERp (grupos com ep) e SERa (grupos com ea). Usar exclui com SERp em grafo(candP sem semRec,'p') e com SERa em grafo(cand,'a'), em safra.js:108/113/124 e no espelho dados2.py:299/303/333. Oráculo: o caso acima, com 20 ha atendidos e decorrido de 10 h."
+        },
+        "veredicto": {
+          "refutado": false,
+          "reproduzido": true,
+          "severidade": "S3",
+          "introduzido_pela_rodada_5": true,
+          "comando": "D=/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev6/w-rend-r5-v2; git archive 2eeb2e3 em $D/new e 9e9cf73 em $D/old (somente tools/prototipo/v37). `node $D/sonda.js $D` carrega o bloco REPARTIR de safra.js de cada commit com new Function e roda repartir(30, [A{rend 1, jan 10, rec Tratores 1}, B{igual a A}, C{rend 1, part 20, jan 0, rec Tratores 1}], {Tratores:{un:2}}), com o controle sem C. `python3 $D/sonda.py $D` roda o mesmo caso em dados2.repartir (Fraction) dos dois commits.",
+          "saida": "JS:\nold com C (jan 0) q= [10,10,0] alocado= 20.00 saldo= 10.00 decorrido= 10 conflito= true\n   motivos: [\"Tratores: ao mesmo tempo precisariam de 3, a fazenda tem 2; trabalham em sequência\",\"C: a parte fixa não cabe na janela de 0 h\",\"as janelas não comportam toda a área\",\"em sequência precisam de 30 h para <área redigida> ha; a janela tem 10 h\"]\nold controle sem C q= [10,10] alocado= 20.00 saldo= 10.00 decorrido= 10\nnew com C (jan 0) q= [5,5,0] alocado= 10.00 saldo= 20.00 decorrido= 5 conflito= true\n   motivos: [..., \"em sequência dividem a mesma janela: a área que não cabe fica sem conjunto\", ...]\nnew controle sem C q= [10,10] alocado= 20.00 saldo= 10.00 decorrido= 10\nPython (espelho):\nold q [10.0, 10.0, 0.0] alocado 20.0 saldo 10.0 decorrido 10.0\nnew q [5.0, 5.0, 0.0] alocado 10.0 saldo 20.0 decorrido 5.0",
+          "fundamento": "O achado se confirma no JS e no espelho Python. Em 2eeb2e3, o grupo Tratores entra em SER (safra.js:113) quando só `ep` é verdadeiro. No plano há 3 usuários (A, B e C, que tem janela 0) para 2 unidades. Na divisão, só A e B têm horas e usam 2 de 2 unidades, por isso `ea` é falso e U não une A e B. Mesmo assim, `grafo(cand,'a')` usa `exclui()`, que consulta o mesmo SER, e cria a clique 'acq:0,1', na qual A e B dividem 10 h. O resultado é 5 + 5 ha em vez de 10 + 10.\n\nIsso contraria a regra que o próprio código declara: a divisão é decidida só com quem tem horas. Fisicamente, C não trabalha, e A e B cabem nos 2 tratores ao mesmo tempo. O resultado também fica incoerente por dentro: o motivo diz 'em sequência dividem a mesma janela', mas o decorrido é 5 h, como se A e B trabalhassem em paralelo.\n\nFoi introduzido pela rodada 5. Em 9e9cf73, o 'pl:Tratores' com `ea` falso tinha xa=[] e não restringia a divisão, que atendia 20 ha. O controle sem C dá 20 ha nos dois commits.\n\nA severidade fica em S3: o erro é conservador. O atendido cai pela metade (de 20 para 10 ha) e o saldo dobra, mas nunca aparece plano fisicamente impossível. Há alternativa: retirar C ou o trator de C quando C tem janela 0. Pela régua dada, incoerência conservadora é S3. Se a perda material de área atendida for tratada como 'cálculo material incorreto', a classificação poderia subir para S2.\n\nA correção proposta faz sentido: separar SERp (grupos com `ep`, para o grafo 'p') de SERa (grupos com `ea`, para o grafo 'a') em safra.js e em dados2.py, e incluir este caso no oráculo esperando 20 ha e decorrido de 10 h."
+        }
+      },
+      {
+        "lente": "rend-r5",
+        "achado": {
+          "branch": "REND",
+          "arquivo": "tools/prototipo/v37/gen37/safra.js",
+          "linha": 99,
+          "titulo": "Teto de 65 536 passos atingido com 28–30 configurações em cadeia: serializa todas sem necessidade e o motivo inventa o pico",
+          "severidade": "S3",
+          "cenario_de_falha": "Montei uma cadeia de configurações: cada uma divide um ativo com a seguinte, por exemplo um trator que puxa o próprio implemento e o do vizinho. Todas usam 1 operador, a fazenda tem n/2 operadores, janela de 100 h, Q=2000. O pico real é n/2, que cabe, e não deveria serializar. Com n ≤ 26 a r5 acerta. Com n=28 e n=30 a busca do componente passa do teto, simul devolve a soma (28 ou 30), o grupo 'Operadores' serializa todas e o atendido cai de 1400 para 100 ha (e de 1500 para 100 ha). O motivo diz 'ao mesmo tempo precisariam de 28, a fazenda tem 14', mas o pico real é 14 e cabe; a rodada prometia 'o motivo diz o pico real'. A r4, sem teto, dava 1400 e 1500 ha. Mesmo quando o pico real passa das unidades, o motivo mostra a soma (caminho de 30 com un=10: 'precisariam de 30', real 15). Conservador.",
+          "evidencia": "Executado: `python3 $S/teto.py`. 'caminho n=26 un=13 ... r5: alocado=1300 | r4: 1300'; 'caminho n=28 un=14 ... r5: alocado=100 (62 ms) ['Operadores: ao mesmo tempo precisariam de 28, a fazenda tem 14; trabalham em sequência'] | r4: alocado=1400'; 'caminho n=30 un=15 ... r5: alocado=100 ... precisariam de 30, a fazenda tem 15 | r4: alocado=1500'. `python3 $S/teto2.py`: Python Fraction igual ao JS (alocado=100.0) em 2eeb2e3.",
+          "correcao_proposta": "Dentro do componente, com pare=true, parar assim que best > un, como na r4. Para o pico do motivo, usar PD exata quando o componente do grafo 'junto' for cordal ou floresta (conjunto independente de peso máximo em tempo linear pela ordem de eliminação perfeita) ou uma cota superior melhor (cobertura por cliques) antes de cair na soma. Se o teto estourar, o motivo não deve afirmar o pico: dizer 'não foi possível conferir; trabalham em sequência'. Oráculo: caminho de 28 com 14 operadores, 1400 ha."
+        },
+        "veredicto": {
+          "refutado": false,
+          "reproduzido": true,
+          "severidade": "S3",
+          "introduzido_pela_rodada_5": true,
+          "comando": "D=/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev6/w-rend-r5-v3; git archive 2eeb2e3 em $D/r5 e 9e9cf73 em $D/r4. Rodei `node $D/sonda.js $D` e `node $D/sonda2.js $D`. As duas sondas extraem o bloco REPARTIR de safra.js de cada versão e chamam repartir(2000, cfgs, {op:{un,nome:'Operadores'}}). Cada configuração i tem rend=1, jan=100, ativos=['a'+i,'a'+(i+1)] e rec={op:1}. Rodei também o espelho Python, dados2.repartir, em r5, com n=26/28.",
+          "saida": "n=26 un=13: r5 alocado=1300 (67 ms) motivo=[], r4 alocado=1300\nn=27 un=14: r5=100.00000000000004, r4=1350 (menor n do caminho em que as duas divergem)\nn=28 un=14: r5 alocado=99.99999999999997 (71 ms) motivo=[\"Operadores: ao mesmo tempo precisariam de 28, a fazenda tem 14; trabalham em sequência\"], r4 alocado=1400 (79 ms) motivo=[]\nn=30 un=15: r5 alocado=99.99999999999997 motivo \"precisariam de 30, a fazenda tem 15\", r4 alocado=1500\nn=30 un=10: r5 alocado=100 motivo \"precisariam de 30, a fazenda tem 10\" (pico real 15), r4 alocado=100 motivo \"precisariam de 11\"\nPython r5: 26/13 alocado=1300.0; 28/14 alocado=99.99999999999997 com o mesmo motivo \"precisariam de 28, a fazenda tem 14\" (1,5 s)\nConjuntos independentes no caminho de 28 nós: 832 040 (acima do teto de 65 536). O maior conjunto independente do caminho de n nós é ceil(n/2), igual a un, portanto cabe.",
+          "fundamento": "O achado se reproduz em JS e no espelho Python, e foi introduzido pela rodada 5.\n\n**O que acontece.** Na cadeia de configurações ligadas por ativo, o pico real de operadores é ceil(n/2). Esse valor é igual às unidades da fazenda, então não precisa serializar. É possível dividir em duas rodadas: ímpares e pares, 50 h cada, sem ativo em comum. Isso dá 50 ha por configuração, ou seja, 1400 ha com n=28.\n\n**A causa.** A rodada 5 trocou a parada \"best > un\" por um teto de 65 536 passos por componente (safra.js, simul, linhas ~96-101; dados2.py, simul). A poda s+rest<=best é fraca quando o pico real está bem abaixo da soma. A partir de n=27 o teto estoura, simul devolve a soma e o grupo Operadores entra em SER/pl:. Com isso todas passam a dividir uma janela de 100 h: o atendido cai de 1350, 1400 e 1500 ha (r4) para 100 ha.\n\n**O motivo exibido é falso.** Ele afirma \"precisariam de 28\", mas o pico real é 14 e cabe. Isso contradiz a promessa da rodada 5 de mostrar o pico real (V7). Mesmo quando o pico passa das unidades (30/10), o motivo mostra a soma (30), não o pico real (15).\n\n**Comparação com 9e9cf73.** A mesma entrada dá 1350, 1400 e 1500 ha, o resultado correto. Portanto a regressão é da rodada 5.\n\n**Severidade: mantenho S3.**\n- O erro é conservador: subaloca e serializa, sem gerar plano fisicamente impossível nem perder dados.\n- Exige pelo menos 27 configurações da mesma operação ligadas em cadeia por ativos. O caminho de 26 ainda acerta. É um cenário atípico na fazenda.\n- O motivo falso é limitado ao texto.\n- Não é coberto pelos itens já conhecidos: o conhecido é serializar quando o pico PASSA das unidades. Aqui o pico não passa."
+        }
+      },
+      {
+        "lente": "rend-r5",
+        "achado": {
+          "branch": "REND",
+          "arquivo": "tools/prototipo/v37/gen37/dados2.py",
+          "linha": 263,
+          "titulo": "Desempenho: espelho Python leva 8 s com 30 configurações e 5 grupos; JS leva 2,4 s com 30 configurações em trios (explosão de cliques)",
+          "severidade": "S4",
+          "cenario_de_falha": "(1) Caminho de 30 configurações com 5 grupos de recursos, todas usando os 5: simul roda 3 vezes por grupo (sA, sP e sm com pare=false), cada vez até o teto, e pare=true não para dentro do componente. JS leva 343–367 ms e o Python 8,2 s (a r4 levava 1–3 ms). (2) Grafo de trios: 30 configurações, compatíveis dentro do trio e exclusivas entre trios. São 3^10 cliques maximais; o Bron–Kerbosch cria 59 049 restrições 'acq' e outras tantas 'pcq', e o aloca percorre todas em pl(x). JS leva 797 ms com 27 e 2408 ms com 30. Os dados do projeto não mudam (plano_op igual nas 4 safras).",
+          "evidencia": "Executado: `python3 $S/perf2.py py`. Saída: 'JS caminho n=30, 5 grupos un=15 367.5 ms'; 'JS trios n=27 797.2 ms'; 'JS trios n=30 2407.9 ms'; 'PY caminho n=30, 5 grupos un=15 8174.0 ms'. `python3 $S/perf.py py 2eeb2e3,9e9cf73`: 'caminho n=30 un=10' leva 1545 ms em 2eeb2e3 contra 2,7 ms em 9e9cf73.",
+          "correcao_proposta": "Parar a busca quando best > un com pare=true. Calcular sm (pare=false) só para o texto e reaproveitar o resultado de sA/sP quando possível. Limitar o número de cliques: acima de um teto, cair no fc conservador do componente. Indexar as restrições por configuração em vez de filtrar Object.keys(jan) em cada pl(x). Um teste de desempenho com 30 configurações no oráculo (<1 s em JS e Python)."
+        },
+        "veredicto": {
+          "refutado": false,
+          "reproduzido": true,
+          "severidade": "S4",
+          "introduzido_pela_rodada_5": true,
+          "comando": "B=/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev6; for c in 2eeb2e3 9e9cf73; do mkdir -p $B/w-rend-r5-v4-$c && git -C /home/user/sp-camada-sintetica archive $c tools/prototipo/v37 | tar -x -C $B/w-rend-r5-v4-$c; done; for c in 9e9cf73 2eeb2e3; do node $B/rev-v4/sonda.js $B/w-rend-r5-v4-$c; python3 $B/rev-v4/sonda.py $B/w-rend-r5-v4-$c; node $B/rev-v4/escala.js $B/w-rend-r5-v4-$c; python3 $B/rev-v4/escala.py $B/w-rend-r5-v4-$c; python3 $B/rev-v4/trios30.py $B/w-rend-r5-v4-$c; done   (sondas próprias em $B/rev-v4/: carregam o bloco REPARTIR do safra.js e dados2.repartir; casos: caminho com ativo dividido entre vizinhas e 1 ou 5 grupos de recursos; trios exclusivos entre si; caso realista com 8 e 12 configurações)",
+          "saida": "Commit 9e9cf73 (rodada 4) contra 2eeb2e3 (rodada 5), tempo de uma chamada repartir(2000, ...):\n- trios n=30: JS 6,7 ms -> 2139,1 ms; PY 24,8 ms -> 6130,1 ms\n- trios n=27: JS 5,6 ms -> 677,1 ms; PY 19,0 ms -> 1645,7 ms\n- trios n=24: JS 3,6 ms -> 241,0 ms; PY 13,3 ms -> 420,3 ms\n- caminho n=30, 1 grupo, un=10: JS 1,5 ms -> 73,3 ms; PY 2,4 ms -> 1523,2 ms\n- caminho n=24, 1 grupo, un=10: JS 2,0 ms -> 27,4 ms; PY 1,7 ms -> 443,0 ms\n- caminho n=30, 5 grupos, un=15: JS 816,0 ms -> 362,2 ms; PY 18569,1 ms -> 7494,0 ms. Este caso já existia na rodada 4, e a rodada 5 o deixou mais rápido.\n- caso realista (2 grupos, 4 tratores, 5 implementos): n=8 JS 0,3 -> 0,7 ms, PY 1,5 -> 1,8 ms; n=12 JS 0,3 -> 1,2 ms, PY 0,9 -> 5,0 ms\nNa rodada 5, todos os casos com até 24 configurações ficaram abaixo de 1 s, o mesmo limite dos testes Q5 e V6 do oráculo.",
+          "fundamento": "Reproduzido em parte, por execução própria (cópias w-rend-r5-v4-*).\n\n1. **Regressão da rodada 5: confirmada.**\n   - No grafo de trios (exclusivos entre trios, compatíveis dentro do trio), a busca de Bron–Kerbosch nova não tem teto. Ela gera 3^(n/3) cliques maximais, e cada uma vira uma restrição pcq/acq.\n   - Com 30 configurações, o JS passa de 7 ms para 2,1 s e o Python de 25 ms para 6,1 s.\n   - No caminho com 1 grupo, o novo simul por componente não para quando passa de un, porque o componente inteiro é buscado antes de testar `pare`. Além disso, roda mais uma vez com `pare=false` para o texto. O Python passa de 2,4 ms para 1,5 s.\n\n2. **Parte do achado está errada.** O caso (1), caminho com 5 grupos e un=15, não foi introduzido pela rodada 5. A rodada 4 já levava 816 ms em JS e 18,6 s em Python; a rodada 5 levou 362 ms e 7,5 s. A afirmação de que \"a r4 levava 1–3 ms\" só vale para o caminho com 1 grupo.\n\n3. **Severidade mantida em S4.**\n   - O resultado continua correto (as quantidades mudam por regra do modelo, não por erro).\n   - A lentidão só aparece com 27 ou mais configurações numa mesma operação, montadas de forma adversarial.\n   - Até 24 configurações, tudo responde em menos de 1 s, o limite que o próprio oráculo cobra em Q5 e V6. O caso realista leva de 1 a 5 ms.\n   - Os dados do projeto não chegam perto disso.\n   - Agravante sem risco prático: `ocorr` (safra.js linha 242) chama `repartir` uma vez por ocorrência, o que multiplicaria o custo. Não achei limite de configurações em `cfgsOf`.\n   - Não chega a S3 nem a S2: não há resultado errado nem fluxo bloqueado com dados plausíveis.\n\nA correção proposta faz sentido. Os dois pontos principais são um teto de cliques que, ao ser passado, cai no fc conservador, e um teste de desempenho com 30 configurações em trios."
+        }
+      },
+      {
+        "lente": "sint-r5",
+        "achado": {
+          "branch": "SINT",
+          "arquivo": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+          "linha": 439,
+          "titulo": "Fertirrigação v2 criada depois de um avanço pequeno (0,01 a ~0,06 ha) nunca credita o pivô: o v1 fica com 0 m³, o v1 + v2 não fecha a volta e o sistema manda irrigar de novo",
+          "severidade": "S3",
+          "cenario_de_falha": "Na OS-0602 (Pivô 8, 50,63 ha, 1 passada): irrIniciar, irrAvanco 0,03 ha e irrReclassTudo com Nitrato 12 kg/ha. A v2 fica com 50,60 ha. Na O.S., a v2 passa por liberar, entregar, confirmar, iniciar, apontar 50,60 ha, conferência e encerrar. O déficit do Pivô 8 continua 6,4 mm, o mesmo de antes da rega. O IR-01 mostra 'Déficit de 6,4 mm passou do limite de 6,0 mm: programe a irrigação' com a ação 'Programar irrigação', e irrProgramar cria a OS-0607 de 7,53 mm (≈3.812 m³) para um pivô que acabou de receber a volta completa. Com avanço 0 o déficit cai para 0,0 mm e com 5 ha para 0,11 mm. Causa: irrTele arredonda o volume a 10 m³ e dá 0 para o v1 de 0,03 ha (linha 356). irrCreditos descarta aplicações com vol 0 (linha 96, filtro a.vol > 0). Assim a cobertura do v1 sai do grupo, o grupo fica só com a v2 (50,60 < 50,63) e vira 'faixa' pendente. Com 2 casas (Y4/Z4), avanços de 0,01 a 0,06 ha são valores normais de entrada. É incoerência conservadora (falta crédito, não sobra), mas o resultado é uma rega duplicada recomendada.",
+          "evidencia": "Executado em node com o JS real da cópia w-sint-r5 (cenario.js_prefixo + JS_NUCLEO + dados_mip + dados_irrigacao + JS_AG01 + g2lib; harness em scratchpad/prerev6/probes-sint-r5/base.py; sondas p6.js e p7.js). Saída do p6: {\"0\":{\"d0\":6.4,\"depois\":0,\"v1\":0,\"v1vol\":0,\"v2area\":50.63,\"faixa\":null,\"etapaOS\":\"Encerradas\"},\"5\":{\"depois\":0.11,\"v1\":5,\"v1vol\":370,...},\"0.02\":{\"depois\":6.4,\"v1\":0.02,\"v1vol\":0,\"v2area\":50.61,\"faixa\":{\"cob\":50.61}},\"0.03\":{\"depois\":6.4,...,\"faixa\":{\"cob\":50.6}},\"0.04\":{\"depois\":6.4,...}}. Saída do p7 (avanço 0,03): irrSituacao → \"sit\":\"A programar\",\"hoje\":\"Déficit de 6,4 mm passou do limite de 6,0 mm: programe a irrigação\",\"acao\":[\"Programar irrigação\",\"IR-02.dc.html#programar=PV08\"], \"faixa\":\"faixa de 50,6 ha (OS-0602): 0,0 mm · resto do pivô: 6,4 mm\"; irrProgramar → \"OS-0607 criada · 7,53 mm em 1 passada ...\". Avanço 5 ha: \"Sem necessidade\".",
+          "correcao_proposta": "Para fechar a volta, conte a cobertura das aplicações da mesma O.S. mesmo com vol 0 (no irrCreditos, some g.cob antes de filtrar por vol > 0, e use vol > 0 só para a lâmina). Outra saída é não arredondar a 0 o volume estimado do v1 (irrTele com v1 > 0 dá pelo menos o volume exato, ou arredonda a 1 m³). Acrescente ao quantidade_test ou ao irr_estado_test a regressão 'avanço 0,03 → v2 → O.S. encerrada → déficit igual ao do avanço 0'."
+        },
+        "veredicto": {
+          "refutado": false,
+          "reproduzido": true,
+          "severidade": "S3",
+          "introduzido_pela_rodada_5": false,
+          "comando": "S=/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev6; for c in 3ba5f14 a1f653e; do D=$S/w-sint-r5-v0-$c; mkdir -p $D && git -C /home/user/sp-camada-sintetica archive $c tools/prototipo/v37 | tar -x -C $D; python3 $S/probes-sint-r5-v0/base.py $D/tools/prototipo/v37/gen37 $S/probes-sint-r5-v0/base-$c.js; cat $S/probes-sint-r5-v0/base-$c.js $S/probes-sint-r5-v0/v0.js > run-$c.js; node run-$c.js; done; depois cat base-3ba5f14.js v1.js | node. A sonda v0.js faz, para avanço em {0; 0,03; 0,06; 0,07; 5} ha na OS-0602: cenReset/irrReset, irrIniciar, irrAvanco, irrReclassTudo (Nitrato de cálcio, 12 kg/ha). Na O.S. faz liberar, entregar, confirmar, iniciar, apontar o saldo, conferência e encerrar. Lê irrDef, irrCreditos, irrApsSetor e irrSituacao. A sonda v1.js (avanço 0,03) imprime irrSituacao, irrDefTxt e irrProgramar.",
+          "saida": "Saída de 3ba5f14 (a de a1f653e é idêntica byte a byte):\n\"0\":{\"d0\":6.4,\"depois\":0,\"v1cob\":0,\"v1vol\":0,\"v2area\":50.63,\"faixa\":null,\"sit\":\"Sem necessidade\"}\n\"0.03\":{\"d0\":6.4,\"depois\":6.4,\"v1cob\":0.03,\"v1vol\":0,\"v2area\":50.6,\"aps\":[{\"cob\":0.03,\"vol\":0},{\"cob\":50.6,\"vol\":3810}],\"faixa\":50.6,\"etapaOS\":\"Encerradas\",\"sit\":\"A programar\",\"hoje\":\"Déficit de 6,4 mm passou do limite de 6,0 mm: programe a irrigação\"}\n\"0.06\":{\"depois\":6.4,\"v1vol\":0,\"faixa\":50.57,\"sit\":\"A programar\"}\n\"0.07\":{\"depois\":0,\"v1vol\":10,\"faixa\":null,\"sit\":\"Sem necessidade\"}\n\"5\":{\"depois\":0.11,\"v1vol\":370,\"sit\":\"Sem necessidade\"}\n\nSonda v1, avanço 0,03:\n- situacao: \"ult\":\"23/09 · OS-0602 · 0,0 mm em 0,03 de 50,63 ha\", \"faixa\":\"faixa de 50,6 ha (OS-0602): 0,0 mm · resto do pivô: 6,4 mm\", \"acao\":[\"Programar irrigação\",\"IR-02.dc.html#programar=PV08\"]\n- defTxt: déficit do Pivô 8 6,4 mm (faixa de 50,6 ha: 0,0 mm)\n- programar: OS-0607 criada · 7,53 mm em 1 passada · OS-0607 Liberadas · LIB-2307 · 7,53 mm · hoje 21:00–amanhã 13:49",
+          "fundamento": "Não refutado: reproduzi o achado com uma cópia própria (rótulo sint-r5-v0) do JS real executado em node.\n\n**Causa, confirmada no código de 3ba5f14**\n- No irrReclassificar (linha 439), o v1 recebe `p.vol = irrTele(...)`.\n- O irrTele (linha 356) arredonda o volume a 10 m³. Com lâmina de 7,53 mm, uma cobertura abaixo de cerca de 0,067 ha dá vol 0.\n- O irrCreditos (linha 96) descarta aplicações com `a.vol > 0` falso. Assim, a cobertura de 0,03 ha sai do grupo da OS-0602.\n- O grupo fica só com a v2 (50,60 < 50,63 ha) e vira faixa pendente. Resultado: a volta completa não abate nada do déficit do pivô.\n\n**Efeito medido**\n- O déficit continua 6,4 mm depois da v2 encerrada. Com avanço 0 ele vai a 0,0 mm, e com avanço 0,07 também (o v1 dá 10 m³).\n- O painel manda programar a irrigação.\n- Um clique em Programar irrigação cria a OS-0607 de 7,53 mm, cerca de 3.812 m³, e ela já sai Liberada. Água sozinha não exige o agrônomo.\n\n**Não foi introduzido pela rodada 5**\n- O mesmo roteiro em a1f653e dá saída idêntica.\n- O diff a1f653e..3ba5f14 não toca o irrTele, o filtro do irrCreditos nem a atribuição de p.vol. Na linha 442, só mudou a assinatura de irrV2Zero.\n- O que a rodada 5 mudou ali foi só o texto 'ult' com 2 casas, que agora mostra \"0,0 mm em 0,03 de 50,63 ha\".\n\n**Severidade S3, mantida**\n- O dano tem peso: o cálculo do balanço fica errado e é recomendada uma rega duplicada, que pode lavar o nitrato recém-aplicado. Por isso o caso fica no limite de S2.\n- Mas é limitado:\n  - só acontece numa janela estreita, com avanço de 0,01 a cerca de 0,067 ha (menos de 0,13 % do pivô) antes de adicionar produtos;\n  - a mesma tela mostra \"faixa de 50,6 ha: 0,0 mm · resto do pivô: 6,4 mm\", que revela que só 0,03 ha ficou sem a água;\n  - programar depende de um clique humano;\n  - não há perda nem corrupção do que foi gravado.\n- O erro é de falta de crédito, não de crédito em excesso. Isso se encaixa em \"limitado com alternativa / incoerência conservadora\".\n\nAs correções propostas no achado continuam válidas, e qualquer uma delas resolve:\n- somar a cobertura no grupo mesmo com vol 0 e usar vol > 0 só para a lâmina;\n- ou não deixar o irrTele arredondar a 0 quando a cobertura é maior que 0."
+        }
+      },
+      {
+        "lente": "sint-r5",
+        "achado": {
+          "branch": "SINT",
+          "arquivo": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+          "linha": 441,
+          "titulo": "X5 incompleto: com a passada em curso parcial e outra programada, a v2 inclui a passada seguinte no volume, mas a área e o produto da O.S. cobrem só o saldo; ao encerrar, essa passada some e o crédito mostra 5.587,9 mm em 0,05 ha",
+          "severidade": "S3",
+          "cenario_de_falha": "Na OS-0604 (PV18, 48,93 ha, 2 passadas), irrIniciar e irrAvanco 48,88 ha, depois 'Adicionar produtos' com Nitrato 12 kg/ha. A v2 é criada com área de 0,05 ha, total de 0,60 kg, volume de 3.287 m³ (soma a passada 2 inteira, linha 441) e lamHa de 6.573 mm. A passada 2 aparece como 'Na O.S. · v2'. A O.S. aponta 0,05 ha e encerra: a irrigação vai para Encerradas com a passada 2 ainda 'Programada' (nunca executada nem creditada), e o 'Crédito no balanço' do IR-03det mostra '5,62 mm líquidos na faixa de 48,88 ha + 5.587,9 mm líquidos na faixa de 0,05 ha (O.S.)'. Com avanço 24,47 acontece o mesmo: a v2 tem 24,46 ha e 293,52 kg, mas 4.924 m³ e lamHa de 20,13 mm, a passada 2 some e o déficit fica 5,77. Com cobertura de 100 %, o X5 recusa e manda terminar a passada e adicionar os produtos às próximas; assim a v2 da passada 2 sai com 48,93 ha e 587,16 kg. Uma diferença de 0,05 ha de avanço muda a v2 de 0,60 kg 'com a passada 2' para 587,16 kg.",
+          "evidencia": "Executado em node (harness base.py; sondas p14.js e p15.js). p14, avanço 48.88: v2 \"... 48,88 ha já irrigados ficam na v1 · requisição de 0,60 kg na liberação.\", fert {\"area\":0.05,\"tot\":0.6,\"vol\":3287,\"lamHa\":6573.12}, pass [\"1:Parcial:48.88:6.71\",\"2:Programada:null:6.71\"], depois {\"etapaIrr\":\"Encerradas\",\"pass\":[\"1:Parcial\",\"2:Programada\"],\"def\":5.78,\"etapaOS\":\"Encerradas\"}. Avanço 24.47: fert {\"area\":24.46,\"tot\":293.52,\"vol\":4924,\"lamHa\":20.13}, depois etapaIrr Encerradas, passada 2 Programada, def 5.77. Caminho do X5 (término, depois v2): fert {\"area\":48.93,\"tot\":587.16}. p15, mesma expressão da linha 437 de areas/irrigacao.py: credito \"5,62 mm líquidos na faixa de 48,88 ha + 5.587,9 mm líquidos na faixa de 0,05 ha (O.S.)\".",
+          "correcao_proposta": "Estender a regra do X5 a toda passada em curso quando irrPassProx(o) existir. Opção 1: recusar a v2 com a mesma mensagem ('confirme o término da passada N e adicione os produtos para as próximas passadas'). Opção 2: deixar as passadas programadas fora da v2 (vol e lamHa só do saldo da passada em curso; as programadas continuam como água na ordem). Acrescentar a regressão: avanço 48,88 com 2 passadas → nenhuma passada 'Programada' numa ordem Encerradas e nenhum crédito acima da lâmina da ordem."
+        },
+        "veredicto": {
+          "refutado": false,
+          "reproduzido": true,
+          "severidade": "S3",
+          "introduzido_pela_rodada_5": false,
+          "comando": "B=/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev6; cópias w-sint-r5-v1 (git archive 3ba5f14) e w-sint-r5-v1-a1f653e (git archive a1f653e). Harness próprio $B/w-sint-r5-v1/probe/mk.py, que concatena cenario.js_prefixo + JS_NUCLEO + dados_mip + dados_irrigacao + AG.JS_AG01, como em quantidade_test.py. Sonda v.js: cenReset; irrReset; irrIniciar OS-0604; irrAvanco com 48.88, com 24.47 ou irrTerminar com área cheia; irrReclassTudo com Nitrato de cálcio 12 kg/ha; na O.S., osc_liberar, entregar, confirmar, osc_iniciar, osc_apontar(saldo), osc_conferencia e osc_encerrar; por fim irrEt, passadas, irrDef, irrApsSetor e irrSituacao. Comandos: `python3 mk.py <gen37> r_new.js v.js && node r_new.js > new.json`; o mesmo em a1f653e para old.json; depois `diff old.json new.json`. A sonda v2.js mostra o painel depois do encerramento.",
+          "saida": "3ba5f14, avanço 48.88: v2 \"... 48,88 ha já irrigados ficam na v1 · requisição de 0,60 kg na liberação.\"; fert {area:0.05, v1:48.88, tot:0.6, vol:3287, lamHa:6573.12}; passadas [1:Parcial:48.88, 2:Programada:null]; fluxo da O.S. todo ok (apontar 0.05); depois {etapaIrr:\"Encerradas\", pass:[\"1:Parcial\",\"2:Programada\"], def:5.78, etapaOS:\"Encerradas\"}; crédito [\"5,62 mm liq faixa 48,88 ha vol=3230\", \"5.587,9 mm liq faixa 0,05 ha (O.S.) vol=3287\"].\nAvanço 24.47: fert {area:24.46, tot:293.52, vol:4924, lamHa:20.13}; depois Encerradas com a passada 2 Programada e def 5.77; crédito \"17,11 mm liq faixa 24,46 ha (O.S.) vol=4924\".\nTérmino cheio: fert {area:48.93, tot:587.16, vol:3283, lamHa:6.71}; crédito \"5,7 mm liq setor (O.S.)\".\ndiff old.json (a1f653e) × new.json (3ba5f14): só as 3 linhas \"ult\" mudam pelo formato do X3 (\"48,9 de 49 ha\" → \"48,88 de 48,93 ha\"). fert, passadas, def e crédito são idênticos.\nv2.js depois do encerramento: irrSituacao d=5.78, sit \"Sem necessidade\", hoje \"Déficit de 5,8 mm abaixo do limite de 9,0 mm: sem rega hoje\", irrAberta=false, passada 2 [\"Programada\", cob null].",
+          "fundamento": "O achado se reproduz como descrito.\n\n**Causa.** Em irrReclassificar, a linha 441 (`o.passadas.filter(z => z.st === 'Programada').forEach(z => { vol += x.ha * z.lam * 10; })`) soma ao volume da v2 a água das passadas programadas sobre o setor inteiro. Com passada em curso, porém, a área da v2 é só o saldo da passada (irrAreaV2). Por isso:\n- lamHa = vol / (10 × área) fica absurda: 6.573 mm em 0,05 ha, ou 20,13 mm contra 6,71 mm em 24,46 ha;\n- o produto cobre só o saldo (0,60 kg), contra 587,16 kg pelo caminho do término;\n- a O.S. da v2 encerra a irrigação (irrEt segue a O.S.) com a passada 2 \"Programada\" para sempre, nunca executada;\n- o detalhe do balanço mostra 5.587,9 mm líquidos na faixa de 0,05 ha.\n\n**Não foi introduzido pela rodada 5.** A linha 441 não muda no diff a1f653e..3ba5f14. O X5 só troca o texto da recusa quando a área do saldo é 0. A mesma sonda em a1f653e dá fert, passadas, def e crédito idênticos; só o texto \"ult\" muda, pelo X3. A descontinuidade entre 99,9 % e 100 % de cobertura (0,60 kg contra 587,16 kg) também já existia: a recusa com 100 % vem da rodada 4 (Y1).\n\n**Severidade S3, sem subir.** O dano material fica contido:\n1. O déficit do pivô é conservador e certo para a água de fato aplicada. irrCreditos agrupa v1 + v2 da mesma ordem, que somam o setor, e usa a menor lâmina líquida (5,62 mm). O déficit fica em 5,78 mm, sem creditar a passada 2, que de fato não correu. O painel volta a pedir rega quando o déficit passar de 9,0 mm.\n2. A outorga e a vazão usam as janelas (sw), não o vol do apontamento, então o volume fantasma de 3.283 m³ não consome outorga.\n3. O total do produto bate com a área da O.S. (regra única), e a mensagem da v2 mostra \"requisição de 0,60 kg\" e \"48,88 ha ficam na v1\" antes de gravar.\n4. Há alternativa segura: confirmar o término e adicionar os produtos depois, que dá a v2 de 48,93 ha e 587,16 kg.\n\nO que sobra é uma incoerência limitada: o plano de 2 passadas some sem aviso (a ordem fica Encerrada com uma passada Programada) e há números absurdos no detalhe do crédito."
+        }
+      },
+      {
+        "lente": "sint-r5",
+        "achado": {
+          "branch": "SINT",
+          "arquivo": "tools/prototipo/v37/gen37/mip.js",
+          "linha": 247,
+          "titulo": "Dose ou área não finita no 'Decidir controle' do AG-01 derruba a tela: cenQtd lança dentro de mipChecks (trava do total 0, Y2, e aviso de estoque, Q4/Z2)",
+          "severidade": "S3",
+          "cenario_de_falha": "No AG-01, em 'Decidir controle' da VIS-013, o usuário digita 1e999 (ou um número de 309+ dígitos, ou Infinity) no campo Dose. A linha 247 (trava do total 0 do Y2) chama cenQtd(Infinity, 95), que lança 'Quantidade fora da faixa'. Com 1e999 na Área, quem lança é o aviso de estoque da linha 261. O renderVals do AG-01 falha: o painel da decisão desaparece, a página mostra 'AG-01.renderVals(): Quantidade fora da faixa: Infinity × 95.' e não sobra campo para corrigir. É preciso recarregar e o rascunho da decisão se perde. É a mesma classe do Q2 da rodada 2 ('dose em notação exponencial derruba a tela'), corrigida só na prévia da irrigação. O mesmo padrão existe no ajuste da O.S.: g2num de 401 dígitos dá Infinity, e osc_ajFalta e a prévia 'na ordem' (processo_os.py:567) chamam cenQtd e lançam.",
+          "evidencia": "Navegador (CHROME_BIN=/tmp/cloudchrome/chrome, flock /tmp/cdp9333.lock, _render da cópia após build.py exit 0 e montar_render exit 0). Em AG-01.dc.html#VIS-013:decidir com setv('#dc_dose','1e999'): 'DEPOIS: '''; body: 'AG-01.renderVals(): Quantidade fora da faixa: Infinity × 95. | ...'; setv('#dc_dose','0,1') → 'sem campo'. Node (p3.js): mipChecks dose '1e999' → \"THROW Quantidade fora da faixa: Infinity × 37.75.\"; área '1e999' → \"THROW Quantidade fora da faixa: 0.25 × Infinity.\"; agDec → \"agDec THROW Quantidade fora da faixa: Infinity × 37.75.\". Node (p10.js): g2num('1'+'0'×400)=Infinity; osc_ajFalta → \"THROW Quantidade fora da faixa: Infinity × 10.\"",
+          "correcao_proposta": "Em mipChecks, validar com Number.isFinite antes de qualquer cenQtd: dose não finita vira trava 'Informe a dose', área não finita vira 'Informe a área', e o aviso de estoque só roda com os dois finitos. Aplicar a mesma guarda em osc_ajFalta e nas prévias do ajuste (processo_os.py:556/567). Outra saída é cenQtd devolver NaN para entrada não finita, com os chamadores tratando NaN como inválido. Acrescentar ao quantidade_test os casos 1e999 em dose e em área."
+        },
+        "veredicto": {
+          "refutado": false,
+          "reproduzido": true,
+          "severidade": "S3",
+          "introduzido_pela_rodada_5": false,
+          "comando": "B=/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev6; para cada C em 3ba5f14 (cópia w-sint-r5-v2), a1f653e e 96ed62e: git -C /home/user/sp-camada-sintetica archive $C tools/prototipo/v37 | tar -x -C $D; cd $D/tools/prototipo/v37/gen37; python3 monta 'globalThis.print=console.log' + cenario.js_prefixo() + dados_mip.js_prefixo() + as 8 primeiras linhas de mip_test.js (S0, c0) + $B/sondaY.js e roda no node. A sondaY.js chama mipChecks(S0(), VIS-013, {kind:'controlar', prod:'inseticida-b', dose, area, data:'2026-10-20'}, c0) com dose '1' / '1e999' / '1e308' / 'Infinity' e área '1e999' / '1e-400', dentro de try/catch.",
+          "saida": "== 3ba5f14 (rodada 5)\ndose 1         OK tr= [\"Carência de 14 dias passa da colheita prevista (10/10): aplicar até 26/09.\"]\ndose 1e999     THROW Quantidade fora da faixa: Infinity × 95.\ndose 1e308     OK tr= [\"Dose fora da bula: 1 kg/ha.\",\"Carência de 14 dias ...\"]\ndose Infinity  THROW Quantidade fora da faixa: Infinity × 95.\narea 1e999     THROW Quantidade fora da faixa: 1 × Infinity.\narea 1e-999    OK tr= [\"Informe a área.\",\"Carência de 14 dias ...\"]\n== a1f653e (rodada 4): saída idêntica (os mesmos 3 THROW)\n== 96ed62e (antes da rodada 4): saída idêntica (os mesmos 3 THROW)\nO git diff a1f653e 3ba5f14 não altera mip.js nem cenario.js.",
+          "fundamento": "Reproduzido no node com a cópia da rodada 5. Em mip.js, mipChecks chama cenQtd sem conferir se o número é finito. Com dose 1e999 ou \"Infinity\", a trava do total 0 (linha 247, do Y2) lança \"Quantidade fora da faixa\"; essa trava fica no ramo else-if da área, então roda mesmo quando a trava \"Dose fora da bula\" já foi registrada. Com área 1e999, a área passa do talhão, mas o aviso de estoque (linha 261, do Q4/Z2) roda porque só exige dose>0 e área>0, e também lança. Isso acontece porque o cenDec de cenario.js devolve null para Infinity.\n\nConsequência na tela, verificada no código e sem navegador: em agronomia.py:680 e :689, o agDec chama mipChecks dentro do renderVals, sem try/catch. O runtime (support.js) captura a exceção, mostra o aviso \"AG-01.renderVals(): …\" e desenha o modelo só com as props. Sem os valores do renderVals, somem dc_temProd, os handlers dc_setdose/dc_setarea e o botão cancelar. Não sobra campo para corrigir, e o rascunho fica só no state.dec do componente: recarregar a página o perde. O mesmo padrão aparece no ajuste da O.S. (processo_os.py:557 e :567, e osc_ajFalta:316), mas só com 309 ou mais dígitos. Lá o g2num tira o 'e', então \"1e999\" vira 1999 e não Infinity.\n\nSeveridade S3: a entrada é absurda, o problema fica limitado à tela e há saída segura (recarregar). Nenhum dado gravado se perde, porque o receituário e a O.S. só são criados no dc_ok. Também não há cálculo errado: a decisão nunca é emitida com esse valor. A classe é a mesma do Q2 da rodada 2, também S3.\n\nNão foi introduzido pela rodada 5. A rodada 5 não tocou em mip.js nem em cenario.js, e a mesma sonda lança as mesmas três exceções em a1f653e e em 96ed62e. O caminho da área e o da dose pelo aviso de estoque vêm do Q4; a linha 247 entrou com o Y2 da rodada 4."
+        }
+      },
+      {
+        "lente": "sint-r5",
+        "achado": {
+          "branch": "SINT",
+          "arquivo": "tools/prototipo/v37/gen37/areas/irrigacao.py",
+          "linha": 431,
+          "titulo": "X3/Y5 incompletos: no IR-03det, a cobertura e a área do setor ainda aparecem com 1 ou 0 casa ao lado dos valores de 2 casas",
+          "severidade": "S4",
+          "cenario_de_falha": "OS-0604 (48,93 ha) com avanço de 20,27 ha. Na mesma tela IR-03det, a linha 'Avanço' mostra '20,3 de 48,9 ha' (irrigacao.py:431), enquanto a grade de passadas mostra '20,27 de 48,93 ha' e a trilha 'Avanço da passada 1 · 20,27 de 48,93 ha'. O painel 'Informar leitura' da OS-0602 (término parcial de 20,27 ha) mostra 'Estimado 1.526 m³ · 7,53 mm em 20,3 ha' e 'Área coberta 20,3 de 50,6 ha' (linhas 499/501). A trilha do término completo diz 'volta completa nos 51 ha' para 50,63 ha (irrigacao_estado.js:374).",
+          "evidencia": "Navegador (mesma configuração; estado gerado em node e injetado em localStorage 'talhao-os-irrigacao-v1'): 'AVANCO ROW: ... AVANÇO | 20,3 de 48,9 h'; 'PASSADAS ROW: ... 20,27 de 48,93 ha'; 'TRILHA: Avanço da passada 1 · 20,27 de 48,93 ha (41 %)'; 'CM PANEL: ... ESTIMADO | 1.526 m³ · 7,53 mm em 20,3 ha | ... | ÁREA COBERTA | 20,3 de 50,6 ha'. Node (p8.js): 'Término · 16,8 h de bombeamento · volta completa nos 51 ha · hidrômetro 3.800 m³'.",
+          "correcao_proposta": "Usar irrN(v,2,1) para a cobertura e irrN(x.ha,2,0) para a área do setor em irrigacao.py:431, :499 e :501 e em irrigacao_estado.js:374 ('nos ' + irrN(x.ha,2,0)), o mesmo formato das linhas 427 e 437."
+        },
+        "veredicto": {
+          "refutado": false,
+          "reproduzido": true,
+          "severidade": "S4",
+          "introduzido_pela_rodada_5": false,
+          "comando": "D=/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev6; git -C /home/user/sp-camada-sintetica archive 3ba5f14 tools/prototipo/v37 | tar -x -C $D/w-sint-r5-v3 (and a1f653e into $D/w-sint-r5-v3-old); python3 $D/probe-sint-r5-v3.py <gen37>. The probe uses node, with no browser. It loads the same prelude as quantidade_test.py (cenario.js + JS_NUCLEO + dados_mip + dados_irrigacao + JS_AG01, with localStorage and DOM in memory). It pulls by regex the exact JS expressions from areas/irrigacao.py: the 'Avanço' line (:431), the passadas grid cell (:427) and v.cm_kv (:499-501). It evaluates them on the real state after these calls: irrIniciar+irrAvanco(OS-0604, 20.27); irrIniciar+irrTerminar(OS-0602, 20.27, null); irrIniciar+irrTerminar(OS-0602, ha, 3800). It then reads the trilha written by irrTerminar (irrigacao_estado.js:374).",
+          "saida": "3ba5f14:\n\"avanco\": \"20,3 de 48,9 ha (41 %) · término previsto amanhã 11:58\"\n\"passadas\": \"20,27 de 48,93 ha\"\n\"trilha\": [\"Avanço da passada 1 · 20,27 de 48,93 ha (41 %)\"]\n\"cm\": [\"Estimado | 1.526 m³ · 7,53 mm em 20,3 ha\", \"Medido | sem leitura\", \"Crédito | volume medido ÷ área coberta × 85 % · só na faixa coberta\", \"Área coberta | 20,3 de 50,6 ha\"]\n\"term\": [\"Término · 16,8 h de bombeamento · volta completa nos 51 ha · hidrômetro 3.800 m³\"]\n\"ha602\": 50.63\n\na1f653e (before round 5): same output, line for line (\"20,3 de 48,9 ha\", \"em 20,3 ha\", \"20,3 de 50,6 ha\", \"nos 51 ha\").\ngit diff a1f653e 3ba5f14 does not touch irrigacao.py:431/499/501 or irrigacao_estado.js:374.\ngit blame: irrigacao.py:431 comes from e8d780d (base); irrigacao_estado.js:374 from abbef761 (round 3).",
+          "fundamento": "Reproduced with the real code and state. On the same IR-03det screen for OS-0604, the 'Avanço' line shows 1 decimal place (\"20,3 de 48,9 ha\"). The passadas grid and the trilha show 2 (\"20,27 de 48,93 ha\"). The 'Informar leitura' panel for OS-0602 shows \"em 20,3 ha\" and \"20,3 de 50,6 ha\" (1 place). The full-término trilha writes \"nos 51 ha\" for 50,63 ha (0 places). The finding stands: X3 swept irrigacao.py:483/492/510 and irrSituacao, and Y5 swept :427/436, but neither reached these four spots.\n\nThe round 5 diff did not introduce it. The same probe on a1f653e gives identical output, and the cited lines do not appear in the a1f653e..3ba5f14 diff. The defect is older (e8d780d / abbef761); round 5 only left the sweep incomplete.\n\nSeverity stays S4, cosmetic. Stored values (p.cob, x.ha, conf.est, credit) still have 2 decimal places, and no calculation, lock, validation or flow depends on these strings. The only effect is a display mismatch between rows on the same screen; for example, \"7,53 mm em 20,3 ha\" does not match 1.526 m³ exactly. The proposed fix (irrN(v,2,1) for coverage and irrN(x.ha,2,0) for the sector area, as on lines 427/437) is consistent with X3/Y5."
+        }
+      },
+      {
+        "lente": "sint-r5",
+        "achado": {
+          "branch": "SINT",
+          "arquivo": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+          "linha": 446,
+          "titulo": "Textos da v2 de fertirrigação mostram a dose com 1 casa ao lado do total de 2 casas, e a conta escrita não fecha",
+          "severidade": "S4",
+          "cenario_de_falha": "Com 'Adicionar produtos' na OS-0604 (48,93 ha) e dose de 12,25 kg/ha, a mensagem e a trilha dizem 'Nitrato de cálcio 12,3 kg/ha ... requisição de 599,39 kg' (12,3 × 48,93 = 601,84). A O.S. grava e mostra 12,25. Com dose de 0,04 kg/ha, o texto diz '0,0 kg/ha ... requisição de 1,96 kg'. É a mesma classe do Z3 e do X3 (texto da v2 com casas diferentes), agora na dose.",
+          "evidencia": "Node (p13.js): 'OS-0604 v2 criada (Nitrato de cálcio 12,3 kg/ha) · ... · requisição de 599,39 kg na liberação.' com O.S. dose 12.25, tot 599.39, área 48.93; 'OS-0604 v2 criada (Nitrato de cálcio 0,0 kg/ha) · ... · requisição de 1,96 kg na liberação.' com O.S. dose 0.04, tot 1.96.",
+          "correcao_proposta": "Nas linhas 446 e 447, mostrar a dose com até 3 casas e mínimo 1 (irrN(d.dose,3,1)) ou com cenNum(d.dose), como a O.S. já mostra."
+        },
+        "veredicto": {
+          "refutado": false,
+          "reproduzido": true,
+          "severidade": "S4",
+          "introduzido_pela_rodada_5": false,
+          "comando": "D=/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev6; git -C /home/user/sp-camada-sintetica archive 3ba5f14 tools/prototipo/v37 | tar -x -C $D/w-sint-r5-v4 (and a1f653e into $D/w-sint-r5-v4-base); python3 $D/sonda-sint-r5-v4/sonda.py <gen37 of each copy>. The probe uses node and builds the same JS as quantidade_test.py: cenario.js_prefixo + JS_NUCLEO + dados_mip + dados_irrigacao + AG.JS_AG01, plus localStorage in memory. For each dose in [12.25, 0.04] it runs cenReset(); irrReset(); irrReclassTudo(null,'OS-0604',{prod:'Nitrato de cálcio',dose,mot:'teste'}). It then prints r.msg, the last trilha entry, o.fert.{dose,area,tot} and cenGet().ordens['OS-0604'].ins.",
+          "saida": "3ba5f14 · dose 12.25: msg 'OS-0604 v2 criada (Nitrato de cálcio 12,3 kg/ha) · para o agrônomo liberar na O.S. · voltou a A liberar · requisição de 599,39 kg na liberação.'; trilha ev 'Versão v2 · Nitrato de cálcio 12,3 kg/ha · teste · voltou a A liberar · requisição de 599,39 kg na liberação'; fertDose 12.25, area 48.93, tot 599.39; O.S. ins [{p:'Nitrato de cálcio',dose:12.25,un:'kg',tot:599.39}]; the written sum 12,3 × 48,93 = 601,84 is not 599,39. dose 0.04: msg '... (Nitrato de cálcio 0,0 kg/ha) ... requisição de 1,96 kg na liberação.'; trilha '... 0,0 kg/ha ... 1,96 kg'; fertDose 0.04, tot 1.96. a1f653e (base): msg identical in both cases (12,3 / 599,39 and 0,0 / 1,96). git log -S shows the irrN(d.dose, 1) text already in e8d780d (root commit), before rounds 3–5.",
+          "fundamento": "The finding reproduced through the same path the screen uses. In areas/irrigacao.py:524–526, rc_ok passes g2num('12,25') = 12.25 unrounded to irrReclassTudo. Lines 446/447 of irrigacao_estado.js format the dose with irrN(d.dose, 1), so the toast and the trilha show 12,3 kg/ha, or 0,0 kg/ha for 0.04, next to a total of 2 decimal places that comes from the real dose. The values the system acts on are correct: o.fert.dose 12.25, tot 599.39 = cenQtd(12.25, 48.93), the O.S. dose 12.25, and the reservation at release. Nothing is computed from the text. The defect is therefore a display inconsistency: the written figures do not add up, and in the extreme case the text shows '0,0 kg/ha' with a 1,96 kg requisition. S4 holds. The trilha is a history text, but the O.S. and the receipt keep the real dose, so no recorded fact is corrupted. The finding was not introduced by round 5: round 5's diff (a1f653e..3ba5f14) does not touch lines 446/447, the probe on a1f653e gives the same output, and the text comes from the root commit e8d780d. It is the same class as Z3/X3 (decimal places in the v2 texts) and was left out of those fixes. The proposed fix, irrN(d.dose,3,1) or cenNum(d.dose), is consistent with the O.S. display."
+        }
+      }
+    ]
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Achar"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 2,
+      "title": "Verificar"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "achar:rend-r5",
+      "phaseIndex": 1,
+      "phaseTitle": "Achar",
+      "agentId": "a1aff3ea20dd7353b",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1791135402614,
+      "queuedAt": 1791135402587,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Revisão da rodada 5 da REND (2eeb2e3 contra 9e9cf73 e 1688f…",
+      "promptPreview": "Contexto: protótipo Python+JS de gestão agrícola em /home/user/sp-camada-sintetica (SOMENTE LEITURA), código em tools/prototipo/v37/gen37/. Registro: tools/prototipo/v37/RETOMADA-NUVEM.md (seções PRE-REV-20261004, rodadas 1–3).\nRevise SÓ a rodada 5 (as rodadas 1–4 já foram revisadas; as 4 rodadas anteriores acharam S2 novos na REND a cada vez, então seja especialmente duro com o modelo de janelas)…",
+      "promptFramed": true,
+      "lastProgressAt": 1791136699089,
+      "tokens": 258556,
+      "toolCalls": 49,
+      "durationMs": 1296473,
+      "resultPreview": "{\"findings\":[{\"branch\":\"REND\",\"arquivo\":\"tools/prototipo/v37/gen37/safra.js\",\"linha\":118,\"titulo\":\"Triângulo de configurações que se excluem perde a janela quando uma 4ª, com janela maior ou sem janela, se exclui das três: com menos máquinas o plano fica mais otimista\",\"severidade\":\"S2\",\"cenario_de_falha\":\"Usei o caso V1 do oráculo: A–B em sequência declarada, A–C no ativo a01, B–C na única planta…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "achar:sint-r5",
+      "phaseIndex": 1,
+      "phaseTitle": "Achar",
+      "agentId": "a9c9068c594d534ef",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1791135402615,
+      "queuedAt": 1791135402587,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Lente: SINT da rodada 5 (git diff a1f653e 3ba5f14, X1–X6), …",
+      "promptPreview": "Contexto: protótipo Python+JS de gestão agrícola em /home/user/sp-camada-sintetica (SOMENTE LEITURA), código em tools/prototipo/v37/gen37/. Registro: tools/prototipo/v37/RETOMADA-NUVEM.md (seções PRE-REV-20261004, rodadas 1–3).\nRevise SÓ a rodada 5 (as rodadas 1–4 já foram revisadas; as 4 rodadas anteriores acharam S2 novos na REND a cada vez, então seja especialmente duro com o modelo de janelas)…",
+      "promptFramed": true,
+      "lastProgressAt": 1791137568861,
+      "tokens": 310177,
+      "toolCalls": 80,
+      "durationMs": 2165426,
+      "resultPreview": "{\"findings\":[{\"branch\":\"SINT\",\"arquivo\":\"tools/prototipo/v37/gen37/irrigacao_estado.js\",\"linha\":439,\"titulo\":\"Fertirrigação v2 criada depois de um avanço pequeno (0,01 a ~0,06 ha) nunca credita o pivô: o v1 fica com 0 m³, o v1 + v2 não fecha a volta e o sistema manda irrigar de novo\",\"severidade\":\"S3\",\"cenario_de_falha\":\"Na OS-0602 (Pivô 8, 50,63 ha, 1 passada): irrIniciar, irrAvanco 0,03 ha e irr…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 3,
+      "label": "verif:rend-r5#0",
+      "phaseIndex": 2,
+      "phaseTitle": "Verificar",
+      "agentId": "aecfb02d622f476ed",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1791136701073,
+      "queuedAt": 1791136701044,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "nenhuma",
+      "promptPreview": "Contexto: protótipo Python+JS de gestão agrícola em /home/user/sp-camada-sintetica (SOMENTE LEITURA), código em tools/prototipo/v37/gen37/. Registro: tools/prototipo/v37/RETOMADA-NUVEM.md (seções PRE-REV-20261004, rodadas 1–3).\nRevise SÓ a rodada 5 (as rodadas 1–4 já foram revisadas; as 4 rodadas anteriores acharam S2 novos na REND a cada vez, então seja especialmente duro com o modelo de janelas)…",
+      "promptFramed": true,
+      "lastProgressAt": 1791137001668,
+      "tokens": 120926,
+      "toolCalls": 16,
+      "durationMs": 300595,
+      "resultPreview": "{\"refutado\":true,\"reproduzido\":true,\"severidade\":\"nenhuma\",\"introduzido_pela_rodada_5\":false,\"comando\":\"B=/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev6; cópias novas com `git archive 2eeb2e3|9e9cf73 tools/prototipo/v37` em $B/w-rend-r5-v0-<commit>; `node $B/v0/sonda.js $B` (bloco REPARTIR real: V1 + D, D com máquina própria ou dividindo t1/t2/t3…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 4,
+      "label": "verif:rend-r5#1",
+      "phaseIndex": 2,
+      "phaseTitle": "Verificar",
+      "agentId": "aa571ddaf45a1a15a",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1791137003950,
+      "queuedAt": 1791136701044,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "S3",
+      "promptPreview": "Contexto: protótipo Python+JS de gestão agrícola em /home/user/sp-camada-sintetica (SOMENTE LEITURA), código em tools/prototipo/v37/gen37/. Registro: tools/prototipo/v37/RETOMADA-NUVEM.md (seções PRE-REV-20261004, rodadas 1–3).\nRevise SÓ a rodada 5 (as rodadas 1–4 já foram revisadas; as 4 rodadas anteriores acharam S2 novos na REND a cada vez, então seja especialmente duro com o modelo de janelas)…",
+      "promptFramed": true,
+      "lastProgressAt": 1791137165460,
+      "tokens": 98620,
+      "toolCalls": 11,
+      "durationMs": 161510,
+      "resultPreview": "{\"refutado\":false,\"reproduzido\":true,\"severidade\":\"S3\",\"introduzido_pela_rodada_5\":true,\"comando\":\"B=/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev6; cópias w-rend-r5-v1 (git archive 2eeb2e3) e w-rend-r5-v1-r4 (git archive 9e9cf73). Rodei node $B/sonda_fc.js $B e node $B/sonda_fc2.js $B; as duas sondas extraem o bloco '// >>> REPARTIR … // <<< REP…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 5,
+      "label": "verif:rend-r5#2",
+      "phaseIndex": 2,
+      "phaseTitle": "Verificar",
+      "agentId": "a5639f7a9a6278a26",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1791137167856,
+      "queuedAt": 1791136701045,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "S3",
+      "promptPreview": "Contexto: protótipo Python+JS de gestão agrícola em /home/user/sp-camada-sintetica (SOMENTE LEITURA), código em tools/prototipo/v37/gen37/. Registro: tools/prototipo/v37/RETOMADA-NUVEM.md (seções PRE-REV-20261004, rodadas 1–3).\nRevise SÓ a rodada 5 (as rodadas 1–4 já foram revisadas; as 4 rodadas anteriores acharam S2 novos na REND a cada vez, então seja especialmente duro com o modelo de janelas)…",
+      "promptFramed": true,
+      "lastProgressAt": 1791137240639,
+      "tokens": 83458,
+      "toolCalls": 7,
+      "durationMs": 72782,
+      "resultPreview": "{\"refutado\":false,\"reproduzido\":true,\"severidade\":\"S3\",\"introduzido_pela_rodada_5\":true,\"comando\":\"D=/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev6/w-rend-r5-v2; git archive 2eeb2e3 em $D/new e 9e9cf73 em $D/old (somente tools/prototipo/v37). `node $D/sonda.js $D` carrega o bloco REPARTIR de safra.js de cada commit com new Function e roda reparti…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 6,
+      "label": "verif:rend-r5#3",
+      "phaseIndex": 2,
+      "phaseTitle": "Verificar",
+      "agentId": "ada969dd0bafed1cf",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1791137242473,
+      "queuedAt": 1791136701045,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "S3",
+      "promptPreview": "Contexto: protótipo Python+JS de gestão agrícola em /home/user/sp-camada-sintetica (SOMENTE LEITURA), código em tools/prototipo/v37/gen37/. Registro: tools/prototipo/v37/RETOMADA-NUVEM.md (seções PRE-REV-20261004, rodadas 1–3).\nRevise SÓ a rodada 5 (as rodadas 1–4 já foram revisadas; as 4 rodadas anteriores acharam S2 novos na REND a cada vez, então seja especialmente duro com o modelo de janelas)…",
+      "promptFramed": true,
+      "lastProgressAt": 1791137339602,
+      "tokens": 81960,
+      "toolCalls": 10,
+      "durationMs": 97129,
+      "resultPreview": "{\"refutado\":false,\"reproduzido\":true,\"severidade\":\"S3\",\"introduzido_pela_rodada_5\":true,\"comando\":\"D=/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev6/w-rend-r5-v3; git archive 2eeb2e3 em $D/r5 e 9e9cf73 em $D/r4. Rodei `node $D/sonda.js $D` e `node $D/sonda2.js $D`. As duas sondas extraem o bloco REPARTIR de safra.js de cada versão e chamam reparti…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 7,
+      "label": "verif:rend-r5#4",
+      "phaseIndex": 2,
+      "phaseTitle": "Verificar",
+      "agentId": "a4b5d277d8f2cfb9f",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1791137341513,
+      "queuedAt": 1791136701045,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "S4",
+      "promptPreview": "Contexto: protótipo Python+JS de gestão agrícola em /home/user/sp-camada-sintetica (SOMENTE LEITURA), código em tools/prototipo/v37/gen37/. Registro: tools/prototipo/v37/RETOMADA-NUVEM.md (seções PRE-REV-20261004, rodadas 1–3).\nRevise SÓ a rodada 5 (as rodadas 1–4 já foram revisadas; as 4 rodadas anteriores acharam S2 novos na REND a cada vez, então seja especialmente duro com o modelo de janelas)…",
+      "promptFramed": true,
+      "lastProgressAt": 1791137529812,
+      "tokens": 95360,
+      "toolCalls": 14,
+      "durationMs": 188298,
+      "resultPreview": "{\"refutado\":false,\"reproduzido\":true,\"severidade\":\"S4\",\"introduzido_pela_rodada_5\":true,\"comando\":\"B=/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev6; for c in 2eeb2e3 9e9cf73; do mkdir -p $B/w-rend-r5-v4-$c && git -C /home/user/sp-camada-sintetica archive $c tools/prototipo/v37 | tar -x -C $B/w-rend-r5-v4-$c; done; for c in 9e9cf73 2eeb2e3; do nod…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 8,
+      "label": "verif:sint-r5#0",
+      "phaseIndex": 2,
+      "phaseTitle": "Verificar",
+      "agentId": "a41d1631fd49f5335",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1791137570828,
+      "queuedAt": 1791137570825,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "S3",
+      "promptPreview": "Contexto: protótipo Python+JS de gestão agrícola em /home/user/sp-camada-sintetica (SOMENTE LEITURA), código em tools/prototipo/v37/gen37/. Registro: tools/prototipo/v37/RETOMADA-NUVEM.md (seções PRE-REV-20261004, rodadas 1–3).\nRevise SÓ a rodada 5 (as rodadas 1–4 já foram revisadas; as 4 rodadas anteriores acharam S2 novos na REND a cada vez, então seja especialmente duro com o modelo de janelas)…",
+      "promptFramed": true,
+      "lastProgressAt": 1791137701643,
+      "tokens": 91333,
+      "toolCalls": 12,
+      "durationMs": 130812,
+      "resultPreview": "{\"refutado\":false,\"reproduzido\":true,\"severidade\":\"S3\",\"introduzido_pela_rodada_5\":false,\"comando\":\"S=/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev6; for c in 3ba5f14 a1f653e; do D=$S/w-sint-r5-v0-$c; mkdir -p $D && git -C /home/user/sp-camada-sintetica archive $c tools/prototipo/v37 | tar -x -C $D; python3 $S/probes-sint-r5-v0/base.py $D/tools/p…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 9,
+      "label": "verif:sint-r5#1",
+      "phaseIndex": 2,
+      "phaseTitle": "Verificar",
+      "agentId": "a22179be716eddfb2",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1791137570830,
+      "queuedAt": 1791137570825,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "S3",
+      "promptPreview": "Contexto: protótipo Python+JS de gestão agrícola em /home/user/sp-camada-sintetica (SOMENTE LEITURA), código em tools/prototipo/v37/gen37/. Registro: tools/prototipo/v37/RETOMADA-NUVEM.md (seções PRE-REV-20261004, rodadas 1–3).\nRevise SÓ a rodada 5 (as rodadas 1–4 já foram revisadas; as 4 rodadas anteriores acharam S2 novos na REND a cada vez, então seja especialmente duro com o modelo de janelas)…",
+      "promptFramed": true,
+      "lastProgressAt": 1791137749422,
+      "tokens": 111806,
+      "toolCalls": 14,
+      "durationMs": 178590,
+      "resultPreview": "{\"refutado\":false,\"reproduzido\":true,\"severidade\":\"S3\",\"introduzido_pela_rodada_5\":false,\"comando\":\"B=/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev6; cópias w-sint-r5-v1 (git archive 3ba5f14) e w-sint-r5-v1-a1f653e (git archive a1f653e). Harness próprio $B/w-sint-r5-v1/probe/mk.py, que concatena cenario.js_prefixo + JS_NUCLEO + dados_mip + dados_…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 10,
+      "label": "verif:sint-r5#2",
+      "phaseIndex": 2,
+      "phaseTitle": "Verificar",
+      "agentId": "a9ad1389dddeb12d3",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1791137703704,
+      "queuedAt": 1791137570825,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "S3",
+      "promptPreview": "Contexto: protótipo Python+JS de gestão agrícola em /home/user/sp-camada-sintetica (SOMENTE LEITURA), código em tools/prototipo/v37/gen37/. Registro: tools/prototipo/v37/RETOMADA-NUVEM.md (seções PRE-REV-20261004, rodadas 1–3).\nRevise SÓ a rodada 5 (as rodadas 1–4 já foram revisadas; as 4 rodadas anteriores acharam S2 novos na REND a cada vez, então seja especialmente duro com o modelo de janelas)…",
+      "promptFramed": true,
+      "lastProgressAt": 1791137836205,
+      "tokens": 91355,
+      "toolCalls": 15,
+      "durationMs": 132500,
+      "resultPreview": "{\"refutado\":false,\"reproduzido\":true,\"severidade\":\"S3\",\"introduzido_pela_rodada_5\":false,\"comando\":\"B=/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev6; para cada C em 3ba5f14 (cópia w-sint-r5-v2), a1f653e e 96ed62e: git -C /home/user/sp-camada-sintetica archive $C tools/prototipo/v37 | tar -x -C $D; cd $D/tools/prototipo/v37/gen37; python3 monta 'g…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 11,
+      "label": "verif:sint-r5#3",
+      "phaseIndex": 2,
+      "phaseTitle": "Verificar",
+      "agentId": "afc187d7e78f54c9a",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1791137751278,
+      "queuedAt": 1791137570826,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "S4",
+      "promptPreview": "Contexto: protótipo Python+JS de gestão agrícola em /home/user/sp-camada-sintetica (SOMENTE LEITURA), código em tools/prototipo/v37/gen37/. Registro: tools/prototipo/v37/RETOMADA-NUVEM.md (seções PRE-REV-20261004, rodadas 1–3).\nRevise SÓ a rodada 5 (as rodadas 1–4 já foram revisadas; as 4 rodadas anteriores acharam S2 novos na REND a cada vez, então seja especialmente duro com o modelo de janelas)…",
+      "promptFramed": true,
+      "lastProgressAt": 1791137844331,
+      "tokens": 86818,
+      "toolCalls": 9,
+      "durationMs": 93051,
+      "resultPreview": "{\"refutado\":false,\"reproduzido\":true,\"severidade\":\"S4\",\"introduzido_pela_rodada_5\":false,\"comando\":\"D=/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev6; git -C /home/user/sp-camada-sintetica archive 3ba5f14 tools/prototipo/v37 | tar -x -C $D/w-sint-r5-v3 (and a1f653e into $D/w-sint-r5-v3-old); python3 $D/probe-sint-r5-v3.py <gen37>. The probe uses n…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 12,
+      "label": "verif:sint-r5#4",
+      "phaseIndex": 2,
+      "phaseTitle": "Verificar",
+      "agentId": "a026505991c4fdfb1",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1791137838016,
+      "queuedAt": 1791137570826,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "S4",
+      "promptPreview": "Contexto: protótipo Python+JS de gestão agrícola em /home/user/sp-camada-sintetica (SOMENTE LEITURA), código em tools/prototipo/v37/gen37/. Registro: tools/prototipo/v37/RETOMADA-NUVEM.md (seções PRE-REV-20261004, rodadas 1–3).\nRevise SÓ a rodada 5 (as rodadas 1–4 já foram revisadas; as 4 rodadas anteriores acharam S2 novos na REND a cada vez, então seja especialmente duro com o modelo de janelas)…",
+      "promptFramed": true,
+      "lastProgressAt": 1791137922147,
+      "tokens": 84421,
+      "toolCalls": 11,
+      "durationMs": 84131,
+      "resultPreview": "{\"refutado\":false,\"reproduzido\":true,\"severidade\":\"S4\",\"introduzido_pela_rodada_5\":false,\"comando\":\"D=/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/prerev6; git -C /home/user/sp-camada-sintetica archive 3ba5f14 tools/prototipo/v37 | tar -x -C $D/w-sint-r5-v4 (and a1f653e into $D/w-sint-r5-v4-base); python3 $D/sonda-sint-r5-v4/sonda.py <gen37 of each cop…"
+    }
+  ],
+  "totalTokens": 1514790,
+  "totalToolCalls": 248
+}
