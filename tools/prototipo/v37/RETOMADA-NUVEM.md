@@ -121,6 +121,13 @@ Sem a camada sintética (tarefa 1), o build para em `dados_lagoa_fonte`, com uma
     - **Z3 · S4 · `gen37/irrigacao_estado.js:438/439/460` e `gen37/areas/irrigacao.py:426/517`:** área com 1 casa ao lado do total de 2 casas nos textos da v2. Passa a até 2 casas.
     - **Z4 · S4 · `gen37/irrigacao_estado.js:344/362` (irrAvanco e término):** avanço digitado com mais de 2 casas faz v1 + v2 ≠ área do setor. A cobertura é guardada com 2 casas.
     - **Z5 · S4 · `gen37/quantidade_test.py`:** varredura nos dois sentidos (área × dose) e testes de comportamento da trava do ajuste, do aviso do MIP e da recusa de total 0.
+  - **Revisão adversarial da rodada 3 (rodada 4), reserva antes de editar:**
+    - **Y1 · S3 · `gen37/irrigacao_estado.js:435` e prévia em `gen37/areas/irrigacao.py:517`:** com o avanço em 100 %, a v2 nascia com 0 ha e 0 kg e a ordem ficava sem saída (Z1 recusa a liberação). Recusa ao criar, com a causa ("a passada já cobriu o setor" ou "aumente a dose").
+    - **Y2 · S3 · `gen37/mip.js:246–262` (mipChecks):** receituário e O.S. com total 0 (foco de 0,01 ha). Trava "dose × área dá 0: aumente a área".
+    - **Y3 · S3 · `gen37/areas/processo_os.py:246–250` (osMerge):** a recusa de total 0 aparecia como "Falta insumo" com dono Suprimentos. Passa a "Total 0", com o agrônomo e "ajustar antes de liberar".
+    - **Y4 · S3 · `gen37/irrigacao_estado.js:344/362` e `gen37/areas/irrigacao.py:491/510`:** o arredondamento a 2 casas vinha depois da validação (término com 0,004 ha virava 0 e encerrava com conferência falsa). Arredonda antes de validar, no estado e na tela.
+    - **Y5 · S4 · `gen37/areas/irrigacao.py:427/436` e `gen37/irrigacao_estado.js:107/557`:** cobertura e faixa com 1 casa ao lado do saldo da v2 com 2 casas. Passa a até 2 casas (mínimo 1, como antes).
+    - **Y6 · S4 · `gen37/areas/processo_os.py` (trava do ajuste) e `gen37/quantidade_test.py`:** a trava vira a função `osc_ajFalta` do núcleo (a tela chama a mesma), com teste de comportamento; testes do término com 20,275 e 0,004 ha, da v2 com 0 ha e do MIP com total 0.
   - **Separação:** nenhum hunk da REND (`126899e5`) toca esses arquivos. A AÇÃO (`20f25726`) toca `agronomia.py:1748` e `irrigacao.py:26–86`, fora das linhas acima. Depois do commit aqui, a `claude/v44-rend-01` recebe esta branch por merge.
 
 ## Reserva ativa · V44-REND (contrato no comentário 5974952517; liberada pelo 5974993475) · branch `claude/v44-rend-01`
