@@ -136,6 +136,13 @@ Sem a camada sintética (tarefa 1), o build para em `dados_lagoa_fonte`, com uma
     - **X5 · S4 · `gen37/irrigacao_estado.js:54` (irrV2Zero):** com outra passada programada, a recusa manda confirmar o término e adicionar os produtos às próximas passadas (não criar nova ordem).
     - **X6 · `gen37/quantidade_test.py`:** proteção de regressão de X1, X2 e X5.
   - **Separação:** nenhum hunk da REND (`126899e5`) toca esses arquivos. A AÇÃO (`20f25726`) toca `agronomia.py:1748` e `irrigacao.py:26–86`, fora das linhas acima. Depois do commit aqui, a `claude/v44-rend-01` recebe esta branch por merge.
+  - **Revisão adversarial da rodada 5 (rodada 6 da SINT), reserva antes de editar; candidata entregue `3ba5f14` (evidências `25d3c47`, PR 36), 5982995985.** Nenhum S1/S2; os cinco achados são anteriores à rodada 5:
+    - **U1 · S3 · `gen37/irrigacao_estado.js:96–101` (irrCreditos) e espelho `gen37/dados_irrigacao.py:69–80` (_gov):** v1 de avanço pequeno (0,01–0,06 ha) fica com 0 m³ pelo arredondamento da telemetria e sai do grupo da ordem; v1 + v2 não fecham a volta e o painel recomenda nova rega. A parcial conta a área coberta mesmo com 0 m³; a lâmina vem só das aplicações com volume.
+    - **U2 · S3 · `gen37/irrigacao_estado.js:54` (irrV2Zero):** com a passada em curso e outra programada, a v2 somava a água da passada seguinte mas cobria só o saldo; a passada seguinte sumia ao encerrar. Recusa com a mesma orientação do X5 (confirmar o término e adicionar os produtos às próximas passadas), no estado e na prévia.
+    - **U3 · S3 · `gen37/mip.js:240–262` (mipChecks) e `gen37/areas/processo_os.py:316/556/567` (osc_ajFalta e prévias do ajuste):** dose ou área não finita (1e999) lançava dentro do renderVals e o painel sumia. Número não finito vira trava "Informe a dose/área" antes de qualquer conta.
+    - **U4 · S4 · `gen37/areas/irrigacao.py:431/499/501` e `gen37/irrigacao_estado.js:374`:** cobertura e área do setor com 0–1 casa ao lado de valores com 2. Passa a até 2 casas.
+    - **U5 · S4 · `gen37/irrigacao_estado.js:446/447`:** dose da v2 com 1 casa ao lado do total com 2. Passa a até 3 casas (mínimo 1), como a O.S.
+    - Regressões em `gen37/quantidade_test.py`. Nenhum hunk da REND toca essas linhas; a AÇÃO toca `irrigacao.py:26–86`, fora delas.
 
 ## Tarefas, na ordem
 1. **CAMADA-SINTETICA (CORTE-REMOTO-01)**
