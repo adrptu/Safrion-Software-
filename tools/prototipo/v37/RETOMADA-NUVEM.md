@@ -100,6 +100,12 @@ Sem a camada sintética (tarefa 1), o build para em `dados_lagoa_fonte`, com uma
 - **Base:** `0fcc2dc` (candidata CAMADA + SINT-REV + SINT-C03), mais o merge **sequencial** (não octopus) de `prototipo-limpo/v44-rend` `126899e5`.
 - **Arquivos:** `gen37/dados2.py`, `gen37/safra.js`, `gen37/areas/processo_safra.py` (preservar a formatação SINT da linha 39), `gen37/rend_multiconjuntos_test.py` e `gen37/rend_multiconjuntos_unit.py`. `gen37/cdp.py` entra só para resolver o conflito do merge.
 - A correção SINT-C03 fica separada (`45b34c7`, na branch `claude/camada-sintetica-01`). A AÇÃO vem depois. A composição não é aceite nem publicação.
+- **Estado da composição (executado na nuvem):**
+  - merge `e9fd934`, com conflito só no `cdp.py`, resolvido mantendo o `CHROME_BIN`; o `rend_multiconjuntos_unit.py` passa a rodar no node fora do macOS;
+  - REND unitário 36/36: o S5 dá 22,5 h necessárias e 12,5 h de déficit, em JS e no espelho Python (Fraction);
+  - REND telas: fluxo 16/16, telas 4/4, bordas 10/10, bordas2 5/5;
+  - build 0, varredura 144/144, camada 14/14, talgeo 8/8, talmapa 8/8, quantidade 6/6 e regressão da Lagoa verde;
+  - aguarda a revisão do Codex e a contraprova do Gemini.
 
 ## Tarefas, na ordem
 1. **CAMADA-SINTETICA (CORTE-REMOTO-01)**

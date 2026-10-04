@@ -18,6 +18,8 @@ from fractions import Fraction as F
 HERE=os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0,HERE)
 import dados2 as D2
 JSC='/System/Library/Frameworks/JavaScriptCore.framework/Versions/Current/Helpers/jsc'
+# jsc no macOS; fora dele (Linux/nuvem) o node, com print → console.log; o mesmo bloco REPARTIR nos dois
+MOTOR,PRELUDIO=([JSC],'') if os.path.exists(JSC) else (['node'],'globalThis.print=(...a)=>console.log(...a);')
 src=open(os.path.join(HERE,'safra.js')).read()
 m=re.search(r'// >>> REPARTIR.*?// <<< REPARTIR',src,re.S); assert m, 'bloco REPARTIR não encontrado em safra.js'
 BLOCO=m.group(0)
@@ -110,9 +112,9 @@ js.append("(()=>{ const r=repartir(108,[{rend:rendCalc(6,8,75)},{rend:rendCalc(1
 js.append("OUT['11']=(()=>{ const t=[repartir(48,[{rend:6},{rend:4}]).decorrido,repartir(48,[{rend:6}]).decorrido,repartir(48,[{rend:8}]).decorrido]; const T=Math.max.apply(null,t); return [48/T,T,t]; })();")
 js.append("OUT['12']=[repartir(1,[{rend:rendCalc(1.1,3.7,63)}]).hconj, 1/(Math.round(rendCalc(1.1,3.7,63)*100)/100)];")
 js.append('print(JSON.stringify(OUT));')
-with tempfile.NamedTemporaryFile('w',suffix='.js',delete=False) as f: f.write('\n'.join(js)); jsf=f.name
-pr=subprocess.run([JSC,jsf],capture_output=True,text=True,timeout=30); os.unlink(jsf)
-if pr.returncode!=0 or not pr.stdout.strip(): print('jsc falhou:',pr.stderr[:800]); print('RESULTADO: 0/1 · jsc não rodou'); sys.exit(1)
+with tempfile.NamedTemporaryFile('w',suffix='.js',delete=False) as f: f.write(PRELUDIO+'\n'+'\n'.join(js)); jsf=f.name
+pr=subprocess.run(MOTOR+[jsf],capture_output=True,text=True,timeout=30); os.unlink(jsf)
+if pr.returncode!=0 or not pr.stdout.strip(): print('motor JS (jsc/node) falhou:',pr.stderr[:800]); print('RESULTADO: 0/1 · jsc não rodou'); sys.exit(1)
 OUT=json.loads(pr.stdout.strip().splitlines()[-1])
 OK=0; N=0
 def near(a,b):
@@ -186,8 +188,8 @@ for n in range(400):
     RND.append((rng.choice([0,rng.randint(1,300),round(rng.uniform(1,300),2),round(rng.uniform(1,300),2)]),cfs,rng.choice([None,{'plant':{'un':1,'nome':'Plantadeiras'}},{'plant':{'un':2,'nome':'Plantadeiras'}}])))
 SELR="r=>({Q:r.Q,alocado:r.alocado,saldo:r.saldo,pendente:r.pendente,causa:r.causa,hconj:r.hconj,decorrido:r.decorrido,custo:r.custo,custoOk:r.custoOk,diesel:r.diesel,hh:r.hh,conflito:r.conflito,deficit:r.deficit,nec:r.nec,falta:r.falta,motivos:r.motivos,it:r.itens.map(x=>({q:x.q,h:x.h,ht:x.ht,H:isFinite(x.H)?x.H:-1,g:x.grupo,s:x.emSeq,nq:x.nq,fq:x.fq}))})"
 jr=['function nfa(n){ return String(n); }',BLOCO,'const SELR='+SELR+';','const R=[];']+[f"R.push(SELR(repartir({json.dumps(Q)},{json.dumps(c)},{json.dumps(pl)})));" for Q,c,pl in RND]+['print(JSON.stringify(R));']
-with tempfile.NamedTemporaryFile('w',suffix='.js',delete=False) as f: f.write('\n'.join(jr)); jsf=f.name
-pr=subprocess.run([JSC,jsf],capture_output=True,text=True,timeout=60); os.unlink(jsf); JR=json.loads(pr.stdout.strip().splitlines()[-1])
+with tempfile.NamedTemporaryFile('w',suffix='.js',delete=False) as f: f.write(PRELUDIO+'\n'+'\n'.join(jr)); jsf=f.name
+pr=subprocess.run(MOTOR+[jsf],capture_output=True,text=True,timeout=60); os.unlink(jsf); JR=json.loads(pr.stdout.strip().splitlines()[-1])
 def inv(r,Q):   # invariantes de um resultado (JS ou Python no mesmo formato)
     e=[]; its=r['it']; sq=sum(x['q'] for x in its)
     if abs(sq+r['saldo']-Q)>1e-7*max(1,Q): e.append('Σq+saldo≠Q')
