@@ -229,10 +229,28 @@ CASOS=[
    dict(q=['2','3','5'],alocado='10',saldo='20',conflito=True)),
  ('Da troca_reservada_ocupa_a_janela','regra (a) · A (50 %, janela 10 h) e B (sem %, troca 10 h) em sequência, 10 ha: a troca reservada de B ocupa a janela; pendente com a causa e o motivo da troca',
    10,[dict(id='A',nome='A',rend=1,custo_h=1,jan=10,part=50,seq=True,troca=0),dict(id='B',nome='B',rend=1,custo_h=1,jan=10,seq=True,troca=10)],None,
-   dict(q=['0','0'],pendente=True,causa='troca reservada ocupa a janela',motivo='B: troca de 10 h reservada na janela de 10 h da sequência')),
+   dict(q=['0','0'],pendente=True,causa='troca reservada ocupa a janela',motivo=['B: troca de 10 h reservada na janela de 10 h de A e B (sequência declarada)','reduza a troca ou tire B da sequência declarada'])),
  ('Db consideradas_em_sequencia','regra (b) · 3 configurações com 1 trator cada e 2 tratores: o motivo diz "consideradas em sequência nesta estimativa" (não afirma que trabalham em sequência)',
    20,[dict(id='A',nome='A',rend=1,custo_h=1,jan=10,part=50,rec={'trator':1}),dict(id='B',nome='B',rend=1,custo_h=1,jan=10,part=25,rec={'trator':1}),dict(id='C',nome='C',rend=1,custo_h=1,jan=10,part=25,rec={'trator':1})],
    {'trator':{'un':2,'nome':'Tratores'}},dict(motivo='Tratores: ao mesmo tempo precisariam de 3, a fazenda tem 2; configurações consideradas em sequência nesta estimativa')),
+ ('R2-2a buraco_por_configuracao_sem_janela','rodada 2 do D-01 · anel de 5 (T1, P2, O3, T3, P1) em que só K0 e K2 têm janela (30 h) e não dividem nada: o buraco passa por configurações sem prazo, que vão por último; K0 e K2 juntas de 0 a 20 h, 20 ha cada, sem conflito',
+   100,[dict(id='K0',nome='K0',rend=1,jan=30,ativos=['T1','P1','O1'],custo_h=1),dict(id='K1',nome='K1',rend=1,ativos=['T1','P2','O2'],custo_h=1),dict(id='K2',nome='K2',rend=1,jan=30,ativos=['T2','P2','O3'],custo_h=1),
+        dict(id='K3',nome='K3',rend=1,ativos=['T3','P3','O3'],custo_h=1),dict(id='K4',nome='K4',rend=1,ativos=['T3','P1','O4'],custo_h=1)],None,
+   dict(q=['20','20','20','20','20'],saldo='0',conflito=False)),
+ ('R2-2b buraco_entre_quem_tem_janela','rodada 2 do D-01 · controle positivo: o mesmo anel com as cinco em 30 h continua no conservador e diz isso no motivo (estimativa)',
+   100,[dict(id='K0',nome='K0',rend=1,jan=30,ativos=['T1','P1','O1'],custo_h=1),dict(id='K1',nome='K1',rend=1,jan=30,ativos=['T1','P2','O2'],custo_h=1),dict(id='K2',nome='K2',rend=1,jan=30,ativos=['T2','P2','O3'],custo_h=1),
+        dict(id='K3',nome='K3',rend=1,jan=30,ativos=['T3','P3','O3'],custo_h=1),dict(id='K4',nome='K4',rend=1,jan=30,ativos=['T3','P1','O4'],custo_h=1)],None,
+   dict(q=['6','6','6','6','6'],conflito=True,motivo=['máquinas compartilhadas em ciclo','consideradas em sequência nesta estimativa, precisam de'])),
+ ('R2-3 partes_fixas_grupo_inteiro_primeiro','rodada 2 do D-01 · A, B e C (3 ha/h, 12 %, 10 h) e D (4 ha/h, 64 %, 20 h), todas com máquina em comum duas a duas: o grupo inteiro (20 h) reduz as quatro na mesma fração (5/7); A+B+C = 8,57 h ≤ 10 h, então o subgrupo de 10 h não reduz de novo',
+   100,[dict(id='A',nome='A',rend=3,part=12,jan=10,ativos=['ab','ac','ad'],custo_h=1),dict(id='B',nome='B',rend=3,part=12,jan=10,ativos=['ab','bc','bd'],custo_h=1),
+        dict(id='C',nome='C',rend=3,part=12,jan=10,ativos=['ac','bc','cd'],custo_h=1),dict(id='D',nome='D',rend=4,part=64,jan=20,ativos=['ad','bd','cd'],custo_h=1)],None,
+   dict(q=['60/7','60/7','60/7','320/7'],motivo='cada uma faz 71,43 %')),
+ ('R2-5b troca_na_mesma_maquina','rodada 2 do D-01 · A e B no mesmo a01 (10 h cada), B com troca de 10 h, sem sequência declarada: o motivo nomeia o grupo e a origem e propõe outro conjunto, não "tirar da sequência"',
+   20,[dict(id='A',nome='A',rend=1,jan=10,ativos=['a01'],custo_h=1),dict(id='B',nome='B',rend=1,jan=10,ativos=['a01'],troca=10,custo_h=1)],None,
+   dict(motivo=['B: troca de 10 h reservada na janela de 10 h de A e B (mesma máquina do cadastro)','reduza a troca ou use outro conjunto para B'])),
+ ('R2-5c troca_nomeia_o_grupo','rodada 2 do D-01 · A–B na máquina x e B–C na máquina y, B troca 3 h e C troca 1 h, mesma janela de 10 h: um motivo de troca por grupo e janela, o da maior troca, dizendo de quais configurações é (antes, "B" com 3 h e "B, C" com 4 h na mesma janela, sem dizer o grupo)',
+   30,[dict(id='A',nome='A',rend=1,jan=10,ativos=['x'],custo_h=1),dict(id='B',nome='B',rend=1,jan=10,troca=3,ativos=['x','y'],custo_h=1),dict(id='C',nome='C',rend=1,jan=10,troca=1,ativos=['y'],custo_h=1)],None,
+   dict(motivo=['B, C: troca de 4 h reservada na janela de 10 h de B e C (mesma máquina do cadastro)'])),
  ('R2b grupo_de_recursos_nao_relaxa_janela_2','PRE-REV R2 · o mesmo com 2 plantadeiras: a mesma divisão (menos recurso nunca dá plano mais otimista); C ao mesmo tempo: 30 h',
    200,[dict(id='A',nome='A',rend=5,seq=True,jan=10,rec={'plant':1},custo_h=100),dict(id='B',nome='B',rend=5,seq=True,jan=10,custo_h=100),dict(id='C',nome='C',rend=5,rec={'plant':1},custo_h=100)],
    {'plant':{'un':2,'nome':'Plantadeiras'}},dict(q=['25','25','150'],saldo='0',decorrido='30',conflito=True,deficit='50/3')),
@@ -272,6 +290,9 @@ js.append("OUT['W4']=(()=>{ const cs=[]; for(let a=0;a<30;a++){ const at=[]; for
 js.append("OUT['D01f']=(()=>{ const r=repartir(15,[{id:'A',nome:'A',rend:1,jan:10,seq:true,ativos:['a01','t1'],rec:{oper:2},custo_h:1},{id:'B',nome:'B',rend:1,jan:10,seq:true,ativos:['t2'],rec:{plant:1,oper:4},custo_h:1},{id:'C',nome:'C',rend:1,jan:10,ativos:['a01','t3'],rec:{plant:1,oper:5},custo_h:1},{id:'D',nome:'D',rend:1,ativos:['t1','t2','t3'],custo_h:1}],{plant:{un:1,nome:'Plantadeiras'},oper:{un:8,nome:'Operadores'}}); return [r.itens.slice(0,3).reduce((a,x)=>a+x.h,0),r.conflito]; })();")
 js.append("OUT['M1']=repartir(100,[{nome:'A',rend:3.6,seq:true,jan:0,custo_h:1},{nome:'B',rend:7.2,seq:true,jan:10,custo_h:1}]).motivos;")
 js.append("OUT['12']=[repartir(1,[{rend:rendCalc(1.1,3.7,63)}]).hconj, 1/(Math.round(rendCalc(1.1,3.7,63)*100)/100)];")
+js.append("OUT['R2-1']=(()=>{ const cs=[]; for(let a=0;a<22;a++){ const at=[]; for(let b=0;b<22;b++) if(a!==b&&Math.floor(a/2)!==Math.floor(b/2)) at.push('e'+Math.min(a,b)+'_'+Math.max(a,b)); cs.push({id:'K'+a,nome:'K'+a,rend:1,jan:10+(a%2)*11+Math.floor(a/2),ativos:at,custo_h:1}); } cs.push({id:'A',nome:'A',rend:1,jan:10,ativos:['ab'],custo_h:1},{id:'B',nome:'B',rend:1,jan:10,ativos:['ab','bc'],custo_h:1},{id:'C',nome:'C',rend:1,jan:10,ativos:['bc'],custo_h:1}); const t0=Date.now(); const r=repartir(3000,cs); return [r.itens.slice(22).map(x=>x.q),r.motivos.some(m=>/combinações demais/.test(m)),Date.now()-t0]; })();")
+js.append("OUT['R2-5a']=(()=>{ const r=repartir(8,[{id:'F',nome:'F',rend:1,part:60,custo_h:1},{id:'B',nome:'B',rend:1,part:10,jan:4,ativos:['m'],troca:2,custo_h:1},{id:'A',nome:'A',rend:2,jan:4,ativos:['m'],custo_h:1}]); return [r.alocado,r.motivos.filter(m=>/troca de/.test(m))]; })();")
+js.append("OUT['R2-5d']=[[20,[{id:'A',nome:'A',rend:1,custo_h:1,jan:10,part:50,rec:{trator:1}},{id:'B',nome:'B',rend:1,custo_h:1,jan:10,part:25,rec:{trator:1}},{id:'C',nome:'C',rend:1,custo_h:1,jan:10,part:25,rec:{trator:1}}],{trator:{un:2,nome:'Tratores'}}],[10,[{id:'A',nome:'A',rend:1,custo_h:1,jan:10,part:50,seq:true},{id:'B',nome:'B',rend:1,custo_h:1,jan:10,seq:true,troca:10}],null],[20,[{id:'A',nome:'A',rend:1,jan:10,ativos:['a01'],custo_h:1},{id:'B',nome:'B',rend:1,jan:10,ativos:['a01'],custo_h:1}],null]].map(([Q,cs,pl])=>{ const r=repartir(Q,cs,pl); return [r.conflito,r.conflitoEst,r.itens.map(x=>[x.emSeq,x.seqEst])]; });")
 js.append('print(JSON.stringify(OUT));')
 with tempfile.NamedTemporaryFile('w',suffix='.js',delete=False) as f: f.write(PRELUDIO+'\n'+'\n'.join(js)); jsf=f.name
 pr=subprocess.run(MOTOR+[jsf],capture_output=True,text=True,timeout=30); os.unlink(jsf)
@@ -367,6 +388,37 @@ chk('D01f triangulo_mais_vizinho_sem_janela','D-01 · o S2 refutado na rodada 5 
 _ps=open(os.path.join(HERE,'areas','processo_safra.py'),encoding='utf-8').read()
 chk('Dc ajuda_sem_promessa','regra (c) · a ajuda de "Parte da área" não promete término no mesmo horário nem capacidade máxima',
     'sem "terminam juntas"','','',"as configurações sem % terminam juntas" not in _ps and 'não garante' in _ps)
+# ---------- rodada 2 do D-01 (pré-revisão adversarial do autor sobre 04bf6f2) ----------
+_ps2=open(os.path.join(HERE,'areas','processo_safra.py'),encoding='utf-8').read(); _sj=open(os.path.join(HERE,'safra.js'),encoding='utf-8').read(); _d2=open(os.path.join(HERE,'dados2.py'),encoding='utf-8').read()
+_bl=lambda t,a,b: t[t.index(a):t.index(b)]
+chk('R2-5e ajudas_e_motivos_sem_regra_antiga','rodada 2 do D-01 · ajudas da janela, da parte e da sequência e motivos do conservador sem "dividem a maior janela" nem "as mesmas horas produtivas"; a ajuda da janela fala em prazo',
+    'ausentes; "Prazo" na ajuda','','',
+    'dividem a maior janela' not in _ps2 and 'mesmas horas produtivas' not in _ps2 and 'Prazo, contado do início da ocorrência' in _ps2 and 'faz a estimativa considerar as configurações em sequência' in _ps2
+    and 'dividem a maior janela' not in _bl(_sj,'// >>> REPARTIR','// <<< REPARTIR') and 'dividem a maior janela' not in _bl(_d2,'# >>> REPARTIR','def _ok('))
+def _pares11():
+    cs=[]
+    for a in range(22):
+        at=[f'e{min(a,b)}_{max(a,b)}' for b in range(22) if a!=b and a//2!=b//2]
+        cs.append(dict(id=f'K{a}',nome=f'K{a}',rend=1,jan=10+(a%2)*11+a//2,ativos=at,custo_h=1))
+    return cs+[dict(id='A',nome='A',rend=1,jan=10,ativos=['ab'],custo_h=1),dict(id='B',nome='B',rend=1,jan=10,ativos=['ab','bc'],custo_h=1),dict(id='C',nome='C',rend=1,jan=10,ativos=['bc'],custo_h=1)]
+_t0=_t.time(); _r21=D2.repartir(3000,_pares11()); _d21=_t.time()-_t0
+chk('R2-1 teto_de_cortes_por_componente','rodada 2 do D-01 · 11 pares que passam de 8 192 cortes ficam no conservador (com motivo), mas o A–B–C independente continua com 5 ha cada (antes 3,33 ha cada, com conflito falso)',
+    'A, B, C = 5 · motivo "combinações demais" · < 1 s',f"JS q={OUT['R2-1'][0]} motivo={OUT['R2-1'][1]} {OUT['R2-1'][2]} ms",f"Py q={[round(float(x['q']),4) for x in _r21['itens'][22:]]} {round(_d21*1000)} ms",
+    all(near(v,5) for v in OUT['R2-1'][0]) and OUT['R2-1'][1] and OUT['R2-1'][2]<1000 and all(abs(float(x['q'])-5)<1e-9 for x in _r21['itens'][22:])
+    and any('combinações demais' in m for m in _r21['motivos']) and _d21<10)
+_c25=[dict(id='F',nome='F',rend=1,part=60,custo_h=1),dict(id='B',nome='B',rend=1,part=10,jan=4,ativos=['m'],troca=2,custo_h=1),dict(id='A',nome='A',rend=2,jan=4,ativos=['m'],custo_h=1)]
+_p25f=D2.repartir(8,_c25); _p25=D2.repartir(F(8),[py_cfg(c) for c in _c25])
+chk('R2-5a empate_sem_motivo_de_troca','rodada 2 do D-01 · tudo cabe (empate de ponto flutuante em A: 1,2 h para 1,2 h): sem o motivo "para liberar horas" da troca, em JS, Python float e Python Fraction',
+    '8 ha, nenhum motivo de troca',OUT['R2-5a'],[float(_p25f['alocado']),[m for m in _p25f['motivos'] if 'troca de' in m],str(_p25['alocado']),[m for m in _p25['motivos'] if 'troca de' in m]],
+    near(OUT['R2-5a'][0],8) and not OUT['R2-5a'][1] and abs(_p25f['alocado']-8)<1e-9 and not any('troca de' in m for m in _p25f['motivos']+_p25['motivos']) and _p25['alocado']==8)
+_e25=[]
+for Q_,cs_,pl_ in ((20,[dict(id='A',nome='A',rend=1,custo_h=1,jan=10,part=50,rec={'trator':1}),dict(id='B',nome='B',rend=1,custo_h=1,jan=10,part=25,rec={'trator':1}),dict(id='C',nome='C',rend=1,custo_h=1,jan=10,part=25,rec={'trator':1})],{'trator':{'un':2,'nome':'Tratores'}}),
+                   (10,[dict(id='A',nome='A',rend=1,custo_h=1,jan=10,part=50,seq=True),dict(id='B',nome='B',rend=1,custo_h=1,jan=10,seq=True,troca=10)],None),
+                   (20,[dict(id='A',nome='A',rend=1,jan=10,ativos=['a01'],custo_h=1),dict(id='B',nome='B',rend=1,jan=10,ativos=['a01'],custo_h=1)],None)):
+    r_=D2.repartir(F(Q_),[py_cfg(c) for c in cs_],pl_); _e25.append([r_['conflito'],r_['conflitoEst'],[[x['emSeq'],x['seqEst']] for x in r_['itens']]])
+_x25=[[True,True,[[True,True]]*3],[True,False,[[False,False],[False,False]]],[True,False,[[True,False],[True,False]]]]   # o 3º: mesma máquina, 20 h em 10 h: conflito de fato
+chk('R2-5d sequencia_de_estimativa_na_tela','rodada 2 do D-01 · regra (b) nos chips: 3 com 1 trator cada e 2 tratores → "em sequência nesta estimativa" e "não cabe na janela nesta estimativa"; sequência declarada e mesma máquina continuam como fato',
+    str(_x25),OUT['R2-5d'],_e25,OUT['R2-5d']==_x25 and _e25==_x25)
 p4=[]
 for o in ('ABC','CAB','BCA'):
     d=dict(A=dict(id='A',nome='A',rend=F(5),seq=True,ativos=['a01'],jan=F(3),troca=F(1),custo_h=F(1)),B=dict(id='B',nome='B',rend=F(5),seq=True,jan=F(3),troca=F(1),custo_h=F(1)),C=dict(id='C',nome='C',rend=F(5),ativos=['a01'],troca=F(1),custo_h=F(1)))
