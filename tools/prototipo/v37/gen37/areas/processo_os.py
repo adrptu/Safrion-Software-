@@ -245,7 +245,7 @@ function osMerge(b,co,c){ if(!co) return b;
   // A liberar: o Estoque (reserva por lote) pode segurar a liberação desde a abertura → selo vermelho e dono na lista, no Kanban e no painel
   if(co.etapa==='A liberar'&&!o.agua&&(co.ins||[]).length){ const e=osLibErro(o,c);
     const z=e&&/Dose × área de (.+?) dá 0/.exec(e);   // total 0: quem resolve é o agrônomo, não o Estoque (PRE-REV Y3)
-    if(z){ o.libErr=e; o.selos=o.selos.filter(s=>!/^Falta insumo|^Total 0/.test(s.t)).concat([{t:'Total 0 · '+z[1],c:'red'}]); o.prazo='ajustar dose ou área';
+    if(z){ o.libErr=e; o.total0=true; o.selos=o.selos.filter(s=>!/^Falta insumo|^Total 0/.test(s.t)).concat([{t:'Total 0 · '+z[1],c:'red'}]); o.dono='Ana (agrônoma)'; o.prazo='ajustar dose ou área';
       o.cond=String(o.cond||'').replace('Próximo passo: liberar para execução.','Dose × área de '+z[1]+' dá 0. Próximo passo: ajustar antes de liberar.'); }
     else if(e){ const pr=(/ de (.+?)(?: no Estoque|:)/.exec(e)||[])[1]||''; o.libErr=e;
       o.selos=o.selos.filter(s=>!/^Falta insumo/.test(s.t)).concat([{t:'Falta insumo'+(pr?' · '+pr:''),c:'red'}]);
@@ -329,6 +329,7 @@ function osc_ajustar(c,id,area,doses,jan,rem,add,lib){ const o=osc_o(c,id); if(o
   add.forEach(a=>{ o.ins.push({g:a.g||'',p:a.p,dose:a.dose,un:a.un,tot:0,emb:(typeof OSD!=='undefined'&&OSD.nova&&(OSD.nova.emb||{})[a.p])||''}); ch.push('incluído '+a.p+' '+cenNum(a.dose)+' '+a.un+'/ha'); });
   if(!ch.length){ if(!lib) throw new Error('Nada foi ajustado.'); const r=osc_liberar(c,id,false,jan); return {msg:'Nada foi ajustado; '+r.msg}; }
   o.area=area; o.saldo=Math.max(0,area-(o.realizado||0)); o.ins.forEach(x=>{ x.tot=cenQtd(x.dose,area); });   /* regra única (SINT-C03) */
+  { const z0=o.ins.find(x=>x.dose>0&&!(x.tot>0)); if(z0) throw new Error('Dose × área de '+z0.p+' dá 0 '+z0.un+': aumente a dose ou a área.'); }   /* nem sem liberar (PRE-REV X2) */
   const s=String(o.versao||''); const re=/\bv(\d+)\b/g; let m=null, k; while((k=re.exec(s))) m=k;
   const vn=m?'v'+(Number(m[1])+1):'v2'; o.versao=m?s.slice(0,m.index)+vn+s.slice(m.index+m[0].length):(s?s+' · ':'')+vn;
   const hr=cenAgora(); o.osc.aj=(o.osc.aj||[]).concat([{v:vn,at:hr,t:vn+' ajustada por Ana (agrônoma) às '+hr+(lib?' ao liberar':'')+': '+ch.join('; ')}]);
@@ -410,7 +411,8 @@ function osProx(o){
   else P={t:'Ordem encerrada: somente consulta.',btn:'',fn:''};
   // impedimento do próximo passo: do registro (máquina, janela, conflito) ou do cenário (saldo no Estoque; sinal ou sobra no encerramento)
   let b=(o.bloq&&o.bloq.fase===o.etapa&&o.bloq.acao===P.fn)?o.bloq:null;
-  if(!b&&P.fn==='liberar'&&!o.agua){ const e=o.libErr||''; if(e) b={acao:'liberar',t:'Liberar bloqueado: '+e.charAt(0).toLowerCase()+e.slice(1),q:'Suprimentos, recebendo o insumo no Estoque.',h:'EST.dc.html',hl:'Ver saldos no Estoque'}; }
+  if(!b&&P.fn==='liberar'&&!o.agua){ const e=o.libErr||''; if(e) b=o.total0?{acao:'liberar',t:'Liberar bloqueado: '+e.charAt(0).toLowerCase()+e.slice(1),q:'Ana (agrônoma), ajustando a dose ou a área antes de liberar.',total0:true}
+      :{acao:'liberar',t:'Liberar bloqueado: '+e.charAt(0).toLowerCase()+e.slice(1),q:'Suprimentos, recebendo o insumo no Estoque.',h:'EST.dc.html',hl:'Ver saldos no Estoque'}; }
   if(!b&&P.fn==='encerrar'&&o.encM) b=osEncBloq(o);
   if(!b&&P.fn==='iniciar'&&!o.agua) b=osIniErro(o,o.r);
   if(!b&&(P.fn==='liberar'||P.fn==='iniciar')&&o.carB) b=Object.assign({},o.carB,{acao:P.fn});   // carência (MAPA-CARENCIA-LMR-20261003)
@@ -523,7 +525,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{};
   v.pan_setrmot=(e)=>self.setState({pa:Object.assign({},self.state.pa,{motivo:e.target.value,err:''})});
   // ajustar antes de liberar (secundário do passo A liberar com produto, também na confirmação): dose por insumo e área → osc_ajustar
   v.pan_hasAj=!!P.sec; v.pan_hasAjc=v.pan_hasAj&&!b&&!!pa&&pa.fn==='liberar'; v.pan_ajbtn=P.sec?P.sec.btn:'';
-  const ajLib=!b||b.h==='EST.dc.html';   // falta no Estoque: o ajuste pode resolver e libera; máquina, janela ou conflito: só grava a versão
+  const ajLib=!b||b.h==='EST.dc.html'||!!b.total0;   // falta no Estoque: o ajuste pode resolver e libera; máquina, janela ou conflito: só grava a versão
   v.pan_ajsbtn=ajLib?'Salvar e liberar':'Salvar ajuste';
   const vs=String(o.versao).match(/\bv\d+\b/g)||[]; const vcur=vs.length?vs[vs.length-1]:'v1'; const vnx='v'+(Number(vcur.slice(1))+1);
   v.pan_ajgo=()=>{ const ds={}; (o.ins||[]).forEach(x=>{ ds[x.p]=nd(x.dose,4); }); self.setState({pa:{id:o.id,fn:'ajustar',area:nd(o.area,4),doses:ds,rem:{},add:[],q:'',qerr:'',errs:{},err:''}});

@@ -480,7 +480,7 @@ function EXTRAVALS(self,v){ const s=irrGet(); const id=detId(self); const o=s.or
   // ---- painel: confirmar término (área coberta + hidrômetro preenchido pela telemetria) ----
   const tm=self.state.tm;
   if(tm){ const pa=irrPassAtual(o); v.tm_open=true; v.tm_titulo='Confirmar término · '+id; v.tm_sub=x.nome+' · '+(pa?'passada '+pa.n+' · início '+irrQuando(pa.iniReal):'');
-    v.tm_full=!!tm.full; v.tm_parc=!tm.full; v.tm_fullT=(x.tipo==='gotejo'?'Turno completo':'Volta completa')+' · '+irrN(x.ha)+' ha';
+    v.tm_full=!!tm.full; v.tm_parc=!tm.full; v.tm_fullT=(x.tipo==='gotejo'?'Turno completo':'Volta completa')+' · '+irrN(x.ha,2,0)+' ha';
     v.tm_cob=tm.cob; v.tm_vol=tm.vol; const er=tm.err||{}; v.tm_ecob=er.cob||''; v.tm_ecob_has=!!er.cob; v.tm_evol=er.vol||''; v.tm_evol_has=!!er.vol;
     v.tm_hint='Leitura da telemetria da '+x.bnome+' · vazio = sem leitura, nada é creditado';
     const set=(k,val)=>(e)=>{ const cur=self.state.tm; const d=Object.assign({},cur,{[k]:val===undefined?e.target.value:val,err:{}});
@@ -489,7 +489,7 @@ function EXTRAVALS(self,v){ const s=irrGet(); const id=detId(self); const o=s.or
       self.setState({tm:d}); };
     v.tm_setfull=set('full',true); v.tm_setparc=set('full',false); v.tm_setcob=set('cob'); v.tm_setvol=set('vol');
     v.tm_ok=()=>{ const cur=self.state.tm; const er={}; const cob=cur.full?x.ha:irr2(g2num(cur.cob)); const vs=String(cur.vol||'').trim(); const vol=vs?g2num(vs):null;
-      if(!cur.full&&!(cob>0&&cob<=x.ha)) er.cob='Área entre 0 e '+irrN(x.ha,1)+' ha (ex.: 11,6).'; if(vs&&!(vol>0)) er.vol='Use um número em m³ (ex.: 8.480) ou deixe vazio.';
+      if(!cur.full&&!(cob>0&&cob<=x.ha)) er.cob='Área entre 0 e '+irrN(x.ha,2,0)+' ha (ex.: 11,6).'; if(vs&&!(vol>0)) er.vol='Use um número em m³ (ex.: 8.480) ou deixe vazio.';
       if(Object.keys(er).length){ self.setState({tm:Object.assign({},cur,{err:er})}); return; }
       run(s0=>irrTerminar(s0,id,cob,vol),()=>fechar(self,'tm')); }; }
   else { v.tm_full=true; v.tm_parc=false; v.tm_cob=''; v.tm_vol=''; v.tm_ecob=''; v.tm_ecob_has=false; v.tm_evol=''; v.tm_evol_has=false; v.tm_hint=''; v.tm_fullT=''; v.tm_setfull=()=>{}; v.tm_setparc=()=>{}; v.tm_setcob=()=>{}; v.tm_setvol=()=>{}; v.tm_ok=()=>{}; v.tm_titulo=''; v.tm_sub=''; }
@@ -507,14 +507,14 @@ function EXTRAVALS(self,v){ const s=irrGet(); const id=detId(self); const o=s.or
   const avs=self.state.av;
   if(avs){ v.av_open=true; v.av_titulo='Registrar avanço · '+id; v.av_sub=x.nome+' · passada '+((irrPassAtual(o)||{}).n||'')+' em execução · área pelo ângulo do pivô ou app de campo';
     v.av_cob=avs.cob; v.av_ecob=avs.err||''; v.av_ecob_has=!!avs.err; v.av_setcob=(e)=>self.setState({av:{cob:e.target.value,err:''}});
-    v.av_ok=()=>{ const c2=irr2(g2num(self.state.av.cob)); if(!(c2>=0&&c2<=x.ha)){ self.setState({av:{cob:self.state.av.cob,err:'Área entre 0 e '+irrN(x.ha,1)+' ha.'}}); return; } run(s0=>irrAvanco(s0,id,c2),()=>fechar(self,'av')); }; }
+    v.av_ok=()=>{ const c2=irr2(g2num(self.state.av.cob)); if(!(c2>=0&&c2<=x.ha)){ self.setState({av:{cob:self.state.av.cob,err:'Área entre 0 e '+irrN(x.ha,2,0)+' ha.'}}); return; } run(s0=>irrAvanco(s0,id,c2),()=>fechar(self,'av')); }; }
   else { v.av_cob=''; v.av_ecob=''; v.av_ecob_has=false; v.av_setcob=()=>{}; v.av_ok=()=>{}; v.av_titulo=''; v.av_sub=''; }
   // ---- painel: adicionar produtos (v2 da mesma ordem, liberada pelo agrônomo na O.S.) ----
   const rc=self.state.rc;
   if(rc){ const exec=(o.etapa==='Em execução'); v.rc_open=true; v.rc_titulo='Adicionar produtos · '+id; v.rc_sub=x.nome+' · versão v2 (fertirrigação) · mesmo setor, janela e saldo';
     v.rc_prod=rc.d.prod; v.rc_dose=rc.d.dose; v.rc_mot=rc.d.mot; const n=g2num(rc.d.dose); const pa=irrPassAtual(o); const area=irrAreaV2(x,pa);   /* a mesma área da v2 (irrReclassificar) */
     const bq=pa?[]:irrChecar(s,o).bloq;
-    const zv=(n>0&&n<=50)?irrV2Zero(x,pa,n):''; v.rc_prev=zv?zv:bq.length?('Resolva antes: '+bq.map(b=>b.t+(b.h?' '+b.h:'')).join(', ')+'.'):((exec?'A ordem continua Em execução com selo Revisão de saldo pendente; '+(pa?irrN(pa.cob||0,2,0)+' ha já cobertos ficam na v1 e o saldo de '+irrN(area,2,0)+' ha para até a liberação.':'as próximas passadas esperam a liberação.'):'A ordem volta a A liberar e a liberação da água é revogada.')+' Ana (agrônoma) libera na O.S.; a liberação reserva '+((n>0&&n<=50)?irrN(cenQtd(n,area),2):'—')+' kg no estoque (falta bloqueia).');
+    const zv=(n>0&&n<=50)?irrV2Zero(o,x,pa,n):''; v.rc_prev=zv?zv:bq.length?('Resolva antes: '+bq.map(b=>b.t+(b.h?' '+b.h:'')).join(', ')+'.'):((exec?'A ordem continua Em execução com selo Revisão de saldo pendente; '+(pa?irrN(pa.cob||0,2,0)+' ha já cobertos ficam na v1 e o saldo de '+irrN(area,2,0)+' ha para até a liberação.':'as próximas passadas esperam a liberação.'):'A ordem volta a A liberar e a liberação da água é revogada.')+' Ana (agrônoma) libera na O.S.; a liberação reserva '+((n>0&&n<=50)?irrN(cenQtd(n,area),2):'—')+' kg no estoque (falta bloqueia).');
     const set=(k)=>(e)=>{ const cur=self.state.rc; const d=Object.assign({},cur.d,{[k]:e.target.value}); const er=Object.assign({},cur.err); delete er[k]; self.setState({rc:Object.assign({},cur,{d,err:er,warn:false})}); };
     v.rc_setprod=set('prod'); v.rc_setdose=set('dose'); v.rc_setmot=set('mot');
     ['prod','dose','mot'].forEach(k=>{ v['rc_e'+k]=(rc.err||{})[k]||''; v['rc_e'+k+'_has']=!!(rc.err||{})[k]; });

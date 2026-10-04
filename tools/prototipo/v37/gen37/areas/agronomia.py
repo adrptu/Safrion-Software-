@@ -673,7 +673,7 @@ function agDec(self,v){ const st=self.state; const d=st.dec; const s=mipGet(); c
   const nCanc=L.filter(u=>u.sit==='Cancelado').length; v.dc_uso='Registrados para '+mipCult(t)+' × '+p.alvo.toLowerCase()+' · '+(L.length-nCanc)+(nCanc?' · '+nCanc+' cancelado':'');
   const a={kind:d.kind,prod:d.prod,dose:d.dose,area:d.area,data:d.data}; const num=(x)=>Number(String(x).replace(',','.'));
   v.dc_prods=L.slice().sort((a0,b0)=>(a0.sit==='Cancelado'?1:0)-(b0.sit==='Cancelado'?1:0)).map(u=>{ const sel=u.id===d.prod; const k=mipChecks(s,vv,{kind:d.kind,prod:u.id,dose:sel?d.dose:u.dmin,area:d.area,data:d.data},c);
-    const TAGS=[[/^Carência/,'Carência × colheita'],[/^Nº máximo/,'Máx. aplicações'],[/^Dose/,'Dose fora da bula'],[/^Registro cancelado/,'Cancelado'],[/^Rotação/,'Rotação'],[/^Estoque/,'Sem estoque'],[/^Colheita/,'Colheita suspensa'],[/reavaliação/,'Reavaliação'],[/não conferido/,'Não conferido']];
+    const TAGS=[[/^Carência/,'Carência × colheita'],[/^Nº máximo/,'Máx. aplicações'],[/^Dose × área dá 0/,'Área pequena · total 0'],[/^Dose/,'Dose fora da bula'],[/^Registro cancelado/,'Cancelado'],[/^Rotação/,'Rotação'],[/^Estoque/,'Sem estoque'],[/^Colheita/,'Colheita suspensa'],[/reavaliação/,'Reavaliação'],[/não conferido/,'Não conferido']];
     const tag=(x)=>{ const m=TAGS.find(q=>q[0].test(x)); return m?m[1]:''; };
     const tt=k.tr.map(tag).filter(Boolean), ta=k.al.map(tag).filter(Boolean); const cc=tt.length?[tt[0],'red']:(ta.length?[ta.slice(0,2).join(' · '),'yellow']:['Conferido','green']); const cs=agCh(cc[1]);
     return {nome:u.nome,on:sel,pick:()=>up({prod:u.id,dose:mipN(u.dmin,3)}),h:'AG-07.dc.html#'+u.id,cht:cc[0],chst:cs.st,chdot:cs.dot,
