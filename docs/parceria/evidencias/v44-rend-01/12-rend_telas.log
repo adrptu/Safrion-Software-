@@ -1,0 +1,7 @@
+$ python3 rend_multiconjuntos_test.py telas
+OK    · 10 S27SF: totais da etapa 4 = espelho dados2.plano_op (uma configuração por atividade) · ['2.670 ha trabalhados · 269 horas-conjunto · 460 horas-homem · 5.590 L de diesel · R$ 1.279.390,60 · R$ 2.313,55/ha da safra · clique numa linha para ver os meses dela', '2.670 ha trabalhados · 269 horas-conjunto · 460 horas-homem · 5.590 L de diesel', 0]
+OK    · 10 LG2627: totais da etapa 4 = espelho dados2.plano_op (uma configuração por atividade) · ['15.423 ha trabalhados · 12.591 horas-conjunto · 105.598 horas-homem · 66.984 L de diesel · R$ 8.772.352,79 · R$ 6.825,51/ha da safra · clique numa linha para ver os meses dela', '15.423 ha trabalhados · 12.591 horas-conjunto · 105.598 horas-homem · 66.984 L de diesel', 0]
+OK    · 11 Safra 2025/26 (encerrada): sem "+ Outra configuração" na tabela nem no formulário, que abre só em consulta · [0, [], True]
+OK    · 9 celular 390 px: etapas 3 e 4 sem rolagem lateral da página (a tabela rola dentro da caixa) e sem erros · [False, False, []]
+RESULTADO: 4/4 OK
+[exit 0]
