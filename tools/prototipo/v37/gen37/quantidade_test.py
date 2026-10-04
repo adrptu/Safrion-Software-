@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-"""Regressão focal SINT-C03 (comentário 5974993475): regra única de quantidade de insumo (quantidade.py ⇄ cenQtd/cenQtdTrecho do
-cenario.js) e o apontamento com custódia. Roda o JS real do protótipo (cenario.js + núcleo da O.S.) no jsc (macOS) ou node (Linux),
-sem navegador. Uso (de gen37/): python3 quantidade_test.py"""
-import json, os, random, subprocess, sys, tempfile
+"""Regressão focal SINT-C03 (comentário 5974993475) e PRE-REV-20261004: regra única de quantidade de insumo (quantidade.py ⇄
+cenQtd/cenQtdTrecho do cenario.js), o apontamento com custódia e todo produtor de total de insumo (O.S., MIP, fertirrigação).
+Roda o JS real do protótipo (cenario.js + núcleo da O.S. + mip.js + irrigacao_estado.js) no jsc (macOS) ou node (Linux), sem navegador.
+Uso (de gen37/): python3 quantidade_test.py"""
+import json, os, random, re, subprocess, sys, tempfile
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-import quantidade as Q, cenario
+import quantidade as Q, cenario, dados_mip, dados_irrigacao
 from areas.processo_os import JS_NUCLEO
 JSC = '/System/Library/Frameworks/JavaScriptCore.framework/Versions/Current/Helpers/jsc'
 MOTOR, PRELUDIO = ([JSC], '') if os.path.exists(JSC) else (['node'], 'globalThis.print=(...a)=>console.log(...a);\n')
@@ -36,17 +37,71 @@ function turno(area,partes){ const f=fixture(area); const c=f.c; c.app={online:t
   for(const h of partes){ try{ c.app.turno={os:'DEMO',ini:'08:00'}; cenFecharTurno(c,h,4,{},'',[]); }catch(e){ out.erros.push(e.message); } }
   const it=c.reqs['REQ-DEMO'].itens[0]; Object.assign(out,{custodia:it.custodia,consumido:it.consumido,saldo:c.ordens.DEMO.saldo}); return out; }
 R.turno=[turno(62.25,[62.25]),turno(62.25,[30.55,31.7])];
+// 6 · a trava de custódia continua: consumo acima do que está em custódia é recusado, sem gravar nada (web e app)
+function recusa(){ const f=fixture(62.25); const it=f.c.reqs['REQ-DEMO'].itens[0]; it.custodia=31.12;   // custódia menor que o consumo 31,13
+  const w={}; try{ osc_apontar(f.c,'DEMO','24/09',62.25); w.erro=''; }catch(e){ w.erro=e.message; }
+  Object.assign(w,{ap:f.c.ordens.DEMO.ap.length,custodia:it.custodia,consumido:it.consumido,realizado:f.c.ordens.DEMO.realizado});
+  const g=fixture(62.25); const c=g.c; const it2=c.reqs['REQ-DEMO'].itens[0]; it2.custodia=31.12; c.app={online:true,fila:[],turno:{os:'DEMO',ini:'08:00'},operador:'Teste'}; c.movs=[];
+  const a={}; try{ cenFecharTurno(c,62.25,4,{},'',[]); a.erro=''; }catch(e){ a.erro=e.message; }
+  Object.assign(a,{ap:c.ordens.DEMO.ap.length,custodia:it2.custodia,consumido:it2.consumido}); return {web:w,app:a}; }
+R.recusa=recusa();
 // 4 · sementes da Lagoa em execução: o saldo restante consome exatamente a custódia de cada item
 R.lagoa=['OS-0506','OS-0507'].map(id=>{ const c=JSON.parse(JSON.stringify(CEN0)); const o=c.ordens[id]; const r=c.reqs[o.req]; let erro='';
   try{ osc_apontar(c,id,'24/09',o.saldo); }catch(e){ erro=e.message; }
   return {id,erro,saldo:o.saldo,custodias:r.itens.map(i=>i.custodia),consumido_vs_total:r.itens.map(i=>[i.consumido,i.solicitado])}; });
 print(JSON.stringify(R));
 """
-src = PRELUDIO + cenario.js_prefixo() + JS_NUCLEO + '\nconst CASOS=' + json.dumps(casos) + ';\n' + JS
-f = tempfile.NamedTemporaryFile('w', suffix='.js', delete=False, encoding='utf-8'); f.write(src); f.close()
-p = subprocess.run(MOTOR + [f.name], capture_output=True, text=True, timeout=120); os.unlink(f.name)
-if p.returncode != 0: print(p.stderr[-1500:]); sys.exit(1)
-R = json.loads(p.stdout.strip().splitlines()[-1])
+# 7/8 · produtores de total fora da O.S.: MIP (mipEmitir) e fertirrigação (irrReclassTudo), percorrendo liberar → entregar → confirmar →
+# iniciar → apontar o saldo → conferência, como na tela. localStorage em memória (a tela grava no navegador).
+LS = ('const __LS={};globalThis.localStorage={getItem:k=>(k in __LS?__LS[k]:null),setItem:(k,v)=>{__LS[k]=String(v)},'
+      'removeItem:k=>{delete __LS[k]}};\n')
+JS_FLUXO = r"""
+(()=>{   // escopo próprio: os prefixos das telas já declaram nomes curtos
+function fluxo(c,id,res){ const o=c.ordens[id]; res.area=o.area; res.tot=o.ins[0].tot; res.regra=cenQtd(o.ins[0].dose,o.area);
+  const passo=(n,f)=>{ try{ f(); }catch(e){ res.erro=n+': '+e.message; throw e; } };
+  // o assunto aqui é a custódia, não a falta de estoque: completa o lote antes de liberar (só no teste)
+  (o.ins||[]).forEach(x=>{ const l=cenLote(c,x.p); if(l&&cenDisp(l)<x.tot) l.fisico+=x.tot; });
+  try{ passo('liberar',()=>osc_liberar(c,id,false,''));
+    const rq=c.reqs[o.req]; for(const it of rq.itens){ const q=cenSaldoEntregar(it); if(q>1e-9) passo('entregar',()=>cenEntregar(c,o.req,it.prod,q,'X')); }
+    passo('confirmar',()=>cenConfirmarRecebimento(c,o.req)); passo('iniciar',()=>osc_iniciar(c,id));
+    passo('apontar o saldo',()=>osc_apontar(c,id,'20/10',o.saldo)); passo('conferência',()=>osc_conferencia(c,id)); }catch(e){}
+  const it=o.req&&c.reqs[o.req]&&c.reqs[o.req].itens[0]; res.custodia=it?it.custodia:null; res.etapa=o.etapa; return res; }
+const R={mip:[],fert:[],area:[]};
+const s0=mipGet(); const maior=a=>a.tr.filter(x=>/Área maior/.test(x));
+// formulário "Decidir controle" (agDecIni real do AG-01), em toda vistoria da Lagoa: o que ele preenche passa nas checagens de área
+if(typeof agDecIni==='function') for(const v of Object.values(s0.vis).filter(v=>/^PV/.test(v.tal))){ const t=mipT(v); let st=null;
+  agDecIni({state:{},setState:x=>{ st=x; }},v.id); const d=st.dec;
+  const ck=(ar)=>mipChecks(mipGet(),v,{kind:d.kind,prod:d.prod,dose:d.dose,area:ar,data:d.data},cenGet());
+  R.area.push({vis:v.id,kind:d.kind,form:d.area,trava:maior(ck(d.area)),antes:d.kind==='controlar'&&maior(ck(mipN(t.area,1))).length>0}); }
+// emissão pelo MIP: área do talhão e a maior área em que 3 casas ficariam ABAIXO da regra única (o caso que recusava o apontamento)
+const tres=(dose,ar)=>Math.round(dose*ar*1000)/1000;
+const sobe=(dose,max)=>{ for(let k=0;k<400;k++){ const ar=Math.round(max*100-k)/100; if(ar<=0) break; if(tres(dose,ar)<cenQtd(dose,ar)) return ar; } return null; };
+const vis=Object.values(s0.vis).filter(v=>/^PV/.test(v.tal)&&!v.dec&&mipElig(v).length);
+for(const v of vis){ const t=mipT(v);
+  for(const u of mipElig(v)){ if(u.sit==='Cancelado') continue; for(const [dose,area] of [[u.dmin,t.area],[u.dmax,t.area],[u.dmin,sobe(u.dmin,t.area)]]){ if(!area) continue; cenReset(); mipReset();
+    if(!cenLote(cenGet(),u.nome)){ R.semLote=(R.semLote||0)+1; continue; }   // produto sem lote no Estoque: a liberação recusa (outra trava)
+    const a={kind:'controlar',prod:u.id,dose:String(dose),area:String(area),data:'2026-10-20',nota:''}; const res={vis:v.id,prod:u.nome,dose,sobe:tres(dose,area)<cenQtd(dose,area)};
+    const k=mipChecks(mipGet(),mipGet().vis[v.id],a,cenGet()); if(k.tr.length){ res.trava=k.tr; R.mip.push(res); continue; }
+    const r=mipEmitir(null,v.id,a); if(r.erro){ res.erro='emitir: '+r.erro; R.mip.push(res); continue; } const c=cenGet();
+    const id=Object.keys(c.ordens).find(x=>c.ordens[x].osc&&c.ordens[x].osc.novo&&(c.ordens[x].osc.novo.keys||[]).indexOf('mip|'+v.id+'|'+v.prot)>=0);
+    R.mip.push(fluxo(c,id,res)); } } }
+const i0=irrGet(); const ords=Object.keys(i0.ordens).filter(k=>['A liberar','Liberadas','Em execução'].indexOf(i0.ordens[k].etapa)>=0&&!i0.ordens[k].fert);
+for(const id of ords){ for(const dose of [1,7,12,50]){ cenReset(); irrReset(); const res={id,dose};
+  const r=irrReclassTudo(null,id,{prod:'Nitrato de cálcio',dose,mot:'teste'}); if(r.erro){ res.recusa=r.erro; R.fert.push(res); continue; }
+  res.msg=r.msg; R.fert.push(fluxo(cenGet(),id,res)); } }
+print(JSON.stringify(R));
+})();
+"""
+
+def roda(src):
+    f = tempfile.NamedTemporaryFile('w', suffix='.js', delete=False, encoding='utf-8'); f.write(src); f.close()
+    p = subprocess.run(MOTOR + [f.name], capture_output=True, text=True, timeout=300); os.unlink(f.name)
+    if p.returncode != 0: print(p.stderr[-1500:]); sys.exit(1)
+    return json.loads(p.stdout.strip().splitlines()[-1])
+R = roda(PRELUDIO + cenario.js_prefixo() + JS_NUCLEO + '\nconst CASOS=' + json.dumps(casos) + ';\n' + JS)
+import areas.agronomia as AG
+DOM = 'globalThis.document={getElementById:()=>null,querySelector:()=>null};globalThis.setTimeout=()=>0;\n'   # agFoco sem tela
+F = roda(PRELUDIO + LS + DOM + cenario.js_prefixo() + JS_NUCLEO + dados_mip.js_prefixo() + dados_irrigacao.js_prefixo() + AG.JS_AG01 + JS_FLUXO)
 
 dif = [(c, a, b) for c, a, b in zip(casos, py, R['grade']) if a != b]
 empates = [c for c in casos if (round(c[0] * c[1] * 1000) % 10 == 5)]
@@ -63,7 +118,27 @@ chk('4 turno do app (cenFecharTurno), inteiro e em 2 trechos: consumo padrão pe
 lg = R['lagoa']
 chk('5 sementes da Lagoa (OS-0506 e OS-0507): apontar o saldo restante consome exatamente a custódia (0 em cada item), sem erro',
     all(not x['erro'] and x['saldo'] < 1e-9 and all(abs(cu) < 1e-9 for cu in x['custodias']) for x in lg), lg)
-ctl = Q.qtd(0.5, 62.25) > 31.12
-chk('6 controle de custódia preservado: consumo acima do que está em custódia continua recusado (sem tolerância nova)', ctl and 'acima do que está em custódia' in JS_NUCLEO, '')
+w, a = R['recusa']['web'], R['recusa']['app']
+chk('6 trava de custódia executada: 31,13 contra 31,12 em custódia é recusado na web e no app, sem apontamento nem baixa (sem tolerância nova)',
+    'acima do que está em custódia' in w['erro'] and w['ap'] == 0 and w['custodia'] == 31.12 and w['consumido'] == 0 and w['realizado'] == 0
+    and 'acima do que está com você' in a['erro'] and a['ap'] == 0 and a['custodia'] == 31.12 and a['consumido'] == 0, R['recusa'])
+ok = lambda x: not x.get('erro') and not x.get('trava') and x['tot'] == x['regra'] and abs(x['custodia']) < 1e-9 and x['etapa'] == 'Em conferência'
+m = F['mip']
+ne = sum(1 for x in m if x['sobe'])
+chk(f'7 MIP → O.S. ({len(m)} emissões nos pivôs da Lagoa, doses da bula; {ne} em que o total antigo de 3 casas ficaria abaixo do consumo; '
+    f'{F.get("semLote", 0)} sem lote no Estoque, fora): total = regra única; liberar, entregar, iniciar e apontar o saldo zeram a custódia e levam à '
+    'conferência', len(m) >= 6 and ne >= 2 and all(map(ok, m)), [x for x in m if not ok(x)][:4])
+fe = F['fert']; fa = [x for x in fe if 'recusa' not in x]
+chk(f'8 fertirrigação → O.S. ({len(fa)} v2 de {len(fe)} tentativas, 1 a 50 kg/ha): total = regra única, com 2 casas na mensagem; o saldo apontado zera a '
+    'custódia', len(fa) >= 8 and all(map(ok, fa)) and all(re.search(r'requisição de [0-9.]+(,[0-9]{1,2})? kg', x['msg']) for x in fa),
+    [x for x in fa if not ok(x)][:4] or [x['msg'][-90:] for x in fa][:2])
+ar = F['area']
+na = sum(1 for x in ar if x['antes'])
+chk(f'9 "Decidir controle" (agDecIni em {len(ar)} vistorias da Lagoa): a área que o formulário preenche nunca passa do talhão '
+    f'(com 1 casa, {na} travariam)', len(ar) >= 8 and na >= 1 and not any(x['trava'] for x in ar), [x for x in ar if x['trava']])
+fontes = {n: open(os.path.join(HERE, n), encoding='utf-8').read() for n in ('mip.js', 'irrigacao_estado.js', 'cenario.js')}
+fontes['processo_os (JS)'] = JS_NUCLEO
+crus = {n: re.findall(r'tot\s*:\s*(?:Math\.round|Number\(|[^,}]*toFixed)', s) for n, s in fontes.items()}
+chk('10 nenhum produtor de total de insumo no JS arredonda por conta própria (Math.round/Number/toFixed em tot:)', not any(crus.values()), crus)
 print(f'RESULTADO: {sum(OK)}/{len(OK)}')
 sys.exit(0 if all(OK) else 1)

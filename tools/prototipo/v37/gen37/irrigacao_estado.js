@@ -430,11 +430,11 @@ function irrReclassificar(s, id, d) {
     p.st = 'Parcial'; p.cob = v1; p.fimReal = q; p.vol = v1 > 0 ? irrTele(s, o, p, v1) : 0; irrCredito(s, o, p);
     vol += area * p.lam * 10; sw = { ini: q, fim: Math.max(q + 15, fim0) }; }
   o.passadas.filter(z => z.st === 'Programada').forEach(z => { vol += x.ha * z.lam * 10; });
-  o.fert = { prod: d.prod, dose: d.dose, mot: d.mot, exec: iniciou, q, area, v1, vol: Math.round(vol), lamHa: area > 0 ? vol / (10 * area) : 0, tot: Math.round(d.dose * area), sw };
+  o.fert = { prod: d.prod, dose: d.dose, mot: d.mot, exec: iniciou, q, area, v1, vol: Math.round(vol), lamHa: area > 0 ? vol / (10 * area) : 0, tot: cenQtd(d.dose, area), sw };   // regra única de quantidade (cenario.js, sempre carregado antes)
   o.versao = 'v2';
   if (!iniciou) { if (o.lib) { o.libRes = o.lib; irrTr(o, q, o.lib, 'Liberação da água revogada: com produto, a liberação é do agrônomo', 'sistema'); } o.lib = null; o.etapa = 'A liberar'; }
-  irrTr(o, q, 'RC-' + id.slice(3) + '-2', 'Versão v2 · ' + d.prod + ' ' + irrN(d.dose, 1) + ' kg/ha · ' + d.mot + ' · ' + (iniciou ? (p ? 'passada ' + p.n + ' parada em ' + irrN(v1, 1) + ' de ' + irrN(x.ha, 1) + ' ha (fica na v1); saldo de ' + irrN(area, 1) + ' ha' : 'passadas seguintes') + ' aguardam a liberação' : 'voltou a A liberar') + ' · requisição de ' + irrN(o.fert.tot) + ' kg na liberação', s.faz[o.faz].gestor);
-  return { msg: id + ' v2 criada (' + d.prod + ' ' + irrN(d.dose, 1) + ' kg/ha) · para o agrônomo liberar na O.S. · ' + (iniciou ? 'segue Em execução com selo Revisão de saldo pendente' + (p ? ' · ' + irrN(v1, 1) + ' ha já irrigados ficam na v1' : '') : 'voltou a A liberar') + ' · requisição de ' + irrN(o.fert.tot) + ' kg na liberação.' };
+  irrTr(o, q, 'RC-' + id.slice(3) + '-2', 'Versão v2 · ' + d.prod + ' ' + irrN(d.dose, 1) + ' kg/ha · ' + d.mot + ' · ' + (iniciou ? (p ? 'passada ' + p.n + ' parada em ' + irrN(v1, 1) + ' de ' + irrN(x.ha, 1) + ' ha (fica na v1); saldo de ' + irrN(area, 1) + ' ha' : 'passadas seguintes') + ' aguardam a liberação' : 'voltou a A liberar') + ' · requisição de ' + irrN(o.fert.tot, 2) + ' kg na liberação', s.faz[o.faz].gestor);
+  return { msg: id + ' v2 criada (' + d.prod + ' ' + irrN(d.dose, 1) + ' kg/ha) · para o agrônomo liberar na O.S. · ' + (iniciou ? 'segue Em execução com selo Revisão de saldo pendente' + (p ? ' · ' + irrN(v1, 1) + ' ha já irrigados ficam na v1' : '') : 'voltou a A liberar') + ' · requisição de ' + irrN(o.fert.tot, 2) + ' kg na liberação.' };
 }
 // Adicionar produtos de uma vez: v2 na irrigação e no cenário da O.S.; se um lado falhar, nada é gravado
 function irrReclassTudo(self, id, d) {
@@ -449,7 +449,7 @@ function irrReclassTudo(self, id, d) {
 function irrReclassCen(c, s, id) {
   const o = s.ordens[id]; const x = s.setores[o.setor]; const f = o.fert; if (!f) throw new Error('Sem v2.');
   if (c.ordens[id]) throw new Error(id + ' já está no cenário da O.S.');
-  const ins = [{ g: 'Fertilizantes', p: f.prod, dose: f.dose, un: 'kg', tot: f.tot, sit: 'Reserva ao liberar' }];
+  const ins = [{ g: 'Fertilizantes', p: f.prod, dose: f.dose, un: 'kg', tot: cenQtd(f.dose, f.area), sit: 'Reserva ao liberar' }];
   const no = { id, novo: false, keys: [], tipo: 'Fertirrigação · ' + f.prod + ' (v2 da irrigação)', talhao: o.setor, area: f.area, etapa: 'A liberar', selos: f.exec ? [{ t: 'Revisão de saldo pendente', c: 'yellow' }] : [],
     faz: x.faz === 'LG' ? 'Lagoa Grande' : 'Santa Rita', saf: '2026/27', lam: irrMm(o.lam) + ' mm', obs: f.mot, agua: false, ins, semins: '', bloq: null, aviso: '', dono: 'Ana (agrônoma)', prazo: 'liberar',
     atv: { op: 'Fertirrigação', nome: 'Fertirrigação · ' + f.prod, gat: '', orig: 'Irrigação ' + id + ' v1 → v2', conj: x.bnome, rend: 0 },

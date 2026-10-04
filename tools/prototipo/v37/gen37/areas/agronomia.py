@@ -661,11 +661,11 @@ function agDecIni(self,id){ const s=mipGet(), v=s.vis[id], c=agC(); const R=mipR
   const kind=K[0][0]; const area=kind==='localizado'?Math.max(1,Math.round((R.reb||1)*t.area/v.npts)):(kind==='erradicar'?1:t.area);
   const L=mipElig(v); const data=mipAmanha();
   const ok=L.find(u=>!mipChecks(s,v,{kind,prod:u.id,dose:u.dmin,area,data},c).tr.length)||L[0];
-  self.setState({pan:id,dec:{vid:id,kind,prod:ok?ok.id:'',dose:ok?mipN(ok.dmin,3):'',area:mipN(area,1),data,mot:'',err:''}}); agFoco(ok?'dc_dose':'pan_x'); }
+  self.setState({pan:id,dec:{vid:id,kind,prod:ok?ok.id:'',dose:ok?mipN(ok.dmin,3):'',area:mipN(area,2),data,mot:'',err:''}}); agFoco(ok?'dc_dose':'pan_x'); }
 function agDec(self,v){ const st=self.state; const d=st.dec; const s=mipGet(); const vv=s.vis[d.vid]; const c=agC(); const R=mipRes(vv,s), t=mipT(vv), p=mipP(vv);
   const up=(patch)=>self.setState({dec:Object.assign({},self.state.dec,patch,{err:''})});
   const K=agKinds(Object.assign({},R,{k:mipSit(s,vv,c).k}),p);
-  v.dc_kinds=K.map(k=>({t:k[1],on:String(d.kind===k[0]),go:()=>{ const area=k[0]==='localizado'?Math.max(1,Math.round((R.reb||1)*t.area/vv.npts)):(k[0]==='erradicar'?1:t.area); up({kind:k[0],area:mipN(area,1)}); },
+  v.dc_kinds=K.map(k=>({t:k[1],on:String(d.kind===k[0]),go:()=>{ const area=k[0]==='localizado'?Math.max(1,Math.round((R.reb||1)*t.area/vv.npts)):(k[0]==='erradicar'?1:t.area); up({kind:k[0],area:mipN(area,2)}); },
     st:'font-family:inherit;font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer;'+(d.kind===k[0]?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;')}));
   const ctl=d.kind==='controlar'||d.kind==='localizado'; v.dc_ctl=ctl; v.dc_err=d.kind==='erradicar'; v.dc_mon=d.kind==='monitorar'; v.dc_nunca=false;
   const L=mipElig(vv); v.dc_temProd=ctl&&L.length>0; v.dc_semProd=ctl&&!L.length; v.dc_semT=(p.sem||('Sem produto registrado para '+mipCult(t)+' × '+p.alvo.toLowerCase()+' nesta base.'))+' A decisão fica pendente.';
