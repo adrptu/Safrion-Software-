@@ -20,6 +20,8 @@ App de campo ligado ao cenário compartilhado (v3.9, 26/09/2026) — MB-01, MB-0
 - Fechar o turno (cenFecharTurno) não encerra a O.S.; erro junto ao campo só para área acima do saldo. Consumo informado acima do que está
   com você não é recusado (RN-018; CONC-07): aviso no campo, o fato fica Em conferência sem baixa e Rui (almoxarife) concilia no Estoque.
   A sugestão dose × área não editada é estimativa (CONC-13): acima do que está com você, o campo pede quanto foi usado (nada abre sozinho).
+- Apontamento único (CTL-2 · AP-ÚNICO): o turno grava pelo mesmo comando da web (cenApontar), com a data operacional e a chave do turno;
+  o mesmo dia já apontado pela web fica "Em conferência · duplicidade", sem soma nem baixa, até Paula (conferência) decidir.
 - MB-05det..MB-10det seguem com dados locais (abaixo) e a regra de irrigação já aplicada (MB-08).
 
 observacoes (dados locais coerentes com dados.py / dados2.py / telas vizinhas):
@@ -432,7 +434,7 @@ v.d_ins=(o.ins||[]).map(x=>{{ const it=r&&r.itens.find(i=>i.prod===x.p);
           s:it?('lote '+it.lote+(it.emb?' · '+it.emb:'')+' · entregue '+cenNum(it.entregue)+' '+it.un+' · consumido '+cenNum(it.consumido)+' '+it.un):(r?'fora da '+r.id+' · nada com você':'sem requisição'),
           c:ct, st:mbTx(cst)}}; }});
 const aps=(o.ap||[]); v.d_semap=!aps.length; const apx=Math.max(0,aps.length-4); v.d_apmais=apx>0; v.d_apmais_t=apx?apx+(apx>1?' turnos anteriores':' turno anterior'):'';
-v.d_aps=aps.slice(-4).map(a=>{{ const ofl=a.sinc===false; const cc=ofl?'yellow':(a.st==='Conferido'?'green':(a.st==='Previsto'?'gray':'yellow'));
+v.d_aps=aps.slice(-4).map(a=>{{ const ofl=a.sinc===false; const cc=ofl?'yellow':(a.st==='Conferido'?'green':((a.st==='Previsto'||a.st===CEN_AP_DESC)?'gray':'yellow'));
   return {{t:'Dia '+a.dia+' · '+a.d+' · '+cenNum(a.ha,1)+' ha'+(a.h?' em '+cenNum(a.h,1)+' h':''), c:ofl?'No aparelho · aguardando sinal':a.st, st:mbChs(cc), dot:mbDot(cc)}}; }});
 const ocs=(c.ocorr||[]).filter(x=>x.os===o.id); v.d_hasoc=ocs.length>0; const ocx=Math.max(0,ocs.length-2); v.d_ocmais=ocx>0; v.d_ocmais_t=ocx?'+ '+ocx+(ocx>1?' anteriores':' anterior'):'';
 v.d_ocs=ocs.slice(-2).reverse().map(x=>({{t:x.id+' · '+x.tipo+' · '+x.at+(x.sinc?'':' · no aparelho'),s:x.texto}}));
@@ -484,10 +486,12 @@ v.lista=fila.map(x=>mbCard(self,c,x));
 const L=s.ft_last; v.has_last=!t&&!!L;
 if(L){ const oo=c.ordens[L.os]; const ap=oo&&(oo.ap||[]).find(a=>a.dia===L.dia); const env=ap?ap.sinc!==false:true;
   v.last_t=L.os+' · dia '+L.dia+' · '+cenNum(L.ha,1)+' ha em '+cenNum(L.h,1)+' h'; v.last_cons=L.cons||'nenhum'; v.last_real=oo?mbRealTxt(oo):'';
-  DCH(v,'lst',env?'Enviado · a ordem continua aberta':'No aparelho · aguardando sinal',env?'green':'yellow');
-  const cf=(c.confs||[]).filter(k=>k.os===L.os&&k.dia===L.dia); const ab=cf.some(k=>k.estado==='Em conferência'); v.last_hasConf=cf.length>0;
-  v.last_conf=cf.map(k=>k.estado==='Em conferência'?'Em conferência · '+cenConfTxt(k,c)+' · '+k.resp+' concilia':k.estado+' por '+k.por+' · '+cenConfTxt(k)).join(' | ');
-  DCH(v,'lcf',ab?'Consumo em conferência':'Conferência resolvida',ab?'yellow':'green'); if(!L.cons&&cf.length) v.last_cons='nada baixado neste turno'; }
+  const dup=!!ap&&ap.st===CEN_AP_DUP, desc=!!ap&&ap.st===CEN_AP_DESC;   // duplicidade: nada baixado até a decisão de Paula (conferência)
+  DCH(v,'lst',dup?'Em conferência · duplicidade':(desc?'Duplicidade · não somado':(env?'Enviado · a ordem continua aberta':'No aparelho · aguardando sinal')),dup?'yellow':(desc?'gray':(env?'green':'yellow')));
+  if(dup) v.last_cons='nada baixado: '+CEN_CONF_AP+' decide se é outro turno'; else if(desc) v.last_cons='nada baixado: guardado como duplicidade';
+  const cf=(c.confs||[]).filter(k=>k.os===L.os&&k.dia===L.dia); const ab=cf.some(k=>k.estado==='Em conferência'||k.estado===CEN_CC_AGUARDA); v.last_hasConf=cf.length>0;
+  v.last_conf=cf.map(k=>k.estado==='Em conferência'?'Em conferência · '+cenConfTxt(k,c)+' · '+k.resp+' concilia':(k.estado===CEN_CC_AGUARDA?'Aguarda a decisão da duplicidade · '+cenConfTxt(k,c)+' · '+CEN_CONF_AP:k.estado+' por '+k.por+' · '+cenConfTxt(k))).join(' | ');
+  DCH(v,'lcf',ab?'Consumo em conferência':'Conferência resolvida',ab?'yellow':'green'); if(!L.cons&&cf.length&&!dup&&!desc) v.last_cons='nada baixado neste turno'; }
 DCH(v,'hdr',t?(mbPausado(t)?'turno pausado':'turno aberto'):'sem turno aberto',t?(mbPausado(t)?'yellow':'green'):'gray');
 v.t_fe=false; v.t_zero=false;
 if(t){ const pz=mbPausado(t);

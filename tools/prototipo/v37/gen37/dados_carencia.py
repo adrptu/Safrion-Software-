@@ -259,7 +259,7 @@ function carPush(arr,x){ if(!arr.some(y=>y.t===x.t)) arr.push(x); return arr; }
 // posterior não conta para aquele lote. Sem corte (situação do talhão), toda aplicação apontada conta, mesmo com data depois da consultada.
 function carAplic(cen,tid,ate,corte){ const T=CARD.tal[tid]||{}; const cult=T.cult||''; const apl=[], pend=[], prev=[]; ate=ate||CARD.hoje;
   Object.keys((cen&&cen.ordens)||{}).forEach(id=>{ const o=cen.ordens[id]; const ts=carTals(o.talhao).filter(x=>x.tid===tid); if(!ts.length) return;
-    const reais=(o.ap||[]).filter(a=>a.st!=='Previsto'); const canc=o.etapa==='Canceladas';
+    const reais=(o.ap||[]).filter(a=>a.st!=='Previsto'&&a.st!==CEN_AP_DESC); const canc=o.etapa==='Canceladas';
     if(canc&&!reais.length) return;   // cancelada sem apontamento nunca conta; com apontamento, a aplicação aconteceu (fato) e conta
     const defs=(o.ins||[]).filter(x=>{ const r=carRegraC(cen,x.p,cult); return r.def||r.desconhecido; }); if(!defs.length) return;   // fora de todo cadastro: possível defensivo
     const parcO=ts[0].parc; const J=carJanela(o);
@@ -303,7 +303,7 @@ function carRot(e){ if(e.k==='curso') return 'carência até '+carAte(e.det.fim)
 function carOps(cen){ return ((CARD.car0||{}).ops||[]).concat(((cen&&cen.car)||{}).ops||[]); }
 function carLotes(cen){ const L={};
   Object.keys((cen&&cen.ordens)||{}).forEach(id=>{ const o=cen.ordens[id]; if(!carEhColheita(o)) return; const ts=carTals(o.talhao); if(!ts.length) return;
-    (o.ap||[]).forEach(a=>{ if(a.st==='Previsto') return; const lid=carLid(id,a.dia);
+    (o.ap||[]).forEach(a=>{ if(a.st==='Previsto'||a.st===CEN_AP_DESC) return; const lid=carLid(id,a.dia);
       L[lid]={id:lid,tipo:'campo',os:id,tal:ts[0].tid,parc:a.parc||ts[0].parc||null,d:carIso(a.d),ha:Number(a.ha)||0,st:a.st,sinc:a.sinc!==false,pais:[],pos:[],q:'colheita '+id+' dia '+a.dia}; }); });
   carOps(cen).forEach(op=>{ if(op.k==='mistura'||op.k==='divisao') (op.novos||[]).forEach(n=>{ L[n.id]={id:n.id,tipo:op.k,pais:(op.de||[]).slice(),d:op.d,pos:[],q:n.q||'',fonte:op.fonte||''}; });
     if(op.k==='pos'&&L[op.lote]) L[op.lote].pos.push(op); });
@@ -401,7 +401,7 @@ function carAvisoAplic(c,o){ if(!o||carEhColheita(o)||(o.etapa!=='A liberar'&&o.
   return null; }
 // colheita apontada dentro da carência (app ou web): fato registrado, nunca impedido → conferência com dono
 function carColhidoEmCarencia(c,o){ if(!o||!carEhColheita(o)) return []; const out=[]; const ts=carTals(o.talhao); if(!ts.length) return out;
-  (o.ap||[]).forEach(a=>{ if(a.st==='Previsto') return; const d=carIso(a.d); if(!d) return; const e=carEstado(c,ts[0].tid,d,a.parc||ts[0].parc,d);
+  (o.ap||[]).forEach(a=>{ if(a.st==='Previsto'||a.st===CEN_AP_DESC) return; const d=carIso(a.d); if(!d) return; const e=carEstado(c,ts[0].tid,d,a.parc||ts[0].parc,d);
     const r=e.ativos.filter(x=>x.d<=d)[0]; if(r) out.push({dia:a.dia,d,lote:carLid(o.id,a.dia),r}); }); return out; }
 // comandos sobre o cenário (só dentro de cenMudar): destino do lote (reavalia e preserva a avaliação anterior) e janela da colheita
 function carc_destino(c,lid,dest){ const L=carLotes(c); if(!L[lid]) throw new Error('Lote '+lid+' não encontrado.'); if(dest&&!CARD.dest[dest]) throw new Error('Destino sem cadastro.');
@@ -447,7 +447,7 @@ function carMerge(o,co,c){ if(!co||typeof CARD==='undefined') return; try{
 // Devolve a lista do que contou (OS-…, caderno dd/mm) para a mensagem nomear com quem resolver.
 function carSaf(o){ const s=String((o&&o.osc&&o.osc.novo&&o.osc.novo.saf)||(CARD.saf||{})[o&&o.id]||''); const m=/\d{4}\/\d{2}/.exec(s); return m?m[0]:s; }
 function carNap(c,tid,parc,p,o){ const sf=carSaf(o), FEZ=['Liberadas','Em execução','Em conferência','Encerradas'];
-  const os=Object.keys((c&&c.ordens)||{}).map(k=>c.ordens[k]).filter(h=>h.id!==o.id&&carSaf(h)===sf&&(FEZ.indexOf(h.etapa)>=0||(h.ap||[]).some(a=>a.st!=='Previsto'))
+  const os=Object.keys((c&&c.ordens)||{}).map(k=>c.ordens[k]).filter(h=>h.id!==o.id&&carSaf(h)===sf&&(FEZ.indexOf(h.etapa)>=0||(h.ap||[]).some(a=>a.st!=='Previsto'&&a.st!==CEN_AP_DESC))
     &&(h.ins||[]).some(x=>x.p===p)&&carTals(h.talhao).some(y=>y.tid===tid&&(!y.parc||!parc||y.parc===parc))).map(h=>h.id);
   return os.concat((CARD.apl0||[]).filter(a=>a.tal===tid&&a.p===p&&a.saf===sf).map(a=>'caderno '+a.d.slice(8,10)+'/'+a.d.slice(5,7))); }
 // gancho de teste/inspeção (o script da tela roda isolado): carencia_test.py lê e muda o cenário pelas mesmas funções

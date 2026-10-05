@@ -28,7 +28,7 @@ R.grade=CASOS.map(([d,a])=>{ try{ return cenQtd(d,a); }catch(e){ return 'ERRO '+
 function fixture(area){ const tot=cenQtd(0.5,area); return {tot,c:{ordens:{DEMO:{id:'DEMO',etapa:'Em execução',area,saldo:area,realizado:0,ap:[],req:'REQ-DEMO',
   ins:[{p:'Produto sintético',dose:0.5,un:'L',tot}]}},reqs:{'REQ-DEMO':{itens:[{prod:'Produto sintético',un:'L',custodia:tot,consumido:0}]}}}}; }
 function apontar(area,partes){ const f=fixture(area); const out={area,tot:f.tot,erros:[],n:0};
-  for(const h of partes){ try{ osc_apontar(f.c,'DEMO','24/09',h); out.n++; }catch(e){ out.erros.push(e.message); } }
+  for(const h of partes){ try{ osc_apontar(f.c,'DEMO',(24+out.n)+'/09',h); out.n++; } /* CTL-2 · A: um trecho por dia (o mesmo dia com outra chave fica em conferência de duplicidade) */ catch(e){ out.erros.push(e.message); } }
   const o=f.c.ordens.DEMO, it=f.c.reqs['REQ-DEMO'].itens[0];
   Object.assign(out,{custodia:it.custodia,consumido:it.consumido,saldo:o.saldo,realizado:o.realizado,somaAp:o.ap.reduce((s,a)=>s+(a.cons['Produto sintético']||0),0)}); return out; }
 R.apontar=[apontar(62.25,[62.25]),apontar(62.79,[62.79]),apontar(62.25,[30.55,31.7]),apontar(62.25,[20.01,20.02,22.22]),apontar(73.18,[0.05,36.5,36.63])];

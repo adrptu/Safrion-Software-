@@ -1,0 +1,113 @@
+# -*- coding: utf-8 -*-
+"""CTL-2 · Frente A (AP-ÚNICO), parte de navegador do ap_unico_test.py: O.S. (1440 px), app MB-03 (390 px) e Estoque sobre o mesmo cenário.
+Uso: python3 ap_unico_test.py nav   (compile antes: build.py && montar_render.py)"""
+import json, time
+from app_lib import App
+
+OS, P = 'OS-0421', 'Fungicida A'
+FA = "c.reqs['REQ-035'].itens[0]"
+FATO = f"[c.ordens['{OS}'].realizado,{FA}.consumido,{FA}.custodia]"
+
+def rodar():
+    a = App(['MB-01', 'MB-03', 'OS', 'EST']); J = a.J; erros = []
+    def web():
+        a.c.size(1440, 1100); a.abrir('OS'); time.sleep(.3)
+    def ordem(id_):
+        J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith({json.dumps(id_)})); r&&r.click();}})()"); time.sleep(.45)
+    def pan():
+        if J('(()=>{const bs=[...document.querySelectorAll(\'aside[role=dialog] section[aria-label] > button[aria-expanded="false"]\')]; bs.forEach(b=>b.click()); return bs.length;})()'): time.sleep(.3)
+        return J("(()=>{const a=document.querySelector('aside[role=dialog]'); return a?a.innerText.replace(/\\s+/g,' '):'';})()") or ''
+    def btn(t):
+        r = J(f"(()=>{{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==={json.dumps(t)}); if(!b) return false; b.click(); return true;}})()"); time.sleep(.4); return r
+    def temb(t): return bool(J(f"[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==={json.dumps(t)})"))
+    def inp(lab): return J(f"(()=>{{const i=[...document.querySelectorAll('aside[role=dialog] input')].find(x=>x.getAttribute('aria-label')==={json.dumps(lab)}); return i?i.value:null;}})()")
+    def setin(lab, val):
+        J(f"""(()=>{{const i=[...document.querySelectorAll('aside[role=dialog] input')].find(x=>x.getAttribute('aria-label')==={json.dumps(lab)});
+          Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,{json.dumps(val)}); i.dispatchEvent(new Event('input',{{bubbles:true}})); i.dispatchEvent(new Event('change',{{bubbles:true}}));}})()"""); time.sleep(.3)
+    def toast(): return J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')") or ''
+    def linha(id_): return J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith({json.dumps(id_)})); return r?r.innerText.replace(/\\s+/g,' '):'';}})()") or ''
+    def restaurar():
+        a.c.size(390, 1800); a.abrir('MB-01'); a.clk('Restaurar demonstração'); time.sleep(.3)
+    def web_apontar(ha, usado=None, data=None):
+        web(); ordem(OS); btn('Registrar apontamento')
+        if data: setin('Data do turno', data)
+        setin('Área feita em hectares', ha)
+        if usado is not None: setin(f'Usado de {P} (L)', usado)
+        btn('Salvar apontamento'); return toast()
+    def app_turno(ha, usado=None):
+        a.c.size(390, 1800); a.abrir('MB-03'); a.clk_sel(f'main button[title="Iniciar turno na {OS}"]'); time.sleep(.2)
+        a.setv('#ft_ha', ha); a.setv('#ft_h', '8')
+        if usado is not None: a.setv('#ft_c0', usado)
+        a.clk('Fechar turno'); return a.toast() or ''
+    def guard():
+        e = a.erros() or []; erros.extend(e)
+    try:
+        restaurar()
+        # 1 · formulário: data operacional, operador herdado, consumo por insumo (Fungicida A sugerido; Adjuvante fora da REQ-035 vazio), sem aviso
+        web(); ordem(OS); n0 = 1; btn('Registrar apontamento'); p = pan()
+        vals = [inp('Data do turno'), inp(f'Usado de {P} (L)'), inp('Usado de Adjuvante espalhante (L)')]
+        a.ok(inp('Data do turno') == '2026-09-26' and 'Turno de Marcos · quem está com os insumos' in p and inp(f'Usado de {P} (L)') == '25'
+             and inp('Usado de Adjuvante espalhante (L)') == '' and 'Fora da REQ-035 · nada em custódia' in p and 'Já há' not in p,
+             'AP-01/02/04 formulário: 26/09, "Turno de Marcos · quem está com os insumos", usado de Fungicida A 25 L sugerido, adjuvante vazio, sem aviso: ' + str(vals) + ' · ' + p[p.find('Data do turno'):][:200])
+        # 2 · usado real 27 L e duplo clique em Salvar: 240 ha, 122 L / 38 L, uma só chave (2 cliques: Registrar + Salvar)
+        setin(f'Usado de {P} (L)', '27')
+        J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Salvar apontamento'); b.click(); b.click();})()"); time.sleep(.5)
+        f = a.cen(FATO); nw = a.cen(f"c.ordens['{OS}'].ap.filter(x=>/^W-/.test(x.chave||'')).length")
+        a.ok(f == [240, 122, 38] and nw == 1, f'AP-03/04 usado 27 L e duplo clique: 240 ha, 122 L / 38 L, um só registro: {f} · {nw}')
+        mv = a.cen("c.movs.filter(m=>m.tipo==='consumo'&&m.origem==='web').map(m=>m.quem+'|'+m.det)")
+        a.ok(mv == ['Marcos|Fungicida A 27'], f'a web grava o movimento de consumo com Marcos (não "web"): {mv}')
+        # 3 · turno do app no mesmo dia: retido, recibo diz quem decide; o formulário web passa a avisar
+        t = app_turno('50'); card = a.body()
+        a.ok('em conferência: já há dia 5, 50 ha pela web em 26/09. Nada foi somado nem baixado; Paula (conferência) decide se é outro turno.' in t
+             and 'Em conferência · duplicidade' in card and 'nada baixado: Paula (conferência) decide se é outro turno' in card and a.cen(FATO) == [240, 122, 38],
+             'AP-05/06 app retido: recibo "Em conferência · duplicidade", nada baixado (240 ha, 122 L): ' + t[:160])
+        guard(); web(); ordem(OS); btn('Registrar apontamento'); p = pan()
+        a.ok('Já há dia 5, 50 ha pela web' in p and 'em 26/09. Se for outro turno, salve' in p, 'aviso no formulário antes de salvar (sem clique): ' + p[p.find('Já há'):][:160])
+        btn('Cancelar')
+        # 4 · painel: selo, pendência com Paula, linha não somada com as três saídas, acumulado 240 (não 290)
+        p = pan()
+        a.ok('Apontamento em conferência' in p and 'Paula (conferência)' in p and 'decidir se o dia 6 é outro turno' in p and 'não somado' in p
+             and temb('Mesmo turno: vale o dia 5') and temb('Mesmo turno: vale este') and temb('Outro turno: somar') and '240 / 350' in p and '290 / 350' not in p
+             and 'Apontamento em conferência' in linha(OS),
+             'AP-06/07 painel: selo na lista e no painel, Paula decide, três saídas, acumulado 240/350: ' + p[p.find('APONTAMENTOS'):][:400])
+        # 5 · "Mesmo turno: vale o dia 5" (1 clique): dia 6 guardado, selo sai, 240 ha
+        btn('Mesmo turno: vale o dia 5'); p = pan(); s6 = a.cen(f"c.ordens['{OS}'].ap.find(x=>x.dia===6).st")
+        a.ok(s6 == 'Duplicidade · não somado' and 'Apontamento em conferência' not in p and a.cen(FATO) == [240, 122, 38] and 'Dia 6 guardado como duplicidade do dia 5' in toast(),
+             f'AP-07 "vale o dia 5": dia 6 = {s6}, selo fora, 240 ha / 122 L')
+        guard()
+        # 6 · "Mesmo turno: vale este": web 50 ha (estimativa 25 L) e app 50 ha com 27 L reais → 240 ha, 122 L; dia 5 estornado e guardado
+        restaurar(); web_apontar('50'); app_turno('50', '27'); web(); ordem(OS); pan(); btn('Mesmo turno: vale este'); time.sleep(.2)
+        f = a.cen(FATO); m5 = a.cen(f"(()=>{{const k=c.ordens['{OS}'].ap.find(x=>x.dia===5); const m=c.movs.find(x=>x.id===k.mov); return [k.st,m.det,m.obs||'']}})()")
+        a.ok(f == [240, 122, 38] and m5[0] == 'Duplicidade · não somado' and m5[1] == '' and m5[2].startswith('Estornado: mesmo turno do dia 6'),
+             f'AP-07 "vale este" (DEMO-11): 240 ha, 122 L / 38 L; dia 5 estornado, movimento sem item: {f} · {m5}')
+        a.c.size(1440, 1100); a.abrir('EST'); eb = a.body()
+        a.ok('retido · duplicidade' not in eb and 'Estornado' not in eb.split('Movimentos')[0][:0] , 'EST abre sem item fantasma do movimento estornado')
+        guard()
+        # 7 · "Outro turno: somar": web 40 ha + app 50 ha → 280 ha, 140 L
+        restaurar(); web_apontar('40'); app_turno('50'); web(); ordem(OS); pan(); btn('Outro turno: somar'); f = a.cen(FATO)
+        a.ok(f[:2] == [280, 140], f'AP-07 "outro turno: somar": 280 ha, 140 L: {f}')
+        guard()
+        # 8 · sem sinal: app 50 ha no aparelho, web 50 ha, sinal volta → 240 ha, 120 L; movimento retido sem item
+        restaurar(); a.abrir('MB-03'); a.clk('Sem sinal'); app_turno('50'); web_apontar('50'); a.c.size(390, 1800); a.abrir('MB-03'); a.clk('Com sinal'); t = a.toast() or ''
+        f = a.cen(FATO); md = a.cen(f"(()=>{{const k=c.ordens['{OS}'].ap.find(x=>x.st==='Duplicidade a conferir'); const m=k&&c.movs.find(x=>x.id===k.mov); return k?[k.dia,m?m.det:null,m?m.obs:null]:null}})()")
+        a.ok(f == [240, 120, 40] and md and md[1] == '' and 'Em conferência de duplicidade: OS-0421 dia 5' in t,
+             f'AP-06 sem sinal + web: 240 ha, 120 L / 40 L; o turno do app fica retido, baixa desfeita, movimento sem item: {f} · {md} · {t[:120]}')
+        guard()
+        # 9 · retido até Em conferência: a pendência é de Paula (decidir a duplicidade), não de Rui
+        restaurar(); a.mudar("return cenEntregar(c,'REQ-035','Fungicida A',15,'Marcos');"); web_apontar('50'); app_turno('50'); web_apontar('110', data='2026-09-27')
+        web(); ordem(OS); btn('Enviar para conferência'); btn('Confirmar envio'); p = pan(); ln = linha(OS)
+        a.ok('Em conferência' in ln and 'Apontamento em conferência' in ln and 'Rui (almoxarife)' not in ln and 'Sobras a receber' not in ln and 'receber a devolução' not in p
+             and 'Encerrar bloqueado: Apontamento em conferência de duplicidade: dia 6' in p and 'Quem resolve: Paula (conferência) decide na linha do apontamento' in p,
+             'AP-08 Em conferência com retido: selo "Apontamento em conferência" na lista (não "Sobras a receber"/Rui) e o painel bloqueia o encerramento com Paula (dono Paula: unit C1): ' + ln[:200] + ' · ' + p[p.find('PRÓXIMO'):][:200])
+        guard()
+        # 10 · negativo: dois turnos do app no mesmo dia (mesmo operador) somam: 230 ha
+        restaurar(); app_turno('20'); app_turno('20'); f = a.cen(FATO)
+        a.ok(f[0] == 230 and a.cen(f"c.ordens['{OS}'].ap.some(x=>x.st==='Duplicidade a conferir')") is False, f'negativo: dois turnos do app somam (230 ha), nada retido: {f}')
+        guard()
+        # 11 · sem erros JS
+        a.ok(not erros, 'sem erros JS em OS, MB-01, MB-03 e EST: ' + str(erros[:3]))
+        restaurar()
+    finally:
+        a.fim()
+    print(f'RESULTADO nav: {a.n - len(a.FAIL)}/{a.n}' + (' · FALHAS: ' + '; '.join(a.FAIL) if a.FAIL else ''))
+    return 1 if a.FAIL else 0
