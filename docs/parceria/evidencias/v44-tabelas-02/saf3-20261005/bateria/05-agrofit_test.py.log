@@ -1,0 +1,21 @@
+$ CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdp9333.lock env CDP_GL=1 timeout 900 python3 agrofit_test.py
+OK    1 O.S.: Agrícola começa por Consulta Agrofit (antes de Planos agronômicos); OS-0430 › Ajustar: "Agrofit ›" → AG-07.dc.html#<ficha>, nova aba 
+OK    2 link da O.S. (AG-07.dc.html#acido-24d-806) abre algo útil: faixa "Da fazenda: 2,4-D 806", a referência conferida (dose 0,8–1,5 L/ha, carência uso pré-plantio, alertas) já na chegada e os 19 registros 
+OK    3 cabeçalho: "Base atualizada · 02/10/2026" e "Fonte: AGROFIT/MAPA · dados abertos (CC-BY) · arquivo de 02/10/2026 · 4.409 produtos com registro" + AGROFIT oficial (nova aba) 
+OK    4 lista: "4.409 de 4.409 produtos", 6 colunas do desenho, 50 linhas e "Mostrar mais" → 150 
+OK    5 busca "feijão percevejo" = "FEIJAO percevejo" = 14 (cultura e alvo no mesmo uso; exclui quem só tem percevejo em outra cultura) 
+OK    6 Cultura Soja: 3168 (com "Todas as culturas") e "Ver só os de Soja" → 2286 (= contagem da cultura no índice) 
+OK    7 Praga ou alvo = Phakopsora pachyrhizi em Soja: 332 registros (Soja + "Todas as culturas"), linhas só deles 
+OK    8 Classe Herbicida = 1443; agrupar por grupo químico: 46 grupos, contagem de cada linha confere 
+OK    9 #reg-22820 abre a ficha de Across: registro, titular, 7 seções, link oficial, nota da bula e receituário bloqueado sem cultura/alvo 
+OK    10 rotação Soja × Phakopsora para Across (FRAC 3 + FRAC 11 + FRAC M5): 106 de outro modo de ação em 22 grupos, 225 do mesmo; nenhum alternativo repete o modo de ação 
+OK    11 LMR ANVISA para Soja: um valor por ingrediente, igual ao agrofit_lmr.json 
+OK    12 receituário: sem dose → "Informe a dose…"; "1,5" → "Informe a unidade…"; "3 litros" → "Informe a base…"; "0,6 L/ha" emite com cultura e alvo 
+OK    13 links antigos: #glifosato-480 → 52 registros; #tembotriona-420-sc (único) → ficha Soberan; #paraquate-200-sl → 0 e "Proibido" 
+OK    14 Na fazenda (Aba 400 WG Nortox): lotes de Abamectina 18 EC, Abamectina 500 FS, TS nematicida (abamectina) iguais ao cenário; referência "Abamectina 18 EC"; dose fora da referência só avisa 
+OK    15 Able (só "Todas as culturas"): Cultura oferece Soja; com "Todas as culturas" o receituário fica bloqueado com orientação; com Soja emite "Soja" 
+OK    16 1280×800: grade sem rolagem lateral (última coluna até 1234 px de 1280); Atinge × Soja sem LMR → "Sem LMR de Soja nos dados abertos…", sem vermelho 
+OK    17 índice indisponível → "Não foi possível carregar a base do AGROFIT" + "Tentar de novo" recarrega; sem erro de execução nas páginas 
+
+RESULTADO: 17/17 ok · 33 s []
+[exit 0]

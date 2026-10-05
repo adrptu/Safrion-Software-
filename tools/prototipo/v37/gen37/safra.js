@@ -367,13 +367,19 @@ function compRend(self,saf){ if(!saf) return; const ro=rendRo(self,saf);
   const jan=(x)=>{ const j=rpNum(x.jan); return (j===null||isNaN(j))?[]:[{k:'mut',t:'janela '+nfa(j)+' h por talhão'}]; };
   // incluir outra configuração: no formulário da atividade; na linha só da atividade já dividida (que não abre formulário)
   const mais=(id)=>ro?[]:[{k:'act',t:'+ Outra configuração',fn:'rendnova:'+id,lk:true}];
-  const cfgP=(k,cj0,multi)=>{ const x=k.v; const inf=(x.modo==='Informado'); x.multi=multi?'sim':'não';
+  const cfgP=(k,cj0,multi)=>{ const x=k.v; const inf=(x.modo==='Informado'); x.multi=multi?'sim':'não'; k.p.custo_kg=[{k:'mut',t:'—'}]; k.s.custo_kg='';
     // conjunto igual ao da operação fica discreto; o diferente aparece em destaque; sem patrimônio diz de onde vem
     const orig=x.conj_id==='classe'?[{k:'mut',t:'por classe, sem patrimônio'}]:(x.conj_id==='prestador'?[{k:'mut',t:'prestador de serviço'}]:[]);
     k.p.nome=[{k:(cj0&&x.nome===cj0&&!multi?'mut':'b'),t:x.nome}].concat(orig); k.s.nome=x.nome;
-    if(multi){ k.p.atv=[{k:'txt',t:'Parte: '+partTxt(x)}].concat(x.seq===SEQ_T?[{k:'chip',t:'em sequência',c:'yellow'}]:[]).concat(jan(x)); k.s.atv=x.atv; }
-    else { k.p.atv=[{k:'txt',t:x.atv}].concat(x.aj?[{k:'chip',t:'ajustado nesta safra',c:'blue'}]:[]).concat(x.planos?[{k:'mut',t:x.planos}]:[]).concat(jan(x)); k.s.atv=x.atv+' '+x.op; }
-    k.v.param=inf?'':(nfa(x.larg)+' m × '+nfa(x.vel)+' km/h × '+nfa(x.efic)+' %'); k.p.param=inf?[{k:'mut',t:'informado'}]:[{k:'txt',t:k.v.param}]; k.s.param=inf?'informado':k.v.param;
+    // TABELAS-FOCO (5983172395): uma variável por coluna — operação, atividade, planos, modo, largura, velocidade, eficiência, parte, sequência e janela
+    k.p.op=[{k:'mut',t:x.op}]; k.s.op=x.op;
+    if(multi){ k.p.atv=[{k:'mut',t:x.atv}]; k.s.atv=x.atv; const pp=rpNum(x.part); k.p.part=(pp===null||isNaN(pp))?[{k:'mut',t:'pelo rendimento'}]:[{k:'txt',t:nfa(pp)}];
+      k.p.seq=x.seq===SEQ_T?[{k:'chip',t:'Em sequência',c:'yellow'}]:[{k:'txt',t:'Ao mesmo tempo'}]; k.s.seq=x.seq===SEQ_T?'Em sequência':'Ao mesmo tempo'; }
+    else { k.p.atv=[{k:'txt',t:x.atv}].concat(x.aj?[{k:'chip',t:'ajustado nesta safra',c:'blue'}]:[]); k.s.atv=x.atv; k.p.part=[{k:'mut',t:'—'}]; k.s.part=''; k.p.seq=[{k:'mut',t:'—'}]; k.s.seq=''; }
+    k.s.planos=x.planos||''; k.p.planos=x.planos?[{k:'txt',t:x.planos}]:[{k:'mut',t:'—'}];
+    { const j=rpNum(x.jan); k.s.jan=(j===null||isNaN(j))?'':nfa(j); }
+    k.v.param=inf?'':(nfa(x.larg)+' m × '+nfa(x.vel)+' km/h × '+nfa(x.efic)+' %'); k.s.modo=inf?'Informado':'Largura × velocidade';
+    ['larg','vel','efic'].forEach(f=>{ if(inf){ k.p[f]=[{k:'mut',t:'—'}]; k.s[f]=''; } else { delete k.p[f]; delete k.s[f]; } });
     const rv=rpNum(x.rend); const okR=rv!==null&&!isNaN(rv)&&rv>0;
     k.p.rend=okR?[{k:'b',t:nf(rv,2)}]:[{k:'chip',t:'sem rendimento',c:'red'}]; k.s.rend=okR?nf(rv,2):'sem rendimento';
     // custo por hora: só o número; a composição (máquina, implemento, pessoas) fica no formulário da linha
@@ -385,18 +391,21 @@ function compRend(self,saf){ if(!saf) return; const ro=rendRo(self,saf);
     if(String(x.op||'').indexOf('Colheita')!==0) return;
     const pc=prodColheita(self,saf,x.op);
     const kg=(!pc.length||!cha)?'R$/kg não calculável':pc.map(q=>(pc.length>1?q.cult+' ':'')+nf(Math.round(cha/q.kg*10000)/10000,4)+' R$/kg').join(' · ');
-    k.p.custo_ha=k.p.custo_ha.concat([{k:'br'},{k:'mut',t:kg}]); k.s.custo_ha+=' · '+kg; };
+    k.p.custo_kg=[{k:(pc.length&&cha?'txt':'mut'),t:(pc.length&&cha?pc.map(q=>(pc.length>1?q.cult+' ':'')+nf(Math.round(cha/q.kg*10000)/10000,4)).join(' · '):'não calculável')}]; k.s.custo_kg=(pc.length&&cha)?kg:''; };
   // atividade com várias configurações: como a área se divide e o rendimento de cada uma (sem somar nem tirar média)
   const atvP=(a)=>{ const ks=cfgLeaves(a.kids); const x=a.v; const fx=ks.filter(k=>{ const p=rpNum(k.v.part); return p!==null&&!isNaN(p); });
     const div=!fx.length?'divide a área pelo rendimento':(fx.length===ks.length?fx.map(k=>nfa(rpNum(k.v.part))+' %').join(' + '):(fx.map(k=>nfa(rpNum(k.v.part))+' %').join(' + ')+' + resto pelo rendimento'));
-    a.p.atv=[{k:'txt',t:x.atv},{k:'chip',t:ks.length+' configurações',c:'blue'}].concat(x.planos?[{k:'mut',t:x.planos}]:[]).concat(mais(ks[0]?ks[0].id:'')); a.s.atv=x.atv+' '+x.op;
-    a.p.nome=[{k:'mut',t:div}]; a.s.nome=ks.map(k=>k.v.nome).join(' '); a.p.param=[{k:'mut',t:'por configuração'}]; a.s.param='';
-    a.p.rend=[{k:'mut',t:ks.map(k=>{ const r=rpNum(k.v.rend); return (r===null||isNaN(r)||r<=0)?'—':nf(r,2); }).join(' e ')}]; a.s.rend='';
-    a.p.custo_ha=[{k:'mut',t:'por configuração'}]; a.s.custo_ha=''; };
+    a.p.op=[{k:'mut',t:x.op}]; a.s.op=x.op;
+    a.p.atv=[{k:'txt',t:x.atv},{k:'chip',t:ks.length+' configurações',c:'blue'}].concat(mais(ks[0]?ks[0].id:'')); a.s.atv=x.atv;
+    a.p.planos=x.planos?[{k:'txt',t:x.planos}]:[{k:'mut',t:'—'}]; a.s.planos=x.planos||'';
+    a.p.nome=[{k:'mut',t:ks.length+' conjuntos'}]; a.s.nome=ks.map(k=>k.v.nome).join(' '); a.p.part=[{k:'mut',t:div}]; a.s.part='';
+    ['modo','larg','vel','efic','rend','custo_ha','custo_kg','seq','jan'].forEach(f=>{ a.p[f]=[{k:'mut',t:f==='modo'?'por configuração':''}]; a.s[f]=''; }); };
   g2rows(self,GR(rendGid(saf))).forEach(g=>{
     if(!g.grp){ cfgP(g,'',false); return; }
     const ks=g.kids||[]; const all=cfgLeaves(ks); const cj=all.map(k=>k.v.nome).filter((n,i,a)=>a.indexOf(n)===i);
-    g.p.atv=[{k:'b',t:g.v.op},{k:'mut',t:ks.length+(ks.length>1?' atividades':' atividade')}].concat(g.v.aj?[{k:'chip',t:'ajustado nesta safra',c:'blue'}]:[]); g.s.atv=g.v.op;
+    g.p.op=[{k:'b',t:g.v.op}].concat(g.v.aj?[{k:'chip',t:'ajustado nesta safra',c:'blue'}]:[]); g.s.op=g.v.op;
+    g.p.atv=[{k:'mut',t:ks.length+(ks.length>1?' atividades':' atividade')}]; g.s.atv='';
+    ['modo','larg','vel','efic','rend','custo_h','custo_ha','custo_kg','part','seq','jan','planos'].forEach(f=>{ g.p[f]=[{k:'mut',t:''}]; g.s[f]=''; });
     g.p.nome=[{k:'mut',t:cj.length===1?cj[0]:cj.length+' conjuntos'}]; g.s.nome=cj.join(' ');
     const cj0=ks.length?(ks[0].grp?((cfgLeaves(ks[0].kids)[0]||{v:{}}).v.nome||''):ks[0].v.nome):'';
     ks.forEach(k=>{ if(k.grp){ atvP(k); (k.kids||[]).forEach(q=>cfgP(q,cj0,true)); } else cfgP(k,cj0,false); }); }); }

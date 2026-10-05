@@ -203,7 +203,7 @@ Sem a camada sintética (tarefa 1), o build para em `dados_lagoa_fonte`, com uma
     - Autor / revisor / integrador: Claude / Codex + Gemini / quem não for autor.
     - Arquivos: `gen37/areas/processo_safra.py` (colunas da etapa 3), `gen37/safra.js` (`compRend`: valores e partes por coluna), `gen37/tabelas_inventario.py` (rótulo com unidade não é composto; coluna do menu vigente), testes que leem as colunas antigas da etapa 3 (`rend_multiconjuntos_test.py`, `saftest.py`, `acao_unica_test.py` saf) e teste novo `gen37/tabelas_saf_test.py`.
     - Aceite e verificação: cada variável filtra e ordena sozinha (TF03); árvore operação→atividade→configuração preservada; regressão: rend_* (fluxo, telas, bordas, bordas2), rend unit, saf*, acao_unica saf, varredura, bateria completa.
-    - Estado: reservado; implementação em seguida.
+    - Estado: implementado (executado): colunas Operação | Atividade | Conjunto | Rendimento | Custo R$/h | R$/ha | R$/kg | Modo | Largura | Velocidade | Eficiência | Parte | Trabalha | Janela | Planos; `tabelas_saf_test.py` 14/14; REND 16/5/10/5; bateria sem falha nova.
   - **TABELAS-FOCO-20261004 v2 (5983172395) · incremento 1: O.S. por Talhão. Reserva antes de editar, base `3d8b3e4` (AÇÃO + REND D-01 R3), branch `claude/v44-tabelas-01`:**
     - ID / resultado útil / persona: localizar e comparar as O.S. de um talhão sem procurar combinação de textos; gestor e agrônomo.
     - Requisitos: PRD 4.2/4.3, G2, UX-ACAO-UNICA v3.1; contrato itens 1–7 e TF01–TF06. Fora: demais tabelas (incremento 2, com o inventário TF05), HML.

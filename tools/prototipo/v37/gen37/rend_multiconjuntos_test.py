@@ -48,7 +48,20 @@ try:
     from comp_lib import IR_ETAPA
     def etapa(n): r=J(f"({IR_ETAPA})({n})"); time.sleep(.5); return r   # a faixa só informa (UX-ACAO-UNICA-20261003): anda pela área de ações
     # células visíveis de cada linha; o triângulo de abrir/recolher (▸ ▾) sai do texto da 1ª célula
-    def rows(): return J("[...document.querySelectorAll('[role=row]')].filter(r=>r.offsetParent).map(r=>[...r.querySelectorAll('[role=cell]')].map((x,i)=>{ const t=x.innerText.replace(/\\s+/g,' ').trim(); return i===0?t.replace(/^[▸▾]\\s*/,''):t; }))") or []
+    # TABELAS-FOCO (5983172395): a etapa 3 tem uma variável por coluna (Operação | Atividade | Conjunto | Modo | Largura | Velocidade | Eficiência |
+    # Rendimento | Custo R$/h | R$/ha | R$/kg | … ; ordem real: Operação | Atividade | Conjunto | Rendimento | custos | Modo | Largura | Velocidade | Eficiência | Parte | Trabalha | Janela | Planos); LEG lê essas colunas e remonta as 6 células de antes, para os
+    # mesmos valores serem conferidos pelas mesmas asserções (as outras grades passam como estão)
+    LEG=r"""(x=>{ const cs=[...x.querySelectorAll('[role=cell]')].map(c=>c.innerText.replace(/\s+/g,' ').trim()); const tb=x.closest('[role=table]');
+      const hs=tb?[...tb.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴]/g,'').replace(/\s+/g,' ').trim().toUpperCase()):[];
+      if(hs[0]!=='OPERAÇÃO'||hs[1]!=='ATIVIDADE'||cs.length<15) return cs;
+      const st=t=>t.replace(/^[▸▾]\s*/,''); const op=st(cs[0]), atv=cs[1], nome=cs[2], modo=cs[7], part=cs[11], seq=cs[12], jan=cs[13].replace(/,0$/,''), pl=cs[14];
+      const janT=(jan&&jan!=='—')?' janela '+jan+' h por talhão':''; const param=modo==='Informado'?'informado':(cs[8]+' m × '+cs[9]+' km/h × '+cs[10]+' %').replace(/,00? /g,' ');
+      if(/^\d+ atividades?$/.test(atv)){ const aj=/ ajustado nesta safra$/.test(op); return [op.replace(/ ajustado nesta safra$/,'')+' '+atv+(aj?' ajustado nesta safra':''),nome,'','','','']; }
+      if(/ configurações/.test(atv)){ const mais=/ \+ Outra configuração$/.test(atv); return [atv.replace(/ \+ Outra configuração$/,'')+(pl!=='—'?' '+pl:'')+(mais?' + Outra configuração':''),part,'por configuração','','','por configuração']; }
+      const c5=cs[5]+((cs[6]&&cs[6]!=='—')?' '+cs[6]:'');
+      if(seq==='Ao mesmo tempo'||seq==='Em sequência') return ['Parte: '+(part==='pelo rendimento'?'pelo rendimento':part.replace(/,0$/,'')+' % da área')+(seq==='Em sequência'?' em sequência':'')+janT,nome,param,cs[3],cs[4],c5];
+      return [atv+(pl!=='—'?' '+pl:'')+janT,nome,param,cs[3],cs[4],c5]; })"""
+    def rows(): return J(f"[...document.querySelectorAll('[role=row]')].filter(r=>r.offsetParent).map(r=>({LEG})(r).map((t,i)=>i===0?t.replace(/^[▸▾]\\s*/,''):t))") or []
     def row(pref):
         return next((r for r in rows() if r and r[0].startswith(pref)),None)
     def rowAfter(anchor,pref):
@@ -56,10 +69,10 @@ try:
         return None if i is None else next((r for r in rs[i+1:] if r and r[0].startswith(pref)),None)
     def rec(t): J(f"(()=>{{const b=[...document.querySelectorAll('button[aria-label]')].filter(x=>x.offsetParent).find(b=>b.getAttribute('aria-label')==='Recolher '+{json.dumps(t)}); if(b) b.click();}})()"); time.sleep(.3)
     def abrirCfg(sub):   # configuração (linha "Parte: …") cujo conjunto contém sub
-        r=J(f"(()=>{{const rs=[...document.querySelectorAll('[role=row].g2ed')].filter(x=>x.offsetParent); const r=rs.find(x=>{{const cs=[...x.querySelectorAll('[role=cell]')].map(c=>c.innerText.replace(/\\s+/g,' ').trim()); return cs[0]&&cs[0].startsWith('Parte:')&&cs[1]&&cs[1].indexOf({json.dumps(sub)})>=0; }}); if(!r) return 'sem linha'; r.querySelector('[role=cell] span').click(); return 'ok';}})()"); time.sleep(.45); return r
+        r=J(f"(()=>{{const rs=[...document.querySelectorAll('[role=row].g2ed')].filter(x=>x.offsetParent); const r=rs.find(x=>{{const cs=({LEG})(x); return cs[0]&&cs[0].startsWith('Parte:')&&cs[1]&&cs[1].indexOf({json.dumps(sub)})>=0; }}); if(!r) return 'sem linha'; r.querySelector('[role=cell] span').click(); return 'ok';}})()"); time.sleep(.45); return r
     def exp(t): r=J(f"(()=>{{const b=[...document.querySelectorAll('button[aria-label]')].filter(x=>x.offsetParent).find(b=>b.getAttribute('aria-label')==='Expandir '+{json.dumps(t)}); if(!b) return 'sem'; b.click(); return 'ok';}})()"); time.sleep(.35); return r
     def abrir(pref,idx=0):
-        r=J(f"(()=>{{const rs=[...document.querySelectorAll('[role=row].g2ed')].filter(x=>x.offsetParent&&x.innerText.replace(/\\s+/g,' ').trim().startsWith({json.dumps(pref)})); const r=rs[{idx}]; if(!r) return 'sem linha'; r.querySelector('[role=cell] span').click(); return 'ok';}})()"); time.sleep(.45); return r
+        r=J(f"(()=>{{const rs=[...document.querySelectorAll('[role=row].g2ed')].filter(x=>x.offsetParent&&(x.innerText.replace(/\\s+/g,' ').trim().startsWith({json.dumps(pref)})||(({LEG})(x)[0]||'').startsWith({json.dumps(pref)}))); const r=rs[{idx}]; if(!r) return 'sem linha'; r.querySelector('[role=cell] span').click(); return 'ok';}})()"); time.sleep(.45); return r
     def campo(k,v):
         return J(f"""(()=>{{const i=document.querySelector('aside [id$="_{k}"]'); if(!i) return 'sem campo {k}'; const P=i.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype;
           Object.getOwnPropertyDescriptor(P,'value').set.call(i,{json.dumps(v)}); i.dispatchEvent(new Event(i.tagName==='SELECT'?'change':'input',{{bubbles:true}})); return 'ok';}})()""")
@@ -199,7 +212,7 @@ try:
             J(f"(()=>{{const b=document.querySelector('button[aria-label={json.dumps(l)}]'); if(b) b.click();}})()"); time.sleep(.3)
         return rows()
     def abrirEm(grupo,pred):   # abre a configuração (linha "Parte: …") de um grupo de atividade, escolhida por pred(conjunto)
-        r=J(f"""(()=>{{const rs=[...document.querySelectorAll('[role=row]')].filter(x=>x.offsetParent); const cs=x=>[...x.querySelectorAll('[role=cell]')].map(c=>c.innerText.replace(/\\s+/g,' ').trim());
+        r=J(f"""(()=>{{const rs=[...document.querySelectorAll('[role=row]')].filter(x=>x.offsetParent); const cs=x=>({LEG})(x);
           const i=rs.findIndex(x=>(cs(x)[0]||'').replace(/^[▸▾]\\s*/,'').startsWith({json.dumps(grupo)})); if(i<0) return 'sem grupo'; const P={pred};
           const r=rs.slice(i+1).find(x=>x.classList.contains('g2ed')&&(cs(x)[0]||'').startsWith('Parte:')&&P(cs(x)[1]||'')); if(!r) return 'sem linha'; r.querySelector('[role=cell] span').click(); return 'ok';}})()"""); time.sleep(.45); return r
     def tecla(enter_real):   # Enter como o teclado manda (keyDown com o caractere) ou só o keyDown sem caractere

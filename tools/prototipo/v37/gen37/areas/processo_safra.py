@@ -112,8 +112,14 @@ def build():
             out.append(dict(id='op_'+c['id'],grp=True,ro=True,v=dict(atv=op,op=op),s={},p={},kids=kids))
         return out
     MODO_CALC=dict(k='modo',eq='Largura × velocidade'); MODO_INF=dict(k='modo',eq='Informado')
-    REND_COLS=[dict(k='atv',l='Operação · atividade',w=250),dict(k='nome',l='Conjunto',w=330),dict(k='param',l='Como se obtém',w=180),
-               dict(k='rend',l='Rendimento (ha/h)',t='num',a='r',d=2),dict(k='custo_h',l='Custo (R$/h)',t='num',a='r',d=2),dict(k='custo_ha',l='Custo (R$/ha)',t='num',a='r',d=2,w=170)]
+    # TABELAS-FOCO (5983172395): uma variável por coluna; a árvore operação → atividade → configuração continua
+    # colunas de foco primeiro (rendimento e custos); como o rendimento se obtém e a divisão da área vêm depois
+    REND_COLS=[dict(k='op',l='Operação',w=160),dict(k='atv',l='Atividade',w=200),dict(k='nome',l='Conjunto',w=260),
+               dict(k='rend',l='Rendimento (ha/h)',t='num',a='r',d=2),dict(k='custo_h',l='Custo (R$/h)',t='num',a='r',d=2),dict(k='custo_ha',l='Custo (R$/ha)',t='num',a='r',d=2),
+               dict(k='custo_kg',l='Custo (R$/kg)',w=150),dict(k='modo',l='Modo',w=150),
+               dict(k='larg',l='Largura (m)',t='num',a='r',d=2,dmin=0),dict(k='vel',l='Velocidade (km/h)',t='num',a='r',d=2,dmin=0),dict(k='efic',l='Eficiência (%)',t='num',a='r',d=1,dmin=0),
+               dict(k='part',l='Parte da área (%)',t='num',a='r',d=1,dmin=0,w=150),dict(k='seq',l='Trabalha',w=130),
+               dict(k='jan',l='Janela (h por talhão)',t='num',a='r',d=1,dmin=0),dict(k='planos',l='Planos',w=240)]
     NUNCA=dict(k='multi',eq='__nunca')   # campo só de rascunho: guarda contexto do formulário e não aparece
     MULTI=dict(k='multi',eq='sim'); UMA=dict(k='multi',eq='não')
     SEQ_T='Em sequência: divide trator, implemento ou operador'; PAR_T='Ao mesmo tempo, com recursos próprios'

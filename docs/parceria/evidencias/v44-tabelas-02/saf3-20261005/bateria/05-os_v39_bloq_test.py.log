@@ -1,0 +1,14 @@
+$ CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdp9333.lock env CDP_GL=1 timeout 900 python3 os_v39_bloq_test.py
+  OK  OS-0417: lista e Kanban com "Rui (almoxarife)"
+  OK  painel da OS-0418 aponta o bloqueio
+  OK  lista da OS-0418: selo vermelho Falta insumo e dono Suprimentos
+  OK  Kanban da OS-0418 com o mesmo selo e dono
+  OK  cabeçalho conta a OS-0418 como impedida desde a abertura
+  OK  situação atual não manda liberar o que está bloqueado
+  OK  lista da OS-0430: Sobras a receber + Rui (almoxarife)
+  OK  Kanban da OS-0430 com o mesmo selo e dono
+  OK  devolução recebida: selo sai e o dono volta a ser Marcos
+  OK  coluna Encerradas com o período das ordens encerradas
+  OK  sem erro JS
+RESULTADO: 11/11 ok
+[exit 0]
