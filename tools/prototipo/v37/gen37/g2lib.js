@@ -7,17 +7,28 @@ function g2num(s){ if(typeof s==='number') return s; if(s===null||s===undefined)
 function g2fmtn(n,d,dmin){ return Number(n).toLocaleString('pt-BR',{minimumFractionDigits:(dmin!==undefined?dmin:(d||0)),maximumFractionDigits:d||0}); }
 function g2fmt(v,c){ if(v===null||v===undefined||v==='') return '—'; if(c&&c.t==='date'&&/^\d{4}-\d{2}-\d{2}$/.test(String(v))){ const a=String(v).split('-'); return a[2]+'/'+a[1]+'/'+a[0]; } if(c&&c.zdash&&Number(v)===0) return '—'; if(c&&c.t==='num'){ const n=Number(v); if(isNaN(n)) return String(v); return (c.pre||'')+g2fmtn(n,c.d,c.dmin)+(c.u?' '+c.u:''); } return String(v); }
 function g2st(self,id){ return ((self.state.g2||{})[id])||{}; }
-function g2set(self,id,patch){ const all=Object.assign({},self.state.g2||{}); all[id]=Object.assign({},all[id]||{},patch); self.setState({g2:all}); }
+function g2set(self,id,patch){ const all=Object.assign({},self.state.g2||{}); all[id]=Object.assign({},all[id]||{},patch); self.setState({g2:all});
+  if(G2KEEP[id]){ try{ const x=all[id]; sessionStorage.setItem(G2KEEP[id],JSON.stringify({f:x.f||{},q:x.q||'',so:x.so||null,qv:x.qv||''})); }catch(e){} } }
+// recorte guardado na sessão (TABELAS-FOCO): filtros, busca e ordenação sobrevivem a abrir o detalhe e voltar; só a tabela que pede (g2keep)
+const G2KEEP={};
+function g2keep(self,id){ let key='g2:'+id; try{ key='g2:'+String(location.pathname).split('/').pop()+':'+id; }catch(e){} G2KEEP[id]=key;
+  if(self.__g2kept&&self.__g2kept[id]) return; (self.__g2kept=self.__g2kept||{})[id]=1;
+  try{ const o=JSON.parse(sessionStorage.getItem(key)||'null'); if(o&&typeof o==='object'){ const all=Object.assign({},self.state.g2||{}); all[id]=Object.assign({},all[id]||{},{f:o.f||{},q:o.q||'',so:o.so||null,qv:o.qv||''}); self.state.g2=all; } }catch(e){} }
 function g2rows(self,sp){ const st=g2st(self,sp.id); return st.rows||sp.rows; }
 function g2find(list,id){ for(const r of list){ if(r.id===id) return r; if(r.kids){ const k=g2find(r.kids,id); if(k) return k; } } return null; }
 function g2text(r,c){ if(r.s&&r.s[c.k]!==undefined&&r.s[c.k]!==null) return String(r.s[c.k]); if(r.v&&r.v[c.k]!==undefined&&r.v[c.k]!==null) return g2fmt(r.v[c.k],c); return ''; }
-function g2key(r,c){ if(c.t==='num'){ let n=(r.v&&r.v[c.k]!==undefined&&r.v[c.k]!==null&&r.v[c.k]!=='')?Number(r.v[c.k]):g2num(r.s&&r.s[c.k]); return isNaN(n)?null:n; } const t=g2text(r,c); return (t===''||t==='—')?null:t; }
+// coluna multivalorada (c.multi, TABELAS-FOCO): a linha traz r.m[k]=[{id,l}] (vínculos estruturados, ex.: talhões); filtro por pertinência
+// do ID, nunca por texto (T1 não pega T10 nem T1-A); vazio é um valor próprio do filtro, nos dois sentidos
+function g2mem(r,c){ return (c.multi&&r.m&&r.m[c.k])||null; }
+function g2fkeys(r,c){ const m=g2mem(r,c); if(m) return m.length?m.map(x=>x.id):['(vazio)']; const t=g2text(r,c); return [(t===''||t==='—')?'(vazio)':t]; }
+function g2key(r,c){ if(c.t==='date'){ const d=r.v&&r.v[c.k]; return (d===undefined||d===null||d==='')?null:String(d); }   // ISO: ordena por data
+  if(c.t==='num'){ let n=(r.v&&r.v[c.k]!==undefined&&r.v[c.k]!==null&&r.v[c.k]!=='')?Number(r.v[c.k]):g2num(r.s&&r.s[c.k]); return isNaN(n)?null:n; } const t=g2text(r,c); return (t===''||t==='—')?null:t; }
 function g2match(r,sp,st,mask,added){
   if(r.sh && !(added||{})[r.sh]) return false;
   if(mask && r.ri!==undefined && mask[r.ri]===false) return false;
   const q=(st.q||'').trim().toLowerCase();
   if(q){ const all=sp.cols.map(c=>g2text(r,c)).join(' ').toLowerCase(); if(all.indexOf(q)<0) return false; }
-  const f=st.f||{}; for(const k in f){ const vals=f[k]; if(!vals||!vals.length) continue; const c=sp.cols.find(x=>x.k===k); if(!c) continue; if(vals.indexOf(g2text(r,c))<0) return false; }
+  const f=st.f||{}; for(const k in f){ const vals=f[k]; if(!vals||!vals.length) continue; const c=sp.cols.find(x=>x.k===k); if(!c) continue; if(!g2fkeys(r,c).some(x=>vals.indexOf(x)>=0)) return false; }
   return true; }
 function g2sort(arr,sp,st){ const so=st.so||sp.so; if(!so||!so.k) return arr; const c=sp.cols.find(x=>x.k===so.k); if(!c) return arr; const d=so.d?-1:1;
   return arr.slice().sort((a,b)=>{ const x=g2key(a,c), y=g2key(b,c); if(x===null&&y===null) return 0; if(x===null) return 1; if(y===null) return -1;
@@ -26,12 +37,13 @@ function g2filtering(st){ return !!((st.q||'').trim()) || Object.keys(st.f||{}).
 // ---------- filtro rápido: chips "Todas N · valor n" sobre uma coluna; vale no 1º nível (em árvore, o grupo fica se ele ou um filho tiver o valor) ----------
 function g2qtok(r,c,qf){ let t=g2text(r,c); if(!t||t==='—') return []; if(qf.cut) t=t.split(qf.cut)[0]; if(qf.num) t=t.replace(/\s+\d.*$/,''); return (qf.sep?t.split(qf.sep):[t]).map(x=>x.trim()).filter(x=>x&&x!=='—'); }
 function g2qhas(r,c,qf,val){ return g2qtok(r,c,qf).indexOf(val)>=0 || (r.kids||[]).some(k=>g2qhas(k,c,qf,val)); }
-function g2qrows(sp,st,rows){ if(!sp.qf||!st.qv) return rows; const c=sp.cols.find(x=>x.k===sp.qf.k); if(!c) return rows; const out=rows.filter(r=>g2qhas(r,c,sp.qf,st.qv)); return out.length?out:rows; }
+function g2qrows(sp,st,rows){ if(!sp.qf||!st.qv) return rows; const c=sp.cols.find(x=>x.k===sp.qf.k); if(!c) return rows; return rows.filter(r=>g2qhas(r,c,sp.qf,st.qv)); }   // vazio continua vazio (TABELAS-FOCO)
 // os chips contam só as linhas que os outros filtros da tela deixam ver (r.sh)
 function g2qvals(self,sp,v,st,rows0,added){ const id=sp.id, qf=sp.qf; const rows=rows0.filter(r=>!(r.sh&&!(added||{})[r.sh])); v[id+'_hasqf']=false; v[id+'_qf']=[]; v[id+'_qfl']=''; if(!qf) return; const c=sp.cols.find(x=>x.k===qf.k); if(!c) return;
   const cnt={}; const tok=(r)=>{ const s=new Set(g2qtok(r,c,qf)); (r.kids||[]).forEach(k=>tok(k).forEach(x=>s.add(x))); return s; };
   rows.forEach(r=>tok(r).forEach(x=>{ cnt[x]=(cnt[x]||0)+1; }));
-  let ks=Object.keys(cnt).sort((a,b)=>(cnt[b]-cnt[a])||a.localeCompare(b,'pt-BR',{numeric:true})); const cur=(st.qv&&cnt[st.qv])?st.qv:'';
+  const cur=st.qv||''; if(cur&&!(cur in cnt)) cnt[cur]=0;   // escolha sem linhas continua à vista (com 0) para poder ser limpa
+  let ks=Object.keys(cnt).sort((a,b)=>(cnt[b]-cnt[a])||a.localeCompare(b,'pt-BR',{numeric:true}));
   if(ks.length<2&&!cur) return; const MAX=10; if(ks.length>MAX){ const top=ks.slice(0,MAX); if(cur&&top.indexOf(cur)<0) top[MAX-1]=cur; ks=top; }
   const ST='font-family:inherit;font-size:12px;font-weight:700;padding:4px 11px;border-radius:999px;cursor:pointer;';
   const ch=(t,n,on,go,lab)=>({t,n:String(n),on:String(!!on),go,lab,st:ST+(on?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;')});
@@ -128,11 +140,12 @@ function g2vals(self,sp,v,mask){
      flabel:'Filtrar '+c.l}));
   // valores do filtro aberto
   const fmc=st.fmc; const fcol=sp.cols.find(c=>c.k===fmc);
-  if(fcol){ const cnt={}; const leaf=(list)=>list.forEach(r=>{ if(r.livre) return; if(r.kids&&r.kids.length) leaf(r.kids); if(!(r.kids&&r.kids.length)||sp.tree===false||!sp.tree){ const t=g2text(r,fcol)||'(vazio)'; cnt[t]=(cnt[t]||0)+1; } }); leaf(rows);
-    const todos=Object.keys(cnt).sort((a,b)=>a.localeCompare(b,'pt-BR',{numeric:true})); const apl=(st.f||{})[fmc];
+  if(fcol){ const cnt={}, lab={}; const leaf=(list)=>list.forEach(r=>{ if(r.livre) return; if(r.kids&&r.kids.length) leaf(r.kids); if(!(r.kids&&r.kids.length)||sp.tree===false||!sp.tree){
+      const m=g2mem(r,fcol); g2fkeys(r,fcol).forEach(k=>{ cnt[k]=(cnt[k]||0)+1; if(!lab[k]){ const x=m&&m.find(y=>y.id===k); lab[k]=x?x.l:k; } }); } }); leaf(rows);
+    const L=(k)=>lab[k]||k; const todos=Object.keys(cnt).sort((a,b)=>L(a).localeCompare(L(b),'pt-BR',{numeric:true})); const apl=(st.f||{})[fmc];
     // rascunho da seleção: abre com o filtro aplicado (ou tudo marcado); só vale no OK, como no Excel e no Google Sheets
     const sel=st.fmd?st.fmd.slice():(apl&&apl.length?apl.filter(k=>cnt[k]):todos.slice()); const q=st.fmq||''; const qn=g2norm(q);
-    const vis=todos.filter(k=>!qn||g2norm(k).indexOf(qn)>=0); const setd=(d)=>g2set(self,id,{fmd:d});
+    const vis=todos.filter(k=>!qn||g2norm(L(k)).indexOf(qn)>=0); const setd=(d)=>g2set(self,id,{fmd:d});
     const P=st.fpos||{x:0,xr:0,y:0}; const W=280, vw=(typeof window!=='undefined'?window.innerWidth:1440), vh=(typeof window!=='undefined'?window.innerHeight:900);
     let x=P.dir?(P.xr-W):P.x; x=Math.max(8,Math.min(x,vw-W-8)); const y=Math.min(P.y+4,vh-460);
     const fechar=()=>g2set(self,id,{fmc:null,fmd:null,fmq:''});
@@ -140,7 +153,7 @@ function g2vals(self,sp,v,mask){
     const tipo=fcol.t==='num'?'num':(fcol.t==='date'?'data':'txt');
     v[id+'_fm']={open:true, l:fcol.l, titulo:'Filtrar '+fcol.l, pos:'top:'+Math.max(8,y)+'px;left:'+x+'px;', qid:'g2fq_'+id, q,
       setq:(e)=>g2set(self,id,{fmq:e.target.value,fmd:sel}),
-      vals:vis.map(k=>({t:k,n:cnt[k],on:sel.indexOf(k)>=0, tog:()=>{ const s=sel.slice(); const i=s.indexOf(k); if(i>=0) s.splice(i,1); else s.push(k); setd(s); }})),
+      vals:vis.map(k=>({t:L(k),n:cnt[k],on:sel.indexOf(k)>=0, tog:()=>{ const s=sel.slice(); const i=s.indexOf(k); if(i>=0) s.splice(i,1); else s.push(k); setd(s); }})),
       semRes:!vis.length, semMarca:!sel.length, okSt:sel.length?'':'opacity:.5;cursor:not-allowed;', conta:sel.length+' de '+todos.length+' marcados',
       todos:()=>setd([...new Set(sel.concat(vis))]), nenhum:()=>setd(sel.filter(k=>vis.indexOf(k)<0)),
       ascT:tipo==='num'?'↑ Classificar do menor para o maior':(tipo==='data'?'↑ Classificar do mais antigo para o mais recente':'↑ Classificar de A a Z'),
@@ -193,6 +206,7 @@ function g2vals(self,sp,v,mask){
   const xids=[]; const wx=(l)=>l.forEach(r=>{ if(r.kids&&r.kids.length){ xids.push(r.id); wx(r.kids); } }); wx(rows);
   const xe=st.x||sp.x0||{}; const xtodos=xids.length>0&&xids.every(k=>xe[k]);
   v[id+'_xlab']=xtodos?'Recolher tudo':'Expandir tudo'; v[id+'_xtog']=xtodos?v[id+'_colall']:v[id+'_expall']; v[id+'_xup']=xtodos; v[id+'_xdown']=!xtodos;
+  v[id+'_xhas']=rows.some(r=>(r.kids||[]).length>0);   // sem grupo na tela, sem botão de expandir
   if(total){ v[id+'_tot']=sp.cols.map((c,ci)=>{ const s=c.agg?g2sum(sp,flat,c):null; return {t:(ci===0?'Total':(s===null?'':g2fmt(s,c))), cls:(ci===0?'g2c0':''), st:'padding:8px 10px;font-weight:800;'+(ci===0?'position:sticky;left:0;z-index:1;background:#F4F6F3;':'')+(c.a==='r'?'text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;':'')}; });
     v[id+'_totopen']=()=>g2set(self,id,{fm:{tot:true,ro:true,mode:'total',draft:{},orig:{},errs:{}},fmc:null}); }
   // formulário lateral

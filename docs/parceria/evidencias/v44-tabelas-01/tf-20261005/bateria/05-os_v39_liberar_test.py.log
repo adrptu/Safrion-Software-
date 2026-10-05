@@ -1,0 +1,17 @@
+$ CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdp9333.lock env CDP_GL=1 timeout 900 python3 os_v39_liberar_test.py
+  OK  nova ordem de colheita nasce sem insumos
+  OK  confirmação diz que não há insumo a reservar
+  OK  toast sem requisição vazia
+  OK  cenário: nenhuma requisição vazia
+  OK  situação atual sem reserva que não houve
+  OK  título sem repetir operação e atividade
+  OK  insumos do plano com dose e total da ordem
+  OK  atividade preenchida pelo plano
+  OK  confirmação lista a reserva por lote
+  OK  requisição nova com três dígitos: REQ-041
+  OK  reserva no lote e situação do insumo com REQ-041
+  OK  sequência contínua: OS-0430 recebe REQ-042
+  OK  colheita da soja no T1 com aplicação de fungicida pendente: liberar segue bloqueado pela carência
+  OK  sem erro JS
+RESULTADO: 14/14 ok
+[exit 0]

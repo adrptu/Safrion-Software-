@@ -109,6 +109,17 @@ ORDENS=[
 # Irrigação só com água (OS-0419, OS-0422, OS-0423) não passa pelo agrônomo: libera pela prontidão operacional (decisão de 26/09).
 for _o in ORDENS:
     _o.setdefault('faz','Santa Rita'); _o.setdefault('saf','2025/26' if _o['id'] in ('OS-0415','OB-0104') else '2026/27')
+# TABELAS-FOCO (5983172395): vínculo estruturado com os talhões do cadastro da fazenda (ID e nome; nunca separado do texto
+# por pontuação), local próprio da ordem sem talhão e início/fim da janela como data (demonstração: hoje = 23/09/2026).
+_TAL={'OS-0415':['T3'],'OS-0417':['P1'],'OS-0418':['P1'],'OS-0419':['P2'],'OS-0420':['T4'],'OS-0421':['T1','T2'],'OS-0422':['P2'],
+      'OS-0423':['T7'],'OS-0424':['P2'],'OS-0425':['C1'],'OS-0430':['T1-A'],'OS-0431':['T2'],'OB-0104':[]}
+_JAN={'OS-0415':('2025-09-10','2025-09-12'),'OS-0417':('2026-09-19','2026-09-21'),'OS-0418':('2026-09-24','2026-09-25'),
+      'OS-0419':('2026-09-23','2026-09-24'),'OS-0420':('2026-09-22','2026-09-28'),'OS-0421':('2026-09-20','2026-09-26'),'OS-0422':('',''),
+      'OS-0423':('2026-09-23','2026-09-23'),'OS-0424':('2026-09-24','2026-09-24'),'OS-0425':('2026-10-15','2026-10-15'),
+      'OS-0430':('2026-09-25','2026-09-25'),'OS-0431':('2026-09-24','2026-09-24'),'OB-0104':('2025-09-15','2025-09-18')}
+for _o in ORDENS:
+    _o['talhoes']=[dict(id=t,nome=t) for t in _TAL[_o['id']]]; _o['local']='' if _TAL[_o['id']] else _o['talhao']
+    _o['ini'],_o['fim']=_JAN[_o['id']]
 ORDEM={o['id']:o for o in ORDENS}
 # ---- Geometria (fonte única para o Mapa IN-04 e o CD-01det): polígono validado do talhão e geometria de cada parcela
 # (cultivo de dados2.CULTIVOS → situação). Cultivo fora do mapa = sem polígono no CD-01det; o Mapa só marca o que está aqui.

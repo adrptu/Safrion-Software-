@@ -25,6 +25,10 @@ class Os:
     # ---- tela ----
     def linha(self, id_):
         return self.J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith({json.dumps(id_)})); return r?r.innerText.replace(/\\s+/g,' '):'';}})()") or ''
+    def cel(self, id_, col):   # TABELAS-FOCO: valor de uma coluna (uma variável por coluna) na linha da O.S.
+        return self.J(f"""(()=>{{const hs=[...document.querySelectorAll('[role=columnheader]')].filter(h=>h.offsetParent).map(h=>h.innerText.replace(/[⇅▾▴▲▼]/g,'').replace(/\\s+/g,' ').trim().toUpperCase());
+          const i=hs.indexOf({json.dumps(col)}.toUpperCase()); const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith({json.dumps(id_)}));
+          const c=r&&[...r.querySelectorAll('[role=cell]')][i]; return c?c.innerText.replace(/\\s+/g,' ').trim():'';}})()""") or ''
     def ordem(self, id_):
         self.J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith({json.dumps(id_)})); r&&r.click();}})()"); time.sleep(.4)
     def pan(self):   # 01/10: abre as seções recolhidas do painel antes de ler

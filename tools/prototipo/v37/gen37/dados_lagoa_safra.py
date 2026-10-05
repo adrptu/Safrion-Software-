@@ -111,7 +111,7 @@ for _it, _q in (('Muda de mamão Formosa', _MUDA), ('Superfosfato simples', _SFS
 def _o(i, tipo, n, etapa, selo, real, janela, resp, chave, extra=None):
     ha = PIVOS[n]; area = ha
     d = dict(id=i, tipo=tipo, talhao=nome(n), area=area, etapa=etapa, selo=selo, realizado=real, saldo=_r(max(0, area - real)), janela=janela, resp=resp,
-             detalhe=None, faz=FAZ, saf='2026/27', chave=chave)
+             detalhe=None, faz=FAZ, saf='2026/27', chave=chave, talhoes=[dict(id='PV%02d' % n, nome=nome(n))], local='')
     if extra: d['selos_extra'] = extra
     return d
 ORDENS = [
@@ -127,8 +127,13 @@ ORDENS = [
  _o('OS-0510', 'Colheita · semana 38', 6, 'Encerradas', None, _A[6], '16–18/09', 'Sérgio', None),
  _o('OS-0511', 'Sexagem e desbaste', 15, 'A liberar', None, 0, '12–14/10 (DAP +90)', 'Sérgio', 'lg15|i8'),
 ]
+_JANL={'OS-0501':('2026-09-30','2026-09-30'),'OS-0502':('2026-09-25','2026-09-27'),'OS-0503':('2026-10-06','2026-10-08'),
+       'OS-0504':('2026-09-24','2026-09-25'),'OS-0505':('2026-09-21','2026-09-24'),'OS-0506':('2026-09-22','2026-09-24'),
+       'OS-0507':('2026-09-21','2026-09-23'),'OS-0508':('2026-09-19','2026-09-20'),'OS-0509':('2026-09-12','2026-09-13'),
+       'OS-0510':('2026-09-16','2026-09-18'),'OS-0511':('2026-10-12','2026-10-14')}
 for _x in ORDENS:
     if not _x['chave']: del _x['chave']
+    _x['ini'],_x['fim']=_JANL[_x['id']]   # TABELAS-FOCO: janela como data; talhões estruturados abaixo (ID do pivô e nome)
 VERSAO = {'OS-0501': 'v1', 'OS-0502': 'v1', 'OS-0503': 'v1', 'OS-0504': 'v1', 'OS-0505': 'v1', 'OS-0506': 'v1',
           'OS-0507': 'v1', 'OS-0508': 'v1', 'OS-0509': 'v1', 'OS-0510': 'v1', 'OS-0511': 'v1'}
 AP = {'OS-0505': [('21/09', 1, _AP0505[0], 'Conferido'), ('22/09', 2, _AP0505[1], 'Provisório'), ('24/09', 3, _AP0505[2], 'Previsto')],

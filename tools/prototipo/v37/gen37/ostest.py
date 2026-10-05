@@ -39,7 +39,8 @@ try:
     check('10 ordens agrícolas na lista (registro canônico, igual ao chip Todas)', N==10 and cs0[:1]==[f'Todas {N}'] and len(set(r0))==N, (r0,cs0[:1]))
     corpo=J("document.body.innerText")
     check('ordens só de água fora da página O.S. (lista e texto)', not any(x in r0 or x in corpo for x in AGUA), [x for x in AGUA if x in corpo])
-    ov=J("(()=>{const t=document.querySelector('[role=table]').parentElement; return [t.scrollWidth,t.clientWidth];})()"); check('lista cabe sem rolagem horizontal', ov[0]<=ov[1]+1, ov)
+    # TABELAS-FOCO (5983172395 item 6): uma variável por coluna; a rolagem horizontal fica dentro da caixa da tabela e não esconde o filtro Talhão
+    ov=J("(()=>{const b=document.getElementById('ost_btn').getBoundingClientRect(); return [document.documentElement.scrollWidth,innerWidth,b.left>=0&&b.right<=innerWidth&&b.width>0];})()"); check('página sem rolagem horizontal e filtro Talhão visível (a tabela rola dentro da caixa)', ov[0]<=ov[1]+1 and ov[2], ov)
     # chips de fase
     clk('Em execução'); r=rows(); check('chip Em execução filtra', r==['OS-0421','OS-0420'] or sorted(r)==['OS-0420','OS-0421'], r)
     check('chip marcado', J("[...document.querySelectorAll('[aria-label=\"Filtrar por fase\"] button')].filter(b=>b.getAttribute('aria-pressed')==='true').map(b=>b.innerText.replace(/\\s+/g,' '))")==['Em execução 2'])

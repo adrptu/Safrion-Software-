@@ -168,7 +168,7 @@ def _ordens():
     for o in D.ORDENS+D.ORDENS_LG:
         if o['id'] in LAM: continue   # irrigação só com água fica no módulo Irrigação (IR-03), fora das O.S. de operações agrícolas (01/10)
         ap=[dict(d=d,dia=n,ha=ha,st=s) for d,n,ha,s in AP.get(o['id'],[])]
-        out.append(dict(id=o['id'],tipo=TIPO.get(o['id'],o['tipo']),talhao=o['talhao'],area=o.get('area'),etapa=o['etapa'],selos=_selos(o),
+        out.append(dict(id=o['id'],tipo=TIPO.get(o['id'],o['tipo']),talhao=o['talhao'],talhoes=o.get('talhoes',[]),local=o.get('local',''),ini=o.get('ini',''),fim=o.get('fim',''),area=o.get('area'),etapa=o['etapa'],selos=_selos(o),
                         faz=o['faz'],saf=o['saf'],agua=o['id'] in LAM,lam=LAM.get(o['id'],''),obs=OBS.get(o['id'],''),
                         realizado=o.get('realizado'),saldo=o.get('saldo'),resp=o['resp'],keys=_chaves(o),
                         canc=CANC.get(o['id']),
@@ -446,13 +446,41 @@ function vendoCanc(self){ return ((((g2st(self,'g_os').f||{}).fase)||[]).indexOf
 function PREVALS(self,v){
   cenOuvir(self);  // Estoque e App (outros quadros) mudam o cenário: a tela redesenha sem recarregar
   const canc=vendoCanc(self); const os=vis(self).filter(o=>o.etapa!=='Canceladas'||canc);
-  GR('g_os').rows=os.map(o=>({id:o.id,
-    v:{id:o.id,ativ:o.tipo,jan:o.janela,fase:o.etapa,cond:o.selos.map(s=>s.t).join(' · '),real:(o.area?o.realizado:null),resp:o.resp},
-    s:{id:o.id,ativ:o.tipo+' '+localTxt(o),cond:(o.selos.length?o.selos.map(s=>s.t).join(' · '):'—')+(o.obs?' '+o.obs:''),real:realTxt(o)+pctTxt(o)+(o.area?' '+salTxt(o):'')},
-    p:{id:[{k:'b',t:o.id}],ativ:[{k:'txt',t:o.tipo},{k:'br'},{k:'mut',t:localTxt(o)}],fase:[{k:'chip',t:o.etapa,c:FCOR[o.etapa]}],
-       cond:(o.selos.length?o.selos.map(s=>({k:'chip',t:s.t,c:s.c})):[{k:'mut',t:'—'}]).concat(o.obs?[{k:'br'},{k:'mut',t:o.obs}]:[]).concat(o.dono?[{k:'br'},{k:'mut',t:o.dono+' · '+o.prazo}]:[]),
-       real:(o.area?[{k:'txt',t:nf(o.realizado)+' / '+nf(o.area)+' ha'+pctTxt(o)},{k:'br'},{k:'mut',t:'saldo '+nf(o.saldo)+' ha'}]
-         .concat(o.disp?[{k:'br'},{k:'mut',t:'dispensado '+nf(o.disp)+' ha'}]:[]):[{k:'mut',t:'—'}])}}));
+  // TABELAS-FOCO (5983172395): uma variável por coluna; Talhão é vínculo estruturado (fazenda|ID), filtrado por pertinência
+  g2keep(self,'g_os');
+  const todas=mfFaz(self)==='Todas';
+  const tals=(o)=>(o.talhoes||[]).map(t=>({id:o.faz+'|'+t.id,l:todas?t.nome+' · '+o.faz:t.nome}));
+  // troca de fazenda/safra: o talhão escolhido fora do novo recorte sai do filtro, com aviso (nunca muda fazenda/safra para "caber")
+  const ctx=mfFaz(self)+'|'+mfSaf(self); if(self.__osCtx!==undefined&&self.__osCtx!==ctx){ const st0=g2st(self,'g_os'), ft=((st0.f||{}).tal)||[];
+    if(ft.length){ const ok=new Set(); os.forEach(o=>tals(o).forEach(t=>ok.add(t.id))); const fica=ft.filter(k=>k==='(vazio)'||ok.has(k)), sai=ft.filter(k=>fica.indexOf(k)<0);
+      if(sai.length){ const f=Object.assign({},st0.f||{}); if(fica.length) f.tal=fica; else delete f.tal; const all=Object.assign({},self.state.g2||{}); all.g_os=Object.assign({},st0,{f}); self.state.g2=all;
+        try{ if(G2KEEP.g_os) sessionStorage.setItem(G2KEEP.g_os,JSON.stringify({f,q:st0.q||'',so:st0.so||null,qv:st0.qv||''})); }catch(e){}
+        self.__osMsg='Talhão fora de '+(mfFaz(self)==='Todas'?'todas as fazendas':mfFaz(self))+(mfSaf(self)==='Todas'?'':' · '+mfSaf(self))+': '+sai.map(k=>k.split('|')[1]).join(', ')+' saiu do filtro.'; } } }
+  self.__osCtx=ctx;
+  const nfx=(x)=>x===null||x===undefined||x===''?null:x;
+  // o texto de pendência mistura próxima ação e prazo ("entrega até 15/10"); na tabela vira duas colunas (uma variável por coluna)
+  const pzx=(t)=>{ t=String(t||''); const m=t.match(/(?:vence\s+)?(?:hoje\s*)?(?:(?:até|antes de|antes das|em)\s+)?(?:\d{2}\/\d{2}(?:\s+\d{2}:\d{2})?|\d{2}:\d{2})|(?:vence\s+)?hoje/);
+    if(!m) return [t.trim(),'']; return [(t.slice(0,m.index)+' '+t.slice(m.index+m[0].length)).replace(/\s+/g,' ').trim(), m[0].replace(/^vence\s+/,'').trim()]; };
+  const base=os.map(o=>{ const tl=tals(o), sel=o.selos.map(x=>({id:x.t,l:x.t}));
+   return {id:o.id,
+    m:{tal:tl,sit:sel},
+    v:{id:o.id,ativ:o.tipo,tal:'',local:o.local||'',area:nfx(o.area),ini:o.ini||'',fim:o.fim||'',fase:o.etapa,sit:'',obs:o.obs||'',dono:o.dono||'',acao:pzx(o.prazo)[0],prazo:pzx(o.prazo)[1],
+       real:(o.area?o.realizado:null),saldo:(o.area?o.saldo:null),disp:(o.disp||null),prog:(o.area?Math.round(1000*(o.realizado||0)/o.area)/10:null),lam:o.lam||'',resp:o.resp},
+    s:{id:o.id,tal:tl.map(t=>t.l).join(', '),sit:sel.map(x=>x.l).join(' · ')},
+    p:{id:[{k:'b',t:o.id}],tal:(tl.length?tl.map(t=>({k:'txt',t:t.l})).reduce((a,x,i)=>a.concat(i?[{k:'br'},x]:[x]),[]):[{k:'mut',t:'—'}]),
+       fase:[{k:'chip',t:o.etapa,c:FCOR[o.etapa]}],sit:(o.selos.length?o.selos.map(x=>({k:'chip',t:x.t,c:x.c})):[{k:'mut',t:'—'}])}}; });
+  // Agrupar por talhão (TABELAS-FOCO item 7, TF06): a mesma O.S. aparece em cada talhão vinculado, com a mesma identidade; o grupo conta
+  // O.S. distintas e soma a área das O.S. vinculadas (não é área física do talhão); o total geral conta cada O.S. uma vez (abaixo, os_gtot)
+  if(self.state.os_agr){ const ft=((g2st(self,'g_os').f||{}).tal)||[]; const gs={}, ord=[];
+    base.forEach(r=>{ const ms=r.m.tal.length?r.m.tal:[{id:'(vazio)',l:'Sem talhão'}];
+      ms.forEach(t=>{ if(ft.length&&ft.indexOf(t.id)<0) return; if(!gs[t.id]){ gs[t.id]={t,kids:[]}; ord.push(t.id); } gs[t.id].kids.push(Object.assign({},r,{id:r.id+'@'+t.id})); }); });
+    ord.sort((a,b)=>gs[a].t.l.localeCompare(gs[b].t.l,'pt-BR',{numeric:true}));
+    GR('g_os').rows=ord.map(k=>{ const g=gs[k], n=g.kids.length, ar=g.kids.reduce((a,x)=>a+(Number(x.v.area)||0),0);
+      return {id:'grp@'+k,ro:true,m:{tal:(k==='(vazio)'?[]:[g.t]),sit:[]},kids:g.kids,
+        v:{id:g.t.l,ativ:'',tal:'',area:ar||null},s:{id:g.t.l,tal:g.t.l},
+        p:{id:[{k:'b',t:g.t.l}],ativ:[{k:'mut',t:n+(n>1?' O.S. vinculadas · área somada das O.S.':' O.S. vinculada · área da O.S.')}],area:(ar?[{k:'txt',t:nf(ar)}]:[{k:'mut',t:'—'}])}}; });
+  } else GR('g_os').rows=base;
+  self.__osBase=base;
 }
 // turnos previstos acompanham o saldo depois de uma dispensa (corta do último para o primeiro)
 function osPeriodo(cs){ const ds=[]; const add=(d,m)=>ds.push([Number(m),Number(d)]); const z=(n)=>('0'+n).slice(-2);
@@ -626,12 +654,24 @@ function EXTRAVALS(self,v){
   const st=self.state, all=ords(self), os=vis(self);
   // OS.dc.html#OS-0420 (vindo do Mapa ou de outra tela): abre a ordem na tela de trabalho, uma vez
   // #OS-0430:ajustar (vindo do Mapa) abre o formulário de ajuste; ordem de outra fazenda troca o filtro Fazenda para a dela
-  const abrirHash=()=>{ let h=''; try{ h=decodeURIComponent(location.hash||''); }catch(e){ h=''; } const m=/^#(O[SB]-\d+)(?::(ajustar))?$/.exec(h); if(!m) return;
+  // #tal=Santa Rita|T1 (entrada pelo Mapa ou por outra tela): herda o talhão no filtro, com a fazenda dele à vista no filtro do topo
+  const abrirHash=()=>{ let h=''; try{ h=decodeURIComponent(location.hash||''); }catch(e){ h=''; }
+    const tm=/^#tal=([^|]+)\|(.+)$/.exec(h); if(tm){ const k=tm[1]+'|'+tm[2]; const ex=ords(self).some(o=>o.faz===tm[1]&&(o.talhoes||[]).some(t=>t.id===tm[2])); if(!ex) return;
+      const f=Object.assign({},g2st(self,'g_os').f||{}); f.tal=[k]; const st={}; if(mfFaz(self)!=='Todas'&&mfFaz(self)!==tm[1]) st.mf_faz=tm[1];
+      setTimeout(()=>{ if(Object.keys(st).length) self.setState(st); g2set(self,'g_os',{f,fmc:null}); },0); return; }
+    const m=/^#(O[SB]-\d+)(?::(ajustar))?$/.exec(h); if(!m) return;
     const oh=ords(self).find(o=>o.id===m[1]); if(!oh) return; const f=mfFaz(self); const st={pan:oh.id,pa:null}; if(f!=='Todas'&&oh.faz&&oh.faz!==f) st.mf_faz=oh.faz;
     if(m[2]==='ajustar') self.__ajAuto=oh.id; setTimeout(()=>self.setState(st),0); };
   if(!self.__hashIni){ self.__hashIni=1; abrirHash(); try{ window.addEventListener('hashchange',abrirHash); }catch(e){} }
   all.forEach(o=>{ v['op_'+o.id.replace('-','')]=()=>self.setState({pan:o.id,pa:null}); });
-  self.g2pick=(gid,rid)=>{ if(gid==='g_os') self.setState({pan:rid}); };
+  self.g2pick=(gid,rid)=>{ if(gid==='g_os'&&String(rid).indexOf('grp@')!==0) self.setState({pan:String(rid).split('@')[0]}); };
+  // agrupar por talhão: liga/desliga; grupos começam abertos; total geral de O.S. distintas (cada O.S. uma vez)
+  v.os_agr=!!self.state.os_agr; v.os_agrT=self.state.os_agr?'Desagrupar':'Agrupar por talhão';
+  v.os_agrgo=()=>{ const on=!self.state.os_agr; const x={}; if(on){ const ks=new Set(); (self.__osBase||[]).forEach(r=>(r.m.tal.length?r.m.tal:[{id:'(vazio)'}]).forEach(t=>ks.add('grp@'+t.id))); ks.forEach(k=>{ x[k]=true; }); }
+    self.setState({os_agr:on}); g2set(self,'g_os',{x}); };
+  { const spB=GR('g_os'), stB=g2st(self,'g_os'); const dist=(self.__osBase||[]).filter(r=>g2match(r,spB,stB)); const ar=dist.reduce((a,r)=>a+(Number(r.v.area)||0),0);
+    if(self.state.os_agr){ v.g_os_count=dist.length; v.g_os_all=(self.__osBase||[]).length; }   // contador da grade = O.S. distintas, não grupos
+    v.os_gtot='Total: '+dist.length+(dist.length===1?' O.S.':' O.S. distintas')+' · '+nf(ar)+' ha (cada O.S. contada uma vez; os grupos se sobrepõem quando a O.S. tem mais de um talhão)'; }
   const openPan=(id)=>self.setState({pan:id});
   // estado vazio do recorte: uma frase e uma ação que troca o filtro que zerou a tela
   const fz=mfFaz(self), sf=mfSaf(self), semFaz=!all.some(o=>fz==='Todas'||o.faz===fz);
@@ -656,13 +696,39 @@ function EXTRAVALS(self,v){
   // colunas e busca da lista). Antes o Kanban ignorava o filtro (reproduzido: Liberadas → lista 2 ordens, Kanban 10). O filtro ativo
   // fica escrito no Kanban, com "Limpar filtros"; Recursos (recurso × dia) diz que o filtro não se aplica, sem descartá-lo em silêncio.
   const spO=GR('g_os'), stO=g2st(self,'g_os'); const filtrando=g2filtering(stO);
-  const okId=filtrando?new Set((spO.rows||[]).filter(r=>g2match(r,spO,stO)).map(r=>r.id)):null; const osK=okId?os.filter(o=>okId.has(o.id)):os;
+  const osRows=self.__osBase||spO.rows||[];   // linhas canônicas (no agrupado, spO.rows são os grupos)
+  const okId=filtrando?new Set(osRows.filter(r=>g2match(r,spO,stO)).map(r=>r.id)):null; const osK=okId?os.filter(o=>okId.has(o.id)):os;
   const fDesc=[].concat(((stO.f||{}).fase||[]).length?['fase '+((stO.f||{}).fase||[]).join(', ')]:[])
-    .concat(Object.keys(stO.f||{}).filter(k=>k!=='fase'&&((stO.f||{})[k]||[]).length).map(k=>{ const c=spO.cols.find(x=>x.k===k); return (c?c.l.toLowerCase():k)+' ('+((stO.f||{})[k]||[]).length+')'; }))
+    .concat(Object.keys(stO.f||{}).filter(k=>k!=='fase'&&((stO.f||{})[k]||[]).length).map(k=>{ const c=spO.cols.find(x=>x.k===k); const vs=(stO.f||{})[k]||[];
+      return (c?c.l.toLowerCase():k)+(k==='tal'?' '+vs.map(x=>x==='(vazio)'?'sem talhão':x.split('|')[1]).join(', '):' ('+vs.length+')'); }))
     .concat((stO.q||'').trim()?['busca “'+(stO.q||'').trim()+'”']:[]).join(' · ');
   v.kb_filtro=filtrando; v.kb_nota='Filtro da lista aplicado: '+fDesc+' · '+osK.filter(o=>FASES.indexOf(o.etapa)>=0).length+' de '+os.filter(o=>FASES.indexOf(o.etapa)>=0).length+' ordens';
   v.os_limpar=()=>g2set(self,'g_os',{f:{},q:'',fmc:null});
-  v.rc_nota='Recursos mostra a semana do PCP por recurso e dia, com todas as ordens'+(filtrando?': o filtro da lista ('+fDesc+') não se aplica a esta visão e continua guardado para Lista e Kanban.':'; os filtros da lista não se aplicam a esta visão.');
+  // Recursos (TABELAS-FOCO): o mesmo recorte da lista mostra só os blocos das ordens dentro dele; conflitos e uso continuam da semana inteira
+  v.rc_nota='Recursos mostra a semana do PCP por recurso e dia'+(filtrando?': só os blocos das ordens no filtro da lista ('+fDesc+'); conflitos, manutenção e uso continuam da semana inteira.':', com todas as ordens.');
+  RC_OS.forEach(id=>{ v['rcv_'+id.replace('-','')]=!okId||okId.has(id); });
+  // ---- Talhão (TABELAS-FOCO): seletor na barra da coleção, fora das abas; o mesmo estado do filtro da coluna Talhão (f.tal) ----
+  { const spc=spO.cols.find(c=>c.k==='tal'); const tcnt={}, tlab={};
+    osRows.forEach(r=>g2fkeys(r,spc).forEach(k=>{ tcnt[k]=(tcnt[k]||0)+1; if(!tlab[k]){ const x=(g2mem(r,spc)||[]).find(y=>y.id===k); tlab[k]=x?x.l:'Sem talhão'; } }));
+    const tsel=((stO.f||{}).tal)||[]; const tq=self.state.ost_q||''; const tqn=g2norm(tq);
+    const tks=Object.keys(tcnt).sort((a,b)=>tlab[a].localeCompare(tlab[b],'pt-BR',{numeric:true}));
+    const setT=(arr)=>{ const f=Object.assign({},g2st(self,'g_os').f||{}); if(arr.length) f.tal=arr; else delete f.tal; self.__osMsg=''; g2set(self,'g_os',{f,fmc:null}); };
+    const nome=(k)=>tlab[k]||(k==='(vazio)'?'Sem talhão':k.split('|')[1]);
+    v.ost_open=!!self.state.ost_open; v.ost_q=tq; v.ost_on=tsel.length?'true':'false';
+    v.ost_btn='Talhão: '+(tsel.length?tsel.map(nome).join(', '):'Todos');
+    v.ost_btnst='display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;'
+      +(tsel.length?'border:1px solid #1E7A4C;background:#E4F3E9;color:#14532D;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;');
+    { const ps=self.state.ost_pos; v.ost_popst=ps?('left:'+ps.l+'px;width:'+ps.w+'px;'):'left:0;width:min(320px, calc(100vw - 32px));'; }
+    v.ost_toggle=()=>{ const ab=!self.state.ost_open; self.setState({ost_open:ab,ost_q:'',ost_pos:null}); if(ab) setTimeout(()=>{ const q=document.getElementById('ost_q'); const d=q&&q.closest('[role=dialog]'); if(d){ const m=document.querySelector('main'), lo=(m?m.getBoundingClientRect().left:0)+8, hi=innerWidth-8; const r=d.getBoundingClientRect();   // celular: cabe entre o menu e a borda
+      if(r.right>hi){ const dx=Math.max(0,Math.min(r.right-hi, r.left-lo)); self.setState({ost_pos:{l:-Math.round(dx),w:Math.round(Math.min(r.width,hi-lo))}}); } } if(q) q.focus({preventScroll:true}); },0); };   // abre com o foco na pesquisa
+    v.ost_fecha=()=>{ self.setState({ost_open:false}); setTimeout(()=>{ const b=document.getElementById('ost_btn'); if(b) b.focus(); },0); };
+    v.ost_setq=(e)=>self.setState({ost_q:e.target.value});
+    v.ost_key=(e)=>{ if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); v.ost_fecha(); } };
+    v.ost_vals=tks.filter(k=>!tqn||g2norm(nome(k)).indexOf(tqn)>=0).map(k=>({t:nome(k),n:String(tcnt[k]),on:tsel.indexOf(k)>=0,
+      tog:()=>{ const a=tsel.slice(); const i=a.indexOf(k); if(i>=0) a.splice(i,1); else a.push(k); setT(a); }}));
+    v.ost_semres=!v.ost_vals.length; v.ost_todos=()=>setT([]); v.ost_limpa=tsel.length>0;
+    v.ost_conta=tsel.length?(osK.length+(osK.length===1?' ordem':' ordens')+' no filtro'):'';
+    v.os_tmsg=self.__osMsg||''; v.os_temmsg=!!self.__osMsg; }
   v.kb=FASES.map(f=>{ const cs=osK.filter(o=>o.etapa===f); const sal=cs.filter(o=>o.area).reduce((s,o)=>s+(o.saldo||0),0);
     return {t:f,n:String(cs.length),nst:chipSt(FCOR[f]),carga:(f==='Encerradas'?osPeriodo(cs):(sal?'saldo '+nf(sal)+' ha':'')),vazio:cs.length===0,
       cards:cs.map(o=>{ const pct=o.area?Math.round(100*(o.realizado||0)/o.area):0;
@@ -775,6 +841,24 @@ def _kanban():
          f'<sc-if value="{H("c.vazio")}" hint-placeholder-val="{F()}"><div style="font-size: 12px; color: {MUTED}; padding: 10px 4px; text-align: center; border: 1px dashed {LINE}; border-radius: 10px;">Nenhuma ordem nesta fase</div></sc-if></div>')
     return f'<div role="list" aria-label="Kanban das ordens" style="display: flex; gap: 10px; align-items: flex-start;"><sc-for list="{H("kb")}" as="c" hint-placeholder-count="5">{col}</sc-for></div>'
 
+def _talsel():
+    """Talhão (TABELAS-FOCO, 5983172395): à vista na barra da coleção, fora das abas (vale para Lista, Kanban e Recursos), Todos e
+    escolha pesquisável por ID do cadastro; o mesmo estado do filtro da coluna Talhão. Aplica ao marcar; Esc fecha e devolve o foco."""
+    lk=f'border: 0; background: transparent; padding: 0; color: {ACC}; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer;'
+    return (f'<div style="position: relative; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">'
+            f'<button type="button" id="ost_btn" aria-haspopup="dialog" aria-expanded="{H("ost_open")}" aria-pressed="{H("ost_on")}" onClick="{H("ost_toggle")}" style="{H("ost_btnst")}">{H("ost_btn")} ▾</button>'
+            f'<sc-if value="{H("ost_limpa")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("ost_todos")}" style="{lk}">Todos os talhões</button><span style="font-size: 12px; color: {MUTED};">{H("ost_conta")}</span></sc-if>'
+            f'<button type="button" aria-pressed="{H("os_agr")}" onClick="{H("os_agrgo")}" style="{_MINI}">{H("os_agrT")}</button>'
+            f'<sc-if value="{H("os_agr")}" hint-placeholder-val="{F()}"><span role="note" style="font-size: 12px; color: {MUTED};">{H("os_gtot")}</span></sc-if>'
+            f'<sc-if value="{H("os_temmsg")}" hint-placeholder-val="{F()}"><span role="status" style="font-size: 12px; font-weight: 700; color: #8A5A00;">{H("os_tmsg")}</span></sc-if>'
+            f'<sc-if value="{H("ost_open")}" hint-placeholder-val="{F()}"><div role="dialog" aria-label="Filtrar por talhão" onKeyDown="{H("ost_key")}" style="position: absolute; top: calc(100% + 6px); z-index: 60; box-sizing: border-box; {H("ost_popst")} background: #fff; border: 1px solid {LINE}; border-radius: 12px; box-shadow: 0 14px 34px -14px rgba(21,32,26,.4); padding: 8px; display: flex; flex-direction: column; gap: 6px;">'
+            f'<input id="ost_q" type="search" aria-label="Pesquisar talhão" placeholder="Pesquisar talhão" value="{H("ost_q")}" onChange="{H("ost_setq")}" style="font-family: inherit; font-size: 14px; padding: 8px 10px; border: 1px solid {LINE}; border-radius: 9px;">'
+            f'<button type="button" onClick="{H("ost_todos")}" style="{lk} text-align: left; padding: 4px 6px;">Todos os talhões</button>'
+            f'<div style="max-height: 260px; overflow-y: auto; border: 1px solid {LINE}; border-radius: 9px; padding: 4px;">'
+            f'<sc-for list="{H("ost_vals")}" as="tv" hint-placeholder-count="0"><label style="display: flex; align-items: center; gap: 10px; padding: 8px 6px; border-radius: 7px; font-size: 14px; cursor: pointer; min-height: 32px;">'
+            f'<input type="checkbox" checked="{H("tv.on")}" onChange="{H("tv.tog")}" style="width: 18px; height: 18px; accent-color: {ACC}; margin: 0;"><span style="flex-grow: 1; min-width: 0; overflow-wrap: anywhere;">{H("tv.t")}</span><span style="font-size: 12px; color: {MUTED};">{H("tv.n")}</span></label></sc-for>'
+            f'<sc-if value="{H("ost_semres")}" hint-placeholder-val="{F()}"><div style="padding: 8px; font-size: 12.5px; color: {MUTED};">Nenhum talhão com “{H("ost_q")}”.</div></sc-if></div>'
+            f'<div style="display: flex; justify-content: flex-end;"><button type="button" onClick="{H("ost_fecha")}" style="{_MINI}">Fechar</button></div></div></sc-if></div>')
 def _chips():
     return (f'<div role="group" aria-label="Filtrar por fase" style="display: flex; flex-wrap: wrap; gap: 6px;">'
             f'<sc-for list="{H("fchips")}" as="fc" hint-placeholder-count="7"><button type="button" aria-pressed="{H("fc.on")}" onClick="{H("fc.fn")}" style="{H("fc.st")}">{H("fc.t")}<span style="{H("fc.nst")}">{H("fc.n")}</span></button></sc-for></div>')
@@ -934,6 +1018,8 @@ def _form():
       f'<button type="button" onClick="{H("nv_save")}" style="{BTN_ST(True,True)}">Emitir ordem</button></div>'
       f'</aside></div></sc-if>')
 
+def _rcv(os_id, html):   # bloco de uma ordem em Recursos: some quando a ordem está fora do recorte da lista (TABELAS-FOCO)
+    return f'<sc-if value="{H("rcv_" + os_id.replace("-", ""))}" hint-placeholder-val="{T()}">{html}</sc-if>'
 def _recursos_tab():
     """Semana do PCP por recurso e dia: ordens e horários, conflitos, manutenção, excesso de jornada e uso."""
     res, conf = AL.semana()
@@ -966,8 +1052,8 @@ def _recursos_tab():
                 tt = ('Conflito de horário · ' if bad else ('Condicional · ' if a['sit'] == 'condicional' else '')) + 'abrir ' + a['os']
                 if a['os'] in LAM:   # irrigação só com água: é do módulo Irrigação (01/10), o bloco leva para lá
                     hr = 'IR-03det.dc.html' if a['os'] == 'OS-0419' else 'IR-03.dc.html'
-                    its += f'<a href="{hr}" title="Irrigação · abrir {a["os"]} no módulo Irrigação" style="display: block; font-size: 11.5px; font-weight: 700; padding: 3px 6px; border-radius: 6px; text-decoration: none; background: #E8F0F8; color: #2F5F8A; border: 1px solid #C9DBEC;">{esc(t)} · irrigação</a>'; continue
-                its += f'<button type="button" onClick="{H("op_" + a["os"].replace("-", ""))}" title="{tt}" style="display: block; width: 100%; text-align: left; font-family: inherit; font-size: 11.5px; font-weight: 700; padding: 3px 6px; border-radius: 6px; cursor: pointer; {st}">{t}</button>'
+                    its += _rcv(a['os'], f'<a href="{hr}" title="Irrigação · abrir {a["os"]} no módulo Irrigação" style="display: block; font-size: 11.5px; font-weight: 700; padding: 3px 6px; border-radius: 6px; text-decoration: none; background: #E8F0F8; color: #2F5F8A; border: 1px solid #C9DBEC;">{esc(t)} · irrigação</a>'); continue
+                its += _rcv(a['os'], f'<button type="button" onClick="{H("op_" + a["os"].replace("-", ""))}" title="{tt}" style="display: block; width: 100%; text-align: left; font-family: inherit; font-size: 11.5px; font-weight: 700; padding: 3px 6px; border-radius: 6px; cursor: pointer; {st}">{t}</button>')
             hint = (f'<span style="font-size: 11px; color: #8A5A00; font-weight: 700;">{str(round(d["h"],1)).replace(".",",")} h · acima da jornada</span>' if d['acima']
                     else (f'<span style="font-size: 11px; color: {MUTED};">livre</span>' if not d['itens'] else ''))
             cells += f'<div style="padding: 6px; display: flex; flex-direction: column; gap: 3px; border-left: 1px solid {LINE};">{its}{hint}</div>'
@@ -995,16 +1081,21 @@ def build():
     import cenario  # aqui dentro: cenario.seed importa este módulo
     fname='OS.dc.html'; E._reset_screen(fname)
     ordens=_ordens()
-    g_os=grid([dict(k='id',l='O.S.'),dict(k='ativ',l='Atividade · local',w=200),dict(k='jan',l='Janela',w=110),
-               dict(k='fase',l='Fase'),dict(k='cond',l='Condição',w=255),dict(k='real',l='Realizado · saldo',t='num',a='r',w=150),
-               dict(k='resp',l='Responsável')],
-              [],edit=dict(m='pick'),gid='g_os',total=False)
+    # TABELAS-FOCO (5983172395): uma variável de negócio por coluna, valor tipado (data ISO, número) e Talhão/Situação multivalorados
+    g_os=grid([dict(k='id',l='O.S.'),dict(k='ativ',l='Atividade',w=190),dict(k='tal',l='Talhão',multi=True,w=120),dict(k='local',l='Local',w=110,zdash=True),
+               dict(k='area',l='Área (ha)',t='num',a='r',d=2,zdash=False),dict(k='ini',l='Início',t='date'),dict(k='fim',l='Fim',t='date'),
+               dict(k='fase',l='Fase'),dict(k='sit',l='Situação',multi=True,w=200),dict(k='obs',l='Observação',w=200),
+               dict(k='dono',l='Quem resolve'),dict(k='acao',l='Próxima ação',w=150),dict(k='prazo',l='Prazo'),
+               dict(k='real',l='Realizado (ha)',t='num',a='r',d=2),dict(k='saldo',l='Saldo (ha)',t='num',a='r',d=2),
+               dict(k='disp',l='Dispensado (ha)',t='num',a='r',d=2,zdash=True),dict(k='prog',l='Progresso (%)',t='num',a='r',d=1),
+               dict(k='lam',l='Lâmina',w=110),dict(k='resp',l='Responsável')],
+              [],edit=dict(m='pick'),gid='g_os',total=False,tree=True)
     # barra da coleção (DS-33 §74.5.7.1): filtros rápidos no começo, seletor de visão no fim; vale para Lista e Kanban (mesmo filtro)
     kb_nota=(f'<sc-if value="{H("kb_filtro")}" hint-placeholder-val="{F()}"><div role="note" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12.5px; color: {MUTED}; margin-bottom: 8px;">'
              f'<span>{H("kb_nota")}</span><button type="button" onClick="{H("os_limpar")}" style="{_MINI}">Limpar filtros</button></div></sc-if>')
     rc_nota=f'<div role="note" style="font-size: 12.5px; color: {MUTED}; margin-bottom: 8px;">{H("rc_nota")}</div>'
     bar,panes=tabs(['Lista','Kanban','Recursos'],[g_os,kb_nota+_kanban(),rc_nota+_recursos_tab()],active=0,label='Visão das ordens')
-    colbar=(f'<div class="os-colbar" style="display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;"><div style="flex: 1 1 320px; min-width: 0;">{_chips()}</div>'
+    colbar=(f'<div class="os-colbar" style="display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;"><div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 8px;">{_talsel()}{_chips()}</div>'
             f'<div style="flex: 0 0 auto; margin-left: auto;">{bar}</div></div>')
     # recorte vazio (Fazenda/Safra do topo): uma frase e uma ação no lugar das visões
     vazio=(f'<sc-if value="{H("os_vazio")}" hint-placeholder-val="{F()}"><div aria-label="Sem ordens no filtro" style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 36px 16px; border: 1px dashed {LINE}; border-radius: 12px;">'
@@ -1016,7 +1107,7 @@ def build():
     EXTRA.append(_painel()); EXTRA.append(_form())
     data=dict(ords=ordens,nova=_nova_ordem_dados(),aloc={o['id']:AL.da_ordem(o['id']) for o in ordens},agf=_agf_fichas())
     # cenário compartilhado (O.S. ↔ Estoque ↔ App) antes do JS da tela
-    EXTRAJS[0]=cenario.js_prefixo()+'const OSD = '+json.dumps(data,ensure_ascii=False).replace('</','<\\/')+';\n'+JS_NUCLEO+JS
+    EXTRAJS[0]=cenario.js_prefixo()+'const OSD = '+json.dumps(data,ensure_ascii=False).replace('</','<\\/')+';\n'+'const RC_OS = '+json.dumps(sorted({a['os'] for a in AL.ALOC if a['sit']!='manutenção'}))+';\n'+JS_NUCLEO+JS
     prim=f'<button type="button" onClick="{H("nv_open")}" style="{BTN_ST(True)}">Nova ordem</button>'
     HEIGHTS37[fname]=1000
     shell37('OS','Ordem de Serviço',corpo,fname=fname,

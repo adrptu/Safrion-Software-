@@ -37,16 +37,16 @@ try:
     # 4 · App: confirma, inicia turno, fica sem sinal e fecha 60 ha → "Aguardando sinal"; realizado e consumo só mudam no envio (custódia 320 L)
     T.mudar(f"cenConfirmarRecebimento(c,'{RQ}'); cenIniciarTurno(c,'{OS}'); cenSinal(c,false); return cenFecharTurno(c,60,5);")
     p = T.pan(); a = T.aps(); i = T.ins(); print('  ', a, '|', T.linha(OS))
-    T.ok('Em execução' in T.linha(OS) and '0 / 160 ha' in T.linha(OS) and len(a) == 1 and 'Dia 1 · app' in a[0] and 'Aguardando sinal' in a[0] and 'não somado' in a[0]
+    T.ok('Em execução' in T.linha(OS) and T.cel(OS, 'Realizado (ha)') == '0,00' and T.cel(OS, 'Saldo (ha)') == '160,00' and len(a) == 1 and 'Dia 1 · app' in a[0] and 'Aguardando sinal' in a[0] and 'não somado' in a[0]
          and 'Acumulado 0 / 160 ha · saldo 160 ha · 60 ha no aparelho aguardando sinal' in p and 'Confirmado no app' in i and 'Consumido 120 L' not in i and 'Em custódia 320 L' in i and 'consumo no aparelho, aguardando sinal' in i,
          'turno do app sem sinal: Em execução, "Dia 1 · app · Aguardando sinal" fora do acumulado; consumo ainda no aparelho (custódia 320 L)', (a, T.linha(OS), i[:300]))
     # 5 · sinal volta: o realizado passa a 60 ha (uma vez só)
     T.mudar("cenSinal(c,true); return cenSinal(c,true);"); a = T.aps(); i = T.ins(); print('  ', a, '|', T.linha(OS))
-    T.ok('60 / 160 ha' in T.linha(OS) and 'saldo 100 ha' in T.linha(OS) and len(a) == 1 and 'Provisório' in a[0] and '60 / 160 ha' in a[0] and 'Consumido 120 L' in i and 'Em custódia 200 L' in i,
+    T.ok(T.cel(OS, 'Realizado (ha)') == '60,00' and T.cel(OS, 'Saldo (ha)') == '100,00' and len(a) == 1 and 'Provisório' in a[0] and '60 / 160 ha' in a[0] and 'Consumido 120 L' in i and 'Em custódia 200 L' in i,
          'sinal de volta: realizado 60 / 160 ha e consumo 120 L (custódia 200 L) juntos, sem duplicar', (a, T.linha(OS), i[:300]))
     # 6 · turno 2 de 100 ha com 180 L de Glifosato (sobra 20 L): saldo zero → próximo passo Enviar para conferência
     T.mudar(f"cenIniciarTurno(c,'{OS}'); return cenFecharTurno(c,100,8,{{'Glifosato 480':180}});"); i = T.ins()
-    T.ok('160 / 160 ha' in T.linha(OS) and T.temb('Enviar para conferência') and 'Consumido 300 L' in i and 'Em custódia 20 L' in i,
+    T.ok(T.cel(OS, 'Realizado (ha)') == '160,00' and T.cel(OS, 'Saldo (ha)') == '0,00' and T.temb('Enviar para conferência') and 'Consumido 300 L' in i and 'Em custódia 20 L' in i,
          'turno 2 (100 ha, 180 L de Glifosato): 160 / 160 ha, sobra 20 L em custódia, botão Enviar para conferência', (T.linha(OS), i[:300]))
     # 7 · em conferência, encerrar fica bloqueado pela sobra, com o atalho para receber a devolução no Estoque
     T.btn('Enviar para conferência'); T.btn('Confirmar envio'); p = T.pan(); print('  ', p[p.find('PRÓXIMO'):][:300])
