@@ -795,7 +795,7 @@ def _nfa(n):   # como nfa do safra.js: até 2 casas, sem zeros à direita
     return _nf(n,2).rstrip('0').rstrip(',')
 # reservas ativas por destino (o físico apto as inclui; LOTES.reservado = soma delas por insumo). chave = cultivo|atividade quando a reserva é da
 # mesma demanda do plano (conta uma vez); sem chave = outro destino, entra como demanda na data da reserva.
-RESERVAS=[dict(item='Fungicida A',q=65,dt='2026-09-24',t='Reserva REQ-039 · OS-0424 (P2)',chave=None,faz='Santa Rita')]
+RESERVAS=[dict(item='Fungicida A',q=65,dt='2026-09-24',t='Reserva REQ-039 · OS-0424 (T1-B)',chave=None,faz='Santa Rita')]
 def fisico_apto(item):
     """Físico apto (fora quarentena) = disponível + reservado. ESTOQUE guarda o disponível por item (checa_coerencia)."""
     return ESTOQUE.get(item,0)+sum(l['reservado'] for l in LOTES if l['item']==item)

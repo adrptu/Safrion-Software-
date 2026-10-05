@@ -121,7 +121,7 @@ try:
     fechar()
     J("(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Kanban'); b&&b.click();})()"); time.sleep(.4)
     J("(()=>{const k=[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] [role=button]')].find(x=>x.innerText.indexOf('OS-0424')===0); k&&k.click();})()"); time.sleep(.4); t=pan()
-    chk('cartão do Kanban abre a mesma tela', 'OS-0424' in t and 'Fungicida A' in t and '0,8 L/ha' in t and '64 L' in t, t[:200])
+    chk('cartão do Kanban abre a mesma tela', 'OS-0424' in t and 'Fungicida A' in t and '0,5 L/ha' in t and '64 L' in t, t[:200])   # G1 do CTL-1: 0,5 L/ha × 128 ha no T1-B (antes 0,8 × 80 no milho do P2)
     c.shot(os.path.join(HERE,'_probe','os_tela.png'))
     # 01/10: ajuste que tira e inclui produto, salvo e liberado — cenário limpo (a OS-0430 acima já foi encerrada)
     fechar(); J("(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Lista'); b&&b.click();})()")

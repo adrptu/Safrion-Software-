@@ -121,7 +121,7 @@ _ORD_MAPA=[  # id, talhões da geometria, complemento do realizado, prazo, açã
  ('OS-0421',['T1','T2'],'','no prazo',None),
  ('OS-0420',['T4'],'','atrasada',('Acompanhar OM-0233','MA-04.dc.html#OM-0233','op',None)),   # PL-05 é oculta e fixa (Frente F): a OM-0233 viva
  ('OS-0419',['P2'],'lâmina 10,81 mm','irrigando hoje',None),
- ('OS-0424',['P2'],'','até 3 dias',None),
+ ('OS-0424',['T1'],'T1-B','até 3 dias',None),
  ('OS-0422',['P2'],'2 passadas de 6,75 mm','até 3 dias',('Definir janela','IR-03det.dc.html#OS-0422:janela','op',None)),
  ('OS-0418',['P1'],'Ureia 12 kg/ha','vence hoje',('Ajustar antes de liberar','OS.dc.html#OS-0418','lib','ag')),
  ('OS-0417',['P1'],'','até 3 dias',('Receber sobras','EST.dc.html','op','cust')),
@@ -159,7 +159,7 @@ ORD=_ord_mapa()
 # {OS-xxxx} no rótulo = realizado atual da ordem (cenário) · {?OS-xxxx texto} = texto só enquanto a ordem está a liberar pelo agrônomo.
 # Talhão sem condição pior ganha amarelo ("atenção ou a liberar") enquanto uma ordem dele está a liberar pelo agrônomo (mesma contagem do cabeçalho).
 INTEG={'T1':['ok','OS-0421 · {OS-0421}'],'T2':['red','OS-0431 impedida · Trator T1'],'T4':['red','OS-0420 impedida'],'T3':['gray','OS-0415 encerrada'],
-       'P1':['ok','OS-0417 · OS-0418'],'P2':['ok','OS-0424 · {OS-0424}'],'T7':['yellow','mancha 1,2 ha · satélite'],'C1':['yellow','OS-0425 · entrega sem saldo']}
+       'P1':['ok','OS-0417 · OS-0418'],'P2':['ok','milho V10'],'T7':['yellow','mancha 1,2 ha · satélite'],'C1':['yellow','OS-0425 · entrega sem saldo']}
 SEMCULT={'T1':'solo exposto · pré-plantio','T2':'solo exposto · pré-plantio','T4':'semeadura · sem leitura','T3':'colhido 12/09'}
 SOLO_B={'T1':[48,4.9,11,62,28,8.6],'T2':[55,5.1,14,88,30,9.1],'T4':[41,4.6,7,36,24,7.8],'T3':[62,5.4,19,110,33,10.2],
         'P1':[58,5.3,16,95,31,9.6],'P2':[60,5.4,21,126,34,10.5],'T7':[66,5.8,24,140,36,11.4],'C1':[52,5.0,12,80,29,9.0]}
@@ -812,7 +812,7 @@ function criarVis(self,ts,extra,pt){ const sat=lay(self)==='Satélite'; const ms
   self.setState(Object.assign({miprev:Date.now(),g2toast:r.msg||r.erro||''},extra||{})); }
 // ---- O.S. do talhão: cartões selecionáveis e o próximo passo da escolhida (osProx e comandos osc_* do núcleo da O.S.) ----
 function osMapa(t){ const mo=M.ord.filter(o=>o.tal.indexOf(t)>=0); const sv=(id)=>{ const x=mo.find(o=>o.id===id); return SEV.indexOf(PZC[x?x.pz:'no prazo']); };
-  return OSN.filter(o=>mo.some(m=>m.id===o.id)&&o.etapa!=='Canceladas').sort((a,b)=>{ const fa=a.etapa==='Encerradas'?1:0, fb=b.etapa==='Encerradas'?1:0; return (fa-fb)||(sv(a.id)-sv(b.id)); }); }
+  return OSN.filter(o=>mo.some(m=>m.id===o.id)&&o.etapa!=='Canceladas').sort((a,b)=>{ const fa=a.etapa==='Encerradas'?1:0, fb=b.etapa==='Encerradas'?1:0; const al=x=>x.etapa==='A liberar'?0:1; return (fa-fb)||(sv(a.id)-sv(b.id))||(al(a)-al(b)); }); }   /* empate de prazo: a decisão do agrônomo (A liberar) vem antes, como no rótulo do talhão (G1 do CTL-1: OS-0424 no T1-B) */
 function mapCt(o,fn){ const insTxt=(o.ins||[]).map(x=>x.p+' '+nd(x.tot)+' '+x.un).join(', '); const vn=osVn(o.versao);  // versão: só "vN" (núcleo da O.S.)
   return {liberar:o.agua?('Liberar '+o.id+': janela, bomba e energia confirmadas; água sem requisição no Estoque.'):('Liberar '+o.id+' (versão '+vn+'): ao confirmar, '+OS_AGRO+' aprova esta versão e libera; '+(insTxt?'a requisição reserva no Estoque, por lote: '+insTxt+'.':'sem insumos a reservar.')+osUsoAtencao(cenGet(),o.id)),
     iniciar:'Iniciar '+o.id+' agora, na janela '+o.janela+'.',conferencia:'Enviar '+o.id+' para conferência: execução física concluída ('+nf(o.realizado)+' ha).',

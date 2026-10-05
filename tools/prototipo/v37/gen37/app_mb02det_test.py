@@ -21,8 +21,8 @@ try:
     a.ok('3 turnos anteriores' in b and 'Dia 7' in b and 'Dia 3 ·' not in b, 'apontamentos: os 4 últimos e "3 turnos anteriores"')
     a.ok('+ 2 anteriores' in b and b.count('OC-50') == 2, 'ocorrências: as 2 mais recentes e "+ 2 anteriores"')
     a.ok(k <= 0, f'7 turnos e 4 ocorrências longas cabem na altura (excesso {k} px)')
-    # OS-0424 feita (80 ha) e sobra devolvida: próximo passo é o encerramento no escritório
-    a.mudar("cenEntregar(c,'REQ-039','Fungicida A',65,'Marcos'); cenConfirmarRecebimento(c,'REQ-039'); cenIniciarTurno(c,'OS-0424'); return cenFecharTurno(c,80,6,null,'');")
+    # OS-0424 feita (128 ha no T1-B desde o G1 do CTL-1) e sobra devolvida: próximo passo é o encerramento no escritório
+    a.mudar("cenEntregar(c,'REQ-039','Fungicida A',65,'Marcos'); cenConfirmarRecebimento(c,'REQ-039'); cenIniciarTurno(c,'OS-0424'); return cenFecharTurno(c,128,6,null,'');")
     a.mudar("const it=c.reqs['REQ-039'].itens[0]; it.devolvido+=it.custodia; it.custodia=0; return {msg:'devolvido'};")
     a.J("localStorage.setItem('talhao-os-mb-os','OS-0424')"); a.abrir('MB-02det'); b = a.body()
     a.ok('Aguardar encerramento' in b and 'encerramento no escritório' in b and 'Área feita · aguarda encerramento' in b and a.foot() == 'Voltar às ordens',

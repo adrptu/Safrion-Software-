@@ -61,7 +61,9 @@ for(const d of [1.49,3.01]){ const c=C(); const r=T(()=>osc_ajustar(c,'OS-0430',
   console.log('       painel:', b.t, '· Quem resolve:', b.q); }
 // ---- a semente inteira pela regra (todas as fases, só leitura)
 if(typeof osUsoErro==='function'){ const c=C(); const f=Object.keys(c.ordens).map(k=>[k,c.ordens[k].etapa,osUsoErro(c,c.ordens[k])]).filter(x=>x[2]);
-  console.log('SEMENTE · ordens fora da regra:', JSON.stringify(f)); ok('S1 semente: só a OS-0424 (Liberadas, Fungicida A em milho) fora da regra', f.length===1&&f[0][0]==='OS-0424', f); }
+  console.log('SEMENTE · '+Object.keys(c.ordens).length+' ordens · fora da regra:', JSON.stringify(f));
+  /* G1 (CTL-1, commit 3): a OS-0424 saiu do milho do P2 (Fungicida A sem registro) para a soja do T1-B a 0,5 L/ha; nenhuma ordem da semente falha */
+  ok('S1 semente: nenhuma ordem fora da regra legal (osUsoErro vazio em todas, em todas as fases; OS-0424 em soja T1-B 0,5 L/ha)', f.length===0&&Object.keys(c.ordens).length>20&&!osUsoErro(c,c.ordens['OS-0424']), f); }
 console.log(MODO+': '+R.filter(x=>x.ok).length+'/'+R.length+' passaram');
 
 }

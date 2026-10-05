@@ -138,7 +138,7 @@ try:
     rowclick('Fungicida A'); fs=memo(); fechar(); fa=fa+' | '+' · '.join(cel('Fungicida A',k) for k in ('Estoque apto','Usado antes da compra','Necessidade líquida'))
     ir('CMP.dc.html#sol=SOL-2026-07&saf=S2627',w=1.4); clk('Expandir tudo'); fa2=rowtxt('Fungicida A'); rowclick('Fungicida A'); fc=memo(); fechar()
     chk('21 Fungicida A (2026/27): estoque apto 545 (65 reservados à OS-0424, usados antes); 145,2 L como antes; memória igual nas duas telas',
-        fa.endswith(' | 545,0 L · 65,0 L · 145,2 L') and 'usado antes: 65,0' in fa2 and '145,2' in fa2 and fs==fc and any(l.startswith('24/09/2026 · Reserva REQ-039 · OS-0424 (P2) · −65,0 L') for l in fs),{'fa':fa,'fa2':fa2,'iguais':fs==fc,'saf':fs[-2:],'cmp':fc[-2:]})
+        fa.endswith(' | 545,0 L · 65,0 L · 145,2 L') and 'usado antes: 65,0' in fa2 and '145,2' in fa2 and fs==fc and any(l.startswith('24/09/2026 · Reserva REQ-039 · OS-0424 (T1-B) · −65,0 L') for l in fs),{'fa':fa,'fa2':fa2,'iguais':fs==fc,'saf':fs[-2:],'cmp':fc[-2:]})
     # safra criada no Planejar safra (fora do cadastro da Compra): a solicitação gravada aparece na lista e abre com contexto próprio
     J("""(()=>{const o=JSON.parse(localStorage.getItem('talhao-os-compras-v1')); const r=JSON.parse(JSON.stringify(o.sols.S27SF)); r.safra='n9'; r.nome='Safra nova teste'; r.id='SOL-2026-10'; o.sols.n9=r; localStorage.setItem('talhao-os-compras-v1',JSON.stringify(o));})()""")
     ir('CMP.dc.html#sol=SOL-2026-10&saf=n9',w=1.4); ctxn=J("(document.body.innerText.match(/Safra nova teste · SOL-2026-10/)||[''])[0]"); cn=cur()

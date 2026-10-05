@@ -19,9 +19,9 @@ try:
     a.J("localStorage.setItem('talhao-os-mb-os','OS-0424')"); a.abrir('MB-02det'); b = a.body()
     a.ok(a.foot() == 'Fechar turno · OS-0421' and 'fechar o turno da OS-0421' in b and 'Iniciar turno' not in b,
          'MB-02det OS-0424: próxima ação e rodapé "Fechar turno · OS-0421" (' + a.foot() + ')')
-    # fecha o turno da OS-0421 e faz a OS-0424 inteira (80 ha) pelo MB-03
+    # fecha o turno da OS-0421 e faz a OS-0424 inteira (128 ha no T1-B desde o G1 do CTL-1; antes 80 ha no P2) pelo MB-03
     a.abrir('MB-03'); a.setv('#ft_ha', '20'); a.setv('#ft_h', '3'); a.clk('Fechar turno')
-    a.clk_sel('main button[title="Iniciar turno na OS-0424"]'); a.setv('#ft_ha', '80'); a.setv('#ft_h', '6'); a.clk('Fechar turno')
+    a.clk_sel('main button[title="Iniciar turno na OS-0424"]'); a.setv('#ft_ha', '128'); a.setv('#ft_h', '6'); a.clk('Fechar turno')
     a.ok(a.cen("c.ordens['OS-0424'].saldo") == 0 and a.cen("!c.app.turno"), 'OS-0424 feita: saldo 0 ha e nenhum turno aberto')
     a.abrir('MB-01'); card = a.J(CARD)
     a.ok('Área feita · sobra com você' in card and 'Devolver sobra' in card and 'Iniciar turno' not in card,

@@ -422,7 +422,7 @@ def su03det():
     org=_origens()['Fungicida A']
     a1=round(sum(x['q'] for x in org if '1ª' in x['t']),1); a2=round(sum(x['q'] for x in org if '2ª' in x['t']),1)
     rows=[R('fis',dict(m='Físico no lote',q=F02['fisico']),dict(q=[b(f"{nq(F02['fisico'])} L")],sit=[txt('validade 03/2028 · NF 4390')]),o=[dict(t='Almox. defensivos · sem quarentena'),dict(t='Movimentos do lote',h='SU-08.dc.html')]),
-          R('os24',dict(m='Reserva confirmada · OS-0424 (fungicida P2)',q=F02['reservado']),dict(q=[txt(f"{nq(F02['reservado'])} L")],sit=[ch('Confirmada · recibo RS-7741','green')]),o=[dict(t='Requisição REQ-039 · separar pelo FEFO',h='SU-07.dc.html')]),
+          R('os24',dict(m='Reserva confirmada · OS-0424 (fungicida T1-B)',q=F02['reservado']),dict(q=[txt(f"{nq(F02['reservado'])} L")],sit=[ch('Confirmada · recibo RS-7741','green')]),o=[dict(t='Requisição REQ-039 · separar pelo FEFO',h='SU-07.dc.html')]),
           R('plano',dict(m='Reserva planejada · Safra 2026/27',q=PLANO_FA),dict(),o=[dict(t=f'1ª aplicação (DAP 45) · T1-A, T1-B e T2 = {nq(a1)} L'),dict(t=f'2ª aplicação (DAP 60) · T1-A, T1-B e T2 = {nq(a2)} L'),dict(t='Abrir em Planejar safra',h='SAF.dc.html')]),
           R('disp',dict(m='Disponível no lote',q=LIVRE_FA),dict(),o=[dict(t=f"Físico {nq(F02['fisico'])} − reservado {nq(F02['reservado'])} = {nq(LIVRE_FA)} L; nunca fica negativo")]),
           R('pend',dict(m='Pendência sem saldo',q=0),dict(),o=[dict(t=f'Coberta pela SOL-2026-07 (líquido de Fungicida A = {nq(SOL_FA)} L)'),dict(t='Abrir em Compra de insumos',h='CMP.dc.html')])]
@@ -793,7 +793,7 @@ def _reqs():
          dict(id='REQ-037',os='OS-0420',tipo='Plantio soja 58 W · T4',item=R37['item'],lote=R37['lote'],un='kg',sol=R37['solicitado'],ent=R37['entregue'],cons=R37['consumido'],
               cust=R37['custodia'],resp='Carlos',local='campo T4',data='2026-09-26',st='devp',ro=True),
          dict(id='REQ-038',os='OS-0418',tipo='Fertirrigação · P1',item=R38['item'],lote='—',un='kg',sol=R38['solicitado'],ent=0,cons=0,cust=0,resp='João',local='casa de bombas P1',data='2026-09-29',st='agr',ro=False),
-         dict(id='REQ-039',os='OS-0424',tipo='Fungicida · P2',item=R39['item'],lote=R39['lote'],un='L',sol=R39['solicitado'],ent=0,cons=0,cust=0,resp='Marcos',local='campo P2',data='2026-09-24',st='sep',ro=False),
+         dict(id='REQ-039',os='OS-0424',tipo='Fungicida · T1-B',item=R39['item'],lote=R39['lote'],un='L',sol=R39['solicitado'],ent=0,cons=0,cust=0,resp='Marcos',local='campo T1-B',data='2026-09-24',st='sep',ro=False),
          dict(id='REQ-040',os='OS-0425',tipo='Adubação 1ª parcela · café C1',item=R40['item'],lote=R40['lote'],un='kg',sol=R40['solicitado'],ent=0,cons=0,cust=0,resp='Paula',local='café C1',data='2026-10-15',st='parc',ro=False)]
     return out
 def su07():

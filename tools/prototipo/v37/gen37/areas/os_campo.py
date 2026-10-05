@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Execução da O.S. liberada — ficha do caldeiro e do operador no app (offline) e ficha impressa (PRD cap. 41.3–41.4).
-Exemplo: OS-0424 · Fungicida A no Pivô 2 (80 ha), liberada; REQ-039 reserva 65 L do lote F26-02.
+Exemplo: OS-0424 · Fungicida A no T1-B (soja, 128 ha a 0,5 L/ha = 64 L), liberada; REQ-039 reserva 65 L do lote F26-02.
+05/10 (G1 do CTL-1): saiu do milho do Pivô 2 (0,8 L/ha, sem registro do Fungicida A para milho) para a soja do T1-B, dentro da bula.
 Conta das cargas (41.4): área da carga = volume final da carga ÷ vazão; produto da carga = dose × área da carga; a última carga é proporcional.
 Retirada (v3.9, 26/09/2026): o estado vem da REQ-039 do cenário compartilhado (cenario.js) — Reservado → Entregue por Rui (Estoque) →
 Recebido (cenConfirmarRecebimento, sem sinal vai para a fila do aparelho). As fichas do caldeiro e do operador não mudam; a ficha impressa também não.
@@ -17,11 +18,11 @@ F = lambda: H('false')
 T = lambda: H('true')
 
 # ---------- dados da ordem e do equipamento (versão v1 liberada) ----------
-OS = dict(id='OS-0424', ativ='Fungicida', op='Pulverização', local='Pivô 2 · Milho V10', area=80.0, versao='v1 liberada por Ana (agrônoma) em 23/09 17:40',
+OS = dict(id='OS-0424', ativ='Fungicida', op='Pulverização', local='T1-B · Soja 62 X', area=128.0, versao='v1 liberada por Ana (agrônoma) em 23/09 17:40',
           janela='24/09 · 06:00–11:00', valida='24/09 18:00', resp='Marcos', req='REQ-039', almox='Rui')
 CJ = next(c for c in D2.CONJ if c['id'] == 'r1')
 EQ = dict(conj=CJ['conj'], tanque=3000, vazao=100, vel=CJ['vel'], barra=CJ['larg'], bicos='leque 110-015 · 3 bar')
-PRODS = [dict(p='Fungicida A', dose=0.8, un='L', lote='F26-02', val='03/2028', emb='galão 5 L', reserv=65)]
+PRODS = [dict(p='Fungicida A', dose=0.5, un='L', lote='F26-02', val='03/2028', emb='galão 5 L', reserv=65)]
 AREA_CARGA = EQ['tanque'] / EQ['vazao']
 N = math.ceil(OS['area'] / AREA_CARGA - 1e-9)
 CARGAS = []

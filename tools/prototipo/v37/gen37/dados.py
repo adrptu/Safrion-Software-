@@ -95,7 +95,7 @@ ORDENS=[
       chave=['c1|a6','c2|a6','c3|a6']),
  dict(id='OS-0422',tipo='Irrigação · água',talhao='P2',area=80,etapa='A liberar',selo='Janela a definir',realizado=0,saldo=80,janela='a definir',resp='João',detalhe='IR-02.dc.html'),
  dict(id='OS-0423',tipo='Irrigação · água por gotejo',talhao='T7',area=42,etapa='A liberar',selo='Conflito · parada da B3',realizado=0,saldo=42,janela='hoje 14:00–16:00',resp='João',detalhe='IR-02.dc.html'),
- dict(id='OS-0424',tipo='Pulverização · Fungicida A',talhao='P2',area=80,etapa='Liberadas',selo=None,realizado=0,saldo=80,janela='24/09',resp='Marcos',detalhe=None),
+ dict(id='OS-0424',tipo='Pulverização · Fungicida A',talhao='T1-B',area=128,etapa='Liberadas',selo=None,realizado=0,saldo=128,janela='24/09',resp='Marcos',detalhe=None),
  dict(id='OS-0425',tipo='Adubação 1ª parcela · café',talhao='C1',area=38,etapa='Liberadas',selo='Entrega sem saldo suficiente',realizado=0,saldo=38,janela='15/10',resp='Paula',detalhe=None,
       chave='c9|k1'),
  dict(id='OS-0430',tipo='Dessecação pré-plantio',talhao='T1-A',area=160,etapa='A liberar',selo=None,realizado=0,saldo=160,janela='25/09 (DAP −20)',resp='Marcos',detalhe=None,
@@ -112,7 +112,7 @@ for _o in ORDENS:
 # TABELAS-FOCO (5983172395): vínculo estruturado com os talhões do cadastro da fazenda (ID e nome; nunca separado do texto
 # por pontuação), local próprio da ordem sem talhão e início/fim da janela como data (demonstração: hoje = 23/09/2026).
 _TAL={'OS-0415':['T3'],'OS-0417':['P1'],'OS-0418':['P1'],'OS-0419':['P2'],'OS-0420':['T4'],'OS-0421':['T1','T2'],'OS-0422':['P2'],
-      'OS-0423':['T7'],'OS-0424':['P2'],'OS-0425':['C1'],'OS-0430':['T1-A'],'OS-0431':['T2'],'OB-0104':[]}
+      'OS-0423':['T7'],'OS-0424':['T1-B'],'OS-0425':['C1'],'OS-0430':['T1-A'],'OS-0431':['T2'],'OB-0104':[]}
 _JAN={'OS-0415':('2025-09-10','2025-09-12'),'OS-0417':('2026-09-19','2026-09-21'),'OS-0418':('2026-09-24','2026-09-25'),
       'OS-0419':('2026-09-23','2026-09-24'),'OS-0420':('2026-09-22','2026-09-28'),'OS-0421':('2026-09-20','2026-09-26'),'OS-0422':('',''),
       'OS-0423':('2026-09-23','2026-09-23'),'OS-0424':('2026-09-24','2026-09-24'),'OS-0425':('2026-10-15','2026-10-15'),

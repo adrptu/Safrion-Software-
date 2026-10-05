@@ -78,13 +78,13 @@ try:
     faz('Santa Rita')
     # 11-12 · cenário compartilhado: outra tela muda a OS-0424 (turno fechado) e devolve a sobra da OS-0417
     s=cenario.seed(); s['rev']=7
-    s['ordens']['OS-0424'].update(etapa='Em execução',realizado=20,saldo=60)
+    s['ordens']['OS-0424'].update(etapa='Em execução',realizado=20,saldo=108)   # G1 do CTL-1: OS-0424 na soja do T1-B (128 ha), não mais no milho do P2
     it=s['reqs']['REQ-031']['itens'][0]; it['devolvido']+=it['custodia']; it['custodia']=0
     J(f"localStorage.setItem('talhao-os-cenario-v1',{json.dumps(json.dumps(s,ensure_ascii=False))}); window.dispatchEvent(new StorageEvent('storage',{{key:'talhao-os-cenario-v1'}}))"); time.sleep(.4)
-    camada('Ordens de serviço'); tap('P2'); t2=pan('P2')
-    chk('11 cenário (camada Ordens de serviço): OS-0424 aparece Em execução com 20/80 ha · saldo 60 ha (sem recarregar) · P2 sem as ordens de água OS-0419/OS-0422',
-        'OS-0424 · Pulverização · Fungicida A' in t2 and '20/80 ha · saldo 60 ha · janela 24/09' in t2 and 'Em execução' in t2 and not any(x in t2 for x in AGUA), t2[:500].replace('\n',' / '))
-    tap('P2'); tap('P1'); t1=pan('P1')
+    camada('Ordens de serviço'); tap('P2'); t2=pan('P2'); tap('P2'); tap('T1'); tt1=pan('T1')
+    chk('11 cenário (camada Ordens de serviço): OS-0424 (T1-B) aparece Em execução com 20/128 ha · saldo 108 ha no T1 (sem recarregar) · P2 sem a OS-0424 e sem as ordens de água OS-0419/OS-0422',
+        'OS-0424 · Pulverização · Fungicida A' in tt1 and '20/128 ha · saldo 108 ha' in tt1 and 'Em execução' in tt1 and 'OS-0424' not in t2 and not any(x in t2 for x in AGUA), (t2[:200].replace('\n',' / '), tt1[:700].replace('\n',' / ')))
+    tap('T1'); tap('P1'); t1=pan('P1')
     chk('12 cenário: sobra da OS-0417 recebida → sem custódia, sem selo "Sobras a receber" e sem "Receber sobras"', '95/95 ha' in t1 and 'custódia' not in t1 and 'Receber sobras' not in t1 and 'Sobras a receber' not in t1, t1[:500].replace('\n',' / '))
     J("localStorage.removeItem('talhao-os-cenario-v1')")
     # 13-14 · caixa de Aprovações (sem O.S.) e Agenda

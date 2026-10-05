@@ -17,7 +17,7 @@ try:
     a.clk('Confirmar recebimento'); b = a.body()
     a.ok(a.cen("c.reqs['REQ-039'].itens[0].confirmado") is True and a.cen("c.app.fila.length") == 1 and 'aguardando sinal' in b,
          'confirmar sem sinal grava no cenário e vai para a fila do aparelho')
-    a.ok('Carga 1 de 3' in b and 'Carga 1 preparada' in a.J("document.querySelector('main').nextElementSibling.innerText"),
+    a.ok('Carga 1 de 5' in b and 'Carga 1 preparada' in a.J("document.querySelector('main').nextElementSibling.innerText"),
          'fichas do caldeiro seguem: carga a carga depois do recebimento')
     a.abrir('MB-01'); a.clk('Com sinal')
     a.ok(a.cen("c.app.fila.length") == 0 and 'recibo REC-7742' in a.toast(), 'sinal volta no app: recebimento enviado uma vez')
