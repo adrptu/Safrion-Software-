@@ -8,14 +8,18 @@ from est_lib import Est
 
 OVF = "[...document.querySelectorAll('[role=table]')].filter(x=>x.offsetParent).map(x=>[x.parentElement.scrollWidth,x.parentElement.clientWidth])"
 INTEIRO = """((ts,t)=>{const r=[...document.querySelectorAll('[role=row]')].find(r=>ts.every(x=>r.innerText.indexOf(x)>=0)); if(!r) return 'sem linha';
-  const e=[...r.querySelectorAll('button,span')].find(x=>x.innerText.trim()===t); if(!e) return 'sem '+t; const box=r.closest('[role=table]').parentElement.getBoundingClientRect(), b=e.getBoundingClientRect();
-  return b.left>=box.left-0.5&&b.right<=box.right+0.5;})"""
+  const e=[...r.querySelectorAll('button,span')].find(x=>x.innerText.trim()===t); if(!e) return 'sem '+t; const sc=r.closest('[role=table]').parentElement;
+  const den=()=>{ const box=sc.getBoundingClientRect(), b=e.getBoundingClientRect(); return b.width>0&&b.left>=box.left-0.5&&b.right<=box.right+0.5; };
+  sc.scrollLeft=0; if(den()) return true;   // à vista sem rolar a grade
+  const f=e.closest('button'); if(f){ f.focus(); f.dispatchEvent(new FocusEvent('focusin',{bubbles:true})); return den()?'teclado':false; }   // ação: o foco do teclado traz inteira para a caixa (focusin despachado: sem janela ativa o Chrome não o dispara)
+  e.scrollIntoView({block:'nearest',inline:'nearest'}); return den()?'rolando':false; })"""
 # linhas da trilha com o tipo do movimento: [texto da linha]
 MOV = "(t=>[...document.querySelectorAll('[role=row].g2ed')].filter(r=>r.innerText.indexOf(t)>=0).map(r=>r.innerText.replace(/\\s+/g,' ')))"
 
 
-def cabe(E): return all(s <= c for s, c in E.J(OVF))
-def inteiro(E, ts, t): return E.J(f"({INTEIRO})({ts!r},{t!r})".replace("'", '"')) is True
+# TABELAS-FOCO (5983172395) item 6: com uma variável por coluna a grade pode rolar dentro da própria caixa; a página não rola
+def cabe(E): return bool(E.J("document.documentElement.scrollWidth<=innerWidth+1"))
+def inteiro(E, ts, t): return E.J(f"({INTEIRO})({ts!r},{t!r})".replace("'", '"')) in (True, 'teclado', 'rolando')
 def movs(E, t): return E.J(f"({MOV})({t!r})".replace("'", '"'))
 
 
@@ -25,9 +29,15 @@ try:
     # 1 · NF 4533 conferida com validade: a grade da etapa 1 continua cabendo, chips inteiros
     E.clk('Conferir NF 4533'); E.setv('fx_g_rec_conf', '20000'); E.setv('fx_g_rec_apto', '20000'); E.setv('fx_g_rec_quar', '0'); E.setv('fx_g_rec_val', '05/2027'); E.salvar()
     print('etapa 1:', E.J(OVF), E.rowtxt('NF 4533'))
-    E.ok(cabe(E) and inteiro(E, ['NF 4533'], 'Conferido') and inteiro(E, ['NF 4501'], 'Aguarda laudo'), 'etapa 1 após conferir NF 4533: sem rolagem, "Conferido" e "Aguarda laudo" inteiros', E.J(OVF))
+    E.ok(cabe(E) and inteiro(E, ['NF 4533'], 'Conferido') and inteiro(E, ['NF 4501'], 'Aguarda laudo'), 'etapa 1 após conferir NF 4533: página sem rolagem, "Conferido" e "Aguarda laudo" inteiros na grade', E.J(OVF))
     E.etapa(4); print('etapa 4:', E.J(OVF))
-    E.ok(cabe(E), 'etapa 4 com Semente de soja 58 W em 2 lotes: sem rolagem', E.J(OVF))
+    # os dois lotes sob o item e, com a grade no início, Item › lote e Disponível à vista (não basta a página não rolar)
+    l4 = E.J("""(()=>{const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent); const sc=t.parentElement; sc.scrollLeft=0; const R=sc.getBoundingClientRect();
+      const hs=[...t.querySelectorAll('[role=columnheader]')].filter(h=>h.getBoundingClientRect().right<=R.right+0.5).map(h=>h.innerText.replace(/[⇅▾▴]/g,'').replace(/\\s+/g,' ').trim().toUpperCase());
+      const rs=[...t.querySelectorAll('[role=row]')].map(r=>r.innerText.replace(/\\s+/g,' ').trim()); const i=rs.findIndex(x=>/^[▾▸]?\\s*Semente de soja 58 W/.test(x));
+      return {vis:hs, kids:rs.slice(i+1,i+3).map(x=>x.split(' ')[0])};})()""")
+    E.ok(cabe(E) and sorted(l4['kids']) == ['S58-0801', 'S58-0926'] and 'ITEM › LOTE' in l4['vis'] and 'DISPONÍVEL' in l4['vis'],
+         'etapa 4 com Semente de soja 58 W em 2 lotes (S58-0801 e S58-0926 sob o item); Item › lote e Disponível à vista sem rolar a grade', l4)
     # 2 · contagem sem diferença: documento e contador na trilha
     E.etapa(5); E.clk('Contar INV-2611'); E.setv('fx_g_cnt_cont', '1200'); E.salvar(); print('toast:', E.toast())
     E.rowbtn('INV-2609', 'Aprovar ajuste'); print('toast:', E.toast())

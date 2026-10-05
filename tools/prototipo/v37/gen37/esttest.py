@@ -91,7 +91,9 @@ def parte2(E):
     E.setv('fx_g_ent_qtd', '45'); E.salvar(); print('toast:', E.toast())
     t = E.rowtxt('REQ-035'); print('REQ-035 reentrega:', t); E.ok('Entrega completa' in t, 'reentrega legítima de 45 L aceita')
     E.clk('Confira saldos'); t = E.rowtxt('M26-07'); print('MAP lote:', t); E.ok('90.500 kg' in t, 'MAP físico 90.000 + 500 kg devolvidos')
-    t = E.rowtxt('NPK 20-05-20'); print('NPK:', t); E.ok('0 kg' in t and '8.000 kg' in t, 'NPK disponível 0, 8 t em custódia (OS-0425)')
+    # por coluna (antes, '0 kg' casava dentro de '8.000 kg' e a verificação passava sempre)
+    npk = [E.cel('NPK 20-05-20', k) for k in ('Disponível', 'Em custódia (fora do depósito)', 'O.S. com custódia')]; print('NPK:', npk)
+    E.ok(npk == ['0 kg', '8.000 kg', 'OS-0425'], 'NPK disponível 0, 8 t em custódia (OS-0425)', npk)
     t = E.rowtxt('F26-02'); print('Fungicida A lote:', t); E.ok('530 L' in t and '65 L' in t, 'Fungicida A: 545 + 30 devolvidos − 45 reentregues = 530 L; reserva da OS-0424 (65 L) preservada')
 
 

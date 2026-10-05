@@ -67,9 +67,11 @@ def build():
     # ---------- etapa 1 · recebimentos (linhas: notas de base + recebimentos gravados no cenário) ----------
     ped_opts=[_ped_label(p) for p in D2.PEDIDOS]
     # larguras (w) contidas: pedido, item e situação quebram em linhas e a grade cabe em 1440 px sem rolagem horizontal
-    g_rec=grid([dict(k='nf',l='Nota fiscal',w=100),dict(k='ped',l='Pedido',w=150),dict(k='item',l='Item · lote',w=190),
-                dict(k='qtd_nf',l='Na nota',t='num',a='r',u='kg'),dict(k='conf',l='Conferida',t='num',a='r',u='kg'),dict(k='apto',l='Apta',t='num',a='r',u='kg'),
-                dict(k='quar',l='Quarentena',t='num',a='r',u='kg'),dict(k='sit',l='Situação',w=200)],
+    # TABELAS-FOCO (5983172395): uma variável por coluna em todas as etapas; a unidade fica junto da quantidade ("60.000 kg"):
+    # decisão do proprietário de 05/10/2026 (mais intuitivo; filtrar unidade não gera valor). O valor tipado (v) continua número para ordenar
+    g_rec=grid([dict(k='nf',l='Nota fiscal',w=100),dict(k='data',l='Data da nota',t='date',w=110),dict(k='cfd',l='Conferida em',t='date',w=110),dict(k='ped',l='Pedido',w=110),dict(k='forn',l='Fornecedor',w=130),dict(k='item',l='Item',w=170),dict(k='lote',l='Lote'),
+                dict(k='qtd_nf',l='Na nota',t='num',a='r'),dict(k='conf',l='Conferida',t='num',a='r'),dict(k='apto',l='Apta',t='num',a='r'),
+                dict(k='quar',l='Quarentena',t='num',a='r'),dict(k='sit',l='Situação',w=150),dict(k='divg',l='Divergência',w=150),dict(k='vali',l='Validade',t='date')],
         [],edit=dict(m='form',title='Recebimento',newTitle='Registrar recebimento',sub='Confira a nota contra o pedido e o material. Só a parte apta entra no disponível.',
             fields=[dict(k='ped',l='Pedido',t='sel',opts=ped_opts,req=True,**{'def':ped_opts[0]}),
                     dict(k='nf',l='Nota fiscal',t='txt',req=True,help='Documento já lançado não cria segunda entrada.'),
@@ -84,15 +86,16 @@ def build():
                     dict(k='obs',l='Motivo da quarentena ou da divergência',t='area',help='Obrigatório quando houver quarentena ou divergência.')]),
         gid='g_rec',total=False,qf=dict(k='sit',cut=' · '))
     # ---------- etapa 2 · entregas por O.S. (uma linha por item de requisição) ----------
-    g_ent=grid([dict(k='req',l='Requisição · O.S.'),dict(k='fase',l='Fase da O.S.'),dict(k='item',l='Item · lote · embalagem',w=200),
-                dict(k='sol',l='Solicitado',t='num',a='r'),dict(k='ent',l='Entregue',t='num',a='r'),dict(k='pend',l='A entregar',t='num',a='r',w=110),dict(k='sit',l='Situação',w=250)],
+    g_ent=grid([dict(k='req',l='Requisição'),dict(k='os',l='O.S.'),dict(k='fase',l='Fase da O.S.'),dict(k='item',l='Item',w=170),dict(k='lote',l='Lote'),dict(k='emb',l='Embalagem',w=120),
+                dict(k='sol',l='Solicitado',t='num',a='r'),dict(k='ent',l='Entregue',t='num',a='r'),dict(k='pend',l='A entregar',t='num',a='r',w=110),
+                dict(k='pk',l='A entregar em embalagens',w=150),dict(k='sit',l='Situação',w=170),dict(k='det',l='Detalhe',w=230)],
         [],edit=dict(m='form',title='Entrega',sub='',
             fields=[dict(k='lote',l='Lote reservado',t='txt',ro=True),dict(k='qtd',l='Quantidade a entregar',t='num',req=True,min=0.001),
                     dict(k='quem',l='Entregar a',t='sel',opts=PESSOAS,req=True)]),
         gid='g_ent',total=False,qf=dict(k='sit',cut=' · '))
     # ---------- etapa 3 · custódia e devoluções ----------
-    g_dev=grid([dict(k='req',l='Requisição · O.S.'),dict(k='item',l='Item · lote'),dict(k='ent',l='Entregue',t='num',a='r'),dict(k='cons',l='Consumido',t='num',a='r'),
-                dict(k='dev',l='Devolvido',t='num',a='r'),dict(k='cust',l='Em custódia',t='num',a='r'),dict(k='enc',l='Encerramento da O.S.',w=220)],
+    g_dev=grid([dict(k='req',l='Requisição'),dict(k='os',l='O.S.'),dict(k='item',l='Item'),dict(k='lote',l='Lote'),dict(k='ent',l='Entregue',t='num',a='r'),dict(k='cons',l='Consumido',t='num',a='r'),
+                dict(k='dev',l='Devolvido',t='num',a='r'),dict(k='cust',l='Em custódia',t='num',a='r'),dict(k='com',l='Com quem'),dict(k='enc',l='Encerramento da O.S.',w=200),dict(k='det',l='Detalhe',w=220)],
         [],edit=dict(m='form',title='Receber devolução',sub='',
             fields=[dict(k='qtd',l='Quantidade conferida',t='num',req=True,min=0.001),dict(k='cond',l='Condição',t='sel',opts=CONDS,req=True),
                     dict(k='obs',l='Observação',t='area',help='Obrigatória quando bloqueada para inspeção.')]),
@@ -100,12 +103,14 @@ def build():
     # ---------- etapa 4 · saldos por item e lote, com filtro por local ----------
     chips=(f'<span style="font-size: 12px; font-weight: 700; color: {MUTED};">Local</span>'
            f'<sc-for list="{H("est_locs")}" as="lc" hint-placeholder-count="5"><button type="button" aria-pressed="{H("lc.on")}" onClick="{H("lc.go")}" style="{H("lc.st")}">{H("lc.t")}</button></sc-for>')
-    g_lot=grid([dict(k='nome',l='Item · lote',w=170),dict(k='local',l='Local'),dict(k='fis',l='Físico',t='num',a='r'),dict(k='res',l='Reservado',t='num',a='r'),
-                dict(k='blq',l='Bloqueado',t='num',a='r',w=170),dict(k='disp',l='Disponível',t='num',a='r'),dict(k='cust',l='Em custódia (fora do depósito)',t='num',a='r'),dict(k='val',l='Validade')],
+    # árvore item › lote: cada linha é uma entidade do seu nível (item ou lote), com o item em coluna própria para filtrar
+    g_lot=grid([dict(k='nome',l='Item › lote',w=170),dict(k='prod',l='Item',w=150),dict(k='local',l='Local'),dict(k='fis',l='Físico',t='num',a='r'),dict(k='res',l='Reservado',t='num',a='r'),
+                dict(k='blq',l='Bloqueado',t='num',a='r',w=170),dict(k='disp',l='Disponível',t='num',a='r'),dict(k='expo',l='Em conferência',t='num',a='r'),dict(k='cust',l='Em custódia (fora do depósito)',t='num',a='r'),
+                dict(k='cos',l='O.S. com custódia'),dict(k='sitl',l='Situação do lote',w=140),dict(k='vali',l='Validade',t='date')],
         [],edit=dict(m='origin',leafOnly=False,title='Saldo',fields=[dict(k='nome',l='Item ou lote',t='txt',ro=True),dict(k='local',l='Local',t='txt',ro=True)]),
         tree=True,gid='g_lot',total=False,tools=chips)
     # ---------- etapa 5 · contagens (cegas) ----------
-    g_cnt=grid([dict(k='inv',l='Contagem'),dict(k='lote',l='Item · lote',w=280),dict(k='local',l='Local'),dict(k='sis',l='Sistema na data de corte',t='num',a='r'),
+    g_cnt=grid([dict(k='inv',l='Contagem'),dict(k='aj',l='Ajuste'),dict(k='prod',l='Item',w=160),dict(k='lote',l='Lote'),dict(k='local',l='Local'),dict(k='sis',l='Sistema na data de corte',t='num',a='r'),
                 dict(k='cont',l='Contado',t='num',a='r'),dict(k='dif',l='Diferença',t='num',a='r'),dict(k='sit',l='Situação',w=230),dict(k='acao',l='Ação',w=120)],
         [],edit=dict(m='form',title='Contagem',newTitle='Nova contagem',sub='',
             fields=[dict(k='lote',l='Item · lote',t='sel',opts=[],req=True),dict(k='cont',l='Quantidade contada',t='num',req=True,min=0),
@@ -113,8 +118,8 @@ def build():
                     dict(k='causa',l='Causa da diferença',t='area',help='Obrigatória para aprovar o ajuste quando houver diferença.')]),
         gid='g_cnt',total=False,qf=dict(k='sit',cut=' · '),tools=f'<sc-if value="{H("cnt_add")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("g_cnt_new")}" style="{_MINI}">+ Nova contagem</button></sc-if>')
     # ---------- etapa 6 · movimentos (trilha do cenário) ----------
-    g_mov=grid([dict(k='hora',l='Hora',w=70),dict(k='tipo',l='Movimento',w=170),dict(k='doc',l='Documento'),dict(k='item',l='Item · lote',w=220),
-                dict(k='qtd',l='Quantidade',a='r'),dict(k='quem',l='Quem',w=150),dict(k='orig',l='Origem',w=120)],
+    g_mov=grid([dict(k='hora',l='Hora',w=70),dict(k='mid',l='Registro'),dict(k='tipo',l='Movimento',w=150),dict(k='cond',l='Condição'),dict(k='doc',l='Documento'),dict(k='os',l='O.S.'),
+                dict(k='item',l='Item',w=180),dict(k='lote',l='Lote'),dict(k='qtd',l='Quantidade',t='num',a='r'),dict(k='quem',l='Quem',w=150),dict(k='orig',l='Origem',w=90),dict(k='sinal',l='Sinal do app')],
         [],edit=dict(m='origin',title='Movimento',fields=[dict(k='tipo',l='Movimento',t='txt',ro=True),dict(k='quem',l='Quem',t='txt',ro=True)]),
         gid='g_mov',total=False,qf=dict(k='tipo',cut=' · ',todas='Todos'))
     # ---------- JS: cenário compartilhado + processo ----------
@@ -150,6 +155,11 @@ function eq(n,un){ n=Number(n)||0; const d=Math.abs(n-Math.round(n))<1e-6?0:(Mat
 function esig(n,un){ return (n>0?'+':(n<0?'−':''))+eq(Math.abs(n),un); }
 function eblank(x){ return x===null||x===undefined||String(x).trim()===''; }
 function elotId(s){ return String(s||'').split(' · ')[0].trim(); }
+// datas tipadas (TABELAS-FOCO): ISO no valor (ordena), dd/mm/aaaa ou mm/aaaa no texto; "previsto 24/09" usa o ano de hoje
+function eiso(s){ const t=String(s||'').replace(/^previsto /,'').replace(/ \(previsto\)$/,'').trim(); let m=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(t); if(m) return m[3]+'-'+m[2]+'-'+m[1];
+  m=/^(\d{2})\/(\d{2})$/.exec(t); return m?String(E2.hoje).split('/')[2]+'-'+m[2]+'-'+m[1]:''; }
+function edmy(iso){ const a=String(iso||'').split('-'); return a.length===3?a[2]+'/'+a[1]+'/'+a[0]:'—'; }
+function eym(s){ const m=/^(\d{2})\/(\d{4})$/.exec(String(s||'')); return m?m[2]+'-'+m[1]:''; }
 function eval_(s){ const m=/^(\d{2})\/(\d{4})$/.exec(String(s||'')); return m?Number(m[2])*100+Number(m[1]):999999; }
 function ehojeYM(){ const a=String(E2.hoje).split('/'); return Number(a[2])*100+Number(a[1]); }
 function ereqN(id){ return Number(String(id||'').replace(/\D/g,''))||0; }
@@ -353,10 +363,12 @@ function elotRow(c,l,ask,INV){ const un=l.un; const venc=evenc(l);
   const mv=(c.movs||[]).filter(m=>m.prod===l.prod&&m.lote===l.lote).map(m=>({t:m.at+' · '+emovTxt(m)}));
   const pend=INV.filter(x=>x.key===l.key&&econtou(x)&&Math.abs(x.cont-x.sis)>1e-9&&!(eajuste(c,x)&&eajuste(c,x).estado==='Aprovado')).map(x=>({t:'Ajuste '+x.id+' '+esig(x.cont-x.sis,un)+' aguardando aprovação · não aplicado ao saldo'}));
   // lote vencido não volta ao disponível: sem "Liberar após inspeção"
-  const blq=l.quarentena>1e-9?[{k:'chip',t:eq(l.quarentena,un),c:'yellow'}].concat(venc?[{k:'mut',t:'vencido: não volta ao disponível'}]:(ask===l.key?[{k:'act',t:'Confirmar liberação',fn:'libok:'+l.key},{k:'act',t:'Manter',fn:'libno:x'}]:[{k:'act',t:'Liberar após inspeção',fn:'libq:'+l.key}])):[{k:'mut',t:'—'}];
-  return {id:'L|'+l.key,ro:true,v:{nome:l.lote,local:l.local,fis:l.fisico,res:l.reservado,blq:l.quarentena,disp:cenDisp(l),cust:'',val:l.validade},s:{nome:l.lote+' '+l.prod},
-    p:{fis:[{k:'txt',t:eq(l.fisico,un)}],res:l.reservado>1e-9?[{k:'txt',t:eq(l.reservado,un)}]:[{k:'mut',t:'—'}],blq,disp:[{k:'b',t:eq(cenDisp(l),un)}],cust:[{k:'mut',t:''}],
-       val:venc?[{k:'chip',t:'Vencido · '+l.validade,c:'red'}]:[{k:'txt',t:l.validade||'—'}]},
+  const blq=l.quarentena>1e-9?[{k:'chip',t:eq(l.quarentena,un),c:'yellow'}].concat(venc?[]:(ask===l.key?[{k:'act',t:'Confirmar liberação',fn:'libok:'+l.key},{k:'act',t:'Manter',fn:'libno:x'}]:[{k:'act',t:'Liberar após inspeção',fn:'libq:'+l.key}])):[{k:'mut',t:'—'}];
+  return {id:'L|'+l.key,ro:true,v:{nome:l.lote,prod:l.prod,un,local:l.local,fis:l.fisico,res:l.reservado,blq:l.quarentena,disp:cenDisp(l),expo:'',cust:'',cos:'',val:l.validade,vali:eym(l.validade),sitl:(venc?'Vencido':(l.quarentena>1e-9?'Em quarentena':'Disponível'))},
+    s:{nome:l.lote,prod:l.prod,un,vali:(l.validade&&l.validade!=='—'?l.validade:''),sitl:(venc?'Vencido':(l.quarentena>1e-9?'Em quarentena':'Disponível'))},
+    p:{prod:[{k:'mut',t:l.prod}],fis:[{k:'txt',t:eq(l.fisico,un)}],res:l.reservado>1e-9?[{k:'txt',t:eq(l.reservado,un)}]:[{k:'mut',t:'—'}],blq,disp:[{k:'b',t:eq(cenDisp(l),un)}],expo:[{k:'mut',t:''}],cust:[{k:'mut',t:''}],cos:[{k:'mut',t:''}],
+       vali:[{k:(l.validade&&l.validade!=='—')?'txt':'mut',t:l.validade||'—'}],
+       sitl:[venc?{k:'chip',t:'Vencido',c:'red'}:(l.quarentena>1e-9?{k:'chip',t:'Em quarentena',c:'yellow'}:{k:'txt',t:'Disponível'})].concat(venc?[{k:'mut',t:'não volta ao disponível'}]:[])},
     o:(mv.length?mv:[{t:'Sem movimentos desde o início da demonstração.'}]).concat(pend)}; }
 
 function PREVALS(self,v){
@@ -367,14 +379,19 @@ function PREVALS(self,v){
   const RC=erecs(C), PD=epeds(C); let npend=0;
   GR('g_rec').rows=RC.map(x=>{ const ok=!!x.ok; if(!ok) npend++; const p=PD.find(y=>y.id===elotId(x.ped)); const quar=ok?(Number(x.quar)||0):0;
     const l=C.lotes[x.item+'|'+x.lote]; const vl=x.val&&x.val!=='—'?x.val:'';
-    const r={id:x.id,ro:ok,v:{nf:x.nf,ped:x.ped,item:x.item,qtd_nf:x.qtd_nf,conf:ok?x.conf:'',apto:ok?x.apto:'',quar:ok?x.quar:'',lote:x.lote,val:vl,local:x.local,div:x.div||'Sem divergência',obs:x.obs||''},s:{},p:{}};
-    r.p.nf=[{k:'b',t:x.nf},{k:'mut',t:ok&&x.hoje?'conferida hoje':String(x.data||'').replace(/\/2026$/,'')}]; r.s.nf=x.nf;
-    r.p.ped=p?[{k:'b',t:p.id},{k:'mut',t:p.forn},{k:'link',t:'Ver pedido',h:'CMP.dc.html'}]:[{k:'mut',t:'—'}]; r.s.ped=p?p.id:'';
-    r.p.item=[{k:'txt',t:x.item},{k:'mut',t:x.lote+(vl?' · validade '+vl:'')}]; r.s.item=x.item+' '+x.lote;
-    let sit; if(!ok) sit={k:'chip',t:'A conferir',c:'yellow'}; else if(quar>0&&l&&l.quarentena>1e-9&&evenc(l)) sit={k:'chip',t:'Vencido',c:'red'};
+    const prev=/previsto/.test(String(x.data||'')); const dt=eiso(x.data); const cf=ok&&x.hoje?eiso(E2.hoje):'';   // data da nota (ou prevista) × data da conferência
+    const r={id:x.id,ro:ok,v:{nf:x.nf,data:dt,cfd:cf,vali:eym(vl),ped:x.ped,forn:p?p.forn:'',item:x.item,un:x.un||'kg',qtd_nf:x.qtd_nf,conf:ok?x.conf:'',apto:ok?x.apto:'',quar:ok?x.quar:'',lote:x.lote,val:vl,local:x.local,div:x.div||'Sem divergência',obs:x.obs||''},s:{},p:{}};
+    r.p.nf=[{k:'b',t:x.nf}]; r.s.nf=x.nf; r.s.data=dt?edmy(dt):''; r.p.data=[{k:dt?'txt':'mut',t:dt?edmy(dt):'—'}];
+    r.s.cfd=cf?edmy(cf):''; r.p.cfd=[{k:cf?'txt':'mut',t:cf?edmy(cf):'—'}];
+    r.p.ped=p?[{k:'b',t:p.id},{k:'link',t:'Ver pedido',h:'CMP.dc.html'}]:[{k:'mut',t:'—'}]; r.s.ped=p?p.id:''; r.s.forn=p?p.forn:''; r.p.forn=[{k:'txt',t:p?p.forn:'—'}];
+    r.p.item=[{k:'txt',t:x.item}]; r.s.item=x.item; r.s.lote=x.lote; r.s.vali=vl; r.p.vali=[{k:vl?'txt':'mut',t:vl||'—'}];
+    ['qtd_nf','conf','apto','quar'].forEach(f=>{ const q=r.v[f]; r.p[f]=(q===''||q===null||q===undefined)?[{k:'mut',t:'—'}]:[{k:'txt',t:eq(q,r.v.un)}]; });
+    // nota que ainda não chegou fica "Prevista"; conferida com lote vencido fica "Vencido" (não volta ao disponível)
+    let sit; if(!ok) sit=prev?{k:'chip',t:'Prevista',c:'gray'}:{k:'chip',t:'A conferir',c:'yellow'};
+    else if(quar>0&&l&&l.quarentena>1e-9&&evenc(l)) sit={k:'chip',t:'Vencido',c:'red'};
     else if(quar>0&&l&&l.quarentena>1e-9) sit={k:'chip',t:'Aguarda laudo',c:'yellow'};
     else if(quar>0) sit={k:'chip',t:'Quarentena liberada',c:'green'}; else sit={k:'chip',t:'Conferido',c:'green'};
-    r.p.sit=[sit].concat(ok&&x.div&&x.div!=='Sem divergência'?[{k:'chip',t:'Divergência',c:'red'},{k:'mut',t:x.div}]:[]); r.s.sit=sit.t+(ok&&x.div&&x.div!=='Sem divergência'?' · Divergência: '+x.div:''); return r; });
+    const dv=ok&&x.div&&x.div!=='Sem divergência'; r.p.sit=[sit]; r.s.sit=sit.t; r.v.divg=dv?x.div:''; r.p.divg=dv?[{k:'chip',t:x.div,c:'red'}]:[{k:'mut',t:'—'}]; r.s.divg=dv?x.div:''; return r; });
   const fmR=g2st(self,'g_rec').fm; const fV=GR('g_rec').edit.fields.find(f=>f.k==='val');
   if(fmR){ const fe=efert(fmR.draft.ped); fV.ro=fe; fV.help=fe?'Fertilizantes e corretivos: sem validade de lote.':'Mês/ano (ex.: 06/2027). Lote vencido entra todo em quarentena.'; }
   // ---- etapa 2: entregas por O.S. ----
@@ -382,47 +399,49 @@ function PREVALS(self,v){
   const eord=x=>(x.pode&&x.l&&x.pend>1e-9)?0:(x.pode?1:2);
   GR('g_ent').rows=IT.slice().sort((a,b)=>(eord(a)-eord(b))||(ereqN(a.rid)-ereqN(b.rid))).map(x=>{ const u=x.un, it=x.it, o=x.o; const ag=it.custodia>1e-9&&!it.confirmado;
     if(eord(x)===0) nent++; if(ag) nag++; if(x.bloq) nimp++; else if(!x.pode) ncons++;
-    const r={id:x.id,ro:eord(x)!==0,v:{req:x.rid,fase:o.etapa||'',item:it.prod,sol:it.solicitado,ent:it.entregue,pend:x.pend,
+    const r={id:x.id,ro:eord(x)!==0,v:{req:x.rid,os:x.os,un:u,emb:it.emb||'',fase:o.etapa||'',item:it.prod,sol:it.solicitado,ent:it.entregue,pend:x.pend,
       lote:x.l?(x.l.lote+' · '+x.l.local+(x.l.validade&&x.l.validade!=='—'?' · validade '+x.l.validade:'')):'Sem lote no estoque',qtd:x.pend>1e-9?x.pend:'',quem:x.quem},s:{},p:{}};
-    r.p.req=[{k:'b',t:x.rid},{k:'link',t:x.os,h:'OS.dc.html'}]; r.s.req=x.rid+' '+x.os;
+    r.p.req=[{k:'b',t:x.rid}]; r.s.req=x.rid; r.p.os=[{k:'link',t:x.os,h:'OS.dc.html'}]; r.s.os=x.os;
     r.p.fase=[{k:'chip',t:o.etapa||'—',c:FCOR[o.etapa]||'gray'}]; r.s.fase=o.etapa||'';
-    r.p.item=[{k:'txt',t:it.prod},{k:'mut',t:(x.l?'lote '+x.l.lote:'sem lote')+(it.emb?' · '+it.emb:'')}]; r.s.item=it.prod+' '+(x.l?x.l.lote:'')+' '+(it.emb||'');
+    r.p.item=[{k:'txt',t:it.prod}]; r.s.item=it.prod; r.s.lote=x.l?x.l.lote:'sem lote'; r.p.lote=[{k:x.l?'txt':'mut',t:x.l?x.l.lote:'sem lote'}];
+    r.s.emb=it.emb||''; r.p.emb=[{k:it.emb?'txt':'mut',t:it.emb||'—'}];
     r.p.sol=[{k:'txt',t:eq(it.solicitado,u)}]; r.p.ent=[{k:'txt',t:eq(it.entregue,u)}];
-    const pk=x.pode?epk(x.pend,it.emb):'';
-    r.p.pend=x.pend>1e-9?[x.pode?{k:'b',t:eq(x.pend,u)}:{k:'txt',t:eq(x.pend,u)}].concat(pk?[{k:'mut',t:pk}]:[]):[{k:'mut',t:'—'}];
+    const pk=x.pode?epk(x.pend,it.emb):''; r.v.pk=pk; r.s.pk=pk; r.p.pk=pk?[{k:'txt',t:pk}]:[{k:'mut',t:'—'}];
+    r.p.pend=x.pend>1e-9?[x.pode?{k:'b',t:eq(x.pend,u)}:{k:'txt',t:eq(x.pend,u)}]:[{k:'mut',t:'—'}];
     let sit,sub='';
     if(x.bloq){ sit={k:'chip',t:'Bloqueada',c:'red'}; sub=x.bloq; }
-    else if(!x.pode){ sit={k:'chip',t:'O.S. '+(EFASE[o.etapa]||String(o.etapa||'').toLowerCase())+' · sem nova entrega',c:'gray'}; sub=(o.etapa==='A liberar'?x.motivo:''); }
+    else if(!x.pode){ sit={k:'chip',t:'O.S. '+(EFASE[o.etapa]||String(o.etapa||'').toLowerCase())+' · sem nova entrega',c:'gray'}; sub=(o.etapa==='A liberar'?x.motivo:(x.pend>1e-9?econta(x):'')); }   // saldo sem nova entrega: a conta fica à vista (Entregue inclui o que voltou)
     else if(!x.l) sit={k:'chip',t:'Sem lote no estoque',c:'red'};
     else if(x.pend<=1e-9) sit={k:'chip',t:'Entrega completa',c:'green'};
     else if(it.entregue>0) sit={k:'chip',t:'Parcial',c:'yellow'}; else sit={k:'chip',t:'A entregar',c:'gray'};
     if(x.pode&&x.l&&x.pend>1e-9) sub=(x.livre<x.pend-1e-9?'lote cobre só '+eq(x.livre,u)+' dos '+eq(x.pend,u):(it.entregue>0?'faltam '+eq(x.pend,u):''));
     const tot=((o.ins||[]).find(i=>i.p===it.prod)||{}).tot; if(x.pode&&tot&&tot>it.solicitado+1e-9) sub=(sub?sub+' · ':'')+'O.S. pede '+eq(tot,u)+', reservado '+eq(it.solicitado,u);
-    r.p.sit=[sit].concat(ag?[{k:'chip',t:'Aguardando confirmação no app',c:'yellow'}]:[]).concat(x.selo?[{k:'chip',t:x.selo,c:'yellow'}]:[]).concat(sub?[{k:'mut',t:sub}]:[]);
-    r.s.sit=sit.t+(ag?' · Aguardando confirmação no app':'')+(sub?' · '+sub:''); return r; });
+    // situação (chips do estado) e detalhe (o porquê, com quantidades) em colunas próprias
+    r.p.sit=[sit].concat(ag?[{k:'chip',t:'Aguardando confirmação no app',c:'yellow'}]:[]).concat(x.selo?[{k:'chip',t:x.selo,c:'yellow'}]:[]);
+    r.s.sit=sit.t+(ag?' · Aguardando confirmação no app':''); r.v.det=sub; r.s.det=sub; r.p.det=sub?[{k:'txt',t:sub}]:[{k:'mut',t:'—'}]; return r; });
   const fmE=g2st(self,'g_ent').fm; if(fmE&&fmE.rid){ const x=IT.find(y=>y.id===fmE.rid); if(x){ const fs=GR('g_ent').edit.fields; const pk=epk(x.pend,x.it.emb);
       fs[1].u=x.un; fs[1].help='A entregar: '+eq(x.pend,x.un)+' = '+econta(x)+'.'+(pk?' Em '+x.it.emb+': '+pk+'.':''); } }
   // ---- etapa 3: custódia e devoluções ----
   const custs=[];
   GR('g_dev').rows=IT.filter(x=>x.it.entregue>1e-9||x.it.custodia>1e-9).sort((a,b)=>((b.it.custodia>1e-9)-(a.it.custodia>1e-9))||(ereqN(a.rid)-ereqN(b.rid))).map(x=>{
     const u=x.un, it=x.it, o=x.o; const cu=it.custodia>1e-9; if(cu) custs.push(x);
-    const r={id:x.id,ro:!cu||x.sinal||!!x.cf,v:{req:x.rid,item:it.prod,ent:it.entregue,cons:it.consumido,dev:it.devolvido,cust:it.custodia,qtd:cu?it.custodia:'',cond:E2.conds[0],obs:''},s:{},p:{}};
-    r.p.req=[{k:'b',t:x.rid},{k:'link',t:x.os,h:'OS.dc.html'}]; r.s.req=x.rid+' '+x.os;
-    r.p.item=[{k:'txt',t:it.prod},{k:'mut',t:'lote '+it.lote}]; r.s.item=it.prod+' '+it.lote;
+    const r={id:x.id,ro:!cu||x.sinal||!!x.cf,v:{req:x.rid,os:x.os,item:it.prod,lote:it.lote,un:u,com:cu?x.quem:'',ent:it.entregue,cons:it.consumido,dev:it.devolvido,cust:it.custodia,qtd:cu?it.custodia:'',cond:E2.conds[0],obs:''},s:{},p:{}};
+    r.p.req=[{k:'b',t:x.rid}]; r.s.req=x.rid; r.p.os=[{k:'link',t:x.os,h:'OS.dc.html'}]; r.s.os=x.os;
+    r.p.item=[{k:'txt',t:it.prod}]; r.s.item=it.prod; r.s.lote=it.lote;
     r.p.ent=[{k:'txt',t:eq(it.entregue,u)}]; r.p.cons=[{k:'txt',t:eq(it.consumido,u)}]; r.p.dev=[{k:'txt',t:eq(it.devolvido,u)}];
-    r.p.cust=cu?[{k:'b',t:eq(it.custodia,u)},{k:'mut',t:'com '+x.quem}]:[{k:'mut',t:'—'}];
+    r.p.cust=cu?[{k:'b',t:eq(it.custodia,u)}]:[{k:'mut',t:'—'}]; r.s.com=cu?x.quem:''; r.p.com=cu?[{k:'txt',t:x.quem}]:[{k:'mut',t:'—'}];
     let pe=''; try{ pe=cenPodeEncerrar(C,x.os); }catch(err){ pe=''; }
     const cOS=IT.filter(y=>y.os===x.os&&y.it.custodia>1e-9).map(y=>eq(y.it.custodia,y.un)).join(' + ');
     let enc,es='';
-    if(x.cf){ r.p.enc=ecfCel(x.cf,C,self.state.est_cfask); r.s.enc='Consumo em conferência '+x.cf.id; return r; }
+    if(x.cf){ r.p.enc=ecfCel(x.cf,C,self.state.est_cfask); r.s.enc='Consumo em conferência '+x.cf.id; r.p.det=[{k:'mut',t:'—'}]; r.s.det=''; return r; }
     if(o.etapa==='Em conferência'){ if(pe){ enc={k:'chip',t:'Bloqueado',c:'red'}; es=cOS?cOS+' em custódia':pe; } else { enc={k:'chip',t:'Pode encerrar',c:'green'}; es='custódia zero'; } }
     else if(cu&&x.sinal){ enc={k:'chip',t:'Aguardando sinal do app',c:'yellow'}; es='consumo no aparelho · receba a sobra depois do envio'; }
     else if(cu){ enc={k:'chip',t:'Em uso na O.S.',c:'gray'}; es='O.S. '+(EFASE[o.etapa]||String(o.etapa||'').toLowerCase()); }
     else enc={k:'chip',t:'Sem custódia',c:'gray'};
-    r.p.enc=[enc].concat(es?[{k:'mut',t:es}]:[]); r.s.enc=enc.t+' '+es; return r; });
+    r.p.enc=[enc]; r.s.enc=enc.t; r.v.det=es; r.s.det=es; r.p.det=es?[{k:'txt',t:es}]:[{k:'mut',t:'—'}]; return r; });
   const CFS=cenConfAbertas(C); CFS.filter(k=>!IT.some(x=>x.rid===k.req&&x.it.prod===k.prod)).forEach(k=>GR('g_dev').rows.push({id:'CF|'+k.id,ro:true,
-    v:{req:k.req||'—',item:k.prod,ent:0,cons:0,dev:0,cust:0,qtd:'',cond:E2.conds[0],obs:''},s:{req:(k.req||'')+' '+k.os,item:k.prod,enc:'Consumo em conferência '+k.id},
-    p:{req:[{k:'b',t:k.req||'sem requisição'},{k:'link',t:k.os,h:'OS.dc.html'}],item:[{k:'txt',t:k.prod},{k:'mut',t:'fora da requisição'}],ent:[{k:'mut',t:'—'}],cons:[{k:'mut',t:'—'}],dev:[{k:'mut',t:'—'}],cust:[{k:'mut',t:'—'}],enc:ecfCel(k,C,self.state.est_cfask)}}));
+    v:{req:k.req||'—',os:k.os,item:k.prod,lote:'',un:k.un||'',com:'',ent:0,cons:0,dev:0,cust:0,qtd:'',cond:E2.conds[0],obs:''},s:{req:(k.req||''),os:k.os,item:k.prod,lote:'fora da requisição',enc:'Consumo em conferência '+k.id,det:''},
+    p:{req:[{k:'b',t:k.req||'sem requisição'}],os:[{k:'link',t:k.os,h:'OS.dc.html'}],item:[{k:'txt',t:k.prod}],lote:[{k:'mut',t:'fora da requisição'}],ent:[{k:'mut',t:'—'}],cons:[{k:'mut',t:'—'}],dev:[{k:'mut',t:'—'}],cust:[{k:'mut',t:'—'}],com:[{k:'mut',t:'—'}],det:[{k:'mut',t:'—'}],enc:ecfCel(k,C,self.state.est_cfask)}}));
   const fmD=g2st(self,'g_dev').fm; if(fmD&&fmD.rid){ const x=IT.find(y=>y.id===fmD.rid); if(x){ const fs=GR('g_dev').edit.fields; fs[0].u=x.un; fs[0].help='Em custódia: '+eq(x.it.custodia,x.un)+' com '+x.quem+'.'; } }
   // ---- etapa 4: saldos por lote e local ----
   const loc=self.state.est_loc||''; const LS=elotes(C).filter(l=>!loc||l.local===loc); const itens=[]; LS.forEach(l=>{ if(itens.indexOf(l.prod)<0) itens.push(l.prod); });
@@ -437,21 +456,22 @@ function PREVALS(self,v){
     const o=[{t:'Disponível = físico − reservado − bloqueado = '+eq(fis,un)+' − '+eq(res,un)+' − '+eq(blq,un)+' = '+eq(dp,un)}]
       .concat(cr.map(x=>({t:'Em custódia (fora do depósito, não soma no físico): '+x.rid+' · '+x.os+' · '+eq(x.it.custodia,un)+' com '+x.quem,h:'OS.dc.html'})))
       .concat(ex.q>1e-9?[{t:'Em conferência (exposição, fora do saldo até a decisão): '+ex.ids.join(', ')+' · '+eq(ex.q,un)+' além da custódia'}]:[]);
-    return {id,v:{nome:pr,local:locs,fis,res,blq,disp:dp,cust:ck,val:''},s:{nome:pr,local:locs},
-      p:{nome:[{k:'b',t:pr},{k:'mut',t:ls.length+(ls.length>1?' lotes':' lote')}],fis:[{k:'txt',t:eq(fis,un)}],res:res>1e-9?[{k:'txt',t:eq(res,un)}]:[{k:'mut',t:'—'}],
-         blq:blq>1e-9?[{k:'chip',t:eq(blq,un),c:'yellow'}]:[{k:'mut',t:'—'}],disp:[{k:'b',t:eq(dp,un)}].concat(ex.q>1e-9?[{k:'mut',t:eq(ex.q,un)+' em conferência ('+ex.ids.join(', ')+')'}]:[]),
-         cust:ck>1e-9?[{k:'txt',t:eq(ck,un)},{k:'mut',t:cr.map(x=>x.os).join(', ')}]:[{k:'mut',t:'—'}],val:[{k:'mut',t:''}]},o,
+    const cos=cr.map(x=>x.os).join(', ');
+    return {id,v:{nome:pr,prod:pr,un,local:locs,fis,res,blq,disp:dp,expo:ex.q>1e-9?ex.q:'',cust:ck,cos,val:''},s:{nome:pr,prod:pr,local:locs,un,cos},
+      p:{nome:[{k:'b',t:pr},{k:'mut',t:ls.length+(ls.length>1?' lotes':' lote')}],prod:[{k:'mut',t:pr}],fis:[{k:'txt',t:eq(fis,un)}],res:res>1e-9?[{k:'txt',t:eq(res,un)}]:[{k:'mut',t:'—'}],
+         blq:blq>1e-9?[{k:'chip',t:eq(blq,un),c:'yellow'}]:[{k:'mut',t:'—'}],disp:[{k:'b',t:eq(dp,un)}],expo:ex.q>1e-9?[{k:'txt',t:eq(ex.q,un)}]:[{k:'mut',t:'—'}],
+         cust:ck>1e-9?[{k:'txt',t:eq(ck,un)}]:[{k:'mut',t:'—'}],cos:cos?[{k:'txt',t:cos}]:[{k:'mut',t:'—'}],vali:[{k:'mut',t:''}],sitl:[{k:'mut',t:''}]},o,
       kids:ls.map(l=>elotRow(C,l,ask,INV))}; });
   GR('g_lot').x0=x0;
   // ---- etapa 5: contagens ----
   let nacontar=0,naprov=0;
   const cntOpts=elotes(C).map(elotLbl);
   GR('g_cnt').rows=INV.map(rec=>{ const l=C.lotes[rec.key]; const un=l?l.un:''; const has=econtou(rec); const d=has?rec.cont-rec.sis:null; const aj=eajuste(C,rec); const apr=!!(aj&&aj.estado==='Aprovado');
-    const r={id:rec.id,ro:apr||(d!==null&&Math.abs(d)<1e-9),v:{inv:rec.id,lote:l?elotLbl(l):rec.key,local:l?l.local:'',sis:has?rec.sis:'',cont:has?rec.cont:'',dif:d===null?'':d,contador:rec.contador||E2.contadores[0],causa:rec.causa||''},s:{},p:{}};
+    const r={id:rec.id,ro:apr||(d!==null&&Math.abs(d)<1e-9),v:{inv:rec.id,aj:aj?aj.id:'',prod:l?l.prod:'',un,lote:l?elotLbl(l):rec.key,local:l?l.local:'',sis:has?rec.sis:'',cont:has?rec.cont:'',dif:d===null?'':d,contador:rec.contador||E2.contadores[0],causa:rec.causa||''},s:{},p:{}};
     // contagens anteriores ficam na origem da linha, visíveis só depois da nova contagem (a recontagem também é cega)
     r.o=has?(rec.hist||[]).map(h=>({t:'Contagem anterior: '+eq(h.cont,un)+' por '+h.contador+' · diferença '+esig(h.dif,un)+(h.causa?' · causa: '+h.causa:'')})):[];
-    r.p.inv=[{k:'b',t:rec.id}].concat(aj?[{k:'mut',t:aj.id}]:[]); r.s.inv=rec.id;
-    r.p.lote=[{k:'txt',t:l?l.prod:''},{k:'mut',t:l?l.lote:''}]; r.s.lote=r.v.lote;
+    r.p.inv=[{k:'b',t:rec.id}]; r.s.inv=rec.id; r.s.aj=aj?aj.id:''; r.p.aj=aj?[{k:'txt',t:aj.id}]:[{k:'mut',t:'—'}];
+    r.p.prod=[{k:'txt',t:l?l.prod:''}]; r.s.prod=l?l.prod:''; r.p.lote=[{k:'txt',t:l?l.lote:''}]; r.s.lote=l?l.lote:'';
     r.p.sis=has?[{k:'txt',t:eq(rec.sis,un)}]:[{k:'mut',t:'oculto até contar'}]; r.s.sis=has?eq(rec.sis,un):'oculto até contar';
     r.p.cont=has?[{k:'txt',t:eq(rec.cont,un)}]:[{k:'mut',t:'a contar'}];
     r.p.dif=d===null?[{k:'mut',t:'—'}]:[{k:'chip',t:(Math.abs(d)<1e-9?'0':esig(d,un)),c:(Math.abs(d)<1e-9?'green':'red')}];
@@ -470,18 +490,34 @@ function PREVALS(self,v){
     // itens do app (confirmação e consumo): um por linha, com a quantidade e a unidade na coluna Quantidade
     const li=APPI[m.id]||null; const q=li?li.map(x=>eq(x.qtd,x.un)).join(', '):emovQtd(m); const tp=MTIPO[m.tipo]||m.tipo;
     const dc=emovDoc(C,m,AJU);
-    const r={id:m.id,v:{hora:m.at,tipo:tp,doc:m.req||(dc&&dc.doc)||'',item:m.prod||'',qtd:q,quem:m.quem||'',orig:app?'App':'Web'},s:{},p:{}};
-    r.p.hora=[{k:'b',t:m.at||''},{k:'mut',t:m.id}]; r.s.hora=(m.at||'')+' '+m.id;
-    r.p.tipo=[{k:'txt',t:tp}].concat(m.tipo==='devolucao'?[{k:'mut',t:m.apto?'apta':'bloqueada'}]:[]).concat(m.tipo==='recebimento-nf'?[{k:'mut',t:m.apto?'apto':'em quarentena'}]:[]); r.s.tipo=tp;
-    r.p.doc=m.req?[{k:'b',t:m.req}].concat(m.os?[{k:'link',t:m.os,h:'OS.dc.html'}]:[]):(dc?[{k:'b',t:dc.doc}].concat(dc.aj?[{k:'mut',t:dc.aj}]:[]):(m.os?[{k:'link',t:m.os,h:'OS.dc.html'}]:[{k:'mut',t:'—'}])); r.s.doc=[m.req,m.os,dc&&dc.doc,dc&&dc.aj].filter(Boolean).join(' ');
+    // TABELAS-FOCO: registro, condição, documento, O.S., item, lote, quantidade, unidade e sinal em colunas próprias (itens do app: um por linha dentro da célula)
+    const cond=m.tipo==='devolucao'?(m.apto?'apta':'bloqueada'):(m.tipo==='recebimento-nf'?(m.apto?'apto':'em quarentena'):'');
+    const r={id:m.id,v:{hora:m.at,mid:m.id,tipo:tp,cond,doc:m.req||(dc&&dc.doc)||'',os:m.os||'',item:m.prod||'',lote:m.lote||'',qtd:'',un:'',quem:m.quem||'',orig:app?'App':'Web',sinal:sem?'Aguardando sinal':''},s:{},p:{}};
+    r.p.hora=[{k:'b',t:m.at||''}]; r.s.hora=m.at||''; r.s.mid=m.id; r.s.cond=cond; r.p.cond=cond?[{k:'txt',t:cond}]:[{k:'mut',t:'—'}];
+    r.p.tipo=[{k:'txt',t:tp}]; r.s.tipo=tp;
+    const dd=m.req||(dc&&dc.doc)||''; r.p.doc=dd?[{k:'b',t:dd}].concat(!m.req&&dc&&dc.aj?[{k:'mut',t:dc.aj}]:[]):[{k:'mut',t:'—'}]; r.s.doc=[dd,!m.req&&dc&&dc.aj].filter(Boolean).join(' ');
+    r.p.os=m.os?[{k:'link',t:m.os,h:'OS.dc.html'}]:[{k:'mut',t:'—'}]; r.s.os=m.os||'';
     const lin=(a)=>a.reduce((o,p,i)=>o.concat(i?[{k:'br'},p]:[p]),[]);
-    r.p.item=m.prod?[{k:'txt',t:m.prod},{k:'mut',t:'lote '+m.lote}]:(li&&li.length?lin(li.map(x=>({k:'txt',t:x.prod}))):(m.det?[{k:'mut',t:m.det}]:[{k:'mut',t:'—'}]));
+    r.p.lote=m.lote?[{k:'txt',t:m.lote}]:[{k:'mut',t:'—'}]; r.s.lote=m.lote||'';
+    r.p.item=m.prod?[{k:'txt',t:m.prod}]:(li&&li.length?lin(li.map(x=>({k:'txt',t:x.prod}))):(m.det?[{k:'mut',t:m.det}]:[{k:'mut',t:'—'}]));
     if(m.conf&&m.origem==='app'){ const ks=(C.confs||[]).filter(k=>m.conf.indexOf(k.id)>=0); r.p.item=(li&&li.length?r.p.item.concat([{k:'br'}]):[]).concat(ks.map(k=>({k:'mut',t:k.prod+' '+eq(k.relatado,k.un)+' em conferência ('+k.id+')'}))); }
     r.s.item=m.prod||(li?li.map(x=>x.prod).join(', '):'')||m.det||'';
-    r.p.qtd=li&&li.length?lin(li.map(x=>({k:'txt',t:eq(x.qtd,x.un)}))):(q?[{k:'txt',t:q}]:[{k:'mut',t:'—'}]); r.s.qtd=q;
-    r.p.orig=[{k:'chip',t:app?'App':'Web',c:app?'blue':'gray'}].concat(sem?[{k:'chip',t:'Aguardando sinal',c:'yellow'}]:[]); r.s.orig=(app?'App':'Web')+(sem?' Aguardando sinal':'');
+    // quantidade com a unidade junto (decisão do proprietário, 05/10/2026); v.qtd numérico ordena; vários itens do app → uma linha por item
+    if(li&&li.length){ r.p.qtd=lin(li.map(x=>({k:'txt',t:eq(x.qtd,x.un)}))); r.s.qtd=li.map(x=>eq(x.qtd,x.un)).join(', ');
+      // valor para ordenar: a soma quando todos os itens têm a mesma unidade; com unidades diferentes não há soma (NaN: vai para o fim)
+      const us=[...new Set(li.map(x=>x.un))]; r.v.qtd=us.length===1?li.reduce((a,x)=>a+(Number(x.qtd)||0),0):NaN;
+      if(li.length===1) r.v.qtd=li[0].qtd; }
+    else { const mq=String(q||'').match(/^([+−-]?[\d.]+(?:,\d+)?)\s*(.*)$/); if(mq){ const ut=String(mq[2]||'').split(' '), u0=ut[0]||'', resto=ut.slice(1).join(' ');   // "320 L reservados": unidade L, condição reservados
+        r.v.qtd=Number(mq[1].replace(/\./g,'').replace(',','.').replace('−','-').replace('+','')); r.v.un=u0; r.p.qtd=[{k:'txt',t:mq[1]+(u0?' '+u0:'')}]; r.s.qtd=r.p.qtd[0].t;
+        if(resto&&!cond){ r.v.cond=resto; r.s.cond=resto; r.p.cond=[{k:'txt',t:resto}]; } }
+      else { r.p.qtd=q?[{k:'txt',t:q}]:[{k:'mut',t:'—'}]; r.s.qtd=q; } }
+    r.p.orig=[{k:'chip',t:app?'App':'Web',c:app?'blue':'gray'}]; r.s.orig=app?'App':'Web'; r.p.sinal=sem?[{k:'chip',t:'Aguardando sinal',c:'yellow'}]:[{k:'mut',t:'—'}]; r.s.sinal=sem?'Aguardando sinal':'';
     r.o=(m.os?[{t:(m.req?'Requisição '+m.req+' da ':'Ordem ')+m.os,h:'OS.dc.html'}]:[]).concat(sem?[{t:'Registrado no aparelho às '+m.at+'; chega ao servidor quando o app tiver sinal.'}]:[]).concat(m.obs?[{t:'Observação: '+m.obs}]:[]);
     return r; });
+  // filtro e busca das quantidades leem o mesmo texto da célula, com a unidade ("60.000 kg"); a ordenação usa o número (v)
+  const esq=(rows,fs)=>(rows||[]).forEach(r=>{ fs.forEach(f=>{ const c=((r.p||{})[f]||[])[0]; if(c&&(r.s||{})[f]===undefined){ r.s=r.s||{}; r.s[f]=(c.k==='mut'||c.t==='—')?'':c.t; } }); esq(r.kids,fs); });   // '—' na célula = vazio no filtro
+  esq(GR('g_rec').rows,['qtd_nf','conf','apto','quar']); esq(GR('g_ent').rows,['sol','ent','pend']); esq(GR('g_dev').rows,['ent','cons','dev','cust']);
+  esq(GR('g_lot').rows,['fis','res','blq','disp','expo','cust']); esq(GR('g_cnt').rows,['cont','dif']);
   v.mov_tem=GR('g_mov').rows.length>0; v.mov_nada=!v.mov_tem;
   // ---- resumos por etapa ----
   const pdTxt=PD.filter(p=>p.a_entregar>0).map(p=>p.id+' '+eq(p.a_entregar,p.un));

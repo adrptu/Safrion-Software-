@@ -11,6 +11,14 @@ SETV = """((sel,val)=>{const i=document.querySelector(sel); if(!i) return 'sem c
 FIND = """((ts)=>[...document.querySelectorAll('[role=row]')].find(r=>ts.every(t=>r.innerText.indexOf(t)>=0)))"""
 
 
+LEGE = r"""(r=>{ const t=r.closest('[role=table]'); const raw=r.innerText.replace(/\s+/g,' '); if(!t) return raw;
+  const hs=[...t.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴▼▲]/g,'').replace(/\s+/g,' ').trim().replace(/ · \d+$/,'').toUpperCase()); if(hs.indexOf('LOTE')<0&&hs.indexOf('COM QUEM')<0) return raw;
+  const cs=[...r.querySelectorAll('[role=cell]')]; const lotePre=hs.indexOf('REQUISIÇÃO')>=0||hs.indexOf('MOVIMENTO')>=0;
+  return cs.map((c,i)=>{ const v=c.innerText.replace(/\s+/g,' ').trim(); const h=hs[i]||'';
+    if(h==='LOTE'&&lotePre&&v&&v!=='—'&&!/^sem lote|^fora da/.test(v)) return 'lote '+v;
+    if(h==='COM QUEM'&&v&&v!=='—') return 'com '+v; if(h==='VALIDADE'&&v&&v!=='—'&&/^\d/.test(v)) return 'validade '+v; return v; }).filter(x=>x!=='').join(' ').replace(/\s+/g,' '); })"""
+
+
 class Est:
     def __init__(self, copiar=True):
         if copiar:
@@ -39,7 +47,15 @@ class Est:
         r = self.J(f"(()=>{{const r=({FIND})({json.dumps(list(ts))}); if(!r) return 'sem linha'; (r.querySelector('[role=cell] span')||r).click(); return 'ok';}})()"); time.sleep(.4); return r
 
     def rowtxt(self, *ts):
-        return self.J(f"(()=>{{const r=({FIND})({json.dumps(list(ts))}); return r?r.innerText.replace(/\\s+/g,' '):'sem linha';}})()")
+        # TABELAS-FOCO (5983172395): lote, "com quem" e validade têm colunas próprias; o texto da linha recompõe "lote X", "com X" e
+        # "validade MM/AAAA" como antes, para as mesmas asserções valerem (a quantidade já traz a unidade junto: decisão de 05/10/2026)
+        return self.J(f"(()=>{{const r=({FIND})({json.dumps(list(ts))}); return r?({LEGE})(r):'sem linha';}})()")
+
+    def cel(self, linha, col):
+        """Valor de uma coluna (pelo cabeçalho) na linha que contém o texto linha (TABELAS-FOCO: uma variável por coluna)."""
+        return self.J(f"""(()=>{{const r=({FIND})({json.dumps([linha])}); if(!r) return 'sem linha'; const t=r.closest('[role=table]');
+          const hs=[...t.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴▼▲]/g,'').replace(/\\s+/g,' ').trim().replace(/ · \\d+$/,'').toUpperCase());
+          const i=hs.indexOf({json.dumps(col.upper())}); const c=[...r.querySelectorAll('[role=cell]')][i]; return c?c.innerText.replace(/\\s+/g,' ').trim():'sem coluna';}})()""")
 
     def rowbtn(self, ts, b):
         ts = [ts] if isinstance(ts, str) else list(ts)
