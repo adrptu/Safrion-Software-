@@ -240,7 +240,10 @@ function osMerge(b,co,c){ if(!co) return b;
   if(co.etapa==='Canceladas'&&x.insx) o.insx=x.insx;
   // execução com turno no aparelho: o mesmo selo da conferência na lista e no Kanban (o painel e o Mapa dizem "aguardando sinal")
   if(co.etapa==='Em execução'){ o.selos=o.selos.filter(s=>!/^Aguardando sinal/.test(s.t));
-    if((co.ap||[]).some(a=>a.sinc===false)) o.selos=o.selos.concat([{t:'Aguardando sinal do app',c:'yellow'}]); }
+    if((co.ap||[]).some(a=>a.sinc===false)) o.selos=o.selos.concat([{t:'Aguardando sinal do app',c:'yellow'}]);
+    const fz=((co.saldo||0)-osApPend(co)>0.001)&&cenIniFalta(co,r);   // componente esgotado com área a fazer (regra única de início)
+    if(fz&&fz.k==='rever'){ o.selos=o.selos.concat([{t:'Insumo esgotado · '+fz.its.map(i=>i.prod).join(', '),c:'red'}]); o.dono=OS_AGRO; o.prazo='decidir a área restante';
+      o.esg={acao:'apontar',t:'Apontar bloqueado: '+fz.t,q:fz.q}; } }
   // conferência: o encerramento depende do cenário (apontamento aguardando sinal ou sobra em custódia)
   if(co.etapa==='Em conferência'){ o.encM=cenPodeEncerrar(c,co.id);
     if(!o.encM){ o.selos=o.selos.filter(s=>!/Sobras a receber|Aguardando sinal/i.test(s.t)); if(!mine){ o.cond='Apontamentos enviados e nada em custódia. Próximo passo: conferir e encerrar.'; o.dono=o.resp; o.prazo='conferir e encerrar'; } }
@@ -382,14 +385,9 @@ function osUsoAtencao(c,id){ const co=c.ordens[id], al=[]; if(co) osUsoErro(c,co
 function osc_reqId(c){ const n=Object.keys(c.reqs||{}).reduce((m,k)=>Math.max(m,parseInt(String(k).replace(/\D/g,''),10)||0),0)+1;
   return 'REQ-'+String(n).padStart(3,'0'); }
 // iniciar exige os insumos com o operador: entregues no Estoque e confirmados no app (água e ordem sem insumo não passam por aqui)
-function osIniErro(o,r){ const its=((o.ins||[]).length&&r)?r.itens:[]; if(!its.length) return null;
-  const q=i=>i.prod+' '+nd(i.custodia>1e-6?i.custodia:cenSaldoEntregar(i))+' '+i.un;
-  const fal=its.filter(i=>!(i.consumido>0)&&!(i.custodia>1e-6));
-  if(fal.length) return {acao:'iniciar',t:'Iniciar bloqueado: '+r.id+' sem entrega · '+fal.map(q).join(', ')+' a entregar.',q:'Rui (almoxarife) entrega no Estoque; '+(o.resp||'o operador')+' confirma o recebimento no app.',h:'EST.dc.html',hl:'Entregar no Estoque'};
-  const nc=its.filter(i=>i.custodia>1e-6&&!i.confirmado);
-  if(nc.length){ const quem=nc.map(i=>i.quem||o.resp).filter((v,k,a)=>a.indexOf(v)===k).join(', ');
-    return {acao:'iniciar',t:'Iniciar bloqueado: '+nc.map(q).join(', ')+(nc.length>1?' entregues a ':' entregue a ')+quem+', aguardando confirmação no app.',q:quem+' confirma o recebimento no app.',h:'MB-05.dc.html',hl:'Ver no app'}; }
-  return null; }
+function osIniErro(o,r){ const f=cenIniFalta(o,r); if(!f) return null;   // regra única (cenario.js), a mesma do app
+  const L={entregar:['EST.dc.html','Entregar no Estoque'],confirmar:['MB-05.dc.html','Ver no app']}[f.k]||[];
+  return {acao:'iniciar',t:'Iniciar bloqueado: '+f.t,q:f.q,h:L[0],hl:L[1]}; }
 function osc_iniciar(c,id){ const o=osc_o(c,id); if(o.etapa!=='Liberadas') throw new Error(id+' não está liberada.');
   { const cb=carBloqColheita(c,o,'iniciar'); if(cb) throw new Error(cb.t); }   // carência (MAPA-CARENCIA-LMR-20261003)
   const e=osIniErro(o,o.req&&c.reqs[o.req]); if(e) throw new Error(e.t);
@@ -457,6 +455,7 @@ function osProx(o){
       :{acao:'liberar',t:'Liberar bloqueado: '+e.charAt(0).toLowerCase()+e.slice(1),q:'Suprimentos, recebendo o insumo no Estoque.',h:'EST.dc.html',hl:'Ver saldos no Estoque'}; }
   if(!b&&P.fn==='encerrar'&&o.encM) b=osEncBloq(o);
   if(!b&&P.fn==='iniciar'&&!o.agua) b=osIniErro(o,o.r);
+  if(!b&&P.fn==='apontar'&&o.esg) b=o.esg;   // componente esgotado: Dispensar saldo segue no painel
   if(!b&&(P.fn==='liberar'||P.fn==='iniciar')&&o.carB) b=Object.assign({},o.carB,{acao:P.fn});   // carência (MAPA-CARENCIA-LMR-20261003)
   return {P,b}; }
 '''

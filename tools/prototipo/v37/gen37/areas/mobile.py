@@ -197,7 +197,9 @@ function mbPasso(c, o){
     if (mbConf(c, o.id)) return { k: 'none', t: '', chip: ['Consumo em conferência · ' + CEN_CONC_RESP, 'yellow'], cor: 'yellow', tt: '', feita: true };
     return { k: 'none', t: '', chip: ['Área feita · aguarda encerramento', 'green'], cor: 'green', tt: '', feita: true };
   }
-  if ((o.ins || []).length && r && !r.itens.some(i => i.custodia > 0)) return { k: 'retirar', t: 'Retirar no almoxarifado', chip: ['Reservado · ' + r.id, 'gray'], cor: 'gray', href: 'MB-05.dc.html#' + o.id, tt: 'Ver o que retirar com Rui no almoxarifado para a ' + o.id };
+  const f = cenIniFalta(o, r);   // regra única de início (cenario.js): a mesma da web e do comando
+  if (f && f.k === 'rever') return { k: 'rever', t: '', chip: ['Insumo esgotado · Ana (agrônoma)', 'red'], cor: 'red', tt: f.t + ' ' + f.q };
+  if (f && f.k === 'entregar') return { k: 'retirar', t: 'Retirar no almoxarifado', chip: [(r.itens.some(i => i.entregue > 0) ? 'Entrega parcial' : 'Reservado') + ' · ' + r.id, 'gray'], cor: 'gray', href: 'MB-05.dc.html#' + o.id, tt: 'Ver o que retirar com Rui no almoxarifado para a ' + o.id };
   if (t) return { k: 'outro', t: 'Fechar turno · ' + t.os, chip: ['Outro turno aberto · ' + t.os, 'yellow'], cor: 'yellow', href: 'MB-03.dc.html', tt: 'Fechar o turno aberto da ' + t.os + ' antes de iniciar a ' + o.id };
   return { k: 'iniciar', t: 'Iniciar turno', chip: [o.etapa === 'Em execução' ? 'Pronta para o próximo turno' : 'Pronta para iniciar', 'green'], cor: 'green',
            fn: (self) => cenMudar(self, c => mbIniciar(c, o.id)), tt: 'Iniciar turno na ' + o.id };
@@ -417,7 +419,7 @@ v.d_aqui=o.id+' · '+o.etapa; v.d_prox=p.t||(p.feita?'Aguardar encerramento':'Vo
 const tt=mbTurno(c); const rs=mbResta(o);
 v.d_falta=({{fechar:'hectares, horas e consumo do turno',confirmar:'confirmar o recebimento',retirar:'retirar os insumos com Rui',iniciar:'saldo de '+cenNum(rs,1)+' ha',
   outro:'fechar o turno da '+(tt?tt.os:'')+' · saldo de '+cenNum(rs,1)+' ha',devolver:'devolver a sobra ao Rui: '+mbSobraTxt(mbSobra(c,o)),
-  enviar:cenNum(mbProv(o),1)+' ha no aparelho, aguardando sinal',none:p.feita?'encerramento no escritório':'liberação no escritório'}})[p.k];
+  enviar:cenNum(mbProv(o),1)+' ha no aparelho, aguardando sinal',rever:'decisão de Ana (agrônoma) sobre a área restante',none:p.feita?'encerramento no escritório':'liberação no escritório'}})[p.k];
 const kv=[{{l:'Versão',t:o.versao}},{{l:'Janela',t:mbJan(o)}},{{l:'Local',t:o.talhao+' · '+cenNum(o.area,1)+' ha'}},{{l:'Andamento',t:mbRealTxt(o)}}];
 if(o.id==='OS-0421'){{ kv.push({{l:'Equipe/conjunto',t:{json.dumps(EQ421)}}}); kv.push({{l:'Preparo por tanque',t:{json.dumps(PREP421)}}}); }}
 v.d_kv=kv; v.d_424=o.id==='OS-0424';

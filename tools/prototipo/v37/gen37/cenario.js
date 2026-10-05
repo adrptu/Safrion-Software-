@@ -144,10 +144,25 @@ function cenConfirmarRecebimento(c, rid) {
   if (!m.sinc) c.app.fila.push(m.id);
   return { msg: 'Recebimento confirmado: ' + pend.map(i => i.prod + ' ' + cenNum(i.custodia) + ' ' + i.un).join(', ') + (m.sinc ? '.' : '. Salvo no aparelho; envia quando houver sinal.') };
 }
+// Regra única de início (CMD-07) e de cada turno: todo componente da versão com o executor, entregue e confirmado (PRD 42.2 l.7067;
+// ESTOS-03 l.7103; 41.3 l.6864). Dano evitado: aplicar mistura incompleta. Confirmação: a da 1ª entrega de cada item (R7). Entrega parcial da quantidade vale (PRD l.1251): aqui só
+// se exige algo de cada componente. Usada pela web (osIniErro), pelo comando do app (cenIniciarTurno) e pelo cartão do app (mbPasso).
+// Devolve null ou {k:'entregar'|'rever'|'confirmar', its, t, q}: t = o que falta, q = quem resolve.
+function cenIniFalta(o, r) {
+  const its = ((o.ins || []).length && r) ? r.itens.filter(i => o.ins.some(x => x.p === i.prod)) : []; if (!its.length) return null;
+  const q = i => i.prod + ' ' + cenNum(i.custodia > 1e-6 ? i.custodia : cenSaldoEntregar(i)) + ' ' + i.un;
+  const sem = its.filter(i => !(i.custodia > 1e-6)), fal = sem.filter(i => cenSaldoEntregar(i) > 1e-6), esg = sem.filter(i => !(cenSaldoEntregar(i) > 1e-6));
+  if (fal.length) return { k: 'entregar', its: fal, t: r.id + ' sem entrega · ' + fal.map(q).join(', ') + ' a entregar.', q: 'Rui (almoxarife) entrega no Estoque; ' + (o.resp || 'o operador') + ' confirma o recebimento no app.' };
+  if (esg.length) return { k: 'rever', its: esg, t: esg.map(i => i.prod).join(', ') + ': todo o solicitado na ' + r.id + ' já foi consumido e nada está com ' + (o.resp || 'o operador') + '.', q: 'Ana (agrônoma) decide a área restante: Dispensar saldo na O.S. e, se ainda precisar aplicar, emitir nova ordem.' };
+  const nc = its.filter(i => !i.confirmado);
+  if (nc.length) { const quem = nc.map(i => i.quem || o.resp).filter((v, k, a) => a.indexOf(v) === k).join(', ');
+    return { k: 'confirmar', its: nc, t: nc.map(q).join(', ') + (nc.length > 1 ? ' entregues a ' : ' entregue a ') + quem + ', aguardando confirmação no app.', q: quem + ' confirma o recebimento no app.' }; }
+  return null; }
 function cenIniciarTurno(c, id) {
   const o = c.ordens[id]; if (!o) throw new Error('Ordem não encontrada.');
   if (['Liberadas', 'Em execução'].indexOf(o.etapa) < 0) throw new Error(id + ' não está liberada para execução.');
   if (c.app.turno && !c.app.turno.fim) throw new Error('Feche o turno aberto antes de iniciar outro.');
+  { const f = cenIniFalta(o, o.req && c.reqs[o.req]); if (f) throw new Error('Iniciar bloqueado: ' + f.t + ' ' + f.q); }   // mesma regra da web
   c.app.turno = { os: id, ini: cenAgora(), pausas: [], fim: null };
   if (o.etapa === 'Liberadas') { o.etapa = 'Em execução'; }
   return { msg: 'Turno iniciado em ' + id + ' às ' + c.app.turno.ini + '.' };
