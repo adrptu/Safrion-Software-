@@ -104,6 +104,45 @@ try:
          and T.cen(f"((c.ordens['{OS}'].osc||{{}}).ev||[]).map(e=>e.cmd+' '+e.v).join(',')") == 'CMD-42 v2,CMD-06 v2',
          'CTL-1: ajustar e liberar grava CMD-42 e CMD-06 da v2 com as doses ajustadas', p[p.find('ORIGEM'):][:600])
     T.fechar()
+    # 14c-14f · CTL-1 (Frente E1): a trava legal única (a mesma do AG-01) no ajuste, no painel e na Nova ordem; alertas na confirmação
+    def reset():
+        T.J("window.__cen.cenReset(); window.dispatchEvent(new StorageEvent('storage',{key:'talhao-os-cenario-v1'}))"); time.sleep(.4)
+    def setid(sel, val):
+        T.J(f"""(()=>{{const i=document.querySelector({json.dumps(sel)}); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,{json.dumps(val)});
+          i.dispatchEvent(new Event('input',{{bubbles:true}})); i.dispatchEvent(new Event('change',{{bubbles:true}}));}})()"""); time.sleep(.25)
+    reset(); T.ordem(OS); T.btn('Ajustar antes de liberar'); setin('Dose de Glifosato 480 (L/ha)', '7,5'); T.btn('Salvar e liberar'); pa = T.pan()
+    st = T.cen(f"[c.ordens['{OS}'].etapa, c.ordens['{OS}'].versao, c.ordens['{OS}'].req, ((c.ordens['{OS}'].osc||{{}}).ev||[]).length]")
+    setin('Dose de Glifosato 480 (L/ha)', '2'); setid('#aj_inc', 'Abamectina 18 EC'); T.btn('Incluir'); setin('Dose de Abamectina 18 EC (L/ha)', '0,5'); T.btn('Salvar e liberar'); pb = T.pan()
+    st2 = T.cen(f"[c.ordens['{OS}'].etapa, c.ordens['{OS}'].versao]")
+    T.btn('Tirar Abamectina 18 EC da ordem') or T.J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>(b.getAttribute('aria-label')||'').startsWith('Tirar Abamectina')); b&&b.click();})()"); time.sleep(.3)
+    T.btn('Salvar e liberar'); tt = T.toast(); st3 = T.cen(f"c.ordens['{OS}'].etapa")
+    T.ok('Glifosato 480 7,5 L/ha em T1 (T1-A): dose fora da bula: 1,5–3 L/ha.' in pa and st == ['A liberar', 'v1', None, 0]
+         and 'Abamectina 18 EC 0,5 L/ha em T1 (T1-A): sem registro para soja.' in pb and st2 == ['A liberar', 'v1'] and st3 == 'Liberadas' and f'{OS} liberada' in tt,
+         'E1 14c: ajuste com Glifosato 7,5 L/ha e Abamectina em soja recusados junto ao campo (nada gravado: v1, sem REQ, sem CMD-42); dentro da bula, Salvar e liberar passa',
+         (pa[-500:], st, pb[-400:], st2, st3, tt))
+    T.fechar(); reset()
+    T.mudar(f"c.ordens['{OS}'].ins[0].dose=7.5; c.ordens['{OS}'].ins[0].tot=1200; return {{msg:''}};"); T.ordem(OS); p = T.pan()
+    T.fechar(); aba = lambda n: (T.J(f"(()=>{{const b=[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==={json.dumps(n)}); b&&b.click();}})()"), time.sleep(.4))
+    aba('Kanban'); kb = T.J("(()=>{const k=[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] [role=button]')].find(x=>x.innerText.indexOf('OS-0430')===0); return k?k.innerText:'';})()") or ''
+    aba('Lista'); T.ordem(OS)
+    T.ok('Fora do registro · Glifosato 480' in T.linha(OS) and 'Fora do registro · Glifosato 480' in kb and 'Liberar bloqueado: Glifosato 480 7,5 L/ha em T1 (T1-A): dose fora da bula: 1,5–3 L/ha.' in p
+         and 'Quem resolve: Ana (agrônoma), ajustando produto ou dose antes de liberar.' in p and not T.temb('Liberar para execução') and T.temb('Ajustar antes de liberar'),
+         'E1 14d: dose fora da bula no cenário → selo "Fora do registro" na lista e no Kanban; painel "Liberar bloqueado", quem resolve = Ana, sem Liberar', (T.linha(OS), kb, p[p.find('PRÓXIMO'):][:400]))
+    T.fechar(); reset()
+    NV = 'aside[role=dialog][aria-label="Nova ordem"]'
+    def nova(saf, cult, atv):
+        T.btn('Nova ordem', root='main'); setv('#nv_saf', saf); setv('#nv_cult', cult); setv('#nv_atv', atv); setv('#nv_jan', '2026-10-05'); T.btn('Emitir ordem', root=NV)
+        return (T.J("(()=>{const a=document.querySelector('aside[role=dialog]'); return a?a.getAttribute('aria-label'):'';})()") or '').split(' · ')[0]
+    def setv(sel, val):
+        T.J(f"""(()=>{{const i=document.querySelector({json.dumps(sel)}); const P=i.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype;
+          Object.getOwnPropertyDescriptor(P,'value').set.call(i,{json.dumps(val)}); i.dispatchEvent(new Event('input',{{bubbles:true}})); i.dispatchEvent(new Event('change',{{bubbles:true}}));}})()"""); time.sleep(.3)
+    oa = nova('S27SF', 'd1', 'm3'); T.btn('Ajustar antes de liberar'); setin('Dose de Atrazina 500 (L/ha)', '4'); T.btn('Salvar e liberar'); pa = T.pan(); T.btn('Voltar'); T.fechar()
+    ob = nova('S2627', 'c1', 'a7'); T.btn('Liberar para execução'); cb = T.pan(); T.btn('Confirmar liberação'); tb = T.toast()
+    T.ok(oa and 'Atrazina 500' in pa and 'sem registro' not in pa and 'fora da bula' not in pa
+         and 'Atenção (não bloqueia): Inseticida B: dose em L/ha e bula em 0,8–1 kg/ha: confira a unidade na bula.' in cb and f'{ob} liberada' in tb,
+         'E1 14e: Nova ordem da Safrinha 2027 (milho no T1-A) aceita a Atrazina sem erro junto ao campo; Nova ordem c1·a7 mostra o alerta do Inseticida B na confirmação e libera',
+         (oa, pa[-300:], ob, cb[-400:], tb))
+    T.fechar()
     # 15 · sem erro de script
     er = T.erros(); T.ok(not er, 'sem erro de script', er)
 finally:

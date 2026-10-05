@@ -105,6 +105,14 @@ try:
     chk('15 Mapa: confirmação "aprova esta versão e libera" e liberar a OS-0430 grava CMD-42 e CMD-06 (v1, Ana)',
         r1=='ok' and r2=='ok' and 'Ana (agrônoma) aprova esta versão e libera' in ct and [e.get('cmd') for e in ev]==['CMD-42','CMD-06']
         and all(e.get('v')=='v1' and e.get('por')=='Ana (agrônoma)' for e in ev) and 'v1 aprovada e liberada por Ana (agrônoma).' in t, [r1,r2,ct[-300:],ev,t])
+    # 16 · CTL-1 (Frente E1): no Mapa, a trava legal é a mesma da O.S.: dose fora da bula → "Liberar bloqueado", quem resolve Ana, sem Liberar
+    c.goto(f'http://127.0.0.1:{p}/OS.dc.html',wait=1.2); tem=J("!!(window.__cen&&window.__cen.cenMudar)")   # o gancho do cenário está na tela O.S.
+    J("window.__cen.cenReset(); window.__cen.cenMudar(null,c=>{ c.ordens['OS-0430'].ins[0].dose=7.5; c.ordens['OS-0430'].ins[0].tot=1200; return {msg:''}; })")
+    mapa(); tap('T1'); ver('T1','Ver ordens'); t1=pan('T1')
+    bt=J("[...document.querySelectorAll('aside[aria-label^=\"T1\"] [aria-label=\"Próximo passo\"] button')].map(b=>b.innerText.trim())") or []
+    chk('16 Mapa · OS-0430 com Glifosato 7,5 L/ha: "Liberar bloqueado… dose fora da bula: 1,5–3 L/ha", quem resolve Ana (agrônoma), sem "Liberar para execução"',
+        tem and 'dose fora da bula: 1,5–3 L/ha' in t1 and 'Ana (agrônoma), ajustando produto ou dose' in t1 and 'Liberar para execução' not in bt, [tem,bt,t1[:600]])
+    tap('T1')
 finally:
     try:
         if c: c.close()

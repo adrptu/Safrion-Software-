@@ -62,7 +62,13 @@ cenReset(); r=cenMudar(null,k=>osc_ajustar(k,'OS-0418',95,{},'',['Ureia 45%'],[]
 ok('N8 OS-0418 sem a Ureia: CMD-42 da v3 "95 ha · sem insumos" e CMD-06 sem "reservada"', e.length===2&&/^v3 aprovada por .* · 95 ha · sem insumos \(CMD-42\)$/.test(e[0].t)&&/^v3 liberada por Ana \(agrônoma\) às \d\d:\d\d \(CMD-06\)$/.test(e[1].t)&&cenGet().ordens['OS-0418'].reservado===false, [e,r]);
 // V2 · osVn igual à regra de osc_ajustar (\bvN\b, o último) e com padrão v1
 ok('V2 osVn: "v3 no saldo de 70 ha (KCl −12 %) · 30 ha na v2" → v2 (o último, como osc_ajustar); "" → v1', typeof osVn==='function'&&osVn('v3 no saldo de 70 ha (KCl −12 %) · 30 ha na v2')==='v2'&&osVn('')==='v1');
-// D · dose com 3 casas (0,125 L/ha) aparece igual na linha do ajuste e na aprovação; a reserva é 0,125 × 160 = 20 L
-cenReset(); r=cenMudar(null,k=>osc_ajustar(k,'OS-0430',160,{'2,4-D 806':0.125},'',[],[],true)); e=ev('OS-0430');
-ok('D dose 0,125 L/ha sem arredondar na trilha (ajuste e CMD-42) e 20 L reservados', /2,4-D 806 0,125 L\/ha/.test((e[0]||{}).t||'')&&/2,4-D 806 1 → 0,125 L\/ha/.test(cenGet().ordens['OS-0430'].osc.aj[0].t)&&cenGet().lotes['2,4-D 806|D26-01'].reservado===20, [e,cenGet().ordens['OS-0430'].osc.aj]);
+// D · dose com 3 casas (1,125 L/ha, dentro da bula do 2,4-D em soja: 0,8–1,5) aparece igual na linha do ajuste e na aprovação; reserva 1,125 × 160 = 180 L
+cenReset(); r=cenMudar(null,k=>osc_ajustar(k,'OS-0430',160,{'2,4-D 806':1.125},'',[],[],true)); e=ev('OS-0430');
+ok('D dose 1,125 L/ha sem arredondar na trilha (ajuste e CMD-42) e 180 L reservados', /2,4-D 806 1,125 L\/ha/.test((e[0]||{}).t||'')&&/2,4-D 806 1 → 1,125 L\/ha/.test(((cenGet().ordens['OS-0430'].osc||{}).aj||[{}])[0].t||'')&&cenGet().lotes['2,4-D 806|D26-01'].reservado===180, [r,e,(cenGet().ordens['OS-0430'].osc||{}).aj]);
+// N9 · CTL-1 (Frente E1): a trava legal recusa antes de qualquer gravação: nem CMD-42, nem CMD-06, nem versão nova, nem reserva
+cenReset(); r=cenMudar(null,k=>osc_ajustar(k,'OS-0430',160,{'Glifosato 480':7.5},'',[],[],true)); const o9=cenGet().ordens['OS-0430'];
+cenMudar(null,k=>{ k.ordens['OS-0430'].ins[0].dose=7.5; k.ordens['OS-0430'].ins[0].tot=1200; return {msg:''}; }); const r9=L(null,'OS-0430');
+ok('N9 recusa legal (Glifosato 7,5 L/ha, bula 1,5–3) no ajuste e na liberação: nenhum CMD-42/CMD-06, versão v1 e nada reservado',
+  !!r.erro&&/dose fora da bula/.test(r.erro)&&!!r9.erro&&/dose fora da bula/.test(r9.erro)&&ev('OS-0430').length===0&&o9.versao==='v1'
+  &&cenGet().ordens['OS-0430'].etapa==='A liberar'&&cenGet().lotes['Glifosato 480|G26-14'].reservado===0, [r,r9,ev('OS-0430'),o9.versao]);
 print('TOTAL '+R.length+' · falhas '+(ok.f||0));

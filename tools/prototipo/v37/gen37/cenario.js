@@ -39,6 +39,25 @@ function cenQtdTrecho(dose, antes, ha) {
   const a0 = Number((antes || 0).toFixed(6)), a1 = Number(((antes || 0) + ha).toFixed(6));
   return Math.round((cenQtd(dose, a1) - cenQtd(dose, a0)) * 100) / 100; }
 function cenNum(n, d) { return Number(n || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: d === undefined ? 2 : d }); }
+// ---------- regra legal de uso de agrotóxico (RN-016 · RF-EXT-002 · ENG-011): a mesma no receituário (AG-01) e na O.S. (liberar e ajustar) ----------
+// us = usos da bula de referência do produto na cultura, com dose por ha (dados_mip.uso); no AG-01 só o uso do alvo escolhido.
+// dose em un/ha; nap = aplicações do produto no talhão no ciclo, sem contar esta. Trava o que a lei proíbe; o resto é alerta.
+function cenUsoLegal(us, rot, dose, un, nap, refs) {   // refs (opcional): o que foi contado, para a mensagem dizer com quem resolver
+  const tr = [], al = []; us = us || [];
+  if (!us.length) { tr.push('Sem registro para ' + rot + '.'); return { tr, al }; }
+  if (us[0].sit === 'Cancelado') tr.push('Registro cancelado: uso proibido.');
+  else if (us[0].sit === 'Em reavaliação') al.push('Produto em reavaliação na Anvisa.');
+  const cmp = us.filter(u => !un || u.un === un), ok = cmp.filter(u => dose >= u.dmin - 1e-9 && dose <= u.dmax + 1e-9);
+  const base = ok.length ? ok : (cmp.length ? cmp : us);
+  const ft = (L) => L.map(u => cenNum(u.dmin, 3) + (u.dmax !== u.dmin ? '–' + cenNum(u.dmax, 3) : '') + ' ' + u.un + '/ha').filter((x, i, a) => a.indexOf(x) === i).join(' ou ') + (L.some(u => u.calda) ? ' (calda de 1.000 L/ha)' : '');
+  if (base.every(u => !u.conf)) al.push('Uso não conferido na bula: confira antes de aplicar.');
+  if (!(dose > 0 && isFinite(dose))) tr.push('Informe a dose.');
+  else if (!cmp.length) al.push('Dose em ' + un + '/ha e bula em ' + ft(us) + ': confira a unidade na bula.');
+  else if (!ok.length) tr.push('Dose fora da bula: ' + ft(cmp) + '.');
+  const mx = Math.max.apply(null, base.map(u => u.mx || Infinity));
+  if (isFinite(mx) && nap >= mx) tr.push('Nº máximo de aplicações no ciclo atingido: ' + nap + ' de ' + mx + (refs && refs.length ? ' (' + refs.join(', ') + ')' : '') + '.');
+  return { tr, al };
+}
 function cenLote(c, prod) { return Object.values(c.lotes).filter(l => l.prod === prod).sort((a, b) => (b.fisico - b.reservado - b.quarentena) - (a.fisico - a.reservado - a.quarentena))[0] || null; }
 function cenDisp(l) { return Math.max(0, (l.fisico || 0) - (l.quarentena || 0) - (l.reservado || 0)); }
 function cenMov(c, m) { m.id = 'MV-' + (1000 + c.movs.length + 1); m.at = m.at || cenAgora(); c.movs.push(m); return m; }

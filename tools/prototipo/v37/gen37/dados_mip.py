@@ -132,6 +132,14 @@ def _dias(txt):
 def _max(x):
     if isinstance(x, int): return x
     m = re.match(r'\s*(\d+)', str(x or '')); return int(m.group(1)) if m else None
+def uso(q, u):
+    """Um uso da bula de referência (agrofit_dados) → dose por ha, carência e máximo de aplicações. Derivação única (Frente E · ENG-011):
+    alimenta o AGF do AG-01 e o CARD da O.S. (dados_carencia._usos). Dose só por semente (TS) → None."""
+    d = _dose(u['dose'], u['cultura'])
+    if not d: return None
+    return dict(id=q['id'], nome=q['nomes_fazenda'][0], cls=q['classe'], gr=q['grupos'], g=q['grupo'], sit=q['situacao'],
+                conf=bool(u['conferido']), dose=u['dose'], dmin=d[0], dmax=d[1], un=d[2], car=_dias(u['carencia']),
+                cart=u['carencia'], mx=_max(u['max_aplic']), inter=u.get('intervalo', ''), calda=('/100 L de água' in u['dose']))
 def _agf():
     out = {}
     for p in PROT.values():
@@ -143,12 +151,9 @@ def _agf():
             if not q['grupos']: continue          # adjuvante não é controle
             for u in q['usos']:
                 if u['cultura'] != p['cultura'] or u['chave'] != p['chave']: continue
-                d = _dose(u['dose'], p['cultura'])
-                if not d: continue                # tratamento de sementes (TS) não entra no receituário foliar do MIP
-                lst.append(dict(id=q['id'], nome=q['nomes_fazenda'][0], cls=q['classe'], gr=q['grupos'], g=q['grupo'], sit=q['situacao'],
-                                conf=bool(u['conferido']), dose=u['dose'], dmin=d[0], dmax=d[1], un=d[2], car=_dias(u['carencia']),
-                                cart=u['carencia'], mx=_max(u['max_aplic']), inter=u.get('intervalo', ''),
-                                calda=('/100 L de água' in u['dose'])))
+                x = uso(q, u)
+                if not x: continue                # tratamento de sementes (TS) não entra no receituário foliar do MIP
+                lst.append(x)
                 break
         out[k] = sorted(lst, key=lambda x: (x['sit'] == 'Cancelado', x['car'] if x['car'] is not None else 0, x['nome']))
     return out

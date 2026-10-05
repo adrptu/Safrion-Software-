@@ -814,7 +814,7 @@ function criarVis(self,ts,extra,pt){ const sat=lay(self)==='Satélite'; const ms
 function osMapa(t){ const mo=M.ord.filter(o=>o.tal.indexOf(t)>=0); const sv=(id)=>{ const x=mo.find(o=>o.id===id); return SEV.indexOf(PZC[x?x.pz:'no prazo']); };
   return OSN.filter(o=>mo.some(m=>m.id===o.id)&&o.etapa!=='Canceladas').sort((a,b)=>{ const fa=a.etapa==='Encerradas'?1:0, fb=b.etapa==='Encerradas'?1:0; return (fa-fb)||(sv(a.id)-sv(b.id)); }); }
 function mapCt(o,fn){ const insTxt=(o.ins||[]).map(x=>x.p+' '+nd(x.tot)+' '+x.un).join(', '); const vn=osVn(o.versao);  // versão: só "vN" (núcleo da O.S.)
-  return {liberar:o.agua?('Liberar '+o.id+': janela, bomba e energia confirmadas; água sem requisição no Estoque.'):('Liberar '+o.id+' (versão '+vn+'): ao confirmar, '+OS_AGRO+' aprova esta versão e libera; '+(insTxt?'a requisição reserva no Estoque, por lote: '+insTxt+'.':'sem insumos a reservar.')),
+  return {liberar:o.agua?('Liberar '+o.id+': janela, bomba e energia confirmadas; água sem requisição no Estoque.'):('Liberar '+o.id+' (versão '+vn+'): ao confirmar, '+OS_AGRO+' aprova esta versão e libera; '+(insTxt?'a requisição reserva no Estoque, por lote: '+insTxt+'.':'sem insumos a reservar.')+osUsoAtencao(cenGet(),o.id)),
     iniciar:'Iniciar '+o.id+' agora, na janela '+o.janela+'.',conferencia:'Enviar '+o.id+' para conferência: execução física concluída ('+nf(o.realizado)+' ha).',
     encerrar:'Encerrar '+o.id+': apontamentos enviados, consumo baixado e nada em custódia.'}[fn]||''; }
 function nxOf(self,o,mo){ const pb=osProx(o); const P=pb.P, b=pb.b; const pa=(self.state.mpa&&self.state.mpa.id===o.id)?self.state.mpa:null;

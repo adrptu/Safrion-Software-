@@ -47,6 +47,8 @@ observacoes (dados coerentes com dados.py / dados2.py / telas vizinhas):
   A checagem do Estoque vale desde a abertura: a OS-0418 (Ureia 45 % sem lote) já nasce impedida. Versão é só "vN" (osVn).
   05/10 (Frente F; padrão adotado, o proprietário pode mudar): a confirmação é o "Aprovar e liberar" do PRD 41.3 e grava na Origem dois
   registros separados, vN aprovada (CMD-42) e vN liberada (CMD-06), com quem, hora, área e doses. Água só com água não grava CMD-42.
+  05/10 (Frente E1, RN-016/RF-EXT-002): liberar e ajustar (também "Salvar ajuste") passam pela regra legal única do AG-01 (cenUsoLegal: registro,
+  situação, dose da bula, nº de aplicações) antes de qualquer gravação; a recusa não grava CMD-42. Alertas aparecem na confirmação.
 - Consulta Agrofit (01/10): no "Ajustar antes de liberar", produto com ficha em agrofit_dados (nome exato da fazenda) ganha o atalho
   "Agrofit ›" para AG-07.dc.html#<id> em nova aba (o formulário fica aberto) e o "Incluir produto" mostra classe e grupo de ação.
 """
@@ -195,7 +197,7 @@ def _gatilho(g):  # gatilho da atividade do plano no formato das ordens do regis
 def _nova_ordem_dados():
     safs=[s for s in D2.SAFRAS if not s['ro']]
     import cenario
-    cult={s['id']:[dict(id=c['id'],t=f"{c['local']} · {c['cultura']} {c['variedade']} · "+format(c['area'],'g').replace('.',',')+" ha",local=c['local'],area=c['area'],plano=c['plano'],var=c['variedade'])
+    cult={s['id']:[dict(id=c['id'],t=f"{c['local']} · {c['cultura']} {c['variedade']} · "+format(c['area'],'g').replace('.',',')+" ha",local=c['local'],area=c['area'],plano=c['plano'],var=c['variedade'],cultura=c['cultura'])
                    for c in D2.CULTIVOS.get(s['id'],[])] for s in safs}
     # atividade do plano com seus insumos (grupo, produto, dose/ha): a ordem nova leva dose × área, como as ordens do registro
     planos={p['id']:dict(nome=p['nome'],versao=p['versao'],atv=[dict(id=a['id'],nome=a['nome'],op=a['op'],gat=_gatilho(a.get('g') or {}),
@@ -248,7 +250,11 @@ function osMerge(b,co,c){ if(!co) return b;
   // A liberar: o Estoque (reserva por lote) pode segurar a liberação desde a abertura → selo vermelho e dono na lista, no Kanban e no painel
   if(co.etapa==='A liberar'&&!o.agua&&(co.ins||[]).length){ const e=osLibErro(o,c);
     const z=e&&/Dose × área de (.+?) dá 0/.exec(e);   // total 0: quem resolve é o agrônomo, não o Estoque (PRE-REV Y3)
-    if(z){ o.libErr=e; o.total0=true; o.selos=o.selos.filter(s=>!/^Falta insumo|^Total 0/.test(s.t)).concat([{t:'Total 0 · '+z[1],c:'red'}]); o.dono=OS_AGRO; o.prazo='ajustar dose ou área';
+    const lg=!z&&!!e&&e===osUsoErro(c,co);   // regra legal (Frente E): quem resolve é o agrônomo
+    if(lg){ const pr=((co.ins||[]).find(x=>osUsoItem(c,co,x))||{}).p||''; o.libErr=e; o.legal=true;
+      o.selos=o.selos.filter(s=>!/^Falta insumo|^Total 0|^Fora do registro/.test(s.t)).concat([{t:'Fora do registro · '+pr,c:'red'}]); o.dono=OS_AGRO; o.prazo='ajustar produto ou dose';
+      o.cond=String(o.cond||'').replace('Próximo passo: liberar para execução.','Próximo passo: ajustar antes de liberar.'); }
+    else if(z){ o.libErr=e; o.total0=true; o.selos=o.selos.filter(s=>!/^Falta insumo|^Total 0/.test(s.t)).concat([{t:'Total 0 · '+z[1],c:'red'}]); o.dono=OS_AGRO; o.prazo='ajustar dose ou área';
       o.cond=String(o.cond||'').replace('Próximo passo: liberar para execução.','Dose × área de '+z[1]+' dá 0. Próximo passo: ajustar antes de liberar.'); }
     else if(e){ const pr=(/ de (.+?)(?: no Estoque|:)/.exec(e)||[])[1]||''; o.libErr=e;
       o.selos=o.selos.filter(s=>!/^Falta insumo/.test(s.t)).concat([{t:'Falta insumo'+(pr?' · '+pr:''),c:'red'}]);
@@ -319,7 +325,8 @@ function osc_liberar(c,id,agua,jan){ const o=osc_o(c,id);
     if(o.etapa!=='A liberar') throw new Error(id+' não está em A liberar.');
     o.etapa='Liberadas';
     r={msg:id+' liberada. Sem insumos a reservar: nenhuma requisição no Estoque.'}; }
-  else { const r0=o.req&&c.reqs[o.req];  // requisição aberta antes da liberação, sem entrega: refeita na liberação, com reserva por lote
+  else { if(!o.ins.some(x=>x.dose>0&&!(x.tot>0))){ const e=osUsoErro(c,o); if(e) throw new Error(e); }   /* regra legal (Frente E1 · RN-016) antes de qualquer gravação; total 0 o cenLiberar recusa */
+    const r0=o.req&&c.reqs[o.req];  // requisição aberta antes da liberação, sem entrega: refeita na liberação, com reserva por lote
     if(r0&&!o.reservado){ r0.itens=r0.itens.filter(i=>i.entregue>0); r0.estado='Reservada'; }
     if(!o.req){ const rid=osc_reqId(c); o.req=rid; c.reqs[rid]={id:rid,os:id,itens:[],estado:'Reservada'}; }  // mesmo formato das existentes (REQ-041)
     r=cenLiberar(c,id); }
@@ -346,12 +353,27 @@ function osc_ajustar(c,id,area,doses,jan,rem,add,lib){ const o=osc_o(c,id); if(o
   if(!ch.length){ if(!lib) throw new Error('Nada foi ajustado.'); const r=osc_liberar(c,id,false,jan); return {msg:'Nada foi ajustado; '+r.msg}; }
   o.area=area; o.saldo=Math.max(0,area-(o.realizado||0)); o.ins.forEach(x=>{ x.tot=cenQtd(x.dose,area); });   /* regra única (SINT-C03) */
   { const z0=o.ins.find(x=>x.dose>0&&!(x.tot>0)); if(z0) throw new Error('Dose × área de '+z0.p+' dá 0 '+z0.un+': aumente a dose ou a área.'); }   /* nem sem liberar (PRE-REV X2) */
+  { const e=osUsoErro(c,o); if(e) throw new Error(e); }   /* regra legal, também em Salvar ajuste (Frente E) */
   const s=String(o.versao||''); const re=/\bv(\d+)\b/g; let m=null, k; while((k=re.exec(s))) m=k;
   const vn=m?'v'+(Number(m[1])+1):'v2'; o.versao=m?s.slice(0,m.index)+vn+s.slice(m.index+m[0].length):(s?s+' · ':'')+vn;
   const hr=cenAgora(); o.osc.aj=(o.osc.aj||[]).concat([{v:vn,at:hr,t:vn+' ajustada por '+OS_AGRO+' às '+hr+(lib?' ao liberar':'')+': '+ch.join('; ')}]);
   if(!lib) return {msg:id+' ajustada para '+vn+'. A liberação continua impedida.'};
   const r=osc_liberar(c,id,false,jan);
   return {msg:String(r.msg).replace(id+' liberada.',id+' ajustada para '+vn+' e liberada.')}; }
+// regra legal na O.S. (liberar e ajustar): a mesma do AG-01 (cenUsoLegal), por produto × cultura de cada talhão (ou parcela) da ordem.
+// Fertilizante, corretivo, semente, muda e adjuvante ficam fora do registro de agrotóxico; uso só com dose por semente (TS) não é comparado
+// por ha. Produto fora de todo cadastro conta como agrotóxico, salvo se o plano o classifica (grupo) como outra coisa.
+function osUsoItem(c,o,x,al){ const P=CARD.prod[x.p]; if(P?(!P.defn||P.adj):(x.g&&!/^(Herbicida|Fungicida|Inseticida|Acaricida|Nematicida)/.test(x.g))) return '';
+  const ts=carTals(o.talhao); if(!ts.length) return x.p+': o talhão '+(o.talhao||'da ordem')+' não está no cadastro; o registro é por cultura.';
+  const cv=String((o.osc&&o.osc.novo&&o.osc.novo.cultura)||'').split(' ')[0];   // cultura do cultivo da ordem nova (outra safra); senão a do talhão
+  for(const t of ts){ const T=CARD.tal[t.tid]; const cu=cv||T.cult; const u=P?(P.usos||{})[cu]:null; if(u&&!(u.fx||[]).length) continue;
+    const us=((u&&u.fx)||[]).map(f=>Object.assign({sit:P.sit},f));
+    const ap=carNap(c,t.tid,t.parc,x.p,o); const R=cenUsoLegal(us,String(cu||'a cultura').toLowerCase(),x.dose,x.un,ap.length,ap);
+    if(al) R.al.forEach(a=>{ const s=x.p+': '+a.charAt(0).toLowerCase()+a.slice(1); if(al.indexOf(s)<0) al.push(s); });
+    if(R.tr.length) return x.p+' '+nd(x.dose)+' '+x.un+'/ha em '+carNome(t.tid)+(t.parc?' ('+t.parc+')':'')+': '+R.tr[0].charAt(0).toLowerCase()+R.tr[0].slice(1); }
+  return ''; }
+function osUsoErro(c,o,al){ for(const x of (o.ins||[])){ const e=osUsoItem(c,o,x,al); if(e) return e; } return ''; }
+function osUsoAtencao(c,id){ const co=c.ordens[id], al=[]; if(co) osUsoErro(c,co,al); return al.length?' Atenção (não bloqueia): '+al.join(' '):''; }   /* alertas na confirmação (O.S. e Mapa) */
 // próxima requisição: maior número existente + 1, com três dígitos (REQ-040 → REQ-041), sem pular
 function osc_reqId(c){ const n=Object.keys(c.reqs||{}).reduce((m,k)=>Math.max(m,parseInt(String(k).replace(/\D/g,''),10)||0),0)+1;
   return 'REQ-'+String(n).padStart(3,'0'); }
@@ -427,7 +449,7 @@ function osProx(o){
   else P={t:'Ordem encerrada: somente consulta.',btn:'',fn:''};
   // impedimento do próximo passo: do registro (máquina, janela, conflito) ou do cenário (saldo no Estoque; sinal ou sobra no encerramento)
   let b=(o.bloq&&o.bloq.fase===o.etapa&&o.bloq.acao===P.fn)?o.bloq:null;
-  if(!b&&P.fn==='liberar'&&!o.agua){ const e=o.libErr||''; if(e) b=o.total0?{acao:'liberar',t:'Liberar bloqueado: '+e.charAt(0).toLowerCase()+e.slice(1),q:'Ana (agrônoma), ajustando a dose ou a área antes de liberar.',total0:true}
+  if(!b&&P.fn==='liberar'&&!o.agua){ const e=o.libErr||''; if(e) b=o.legal?{acao:'liberar',t:'Liberar bloqueado: '+e,q:OS_AGRO+', ajustando produto ou dose antes de liberar.',legal:true}:o.total0?{acao:'liberar',t:'Liberar bloqueado: '+e.charAt(0).toLowerCase()+e.slice(1),q:'Ana (agrônoma), ajustando a dose ou a área antes de liberar.',total0:true}
       :{acao:'liberar',t:'Liberar bloqueado: '+e.charAt(0).toLowerCase()+e.slice(1),q:'Suprimentos, recebendo o insumo no Estoque.',h:'EST.dc.html',hl:'Ver saldos no Estoque'}; }
   if(!b&&P.fn==='encerrar'&&o.encM) b=osEncBloq(o);
   if(!b&&P.fn==='iniciar'&&!o.agua) b=osIniErro(o,o.r);
@@ -569,7 +591,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{};
   v.pan_setrmot=(e)=>self.setState({pa:Object.assign({},self.state.pa,{motivo:e.target.value,err:''})});
   // ajustar antes de liberar (secundário do passo A liberar com produto, também na confirmação): dose por insumo e área → osc_ajustar
   v.pan_hasAj=!!P.sec; v.pan_hasAjc=v.pan_hasAj&&!b&&!!pa&&pa.fn==='liberar'; v.pan_ajbtn=P.sec?P.sec.btn:'';
-  const ajLib=!b||b.h==='EST.dc.html'||!!b.total0;   // falta no Estoque: o ajuste pode resolver e libera; máquina, janela ou conflito: só grava a versão
+  const ajLib=!b||b.h==='EST.dc.html'||!!b.total0||!!b.legal;   // falta no Estoque: o ajuste pode resolver e libera; máquina, janela ou conflito: só grava a versão
   v.pan_ajsbtn=ajLib?'Salvar e liberar':'Salvar ajuste';
   const vcur=osVn(o.versao); const vnx='v'+(Number(vcur.slice(1))+1);
   v.pan_ajgo=()=>{ const ds={}; (o.ins||[]).forEach(x=>{ ds[x.p]=nd(x.dose,4); }); self.setState({pa:{id:o.id,fn:'ajustar',area:nd(o.area,4),doses:ds,rem:{},add:[],q:'',qerr:'',errs:{},err:''}});
@@ -619,14 +641,14 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{};
     (o.ins||[]).forEach(x=>{ if(rem.indexOf(x.p)>=0) return; const d=g2num((cur.doses||{})[x.p]); if(!(d>0&&isFinite(d))) errs[x.p]='Informe a dose maior que 0 '+x.un+'/ha.'; else ds[x.p]=d; });
     (cur.add||[]).forEach(a=>{ const d=g2num(a.dose); if(!(d>0&&isFinite(d))) errs['+'+a.p]='Informe a dose maior que 0 '+a.un+'/ha.'; else add.push({p:a.p,dose:d,un:a.un,g:a.g}); });
     if(prodN(cur.q)){ self.setState({pa:Object.assign({},cur,{errs,err:'',qerr:'Clique em Incluir para adicionar "'+cur.q.trim()+'" ou apague o texto.'})}); return; }
-    if(ajLib&&!isNaN(ar)&&ar>0){ const ck=(p,un,d,k)=>{ if(errs[k]) return; const m=osc_ajFalta(cenC,p,un,d,ar); if(m) errs[k]=m; };   /* o mesmo do núcleo (PRE-REV Y6) */
-      (o.ins||[]).forEach(x=>{ if(ds[x.p]!==undefined) ck(x.p,x.un,ds[x.p],x.p); }); add.forEach(a=>ck(a.p,a.un,a.dose,'+'+a.p)); }
+    if(!isNaN(ar)&&ar>0){ const co=cenC.ordens[o.id]; const ck=(p,un,d,k,g)=>{ if(errs[k]) return; const m=(co?osUsoItem(cenC,co,{p,un,dose:d,g}):'')||(ajLib?osc_ajFalta(cenC,p,un,d,ar):''); if(m) errs[k]=m; };   /* o mesmo do núcleo (PRE-REV Y6); regra legal com a ordem do cenário (Frente E) */
+      (o.ins||[]).forEach(x=>{ if(ds[x.p]!==undefined) ck(x.p,x.un,ds[x.p],x.p,x.g); }); add.forEach(a=>ck(a.p,a.un,a.dose,'+'+a.p,a.g)); }
     if(Object.keys(errs).length){ self.setState({pa:Object.assign({},cur,{errs,err:''})}); return; }
     if((o.ins||[]).length&&rem.length===(o.ins||[]).length&&!add.length&&!cur.confVazio){
       self.setState({pa:Object.assign({},cur,{errs,confVazio:true,err:'A ordem fica sem nenhum produto. Clique em '+v.pan_ajsbtn+' de novo para confirmar, ou inclua um produto.'})}); return; }
     osRun(self,c=>osc_ajustar(c,o.id,ar,ds,o.janela,rem,add,ajLib),{pa:null}); };
   const insTxt=(o.ins||[]).map(x=>x.p+' '+nd(x.tot)+' '+x.un).join(', ');
-  v.pan_ct={liberar:o.agua?('Liberar '+o.id+': janela, bomba e energia confirmadas; água sem requisição no Estoque.'):('Liberar '+o.id+' (versão '+o.versao+'): ao confirmar, '+OS_AGRO+' aprova esta versão e libera; '+(insTxt?'a requisição reserva no Estoque, por lote: '+insTxt+'.':'sem insumos a reservar, nenhuma requisição no Estoque.')),iniciar:'Iniciar '+o.id+' agora, na janela '+o.janela+(o.r&&(o.ins||[]).length?': insumos com '+o.resp+', confirmados no app.':'.'),
+  v.pan_ct={liberar:o.agua?('Liberar '+o.id+': janela, bomba e energia confirmadas; água sem requisição no Estoque.'):('Liberar '+o.id+' (versão '+o.versao+'): ao confirmar, '+OS_AGRO+' aprova esta versão e libera; '+(insTxt?'a requisição reserva no Estoque, por lote: '+insTxt+'.':'sem insumos a reservar, nenhuma requisição no Estoque.')+osUsoAtencao(cenC,o.id)),iniciar:'Iniciar '+o.id+' agora, na janela '+o.janela+(o.r&&(o.ins||[]).length?': insumos com '+o.resp+', confirmados no app.':'.'),
     conferencia:'Enviar '+o.id+' para conferência: execução física concluída ('+nf(o.realizado)+' ha).',encerrar:'Encerrar '+o.id+': apontamentos enviados, consumo baixado e nada em custódia.'}[pa?pa.fn:'']||'';
   v.pan_cbtn={liberar:'Confirmar liberação',iniciar:'Confirmar início',conferencia:'Confirmar envio',encerrar:'Confirmar encerramento'}[pa?pa.fn:'']||'';
   v.pan_back=()=>self.setState({pa:null});
@@ -814,7 +836,7 @@ function EXTRAVALS(self,v){
       const ins=(a.ins||[]).map(x=>({g:x.g,p:x.p.replace(/ · (variedade|híbrido) do cultivo$/,' '+c.var),dose:x.dose,un:x.un,tot:cenQtd(x.dose,c.area),sit:'Reserva ao liberar'}));
       const cj=(OSD.nova.conj||{})[a.op]||null;
       const no={id,novo:true,keys:[cur.cult+'|'+cur.atv],tipo:(a.op===a.nome?a.nome:a.op+' · '+a.nome),talhao:c.local,area:c.area,etapa:'A liberar',selos:[],
-        faz:'Santa Rita',saf:s.mf,obs:'',agua:false,ins,semins:'',bloq:null,aviso:'',dono:OS_AGRO,prazo:'liberar',
+        faz:'Santa Rita',saf:s.mf,cultura:c.cultura||'',obs:'',agua:false,ins,semins:'',bloq:null,aviso:'',dono:OS_AGRO,prazo:'liberar',
         atv:{op:a.op,nome:a.nome,gat:a.gat||'',orig:pl.nome+' v'+pl.versao,conj:cj?cj.conj:'',rend:cj?cj.rend:0},
         realizado:0,saldo:c.area,resp:'—',versao:'v1',janela:'a partir de '+brd(cur.jan),ap:[],nota:'',
         cond:'Ana (agrônoma) confere, ajusta se precisar e libera; liberar exige a prontidão de máquina, equipe e insumos. Próximo passo: liberar para execução.',

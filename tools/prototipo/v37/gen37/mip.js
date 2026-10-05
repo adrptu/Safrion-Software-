@@ -236,18 +236,14 @@ function mipChecks(s, v, a, c) {
   const L = mipElig(v); u = L.find(x => x.id === a.prod) || null;
   if (!L.length) { tr.push('Sem produto registrado para ' + mipCult(t) + ' × ' + p.alvo.toLowerCase() + ' nesta base.'); return out(); }
   if (!a.prod) { tr.push('Escolha um produto registrado.'); return out(); }
-  if (!u) { tr.push('Sem registro para ' + mipCult(t) + ' × ' + p.alvo.toLowerCase() + '.'); return out(); }
-  if (u.sit === 'Cancelado') tr.push('Registro cancelado: uso proibido.');
-  else if (u.sit === 'Em reavaliação') al.push('Produto em reavaliação na Anvisa.');
-  if (!u.conf) al.push('Uso não conferido na bula: confira antes de emitir.');
   const dose = Number(String(a.dose).replace(',', '.')), area = Number(String(a.area).replace(',', '.'));
-  const fx = mipN(u.dmin, 3) + (u.dmax !== u.dmin ? '–' + mipN(u.dmax, 3) : '') + ' ' + u.un + '/ha';
-  if (!(dose > 0 && isFinite(dose))) tr.push('Informe a dose.'); else if (dose < u.dmin - 1e-9 || dose > u.dmax + 1e-9) tr.push('Dose fora da bula: ' + fx + (u.calda ? ' (calda de 1.000 L/ha)' : '') + '.');
+  const hist = mipApl(s, c).filter(x => x.tal === v.tal && (!a.os || x.os !== a.os));   // aplicação de O.S. cancelada não conta
+  const lg = cenUsoLegal(u ? [u] : [], mipCult(t) + ' × ' + p.alvo.toLowerCase(), dose, u ? u.un : '', u ? hist.filter(x => x.prod === u.id).length : 0);   // regra única (ENG-011)
+  if (!u) { tr.push(lg.tr[0]); return out(); }
+  lg.tr.forEach(x => tr.push(x)); lg.al.forEach(x => al.push(x));
   if (!(area > 0 && isFinite(area))) tr.push('Informe a área.'); else if (area > t.area + 1e-9) tr.push('Área maior que o talhão (' + mipN(t.area, 2) + ' ha).');
   else if (dose > 0 && isFinite(dose) && !(cenQtd(dose, area) > 0)) tr.push('Dose × área dá 0 ' + u.un + ': aumente a área.');   // a liberação recusaria (PRE-REV Y2)
   if (!a.data) tr.push('Informe a data da aplicação.'); else if (a.data < MIPD.hoje) tr.push('Data da aplicação no passado.');
-  const hist = mipApl(s, c).filter(x => x.tal === v.tal && (!a.os || x.os !== a.os));   // aplicação de O.S. cancelada não conta
-  const nap = hist.filter(x => x.prod === u.id).length; if (u.mx && nap >= u.mx) tr.push('Nº máximo de aplicações no ciclo atingido: ' + nap + ' de ' + u.mx + '.');
   const prev = hist.filter(x => x.chave === p.chave && (!a.data || x.data <= a.data)).sort((x, y) => (x.data < y.data ? -1 : 1)).pop();
   if (prev) { const G = MIPD.grupo[prev.prod] || { gr: [], nome: prev.prod }; const com = G.gr.filter(g => u.gr.indexOf(g) >= 0);
     if (com.length) al.push('Rotação: mesmo grupo ' + com.join(' + ') + ' da última aplicação no ' + t.rot + ' (' + mipBr(prev.data) + ' · ' + G.nome + ').'); }

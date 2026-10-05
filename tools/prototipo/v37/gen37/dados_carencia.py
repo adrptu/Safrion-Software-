@@ -113,6 +113,10 @@ def _usos(p):
             out[c] = dict(dias=None, conf=True, na=True, alvos=alvos, txt=na[0]['carencia'])
         else:
             out[c] = dict(dias=None, conf=False, na=False, alvos=alvos, txt=str(us[0]['carencia']))
+    import dados_mip as DM   # Frente E: usos por ha (dose, unidade, nº máximo, conferido) pela mesma derivação do AG-01 (dados_mip.uso)
+    for c, r in out.items():
+        r['fx'] = [dict(dmin=x['dmin'], dmax=x['dmax'], un=x['un'], mx=x['mx'], conf=x['conf'], calda=x['calda'])
+                   for x in (DM.uso(p, u) for u in por[c]) if x]
     return out
 
 
@@ -123,7 +127,7 @@ def _produtos():
         adj = p['classe'] == 'Adjuvante'
         for n in dict.fromkeys(p['nomes_fazenda'] + [p['nome']]):   # ordem estável (set variava com o hash do processo e a página mudava a cada build)
             out[n] = dict(ingr=' + '.join(_ingr(p['ingrediente'])), classe=p['classe'], defn=True, adj=adj, ficha=p['id'],
-                          usos={} if adj else _usos(p))
+                          usos={} if adj else _usos(p), sit=p['situacao'])
     # insumos que não são agrotóxicos (fertilizante, corretivo, semente, muda): fora da carência
     DEF = ('Herbicida', 'Fungicida', 'Inseticida', 'Acaricida', 'Nematicida')
     for pl in D2.PLANOS + DL.PLANOS:
@@ -206,7 +210,10 @@ def card():
         for c, u in p['usos'].items():
             if isinstance(u.get('dias'), int): maxcar[c] = max(maxcar.get(c, 0), u['dias'])
     jan = {o['id']: o['janela'] for o in D.ORDENS + D.ORDENS_LG}
-    return dict(hoje=HOJE, tal=tal, nomes=_nomes(tal), prod=prod, maxcar=maxcar, jan=jan, dest=DESTINOS, quem=QUEM, car0=CAR0,
+    import dados_mip as DM   # Frente E: safra de cada O.S. e aplicações de antes do sistema (caderno de campo: APL sem O.S., ciclo atual do MIP)
+    saf = {o['id']: o['saf'] for o in D.ORDENS + D.ORDENS_LG}
+    apl0 = [dict(tal=a['tal'], p=DM.GRUPO[a['prod']]['nome'], d=a['data'], saf='2026/27') for a in DM.APL if not a['os']]
+    return dict(hoje=HOJE, tal=tal, nomes=_nomes(tal), prod=prod, maxcar=maxcar, jan=jan, saf=saf, apl0=apl0, dest=DESTINOS, quem=QUEM, car0=CAR0,
                 lmr=L['lmr'], lmrf=dict(fonte=L['fonte'], link=L['link'], extraido=L['extraido'], atualizacao=L['atualizacao'], recorte=L['recorte']),
                 fonte_car='bula de referência (Agrofit demonstrativo: usos conferidos em bula pública do ingrediente; não substitui a bula do produto comercial)')
 
@@ -435,6 +442,14 @@ function carMerge(o,co,c){ if(!co||typeof CARD==='undefined') return; try{
   const cc=carColhidoEmCarencia(c,co); if(cc.length){ o.carCol=cc; o.selos=o.selos.concat([{t:'Colhido em carência · conferir',c:'red'}]);
     if(co.etapa==='Em execução'||co.etapa==='Em conferência'){ o.dono=CARD.quem.ag; o.prazo='conferir '+cc.map(x=>x.lote).join(', ')+' (colhido em carência)'; } }
   }catch(e){} }
+// aplicações do produto no talhão (ou na parcela) na safra da ordem, sem a própria: O.S. que já autorizou ou fez a aplicação (Liberadas em diante;
+// cancelada só com apontamento) + caderno de campo (dados_mip.APL sem O.S.). Ordem ainda A liberar não conta: a primeira a liberar ocupa a vaga.
+// Devolve a lista do que contou (OS-…, caderno dd/mm) para a mensagem nomear com quem resolver.
+function carSaf(o){ const s=String((o&&o.osc&&o.osc.novo&&o.osc.novo.saf)||(CARD.saf||{})[o&&o.id]||''); const m=/\d{4}\/\d{2}/.exec(s); return m?m[0]:s; }
+function carNap(c,tid,parc,p,o){ const sf=carSaf(o), FEZ=['Liberadas','Em execução','Em conferência','Encerradas'];
+  const os=Object.keys((c&&c.ordens)||{}).map(k=>c.ordens[k]).filter(h=>h.id!==o.id&&carSaf(h)===sf&&(FEZ.indexOf(h.etapa)>=0||(h.ap||[]).some(a=>a.st!=='Previsto'))
+    &&(h.ins||[]).some(x=>x.p===p)&&carTals(h.talhao).some(y=>y.tid===tid&&(!y.parc||!parc||y.parc===parc))).map(h=>h.id);
+  return os.concat((CARD.apl0||[]).filter(a=>a.tal===tid&&a.p===p&&a.saf===sf).map(a=>'caderno '+a.d.slice(8,10)+'/'+a.d.slice(5,7))); }
 // gancho de teste/inspeção (o script da tela roda isolado): carencia_test.py lê e muda o cenário pelas mesmas funções
 try{ window.__car={carEstado,carAvaliar,carLotes,carBloqColheita,carAvisoAplic,carColhidoEmCarencia,carc_janela,carc_destino,carc_bula,carc_liberar_lote,carJanela,cenGet,cenMudar}; }catch(e){}
 '''
