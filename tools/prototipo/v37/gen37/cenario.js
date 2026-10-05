@@ -52,7 +52,7 @@ function cenUsoLegal(us, rot, dose, un, nap, refs) {   // refs (opcional): o que
   const ft = (L) => L.map(u => cenNum(u.dmin, 3) + (u.dmax !== u.dmin ? '–' + cenNum(u.dmax, 3) : '') + ' ' + u.un + '/ha').filter((x, i, a) => a.indexOf(x) === i).join(' ou ') + (L.some(u => u.calda) ? ' (calda de 1.000 L/ha)' : '');
   if (base.every(u => !u.conf)) al.push('Uso não conferido na bula: confira antes de aplicar.');
   if (!(dose > 0 && isFinite(dose))) tr.push('Informe a dose.');
-  else if (!cmp.length) al.push('Dose em ' + un + '/ha e bula em ' + ft(us) + ': confira a unidade na bula.');
+  else if (!cmp.length) tr.push('Dose em ' + un + '/ha e bula em ' + ft(us) + ': unidade diferente da bula, não dá para conferir a dose; corrija a unidade.');   // trava: dose sem comparação pode passar do máximo (CTL-1 rev. 1)
   else if (!ok.length) tr.push('Dose fora da bula: ' + ft(cmp) + '.');
   const mx = Math.max.apply(null, base.map(u => u.mx || Infinity));
   if (isFinite(mx) && nap >= mx) tr.push('Nº máximo de aplicações no ciclo atingido: ' + nap + ' de ' + mx + (refs && refs.length ? ' (' + refs.join(', ') + ')' : '') + '.');

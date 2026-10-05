@@ -318,7 +318,9 @@ function osc_aprovLib(o){ const hr=cenAgora(), vn=osVn(o.versao);
 // liberar (agrônomo; pode ajustar antes): reserva por lote (cenLiberar); água sem produto libera pela prontidão, sem requisição
 function osc_liberar(c,id,agua,jan){ const o=osc_o(c,id);
   { const cb=carBloqColheita(c,o,'liberar'); if(cb) throw new Error(cb.t); }   // carência (MAPA-CARENCIA-LMR-20261003)
-  if(agua){ if(o.etapa!=='A liberar') throw new Error(id+' não está em A liberar.'); o.etapa='Liberadas';
+  if(agua){ if(o.etapa!=='A liberar') throw new Error(id+' não está em A liberar.');
+    if((o.ins||[]).length) throw new Error(id+' tem produto: exige aprovação agronômica.');   /* o comando não confia no sinal da tela (CTL-1 rev. 3) */
+    o.etapa='Liberadas';
     return {msg:id+' liberada pela prontidão operacional. Água sem requisição no Estoque.'}; }
   let r;
   if(!(o.ins||[]).length){  // sem insumo: libera sem requisição (nada a reservar no Estoque)
@@ -357,16 +359,18 @@ function osc_ajustar(c,id,area,doses,jan,rem,add,lib){ const o=osc_o(c,id); if(o
   const s=String(o.versao||''); const re=/\bv(\d+)\b/g; let m=null, k; while((k=re.exec(s))) m=k;
   const vn=m?'v'+(Number(m[1])+1):'v2'; o.versao=m?s.slice(0,m.index)+vn+s.slice(m.index+m[0].length):(s?s+' · ':'')+vn;
   const hr=cenAgora(); o.osc.aj=(o.osc.aj||[]).concat([{v:vn,at:hr,t:vn+' ajustada por '+OS_AGRO+' às '+hr+(lib?' ao liberar':'')+': '+ch.join('; ')}]);
-  if(!lib) return {msg:id+' ajustada para '+vn+'. A liberação continua impedida.'};
+  if(!lib) return {msg:id+' ajustada para '+vn+'. A liberação continua impedida.'+osUsoAtencao(c,id)};
   const r=osc_liberar(c,id,false,jan);
-  return {msg:String(r.msg).replace(id+' liberada.',id+' ajustada para '+vn+' e liberada.')}; }
+  return {msg:String(r.msg).replace(id+' liberada.',id+' ajustada para '+vn+' e liberada.')+osUsoAtencao(c,id)}; }   /* alertas também no Salvar e liberar (CTL-1 rev. 1) */
 // regra legal na O.S. (liberar e ajustar): a mesma do AG-01 (cenUsoLegal), por produto × cultura de cada talhão (ou parcela) da ordem.
 // Fertilizante, corretivo, semente, muda e adjuvante ficam fora do registro de agrotóxico; uso só com dose por semente (TS) não é comparado
 // por ha. Produto fora de todo cadastro conta como agrotóxico, salvo se o plano o classifica (grupo) como outra coisa.
 function osUsoItem(c,o,x,al){ const P=CARD.prod[x.p]; if(P?(!P.defn||P.adj):(x.g&&!/^(Herbicida|Fungicida|Inseticida|Acaricida|Nematicida)/.test(x.g))) return '';
   const ts=carTals(o.talhao); if(!ts.length) return x.p+': o talhão '+(o.talhao||'da ordem')+' não está no cadastro; o registro é por cultura.';
   const cv=String((o.osc&&o.osc.novo&&o.osc.novo.cultura)||'').split(' ')[0];   // cultura do cultivo da ordem nova (outra safra); senão a do talhão
-  for(const t of ts){ const T=CARD.tal[t.tid]; const cu=cv||T.cult; const u=P?(P.usos||{})[cu]:null; if(u&&!(u.fx||[]).length) continue;
+  for(const t of ts){ const T=CARD.tal[t.tid]; const cu=cv||T.cult; const u=P?(P.usos||{})[cu]:null;
+    if(u&&!(u.fx||[]).length){ if(/tratamento de sementes/i.test(o.tipo||'')) continue;   /* uso só TS: só em ordem de tratamento de sementes (CTL-1 rev. 2) */
+      return x.p+' em '+carNome(t.tid)+(t.parc?' ('+t.parc+')':'')+': registro em '+String(cu).toLowerCase()+' só para tratamento de sementes.'; }
     const us=((u&&u.fx)||[]).map(f=>Object.assign({sit:P.sit},f));
     const ap=carNap(c,t.tid,t.parc,x.p,o); const R=cenUsoLegal(us,String(cu||'a cultura').toLowerCase(),x.dose,x.un,ap.length,ap);
     if(al) R.al.forEach(a=>{ const s=x.p+': '+a.charAt(0).toLowerCase()+a.slice(1); if(al.indexOf(s)<0) al.push(s); });
@@ -648,7 +652,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{};
       self.setState({pa:Object.assign({},cur,{errs,confVazio:true,err:'A ordem fica sem nenhum produto. Clique em '+v.pan_ajsbtn+' de novo para confirmar, ou inclua um produto.'})}); return; }
     osRun(self,c=>osc_ajustar(c,o.id,ar,ds,o.janela,rem,add,ajLib),{pa:null}); };
   const insTxt=(o.ins||[]).map(x=>x.p+' '+nd(x.tot)+' '+x.un).join(', ');
-  v.pan_ct={liberar:o.agua?('Liberar '+o.id+': janela, bomba e energia confirmadas; água sem requisição no Estoque.'):('Liberar '+o.id+' (versão '+o.versao+'): ao confirmar, '+OS_AGRO+' aprova esta versão e libera; '+(insTxt?'a requisição reserva no Estoque, por lote: '+insTxt+'.':'sem insumos a reservar, nenhuma requisição no Estoque.')+osUsoAtencao(cenC,o.id)),iniciar:'Iniciar '+o.id+' agora, na janela '+o.janela+(o.r&&(o.ins||[]).length?': insumos com '+o.resp+', confirmados no app.':'.'),
+  v.pan_ct={liberar:o.agua?('Liberar '+o.id+': janela, bomba e energia confirmadas; água sem requisição no Estoque.'):('Liberar '+o.id+' (versão '+osVn(o.versao)+'): ao confirmar, '+OS_AGRO+' aprova esta versão e libera; '+(insTxt?'a requisição reserva no Estoque, por lote: '+insTxt+'.':'sem insumos a reservar, nenhuma requisição no Estoque.')+osUsoAtencao(cenC,o.id)),iniciar:'Iniciar '+o.id+' agora, na janela '+o.janela+(o.r&&(o.ins||[]).length?': insumos com '+o.resp+', confirmados no app.':'.'),
     conferencia:'Enviar '+o.id+' para conferência: execução física concluída ('+nf(o.realizado)+' ha).',encerrar:'Encerrar '+o.id+': apontamentos enviados, consumo baixado e nada em custódia.'}[pa?pa.fn:'']||'';
   v.pan_cbtn={liberar:'Confirmar liberação',iniciar:'Confirmar início',conferencia:'Confirmar envio',encerrar:'Confirmar encerramento'}[pa?pa.fn:'']||'';
   v.pan_back=()=>self.setState({pa:null});

@@ -40,6 +40,11 @@ ok('N3 saldo insuficiente (Glifosato 100 L para 320 L): recusa e nenhum registro
 cenReset(); cenMudar(null,k=>{ k.ordens['OS-W']={id:'OS-W',tipo:'Irrigação · água',talhao:'P2',area:80,etapa:'A liberar',versao:'v1',realizado:0,saldo:80,resp:'João',ins:[],req:null,selos:[],ap:[],reservado:false}; return {msg:''}; });
 r=cenMudar(null,k=>osc_liberar(k,'OS-W',true,'')); 
 ok('N4 água sem produto: Liberadas pela prontidão, sem registro de agrônomo', cenGet().ordens['OS-W'].etapa==='Liberadas'&&ev('OS-W').length===0&&!/aprovada|agrônom/.test(r.msg), r);
+// N4b · revisão do CTL-1, achado 3: o sinal "água" vindo da tela não libera ordem com produto (o comando confere); N4c · nem ordem já liberada (M16)
+r=cenMudar(null,k=>osc_liberar(k,'OS-0430',true,''));
+ok('N4b sinal água na OS-0430 (herbicidas): recusa "exige aprovação agronômica", segue A liberar, sem CMD-42 e sem reserva', /OS-0430 tem produto: exige aprovação agronômica/.test(r.erro||'')&&cenGet().ordens['OS-0430'].etapa==='A liberar'&&ev('OS-0430').length===0&&!cenGet().lotes['Glifosato 480|G26-14'].reservado, r);
+r=cenMudar(null,k=>osc_liberar(k,'OS-W',true,''));
+ok('N4c água na OS-W já liberada: recusa "não está em A liberar"', /OS-W não está em A liberar/.test(r.erro||''), r);
 // N5 · ajuste sem liberar (liberação impedida por outro motivo): grava a versão, sem aprovação nem liberação
 r=cenMudar(null,k=>osc_ajustar(k,'OS-0430',150,{},'',[],[],false));
 ok('N5 ajustar sem liberar: v2 gravada, etapa A liberar, nenhum CMD-42/CMD-06', cenGet().ordens['OS-0430'].etapa==='A liberar'&&ev('OS-0430').length===0&&/v2/.test(cenGet().ordens['OS-0430'].versao), r);

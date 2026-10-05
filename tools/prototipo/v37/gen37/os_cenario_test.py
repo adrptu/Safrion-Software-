@@ -137,11 +137,12 @@ try:
         T.J(f"""(()=>{{const i=document.querySelector({json.dumps(sel)}); const P=i.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype;
           Object.getOwnPropertyDescriptor(P,'value').set.call(i,{json.dumps(val)}); i.dispatchEvent(new Event('input',{{bubbles:true}})); i.dispatchEvent(new Event('change',{{bubbles:true}}));}})()"""); time.sleep(.3)
     oa = nova('S27SF', 'd1', 'm3'); T.btn('Ajustar antes de liberar'); setin('Dose de Atrazina 500 (L/ha)', '4'); T.btn('Salvar e liberar'); pa = T.pan(); T.btn('Voltar'); T.fechar()
-    ob = nova('S2627', 'c1', 'a7'); T.btn('Liberar para execução'); cb = T.pan(); T.btn('Confirmar liberação'); tb = T.toast()
+    ob = nova('S2627', 'c1', 'a7'); cb = T.pan()   # revisão do CTL-1, achado 1: unidade diferente da bula agora trava (antes só alerta)
     T.ok(oa and 'Atrazina 500' in pa and 'sem registro' not in pa and 'fora da bula' not in pa
-         and 'Atenção (não bloqueia): Inseticida B: dose em L/ha e bula em 0,8–1 kg/ha: confira a unidade na bula.' in cb and f'{ob} liberada' in tb,
-         'E1 14e: Nova ordem da Safrinha 2027 (milho no T1-A) aceita a Atrazina sem erro junto ao campo; Nova ordem c1·a7 mostra o alerta do Inseticida B na confirmação e libera',
-         (oa, pa[-300:], ob, cb[-400:], tb))
+         and 'Liberar bloqueado: Inseticida B 0,3 L/ha em T1 (T1-A): dose em L/ha e bula em 0,8–1 kg/ha: unidade diferente da bula' in cb
+         and not T.temb('Liberar para execução') and T.temb('Ajustar antes de liberar'),
+         'E1 14e: Nova ordem da Safrinha 2027 (milho no T1-A) aceita a Atrazina sem erro junto ao campo; Nova ordem c1·a7 bloqueia a liberação pela unidade do Inseticida B (L/ha × bula em kg/ha) e oferece o ajuste',
+         (oa, pa[-300:], ob, cb[cb.find('PRÓXIMO'):][:400]))
     T.fechar()
     # 15 · sem erro de script
     er = T.erros(); T.ok(not er, 'sem erro de script', er)

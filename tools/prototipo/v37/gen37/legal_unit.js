@@ -32,7 +32,7 @@ for(const d of [1.5,3]){ const c=C(); const r=T(()=>osc_ajustar(c,'OS-0430',160,
   ok('P10 cultura do cultivo da ordem (safrinha de milho no T1-A): Atrazina 500 3 L/ha passa na regra', e1==='', e1);
   ok('N10 a mesma Atrazina sem a cultura do cultivo cai na cultura atual do talhão (soja) e é recusada', /sem registro para soja/.test(e2), e2); }
 { const c=C(); const e=osUsoItem(c,{id:'X',talhao:'T1-A'},{g:'Inseticidas',p:'Inseticida B',dose:0.3,un:'L'}); const k=cenUsoLegal([{sit:'Vigente',dmin:0.8,dmax:1,un:'kg',mx:2,conf:true}],'soja',0.3,'L',0);
-  ok('P11 unidade da ordem (L/ha) diferente da bula (kg/ha): alerta "confira a unidade", sem trava', e===''&&k.tr.length===0&&/confira a unidade/.test(k.al.join()), [e,k]); }
+  ok('N11 unidade da ordem (L/ha) diferente da bula (kg/ha): trava "unidade diferente da bula" (antes só alerta; CTL-1 rev. 1)', /^Inseticida B 0,3 L\/ha em T1 \(T1-A\): dose em L\/ha e bula em 0,8–1 kg\/ha: unidade diferente da bula/.test(e)&&k.tr.length===1&&/corrija a unidade/.test(k.tr[0]), [e,k]); }
 { const c=C(); const e=osUsoItem(c,{id:'X',talhao:'T1-A'},{g:'Sementes',p:'Semente de milho Híbrido AG 8700',dose:20,un:'kg'});
   ok('P12 produto fora do cadastro classificado pelo plano como semente fica fora da regra', e==='', e); }
 // ---- negativos
@@ -83,10 +83,20 @@ const nova=(c,id,tal,ins,saf)=>osc_nova(c,{id,tipo:'Teste',talhao:tal,area:160,v
 // D3 · O.S. cancelada sem execução continua fora da conta; A liberar também
 { const c=cenClone(CEN0); nova(c,'OS-0440','Pivô 6',[{p:'Abamectina 18 EC',dose:0.5,un:'L',tot:31.4}]); osc_cancelar(c,'OS-0504','teste',['','','']);
   const e=T(c,'OS-0440'); ok('D3 OS-0504 cancelada: Pivô 6 tem 1 de 2 (caderno) e a nova libera', e==='', e); }
-// A1 · alertas recolhidos para a confirmação (antes descartados): unidade do Inseticida B e uso não conferido
-{ const c=cenClone(CEN0); const o={id:'X',talhao:'T1-A',ins:[{p:'Fungicida A',dose:0.5,un:'L'},{p:'Inseticida B',dose:0.3,un:'L'},{p:'Cletodim 240',dose:0.4,un:'L'}]};
+// A1 · alertas recolhidos para a confirmação (antes descartados): produto em reavaliação e uso não conferido (M19 da revisão do CTL-1)
+{ const c=cenClone(CEN0); const E='Epoxiconazol + piraclostrobina 50+133 SE'; const o={id:'X',talhao:'T1-A',ins:[{p:'Fungicida A',dose:0.5,un:'L'},{p:E,dose:0.5,un:'L'},{p:'Cletodim 240',dose:0.4,un:'L'}]};
   const al=[]; const e=osUsoErro(c,o,al);
-  ok('A1 sem trava e com 2 alertas: unidade do Inseticida B e Cletodim não conferido (T1 e T1-A não repetem)', e===''&&al.length===2&&/^Inseticida B: dose em L\/ha e bula em 0,8–1 kg\/ha/.test(al[0])&&/^Cletodim 240: uso não conferido/.test(al[1]), [e,al]); console.log('       ', JSON.stringify(al)); }
+  ok('A1 sem trava e com 3 alertas: Epoxiconazol em reavaliação e não conferido, Cletodim não conferido (T1 e T1-A não repetem)', e===''&&al.length===3&&al[0]===E+': produto em reavaliação na Anvisa.'&&/^Epoxiconazol .*: uso não conferido/.test(al[1])&&/^Cletodim 240: uso não conferido/.test(al[2]), [e,al]); console.log('       ', JSON.stringify(al)); }
+// R1 · revisão do CTL-1, achado 1: Inseticida B (bula em kg/ha) incluído em L/ha no ajuste é recusado em qualquer dose; nada gravado
+for(const d of [0.3,5]){ const c=cenClone(CEN0); let m=''; try{ osc_ajustar(c,'OS-0430',10,{},'',[],[{p:'Inseticida B',dose:d,un:'L',g:'Inseticidas'}],true); }catch(x){ m=x.message; } const o=c.ordens['OS-0430'];
+  ok('R1 ajuste com Inseticida B '+d+' L/ha: recusado pela unidade, v1 e A liberar, sem CMD-42', /unidade diferente da bula/.test(m)&&o.etapa==='A liberar'&&!/v2/.test(o.versao)&&!((o.osc||{}).ev||[]).length, [m,o.etapa,o.versao]); }
+// R2 · achado 2: produto registrado só para tratamento de sementes recusado como pulverização; aceito em ordem de tratamento de sementes
+{ const c=cenClone(CEN0); let m=''; try{ osc_ajustar(c,'OS-0430',4,{},'',[],[{p:'Fungicida TS',dose:5,un:'L',g:'Fungicidas'}],true); }catch(x){ m=x.message; }
+  const ts={id:'X',tipo:'Tratamento de sementes',talhao:'T1-A',ins:[{p:'Fungicida TS',dose:0.1,un:'L'}]};
+  ok('R2 Fungicida TS 5 L/ha na dessecação da soja: recusado ("só para tratamento de sementes"); na ordem de tratamento de sementes passa', m==='Fungicida TS em T1 (T1-A): registro em soja só para tratamento de sementes.'&&c.ordens['OS-0430'].etapa==='A liberar'&&osUsoErro(c,ts)==='', [m,osUsoErro(c,ts)]); }
+// R3 · achado 1 (complemento): o Salvar e liberar do ajuste devolve os alertas (antes só a confirmação do Liberar mostrava)
+{ const c=cenClone(CEN0); let m=''; try{ m=osc_ajustar(c,'OS-0430',10,{},'',[],[{p:'Cletodim 240',dose:0.4,un:'L',g:'Herbicidas'}],true).msg; }catch(x){ m='ERRO '+x.message; }
+  ok('R3 ajuste com Cletodim (uso não conferido): liberado e a mensagem traz "Atenção (não bloqueia): Cletodim 240: uso não conferido"', /ajustada para v2 e liberada/.test(m)&&/Atenção \(não bloqueia\): Cletodim 240: uso não conferido/.test(m), m); }
 // U1 · erro junto ao campo: com a ordem do cenário, a tela dá o mesmo resultado do comando (com o objeto da tela, não)
 { const c=cenClone(CEN0); osc_nova(c,{id:'OS-0440',tipo:'Herbicida',talhao:'T1-A',area:160,versao:'v1',resp:'Marcos',saf:'Safrinha 2027',cultura:'Milho safrinha',ins:[{g:'Herbicidas',p:'Atrazina 500',dose:3,un:'L',tot:480}],selos:[]});
   const co=c.ordens['OS-0440'], tela=osMerge(co.osc.novo,co,c), x={p:'Atrazina 500',un:'L',dose:3,g:'Herbicidas'};
