@@ -1,0 +1,69 @@
+== BEN-03
+est 888.888889 agua 111.111111 soma 1000.000000 q4 888.8889 111.1111 q3 888.889 111.111
+== empate (C-01 em 6 casas)
+exato 10.8024665 est 10.802467 agua=m-est 1.543209 direta q6 1.543210 soma direta 12.345677
+== quantizacao dupla
+q6 0.000500 q3(q6) 0.001 q3 direto 0.000
+R-F04 0.000001
+== BEN-1 OB-0110
+entrada 12000
+A tara 576.0 liq 9600.0 B tara 108.0 liq 1800.0 desc 600 soma 12000.0 dif 0.0
+recup 95.00 A 80.00 B 15.00 descarte 5.00
+rateio L39-120 ['2408', '2384', '2392', '2416'] soma 9600.000000
+rateio L39-121 ['451.5', '447', '448.5', '453'] soma 1800.000000
+rateio descarte ['150.5', '149', '149.5', '151'] soma 600.000000
+caixas sugeridas 12000 570 9270 440.325 441 6140 291.65 292
+h-linha 6140 2.558333 exib 2.56 HH 15.350000 12000 h 5 HH 30 kg/HH 400
+tolerancia pesada 0,1% de 12000 12.000 alcada pct 0,5% 60.000
+B bruto 1868 liq 1760.0 dif 40.0 pct 0.333333
+B bruto 1808 liq 1700.0 dif 100.0 pct 0.833333
+A bruto 10177 liq 9601.0 dif -1.0 pct -0.008333
+A +100 soma pesada 12100.0 limite 12012.000
+liq por caixa B 80 un 22.5 desvio % 12.500000
+pallet: tara 776.0 liq 9600.0 sem pallet liq 9800.0 kg/cx 20.416667 desvio % 2.083333
+teto sintetico: entrada 40000 pct 200.000 banda 40.000 dif 150 pct 0.375000
+caixas: CX26-01 270 +30 = 300 - 292 = 8 441>300
+custo BEN-2 4296.00 R$/kg entrada 0.358000 R$/kg vendavel 0.376842 0.3768
+== BEN-3 grão
+L38-120 48000 u mistura 17.200000000000 media simples 17.28
+parcial est 39378.139535 agua 1521.860465 dif 278.139535
+final imp 0 est 46213.953488 agua 1786.046512 dif 283.953488 dif% 0.591570 recup 99.385568
+final imp 250 est 45973.255814 agua 1776.744186 dif 43.255814 dif% 0.090116 recup 99.365567
+final imp 100 est 46117.674419 agua 1782.325581 dif 187.674419 dif% 0.390988 recup 99.377566
+PRD-02 contra est 46134.181828 agua 1865.818172 dif 204.181828 MS 175.900 msp 39744.000 mss 39568.10
+ordem invertida igual True
+uf* 13.85129544959721315044633137382974 est com uf* q2 46133.488102 q4 46134.184265
+banda imp 0 157.551109
+banda imp 250 156.980530
+banda imp 100 157.322877
+u_sai 13.9 est 45919.860627 dif -10.139373 pct -0.021124 banda 156.791940
+u_sai 13.4 est 45654.734411 dif -275.265589 pct -0.573470 banda 155.857661
+ui 17,7 est 45695.639535 dif -234.360465 pct -0.488251 banda 156.657720
+BEN-03 889 dif -0.111111 banda 3.098765
+sc 45930 765.500000
+sc 221400 3690.000000
+sc 2305200 38420.000000
+sc 2072700 34545.000000
+sc 191400 3190.000000
+sc 4120 68.666667
+sc 7100 118.333333
+sc 48000 800.000000
+sc 211900 3531.666667
+sc 2098 34.966667
+soja disp 2072700 34545.0 reserva sc 3875
+== BEN-4 café
+OB-0114 est 2106.818182 agua 2013.181818 dif 8.818182 pct 0.214034 recup 99.581446 banda pesada 4.120
+OB-0104 entrada 438600 saidas 438600 rend 50.478796 0.504787961696
+rateio L27-013 ['116807.934337', '104592.065663'] 221400.000000
+rend base seca coco 12 benef 11,4 50.822970
+alcada CAF-BEN pct 2193.000 tol 438.600 600 pct 0.136799
+disp L27-013 apos 30000 191400 3190 PV-028 kg 30000
+bloqueado cafe 98,17? 98.173111
+C-02 fechamento 0.540853 0.093580
+== semanas ISO datetime.IsoCalendarDate(year=2026, week=39, weekday=3) datetime.IsoCalendarDate(year=2026, week=38, weekday=5) datetime.IsoCalendarDate(year=2026, week=38, weekday=2) datetime.IsoCalendarDate(year=2026, week=38, weekday=7) datetime.IsoCalendarDate(year=2026, week=39, weekday=2) datetime.IsoCalendarDate(year=2026, week=39, weekday=4)
+== extras
+K42 falta 141 PC 676.80
+K50 soma m*u 825600.0 soma m 48000
+K08 HH 6140 15.350000 q2 h 2.56
+PV-030 saldo kg 240000 falta apos RS 7500 125.0
+OB-0104 soma saidas 438600

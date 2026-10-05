@@ -1,0 +1,4 @@
+regras 60 casos 59 testes 45 ACs 59
+referencias sem alvo []
+AC duplicados []
+trava sem dano []
