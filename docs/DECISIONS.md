@@ -23,6 +23,8 @@ Registradas no capítulo 72 do PRD v3.9 (26/09/2026).
 | DEC-2609-13 | Estoque e app de campo prontos para os primeiros testes com clientes | PRD 72.2 |
 | DEC-2609-14 | Cadastros completos para a inteligência do sistema | PRD 72.2 |
 | DEC-2709-01 | Início do software real (F0 e F1) só com dados fictícios; decisões técnicas delegadas a Claude e Codex juntos. Continuam com o proprietário: custo, conta e contrato, dados reais, ERP real, publicação a usuários reais e aceite da candidata antes da produção | `docs/parceria/rodadas/R-006-skills-ferramentas-plano.md` §7 |
+| DEC-0510-01 | Protótipo em regime leve: branch única, sem PR por incremento, revisão sem bloqueio; rigor completo só no software real | `AGENTS.md` 3.5 |
+| DEC-0510-02 | Unidade junto do valor, na célula ("62.500 kg", "160,00 ha"), sem coluna nem filtro de unidade; ordenação pelo número. Rótulos de custo: "Custo R$/h", "Custo R$/ha", "Custo R$/kg" | issue 1, comentário 5997108200 |
 
 ## Decisões pendentes do proprietário
 
@@ -42,6 +44,9 @@ Até a decisão, vale o comportamento conservador descrito no próprio PRD.
 | PEND-01.. | Pendências da revisão v3.10 (confiabilidade transacional, offline e desempenho), entre elas a proposta de pré-autorização por limiares, **não aprovada** | PRD 73.12 (em revisão) |
 | PEND-REPO-01 | Em 27/09 o proprietário informou "Fiz upgrade no git", e a CI remota voltou a rodar. Plano exato ainda não conferido; se permitir, aplicar a proteção da `main` (`tools/github/configurar_protecao.sh`). Texto anterior: **só se o plano da conta for Free** (ainda não verificado): proteção da `main` imposta pelo servidor em repositório privado exige GitHub Pro (custo mensal da conta). Opções: contratar o Pro; ou manter privado sem proteção imposta, com a disciplina de pull request, CI e parecer escrito. Tornar público só por decisão expressa. **Até decidir:** privado, sem proteção imposta, disciplina de processo. | `docs/STATUS.md`, bloqueio 2 |
 | PEND-DS-01.. | Pendências do design system (modo escuro, marca, fontes de títulos e outras) | PRD 74.12 (em revisão) |
+| PEND-OS-01 | O.S. sem etapa de revisão (pedido de 01/10) × DEC-2609-05. **Padrão adotado:** "Liberar para execução" é o "Aprovar e liberar" do PRD 41.3, gravando aprovado por (CMD-42) e liberado por (CMD-06) em separado | issue 1, comentário 6001191813 |
+| PEND-CTL-02 | Quem aprova ajuste de estoque e consumo acima da custódia. **Padrão adotado:** o gestor; se ele mesmo registrou a contagem, fica revisão posterior (PRD 2.1) | idem |
+| PEND-CTL-03 | Entrada transversal de Controle (previsto × realizado). **Padrão adotado:** vem depois do CONTROLE-01 | idem |
 
 ## Decisões de arquitetura (ADR)
 
