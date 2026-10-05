@@ -1,0 +1,11 @@
+$ CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdp9333.lock env CDP_GL=1 timeout 900 python3 app_mb02det_test.py
+  OK  Fungicida A: "entregue 160 L · consumido 95 L" (unidade em todos os números)
+  OK  Adjuvante: "fora da REQ-035" coerente com o título Insumos · REQ-035 (sem "sem requisição")
+  OK  apontamentos: os 4 últimos e "3 turnos anteriores"
+  OK  ocorrências: as 2 mais recentes e "+ 2 anteriores"
+  OK  7 turnos e 4 ocorrências longas cabem na altura (excesso 0 px)
+  OK  OS-0424 feita e sem sobra: "Aguardar encerramento" e rodapé Voltar às ordens (Voltar às ordens)
+  OK  OS-0424 sem saldo não oferece Iniciar turno
+  OK  sem erros JS []
+8/8 ok · FALHAS: 0
+[exit 0]

@@ -1,0 +1,37 @@
+erros JS? nenhum
+etapa inicial: 1 Escolha a safra · etapa atual
+impedimentos: 1 Escolha a safra · etapa atual | 2 Defina cultivos e planos · impedida Escolha a safra | 3 Defina os rendimentos · impedida Escolha a safra | 4 Confira o plano operacional · impedida Escolha a safra | 5 Dimensione os recursos · impedida Escolha a safra | 6 Confira a demanda de insumos · impedida Escolha a safra
+safras: ['Safra 2026/27', 'Safrinha 2027', 'Safra 2025/26', 'Safra Mamão 2026/27']
+clicar etapa 4 sem safra: sem caminho de 1 para 4 
+abrir safra: ok Safra aberta: Safra 2026/27 · etapa 2
+etapa agora: 2 Defina cultivos e planos · etapa atual
+k2: 9 cultivos · 1.165 ha · 5 com plano · 4 sem plano · 1 ajuste local
+selecionados: 4 · form aberto? False
+aplicar em lote: ok · painel: Aplicar plano a 4 cultivos
+opções: ['Escolha o plano', 'Soja alta tecnologia v6 · 8 atividades', 'Soja padrão v3 · 4 atividades']
+plano sugerido: Soja alta tecnologia v6 · 8 atividades
+aplicar sem plano: ok Escolha o plano a aplicar.
+aplicar: ok Soja alta tecnologia v6 aplicado a 4 cultivos. Plano operacional, recursos e demanda recalculados.
+k2 após: 9 cultivos · 1.165 ha · 9 com plano · 1 ajuste local
+confirmação: Isto substitui o plano de 1 cultivo. O plano padrão e os demais cultivos não mudam.
+Voltar
+Confirmar substituição
+voltar/cancelar: ok ok
+painel local: Insumos e doses de T1-B · Soja 62 X, 152 ha
+grupos/gatilhos: ['DAP −20', 'DAP −1', 'DAP 0', 'DAP +20', 'DAP +25', 'DAP +45', 'DAP +60', 'DAP +118']
+ajuste local existente: False
+aviso não salvo: True
+salvar local: 1 selecionado | 2 doses alteradas em T1-B. Plano operacional, recursos e demanda recalculados; o plano padrão e os outros talhões não mudaram.
+k2 ajustes: 9 cultivos · 1.165 ha · 9 com plano · 2 ajustes locais
+rendimentos linhas: 43
+rendimento calculado no formulário: 4,50
+rend salvo: Rendimento de Colheita · Colhedora Axial-Flow 7250 + trator com graneleiro: 4,50 ha/h · R$ 254,67/ha. Plano operacional e recursos recalculados. · linha: Colheita de grãos Colheita Colhedora Axial-Flow 7250 + trator com graneleiro 4,50 1.146,00 254,67 0,0675 Largura × velocidade 10 5,63 80 — — — Soja alta tecnologia, Soja padrão, Milho safrinha, Feijão pivô
+k4: 9.034 ha trabalhados · 905 horas-conjunto · 1.716 horas-homem · 12.726 L de diesel · R$ 2.868.787,87 · R$ 2.462,48/ha da safra · clique numa linha para ver os meses dela
+matriz: []
+k5: Colhedoras: precisa de 2, tem 1 em fev/27 — em vermelho na visão por mês
+k6: Valor da necessidade líquida R$ 1.273.146,10 · 18 insumos a comprar · solicitação SOL-2026-07 em cotação
+enviar: ok Complemento SOL-2026-07-C1 enviado com só a diferença: 13 insumos, R$ 893.566,10. A solicitação original não foi duplicada.
+enviar de novo: NÃO ACHEI: Enviar para cotação Complemento SOL-2026-07-C1 enviado com só a diferença: 13 insumos, R$ 893.566,10. A solicitação original não foi duplicada.
+registro compartilhado: ['SOL-2026-07', 1, 18]
+abrir compra: ok /CMP.dc.html#sol=SOL-2026-07&saf=S2627 2 Confira a demanda · etapa atual
+compra mostra o complemento: SOL-2026-07 · Safra 2026/27 · enviada em 23/09/2026 10:40 por Ana (gestora) · 18 insumos a comprar · R$ 1.273.146,10 a preço de referência · 0 insumos cobertos por estoque e pedidos

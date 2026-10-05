@@ -1,0 +1,3 @@
+$ CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdp9333.lock python3 ../ferramentas/acoes_duplicadas.py . /tmp/tab11/duplicadas.json
+RESULTADO: 144 páginas · 0 com ação repetida · erros 0
+[exit 0]

@@ -1,0 +1,4 @@
+$ CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdp9333.lock env CDP_GL=1 timeout 900 python3 pltest.py
+{'dec_abre': True, 'dec_sem_evid_antes': True, 'cond_evid': True, 'exige_evid': True, 'dec_salva': True, 'dec_aviso': True, 'link_talhao': True, 'nec028': True, 'janela_recalc': True, 'programa': True, 'sem_ids_colididos': True}
+OK
+[exit 0]

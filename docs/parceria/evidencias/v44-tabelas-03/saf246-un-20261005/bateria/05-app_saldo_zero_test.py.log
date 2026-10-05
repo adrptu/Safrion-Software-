@@ -1,0 +1,15 @@
+$ CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdp9333.lock env CDP_GL=1 timeout 900 python3 app_saldo_zero_test.py
+  OK  MB-01: com turno na OS-0421 a OS-0424 nomeia "Fechar turno · OS-0421" → MB-03 (MB-03.dc.html)
+  OK  MB-02det OS-0424: próxima ação e rodapé "Fechar turno · OS-0421" (Fechar turno · OS-0421)
+  OK  OS-0424 feita: saldo 0 ha e nenhum turno aberto
+  OK  MB-01: OS-0424 com saldo 0 não oferece Iniciar turno; passo "Devolver sobra"
+  OK  MB-01: nenhum botão Iniciar na OS-0424; rodapé segue na OS-0421 (Iniciar turno · OS-0421)
+  OK  MB-02det OS-0424: FALTA "devolver a sobra ao Rui: Fungicida A 1 L" e rodapé "Devolver sobra" (Devolver sobra)
+  OK  MB-05: a sobra da OS-0424 aparece em "Com você" com o passo de devolução
+  OK  MB-03 sem turno: a OS-0424 não é oferecida para iniciar
+  OK  guarda do app: iniciar sem saldo é recusado: A OS-0424 não tem área a fazer (saldo 0 ha). Nada a iniciar.
+  OK  MB-03 com turno numa ordem sem saldo: sem formulário e rodapé "Descartar turno" (Descartar turno)
+  OK  Descartar turno libera o app: Turno da OS-0424 descartado sem apontamento: a ordem não tem
+  OK  sem erros JS []
+12/12 ok · FALHAS: 0
+[exit 0]
