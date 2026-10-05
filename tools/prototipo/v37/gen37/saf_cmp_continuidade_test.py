@@ -61,8 +61,9 @@ try:
     chk('2 SAF etapa 6 (CAL-01): R$ 1.098.502,50 · 8 insumos a comprar · ainda não enviada',k6=='Valor da necessidade líquida R$ 1.098.502,50 · 8 insumos a comprar · ainda não enviada',k6)
     clk('Expandir tudo'); mp=rowtxt('MAP 11-52')
     # TABELAS-FOCO (5983172395): necessidade, unidade, data da falta e "usado antes" em colunas próprias
-    mpc=[cel('MAP 11-52',k) for k in ('Necessidade líquida','Unidade','Falta em','Usado antes da compra')]
-    chk('3 SAF MAP 11-52: 101.440 kg com falta em 20/02/2027 · estoque apto 90.000 usado antes',mpc==['101.440','kg','20/02/2027','90.000'],(mpc,mp))
+    # a unidade fica junto do valor (decisão do proprietário, 05/10/2026); data da falta e "usado antes" em colunas próprias
+    mpc=[cel('MAP 11-52',k) for k in ('Necessidade líquida','Falta em','Usado antes da compra')]
+    chk('3 SAF MAP 11-52: 101.440 kg com falta em 20/02/2027 · estoque apto 90.000 usado antes',mpc==['101.440 kg','20/02/2027','90.000 kg'],(mpc,mp))
     rowclick('MAP 11-52'); m_saf=memo(); fechar()
     chk('4 SAF memória MAP: estoque apto, usos da Safra 2026/27 antes, resultado com a data',m_saf[:1]==['Estoque apto hoje: 90.000 kg'] and any(l.startswith('15/10/2026 · Safra 2026/27 · 1 uso · −') for l in m_saf)
         and m_saf[-1]=='Necessidade líquida = soma das faltas desta safra = 101.440 kg · falta a partir de 20/02/2027',m_saf)
@@ -125,14 +126,19 @@ try:
     hs=J("[...[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent).querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/\\s+/g,' ').replace(/ ⇅.*$/,'').trim())") or []
     # TABELAS-FOCO item 6: com uma variável por coluna a tabela pode rolar dentro da caixa; a página não rola e "1º uso" segue logo depois do insumo (v3.8)
     pg=J("[document.documentElement.scrollWidth, innerWidth]")
-    chk('23 SAF etapa 6 (2026/27, grupos recolhidos): a tabela rola dentro da caixa, a página não; "1º uso" logo depois de Grupo | Insumo (v3.8)',pg[0]<=pg[1]+1 and w['box']<=1230 and len(hs)>3 and [h.upper() for h in hs[:3]]==['GRUPO','INSUMO','1º USO'],(w,pg,hs[:4]))
+    # com a rolagem no início, as colunas essenciais da compra ficam à vista dentro da caixa (não basta a página não rolar)
+    vis=J("""(()=>{const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent); const box=t.parentElement; box.scrollLeft=0; const R=box.getBoundingClientRect();
+      return [...t.querySelectorAll('[role=columnheader]')].filter(h=>R.right+0.5>=h.getBoundingClientRect().right).map(h=>h.innerText.replace(/[⇅▾▴]/g,'').replace(/\\s+/g,' ').trim().toUpperCase());})()""") or []
+    ess=['GRUPO','INSUMO','1º USO','NECESSIDADE LÍQUIDA','FALTA EM']
+    chk('23 SAF etapa 6 (2026/27, grupos recolhidos): a página não rola; "1º uso" logo depois de Grupo | Insumo (v3.8); Necessidade líquida e Falta em à vista sem rolar a tabela',
+        pg[0]<=pg[1]+1 and len(hs)>3 and [h.upper() for h in hs[:3]]==['GRUPO','INSUMO','1º USO'] and all(x in vis for x in ess),(w,pg,hs[:4],vis))
     clk('Expandir tudo'); fa=rowtxt('Fungicida A'); gl=rowtxt('Glifosato 480'); rowclick('Glifosato 480'); gm=memo(); fechar()
     chk('24 memória como extrato por data, com a origem de sempre: "25/09/2026 · T1-A · Dessecação pré-plantio · 2,00 L/ha × 160 ha = 320,0 L"; 1º uso intacto',
         any(l.startswith('25/09/2026 · T1-A · Dessecação pré-plantio · 2,00 L/ha × 160 ha = 320,0 L → saldo') for l in gm) and cel('Glifosato 480','1º uso')=='25/09/2026',(gl,gm[:3]))
-    rowclick('Fungicida A'); fs=memo(); fechar(); fa=fa+' | '+' · '.join(cel('Fungicida A',k) for k in ('Estoque apto','Usado antes da compra','Necessidade líquida','Unidade'))
+    rowclick('Fungicida A'); fs=memo(); fechar(); fa=fa+' | '+' · '.join(cel('Fungicida A',k) for k in ('Estoque apto','Usado antes da compra','Necessidade líquida'))
     ir('CMP.dc.html#sol=SOL-2026-07&saf=S2627',w=1.4); clk('Expandir tudo'); fa2=rowtxt('Fungicida A'); rowclick('Fungicida A'); fc=memo(); fechar()
     chk('21 Fungicida A (2026/27): estoque apto 545 (65 reservados à OS-0424, usados antes); 145,2 L como antes; memória igual nas duas telas',
-        fa.endswith(' | 545,0 · 65,0 · 145,2 · L') and 'usado antes: 65,0' in fa2 and '145,2' in fa2 and fs==fc and any(l.startswith('24/09/2026 · Reserva REQ-039 · OS-0424 (P2) · −65,0 L') for l in fs),{'fa':fa,'fa2':fa2,'iguais':fs==fc,'saf':fs[-2:],'cmp':fc[-2:]})
+        fa.endswith(' | 545,0 L · 65,0 L · 145,2 L') and 'usado antes: 65,0' in fa2 and '145,2' in fa2 and fs==fc and any(l.startswith('24/09/2026 · Reserva REQ-039 · OS-0424 (P2) · −65,0 L') for l in fs),{'fa':fa,'fa2':fa2,'iguais':fs==fc,'saf':fs[-2:],'cmp':fc[-2:]})
     # safra criada no Planejar safra (fora do cadastro da Compra): a solicitação gravada aparece na lista e abre com contexto próprio
     J("""(()=>{const o=JSON.parse(localStorage.getItem('talhao-os-compras-v1')); const r=JSON.parse(JSON.stringify(o.sols.S27SF)); r.safra='n9'; r.nome='Safra nova teste'; r.id='SOL-2026-10'; o.sols.n9=r; localStorage.setItem('talhao-os-compras-v1',JSON.stringify(o));})()""")
     ir('CMP.dc.html#sol=SOL-2026-10&saf=n9',w=1.4); ctxn=J("(document.body.innerText.match(/Safra nova teste · SOL-2026-10/)||[''])[0]"); cn=cur()
@@ -149,7 +155,7 @@ try:
     ir('SAF.dc.html#saf=LG2627&etapa=6',w=1.6); clk('Expandir tudo'); cal=rowtxt('Calcário dolomítico filler'); fz=J("[...document.querySelectorAll('span')].filter(s=>s.children.length===0&&/^Fazenda /.test(s.innerText.trim())).map(s=>s.innerText.trim())")
     # falta com necessidade líquida (a ruptura coberta pelo recebimento não conta): data da coluna "Falta em" antes de hoje
     passadas=J("""(()=>{const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent); const hs=[...t.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴]/g,'').replace(/\\s+/g,' ').trim().toUpperCase());
-      const iF=hs.indexOf('FALTA EM'), iL=hs.indexOf('NECESSIDADE LÍQUIDA'); return [...t.querySelectorAll('[role=row]')].map(r=>[...r.querySelectorAll('[role=cell]')].map(c=>c.innerText.trim())).filter(c=>c.length>iF&&/^\\d\\d\\/\\d\\d\\/\\d{4}$/.test(c[iF])&&c[iL]&&c[iL]!=='0'&&c[iL]!=='0,0').map(c=>c[iF]).filter(s=>{const m=s.split('/'); return (m[2]+m[1]+m[0])<'20260923';});})()""")
+      const iF=hs.indexOf('FALTA EM'), iL=hs.indexOf('NECESSIDADE LÍQUIDA'); return [...t.querySelectorAll('[role=row]')].map(r=>[...r.querySelectorAll('[role=cell]')].map(c=>c.innerText.trim())).filter(c=>c.length>iF&&/^\\d\\d\\/\\d\\d\\/\\d{4}$/.test(c[iF])&&c[iL]&&!/^0(,0+)?( |$)/.test(c[iL])).map(c=>c[iF]).filter(s=>{const m=s.split('/'); return (m[2]+m[1]+m[0])<'20260923';});})()""")
     # números do calcário pelo espelho dados2.demanda (área da fonte da Lagoa; PRE-REV R6: antes eram fixos da área antiga)
     cdm=D2.demanda('LG2627')['Calcário dolomítico filler']; nk=lambda v: f"{v:,.0f}".replace(',','.'); dm_=lambda iso: iso[8:10]+'/'+iso[5:7]
     rup_=f"ruptura {dm_(cdm['falta'])}–{dm_(cdm['cob'])}"
@@ -159,8 +165,8 @@ try:
         return bool(m) and f"× {D2._nfa(_F.PIVOS_HA[int(m.group(1))])} ha" in ln
     chk(f"28 SAF Mamão 2026/27: Fazenda Lagoa Grande; nenhuma falta antes de hoje; calcário com {nk(cdm['real'])} realizados, {rup_} coberta pelo recebimento, 0 a comprar (= dados2.demanda)",
         fz==['Fazenda Lagoa Grande'] and not passadas and cdm['liq']==0 and cdm['rup']>0
-        and [cel('Calcário dolomítico filler',k) for k in ('Já realizado','Falta em','Coberta em','Situação','Demanda bruta','Unidade')]==[nk(cdm['real']),dm_(cdm['falta'])+'/'+cdm['falta'][:4],dm_(cdm['cob'])+'/'+cdm['cob'][:4],'Coberto pelo recebimento',nk(cdm['bruta']),'kg'],
-        (fz,passadas,cal,[cel('Calcário dolomítico filler',k) for k in ('Já realizado','Falta em','Coberta em','Situação','Demanda bruta','Unidade')]))
+        and [cel('Calcário dolomítico filler',k) for k in ('Já realizado','Falta em','Coberta em','Situação','Demanda bruta')]==[nk(cdm['real'])+' kg',dm_(cdm['falta'])+'/'+cdm['falta'][:4],dm_(cdm['cob'])+'/'+cdm['cob'][:4],'Coberto pelo recebimento',nk(cdm['bruta'])+' kg'],
+        (fz,passadas,cal,[cel('Calcário dolomítico filler',k) for k in ('Já realizado','Falta em','Coberta em','Situação','Demanda bruta')]))
     rowclick('Calcário dolomítico filler'); mc=memo(); fechar(); foto('7_saf_lg_etapa6')
     chk('29 memória do calcário: realizado antes de hoje, ruptura na calagem de 25/09, recebimento de 30/09 cobre, sem compra nova',
         len(mc)>2 and mc[1].startswith('Realizado antes de 23/09/2026 · ') and any(l.startswith('30/09/2026 · ') and l.endswith('cobre a ruptura') for l in mc)

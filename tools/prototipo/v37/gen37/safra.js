@@ -491,10 +491,10 @@ function rendActs(self,gid,r){ if(!r||r.grp) return []; const saf=self.state.saf
       go:()=>{ if(!ask){ self.setState({rmCfg:r.id}); return; } rendRemover(self,gid,r.id); }}); }
   return out; }
 function leafParts(r,adj,kid){ const pl=planById(r.v.plano); const na=Object.keys(adj[r.id]||{}).length; const t=r.v.talhao||r.v.local;
-  // TABELAS-FOCO (5983172395): local | tipo | … | meta | unidade da meta | plano | versão | ajustes, uma variável por coluna (a ação fica com a entidade)
+  // TABELAS-FOCO (5983172395): local | tipo | … | meta (com a unidade junto, decisão de 05/10/2026) | plano | versão | ajustes; a ação fica com a entidade
   r.p.local=[{k:'b',t:r.v.local||'—'}].concat((!kid&&!r.ro)?[{k:'act',t:'Dividir',fn:'divide:'+t,lk:true}]:[]); r.s.local=r.v.local;
   r.v.tipo=(kid?'Parcela':'Talhão inteiro')+(r.decl?' (sem polígono)':''); r.p.tipo=[{k:'txt',t:r.v.tipo}]; r.s.tipo=r.v.tipo; r.v.livre=''; r.p.livre=[{k:'mut',t:'—'}]; r.s.livre='';
-  r.p.meta=[{k:'txt',t:nf(r.v.meta)}]; r.s.meta=nf(r.v.meta); r.p.unm=[{k:'txt',t:r.v.unm||'—'}]; r.s.unm=r.v.unm||''; dcol(r,'dt_plantio',r.v.plantio);
+  r.p.meta=[{k:'txt',t:nfa(r.v.meta)+(r.v.unm?' '+r.v.unm:'')}]; r.s.meta=r.p.meta[0].t; dcol(r,'dt_plantio',r.v.plantio);   // meta exata (até 2 casas) com a unidade junto (decisão do proprietário, 05/10/2026)
   r.v.ver=(pl&&pl.cultura===r.v.cult)?pl.versao:''; r.p.ver=r.v.ver?[{k:'txt',t:'v'+r.v.ver}]:[{k:'mut',t:'—'}]; r.s.ver=r.v.ver?'v'+r.v.ver:'';
   if(pl && pl.cultura===r.v.cult){ r.p.plano=[{k:'txt',t:pl.nome},{k:'br'},{k:'act',t:(r.ro?'Ver insumos':'Ajustar insumos'),fn:'openlp:'+r.id,lk:true}]; r.s.plano=pl.nome; }
   else if(pl){ r.p.plano=[{k:'chip',t:'Plano de '+pl.cultura+' incompatível',c:'red'},{k:'act',t:'Reaplicar',fn:'applyone:'+r.id}]; r.s.plano='incompatível'; }
@@ -504,7 +504,7 @@ function grpParts(r,adj){ const ks=r.kids||[]; const t=r.v.talhao; const T=talha
   const uniq=(f)=>[...new Set(ks.map(c=>c.v[f]).filter(x=>x!==''&&x!==undefined&&x!==null))];
   r.v.area=r2(A); r.v.faz=(ks[0]&&ks[0].v.faz)||r.v.faz; r.v.cult=uniq('cult').join(', '); r.v.var=uniq('var').join(', ');
   const ds=uniq('plantio').sort(); r.v.plantio=ds[0]||''; dcol(r,'dt_plantio',ds[0],(ds.length>1?(br(ds[0]).slice(0,5)+' a '+br(ds[ds.length-1])):''));
-  r.v.meta=''; r.p.meta=[{k:'mut',t:'por parcela'}]; r.s.meta=''; r.p.unm=[{k:'mut',t:''}]; r.s.unm='';
+  r.v.meta=''; r.p.meta=[{k:'mut',t:'por parcela'}]; r.s.meta='';
   const pls=uniq('plano').map(planById).filter(Boolean); r.p.plano=pls.length?[{k:'txt',t:(pls.length===1?pls[0].nome:(pls.length+' planos'))}]:[{k:'mut',t:'sem plano'}]; r.s.plano=pls.map(x=>x.nome).join(', ');
   const vs=[...new Set(pls.map(x=>'v'+x.versao))]; r.v.ver=''; r.p.ver=vs.length?[{k:'txt',t:vs.join(', ')}]:[{k:'mut',t:'—'}]; r.s.ver=vs.join(', ');
   const na=ks.reduce((a,c)=>a+Object.keys(adj[c.id]||{}).length,0); r.v.aj=na; r.p.aj=na?[{k:'txt',t:String(na)}]:[{k:'mut',t:'—'}]; r.s.aj=String(na);
@@ -790,23 +790,27 @@ function PREVALS(self,v){ compRend(self,self.state.saf||null);
   let tot=0, nliq=0, npend=0;
   GR('g_dem').rows=Object.keys(grupos).sort((a,b)=>a.localeCompare(b,'pt-BR')).map((g,gi)=>{ const its=grupos[g].sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
     const val=its.reduce((a,d)=>a+d.valor,0); tot+=val; const uso=its.map(d=>d.uso).filter(Boolean).sort()[0]||'';
-    // TABELAS-FOCO (5983172395): uma variável por coluna — grupo, insumo, unidade, quantidades sem unidade colada, datas e solicitação próprias
+    // TABELAS-FOCO (5983172395): uma variável por coluna — grupo, insumo, quantidades (com a unidade junto), datas, situação, solicitação e complemento próprios
     const gr={id:'G'+gi,v:{grp:g,ins:'',valor:val},s:{grp:g,ins:''},p:{grp:[{k:'b',t:g}],ins:[{k:'mut',t:its.length+(its.length>1?' insumos':' insumo')}]},
       kids:its.map((d,ix)=>{ const dec=(d.un==='L')?1:0; const sent=sol&&sol.itens?(sol.itens[d.nome]||0):0; if(d.liq>0) nliq++;
-        let sit, sid=''; if(d.liq<=0.001&&d.rup>0.001) sit={k:'chip',t:'Coberto pelo recebimento',c:'yellow'}; else if(d.liq<=0.001) sit={k:'chip',t:'Coberto pelo estoque',c:'green'}; else if(sol && sent>=d.liq-0.01){ sit={k:'chip',t:'Em cotação',c:'blue'}; sid=sol.id; } else if(sol){ sit={k:'chip',t:'Complemento: +'+nf(d.liq-sent,dec)+' '+d.un,c:'yellow'}; sid=sol.id; npend++; } else { sit={k:'chip',t:'A enviar',c:'gray'}; npend++; }
-        const q=(x)=>[{k:'txt',t:nf(x,dec)}], z=(x)=>x>0.001?[{k:'txt',t:nf(x,dec)}]:[{k:'mut',t:'—'}];
+        let sit, sid=''; if(d.liq<=0.001&&d.rup>0.001) sit={k:'chip',t:'Coberto pelo recebimento',c:'yellow'}; else if(d.liq<=0.001) sit={k:'chip',t:'Coberto pelo estoque',c:'green'}; else if(sol && sent>=d.liq-0.01){ sit={k:'chip',t:'Em cotação',c:'blue'}; sid=sol.id; } else if(sol){ sit={k:'chip',t:'Complemento',c:'yellow'}; sid=sol.id; npend++; } else { sit={k:'chip',t:'A enviar',c:'gray'}; npend++; }
+        // decisão do proprietário (05/10/2026): a unidade fica junto do valor ("62.500 kg"); o valor tipado (v) continua número para ordenar e filtrar
+        const qt=(x)=>nf(x,dec)+' '+d.un, q=(x)=>[{k:'txt',t:qt(x)}], z=(x)=>x>0.001?[{k:'txt',t:qt(x)}]:[{k:'mut',t:'—'}];
         const kr={id:'G'+gi+'_'+ix,ro:true,v:{grp:d.grupo,ins:d.nome,bruta:d.bruta,real:(d.real>0.001?d.real:''),est:d.est,antes:(d.liq>0.001&&d.antes>0.001?d.antes:''),res:(!(d.liq>0.001&&d.antes>0.001)&&d.res>0.001?d.res:''),
-               rec:d.rec,tarde:((d.liq>0.001||d.rup>0.001)&&d.tarde>0.001?d.tarde:''),liq:d.liq,un:d.un,preco:d.preco,valor:d.valor,sol:sid},s:{sit:sit.t,un:d.un,sol:sid},
-          p:{grp:[{k:'mut',t:d.grupo}],un:[{k:'txt',t:d.un}],bruta:q(d.bruta),real:z(d.real),est:q(d.est),antes:z(d.liq>0.001?d.antes:0),res:z((d.liq>0.001&&d.antes>0.001)?0:d.res),rec:q(d.rec),
-             tarde:z(((d.liq>0.001||d.rup>0.001)&&d.tarde>0.001)?d.tarde:0),liq:[{k:'b',t:nf(d.liq,dec)}],sit:[sit],sol:sid?[{k:'txt',t:sid}]:[{k:'mut',t:'—'}]},
+               rec:d.rec,tarde:((d.liq>0.001||d.rup>0.001)&&d.tarde>0.001?d.tarde:''),liq:d.liq,un:d.un,preco:d.preco,valor:d.valor,sol:sid,comp:(sit.t==='Complemento'?d.liq-sent:'')},s:{sit:sit.t,sol:sid},
+          p:{grp:[{k:'mut',t:d.grupo}],bruta:q(d.bruta),real:z(d.real),est:q(d.est),antes:z(d.liq>0.001?d.antes:0),res:z((d.liq>0.001&&d.antes>0.001)?0:d.res),rec:q(d.rec),
+             tarde:z(((d.liq>0.001||d.rup>0.001)&&d.tarde>0.001)?d.tarde:0),liq:[{k:'b',t:qt(d.liq)}],sit:[sit],sol:sid?[{k:'txt',t:sid}]:[{k:'mut',t:'—'}],
+             comp:sit.t==='Complemento'?q(d.liq-sent):[{k:'mut',t:'—'}],preco:[{k:'txt',t:rs(d.preco)+'/'+d.un}]},
           o:d.memo.map(t=>({t})).concat(sol?[{t:'Ver '+sol.id+' na Compra de insumos',h:solHref(saf,sol)}]:[]) }; dcol(kr,'uso',d.uso);
+        // filtro e busca leem o mesmo texto da célula (com a unidade)
+        ['bruta','real','est','antes','res','rec','tarde','liq','comp','preco'].forEach(f=>{ const c=kr.p[f]&&kr.p[f][0]; kr.s[f]=(c&&c.t!=='—')?c.t:''; });
         // falta: quando o estoque acaba (com necessidade líquida ou só ruptura coberta por recebimento); coberta em: o recebimento que cobre a ruptura
         dcol(kr,'falta',(d.liq>0.001||d.rup>0.001)?d.falta:''); if(kr.s.falta) kr.p.falta=[{k:'cn',t:kr.s.falta,c:'red'}]; dcol(kr,'cob',(d.liq<=0.001&&d.rup>0.001)?d.cob:''); return kr; })};
     // situação do grupo: contagem por situação dos insumos (o que falta enviar primeiro)
     const cnt={}; gr.kids.forEach(k=>{ const t=String(k.s.sit||'').replace(/ · .*/,'').replace(/^Complemento.*/,'Complemento'); cnt[t]=(cnt[t]||0)+1; });
     const ord=['A enviar','Complemento','Em cotação','Coberto pelo recebimento','Coberto pelo estoque']; const cor={'A enviar':'gray','Complemento':'yellow','Em cotação':'blue','Coberto pelo recebimento':'yellow','Coberto pelo estoque':'green'};
     gr.p.sit=ord.filter(t=>cnt[t]).map(t=>({k:'chip',t:cnt[t]+' '+(t==='Coberto pelo estoque'?'coberto'+(cnt[t]>1?'s':''):(t==='Coberto pelo recebimento'?'coberto'+(cnt[t]>1?'s':'')+' pelo recebimento':t.toLowerCase())),c:cor[t]})); gr.s.sit='';
-    ['un','bruta','real','est','antes','res','rec','tarde','liq','falta','cob','preco','sol'].forEach(f=>{ gr.p[f]=[{k:'mut',t:''}]; gr.s[f]=''; });
+    ['bruta','real','est','antes','res','rec','tarde','liq','falta','cob','preco','sol','comp'].forEach(f=>{ gr.p[f]=[{k:'mut',t:''}]; gr.s[f]=''; });
     dcol(gr,'uso',uso); return gr; });
   const est=sol?solEstado(saf,sol):'';
   v.k6='Valor da necessidade líquida '+rs(tot)+' · '+nliq+' insumos a comprar'+(sol?(' · solicitação '+sol.id+(est?' · '+est:' em cotação')+(sol.comp?' (+'+sol.comp+' complemento'+(sol.comp>1?'s':'')+')':'')):' · ainda não enviada');

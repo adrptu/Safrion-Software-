@@ -16,7 +16,8 @@ def toast(): return J("[...document.querySelectorAll('[role=status]')].map(x=>x.
 SETV="""((lab,val)=>{const e=[...document.querySelectorAll('aside[role=dialog] input,aside[role=dialog] select')].find(x=>x.getAttribute('aria-label')===lab); if(!e) return 'NÃO ACHEI '+lab;
   const proto=e.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(proto,'value').set.call(e,val); e.dispatchEvent(new Event(e.tagName==='SELECT'?'change':'input',{bubbles:true})); return 'ok';})"""
 def setv(lab,val): r=J(f"({SETV})({json.dumps(lab)},{json.dumps(val)})"); time.sleep(.25); return r
-# TABELAS-FOCO (5983172395): a etapa 2 tem uma variável por coluna (Talhão ou parcela | Tipo | … | Área livre | … | Ajustes locais); LEGT lê as
+# TABELAS-FOCO (5983172395): a etapa 2 tem uma variável por coluna (Talhão ou parcela | Tipo | … | Área livre | … | Ajustes locais; a Meta leva a unidade
+# junto, decisão de 05/10/2026); LEGT lê as
 # colunas pelo cabeçalho e remonta o texto de antes ("T1 2 parcelas · área toda alocada Dividir …"), para as mesmas asserções valerem
 LEGT="""(r=>{ const t=r.closest('[role=table]'); const hs=t?[...t.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴]/g,'').replace(/\\s+/g,' ').trim().toUpperCase()):[];
   const raw=r.innerText.replace(/\\s+/g,' ').trim().replace(/^[▾▸] /,''); const iT=hs.indexOf('TIPO'); if(hs.indexOf('TALHÃO OU PARCELA')<0||iT<0) return raw;
@@ -25,7 +26,7 @@ LEGT="""(r=>{ const t=r.closest('[role=table]'); const hs=t?[...t.querySelectorA
   let head; if(/^\\d+ parcelas?$/.test(tp)){ const v=lv.replace(/^[-−]/,''); head=nm+' '+tp+' · '+(lv==='0'?'área toda alocada':(/^[-−]/.test(lv)?'excede '+v+' ha':lv+' ha livres'))+(div?' Dividir':''); }
   else head=nm+' '+tp.toLowerCase().replace(' (sem polígono)',' · sem polígono')+(div?' Dividir':'');
   const n=/^\\d+$/.test(aj)?Number(aj):0; const ajt=n?(/^\\d+ parcelas?$/.test(tp)?(' '+n+(n>1?' ajustes locais':' ajuste local')):(' '+n+(n>1?' ajustes deste talhão':' ajuste deste talhão'))):'';
-  return [head,g('CULTURA'),g('VARIEDADE'),g('ÁREA (HA)')+' ha',g('PLANTIO'),g('META')+(g('UNIDADE DA META')?' '+g('UNIDADE DA META'):''),g('PLANO AGRONÔMICO'),g('VERSÃO')].join(' ').replace(/\\s+/g,' ').trim()+ajt; })"""
+  return [head,g('CULTURA'),g('VARIEDADE'),g('ÁREA (HA)')+' ha',g('PLANTIO'),g('META'),g('PLANO AGRONÔMICO'),g('VERSÃO')].join(' ').replace(/\\s+/g,' ').trim()+ajt; })"""
 ROWS=f"""(()=>[...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent).flatMap(t=>[...t.querySelectorAll('[role=row]')].slice(1)).map(r=>({LEGT})(r)))()"""
 def rows(): return J(ROWS) or []
 def rowbtn(prefix,label):
