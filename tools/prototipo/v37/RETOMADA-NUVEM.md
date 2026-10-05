@@ -17,9 +17,10 @@
   - Nenhum dado real da Fazenda Lagoa Grande sai do Mac: CAR, coordenadas, perímetros, áreas por pivô, outorgas, cenas e imagens Sentinel.
   - **Não use os commits `c9d61266` e `d22da69` da branch `prototipo/v43`.** Eles contêm áreas reais em páginas geradas e coordenadas em testes; a remediação é do Codex.
   - Use só as branches `prototipo-limpo/*` abaixo.
-- **Autoria:** uma por arquivo, ao mesmo tempo.
+- **Autoria:** uma por arquivo, ao mesmo tempo. Desde 05/10 sem reserva em commit (regime leve).
 - **Relatórios:** em pt-BR, separando protótipo, software real e HML. Cite só número, SHA e hora que saíram de um comando seu.
-- **Publicação:** protótipo testado é publicado a cada pedido do Adrianus (artefato `https://claude.ai/artifact/HqspGRcrX1wcayCVMe9emm`). Sem push em main, sem merge e sem PR próprio integrado: o Codex revisa e integra.
+- **Regime leve (proprietário, 05/10/2026; `AGENTS.md` 3.5, DEC-0510-01):** o protótipo vive na branch única `claude/prototipo-v44`, com commit e push direto e um só PR rascunho como janela de revisão. Os PRs #36, #37 e #39–#45 foram fechados como absorvidos. Por mudança: unidade das regras, build, varredura e testes do módulo mexido; bateria completa só a cada marco. O Codex revisa sem bloquear.
+- **Publicação:** o artefato `https://claude.ai/artifact/HqspGRcrX1wcayCVMe9emm` é atualizado a cada melhoria testada. Sem push em main.
 - **Padrão de comandos v3.1:** `tools/prototipo/v37/specs/padrao-comandos-v3-prompt.md`. Uma ação por efeito, posição e tipo de botão por função, dentro × fora do componente.
 - **Decisões D1–D8** (DECISOES-DELEGADAS-20261003), com os ajustes do Codex (retorno `cc02b54f`):
   - **D1:** a sequência de conjuntos é uma "alternativa factível sugerida" com premissas, conforme PRD 44.9 e REND `7ae753dc`. Nunca é a mais rápida incondicionalmente.
