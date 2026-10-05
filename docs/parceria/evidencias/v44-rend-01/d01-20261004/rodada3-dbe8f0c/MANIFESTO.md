@@ -3,7 +3,7 @@
 - Corrige os 2 S2 da revisão da rodada 2 (`16-revisao-rodada2-2e31588.json`): com 2+ prazos e P4 induzido entre quem tem prazo, cortes por clique aceitavam plano inviável (trator × implemento em P4; anel com membro sem janela). E os S3/S4 de rótulo e texto.
 - Cadeia `00-cadeia8.sh` (23:22–23:54Z): 25/25 verde; oráculo 106/106 (101 + 5), paridade 400/400.
 - Mutantes `00-mutantes11.sh`: 7/7 mortos (o da rodada 2 inteira dá 99/106).
-- `15-verificador-pl/`: verificador independente (PL por fase, scipy) em 12.000 casos: atendido fisicamente inviável dbe8f0c 0 · 2e31588 40 · ee4f954 357.
+- `15-verificador-pl/`: verificador independente (PL por fase, scipy), lotes do revisor (6.000 gerais, 3.000 anéis, 3.000 trator × implemento): nenhuma inviabilidade detectada nos lotes publicados (dbe8f0c 0 · 2e31588 40 · ee4f954 357). Alcance: o PL devolve NaN quando o solver não termina com status 0 e o agregador só conta falta > 1e-7 h, então isto não prova 12.000 resoluções válidas; os conjuntos e sementes completos não estão no pacote; o modelo admite preempção e ignora trocas. Complemento: o verificador exato do cético do achado 8 (6.000 entradas) dá 0 inviáveis em dbe8f0c e 5 em 2e31588.
 
 | Arquivo | Comando | Exit | Resultado | Redações | sha256 publicado | sha256 original |
 |---|---|---|---|---|---|---|
