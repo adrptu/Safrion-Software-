@@ -35,7 +35,7 @@ def busca(q): J(f"(()=>{{const i=[...document.querySelectorAll('main input[aria-
 ROWS = "[...[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent).querySelectorAll('[role=row]')].slice(1).map(r=>({t:r.innerText.replace(/\\s+/g,' ').trim().replace(/^[▾▸] /,''),kid:r.classList.contains('g2kid')}))"
 LARG = r"""(()=>{const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent); const box=t.parentElement; return {box:box.clientWidth, scroll:box.scrollWidth, tab:Math.round(t.getBoundingClientRect().width)};})()"""
 CUSTOH = r"""(()=>{const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent); const hs=[...t.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/\s+/g,' ').trim());
-  const ci=hs.findIndex(h=>/^CUSTO \(R\$\/H\)/i.test(h)); return [...t.querySelectorAll('[role=row].g2kid')].map(r=>{ const cell=r.querySelectorAll('[role=cell]')[ci]; const cr=cell.getBoundingClientRect();
+  const ci=hs.findIndex(h=>/^CUSTO R\$\/H/i.test(h)); return [...t.querySelectorAll('[role=row].g2kid')].map(r=>{ const cell=r.querySelectorAll('[role=cell]')[ci]; const cr=cell.getBoundingClientRect();
     const sp=[...cell.querySelectorAll('.g2pw span')].filter(s=>s.children.length===0&&s.innerText.trim()); const mids=new Set(sp.map(s=>Math.round(s.getBoundingClientRect().top+s.getBoundingClientRect().height/2)));
     return {nome:r.innerText.split('\n')[0], t:sp.map(s=>s.innerText).join(' | '), linhas:mids.size, esq:Math.round(Math.min(...sp.map(s=>s.getBoundingClientRect().left))-cr.left), dir:Math.round(sp[sp.length-1].getBoundingClientRect().right)}; });})()"""
 num = lambda s: float(s.replace('.', '').replace(',', '.'))
@@ -120,7 +120,7 @@ try:
     for q in ['Milho', 'Feijão', 'por cultura']:
         busca(q); rs = J(ROWS); chk(f'E · busca "{q}" encontra a Colheita de grãos', any(x['t'].startswith('Colhedora') for x in rs), [x['t'][:30] for x in rs])
     busca('')
-    J("document.querySelector('main button[aria-label=\"Filtrar Custo (R$/kg)\"]').click()"); time.sleep(.4)
+    J("document.querySelector('main button[aria-label=\"Filtrar Custo R$/kg\"]').click()"); time.sleep(.4)
     fv = J("[...document.querySelectorAll('main label')].filter(l=>l.querySelector('input[type=checkbox]')).map(l=>l.innerText.replace(/\\s+/g,' ').trim())")
     chk('E · filtro oferece o texto visível (por cultura · Milho … · Feijão …)', 'por cultura · Milho 0,0216 · Feijão 0,0764 1' in fv and 'por cultura 1' not in fv, fv)
     clk('Fechar', 'main')

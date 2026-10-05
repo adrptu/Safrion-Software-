@@ -51,8 +51,13 @@ try:
     # TABELAS-FOCO (5983172395): a etapa 3 tem uma variável por coluna (Operação | Atividade | Conjunto | Modo | Largura | Velocidade | Eficiência |
     # Rendimento | Custo R$/h | R$/ha | R$/kg | … ; ordem real: Operação | Atividade | Conjunto | Rendimento | custos | Modo | Largura | Velocidade | Eficiência | Parte | Trabalha | Janela | Planos); LEG lê essas colunas e remonta as 6 células de antes, para os
     # mesmos valores serem conferidos pelas mesmas asserções (as outras grades passam como estão)
-    LEG=r"""(x=>{ const cs=[...x.querySelectorAll('[role=cell]')].map(c=>c.innerText.replace(/\s+/g,' ').trim()); const tb=x.closest('[role=table]');
+    LEG=r"""(x=>{ let cs=[...x.querySelectorAll('[role=cell]')].map(c=>c.innerText.replace(/\s+/g,' ').trim()); const tb=x.closest('[role=table]');
       const hs=tb?[...tb.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴]/g,'').replace(/\s+/g,' ').trim().toUpperCase()):[];
+      // incremento 2d (decisão de 05/10/2026): a unidade fixa vai na célula ("36 m", "R$ 109,40/ha"); para as contas abaixo valerem como antes,
+      // tira a unidade só das colunas que a levam (data-un no cabeçalho); a exibição com unidade é conferida em tabelas_saf_test
+      const UN=tb?[...tb.querySelectorAll('[role=columnheader]')].map(h=>h.getAttribute('data-un')||''):[];
+      const tira=(t,u)=>{ if(!u||t==='—') return t; if(u.indexOf('R$')===0){ const m=t.match(/^([−-]?)R\$ (.+?)(\/\S+)?$/); return m?m[1]+m[2]:t; } return t.endsWith(' '+u)?t.slice(0,-u.length-1):t; };
+      cs=cs.map((t,i)=>tira(t,UN[i]));
       // etapa 4: Gatilho | Data separados e Parte | Janela | Talhão no fim; remonta a coluna "Gatilho · data" de antes (regra, data ou parte da configuração)
       if(hs[1]==='GATILHO'&&hs[2]==='DATA'&&cs.length>=15){ const nm=cs[0], ix=nm.indexOf(' precisa de '); const part=cs[12], jan=cs[13];
         const cfg=part&&part!=='—'; const opOld=cfg?((part==='pelo rendimento'?'pelo rendimento':part+' % da área')+(jan&&jan!=='—'?' · janela '+jan+' h':'')+(ix>=0?' '+nm.slice(ix+1):''))
@@ -93,7 +98,7 @@ try:
         exp_t=f"{nfa(m['area'])} ha trabalhados · {fmt(m['hconj'])} horas-conjunto · {fmt(m['hh'])} horas-homem · {fmt(m['diesel'])} L de diesel"
         print('k4 inicial:',t0); print('espelho   :',exp_t,'· custo op.',round(m['cop'],2),'· multi',m['multi'],'· sem conjunto',m['saldo'],'· pendentes',m['pend'])
         chk('1 totais iniciais da etapa 4 = espelho dados2.plano_op (área, horas-conjunto, horas-homem, diesel)',t0.startswith(exp_t),[t0,exp_t])
-        tot=next((r for r in rows() if r and r[0]=='Total'),None); chk('1b total da coluna Operação (R$) = espelho',tot and fmt(m['cop']) in tot,[tot,fmt(m['cop'])])
+        tot=next((r for r in rows() if r and r[0]=='Total'),None); chk('1b total da coluna Custo de operação = espelho',tot and fmt(m['cop']) in tot,[tot,fmt(m['cop'])])
         etapa(6); k6a=k6(); print('k6 inicial:',k6a); etapa(4)
         # ---------- 2 · T2 dividido entre dois conjuntos ----------
         pools={r['id']:dict(un=r['un'],nome=r['nome']) for r in D2.RECURSOS}

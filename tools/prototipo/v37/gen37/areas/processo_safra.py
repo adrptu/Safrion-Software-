@@ -118,7 +118,7 @@ def build():
     # colunas de foco primeiro (rendimento e custos); como o rendimento se obtém e a divisão da área vêm depois
     REND_COLS=[dict(k='op',l='Operação',w=160),dict(k='atv',l='Atividade',w=200),dict(k='nome',l='Conjunto',w=260),
                dict(k='rend',l='Rendimento (ha/h)',t='num',a='r',d=2),dict(k='custo_h',l='Custo (R$/h)',t='num',a='r',d=2),dict(k='custo_ha',l='Custo (R$/ha)',t='num',a='r',d=2),
-               dict(k='custo_kg',l='Custo (R$/kg)',w=150),dict(k='modo',l='Modo',w=150),
+               dict(k='custo_kg',l='Custo R$/kg',w=170),dict(k='modo',l='Modo',w=150),
                dict(k='larg',l='Largura (m)',t='num',a='r',d=2,dmin=0),dict(k='vel',l='Velocidade (km/h)',t='num',a='r',d=2,dmin=0),dict(k='efic',l='Eficiência (%)',t='num',a='r',d=1,dmin=0),
                dict(k='part',l='Parte da área (%)',t='num',a='r',d=1,dmin=0,w=150),dict(k='seq',l='Trabalha',w=130),
                dict(k='jan',l='Janela (h por talhão)',t='num',a='r',d=1,dmin=0),dict(k='planos',l='Planos',w=240)]

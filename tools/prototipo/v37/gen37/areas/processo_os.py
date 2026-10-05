@@ -169,7 +169,7 @@ def _ordens():
         if o['id'] in LAM: continue   # irrigação só com água fica no módulo Irrigação (IR-03), fora das O.S. de operações agrícolas (01/10)
         ap=[dict(d=d,dia=n,ha=ha,st=s) for d,n,ha,s in AP.get(o['id'],[])]
         out.append(dict(id=o['id'],tipo=TIPO.get(o['id'],o['tipo']),talhao=o['talhao'],talhoes=o.get('talhoes',[]),local=o.get('local',''),ini=o.get('ini',''),fim=o.get('fim',''),area=o.get('area'),etapa=o['etapa'],selos=_selos(o),
-                        faz=o['faz'],saf=o['saf'],agua=o['id'] in LAM,lam=LAM.get(o['id'],''),obs=OBS.get(o['id'],''),
+                        faz=o['faz'],saf=o['saf'],agua=o['id'] in LAM,obs=OBS.get(o['id'],''),
                         realizado=o.get('realizado'),saldo=o.get('saldo'),resp=o['resp'],keys=_chaves(o),
                         canc=CANC.get(o['id']),
                         versao=VERSAO[o['id']],
@@ -435,7 +435,7 @@ try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenD
 function mfFaz(self){ return self.state.mf_faz||'Santa Rita'; }
 function mfSaf(self){ return self.state.mf_saf||'Todas'; }
 function vis(self){ const f=mfFaz(self), s=mfSaf(self); return ords(self).filter(o=>(f==='Todas'||o.faz===f)&&(s==='Todas'||o.saf===s)); }
-function localTxt(o){ return o.talhao+(o.area?' · '+nf(o.area)+' ha':'')+(o.lam?' · '+o.lam:''); }
+function localTxt(o){ return o.talhao+(o.area?' · '+nf(o.area)+' ha':''); }
 function acum(o){ let conf=0,prov=0,sem=0; (o.ap||[]).forEach(a=>{ if(a.sinc===false) sem+=a.ha; else if(a.st==='Conferido') conf+=a.ha; else if(a.st==='Provisório') prov+=a.ha; }); return {conf,prov,sem}; }
 function realTxt(o){ return o.area? (nf(o.realizado)+' / '+nf(o.area)+' ha') : '—'; }
 function pctTxt(o){ return (o.area&&(o.realizado||0)>0)?' · '+Math.round(100*o.realizado/o.area)+' %':''; }
@@ -465,7 +465,7 @@ function PREVALS(self,v){
    return {id:o.id,
     m:{tal:tl,sit:sel},
     v:{id:o.id,ativ:o.tipo,tal:'',local:o.local||'',area:nfx(o.area),ini:o.ini||'',fim:o.fim||'',fase:o.etapa,sit:'',obs:o.obs||'',dono:o.dono||'',acao:pzx(o.prazo)[0],prazo:pzx(o.prazo)[1],
-       real:(o.area?o.realizado:null),saldo:(o.area?o.saldo:null),disp:(o.disp||null),prog:(o.area?Math.round(1000*(o.realizado||0)/o.area)/10:null),lam:o.lam||'',resp:o.resp},
+       real:(o.area?o.realizado:null),saldo:(o.area?o.saldo:null),disp:(o.disp||null),prog:(o.area?Math.round(1000*(o.realizado||0)/o.area)/10:null),resp:o.resp},
     s:{id:o.id,tal:tl.map(t=>t.l).join(', '),sit:sel.map(x=>x.l).join(' · ')},
     p:{id:[{k:'b',t:o.id}],tal:(tl.length?tl.map(t=>({k:'txt',t:t.l})).reduce((a,x,i)=>a.concat(i?[{k:'br'},x]:[x]),[]):[{k:'mut',t:'—'}]),
        fase:[{k:'chip',t:o.etapa,c:FCOR[o.etapa]}],sit:(o.selos.length?o.selos.map(x=>({k:'chip',t:x.t,c:x.c})):[{k:'mut',t:'—'}])}}; });
@@ -799,7 +799,7 @@ function EXTRAVALS(self,v){
       const ins=(a.ins||[]).map(x=>({g:x.g,p:x.p.replace(/ · (variedade|híbrido) do cultivo$/,' '+c.var),dose:x.dose,un:x.un,tot:cenQtd(x.dose,c.area),sit:'Reserva ao liberar'}));
       const cj=(OSD.nova.conj||{})[a.op]||null;
       const no={id,novo:true,keys:[cur.cult+'|'+cur.atv],tipo:(a.op===a.nome?a.nome:a.op+' · '+a.nome),talhao:c.local,area:c.area,etapa:'A liberar',selos:[],
-        faz:'Santa Rita',saf:s.mf,lam:'',obs:'',agua:false,ins,semins:'',bloq:null,aviso:'',dono:'Ana (agrônoma)',prazo:'liberar',
+        faz:'Santa Rita',saf:s.mf,obs:'',agua:false,ins,semins:'',bloq:null,aviso:'',dono:'Ana (agrônoma)',prazo:'liberar',
         atv:{op:a.op,nome:a.nome,gat:a.gat||'',orig:pl.nome+' v'+pl.versao,conj:cj?cj.conj:'',rend:cj?cj.rend:0},
         realizado:0,saldo:c.area,resp:'—',versao:'v1',janela:'a partir de '+brd(cur.jan),ap:[],nota:'',
         cond:'Ana (agrônoma) confere, ajusta se precisar e libera; liberar exige a prontidão de máquina, equipe e insumos. Próximo passo: liberar para execução.',
@@ -1088,7 +1088,7 @@ def build():
                dict(k='dono',l='Quem resolve'),dict(k='acao',l='Próxima ação',w=150),dict(k='prazo',l='Prazo'),
                dict(k='real',l='Realizado (ha)',t='num',a='r',d=2),dict(k='saldo',l='Saldo (ha)',t='num',a='r',d=2),
                dict(k='disp',l='Dispensado (ha)',t='num',a='r',d=2,zdash=True),dict(k='prog',l='Progresso (%)',t='num',a='r',d=1),
-               dict(k='lam',l='Lâmina',w=110),dict(k='resp',l='Responsável')],
+               dict(k='resp',l='Responsável')],   # sem coluna Lâmina: a O.S. só com água saiu para a Irrigação (01/10), onde a lâmina tem colunas próprias (IR-03); aqui ela ficava sempre vazia
               [],edit=dict(m='pick'),gid='g_os',total=False,tree=True)
     # barra da coleção (DS-33 §74.5.7.1): filtros rápidos no começo, seletor de visão no fim; vale para Lista e Kanban (mesmo filtro)
     kb_nota=(f'<sc-if value="{H("kb_filtro")}" hint-placeholder-val="{F()}"><div role="note" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12.5px; color: {MUTED}; margin-bottom: 8px;">'

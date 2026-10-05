@@ -22,11 +22,11 @@ def setv(lab,val): r=J(f"({SETV})({json.dumps(lab)},{json.dumps(val)})"); time.s
 LEGT="""(r=>{ const t=r.closest('[role=table]'); const hs=t?[...t.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴]/g,'').replace(/\\s+/g,' ').trim().toUpperCase()):[];
   const raw=r.innerText.replace(/\\s+/g,' ').trim().replace(/^[▾▸] /,''); const iT=hs.indexOf('TIPO'); if(hs.indexOf('TALHÃO OU PARCELA')<0||iT<0) return raw;
   const cs=[...r.querySelectorAll('[role=cell]')].map(c=>c.innerText.replace(/\\s+/g,' ').trim()); const g=k=>(cs[hs.indexOf(k)]||'').replace(/^[▾▸] ?/,'');
-  const L=g('TALHÃO OU PARCELA'), div=/ Dividir$/.test(L), nm=L.replace(/ Dividir$/,''), tp=g('TIPO'), lv=g('ÁREA LIVRE (HA)'), aj=g('AJUSTES LOCAIS');
+  const L=g('TALHÃO OU PARCELA'), div=/ Dividir$/.test(L), nm=L.replace(/ Dividir$/,''), tp=g('TIPO'), lv=g('ÁREA LIVRE').replace(/ ha$/,''), aj=g('AJUSTES LOCAIS');
   let head; if(/^\\d+ parcelas?$/.test(tp)){ const v=lv.replace(/^[-−]/,''); head=nm+' '+tp+' · '+(lv==='0'?'área toda alocada':(/^[-−]/.test(lv)?'excede '+v+' ha':lv+' ha livres'))+(div?' Dividir':''); }
   else head=nm+' '+tp.toLowerCase().replace(' (sem polígono)',' · sem polígono')+(div?' Dividir':'');
   const n=/^\\d+$/.test(aj)?Number(aj):0; const ajt=n?(/^\\d+ parcelas?$/.test(tp)?(' '+n+(n>1?' ajustes locais':' ajuste local')):(' '+n+(n>1?' ajustes deste talhão':' ajuste deste talhão'))):'';
-  return [head,g('CULTURA'),g('VARIEDADE'),g('ÁREA (HA)')+' ha',g('PLANTIO'),g('META'),g('PLANO AGRONÔMICO'),g('VERSÃO')].join(' ').replace(/\\s+/g,' ').trim()+ajt; })"""
+  return [head,g('CULTURA'),g('VARIEDADE'),g('ÁREA'),g('PLANTIO'),g('META'),g('PLANO AGRONÔMICO'),g('VERSÃO')].join(' ').replace(/\\s+/g,' ').trim()+ajt; })"""
 ROWS=f"""(()=>[...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent).flatMap(t=>[...t.querySelectorAll('[role=row]')].slice(1)).map(r=>({LEGT})(r)))()"""
 def rows(): return J(ROWS) or []
 def rowbtn(prefix,label):
@@ -75,7 +75,7 @@ try:
     rs=rows(); chk('5 sublinhas de T4', sum(1 for r in rs if r.startswith('T4-'))==5 and any(r.startswith('T4 5 parcelas') for r in rs))
     k2b=k(r"/\d+ cultivos · [^\n]+/"); chk('k2 conta folhas (15 cultivos, mesma área)', k2b.startswith('15 cultivos · 1.165 ha'), k2b)
     tot=J("(()=>{const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent); const r=[...t.querySelectorAll('[role=row]')].pop(); return r.innerText.replace(/\\s+/g,' ');})()")
-    chk('total da tabela 1.165 ha (unidade no cabeçalho "Área (ha)", TABELAS-FOCO)', 'Total 1.165' in (tot or '') and bool(J("[...document.querySelectorAll('[role=columnheader]')].some(h=>/^Área \\(ha\\)/i.test(h.innerText.trim()))")), tot)
+    chk('total da tabela 1.165 ha (unidade na célula, cabeçalho "Área": decisão de 05/10/2026)', 'Total 1.165 ha' in (tot or '') and bool(J("[...document.querySelectorAll('[role=columnheader]')].some(h=>/^Área\\b/i.test(h.innerText.trim())&&!/livre|\\(/i.test(h.innerText))")), tot)
     # --- 27 parcelas: nomes após Z viram AA
     rowbtn('T1 2 parcelas','Dividir')
     for _ in range(25): clk('+ Adicionar parcela','aside[role=dialog]')

@@ -1147,7 +1147,31 @@ _PARTS=(f'<sc-if value="{{{{p.isTxt}}}}" hint-placeholder-val="{{{{false}}}}"><s
         f'<sc-if value="{{{{p.isAct}}}}" hint-placeholder-val="{{{{false}}}}"><button type="button" class="{{{{p.cls}}}}" onClick="{{{{p.fn}}}}" style="{{{{p.st}}}}">{{{{p.t}}}}</button></sc-if>'
         f'<sc-if value="{{{{p.isBr}}}}" hint-placeholder-val="{{{{false}}}}"><span style="flex-basis: 100%; height: 0;"></span></sc-if>')
 def _h(x): return '{{'+x+'}}'
+# Unidade junto do valor (decisão do proprietário, 05/10/2026): coluna numérica com unidade fixa no cabeçalho ("Área (ha)") passa a mostrar a
+# unidade na célula ("160 ha", "R$ 14,49/ha", "54 %") e o cabeçalho fica sem ela ("Área"). Só unidades da lista; rótulos explicativos entre
+# parênteses ("Em custódia (fora do depósito)") e colunas que já formatam (u/pre) ficam como estão. O valor tipado (v) continua número.
+_RS_NOME={'Operação':'Custo de operação','Insumos':'Custo de insumos','Total':'Custo total'}   # sem o (R$), o rótulo diria outra coisa
+_UNID_CEL={'ha','%','R$','ha/h','R$/h','R$/ha','R$/kg','R$/un','R$/sc','m','km/h','h','h/dia','L','kg','t','sc','mm','dias'}
+def _col_un(c):
+    if c.get('t')!='num' or c.get('u') or c.get('pre') or c.get('un'): return c
+    if (c.get('l') or '') in ('R$/ha','R$/h','R$/kg'):   # cabeçalho que é só a unidade ("R$/ha") → "Custo R$/ha" (proprietário, 05/10/2026)
+        u=c['l']; c=dict(c); c['un']=u; c['l']='Custo '+u; return c
+    m=_re_un.match(c.get('l') or '')
+    if not m: return c
+    base,u=m.group(1),m.group(2)
+    if u in _UNID_CEL: c=dict(c); c['un']=u; c['l']=(_RS_NOME.get(base,base) if u=='R$' else base); return c
+    m2=_re_un2.match(u)   # "Janela (h por talhão)" → "Janela por talhão", célula "3 h"
+    if m2 and m2.group(1) in _UNID_CEL: c=dict(c); c['un']=m2.group(1); c['l']=base+' por '+m2.group(2); return c
+    return c
+import re as _re_mod
+_re_un=_re_mod.compile(r'^(.*?)\s*\(([^()]+)\)\s*$'); _re_un2=_re_mod.compile(r'^(\S+) por (.+)$')
+
 def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=True,so=None,add=None,bulk='',gid=None,x0=None,frame=True,tools='',headtools=True,qf=None):
+    cols=[_col_un(c) for c in cols]
+    # rótulos que ficariam iguais sem a unidade ("Custo (R$/h)" e "Custo (R$/ha)") mantêm a unidade, sem parênteses: "Custo R$/h", "Custo R$/ha"
+    # (proprietário, 05/10/2026: "Custo R$/h e R$/ha é melhor e mais intuitivo")
+    _ls=[c.get('l') for c in cols]
+    cols=[(dict(c,l=c['l']+' '+c['un']) if (c.get('un') and _ls.count(c.get('l'))>1) else c) for c in cols]
     """Grade interativa. cols: [dict(k,l,t='txt'|'num',a='r',u,d,agg='sum'|'avg',chips={valor:cor},w,pre)];
     rows: [dict(id,v={},s={},p={k:[partes]},ro=False,kids=[...],o=[dict(t,h)],dr='d3_open',sh='d2')];
     edit: dict(m='form'|'ro'|'origin'|'none', title, sub, fields=[dict(k,l,t='txt'|'num'|'sel'|'date'|'area',opts,req,min,max,u,cond=dict(k,eq),help,def,ro)], calc, newTitle, leafOnly)."""
@@ -1197,7 +1221,7 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     hsel=f'<div role="columnheader" style="padding: 6px 4px 6px 12px; display: flex; align-items: center;"><button type="button" aria-label="{H("_selallLab")}" title="{H("_selallLab")}" onClick="{H("_selall")}" style="border: 1px solid {LINE}; background: {SURF}; width: 16px; height: 16px; border-radius: 4px; cursor: pointer; padding: 0;"></button></div>' if sel else ''
     hdel=f'<div role="columnheader"></div>' if dele else ''
     head=(f'<div role="row" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; background: {BG}; border-radius: 0;">{hsel}'
-          f'<sc-for list="{H("_head")}" as="h" hint-placeholder-count="{len(cols)}"><div role="columnheader" class="{_h("h.cls")}" style="{_h("h.st")} padding: 0 4px 0 8px;">'
+          f'<sc-for list="{H("_head")}" as="h" hint-placeholder-count="{len(cols)}"><div role="columnheader" class="{_h("h.cls")}" data-un="{_h("h.un")}" style="{_h("h.st")} padding: 0 4px 0 8px;">'
           + (f'<button type="button" class="g2hb" onClick="{_h("h.sort")}" aria-label="{_h("h.sortLabel")}">{_h("h.l")} <span aria-hidden="true" style="{_h("h.astyle")} font-size: 9px;">{_h("h.arrow")}</span></button>'
              f'<button type="button" class="g2fb" onClick="{_h("h.fmenu")}" aria-label="{_h("h.flabel")}" title="{_h("h.flabel")}" style="color: {_h("h.fcolor")};">▾{_h("h.fil")}</button>' if headtools else
              f'<span class="g2hb" style="cursor: default;">{_h("h.l")}</span>')

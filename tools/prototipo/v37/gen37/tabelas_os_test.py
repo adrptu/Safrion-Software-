@@ -5,7 +5,7 @@ fazendas distintas); TF02 recorte combinado conservado em Lista/Kanban/Recursos,
 TF03 colunas tipadas (número, data com anos distintos, vazio); TF04 teclado e toque em 1440 e 390 px com capturas; TF06 agrupar por
 talhão com contagem distinta e total sem somar grupos sobrepostos.
 Uso: python3 tabelas_os_test.py [pasta de capturas]   (< 90 s)"""
-import sys, os, time, json
+import sys, os, re, time, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from comp_lib import Chrome, servir
 OUT = sys.argv[1] if len(sys.argv) > 1 else None
@@ -104,13 +104,16 @@ try:
     fase('Todas')
     chk('TF02 filtrar não executou ação de negócio (cenário salvo inalterado)', negocio() == neg0)
     # ---------------- TF03 ----------------
-    ordena('Área (ha)'); a = [x for x in cel_col('Área (ha)') if x not in ('—', '')]
-    num = [float(x.replace('.', '').replace(',', '.')) for x in a]
-    chk('TF03 Área (ha) ordena por número (38 antes de 100)', num == sorted(num) or num == sorted(num, reverse=True), a)
+    ordena('Área'); a = [x for x in cel_col('Área') if x not in ('—', '')]
+    num = [float(x.split(' ')[0].replace('.', '').replace(',', '.')) for x in a if re.match(r'^[\d.]+,\d{2} ha$', x)]
+    chk('TF03 Área ordena por número (38 antes de 100), com a unidade na célula ("160,00 ha", decisão de 05/10/2026)', len(num) == len(a) > 1 and (num == sorted(num) or num == sorted(num, reverse=True)), a)
     ordena('Início'); d = [x for x in cel_col('Início') if x not in ('—', '')]
     iso = [x[6:] + x[3:5] + x[:2] for x in d]
     chk('TF03 Início ordena por data, anos distintos (2025 antes de 2026)', (iso == sorted(iso) or iso == sorted(iso, reverse=True)) and any(x.endswith('2025') for x in d) and any(x.endswith('2026') for x in d), d)
-    chk('TF03 Realizado, Saldo e Progresso em colunas próprias, com unidade no cabeçalho', all(cel_col(k) for k in ('Realizado (ha)', 'Saldo (ha)', 'Progresso (%)', 'Quem resolve', 'Próxima ação', 'Prazo')))
+    chk('TF03 Realizado, Saldo e Progresso em colunas próprias', all(cel_col(k) for k in ('Realizado', 'Saldo', 'Progresso', 'Quem resolve', 'Próxima ação', 'Prazo')))
+    un = [(k, x) for k, u in (('Realizado', 'ha'), ('Saldo', 'ha'), ('Dispensado', 'ha'), ('Progresso', '%')) for x in cel_col(k) if x not in ('—', '') and not re.match(r'^[\d.]+(,\d+)? ' + u + '$', x)]
+    hs_os = J("[...document.querySelectorAll('[role=columnheader]')].filter(h=>h.offsetParent).map(h=>h.innerText.replace(/[⇅▾▴▲▼]/g,'').replace(/\\s+/g,' ').trim())") or []
+    chk('TF03 unidade fixa na célula ("60,00 ha", "37,5 %"), cabeçalho sem "(ha)"; sem a coluna Lâmina, que ficava sempre vazia', not un and hs_os and not any('(' in h for h in hs_os) and 'Lâmina' not in hs_os, (un[:3], hs_os))
     pr = dict(zip(ids(), cel_col('Prazo'))); ac = dict(zip(ids(), cel_col('Próxima ação')))
     chk('TF03 Próxima ação separada do prazo ("entrega" | "até 15/10")', ac.get('OS-0425') == 'entrega' and pr.get('OS-0425') == 'até 15/10', (ac.get('OS-0425'), pr.get('OS-0425')))
     # ---------------- TF06 ----------------

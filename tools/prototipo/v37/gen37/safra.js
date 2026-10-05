@@ -391,7 +391,9 @@ function compRend(self,saf){ if(!saf) return; const ro=rendRo(self,saf);
     if(String(x.op||'').indexOf('Colheita')!==0) return;
     const pc=prodColheita(self,saf,x.op);
     const kg=(!pc.length||!cha)?'R$/kg não calculável':pc.map(q=>(pc.length>1?q.cult+' ':'')+nf(Math.round(cha/q.kg*10000)/10000,4)+' R$/kg').join(' · ');
-    k.p.custo_kg=[{k:(pc.length&&cha?'txt':'mut'),t:(pc.length&&cha?pc.map(q=>(pc.length>1?q.cult+' ':'')+nf(Math.round(cha/q.kg*10000)/10000,4)).join(' · '):'não calculável')}]; k.s.custo_kg=(pc.length&&cha)?kg:''; };
+    // custo por quilo com a unidade junto (decisão do proprietário, 05/10/2026): "R$ 0,0606/kg"; várias culturas: uma por cultura
+    const ckg=(pc.length&&cha)?pc.map(q=>(pc.length>1?q.cult+' ':'')+'R$ '+nf(Math.round(cha/q.kg*10000)/10000,4)+'/kg').join(' · '):'';
+    k.p.custo_kg=[{k:(ckg?'txt':'mut'),t:(ckg||'não calculável')}]; k.s.custo_kg=ckg; };
   // atividade com várias configurações: como a área se divide e o rendimento de cada uma (sem somar nem tirar média)
   const atvP=(a)=>{ const ks=cfgLeaves(a.kids); const x=a.v; const fx=ks.filter(k=>{ const p=rpNum(k.v.part); return p!==null&&!isNaN(p); });
     const div=!fx.length?'divide a área pelo rendimento':(fx.length===ks.length?fx.map(k=>nfa(rpNum(k.v.part))+' %').join(' + '):(fx.map(k=>nfa(rpNum(k.v.part))+' %').join(' + ')+' + resto pelo rendimento'));

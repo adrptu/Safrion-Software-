@@ -5,7 +5,10 @@ const G2CTA='display:inline-flex;align-items:center;gap:6px;padding:5px 11px;bor
 const G2CTAU='display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:9px;font-size:12.5px;font-weight:700;text-decoration:none;background:#FFFFFF;color:#B42318;border:1px solid #B42318;cursor:pointer;font-family:inherit;line-height:1.25;';
 function g2num(s){ if(typeof s==='number') return s; if(s===null||s===undefined) return NaN; let t=String(s).trim(); if(!t) return NaN; t=t.replace(/[^0-9,.\-]/g,''); if(t.indexOf(',')>=0){ t=t.replace(/\./g,'').replace(',','.'); } else if((t.match(/\./g)||[]).length>1 || /^\-?\d{1,3}(\.\d{3})+$/.test(t)){ t=t.replace(/\./g,''); } return parseFloat(t); }
 function g2fmtn(n,d,dmin){ return Number(n).toLocaleString('pt-BR',{minimumFractionDigits:(dmin!==undefined?dmin:(d||0)),maximumFractionDigits:d||0}); }
-function g2fmt(v,c){ if(v===null||v===undefined||v==='') return '—'; if(c&&c.t==='date'&&/^\d{4}-\d{2}-\d{2}$/.test(String(v))){ const a=String(v).split('-'); return a[2]+'/'+a[1]+'/'+a[0]; } if(c&&c.zdash&&Number(v)===0) return '—'; if(c&&c.t==='num'){ const n=Number(v); if(isNaN(n)) return String(v); return (c.pre||'')+g2fmtn(n,c.d,c.dmin)+(c.u?' '+c.u:''); } return String(v); }
+// unidade junto do valor (c.un, decisão de 05/10/2026): "160 ha", "54 %", "R$ 14,49/ha"; só em texto que é um número puro
+function g2unf(t,c){ const s=String(t==null?'':t).trim(); if(!c||!c.un||!/^[+−-]?[\d.]+(,\d+)?$/.test(s)) return String(t==null?'':t);
+  const u=c.un; if(u.indexOf('R$')===0){ const neg=/^[−-]/.test(s); return (neg?'−':'')+'R$ '+s.replace(/^[+−-]/,'')+u.slice(2); } return s+' '+u; }
+function g2fmt(v,c){ if(v===null||v===undefined||v==='') return '—'; if(c&&c.t==='date'&&/^\d{4}-\d{2}-\d{2}$/.test(String(v))){ const a=String(v).split('-'); return a[2]+'/'+a[1]+'/'+a[0]; } if(c&&c.zdash&&Number(v)===0) return '—'; if(c&&c.t==='num'){ const n=Number(v); if(isNaN(n)) return String(v); const t=(c.pre||'')+g2fmtn(n,c.d,c.dmin)+(c.u?' '+c.u:''); return c.un?g2unf(t,c):t; } return String(v); }
 function g2st(self,id){ return ((self.state.g2||{})[id])||{}; }
 function g2set(self,id,patch){ const all=Object.assign({},self.state.g2||{}); all[id]=Object.assign({},all[id]||{},patch); self.setState({g2:all});
   if(G2KEEP[id]){ try{ const x=all[id]; sessionStorage.setItem(G2KEEP[id],JSON.stringify({f:x.f||{},q:x.q||'',so:x.so||null,qv:x.qv||''})); }catch(e){} } }
@@ -16,7 +19,7 @@ function g2keep(self,id){ let key='g2:'+id; try{ key='g2:'+String(location.pathn
   try{ const o=JSON.parse(sessionStorage.getItem(key)||'null'); if(o&&typeof o==='object'){ const all=Object.assign({},self.state.g2||{}); all[id]=Object.assign({},all[id]||{},{f:o.f||{},q:o.q||'',so:o.so||null,qv:o.qv||''}); self.state.g2=all; } }catch(e){} }
 function g2rows(self,sp){ const st=g2st(self,sp.id); return st.rows||sp.rows; }
 function g2find(list,id){ for(const r of list){ if(r.id===id) return r; if(r.kids){ const k=g2find(r.kids,id); if(k) return k; } } return null; }
-function g2text(r,c){ if(r.s&&r.s[c.k]!==undefined&&r.s[c.k]!==null) return String(r.s[c.k]); if(r.v&&r.v[c.k]!==undefined&&r.v[c.k]!==null) return g2fmt(r.v[c.k],c); return ''; }
+function g2text(r,c){ if(r.s&&r.s[c.k]!==undefined&&r.s[c.k]!==null) return (c&&c.un)?g2unf(r.s[c.k],c):String(r.s[c.k]); if(r.v&&r.v[c.k]!==undefined&&r.v[c.k]!==null) return g2fmt(r.v[c.k],c); return ''; }
 // coluna multivalorada (c.multi, TABELAS-FOCO): a linha traz r.m[k]=[{id,l}] (vínculos estruturados, ex.: talhões); filtro por pertinência
 // do ID, nunca por texto (T1 não pega T10 nem T1-A); vazio é um valor próprio do filtro, nos dois sentidos
 function g2mem(r,c){ return (c.multi&&r.m&&r.m[c.k])||null; }
@@ -130,7 +133,7 @@ function g2vals(self,sp,v,mask){
   const flat=g2flat(sp,st,g2qrows(sp,st,rows),mask,added); const ed=sp.edit||{m:'none'}; const editable=ed.m&&ed.m!=='none';
   g2qvals(self,sp,v,st,rows,added);
   const so=st.so||sp.so||{};
-  v[id+'_head']=sp.cols.map((c,ci)=>({l:c.l, cls:(ci===0?'g2c0':''), st:'display:flex;align-items:center;gap:2px;justify-content:'+(c.a==='r'?'flex-end':'flex-start')+';'+(ci===0?'position:sticky;left:0;z-index:2;background:#F4F6F3;box-shadow:1px 0 0 #E4E9E5;':''),
+  v[id+'_head']=sp.cols.map((c,ci)=>({l:c.l, un:c.un||'', cls:(ci===0?'g2c0':''), st:'display:flex;align-items:center;gap:2px;justify-content:'+(c.a==='r'?'flex-end':'flex-start')+';'+(ci===0?'position:sticky;left:0;z-index:2;background:#F4F6F3;box-shadow:1px 0 0 #E4E9E5;':''),
      arrow:(so.k===c.k?(so.d?'▼':'▲'):'⇅'), astyle:(so.k===c.k?'color:#1E7A4C;':'color:#B7C1BA;'), sortLabel:'Ordenar por '+c.l,
      sort:()=>{ const cur=g2st(self,id).so||sp.so||{}; let nx; if(cur.k!==c.k) nx={k:c.k,d:false}; else if(!cur.d) nx={k:c.k,d:true}; else nx={}; g2set(self,id,{so:nx}); },
      fil:(((st.f||{})[c.k]||[]).length?' · '+((st.f||{})[c.k]||[]).length:''), fcolor:(((st.f||{})[c.k]||[]).length?'#1E7A4C':'#8A968E'),
@@ -170,7 +173,9 @@ function g2vals(self,sp,v,mask){
       tog:()=>{ const s2=Object.assign({},g2st(self,id).sel||{}); s2[r.id]=!s2[r.id]; g2set(self,id,{sel:s2}); },st:'padding:6px 4px 6px 12px;'});
     sp.cols.forEach((c,ci)=>{
       const empty=(has && ci>0 && !(r.p&&r.p[c.k]) && (!r.v || r.v[c.k]===undefined || r.v[c.k]===''));
-      const raw=empty?[]:((r.p&&r.p[c.k]&&r.p[c.k].length)?r.p[c.k]:[{k:(ci===0&&lvl===0&&has?'b':'txt'),t:g2fmt(r.v?r.v[c.k]:'',c)}]);
+      const raw0=empty?[]:((r.p&&r.p[c.k]&&r.p[c.k].length)?r.p[c.k]:[{k:(ci===0&&lvl===0&&has?'b':'txt'),t:g2fmt(r.v?r.v[c.k]:'',c)}]);
+      // partes próprias (p) com número puro ganham a unidade (cópia: r.p não muda)
+      const raw=c.un?raw0.map(p=>(p&&typeof p.t==='string'&&['txt','b','cn','chip'].indexOf(p.k)>=0)?Object.assign({},p,{t:g2unf(p.t,c)}):p):raw0;
       const cell={isSel:false,isData:true,isDel:false,cls:(ci===0?'g2c0':''),parts:raw.map(p=>g2part(p,v)),pw:'max-width:'+(c.w||340)+'px;',
         st:'padding:6px 8px;'+(c.a==='r'?'text-align:right;justify-content:flex-end;white-space:nowrap;font-variant-numeric:tabular-nums;':'')+(ci===0&&sp.tree?'padding-left:'+(8+lvl*20)+'px;':'')+(ci===0?'position:sticky;left:0;z-index:1;background:inherit;box-shadow:1px 0 0 #E4E9E5;':'')};
       if(ci===0 && sp.tree){ cell.hasCaret=true; cell.caretOk=has; cell.caretNo=!has; const open=!!exp[r.id]||(g2filtering(st)&&has);
