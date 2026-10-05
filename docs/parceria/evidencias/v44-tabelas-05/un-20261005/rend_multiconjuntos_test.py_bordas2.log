@@ -1,0 +1,13 @@
+classe: ('ok', 'Configuração incluída em Adubação de cobertura · Classe distribuidor 12 m: 6,72 ha/h. A área de Adubação de cobertura agora se divide entre 2 configurações. Plano operacional e recursos recalculados.')
+T2: ['T2 · Soja 58 W 2 configurações Distribuidores: ao mesmo tempo precisariam de 2, a fazenda tem 1; trabalham uma de cada vez', '07/11/2026', 'nov/26', '298', '24,1', '24,1', '5.075', '85.824', '90.899', '305,03', '241']
+OK    · B5a "Ao mesmo tempo" posta em sequência pelo grupo da fazenda: a ocorrência mostra "Distribuidores: ao mesmo tempo precisariam de 2, a fazenda tem 1" · ['T2 · Soja 58 W 2 configurações Distribuidores: ao mesmo tempo precisariam de 2, a fazenda tem 1; trabalham uma de cada vez', '07/11/2026', 'nov/26', '298', '24,1', '24,1', '5.075', '85.824', '90.899', '305,03', '241']
+troca 2 h na 1ª: ok ok ('ok', 'Rendimento de Adubação de cobertura · Trator 03 + Distribuidor 3 t: 18,00 ha/h · R$ 12,94/ha. Plano operacional e recursos recalculados.')
+T2 com troca: ['T2 · Soja 58 W 2 configurações Distribuidores: ao mesmo tempo precisariam de 2, a fazenda tem 1; trabalham uma de cada vez', '07/11/2026', 'nov/26', '298', '24,1', '26,1', '5.075', '85.824', '90.899', '305,03', '241']
+OK    · B5b troca informada na 1ª configuração entra no decorrido (decorrido = horas-conjunto + 2 h) · ['T2 · Soja 58 W 2 configurações Distribuidores: ao mesmo tempo precisariam de 2, a fazenda tem 1; trabalham uma de cada vez', '07/11/2026', 'nov/26', '298', '24,1', '26,1', '5.075', '85.824', '90.899', '305,03', '241']
+prestador: 1 250,00 ('ok', 'Configuração incluída em Adubação de cobertura · Prestador lanço: 18,00 ha/h. A área de Adubação de cobertura agora se divide entre 2 configurações. Prestador: a tarifa é a de Máquina (R$ 250,00/h); implemento e pessoas da fazenda não entram. Plano operacional e recursos recalculados.')
+k4: 5.234 ha trabalhados · 562 horas-conjunto · 1.225 horas-homem · 6.876 L de diesel · R$ 1.663.455,13 · R$ 1.427,86/ha da safra · clique numa linha para ver os meses dela
+etapa 5 pessoas: ['Demanda (h)', '21', '171', '57', '51', '2', '244', '0', '0', '651', '2', '25', '0', '1.225']
+OK    · B6a prestador incluído pelo formulário (Pessoas vinha 1, copiado): horas-homem da etapa 4 = demanda de pessoas da etapa 5 · ['1', '1.225', '1.225']
+OK    · B6b o aviso diz que a tarifa do prestador é a de Máquina e que implemento e pessoas da fazenda não entram · ('ok', 'Configuração incluída em Adubação de cobertura · Prestador lanço: 18,00 ha/h. A área de Adubação de cobertura agora se divide entre 2 configurações. Prestador: a tarifa é a de Máquina (R$ 250,00/h); implemento e pessoas da fazenda não entram. Plano operacional e recursos recalculados.')
+OK    · B7 sem erros de JS · []
+RESULTADO: 5/5 OK

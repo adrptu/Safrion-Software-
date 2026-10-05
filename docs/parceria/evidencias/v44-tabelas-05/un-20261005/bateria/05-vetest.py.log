@@ -1,0 +1,66 @@
+$ CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdp9333.lock env CDP_GL=1 timeout 900 python3 vetest.py
+OK  VE-01: faixa 6 etapas por links
+OK  VE-01: etapa atual = 'Confira demanda e oferta'
+OK  VE-01: sem erro JS
+OK  VE-02: faixa 6 etapas por links
+OK  VE-02: etapa atual = 'Acompanhe o mercado'
+OK  VE-02: sem erro JS
+OK  VE-03: faixa 6 etapas por links
+OK  VE-03: etapa atual = 'Faça ofertas'
+OK  VE-03: sem erro JS
+OK  VE-04: faixa 6 etapas por links
+OK  VE-04: etapa atual = 'Registre pedidos\nPV-031 · falta 0,4 t'
+OK  VE-04: sem erro JS
+OK  VE-04det: faixa 6 etapas por links
+OK  VE-04det: etapa atual = 'Registre pedidos\nPV-031 · falta 0,4 t'
+OK  VE-04det: sem erro JS
+OK  VE-05: faixa 6 etapas por links
+OK  VE-05: etapa atual = 'Controle contratos'
+OK  VE-05: sem erro JS
+OK  VE-06: faixa 6 etapas por links
+OK  VE-06: etapa atual = 'Trate reclamações\nRC-12 aguarda Qualidade'
+OK  VE-06: sem erro JS
+confirmar PV-032: ok
+OK  PV-032 confirmado com recibo: PV-032 confirmado numa transação única: preço, crédito, saldo (1,8 t B) e capacidade verificados · 1,8 t alocadas uma única vez · recibo CMD-5521.
+confirmar PV-033: ok
+OK  PV-033 conflito: Conflito de saldo no PV-033: a versão do saldo mudou (v15 → v16) · disponível classe B 28/09–04/10 = 0,0 t · alternativas: 1,2 t B na semana 05/10 ou reduzir o volume com aceite · nada foi reservado.
+OK  linha PV-033 mostra conflito: PV-033 Rede Hortifrúti BA Mamão Formosa · B 1,2 t 28/09–04/10 R$ 2,25/kg CIF · 35 d Conflito de saldo · 0,0 t B livres Confirmar pedido
+OK  ação da linha não abre edição
+repetir PV-032: ok PV-032 já confirmado · mesmo recibo CMD-5521 devolvido · nada deduzido de novo.
+OK  linha PV-032 confirmada: PV-032 Frutas Real Mamão Formosa · B 1,8 t 28/09–04/10 R$ 2,10/kg FOB · 21 d Confirmado · recibo CMD-5521 Confirmar pedido
+abrir PV-033: ok ['fx_g_cart_cli=Rede Hortifrúti BA', 'fx_g_cart_item=Mamão Formosa · B', 'fx_g_cart_qtd=1,2', 'fx_g_cart_un=t', 'fx_g_cart_preco=2,25', 'fx_g_cart_janela=28/09–04/10', 'fx_g_cart_cond=CIF · 35 d']
+campo qtd #fx_g_cart_qtd ok
+OK  PV-033 editado pela linha: PV-033 Rede Hortifrúti BA Mamão Formosa · B 1,0 t 28/09–04/10 R$ 2,25/kg CIF · 35 d Conflito de saldo · 0,0 t B livres Confirmar pedido
+novo pedido: ok
+['fx_g_cart_cli=Frutas Real', 'fx_g_cart_item=Mamão Formosa · A', 'fx_g_cart_qtd=', 'fx_g_cart_un=t', 'fx_g_cart_preco=', 'fx_g_cart_janela=', 'fx_g_cart_cond=CIF · 28 d']
+OK  novo pedido PV-034 criado: Registro incluído
+OK  PV-031 mostra origem L39-120/OB-0110/INSP-92/genealogia
+OK  PV-031 não aparece Confirmado
+enviar v3: ok
+['fx_g_ver_qtd=9,6', 'fx_g_ver_preco=3,05', 'fx_g_ver_janela=28/09–04/10', 'fx_g_ver_motivo=Rendimento A de 80% sobre 12,0 t brutas']
+OK  v3 enviada: Revisão v3 (9,6 t) enviada ao cliente · v2 preservada · o pedido fica “Revisão v3 aguardando aceite” (simulado · nenhuma mensagem real enviada).
+OK  estado muda para Revisão v3 aguardando aceite
+OK  ação primária muda
+OK  reenvio não duplica: Revisão v3 já enviada hoje 14:57 · nada reenviado · aguarda aceite do cliente.
+abrir OF-103: ok
+FALHA OF-103 editada: OF-103 · enviada Mamão Formosa A 2.000 kg 05/10–11/10 CIF região Sudeste Frutas Real R$ 3,05/kg · 28 d Enviada · reservada pela RT-0112 válida até 30/09 Ver reserva
+abrir OF-101 (aceita): ok
+OK  OF-101 aceita abre em consulta
+nova oferta: ok
+OK  nova oferta OF-104: OF-104 · rascunho Mamão Formosa · classe A 800 kg 12/10–18/10 CIF região Sudeste a definir R$ 3,00/kg · 28 d Rascunho · privado válida até 05/10 clique para ajustar
+OK  VE-05 inclui CPR 6.900 e base V2 51.280
+formalizar: ok
+OK  CT-204 formalizado: CT-204 formalizado · obrigação registrada uma única vez · soja sem obrigação física recalculada.
+OK  VE-06 tem caso da VG-117
+abrir caso: ok
+OK  caso RC-16 aberto: Caso RC-16 aberto · lote L27-021 e clientes afetados carregados pela genealogia.
+autorizar retorno RC-15: ok Retorno de 0,4 t do L38-110 autorizado · entra BLOQUEADO no recebimento (CO-04) — não volta ao vendável até a Qualidade decidir. | Caso RC-16 aberto · lote L27-021 e clientes afetados carregados pela genealogia.
+OK  ação da linha não edita
+abrir RT-0112: ok
+OK  reserva ajustada: RT-0112 Frutas Real · portal · OF-103 Reserva temporária 1.500 kg 24/09 18:00 Aguardando pedido já deduzida; vira pedido sem nova dedução
+OK  saldo e balanço recalculados: RT-0112 ajustada para 1.500 kg · saldo recalculado com dedução única (antes 3.000 kg).
+abrir RT-0109 expirada: ok
+OK  reserva expirada em consulta
+
+RESULTADO: 1 FALHA(S)
+[exit 0]

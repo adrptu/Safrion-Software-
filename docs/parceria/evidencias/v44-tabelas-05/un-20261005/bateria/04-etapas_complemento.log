@@ -1,0 +1,14 @@
+$ CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdp9333.lock timeout 900 python3 etapas_celular_test.py complemento
+FALHA 17 lista da tela alcançável (O.S. e AG-07 em 390 px e zoom de 200 %, EST em 320 px): caixa não espremida e última linha tocável rolando a tela {'OS 390x844@1': {'alt': 409, 'cont': 409, 'linhas': 11, 'rolaTela': True, 'ultNaJanela': True, 'ultTocavel': True}, 'OS 720x450@2': {'alt': 409, 'cont': 409, 'linhas': 11, 'rolaTela': True, 'ultNaJanela': False, 'ultTocavel': True}, 'AG-07 390x844@1': {'alt': 6008, 'cont': 6008, 'linhas': 51, 'rolaTela': True, 'ultNaJanela': True, 'ultTocavel': True}, 'AG-07 720x450@2': {'alt': 4748, 'cont': 4748, 'linhas': 51, 'rolaTela': True, 'ultNaJanela': False, 'ultTocavel': True}, 'EST 320x700@1': {'alt': 149, 'cont': 149, 'linhas': 3, 'rolaTela': True, 'ultNaJanela': True, 'ultTocavel': True}}
+OK    18 390 px · título de bloco com ação (MA-01, CO-01): seletor e comandos dentro da largura e tocáveis; título "Agenda por captação" (IR-02) em até 2 linhas 
+OK    19 CD-07 em 390 e 600 px · Cadastrar código, Importar do ERP, Recolher tudo, Publicar estrutura e Traduzir no ERP na tela e tocáveis 
+OK    20 tela baixa (800×360 e 568×320) · folha com a última etapa à vista (CMP, SAF: só informa) ou tocável (EST, MA-01: telas); IR-02 com ≥ 280 px úteis (cabeçalho rola, faixa fica) e "Programar irrigação" alcançável 
+OK    21 zoom 200 % · CO-02, CO-02det, CO-06, CO-06det e LO-02det com ≥ 300 px úteis (cabeçalho rola junto) 
+OK    22 toque · folha abre; tocar fora fecha; tocar na etapa atual fecha sem mudar; tocar na etapa 3 fecha sem navegar (a lista só informa · UX-ACAO-UNICA) 
+OK    23 alvos de toque da faixa compacta ≥ 44 px (rótulo e telas da folha) e nenhuma seta ‹ › (UX-ACAO-UNICA) 
+OK    24 390 px · situação do cabeçalho inteira (CD-01, CD-03, CD-07, SU-09) 
+OK    25 sem erro de JS nas telas visitadas 
+
+RESULTADO: 8 ok · 1 falhas (complemento)
+  - 17 lista da tela alcançável (O.S. e AG-07 em 390 px e zoom de 200 %, EST em 320 px): caixa não espremida e última linha tocável rolando a tela
+[exit 1]
