@@ -98,7 +98,11 @@ try:
     shot('q_consumo_5_est_aceito.png')
     erros += a.erros() or []
     # 5 · fora da requisição (Adjuvante, nada com o operador) e recusa: relato sem efeito, nenhum relato apagado
-    a.c.size(390, 1800); a.abrir('MB-03'); a.mudar(f"return cenIniciarTurno(c,'{OS}');"); a.abrir('MB-03')   # custódia 0: o cartão pede retirada; o turno abre direto
+    # CTL-2 · B: com custódia 0 o app recusa iniciar (regra única da web); o relato fora da requisição continua possível num turno aberto antes
+    a.c.size(390, 1800); a.abrir('MB-03'); rx = a.mudar(f"return cenIniciarTurno(c,'{OS}');")
+    ok(rx == 'Iniciar bloqueado: REQ-035 sem entrega · Fungicida A 14 L a entregar. Rui (almoxarife) entrega no Estoque; Marcos confirma o recebimento no app.' and a.cen("!c.app.turno"),
+       f'custódia 0: o app recusa iniciar com o texto da web e o dono, sem abrir turno: {rx}')
+    a.mudar(f"c.app.turno={{os:'{OS}',ini:'10:00',pausas:[],fim:null}}; return 'turno aberto antes';"); a.abrir('MB-03')   # como app_saldo_zero_test.py
     a.setv('#ft_ha', '2'); a.setv('#ft_h', '1'); a.setv('#ft_c0', '0'); a.setv('#ft_c1', '0,5')
     av1 = campo(1); a.clk('Fechar turno')
     k2 = a.cen("(c.confs||[]).map(k=>k.id+' '+k.prod+' '+k.relatado+' '+k.custodia+' '+k.estado+' '+k.motivo)")
@@ -111,7 +115,7 @@ try:
          f'EST: linha própria do relato fora da requisição (singular, "nada em custódia"); recusar deixa sem efeito e preserva o relatado: {kr}', lf[:160])
     erros += a.erros() or []
     # 6 · sem sinal: o caso fica no aparelho e só aparece no Estoque e na O.S. depois do envio, uma vez
-    a.mudar(f"cenSinal(c,false); cenIniciarTurno(c,'{OS}'); return cenFecharTurno(c,2,1,{{'{P}':3,'Adjuvante espalhante':0}},'');")
+    a.mudar(f"cenSinal(c,false); c.app.turno={{os:'{OS}',ini:'10:00',pausas:[],fim:null}}; return cenFecharTurno(c,2,1,{{'{P}':3,'Adjuvante espalhante':0}},'');")   # turno aberto antes (CTL-2 · B)
     s0 = a.cen(f"[(c.confs||[]).filter(k=>k.estado==='Em conferência'&&k.sinc).length,c.confs.slice(-1)[0].sinc,c.ordens['{OS}'].selos.map(s=>s.t).join(',')]")
     a.mudar("cenSinal(c,true); return cenSinal(c,true);")
     s1 = a.cen(f"[(c.confs||[]).filter(k=>k.estado==='Em conferência'&&k.sinc).length,c.confs.length,c.ordens['{OS}'].selos.map(s=>s.t).join(',')]")
@@ -135,7 +139,7 @@ try:
     shot('q_consumo_8_est_reserva_propria.png')
     erros += a.erros() or []
     # 8 · recibo do turno com o caso resolvido abre com o estado (Recusado por …), não com "Em conferência"
-    a.c.size(390, 1800); a.mudar("return window.__cen.cenIniciarTurno(c,'OS-0424');"); a.abrir('MB-03')
+    a.c.size(390, 1800); a.mudar("c.app.turno={os:'OS-0424',ini:'10:00',pausas:[],fim:null}; return 'turno aberto antes';"); a.abrir('MB-03')   # custódia 0 após §7 (CTL-2 · B)
     a.setv('#ft_ha', '2'); a.setv('#ft_h', '1'); a.setv('#ft_c0', '3'); a.clk('Fechar turno')
     kid = a.cen("c.confs.slice(-1)[0].id")
     a.J("(()=>{const {cenMudar,cenConciliar}=window.__cen; return cenMudar(null,c=>cenConciliar(c,'%s',false,'registro sem fato físico'));})()" % kid)

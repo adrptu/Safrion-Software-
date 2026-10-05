@@ -92,7 +92,7 @@ try:
     chk('apontamento de 60 ha com insumos usados', 'Apontamento do dia 1: 60 ha' in tt and 'Glifosato 480 120 L' in tt and 'continua em execução' in tt, tt)
     chk('ordem continua em execução, saldo 100', 'Em execução' in fase_lista('OS-0430') and '60 / 160 ha' in fase_lista('OS-0430'), fase_lista('OS-0430'))
     chk('coluna Usado atualiza (120 L)', '120 L' in t)
-    btn('Registrar apontamento'); setin('Área feita em hectares','100'); btn('Salvar apontamento')
+    btn('Registrar apontamento'); setin('Data do turno','2026-09-27'); setin('Área feita em hectares','100'); btn('Salvar apontamento')   # CTL-2 · A: outro dia (o mesmo dia com outra chave fica em conferência de duplicidade)
     chk('saldo zero muda o botão para Enviar para conferência', J("[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==='Enviar para conferência')"))
     btn('Enviar para conferência'); btn('Confirmar envio')
     chk('em conferência', 'Em conferência' in fase_lista('OS-0430'))

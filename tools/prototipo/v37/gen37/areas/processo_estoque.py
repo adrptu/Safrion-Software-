@@ -228,7 +228,9 @@ function emovTxt(m){ const u=m.un||'';
   if(m.tipo==='inspecao') return 'quarentena liberada após inspeção: '+eq(m.qtd,u)+' passam a disponível';
   if(m.tipo==='contagem') return 'contagem '+(m.doc?m.doc+' ':'')+'sem diferença';
   if(m.tipo==='ajuste') return 'ajuste de inventário '+(m.doc?m.doc+' ':'')+'aprovado por Ana (gestora): '+esig(m.qtd,u);
-  return MTIPO[m.tipo]||m.tipo; }
+  return emovTipo(m); }
+// consumo: o canal do apontamento (app ou web) ou o aceite do almoxarife (conf = o caso conciliado)
+function emovTipo(m){ if(m.tipo==='consumo'&&m.origem!=='app') return typeof m.conf==='string'?'Consumo aceito na conferência':'Consumo apontado na web'; return MTIPO[m.tipo]||m.tipo; }
 // lote vencido: validade (mês/ano) anterior ao mês de hoje; entra todo em quarentena e não volta ao disponível
 function evenc(l){ return !!l&&!!l.validade&&l.validade!=='—'&&eval_(l.validade)<ehojeYM(); }
 // consumo apontado no app: "Glifosato 480 10, 2,4-D 806 5" (cenFecharTurno) → itens com a unidade da requisição ou da O.S.
@@ -488,7 +490,7 @@ function PREVALS(self,v){
   let nsin=0; const SEM=esemSinal(C), APPI=eappItens(C), AJU={}; (C.movs||[]).forEach(m=>{ if(m.aj) AJU[m.aj]=true; });
   GR('g_mov').rows=(C.movs||[]).slice().reverse().map(m=>{ const app=m.origem==='app'; const sem=!!SEM[m.id]; if(sem) nsin++;
     // itens do app (confirmação e consumo): um por linha, com a quantidade e a unidade na coluna Quantidade
-    const li=APPI[m.id]||null; const q=li?li.map(x=>eq(x.qtd,x.un)).join(', '):emovQtd(m); const tp=MTIPO[m.tipo]||m.tipo;
+    const li=APPI[m.id]||null; const q=li?li.map(x=>eq(x.qtd,x.un)).join(', '):emovQtd(m); const tp=emovTipo(m);
     const dc=emovDoc(C,m,AJU);
     // TABELAS-FOCO: registro, condição, documento, O.S., item, lote, quantidade, unidade e sinal em colunas próprias (itens do app: um por linha dentro da célula)
     const cond=m.tipo==='devolucao'?(m.apto?'apta':'bloqueada'):(m.tipo==='recebimento-nf'?(m.apto?'apto':'em quarentena'):'');
@@ -500,7 +502,7 @@ function PREVALS(self,v){
     const lin=(a)=>a.reduce((o,p,i)=>o.concat(i?[{k:'br'},p]:[p]),[]);
     r.p.lote=m.lote?[{k:'txt',t:m.lote}]:[{k:'mut',t:'—'}]; r.s.lote=m.lote||'';
     r.p.item=m.prod?[{k:'txt',t:m.prod}]:(li&&li.length?lin(li.map(x=>({k:'txt',t:x.prod}))):(m.det?[{k:'mut',t:m.det}]:[{k:'mut',t:'—'}]));
-    if(m.conf&&m.origem==='app'){ const ks=(C.confs||[]).filter(k=>m.conf.indexOf(k.id)>=0); r.p.item=(li&&li.length?r.p.item.concat([{k:'br'}]):[]).concat(ks.map(k=>({k:'mut',t:k.prod+' '+eq(k.relatado,k.un)+' em conferência ('+k.id+')'}))); }
+    if(Array.isArray(m.conf)){ const ks=(C.confs||[]).filter(k=>m.conf.indexOf(k.id)>=0); r.p.item=(li&&li.length?r.p.item.concat([{k:'br'}]):[]).concat(ks.map(k=>({k:'mut',t:k.prod+' '+eq(k.relatado,k.un)+' em conferência ('+k.id+')'}))); }
     r.s.item=m.prod||(li?li.map(x=>x.prod).join(', '):'')||m.det||'';
     // quantidade com a unidade junto (decisão do proprietário, 05/10/2026); v.qtd numérico ordena; vários itens do app → uma linha por item
     if(li&&li.length){ r.p.qtd=lin(li.map(x=>({k:'txt',t:eq(x.qtd,x.un)}))); r.s.qtd=li.map(x=>eq(x.qtd,x.un)).join(', ');

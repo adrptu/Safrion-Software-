@@ -36,8 +36,8 @@ try:
     T.mudar(f"return cenDevolver(c,'{RQ}','Glifosato 480',20,true);"); l = T.linha(OS)
     T.ok('Sobras a receber' not in l and T.cel(OS, 'Quem resolve') == 'Marcos' and T.cel(OS, 'Próxima ação') == 'conferir e encerrar', 'devolução recebida: selo sai e o dono volta a ser Marcos', l)
     T.ordem(OS); T.btn('Conferir e encerrar'); T.btn('Confirmar encerramento'); T.fechar()
-    hoje = datetime.date.today(); fim = f'{hoje:%d}/{hoje:%m}'
-    esp = f'período 10–{fim}' if hoje.month == 9 else f'período 10/09–{fim}'
+    # CTL-2 · A (AP-02): o turno do app grava a data operacional (CEN_DIA_OP = 26/09), não o relógio do aparelho → o período fecha em 26/09
+    esp = 'período 10–26/09'
     tab('Kanban'); col = J("[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] > div')].map(d=>d.innerText.split('\\n').slice(0,3).join(' | ')).pop()") or ''
     T.ok(col.endswith(esp) and '3' in col, 'coluna Encerradas com o período das ordens encerradas', (col, esp))
     T.ok(not T.erros(), 'sem erro JS', T.erros())

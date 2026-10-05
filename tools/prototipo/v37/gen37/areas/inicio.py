@@ -699,7 +699,7 @@ function precoDe(p){ if(M.preco[p]!==undefined) return M.preco[p]; for(const k i
 function ordCusto(o){ const r={ins:0,op:0,ha:0,haConf:0,rs:0,rsConf:0,prevExec:0,pend:[]}; const op=(o.atv||{}).op||''; const cop=M.cop[op];
   if(cop===undefined) r.pend.push('Operação '+(op||'—')+' sem rendimento na safra: custo de operação não somado');
   const prHa=(o.ins||[]).reduce((s,x)=>{ const p=precoDe(x.p); if(p===null){ r.pend.push('Sem preço: '+x.p+' (não somado)'); return s; } return s+x.dose*p; },0);
-  (o.ap||[]).forEach(a=>{ if(a.st==='Previsto'||a.sinc===false) return; const ha=Number(a.ha)||0; let vi=0;
+  (o.ap||[]).forEach(a=>{ if(!cenApSomado(a)) return; const ha=Number(a.ha)||0; let vi=0;   // duplicidade retida ou guardada não vira custo
     if(a.cons&&Object.keys(a.cons).length) Object.keys(a.cons).forEach(p=>{ const pr=precoDe(p); if(pr!==null) vi+=(Number(a.cons[p])||0)*pr; }); else vi=prHa*ha;
     const vo=(cop||0)*ha; r.ins+=vi; r.op+=vo; r.ha+=ha; r.rs+=vi+vo; r.prevExec+=(prHa+(cop||0))*ha; if(a.st==='Conferido'){ r.haConf+=ha; r.rsConf+=vi+vo; } });
   r.pend=r.pend.filter((x,i,a)=>a.indexOf(x)===i); return r; }
@@ -825,7 +825,7 @@ function nxOf(self,o,mo){ const pb=osProx(o); const P=pb.P, b=pb.b; const pa=(se
   // ação da ordem no passo: 'lib' = Ajustar antes de liberar (o primário é o Liberar do núcleo) · 'op' só com o passo impedido, quando leva a outro destino que o do impedimento
   const a=mo&&mo.act; if(a&&(a.k==='lib'||(a.k==='op'&&b&&b.h&&a.h!==b.h))){ N.hasLib=true; N.libt=a.t; N.libh=a.h==='OS.dc.html'?'OS.dc.html#'+o.id:a.h; if(a.k==='lib') N.libh='OS.dc.html#'+o.id+':ajustar'; }
   if(!b&&P.btn){ N.isBtn=true; N.btn=P.btn; N.go=()=>{ if(P.fn==='apontar'){ const prox=(o.ap||[]).find(x=>x.st==='Previsto'); const mx=Math.max(0,(o.saldo||0)-osApPend(o));
-      self.setState({mpa:{id:o.id,fn:'apontar',d:'2026-09-23',ha:String(Math.min(mx,prox?prox.ha:mx)).replace('.',','),err:''}}); } else self.setState({mpa:{id:o.id,fn:P.fn,err:''}}); }; }
+      self.setState({mpa:{id:o.id,fn:'apontar',d:CEN_DIA_OP,ha:String(Math.min(mx,prox?prox.ha:mx)).replace('.',','),chave:'W-'+o.id+'-'+Date.now(),err:''}}); } else self.setState({mpa:{id:o.id,fn:P.fn,err:''}}); }; }
   if(!b&&o.dono){ N.dono='Pendência com '+o.dono+(o.prazo?' · '+o.prazo:''); N.hasDono=true; }
   if(pa&&['liberar','iniciar','conferencia','encerrar'].indexOf(pa.fn)>=0){ N.conf=true; N.ct=mapCt(o,pa.fn); N.cbtn={liberar:'Confirmar liberação',iniciar:'Confirmar início',conferencia:'Confirmar envio',encerrar:'Confirmar encerramento'}[pa.fn];
     N.yes=()=>{ const F={liberar:c=>osc_liberar(c,o.id,o.agua,o.janela),iniciar:c=>osc_iniciar(c,o.id),conferencia:c=>osc_conferencia(c,o.id),encerrar:c=>osc_encerrar(c,o.id)}[pa.fn];
@@ -836,7 +836,7 @@ function nxOf(self,o,mo){ const pb=osProx(o); const P=pb.P, b=pb.b; const pa=(se
     N.asave=()=>{ const cur=self.state.mpa; const n=g2num(cur.ha); const er=(m)=>self.setState({mpa:Object.assign({},cur,{err:m})});
       if(!cur.d) return er('Informe a data do turno.'); if(isNaN(n)||n<=0) return er('Informe a área feita (maior que 0 ha).');
       if(n>(o.saldo||0)+0.001) return er('Máximo '+nf(o.saldo)+' ha: é o saldo da ordem.'); if(n>apMax+0.001) return er('Máximo '+nf(apMax)+' ha: '+nf(apP)+' ha do app aguardam sinal.');
-      const d=cur.d.split('-'); osRun(self,c=>osc_apontar(c,o.id,d[2]+'/'+d[1],n),{mpa:null},(e)=>er(e)); }; }
+      const d=cur.d.split('-'); osRun(self,c=>osc_apontar(c,o.id,d[2]+'/'+d[1],n,undefined,undefined,cur.chave),{mpa:null},(e)=>er(e)); }; }
   if(pa&&pa.err){ N.err=pa.err; N.hasErr=true; }
   N.idle=!N.conf&&!N.ap; N.semAcao=N.idle&&!N.isBtn&&!N.hasLib&&!N.bloq;
   const PR='display:inline-flex;align-items:center;padding:6px 12px;border-radius:9px;font-size:12.5px;font-weight:700;text-decoration:none;white-space:nowrap;font-family:inherit;';

@@ -52,7 +52,7 @@ try:
     E.ok(len(r) == 1 and 'Glifosato 480' in r[0] and '320 L' in r[0] and '2,4-D' not in r[0] and 'Óleo mineral' not in r[0], 'confirmação do app lista só o Glifosato 480 (320 L) entregue', r)
     # 4 · entrega dos outros 2 itens e turno de 5 ha fechado sem sinal: consumo com unidade e chip "Aguardando sinal" inteiro
     E.mudar(f"cenEntregar(c,'{RQ}','2,4-D 806',160,'Marcos'); return cenEntregar(c,'{RQ}','Óleo mineral',80,'Marcos');")
-    print('app:', E.mudar("cenSinal(c,false); cenIniciarTurno(c,'OS-0430'); return cenFecharTurno(c,5,1);"))
+    print('app:', E.mudar(f"cenConfirmarRecebimento(c,'{RQ}'); cenSinal(c,false); cenIniciarTurno(c,'OS-0430'); return cenFecharTurno(c,5,1);"))   # CTL-2 · B: o turno exige o recebimento confirmado
     E.abrir(); E.etapa(6); r = movs(E, 'Consumo apontado no app'); k = E.k(); print(' ', r, '|', k)
     E.ok(len(r) == 1 and all(x in r[0] for x in ('Glifosato 480', '10 L', '2,4-D 806', '5 L', 'Óleo mineral', '2,5 L')) and 'Glifosato 480 10,' not in r[0],
          'consumo do app: cada item com quantidade e unidade (10 L, 5 L, 2,5 L) na coluna Quantidade', r)

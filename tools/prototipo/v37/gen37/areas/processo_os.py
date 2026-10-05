@@ -240,13 +240,17 @@ function osMerge(b,co,c){ if(!co) return b;
   if(co.etapa==='Canceladas'&&x.insx) o.insx=x.insx;
   // execução com turno no aparelho: o mesmo selo da conferência na lista e no Kanban (o painel e o Mapa dizem "aguardando sinal")
   if(co.etapa==='Em execução'){ o.selos=o.selos.filter(s=>!/^Aguardando sinal/.test(s.t));
-    if((co.ap||[]).some(a=>a.sinc===false)) o.selos=o.selos.concat([{t:'Aguardando sinal do app',c:'yellow'}]); }
+    if((co.ap||[]).some(a=>a.sinc===false)) o.selos=o.selos.concat([{t:'Aguardando sinal do app',c:'yellow'}]);
+    const fz=((co.saldo||0)-osApPend(co)>0.001)&&cenIniFalta(co,r);   // componente esgotado com área a fazer (regra única de início)
+    if(fz&&fz.k==='rever'){ o.selos=o.selos.concat([{t:'Insumo esgotado · '+fz.its.map(i=>i.prod).join(', '),c:'red'}]); o.dono=OS_AGRO; o.prazo='decidir a área restante';
+      o.esg={acao:'apontar',t:'Apontar bloqueado: '+fz.t,q:fz.q}; }
+    const dpx=(co.ap||[]).filter(a=>a.st===CEN_AP_DUP); if(dpx.length){ o.dono=CEN_CONF_AP; o.prazo='decidir se o dia '+dpx.map(a=>a.dia).join(', ')+' é outro turno'; } }   // duplicidade retida: decide a conferência (CMD-09)
   // conferência: o encerramento depende do cenário (apontamento aguardando sinal ou sobra em custódia)
   if(co.etapa==='Em conferência'){ o.encM=cenPodeEncerrar(c,co.id);
     if(!o.encM){ o.selos=o.selos.filter(s=>!/Sobras a receber|Aguardando sinal/i.test(s.t)); if(!mine){ o.cond='Apontamentos enviados e nada em custódia. Próximo passo: conferir e encerrar.'; o.dono=o.resp; o.prazo='conferir e encerrar'; } }
-    else { const sin=/sinal/.test(o.encM); const t=sin?'Aguardando sinal do app':'Sobras a receber';  // o bloqueio também na lista e no Kanban
+    else { const sin=/sinal/.test(o.encM); const t=sin?'Aguardando sinal do app':(/duplicidade/.test(o.encM)?'Apontamento em conferência':'Sobras a receber');  // o bloqueio também na lista e no Kanban
       if(!o.selos.some(s=>s.t===t)) o.selos=o.selos.concat([{t,c:'yellow'}]);
-      if(sin){ o.dono=o.resp; o.prazo='reconectar o app'; } else if(!/almoxarife/.test(o.dono||'')){ o.dono='Rui (almoxarife)'; o.prazo='receber a devolução'; } } }
+      if(sin){ o.dono=o.resp; o.prazo='reconectar o app'; } else if(/duplicidade/.test(o.encM)){ o.dono=CEN_CONF_AP; o.prazo='decidir a duplicidade'; } else if(!/almoxarife/.test(o.dono||'')){ o.dono='Rui (almoxarife)'; o.prazo='receber a devolução'; } } }
   // A liberar: o Estoque (reserva por lote) pode segurar a liberação desde a abertura → selo vermelho e dono na lista, no Kanban e no painel
   if(co.etapa==='A liberar'&&!o.agua&&(co.ins||[]).length){ const e=osLibErro(o,c);
     const z=e&&/Dose × área de (.+?) dá 0/.exec(e);   // total 0: quem resolve é o agrônomo, não o Estoque (PRE-REV Y3)
@@ -295,6 +299,7 @@ function osLibErro(o,c0){ const c=c0||cenGet(); if(!c.ordens[o.id]) return ''; c
   try { osc_liberar(k,o.id,false,o.janela); return ''; } catch (e) { return String(e.message||e); } }
 function osEncBloq(o){ const m=o.encM;
   if(/sinal/.test(m)) return {acao:'encerrar',t:'Encerrar bloqueado: há apontamentos no aparelho aguardando sinal.',q:o.resp+' reconecta o app; o envio é automático e não duplica.'};
+  if(/duplicidade/.test(m)) return {acao:'encerrar',t:'Encerrar bloqueado: '+m,q:CEN_CONF_AP+' decide na linha do apontamento: mesmo turno conta uma vez; outro turno soma.'};
   const its=(o.r?o.r.itens:[]).filter(i=>i.custodia>0.001); const quem=its.map(i=>i.quem||o.resp).filter((v,i,a)=>a.indexOf(v)===i).join(', ')||o.resp;
   return {acao:'encerrar',t:'Encerrar bloqueado: sobra em custódia · '+its.map(i=>{ const pk=osPk(i.custodia,i.emb); return i.prod+' '+nd(i.custodia)+' '+i.un+(pk?' ('+pk+')':''); }).join(', ')+' com '+quem+'.',
     q:'Rui (almoxarife) recebe a devolução no Estoque.',h:'EST.dc.html',hl:'Receber devolução no Estoque'}; }
@@ -382,31 +387,37 @@ function osUsoAtencao(c,id){ const co=c.ordens[id], al=[]; if(co) osUsoErro(c,co
 function osc_reqId(c){ const n=Object.keys(c.reqs||{}).reduce((m,k)=>Math.max(m,parseInt(String(k).replace(/\D/g,''),10)||0),0)+1;
   return 'REQ-'+String(n).padStart(3,'0'); }
 // iniciar exige os insumos com o operador: entregues no Estoque e confirmados no app (água e ordem sem insumo não passam por aqui)
-function osIniErro(o,r){ const its=((o.ins||[]).length&&r)?r.itens:[]; if(!its.length) return null;
-  const q=i=>i.prod+' '+nd(i.custodia>1e-6?i.custodia:cenSaldoEntregar(i))+' '+i.un;
-  const fal=its.filter(i=>!(i.consumido>0)&&!(i.custodia>1e-6));
-  if(fal.length) return {acao:'iniciar',t:'Iniciar bloqueado: '+r.id+' sem entrega · '+fal.map(q).join(', ')+' a entregar.',q:'Rui (almoxarife) entrega no Estoque; '+(o.resp||'o operador')+' confirma o recebimento no app.',h:'EST.dc.html',hl:'Entregar no Estoque'};
-  const nc=its.filter(i=>i.custodia>1e-6&&!i.confirmado);
-  if(nc.length){ const quem=nc.map(i=>i.quem||o.resp).filter((v,k,a)=>a.indexOf(v)===k).join(', ');
-    return {acao:'iniciar',t:'Iniciar bloqueado: '+nc.map(q).join(', ')+(nc.length>1?' entregues a ':' entregue a ')+quem+', aguardando confirmação no app.',q:quem+' confirma o recebimento no app.',h:'MB-05.dc.html',hl:'Ver no app'}; }
-  return null; }
+function osIniErro(o,r){ const f=cenIniFalta(o,r); if(!f) return null;   // regra única (cenario.js), a mesma do app
+  const L={entregar:['EST.dc.html','Entregar no Estoque'],confirmar:['MB-05.dc.html','Ver no app']}[f.k]||[];
+  return {acao:'iniciar',t:'Iniciar bloqueado: '+f.t,q:f.q,h:L[0],hl:L[1]}; }
 function osc_iniciar(c,id){ const o=osc_o(c,id); if(o.etapa!=='Liberadas') throw new Error(id+' não está liberada.');
   { const cb=carBloqColheita(c,o,'iniciar'); if(cb) throw new Error(cb.t); }   // carência (MAPA-CARENCIA-LMR-20261003)
   const e=osIniErro(o,o.req&&c.reqs[o.req]); if(e) throw new Error(e.t);
   o.etapa='Em execução';
   return {msg:id+' em execução. Registre o apontamento de cada turno.'}; }
-// apontamento pela web: mesma regra do app (consumo = dose × área baixa a custódia; nunca acima do que foi entregue)
-function osc_apontar(c,id,d,ha){ const o=osc_o(c,id); if(o.etapa!=='Em execução') throw new Error(id+' não está em execução.');
-  if(!(ha>0)) throw new Error('Informe a área feita (maior que 0 ha).'); if(ha>o.saldo+1e-9) throw new Error('Máximo '+cenNum(o.saldo)+' ha: é o saldo da ordem.');
-  const pap=osApPend(o); if(ha>o.saldo-pap+1e-9) throw new Error('Máximo '+cenNum(o.saldo-pap)+' ha: '+cenNum(pap)+' ha do app aguardam sinal.');
-  const cons={}; (o.ins||[]).forEach(x=>{ cons[x.p]=cenQtdTrecho(x.dose,(o.realizado||0)+pap,ha); /* regra única: o trecho fecha no total (SINT-C03) */ }); const r=o.req&&c.reqs[o.req];
-  if(r) for(const it of r.itens){ const q=cons[it.prod]||0; if(q>it.custodia+1e-9) throw new Error('Consumo de '+it.prod+' ('+cenNum(q)+' '+it.un+') acima do que está em custódia ('+cenNum(it.custodia)+' '+it.un+'). Confira a entrega no Estoque.'); }
-  if(r) r.itens.forEach(it=>{ const q=cons[it.prod]||0; it.consumido+=q; it.custodia-=q; });
-  const feitos=(o.ap||[]).filter(a=>a.st!=='Previsto'); const prev=(o.ap||[]).filter(a=>a.st==='Previsto').slice(1).map((x,i)=>Object.assign({},x,{dia:feitos.length+2+i}));
-  const dia=feitos.length+1; o.realizado+=ha; o.saldo=Math.max(0,o.saldo-ha);
-  o.ap=feitos.concat([{d,dia,ha,st:'Provisório',cons,origem:'web',sinc:true}]).concat(o.saldo>0?prev:[]);
-  const ins=(o.ins||[]).map(x=>x.p+' '+nd(cons[x.p])+' '+x.un).join(', ');
-  return {msg:'Apontamento do dia '+dia+': '+nd(ha)+' ha (provisório)'+(ins?' · usado: '+ins:'')+'. Saldo '+nf(o.saldo)+' ha; a ordem continua em execução.'}; }
+// apontamento pela web (O.S. e Mapa): o mesmo comando do app (cenApontar); cons/est vêm do formulário (osApIns), chave do formulário aberto
+function osc_apontar(c,id,d,ha,cons,est,chave){ const R=cenApontar(c,{os:id,d,ha,cons,est,chave,origem:'web'}); const o=c.ordens[id]; const ap=R.ap;
+  if(R.repetido) return {msg:'Apontamento do dia '+ap.dia+' já registrado ('+nd(ap.ha)+' ha): nada foi somado de novo.'};
+  if(R.dup.length) return {msg:'Apontamento do dia '+ap.dia+' ('+nd(ha)+' ha em '+d+') em conferência: já há '+cenApDupTxt(R.dup)+' nesta data. Nada foi somado nem baixado; '+CEN_CONF_AP+' decide se é outro turno.'};
+  const un=p=>((o.ins||[]).find(x=>x.p===p)||{}).un||''; const ins=Object.keys(ap.cons||{}).map(p=>p+' '+nd(ap.cons[p])+' '+un(p)).join(', ');
+  return {msg:'Apontamento do dia '+ap.dia+': '+nd(ha)+' ha (provisório)'+(ins?' · usado: '+ins:'')+'. Saldo '+nf(o.saldo)+' ha; a ordem continua em execução.'
+    +(R.ks.length?' Consumo em conferência: '+R.ks.map(k=>cenConfTxt(k,c)).join('; ')+' · '+CEN_CONC_RESP+' concilia.':'')}; }
+function osc_apDecidir(c,id,dia,modo,us){ return cenApDecidir(c,id,dia,modo,CEN_CONF_AP,us); }   // CMD-09: 'anterior' | 'este' | 'somar'; us = usado informado na conferência
+// linhas de consumo do formulário (O.S. e Mapa), a mesma regra do MB-03: com o operador, sugere dose × área do trecho (editável, estimativa);
+// fora da requisição nada está em custódia: vazio = 0. q = o que vai ao comando; est = sugestão não editada.
+function osApIns(c,o,ha,ced){ const r=o.req&&c.reqs[o.req]; const pend=osApPend(o);
+  return (o.ins||[]).map((x,i)=>{ const it=r&&r.itens.find(y=>y.prod===x.p); const ed=(ced||{})[x.p]; const vazio=ed===undefined||String(ed).trim()==='';
+    const sug=(ha>0&&it&&isFinite(ha))?cenQtdTrecho(x.dose,(o.realizado||0)+pend,ha):null; const tem=it?it.custodia:0;
+    const q=!vazio?g2num(ed):(it?(ed===undefined?sug:NaN):0);
+    const warn=(q>tem+1e-9)?(ed===undefined?'Sugestão acima do que está em custódia ('+nd(tem)+' '+x.un+'): informe quanto foi usado.':'Acima da custódia ('+nd(tem)+' '+x.un+'): o consumo vai para conferência com '+CEN_CONC_RESP+'.'):'';
+    return {p:x.p,un:x.un,fid:'ap_c'+i,lab:'Usado de '+x.p+' ('+x.un+')',v:ed!==undefined?ed:(sug!==null?String(sug).replace('.',','):''),q,est:ed===undefined,warn,hasWarn:!!warn,
+      hint:it?nd(x.dose)+' '+x.un+'/ha × área · em custódia '+nd(tem)+' '+x.un:(r?'Fora da '+r.id+' · nada em custódia':'Sem requisição · nada em custódia')}; }); }
+function osApColeta(L){ const cons={},est=[]; let erro='';
+  L.forEach(x=>{ if(erro) return; if(isNaN(x.q)||x.q<0){ erro='Informe o usado de '+x.p+' em '+x.un+' (0 se não usou).'; return; } cons[x.p]=x.q; if(x.est) est.push(x.p); });
+  return {cons,est,erro}; }
+// aviso no formulário (não trava): o mesmo critério do servidor (cenApDup) para a data escolhida, antes de salvar
+function osApDupAviso(c,o,d){ const co=c.ordens[o.id]; if(!co||!/^\d\d\/\d\d$/.test(d||'')) return '';
+  const l=cenApDup(co,{d,parc:null,chave:'?',origem:'web'}); return l.length?'Já há '+cenApDupTxt(l)+' em '+d+'. Se for outro turno, salve: ele fica em conferência com '+CEN_CONF_AP+' e só soma depois da decisão.':''; }
 function osc_conferencia(c,id){ const o=osc_o(c,id); if(o.etapa!=='Em execução') throw new Error(id+' não está em execução.');
   if(o.area&&o.saldo>0.001) throw new Error('Ainda há '+cenNum(o.saldo)+' ha de saldo.'); o.etapa='Em conferência'; o.selos=[];
   return {msg:id+' enviada para conferência.'}; }
@@ -423,7 +434,8 @@ function osc_cancelar(c,id,mot,cx){ const o=osc_o(c,id);
   o.etapa='Canceladas'; o.reservado=false; o.selos=[]; osc_txt(o,{cond:'Cancelada sem execução: '+mot+'. '+cx[1],dono:'',prazo:'',insx:cx[2]});
   return {msg:id+' cancelada sem execução. '+cx[1]}; }
 function osc_dispensar(c,id,n,mot){ const o=osc_o(c,id); if(o.etapa!=='Em execução') throw new Error(id+' não está em execução.');
-  if(n>o.saldo+0.001) throw new Error('Máximo '+cenNum(o.saldo)+' ha: é o saldo da ordem.');
+  { const dp=(o.ap||[]).filter(a=>a.st===CEN_AP_DUP); if(dp.length) throw new Error('Apontamento em conferência de duplicidade (dia '+dp.map(a=>a.dia).join(', ')+'): '+CEN_CONF_AP+' decide antes de dispensar o saldo.'); }
+  const pap=osApPend(o); if(n>o.saldo-pap+0.001) throw new Error('Máximo '+cenNum(Math.max(0,o.saldo-pap))+' ha: é o saldo da ordem'+(pap?' descontando '+cenNum(pap)+' ha ainda no aparelho.':'.'));
   const tot=(o.osc.disp||0)+n; o.saldo=Math.max(0,o.saldo-n); o.ap=cortaPrev(o.ap,o.saldo);
   osc_txt(o,{disp:tot,cond:'Saldo de '+nd(n)+' ha dispensado: '+mot+' · validação agronômica registrada. Realizado de '+nf(o.realizado)+' ha preservado.',dono:'',prazo:''});
   return {msg:'Dispensados '+nd(n)+' ha da '+id+' · realizado '+nf(o.realizado)+' ha preservado · saldo '+nf(o.saldo)+' ha.'+(o.saldo<=0.001?' Envie a ordem para conferência.':'')}; }
@@ -457,13 +469,14 @@ function osProx(o){
       :{acao:'liberar',t:'Liberar bloqueado: '+e.charAt(0).toLowerCase()+e.slice(1),q:'Suprimentos, recebendo o insumo no Estoque.',h:'EST.dc.html',hl:'Ver saldos no Estoque'}; }
   if(!b&&P.fn==='encerrar'&&o.encM) b=osEncBloq(o);
   if(!b&&P.fn==='iniciar'&&!o.agua) b=osIniErro(o,o.r);
+  if(!b&&P.fn==='apontar'&&o.esg) b=o.esg;   // componente esgotado: Dispensar saldo segue no painel
   if(!b&&(P.fn==='liberar'||P.fn==='iniciar')&&o.carB) b=Object.assign({},o.carB,{acao:P.fn});   // carência (MAPA-CARENCIA-LMR-20261003)
   return {P,b}; }
 '''
 JS=r'''
 const FASES=['A liberar','Liberadas','Em execução','Em conferência','Encerradas'];
 const FCOR={'A liberar':'gray','Liberadas':'green','Em execução':'green','Em conferência':'yellow','Encerradas':'gray','Canceladas':'gray'};
-const STCOR={'Conferido':'green','Provisório':'yellow','Previsto':'gray','Aguardando sinal':'yellow'};
+const STCOR={'Conferido':'green','Provisório':'yellow','Previsto':'gray','Aguardando sinal':'yellow',[CEN_AP_DUP]:'yellow',[CEN_AP_DESC]:'gray'};
 const LIM_DISP=0.20;  // alçada AL-05: dispensa de saldo até 20 % da área sem a Direção
 function GR(id){ return GRIDS.find(g=>g.id===id); }
 function chipSt(c){ const cc=G2C[c]||G2C.gray; return 'display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;color:'+cc[0]+';background:'+cc[1]+';'; }
@@ -471,7 +484,7 @@ function dotSt(c){ const cc=G2C[c]||G2C.gray; return 'width:6px;height:6px;borde
 // ===== O.S. × cenário compartilhado (cenario.js, o mesmo estado do Estoque e do App) =====
 // Fase, realizado/saldo, apontamentos, requisição e insumos vêm de cenGet(); o que o cenário não tem vem de OSD (registro).
 // Gancho de teste/inspeção (o script da tela roda isolado): os testes os_* leem e mudam o cenário na própria página.
-try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenDevolver, cenConfirmarRecebimento, cenIniciarTurno, cenPausar, cenFecharTurno, cenOcorrencia, cenSinal, cenPodeEncerrar, osc_liberar, osc_ajustar, osc_encerrar }; } catch (e) {}
+try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenDevolver, cenConfirmarRecebimento, cenIniciarTurno, cenPausar, cenFecharTurno, cenOcorrencia, cenSinal, cenPodeEncerrar, osc_liberar, osc_ajustar, osc_encerrar, osc_apontar }; } catch (e) {}
 // filtros do topo (Fazenda e Safra): lista, Kanban, chips de fase e selo do cabeçalho mostram só as ordens do recorte
 function mfFaz(self){ return self.state.mf_faz||'Santa Rita'; }
 function mfSaf(self){ return self.state.mf_saf||'Todas'; }
@@ -588,7 +601,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{};
   v.pan_pst='display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:12px;'+(b?(bam?'background:#FFF3D6;border:1px solid #F0D9A0;':'background:#FDE8E6;border:1px solid #F4C7C1;'):(P.btn?'background:#E4F3E9;border:1px solid #BFE0CB;':'background:#F4F6F3;border:1px solid #E4E9E5;'));
   const pa=(st.pa&&st.pa.id===o.id)?st.pa:null;
   const apP=osApPend(o), apMax=Math.max(0,(o.saldo||0)-apP);
-  v.pan_go=()=>{ if(P.fn==='apontar'){ const prox=(o.ap||[]).find(x=>x.st==='Previsto'); self.setState({pa:{id:o.id,fn:'apontar',d:'2026-09-26',ha:String(Math.min(apMax,prox?prox.ha:apMax)).replace('.',','),err:''}}); return; } self.setState({pa:{id:o.id,fn:P.fn}}); };
+  v.pan_go=()=>{ if(P.fn==='apontar'){ const prox=(o.ap||[]).find(x=>x.st==='Previsto'); self.setState({pa:{id:o.id,fn:'apontar',d:CEN_DIA_OP,ha:String(Math.min(apMax,prox?prox.ha:apMax)).replace('.',','),ced:{},chave:'W-'+o.id+'-'+Date.now(),err:''}}); return; } self.setState({pa:{id:o.id,fn:P.fn}}); };
   v.pan_conf=!!pa&&['liberar','iniciar','conferencia','encerrar'].indexOf(pa.fn)>=0; v.pan_apf=!!pa&&pa.fn==='apontar'; v.pan_ajf=!!pa&&pa.fn==='ajustar'; v.pan_idle=!pa;
   v.pan_canf=!!pa&&pa.fn==='cancelar'; v.pan_disf=!!pa&&pa.fn==='dispensar';
   v.pan_rmot=(pa&&pa.motivo)||''; v.pan_rerr=(pa&&pa.err)||''; v.pan_hasRerr=!!(pa&&pa.err);
@@ -661,18 +674,26 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{};
   v.pan_ad=pa&&pa.d||''; v.pan_aha=pa&&pa.ha||''; v.pan_aerr=pa&&pa.err||''; v.pan_hasAerr=!!(pa&&pa.err);
   v.pan_asub='Saldo da ordem: '+nf(o.saldo)+' ha'+(apP>0?' · '+nf(apP)+' ha no aparelho aguardando sinal':'');
   v.pan_setad=(e)=>self.setState({pa:Object.assign({},self.state.pa,{d:e.target.value,err:''})}); v.pan_setaha=(e)=>self.setState({pa:Object.assign({},self.state.pa,{ha:e.target.value,err:''})});
-  v.pan_asave=()=>{ const cur=self.state.pa; const n=g2num(cur.ha);
+  // consumo real (AP-04): uma linha por insumo, a mesma regra do MB-03; o operador é herdado (quem está com os insumos) e aparece no formulário
+  const apf=!!pa&&pa.fn==='apontar'; const apL=apf?osApIns(cenC,o,g2num(pa.ha),pa.ced):[];
+  v.pan_acons=apL.map(x=>({lab:x.lab,v:x.v,hint:x.hint,warn:x.warn,hasWarn:x.hasWarn,fid:x.fid,set:(e)=>{ const cur=self.state.pa; if(!cur) return; self.setState({pa:Object.assign({},cur,{ced:Object.assign({},cur.ced,{[x.p]:e.target.value}),err:''})}); }}));
+  v.pan_hasAcons=apL.length>0;
+  { const rq=o.req&&cenC.reqs[o.req]; const qm=rq&&(rq.itens.find(i=>i.quem)||{}).quem; const com=!!rq&&rq.itens.some(i=>i.custodia>1e-6);   // o mesmo quem do cenApontar
+    v.pan_aquem='Turno de '+(qm||o.resp||'—')+(com?' · quem está com os insumos':' · responsável da ordem'); }
+  v.pan_adup=apf?osApDupAviso(cenC,o,cenDdMm(pa.d)):''; v.pan_hasAdup=!!v.pan_adup;   // aviso antes de salvar (não trava): o mesmo critério do servidor
+  v.pan_asave=()=>{ const cur=self.state.pa; if(!cur) return; const n=g2num(cur.ha);
     if(!cur.d){ self.setState({pa:Object.assign({},cur,{err:'Informe a data do turno.'})}); return; }
     if(isNaN(n)||n<=0){ self.setState({pa:Object.assign({},cur,{err:'Informe a área feita (maior que 0 ha).'})}); return; }
     if(n>(o.saldo||0)+0.001){ self.setState({pa:Object.assign({},cur,{err:'Máximo '+nf(o.saldo)+' ha: é o saldo da ordem.'})}); return; }
     if(n>apMax+0.001){ self.setState({pa:Object.assign({},cur,{err:'Máximo '+nf(apMax)+' ha: '+nf(apP)+' ha do app aguardam sinal.'})}); return; }
-    const d=cur.d.split('-'); osRun(self,c=>osc_apontar(c,o.id,d[2]+'/'+d[1],n),{pa:null}); };
+    const col=osApColeta(osApIns(cenGet(),o,n,cur.ced)); if(col.erro){ self.setState({pa:Object.assign({},cur,{err:col.erro})}); return; }
+    const d=cur.d.split('-'); osRun(self,c=>osc_apontar(c,o.id,d[2]+'/'+d[1],n,col.cons,col.est,cur.chave),{pa:null}); };   // chave do formulário aberto: duplo clique não soma (OSDIA-03)
   // ação secundária pelo realizado: sem realizado → cancelar sem execução; em execução → dispensar saldo (nunca cancela fato executado)
   const canCanc=!((o.realizado||0)>0)&&(o.etapa==='A liberar'||o.etapa==='Liberadas');
   const canDisp=o.etapa==='Em execução'&&!!o.area&&(o.saldo||0)>0.001;
   v.pan_hasCanc=canCanc; v.pan_hasDisp=canDisp;
   v.pan_cango=()=>self.setState({pa:{id:o.id,fn:'cancelar',motivo:'',err:''}});
-  v.pan_disgo=()=>self.setState({pa:{id:o.id,fn:'dispensar',ha:String(o.saldo).replace('.',','),motivo:'',val:false,err:''}});
+  v.pan_disgo=()=>self.setState({pa:{id:o.id,fn:'dispensar',ha:String(apMax).replace('.',','),motivo:'',val:false,err:''}});
   // (confirmação, aviso final, nova situação do insumo): a seção Insumos acompanha o que o aviso diz
   const cx=o.canc||((o.reservado&&insTxt)?['Libera a reserva no Estoque: '+insTxt+'.','Reserva liberada no Estoque: '+insTxt+'.','Reserva liberada no Estoque']:((o.ins||[]).length?['Nenhum insumo foi reservado.','Nenhum insumo estava reservado.','Nada reservado · ordem cancelada']:['','','']));
   v.pan_cct='Cancelar '+o.id+' sem execução: a ordem sai do quadro e fica em Canceladas. '+cx[0];
@@ -685,7 +706,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{};
   v.pan_dissave=()=>{ const cur=self.state.pa; const n=g2num(cur.ha); const mot=String(cur.motivo||'').trim(); const tot=(o.disp||0)+n;
     const err=(m)=>self.setState({pa:Object.assign({},cur,{err:m})});
     if(isNaN(n)||n<=0) return err('Informe a área a dispensar (maior que 0 ha).');
-    if(n>(o.saldo||0)+0.001) return err('Máximo '+nf(o.saldo)+' ha: é o saldo da ordem.');
+    if(n>apMax+0.001) return err('Máximo '+nf(apMax)+' ha: é o saldo da ordem'+(apP>0?' descontando '+nf(apP)+' ha ainda no aparelho.':'.'));
     if(tot>lim+0.001) return err(nd(tot)+' ha = '+nd(100*tot/o.area,1)+' % acima de 20 % · exige Direção.');
     if(!mot) return err('Informe o motivo da dispensa.');
     if(!cur.val) return err('Marque a validação agronômica.');
@@ -792,8 +813,21 @@ function EXTRAVALS(self,v){
     const kv=[['Local',o.talhao],['Janela',o.janela],['Responsável',o.resp],['Versão',o.versao]];
     if(o.area){ kv.splice(1,0,['Área autorizada',nf(o.area)+' ha'],['Realizado',nf(o.realizado)+' ha'+((a.conf||a.prov)?' ('+nf(a.conf)+' conf. + '+nf(a.prov)+' prov.)':'')+(a.sem?' · '+nf(a.sem)+' ha aguardando sinal':'')],['Saldo',nf(o.saldo)+' ha']); }    v.pan_kv=kv.map(x=>({l:x[0],v:x[1]}));
     // apontamentos: os do app mostram a origem; sem sinal ficam "Aguardando sinal" e não entram no acumulado
-    let ac=0; v.pan_ap=(o.ap||[]).map(x=>{ const prev=x.st==='Previsto'; const sem=x.sinc===false; if(!prev&&!sem) ac+=x.ha; const s=sem?'Aguardando sinal':x.st;
-      return {d:x.d,dia:'Dia '+x.dia+(x.origem==='app'?' · app':''),ha:(prev?'prev. ':'')+nf(x.ha)+' ha'+(x.h?' · '+nd(x.h,1)+' h':''),ac:(prev?'—':(sem?'não somado':nf(ac)+' / '+nf(o.area)+' ha')),t:s,st:chipSt(STCOR[s]),dot:dotSt(STCOR[s]),rst:prev?'color:#8A968E;':''}; });
+    // duplicidade (AP-06/07): o retido não soma e mostra as três saídas de Paula (CMD-09); "vale este" só contra um relato já somado
+    const cg=cenGet(), cgo=cg.ordens[o.id]; const apus=st.apus&&st.apus.id===o.id?st.apus:{id:o.id};
+    const usOf=(dia)=>{ const u=apus[dia]||{}; const r={}; Object.keys(u).forEach(p=>{ const n=g2num(u[p]); if(String(u[p]).trim()!==''&&!isNaN(n)) r[p]=n; }); return r; };
+    const apDec=(dia,modo)=>osRun(self,c=>osc_apDecidir(c,o.id,dia,modo,usOf(dia)),{apus:null},(e)=>self.setState({g2toast:e}));
+    let ac=0; v.pan_ap=(o.ap||[]).map(x=>{ const prev=x.st==='Previsto'; const sem=x.sinc===false; const som=!prev&&cenApSomado(x); if(som) ac+=x.ha; const s=sem?'Aguardando sinal':x.st;
+      const dup=x.st===CEN_AP_DUP&&!!cgo; const viv=dup?cenApDupVivos(cgo,x):[]; const de=viv.map(a=>a.dia).join(', ');
+      const K=viv.length===1&&cenApSomado(viv[0])?viv[0]:null; const uso=K?cenApUsoK(cg,cgo,K):'';
+      const fal=dup?cenApDecCons(cgo,x,cenApDecBase(cg,cgo,null),null).falta:[];
+      const usx=fal.map(f=>({lab:'Usado de '+f.p+' ('+f.un+')',v:(apus[x.dia]||{})[f.p]||'',hint:'Estimativa '+nd(f.q)+' '+f.un+' passa da custódia ('+nd(f.cust)+' '+f.un+'): informe o usado'+(x.quem?' com '+x.quem:''),
+        set:(e)=>{ const cur=self.state.apus&&self.state.apus.id===o.id?self.state.apus:{id:o.id}; self.setState({apus:Object.assign({},cur,{[x.dia]:Object.assign({},cur[x.dia]||{},{[f.p]:e.target.value})})}); }}));
+      return {d:x.d,dia:'Dia '+x.dia+(x.origem==='app'?' · app':''),ha:(prev?'prev. ':'')+nf(x.ha)+' ha'+(x.h?' · '+nd(x.h,1)+' h':''),ac:(prev?'—':(!som?'não somado':nf(ac)+' / '+nf(o.area)+' ha')),t:s,st:chipSt(STCOR[s]),dot:dotSt(STCOR[s]),rst:prev?'color:#8A968E;':'',
+        dup,dupT:!dup?'':(viv.length?'Mesma data e talhão do dia '+de+'. É outro turno? Quem decide: '+CEN_CONF_AP+'.':'O dia '+(x.dupDe||[]).join(', ')+' já não vale: este só pode ser somado como outro turno. Quem decide: '+CEN_CONF_AP+'.')
+          +(uso?' "Vale este" indisponível: '+uso+'.':''),
+        vant:'Mesmo turno: vale o dia '+de,hasAnt:viv.length>0,hasEste:!!K&&!uso,usx,hasUs:usx.length>0,
+        ant:()=>apDec(x.dia,'anterior'),este:()=>apDec(x.dia,'este'),somar:()=>apDec(x.dia,'somar')}; });
     v.pan_hasAp=v.pan_ap.length>0; v.pan_noAp=!v.pan_hasAp;
     v.pan_noApT=o.area?(o.etapa==='A liberar'||o.etapa==='Liberadas'?'Sem apontamentos: a ordem ainda não foi iniciada.':'Sem apontamentos registrados.'):'Ordem de processo: entradas e saídas são registradas por etapa do beneficiamento, não por área.';
     v.pan_acum=!o.area?'':(o.disp?('Realizado '+nf(o.realizado)+' ha · Dispensado '+nf(o.disp)+' ha · Saldo '+nf(o.saldo)+' ha (de '+nf(o.area)+' ha)')
@@ -920,7 +954,17 @@ def _painel():
           f'<sc-if value="{H("psx_"+k+"_c")}" hint-placeholder-val="{T()}"><span style="font-size: 12.5px; color: {MUTED}; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{H("psx_"+k+"_sum")}</span></sc-if></button>'
           f'<sc-if value="{H("psx_"+k)}" hint-placeholder-val="{F()}"><div style="padding: 0 12px 12px; display: flex; flex-direction: column; gap: 6px;">{corpo}</div></sc-if></section></sc-if>')
     aprow=(f'<div style="display: grid; grid-template-columns: 64px 84px 1fr 1.3fr auto; gap: 8px; align-items: center; padding: 7px 0; border-top: 1px solid {LINE}; font-size: 12.8px; font-variant-numeric: tabular-nums; {H("a.rst")}">'
-           f'<span>{H("a.d")}</span><span>{H("a.dia")}</span><span style="text-align: right;">{H("a.ha")}</span><span style="text-align: right; font-weight: 700;">{H("a.ac")}</span>{_chip_hole("a.t","a.st","a.dot")}</div>')
+           f'<span>{H("a.d")}</span><span>{H("a.dia")}</span><span style="text-align: right;">{H("a.ha")}</span><span style="text-align: right; font-weight: 700;">{H("a.ac")}</span>{_chip_hole("a.t","a.st","a.dot")}</div>'
+           f'<sc-if value="{H("a.dup")}" hint-placeholder-val="{F()}"><div role="group" aria-label="Decidir duplicidade" style="display: flex; flex-direction: column; gap: 6px; padding: 0 0 8px;">'
+           f'<span style="font-size: 12.5px; color: #8A5A00; font-weight: 600;">{H("a.dupT")}</span>'
+           f'<sc-if value="{H("a.hasUs")}" hint-placeholder-val="{F()}"><div style="display: flex; flex-direction: column; gap: 6px;"><sc-for list="{H("a.usx")}" as="u" hint-placeholder-count="1">'
+           f'<label style="display: grid; grid-template-columns: minmax(0,1fr) 96px; gap: 2px 10px; align-items: center; font-size: 12px; font-weight: 600; color: {MUTED};"><span>{H("u.lab")}</span>'
+           f'<input aria-label="{H("u.lab")}" inputMode="decimal" value="{H("u.v")}" onChange="{H("u.set")}" style="font-family: inherit; font-size: 14px; padding: 6px 9px; border-radius: 8px; border: 1px solid {LINE}; text-align: right; grid-row: span 2;">'
+           f'<span style="font-weight: 400; font-size: 11.5px;">{H("u.hint")}</span></label></sc-for></div></sc-if>'
+           f'<div style="display: flex; gap: 6px; flex-wrap: wrap;">'
+           f'<sc-if value="{H("a.hasAnt")}" hint-placeholder-val="{T()}"><button type="button" onClick="{H("a.ant")}" style="{_MINI}">{H("a.vant")}</button></sc-if>'
+           f'<sc-if value="{H("a.hasEste")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("a.este")}" style="{_MINI}">Mesmo turno: vale este</button></sc-if>'
+           f'<button type="button" onClick="{H("a.somar")}" style="{_MINI}">Outro turno: somar</button></div></div></sc-if>')
     aphead=(f'<div style="display: grid; grid-template-columns: 64px 84px 1fr 1.3fr auto; gap: 8px; padding: 4px 0; font-size: 10.5px; font-weight: 700; letter-spacing: .04em; color: {MUTED}; text-transform: uppercase;">'
             f'<span>Data</span><span>Turno</span><span style="text-align: right;">Realizado</span><span style="text-align: right;">Acumulado</span><span>Situação</span></div>')
     IC='minmax(0,1.6fr) 96px 110px 110px minmax(0,1.5fr)'
@@ -999,6 +1043,13 @@ def _painel():
       f'<div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;"><label style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 600; color: {MUTED};">Data do turno<input type="date" aria-label="Data do turno" value="{H("pan_ad")}" onChange="{H("pan_setad")}" style="font-family: inherit; font-size: 14px; padding: 7px 9px; border-radius: 8px; border: 1px solid {LINE};"></label>'
       f'<label style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 600; color: {MUTED};">Área feita (ha)<input aria-label="Área feita em hectares" inputMode="decimal" value="{H("pan_aha")}" onChange="{H("pan_setaha")}" style="font-family: inherit; font-size: 14px; padding: 7px 9px; border-radius: 8px; border: 1px solid {LINE}; width: 110px; text-align: right;"></label>'
       f'<span style="font-size: 12px; color: {MUTED}; padding-bottom: 9px;">{H("pan_asub")}</span></div>'
+      f'<span style="font-size: 12.5px; color: {INK}; font-weight: 600;">{H("pan_aquem")}</span>'
+      f'<sc-if value="{H("pan_hasAdup")}" hint-placeholder-val="{F()}"><span role="status" style="font-size: 12px; font-weight: 600; color: #8A5A00;">{H("pan_adup")}</span></sc-if>'
+      f'<sc-if value="{H("pan_hasAcons")}" hint-placeholder-val="{T()}"><div style="display: flex; flex-direction: column; gap: 6px;"><sc-for list="{H("pan_acons")}" as="x" hint-placeholder-count="2">'
+      f'<label style="display: grid; grid-template-columns: minmax(0,1fr) 96px; gap: 2px 10px; align-items: center; font-size: 12px; font-weight: 600; color: {MUTED};"><span>{H("x.lab")}</span>'
+      f'<input aria-label="{H("x.lab")}" inputMode="decimal" value="{H("x.v")}" onChange="{H("x.set")}" style="font-family: inherit; font-size: 14px; padding: 6px 9px; border-radius: 8px; border: 1px solid {LINE}; text-align: right; grid-row: span 2;">'
+      f'<span style="font-weight: 400; font-size: 11.5px;">{H("x.hint")}</span></label>'
+      f'<sc-if value="{H("x.hasWarn")}" hint-placeholder-val="{F()}"><span role="status" style="font-size: 12px; font-weight: 600; color: #8A5A00;">{H("x.warn")}</span></sc-if></sc-for></div></sc-if>'
       f'<sc-if value="{H("pan_hasAerr")}" hint-placeholder-val="{F()}"><span role="alert" style="font-size: 12px; font-weight: 700; color: {RED};">{H("pan_aerr")}</span></sc-if>'
       f'<div style="display: flex; gap: 8px;"><button type="button" onClick="{H("pan_back")}" style="{_MINI}">Cancelar</button><button type="button" onClick="{H("pan_asave")}" style="{_MINIP}">Salvar apontamento</button></div></div></sc-if></div>')
     return (f'<sc-if value="{H("pan_open")}" hint-placeholder-val="{F()}"><div style="position: fixed; inset: 0; z-index: 60; display: flex; justify-content: flex-end;">'

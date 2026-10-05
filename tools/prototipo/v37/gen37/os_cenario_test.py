@@ -51,8 +51,9 @@ try:
          'sinal de volta: realizado 60 / 160 ha e consumo 120 L (custódia 200 L) juntos, sem duplicar', (a, T.linha(OS), i[:300]))
     # 6 · turno 2 de 100 ha com 180 L de Glifosato (sobra 20 L): saldo zero → próximo passo Enviar para conferência
     T.mudar(f"cenIniciarTurno(c,'{OS}'); return cenFecharTurno(c,100,8,{{'Glifosato 480':180}});"); i = T.ins()
-    T.ok(T.cel(OS, 'Realizado') == '160,00 ha' and T.cel(OS, 'Saldo') == '0,00 ha' and T.temb('Enviar para conferência') and 'Consumido 300 L' in i and 'Em custódia 20 L' in i,
-         'turno 2 (100 ha, 180 L de Glifosato): 160 / 160 ha, sobra 20 L em custódia, botão Enviar para conferência', (T.linha(OS), i[:300]))
+    T.ok(T.cel(OS, 'Realizado') == '160,00 ha' and T.cel(OS, 'Saldo') == '0,00 ha' and T.temb('Enviar para conferência') and 'Consumido 300 L' in i and 'Em custódia 20 L' in i
+         and 'Insumo esgotado' not in T.linha(OS),
+         'turno 2 (100 ha, 180 L de Glifosato): 160 / 160 ha, sobra 20 L em custódia, botão Enviar para conferência, sem "Insumo esgotado" (CTL-2 · B, P5)', (T.linha(OS), i[:300]))
     # 7 · em conferência, encerrar fica bloqueado pela sobra, com o atalho para receber a devolução no Estoque
     T.btn('Enviar para conferência'); T.btn('Confirmar envio'); p = T.pan(); print('  ', p[p.find('PRÓXIMO'):][:300])
     T.ok('Em conferência' in T.linha(OS) and 'Encerrar bloqueado: sobra em custódia · Glifosato 480 20 L (1 × galão 20 L) com Marcos.' in p

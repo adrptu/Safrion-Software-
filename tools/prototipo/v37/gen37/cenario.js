@@ -144,11 +144,27 @@ function cenConfirmarRecebimento(c, rid) {
   if (!m.sinc) c.app.fila.push(m.id);
   return { msg: 'Recebimento confirmado: ' + pend.map(i => i.prod + ' ' + cenNum(i.custodia) + ' ' + i.un).join(', ') + (m.sinc ? '.' : '. Salvo no aparelho; envia quando houver sinal.') };
 }
+// Regra única de início (CMD-07) e de cada turno: todo componente da versão com o executor, entregue e confirmado (PRD 42.2 l.7067;
+// ESTOS-03 l.7103; 41.3 l.6864). Dano evitado: aplicar mistura incompleta. Confirmação: a da 1ª entrega de cada item (R7). Entrega parcial da quantidade vale (PRD l.1251): aqui só
+// se exige algo de cada componente. Usada pela web (osIniErro), pelo comando do app (cenIniciarTurno) e pelo cartão do app (mbPasso).
+// Devolve null ou {k:'entregar'|'rever'|'confirmar', its, t, q}: t = o que falta, q = quem resolve.
+function cenIniFalta(o, r) {
+  const its = ((o.ins || []).length && r) ? r.itens.filter(i => o.ins.some(x => x.p === i.prod)) : []; if (!its.length) return null;
+  const q = i => i.prod + ' ' + cenNum(i.custodia > 1e-6 ? i.custodia : cenSaldoEntregar(i)) + ' ' + i.un;
+  const sem = its.filter(i => !(i.custodia > 1e-6)), fal = sem.filter(i => cenSaldoEntregar(i) > 1e-6), esg = sem.filter(i => !(cenSaldoEntregar(i) > 1e-6));
+  if (fal.length) return { k: 'entregar', its: fal, t: r.id + ' sem entrega · ' + fal.map(q).join(', ') + ' a entregar.', q: 'Rui (almoxarife) entrega no Estoque; ' + (o.resp || 'o operador') + ' confirma o recebimento no app.' };
+  if (esg.length) return { k: 'rever', its: esg, t: esg.map(i => i.prod).join(', ') + ': todo o solicitado na ' + r.id + ' já foi consumido e nada está com ' + (o.resp || 'o operador') + '.', q: 'Ana (agrônoma) decide a área restante: Dispensar saldo na O.S. e, se ainda precisar aplicar, emitir nova ordem.' };
+  const nc = its.filter(i => !i.confirmado);
+  if (nc.length) { const quem = nc.map(i => i.quem || o.resp).filter((v, k, a) => a.indexOf(v) === k).join(', ');
+    return { k: 'confirmar', its: nc, t: nc.map(q).join(', ') + (nc.length > 1 ? ' entregues a ' : ' entregue a ') + quem + ', aguardando confirmação no app.', q: quem + ' confirma o recebimento no app.' }; }
+  return null; }
 function cenIniciarTurno(c, id) {
   const o = c.ordens[id]; if (!o) throw new Error('Ordem não encontrada.');
   if (['Liberadas', 'Em execução'].indexOf(o.etapa) < 0) throw new Error(id + ' não está liberada para execução.');
   if (c.app.turno && !c.app.turno.fim) throw new Error('Feche o turno aberto antes de iniciar outro.');
-  c.app.turno = { os: id, ini: cenAgora(), pausas: [], fim: null };
+  { const f = cenIniFalta(o, o.req && c.reqs[o.req]); if (f) throw new Error('Iniciar bloqueado: ' + f.t + ' ' + f.q); }   // mesma regra da web
+  c.app.nt = (c.app.nt || 0) + 1;   // chave do turno, gerada por quem inicia (o aparelho)
+  c.app.turno = { os: id, ini: cenAgora(), d: cenDdMm(CEN_DIA_OP), chave: 'TU-' + id + '-' + c.app.nt, pausas: [], fim: null };
   if (o.etapa === 'Liberadas') { o.etapa = 'Em execução'; }
   return { msg: 'Turno iniciado em ' + id + ' às ' + c.app.turno.ini + '.' };
 }
@@ -173,40 +189,158 @@ function cenResTot(c, rid, prod) { const s0 = (typeof CEN0 !== 'undefined' && CE
   if (s0 && s0.estado === 'Reservada') { const i = s0.itens.find(x => x.prod === prod); return i ? i.solicitado : 0; }
   return (c.movs || []).filter(m => m.tipo === 'reserva' && m.req === rid && m.prod === prod).reduce((a, m) => a + (m.qtd || 0), 0); }
 function cenResPropria(c, rid, it, l) { return (l && it) ? Math.max(0, Math.min(l.reservado || 0, cenResTot(c, rid, it.prod) - (it.entregue || 0))) : 0; }
-// Fechar turno: registra hectares, horas e consumo (dose × área, ajustável). Fechar o turno não encerra a O.S.
+// ---------- Apontamento: comando único da web (O.S. e Mapa) e do app (PRD 8.5; OSDIA-03/04) ----------
+// k = {os, d:'dd/mm' (data operacional), parc (talhão/parcela; vazio = a ordem toda), ha, h, cons {produto: usado informado},
+//      est [produtos com a sugestão não editada], origem 'web'|'app', quem, chave (de quem inicia: formulário da web ou turno do app), obs}
+// Consumo: informado é o fato; não informado = dose × área do trecho (SINT-C03), só estimativa (CONC-13): acima da custódia, estimativa é
+// recusada e informado vai para conferência com o almoxarife (CONC-07). Mesma chave = mesmo apontamento, nada de novo (OSDIA-03).
+// Duplicata provável (cenApDup) fica "Duplicidade a conferir": não soma área nem baixa consumo até a decisão (OSDIA-04; PRD 8.5).
+const CEN_DIA_OP = '2026-09-26';   // data padrão do apontamento na demonstração: a mesma na O.S., no Mapa e no turno do app
+const CEN_AP_DUP = 'Duplicidade a conferir', CEN_AP_DESC = 'Duplicidade · não somado', CEN_CC_AGUARDA = 'Aguarda duplicidade';
+const CEN_CONF_AP = 'Paula (conferência)';   // quem confere os apontamentos (campo.QUEM: "Turno do dia 4 aguardando conferência · Paula")
+function cenDdMm(iso) { const a = String(iso || '').split('-'); return a.length === 3 ? a[2] + '/' + a[1] : String(iso || ''); }
+function cenApSomado(a) { return a.sinc !== false && (a.st === 'Provisório' || a.st === 'Conferido'); }   // entra no realizado, no custo e no acumulado
+// duplicata provável: mesma O.S. e data, talhão sobreposto, já recebida pelo servidor, outra chave. Turnos do mesmo operador no app não
+// são duplicata entre si (cada um foi aberto e fechado no aparelho, com chave própria).
+function cenApDup(o, ap) { const sob = (x, y) => !x || !y || x === y;
+  return (o.ap || []).filter(a => a !== ap && a.st !== 'Previsto' && a.st !== CEN_AP_DESC && a.sinc !== false && a.d === ap.d && sob(a.parc, ap.parc)
+    && a.chave !== ap.chave && !(a.origem === 'app' && ap.origem === 'app' && a.quem && a.quem === ap.quem)); }
+// relatos de dupDe que ainda valem ou aguardam decisão: o estornado ou guardado depois não conta (rótulo, "vale este" e mensagens)
+function cenApDupVivos(o, ap) { return (ap.dupDe || []).map(d => (o.ap || []).find(a => a.dia === d)).filter(a => a && (cenApSomado(a) || a.st === CEN_AP_DUP)); }
+// o que já foi feito sobre o relato somado K e impede estorná-lo por "vale este": consumo aceito pelo almoxarife (CMD-50) e lote de colheita
+// com destino, liberação ou operação (carLoteUso, carência). Devolve o texto ou ''.
+function cenApUsoK(c, o, K) {
+  const ac = (c.confs || []).filter(k => k.os === o.id && k.dia === K.dia && k.estado === 'Aceito').map(k => k.id);
+  const lid = typeof carLid === 'function' ? carLid(o.id, K.dia) : ''; const us = (lid && typeof carLoteUso === 'function') ? carLoteUso(c, lid) : [];
+  return [ac.length ? 'consumo já aceito por ' + CEN_CONC_RESP + ' (' + ac.join(', ') + ')' : '', us.length ? 'lote ' + lid + ' com ' + us.join(', ') : ''].filter(Boolean).join('; '); }
+// estado da decisão antes de gravar: realizado, saldo e custódia depois do estorno de K ("vale este"); pend = área no aparelho (conta no máximo)
+function cenApDecBase(c, o, K) { const r = o.req && c.reqs[o.req]; const cust = {};
+  if (r) r.itens.forEach(it => { cust[it.prod] = it.custodia + (K ? ((K.cons || {})[it.prod] || 0) : 0); });
+  return { r, cust, real: (o.realizado || 0) - (K ? K.ha : 0), saldo: (o.saldo || 0) + (K ? K.ha : 0), pend: (o.ap || []).filter(a => a.sinc === false).reduce((s, a) => s + (a.ha || 0), 0) }; }
+// consumo a gravar na decisão: o informado fica; a estimativa é refeita no acumulado de agora (SINT-C03) e, acima da custódia, é recusada como
+// na captura (AP-04): falta = o que precisa do usado. us = {produto: usado} informado na conferência (vira informado).
+function cenApDecCons(o, ap, b, us) { const cons = Object.assign({}, ap.cons || {}), inf = Object.assign({}, ap.inf || {}), falta = [];
+  (o.ins || []).forEach(x => { const it = b.r && b.r.itens.find(i => i.prod === x.p); if (!(x.p in cons) || inf[x.p] || !it) return;
+    const u = us ? us[x.p] : undefined; if (u !== undefined && u !== null && u !== '' && Number(u) >= 0) { cons[x.p] = Number(u); inf[x.p] = true; return; }
+    const q = cenQtdTrecho(x.dose, b.real + b.pend, ap.ha); cons[x.p] = q; if (q > (b.cust[x.p] || 0) + 1e-9) falta.push({ p: x.p, q, un: it.un, cust: b.cust[x.p] || 0 }); });
+  return { cons, inf, falta }; }
+// impressão do conteúdo do comando (ENG-021): a mesma chave com outro conteúdo é conflito, não "já registrado"
+function cenApImp(k) { const n = x => (x === undefined || x === null || x === '') ? null : Number(x);
+  const cs = Object.keys(k.cons || {}).filter(p => k.cons[p] !== undefined && k.cons[p] !== null).sort().map(p => p + '=' + Number(k.cons[p]));
+  return JSON.stringify([k.d || '', n(k.ha), n(k.h), k.parc || null, k.origem || 'web', k.quem || '', cs, (k.est || []).slice().sort()]); }
+function cenApDupTxt(l) { return l.map(a => 'dia ' + a.dia + ', ' + cenNum(a.ha) + ' ha ' + (a.origem === 'app' ? 'pelo app' + (a.quem ? ' (' + a.quem + ')' : '') : 'pela web')).join('; '); }
+function cenSeloAp(c, id) { const o = c.ordens[id]; if (!o) return; const t = 'Apontamento em conferência';
+  o.selos = (o.selos || []).filter(s => s.t !== t); if ((o.ap || []).some(a => a.st === CEN_AP_DUP)) o.selos.push({ t, c: 'yellow' }); }
+// baixa do consumo do apontamento, uma vez: até a custódia baixa; acima vira conferência com o almoxarife (CONC-07; CMD-50)
+function cenApBaixa(c, o, ap) {
+  const r = o.req && c.reqs[o.req]; const cons = ap.cons = ap.cons || {}; const inf = ap.inf || {}; const conf = {};
+  if (r) for (const it of r.itens) { const q = cons[it.prod] || 0; if (q > it.custodia + 1e-9) conf[it.prod] = { q, it }; }
+  Object.keys(inf).forEach(k => { if (!(r && r.itens.some(i => i.prod === k)) && cons[k] > 1e-9) conf[k] = { q: cons[k], it: null }; });
+  if (r) r.itens.forEach(it => { if (conf[it.prod]) return; const q = cons[it.prod] || 0; it.consumido += q; it.custodia -= q; });
+  Object.keys(cons).forEach(k => { if (conf[k] || !(cons[k] > 0)) delete cons[k]; });   // ap.cons = só o baixado; sem linha 0
+  c.movs = c.movs || []; const det = Object.keys(cons).map(k => k + ' ' + cenNum(cons[k], 1)).join(', ');
+  const m = (ap.mov && c.movs.find(x => x.id === ap.mov)) || cenMov(c, { tipo: 'consumo', os: o.id, req: o.req || '', qtd: 0, quem: ap.quem || 'web', origem: ap.origem, sinc: ap.sinc !== false, det });
+  m.det = det; ap.mov = m.id;
+  const ks = Object.keys(conf).map(k => { const x = conf[k]; c.confs = c.confs || [];
+    const kc = { id: 'CC-' + (300 + c.confs.length + 1), os: o.id, req: o.req || '', prod: k, lote: x.it ? x.it.lote : '—', un: x.it ? x.it.un : ((o.ins || []).find(i => i.p === k) || {}).un || '',
+      relatado: x.q, custodia: x.it ? x.it.custodia : 0, dia: ap.dia, at: ap.at, quem: ap.quem || 'web', resp: CEN_CONC_RESP, estado: 'Em conferência',
+      motivo: x.it ? 'Consumo acima da custódia' : 'Consumo sem material em custódia', mov: m.id, sinc: ap.sinc !== false };
+    c.confs.push(kc); return kc; });
+  if (ks.length) { ap.conf = Object.assign(ap.conf || {}); ks.forEach(k => { ap.conf[k.prod] = k.relatado; }); m.conf = (m.conf || []).concat(ks.map(k => k.id)); cenSeloConf(c, o.id); }
+  return ks; }
+// chegada ao servidor (comando com sinal ou envio da fila): soma uma vez, ou retém a duplicata provável sem efeito
+function cenApEntra(c, o, ap, baixado) {
+  const dup = cenApDup(o, ap);
+  if (dup.length) { ap.st = CEN_AP_DUP; ap.dupDe = dup.map(a => a.dia);
+    if (baixado) { const r = o.req && c.reqs[o.req];   // o aparelho já tinha baixado: desfaz, o relato fica guardado no apontamento
+      if (r) r.itens.forEach(it => { const q = (ap.cons || {})[it.prod] || 0; it.consumido -= q; it.custodia += q; });
+      (c.confs || []).forEach(k => { if (k.os === o.id && k.dia === ap.dia && k.estado === 'Em conferência') k.estado = CEN_CC_AGUARDA; });
+      const mv = ap.mov && (c.movs || []).find(x => x.id === ap.mov); if (mv) { mv.det = ''; mv.obs = 'Retido: mesma data do dia ' + ap.dupDe.join(', ') + '; nada baixado até a decisão de ' + CEN_CONF_AP + '.'; }
+      cenSeloConf(c, o.id); }
+    cenSeloAp(c, o.id); return { ap, ks: [], dup }; }
+  const ks = baixado ? [] : cenApBaixa(c, o, ap);
+  o.realizado += ap.ha; o.saldo = Math.max(0, o.saldo - ap.ha);
+  return { ap, ks, dup: [] }; }
+function cenApontar(c, k) {
+  const o = c.ordens[k.os]; if (!o) throw new Error('Ordem não encontrada.');
+  const ja = k.chave ? (o.ap || []).find(a => a.chave === k.chave) : null;
+  if (ja) { if (ja.imp ? ja.imp !== cenApImp(k) : (ja.ha !== Number(k.ha) || ja.d !== k.d)) throw new Error('Este registro (' + k.chave + ') já foi gravado como dia ' + ja.dia + ' (' + cenNum(ja.ha) + ' ha em ' + ja.d + ') com outro conteúdo: conflito, nada gravado.');   // ENG-021
+    return { ap: ja, repetido: true, ks: [], dup: [] }; }
+  if (o.etapa !== 'Em execução') throw new Error(k.os + ' não está em execução.');
+  if (!/^\d\d\/\d\d$/.test(k.d || '')) throw new Error('Informe a data do turno.');
+  const ha = Number(k.ha); if (!(ha > 0)) throw new Error('Informe a área feita (maior que 0 ha).');
+  const pend = (o.ap || []).filter(a => a.sinc === false).reduce((s, a) => s + (a.ha || 0), 0);   // no aparelho, ainda sem sinal
+  if (ha > o.saldo - pend + 1e-9) throw new Error('Máximo ' + cenNum(Math.max(0, o.saldo - pend)) + ' ha: é o saldo da ordem' + (pend ? ' descontando ' + cenNum(pend) + ' ha ainda no aparelho.' : '.'));
+  const cons = {}, es = k.est || [], inf = {};
+  Object.keys(k.cons || {}).forEach(p => { const q = k.cons[p]; if (q === undefined || q === null) return; cons[p] = q; if (es.indexOf(p) < 0) inf[p] = true; });
+  const r = o.req && c.reqs[o.req];   // não informado: dose × área do trecho para o que está com o operador; fora da requisição, 0 (como no MB-03)
+  (o.ins || []).forEach(x => { if (cons[x.p] === undefined) cons[x.p] = (r && r.itens.some(i => i.prod === x.p)) ? cenQtdTrecho(x.dose, (o.realizado || 0) + pend, ha) : 0; });   // regra única (SINT-C03)
+  if (r) for (const it of r.itens) { const q = cons[it.prod] || 0; if (q > it.custodia + 1e-9 && !inf[it.prod]) throw new Error('Consumo de ' + it.prod + ' (' + cenNum(q) + ' ' + it.un + ') acima do que está '
+    + (k.origem === 'app' ? 'com você (' + cenNum(it.custodia) + ' ' + it.un + '). Confira a retirada.' : 'em custódia (' + cenNum(it.custodia) + ' ' + it.un + '). '
+    + (k.cons ? 'Informe quanto foi usado ou confira a entrega no Estoque.' : 'Aponte pela O.S., informando quanto foi usado, ou confira a entrega no Estoque.'))); }
+  const quem = k.quem || ((r && (r.itens.find(i => i.quem) || {}).quem) || o.resp || '');   // web: herda quem está com o material (AGENTS §3.3)
+  const feitos = (o.ap || []).filter(a => a.st !== 'Previsto'); const dia = feitos.length + 1;
+  // previstos são plano, não fato: a web mantém os próximos dias (renumerados) e o app não os guarda — o que cada tela já fazia
+  const ap = { d: k.d, dia, ha, h: k.h || null, parc: k.parc || null, st: 'Provisório', cons, inf, obs: k.obs || '', origem: k.origem || 'web', quem,
+    chave: k.chave || ((k.origem === 'app' ? 'TU-' : 'W-') + k.os + '-dia' + dia), imp: cenApImp(k), at: cenAgora(), sinc: k.origem === 'app' ? cenOnline(c) : true };
+  const reter = ap.sinc && cenApDup(o, ap).length > 0;   // previsto só sai quando o apontamento soma
+  const prev = k.origem === 'app' ? [] : (o.ap || []).filter(a => a.st === 'Previsto').slice(reter ? 0 : 1).map((x, i) => Object.assign({}, x, { dia: dia + 1 + i }));
+  o.ap = feitos.concat([ap]).concat(prev);
+  let R;
+  if (ap.sinc) R = cenApEntra(c, o, ap, false);
+  else { R = { ap, ks: cenApBaixa(c, o, ap), dup: [] }; c.app.fila.push('AP|' + k.os + '|' + dia); }   // no aparelho: baixa local; o servidor decide no envio
+  if (!(o.saldo > 1e-9)) o.ap = o.ap.filter(a => a.st !== 'Previsto');
+  return R; }
+// decisão de quem confere (CMD-09; CEN_CONF_AP). modo: 'somar' (outro turno: soma e baixa uma vez) · 'anterior' (mesmo turno: vale o já
+// somado; este fica guardado como duplicidade) · 'este' (mesmo turno: vale este; o já somado é estornado e guardado). O relógio ou a ordem de
+// chegada não define o vencedor (DEMO-11). Nenhum relato é apagado. true/false = 'somar'/'anterior' (chamadas antigas). us = usado informado
+// na conferência para a estimativa que passou da custódia (AP-04). Tudo é conferido antes de gravar: recusa não muda nada.
+function cenApDecidir(c, id, dia, modo, quem, us) {
+  modo = modo === true ? 'somar' : (modo === false ? 'anterior' : modo); quem = quem || CEN_CONF_AP;
+  const o = c.ordens[id]; const ap = o && (o.ap || []).find(a => a.dia === dia && a.st === CEN_AP_DUP);
+  if (!ap) throw new Error('O apontamento do dia ' + dia + ' não está em conferência de duplicidade.');
+  if (['anterior', 'este', 'somar'].indexOf(modo) < 0) throw new Error('Decisão desconhecida: ' + modo + '.');
+  const viv = cenApDupVivos(o, ap); const de = viv.map(a => a.dia).join(', '), de0 = (ap.dupDe || []).join(', ');
+  const ag = (c.confs || []).filter(k => k.os === id && k.dia === dia && k.estado === CEN_CC_AGUARDA);
+  const r = o.req && c.reqs[o.req]; const mvOf = a => a.mov && (c.movs || []).find(x => x.id === a.mov);
+  const guarda = (a, txt) => { a.st = CEN_AP_DESC; const m = mvOf(a); if (m) { m.det = ''; m.obs = txt; } };   // det vazio: o Estoque não lê item
+  if (modo !== 'somar' && !viv.length) throw new Error('O dia ' + de0 + ' já não vale (estornado ou guardado): o dia ' + dia + ' só pode ser somado como outro turno.');
+  if (modo === 'anterior') {
+    ap.dec = { modo, quem, at: cenAgora() }; guarda(ap, 'Mesmo turno do dia ' + de + ': guardado como duplicidade, nada baixado.');
+    ag.forEach(k => { k.estado = 'Recusado'; k.decisao = 'mesmo turno do dia ' + de; k.por = quem; }); cenSeloAp(c, id); cenSeloConf(c, id);
+    return { msg: 'Dia ' + dia + ' guardado como duplicidade do dia ' + de + ': nada foi somado nem baixado; o relato fica no histórico.' }; }
+  const K = modo === 'este' ? (viv.length === 1 && cenApSomado(viv[0]) ? viv[0] : null) : null;
+  if (modo === 'este') { if (!K) throw new Error('"Vale este" só contra um apontamento já somado: decida antes o dia ' + (de || de0) + '.');
+    const uso = cenApUsoK(c, o, K); if (uso) throw new Error('"Vale este" não desfaz o dia ' + K.dia + ': ' + uso + '. Escolha "Mesmo turno: vale o dia ' + K.dia + '".'); }
+  const b = cenApDecBase(c, o, K);
+  if (ap.ha > b.saldo - b.pend + 1e-9) throw new Error((K ? '"Vale este" com ' : 'Somar ') + cenNum(ap.ha) + ' ha passa do saldo da ordem (' + cenNum(Math.max(0, b.saldo - b.pend)) + ' ha'
+    + (b.pend ? ', descontando ' + cenNum(b.pend) + ' ha ainda no aparelho' : '') + ')' + (K ? '.' : ': confira se é o mesmo turno do dia ' + (de || de0) + '.'));
+  const dc = cenApDecCons(o, ap, b, us);
+  if (dc.falta.length) throw new Error(dc.falta.map(f => f.p + ': a estimativa dose × área (' + cenNum(f.q) + ' ' + f.un + ') passa do que está em custódia (' + cenNum(f.cust) + ' ' + f.un + ')').join('; ')
+    + '. Informe o usado' + (ap.quem ? ' (com ' + ap.quem + ')' : '') + ' e decida de novo.');
+  ap.dec = { modo, quem, at: cenAgora() }; let est = '';
+  if (K) { if (r) r.itens.forEach(it => { const q = (K.cons || {})[it.prod] || 0; it.consumido -= q; it.custodia += q; });   // estorno vinculado (RN-020)
+    (c.confs || []).forEach(k => { if (k.os === id && k.dia === K.dia && k.estado === 'Em conferência') { k.estado = 'Recusado'; k.decisao = 'mesmo turno: vale o dia ' + dia; k.por = quem; } });
+    o.realizado -= K.ha; o.saldo += K.ha; K.dec = { modo: 'estornado', quem, at: ap.dec.at, vale: dia };
+    guarda(K, 'Estornado: mesmo turno do dia ' + dia + ', que ficou valendo.'); est = ' O dia ' + K.dia + ' foi estornado e fica guardado como duplicidade.'; }
+  ap.st = 'Provisório'; ag.forEach(k => { k.estado = 'Em conferência'; }); ap.cons = dc.cons; ap.inf = dc.inf;
+  const ks = cenApBaixa(c, o, ap); const m0 = mvOf(ap); if (m0) m0.obs = (K ? 'Mesmo turno: vale este dia' : 'Somado como outro turno') + ' · ' + quem + '.';
+  o.realizado += ap.ha; o.saldo = Math.max(0, o.saldo - ap.ha); cenSeloAp(c, id); cenSeloConf(c, id);
+  if (!(o.saldo > 1e-9)) o.ap = o.ap.filter(a => a.st !== 'Previsto');
+  return { msg: 'Dia ' + dia + (K ? ' vale como o turno de ' + ap.d + ': ' : ' somado como outro turno: ') + cenNum(ap.ha) + ' ha · saldo ' + cenNum(o.saldo) + ' ha.' + est
+    + (ks.length || ag.length ? ' Consumo em conferência com ' + CEN_CONC_RESP + '.' : '') }; }
+// Fechar turno (app): o mesmo comando da web, com a data e a chave do turno. Fechar o turno não encerra a O.S.
 function cenFecharTurno(c, ha, horas, consumo, obs, est) {
   const t = c.app.turno; if (!t || t.fim) throw new Error('Nenhum turno aberto.');
-  const o = c.ordens[t.os]; if (!(ha > 0)) throw new Error('Informe os hectares feitos.');
-  const haPend = (o.ap || []).filter(a => a.sinc === false).reduce((s, a) => s + (a.ha || 0), 0);   // apontado no aparelho, ainda sem sinal
-  const saldoApp = Math.max(0, o.saldo - haPend);
-  if (ha > saldoApp + 1e-9) throw new Error('Máximo ' + cenNum(saldoApp) + ' ha: é o saldo da ordem' + (haPend ? ' descontando ' + cenNum(haPend) + ' ha ainda no aparelho.' : '.'));
+  if (!(ha > 0)) throw new Error('Informe os hectares feitos.');
   if (!(horas > 0)) throw new Error('Informe as horas trabalhadas.');
-  t.fim = cenAgora();
-  const cons = consumo || {}; const es = est || []; const inf = {};   // informado pelo executor (a estimativa não editada não conta como informada)
-  Object.keys(cons).forEach(k => { if (cons[k] !== undefined && cons[k] !== null && es.indexOf(k) < 0) inf[k] = true; });
-  (o.ins || []).forEach(x => { if (cons[x.p] === undefined) cons[x.p] = cenQtdTrecho(x.dose, (o.realizado || 0) + haPend, ha); });   // regra única (SINT-C03)
-  const r = o.req && c.reqs[o.req]; const conf = {};
-  if (r) for (const it of r.itens) { const q = cons[it.prod] || 0; if (q > it.custodia + 1e-9) {
-    if (!inf[it.prod]) throw new Error('Consumo de ' + it.prod + ' (' + cenNum(q) + ' ' + it.un + ') acima do que está com você (' + cenNum(it.custodia) + ' ' + it.un + '). Confira a retirada.');
-    conf[it.prod] = { q, it }; } }
-  Object.keys(inf).forEach(k => { if (!(r && r.itens.some(i => i.prod === k)) && cons[k] > 1e-9) conf[k] = { q: cons[k], it: null }; });   // nada dele com o executor
-  if (r) r.itens.forEach(it => { if (conf[it.prod]) return; const q = cons[it.prod] || 0; it.consumido += q; it.custodia -= q; });
-  Object.keys(conf).forEach(k => { delete cons[k]; });   // ap.cons = só o consumo baixado; o relatado em conferência fica em ap.conf
-  const dia = (o.ap || []).filter(a => a.st !== 'Previsto').length + 1;
-  const ap = { d: new Date().toLocaleDateString('pt-BR').slice(0, 5), dia, ha, h: horas, st: 'Provisório', cons, obs: obs || '', origem: 'app', sinc: cenOnline(c) };
-  o.ap = (o.ap || []).filter(a => a.st !== 'Previsto').concat([ap]);
-  if (ap.sinc) { o.realizado += ha; o.saldo = Math.max(0, o.saldo - ha); } else { c.app.fila.push('AP|' + t.os + '|' + dia); }
-  const m = cenMov(c, { tipo: 'consumo', os: t.os, req: o.req || '', qtd: 0, quem: c.app.operador, origem: 'app', sinc: ap.sinc, det: Object.keys(cons).map(k => k + ' ' + cenNum(cons[k], 1)).join(', ') });
-  ap.mov = m.id;
-  const ks = Object.keys(conf).map(k => { const x = conf[k]; c.confs = c.confs || [];
-    const kc = { id: 'CC-' + (300 + c.confs.length + 1), os: t.os, req: o.req || '', prod: k, lote: x.it ? x.it.lote : '—', un: x.it ? x.it.un : ((o.ins || []).find(i => i.p === k) || {}).un || '',
-      relatado: x.q, custodia: x.it ? x.it.custodia : 0, dia, at: t.fim, quem: c.app.operador, resp: CEN_CONC_RESP, estado: 'Em conferência',
-      motivo: x.it ? 'Consumo acima da custódia' : 'Consumo sem material em custódia', mov: m.id, sinc: ap.sinc };
-    c.confs.push(kc); return kc; });
-  if (ks.length) { ap.conf = {}; ks.forEach(k => { ap.conf[k.prod] = k.relatado; }); m.conf = ks.map(k => k.id); cenSeloConf(c, t.os); }
-  c.app.turno = null;
+  const R = cenApontar(c, { os: t.os, d: t.d || cenDdMm(CEN_DIA_OP), ha, h: horas, cons: consumo, est, obs, origem: 'app', quem: c.app.operador, chave: t.chave });
+  t.fim = cenAgora(); c.app.turno = null; const ap = R.ap;
+  if (R.repetido) return { msg: 'Turno já registrado como dia ' + ap.dia + ' (' + cenNum(ap.ha, 1) + ' ha): nada foi somado de novo.' };
+  if (R.dup.length) return { msg: 'Turno fechado: ' + cenNum(ha, 1) + ' ha em ' + cenNum(horas, 1) + ' h, em conferência: já há ' + cenApDupTxt(R.dup) + ' em ' + ap.d
+    + '. Nada foi somado nem baixado; ' + CEN_CONF_AP + ' decide se é outro turno.' };
   return { msg: 'Turno fechado: ' + cenNum(ha, 1) + ' ha em ' + cenNum(horas, 1) + ' h' + (ap.sinc ? '.' : ' · salvo no aparelho, envia quando houver sinal.') + ' A ordem continua em execução.'
-    + (ks.length ? ' Consumo em conferência: ' + ks.map(k => cenConfTxt(k, c)).join('; ') + ' · ' + CEN_CONC_RESP + ' concilia.' : '') };
+    + (R.ks.length ? ' Consumo em conferência: ' + R.ks.map(k => cenConfTxt(k, c)).join('; ') + ' · ' + CEN_CONC_RESP + ' concilia.' : '') };
 }
 // Conciliar o consumo em conferência (CMD-50, almoxarife). Prévia = efeito: aceitar baixa o relatado uma vez; o que passa da custódia
 // sai do lote do item (primeiro a reserva da própria requisição, depois o livre) como entrega a regularizar; sem origem no lote é
@@ -248,19 +382,24 @@ function cenConciliar(c, id, aceitar, motivo) {
 function cenOcorrencia(c, id, tipo, texto) { if (!texto) throw new Error('Descreva a ocorrência.');
   const oc = { id: 'OC-' + (500 + c.ocorr.length + 1), os: id, tipo, texto, at: cenAgora(), sinc: cenOnline(c) }; c.ocorr.push(oc); if (!oc.sinc) c.app.fila.push(oc.id);
   return { msg: 'Ocorrência ' + oc.id + ' registrada' + (oc.sinc ? '.' : ' no aparelho.') }; }
-// Sinal: sem sinal tudo vai para a fila; ao voltar, a fila é enviada uma vez só (sem duplicar).
+// Sinal: a fila vai uma vez só; cada apontamento passa pela mesma chegada ao servidor (soma ou fica em conferência de duplicidade).
 function cenSinal(c, online) {
   c.app.online = !!online; if (!online) return { msg: 'Sem sinal: o app continua funcionando e guarda os registros.' };
-  let n = 0; c.app.fila.forEach(k => { if (k.indexOf('AP|') === 0) { const [, id, dia] = k.split('|'); const o = c.ordens[id]; const ap = (o.ap || []).find(a => String(a.dia) === dia && !a.sinc);
-      if (ap) { ap.sinc = true; o.realizado += ap.ha; o.saldo = Math.max(0, o.saldo - ap.ha); n++;
+  let n = 0; const ret = [];
+  c.app.fila.forEach(k => { if (k.indexOf('AP|') === 0) { const [, id, dia] = k.split('|'); const o = c.ordens[id]; const ap = (o.ap || []).find(a => String(a.dia) === dia && !a.sinc);
+      if (ap) { ap.sinc = true; n++;
         if (ap.mov) { const mv = c.movs.find(x => x.id === ap.mov); if (mv) mv.sinc = true; }
-        if (ap.conf) { (c.confs || []).forEach(k => { if (k.os === id && String(k.dia) === dia) k.sinc = true; }); cenSeloConf(c, id); } } }
+        if (ap.conf) (c.confs || []).forEach(q => { if (q.os === id && String(q.dia) === dia) q.sinc = true; });
+        const e = cenApEntra(c, o, ap, true); if (e.dup.length) ret.push(id + ' dia ' + dia + ' (mesma data do ' + cenApDupTxt(e.dup) + ')');
+        if (ap.conf) cenSeloConf(c, id); } }
     else { const m = c.movs.find(x => x.id === k) || c.ocorr.find(x => x.id === k); if (m && !m.sinc) { m.sinc = true; n++; } } });
-  c.app.fila = []; return { msg: n ? (n + (n > 1 ? ' registros enviados' : ' registro enviado') + ' ao voltar o sinal.') : 'Sinal de volta. Nada pendente.' };
+  c.app.fila = []; return { msg: (n ? (n + (n > 1 ? ' registros enviados' : ' registro enviado') + ' ao voltar o sinal.') : 'Sinal de volta. Nada pendente.')
+    + (ret.length ? ' Em conferência de duplicidade: ' + ret.join('; ') + '. Nada foi somado; ' + CEN_CONF_AP + ' decide.' : '') };
 }
 // Encerrar exige apontamentos enviados e nada em custódia (sobra devolvida).
 function cenPodeEncerrar(c, id) { const o = c.ordens[id]; const r = o.req && c.reqs[o.req];
   if ((o.ap || []).some(a => a.sinc === false)) return 'Há apontamentos no aparelho aguardando sinal.';
+  const dp = (o.ap || []).filter(a => a.st === CEN_AP_DUP); if (dp.length) return 'Apontamento em conferência de duplicidade: ' + dp.map(a => 'dia ' + a.dia + ' (' + a.d + ', ' + cenNum(a.ha) + ' ha)').join(', ') + '. ' + CEN_CONF_AP + ' decide se é outro turno.';
   const cf = cenConfAbertas(c, id); if (cf.length) return 'Consumo em conferência: ' + cf.map(k => cenConfTxt(k, c)).join('; ') + '. ' + CEN_CONC_RESP + ' concilia no Estoque.';
   const cust = r ? r.itens.filter(i => i.custodia > 0.001) : []; if (cust.length) return 'Sobra em custódia: ' + cust.map(i => i.prod + ' ' + cenNum(i.custodia) + ' ' + i.un).join(', ') + '. Receba a devolução no Estoque.';
   return ''; }
