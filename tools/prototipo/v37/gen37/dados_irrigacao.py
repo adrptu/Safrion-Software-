@@ -40,7 +40,7 @@ CAPT = {
     'SR-RIO': dict(faz='SR', nome='Rio · captação da sede', outorga='demonstrativa', ls=400, h=21, venc='2028-06-30', st='Vigente'),
     'SR-RES': dict(faz='SR', nome='Reservatório da sede', outorga='demonstrativa', ls=250, h=21, venc='2028-06-30', st='Vigente'),
     'LG-PAR': dict(faz='LG', nome='Rio A (demonstração)', outorga='SINT-002/0000', ls=573, h=21, venc='2023-11-22', st='Em renovação',
-                   obs='renovação no processo técnico 56898/2023 · irrigação de 619,29 ha por pivô central'),
+                   obs='renovação em análise (processo demonstrativo) · irrigação por pivô central'),
     'LG-STC': dict(faz='LG', nome='Ribeirão B (demonstração)', outorga='SINT-003/0000', ls=19, h=21, venc='2024-02-13', st='Vencida',
                    obs='irrigação de 136 ha por pivô central · nenhum setor ligado'),
     'LG-BAR': dict(faz='LG', nome='Barramento · afluente do Ribeirão B (demonstração)', outorga='SINT-004/0000', ls=65, h=24, venc='2027-11-25', st='Vigente',
