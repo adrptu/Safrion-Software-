@@ -63,7 +63,7 @@ try:
     ok(J("document.querySelector('h1').innerText")=='Vencimentos e paradas' and 'Gerar 3 ordens preventivas' in t and 'Simular paradas' not in t and 'Confirmar 2 paradas' not in t, 'MA-03: Vencimentos e paradas com a primária pelo estado; ações sem efeito cortadas')
     clk('Mover OM-0234 para 29/09'); ok('movida para 29/09' in T() and 'Mover OM-0234' not in body(), 'MA-03: mover a OM-0234 para 29/09 tira o conflito · '+T()[:100])
     clk('Propor substituição'); ok('aguarda PCP' in T() and 'Propor substituição' not in body(), 'MA-03: propor substituição registra proposta (uma vez)')
-    ok(clk('Abrir impedimentos')=='ok', 'MA-03: link para impedimentos aparece')
+    ok(clk('Abrir impedimentos')!='ok' and 'PL-05' not in (J("document.body.innerHTML") or ''), 'MA-03: sem link para impedimentos (PL-05 oculta e fixa · CTL-1, Frente F)')
     # ---------- MA-04 ----------
     print('MA-04'); comum('MA-04.dc.html',4)
     clk('Iniciar serviço'); ok('Em execução' in T(), 'MA-04: iniciar serviço da OM-0228')

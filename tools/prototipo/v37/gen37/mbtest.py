@@ -16,6 +16,7 @@ srv=subprocess.Popen(['python3','-m','http.server',str(p),'--bind','127.0.0.1','
 c=Chrome(port=free()); J=c.js; FAIL=[]
 PARTES=[x for x in sys.argv[1:] if x in ('a','b','c','d')] or ['a','b','c','d']
 def parte(x): return x in PARTES
+OCULTAS={'MB-01':{f'MB-{n:02d}.dc.html' for n in (7,8,9,10)},'MB-02':{'MB-08.dc.html'},'MB-05':{'MB-05det.dc.html','SU-03det.dc.html'}}
 SETV="""((sel,val)=>{const i=document.querySelector(sel); const P=i.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(P,'value').set.call(i,val); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})"""
 CLK="""((t)=>{const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...document.querySelectorAll('button,a')].filter(e=>e.offsetParent!==null); const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok';})"""
 T=lambda: J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')")
@@ -41,6 +42,9 @@ try:
         nt=J("[...document.querySelectorAll('main button, main a')].filter(e=>e.offsetParent!==null&&!e.getAttribute('title')&&e.getAttribute('role')!=='tab').map(e=>e.innerText.trim()).slice(0,4)")
         ok(not nt,'ações secundárias com title '+str(nt))
         ok(not re.search(r'\bEditar\b',BODY()),'sem botão Editar')
+        if t in OCULTAS:   # CTL-1 (Frente F): o app em teste não leva a tela oculta que só simula (MB-07..MB-10, MB-05det, SU-03det)
+            hr=J("[...document.querySelectorAll('a[href]')].map(a=>a.getAttribute('href').split('#')[0])") or []
+            ok(not [h for h in hr if h in OCULTAS[t]], f'{t}: sem elo para tela oculta e fixa {sorted(set(h for h in hr if h in OCULTAS[t]))}')
         if '--shots' in sys.argv: c.shot(os.path.join(OUT,t+'_cdp.png'))
     if parte('c'):
       print('v3.9 · MB-01 minha fila do cenário')

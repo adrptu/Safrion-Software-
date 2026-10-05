@@ -163,7 +163,7 @@ def ma01():
     corpo=(kpis([('ATIVOS APTOS',H('k_aptos'),'condição técnica'),('BLOQUEADOS · RESTRITOS',H('k_br'),H('k_brd')),
                  ('MANUTENÇÃO VENCIDA',H('k_ven'),H('k_vend')),('ELEGÍVEIS P/ TAREFA',H('k_eleg'),H('k_elegd'))])
       + section('Quadro de ativos','',
-                [sel,ilnk('Ver agenda','PL-04.dc.html','calendar','Abrir a agenda compartilhada com o PCP')],g_at)
+                [sel],g_at)
       + section('Utilização por grupo','','',g_ut,state='gray'))
     EXTRAJS[0]=DM.js_prefixo()+JSBASE+r'''
 const MA_ELEG={pl:{a01:1,a02:1,a06:1},pu:{a05:1}};
@@ -262,7 +262,7 @@ def ma02():
        [dict(id='o1',v=dict(os=f'OS-0420 · {OS420["tipo"]} · {OS420["talhao"]} · {OS420["area"]} ha',tr=f'{OS420["realizado"]} ha feitos preservados · {D.OM["substituto"]}: {SUBST}'),s={},
              p=dict(os=[Pt.b('OS-0420'),Pt.br(),Pt.mut(f'{OS420["tipo"]} · {OS420["talhao"]} · {OS420["area"]} ha')],ef=[Pt.chip('Impedida · ativo bloqueado','red')],ab=[Pt.link('Abrir O.S.','OS.dc.html#OS-0420')])),
         dict(id='o2',v=dict(os=f'OS-0431 · {OS431["tipo"]} · {OS431["talhao"]} · {OS431["area"]} ha',tr='Bloqueio executado antes do 1º início (INSP-105) · substituição a propor em Vencimentos e paradas'),s={},
-             p=dict(os=[Pt.b('OS-0431'),Pt.br(),Pt.mut(f'{OS431["tipo"]} · {OS431["talhao"]} · {OS431["area"]} ha')],ef=[Pt.chip('Retirada de Liberadas → A liberar','red')],ab=[Pt.link('Ver impedimento','PL-05det.dc.html')]))],
+             p=dict(os=[Pt.b('OS-0431'),Pt.br(),Pt.mut(f'{OS431["tipo"]} · {OS431["talhao"]} · {OS431["area"]} ha')],ef=[Pt.chip('Retirada de Liberadas → A liberar','red')],ab=[Pt.link('Abrir O.S.','OS.dc.html#OS-0431')]))],
        edit=dict(m='ro',title='Ordem afetada',fields=[dict(k='os',l='Ordem',ro=True),dict(k='tr',l='Tratamento',ro=True)]),search=False,gid='g_ct',total=False)
     corpo=(kpis([('ABERTAS',H('k_ab'),'fila por risco e prazo'),('ALTA CRITICIDADE',H('k_alta'),'resposta imediata'),
                  ('BLOQUEIO OU RESTRIÇÃO',H('k_br'),'recomendado ou em vigor'),('SEM ORDEM',H('k_so'),'aguardam triagem ou vínculo')])
@@ -319,8 +319,7 @@ def ma03():
       + section('Vencimentos por ativo e serviço','',[],g_vc+_restaurar())
       + section('Manutenções e impacto na produção','',
           [IF('mi_podeMover',sbtn(H('mi_movt'),'mi_mover','calendar','Mover a preventiva do MF 7719 para depois da OS-0420, dentro da tolerância do plano')),
-           IF('mi_podeProp',sbtn('Propor substituição','mi_prop','truck','Registrar proposta de substituto para as ordens afetadas pelo Trator T1'),True),
-           IF('mi_link',ilnk("Abrir impedimentos","PL-05.dc.html","alert","Abrir Impedimentos e reprogramação (PCP)"))],g_mi,state='red'))
+           IF('mi_podeProp',sbtn('Propor substituição','mi_prop','truck','Registrar proposta de substituto para as ordens afetadas pelo Trator T1'),True)],g_mi,state='red'))
     prim=(IF('prim_gera',f'<button type="button" onClick="{H("prim_fn")}" style="{BTN_ST(True)}">{H("prim_t")}</button>',True)
           + IF('prim_ver',f'<a href="MA-04.dc.html" style="text-decoration: none; display: inline-block; {BTN_ST(True)}">Ver ordens de manutenção</a>'))
     EXTRAJS[0]=DM.js_prefixo()+JSBASE+JSVENC+JSRST+r'''
@@ -359,7 +358,7 @@ function PREVALS(self,v){ manOuvir(self); const c=manGet(); const prop=!!c.prop;
   v.st_ma=(ven.length?ven.length+(ven.length>1?' vencidas':' vencida'):(bre.length?bre.length+' vence'+(bre.length>1?'m':'')+' em breve':'Preventivas em dia'))+(sem.length?' · '+sem.length+' sem ordem':'');
   v.st_ma_st=ma_chipSt(sc).replace('padding:2px 9px;','padding:3px 10px;'); v.st_ma_dot=ma_dotSt(sc);
   const mv=ma_mover(c); v.mi_podeMover=!!(mv&&mv.ok); v.mi_movt=mv?('Mover OM-0234 para '+manBr(mv.alvo)):'';
-  v.mi_podeProp=!prop; v.mi_link=prop; }
+  v.mi_podeProp=!prop; }
 function EXTRAVALS(self,v){ ma_gerarV(self,v); ma_rstV(self,v,'ma');
   v.mi_mover=()=>manMudar(self,c=>{ const mv=ma_mover(c); if(!mv) return {nada:true,msg:'A OM-0234 não tem conflito de janela a resolver.'};
     if(!mv.ok) throw new Error('Fora da tolerância: a Revisão 250 h aceita até '+manQ(mv.lim,'h')+' ≈ '+manBr(mv.dl)+'.');
@@ -621,10 +620,10 @@ function PREVALS(self,v){ const S=ma_st(self);
        sit:S.apto?[ma_chip('Impedimento removido','yellow'),{k:'br',t:''},{k:'mut',t:'saldo 70 ha aguarda reprogramação do PCP'}]:[{k:'txt',t:'30 ha feitos preservados · saldo 70 ha pausado'}],ab:[L('Abrir O.S.','OS.dc.html#OS-0420')]}},
    {id:'b2',v:{obj:'OS-0431 · plantio T2 · 102 ha',tr:'Bloqueio executado antes do 1º início (INSP-105) · substituição proposta em Vencimentos e paradas'},s:{},
     p:{obj:[{k:'b',t:'OS-0431'},{k:'br',t:''},{k:'mut',t:'Plantio · Soja 58 W · T2 · 102 ha'}],ef:[ma_chip('Retirada de Liberadas → A liberar','red')],
-       sit:S.apto?[ma_chip('Continua A liberar','yellow'),{k:'br',t:''},{k:'mut',t:'reprogramação pelo PCP'}]:[{k:'txt',t:'A liberar · aguarda ativo ou substituto'}],ab:[L('Ver impedimento','PL-05det.dc.html')]}},
+       sit:S.apto?[ma_chip('Continua A liberar','yellow'),{k:'br',t:''},{k:'mut',t:'reprogramação pelo PCP'}]:[{k:'txt',t:'A liberar · aguarda ativo ou substituto'}],ab:[L('Abrir O.S.','OS.dc.html#OS-0431')]}},
    {id:'b3',v:{obj:'Agenda do Trator T1',tr:'Liberar o ativo não reassume a agenda antiga — volta pela fila de reprogramação'},s:{},
     p:{obj:[{k:'b',t:'Agenda do Trator T1'}],ef:[ma_chip(S.apto?'Apto':'Retirada',S.apto?'green':'gray')].concat(S.apto?[{k:'br',t:''},{k:'mut',t:'agenda antiga não reassumida'}]:[]),
-       sit:[{k:'txt',t:S.apto?'na fila de reprogramação do PCP':'capacidade reduzida contada uma vez'}],ab:[L('Ver impedimentos','PL-05.dc.html')]}}]; }
+       sit:[{k:'txt',t:S.apto?'na fila de reprogramação do PCP':'capacidade reduzida contada uma vez'}],ab:[{k:'mut',t:'—'}]}}]; }
 function EXTRAVALS(self,v){ const S=ma_st(self); const T=(m,p)=>self.setState(Object.assign({g2toast:m},p||{}));
   const hrs=ma_R(self,'g_tk').reduce((a,r)=>a+(Number(r.v.horas)||0),0); const custo=4.1+hrs*0.32;
   v.custo='Custo até agora: R$ '+ma_nf(custo,1)+' mil na safra '+MA_SAFRA+' — peças R$ 4,1 mil · '+ma_nf(hrs,1)+' h de oficina a R$ 320/h (hipótese de custo-hora) · sem terceiros. Retrabalho fora do escopo criaria ordem vinculada, preservando esta.';
@@ -700,8 +699,7 @@ def ma05():
            idrw('Corrigir com estorno',dict(title='Corrigir lançamento com estorno',
              sub='O lançamento original fica no histórico; o estorno e o novo lançamento ficam vinculados.',
              fields=[('Lançamento','AB-1041'),('Motivo','Lote do comboio errado (D-117 → D-118)'),('Tanque/lote','Comboio CB-01 · D-118'),('Responsável','PCM')],
-             confirm='Estornar e relançar',done='Estorno ES-0089 e lançamento AB-1044 vinculados a AB-1041'),'doc','Corrigir um lançamento com estorno vinculado'),
-           ilnk('Abrir no app','MB-09.dc.html','fuel','Abrir o formulário do abastecedor no app')],g_ab)
+             confirm='Estornar e relançar',done='Estorno ES-0089 e lançamento AB-1044 vinculados a AB-1041'),'doc','Corrigir um lançamento com estorno vinculado')],g_ab)
       + section('Consumo reconciliado por ativo (7 d)','','',g_co,state='yellow'))
     EXTRAJS[0]=DM.js_prefixo()+JSBASE+'const MA_AID='+json.dumps({nome(x):x for x in DM.ORDEM_ATIVOS},ensure_ascii=False)+';\n'+r'''
 function PREVALS(self,v){ manOuvir(self); const c=manGet(); const G=ma_G('g_ab'); if(!self.__ab0) self.__ab0=G.rows.slice();

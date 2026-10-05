@@ -90,6 +90,7 @@ try:
     chk('IR-03det: a v2 entra no cenário da O.S. (A liberar, Nitrato de potássio, 50 ha × 7 = 350 kg)', J("(c=>c&&c.ordens['OS-0419']?[c.ordens['OS-0419'].etapa,c.ordens['OS-0419'].ins[0].p,c.ordens['OS-0419'].ins[0].tot]:null)(JSON.parse(localStorage.getItem('talhao-os-cenario-v1')))") == ['A liberar', 'Nitrato de potássio', 350])
     # ---------- IR-04 ----------
     goto('IR-04.dc.html'); J(f"({SETV})('select[aria-label=\"Filtrar por fazenda\"]','Santa Rita')"); time.sleep(.5)
+    chk('IR-04: sem elo para GE-07 (oculta e fixa · CTL-1, Frente F)', not J("[...document.querySelectorAll('a[href]')].some(a=>a.getAttribute('href').startsWith('GE-07'))"), J("[...document.querySelectorAll('a[href]')].map(a=>a.getAttribute('href'))"))
     rowopen('Sonda de umidade · P2'); clk('Marcar leitura suspeita', 'aside[role=dialog]'); t = T()
     chk('IR-04: marcar leitura suspeita tira a sonda do balanço e o P2 passa a estimativa', 'suspeita' in t and 'Suspeita' in ROW('Sonda de umidade · P2') and 'Pivô 2 por estimativa de ET' in ROW('Sonda de umidade · P2'), [t, ROW('Sonda de umidade · P2')])
     clk('+ Cadastrar sensor'); sv('#fx_g_src_nome', 'Sonda de umidade · P2 (40 cm)'); sv('#fx_g_src_cal', '2027-03-31'); clk('Salvar', 'aside[role=dialog]'); time.sleep(.3)

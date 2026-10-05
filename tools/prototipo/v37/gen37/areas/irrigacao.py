@@ -574,7 +574,6 @@ function PREVALS(self,v){ irrOuvir(self); const s=irrGet(); const fz=irrFazK(sel
          st:[{k:'chip',t:cp.st,c:{'Vigente':'green','Em renovação':'yellow','Vencida':'red'}[cp.st]||'gray'}],uso:[{k:'txt',t:irrN(vol)+' m³ · '+irrN(pct,0)+' % do dia'}],
          set:[{k:ss.length?'txt':'mut',t:ss.length?ss.length+(ss.length>1?' setores':' setor'):'nenhum'}].concat(ss.length&&ss.length<=3?[{k:'br',t:''},{k:'mut',t:ss.map(z=>s.setores[z].nome).join(', ')}]:[])}}; });
   v.hs_t=c.sensT||'Fontes em dia'; v.hs_st=chipSt(c.sens?'yellow':'green');
-  const prob=fs.map(k=>s.fontes[k]).filter(f=>f.st==='Suspeita'||f.st==='Sem dado')[0]; v.p_has=!!prob; v.p_t=prob?'Abrir ação · '+prob.nome.replace('Sonda de umidade · ','sonda '):'';
   v.des=fz!=='LG'&&fz!=='BV'; v.tem=fz!=='BV'; v.vazio=fz==='BV'; v.vazioT='Boa Vista não tem fonte de clima ou sensor cadastrado.'; }
 function EXTRAVALS(self,v){ const fz=irrFazK(self);
   self.g2after=(gid,rows,r,isNew)=>{ if(gid!=='g_src'||!r) return; g2set(self,'g_src',{rows:null,fl:isNew?null:r.id});
@@ -583,15 +582,13 @@ function EXTRAVALS(self,v){ const fz=irrFazK(self);
   self.g2formActs=(gid,r)=>{ if(gid!=='g_src') return []; const s=irrGet(); const f=s.fontes[r.id]; if(!f||f.ro) return []; const out=[]; const fechar=()=>g2set(self,'g_src',{fm:null});
     if(f.st==='Ativa'&&f.gr==='Umidade do solo') out.push({t:'Marcar leitura suspeita',h:'Sai do balanço até a inspeção; o setor passa a estimativa por ET em todas as telas.',go:()=>{ fechar(); irrMudar(self,s0=>irrSondaMarcar(s0,r.id,'Suspeita','marcada na conferência')); }});
     if(f.st==='Suspeita') out.push({t:'Validar leitura',h:'Volta ao balanço com a medição.',go:()=>{ fechar(); irrMudar(self,s0=>irrSondaMarcar(s0,r.id,'Ativa')); }});
-    if(f.st==='Suspeita'||f.st==='Sem dado') out.push({t:'Abrir ação',h:'Inspeção na gestão (GE-07).',go:()=>irrGo('GE-07.dc.html')});
     return out; }; }
 '''
     corpo=(vazio('vazio','vazioT','Cadastrar sensores','CD-03.dc.html')
            + f'<sc-if value="{H("tem")}" hint-placeholder-val="{T()}">'
            + section('Fontes e sensores','','',g_src) + section('Captações e outorgas','','',g_cap)
            + f'<sc-if value="{H("des")}" hint-placeholder-val="{T()}">'+section('Desempenho por setor · 09–22/09','','',g_des)+'</sc-if></sc-if>')
-    prim=(f'<span style="{H("hs_st")}">{H("hs_t")}</span><span style="width: 8px;"></span>'
-          f'<sc-if value="{H("p_has")}" hint-placeholder-val="{T()}"><a href="GE-07.dc.html" style="{BTN_ST(True)} text-decoration: none;">{H("p_t")}</a></sc-if>')
+    prim=f'<span style="{H("hs_st")}">{H("hs_t")}</span>'
     shell37('IR-04','Clima e sensores',corpo,fname=fname,crumbs_extra=['Clima e sensores'],primary_html=prim,steps=faixa(4),search=False)
 
 def build():

@@ -29,6 +29,11 @@ try:
     T.ok('reserva no Estoque, por lote: Glifosato 480 320 L, 2,4-D 806 160 L, Óleo mineral 80 L' in ct and st[0] == 'Liberadas' and st[1].startswith('Glifosato 480 320 G26-14 | 2,4-D 806 160')
          and 'Óleo mineral 80' in st[1] and st[2] == 320 and f'{OS} liberada. {RQ} reservou' in tt and 'Reservado 320 L · lote G26-14' in T.ins() and 'Liberadas' in T.linha(OS),
          f'liberar: {RQ} reserva Glifosato 480 320 L (G26-14), 2,4-D 806 160 L e Óleo mineral 80 L; painel mostra a reserva por lote', (ct[-300:], st, tt))
+    # 2b · CTL-1 (Frente F): a confirmação diz que é aprovar e liberar; a Origem ganha CMD-42 (área e doses) e CMD-06 (requisição reservada)
+    p = T.pan()
+    T.ok('ao confirmar, Ana (agrônoma) aprova esta versão e libera' in ct and re.search(r'v1 aprovada por Ana \(agrônoma\) às \d\d:\d\d · 160 ha · Glifosato 480 2 L/ha, 2,4-D 806 1 L/ha, Óleo mineral 0,5 L/ha \(CMD-42\)', p)
+         and re.search(r'v1 liberada por Ana \(agrônoma\) às \d\d:\d\d · ' + RQ + r' reservada no Estoque \(CMD-06\)', p) and tt.rstrip().endswith('v1 aprovada e liberada por Ana (agrônoma).'),
+         'CTL-1: confirmar = aprovar esta versão e liberar; Origem com CMD-42 e CMD-06 separados', (ct[-300:], p[p.find('ORIGEM'):][:500], tt))
     # 3 · Estoque entrega os 3 itens a Marcos (outra tela): o painel mostra entregue, embalagem e a quem, sem recarregar
     for prod, q in (('Glifosato 480', 320), ('2,4-D 806', 160), ('Óleo mineral', 80)): T.mudar(f"return cenEntregar(c,'{RQ}','{prod}',{q},'Marcos');", avisar=False)
     T.mudar("return {msg:''};"); i = T.ins(); print('  ', i[:400])
@@ -94,6 +99,10 @@ try:
     T.ok(st == ['Liberadas', 'v2', 150, 'Glifosato 480 270 | 2,4-D 806 150 | Óleo mineral 75'] and f'{OS} ajustada para v2 e liberada' in tt
          and re.search(r'v2 ajustada por Ana \(agrônoma\) às \d\d:\d\d ao liberar: área 160 → 150 ha; Glifosato 480 2 → 1,8 L/ha', p) is not None and '1,8 L/ha' in i and '270 L' in i and 'Liberadas' in T.linha(OS),
          'Ajustar antes de liberar: 150 ha e Glifosato 1,8 L/ha → v2 com histórico na Origem, liberada com a reserva ajustada (270 L)', (st, tt, p[-400:]))
+    # 14b · CTL-1 (Frente F): o CMD-42 aprova a v2 com as doses ajustadas
+    T.ok(re.search(r'v2 aprovada por Ana \(agrônoma\) às \d\d:\d\d · 150 ha · Glifosato 480 1,8 L/ha, 2,4-D 806 1 L/ha, Óleo mineral 0,5 L/ha \(CMD-42\)', p) is not None
+         and T.cen(f"((c.ordens['{OS}'].osc||{{}}).ev||[]).map(e=>e.cmd+' '+e.v).join(',')") == 'CMD-42 v2,CMD-06 v2',
+         'CTL-1: ajustar e liberar grava CMD-42 e CMD-06 da v2 com as doses ajustadas', p[p.find('ORIGEM'):][:600])
     T.fechar()
     # 15 · sem erro de script
     er = T.erros(); T.ok(not er, 'sem erro de script', er)

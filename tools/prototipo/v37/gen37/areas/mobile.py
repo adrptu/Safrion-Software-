@@ -329,10 +329,7 @@ def build():
               navcard('Ocorrência','tipo, texto, foto e voz','MB-04','alert'),
               navcard('Almoxarifado','retirar e confirmar','MB-05','box'),
               navcard('Vistoria','rota por pontos','MB-06','leaf'),
-              navcard('Contagem de frutos','por planta e parcela','MB-07','grid'),
-              navcard('Irrigação','água e fertirrigação','MB-08','drop'),
-              navcard('Manutenção e combustível','serviço e abastecimento','MB-09','wrench'),
-              navcard('Cargas e entregas','pesagem e romaneio','MB-10','truck'),'<span></span>')
+              '<span></span>')   # MB-07..MB-10 só simulam com dados locais (Frente F): fora do app até ligarem ao estado
       + f'<div style="display: flex; justify-content: flex-end;"><button type="button" onClick="{H("restaurar")}" title="Voltar ordens, estoque e app ao início da demonstração" '
         f'style="font-family: inherit; font-size: 12px; font-weight: 600; color: {MUTED}; background: transparent; border: 0; padding: 4px 0; cursor: pointer; text-decoration: underline;">Restaurar demonstração</button></div>')
     js='''const fila=mbFila(c); v.fila=fila.map(o=>mbCard(self,c,o)); v.fila_vazia=!fila.length;
@@ -371,8 +368,7 @@ v.restaurar=()=>{ cenReset(); cenSave(cenGet()); mbSelSet(''); self.setState({ce
       + card(f'<b>{O419["id"]}</b> · Irrigação · água',[
           kv('Contexto',f'Pivô 2 · Santa Rita · janela hoje {IRR["janela"]} · resp. {O419["resp"]}'),
           chips(etapa('Liberadas'),tag('necessidade do balanço')),
-          note('Água simplificada: abre em Irrigação, sem materiais e sem requisição.'),
-          btns(lnk('Abrir água simplificada','MB-08.dc.html','drop','Abrir a volta do Pivô 2'))],state='blue')
+          note('Água simplificada: abre em Irrigação, sem materiais e sem requisição.')],state='blue')   # MB-08 só simula (Frente F)
       + btns(say('Ler QR','QR da OS-0421 lido · ordem aberta na versão autorizada v2.','grid','Ler o QR impresso da ordem'))
       + note('Fechar o turno não encerra a ordem. Encerrar é no escritório, com apontamentos enviados e nada em custódia.'))
     js='''const mine=mbMinhas(c).filter(o=>o.etapa!=='Encerradas'); v.minhas=mine.map(o=>mbCard(self,c,o));
@@ -656,8 +652,7 @@ const ocd=done&&(c.ocorr||[]).find(x=>x.id===done); DCH(v,'hdr',done?(ocd&&!ocd.
       card(f'Receber devolução · <b>{REQ["id"]}</b> · {REQ["os"]}',[
           kv('Produto',f'{REQ["item"]} · {REQ["un"]}'),
           kv('Conta',f'entregue {REQ["entregue"]} · consumo {REQ["consumido"]} · devolvido {REQ["dev_recebida"]} · <b>custódia {REQ["custodia"]} sc com Paula</b>'),
-          chips(chip(f'{REQ["custodia"]} sc a receber · OS-0417 em conferência','yellow')),
-          btns(lnk('Abrir tarefa','MB-05det.dc.html','box','Conferir a devolução contra o QR'))],state='yellow')
+          chips(chip(f'{REQ["custodia"]} sc a receber · OS-0417 em conferência','yellow'))],state='yellow')   # MB-05det só simula o DV-0912 (Frente F)
       + card(f'Conferir e entregar · <b>{R38["id"]}</b> · {R38["os"]} fertirrigação',[
           kv('Produto',f'{R38["item"]} · {nf(R38["solicitado"])} kg (12 kg/ha × 95 ha)'),
           chips(chip('Aguardando liberação da O.S.','yellow'),chip('Saldo apto 0 kg','red')),
@@ -666,8 +661,7 @@ const ocd=done&&(c.ocorr||[]).find(x=>x.id===done); DCH(v,'hdr',done?(ocd&&!ocd.
           kv('Saldo',f'{nf(F02["fisico"])} L físicos · {F02["reservado"]} L reservados (OS-0424) · <b>{nf(F02_LIVRE)} L livres</b>'),
           kv('Conflito',f'reserva planejada da safra pediu {nf(PLAN_FA,1)} L → nada reservado · pendência de {nf(PEND_FA,1)} L na SOL-2026-07'),
           chips(chip('Conflito · decide o planejamento','red')),
-          btns(lnk('Ver conflito','SU-03det.dc.html','box','Abrir o lote F26-02 e as duas reservas'),
-               say('Registrar divergência','Divergência registrada com dono (planejamento) e prazo · reservas congeladas até a decisão — nada foi entregue.','alert','Registrar a divergência física do lote'))],state='red')
+          btns(say('Registrar divergência','Divergência registrada com dono (planejamento) e prazo · reservas congeladas até a decisão — nada foi entregue.','alert','Registrar a divergência física do lote'))],state='red')
       + note(f'<b style="color:{INK};">{O419["id"]} · água</b> não aparece aqui: água só-água não cria fila nem documento de movimentação de produtos.'))
     corpo=tabs+IF('r0',operador)+IF('r1',almox)
     js=f'''const r0=(s.role||0)===0; v.r0=r0; v.r1=!r0;
@@ -685,14 +679,14 @@ const cust=[]; const res=[];
 reqs.forEach(r=>r.itens.forEach(i=>{{ if(i.custodia>0&&i.confirmado) cust.push({{p:i.prod,q:cenNum(i.custodia)+' '+i.un,l:lot(i)+' · '+r.os+' · consumido '+cenNum(i.consumido)+' '+i.un+(mbConf(c,r.os,i.prod)?' · consumo em conferência com '+CEN_CONC_RESP:(mbResta(c.ordens[r.os])<=0.001?' · área feita: devolva a sobra ao Rui':''))}});
   else if(!(i.custodia>0)&&cenSaldoEntregar(i)>0) res.push({{p:i.prod,q:cenNum(cenSaldoEntregar(i))+' '+i.un,l:lot(i)+' · '+mbEmb(i,cenSaldoEntregar(i))+' · '+r.id+' · '+r.os}}); }}));
 v.cust=cust; v.has_cust=cust.length>0; v.res=res; v.has_res=res.length>0; v.nada=!pend.length&&!cust.length&&!res.length;
-v.p_conf=r0&&pend.length>0; v.p_back=r0&&!pend.length; v.p_qr=!r0;
+v.p_conf=r0&&pend.length>0; v.p_back=r0&&!pend.length;
 v.pc_lab='Confirmar recebimento'+(pend.length>1?' · '+pend[0].id:'');
 v.pc_go=()=>{{ if(pend[0]) cenMudar(self,c=>cenConfirmarRecebimento(c,pend[0].id)); }};
 if(r0) DCH(v,'hdr',(foco&&c.ordens[foco]?foco+' · ':'')+(pend.length?pend.length+(pend.length>1?' entregas a confirmar':' entrega a confirmar'):(cust.length?'insumos com você':'nada a confirmar')),pend.length?'yellow':'green');
 else DCH(v,'hdr','1 devolução hoje','yellow');'''
     emit('MB-05','Almoxarifado móvel','retiradas do operador e tarefas do almoxarife · por lote e embalagem',None,
          'Confirmar recebimento',corpo,H_=1220,back='MB-01.dc.html',js=js,dyn_status=True,cen=True,
-         prim=[('p_conf','b',H('pc_lab'),'pc_go'),('p_back','a','Voltar à fila','MB-01.dc.html'),('p_qr','a','Ler QR da O.S.','MB-05det.dc.html')])
+         prim=[('p_conf','b',H('pc_lab'),'pc_go'),('p_back','a','Voltar à fila','MB-01.dc.html')])
 
     # ---- MB-05det · tarefa-âncora: receber devolução REQ-031 ----
     corpo=(

@@ -108,7 +108,8 @@ try:
     btn('Voltar')
     chk('plantio com semente e MAP pela dose', '52 kg/ha' in t and '5.304 kg' in t and '250 kg/ha' in t and '25.500 kg' in t, t)
     fechar(); abrir('OS-0417'); t=pan()
-    chk('conferência bloqueada por sobras com atalho ao Estoque e à conferência', 'Encerrar bloqueado' in t and J("[...document.querySelectorAll('aside[role=dialog] a')].some(a=>a.getAttribute('href')==='EST.dc.html')") and J("[...document.querySelectorAll('aside[role=dialog] a')].some(a=>a.getAttribute('href')==='CA-02.dc.html')"), t[:300])
+    # CTL-1 (Frente F): CA-02 é oculta e fixa; o painel fica com o atalho vivo ao Estoque
+    chk('conferência bloqueada por sobras com atalho ao Estoque e sem elo para CA-02 (oculta e fixa)', 'Encerrar bloqueado' in t and J("[...document.querySelectorAll('aside[role=dialog] a')].some(a=>a.getAttribute('href')==='EST.dc.html')") and not J("[...document.querySelectorAll('aside[role=dialog] a')].some(a=>(a.getAttribute('href')||'').startsWith('CA-02'))"), t[:300])
     fechar()
     # 01/10: água sem produto não é O.S. agrícola: OS-0419/OS-0422/OS-0423 não abrem mais aqui (regras conferidas na IR-03/IR-03det, abaixo)
     corpo=J("document.body.innerText") or ''

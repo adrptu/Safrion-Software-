@@ -5,7 +5,7 @@ Decisão do proprietário de 01/10/2026: ao clicar no talhão, o painel mostra s
 "Nova O.S. neste talhão" só aparecem na camada Ordens de serviço; as seções ficam sempre abertas. As ordens só de água (OS-0419/0422/0423)
 não são O.S.: o conflito do T7 sai da camada Ordens de serviço e se resolve na camada Irrigação (02/10: direto na ação, IR-03det#OS-0423:conflito).
 OS-0418 e OS-0430, a liberar pelo agrônomo, entram na contagem (2 a liberar) e deixam P1 e T1 amarelos; a OS-0420 só tem o impedimento
-da máquina; os painéis não repetem destino; "Receber sobras" leva ao Estoque do menu; a devolução recebida pela tela EST e a liberação
+da máquina (CTL-1: primário "Acompanhar OM-0233" → MA-04, não a PL-05 fixa); os painéis não repetem destino; "Receber sobras" leva ao Estoque do menu; a devolução recebida pela tela EST e a liberação
 feita pela tela O.S. (cenário compartilhado) chegam ao mapa. Uso: python3 map_decisoes_test.py (≈ 30 s)."""
 import sys, os, time, subprocess, json
 HERE=os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0,HERE)
@@ -67,8 +67,9 @@ try:
         'Liberar bloqueado' in p1 and pr==['Ajustar antes de liberar','OS.dc.html#OS-0418:ajustar'] and pr2==['Receber devolução no Estoque','EST.dc.html'] and unico(lk) and unico(lk2)
         and not any(h in ('SU-07.dc.html','IN-02det.dc.html') for _,h in lk+lk2), [pr,lk,pr2,lk2])
     tap('P1'); tap('T4'); lk=links('T4'); pr=prim('T4')
-    chk('6 T4: OS-0420 parada só pela máquina · primário "Reprogramar saldo" → PL-05 · ordem completa → CA-01x-os0420 · sem IN-02x-os0420 · nenhum destino repetido',
-        pr==['Reprogramar saldo','PL-05.dc.html'] and any(h=='CA-01x-os0420.dc.html' for _,h in lk) and not any('IN-02x' in (h or '') for _,h in lk) and unico(lk), [pr,lk])
+    # CTL-1 (Frente F): PL-05 é oculta e fixa; o passo vai para a OM-0233 viva no MA-04 (âncora abre o painel)
+    chk('6 T4: OS-0420 parada só pela máquina · primário "Acompanhar OM-0233" → MA-04#OM-0233 · ordem completa → CA-01x-os0420 · sem IN-02x-os0420 · sem PL-05 · nenhum destino repetido',
+        pr==['Acompanhar OM-0233','MA-04.dc.html#OM-0233'] and not any((h or '').startswith('PL-05') for _,h in lk) and any(h=='CA-01x-os0420.dc.html' for _,h in lk) and not any('IN-02x' in (h or '') for _,h in lk) and unico(lk), [pr,lk])
     tap('T4')
     # 7 · o conflito de água do T7 (OS-0423) não é O.S. (01/10): em Ordens de serviço o T7 fica sem ordem; na camada Irrigação, um só botão que abre a ação no registro
     l7,_=lab('T7'); tap('T7'); t7=pan('T7'); tap('T7')
@@ -95,6 +96,15 @@ try:
         l1=='T1: OS-0421 · 190/350 ha' and f1==VERDE and r=='ok' and 'Liberadas' in t1 and 'Ajustar antes de liberar' not in t1 and unico(lk), [l1,f1,r,lk])
     tap('T1')
     sh=J("document.documentElement.scrollHeight"); chk('13 sem rolagem (≤ 900)', sh<=900, sh)
+    # 14-15 · CTL-1 (Frente F): "Acompanhar OM-0233" abre a OM viva no MA-04; liberar pelo Mapa grava CMD-42 e CMD-06 como a tela O.S.
+    c.goto(f'http://127.0.0.1:{p}/MA-04.dc.html#OM-0233',wait=1.2); am=J("(document.querySelector('aside[role=dialog]')||{}).innerText||''") or ''
+    chk('14 "Acompanhar OM-0233" (MA-04#OM-0233): o painel da OM-0233 viva abre pela âncora', 'OM-0233' in am, am[:200])
+    J("localStorage.removeItem('talhao-os-cenario-v1')"); mapa(); tap('T1'); ver('T1','Ver ordens')
+    r1=clk('Liberar para execução','aside[aria-label^="T1"]'); ct=pan('T1'); r2=clk('Confirmar liberação','aside[aria-label^="T1"]'); t=T()
+    ev=J("(((JSON.parse(localStorage.getItem('talhao-os-cenario-v1')||'{}').ordens||{})['OS-0430']||{}).osc||{}).ev||[]") or []
+    chk('15 Mapa: confirmação "aprova esta versão e libera" e liberar a OS-0430 grava CMD-42 e CMD-06 (v1, Ana)',
+        r1=='ok' and r2=='ok' and 'Ana (agrônoma) aprova esta versão e libera' in ct and [e.get('cmd') for e in ev]==['CMD-42','CMD-06']
+        and all(e.get('v')=='v1' and e.get('por')=='Ana (agrônoma)' for e in ev) and 'v1 aprovada e liberada por Ana (agrônoma).' in t, [r1,r2,ct[-300:],ev,t])
 finally:
     try:
         if c: c.close()

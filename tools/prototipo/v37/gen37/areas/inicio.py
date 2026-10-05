@@ -18,7 +18,7 @@ observacoes (dados locais coerentes com dados.py / dados2.py / telas vizinhas):
   responsável e link de detalhe vêm do registro; OS-0430 (T1-A) aparece no polígono T1.
 - OS-0420: 30/100 ha, saldo 70 ha; os 30 ha realizados ficam na v2 e a v3 (KCl −12 % só no saldo) já vale, ajustada por Ana (agrônoma)
   em 23/09. Selo do registro "Impedida · ativo bloqueado", igual ao de OS.dc.html e CA-01x-os0420 (DEMO-14): o saldo está parado só pelo
-  Trator T1 (OM-0233), sem pendência do agrônomo; no Mapa o próximo passo é Reprogramar saldo (PL-05). OS-0431 "Falta máquina" conta como impedida.
+  Trator T1 (OM-0233), sem pendência do agrônomo; no Mapa o próximo passo é Acompanhar OM-0233 (MA-04, estado da manutenção; Frente F). OS-0431 "Falta máquina" conta como impedida.
 - Geometria (26/09): dados.GEO_TAL/GEO_PARC, fonte única com o CD-01det (polígono do T1 v3 validado em 12/09; T1-B sem polígono).
   O painel Integrado mostra a linha Geometria onde houver dado; "Próxima ocupação" marca a parcela sem polígono. A T1-B não é desenhada.
 - "Programar vistoria" da barra do MIP/MID é um modo (como Medir): clique no talhão programa a vistoria com a mesma função do painel
@@ -119,7 +119,7 @@ FILT['Carência e destino']=[('qd','Consultar em',['Hoje','Em 7 dias','Em 14 dia
 # condição: 'ag' = só enquanto a ordem está a liberar pelo agrônomo no cenário, 'cust' = só com custódia).
 _ORD_MAPA=[  # id, talhões da geometria, complemento do realizado, prazo, ação
  ('OS-0421',['T1','T2'],'','no prazo',None),
- ('OS-0420',['T4'],'','atrasada',('Reprogramar saldo','PL-05.dc.html','op',None)),
+ ('OS-0420',['T4'],'','atrasada',('Acompanhar OM-0233','MA-04.dc.html#OM-0233','op',None)),   # PL-05 é oculta e fixa (Frente F): a OM-0233 viva
  ('OS-0419',['P2'],'lâmina 10,81 mm','irrigando hoje',None),
  ('OS-0424',['P2'],'','até 3 dias',None),
  ('OS-0422',['P2'],'2 passadas de 6,75 mm','até 3 dias',('Definir janela','IR-03det.dc.html#OS-0422:janela','op',None)),
@@ -813,8 +813,8 @@ function criarVis(self,ts,extra,pt){ const sat=lay(self)==='Satélite'; const ms
 // ---- O.S. do talhão: cartões selecionáveis e o próximo passo da escolhida (osProx e comandos osc_* do núcleo da O.S.) ----
 function osMapa(t){ const mo=M.ord.filter(o=>o.tal.indexOf(t)>=0); const sv=(id)=>{ const x=mo.find(o=>o.id===id); return SEV.indexOf(PZC[x?x.pz:'no prazo']); };
   return OSN.filter(o=>mo.some(m=>m.id===o.id)&&o.etapa!=='Canceladas').sort((a,b)=>{ const fa=a.etapa==='Encerradas'?1:0, fb=b.etapa==='Encerradas'?1:0; return (fa-fb)||(sv(a.id)-sv(b.id)); }); }
-function mapCt(o,fn){ const insTxt=(o.ins||[]).map(x=>x.p+' '+nd(x.tot)+' '+x.un).join(', '); const vn=(String(o.versao||'').match(/v\d+/g)||['']).pop();  // versão: só "vN"
-  return {liberar:o.agua?('Liberar '+o.id+': janela, bomba e energia confirmadas; água sem requisição no Estoque.'):('Liberar '+o.id+(vn?' (versão '+vn+')':'')+': '+(insTxt?'a requisição reserva no Estoque, por lote: '+insTxt+'.':'sem insumos a reservar.')),
+function mapCt(o,fn){ const insTxt=(o.ins||[]).map(x=>x.p+' '+nd(x.tot)+' '+x.un).join(', '); const vn=osVn(o.versao);  // versão: só "vN" (núcleo da O.S.)
+  return {liberar:o.agua?('Liberar '+o.id+': janela, bomba e energia confirmadas; água sem requisição no Estoque.'):('Liberar '+o.id+' (versão '+vn+'): ao confirmar, '+OS_AGRO+' aprova esta versão e libera; '+(insTxt?'a requisição reserva no Estoque, por lote: '+insTxt+'.':'sem insumos a reservar.')),
     iniciar:'Iniciar '+o.id+' agora, na janela '+o.janela+'.',conferencia:'Enviar '+o.id+' para conferência: execução física concluída ('+nf(o.realizado)+' ha).',
     encerrar:'Encerrar '+o.id+': apontamentos enviados, consumo baixado e nada em custódia.'}[fn]||''; }
 function nxOf(self,o,mo){ const pb=osProx(o); const P=pb.P, b=pb.b; const pa=(self.state.mpa&&self.state.mpa.id===o.id)?self.state.mpa:null;
