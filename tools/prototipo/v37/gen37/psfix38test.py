@@ -16,7 +16,8 @@ def chk(nome, cond, det=''):
     (OK if cond else FAIL).append(nome); print(('  ok  ' if cond else '  FALHOU ') + nome + (' · ' + str(det) if det != '' else ''))
 CLK = """((t,root)=>{const r=root?document.querySelector(root):document; if(!r) return 'SEM RAIZ'; const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...r.querySelectorAll('button,a')]; const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok';})"""
 def clk(t, root=None): r = J(f"({CLK})({json.dumps(t)},{json.dumps(root)})"); time.sleep(.45); return r
-def etapa(i): J(f"document.querySelectorAll('nav[aria-label=\"Etapas do processo\"] button')[{i-1}].click()"); time.sleep(.55)
+from comp_lib import IR_ETAPA
+def etapa(i): r = J(f"({IR_ETAPA})({i})"); time.sleep(.55); return r   # a faixa só informa (UX-ACAO-UNICA-20261003): anda pela área de ações
 def abrir(nome):
     etapa(1); J(f"""(()=>{{const r=[...document.querySelectorAll('[role=row]')].find(x=>x.innerText.indexOf({json.dumps(nome)})>=0); [...r.querySelectorAll('button')].find(b=>/safra|^Continuar/.test(b.innerText.trim())).click();}})()"""); time.sleep(.55); etapa(2)
 def panel(): return J("(()=>{const a=document.querySelector('aside[role=dialog]'); return a?a.innerText.replace(/\\s+/g,' '):'';})()") or ''

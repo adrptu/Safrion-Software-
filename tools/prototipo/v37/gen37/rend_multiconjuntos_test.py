@@ -45,7 +45,8 @@ try:
     T=lambda: J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')") or ''
     k4=lambda: J("(document.body.innerText.match(/[\\d.,]+ ha trabalhados[^\\n]+/)||[''])[0]") or ''
     k6=lambda: J("(document.body.innerText.match(/Valor da necessidade[^\\n]+/)||[''])[0]") or ''
-    def etapa(n): J(f"(()=>{{const b=[...document.querySelectorAll('nav[aria-label^=\"Etapas\"] button')].find(b=>b.innerText.replace(/\\s+/g,' ').trim().startsWith('{n} ')); if(b) b.click();}})()"); time.sleep(.5)
+    from comp_lib import IR_ETAPA
+    def etapa(n): r=J(f"({IR_ETAPA})({n})"); time.sleep(.5); return r   # a faixa só informa (UX-ACAO-UNICA-20261003): anda pela área de ações
     # células visíveis de cada linha; o triângulo de abrir/recolher (▸ ▾) sai do texto da 1ª célula
     def rows(): return J("[...document.querySelectorAll('[role=row]')].filter(r=>r.offsetParent).map(r=>[...r.querySelectorAll('[role=cell]')].map((x,i)=>{ const t=x.innerText.replace(/\\s+/g,' ').trim(); return i===0?t.replace(/^[▸▾]\\s*/,''):t; }))") or []
     def row(pref):

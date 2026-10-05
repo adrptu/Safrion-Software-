@@ -32,11 +32,12 @@ def shots(tela):
     J("(()=>{const m=document.querySelector('main[data-scroll]'); if(m) m.scrollTop=0;})()")
 try:
     c.size(1440,1000)
-    for tela,cur in [('LO-01.dc.html','1 Programe o transporte'),('LO-02.dc.html','2 Expeça as cargas'),('LO-02det.dc.html','2 Expeça as cargas'),('LO-03.dc.html','3 Acompanhe viagens'),('LO-04.dc.html','4 Controle fretes')]:
+    # UX-ACAO-UNICA-20261003: LO-01…04 são telas irmãs de um módulo (navegação "Telas do módulo", sem número de etapa, atual com aria-current=page)
+    for tela,cur in [('LO-01.dc.html','Programe o transporte'),('LO-02.dc.html','Expeça as cargas'),('LO-02det.dc.html','Expeça as cargas'),('LO-03.dc.html','Acompanhe viagens'),('LO-04.dc.html','Controle fretes')]:
         open_(tela); print(tela)
-        a=J("(document.querySelector('[aria-current=step]')||{}).innerText||''").replace('\n',' ')
-        ok(a.startswith(cur),f'etapa atual destacada: {a}')
-        ok(J("[...document.querySelectorAll('nav[aria-label=\"Etapas do processo\"] a')].filter(a=>!a.getAttribute('aria-label')).filter(a=>!a.getAttribute('aria-label')).map(a=>a.getAttribute('href')).join(',')")=='LO-01.dc.html,LO-02.dc.html,LO-03.dc.html,LO-04.dc.html','faixa por links LO-01..04')
+        a=J("(document.querySelector('nav.etp-sec .etp-itens [aria-current=page]')||{}).innerText||''").replace('\n',' ')
+        ok(a.startswith(cur),f'tela atual destacada: {a}')
+        ok(J("[...document.querySelectorAll('nav[aria-label=\"Telas do módulo\"] a')].filter(a=>!a.getAttribute('aria-label')).filter(a=>!a.getAttribute('aria-label')).map(a=>a.getAttribute('href')).join(',')")=='LO-01.dc.html,LO-02.dc.html,LO-03.dc.html,LO-04.dc.html','faixa por links LO-01..04')
         ok(J("document.body.innerText.indexOf('{{')<0"),'sem buracos {{}} visíveis')
         ok(J("![...document.querySelectorAll('[role=row] button, [role=row] a')].some(b=>/^(Editar|Alterar)/.test(b.innerText.trim()))"),'sem botões Editar nas linhas')
         ov=J("[...document.querySelectorAll('[role=table]')].map((t,i)=>{const w=t.parentElement; return w.scrollWidth-w.clientWidth>2?('grade '+i+' +'+(w.scrollWidth-w.clientWidth)+'px'):null;}).filter(Boolean)")

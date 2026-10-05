@@ -16,7 +16,8 @@ CLK = """((t,root)=>{const r=root?document.querySelector(root):document; if(!r) 
 def clk(t, root=None): r = J(f"({CLK})({json.dumps(t)},{json.dumps(root)})"); time.sleep(.45); return r
 def toast(): return J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')") or ''
 def panel(): return J("(()=>{const a=document.querySelector('aside[role=dialog]'); return a?a.innerText.replace(/\\s+/g,' '):'';})()") or ''
-def etapa(i): J(f"document.querySelectorAll('nav[aria-label=\"Etapas do processo\"] button')[{i-1}].click()"); time.sleep(.55)
+from comp_lib import IR_ETAPA
+def etapa(i): r = J(f"({IR_ETAPA})({i})"); time.sleep(.55); return r   # a faixa só informa (UX-ACAO-UNICA-20261003): anda pela área de ações
 def abrir(nome):
     etapa(1); r = J(f"""(()=>{{const r=[...document.querySelectorAll('[role=row]')].find(x=>x.innerText.indexOf({json.dumps(nome)})>=0); if(!r) return 'sem linha'; const b=[...r.querySelectorAll('button')].find(b=>/safra|^Continuar/.test(b.innerText.trim())); b.click(); return 'ok';}})()""")
     time.sleep(.55); etapa(2); return r

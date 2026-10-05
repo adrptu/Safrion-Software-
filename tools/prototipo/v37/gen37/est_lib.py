@@ -25,7 +25,8 @@ class Est:
         self.J("window.__errs=window.__errs||[]; if(!window.__ouve){ window.__ouve=1; window.addEventListener('error',e=>window.__errs.push(e.message)); }")
 
     def etapa(self, i):
-        self.J(f"document.querySelectorAll('nav[aria-label=\"Etapas do processo\"] button')[{i - 1}].click()"); time.sleep(.4)
+        # Estoque é trabalho paralelo: as visões ficam na navegação "Seções do estoque" (mesma ordem 1…5), não em etapas (UX-ACAO-UNICA-20261003)
+        self.J(f"document.querySelectorAll('nav[aria-label=\"Seções do estoque\"] button')[{i - 1}].click()"); time.sleep(.4)
 
     def clk(self, t, root=None):
         r = self.J(f"({CLK})({json.dumps(t)},{json.dumps(root)})"); time.sleep(.4); return r

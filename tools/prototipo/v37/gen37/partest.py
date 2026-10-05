@@ -28,7 +28,8 @@ def rowclick(prefix):
 def panel(): return J("(()=>{const a=document.querySelector('aside[role=dialog]'); return a?a.innerText.replace(/\\s+/g,' '):'';})()") or ''
 def pvals(): return J("[...document.querySelectorAll('aside[role=dialog] input')].filter(i=>/^Nome da parcela|^Área de/.test(i.getAttribute('aria-label'))).map(i=>i.value)")
 def k(txt_re): return J(f"(document.body.innerText.match({txt_re})||[''])[0]")
-def etapa(i): J(f"document.querySelectorAll('nav[aria-label=\"Etapas do processo\"] button')[{i-1}].click()"); time.sleep(.5)
+from comp_lib import IR_ETAPA
+def etapa(i): r=J(f"({IR_ETAPA})({i})"); time.sleep(.5); return r   # a faixa só informa (UX-ACAO-UNICA-20261003): anda pela área de ações
 try:
     c.size(1440,1000); c.goto(f'http://127.0.0.1:{p}/SAF.dc.html',wait=1.3)
     chk('sem erro de JS ao abrir', (J("window.__err||''") or '')=='', J("window.__err||''"))
@@ -117,13 +118,13 @@ try:
     # --- Safrinha: novo cultivo em talhão livre e em talhão já planejado
     etapa(1); J("(()=>{const rs=[...document.querySelectorAll('[role=row]')]; const r=rs.find(x=>/Safrinha/.test(x.innerText)); const b=[...r.querySelectorAll('button')].find(b=>/^Continuar/.test(b.innerText.trim())); b.click();})()"); time.sleep(.5); etapa(2)   # a Safrinha pode abrir noutra etapa
     rs=rows(); chk('Safrinha: T1 com 1 parcela e 152 ha livres', any(r.startswith('T1 1 parcela · 152 ha livres') for r in rs), [r for r in rs if r.startswith('T1')])
-    clk('Novo cultivo'); time.sleep(.3)
+    clk('Adicionar cultivo'); time.sleep(.3)   # AÇÃO: o "Novo cultivo" do topo virou "Adicionar cultivo" junto da lista (abre o mesmo formulário Novo cultivo)
     def fset(label,val,sel=False):
         return J(f"""(()=>{{const a=document.querySelector('aside[role=dialog]'); const l=[...a.querySelectorAll('label')].find(l=>l.innerText.trim().startsWith({json.dumps(label)})); if(!l) return 'sem '+{json.dumps(label)}; const i=document.getElementById(l.getAttribute('for')); const pr=i.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(pr,'value').set.call(i,{json.dumps(val)}); i.dispatchEvent(new Event(i.tagName==='SELECT'?'change':'input',{{bubbles:true}})); return 'ok';}})()""")
     for lab_,val in [('Talhão','T4'),('Cultura','Milho'),('Variedade','AG 8700'),('Área','100'),('Plantio','2027-02-28'),('Meta de produtividade','170')]: fset(lab_,val); time.sleep(.15)
     clk('Salvar','aside[role=dialog]'); t=toast()
     chk('novo cultivo em talhão livre vira parcela T4-A com 104 ha livres', 'parcela T4-A · 104 ha livres em T4' in t, t)
-    clk('Novo cultivo'); time.sleep(.3)
+    clk('Adicionar cultivo'); time.sleep(.3)   # AÇÃO: o "Novo cultivo" do topo virou "Adicionar cultivo" junto da lista (abre o mesmo formulário Novo cultivo)
     for lab_,val in [('Talhão','T2'),('Cultura','Milho'),('Variedade','AG 8700'),('Área','50'),('Plantio','2027-03-01'),('Meta de produtividade','170')]: fset(lab_,val); time.sleep(.15)
     clk('Salvar','aside[role=dialog]'); time.sleep(.3); t=toast(); pt=panel()
     chk('novo cultivo em talhão planejado abre o painel com a nova parcela', 'T2 já está nesta safra' in t and 'Dividir T2 em parcelas' in pt and 'Excede em 50 ha' in pt, (t,pt[:200]))

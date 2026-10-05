@@ -31,8 +31,9 @@ try:
     c.size(1440,1000)
     for i,t in enumerate(['VE-01','VE-02','VE-03','VE-04','VE-04det','VE-05','VE-06']):
         c.goto(f'http://127.0.0.1:{p}/{t}.dc.html'); time.sleep(.5)
-        st=J("[...document.querySelectorAll('nav[aria-label=Etapas] a')].map(a=>a.getAttribute('href')+'|'+a.innerText.replace(/\\s+/g,' ').trim())")
-        cur=J("(document.querySelector('nav[aria-label=Etapas] [aria-current=step]')||{}).innerText")
+        # UX-ACAO-UNICA-20261003: VE-01…06 são telas irmãs do módulo (navegação "Telas do módulo", sem setas, atual com aria-current=page)
+        st=J("[...document.querySelectorAll('nav[aria-label=\"Telas do módulo\"] .etp-itens a')].map(a=>a.getAttribute('href')+'|'+a.innerText.replace(/\\s+/g,' ').trim())")
+        cur=J("(document.querySelector('nav[aria-label=\"Telas do módulo\"] .etp-itens [aria-current=page]')||{}).innerText")
         ok(len(st)==6 and all(NOMES[k] in st[k] for k in range(6)),f'{t}: faixa 6 etapas por links')
         ok(cur and NOMES[min(i,3) if i<5 else i-1] in cur,f'{t}: etapa atual = {cur!r}')
         ok(J("window.__err||''")=='' ,f'{t}: sem erro JS')

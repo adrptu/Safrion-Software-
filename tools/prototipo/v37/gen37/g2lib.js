@@ -302,6 +302,7 @@ function g2navvals(self,v,nav){ const rec=(self.state.menuRec===undefined)?g2men
     if(!d.contains(a)){ e.preventDefault(); (e.shiftKey?fs[fs.length-1]:fs[0]).focus(); }
     else if(e.shiftKey&&i===0){ e.preventDefault(); fs[fs.length-1].focus(); }
     else if(!e.shiftKey&&i===fs.length-1){ e.preventDefault(); fs[0].focus(); } },true);
+  // quem abriu: o foco atual fora do painel (focus() sem janela ativa não dispara focusin) ou, sem ele, o último foco fora do painel
   // o nó que abriu o painel pode ser redesenhado ao fechar (área de ações, cartão): guarda também como reencontrar o equivalente
   const marca=(v)=>v?{a:v.dataset&&v.dataset.acao,id:v.id,t:(v.innerText||'').replace(/\s+/g,' ').trim(),area:!!(v.closest&&v.closest('[data-acoes]'))}:null;
   const acha=(m)=>{ if(!m) return null; if(m.id){ const e=document.getElementById(m.id); if(vis(e)) return e; }
@@ -309,7 +310,7 @@ function g2navvals(self,v,nav){ const rec=(self.state.menuRec===undefined)?g2men
     return (m.a&&cs.find(e=>e.dataset.acao===m.a))||cs.find(e=>(e.innerText||'').replace(/\s+/g,' ').trim()===m.t)||null; };
   const devolve=(v,m)=>{ const ae=document.activeElement; if(ae&&ae!==document.body&&ae.isConnected) return true; const alvo=vis(v)?v:acha(m); if(!alvo) return false; try{ alvo.focus({preventScroll:true}); }catch(e){} return document.activeElement===alvo; };
   const olha=()=>{ const d=modal();
-    if(d&&d!==aberto){ aberto=d; d.__volta=fora; d.__marca=marca(fora); if(d.getAttribute('aria-modal')!=='true') d.setAttribute('aria-modal','true'); }
+    if(d&&d!==aberto){ aberto=d; const ae=document.activeElement, o=(ae&&ae!==document.body&&!(ae.closest&&ae.closest('aside[role=dialog]')))?ae:fora; d.__volta=o; d.__marca=marca(o); if(d.getAttribute('aria-modal')!=='true') d.setAttribute('aria-modal','true'); }
     else if(!d&&aberto){ const v=aberto.__volta, m=aberto.__marca; aberto=null;
       devolve(v,m); setTimeout(()=>devolve(v,m),0); setTimeout(()=>devolve(v,m),80); } };   // de novo depois do redesenho da tela (só age se o foco caiu no BODY)
   try{ new MutationObserver(olha).observe(document.documentElement,{childList:true,subtree:true}); }catch(e){} })();

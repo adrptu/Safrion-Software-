@@ -397,7 +397,10 @@ try:
         for pg in P20:
             abre(pg); d=J(DUPJS); d20[pg]=len(d.get('mesmoRotulo',[]))+len(d.get('mesmoDestino',[]))
         abre('AG-01det'); os0=J("[...document.querySelectorAll('a[href=\"OS.dc.html#OS-0420\"]')].filter(a=>a.getClientRects().length).length")
-        fechou=J("(()=>{ try{ const c=cenGet(); const o=c.ordens['OS-0420']; if(!o) return 'sem OS-0420'; o.etapa='Encerradas'; cenSave(c); return 'ok'; }catch(e){ return 'erro '+e.message; } })()")
+        # o AG-01det não expõe o cenário (cenGet/cenSave ficam no escopo da página): encerra a OS-0420 pela tela das O.S. (window.__cen) e grava
+        # no cenário compartilhado (talhao-os-cenario-v1), como depois de qualquer ação; o AG-01det relê o cenário ao abrir
+        abre('OS',limpa=False)
+        fechou=J("(()=>{ try{ const C=window.__cen; if(!C) return 'sem window.__cen'; const c=C.cenGet(); const o=c.ordens['OS-0420']; if(!o) return 'sem OS-0420'; o.etapa='Encerradas'; c.rev=(c.rev||0)+1; localStorage.setItem('talhao-os-cenario-v1', JSON.stringify(c)); return 'ok'; }catch(e){ return 'erro '+e.message; } })()")
         abre('AG-01det',limpa=False); d=J(DUPJS); os1=J("[...document.querySelectorAll('a[href=\"OS.dc.html#OS-0420\"]')].filter(a=>a.getClientRects().length).map(a=>a.closest('header')?'cabeçalho':'conteúdo')")
         dupE=len(d.get('mesmoRotulo',[]))+len(d.get('mesmoDestino',[])); J("localStorage.clear()")
         abre('MB-01'); h5=J("(()=>{ const a=[...document.querySelectorAll('a[href^=\"MB-05.dc.html#OS-\"]')].find(a=>a.getClientRects().length); return a?a.getAttribute('href'):''; })()")

@@ -31,7 +31,8 @@ def row_click(t,texto,sel="[role=row].g2ed"):
     return t.js(f"""(()=>{{const r=[...document.querySelectorAll('{sel}')].find(r=>r.innerText.indexOf({json.dumps(texto)})>=0); if(!r) return 'sem linha'; const c=r.querySelector('[role=cell] span')||r.querySelector('[role=cell]'); c.click(); return 'ok';}})()""")
 def abrir_safra(t):
     t.abrir('SAF.dc.html'); t.js("(()=>{const b=[...document.querySelectorAll('button')].find(b=>/^Continuar/.test(b.innerText.trim())); if(b) b.click();})()"); time.sleep(.5)
-def etapa(t,i): t.js(f"document.querySelectorAll('nav[aria-label=\"Etapas do processo\"] button')[{i-1}].click()"); time.sleep(.5)
+from comp_lib import IR_ETAPA
+def etapa(t,i): r=t.js(f"({IR_ETAPA})({i})"); time.sleep(.5); return r   # a faixa só informa (UX-ACAO-UNICA-20261003): anda pela área de ações
 # ---------------------------------------------------------------- testes
 def t01(t):
     """Escolher/criar safra e percorrer as seis etapas."""
@@ -42,10 +43,10 @@ def t01(t):
     t.setv('#'+ids[0],'Safra 2027/28'); t.setv('#'+ids[1],'set/2027 – ago/2028')
     t.clk('Salvar','aside[role=dialog]'); t.check('Safra criada e aberta na etapa 2',t.js("document.querySelector('[aria-current=step]').innerText.indexOf('Defina cultivos')>=0"),t.aviso())
     t.foto('nova-safra')
-    t.clk('1'); t.clk('Continuar')  # abre a 2026/27 no próximo passo (etapa 2)
+    r1=etapa(t,1); t.log('Voltar à etapa 1 (área de ações; a faixa só informa)',r1==1,r1); t.clk('Continuar')  # abre a 2026/27 no próximo passo (etapa 2)
     for i in range(2,7):
         etapa(t,i); cur=t.js("document.querySelector('[aria-current=step]').innerText.replace(/\\s+/g,' ')")
-        t.check(f'Etapa {i} aberta pela faixa',cur.startswith(str(i)),cur)
+        t.check(f'Etapa {i} aberta pela área de ações',cur.startswith(str(i)),cur)
     t.foto('etapa6')
 def t02(t):
     """Aplicar um plano a vários cultivos e ajustar somente um."""
@@ -79,7 +80,7 @@ def t04(t):
     # 01/10: com tudo já enviado, a etapa 6 não oferece novo envio (não há como duplicar) e a ação principal abre a Compra
     tem_env=t.js("[...document.querySelectorAll('button')].some(b=>b.innerText.trim()==='Enviar para cotação')")
     if tem_env: t.clk('Enviar para cotação'); t.check('Envio não duplica solicitação existente',('Nenhuma solicitação duplicada' in t.aviso()) or ('enviada' in t.aviso()),t.aviso())
-    else: t.check('Envio não duplica solicitação existente (nada a enviar: só "Abrir Compra de insumos")',t.js("[...document.querySelectorAll('button')].some(b=>/^Abrir Compra de insumos/.test(b.innerText.trim()))"),'')
+    else: t.check('Envio não duplica solicitação existente (nada a enviar: só "Abrir Compra de insumos")',t.js("[...document.querySelectorAll('button,a')].some(b=>/^Abrir Compra de insumos/.test(b.innerText.trim()))"),'')   # AÇÃO: ir a outra tela é link (área de ações)
     t.clk('Abrir Compra de insumos'); time.sleep(1.2)
     t.check('Abriu Compra de insumos',t.js("location.pathname").endswith('CMP.dc.html'))
     t.check('Compras mostra a SOL-2026-07',t.js("document.body.innerText.indexOf('SOL-2026-07')>=0"))
