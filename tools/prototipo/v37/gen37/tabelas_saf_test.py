@@ -4,7 +4,7 @@ TF03: Operação, Atividade, Modo, Largura, Velocidade, Eficiência, Rendimento,
 cada uma filtra (menu da coluna, valor exato) e ordena pelo valor tipado; a árvore operação → atividade → configuração continua; R$/kg só
 na colheita e fora do R$/ha; editar a largura recalcula o rendimento na mesma linha; 390 px sem rolagem da página.
 Uso: python3 tabelas_saf_test.py [pasta de capturas]   (< 90 s)"""
-import sys, os, time, json
+import sys, os, time, json, re
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from comp_lib import Chrome, servir
 OUT = sys.argv[1] if len(sys.argv) > 1 else None
@@ -87,15 +87,29 @@ try:
             time.sleep(.35)
     # etapa 2: cultivos
     c.goto(URL.replace('etapa=3', 'etapa=2'), 1.6); TB = TBF('TIPO'); h2 = [x.upper() for x in heads()]; d2 = dicts(); shot('saf2-1440')
-    chk('2b etapa 2: Tipo, Área livre, Unidade da meta, Plano, Versão e Ajustes em colunas próprias',
-        all(k in h2 for k in ('TALHÃO OU PARCELA', 'TIPO', 'ÁREA (HA)', 'ÁREA LIVRE (HA)', 'META', 'UNIDADE DA META', 'PLANO AGRONÔMICO', 'VERSÃO', 'AJUSTES LOCAIS')) and not any('PLANO E AJUSTES' == x for x in h2), h2)
+    # decisão do proprietário (05/10/2026): a unidade fica junto do valor ("45 t/ha/ano", "62.500 kg"); filtrar unidade não gera valor
+    chk('2b etapa 2: Tipo, Área livre, Plano, Versão e Ajustes em colunas próprias; Meta com a unidade junto (sem coluna de unidade)',
+        all(k in h2 for k in ('TALHÃO OU PARCELA', 'TIPO', 'ÁREA (HA)', 'ÁREA LIVRE (HA)', 'META', 'PLANO AGRONÔMICO', 'VERSÃO', 'AJUSTES LOCAIS')) and 'UNIDADE DA META' not in h2 and not any('PLANO E AJUSTES' == x for x in h2), h2)
     t7 = next((r for r in d2 if r.get('TALHÃO OU PARCELA', '').startswith('T7')), {})
-    chk('2b T7: meta 45 e unidade t/ha/ano separadas; plano sem a versão colada (v3 na coluna Versão)', t7.get('META') == '45' and t7.get('UNIDADE DA META') == 't/ha/ano' and t7.get('VERSÃO') == 'v3' and 'v3' not in t7.get('PLANO AGRONÔMICO', ''), t7)
-    filtra('Unidade da meta', ['t/ha/ano']); d = [r for r in dicts() if r.get('CULTURA')]
-    chk('2b filtro Unidade da meta = t/ha/ano: só cultivos com meta em t/ha/ano (mamão)', d and all(r.get('UNIDADE DA META', '') == 't/ha/ano' for r in d), [(r.get('TALHÃO OU PARCELA', ''), r.get('UNIDADE DA META', '')) for r in d])
+    chk('2b T7: meta "45 t/ha/ano" (valor com a unidade); plano sem a versão colada (v3 na coluna Versão)', t7.get('META') == '45 t/ha/ano' and t7.get('VERSÃO') == 'v3' and 'v3' not in t7.get('PLANO AGRONÔMICO', ''), t7)
+    filtra('Meta', ['45 t/ha/ano']); d = [r for r in dicts() if r.get('CULTURA')]
+    chk('2b filtro Meta = "45 t/ha/ano" (o filtro mostra o valor com a unidade, como a célula): só o T7', d and all(r.get('META', '') == '45 t/ha/ano' for r in d) and d[0].get('TALHÃO OU PARCELA', '').startswith('T7'), [(r.get('TALHÃO OU PARCELA', ''), r.get('META', '')) for r in d])
     limpa(); filtra('Tipo', ['Parcela']); d = [r for r in dicts() if r.get('CULTURA')]
-    chk('2b filtro Tipo = Parcela: as parcelas T1-A e T1-B (com o talhão T1 que as agrupa)', sorted(r.get('TALHÃO OU PARCELA', '').split(' ')[0] for r in d if r.get('TIPO', '') == 'Parcela') == ['T1-A', 'T1-B'], [(r.get('TALHÃO OU PARCELA', ''), r.get('TIPO', '')) for r in d])
+    # o filtro tem de cortar: só parcelas e o talhão que as agrupa ("2 parcelas"), nenhum "Talhão inteiro", menos linhas que sem filtro
+    chk('2b filtro Tipo = Parcela: as parcelas T1-A e T1-B (com o talhão T1 que as agrupa), sem talhão inteiro',
+        sorted(r.get('TALHÃO OU PARCELA', '').split(' ')[0] for r in d if r.get('TIPO', '') == 'Parcela') == ['T1-A', 'T1-B']
+        and all(r.get('TIPO', '') == 'Parcela' or re.match(r'^\d+ parcelas?$', r.get('TIPO', '')) for r in d)
+        and len(d) < len([r for r in d2 if r.get('CULTURA')]), [(r.get('TALHÃO OU PARCELA', ''), r.get('TIPO', '')) for r in d])
     limpa()
+    # meta decimal: a célula e o filtro mostram o valor exato com a unidade ("62,5 sc/ha"), sem arredondar
+    J(f"(()=>{{const r=[...({TB}).querySelectorAll('[role=row].g2ed')].filter(x=>x.offsetParent).find(x=>/^T2\\b/.test(x.innerText.trim())); r.querySelector('[role=cell]:nth-child(2)').click();}})()"); time.sleep(.5)
+    J("""(()=>{const i=document.querySelector('aside [id$="_meta"]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,'62,5'); i.dispatchEvent(new Event('input',{bubbles:true}));})()"""); time.sleep(.2)
+    J("[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Salvar').click()"); time.sleep(.6)
+    t2 = next((r for r in dicts() if r.get('TALHÃO OU PARCELA', '').startswith('T2')), {})
+    J(f"({TB}).querySelector('button[aria-label=\"Filtrar Meta\"]').click()"); time.sleep(.4)
+    rot = J("[...document.querySelectorAll('[role=dialog] label')].map(l=>l.innerText.replace(/\\s+\\d+$/,'').trim())") or []
+    J("(()=>{const b=[...document.querySelectorAll('[role=dialog] button')].find(b=>b.innerText.trim()==='Cancelar'); b&&b.click();})()"); time.sleep(.3)
+    chk('2b meta 62,5 salva no T2: célula e filtro mostram "62,5 sc/ha" (sem arredondar para 63)', t2.get('META') == '62,5 sc/ha' and '62,5 sc/ha' in rot and '63 sc/ha' not in rot, (t2.get('META'), rot))
     # etapa 4: plano operacional
     c.goto(URL.replace('etapa=3', 'etapa=4'), 1.6); TB = TBF('GATILHO'); expande(); d4 = dicts(); shot('saf4-1440')
     des = next((r for r in d4 if r.get('OPERAÇÃO › ATIVIDADE › CULTIVO', '').startswith('Dessecação pré-plantio')), {})
@@ -105,15 +119,24 @@ try:
     chk('2b filtro Talhão = T2: só ocorrências do T2 (com operação e atividade que as agrupam)', folhas and all(r.get('TALHÃO', '') == 'T2' for r in folhas), len(folhas))
     limpa()
     # etapa 6: demanda de insumos
-    c.goto(URL.replace('etapa=3', 'etapa=6'), 1.6); TB = TBF('UNIDADE'); expande(); d6 = dicts(); shot('saf6-1440')
+    c.goto(URL.replace('etapa=3', 'etapa=6'), 1.6); TB = TBF('FALTA EM'); expande(); d6 = dicts(); h6 = [x.upper() for x in heads()]; shot('saf6-1440')
     mp = next((r for r in d6 if r.get('INSUMO') == 'MAP 11-52'), {})
-    chk('2b etapa 6: MAP 11-52 com necessidade 62.500 | kg | falta 18/10/2026 | Em cotação | SOL-2026-07 em colunas próprias',
-        [mp.get(k) for k in ('NECESSIDADE LÍQUIDA', 'UNIDADE', 'FALTA EM', 'SITUAÇÃO', 'SOLICITAÇÃO')] == ['62.500', 'kg', '18/10/2026', 'Em cotação', 'SOL-2026-07'], mp)
-    chk('2b etapa 6: nenhuma quantidade com unidade colada nem "falta em" no texto', not any(' kg' in v or ' L' == v[-2:] or 'falta em' in v for r in d6 for k, v in r.items() if k not in ('UNIDADE', 'INSUMO', 'SITUAÇÃO')), [r for r in d6 if any(' kg' in v for v in r.values())][:1])
-    filtra('Unidade', ['L']); d = [r for r in dicts() if r.get('UNIDADE') in ('L', 'kg')]
-    chk('2b filtro Unidade = L: só insumos em litros', d and all(r.get('UNIDADE', '') == 'L' for r in d), sorted({r.get('INSUMO', '') for r in d}))
-    limpa(); expande(); ordena('Necessidade líquida', desc=True); print('   etapa6 cabeçalhos:', heads()[:6], dicts()[:2]); fe = [r.get('NECESSIDADE LÍQUIDA', '') for r in dicts() if r.get('GRUPO') == 'Fertilizantes' and r.get('UNIDADE')]
-    chk('2b ordenar Necessidade líquida decrescente nos fertilizantes: 62.500 primeiro, 0 por último (número)', fe and fe[0] == '62.500' and fe[-1] == '0' and [num(x) for x in fe] == sorted([num(x) for x in fe], reverse=True), fe)
+    chk('2b etapa 6: MAP 11-52 com necessidade "62.500 kg" | falta 18/10/2026 | Em cotação | SOL-2026-07 em colunas próprias',
+        [mp.get(k) for k in ('NECESSIDADE LÍQUIDA', 'FALTA EM', 'SITUAÇÃO', 'SOLICITAÇÃO')] == ['62.500 kg', '18/10/2026', 'Em cotação', 'SOL-2026-07'], mp)
+    QT6 = ('NECESSIDADE LÍQUIDA', 'DEMANDA BRUTA', 'ESTOQUE APTO', 'RECEBIMENTOS PREVISTOS', 'JÁ REALIZADO', 'USADO ANTES DA COMPRA', 'RESERVADO', 'RECEBIDO APÓS A FALTA', 'A COMPLEMENTAR')
+    folhas6 = [r for r in d6 if r.get('FALTA EM') is not None and r.get('SITUAÇÃO') and r.get('INSUMO') and not r.get('INSUMO', '').endswith(('insumos', 'insumo'))]
+    # cada quantidade mostrada leva a unidade; '—' só onde não há valor; o preço leva a unidade do insumo ("R$ 3,90/kg")
+    sem_un = [(r.get('INSUMO'), k, r.get(k)) for r in folhas6 for k in QT6 if r.get(k, '—') != '—' and not re.match(r'^[\d.]+(,\d+)? (kg|L|un|t|sc)$', r.get(k, ''))]
+    sem_un += [(r.get('INSUMO'), 'PREÇO', r.get('PREÇO')) for r in folhas6 if not re.match(r'^R\$ [\d.]+,\d{2}/(kg|L|un|t|sc)$', r.get('PREÇO', ''))]
+    chk('2b etapa 6: cada quantidade com a unidade junto ("152.500 kg", "610,0 L"), sem coluna Unidade e sem "falta em" no texto',
+        folhas6 and not sem_un and 'UNIDADE' not in h6 and not any('falta em' in v for r in d6 for v in r.values()), sem_un[:3])
+    filtra('Necessidade líquida', ['62.500 kg']); d = [r for r in dicts() if r.get('INSUMO') and not r.get('INSUMO', '').endswith(('insumos', 'insumo'))]
+    chk('2b filtro Necessidade líquida = "62.500 kg" (o filtro usa o texto da célula, com a unidade): só o MAP 11-52', [r.get('INSUMO') for r in d] == ['MAP 11-52'], [r.get('INSUMO') for r in d])
+    limpa(); expande(); filtra('Grupo', ['Herbicidas']); d = [r for r in dicts() if r.get('INSUMO') and not r.get('INSUMO', '').endswith(('insumos', 'insumo'))]
+    chk('2b filtro Grupo = Herbicidas: só os herbicidas', d and all(r.get('GRUPO', '') == 'Herbicidas' for r in d), sorted({r.get('INSUMO', '') for r in d}))
+    limpa(); expande(); ordena('Necessidade líquida', desc=True); fe = [r.get('NECESSIDADE LÍQUIDA', '') for r in dicts() if r.get('GRUPO') == 'Fertilizantes' and r.get('NECESSIDADE LÍQUIDA')]
+    chk('2b ordenar Necessidade líquida decrescente nos fertilizantes: "62.500 kg" primeiro, "0 kg" por último (ordem pelo número)',
+        fe and fe[0] == '62.500 kg' and fe[-1] == '0 kg' and [num(x.split(' ')[0]) for x in fe] == sorted([num(x.split(' ')[0]) for x in fe], reverse=True), fe)
     chk('sem erro de script (etapas 2, 4 e 6)', not J("window.__e"), J("window.__e"))
     TB = TBF('OPERAÇÃO')
     # 390 px
