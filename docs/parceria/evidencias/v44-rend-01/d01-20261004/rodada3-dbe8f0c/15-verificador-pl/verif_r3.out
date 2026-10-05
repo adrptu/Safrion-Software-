@@ -1,0 +1,15 @@
+== lote cases.json (new=dbe8f0c old=2e31588 pre=ee4f954)
+ok 6000 ms 9548
+new casos 6000 atendido inviável (PL): 0 · desses sem conflito e saldo 0: 0 · pior falta/horas com prazo: 0.0% caso None
+old casos 6000 atendido inviável (PL): 19 · desses sem conflito e saldo 0: 0 · pior falta/horas com prazo: 0.0% caso None
+pre casos 6000 atendido inviável (PL): 204 · desses sem conflito e saldo 0: 38 · pior falta/horas com prazo: 44.4% caso 2710
+== lote cases_anel.json (new=dbe8f0c old=2e31588 pre=ee4f954)
+ok 3000 ms 5558
+new casos 3000 atendido inviável (PL): 0 · desses sem conflito e saldo 0: 0 · pior falta/horas com prazo: 0.0% caso None
+old casos 3000 atendido inviável (PL): 8 · desses sem conflito e saldo 0: 3 · pior falta/horas com prazo: 14.3% caso 1687
+pre casos 3000 atendido inviável (PL): 8 · desses sem conflito e saldo 0: 3 · pior falta/horas com prazo: 14.3% caso 1687
+== lote cases_rook.json (new=dbe8f0c old=2e31588 pre=ee4f954)
+ok 3000 ms 6104
+new casos 3000 atendido inviável (PL): 0 · desses sem conflito e saldo 0: 0 · pior falta/horas com prazo: 0.0% caso None
+old casos 3000 atendido inviável (PL): 13 · desses sem conflito e saldo 0: 1 · pior falta/horas com prazo: 11.1% caso 478
+pre casos 3000 atendido inviável (PL): 145 · desses sem conflito e saldo 0: 75 · pior falta/horas com prazo: 33.3% caso 227

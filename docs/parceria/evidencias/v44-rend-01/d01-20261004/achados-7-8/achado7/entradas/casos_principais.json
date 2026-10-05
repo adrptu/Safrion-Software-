@@ -1,0 +1,2289 @@
+[
+{
+"nome": "5x6 partes fixas, todas 10 h",
+"Q": 600,
+"cfgs": [
+{
+"id": "T0P0",
+"nome": "T0+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p0"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T0P1",
+"nome": "T0+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p1"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T0P2",
+"nome": "T0+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p2"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T0P3",
+"nome": "T0+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p3"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T0P4",
+"nome": "T0+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p4"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T0P5",
+"nome": "T0+P5",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p5"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T1P0",
+"nome": "T1+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p0"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T1P1",
+"nome": "T1+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p1"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T1P2",
+"nome": "T1+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p2"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T1P3",
+"nome": "T1+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p3"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T1P4",
+"nome": "T1+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p4"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T1P5",
+"nome": "T1+P5",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p5"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T2P0",
+"nome": "T2+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p0"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T2P1",
+"nome": "T2+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p1"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T2P2",
+"nome": "T2+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p2"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T2P3",
+"nome": "T2+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p3"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T2P4",
+"nome": "T2+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p4"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T2P5",
+"nome": "T2+P5",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p5"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T3P0",
+"nome": "T3+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p0"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T3P1",
+"nome": "T3+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p1"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T3P2",
+"nome": "T3+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p2"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T3P3",
+"nome": "T3+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p3"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T3P4",
+"nome": "T3+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p4"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T3P5",
+"nome": "T3+P5",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p5"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T4P0",
+"nome": "T4+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t4",
+"p0"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T4P1",
+"nome": "T4+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t4",
+"p1"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T4P2",
+"nome": "T4+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t4",
+"p2"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T4P3",
+"nome": "T4+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t4",
+"p3"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T4P4",
+"nome": "T4+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t4",
+"p4"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T4P5",
+"nome": "T4+P5",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t4",
+"p5"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+}
+],
+"pools": {}
+},
+{
+"nome": "6x5 partes fixas, todas 10 h",
+"Q": 600,
+"cfgs": [
+{
+"id": "T0P0",
+"nome": "T0+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p0"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T0P1",
+"nome": "T0+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p1"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T0P2",
+"nome": "T0+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p2"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T0P3",
+"nome": "T0+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p3"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T0P4",
+"nome": "T0+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p4"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T1P0",
+"nome": "T1+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p0"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T1P1",
+"nome": "T1+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p1"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T1P2",
+"nome": "T1+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p2"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T1P3",
+"nome": "T1+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p3"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T1P4",
+"nome": "T1+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p4"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T2P0",
+"nome": "T2+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p0"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T2P1",
+"nome": "T2+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p1"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T2P2",
+"nome": "T2+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p2"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T2P3",
+"nome": "T2+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p3"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T2P4",
+"nome": "T2+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p4"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T3P0",
+"nome": "T3+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p0"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T3P1",
+"nome": "T3+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p1"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T3P2",
+"nome": "T3+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p2"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T3P3",
+"nome": "T3+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p3"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T3P4",
+"nome": "T3+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p4"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T4P0",
+"nome": "T4+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t4",
+"p0"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T4P1",
+"nome": "T4+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t4",
+"p1"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T4P2",
+"nome": "T4+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t4",
+"p2"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T4P3",
+"nome": "T4+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t4",
+"p3"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T4P4",
+"nome": "T4+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t4",
+"p4"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T5P0",
+"nome": "T5+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t5",
+"p0"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T5P1",
+"nome": "T5+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t5",
+"p1"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T5P2",
+"nome": "T5+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t5",
+"p2"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T5P3",
+"nome": "T5+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t5",
+"p3"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T5P4",
+"nome": "T5+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t5",
+"p4"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+}
+],
+"pools": {}
+},
+{
+"nome": "5x6 T4+P5 sem janela (prestador)",
+"Q": 600,
+"cfgs": [
+{
+"id": "T0P0",
+"nome": "T0+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p0"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T0P1",
+"nome": "T0+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p1"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T0P2",
+"nome": "T0+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p2"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T0P3",
+"nome": "T0+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p3"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T0P4",
+"nome": "T0+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p4"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T0P5",
+"nome": "T0+P5",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p5"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T1P0",
+"nome": "T1+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p0"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T1P1",
+"nome": "T1+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p1"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T1P2",
+"nome": "T1+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p2"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T1P3",
+"nome": "T1+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p3"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T1P4",
+"nome": "T1+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p4"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T1P5",
+"nome": "T1+P5",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p5"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T2P0",
+"nome": "T2+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p0"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T2P1",
+"nome": "T2+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p1"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T2P2",
+"nome": "T2+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p2"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T2P3",
+"nome": "T2+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p3"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T2P4",
+"nome": "T2+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p4"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T2P5",
+"nome": "T2+P5",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p5"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T3P0",
+"nome": "T3+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p0"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T3P1",
+"nome": "T3+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p1"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T3P2",
+"nome": "T3+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p2"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T3P3",
+"nome": "T3+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p3"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T3P4",
+"nome": "T3+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p4"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T3P5",
+"nome": "T3+P5",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p5"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T4P0",
+"nome": "T4+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t4",
+"p0"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T4P1",
+"nome": "T4+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t4",
+"p1"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T4P2",
+"nome": "T4+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t4",
+"p2"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T4P3",
+"nome": "T4+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t4",
+"p3"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T4P4",
+"nome": "T4+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t4",
+"p4"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+},
+{
+"id": "T4P5",
+"nome": "T4+P5",
+"rend": 2,
+"jan": "",
+"ativos": [
+"t4",
+"p5"
+],
+"custo_h": 1,
+"part": 3.3333333333333335
+}
+],
+"pools": {}
+},
+{
+"nome": "caso 9: 5x6 janelas variadas (perf_casos #9)",
+"Q": 3000,
+"cfgs": [
+{
+"id": "T0P0",
+"nome": "T0+P0",
+"rend": 1,
+"jan": 10,
+"ativos": [
+"t0",
+"p0"
+],
+"custo_h": 1
+},
+{
+"id": "T0P1",
+"nome": "T0+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p1"
+],
+"custo_h": 1
+},
+{
+"id": "T0P2",
+"nome": "T0+P2",
+"rend": 3,
+"jan": 10,
+"ativos": [
+"t0",
+"p2"
+],
+"custo_h": 1
+},
+{
+"id": "T0P3",
+"nome": "T0+P3",
+"rend": 1,
+"jan": 45,
+"ativos": [
+"t0",
+"p3"
+],
+"custo_h": 1
+},
+{
+"id": "T0P4",
+"nome": "T0+P4",
+"rend": 2,
+"jan": 20,
+"ativos": [
+"t0",
+"p4"
+],
+"custo_h": 1
+},
+{
+"id": "T0P5",
+"nome": "T0+P5",
+"rend": 3,
+"jan": 45,
+"ativos": [
+"t0",
+"p5"
+],
+"custo_h": 1
+},
+{
+"id": "T1P0",
+"nome": "T1+P0",
+"rend": 2,
+"jan": 20,
+"ativos": [
+"t1",
+"p0"
+],
+"custo_h": 1
+},
+{
+"id": "T1P1",
+"nome": "T1+P1",
+"rend": 3,
+"jan": 2,
+"ativos": [
+"t1",
+"p1"
+],
+"custo_h": 1
+},
+{
+"id": "T1P2",
+"nome": "T1+P2",
+"rend": 1,
+"jan": 2,
+"ativos": [
+"t1",
+"p2"
+],
+"custo_h": 1
+},
+{
+"id": "T1P3",
+"nome": "T1+P3",
+"rend": 2,
+"jan": 8,
+"ativos": [
+"t1",
+"p3"
+],
+"custo_h": 1
+},
+{
+"id": "T1P4",
+"nome": "T1+P4",
+"rend": 3,
+"jan": 20,
+"ativos": [
+"t1",
+"p4"
+],
+"custo_h": 1
+},
+{
+"id": "T1P5",
+"nome": "T1+P5",
+"rend": 1,
+"jan": 60,
+"ativos": [
+"t1",
+"p5"
+],
+"custo_h": 1
+},
+{
+"id": "T2P0",
+"nome": "T2+P0",
+"rend": 3,
+"jan": 2,
+"ativos": [
+"t2",
+"p0"
+],
+"custo_h": 1
+},
+{
+"id": "T2P1",
+"nome": "T2+P1",
+"rend": 1,
+"jan": "",
+"ativos": [
+"t2",
+"p1"
+],
+"custo_h": 1
+},
+{
+"id": "T2P2",
+"nome": "T2+P2",
+"rend": 2,
+"jan": 8,
+"ativos": [
+"t2",
+"p2"
+],
+"custo_h": 1
+},
+{
+"id": "T2P3",
+"nome": "T2+P3",
+"rend": 3,
+"jan": 60,
+"ativos": [
+"t2",
+"p3"
+],
+"custo_h": 1
+},
+{
+"id": "T2P4",
+"nome": "T2+P4",
+"rend": 1,
+"jan": 45,
+"ativos": [
+"t2",
+"p4"
+],
+"custo_h": 1
+},
+{
+"id": "T2P5",
+"nome": "T2+P5",
+"rend": 2,
+"jan": 60,
+"ativos": [
+"t2",
+"p5"
+],
+"custo_h": 1
+},
+{
+"id": "T3P0",
+"nome": "T3+P0",
+"rend": 1,
+"jan": 20,
+"ativos": [
+"t3",
+"p0"
+],
+"custo_h": 1
+},
+{
+"id": "T3P1",
+"nome": "T3+P1",
+"rend": 2,
+"jan": 8,
+"ativos": [
+"t3",
+"p1"
+],
+"custo_h": 1
+},
+{
+"id": "T3P2",
+"nome": "T3+P2",
+"rend": 3,
+"jan": 15,
+"ativos": [
+"t3",
+"p2"
+],
+"custo_h": 1
+},
+{
+"id": "T3P3",
+"nome": "T3+P3",
+"rend": 1,
+"jan": 60,
+"ativos": [
+"t3",
+"p3"
+],
+"custo_h": 1
+},
+{
+"id": "T3P4",
+"nome": "T3+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p4"
+],
+"custo_h": 1
+},
+{
+"id": "T3P5",
+"nome": "T3+P5",
+"rend": 3,
+"jan": "",
+"ativos": [
+"t3",
+"p5"
+],
+"custo_h": 1
+},
+{
+"id": "T4P0",
+"nome": "T4+P0",
+"rend": 2,
+"jan": 20,
+"ativos": [
+"t4",
+"p0"
+],
+"custo_h": 1
+},
+{
+"id": "T4P1",
+"nome": "T4+P1",
+"rend": 3,
+"jan": 10,
+"ativos": [
+"t4",
+"p1"
+],
+"custo_h": 1
+},
+{
+"id": "T4P2",
+"nome": "T4+P2",
+"rend": 1,
+"jan": 3,
+"ativos": [
+"t4",
+"p2"
+],
+"custo_h": 1
+},
+{
+"id": "T4P3",
+"nome": "T4+P3",
+"rend": 2,
+"jan": 45,
+"ativos": [
+"t4",
+"p3"
+],
+"custo_h": 1
+},
+{
+"id": "T4P4",
+"nome": "T4+P4",
+"rend": 3,
+"jan": 2,
+"ativos": [
+"t4",
+"p4"
+],
+"custo_h": 1
+},
+{
+"id": "T4P5",
+"nome": "T4+P5",
+"rend": 1,
+"jan": 20,
+"ativos": [
+"t4",
+"p5"
+],
+"custo_h": 1
+}
+],
+"pools": {}
+},
+{
+"nome": "controle 4x5 partes fixas, todas 10 h",
+"Q": 600,
+"cfgs": [
+{
+"id": "T0P0",
+"nome": "T0+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p0"
+],
+"custo_h": 1,
+"part": 5.0
+},
+{
+"id": "T0P1",
+"nome": "T0+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p1"
+],
+"custo_h": 1,
+"part": 5.0
+},
+{
+"id": "T0P2",
+"nome": "T0+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p2"
+],
+"custo_h": 1,
+"part": 5.0
+},
+{
+"id": "T0P3",
+"nome": "T0+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p3"
+],
+"custo_h": 1,
+"part": 5.0
+},
+{
+"id": "T0P4",
+"nome": "T0+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p4"
+],
+"custo_h": 1,
+"part": 5.0
+},
+{
+"id": "T1P0",
+"nome": "T1+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p0"
+],
+"custo_h": 1,
+"part": 5.0
+},
+{
+"id": "T1P1",
+"nome": "T1+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p1"
+],
+"custo_h": 1,
+"part": 5.0
+},
+{
+"id": "T1P2",
+"nome": "T1+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p2"
+],
+"custo_h": 1,
+"part": 5.0
+},
+{
+"id": "T1P3",
+"nome": "T1+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p3"
+],
+"custo_h": 1,
+"part": 5.0
+},
+{
+"id": "T1P4",
+"nome": "T1+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p4"
+],
+"custo_h": 1,
+"part": 5.0
+},
+{
+"id": "T2P0",
+"nome": "T2+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p0"
+],
+"custo_h": 1,
+"part": 5.0
+},
+{
+"id": "T2P1",
+"nome": "T2+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p1"
+],
+"custo_h": 1,
+"part": 5.0
+},
+{
+"id": "T2P2",
+"nome": "T2+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p2"
+],
+"custo_h": 1,
+"part": 5.0
+},
+{
+"id": "T2P3",
+"nome": "T2+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p3"
+],
+"custo_h": 1,
+"part": 5.0
+},
+{
+"id": "T2P4",
+"nome": "T2+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p4"
+],
+"custo_h": 1,
+"part": 5.0
+},
+{
+"id": "T3P0",
+"nome": "T3+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p0"
+],
+"custo_h": 1,
+"part": 5.0
+},
+{
+"id": "T3P1",
+"nome": "T3+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p1"
+],
+"custo_h": 1,
+"part": 5.0
+},
+{
+"id": "T3P2",
+"nome": "T3+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p2"
+],
+"custo_h": 1,
+"part": 5.0
+},
+{
+"id": "T3P3",
+"nome": "T3+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p3"
+],
+"custo_h": 1,
+"part": 5.0
+},
+{
+"id": "T3P4",
+"nome": "T3+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p4"
+],
+"custo_h": 1,
+"part": 5.0
+}
+],
+"pools": {}
+},
+{
+"nome": "controle 4x6 partes fixas, todas 10 h",
+"Q": 600,
+"cfgs": [
+{
+"id": "T0P0",
+"nome": "T0+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p0"
+],
+"custo_h": 1,
+"part": 4.166666666666667
+},
+{
+"id": "T0P1",
+"nome": "T0+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p1"
+],
+"custo_h": 1,
+"part": 4.166666666666667
+},
+{
+"id": "T0P2",
+"nome": "T0+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p2"
+],
+"custo_h": 1,
+"part": 4.166666666666667
+},
+{
+"id": "T0P3",
+"nome": "T0+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p3"
+],
+"custo_h": 1,
+"part": 4.166666666666667
+},
+{
+"id": "T0P4",
+"nome": "T0+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p4"
+],
+"custo_h": 1,
+"part": 4.166666666666667
+},
+{
+"id": "T0P5",
+"nome": "T0+P5",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p5"
+],
+"custo_h": 1,
+"part": 4.166666666666667
+},
+{
+"id": "T1P0",
+"nome": "T1+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p0"
+],
+"custo_h": 1,
+"part": 4.166666666666667
+},
+{
+"id": "T1P1",
+"nome": "T1+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p1"
+],
+"custo_h": 1,
+"part": 4.166666666666667
+},
+{
+"id": "T1P2",
+"nome": "T1+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p2"
+],
+"custo_h": 1,
+"part": 4.166666666666667
+},
+{
+"id": "T1P3",
+"nome": "T1+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p3"
+],
+"custo_h": 1,
+"part": 4.166666666666667
+},
+{
+"id": "T1P4",
+"nome": "T1+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p4"
+],
+"custo_h": 1,
+"part": 4.166666666666667
+},
+{
+"id": "T1P5",
+"nome": "T1+P5",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p5"
+],
+"custo_h": 1,
+"part": 4.166666666666667
+},
+{
+"id": "T2P0",
+"nome": "T2+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p0"
+],
+"custo_h": 1,
+"part": 4.166666666666667
+},
+{
+"id": "T2P1",
+"nome": "T2+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p1"
+],
+"custo_h": 1,
+"part": 4.166666666666667
+},
+{
+"id": "T2P2",
+"nome": "T2+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p2"
+],
+"custo_h": 1,
+"part": 4.166666666666667
+},
+{
+"id": "T2P3",
+"nome": "T2+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p3"
+],
+"custo_h": 1,
+"part": 4.166666666666667
+},
+{
+"id": "T2P4",
+"nome": "T2+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p4"
+],
+"custo_h": 1,
+"part": 4.166666666666667
+},
+{
+"id": "T2P5",
+"nome": "T2+P5",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p5"
+],
+"custo_h": 1,
+"part": 4.166666666666667
+},
+{
+"id": "T3P0",
+"nome": "T3+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p0"
+],
+"custo_h": 1,
+"part": 4.166666666666667
+},
+{
+"id": "T3P1",
+"nome": "T3+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p1"
+],
+"custo_h": 1,
+"part": 4.166666666666667
+},
+{
+"id": "T3P2",
+"nome": "T3+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p2"
+],
+"custo_h": 1,
+"part": 4.166666666666667
+},
+{
+"id": "T3P3",
+"nome": "T3+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p3"
+],
+"custo_h": 1,
+"part": 4.166666666666667
+},
+{
+"id": "T3P4",
+"nome": "T3+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p4"
+],
+"custo_h": 1,
+"part": 4.166666666666667
+},
+{
+"id": "T3P5",
+"nome": "T3+P5",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p5"
+],
+"custo_h": 1,
+"part": 4.166666666666667
+}
+],
+"pools": {}
+},
+{
+"nome": "controle 5x5 partes fixas, todas 10 h",
+"Q": 600,
+"cfgs": [
+{
+"id": "T0P0",
+"nome": "T0+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p0"
+],
+"custo_h": 1,
+"part": 4.0
+},
+{
+"id": "T0P1",
+"nome": "T0+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p1"
+],
+"custo_h": 1,
+"part": 4.0
+},
+{
+"id": "T0P2",
+"nome": "T0+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p2"
+],
+"custo_h": 1,
+"part": 4.0
+},
+{
+"id": "T0P3",
+"nome": "T0+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p3"
+],
+"custo_h": 1,
+"part": 4.0
+},
+{
+"id": "T0P4",
+"nome": "T0+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t0",
+"p4"
+],
+"custo_h": 1,
+"part": 4.0
+},
+{
+"id": "T1P0",
+"nome": "T1+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p0"
+],
+"custo_h": 1,
+"part": 4.0
+},
+{
+"id": "T1P1",
+"nome": "T1+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p1"
+],
+"custo_h": 1,
+"part": 4.0
+},
+{
+"id": "T1P2",
+"nome": "T1+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p2"
+],
+"custo_h": 1,
+"part": 4.0
+},
+{
+"id": "T1P3",
+"nome": "T1+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p3"
+],
+"custo_h": 1,
+"part": 4.0
+},
+{
+"id": "T1P4",
+"nome": "T1+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t1",
+"p4"
+],
+"custo_h": 1,
+"part": 4.0
+},
+{
+"id": "T2P0",
+"nome": "T2+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p0"
+],
+"custo_h": 1,
+"part": 4.0
+},
+{
+"id": "T2P1",
+"nome": "T2+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p1"
+],
+"custo_h": 1,
+"part": 4.0
+},
+{
+"id": "T2P2",
+"nome": "T2+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p2"
+],
+"custo_h": 1,
+"part": 4.0
+},
+{
+"id": "T2P3",
+"nome": "T2+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p3"
+],
+"custo_h": 1,
+"part": 4.0
+},
+{
+"id": "T2P4",
+"nome": "T2+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t2",
+"p4"
+],
+"custo_h": 1,
+"part": 4.0
+},
+{
+"id": "T3P0",
+"nome": "T3+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p0"
+],
+"custo_h": 1,
+"part": 4.0
+},
+{
+"id": "T3P1",
+"nome": "T3+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p1"
+],
+"custo_h": 1,
+"part": 4.0
+},
+{
+"id": "T3P2",
+"nome": "T3+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p2"
+],
+"custo_h": 1,
+"part": 4.0
+},
+{
+"id": "T3P3",
+"nome": "T3+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p3"
+],
+"custo_h": 1,
+"part": 4.0
+},
+{
+"id": "T3P4",
+"nome": "T3+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t3",
+"p4"
+],
+"custo_h": 1,
+"part": 4.0
+},
+{
+"id": "T4P0",
+"nome": "T4+P0",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t4",
+"p0"
+],
+"custo_h": 1,
+"part": 4.0
+},
+{
+"id": "T4P1",
+"nome": "T4+P1",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t4",
+"p1"
+],
+"custo_h": 1,
+"part": 4.0
+},
+{
+"id": "T4P2",
+"nome": "T4+P2",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t4",
+"p2"
+],
+"custo_h": 1,
+"part": 4.0
+},
+{
+"id": "T4P3",
+"nome": "T4+P3",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t4",
+"p3"
+],
+"custo_h": 1,
+"part": 4.0
+},
+{
+"id": "T4P4",
+"nome": "T4+P4",
+"rend": 2,
+"jan": 10,
+"ativos": [
+"t4",
+"p4"
+],
+"custo_h": 1,
+"part": 4.0
+}
+],
+"pools": {}
+}
+]

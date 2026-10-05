@@ -1,0 +1,7 @@
+{"nome": "5x6 partes fixas, todas 10 h", "violacoes": [], "theta": 4.239999999999999, "motor": "V3b"}
+{"nome": "6x5 partes fixas, todas 10 h", "violacoes": [], "theta": 4.9999999999999964, "motor": "V3b"}
+{"nome": "5x6 T4+P5 sem janela (prestador)", "violacoes": ["V2 at:p5@10: 15.303 > 10", "V2 at:t4@10: 12 > 10", "V3 cronograma inexistente: θ*=0.653465347 (V3b)"], "theta": 0.6534653465346535, "motor": "V3b"}
+{"nome": "caso 9: 5x6 janelas variadas (perf_casos #9)", "violacoes": ["V2 at:p1@8: 10 > 8", "V2 at:p1@10: 29.2917 > 10", "V2 at:p2@3: 5 > 3", "V2 at:p2@8: 8.33333 > 8", "V2 at:p2@10: 11.6667 > 10", "V2 at:p4@10: 12 > 10", "V2 at:p4@20: 33.1458 > 20", "V2 at:p5@60: 113.688 > 60", "V2 at:t0@10: 17.125 > 10", "V2 at:t0@20: 26.4167 > 20", "V2 at:t1@2: 4 > 2", "V2 at:t1@8: 12 > 8", "V2 at:t1@20: 28.3542 > 20", "V2 at:t2@60: 92.1667 > 60", "V2 at:t3@10: 18 > 10", "V2 at:t3@15: 21.3333 > 15", "V2 at:t3@20: 25.8333 > 20", "V2 at:t4@3: 5 > 3", "V2 at:t4@10: 15 > 10", "V2 at:t4@20: 32.25 > 20", "V3 cronograma inexistente: θ*=0.341394026 (V3b)"], "theta": 0.34139402560455195, "motor": "V3b"}
+{"nome": "controle 4x5 partes fixas, todas 10 h", "violacoes": [], "theta": 1.0, "motor": "V3b"}
+{"nome": "controle 4x6 partes fixas, todas 10 h", "violacoes": [], "theta": 1.0000000000000002, "motor": "V3b"}
+{"nome": "controle 5x5 partes fixas, todas 10 h", "violacoes": [], "theta": 1.0, "motor": "V3b"}

@@ -1,0 +1,18 @@
+P1: menos=24 (com configuração sem %: 24; horas-conjunto maiores que P0: 4; menores: 3) · mais=323 (com sem %: 189; com menos horas-conjunto: 1)
+P2: menos=56 (com configuração sem %: 32; horas-conjunto maiores que P0: 6; menores: 38) · mais=45 (com sem %: 25; com menos horas-conjunto: 8)
+
+P1 idx 449: entrada {"Q": 1000, "cfgs": [{"id": "c0", "nome": "c0", "rend": 0.5, "custo_h": 1, "jan": 20, "part": 5, "ativos": ["a01"]}, {"id": "c1", "nome": "c1", "rend": 1, "custo_h": 1, "jan": 20, "part": 10, "ativos": ["a01"]}, {"id": "c2", "nome": "c2", "rend": 3, "custo_h": 1, "jan": 50, "part": 10, "ativos": ["a01"]}, {"id": "c3", "nome": "c3", "rend": 3, "custo_h": 1, "jan": 20, "part": "", "ativos": ["a01"]}]}
+  P0: q=['5', '10', '750/11', '0'] alocado=915/11 (83.1818) conflito=True
+  P1: q=['5', '10', '90', '0'] alocado=105 (105.0000) conflito=True
+
+P1 idx 4422: entrada {"Q": 1000, "cfgs": [{"id": "c0", "nome": "c0", "rend": 0.5, "custo_h": 1, "jan": 10, "part": 50, "seq": true}, {"id": "c1", "nome": "c1", "rend": 3, "custo_h": 1, "jan": 50, "part": "", "seq": true}, {"id": "c2", "nome": "c2", "rend": 1, "custo_h": 1, "jan": 50, "part": 10, "seq": true}, {"id": "c3", "nome": "c3", "rend": 2, "custo_h": 1, "jan": 10, "part": 10, "seq": true}]}
+  P0: q=['5/2', '90/7', '250/7', '10'] alocado=855/14 (61.0714) conflito=True
+  P1: q=['5/2', '0', '40', '10'] alocado=105/2 (52.5000) conflito=True
+
+P2 idx 113: entrada {"Q": 1000, "cfgs": [{"id": "c0", "nome": "c0", "rend": 0.5, "custo_h": 1, "jan": 20, "part": 20, "ativos": ["a1"], "rec": {"plant": 1}}, {"id": "c1", "nome": "c1", "rend": 0.5, "custo_h": 1, "jan": 100, "part": 10, "ativos": ["a1", "a3"], "seq": true}, {"id": "c2", "nome": "c2", "rend": 2, "custo_h": 1, "jan": 100, "part": 50, "seq": true}, {"id": "c3", "nome": "c3", "rend": 0.5, "custo_h": 1, "jan": 50, "part": 5, "ativos": ["a2"]}, {"id": "c4", "nome": "c4", "rend": 1, "custo_h": 1, "jan": 100, "part": 30, "ativos": ["a1"], "seq": true}], "pools": {"plant": {"un": 1, "nome": "Plantadeiras"}}}
+  P0: q=['10', '50/3', '200/3', '25', '100/3'] alocado=455/3 (151.6667) conflito=True
+  P2: q=['50/11', '250/21', '2200/21', '25', '500/21'] alocado=39275/231 (170.0216) conflito=True
+
+P2 idx 5549: entrada {"Q": 500, "cfgs": [{"id": "c0", "nome": "c0", "rend": 3, "custo_h": 1, "jan": 20, "part": "", "ativos": ["a1", "a2"]}, {"id": "c1", "nome": "c1", "rend": 1, "custo_h": 1, "jan": "", "part": 10, "ativos": ["a2"], "seq": true}, {"id": "c2", "nome": "c2", "rend": 1, "custo_h": 1, "jan": 50, "part": 20, "ativos": ["a1", "a3"], "seq": true}, {"id": "c3", "nome": "c3", "rend": 0.5, "custo_h": 1, "jan": 50, "part": 5, "ativos": ["a1", "a3"], "rec": {"plant": 1}}, {"id": "c4", "nome": "c4", "rend": 2, "custo_h": 1, "jan": 100, "part": 20, "ativos": ["a2", "a3"]}, {"id": "c5", "nome": "c5", "rend": 1, "custo_h": 1, "jan": 20, "part": "", "ativos": ["a1"]}], "pools": {"plant": {"un": 1, "nome": "Plantadeiras"}}}
+  P0: q=['0', '50', '25', '25/2', '100', '0'] alocado=375/2 (187.5000) conflito=True
+  P2: q=['0', '50', '25', '25/2', '200/3', '0'] alocado=925/6 (154.1667) conflito=True

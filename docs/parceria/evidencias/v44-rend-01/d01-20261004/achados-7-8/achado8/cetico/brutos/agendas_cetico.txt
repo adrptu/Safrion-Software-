@@ -1,0 +1,8 @@
+F5 total 260 260.0 erros []
+F5seq total 260 260.0 erros []
+F1 total 100 100.0 erros []
+F1b total 110 110.0 erros []
+F1c total 110 110.0 erros []
+F3 total 100 100.0 erros []
+F4 total 100 100.0 erros []
+M2 total 37/3 12.333333333333334 erros []

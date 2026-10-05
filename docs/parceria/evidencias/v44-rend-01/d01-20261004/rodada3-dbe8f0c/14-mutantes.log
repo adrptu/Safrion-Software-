@@ -1,0 +1,48 @@
+$ bash 00-mutantes11.sh
+== sem mutante
+RESULTADO: 106/106 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+== mutante rodada 2 inteira: bloco e espelho de 2e31588
+FALHA V9 b5a_pico_do_grupo_de_1 · B5a · A e B ao mesmo tempo, cada uma com o único distribuidor: o motivo d
+FALHA R2-2b buraco_entre_quem_tem_janela · rodada 2 do D-01 · controle positivo: o mesmo anel com as cinco e
+FALHA R3-1a p4_trator_implemento_prazos_diferentes · rodada 3 do D-01 · S2 (anterior ao D-01): A=T1+I1 (1 h)
+FALHA R3-1b anel_com_membro_sem_janela · rodada 3 do D-01 · S2 (agravado pela R2-2): anel A–B–C–D–E 
+FALHA R3-2c conflito_de_fato_e_de_estimativa · rodada 3 do D-01 · A e B na mesma máquina t1 (fato) e C, D s
+FALHA R3-4a par_que_passa_do_grupo_e_fato · rodada 3 do D-01 · A precisa de 2 tratores e B de 1, a fazenda t
+FALHA R3-2 conflito_de_fato_nao_vira_estimativa · rodada 3 do D-01 · (a) A e B em sequência declarada (6 h)
+RESULTADO: 99/106 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+== mutante R3-1: sem o conservador de prazos diferentes com P4 (JS)
+FALHA R3-1a p4_trator_implemento_prazos_diferentes · rodada 3 do D-01 · S2 (anterior ao D-01): A=T1+I1 (1 h)
+FALHA R3-1b anel_com_membro_sem_janela · rodada 3 do D-01 · S2 (agravado pela R2-2): anel A–B–C–D–E 
+RESULTADO: 104/106 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+== mutante R3-1b: conservador sem exigir P4 (JS, amplo demais)
+FALHA M2 fracao_final_no_corte_aninhado · rodada 2 · A e B (30 % cada, sequência, janela 4 h) e C (40 %, ja
+FALHA R1 paridade_js_python_400 · 400 entradas aleatórias (rendimento vazio/0/vírgula, partes, janelas 0–
+RESULTADO: 104/106 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+== mutante R3-2: sem os cortes de fato no plano (JS)
+FALHA R2-4 motivos_por_grupo_e_janela · rodada 2 do D-01 · 26 configurações em 13 partes (máquina por par
+RESULTADO: 105/106 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+== mutante R3-4a: par que passa do grupo deixa de ser fato (JS)
+FALHA R3-4a par_que_passa_do_grupo_e_fato · rodada 3 do D-01 · A precisa de 2 tratores e B de 1, a fazenda t
+FALHA R3-2 conflito_de_fato_nao_vira_estimativa · rodada 3 do D-01 · (a) A e B em sequência declarada (6 h)
+RESULTADO: 104/106 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+== mutante R3-4b: leitura de número antiga (JS)
+FALHA R3-2 conflito_de_fato_nao_vira_estimativa · rodada 3 do D-01 · (a) A e B em sequência declarada (6 h)
+RESULTADO: 105/106 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+== mutante R3-4c: conflito sem o motivo de fato quando há estimativa maior (JS)
+FALHA 05c sequencia_nao_cabe_na_janela · a mesma sequência precisaria de 21 h numa janela de 12 h → confli
+FALHA S1 sequencia_janela_3h_B4.3 · 42 ha, 3,6 e 7,2 ha/h em sequência, janela de 3 h → 1,5 h cada: 5,4 + 
+FALHA S2 sequencia_e_paralela · A e B em sequência (janela 3 h) e C 6 ha/h ao mesmo tempo, sem janela, 42 ha
+FALHA S5 partes_fixas_em_sequencia · PRD 22.1 · 50 % + 50 % em sequência, janela de 10 h. Necessário (dema
+FALHA R1 janela_zero_na_sequencia_declarada · PRE-REV R1 · o S5 com a janela de A = 0: A não recebe área, 
+FALHA R2a grupo_de_recursos_nao_relaxa_janela_1 · PRE-REV R2 · A e B em sequência declarada (janela 10 h), 
+FALHA T1a ociosa_nao_liga_ativo · rodada 2 · Z (janela 0, sem %, fora do plano) no trator a01 e na sequênci
+FALHA N1 troca_reservada_e_cobrada · rodada 2 · A e B em sequência (janela 10 h, troca 2 h cada) e C com a 
+FALHA W1a dois_tratores_duas_plantadeiras · rodada 6 · T1+P1, T1+P2, T2+P1 e T2+P2 (2 ha/h, janelas de 10 h,
+FALHA D01a subgrupo_finito_com_vizinho_de_100h · D-01 (5983640246) · A, B e C (janelas de 10 h) e D (100 h) 
+FALHA R3-2c conflito_de_fato_e_de_estimativa · rodada 3 do D-01 · A e B na mesma máquina t1 (fato) e C, D s
+FALHA R3-4a par_que_passa_do_grupo_e_fato · rodada 3 do D-01 · A precisa de 2 tratores e B de 1, a fazenda t
+FALHA R2-4 motivos_por_grupo_e_janela · rodada 2 do D-01 · 26 configurações em 13 partes (máquina por par
+FALHA R1 paridade_js_python_400 · 400 entradas aleatórias (rendimento vazio/0/vírgula, partes, janelas 0–
+RESULTADO: 92/106 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+== fim
+[exit 0]

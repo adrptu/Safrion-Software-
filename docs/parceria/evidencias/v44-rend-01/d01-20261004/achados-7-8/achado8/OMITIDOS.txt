@@ -1,0 +1,2 @@
+# arquivos acima de 2 MB compactados, listados com sha256 e bytes do original (ficam no executor)
+

@@ -185,29 +185,31 @@ def cfg_in(c):
     return dict(id=c.get('id'),nome=c.get('conj'),rend=rend_efetivo(c),part=c.get('part',''),jan=c.get('jan',''),custo_h=custo_h(c),diesel=c.get('diesel',''),
                 pess=0 if c.get('conj_id')=='prestador' else c.get('pess'),seq=c.get('seq')=='Em sequência: divide trator, implemento ou operador',troca=c.get('troca',''),ativos=c.get('ativos',[]),rec=c.get('rec') or {})
 # >>> REPARTIR (espelho de safra.js · repartir; mesmas regras e mesma ordem; aceita Fraction para conferir sem arredondamento)
-# 1) junta quem trabalha em sequência antes de dividir a área; a sequência divide a janela da ocorrência (a maior entre as dela), começa a
-#    de menor troca e cada outra entra com a sua troca (PRD 44.3: capacidade depois de respeitar simultaneidade e conflitos)
+# 1) junta quem trabalha em sequência antes de dividir a área; em sequência, cada uma termina dentro da própria janela (prazo do início da
+#    ocorrência; a janela maior de outra não amplia a dela, D-01); começa a de menor troca e cada outra entra com a sua troca (PRD 44.3)
 # 2) % fixos primeiro; o resto às sem % na proporção do rendimento (as mesmas horas); cada uma para na própria janela e a sequência para
 #    quando as horas dela com as trocas enchem a janela; o que não cabe fica sem conjunto. Pendente diz a causa.
 # 3) REND-RETORNO-1818 (S5): PLANO (demanda inteira pela partilha, sem janela) → necessidade da sequência e déficit; ATENDIDO (janelas);
 #    SALDO (área sem conjunto + horas que faltam pelas premissas do plano). nec = atendido + saldo em ha e em horas-conjunto.
 import math as _math
 from fractions import Fraction as _Fr
-def _rp_num(x):
-    if x is None or x=='': return None
+_RP_DEC=__import__('re').compile(r'[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?')
+def _rp_num(x):   # igual a safra.js rpNum: decimal simples com vírgula ou ponto; vazio (ou só espaço) = sem valor
+    if x is None: return None
     if isinstance(x,bool): return _math.nan
     if isinstance(x,(int,float,_Fr)): return x if not (isinstance(x,float) and (_math.isnan(x) or _math.isinf(x))) else _math.nan
-    try:
-        n=float(str(x).strip().replace(',','.')); return n if not (_math.isnan(n) or _math.isinf(n)) else _math.nan
-    except ValueError: return _math.nan
+    t=str(x).strip().replace(',','.',1)
+    if t=='': return None
+    if not _RP_DEC.fullmatch(t): return _math.nan
+    n=float(t); return n if not (_math.isnan(n) or _math.isinf(n)) else _math.nan
 def _ok(n): return n is not None and not (isinstance(n,float) and _math.isnan(n))
 def _rp_f(n):
     v=_math.floor(float(n)*100+0.5)/100
     return (str(int(v)) if v==int(v) else repr(v)).replace('.',',')
 def repartir(Q,cfgs,pools=None):
-    mot=[]
+    mot=[]; mot_s=set()
     def add(m):
-        if m not in mot: mot.append(m)
+        if m not in mot_s: mot_s.add(m); mot.append(m)
     Q=_rp_num(Q)
     if not _ok(Q) or Q<0: add('área inválida'); Q=0
     PV=[(k,pv or {},_rp_num((pv or {}).get('un'))) for k,pv in (pools or {}).items()]; PV=[z for z in PV if _ok(z[2]) and z[2]>=0]   # grupos com unidades válidas
@@ -217,7 +219,7 @@ def repartir(Q,cfgs,pools=None):
         x=dict(i=i,id=c.get('id'),nome=c.get('nome') or f'Configuração {i+1}',r=r if _ok(r) and r>0 else None,p=p if _ok(p) and p>=0 else None,
                H=_math.inf if (H is None or not _ok(H) or H<0) else H,ch=ch if _ok(ch) and ch>=0 else None,d=d if _ok(d) and d>=0 else None,
                troca=tr if _ok(tr) and tr>0 else 0,pess=pe if _ok(pe) and pe>0 else 0,seq=bool(c.get('seq')),ativos=[a for a in (c.get('ativos') or []) if a],
-               rec=c.get('rec') or {},t=0,q=0,h=0,ht=0,custo=None,diesel=None,emSeq=False,grupo=i)
+               rec=c.get('rec') or {},t=0,q=0,h=0,ht=0,custo=None,diesel=None,emSeq=False,seqEst=False,grupo=i)
         if H is not None and (not _ok(H) or H<0): add(x['nome']+': janela inválida, considerada sem limite')
         x['Hin']=x['H']; fr=next((z for z in PV if 0<(_rp_num(x['rec'].get(z[0])) or 0) and (_rp_num(x['rec'].get(z[0])) or 0)>z[2]+1e-9),None)   # sozinha precisa de mais unidades: não trabalha
         if fr: x['H']=0; x['semRec']=True; add(f"{x['nome']}: precisa de {_rp_f(_rp_num(x['rec'].get(fr[0])))} em {fr[1].get('nome') or fr[0]}, a fazenda tem {_rp_f(fr[2])}; não trabalha nesta ocorrência")
@@ -313,10 +315,10 @@ def repartir(Q,cfgs,pools=None):
                 if ea and k not in SERa: SERa.append(k)
             sm,es=simul(u_a if ea else u_p,k,un,False); dp=(s_a>un+1e-9 and not e_a) if ea else (s_p>un+1e-9 and not e_p)   # dp: a decisão achou mais do que un sem estourar
             nome=f"{pv.get('nome') or k}"
-            if es: add(nome+(f": ao mesmo tempo precisariam de mais do que as {_rp_f(un)} da fazenda; trabalham em sequência" if dp else ": combinações demais para conferir quantas trabalham ao mesmo tempo; trabalham em sequência (conservador)"))
-            else: add(nome+(f": ao mesmo tempo precisariam de {_rp_f(sm)}, a fazenda tem {_rp_f(un)}; trabalham em sequência" if sm>un+1e-9 else f": a fazenda tem {_rp_f(un)}; quem a usa divide a janela dela"))
-    # clique maximal do grafo "nunca ao mesmo tempo" divide a maior janela dele; grafo não perfeito (buraco ímpar de 5+ no grafo ou no
-    # complemento), cliques demais ou busca acima do teto: o componente divide a maior janela dos membros (como no safra.js, W1/W2/W4)
+            if es: add(nome+(f": ao mesmo tempo precisariam de mais do que as {_rp_f(un)} da fazenda; configurações consideradas em sequência nesta estimativa" if dp else ": combinações demais para conferir quantas trabalham ao mesmo tempo; configurações consideradas em sequência nesta estimativa (conservador)"))
+            else: add(nome+(f": ao mesmo tempo precisariam de {_rp_f(sm)}, a fazenda tem {_rp_f(un)}"+('; trabalham uma de cada vez' if (un<=1 or all((_rp_num(x['rec'].get(k)) or 0)+(_rp_num(y['rec'].get(k)) or 0)>un+1e-9 for i_,x in enumerate(u_a if ea else u_p) for y in (u_a if ea else u_p)[i_+1:])) else '; configurações consideradas em sequência nesta estimativa') if sm>un+1e-9 else f": a fazenda tem {_rp_f(un)}; quem a usa divide a janela dela"))
+    # cortes por prazo de cada clique maximal do grafo "nunca ao mesmo tempo" (D-01); grafo não perfeito entre quem tem janela (buraco ímpar de
+    # 5+ no grafo ou no complemento), cliques ou cortes demais, ou busca acima do teto: só esse componente no conservador (como no safra.js)
     def exclui(x,y,S): return junto(x,y) or any((_rp_num(x['rec'].get(k)) or 0)>0 and (_rp_num(y['rec'].get(k)) or 0)>0 for k in S)
     def buraco(cs,A):   # ciclo induzido com número ímpar (5+) de vértices: True, False ou None (passou do teto)
         st=dict(passos=0)
@@ -341,6 +343,13 @@ def repartir(Q,cfgs,pools=None):
         n=len(V)
         if n<2: return
         adj=[[a!=b and exclui(V[a],V[b],S) for b in range(n)] for a in range(n)]; cl=[]; fc=[]
+        def cortes(xs,tipo,out,visto):   # cortes por prazo de um grupo (D-01, 5983640246): quem tem janela ≤ t cabe em t; sem repetir; sub: prazo menor
+            for t_ in sorted({x['H'] for x in xs if x['H']!=_math.inf}):
+                st=[x for x in xs if x['H']<=t_]
+                if len(st)<2: continue
+                k=pref+tipo+':'+','.join(str(x['i']) for x in st)+'@'+str(t_)
+                if k in visto: continue
+                visto.add(k); out.append((k,st,t_,len(st)<len(xs)))
         vis=[False]*n
         for s0 in range(n):
             if vis[s0]: continue
@@ -364,19 +373,37 @@ def repartir(Q,cfgs,pools=None):
                     bk(R_+[v],[w for w in P if adj[v][w]],[w for w in X if adj[v][w]])
                     if st['est']: return
                     P=[w for w in P if w!=v]; X=X+[v]
-            bk([],list(comp),[]); est=st['est']; imp=est
+            bk([],list(comp),[]); est=st['est']
+            if not est:   # teto de cortes deste componente
+                nc=[]; v0=set()
+                for c in cc:
+                    cortes([V[i] for i in c],'cq',nc,v0)
+                    if len(nc)>8192: est=True; break
+            imp=est
             if not est:
-                cl.extend(cc); h=buraco(comp,adj)
-                if h is False: h=buraco(comp,[[a!=b and not adj[a][b] for b in range(n)] for a in range(n)])
-                if h is not False: imp=True
-                if h is None: est=True
-            if est: add('combinações demais para conferir quem trabalha ao mesmo tempo: as configurações ligadas dividem a maior janela delas (conservador)')
+                cl.extend(cc); cf0=[i for i in comp if V[i]['H']!=_math.inf]   # só quem tem janela (R2-2)
+                fin=[i for i in cf0 if V[i]['H']>0]; dl=[]
+                for i in fin:
+                    if V[i]['H'] not in dl: dl.append(V[i]['H'])
+                cliq=all(adj[a][b] for k,a in enumerate(fin) for b in fin[k+1:])
+                def p4():   # P4 induzido entre quem tem prazo, como no safra.js
+                    return any(c!=b and adj[b][c] and any(a!=c and adj[a][b] and not adj[a][c] and any(d!=b and d!=a and adj[c][d] and not adj[b][d] and not adj[a][d] for d in fin) for a in fin) for b in fin for c in fin)
+                if not cliq and len(dl)>1 and p4():   # R3-1: prazos diferentes sem exclusão total entre quem tem prazo: conservador do componente
+                    imp=True; add('prazos diferentes em recursos compartilhados: as configurações ligadas são consideradas juntas em cada janela nesta estimativa (conservador)')
+                elif not cliq:
+                    h=buraco(cf0,adj)
+                    if h is False: h=buraco(cf0,[[a!=b and not adj[a][b] for b in range(n)] for a in range(n)])
+                    if h is not False: imp=True
+                    if h is None: est=True
+                    elif h: add('arranjo de recursos compartilhados que esta estimativa não confere exatamente: as configurações ligadas são consideradas juntas em cada janela (conservador)')
+            if est: add('combinações demais para conferir quem trabalha ao mesmo tempo: as configurações ligadas são consideradas juntas em cada janela nesta estimativa (conservador)')
             if imp: fc.append(comp)
         cl.sort()
-        for c in cl:
-            xs=[V[i] for i in c]; RS.append((pref+'cq:'+','.join(str(x['i']) for x in xs),xs if pref=='p' else [],xs if pref=='a' else []))
-        for c in fc:
-            xs=[V[i] for i in c]; RS.append((pref+'fc:'+str(xs[0]['i']),xs if pref=='p' else [],xs if pref=='a' else []))
+        cc=[]; vc=set()
+        for c in cl: cortes([V[i] for i in c],'cq',cc,vc)
+        cf=[]; vf=set()
+        for c in fc: cortes([V[i] for i in c],'fc',cf,vf)
+        for k,st,t_,sub in cc+cf: RS.append((k,st if pref=='p' else [],st if pref=='a' else [],t_,sub))
     grafo([x for x in cand_p if not x.get('semRec')],'p',SERp); grafo(cand,'a',SERa)
     def troca_de(xs):
         if len(xs)<2: return 0
@@ -385,20 +412,54 @@ def repartir(Q,cfgs,pools=None):
         if len(xs)<2: return 0
         g=V.raiz(xs[0]['i']); mn=min((y['troca'] for y in P if V.raiz(y['i'])==g),default=_math.inf)
         return sum((x['troca'] for x in xs),0)-(mn if any(x['troca']==mn for x in xs) else 0)
-    W={}; jan={}; pista={}; pista_a={}
+    def troca_quem(xs,P,V):   # quem tem a troca reservada: todos com troca, menos uma com a menor troca do fecho (a que começa) — regra (a)
+        g=V.raiz(xs[0]['i']); mn=min((y['troca'] for y in P if V.raiz(y['i'])==g),default=_math.inf); out=[]; tirou=False
+        for x in xs:
+            if not tirou and x['troca']==mn: tirou=True; continue
+            if x['troca']>0: out.append(x['nome'])
+        return out
+    # origem (sequência declarada, mesma máquina, recurso da fazenda ou mista) e estimativa (par que só se exclui por grupo de 2+ que serializa)
+    def pool_nome(k): return ((pools or {}).get(k) or {}).get('nome') or k
+    def _par_excede(x,y):
+        for z in PV:
+            a=_rp_num(x['rec'].get(z[0])) or 0; b=_rp_num(y['rec'].get(z[0])) or 0
+            if a>0 and b>0 and a+b>z[2]+1e-9: return True
+        return False
+    JM=[[x is not y and (junto(x,y) or _par_excede(x,y)) for y in it] for x in it]   # sequência de fato (inclui par que sozinho passa das unidades)
+    def est_de(k,ms):
+        if k=='sq' or k.startswith('at:'): return False
+        return any(not JM[x['i']][y['i']] for a,x in enumerate(ms) for y in ms[a+1:])
+    def nomes(xs):
+        n=[x['nome'] for x in xs]
+        if len(n)>4: return ', '.join(n[:3])+' e mais '+str(len(n)-3)
+        return ', '.join(n[:-1])+' e '+n[-1] if len(n)>1 else ''.join(n)
+    def origens(ms):   # todas as origens comuns (R3-4)
+        o=[]
+        if all(x['seq'] for x in ms): o.append('sq')
+        for a in ms[0]['ativos']:
+            if all(a in x['ativos'] for x in ms) and 'at:'+str(a) not in o: o.append('at:'+str(a))
+        for pk in (pools or {}):
+            if (pk in um or pk in SERp or pk in SERa) and all((_rp_num(x['rec'].get(pk)) or 0)>0 for x in ms): o.append('pl:'+str(pk))
+        return o
+    W={}; jan={}; pista={}; pista_a={}; TRC={}; SUB={}; MS={}; EC={}
+    def EST(k):   # só para quem vira motivo
+        if k not in EC: EC[k]=est_de(k,MS[k])
+        return EC[k]
     for r_ in RS:
         k,xs,xa=r_[:3]
-        w=max((x['H'] for x in xs+xa),default=-_math.inf)
+        w=r_[3] if len(r_)>3 else max((x['H'] for x in xs+xa),default=-_math.inf)   # corte por prazo: janela t
         if w==_math.inf or w==-_math.inf: continue
-        W[k]=w
+        W[k]=w; MS[k]=xs if len(xs)>1 else xa; SUB[k]=bool(r_[4]) if len(r_)>4 else False
         if len(xs)>1: pista[k]=xs
-        if len(xa)>1: pista_a[k]=xa; jan[k]=w-troca_r(xa,cand,U)
+        if len(xa)>1:
+            pista_a[k]=xa; tr=troca_r(xa,cand,U); jan[k]=w-tr
+            if tr>1e-12: TRC[k]=troca_quem(xa,cand,U)
     PL={}
     for g in jan:
         for y in pista_a[g]: PL.setdefault(y['i'],[]).append(g)
     def pl(x): return PL.get(x['i'],[])   # restrições de janela da divisão de uma configuração (indexadas, W4)
     def aloca(ad):
-        q=[0]*len(it); saldo=0; cz={}; uso={}
+        q=[0]*len(it); saldo=0; cz={}; uso={}; liga={}
         for x in fx:
             t=x['t']
             if t<=1e-12: continue
@@ -409,15 +470,20 @@ def repartir(Q,cfgs,pools=None):
                 if x.get('semRec'): cz['rec']=1
                 else: cz['jan']=1; ad(f"{x['nome']}: a parte fixa não cabe na janela de {_rp_f(x['H'])} h")
         cab=q[:]; cortes=[]   # o que cabia na própria janela; o motivo diz a fração final, depois de todas as restrições
-        for g in jan:
+        for g in [g for g in jan if not SUB[g]]+[g for g in jan if SUB[g]]:   # o grupo inteiro reduz primeiro; subgrupo só o que ainda passar (R2-3)
             xs=[x for x in pista_a[g] if x['p'] is not None and q[x['i']]>0]; hf=sum((q[x['i']]/x['r'] for x in xs),0); B=max(0,jan[g])
             if hf>B+1e-9:
                 f=B/hf
                 for x in xs: n=q[x['i']]*f; saldo+=q[x['i']]-n; q[x['i']]=n
-                cz['seq']=1; cortes.append(g)
+                cz['seq']=1; cortes.append(g); liga[g]=1
+        pf_g={}; pf_o=[]   # um motivo por grupo e janela: a restrição da menor fração final (R2-4)
         for g in cortes:
             fs=[q[x['i']]/cab[x['i']] for x in pista_a[g] if x['p'] is not None and cab[x['i']]>0]; mn,mx=min(fs),max(fs)
-            ad(f"as partes fixas em sequência não cabem na janela de {_rp_f(W[g])} h: "+(f'cada uma faz {_rp_f(mn*100)} %' if mx-mn<=1e-9 else f'fazem de {_rp_f(mn*100)} % a {_rp_f(mx*100)} %')+' do que cabia na própria janela')
+            r0=(raiz(pista_a[g][0]['i']),W[g])
+            if r0 not in pf_g: pf_g[r0]=[g,mn,mx]; pf_o.append(pf_g[r0])
+            elif mn<pf_g[r0][1]-1e-9: pf_g[r0][:]=[g,mn,mx]
+        for g,mn,mx in pf_o:
+            ad(f"as partes fixas {'consideradas em sequência nesta estimativa' if EST(g) else 'em sequência'} não cabem na janela de {_rp_f(W[g])} h: "+(f'cada uma faz {_rp_f(mn*100)} %' if mx-mn<=1e-9 else f'fazem de {_rp_f(mn*100)} % a {_rp_f(mx*100)} %')+' do que cabia na própria janela ('+nomes([x for x in pista_a[g] if x['p'] is not None and cab[x['i']]>0])+')')
         for g in jan: uso[g]=sum((q[x['i']]/x['r'] for x in pista_a[g] if x['p'] is not None),0)   # depois de todas as restrições
         if R>0:
             if not livres:
@@ -430,7 +496,7 @@ def repartir(Q,cfgs,pools=None):
                 for x in livres:
                     if x['r'] is None: ad(x['nome']+': sem rendimento válido (ha/h); '+('a divisão pelo rendimento fica pendente' if len(livres)>1 else 'horas pendentes'))
             else:
-                rest=R; at=livres[:]; bj=False; bs=False; br=False
+                rest=R; at=livres[:]; bj=False; bs=False; bs_f=False; br=False; lg={}
                 while at:
                     sr=sum(x['r'] for x in at); T=rest/sr; e=T
                     for x in at:
@@ -449,16 +515,39 @@ def repartir(Q,cfgs,pools=None):
                         q[x['i']]=x['r']*e; rest-=q[x['i']]
                         for g in pl(x):
                             uso[g]=uso.get(g,0)+e
-                            if tl[g]<=e: bs=True
+                            if tl[g]<=e:
+                                bs=True; lg[g]=1
+                                if not bs_f and not EST(g): bs_f=True
                         if x['H']<=e:
                             if x.get('semRec'): br=True
                             else: bj=True
                     fzi={x['i'] for x in fz}; at=[x for x in at if x['i'] not in fzi]
-                if rest>1e-9:
+                if rest>1e-9:   # o motivo da troca só quando sobra área (empate de ponto flutuante)
                     saldo+=rest
-                    if bs: cz['seq']=1; ad('em sequência dividem a mesma janela: a área que não cabe fica sem conjunto')
+                    for g in lg: liga[g]=1
+                    if bs: cz['seq']=1; ad(('em sequência' if bs_f else 'consideradas em sequência nesta estimativa,')+' dividem a mesma janela: a área que não cabe fica sem conjunto')
                     if bj or (not bs and not br): cz['jan']=1; ad('as janelas não comportam toda a área')
                     if br: cz['rec']=1
+        tc_g={}; tc_o=[]   # regra (a): a troca reservada fica (conservadora); um motivo por grupo e janela (R2-4)
+        for g in liga:
+            ns=TRC.get(g)
+            if not ns: continue
+            if jan[g]<=1e-9: cz['troca']=1
+            v=(1 if jan[g]<=1e-9 else 0,W[g]-jan[g])
+            r0=(raiz(pista_a[g][0]['i']),W[g])
+            if r0 not in tc_g: tc_g[r0]=[g,v]; tc_o.append(tc_g[r0])
+            elif v[0]>tc_g[r0][1][0] or (v[0]==tc_g[r0][1][0] and v[1]>tc_g[r0][1][1]+1e-9): tc_g[r0][:]=[g,v]
+        for g,_v in tc_o:
+            ns=TRC[g]
+            quem=', '.join(ns); os_=origens(pista_a[g])
+            rot=lambda o: 'sequência declarada' if o=='sq' else ('mesma máquina do cadastro' if o.startswith('at:') else pool_nome(o[3:])+' da fazenda')
+            rs=[]
+            for o_ in os_:
+                if rot(o_) not in rs: rs.append(rot(o_))
+            de=' e '.join(rs); o=os_[0] if len(os_)==1 else ''
+            aj=f'tire {quem} da sequência declarada' if o=='sq' else (f'use outro conjunto para {quem}' if o.startswith('at:') else (f'tenha mais {pool_nome(o[3:])} na fazenda' if o.startswith('pl:') else f'separe {quem} das outras ('+(de or 'sequência declarada, mesma máquina ou recurso da fazenda')+')'))
+            ori=(de+(', em sequência nesta estimativa' if EST(g) else '')) if de else ('em sequência nesta estimativa' if EST(g) else 'em sequência')
+            ad(f"{quem}: troca de {_rp_f(W[g]-jan[g])} h reservada na janela de {_rp_f(W[g])} h de {nomes(pista_a[g])} ({ori}); para liberar horas, reduza a troca ou {aj}")
         return q,saldo,cz
     q2,saldo,cz=aloca(add)
     for x in it: x['q']=q2[x['i']]
@@ -469,16 +558,55 @@ def repartir(Q,cfgs,pools=None):
     if R>0 and liv_ok:
         sr=sum(x['r'] for x in plan_liv)
         for x in plan_liv: q1[x['i']]=x['r']*R/sr
-    conflito=False; deficit=0
+    # conflito (R3-2): fato e estimativa separados, como no safra.js
+    st_c=dict(conflito=False,deficit=0,cf_f=False); cf_g={}; cf_o=[]
     P1=[x for x in cand_p if q1[x['i']]>1e-12]
-    for g in pista:
-        xs=[x for x in pista[g] if q1[x['i']]>1e-12]
-        if len(xs)<2: continue
+    def viol(xs,t,est,g):
+        if len(xs)<2: return
         nec=sum((q1[x['i']]/x['r'] for x in xs),0)+troca_r(xs,P1,UP)
-        if nec>W[g]+1e-9: conflito=True; deficit=max(deficit,nec-W[g]); add(f"em sequência precisam de {_rp_f(nec)} h para {_rp_f(sum((q1[x['i']] for x in xs),0))} ha; a janela tem {_rp_f(W[g])} h")
+        if not nec>t+1e-9: return
+        st_c['conflito']=True; d=nec-t
+        if g is not None: st_c['deficit']=max(st_c['deficit'],d)
+        if not est: st_c['cf_f']=True
+        r0=UP.raiz(xs[0]['i'])
+        if r0 not in cf_g: cf_g[r0]=dict(f=None,e=None,n=0); cf_o.append(r0)
+        c=cf_g[r0]
+        if g is not None: c['n']+=1
+        k='e' if est else 'f'
+        if c[k] is None or d>c[k]['d']+1e-9: c[k]=dict(xs=xs,nec=nec,d=d,t=t)
+    for g in pista: viol([x for x in pista[g] if q1[x['i']]>1e-12],W[g],EST(g),g)
+    ns=[x for x in P1 if not x.get('semRec')]; cl_f=[]; ps=[0]
+    def bk_f(R_,P,X):
+        ps[0]+=1
+        if ps[0]>65536 or len(cl_f)>4096: return
+        if not P and not X:
+            if len(R_)>1: cl_f.append(R_)
+            return
+        u=(P+X)[0]
+        for v in [v for v in P if not JM[ns[u]['i']][ns[v]['i']]]:
+            bk_f(R_+[v],[w for w in P if JM[ns[v]['i']][ns[w]['i']]],[w for w in X if JM[ns[v]['i']][ns[w]['i']]]); P=[w for w in P if w!=v]; X=X+[v]
+    if len(ns)>1: bk_f([],list(range(len(ns))),[])
+    for c_ in cl_f:
+        xs=[ns[k] for k in c_]; ts=[]
+        for x in xs:
+            if x['H']!=_math.inf and x['H'] not in ts: ts.append(x['H'])
+        for t in ts: viol([x for x in xs if x['H']<=t],t,False,None)
+    conflito=st_c['conflito']; deficit=st_c['deficit']; cf_f=st_c['cf_f']
+    for r0 in cf_o:
+        c=cf_g[r0]; ms=[]
+        if c['f']: ms.append((c['f'],False))
+        if c['e'] and (not c['f'] or c['e']['d']>c['f']['d']+1e-9): ms.append((c['e'],True))
+        mais=c['n']-len(ms)
+        for k,(v,est) in enumerate(ms):
+            add(nomes(v['xs'])+(': consideradas em sequência nesta estimativa, precisam de ' if est else ': em sequência precisam de ')+f"{_rp_f(v['nec'])} h para {_rp_f(sum((q1[x['i']] for x in v['xs']),0))} ha; a janela tem {_rp_f(v['t'])} h"
+                +((' (e mais '+str(mais)+(' combinações que também não cabem)' if mais>1 else ' combinação que também não cabe)')) if k==len(ms)-1 and mais>0 else ''))
     grp={}
     for x in it:
         if x['q']>1e-12: grp.setdefault(raiz(x['i']),[]).append(x)
+    UI=_UF()   # sequência de fato (sequência declarada, mesma máquina, grupo de 1 unidade)
+    for a,x in enumerate(cand):
+        for y in cand[a+1:]:
+            if JM[x['i']][y['i']]: UI.une(x['i'],y['i'])
     decorrido=0; troca_t=0
     for g in sorted(grp):
         xs=grp[g]; soma=0; mn=min(x['troca'] for x in xs)
@@ -487,7 +615,7 @@ def repartir(Q,cfgs,pools=None):
         for x in xs:
             x['h']=x['q']/x['r']; tr=0
             if len(xs)>1 and x is not ini: tr=x['troca']
-            x['ht']=x['h']+tr; troca_t+=tr; x['emSeq']=len(xs)>1; x['grupo']=g; soma+=x['ht']
+            x['ht']=x['h']+tr; troca_t+=tr; x['emSeq']=len(xs)>1; x['seqEst']=x['emSeq'] and not any(y is not x and UI.raiz(y['i'])==UI.raiz(x['i']) for y in xs); x['grupo']=g; soma+=x['ht']
         if soma>decorrido: decorrido=soma
     for x in it:
         if x['q']<=1e-12: x['grupo']=raiz(x['i'])
@@ -503,7 +631,7 @@ def repartir(Q,cfgs,pools=None):
     alocado=sum((x['q'] for x in it),0)
     if saldo<1e-9: saldo=0
     pend=Q>1e-12 and alocado<=1e-12
-    causa='' if not pend else ('sem conjunto' if cz.get('cfg') else ('sem rendimento' if cz.get('rend') else ('sem horas na janela' if (cz.get('jan') or cz.get('seq')) else ('sem recurso na fazenda' if cz.get('rec') else 'partes fixas abaixo de 100 %'))))
+    causa='' if not pend else ('sem conjunto' if cz.get('cfg') else ('sem rendimento' if cz.get('rend') else (('troca reservada ocupa a janela' if cz.get('troca') else 'sem horas na janela') if (cz.get('jan') or cz.get('seq')) else ('sem recurso na fazenda' if cz.get('rec') else 'partes fixas abaixo de 100 %'))))
     # 3) saldo em horas pelas premissas do plano; necessário = atendido + saldo (ha e horas-conjunto); decorrido necessário por sequência inteira
     sem_h=0; fq=[0]*len(it)
     for x in fx:
@@ -529,7 +657,7 @@ def repartir(Q,cfgs,pools=None):
     nec=dict(area=Q,hconj=None if sem_nada else nhc,decorrido=None if sem_nada else nec_dec,semHoras=sem_h)
     falta=dict(area=saldo,hconj=None if sem_nada else fhc,decorrido=None if sem_nada else max(0,nec_dec-(0 if pend else decorrido)),semHoras=sem_h)
     return dict(Q=Q,alocado=alocado,saldo=saldo,pendente=pend,causa=causa,hconj=None if pend else hc,decorrido=None if pend else decorrido,troca=troca_t,custo=custo,custoOk=custo_ok,
-                custoHa=(custo/alocado) if (custo_ok and alocado>1e-12) else None,diesel=diesel,dieselOk=diesel_ok,hh=hh,conflito=conflito,deficit=deficit,nec=nec,falta=falta,motivos=mot,itens=it)
+                custoHa=(custo/alocado) if (custo_ok and alocado>1e-12) else None,diesel=diesel,dieselOk=diesel_ok,hh=hh,conflito=conflito,conflitoEst=conflito and not cf_f,deficit=deficit,nec=nec,falta=falta,motivos=mot,itens=it)
 # <<< REPARTIR
 def plano_op(safra):
     """Espelho dos totais da etapa 4 (Confira o plano operacional) com os dados iniciais: área, horas-conjunto, custo de operação,

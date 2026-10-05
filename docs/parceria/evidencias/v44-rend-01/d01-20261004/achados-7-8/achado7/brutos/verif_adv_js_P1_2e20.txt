@@ -1,0 +1,71 @@
+{"nome": "trator×implemento 5x6 jan 10", "violacoes": [], "theta": 1.0000000000000002, "motor": "V3b"}
+{"nome": "trator×implemento 6x5 jan 10", "violacoes": [], "theta": 0.9999999999999999, "motor": "V3b"}
+{"nome": "trator×implemento 6x6 jan 10", "violacoes": [], "theta": 1.0, "motor": "V3b"}
+{"nome": "trator×implemento 5x7 jan 10", "violacoes": [], "theta": 0.9999999999999997, "motor": "V3b"}
+{"nome": "trator×implemento 7x5 jan 10", "violacoes": [], "theta": 0.9999999999999998, "motor": "V3b"}
+{"nome": "trator×implemento 4x8 jan 10", "violacoes": [], "theta": 1.0000000000000002, "motor": "V3b"}
+{"nome": "trator×implemento 8x4 jan 10", "violacoes": [], "theta": 1.0000000000000002, "motor": "V3b"}
+{"nome": "trator×implemento 5x6 janelas variadas (todas finitas)", "violacoes": [], "theta": 0.9999999999999998, "motor": "V3b"}
+{"nome": "trator×implemento 6x6 janelas variadas (todas finitas)", "violacoes": ["V3 cronograma inexistente: θ*=0.995218619 (V3b)"], "theta": 0.9952186186610867, "motor": "V3b"}
+{"nome": "anel C20", "violacoes": [], "theta": 1.0, "motor": "V3b"}
+{"nome": "anel C24", "violacoes": [], "theta": 1.0, "motor": "V3b"}
+{"nome": "anel C30", "violacoes": [], "theta": 1.0, "motor": "V3b"}
+{"nome": "anel C21", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "anel C25", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "anel C29", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "complemento do anel C20", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "complemento do anel C24", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "complemento do anel C30", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "complemento do anel C21", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "complemento do anel C25", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "multipartido completo 5×5×5×5×5×5", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "multipartido completo 6×6×6×6×6", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "multipartido completo 3×3×3×3×3×3×3×3×3×3", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "multipartido completo 10×10×10", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "multipartido completo 2×2×2×2×2×2×2×2×2×2×2×2×2×2×2", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "cadeia P20", "violacoes": [], "theta": 1.0, "motor": "V3b"}
+{"nome": "cadeia P30", "violacoes": [], "theta": 1.0, "motor": "V3b"}
+{"nome": "malha 4x5", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "malha 5x5", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "malha 5x6", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "aleatório G(20,0.1)", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "aleatório G(20,0.2)", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "aleatório G(20,0.3)", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "aleatório G(20,0.5)", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "aleatório G(20,0.7)", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "aleatório G(20,0.9)", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "aleatório G(25,0.1)", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "aleatório G(25,0.2)", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "aleatório G(25,0.3)", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "aleatório G(25,0.5)", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "aleatório G(25,0.7)", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "aleatório G(25,0.9)", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "aleatório G(30,0.1)", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "aleatório G(30,0.2)", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "aleatório G(30,0.3)", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "aleatório G(30,0.5)", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "aleatório G(30,0.7)", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "aleatório G(30,0.9)", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "bipartido aleatório 15+15 p=0.2", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "bipartido aleatório 15+15 p=0.4", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "hipercubo Q5", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "perf_casos: trios10x3_jan_distintas (3^10 cliques: teto de cliques)", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "perf_casos: trios7x3+9 (2187 cliques de 16, jan distintas)", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "perf_casos: pares11x2+8 (2048 cliques de 19, jan distintas)", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "perf_casos: pares12x2+6 (4096 cliques de 18, jan distintas)", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "perf_casos: pares12x2+6 com partes fixas e troca", "violacoes": [], "theta": 1.9310344827586208, "motor": "V3e"}
+{"nome": "perf_casos: pares13x2+4 (8192 cliques: teto)", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "perf_casos: trios8x3+6 (6561 cliques: teto)", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "perf_casos: quartetos5x4+10 (1024 cliques de 15)", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "perf_casos: trios9x3+3 jan aleatórias", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "perf_casos: trator×implemento 5×6 janelas variadas", "violacoes": ["V3 cronograma inexistente: θ*=0.924731183 (V3b)"], "theta": 0.9247311827956989, "motor": "V3b"}
+{"nome": "perf_casos: trator×implemento 5×6 jan distintas + 4 operadores (serializa)", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "perf_casos: cadeia 30 jan distintas", "violacoes": [], "theta": 1.0, "motor": "V3b"}
+{"nome": "perf_casos: cadeia 30 + operadores 10", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "perf_casos: sequência única 30 jan distintas e troca", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "perf_casos: aleatório n=30 p=0.5", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "perf_casos: aleatório n=30 p=0.7", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "perf_casos: aleatório n=30 p=0.85", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "perf_casos: aleatório n=30 p=0.95", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "perf_casos: pares12x2 (24 cfg, 4096 cliques de 12)", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}
+{"nome": "perf_casos: pares10x2+4 (24 cfg, 1024 cliques de 14) partes fixas", "violacoes": [], "theta": null, "motor": "não aplicável (>16 sem estrutura de bipartido)"}

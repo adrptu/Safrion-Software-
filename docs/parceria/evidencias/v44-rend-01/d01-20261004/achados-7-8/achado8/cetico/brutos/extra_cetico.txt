@@ -1,0 +1,12 @@
+idx 1750 conflito P0/P1/P2: [True, True, True] alocado: [226.0106, 227.5, 226.0106]
+idx 2462 conflito P0/P1/P2: [True, True, True] alocado: [211.6667, 211.6667, 211.6667]
+idx 3327 conflito P0/P1/P2: [True, True, True] alocado: [226.0421, 235.3958, 198.4558]
+idx 4617 conflito P0/P1/P2: [True, True, True] alocado: [193.929, 202.1345, 196.25]
+idx 4934 conflito P0/P1/P2: [True, True, True] alocado: [115.0, 115.0, 115.0]
+idx 1582 P1 perda: 125.66666666666667 -> 114.0 = 11.666666666666666 ha 0.09283819628647215
+idx 449 [('P0', 83.1818), ('P1', 105.0), ('P2', 83.1818)]
+idx 4422 [('P0', 61.0714), ('P1', 52.5), ('P2', 61.0714)]
+idx 113 [('P0', 151.6667), ('P1', 151.6667), ('P2', 170.0216)]
+idx 5549 [('P0', 187.5), ('P1', 187.5), ('P2', 154.1667)]
+2462 h [Fraction(25, 1), Fraction(50, 3), Fraction(20, 1), Fraction(0, 1), Fraction(250, 3), Fraction(50, 3)]  necessidade em [20,100] de c1+c4 = 290/3 > 80 ? True
+4934 h [Fraction(50, 1), Fraction(10, 1), Fraction(10, 1), Fraction(5, 1), Fraction(40, 1)]  c2 ocupa [0,10], c3 [0,5] -> c1 só em [10,20]; c4 no máx 5 h em [0,20]; em [20,100] c0+c4 >= 85 > 80 ? True

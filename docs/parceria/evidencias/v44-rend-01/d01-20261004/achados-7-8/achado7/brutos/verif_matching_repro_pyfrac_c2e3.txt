@@ -1,0 +1,7 @@
+{"nome": "5x6 partes fixas, todas 10 h", "configs_com_prazo": 30, "emparelhamentos": 4050, "segmentos": 1, "theta": 4.239999999999999, "executavel": true}
+{"nome": "6x5 partes fixas, todas 10 h", "configs_com_prazo": 30, "emparelhamentos": 4050, "segmentos": 1, "theta": 4.999999999999999, "executavel": true}
+{"nome": "5x6 T4+P5 sem janela (prestador)", "configs_com_prazo": 29, "emparelhamentos": 3549, "segmentos": 1, "theta": 1.0, "executavel": true}
+{"nome": "caso 9: 5x6 janelas variadas (perf_casos #9)", "configs_com_prazo": 28, "emparelhamentos": 3121, "segmentos": 8, "theta": 0.9247311827956991, "executavel": false}
+{"nome": "controle 4x5 partes fixas, todas 10 h", "configs_com_prazo": 20, "emparelhamentos": 500, "segmentos": 1, "theta": 0.9999999999999999, "executavel": true}
+{"nome": "controle 4x6 partes fixas, todas 10 h", "configs_com_prazo": 24, "emparelhamentos": 1044, "segmentos": 1, "theta": 0.9999999999999993, "executavel": true}
+{"nome": "controle 5x5 partes fixas, todas 10 h", "configs_com_prazo": 25, "emparelhamentos": 1545, "segmentos": 1, "theta": 0.9999999999999998, "executavel": true}

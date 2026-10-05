@@ -1,0 +1,8 @@
+IGUAL trator×implemento 5x6 jan 10 | JS ms [79.79] | Py ms [1178.14]
+IGUAL trator×implemento 6x6 jan 10 | JS ms [524.96] | Py ms [9374.78]
+IGUAL trator×implemento 7x5 jan 10 | JS ms [269.41] | Py ms [5113.55]
+IGUAL trator×implemento 6x6 janelas variadas (todas finitas) | JS ms [492.71] | Py ms [8990.93]
+IGUAL hipercubo Q5 | JS ms [117.2] | Py ms [1504.42]
+IGUAL extra 7x6 partes fixas, todas 10 h | JS ms [4248.97, 4019.5, 3952.8] | Py ms [57963.75]
+IGUAL extra 10x10 partes fixas, todas 10 h | JS ms [12182.25, 12087.12, 11664.96] | Py ms [176756.72]
+# 7 casos, 0 com diferença

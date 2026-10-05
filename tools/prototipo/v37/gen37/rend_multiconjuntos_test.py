@@ -216,7 +216,7 @@ try:
         chk('B1a janela 0 h (rendimento 40 ha/h válido): o aviso diz "sem horas na janela · pendente", não "sem rendimento"',
             bool(oc) and 'sem horas na janela · pendente' in oc[0] and 'sem rendimento' not in oc[0] and 'ocorrências pendentes (sem horas na janela)' in tk and 'sem rendimento' not in tk,[oc,tk])
         chk('B1b linhas de operação e atividade com todas as ocorrências pendentes não mostram 0,0 h nem R$ 0',
-            bool(op) and op[4] not in ('0','0,0') and op[6] not in ('0','0,0') and '3 sem horas na janela · pendente' in op[0],op)
+            bool(op) and op[4] not in ('0','0,0') and op[6] not in ('0','0,0') and 'sem horas na janela · 3 pendentes' in op[0],op)
         etapa(5); t5=J("document.querySelector('main').innerText") or ''; av=next((l for l in t5.split('\n') if 'A demanda não inclui' in l),'')
         c.shot(os.path.join(PROBE,'rend_bordas_janela0_etapa5.png')); print('etapa 5:',av)
         chk('B1c etapa 5 avisa que a demanda não inclui a área sem conjunto nem as ocorrências pendentes','610 ha sem conjunto' in av and '3 ocorrências pendentes' in av,av)

@@ -1,0 +1,7 @@
+{"nome": "5x6 partes fixas, todas 10 h", "violacoes": [], "theta": 4.24, "motor": "V3b"}
+{"nome": "6x5 partes fixas, todas 10 h", "violacoes": [], "theta": 4.999999999999999, "motor": "V3b"}
+{"nome": "5x6 T4+P5 sem janela (prestador)", "violacoes": [], "theta": 1.0, "motor": "V3b"}
+{"nome": "caso 9: 5x6 janelas variadas (perf_casos #9)", "violacoes": ["V3 cronograma inexistente: θ*=0.924731183 (V3b)"], "theta": 0.9247311827956989, "motor": "V3b"}
+{"nome": "controle 4x5 partes fixas, todas 10 h", "violacoes": [], "theta": 1.0, "motor": "V3b"}
+{"nome": "controle 4x6 partes fixas, todas 10 h", "violacoes": [], "theta": 1.0000000000000002, "motor": "V3b"}
+{"nome": "controle 5x5 partes fixas, todas 10 h", "violacoes": [], "theta": 1.0, "motor": "V3b"}

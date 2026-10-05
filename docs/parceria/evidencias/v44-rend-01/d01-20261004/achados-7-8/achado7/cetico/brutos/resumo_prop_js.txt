@@ -1,0 +1,133 @@
+== P0
+  5x6 partes fixas, todas 10 h               20.0 290 CONS 60
+  6x5 partes fixas, todas 10 h               20.0 290 CONS 50
+  5x6 T4+P5 sem janela (prestador)           96.73 50 cliq 46
+  caso 9: 5x6 janelas variadas (perf_casos # 3000 255 cliq 35
+  controle 4x5 partes fixas, todas 10 h      66.25 65 cliq 4
+  controle 4x6 partes fixas, todas 10 h      66.32 65.0 cliq 8
+  controle 5x5 partes fixas, todas 10 h      84.76 50 cliq 20
+  extra 6x6 partes fixas, todas 10 h         20.0 290 CONS 73
+  extra 5x7 partes fixas, todas 10 h         20.0 290.0 CONS 59
+  extra 7x5 partes fixas, todas 10 h         20.0 290.0 CONS 55
+  extra 6x7 partes fixas, todas 10 h         20.0 290.0 CONS 70
+  extra 7x6 partes fixas, todas 10 h         20.0 290.0 CONS 74
+  extra 7x7 partes fixas, todas 10 h         20.0 290.0 CONS 88
+  extra 8x8 partes fixas, todas 10 h         20.0 290 CONS 113
+  extra 10x10 partes fixas, todas 10 h       20.0 290 CONS 180
+  extra 6x6 T5+P5 sem janela                 36.67 281.67 CONS 66
+  contraexemplo 7 configurações, prazos 2/3/ 15.5 0 cliq 2
+  contraexemplo 7 configurações, sem %, Q=15 15.5 2.43 cliq 1
+== P1_2e18
+  5x6 partes fixas, todas 10 h               84.8 50 cliq 66
+  6x5 partes fixas, todas 10 h               100.0 50 cliq 69
+  5x6 T4+P5 sem janela (prestador)           96.73 50 cliq 47
+  caso 9: 5x6 janelas variadas (perf_casos # 3000 255 cliq 38
+  controle 4x5 partes fixas, todas 10 h      66.25 65 cliq 4
+  controle 4x6 partes fixas, todas 10 h      66.32 65.0 cliq 16
+  controle 5x5 partes fixas, todas 10 h      84.76 50 cliq 28
+  extra 6x6 partes fixas, todas 10 h         20.0 290 CONS 246
+  extra 5x7 partes fixas, todas 10 h         20.0 290.0 CONS 215
+  extra 7x5 partes fixas, todas 10 h         20.0 290.0 CONS 207
+  extra 6x7 partes fixas, todas 10 h         20.0 290.0 CONS 284
+  extra 7x6 partes fixas, todas 10 h         20.0 290.0 CONS 302
+  extra 7x7 partes fixas, todas 10 h         20.0 290.0 CONS 339
+  extra 8x8 partes fixas, todas 10 h         20.0 290 CONS 473
+  extra 10x10 partes fixas, todas 10 h       20.0 290 CONS 726
+  extra 6x6 T5+P5 sem janela                 36.67 281.67 CONS 277
+  contraexemplo 7 configurações, prazos 2/3/ 15.5 0 cliq 1
+  contraexemplo 7 configurações, sem %, Q=15 15.5 2.43 cliq 1
+== P1_2e20
+  5x6 partes fixas, todas 10 h               84.8 50 cliq 66
+  6x5 partes fixas, todas 10 h               100.0 50 cliq 68
+  5x6 T4+P5 sem janela (prestador)           96.73 50 cliq 47
+  caso 9: 5x6 janelas variadas (perf_casos # 3000 255 cliq 41
+  controle 4x5 partes fixas, todas 10 h      66.25 65 cliq 3
+  controle 4x6 partes fixas, todas 10 h      66.32 65.0 cliq 9
+  controle 5x5 partes fixas, todas 10 h      84.76 50 cliq 17
+  extra 6x6 partes fixas, todas 10 h         104.62 40.0 cliq 545
+  extra 5x7 partes fixas, todas 10 h         85.6 50.0 cliq 225
+  extra 7x5 partes fixas, todas 10 h         100.0 50.0 cliq 303
+  extra 6x7 partes fixas, todas 10 h         20.0 290.0 CONS 1128
+  extra 7x6 partes fixas, todas 10 h         20.0 290.0 CONS 1199
+  extra 7x7 partes fixas, todas 10 h         20.0 290.0 CONS 1404
+  extra 8x8 partes fixas, todas 10 h         20.0 290 CONS 1817
+  extra 10x10 partes fixas, todas 10 h       20.0 290 CONS 2885
+  extra 6x6 T5+P5 sem janela                 102.6 40.0 cliq 426
+  contraexemplo 7 configurações, prazos 2/3/ 15.5 0 cliq 1
+  contraexemplo 7 configurações, sem %, Q=15 15.5 2.43 cliq 1
+== P1_2e22
+  5x6 partes fixas, todas 10 h               84.8 50 cliq 76
+  6x5 partes fixas, todas 10 h               100.0 50 cliq 70
+  5x6 T4+P5 sem janela (prestador)           96.73 50 cliq 46
+  caso 9: 5x6 janelas variadas (perf_casos # 3000 255 cliq 36
+  controle 4x5 partes fixas, todas 10 h      66.25 65 cliq 4
+  controle 4x6 partes fixas, todas 10 h      66.32 65.0 cliq 9
+  controle 5x5 partes fixas, todas 10 h      84.76 50 cliq 18
+  extra 6x6 partes fixas, todas 10 h         104.62 40.0 cliq 518
+  extra 5x7 partes fixas, todas 10 h         85.6 50.0 cliq 235
+  extra 7x5 partes fixas, todas 10 h         100.0 50.0 cliq 258
+  extra 6x7 partes fixas, todas 10 h         105.38 40.0 cliq 2863
+  extra 7x6 partes fixas, todas 10 h         120.0 40.0 cliq 3547
+  extra 7x7 partes fixas, todas 10 h         20.0 290.0 CONS 5716
+  extra 8x8 partes fixas, todas 10 h         20.0 290 CONS 7461
+  extra 10x10 partes fixas, todas 10 h       20.0 290 CONS 11519
+  extra 6x6 T5+P5 sem janela                 102.6 40.0 cliq 392
+  contraexemplo 7 configurações, prazos 2/3/ 15.5 0 cliq 1
+  contraexemplo 7 configurações, sem %, Q=15 15.5 2.43 cliq 1
+== P2
+  5x6 partes fixas, todas 10 h               84.8 50 cliq 4
+  6x5 partes fixas, todas 10 h               100.0 50 cliq 3
+  5x6 T4+P5 sem janela (prestador)           96.73 50 cliq 3
+  caso 9: 5x6 janelas variadas (perf_casos # 3000 255 cliq 2
+  controle 4x5 partes fixas, todas 10 h      66.25 65 cliq 1
+  controle 4x6 partes fixas, todas 10 h      66.32 65.0 cliq 1
+  controle 5x5 partes fixas, todas 10 h      84.76 50 cliq 1
+  extra 6x6 partes fixas, todas 10 h         104.62 40.0 cliq 4
+  extra 5x7 partes fixas, todas 10 h         85.6 50.0 cliq 3
+  extra 7x5 partes fixas, todas 10 h         100.0 50.0 cliq 2
+  extra 6x7 partes fixas, todas 10 h         105.38 40.0 cliq 2
+  extra 7x6 partes fixas, todas 10 h         120.0 40.0 cliq 2
+  extra 7x7 partes fixas, todas 10 h         125.24 32.86 cliq 3
+  extra 8x8 partes fixas, todas 10 h         145.87 27.5 cliq 4
+  extra 10x10 partes fixas, todas 10 h       187.14 20 cliq 10
+  extra 6x6 T5+P5 sem janela                 102.6 40.0 cliq 3
+  contraexemplo 7 configurações, prazos 2/3/ 15.5 0 cliq 1
+  contraexemplo 7 configurações, sem %, Q=15 15.5 2.43 cliq 1
+== P2u
+  5x6 partes fixas, todas 10 h               84.8 50 cliq 5
+  6x5 partes fixas, todas 10 h               100.0 50 cliq 4
+  5x6 T4+P5 sem janela (prestador)           96.73 50 cliq 3
+  caso 9: 5x6 janelas variadas (perf_casos # 3000 255 cliq 45
+  controle 4x5 partes fixas, todas 10 h      66.25 65 cliq 1
+  controle 4x6 partes fixas, todas 10 h      66.32 65.0 cliq 2
+  controle 5x5 partes fixas, todas 10 h      84.76 50 cliq 2
+  extra 6x6 partes fixas, todas 10 h         104.62 40.0 cliq 10
+  extra 5x7 partes fixas, todas 10 h         85.6 50.0 cliq 3
+  extra 7x5 partes fixas, todas 10 h         100.0 50.0 cliq 3
+  extra 6x7 partes fixas, todas 10 h         105.38 40.0 cliq 2
+  extra 7x6 partes fixas, todas 10 h         120.0 40.0 cliq 2
+  extra 7x7 partes fixas, todas 10 h         125.24 32.86 cliq 3
+  extra 8x8 partes fixas, todas 10 h         145.87 27.5 cliq 5
+  extra 10x10 partes fixas, todas 10 h       187.14 20 cliq 14
+  extra 6x6 T5+P5 sem janela                 102.6 40.0 cliq 3
+  contraexemplo 7 configurações, prazos 2/3/ 15.5 0 cliq 1
+  contraexemplo 7 configurações, sem %, Q=15 15.5 2.43 cliq 1
+== cliq
+  5x6 partes fixas, todas 10 h               84.8 50 cliq 3
+  6x5 partes fixas, todas 10 h               100.0 50 cliq 2
+  5x6 T4+P5 sem janela (prestador)           96.73 50 cliq 3
+  caso 9: 5x6 janelas variadas (perf_casos # 3000 255 cliq 3
+  controle 4x5 partes fixas, todas 10 h      66.25 65 cliq 1
+  controle 4x6 partes fixas, todas 10 h      66.32 65.0 cliq 1
+  controle 5x5 partes fixas, todas 10 h      84.76 50 cliq 1
+  extra 6x6 partes fixas, todas 10 h         104.62 40.0 cliq 4
+  extra 5x7 partes fixas, todas 10 h         85.6 50.0 cliq 3
+  extra 7x5 partes fixas, todas 10 h         100.0 50.0 cliq 2
+  extra 6x7 partes fixas, todas 10 h         105.38 40.0 cliq 3
+  extra 7x6 partes fixas, todas 10 h         120.0 40.0 cliq 2
+  extra 7x7 partes fixas, todas 10 h         125.24 32.86 cliq 3
+  extra 8x8 partes fixas, todas 10 h         145.87 27.5 cliq 5
+  extra 10x10 partes fixas, todas 10 h       187.14 20 cliq 11
+  extra 6x6 T5+P5 sem janela                 102.6 40.0 cliq 3
+  contraexemplo 7 configurações, prazos 2/3/ 15.5 0 cliq 1
+  contraexemplo 7 configurações, sem %, Q=15 15.5 2.43 cliq 1

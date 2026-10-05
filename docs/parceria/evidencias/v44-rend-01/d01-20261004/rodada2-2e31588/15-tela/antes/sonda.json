@@ -1,0 +1,196 @@
+{
+ "A": [
+  "ok",
+  "Rendimento de Controle de ácaro · Trator 02 MF 7719 + Pulverizador PJ-3030 36 m: 3,60 ha/h · R$ 50,00/ha. Plano operacional e recursos recalculados."
+ ],
+ "abre B prestador 12 m": "ok",
+ "B prestador 12 m": [
+  "ok",
+  "Configuração incluída em Controle de ácaro · B prestador 12 m: 7,20 ha/h. A área de Controle de ácaro agora se divide entre 2 configurações. Plano operacional e recursos recalculados."
+ ],
+ "abre C prestador 6 m": "ok",
+ "C prestador 6 m": [
+  "ok",
+  "Configuração incluída em Controle de ácaro · C prestador 6 m: 3,60 ha/h. A área de Controle de ácaro agora se divide entre 3 configurações. Plano operacional e recursos recalculados."
+ ],
+ "abre D prestador 6 m": "ok",
+ "D prestador 6 m": [
+  "ok",
+  "Configuração incluída em Controle de ácaro · D prestador 6 m: 3,60 ha/h. A área de Controle de ácaro agora se divide entre 4 configurações. Plano operacional e recursos recalculados."
+ ],
+ "A seq": [
+  "ok",
+  "ok",
+  [
+   "ok",
+   "Rendimento de Controle de ácaro · Trator 02 MF 7719 + Pulverizador PJ-3030 36 m: 3,60 ha/h · R$ 50,00/ha. Plano operacional e recursos recalculados."
+  ]
+ ],
+ "seq_T7": [
+  "T7 · Mamão Formosa Formosa 4 configurações sequência declarada: dividem trator, implemento ou operador",
+  "15/10/2026",
+  "out/26",
+  "42",
+  "9,3",
+  "9,3",
+  "2.520",
+  "4.536",
+  "7.056",
+  "168,00",
+  "131"
+ ],
+ "seq_cfgs": [
+  [
+   "Trator 02 MF 7719 + Pulverizador PJ-3030 36 m em sequência",
+   "pelo rendimento · janela 3 h",
+   "",
+   "8,4",
+   "2,3",
+   "2,3",
+   "420",
+   "—",
+   "—",
+   "50,00",
+   "33"
+  ],
+  [
+   "B prestador 12 m em sequência",
+   "pelo rendimento · janela 3 h",
+   "",
+   "16,8",
+   "2,3",
+   "2,3",
+   "700",
+   "—",
+   "—",
+   "41,67",
+   "33"
+  ],
+  [
+   "C prestador 6 m em sequência",
+   "pelo rendimento · janela 3 h",
+   "",
+   "8,4",
+   "2,3",
+   "2,3",
+   "700",
+   "—",
+   "—",
+   "83,33",
+   "33"
+  ],
+  [
+   "D prestador 6 m em sequência",
+   "pelo rendimento · janela 100 h",
+   "",
+   "8,4",
+   "2,3",
+   "2,3",
+   "700",
+   "—",
+   "—",
+   "83,33",
+   "33"
+  ]
+ ],
+ "par t=>t.indexOf('prestador')<0": [
+  "ok",
+  "ok",
+  [
+   "ok",
+   "Rendimento de Controle de ácaro · Trator 02 MF 7719 + Pulverizador PJ-3030 36 m: 3,60 ha/h · R$ 50,00/ha. Plano operacional e recursos recalculados."
+  ]
+ ],
+ "par t=>t.indexOf('B prestador')>=0": [
+  "ok",
+  "ok",
+  [
+   "ok",
+   "Rendimento de Controle de ácaro · B prestador 12 m: 7,20 ha/h · R$ 41,67/ha. Plano operacional e recursos recalculados."
+  ]
+ ],
+ "par t=>t.indexOf('C prestador')>=0": [
+  "ok",
+  "ok",
+  [
+   "ok",
+   "Rendimento de Controle de ácaro · C prestador 6 m: 3,60 ha/h · R$ 83,33/ha. Plano operacional e recursos recalculados."
+  ]
+ ],
+ "par t=>t.indexOf('D prestador')>=0": [
+  "ok",
+  "ok",
+  [
+   "ok",
+   "Rendimento de Controle de ácaro · D prestador 6 m: 3,60 ha/h · R$ 83,33/ha. Plano operacional e recursos recalculados."
+  ]
+ ],
+ "par_T7": [
+  "T7 · Mamão Formosa Formosa 4 configurações",
+  "15/10/2026",
+  "out/26",
+  "42",
+  "9,3",
+  "2,3",
+  "2.520",
+  "4.536",
+  "7.056",
+  "168,00",
+  "131"
+ ],
+ "par_cfgs": [
+  [
+   "Trator 02 MF 7719 + Pulverizador PJ-3030 36 m",
+   "pelo rendimento · janela 3 h",
+   "",
+   "8,4",
+   "2,3",
+   "2,3",
+   "420",
+   "—",
+   "—",
+   "50,00",
+   "33"
+  ],
+  [
+   "B prestador 12 m",
+   "pelo rendimento · janela 3 h",
+   "",
+   "16,8",
+   "2,3",
+   "2,3",
+   "700",
+   "—",
+   "—",
+   "41,67",
+   "33"
+  ],
+  [
+   "C prestador 6 m",
+   "pelo rendimento · janela 3 h",
+   "",
+   "8,4",
+   "2,3",
+   "2,3",
+   "700",
+   "—",
+   "—",
+   "83,33",
+   "33"
+  ],
+  [
+   "D prestador 6 m",
+   "pelo rendimento · janela 100 h",
+   "",
+   "8,4",
+   "2,3",
+   "2,3",
+   "700",
+   "—",
+   "—",
+   "83,33",
+   "33"
+  ]
+ ],
+ "erros_js": []
+}

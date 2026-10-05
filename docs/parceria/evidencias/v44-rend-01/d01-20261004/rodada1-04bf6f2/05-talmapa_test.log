@@ -1,0 +1,37 @@
+$ CDP_GL=1 flock /tmp/cdp9333.lock python3 talmapa_test.py /tmp/evid12/capturas
+OK  1 IN-04 na Lagoa Grande: mapa MapLibre pronto, sem erro de JavaScript · [True, '', '']
+OK  2 rótulo visível "Demonstração sintética · pivôs, imagem e índices fictícios"; mapa rotulado; sem "imagem real", "Sentinel-2 real" nem "KML do proprietário" · Talhão à O.S.
+Mapa
+Cadastros
+▸
+Agrícola
+▸
+Manutenção
+▸
+Suprimentos
+▸
+DEMONSTRAÇÃO · dados fictícios
+A
+Ana · Gestora
+Trocar perfil de demonstração ▾
+Fazenda
+Todas
+Lagoa Grande
+Santa Rita
+Boa Vista
+Mapa › Mapa
+Mapa da fazenda
+OS-0507 impedida · 3 a liberar
+Integrado
+Satélite
+Lavoura
+Pragas e doenças
+C
+OK  3 23 pivôs no mapa = dados_lagoa_fonte (id, ha, lon, lat) e 23 marcadores · [23, 23]
+OK  4 tmAneis: 23 contornos (círculos), nome "Pivô n", área ≈ ha (< 1 %) · [23, 0.0057961475684788185, [['PV01', 'Pivô 1', 30.09315289957621]]]
+OK  5 tmSobrepoe: quadrado de 200 m no centro do Pivô 5 acusa o Pivô 5; ao norte, fora da grade, nada · [['Pivô 5 (4,0 ha)'], []]
+OK  6 talhão novo desenhado fora dos pivôs: tmValida sem erro, grava LGT01 com a área; nome repetido e sobreposição são recusados; 24 contornos · [{}, {'id': 'LGT01', 'ver': 'v1', 'ha': 2.27, 'nome': 'Talhão sintético 1'}, {'nome': 'Já existe Pivô 1 na Lagoa Grande. Use outro nome.', 'geo': 'O contorno sobrepõe Pivô 5 (4,0 ha): ajuste o desenho para não contar a mesma área duas vezes.'}]
+OK  7 camada Satélite: legenda sintética; pixels (lagoa_s2.json): Pivô 12 com lavoura velha em 10/09 (NDVI > 0,5) e solo exposto em 25/09 (< 0,25); cena rotulada sintética · [{'ok': 1, 'n': 128508, 'a': 0.6358265179677842, 'b': 0.13803717472119248, 'proc': 'Demonstração sintética · imagem e índices gerados, sem dado real'}, 'Talhão à O.S.\nMapa\nCadastros\n▸\nAgrícola\n▸\nManutenção\n▸\nSuprimentos\n▸\nDEMONSTRAÇÃO · dados fictícios\nA\nAna · Gestora\nTrocar perfil de d
+OK  8 celular 390 px: mapa pronto, rótulo visível, sem rolagem horizontal, sem erro · [True, '']
+RESULTADO: 8/8
+[exit 0]

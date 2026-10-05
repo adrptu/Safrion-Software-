@@ -1,0 +1,2 @@
+P0nR23 × 2e31588 (Python exato, 6 000): q diferente em 6; atende mais 4; menos 2; inviáveis (tol 1e-9 h) 0
+P2nR23 × 2e31588 (Python exato, 6 000): q diferente em 465; atende mais 263; menos 180; inviáveis (tol 1e-9 h) 0

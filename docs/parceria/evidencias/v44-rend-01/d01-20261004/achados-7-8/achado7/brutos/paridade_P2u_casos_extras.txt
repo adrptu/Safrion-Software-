@@ -1,0 +1,10 @@
+IGUAL extra 6x6 partes fixas, todas 10 h | JS ms [9.42, 15.66, 4.89] | Py ms [7.89]
+IGUAL extra 5x7 partes fixas, todas 10 h | JS ms [2.76, 2.51, 2.83] | Py ms [8.28]
+IGUAL extra 7x5 partes fixas, todas 10 h | JS ms [2.1, 2.04, 2.53] | Py ms [7.13]
+IGUAL extra 6x7 partes fixas, todas 10 h | JS ms [2.26, 2.84, 2.79] | Py ms [12.28]
+IGUAL extra 7x6 partes fixas, todas 10 h | JS ms [3.16, 2.45, 2.59] | Py ms [10.76]
+IGUAL extra 7x7 partes fixas, todas 10 h | JS ms [2.75, 2.3, 2.64] | Py ms [13.4]
+IGUAL extra 8x8 partes fixas, todas 10 h | JS ms [4.53, 3.82, 3.95] | Py ms [22.42]
+IGUAL extra 10x10 partes fixas, todas 10 h | JS ms [21.83, 16.92, 14.48] | Py ms [54.28]
+IGUAL extra 6x6 T5+P5 sem janela | JS ms [4.35, 7.28, 2.86] | Py ms [7.55]
+# 9 casos, 0 com diferença

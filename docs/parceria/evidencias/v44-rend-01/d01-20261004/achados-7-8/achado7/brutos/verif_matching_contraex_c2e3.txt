@@ -1,0 +1,2 @@
+{"nome": "contraexemplo 7 configurações, prazos 2/3/10, partes fixas (rend 1)", "configs_com_prazo": 7, "emparelhamentos": 24, "segmentos": 3, "theta": 0.967741935483871, "executavel": false}
+{"nome": "contraexemplo 7 configurações, sem %, Q=15,5", "configs_com_prazo": 7, "emparelhamentos": 24, "segmentos": 3, "theta": 0.967741935483871, "executavel": false}
