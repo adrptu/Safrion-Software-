@@ -1,0 +1,22 @@
+$ CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdp9333.lock env CDP_GL=1 timeout 900 python3 ma_planos_test.py
+  ok  PM: sem erro de JS 
+  ok  menu: Planos de manutenção primeiro na Manutenção; MA-03 = Vencimentos e paradas
+  ok  biblioteca: 10 planos, 4 sem plano, PM-02 com 1 vencida (10, 4)
+  ok  vencimento: manVenc (JS) = vencimento() (Python) nos 14 ativo × serviço
+  ok  MA-03: sem erro de JS 
+  ok  MA-03: 2 vencidas · 3 sem ordem · primária Gerar 3 ordens preventivas ['VENCIDAS 2 Trator 03 · Plantadeira 24 linhas', 'SEM ORDEM 3 Trator 03 · Plantadeira 24 linhas · Bomba do Pivô 2'] ['Gerar 3 ordens preventivas']
+  ok  gerar: 3 ordens, sem duplicar no 2º clique · 3 ordens preventivas geradas: OM-0235, OM-0236, OM-0237 · em A liberar · OM-0235 com Falta
+  ok  MA-03: sem nada a gerar, a primária vira Ver ordens de manutenção
+  ok  MA-04: sem erro de JS 
+  ok  OM-0235: 5 tarefas do plano, Falta peça e liberar bloqueado
+  ok  OM-0234: conflito vira aviso; liberar mesmo assim reserva as peças
+  ok  concluir exige checklist respondido e leitura não menor que a última
+  ok  concluir fecha o ciclo: próxima em 3.245 h · OM-0234 em conferência · ciclo fechado: próxima Revisão 250 h em 3.245 h ≈ 15/10 (em dia).
+  ok  PM etapa 2: sem erro de JS 
+  ok  PM-01: Trator 02 Em dia, próxima 3.245 h, última 2.995 h pela OM-0234 · Trator 02 MF 7719 Revisão 250 h a cada 250 h ou 180 dias 2.995 h · 23/09 última 23/09 · 2.995 h · OM-0234 3.245 h ≈ 15/10 o horímetro vence 
+  ok  publicar v4: OM-0237 segue na v3 · PM-07 v4 publicada · OM-0237 segue na v3 · vencimentos recalculados pela v4.
+  ok  MA-05: sem erro de JS 
+  ok  MA-05: 3.530 h deixa o Trator 04 vencendo em breve; 48.100 km < 48.200 km pede confirmação · Lançamento AB-1043 registrado · Trator 04 · JD 5078E em 3.530 h · Revisão 250 h:
+  ok  MA-03: Trator 04 recalculado; comboio mantém 48.200 km com leitura a confirmar
+FALHAS: 0
+[exit 0]

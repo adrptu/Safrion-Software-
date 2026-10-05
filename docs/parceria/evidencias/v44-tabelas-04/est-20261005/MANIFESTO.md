@@ -1,0 +1,8 @@
+# TABELAS-FOCO-20261004 v2 (5983172395) · incremento 2c: Estoque (etapas 1–6) — evidência executada
+
+- Branch `claude/v44-tabelas-04`, base `cd9cdc3` (2b) + reserva `5b02912`; commit `e1091d5` (2c) e merge `cb3f3fe` do 2b corrigido (`e4727eb`, unidade junto do valor). A bateria rodou em `cb3f3fe` sem alteração local (`bateria/sujos.txt` vazio). Dados sintéticos.
+- `tabelas_est_test.log`: `python3 tabelas_est_test.py` → **34/34**. Por seção: colunas próprias, sem coluna Unidade; cada quantidade com a unidade junto; página sem rolagem e identificação à vista; NF 4533 "Prevista" (24/09/2026) e, depois de conferida, "Conferida em 23/09/2026" e validade 12/2026; filtro Na nota = "60.000 kg" → só NF 4501; ordem por Data da nota; árvore item › lote com Situação do lote; menu de filtro de Reservado com o texto das células; ordem por Validade (S58-0926 12/2026 antes de S58-0801 06/2027); movimentos de vários itens ordenados pela soma em L; 390 px nas 6 seções.
+- `est_fix1_test.log` **13/13** (falhava antes deste incremento: a faixa da etapa 2 esperava uma contagem fixa anterior à Lagoa sintética; agora confere com as linhas da grade; NF com lote vencido = "Vencido"; ação inteira pelo teclado). `est_fix2_test.log` **11/11**. `esttest.py_1/2/3` OK. `est_cenario_test.log` 15/15. `consumo_divergente_test.log` sem falha.
+- `capturas/`: as 6 seções a 1440 px e a etapa 4 a 390 px.
+- `bateria/` + `00-bateria.sh`: bateria completa, 102 passos (retomada uma vez depois do limite de tempo; passos concluídos reaproveitados). Comparada com a do 2b (`v44-tabelas-03/saf246-un-20261005/bateria`): nenhuma falha nova; `est_fix1_test` e `est_fix2_test` saíram dos vermelhos. Seguem os 11 vermelhos anteriores.
+- `SHA256SUMS`: hash de cada arquivo deste pacote.
