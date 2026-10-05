@@ -1,0 +1,30 @@
+$ CDP_GL=1 timeout 900 flock /tmp/cdp9333.lock python3 intest.py
+OK    sem erro de render 
+OK    scrollHeight <= 900 900
+FALHA barra vertical com as 9 funcionalidades 
+OK    barra horizontal com filtros e indicadores da funcionalidade 
+FALHA ferramentas sobre o mapa com nomes 
+FALHA rótulo no talhão (foreignObject): T1 em amarelo com a OS-0430 a liberar pelo agrônomo 
+Integrado T4: None None
+Solo V% T4: None None
+FALHA camada Solo ativa None
+Solo K T4: None None
+Solo P T1 None None
+Solo MO T1 None None
+FALHA filtro muda cor do talhão (P→MO no T1) None → None
+20–40 T2 None None
+P2 21/09 None 06/09 None
+FALHA Satélite: cena 06/09 deixa P2 hachurado (nuvem) None → None
+NDWI P1 None None
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/intest.py", line 45, in <module>
+    tap('T7'); time.sleep(.4)
+    ^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/intest.py", line 20, in <lambda>
+    tap=lambda t: J(f"(()=>{{const e=[...document.querySelectorAll('svg [role=button]')].find(x=>(x.getAttribute('aria-label')||'').startsWith('{t}:')); e.dispatchEvent(new MouseEvent('click',{{bubbles:true}})); return 'ok';}})()")
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/cdp.py", line 95, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught
+[exit 1]

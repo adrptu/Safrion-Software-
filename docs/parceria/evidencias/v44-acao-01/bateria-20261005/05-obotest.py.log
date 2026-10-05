@@ -1,0 +1,35 @@
+$ CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdp9333.lock env CDP_GL=1 timeout 900 python3 obotest.py
+OK  ON-01 ação de linha abre painel 
+OK  ON-01 painel confirma e passo avança Cultura e ciclo salvos
+OK  ON-01 CAR baixa pendência 
+OK  ON-01 linha abre consulta 
+OK  ON-01det falta inicial 
+OK  ON-01det 1ª validação Gravados: 9 talhões, 6 máquinas · permanecem na prévia, com erro localizado: 1 talhão com sobreposição a justificar; o estoque inicial (48 linhas) até definir a
+OK  ON-01det máquinas gravadas Gravado
+OK  ON-01det campo condicional unidade 
+OK  ON-01det erro some após salvar item, depósito, qtde · qtde em sc 50 kg
+OK  ON-01det falta recalculada 
+OK  ON-01det 2ª validação só grava o novo Gravados: 48 linhas de estoque (sc 50 kg) · permanecem na prévia, com erro localizado: 1 talhão com sobreposição a justi
+OK  ON-01det gravado abre em consulta 
+OK  BO-01 KPIs 
+OK  BO-01 nova versão abre form 
+OK  BO-01 nova versão salva Produtor Piloto v5 criada como proposta · hipótese rotulada · contratos vigentes intactos
+OK  BO-01 KPI hipóteses = 3 
+OK  BO-01 vigente abre em consulta 
+OK  BO-01 link v3 vai ao detalhe 
+OK  BO-02 KPI abertas 3 
+OK  BO-02 FAT-016 paga Conciliada: FAT-2209-016 paga (evt_1JKT5 validado) · evento repetido será ignorado por idempotência
+OK  BO-02 KPI abertas 2 · R$ 6,7 mil 
+OK  BO-02 reconciliar tudo sem duplicar Sem conciliação: FAT-2209-015: sem evento novo do provedor; tentativa 2 agendada para 25/09 · FAT-2209-017: aguarda a autenticação bancária 
+OK  BO-03 AJ-009 aprovado AJ-009 (Agro Bela Vista, +13 ha) aprovado após retorno à conciliação · vigência 
+OK  BO-03 segunda aprovação não duplica 
+OK  BO-03 linha abre origem com link 
+OK  BO-03det primário abre form do ajuste 
+OK  BO-03det mudança de base recusada Mudança de base não se resolve nesta medição: é decisão comercial pendente em Planos e con
+OK  BO-03det ajuste registrado Registrado · período conciliado
+OK  BO-03det selo acompanha 
+OK  BO-03det aprovado 
+OK  BO-04 origem da coorte 
+erros JS: nenhum
+31/31 verificações OK
+[exit 0]

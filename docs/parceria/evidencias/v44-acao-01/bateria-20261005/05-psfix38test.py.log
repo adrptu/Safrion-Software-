@@ -1,0 +1,18 @@
+$ CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdp9333.lock env CDP_GL=1 timeout 900 python3 psfix38test.py
+  ok  A · grupos em ordem de calendário (crescente) · ['Adjuvantes 25/09/2026', 'Herbicidas 25/09/2026', 'Fertilizantes 01/10/2026', 'Fungicidas 14/10/2026', 'Inoculantes 14/10/2026', 'Inseticidas 15/10/2026', 'Sementes 15/10/2026']
+  ok  A · insumos em ordem de calendário dentro de cada grupo · []
+  ok  A · Fungicida A (29/11/2026) antes de Fungicida C (20/01/2027)
+  ok  A · MAP e NPK (15/10) antes de Nitrato de potássio (01/11) e KCl (04/11)
+  ok  A · decrescente: grupos da data mais tardia para a mais cedo · [('2026', '10', '15'), ('2026', '10', '15'), ('2026', '10', '14')]
+  ok  A · busca pela data exibida encontra o insumo · ['Fungicidas 3 insumos 14/10/202', 'Fungicida C 20/01/2027 30,4 L ', 'Total 33.312,00']
+  ok  A · filtro de 1º uso oferece as datas como aparecem (dd/mm/aaaa) · ['01/10/2026 1', '01/11/2026 1', '04/11/2026 1', '09/11/2026 1']
+  ok  A · etapa 2: talhões por data de plantio (2019, 2025, 2026 …) · ['C1', 'T7', 'T1', 'T2', 'T4', 'T3', 'P1', 'P2']
+Traceback (most recent call last):
+  File "/home/user/sp-acao/tools/prototipo/v37/gen37/psfix38test.py", line 87, in <module>
+    ch = J(CUSTOH); chk('C · padrão: composição de todos os conjuntos soma o total', len(ch) == 8 and all(fecha(x['t']) for x in ch), [x['t'] for x in ch if not fecha(x['t'])])
+         ^^^^^^^^^
+  File "/home/user/sp-acao/tools/prototipo/v37/gen37/cdp.py", line 95, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught
+[exit 1]

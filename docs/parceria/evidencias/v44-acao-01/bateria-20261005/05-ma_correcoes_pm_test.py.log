@@ -1,0 +1,22 @@
+$ CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdp9333.lock env CDP_GL=1 timeout 900 python3 ma_correcoes_pm_test.py
+  ok  PM#PM-05: sem erro de JS 
+  ok  base programada: próxima em 20/09/2027 · OM-0235 em conferência · ciclo fechado: próxima Revisão pré-plantio em 20/09/2027 (em dia) · conta do vencimento programado.
+  ok  atalho Criar plano: Distribuidor fica Sem vínculo · Vincular · PM-11, hash #PM-11, sem plano 3 · Distribuidor 3 t Distribuidor · Galpão 1 · 640 h Apto Livre Não elegível Sem vínculo Vincu
+  ok  vincular: leitura negativa recusada no campo
+  ok  vincular: leitura 600 aceita · Distribuidor 3 t vinculado ao PM-11 · os vencimentos começam quando o plano for 
+  ok  dois planos, mesmo serviço: aviso ao criar e vínculo recusado · nto AB-1042
+Data da última execução
+Leitura na última execução
+h
+Sem histórico: usar hoje e a leitura atual (marco estimado)
+Cancelar
+Salvar
+  ok  inativar com vencida pede confirmação · PM-02 tem Trator 03 · Revisão 250 h vencida. Inativar tira o plano dos vencimentos.
+Inativar mesmo a
+  ok  F5 reabre o plano: hash #PM-04 · PM-04 · Pulverizador Uniport 3030 · revisões
+  ok  PM-04: sem candidatos, sem botão Vincular ativo
+  ok  painel do serviço: Tab preso no painel (True) e Esc fora fecha
+  ok  editar plano: nome salvo · PM-04 salvo · Pulverizador PJ-3030.
+  ok  PM fim: sem erro de JS 
+FALHAS: 0
+[exit 0]
