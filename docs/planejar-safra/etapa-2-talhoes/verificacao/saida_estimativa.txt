@@ -1,0 +1,50 @@
+# R-04 (d) · candidatos: ciclo da cultivar × última atividade dos planos publicados da cultura
+   c4  T4    58 W  plantio 20/10/2026 | ciclo 15/02/2027 | planos {'SOJA-AT': '15/02/2027', 'SOJA-PD': '12/02/2027'} → estimado 15/02/2027 | núcleo 08/02/2027 | P 31/08/2027
+   c5  T3    62 X  plantio 22/10/2026 | ciclo 11/02/2027 | planos {'SOJA-AT': '17/02/2027', 'SOJA-PD': '14/02/2027'} → estimado 17/02/2027 | núcleo 10/02/2027 | P 31/08/2027
+   c6  P1    58 W  plantio 10/11/2026 | ciclo 08/03/2027 | planos {'SOJA-AT': '08/03/2027', 'SOJA-PD': '05/03/2027'} → estimado 08/03/2027 | núcleo 01/03/2027 | P 31/08/2027
+   c7  P2    62 X  plantio 25/11/2026 | ciclo 17/03/2027 | planos {'SOJA-AT': '23/03/2027', 'SOJA-PD': '20/03/2027'} → estimado 23/03/2027 | núcleo 16/03/2027 | P 31/08/2027
+
+# Folga 0, 1 e 3 (Livre a partir de; T1-B 20/02 e 21/02)
+   folga=0 S27SF   Nesta safra 553 · Livre 152 · A conferir 380 · Perene 80 · de 1165 ha · 1 sucessão a conferir | T1:20/02/2027 T2:— T3:17/02/2027 T4:15/02/2027 P1:— P2:23/03/2027
+   folga=0 caso 5  Nesta safra 0 · Livre 450 · A conferir 475 · Perene 80 · Ocupado 160 · de 1165 ha | T1:10/02/2027 T2:15/07/2027 T3:17/02/2027 T4:15/02/2027 P1:14/07/2027 P2:23/03/2027
+   folga=0 Milho T1-B 20/02/2027                     início 20/02/2027 → Ocupa até 10/07/2027 (Pelo plano) | salva
+   folga=0 Milho T1-B 21/02/2027                     início 21/02/2027 → Ocupa até 11/07/2027 (Pelo plano) | salva
+   folga=1 S27SF   Nesta safra 553 · Livre 152 · A conferir 380 · Perene 80 · de 1165 ha · 1 sucessão a conferir | T1:21/02/2027 T2:— T3:18/02/2027 T4:16/02/2027 P1:— P2:24/03/2027
+   folga=1 caso 5  Nesta safra 0 · Livre 450 · A conferir 475 · Perene 80 · Ocupado 160 · de 1165 ha | T1:21/02/2027 T2:16/07/2027 T3:18/02/2027 T4:16/02/2027 P1:15/07/2027 P2:24/03/2027
+   folga=1 Milho T1-B 20/02/2027                     início 20/02/2027 → Ocupa até 10/07/2027 (Pelo plano) | salva | pendência {'nv': [('prevista', 'c2', '20/02/2027..20/02/2027', '1 dia(s)')]}
+   folga=1 Milho T1-B 21/02/2027                     início 21/02/2027 → Ocupa até 11/07/2027 (Pelo plano) | salva
+   folga=3 S27SF   Nesta safra 553 · Livre 152 · A conferir 380 · Perene 80 · de 1165 ha · 1 sucessão a conferir | T1:23/02/2027 T2:— T3:20/02/2027 T4:18/02/2027 P1:— P2:26/03/2027
+   folga=3 caso 5  Nesta safra 0 · Livre 450 · A conferir 475 · Perene 80 · Ocupado 160 · de 1165 ha | T1:23/02/2027 T2:18/07/2027 T3:20/02/2027 T4:18/02/2027 P1:17/07/2027 P2:26/03/2027
+   folga=3 Milho T1-B 20/02/2027                     início 20/02/2027 → Ocupa até 10/07/2027 (Pelo plano) | salva | pendência {'nv': [('prevista', 'c2', '20/02/2027..22/02/2027', '3 dia(s)')]}
+   folga=3 Milho T1-B 21/02/2027                     início 21/02/2027 → Ocupa até 11/07/2027 (Pelo plano) | salva | pendência {'nv': [('prevista', 'c2', '21/02/2027..22/02/2027', '2 dia(s)')]}
+
+# OC-R1 (a) · e5 sem colheita informada
+   e5 estimado até 28/12/2026 · núcleo 27/12/2026 · P 28/12/2026
+   S2627 P2: A conferir | seq [('e5', 'c7')] | Nesta safra 1165 · de 1165 ha · 2 sucessões a conferir | chips {'Todas': 8, 'Planejado': 6, 'A conferir': 2} | linhas 18
+   c7 SOJA-AT (e5 sem colheita)                      início 05/11/2026 → Ocupa até 23/03/2027 (Pelo plano) | TRAVA [('faixa', 'e5', 'c7', '25/11/2026')]
+# OC-R1 (b) · milho sem plano no T4 da S27SF, plantio 20/03/2027; safra a partir de 01/08/2027
+   mt estimado até 07/08/2027 · P 07/08/2027
+   ago/27 T4: A conferir · 204 ha a partir de 08/08/2027 · visíveis ['c4', 'mt']
+   ago/27 Soja sem plano T4 05/08/2027               início 05/08/2027 → Ocupa até 01/12/2027 (Estimado (ciclo)) | salva | pendência {'sj': [('provavel', 'mt', '05/08/2027..07/08/2027', '3 dia(s)')]} | aviso saída estimada [('c4', '15/02/2027'), ('mt', '07/08/2027')]
+# OC-R1 (c) regressão: com os dados atuais, S2627 e S27SF não mudam (ver saida_ocupacao_f1.txt)
+
+# DONO-07 · Colheita prevista informada no c4 (10/02/2027) e no c6 (05/03/2027)
+   S27SF T4 Livre 204 ha a partir de 11/02/2027 | Nesta safra 553 · Livre 356 · A conferir 176 · Perene 80 · de 1165 ha · 1 sucessão a conferir | chips {'Todas': 8, 'A conferir': 3, 'Livre': 2, 'Perene': 2, 'Planejado': 1} | linhas 15
+# OC-12 · SOJA-AT no c6: P1 nas duas safras
+   S2627 P1: Planejado | Nesta safra 1165 · de 1165 ha | chips {'Todas': 8, 'Planejado': 8} | linhas 18
+   S27SF P1: Planejado | Nesta safra 553 · Livre 152 · A conferir 380 · Perene 80 · de 1165 ha | chips {'Todas': 8, 'A conferir': 3, 'Planejado': 2, 'Perene': 2, 'Livre': 1} | linhas 15
+
+# OC-06 · Planejar T1 (T1-B 152 ha 21/02/2027) na S27SF
+    Nesta safra 705 · A conferir 380 · Perene 80 · de 1165 ha · 1 sucessão a conferir | chips {'Todas': 8, 'A conferir': 4, 'Planejado': 2, 'Perene': 2} | linhas 16 | T1 Planejado
+# OC-R4 · T4-A 100 ha 28/02/2027 (partest.py:132-137)
+   T4 A conferir · 104 ha a partir de 16/02/2027 · desta safra ['t4a'] · visíveis ['c4'] | Nesta safra 653 · Livre 152 · A conferir 280 · Perene 80 · de 1165 ha · 1 sucessão a conferir | chips {'Todas': 8, 'A conferir': 4, 'Perene': 2, 'Livre': 1, 'Planejado': 1} | linhas 17
+# OC-R2 (a) · Planejar T3 96 ha 18/02/2027
+    Nesta safra 649 · Livre 152 · A conferir 284 · Perene 80 · de 1165 ha · 2 sucessões a conferir | chips {'Todas': 8, 'A conferir': 4, 'Perene': 2, 'Livre': 1, 'Planejado': 1} | linhas 17 | T3 A conferir ['c5']
+
+# R-24 Vincular ciclo · 2027/28 (T7 e C1) e Lagoa nova 2027/28
+   antes    Nesta safra 0 · Livre 1085 · Perene 80 · de 1165 ha | chips {'Todas': 8, 'Livre': 6, 'Perene': 2} | linhas 8 | Vincular {'T7': ['c8'], 'C1': ['c9']}
+   C1       Nesta safra 38 · Livre 1085 · Perene 42 · de 1165 ha | chips {'Todas': 8, 'Livre': 6, 'Perene': 1, 'Planejado': 1} | linhas 8 | Vincular {'T7': ['c8']}
+   C1+T7    Nesta safra 80 · Livre 1085 · de 1165 ha | chips {'Todas': 8, 'Livre': 6, 'Planejado': 2} | linhas 8
+   S2627 depois: Nesta safra 1165 · de 1165 ha · 1 sucessão a conferir | chips {'Todas': 8, 'Planejado': 7, 'A conferir': 1} | linhas 18 | cultivos vinculados sem plano: ['v_c9', 'v_c8']
+   Lagoa 2027/28 depois de vincular os 23: Nesta safra 1285.23 · de 1285.23 ha | chips {'Todas': 23, 'Planejado': 23} | linhas 23
+   LG2627 depois: Nesta safra 1285.23 · de 1285.23 ha | chips {'Todas': 23, 'Planejado': 23} | linhas 23

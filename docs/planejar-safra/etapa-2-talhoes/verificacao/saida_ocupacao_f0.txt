@@ -1,0 +1,127 @@
+# folga = 0 | ciclo mínimo {'Soja': 112, 'Milho': 140, 'Feijão': 90} | maior ciclo {'Soja': 125, 'Milho': 140, 'Feijão': 90} | antecedência {'SOJA-AT': 20, 'SOJA-PD': 15, 'MILHO-SF': 0, 'FEIJ-PV': 0, 'CAFE-AR': 0, 'MAMAO-F': 0, 'MAMAO-IMP': 60, 'MAMAO-PROD': 0}
+
+######## COM e4/e5
+# períodos (Santa Rita): início · plantio · Ocupa até (fim por) · núcleo até · P
+   c9   S2627  C1    Café Catuaí 144            38 ha  início 15/01/2019  plantio 15/01/2019  Ocupa até sem fim    (Perene            ) núcleo sem fim    P sem fim
+   c8   S2627  T7    Mamão Formosa Formosa      42 ha  início 10/03/2025  plantio 10/03/2025  Ocupa até sem fim    (Perene            ) núcleo sem fim    P sem fim
+   e1   S2526  T1    Soja 58 W                 312 ha  início 22/09/2025  plantio 12/10/2025  Ocupa até 07/02/2026 (Pelo plano        ) núcleo 31/01/2026 P 07/02/2026
+   e2   S2526  T2    Soja 58 W                 298 ha  início 26/09/2025  plantio 16/10/2025  Ocupa até 11/02/2026 (Pelo plano        ) núcleo 04/02/2026 P 11/02/2026
+   e3   S2526  T3    Milho Híbrido AG           96 ha  início 20/10/2025  plantio 20/10/2025  Ocupa até 09/03/2026 (Pelo plano        ) núcleo 08/03/2026 P 09/03/2026
+   e4   S2526  P1    Feijão BRS Estilo          95 ha  início 05/07/2026  plantio 05/07/2026  Ocupa até 10/10/2026 (Colheita informada) núcleo 02/10/2026 P 10/10/2026
+   e5   S2526  P2    Milho Híbrido AG           80 ha  início 10/08/2026  plantio 10/08/2026  Ocupa até 15/11/2026 (Colheita informada) núcleo 15/11/2026 P 15/11/2026
+   c1   S2627  T1-A  Soja 58 W                 160 ha  início 25/09/2026  plantio 15/10/2026  Ocupa até 10/02/2027 (Pelo plano        ) núcleo 03/02/2027 P 10/02/2027
+   c3   S2627  T2    Soja 58 W                 298 ha  início 28/09/2026  plantio 18/10/2026  Ocupa até 13/02/2027 (Pelo plano        ) núcleo 06/02/2027 P 13/02/2027
+   c4   S2627  T4    Soja 58 W                 204 ha  início 20/10/2026  plantio 20/10/2026  Ocupa até 15/02/2027 (Estimado (ciclo)  ) núcleo 08/02/2027 P 31/08/2027
+   c5   S2627  T3    Soja 62 X                  96 ha  início 22/10/2026  plantio 22/10/2026  Ocupa até 17/02/2027 (Estimado (ciclo)  ) núcleo 10/02/2027 P 31/08/2027
+   c2   S2627  T1-B  Soja 62 X                 152 ha  início 05/10/2026  plantio 25/10/2026  Ocupa até 20/02/2027 (Pelo plano        ) núcleo 13/02/2027 P 20/02/2027
+   c6   S2627  P1    Soja 58 W                  95 ha  início 10/11/2026  plantio 10/11/2026  Ocupa até 08/03/2027 (Estimado (ciclo)  ) núcleo 01/03/2027 P 31/08/2027
+   c7   S2627  P2    Soja 62 X                  80 ha  início 25/11/2026  plantio 25/11/2026  Ocupa até 23/03/2027 (Estimado (ciclo)  ) núcleo 16/03/2027 P 31/08/2027
+   d1   S27SF  T1-A  Milho Híbrido AG          160 ha  início 20/02/2027  plantio 20/02/2027  Ocupa até 10/07/2027 (Pelo plano        ) núcleo 09/07/2027 P 10/07/2027
+   d2   S27SF  T2    Milho Híbrido AG          298 ha  início 25/02/2027  plantio 25/02/2027  Ocupa até 15/07/2027 (Pelo plano        ) núcleo 14/07/2027 P 15/07/2027
+   d3   S27SF  P1    Feijão Pérola              95 ha  início 15/04/2027  plantio 15/04/2027  Ocupa até 14/07/2027 (Pelo plano        ) núcleo 13/07/2027 P 14/07/2027
+== S2627 | Nesta safra 1165 · de 1165 ha · 1 sucessão a conferir | chips {'Todas': 8, 'Planejado': 7, 'A conferir': 1} | linhas 18 | soma faixa 1165
+   T1       Planejado    Área livre 0      a partir de —          | nesta 312   | own [('c1', 'T1-A', '10/02/2027', 'plano'), ('c2', 'T1-B', '20/02/2027', 'plano')] | visíveis [('d1', 'T1-A', '10/07/2027', 'plano', 'S27SF')]
+   T2       Planejado    Área livre 0      a partir de —          | nesta 298   | own [('c3', 'T2', '13/02/2027', 'plano')] | visíveis [('d2', 'T2', '15/07/2027', 'plano', 'S27SF')]
+   T3       Planejado    Área livre 0      a partir de —          | nesta 96    | own [('c5', 'T3', '17/02/2027', 'estimado')] | visíveis []
+   T4       Planejado    Área livre 0      a partir de —          | nesta 204   | own [('c4', 'T4', '15/02/2027', 'estimado')] | visíveis []
+   P1       A conferir   Área livre 0      a partir de —          | nesta 95    | own [('c6', 'P1', '08/03/2027', 'estimado')] | visíveis [('d3', 'P1', '14/07/2027', 'plano', 'S27SF'), ('e4', 'P1', '10/10/2026', 'informada', 'S2526')] | seq [('c6', 'd3')]
+   P2       Planejado    Área livre 0      a partir de —          | nesta 80    | own [('c7', 'P2', '23/03/2027', 'estimado')] | visíveis [('e5', 'P2', '15/11/2026', 'informada', 'S2526')]
+   T7       Planejado    Área livre 0      a partir de —          | nesta 42    | own [('c8', 'T7', 'sem fim', 'perene')] | visíveis []
+   C1       Planejado    Área livre 0      a partir de —          | nesta 38    | own [('c9', 'C1', 'sem fim', 'perene')] | visíveis []
+== S27SF | Nesta safra 553 · Livre 152 · A conferir 380 · Perene 80 · de 1165 ha · 1 sucessão a conferir | chips {'Todas': 8, 'A conferir': 4, 'Perene': 2, 'Livre': 1, 'Planejado': 1} | linhas 15 | soma faixa 1165
+   T1       Livre        Área livre 152    a partir de 20/02/2027 | nesta 160   | own [('d1', 'T1-A', '10/07/2027', 'plano')] | visíveis [('c1', 'T1-A', '10/02/2027', 'plano', 'S2627'), ('c2', 'T1-B', '20/02/2027', 'plano', 'S2627')]
+   T2       Planejado    Área livre 0      a partir de —          | nesta 298   | own [('d2', 'T2', '15/07/2027', 'plano')] | visíveis [('c3', 'T2', '13/02/2027', 'plano', 'S2627')]
+   T3       A conferir   Área livre 96     a partir de 17/02/2027 | nesta 0     | own [] | visíveis [('c5', 'T3', '17/02/2027', 'estimado', 'S2627')]
+   T4       A conferir   Área livre 204    a partir de 15/02/2027 | nesta 0     | own [] | visíveis [('c4', 'T4', '15/02/2027', 'estimado', 'S2627')]
+   P1       A conferir   Área livre 0      a partir de —          | nesta 95    | own [('d3', 'P1', '14/07/2027', 'plano')] | visíveis [('c6', 'P1', '08/03/2027', 'estimado', 'S2627')] | seq [('c6', 'd3')]
+   P2       A conferir   Área livre 80     a partir de 23/03/2027 | nesta 0     | own [] | visíveis [('c7', 'P2', '23/03/2027', 'estimado', 'S2627')]
+   T7       Perene       Área livre 0      a partir de —          | nesta 0     | own [] | visíveis [('c8', 'T7', 'sem fim', 'perene', 'S2627')]
+   C1       Perene       Área livre 0      a partir de —          | nesta 0     | own [] | visíveis [('c9', 'C1', 'sem fim', 'perene', 'S2627')]
+== caso 5 | Nesta safra 0 · Livre 450 · A conferir 475 · Perene 80 · Ocupado 160 · de 1165 ha | chips {'Todas': 8, 'A conferir': 4, 'Livre': 2, 'Perene': 2} | linhas 15 | soma faixa 1165
+   T1       Livre        Área livre 152    a partir de 10/02/2027 | nesta 0     | own [] | visíveis [('c1', 'T1-A', '10/02/2027', 'plano', 'S2627'), ('c2', 'T1-B', '20/02/2027', 'plano', 'S2627'), ('d1', 'T1-A', '10/07/2027', 'plano', 'S27SF')]
+   T2       Livre        Área livre 298    a partir de 15/07/2027 | nesta 0     | own [] | visíveis [('c3', 'T2', '13/02/2027', 'plano', 'S2627'), ('d2', 'T2', '15/07/2027', 'plano', 'S27SF')]
+   T3       A conferir   Área livre 96     a partir de 17/02/2027 | nesta 0     | own [] | visíveis [('c5', 'T3', '17/02/2027', 'estimado', 'S2627')]
+   T4       A conferir   Área livre 204    a partir de 15/02/2027 | nesta 0     | own [] | visíveis [('c4', 'T4', '15/02/2027', 'estimado', 'S2627')]
+   P1       A conferir   Área livre 95     a partir de 14/07/2027 | nesta 0     | own [] | visíveis [('c6', 'P1', '08/03/2027', 'estimado', 'S2627'), ('d3', 'P1', '14/07/2027', 'plano', 'S27SF')]
+   P2       A conferir   Área livre 80     a partir de 23/03/2027 | nesta 0     | own [] | visíveis [('c7', 'P2', '23/03/2027', 'estimado', 'S2627')]
+   T7       Perene       Área livre 0      a partir de —          | nesta 0     | own [] | visíveis [('c8', 'T7', 'sem fim', 'perene', 'S2627')]
+   C1       Perene       Área livre 0      a partir de —          | nesta 0     | own [] | visíveis [('c9', 'C1', 'sem fim', 'perene', 'S2627')]
+== 2027/28 | Nesta safra 0 · Livre 1085 · Perene 80 · de 1165 ha | chips {'Todas': 8, 'Livre': 6, 'Perene': 2} | linhas 8 | soma faixa 1165
+   T1       Livre        Área livre 312    a partir de 01/09/2027 | nesta 0     | own [] | visíveis []
+   T2       Livre        Área livre 298    a partir de 01/09/2027 | nesta 0     | own [] | visíveis []
+   T3       Livre        Área livre 96     a partir de 01/09/2027 | nesta 0     | own [] | visíveis []
+   T4       Livre        Área livre 204    a partir de 01/09/2027 | nesta 0     | own [] | visíveis []
+   P1       Livre        Área livre 95     a partir de 01/09/2027 | nesta 0     | own [] | visíveis []
+   P2       Livre        Área livre 80     a partir de 01/09/2027 | nesta 0     | own [] | visíveis []
+   T7       Perene       Área livre 0      a partir de —          | nesta 0     | own [] | visíveis [('c8', 'T7', 'sem fim', 'perene', 'S2627')] | Vincular ['c8']
+   C1       Perene       Área livre 0      a partir de —          | nesta 0     | own [] | visíveis [('c9', 'C1', 'sem fim', 'perene', 'S2627')] | Vincular ['c9']
+== LG2627 | Nesta safra 1285.23 · de 1285.23 ha | chips {'Todas': 23, 'Planejado': 23} | linhas 23 | soma faixa 1285.23
+   pivôs com Vincular ciclo: 0 · com Planejar: 0
+== Boa Vista nova | Nesta safra 0 · Livre 120 · de 120 ha | chips {'Todas': 1, 'Livre': 1} | linhas 1 | soma faixa 120
+   B1       Livre        Área livre 120    a partir de 01/09/2026 | nesta 0     | own [] | visíveis []
+== Lagoa nova 2027/28 | Nesta safra 0 · Perene 1285.23 · de 1285.23 ha | chips {'Todas': 23, 'Perene': 23} | linhas 23 | soma faixa 1285.23
+   pivôs com Vincular ciclo: 23 · com Planejar: 0
+== Lagoa nova 2026/27 | Nesta safra 0 · Perene 1285.23 · de 1285.23 ha | chips {'Todas': 23, 'Perene': 23} | linhas 23 | soma faixa 1285.23
+   pivôs com Vincular ciclo: 0 · com Planejar: 0
+
+######## SEM e4/e5
+# períodos (Santa Rita): início · plantio · Ocupa até (fim por) · núcleo até · P
+   c9   S2627  C1    Café Catuaí 144            38 ha  início 15/01/2019  plantio 15/01/2019  Ocupa até sem fim    (Perene            ) núcleo sem fim    P sem fim
+   c8   S2627  T7    Mamão Formosa Formosa      42 ha  início 10/03/2025  plantio 10/03/2025  Ocupa até sem fim    (Perene            ) núcleo sem fim    P sem fim
+   e1   S2526  T1    Soja 58 W                 312 ha  início 22/09/2025  plantio 12/10/2025  Ocupa até 07/02/2026 (Pelo plano        ) núcleo 31/01/2026 P 07/02/2026
+   e2   S2526  T2    Soja 58 W                 298 ha  início 26/09/2025  plantio 16/10/2025  Ocupa até 11/02/2026 (Pelo plano        ) núcleo 04/02/2026 P 11/02/2026
+   e3   S2526  T3    Milho Híbrido AG           96 ha  início 20/10/2025  plantio 20/10/2025  Ocupa até 09/03/2026 (Pelo plano        ) núcleo 08/03/2026 P 09/03/2026
+   c1   S2627  T1-A  Soja 58 W                 160 ha  início 25/09/2026  plantio 15/10/2026  Ocupa até 10/02/2027 (Pelo plano        ) núcleo 03/02/2027 P 10/02/2027
+   c3   S2627  T2    Soja 58 W                 298 ha  início 28/09/2026  plantio 18/10/2026  Ocupa até 13/02/2027 (Pelo plano        ) núcleo 06/02/2027 P 13/02/2027
+   c4   S2627  T4    Soja 58 W                 204 ha  início 20/10/2026  plantio 20/10/2026  Ocupa até 15/02/2027 (Estimado (ciclo)  ) núcleo 08/02/2027 P 31/08/2027
+   c5   S2627  T3    Soja 62 X                  96 ha  início 22/10/2026  plantio 22/10/2026  Ocupa até 17/02/2027 (Estimado (ciclo)  ) núcleo 10/02/2027 P 31/08/2027
+   c2   S2627  T1-B  Soja 62 X                 152 ha  início 05/10/2026  plantio 25/10/2026  Ocupa até 20/02/2027 (Pelo plano        ) núcleo 13/02/2027 P 20/02/2027
+   c6   S2627  P1    Soja 58 W                  95 ha  início 10/11/2026  plantio 10/11/2026  Ocupa até 08/03/2027 (Estimado (ciclo)  ) núcleo 01/03/2027 P 31/08/2027
+   c7   S2627  P2    Soja 62 X                  80 ha  início 25/11/2026  plantio 25/11/2026  Ocupa até 23/03/2027 (Estimado (ciclo)  ) núcleo 16/03/2027 P 31/08/2027
+   d1   S27SF  T1-A  Milho Híbrido AG          160 ha  início 20/02/2027  plantio 20/02/2027  Ocupa até 10/07/2027 (Pelo plano        ) núcleo 09/07/2027 P 10/07/2027
+   d2   S27SF  T2    Milho Híbrido AG          298 ha  início 25/02/2027  plantio 25/02/2027  Ocupa até 15/07/2027 (Pelo plano        ) núcleo 14/07/2027 P 15/07/2027
+   d3   S27SF  P1    Feijão Pérola              95 ha  início 15/04/2027  plantio 15/04/2027  Ocupa até 14/07/2027 (Pelo plano        ) núcleo 13/07/2027 P 14/07/2027
+== S2627 | Nesta safra 1165 · de 1165 ha · 1 sucessão a conferir | chips {'Todas': 8, 'Planejado': 7, 'A conferir': 1} | linhas 15 | soma faixa 1165
+   T1       Planejado    Área livre 0      a partir de —          | nesta 312   | own [('c1', 'T1-A', '10/02/2027', 'plano'), ('c2', 'T1-B', '20/02/2027', 'plano')] | visíveis [('d1', 'T1-A', '10/07/2027', 'plano', 'S27SF')]
+   T2       Planejado    Área livre 0      a partir de —          | nesta 298   | own [('c3', 'T2', '13/02/2027', 'plano')] | visíveis [('d2', 'T2', '15/07/2027', 'plano', 'S27SF')]
+   T3       Planejado    Área livre 0      a partir de —          | nesta 96    | own [('c5', 'T3', '17/02/2027', 'estimado')] | visíveis []
+   T4       Planejado    Área livre 0      a partir de —          | nesta 204   | own [('c4', 'T4', '15/02/2027', 'estimado')] | visíveis []
+   P1       A conferir   Área livre 0      a partir de —          | nesta 95    | own [('c6', 'P1', '08/03/2027', 'estimado')] | visíveis [('d3', 'P1', '14/07/2027', 'plano', 'S27SF')] | seq [('c6', 'd3')]
+   P2       Planejado    Área livre 0      a partir de —          | nesta 80    | own [('c7', 'P2', '23/03/2027', 'estimado')] | visíveis []
+   T7       Planejado    Área livre 0      a partir de —          | nesta 42    | own [('c8', 'T7', 'sem fim', 'perene')] | visíveis []
+   C1       Planejado    Área livre 0      a partir de —          | nesta 38    | own [('c9', 'C1', 'sem fim', 'perene')] | visíveis []
+== S27SF | Nesta safra 553 · Livre 152 · A conferir 380 · Perene 80 · de 1165 ha · 1 sucessão a conferir | chips {'Todas': 8, 'A conferir': 4, 'Perene': 2, 'Livre': 1, 'Planejado': 1} | linhas 15 | soma faixa 1165
+   T1       Livre        Área livre 152    a partir de 20/02/2027 | nesta 160   | own [('d1', 'T1-A', '10/07/2027', 'plano')] | visíveis [('c1', 'T1-A', '10/02/2027', 'plano', 'S2627'), ('c2', 'T1-B', '20/02/2027', 'plano', 'S2627')]
+   T2       Planejado    Área livre 0      a partir de —          | nesta 298   | own [('d2', 'T2', '15/07/2027', 'plano')] | visíveis [('c3', 'T2', '13/02/2027', 'plano', 'S2627')]
+   T3       A conferir   Área livre 96     a partir de 17/02/2027 | nesta 0     | own [] | visíveis [('c5', 'T3', '17/02/2027', 'estimado', 'S2627')]
+   T4       A conferir   Área livre 204    a partir de 15/02/2027 | nesta 0     | own [] | visíveis [('c4', 'T4', '15/02/2027', 'estimado', 'S2627')]
+   P1       A conferir   Área livre 0      a partir de —          | nesta 95    | own [('d3', 'P1', '14/07/2027', 'plano')] | visíveis [('c6', 'P1', '08/03/2027', 'estimado', 'S2627')] | seq [('c6', 'd3')]
+   P2       A conferir   Área livre 80     a partir de 23/03/2027 | nesta 0     | own [] | visíveis [('c7', 'P2', '23/03/2027', 'estimado', 'S2627')]
+   T7       Perene       Área livre 0      a partir de —          | nesta 0     | own [] | visíveis [('c8', 'T7', 'sem fim', 'perene', 'S2627')]
+   C1       Perene       Área livre 0      a partir de —          | nesta 0     | own [] | visíveis [('c9', 'C1', 'sem fim', 'perene', 'S2627')]
+== caso 5 | Nesta safra 0 · Livre 450 · A conferir 475 · Perene 80 · Ocupado 160 · de 1165 ha | chips {'Todas': 8, 'A conferir': 4, 'Livre': 2, 'Perene': 2} | linhas 15 | soma faixa 1165
+   T1       Livre        Área livre 152    a partir de 10/02/2027 | nesta 0     | own [] | visíveis [('c1', 'T1-A', '10/02/2027', 'plano', 'S2627'), ('c2', 'T1-B', '20/02/2027', 'plano', 'S2627'), ('d1', 'T1-A', '10/07/2027', 'plano', 'S27SF')]
+   T2       Livre        Área livre 298    a partir de 15/07/2027 | nesta 0     | own [] | visíveis [('c3', 'T2', '13/02/2027', 'plano', 'S2627'), ('d2', 'T2', '15/07/2027', 'plano', 'S27SF')]
+   T3       A conferir   Área livre 96     a partir de 17/02/2027 | nesta 0     | own [] | visíveis [('c5', 'T3', '17/02/2027', 'estimado', 'S2627')]
+   T4       A conferir   Área livre 204    a partir de 15/02/2027 | nesta 0     | own [] | visíveis [('c4', 'T4', '15/02/2027', 'estimado', 'S2627')]
+   P1       A conferir   Área livre 95     a partir de 14/07/2027 | nesta 0     | own [] | visíveis [('c6', 'P1', '08/03/2027', 'estimado', 'S2627'), ('d3', 'P1', '14/07/2027', 'plano', 'S27SF')]
+   P2       A conferir   Área livre 80     a partir de 23/03/2027 | nesta 0     | own [] | visíveis [('c7', 'P2', '23/03/2027', 'estimado', 'S2627')]
+   T7       Perene       Área livre 0      a partir de —          | nesta 0     | own [] | visíveis [('c8', 'T7', 'sem fim', 'perene', 'S2627')]
+   C1       Perene       Área livre 0      a partir de —          | nesta 0     | own [] | visíveis [('c9', 'C1', 'sem fim', 'perene', 'S2627')]
+== 2027/28 | Nesta safra 0 · Livre 1085 · Perene 80 · de 1165 ha | chips {'Todas': 8, 'Livre': 6, 'Perene': 2} | linhas 8 | soma faixa 1165
+   T1       Livre        Área livre 312    a partir de 01/09/2027 | nesta 0     | own [] | visíveis []
+   T2       Livre        Área livre 298    a partir de 01/09/2027 | nesta 0     | own [] | visíveis []
+   T3       Livre        Área livre 96     a partir de 01/09/2027 | nesta 0     | own [] | visíveis []
+   T4       Livre        Área livre 204    a partir de 01/09/2027 | nesta 0     | own [] | visíveis []
+   P1       Livre        Área livre 95     a partir de 01/09/2027 | nesta 0     | own [] | visíveis []
+   P2       Livre        Área livre 80     a partir de 01/09/2027 | nesta 0     | own [] | visíveis []
+   T7       Perene       Área livre 0      a partir de —          | nesta 0     | own [] | visíveis [('c8', 'T7', 'sem fim', 'perene', 'S2627')] | Vincular ['c8']
+   C1       Perene       Área livre 0      a partir de —          | nesta 0     | own [] | visíveis [('c9', 'C1', 'sem fim', 'perene', 'S2627')] | Vincular ['c9']
+== LG2627 | Nesta safra 1285.23 · de 1285.23 ha | chips {'Todas': 23, 'Planejado': 23} | linhas 23 | soma faixa 1285.23
+   pivôs com Vincular ciclo: 0 · com Planejar: 0
+== Boa Vista nova | Nesta safra 0 · Livre 120 · de 120 ha | chips {'Todas': 1, 'Livre': 1} | linhas 1 | soma faixa 120
+   B1       Livre        Área livre 120    a partir de 01/09/2026 | nesta 0     | own [] | visíveis []
+== Lagoa nova 2027/28 | Nesta safra 0 · Perene 1285.23 · de 1285.23 ha | chips {'Todas': 23, 'Perene': 23} | linhas 23 | soma faixa 1285.23
+   pivôs com Vincular ciclo: 23 · com Planejar: 0
+== Lagoa nova 2026/27 | Nesta safra 0 · Perene 1285.23 · de 1285.23 ha | chips {'Todas': 23, 'Perene': 23} | linhas 23 | soma faixa 1285.23
+   pivôs com Vincular ciclo: 0 · com Planejar: 0
