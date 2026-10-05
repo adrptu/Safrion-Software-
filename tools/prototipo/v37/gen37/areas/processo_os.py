@@ -244,7 +244,7 @@ function osMerge(b,co,c){ if(!co) return b;
     const fz=((co.saldo||0)-osApPend(co)>0.001)&&cenIniFalta(co,r);   // componente esgotado com área a fazer (regra única de início)
     if(fz&&fz.k==='rever'){ o.selos=o.selos.concat([{t:'Insumo esgotado · '+fz.its.map(i=>i.prod).join(', '),c:'red'}]); o.dono=OS_AGRO; o.prazo='decidir a área restante';
       o.esg={acao:'apontar',t:'Apontar bloqueado: '+fz.t,q:fz.q}; }
-    const dpx=(co.ap||[]).filter(a=>a.st===CEN_AP_DUP); if(dpx.length&&!mine){ o.dono=CEN_CONF_AP; o.prazo='decidir se o dia '+dpx.map(a=>a.dia).join(', ')+' é outro turno'; } }   // duplicidade retida: decide a conferência (CMD-09)
+    const dpx=(co.ap||[]).filter(a=>a.st===CEN_AP_DUP); if(dpx.length){ o.dono=CEN_CONF_AP; o.prazo='decidir se o dia '+dpx.map(a=>a.dia).join(', ')+' é outro turno'; } }   // duplicidade retida: decide a conferência (CMD-09)
   // conferência: o encerramento depende do cenário (apontamento aguardando sinal ou sobra em custódia)
   if(co.etapa==='Em conferência'){ o.encM=cenPodeEncerrar(c,co.id);
     if(!o.encM){ o.selos=o.selos.filter(s=>!/Sobras a receber|Aguardando sinal/i.test(s.t)); if(!mine){ o.cond='Apontamentos enviados e nada em custódia. Próximo passo: conferir e encerrar.'; o.dono=o.resp; o.prazo='conferir e encerrar'; } }
@@ -402,7 +402,7 @@ function osc_apontar(c,id,d,ha,cons,est,chave){ const R=cenApontar(c,{os:id,d,ha
   const un=p=>((o.ins||[]).find(x=>x.p===p)||{}).un||''; const ins=Object.keys(ap.cons||{}).map(p=>p+' '+nd(ap.cons[p])+' '+un(p)).join(', ');
   return {msg:'Apontamento do dia '+ap.dia+': '+nd(ha)+' ha (provisório)'+(ins?' · usado: '+ins:'')+'. Saldo '+nf(o.saldo)+' ha; a ordem continua em execução.'
     +(R.ks.length?' Consumo em conferência: '+R.ks.map(k=>cenConfTxt(k,c)).join('; ')+' · '+CEN_CONC_RESP+' concilia.':'')}; }
-function osc_apDecidir(c,id,dia,modo){ return cenApDecidir(c,id,dia,modo,CEN_CONF_AP); }   // CMD-09: 'anterior' | 'este' | 'somar'
+function osc_apDecidir(c,id,dia,modo,us){ return cenApDecidir(c,id,dia,modo,CEN_CONF_AP,us); }   // CMD-09: 'anterior' | 'este' | 'somar'; us = usado informado na conferência
 // linhas de consumo do formulário (O.S. e Mapa), a mesma regra do MB-03: com o operador, sugere dose × área do trecho (editável, estimativa);
 // fora da requisição nada está em custódia: vazio = 0. q = o que vai ao comando; est = sugestão não editada.
 function osApIns(c,o,ha,ced){ const r=o.req&&c.reqs[o.req]; const pend=osApPend(o);
@@ -434,7 +434,8 @@ function osc_cancelar(c,id,mot,cx){ const o=osc_o(c,id);
   o.etapa='Canceladas'; o.reservado=false; o.selos=[]; osc_txt(o,{cond:'Cancelada sem execução: '+mot+'. '+cx[1],dono:'',prazo:'',insx:cx[2]});
   return {msg:id+' cancelada sem execução. '+cx[1]}; }
 function osc_dispensar(c,id,n,mot){ const o=osc_o(c,id); if(o.etapa!=='Em execução') throw new Error(id+' não está em execução.');
-  if(n>o.saldo+0.001) throw new Error('Máximo '+cenNum(o.saldo)+' ha: é o saldo da ordem.');
+  { const dp=(o.ap||[]).filter(a=>a.st===CEN_AP_DUP); if(dp.length) throw new Error('Apontamento em conferência de duplicidade (dia '+dp.map(a=>a.dia).join(', ')+'): '+CEN_CONF_AP+' decide antes de dispensar o saldo.'); }
+  const pap=osApPend(o); if(n>o.saldo-pap+0.001) throw new Error('Máximo '+cenNum(Math.max(0,o.saldo-pap))+' ha: é o saldo da ordem'+(pap?' descontando '+cenNum(pap)+' ha ainda no aparelho.':'.'));
   const tot=(o.osc.disp||0)+n; o.saldo=Math.max(0,o.saldo-n); o.ap=cortaPrev(o.ap,o.saldo);
   osc_txt(o,{disp:tot,cond:'Saldo de '+nd(n)+' ha dispensado: '+mot+' · validação agronômica registrada. Realizado de '+nf(o.realizado)+' ha preservado.',dono:'',prazo:''});
   return {msg:'Dispensados '+nd(n)+' ha da '+id+' · realizado '+nf(o.realizado)+' ha preservado · saldo '+nf(o.saldo)+' ha.'+(o.saldo<=0.001?' Envie a ordem para conferência.':'')}; }
@@ -483,7 +484,7 @@ function dotSt(c){ const cc=G2C[c]||G2C.gray; return 'width:6px;height:6px;borde
 // ===== O.S. × cenário compartilhado (cenario.js, o mesmo estado do Estoque e do App) =====
 // Fase, realizado/saldo, apontamentos, requisição e insumos vêm de cenGet(); o que o cenário não tem vem de OSD (registro).
 // Gancho de teste/inspeção (o script da tela roda isolado): os testes os_* leem e mudam o cenário na própria página.
-try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenDevolver, cenConfirmarRecebimento, cenIniciarTurno, cenPausar, cenFecharTurno, cenOcorrencia, cenSinal, cenPodeEncerrar, osc_liberar, osc_ajustar, osc_encerrar }; } catch (e) {}
+try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenDevolver, cenConfirmarRecebimento, cenIniciarTurno, cenPausar, cenFecharTurno, cenOcorrencia, cenSinal, cenPodeEncerrar, osc_liberar, osc_ajustar, osc_encerrar, osc_apontar }; } catch (e) {}
 // filtros do topo (Fazenda e Safra): lista, Kanban, chips de fase e selo do cabeçalho mostram só as ordens do recorte
 function mfFaz(self){ return self.state.mf_faz||'Santa Rita'; }
 function mfSaf(self){ return self.state.mf_saf||'Todas'; }
@@ -692,7 +693,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{};
   const canDisp=o.etapa==='Em execução'&&!!o.area&&(o.saldo||0)>0.001;
   v.pan_hasCanc=canCanc; v.pan_hasDisp=canDisp;
   v.pan_cango=()=>self.setState({pa:{id:o.id,fn:'cancelar',motivo:'',err:''}});
-  v.pan_disgo=()=>self.setState({pa:{id:o.id,fn:'dispensar',ha:String(o.saldo).replace('.',','),motivo:'',val:false,err:''}});
+  v.pan_disgo=()=>self.setState({pa:{id:o.id,fn:'dispensar',ha:String(apMax).replace('.',','),motivo:'',val:false,err:''}});
   // (confirmação, aviso final, nova situação do insumo): a seção Insumos acompanha o que o aviso diz
   const cx=o.canc||((o.reservado&&insTxt)?['Libera a reserva no Estoque: '+insTxt+'.','Reserva liberada no Estoque: '+insTxt+'.','Reserva liberada no Estoque']:((o.ins||[]).length?['Nenhum insumo foi reservado.','Nenhum insumo estava reservado.','Nada reservado · ordem cancelada']:['','','']));
   v.pan_cct='Cancelar '+o.id+' sem execução: a ordem sai do quadro e fica em Canceladas. '+cx[0];
@@ -705,7 +706,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{};
   v.pan_dissave=()=>{ const cur=self.state.pa; const n=g2num(cur.ha); const mot=String(cur.motivo||'').trim(); const tot=(o.disp||0)+n;
     const err=(m)=>self.setState({pa:Object.assign({},cur,{err:m})});
     if(isNaN(n)||n<=0) return err('Informe a área a dispensar (maior que 0 ha).');
-    if(n>(o.saldo||0)+0.001) return err('Máximo '+nf(o.saldo)+' ha: é o saldo da ordem.');
+    if(n>apMax+0.001) return err('Máximo '+nf(apMax)+' ha: é o saldo da ordem'+(apP>0?' descontando '+nf(apP)+' ha ainda no aparelho.':'.'));
     if(tot>lim+0.001) return err(nd(tot)+' ha = '+nd(100*tot/o.area,1)+' % acima de 20 % · exige Direção.');
     if(!mot) return err('Informe o motivo da dispensa.');
     if(!cur.val) return err('Marque a validação agronômica.');
@@ -813,11 +814,19 @@ function EXTRAVALS(self,v){
     if(o.area){ kv.splice(1,0,['Área autorizada',nf(o.area)+' ha'],['Realizado',nf(o.realizado)+' ha'+((a.conf||a.prov)?' ('+nf(a.conf)+' conf. + '+nf(a.prov)+' prov.)':'')+(a.sem?' · '+nf(a.sem)+' ha aguardando sinal':'')],['Saldo',nf(o.saldo)+' ha']); }    v.pan_kv=kv.map(x=>({l:x[0],v:x[1]}));
     // apontamentos: os do app mostram a origem; sem sinal ficam "Aguardando sinal" e não entram no acumulado
     // duplicidade (AP-06/07): o retido não soma e mostra as três saídas de Paula (CMD-09); "vale este" só contra um relato já somado
-    const apDec=(dia,modo)=>osRun(self,c=>osc_apDecidir(c,o.id,dia,modo),{},(e)=>self.setState({g2toast:e}));
+    const cg=cenGet(), cgo=cg.ordens[o.id]; const apus=st.apus&&st.apus.id===o.id?st.apus:{id:o.id};
+    const usOf=(dia)=>{ const u=apus[dia]||{}; const r={}; Object.keys(u).forEach(p=>{ const n=g2num(u[p]); if(String(u[p]).trim()!==''&&!isNaN(n)) r[p]=n; }); return r; };
+    const apDec=(dia,modo)=>osRun(self,c=>osc_apDecidir(c,o.id,dia,modo,usOf(dia)),{apus:null},(e)=>self.setState({g2toast:e}));
     let ac=0; v.pan_ap=(o.ap||[]).map(x=>{ const prev=x.st==='Previsto'; const sem=x.sinc===false; const som=!prev&&cenApSomado(x); if(som) ac+=x.ha; const s=sem?'Aguardando sinal':x.st;
-      const dup=x.st===CEN_AP_DUP, de=(x.dupDe||[]).join(', '); const K=dup&&(x.dupDe||[]).length===1?(o.ap||[]).find(a=>a.dia===x.dupDe[0]):null;
+      const dup=x.st===CEN_AP_DUP&&!!cgo; const viv=dup?cenApDupVivos(cgo,x):[]; const de=viv.map(a=>a.dia).join(', ');
+      const K=viv.length===1&&cenApSomado(viv[0])?viv[0]:null; const uso=K?cenApUsoK(cg,cgo,K):'';
+      const fal=dup?cenApDecCons(cgo,x,cenApDecBase(cg,cgo,null),null).falta:[];
+      const usx=fal.map(f=>({lab:'Usado de '+f.p+' ('+f.un+')',v:(apus[x.dia]||{})[f.p]||'',hint:'Estimativa '+nd(f.q)+' '+f.un+' passa da custódia ('+nd(f.cust)+' '+f.un+'): informe o usado'+(x.quem?' com '+x.quem:''),
+        set:(e)=>{ const cur=self.state.apus&&self.state.apus.id===o.id?self.state.apus:{id:o.id}; self.setState({apus:Object.assign({},cur,{[x.dia]:Object.assign({},cur[x.dia]||{},{[f.p]:e.target.value})})}); }}));
       return {d:x.d,dia:'Dia '+x.dia+(x.origem==='app'?' · app':''),ha:(prev?'prev. ':'')+nf(x.ha)+' ha'+(x.h?' · '+nd(x.h,1)+' h':''),ac:(prev?'—':(!som?'não somado':nf(ac)+' / '+nf(o.area)+' ha')),t:s,st:chipSt(STCOR[s]),dot:dotSt(STCOR[s]),rst:prev?'color:#8A968E;':'',
-        dup,dupT:dup?'Mesma data e talhão do dia '+de+'. É outro turno? Quem decide: '+CEN_CONF_AP+'.':'',vant:'Mesmo turno: vale o dia '+de,hasEste:!!(K&&cenApSomado(K)),
+        dup,dupT:!dup?'':(viv.length?'Mesma data e talhão do dia '+de+'. É outro turno? Quem decide: '+CEN_CONF_AP+'.':'O dia '+(x.dupDe||[]).join(', ')+' já não vale: este só pode ser somado como outro turno. Quem decide: '+CEN_CONF_AP+'.')
+          +(uso?' "Vale este" indisponível: '+uso+'.':''),
+        vant:'Mesmo turno: vale o dia '+de,hasAnt:viv.length>0,hasEste:!!K&&!uso,usx,hasUs:usx.length>0,
         ant:()=>apDec(x.dia,'anterior'),este:()=>apDec(x.dia,'este'),somar:()=>apDec(x.dia,'somar')}; });
     v.pan_hasAp=v.pan_ap.length>0; v.pan_noAp=!v.pan_hasAp;
     v.pan_noApT=o.area?(o.etapa==='A liberar'||o.etapa==='Liberadas'?'Sem apontamentos: a ordem ainda não foi iniciada.':'Sem apontamentos registrados.'):'Ordem de processo: entradas e saídas são registradas por etapa do beneficiamento, não por área.';
@@ -947,8 +956,13 @@ def _painel():
     aprow=(f'<div style="display: grid; grid-template-columns: 64px 84px 1fr 1.3fr auto; gap: 8px; align-items: center; padding: 7px 0; border-top: 1px solid {LINE}; font-size: 12.8px; font-variant-numeric: tabular-nums; {H("a.rst")}">'
            f'<span>{H("a.d")}</span><span>{H("a.dia")}</span><span style="text-align: right;">{H("a.ha")}</span><span style="text-align: right; font-weight: 700;">{H("a.ac")}</span>{_chip_hole("a.t","a.st","a.dot")}</div>'
            f'<sc-if value="{H("a.dup")}" hint-placeholder-val="{F()}"><div role="group" aria-label="Decidir duplicidade" style="display: flex; flex-direction: column; gap: 6px; padding: 0 0 8px;">'
-           f'<span style="font-size: 12.5px; color: #8A5A00; font-weight: 600;">{H("a.dupT")}</span><div style="display: flex; gap: 6px; flex-wrap: wrap;">'
-           f'<button type="button" onClick="{H("a.ant")}" style="{_MINI}">{H("a.vant")}</button>'
+           f'<span style="font-size: 12.5px; color: #8A5A00; font-weight: 600;">{H("a.dupT")}</span>'
+           f'<sc-if value="{H("a.hasUs")}" hint-placeholder-val="{F()}"><div style="display: flex; flex-direction: column; gap: 6px;"><sc-for list="{H("a.usx")}" as="u" hint-placeholder-count="1">'
+           f'<label style="display: grid; grid-template-columns: minmax(0,1fr) 96px; gap: 2px 10px; align-items: center; font-size: 12px; font-weight: 600; color: {MUTED};"><span>{H("u.lab")}</span>'
+           f'<input aria-label="{H("u.lab")}" inputMode="decimal" value="{H("u.v")}" onChange="{H("u.set")}" style="font-family: inherit; font-size: 14px; padding: 6px 9px; border-radius: 8px; border: 1px solid {LINE}; text-align: right; grid-row: span 2;">'
+           f'<span style="font-weight: 400; font-size: 11.5px;">{H("u.hint")}</span></label></sc-for></div></sc-if>'
+           f'<div style="display: flex; gap: 6px; flex-wrap: wrap;">'
+           f'<sc-if value="{H("a.hasAnt")}" hint-placeholder-val="{T()}"><button type="button" onClick="{H("a.ant")}" style="{_MINI}">{H("a.vant")}</button></sc-if>'
            f'<sc-if value="{H("a.hasEste")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("a.este")}" style="{_MINI}">Mesmo turno: vale este</button></sc-if>'
            f'<button type="button" onClick="{H("a.somar")}" style="{_MINI}">Outro turno: somar</button></div></div></sc-if>')
     aphead=(f'<div style="display: grid; grid-template-columns: 64px 84px 1fr 1.3fr auto; gap: 8px; padding: 4px 0; font-size: 10.5px; font-weight: 700; letter-spacing: .04em; color: {MUTED}; text-transform: uppercase;">'

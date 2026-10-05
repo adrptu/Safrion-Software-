@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """CTL-2 · Frente A (AP-ÚNICO), parte de navegador do ap_unico_test.py: O.S. (1440 px), app MB-03 (390 px) e Estoque sobre o mesmo cenário.
 Uso: python3 ap_unico_test.py nav   (compile antes: build.py && montar_render.py)"""
-import json, time
+import json, re, time
 from app_lib import App
 
 OS, P = 'OS-0421', 'Fungicida A'
@@ -20,6 +20,7 @@ def rodar():
     def btn(t):
         r = J(f"(()=>{{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==={json.dumps(t)}); if(!b) return false; b.click(); return true;}})()"); time.sleep(.4); return r
     def temb(t): return bool(J(f"[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==={json.dumps(t)})"))
+    def temb_ini(t): return bool(J(f"[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim().startsWith({json.dumps(t)}))"))
     def inp(lab): return J(f"(()=>{{const i=[...document.querySelectorAll('aside[role=dialog] input')].find(x=>x.getAttribute('aria-label')==={json.dumps(lab)}); return i?i.value:null;}})()")
     def setin(lab, val):
         J(f"""(()=>{{const i=[...document.querySelectorAll('aside[role=dialog] input')].find(x=>x.getAttribute('aria-label')==={json.dumps(lab)});
@@ -39,6 +40,8 @@ def rodar():
         a.setv('#ft_ha', ha); a.setv('#ft_h', '8')
         if usado is not None: a.setv('#ft_c0', usado)
         a.clk('Fechar turno'); return a.toast() or ''
+    def cmd(js):   # comando direto no cenário da página (window.__cen), como um reenvio do mesmo formulário ou outro canal
+        return J("(()=>{const W=window.__cen; const r=W.cenMudar(null,c=>" + js + "); return r.erro||r.msg||'';})()") or ''
     def guard():
         e = a.erros() or []; erros.extend(e)
     try:
@@ -54,6 +57,12 @@ def rodar():
         J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Salvar apontamento'); b.click(); b.click();})()"); time.sleep(.5)
         f = a.cen(FATO); nw = a.cen(f"c.ordens['{OS}'].ap.filter(x=>/^W-/.test(x.chave||'')).length")
         a.ok(f == [240, 122, 38] and nw == 1, f'AP-03/04 usado 27 L e duplo clique: 240 ha, 122 L / 38 L, um só registro: {f} · {nw}')
+        # a chave gravada é a do formulário aberto (não a reserva "-dia5"); reenviar o mesmo conteúdo com ela não soma; outro conteúdo é conflito (ENG-021)
+        ch = a.cen(f"c.ordens['{OS}'].ap.find(x=>x.dia===5).chave") or ''
+        r1 = cmd(f"W.osc_apontar(c,'{OS}','26/09',50,{{'{P}':27,'Adjuvante espalhante':0}},['Adjuvante espalhante'],{json.dumps(ch)})")
+        r2 = cmd(f"W.osc_apontar(c,'{OS}','26/09',50,{{'{P}':30,'Adjuvante espalhante':0}},['Adjuvante espalhante'],{json.dumps(ch)})")
+        a.ok(bool(re.match(r'^W-OS-0421-\d{13}$', ch)) and 'já registrado' in r1 and 'com outro conteúdo: conflito' in r2 and a.cen(FATO) == [240, 122, 38],
+             f'ENG-021 chave do formulário {ch}: reenvio igual "já registrado", outro consumo = conflito, 240 ha / 122 L: {r1[:70]} · {r2[:90]}')
         mv = a.cen("c.movs.filter(m=>m.tipo==='consumo'&&m.origem==='web').map(m=>m.quem+'|'+m.det)")
         a.ok(mv == ['Marcos|Fungicida A 27'], f'a web grava o movimento de consumo com Marcos (não "web"): {mv}')
         # 3 · turno do app no mesmo dia: retido, recibo diz quem decide; o formulário web passa a avisar
@@ -80,8 +89,11 @@ def rodar():
         f = a.cen(FATO); m5 = a.cen(f"(()=>{{const k=c.ordens['{OS}'].ap.find(x=>x.dia===5); const m=c.movs.find(x=>x.id===k.mov); return [k.st,m.det,m.obs||'']}})()")
         a.ok(f == [240, 122, 38] and m5[0] == 'Duplicidade · não somado' and m5[1] == '' and m5[2].startswith('Estornado: mesmo turno do dia 6'),
              f'AP-07 "vale este" (DEMO-11): 240 ha, 122 L / 38 L; dia 5 estornado, movimento sem item: {f} · {m5}')
-        a.c.size(1440, 1100); a.abrir('EST'); eb = a.body()
-        a.ok('retido · duplicidade' not in eb and 'Estornado' not in eb.split('Movimentos')[0][:0] , 'EST abre sem item fantasma do movimento estornado')
+        mid = a.cen(f"c.ordens['{OS}'].ap.find(x=>x.dia===5).mov")
+        a.c.size(1440, 1100); a.abrir('EST'); J("document.querySelectorAll('nav[aria-label=\"Seções do estoque\"] button')[5].click()"); time.sleep(.5)
+        row = J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.indexOf({json.dumps(mid)})>=0); return r?r.innerText.replace(/\\s+/g,' '):'';}})()") or ''
+        a.ok(bool(mid) and 'Consumo apontado na web' in row and ' Web ' in row + ' ' and P not in row and '25 L' not in row,
+             f'EST · movimentos: o consumo estornado do dia 5 ({mid}) é "Consumo apontado na web", origem Web, sem item nem quantidade: {row}')
         guard()
         # 7 · "Outro turno: somar": web 40 ha + app 50 ha → 280 ha, 140 L
         restaurar(); web_apontar('40'); app_turno('50'); web(); ordem(OS); pan(); btn('Outro turno: somar'); f = a.cen(FATO)
@@ -103,6 +115,44 @@ def rodar():
         # 10 · negativo: dois turnos do app no mesmo dia (mesmo operador) somam: 230 ha
         restaurar(); app_turno('20'); app_turno('20'); f = a.cen(FATO)
         a.ok(f[0] == 230 and a.cen(f"c.ordens['{OS}'].ap.some(x=>x.st==='Duplicidade a conferir')") is False, f'negativo: dois turnos do app somam (230 ha), nada retido: {f}')
+        guard()
+        # 12 · S2 (revisão 2): "Outro turno: somar" desconta a área no aparelho; com o sinal o realizado não passa da área (310 ≤ 350)
+        restaurar(); web_apontar('50', data='2026-09-27'); web_apontar('50', data='2026-09-27')
+        a.c.size(390, 1800); a.abrir('MB-03'); a.clk('Sem sinal'); app_turno('70', '35')
+        web(); ordem(OS); pan(); btn('Outro turno: somar'); t = toast(); a.c.size(390, 1800); a.abrir('MB-03'); a.clk('Com sinal')
+        f = a.cen(f"[c.ordens['{OS}'].realizado,c.ordens['{OS}'].saldo,c.ordens['{OS}'].area,c.ordens['{OS}'].ap.find(x=>x.dia===6).st]")
+        a.ok('Somar 50 ha passa do saldo da ordem (40 ha, descontando 70 ha ainda no aparelho)' in t and f == [310, 40, 350, 'Duplicidade a conferir'],
+             f'S2 somar com área no aparelho recusado; depois do sinal 310/350 ha, dia 6 segue retido: {f} · {t[:140]}')
+        guard()
+        # 13 · app: o caso do turno retido fica "Aguarda a decisão da duplicidade" e conta como aberto no cartão (não "Conferência resolvida")
+        restaurar(); a.abrir('MB-03'); a.clk('Sem sinal'); app_turno('2', '70')
+        cmd("W.cenApontar(c,{os:'OS-0421',d:'26/09',ha:2,origem:'web',chave:'W-nav-13'})"); a.clk('Com sinal'); time.sleep(.3)
+        b = a.body(); card = b[b.find('Turno fechado ·'):][:420].replace('\n', ' | ')
+        a.ok('Em conferência · duplicidade' in card and 'Consumo em conferência' in card and 'Aguarda a decisão da duplicidade · Fungicida A 70 L relatados' in card and 'Conferência resolvida' not in card,
+             'app: turno retido com consumo em conferência fica aberto no cartão: ' + card[:260])
+        guard()
+        # 14 · S3 (revisão 2): com o dia 5 estornado por "vale este" no dia 6, o dia 7 só oferece "Outro turno: somar"
+        restaurar(); web_apontar('50'); a.c.size(390, 1800); a.abrir('MB-03'); a.clk('Sem sinal'); app_turno('25'); app_turno('25'); a.abrir('MB-03'); a.clk('Com sinal')
+        web(); ordem(OS); pan(); btn('Mesmo turno: vale este'); p = pan()
+        a.ok('O dia 5 já não vale: este só pode ser somado como outro turno' in p and not temb_ini('Mesmo turno') and temb('Outro turno: somar'),
+             'dia 7 depois do estorno do dia 5: só "somar", com a causa: ' + p[p.find('Dia 7'):][:200])
+        btn('Outro turno: somar'); f = a.cen(FATO)
+        a.ok(f == [240, 120, 40], f'dia 7 somado: 25 + 25 ha do app no lugar dos 50 ha da web: 240 ha, 120 L / 40 L: {f}')
+        guard()
+        # 15 · S3 (revisão 2): estimativa acima da custódia na decisão pede o usado na linha (AP-04); com 8 L informado, soma e baixa 8 L
+        restaurar(); web_apontar('50'); web_apontar('40'); web_apontar('60', usado='30', data='2026-09-27')
+        web(); ordem(OS); p = pan(); btn('Outro turno: somar'); t = toast(); f0 = a.cen(FATO)
+        a.ok('Estimativa 20 L passa da custódia (10 L): informe o usado com Marcos' in p and 'Informe o usado (com Marcos) e decida de novo' in t and f0 == [300, 150, 10],
+             f'linha do dia 6 pede o usado; "somar" sem ele é recusado, nada muda: {f0} · {t[:140]}')
+        setin(f'Usado de {P} (L)', '8'); btn('Outro turno: somar'); f = a.cen(FATO)
+        a.ok(f == [340, 158, 2], f'com 8 L informado: 340 ha, 158 L consumidos, 2 L em custódia: {f}')
+        guard()
+        # 16 · S2 (revisão 2): consumo do dia 5 já aceito por Rui → a linha do retido não oferece "vale este" e diz por quê
+        restaurar(); web_apontar('50', usado='70'); a.c.size(390, 1800); a.abrir('MB-01'); ac = cmd("W.cenConciliar(c,'CC-301',true)")
+        web_apontar('50', usado='27'); web(); ordem(OS); p = pan()
+        a.ok('aceito' in ac and '"Vale este" indisponível: consumo já aceito por Rui (almoxarife) (CC-301).' in p and not temb('Mesmo turno: vale este')
+             and temb('Mesmo turno: vale o dia 5') and temb('Outro turno: somar') and a.cen(FATO) == [240, 165, 0],
+             f'linha do dia 6 sem "vale este" depois do aceite do CC-301 (240 ha, 165 L): {ac[:60]} · ' + p[p.find('Dia 6'):][:220])
         guard()
         # 11 · sem erros JS
         a.ok(not erros, 'sem erros JS em OS, MB-01, MB-03 e EST: ' + str(erros[:3]))

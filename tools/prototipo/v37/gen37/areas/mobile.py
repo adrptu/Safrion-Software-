@@ -158,7 +158,7 @@ MBJAN={k:dict(j=o.get('janela') or 'a definir',k=_jk(o.get('janela'))) for k,o i
 MBAPP_JS=('const MBJAN = '+json.dumps(MBJAN,ensure_ascii=False)+';\nconst MB_ETAPA_COR = '+json.dumps(ETAPA_COR,ensure_ascii=False)
           +';\nconst MBTX = {ink:"%s",muted:"%s",surf:"%s",line:"%s",acc:"%s",accs:"%s",yel:"%s",yels:"%s"};\n' % (INK,MUTED,SURF,LINE,ACC,ACCS,YEL,YELS)) + r'''
 // Gancho de teste/inspeção: o script da tela roda isolado (new Function); os testes app_* usam a mesma API do cenário por aqui.
-try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenConfirmarRecebimento, cenIniciarTurno, cenFecharTurno, cenOcorrencia, cenSinal, cenPodeEncerrar, cenConciliar }; window.__mb = { mbIniciar, mbDescartar, mbResta }; } catch (e) {}
+try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenConfirmarRecebimento, cenIniciarTurno, cenFecharTurno, cenOcorrencia, cenSinal, cenPodeEncerrar, cenConciliar, cenApontar }; window.__mb = { mbIniciar, mbDescartar, mbResta }; } catch (e) {}
 const MB_SEL_KEY = 'talhao-os-mb-os';   // ordem aberta no detalhe (conveniência do aparelho; o cenário não muda)
 function mbSelGet(){ try { return localStorage.getItem(MB_SEL_KEY) || ''; } catch (e) { return ''; } }
 function mbSelSet(id){ try { localStorage.setItem(MB_SEL_KEY, id || ''); } catch (e) {} }

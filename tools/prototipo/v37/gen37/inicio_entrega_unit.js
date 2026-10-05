@@ -83,6 +83,12 @@ rid = lib0430(); ent(rid, 'Glifosato 480', 320); ent(rid, '2,4-D 806', 160); ent
 const m6 = MG('OS-0430');
 ok('P6 web: turno no aparelho consumiu tudo; a web segue "Aguardando sinal do app", sem "Insumo esgotado" nem dona Ana', m6[0] === 'Aguardando sinal do app/yellow' && m6[1] !== 'Ana (agrônoma)' && m6[4] === null, m6);
 mud(A, 'return cenSinal(c,true)');
+// P6b · o aparelho baixou todo o insumo em 100 de 160 ha (usado informado), sem sinal: a web lê o servidor (osReqVis), não a baixa local;
+// com o sinal, o servidor vê o esgotado com 60 ha a fazer e a dona passa a ser Ana
+rid = lib0430(); ent(rid, 'Glifosato 480', 320); ent(rid, '2,4-D 806', 160); ent(rid, 'Óleo mineral', 80); conf(rid); mud(A, 'return cenSinal(c,false)'); iniApp('OS-0430');
+fechar(100, { 'Glifosato 480': 320, '2,4-D 806': 160, 'Óleo mineral': 80 }); const m6b = MG('OS-0430'); mud(A, 'return cenSinal(c,true)'); const m6c = MG('OS-0430');
+ok('P6b web sem sinal: o consumo no aparelho não vira "Insumo esgotado" antes do envio; com o sinal vira, com Ana (60 ha a fazer)', !/Insumo esgotado/.test(m6b[0]) && m6b[1] !== 'Ana (agrônoma)'
+   && /Insumo esgotado · Glifosato 480, 2,4-D 806, Óleo mineral\/red/.test(m6c[0]) && m6c[1] === 'Ana (agrônoma)', [m6b, m6c]);
 // P3 · exceções legítimas: ordem sem insumo (inclui água sem produto, DEC-2609-10) não passa pela regra
 reset(); mud(W, "return osc_liberar(c,'OS-0511',false,'')");
 ok('P3 sem insumo: OS-0505 (Em execução) e OS-0511 (liberada sem requisição) iniciam', iniApp('OS-0505') === '' && mud(A, 'c.app.turno=null; return {msg:"x"}') === 'x' && iniApp('OS-0511') === '', [iniApp('OS-0505')]);

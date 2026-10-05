@@ -205,6 +205,29 @@ function cenApSomado(a) { return a.sinc !== false && (a.st === 'Provisório' || 
 function cenApDup(o, ap) { const sob = (x, y) => !x || !y || x === y;
   return (o.ap || []).filter(a => a !== ap && a.st !== 'Previsto' && a.st !== CEN_AP_DESC && a.sinc !== false && a.d === ap.d && sob(a.parc, ap.parc)
     && a.chave !== ap.chave && !(a.origem === 'app' && ap.origem === 'app' && a.quem && a.quem === ap.quem)); }
+// relatos de dupDe que ainda valem ou aguardam decisão: o estornado ou guardado depois não conta (rótulo, "vale este" e mensagens)
+function cenApDupVivos(o, ap) { return (ap.dupDe || []).map(d => (o.ap || []).find(a => a.dia === d)).filter(a => a && (cenApSomado(a) || a.st === CEN_AP_DUP)); }
+// o que já foi feito sobre o relato somado K e impede estorná-lo por "vale este": consumo aceito pelo almoxarife (CMD-50) e lote de colheita
+// com destino, liberação ou operação (carLoteUso, carência). Devolve o texto ou ''.
+function cenApUsoK(c, o, K) {
+  const ac = (c.confs || []).filter(k => k.os === o.id && k.dia === K.dia && k.estado === 'Aceito').map(k => k.id);
+  const lid = typeof carLid === 'function' ? carLid(o.id, K.dia) : ''; const us = (lid && typeof carLoteUso === 'function') ? carLoteUso(c, lid) : [];
+  return [ac.length ? 'consumo já aceito por ' + CEN_CONC_RESP + ' (' + ac.join(', ') + ')' : '', us.length ? 'lote ' + lid + ' com ' + us.join(', ') : ''].filter(Boolean).join('; '); }
+// estado da decisão antes de gravar: realizado, saldo e custódia depois do estorno de K ("vale este"); pend = área no aparelho (conta no máximo)
+function cenApDecBase(c, o, K) { const r = o.req && c.reqs[o.req]; const cust = {};
+  if (r) r.itens.forEach(it => { cust[it.prod] = it.custodia + (K ? ((K.cons || {})[it.prod] || 0) : 0); });
+  return { r, cust, real: (o.realizado || 0) - (K ? K.ha : 0), saldo: (o.saldo || 0) + (K ? K.ha : 0), pend: (o.ap || []).filter(a => a.sinc === false).reduce((s, a) => s + (a.ha || 0), 0) }; }
+// consumo a gravar na decisão: o informado fica; a estimativa é refeita no acumulado de agora (SINT-C03) e, acima da custódia, é recusada como
+// na captura (AP-04): falta = o que precisa do usado. us = {produto: usado} informado na conferência (vira informado).
+function cenApDecCons(o, ap, b, us) { const cons = Object.assign({}, ap.cons || {}), inf = Object.assign({}, ap.inf || {}), falta = [];
+  (o.ins || []).forEach(x => { const it = b.r && b.r.itens.find(i => i.prod === x.p); if (!(x.p in cons) || inf[x.p] || !it) return;
+    const u = us ? us[x.p] : undefined; if (u !== undefined && u !== null && u !== '' && Number(u) >= 0) { cons[x.p] = Number(u); inf[x.p] = true; return; }
+    const q = cenQtdTrecho(x.dose, b.real + b.pend, ap.ha); cons[x.p] = q; if (q > (b.cust[x.p] || 0) + 1e-9) falta.push({ p: x.p, q, un: it.un, cust: b.cust[x.p] || 0 }); });
+  return { cons, inf, falta }; }
+// impressão do conteúdo do comando (ENG-021): a mesma chave com outro conteúdo é conflito, não "já registrado"
+function cenApImp(k) { const n = x => (x === undefined || x === null || x === '') ? null : Number(x);
+  const cs = Object.keys(k.cons || {}).filter(p => k.cons[p] !== undefined && k.cons[p] !== null).sort().map(p => p + '=' + Number(k.cons[p]));
+  return JSON.stringify([k.d || '', n(k.ha), n(k.h), k.parc || null, k.origem || 'web', k.quem || '', cs, (k.est || []).slice().sort()]); }
 function cenApDupTxt(l) { return l.map(a => 'dia ' + a.dia + ', ' + cenNum(a.ha) + ' ha ' + (a.origem === 'app' ? 'pelo app' + (a.quem ? ' (' + a.quem + ')' : '') : 'pela web')).join('; '); }
 function cenSeloAp(c, id) { const o = c.ordens[id]; if (!o) return; const t = 'Apontamento em conferência';
   o.selos = (o.selos || []).filter(s => s.t !== t); if ((o.ap || []).some(a => a.st === CEN_AP_DUP)) o.selos.push({ t, c: 'yellow' }); }
@@ -241,7 +264,7 @@ function cenApEntra(c, o, ap, baixado) {
 function cenApontar(c, k) {
   const o = c.ordens[k.os]; if (!o) throw new Error('Ordem não encontrada.');
   const ja = k.chave ? (o.ap || []).find(a => a.chave === k.chave) : null;
-  if (ja) { if (ja.ha !== Number(k.ha) || ja.d !== k.d) throw new Error('Este registro (' + k.chave + ') já foi gravado como dia ' + ja.dia + ' com ' + cenNum(ja.ha) + ' ha em ' + ja.d + ': conflito, nada gravado.');   // ENG-021
+  if (ja) { if (ja.imp ? ja.imp !== cenApImp(k) : (ja.ha !== Number(k.ha) || ja.d !== k.d)) throw new Error('Este registro (' + k.chave + ') já foi gravado como dia ' + ja.dia + ' (' + cenNum(ja.ha) + ' ha em ' + ja.d + ') com outro conteúdo: conflito, nada gravado.');   // ENG-021
     return { ap: ja, repetido: true, ks: [], dup: [] }; }
   if (o.etapa !== 'Em execução') throw new Error(k.os + ' não está em execução.');
   if (!/^\d\d\/\d\d$/.test(k.d || '')) throw new Error('Informe a data do turno.');
@@ -253,12 +276,13 @@ function cenApontar(c, k) {
   const r = o.req && c.reqs[o.req];   // não informado: dose × área do trecho para o que está com o operador; fora da requisição, 0 (como no MB-03)
   (o.ins || []).forEach(x => { if (cons[x.p] === undefined) cons[x.p] = (r && r.itens.some(i => i.prod === x.p)) ? cenQtdTrecho(x.dose, (o.realizado || 0) + pend, ha) : 0; });   // regra única (SINT-C03)
   if (r) for (const it of r.itens) { const q = cons[it.prod] || 0; if (q > it.custodia + 1e-9 && !inf[it.prod]) throw new Error('Consumo de ' + it.prod + ' (' + cenNum(q) + ' ' + it.un + ') acima do que está '
-    + (k.origem === 'app' ? 'com você (' + cenNum(it.custodia) + ' ' + it.un + '). Confira a retirada.' : 'em custódia (' + cenNum(it.custodia) + ' ' + it.un + '). Informe quanto foi usado ou confira a entrega no Estoque.')); }
+    + (k.origem === 'app' ? 'com você (' + cenNum(it.custodia) + ' ' + it.un + '). Confira a retirada.' : 'em custódia (' + cenNum(it.custodia) + ' ' + it.un + '). '
+    + (k.cons ? 'Informe quanto foi usado ou confira a entrega no Estoque.' : 'Aponte pela O.S., informando quanto foi usado, ou confira a entrega no Estoque.'))); }
   const quem = k.quem || ((r && (r.itens.find(i => i.quem) || {}).quem) || o.resp || '');   // web: herda quem está com o material (AGENTS §3.3)
   const feitos = (o.ap || []).filter(a => a.st !== 'Previsto'); const dia = feitos.length + 1;
   // previstos são plano, não fato: a web mantém os próximos dias (renumerados) e o app não os guarda — o que cada tela já fazia
   const ap = { d: k.d, dia, ha, h: k.h || null, parc: k.parc || null, st: 'Provisório', cons, inf, obs: k.obs || '', origem: k.origem || 'web', quem,
-    chave: k.chave || ((k.origem === 'app' ? 'TU-' : 'W-') + k.os + '-dia' + dia), at: cenAgora(), sinc: k.origem === 'app' ? cenOnline(c) : true };
+    chave: k.chave || ((k.origem === 'app' ? 'TU-' : 'W-') + k.os + '-dia' + dia), imp: cenApImp(k), at: cenAgora(), sinc: k.origem === 'app' ? cenOnline(c) : true };
   const reter = ap.sinc && cenApDup(o, ap).length > 0;   // previsto só sai quando o apontamento soma
   const prev = k.origem === 'app' ? [] : (o.ap || []).filter(a => a.st === 'Previsto').slice(reter ? 0 : 1).map((x, i) => Object.assign({}, x, { dia: dia + 1 + i }));
   o.ap = feitos.concat([ap]).concat(prev);
@@ -269,34 +293,41 @@ function cenApontar(c, k) {
   return R; }
 // decisão de quem confere (CMD-09; CEN_CONF_AP). modo: 'somar' (outro turno: soma e baixa uma vez) · 'anterior' (mesmo turno: vale o já
 // somado; este fica guardado como duplicidade) · 'este' (mesmo turno: vale este; o já somado é estornado e guardado). O relógio ou a ordem de
-// chegada não define o vencedor (DEMO-11). Nenhum relato é apagado. true/false = 'somar'/'anterior' (chamadas antigas).
-function cenApDecidir(c, id, dia, modo, quem) {
+// chegada não define o vencedor (DEMO-11). Nenhum relato é apagado. true/false = 'somar'/'anterior' (chamadas antigas). us = usado informado
+// na conferência para a estimativa que passou da custódia (AP-04). Tudo é conferido antes de gravar: recusa não muda nada.
+function cenApDecidir(c, id, dia, modo, quem, us) {
   modo = modo === true ? 'somar' : (modo === false ? 'anterior' : modo); quem = quem || CEN_CONF_AP;
   const o = c.ordens[id]; const ap = o && (o.ap || []).find(a => a.dia === dia && a.st === CEN_AP_DUP);
   if (!ap) throw new Error('O apontamento do dia ' + dia + ' não está em conferência de duplicidade.');
-  const de = (ap.dupDe || []).join(', '); const ag = (c.confs || []).filter(k => k.os === id && k.dia === dia && k.estado === CEN_CC_AGUARDA);
+  if (['anterior', 'este', 'somar'].indexOf(modo) < 0) throw new Error('Decisão desconhecida: ' + modo + '.');
+  const viv = cenApDupVivos(o, ap); const de = viv.map(a => a.dia).join(', '), de0 = (ap.dupDe || []).join(', ');
+  const ag = (c.confs || []).filter(k => k.os === id && k.dia === dia && k.estado === CEN_CC_AGUARDA);
   const r = o.req && c.reqs[o.req]; const mvOf = a => a.mov && (c.movs || []).find(x => x.id === a.mov);
   const guarda = (a, txt) => { a.st = CEN_AP_DESC; const m = mvOf(a); if (m) { m.det = ''; m.obs = txt; } };   // det vazio: o Estoque não lê item
-  ap.dec = { modo, quem, at: cenAgora() };
-  if (modo === 'anterior') { guarda(ap, 'Mesmo turno do dia ' + de + ': guardado como duplicidade, nada baixado.');
+  if (modo !== 'somar' && !viv.length) throw new Error('O dia ' + de0 + ' já não vale (estornado ou guardado): o dia ' + dia + ' só pode ser somado como outro turno.');
+  if (modo === 'anterior') {
+    ap.dec = { modo, quem, at: cenAgora() }; guarda(ap, 'Mesmo turno do dia ' + de + ': guardado como duplicidade, nada baixado.');
     ag.forEach(k => { k.estado = 'Recusado'; k.decisao = 'mesmo turno do dia ' + de; k.por = quem; }); cenSeloAp(c, id); cenSeloConf(c, id);
     return { msg: 'Dia ' + dia + ' guardado como duplicidade do dia ' + de + ': nada foi somado nem baixado; o relato fica no histórico.' }; }
-  let est = '';
-  if (modo === 'este') { const K = (o.ap || []).find(a => a.dia === ap.dupDe[0]);
-    if (ap.dupDe.length !== 1 || !K || !cenApSomado(K)) throw new Error('"Vale este" só contra um apontamento já somado: decida antes o dia ' + de + '.');
-    if (r) r.itens.forEach(it => { const q = (K.cons || {})[it.prod] || 0; it.consumido -= q; it.custodia += q; });   // estorno vinculado (RN-020)
+  const K = modo === 'este' ? (viv.length === 1 && cenApSomado(viv[0]) ? viv[0] : null) : null;
+  if (modo === 'este') { if (!K) throw new Error('"Vale este" só contra um apontamento já somado: decida antes o dia ' + (de || de0) + '.');
+    const uso = cenApUsoK(c, o, K); if (uso) throw new Error('"Vale este" não desfaz o dia ' + K.dia + ': ' + uso + '. Escolha "Mesmo turno: vale o dia ' + K.dia + '".'); }
+  const b = cenApDecBase(c, o, K);
+  if (ap.ha > b.saldo - b.pend + 1e-9) throw new Error((K ? '"Vale este" com ' : 'Somar ') + cenNum(ap.ha) + ' ha passa do saldo da ordem (' + cenNum(Math.max(0, b.saldo - b.pend)) + ' ha'
+    + (b.pend ? ', descontando ' + cenNum(b.pend) + ' ha ainda no aparelho' : '') + ')' + (K ? '.' : ': confira se é o mesmo turno do dia ' + (de || de0) + '.'));
+  const dc = cenApDecCons(o, ap, b, us);
+  if (dc.falta.length) throw new Error(dc.falta.map(f => f.p + ': a estimativa dose × área (' + cenNum(f.q) + ' ' + f.un + ') passa do que está em custódia (' + cenNum(f.cust) + ' ' + f.un + ')').join('; ')
+    + '. Informe o usado' + (ap.quem ? ' (com ' + ap.quem + ')' : '') + ' e decida de novo.');
+  ap.dec = { modo, quem, at: cenAgora() }; let est = '';
+  if (K) { if (r) r.itens.forEach(it => { const q = (K.cons || {})[it.prod] || 0; it.consumido -= q; it.custodia += q; });   // estorno vinculado (RN-020)
     (c.confs || []).forEach(k => { if (k.os === id && k.dia === K.dia && k.estado === 'Em conferência') { k.estado = 'Recusado'; k.decisao = 'mesmo turno: vale o dia ' + dia; k.por = quem; } });
     o.realizado -= K.ha; o.saldo += K.ha; K.dec = { modo: 'estornado', quem, at: ap.dec.at, vale: dia };
     guarda(K, 'Estornado: mesmo turno do dia ' + dia + ', que ficou valendo.'); est = ' O dia ' + K.dia + ' foi estornado e fica guardado como duplicidade.'; }
-  else if (modo !== 'somar') throw new Error('Decisão desconhecida: ' + modo + '.');
-  if (ap.ha > o.saldo + 1e-9) throw new Error('Somar ' + cenNum(ap.ha) + ' ha passa do saldo da ordem (' + cenNum(o.saldo) + ' ha): confira se é o mesmo turno do dia ' + de + '.');
-  ap.st = 'Provisório'; ag.forEach(k => { k.estado = 'Em conferência'; });
-  const pend = (o.ap || []).filter(a => a.sinc === false).reduce((s, a) => s + (a.ha || 0), 0);   // estimativa no acumulado de agora (SINT-C03)
-  (o.ins || []).forEach(x => { if (ap.cons && x.p in ap.cons && !(ap.inf || {})[x.p] && r && r.itens.some(i => i.prod === x.p)) ap.cons[x.p] = cenQtdTrecho(x.dose, (o.realizado || 0) + pend, ap.ha); });
-  const ks = cenApBaixa(c, o, ap); const m0 = mvOf(ap); if (m0) m0.obs = (modo === 'este' ? 'Mesmo turno: vale este dia' : 'Somado como outro turno') + ' · ' + quem + '.';
+  ap.st = 'Provisório'; ag.forEach(k => { k.estado = 'Em conferência'; }); ap.cons = dc.cons; ap.inf = dc.inf;
+  const ks = cenApBaixa(c, o, ap); const m0 = mvOf(ap); if (m0) m0.obs = (K ? 'Mesmo turno: vale este dia' : 'Somado como outro turno') + ' · ' + quem + '.';
   o.realizado += ap.ha; o.saldo = Math.max(0, o.saldo - ap.ha); cenSeloAp(c, id); cenSeloConf(c, id);
   if (!(o.saldo > 1e-9)) o.ap = o.ap.filter(a => a.st !== 'Previsto');
-  return { msg: 'Dia ' + dia + (modo === 'este' ? ' vale como o turno de ' + ap.d + ': ' : ' somado como outro turno: ') + cenNum(ap.ha) + ' ha · saldo ' + cenNum(o.saldo) + ' ha.' + est
+  return { msg: 'Dia ' + dia + (K ? ' vale como o turno de ' + ap.d + ': ' : ' somado como outro turno: ') + cenNum(ap.ha) + ' ha · saldo ' + cenNum(o.saldo) + ' ha.' + est
     + (ks.length || ag.length ? ' Consumo em conferência com ' + CEN_CONC_RESP + '.' : '') }; }
 // Fechar turno (app): o mesmo comando da web, com a data e a chave do turno. Fechar o turno não encerra a O.S.
 function cenFecharTurno(c, ha, horas, consumo, obs, est) {

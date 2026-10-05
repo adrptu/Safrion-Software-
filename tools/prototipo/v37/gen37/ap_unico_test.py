@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """CTL-2 · Frente A (AP-ÚNICO): apontamento único web (O.S. e Mapa) × app. PRD 8.5 l.3017-3036 (OSDIA-03/04/06), DEMO-11 l.4751, CMD-09, ENG-021.
-unit: monta o JS real (cenario.js + JS_NUCLEO da O.S. com carência + OSD do gerador + econsDet do Estoque) e roda ap_unico_unit.js no node.
+unit: monta o JS real (cenario.js + JS_NUCLEO da O.S. com carência + OSD do gerador + econsDet do Estoque + ordCusto do Mapa) e roda ap_unico_unit.js no node.
 nav:  Chrome real (O.S. 1440 px e app 390 px) sobre o mesmo cenário (localStorage): formulário com consumo real e operador herdado,
       duplo clique, turno do app retido, as três saídas de Paula, sem sinal, Em conferência e cliques.
 Uso (de gen37/, depois do build): python3 ap_unico_test.py [unit|nav]   (sem argumento: as duas partes; sai 1 se alguma falhar)"""
@@ -15,9 +15,12 @@ def unit():
     est = open(os.path.join(HERE, 'areas', 'processo_estoque.py'), encoding='utf-8').read()
     econs = re.search(r'function econsDet\(c,m\)\{.*?\.filter\(Boolean\); \}', est, re.S).group(0)
     g2 = [l for l in open(os.path.join(HERE, 'g2lib.js'), encoding='utf-8') if l.startswith('function g2num')][0]
+    ini = open(os.path.join(HERE, 'areas', 'inicio.py'), encoding='utf-8').read()   # custo do Mapa (ordCusto) com preços sintéticos isolados em M
+    custo = ('const CUSTO=(function(M){ ' + re.search(r'function precoDe\(p\)\{.*?\n', ini).group(0) + re.search(r'function ordCusto\(o\)\{.*?return r; \}\n', ini, re.S).group(0)
+             + ' return {ordCusto}; })({cop:{"Pulverização":10},preco:{"Fungicida A":100},gen:{}});\n')
     pre = "var window={addEventListener(){}}; var localStorage=undefined; var location={hash:''};\n" + g2
     osd = dict(ords=P._ordens(), nova=P._nova_ordem_dados(), aloc={}, agf={})
-    src = (pre + cenario.js_prefixo() + 'const OSD = ' + json.dumps(osd, ensure_ascii=False) + ';\nconst RC_OS=[];\n' + P.JS_NUCLEO + '\n' + econs + '\n'
+    src = (pre + cenario.js_prefixo() + 'const OSD = ' + json.dumps(osd, ensure_ascii=False) + ';\nconst RC_OS=[];\n' + P.JS_NUCLEO + '\n' + econs + '\n' + custo
            + open(os.path.join(HERE, 'ap_unico_unit.js'), encoding='utf-8').read())
     fd, p = tempfile.mkstemp(prefix='ap_unico_', suffix='.js')
     with os.fdopen(fd, 'w', encoding='utf-8') as f: f.write(src)

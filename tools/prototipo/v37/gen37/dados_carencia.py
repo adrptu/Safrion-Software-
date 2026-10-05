@@ -303,11 +303,17 @@ function carRot(e){ if(e.k==='curso') return 'carência até '+carAte(e.det.fim)
 function carOps(cen){ return ((CARD.car0||{}).ops||[]).concat(((cen&&cen.car)||{}).ops||[]); }
 function carLotes(cen){ const L={};
   Object.keys((cen&&cen.ordens)||{}).forEach(id=>{ const o=cen.ordens[id]; if(!carEhColheita(o)) return; const ts=carTals(o.talhao); if(!ts.length) return;
-    (o.ap||[]).forEach(a=>{ if(a.st==='Previsto'||a.st===CEN_AP_DESC) return; const lid=carLid(id,a.dia);
+    (o.ap||[]).forEach(a=>{ if(a.st==='Previsto'||a.st===CEN_AP_DESC||a.st===CEN_AP_DUP) return; const lid=carLid(id,a.dia);
       L[lid]={id:lid,tipo:'campo',os:id,tal:ts[0].tid,parc:a.parc||ts[0].parc||null,d:carIso(a.d),ha:Number(a.ha)||0,st:a.st,sinc:a.sinc!==false,pais:[],pos:[],q:'colheita '+id+' dia '+a.dia}; }); });
   carOps(cen).forEach(op=>{ if(op.k==='mistura'||op.k==='divisao') (op.novos||[]).forEach(n=>{ L[n.id]={id:n.id,tipo:op.k,pais:(op.de||[]).slice(),d:op.d,pos:[],q:n.q||'',fonte:op.fonte||''}; });
     if(op.k==='pos'&&L[op.lote]) L[op.lote].pos.push(op); });
   return L; }
+// o que já foi registrado sobre o lote (destino, liberação, pós-colheita, mistura ou divisão, laudo): o relato que o originou não é estornado por cima
+function carLoteUso(cen,lid){ const C=(cen&&cen.car)||{}; const out=[];
+  if(carDestino(cen,lid)) out.push('destino'); if(((C.lib||{})[lid]||[]).length) out.push('liberação comercial');
+  carOps(cen).forEach(op=>{ if(op.k==='pos'&&op.lote===lid) out.push('operação de pós-colheita'); if((op.k==='mistura'||op.k==='divisao')&&(op.de||[]).indexOf(lid)>=0) out.push(op.k==='mistura'?'mistura':'divisão'); });
+  if(((CARD.car0||{}).laudos||[]).concat(C.laudos||[]).some(x=>(x.escopo||[]).indexOf(lid)>=0)) out.push('laudo');
+  return out.filter((v,i,a)=>a.indexOf(v)===i); }
 function carAncestrais(L,lid,seen){ seen=seen||{}; if(seen[lid]) return []; seen[lid]=1; const l=L[lid]; if(!l) return []; let out=[l]; (l.pais||[]).forEach(p=>{ out=out.concat(carAncestrais(L,p,seen)); }); return out; }
 function carDestino(cen,lid){ const d=(((cen&&cen.car)||{}).dest||{}); return (d[lid]!==undefined)?d[lid]:(((CARD.car0||{}).dest||{})[lid]||''); }
 function carLaudos(cen,L,lid){ const l=L[lid]; const ok=[lid]; if(l&&l.tipo==='divisao') (l.pais||[]).forEach(p=>ok.push(p));   // divisão: a amostra do lote de origem representa as partes; mistura precisa da própria amostra
