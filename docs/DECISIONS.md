@@ -25,6 +25,7 @@ Registradas no capítulo 72 do PRD v3.9 (26/09/2026).
 | DEC-2709-01 | Início do software real (F0 e F1) só com dados fictícios; decisões técnicas delegadas a Claude e Codex juntos. Continuam com o proprietário: custo, conta e contrato, dados reais, ERP real, publicação a usuários reais e aceite da candidata antes da produção | `docs/parceria/rodadas/R-006-skills-ferramentas-plano.md` §7 |
 | DEC-0510-01 | Protótipo em regime leve: branch única, sem PR por incremento, revisão sem bloqueio; rigor completo só no software real | `AGENTS.md` 3.5 |
 | DEC-0510-02 | Unidade junto do valor, na célula ("62.500 kg", "160,00 ha"), sem coluna nem filtro de unidade; ordenação pelo número. Rótulos de custo: "Custo R$/h", "Custo R$/ha", "Custo R$/kg" | issue 1, comentário 5997108200 |
+| DEC-0510-03 | Unidade de produção e produtividade de cada cultura é a mais usada no mercado: t/ha para frutas e cana; sacas (60 kg) para grãos e café; demais culturas pela unidade de mercado com fonte. Fica no cadastro da cultura e vale para meta, apontamento, colheita, estoque de produto e comercial | Chat do proprietário, 05/10/2026 |
 
 ## Decisões pendentes do proprietário
 
