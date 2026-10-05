@@ -574,7 +574,7 @@ function PREVALS(self,v){ compRend(self,self.state.saf||null);
   g2rows(self,GR('g_saf')).forEach(r=>{ const cs=leaves(g2rows(self,GR('g_cult_'+sk(r.id)))); r.v.n=cs.length; r.v.area=cs.reduce((s,c)=>s+(Number(c.v.area)||0),0);
     const est=r.v.estado||'Rascunho'; r.p.estado=[{k:'chip',t:est,c:(est==='Encerrada'?'gray':(est==='Em planejamento'?'green':'yellow'))}].concat(r.id===saf?[{k:'chip',t:'Selecionada',c:'blue'}]:[]);
     r.v.periodo=safPeriodo(r.v.ini,r.v.fim)||r.v.periodo||''; r.p.nome=[{k:'b',t:r.v.nome},{k:'mut',t:r.v.periodo}].concat(r.ro?[]:[{k:'act',t:'Editar',fn:'safedit:'+r.id,lk:true}]); r.s.nome=r.v.nome;
-    const px=proxSaf(self,r); r._prox=px[1]; r.dr='open_'+r.id;
+    const px=proxSaf(self,r); r._prox=px[1]; r.dr='open_'+r.id; r.drDup=true;   // o clique na linha repete o botão "Continuar" da linha: uma parada de Tab só (v3.1)
     r.p.acao=[{k:'act',t:px[0],fn:'pickat:'+r.id+'|'+px[1],u:false}]; r.s.acao=px[0]; });
   // ---- etapa 2: partes calculadas do cultivo (plano aplicado, ajustes) ----
   const adj=adjOf(self);
