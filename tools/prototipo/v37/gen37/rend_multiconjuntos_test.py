@@ -53,6 +53,11 @@ try:
     # mesmos valores serem conferidos pelas mesmas asserções (as outras grades passam como estão)
     LEG=r"""(x=>{ const cs=[...x.querySelectorAll('[role=cell]')].map(c=>c.innerText.replace(/\s+/g,' ').trim()); const tb=x.closest('[role=table]');
       const hs=tb?[...tb.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴]/g,'').replace(/\s+/g,' ').trim().toUpperCase()):[];
+      // etapa 4: Gatilho | Data separados e Parte | Janela | Talhão no fim; remonta a coluna "Gatilho · data" de antes (regra, data ou parte da configuração)
+      if(hs[1]==='GATILHO'&&hs[2]==='DATA'&&cs.length>=15){ const nm=cs[0], ix=nm.indexOf(' precisa de '); const part=cs[12], jan=cs[13];
+        const cfg=part&&part!=='—'; const opOld=cfg?((part==='pelo rendimento'?'pelo rendimento':part+' % da área')+(jan&&jan!=='—'?' · janela '+jan+' h':'')+(ix>=0?' '+nm.slice(ix+1):''))
+          :((cs[1]&&cs[1]!=='—')?cs[1]:((cs[2]&&cs[2]!=='—')?cs[2]:''));
+        return [cfg&&ix>=0?nm.slice(0,ix):nm,opOld].concat(cs.slice(3,12)); }
       if(hs[0]!=='OPERAÇÃO'||hs[1]!=='ATIVIDADE'||cs.length<15) return cs;
       const st=t=>t.replace(/^[▸▾]\s*/,''); const op=st(cs[0]), atv=cs[1], nome=cs[2], modo=cs[7], part=cs[11], seq=cs[12], jan=cs[13].replace(/,0$/,''), pl=cs[14];
       const janT=(jan&&jan!=='—')?' janela '+jan+' h por talhão':''; const param=modo==='Informado'?'informado':(cs[8]+' m × '+cs[9]+' km/h × '+cs[10]+' %').replace(/,00? /g,' ');

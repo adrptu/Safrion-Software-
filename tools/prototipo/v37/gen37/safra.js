@@ -491,21 +491,27 @@ function rendActs(self,gid,r){ if(!r||r.grp) return []; const saf=self.state.saf
       go:()=>{ if(!ask){ self.setState({rmCfg:r.id}); return; } rendRemover(self,gid,r.id); }}); }
   return out; }
 function leafParts(r,adj,kid){ const pl=planById(r.v.plano); const na=Object.keys(adj[r.id]||{}).length; const t=r.v.talhao||r.v.local;
-  r.p.local=[{k:'b',t:r.v.local||'—'},{k:'mut',t:(kid?'parcela':'talhão inteiro')+(r.decl?' · sem polígono':'')}].concat((!kid&&!r.ro)?[{k:'act',t:'Dividir',fn:'divide:'+t,lk:true}]:[]); r.s.local=r.v.local;
-  r.p.meta=[{k:'txt',t:nf(r.v.meta)+' '+(r.v.unm||'')}]; r.s.meta=String(r.v.meta); dcol(r,'dt_plantio',r.v.plantio);
-  if(pl && pl.cultura===r.v.cult){ r.p.plano=[{k:'txt',t:pl.nome+' v'+pl.versao},{k:'br'},{k:'act',t:(r.ro?'Ver insumos':'Ajustar insumos'),fn:'openlp:'+r.id,lk:true}]; r.s.plano=pl.nome; }
+  // TABELAS-FOCO (5983172395): local | tipo | … | meta | unidade da meta | plano | versão | ajustes, uma variável por coluna (a ação fica com a entidade)
+  r.p.local=[{k:'b',t:r.v.local||'—'}].concat((!kid&&!r.ro)?[{k:'act',t:'Dividir',fn:'divide:'+t,lk:true}]:[]); r.s.local=r.v.local;
+  r.v.tipo=(kid?'Parcela':'Talhão inteiro')+(r.decl?' (sem polígono)':''); r.p.tipo=[{k:'txt',t:r.v.tipo}]; r.s.tipo=r.v.tipo; r.v.livre=''; r.p.livre=[{k:'mut',t:'—'}]; r.s.livre='';
+  r.p.meta=[{k:'txt',t:nf(r.v.meta)}]; r.s.meta=nf(r.v.meta); r.p.unm=[{k:'txt',t:r.v.unm||'—'}]; r.s.unm=r.v.unm||''; dcol(r,'dt_plantio',r.v.plantio);
+  r.v.ver=(pl&&pl.cultura===r.v.cult)?pl.versao:''; r.p.ver=r.v.ver?[{k:'txt',t:'v'+r.v.ver}]:[{k:'mut',t:'—'}]; r.s.ver=r.v.ver?'v'+r.v.ver:'';
+  if(pl && pl.cultura===r.v.cult){ r.p.plano=[{k:'txt',t:pl.nome},{k:'br'},{k:'act',t:(r.ro?'Ver insumos':'Ajustar insumos'),fn:'openlp:'+r.id,lk:true}]; r.s.plano=pl.nome; }
   else if(pl){ r.p.plano=[{k:'chip',t:'Plano de '+pl.cultura+' incompatível',c:'red'},{k:'act',t:'Reaplicar',fn:'applyone:'+r.id}]; r.s.plano='incompatível'; }
   else { r.p.plano=r.ro?[{k:'mut',t:'sem plano'}]:[{k:'act',t:'Aplicar plano',fn:'applyone:'+r.id}]; r.s.plano=''; }
-  if(na) r.p.plano=r.p.plano.concat([{k:'br'},{k:'chip',t:na+(na>1?' ajustes deste talhão':' ajuste deste talhão'),c:'yellow'}]); r.s.aj=String(na); }
+  r.v.aj=na; r.p.aj=na?[{k:'chip',t:String(na),c:'yellow'}]:[{k:'mut',t:'—'}]; r.s.aj=String(na); }
 function grpParts(r,adj){ const ks=r.kids||[]; const t=r.v.talhao; const T=talhaoArea(t); const A=ks.reduce((a,c)=>a+(Number(c.v.area)||0),0); const L=T-A;
   const uniq=(f)=>[...new Set(ks.map(c=>c.v[f]).filter(x=>x!==''&&x!==undefined&&x!==null))];
   r.v.area=r2(A); r.v.faz=(ks[0]&&ks[0].v.faz)||r.v.faz; r.v.cult=uniq('cult').join(', '); r.v.var=uniq('var').join(', ');
   const ds=uniq('plantio').sort(); r.v.plantio=ds[0]||''; dcol(r,'dt_plantio',ds[0],(ds.length>1?(br(ds[0]).slice(0,5)+' a '+br(ds[ds.length-1])):''));
-  r.v.meta=''; r.p.meta=[{k:'mut',t:'por parcela'}]; r.s.meta='';
-  const pls=uniq('plano').map(planById).filter(Boolean); r.p.plano=pls.length?[{k:'txt',t:(pls.length===1?(pls[0].nome+' v'+pls[0].versao):(pls.length+' planos'))}]:[{k:'mut',t:'sem plano'}]; r.s.plano=pls.map(x=>x.nome).join(', ');
-  const na=ks.reduce((a,c)=>a+Object.keys(adj[c.id]||{}).length,0); if(na) r.p.plano=r.p.plano.concat([{k:'br'},{k:'mut',t:na+(na>1?' ajustes locais':' ajuste local')}]); r.s.aj=String(na);
-  const lv=Math.abs(L)<=0.005?'área toda alocada':(L>0?(nfa(L)+' ha livres'):('excede '+nfa(-L)+' ha'));
-  r.p.local=[{k:'b',t:t},{k:'mut',t:ks.length+(ks.length>1?' parcelas':' parcela')+' · '+lv}].concat(r.ro?[]:[{k:'act',t:'Dividir',fn:'divide:'+t,lk:true}]); r.s.local=t; }
+  r.v.meta=''; r.p.meta=[{k:'mut',t:'por parcela'}]; r.s.meta=''; r.p.unm=[{k:'mut',t:''}]; r.s.unm='';
+  const pls=uniq('plano').map(planById).filter(Boolean); r.p.plano=pls.length?[{k:'txt',t:(pls.length===1?pls[0].nome:(pls.length+' planos'))}]:[{k:'mut',t:'sem plano'}]; r.s.plano=pls.map(x=>x.nome).join(', ');
+  const vs=[...new Set(pls.map(x=>'v'+x.versao))]; r.v.ver=''; r.p.ver=vs.length?[{k:'txt',t:vs.join(', ')}]:[{k:'mut',t:'—'}]; r.s.ver=vs.join(', ');
+  const na=ks.reduce((a,c)=>a+Object.keys(adj[c.id]||{}).length,0); r.v.aj=na; r.p.aj=na?[{k:'txt',t:String(na)}]:[{k:'mut',t:'—'}]; r.s.aj=String(na);
+  // área livre (ha) do talhão dividido: positiva = livre, negativa = excede (aviso em vermelho)
+  r.v.livre=Math.abs(L)<=0.005?0:r2(L); r.p.livre=[{k:L< -0.005?'cn':'txt',t:nfa(Math.abs(L)<=0.005?0:L),c:'red'}]; r.s.livre=nfa(Math.abs(L)<=0.005?0:L);
+  r.v.tipo=ks.length+(ks.length>1?' parcelas':' parcela'); r.p.tipo=[{k:'txt',t:r.v.tipo}]; r.s.tipo=r.v.tipo;
+  r.p.local=[{k:'b',t:t}].concat(r.ro?[]:[{k:'act',t:'Dividir',fn:'divide:'+t,lk:true}]); r.s.local=t; }
 // Uma parcela com a área toda volta a talhão inteiro; talhão inteiro com área menor vira parcela com área livre visível.
 function normCult(rows){ const out=[];
   rows.forEach(r=>{ const t=r.v.talhao, T=talhaoArea(t);
@@ -688,16 +694,19 @@ function PREVALS(self,v){ compRend(self,self.state.saf||null);
       {k:'br'},{k:'mut',t:'Atendido: '+nfa(rp.alocado)+' ha'+(rp.pendente?'':hs(rp.hconj,rp.decorrido))},
       {k:'br'},{k:'mut',t:'Saldo: '+nfa(rp.saldo)+' ha'+(f.hconj===null?' · horas pendentes':' · faltam '+hs(f.hconj,f.decorrido).slice(3))+(f.hconj!==null&&f.semHoras>1e-9?' ('+nfa(f.semHoras)+' ha sem horas calculáveis)':'')}]; };
   const linhaCfg=(id,i,x,j)=>{ const fixo=x.p!==null; const sem=x.r===null;
-    const r={id:id+'_c'+j,ro:true,v:{nome:x.nome,op:'',mes:'',area:x.q,horas:sem?'':x.h,dec:(sem||!x.q)?'':x.ht,cop:(x.custo===null||sem)?'':x.custo,cins:'',ctot:'',rha:(x.q>0&&x.custo!==null)?x.custo/x.q:'',diesel:(x.diesel===null||!x.q)?'':x.diesel},s:{nome:x.nome},p:{}};
+    const r={id:id+'_c'+j,ro:true,v:{nome:x.nome,gat:'',data:'',tal:'',mes:'',area:x.q,horas:sem?'':x.h,dec:(sem||!x.q)?'':x.ht,cop:(x.custo===null||sem)?'':x.custo,cins:'',ctot:'',rha:(x.q>0&&x.custo!==null)?x.custo/x.q:'',diesel:(x.diesel===null||!x.q)?'':x.diesel},s:{nome:x.nome},p:{}};
     r.p.nome=[{k:'txt',t:x.nome}].concat(sem?[{k:'chip',t:'sem rendimento',c:'red'}]:[]).concat(x.emSeq?[{k:'chip',t:x.seqEst?'em sequência nesta estimativa':'em sequência',c:'yellow'}]:[]);
-    r.p.op=[{k:'mut',t:(fixo?(nfa(x.p)+' % da área'):'pelo rendimento')+((x.Hin!==undefined?x.Hin:x.H)!==Infinity?' · janela '+nfa(x.Hin!==undefined?x.Hin:x.H)+' h':'')}]; r.s.op=''; r.p.mes=[{k:'mut',t:''}];
+    // TABELAS-FOCO: parte e janela da configuração em colunas próprias (antes ficavam na coluna do gatilho)
+    { const jh=(x.Hin!==undefined?x.Hin:x.H); r.v.part=fixo?x.p:''; r.p.part=[{k:fixo?'txt':'mut',t:fixo?nfa(x.p):'pelo rendimento'}]; r.s.part=fixo?nfa(x.p):'pelo rendimento';
+      r.v.jan=jh!==Infinity?jh:''; r.p.jan=jh!==Infinity?[{k:'txt',t:nfa(jh)}]:[{k:'mut',t:'—'}]; }
+    r.p.gat=[{k:'mut',t:''}]; r.s.gat=''; r.p.mes=[{k:'mut',t:''}];
     // a área da linha é o atendido; quando falta, a parte da demanda inteira (necessário) e o saldo dela, com as horas
-    if(x.fq>1e-9) r.p.op=r.p.op.concat([{k:'br'},{k:'mut',t:'precisa de '+nfa(x.nq)+' ha = '+nf(x.nh,1)+' h · faltam '+nfa(x.fq)+' ha = '+nf(x.fh,1)+' h'}]);
+    if(x.fq>1e-9) r.p.nome=r.p.nome.concat([{k:'br'},{k:'mut',t:'precisa de '+nfa(x.nq)+' ha = '+nf(x.nh,1)+' h · faltam '+nfa(x.fq)+' ha = '+nf(x.fh,1)+' h'}]);
     if(x.q>0&&x.ht>x.h+1e-9) r.p.dec=[{k:'txt',t:nf(x.ht,1)},{k:'br'},{k:'mut',t:'com '+nfa(x.ht-x.h)+' h de troca'}];
     return r; };
   const linhaOc=(g,i,ix)=>{ const id=g.id+'_'+ix; const rp=i.rp; const multi=i.cfs.length>1;
-    const r={id,ro:true,v:{nome:i.c.v.local+' · '+i.c.v.cult+' '+i.c.v.var,op:br(i.dt),mes:(i.mi>=0?D2.meses[i.mi][1]:'fora do período'),area:i.area,horas:i.pend?'':i.horas,dec:(i.pend||rp.alocado<=0)?'':i.dec,
-      cop:i.pend?'':i.cop,cins:i.cins,ctot:i.cop+i.cins,rha:i.area?(i.cop+i.cins)/i.area:0,diesel:dInf(i)?i.diesel:''},s:{},p:{}};
+    const r={id,ro:true,v:{nome:i.c.v.local+' · '+i.c.v.cult+' '+i.c.v.var,gat:'',tal:i.c.v.local,mes:(i.mi>=0?D2.meses[i.mi][1]:'fora do período'),area:i.area,horas:i.pend?'':i.horas,dec:(i.pend||rp.alocado<=0)?'':i.dec,
+      cop:i.pend?'':i.cop,cins:i.cins,ctot:i.cop+i.cins,rha:i.area?(i.cop+i.cins)/i.area:0,diesel:dInf(i)?i.diesel:''},s:{},p:{}}; dcol(r,'data',i.dt);
     const avs=avisos([i]); if(avs.length||multi) r.p.nome=[{k:'txt',t:r.v.nome}].concat(multi?[{k:'mut',t:i.cfs.length+' configurações'}]:[]).concat(avs)
       .concat((i.pend||i.saldo>1e-9||rp.conflito||rp.itens.some(x=>x.emSeq))&&rp.motivos.length?[{k:'br'},{k:'mut',t:rp.motivos.join(' · ')}]:[]);
     if(rp.saldo>1e-9) r.p.nome=(r.p.nome||[{k:'txt',t:r.v.nome}]).concat(trio(rp));
@@ -705,10 +714,10 @@ function PREVALS(self,v){ compRend(self,self.state.saf||null);
     if(multi) r.kids=rp.itens.map((x,j)=>linhaCfg(id,i,x,j));
     return r; };
   const linhaAtv=(g)=>{ const gs=[...new Set(g.items.map(i=>gatLabel(i.a.g)))];
-    return {id:g.id,v:Object.assign({nome:g.nome,op:gs.join(' · '),mes:mlab(g.mis)},soma(g.items)),s:{},p:{nome:[{k:'txt',t:g.nome}].concat(ncfg(g.items)).concat(avisos(g.items))},
+    return {id:g.id,v:Object.assign({nome:g.nome,gat:gs.join(', '),data:'',tal:'',mes:mlab(g.mis)},soma(g.items)),s:{},p:{nome:[{k:'txt',t:g.nome}].concat(ncfg(g.items)).concat(avisos(g.items))},
       kids:g.items.slice().sort((a,b)=>a.dt<b.dt?-1:1).map((i,ix)=>linhaOc(g,i,ix))}; };
   GR('g_op').rows=opsL.map(o=>{ const n=o.acts.length;
-    return {id:o.id,v:Object.assign({nome:o.op,op:'',mes:mlab(o.mis)},soma(o.items)),s:{nome:o.op},p:{nome:[{k:'b',t:o.op},{k:'mut',t:n+(n>1?' atividades':' atividade')}].concat(avisos(o.items)),op:[{k:'mut',t:''}]},kids:o.acts.map(linhaAtv)}; });
+    return {id:o.id,v:Object.assign({nome:o.op,gat:'',data:'',tal:'',mes:mlab(o.mis)},soma(o.items)),s:{nome:o.op},p:{nome:[{k:'b',t:o.op},{k:'mut',t:n+(n>1?' atividades':' atividade')}].concat(avisos(o.items)),gat:[{k:'mut',t:''}]},kids:o.acts.map(linhaAtv)}; });
   const selO=st.atv? opsL.find(o=>o.id===st.atv):null; const selA=(!selO&&st.atv)? acts.find(a=>a.id===st.atv):null; const base=selO?selO.items:(selA?selA.items:oc);
   const vis0=st.opv==='mes'?'mes':'op'; const M=D2.meses.length; const z=()=>new Array(M).fill(0); const mat={area:z(),horas:z(),cop:z(),cins:z(),diesel:z()};
   base.forEach(i=>{ if(i.mi<0) return; mat.area[i.mi]+=i.area; mat.horas[i.mi]+=i.horas; mat.cop[i.mi]+=(i.cop||0); mat.cins[i.mi]+=i.cins; mat.diesel[i.mi]+=(i.diesel||0); });
@@ -781,19 +790,23 @@ function PREVALS(self,v){ compRend(self,self.state.saf||null);
   let tot=0, nliq=0, npend=0;
   GR('g_dem').rows=Object.keys(grupos).sort((a,b)=>a.localeCompare(b,'pt-BR')).map((g,gi)=>{ const its=grupos[g].sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
     const val=its.reduce((a,d)=>a+d.valor,0); tot+=val; const uso=its.map(d=>d.uso).filter(Boolean).sort()[0]||'';
-    const gr={id:'G'+gi,v:{ins:g,valor:val},s:{ins:g},p:{ins:[{k:'b',t:g},{k:'mut',t:its.length+(its.length>1?' insumos':' insumo')}]},
+    // TABELAS-FOCO (5983172395): uma variável por coluna — grupo, insumo, unidade, quantidades sem unidade colada, datas e solicitação próprias
+    const gr={id:'G'+gi,v:{grp:g,ins:'',valor:val},s:{grp:g,ins:''},p:{grp:[{k:'b',t:g}],ins:[{k:'mut',t:its.length+(its.length>1?' insumos':' insumo')}]},
       kids:its.map((d,ix)=>{ const dec=(d.un==='L')?1:0; const sent=sol&&sol.itens?(sol.itens[d.nome]||0):0; if(d.liq>0) nliq++;
-        let sit; if(d.liq<=0.001&&d.rup>0.001) sit={k:'chip',t:'Coberto pelo recebimento',c:'yellow'}; else if(d.liq<=0.001) sit={k:'chip',t:'Coberto pelo estoque',c:'green'}; else if(sol && sent>=d.liq-0.01) sit={k:'chip',t:'Em cotação · '+sol.id,c:'blue'}; else if(sol){ sit={k:'chip',t:'Complemento: +'+nf(d.liq-sent,dec)+' '+d.un,c:'yellow'}; npend++; } else { sit={k:'chip',t:'A enviar',c:'gray'}; npend++; }
-        const kr={id:'G'+gi+'_'+ix,ro:true,v:{ins:d.nome,bruta:d.bruta,est:d.est,rec:d.rec,liq:d.liq,un:d.un,preco:d.preco,valor:d.valor},s:{sit:sit.t},
-          p:{bruta:[{k:'txt',t:nf(d.bruta,dec)+' '+d.un}].concat(d.real>0.001?[{k:'br'},{k:'mut',t:'realizado: '+nf(d.real,dec)}]:[]),est:[{k:'txt',t:nf(d.est,dec)+' '+d.un}].concat(notaEst(d,dec)),
-             rec:[{k:'txt',t:nf(d.rec,dec)+' '+d.un}].concat((d.liq>0.001||d.rup>0.001)&&d.tarde>0.001?[{k:'br'},{k:'mut',t:nf(d.tarde,dec)+' após a falta'}]:[]),
-             liq:[{k:'b',t:nf(d.liq,dec)+' '+d.un}].concat(d.liq>0.001&&d.falta?[{k:'br'},{k:'cn',t:'falta em '+br(d.falta),c:'red'}]
-               :(d.rup>0.001&&d.falta?[{k:'br'},{k:'cn',t:'ruptura '+br(d.falta).slice(0,5)+'–'+br(d.cob).slice(0,5),c:'red'}]:[])),sit:[sit]},
-          o:d.memo.map(t=>({t})).concat(sol?[{t:'Ver '+sol.id+' na Compra de insumos',h:solHref(saf,sol)}]:[]) }; dcol(kr,'uso',d.uso); return kr; })};
+        let sit, sid=''; if(d.liq<=0.001&&d.rup>0.001) sit={k:'chip',t:'Coberto pelo recebimento',c:'yellow'}; else if(d.liq<=0.001) sit={k:'chip',t:'Coberto pelo estoque',c:'green'}; else if(sol && sent>=d.liq-0.01){ sit={k:'chip',t:'Em cotação',c:'blue'}; sid=sol.id; } else if(sol){ sit={k:'chip',t:'Complemento: +'+nf(d.liq-sent,dec)+' '+d.un,c:'yellow'}; sid=sol.id; npend++; } else { sit={k:'chip',t:'A enviar',c:'gray'}; npend++; }
+        const q=(x)=>[{k:'txt',t:nf(x,dec)}], z=(x)=>x>0.001?[{k:'txt',t:nf(x,dec)}]:[{k:'mut',t:'—'}];
+        const kr={id:'G'+gi+'_'+ix,ro:true,v:{grp:d.grupo,ins:d.nome,bruta:d.bruta,real:(d.real>0.001?d.real:''),est:d.est,antes:(d.liq>0.001&&d.antes>0.001?d.antes:''),res:(!(d.liq>0.001&&d.antes>0.001)&&d.res>0.001?d.res:''),
+               rec:d.rec,tarde:((d.liq>0.001||d.rup>0.001)&&d.tarde>0.001?d.tarde:''),liq:d.liq,un:d.un,preco:d.preco,valor:d.valor,sol:sid},s:{sit:sit.t,un:d.un,sol:sid},
+          p:{grp:[{k:'mut',t:d.grupo}],un:[{k:'txt',t:d.un}],bruta:q(d.bruta),real:z(d.real),est:q(d.est),antes:z(d.liq>0.001?d.antes:0),res:z((d.liq>0.001&&d.antes>0.001)?0:d.res),rec:q(d.rec),
+             tarde:z(((d.liq>0.001||d.rup>0.001)&&d.tarde>0.001)?d.tarde:0),liq:[{k:'b',t:nf(d.liq,dec)}],sit:[sit],sol:sid?[{k:'txt',t:sid}]:[{k:'mut',t:'—'}]},
+          o:d.memo.map(t=>({t})).concat(sol?[{t:'Ver '+sol.id+' na Compra de insumos',h:solHref(saf,sol)}]:[]) }; dcol(kr,'uso',d.uso);
+        // falta: quando o estoque acaba (com necessidade líquida ou só ruptura coberta por recebimento); coberta em: o recebimento que cobre a ruptura
+        dcol(kr,'falta',(d.liq>0.001||d.rup>0.001)?d.falta:''); if(kr.s.falta) kr.p.falta=[{k:'cn',t:kr.s.falta,c:'red'}]; dcol(kr,'cob',(d.liq<=0.001&&d.rup>0.001)?d.cob:''); return kr; })};
     // situação do grupo: contagem por situação dos insumos (o que falta enviar primeiro)
     const cnt={}; gr.kids.forEach(k=>{ const t=String(k.s.sit||'').replace(/ · .*/,'').replace(/^Complemento.*/,'Complemento'); cnt[t]=(cnt[t]||0)+1; });
     const ord=['A enviar','Complemento','Em cotação','Coberto pelo recebimento','Coberto pelo estoque']; const cor={'A enviar':'gray','Complemento':'yellow','Em cotação':'blue','Coberto pelo recebimento':'yellow','Coberto pelo estoque':'green'};
     gr.p.sit=ord.filter(t=>cnt[t]).map(t=>({k:'chip',t:cnt[t]+' '+(t==='Coberto pelo estoque'?'coberto'+(cnt[t]>1?'s':''):(t==='Coberto pelo recebimento'?'coberto'+(cnt[t]>1?'s':'')+' pelo recebimento':t.toLowerCase())),c:cor[t]})); gr.s.sit='';
+    ['un','bruta','real','est','antes','res','rec','tarde','liq','falta','cob','preco','sol'].forEach(f=>{ gr.p[f]=[{k:'mut',t:''}]; gr.s[f]=''; });
     dcol(gr,'uso',uso); return gr; });
   const est=sol?solEstado(saf,sol):'';
   v.k6='Valor da necessidade líquida '+rs(tot)+' · '+nliq+' insumos a comprar'+(sol?(' · solicitação '+sol.id+(est?' · '+est:' em cotação')+(sol.comp?' (+'+sol.comp+' complemento'+(sol.comp>1?'s':'')+')':'')):' · ainda não enviada');

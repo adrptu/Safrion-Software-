@@ -32,9 +32,11 @@ def build():
     TALH={t:ha for t,ha,*_ in D.TALHOES}
     import dados_lagoa_safra as DL
     TALFAZ={t:'Santa Rita' for t in TALH}; TALFAZ.update(DL.TALFAZ); TALH.update(DL.TALHOES)   # pivôs da Lagoa Grande
-    CULT_COLS=[dict(k='local',l='Talhão ou parcela',w=180),dict(k='cult',l='Cultura'),dict(k='var',l='Variedade'),
-               dict(k='area',l='Área',t='num',a='r',u='ha',agg='sum',d=2,dmin=0),dict(k='dt_plantio',l='Plantio',t='num'),dict(k='meta',l='Meta',a='r'),
-               dict(k='plano',l='Plano e ajustes',w=170)]
+    # TABELAS-FOCO (5983172395): uma variável por coluna (tipo, área livre, unidade da meta, versão e ajustes separados)
+    # o plano (e a ação Aplicar plano) fica à vista: logo depois da variedade
+    CULT_COLS=[dict(k='local',l='Talhão ou parcela',w=130),dict(k='tipo',l='Tipo',w=120),dict(k='cult',l='Cultura'),dict(k='var',l='Variedade'),
+               dict(k='plano',l='Plano agronômico',w=190),dict(k='ver',l='Versão'),dict(k='area',l='Área (ha)',t='num',a='r',agg='sum',d=2,dmin=0),dict(k='dt_plantio',l='Plantio',t='num'),
+               dict(k='meta',l='Meta',t='num',a='r'),dict(k='unm',l='Unidade da meta',w=110),dict(k='livre',l='Área livre (ha)',t='num',a='r',d=2,dmin=0),dict(k='aj',l='Ajustes locais',t='num',a='r')]
     CULT_FIELDS=[dict(k='talhao',l='Talhão',t='sel',opts=list(TALH),req=True,newOnly=True,**{'def':'T1'},
                       help='Áreas: '+' · '.join(f'{t} '+format(ha,'g').replace('.',',')+' ha' for t,ha in TALH.items())),
                  dict(k='local',l='Parcela',t='txt',help='Em branco: o sistema usa o nome do talhão ou a próxima parcela (ex.: T3-A).'),
@@ -151,10 +153,13 @@ def build():
         g=grid(REND_COLS,rrows,edit=(dict(REND_EDIT,m='ro') if k=='S2526' else REND_EDIT),gid=f'g_rend_{k}',total=False,tree=True,x0=x0)
         rend_html+=f'<sc-if value="{H("rend_"+k)}" hint-placeholder-val="{F()}">{g}</sc-if>'
     # ---------- etapa 4 · plano operacional ----------
-    g_op=grid([dict(k='nome',l='Operação · atividade · cultivo · conjunto',w=280),dict(k='op',l='Gatilho · data',w=150),dict(k='mes',l='Mês'),dict(k='area',l='Área (ha)',t='num',a='r',agg='sum',d=2,dmin=0),
+    # TABELAS-FOCO: a 1ª coluna é a árvore (cada linha é uma entidade do seu nível: operação › atividade › cultivo › configuração);
+    # gatilho (regra da atividade) e data (da ocorrência) separados; parte, janela e talhão em colunas próprias
+    g_op=grid([dict(k='nome',l='Operação › atividade › cultivo',w=280),dict(k='gat',l='Gatilho',w=120),dict(k='data',l='Data',t='num',w=100),dict(k='mes',l='Mês'),dict(k='area',l='Área (ha)',t='num',a='r',agg='sum',d=2,dmin=0),
                dict(k='horas',l='Horas-conjunto (h)',t='num',a='r',d=1,agg='sum'),dict(k='dec',l='Decorrido (h)',t='num',a='r',d=1),
                dict(k='cop',l='Operação (R$)',t='num',a='r',agg='sum'),dict(k='cins',l='Insumos (R$)',t='num',a='r',agg='sum'),
-               dict(k='ctot',l='Total (R$)',t='num',a='r',agg='sum'),dict(k='rha',l='R$/ha',t='num',a='r',d=2),dict(k='diesel',l='Diesel (L)',t='num',a='r',agg='sum')],
+               dict(k='ctot',l='Total (R$)',t='num',a='r',agg='sum'),dict(k='rha',l='R$/ha',t='num',a='r',d=2),dict(k='diesel',l='Diesel (L)',t='num',a='r',agg='sum'),
+               dict(k='part',l='Parte da área (%)',t='num',a='r',w=140),dict(k='jan',l='Janela (h por talhão)',t='num',a='r',w=140),dict(k='tal',l='Talhão',w=90)],
        [],edit=dict(m='pick',leafOnly=False),tree=True,gid='g_op',total=True)
     MCOLS=[dict(k='ind',l='Indicador',w=190)]+[dict(k=f'm{i}',l=lab,t='num',a='r') for i,(_,lab) in enumerate(meses)]+[dict(k='tot',l='Total do período',t='num',a='r')]
     g_mat=grid(MCOLS,[],edit=dict(m='none'),search=False,gid='g_mat',total=False,headtools=False)
@@ -183,8 +188,13 @@ def build():
     g_resd=grid([dict(k='ind',l='Atividade',w=240)]+[dict(k=f'm{i}',l=lab,t='num',a='r',d=1) for i,(_,lab) in enumerate(meses)]+[dict(k='tot',l='Total (h)',t='num',a='r',d=1)],
                 [],edit=dict(m='none'),search=False,gid='g_resd',total=False,headtools=False)
     # ---------- etapa 6 · demanda ----------
-    g_dem=grid([dict(k='ins',l='Grupo · insumo',w=230),dict(k='uso',l='1º uso',t='num'),dict(k='bruta',l='Demanda bruta',t='num',a='r'),dict(k='est',l='Estoque apto',t='num',a='r',w=118),dict(k='rec',l='Recebimentos previstos',t='num',a='r',w=112),
-                dict(k='liq',l='Necessidade líquida',t='num',a='r',w=128),dict(k='preco',l='Preço (R$/un)',t='num',a='r',d=2),dict(k='valor',l='Valor (R$)',t='num',a='r',d=2,agg='sum'),dict(k='sit',l='Situação')],
+    # TABELAS-FOCO (5983172395): uma variável por coluna; a unidade varia por insumo e tem coluna própria; a árvore grupo → insumo continua
+    # "1º uso" logo depois do insumo (v3.8); depois o essencial da compra (necessidade, unidade, falta, valor, situação)
+    g_dem=grid([dict(k='grp',l='Grupo',w=130),dict(k='ins',l='Insumo',w=200),dict(k='uso',l='1º uso',t='num'),dict(k='liq',l='Necessidade líquida',t='num',a='r',w=128),dict(k='un',l='Unidade',w=80),dict(k='falta',l='Falta em',t='num',w=110),
+                dict(k='valor',l='Valor (R$)',t='num',a='r',d=2,agg='sum'),dict(k='sit',l='Situação'),dict(k='sol',l='Solicitação',w=120),
+                dict(k='bruta',l='Demanda bruta',t='num',a='r'),dict(k='real',l='Já realizado',t='num',a='r'),dict(k='est',l='Estoque apto',t='num',a='r',w=118),dict(k='antes',l='Usado antes da compra',t='num',a='r',w=130),
+                dict(k='res',l='Reservado',t='num',a='r'),dict(k='rec',l='Recebimentos previstos',t='num',a='r',w=112),dict(k='tarde',l='Recebido após a falta',t='num',a='r',w=130),
+                dict(k='cob',l='Coberta em',t='num',w=110),dict(k='preco',l='Preço (R$/un)',t='num',a='r',d=2)],
        [],edit=dict(m='origin',leafOnly=True,title='Insumo',fields=[dict(k='ins',l='Insumo',t='txt',ro=True),dict(k='un',l='Unidade',t='txt',ro=True)]),tree=True,gid='g_dem',total=True,qf=dict(k='sit',cut=' · ',l='situação'))
     # ---------- JS do processo ----------
     sol0={'S2627':dict(id='SOL-2026-07',at='23/09/2026',itens={n:round(o['liq'],3) for n,o in D2.demanda('S2627').items() if o['liq']>0.001},comp=0)}

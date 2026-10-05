@@ -203,7 +203,7 @@ Sem a camada sintética (tarefa 1), o build para em `dados_lagoa_fonte`, com uma
     - Autor / revisor / integrador: Claude / Codex + Gemini / quem não for autor.
     - Arquivos: `gen37/areas/processo_safra.py` (colunas das etapas 2, 4 e 6), `gen37/safra.js` (linhas das etapas 2, 4 e 6), `gen37/tabelas_saf_test.py` (casos novos), testes que leem as colunas antigas dessas etapas (`rend_multiconjuntos_test.py`, `saftest.py`, `saf_cmp_continuidade_test.py`, `acao_unica_test.py` saf e outros que a bateria apontar).
     - Aceite e verificação: TF03 nas três etapas (cada variável filtra e ordena sozinha, unidade identificada, totais iguais); regressão: bateria completa sem falha nova.
-    - Estado: reservado; implementação em seguida.
+    - Estado: implementado (executado): etapas 2, 4 e 6 com uma variável por coluna; `tabelas_saf_test.py` 25/25; REND, continuidade e partest pela leitura por coluna; bateria sem falha nova.
   - **TABELAS-FOCO-20261004 v2 (5983172395) · incremento 2a: Planejar safra, etapa 3 (Rendimentos). Reserva antes de editar, base `5ad4cad` (incremento 1, PR #40), branch `claude/v44-tabelas-02`:**
     - ID / resultado útil / persona: comparar e filtrar rendimentos por operação, atividade, largura, velocidade e eficiência sem ler texto composto; gestor e planejador.
     - Requisitos: contrato item 2 (Operação | Atividade; Largura | Velocidade | Eficiência; Custo R$/ha | R$/kg) e item 3 (valor tipado). Prioridade pelo inventário TF05 cruzado com o menu vigente (83 grades, 112 colunas suspeitas; 57 no SAF). Fora: as outras etapas do SAF (incremento 2b), outras telas, HML.

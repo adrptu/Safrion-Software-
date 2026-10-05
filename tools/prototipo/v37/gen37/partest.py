@@ -16,15 +16,25 @@ def toast(): return J("[...document.querySelectorAll('[role=status]')].map(x=>x.
 SETV="""((lab,val)=>{const e=[...document.querySelectorAll('aside[role=dialog] input,aside[role=dialog] select')].find(x=>x.getAttribute('aria-label')===lab); if(!e) return 'NÃO ACHEI '+lab;
   const proto=e.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(proto,'value').set.call(e,val); e.dispatchEvent(new Event(e.tagName==='SELECT'?'change':'input',{bubbles:true})); return 'ok';})"""
 def setv(lab,val): r=J(f"({SETV})({json.dumps(lab)},{json.dumps(val)})"); time.sleep(.25); return r
-ROWS="""(()=>[...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent).flatMap(t=>[...t.querySelectorAll('[role=row]')].slice(1)).map(r=>r.innerText.replace(/\\s+/g,' ').trim().replace(/^[▾▸] /,'')))()"""
+# TABELAS-FOCO (5983172395): a etapa 2 tem uma variável por coluna (Talhão ou parcela | Tipo | … | Área livre | … | Ajustes locais); LEGT lê as
+# colunas pelo cabeçalho e remonta o texto de antes ("T1 2 parcelas · área toda alocada Dividir …"), para as mesmas asserções valerem
+LEGT="""(r=>{ const t=r.closest('[role=table]'); const hs=t?[...t.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴]/g,'').replace(/\\s+/g,' ').trim().toUpperCase()):[];
+  const raw=r.innerText.replace(/\\s+/g,' ').trim().replace(/^[▾▸] /,''); const iT=hs.indexOf('TIPO'); if(hs.indexOf('TALHÃO OU PARCELA')<0||iT<0) return raw;
+  const cs=[...r.querySelectorAll('[role=cell]')].map(c=>c.innerText.replace(/\\s+/g,' ').trim()); const g=k=>(cs[hs.indexOf(k)]||'').replace(/^[▾▸] ?/,'');
+  const L=g('TALHÃO OU PARCELA'), div=/ Dividir$/.test(L), nm=L.replace(/ Dividir$/,''), tp=g('TIPO'), lv=g('ÁREA LIVRE (HA)'), aj=g('AJUSTES LOCAIS');
+  let head; if(/^\\d+ parcelas?$/.test(tp)){ const v=lv.replace(/^[-−]/,''); head=nm+' '+tp+' · '+(lv==='0'?'área toda alocada':(/^[-−]/.test(lv)?'excede '+v+' ha':lv+' ha livres'))+(div?' Dividir':''); }
+  else head=nm+' '+tp.toLowerCase().replace(' (sem polígono)',' · sem polígono')+(div?' Dividir':'');
+  const n=/^\\d+$/.test(aj)?Number(aj):0; const ajt=n?(/^\\d+ parcelas?$/.test(tp)?(' '+n+(n>1?' ajustes locais':' ajuste local')):(' '+n+(n>1?' ajustes deste talhão':' ajuste deste talhão'))):'';
+  return [head,g('CULTURA'),g('VARIEDADE'),g('ÁREA (HA)')+' ha',g('PLANTIO'),g('META')+(g('UNIDADE DA META')?' '+g('UNIDADE DA META'):''),g('PLANO AGRONÔMICO'),g('VERSÃO')].join(' ').replace(/\\s+/g,' ').trim()+ajt; })"""
+ROWS=f"""(()=>[...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent).flatMap(t=>[...t.querySelectorAll('[role=row]')].slice(1)).map(r=>({LEGT})(r)))()"""
 def rows(): return J(ROWS) or []
 def rowbtn(prefix,label):
     return J(f"""(()=>{{const rs=[...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent).flatMap(t=>[...t.querySelectorAll('[role=row]')]);
-      const r=rs.find(x=>x.innerText.replace(/\\s+/g,' ').trim().replace(/^[▾▸] /,'').startsWith({json.dumps(prefix)})); if(!r) return 'SEM LINHA';
+      const r=rs.find(x=>({LEGT})(x).startsWith({json.dumps(prefix)})); if(!r) return 'SEM LINHA';
       const b=[...r.querySelectorAll('button')].find(b=>b.innerText.trim()==={json.dumps(label)}); if(!b) return 'SEM BOTÃO'; b.click(); return 'ok';}})()""")
 def rowclick(prefix):
     return J(f"""(()=>{{const rs=[...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent).flatMap(t=>[...t.querySelectorAll('[role=row]')]);
-      const r=rs.find(x=>x.innerText.replace(/\\s+/g,' ').trim().replace(/^[▾▸] /,'').startsWith({json.dumps(prefix)})); if(!r) return 'SEM LINHA'; const cell=[...r.children].find(x=>!x.querySelector('input,button')&&x.innerText.trim())||r; cell.click(); return 'ok';}})()""")
+      const r=rs.find(x=>({LEGT})(x).startsWith({json.dumps(prefix)})); if(!r) return 'SEM LINHA'; const cell=[...r.children].find(x=>!x.querySelector('input,button')&&x.innerText.trim())||r; cell.click(); return 'ok';}})()""")
 def panel(): return J("(()=>{const a=document.querySelector('aside[role=dialog]'); return a?a.innerText.replace(/\\s+/g,' '):'';})()") or ''
 def pvals(): return J("[...document.querySelectorAll('aside[role=dialog] input')].filter(i=>/^Nome da parcela|^Área de/.test(i.getAttribute('aria-label'))).map(i=>i.value)")
 def k(txt_re): return J(f"(document.body.innerText.match({txt_re})||[''])[0]")
@@ -64,7 +74,7 @@ try:
     rs=rows(); chk('5 sublinhas de T4', sum(1 for r in rs if r.startswith('T4-'))==5 and any(r.startswith('T4 5 parcelas') for r in rs))
     k2b=k(r"/\d+ cultivos · [^\n]+/"); chk('k2 conta folhas (15 cultivos, mesma área)', k2b.startswith('15 cultivos · 1.165 ha'), k2b)
     tot=J("(()=>{const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent); const r=[...t.querySelectorAll('[role=row]')].pop(); return r.innerText.replace(/\\s+/g,' ');})()")
-    chk('total da tabela 1.165 ha', '1.165 ha' in (tot or ''), tot)
+    chk('total da tabela 1.165 ha (unidade no cabeçalho "Área (ha)", TABELAS-FOCO)', 'Total 1.165' in (tot or '') and bool(J("[...document.querySelectorAll('[role=columnheader]')].some(h=>/^Área \\(ha\\)/i.test(h.innerText.trim()))")), tot)
     # --- 27 parcelas: nomes após Z viram AA
     rowbtn('T1 2 parcelas','Dividir')
     for _ in range(25): clk('+ Adicionar parcela','aside[role=dialog]')
