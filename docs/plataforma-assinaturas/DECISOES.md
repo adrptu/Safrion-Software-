@@ -16,8 +16,8 @@ Formato: decisão · por quê · como reverter.
 - Por quê: mostrar "o que cada plano inclui" e a troca com prévia precisa de ao menos dois planos pagos. O Essencial é valor novo, só de exemplo.
 - Reverter: editar a tabela de planos em `dados_assinatura.py` (fonte única); as três telas e a prévia leem dela.
 
-**PLAT-D04 · Corte de módulos pela onda do PRD 18.1.** O núcleo E1 (Mapa, Cadastros, Agrícola com O.S. e app, Manutenção, Suprimentos) está em todos os planos. Colheita e pós-colheita, comercial e logística, gestão e integração ERP só no Completo.
-- Por quê: o núcleo é uma cadeia (O.S. → reserva → entrega → apontamento → custo). Partir essa cadeia entre planos deixaria O.S. sem estoque ou sem bloqueio de máquina. Controles essenciais não são opcionais (PRD 57.2). E2 depende de E1, não o contrário.
+**PLAT-D04 · Corte de módulos pela onda do PRD 18.1, sem partir a cadeia da O.S.** O núcleo (Mapa, Cadastros, Agrícola com O.S. e app, colheita e produção por talhão, Manutenção, Suprimentos) está em todos os planos. Pós-colheita (beneficiamento), comercial e logística, gestão e resultados e integração ERP só no Completo.
+- Por quê: o núcleo é uma cadeia (O.S. → reserva → entrega → apontamento → colheita → produção → custo). Partir essa cadeia entre planos deixaria O.S. sem estoque, sem bloqueio de máquina ou colheita sem registro de produção. Controles essenciais não são opcionais (PRD 57.2). E2 depende de E1, não o contrário. Revisão de 06/10 (RV-11): a colheita saiu do Completo porque a O.S. de colheita é núcleo e o registro da produção é o fato dela; a frente colheita põe "Produção" no menu.
 - Reverter: mover módulos entre os planos na mesma tabela; a regra R15 continua a impedir que o núcleo seja partido.
 
 **PLAT-D05 · Base de cobrança (DEC-01).** Cobra-se a área cultivável dos talhões ativos (medida no cadastro), limitada pela área contratada. A memória mostra também quanto seria pela área contratada.
@@ -32,8 +32,8 @@ Formato: decisão · por quê · como reverter.
 - Por quê: o legado do PRD 57.4.1 (dia 1; 3 tentativas em 10 dias) já estava no CF-05. Sem pró-rata, o mês tem uma conta só, legível. O limite contratado impede que um talhão do dia 29 vire surpresa.
 - Reverter: parâmetros `DIA_VENC`, `TENTATIVAS` e `PRORATA` em `dados_assinatura.py`.
 
-**PLAT-D08 · Régua de inadimplência.** Com 1 a 10 dias de atraso, só aviso. Com 11 dias ou mais, a organização não amplia o uso: não cria talhão novo pelo cadastro nem pelo mapa. Nenhuma ação de O.S., estoque, irrigação, manutenção ou consulta é restringida, e nada é apagado.
-- Por quê: o pedido quer aviso e restrição gradual, sem perda de dado. Restringir O.S. empurraria o trabalho de campo para fora do sistema, sem aprovação agronômica, carência e rastreio, o que é pior para a segurança e para os dados. A ampliação é o que aumenta a dívida e o custo de servir.
+**PLAT-D08 · Régua de inadimplência.** Com 1 a 10 dias de atraso, só aviso. Com 11 dias ou mais, a organização não amplia a área medida: não cria talhão novo (cadastro, desenho ou importação) nem reativa talhão inativo. Corrigir a área de um talhão existente e trocar o contorno seguem. Nenhuma ação de O.S., estoque, irrigação, manutenção, colheita, consulta ou exportação é restringida, e nada é apagado.
+- Por quê: o pedido quer aviso e restrição gradual, sem perda de dado. Restringir O.S. empurraria o trabalho de campo para fora do sistema, sem aprovação agronômica, carência e rastreio, o que é pior para a segurança e para os dados. A ampliação aumenta o custo de servir sem pagamento; a dívida não cresce por ela, porque a área acima do contratado não é cobrada (R2). Bloquear a correção da área de um talhão existente atingiria a integridade do fato registrado, por isso fica fora.
 - Reverter: parâmetros `DIAS_AVISO` e `RESTRICOES` (lista de ações) em `dados_assinatura.py`. Com lista vazia, fica só o aviso.
 
 **PLAT-D09 · Mudança vale do próximo ciclo.** Mudança de plano ou área começa no dia 1 seguinte e nunca retroage. No aceite, a área contratada precisa ser maior ou igual à medida do dia.
@@ -45,12 +45,12 @@ Formato: decisão · por quê · como reverter.
 - Reverter: não se reverte. Uma regra de dinheiro diferente da de quantidade exige ADR.
 
 **PLAT-D11 · Pagamento simulado.** Na organização da demonstração, o evento simulado do provedor chega no clique de pagar. Nas outras organizações, a fatura só fica Paga por "Conciliar pagamentos" no BO-02.
-- Por quê: mostrar ao proprietário, num passo, que pagar tira o aviso e a trava, sem abandonar a regra de evento validado (PRD 58.4). A conciliação continua demonstrada no BO-02.
+- Por quê: mostrar ao proprietário, num passo, que pagar tira o aviso e a trava, sem abandonar a regra de evento validado (PRD 58.4). A conciliação continua demonstrada no BO-02. A forma de pagamento é escolhida numa lista (Pix, boleto, cartão final 4242 · simulado): nenhuma tela tem campo de cartão, conta ou documento, porque uma página publicada não pode coletar dado de pagamento.
 - Reverter: em `assinPagar`, gravar o evento na fila do provedor em vez de aplicá-lo; a fatura fica Pendente até conciliar.
 
-**PLAT-D12 · Estado em `c.assin` sem subir `CEN0.v`.** Um cenário salvo sem `assin` recebe a do seed na leitura.
-- Por quê: o pedido quer tudo no mesmo estado. Subir a versão descartaria o progresso salvo de quem testa as O.S. e disputaria o número com outras frentes (o SUP-2a também sobe `v`).
-- Reverter: incluir `assin` no seed e subir `v` no `cenario.py:80`, com o aviso de que o salvo é descartado.
+**PLAT-D12 · Estado em `c.assin` sem subir `CEN0.v` e sem tocar o `cenario.py`.** O seed da assinatura fica só em `ASSIN0` (`dados_assinatura.py`), anexado uma vez a toda tela pelo `engine()`. Um cenário salvo sem `assin` vale `ASSIN0` na leitura; a primeira gravação o copia para `c.assin`. Telas sem `cenario.js` leem a mesma chave e aceitam o cenário só com o `v` vigente, como o `cenGet`.
+- Por quê: o pedido quer tudo no mesmo estado. Subir a versão descartaria o progresso salvo de quem testa as O.S. e disputaria o número com outras frentes (o SUP-2a também sobe `v`). Editar o `cenario.py` disputaria a mesma linha com elas, e um seed em `CEN0` e outro para as telas sem `cenario.js` seriam dois seeds na página (revisão de 06/10, RV-01 e RV-22).
+- Reverter: incluir `assin` no `CEN0` e subir `v` no `cenario.py:80`, com o aviso de que o salvo é descartado; `ASSIN0` passa a ser lido de lá.
 
 **PLAT-D13 · Data simulada só da cobrança.** Um painel "Demonstração" no CF-05 avança a data da cobrança (23/09, 01/10, 06/10, 16/10). Os outros módulos seguem em 23/09, e as outras organizações não fecham período.
 - Por quê: sem avançar a data não dá para ver fatura, atraso e trava. Avançar a data de todo o protótipo mudaria todos os módulos.
@@ -65,7 +65,7 @@ Formato: decisão · por quê · como reverter.
 - Reverter: tirar `Contestar` e `Resolver`. A régua volta a contar sem exceção.
 
 **PLAT-D16 · Terceira cópia da regra de mescla do cadastro.** `assinMedir` repete a regra de `tmBase` (`talmapa.js:7-11`): o salvo primeiro, depois a base para os ids que faltam, e os inativos saem. Um teste unitário compara as duas sobre o mesmo dado.
-- Por quê: `talmapa.js` e `cad_fazendas.py` são de outras frentes ativas. Extrair a regra agora criaria conflito com elas.
+- Por quê: `talmapa.js` e `cad_fazendas.py` são de outras frentes ativas. Extrair a regra agora criaria conflito com elas. O P5 toca esses arquivos só com uma linha de guarda em cada ponto que amplia a área (revisão de 06/10, RV-24); a extração mexe nas funções inteiras e fica para a frente de cadastros.
 - Reverter (quitar a dívida): mover a regra para uma função pura comum quando a frente de cadastros tocar `talmapa.js` e `cad_fazendas.py`, e apagar as cópias.
 
 ## Para o proprietário decidir (sem pressa; o protótipo funciona com os exemplos)
