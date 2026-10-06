@@ -991,7 +991,10 @@ def agf_dados():
     gref=[[[_agf_norm(n) for n in ns],c] for ns,c in A.GRUPO_RESIST]
     lac=A.lacunas_resist(ind)
     if lac: print(f'AVISO AG-07: {len(lac)} ingrediente(s) químico(s) sem código IRAC/FRAC/HRAC (rotação cai no grupo químico): {lac[:12]}')
-    return dict(ref=ref,grupos={k:list(v) for k,v in A.GRUPOS_RESIST.items()},grupo_ref=gref,gq_gen=[_agf_norm(g) for g in A.GQ_GENERICOS],
+    # produtos que a O.S. aceita no "Incluir produto" (o mesmo catálogo da tela O.S.: plano + lotes): "Usar na O.S." só oferece estes (CTL-5)
+    from areas.processo_os import _nova_ordem_dados
+    osp=sorted({x['p'] for x in _nova_ordem_dados()['prods']})
+    return dict(ref=ref,osp=osp,grupos={k:list(v) for k,v in A.GRUPOS_RESIST.items()},grupo_ref=gref,gq_gen=[_agf_norm(g) for g in A.GQ_GENERICOS],
                 planos=planos,culturas=AGF_CULTURAS,consulta=A.CONSULTA['data'],oficial=A.CONSULTA['link'])
 
 def _agf_norm(s):
@@ -1557,7 +1560,7 @@ function agFichaVals(self,v){ const st=self.state; const pi=(st.agf&&AGX.st==='o
   v.af_alvos=[{v:'',t:!uOk?'Carregando alvos…':(cul===''?'Escolha a cultura primeiro':('Escolha o alvo ('+agNf(meus.length)+')'))}]
     .concat(meus.map(a=>({v:String(a),t:agAlvoT(a,true)+' · '+((I.alvos[a]||[''])[0]||'—')})));
   // uso na O.S. (CTL-5 · RL-E3): leva produto da fazenda, cultura e alvo ao "Ajustar antes de liberar" da ordem; a consulta não emite receituário
-  const F=agFaz(p,c), nf=F?F.nf:[], pf=nf.length===1?nf[0]:(nf.indexOf(st.af_pf)>=0?st.af_pf:'');
+  const F=agFaz(p,c), nf=F?F.nf.filter(n=>(AGF.osp||[]).indexOf(n)>=0):[], pf=nf.length===1?nf[0]:(nf.indexOf(st.af_pf)>=0?st.af_pf:'');
   v.af_hasPf=nf.length>1; v.af_pf=pf; v.af_pfs=[{v:'',t:'Escolha o produto ('+agNf(nf.length)+')'}].concat(nf.map(n=>({v:n,t:n}))); v.af_setpf=(e)=>self.setState({af_pf:e.target.value});
   const cand=(cul!==''&&!isTD)?agOsCand(c,cn):[], ord=cand.some(o=>o.id===st.af_ord)?st.af_ord:(cand.length===1?cand[0].id:'');
   v.af_ord=ord; v.af_ordDis=!cand.length; v.af_setord=(e)=>self.setState({af_ord:e.target.value});
@@ -1568,7 +1571,8 @@ function agFichaVals(self,v){ const st=self.state; const pi=(st.agf&&AGX.st==='o
   v.af_dica=!uOk?'Carregando os usos registrados…':(cul===''?'Escolha a cultura e o alvo do uso registrado para usar o produto numa O.S.'
     :(isTD?'Uso registrado em “Todas as culturas”: escolha no campo Cultura a cultura do talhão (ex.: '+(extra.slice(0,2).map(x=>I.culturas[x][0]).join(', ')||'Soja')+').'
     :(al===''?((viaTD?'Registro sem uso específico em '+cn+': vale o uso em “Todas as culturas”. ':'')+'Escolha o alvo.')
-    :(!nf.length?'Sem produto da fazenda com este ingrediente ativo: cadastre o produto para usá-lo numa O.S.'
+    :(!nf.length?(F?('A fazenda tem '+F.nf.join(', ')+' só como referência de bula (sem lote nem plano): cadastre o produto para usá-lo numa O.S.')
+      :'Sem produto da fazenda com este ingrediente ativo: cadastre o produto para usá-lo numa O.S.')
     :(!cand.length?'Nenhuma ordem A liberar em '+cn.toLowerCase()+'. A ordem nasce do plano (Nova ordem, na O.S.) ou da vistoria (Pragas e doenças).'
     :(!pf?'Escolha o produto da fazenda.':(!ord?'Escolha a ordem A liberar.'
     :'Abre a '+ord+' em Ajustar antes de liberar com '+pf+' incluído para '+an+'. A agrônoma informa a dose; ao liberar, a O.S. confere registro, dose e nº de aplicações e grava a aprovação. Esta consulta não emite receituário.')))))));

@@ -37,5 +37,9 @@ chk('F2 AG-07 oferece "Usar na O.S." com cultura, alvo e ordem A liberar, e leva
     '>Usar na O.S.</button>' in ag7 and 'aria-label="Ordem A liberar"' in ag7 and ":usar='+[pf,cn,an].map(encodeURIComponent).join('|')" in ag7)
 chk('F3 o link da O.S. aceita #OS-xxxx:usar=<produto>|<cultura>|<alvo> e abre o ajuste com o produto incluído, dose em branco',
     'usar=(.*)' in JS_NUCLEO + open(os.path.join(HERE, 'areas', 'processo_os.py'), encoding='utf-8').read() and "dose:'',alvo:us.alvo" in open(os.path.join(HERE, 'areas', 'processo_os.py'), encoding='utf-8').read())
+from areas.processo_os import _nova_ordem_dados
+osp = (AG.agf_dados().get('osp') if hasattr(AG, 'agf_dados') else None) or []
+chk('F4 o AG-07 só oferece produto que a O.S. aceita: AGF.osp = catálogo do "Incluir produto" da O.S. (sem link sem saída para produto só de referência)',
+    osp == sorted({x['p'] for x in _nova_ordem_dados()['prods']}) and "F.nf.filter(n=>(AGF.osp||[]).indexOf(n)>=0)" in ag7, len(osp))
 print(f'\nRESULTADO {len(OK)}/{len(OK) + len(FAIL)}')
 sys.exit(1 if FAIL else 0)

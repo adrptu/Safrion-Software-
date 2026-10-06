@@ -157,6 +157,14 @@ try:
     chk('E2.11 RECUSA sem produto da fazenda: "Usar na O.S." desligado com "Sem produto da fazenda com este ingrediente ativo…"',
         BTN('Usar na O.S.') == {'dis': True} and 'Sem produto da fazenda com este ingrediente ativo' in PASSO(), [sem, PASSO()])
 
+    # produto da fazenda só de referência de bula (sem lote nem plano, fora do catálogo da O.S.): sem link sem saída
+    ref = J("""(()=>{ try{ const {AGX}=window.__agx; const SO=AGX.I.culturas.findIndex(c=>c[0]==='Soja'); const r=Object.values(AGX.FK).find(L=>L.every(x=>x.nomes_fazenda.length&&x.nomes_fazenda.every(n=>/^Mancozebe/.test(n))));
+      const p=r&&AGX.P.find(p=>p.key===r[0].key&&p.culSet.has(SO)&&AGX.PU[p.i].some(x=>x[0]===SO)); if(!p) return null; return {reg:p.reg,SO,a:AGX.PU[p.i].find(x=>x[0]===SO)[1]}; }catch(e){ return null; } })()""") or {}
+    J(f"location.hash='#reg-{ref.get('reg')}'"); time.sleep(.9)
+    sv(f'{FX} select[aria-label="Cultura do uso"]', str(ref.get('SO'))); sv(f'{FX} select[aria-label="Alvo do uso"]', str(ref.get('a')))
+    chk('E2.11b RECUSA produto só de referência (Mancozebe 750 WG, sem lote nem plano): "Usar na O.S." desligado com "… só como referência de bula … cadastre o produto"',
+        bool(ref) and BTN('Usar na O.S.') == {'dis': True} and 'Mancozebe 750 WG só como referência de bula' in PASSO(), [ref, PASSO()])
+
     # =============== 390 px ===============
     c.size(390, 844); goto('AG-07.dc.html', 1.5); ag_pronto(); J(f"location.hash='#reg-{alvo.get('reg')}'"); time.sleep(.9)
     sv(f'{FX} select[aria-label="Cultura do uso"]', str(alvo.get('MA'))); sv(f'{FX} select[aria-label="Alvo do uso"]', str(alvo.get('a')))

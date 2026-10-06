@@ -247,13 +247,13 @@ try:
     lin=[f"{l['prod']} {l['lote']} {l['local']} {nf(l['fisico'])} {l['un']} {nf(l['reservado'])} {l['un']} {nf(disp(l))} {l['un']}" for l in LA]
     MA=cid('Mamão'); alm=sorted(a for c_,a in ((c_,a) for c_,L in U.items() if int(c_)==MA for a,ps in L if XA['i'] in ps))
     setv(f'{FX} select[aria-label="Cultura do uso"]',str(MA)); setv(f'{FX} select[aria-label="Alvo do uso"]',str(alm[0]))
-    pfs=[o for o in (J(f"[...document.querySelectorAll('{FX} select[aria-label=\"Produto da fazenda\"] option')].map(o=>o.value)") or []) if o]; d14=USAR()
-    setv(f'{FX} select[aria-label="Produto da fazenda"]','Abamectina 18 EC'); d14b=USAR()
-    chk(f'14 Na fazenda ({XA["nome"]}): lotes de {", ".join(nfz)} iguais ao cenário; referência "Abamectina 18 EC"; Mamão: escolher o produto da fazenda ({len(nfz)}) e a ordem A liberar de mamão',
+    pfs=J(f"!!document.querySelector('{FX} select[aria-label=\"Produto da fazenda\"]')"); d14=USAR(); d14b=d14
+    # dos 3 nomes da fazenda com abamectina, só a Abamectina 18 EC está no catálogo da O.S. (lote ou plano): é ela que vai, sem perguntar
+    chk(f'14 Na fazenda ({XA["nome"]}): lotes de {", ".join(nfz)} iguais ao cenário; referência "Abamectina 18 EC"; Mamão: a ordem A liberar de mamão (o produto é o do catálogo da O.S.)',
         lot==lin and len(lin)>0 and 'REFERÊNCIA CONFERIDA EM BULA' in f.upper() and 'Abamectina 18 EC' in f
-        and sorted(pfs)==nfz and d14 is True and ORDS()==['OS-0501','OS-0502','OS-0511'], [lin,lot,pfs,d14,ORDS()])
+        and pfs is False and d14 is True and ORDS()==['OS-0501','OS-0502','OS-0511'], [lin,lot,pfs,d14,ORDS()])
     setv(f'{FX} select[aria-label="Ordem A liberar"]','OS-0501')
-    chk('14b com produto e ordem escolhidos, "Usar na O.S." liga e diz o próximo passo na OS-0501', d14b is True and USAR() is False and 'Abre a OS-0501 em Ajustar antes de liberar com Abamectina 18 EC incluído' in PASSO(), [d14b,USAR(),PASSO()])
+    chk('14b com a ordem escolhida, "Usar na O.S." liga e diz o próximo passo na OS-0501 com a Abamectina 18 EC', d14b is True and USAR() is False and 'Abre a OS-0501 em Ajustar antes de liberar com Abamectina 18 EC incluído' in PASSO(), [d14b,USAR(),PASSO()])
     J(f"(()=>{{const s=document.querySelector('{FX} section[aria-label=\"Na fazenda\"]'); if(s) s.scrollIntoView({{block:'start'}});}})()"); time.sleep(.3)
     shot('ficha_na_fazenda'); junta('AG-07 abamectina')
 
