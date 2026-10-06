@@ -35,3 +35,9 @@ a = D('48.47'); print('PV12 calagem', a * 200, a * 200 * D('0.18'), '· gesso', 
 print('T2 calcário', D(298) * D('1.2'), D(298) * D('1.2') * 180, '· KCl T2', 298 * 120, 298 * 120 * D('2.4'),
       '· T1-A', 160 * 30, 160 * 30 * D('2.4'), '· T1-B', 152 * 30, 152 * 30 * D('2.4'), '· T7', D(42) * D('0.4'), D(42) * D('0.4') * 180)
 print('KCl líquido S2627', 4800 + 4560 - 35760, (4800 + 4560 - 35760) * D('2.4'))
+# revisão por contraexemplo (06/10/2026): estoque da OS-0502 no cenário, faixa de meta da R07 e R17 com um laudo sintético do T1 (V 50 %)
+import cenario, quantidade as Q
+lot = [(k, l['fisico'], l['reservado']) for k, l in cenario.seed()['lotes'].items() if k.startswith('Calcário dolomítico filler')]
+print('OS-0502 lote', lot, '· precisa 2.000', Q.qtd(2000, 48.47), '· 1.800', Q.qtd(1800, 48.47))
+print('metas R07 kg/ha', {c['local']: c['meta'] * 60 for c in D2.CULTIVOS['S2627'] if c['cultura'] == 'Soja' and c['plano']}, '· faixa 2.400–4.800')
+print('R17 T1 V 50 %', [q(x, '0.0001') for x in nc(D(50), D(60), D('7.50'), D(85))], '→ T1-A e T1-B na S2627; nada na S27SF')
