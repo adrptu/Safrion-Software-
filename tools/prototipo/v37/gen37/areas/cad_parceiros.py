@@ -214,7 +214,7 @@ function trocaPapel(self,k,st){ if(k===(self.state.cd5_p||'')){ if(st) self.setS
   Object.keys(g.f||{}).forEach(x=>{ if(ks.indexOf(x)>=0&&x!=='papel'&&(g.f[x]||[]).length) f[x]=g.f[x]; });
   g2set(self,'g_forn',{f:f,fmc:null}); self.setState(Object.assign({cd5_p:k},st||{})); }
 function cotaveis(rows){ return rows.filter(r=>ml(r.v.papeis).indexOf('Fornecedor')>=0&&r.v.sit!=='Suspenso'&&r.v.homol==='Sim'&&r.v.email&&ml(r.v.canais).indexOf('E-mail')>=0); }
-function PREVALS(self,v){ const rows=RW(self,'g_forn'); const fp=self.state.cd5_p||''; GR('g_forn').cols=(fp&&COLS_P[fp])||COLS_T;
+function PREVALS(self,v){ const rows=RW(self,'g_forn'); const fp=self.state.cd5_p||''; GR('g_forn').cols=(fp&&COLS_P[fp])||COLS_T; v.cd5_ncol=GR('g_forn').cols.length;
   rows.forEach(r=>{ const V=r.v; const pp=ml(V.papeis); Object.assign(V,rpFlags(pp)); if(!V.sit) V.sit='Ativo';
     const forn=pp.indexOf('Fornecedor')>=0, hom=V.homol==='Sim', gg=ml(V.grupos), susp=V.sit==='Suspenso';
     r.p.nome=[{k:'b',t:V.nome||''}]; r.s.nome=V.nome||''; r.p.cnpj=[V.cnpj?{k:'txt',t:V.cnpj}:{k:'mut',t:'—'}]; r.s.cnpj=V.cnpj||'';
@@ -314,3 +314,5 @@ function EXTRAVALS(self,v){ const sp=GR('g_forn'); const F=v.g_forn_F; v.cd5_sus
     HEIGHTS37[fname]=1000   # sem rolagem de página: só a tabela da aba rola
     shell37('CD-05','Parceiros e fornecedores',corpo,fname=fname,status=None,primary_html=None,search=False)
     estado_cab(fname,'Parceiros e fornecedores','cd5e')
+    from areas.cadastros import ncol_dinamico
+    ncol_dinamico(fname,['cd5_ncol'])   # as colunas do papel mudam a quantidade de colunas (8 ou 9)

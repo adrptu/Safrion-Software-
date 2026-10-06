@@ -199,6 +199,16 @@ def estado_cab(fname,titulo,key):
     p=os.path.join(E.P,fname); s=open(p).read(); alvo=f'>{esc(titulo)}</h1>'
     assert s.count(alvo)==1, (fname,alvo)
     open(p,'w').write(s.replace(alvo,alvo+estado_html(key),1))
+def ncol_dinamico(fname,holes):
+    """grade cujas colunas mudam no navegador (ex.: colunas do papel no CD-05; Fazenda só em "Todas" na Irrigação): troca o nº fixo de
+    colunas da i-ésima grade da página (ordem do HTML) pelo buraco holes[i] (None mantém), para a trilha do grid acompanhar as colunas."""
+    import os
+    p=os.path.join(E.P,fname); s=open(p,encoding='utf-8').read(); alvo='grid-template-columns: var(--g2cols, repeat('
+    partes=s.split(alvo); assert len(partes)-1>=len(holes), (fname,len(partes)-1,holes)
+    for i,h in enumerate(holes):
+        if h is None: continue
+        q=partes[i+1]; j=q.index(','); assert q[:j].isdigit(), (fname,q[:20]); partes[i+1]='{{'+h+'}}'+q[j:]
+    open(p,'w',encoding='utf-8').write(alvo.join(partes))
 def estado_html(key):
     return f'<span class="cadx-estado" style="{H(key+"_stst")}"><span style="{H(key+"_stdot")}"></span>{H(key)}</span>'
 def acoes_form(gid):
