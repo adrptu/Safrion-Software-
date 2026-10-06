@@ -18,7 +18,7 @@ BLOCO = SRC[SRC.index('// >>> CAPACIDADE'):SRC.index('// <<< CAPACIDADE')]
 JS_RUN = r"""
 const fs=require('fs'); eval(fs.readFileSync(process.argv[1],'utf8')+'\n;globalThis.CX={capSaf,capVeredito,fmtOcup,cargaRec,classeOc,capJanelas};');
 const X=globalThis.CX; const jobs=JSON.parse(fs.readFileSync(0,'utf8')); const out=[];
-for(const j of jobs){ if(j.op==='fmt'){ out.push(j.v.map(x=>X.fmtOcup(x))); continue; }
+for(const j of jobs){ if(j.op==='fmt'){ out.push(j.v.map(x=>X.fmtOcup(x))); continue; } if(j.op==='cls'){ out.push(j.v.map(x=>X.classeOc(...x))); continue; }
   const G=X.capSaf(j.oc,j.outras,j.recursos,j.meses,j.dias); const g={};
   Object.keys(G).forEach(k=>{ const x=G[k]; g[k]={un:x.un,cells:x.cells.map(c=>({d:c.d,dThis:c.dThis,dOth:c.dOth,cap:c.cap,ocup:c.ocup,nec:c.nec,red:c.red,soma:c.soma,own:c.own})),
     max:x.max?{mes:x.max.mes,ocup:x.max.ocup}:null,reds:x.reds.map(c=>c.mes),horas:x.horasSafra,txt:x.max?X.fmtOcup(x.max.ocup):'—'}; });
@@ -30,8 +30,10 @@ def js(jobs):
     p = subprocess.run(['node', '-e', JS_RUN, BF], input=json.dumps(jobs), capture_output=True, text=True, timeout=600)
     if p.returncode: raise SystemExit('node falhou: ' + p.stderr[-2000:])
     return json.loads(p.stdout)
-def oc_json(o):
-    return dict(mi=o['mi'], a=dict(op=o['a']['op'], nome=o['a']['nome']), dt=o['dt'].isoformat(),
+def oc_json(o, safra=None):
+    # cls = etiqueta do calendário da própria safra (classeOc no capCalc da tela): só as ocorrências desta safra a levam (revisão SAF, S3.1)
+    s = SAF.get(safra) if safra else None
+    return dict(mi=o['mi'], a=dict(op=o['a']['op'], nome=o['a']['nome']), dt=o['dt'].isoformat(), **({'cls': D2.classe_oc(o['dt'], o['mi'], s['ini'], s['fim'])} if s else {}),
                 rp=dict(itens=[dict(nh=x.get('nh') or 0, h=x.get('h') or 0, nq=x.get('nq') or 0, semRec=bool(x.get('semRec')), Hin=(None if x.get('Hin') in (None, float('inf')) else x.get('Hin')), nome=x.get('nome')) for x in o['rp']['itens']],
                         falta=dict(semHoras=o['rp']['falta']['semHoras'])), cfs=o['cfs'])
 def recs(**mod):
@@ -47,7 +49,7 @@ def ver_in(safra, oc, recursos):
     com = [c for c in cs if c['plano'] and D2.PLANO.get(c['plano'], {}).get('cultura') == c['cultura']]; sem = [c for c in cs if c not in com]
     cls = dict(antes=0, fora=0, depois=0, cal=0)
     for o in oc:
-        dt = o['dt'].isoformat(); cl = 'antes' if dt < s['ini'] else ('depois' if dt > s['fim'] else ('fora' if o['mi'] < 0 else 'cal')); cls[cl] += 1
+        cls[D2.classe_oc(o['dt'], o['mi'], s['ini'], s['fim'])] += 1
     return dict(semPlano=[dict(local=c['local'], area=c['area']) for c in sem], aPlano=sum(c['area'] for c in com), cls=cls, ini=br(s['ini']),
                 outras={x['id']: x['nome'] for x in D2.SAFRAS}, pend=sum(1 for o in oc if o['pend']), semHoras=sum(o['rp']['falta']['semHoras'] for o in oc),
                 incompleto='', periodoCal=D2.MESES[0][1] + ' – ' + D2.MESES[-1][1])
@@ -55,7 +57,7 @@ def job(safra, recursos=None, planos=None, cfg=None, ver=False, outras_off=False
     rs = recursos or D2.RECURSOS
     oc = D2.ocorr_op(safra, planos, cfg, rs)
     outras = [] if outras_off else [dict(id=sid, nome=SAF[sid]['nome'], oc=[oc_json(o) for o in D2.ocorr_op(sid, None, None, rs)]) for sid in D2.outras_safras(safra)]
-    j = dict(op='cap', oc=[oc_json(o) for o in oc], outras=outras, recursos=rec_js(rs), meses=D2.MESES, dias=D2.DIAS_UTEIS)
+    j = dict(op='cap', oc=[oc_json(o, safra) for o in oc], outras=outras, recursos=rec_js(rs), meses=D2.MESES, dias=D2.DIAS_UTEIS)
     if ver: j['ver'] = ver_in(safra, oc, rs)
     return j, oc
 def py_cap(safra, recursos=None, planos=None, cfg=None): return D2.capacidade(safra, recursos, planos, cfg)
@@ -144,8 +146,9 @@ if __name__ == '__main__':
     chk('C20 fmtOcup: <1 % · 1 % · <1 % · — · não calculável · 1.584 %', f == ['<1 %', '1 %', '<1 %', '—', 'não calculável', '1.584 %'] and [D2.fmt_ocup(x) for x in (cel(G, 'pulv', 'jan/27')['ocup'], cel(G, 'dist', 'out/26')['ocup'], 0, None, 1584.4)] == ['<1 %', '1 %', '—', 'não calculável', '1.584 %'], f)
     for nome in ('base S2627', 'base S27SF', 'base LG2627', 'base S2526'):
         r, oc = RES[nome]; tot = {}
+        s = SAF[nome.split()[-1]]
         for o, cg in zip(oc, r['carga']):
-            if o['mi'] < 0: continue
+            if o['mi'] < 0 or D2.classe_oc(o['dt'], o['mi'], s['ini'], s['fim']) != 'cal': continue
             for k, h in cg.items(): tot[(k, o['mi'])] = tot.get((k, o['mi']), 0) + h
         bad = [(k, mi) for k in r['G'] for mi in range(12) if abs(tot.get((k, mi), 0) - r['G'][k]['cells'][mi]['dThis']) > 1e-9]
         chk('C21 Σ cargaRec das ocorrências = demanda desta safra em cada recurso e mês · ' + nome, not bad, bad[:4])
@@ -175,6 +178,26 @@ if __name__ == '__main__':
     chk('V13 veredito Colhedoras = 0', V['Colhedoras 0'].startswith('Falta recurso: Colhedoras precisam de 1 em fev/27 e você tem 0. Inclui 3 ocorrências ainda sem alocação. Fora da conta: '), V['Colhedoras 0'])
     chk('V10/C9 veredito com SOJA-AT nos sem plano começa por Colhedoras', RES['SOJA-AT nos sem plano'][0]['ver']['txt'].startswith('Falta recurso: Colhedoras precisam de 2 em fev/27 e você tem 1.'), RES['SOJA-AT nos sem plano'][0]['ver']['txt'])
     chk('P2 veredito Operadores 8 → 5', 'Operadores e equipe precisam de 6 em mai/27 e você tem 5' in RES['Operadores 5'][0]['ver']['txt'], RES['Operadores 5'][0]['ver']['txt'])
+    # S3.1 (revisão SAF, 06/10/2026) · ocorrência desta safra depois do fim (ou antes do início) conta no custo e não na capacidade.
+    # d3 da S27SF com plantio em 20/05/2027: a colheita cai em ago/27, depois do fim (31/07/2027). Antes da correção, Colhedoras e
+    # Operadores somavam ago/27 (19 h e 42,4 h) com o veredito dizendo "Fora da conta: 2 ocorrências depois do fim".
+    _orig = copy.deepcopy(D2.CULTIVOS['S27SF'])
+    try:
+        for c_ in D2.CULTIVOS['S27SF']:
+            if c_['id'] == 'd3': c_['plantio'] = '2027-05-20'
+        j31, oc31 = job('S27SF', ver=True); r31 = js([j31])[0]; g31 = D2.capacidade('S27SF')
+        cl31 = ver_in('S27SF', oc31, D2.RECURSOS)['cls']; ago = MI['ago/27']
+        chk('S3.1 d3 em 20/05/2027: 2 ocorrências depois do fim, e nenhuma hora delas na capacidade de ago/27 (JS e Python)',
+            cl31['depois'] == 2 and all(r31['G'][k]['cells'][ago]['dThis'] == 0 and g31[k]['cells'][ago]['dThis'] == 0 for k in r31['G']),
+            (cl31, {k: (r31['G'][k]['cells'][ago]['dThis'], g31[k]['cells'][ago]['dThis']) for k in r31['G']}))
+        chk('S3.1 veredito diz "Fora da conta: 2 ocorrências depois do fim da safra" e não cita ago/27', 'Fora da conta: 2 ocorrências depois do fim da safra' in r31['ver']['txt'] and 'ago/27' not in r31['ver']['txt'], r31['ver']['txt'])
+        dif = [(k, i) for k in r31['G'] for i in range(12) if abs(r31['G'][k]['cells'][i]['d'] - g31[k]['cells'][i]['d']) > 1e-6 or r31['G'][k]['cells'][i]['red'] != g31[k]['cells'][i]['red']]
+        chk('S3.1 paridade JS = Python com ocorrências depois do fim', not dif, dif[:4])
+        casos = [('2027-01-31', 4, '2027-02-01', '2027-07-31'), ('2027-08-01', 11, '2027-02-01', '2027-07-31'), ('2025-10-01', -1, '2025-09-01', '2026-08-31'), ('2027-03-01', 6, '2027-02-01', '2027-07-31')]
+        cj = js([dict(op='cls', v=[list(x) for x in casos])])[0]
+        chk('S3.1 classe_oc (Python) = classeOc (tela): antes · depois · fora · cal', [D2.classe_oc(*x) for x in casos] == cj == ['antes', 'depois', 'fora', 'cal'], cj)
+    finally:
+        D2.CULTIVOS['S27SF'][:] = _orig
     # C11 · 200 combinações sorteadas de unidades, jornada, turnos, disponibilidade e absenteísmo (e sobrescrita de configuração), JS = Python
     random.seed(20261005); J2 = []; P2 = []
     for k in range(200):

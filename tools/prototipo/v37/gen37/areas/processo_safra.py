@@ -48,7 +48,7 @@ def build():
     # painel "Planejar T1" (§2): contexto herdado no subtítulo; Plano antes do Plantio; Plantio = PlantioMin; Colheita prevista editável só sem
     # plano; meta na unidade de mercado da cultura (DEC-0510-03). "Vincular ciclo C1" (R-24) mostra o ciclo travado e pede plano e meta.
     CULT_FIELDS=[dict(k='modo',l='',t='txt',cond=NUNCA_C),dict(k='talhao',l='',t='txt',cond=NUNCA_C),
-                 dict(k='cult',l='Cultura',t='sel',opts=list(OCEN.CULTURAS),req=True,cond=PLAN),dict(k='cult',l='Cultura',ro=True,cond=VINC),
+                 dict(k='cult',l='Cultura',t='sel',dyn=True,opts=[],req=True,cond=PLAN),dict(k='cult',l='Cultura',ro=True,cond=VINC),
                  dict(k='var',l='Variedade',t='txt',req=True,cond=PLAN),dict(k='var',l='Variedade',ro=True,cond=VINC),
                  dict(k='plano',l='Plano agronômico',t='sel',dyn=True,opts=[],
                       help='Planos publicados da cultura escolhida. Trocar o plano descarta os ajustes de insumos deste cultivo.'),
@@ -186,7 +186,9 @@ def build():
     def cap_cols(mis):
         return ([dict(k='rec',l='Recurso',w=170),dict(k='maior',l='Maior uso',t='num',a='r'),dict(k='mes',l='Mês',t='num')]+
                 [dict(k=f'm{i}',l=meses[i][1],t='num',a='r',nr=True) for i in mis])
-    CAP_MIS={'S27SF':[i for i,(m,_) in enumerate(meses) if '2027-02'<=m<='2027-07']}
+    # meses do período de cada safra no calendário (sem interseção, o calendário inteiro): a regra é a capMeses de safra.js, que também
+    # recorta a g_cap_NOVA em tempo de execução; aqui só dimensiona a grade de cada safra fixa pelos dados (revisão SAF, S3.1)
+    CAP_MIS={s['id']:([i for i,(m,_) in enumerate(meses) if s['ini'][:7]<=m<=s['fim'][:7]] or list(range(len(meses)))) for s in D2.SAFRAS}
     cap_html=''
     for k in ['S2627','S27SF','S2526','LG2627','NOVA']:
         g=grid(cap_cols(CAP_MIS.get(k,list(range(len(meses))))),[],edit=dict(m='pick',leafOnly=False),search=False,gid=f'g_cap_{k}',total=False,headtools=False)
@@ -233,7 +235,7 @@ function _safhooks(self){ self.g2after=(gid,rows,r,isNew)=>{ if(gid==='g_saf' &&
   self.g2live=(gid,k,d)=>(String(gid).indexOf('g_rend_')===0?rendLive(k,d,self):(String(gid).indexOf('g_cult_')===0?cultLive(self,gid,k,d):(String(gid).indexOf('g_recp_')===0?recLive(self,gid,k,d):null)));
   self.g2draft=(gid,k,d,fm)=>(String(gid).indexOf('g_cult_')===0?cultDraft(self,gid,k,d,fm):null);
   self.g2formSub=(gid,r,fm)=>(String(gid).indexOf('g_cult_')===0?cultSub(self,gid,r,fm):(String(gid).indexOf('g_recp_')===0?recSub(self):null));
-  self.g2opts=(gid,k,d,rid)=>(String(gid).indexOf('g_cult_')===0&&k==='plano'?planOpts(d):(String(gid).indexOf('g_rend_')===0&&k==='conj_id'?conjOpts(rid||d.base):null));
+  self.g2opts=(gid,k,d,rid)=>(String(gid).indexOf('g_cult_')===0&&k==='plano'?planOpts(d):(String(gid).indexOf('g_cult_')===0&&k==='cult'?cultOpts(d):(String(gid).indexOf('g_rend_')===0&&k==='conj_id'?conjOpts(rid||d.base):null)));
   self.g2formActs=(gid,r,fm)=>(String(gid).indexOf('g_cult_')===0?cultActs(self,gid,r):(String(gid).indexOf('g_rend_')===0?rendActs(self,gid,r):null));
   self.g2check=(gid,rows,r,d,isNew)=>(String(gid).indexOf('g_cult_')===0?cultCheck(self,gid,rows,r,d,isNew):(String(gid).indexOf('g_rend_')===0?(self._conjAntes=(r?String(r.v.conj_id||''):null),opAntes(self,r),rendCheck(self,rows,r,d,isNew)):(String(gid).indexOf('g_recp_')===0?(opAntes(self,r),null):(gid==='g_saf'?safCheck(d):null))));
   self.g2pick=(gid,rid,r)=>{ if(gid==='g_op') abrirRend(self,rid); if(String(gid).indexOf('g_cap_')===0) abrirRec(self,rid); }; }
@@ -348,7 +350,7 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
             f'<input aria-label="Variedade de {H("r.lab")}" value="{H("r.var")}" onChange="{H("r.s_var")}" readOnly="{H("r.dis")}" style="{H("r.st_var")}">'
             f'<input type="date" aria-label="Plantio de {H("r.lab")}" value="{H("r.plantio")}" onChange="{H("r.s_plantio")}" readOnly="{H("r.dis")}" style="{H("r.st_plantio")}">'
             f'<input aria-label="Meta de {H("r.lab")}" inputMode="decimal" value="{H("r.meta")}" onChange="{H("r.s_meta")}" readOnly="{H("r.dis")}" style="{H("r.st_meta")}">'
-            f'<select aria-label="Unidade da meta de {H("r.lab")}" value="{H("r.unm")}" onChange="{H("r.s_unm")}" disabled="{H("r.dis")}" style="{H("r.st_unm")}"><sc-for list="{H("r.ou")}" as="o" hint-placeholder-count="2"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select>'
+            f'<span data-un="meta" style="font-size: 13px; color: {MUTED}; white-space: nowrap;">{H("r.unm")}</span>'   # unidade de mercado da cultura (DEC-0510-03), sem escolha
             f'<span style="display: flex; flex-direction: column; gap: 3px; min-width: 0;"><select aria-label="Plano agronômico de {H("r.lab")}" value="{H("r.planoId")}" onChange="{H("r.s_plano")}" disabled="{H("r.dis")}" style="{H("r.st_plano")}"><sc-for list="{H("r.op")}" as="o" hint-placeholder-count="2"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select>'
             f'<sc-if value="{H("r.temNota")}" hint-placeholder-val="{F()}"><span style="{H("r.pst")}">{H("r.plano")}</span></sc-if></span>'
             f'<span><sc-if value="{H("r.notAsk")}" hint-placeholder-val="{H("true")}"><button type="button" class="g2del" aria-label="Excluir parcela {H("r.lab")}" title="Excluir parcela" onClick="{H("r.rm")}">×</button></sc-if></span></div>'

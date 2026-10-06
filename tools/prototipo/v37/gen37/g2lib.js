@@ -209,10 +209,11 @@ function g2vals(self,sp,v,mask){
   { const ids=Object.keys(st.sel||{}).filter(k=>(st.sel||{})[k]); const vis=new Set(flat.map(x=>x.r.id)); const fora=ids.filter(k=>!vis.has(k)).length;
     v[id+'_selmsg']=ids.length+(ids.length>1?' selecionados':' selecionado')+(fora?' · '+fora+' fora da vista (filtro ou grupo recolhido)':'');
     // com seleção, a região de ações da barra dá lugar à do lote (o "+ Novo…" volta quando a seleção é limpa); "Selecionar todas" diz o alcance
-    v[id+'_semsel']=!ids.length; const todas=flat.length>0&&flat.every(x=>(st.sel||{})[x.r.id]);
-    v[id+'_selallLab']=todas?('Desmarcar as '+flat.length+' linhas visíveis'):('Selecionar as '+flat.length+' linhas visíveis (filtro e grupos recolhidos ficam de fora)'); }
+    // só as linhas que têm caixa: linha de exibição (talhão, ocupação de fora, área livre) não é registro e não entra (R-23, revisão SAF S3.8)
+    v[id+'_semsel']=!ids.length; const selv=flat.filter(x=>!(x.r.livre||x.r.fora||x.r.nosel)); const todas=selv.length>0&&selv.every(x=>(st.sel||{})[x.r.id]);
+    v[id+'_selallLab']=todas?('Desmarcar as '+selv.length+' linhas visíveis'):('Selecionar as '+selv.length+' linhas visíveis (filtro e grupos recolhidos ficam de fora)'); }
   v[id+'_selclear']=()=>g2set(self,id,{sel:{}});
-  v[id+'_selall']=()=>{ const s2={}; const allOn=flat.every(x=>(st.sel||{})[x.r.id]); if(!allOn) flat.forEach(x=>{ s2[x.r.id]=true; }); g2set(self,id,{sel:s2}); };
+  v[id+'_selall']=()=>{ const s2={}; const selv=flat.filter(x=>!(x.r.livre||x.r.fora||x.r.nosel)); const allOn=selv.length>0&&selv.every(x=>(st.sel||{})[x.r.id]); if(!allOn) selv.forEach(x=>{ s2[x.r.id]=true; }); g2set(self,id,{sel:s2}); };
   v[id+'_new']=()=>g2new(self,sp);
   v[id+'_expall']=()=>{ const x={}; const w=(l)=>l.forEach(r=>{ if(r.kids&&r.kids.length){ x[r.id]=true; w(r.kids);} }); w(rows); g2set(self,id,{x}); };
   v[id+'_colall']=()=>g2set(self,id,{x:{}});

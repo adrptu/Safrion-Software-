@@ -743,14 +743,22 @@ def outras_safras(safra):
     me=next((s for s in SAFRAS if s['id']==safra),None)
     if not me or me['ro']: return []
     return [s['id'] for s in SAFRAS if s['id']!=safra and not s['ro'] and s['fazenda']==me['fazenda']]
+def classe_oc(dt,mi,ini,fim):
+    """Espelho do classeOc (safra.js): antes do início, depois do fim, fora do calendário ou no calendário ('cal')."""
+    d=dt.isoformat() if hasattr(dt,'isoformat') else str(dt)
+    if ini and d<ini: return 'antes'
+    if fim and d>fim: return 'depois'
+    if mi<0: return 'fora'
+    return 'cal'
 def capacidade(safra,recursos=None,planos=None,cfg_override=None):
     """Espelho do capSaf (safra.js · bloco CAPACIDADE): por grupo de recursos e mês, demanda desta safra e das outras safras abertas da mesma
     fazenda (x.nh × rc, inclui o necessário sem alocação), capacidade, ocupação (None = não calculável), necessárias e falta."""
     recs=recursos or RECURSOS; M=len(MESES); G={}
     for r in recs: g=cap_rec(r); g.update(dThis=[0.0]*M,dThisAt=[0.0]*M,dOth=[0.0]*M,oth={},sim=[0]*M,semH=[0.0]*M,pendSR=[0]*M); G[r['id']]=g
-    oc=ocorr_op(safra,planos,cfg_override,recs)
+    oc=ocorr_op(safra,planos,cfg_override,recs); me=next((s for s in SAFRAS if s['id']==safra),{})
     def add(o,own,sid):
-        if o['mi']<0: return
+        # ocorrência desta safra com etiqueta do calendário conta no custo e não na capacidade (espelho do capSaf; revisão SAF, S3.1)
+        if o['mi']<0 or (own and classe_oc(o['dt'],o['mi'],me.get('ini'),me.get('fim'))!='cal'): return
         cs=carga_itens(o)
         for c in cs:
             g=G.get(c['k'])

@@ -141,7 +141,10 @@ try:
         return J(f"""(()=>{{const a=document.querySelector('aside[role=dialog]'); const l=[...a.querySelectorAll('label')].find(l=>l.innerText.trim().startsWith({json.dumps(label)})); if(!l) return 'sem '+{json.dumps(label)}; const i=document.getElementById(l.getAttribute('for')); const pr=i.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(pr,'value').set.call(i,{json.dumps(val)}); i.dispatchEvent(new Event(i.tagName==='SELECT'?'change':'input',{{bubbles:true}})); return 'ok';}})()""")
     for lab_,val in [('Cultura','Milho'),('Variedade','AG 8700'),('Área','100'),('Plantio','2027-02-28'),('Meta de produtividade','170')]: fset(lab_,val); time.sleep(.15)
     clk('Salvar','aside[role=dialog]'); t=toast()
-    chk('Planejar › no T4 livre vira parcela T4-A com 104 ha livres', 'parcela T4-A · 104 ha livres em T4' in t, t)
+    # o Parcela veio "T4" (sugestão para a área cheia) e a área baixou para 100 ha: o nome final é o mesmo que a trava conferiu (parcelaFinal,
+    # revisão SAF S2.2), a próxima letra livre no talhão; T4-A a T4-E já são faixas da Safra 2026/27 (divididas acima) e não se repetem,
+    # senão a parcela de 100 ha seria tratada como a mesma área da T4-A de 40,8 ha
+    chk('Planejar › no T4 livre vira parcela T4-F com 104 ha livres', 'parcela T4-F · 104 ha livres em T4' in t, t)
     T4=J("""(()=>{const r=[...document.querySelectorAll('[role=row]')].find(x=>x.querySelector('.g2c0')&&/^[▾▸]?\\s?T4\\s/.test(x.querySelector('.g2c0').innerText.trim()+' ')); return r?r.innerText.replace(/\\s+/g,' '):'';})()""")
     chk('T4 continua A conferir e a ocupação da soja (c4) continua na linha', 'A conferir' in (T4 or '') and J("!!document.querySelector('[role=row][data-rid=fora_c4]')"), T4)
     T2c=J("""(()=>{const r=[...document.querySelectorAll('[role=row]')].find(x=>x.querySelector('.g2c0')&&/^[▾▸]?\\s?T2\\s/.test(x.querySelector('.g2c0').innerText.trim()+' ')); return r?r.querySelector('.g2c0').innerText.replace(/\\s+/g,' '):'';})()""")
