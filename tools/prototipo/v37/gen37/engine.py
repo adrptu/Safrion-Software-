@@ -1436,6 +1436,7 @@ ENGINE_JS2=ENGINE_JS2.replace("    return v;\n  }\n}","""    v.g2toast = this.st
     if (typeof PREVALS === 'function') PREVALS(this, v);
     for (const sp of GRIDS) g2vals(this, sp, v, vis[sp.id]);
     if (typeof EXTRAVALS === 'function') EXTRAVALS(this, v);
+    if (typeof assinAvisoVals === 'function') assinAvisoVals(this, v);   // faixa de cobrança (PLAT-01, R11): só as telas da organização têm o buraco
     return v;
   }
   componentDidUpdate(pp, ps) { if (this.state.g2toast && this.state.g2toast !== (ps || {}).g2toast) { clearTimeout(this._g2t); this._g2t = setTimeout(() => this.setState({ g2toast: '' }), 4500); } }

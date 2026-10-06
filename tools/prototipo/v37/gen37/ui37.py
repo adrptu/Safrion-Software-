@@ -254,6 +254,13 @@ def _macro_html(fname, ctx):
                 f'<button type="button" onClick="{{{{mf_trocar}}}}" title="Voltar à etapa 1 para escolher outra safra" style="border: 0; background: transparent; color: {ACC}; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;">Trocar safra</button>')
     return out + f'<span style="width: 1px; height: 18px; background: {LINE};"></span>'
 
+# Faixa de cobrança (PLAT-01, R11): só nas telas web da organização (fora de BO, ON e PT; não no próprio CF-05, que já mostra o estado e a
+# primária). Amarela em atraso (nada restrito), vermelha inadimplente (ampliar a área suspenso). "Pagar fatura" é link de texto para o CF-05,
+# nunca botão verde (não vira 2ª primária). O app de campo (mobile37) nunca mostra cobrança. Texto e cor vêm de assinAvisoVals (assinatura.js).
+def faixa_cobranca(fid,fname):
+    if fid[:2] in ('BO','ON','PT') or fname.startswith('CF-05'): return ''
+    return (f'<sc-if value="{{{{assin_fx}}}}" hint-placeholder-val="{{{{false}}}}"><div role="note" aria-label="Cobrança" style="{{{{assin_fx_st}}}}">'
+            f'<span>{{{{assin_fx_t}}}}</span><a href="CF-05.dc.html#pagar" style="color: inherit; font-weight: 800; text-decoration: underline; text-underline-offset: 3px;">Pagar fatura ›</a></div></sc-if>')
 def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=None,crumbs_extra=None,
             ctx=('Fazenda Santa Rita','Safra 2026/27',None),cont=None,chipsrow='',footer=None,
             fname=None,W=1440,H=880,perfil='Ana · Gestora',search=True,steps=None,primary_html=None):
@@ -330,6 +337,7 @@ a{{color:{ACC}}}@media (hover:hover){{a:hover{{color:#15603a}}}}
 {prim}
 </div>
 {f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.35; max-width: 900px; margin-top: -4px;">{esc(subtitle)}</div>' if subtitle else ''}
+{faixa_cobranca(fid,fname)}
 {controw}
 {chipsrow}
 </header>
