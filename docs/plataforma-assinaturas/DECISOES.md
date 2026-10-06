@@ -1,0 +1,77 @@
+# Plataforma de assinaturas · decisões tomadas sem o proprietário
+
+Cada decisão abaixo foi tomada pelo Claude para destravar o protótipo. Nenhuma é decisão do proprietário: preços, trial, franquias, base de cobrança e régua continuam **a decidir pelo proprietário** (DEC-01, DEC-05, DEC-09 do PRD 70.4). Rótulo: **especificado**. Revisor: Codex.
+
+Formato: decisão · por quê · como reverter.
+
+**PLAT-D01 · Duas visões, uma no menu.** A organização vê só o CF-05 "Assinatura e cobrança", no grupo Configurações, por último no menu. O backoffice da plataforma (BO-01, BO-02) fica fora do menu do agricultor, acessível pelo índice do protótipo.
+- Por quê: PRD 57.5 isola o backoffice ("não aparece na navegação do agricultor"); o pedido coloca "Assinatura e cobrança" em Configurações.
+- Reverter: acrescentar um grupo "Plataforma" em `MENU2` (`ui37.py:35-41`) com BO-02 e BO-01.
+
+**PLAT-D02 · De 9 telas para 3.** CF-05det, BO-01det, BO-02det, BO-03 e BO-03det viram o detalhe da linha; BO-04 sai.
+- Por quê: essencialismo (menos telas, master-detail); a medição e a memória são o detalhe da fatura ou da organização, não telas próprias.
+- Reverter: restaurar as funções de `9c617c4` (`configuracoes.py:526-553`, `onboarding_backoffice.py:298-582`) e tirar os nomes da lista de `build.py:23`.
+
+**PLAT-D03 · Três planos de exemplo.** Avaliação (30 dias, R$ 0); Essencial (R$ 1,50/ha·mês, mínimo R$ 199, satélite 6 cenas e IA 100 por mês); Completo (R$ 2,00/ha·mês, mínimo R$ 299, satélite 12 e IA 200: a hipótese do PRD 57.2 e as franquias do BO-01det atual). Os dois pagos vão até 5.000 ha.
+- Por quê: mostrar "o que cada plano inclui" e a troca com prévia precisa de ao menos dois planos pagos. O Essencial é valor novo, só de exemplo.
+- Reverter: editar a tabela de planos em `dados_assinatura.py` (fonte única); as três telas e a prévia leem dela.
+
+**PLAT-D04 · Corte de módulos pela onda do PRD 18.1.** O núcleo E1 (Mapa, Cadastros, Agrícola com O.S. e app, Manutenção, Suprimentos) está em todos os planos. Colheita e pós-colheita, comercial e logística, gestão e integração ERP só no Completo.
+- Por quê: o núcleo é uma cadeia (O.S. → reserva → entrega → apontamento → custo). Partir essa cadeia entre planos deixaria O.S. sem estoque ou sem bloqueio de máquina. Controles essenciais não são opcionais (PRD 57.2). E2 depende de E1, não o contrário.
+- Reverter: mover módulos entre os planos na mesma tabela; a regra R15 continua a impedir que o núcleo seja partido.
+
+**PLAT-D05 · Base de cobrança (DEC-01).** Cobra-se a área cultivável dos talhões ativos (medida no cadastro), limitada pela área contratada. A memória mostra também quanto seria pela área contratada.
+- Por quê: o pedido quer o uso lido dos cadastros. O PRD 57.2 quer área contratada, versionada e com aceite para ampliar. Com o limite, o desenho de um talhão nunca vira cobrança-surpresa. Pousio não reduz a cobrança, porque o talhão segue Ativo. A memória com os dois valores ajuda o proprietário a decidir.
+- Reverter: parâmetro `BASE='contratada'` em `dados_assinatura.py`; a cobrada passa a ser a contratada, sem outra mudança.
+
+**PLAT-D06 · Usuários sem limite e fora da cobrança.** A tela mostra quantas pessoas têm acesso, como informação.
+- Por quê: PRD 58.1 ("colaboradores convidados não precisam contratar uma segunda assinatura"). Assim o produtor não deixa de cadastrar o operador por medo de custo.
+- Reverter: coluna "Usuários incluídos" na tabela de planos e um termo por usuário excedente em `assinMensalidade`.
+
+**PLAT-D07 · Calendário de exemplo.** O período é o mês civil e fecha no último dia. A fatura é emitida e vence no dia 1 do mês seguinte, com 3 tentativas em 10 dias. Não há pró-rata: a área do fechamento vale para o mês.
+- Por quê: o legado do PRD 57.4.1 (dia 1; 3 tentativas em 10 dias) já estava no CF-05. Sem pró-rata, o mês tem uma conta só, legível. O limite contratado impede que um talhão do dia 29 vire surpresa.
+- Reverter: parâmetros `DIA_VENC`, `TENTATIVAS` e `PRORATA` em `dados_assinatura.py`.
+
+**PLAT-D08 · Régua de inadimplência.** Com 1 a 10 dias de atraso, só aviso. Com 11 dias ou mais, a organização não amplia o uso: não cria talhão novo pelo cadastro nem pelo mapa. Nenhuma ação de O.S., estoque, irrigação, manutenção ou consulta é restringida, e nada é apagado.
+- Por quê: o pedido quer aviso e restrição gradual, sem perda de dado. Restringir O.S. empurraria o trabalho de campo para fora do sistema, sem aprovação agronômica, carência e rastreio, o que é pior para a segurança e para os dados. A ampliação é o que aumenta a dívida e o custo de servir.
+- Reverter: parâmetros `DIAS_AVISO` e `RESTRICOES` (lista de ações) em `dados_assinatura.py`. Com lista vazia, fica só o aviso.
+
+**PLAT-D09 · Mudança vale do próximo ciclo.** Mudança de plano ou área começa no dia 1 seguinte e nunca retroage. No aceite, a área contratada precisa ser maior ou igual à medida do dia.
+- Por quê: PRD 57.2 e PRECO-04. O mínimo da área evita contratar pouco e gerir muito pagando o mínimo.
+- Reverter: parâmetro `INICIO='imediato'` (com pró-rata, PLAT-D07). O piso da área só sai com nova decisão.
+
+**PLAT-D10 · Dinheiro em decimal pela regra que já existe.** O valor sai de `cenQtd(preço, área)`, o decimal exato com 2 casas e arredondamento meio para cima de `cenario.js:29-40`. As áreas somam em centésimos inteiros.
+- Por quê: ENG-011 e ENG-013 (fórmula única, decimal). Executado: `2570.23*1.5` dá 3855.3450000000003 em ponto flutuante, e a soma das áreas dá 2570.2299999999996.
+- Reverter: não se reverte. Uma regra de dinheiro diferente da de quantidade exige ADR.
+
+**PLAT-D11 · Pagamento simulado.** Na organização da demonstração, o evento simulado do provedor chega no clique de pagar. Nas outras organizações, a fatura só fica Paga por "Conciliar pagamentos" no BO-02.
+- Por quê: mostrar ao proprietário, num passo, que pagar tira o aviso e a trava, sem abandonar a regra de evento validado (PRD 58.4). A conciliação continua demonstrada no BO-02.
+- Reverter: em `assinPagar`, gravar o evento na fila do provedor em vez de aplicá-lo; a fatura fica Pendente até conciliar.
+
+**PLAT-D12 · Estado em `c.assin` sem subir `CEN0.v`.** Um cenário salvo sem `assin` recebe a do seed na leitura.
+- Por quê: o pedido quer tudo no mesmo estado. Subir a versão descartaria o progresso salvo de quem testa as O.S. e disputaria o número com outras frentes (o SUP-2a também sobe `v`).
+- Reverter: incluir `assin` no seed e subir `v` no `cenario.py:80`, com o aviso de que o salvo é descartado.
+
+**PLAT-D13 · Data simulada só da cobrança.** Um painel "Demonstração" no CF-05 avança a data da cobrança (23/09, 01/10, 06/10, 16/10). Os outros módulos seguem em 23/09, e as outras organizações não fecham período.
+- Por quê: sem avançar a data não dá para ver fatura, atraso e trava. Avançar a data de todo o protótipo mudaria todos os módulos.
+- Reverter: tirar o painel; a assinatura fica em 23/09.
+
+**PLAT-D14 · Organização e outros clientes do seed.** "Grupo Santa Rita" reúne as três fazendas do cadastro, inclusive a Lagoa Grande sintética. Os outros clientes são reduzidos a cinco produtores, um por estado. Parceiros e patrocínio saem (Fertisul, Coop. Verde Vale).
+- Por quê: um cliente por estado basta para mostrar a carteira. Os planos de parceiro dependem do DEC-05, e o portal está fora do menu.
+- Reverter: acrescentar organizações em `dados_assinatura.py`; parceiros voltam com o PT-07 (fora de escopo §9).
+
+**PLAT-D15 · Contestação mínima.** Contestar congela a régua daquela fatura. A plataforma resolve mantendo o valor (novo vencimento em 5 dias) ou creditando no período seguinte. A fatura contestada nunca é reescrita.
+- Por quê: é o contrapeso da trava, porque não se restringe cliente por cobrança que ele contesta (PRD BO-03). Fica no último passo (P6) e não bloqueia os anteriores.
+- Reverter: tirar `Contestar` e `Resolver`. A régua volta a contar sem exceção.
+
+**PLAT-D16 · Terceira cópia da regra de mescla do cadastro.** `assinMedir` repete a regra de `tmBase` (`talmapa.js:7-11`): o salvo primeiro, depois a base para os ids que faltam, e os inativos saem. Um teste unitário compara as duas sobre o mesmo dado.
+- Por quê: `talmapa.js` e `cad_fazendas.py` são de outras frentes ativas. Extrair a regra agora criaria conflito com elas.
+- Reverter (quitar a dívida): mover a regra para uma função pura comum quando a frente de cadastros tocar `talmapa.js` e `cad_fazendas.py`, e apagar as cópias.
+
+## Para o proprietário decidir (sem pressa; o protótipo funciona com os exemplos)
+
+1. Base de cobrança: área contratada ou área medida no cadastro (DEC-01; PLAT-D05).
+2. Preço, mínimo e franquias de cada plano, e se haverá dois planos (DEC-09; PLAT-D03, D04).
+3. Duração do trial, retenção depois do fim e calendário de cobrança (DEC-09; PLAT-D07).
+4. Régua de inadimplência: dias e o que é restringido (PLAT-D08).
+5. Preços e trial dos parceiros (DEC-05; fora de escopo).
