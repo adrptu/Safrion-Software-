@@ -316,7 +316,7 @@ function PREVALS(self,v){
     return {id:'DG'+gi,v:{ins:g,valor:val,falta:fg},s:{ins:g},p:{ins:[B(g),MU(its.length+(its.length>1?' insumos':' insumo'))],falta:fg?[MU(brd(fg))]:[MU('')]},
       kids:its.map((d,ix)=>{ const dc=d.un==='L'?1:0; const fa=fas[ix]; const sit=sitDem(self,m,d,fa); const c=calDe(d);
         return {id:'DG'+gi+'_'+ix,ro:true,v:{ins:d.nome,bruta:d.bruta,est:d.est,rec:d.rec,liq:d.liq,un:d.un,falta:fa||'',preco:d.preco,valor:d.valor},s:{sit:sit.map(x=>x.t).join(' ')},
-          p:{bruta:[T(nf(d.bruta,dc))].concat(c.real>0.001?[BR(),MU('realizado: '+nf(c.real,dc))]:[]),est:[T(nf(d.est,dc))].concat((d.liq>0.001&&c.antes>0.001)?[BR(),MU('usado antes: '+nf(c.antes,dc))]:(d.res?[BR(),MU('res. '+nf(d.res,dc))]:[])),
+          p:{bruta:[T(nf(d.bruta,dc))].concat(c.real>0.001?[BR(),MU('antes de hoje sem O.S.: '+nf(c.real,dc))]:[]),est:[T(nf(d.est,dc))].concat((d.liq>0.001&&c.antes>0.001)?[BR(),MU('usado antes: '+nf(c.antes,dc))]:(d.res?[BR(),MU('res. '+nf(d.res,dc))]:[])),
              rec:[T(nf(d.rec,dc))].concat(d.liq>0.001&&c.tarde>0.001?[BR(),MU(nf(c.tarde,dc)+' após a falta')]:[]),
              liq:[B(nf(d.liq,dc))],falta:fa?[(d.liq>0.001?B(brd(fa)):CH(brd(fa),'red'))]:[MU('—')],sit},
           o:cal01Memo(c,{un:d.un,res:d.res,quar:d.quar}).map(t=>({t})).concat([{t:'Ver no Planejar safra · demanda de insumos',h:SX.origem.h}])}; })}; });

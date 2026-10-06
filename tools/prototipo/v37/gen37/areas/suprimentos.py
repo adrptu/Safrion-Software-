@@ -235,6 +235,7 @@ def su01():
         res=sum(l['reservado'] for l in lots); disp=D2.ESTOQUE.get(nm,0); cond=sum(l['quarentena'] for l in lots)
         firm=D2.RECEB.get(nm,0); ped=next((p for p in D2.PEDIDOS if p['item']==nm and p['a_entregar']>0),None)
         oo=org.get(nm,[]); tot=sum(x['q'] for x in oo); falta=max(0.0,tot-disp-firm)
+        if not oo: continue   # CTL-4: insumo que só uma O.S. usa (Ureia da OS-0418) não tem origem do plano nesta tela antiga (oculta)
         data=min(x['dt'] for x in oo); lead=_lead(o['grupo'])+SEG
         if falta>0.001:
             nfalta+=1

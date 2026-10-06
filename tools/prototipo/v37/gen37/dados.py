@@ -83,14 +83,17 @@ APROV=[
 # Histórico (encerradas antigas) usa a faixa OS-0380..OS-0399; novas ordens criadas no protótipo: OS-0440 em diante.
 # Campos opcionais: selos_extra = condições além do selo principal (mesma lista na O.S., no Mapa e no detalhe);
 # chave = cultivo|atividade do plano que gerou a ordem, ou lista delas quando a ordem cobre vários cultivos
-# (a "Nova ordem" não emite outra para a mesma chave): OS-0421 = T1-A, T1-B e T2 · a6; OS-0425 = c9|k1; OS-0430 = c1|a1; OS-0431 = c3|a3.
+# (a "Nova ordem" não emite outra para a mesma chave): OS-0421 = T1-A, T1-B e T2 · a6; OS-0425 = c9|k1; OS-0430 = c1|a1; OS-0431 = c3|a3;
+# OS-0420 = c4|a3 (origem declarada: Soja alta tecnologia v6 · REC-014 v2 · Plantio e adubação de base, 1ª onda de 100 ha da NEC-028 no T4;
+# CTL-4: com o plano aplicado no T4 a ordem cobre a parte dela, sem somar plano e O.S. do mesmo consumo).
 # Selo com "Impedida" ou "Falta máquina" conta como ordem impedida em todas as telas.
 ORDENS=[
  dict(id='OS-0415',tipo='Dessecação pós-colheita',talhao='T3',area=96,etapa='Encerradas',selo=None,realizado=96,saldo=0,janela='10–12/09',resp='Marcos',detalhe=None),
  dict(id='OS-0417',tipo='Adubação de cobertura',talhao='P1',area=95,etapa='Em conferência',selo='Sobras a receber',realizado=95,saldo=0,janela='19–21/09',resp='Paula',detalhe=None),
  dict(id='OS-0418',tipo='Fertirrigação · reclassificada',talhao='P1',area=95,etapa='A liberar',selo=None,realizado=0,saldo=95,janela='24/09 21:00–25/09 11:15',resp='João',detalhe=None),
  dict(id='OS-0419',tipo='Irrigação · água por política',talhao='P2',area=80,etapa='Liberadas',selo=None,realizado=0,saldo=80,janela='hoje 20:00–amanhã 10:31',resp='João',detalhe='IR-03det.dc.html'),
- dict(id='OS-0420',tipo='Plantio · Soja 58 W',talhao='T4',area=100,etapa='Em execução',selo='Impedida · ativo bloqueado',realizado=30,saldo=70,janela='22–28/09',resp='Carlos',detalhe='CA-01x-os0420.dc.html'),
+ dict(id='OS-0420',tipo='Plantio · Soja 58 W',talhao='T4',area=100,etapa='Em execução',selo='Impedida · ativo bloqueado',realizado=30,saldo=70,janela='22–28/09',resp='Carlos',detalhe='CA-01x-os0420.dc.html',
+      chave='c4|a3'),
  dict(id='OS-0421',tipo='Pulverização · Fungicida 1ª aplicação',talhao='T1+T2',area=350,etapa='Em execução',selo='Parcial · dia 4 de 7',realizado=190,saldo=160,janela='20–26/09',resp='Marcos',detalhe='CA-01det.dc.html',
       chave=['c1|a6','c2|a6','c3|a6']),
  dict(id='OS-0422',tipo='Irrigação · água',talhao='P2',area=80,etapa='A liberar',selo='Janela a definir',realizado=0,saldo=80,janela='a definir',resp='João',detalhe='IR-02.dc.html'),

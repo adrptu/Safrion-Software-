@@ -140,27 +140,19 @@ def _ocorr_py(safra,ajustes,planos_extra):
             for i,p in enumerate(a['prods']):
                 dose=ajustes.get(c['id'],{}).get(f"{a['id']}|{i}",p['dose'])
                 yield c,a,p,dose,dose*c['area']
-def demanda(safra,ajustes=None,planos_extra=None):
-    """Demanda por produto (unidade, preço, origens) e necessidade líquida por data (CAL-01) — igual ao cálculo da etapa 6 no JS (safra.js + cal01.js).
-    estoque = físico apto (inclui reservas); receb = recebimentos previstos (total); liq/falta saem da projeção datada com as outras origens do mesmo estoque.
-    bruta = demanda residual (usos de hoje em diante); real = usos planejados antes de hoje (já realizados); plano = total do plano."""
-    ajustes=AJUSTES if ajustes is None else ajustes
-    out={}; ordem={s['id']:i for i,s in enumerate(SAFRAS)}
-    for c,a,p,dose,q in _ocorr_py(safra,ajustes,planos_extra):
-        nm=prod_nome(p['prod'],c)
-        o=out.setdefault(nm,dict(grupo=p['grupo'],un=p['un'],preco=p['preco'],bruta=0.0,orig=[],evs=[]))
-        o['bruta']+=q; o['orig'].append((c['local'],a['nome'],dose,c['area'],q))
-        o['evs'].append(dict(dt=data_atividade(c,a).isoformat(),q=q,tipo='dem',own=True,ord=ordem.get(safra,99),chave=f"{c['id']}|{a['id']}",
-                             t=f"{c['local']} · {a['nome']}",calc=f"{_nf(dose,2)} {p['un']}/ha × {_nfa(c['area'])} ha"))   # área com até 2 casas (PRE-REV R5)
-    for nm,o in out.items():
-        o['evs']+=_outras_origens(safra,nm)
-        o['estoque']=fisico_apto(nm); o['reservado']=sum(r['q'] for r in RESERVAS if r['item']==nm); o['receb']=RECEB.get(nm,0)
-        r=cal01(o['estoque'],o['evs'],0.0,HOJE_ISO,VIAVEL); o['liq']=r['liq']; o['falta']=r['falta']; o['valor']=o['liq']*o['preco']
-        o['plano']=o['bruta']; o['bruta']=r['bruta']; o['real']=r['real']; o['rup']=r['rupRec']; o['cob']=r['cob']
-    return out
+def demanda(safra,ajustes=None,planos_extra=None,osd=None):
+    """Demanda por insumo e necessidade líquida por data (CAL-01) — espelho de demFazenda (cal01.js), a conta única do Planejar safra (etapa 4)
+    e do Mapa › Insumos; a Compra de insumos lê esta (CTL-4, DEM-01..07). estoque = físico apto da fazenda da safra (inclui reservas);
+    receb = recebimentos previstos da fazenda; bruta = usos desta safra de hoje em diante (plano sem a parte coberta por O.S. + pendente das O.S.);
+    real = uso do plano antes de hoje sem O.S. (fora da demanda, DEM-06); plano = plano sem a parte coberta, todas as datas.
+    osd: ordens (os_dem) — os testes passam um cenário alterado."""
+    m=dem_fazenda(dict(dem_entradas(safra,ajustes,planos_extra),osd=os_dem() if osd is None else osd))
+    for o in m.values(): o.update(estoque=o['est'],reservado=o['res'],receb=o['rec'])
+    return m
 # ---- Fazenda Lagoa Grande (dados_lagoa_safra.py): safra de mamão nos 23 pivôs reais, planos, conjuntos e estoque ----
 import dados_lagoa_safra as _DL
 _DL.SAFRA['periodo']=periodo_txt(_DL.SAFRA['ini'],_DL.SAFRA['fim']); SAFRAS.append(_DL.SAFRA); CULTIVOS[_DL.SAFRA['id']]=_DL.CULTIVOS; PLANOS.extend(_DL.PLANOS); PLANO.update({p['id']:p for p in _DL.PLANOS}); CONJ.extend(_DL.CONJ)
+EST_FAZ={'Santa Rita':dict(ESTOQUE),'Lagoa Grande':dict(_DL.ESTOQUE)}   # DEM-07: o físico de cada fazenda (ESTOQUE junta os dois para as telas de estoque)
 ESTOQUE.update(_DL.ESTOQUE); RECEB.update(_DL.RECEB)
 # ---- REND-MULTICONJUNTOS-20261003 · configurações por atividade (etapa 3 · Defina os rendimentos) e espelho do cálculo da etapa 4 ----
 # diesel por hora de conjunto (L/h, estimativa da fazenda; vazio = não informado). Só estima litros pelas horas: o custo do combustível
@@ -815,7 +807,7 @@ def resumo_cultura(safra,ajustes=None,planos_extra=None,cfg_override=None):
     return by
 def js_data():
     return dict(meses=MESES,dias=DIAS_UTEIS,safras=SAFRAS,tipos=TIPOS,planos=PLANOS,cultivos=CULTIVOS,ajustes=AJUSTES,conj=CONJ,recursos=RECURSOS,estoque=ESTOQUE,receb=RECEB,
-                fisico={k:fisico_apto(k) for k in ESTOQUE},reservas=RESERVAS,recebDt=RECEB_DT,
+                fisico={f:fisico_faz(f) for f in EST_FAZ},reservas=RESERVAS,recebDt=RECEB_DT,osb=os_base(),   # CTL-4: físico por fazenda (DEM-07) e ordens (cenOsDem)
                 quar={l['item']:l['quarentena'] for l in LOTES if l['quarentena']})
 # =================== Suprimentos: fornecedores, cotações, pedidos, estoque (ligam Compras ↔ Estoque ↔ Cadastros) ===================
 GRUPOS=['Sementes','Fertilizantes','Herbicidas','Fungicidas','Inseticidas','Adjuvantes','Inoculantes','Combustível','Peças']
@@ -932,29 +924,168 @@ def _nf(n,d=0):
     t=f"{n:,.{d}f}"; return t.replace(',','X').replace('.',',').replace('X','.')
 def _nfa(n):   # como nfa do safra.js: até 2 casas, sem zeros à direita
     return _nf(n,2).rstrip('0').rstrip(',')
-# reservas ativas por destino (o físico apto as inclui; LOTES.reservado = soma delas por insumo). chave = cultivo|atividade quando a reserva é da
-# mesma demanda do plano (conta uma vez); sem chave = outro destino, entra como demanda na data da reserva.
-RESERVAS=[dict(item='Fungicida A',q=65,dt='2026-09-24',t='Reserva REQ-039 · OS-0424 (T1-B)',chave=None,faz='Santa Rita')]
-def fisico_apto(item):
-    """Físico apto (fora quarentena) = disponível + reservado. ESTOQUE guarda o disponível por item (checa_coerencia)."""
-    return ESTOQUE.get(item,0)+sum(l['reservado'] for l in LOTES if l['item']==item)
-# recebimentos previstos com data (pedidos em aberto; o calcário da Lagoa Grande não tem PC no protótipo: pedido de 30/09)
-RECEB_DT=[dict(item=p['item'],q=p['a_entregar'],dt=iso_br(p['previsao']),ref=p['id'],t=f"Recebimento {p['id']} ({next(f['nome'] for f in FORNECEDORES if f['id']==p['f'])})")
-          for p in PEDIDOS if p['a_entregar']]+[dict(item='Calcário dolomítico filler',q=50000,dt='2026-09-30',ref=None,t='Recebimento previsto (pedido de 30/09)')]
-def _outras_origens(safra,nm):
-    """Outras origens do mesmo estoque para o insumo nm: safras abertas da mesma fazenda (agregadas por data), reservas e recebimentos datados."""
-    me=next((s for s in SAFRAS if s['id']==safra),None); faz=(me or {}).get('fazenda','Santa Rita'); evs=[]
-    for i,s in enumerate(SAFRAS):
-        if s['id']==safra or s['ro'] or s['fazenda']!=faz: continue
+# reservas ativas por destino (o físico apto as inclui; LOTES.reservado = soma delas por insumo). chave = cultivo|atividade ou ID da O.S. quando a
+# reserva é da mesma demanda (conta uma vez, DEM-04); sem chave = outro destino, entra como demanda na data da reserva.
+RESERVAS=[dict(item='Fungicida A',q=65,dt='2026-09-24',t='Reserva REQ-039 · OS-0424 (T1-B)',chave='OS-0424',faz='Santa Rita')]
+def fisico_apto(item,faz):
+    """Físico apto (fora quarentena) da fazenda (DEM-07: estoque de outra fazenda não cobre) = disponível + reservado na fazenda.
+    EST_FAZ guarda o disponível por item (checa_coerencia, na Santa Rita); a Lagoa Grande não tem reserva em RESERVAS."""
+    return EST_FAZ.get(faz,{}).get(item,0)+sum(r['q'] for r in RESERVAS if r['item']==item and r['faz']==faz)
+def fisico_faz(faz):
+    return {k:fisico_apto(k,faz) for k in list(EST_FAZ.get(faz,{}))+[r['item'] for r in RESERVAS if r['faz']==faz]}
+# recebimentos previstos com data e fazenda (pedidos em aberto, todos da Santa Rita; o calcário da Lagoa Grande não tem PC no protótipo: pedido de 30/09)
+RECEB_DT=[dict(item=p['item'],q=p['a_entregar'],dt=iso_br(p['previsao']),ref=p['id'],faz='Santa Rita',t=f"Recebimento {p['id']} ({next(f['nome'] for f in FORNECEDORES if f['id']==p['f'])})")
+          for p in PEDIDOS if p['a_entregar']]+[dict(item='Calcário dolomítico filler',q=50000,dt='2026-09-30',ref=None,faz='Lagoa Grande',t='Recebimento previsto (pedido de 30/09)')]
+# ---- CTL-4 · demanda única (DEM-01..07): espelho de cenOsDem (cenario.js) e de demRestante/demOsEvs/demFazenda (cal01.js) ----
+OS_FASES_PEND=('A liberar','Liberadas','Em execução')
+def _saf_id(faz,lab):   # rótulo de safra da ordem ('2026/27', 'Safrinha 2027') → id da safra aberta da fazenda
+    return next((s['id'] for s in SAFRAS if s['fazenda']==faz and s['nome'].endswith(lab) and not s['ro']),None)
+_OSB=[None]
+def os_base():
+    """Parte fixa das ordens para a demanda (vai às telas como D2.osb / MDATA.dem.osb): fazenda, safra (id), chaves do plano, talhões, início
+    da janela e texto; as safras abertas (para a ordem nova emitida no cenário) e grupo e preço de referência de cada insumo."""
+    if _OSB[0] is None:
+        import areas.processo_os as P
+        ords=[]
+        for b in P._ordens():
+            saf=_saf_id(b['faz'],b['saf'])
+            if not saf: continue
+            ords.append(dict(id=b['id'],faz=b['faz'],saf=saf,chaves=list(b['keys']),loc=[t['nome'] for t in (b.get('talhoes') or [])] or [b['talhao']],
+                             ini=b.get('ini') or '',t=f"{b['talhao']} · {b['id']} · {b['atv']['nome']}"))
+        cat={}
+        for s_ in SAFRAS:
+            for c in CULTIVOS.get(s_['id'],[]):
+                for a in (PLANO[c['plano']]['atividades'] if c['plano'] else []):
+                    for x in a['prods']: cat.setdefault(prod_nome(x['prod'],c),dict(g=x['grupo'],preco=x['preco']))
+        for pl in PLANOS:
+            for a in pl['atividades']:
+                for x in a['prods']: cat.setdefault(x['prod'],dict(g=x['grupo'],preco=x['preco']))
+        _OSB[0]=dict(ords=ords,safs=[dict(id=s_['id'],faz=s_['fazenda'],nome=s_['nome']) for s_ in SAFRAS if not s_['ro']],cat=cat,hoje=HOJE_ISO)
+    return _OSB[0]
+_OSD=[None]
+def os_dem(cen=None):
+    """DEM-02 · espelho de cenOsDem: o que cada O.S. ainda tira do almoxarifado, na semente do cenário (ou no estado cen). A liberar, Liberadas
+    e Em execução: pendente = máx(0, quantidade(dose, saldo) − custódia da requisição); sem realizado, o total da versão. Em conferência e
+    Encerradas: pendente 0, mas a ordem continua cobrindo o plano (DEM-01). Canceladas não cobrem nada. Data = máx(hoje, início da janela)."""
+    if cen is None and _OSD[0] is not None: return _OSD[0]
+    import cenario, quantidade as Q
+    c=cenario.seed() if cen is None else cen; b=os_base(); out=[]
+    def um(x,co):
+        if not co or co['etapa']=='Canceladas': return
+        r=(c.get('reqs') or {}).get(co.get('req') or '') or {'itens':[]}; itens=[]
+        if co['etapa'] in OS_FASES_PEND:
+            real=co.get('realizado') or 0; saldo=(co.get('saldo') or 0) if real else (co.get('area') or 0)
+            for i in co.get('ins') or []:
+                cust=sum(y.get('custodia') or 0 for y in r['itens'] if y['prod']==i['p'])
+                bruto=Q.qtd(i['dose'],saldo) if real else (i.get('tot') or 0); k=b['cat'].get(i['p'],{})
+                itens.append(dict(p=i['p'],q=max(0.0,Q.qtd(bruto-cust,1)),un=i['un'],g=k.get('g',''),preco=k.get('preco',0),
+                                  calc=f"{_nf(i['dose'],2)} {i['un']}/ha × {_nfa(saldo)} ha"+(f" − {_nfa(cust)} {i['un']} em custódia" if cust>0 else '')))
+        if not x['chaves'] and not any(i['q']>0 for i in itens): return
+        out.append(dict(id=x['id'],faz=x['faz'],saf=x['saf'],chaves=list(x['chaves']),area=co.get('area') or 0,dt=(x['ini'] if x['ini'] and x['ini']>b['hoje'] else b['hoje']),
+                        etapa=co['etapa'],t=x['t'],loc=list(x['loc']),itens=itens))
+    vistos=set()
+    for x in b['ords']: vistos.add(x['id']); um(x,c['ordens'].get(x['id']))
+    for k,co in c['ordens'].items():   # ordem nova emitida no cenário (tela O.S.): leva chave, talhão e janela
+        no=((co or {}).get('osc') or {}).get('novo')
+        if k in vistos or not no: continue
+        saf=_saf_id(no.get('faz') or 'Santa Rita',no.get('saf') or '')
+        if saf: um(dict(id=k,faz=no.get('faz') or 'Santa Rita',saf=saf,chaves=list(no.get('keys') or []),loc=[no.get('talhao')],ini=no.get('jan') or '',
+                        t=f"{no.get('talhao')} · {k} · {(no.get('atv') or {}).get('nome') or no.get('tipo') or ''}"),co)
+    if cen is None: _OSD[0]=out
+    return out
+def _tal_de(c):
+    import ocupacao_cen as _OC
+    return _OC.tal_de(c['local'],c['tipo'])
+def occ_faz(safra,ajustes=None,planos_extra=None):
+    """Ocorrências do plano das safras abertas da fazenda da safra (esta com os ajustes e os planos da tela), como o ocorr do safra.js:
+    [{saf, k, a, local, tal, area, dt, nome, prods:[{nome, grupo, un, preco, dose, q}]}] na ordem safra → cultivo → atividade."""
+    ajustes=AJUSTES if ajustes is None else ajustes
+    me=next(s for s in SAFRAS if s['id']==safra); out=[]
+    for s in [me]+[x for x in SAFRAS if x['id']!=safra and not x['ro'] and x['fazenda']==me['fazenda']]:
+        aj=ajustes if s['id']==safra else AJUSTES; px=planos_extra if s['id']==safra else None
+        for c in CULTIVOS[s['id']]:
+            pid=(px or {}).get(c['id'],c['plano'])
+            if not pid: continue
+            for a in PLANO[pid]['atividades']:
+                prods=[]
+                for i,p in enumerate(a['prods']):
+                    dose=aj.get(c['id'],{}).get(f"{a['id']}|{i}",p['dose'])
+                    prods.append(dict(nome=prod_nome(p['prod'],c),grupo=p['grupo'],un=p['un'],preco=p['preco'],dose=dose,q=dose*c['area']))
+                out.append(dict(saf=s['id'],k=f"{c['id']}|{a['id']}",a=a['id'],local=c['local'],tal=_tal_de(c),area=c['area'],
+                                dt=data_atividade(c,a).isoformat(),nome=a['nome'],prods=prods))
+    return out
+def dem_entradas(safra,ajustes=None,planos_extra=None):
+    """Entradas de demFazenda para a safra (sem as ordens): as mesmas que o Planejar safra monta na tela."""
+    faz=next(s for s in SAFRAS if s['id']==safra)['fazenda']
+    return dict(saf=safra,faz=faz,hoje=HOJE_ISO,viavel=VIAVEL,ordem={s['id']:i for i,s in enumerate(SAFRAS)},nomes={s['id']:s['nome'] for s in SAFRAS},
+                occ=occ_faz(safra,ajustes,planos_extra),reservas=RESERVAS,recebDt=RECEB_DT,fisico=fisico_faz(faz))
+def dem_restante(osd,occ):
+    """DEM-01 · espelho de demRestante: {chave: {f: fração do plano sem O.S., txt}} pelo escopo da O.S. (atividade × talhões × safra dela)."""
+    cob={}; txt={}
+    for o in osd:
+        ts=set(o.get('loc') or []); ats=[]
+        for k in o.get('chaves') or []:
+            a=str(k).split('|')[1]
+            if a not in ats: ats.append(a)
+        for a in ats:
+            ks=[x for x in occ if x['saf']==o['saf'] and x['a']==a and (x['local'] in ts or x['tal'] in ts)]; tot=sum(x['area'] for x in ks)
+            if not tot>0: continue
+            for x in ks:
+                cob[x['k']]=cob.get(x['k'],0)+min(1,(o.get('area') or 0)/tot)
+                txt.setdefault(x['k'],[]).append(f"{o['id']} cobre {_nfa(o.get('area') or 0)} de {_nfa(tot)} ha"+(', rateados pela área' if len(ks)>1 else ''))
+    return {k:dict(f=max(0,1-v),txt='; '.join(txt[k])) for k,v in cob.items()}
+def _dem_tal(t): return str(t or '').split('-')[0]
+def dem_os_evs(osd,prod,saf,ordem,tal_prod):
+    """DEM-02/03/04 · espelho de demOsEvs."""
+    out=[]
+    for o in osd:
+        for i in o['itens']:
+            if i['p']!=prod or not i['q']>1e-9: continue
+            av=(not o['chaves']) and any(prod in tal_prod.get(o['saf'],{}).get(_dem_tal(t),{}) for t in o['loc'])
+            out.append(dict(dt=o['dt'],q=i['q'],tipo='dem',own=o['saf']==saf,ord=ordem.get(o['saf'],99),chave=o['id'],
+                            t=o['t']+(' · sem vínculo com o plano do talhão: se for o mesmo uso, retire o produto do plano do talhão (etapa 2)' if av else ''),calc=i['calc'],loc=o['loc']))
+    return out
+def dem_fazenda(x):
+    """DEM-05/06/07 · espelho de demFazenda (cal01.js), passo a passo e na mesma ordem de eventos."""
+    m={}; ordem=x['ordem']; occ=x['occ']; osd=[o for o in x['osd'] if o['faz']==x['faz']]; fr=dem_restante(osd,occ); tp={}
+    for o in occ:
+        for q in o['prods']: tp.setdefault(o['saf'],{}).setdefault(o['tal'],{})[q['nome']]=1
+    def novo(nome,g,un,preco): return m.setdefault(nome,dict(nome=nome,grupo=g or '',un=un,preco=preco or 0,plano=0.0,evs=[]))
+    for o in occ:
+        if o['saf']!=x['saf']: continue
+        c=fr.get(o['k']); f=c['f'] if c else 1
+        for p in o['prods']:
+            d=novo(p['nome'],p['grupo'],p['un'],p['preco']); d['plano']+=p['q']*f
+            if not f>1e-9: continue
+            ar=o['area']*f
+            d['evs'].append(dict(dt=o['dt'] or '',q=p['dose']*ar,tipo='dem',own=True,ord=ordem.get(x['saf'],99),chave=o['k'],
+                                 t=f"{o['local']} · {o['nome']}"+(f" · parte sem O.S. ({c['txt']})" if c and f<1-1e-9 else ''),calc=f"{_nf(p['dose'],2)} {p['un']}/ha × {_nfa(ar)} ha",loc=[o['local']]))
+    for o in osd:
+        if o['saf']!=x['saf']: continue
+        for i in o['itens']:
+            if i['q']>1e-9: novo(i['p'],i['g'],i['un'],i['preco'])   # insumo que só a O.S. usa
+    for d in m.values(): d['evs']+=dem_os_evs(osd,d['nome'],x['saf'],ordem,tp)
+    for s in sorted(ordem,key=lambda k:ordem[k]):
+        if s==x['saf']: continue
         ag={}
-        for c,a,p,dose,q in _ocorr_py(s['id'],AJUSTES,None):
-            if prod_nome(p['prod'],c)!=nm: continue
-            dt=data_atividade(c,a).isoformat(); x=ag.setdefault(dt,dict(q=0.0,n=0,chaves=[])); x['q']+=q; x['n']+=1; x['chaves'].append(f"{c['id']}|{a['id']}")
-        for dt,x in ag.items():
-            evs.append(dict(dt=dt,q=x['q'],tipo='dem',own=False,ord=i,chaves=x['chaves'],t=f"{s['nome']} · {x['n']} {'usos' if x['n']>1 else 'uso'}"))
-    evs+=[dict(dt=r['dt'],q=r['q'],tipo='res',own=False,ord=0,chave=r['chave'],t=r['t']) for r in RESERVAS if r['item']==nm and r['faz']==faz]
-    evs+=[dict(dt=r['dt'],q=r['q'],tipo='rec',own=False,ord=0,ref=r['ref'],t=r['t']) for r in RECEB_DT if r['item']==nm]
-    return evs
+        for o in occ:
+            if o['saf']!=s: continue
+            c=fr.get(o['k']); f=c['f'] if c else 1
+            if not f>1e-9: continue
+            for p in o['prods']:
+                if p['nome'] not in m: continue
+                a=ag.setdefault((p['nome'],o['dt']),dict(nome=p['nome'],dt=o['dt'] or '',q=0.0,n=0,chaves=[])); a['q']+=p['q']*f; a['n']+=1; a['chaves'].append(o['k'])
+        for a in ag.values():
+            m[a['nome']]['evs'].append(dict(dt=a['dt'],q=a['q'],tipo='dem',own=False,ord=ordem.get(s,99),chaves=a['chaves'],t=f"{x['nomes'].get(s,s)} · {a['n']} {'usos' if a['n']>1 else 'uso'}"))
+    for d in m.values():
+        da=lambda r: r['item']==d['nome'] and r['faz']==x['faz']
+        d['evs']+=[dict(dt=r['dt'],q=r['q'],tipo='res',own=False,ord=0,chave=r['chave'],t=r['t']) for r in x['reservas'] if da(r)]
+        d['evs']+=[dict(dt=r['dt'],q=r['q'],tipo='rec',own=False,ord=0,ref=r['ref'],t=r['t']) for r in x['recebDt'] if da(r)]
+        d['res']=sum(r['q'] for r in x['reservas'] if da(r)); d['rec']=sum(r['q'] for r in x['recebDt'] if da(r)); d['est']=x['fisico'].get(d['nome'],0)
+        r=cal01(d['est'],d['evs'],0.0,x['hoje'],x['viavel'])
+        d.update(liq=r['liq'],falta=r['falta'],antes=r['antes'],tarde=r['tarde'],valor=r['liq']*d['preco'],bruta=r['bruta'],real=r['real'],rup=r['rupRec'],cob=r['cob'],
+                 uso=min([e['dt'] for e in d['evs'] if e['tipo']=='dem' and e.get('own') and e['dt'] and e['dt']>=x['hoje']] or ['']))
+    return m
 # chegada viável de uma compra nova (CAL-01 · reposicao_proposta_com_chegada_viavel): hoje + prazo mínimo de reposição (parâmetro de demonstração)
 PRAZO_REPOSICAO=7
 HOJE_ISO=iso_br(HOJE)

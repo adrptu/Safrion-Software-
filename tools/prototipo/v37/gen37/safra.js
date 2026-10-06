@@ -539,27 +539,17 @@ function ocorr(self,saf,poolsX){ const out=[]; const adj=adjOf(self); const pool
       out.push({c,a,pl,dt,mi:mesIdx(dt),area,horas,dec:rp.decorrido,cop:rp.custo,cins:prods.reduce((s,p)=>s+p.q*p.preco,0),prods,rec,rp,cfs,
         saldo:rp.saldo,diesel:rp.diesel,hh:rp.hh,pend:rp.pendente}); }); });
   return out; }
-// demanda por produto (CAL-01, cal01.js): uso = 1º uso de hoje em diante; a necessidade sai da projeção datada do insumo com as outras
-// origens do mesmo estoque — safras abertas da mesma fazenda (agregadas por data), reservas para outros destinos e recebimentos com data.
-// Uso planejado antes de hoje já foi realizado (sai da demanda residual: bruta = residual, real = realizado); compra nova só chega na data viável.
-function demanda(self,saf){ const m={}; const safRows=g2rows(self,GR('g_saf')); const me=safRows.find(r=>r.id===saf); const faz=(me&&me.v.faz)||'Santa Rita';
-  const ordem=(id)=>{ const i=safRows.findIndex(r=>r.id===id); return i<0?99:i; };
-  ocorr(self,saf).forEach(o=>o.prods.forEach(p=>{ const d=m[p.nome]||(m[p.nome]={nome:p.nome,grupo:p.grupo,un:p.un,preco:p.preco,bruta:0,uso:'',evs:[]});
-   d.bruta+=p.q; if(o.dt&&o.dt>=(D2.hoje||'')&&(!d.uso||o.dt<d.uso)) d.uso=o.dt;
-   d.evs.push({dt:o.dt||'',q:p.q,tipo:'dem',own:true,ord:ordem(saf),chave:o.c.id+'|'+o.a.id,t:o.c.v.local+' · '+o.a.nome,calc:nf(p.dose,2)+' '+p.un+'/ha × '+nfa(o.area)+' ha'}); }));   // área com até 2 casas (PRE-REV R5)
-  const vistos={}; vistos[sk(saf)]=1;
-  safRows.forEach(r=>{ if(r.id===saf||r.ro||(r.v.faz||'Santa Rita')!==faz||vistos[sk(r.id)]) return; vistos[sk(r.id)]=1; const ag={}, ks=[];
-    ocorr(self,r.id).forEach(o=>o.prods.forEach(p=>{ if(!m[p.nome]) return; const k=p.nome+'|'+o.dt; if(!ag[k]){ ag[k]={nome:p.nome,dt:o.dt||'',q:0,n:0,chaves:[]}; ks.push(k); }
-      ag[k].q+=p.q; ag[k].n++; ag[k].chaves.push(o.c.id+'|'+o.a.id); }));
-    ks.forEach(k=>{ const x=ag[k]; m[x.nome].evs.push({dt:x.dt,q:x.q,tipo:'dem',own:false,ord:ordem(r.id),chaves:x.chaves,t:r.v.nome+' · '+x.n+(x.n>1?' usos':' uso')}); }); });
-  Object.values(m).forEach(d=>{
-    (D2.reservas||[]).forEach(x=>{ if(x.item===d.nome&&x.faz===faz) d.evs.push({dt:x.dt,q:x.q,tipo:'res',own:false,ord:0,chave:x.chave,t:x.t}); });
-    (D2.recebDt||[]).forEach(x=>{ if(x.item===d.nome) d.evs.push({dt:x.dt,q:x.q,tipo:'rec',own:false,ord:0,ref:x.ref,t:x.t}); });
-    d.res=(D2.reservas||[]).filter(x=>x.item===d.nome&&x.faz===faz).reduce((a,x)=>a+x.q,0);
-    d.est=(D2.fisico||{})[d.nome]!==undefined?D2.fisico[d.nome]:(D2.estoque[d.nome]||0); d.rec=D2.receb[d.nome]||0;
-    const c=cal01(d.est,d.evs,0,{hoje:D2.hoje,viavel:D2.viavel}); d.liq=c.liq; d.falta=c.falta; d.antes=c.antes; d.tarde=c.tarde; d.valor=d.liq*d.preco;
-    d.plano=d.bruta; d.bruta=c.bruta; d.real=c.real; d.rup=c.rupRec; d.cob=c.cob;
-    d.quar=(D2.quar||{})[d.nome]||0; d.memo=cal01Memo(c,{un:d.un,res:d.res,quar:d.quar}); }); return m; }
+// demanda por produto (CTL-4): a conta única demFazenda (cal01.js) com as ocorrências do plano desta safra e das outras safras abertas da mesma
+// fazenda (ocorr, com os ajustes da tela), as O.S. lidas do cenário compartilhado (cenOsDem: o que cada ordem ainda tira do almoxarifado; a parte
+// do plano que ela cobre sai do plano), reservas, recebimentos e o físico apto da própria fazenda. A Compra e o Mapa › Insumos leem a mesma conta.
+function demanda(self,saf){ const safRows=g2rows(self,GR('g_saf')); const me=safRows.find(r=>r.id===saf); const faz=(me&&me.v.faz)||'Santa Rita';
+  const ordem={}, nomes={}; safRows.forEach((r,i)=>{ ordem[r.id]=i; nomes[r.id]=r.v.nome; });
+  const occ=[]; const vistos={}; vistos[sk(saf)]=1;
+  const add=(s)=>ocorr(self,s).forEach(o=>occ.push({saf:s,k:o.c.id+'|'+o.a.id,a:String(o.a.id),local:o.c.v.local,tal:o.c.v.talhao||ocTalhaoDe(o.c.v.local,o.c.v.tipo),
+    area:o.area,dt:o.dt||'',nome:o.a.nome,prods:o.prods}));   // área com até 2 casas na conta escrita (PRE-REV R5)
+  add(saf); safRows.forEach(r=>{ if(r.id===saf||r.ro||(r.v.faz||'Santa Rita')!==faz||vistos[sk(r.id)]) return; vistos[sk(r.id)]=1; add(r.id); });
+  const m=demFazenda({saf,faz,hoje:D2.hoje,viavel:D2.viavel,ordem,nomes,occ,osd:cenOsDem(cenGet(),D2.osb),reservas:D2.reservas,recebDt:D2.recebDt,fisico:(D2.fisico||{})[faz]||{}});
+  Object.values(m).forEach(d=>{ d.quar=(D2.quar||{})[d.nome]||0; d.memo=cal01Memo(d.cal,{un:d.un,res:d.res,quar:d.quar}); }); return m; }
 // produtividade da colheita (kg/ha) por cultura, a partir dos cultivos da safra aberta cujo plano (compatível) usa a operação; média ponderada pela área
 const KG_UN={'sc/ha':60,'t/ha/ano':1000,'kg/ha':1};
 function prodColheita(self,saf,op){ const by={};
@@ -1150,9 +1140,10 @@ function resumoVals(self,v){ const st=self.state; const saf=st.saf; const e=self
       if(b.copAntes>0.005||b.cinsAntes>0.005) nota.push('inclui '+rs(b.copAntes)+' de operação e '+rs(b.cinsAntes)+' de insumos antes de '+br(me.ini));
       return {cult:b.cult,area:nfa(b.area)+' ha',cop:rs(b.cop),cins:rs(b.cins),rha:b.rha===null?'parcial':rs(b.rha)+'/ha',temNota:nota.length>0,nota:nota.join(' · ')}; });
   const T=(f)=>L.reduce((a,b)=>a+b[f],0); lin.push({cult:'Total',area:nfa(T('area'))+' ha',cop:rs(T('cop')),cins:rs(T('cins')),rha:'—',temNota:false,nota:''}); v.rs_lin=lin;
-  const dm=demanda(self,saf); const Z=Object.values(dm).reduce((a,d)=>a+(Number(d.bruta)||0)*(Number(d.preco)||0),0); const Y=T('cins')-Z;
-  v.rs_nota='Insumos do plano: dose × área × preço de todas as datas, antes do estoque. '+(Y>0.005?'Deles, '+rs(Y)+' são de antes de hoje ('+br(D2.hoje)+', já realizados) e '+rs(Z)+' de hoje em diante (a "Demanda bruta" da etapa 4).'
-    :'Todos de hoje em diante ('+br(D2.hoje)+'): são a "Demanda bruta" da etapa 4.')+' A necessidade líquida está na etapa 4.';
+  // CTL-4 (DEM-06): data antes de hoje não é "realizado" (RN-003); a etapa 4 troca a parte do plano já emitida em O.S. pelo que elas ainda tiram do estoque
+  const Z=oc.filter(i=>i.dt&&i.dt>=D2.hoje).reduce((a,i)=>a+(Number(i.cins)||0),0); const Y=T('cins')-Z;
+  v.rs_nota='Insumos do plano: dose × área × preço de todas as datas, antes do estoque. '+(Y>0.005?'Deles, '+rs(Y)+' têm data antes de hoje ('+br(D2.hoje)+') e '+rs(Z)+' de hoje em diante.'
+    :'Todos de hoje em diante ('+br(D2.hoje)+').')+' A etapa 4 troca a parte já emitida em O.S. pelo que elas ainda vão tirar do estoque e calcula a necessidade líquida.';
   const S=(lst,f)=>lst.reduce((a,i)=>a+(Number(f(i))||0),0); const tr=(lst)=>nfa(S(lst,i=>i.area))+' ha-op · '+nf(S(lst,i=>i.horas),2)+' horas-conjunto · '+nf(S(lst,i=>i.hh),2)+' horas-homem · '+nf(S(lst,i=>i.diesel),2)+' L';
   const semL=oc.filter(i=>!e3Dinf(i)).length; const an=oc.filter(i=>i.cls==='antes');
   v.rs_trab=nfa(S(oc,i=>i.area))+' ha-op (hectares-operação) · '+nf(S(oc,i=>i.horas),2)+' horas-conjunto · '+nf(S(oc,i=>i.hh),2)+' horas-homem · '+nf(S(oc,i=>i.diesel),2)+' L de diesel estimado'+(semL?' ('+semL+(semL>1?' ocorrências sem L/h)':' ocorrência sem L/h)'):'')

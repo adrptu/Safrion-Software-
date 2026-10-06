@@ -37,7 +37,8 @@ observacoes (dados locais coerentes com dados.py / dados2.py / telas vizinhas):
   Próximo ciclo = OS-0422 (13,5 mm em 2 passadas de 6,75 mm · janela a definir), sem aprovação do agrônomo.
 - Almoxarife (aba de MB-05) = dados2: REQ-031 (MAP 100/70/20/10 sc, custódia de Paula; sobras vão ao lote M26-05 de suprimentos.py),
   REQ-038 (OS-0418, Ureia 45 % 1.140 kg, aguardando liberação; estoque apto 0 kg), conflito F26-02 rebaseado como em suprimentos.py
-  (545 L físicos, 65 L reservados à OS-0424, 480 L livres; reserva planejada da safra 625,2 L em conflito, pendência 145,2 L).
+  (545 L físicos, 65 L reservados à OS-0424, 480 L livres); o uso da safra e a pendência na SOL-2026-07 vêm de dados2.demanda (CTL-4: com as
+  O.S. na demanda, o Fungicida A não tem pendência e o cartão sai do vermelho).
 - DEMO-20: Balança/Recebedor usam a carga CG-1207 da colheita.py (OC-0510 · talhão T7 · Carreta 03 · 4.310 − 1.180 = 3.130 kg ·
   ROM-0791 · Packing Sede · chegada a confirmar). Motorista = caminhão T1 da logistica.py (VD-2101 1ª de 3, janela 08:00,
   previsão 09:10 informada às 07:40, posição 4 ao chegar). Carga 07 = PV-034 · CD Horti · 9,6 t · dono Sandra (fiscal) · prazo 10:00.
@@ -65,7 +66,8 @@ REQ=next(r for r in D2.REQUISICOES if r['id']=='REQ-031')
 R38=next(r for r in D2.REQUISICOES if r['id']=='REQ-038')
 F02=next(l for l in D2.LOTES if l['lote']=='F26-02')
 F02_LIVRE=F02['fisico']-F02['quarentena']-F02['reservado']                            # 480 L
-PLAN_FA=625.2; PEND_FA=round(PLAN_FA-F02_LIVRE,1)                                    # reserva planejada da safra · pendência 145,2 L
+_DFA=D2.demanda('S2627')['Fungicida A']   # CTL-4: a mesma demanda da Compra (plano sem a parte das O.S. + pendente das O.S.), nunca número fixo
+PLAN_FA=round(_DFA['bruta'],1); PEND_FA=round(_DFA['liq'],1)                          # uso da safra de hoje em diante · pendência na SOL-2026-07
 EQ421='Marcos · Pulverizador PJ-3030 + Trator 03'
 CALDA=dict(litros='2.000', vazao='120 L/ha', dose='0,5 L/ha de Fungicida A', cobre='16,7 ha', por_tanque='8,3 L')
 P,POL=D.PIVO,D.POLITICA_AGUA
@@ -667,11 +669,12 @@ const ocd=done&&(c.ocorr||[]).find(x=>x.id===done); DCH(v,'hdr',done?(ocd&&!ocd.
           kv('Produto',f'{R38["item"]} · {nf(R38["solicitado"])} kg (12 kg/ha × 95 ha)'),
           chips(chip('Aguardando liberação da O.S.','yellow'),chip('Saldo apto 0 kg','red')),
           btns(say('Conferir e entregar · bloqueado',f'Bloqueado: a {R38["os"]} aguarda a liberação por Ana (agrônoma) e a {R38["item"]} não tem saldo apto (0 kg) — nada foi separado.','alert','Ver por que não pode entregar'))],state='yellow')
-      + card(f'Conflito de reserva · lote {F02["lote"]} · {F02["item"]}',[
+      + card(f'{"Conflito de reserva" if PEND_FA>0.05 else "Reserva da safra"} · lote {F02["lote"]} · {F02["item"]}',[
           kv('Saldo',f'{nf(F02["fisico"])} L físicos · {F02["reservado"]} L reservados (OS-0424) · <b>{nf(F02_LIVRE)} L livres</b>'),
-          kv('Conflito',f'reserva planejada da safra pediu {nf(PLAN_FA,1)} L → nada reservado · pendência de {nf(PEND_FA,1)} L na SOL-2026-07'),
-          chips(chip('Conflito · decide o planejamento','red')),
-          btns(say('Registrar divergência','Divergência registrada com dono (planejamento) e prazo · reservas congeladas até a decisão — nada foi entregue.','alert','Registrar a divergência física do lote'))],state='red')
+          kv('Conflito',f'reserva planejada da safra pediu {nf(PLAN_FA,1)} L → nada reservado · pendência de {nf(PEND_FA,1)} L na SOL-2026-07') if PEND_FA>0.05 else
+          kv('Safra',f'uso de hoje em diante {nf(PLAN_FA,1)} L (O.S. abertas pelo pendente + plano sem O.S.) · sem pendência na SOL-2026-07: o estoque apto cobre'),
+          chips(chip('Conflito · decide o planejamento','red') if PEND_FA>0.05 else chip('Sem pendência de compra','green')),
+          btns(say('Registrar divergência','Divergência registrada com dono (planejamento) e prazo · reservas congeladas até a decisão — nada foi entregue.','alert','Registrar a divergência física do lote'))],state='red' if PEND_FA>0.05 else 'green')
       + note(f'<b style="color:{INK};">{O419["id"]} · água</b> não aparece aqui: água só-água não cria fila nem documento de movimentação de produtos.'))
     corpo=tabs+IF('r0',operador)+IF('r1',almox)
     js=f'''const r0=(s.role||0)===0; v.r0=r0; v.r1=!r0;

@@ -1,10 +1,11 @@
-// ===== CAL-01 · Necessidade líquida por data (PRD v3.9) — a mesma memória de cálculo no Planejar safra (etapa 6) e na Compra de insumos =====
+// ===== CAL-01 · Necessidade líquida por data (PRD v3.9) — a mesma memória de cálculo no Planejar safra (etapa 4), na Compra de insumos e no Mapa › Insumos =====
 // Convenção única: o físico apto (fora quarentena) INCLUI as reservas; cada necessidade entra uma vez. Reserva da mesma demanda (chave
-// cultivo|atividade presente na demanda) não é subtraída de novo; reserva para outro destino entra como demanda na data dela.
+// cultivo|atividade ou ID da O.S. presente na demanda, DEM-04) não é subtraída de novo; reserva para outro destino entra como demanda na data dela.
 // Recebimento só cobre usos na data dele ou depois. A reposição proposta entra no saldo projetado: faltas sucessivas não se acumulam.
-// opt {hoje, viavel} (AAAA-MM-DD): uso planejado antes de hoje já foi realizado ou entregue à O.S. — saiu do físico e da demanda residual (só
-// aparece na memória). Falta antes da chegada viável de uma compra nova é ruptura: os recebimentos até lá a cobrem (a mais antiga primeiro) e o
-// que sobrar vira reposição na data viável. Sem opt, a reposição entra na própria data da falta.
+// opt {hoje, viavel} (AAAA-MM-DD): uso do plano com data antes de hoje e sem O.S. fica fora da demanda (DEM-06: histórico do plano, não
+// "realizado"; o realizado vem das O.S., DEM-02). Falta antes da chegada viável de uma compra nova é ruptura: os recebimentos até lá a cobrem
+// (a mais antiga primeiro) e o que sobrar vira reposição na data viável. Sem opt, a reposição entra na própria data da falta.
+// O que entra nos eventos (plano sem a parte das O.S., O.S. pelo pendente, outras safras, reservas e recebimentos da fazenda) sai de demFazenda (abaixo).
 // ev: {dt:'AAAA-MM-DD', q, tipo:'rec'|'res'|'dem', own:bool (é da solicitação calculada), ord:ordem global da origem, t:texto, chave|chaves, ref}
 // No mesmo dia: recebimento, chegada viável, reserva e as demandas na ordem global das safras (igual em todas as telas: a falta não é atribuída duas vezes).
 function cal01(fis, evs, seg, opt){
@@ -44,7 +45,7 @@ function cal01Memo(r, o){ o=o||{}; const u=' '+(o.un||'');
   const n1=(x)=>Number(x||0).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1});
   const d=(s)=>s?String(s).slice(8,10)+'/'+String(s).slice(5,7)+'/'+String(s).slice(0,4):'—';
   const out=['Estoque apto hoje: '+n(r.fis)+u+(o.res?' (inclui '+n(o.res)+u+' reservados)':'')+(o.quar?' · '+n(o.quar)+u+' em quarentena não contam até o laudo':'')];
-  if(r.real>1e-9) out.push('Realizado antes de '+d(r.hoje)+' · '+r.nreal+(r.nreal>1?' usos':' uso')+' · '+n(r.real)+u+' · fora do estoque e da demanda');
+  if(r.real>1e-9) out.push('Antes de '+d(r.hoje)+' sem O.S. · '+r.nreal+(r.nreal>1?' usos':' uso')+' · '+n(r.real)+u+' · fora da demanda (histórico do plano; se ainda vai acontecer, emita a O.S.)');   // DEM-06 (RN-003)
   r.linhas.filter(l=>l.ate).forEach(l=>{ const sx=' → saldo '+n(l.saldo)+u; const t=d(l.dt)+' · '+(l.t||'Uso')+' · ';
     if(l.tipo==='rec') out.push(t+'+'+n1(l.q)+u+sx+(l.cobre>1e-9?' · cobre a ruptura':''));
     else if(l.tipo==='via') out.push(t+'+'+n1(l.q)+u+sx);
@@ -56,6 +57,63 @@ function cal01Memo(r, o){ o=o||{}; const u=' '+(o.un||'');
     :('Sem falta nesta safra · saldo depois do último uso: '+n(r.saldoUlt==null?r.saldo:r.saldoUlt)+u)));
   return out;
 }
+
+// ===== CTL-4 · demanda líquida única por fazenda (DEM-01..07; PRD RN-006, AC-08, RN-008, CAL-01 l.4199–4201, RN-011, l.9184) =====
+// Uma só conta para o Planejar safra (etapa 4, passo=demanda) e o Mapa › Insumos: demFazenda, com as ordens lidas do cenário compartilhado
+// (cenOsDem, cenario.js). A Compra de insumos lê o espelho Python (dados2.demanda: mesmos eventos na mesma ordem; paridade em demanda_unica_test.py).
+function calNf(x,d){ return Number(x||0).toLocaleString('pt-BR',{minimumFractionDigits:d||0,maximumFractionDigits:d||0}); }
+function calNfa(x){ return Number(x||0).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:2}); }
+function demTal(t){ return String(t||'').split('-')[0]; }   // talhão de um local da O.S. ('T1-B' → 'T1'; 'Pivô 13' fica)
+// DEM-01 · a O.S. cobre, em cada atividade das chaves dela, as ocorrências do plano da safra dela nos talhões dela (o próprio cultivo ou as
+// parcelas do talhão: dividir o talhão com o mesmo plano não muda a parte coberta). Fração coberta = área da O.S. ÷ área dessas ocorrências
+// (máx. 1). occ: [{saf, k:'cultivo|atividade', a, local, tal, area}] · osd: cenOsDem · devolve {chave: {f: fração sem O.S., txt}}.
+// Dano evitado: compra em dobro do que a O.S. já tem (Fungicida A 145,2 L na OS-0421).
+function demRestante(osd, occ){ const cob={}, txt={};
+  (osd||[]).forEach(o=>{ const ts={}; (o.loc||[]).forEach(t=>{ ts[t]=1; }); const ats=[];
+    (o.chaves||[]).forEach(k=>{ const a=String(k).split('|')[1]; if(ats.indexOf(a)<0) ats.push(a); });
+    ats.forEach(a=>{ const ks=(occ||[]).filter(x=>x.saf===o.saf&&x.a===a&&(ts[x.local]||ts[x.tal])); const tot=ks.reduce((s,x)=>s+(Number(x.area)||0),0); if(!(tot>0)) return;
+      ks.forEach(x=>{ cob[x.k]=(cob[x.k]||0)+Math.min(1,(Number(o.area)||0)/tot);
+        (txt[x.k]=txt[x.k]||[]).push(o.id+' cobre '+calNfa(o.area)+' de '+calNfa(tot)+' ha'+(ks.length>1?', rateados pela área':'')); }); }); });
+  const fr={}; Object.keys(cob).forEach(k=>{ fr[k]={f:Math.max(0,1-cob[k]),txt:txt[k].join('; ')}; }); return fr; }
+// DEM-02/03/04 · eventos das ordens para o insumo prod: cada ordem conta pelo que ainda vai tirar do almoxarifado (pendente de cenOsDem), na data
+// máx(hoje, início da janela); é dona da safra dela; chave = ID da ordem (a reserva da mesma ordem conta uma vez). Ordem sem chave nunca some
+// (dano evitado: compra a menos, MAP 17.500 kg da OS-0420, Ureia 1.140 kg da OS-0418); a linha avisa só quando o plano do mesmo talhão usa o
+// mesmo produto (talProd[safra][talhão][produto]) — casar por coincidência seria vínculo inventado (RN-003).
+function demOsEvs(osd, prod, saf, ordem, talProd){ const out=[]; const tp=talProd||{};
+  (osd||[]).forEach(o=>{ (o.itens||[]).forEach(i=>{ if(i.p!==prod||!(i.q>1e-9)) return;
+    const av=!(o.chaves||[]).length&&(o.loc||[]).some(t=>((tp[o.saf]||{})[demTal(t)]||{})[prod]);
+    out.push({dt:o.dt,q:i.q,tipo:'dem',own:o.saf===saf,ord:ordem(o.saf),chave:o.id,t:o.t+(av?' · sem vínculo com o plano do talhão: se for o mesmo uso, retire o produto do plano do talhão (etapa 2)':''),
+      calc:i.calc,loc:o.loc}); }); });
+  return out; }
+// DEM-05/06/07 · demanda por insumo da safra x.saf na fazenda x.faz: o plano sem a parte coberta por O.S. (DEM-01), as O.S. pelo pendente
+// (DEM-02/03), as outras safras abertas da fazenda (agregadas por data, também sem a parte coberta), reservas, recebimentos e o físico apto
+// da PRÓPRIA fazenda (DEM-07: estoque de outra fazenda não cobre; dano evitado: Glifosato 293 L a menos na Lagoa Grande).
+// x: {saf, faz, hoje, viavel, ordem:{safra:índice}, nomes:{safra:nome}, occ, osd, reservas, recebDt, fisico:{insumo: físico apto da fazenda}}
+// occ: ocorrências das safras abertas da fazenda, na ordem cultivo → atividade: [{saf,k,a,local,tal,area,dt,nome,prods:[{nome,grupo,un,preco,dose,q}]}]
+function demFazenda(x){ const m={}; const ord=(s)=>{ const i=(x.ordem||{})[s]; return i===undefined?99:i; };
+  const occ=x.occ||[]; const osd=(x.osd||[]).filter(o=>o.faz===x.faz); const fr=demRestante(osd,occ); const tp={};
+  occ.forEach(o=>{ const t=(tp[o.saf]||(tp[o.saf]={})); const p=(t[o.tal]||(t[o.tal]={})); (o.prods||[]).forEach(q=>{ p[q.nome]=1; }); });
+  const novo=(nome,g,un,preco)=>m[nome]||(m[nome]={nome,grupo:g||'',un,preco:Number(preco)||0,plano:0,evs:[]});
+  occ.forEach(o=>{ if(o.saf!==x.saf) return; const c=fr[o.k]; const f=c?c.f:1;
+    (o.prods||[]).forEach(p=>{ const d=novo(p.nome,p.grupo,p.un,p.preco); d.plano+=p.q*f; if(!(f>1e-9)) return; const ar=o.area*f;
+      d.evs.push({dt:o.dt||'',q:p.dose*ar,tipo:'dem',own:true,ord:ord(x.saf),chave:o.k,t:o.local+' · '+o.nome+((c&&f<1-1e-9)?' · parte sem O.S. ('+c.txt+')':''),
+        calc:calNf(p.dose,2)+' '+p.un+'/ha × '+calNfa(ar)+' ha',loc:[o.local]}); }); });
+  osd.forEach(o=>{ if(o.saf!==x.saf) return; (o.itens||[]).forEach(i=>{ if(i.q>1e-9) novo(i.p,i.g,i.un,i.preco); }); });   // insumo que só a O.S. usa
+  Object.values(m).forEach(d=>{ d.evs=d.evs.concat(demOsEvs(osd,d.nome,x.saf,ord,tp)); });
+  Object.keys(x.ordem||{}).sort((a,b)=>x.ordem[a]-x.ordem[b]).forEach(s=>{ if(s===x.saf) return; const ag={}, ks=[];
+    occ.forEach(o=>{ if(o.saf!==s) return; const c=fr[o.k]; const f=c?c.f:1; if(!(f>1e-9)) return;
+      (o.prods||[]).forEach(p=>{ if(!m[p.nome]) return; const k=p.nome+'|'+o.dt; if(!ag[k]){ ag[k]={nome:p.nome,dt:o.dt||'',q:0,n:0,chaves:[]}; ks.push(k); }
+        ag[k].q+=p.q*f; ag[k].n++; ag[k].chaves.push(o.k); }); });
+    ks.forEach(k=>{ const a=ag[k]; m[a.nome].evs.push({dt:a.dt,q:a.q,tipo:'dem',own:false,ord:ord(s),chaves:a.chaves,t:((x.nomes||{})[s]||s)+' · '+a.n+(a.n>1?' usos':' uso')}); }); });
+  Object.values(m).forEach(d=>{ const daFaz=(r)=>r.item===d.nome&&r.faz===x.faz;
+    (x.reservas||[]).forEach(r=>{ if(daFaz(r)) d.evs.push({dt:r.dt,q:r.q,tipo:'res',own:false,ord:0,chave:r.chave,t:r.t}); });
+    (x.recebDt||[]).forEach(r=>{ if(daFaz(r)) d.evs.push({dt:r.dt,q:r.q,tipo:'rec',own:false,ord:0,ref:r.ref,t:r.t}); });
+    d.res=(x.reservas||[]).filter(daFaz).reduce((a,r)=>a+r.q,0); d.rec=(x.recebDt||[]).filter(daFaz).reduce((a,r)=>a+r.q,0);
+    d.est=Number((x.fisico||{})[d.nome])||0;
+    const c=cal01(d.est,d.evs,0,{hoje:x.hoje,viavel:x.viavel}); d.cal=c;
+    d.liq=c.liq; d.falta=c.falta; d.antes=c.antes; d.tarde=c.tarde; d.valor=d.liq*d.preco; d.bruta=c.bruta; d.real=c.real; d.rup=c.rupRec; d.cob=c.cob;
+    d.uso=d.evs.filter(e=>e.tipo==='dem'&&e.own&&e.dt&&e.dt>=(x.hoje||'')).map(e=>e.dt).sort()[0]||''; });   // 1º uso desta safra de hoje em diante
+  return m; }
 // DEM-08 · Compra, etapa 4: escolha padrão = a de menor custo que chega antes da falta; sem nenhuma a tempo, a que chega primeiro (empate: menor
 // custo), sem justificativa obrigatória — não existe alternativa a tempo a justificar (AGENTS §4); o aviso "chega depois da falta" continua.
 // props em ordem de custo (unit crescente), com {f, unit, chega, late}.

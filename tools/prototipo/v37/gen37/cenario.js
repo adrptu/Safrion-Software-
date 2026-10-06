@@ -60,6 +60,29 @@ function cenUsoLegal(us, rot, dose, un, nap, refs) {   // refs (opcional): o que
 }
 function cenLote(c, prod) { return Object.values(c.lotes).filter(l => l.prod === prod).sort((a, b) => (b.fisico - b.reservado - b.quarentena) - (a.fisico - a.reservado - a.quarentena))[0] || null; }
 function cenDisp(l) { return Math.max(0, (l.fisico || 0) - (l.quarentena || 0) - (l.reservado || 0)); }
+// ---------- CTL-4 · o que cada O.S. ainda tira do almoxarifado (DEM-02), lido do cenário vivo: Planejar safra (etapa 4) e Mapa › Insumos usam
+// na demanda única (demFazenda, cal01.js); espelho dados2.os_dem na semente. b (dados2.os_base): {ords:[{id,faz,saf,chaves,loc,ini,t}],
+// safs:[{id,faz,nome}], cat:{insumo:{g,preco}}, hoje}. A liberar, Liberadas e Em execução: pendente = máx(0, quantidade(dose, saldo) − custódia
+// da requisição); sem realizado, o total da versão. Em conferência e Encerradas: pendente 0, mas a ordem continua cobrindo o plano (DEM-01).
+// Canceladas não cobrem nada. Ordem nova emitida no cenário (osc.novo) entra com a chave, o talhão e a janela dela. Data = máx(hoje, início da janela).
+function cenOsDem(c, b) { b = b || {}; const out = []; const vistos = {}; const hoje = b.hoje || ''; const cat = b.cat || {};
+  const n2 = (x) => Number(x || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const na = (x) => Number(x || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  const safDe = (faz, lab) => ((b.safs || []).find(s => s.faz === faz && String(s.nome).endsWith(String(lab || ''))) || {}).id || '';
+  const um = (x, co) => { if (!co || co.etapa === 'Canceladas') return;
+    const r = ((c && c.reqs) || {})[co.req || ''] || { itens: [] }; const itens = [];
+    if (['A liberar', 'Liberadas', 'Em execução'].indexOf(co.etapa) >= 0) { const real = co.realizado || 0; const saldo = real ? (co.saldo || 0) : (co.area || 0);
+      (co.ins || []).forEach(i => { const cust = r.itens.filter(y => y.prod === i.p).reduce((a, y) => a + (y.custodia || 0), 0);
+        const bruto = real ? cenQtd(i.dose, saldo) : (i.tot || 0); const k = cat[i.p] || {};
+        itens.push({ p: i.p, q: Math.max(0, cenQtd(bruto - cust, 1)), un: i.un, g: k.g || '', preco: k.preco || 0,
+          calc: n2(i.dose) + ' ' + i.un + '/ha × ' + na(saldo) + ' ha' + (cust > 0 ? ' − ' + na(cust) + ' ' + i.un + ' em custódia' : '') }); }); }
+    if (!(x.chaves || []).length && !itens.some(i => i.q > 0)) return;
+    out.push({ id: x.id, faz: x.faz, saf: x.saf, chaves: (x.chaves || []).slice(), area: co.area || 0, dt: (x.ini && x.ini > hoje) ? x.ini : hoje, etapa: co.etapa, t: x.t, loc: (x.loc || []).slice(), itens }); };
+  (b.ords || []).forEach(x => { vistos[x.id] = 1; um(x, ((c && c.ordens) || {})[x.id]); });
+  Object.keys((c && c.ordens) || {}).forEach(k => { const co = c.ordens[k]; const no = co && co.osc && co.osc.novo; if (vistos[k] || !no) return;
+    const faz = no.faz || 'Santa Rita'; const saf = safDe(faz, no.saf || ''); if (!saf) return;
+    um({ id: k, faz, saf, chaves: (no.keys || []).slice(), loc: [no.talhao], ini: no.jan || '', t: no.talhao + ' · ' + k + ' · ' + (((no.atv || {}).nome) || no.tipo || '') }, co); });
+  return out; }
 function cenMov(c, m) { m.id = 'MV-' + (1000 + c.movs.length + 1); m.at = m.at || cenAgora(); c.movs.push(m); return m; }
 // Decisão que exige papel (PRD 2.1; DEC-2609-13; CMD-47): o comando recebe quem age (no protótipo, o perfil de demonstração de g2lib.js;
 // no software, o ator da sessão no servidor) e confere o papel no cadastro (g2pf). Sem o papel, recusa e nada muda (dano: decisão gravada

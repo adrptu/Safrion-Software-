@@ -113,22 +113,23 @@ try:
     # etapa 4: demanda de insumos
     c.goto(URL.replace('passo=operacoes', 'passo=demanda'), 1.6); TB = TBF('FALTA EM'); expande(); d6 = dicts(); h6 = [x.upper() for x in heads()]; shot('saf6-1440')
     mp = next((r for r in d6 if r.get('INSUMO') == 'MAP 11-52'), {})
-    chk('2b etapa 4 (demanda): MAP 11-52 com necessidade "62.500 kg" | falta 18/10/2026 | Em cotação | SOL-2026-07 em colunas próprias',
-        [mp.get(k) for k in ('NECESSIDADE LÍQUIDA', 'FALTA EM', 'SITUAÇÃO', 'SOLICITAÇÃO')] == ['62.500 kg', '18/10/2026', 'Em cotação', 'SOL-2026-07'], mp)
-    QT6 = ('NECESSIDADE LÍQUIDA', 'DEMANDA BRUTA', 'ESTOQUE APTO', 'RECEBIMENTOS PREVISTOS', 'JÁ REALIZADO', 'USADO ANTES DA COMPRA', 'RESERVADO', 'RECEBIDO APÓS A FALTA', 'A COMPLEMENTAR')
+    # CTL-4 (demanda única): MAP 80.000 kg (antes 62.500) — a OS-0420 (T4) conta pelo pendente; a coluna "Já realizado" vira "Antes de hoje sem O.S." (DEM-06)
+    chk('2b etapa 4 (demanda): MAP 11-52 com necessidade "80.000 kg" | falta 18/10/2026 | Em cotação | SOL-2026-07 em colunas próprias',
+        [mp.get(k) for k in ('NECESSIDADE LÍQUIDA', 'FALTA EM', 'SITUAÇÃO', 'SOLICITAÇÃO')] == ['80.000 kg', '18/10/2026', 'Em cotação', 'SOL-2026-07'], mp)
+    QT6 = ('NECESSIDADE LÍQUIDA', 'DEMANDA BRUTA', 'ESTOQUE APTO', 'RECEBIMENTOS PREVISTOS', 'ANTES DE HOJE SEM O.S.', 'USADO ANTES DA COMPRA', 'RESERVADO', 'RECEBIDO APÓS A FALTA', 'A COMPLEMENTAR')
     folhas6 = [r for r in d6 if r.get('FALTA EM') is not None and r.get('SITUAÇÃO') and r.get('INSUMO') and not r.get('INSUMO', '').endswith(('insumos', 'insumo'))]
     # cada quantidade mostrada leva a unidade; '—' só onde não há valor; o preço leva a unidade do insumo ("R$ 3,90/kg")
     sem_un = [(r.get('INSUMO'), k, r.get(k)) for r in folhas6 for k in QT6 if r.get(k, '—') != '—' and not re.match(r'^[\d.]+(,\d+)? (kg|L|un|t|sc)$', r.get(k, ''))]
     sem_un += [(r.get('INSUMO'), 'PREÇO', r.get('PREÇO')) for r in folhas6 if not re.match(r'^R\$ [\d.]+,\d{2}/(kg|L|un|t|sc)$', r.get('PREÇO', ''))]
     chk('2b etapa 4 (demanda): cada quantidade com a unidade junto ("152.500 kg", "610,0 L"), sem coluna Unidade e sem "falta em" no texto',
         folhas6 and not sem_un and 'UNIDADE' not in h6 and not any('falta em' in v for r in d6 for v in r.values()), sem_un[:3])
-    filtra('Necessidade líquida', ['62.500 kg']); d = [r for r in dicts() if r.get('INSUMO') and not r.get('INSUMO', '').endswith(('insumos', 'insumo'))]
-    chk('2b filtro Necessidade líquida = "62.500 kg" (o filtro usa o texto da célula, com a unidade): só o MAP 11-52', [r.get('INSUMO') for r in d] == ['MAP 11-52'], [r.get('INSUMO') for r in d])
+    filtra('Necessidade líquida', ['80.000 kg']); d = [r for r in dicts() if r.get('INSUMO') and not r.get('INSUMO', '').endswith(('insumos', 'insumo'))]
+    chk('2b filtro Necessidade líquida = "80.000 kg" (o filtro usa o texto da célula, com a unidade): só o MAP 11-52', [r.get('INSUMO') for r in d] == ['MAP 11-52'], [r.get('INSUMO') for r in d])
     limpa(); expande(); filtra('Grupo', ['Herbicidas']); d = [r for r in dicts() if r.get('INSUMO') and not r.get('INSUMO', '').endswith(('insumos', 'insumo'))]
     chk('2b filtro Grupo = Herbicidas: só os herbicidas', d and all(r.get('GRUPO', '') == 'Herbicidas' for r in d), sorted({r.get('INSUMO', '') for r in d}))
     limpa(); expande(); ordena('Necessidade líquida', desc=True); fe = [r.get('NECESSIDADE LÍQUIDA', '') for r in dicts() if r.get('GRUPO') == 'Fertilizantes' and r.get('NECESSIDADE LÍQUIDA')]
-    chk('2b ordenar Necessidade líquida decrescente nos fertilizantes: "62.500 kg" primeiro, "0 kg" por último (ordem pelo número)',
-        fe and fe[0] == '62.500 kg' and fe[-1] == '0 kg' and [num(x.split(' ')[0]) for x in fe] == sorted([num(x.split(' ')[0]) for x in fe], reverse=True), fe)
+    chk('2b ordenar Necessidade líquida decrescente nos fertilizantes: "80.000 kg" primeiro, "0 kg" por último (ordem pelo número)',
+        fe and fe[0] == '80.000 kg' and fe[-1] == '0 kg' and [num(x.split(' ')[0]) for x in fe] == sorted([num(x.split(' ')[0]) for x in fe], reverse=True), fe)
     chk('sem erro de script (etapas 2 e 4)', not J("window.__e"), J("window.__e"))
     TB = TBF('OPERAÇÃO › ATIVIDADE › TALHÃO')
     # 390 px
