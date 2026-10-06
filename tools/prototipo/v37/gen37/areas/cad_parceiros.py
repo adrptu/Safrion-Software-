@@ -146,7 +146,7 @@ COLS_T=_ID+[dict(k='papeis',l='Papéis',multi=True,w=170)]+_CT+[_SIT]
 COLS_P={'Fornecedor':_ID+[dict(k='grupos',l='Grupos homologados',multi=True,w=260)]+_CT+[dict(k='homol',l='Homologado',w=130)],
         'Cliente':_ID+_CT+[dict(k='lim',l='Limite de crédito',t='num',a='r',un='R$',d=0),dict(k='limv',l='Validade da análise de crédito',t='date'),_SIT],
         'Parceiro de crédito':_ID+_CT+[dict(k='linhas',l='Linhas de crédito',multi=True,w=220),dict(k='gar',l='Garantias aceitas',multi=True,w=240),_SIT],
-        'Transportador':_ID+_CT+[dict(k='rntrc',l='RNTRC'),dict(k='veic',l='Veículos e capacidade',multi=True,w=260),_SIT],
+        'Transportador':_ID+_CT+[dict(k='rntrc',l='RNTRC'),dict(k='veic',l='Veículos',multi=True,w=260),_SIT],
         'Prestador':_ID+_CT+[dict(k='ops',l='Operações que presta',multi=True,w=220),_SIT]}
 FILTROS=[('','Todos'),('Fornecedor','Fornecedores'),('Cliente','Clientes'),('Parceiro de crédito','Parceiros de crédito'),('Transportador','Transportadores'),('Prestador','Prestadores')]
 
