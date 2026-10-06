@@ -241,4 +241,12 @@ caso('C1 e recibos', () => {
   ok('D-46 · comando com versão do registro diferente é recusado ("Mudou desde que você abriu")', /Mudou desde que você abriu/.test(e), e);
 });
 
+caso('Propor substituto (ponte até o 1b)', () => {
+  const c = S(); const r = run(c, x => manPropor(x, 'OM-0233', OT)); const r2 = run(c, x => manPropor(x, 'OM-0233', OT)); const z = run(S(), x => manPropor(x, 'OM-0233', ZE));
+  ok('§0.1 · "Propor substituto" (sai no 1b): Otávio registra Trator 02 para as O.S. alocadas ao T1 desde o bloqueio (OS-0420 e OS-0431); repetir não duplica; Zé recusado',
+    !r.erro && c.prop['OM-0233'].sub === 'a02' && c.prop['OM-0233'].os.join() === 'OS-0420,OS-0431' && r2.nada && /Ação do Otávio/.test(z.erro || ''), [r, r2, z, c.prop]);
+  const d = S(); const e = run(d, x => manPropor(x, 'OM-0234', OT));
+  ok('§0.1 · só para ativo bloqueado com ordem aberta (Trator 02 apto: recusado)', e.erro && /bloqueado/.test(e.erro), e);
+});
+
 print(JSON.stringify(R));

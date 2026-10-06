@@ -98,11 +98,11 @@ function ma_espera(c,o,pf){ const k=manPf(pf).k, pa=manPapelDe(pf); if(!manAbert
 function ma_ordFila(c){ return Object.values(c.oms).filter(o=>manAberta(o)).sort((a,b)=>(a.janIso||'9').localeCompare(b.janIso||'9')||({'Alta':0,'Média':1,'Baixa':2}[a.crit]-{'Alta':0,'Média':1,'Baixa':2}[b.crit])||a.id.localeCompare(b.id)); }
 function ma_autoAbre(self){ try{ if(!window.matchMedia('(min-width: 1024px)').matches) return; }catch(e){ return; } const st=self.state; if(st.pan||st.pg||st.vis!=='ordens') return;
   const c=manGet(); const o=ma_ordFila(c).find(x=>ma_espera(c,x,g2perfil())); if(o) self.setState({pan:{k:'om',id:o.id,modal:false},rec:null,anun:'Painel da '+o.id+' aberto ao lado.'}); }
-function ma_vis(self,k){ self.setState({vis:k,pg:null,pan:null,rec:null,card:'',fase:'',rot:''}); if(k==='ordens') setTimeout(()=>ma_autoAbre(self),0); }
+function ma_vis(self,k){ self.setState({vis:k,pg:null,pan:null,rec:null,card:'',fase:'',rot:'',anun:''}); if(k==='ordens') setTimeout(()=>ma_autoAbre(self),0); }
 function ma_abrir(self,k,id,extra){ const r=document.activeElement; if(!self.state.pan) self.__panRet=(r&&r!==document.body&&!(r.closest&&r.closest('#ma-painel')))?r:null;
   self.setState(Object.assign({pan:{k,id,modal:true},rec:null,pf:{},pchave:manChave(),paviso:null},extra||{})); setTimeout(()=>{ const e=document.getElementById('ma-painel'); if(e) e.focus(); },0); }
-function ma_fechar(self){ self.setState({pan:null,rec:null,paviso:null,pf:{}}); setTimeout(()=>{ const r=self.__panRet; self.__panRet=null; if(r&&document.contains(r)) r.focus(); },0); }
-function ma_pg(self,k,id){ self.setState({pg:{k,id},pan:null,rec:null,blk:{}}); try{ const m=document.querySelector('main[data-scroll]'); if(m) m.scrollTop=0; }catch(e){} }
+function ma_fechar(self){ self.setState({pan:null,rec:null,paviso:null,pf:{},anun:''}); setTimeout(()=>{ const r=self.__panRet; self.__panRet=null; if(r&&document.contains(r)) r.focus(); },0); }
+function ma_pg(self,k,id){ self.setState({pg:{k,id},pan:null,rec:null,blk:{},anun:''}); try{ const m=document.querySelector('main[data-scroll]'); if(m) m.scrollTop=0; }catch(e){} }
 function ma_volta(self){ const k=self.state.pg&&self.state.pg.k; self.setState({pg:null,pan:null,rec:null,vis:k==='plano'?'planos':'ativos'});
   setTimeout(()=>{ try{ const g=self.__lastRow; if(g){ const r=document.querySelector('[data-rid="'+g+'"]'); if(r){ r.scrollIntoView({block:'center'}); r.focus(); } } }catch(e){} },60); }
 /* comando: aplica, guarda o comprovante no painel e a "Próxima" (só navega); a chave do registro é renovada depois de cada comando gravado */
@@ -111,7 +111,8 @@ function ma_rec(self,r,prox){ if(r&&!r.erro&&r.msg) self.setState({rec:{msg:r.ms
 function ma_proxOm(c,pf,id){ const o=ma_ordFila(c).find(x=>x.id!==id&&ma_espera(c,x,pf)); return o?{t:'Próxima: '+o.id+' ›',k:'om',id:o.id}:null; }
 /* ---------- linhas das grades (a linha identifica, o painel resolve: nenhum botão de comando na linha; o ID é link) ---------- */
 function ma_selosAtv(c,a){ const s=[]; if(a.cond==='Bloqueado') s.push(ma_ch('Ativo bloqueado','red')); if(a.suspeita) s.push(ma_ch('Leitura a confirmar','yellow'));
-  else if(manAntiga(c,a)) s.push(ma_ch('Leitura de '+manBr(a.leit.data),'yellow')); return s; }
+  else if(manAntiga(c,a)) s.push(ma_ch('Leitura de '+manBr(a.leit.data),'yellow'));
+  Object.keys(c.prop||{}).forEach(k=>{ const pp=c.prop[k]; if(pp.sub===a.id) s.push(ma_ch('Substituto proposto · '+pp.os.join(' e ')+' · aguarda PCP','yellow')); }); return s; }
 function ma_pecasTxt(c,s){ const fs=(s.pecas||[]).filter(x=>{ const it=c.itens[x.item]; return it&&(it.saldo-it.reservado)<x.qtd; });
   if(!(s.pecas||[]).length) return {t:'—',c:''}; if(!fs.length) return {t:'Com saldo',c:''}; const x=fs[0], it=c.itens[x.item]; return {t:'Falta '+manN(x.qtd-Math.max(0,it.saldo-it.reservado),1)+' '+it.un+' · '+it.nome,c:'red'}; }
 function ma_linhasSemOrdem(self,c,st){ const rows=[]; const hz=st.prazo==='venc'?-1e9:(st.prazo==='30'?30:c.horiz);
@@ -427,7 +428,7 @@ function ma_cas(self,c,lst,pf){ const pd=manPode(c,pf,'decidir');
     ds:()=>ma_cmd(self,c2=>manAppConfDescartar(c2,x.id,(self.state.pf||{})['cad_'+x.id],g2perfil()),(r)=>ma_rec(self,r))})); }
 function ma_panOm(self,v,c,o,pf){ const st=self.state; const f=st.pf||{}; const a=c.ativos[o.aid]; const cur=MAN_FASES.indexOf(o.etapa);
   v.om_cas=ma_cas(self,c,manAppConfAbertos(c,o.id),pf); v.om_hasCa=v.om_cas.length>0;
-  v.pan_t=o.id+' · '+(a?a.nome:''); v.pan_sub=o.tipo+(o.pid?' · '+o.pid+' v'+o.ver:'')+' · '+o.serv; v.om_ah='#ativo='+o.aid; v.om_at='Abrir '+(a?a.nome:'ativo')+' ›'; v.om_goAt=()=>ma_pg(self,'ativo',o.aid);
+  v.pan_t=o.id+' · '+(a?a.nome:''); v.pan_sub=(String(o.serv||'').indexOf(o.tipo)===0?o.serv:o.tipo+(o.pid?' · '+o.pid+' v'+o.ver:'')+' · '+o.serv); v.om_ah='#ativo='+o.aid; v.om_at='Abrir '+(a?a.nome:'ativo')+' ›'; v.om_goAt=()=>ma_pg(self,'ativo',o.aid);
   v.om_fases=MAN_FASES.map((x,i)=>({t:x,cur:i===cur?'step':'false',st:'display:flex;flex-direction:column;gap:5px;font-size:11.5px;font-weight:'+(i===cur?'800':'600')+';color:'+(i<=cur?'#15201A':'#8A968E')+';',
     bst:'height:5px;border-radius:999px;background:'+(i<cur?'#9CCBB0':(i===cur?'#1E7A4C':'#E4E9E5'))+';'}));
   const pr=ma_omPrim(self,c,o,pf,f); const sl=manSelos(c,o); const p0=sl[0];
@@ -448,6 +449,11 @@ function ma_panOm(self,v,c,o,pf){ const st=self.state; const f=st.pf||{}; const 
   const podeJ=(o.etapa==='A liberar'||o.etapa==='Liberadas'); const pm=manPode(c,pf,'mover'); v.om_janEd=podeJ&&!pm; v.om_janRo=!v.om_janEd;
   v.om_jan=(o.jan||'—')+(o.vencOrig&&o.vencOrig!==o.janIso?' · vencimento original '+manBr(o.vencOrig):''); v.om_conf=!!cf; v.om_conft=cf?(cf.t+' · '+cf.det):'';
   const usa=MAN_AL.rec[o.aid]?MAN_AL.aloc.filter(x=>x.r===MAN_AL.rec[o.aid]&&x.dia>=c.hoje&&x.sit!=='manutenção').map(x=>x.os):[];
+  /* substituto proposto (ponte até o 1b): o PCP decide em O.S. › Recursos */
+  const pp=(c.prop||{})[o.id]; const ps=pp?c.ativos[pp.sub]:null; const pa=(a&&a.cond==='Bloqueado'&&manAberta(o))?manPropAfeta(c,o):[];
+  v.om_prop=pp?('Substituto proposto: '+(ps?manNome(ps):pp.sub)+' para '+pp.os.join(' e ')+' · por '+pp.por+' · aguarda PCP (simulado)'):''; v.om_hasProp=!!pp;
+  v.om_podeProp=!pp&&pa.length>0&&!!manPropSub(c,o); v.om_propDis=!!manPode(c,pf,'ponte'); v.om_propWhy=manPode(c,pf,'ponte')||('Registrar a proposta de substituto para '+pa.join(' e '));
+  v.om_propGo=()=>ma_cmd(self,c2=>manPropor(c2,o.id,g2perfil()),(r)=>ma_rec(self,r));
   v.om_imp=(cf||(a&&a.cond==='Bloqueado'))?('Impacto na produção: '+(cf?cf.os.join(' e ')+' em '+manBr(cf.dia):([...new Set(usa)].join(', ')||'nenhuma O.S. alocada na semana'))+' · lido da alocação do PCP (O.S. › Recursos)'):''; v.om_hasImp=!!v.om_imp;
   const pl=podeJ?manProxLivre(c,o):null; const tl=manTolLim(c,o);
   v.om_atalhos=podeJ?[{t:'Amanhã',d:manAdd(c.hoje,1)}].concat(pl?[{t:'Próxima sem conflito ('+manBr(pl)+')',d:pl}]:[]).map(x=>({t:x.t,on:String(f.jan===x.d),st:ma_pill(f.jan===x.d),go:()=>maF(self,'jan',x.d)})):[];
@@ -468,7 +474,7 @@ function ma_panOm(self,v,c,o,pf){ const st=self.state; const f=st.pf||{}; const 
   v.om_tks=o.chk.map((t,i)=>{ const tp=t.tipo||'Serviço'; const isT=tp==='Teste'; const isM=tp==='Medição'; const why=isT?pT:pE; const ed=exe&&!why;
     const R=MAN_RESP[tp]||MAN_RESP['Serviço']; const ul=(t.tent||[]).slice(-1)[0]; const rr=isT?(ul?ul.r:''):(t.r||'');
     const pend=f['tr'+i]||'';
-    return {n:String(i+1),t:t.t,tipo:tp,isT,notT:!isT,isM,ed,ro:!ed,why:exe&&why?why:'',hasWhy:exe&&!!why,nova:!!(t.nova&&!t.r),
+    return {n:String(i+1),t:t.t,tipo:tp,isT,notT:!isT,isM,ed,edR:ed&&!isT,ro:!ed,why:exe&&isT&&!pE&&pT?'Teste: '+pT:'',hasWhy:exe&&isT&&!pE&&!!pT,nova:!!(t.nova&&!t.r),
       opts:R.map(x=>({t:x,on:String(isT?pend===x:t.r===x),lab:x+' · '+t.t,go:()=>{ if(isT){ maF(self,'tr'+i,pend===x?'':x); return; } manMudar(self,c2=>manResp(c2,o.id,i,t.r===x?'':x,undefined,g2perfil())); },
         st:'font-family:inherit;font-size:12px;font-weight:700;padding:4px 9px;border-radius:8px;cursor:pointer;white-space:nowrap;'+((isT?pend===x:t.r===x)?(MAN_OK.indexOf(x)>=0?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #8A5A00;background:#FFF3D6;color:#8A5A00;'):'border:1px solid #E4E9E5;background:#fff;color:#15201A;')})),
       r:rr||'Sem resposta',rst:ma_chipSt(MAN_OK.indexOf(rr)>=0?'green':(rr?(rr==='Reprovado'?'red':'yellow'):'gray')),rdot:ma_dotSt(MAN_OK.indexOf(rr)>=0?'green':(rr?(rr==='Reprovado'?'red':'yellow'):'gray')),
@@ -905,16 +911,16 @@ def _prim_cab():
 
 def _visoes():
     G=lambda cols,gid,**k: grid(cols,[],edit=dict(m='pick'),gid=gid,total=k.pop('total',False),**k)
-    g_so=G([dict(k='item',l='Item',w=150),dict(k='ativo',l='Ativo · leitura',w=210),dict(k='oque',l='O que',w=210),dict(k='prazo',l='Prazo',t='num',w=170),
-            dict(k='pecas',l='Peças',w=160),dict(k='prox',l='Próximo passo',w=170)],'g_so')
-    g_om=G([dict(k='om',l='Ordem · ativo',w=150),dict(k='serv',l='Serviço · tipo',w=200),dict(k='jan',l='Janela',t='date',w=90),dict(k='fase',l='Fase',w=120),
-            dict(k='pend',l='Pendência',w=220),dict(k='exe',l='Executante',w=110),dict(k='tempo',l='Tempo',t='num',w=110),dict(k='custo',l='Custo',t='num',w=130)],'g_om')
-    g_at=G([dict(k='ativo',l='Ativo · local',w=240),dict(k='cond',l='Condição',w=170),dict(k='leit',l='Leitura',t='num',w=140),dict(k='prox',l='Próxima manutenção',t='num',w=230),
-            dict(k='ab',l='Em aberto',w=170),dict(k='custo',l='Custo no período',t='num',a='r',d=2,pre='R$ ',agg='sum',w=140),dict(k='cons',l='Consumo',w=150)],'g_at',total=True,
+    g_so=G([dict(k='item',l='Item',w=120),dict(k='ativo',l='Ativo · leitura',w=160),dict(k='oque',l='O que',w=170),dict(k='prazo',l='Prazo',t='num',w=130),
+            dict(k='pecas',l='Peças',w=120),dict(k='prox',l='Próximo passo',w=140)],'g_so')
+    g_om=G([dict(k='om',l='Ordem · ativo',w=120),dict(k='serv',l='Serviço · tipo',w=140),dict(k='jan',l='Janela',t='date',w=75),dict(k='fase',l='Fase',w=100),
+            dict(k='pend',l='Pendência',w=145),dict(k='exe',l='Executante',w=90),dict(k='tempo',l='Tempo',t='num',w=80),dict(k='custo',l='Custo',t='num',w=100)],'g_om')
+    g_at=G([dict(k='ativo',l='Ativo · local',w=150),dict(k='cond',l='Condição',w=120),dict(k='leit',l='Leitura',t='num',w=95),dict(k='prox',l='Próxima manutenção',t='num',w=145),
+            dict(k='ab',l='Em aberto',w=120),dict(k='custo',l='Custo no período',t='num',a='r',d=2,pre='R$ ',agg='sum',w=110),dict(k='cons',l='Consumo',w=95)],'g_at',total=True,
            qf=dict(k='cond',l='condição'))
-    g_ab=G([dict(k='id',l='Lançamento · operador',w=170),dict(k='ativo',l='Ativo',w=160),dict(k='tq',l='Tanque/lote',w=170),dict(k='vol',l='Volume (L)',t='num',a='r',w=90),
-            dict(k='data',l='Data · leitura',w=120),dict(k='met',l='Método',w=150),dict(k='lh',l='Consumo L/h',t='num',a='r',w=100),dict(k='qual',l='Qualidade',w=170)],'g_ab',qf=dict(k='qual',l='qualidade'))
-    g_pl=G([dict(k='nome',l='Plano',w=260),dict(k='est',l='Estado',w=200),dict(k='apl',l='Aplica-se a',w=190),dict(k='svs',l='Serviços',w=200),dict(k='atv',l='Ativos',w=150),dict(k='sit',l='Situação',w=220)],'g_pl')
+    g_ab=G([dict(k='id',l='Lançamento · operador',w=130),dict(k='ativo',l='Ativo',w=120),dict(k='tq',l='Tanque/lote',w=105),dict(k='vol',l='Volume (L)',t='num',a='r',w=75),
+            dict(k='data',l='Data · leitura',w=100),dict(k='met',l='Método',w=110),dict(k='lh',l='Consumo L/h',t='num',a='r',w=80),dict(k='qual',l='Qualidade',w=105)],'g_ab',qf=dict(k='qual',l='qualidade'))
+    g_pl=G([dict(k='nome',l='Plano',w=150),dict(k='est',l='Estado',w=140),dict(k='apl',l='Aplica-se a',w=140),dict(k='svs',l='Serviços',w=140),dict(k='atv',l='Ativos',w=110),dict(k='sit',l='Situação',w=165)],'g_pl')
     flt=lambda *xs: '<div class="ma-flt" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">'+''.join(xs)+'</div>'
     semordem=(_card_html('c_so') + flt(_chips('so_tipo','Tipo'),_chips('so_prazo','Prazo pelo início da janela'),_sel('f_crit','f_setcrit','f_crits','Criticidade'),_sel('f_grupo','f_setgrupo','f_grupos','Grupo'),_sel('f_plano','f_setplano','f_planos','Plano'))
               + g_so)
@@ -1071,6 +1077,8 @@ def _painel():
     jan=(f'<div style="font-size: 13px;"><b>Janela:</b> {H("om_jan")}</div>'
          + IF('om_conf',f'<div role="alert" style="padding: 7px 10px; border-radius: 8px; background: {REDS}; color: {RED}; font-size: 12.5px; font-weight: 700;">{H("om_conft")}</div>')
          + IF('om_hasImp',f'<div style="{sb}">{H("om_imp")}</div>')
+         + IF('om_hasProp',f'<div style="font-size: 12.8px; font-weight: 700; color: {YEL};">{H("om_prop")}</div>')
+         + IF('om_podeProp',f'<div><button type="button" disabled="{H("om_propDis")}" title="{H("om_propWhy")}" onClick="{H("om_propGo")}" style="{SEC}">Propor substituto (simulado · o PCP decide)</button></div>')
          + IF('om_janEd',f'<div style="display: flex; align-items: flex-end; gap: 8px; flex-wrap: wrap;">' + FOR('om_atalhos','x',f'<button type="button" aria-pressed="{H("x.on")}" onClick="{H("x.go")}" style="{H("x.st")}">{H("x.t")}</button>',2)
               + _fld('Dia',f'<input type="date" aria-label="Dia da janela" value="{H("om_jand")}" onChange="{H("om_setjand")}" style="{INP}">')
               + f'<button type="button" disabled="{H("om_moverDis")}" onClick="{H("om_mover")}" style="{SEC}">Mover janela</button></div>'
@@ -1086,7 +1094,7 @@ def _painel():
            f'<span style="font-size: 11px; font-weight: 700; color: {MUTED}; border: 1px solid {LINE}; border-radius: 999px; padding: 0 7px;">{H("t.tipo")}</span>'
            + IF('t.nova',f'<span style="{ma_chip_st("yellow")}">Tarefa nova</span>')
            + IF('t.fixo',f'<span style="font-size: 11px; color: {MUTED};">não excluível</span>')
-           + IF('t.ed && t.notT',f'<span role="group" aria-label="{H("t.t")}" style="display: inline-flex; gap: 4px; flex-wrap: wrap;">'+FOR('t.opts','b',f'<button type="button" aria-pressed="{H("b.on")}" aria-label="{H("b.lab")}" onClick="{H("b.go")}" style="{H("b.st")}">{H("b.t")}</button>',3)+'</span>')
+           + IF('t.edR',f'<span role="group" aria-label="{H("t.t")}" style="display: inline-flex; gap: 4px; flex-wrap: wrap;">'+FOR('t.opts','b',f'<button type="button" aria-pressed="{H("b.on")}" aria-label="{H("b.lab")}" onClick="{H("b.go")}" style="{H("b.st")}">{H("b.t")}</button>',3)+'</span>')
            + IF('t.ro',_chiph('t.r','t.rst','t.rdot')) + IF('t.hasPor',f'<span style="font-size: 12px; color: {MUTED};">{H("t.por")}</span>') + '</div>'
            + IF('t.hasValIn',f'<label style="margin-left: 26px; display: inline-flex; align-items: center; gap: 6px; {LBL}">Valor<input aria-label="{H("t.vlab")}" inputMode="decimal" value="{H("t.val")}" onChange="{H("t.setval")}" style="{INP} width: 100px; text-align: right;">{H("t.un")}</label>')
            + IF('t.hasValTx',f'<span style="margin-left: 26px; font-size: 12.8px;">Medido: {H("t.valTx")}</span>')

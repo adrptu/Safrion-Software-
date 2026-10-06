@@ -912,6 +912,17 @@ function manCustoPeriodo(c,k,aid){ const P=manPeriodo(c,k); let enc=0, and=0;
     else if(manAberta(o)&&o.etapa!=='A liberar') and+=manCusto(c,o,'est'); }); return {enc,and,P}; }
 function manCumprimento(c,k){ const P=manPeriodo(c,k); const os=Object.values(c.oms).filter(o=>o.tipo==='Preventiva'&&o.etapa==='Encerradas'&&o.vencOrig&&o.exec&&o.exec.data>=P.de&&o.exec.data<=P.ate);
   if(!os.length) return null; const ok=os.filter(o=>o.exec.data<=o.vencOrig).length; return {ok,n:os.length,pct:Math.round(ok*100/os.length)}; }
+/* ---------- "Propor substituto" (ponte até o 1b, ESPECIFICACAO §0.1: sai com a PCMS-M09b): o ativo parado afeta O.S. na alocação;
+   Otávio registra a proposta de um substituto apto da mesma classe e o PCP decide em O.S. › Recursos (simulado) ---------- */
+function manPropAfeta(c,o){ const a=c.ativos[o.aid]; const r=MAN_AL.rec[o.aid]; if(!a||!r) return []; const de=(a.condInfo&&a.condInfo.desde)||c.hoje;
+  return [...new Set(MAN_AL.aloc.filter(x=>x.r===r&&x.sit!=='manutenção'&&x.dia>=de).map(x=>x.os))]; }
+function manPropSub(c,o){ const a=c.ativos[o.aid]; if(!a) return null; return Object.values(c.ativos).filter(x=>x.id!==a.id&&x.classe===a.classe&&x.cond==='Apto').sort((x,y)=>x.id.localeCompare(y.id))[0]||null; }
+function manPropor(c,id,pf){ const o=c.oms[id]; if(!o) throw new Error('Ordem não encontrada.'); if(pf!==undefined) manExige(c,pf,'ponte');
+  const a=c.ativos[o.aid]; if(!a||a.cond!=='Bloqueado'||!manAberta(o)) throw new Error('Só para ativo bloqueado com ordem aberta.');
+  c.prop=c.prop||{}; if(c.prop[id]) return {nada:true,msg:'Proposta já registrada · aguarda PCP em O.S. › Recursos (simulado).'};
+  const os=manPropAfeta(c,o), s=manPropSub(c,o); if(!os.length) throw new Error('Nenhuma O.S. alocada a '+a.nome+' a partir de '+manBr((a.condInfo||{}).desde||c.hoje)+'.'); if(!s) throw new Error('Nenhum '+a.classe.toLowerCase()+' apto para substituir.');
+  c.prop[id]={sub:s.id,os,por:manPor(pf),em:c.hoje};
+  return {msg:'Proposta registrada: '+manNome(s)+' para '+os.join(' e ')+' · aguarda PCP em O.S. › Recursos (simulado).'}; }
 /* ---------- app de campo (PCM S4, §3.7): o MB-09, o MB-09det e o MB-04 usam as mesmas funções, com a chave gerada no aparelho.
    Com sinal: aplica já. Sem sinal: valida na cópia do aparelho (mesma regra; erro volta ao campo) e vai para a fila (c.app.manFila).
    Na volta do sinal a fila vai uma vez só: o cenário revalida fase e o.rv da OM; se mudou, vira "Conflito a resolver · Otávio" e nunca é aplicado em silêncio. ---------- */
@@ -968,7 +979,7 @@ function manAppConfDescartar(c,id,motivo,pf){ manExige(c,pf,'decidir'); const x=
   if(manVazio(motivo)) throw new Error('Informe o motivo para descartar.'); x.estado='Descartado'; x.dec={por:manPor(pf),em:c.hoje,motivo:String(motivo).trim()}; manAppConfBaixa(c,x);
   return {msg:'Registro do app descartado: '+x.desc+' ('+String(motivo).trim()+') · fica no histórico da ordem.'}; }
 /* acesso para os testes de navegador (mesmo padrão do window.__cen da O.S.) */
-try { window.__man = { manAppCmd, manAppSinal, manAppProj, manAppConfAplicar, manAppConfDescartar, manMudar, manRetirada, manIncluir, manGet, manClone, manLinhas, manVenc, manGerar, manGerarTodas, manLiberar, manConcluir, manReset, manLeitura, manLeituraOk, manLeituraDescartar, manSolicitar, manReceber, manPlaus, manNum,
+try { window.__man = { manPropor, manAppCmd, manAppSinal, manAppProj, manAppConfAplicar, manAppConfDescartar, manMudar, manRetirada, manIncluir, manGet, manClone, manLinhas, manVenc, manGerar, manGerarTodas, manLiberar, manConcluir, manReset, manLeitura, manLeituraOk, manLeituraDescartar, manSolicitar, manReceber, manPlaus, manNum,
   manConflito, manProxLivre, manMover, manPode, manAchOpcoes, manCusto, manCustoFinal, manTesteValido, manFaltaEncerrar, manFaltaConcluir, manMarcoSug }; } catch (e) {}
 '''
 
