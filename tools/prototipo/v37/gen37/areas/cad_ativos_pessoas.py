@@ -306,10 +306,11 @@ def cd04():
                sel('acesso','Acesso ao app',['Com login','Sem login','Acesso solicitado','Solicitar acesso ao app'],**{'def':'Sem login'}),
                sel('sit','Situação',['Ativa','Inativa'],**{'def':'Ativa'})])
     # pessoa numa linha, uma variável por coluna (TABELAS-FOCO, 04/10/2026): equipe, habilidades (filtro por habilidade), vínculo, disponível até,
-    # "Custo R$/h", habilitação exigida e a validade que vence primeiro; situação (alocável em O.S. ou não). Calendário próprio e acesso ao app no painel
+    # "Custo R$/h", habilitação exigida e a validade que vence primeiro, calendário (o da equipe ou o próprio) e acesso ao app (a ficha de campo
+    # depende dele); situação (alocável em O.S. ou não)
     gp=grid([dict(k='nome',l='Pessoa',w=140),dict(k='equipe',l='Equipe',w=120),dict(k='habs',l='Habilidades',multi=True,w=240),dict(k='vinc',l='Vínculo',w=100),
              dict(k='ate',l='Disponível até',t='date'),dict(k='custo',l='R$/h',t='num',a='r',d=2),dict(k='habx',l='Habilitação',multi=True),
-             dict(k='habv',l='Validade da habilitação',t='date'),dict(k='est',l='Situação',w=200)],
+             dict(k='habv',l='Validade da habilitação',t='date'),dict(k='cal',l='Calendário',w=150),dict(k='acesso',l='Acesso ao app',w=140),dict(k='est',l='Situação',w=200)],
         [R(pid,v) for pid,v in pes],gid='g_pes',total=False,frame=False,
         tools=qf_chips('g_pes')+filtro_sel('c4fun','Função')+prim('g_pes_new','Cadastrar pessoa'),
         edit=dict(m='form',title='Pessoa',newTitle='Cadastrar pessoa',
@@ -349,6 +350,9 @@ function PREVALS(self,v){ cadActsIni(self); const ps=RW(self,'g_pes'); const eqc
     const A=alocavel(V); const ex=habExig(V.hab); r.m.habx=ex.map(x=>({id:x,l:x})); r.p.habx=[ex.length?{k:'txt',t:ex.join(', ')}:{k:'mut',t:'—'}]; r.s.habx=ex.join(', ');
     const hv=c4val(A); V.habv=hv; const pend=A.t.some(y=>y.s==='pend'); const hvc=A.t.some(y=>y.s==='venc')?'red':(A.vence?'yellow':'');
     r.p.habv=[hv?(hvc?{k:'cn',t:br(hv),c:hvc}:{k:'txt',t:br(hv)}):(pend?{k:'cn',t:'pendente',c:'red'}:{k:'mut',t:'—'})]; r.s.habv=hv?br(hv):(pend?'pendente':'');
+    // calendário: o da equipe (apagado) ou o próprio, que é a exceção; acesso ao app: sem login ou pedido em aberto ficam à vista
+    const herd=!V.cal||V.cal==='Da equipe'; r.p.cal=[herd?{k:'mut',t:'Da equipe'}:{k:'txt',t:V.cal}]; r.s.cal=herd?'Da equipe':V.cal;
+    const ac=V.acesso||'Sem login'; r.p.acesso=[{k:ac==='Com login'?'mut':'txt',t:ac}]; r.s.acesso=ac;
     const S=c4sit(V); r.p.est=S.p; r.s.est=S.t; });
   // filtro do bloco: estado (Todas · A resolver) e função (lista), que valem juntos
   const fun=cadSel(self,v,'c4fun',[{v:'',t:'Todas'}].concat(C4.qf.filter(([k])=>k!=='nao').map(([k,t])=>({v:k,t:t+' ('+ps.filter(r=>c4qf(k,r.v,alocavel(r.v))).length+')'}))));

@@ -2,6 +2,7 @@
 """CD-04 · pessoas e equipes (15 verificações no Chrome): caldeira da OS-0424 (Paula), habilidades em múltipla escolha com a habilitação
 exigida, habilitação vencida grava e marca 'Não alocável em O.S.', filtros rápidos por habilidade e 'Não alocáveis', estado calculado e
 clicável, vigência do safrista, calendário herdado da equipe, 'Irrigante' e 'Solicitar acesso ao app' simulado no formulário."""
+# TABELAS-FOCO (06/10/2026): vínculo | disponível até | habilitação | validade (vencida em vermelho) | calendário | acesso ao app em colunas próprias; "simulado" fica no aviso
 from cada_lib import T
 import time, json
 t=T(); J=t.J
@@ -14,13 +15,14 @@ try:
     t.goto('CD-04.dc.html')
     t.chk('cabeçalho: estado calculado "2 não alocáveis · 1 a renovar em 30 dias" e primária "Cadastrar pessoa"',
           '2 não alocáveis · 1 a renovar em 30 dias' in t.header() and 'Cadastrar pessoa' in t.bloco() and not t.errs(), t.header()+' '+t.errs())
+    # TABELAS-FOCO (06/10/2026): habilitação e validade em colunas próprias ("NR-31 | 30/04/2027"), o estado no chip da Situação
     p=t.rowtxt(0,'Paula') or ''
     t.chk('Paula é caldeira da equipe Campo 1 (OS-0424) com NR-31 válida; "Irrigante" no lugar de "Irrigacionista"',
-          'Preparar calda (caldeiro)' in p and 'Campo 1' in p and 'NR-31 até 30/04/2027' in p and 'Irrigacionista' not in J("document.body.innerText")
+          'Preparar calda (caldeiro)' in p and 'Campo 1' in p and 'NR-31 30/04/2027' in p and 'Alocável' in p and 'Irrigacionista' not in J("document.body.innerText")
           and 'Irrigantes (1)' in J("[...document.querySelectorAll('main select option')].map(o=>o.text).join(' | ')"), p)
     l=t.rowtxt(0,'Lucas') or ''
     t.chk('Lucas (safrista) com NR-31 vencida aparece "Não alocável em O.S." com o motivo e a vigência do contrato',
-          'Não alocável em O.S.' in l and 'NR-31 vencida em 15/08/2026' in l and 'Safrista' in l and 'até 31/07/2027' in l, l)
+          'Não alocável em O.S.' in l and 'NR-31 15/08/2026' in l and 'Safrista 31/07/2027' in l, l)
     t.mainsel('cal'); a=nomes(); t.clk('A resolver'); b=nomes(); t.mainsel(''); b2=nomes(); t.clk('Todas'); c=conta()
     t.chk('filtros do bloco: Função Caldeiros → Paula e Nilton; com A resolver → nenhum caldeiro; Todas → 10', a==['Paula','Nilton'] and b==[] and c=='10/10', [a,b,c])
     t.clk('A resolver'); a=nomes(); ch=J("(()=>{const b=[...document.querySelectorAll('main .cadx-qf button')].find(b=>b.innerText.trim().startsWith('A resolver')); return !!b&&b.getAttribute('aria-pressed')==='true';})()"); t.clk('Limpar filtros'); c=conta()
@@ -34,7 +36,7 @@ try:
           not t.isopen() and 'R$ 40,00/h' in l and 'Não alocável em O.S.' in l and 'não alocável em O.S. até resolver NR-31 vencida em 15/08/2026' in ts, [l,ts,t.alerts()])
     t.openrow(0,'Lucas'); t.fset('v31','2027-08-15'); t.btn('Salvar'); time.sleep(.2); l=t.rowtxt(0,'Lucas') or ''
     t.chk('renovar a NR-31 libera o Lucas e o estado do cabeçalho é recalculado',
-          'NR-31 até 15/08/2027' in l and 'Não alocável' not in l and '1 não alocável · 1 a renovar em 30 dias' in t.header(), [l,t.header()])
+          'NR-31 15/08/2027' in l and 'Não alocável' not in l and '1 não alocável · 1 a renovar em 30 dias' in t.header(), [l,t.header()])
     t.openrow(0,'Rui'); h0=help_('Habilidades'); marca('Irrigar'); L=t.labels(); h1=help_('Habilidades')
     t.chk('marcar "Irrigar" faz aparecer a validade da NR-10 exigida (Rui não exigia nenhuma)',
           'Nenhuma habilitação exigida' in h0 and 'Validade da NR-10' in L and 'Exige NR-10 com validade' in h1, [h0,L,h1])
@@ -44,7 +46,7 @@ try:
           'Calendário da equipe: seg–sáb · 06–15h · 9 h/dia' in he and ops==['Sem login','Solicitar acesso ao app'] and t.fv('cal')=='Da equipe', [he,ops,t.fv('cal')])
     t.fset('acesso','Solicitar acesso ao app'); t.fset('cal','escala 6×2 · 8h'); t.btn('Salvar'); time.sleep(.2); b=t.rowtxt(0,'Beto') or ''; ts=t.toast()
     t.chk('"Solicitar acesso ao app" (simulado) grava o pedido e a exceção de calendário aparece na linha',
-          'Acesso solicitado' in b and 'simulado' in b and 'calendário próprio: escala 6×2 · 8h' in b and 'pedido de acesso ao app enviado ao administrador (simulado)' in ts, [b,ts])
+          'escala 6×2 · 8h Acesso solicitado' in b and 'pedido de acesso ao app enviado ao administrador (simulado)' in ts, [b,ts])
     t.openrow(0,'Ana'); acd=t.fdis('acesso'); t.cancel()
     t.chk('quem já tem login vê o acesso só em consulta', acd is True, acd)
     t.clk('Cadastrar pessoa')

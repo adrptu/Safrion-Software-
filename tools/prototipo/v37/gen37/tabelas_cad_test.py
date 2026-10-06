@@ -159,7 +159,7 @@ try:
     shot('cd03-1440')
     # ================= CD-04 =================
     abre('CD-04.dc.html'); aba('Pessoas'); g = Grade(J, 0)
-    d = tf03('CD-04 Pessoas', g, ['Pessoa', 'Equipe', 'Habilidades', 'Vínculo', 'Disponível até', 'Custo R$/h', 'Habilitação', 'Validade da habilitação', 'Situação'], extra=())
+    d = tf03('CD-04 Pessoas', g, ['Pessoa', 'Equipe', 'Habilidades', 'Vínculo', 'Disponível até', 'Custo R$/h', 'Habilitação', 'Validade da habilitação', 'Calendário', 'Acesso ao app', 'Situação'], extra=())
     lu = next((r for r in d if r.get('Pessoa') == 'Lucas'), {})
     chk('CD-04: Lucas Campo 2 | Safrista | 31/07/2027 | R$ 38,00/h | NR-31 | 15/08/2026 | Não alocável em O.S.',
         [lu.get(k) for k in ('Equipe', 'Vínculo', 'Disponível até', 'Custo R$/h', 'Habilitação', 'Validade da habilitação', 'Situação')] == ['Campo 2', 'Safrista', '31/07/2027', 'R$ 38,00/h', 'NR-31', '15/08/2026', 'Não alocável em O.S.'], lu)
@@ -173,13 +173,13 @@ try:
     abre('CD-05.dc.html'); aba('Parceiros'); g = Grade(J, 0)
     d = tf03('CD-05 Parceiros', g, ['Parceiro', 'CPF/CNPJ', 'Papéis', 'Contato', 'WhatsApp', 'E-mail', 'Canais autorizados', 'Situação do papel'])
     sv = next((r for r in d if r.get('Parceiro') == 'Sementes Vale'), {}); cv = next((r for r in d if r.get('Parceiro') == 'Coop. Vale'), {})
-    chk('CD-05: Sementes Vale WhatsApp 65 99555-6677 sem autorização (Canais = E-mail); Coop. Vale com dois papéis e dois estados',
-        sv.get('WhatsApp') == '65 99555-6677' and sv.get('Canais autorizados') == 'E-mail' and cv.get('Papéis') == 'Fornecedor, Cliente' and cv.get('Situação do papel') == 'Homologado Limite vigente', (sv, cv))
+    chk('CD-05: Sementes Vale WhatsApp 65 99555-6677 "não autorizado" (Canais = E-mail); Coop. Vale com dois papéis e dois estados',
+        sv.get('WhatsApp') == '65 99555-6677 não autorizado' and sv.get('Canais autorizados') == 'E-mail' and cv.get('Papéis') == 'Fornecedor, Cliente' and cv.get('Situação do papel') == 'Homologado Limite vigente', (sv, cv))
     g.filtra('Canais autorizados', ['WhatsApp']); fl = g.dicts()
     chk('CD-05: filtro Canais autorizados = WhatsApp (por item da lista)', fl and all('WhatsApp' in r.get('Canais autorizados', '') for r in fl) and len(fl) < len(d), len(fl))
     limpa(J)
     J("[...document.querySelectorAll('[role=group][aria-label=\"Filtrar por papel\"] button')].find(b=>b.innerText.trim().startsWith('Clientes')).click()"); time.sleep(.6)
-    dc = tf03('CD-05 Clientes', g, ['Parceiro', 'CPF/CNPJ', 'Contato', 'WhatsApp', 'E-mail', 'Canais autorizados', 'Limite de crédito', 'Validade da análise de crédito', 'Situação do papel'])
+    dc = tf03('CD-05 Clientes', g, ['Parceiro', 'CPF/CNPJ', 'Papéis', 'Contato', 'WhatsApp', 'E-mail', 'Canais autorizados', 'Limite de crédito', 'Validade da análise de crédito', 'Situação do papel'])
     rh = next((r for r in dc if r.get('Parceiro') == 'Rede Hortifrúti BA'), {})
     chk('CD-05 Clientes: Rede Hortifrúti BA R$ 40.000 | 31/08/2026 | Limite vencido', [rh.get(k) for k in ('Limite de crédito', 'Validade da análise de crédito', 'Situação do papel')] == ['R$ 40.000', '31/08/2026', 'Limite vencido'], rh)
     g.ordena('Limite de crédito', desc=True); lc = [num(x) for x in g.col('Limite de crédito')]
