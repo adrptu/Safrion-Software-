@@ -157,6 +157,8 @@ function EXTRAVALS(self,v){ const X=self._cf; const {A,org,hoje,med,k,ag,P,pv}=X
   ASSIN_PAR.planos.forEach(x=>{ v['cf_pl_'+x.id]=()=>cfAbrePl(self,x.id,(ag||k).ha); });
   // atalho da faixa: CF-05.dc.html#pagar abre a fatura aberta
   if(!self.__cfh){ self.__cfh=1; let h=''; try{ h=location.hash||''; }catch(e){} if(/pagar/.test(h)&&ab) setTimeout(()=>cfAbreFat(self,ab.id),0); }
+  // origem do talhão: o título diz o talhão (a 1ª coluna da grade é a fazenda)
+  const FU=v.g_uso_F, fu=g2st(self,'g_uso').fm; if(FU&&FU.open&&fu&&fu.rid){ const r=g2find(aGrid('g_uso').rows,fu.rid); if(r) FU.title='Talhão '+r.v.t+' · '+r.v.faz; }
   // ---- painel da fatura ----
   const f=st.cf_fat?cfFaturas(org,A,med).find(x=>x.id===st.cf_fat):null; const fe=f?assinFatEstado(f,hoje):'';
   aPainel(self,v,'cf_fp',!!f,f?'Fatura de '+assinComp(f.comp):'',()=>self.setState({cf_fat:null}));
@@ -173,8 +175,8 @@ function EXTRAVALS(self,v){ const X=self._cf; const {A,org,hoje,med,k,ag,P,pv}=X
   // ---- painel do plano ou área (prévia hoje → depois) ----
   aPainel(self,v,'cf_pp',!!st.cf_pl,'Alterar plano ou área',()=>self.setState({cf_pl:false}));
   if(st.cf_pl){ const pl=st.cf_pl_plano||k.plano; const P1=assinPlano(pl); const ha=assinNum(st.cf_pl_ha); const desde=assinMesSeg(hoje);
-    v.cf_ppl=ASSIN_PAR.planos.filter(x=>x.pago).map(x=>({t:x.nome,on:String(pl===x.id),go:()=>self.setState({cf_pl_plano:x.id,cf_pl_err:''})}));
-    v.cf_pha=st.cf_pl_ha||''; v.cf_setha=(e)=>self.setState({cf_pl_ha:e.target.value,cf_pl_err:''});
+    v.cf_ppl=ASSIN_PAR.planos.filter(x=>x.pago).map(x=>({t:x.nome,on:String(pl===x.id),go:()=>self.setState({cf_pl_plano:x.id,cf_pl_err:'',cf_pl_chave:assinChave('ace')})}));
+    v.cf_pha=st.cf_pl_ha||''; v.cf_setha=(e)=>self.setState({cf_pl_ha:e.target.value,cf_pl_err:'',cf_pl_chave:assinChave('ace')});
     v.cf_pha_aj='medida hoje: '+assinHa(med.ha)+' · o plano vai até '+assinNf(ASSIN_PAR.limite_ha,0,0)+' ha';
     const ve=assinValidaArea(st.cf_pl_ha,med.ha); v.cf_pl_err=st.cf_pl_err||''; v.cf_tplerr=!!v.cf_pl_err; v.cf_pha_st='width:160px;font-family:inherit;font-size:14px;padding:9px 11px;border-radius:10px;box-sizing:border-box;border:1px solid '+(v.cf_pl_err?'#B42318':'#E4E9E5')+';';
     v.cf_pini='Início: '+assinBr(desde)+' (dia 1 do próximo ciclo; a mudança nunca retroage)';
@@ -185,13 +187,13 @@ function EXTRAVALS(self,v){ const X=self._cf; const {A,org,hoje,med,k,ag,P,pv}=X
       ['Mínimo',assinR(P.minimo)+'/mês',P1?assinR(P1.minimo)+'/mês':'—'],['Franquias',cfFranq(P),P1?cfFranq(P1):'—'],
       ['Mensalidade com a área medida hoje ('+assinHa(med.ha)+')',assinR(m0.valor),m1?assinR(m1.valor):'—'],
       ['Diferença por mês','',dif===null?'—':((dif>0?'+':(dif<0?'−':''))+assinR(Math.abs(dif)).replace('R$ ','R$ '))],
-      ['Módulos que mudam','',P1?mods(P,P1):'—'],['Início','',assinBr(desde)],['Periodicidade','mensal','mensal'],['Prazo e cancelamento','',ASSIN_PAR.cancelamento]];
-    v.cf_pv=L.map(x=>({t:x[0],a:x[1],b:x[2],tema:!!x[1],mud:x[1]!==x[2]&&!!x[1]}));
+      ['Módulos que mudam','',P1?mods(P,P1):'—'],['Periodicidade','','mensal'],['Prazo e cancelamento','',ASSIN_PAR.cancelamento]];
+    v.cf_pv=L.map(x=>({t:x[0],a:x[1],b:x[2],tema:!!x[1]&&x[1]!==x[2]}));   /* só o que muda mostra hoje → depois */
     const alvo=ag||k; v.cf_pl_pode=!(alvo.plano===pl&&assinCent(alvo.ha)===assinCent(ha));
     v.cf_pl_ok='Aceitar e agendar para '+assinBr(desde);
-    v.cf_aceitar=()=>{ const r=cenMudar(self,c=>assinMudar(c,pl,self.state.cf_pl_ha,cfMed().ha,self.state.cf_pl_chave)); if(r.erro) self.setState({cf_pl_err:r.erro}); else self.setState({cf_pl_chave:assinChave('ace'),cf_pl_err:''}); };
+    v.cf_aceitar=()=>{ const r=cenMudar(self,c=>assinMudar(c,pl,self.state.cf_pl_ha,cfMed().ha,self.state.cf_pl_chave)); self.setState({cf_pl_err:r.erro||''}); };   /* a chave muda quando o formulário muda (ou ao desfazer): o clique repetido devolve o mesmo recibo (R8) */
     v.cf_tag=!!ag; v.cf_ag_t=ag?('Mudança agendada: '+assinPlano(ag.plano).nome+' · '+assinHa(ag.ha)+' a partir de '+assinBr(ag.desde)+' (aceite '+assinBrC(ag.aceite)+(ag.recibo?' · '+ag.recibo:'')+').'):'';
-    v.cf_desfazer=()=>cenMudar(self,c=>assinDesfazer(c)); }
+    v.cf_desfazer=()=>{ cenMudar(self,c=>assinDesfazer(c)); self.setState({cf_pl_chave:assinChave('ace')}); }; }
   else { v.cf_ppl=[]; v.cf_pv=[]; }
   // ---- demonstração: data simulada da cobrança (só avança) e restaurar ----
   v.cf_hoje=assinBr(hoje);
@@ -279,5 +281,5 @@ def build():
     shell37('CF-05', 'Assinatura e cobrança', corpo, fname=fname, search=False,
             subtitle='Cobrança simulada · nenhum valor é cobrado. Plano, uso medido no cadastro, faturas e mudança de plano ou área com prévia.',
             primary_html=f'<button type="button" onClick="{H("cf_prim_fn")}" style="{BTN_ST(True)}">{H("cf_prim_t")}</button>',
-            footer='Preços, mínimo, franquias, trial, calendário e régua de inadimplência são exemplos a decidir pelo proprietário (DEC-01, DEC-05, DEC-09). Inadimplência nunca apaga dado nem para o trabalho de campo.')
+            footer='Preços, trial e régua são exemplos a decidir pelo proprietário (DEC-01/05/09). Inadimplência nunca apaga dado.')
     injeta(fname, 'Assinatura e cobrança', chip_dyn('cf_st'))

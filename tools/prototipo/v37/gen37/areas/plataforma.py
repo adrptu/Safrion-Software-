@@ -130,7 +130,7 @@ def bo02():
     shell37('BO-02', 'Assinaturas e cobrança', corpo, fname=fname, ctx=CTX_BO, perfil=PERFIL_BO, steps=telas(1), search=False,
             subtitle='Plataforma · cobrança simulada, nenhum provedor real. Todas as organizações no mesmo estado; a da demonstração é medida ao vivo no cadastro.',
             primary_html=f'<button type="button" onClick="{H("bo_conciliar")}" style="{BTN_ST(True)}">Conciliar pagamentos</button>',
-            footer='Fatura só fica Paga por evento do provedor (simulado), aplicado uma vez. Inadimplência restringe aos poucos e nunca apaga dado.')
+            footer='Fatura só fica Paga por evento do provedor (simulado), aplicado uma vez. Nada é apagado.')
     injeta(fname, 'Assinaturas e cobrança', chip_dyn('bo_st'))
 
 
@@ -176,7 +176,7 @@ def bo01():
     shell37('BO-01', 'Planos e preços', corpo, fname=fname, ctx=CTX_BO, perfil=PERFIL_BO, steps=telas(2), search=False,
             subtitle='Parâmetros de exemplo dos planos (a decidir pelo proprietário) e simulação por área. Nada aqui gera cobrança real.',
             primary_html=f'<button type="button" onClick="{H("bo_simular")}" style="{BTN_ST(True)}">Simular área</button>',
-            footer='Criar, revisar e aprovar versão de plano volta quando o proprietário decidir DEC-01/05/09 (fora de escopo, §9 da especificação).')
+            footer='Versões de plano (criar, aprovar) voltam quando o proprietário decidir DEC-01/05/09.')
 
 
 def build():
