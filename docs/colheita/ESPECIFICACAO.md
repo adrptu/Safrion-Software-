@@ -223,3 +223,10 @@ Quem age (sem login; grava o papel, como `cenDevolver`; com o seletor de perfil 
 | Grão em secagem como "Em processo" | BEN-3 (hoje o comercial corrigido entra acabado, D-07) |
 | Mostrar `CULTURA_UN` no CD-02 | próxima passada de Cadastros |
 | Cinco referências do setor do módulo (AGENTS §3.3) | Codex registra antes do aceite; não bloqueia o código |
+
+## 10. Implementação (executado em 06/10/2026, branch `claude/v44-colheita`)
+- **Rótulo:** executado. Commits P1 a P7 nesta branch, cada um com build 0 FALHA; números da §6 conferidos em `producao_unit_test.py` (node) e no navegador (`producao_fluxo_test.py`).
+- **Arquivos novos:** `gen37/producao.js` (regras e comandos `pr*`), `gen37/dados_producao.py` (catálogo PRDC e semente), `gen37/areas/producao.py` (COLH, CARGA, PROD e o painel do registro), `gen37/producao_unit.js` + `producao_unit_test.py`, `gen37/producao_fluxo_test.py`.
+- **Desvios desta especificação, decididos na implementação:** D-26 a D-30 (DECISOES.md). Defeitos achados nos testes e corrigidos: nome `prNum` da tela por cima do leitor de número (regressão nova em `producao_unit_test.py`); impedimento de encerrar por carga a pesar mostrado como "sobra em custódia" na O.S. (AC-15 em `producao_fluxo_test.py erros`).
+- **Defeito A-05 reproduzido antes da correção:** `producao_fluxo_test.py os` na base `9c617c4` → 0/7; na branch → 8/8.
+- **Fora (inalterado, §9):** beneficiamento, expedição e logística, telas comerciais além do vínculo pedido ↔ lote, custo realizado (Controle), mapa de produtividade, as cinco referências do setor (Codex).

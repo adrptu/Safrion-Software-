@@ -503,7 +503,7 @@ function PREVALS(self,v){ cenOuvir(self); prTopo(self,v); const c=cenGet(); self
         p:{sem:[{k:'b',t:prSemTxt(w)},{k:'mut',t:' · '+prBr(ini)+'–'+prBr(prDiaMais(ini,6))+(w===s0?' (em curso)':'')}],prod:[{k:'txt',t:pr}],
            pub:[{k:of.tem?'txt':'mut',t:of.tem?U(of.pub):'sem versão publicada'}],colh:[{k:ps.length?'txt':'mut',t:ps.length?U(colh)+(fim?'':' · parcial'):'—'}],
            fut:[{k:'txt',t:U(of.futKg)}].concat(of.fut.length?[{k:'br'},{k:'mut',t:of.fut.map(p=>p.id).join(', ')}]:[]),
-           livre:prCmp(of.livre,0)<0?[{k:'chip',t:'déficit '+U(prSub(0,of.livre)),c:'red'}]:[{k:'b',t:U(of.livre)}],
+           livre:w<s0?[{k:'mut',t:'semana encerrada'}]:(prCmp(of.livre,0)<0?[{k:'chip',t:'déficit '+U(prSub(0,of.livre)),c:'red'}]:[{k:'b',t:U(of.livre)}]),
            desv:[{k:desv===null?'mut':'txt',t:desv===null?(w>=s0?'semana aberta':'—'):prFmt(desv,1)+' %'}]}}); }); });
   const safs=[...new Set(X.filter(x=>!x.k.semanal&&prUn(x.k.cultura).base==='comercial').map(x=>prUn(x.k.cultura).prod+'|'+(PRDC.safras[x.k.saf]||{}).mf))];
   safs.forEach(ks=>{ const [pr,sf]=ks.split('|'); const of=prOfertaSafra(c,pr,sf); const cu=of.cultura; const U=x=>prUnTxt(cu,x,0);
