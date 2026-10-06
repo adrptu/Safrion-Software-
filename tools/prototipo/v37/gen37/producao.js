@@ -165,8 +165,11 @@ function prPublicavel(c, cid, par) { const r = prRascunho(c, cid, par); if (!r) 
 /* ---------- lotes: qualidade efetiva e saldos (R-10, R-12, R-14) ---------- */
 function prFis(c, lid) { return prSoma(prP(c).movs.filter(m => m.lote === lid && m.fis !== false).map(m => m.kg)); }
 function prResLote(c, lid) { return prSoma(Object.values(prP(c).reservas).filter(r => r.lote === lid && r.st === 'Ativa').map(r => r.kg)); }
+/* origens de campo do lote (carga → O.S. e dia da colheita); o lote do beneficiamento herda as das entradas pela genealogia (BEN-1, R-E07) */
+function prOrigCampo(c, L, vis) { const P = prP(c); vis = vis || {}; if (!L || vis[L.id]) return []; vis[L.id] = 1; const out = [];
+  (L.origem || []).forEach(x => { if (x.est) return; if (x.lote) out.push.apply(out, prOrigCampo(c, P.lotes[x.lote], vis)); else if (x.os) out.push(x); }); return out; }
 /* lotes de campo de origem (vivos: o LC- entra quando o apontamento da data existe) */
-function prLcs(c, L) { const out = []; (L.origem || []).forEach(x => { if (x.est) return; const lc = prLc(c, x.os, x.dcol); if (lc && out.indexOf(lc) < 0) out.push(lc); }); return out; }
+function prLcs(c, L) { const out = []; prOrigCampo(c, L).forEach(x => { const lc = prLc(c, x.os, x.dcol); if (lc && out.indexOf(lc) < 0) out.push(lc); }); return out; }
 /* pós-colheita registrado no motor de carência (CAR0) sobre o lote de campo, na data do recebimento ou depois: fruta fora do vendável (D-23) */
 function prOpPos(c, L) { if (typeof carOps !== 'function' || typeof CARD === 'undefined') return null; const lcs = prLcs(c, L);
   for (const op of carOps(c)) { const d = op.d || ''; if (d < (L.drec || '')) continue;
@@ -175,14 +178,18 @@ function prOpPos(c, L) { if (typeof carOps !== 'function' || typeof CARD === 'un
       const de = (op.de || []).filter(x => lcs.indexOf(x) >= 0).join(', '); const nv = (op.novos || []).map(n => n.id).join(', ');
       return { t: (op.k === 'mistura' ? 'Misturado no ' + nv : 'Dividido em ' + nv) + ' em ' + prBr(d) + ' (' + de + ')', op }; } }
   return null; }
-function prQualidade(c, L) {
+/* opt.base (BEN-1, R-A03): a qualidade que vale fora do processo, para conferir a entrada de uma ordem de beneficiamento: sem a regra
+   do local de processo, do pós-colheita do CAR0 e da ordem que já reservou o lote */
+function prQualidade(c, L, opt) { const base = !!(opt && opt.base);
   const loc = PRDC.locais[L.local] || {}; const u = prUn(L.cultura);
   if (u.campo && !L.benef) return { q: 'Em processo', mot: 'Café da roça em L: a saca sai do rendimento medido no beneficiamento (sc a apurar)', dono: 'Beneficiamento' };
-  if ((PRDC.proc || []).indexOf(loc.tipo) >= 0) return { q: 'Em processo', mot: 'Recebido no ' + loc.nome + ' (' + loc.tipo + '): beneficiamento antes de vender', dono: 'Beneficiamento' };
-  const op = prOpPos(c, L); if (op) return { q: 'Em processo', mot: op.t + ': fora do vendável até a ordem de processo', dono: 'Beneficiamento' };
+  if (!base) { const ob = L.ordem && (c.ordens || {})[L.ordem];   /* entrada liberada para uma ordem de beneficiamento: em processo nela até o Fechar */
+    if (ob && ['Encerradas', 'Canceladas'].indexOf(ob.etapa) < 0) return { q: 'Em processo', mot: 'Em processo na ' + L.ordem + ' (beneficiamento, ' + ob.etapa + ')', dono: (typeof BENC !== 'undefined' && BENC.quem.prod) || 'Beneficiamento', ordem: L.ordem };
+    if (!L.benef) { if ((PRDC.proc || []).indexOf(loc.tipo) >= 0) return { q: 'Em processo', mot: 'Recebido no ' + loc.nome + ' (' + loc.tipo + '): beneficiamento antes de vender', dono: 'Beneficiamento' };
+      const op = prOpPos(c, L); if (op) return { q: 'Em processo', mot: op.t + ': fora do vendável até a ordem de processo', dono: 'Beneficiamento' }; } }
   let pior = null;
   if (typeof CARD !== 'undefined' && typeof carEstado === 'function') {
-    (L.origem || []).filter(x => !x.est).forEach(x => { const o = (c.ordens || {})[x.os];
+    prOrigCampo(c, L).forEach(x => { const o = (c.ordens || {})[x.os];
       if (!o || PR_FEZ.indexOf(o.etapa) < 0) { if (!pior) pior = { q: 'Em inspeção', mot: 'Colheita sem ordem liberada (' + x.os + (o ? ' em ' + o.etapa : ' sem registro') + ')', dono: CARD.quem.ag }; return; }
       carTals(o.talhao).forEach(t => { const e = carEstado(c, t.tid, x.dcol, t.parc, x.dcol);
         if (e.k === 'curso') { const r = e.ativos[0]; pior = { q: 'Bloqueado', mot: 'Colhido em ' + prBr(x.dcol) + ' dentro da carência de ' + r.p + ' (' + r.os + ', aplicado em ' + carBr(r.d) + ', carência até ' + carAte(r.fim) + ')', dono: CARD.quem.ag, fim: r.fim }; }
@@ -190,20 +197,33 @@ function prQualidade(c, L) {
       /* R-12 (revisão A-01): a carência é lida no dia da colheita; dia sem apontamento somado na O.S. não é fato confirmado (data digitada ou padrão errada) */
       if (!pior && !prApDia(o, x.dcol)) pior = { q: 'Em inspeção', mot: 'Colhido em ' + prBr(x.dcol) + ' sem apontamento de área da ' + x.os + ' nesse dia: confirme o dia da colheita ou aponte a área do dia', dono: prResp(o) }; }); }
   if (pior) return pior;
+  /* decisões da Qualidade sobre o lote de produção (BEN-1, R-E03): destinado e bloqueado com motivo */
+  if (L.q0 === 'Destinado') return { q: 'Destinado', mot: 'Destinado' + (L.dest ? ' por ' + L.dest.quem + ' em ' + prBr(L.dest.d) + ': ' + L.dest.motivo : ''), dono: '' };
+  if (L.q0 === 'Bloqueado') return { q: 'Bloqueado', mot: (L.bloq && L.bloq.motivo) || 'Bloqueado pela Qualidade', dono: prQuem('qual'), fim: L.bloq && L.bloq.prazo };
   if (L.q0 === 'Liberado') return { q: 'Liberado', mot: L.lib ? 'Liberado por ' + L.lib.quem + ' em ' + prBr(L.lib.d) : 'Íntegro no recebimento', dono: '' };
+  if (L.insp) return { q: 'Em inspeção', mot: 'Inspeção ' + L.insp + ': fechar o processo não libera; a Qualidade registra o resultado e decide', dono: prQuem('qual') };
   return { q: 'Em inspeção', mot: 'Recebido ' + String(L.cond || '').toLowerCase() + ': a Qualidade confere e libera', dono: prQuem('qual') }; }
 function prSaldos(c, L) { const Q = prQualidade(c, L); const fis = prFis(c, L.id); const res = prResLote(c, L.id); const z = { fis, res, q: Q.q, mot: Q.mot, dono: Q.dono, fim: Q.fim, blq: 0, apto: 0, proc: 0, disp: 0 };
   if (Q.q === 'Em processo') z.proc = fis; else if (Q.q === 'Liberado') { z.apto = fis; z.disp = prCmp(fis, res) > 0 ? prSub(fis, res) : 0; } else z.blq = fis;
-  z.esgotado = prCmp(fis, 0) <= 0; z.vencido = !!(L.validade && L.validade < prHoje()); return z; }
+  z.esgotado = prCmp(fis, 0) <= 0; z.vencido = !!(L.validade && L.validade < prHoje()); z.ordem = Q.ordem || ''; return z; }
 
 /* ---------- pedidos, reservas e oferta (R-15, R-16) ---------- */
 function prExpedido(c, pid) { return prSoma(prP(c).movs.filter(m => m.tipo === 'expedição' && m.pedido === pid).map(m => -m.kg)); }
 function prResPed(c, pid) { return Object.values(prP(c).reservas).filter(r => r.pedido === pid && r.st === 'Ativa'); }
 function prFalta(c, ped) { const f = prSub(prSub(ped.qtd, prExpedido(c, ped.id)), prSoma(prResPed(c, ped.id).map(r => r.kg))); return prCmp(f, 0) > 0 ? f : 0; }
-function prCompat(ped, L) { return ped.prod === L.prod && (!ped.classe || !L.classe || ped.classe === L.classe) && (!ped.saf || !L.saf || ped.saf === L.saf); }
+/* produto classificado (BEN-1, R-E05): a classe é obrigatória nos dois e igual; vazio igual a vazio nunca passa. Os demais seguem a regra da colheita */
+function prClassificado(prod) { return typeof BENC !== 'undefined' && Object.values(BENC.rotas).some(r => (r.saidas || []).some(s => s.fluxo === 'Produto' && s.prod === prod && (s.classes || []).length)); }
+function prCompatErro(ped, L) { if (!ped || !L) return 'Pedido ou lote não encontrado.';
+  if (ped.prod !== L.prod) return L.id + ' (' + L.prod + (L.classe ? ' · ' + L.classe : '') + (L.saf ? ' ' + L.saf : '') + ') não atende o ' + ped.id + ' (' + ped.prod + (ped.classe ? ' · ' + ped.classe : '') + (ped.saf ? ' ' + ped.saf : '') + ').';
+  if (prClassificado(L.prod)) { if (!ped.classe || !L.classe) return 'Classe não informada (' + (!L.classe ? L.id : ped.id) + ').';
+    if (ped.classe !== L.classe) return 'Classe ' + L.classe + ' ≠ ' + ped.classe + ' do ' + ped.id + '.'; }
+  else if (ped.classe && L.classe && ped.classe !== L.classe) return L.id + ' (' + L.prod + ' · ' + L.classe + ') não atende o ' + ped.id + ' (' + ped.prod + ' · ' + ped.classe + ').';
+  if (ped.saf && L.saf && ped.saf !== L.saf) return L.id + ' (' + L.prod + ' ' + L.saf + ') não atende o ' + ped.id + ' (' + ped.prod + ' ' + ped.saf + ').';
+  return ''; }
+function prCompat(ped, L) { return !prCompatErro(ped, L); }
 /* situação do pedido: Entregue · Coberto · Parcial · Sem reserva · Em risco (reserva com expedição impedida) · Futura: compromete a previsão */
 function prSitPed(c, ped) { const rs = prResPed(c, ped.id); const exp = prExpedido(c, ped.id); const falta = prFalta(c, ped);
-  const imp = rs.filter(r => { const L = prP(c).lotes[r.lote]; return !L || prSaldos(c, L).q !== 'Liberado'; });
+  const imp = rs.filter(r => { const L = prP(c).lotes[r.lote]; return !L || prSaldos(c, L).q !== 'Liberado' || !prCompat(ped, L); });   /* bloqueado ou reclassificado depois da reserva (R-E06) */
   if (prCmp(exp, ped.qtd) >= 0) return { t: 'Entregue', c: 'gray', imp };
   if (imp.length) return { t: 'Em risco', c: 'red', imp };
   if (prCmp(falta, 0) <= 0) return { t: 'Coberto', c: 'green', imp };
@@ -241,6 +261,12 @@ function prNum(x) { if (typeof x === 'number') return x; let t = String(x === nu
 function prNumOk(x) { return x !== '' && x !== null && x !== undefined && isFinite(prNum(x)); }
 /* ticket da balança comparável: maiúsculas, sem espaço, hífen, ponto ou barra, sem o prefixo TK ("tk-4520", "TK 4520" e "4520" são o mesmo) */
 function prTk(x) { return String(x || '').toUpperCase().replace(/[\s\-_.\/]/g, '').replace(/^TK/, ''); }
+/* ID de lote (Colheita R-11; BEN R-A16): L<semana ISO do fato>-<n>, sequência única c.producao.seq.lote (piso 130), nunca reaproveitada;
+   também acima de qualquer lote ou destino de saída do beneficiamento já gravado na semana (um ID de saída estornada não volta) */
+function prProxLote(c, iso) { const P = prP(c, 1); const w = String(prSemN(prSem(iso))).padStart(2, '0'); const re = new RegExp('^L' + w + '-(\\d+)$'); let n = P.seq.lote[w] || 130;
+  const ve = id => { const m = re.exec(String(id || '')); if (m) n = Math.max(n, Number(m[1])); };
+  Object.keys(P.lotes).forEach(ve); Object.values(c.ordens || {}).forEach(o => ((o.ben && o.ben.sai) || []).forEach(s => ve(s.lote)));
+  P.seq.lote[w] = n + 1; return 'L' + w + '-' + (n + 1); }
 /* arredonda para baixo em d casas (sugestão que nunca passa do disponível) */
 function prPiso(x, d) { const k = 10n ** BigInt(6 - d); const m = prM(x); const q = m >= 0n ? m / k : -((-m + k - 1n) / k); return prN(q * k); }
 
@@ -335,7 +361,7 @@ function prReceber(c, k) { const P = prP(c, 1); const g0 = k.carga ? P.cargas[k.
   /* revisão A-05: lote liberado depois pela Qualidade não recebe carga nova com avaria (ela nasceria apta sem conferência) */
   let L = misto ? null : Object.values(P.lotes).find(x => !x.misto && x.prod === prod && x.local === local && x.drec === drec && x.cond === k.cond && x.q0 === q0 && !x.lib && (x.origem || []).length && x.origem.every(y => y.os === osId && y.dcol === dcol));
   const novo = !L;
-  if (!L) { const w = String(prSemN(prSem(drec))).padStart(2, '0'); P.seq.lote[w] = (P.seq.lote[w] || 130) + 1; const id = 'L' + w + '-' + P.seq.lote[w];
+  if (!L) { const id = prProxLote(c, drec);
     L = P.lotes[id] = { id, prod, cultura, classe: u.grao ? 'Padrão' : '', saf: (PRDC.safras[kk.saf] || {}).mf || '', faz, local, drec, dcol, validade: u.vida ? prDiaMais(dcol, u.vida) : null,
       q0, cond: k.cond, misto, origem: [], cargas: [] }; }
   const g = g0 || (P.seq.cg = (P.seq.cg || 2100) + 1, P.cargas['CG-' + P.seq.cg] = { id: 'CG-' + P.seq.cg, os: osId, dcol, via: 'web', sinc: true, chave: k.chave || ('W-CG-' + P.seq.cg), hora: cenAgora() });
@@ -368,19 +394,21 @@ function prDescartarCarga(c, id, motivo, quem) { const P = prP(c, 1); const g = 
   return { msg: id + ' descartada (' + mot + '): a carga sai da fila de pesagem; nada entra na produção. O registro e o motivo ficam no histórico.' }; }
 
 /* liberar lote (Qualidade, R-13): reavalia carência e ordem; recusa com a pendência e o dono */
-function prLiberarLote(c, lid, quem) { const P = prP(c, 1); const L = P.lotes[lid]; if (!L) throw new Error('Lote não encontrado.'); const S = prSaldos(c, L);
+/* ator = perfil de quem age (CTL-3): só a Qualidade ou a agrônoma libera lote (BEN-1 (d)); dano evitado: liberação gravada em nome de quem não decidiu */
+function prLiberarLote(c, lid, ator) { const quem = cenExigeUm(ator, ['qualidade', 'agronomo'], 'Liberar o lote ' + lid); const P = prP(c, 1); const L = P.lotes[lid]; if (!L) throw new Error('Lote não encontrado.'); const S = prSaldos(c, L);
+  if (L.insp) throw new Error(lid + ' é lote do beneficiamento: registre o resultado da inspeção ' + L.insp + ' e a decisão (fechar o processo não libera).');
   if (S.q === 'Liberado') throw new Error(lid + ' já está liberado.');
   if (S.q === 'Em processo') throw new Error(lid + ' está em processo (' + S.mot + '): o beneficiamento libera o lote de saída.');
   if (S.q === 'Bloqueado') throw new Error('Liberar recusado: ' + S.mot + '. Lote bloqueado por carência só sai pela Qualidade com laudo (fora desta etapa). Quem decide: ' + S.dono + '.');
   const Q = prQualidade(c, Object.assign({}, L, { q0: 'Liberado' })); if (Q.q !== 'Liberado') throw new Error('Liberar recusado: ' + Q.mot + '. Quem resolve: ' + Q.dono + '.');
-  L.q0 = 'Liberado'; L.lib = { quem: quem || prQuem('qual'), d: prHoje(), at: cenAgora() }; prMov(c, { tipo: 'liberação', lote: lid, kg: 0, fis: false, quem: L.lib.quem });
+  L.q0 = 'Liberado'; L.lib = { quem, d: prHoje(), at: cenAgora() }; prMov(c, { tipo: 'liberação', lote: lid, kg: 0, fis: false, quem: L.lib.quem });
   return { msg: lid + ' liberado por ' + L.lib.quem + ': ' + prEstTxt(L.cultura, S.fis) + ' aptos para reserva e venda.' }; }
 
 /* reservar lote apto para pedido (R-15): mesma classe, avaliação do destino, ≤ disponível e ≤ falta; dedução única */
 function prReservar(c, k) { const P = prP(c, 1); const kg = prNumOk(k.kg) ? prNum(k.kg) : NaN; const imp = JSON.stringify([k.pedido, k.lote, kg]);
   if (k.chave) { const ja = Object.values(P.reservas).find(r => r.chave === k.chave); if (ja) { if (ja.imp && ja.imp !== imp) throw prConflito(k.chave, ja.id); return { msg: 'Reserva ' + ja.id + ' já registrada: nada foi deduzido de novo.', rs: ja, repetido: true }; } }
   const ped = P.pedidos[k.pedido]; if (!ped) throw new Error('Escolha o pedido.'); const L = P.lotes[k.lote]; if (!L) throw new Error('Escolha o lote.');
-  if (!prCompat(ped, L)) throw new Error(L.id + ' (' + L.prod + (L.classe ? ' · ' + L.classe : '') + (L.saf ? ' ' + L.saf : '') + ') não atende o ' + ped.id + ' (' + ped.prod + (ped.classe ? ' · ' + ped.classe : '') + (ped.saf ? ' ' + ped.saf : '') + ').');
+  const ce = prCompatErro(ped, L); if (ce) throw new Error(ce);
   const S = prSaldos(c, L); if (S.q !== 'Liberado') throw new Error(L.id + ' não está apto (' + S.q + ': ' + S.mot + '). Quem resolve: ' + (S.dono || prQuem('qual')) + '.');
   const dest = ped.dest || 'MI-BR'; let pend = [];
   if (typeof carAvaliar === 'function' && typeof CARD !== 'undefined') for (const lc of prLcs(c, L)) { const a = carAvaliar(c, lc, dest);

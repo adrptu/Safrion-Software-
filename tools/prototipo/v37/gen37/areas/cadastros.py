@@ -12,6 +12,7 @@ import ui37
 from ui37 import shell37, continuity, HEIGHTS37, PARENT37, farm_map
 import dados as D
 import dados2 as D2
+import dados_cad as DC   # item caixa do packing com massa e tara (BEN-1)
 
 H=lambda s: '{{'+s+'}}'
 # alturas antigas medidas pelo qa37 valiam para o layout anterior; as telas novas definem a própria altura
@@ -687,7 +688,7 @@ def _itens():
                 it[x['prod']]=dict(grupo=x['grupo'],un=x['un'])
     for n in ['Semente de soja 58 W','Semente de soja 62 X','Semente de milho AG 8700','Semente de feijão Pérola']: it[n]=dict(grupo='Sementes',un='kg')
     it['Diesel S10']=dict(grupo='Combustível',un='L'); it['Soja em grão']=dict(grupo='Produto agrícola',un='sc 60 kg')
-    it['Café beneficiado']=dict(grupo='Produto agrícola',un='sc 60 kg'); it['Caixa de mamão 20 kg']=dict(grupo='Embalagem',un='un')
+    it['Café beneficiado']=dict(grupo='Produto agrícola',un='sc 60 kg'); it[DC.CX_MAMAO]=dict(grupo='Embalagem',un='un')
     return it
 CONV_ITEM={'Diesel S10':'1 m³ = 1.000 L'}
 CONV={'kg':'1 sc = 50 kg · 1 t = 1.000 kg','L':'1 frasco = 5 L · 1 cx = 4 frascos','sc 60 kg':'1 sc = 60 kg · 1 t = 16,67 sc','un':'1 pallet = 60 cx'}
@@ -711,7 +712,7 @@ def cd06():
         else: saldo[n]=(0,it[n]['un'],'')
     val={'Sementes':12,'Herbicidas':24,'Fungicidas':24,'Inseticidas':24,'Adjuvantes':36,'Inoculantes':6}
     gar={'MAP 11-52':'11% N · 52% P₂O₅','KCl 60%':'60% K₂O','Ureia 45%':'45% N','NPK 20-05-20':'20-05-20','Nitrato de cálcio':'15,5% N · 19% Ca','Nitrato de potássio':'13% N · 44% K₂O',
-         'Diesel S10':'densidade 0,85 kg/L a 20 °C','Soja em grão':'umidade-base 14%','Café beneficiado':'umidade-base 12%','Caixa de mamão 20 kg':'tara 1,2 kg'}
+         'Diesel S10':'densidade 0,85 kg/L a 20 °C','Soja em grão':'umidade-base 14%','Café beneficiado':'umidade-base 12%',DC.CX_MAMAO:'tara '+DC.EMB_PACK[DC.CX_MAMAO]['tara'].replace('.',',')+' kg'}
     grupos={}; saldo_ids=[]
     for n,d in sorted(it.items(),key=lambda x:(x[1]['grupo'],x[0])):
         g=d['grupo']; lote='Sim' if g not in ('Embalagem',) and n!='Diesel S10' else 'Não'

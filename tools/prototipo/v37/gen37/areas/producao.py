@@ -303,7 +303,7 @@ function prPanLote(self,c,L){ const P=prP(c); const S=prSaldos(c,L); const cu=L.
     kv:[{l:'Físico',v:U(S.fis)},{l:'Bloqueado',v:U(S.blq)},{l:'Apto',v:U(S.apto)},{l:'Reservado',v:U(S.res)},{l:'Disponível',v:U(S.disp)},{l:'Em processo',v:U(S.proc)}],
     secs:[{t:'Origem',rows:orig},{t:'Avaliação do destino dos pedidos',rows:av,vazio:L.abertura?'Saldo de abertura sem lote de campo: o destino é avaliado na expedição.':'Sem lote de campo ainda (o apontamento da data cria o LC-).'},{t:'Reservas',rows:rs,vazio:'Nenhuma reserva.'},{t:'Movimentos',rows:mv}],
     err:self.state.pr_err};
-  if(nx.a==='liberar'){ PPx.prim={t:'Liberar '+L.id,go:()=>prRun(self,x=>prLiberarLote(x,L.id,prQuem('qual')),{pr_modo:null})}; PPx.form={t:'Liberar lote · '+prQuem('qual'),h:'Confira a condição do lote. Liberar reavalia carência e ordem de colheita; com pendência, nada muda e a mensagem diz quem resolve.',fields:[]}; }
+  if(nx.a==='liberar'){ PPx.prim={t:'Liberar '+L.id,go:()=>prRun(self,x=>prLiberarLote(x,L.id,g2perfil()),{pr_modo:null})}; PPx.form={t:'Liberar lote · '+prQuem('qual'),h:'Confira a condição do lote. Liberar reavalia carência e ordem de colheita; com pendência, nada muda e a mensagem diz quem resolve.',fields:[]}; }
   else if(nx.a==='reservar'){ if(self.state.pr_ch){ const f=prFormReserva(self,c,L,null,'lote'); PPx.form={t:'Reservar para pedido · '+prQuem('com'),h:'Reserva só de lote apto; a quantidade não passa do disponível nem da falta do pedido.',fields:f.fields}; PPx.prim={t:'Reservar',go:f.go}; }
     else PPx.prim={t:'Reservar '+L.id+' para pedido',go:()=>self.setState({pr_ch:prChave('W-RS'),pr_form:null,pr_err:''})}; }   /* depois de reservar, nova reserva abre outro formulário (outra chave) */
   return PPx; }

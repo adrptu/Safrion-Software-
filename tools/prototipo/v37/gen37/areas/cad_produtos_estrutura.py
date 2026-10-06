@@ -66,7 +66,7 @@ def cd06():
         if n=='Diesel S10': return 9800
         return D2.ESTOQUE.get(n,0)
     gar={'MAP 11-52':'11% N · 52% P₂O₅','KCl 60%':'60% K₂O','Ureia 45%':'45% N','NPK 20-05-20':'20-05-20','Nitrato de cálcio':'15,5% N · 19% Ca','Nitrato de potássio':'13% N · 44% K₂O',
-         'Diesel S10':'densidade 0,85 kg/L a 20 °C','Soja em grão':'umidade-base 14%','Café beneficiado':'umidade-base 12%','Caixa de mamão 20 kg':'tara 1,2 kg',
+         'Diesel S10':'densidade 0,85 kg/L a 20 °C','Soja em grão':'umidade-base 14%','Café beneficiado':'umidade-base 12%',DC.CX_MAMAO:'tara '+DC.EMB_PACK[DC.CX_MAMAO]['tara'].replace('.',',')+' kg',
          'Calcário dolomítico':'PRNT 85%'}
     fmt=lambda x: f'{x:,.0f}'.replace(',','.')
     grupos={}; k=0

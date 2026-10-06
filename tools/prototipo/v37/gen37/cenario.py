@@ -79,15 +79,19 @@ def seed():
     # v=3 (04/10, SINT-C03 + PRE-REV-20261004): quantidades da semente pela regra única; o salvo com a regra antiga travaria o apontamento
     # v=4 (06/10, colheita de ponta a ponta · docs/colheita): o estado ganha c.producao (contagens, previsões, cargas, lotes de produto,
     # pedidos, reservas e movimentos MP-); o salvo sem ele é descartado (D-18)
-    import dados_producao
-    return dict(v=4, rev=0, ordens=ordens, reqs=reqs, lotes=lotes, movs=[], ocorr=[],
-                app=dict(online=True, fila=[], turno=None, operador='Marcos'), producao=dados_producao.seed())
+    # v=5 (06/10, beneficiamento BEN-1 · docs/beneficiamento): ordens de processo OB-0110 e OB-0112 (fam BEN) em c.ordens, REQ-030 e o lote
+    # de caixas CX26-01; no estado da Produção, os lotes do packing, o PV-031 e as inspeções (c.producao.ben); o salvo sem eles é descartado
+    import dados_producao, dados_ben
+    est = dict(v=5, rev=0, ordens=ordens, reqs=reqs, lotes=lotes, movs=[], ocorr=[],
+               app=dict(online=True, fila=[], turno=None, operador='Marcos'), producao=dados_producao.seed())
+    return dados_ben.semear(est)
 
 
 def js_prefixo():
     import dados_producao   # regras da produção (producao.js) em toda página do estado (D-22): O.S., Mapa, Estoque e app têm prPodeEncerrar
+    import dados_ben        # regras do beneficiamento (ben.js) depois: a qualidade do lote de produção e as decisões valem em toda página do estado
     return ('const CEN0 = ' + json.dumps(seed(), ensure_ascii=False).replace('</', '<\\/') + ';\n' + open(os.path.join(HERE, 'cenario.js'), encoding='utf-8').read() + '\n'
-            + dados_producao.js_regras())
+            + dados_producao.js_regras() + dados_ben.js_regras())
 
 
 def perfis_js():
