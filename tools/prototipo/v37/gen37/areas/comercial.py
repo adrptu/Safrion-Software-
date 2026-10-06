@@ -328,7 +328,15 @@ function EXTRAVALS(self,v){ self.g2after=(gid,rows,r)=>{ if(gid!=='g_of'||!r) re
                 dict(k='janela',l='Janela',t='txt',req=True,help='Ex.: 05/10–11/10'),
                 dict(k='cond',l='Condição',t='sel',req=True,opts=['FOB · 21 d','CIF · 14 d','CIF · 21 d','CIF · 28 d','CIF · 35 d','FOB · contra entrega','FOB armazém'],**{'def':'CIF · 28 d'})]),
         add='Novo pedido',gid='g_cart',total=False)
-    EXTRAJS[0]=JS_BASE+'''
+    # colheita (06/10, spec §3.5): seção "Reservas de produto" com os pedidos do estado (c.producao) e o mesmo comando prReservar do Estoque
+    # de produto; a linha estática do PV-030 na carteira continua até a frente Comercial (§9)
+    import cenario, dados_carencia as _DC
+    from areas import producao as _PRD
+    g_rsv=grid([C('ped','Pedido · cliente',w=200),C('prod','Produto',w=190),C('tipo','Tipo · janela',w=160),dict(k='qtd',l='Quantidade',t='num',a='r'),
+                dict(k='res',l='Reservado',t='num',a='r'),dict(k='falta',l='Falta',t='num',a='r'),C('sit','Situação · próximo passo',w=250)],
+               [],edit=dict(m='pick'),gid='g_rsv',total=False,qf=dict(k='sit',cut=' · ',l='Situação',todas='Todos'))
+    E.EXTRA.append(_PRD.painel())
+    EXTRAJS[0]=cenario.js_prefixo()+_DC.js_nucleo()+_PRD.PR_UI_JS+_PRD.PR_PED_JS+JS_BASE+'''
 const NEED={'PV-032':1.8,'PV-033':1.2}; const SALDO_B=1.8; const REC={'PV-032':'CMD-5521','PV-033':'CMD-5522'};
 function qtxt(r){ return (r.v.un==='t'?nf(r.v.qtd,1):nf(r.v.qtd))+' '+(r.v.un||''); }
 function EXTRAVALS(self,v){
@@ -346,12 +354,21 @@ function EXTRAVALS(self,v){
     if(isNew(r)){ const n=rows.filter(x=>String(x.id).indexOf('n')===0).length; const id='PV-0'+(33+n); r.v.__ok=1; r.p.ped=[{k:'b',t:id}]; r.s.ped=id; r.p.aloc=[{k:'chip',t:'Aguardando confirmação',c:'yellow'}]; r.s.aloc='Aguardando confirmação'; r.p.acao=[{k:'mut',t:'confirmação verifica saldo e crédito'}]; }
     r.v.unp='R$/'+(r.v.un==='t'?'kg':r.v.un); r.p.qt=[{k:'txt',t:qtxt(r)},{k:'br',t:''},{k:'mut',t:r.v.janela||''}]; r.s.qt=qtxt(r); r.p.pr=[{k:'txt',t:'R$ '+nf(r.v.preco,2)+'/'+(r.v.un==='t'?'kg':r.v.un)},{k:'br',t:''},{k:'mut',t:r.v.cond||''}]; r.s.pr=r.p.pr[0].t; self.setState({tick:Date.now()}); };
 }
+/* reservas de produto (estado compartilhado com Produção › Estoque de produto): mesma linha, mesmo painel, mesmo prReservar */
+const PR_GRIDS={g_rsv:1};
+const _g2rows0=g2rows; g2rows=function(self,sp){ return PR_GRIDS[sp.id]?sp.rows:_g2rows0(self,sp); };
+function PREVALS(self,v){ cenOuvir(self); const c=cenGet(); self._c=c;
+  self.g2pick=(gid,rid)=>{ if(gid==='g_rsv') self.setState({pr_sel:{g:gid,id:rid},pr_pan:{g:gid,id:rid},pr_form:null,pr_err:'',pr_cx:null}); };
+  GR('g_rsv').rows=Object.values(prP(c).pedidos).sort((a,b)=>a.id.localeCompare(b.id)).map(p=>prPedRow(c,p)); }
+const _EXV_VE=EXTRAVALS; EXTRAVALS=function(self,v){ _EXV_VE(self,v); const c=self._c||cenGet(); const P=prP(c); const pan=self.state.pr_pan;
+  prPainel(self,v,(pan&&pan.g==='g_rsv'&&P.pedidos[pan.id])?prPanPed(self,c,P.pedidos[pan.id]):null); };
 '''
     corpo=(
       kpis([('A CONFIRMAR','3','PV-031 · PV-032 · PV-033'),('DISPUTA DE SALDO','3,0 t × 1,8 t','Mamão B · 28/09–04/10'),
             ('SEM ALOCAÇÃO','2',f'{PV["id"]} falta {n1(PV["falta_t"])} t · PV-028'),('RECEBÍVEIS EM ABERTO','R$ 244 mil','PV-029')])
       + section('Carteira de pedidos','Confirme pedidos pela linha de ação e clique na linha para ajustar um pedido ainda a confirmar.',
-        '',g_cart))
+        '',g_cart)
+      + section('Reservas de produto','Pedidos do estado: clique num pedido para reservar lote apto ou cancelar reserva (o mesmo comando do Estoque de produto).','',g_rsv))
     shell37('VE-04','Pedidos de venda',corpo,
       subtitle='Confirmação valida preço, crédito, saldo e capacidade numa transação única; alocações futuras e físicas ficam separadas.',
       status=('2 pedidos em risco · 1 disputa','yellow'),
