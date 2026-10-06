@@ -278,6 +278,72 @@ function repartir(Q,cfgs,pools){ const mot=[], motS=new Set(); const add=(m)=>{ 
   return {Q,alocado,saldo,pendente:pend,causa,hconj:pend?null:hc,decorrido:pend?null:decorrido,troca:trocaT,custo,custoOk,custoHa:(custoOk&&alocado>1e-12)?custo/alocado:null,
     diesel,dieselOk,hh,conflito,conflitoEst:conflito&&!cfF,deficit,nec,falta,motivos:mot,itens:it}; }
 // <<< REPARTIR
+// >>> CAPACIDADE (SAF etapa única "Dimensione operações e recursos" · ESPECIFICACAO §3.3) · funções puras, sem tela; espelho em
+// dados2.capacidade; teste capacidade_unit.py. Uma fonte para a célula da g_cap, o filtro, os atalhos, o veredito, a prévia e o espelho.
+// capacidade do grupo no mês = unidades × horas de uma unidade; horas de uma unidade = dias úteis × jornada × turnos × disponibilidade
+// (pessoas: × (1 − absenteísmo), turnos = 1). Demanda = Σ x.nh × rc[k] (necessário = atendido + saldo: inclui o que ainda não tem alocação,
+// PRD 53.2, "não truncar déficit"), desta safra e das outras safras abertas da mesma fazenda. Ocupação = demanda ÷ capacidade (capacidade 0
+// com demanda: não calculável). Necessárias = o maior entre teto(demanda ÷ horas de uma unidade) e a maior equipe que trabalha ao mesmo tempo.
+function capRec(r,meses,dias){ const pes=!!r.pes; const pc=(x)=>Math.min(100,Math.max(0,Number(x)||0))/100;
+  const un=Number(r.un)||0, J=Number(r.jornada)||0, T=pes?1:(Number(r.turnos)||0), DP=pes?1-pc(r.abs):pc(r.disp);
+  const porUn=meses.map(m=>(dias[m[0]]||0)*J*T*DP); return {id:r.id,nome:r.nome,pes,un,porUn,cap:porUn.map(p=>un*p)}; }
+// carga de cada configuração de uma ocorrência por grupo de recursos: necessário (nh) × unidades (rc); ha = só o atendido; sim = equipe
+// que trabalha ao mesmo tempo quando a configuração tem área necessária
+function cargaItens(i){ const o=[]; ((i.rp&&i.rp.itens)||[]).forEach((x,j)=>{ const rc=(i.cfs&&i.cfs[j]&&i.cfs[j].rec)||{};
+  Object.keys(rc).forEach(k=>{ const u=Number(rc[k])||0; if(u<=0) return; o.push({k,j,u,h:(Number(x.nh)||0)*u,ha:(Number(x.h)||0)*u,sim:(Number(x.nq)||0)>1e-12?u:0,semRec:!!x.semRec,nome:x.nome}); }); }); return o; }
+function cargaRec(i,k){ return cargaItens(i).filter(c=>c.k===k).reduce((a,c)=>a+c.h,0); }
+// etiqueta do calendário de uma ocorrência (uma só): antes do início, depois do fim ou fora do calendário; conta no custo, não na capacidade
+function classeOc(dt,mi,ini,fim){ if(ini&&dt<ini) return 'antes'; if(fim&&dt>fim) return 'depois'; if(mi<0) return 'fora'; return 'cal'; }
+// texto único da ocupação (célula, aria-label, filtro, atalhos e espelho): "<1 %" abaixo de 1 %; "—" sem demanda; null = não calculável
+function fmtOcup(o){ if(o===null||o===undefined) return 'não calculável'; if(o<=0) return '—'; if(o<1) return '<1 %'; return Math.round(o).toLocaleString('pt-BR')+' %'; }
+// atividades em uso de uma operação nesta safra (fonte única do "N atividades" da g_op e do alcance do "Todas")
+function atvEmUso(oc,op){ const s=new Set(); oc.forEach(i=>{ if(i.a&&i.a.op===op) s.add(i.a.nome); }); return s; }
+// capSaf(oc, outras, recursos, meses, dias): oc = ocorrências desta safra; outras = [{id, nome, oc}] das safras abertas da mesma fazenda
+function capSaf(oc,outras,recursos,meses,dias){ const M=meses.length; const Z=()=>new Array(M).fill(0); const G={};
+  recursos.forEach(r=>{ G[r.id]=Object.assign(capRec(r,meses,dias),{dThis:Z(),dThisAt:Z(),dOth:Z(),oth:{},sim:Z(),semH:Z(),pendSR:Z()}); });
+  const add=(i,own,sid)=>{ if(!(i.mi>=0)) return; const cs=cargaItens(i);
+    cs.forEach(c=>{ const g=G[c.k]; if(!g) return; if(own){ g.dThis[i.mi]+=c.h; g.dThisAt[i.mi]+=c.ha; if(c.semRec) g.pendSR[i.mi]++; } else { g.dOth[i.mi]+=c.h; (g.oth[sid]||(g.oth[sid]=Z()))[i.mi]+=c.h; }
+      g.sim[i.mi]=Math.max(g.sim[i.mi],c.sim); });
+    if(own&&i.rp&&i.rp.falta&&i.rp.falta.semHoras>1e-9){ const ks={}; cs.forEach(c=>{ ks[c.k]=1; }); Object.keys(ks).forEach(k=>{ if(G[k]) G[k].semH[i.mi]+=i.rp.falta.semHoras; }); } };
+  (oc||[]).forEach(i=>add(i,true,null)); (outras||[]).forEach(s=>(s.oc||[]).forEach(i=>add(i,false,s.id)));
+  Object.values(G).forEach(g=>{ g.cells=meses.map((m,mi)=>{ const d=g.dThis[mi]+g.dOth[mi], cap=g.cap[mi], pu=g.porUn[mi];
+      const nc=(h)=>h>1e-4?(pu>0?Math.max(Math.ceil(h/pu-1e-9),g.sim[mi]):-1):0;   // −1: sem horas de uma unidade no mês (guarda)
+      const nec=nc(d), necThis=nc(g.dThis[mi]); const falta=(n)=>n<0||n>g.un; const red=d>1e-4&&falta(nec);
+      return {mi,mes:m[1],d,dThis:g.dThis[mi],dOth:g.dOth[mi],cap,porUn:pu,ocup:d>1e-4?(cap>0?100*d/cap:null):0,nec,red,soma:red&&!falta(necThis),own:g.dThis[mi]>1e-4,ge:g.semH[mi]>1e-9,pendSR:g.pendSR[mi]}; });
+    const own=g.cells.filter(c=>c.own), calc=own.filter(c=>c.ocup!==null);
+    g.max=calc.length?calc.reduce((b,c)=>(!b||c.ocup>b.ocup+1e-12)?c:b,null):(own[0]||null);   // empate: o 1º
+    g.reds=own.filter(c=>c.red); g.necMax=g.reds.reduce((b,c)=>(!b||c.nec>b.nec||(b.nec>=0&&c.nec<0))?c:b,null);
+    g.horasSafra=g.dThis.reduce((a,b)=>a+b,0); g.horasSafraAt=g.dThisAt.reduce((a,b)=>a+b,0); });
+  return G; }
+// atividades com ocorrência no calendário (M) e as que têm configuração com área necessária e janela vazia (J): a janela é de cada atividade
+function capJanelas(oc){ const A={}; oc.forEach(i=>{ if(!(i.mi>=0)) return; const key=i.a.op+'|'+i.a.nome; const a=A[key]||(A[key]={sem:false});
+  ((i.rp&&i.rp.itens)||[]).forEach(x=>{ const H=(x.Hin===undefined||x.Hin===null)?Infinity:x.Hin; if((x.nq||0)>1e-12&&!isFinite(H)) a.sem=true; }); });   // sem janela = Infinity (null no JSON)
+  const ks=Object.keys(A); return {M:ks.length,J:ks.filter(k=>A[k].sem).length}; }
+function capNomes(l){ return l.length>1?l.slice(0,-1).join(', ')+' e '+l[l.length-1]:l.join(''); }
+function capH(n){ return Number(n).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1}); }
+// veredito (§3.1): o único lugar de "cabe", do que falta e do que ficou fora da conta. x = {semPlano:[{local,area}], aPlano, cls (contagens antes/
+// fora/depois/cal), ini (dd/mm/aaaa), outras {id: nome}, pend (ocorrências sem alocação), semHoras (ha), incompleto (texto do R3)}
+function capVeredito(G,oc,x){ const nfa0=(n)=>Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:2});
+  const fora=[]; if(x.semPlano.length) fora.push(capNomes(x.semPlano.map(c=>c.local))+' ('+nfa0(x.semPlano.reduce((a,c)=>a+(Number(c.area)||0),0))+' ha), sem plano');
+  if(x.cls.antes) fora.push(x.cls.antes+(x.cls.antes>1?' ocorrências':' ocorrência')+' antes do início da safra ('+x.ini+')');
+  if(x.cls.fora) fora.push(x.cls.fora+(x.cls.fora>1?' ocorrências':' ocorrência')+' fora do calendário');
+  if(x.cls.depois) fora.push(x.cls.depois+(x.cls.depois>1?' ocorrências':' ocorrência')+' depois do fim da safra');
+  const foraTxt=fora.length?' Fora da conta: '+fora.join('; ')+'.':'';
+  const jn=capJanelas(oc); const prazo=jn.J?' Prazo por talhão não verificado: '+jn.J+' de '+jn.M+(jn.M>1?' atividades':' atividade')+' sem janela.':'';
+  if(!x.aPlano) return {R:'R0',cor:'',txt:''};
+  if(!x.cls.cal) return {R:'R1',cor:'gray',txt:'Capacidade não calculada: '+(oc.length>1?'as '+oc.length+' ocorrências desta safra ficam':'a ocorrência desta safra fica')+' fora do calendário do protótipo ('+x.periodoCal+').'};
+  const aperto=(g)=>{ const c=g.necMax; return c.nec<0?Infinity:c.nec/Math.max(g.un,1e-9); };
+  const reds=Object.values(G).filter(g=>g.reds.length).sort((a,b)=>aperto(b)-aperto(a));
+  if(reds.length){ const tr=reds.map((g,ix)=>{ const c=g.necMax; const n=c.nec<0?'horas':c.nec;
+      const so=g.reds.every(q=>q.soma)?', somando '+Object.keys(g.oth).filter(o=>g.oth[o][c.mi]>1e-4).map(o=>'a '+(x.outras[o]||o)+' ('+capH(g.oth[o][c.mi])+' h)').join(' e '):'';
+      return (ix===0?g.nome+(/s$/.test(g.nome)||g.pes?' precisam de ':' precisa de '):g.nome+', ')+n+' em '+c.mes+' e você tem '+g.un+(g.reds.length>1?' ('+g.reds.length+' meses)':'')+so; });
+    const pend=x.pend?' Inclui '+x.pend+(x.pend>1?' ocorrências ainda sem alocação.':' ocorrência ainda sem alocação.'):'';
+    const sh=x.semHoras>1e-9?' '+nfa0(x.semHoras)+' ha sem horas calculáveis ficam fora: a falta pode ser maior.':'';
+    return {R:'R2',cor:'red',txt:'Falta recurso: '+tr.join('; ')+'.'+pend+sh+foraTxt}; }
+  if(x.incompleto) return {R:'R3',cor:'yellow',txt:'Cálculo incompleto: '+x.incompleto+'.'+foraTxt};
+  if(fora.length) return {R:'R4',cor:'yellow',txt:'Na estimativa mensal, cabe nos '+nfa0(x.aPlano)+' ha com plano.'+foraTxt+prazo};
+  return {R:'R5',cor:'green',txt:'Na estimativa mensal, cabe com o que você tem.'+prazo}; }
+// <<< CAPACIDADE
 // configurações de uma atividade nesta safra (uma ou várias); sem nenhuma → pendência com motivo, nunca o conjunto de outra atividade
 function cfgLeaves(rows){ const o=[]; const w=(l)=>(l||[]).forEach(r=>{ if(r.livre) return; if(r.kids&&r.kids.length) w(r.kids); else if(!r.grp) o.push(r); }); w(rows); return o; }
 function cfgsOf(self,saf,op,atv){ return cfgLeaves(g2rows(self,GR(rendGid(saf)))).filter(k=>k.v.op===op&&k.v.atv===atv); }

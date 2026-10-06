@@ -663,21 +663,148 @@ def repartir(Q,cfgs,pools=None):
     return dict(Q=Q,alocado=alocado,saldo=saldo,pendente=pend,causa=causa,hconj=None if pend else hc,decorrido=None if pend else decorrido,troca=troca_t,custo=custo,custoOk=custo_ok,
                 custoHa=(custo/alocado) if (custo_ok and alocado>1e-12) else None,diesel=diesel,dieselOk=diesel_ok,hh=hh,conflito=conflito,conflitoEst=conflito and not cf_f,deficit=deficit,nec=nec,falta=falta,motivos=mot,itens=it)
 # <<< REPARTIR
-def plano_op(safra):
-    """Espelho dos totais da etapa 4 (Confira o plano operacional) com os dados iniciais: área, horas-conjunto, custo de operação,
-    diesel, horas-homem, área sem conjunto e ocorrências pendentes; as configurações vêm de cfgs_rend e os grupos de recursos de RECURSOS.
-    REND-RETORNO-1818: também as horas-conjunto necessárias (nec_h = hconj + falta_h) e a área sem horas calculáveis (sem_h) das etapas 4 e 5."""
-    pools={r['id']:dict(un=r['un'],nome=r['nome']) for r in RECURSOS}
-    t=dict(area=0,hconj=0,cop=0,diesel=0,hh=0,saldo=0,pend=0,conflito=0,ocorr=0,multi=0,nec_h=0,falta_h=0,sem_h=0)
-    for c in CULTIVOS[safra]:
-        pl=PLANO.get(c['plano']) if c['plano'] else None
+# ---- SAF etapa única "Dimensione operações e recursos" (ESPECIFICACAO §3.3, §4.3, §7): espelhos de ocorr, capSaf e resumoCultura ----
+def _cfgs_safra(safra,op,atv,cfg_override,atvs_em_uso):
+    """Configurações de uma atividade com a sobrescrita do teste aplicada pelas regras do rendAfter: rendimento pelos parâmetros
+    (rend_efetivo); prestador sem implemento, pessoas e recursos da fazenda; rec.oper = pessoas. Chave (op, atv, id) ou (op, '*', id) =
+    todas as atividades em uso da operação (a dividida entre configurações não muda)."""
+    cfs=cfgs_rend(safra,op,atv)
+    if not cfg_override: return cfs
+    out=[]
+    for c in cfs:
+        o=(cfg_override.get((op,atv,c['id'])) or (cfg_override.get((op,'*',c['id'])) if (len(cfs)==1 and atv in atvs_em_uso) else None))
+        if o:
+            c=dict(c); c.update(o); c['rec']=dict(c.get('rec') or {})
+            if c.get('larg') and c.get('modo','Largura × velocidade')!='Informado': c['rend']=rend_calc(c['larg'],c['vel'],c['efic'])
+            if c.get('conj_id')=='prestador': c.update(impl=0,pess=0,pess_rs=0); c['rec']={}
+            elif c.get('pess',0)>0: c['rec']['oper']=c['pess']
+            else: c['rec'].pop('oper',None)
+        out.append(c)
+    return out
+def _mes_idx(dt):
+    k=dt.isoformat()[:7]
+    return next((i for i,(m,_) in enumerate(MESES) if m==k),-1)
+def _pools(recursos): return {r['id']:dict(un=r['un'],nome=r['nome']) for r in (recursos or RECURSOS)}
+def ocorr_op(safra,planos=None,cfg_override=None,recursos=None,ajustes=None):
+    """Ocorrências (cultivo × atividade) da safra como o ocorr do safra.js: data, mês, área, repartir com os grupos de recursos da fazenda,
+    custo de operação e insumos (dose × área, com os ajustes '-' e '+'). planos: {cultivo: plano} sobrescreve o plano do cultivo."""
+    pools=_pools(recursos); aj=AJUSTES if ajustes is None else ajustes; out=[]
+    cults=[c for c in CULTIVOS.get(safra,[])]
+    usados={}
+    for c in cults:
+        pid=(planos or {}).get(c['id'],c['plano']); pl=PLANO.get(pid) if pid else None
+        if pl and pl['cultura']==c['cultura']:
+            for a in pl['atividades']: usados.setdefault(a['op'],set()).add(a['nome'])
+    for c in cults:
+        pid=(planos or {}).get(c['id'],c['plano']); pl=PLANO.get(pid) if pid else None
         if not pl or pl['cultura']!=c['cultura']: continue
+        cc=dict(c,plano=pid)
         for a in pl['atividades']:
-            cfs=cfgs_rend(safra,a['op'],a['nome']); rp=repartir(c['area'],[cfg_in(x) for x in cfs],pools)
-            t['ocorr']+=1; t['area']+=c['area']; t['hconj']+=rp['hconj'] or 0; t['cop']+=rp['custo']; t['diesel']+=rp['diesel']; t['hh']+=rp['hh']; t['saldo']+=rp['saldo']
-            t['pend']+=1 if rp['pendente'] else 0; t['conflito']+=1 if rp['conflito'] else 0; t['multi']+=1 if len(cfs)>1 else 0
-            t['nec_h']+=rp['nec']['hconj'] or 0; t['falta_h']+=rp['falta']['hconj'] or 0; t['sem_h']+=rp['falta']['semHoras']
+            dt=data_atividade(cc,a); cfs=_cfgs_safra(safra,a['op'],a['nome'],cfg_override,usados.get(a['op'],set()))
+            rp=repartir(c['area'],[cfg_in(x) for x in cfs],pools); A=aj.get(c['id'],{})
+            cins=0.0
+            for i,pr in enumerate(a['prods']):
+                k=f"{a['id']}|{i}"
+                if A.get(k)=='-': continue
+                dose=A[k] if (k in A and A[k]!='-') else pr['dose']; cins+=float(dose)*c['area']*pr['preco']
+            for k,x in A.items():
+                if k.startswith(f"{a['id']}|+") and isinstance(x,dict): cins+=float(x['dose'])*c['area']*x['preco']
+            out.append(dict(c=c,a=a,dt=dt,mi=_mes_idx(dt),area=c['area'],rp=rp,cfs=[dict(rec=x.get('rec') or {}) for x in cfs],cop=rp['custo'],cins=cins,
+                            horas=rp['hconj'] or 0,pend=rp['pendente'],saldo=rp['saldo'],hh=rp['hh'],diesel=rp['diesel']))
+    return out
+def plano_op(safra,planos=None,cfg_override=None,recursos=None):
+    """Espelho dos totais do plano operacional (etapa 3 "Dimensione operações e recursos"): área, horas-conjunto, custo de operação,
+    diesel, horas-homem, área sem conjunto e ocorrências pendentes; as configurações vêm de cfgs_rend (com a sobrescrita do teste) e os
+    grupos de recursos de RECURSOS. REND-RETORNO-1818: também as horas-conjunto necessárias (nec_h = hconj + falta_h) e a área sem horas
+    calculáveis (sem_h)."""
+    t=dict(area=0,hconj=0,cop=0,diesel=0,hh=0,saldo=0,pend=0,conflito=0,ocorr=0,multi=0,nec_h=0,falta_h=0,sem_h=0)
+    for o in ocorr_op(safra,planos,cfg_override,recursos):
+        rp=o['rp']
+        t['ocorr']+=1; t['area']+=o['area']; t['hconj']+=rp['hconj'] or 0; t['cop']+=rp['custo']; t['diesel']+=rp['diesel']; t['hh']+=rp['hh']; t['saldo']+=rp['saldo']
+        t['pend']+=1 if rp['pendente'] else 0; t['conflito']+=1 if rp['conflito'] else 0; t['multi']+=1 if len(o['cfs'])>1 else 0
+        t['nec_h']+=rp['nec']['hconj'] or 0; t['falta_h']+=rp['falta']['hconj'] or 0; t['sem_h']+=rp['falta']['semHoras']
     return t
+def carga_itens(o):
+    out=[]
+    for j,x in enumerate(o['rp']['itens']):
+        rc=(o['cfs'][j]['rec'] if j<len(o['cfs']) else {}) or {}
+        for k,u in rc.items():
+            u=float(u or 0)
+            if u<=0: continue
+            out.append(dict(k=k,j=j,u=u,h=float(x.get('nh') or 0)*u,ha=float(x.get('h') or 0)*u,sim=u if float(x.get('nq') or 0)>1e-12 else 0,semRec=bool(x.get('semRec'))))
+    return out
+def cap_rec(r):
+    pes=r['id']=='oper' or 'abs' in r
+    pc=lambda x: min(100,max(0,float(x or 0)))/100
+    un=float(r['un'] or 0); J=float(r['jornada'] or 0); T=1 if pes else float(r.get('turnos') or 0); DP=(1-pc(r.get('abs'))) if pes else pc(r.get('disp'))
+    por=[DIAS_UTEIS.get(m,0)*J*T*DP for m,_ in MESES]
+    return dict(id=r['id'],nome=r['nome'],pes=pes,un=un,porUn=por,cap=[un*p for p in por])
+def outras_safras(safra):
+    me=next((s for s in SAFRAS if s['id']==safra),None)
+    if not me or me['ro']: return []
+    return [s['id'] for s in SAFRAS if s['id']!=safra and not s['ro'] and s['fazenda']==me['fazenda']]
+def capacidade(safra,recursos=None,planos=None,cfg_override=None):
+    """Espelho do capSaf (safra.js · bloco CAPACIDADE): por grupo de recursos e mês, demanda desta safra e das outras safras abertas da mesma
+    fazenda (x.nh × rc, inclui o necessário sem alocação), capacidade, ocupação (None = não calculável), necessárias e falta."""
+    recs=recursos or RECURSOS; M=len(MESES); G={}
+    for r in recs: g=cap_rec(r); g.update(dThis=[0.0]*M,dThisAt=[0.0]*M,dOth=[0.0]*M,oth={},sim=[0]*M,semH=[0.0]*M,pendSR=[0]*M); G[r['id']]=g
+    oc=ocorr_op(safra,planos,cfg_override,recs)
+    def add(o,own,sid):
+        if o['mi']<0: return
+        cs=carga_itens(o)
+        for c in cs:
+            g=G.get(c['k'])
+            if not g: continue
+            if own:
+                g['dThis'][o['mi']]+=c['h']; g['dThisAt'][o['mi']]+=c['ha']
+                if c['semRec']: g['pendSR'][o['mi']]+=1
+            else:
+                g['dOth'][o['mi']]+=c['h']; g['oth'].setdefault(sid,[0.0]*M)[o['mi']]+=c['h']
+            g['sim'][o['mi']]=max(g['sim'][o['mi']],c['sim'])
+        if own and o['rp']['falta']['semHoras']>1e-9:
+            for k in {c['k'] for c in cs}:
+                if k in G: G[k]['semH'][o['mi']]+=o['rp']['falta']['semHoras']
+    for o in oc: add(o,True,None)
+    for sid in outras_safras(safra):
+        for o in ocorr_op(sid,None,None,recs): add(o,False,sid)
+    for g in G.values():
+        cells=[]
+        for mi,(m,lab) in enumerate(MESES):
+            d=g['dThis'][mi]+g['dOth'][mi]; cap=g['cap'][mi]; pu=g['porUn'][mi]
+            nc=lambda h: (max(_math.ceil(h/pu-1e-9),g['sim'][mi]) if pu>0 else -1) if h>1e-4 else 0
+            nec=nc(d); nt=nc(g['dThis'][mi]); falta=lambda n: n<0 or n>g['un']; red=d>1e-4 and falta(nec)
+            cells.append(dict(mi=mi,mes=lab,d=d,dThis=g['dThis'][mi],dOth=g['dOth'][mi],cap=cap,porUn=pu,ocup=(None if cap<=0 else 100*d/cap) if d>1e-4 else 0,
+                              nec=nec,red=red,soma=red and not falta(nt),own=g['dThis'][mi]>1e-4,ge=g['semH'][mi]>1e-9,pendSR=g['pendSR'][mi]))
+        g['cells']=cells; own=[c for c in cells if c['own']]; calc=[c for c in own if c['ocup'] is not None]
+        mx=None
+        for c in calc:
+            if mx is None or c['ocup']>mx['ocup']+1e-12: mx=c
+        g['max']=mx if calc else (own[0] if own else None)
+        g['reds']=[c for c in own if c['red']]; nm=None
+        for c in g['reds']:
+            if nm is None or c['nec']>nm['nec'] or (nm['nec']>=0 and c['nec']<0): nm=c
+        g['necMax']=nm; g['horasSafra']=sum(g['dThis']); g['horasSafraAt']=sum(g['dThisAt'])
+    return G
+def fmt_ocup(o):
+    if o is None: return 'não calculável'
+    if o<=0: return '—'
+    if o<1: return '<1 %'
+    return '{:,} %'.format(int(_math.floor(o+0.5))).replace(',','.')
+def resumo_cultura(safra,ajustes=None,planos_extra=None,cfg_override=None):
+    """Custo por cultura (§4.3): área com plano (cada cultivo uma vez), custo de operação, insumos do plano (dose × área × preço, com os
+    ajustes '-' e '+'), R$/ha por ha físico com plano; parcial com ocorrência pendente ou tarifa desconhecida; parcela antes do início."""
+    me=next((s for s in SAFRAS if s['id']==safra),{}); ini=me.get('ini','')
+    by={}; vistos=set()
+    for o in ocorr_op(safra,planos_extra,cfg_override,None,ajustes):
+        cu=o['c']['cultura']; b=by.setdefault(cu,dict(cult=cu,area=0.0,cop=0.0,cins=0.0,npend=0,ntar=0,copAntes=0.0,cinsAntes=0.0))
+        if o['c']['id'] not in vistos: vistos.add(o['c']['id']); b['area']+=o['area']
+        b['cop']+=o['cop'] or 0; b['cins']+=o['cins']
+        if o['pend']: b['npend']+=1
+        elif not o['rp']['custoOk']: b['ntar']+=1
+        if ini and o['dt'].isoformat()<ini: b['copAntes']+=o['cop'] or 0; b['cinsAntes']+=o['cins']
+    for b in by.values():
+        b['tot']=b['cop']+b['cins']; b['rha']=None if (b['npend'] or b['ntar']) else (b['tot']/b['area'] if b['area'] else None)
+    return by
 def js_data():
     return dict(meses=MESES,dias=DIAS_UTEIS,safras=SAFRAS,tipos=TIPOS,planos=PLANOS,cultivos=CULTIVOS,ajustes=AJUSTES,conj=CONJ,recursos=RECURSOS,estoque=ESTOQUE,receb=RECEB,
                 fisico={k:fisico_apto(k) for k in ESTOQUE},reservas=RESERVAS,recebDt=RECEB_DT,
