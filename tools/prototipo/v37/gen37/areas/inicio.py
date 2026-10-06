@@ -332,45 +332,6 @@ def _fechar(P):
     P['tot']=round(P['ins']+P['op'],2); P['ins']=round(P['ins'],2); P['op']=round(P['op'],2); P['pend']=list(dict.fromkeys(P['pend'])); return P
 PREV=_prev()
 
-# ---- insumos: necessidade do talhão (plano da safra; sem plano, O.S. abertas) × situação da fazenda (estoque compartilhado + pedidos) ----
-def _nec():
-    nec={t:[] for t in TIDS}
-    for c in D2.CULTIVOS['S2627']:
-        t=c['local'].split('-')[0]
-        if not c['plano']: continue
-        nec[t].extend(_nec_cult(c))
-    for oid,tal,*_ in _ORD_MAPA:
-        if oid not in ORD_REG or len(tal)!=1 or tal[0] not in nec or any(c['plano'] and c['local'].split('-')[0]==tal[0] for c in D2.CULTIVOS['S2627']): continue   # Lagoa Grande: pelo plano
-        o=ORD_REG[oid]
-        if o['etapa'] in ('Encerradas','Em conferência'): continue
-        f=((o.get('saldo') or 0)/(o.get('area') or 1)) if o['etapa']=='Em execução' else 1
-        for x in o['ins']: nec[tal[0]].append(dict(p=x['p'],q=round(x['tot']*f,2),un=x['un'],dt=HOJE.isoformat(),orig=oid+' · '+o['atv']['nome']))
-    return nec
-def _nec_cult(c):   # insumos das atividades do plano ainda por vir (atividade já passada não gera necessidade nova)
-    out=[]; pl=next(p for p in D2.PLANOS if p['id']==c['plano'])
-    for a in pl['atividades']:
-        d=_data_atv(c,a)
-        if d is None or d<HOJE: continue
-        for x in a['prods']: out.append(dict(p=_nome(x['prod'],c),q=round(x['dose']*c['area'],2),un=x['un'],dt=d.isoformat(),orig=c['local']+' · '+a['nome']))
-    return out
-NEC=_nec()
-def _fazst():
-    lim=(HOJE+_dt.timedelta(days=30)).isoformat(); out={}
-    for per in ('Próximos 30 dias','Safra toda'):
-        tot={}
-        for t,its in NEC.items():
-            for x in its:
-                if per=='Safra toda' or x['dt']<=lim: tot[x['p']]=tot.get(x['p'],0)+x['q']
-        st={}
-        for p,q in tot.items():
-            est=D2.ESTOQUE.get(p,0); rec=D2.RECEB.get(p,0); un=next(x['un'] for its in NEC.values() for x in its if x['p']==p)
-            ped=next((pc for pc in D2.PEDIDOS if pc['item']==p and pc.get('a_entregar',0)>0),None)
-            if est>=q-1e-9: st[p]=['Estoque cobre','ok',f'fazenda precisa de {nfb(q)} {un} no período · estoque {nfb(est)} {un}']
-            elif est+rec>=q-1e-9: st[p]=['Pedido a receber'+(f" · {ped['id']} · {ped['previsao'][:5]}" if ped else ''),'yellow',f'fazenda precisa de {nfb(q)} {un} · estoque {nfb(est)} · a receber {nfb(rec)} {un}']
-            else: st[p]=['Falta '+nfb(q-est-rec)+' '+un,'red',f'fazenda precisa de {nfb(q)} {un} · estoque {nfb(est)} · a receber {nfb(rec)} {un}']
-        out[per]=st
-    return out
-FAZST=_fazst()
 
 # ---- satélite: cinco índices (Sentinel-2 L2A, 10 m) e grade de pixels dentro de cada polígono com cultura ----
 IDXN=['NDVI','NDRE','EVI','SAVI','NDMI']
@@ -462,8 +423,6 @@ for _p in LG['pivos']:
     _c=_LGC.get(_p['id'])
     LAV[_p['id']]=_lav_lg(_p,_c)
     PREV[_p['id']]=_fechar(dict(fonte='',tot=0,ins=0,op=0,base=0,orig='',pend=[],lin=[])) if not _c else _fechar(_somar_plano(dict(fonte='',tot=0,ins=0,op=0,base=0,orig='',pend=[],lin=[]),[_c],'área do pivô (KML) · Safra Mamão 2026/27'))
-    NEC[_p['id']]=_nec_cult(_c) if _c else []
-FAZST=_fazst()   # situação da fazenda com as necessidades da Lagoa Grande
 _RGB=json.load(open(_os.path.join(_LGD,'lagoa_rgb.json'),encoding='utf-8'))
 _RGBK={'25/09':'lagoa_rgb_20260925.png','10/09':'lagoa_rgb_20260910.png'}
 LG_DADOS=dict(rot=_LGROT,ids=LG_IDS,rgb=dict(cantos=_RGB['lagoa_rgb_20260925.png']['cantos'],png=_RGBK),pivos=LG['pivos'],cantos=LG['cantos'],geo=LG_GEO,H=LG['H'],W=LG['W'],
@@ -478,6 +437,19 @@ _SEMPLANO={t:(not any(c['plano'] for c in D2.CULTIVOS['S2627'] if c['local'].spl
 _PLANT=sum(x for x in (95,80,42,38,30)); _PRE=312+298+174
 _LG_ROT={p['rot'].replace('P','Pivô ',1):p['id'] for p in LG['pivos']}   # 'Pivô 1' (local do cultivo) → PV01
 _SEMPLANO.update({t:(not any(c['plano'] for c in D2.CULTIVOS[DLS.SAFRA['id']] if _LG_ROT.get(c['local'])==t)) for t in LG_IDS})
+# ---- insumos (CTL-4 · DEM-05): o Mapa calcula com a mesma conta do Planejar safra e da Compra (demFazenda, cal01.js) e com as O.S. do cenário
+# vivo (cenOsDem); aqui só vão as entradas por fazenda: ocorrências do plano das safras abertas, reservas, recebimentos, físico apto da fazenda e a
+# área dos cultivos por talhão (rateio da O.S. de vários talhões). Antes havia uma conta própria (estoque das duas fazendas, reserva contada duas vezes).
+def _dem_mapa():
+    tid={**{t:t for t in TIDS},**_LG_ROT}; faz={}
+    for f,saf in (('Santa Rita','S2627'),('Lagoa Grande',DLS.SAFRA['id'])):
+        x=D2.dem_entradas(saf); aT={}; vistos=set()
+        for o in x['occ']:
+            cid=o['k'].split('|')[0]
+            if o['saf']!=saf or cid in vistos: continue
+            vistos.add(cid); k=tid.get(o['local'],o['local'].split('-')[0]); aT[k]=aT.get(k,0)+o['area']
+        x['areaT']=aT; faz[f]=x
+    return dict(faz=faz,osb=D2.os_base(),tid=tid)
 SEMCULT.update({t:'preparo de área · sem lavoura' for t in LG_IDS if LAV[t]['c']=='gray'})
 _GEO_TXT=_geo(); _GEO_TXT.update({p['id']:f"círculo pelo centro do KML e pela área declarada · raio {nfb(p['r_m'])} m" for p in LG['pivos']})
 import dados_cad as DC
@@ -487,7 +459,7 @@ def _cad0():
     return dict(faz=[pk(r) for r in CF._faz_rows()],tal=[pk(r) for r in CF._tal_rows()])
 MDATA=dict(cad0=_cad0(),hoje_iso=HOJE.isoformat(),motivos=DC.MOTIVOS_DIF,tal={t:dict(ha=TAL[t]['ha'],cult=TAL[t]['cult'],per=PERIM[t]) for t in TIDS+LG_IDS},lg=LG_DADOS,tids=TIDS,lays=LAYS,
            filt={k:[dict(k=a,l=b,o=c) for a,b,c in v] for k,v in FILT.items()},ord=ORD,integ=INTEG,sat=SAT,semcult=SEMCULT,
-           idxn=IDXN,idx=IDX,satpal=SATPAL,clsn=CLSN,px=PX,cs=CS,lav=LAV,prev=PREV,preco=PRECO,gen=_GEN,cop=COP,nec=NEC,fazst=FAZST,
+           idxn=IDXN,idx=IDX,satpal=SATPAL,clsn=CLSN,px=PX,cs=CS,lav=LAV,prev=PREV,preco=PRECO,gen=_GEN,cop=COP,dem=_dem_mapa(),
            lim30=(HOJE+_dt.timedelta(days=30)).isoformat(),hoje=_br(HOJE),semplano=_SEMPLANO,
            lavstrip=[['Área com lavoura',f'{_PLANT} ha'],['Pré-plantio',f'{nfb(_PRE)} ha'],['Colhido','96 ha'],['Cultivos na safra 2026/27',str(len(D2.CULTIVOS["S2627"]))]],
            geo=_GEO_TXT,lcop=LCOR_OP,nome=NOME_LAY)
@@ -692,7 +664,13 @@ function satEstado(t,f){ const v=satVal(f.dt,t,f.idx); const nt=(M.sat[f.dt].nt|
   if(ms.length||(dv!==null&&dv<-10)) return ['Atenção','yellow'];
   return ['Normal','green']; }
 // ---- insumos: necessidade do talhão × situação da fazenda (estoque compartilhado não é dividido por talhão) ----
-function necAgg(t,per){ const m={}; (M.nec[t]||[]).filter(x=>per==='Safra toda'||x.dt<=M.lim30).forEach(x=>{ const a=m[x.p]||(m[x.p]={p:x.p,q:0,un:x.un,dt:x.dt,orig:[]}); a.q+=x.q; if(x.dt<a.dt) a.dt=x.dt; a.orig.push(x.orig); });
+// CTL-4 (DEM-05): a mesma conta do Planejar safra e da Compra (demFazenda, cal01.js) com as O.S. do cenário vivo (cenOsDem): liberar, apontar,
+// cancelar ou emitir uma O.S. muda a necessidade e a situação; recalcula só quando as ordens mudam
+function insFaz(){ const D=M.dem; const F=D.faz[FAZ]; if(!F) return {nec:{},st:{}}; const osd=cenOsDem(cenGet(),D.osb); const k=FAZ+'|'+JSON.stringify(osd);
+  if(insFaz._k===k) return insFaz._v; const m=demFazenda(Object.assign({},F,{osd})); const tid=(t)=>D.tid[t]||demTal(t);
+  const v={nec:demPorLocal(m,tid,F.areaT,F.hoje),st:{'Safra toda':demSituacao(m,null,F.hoje,F.viavel),'Próximos 30 dias':demSituacao(m,M.lim30,F.hoje,F.viavel)}};
+  insFaz._k=k; insFaz._v=v; return v; }
+function necAgg(t,per){ const m={}; (insFaz().nec[t]||[]).filter(x=>per==='Safra toda'||x.dt<=M.lim30).forEach(x=>{ const a=m[x.p]||(m[x.p]={p:x.p,q:0,un:x.un,dt:x.dt,orig:[]}); a.q+=x.q; if(x.dt<a.dt) a.dt=x.dt; a.orig.push(x.orig); });
   return Object.values(m).sort((a,b)=>a.dt<b.dt?-1:(a.dt>b.dt?1:0)); }
 function brIso(s){ if(!s) return ''; const a=s.split('-'); return a[2]+'/'+a[1]; }
 // ---- custos: previsto (plano ou O.S.) × realizado provisório (apontamentos aceitos) × conferido; preço ausente não vira zero ----
@@ -732,7 +710,7 @@ function cls(l,f,t){
     if(f.ver==='Balanço hídrico'){ if(x.d===null) return {c:'gray',l:x.l}; if(x.est) return {c:'cloud',l:'≈'+nfx(x.d,1)+' mm · estimado'};
       return {c:x.d<5?'ok':(x.d<10?'yellow':(x.d<15?'orange':'red')),l:'déficit '+nfx(x.d,1)+' mm'}; }
     return {c:x.c,l:x.l}; }
-  if(l==='Insumos'){ const its=necAgg(t,f.per); const st=M.fazst[f.per]||{};
+  if(l==='Insumos'){ const its=necAgg(t,f.per); const st=insFaz().st[f.per]||{};
     if(!its.length) return M.semplano[t]?{c:'gray',l:'sem plano na safra'}:{c:'none',l:'sem necessidade'};
     const c=worstC(its.map(x=>(st[x.p]||['','none'])[1])); const fal=its.filter(x=>(st[x.p]||[])[1]==='red');
     return {c,l:fal.length?('falta '+fal[0].p+(fal.length>1?' +'+(fal.length-1):'')):(c==='yellow'?'aguardando pedido':'estoque cobre')}; }
@@ -782,7 +760,7 @@ function strip(self,l,f){ const N=(k,val)=>({k,val}); const tids=TIDS(); const o
     if(f.ver==='Balanço hídrico'){ const a=area(xs); const dm=a?xs.reduce((q,t)=>q+M.irr[t].d*M.tal[t].ha,0)/a:0; const mx=xs.slice().sort((p,q)=>M.irr[q].d-M.irr[p].d)[0];
       return [N('Área com balanço',nfx(a)+' ha'),N('Déficit médio',nfx(dm,1)+' mm'),N('Maior déficit',mx?(rotT(mx)+' · '+nfx(M.irr[mx].d,1)+' mm'):'—'),N('Estimados (sem sonda)',nest)]; }
     return [N('Irrigando ou programadas',n('blue')+n('lime')),N('Pendentes',n('yellow')),N('Impedidas',n('red')),N('Estimados (≈)',nest)]; }
-  if(l==='Insumos'){ const st=M.fazst[f.per]||{}; const vs=Object.values(st); return [N('Produtos no período',vs.length),N('Faltam',vs.filter(x=>x[1]==='red').length),N('Aguardando pedido',vs.filter(x=>x[1]==='yellow').length),N('Estoque cobre',vs.filter(x=>x[1]==='ok').length)]; }
+  if(l==='Insumos'){ const st=insFaz().st[f.per]||{}; const vs=Object.values(st); return [N('Produtos no período',vs.length),N('Faltam',vs.filter(x=>x[1]==='red').length),N('Aguardando pedido',vs.filter(x=>x[1]==='yellow').length),N('Estoque cobre',vs.filter(x=>x[1]==='ok').length)]; }
   if(l==='Custos'){ let p=0,r=0,c=0,sh={}; tids.forEach(t=>{ p+=M.prev[t].tot; const R=cusReal(t); r+=R.rs; c+=R.rsConf; R.shared.forEach(s=>{ sh[s.o.id]=s.c; }); });
     Object.values(sh).forEach(x=>{ r+=x.rs; c+=x.rsConf; });
     return [N('Previsto',mil(p)),N('Realizado provisório',mil(r)),N('Conferido',mil(c)),N('Execução',p?nfx(r/p*100,1)+' %':'—')]; }
@@ -893,7 +871,7 @@ function panelTal(self,l,f,t){ const T=M.tal[t]; const c=cls(l,f,t); const lv=M.
       note=nt>0?'':''; }
     P.secs.push(SEC(self,l,'sat','Satélite',sum,{kv,items,note,lk:'AG-06.dc.html',lkt:'Ver histórico do talhão'})); }
   // insumos
-  { const fi=flt(self,'Insumos'); const its=necAgg(t,fi.per); const st=M.fazst[fi.per]||{};
+  { const fi=flt(self,'Insumos'); const its=necAgg(t,fi.per); const st=insFaz().st[fi.per]||{};
     const items=its.map(x=>{ const s=st[x.p]||['—','gray','']; return {t:x.p+' · '+nfx(x.q,x.q%1?1:0)+' '+x.un,sub:'a partir de '+brIso(x.dt)+' · '+x.orig[0]+(x.orig.length>1?' +'+(x.orig.length-1):'')+' · '+s[2],ch:[CH(s[0],s[1]==='ok'?'green':s[1])],
       acts:s[1]==='red'?[A('Comprar',{h:'CMP.dc.html',ic:'cart',tt:'Abrir Compra de insumos'})]:[]}; });
     const reqs=[]; osMapa(t).forEach(o=>{ if(!o.r||!o.r.itens||!o.r.itens.length||['Encerradas','Canceladas'].indexOf(o.etapa)>=0) return;
@@ -1304,7 +1282,7 @@ def build_in04(HCARD=742):
     HEIGHTS37[fname]=900
     osd=dict(ords=_ordens_os())   # as mesmas ordens da tela O.S. (o Mapa usa o núcleo dela: próximo passo, impedimentos e comandos)
     import dados_mip
-    EXTRAJS[0]=(pref+DI.js_prefixo()+dados_mip.js_prefixo()+JS_COMUM+'const OSD = '+json.dumps(osd,ensure_ascii=False).replace('</','<\\/')+';\n'+JS_NUCLEO
+    EXTRAJS[0]=(pref+DI.js_prefixo()+dados_mip.js_prefixo()+JS_COMUM+open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'..','cal01.js'),encoding='utf-8').read()+'\n'+'const OSD = '+json.dumps(osd,ensure_ascii=False).replace('</','<\\/')+';\n'+JS_NUCLEO
                 +'const M = '+json.dumps(MDATA,ensure_ascii=False).replace('</','<\\/')+';\n'+MAP_JS
                 +open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'..','talgeo.js'),encoding='utf-8').read()+'\n'
                 +open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'..','talmapa.js'),encoding='utf-8').read()+r'''

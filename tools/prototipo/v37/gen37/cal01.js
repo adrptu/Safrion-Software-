@@ -114,6 +114,25 @@ function demFazenda(x){ const m={}; const ord=(s)=>{ const i=(x.ordem||{})[s]; r
     d.liq=c.liq; d.falta=c.falta; d.antes=c.antes; d.tarde=c.tarde; d.valor=d.liq*d.preco; d.bruta=c.bruta; d.real=c.real; d.rup=c.rupRec; d.cob=c.cob;
     d.uso=d.evs.filter(e=>e.tipo==='dem'&&e.own&&e.dt&&e.dt>=(x.hoje||'')).map(e=>e.dt).sort()[0]||''; });   // 1º uso desta safra de hoje em diante
   return m; }
+// DEM-05 · Mapa › Insumos: situação de cada insumo da fazenda no período (eventos até lim; sem lim, a safra toda) pela mesma projeção:
+// Falta (necessidade líquida) · Pedido a receber (sem os recebimentos faltaria) · Estoque cobre. Entra o insumo com uso desta safra de hoje em
+// diante no período. Devolve {insumo: [rótulo, cor ('red'|'yellow'|'ok'), detalhe]}.
+function demSituacao(m, lim, hoje, viavel){ const st={}; const dm=(s)=>s?s.slice(8,10)+'/'+s.slice(5,7):''; const d4=(s)=>s?dm(s)+'/'+s.slice(0,4):'';
+  Object.values(m||{}).forEach(d=>{ const evs=lim?d.evs.filter(e=>e.dt<=lim):d.evs; const own=evs.filter(e=>e.tipo==='dem'&&e.own&&e.dt>=hoje); if(!own.length) return;
+    const r=cal01(d.est,evs,0,{hoje,viavel}), r0=cal01(d.est,evs.filter(e=>e.tipo!=='rec'),0,{hoje,viavel}); const u=' '+d.un;
+    const rc=evs.filter(e=>e.tipo==='rec').sort((a,b)=>a.dt<b.dt?-1:(a.dt>b.dt?1:0))[0]; const ar=evs.filter(e=>e.tipo==='rec').reduce((a,e)=>a+e.q,0);
+    const base='precisa de '+calNf(own.reduce((a,e)=>a+e.q,0))+u+' · estoque apto '+calNf(d.est)+u;
+    if(r.liq>1e-9) st[d.nome]=['Falta '+calNf(r.liq)+u,'red',base+' · falta a partir de '+d4(r.falta)+' · Suprimentos compra na Compra de insumos'];
+    else if(r0.liq>1e-9||r0.rupRec>1e-9) st[d.nome]=['Pedido a receber'+(rc?(rc.ref?' · '+rc.ref:'')+' · '+dm(rc.dt):''),'yellow',base+' · a receber '+calNf(ar)+u];
+    else st[d.nome]=['Estoque cobre','ok',base]; });
+  return st; }
+// DEM-05 · necessidade por talhão no Mapa: os eventos desta safra de hoje em diante; a O.S. de vários talhões é rateada pela área dos cultivos
+// da safra em cada talhão (areaT[talhão]), e a soma dos talhões fecha com a fazenda. tid: local → talhão do mapa.
+function demPorLocal(m, tid, areaT, hoje){ const out={};
+  Object.values(m||{}).forEach(d=>d.evs.forEach(e=>{ if(e.tipo!=='dem'||!e.own||!(e.dt>=hoje)) return; const ls=e.loc||[]; if(!ls.length) return;
+    const ar=ls.map(t=>Number((areaT||{})[tid(t)])||1); const s=ar.reduce((a,b)=>a+b,0);
+    ls.forEach((t,i)=>{ const k=tid(t); (out[k]||(out[k]=[])).push({p:d.nome,q:e.q*ar[i]/s,un:d.un,dt:e.dt,orig:e.t}); }); }));
+  return out; }
 // DEM-08 · Compra, etapa 4: escolha padrão = a de menor custo que chega antes da falta; sem nenhuma a tempo, a que chega primeiro (empate: menor
 // custo), sem justificativa obrigatória — não existe alternativa a tempo a justificar (AGENTS §4); o aviso "chega depois da falta" continua.
 // props em ordem de custo (unit crescente), com {f, unit, chega, late}.
