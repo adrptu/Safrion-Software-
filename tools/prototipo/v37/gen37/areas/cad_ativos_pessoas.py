@@ -25,7 +25,8 @@ for _f in ('CD-03.dc.html','CD-04.dc.html'): ui37.H_OVR.pop(_f,None)   # layout 
 
 # ---------------- pessoas, habilidades e habilitações (fonte do CD-04; o CD-03 lê para os operadores do conjunto) ----------------
 CALDA='Preparar calda (caldeiro)'; AGRO='Liberar O.S. (agrônomo)'
-HABILIDADES=['Operar trator','Operar pulverizador','Operar plantadeira','Operar colhedora',CALDA,'Irrigar','Almoxarifado',AGRO,'Conferir','Manutenção de máquinas']
+HABILIDADES=['Operar trator','Operar pulverizador','Operar plantadeira','Operar colhedora',CALDA,'Irrigar','Almoxarifado',AGRO,'Conferir','Manutenção de máquinas',
+             'Testar reparo','Aprovar O.S. de manutenção','Liberar ativo']   # PCM simplificado (05/10): teste do reparo (D-36) e responsável de manutenção (D-20)
 HAB_EXIGE={'Operar trator':'NR-31','Operar pulverizador':'NR-31','Operar plantadeira':'NR-31','Operar colhedora':'NR-31',CALDA:'NR-31',
            'Irrigar':'NR-10','Manutenção de máquinas':'NR-12',AGRO:'CREA'}
 HABIL=[('NR-31','v31','Validade da NR-31'),('NR-10','v10','Validade da NR-10'),('NR-12','v12','Validade da NR-12'),('CREA','vcrea','Validade do registro no CREA')]
@@ -35,7 +36,7 @@ _REN={'Preparar calda':CALDA}
 _OVR={'p6':dict(funcao='Caldeiro',equipe='Campo 1',hab=[CALDA,'Conferir'],v31='2027-04-30'),
       'p7':dict(funcao='Almoxarife',hab=['Almoxarifado','Conferir']),
       'p10':dict(equipe='Campo 2')}
-_ORDEM=['p1','p2','p3','p6','p10','p4','p5','p7','p8','p9']
+_ORDEM=['p1','p2','p3','p6','p10','p4','p5','p7','p8','p11','p9']
 def pessoas():
     by={p['id']:dict(p,**_OVR.get(p['id'],{})) for p in DC.PESSOAS}
     out=[]
@@ -214,7 +215,7 @@ function PREVALS(self,v){ cadActsIni(self); const atv=RW(self,'g_atv'); self._c3
     r.p.nome=[{k:'b',t:V.nome||''}].concat(V.modelo?[{k:'mut',t:V.modelo}]:[]); r.s.nome=(V.nome||'')+' '+(V.modelo||'');
     r.p.classe=[{k:'txt',t:V.classe||'—'}]; r.s.classe=V.classe||'';
     r.p.cap=[{k:'txt',t:c3cap(V)}]; r.s.cap=c3cap(V);
-    V.cond_t=C.m?C.t+' · '+C.m:C.t; r.o=C.x?[{t:'Ver ordens afetadas · '+C.x.ordens.join(' e '),h:'OS.dc.html'},{t:'Abrir '+C.x.om+' na Manutenção',h:'MA-04det.dc.html'}]:null;
+    V.cond_t=C.m?C.t+' · '+C.m:C.t; r.o=C.x?[{t:'Ver ordens afetadas · '+C.x.ordens.join(' e '),h:'OS.dc.html'},{t:'Abrir '+C.x.om+' na Manutenção',h:'MA.dc.html#om='+C.x.om}]:null;
     r.p.custo_h=isnum(V.custo_h)&&String(V.custo_h)!==''?[{k:'txt',t:'R$ '+nf(V.custo_h,2)+'/h'}]:[{k:'mut',t:'—'}];
     const n=(usos[V.nome]||[]).length; V.ncj=n; r.p.ncj=[{k:(n?'txt':'mut'),t:n?String(n):'—'}]; r.s.ncj=n?String(n):'';
     const S=c3sit(r); r.p.est=S.p; r.s.est=S.t; });

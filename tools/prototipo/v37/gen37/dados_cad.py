@@ -65,7 +65,7 @@ CONJUNTOS=[('k1','Trator 02','Pulverizador PJ-3030','Pulverização','r1'),('k2'
 
 # ============ CD-04 · pessoas, habilidades e habilitações ============
 HABILIDADES=['Operar trator','Operar pulverizador','Operar plantadeira','Operar colhedora','Preparar calda','Irrigar','Almoxarifado',
-             'Operar empilhadeira','Conferir','Manutenção de máquinas','Liberar O.S. (agrônomo)']
+             'Operar empilhadeira','Conferir','Manutenção de máquinas','Testar reparo','Aprovar O.S. de manutenção','Liberar ativo','Liberar O.S. (agrônomo)']
 # habilitação exigida por habilidade (validade controlada na pessoa)
 HAB_EXIGE={'Operar trator':'NR-31','Operar pulverizador':'NR-31','Operar plantadeira':'NR-31','Operar colhedora':'NR-31','Preparar calda':'NR-31',
            'Irrigar':'NR-10','Operar empilhadeira':'NR-11','Manutenção de máquinas':'NR-12','Liberar O.S. (agrônomo)':'CREA'}
@@ -83,7 +83,9 @@ PESSOAS=[
  dict(id='p5',nome='João',funcao='Irrigante',equipe='Irrigação',vinc='CLT',hab=['Irrigar'],v10='2027-03-31',adm='2018-05-02',custo=32,login=True),
  dict(id='p6',nome='Paula',funcao='Almoxarife',equipe='Suprimentos',vinc='CLT',hab=['Almoxarifado','Conferir'],adm='2020-02-03',custo=32,login=True),
  dict(id='p7',nome='Rui',funcao='Conferente',equipe='Suprimentos',vinc='CLT',hab=['Conferir','Almoxarifado','Operar empilhadeira'],v11='2027-02-28',adm='2017-09-11',custo=30,login=True),
- dict(id='p8',nome='Zé',funcao='Mecânico',equipe='Oficina',vinc='CLT',hab=['Manutenção de máquinas'],v12='2027-05-31',adm='2016-04-04',custo=34,login=True),
+ dict(id='p8',nome='Zé',funcao='Mecânico',equipe='Oficina',vinc='CLT',hab=['Manutenção de máquinas','Testar reparo'],v12='2027-05-31',adm='2016-04-04',custo=34,login=True),
+ # PCM simplificado (05/10, D-20/D-37): Otávio, responsável de manutenção (sintético), aprova a OM e decide a aptidão do ativo (CMD-19)
+ dict(id='p11',nome='Otávio',funcao='Responsável de manutenção',equipe='Oficina',vinc='CLT',hab=['Aprovar O.S. de manutenção','Liberar ativo'],adm='2015-03-02',custo=58,login=True),
  dict(id='p9',nome='Beto',funcao='Operador',equipe='Campo 1',vinc='CLT',hab=['Operar trator'],v31='',adm='2026-09-22',custo=38,login=False),
 ]
 

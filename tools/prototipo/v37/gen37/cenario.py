@@ -77,8 +77,11 @@ def seed():
         reqs[rid] = dict(id=rid, os=oid, estado=('Reservada' if fe == 0 else 'Entregue'), itens=itens)
     # v=2 (01/10, O.S. sem revisão): descarta o cenário salvo no navegador que ainda tinha aprov, selos de aprovação e recibo APV-
     # v=3 (04/10, SINT-C03 + PRE-REV-20261004): quantidades da semente pela regra única; o salvo com a regra antiga travaria o apontamento
-    return dict(v=3, rev=0, ordens=ordens, reqs=reqs, lotes=lotes, movs=[], ocorr=[],
-                app=dict(online=True, fila=[], turno=None, operador='Marcos'))
+    # v=4 (1a · PCMS-M01, PCM simplificado §7.2): a manutenção entra no cenário único (c.man, com achados, leituras e recibos); a chave própria
+    # chave própria da manutenção sai. O.S., Estoque, App, CD-03 e a tela MA leem e gravam o mesmo estado; o salvo v=3 volta ao seed (cenGet).
+    import dados_manutencao as DM
+    return dict(v=4, rev=0, ordens=ordens, reqs=reqs, lotes=lotes, movs=[], ocorr=[],
+                app=dict(online=True, fila=[], turno=None, operador='Marcos'), man=DM.seed())
 
 
 def js_prefixo():

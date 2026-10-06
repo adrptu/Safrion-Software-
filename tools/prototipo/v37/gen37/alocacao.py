@@ -22,8 +22,8 @@ for dia, fim in [('2026-09-22', 11.0), ('2026-09-23', 11.0), ('2026-09-24', 11.0
 _a(['T1', 'PL', 'CAR'], 'OS-0420', '2026-09-22', 6.0, 9.5)                      # 12 ha até a quebra do T1
 _a(['T1'], 'OM-0233', '2026-09-22', 9.5, 18.0, 'manutenção')
 for dia in ['2026-09-23', '2026-09-24']: _a(['T1'], 'OM-0233', dia, 6.0, 18.0, 'manutenção')
-for dia in ['2026-09-24', '2026-09-25', '2026-09-26', '2026-09-27']:
-    _a(['T02', 'PL', 'CAR'], 'OS-0420', dia, 6.0, 16.0, 'condicional')              # saldo de 70 ha após a v3
+for dia in ['2026-09-24', '2026-09-25', '2026-09-26', '2026-09-27', '2026-09-28']:
+    _a(['T02', 'PL', 'CAR'], 'OS-0420', dia, 6.0, 16.0, 'condicional')              # saldo de 70 ha após a v3 (28/09: PCM simplificado S1, alinha com o substituto "até 28/09")
 _a(['T1', 'PL', 'CAR'], 'OS-0431', '2026-09-24', 6.0, 16.0, 'condicional')           # plantio T2 pede o T1 bloqueado
 _a(['T04', 'PJ', 'MAR', 'PAU'], 'OS-0424', '2026-09-24', 6.0, 11.0)
 _a(['T03', 'PJ', 'MAR', 'PAU'], 'OS-0430', '2026-09-25', 13.0, 20.4, 'condicional')  # 160 ha ÷ 21,6 ha/h ≈ 7,4 h
