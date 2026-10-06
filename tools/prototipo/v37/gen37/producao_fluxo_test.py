@@ -31,7 +31,7 @@ window.ROWTXT=(t)=>{ const r=[...document.querySelectorAll('[role=row]')].find(x
 window.PAN=()=>{ const a=[...document.querySelectorAll('aside[role=dialog]')].find(VIS); return a?N(a.innerText):''; };
 window.TOAST=()=>[...document.querySelectorAll('[role=status]')].map(x=>N(x.innerText)).filter(Boolean).join(' | ');
 window.PRIM=()=>{ const b=[...document.querySelectorAll('header .pr-prim, header button, header a')].filter(e=>VIS(e)&&getComputedStyle(e).backgroundColor==='rgb(30, 122, 76)'); return b.map(e=>N(e.innerText)); };
-window.CEN=()=>JSON.parse(localStorage.getItem('talhao-os-cenario-v1')||'null');
+window.CEN=()=>JSON.parse(localStorage.getItem('talhao-os-cenario-v1')||'null')||((window.__car&&window.__car.cenGet)?window.__car.cenGet():null);
 'ok'"""
 def lib(): J(LIB)
 def ir(pg, limpa=False, w=1440, h=1000):
@@ -155,6 +155,12 @@ try:
         ir('MB-10.dc.html'); lib(); clk('Com sinal'); clk('Com sinal')
         ir('CARGA.dc.html'); n2 = J(f"[...document.querySelectorAll('[role=row]')].filter(r=>N(r.innerText).indexOf({json.dumps(cid)})>=0).length")
         t.chk('AC-16 ao voltar o sinal a carga entra uma vez (repetir o envio não duplica)', n2 == 1, n2)
+        # AC-15 no OS.dc.html: a OS-0505 posta Em conferência (término físico) com a CG-2108 a pesar não encerra; dono Lúcia
+        ir('OS.dc.html', limpa=True)
+        J("window.__car.cenMudar(null,c=>{ const o=c.ordens['OS-0505']; o.etapa='Em conferência'; o.saldo=0; o.ap=o.ap.filter(a=>a.st!=='Previsto'); return {msg:''}; })")
+        ir('OS.dc.html#OS-0505'); a = clk('Conferir e encerrar', 'aside'); p = pan() + ' ' + toast()
+        et = cen("c.ordens['OS-0505'].etapa"); lk = J("(()=>{ const a=[...document.querySelectorAll('aside[role=dialog] a')].find(x=>N(x.innerText).startsWith('Pesar a carga')); return a?a.getAttribute('href'):''; })()")
+        t.chk('AC-15 no OS.dc.html, encerrar a OS-0505 com a CG-2108 a pesar fica impedido no comando, com dono Lúcia e o caminho para pesar', et == 'Em conferência' and a.startswith('NÃO ACHEI') and 'Encerrar bloqueado: Carga a pesar: CG-2108' in p and 'Lúcia pesa e recebe' in p and lk == 'CARGA.dc.html#CG-2108', [a, et, lk, p[:700]])
         shot('erros')
     if 'celular' in MODOS:
         print('== celular · AC-19 em 390 × 844')
