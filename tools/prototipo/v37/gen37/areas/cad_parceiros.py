@@ -136,8 +136,18 @@ CAMPOS=[txt('cnpj','CPF ou CNPJ',newOnly=True,help='CPF com 11 dígitos ou CNPJ 
         # escondidos: situação e papéis marcados (condição das seções)
         dict(k='sit',l='Situação',t='txt',req=False,cond=NUNCA,**{'def':'Ativo'})]+[dict(k=k,l=k,t='txt',req=False,cond=NUNCA) for k in RP.values()]
 SECOES={'grupos':'FORNECEDOR','prod':'CLIENTE','linhas':'PARCEIRO DE CRÉDITO','rntrc':'TRANSPORTADOR','ops':'PRESTADOR','motivo':'SUSPENSÃO'}
-COLS_T=[dict(k='nome',l='Parceiro · CPF/CNPJ',w=280),dict(k='papeis',l='Papéis',w=170),dict(k='cont',l='Contato',w=280),dict(k='papel',l='Situação do papel',w=320)]
-COLS_F=[COLS_T[0],dict(k='grupos',l='Grupos homologados',w=300),COLS_T[2],dict(k='homol',l='Homologado',w=220)]
+# uma variável por coluna (TABELAS-FOCO, 04/10/2026): parceiro e CPF/CNPJ; contato, WhatsApp, e-mail e canais autorizados; a situação de cada papel
+# em chip (multivalorada: filtra por estado). No filtro de um papel, as colunas desse papel (grupos, limite e validade, linhas e garantias, RNTRC e
+# veículos, operações) entram no lugar de Papéis; em Todos elas ficam no painel do parceiro. Listas (papéis, canais, grupos…) filtram por item.
+_ID=[dict(k='nome',l='Parceiro',w=180),dict(k='cnpj',l='CPF/CNPJ',w=150)]
+_CT=[dict(k='cont',l='Contato',w=140),dict(k='whats',l='WhatsApp',w=130),dict(k='email',l='E-mail',w=220),dict(k='canais',l='Canais autorizados',multi=True,w=150)]
+_SIT=dict(k='papel',l='Situação do papel',multi=True,w=220)
+COLS_T=_ID+[dict(k='papeis',l='Papéis',multi=True,w=170)]+_CT+[_SIT]
+COLS_P={'Fornecedor':_ID+[dict(k='grupos',l='Grupos homologados',multi=True,w=260)]+_CT+[dict(k='homol',l='Homologado',w=130)],
+        'Cliente':_ID+_CT+[dict(k='lim',l='Limite de crédito',t='num',a='r',un='R$',d=0),dict(k='limv',l='Validade da análise de crédito',t='date'),_SIT],
+        'Parceiro de crédito':_ID+_CT+[dict(k='linhas',l='Linhas de crédito',multi=True,w=220),dict(k='gar',l='Garantias aceitas',multi=True,w=240),_SIT],
+        'Transportador':_ID+_CT+[dict(k='rntrc',l='RNTRC'),dict(k='veic',l='Veículos e capacidade',multi=True,w=260),_SIT],
+        'Prestador':_ID+_CT+[dict(k='ops',l='Operações que presta',multi=True,w=220),_SIT]}
 FILTROS=[('','Todos'),('Fornecedor','Fornecedores'),('Cliente','Clientes'),('Parceiro de crédito','Parceiros de crédito'),('Transportador','Transportadores'),('Prestador','Prestadores')]
 
 def _form_extra(form):
@@ -173,7 +183,7 @@ def cd05():
     cadx_css()
     corpo=bloco_cad(abas('c5t',['Parceiros','Cobertura de cotação'],'Cadastros de parceiros'),pane('c5t',0,faixa('cd5_fx0')+g)+pane('c5t',1,faixa('cd5_fx1')+cob),
                     'Parceiros e fornecedores')
-    js({},'const GRUPOS_='+json.dumps(D2.GRUPOS,ensure_ascii=False)+', COLS_T='+json.dumps(COLS_T,ensure_ascii=False)+', COLS_F='+json.dumps(COLS_F,ensure_ascii=False)
+    js({},'const GRUPOS_='+json.dumps(D2.GRUPOS,ensure_ascii=False)+', COLS_T='+json.dumps(COLS_T,ensure_ascii=False)+', COLS_P='+json.dumps(COLS_P,ensure_ascii=False)
        +', FILTROS='+json.dumps(FILTROS,ensure_ascii=False)+', RP='+json.dumps(RP,ensure_ascii=False)+', SECOES='+json.dumps(SECOES,ensure_ascii=False)
        +', PAPEIS_='+json.dumps(PAPEIS,ensure_ascii=False)+', ACC_='+json.dumps(E.ACC)+', ACCS_='+json.dumps(E.ACCS)+', LINE_='+json.dumps(LINE)+', INK_='+json.dumps(INK)+', MUTED_='+json.dumps(MUTED)+';\n'+r'''
 const OCULTO='cd5_fora_do_filtro';   // linha fora do filtro de papel: r.sh sem entrada em state.added some da grade
@@ -183,57 +193,48 @@ function docOk(dg){ if(/^(\d)\1+$/.test(dg)) return false; const N=k=>Number(dg[
   if(dg.length===11){ for(const n of [9,10]){ let s=0; for(let i=0;i<n;i++) s+=N(i)*(n+1-i); if((s*10)%11%10!==N(n)) return false; } return true; }
   if(dg.length===14){ const w=[6,5,4,3,2,9,8,7,6,5,4,3,2]; for(const n of [12,13]){ let s=0; for(let i=0;i<n;i++) s+=N(i)*w[i+13-n]; const r=s%11; if((r<2?0:11-r)!==N(n)) return false; } return true; }
   return false; }
-function rs(n){ return 'R$ '+nf(n,0); }
 function ordena(a){ return a.slice().sort((x,y)=>PAPEIS_.indexOf(x)-PAPEIS_.indexOf(y)); }
 function rpFlags(pp){ const o={}; Object.keys(RP).forEach(p=>{ o[RP[p]]=pp.indexOf(p)>=0?'Sim':''; }); return o; }
 function draftSet(self,gid,patch){ const cur=g2st(self,gid).fm; if(!cur) return; const er=Object.assign({},cur.errs||{}); Object.keys(patch).forEach(k=>{ delete er[k]; });
   g2set(self,gid,{fm:Object.assign({},cur,{draft:Object.assign({},cur.draft,patch),errs:er,warn:false})}); }
 function dupDoc(self,doc,rid){ const dg=dig(doc); if(dg.length!==11&&dg.length!==14) return null; return RW(self,'g_forn').find(r=>r.id!==rid&&dig(r.v.cnpj)===dg)||null; }
-function txtp(ps){ return ps.map(p=>p.t||'').filter(Boolean).join(' '); }
-// contato: nome na 1ª linha; e-mail · WhatsApp na 2ª; canal preenchido sem autorização leva o aviso discreto "não autorizado"
-function canal(val,aut){ return aut?[{k:'txt',t:val}]:[{k:'txt',t:val},{k:'mut',t:'não autorizado'}]; }
-// contato numa linha: nome e um canal (WhatsApp; sem ele, o e-mail), com "não autorizado" quando o canal não foi autorizado;
-// o outro canal e as autorizações completas ficam no painel. Fornecedor homologado sem e-mail continua sinalizado.
-function contato(V,forn,hom){ const cc=ml(V.canais); const l2=[];
-  if(V.whats) l2.push(...canal(V.whats,cc.indexOf('WhatsApp')>=0));
-  else if(V.email) l2.push(...canal(V.email,cc.indexOf('E-mail')>=0));
-  if(!V.email&&forn&&hom){ if(l2.length) l2.push({k:'mut',t:'·'}); l2.push(chipc('sem e-mail','red')); }
-  const p=(V.contato?[{k:'txt',t:V.contato}]:[]).concat(V.contato&&l2.length?[{k:'mut',t:'·'}]:[]).concat(l2); return p.length?p:[{k:'mut',t:'—'}]; }
-function suspenso(V){ return [chipc('Suspenso','gray')].concat(V.motivo?[{k:'mut',t:V.motivo}]:[]); }
-// situação de cada papel (no filtro de um papel, só a dele)
-function sitPapel(V,pp,so){ if(V.sit==='Suspenso') return suspenso(V);
-  const out=[]; const add=(ps)=>{ if(out.length) out.push({k:'mut',t:'·'}); out.push(...ps); };
-  pp.filter(p=>!so||p===so).forEach(p=>{
-    if(p==='Fornecedor'){ const n=ml(V.grupos).length; add(V.homol==='Sim'?sitOk('Homologado · '+n+(n>1?' grupos':' grupo')):[chipc('Não homologado','gray'),{k:'mut',t:'não recebe cotação'}]); }
-    if(p==='Cliente'){ const lim=Number(V.lim)||0;
-      if(!lim) add([chipc('Sem limite de crédito','yellow')]);
-      else if(V.limv&&V.limv<HOJE) add([chipc('Limite vencido em '+br(V.limv),'red'),{k:'mut',t:rs(lim)}]);
-      else add([{k:'txt',t:'Limite '+rs(lim)+(V.limv?' até '+br(V.limv):'')}]); }
-    if(p==='Parceiro de crédito') add([{k:'txt',t:ml(V.linhas).join(', ')||'sem linha'}].concat(ml(V.gar).length?[{k:'mut',t:ml(V.gar).join(', ')}]:[]));
-    if(p==='Transportador') add([{k:'txt',t:V.rntrc?'RNTRC '+V.rntrc:'sem RNTRC'}].concat(ml(V.veic).length?[{k:'mut',t:ml(V.veic).join(', ')}]:[]));
-    if(p==='Prestador') add([{k:'txt',t:ml(V.ops).join(', ')||'sem operação'}]); });
-  return out.length?out:[{k:'mut',t:'—'}]; }
+// situação de cada papel (no filtro de um papel, só a dele): só o estado, em chip; o valor (limite, linhas, RNTRC…) fica na coluna do papel e no painel
+function sitPapeis(V,pp,so){ if(V.sit==='Suspenso') return [{t:'Suspenso',c:'gray'}];
+  const out=[]; pp.filter(p=>!so||p===so).forEach(p=>{
+    if(p==='Fornecedor') out.push(V.homol==='Sim'?{t:'Homologado',c:'green'}:{t:'Não homologado',c:'gray'});
+    if(p==='Cliente'){ const lim=Number(V.lim)||0; out.push(!lim?{t:'Sem limite de crédito',c:'yellow'}:(V.limv&&V.limv<HOJE?{t:'Limite vencido',c:'red'}:{t:'Limite vigente',c:'green'})); }
+    if(p==='Parceiro de crédito') out.push(ml(V.linhas).length?{t:'Ativo',c:'green'}:{t:'Sem linha de crédito',c:'yellow'});
+    if(p==='Transportador') out.push(V.rntrc?{t:'Ativo',c:'green'}:{t:'Sem RNTRC',c:'yellow'});
+    if(p==='Prestador') out.push(ml(V.ops).length?{t:'Ativo',c:'green'}:{t:'Sem operação',c:'yellow'}); });
+  return out; }
 // troca o filtro de papel: limpa o filtro de coluna que sai da grade e o de "Situação do papel" (o texto dela muda com o papel),
 // para não sobrar chip de filtro que não vale; os demais filtros de coluna e a busca continuam
 function trocaPapel(self,k,st){ if(k===(self.state.cd5_p||'')){ if(st) self.setState(st); return; }
-  const g=g2st(self,'g_forn'), ks=(k==='Fornecedor'?COLS_F:COLS_T).map(c=>c.k), f={};
+  const g=g2st(self,'g_forn'), ks=((k&&COLS_P[k])||COLS_T).map(c=>c.k), f={};
   Object.keys(g.f||{}).forEach(x=>{ if(ks.indexOf(x)>=0&&x!=='papel'&&(g.f[x]||[]).length) f[x]=g.f[x]; });
   g2set(self,'g_forn',{f:f,fmc:null}); self.setState(Object.assign({cd5_p:k},st||{})); }
 function cotaveis(rows){ return rows.filter(r=>ml(r.v.papeis).indexOf('Fornecedor')>=0&&r.v.sit!=='Suspenso'&&r.v.homol==='Sim'&&r.v.email&&ml(r.v.canais).indexOf('E-mail')>=0); }
-function PREVALS(self,v){ const rows=RW(self,'g_forn'); const fp=self.state.cd5_p||''; GR('g_forn').cols=(fp==='Fornecedor'?COLS_F:COLS_T);
+function PREVALS(self,v){ const rows=RW(self,'g_forn'); const fp=self.state.cd5_p||''; GR('g_forn').cols=(fp&&COLS_P[fp])||COLS_T;
   rows.forEach(r=>{ const V=r.v; const pp=ml(V.papeis); Object.assign(V,rpFlags(pp)); if(!V.sit) V.sit='Ativo';
     const forn=pp.indexOf('Fornecedor')>=0, hom=V.homol==='Sim', gg=ml(V.grupos), susp=V.sit==='Suspenso';
-    r.p.nome=[{k:'b',t:V.nome||''},{k:'mut',t:V.cnpj||'sem CPF/CNPJ'}]; r.s.nome=(V.nome||'')+' '+(V.cnpj||'');
-    r.p.papeis=[{k:'txt',t:pp.join(' · ')||'—'}]; r.s.papeis=pp.join(', ');
-    r.p.cont=contato(V,forn,hom); r.s.cont=[V.contato,V.email,V.whats].filter(Boolean).join(' ');
-    r.p.papel=sitPapel(V,pp,fp); r.s.papel=txtp(r.p.papel);
-    r.p.grupos=gg.length?[{k:'txt',t:gg.join(' · ')}]:[{k:'mut',t:'nenhum grupo'}]; r.s.grupos=gg.join(', ');
-    r.p.homol=susp?suspenso(V):(hom?sitOk('Sim'):[chipc('Não','gray'),{k:'mut',t:'não recebe cotação'}]); r.s.homol=susp?'Suspenso':(hom?'Sim':'Não');
+    r.p.nome=[{k:'b',t:V.nome||''}]; r.s.nome=V.nome||''; r.p.cnpj=[V.cnpj?{k:'txt',t:V.cnpj}:{k:'mut',t:'—'}]; r.s.cnpj=V.cnpj||'';
+    const M=r.m=Object.assign({},r.m||{}); const lst=(k,a)=>{ M[k]=a.map(x=>({id:x,l:x})); r.p[k]=[a.length?{k:'txt',t:a.join(', ')}:{k:'mut',t:'—'}]; r.s[k]=a.join(', '); };
+    lst('papeis',pp); lst('canais',ml(V.canais)); lst('grupos',gg); lst('linhas',ml(V.linhas)); lst('gar',ml(V.gar)); lst('veic',ml(V.veic)); lst('ops',ml(V.ops));
+    r.p.cont=[V.contato?{k:'txt',t:V.contato}:{k:'mut',t:'—'}]; r.s.cont=V.contato||''; r.p.whats=[V.whats?{k:'txt',t:V.whats}:{k:'mut',t:'—'}]; r.s.whats=V.whats||'';
+    // fornecedor homologado sem e-mail não recebe a cotação (vai por e-mail): o vazio vira aviso
+    r.p.email=V.email?[{k:'txt',t:V.email}]:(forn&&hom&&!susp?[chipc('Sem e-mail','red')]:[{k:'mut',t:'—'}]); r.s.email=V.email||(forn&&hom&&!susp?'Sem e-mail':'');
+    const S=sitPapeis(V,pp,fp); M.papel=S.map(x=>({id:x.t,l:x.t})); r.p.papel=S.length?S.map(x=>chipc(x.t,x.c)):[{k:'mut',t:'—'}]; r.s.papel=S.map(x=>x.t).join(', ');
+    r.p.homol=[chipc(susp?'Suspenso':(hom?'Sim':'Não'),hom&&!susp?'green':'gray')]; r.s.homol=susp?'Suspenso':(hom?'Sim':'Não');
+    const lim=Number(V.lim)||0; r.p.lim=[lim?{k:'txt',t:nf(lim,0)}:{k:'mut',t:'—'}]; r.s.lim=lim?nf(lim,0):'';
+    r.p.limv=[V.limv?(V.limv<HOJE?{k:'cn',t:br(V.limv),c:'red'}:{k:'txt',t:br(V.limv)}):{k:'mut',t:'—'}]; r.s.limv=V.limv?br(V.limv):'';
+    r.p.rntrc=[V.rntrc?{k:'txt',t:V.rntrc}:{k:'mut',t:'—'}]; r.s.rntrc=V.rntrc||'';
     if(fp&&pp.indexOf(fp)<0) r.sh=OCULTO; else delete r.sh; });
   const ok=cotaveis(rows);
   GR('g_cob').rows=GRUPOS_.map(g=>{ const fs=ok.filter(r=>ml(r.v.grupos).indexOf(g)>=0); const n=fs.length;
-    return {id:'c_'+g,v:{g:g,n:n},s:{sit:(n===0?'Sem fornecedor':(n===1?'Só 1':'ok'))},
-      p:{g:[{k:'b',t:g}],sit:n===0?sitX('Sem fornecedor que receba cotação','yellow','Homologar fornecedor'):(n===1?[chipc('Só 1 fornecedor · sem concorrência','yellow')]:sitOk(n+' fornecedores concorrem'))},
+    // situação da cobertura só com o estado (o número está na coluna ao lado)
+    const st=n===0?['Sem fornecedor',sitX('Sem fornecedor','yellow','Homologar fornecedor')]:(n===1?['Sem concorrência',[chipc('Sem concorrência','yellow')]]:['Com concorrência',sitOk('Com concorrência')]);
+    return {id:'c_'+g,v:{g:g,n:n},s:{sit:st[0]},
+      p:{g:[{k:'b',t:g}],sit:st[1]},
       o:n?fs.map(r=>({t:r.v.nome+' · '+(r.v.contato?r.v.contato+' · ':'')+r.v.email})):[{t:'Nenhum fornecedor homologado com e-mail autorizado neste grupo. Marque o grupo num fornecedor e homologue.'}]}; });
   // filtros rápidos por papel, com contagem
   v.cd5_fil=FILTROS.map(([k,t])=>{ const n=k?rows.filter(r=>ml(r.v.papeis).indexOf(k)>=0).length:rows.length; const on=(k===fp);
