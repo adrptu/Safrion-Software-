@@ -353,7 +353,7 @@ function EXTRAVALS(self,v){ v['a4go_REC-014']=()=>{ location.href='AG-04det.dc.h
     CUSTO=[('c1','Semente de soja 58 W','REQ-036','SU-07.dc.html','1.560 kg × R$ 9,50',1560*9.5,'Definitivo','green'),
            ('c2','KCl 60 %','REQ-037','SU-07.dc.html','3.600 kg × R$ 2,40',3600*2.4,'Definitivo','green'),
            ('c3','Máquina e equipe · plantio','Apontamentos dias 1 e 2','CA-02.dc.html','6,0 h × R$ 396,00',6*396,'Provisório · 12 ha a conferir','yellow'),
-           ('c4','Diesel S10 · Trator T1','Abastecimento','MA-05.dc.html','84 L × R$ 5,92',84*5.92,'Provisório · conciliar tanque','yellow')]
+           ('c4','Diesel S10 · Trator T1','Abastecimento','MA.dc.html#vis=ativos&modo=abastecimentos','84 L × R$ 5,92',84*5.92,'Provisório · conciliar tanque','yellow')]
     ccu=[dict(k='item',l='Recurso',w=200),dict(k='orig',l='Origem'),dict(k='qtd',l='Quantidade × preço',w=170),dict(k='custo',l='Custo',t='num',a='r',d=2,pre='R$ ',agg='sum'),dict(k='sit',l='Situação',w=200)]
     gcu=grid(ccu,[R(i,item=it,orig=[Pt.link(o,h)],qtd=q,custo=round(v,2),sit=[Pt.chip(s,c)],o=[(f'{o} · {q}',h),(f'{REAL20} ha realizados na v2 · preservados na v3',None)])
                   for i,it,o,h,q,v,s,c in CUSTO],

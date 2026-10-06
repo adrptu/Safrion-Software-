@@ -119,7 +119,7 @@ FILT['Carência e destino']=[('qd','Consultar em',['Hoje','Em 7 dias','Em 14 dia
 # condição: 'ag' = só enquanto a ordem está a liberar pelo agrônomo no cenário, 'cust' = só com custódia).
 _ORD_MAPA=[  # id, talhões da geometria, complemento do realizado, prazo, ação
  ('OS-0421',['T1','T2'],'','no prazo',None),
- ('OS-0420',['T4'],'','atrasada',('Acompanhar OM-0233','MA-04.dc.html#OM-0233','op',None)),   # PL-05 é oculta e fixa (Frente F): a OM-0233 viva
+ ('OS-0420',['T4'],'','atrasada',('Acompanhar OM-0233','MA.dc.html#om=OM-0233','op',None)),   # PL-05 é oculta e fixa (Frente F): a OM-0233 viva
  ('OS-0419',['P2'],'lâmina 10,81 mm','irrigando hoje',None),
  ('OS-0424',['T1'],'T1-B','até 3 dias',None),
  ('OS-0422',['P2'],'2 passadas de 6,75 mm','até 3 dias',('Definir janela','IR-03det.dc.html#OS-0422:janela','op',None)),
@@ -1388,7 +1388,7 @@ function EXTRAVALS(self,v){ const rs=g2rows(self,GRx('g_dia')); const h=rs.filte
                f'Sincronização pendente do celular de João · <b style="color:{INK};">×2</b> → registros guardados no aparelho, sem conflito'))
     corpo=(bloco('Fila do dia','Resolva primeiro o que vence hoje; clique na linha para atribuir o responsável ou ajustar o prazo.',g)
            + bloco('Alertas agrupados','Trate cada caso uma vez; alertas repetidos ficam agrupados com a contagem.',alert,
-                   ilink('Abrir OM-0233','MA-04det.dc.html','wrench','Abrir a ordem de manutenção do Trator T1')+ilink('Ver app de João','MB-01.dc.html','users','Abrir o app móvel'),tone='yellow'))
+                   ilink('Abrir OM-0233','MA.dc.html#om=OM-0233','wrench','Abrir a ordem de manutenção do Trator T1')+ilink('Ver app de João','MB-01.dc.html','users','Abrir o app móvel'),tone='yellow'))
     HEIGHTS37[fname]=900
     shell37('IN-01','Meu dia',corpo,primary_html=f'<span style="{H("hs_st")}">{H("hs_t")}</span>'+btn('Registrar ocorrência',True,href='CA-03.dc.html'),search=False)
 
