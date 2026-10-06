@@ -21,7 +21,8 @@ function tmUser(id){ if (!id || isLG(id)) return null; const { st, tal } = tmBas
 function tmIdNovo(tal, faz){ const pre = faz === 'Lagoa Grande' ? 'LGT' : 'TN'; let n = 1; while (tal.some(t => t.id === pre + String(n).padStart(2, '0'))) n++; return pre + String(n).padStart(2, '0'); }
 function tmNum(s){ const x = Number(String(s == null ? '' : s).trim().replace(/\./g, '').replace(',', '.')); return isFinite(x) ? x : NaN; }
 // grava um contorno: talhão novo ou nova versão do contorno de um talhão existente; devolve id, versão e área
-function tmSalvar(d){ const { st, faz, tal } = tmBase(); const ha = Math.round(tgAreaHa(d.ring) * 100) / 100; let id = d.alvo;
+function tmSalvar(d){ if (d.alvo === 'novo' && typeof assinTrava === 'function'){ const tv = assinTrava('ampliar_area'); if (tv) throw new Error(tv); }   // PLAT-01 R12 (defesa)
+  const { st, faz, tal } = tmBase(); const ha = Math.round(tgAreaHa(d.ring) * 100) / 100; let id = d.alvo;
   if (id === 'novo'){ id = tmIdNovo(tal, d.faz); tal.push({ id, v: { t: d.nome, faz: d.faz, sis: d.sis || 'Sequeiro', setor: '', decl: d.decl, calc: ha, motivo: d.motivo || '', sit: 'Ativo', inat: '', ver: '', geo: 'poly', geo_t: '' } }); }
   const T = tal.find(t => t.id === id); if (!T) throw new Error('Talhão não encontrado no cadastro.');
   const vers = Object.assign({}, st.vers || {}); const vs = (vers[id] || []).slice(); const ver = 'v' + (vs.length + 1);
@@ -108,6 +109,8 @@ function tmAvisosImp(rows){ const ficam = []; rows.forEach(r => { if (r.dest ===
 function tmImportar(self){ const imp = self.state.imp; if (!imp || !imp.rows) return; const av = tmAvisosImp(imp.rows); const ruins = imp.rows.filter((r, i) => r.dest !== 'nao' && av[i]);
   if (ruins.length){ self.setState({ imp: Object.assign({}, imp, { err: ruins.length + (ruins.length > 1 ? ' linhas sobrepõem' : ' linha sobrepõe') + ' talhões: escolha "Não importar" ou corrija o arquivo.' }) }); return; }
   const sel = imp.rows.filter(r => r.dest !== 'nao'); if (!sel.length){ self.setState({ imp: Object.assign({}, imp, { err: 'Nenhuma linha para importar: escolha o destino de pelo menos uma.' }) }); return; }
+  const tv = typeof assinTrava === 'function' ? assinTrava('ampliar_area') : ''; const nv = sel.filter(r => r.dest === 'novo');   // PLAT-01 R12
+  if (tv && nv.length){ self.setState({ imp: Object.assign({}, imp, { err: (nv.length > 1 ? nv.length + ' linhas são talhão novo' : 'A linha ' + tmBonito(nv[0].nome) + ' é talhão novo') + ': escolha "Não importar" nela. ' + tv }) }); return; }
   let nov = 0, upd = 0, dif = 0; const nomes = tmBase().tal.filter(t => t.v.faz === FAZ).map(t => tgNome(t.v.t));
   try{ sel.forEach(r => { const origem = (/\.kml$/i.test(imp.arq) ? 'KML ' : 'GeoJSON ') + imp.arq;
       if (r.dest === 'novo'){ let nm = tmBonito(r.nome); while (nomes.indexOf(tgNome(nm)) >= 0) nm = nm + ' (importado)'; nomes.push(tgNome(nm));
@@ -164,7 +167,7 @@ function tmVals(self, v){ const st = self.state; const real = !!v.map_lg; v.tm_o
     if (md || mi || mt) setTimeout(() => { if (md) tmIniciar(self, md[1]); else if (mi) self.setState({ imp: { etapa: 'arq', err: '' }, dw: null }); else { self.setState({ tsel: [mt[1]], px: null, mpa: null }); const go = (n) => { const a = tmAneis('Lagoa Grande').find(o => o.id === mt[1]); if (a && LGI.map) tmEnquadra(a.ring); else if (n < 20) setTimeout(() => go(n + 1), 300); }; go(0); } }, 0); }
   const sty = (on) => 'display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:10px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:700;color:#15201A;box-shadow:0 1px 3px rgba(21,32,26,.18);' + (on ? 'border:1px solid #1E7A4C;background:#E4F3E9;' : 'border:1px solid #E4E9E5;background:#FFFFFF;');
   v.r_des_st = sty(!!st.dw); v.r_des_on = st.dw ? 'true' : 'false'; v.r_imp_st = sty(!!st.imp); v.r_imp_on = st.imp ? 'true' : 'false';
-  v.r_des = () => { if (self.state.dw) self.setState({ dw: null, g2toast: 'Desenho descartado.' }); else tmIniciar(self, 'novo'); };
+  v.r_des = () => { if (self.state.dw) self.setState({ dw: null, g2toast: 'Desenho descartado.' }); else { const tv = typeof assinTrava === 'function' ? assinTrava('ampliar_area') : ''; if (tv) self.setState({ g2toast: tv }); else tmIniciar(self, 'novo'); } };   // PLAT-01 R12
   v.r_imp = () => self.setState({ imp: self.state.imp ? null : { etapa: 'arq', err: '' }, dw: null, tsel: [], px: null, mpa: null });
   // barra do desenho
   const dw = st.dw; v.tm_dbar = !!(real && dw && dw.etapa === 'desenho');

@@ -157,6 +157,8 @@ function valida2(self,v,gid,fn){ const F=v[gid+'_F']; if(!F||!F.open||!F.edit) r
 function talErros(d,fm,ctx){ const e={}; const id=fm.rid; const nome=String(d.t||'').trim(); const out=ctx.tals.filter(r=>r.id!==id);
   const fz=ctx.fazs.find(f=>f.v.nome===d.faz); const al=(id&&ctx.aloc[id])||{}; const comParc=Object.keys(al).filter(s=>al[s]>0);
   const antes=id?ctx.tals.find(r=>r.id===id):null;
+  // PLAT-01 R12: assinatura inadimplente não amplia a área medida (talhão novo ou reativado); editar o existente segue (defesa ao gravar)
+  const tv=(typeof assinTrava==='function'&&d.sit!=='Inativo'&&(!id||(antes&&antes.v.sit==='Inativo')))?assinTrava('ampliar_area'):''; if(tv){ if(id) e.sit=tv; else e.t=tv; }
   if(!d.faz||d.faz===NOVA_FAZ) e.faz='Escolha a fazenda.';
   // parcelas de safra aberta pertencem à fazenda da safra: o talhão só muda de fazenda depois de tirá-las no Planejar safra
   else if(antes&&antes.v.faz&&d.faz!==antes.v.faz&&comParc.length) e.faz=(nome||'O talhão')+' tem parcelas na '+comParc.join(' e na ')+' da '+antes.v.faz+'. Tire-as no Planejar safra antes de mudar de fazenda.';
@@ -423,8 +425,11 @@ function EXTRAVALS(self,v){ simv(self,v); const fz=RW(self,'g_faz'), ts=tals(RW(
     ff.set=(e)=>{ const val=e.target.value; if(val!==NOVA_FAZ){ draftSet(self,'g_tal',{faz:val}); return; }
       self._stash=Object.assign({},g2st(self,'g_tal').fm); g2set(self,'g_tal',{fm:null}); g2new(self,GR('g_faz')); }; }
   valida2(self,v,'g_tal',(d,fm)=>{ const o=fm.rid?ts.find(t=>t.id===fm.rid):null; self._sit0=o?o.v.sit:''; return talErros(d,fm,{tals:ts,fazs:fz,aloc:ALOC}); });
-  v.tal_new=(fid)=>{ const f=fz.find(x=>x.id===fid); g2new(self,GR('g_tal')); if(!f) return; const cur=g2st(self,'g_tal').fm;
-    g2set(self,'g_tal',{fm:Object.assign({},cur,{draft:Object.assign({},cur.draft,{faz:f.v.nome}),orig:Object.assign({},cur.orig,{faz:f.v.nome})})}); };
+  // PLAT-01 R12: Cadastrar talhão recusa antes de abrir o formulário quando a assinatura está inadimplente
+  const trava=(go)=>(...a)=>{ const tv=typeof assinTrava==='function'?assinTrava('ampliar_area'):''; if(tv){ self.setState({g2toast:tv}); return; } return go(...a); };
+  if(v.g_tal_new) v.g_tal_new=trava(v.g_tal_new);
+  v.tal_new=trava((fid)=>{ const f=fz.find(x=>x.id===fid); g2new(self,GR('g_tal')); if(!f) return; const cur=g2st(self,'g_tal').fm;
+    g2set(self,'g_tal',{fm:Object.assign({},cur,{draft:Object.assign({},cur.draft,{faz:f.v.nome}),orig:Object.assign({},cur.orig,{faz:f.v.nome})})}); });
   const fmp=fz.find(f=>f.id===MAPA_FID);
   MAPA.forEach(id=>{ v['mc_'+id]=()=>{ const r=g2find(RW(self,'g_tal'),id); if(r&&fmp&&r.v.faz===fmp.v.nome) g2open(self,GR('g_tal'),id,null); }; });
   self.g2after=(gid,rows,r,isNew)=>{ if(!r) return;
