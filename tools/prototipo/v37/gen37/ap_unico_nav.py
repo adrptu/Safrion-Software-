@@ -74,6 +74,10 @@ def rodar():
         a.ok('Já há dia 5, 50 ha pela web' in p and 'em 26/09. Se for outro turno, salve' in p, 'aviso no formulário antes de salvar (sem clique): ' + p[p.find('Já há'):][:160])
         btn('Cancelar')
         # 4 · painel: selo, pendência com Paula, linha não somada com as três saídas, acumulado 240 (não 290)
+        # CTL-3 (ATOR): as três saídas são de quem confere; com o perfil Ana (padrão) a linha só diz quem decide; com o perfil Paula, elas aparecem
+        p = pan(); semAna = not temb('Outro turno: somar') and not temb('Mesmo turno: vale o dia 5') and 'Quem decide: Paula (conferência).' in p
+        a.ok(semAna, 'CTL-3: perfil Ana não vê as três saídas da duplicidade; a linha diz "Quem decide: Paula (conferência).": ' + p[p.find('Dia 6'):][:220])
+        J("(()=>{const i=document.querySelector('[aria-label=\"Trocar perfil de demonstração\"]'); Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(i,'Paula'); i.dispatchEvent(new Event('change',{bubbles:true}));})()"); time.sleep(.4)
         p = pan()
         a.ok('Apontamento em conferência' in p and 'Paula (conferência)' in p and 'decidir se o dia 6 é outro turno' in p and 'não somado' in p
              and temb('Mesmo turno: vale o dia 5') and temb('Mesmo turno: vale este') and temb('Outro turno: somar') and '240 / 350' in p and '290 / 350' not in p

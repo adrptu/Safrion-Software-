@@ -31,8 +31,8 @@ try:
          f'liberar: {RQ} reserva Glifosato 480 320 L (G26-14), 2,4-D 806 160 L e Óleo mineral 80 L; painel mostra a reserva por lote', (ct[-300:], st, tt))
     # 2b · CTL-1 (Frente F): a confirmação diz que é aprovar e liberar; a Origem ganha CMD-42 (área e doses) e CMD-06 (requisição reservada)
     p = T.pan()
-    T.ok('ao confirmar, Ana (agrônoma) aprova esta versão e libera' in ct and re.search(r'v1 aprovada por Ana \(agrônoma\) às \d\d:\d\d · 160 ha · Glifosato 480 2 L/ha, 2,4-D 806 1 L/ha, Óleo mineral 0,5 L/ha \(CMD-42\)', p)
-         and re.search(r'v1 liberada por Ana \(agrônoma\) às \d\d:\d\d · ' + RQ + r' reservada no Estoque \(CMD-06\)', p) and tt.rstrip().endswith('v1 aprovada e liberada por Ana (agrônoma).'),
+    T.ok('ao confirmar, Ana (agrônoma) aprova esta versão e Ana (gestora) libera' in ct and re.search(r'v1 aprovada por Ana \(agrônoma\) às \d\d:\d\d · 160 ha · Glifosato 480 2 L/ha, 2,4-D 806 1 L/ha, Óleo mineral 0,5 L/ha \(CMD-42\)', p)
+         and re.search(r'v1 liberada por Ana \(gestora\) às \d\d:\d\d · ' + RQ + r' reservada no Estoque \(CMD-06\)', p) and tt.rstrip().endswith('v1 aprovada por Ana (agrônoma) e liberada por Ana (gestora).'),   # CTL-3: CMD-06 pelo papel liberador (gestor)
          'CTL-1: confirmar = aprovar esta versão e liberar; Origem com CMD-42 e CMD-06 separados', (ct[-300:], p[p.find('ORIGEM'):][:500], tt))
     # 3 · Estoque entrega os 3 itens a Marcos (outra tela): o painel mostra entregue, embalagem e a quem, sem recarregar
     for prod, q in (('Glifosato 480', 320), ('2,4-D 806', 160), ('Óleo mineral', 80)): T.mudar(f"return cenEntregar(c,'{RQ}','{prod}',{q},'Marcos');", avisar=False)

@@ -14,7 +14,7 @@ const iniWeb = id => w(`(()=>{const r=cenMudar(null,c=>osc_iniciar(c,'${id}'));r
 const mud = (X, s) => X.__x(`(()=>{const r=cenMudar(null,c=>{${s}});return r.erro||r.msg||''})()`);
 const reset = () => { w('cenReset()'); a('cenReset()'); };   // os dois quadros voltam ao seed (cenReset limpa a memória de cada um)
 const st = s => w(`(()=>{const c=cenGet();return (${s})})()`);
-const lib0430 = () => { reset(); mud(W, "return osc_liberar(c,'OS-0430',false,'')"); return st("c.ordens['OS-0430'].req"); };
+const lib0430 = () => { reset(); mud(W, "return osc_liberar(c,'OS-0430',false,'','Ana')"); return st("c.ordens['OS-0430'].req"); };
 const ent = (rid, p, q) => mud(W, `return cenEntregar(c,'${rid}','${p}',${q},'Marcos')`);
 const conf = rid => mud(A, `return cenConfirmarRecebimento(c,'${rid}')`);
 const fechar = (ha, cons) => mud(A, `return cenFecharTurno(c,${ha},1,${cons ? JSON.stringify(cons) : 'null'},'')`);
@@ -90,7 +90,7 @@ fechar(100, { 'Glifosato 480': 320, '2,4-D 806': 160, 'Óleo mineral': 80 }); co
 ok('P6b web sem sinal: o consumo no aparelho não vira "Insumo esgotado" antes do envio; com o sinal vira, com Ana (60 ha a fazer)', !/Insumo esgotado/.test(m6b[0]) && m6b[1] !== 'Ana (agrônoma)'
    && /Insumo esgotado · Glifosato 480, 2,4-D 806, Óleo mineral\/red/.test(m6c[0]) && m6c[1] === 'Ana (agrônoma)', [m6b, m6c]);
 // P3 · exceções legítimas: ordem sem insumo (inclui água sem produto, DEC-2609-10) não passa pela regra
-reset(); mud(W, "return osc_liberar(c,'OS-0511',false,'')");
+reset(); mud(W, "return osc_liberar(c,'OS-0511',false,'','Ana')");
 ok('P3 sem insumo: OS-0505 (Em execução) e OS-0511 (liberada sem requisição) iniciam', iniApp('OS-0505') === '' && mud(A, 'c.app.turno=null; return {msg:"x"}') === 'x' && iniApp('OS-0511') === '', [iniApp('OS-0505')]);
 // P4 · residual registrado: componente fora da requisição (Adjuvante da OS-0421) não é coberto por esta correção
 reset();

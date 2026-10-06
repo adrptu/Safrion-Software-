@@ -13,6 +13,8 @@ cham=sorted(f for f,s in src.items() if re.search(r'\bosc_liberar\(',s))
 ok('E1 em todo o código de produto, só a O.S. e o Mapa chamam osc_liberar', cham==['areas/inicio.py','areas/processo_os.py'], cham)
 cl=sorted(f for f,s in src.items() if re.search(r'\bcenLiberar\(c',s) and not f.endswith('cenario.js'))
 ok('E1b só osc_liberar (processo_os) chama cenLiberar: nenhum atalho libera sem gravar CMD-42/CMD-06', cl==['areas/processo_os.py'], cl)
+ef=[(f,len(re.findall(r'\bosc_libEfeito\(',s))) for f,s in src.items() if re.search(r'\bosc_libEfeito\(',s)]   # CTL-3: definição + 2 chamadas
+ok('E1c o efeito sem o registro de quem decide (osc_libEfeito) só é chamado por osc_liberar e pela prévia osLibErro (cópia)', ef==[('areas/processo_os.py',3)], ef)
 seed=cenario.seed()['ordens']
 ok('E2 nenhuma ordem de beneficiamento ou manutenção em A liberar no cenário (OB-0104 Encerradas)', not [k for k,o in seed.items() if re.match(r'O[BM]-',k) and o['etapa']=='A liberar'])
 ops={a['op'] for p in P._nova_ordem_dados()['planos'].values() for a in p['atv']}

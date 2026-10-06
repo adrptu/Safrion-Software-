@@ -102,9 +102,15 @@ try:
     J("localStorage.removeItem('talhao-os-cenario-v1')"); mapa(); tap('T1'); ver('T1','Ver ordens')
     r1=clk('Liberar para execução','aside[aria-label^="T1"]'); ct=pan('T1'); r2=clk('Confirmar liberação','aside[aria-label^="T1"]'); t=T()
     ev=J("(((JSON.parse(localStorage.getItem('talhao-os-cenario-v1')||'{}').ordens||{})['OS-0430']||{}).osc||{}).ev||[]") or []
-    chk('15 Mapa: confirmação "aprova esta versão e libera" e liberar a OS-0430 grava CMD-42 e CMD-06 (v1, Ana)',
-        r1=='ok' and r2=='ok' and 'Ana (agrônoma) aprova esta versão e libera' in ct and [e.get('cmd') for e in ev]==['CMD-42','CMD-06']
-        and all(e.get('v')=='v1' and e.get('por')=='Ana (agrônoma)' for e in ev) and 'v1 aprovada e liberada por Ana (agrônoma).' in t, [r1,r2,ct[-300:],ev,t])
+    chk('15 Mapa: confirmação "Ana (agrônoma) aprova esta versão e Ana (gestora) libera" e liberar a OS-0430 grava CMD-42 (agrônoma) e CMD-06 (gestora), v1 (CTL-3: o Mapa repassa o perfil)',
+        r1=='ok' and r2=='ok' and 'Ana (agrônoma) aprova esta versão e Ana (gestora) libera' in ct and [e.get('cmd') for e in ev]==['CMD-42','CMD-06']
+        and all(e.get('v')=='v1' for e in ev) and [e.get('por') for e in ev]==['Ana (agrônoma)','Ana (gestora)'] and 'v1 aprovada por Ana (agrônoma) e liberada por Ana (gestora).' in t, [r1,r2,ct[-300:],ev,t])
+    # 15b · CTL-3 (ATOR): com o perfil Caio (PCP), o Mapa mostra quem decide no lugar de "Liberar para execução" e não oferece o ajuste
+    J("localStorage.removeItem('talhao-os-cenario-v1'); localStorage.setItem('safrion.perfilDemo','Caio')"); mapa(); tap('T1'); ver('T1','Ver ordens'); t1=pan('T1')
+    bt=J("[...document.querySelectorAll('aside[aria-label^=\"T1\"] [aria-label=\"Próximo passo\"] button, aside[aria-label^=\"T1\"] [aria-label=\"Próximo passo\"] a')].map(b=>b.innerText.trim())") or []
+    chk('15b Mapa com o perfil Caio: "Liberar para execução: decisão de Ana (agrônoma e gestora)." sem o botão nem "Ajustar antes de liberar"',
+        'Liberar para execução: decisão de Ana (agrônoma e gestora).' in t1 and not any(b.startswith('Liberar para execução') or b.startswith('Ajustar antes de liberar') for b in bt), [bt,t1[:500]])
+    J("localStorage.removeItem('safrion.perfilDemo')"); tap('T1')
     # 16 · CTL-1 (Frente E1): no Mapa, a trava legal é a mesma da O.S.: dose fora da bula → "Liberar bloqueado", quem resolve Ana, sem Liberar
     c.goto(f'http://127.0.0.1:{p}/OS.dc.html',wait=1.2); tem=J("!!(window.__cen&&window.__cen.cenMudar)")   # o gancho do cenário está na tela O.S.
     J("window.__cen.cenReset(); window.__cen.cenMudar(null,c=>{ c.ordens['OS-0430'].ins[0].dose=7.5; c.ordens['OS-0430'].ins[0].tot=1200; return {msg:''}; })")

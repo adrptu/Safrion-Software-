@@ -10,7 +10,7 @@ MOTOR, PRELUDIO = ([JSC], '') if os.path.exists(JSC) else (['node'], 'globalThis
 import cenario
 import areas.processo_os as P
 osd = dict(ords=P._ordens(), nova=P._nova_ordem_dados())
-src = (PRELUDIO + cenario.js_prefixo() + 'const OSD = ' + json.dumps(osd, ensure_ascii=False) + ';\n' + P.JS_NUCLEO + '\n'
+src = (PRELUDIO + cenario.perfis_js() + cenario.js_prefixo() + 'const OSD = ' + json.dumps(osd, ensure_ascii=False) + ';\n' + P.JS_NUCLEO + '\n'
        + open(os.path.join(HERE, 'os_aprov_lib_unit.js'), encoding='utf-8').read())
 fd, p = tempfile.mkstemp(prefix='os_aprov_lib_', suffix='.js')
 with os.fdopen(fd, 'w', encoding='utf-8') as f: f.write(src)

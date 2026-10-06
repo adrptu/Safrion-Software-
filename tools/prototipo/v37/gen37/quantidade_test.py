@@ -61,7 +61,7 @@ function fluxo(c,id,res){ const o=c.ordens[id]; res.area=o.area; res.tot=o.ins[0
   const passo=(n,f)=>{ try{ f(); }catch(e){ res.erro=n+': '+e.message; throw e; } };
   // o assunto aqui é a custódia, não a falta de estoque: completa o lote antes de liberar (só no teste)
   (o.ins||[]).forEach(x=>{ const l=cenLote(c,x.p); if(l&&cenDisp(l)<x.tot) l.fisico+=x.tot; });
-  try{ passo('liberar',()=>osc_liberar(c,id,false,''));
+  try{ passo('liberar',()=>osc_liberar(c,id,false,'','Ana'));   /* CTL-3: quem aprova e libera */
     const rq=c.reqs[o.req]; for(const it of rq.itens){ const q=cenSaldoEntregar(it); if(q>1e-9) passo('entregar',()=>cenEntregar(c,o.req,it.prod,q,'X')); }
     passo('confirmar',()=>cenConfirmarRecebimento(c,o.req)); passo('iniciar',()=>osc_iniciar(c,id));
     passo('apontar o saldo',()=>osc_apontar(c,id,'20/10',o.saldo)); passo('conferência',()=>osc_conferencia(c,id)); }catch(e){}
@@ -117,7 +117,7 @@ R.r4.term=[term(20.275),term(0.004)];
   R.r4.rotulo=[o.selos.map(x=>x.t).join(','),o.dono,o.prazo];
   // 13 · rodada 5 (PRE-REV X1/X2/X5): o painel diz o agrônomo e não o Estoque; ajuste sem liberar recusa total 0; v2 com outra passada
   let px=null; try{ px=osProx(o); }catch(e){ px={erro:e.message}; } R.r5={prox:JSON.stringify(px||{})};
-  try{ osc_ajustar(c,'Z0',9,{[ub.nome]:0.0001},'',[],[],false); /* muda a área: grava versão nova */ R.r5.ajSemLib='gravou'; }catch(e){ R.r5.ajSemLib=e.message; } }
+  try{ osc_ajustar(c,'Z0',9,{[ub.nome]:0.0001},'',[],[],false,'Ana'); /* muda a área: grava versão nova */ R.r5.ajSemLib='gravou'; }catch(e){ R.r5.ajSemLib=e.message; } }
 { irrReset(); const s=irrGet(); const id2=Object.keys(s.ordens).find(k=>s.ordens[k].passadas.length>1&&['Liberadas'].indexOf(s.ordens[k].etapa)>=0);
   if(id2){ irrIniciar(s,id2); const o2=s.ordens[id2], x2=s.setores[o2.setor], p2=irrPassAtual(o2); p2.cob=x2.ha; R.r5.multi=irrV2Zero(o2,x2,p2,12); } else R.r5.multi='sem ordem de 2 passadas'; }
 // 14 · rodada 6 (PRE-REV U1–U5): crédito de avanço pequeno; v2 com passada em curso e outra programada; número não finito; dose da v2
@@ -145,10 +145,10 @@ def roda(src):
     p = subprocess.run(MOTOR + [f.name], capture_output=True, text=True, timeout=300); os.unlink(f.name)
     if p.returncode != 0: print(p.stderr[-1500:]); sys.exit(1)
     return json.loads(p.stdout.strip().splitlines()[-1])
-R = roda(PRELUDIO + cenario.js_prefixo() + JS_NUCLEO + '\nconst CASOS=' + json.dumps(casos) + ';\n' + JS)
+R = roda(PRELUDIO + cenario.perfis_js() + cenario.js_prefixo() + JS_NUCLEO + '\nconst CASOS=' + json.dumps(casos) + ';\n' + JS)
 import areas.agronomia as AG
 DOM = 'globalThis.document={getElementById:()=>null,querySelector:()=>null};globalThis.setTimeout=()=>0;\n'   # agFoco sem tela
-F = roda(PRELUDIO + LS + DOM + cenario.js_prefixo() + JS_NUCLEO + dados_mip.js_prefixo() + dados_irrigacao.js_prefixo() + AG.JS_AG01 + JS_FLUXO)
+F = roda(PRELUDIO + LS + DOM + cenario.perfis_js() + cenario.js_prefixo() + JS_NUCLEO + dados_mip.js_prefixo() + dados_irrigacao.js_prefixo() + AG.JS_AG01 + JS_FLUXO)
 
 dif = [(c, a, b) for c, a, b in zip(casos, py, R['grade']) if a != b]
 empates = [c for c in casos if (round(c[0] * c[1] * 1000) % 10 == 5)]

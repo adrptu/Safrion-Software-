@@ -296,7 +296,7 @@ function osTrilha(o,it){ if(!it||o.etapa==='Canceladas'||(!o.reservado&&!(it.ent
   return S.map((s,i)=>({t:(i?'› ':'')+s[0],st:ST[s[1]]})); }
 // liberar sem gravar (cópia do cenário): o erro de saldo ou de lote vira o motivo do bloqueio antes do clique
 function osLibErro(o,c0){ const c=c0||cenGet(); if(!c.ordens[o.id]) return ''; const k=cenClone(c);
-  try { osc_liberar(k,o.id,false,o.janela); return ''; } catch (e) { return String(e.message||e); } }
+  try { osc_libEfeito(k,o.id,false,o.janela); return ''; } catch (e) { return String(e.message||e); } }   /* o motivo do Estoque, da lei ou da carência; não o perfil */
 function osEncBloq(o){ const m=o.encM;
   if(/sinal/.test(m)) return {acao:'encerrar',t:'Encerrar bloqueado: há apontamentos no aparelho aguardando sinal.',q:o.resp+' reconecta o app; o envio é automático e não duplica.'};
   if(/duplicidade/.test(m)) return {acao:'encerrar',t:'Encerrar bloqueado: '+m,q:CEN_CONF_AP+' decide na linha do apontamento: mesmo turno conta uma vez; outro turno soma.'};
@@ -314,14 +314,26 @@ function osc_txt(o,p){ Object.assign(o.osc,p,{fase:o.etapa}); }
 // registros separados na trilha da ordem: aprovação da versão (CMD-42, agrônomo) e liberação (CMD-06). Água só com água (DEC-2609-10)
 // não grava CMD-42; manutenção (manLiberar) e beneficiamento não passam por osc_liberar.
 const OS_AGRO='Ana (agrônoma)';   // agrônoma das duas fazendas no protótipo (DONO aqui e em dados_lagoa_safra)
+const OS_LIB='gestor';   /* papel liberador do CMD-06 na demonstração (padrão dos agentes, 05/10/2026; o proprietário pode mudar). O CMD-42 é do agrônomo */
 function osVn(s){ return (String(s||'').match(/\bv\d+\b/g)||['v1']).pop(); }   // versão da ordem: o último vN (fonte única: tela, Mapa e registro)
-function osc_aprovLib(o){ const hr=cenAgora(), vn=osVn(o.versao);
+function osc_aprovLib(o,qa,ql){ const hr=cenAgora(), vn=osVn(o.versao);   /* qa/ql: quem aprovou e quem liberou (perfil conferido em osLibPor) */
   const esc=cenNum(o.area)+' ha · '+((o.ins||[]).length?o.ins.map(x=>x.p+' '+cenNum(x.dose,4)+' '+x.un+'/ha').join(', '):'sem insumos');
-  o.osc.ev=(o.osc.ev||[]).concat([{cmd:'CMD-42',v:vn,por:OS_AGRO,at:hr,t:vn+' aprovada por '+OS_AGRO+' às '+hr+' · '+esc+' (CMD-42)'},
-    {cmd:'CMD-06',v:vn,por:OS_AGRO,at:hr,t:vn+' liberada por '+OS_AGRO+' às '+hr+(o.reservado&&o.req?' · '+o.req+' reservada no Estoque':'')+' (CMD-06)'}]);
-  return ' '+vn+' aprovada e liberada por '+OS_AGRO+'.'; }   // o próximo passo fica só no painel (osCondGen), sem segunda versão no aviso
-// liberar (agrônomo; pode ajustar antes): reserva por lote (cenLiberar); água sem produto libera pela prontidão, sem requisição
-function osc_liberar(c,id,agua,jan){ const o=osc_o(c,id);
+  o.osc.ev=(o.osc.ev||[]).concat([{cmd:'CMD-42',v:vn,por:qa,at:hr,t:vn+' aprovada por '+qa+' às '+hr+' · '+esc+' (CMD-42)'},
+    {cmd:'CMD-06',v:vn,por:ql,at:hr,t:vn+' liberada por '+ql+' às '+hr+(o.reservado&&o.req?' · '+o.req+' reservada no Estoque':'')+' (CMD-06)'}]);
+  return ' '+vn+' aprovada por '+qa+' e liberada por '+ql+'.'; }   /* o próximo passo fica só no painel (osCondGen), sem segunda versão no aviso */
+// CTL-3 · ATOR: quem aprova (CMD-42, agrônomo) e quem libera (CMD-06, OS_LIB) vêm do perfil de quem age, conferido no cadastro antes de qualquer
+// gravação (PRD 41.3 l.6864: "o usuário possuir ambas as permissões"; CMD-06 l.2777). Dano evitado: liberação gravada em nome de quem não decidiu.
+function osLibPor(ator,id,vn){ return [cenExige(ator,'agronomo','Aprovar a '+vn+' da '+id+' (CMD-42)'),cenExige(ator,OS_LIB,'Liberar a '+id+' (CMD-06)')]; }
+function osLibTxt(PF){ return g2ator(PF,'agronomo')+' aprova esta versão e '+g2ator(PF,OS_LIB)+' libera'; }   /* confirmação (O.S. e Mapa) */
+// água só com água (DEC-2609-10) é decidida pela ordem (cadastro de irrigação), não pelo sinal da tela: sem isso o sinal liberaria sem CMD-42
+function osSoAgua(o){ return (typeof OSD!=='undefined'&&(OSD.ords||[]).some(b=>b.id===o.id&&b.agua))||/^Irrigação/i.test(String(o.tipo||'')); }
+// liberar (agrônomo aprova e liberador libera; pode ajustar antes): reserva por lote (cenLiberar); água sem produto libera pela prontidão, sem requisição
+function osc_liberar(c,id,agua,jan,ator){ const o=osc_o(c,id);
+  if(agua&&!osSoAgua(o)) throw new Error(id+' não é irrigação só com água: exige aprovação agronômica.');
+  const q=agua?null:osLibPor(ator,id,osVn(o.versao));
+  const r=osc_libEfeito(c,id,agua,jan); if(q) r.msg+=osc_aprovLib(o,q[0],q[1]); return r; }
+// efeito da liberação, sem o registro de quem decide: só osc_liberar (que grava CMD-42/CMD-06) e a prévia osLibErro (na cópia) o chamam
+function osc_libEfeito(c,id,agua,jan){ const o=osc_o(c,id);
   { const cb=carBloqColheita(c,o,'liberar'); if(cb) throw new Error(cb.t); }   // carência (MAPA-CARENCIA-LMR-20261003)
   if(agua){ if(o.etapa!=='A liberar') throw new Error(id+' não está em A liberar.');
     if((o.ins||[]).length) throw new Error(id+' tem produto: exige aprovação agronômica.');   /* o comando não confia no sinal da tela (CTL-1 rev. 3) */
@@ -337,7 +349,7 @@ function osc_liberar(c,id,agua,jan){ const o=osc_o(c,id);
     if(r0&&!o.reservado){ r0.itens=r0.itens.filter(i=>i.entregue>0); r0.estado='Reservada'; }
     if(!o.req){ const rid=osc_reqId(c); o.req=rid; c.reqs[rid]={id:rid,os:id,itens:[],estado:'Reservada'}; }  // mesmo formato das existentes (REQ-041)
     r=cenLiberar(c,id); }
-  r.msg+=osc_aprovLib(o); return r; }
+  return r; }
 // ajustar antes de liberar (agrônomo): tirar produto, incluir produto, mudar dose e área; grava a versão seguinte (vN → vN+1) com a
 // linha de histórico, recalcula o total (dose × área) e libera no mesmo comando. Erro de saldo/lote desfaz tudo (cenMudar não grava).
 // rem = produtos que saem; add = [{p,dose,un,g}] produtos incluídos (do catálogo).
@@ -346,7 +358,8 @@ function osc_ajFalta(c,p,un,d,ar){ if(!isFinite(d)||!isFinite(ar)) return 'Dose 
   const l=cenLote(c,p), dp=l?cenDisp(l):0, need=cenQtd(d,ar);
   if(!(need>0)) return 'Dose × área dá 0 '+un+': aumente a dose ou a área.';
   return need>dp+1e-9?('Estoque: '+cenNum(dp)+' '+un+' disponíveis'+(l?' no lote '+l.lote:'')+' para '+cenNum(need)+' '+un+'. Baixe a dose ou a área, ou troque o produto.'):''; }
-function osc_ajustar(c,id,area,doses,jan,rem,add,lib){ const o=osc_o(c,id); if(o.etapa!=='A liberar') throw new Error(id+' não está em A liberar.');
+function osc_ajustar(c,id,area,doses,jan,rem,add,lib,ator){ const o=osc_o(c,id); const qa=cenExige(ator,'agronomo','Ajustar a '+id+' (nova versão)');   /* dose e área: decisão do agrônomo */
+  if(o.etapa!=='A liberar') throw new Error(id+' não está em A liberar.');
   rem=rem||[]; add=add||[]; o.ins=o.ins||[]; lib=lib!==false;   // lib=false: grava a versão sem liberar (liberação impedida por outro motivo)
   if(!(area>0)) throw new Error('Informe a área maior que 0 ha.'); if(area>o.area+1e-9) throw new Error('Máximo '+cenNum(o.area)+' ha: é a área da ordem.');
   rem.forEach(p=>{ if(!o.ins.some(x=>x.p===p)) throw new Error(p+' não está na ordem.'); });
@@ -357,15 +370,15 @@ function osc_ajustar(c,id,area,doses,jan,rem,add,lib){ const o=osc_o(c,id); if(o
   o.ins.forEach(x=>{ const d=(doses||{})[x.p]; if(d===undefined) return; if(!(d>0)) throw new Error('Informe a dose de '+x.p+' maior que 0 '+x.un+'/ha.');
     if(Math.abs(d-x.dose)>1e-9){ ch.push(x.p+' '+cenNum(x.dose,4)+' → '+cenNum(d,4)+' '+x.un+'/ha'); x.dose=d; } });
   add.forEach(a=>{ o.ins.push({g:a.g||'',p:a.p,dose:a.dose,un:a.un,tot:0,emb:(typeof OSD!=='undefined'&&OSD.nova&&(OSD.nova.emb||{})[a.p])||''}); ch.push('incluído '+a.p+' '+cenNum(a.dose,4)+' '+a.un+'/ha'); });
-  if(!ch.length){ if(!lib) throw new Error('Nada foi ajustado.'); const r=osc_liberar(c,id,false,jan); return {msg:'Nada foi ajustado; '+r.msg}; }
+  if(!ch.length){ if(!lib) throw new Error('Nada foi ajustado.'); const r=osc_liberar(c,id,false,jan,ator); return {msg:'Nada foi ajustado; '+r.msg}; }
   o.area=area; o.saldo=Math.max(0,area-(o.realizado||0)); o.ins.forEach(x=>{ x.tot=cenQtd(x.dose,area); });   /* regra única (SINT-C03) */
   { const z0=o.ins.find(x=>x.dose>0&&!(x.tot>0)); if(z0) throw new Error('Dose × área de '+z0.p+' dá 0 '+z0.un+': aumente a dose ou a área.'); }   /* nem sem liberar (PRE-REV X2) */
   { const e=osUsoErro(c,o); if(e) throw new Error(e); }   /* regra legal, também em Salvar ajuste (Frente E) */
   const s=String(o.versao||''); const re=/\bv(\d+)\b/g; let m=null, k; while((k=re.exec(s))) m=k;
   const vn=m?'v'+(Number(m[1])+1):'v2'; o.versao=m?s.slice(0,m.index)+vn+s.slice(m.index+m[0].length):(s?s+' · ':'')+vn;
-  const hr=cenAgora(); o.osc.aj=(o.osc.aj||[]).concat([{v:vn,at:hr,t:vn+' ajustada por '+OS_AGRO+' às '+hr+(lib?' ao liberar':'')+': '+ch.join('; ')}]);
+  const hr=cenAgora(); o.osc.aj=(o.osc.aj||[]).concat([{v:vn,at:hr,por:qa,t:vn+' ajustada por '+qa+' às '+hr+(lib?' ao liberar':'')+': '+ch.join('; ')}]);
   if(!lib) return {msg:id+' ajustada para '+vn+'. A liberação continua impedida.'+osUsoAtencao(c,id)};
-  const r=osc_liberar(c,id,false,jan);
+  const r=osc_liberar(c,id,false,jan,ator);
   return {msg:String(r.msg).replace(id+' liberada.',id+' ajustada para '+vn+' e liberada.')+osUsoAtencao(c,id)}; }   /* alertas também no Salvar e liberar (CTL-1 rev. 1) */
 // regra legal na O.S. (liberar e ajustar): a mesma do AG-01 (cenUsoLegal), por produto × cultura de cada talhão (ou parcela) da ordem.
 // Fertilizante, corretivo, semente, muda e adjuvante ficam fora do registro de agrotóxico; uso só com dose por semente (TS) não é comparado
@@ -402,7 +415,7 @@ function osc_apontar(c,id,d,ha,cons,est,chave){ const R=cenApontar(c,{os:id,d,ha
   const un=p=>((o.ins||[]).find(x=>x.p===p)||{}).un||''; const ins=Object.keys(ap.cons||{}).map(p=>p+' '+nd(ap.cons[p])+' '+un(p)).join(', ');
   return {msg:'Apontamento do dia '+ap.dia+': '+nd(ha)+' ha (provisório)'+(ins?' · usado: '+ins:'')+'. Saldo '+nf(o.saldo)+' ha; a ordem continua em execução.'
     +(R.ks.length?' Consumo em conferência: '+R.ks.map(k=>cenConfTxt(k,c)).join('; ')+' · '+CEN_CONC_RESP+' concilia.':'')}; }
-function osc_apDecidir(c,id,dia,modo,us){ return cenApDecidir(c,id,dia,modo,CEN_CONF_AP,us); }   // CMD-09: 'anterior' | 'este' | 'somar'; us = usado informado na conferência
+function osc_apDecidir(c,id,dia,modo,us,ator){ return cenApDecidir(c,id,dia,modo,ator,us); }   /* CMD-09 (quem confere): 'anterior' | 'este' | 'somar'; us = usado informado na conferência */
 // linhas de consumo do formulário (O.S. e Mapa), a mesma regra do MB-03: com o operador, sugere dose × área do trecho (editável, estimativa);
 // fora da requisição nada está em custódia: vazio = 0. q = o que vai ao comando; est = sugestão não editada.
 function osApIns(c,o,ha,ced){ const r=o.req&&c.reqs[o.req]; const pend=osApPend(o);
@@ -454,7 +467,7 @@ function nd(n,d){ return Number(n||0).toLocaleString('pt-BR',{minimumFractionDig
 // período da coluna Encerradas: da primeira à última data (janela e apontamentos feitos) das ordens da coluna
 // próximo passo da fase e o impedimento dele (registro: máquina, janela, conflito · cenário: saldo no Estoque, entrega, sinal ou sobra)
 // mesmo cálculo na tela de trabalho da O.S. e no painel do Mapa
-function osProx(o){
+function osProx(o,PF){
   let P; const temIns=(o.ins||[]).length>0;
   // A liberar: o agrônomo libera; com produto, pode ajustar dose e área antes (secundário P.sec, fn 'ajustar')
   if(o.etapa==='A liberar') P=o.agua?{t:'Água sem produto: libere pela prontidão operacional (janela, bomba, energia e sem conflito).',btn:'Liberar para execução',fn:'liberar'}
@@ -474,6 +487,8 @@ function osProx(o){
   if(!b&&P.fn==='iniciar'&&!o.agua) b=osIniErro(o,o.r);
   if(!b&&P.fn==='apontar'&&o.esg) b=o.esg;   // componente esgotado: Dispensar saldo segue no painel
   if(!b&&(P.fn==='liberar'||P.fn==='iniciar')&&o.carB) b=Object.assign({},o.carB,{acao:P.fn});   // carência (MAPA-CARENCIA-LMR-20261003)
+  const LP=['agronomo',OS_LIB];   /* CTL-3 · ATOR: sem os dois papéis, a tela diz quem decide; o comando recusa do mesmo jeito */
+  if(!b&&P.fn==='liberar'&&!o.agua&&PF&&!g2papel(PF,LP)) b={acao:'liberar',t:'Liberar para execução: decisão de '+g2quem(LP)+'.',q:g2quem('agronomo')+' aprova esta versão e '+g2quem(OS_LIB)+' libera; o perfil '+PF.t+' não tem esses papéis.',tone:'yellow',papel:true};
   return {P,b}; }
 '''
 JS=r'''
@@ -486,7 +501,7 @@ function dotSt(c){ const cc=G2C[c]||G2C.gray; return 'width:6px;height:6px;borde
 // ===== O.S. × cenário compartilhado (cenario.js, o mesmo estado do Estoque e do App) =====
 // Fase, realizado/saldo, apontamentos, requisição e insumos vêm de cenGet(); o que o cenário não tem vem de OSD (registro).
 // Gancho de teste/inspeção (o script da tela roda isolado): os testes os_* leem e mudam o cenário na própria página.
-try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenDevolver, cenConfirmarRecebimento, cenIniciarTurno, cenPausar, cenFecharTurno, cenOcorrencia, cenSinal, cenPodeEncerrar, osc_liberar, osc_ajustar, osc_encerrar, osc_apontar, osc_dispensar }; } catch (e) {}
+try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenDevolver, cenConfirmarRecebimento, cenIniciarTurno, cenPausar, cenFecharTurno, cenOcorrencia, cenSinal, cenPodeEncerrar, osc_liberar, osc_ajustar, osc_encerrar, osc_apontar, osc_dispensar, osc_apDecidir }; } catch (e) {}
 // filtros do topo (Fazenda e Safra): lista, Kanban, chips de fase e selo do cabeçalho mostram só as ordens do recorte
 function mfFaz(self){ return self.state.mf_faz||'Santa Rita'; }
 function mfSaf(self){ return self.state.mf_saf||'Todas'; }
@@ -566,7 +581,7 @@ function panSecs(self,v,o){ const f=o.etapa; const sx=((self.state.psx||{})[o.id
   const pct=o.area?Math.round(100*(o.realizado||0)/o.area):0; v.pan_hasProg=!!o.area&&(o.realizado||0)>0;
   v.pan_prog=nf(o.realizado||0)+' / '+nf(o.area||0)+' ha · '+pct+' %'+(o.saldo?' · saldo '+nf(o.saldo)+' ha':''); v.pan_progst='height:6px;border-radius:999px;background:#1E7A4C;width:'+Math.min(100,pct)+'%;'; }
 // tela de trabalho da ordem: atividade, insumos e doses, e o botão do próximo passo da fase
-function osWork(self,v,o){ const st=self.state; const a=o.atv||{};
+function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2perfil();   /* quem age (perfil de demonstração; CTL-3) */
   const kv=[['Operação',a.op||'—'],['Atividade',a.nome||o.tipo],['Gatilho',a.gat||'—'],['Local · área',o.talhao+(o.area?' · '+nf(o.area)+' ha':'')],['Janela',o.janela],['Responsável',o.resp]];
   if(a.conj){ kv.push(['Conjunto',a.conj+' · '+nd(a.rend)+' ha/h']); if(o.area) kv.push(['Horas previstas',nd(o.area/a.rend,1)+' h ('+nd((o.saldo||0)/a.rend,1)+' h no saldo)']); }
   const vp=String(o.versao).split(' · ').filter(p=>(a.orig||'').indexOf(p)<0); if(o.ajv&&vp.indexOf(o.ajv)<0) vp.push(o.ajv);  // ajustada ao liberar: a versão nova sempre aparece
@@ -590,7 +605,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{};
   v.pan_hasRet=exe&&(v.pan_retLink||v.pan_hasPrep||v.pan_fichas); v.pan_retT=v.pan_retLink?'Retirada e fichas de execução':'Fichas de execução';
   v.pan_hasIns=v.pan_ins.length>0; v.pan_semIns=!v.pan_hasIns; v.pan_semInsT=o.semins||'Sem insumos: a atividade é só operação.';
   // próximo passo por fase e impedimento (osProx, o mesmo do Mapa)
-  const pb=osProx(o); const P=pb.P; let b=pb.b;
+  const pb=osProx(o,PF); const P=pb.P; let b=pb.b;
   v.pan_dono=(!b&&o.dono)?('Pendência com '+o.dono+' · '+o.prazo):''; v.pan_hasDono=!!v.pan_dono;
   v.pan_pt=P.t; v.pan_pbtn=P.btn; v.pan_hasBtn=!!P.btn&&!b; v.pan_bloq=!!b; v.pan_bt=b?b.t:''; v.pan_bq=b?('Quem resolve: '+b.q):'';
   v.pan_hasBl=!!(b&&b.h); v.pan_bh=(b&&b.h)||'#'; v.pan_bhl=(b&&b.hl)||'';
@@ -609,7 +624,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{};
   v.pan_rmot=(pa&&pa.motivo)||''; v.pan_rerr=(pa&&pa.err)||''; v.pan_hasRerr=!!(pa&&pa.err);
   v.pan_setrmot=(e)=>self.setState({pa:Object.assign({},self.state.pa,{motivo:e.target.value,err:''})});
   // ajustar antes de liberar (secundário do passo A liberar com produto, também na confirmação): dose por insumo e área → osc_ajustar
-  v.pan_hasAj=!!P.sec; v.pan_hasAjc=v.pan_hasAj&&!b&&!!pa&&pa.fn==='liberar'; v.pan_ajbtn=P.sec?P.sec.btn:'';
+  v.pan_hasAj=!!P.sec&&g2papel(PF,'agronomo'); v.pan_hasAjc=v.pan_hasAj&&!b&&!!pa&&pa.fn==='liberar'; v.pan_ajbtn=P.sec?P.sec.btn:'';
   const ajLib=!b||b.h==='EST.dc.html'||!!b.total0||!!b.legal;   // falta no Estoque: o ajuste pode resolver e libera; máquina, janela ou conflito: só grava a versão
   v.pan_ajsbtn=ajLib?'Salvar e liberar':'Salvar ajuste';
   const vcur=osVn(o.versao); const vnx='v'+(Number(vcur.slice(1))+1);
@@ -665,13 +680,13 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{};
     if(Object.keys(errs).length){ self.setState({pa:Object.assign({},cur,{errs,err:''})}); return; }
     if((o.ins||[]).length&&rem.length===(o.ins||[]).length&&!add.length&&!cur.confVazio){
       self.setState({pa:Object.assign({},cur,{errs,confVazio:true,err:'A ordem fica sem nenhum produto. Clique em '+v.pan_ajsbtn+' de novo para confirmar, ou inclua um produto.'})}); return; }
-    osRun(self,c=>osc_ajustar(c,o.id,ar,ds,o.janela,rem,add,ajLib),{pa:null}); };
+    osRun(self,c=>osc_ajustar(c,o.id,ar,ds,o.janela,rem,add,ajLib,g2perfil()),{pa:null}); };
   const insTxt=(o.ins||[]).map(x=>x.p+' '+nd(x.tot)+' '+x.un).join(', ');
-  v.pan_ct={liberar:o.agua?('Liberar '+o.id+': janela, bomba e energia confirmadas; água sem requisição no Estoque.'):('Liberar '+o.id+' (versão '+osVn(o.versao)+'): ao confirmar, '+OS_AGRO+' aprova esta versão e libera; '+(insTxt?'a requisição reserva no Estoque, por lote: '+insTxt+'.':'sem insumos a reservar, nenhuma requisição no Estoque.')+osUsoAtencao(cenC,o.id)),iniciar:'Iniciar '+o.id+' agora, na janela '+o.janela+(o.r&&(o.ins||[]).length?': insumos com '+o.resp+', confirmados no app.':'.'),
+  v.pan_ct={liberar:o.agua?('Liberar '+o.id+': janela, bomba e energia confirmadas; água sem requisição no Estoque.'):('Liberar '+o.id+' (versão '+osVn(o.versao)+'): ao confirmar, '+osLibTxt(PF)+'; '+(insTxt?'a requisição reserva no Estoque, por lote: '+insTxt+'.':'sem insumos a reservar, nenhuma requisição no Estoque.')+osUsoAtencao(cenC,o.id)),iniciar:'Iniciar '+o.id+' agora, na janela '+o.janela+(o.r&&(o.ins||[]).length?': insumos com '+o.resp+', confirmados no app.':'.'),
     conferencia:'Enviar '+o.id+' para conferência: execução física concluída ('+nf(o.realizado)+' ha).',encerrar:'Encerrar '+o.id+': apontamentos enviados, consumo baixado e nada em custódia.'}[pa?pa.fn:'']||'';
   v.pan_cbtn={liberar:'Confirmar liberação',iniciar:'Confirmar início',conferencia:'Confirmar envio',encerrar:'Confirmar encerramento'}[pa?pa.fn:'']||'';
   v.pan_back=()=>self.setState({pa:null});
-  v.pan_yes=()=>{ const F={liberar:c=>osc_liberar(c,o.id,o.agua,o.janela),iniciar:c=>osc_iniciar(c,o.id),conferencia:c=>osc_conferencia(c,o.id),encerrar:c=>osc_encerrar(c,o.id)}[pa.fn];
+  v.pan_yes=()=>{ const F={liberar:c=>osc_liberar(c,o.id,o.agua,o.janela,g2perfil()),iniciar:c=>osc_iniciar(c,o.id),conferencia:c=>osc_conferencia(c,o.id),encerrar:c=>osc_encerrar(c,o.id)}[pa.fn];
     if(F) osRun(self,F,{pa:null}); };
   v.pan_ad=pa&&pa.d||''; v.pan_aha=pa&&pa.ha||''; v.pan_aerr=pa&&pa.err||''; v.pan_hasAerr=!!(pa&&pa.err);
   v.pan_asub='Saldo da ordem: '+nf(o.saldo)+' ha'+(apP>0?' · '+nf(apP)+' ha no aparelho aguardando sinal':'');
@@ -693,7 +708,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{};
   // ação secundária pelo realizado: sem realizado → cancelar sem execução; em execução → dispensar saldo (nunca cancela fato executado)
   const canCanc=!((o.realizado||0)>0)&&(o.etapa==='A liberar'||o.etapa==='Liberadas');
   const canDisp=o.etapa==='Em execução'&&!!o.area&&(o.saldo||0)>0.001;
-  const PF=g2perfil(), DSP=['gestor','agronomo'], agr=g2papel(PF,DSP);   /* dispensa: alçada gerencial e validação agronômica (CMD-47; AL-05) */
+  const DSP=['gestor','agronomo'], agr=g2papel(PF,DSP);   /* dispensa: alçada gerencial e validação agronômica (CMD-47; AL-05) */
   v.pan_hasCanc=canCanc; v.pan_hasDisp=canDisp&&agr; v.pan_dispQ=(canDisp&&!agr)?('Dispensar saldo: decisão de '+g2quem(DSP)+'.'):''; v.pan_hasDispQ=!!v.pan_dispQ;
   v.pan_cango=()=>self.setState({pa:{id:o.id,fn:'cancelar',motivo:'',err:''}});
   v.pan_disgo=()=>self.setState({pa:{id:o.id,fn:'dispensar',ha:String(apMax).replace('.',','),motivo:'',err:''}});
@@ -817,7 +832,8 @@ function EXTRAVALS(self,v){
     // duplicidade (AP-06/07): o retido não soma e mostra as três saídas de Paula (CMD-09); "vale este" só contra um relato já somado
     const cg=cenGet(), cgo=cg.ordens[o.id]; const apus=st.apus&&st.apus.id===o.id?st.apus:{id:o.id};
     const usOf=(dia)=>{ const u=apus[dia]||{}; const r={}; Object.keys(u).forEach(p=>{ const n=g2num(u[p]); if(String(u[p]).trim()!==''&&!isNaN(n)) r[p]=n; }); return r; };
-    const apDec=(dia,modo)=>osRun(self,c=>osc_apDecidir(c,o.id,dia,modo,usOf(dia)),{apus:null},(e)=>self.setState({g2toast:e}));
+    const apDec=(dia,modo)=>osRun(self,c=>osc_apDecidir(c,o.id,dia,modo,usOf(dia),g2perfil()),{apus:null},(e)=>self.setState({g2toast:e}));
+    const CONF=g2papel(g2perfil(),'conferente');   /* CMD-09: as três saídas só para quem confere (CTL-3 · ATOR) */
     let ac=0; v.pan_ap=(o.ap||[]).map(x=>{ const prev=x.st==='Previsto'; const sem=x.sinc===false; const som=!prev&&cenApSomado(x); if(som) ac+=x.ha; const s=sem?'Aguardando sinal':x.st;
       const dup=x.st===CEN_AP_DUP&&!!cgo; const viv=dup?cenApDupVivos(cgo,x):[]; const de=viv.map(a=>a.dia).join(', ');
       const K=viv.length===1&&cenApSomado(viv[0])?viv[0]:null; const uso=K?cenApUsoK(cg,cgo,K):'';
@@ -827,7 +843,7 @@ function EXTRAVALS(self,v){
       return {d:x.d,dia:'Dia '+x.dia+(x.origem==='app'?' · app':''),ha:(prev?'prev. ':'')+nf(x.ha)+' ha'+(x.h?' · '+nd(x.h,1)+' h':''),ac:(prev?'—':(!som?'não somado':nf(ac)+' / '+nf(o.area)+' ha')),t:s,st:chipSt(STCOR[s]),dot:dotSt(STCOR[s]),rst:prev?'color:#8A968E;':'',
         dup,dupT:!dup?'':(viv.length?'Mesma data e talhão do dia '+de+'. É outro turno? Quem decide: '+CEN_CONF_AP+'.':'O dia '+(x.dupDe||[]).join(', ')+' já não vale: este só pode ser somado como outro turno. Quem decide: '+CEN_CONF_AP+'.')
           +(uso?' "Vale este" indisponível: '+uso+'.':''),
-        vant:'Mesmo turno: vale o dia '+de,hasAnt:viv.length>0,hasEste:!!K&&!uso,usx,hasUs:usx.length>0,
+        vant:'Mesmo turno: vale o dia '+de,hasAnt:viv.length>0,hasEste:!!K&&!uso,usx,hasUs:CONF&&usx.length>0,pode:CONF,
         ant:()=>apDec(x.dia,'anterior'),este:()=>apDec(x.dia,'este'),somar:()=>apDec(x.dia,'somar')}; });
     v.pan_hasAp=v.pan_ap.length>0; v.pan_noAp=!v.pan_hasAp;
     v.pan_noApT=o.area?(o.etapa==='A liberar'||o.etapa==='Liberadas'?'Sem apontamentos: a ordem ainda não foi iniciada.':'Sem apontamentos registrados.'):'Ordem de processo: entradas e saídas são registradas por etapa do beneficiamento, não por área.';
@@ -962,10 +978,10 @@ def _painel():
            f'<label style="display: grid; grid-template-columns: minmax(0,1fr) 96px; gap: 2px 10px; align-items: center; font-size: 12px; font-weight: 600; color: {MUTED};"><span>{H("u.lab")}</span>'
            f'<input aria-label="{H("u.lab")}" inputMode="decimal" value="{H("u.v")}" onChange="{H("u.set")}" style="font-family: inherit; font-size: 14px; padding: 6px 9px; border-radius: 8px; border: 1px solid {LINE}; text-align: right; grid-row: span 2;">'
            f'<span style="font-weight: 400; font-size: 11.5px;">{H("u.hint")}</span></label></sc-for></div></sc-if>'
-           f'<div style="display: flex; gap: 6px; flex-wrap: wrap;">'
+           f'<sc-if value="{H("a.pode")}" hint-placeholder-val="{T()}"><div style="display: flex; gap: 6px; flex-wrap: wrap;">'
            f'<sc-if value="{H("a.hasAnt")}" hint-placeholder-val="{T()}"><button type="button" onClick="{H("a.ant")}" style="{_MINI}">{H("a.vant")}</button></sc-if>'
            f'<sc-if value="{H("a.hasEste")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("a.este")}" style="{_MINI}">Mesmo turno: vale este</button></sc-if>'
-           f'<button type="button" onClick="{H("a.somar")}" style="{_MINI}">Outro turno: somar</button></div></div></sc-if>')
+           f'<button type="button" onClick="{H("a.somar")}" style="{_MINI}">Outro turno: somar</button></div></sc-if></div></sc-if>')
     aphead=(f'<div style="display: grid; grid-template-columns: 64px 84px 1fr 1.3fr auto; gap: 8px; padding: 4px 0; font-size: 10.5px; font-weight: 700; letter-spacing: .04em; color: {MUTED}; text-transform: uppercase;">'
             f'<span>Data</span><span>Turno</span><span style="text-align: right;">Realizado</span><span style="text-align: right;">Acumulado</span><span>Situação</span></div>')
     IC='minmax(0,1.6fr) 96px 110px 110px minmax(0,1.5fr)'

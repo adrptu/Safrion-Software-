@@ -26,12 +26,12 @@ try:
     T.ok(oid == 'OS-0440' and 'Sem insumos' in p, 'nova ordem de colheita nasce sem insumos', (oid, p[:200]))
     pedir_liberar(); p = T.pan()
     T.ok('sem insumos a reservar' in p and 'nenhum insumo' not in p and 'por lote:' not in p, 'confirmação diz que não há insumo a reservar', p[p.find('PRÓXIMO'):][:300])
-    T.ok('Ana (agrônoma) aprova esta versão e libera' in p, 'CTL-1: confirmação diz que confirmar é aprovar esta versão e liberar', p[p.find('PRÓXIMO'):][:300])
+    T.ok('Ana (agrônoma) aprova esta versão e Ana (gestora) libera' in p, 'CTL-1/CTL-3: confirmação diz que confirmar é aprovar esta versão (agrônoma) e liberar (gestora)', p[p.find('PRÓXIMO'):][:300])
     T.btn('Confirmar liberação'); t = T.toast(); p = T.pan()
     ev = T.cen("((c.ordens['OS-0440'].osc||{}).ev||[]).map(e=>e.cmd+'|'+e.t)") or []
-    T.ok(len(ev) == 2 and re.match(r'^CMD-42\|v1 aprovada por Ana \(agrônoma\) às \d\d:\d\d · [\d.,]+ ha · sem insumos \(CMD-42\)$', ev[0]) and re.match(r'^CMD-06\|v1 liberada por Ana \(agrônoma\) às \d\d:\d\d \(CMD-06\)$', ev[1])
+    T.ok(len(ev) == 2 and re.match(r'^CMD-42\|v1 aprovada por Ana \(agrônoma\) às \d\d:\d\d · [\d.,]+ ha · sem insumos \(CMD-42\)$', ev[0]) and re.match(r'^CMD-06\|v1 liberada por Ana \(gestora\) às \d\d:\d\d \(CMD-06\)$', ev[1])
          and 'sem insumos (CMD-42)' in p and 'reservada' not in p, 'CTL-1: sem insumos grava CMD-42 "sem insumos" e CMD-06 sem reserva, e a Origem mostra os dois', (ev, p[p.find('ORIGEM'):][:400]))
-    T.ok(t.rstrip().endswith('v1 aprovada e liberada por Ana (agrônoma).'), 'CTL-1: aviso termina na aprovação (sem segundo próximo passo)', t)
+    T.ok(t.rstrip().endswith('v1 aprovada por Ana (agrônoma) e liberada por Ana (gestora).'), 'CTL-1/CTL-3: aviso termina na aprovação e na liberação (sem segundo próximo passo)', t)
     T.ok('OS-0440 liberada' in t and 'REQ' not in t and 'reservou' not in t, 'toast sem requisição vazia', t)
     T.ok(T.cen("c.ordens['OS-0440'].req") is None and T.cen("Object.keys(c.reqs).length") == n0 and not T.cen("Object.values(c.reqs).some(r=>!r.itens.length)"),
          'cenário: nenhuma requisição vazia', T.cen("JSON.stringify(Object.values(c.reqs).map(r=>[r.id,r.itens.length]))"))
@@ -47,9 +47,9 @@ try:
     T.ok('por lote: Fungicida TS 16 L, Inoculante líquido 32 L' in p, 'confirmação lista a reserva por lote', p[p.find('PRÓXIMO'):][:300])
     T.btn('Confirmar liberação'); t = T.toast(); p = T.pan()
     T.ok('REQ-041 reservou no Estoque: Fungicida TS 16 L, Inoculante líquido 32 L' in t, 'requisição nova com três dígitos: REQ-041', t)
-    T.ok(t.rstrip().endswith('v1 aprovada e liberada por Ana (agrônoma).'), 'CTL-1: aviso termina em "v1 aprovada e liberada por Ana (agrônoma)."', t)
+    T.ok(t.rstrip().endswith('v1 aprovada por Ana (agrônoma) e liberada por Ana (gestora).'), 'CTL-1/CTL-3: aviso termina em "v1 aprovada por Ana (agrônoma) e liberada por Ana (gestora)."', t)
     T.ok(re.search(r'v1 aprovada por Ana \(agrônoma\) às \d\d:\d\d · 160 ha · Fungicida TS 0,1 L/ha, Inoculante líquido 0,2 L/ha \(CMD-42\)', p)
-         and re.search(r'v1 liberada por Ana \(agrônoma\) às \d\d:\d\d · REQ-041 reservada no Estoque \(CMD-06\)', p), 'CTL-1: Origem com CMD-42 (área e doses) e CMD-06 (REQ-041 reservada)', p[p.find('ORIGEM'):][:500])
+         and re.search(r'v1 liberada por Ana \(gestora\) às \d\d:\d\d · REQ-041 reservada no Estoque \(CMD-06\)', p), 'CTL-1: Origem com CMD-42 (área e doses) e CMD-06 (REQ-041 reservada)', p[p.find('ORIGEM'):][:500])
     T.ok(T.cen("c.lotes['Fungicida TS|FT26-09'].reservado") == 16 and 'REQ-041' in T.ins(), 'reserva no lote e situação do insumo com REQ-041', (T.cen("c.lotes['Fungicida TS|FT26-09'].reservado"), T.ins()[:260]))
     T.fechar()
     # ---- 3) a próxima liberação segue a sequência (OS-0430 → REQ-042) ----

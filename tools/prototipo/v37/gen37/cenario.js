@@ -304,12 +304,13 @@ function cenApontar(c, k) {
   else { R = { ap, ks: cenApBaixa(c, o, ap), dup: [] }; c.app.fila.push('AP|' + k.os + '|' + dia); }   // no aparelho: baixa local; o servidor decide no envio
   if (!(o.saldo > 1e-9)) o.ap = o.ap.filter(a => a.st !== 'Previsto');
   return R; }
-// decisão de quem confere (CMD-09; CEN_CONF_AP). modo: 'somar' (outro turno: soma e baixa uma vez) · 'anterior' (mesmo turno: vale o já
+// decisão de quem confere (CMD-09; papel conferente, CTL-3 · ATOR: só quem tem o papel decide e só o nome dele é gravado). modo: 'somar' (outro turno: soma e baixa uma vez) · 'anterior' (mesmo turno: vale o já
 // somado; este fica guardado como duplicidade) · 'este' (mesmo turno: vale este; o já somado é estornado e guardado). O relógio ou a ordem de
 // chegada não define o vencedor (DEMO-11). Nenhum relato é apagado. true/false = 'somar'/'anterior' (chamadas antigas). us = usado informado
-// na conferência para a estimativa que passou da custódia (AP-04). Tudo é conferido antes de gravar: recusa não muda nada.
-function cenApDecidir(c, id, dia, modo, quem, us) {
-  modo = modo === true ? 'somar' : (modo === false ? 'anterior' : modo); quem = quem || CEN_CONF_AP;
+// na conferência para a estimativa que passou da custódia (AP-04). ator = quem decide (perfil). Tudo é conferido antes de gravar: recusa não muda nada.
+function cenApDecidir(c, id, dia, modo, ator, us) {
+  const quem = cenExige(ator, 'conferente', 'Decidir a duplicidade do dia ' + dia + ' da ' + id);   // dano evitado: decisão gravada em nome de Paula sem Paula
+  modo = modo === true ? 'somar' : (modo === false ? 'anterior' : modo);
   const o = c.ordens[id]; const ap = o && (o.ap || []).find(a => a.dia === dia && a.st === CEN_AP_DUP);
   if (!ap) throw new Error('O apontamento do dia ' + dia + ' não está em conferência de duplicidade.');
   if (['anterior', 'este', 'somar'].indexOf(modo) < 0) throw new Error('Decisão desconhecida: ' + modo + '.');
