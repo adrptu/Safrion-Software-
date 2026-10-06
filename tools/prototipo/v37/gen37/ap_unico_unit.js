@@ -162,11 +162,11 @@ caso(()=>{ const c=C(); osc_apontar(c,'OS-0421','27/09',50,undefined,undefined,'
 caso(()=>{ const c=C(); osc_apontar(c,'OS-0421','27/09',50,undefined,undefined,'W-1'); osc_apontar(c,'OS-0421','27/09',100,{'Fungicida A':0,'Adjuvante espalhante':0},[],'W-2');
   cenSinal(c,false); turno(c,70,8,{'Fungicida A':35}); const x=TRY(()=>cenApDecidir(c,'OS-0421',6,'este')); cenSinal(c,true);
   ok('V1b S2 "vale este" também desconta: 100 ha contra 90 ha (160 depois do estorno − 70 no aparelho) é recusado e nada é estornado', /^"Vale este" com 100 ha passa do saldo da ordem \(90 ha, descontando 70 ha ainda no aparelho\)\.$/.test(x.e)&&apS(c,5)==='Provisório'&&O(c).realizado===310&&inv(c), [x.e,fato(c)]); });
-caso(()=>{ const c=C(); osc_apontar(c,'OS-0421','26/09',50,{'Fungicida A':70,'Adjuvante espalhante':0},[],'W-1'); cenConciliar(c,c.confs[0].id,true);
+caso(()=>{ const c=C(); osc_apontar(c,'OS-0421','26/09',50,{'Fungicida A':70,'Adjuvante espalhante':0},[],'W-1'); cenConciliar(c,c.confs[0].id,true,undefined,'Ana');   // CTL-3 (padrão 2): os 5 L acima da custódia, aceite da gestora
   osc_apontar(c,'OS-0421','26/09',50,{'Fungicida A':27,'Adjuvante espalhante':0},[],'W-2'); const f0=JSON.stringify(fato(c)); const K=O(c).ap.find(a=>a.dia===5);
   const x=TRY(()=>cenApDecidir(c,'OS-0421',6,'este'));
-  ok('V2 S2 "vale este" com o consumo do dia 5 já aceito por Rui (CC-301) é recusado; nada muda (165 L, sem caso novo); a tela esconde o botão (cenApUsoK)', /^"Vale este" não desfaz o dia 5: consumo já aceito por Rui \(almoxarife\) \(CC-301\)\. Escolha "Mesmo turno: vale o dia 5"\.$/.test(x.e)
-     &&JSON.stringify(fato(c))===f0&&f0==='{"real":240,"saldo":110,"cons":165,"cust":0}'&&c.confs.length===1&&apS(c,5)==='Provisório'&&apS(c,6)===CEN_AP_DUP&&cenApUsoK(c,O(c),K)==='consumo já aceito por Rui (almoxarife) (CC-301)', [x.e,fato(c),c.confs.length]);
+  ok('V2 S2 "vale este" com o consumo do dia 5 já aceito (CC-301, pela gestora: CTL-3) é recusado com quem aceitou; nada muda (165 L, sem caso novo); a tela esconde o botão (cenApUsoK)', /^"Vale este" não desfaz o dia 5: consumo já aceito por Ana \(gestora\) \(CC-301\)\. Escolha "Mesmo turno: vale o dia 5"\.$/.test(x.e)
+     &&JSON.stringify(fato(c))===f0&&f0==='{"real":240,"saldo":110,"cons":165,"cust":0}'&&c.confs.length===1&&apS(c,5)==='Provisório'&&apS(c,6)===CEN_AP_DUP&&cenApUsoK(c,O(c),K)==='consumo já aceito por Ana (gestora) (CC-301)', [x.e,fato(c),c.confs.length]);
   const d=TRY(()=>cenApDecidir(c,'OS-0421',6,'anterior')); ok('V2b a saída que resta ("vale o dia 5") guarda o dia 6 sem baixa', !d.e&&apS(c,6)===CEN_AP_DESC&&JSON.stringify(fato(c))===f0, [d.e,fato(c)]); });
 caso(()=>{ const c=C(); const ids=()=>Object.keys(carLotes(c)).filter(k=>/^LC-0505-\d+$/.test(k)).join(','); const lid=carLid('OS-0505',4);
   osc_apontar(c,'OS-0505','26/09',10,undefined,undefined,'W-1'); t0505(c,10);
@@ -178,13 +178,14 @@ caso(()=>{ const c=C(); osc_apontar(c,'OS-0505','26/09',10,undefined,undefined,'
   ok('V3c "vale este" na colheita com o lote do dia 3 já com destino e liberação é recusado; lote, destino e liberação ficam', /^"Vale este" não desfaz o dia 3: lote LC-0505-3 com destino, liberação comercial\./.test(x.e)&&!!carLotes(c)[lk]&&st0505(c,3)==='Provisório'&&st0505(c,4)===CEN_AP_DUP&&!!carLib(c,lk), x.e); });
 caso(()=>{ const c=C(); osc_apontar(c,'OS-0505','26/09',10,undefined,undefined,'W-1'); t0505(c,10); const d=TRY(()=>cenApDecidir(c,'OS-0505',4,'este')); const L=carLotes(c);
   ok('V3d sem registro sobre o lote, "vale este" troca o lote: LC-0505-3 sai, LC-0505-4 entra', !d.e&&!L['LC-0505-3']&&!!L['LC-0505-4'], [d.e,Object.keys(L)]); });
-caso(()=>{ const c=C(); osc_apontar(c,'OS-0421','26/09',50,undefined,undefined,'W-1'); turno(c,50); const x=TRY(()=>osc_dispensar(c,'OS-0421',110,'chuva'));
+caso(()=>{ const c=C(); osc_apontar(c,'OS-0421','26/09',50,undefined,undefined,'W-1'); turno(c,50); const x=TRY(()=>osc_dispensar(c,'OS-0421',110,'chuva','Ana'));
   const s=TRY(()=>cenApDecidir(c,'OS-0421',6,'somar'));
   ok('V4 dispensar saldo com retido é recusado (Paula decide antes); "Outro turno: somar" continua possível: 290 ha', /^Apontamento em conferência de duplicidade \(dia 6\): Paula \(conferência\) decide antes de dispensar o saldo\.$/.test(x.e)&&!s.e&&O(c).realizado===290&&!(O(c).osc||{}).disp, [x.e,s.e,fato(c)]); });
-caso(()=>{ const c=C(); osc_dispensar(c,'OS-0421',10,'borda'); osc_apontar(c,'OS-0421','26/09',50,undefined,undefined,'W-1'); turno(c,50); const v=view(c,'OS-0421');
+caso(()=>{ const c=C(); osc_dispensar(c,'OS-0421',10,'borda','Ana'); osc_apontar(c,'OS-0421','26/09',50,undefined,undefined,'W-1'); turno(c,50); const v=view(c,'OS-0421');
   ok('V4b dispensa parcial na mesma fase e depois retido: dono Paula (conferência), não vazio', v.dono===CEN_CONF_AP&&v.prazo==='decidir se o dia 6 é outro turno', v); });
-caso(()=>{ const c=C(); cenSinal(c,false); turno(c,70,8,{'Fungicida A':35}); const x=TRY(()=>osc_dispensar(c,'OS-0421',160,'chuva')); const y=TRY(()=>osc_dispensar(c,'OS-0421',90,'chuva')); cenSinal(c,true);
-  ok('V4c S2 pré-existente: dispensar desconta a área no aparelho; 160 recusado (máximo 90 ha), 90 aceito; com o sinal, 260 + 90 dispensados = 350 ha', /^Máximo 90 ha: é o saldo da ordem descontando 70 ha ainda no aparelho\.$/.test(x.e)&&!y.e&&O(c).realizado===260&&O(c).osc.disp===90&&inv(c), [x.e,y.e,fato(c)]); });
+// CTL-3 (R-D3): a alçada de 20 % (70 ha) passou para o comando; o turno no aparelho vira 100 ha para o máximo (60 ha) ficar dentro da alçada
+caso(()=>{ const c=C(); cenSinal(c,false); turno(c,100,8,{'Fungicida A':50}); const x=TRY(()=>osc_dispensar(c,'OS-0421',61,'chuva','Ana')); const y=TRY(()=>osc_dispensar(c,'OS-0421',60,'chuva','Ana')); cenSinal(c,true);
+  ok('V4c S2 pré-existente: dispensar desconta a área no aparelho; 61 recusado (máximo 60 ha), 60 aceito; com o sinal, 290 + 60 dispensados = 350 ha', /^Máximo 60 ha: é o saldo da ordem descontando 100 ha ainda no aparelho\.$/.test(x.e)&&!y.e&&O(c).realizado===290&&O(c).osc.disp===60&&inv(c), [x.e,y.e,fato(c)]); });
 caso(()=>{ const c=C(); osc_apontar(c,'OS-0421','26/09',50,undefined,undefined,'W-1'); osc_apontar(c,'OS-0421','26/09',50,undefined,undefined,'W-2'); turno(c,50);
   const d7=O(c).ap.find(a=>a.dia===7); const de0=d7.dupDe.join(); cenApDecidir(c,'OS-0421',6,'anterior'); const viv=cenApDupVivos(O(c),d7).map(a=>a.dia).join(); const x=TRY(()=>cenApDecidir(c,'OS-0421',7,'este'));
   ok('V5 "vale este" só olha o que ainda vale: dia 7 (dupDe 5, 6), com o 6 guardado, vale contra o 5: 240 ha, 120 L (DEMO-11)', de0==='5,6'&&viv==='5'&&!x.e&&JSON.stringify(fato(c))==='{"real":240,"saldo":110,"cons":120,"cust":40}'&&apS(c,5)===CEN_AP_DESC&&apS(c,7)==='Provisório', [de0,viv,x.e,fato(c)]); });

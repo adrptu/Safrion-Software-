@@ -18,7 +18,7 @@ def unit():
     ini = open(os.path.join(HERE, 'areas', 'inicio.py'), encoding='utf-8').read()   # custo do Mapa (ordCusto) com preços sintéticos isolados em M
     custo = ('const CUSTO=(function(M){ ' + re.search(r'function precoDe\(p\)\{.*?\n', ini).group(0) + re.search(r'function ordCusto\(o\)\{.*?return r; \}\n', ini, re.S).group(0)
              + ' return {ordCusto}; })({cop:{"Pulverização":10},preco:{"Fungicida A":100},gen:{}});\n')
-    pre = "var window={addEventListener(){}}; var localStorage=undefined; var location={hash:''};\n" + g2
+    pre = "var window={addEventListener(){}}; var localStorage=undefined; var location={hash:''};\n" + g2 + cenario.perfis_js()   # CTL-3: decisões com papel (cenExige)
     osd = dict(ords=P._ordens(), nova=P._nova_ordem_dados(), aloc={}, agf={})
     src = (pre + cenario.js_prefixo() + 'const OSD = ' + json.dumps(osd, ensure_ascii=False) + ';\nconst RC_OS=[];\n' + P.JS_NUCLEO + '\n' + econs + '\n' + custo
            + open(os.path.join(HERE, 'ap_unico_unit.js'), encoding='utf-8').read())

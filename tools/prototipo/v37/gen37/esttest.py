@@ -3,6 +3,7 @@
   python3 esttest.py 1   recebimento com quarentena e validade do lote, NF duplicada, saldos da etapa 4, liberação da quarentena no lote
   python3 esttest.py 2   entregas (O.S. em conferência e impedida só consulta, saldo = solicitado − consumido − custódia), devoluções reabrindo saldo
   python3 esttest.py 3   contagem cega com recontagem por outro contador e causa exigida na aprovação
+  python3 esttest.py 4   CTL-3 (aprova quem decide): perfil Rui não aprova nem libera; Rui registra a contagem e Ana aprova sem revisão posterior
 Sem argumento roda as três em sequência (use as partes quando o limite de tempo por comando for curto)."""
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -44,8 +45,14 @@ def parte1(E):
     t = E.rowtxt('Semente de soja 58 W'); print('item:', t); E.ok('30.000 kg' in t, 'disponível do item 12 t + 18 t = 30 t')
     E.row('S58-0926'); og = E.aside(); E.ok('validade 03/2027' in og, 'origem do lote registra a validade do recebimento', og[:200]); E.fechar()
     # ---- liberar quarentena do KCl no lote, após inspeção (DEMO-02: atualiza e não soma duas vezes) ----
-    E.rowbtn('K26-11', 'Liberar após inspeção'); print('confirmar:', E.rowbtn('K26-11', 'Confirmar liberação')); print('toast:', E.toast())
+    # CTL-3 (R-D2): liberar exige o nº do laudo e o papel de gestor; sem laudo nada muda e o erro fica junto ao campo
+    E.rowbtn('K26-11', 'Liberar após inspeção'); print('sem laudo:', E.clk('Liberar com o laudo'))
+    al = E.J("[...document.querySelectorAll('[role=alert]')].map(x=>x.innerText).join(' | ')")
+    E.ok('Sem laudo o lote continua bloqueado' in al and E.cen("c.lotes['KCl 60%|K26-11'].quarentena") == 10000, 'CTL-3: sem laudo o KCl segue com 10 t bloqueadas e o erro aparece junto ao campo', al)
+    E.setv('est-laudo', 'LAB-0917'); print('com laudo:', E.clk('Liberar com o laudo')); print('toast:', E.toast())
     t = E.rowtxt('KCl 60%'); print('KCl após:', t); E.ok(t.count('60.000 kg') >= 2 and 'Liberar após inspeção' not in E.rowtxt('K26-11'), 'KCl disponível 60 t após a inspeção; botão some do lote')
+    E.row('K26-11'); og = E.aside(); E.fechar()
+    E.ok('quarentena liberada com o laudo LAB-0917 por Ana (gestora): 10.000 kg passam a disponível' in og, 'CTL-3: a origem do lote registra o laudo e quem liberou', og[:300])
     E.clk('Confira recebimentos'); t = E.rowtxt('NF 4501'); E.ok('Quarentena liberada' in t, 'nota NF 4501 passa a Quarentena liberada', t)
 
 
@@ -123,11 +130,34 @@ def parte3(E):
     E.row('INV-2611'); og = E.aside(); print('origem:', og[:400]); E.ok('Contagem anterior: 1.180 L por Paula (almoxarife) · diferença −20 L · causa: 2 bombonas' in og, 'contagem anterior fica na origem da linha')
     E.setv('fx_g_cnt_causa', 'Bombona com vazamento separada no descarte'); E.salvar()
     print('aprovar:', E.rowbtn('INV-2611', 'Aprovar ajuste'), E.toast())
+    E.ok('Fica revisão posterior pendente (Ana registrou a contagem e decidiu).' in E.toast(), 'CTL-3 (padrão 2): Ana registrou a contagem e aprovou: a decisão vale e fica revisão posterior', E.toast())
     E.clk('Confira saldos'); t = E.rowtxt('G26-14'); print('glifosato:', t); E.ok('1.185 L' in t, 'após aprovação o físico vai a 1.185 L')
     E.shot('est_e4b.png')
 
 
-PARTES = {'1': parte1, '2': parte2, '3': parte3}
+def parte4(E):
+    # CTL-3 · aprova quem decide (R-D1, R-D2; padrão 2): o perfil de demonstração (menu lateral) é quem age; não é segurança de acesso
+    SEL = '[aria-label="Trocar perfil de demonstração"]'
+    E.ok(E.J(f"(document.querySelector('{SEL}')||{{value:''}}).value") == 'Ana', 'menu lateral: seletor de perfil começa em Ana')
+    print('perfil Rui:', E.setv(SEL, 'Rui'), E.toast()); E.ok('Rui · Almoxarife (não é segurança de acesso)' in E.toast(), 'trocar de perfil avisa que não é segurança de acesso', E.toast())
+    E.clk('Faça contagens'); t = E.rowtxt('INV-2609'); print('INV-2609 (Rui):', t)
+    E.ok('aprova: Ana (gestora)' in t and 'Aprovar ajuste' not in t and 'Recontar' in t, 'Rui vê "aprova: Ana (gestora)" no lugar de Aprovar ajuste; Recontar continua', t)
+    E.clk('Confira saldos'); t = E.rowtxt('K26-11'); print('K26-11 (Rui):', t)
+    E.ok('aguarda laudo · Ana (gestora) libera' in t and 'Liberar após inspeção' not in t, 'Rui vê "aguarda laudo · Ana (gestora) libera" no lote em quarentena', t)
+    r = E.J("(()=>{const X=window.__cen; const r=X.cenMudar(null,c=>X.cenLiberarQuarentena(c,'KCl 60%|K26-11','LAB-0917',{k:'Rui'})); return r.erro||r.msg;})()")
+    E.ok(r == 'Liberar a quarentena do lote K26-11: decisão de Ana (gestora). Nada foi alterado.' and E.cen("c.lotes['KCl 60%|K26-11'].quarentena") == 10000, 'comando direto como Rui é recusado e nada muda', r)
+    E.clk('Faça contagens'); print('contar:', E.clk('Contar INV-2611'))
+    E.setv('fx_g_cnt_contador', 'Paula (almoxarife)'); E.setv('fx_g_cnt_cont', '1180'); E.setv('fx_g_cnt_causa', 'Bombona avariada descartada sem baixa'); E.salvar(); print('toast:', E.toast())
+    reg = E.cen("[(c.ajustes||[]).slice(-1)[0].reg,(c.ajustes||[]).slice(-1)[0].contador]"); t = E.rowtxt('INV-2611')
+    E.ok(reg == ['Rui (almoxarife)', 'Paula (almoxarife)'] and 'aprova: Ana (gestora)' in t, 'Rui registra a contagem de Paula: o ajuste guarda quem registrou; a linha diz quem aprova', [reg, t])
+    print('perfil Ana:', E.setv(SEL, 'Ana')); t = E.rowtxt('INV-2611'); E.ok('Aprovar ajuste' in t, 'de volta a Ana, a linha oferece Aprovar ajuste', t)
+    print('aprovar:', E.rowbtn('INV-2611', 'Aprovar ajuste'), E.toast())
+    tt = E.toast(); E.ok('Ajuste INV-2611 (AJ-71) aprovado por Ana (gestora): −20 L no lote G26-14. Físico 1.200 L → 1.180 L.' in tt and 'revisão' not in tt, 'Ana aprova a contagem registrada por Rui: sem revisão posterior', tt)
+    E.clk('Confira saldos'); t = E.rowtxt('G26-14'); E.ok('1.180 L' in t, 'G26-14 vai a 1.180 L', t)
+    E.shot('est_ctl3_perfil.png')
+
+
+PARTES = {'1': parte1, '2': parte2, '3': parte3, '4': parte4}
 if __name__ == '__main__':
     sel = [a for a in sys.argv[1:] if a in PARTES] or list(PARTES)
     falhas = []

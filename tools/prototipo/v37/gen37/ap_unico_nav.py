@@ -147,10 +147,11 @@ def rodar():
         setin(f'Usado de {P} (L)', '8'); btn('Outro turno: somar'); f = a.cen(FATO)
         a.ok(f == [340, 158, 2], f'com 8 L informado: 340 ha, 158 L consumidos, 2 L em custódia: {f}')
         guard()
-        # 16 · S2 (revisão 2): consumo do dia 5 já aceito por Rui → a linha do retido não oferece "vale este" e diz por quê
-        restaurar(); web_apontar('50', usado='70'); a.c.size(390, 1800); a.abrir('MB-01'); ac = cmd("W.cenConciliar(c,'CC-301',true)")
+        # 16 · S2 (revisão 2): consumo do dia 5 já aceito → a linha do retido não oferece "vale este" e diz por quê e por quem
+        # CTL-3 (padrão 2): os 5 L acima da custódia saem do lote: aceite da gestora, e a linha nomeia quem aceitou de fato
+        restaurar(); web_apontar('50', usado='70'); a.c.size(390, 1800); a.abrir('MB-01'); ac = cmd("W.cenConciliar(c,'CC-301',true,undefined,'Ana')")
         web_apontar('50', usado='27'); web(); ordem(OS); p = pan()
-        a.ok('aceito' in ac and '"Vale este" indisponível: consumo já aceito por Rui (almoxarife) (CC-301).' in p and not temb('Mesmo turno: vale este')
+        a.ok('aceito' in ac and '"Vale este" indisponível: consumo já aceito por Ana (gestora) (CC-301).' in p and not temb('Mesmo turno: vale este')
              and temb('Mesmo turno: vale o dia 5') and temb('Outro turno: somar') and a.cen(FATO) == [240, 165, 0],
              f'linha do dia 6 sem "vale este" depois do aceite do CC-301 (240 ha, 165 L): {ac[:60]} · ' + p[p.find('Dia 6'):][:220])
         guard()

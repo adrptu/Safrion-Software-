@@ -61,6 +61,13 @@ function cenUsoLegal(us, rot, dose, un, nap, refs) {   // refs (opcional): o que
 function cenLote(c, prod) { return Object.values(c.lotes).filter(l => l.prod === prod).sort((a, b) => (b.fisico - b.reservado - b.quarentena) - (a.fisico - a.reservado - a.quarentena))[0] || null; }
 function cenDisp(l) { return Math.max(0, (l.fisico || 0) - (l.quarentena || 0) - (l.reservado || 0)); }
 function cenMov(c, m) { m.id = 'MV-' + (1000 + c.movs.length + 1); m.at = m.at || cenAgora(); c.movs.push(m); return m; }
+// Decisão que exige papel (PRD 2.1; DEC-2609-13; CMD-47): o comando recebe quem age (no protótipo, o perfil de demonstração de g2lib.js;
+// no software, o ator da sessão no servidor) e confere o papel no cadastro (g2pf). Sem o papel, recusa e nada muda (dano: decisão gravada
+// em nome de quem não decidiu). Mesma pessoa no fato e na decisão: a decisão vale e fica "revisão posterior pendente" (padrão adotado em
+// 05/10/2026; o proprietário pode mudar). Ação aberta a todos (cenQuem) também exige um perfil do cadastro: nenhum registro grava quem não agiu.
+function cenExige(ator, papel, acao) { if (!g2papel(ator, papel)) throw new Error(acao + ': decisão de ' + g2quem(papel) + '. Nada foi alterado.'); return g2ator(ator, papel); }
+function cenQuem(ator, papel, acao) { const q = g2ator(ator, papel); if (!q) throw new Error(acao + ': sem o perfil de quem age. Nada foi alterado.'); return q; }
+function cenRevisao(ator, autor, fato) { const q = g2pf(ator); return q && g2mesma(q.k, autor) ? 'revisão posterior pendente (' + q.k + ' ' + fato + ' e decidiu)' : ''; }
 
 // ---------- O.S. (web) ----------
 // Liberar (agrônomo): reserva cada insumo no lote com saldo (a reserva nunca passa do disponível).
@@ -117,9 +124,12 @@ function cenReceber(c, prod, lote, qtd, un, local, validade, doc, apto) {
   cenMov(c, { tipo: 'recebimento-nf', prod, lote, qtd, un: l.un, quem: 'Rui (almoxarife)', origem: 'web', doc, apto: !!apto });
   return { msg: cenNum(qtd) + ' ' + l.un + ' de ' + prod + ' recebidos no lote ' + lote + ' (' + l.local + ')' + (apto ? '.' : ' e bloqueados até a inspeção.') };
 }
-function cenLiberarQuarentena(c, key) { const l = c.lotes[key]; if (!l || !(l.quarentena > 0)) throw new Error('Nada bloqueado neste lote.');
-  const q = l.quarentena; l.quarentena = 0; cenMov(c, { tipo: 'inspecao', prod: l.prod, lote: l.lote, qtd: q, un: l.un, quem: 'Rui (almoxarife)', origem: 'web' });
-  return { msg: cenNum(q) + ' ' + l.un + ' do lote ' + l.lote + ' liberados após inspeção.' }; }
+// Liberar quarentena (RN-015; SU-06 "Liberar qualidade"): só com o nº do laudo ou relatório de inspeção, pelo gestor (padrão adotado, igual ao ajuste)
+function cenLiberarQuarentena(c, key, laudo, ator) { const l = c.lotes[key]; if (!l || !(l.quarentena > 0)) throw new Error('Nada bloqueado neste lote.');
+  const quem = cenExige(ator, 'gestor', 'Liberar a quarentena do lote ' + l.lote); const doc = String(laudo || '').trim();
+  if (!doc) throw new Error('Informe o nº do laudo ou relatório de inspeção do lote ' + l.lote + '. Sem laudo o lote continua bloqueado.');
+  const q = l.quarentena; l.quarentena = 0; cenMov(c, { tipo: 'inspecao', prod: l.prod, lote: l.lote, qtd: q, un: l.un, quem, origem: 'web', doc });
+  return { msg: cenNum(q) + ' ' + l.un + ' do lote ' + l.lote + ' liberados com o laudo ' + doc + ' por ' + quem + '.' }; }
 // Inventário: contagem cega por lote; diferença vira ajuste pendente (o saldo só muda com a aprovação do gestor).
 function cenContar(c, key, contado) { const l = c.lotes[key]; if (!l) throw new Error('Lote não encontrado.');
   if (!(contado >= 0) || contado === '' || contado === null) throw new Error('Informe a quantidade contada.');
@@ -128,10 +138,12 @@ function cenContar(c, key, contado) { const l = c.lotes[key]; if (!l) throw new 
   if (contado + 1e-9 < l.reservado + l.quarentena) throw new Error('Contagem abaixo do reservado e bloqueado (' + cenNum(l.reservado + l.quarentena) + ' ' + l.un + '). Recontar antes de ajustar.');
   const aj = { id: 'AJ-' + (70 + c.ajustes.length + 1), key, prod: l.prod, lote: l.lote, un: l.un, sistema: l.fisico, contado, dif, estado: 'Aguardando gestor' }; c.ajustes.push(aj);
   return { msg: 'Divergência de ' + cenNum(dif) + ' ' + l.un + ' no lote ' + l.lote + ' · ' + aj.id + ' aguarda o gestor. O saldo não muda até a aprovação.' }; }
-function cenAprovarAjuste(c, id, aprovar) { const aj = (c.ajustes || []).find(a => a.id === id); if (!aj || aj.estado !== 'Aguardando gestor') throw new Error('Ajuste não está pendente.');
-  const l = c.lotes[aj.key]; if (aprovar) { l.fisico = aj.contado; aj.estado = 'Aprovado'; cenMov(c, { tipo: 'ajuste', prod: aj.prod, lote: aj.lote, qtd: aj.dif, un: aj.un, quem: 'Ana (gestora)', origem: 'web' }); }
-  else aj.estado = 'Recusado';
-  return { msg: aj.id + (aprovar ? ' aprovado: lote ' + aj.lote + ' passa a ' + cenNum(aj.contado) + ' ' + aj.un + '.' : ' recusado: recontar o lote ' + aj.lote + '.') }; }
+function cenAprovarAjuste(c, id, aprovar, ator) { const aj = (c.ajustes || []).find(a => a.id === id); if (!aj || aj.estado !== 'Aguardando gestor') throw new Error('Ajuste não está pendente.');
+  const l = c.lotes[aj.key]; if (aprovar) { const quem = cenExige(ator, 'gestor', 'Aprovar o ajuste ' + (aj.inv || aj.id));
+    l.fisico = aj.contado; aj.estado = 'Aprovado'; aj.por = quem; aj.em = cenAgora(); aj.rev = cenRevisao(ator, aj.reg, 'registrou a contagem');
+    cenMov(c, { tipo: 'ajuste', prod: aj.prod, lote: aj.lote, qtd: aj.dif, un: aj.un, quem, origem: 'web', rev: aj.rev }); }
+  else aj.estado = 'Recusado';   // recusar = recontar: não muda saldo, qualquer contador pede
+  return { msg: aj.id + (aprovar ? ' aprovado por ' + aj.por + ': lote ' + aj.lote + ' passa a ' + cenNum(aj.contado) + ' ' + aj.un + '.' + (aj.rev ? ' Fica ' + aj.rev + '.' : '') : ' recusado: recontar o lote ' + aj.lote + '.') }; }
 
 // ---------- App de campo ----------
 function cenOnline(c) { return c.app.online !== false; }
@@ -210,9 +222,10 @@ function cenApDupVivos(o, ap) { return (ap.dupDe || []).map(d => (o.ap || []).fi
 // o que já foi feito sobre o relato somado K e impede estorná-lo por "vale este": consumo aceito pelo almoxarife (CMD-50) e lote de colheita
 // com destino, liberação ou operação (carLoteUso, carência). Devolve o texto ou ''.
 function cenApUsoK(c, o, K) {
-  const ac = (c.confs || []).filter(k => k.os === o.id && k.dia === K.dia && k.estado === 'Aceito').map(k => k.id);
+  const acs = (c.confs || []).filter(k => k.os === o.id && k.dia === K.dia && k.estado === 'Aceito'), ac = acs.map(k => k.id);
+  const por = acs.map(k => k.por || CEN_CONC_RESP).filter((x, i, a) => a.indexOf(x) === i).join(', ');   // quem aceitou de fato (padrão 2: o excedente é do gestor)
   const lid = typeof carLid === 'function' ? carLid(o.id, K.dia) : ''; const us = (lid && typeof carLoteUso === 'function') ? carLoteUso(c, lid) : [];
-  return [ac.length ? 'consumo já aceito por ' + CEN_CONC_RESP + ' (' + ac.join(', ') + ')' : '', us.length ? 'lote ' + lid + ' com ' + us.join(', ') : ''].filter(Boolean).join('; '); }
+  return [ac.length ? 'consumo já aceito por ' + por + ' (' + ac.join(', ') + ')' : '', us.length ? 'lote ' + lid + ' com ' + us.join(', ') : ''].filter(Boolean).join('; '); }
 // estado da decisão antes de gravar: realizado, saldo e custódia depois do estorno de K ("vale este"); pend = área no aparelho (conta no máximo)
 function cenApDecBase(c, o, K) { const r = o.req && c.reqs[o.req]; const cust = {};
   if (r) r.itens.forEach(it => { cust[it.prod] = it.custodia + (K ? ((K.cons || {})[it.prod] || 0) : 0); });
@@ -360,9 +373,12 @@ function cenConcPrevia(c, id) {
   const txt = 'Baixa ' + cenNum(k.relatado) + ' ' + un + ' na ' + k.os + ': ' + [cust > 1e-9 ? cenNum(Math.min(cust, k.relatado)) + ' ' + un + ' da custódia de ' + k.quem : '', ori].filter(Boolean).join(' · ') + '.';
   return { k, r, it, l, cust, falta, res, livre, erro, txt };
 }
-function cenConciliar(c, id, aceitar, motivo) {
+function cenConciliar(c, id, aceitar, motivo, ator) {
   const p = cenConcPrevia(c, id); const k = p.k, r = p.r, l = p.l; let it = p.it;
-  if (!aceitar) { k.estado = 'Recusado'; k.decisao = motivo || 'registro sem fato físico'; k.por = CEN_CONC_RESP; cenSeloConf(c, k.os);
+  // padrão (2) adotado em 05/10/2026, o proprietário pode mudar: o que passa da custódia sai do lote (como um ajuste) → aceite do gestor
+  const quem = (aceitar && !p.erro && p.falta > 1e-9) ? cenExige(ator, 'gestor', 'Aceitar ' + cenNum(p.falta) + ' ' + k.un + ' acima da custódia (' + k.id + ')')
+    : cenQuem(ator, 'almoxarife', (aceitar ? 'Aceitar' : 'Recusar') + ' o relato ' + k.id);   // coberto pela custódia ou recusa: aberto, com autor
+  if (!aceitar) { k.estado = 'Recusado'; k.decisao = motivo || 'registro sem fato físico'; k.por = quem; cenSeloConf(c, k.os);
     return { msg: k.id + ' recusado (' + k.decisao + '): ' + k.prod + ' ' + cenNum(k.relatado) + ' ' + k.un + ' sem efeito no saldo' + (it && it.custodia > 1e-9 ? '; ' + cenNum(it.custodia) + ' ' + it.un + cenPl(it.custodia, ' segue', ' seguem') + ' em custódia com ' + k.quem + '.' : '.') }; }
   if (p.erro) throw new Error(p.erro);
   const falta = p.falta;
@@ -370,12 +386,12 @@ function cenConciliar(c, id, aceitar, motivo) {
     l.fisico -= falta; l.reservado = Math.max(0, (l.reservado || 0) - p.res);   // a reserva da própria requisição não fica maior que a necessidade
     if (!it && r) { it = { prod: k.prod, lote: l.lote, un: k.un, emb: '', solicitado: 0, entregue: 0, consumido: 0, devolvido: 0, custodia: 0, confirmado: true }; r.itens.push(it); }
     if (it) { it.entregue += falta; it.custodia += falta; }
-    cenMov(c, { tipo: 'entrega', req: k.req, os: k.os, prod: k.prod, lote: l.lote, qtd: falta, un: k.un, quem: CEN_CONC_RESP + ' → ' + k.quem + ' · regularização ' + k.id, origem: 'web', conf: k.id });
+    cenMov(c, { tipo: 'entrega', req: k.req, os: k.os, prod: k.prod, lote: l.lote, qtd: falta, un: k.un, quem: quem + ' → ' + k.quem + ' · regularização ' + k.id, origem: 'web', conf: k.id });
   }
   if (it) { it.consumido += k.relatado; it.custodia = Math.max(0, it.custodia - k.relatado); }
-  cenMov(c, { tipo: 'consumo', os: k.os, req: k.req, qtd: 0, quem: CEN_CONC_RESP + ' · aceite ' + k.id, origem: 'web', sinc: true, det: k.prod + ' ' + cenNum(k.relatado, 1), conf: k.id });
+  cenMov(c, { tipo: 'consumo', os: k.os, req: k.req, qtd: 0, quem: quem + ' · aceite ' + k.id, origem: 'web', sinc: true, det: k.prod + ' ' + cenNum(k.relatado, 1), conf: k.id });
   const de = falta > 1e-9 ? ' do lote ' + l.lote + (p.res > 1e-9 ? ' (reserva da ' + k.req + ')' : '') : '';
-  k.estado = 'Aceito'; k.decisao = falta > 1e-9 ? 'origem ' + cenNum(falta) + ' ' + k.un + de : 'coberto pela custódia'; k.por = CEN_CONC_RESP; cenSeloConf(c, k.os);
+  k.estado = 'Aceito'; k.decisao = falta > 1e-9 ? 'origem ' + cenNum(falta) + ' ' + k.un + de : 'coberto pela custódia'; k.por = quem; cenSeloConf(c, k.os);
   return { msg: k.id + ' aceito: ' + k.prod + ' ' + cenNum(k.relatado) + ' ' + k.un + cenPl(k.relatado, ' baixado', ' baixados') + ' na ' + k.os
     + (falta > 1e-9 ? ' · ' + cenNum(falta) + ' ' + k.un + cenPl(falta, ' regularizado', ' regularizados') + de + '.' : '.') };
 }

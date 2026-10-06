@@ -19,6 +19,13 @@ def clk(txt,root=''):
     time.sleep(.4); return r
 def setv(sel,val): r=J(f"({SETV})({json.dumps(sel)},{json.dumps(val)})"); time.sleep(.2); return r
 def pan(): return J("(document.querySelector('aside[role=dialog]')||{}).innerText||''") or ''
+def feitas():   # CTL-3 (R-D4): sem ação em massa; cada tarefa sem resposta recebe "Feito", uma a uma (PRD 54.2), com quem e hora
+    n=0
+    for _ in range(30):
+        r=J("(()=>{const g=[...document.querySelectorAll('aside [role=group]')].find(g=>{const bs=[...g.querySelectorAll('button')]; return bs.some(b=>b.innerText.trim()==='Feito')&&!bs.some(b=>b.getAttribute('aria-pressed')==='true');}); if(!g) return false; [...g.querySelectorAll('button')].find(b=>b.innerText.trim()==='Feito').click(); return true;})()"); time.sleep(.3)
+        if not r: break
+        n+=1
+    return n
 def key(k,code,vk):
     t.c.call('Input.dispatchKeyEvent',{'type':'keyDown','key':k,'code':code,'windowsVirtualKeyCode':vk}); t.c.call('Input.dispatchKeyEvent',{'type':'keyUp','key':k,'code':code,'windowsVirtualKeyCode':vk}); time.sleep(.05)
 def novo(): J("localStorage.clear()")
@@ -42,7 +49,7 @@ try:
     t.goto('MA-04.dc.html'); novo()
     # 1 · leitura absurda na conclusão: aviso a confirmar; corrigir e concluir com aplicado menor que o planejado (sobra entra no recibo e no custo)
     t.goto('MA-04.dc.html#OM-0234'); time.sleep(.4); sem_erro('MA-04')
-    clk('Liberar serviço','aside'); clk('Liberar mesmo assim','aside'); clk('Iniciar serviço','aside'); clk('Marcar pendentes como feitas','aside')
+    clk('Liberar serviço','aside'); clk('Liberar mesmo assim','aside'); clk('Iniciar serviço','aside'); feitas(); ok('por Ana (gestora) às' in pan(),'CTL-3 (R-D4): cada tarefa respondida mostra quem e a hora')
     setv('#om-leitura','29.950'); clk('Concluir serviço','aside'); p=pan(); fase=J("__man.manGet().oms['OM-0234'].etapa")
     ok('Concluir com esta leitura' in p and 'acima da última' in p and fase=='Em execução', f'leitura 29.950 h: aviso a confirmar, ordem segue Em execução · {fase}')
     clk('Corrigir leitura','aside'); foco=J("document.activeElement&&document.activeElement.id")

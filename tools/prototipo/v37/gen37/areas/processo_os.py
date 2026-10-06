@@ -433,12 +433,15 @@ function osc_cancelar(c,id,mot,cx){ const o=osc_o(c,id);
   if(r){ if(o.reservado) r.itens.forEach(it=>{ const l=c.lotes[it.prod+'|'+it.lote]; const res=Math.max(0,it.solicitado-it.entregue); if(l&&res>0) l.reservado=Math.max(0,l.reservado-res); }); r.estado='Cancelada'; }
   o.etapa='Canceladas'; o.reservado=false; o.selos=[]; osc_txt(o,{cond:'Cancelada sem execução: '+mot+'. '+cx[1],dono:'',prazo:'',insx:cx[2]});
   return {msg:id+' cancelada sem execução. '+cx[1]}; }
-function osc_dispensar(c,id,n,mot){ const o=osc_o(c,id); if(o.etapa!=='Em execução') throw new Error(id+' não está em execução.');
+const LIM_DISP=0.20;  /* alçada AL-05: dispensa de saldo até 20 % da área sem a Direção (regra única: comando e texto da tela) */
+function osc_dispensar(c,id,n,mot,ator){ const o=osc_o(c,id); const quem=cenExige(ator,['gestor','agronomo'],'Dispensar saldo da '+id);   /* CMD-47 · AL-05: alçada gerencial e validação agronômica */
+  if(o.etapa!=='Em execução') throw new Error(id+' não está em execução.');
   { const dp=(o.ap||[]).filter(a=>a.st===CEN_AP_DUP); if(dp.length) throw new Error('Apontamento em conferência de duplicidade (dia '+dp.map(a=>a.dia).join(', ')+'): '+CEN_CONF_AP+' decide antes de dispensar o saldo.'); }
   const pap=osApPend(o); if(n>o.saldo-pap+0.001) throw new Error('Máximo '+cenNum(Math.max(0,o.saldo-pap))+' ha: é o saldo da ordem'+(pap?' descontando '+cenNum(pap)+' ha ainda no aparelho.':'.'));
-  const tot=(o.osc.disp||0)+n; o.saldo=Math.max(0,o.saldo-n); o.ap=cortaPrev(o.ap,o.saldo);
-  osc_txt(o,{disp:tot,cond:'Saldo de '+nd(n)+' ha dispensado: '+mot+' · validação agronômica registrada. Realizado de '+nf(o.realizado)+' ha preservado.',dono:'',prazo:''});
-  return {msg:'Dispensados '+nd(n)+' ha da '+id+' · realizado '+nf(o.realizado)+' ha preservado · saldo '+nf(o.saldo)+' ha.'+(o.saldo<=0.001?' Envie a ordem para conferência.':'')}; }
+  const tot=(o.osc.disp||0)+n; if(o.area>0&&tot>o.area*LIM_DISP+0.001) throw new Error(nd(tot)+' ha = '+nd(100*tot/o.area,1)+' % acima de 20 % · exige Direção.');
+  o.saldo=Math.max(0,o.saldo-n); o.ap=cortaPrev(o.ap,o.saldo);
+  const hr=cenAgora(); osc_txt(o,{disp:tot,dispPor:quem,dispEm:hr,cond:'Saldo de '+nd(n)+' ha dispensado: '+mot+' · decisão gerencial e validação agronômica de '+quem+' às '+hr+'. Realizado de '+nf(o.realizado)+' ha preservado.',dono:'',prazo:''});
+  return {msg:'Dispensados '+nd(n)+' ha da '+id+' por '+quem+' · realizado '+nf(o.realizado)+' ha preservado · saldo '+nf(o.saldo)+' ha.'+(o.saldo<=0.001?' Envie a ordem para conferência.':'')}; }
 // nova ordem: entra no cenário em A liberar com os insumos da atividade do plano (dose × área) e sem requisição; os textos da tela ficam em osc.novo
 function osc_nova(c,no){ if(c.ordens[no.id]) throw new Error(no.id+' já existe.');
   const ins=(no.ins||[]).map(x=>({p:x.p,dose:x.dose,un:x.un,tot:x.tot,emb:(OSD.nova.emb||{})[x.p]||''}));
@@ -477,14 +480,13 @@ JS=r'''
 const FASES=['A liberar','Liberadas','Em execução','Em conferência','Encerradas'];
 const FCOR={'A liberar':'gray','Liberadas':'green','Em execução':'green','Em conferência':'yellow','Encerradas':'gray','Canceladas':'gray'};
 const STCOR={'Conferido':'green','Provisório':'yellow','Previsto':'gray','Aguardando sinal':'yellow',[CEN_AP_DUP]:'yellow',[CEN_AP_DESC]:'gray'};
-const LIM_DISP=0.20;  // alçada AL-05: dispensa de saldo até 20 % da área sem a Direção
 function GR(id){ return GRIDS.find(g=>g.id===id); }
 function chipSt(c){ const cc=G2C[c]||G2C.gray; return 'display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;color:'+cc[0]+';background:'+cc[1]+';'; }
 function dotSt(c){ const cc=G2C[c]||G2C.gray; return 'width:6px;height:6px;border-radius:999px;flex-shrink:0;background:'+cc[0]+';'; }
 // ===== O.S. × cenário compartilhado (cenario.js, o mesmo estado do Estoque e do App) =====
 // Fase, realizado/saldo, apontamentos, requisição e insumos vêm de cenGet(); o que o cenário não tem vem de OSD (registro).
 // Gancho de teste/inspeção (o script da tela roda isolado): os testes os_* leem e mudam o cenário na própria página.
-try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenDevolver, cenConfirmarRecebimento, cenIniciarTurno, cenPausar, cenFecharTurno, cenOcorrencia, cenSinal, cenPodeEncerrar, osc_liberar, osc_ajustar, osc_encerrar, osc_apontar }; } catch (e) {}
+try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenDevolver, cenConfirmarRecebimento, cenIniciarTurno, cenPausar, cenFecharTurno, cenOcorrencia, cenSinal, cenPodeEncerrar, osc_liberar, osc_ajustar, osc_encerrar, osc_apontar, osc_dispensar }; } catch (e) {}
 // filtros do topo (Fazenda e Safra): lista, Kanban, chips de fase e selo do cabeçalho mostram só as ordens do recorte
 function mfFaz(self){ return self.state.mf_faz||'Santa Rita'; }
 function mfSaf(self){ return self.state.mf_saf||'Todas'; }
@@ -691,9 +693,10 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{};
   // ação secundária pelo realizado: sem realizado → cancelar sem execução; em execução → dispensar saldo (nunca cancela fato executado)
   const canCanc=!((o.realizado||0)>0)&&(o.etapa==='A liberar'||o.etapa==='Liberadas');
   const canDisp=o.etapa==='Em execução'&&!!o.area&&(o.saldo||0)>0.001;
-  v.pan_hasCanc=canCanc; v.pan_hasDisp=canDisp;
+  const PF=g2perfil(), DSP=['gestor','agronomo'], agr=g2papel(PF,DSP);   /* dispensa: alçada gerencial e validação agronômica (CMD-47; AL-05) */
+  v.pan_hasCanc=canCanc; v.pan_hasDisp=canDisp&&agr; v.pan_dispQ=(canDisp&&!agr)?('Dispensar saldo: decisão de '+g2quem(DSP)+'.'):''; v.pan_hasDispQ=!!v.pan_dispQ;
   v.pan_cango=()=>self.setState({pa:{id:o.id,fn:'cancelar',motivo:'',err:''}});
-  v.pan_disgo=()=>self.setState({pa:{id:o.id,fn:'dispensar',ha:String(apMax).replace('.',','),motivo:'',val:false,err:''}});
+  v.pan_disgo=()=>self.setState({pa:{id:o.id,fn:'dispensar',ha:String(apMax).replace('.',','),motivo:'',err:''}});
   // (confirmação, aviso final, nova situação do insumo): a seção Insumos acompanha o que o aviso diz
   const cx=o.canc||((o.reservado&&insTxt)?['Libera a reserva no Estoque: '+insTxt+'.','Reserva liberada no Estoque: '+insTxt+'.','Reserva liberada no Estoque']:((o.ins||[]).length?['Nenhum insumo foi reservado.','Nenhum insumo estava reservado.','Nada reservado · ordem cancelada']:['','','']));
   v.pan_cct='Cancelar '+o.id+' sem execução: a ordem sai do quadro e fica em Canceladas. '+cx[0];
@@ -702,15 +705,13 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{};
     osRun(self,c=>osc_cancelar(c,o.id,mot,cx),{pa:null}); };
   const lim=(o.area||0)*LIM_DISP;
   v.pan_dsub='Até 20 % da área ('+nd(lim,1)+' ha) sem alçada; acima disso, exige Direção. O realizado de '+nf(o.realizado)+' ha fica preservado.';
-  v.pan_dval=!!(pa&&pa.val); v.pan_setdval=(e)=>self.setState({pa:Object.assign({},self.state.pa,{val:!!e.target.checked,err:''})});
-  v.pan_dissave=()=>{ const cur=self.state.pa; const n=g2num(cur.ha); const mot=String(cur.motivo||'').trim(); const tot=(o.disp||0)+n;
+  v.pan_dval=agr?('Decisão gerencial e validação agronômica: '+g2ator(PF,DSP)+', registradas ao confirmar.'):'';
+  v.pan_dissave=()=>{ const cur=self.state.pa; const n=g2num(cur.ha); const mot=String(cur.motivo||'').trim();
     const err=(m)=>self.setState({pa:Object.assign({},cur,{err:m})});
     if(isNaN(n)||n<=0) return err('Informe a área a dispensar (maior que 0 ha).');
     if(n>apMax+0.001) return err('Máximo '+nf(apMax)+' ha: é o saldo da ordem'+(apP>0?' descontando '+nf(apP)+' ha ainda no aparelho.':'.'));
-    if(tot>lim+0.001) return err(nd(tot)+' ha = '+nd(100*tot/o.area,1)+' % acima de 20 % · exige Direção.');
     if(!mot) return err('Informe o motivo da dispensa.');
-    if(!cur.val) return err('Marque a validação agronômica.');
-    osRun(self,c=>osc_dispensar(c,o.id,n,mot),{pa:null}); };
+    osRun(self,c=>osc_dispensar(c,o.id,n,mot,g2perfil()),{pa:null}); };
 }
 function EXTRAVALS(self,v){
   const st=self.state, all=ords(self), os=vis(self);
@@ -993,6 +994,7 @@ def _painel():
       f'<sc-if value="{H("pan_hasAj")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("pan_ajgo")}" title="Mudar dose ou área antes de liberar (gera a versão seguinte)" style="{_MINI}">{H("pan_ajbtn")}</button></sc-if>'
       f'<span style="flex-grow: 1;"></span>'
       f'<sc-if value="{H("pan_hasDisp")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("pan_disgo")}" title="Dispensar parte do saldo sem executar (o realizado fica preservado)" style="{_LNK}">Dispensar saldo</button></sc-if>'
+      f'<sc-if value="{H("pan_hasDispQ")}" hint-placeholder-val="{F()}"><span style="font-size: 12px; color: {MUTED};">{H("pan_dispQ")}</span></sc-if>'
       f'<sc-if value="{H("pan_hasCanc")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("pan_cango")}" title="Cancelar a ordem que ainda não teve execução (exige motivo)" style="{_LNK} color: {RED};">Cancelar sem execução</button></sc-if></div></sc-if>'
       f'<sc-if value="{H("pan_canf")}" hint-placeholder-val="{F()}"><div style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: {SURF}; border: 1px solid {LINE};">'
       f'<div style="font-size: 13px; font-weight: 600; line-height: 1.45;">{H("pan_cct")}</div>'
@@ -1003,7 +1005,7 @@ def _painel():
       f'<div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;"><label style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 600; color: {MUTED};">Área a dispensar (ha)<input aria-label="Área a dispensar em hectares" inputMode="decimal" value="{H("pan_aha")}" onChange="{H("pan_setaha")}" style="font-family: inherit; font-size: 14px; padding: 7px 9px; border-radius: 8px; border: 1px solid {LINE}; width: 110px; text-align: right;"></label>'
       f'<span style="font-size: 12px; color: {MUTED}; padding-bottom: 9px; flex: 1 1 260px;">{H("pan_dsub")}</span></div>'
       f'<textarea aria-label="Motivo da dispensa" placeholder="Motivo da dispensa" value="{H("pan_rmot")}" onChange="{H("pan_setrmot")}" style="font-family: inherit; font-size: 13px; padding: 7px 9px; border-radius: 8px; border: 1px solid {LINE}; min-height: 54px; resize: vertical;"></textarea>'
-      f'<label style="display: flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 600;"><input type="checkbox" aria-label="Validação agronômica" checked="{H("pan_dval")}" onChange="{H("pan_setdval")}" style="width: 16px; height: 16px; accent-color: {ACC}; margin: 0;">Validação agronômica: o agrônomo confirmou a dispensa</label>'
+      f'<span style="font-size: 13px; font-weight: 600;">{H("pan_dval")}</span>'
       f'<sc-if value="{H("pan_hasRerr")}" hint-placeholder-val="{F()}"><span role="alert" style="font-size: 12px; font-weight: 700; color: {RED};">{H("pan_rerr")}</span></sc-if>'
       f'<div style="display: flex; gap: 8px;"><button type="button" onClick="{H("pan_back")}" style="{_MINI}">Voltar</button><button type="button" onClick="{H("pan_dissave")}" style="{_MINIP}">Confirmar dispensa</button></div></div></sc-if>'
       f'<sc-if value="{H("pan_conf")}" hint-placeholder-val="{F()}"><div role="alert" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: {SURF}; border: 1px solid {LINE}; font-size: 13px; font-weight: 600; line-height: 1.45;">{H("pan_ct")}'

@@ -85,6 +85,14 @@ def js_prefixo():
     return 'const CEN0 = ' + json.dumps(seed(), ensure_ascii=False).replace('</', '<\\/') + ';\n' + open(os.path.join(HERE, 'cenario.js'), encoding='utf-8').read() + '\n'
 
 
+def perfis_js():
+    """Bloco de perfis de demonstração do g2lib.js (G2_PERFIS, g2pf, g2perfil, g2papel, g2ator, g2quem, g2mesma), entre os marcadores
+    <perfis> e </perfis>: as decisões do cenário (cenExige) o usam, e os testes sem navegador montam o motor com ele. As telas já o têm (G2LIB)."""
+    s = open(os.path.join(HERE, 'g2lib.js'), encoding='utf-8').read()
+    i = s.index('// <perfis>'); j = s.index('// </perfis>')
+    return s[i:j] + '\n'
+
+
 if __name__ == '__main__':
     import sys; sys.path.insert(0, HERE)
     s = seed()

@@ -19,7 +19,7 @@ def a(E):
     E.setv('fx_g_rec_conf', '20000'); E.setv('fx_g_rec_apto', '0'); E.setv('fx_g_rec_quar', '20000'); E.setv('fx_g_rec_val', '08/2026'); E.setv('fx_g_rec_obs', 'Lote vencido'); E.salvar()
     print('toast:', E.toast()); print('NF 4533:', E.rowtxt('NF 4533')); print('ovf etapa1 (vencido):', E.J(OVF))
     E.etapa(4); print('S58-0926:', E.rowtxt('S58-0926')); print('ovf etapa4:', E.J(OVF))
-    print(E.rowbtn('S58-0926', 'Liberar após inspeção')); print(E.rowbtn('S58-0926', 'Confirmar liberação')); print('toast:', E.toast())
+    print(E.rowbtn('S58-0926', 'Liberar após inspeção')); E.setv('est-laudo', 'LAB-0001'); print(E.clk('Liberar com o laudo')); print('toast:', E.toast())   # CTL-3: com o laudo
     print('S58-0926 depois:', E.rowtxt('S58-0926'))
 
 

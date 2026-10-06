@@ -451,14 +451,12 @@ function EXTRAVALS(self,v){ const c=manGet(); const st=self.state; ma_rstV(self,
   // checklist: Feito · Não feito · Não se aplica (os dois últimos com motivo); só se responde com a ordem Em execução
   const ed=o.etapa==='Em execução'&&!o.det; const R=['Feito','Não feito','Não se aplica'];
   v.pan_chk=o.chk.map((t,i)=>({n:String(i+1),t:t.t,ed,ro:!ed,
-    opts:R.map(r=>({t:r,on:String(t.r===r),lab:r+' · '+t.t,go:()=>manMudar(self,c2=>manResp(c2,o.id,i,t.r===r?'':r)),
+    opts:R.map(r=>({t:r,on:String(t.r===r),lab:r+' · '+t.t,go:()=>manMudar(self,c2=>manResp(c2,o.id,i,t.r===r?'':r,undefined,g2perfil())),
       st:'font-family:inherit;font-size:12px;font-weight:700;padding:4px 9px;border-radius:8px;cursor:pointer;white-space:nowrap;'+(t.r===r?(r==='Feito'?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #8A5A00;background:#FFF3D6;color:#8A5A00;'):'border:1px solid #E4E9E5;background:#fff;color:#15201A;')})),
     r:t.r||'Sem resposta',rst:ma_chipSt(t.r==='Feito'?'green':(t.r?'yellow':'gray')),rdot:ma_dotSt(t.r==='Feito'?'green':(t.r?'yellow':'gray')),
-    mot:t.mot||'',hasMotIn:ed&&!!t.r&&t.r!=='Feito',hasMotTx:!ed&&!!t.mot,motlab:'Motivo · '+t.t,
-    setmot:(e)=>{ const val=e.target.value; manMudar(self,c2=>manResp(c2,o.id,i,t.r,val)); }}));
+    por:t.por?('por '+t.por+(t.em?' às '+t.em:'')):'',hasPor:!!t.por,mot:t.mot||'',hasMotIn:ed&&!!t.r&&t.r!=='Feito',hasMotTx:!ed&&!!t.mot,motlab:'Motivo · '+t.t,
+    setmot:(e)=>{ const val=e.target.value; manMudar(self,c2=>manResp(c2,o.id,i,t.r,val,g2perfil())); }}));
   const nr=o.chk.filter(t=>t.r).length; v.pan_chkn=nr+' de '+o.chk.length+' respondidas';
-  v.pan_hasTodas=ed&&o.chk.some(t=>!t.r);
-  v.pan_todas=()=>manMudar(self,c2=>{ const x=c2.oms[o.id]; if(x.etapa!=='Em execução') throw new Error('Responda o checklist com a ordem Em execução.'); let n=0; x.chk.forEach(t=>{ if(!t.r){ t.r='Feito'; n++; } }); return {msg:n+(n>1?' tarefas marcadas como feitas.':' tarefa marcada como feita.')}; });
   // execução: leitura do contador e horas (obrigatória a leitura para concluir)
   v.pan_exEd=ed; v.pan_hasCont=!!(a&&a.un); v.pan_unl=a&&a.un==='km'?'Leitura do odômetro (km)':'Leitura do horímetro (h)';
   v.pan_leit=st.pl||''; v.pan_setleit=(e)=>self.setState({pl:e.target.value,pavl:false}); v.pan_horas=st.ph||''; v.pan_sethoras=(e)=>self.setState({ph:e.target.value});
@@ -504,12 +502,12 @@ def _painel_om():
             f'<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;"><span style="font-size: 12px; font-weight: 800; color: {MUTED}; width: 18px;">{H("t.n")}</span>'
             f'<span style="font-size: 13px; font-weight: 600; flex: 1 1 200px; min-width: 0;">{H("t.t")}</span>'
             + IF('t.ed',f'<span role="group" aria-label="{H("t.t")}" style="display: inline-flex; gap: 4px;">'+FOR('t.opts','b',f'<button type="button" aria-pressed="{H("b.on")}" aria-label="{H("b.lab")}" onClick="{H("b.go")}" style="{H("b.st")}">{H("b.t")}</button>',3)+'</span>')
-            + IF('t.ro',chip_h('t.r','t.rst','t.rdot')) + '</div>'
+            + IF('t.ro',chip_h('t.r','t.rst','t.rdot')) + IF('t.hasPor',f'<span style="font-size: 12px; color: {MUTED};">{H("t.por")}</span>') + '</div>'
             + IF('t.hasMotIn',f'<input aria-label="{H("t.motlab")}" placeholder="Motivo (obrigatório)" value="{H("t.mot")}" onChange="{H("t.setmot")}" style="margin-left: 28px; font-family: inherit; font-size: 13px; padding: 6px 9px; border-radius: 8px; border: 1px solid {LINE};">')
             + IF('t.hasMotTx',f'<span style="margin-left: 28px; font-size: 12.5px; color: {MUTED};">Motivo: {H("t.mot")}</span>') + '</div>')
     chk=(f'<section aria-label="Checklist" style="display: flex; flex-direction: column; gap: 4px;"><div style="display: flex; align-items: center; gap: 10px;">{lab("Checklist")}'
          f'<span style="font-size: 12px; color: {MUTED}; flex-grow: 1;">{H("pan_chkn")}</span>'
-         + IF('pan_hasTodas',f'<button type="button" onClick="{H("pan_todas")}" style="{_MINI}">Marcar pendentes como feitas</button>') + '</div>'
+         + '</div>'
          + FOR('pan_chk','t',chkrow,5) + '</section>')
     exe=(IF('pan_exEd',f'<section aria-label="Execução" style="display: flex; flex-direction: column; gap: 8px;">{lab("Execução")}<div style="display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end;">'
             + IF('pan_hasCont',f'<label style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 600; color: {MUTED};">{H("pan_unl")}'
