@@ -34,6 +34,16 @@ def main():
         cu = next((k for k, u in DC.CULTURA_UN.items() if u['prod'] == prod), None)
         ok(f'U01 item do CD-06 "{prod}" na mesma unidade de CULTURA_UN ({it.get(prod, {}).get("un")})',
            cu and it.get(prod, {}).get('un') == f"{DC.CULTURA_UN[cu]['un']} {DC.CULTURA_UN[cu]['massa']} kg", (cu, it.get(prod)))
+    # regressão (06/10): a tela redefinia prNum (parte de célula) por cima do leitor de número de producao.js e a pesagem recusava o bruto.
+    # Nenhum nome global de producao.js pode ser redefinido pelo JS das telas, do cenário ou da carência.
+    import re
+    from areas import producao as AP
+    defs = lambda t: set(re.findall(r'^(?:function|const|let|var)\s+([A-Za-z_$][\w$]*)', t, re.M)) | set(re.findall(r'(?<![\w.])function\s+([A-Za-z_$][\w$]*)\s*\(', t))
+    pr = defs(open(os.path.join(HERE, 'producao.js'), encoding='utf-8').read())
+    outros = {'cenario.js': open(os.path.join(HERE, 'cenario.js'), encoding='utf-8').read(), 'dados_carencia.JS': __import__('dados_carencia').JS}
+    outros.update({'areas/producao.py:' + k: getattr(AP, k) for k in dir(AP) if k.endswith('_JS') and isinstance(getattr(AP, k), str)})
+    for nome, t in outros.items():
+        dup = sorted(pr & defs(t)); ok(f'nomes de producao.js não são redefinidos em {nome}', not dup, dup)
     print('RESULTADO:', 'OK' if all(OK) else 'FALHOU', f'{sum(OK)}/{len(OK)}')
     return all(OK)
 

@@ -37,7 +37,7 @@ MENU2=[('Mapa','map',[('Mapa','IN-04.dc.html')]),
  ('Cadastros','layers',[('Fazendas, áreas e talhões','CD-01.dc.html'),('Culturas, cultivares e operações','CD-02.dc.html'),('Máquinas, instalações e setores','CD-03.dc.html'),
    ('Pessoas e equipes','CD-04.dc.html'),('Parceiros e fornecedores','CD-05.dc.html'),('Produtos, unidades e locais','CD-06.dc.html'),('Estrutura gerencial','CD-07.dc.html')]),
  ('Agrícola','leaf',[('Consulta Agrofit','AG-07.dc.html'),('Planos agronômicos','PA.dc.html'),('Planejar safra','SAF.dc.html'),('Ordem de Serviço','OS.dc.html'),('Pragas e doenças (MIP/MID)','AG-01.dc.html'),('Irrigação','IR-01.dc.html')]),
- ('Produção','Colheita',[('Estoque de produto','PROD.dc.html')]),
+ ('Produção','Colheita',[('Cargas e recebimento','CARGA.dc.html'),('Estoque de produto','PROD.dc.html')]),
  ('Manutenção','wrench',[('Planos de manutenção','PM.dc.html'),('Ativos e disponibilidade','MA-01.dc.html'),('Solicitações e inspeções','MA-02.dc.html'),
    ('Vencimentos e paradas','MA-03.dc.html'),('Ordens de manutenção','MA-04.dc.html'),('Abastecimentos e desempenho','MA-05.dc.html')]),
  ('Suprimentos','cart',[('Compra de insumos','CMP.dc.html'),('Estoque','EST.dc.html')])]
@@ -230,6 +230,7 @@ MACRO = {
     'SAF.dc.html': dict(faz='contexto', saf='contexto'),
     'CMP.dc.html': dict(faz='contexto', saf='contexto'),
     'EST.dc.html': dict(faz='filtro'),
+    'CARGA.dc.html': dict(faz='filtro', saf='filtro'),
     'PROD.dc.html': dict(faz='filtro', saf='filtro'),
 }
 FAZENDAS = ['Lagoa Grande', 'Santa Rita', 'Boa Vista']
