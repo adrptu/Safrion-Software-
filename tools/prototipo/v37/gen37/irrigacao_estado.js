@@ -11,7 +11,7 @@ function irrInicial() { const s = irrClone(IRR0); irrGerar(s); return s; }
 function irrGet() {
   let t = null; try { t = localStorage.getItem(IRR_KEY); } catch (e) { t = null; }
   if (t) { let o = (t === IRR_RAW && IRR_OBJ) ? IRR_OBJ : null;
-    if (!o) { try { const p = JSON.parse(t); if (p && p.v === IRR0.v) o = p; } catch (e) {} }
+    if (!o) { try { const p = JSON.parse(t); if (p && p.v === IRR0.v) { o = p; o.capt = irrClone(IRR0.capt); } } catch (e) {} }   // outorga: vale sempre a do cadastro (CTL-5)
     if (o && irrOrfa(o)) { irrReset(); o = null; }
     if (o) { IRR_RAW = t; IRR_OBJ = o; return o; } }
   if (IRR_MEM && irrOrfa(IRR_MEM)) IRR_MEM = null;
@@ -173,6 +173,12 @@ function irrOv(a1, b1, a2, b2) { return a1 < b2 && a2 < b1; }
 function irrPonta(s, a, b) { const P = s.ponta; let ini = null, fim = null;
   for (let k = irrDiaN(a); k <= irrDiaN(b); k++) { const pa = k * 1440 + P[0], pb = k * 1440 + P[1]; if (irrOv(a, b, pa, pb)) { const x = Math.max(a, pa), y = Math.min(b, pb); if (ini === null) { ini = x; fim = y; } } }
   if (ini === null) return ''; const tot = (fim - ini) >= (P[1] - P[0]); return (tot ? 'Ponta' : 'Ponta parcial') + ' (' + irrN(ini % 1440 / 60, 0) + '–' + irrN((fim % 1440 || 1440) / 60, 0) + ' h)'; }
+// ---------- outorga da captação (fonte única: o cadastro, via dados_lagoa_fonte.captacao; CTL-5 · RL-E4) ----------
+// volume do dia autorizado (m³) = vazão (L/s) × horas por dia × 3,6: uma conta só para a trava e para as telas
+function irrCapDia(cp) { return cp ? cp.ls * cp.h * 3.6 : 0; }
+function irrOutC(st) { return { 'Vigente': 'green', 'Vence em 90 dias': 'yellow', 'Em renovação': 'yellow', 'Vencida': 'red' }[st] || 'gray'; }
+function irrOutVenc(s, cp) { const a = String((cp && cp.venc) || '').split('-'); if (a.length !== 3) return 'sem vencimento no cadastro';
+  return (cp.venc < s.hoje ? 'venceu em ' : 'até ') + a[2] + '/' + a[1] + '/' + a[0]; }
 // bloqueios de uma janela: bomba ocupada, parada do PCM, outorga vencida, vazão outorgada (instantânea e do dia)
 function irrBloqJanela(s, x, a, b, excl, proprias) {
   const F = s.faz[x.faz]; const out = []; const occ = irrComprometidas(s, excl).concat(proprias || []);
@@ -180,12 +186,12 @@ function irrBloqJanela(s, x, a, b, excl, proprias) {
   s.paradas.filter(z => z.bomba === x.bomba && irrOv(a, b, z.ini, z.fim)).forEach(z => out.push({ k: 'parada', c: 'red', t: 'Conflito · ' + z.txt, h: irrHm(z.ini) + '–' + irrHm(z.fim) + (irrDiaN(z.ini) !== irrDiaN(z.fim) ? ' (' + irrDdmm(irrDiaN(z.fim)) + ')' : ''), dono: z.dono || F.pcm, ref: z.ref }));
   const cp = s.capt[x.capt];
   if (cp) {
-    if (cp.st === 'Vencida') out.push({ k: 'outorga', c: 'red', t: 'Outorga vencida · ' + cp.nome, dono: F.gestor });
+    if (cp.st === 'Vencida') { out.push({ k: 'outorga', c: 'red', t: 'Outorga vencida · ' + cp.nome, dono: F.gestor }); return out; }   // sem outorga vigente nada se capta: a vazão não entra
     const ws = occ.filter(w => w.capt === x.capt && w.bomba !== x.bomba);
     const pts = [a].concat(ws.filter(w => w.ini > a && w.ini < b).map(w => w.ini)); let mx = 0;
     pts.forEach(t => { const q = x.vazao + ws.filter(w => w.ini <= t && w.fim > t).reduce((q2, w) => q2 + w.ls, 0); if (q > mx) mx = q; });
     if (mx > cp.ls + 1e-9) out.push({ k: 'vazao', c: 'red', t: 'Sem vazão outorgada · ' + irrN(mx) + ' de ' + irrN(cp.ls) + ' L/s', dono: F.gestor });
-    else { const lim = cp.ls * cp.h * 3.6; for (let k = irrDiaN(a); k <= irrDiaN(b); k++) { const d0 = k * 1440, d1 = d0 + 1440; let v = 0;
+    else { const lim = irrCapDia(cp); for (let k = irrDiaN(a); k <= irrDiaN(b); k++) { const d0 = k * 1440, d1 = d0 + 1440; let v = 0;
         ws.concat([{ ini: a, fim: b, ls: x.vazao }]).forEach(w => { const o0 = Math.max(d0, w.ini), o1 = Math.min(d1, w.fim); if (o1 > o0) v += w.ls * (o1 - o0) * 0.06; });
         if (v > lim + 1e-6) { out.push({ k: 'vazao', c: 'red', t: 'Sem vazão outorgada · ' + irrN(v) + ' de ' + irrN(lim) + ' m³ em ' + irrDdmm(k), dono: F.gestor }); break; } } }
   }
@@ -196,6 +202,8 @@ function irrChecar(s, o, ps) {
   ps = ps || o.passadas; const x = s.setores[o.setor]; const F = s.faz[x.faz]; const bloq = [], av = [];
   const pend = ps.filter(p => p.st === 'Programada' || p.st === 'Em execução');
   if (pend.some(p => p.ini === null || p.ini === undefined)) bloq.push({ k: 'jan', c: 'yellow', t: 'Janela a definir', dono: F.irrig });
+  // outorga vencida sem janela: quem resolve é o gestor (com janela, irrBloqJanela já trava por passada)
+  { const cp0 = s.capt[x.capt]; if (cp0 && cp0.st === 'Vencida' && pend.some(p => p.ini === null || p.ini === undefined)) bloq.unshift({ k: 'outorga', c: 'red', t: 'Outorga vencida · ' + cp0.nome, dono: F.gestor }); }
   const prop = [];
   pend.forEach(p => { if (p.ini === null || p.ini === undefined) return; const a = p.ini, b = irrFimP(o, p);
     irrBloqJanela(s, x, a, b, o.id, prop).forEach(z => bloq.push(z)); prop.push({ os: o.id, n: p.n, bomba: x.bomba, capt: x.capt, ls: x.vazao, ini: a, fim: b });
@@ -206,7 +214,7 @@ function irrChecar(s, o, ps) {
   const todos = ant.slice(-1).concat(ini).sort((p, q) => p - q);
   for (let i = 1; i < todos.length; i++) { const dh = (todos[i] - todos[i - 1]) / 60; if (dh < x.imin - 1e-9) { av.push({ k: 'int', t: 'Intervalo curto · ' + irrN(dh, 1) + ' h (mín. ' + irrN(x.imin) + ' h)' }); break; } }
   if (irrEst(s, x)) av.push({ k: 'est', t: 'Estimativa por ET' });
-  const cp = s.capt[x.capt]; if (cp && cp.st === 'Em renovação') av.push({ k: 'renov', t: 'Outorga em renovação' });
+  const cp = s.capt[x.capt]; if (cp && cp.aviso) av.push({ k: 'renov', t: cp.aviso });   // aviso da outorga vem do cadastro (vence em 90 dias, em renovação)
   // lâmina × necessidade (só aviso): acima do que o setor vai precisar até a última passada, ou setor abaixo do limiar de irrigação
   if (x.bal && !ps.some(p => p.st === 'Feita' || p.st === 'Parcial' || p.st === 'Em execução')) {
     const liq = ps.filter(p => p.st === 'Programada').reduce((q, p) => q + p.lam, 0) * (o.ef || x.efic) / 100; const d = irrDef(s, o.setor);

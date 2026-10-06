@@ -319,7 +319,7 @@ function aguaSit(V){ if(!V.tipo) return {t:'Sem descrição no KML',p:sitInfo('S
   if(V.venc&&ddiff(HOJE,V.venc)<=90) return {t:'Vence em 90 dias',p:sitX('Vence '+br(V.venc),'yellow','Renovar'),res:'avenc'};
   return {t:'Vigente',p:sitOk('Vigente até '+br(V.venc))}; }
 function aguaNome(V){ return /^\d+$/.test(String(V.nome))?'Ponto '+V.nome:V.nome; }
-function aguaDoc(V){ return V.tipo==='Outorga estadual'?'Outorga '+V.num:(V.tipo?'Certidão '+V.num:''); }
+function aguaDoc(V){ return /^Outorga/.test(V.tipo||'')?'Outorga '+V.num:(V.tipo?'Certidão '+V.num:''); }   // 'Outorga' (sintético) e 'Outorga estadual' (KML real): o mesmo nome da IR-04 (CTL-5)
 function fazPend(V){ return V.sit!=='Inativa'&&(fazDocs(V).length>0||!!V.pend); }
 function irDet(id){ location.href='CD-01det.dc.html#talhao='+encodeURIComponent(id); }
 CAD_ACTS.g_tal=(self,r,fm)=>{ const sem=r.v.sit!=='Inativo'&&!isnum(r.v.calc)&&!circ(r.v); const t=sem?'Definir polígono ›':'Abrir talhão ›';

@@ -9,11 +9,14 @@ Balanço (PRD cap. 63 e CAL-09): déficit = déficit inicial + ETc − chuva efe
 Santa Rita: P2 11,2 mm (medido) · P1 ≈8,4 mm (sonda suspeita) · T7 ≈10,0 mm (sonda sem dado desde 20/09) — os mesmos números das outras telas;
 a ETc dos 7 dias fecha a memória com a irrigação líquida dos eventos medidos.
 Lagoa Grande: balanço DEMONSTRATIVO sobre os pivôs reais do KML (ETo 5,5 mm/dia × Kc do mamão pela fase). Vazão demonstrativa de 1,25 L/s
-por ha, eficiência 85 %, até 8 mm por passada, intervalo de 18 h; todos os pivôs na captação do Rio A (demonstração) (outorga SINT-001/0000, 573 L/s
-× 21 h/dia, vencida em 22/11/2023 e em renovação — aviso). Ribeirão B (demonstração) (19 L/s, vencida em 13/02/2024) aparece em IR-04 sem setor ligado.
+por ha, eficiência 85 %, até 8 mm por passada, intervalo de 18 h; todos os pivôs na captação do Rio A (demonstração).
+Outorga (CTL-5, RL-E4): fonte única = o cadastro (dados_lagoa_fonte.LG_AGUA, aba Água do CD-01); captacao() soma as outorgas vigentes de
+captação superficial para irrigação do curso (premissa declarada: rede comum aos pontos do Rio A). A irrigação não guarda valor de outorga:
+irrGet() repõe a captação da semente a cada leitura, e as outorgas sem setor ligado ficam só no cadastro.
 As tarefas do dia da Lagoa Grande (tarefa única por setor) são geradas pelo irrGerar() de irrigacao_estado.js na primeira leitura (OS-0601…)."""
 import json, os, math, datetime as dt
 import dados_lagoa_safra as DLS
+import dados_lagoa_fonte as LF   # outorga: fonte única = o cadastro (CTL-5)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOJE = dt.date(2026, 9, 23)
@@ -39,12 +42,8 @@ FAZ = {'SR': dict(nome='Santa Rita', irrig='João', pcp='Caio · PCP', gestor='A
 CAPT = {
     'SR-RIO': dict(faz='SR', nome='Rio · captação da sede', outorga='demonstrativa', ls=400, h=21, venc='2028-06-30', st='Vigente'),
     'SR-RES': dict(faz='SR', nome='Reservatório da sede', outorga='demonstrativa', ls=250, h=21, venc='2028-06-30', st='Vigente'),
-    'LG-PAR': dict(faz='LG', nome='Rio A (demonstração)', outorga='SINT-002/0000', ls=573, h=21, venc='2023-11-22', st='Em renovação',
-                   obs='renovação em análise (processo demonstrativo) · irrigação por pivô central'),
-    'LG-STC': dict(faz='LG', nome='Ribeirão B (demonstração)', outorga='SINT-003/0000', ls=19, h=21, venc='2024-02-13', st='Vencida',
-                   obs='irrigação de 136 ha por pivô central · nenhum setor ligado'),
-    'LG-BAR': dict(faz='LG', nome='Barramento · afluente do Ribeirão B (demonstração)', outorga='SINT-004/0000', ls=65, h=24, venc='2027-11-25', st='Vigente',
-                   obs='65 L/s de março a novembro · 0 L/s em dezembro a fevereiro · nenhum setor ligado'),
+    # Lagoa Grande: lida do cadastro (fonte única); Santa Rita não tem aba Água no cadastro e fica demonstrativa
+    'LG-PAR': dict(faz='LG', **LF.captacao(LF.LG_AGUA, str(HOJE))),
 }
 
 FONTES = {
@@ -110,7 +109,7 @@ DEF_LG = {'PV01': 6.1, 'PV02': 9.8, 'PV03': 7.4, 'PV04': 4.8, 'PV05': 13.2, 'PV0
 
 
 def _lg():
-    cad = json.load(open(os.path.join(__import__('dados_lagoa_fonte').DIR, 'lagoa_cadastro.json'), encoding='utf-8'))
+    cad = json.load(open(os.path.join(LF.DIR, 'lagoa_cadastro.json'), encoding='utf-8'))
     plantio = {DLS.PID_DE[c['local']]: c['plantio'] for c in DLS.CULTIVOS}
     S = {}
     for p in cad['pivos']:
@@ -180,7 +179,8 @@ PARADAS = [dict(bomba='B3', ini=m(0, '14:00'), fim=m(0, '15:00'), txt='parada da
 
 def seed():
     # v=2 (04/10, PRE-REV-20261004): base das fertirrigações = realizado semeado; descarta o estado salvo com a base antiga
-    st = dict(v=2, rev=0, hoje='2026-09-23', agora=AGORA, ponta=[18 * 60, 21 * 60], tol=3, faz=FAZ, capt=CAPT, fontes=FONTES,
+    # v=3 (06/10, CTL-5): outorga da Lagoa Grande lida do cadastro; descarta o estado salvo com a cópia antiga
+    st = dict(v=3, rev=0, hoje='2026-09-23', agora=AGORA, ponta=[18 * 60, 21 * 60], tol=3, faz=FAZ, capt=CAPT, fontes=FONTES,
               setores=dict(_sr(), **_lg()), ordens=_ordens(), fert=FERT, paradas=PARADAS, ger=False,
               seq=dict(os=600, lib=2300, ex=5121, au=3101))
     return st
