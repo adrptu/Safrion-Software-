@@ -83,9 +83,10 @@ def cd06():
         gid=f'GR{i}'
         g_rows.append(R(gid,dict(nome=g,nat=_nat(g))))
         tree.append(dict(id=gid,v=dict(item=g),s={},p={},kids=grupos.get(g,[])))
-    # item numa linha: nome e garantia · unidade e embalagem · controle · preço com data · situação; o saldo vive no Estoque (painel do item)
-    gi=grid([dict(k='item',l='Grupo · item',w=330),dict(k='un',l='Unidade · embalagem',w=220),dict(k='ctrl',l='Controle'),
-             dict(k='preco',l='Preço de referência',t='num',a='r',w=190),dict(k='est',l='Situação',w=300)],
+    # item numa linha, uma variável por coluna (TABELAS-FOCO, 04/10/2026): natureza de custo (do grupo), unidade-base, embalagem, controle,
+    # preço com a unidade ("R$ 22,00/L", ordena pelo número), data do preço e situação; garantia ou densidade e saldo no painel do item
+    gi=grid([dict(k='item',l='Grupo › item',w=220),dict(k='nat',l='Natureza de custo',w=210),dict(k='un',l='Unidade'),dict(k='embt',l='Embalagem',w=150),
+             dict(k='ctrl',l='Controle'),dict(k='preco',l='Preço de referência',t='num',a='r',w=140),dict(k='pdata',l='Data do preço',t='date'),dict(k='est',l='Situação',w=200)],
         tree,gid='g_itm',tree=True,dele=False,total=False,frame=False,x0={r['id']:True for r in tree},
         tools=qf_chips('g_itm')+prim('g_itm_new','Cadastrar item'),
         edit=dict(m='form',title='Item',newTitle='Cadastrar item',
@@ -110,12 +111,13 @@ def cd06():
     cap_silo={a['local']:a for a in DC.ATIVOS if a.get('cap_sc')}
     lrows=[]
     for i,n,faz,tp,cap,capu in DC.LOCAIS:
-        v=dict(nome=n,faz=faz,tipo=tp,cap=cap if tp=='Tanque' else '',capa='')
+        v=dict(nome=n,faz=faz,tipo=tp,cap=cap if tp=='Tanque' else '',capa='',capsc='')
         if tp=='Silo':
             a=next((a for a in DC.ATIVOS if a['nome']==n and a.get('cap_sc')),None)
-            if a: v['capa']=f'{fmt(a["cap_sc"])} sc 60 kg · ativo {a["nome"]}'
+            if a: v['capa']=f'{fmt(a["cap_sc"])} sc 60 kg · ativo {a["nome"]}'; v['capsc']=a['cap_sc']
         lrows.append(R(i,v))
-    gl=grid([dict(k='nome',l='Local'),dict(k='faz',l='Fazenda'),dict(k='tipo',l='Tipo'),dict(k='cap',l='Capacidade',a='r'),dict(k='itens',l='Itens com este local padrão',t='num',a='r')],
+    # capacidade como número (ordena) com a unidade na célula: tanque em L, silo em sc de 60 kg (o ativo de origem fica no painel do local)
+    gl=grid([dict(k='nome',l='Local'),dict(k='faz',l='Fazenda'),dict(k='tipo',l='Tipo'),dict(k='capn',l='Capacidade',t='num',a='r'),dict(k='itens',l='Itens com este local padrão',t='num',a='r')],
         lrows,gid='g_loc',qf=dict(k='tipo',todas='Todos'),dele=False,total=False,search=True,frame=False,tools=prim('g_loc_new','Cadastrar local'),
         edit=dict(m='form',title='Local',newTitle='Cadastrar local',sub='Altere o local de estoque. Local com itens não pode ser excluído.',
             fields=[txt('nome','Nome do local'),sel('faz','Fazenda',[f['nome'] for f in DC.FAZENDAS],**{'def':'Santa Rita'}),
@@ -146,14 +148,15 @@ CAD_ACTS.g_itm=(self,r)=>{ const s=Number(r.v.saldo)||0; const why=r.nd==='com s
 CAD_ACTS.g_loc=(self,r)=>[cadExcluir(self,'g_loc',r,'local',r.nd?'tem itens com este local padrão; troque o local deles antes':'')];
 function PREVALS(self,v){ cadActsIni(self); const grps=RW(self,'g_grp'); const its=[]; const locs=RW(self,'g_loc');
   c6pais(self).forEach(p=>{ const g=grps.find(x=>x.id===p.id); if(!g) return; const G=g.v; const ks=p.kids||[]; p.dr='c6g_'+p.id; p.v.item=G.nome;
-    p.p.item=[{k:'b',t:G.nome},{k:'mut',t:ks.length+(ks.length===1?' item':' itens')+' · '+(c6custo(G.nat)?G.nat:'receita')}]; p.s.item=G.nome;
-    ['un','ctrl','preco','est'].forEach(k=>{ p.p[k]=[{k:'mut',t:''}]; p.s[k]=''; });
+    const nat=c6custo(G.nat)?G.nat:'Receita'; p.p.item=[{k:'b',t:G.nome},{k:'mut',t:ks.length+(ks.length===1?' item':' itens')}]; p.s.item=G.nome;
+    p.p.nat=[{k:'txt',t:nat}]; p.s.nat=nat;
+    ['un','embt','ctrl','preco','pdata','est'].forEach(k=>{ p.p[k]=[{k:'mut',t:''}]; p.s[k]=''; });
     ks.forEach(r=>{ const V=r.v; V.grupo=G.nome; V.custo=c6custo(G.nat); its.push(r); r.dr='c6i_'+r.id;
-      r.p.item=[{k:'b',t:V.item||''}].concat(V.gar?[{k:'mut',t:V.gar}]:[]); r.s.item=V.item||'';
-      const e=c6emb(V); r.p.un=[{k:'txt',t:V.un||''},{k:'mut',t:e||'sem embalagem'}]; r.s.un=(V.un||'')+' '+(e||'sem embalagem');
+      r.p.item=[{k:'b',t:V.item||''}]; r.s.item=V.item||''; r.p.nat=[{k:'mut',t:nat}]; r.s.nat=nat;   // natureza do grupo (o filtro vale no item)
+      const e=c6emb(V); r.p.un=[{k:'txt',t:V.un||'—'}]; r.s.un=V.un||''; r.p.embt=[e?{k:'txt',t:e}:{k:'mut',t:'—'}]; r.s.embt=e||'';
       r.p.ctrl=[{k:(V.ctrl==='Sem lote'?'mut':'txt'),t:V.ctrl||'—'}]; r.s.ctrl=V.ctrl||'';
-      r.p.preco=isnum(V.preco)?[{k:'mut',t:V.pdata?br(V.pdata):'sem data'},{k:'txt',t:'R$ '+nf(V.preco,2)+'/'+V.un}]:[{k:'mut',t:'—'}];
-      r.s.preco=isnum(V.preco)?nf(V.preco,2):(V.custo?'Sem preço':'');
+      const pr=isnum(V.preco)&&String(V.preco)!==''; r.p.preco=pr?[{k:'txt',t:'R$ '+nf(V.preco,2)+'/'+V.un}]:[{k:'mut',t:'—'}]; r.s.preco=pr?'R$ '+nf(V.preco,2)+'/'+V.un:'';
+      r.p.pdata=[pr&&V.pdata?{k:'txt',t:br(V.pdata)}:{k:'mut',t:'—'}]; r.s.pdata=pr&&V.pdata?br(V.pdata):'';
       const S=c6sit(V); r.p.est=S.p; r.s.est=S.t; }); });
   cadQf(self,v,'g_itm','c6qf',[{k:'res',t:'A resolver',f:r=>!!c6sit(r.v).res},{k:'inat',t:'Inativos',f:r=>r.v.sit==='Inativo',oz:true}]);
   const f=(GR('g_itm').edit.fields||[]).find(x=>x.k==='grupo'); if(f) f.opts=grps.map(g=>g.v.nome).sort((a,b)=>a.localeCompare(b,'pt-BR')).concat([OUTRO_G]);
@@ -162,8 +165,9 @@ function PREVALS(self,v){ cadActsIni(self); const grps=RW(self,'g_grp'); const i
   const lf=(GR('g_itm').edit.fields||[]).find(x=>x.k==='local'); if(lf) lf.opts=locs.map(l=>l.v.nome);
   const dl=locs.find(l=>l.id===C6.defl); cadcPadrao('g_itm','local',dl?dl.v.nome:'');
   locs.forEach(r=>{ const V=r.v; const n=its.filter(i=>i.v.local===V.nome).length; V.itens=n; r.nd=n?'com itens':''; r.p.nome=[{k:'b',t:V.nome||''}]; r.s.nome=V.nome||'';
-    const cap=V.tipo==='Tanque'&&isnum(V.cap)?nf(V.cap)+' L':(V.tipo==='Silo'?(V.capa||''):'');
-    r.p.cap=cap?[{k:'txt',t:cap}]:[{k:'mut',t:'—'}]; r.s.cap=cap; }); }
+    const tq=V.tipo==='Tanque'&&isnum(V.cap)&&String(V.cap)!==''; const si=V.tipo==='Silo'&&isnum(V.capsc)&&String(V.capsc)!=='';
+    V.capn=tq?Number(V.cap):(si?Number(V.capsc):''); const cap=tq?nf(V.cap)+' L':(si?nf(V.capsc)+' sc de 60 kg':'');
+    r.p.capn=cap?[{k:'txt',t:cap}]:[{k:'mut',t:'—'}]; r.s.capn=cap; }); }
 function EXTRAVALS(self,v){
   const its=leaves(RW(self,'g_itm')).filter(r=>!/^GR/.test(r.id));
   const semP=its.filter(r=>r.v.sit!=='Inativo'&&r.v.custo&&!isnum(r.v.preco)).length, semE=its.filter(r=>r.v.sit!=='Inativo'&&!c6emb(r.v)).length;
@@ -256,7 +260,11 @@ def cd07():
     for j,(c,n) in enumerate(DC.PROCESSOS,1):
         kids['Processo'].append(R(f'pr{j}',dict(dim='Processo',cod=c,nome=n,sup='',rat='',ini='2024-07-01',fim='',trad='Dimensão própria',conta='',top='',orig='Operações e rendimentos',grp='',ops=', '.join(op_proc.get(n,[]))),nd='vem de Operações'))
     tree=[dict(id=f'DM{i}',ro=True,v=dict(cod=d),s={},p={},kids=kids[d]) for i,d in enumerate(DC.DIMS,1)]
-    g=grid([dict(k='cod',l='Dimensão · código',w=270),dict(k='vig',l='Vigência',w=170),dict(k='vinc',l='Vínculos',w=200),dict(k='conta',l='Tradução no ERP (Sankhya)',w=160),dict(k='est',l='Situação',w=240)],
+    # árvore dimensão › código, uma variável por coluna (TABELAS-FOCO, 04/10/2026): nome, origem, início e fim da vigência (datas que ordenam),
+    # vínculos, conta e TOP no ERP, situação (chip) e o que muda no rascunho; o código superior fica no painel
+    g=grid([dict(k='cod',l='Dimensão › código',w=170),dict(k='nome',l='Nome',w=230),dict(k='orig',l='Origem',w=170),dict(k='ini',l='Início da vigência',t='date'),
+            dict(k='fim',l='Fim da vigência',t='date'),dict(k='vinc',l='Vínculos',w=220),dict(k='conta',l='Conta no ERP (Sankhya)',w=150),dict(k='top',l='TOP no ERP'),
+            dict(k='est',l='Situação',w=170),dict(k='rasc',l='No rascunho',w=110)],
         tree,gid='g_dim',tree=True,dele=False,total=False,frame=False,x0={r['id']:True for r in tree},
         tools=qf_chips('g_dim')+secbtn('c7imp','Importar do ERP','Simulação: mostra a prévia antes de trazer qualquer código')+prim('g_dim_new','Cadastrar código'),
         edit=dict(m='form',title='Código',newTitle='Cadastrar código',leafOnly=True,
@@ -298,20 +306,22 @@ function c7impCalc(self){ const viv=c7vivos(self); const novos=[], alts=[];
   C7.imp.alterados.forEach(x=>{ const r=viv.find(q=>q.v.dim==='Natureza'&&q.v.cod===x.cod); if(r&&r.v.nome!==x.para) alts.push({id:r.id,set:{nome:x.para},t:x.cod+' · '+r.v.nome+' → '+x.para}); });
   return {novos,alts,n:novos.length+alts.length}; }
 // situação do código: excluído no rascunho, tradução pendente, mapeado ou dimensão própria (com "novo/alterado na vN")
-function c7sit(self,r){ const V=r.v; const m=c7mud(self)[r.id]; const nv=c7ver(self)+1; const prop=V.trad==='Dimensão própria'; const ex=m&&m!=='excluído'?[{k:'mut',t:m+' na v'+nv}]:[];
-  if(m==='excluído') return {t:'Excluído',p:[chipc('Excluído','gray'),{k:'mut',t:'sai na v'+nv}]};
-  if(!prop&&!V.conta) return {t:'Tradução pendente',p:sitX('Tradução pendente','yellow','Traduzir').concat(ex),res:true};
-  return {t:prop?'Dimensão própria':'Mapeado',p:(prop?sitInfo('Dimensão própria'):sitOk('Mapeado')).concat(ex)}; }
+// (o que muda no rascunho tem coluna própria: No rascunho)
+function c7sit(self,r){ const V=r.v; const m=c7mud(self)[r.id]; const prop=V.trad==='Dimensão própria';
+  if(m==='excluído') return {t:'Excluído',p:[chipc('Excluído','gray')]};
+  if(!prop&&!V.conta) return {t:'Tradução pendente',p:sitX('Tradução pendente','yellow','Traduzir'),res:true};
+  return {t:prop?'Dimensão própria':'Mapeado',p:(prop?sitInfo('Dimensão própria'):sitOk('Mapeado'))}; }
 const C7_ND={'com lançamentos':'tem lançamentos; encerre a vigência em vez de excluir','usada em grupos':'é a natureza de grupos de insumo em Produtos; troque lá antes',
   'vem de Culturas':'vem de Culturas, cultivares e operações; exclua lá','vem de Operações':'vem de Culturas, cultivares e operações; exclua lá'};
 CAD_ACTS.g_dim=(self,r,fm)=>{ if(!r.v.dim||r.ro||fm.ro) return []; return [cadExcluir(self,'g_dim',r,'código',C7_ND[r.nd]||r.nd||'',()=>c7excluir(self,r.id))]; };
 function PREVALS(self,v){ cadActsIni(self); const mud=c7mud(self); const cods=c7vivos(self);
   c7cods(self).forEach(r=>{ if(mud[r.id]==='excluído') r.ro=true; });
   RW(self,'g_dim').forEach(p=>{ const ks=(p.kids||[]).filter(k=>k.v.dim); const orig=ks.length&&ks[0].v.orig;
-    p.p.cod=[{k:'b',t:p.v.cod},{k:'mut',t:ks.length+(ks.length===1?' código':' códigos')+(orig?' · de '+orig:'')}]; p.s.cod=p.v.cod; });
+    p.p.cod=[{k:'b',t:p.v.cod},{k:'mut',t:ks.length+(ks.length===1?' código':' códigos')}]; p.s.cod=p.v.cod; });
   c7cods(self).forEach(r=>{ const V=r.v;
-    r.p.cod=[{k:'b',t:V.cod||''},{k:'mut',t:(V.nome||'')+(V.sup?' · em '+V.sup:'')}]; r.s.cod=(V.cod||'')+' '+(V.nome||'');
-    r.p.vig=[{k:'txt',t:V.fim?br(V.ini)+' – '+br(V.fim):'desde '+br(V.ini)}]; r.s.vig=V.ini||'';
+    r.p.cod=[{k:'b',t:V.cod||''}]; r.s.cod=V.cod||''; r.p.nome=[{k:'txt',t:V.nome||''}]; r.s.nome=V.nome||'';
+    const og=V.orig||'Estrutura gerencial'; r.p.orig=[{k:V.orig?'txt':'mut',t:og}]; r.s.orig=og;
+    r.p.ini=[V.ini?{k:'txt',t:br(V.ini)}:{k:'mut',t:'—'}]; r.s.ini=V.ini?br(V.ini):''; r.p.fim=[V.fim?{k:'txt',t:br(V.fim)}:{k:'mut',t:'—'}]; r.s.fim=V.fim?br(V.fim):'';
     let vi='';
     if(V.dim==='Natureza'){ const fil=cods.filter(x=>x.v.dim==='Natureza'&&x.v.sup===V.cod).length; vi=fil?'soma '+fil+(fil===1?' natureza':' naturezas'):(V.grp?'grupos '+V.grp:''); }
     else if(V.dim==='Processo') vi=V.ops?'operações '+V.ops:'';
@@ -319,9 +329,11 @@ function PREVALS(self,v){ cadActsIni(self); const mud=c7mud(self); const cods=c7
     else if(V.dim==='Centro de responsabilidade') vi=V.rat?'rateio por '+String(V.rat).toLowerCase():'';
     r.p.vinc=vi?[{k:'txt',t:vi}]:[{k:'mut',t:'—'}]; r.s.vinc=vi;
     const prop=V.trad==='Dimensão própria';
-    r.p.conta=prop?[{k:'mut',t:'traduzida na integração'}]:(V.conta?[{k:'txt',t:V.conta+(V.top?' · TOP '+V.top:'')}]:[{k:'mut',t:'sem conta'}]); r.s.conta=V.conta||'';
-    const S=c7sit(self,r); r.p.est=S.p; r.s.est=S.t; });
-  RW(self,'g_dim').forEach(p=>{ ['vig','vinc','conta','est'].forEach(k=>{ p.p[k]=[{k:'mut',t:''}]; p.s[k]=''; }); });
+    // dimensão própria não tem conta fixa (a Situação diz "Dimensão própria": é traduzida na integração)
+    r.p.conta=[!prop&&V.conta?{k:'txt',t:V.conta}:{k:'mut',t:'—'}]; r.s.conta=!prop&&V.conta?V.conta:''; r.p.top=[!prop&&V.top?{k:'txt',t:V.top}:{k:'mut',t:'—'}]; r.s.top=!prop&&V.top?V.top:'';
+    const S=c7sit(self,r); r.p.est=S.p; r.s.est=S.t;
+    const m=mud[r.id]; const mt=m?m.charAt(0).toUpperCase()+m.slice(1):''; r.p.rasc=[m?chipc(mt,m==='excluído'?'gray':'blue'):{k:'mut',t:'—'}]; r.s.rasc=mt; });
+  RW(self,'g_dim').forEach(p=>{ ['nome','orig','ini','fim','vinc','conta','top','est','rasc'].forEach(k=>{ p.p[k]=[{k:'mut',t:''}]; p.s[k]=''; }); });
   const nv=c7ver(self)+1;
   cadQf(self,v,'g_dim','c7qf',[{k:'alt',t:'No rascunho v'+nv,f:r=>!!mud[r.id]},{k:'res',t:'A resolver',f:r=>!!c7sit(self,r).res}]); }
 function EXTRAVALS(self,v){ const ver=c7ver(self), mud=c7mud(self), n=Object.keys(mud).length, pend=c7pend(self).length;
