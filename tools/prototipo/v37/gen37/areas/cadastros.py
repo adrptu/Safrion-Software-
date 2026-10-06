@@ -213,9 +213,9 @@ CADXJS=r'''
 // ===== padrão visual dos cadastros =====
 const CADT={yellow:['#8A5A00','#FFF3D6'],red:['#B42318','#FDE8E6'],gray:['#5B6660','#EEF1EE'],green:['#1E7A4C','#E4F3E9']};
 const CAD_TAB=[__TABOFF__,__TABON__];
-// situação da linha: estado OK sem pílula (ponto verde + texto apagado); exceção em chip com o próximo passo
-function sitOk(t){ return [{k:'cn',t:'●',c:'green'},{k:'mut',t:t}]; }
-function sitInfo(t){ return [{k:'cn',t:'●',c:'gray'},{k:'mut',t:t}]; }   // estado neutro (nem ok nem pendência): ponto cinza
+// situação da linha como chip (TABELAS-FOCO, proprietário 04/10/2026): verde quando ok, cinza quando neutro; exceção em chip com o próximo passo
+function sitOk(t){ return [chipc(t,'green')]; }
+function sitInfo(t){ return [chipc(t,'gray')]; }   // estado neutro (nem ok nem pendência)
 function sitX(t,c,verbo,h){ return [chipc(t,c)].concat(verbo?[h?{k:'link',t:verbo+' ›',h:h}:{k:'b',t:verbo+' ›'}]:[]); }
 // estado da tela ao lado do título
 function cadEstado(v,key,t,cor){ const c=(CADT[cor]||CADT.gray)[0]; v[key]=t;
