@@ -50,6 +50,14 @@ def cartoes(lst):
             f'<span style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px;"><span style="{H("k.cst")}"><span style="{H("k.cdot")}"></span>{H("k.ct")}</span>'
             f'<span style="font-size: 12.5px; font-weight: 700; color: {ACC};">{H("k.nx")}</span></span></button></sc-if></sc-for></div>')
 
+def restaurar():
+    """ação discreta no fim da tela: volta O.S., estoque, app e produção ao início da demonstração (com confirmação)"""
+    lk=f'border: 0; background: transparent; color: {MUTED}; font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; padding: 4px;'
+    return (f'<div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px; flex-wrap: wrap;">'
+            f'<sc-if value="{H("rst_no")}" hint-placeholder-val="{T()}"><button type="button" onClick="{H("rst")}" style="{lk}">Restaurar demonstração</button></sc-if>'
+            f'<sc-if value="{H("rst_ask")}" hint-placeholder-val="{F()}"><span style="font-size: 12px; color: {MUTED};">Volta O.S., estoque, app e produção ao início da demonstração.</span>'
+            f'<button type="button" onClick="{H("rst_ok")}" style="{_MINI} color: {RED}; border-color: {RED};">Restaurar</button><button type="button" onClick="{H("rst_cancel")}" style="{_MINI}">Manter</button></sc-if></div>')
+
 def painel():
     """Painel do registro (detalhe do master-detail), fora do main: próximo passo, dados, seções, formulário e uma ação primária."""
     chip=f'<span style="{H("pp_cst")}"><span style="{H("pp_cdot")}"></span>{H("pp_ct")}</span>'
@@ -102,7 +110,7 @@ def _status(fname):
     open(p,'w',encoding='utf-8').write(s.replace(old,f'<span style="{H("st_st")}"><span style="{H("st_dot")}"></span>{H("st_t")}</span>'))
 
 def _shell(fid,title,sub,corpo,fname,altura,foot):
-    EXTRA.append('<style>'+CSS+'</style>'); EXTRA.append(painel())
+    EXTRA.append('<style>'+CSS+'</style>'); EXTRA.append(painel()); corpo=corpo+restaurar()
     HEIGHTS37[fname]=altura
     shell37(fid,title,corpo,fname=fname,subtitle=sub,status=(H('st_t'),'yellow'),primary_html=prim_html(),search=False,footer=foot)
     _status(fname)
@@ -152,6 +160,8 @@ function prRun(self,fn,ok){ const r=cenMudar(null,fn); if(r.erro){ self.setState
   self.setState(Object.assign({cenrev:Date.now(),g2toast:r.msg||'Registrado.',pr_err:'',pr_ferr:null},ok||{})); return r; }
 function prPrim(v,p){ v.prim_isB=!!(p&&p.go); v.prim_isA=!!(p&&p.h&&!p.go); v.prim_t=p?p.t:''; v.prim_fn=(p&&p.go)||(()=>{}); v.prim_h=(p&&p.h)||'#'; }
 function prStatus(v,t,c){ v.st_t=t; v.st_st=prChs(c); v.st_dot=prDot(c); }
+function prRst(self,v){ v.rst_no=!self.state.pr_rst; v.rst_ask=!!self.state.pr_rst; v.rst=()=>self.setState({pr_rst:true}); v.rst_cancel=()=>self.setState({pr_rst:false});
+  v.rst_ok=()=>{ cenReset(); cenSave(cenGet()); self.setState({pr_rst:false,pr_pan:null,pr_sel:null,pr_form:null,pr_err:'',cenrev:Date.now(),g2toast:'Demonstração restaurada: O.S., estoque, app e produção voltaram ao início.'}); }; }
 /* cartões: as linhas que a grade mostra agora (mesmo filtro, busca e ordem) */
 function prCards(self,v,gid,mk){ const ids=(v[gid+'_rows']||[]).map(r=>r.id); const sel=(self.state.pr_sel||{}).id; return ids.map(id=>{ const k=mk(id); if(!k) return null; k.cur=String(id===sel); return k; }).filter(Boolean); }
 function prCard(o){ return {grp:!!o.grp,reg:!o.grp,t1:o.t1||'',num:o.num||'',t2:o.t2||'',ct:(o.chip||['',''])[0],cst:prChs((o.chip||['','gray'])[1]),cdot:prDot((o.chip||['','gray'])[1]),nx:o.nx||'',go:o.go||(()=>{}),cur:'false'}; }
@@ -248,7 +258,7 @@ function PREVALS(self,v){ cenOuvir(self); prTopo(self,v); const c=cenGet(); self
   const peds=Object.values(P.pedidos).filter(p=>{ const L=Object.values(P.lotes).find(x=>x.prod===p.prod); return prFazOk(self,L?L.faz:'')&&prSafOk(self,p.saf||(L&&L.saf)); });
   GR('g_ped').rows=peds.sort((a,b)=>a.id.localeCompare(b.id)).map(p=>prPedRow(c,p));
   self._lots=lots; self._peds=peds; }
-function EXTRAVALS(self,v){ const c=self._c||cenGet(); const P=prP(c); const st=self.state;
+function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const P=prP(c); const st=self.state;
   /* cartões (celular): mesmos registros, filtro e ordem da grade */
   v.cards_lot=prCards(self,v,'g_lot',id=>{ if(String(id).indexOf('grp:')===0){ const pr=id.slice(4); const ls=(self._lots||[]).filter(L=>L.prod===pr); if(!ls.length) return null; const cu=ls[0].cultura;
       return prCard({grp:true,t1:pr,num:prEstTxt(cu,prSoma(ls.map(L=>prSaldos(c,L).disp)))+' disponível'}); }
@@ -386,7 +396,7 @@ function prPanCarga(self,c,g){ const P=prP(c); const s=prCgSit(c,g); const cu=g.
       PPx.prim={t:'Confirmar estorno',go:()=>prRun(self,x=>prEstornar(x,g.id,prFval(self,'mot',''),prRec(g.faz)),{pr_modo:null,pr_form:null})}; PPx.sec=[{t:'Manter carga',go:()=>self.setState({pr_modo:null,pr_err:''})}]; }
     else PPx.sec=[{t:'Estornar',go:()=>self.setState({pr_modo:'estorno',pr_form:null,pr_err:''})}]; }
   return PPx; }
-function EXTRAVALS(self,v){ const c=self._c||cenGet(); const P=prP(c); const st=self.state;
+function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const P=prP(c); const st=self.state;
   v.cards_cg=prCards(self,v,'g_cg',id=>{ const g=P.cargas[id]; if(!g) return null; const s=prCgSit(c,g);
     return prCard({t1:g.id+(g.ticket?' · '+g.ticket:''),num:g.liq===null?'a pesar':prFmtT(g.liq,2)+' kg',t2:prCgOrig(g).join(' + ')+' · colhida '+prBr(g.dcol)+(g.lote?' · '+g.lote:''),chip:[s.t,s.c],nx:s.nx,go:()=>self.g2pick('g_cg',id)}); });
   const sel=st.pr_sel; const gs=sel&&P.cargas[sel.id]; let prim;
@@ -534,7 +544,7 @@ function prPanTal(self,c,X){ const k=X.k, R=X.R; const P=prP(c); const U=x=>prUn
       PPx.prim={t:'Publicar previsão',go:()=>{ const par=k.semanal?{plantas_ha:prNum(prFval(self,'ph',par0.plantas_ha)),perda:prDiv(prNum(prFval(self,'pe',prFmtT(prMul(par0.perda,100),2))),100)}:null;
         prRun(self,x=>prPublicar(x,k.id,prQuem('ag'),par),{pr_form:null}); }}; } }
   return PPx; }
-function EXTRAVALS(self,v){ const c=self._c||cenGet(); const st=self.state; const vis=st.pr_vis||'t';
+function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const st=self.state; const vis=st.pr_vis||'t';
   v.vt=vis==='t'; v.vs=vis==='s'; v.vt_on=String(vis==='t'); v.vs_on=String(vis==='s'); v.vt_go=()=>self.setState({pr_vis:'t'}); v.vs_go=()=>self.setState({pr_vis:'s'});
   const XS=self._X||[]; const byId={}; XS.forEach(x=>{ byId[x.k.id]=x; });
   v.cards_tal=prCards(self,v,'g_tal',id=>{ if(String(id).indexOf('grp:')===0){ const cu=id.slice(4); const xs=XS.filter(x=>x.k.cultura===cu); const pd=prPonderada(xs.map(x=>x.R));

@@ -239,7 +239,7 @@ function prContar(c, k) { const P = prP(c, 1); const kk = PRDC.cult[k.cult];
   const x = { id, cult: k.cult, tal: kk.local, d: k.d || prHoje(), at: cenAgora(), quem: k.quem || '', plantas: n, pintado: e[0], devez: e[1], verde: e[2], peso, chave: k.chave || id, imp, sinc: on, via: k.via || 'web' };
   P.contagens.push(x); if (!on) c.app.fila.push(id);
   const r = prRascunho(c, k.cult); const sems = Object.keys(r.sem).filter(s => !prSemComecou(s));
-  return { msg: 'Contagem ' + id + ' do ' + kk.local + ' gravada: ' + n + ' plantas, peso médio ' + prFmtT(peso, 2) + ' kg. Rascunho: ' + sems.map(s => prSemTxt(s) + ' ' + prUnTxt(kk.cultura, r.sem[s])).join(' · ')
+  return { msg: 'Contagem ' + id + ' do ' + kk.local + ' gravada: ' + n + (n > 1 ? ' plantas' : ' planta') + ', peso médio ' + prFmtT(peso, 2) + ' kg. Rascunho: ' + sems.map(s => prSemTxt(s) + ' ' + prUnTxt(kk.cultura, r.sem[s])).join(' · ')
     + '. A previsão só muda quando ' + prQuem('ag') + ' publicar.' + (on ? '' : ' Salvo no aparelho; envia quando houver sinal.'), cnt: x }; }
 
 /* publicar previsão (Ana): congela a versão nova só das semanas que ainda não começaram (R-17) */

@@ -155,6 +155,13 @@ try:
         ir('MB-10.dc.html'); lib(); clk('Com sinal'); clk('Com sinal')
         ir('CARGA.dc.html'); n2 = J(f"[...document.querySelectorAll('[role=row]')].filter(r=>N(r.innerText).indexOf({json.dumps(cid)})>=0).length")
         t.chk('AC-16 ao voltar o sinal a carga entra uma vez (repetir o envio não duplica)', n2 == 1, n2)
+        # AC-12 no app: contar no MB-07 grava a CNT- e não publica; a Previsão e colheita oferece "Publicar previsão" ao Pivô 6
+        ir('MB-07.dc.html#lg06'); clk('Mais um fruto Pintado'); clk('Mais um fruto Pintado'); clk('Mais um fruto De vez'); clk('Registrar e ir à planta 2')
+        setv('#mb_peso', '1,10'); clk('Concluir talhão (1 planta)'); p = toast()
+        vs = cen("(c.producao.previsoes.lg06||[]).length")
+        t.chk('AC-12 MB-07: Concluir talhão grava a CNT-0002 do Pivô 6 sem publicar (versão vigente continua a v1)', 'CNT-0002' in p and 'só muda quando' in p and vs == 1, [p, vs])
+        ir('COLH.dc.html'); row('Pivô 6'); t.chk('AC-12 depois da contagem, a ação do Pivô 6 é "Publicar previsão"', J("PRIM()") == ['Publicar previsão'], J("PRIM()"))
+        clk('Fechar', 'aside')
         # AC-15 no OS.dc.html: a OS-0505 posta Em conferência (término físico) com a CG-2108 a pesar não encerra; dono Lúcia
         ir('OS.dc.html', limpa=True)
         J("window.__car.cenMudar(null,c=>{ const o=c.ordens['OS-0505']; o.etapa='Em conferência'; o.saldo=0; o.ap=o.ap.filter(a=>a.st!=='Previsto'); return {msg:''}; })")

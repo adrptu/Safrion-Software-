@@ -217,3 +217,10 @@ function OSX(c, id, tal, etapa, ap, tipo, ins) { c.ordens[id] = { id, tipo: tipo
   const r = MUD(c, x => prReceber(x, { os: 'OS-0932', ticket: 'TK-T7', bruto: 9400, tara: 3200, cond: 'Íntegra', dcol: '2026-09-25' }));
   ok('U16c carga do T7 vai ao l8 Packing (tipo Packing, D-24) e nasce Em processo', !r.erro && r.L.local === 'l8' && prSaldos(c, r.L).q === 'Em processo' && PRDC.locais.l8.tipo === 'Packing', [r.erro, r.L && r.L.local]);
   ok('U16d seq da semente: próxima carga CG-2109, próximo lote da S39 L39-133, próxima reserva RS-0002, próximo MP-1011', CEN0.producao.seq.cg === 2108 && CEN0.producao.seq.lote['39'] === 132 && CEN0.producao.seq.rs === 1 && CEN0.producao.seq.mp === 1010); }
+
+// ---- U15c · contagem sem sinal: fica no aparelho, não vira rascunho; ao voltar o sinal entra uma vez (R-07, AC-16) ----
+{ const c = NOVO(); MUD(c, x => cenSinal(x, false));
+  const n = MUD(c, x => prContar(x, { cult: 'lg06', plantas: 20, pintado: 9, devez: 10, verde: 11, peso: '1,10', quem: 'Marcos', via: 'app', chave: 'APP-CNT-OFF' }));
+  ok('U15c contagem sem sinal fica no aparelho (fila) e não entra no rascunho do Pivô 6', !n.erro && n.cnt.sinc === false && c.app.fila.indexOf(n.cnt.id) >= 0 && prContagem(c, 'lg06') === null, [n.erro, c.app.fila]);
+  MUD(c, x => cenSinal(x, true)); MUD(c, x => cenSinal(x, true)); const r = MUD(c, x => prContar(x, { cult: 'lg06', plantas: 20, pintado: 9, devez: 10, verde: 11, peso: '1,10', quem: 'Marcos', via: 'app', chave: 'APP-CNT-OFF' }));
+  ok('U15d ao voltar o sinal a contagem entra uma vez; reenviar a mesma chave não cria outra', prContagem(c, 'lg06') && prContagem(c, 'lg06').id === n.cnt.id && r.repetido && c.producao.contagens.length === 2, [prContagem(c, 'lg06'), r]); }
