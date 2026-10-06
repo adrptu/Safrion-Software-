@@ -67,8 +67,8 @@ try:
         for _ in range(45):
             c.tab(); paradas.append(J("(()=>{const a=document.activeElement; return a?(a.closest('.etp-ind')?'FAIXA':(a.closest('[data-acoes]')?'AREA':'')):'';})()"))
         shot('saf_faixa_1440')
-        chk('1 SAF · faixa só informa: lista ordenada de 6 etapas sem botão/link/handler/Tab (0 controles), palavra do estado (concluída/etapa atual/pendente), cursor comum, clicar na etapa 3 não navega, nenhuma seta ‹ › e 45 Tabs nunca param na faixa',
-            fx['tag']=='DIV' and fx['ol'] and fx['n']==6 and fx['li'] and fx['ctl']==0 and fx['atual'].startswith('2 ') and 'concluída' in ' '.join(fx['sr']) and 'etapa atual' in ' '.join(fx['sr']) and 'pendente' in ' '.join(fx['sr'])
+        chk('1 SAF · faixa só informa: lista ordenada de 4 etapas sem botão/link/handler/Tab (0 controles), palavra do estado (concluída/etapa atual/pendente), cursor comum, clicar na etapa 3 não navega, nenhuma seta ‹ › e 45 Tabs nunca param na faixa',
+            fx['tag']=='DIV' and fx['ol'] and fx['n']==4 and fx['li'] and fx['ctl']==0 and fx['atual'].startswith('2 ') and 'concluída' in ' '.join(fx['sr']) and 'etapa atual' in ' '.join(fx['sr']) and 'pendente' in ' '.join(fx['sr'])
             and fx['cursor']!='pointer' and fx['setas']==0 and e1['etapa']==2 and 'FAIXA' not in paradas, [fx,e1,paradas])
         # 2 · uma primária e uma rota de avanço por estado, sem cópia do mesmo comando (cabeçalho, bloco, faixa, área)
         estados={}
@@ -79,14 +79,14 @@ try:
           return {tabela:Math.round(r.getBoundingClientRect().height), linhas:r.querySelectorAll('[role=row]').length, area:Math.round(ra.height), folga:Math.round(rm.bottom-ra.bottom), mainRola:m.scrollHeight>m.clientHeight+1};})()""")
         chk('2b SAF · a tabela de cultivos estica até a área de ações (≥ 300 px, todas as linhas cabem ou rolam dentro dela) e a área fica no pé do conteúdo (≤ 40 px do fim, altura ≤ 140 px), sem rolagem dupla',
             lay['tabela']>=300 and lay['area']<=140 and 0<=lay['folga']<=40 and not lay['mainRola'], lay)
-        for i in (3,4,5,6): etapa(i); estados[f'{i}']=est()
-        shot('saf_etapa6_revisao')
+        for i in (3,4): etapa(i); estados[f'{i}']=est()
+        shot('saf_etapa4_revisao')
         def uma(s): return len(s['prims'])<=1 and s['avancos']<=1 and all(s['prims'].count(x)==1 for x in s['prims'])
         rotulos={k:[a.split(':',1)[1] for a in v['area'] if a.startswith(('avancar:','resolver:','comando:','abrir:'))] for k,v in estados.items()}
-        sem_copia=all(sum(1 for x in J(f"[...document.querySelectorAll('header button,header a,main button,main a')].filter(e=>e.getClientRects().length).map(e=>{N}(e.innerText))") if x==t)<=1 for t in rotulos['6'])
-        chk('2 SAF · no máximo uma primária e uma rota de avanço em cada estado (sem safra, falta de plano, etapas 3-6), sem cópia do mesmo comando; Nova safra secundária',
+        sem_copia=all(sum(1 for x in J(f"[...document.querySelectorAll('header button,header a,main button,main a')].filter(e=>e.getClientRects().length).map(e=>{N}(e.innerText))") if x==t)<=1 for t in rotulos['4'])
+        chk('2 SAF · no máximo uma primária e uma rota de avanço em cada estado (sem safra, falta de plano, etapas 3 e 4), sem cópia do mesmo comando; Nova safra secundária',
             all(uma(s) for s in estados.values()) and estados['1 sem safra']['prims']==[] and estados['2 falta plano']['prims']==['Aplicar plano em 4 cultivos'] and estados['2 falta plano']['avancos']==1
-            and [estados[k]['prims'] for k in ('3','4','5')]==[['Conferir plano operacional ›'],['Dimensionar recursos ›'],['Conferir demanda de insumos ›']] and estados['6']['prims']==['Abrir Compra de insumos ›'] and sem_copia,
+            and estados['3']['prims']==['Conferir demanda de insumos ›'] and estados['4']['prims']==['Abrir Compra de insumos ›'] and sem_copia,
             {k:(v['etapa'],v['prims'],v['area']) for k,v in estados.items()})
         # 3 · etapa 2 nova (todos os talhões): sem "Adicionar cultivo"; "Planejar ›" na linha do talhão abre o painel sem trocar de etapa e
         #     preserva o rascunho (Esc → Continuar editando)
@@ -103,8 +103,8 @@ try:
         abre('SAF',hash='#saf=S2627&passo=cultivos'); time.sleep(.3)
         e4=est(); k2a=' '.join(a for a in e4['area'] if a.startswith('nota:'))
         acao('avancar'); e4b=est(); etapa(2); k2b=' '.join(a for a in est()['area'] if a.startswith('nota:'))
-        chk('4 SAF · falta de plano: nota com a causa e os talhões, "Aplicar plano em 4 cultivos" é a primária (resolver) e "Definir rendimentos ›" o único avanço, secundário; avançar leva à etapa 3 sem aplicar plano (4 sem plano antes e depois, na nota)',
-            any(a.startswith('nota:4 cultivos sem plano agronômico (T4, T3, P1, P2)') for a in e4['area']) and 'resolver:Aplicar plano em 4 cultivos' in e4['area'] and 'avancar:Definir rendimentos ›' in e4['area']
+        chk('4 SAF · falta de plano: nota com a causa e os talhões, "Aplicar plano em 4 cultivos" é a primária (resolver) e "Dimensionar operações ›" o único avanço, secundário; avançar leva à etapa 3 sem aplicar plano (4 sem plano antes e depois, na nota)',
+            any(a.startswith('nota:4 cultivos sem plano agronômico (T4, T3, P1, P2)') for a in e4['area']) and 'resolver:Aplicar plano em 4 cultivos' in e4['area'] and 'avancar:Dimensionar operações ›' in e4['area']
             and e4b['etapa']==3 and '4 cultivos sem plano' in k2a and '4 cultivos sem plano' in k2b, [e4['area'],e4b['etapa'],k2a,k2b])
         # 5 · vazio: safra nova sem cultivos → nenhuma primária e nenhum avanço; a nota diz o que está livre e a conferir e manda planejar na linha
         abre('SAF'); clk('Nova safra'); time.sleep(.3)
@@ -134,15 +134,15 @@ try:
         clk('Aplicar plano','aside[role=dialog]'); time.sleep(.5); clk('Confirmar substituição','aside[role=dialog]',.4)
         e7b=est(); r2=acao('avancar',.9); e7c=est(); y1=rolagem(); q=J("(document.querySelector('main input[type=search]')||{value:''}).value"); nota1=[a for a in e7c['area'] if a.startswith('nota:')]
         f2=J("(()=>{const a=document.activeElement; return a?(a.dataset.acao||a.tagName):'';})()"); shot('saf_volta_revisao')
-        chk('7 SAF · "Corrigir cultivos" na revisão leva à etapa 2 com o foco no 1º cultivo sem plano e "Aplicar plano" + "Voltar à revisão ›"; depois de aplicar, volta direto à etapa 6 na mesma posição de rolagem (±4 px), com a busca "o" e a pendência recalculada (1280×640)',
+        chk('7 SAF · "Corrigir cultivos" na revisão leva à etapa 2 com o foco no 1º cultivo sem plano e "Aplicar plano" + "Voltar à revisão ›"; depois de aplicar, volta direto à etapa 4 na mesma posição de rolagem (±4 px), com a busca "o" e a pendência recalculada (1280×640)',
             r=='Corrigir cultivos' and e7['etapa']==2 and foco in ('T4','T3','P1','P2') and any('Correção pedida pela revisão' in a for a in e7['area']) and 'avancar:Voltar à revisão ›' in e7['area']
-            and r2.startswith('Voltar à revisão') and e7c['etapa']==6 and y0>0 and abs(y1-y0)<=4 and q=='o' and nota1!=nota0, [r,e7['area'],foco,ok_sel,e7b['area'],r2,e7c['etapa'],y0,y1,q,nota0,nota1,f2])
-        # 8 · avançar não envia: Safrinha 2027 (não enviada) → etapa 6 com "Enviar para cotação" (comando) distinto; andar 6→2→6 não cria solicitação
+            and r2.startswith('Voltar à revisão') and e7c['etapa']==4 and y0>0 and abs(y1-y0)<=4 and q=='o' and nota1!=nota0, [r,e7['area'],foco,ok_sel,e7b['area'],r2,e7c['etapa'],y0,y1,q,nota0,nota1,f2])
+        # 8 · avançar não envia: Safrinha 2027 (não enviada) → etapa 4 com "Enviar para cotação" (comando) distinto; andar 6→2→6 não cria solicitação
         abre('SAF'); r=J("(()=>{const r=[...document.querySelectorAll('[role=row]')].find(x=>x.innerText.indexOf('Safrinha 2027')>=0); const b=r&&[...r.querySelectorAll('button')].find(b=>/^Continuar/.test(b.innerText.trim())); if(!b) return 'sem'; b.click(); return b.innerText.trim();})()"); time.sleep(.6)
-        e8=est(); etapa(2); etapa(6); e8b=est(); ls=J("localStorage.getItem('talhao-os-compras-v1')"); k6=J("(document.body.innerText.match(/Valor da necessidade[^\\n]+/)||[''])[0]")
+        e8=est(); etapa(2); etapa(4); e8b=est(); ls=J("localStorage.getItem('talhao-os-compras-v1')"); k6=J("(document.body.innerText.match(/Valor da necessidade[^\\n]+/)||[''])[0]")
         abr=J(f"[...document.querySelectorAll('main a,main button')].filter(e=>e.getClientRects().length&&/Abrir Compra de insumos/.test({N}(e.innerText))).length"); shot('saf_enviar_distinto')
-        chk('8 SAF · avançar só troca de etapa: Safrinha 2027 na etapa 6 tem "Enviar para cotação" como comando (não avanço); 6→2→6 pela área não envia (nada gravado, "ainda não enviada") e não mostra "Abrir Compra de insumos"',
-            e8['etapa']==6 and 'comando:Enviar para cotação' in e8['area'] and e8b['etapa']==6 and 'comando:Enviar para cotação' in e8b['area'] and not ls and 'ainda não enviada' in k6 and abr==0, [r,e8,e8b['area'],ls,k6,abr])
+        chk('8 SAF · avançar só troca de etapa: Safrinha 2027 na etapa 4 tem "Enviar para cotação" como comando (não avanço); 4→2→4 pela área não envia (nada gravado, "ainda não enviada") e não mostra "Abrir Compra de insumos"',
+            e8['etapa']==4 and 'comando:Enviar para cotação' in e8['area'] and e8b['etapa']==4 and 'comando:Enviar para cotação' in e8b['area'] and not ls and 'ainda não enviada' in k6 and abr==0, [r,e8,e8b['area'],ls,k6,abr])
         ERRL.extend(errs()); chk('9 sem erro de JS (SAF)', not ERRL, ERRL[:5])
     elif MODO=='familias':
         fam={}
@@ -296,8 +296,8 @@ try:
         c.tecla('Enter','Enter',13,text='\r'); time.sleep(.7); e2=est(); k2=0
         while k2<120 and J("(document.activeElement&&document.activeElement.innerText||'').trim()")!='Voltar à revisão ›': c.tab(); k2+=1
         c.tecla('Enter','Enter',13,text='\r'); time.sleep(.8); e6=est(); shot('saf_corrigir_teclado')
-        chk('22 (c) teclado · Tab chega a "Corrigir cultivos" na nota da revisão; Enter leva à etapa 2 (correção); Tab chega a "Voltar à revisão ›"; Enter volta direto à etapa 6 (sem percorrer 3-5)',
-            k<120 and e2['etapa']==2 and any('Correção pedida pela revisão' in a for a in e2['area']) and k2<120 and e6['etapa']==6, [k,e2['area'],k2,e6['etapa']])
+        chk('22 (c) teclado · Tab chega a "Corrigir cultivos" na nota da revisão; Enter leva à etapa 2 (correção); Tab chega a "Voltar à revisão ›"; Enter volta direto à etapa 4 (sem percorrer a etapa 3)',
+            k<120 and e2['etapa']==2 and any('Correção pedida pela revisão' in a for a in e2['area']) and k2<120 and e6['etapa']==4, [k,e2['area'],k2,e6['etapa']])
         ERRL.extend(errs()); info('erros de JS (gemini)',ERRL[:5])
     elif MODO=='v3':
         import re as _re

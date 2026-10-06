@@ -1146,7 +1146,7 @@ _PARTS=(f'<sc-if value="{{{{p.isTxt}}}}" hint-placeholder-val="{{{{false}}}}"><s
         f'<sc-if value="{{{{p.isTag}}}}" hint-placeholder-val="{{{{false}}}}"><span style="display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; color: {MUTED}; border: 1px solid {LINE}; white-space: nowrap;">{{{{p.t}}}}</span></sc-if>'
         f'<sc-if value="{{{{p.isLink}}}}" hint-placeholder-val="{{{{false}}}}"><a href="{{{{p.href}}}}" style="color: {ACC}; font-weight: 700; text-decoration: none;">{{{{p.t}}}}</a></sc-if>'
         f'<sc-if value="{{{{p.isCta}}}}" hint-placeholder-val="{{{{false}}}}"><a class="{{{{p.cls}}}}" href="{{{{p.href}}}}" style="{{{{p.st}}}}">{{{{p.t}}}}</a></sc-if>'
-        f'<sc-if value="{{{{p.isAct}}}}" hint-placeholder-val="{{{{false}}}}"><button type="button" class="{{{{p.cls}}}}" onClick="{{{{p.fn}}}}" style="{{{{p.st}}}}">{{{{p.t}}}}</button></sc-if>'
+        f'<sc-if value="{{{{p.isAct}}}}" hint-placeholder-val="{{{{false}}}}"><button type="button" class="{{{{p.cls}}}}" aria-label="{{{{p.al}}}}" onClick="{{{{p.fn}}}}" style="{{{{p.st}}}}">{{{{p.t}}}}</button></sc-if>'
         f'<sc-if value="{{{{p.isBr}}}}" hint-placeholder-val="{{{{false}}}}"><span style="flex-basis: 100%; height: 0;"></span></sc-if>')
 def _h(x): return '{{'+x+'}}'
 # Unidade junto do valor (decisão do proprietário, 05/10/2026): coluna numérica com unidade fixa no cabeçalho ("Área (ha)") passa a mostrar a

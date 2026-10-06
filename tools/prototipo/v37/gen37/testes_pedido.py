@@ -35,7 +35,7 @@ from comp_lib import IR_ETAPA
 def etapa(t,i): r=t.js(f"({IR_ETAPA})({i})"); time.sleep(.5); return r   # a faixa só informa (UX-ACAO-UNICA-20261003): anda pela área de ações
 # ---------------------------------------------------------------- testes
 def t01(t):
-    """Escolher/criar safra e percorrer as seis etapas."""
+    """Escolher/criar safra e percorrer as quatro etapas (05/10/2026: as antigas 3, 4 e 5 viraram "Dimensione operações e recursos")."""
     t.abrir('SAF.dc.html')
     t.check('Nenhuma safra escolhida automaticamente',t.js("document.body.innerText.indexOf('Nenhuma safra escolhida')>=0"))
     t.clk('Nova safra'); t.check('Formulário "Nova safra" abriu pela direita',t.form())
@@ -44,14 +44,14 @@ def t01(t):
     t.clk('Salvar','aside[role=dialog]'); t.check('Safra criada e aberta na etapa 2',t.js("document.querySelector('[aria-current=step]').innerText.indexOf('Defina cultivos')>=0"),t.aviso())
     t.foto('nova-safra')
     r1=etapa(t,1); t.log('Voltar à etapa 1 (área de ações; a faixa só informa)',r1==1,r1); t.clk('Continuar')  # abre a 2026/27 no próximo passo (etapa 2)
-    for i in range(2,7):
+    for i in range(2,5):
         etapa(t,i); cur=t.js("document.querySelector('[aria-current=step]').innerText.replace(/\\s+/g,' ')")
         t.check(f'Etapa {i} aberta pela área de ações',cur.startswith(str(i)),cur)
-    t.foto('etapa6')
+    t.foto('etapa4')
 def t02(t):
     """Aplicar um plano a vários cultivos e ajustar somente um."""
     abrir_safra(t)
-    n=t.js("""(()=>{let n=0; [...document.querySelectorAll('[role=row].g2ed')].forEach(r=>{ if(/\\b(T4|T3|P1|P2)\\b/.test(r.innerText)){ r.querySelector('input[type=checkbox]').click(); n++; } }); return n;})()"""); time.sleep(.4)
+    n=t.js("""(()=>{let n=0; [...document.querySelectorAll('[role=row].g2ed')].filter(r=>r.querySelector('input[type=checkbox]')).forEach(r=>{ if(/\\b(T4|T3|P1|P2)\\b/.test(r.innerText)){ r.querySelector('input[type=checkbox]').click(); n++; } }); return n;})()"""); time.sleep(.4)
     t.check('4 cultivos selecionados (seleção não abre edição)',n==4 and not t.form(),n)
     t.clk('Aplicar plano'); t.setv('#ap_sel','SOJA-AT'); t.clk('Aplicar plano','aside[role=dialog]')
     t.check('Plano aplicado aos 4',('aplicado a 4 cultivos' in t.aviso()),t.aviso())
@@ -72,12 +72,12 @@ def t03(t):
     before=t.js("document.body.innerText.length"); t.js("(()=>{const b=document.querySelector('button[aria-label^=\"Recolher\"],button[aria-label^=\"Expandir\"]'); b.click();})()"); time.sleep(.4)
     t.check('Seta expande/recolhe sem abrir edição',not t.form() and t.js("document.body.innerText.length")!=before)
     t.foto('planos')
-    abrir_safra(t); etapa(t,6); t.clk('Expandir tudo')
+    abrir_safra(t); etapa(t,4); t.clk('Expandir tudo')
     t.check('Demanda: grupos expandidos mostram insumos',t.js("document.body.innerText.indexOf('Glifosato 480')>=0"))
 def t04(t):
     """Encaminhar demanda para compras mantendo a origem."""
-    abrir_safra(t); etapa(t,6)
-    # 01/10: com tudo já enviado, a etapa 6 não oferece novo envio (não há como duplicar) e a ação principal abre a Compra
+    abrir_safra(t); etapa(t,4)
+    # 01/10: com tudo já enviado, a etapa 4 (demanda de insumos) não oferece novo envio (não há como duplicar) e a ação principal abre a Compra
     tem_env=t.js("[...document.querySelectorAll('button')].some(b=>b.innerText.trim()==='Enviar para cotação')")
     if tem_env: t.clk('Enviar para cotação'); t.check('Envio não duplica solicitação existente',('Nenhuma solicitação duplicada' in t.aviso()) or ('enviada' in t.aviso()),t.aviso())
     else: t.check('Envio não duplica solicitação existente (nada a enviar: só "Abrir Compra de insumos")',t.js("[...document.querySelectorAll('button,a')].some(b=>/^Abrir Compra de insumos/.test(b.innerText.trim()))"),'')   # AÇÃO: ir a outra tela é link (área de ações)
@@ -91,10 +91,10 @@ def t05(t):
     abrir_safra(t)
     row_click(t,'T2'); time.sleep(.4); fid=t.js("[...document.querySelectorAll('aside[role=dialog] input')].find(i=>/_area$/.test(i.id)).id")
     t.setv('#'+fid,'250'); t.clk('Salvar','aside[role=dialog]')
-    etapa(t,4); k1=t.js("document.body.innerText.match(/[\\d.]+ ha trabalhados/)[0]")
+    etapa(t,3); k1=t.js("(document.body.innerText.match(/Custo de operação R\\$ [\\d.,]+/)||[''])[0]")   # etapa única: o k4 saiu; o custo de operação fica no título
     etapa(t,2); t.check('Área editada preservada ao voltar (250 ha, 48 ha livres)',t.js("[...document.querySelectorAll('[role=row].g2ed')].find(r=>/\\bT2\\b/.test(r.innerText)).innerText.indexOf('250 ha')>=0") and t.js("document.body.innerText.indexOf('48 ha livres')>=0"))
-    etapa(t,6); etapa(t,4); k2=t.js("document.body.innerText.match(/[\\d.]+ ha trabalhados/)[0]")
-    t.check('Plano operacional mantém o recálculo entre idas e voltas',k1==k2,f'{k1} = {k2}')
+    etapa(t,4); etapa(t,3); k2=t.js("(document.body.innerText.match(/Custo de operação R\\$ [\\d.,]+/)||[''])[0]")
+    t.check('Operações e recursos mantêm o recálculo entre idas e voltas',k1==k2 and k1!='',f'{k1} = {k2}')
 def t06(t):
     """Clicar na linha para editar pelo formulário lateral."""
     for f,txt in [('SAF.dc.html',None),('CD-05.dc.html','Fertisul'),('EST.dc.html',None)]:
@@ -107,14 +107,14 @@ def t06(t):
 def t07(t):
     """Expandir, selecionar ou excluir sem abrir acidentalmente a edição."""
     abrir_safra(t)
-    t.js("[...document.querySelectorAll('[role=row].g2ed')].find(r=>/\\bP2\\b/.test(r.innerText)).querySelector('input[type=checkbox]').click()"); time.sleep(.3)
+    t.js("[...document.querySelectorAll('[role=row].g2ed')].find(r=>/\\bP2\\b/.test(r.innerText)&&r.querySelector('input[type=checkbox]')).querySelector('input[type=checkbox]').click()"); time.sleep(.3)
     t.check('Selecionar não abre edição',not t.form())
-    t.js("[...document.querySelectorAll('[role=row].g2ed')].find(r=>/\\bP2\\b/.test(r.innerText)).querySelector('button.g2del').click()"); time.sleep(.3)
+    t.js("[...document.querySelectorAll('[role=row].g2ed')].find(r=>/\\bP2\\b/.test(r.innerText)&&r.querySelector('input[type=checkbox]')).querySelector('button.g2del').click()"); time.sleep(.3)
     t.check('Excluir pede confirmação e não abre edição',not t.form() and t.js("document.body.innerText.indexOf('Excluir?')>=0"))
     t.clk('Manter'); t.check('Manter preserva o registro',t.js("[...document.querySelectorAll('[role=row].g2ed')].some(r=>/\\bP2\\b/.test(r.innerText))"))
     etapa(t,3); t.js("document.querySelector('button.g2car').click()"); time.sleep(.3)
     t.check('Seta de drill só recolhe/expande',not t.form())
-    etapa(t,6); t.js("document.querySelector('button.g2car').click()"); time.sleep(.3)
+    etapa(t,4); t.js("document.querySelector('button.g2car').click()"); time.sleep(.3)
     t.check('Seta de drill na demanda não abre painel',not t.form())
 def t08(t):
     """Salvar, cancelar e tratar alterações não salvas."""
@@ -135,7 +135,7 @@ def t09(t):
     t.clk('Fechar','aside[role=dialog]')
 def t10(t):
     """Abrir a origem de indicadores calculados."""
-    abrir_safra(t); etapa(t,6); t.clk('Expandir tudo'); row_click(t,'Fungicida A'); time.sleep(.4)
+    abrir_safra(t); etapa(t,4); t.clk('Expandir tudo'); row_click(t,'Fungicida A'); time.sleep(.4)
     t.check('Insumo calculado abre origem (consulta com cultivos e atividades)',t.form() and t.js("document.querySelector('aside[role=dialog]').innerText.indexOf('ORIGEM')>=0 && /T1-B/.test(document.querySelector('aside[role=dialog]').innerText)"))
     t.foto('origem-demanda')
     t.clk('Fechar','aside[role=dialog]')

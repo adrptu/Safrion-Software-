@@ -820,7 +820,7 @@ FORNECEDORES=[  # cadastro de parceiros (CD-05): grupos homologados, e-mail e Wh
  dict(id='F06',nome='Coop. Vale',cnpj='66.890.123/0001-53',grupos=['Sementes','Fertilizantes','Herbicidas','Fungicidas'],email='insumos@coopvale.coop.br',whats='65 99466-7788',homologado=True),
  dict(id='F07',nome='Química Centro-Oeste',cnpj='77.901.234/0001-34',grupos=['Fungicidas','Inseticidas'],email='',whats='65 99377-8899',homologado=False),
 ]
-SOL_INICIAL=dict(id='SOL-2026-07',safra='S2627',origem='Planejar safra · Safra 2026/27 · etapa 6',enviada='23/09/2026 10:40',por='Ana (gestora)')
+SOL_INICIAL=dict(id='SOL-2026-07',safra='S2627',origem='Planejar safra · Safra 2026/27 · demanda de insumos',enviada='23/09/2026 10:40',por='Ana (gestora)')
 def sol_itens():
     d=demanda('S2627'); return {n:dict(grupo=o['grupo'],un=o['un'],qtd=round(o['liq'],2),preco_ref=o['preco']) for n,o in d.items() if o['liq']>0.001}
 # propostas simuladas (respostas dos convites) por grupo: preço unitário, prazo de entrega (dias), frete, validade

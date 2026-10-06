@@ -41,7 +41,8 @@ def panel(): return J("(()=>{const a=document.querySelector('aside[role=dialog]'
 def pvals(): return J("[...document.querySelectorAll('aside[role=dialog] input')].filter(i=>/^Nome da parcela|^Área de/.test(i.getAttribute('aria-label'))).map(i=>i.value)")
 def k(txt_re): return J(f"(document.body.innerText.match({txt_re})||[''])[0]")
 from comp_lib import IR_ETAPA
-def etapa(i): r=J(f"({IR_ETAPA})({i})"); time.sleep(.5); return r   # a faixa só informa (UX-ACAO-UNICA-20261003): anda pela área de ações
+def etapa(i): r=J(f"({IR_ETAPA})({i})"); time.sleep(.5); return r
+def k3(): return J("(()=>{ const c=(document.body.innerText.match(/Custo de operação R\\$ [\\d.,]+/)||[''])[0]; const t=[...document.querySelectorAll('[role=row]')].filter(r=>r.offsetParent&&/^Total\\b/.test(r.innerText.trim())).map(r=>r.innerText.replace(/\\s+/g,' ').trim()).join(' | '); return c+' · '+t; })()") or ''   # a faixa só informa (UX-ACAO-UNICA-20261003): anda pela área de ações
 try:
     c.size(1440,1000); c.goto(f'http://127.0.0.1:{p}/SAF.dc.html',wait=1.3)
     chk('sem erro de JS ao abrir', (J("window.__err||''") or '')=='', J("window.__err||''"))
@@ -53,8 +54,9 @@ try:
     NFOLHAS=f"""(()=>[...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent).flatMap(t=>[...t.querySelectorAll('[role=row]')]).filter(r=>r.querySelector('input[type=checkbox]')&&!({FORA})(r)).length)()"""
     k2a=k(r"/Nesta safra [^\n]+/"); print('   faixa:',k2a)
     chk('faixa "Nesta safra 1.165" e 9 cultivos (folhas)', k2a.startswith('Nesta safra 1.165') and J(NFOLHAS)==9, (k2a,J(NFOLHAS)))
-    etapa(4); k4a=k(r"/[\d.]+ ha trabalhados[^\n]+/"); etapa(6); k6a=k(r"/Valor da necessidade[^\n]+/"); etapa(2)
-    print('   k4:',k4a); print('   k6:',k6a)
+    # etapa única (05/10/2026): o k4 saiu; horas e custo de operação ficam na etapa 3 (Total da g_op e linha do título); a demanda na 4
+    etapa(3); k4a=k3(); etapa(4); k6a=k(r"/Valor da necessidade[^\n]+/"); etapa(2)
+    print('   etapa 3:',k4a); print('   k6:',k6a)
     # --- invariante: dividir T2 em 3 com o mesmo plano não muda k4/k6
     chk('abre Dividir T2', rowbtn('T2 talhão inteiro','Dividir')=='ok' and 'Dividir T2 em parcelas' in panel())
     chk('proposta inicial T2-A/T2-B 149/149', pvals()==['T2-A','149','T2-B','149'], pvals())
@@ -67,8 +69,8 @@ try:
     clk('Salvar divisão','aside[role=dialog]'); t=toast()
     chk('salvou T2 em 3 parcelas', 'T2 dividido em 3 parcelas' in t and not panel(), t)
     rs=rows(); chk('T2 tem sublinhas T2-A..C', all(any(r.startswith(f'T2-{x} parcela') for r in rs) for x in 'ABC'))
-    etapa(4); k4b=k(r"/[\d.]+ ha trabalhados[^\n]+/"); etapa(6); k6b=k(r"/Valor da necessidade[^\n]+/"); etapa(2)
-    chk('k4 idêntico após dividir T2', k4b==k4a, k4b); chk('k6 idêntico após dividir T2', k6b==k6a, k6b)
+    etapa(3); k4b=k3(); etapa(4); k6b=k(r"/Valor da necessidade[^\n]+/"); etapa(2)
+    chk('horas-conjunto e custo de operação (etapa 3) idênticos após dividir T2', k4b==k4a and 'Custo de operação' in k4a, k4b); chk('k6 idêntico após dividir T2', k6b==k6a, k6b)
     # --- T4 em 5 parcelas
     rowbtn('T4 talhão inteiro','Dividir')
     for _ in range(3): clk('+ Adicionar parcela','aside[role=dialog]')
@@ -118,8 +120,8 @@ try:
     setv('Área de T2-A em hectares','298')
     clk('Salvar divisão','aside[role=dialog]'); t=toast(); chk('T2 volta a talhão inteiro', 'T2 volta a talhão inteiro' in t, t)
     chk('linha T2 talhão inteiro', any(r.startswith('T2 talhão inteiro') for r in rows()))
-    etapa(4); k4c=k(r"/[\d.]+ ha trabalhados[^\n]+/"); etapa(2)
-    print('   k4 depois das divisões:',k4c)
+    etapa(3); k4c=k3(); etapa(2)
+    print('   etapa 3 depois das divisões:',k4c)
     # --- formulário: validação cruzada de área
     rowclick('T3-A'); time.sleep(.3)
     setv('Área','200') if False else None
