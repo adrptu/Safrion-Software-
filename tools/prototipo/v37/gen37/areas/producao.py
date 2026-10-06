@@ -189,10 +189,10 @@ function prPedRow(c,p){ const cu=p.cultura; const U=x=>prEstTxt(cu,x); const rs=
     s:{ped:p.id+' '+p.cliente,prod:p.prod,tipo:(p.tipo==='futura'?'Futura':'Pronta entrega')+' · '+p.janela,qtd:U(p.qtd),res:U(res),falta:U(falta),sit:st.t+' · '+nx},
     p:{ped:[{k:'b',t:p.id},{k:'mut',t:' · '+p.cliente}],prod:[{k:'txt',t:p.prod}],tipo:[{k:'txt',t:p.tipo==='futura'?'Futura':'Pronta entrega'},{k:'br'},{k:'mut',t:p.janela+(p.obs?' · '+p.obs:'')}],
        qtd:prTx(U(p.qtd)),res:prTx(U(res)),falta:[{k:'b',t:U(falta)}],sit:[{k:'chip',t:st.t,c:st.c},{k:'br'},{k:'mut',t:nx}]}}; }
-function prFormReserva(self,c,L,p,fixo){ /* fixo: 'lote' (vem do lote: escolhe o pedido) ou 'ped' (vem do pedido: escolhe o lote) */
+function prFormReserva(self,c,L,p,fixo,lotes){ /* fixo: 'lote' (vem do lote: escolhe o pedido) ou 'ped' (vem do pedido: escolhe o lote); lotes: lista já filtrada (Contratos e pedidos, R-C05) */
   const P=prP(c); let opcPed=[], opcLot=[];
   if(fixo==='lote'){ opcPed=prPedidosPara(c,L); p=P.pedidos[prFval(self,'ped',(opcPed[0]||{}).id||'')]||opcPed[0]||null; }
-  else { opcLot=Object.values(P.lotes).filter(x=>prCompat(p,x)&&prCmp(prSaldos(c,x).disp,0)>0); L=P.lotes[prFval(self,'lot',(opcLot[0]||{}).id||'')]||opcLot[0]||null; }
+  else { opcLot=lotes||Object.values(P.lotes).filter(x=>prCompat(p,x)&&prCmp(prSaldos(c,x).disp,0)>0); L=P.lotes[prFval(self,'lot',(opcLot[0]||{}).id||'')]||opcLot[0]||null; }
   const S=L?prSaldos(c,L):null; const falta=p?prFalta(c,p):0; const sug=(S&&p)?(prCmp(S.disp,falta)<0?S.disp:falta):0; const cu=(L||p||{}).cultura||'Soja'; const un=prEstUn(cu);
   const fields=[]; if(fixo==='lote') fields.push(prFld(self,'ped','Pedido',{t:'opts',v:p?p.id:'',opts:opcPed.map(x=>({v:x.id,t:x.id+' · '+x.cliente+' · falta '+prEstTxt(x.cultura,prFalta(c,x))+(x.tipo==='futura'?' · futura':'')}))}));
   else fields.push(prFld(self,'lot','Lote apto',{t:'opts',v:L?L.id:'',opts:opcLot.map(x=>({v:x.id,t:x.id+' · disponível '+prEstTxt(x.cultura,prSaldos(c,x).disp)}))}));
@@ -200,7 +200,7 @@ function prFormReserva(self,c,L,p,fixo){ /* fixo: 'lote' (vem do lote: escolhe o
   fields.push(prFld(self,k,'Quantidade a reservar',{t:'txt',v:sugT,u:un,h:'Sugestão: o menor entre o disponível do lote ('+(S?prEstTxt(cu,S.disp):'—')+') e a falta do pedido ('+prEstTxt(cu,falta)+'). Pode reduzir.'}));
   const go=()=>{ if(!L||!p){ self.setState({pr_err:'Escolha '+(fixo==='lote'?'o pedido':'o lote')+'.'}); return; } const q=prFval(self,k,sugT);
     const kg=q===sugT?sug:(prNumOk(q)?prEstBase(cu,prNum(q)):NaN); const ch=self.state.pr_ch||prChave('W-RS');   /* sem edição: a sugestão exata na base */
-    prRun(self,x=>prReservar(x,{pedido:p.id,lote:L.id,kg,chave:ch,quem:prQuem('com')}),{pr_modo:null,pr_form:null,pr_ch:null}); };
+    prRun(self,x=>prReservar(x,{pedido:p.id,lote:L.id,kg,chave:ch,ator:g2perfil()}),{pr_modo:null,pr_form:null,pr_ch:null}); };   /* quem age: o perfil (Comercial CE-10) */
   return {fields,go,L,p}; }
 function prPanPed(self,c,p){ const P=prP(c); const cu=p.cultura; const U=x=>prEstTxt(cu,x); const st=prSitPed(c,p); const falta=prFalta(c,p); const cx=self.state.pr_cx;
   const rs=Object.values(P.reservas).filter(r=>r.pedido===p.id).map(r=>{ const L=P.lotes[r.lote]; const imp=r.st==='Ativa'&&L&&prSaldos(c,L).q!=='Liberado';
@@ -211,7 +211,7 @@ function prPanPed(self,c,p){ const P=prP(c); const cu=p.cultura; const U=x=>prEs
     next:ofTxt||(st.t==='Em risco'?'Expedição impedida: o lote reservado deixou de ser apto. '+prQuem('qual')+' confere; '+prQuem('com')+' troca o lote ou cancela a reserva.':(prCmp(falta,0)>0?'Reservar lote apto para cobrir '+U(falta)+'.':'Coberto: aguardar a expedição.')),nred:st.t==='Em risco',
     secs:[{t:'Reservas',rows:rs,vazio:'Nenhuma reserva.'}],err:self.state.pr_err};
   if(cx){ PPx.form={t:'Cancelar '+cx,h:'O motivo fica no histórico; o disponível do lote volta.',fields:[prFld(self,'mot','Motivo do cancelamento',{t:'txt',im:'text',ph:'ex.: cliente adiou a retirada'})]};
-    PPx.prim={t:'Cancelar '+cx,go:()=>prRun(self,x=>prCancelarReserva(x,cx,prFval(self,'mot',''),prQuem('com')),{pr_cx:null,pr_form:null})}; PPx.sec=[{t:'Manter reserva',go:()=>self.setState({pr_cx:null,pr_err:''})}]; return PPx; }
+    PPx.prim={t:'Cancelar '+cx,go:()=>prRun(self,x=>prCancelarReserva(x,cx,prFval(self,'mot',''),g2perfil()),{pr_cx:null,pr_form:null})}; PPx.sec=[{t:'Manter reserva',go:()=>self.setState({pr_cx:null,pr_err:''})}]; return PPx; }
   const a=prCmp(falta,0)>0?Object.values(P.lotes).filter(x=>prCompat(p,x)&&prCmp(prSaldos(c,x).disp,0)>0):[];
   if(a.length){ if(self.state.pr_ch){ const f=prFormReserva(self,c,null,p,'ped'); PPx.form={t:'Reservar lote para o '+p.id+' · '+prQuem('com'),h:'Só lote apto, do mesmo produto e classe. Venda futura reserva sem tocar a oferta publicada além da dedução.',fields:f.fields}; PPx.prim={t:'Reservar',go:f.go}; }
     else PPx.prim={t:'Reservar lote para o '+p.id,go:()=>self.setState({pr_ch:prChave('W-RS'),pr_form:null,pr_err:''})}; }   /* depois de reservar, nova reserva abre outro formulário (outra chave) */

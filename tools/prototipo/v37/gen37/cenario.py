@@ -79,9 +79,11 @@ def seed():
     # v=3 (04/10, SINT-C03 + PRE-REV-20261004): quantidades da semente pela regra única; o salvo com a regra antiga travaria o apontamento
     # v=4 (06/10, colheita de ponta a ponta · docs/colheita): o estado ganha c.producao (contagens, previsões, cargas, lotes de produto,
     # pedidos, reservas e movimentos MP-); o salvo sem ele é descartado (D-18)
-    import dados_producao
-    return dict(v=4, rev=0, ordens=ordens, reqs=reqs, lotes=lotes, movs=[], ocorr=[],
-                app=dict(online=True, fila=[], turno=None, operador='Marcos'), producao=dados_producao.seed())
+    # v=5 (06/10, comercial e logística · docs/comercial): c.producao ganha vendas com preço e condição, CT-203/CRE-0095/BT-090 no estado,
+    # cargas de saída (RM-) e sequências rm/pv/ct; o salvo da v=4 é descartado (o integrador confere se outra frente subiu a versão antes)
+    import dados_producao, dados_comercial
+    return dict(v=5, rev=0, ordens=ordens, reqs=reqs, lotes=lotes, movs=[], ocorr=[],
+                app=dict(online=True, fila=[], turno=None, operador='Marcos'), producao=dados_comercial.completar(dados_producao.seed()))
 
 
 def js_prefixo():

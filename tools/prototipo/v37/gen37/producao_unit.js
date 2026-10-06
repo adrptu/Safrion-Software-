@@ -63,7 +63,7 @@ function OSX(c, id, tal, etapa, ap, tipo, ins) { c.ordens[id] = { id, tipo: tipo
   const L = c.producao.lotes['L39-133']; const S = L && prSaldos(c, L); const p2 = prResultado(c, 'lg19').passes[0];
   ok('U03c K13 CG-2108 pesada: L39-133 com 12.050 kg, Liberado, vence 29/09, no Galpão de frutas Lagoa Grande', !g.erro && L && S.fis === 12050 && S.q === 'Liberado' && L.validade === '2026-09-29' && L.local === 'l11', [g.erro, L, S]);
   ok('U03d K13 passe S39 0,65 t/ha (48,47 t em 75 ha); ciclo 0,65 t/ha (75,11 ha)', F2(p2.prtv) === '0,65' && F2(prResultado(c, 'lg19').prtv) === '0,65' && p2.kg === 48470, [p2.prtv, p2.kg]);
-  const rs = MUD(c, x => prReservar(x, { pedido: 'PV-036', lote: 'L39-133', kg: 10000, chave: 'W-RS-1' }));
+  const rs = MUD(c, x => prReservar(x, { pedido: 'PV-036', lote: 'L39-133', kg: 10000, chave: 'W-RS-1', ator: 'Ana' }));
   const S2 = prSaldos(c, c.producao.lotes['L39-133']); const sit = prSitPed(c, c.producao.pedidos['PV-036']);
   ok('U03e K13 reservar 10.000 kg para o PV-036: L39-133 disponível 2.050 kg; PV-036 Coberto', !rs.erro && S2.disp === 2050 && S2.res === 10000 && sit.t === 'Coberto' && rs.rs.id === 'RS-0002', [rs.erro, S2, sit]);
   // K06: sem o apontamento, pesar a CG-2108 dá passe 0,97 e ciclo 0,65
@@ -105,7 +105,7 @@ function OSX(c, id, tal, etapa, ap, tipo, ins) { c.ordens[id] = { id, tipo: tipo
   const L = r.L; const S0 = prSaldos(c, L);
   ok('U07a Íntegra e carência cumprida (' + d0 + ' dias de bula) → Liberado', !r.erro && typeof d0 === 'number' && d0 < 19 && S0.q === 'Liberado', [r.erro, d0, S0.q, S0.mot]);
   c.producao.pedidos['PV-T1'] = { id: 'PV-T1', cliente: 'Cliente teste', prod: MAM, cultura: 'Mamão Formosa', classe: '', saf: '', tipo: 'pronta', janela: '26/09', qtd: 5000, dest: 'MI-BR' };
-  const rs = MUD(c, x => prReservar(x, { pedido: 'PV-T1', lote: L.id, kg: 5000 }));
+  const rs = MUD(c, x => prReservar(x, { pedido: 'PV-T1', lote: L.id, kg: 5000, ator: 'Ana' }));
   const b = MUD(c, x => carc_bula(x, P, 'Mamão', 30)); const S1 = prSaldos(c, c.producao.lotes[L.id]); const sit = prSitPed(c, c.producao.pedidos['PV-T1']);
   ok('U07b bula corrigida para 30 dias DEPOIS do recebimento: o lote passa a Bloqueado (carência até 04/10) sem nada regravado', !rs.erro && !b.erro && S1.q === 'Bloqueado' && /carência até 04\/10/.test(S1.mot), [rs.erro, b.erro, S1]);
   ok('U07c a reserva já feita fica com a expedição impedida (pedido Em risco)', sit.t === 'Em risco' && sit.imp.length === 1, sit);
@@ -129,28 +129,29 @@ function OSX(c, id, tal, etapa, ap, tipo, ins) { c.ordens[id] = { id, tipo: tipo
   ok('U08b PV-030: falta 7.500 kg depois da RS-0001 (4.000 sc = 240.000 kg)', prFalta(c, c.producao.pedidos['PV-030']) === 7500, prFalta(c, c.producao.pedidos['PV-030'])); }
 
 // ---- U09 · reserva: recusas (AC-10) ----
-{ const c = NOVO(); const e1 = MUD(c, x => prReservar(x, { pedido: 'PV-036', lote: 'L39-131', kg: 1000 }));
+{ const c = NOVO(); const e1 = MUD(c, x => prReservar(x, { pedido: 'PV-036', lote: 'L39-131', kg: 1000, ator: 'Ana' }));
   ok('U09a lote Em processo (CAR0: mistura LM-39-01) não reserva', /não está apto/.test(e1.erro || '') && /Em processo/.test(e1.erro), e1);
-  const e2 = MUD(c, x => prReservar(x, { pedido: 'PV-030', lote: 'L10-031', kg: 7501 }));
+  const e2 = MUD(c, x => prReservar(x, { pedido: 'PV-030', lote: 'L10-031', kg: 7501, ator: 'Ana' }));
   ok('U09b acima da falta do pedido (7.500 kg) é recusado', /Acima da falta/.test(e2.erro || ''), e2);
   MUD(c, x => prReceber(x, { carga: 'CG-2108', ticket: 'TK-4520', bruto: 19250, tara: 7200, cond: 'Íntegra' }));
-  const e3 = MUD(c, x => prReservar(x, { pedido: 'PV-038', lote: 'L39-133', kg: 12051 }));
+  const e3 = MUD(c, x => prReservar(x, { pedido: 'PV-038', lote: 'L39-133', kg: 12051, ator: 'Ana' }));
   ok('U09c acima do disponível do lote é recusado', /Acima do disponível/.test(e3.erro || ''), e3);
-  const e4 = MUD(c, x => prReservar(x, { pedido: 'PV-030', lote: 'L39-133', kg: 100 }));
+  const e4 = MUD(c, x => prReservar(x, { pedido: 'PV-030', lote: 'L39-133', kg: 100, ator: 'Ana' }));
   ok('U09d produto diferente do pedido é recusado', /não atende o PV-030/.test(e4.erro || ''), e4);
   c.car = c.car || {}; c.car.laudos = [{ id: 'LAB-T9', escopo: ['LC-0505-2'], d: '2026-09-25', res: { tebuconazol: { v: 5, un: 'mg/kg', lq: 0.01 } } }];
-  const e5 = MUD(c, x => prReservar(x, { pedido: 'PV-036', lote: 'L39-133', kg: 1000 }));
+  const e5 = MUD(c, x => prReservar(x, { pedido: 'PV-036', lote: 'L39-133', kg: 1000, ator: 'Ana' }));
   ok('U09e destino do pedido Não conforme (laudo acima do limite da ANVISA) recusa a reserva, com quem decide', /Reserva recusada/.test(e5.erro || '') && /Não conforme/.test(e5.erro) && /Qualidade/.test(e5.erro), e5);
-  c.car.laudos = []; const ok1 = MUD(c, x => prReservar(x, { pedido: 'PV-036', lote: 'L39-133', kg: 4000 }));
-  const e6 = MUD(c, x => prCancelarReserva(x, ok1.rs.id, ''));
-  const k6 = MUD(c, x => prCancelarReserva(x, ok1.rs.id, 'cliente adiou')); const S = prSaldos(c, c.producao.lotes['L39-133']);
+  c.car.laudos = []; const ok1 = MUD(c, x => prReservar(x, { pedido: 'PV-036', lote: 'L39-133', kg: 4000, ator: 'Ana' }));
+  const e6 = MUD(c, x => prCancelarReserva(x, ok1.rs.id, '', 'Ana'));
+  const k6 = MUD(c, x => prCancelarReserva(x, ok1.rs.id, 'cliente adiou', 'Ana')); const S = prSaldos(c, c.producao.lotes['L39-133']);
   ok('U09f cancelar sem motivo é recusado; com motivo o disponível volta (12.050 kg)', /motivo/.test(e6.erro || '') && !k6.erro && S.disp === 12050, [e6, k6.erro, S.disp]);
-  const k7 = MUD(c, x => prReservar(x, { pedido: 'PV-038', lote: 'L39-133', kg: 3000 }));
+  const k7 = MUD(c, x => prReservar(x, { pedido: 'PV-038', lote: 'L39-133', kg: 3000, ator: 'Ana' }));
   ok('U09g venda futura (PV-038) aceita reserva de lote apto (R-15)', !k7.erro && prSaldos(c, c.producao.lotes['L39-133']).disp === 9050, k7); }
 
 // ---- U10 · venda futura não muda o físico; oferta livre (AC-11, K10, K14) ----
 { const c = NOVO(); const of = prOfertaSafra(c, 'Soja em grão', '2026/27'); const T = x => prEstTxt('Soja', x);
-  ok('U10a soja 26/27: oferta publicada 68.180 sc; obrigações do VE-05 (CT-203, CRE-0095, BT-090) 19.900 sc; oferta livre 48.280 sc', T(of.pub) === '68.180 sc' && T(of.futKg) === '19.900 sc' && T(of.livre) === '48.280 sc' && of.ob.length === 3, [T(of.pub), T(of.futKg), T(of.livre)]);
+  /* expectativa mudada no Comercial P1 (D-C04): CT-203, CRE-0095 e BT-090 saem do catálogo e entram no estado como vendas futuras; a oferta livre é a mesma */
+  ok('U10a soja 26/27: oferta publicada 68.180 sc; vendas futuras do estado (CT-203, CRE-0095, BT-090) 19.900 sc; oferta livre 48.280 sc', T(of.pub) === '68.180 sc' && T(of.futKg) === '19.900 sc' && T(of.livre) === '48.280 sc' && of.fut.map(p => p.id).sort().join() === 'BT-090,CRE-0095,CT-203' && !(of.ob || []).length, [T(of.pub), T(of.futKg), T(of.livre), of.fut.map(p => p.id)]);
   ok('U10b o L10-031 continua com 34.545 sc disponíveis (a venda futura não desconta o físico)', T(prSaldos(c, c.producao.lotes['L10-031']).disp) === '34.545 sc');
   const s41 = prOfertaSem(c, MAM, '2026-W41'); ok('U10c S41 sem versão publicada: PV-038 aparece como déficit de 30.000 kg', s41.livre === -30000 && !s41.tem, s41);
   const pb = MUD(c, x => prPublicar(x, 'lg19', 'Ana (agrônoma)')); const s41b = prOfertaSem(c, MAM, '2026-W41');
@@ -184,10 +185,10 @@ function OSX(c, id, tal, etapa, ap, tipo, ins) { c.ordens[id] = { id, tipo: tipo
 
 // ---- U13 · estorno (AC-14, R-19) ----
 { const c = NOVO(); MUD(c, x => prReceber(x, { carga: 'CG-2108', ticket: 'TK-4520', bruto: 19250, tara: 7200, cond: 'Íntegra' }));
-  MUD(c, x => prReservar(x, { pedido: 'PV-036', lote: 'L39-133', kg: 10000 }));
+  MUD(c, x => prReservar(x, { pedido: 'PV-036', lote: 'L39-133', kg: 10000, ator: 'Ana' }));
   const e = MUD(c, x => prEstornar(x, 'CG-2108', 'ticket trocado')); ok('U13a estorno que deixaria o lote abaixo do reservado é recusado', /abaixo do reservado/.test(e.erro || ''), e);
   const e0 = MUD(c, x => prEstornar(x, 'CG-2108', '')); ok('U13b estorno sem motivo é recusado', /motivo/.test(e0.erro || ''), e0);
-  MUD(c, x => prCancelarReserva(x, 'RS-0002', 'refazer pesagem'));
+  MUD(c, x => prCancelarReserva(x, 'RS-0002', 'refazer pesagem', 'Ana'));
   const ok1 = MUD(c, x => prEstornar(x, 'CG-2108', 'ticket trocado')); const g = c.producao.cargas['CG-2108'];
   ok('U13c estorno com motivo: lote volta a 0 kg, carga Estornada, produção do Pivô 19 volta a 36,42 t e o histórico fica', !ok1.erro && prFis(c, 'L39-133') === 0 && g.st === 'Estornada' && prResultado(c, 'lg19').kg === 36420 && c.producao.movs.some(m => m.tipo === 'estorno'), [ok1.erro, prFis(c, 'L39-133')]);
   const nv = MUD(c, x => prReceber(x, { os: 'OS-0505', ticket: 'TK-4520', bruto: 19200, tara: 7200, cond: 'Íntegra', dcol: '2026-09-22' }));
@@ -234,7 +235,7 @@ const TEB = (c, dap) => { c.ordens['OS-0999'] = { id: 'OS-0999', tipo: 'Pulveriz
 { const c = NOVO(); TEB(c, '19/09');
   const r = MUD(c, x => prReceber(x, { os: 'OS-0505', ticket: 'TK-D1', bruto: 19200, tara: 7200, cond: 'Íntegra', dcol: '2026-09-26' })); const S = r.L && prSaldos(c, r.L);
   ok('R01a carga "colhida" em 26/09 sem apontamento da OS-0505 nesse dia: lote Em inspeção, dono Sérgio (não Liberado)', !r.erro && S.q === 'Em inspeção' && S.dono === 'Sérgio' && /sem apontamento de área da OS-0505/.test(S.mot), [r.erro, S]);
-  const rs = MUD(c, x => prReservar(x, { pedido: 'PV-036', lote: r.L.id, kg: 10000, chave: 'W-R01' })); const lb = MUD(c, x => prLiberarLote(x, r.L.id));
+  const rs = MUD(c, x => prReservar(x, { pedido: 'PV-036', lote: r.L.id, kg: 10000, chave: 'W-R01', ator: 'Ana' })); const lb = MUD(c, x => prLiberarLote(x, r.L.id));
   ok('R01b esse lote não é reservado e a Qualidade não o libera enquanto o dia não for confirmado (quem resolve: Sérgio)', /não está apto/.test(rs.erro || '') && /Liberar recusado/.test(lb.erro || '') && /Sérgio/.test(lb.erro), [rs.erro, lb.erro]);
   const c2 = NOVO(); TEB(c2, '19/09'); MUD(c2, x => cenApontar(x, { os: 'OS-0505', d: '25/09', ha: 10, h: 4, origem: 'app', quem: 'Marcos', chave: 'APC-R01-25' }));
   const r2 = MUD(c2, x => prReceber(x, { os: 'OS-0505', ticket: 'TK-D2', bruto: 19200, tara: 7200, cond: 'Íntegra', dcol: '2026-09-25' }));
@@ -252,11 +253,11 @@ ok('R02a prNum: "19.250" = 19.250; "1.234.567,8"; "1,20" = 1,2; "1.20" = 1,2; "1
 
 // ---- A-03 (S2) · reservar, cancelar e reservar de novo (chave nova do formulário); mesma chave e outro conteúdo = conflito (M34) ----
 { const c = NOVO(); MUD(c, x => prReceber(x, { carga: 'CG-2108', ticket: 'TK-4520', bruto: 19250, tara: 7200, cond: 'Íntegra' }));
-  const a = MUD(c, x => prReservar(x, { pedido: 'PV-036', lote: 'L39-133', kg: 10000, chave: 'W-RS-k1' }));
-  const x8 = MUD(c, x => prReservar(x, { pedido: 'PV-036', lote: 'L39-133', kg: 8000, chave: 'W-RS-k1' }));
+  const a = MUD(c, x => prReservar(x, { pedido: 'PV-036', lote: 'L39-133', kg: 10000, chave: 'W-RS-k1', ator: 'Ana' }));
+  const x8 = MUD(c, x => prReservar(x, { pedido: 'PV-036', lote: 'L39-133', kg: 8000, chave: 'W-RS-k1', ator: 'Ana' }));
   ok('R03a (M34) mesma chave com outra quantidade = conflito, nada deduzido', !a.erro && /conflito/.test(x8.erro || '') && prResPed(c, 'PV-036').length === 1, [a.erro, x8]);
-  MUD(c, x => prCancelarReserva(x, a.rs.id, 'cliente adiou'));
-  const b = MUD(c, x => prReservar(x, { pedido: 'PV-036', lote: 'L39-133', kg: 10000, chave: 'W-RS-k2' }));
+  MUD(c, x => prCancelarReserva(x, a.rs.id, 'cliente adiou', 'Ana'));
+  const b = MUD(c, x => prReservar(x, { pedido: 'PV-036', lote: 'L39-133', kg: 10000, chave: 'W-RS-k2', ator: 'Ana' }));
   ok('R03b depois de cancelar, a reserva com a chave do novo formulário fica ativa (PV-036 coberto)', !b.erro && !b.repetido && prResPed(c, 'PV-036').length === 1 && prSitPed(c, c.producao.pedidos['PV-036']).t === 'Coberto', [b.erro, b.repetido, prResPed(c, 'PV-036').length]); }
 
 // ---- A-04 (S2) · O.S. de colheita com carga não é cancelada "sem execução" ----
@@ -345,7 +346,7 @@ ok('R19 "semana 2" lida em 26/09/2026 = 2027-W02; "semana 39" = 2026-W39; janela
   const lg = c.producao.lotes[c.producao.cargas['CG-2108'].lote] || { origem: [] }; const og = lg.origem.find(x => x.carga === 'CG-2108') || {};
   ok('M32 estorno marca a origem do lote (sai do lote de campo e da qualidade)', og.est === true && prLcs(c, lg).length === 0, lg.origem); }
 { const c = NOVO(); const sem = c.producao.pedidos['PV-038'].sem; const f0 = prOfertaSem(c, MAM, sem);
-  MUD(c, x => prReceber(x, { carga: 'CG-2108', ticket: 'TK-4520', bruto: 19250, tara: 7200, cond: 'Íntegra' })); MUD(c, x => prReservar(x, { pedido: 'PV-038', lote: 'L39-133', kg: 3000, chave: 'W-M09' }));
+  MUD(c, x => prReceber(x, { carga: 'CG-2108', ticket: 'TK-4520', bruto: 19250, tara: 7200, cond: 'Íntegra' })); MUD(c, x => prReservar(x, { pedido: 'PV-038', lote: 'L39-133', kg: 3000, chave: 'W-M09', ator: 'Ana' }));
   const f1 = prOfertaSem(c, MAM, sem);
   ok('M09 reserva de lote para venda futura sai da oferta comprometida: oferta livre ' + sem + ' sobe 3.000 kg', prSub(f1.livre, f0.livre) === 3000 && f1.resKg === 3000, [f0.livre, f1.livre]);
   const v1 = c.producao.previsoes.lg19[0]; c.producao.previsoes.lg19.push(Object.assign({}, v1, { v: 2, d: prSemIni('2026-W39'), sem: { '2026-W39': 1 } }));
