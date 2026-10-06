@@ -20,8 +20,10 @@ for a in AREAS:
         FALHAS.append((a,repr(ex))); traceback.print_exc()
 if FALHAS: print('MÓDULOS COM FALHA:',FALHAS)
 # telas que deixaram de ser geradas (01/10: O.S. sem revisão; o agrônomo libera na tela O.S.): o arquivo de um build anterior sai do project/ e do canvas
-for _f in ('IN-02det.dc.html','IN-02x-os0420.dc.html'):
-    if os.path.exists(os.path.join(E.P,_f)): os.remove(os.path.join(E.P,_f))
+# 06/10 (PLAT-01): CF-05det vira o detalhe da fatura no CF-05; a tela antiga sai também do _render/ (o montar_render só copia)
+for _f in ('IN-02det.dc.html','IN-02x-os0420.dc.html','CF-05det.dc.html'):
+    for _d in (E.P,os.path.join(os.path.dirname(E.P),'_render')):
+        if os.path.exists(os.path.join(_d,_f)): os.remove(os.path.join(_d,_f))
 # tudo que foi escrito no project/ com meta conhecida entra no canvas
 from ui37 import HEIGHTS37, _h
 from ui37 import menu_item, MENU2

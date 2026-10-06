@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Área Configurações (módulo OCULTO do menu, preservado; não sequencial → sem faixa de etapas).
 CF-01 Usuários e permissões · CF-02 Alçadas e regras (+ CF-02det AL-05) · CF-03 Integrações e sincronização
-(+ CF-03det reconciliação do ERP e conflito offline) · CF-04 Auditoria e parâmetros · CF-05 Assinatura e medição (+ CF-05det).
+(+ CF-03det reconciliação do ERP e conflito offline) · CF-04 Auditoria e parâmetros. CF-05 Assinatura e cobrança está em areas/assinatura.py (PLAT-01).
 Padrão v3.7-processos: descrição imperativa sob cada bloco, edição pela linha (G2), ícone + rótulo + title nas ações secundárias.
 
 observacoes (dados locais coerentes com dados.py / dados2.py / telas vizinhas):
@@ -21,16 +21,7 @@ import dados as D
 import dados2 as D2
 
 H=lambda s: '{{'+s+'}}'
-AREA_HA=sum(t[1] for t in D.TALHOES)          # 1.165 ha físicos produtivos (mundo único)
 def n0(v): return f'{v:,.0f}'.replace(',','.')
-AREA_FMT=n0(AREA_HA)
-RESERVA=84                                     # reserva ambiental (fora da base)
-FIS_FMT=n0(AREA_HA+RESERVA)                    # 1.249
-MENS=AREA_HA*2                                 # R$ 2/ha (hipótese 57.2) => R$ 2.330
-MENS_FMT=n0(MENS)
-V1_HA=1120; AMPL=AREA_HA-V1_HA                 # ampliação de 45 ha em 16/07
-JUL=V1_HA*2+AMPL*2//2                          # jul: 1.120 ha mês cheio + 45 ha por meio mês = R$ 2.285
-JUL_FMT=n0(JUL)
 OS0,OS1,OS2,OS3=D.OS[0],D.OS[1],D.OS[2],D.OS[3]
 # DEMO-11 · mesmo fato do app (MB-03): dia 4 da OS-0421
 APT=dict(id='APT-1187',os=OS0['id'],dia=4,ha=OS0['dias'][3],uuid='c9e2-…-4f1a',recibo='REC-7741')
@@ -465,89 +456,4 @@ function EXTRAVALS(self,v){
       subtitle='Histórico de decisões, parâmetros globais, retenção e documentação — quem fez o quê, quando, por quê e com que efeito.',
       status=('Trilha íntegra','green'),
       footer='Consulta não edita fato: correção acontece no domínio, por ajuste/estorno vinculado ao documento de origem.')
-
-    # ================= CF-05 · Assinatura e medição (cap. 57 · 70.4) =================
-    fname='CF-05.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1400
-    g_pl=grid([C('campo','Campo',w=170),C('val','Valor',w=300),C('obs','Observação',w=340)],[
-        R('l1',campo='Plano / versão',val=[Pt.b('Produtor · v2')],obs='vigente desde 16/07/2026 · v1 arquivada'),
-        R('l2',campo='Escopo',val='Santa Rita + Boa Vista · conta única',obs='sem cobrança por fazenda separada'),
-        R('l3',campo='Período e cobrança',val='mensal · dia 1 · 3 retentativas em 10 dias',obs='inadimplência pausa recursos, não apaga dados'),
-        R('l4',campo='Trial',val=ch('HIPÓTESE · 60 dias · encerrado em 31/05','yellow'),obs='direitos do trial pela matriz versionada'),
-        R('l5',campo='Preço contratado',val=ch('HIPÓTESE · R$ 2/ha/mês · mínimo R$ 299','yellow'),obs='proposta comercial em decisão — não é tabela ativa'),
-        R('l6',campo='Regra contratual',val='arredondamento meio para cima · pró-rata em ampliação',obs='definida em contrato, não recalculada por edição de polígono')],
-       edit=dict(m='none'),search=False,gid='g_pl',total=False)
-    AREAS=[('T1','soja',312,312,'—','Contratado v2','green'),('T2','soja',298,298,'—','Contratado v2','green'),('T4','soja',204,204,'—','Contratado v2','green'),
-           ('T3','milho colhido',96,96,'pousio/entressafra não cancela gestão nem cobrança','Contratado v2','green'),
-           ('P1','feijão (2 ciclos no período)',95,95,'2ª safra cobrada 1× · sem duplicar','Deduplicado','green'),('P2','milho',80,80,'—','Contratado v2','green'),
-           ('T7','mamão',42,42,'—','Contratado v2','green'),('C1','café',38,38,'—','Contratado v2','green'),('Reserva ambiental','não produtiva',RESERVA,0,'área não produtiva excluída da base','Excluída','gray')]
-    assert sum(a[3] for a in AREAS)==AREA_HA
-    g_ar=grid([C('tal','Talhão / área',w=210),C('fis','Física',t='num',a='r',u='ha',agg='sum'),C('ele','Elegível',t='num',a='r',u='ha',agg='sum'),C('exc','Exclusões e deduplicação',w=300),C('sit','Situação',w=190)],
-       [R(f'a_{i}',v=dict(motivo='',evid=''),tal=two(t,c),fis=f,ele=e,exc=x,sit=ch(s,cor)) for i,(t,c,f,e,x,s,cor) in enumerate(AREAS)],
-       edit=dict(m='form',title='Contestar medição',sub='A contestação congela a discussão na versão medida; a fatura fica aberta sem juros até a decisão. Área e hectares não mudam aqui.',
-         fields=[dict(k='fis',l='Física',t='num',ro=True,u='ha'),dict(k='ele',l='Elegível',t='num',ro=True,u='ha'),
-                 dict(k='motivo',l='Motivo da contestação',t='area',req=True,help='Ex.: área em pousio negociada fora do contrato'),dict(k='evid',l='Evidência',t='txt',req=True,help='Ex.: aditivo contratual de 12/09')]),
-       so={'k':'fis','d':True},gid='g_ar',total=True)
-    g_fat=grid([C('comp','Competência'),C('base','Base (ha)',a='r'),C('regra','Regra aplicada',w=300),C('val','Valor',a='r'),C('est','Estado',w=190),C('mem','Memória')],[
-        R('f_set',comp=[Pt.b('set/2026')],base=AREA_FMT,regra='R$ 2/ha (≥ mínimo R$ 299) · HIPÓTESE',val=f'R$ {MENS_FMT}',est=ch('Aberta · vence 01/10','yellow'),mem=[Pt.cta('Ver memória','CF-05det.dc.html')],
-          o=[(f'{AREA_FMT} ha elegíveis (área v2) × R$ 2,00 = R$ {MENS_FMT} · maior que o mínimo R$ 299',None),('Memória completa de set/2026','CF-05det.dc.html')]),
-        R('f_ago',comp=[Pt.txt('ago/2026')],base=AREA_FMT,regra='R$ 2/ha · HIPÓTESE',val=f'R$ {MENS_FMT}',est=ch('Paga · 01/09','green'),mem=[Pt.mut('clique na linha')],
-          o=[(f'{AREA_FMT} ha elegíveis (área v2) × R$ 2,00 = R$ {MENS_FMT}',None),('Paga em 01/09 · confirmação do financeiro',None)]),
-        R('f_jul',comp=[Pt.txt('jul/2026')],base=f'{n0(V1_HA)} + {AMPL}',regra=f'pró-rata: +{AMPL} ha desde 16/07 (T7 + parte C1) · HIPÓTESE',val=f'R$ {JUL_FMT}',est=ch('Paga · 01/08','green'),mem=[Pt.mut('clique na linha')],
-          o=[(f'v1: {n0(V1_HA)} ha × R$ 2,00 = R$ {n0(V1_HA*2)} (mês cheio)',None),(f'v2: +{AMPL} ha × R$ 2,00 × ½ mês = R$ {n0(AMPL*2//2)} (desde 16/07)',None),(f'Total R$ {JUL_FMT} · paga em 01/08',None)])],
-       edit=dict(m='origin',title='Fatura',fields=[dict(k='base',l='Base (ha)',ro=True),dict(k='regra',l='Regra aplicada',ro=True),dict(k='val',l='Valor',ro=True)]),
-       search=False,gid='g_fat',total=False)
-    EXTRAJS[0]=JS_BASE+'''
-let CT=11;
-function EXTRAVALS(self,v){
-  self.g2after=(gid,rows,r)=>{ if(gid!=='g_ar'||!r) return; if(!r.v.ct){ CT+=1; r.v.ct='CT-0'+CT; }
-    r.p.sit=[CH('Contestada · '+r.v.ct,'yellow'),BR,MU('medição v2 preservada')]; r.s.sit='Contestada';
-    self.setState({g2toast:'Contestação '+r.v.ct+' aberta · fatura set/2026 permanece aberta sem juros até decisão · medição v2 preservada.'}); };
-}'''
-    corpo=(
-      kpis([('ÁREA CONTRATADA (v2)',f'{AREA_FMT} ha','física produtiva · HIPÓTESE de base'),
-            ('ÁREA MEDIDA DEDUPLICADA',f'{AREA_FMT} ha','2ª safra e consórcio não duplicam'),
-            ('MENSALIDADE · HIPÓTESE',f'R$ {MENS_FMT}','maior entre R$ 299 e R$ 2/ha'),
-            ('PRÓXIMA FATURA','01/10','set/2026 em aberto')])
-      + section('Plano de serviço','Confira plano, escopo e regra de cobrança; nenhum valor desta tela gera cobrança real antes de decisão e aceite.',
-        [ic(drawer_button('Simular mudança',dict(title='Simular mudança de plano ou área',sub='Simulação não altera contrato: ampliação exige prévia informação de preço e aceite registrado.',
-           fields=[('Plano','Produtor'),('Hectares contratados','1.240'),('Vigência da mudança','01/11/2026')],
-           confirm='Simular',done='Simulação: 1.240 ha → R$ 2.480/mês (HIPÓTESE · R$ 2/ha, acima do mínimo R$ 299) — nada muda até aceite')),'calc','Simular mudança de plano ou área sem alterar o contrato'),
-         ic(msgbtn('Solicitar plano','Solicitação enviada ao comercial (simulado · nenhuma mensagem real enviada) · proposta com vigência explícita virá para aceite — nenhuma cobrança muda antes disso.'),'doc','Pedir proposta de plano ao comercial')],g_pl)
-      + section('Área contratada e medição',f'Confira a área física e a elegível por talhão; clique na linha para contestar a medição.','',
-        g_ar + nota(f'{FIS_FMT} ha físicos, {AREA_FMT} ha elegíveis: safras sobrepostas, parcelas e consórcio não duplicam hectare; reserva ambiental fica fora da base.'))
-      + section('Faturas e memória de cobrança','Abra a memória de cada fatura: base, regra aplicada e versão da área.',
-        [ic(msgbtn('Baixar dados','Exportação completa gerada (área, memória, faturas) · dados permanecem acessíveis mesmo em inadimplência ou cancelamento.'),'doc','Baixar área, memória e faturas')],g_fat))
-    shell37('CF-05','Assinatura e medição',corpo,fname=fname,
-      subtitle='Plano, área contratada/medida, memória de cobrança, faturas e contestação — a base de cobrança ainda é decisão comercial pendente.',
-      status=('Fatura set/2026 aberta','yellow'),
-      primary='Ver memória de cobrança',primary_href='CF-05det.dc.html',
-      footer='Cobrança usa área física produtiva contratada e versionada (HIPÓTESE · DEC-01); hectare ativo seria outra base — 60 ha contratados com 35 ha ocupados mediriam 60 ou 35.')
-
-    # ---- CF-05det · memória de cobrança set/2026 ----
-    fname='CF-05det.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=980; PARENT37[fname]='CF-05.dc.html'
-    g_cmp=grid([C('comp','Componente',w=260),C('base','Base',w=160),C('regra','Regra',w=250),C('val','Valor',a='r',w=200)],[
-        R('m1',comp='Área contratada v2 (vigente em set)',base=f'{AREA_FMT} ha elegíveis',regra='R$ 2,00/ha/mês · HIPÓTESE',val=f'R$ {MENS_FMT}',o=[(f'{AREA_FMT} ha × R$ 2,00 = R$ {MENS_FMT}',None),('Área por talhão','CF-05.dc.html')]),
-        R('m2',comp='Comparação com o mínimo',base='R$ 299',regra='cobra-se o MAIOR — não se soma',val=f'não aplicado ({MENS_FMT} > 299)',o=[(f'max(R$ 299; R$ {MENS_FMT}) = R$ {MENS_FMT}',None)]),
-        R('m3',comp='P1 · 2 ciclos de feijão no período',base='95 ha',regra='safra sobreposta cobrada 1×',val='sem valor adicional',o=[('95 ha entram uma vez na base elegível',None)]),
-        R('m4',comp='Reserva ambiental',base=f'{RESERVA} ha',regra='área não produtiva excluída',val='R$ 0',o=[(f'{RESERVA} ha físicos · 0 ha elegíveis',None)]),
-        R('m5',comp='Operações repetidas em T1+T2',base='ha-operação',regra='não entram na base de assinatura',val='R$ 0',o=[('Base é área, não hectare-operação',None)]),
-        R('m6',comp=[Pt.b('Total da fatura')],base='',regra='',val=[Pt.b(f'R$ {MENS_FMT}')],o=[(f'R$ {MENS_FMT} = área v2 × regra; mínimo não aplicado; sem adicionais',None)])],
-       edit=dict(m='origin',title='Componente',fields=[dict(k='base',l='Base',ro=True),dict(k='regra',l='Regra',ro=True),dict(k='val',l='Valor',ro=True)]),search=False,gid='g_cmp',total=False)
-    g_ver=grid([C('ver','Versão'),C('vig','Vigência'),C('area','Área elegível',a='r'),C('mud','Mudança',w=300),C('ace','Aceite')],[
-        R('v1',ro=True,ver='v1',vig='01/06 – 15/07/2026',area=f'{n0(V1_HA)} ha',mud='contratação inicial',ace=[Pt.tag('Aceite 28/05')]),
-        R('v2',ro=True,ver=[Pt.b('v2'),Pt.mut(' (vigente)')],vig='desde 16/07/2026',area=f'{AREA_FMT} ha',mud=f'+{AMPL} ha (T7 e parte de C1) · pró-rata em jul',ace=[Pt.tag('Aceite 10/07')]),
-        R('v3',ro=True,ver='v3 (proposta)',vig='—',area='1.240 ha',mud='simulação de ampliação · sem efeito',ace=ch('HIPÓTESE · sem aceite','yellow'))],
-       edit=dict(m='ro',title='Versão da área',fields=[dict(k='vig',l='Vigência',ro=True),dict(k='area',l='Área elegível',ro=True),dict(k='mud',l='Mudança',ro=True)]),search=False,gid='g_ver',total=False)
-    corpo=(
-      continuity('Assinatura · faturas','Memória set/2026 · fatura aberta','pagamento até 01/10 ou contestação','Informar pagamento até 01/10')
-      + section('Composição da fatura','Confira base × regra com a versão da área usada; clique no componente para ver o cálculo.','',g_cmp)
-      + section('Linha do tempo da área contratada','Consulte as versões com vigência; correção cadastral não gera cobrança retroativa.','',g_ver)
-      + section('Contestação e pagamento','Informe o pagamento ou conteste a fatura; contestar não acumula juros.','',
-        toolrow(msgbtn('Informar pagamento','Pagamento informado · pendente de confirmação do financeiro — a fatura só muda para Paga com a confirmação oficial, não com a intenção.',primary=True)
-          + ic(drawer_button('Contestar esta fatura',dict(title='Contestar fatura set/2026',sub='A contestação congela a discussão na versão medida.',fields=[('Motivo','Divergência de área do T3'),('Evidência','Aditivo contratual de 12/09')],
-              confirm='Abrir contestação',done='Contestação CT-012 aberta sobre set/2026 · fatura permanece aberta sem juros até decisão')),'alert','Contestar a fatura set/2026')
-          + ic(msgbtn('Baixar memória','Memória de cálculo exportada (CSV) · inclui versão da área, regra e exclusões.'),'doc','Baixar a memória de cálculo em CSV'))))
-    shell37('CF-05','Memória de cobrança · set/2026',corpo,fname=fname,crumbs_extra=['set/2026'],
-      subtitle='Como a fatura foi calculada: versão da área, regra aplicada, deduplicações e exclusões.',
-      status=('Aberta · vence 01/10','yellow'),
-      footer='A memória cita a versão exata da área contratada; recomputar fatura a cada edição de polígono é proibido — mudança tem vigência e aceite.')
+    # CF-05 (Assinatura e cobrança) saiu daqui em 06/10/2026: areas/assinatura.py, no menu Configurações (PLAT-01). CF-05det virou o detalhe da fatura.
