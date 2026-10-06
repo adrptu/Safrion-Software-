@@ -142,7 +142,7 @@ function benProx(c, o) { const b = benBal(o); const it = benReqItem(c, o);
   if (o.etapa === 'Liberadas') { const falta = it && cenSaldoEntregar(it) > 1e-9 && !(it.custodia > 1e-9);
     return { t: 'Iniciar processo', quem: benProdQ(), acao: 'iniciar', nota: falta ? 'Caixas da ' + o.req + ' ainda no Estoque: ' + benQuem('almoxarife') + ' entrega no balcão (' + benUn(cenSaldoEntregar(it)) + ').' : '' }; }
   if (o.etapa === 'Em execução') { const pr = benValidos(o).some(s => s.fluxo === 'Produto');
-    return pr ? { t: 'Concluir execução', quem: benProdQ(), acao: 'concluir', nota: 'O que não foi registrado (' + benKg(benEmProc(o)) + ') vira diferença na conferência.' } : { t: 'Registrar saída', quem: benProdQ(), acao: 'saida' }; }
+    const ep = benEmProc(o); return pr ? { t: 'Concluir execução', quem: benProdQ(), acao: 'concluir', nota: prCmp(ep, 0) > 0 ? 'O que não foi registrado (' + benKg(ep) + ') vira diferença na conferência.' : '' } : { t: 'Registrar saída', quem: benProdQ(), acao: 'saida' }; }
   if (o.etapa === 'Em conferência') {
     if (o.ben.corr && o.ben.corr.pend) return { t: 'Confirmar correção', quem: benQuem('gestor'), acao: 'confirmar', nota: 'Correção na conferência ' + o.ben.corr.msg + ': decide ' + benQuem('gestor') + '.', red: true };
     if (o.ben.conf) { const pe = cenPodeEncerrar(c, o.id); return { t: 'Fechar processo', quem: benProdQ(), acao: 'fechar', nota: pe, red: !!pe, quemNota: pe ? benQuem('almoxarife') : '' }; }
@@ -265,7 +265,7 @@ function benSaida(c, id, k, ator) { const quem = cenExige(ator, 'producao', 'Reg
   const proc = benEntrada(o), tol = benFaixa(proc, r); const tot = prSoma([benSoma(benValidos(o)), s.kg]);
   if (prCmp(tot, prSoma([proc, tol])) > 0) throw new Error('Saídas pesadas ' + benKg(tot) + ' > entrada ' + benKg(proc) + ' + tolerância ' + benKg(tol) + '. Confira a pesagem.');
   if (s.fluxo === 'Produto') { s.lote = (o.ben.sai.find(x => x.fluxo === 'Produto' && x.classe === s.classe && x.lote) || {}).lote || prProxLote(c, prHoje());   /* um lote por classe da ordem (R-A16) */
-    it.consumido += s.cx; it.custodia -= s.cx;
+    it.consumido += s.cx; it.custodia -= s.cx; it.confirmado = 'balcao';   /* quem embala tem as caixas: recebidas no balcão (PCMS-M14) */
     s.mv = cenMov(c, { tipo: 'consumo', os: id, req: o.req, prod: BENC.cx.item, lote: it.lote, qtd: s.cx, un: 'un', quem, origem: 'web', sinc: true, det: BENC.cx.item + ' ' + s.cx }).id; }
   const b0 = benBal(o); o.ben.nsai += 1; o.ben.sai.push(s); const b1 = benBal(o);
   if (conf) { benBalMudou(o, quem); benCorrecao(o, quem, ator, b0, b1, s.motivo); }
@@ -372,8 +372,10 @@ function benDecisoes(c, L) { const I = benInspDe(c, L); const res = I && I.res[L
 function benProxLote(c, L, S) { const I = benInspDe(c, L); if (!I) return null; const res = I.res[L.id]; const q = benQualQ();
   if (L.q0 === 'Destinado') return { t: 'destinado · rastreio guardado' };
   if (L.q0 === 'Liberado') return null;
-  if (!res) return { t: 'Registrar resultado · ' + q, a: 'resultado', insp: I.id, prazo: I.prazo };
-  return { t: 'Registrar decisão · ' + q, a: 'decisao', insp: I.id, prazo: I.prazo }; }
+  /* prazo da inspeção à vista (I11): vencida ou vence hoje no próprio texto do passo */
+  const pz = !I.prazo ? '' : (I.prazo < prHoje() ? ' · ' + I.id + ' vencida em ' + prBr(I.prazo) : (I.prazo === prHoje() ? ' · ' + I.id + ' vence hoje' : ' · ' + I.id + ' até ' + prBr(I.prazo)));
+  if (!res) return { t: 'Registrar resultado · ' + q + pz, a: 'resultado', insp: I.id, prazo: I.prazo };
+  return { t: 'Registrar decisão · ' + q + pz, a: 'decisao', insp: I.id, prazo: I.prazo }; }
 function benResultado(c, lid, sit, obs, ator) { const quem = cenExigeUm(ator, BEN_QUAL, 'Registrar o resultado do ' + lid); const L = prP(c, 1).lotes[lid]; const I = benInspDe(c, L);
   if (!I) throw new Error((L ? lid : 'Lote') + ' sem inspeção aberta.');
   if (I.res[lid]) throw new Error('Já feito: resultado do ' + lid + ' registrado (' + I.res[lid].sit + ', ' + I.res[lid].quem + ').');

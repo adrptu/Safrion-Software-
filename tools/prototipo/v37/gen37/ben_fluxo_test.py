@@ -63,8 +63,9 @@ try:
         itens = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].map(a=>[N(a.innerText),a.getAttribute('href')]).filter(x=>['COLH.dc.html','CARGA.dc.html','BEN.dc.html','PROD.dc.html'].indexOf(x[1])>=0)") or []
         t.chk('(1) menu: Produção › Beneficiamento entre Cargas e recebimento e Estoque de produto (4 itens, no fluxo do recebido ao estoque)',
               [x[0] for x in itens] == ['Previsão e colheita', 'Cargas e recebimento', 'Beneficiamento', 'Estoque de produto'] and m.find('Produção') < m.find('Manutenção'), itens)
-        kb = J("(()=>{ CLK('Kanban'); return [...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] > *')].map(x=>N(x.innerText).slice(0,40)); })()"); time.sleep(.3)
-        t.chk('Kanban com exatamente 5 fases e a contagem da semente (A liberar 1, Em execução 1)', len(kb or []) == 5 and kb[0].startswith('A liberar 1') and kb[2].startswith('Em execução 1') and kb[4].startswith('Encerradas 0'), kb)
+        clk('Kanban', '[aria-label="Visão das ordens"]', w=.7)
+        kb = J("[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] > *')].filter(VIS).map(x=>N(x.innerText).slice(0,40))")
+        t.chk('Kanban com exatamente 5 fases e a contagem da semente (A liberar 1, Em execução 1)', len(kb or []) == 5 and kb[0].lower().startswith('a liberar 1') and kb[2].lower().startswith('em execução 1') and kb[4].lower().startswith('encerradas 0'), kb)
         J("window.__cl=0"); clk('Lista')
         t.chk('sem seleção, a ação primária do cabeçalho é a da 1ª ordem com passo: "Autorizar rota e liberar · OB-0112"', J("PRIM()") == ['Autorizar rota e liberar · OB-0112'], J("PRIM()"))
         shot('lista')
@@ -92,7 +93,7 @@ try:
         ir('BEN.dc.html#OB-0110'); perfil('Igor'); time.sleep(.3); clk('Fechar processo', 'aside'); p = toast()
         st = cen("[c.ordens['OB-0110'].etapa, c.producao.lotes['L39-120']&&c.producao.lotes['L39-120'].q0, c.producao.lotes['L39-121']&&c.producao.lotes['L39-121'].q0, c.producao.ben.insp['INSP-92'].prazo]")
         t.chk('(3) Fechar: OB-0110 Encerradas; L39-120 e L39-121 Em inspeção (INSP-92, Marta, prazo 28/09); "Fechar não libera"', st == ['Encerradas', 'Em inspeção', 'Em inspeção', '2026-09-28'] and 'Fechar não libera' in p, [st, p])
-        p = pan(); t.chk('painel da ordem encerrada: lotes gerados com link ao Estoque de produto; nenhuma primária', 'Lotes gerados' in p and 'Abrir no Estoque de produto' in p and J("PPRIM()") == [], [J("PPRIM()"), p[:300]])
+        p = pan(); t.chk('painel da ordem encerrada: lotes gerados com link ao Estoque de produto; nenhuma primária', 'lotes gerados' in p.lower() and 'abrir no estoque de produto' in p.lower() and J("PPRIM()") == [], [J("PPRIM()"), p[:300]])
         shot('ob0110_fechada')
         # (4) Estoque de produto: Qualidade (Marta) registra resultado e libera; Comercial reserva
         ir('PROD.dc.html#L39-120'); time.sleep(.4); p = pan()
@@ -106,7 +107,7 @@ try:
         st = cen("[Object.values(c.producao.reservas).filter(r=>r.lote==='L39-120'&&r.st==='Ativa').map(r=>r.id+':'+r.kg).join(','), c.producao.pedidos['PV-031'].qtd]")
         t.chk('(4) Reservar para pedido: PV-031 sugerido, quantidade 9600 (o lote não cobre o pedido inteiro); RS-0002 de 9.600 kg', sug == '9600' and st[0] == 'RS-0002:9600', [sug, st, p])
         row('PV-031'); p = pan()
-        t.chk('(4) PV-031 mostra a falta de 400 kg (parcial)', 'Falta' in p and '400 kg' in p and 'Parcial' in p, p[:500])
+        t.chk('(4) PV-031 mostra a falta de 400 kg (parcial)', 'falta 400 kg' in p.lower() and 'Parcial' in p, p[:500])
         # (5) OB-0112: retirar o L39-119 e liberar → REQ-041 no Estoque
         ir('BEN.dc.html#OB-0112'); perfil('Igor'); time.sleep(.3); clk('Retirar L39-119 da ordem', 'aside'); p = toast()
         clk('Autorizar rota e liberar', 'aside'); p2 = toast()
@@ -122,7 +123,7 @@ try:
         r0 = rev(); clk('Abrir ordem de beneficiamento', 'aside', w=1.0); lib(); time.sleep(.4); p = pan()
         t.chk('o atalho abre a ordem nova com o L39-131 marcado, a rota única (PACK-FRU v3) e as caixas sugeridas (2.292); navegar não gravou', 'Nova ordem' in p and 'PACK-FRU v3' in p and '2292' in J("(document.querySelector('aside [id^=pf_cx_]')||{}).value||''") and rev() == r0,
               [p[:500], J("(document.querySelector('aside [id^=pf_cx_]')||{}).value")])
-        clk('Criar ordem', 'aside'); st = cen("c.ordens['OB-0113']&&[c.ordens['OB-0113'].etapa,c.ordens['OB-0113'].ben.ent[0].lote,c.ordens['OB-0113'].ins[0].tot]")
+        perfil('Igor'); clk('Criar ordem', 'aside'); st = cen("c.ordens['OB-0113']&&[c.ordens['OB-0113'].etapa,c.ordens['OB-0113'].ben.ent[0].lote,c.ordens['OB-0113'].ins[0].tot]")
         t.chk('Criar ordem: OB-0113 A liberar com o L39-131 e 2.292 caixas; nada reservado antes de liberar', st == ['A liberar', 'L39-131', 2292] and not cen("c.producao.lotes['L39-131'].ordem"), [st, toast()])
         shot('fluxo_fim')
         t.chk('fluxo sem erro de JS', not t.errs(), t.errs())
@@ -138,8 +139,8 @@ try:
         clk('Cancelar', 'aside'); row('OB-0110'); clk('Estornar S-02', 'aside'); clk('Confirmar estorno de S-02', 'aside'); p = pan()
         t.chk('estorno sem motivo recusado', 'motivo do estorno' in p and rev() == r0, p[-300:])
         clk('Pesagem refeita', 'aside'); clk('Confirmar estorno de S-02', 'aside'); p = pan(); st = cen("[c.ordens['OB-0110'].ben.sai[1].estorno&&c.ordens['OB-0110'].ben.sai[1].estorno.motivo, c.reqs['REQ-030'].itens[0].custodia, c.movs.slice(-1)[0].tipo]")
-        t.chk('estorno com motivo: S-02 riscada, 180 cx voltam à custódia (240), MV estorno-consumo; o relançamento abre herdando fluxo e classe', st == ['Pesagem refeita', 240, 'estorno-consumo'] and 'Relançar S-02' in p
-              and J("[...document.querySelectorAll('aside button[aria-pressed=true]')].map(b=>N(b.innerText)).join('|')") == 'Produto|B', [st, p[:300], J("[...document.querySelectorAll('aside button[aria-pressed=true]')].map(b=>N(b.innerText)).join('|')")])
+        t.chk('estorno com motivo: S-02 riscada, 180 cx voltam à custódia (240), MV estorno-consumo; o relançamento abre herdando fluxo e classe', st == ['Pesagem refeita', 240, 'estorno-consumo'] and 'relançar s-02' in p.lower()
+              and J("[...document.querySelectorAll('aside button[aria-pressed=true]')].map(b=>N(b.innerText)).join('|')") == 'Produto|B', [st, J("[...document.querySelectorAll('aside button[aria-pressed=true]')].map(b=>N(b.innerText)).join('|')"), p[p.lower().find('relançar'):][:120]])
         setv('#pf_cx', '180'); setv('#pf_br', '1808'); J("(()=>{ const b=[...document.querySelectorAll('aside button')].find(x=>N(x.innerText)==='Registrar'); b.click(); b.click(); })()"); time.sleep(.6)
         n = cen("c.ordens['OB-0110'].ben.sai.filter(s=>!s.estorno).length"); nm = cen("c.movs.filter(m=>m.tipo==='consumo').length")
         t.chk('toque duplo no Registrar (mesma chave): 1 registro novo e 1 MV de consumo', n == 3 and nm == 1, [n, nm, toast()])
@@ -174,3 +175,4 @@ try:
         t.chk('celular sem erro de JS', not t.errs(), t.errs())
 finally:
     t.fim()
+sys.exit(0 if all(t.ok) else 1)   # juízo pela linha RESULTADO e pelo código de saída

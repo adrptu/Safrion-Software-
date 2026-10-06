@@ -96,7 +96,7 @@ try:
     # 15 · restaurar demonstração volta o cenário ao início; sem erro de script
     E.clk('Restaurar demonstração'); E.clk('Restaurar'); print('toast:', E.toast())
     st = E.cen("[Object.keys(c.reqs).length, c.movs.length, c.ordens['OS-0430'].etapa, c.lotes['Glifosato 480|G26-14'].fisico]"); er = E.erros(); print(' ', st, er)
-    E.ok(st == [11, 0, 'A liberar', 1200] and not er, 'Restaurar demonstração: 11 requisições (6 da Santa Rita + 5 da Lagoa Grande), nenhum movimento, OS-0430 A liberar, G26-14 1.200 L; sem erro de script', er)
+    E.ok(st == [12, 0, 'A liberar', 1200] and not er, 'Restaurar demonstração: 12 requisições (6 da Santa Rita + 5 da Lagoa Grande + REQ-030 da OB-0110, BEN-1), nenhum movimento, OS-0430 A liberar, G26-14 1.200 L; sem erro de script', er)
 finally:
     ok = E.fim()
 sys.exit(0 if ok else 1)

@@ -145,8 +145,12 @@ function bnPainel(self,c,o){ const r=benRota(o.ben.rota); const b=benBal(o); con
   secs.push({t:'Histórico',rows:(o.ben.hist||[]).slice().reverse().map(h=>({c:[[prBr(h.d)+' '+h.at,'b'],h.quem,h.ev,h.det,h.mov||''].filter(Boolean)}))});
   const kv=[{l:'Rota',v:benRotaTxt(r)+' · aprovada por '+r.aprov.quem+' em '+prBr(r.aprov.em)},{l:'Versão da ordem',v:o.versao},{l:'Entrada',v:benKg(b.proc)},{l:'Diferença',v:benKg(b.dif)+' · faixa ± '+benKg(b.faixa)},
     {l:'Caixas em custódia',v:it?benUn(it.custodia):'—'},{l:'Responsável',v:benProdQ()}];
+  /* quem age é o perfil (CTL-3): se o perfil escolhido não registra o passo, o painel diz quem registra antes do toque */
+  const PAP={liberar:'producao',iniciar:'producao',saida:'producao',concluir:'producao',confirmar:'gestor',conferir:'conferente',fechar:'producao',
+    justificar:benAlcada(o,b.dif).passa?'gestor':['producao','gestor']}[nx.acao]; const pf=g2perfil();
+  const semPapel=PAP&&!(Array.isArray(PAP)?g2umPapel(pf,PAP):g2papel(pf,PAP)) ? ' Seu perfil ('+pf.k+') não registra este passo: escolha '+(Array.isArray(PAP)?g2quemUm(PAP):g2quem(PAP))+' no seletor de perfil.' : '';
   const PPx={title:o.id+' · '+bnProdTxt(o)+' · '+benRotaTxt(r),chip:[at,BN_FCOR[at]||'gray'],sub:o.talhao+' · '+o.ben.faz+' · janela '+prBr(o.ben.ini)+'–'+prBr(o.ben.fim)+' · '+benProdQ(),
-    next:nx.t+(nx.quem?' · '+nx.quem:'')+(nx.nota?'. '+nx.nota:''),nred:!!nx.red,kv,secs,err:self.state.pr_err,sec};
+    next:nx.t+(nx.quem?' · '+nx.quem:'')+(nx.nota?'. '+nx.nota:'')+semPapel,nred:!!nx.red||!!semPapel,kv,secs,err:self.state.pr_err,sec};
   /* modos do painel: formulário de saída, estorno, justificativa, reabertura */
   if(modo==='saida'){ const f=bnSaidaForm(self,c,o); PPx.form={t:(self.state.bn_sub?'Relançar '+self.state.bn_sub.id:'Registrar saída')+' · '+benProdQ(),h:f.h,fields:f.fields}; PPx.prim={t:'Registrar',go:f.go}; return PPx; }
   if(modo.indexOf('estorno:')===0){ const sid=modo.slice(8); const s=o.ben.sai.find(x=>x.id===sid)||{};
@@ -162,6 +166,8 @@ function bnPainel(self,c,o){ const r=benRota(o.ben.rota); const b=benBal(o); con
     PPx.sec=[{t:'Voltar',go:()=>self.setState({pr_modo:null,pr_err:''})}]; return PPx; }
   if(modo==='reabrir'){ PPx.form={t:'Reabrir execução · '+benProdQ(),h:'Volta a Em execução: a declaração do Concluir, a conferência e a justificativa caem. Para corrigir um registro, estorne na conferência.',fields:[prFld(self,'mr','Motivo',{t:'txt',im:'text',ph:'ex.: faltou registrar a classe B do turno da tarde'})]};
     PPx.prim={t:'Reabrir execução',go:()=>bnRun(self,x=>benReabrir(x,o.id,prFval(self,'mr',''),g2perfil()),{pr_form:null,pr_modo:null})}; PPx.sec=[{t:'Voltar',go:()=>self.setState({pr_modo:null,pr_err:''})}]; return PPx; }
+  /* recusa de um comando sem formulário aberto (autorizar, concluir, conferir, fechar): a causa fica no painel, junto da ação */
+  if(self.state.pr_err&&!modo) PPx.form={t:'Não gravado',h:'Nada foi alterado. Resolva a causa e toque de novo.',fields:[]};
   /* uma ação primária por estado (§5.3); secundárias à esquerda */
   const abreSaida=()=>self.setState({pr_modo:'saida',pr_form:null,pr_err:'',pr_ch:prChave('W-BNS'),bn_sub:null,bn_ver:o.ver});
   const k={ver:o.ver};

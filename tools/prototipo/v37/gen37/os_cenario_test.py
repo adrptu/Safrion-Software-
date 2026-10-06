@@ -91,8 +91,9 @@ try:
     T.btn('Restaurar demonstração', 'body'); T.btn('Restaurar', 'body'); tt = T.toast()
     st = T.cen(f"[Object.keys(c.reqs).length, c.ordens['{OS}'].etapa, c.lotes['Glifosato 480|G26-14'].fisico]"); print('  ', st, tt)
     # 01/10: + 5 requisições da Fazenda Lagoa Grande (REQ-021 a REQ-025, dados_lagoa_safra.py) → 11 no cenário inicial
-    T.ok(st == [11, 'A liberar', 1200] and 'Demonstração restaurada' in tt and 'A liberar' in T.linha(OS),
-         'Restaurar demonstração: 11 requisições (6 da Santa Rita + 5 da Lagoa Grande), OS-0430 volta a A liberar, G26-14 com 1.200 L', (st, tt))
+    # 06/10 (BEN-1): + REQ-030 das caixas da OB-0110 (ordem de beneficiamento) → 12
+    T.ok(st == [12, 'A liberar', 1200] and 'Demonstração restaurada' in tt and 'A liberar' in T.linha(OS),
+         'Restaurar demonstração: 12 requisições (6 da Santa Rita + 5 da Lagoa Grande + REQ-030 do beneficiamento), OS-0430 volta a A liberar, G26-14 com 1.200 L', (st, tt))
     # 14 · Ajustar antes de liberar: área e dose no mesmo passo; Salvar e liberar grava a v2 (histórico na Origem) e libera com a reserva ajustada
     T.ordem(OS); T.btn('Ajustar antes de liberar'); setin('Área da ordem (ha)', '150'); setin('Dose de Glifosato 480 (L/ha)', '1,8'); T.btn('Salvar e liberar')
     tt = T.toast(); p = T.pan(); i = T.ins()
