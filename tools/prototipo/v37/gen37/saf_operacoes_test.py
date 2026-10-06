@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Teste de navegador · Planejar safra, etapa 3 "Dimensione operações e recursos" (ESPECIFICACAO etapa-unica-3-4-5 §9.2).
 Endereços e faixa (N1–N7), operações (O1–O5, O8, O9, O11–O15), capacidade, veredito e layout (V1, V3, V4, V6, V8, V11–V13, L1, L2, L4),
-recurso, resumo e aviso (P1, P2, P4, P7). Números comparados com o espelho Python (dados2.ocorr_op, plano_op, capacidade, resumo_cultura)
+recurso, resumo e aviso (P1, P2, P4, P7, P8). Números comparados com o espelho Python (dados2.ocorr_op, plano_op, capacidade, resumo_cultura)
 ou com os oráculos do capacidade_unit.py. Fluxo normal, erro/recusa (janela em "Todas", pessoas fracionárias) e repetição (salvar sem
 mudar). Emulação no Chrome headless: não é aparelho físico.
 Uso: python3 saf_operacoes_test.py [desktop|celular|tudo]   (padrão: tudo)"""
@@ -55,7 +55,9 @@ def botao(lab, raiz='document', inicio=False):
       const b=bs.find(b=>n(b.innerText)==={json.dumps(lab)})||({json.dumps(inicio)}&&bs.find(b=>n(b.innerText).indexOf({json.dumps(lab)})===0)); if(!b) return 'sem botão'; b.click(); return 'ok';}})()"""); time.sleep(.6); return r
 PAINEL = "[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.offsetParent)"
 def salvar(): return botao('Salvar', PAINEL)
-def fechar(): c.tecla('Escape', 'Escape', 27); time.sleep(.5)
+def fechar():   # fecha o painel aberto pelo botão (o Esc só chega ao painel com o foco dentro dele; ver P4 para o Esc)
+    c.js("(()=>{const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.offsetParent); if(!a) return; const bs=[...a.querySelectorAll('button')].filter(b=>b.offsetParent); const b=bs.find(b=>b.innerText.trim()==='Cancelar')||bs.find(b=>b.getAttribute('aria-label')==='Fechar')||bs.find(b=>b.innerText.trim()==='Fechar'); if(b) b.click();})()"); time.sleep(.4)
+    c.js("(()=>{const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.offsetParent); const b=a&&[...a.querySelectorAll('button')].find(b=>b.innerText.trim()==='Descartar alterações'); if(b) b.click();})()"); time.sleep(.3)
 def clica_rid(rid):
     r = c.js(f"""(()=>{{const r=document.querySelector('[role=row][data-rid={json.dumps(rid)}]'); if(!r) return 'sem linha'; const x=[...r.querySelectorAll('[role=cell]')].find(z=>!z.querySelector('input,button')&&z.innerText.trim()&&!z.classList.contains('g2nr'))||r; x.click(); return 'ok';}})()"""); time.sleep(.6); return r
 def cel_cap(rid, mes):
@@ -213,12 +215,23 @@ try:
         abre('#saf=S2627&passo=operacoes', 1440, 1040); botao('Capacidade por mês ▾'); clica_rid('colh'); fset('g_recp_maq', 'un', '0'); salvar(); time.sleep(.6)
         chk('V13 Colhedoras 0: veredito com "precisam de 1 em fev/27 e você tem 0. Inclui 3 ocorrências ainda sem alocação."', veredito().startswith('Falta recurso: Colhedoras precisam de 1 em fev/27 e você tem 0. Inclui 3 ocorrências ainda sem alocação. Fora da conta:'), veredito())
         colh = next(r for r in gcap()['rows'] if r['_id'] == 'colh'); chk('V13 fev/27 "precisa 1"; Maior uso "não calculável"', colh['FEV/27'] == 'precisa 1' and colh['MAIOR USO'] == 'não calculável', colh)
+        # ---------- P8: +1 pessoa na configuração própria do Plantio (C22): Operadores sobe no formulário do recurso e no Resumo ----------
+        abre('#saf=S2627&passo=operacoes', 1440, 1040); botao('Capacidade por mês ▾'); clica_rid('oper'); h0 = campos('g_recp_pes').get('hs_c', ''); fechar()
+        expande('op:Plantio'); expande('at:Plantio|Plantio e adubação de base')
+        rid = c.js("(()=>{const m=(window.__safSelf||{}).__opmap||{}; return Object.keys(m).find(k=>m[k].t==='oc'&&m[k].op==='Plantio'&&m[k].i.c.v.local==='T2')||null;})()")
+        expande(rid); clica_rid(rid + '|c0'); pe0 = int(campos('g_rend_S2627').get('pess') or 0); fset('g_rend_S2627', 'pess', str(pe0 + 1)); salvar(); time.sleep(.5)
+        clica_rid('oper'); h1 = campos('g_recp_pes').get('hs_c', ''); fechar()
+        cf8 = {('Plantio', 'Plantio e adubação de base', 'r2'): {'pess': pe0 + 1}}; G8 = D2.capacidade('S2627', None, None, cf8); p8 = D2.plano_op('S2627', None, cf8)
+        num = lambda t: float(t.split(' h')[0].replace('.', '').replace(',', '.')) if t else -1
+        chk('P8 +1 pessoa no Plantio: horas de Operadores no formulário do recurso = espelho (sobe 62,70 h)', abs(num(h1) - G8['oper']['horasSafra']) <= 0.051 and abs(num(h1) - num(h0) - 62.70) <= 0.11 and abs(G8['oper']['horasSafra'] - D2.capacidade('S2627')['oper']['horasSafra'] - 62.70) < 0.01, (h0, h1, G8['oper']['horasSafra']))
+        botao('Resumo da safra'); pn = painel(); fechar()
+        chk('P8 horas-homem do Resumo = espelho (C22)', (fmt(p8['hh'], 2) + ' horas-homem') in pn, (fmt(p8['hh'], 2), pn[-400:]))
         # ---------- P4: Resumo da safra ----------
         abre('#saf=S2627&passo=operacoes', 1440, 1040); botao('Resumo da safra'); pn = painel(); R = D2.resumo_cultura('S2627')
         lin = all(f"{b['cult']} {nfa(b['area'])} ha {rs(b['cop'])} {rs(b['cins'])} {rs(b['rha'])}/ha" in pn for b in R.values())
         chk('P4 Resumo S2627: custo por cultura = espelho e Total', lin and ('Total ' + nfa(sum(b['area'] for b in R.values())) + ' ha ' + rs(sum(b['cop'] for b in R.values()))) in pn, pn[:900])
         chk('P4 nota "Todos de hoje em diante" e trabalho da safra', 'Todos de hoje em diante' in pn and (nfa(pc['area']) + ' ha-op (hectares-operação) · ' + fmt(pc['hconj'], 2) + ' horas-conjunto · ' + fmt(pc['hh'], 2) + ' horas-homem') in pn, pn[-900:])
-        fechar(); foco = c.js("document.activeElement&&document.activeElement.getAttribute('data-acao')")
+        c.tecla('Escape', 'Escape', 27); time.sleep(.5); foco = c.js("document.activeElement&&document.activeElement.getAttribute('data-acao')")
         chk('P4 Esc fecha o Resumo e o foco volta ao link', painel() == '' and foco == 'resumo', (painel()[:80], foco))
         # ---------- V12, V11, V8 ----------
         abre('#saf=S27SF&passo=operacoes'); chk('V12 S27SF veredito R5 (verde) e atalho Colhedoras 56 % · jul/27', veredito() == VER['S27SF'] and atalhos() == ['Maior uso: Colhedoras 56 % · jul/27'], (veredito(), atalhos()))

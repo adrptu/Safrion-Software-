@@ -675,7 +675,7 @@ function rendAfter(self,gid,rows,r,isNew){ const x=r.v; let trocou=''; const nv=
   if(todas){ g.v.aj=true;
     g.kids.forEach(k=>{ if(k.id===r.id) return; const atvK=k.grp?((cfgLeaves(k.kids)[0]||{v:{}}).v.atv):k.v.atv; if(!uso.has(atvK)) return; if(k.grp){ nd++; return; } ['conj_id','nome','modo','larg','vel','efic','rend','maq','impl','pess','pess_rs','pes_h','custo_h','custo_ha','diesel'].forEach(f=>{ k.v[f]=x[f]; }); k.v.aj=false; k.rec=Object.assign({},r.rec); if(k.s) delete k.s.nome; n++; }); }
   normRend(rows);
-  g2set(self,gid,{rows:g2clone(rows),fl:r.id}); const antE3=self._antes; self._antes=null; const orow=self._e3row;
+  g2set(self,gid,{rows:g2clone(rows),fl:r.id}); const antE3=self._antes; self._antes=null; const orow=self._e3row; self._recPrev=null;
   const msg=(isNew?('Configuração incluída em '+x.atv+' · '+x.nome+': '+nf(x.rend,2)+' ha/h.'+novaMsg+prest)
     :('Rendimento de '+(n?x.op+' ('+(n+1)+' atividades)':x.atv)+' · '+x.nome+': '+nf(x.rend,2)+' ha/h · '+rs(x.custo_ha||0)+'/ha.'+trocou+prest+(nd?(' '+nd+(nd>1?' atividades divididas entre conjuntos não mudaram.':' atividade dividida entre conjuntos não mudou.')):'')))
     ;
@@ -1051,7 +1051,7 @@ function abrirRend(self,rid){ const m=(self.__opmap||{})[rid]; const saf=self.st
   if(!m.leaf||!sp) return; self._e3ctx=m; self._e3row=rid; g2open(self,sp,m.leaf,null); const fm=g2st(self,gid).fm; if(!fm) return;
   const pa={esc,ctx,colh:String(m.op||'').indexOf('Colheita')===0?'sim':'não'};
   g2set(self,gid,{fm:Object.assign({},fm,{draft:Object.assign({},fm.draft,pa),orig:Object.assign({},fm.orig,pa)})}); }
-function abrirRec(self,rid){ const gid=rid==='oper'?'g_recp_pes':'g_recp_maq'; const sp=GR(gid); if(!sp) return; self._e3cap=rid; g2open(self,sp,rid,null); }
+function abrirRec(self,rid){ const gid=rid==='oper'?'g_recp_pes':'g_recp_maq'; const sp=GR(gid); if(!sp) return; self._e3cap=rid; self._recPrev=null; g2open(self,sp,rid,null); }   // prévia recalculada com o plano atual
 // origem da configuração (§4.1): "Padrão do cadastro (CD-02)" só quando igual ao conjunto padrão da operação; o rendimento calculado fica fora
 function origemCfg(d){ const base=String(d.base||''); const c=(D2.conj||[]).find(x=>x.id===base); if(!c) return 'Ajustado nesta safra';
   const co=(D2.conj_opts||{})[base]; const N=(x)=>{ const n=g2num(x); return isNaN(n)?null:Math.round(n*1e6)/1e6; }; const eq=(a,b)=>N(a)===N(b); const AJ='Ajustado nesta safra';
