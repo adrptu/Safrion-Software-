@@ -2,7 +2,7 @@
 
 **Pedido do proprietário (Adrianus, 05/10/2026):** "adicione configurações e plataforma de assinaturas na ordem mais correta possível de prioridade". Diretriz permanente: essencialismo, uma ação primária por tela, tudo no mesmo estado, sem redigitação.
 
-**Rótulos.** Tudo é **especificado**, salvo o marcado **executado**. Nenhum código foi editado. Base `9c617c4`, branch `claude/v44-plataforma`. Autor: Claude. Revisor: Codex. Decisões tomadas sem o proprietário: `DECISOES.md` (PLAT-D01..D16). Revisão por contraexemplo de 06/10 (Claude, não substitui a do Codex): §10.
+**Rótulos.** Tudo é **especificado**, salvo o marcado **executado**. A implementação de 06/10 está na §11. Base `9c617c4`, branch `claude/v44-plataforma`. Autor: Claude. Revisor: Codex. Decisões tomadas sem o proprietário: `DECISOES.md` (PLAT-D01..D20). Revisão por contraexemplo de 06/10 (Claude, não substitui a do Codex): §10.
 
 **Executado (leitura e sondas, 05–06/10):**
 - Leitura de `gen37/areas/onboarding_backoffice.py` (BO-01..04 e detalhes), `areas/configuracoes.py:24-33, 469-553` (CF-05, CF-05det), `ui37.py`, `engine.py:1427-1449`, `cenario.py`, `cenario.js`, `talmapa.js`, `areas/cad_fazendas.py` (`talErros` :154, Reativar :647), `areas/inicio.py:484-488` (`_cad0`), `dados_cad.py`, `build.py`, `montar_render.py`, `varredura.py`, `acao_unica_test.py`, `catalogo.json` (BO-01..04, CF-05); PRD 5 (BO-01..04, CF-05), 18.1, 18.3, 57.2, 57.5, 57.6, 58.1, 58.4, 70.4 (DEC-01/05/09).
@@ -253,3 +253,26 @@ Revisor: Claude, numa passada separada da autoria. Rótulo: **executado** para a
 | RV-22 | S4 | Editar `cenario.py:80` disputa a linha com outras frentes (o SUP-2a sobe `v` ali) e deixa dois seeds na página | §0, §5, D12 |
 | RV-23 | S4 | Aceite sem teto: 9.000 ha passariam num plano "até 5.000 ha" | R7, A5 |
 | RV-24 | S4 | O PLAT-D16 diz não tocar `talmapa.js` e `cad_fazendas.py`, mas o P5 os edita | D16 |
+
+## 11. Implementação (06/10/2026)
+
+Autor: Claude, branch `claude/v44-plataforma`, sem push. Rótulo: **executado** para o que está nesta seção, com o comando; o resto segue **especificado**. Revisão do Codex: pendente.
+
+| Passo | Commit | Onde |
+|---|---|---|
+| P1 estado e regras | `899bcfe` | `dados_assinatura.py`, `assinatura.js`, `engine.py` (prefixo uma vez), `assinatura_unit*.{js,py}` |
+| P2 CF-05 no menu | `0bd1b52` | `areas/assinatura.py`, `ui37.py` (MENU2 + regra do grupo de 1 item), `configuracoes.py`, `build.py` |
+| P3 faixa | `dc50b00` | `engine.py` (assinAvisoVals), `ui37.py` (faixa_cobranca) |
+| P4 plataforma | `d45b742` | `areas/plataforma.py`, `onboarding_backoffice.py` (só ON), índice e listas de exceção |
+| P5 trava | `bcc5033` | `talmapa.js` (Desenhar, importação, tmSalvar), `cad_fazendas.py` (talErros, Cadastrar talhão) |
+| P6 contestação | junto com P1, P2 e P4 | `assinContestar`/`assinResolver`, painel da fatura (CF-05) e detalhe da organização (BO-02) |
+
+Diferenças em relação ao texto acima (todas registradas em `DECISOES.md`, PLAT-D17..D20):
+- `obotest.py` não foi apagado: ficou só com ON-01/ON-01det; o backoffice novo está em `plataforma_test.py` (D17).
+- Recibos com sequência por tipo (PAG-, ACE-, CON-, CTS-, RES-) (D18). A chave do aceite muda quando o formulário muda ou ao desfazer; o clique repetido devolve o mesmo recibo.
+- `assinMudar(c, plano, ha, medida, chave)` recebe a medida do dia (R7 precisa dela).
+- Talhão sem parcela é o único que o CD-01 deixa inativar; por isso o roteiro de inativar/reativar usa o B1 (Boa Vista).
+
+Testes de navegador e ajustes vistos neles: `670a29a`. Testes por critério estão nos arquivos `assinatura_unit_test.py` (A1–A7, A10, A12, A17, A18 sem navegador), `assinatura_test.py` (CF-05, faixa, trava, 390 px) e `plataforma_test.py` (BO-02, BO-01, 390 px).
+
+**Executado (06/10, um por vez sob o flock, em retrato do `_render`):** `assinatura_unit_test.py` 46/46 + S0; `assinatura_test.py` 42/42; `plataforma_test.py` 19/19; `varredura.py` 138/138; `acoes_duplicadas.py` 138 páginas, 0 com ação repetida; `obotest.py` 12/12; `cftest.py` 37/37; `cadf_test.py` 15/15; `cadf_det_test.py` 13/13; `talmapa_test.py` 8/8; `acao_unica_test.py v3` 10/10; `links_ocultos_test.py` 7/7; build 0 FALHA em cada commit. Na árvore final: `varredura.py` 138/138 e `acoes_duplicadas.py` 0 com ação repetida. Não rodados por este módulo: os demais testes do protótipo e os vermelhos conhecidos da base.

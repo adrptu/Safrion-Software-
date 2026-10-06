@@ -68,6 +68,24 @@ Formato: decisão · por quê · como reverter.
 - Por quê: `talmapa.js` e `cad_fazendas.py` são de outras frentes ativas. Extrair a regra agora criaria conflito com elas. O P5 toca esses arquivos só com uma linha de guarda em cada ponto que amplia a área (revisão de 06/10, RV-24); a extração mexe nas funções inteiras e fica para a frente de cadastros.
 - Reverter (quitar a dívida): mover a regra para uma função pura comum quando a frente de cadastros tocar `talmapa.js` e `cad_fazendas.py`, e apagar as cópias.
 
+## Decisões da implementação (06/10/2026)
+
+**PLAT-D17 · obotest.py fica, só com o onboarding.** A especificação mandava substituí-lo por plataforma_test.py, mas ele também cobre ON-01 e ON-01det, que não mudaram.
+- Por quê: tirar o teste inteiro deixaria o onboarding sem cobertura. Os blocos BO-01..BO-04 saem (telas e números novos) e o backoffice novo fica em plataforma_test.py.
+- Reverter: apagar obotest.py quando o onboarding ganhar teste próprio.
+
+**PLAT-D18 · Recibo com sequência por tipo.** PAG- (pagamento), ACE- (aceite), CON- (conciliação), CTS- (contestação), RES- (resolução), cada um de 0001.
+- Por quê: o recibo que a pessoa vê começa em 0001 no primeiro pagamento, mesmo depois de um aceite; a chave de idempotência continua sendo a de quem inicia (R8).
+- Reverter: uma sequência única em `assinRecibo` (assinatura.js).
+
+**PLAT-D19 · A data simulada vale para todas as organizações; só a da demonstração fecha período.** Os dias de atraso da Aurora e o dia do trial da Boa Esperança andam com a data do painel Demonstração.
+- Por quê: um relógio só na tela. As outras organizações não fecham período (PLAT-D13), então os números de mensalidade delas não mudam.
+- Reverter: guardar `hoje` por organização em `c.assin.orgs[id]`.
+
+**PLAT-D20 · Crédito da contestação vai para o período aberto na data da resolução.** Resolvida em 16/10, o crédito aparece na prévia de out/2026 e entra na fatura quando ela fechar; a fatura contestada volta a vencer em 5 dias e não é reescrita.
+- Por quê: R16 ("linha negativa na próxima fatura") sem reescrever a contestada; o painel Demonstração não passa de 16/10, por isso o crédito se vê na prévia.
+- Reverter: aplicar o crédito no período seguinte ao da fatura contestada (`assinResolver`).
+
 ## Para o proprietário decidir (sem pressa; o protótipo funciona com os exemplos)
 
 1. Base de cobrança: área contratada ou área medida no cadastro (DEC-01; PLAT-D05).
