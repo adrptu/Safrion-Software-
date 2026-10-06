@@ -198,6 +198,12 @@ python3 quantidade_test.py && python3 carencia_test.py unit && python3 mip_unit_
 - tudo vencido trava com o gestor;
 - volume do dia ≤ 13.120.
 
+**Executado em 06/10 (CTL-5 da tabela nova, branch `claude/v44-controle-05`):**
+- fonte: `dados_lagoa_fonte.captacao()` sobre `LG_AGUA`; a irrigação não guarda outorga (`irrGet` repõe a captação da semente a cada leitura; `seed` v=3);
+- uma conta e um texto para IR-02, IR-04 e a trava: `irrCapDia`, `irrOutC`, `irrOutVenc` (`irrigacao_estado.js`); outorga vencida sem janela trava com o gestor;
+- o CD-01 nomeia o ponto como a IR-04 ("Outorga SINT-002/0000"; antes "Certidão");
+- testes: `outorga_unit_test.py` (base 2/18 → 18/18) e `ctl5_test.py` E3.1–E3.7 (1440 e 390 px).
+
 ### CTL-4 · B (início com entrega parcial)
 
 **Arquivos:**
@@ -357,6 +363,12 @@ python3 quantidade_test.py && python3 carencia_test.py unit && python3 mip_unit_
 **Teste:** `agrofit_test.py`, itens 9, 12, 14 e 15.
 
 **Aceite:** nenhuma tela diz "Receituário emitido" sem registro do AG-01.
+
+**Executado em 06/10 (CTL-5 da tabela nova):**
+- no lugar do link "Preparar receituário em Pragas e doenças", o AG-07 oferece "Usar na O.S." (pedido do integrador): produto da fazenda, cultura e alvo vão ao "Ajustar antes de liberar" da ordem A liberar escolhida, só as da cultura (`carCult`, a mesma regra da trava legal; `dados_carencia.JS_LOCAL`);
+- dose em branco; a trava legal do CTL-1 decide; a aprovação (CMD-42) grava produto, dose e alvo; a gaveta de receituário saiu;
+- fica: `catalogo.json` (AG-07, do PRD) ainda diz "Preparar receituário → FO-04" (mudança de contrato: Codex e proprietário);
+- testes: `usar_os_unit_test.py` (base 6/16 → 16/16), `agrofit_test.py` 9, 12, 14, 14b e 15, `ctl5_test.py` E2.1–E2.13.
 
 ---
 

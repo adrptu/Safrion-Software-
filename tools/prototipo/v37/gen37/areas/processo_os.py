@@ -317,7 +317,7 @@ const OS_AGRO='Ana (agrônoma)';   // agrônoma das duas fazendas no protótipo 
 const OS_LIB='gestor';   /* papel liberador do CMD-06 na demonstração (padrão dos agentes, 05/10/2026; o proprietário pode mudar). O CMD-42 é do agrônomo */
 function osVn(s){ return (String(s||'').match(/\bv\d+\b/g)||['v1']).pop(); }   // versão da ordem: o último vN (fonte única: tela, Mapa e registro)
 function osc_aprovLib(o,qa,ql){ const hr=cenAgora(), vn=osVn(o.versao);   /* qa/ql: quem aprovou e quem liberou (perfil conferido em osLibPor) */
-  const esc=cenNum(o.area)+' ha · '+((o.ins||[]).length?o.ins.map(x=>x.p+' '+cenNum(x.dose,4)+' '+x.un+'/ha').join(', '):'sem insumos');
+  const esc=cenNum(o.area)+' ha · '+((o.ins||[]).length?o.ins.map(x=>x.p+' '+cenNum(x.dose,4)+' '+x.un+'/ha'+(x.alvo?' para '+x.alvo:'')).join(', '):'sem insumos');
   o.osc.ev=(o.osc.ev||[]).concat([{cmd:'CMD-42',v:vn,por:qa,at:hr,t:vn+' aprovada por '+qa+' às '+hr+' · '+esc+' (CMD-42)'},
     {cmd:'CMD-06',v:vn,por:ql,at:hr,t:vn+' liberada por '+ql+' às '+hr+(o.reservado&&o.req?' · '+o.req+' reservada no Estoque':'')+' (CMD-06)'}]);
   return ' '+vn+' aprovada por '+qa+' e liberada por '+ql+'.'; }   /* o próximo passo fica só no painel (osCondGen), sem segunda versão no aviso */
@@ -370,7 +370,8 @@ function osc_ajustar(c,id,area,doses,jan,rem,add,lib,ator){ const o=osc_o(c,id);
   if(rem.length){ o.ins=o.ins.filter(x=>rem.indexOf(x.p)<0); rem.forEach(p=>ch.push('tirado '+p)); }
   o.ins.forEach(x=>{ const d=(doses||{})[x.p]; if(d===undefined) return; if(!(d>0)) throw new Error('Informe a dose de '+x.p+' maior que 0 '+x.un+'/ha.');
     if(Math.abs(d-x.dose)>1e-9){ ch.push(x.p+' '+cenNum(x.dose,4)+' → '+cenNum(d,4)+' '+x.un+'/ha'); x.dose=d; } });
-  add.forEach(a=>{ o.ins.push({g:a.g||'',p:a.p,dose:a.dose,un:a.un,tot:0,emb:(typeof OSD!=='undefined'&&OSD.nova&&(OSD.nova.emb||{})[a.p])||''}); ch.push('incluído '+a.p+' '+cenNum(a.dose,4)+' '+a.un+'/ha'); });
+  add.forEach(a=>{ const x={g:a.g||'',p:a.p,dose:a.dose,un:a.un,tot:0,emb:(typeof OSD!=='undefined'&&OSD.nova&&(OSD.nova.emb||{})[a.p])||''}; if(a.alvo) x.alvo=String(a.alvo);   /* alvo vindo da Consulta Agrofit (CTL-5) */
+    o.ins.push(x); ch.push('incluído '+a.p+' '+cenNum(a.dose,4)+' '+a.un+'/ha'+(a.alvo?' para '+a.alvo:'')); });
   if(!ch.length){ if(!lib) throw new Error('Nada foi ajustado.'); const r=osc_liberar(c,id,false,jan,ator); return {msg:'Nada foi ajustado; '+r.msg}; }
   o.area=area; o.saldo=Math.max(0,area-(o.realizado||0)); o.ins.forEach(x=>{ x.tot=cenQtd(x.dose,area); });   /* regra única (SINT-C03) */
   { const z0=o.ins.find(x=>x.dose>0&&!(x.tot>0)); if(z0) throw new Error('Dose × área de '+z0.p+' dá 0 '+z0.un+': aumente a dose ou a área.'); }   /* nem sem liberar (PRE-REV X2) */
@@ -386,8 +387,7 @@ function osc_ajustar(c,id,area,doses,jan,rem,add,lib,ator){ const o=osc_o(c,id);
 // por ha. Produto fora de todo cadastro conta como agrotóxico, salvo se o plano o classifica (grupo) como outra coisa.
 function osUsoItem(c,o,x,al){ const P=CARD.prod[x.p]; if(P?(!P.defn||P.adj):(x.g&&!/^(Herbicida|Fungicida|Inseticida|Acaricida|Nematicida)/.test(x.g))) return '';
   const ts=carTals(o.talhao); if(!ts.length) return x.p+': o talhão '+(o.talhao||'da ordem')+' não está no cadastro; o registro é por cultura.';
-  const cv=String((o.osc&&o.osc.novo&&o.osc.novo.cultura)||'').split(' ')[0];   // cultura do cultivo da ordem nova (outra safra); senão a do talhão
-  for(const t of ts){ const T=CARD.tal[t.tid]; const cu=cv||T.cult; const u=P?(P.usos||{})[cu]:null;
+  for(const t of ts){ const cu=carCult(o,t.tid); const u=P?(P.usos||{})[cu]:null;   /* cultura do cultivo da ordem nova (outra safra); senão a do talhão */
     if(u&&!(u.fx||[]).length){ if(/tratamento de sementes/i.test(o.tipo||'')) continue;   /* uso só TS: só em ordem de tratamento de sementes (CTL-1 rev. 2) */
       return x.p+' em '+carNome(t.tid)+(t.parc?' ('+t.parc+')':'')+': registro em '+String(cu).toLowerCase()+' só para tratamento de sementes.'; }
     const us=((u&&u.fx)||[]).map(f=>Object.assign({sit:P.sit},f));
@@ -634,9 +634,19 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
   const ajLib=!b||b.h==='EST.dc.html'||!!b.total0||!!b.legal;   // falta no Estoque: o ajuste pode resolver e libera; máquina, janela ou conflito: só grava a versão
   v.pan_ajsbtn=ajLib?'Salvar e liberar':'Salvar ajuste';
   const vcur=osVn(o.versao); const vnx='v'+(Number(vcur.slice(1))+1);
-  v.pan_ajgo=()=>{ const ds={}; (o.ins||[]).forEach(x=>{ ds[x.p]=nd(x.dose,4); }); self.setState({pa:{id:o.id,fn:'ajustar',area:nd(o.area,4),doses:ds,rem:{},add:[],q:'',qerr:'',errs:{},err:''}});
-    setTimeout(()=>{ const el=document.getElementById('aj_d0')||document.getElementById('aj_area'); if(el) el.focus(); },60); };
-  if(self.__ajAuto===o.id){ self.__ajAuto=null; if(v.pan_hasAj&&!pa) setTimeout(v.pan_ajgo,0); }   // OS.dc.html#OS-0430:ajustar (vindo do Mapa)
+  // us = produto vindo do "Usar na O.S." do AG-07 ({p,cul,alvo}): entra como incluído, dose em branco (nunca o último valor)
+  const ajAbrir=(us)=>{ const ds={}; (o.ins||[]).forEach(x=>{ ds[x.p]=nd(x.dose,4); }); let add=[], qerr='', foco='aj_d0';
+    if(us&&us.p){ const x=((OSD.nova&&OSD.nova.prods)||[]).find(y=>y.p===us.p), i=(o.ins||[]).findIndex(y=>y.p===us.p);
+      if(i>=0){ qerr=us.p+' já está na ordem: mude a dose na linha dele.'; foco='aj_d'+i; }
+      else if(!x) qerr=us.p+': produto não encontrado no cadastro da fazenda.';
+      else { add=[{p:x.p,un:x.un,g:x.g,dose:'',alvo:us.alvo,cul:us.cul}]; foco='aj_n0'; } }
+    self.setState({pa:{id:o.id,fn:'ajustar',area:nd(o.area,4),doses:ds,rem:{},add,q:'',qerr,errs:{},err:''}});
+    setTimeout(()=>{ const el=document.getElementById(foco)||document.getElementById('aj_d0')||document.getElementById('aj_area'); if(el) el.focus(); },60); };
+  v.pan_ajgo=()=>ajAbrir(null);
+  if(self.__ajAuto===o.id){ self.__ajAuto=null; const us=(self.__usar&&self.__usar.id===o.id)?self.__usar:null; self.__usar=null;   /* OS.dc.html#OS-0430:ajustar (Mapa) ou :usar= (AG-07) */
+    if(v.pan_hasAj&&!pa) setTimeout(()=>ajAbrir(us),0);
+    else if(us) setTimeout(()=>self.setState({g2toast:o.etapa!=='A liberar'?(o.id+' está em '+o.etapa+': '+us.p+' não foi incluído. Só ordem A liberar recebe produto novo.')
+      :('Incluir '+us.p+' na '+o.id+' é decisão de '+OS_AGRO+'. Nada foi incluído.')}),0); }
   const ajE=(pa&&pa.errs)||{}; const ajA=(pa&&pa.fn==='ajustar')?g2num(pa.area):NaN;
   const ajSt=(e)=>'font-family:inherit;font-size:14px;padding:7px 9px;border-radius:8px;width:110px;box-sizing:border-box;text-align:right;background:#FFFFFF;color:#15201A;border:1px solid '+(e?'#B42318':'#E4E9E5')+';';
   v.pan_ajt='Tire, inclua ou mude a dose dos produtos e a área da '+vcur+'. '+(ajLib?'Salvar e liberar grava a '+vnx+' e libera para execução, reservando no Estoque o total ajustado.':'Salvar ajuste grava a '+vnx+'; a liberação continua impedida: '+String(b.t).replace(/^Liberar bloqueado: /,'')+'.');
@@ -661,7 +671,8 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
     setTimeout(()=>{ const el=document.getElementById('aj_n'+ni); if(el) el.focus(); },60); };
   v.pan_ajqkey=(e)=>{ if(e&&e.key==='Enter'){ e.preventDefault(); v.pan_ajinc(); } };
   v.pan_ajadd=ajAdd.map((a,i)=>{ const d=g2num(a.dose); const e=ajE['+'+a.p]||'';
-    return {p:a.p,agf:agfH(a.p),hasAgf:!!agf(a.p),fid:'aj_n'+i,lab:'Dose de '+a.p+' ('+a.un+'/ha)',un:a.un+'/ha',v:a.dose,st:ajSt(e),err:e,hasErr:!!e,tot:((d>0&&ajA>0&&isFinite(d)&&isFinite(ajA))?'na ordem '+nd(cenQtd(d,ajA))+' '+a.un+' · ':'')+(ajLib?'disponível '+nd(disp(a.p))+' '+a.un:''),
+    return {p:a.p,agf:agfH(a.p),hasAgf:!!agf(a.p),fid:'aj_n'+i,lab:'Dose de '+a.p+' ('+a.un+'/ha)',un:a.un+'/ha',v:a.dose,st:ajSt(e),err:e,hasErr:!!e,
+      hasAlvo:!!a.alvo,alvoT:a.alvo?('para '+a.alvo+(a.cul?' em '+String(a.cul).toLowerCase():'')+' · Consulta Agrofit'):'',tot:((d>0&&ajA>0&&isFinite(d)&&isFinite(ajA))?'na ordem '+nd(cenQtd(d,ajA))+' '+a.un+' · ':'')+(ajLib?'disponível '+nd(disp(a.p))+' '+a.un:''),
       set:(ev)=>{ const cur=self.state.pa; const er=Object.assign({},cur.errs); delete er['+'+a.p]; const ad=cur.add.map(y=>y.p===a.p?Object.assign({},y,{dose:ev.target.value}):y); self.setState({pa:ajPa({add:ad,errs:er})}); },
       rm:()=>{ const cur=self.state.pa; self.setState({pa:ajPa({add:cur.add.filter(y=>y.p!==a.p)})}); }}; });
   v.pan_hasAjadd=ajAdd.length>0;
@@ -679,7 +690,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
     if(isNaN(ar)||ar<=0) errs._area='Informe a área maior que 0 ha.'; else if(ar>(o.area||0)+1e-9) errs._area='Máximo '+nf(o.area)+' ha: é a área da ordem. Informe até '+nf(o.area)+' ha.';
     const rem=Object.keys(cur.rem||{}).filter(p=>cur.rem[p]); const add=[];
     (o.ins||[]).forEach(x=>{ if(rem.indexOf(x.p)>=0) return; const d=g2num((cur.doses||{})[x.p]); if(!(d>0&&isFinite(d))) errs[x.p]='Informe a dose maior que 0 '+x.un+'/ha.'; else ds[x.p]=d; });
-    (cur.add||[]).forEach(a=>{ const d=g2num(a.dose); if(!(d>0&&isFinite(d))) errs['+'+a.p]='Informe a dose maior que 0 '+a.un+'/ha.'; else add.push({p:a.p,dose:d,un:a.un,g:a.g}); });
+    (cur.add||[]).forEach(a=>{ const d=g2num(a.dose); if(!(d>0&&isFinite(d))) errs['+'+a.p]='Informe a dose maior que 0 '+a.un+'/ha.'; else add.push({p:a.p,dose:d,un:a.un,g:a.g,alvo:a.alvo||''}); });
     if(prodN(cur.q)){ self.setState({pa:Object.assign({},cur,{errs,err:'',qerr:'Clique em Incluir para adicionar "'+cur.q.trim()+'" ou apague o texto.'})}); return; }
     if(!isNaN(ar)&&ar>0){ const co=cenC.ordens[o.id]; const ck=(p,un,d,k,g)=>{ if(errs[k]) return; const m=(co?osUsoItem(cenC,co,{p,un,dose:d,g}):'')||(ajLib?osc_ajFalta(cenC,p,un,d,ar):''); if(m) errs[k]=m; };   /* o mesmo do núcleo (PRE-REV Y6); regra legal com a ordem do cenário (Frente E) */
       (o.ins||[]).forEach(x=>{ if(ds[x.p]!==undefined) ck(x.p,x.un,ds[x.p],x.p,x.g); }); add.forEach(a=>ck(a.p,a.un,a.dose,'+'+a.p,a.g)); }
@@ -744,9 +755,12 @@ function EXTRAVALS(self,v){
     const tm=/^#tal=([^|]+)\|(.+)$/.exec(h); if(tm){ const k=tm[1]+'|'+tm[2]; const ex=ords(self).some(o=>o.faz===tm[1]&&(o.talhoes||[]).some(t=>t.id===tm[2])); if(!ex) return;
       const f=Object.assign({},g2st(self,'g_os').f||{}); f.tal=[k]; const st={}; if(mfFaz(self)!=='Todas'&&mfFaz(self)!==tm[1]) st.mf_faz=tm[1];
       setTimeout(()=>{ if(Object.keys(st).length) self.setState(st); g2set(self,'g_os',{f,fmc:null}); },0); return; }
-    const m=/^#(O[SB]-\d+)(?::(ajustar))?$/.exec(h); if(!m) return;
+    const m=/^#(O[SB]-\d+)(?::(ajustar|usar=(.*)))?$/.exec(h); if(!m) return;
     const oh=ords(self).find(o=>o.id===m[1]); if(!oh) return; const f=mfFaz(self); const st={pan:oh.id,pa:null}; if(f!=='Todas'&&oh.faz&&oh.faz!==f) st.mf_faz=oh.faz;
-    if(m[2]==='ajustar') self.__ajAuto=oh.id; setTimeout(()=>self.setState(st),0); };
+    if(m[2]) self.__ajAuto=oh.id;
+    if(m[3]!==undefined){ const u=m[3].split('|'); self.__usar={id:oh.id,p:u[0]||'',cul:u[1]||'',alvo:u[2]||''};   /* "Usar na O.S." do AG-07: produto, cultura e alvo */
+      try{ history.replaceState(null,'','#'+oh.id); }catch(e){} }   /* o link é consumido: recarregar não inclui de novo */
+    setTimeout(()=>self.setState(st),0); };
   if(!self.__hashIni){ self.__hashIni=1; abrirHash(); try{ window.addEventListener('hashchange',abrirHash); }catch(e){} }
   all.forEach(o=>{ v['op_'+o.id.replace('-','')]=()=>self.setState({pan:o.id,pa:null}); });
   self.g2pick=(gid,rid)=>{ if(gid==='g_os'&&String(rid).indexOf('grp@')!==0) self.setState({pan:String(rid).split('@')[0]}); };
@@ -1052,6 +1066,7 @@ def _painel():
       f'<sc-if value="{H("d.hasErr")}" hint-placeholder-val="{F()}"><span role="alert" style="font-size: 12px; font-weight: 700; color: {RED};">{H("d.err")}</span></sc-if></div></sc-for>'
       f'<sc-for list="{H("pan_ajadd")}" as="n" hint-placeholder-count="0"><div style="display: flex; flex-direction: column; gap: 3px;"><div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">'
       f'<span style="flex: 1 1 180px; min-width: 0; display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap;"><label for="{H("n.fid")}" style="font-size: 12.8px; font-weight: 700;">{H("n.p")} <span style="font-size: 11px; font-weight: 800; color: {ACC};">incluído</span></label>'
+      f'<sc-if value="{H("n.hasAlvo")}" hint-placeholder-val="{F()}"><span style="font-size: 12px; color: {MUTED};">{H("n.alvoT")}</span></sc-if>'
       f'<sc-if value="{H("n.hasAgf")}" hint-placeholder-val="{F()}"><a href="{H("n.agf")}" target="_blank" rel="noopener" title="Ver a ficha no Consulta Agrofit" style="font-size: 12px; font-weight: 700; color: {ACC}; text-decoration: none; white-space: nowrap;">Agrofit ›</a></sc-if></span>'
       f'<input id="{H("n.fid")}" aria-label="{H("n.lab")}" inputMode="decimal" value="{H("n.v")}" onChange="{H("n.set")}" style="{H("n.st")}"><span style="font-size: 12px; color: {MUTED}; min-width: 44px;">{H("n.un")}</span>'
       f'<span style="font-size: 12px; color: {MUTED}; min-width: 120px; text-align: right; font-variant-numeric: tabular-nums;">{H("n.tot")}</span>'

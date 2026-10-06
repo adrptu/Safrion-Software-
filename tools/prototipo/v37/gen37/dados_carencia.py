@@ -218,6 +218,27 @@ def card():
                 fonte_car='bula de referência (Agrofit demonstrativo: usos conferidos em bula pública do ingrediente; não substitui a bula do produto comercial)')
 
 
+# ------------------------------------------------------------------ local e cultura da ordem (O.S., Mapa, app, CO-06 e AG-07: uma regra só)
+JS_LOCAL = r'''
+function carNome(t){ return (CARD.tal[t]||{}).nome||t; }
+// local da O.S. → talhões do mapa ('Pivô 6' → PV06 · 'T1-A' → T1, parcela T1-A · 'T1+T2' → T1 e T2)
+function carTals(nome){ const s=String(nome||''); const out=[]; const add=(tid,parc)=>{ if(CARD.tal[tid]&&!out.some(x=>x.tid===tid&&x.parc===parc)) out.push({tid,parc}); };
+  if(CARD.nomes[s]){ const t=CARD.nomes[s]; add(t,t===s?null:(s.indexOf(t+'-')===0?s:null)); return out; }
+  (s.match(/Pivô\s*\d+/g)||[]).forEach(x=>{ const n=Number(x.replace(/\D/g,'')); add('PV'+('0'+n).slice(-2),null); });
+  (s.match(/\b(T|P|C)\d+(-[A-Z])?\b/g)||[]).forEach(x=>{ const m=/^((?:T|P|C)\d+)(-[A-Z])?$/.exec(x); add(m[1],m[2]?x:null); });
+  return out; }
+// cultura de um talhão da ordem: a do cultivo da ordem nova (outra safra); senão a do talhão (trava legal da O.S. e "Usar na O.S." do AG-07)
+function carCult(o,tid){ const cv=String((o&&o.osc&&o.osc.novo&&o.osc.novo.cultura)||'').split(' ')[0]; return cv||((CARD.tal[tid]||{}).cult||''); }
+'''
+
+
+def js_local():
+    """só o local e a cultura das ordens (AG-07 · Usar na O.S.): talhões com nome e cultura + JS_LOCAL, sem o motor de carência."""
+    tal = _talhoes()
+    c = dict(tal={k: dict(nome=v['nome'], cult=v['cult']) for k, v in tal.items()}, nomes=_nomes(tal))
+    return 'const CARD = ' + json.dumps(c, ensure_ascii=False).replace('</', '<\\/') + ';\n' + JS_LOCAL
+
+
 # ------------------------------------------------------------------ motor (JS puro: O.S., Mapa, CO-06 e testes no jsc)
 JS = r'''
 // ===== Carência e destino (MAPA-CARENCIA-LMR-20261003) · motor puro sobre o cenário compartilhado (cenGet) =====
@@ -229,13 +250,6 @@ function carIso(s,ref){ s=String(s||'').trim(); let m=/^(\d{4})-(\d{2})-(\d{2})/
 function carAdd(iso,n){ const d=new Date(iso+'T12:00:00Z'); d.setUTCDate(d.getUTCDate()+n); return d.toISOString().slice(0,10); }
 function carBr(iso){ if(!iso) return '—'; const a=String(iso).split('-'); return a[2]+'/'+a[1]; }
 function carNum(n,d){ return Number(n||0).toLocaleString('pt-BR',{maximumFractionDigits:(d===undefined?1:d)}); }
-function carNome(t){ return (CARD.tal[t]||{}).nome||t; }
-// local da O.S. → talhões do mapa ('Pivô 6' → PV06 · 'T1-A' → T1, parcela T1-A · 'T1+T2' → T1 e T2)
-function carTals(nome){ const s=String(nome||''); const out=[]; const add=(tid,parc)=>{ if(CARD.tal[tid]&&!out.some(x=>x.tid===tid&&x.parc===parc)) out.push({tid,parc}); };
-  if(CARD.nomes[s]){ const t=CARD.nomes[s]; add(t,t===s?null:(s.indexOf(t+'-')===0?s:null)); return out; }
-  (s.match(/Pivô\s*\d+/g)||[]).forEach(x=>{ const n=Number(x.replace(/\D/g,'')); add('PV'+('0'+n).slice(-2),null); });
-  (s.match(/\b(T|P|C)\d+(-[A-Z])?\b/g)||[]).forEach(x=>{ const m=/^((?:T|P|C)\d+)(-[A-Z])?$/.exec(x); add(m[1],m[2]?x:null); });
-  return out; }
 function carRegra(p,cult){ const P=CARD.prod[p]; if(!P) return {def:false,desconhecido:true};
   if(!P.defn) return {def:false}; if(P.adj) return {def:true,adj:true};
   const u=(P.usos||{})[cult]; if(!u) return {def:true,semUso:true,ingr:P.ingr,ficha:P.ficha};
@@ -467,7 +481,7 @@ def js_nucleo(app=False):
     if app:
         c = dict(c, lmr={}, car0={}, prod={k: dict(v, usos={cu: {kk: u[kk] for kk in ('dias', 'conf', 'na', 'txt')} for cu, u in v['usos'].items()})
                                           for k, v in c['prod'].items()})
-    return 'const CARD = ' + json.dumps(c, ensure_ascii=False).replace('</', '<\\/') + ';\n' + JS
+    return 'const CARD = ' + json.dumps(c, ensure_ascii=False).replace('</', '<\\/') + ';\n' + JS + JS_LOCAL
 
 
 if __name__ == '__main__':
