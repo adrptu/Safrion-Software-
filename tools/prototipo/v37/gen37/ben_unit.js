@@ -66,6 +66,14 @@ function fechar110(c) { const a = MUD(c, x => benConcluir(x, 'OB-0110', IG)); co
   const tol = MUD(c, x => benSaida(x, 'OB-0110', { fluxo: 'Descarte', destino: 'Compostagem', kg: 11 }, IG));
   ok('U08c a tolerância vale: +11 kg ainda cabe (Σ 12.012 ≤ 12.012); mais 2 kg não (12.014)', !tol.erro && /Saídas pesadas 12.014 kg/.test(MUD(c, x => benSaida(x, 'OB-0110', { fluxo: 'Descarte', destino: 'Compostagem', kg: 2 }, IG)).erro || ''), tol); }
 
+// ---- U08d · R-F02 ganho aparente fora da faixa (o valor absoluto conta nos dois sinais) ----
+/* na fruta a R-A07 usa a mesma tolerância da faixa, então o ganho fora da faixa não nasce de um registro novo: fixture da função pura com
+   a entrada declarada menor que as saídas (ordem de 11.950 kg com as saídas da OB-0110) */
+{ const c = NOVO(); const o = O(c, 'OB-0110'); o.ben.ent[3].kg = 2970; o.ben.conc = { quem: 'Igor', em: '', dif0: -50 }; o.etapa = 'Em conferência'; const b = benBal(o);
+  const cf = MUD(c, x => benConferir(x, 'OB-0110', PA));
+  ok('U08d ganho de 50 kg (−0,42 %) passa da faixa de 11,95 kg: selo "Ganho aparente acima da faixa", conferir recusado; Igor justifica "Erro de medição" (50 ≤ 59,75 kg)', b.dif === -50 && !b.dentro && b.ganho
+     && benSelos(c, O(c, 'OB-0110')).some(s => s.t === 'Ganho aparente acima da faixa') && /fora da faixa/.test(cf.erro || '') && !MUD(c, x => benJustificar(x, 'OB-0110', 'Erro de medição', 'balança da linha descalibrada', IG)).erro, [b.dif, b.faixa, cf]); }
+
 // ---- U09 · R-F02, R-F03, R-G06 · K13, K14, K16 faixa e alçada ----
 { const c = NOVO(); MUD(c, x => benEstornar(x, 'OB-0110', 'S-02', 'Pesagem refeita', '', IG));
   MUD(c, x => benSaida(x, 'OB-0110', { fluxo: 'Produto', classe: 'B', cx: 180, bruto: 1868 }, IG)); MUD(c, x => benConcluir(x, 'OB-0110', IG)); const b = benBal(O(c, 'OB-0110'));
@@ -129,6 +137,8 @@ function fechar110(c) { const a = MUD(c, x => benConcluir(x, 'OB-0110', IG)); co
   ok('U13b saída da OB-0112 vai ao L39-133; o Fechar da OB-0110 cria L39-120 e L39-121 (sem colisão)', !s.erro && s.s.lote === 'L39-133' && !f.erro && LT(c, 'L39-120') && LT(c, 'L39-121') && !LT(c, 'L39-133'), [s.erro, s.s && s.s.lote, f.erro]);
   const e = MUD(c, x => benEstornar(x, 'OB-0112', s.s.id, 'Erro de digitação', '', IG)); const s2 = MUD(c, x => benSaida(x, 'OB-0112', { fluxo: 'Produto', classe: 'B', cx: 10, bruto: 106 }, IG));
   ok('U13c ID de saída estornada não volta: a classe B nova ganha o L39-134', !e.erro && s2.s.lote === 'L39-134', s2.s && s2.s.lote);
+  const c4 = NOVO(); c4.ordens['OB-0110'].ben.sai[0].lote = 'L39-140'; const x4 = cenClone(c4);
+  ok('U13e K28 gerador que olha só os lotes falha: um destino de saída ainda sem lote (L39-140) também conta; o próximo é L39-141', prProxLote(x4, '2026-09-26') === 'L39-141', prProxLote(cenClone(c4), '2026-09-26'));
   const c2 = NOVO(); c2.producao.lotes['L39-120'] = Object.assign({}, LT(c2, 'L39-117'), { id: 'L39-120' }); const ff = fechar110(c2)[3];
   ok('U13d Fechar com ID que já existe para outra origem é recusado', /Lote L39-120 já existe/.test(ff.erro || ''), ff); }
 
@@ -187,6 +197,11 @@ function fechar110(c) { const a = MUD(c, x => benConcluir(x, 'OB-0110', IG)); co
   const lb = MUD(c, x => benDecidir(x, 'L26-118', 'Liberar', {}, MA)); const ds = MUD(c, x => benDecidir(x, 'L26-118', 'Destinar', {}, MA));
   const dd = MUD(c, x => benDecidir(x, 'L26-118', 'Destinar', { motivo: 'maturação avançada: indústria de polpa' }, MA)); const S = prSaldos(c, LT(c, 'L26-118'));
   ok('U17c K25 L26-118 não conforme: Liberar recusado com as três saídas; destinar sem motivo recusado; com motivo: físico 0, Destinado, MP destinação, rastreio fica', lb.erro === 'Resultado não conforme (INSP-93): libere como classe atingida, mantenha o bloqueio ou destine.' && /motivo da destinação/.test(ds.erro || '') && !dd.erro && S.fis === 0 && LT(c, 'L26-118').q0 === 'Destinado' && c.producao.movs.some(m => m.lote === 'L26-118' && m.tipo === 'destinação' && m.kg === -300), [lb, ds, dd, S]);
+  const c5 = NOVO(); fechar110(c5); MUD(c5, x => benResultado(x, 'L39-120', 'Conforme', '', MA));
+  ok('U17e as opções da decisão seguem o resultado: Não conforme sem "Liberar"; Conforme sem "Liberar como classe atingida"', JSON.stringify(benDecisoes(c5, LT(c5, 'L26-118'))) === '["Liberar como classe atingida","Manter bloqueio","Destinar"]'
+     && JSON.stringify(benDecisoes(c5, LT(c5, 'L39-120'))) === '["Liberar","Manter bloqueio","Destinar"]' && JSON.stringify(benDecisoes(c5, LT(c5, 'L39-121'))) === '[]', [benDecisoes(c5, LT(c5, 'L26-118')), benDecisoes(c5, LT(c5, 'L39-120'))]);
+  const c6 = NOVO(); const rv = MUD(c6, x => prReceber(x, { carga: 'CG-2108', ticket: 'TK-4520', bruto: 19250, tara: 7200, cond: 'Com avaria' })); const li = MUD(c6, x => prLiberarLote(x, rv.L.id, IG)); const lm = MUD(c6, x => prLiberarLote(x, rv.L.id, MA));
+  ok('U17f "Liberar lote" da Colheita: Igor (produção) recusado ("decisão de Ana (agrônoma) ou Marta (qualidade)"); Marta libera e o nome gravado é o do perfil', /decisão de Ana \(agrônoma\) ou Marta \(qualidade\)/.test(li.erro || '') && !lm.erro && LT(c6, rv.L.id).lib.quem === 'Marta (qualidade)', [li, lm]);
   const c2 = NOVO(); const ca = MUD(c2, x => benDecidir(x, 'L26-118', 'Liberar como classe atingida', { classe: 'B' }, MA));
   ok('U17d "Liberar como classe atingida" (B): grava a classe e o MP de reclassificação sem mudar a massa, e libera', !ca.erro && LT(c2, 'L26-118').classe === 'B' && prSaldos(c2, LT(c2, 'L26-118')).q === 'Liberado' && prFis(c2, 'L26-118') === 300 && c2.producao.movs.some(m => m.lote === 'L26-118' && m.tipo === 'reclassificação' && m.kg === 0), ca); }
 

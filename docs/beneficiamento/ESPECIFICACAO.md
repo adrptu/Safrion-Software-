@@ -1023,3 +1023,11 @@ Negativos marcados com −. Toda recusa confere o que a R-G05 pede.
 | AC-74 − | Teto da CAF-BEN | R-G06 | K74 | unitário |
 | AC-75 − | Umidade do beneficiado obrigatória; acima do limite, aviso | R-B06 | K75 | unitário |
 | AC-76 | Fluxo FL-BEN-03 percorrido | §2 | — | fluxo |
+
+## 13. Implementação do BEN-1 (executado em 06/10/2026, branch `claude/v44-beneficiamento`)
+
+- **Rótulo:** executado. Decisões e adaptações à base (a Colheita já cria lote, MP-, pedido e reserva): `DECISOES.md` §12 (BEN-D01 a BEN-D13).
+- **Arquivos novos (`gen37/`):** `ben.js` (regras e comandos `ben*`), `dados_ben.py` (rotas, caixa, semente), `ben_massa.py` (espelho Decimal das contas, só para teste), `areas/processo_beneficiamento.py` (`BEN.dc.html`), `ben_unit.js` + `ben_unit_test.py` (node), `ben_mutantes.py` (mutantes do §11.4), `ben_fluxo_test.py` (navegador).
+- **Editados:** `producao.js` (qualidade do lote beneficiado, carência e LC- pela genealogia, classe obrigatória no produto classificado, `prProxLote`, liberar lote pelo perfil), `areas/producao.py` (Estoque de produto: inspeção, resultado e decisão do lote de produção, atalhos ao Beneficiamento), `cenario.py` (cenário v5 com a semente e `ben.js` no prefixo), `dados_cad.py` (caixa de 10 kg com tara, Igor e Marta, equipe e8), `g2lib.js` (perfis Igor e Marta), `ui37.py` (Produção › Beneficiamento), `areas/cadastros.py` e `areas/cad_produtos_estrutura.py` (texto da caixa pela fonte única).
+- **Casos com a caixa de 10 kg:** os números do §10.3 valem com as caixas dobradas e a massa igual (K01 tara 576 kg = 960 × 0,6; K03 1.140 sugeridas e 1.200 confirmadas; K06 881; K07 584; K08 REQ-041 com 584 un e 16 livres; K17 584 un em custódia); o próximo lote na semente é o L39-133 (K28; sequência única da Produção).
+- **Fora (inalterado):** BEN-2 a BEN-8 (§11.8), a OB-0104 em consulta e a saída dela da O.S. (fica no Kanban da O.S., como antes), as abas do painel (o painel usa seções na mesma rolagem), colunas configuráveis (plano B do §5.2: 7 colunas visíveis), indicadores agregados da seção (só o selo do cabeçalho e as razões do balanço).

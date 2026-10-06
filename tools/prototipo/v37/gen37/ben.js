@@ -354,7 +354,8 @@ function benFechar(c, id, ator) { const quem = cenExige(ator, 'producao', 'Fecha
   const B = benB(c, 1); const I = B.insp[inspId] || (B.insp[inspId] = { id: inspId, lotes: [], ordem: id, padrao: benRotaTxt(r) + ' · classes ' + ((r.saidas.find(s => s.fluxo === 'Produto') || {}).classes || []).join(' e ') + ' (sintético)', resp: benQualQ(), prazo: '', estado: 'Planejada', res: {} });
   I.lotes = novos; I.prazo = prazo; I.estado = 'Aberta'; I.ordem = id; I.resp = benQualQ(); o.ben.insp = inspId; o.etapa = 'Encerradas'; o.ben.fech = { quem, em: benEm() };
   const b = benBal(o);
-  const det = novos.map(l => l + ' ' + benKg(prFis(c, l))).join(' e ') + ' Em inspeção (' + inspId + ' · ' + benQualQ() + ' · prazo ' + prBr(prazo) + '); entradas esgotadas' + (b.desc || b.outro ? '; descarte e outro destino destinados' : '') + '; diferença ' + benKg(b.dif);
+  const dst = [prCmp(b.desc, 0) > 0 ? 'descarte ' + benKg(b.desc) : '', prCmp(b.outro, 0) > 0 ? 'outro destino ' + benKg(b.outro) : ''].filter(Boolean);
+  const det = novos.map(l => l + ' ' + benKg(prFis(c, l))).join(' e ') + ' Em inspeção (' + inspId + ' · ' + benQualQ() + ' · prazo ' + prBr(prazo) + '); entradas esgotadas' + (dst.length ? '; ' + dst.join(' e ') + ' destinados' : '') + '; diferença ' + benKg(b.dif);
   benHist(o, quem, 'Processo fechado (CMD-23)', det, movs.join(', ')); benToca(o);
   return { msg: id + ' fechada: ' + det + '. Fechar não libera: a Qualidade libera em Produção › Estoque de produto.', lotes: novos }; }
 
@@ -370,10 +371,9 @@ function benDecisoes(c, L) { const I = benInspDe(c, L); const res = I && I.res[L
 /* próximo passo do lote de produção no Estoque de produto (null = vale a regra geral: reservar ou disponível) */
 function benProxLote(c, L, S) { const I = benInspDe(c, L); if (!I) return null; const res = I.res[L.id]; const q = benQualQ();
   if (L.q0 === 'Destinado') return { t: 'destinado · rastreio guardado' };
-  if (S.q === 'Liberado') return null;
-  if (S.q === 'Em inspeção' && !res) return { t: 'Registrar resultado · ' + q, a: 'resultado', insp: I.id, prazo: I.prazo };
-  if (S.q === 'Em inspeção' || (S.q === 'Bloqueado' && L.q0 === 'Bloqueado')) return { t: 'Registrar decisão · ' + q, a: 'decisao', insp: I.id, prazo: I.prazo };
-  return null; }
+  if (L.q0 === 'Liberado') return null;
+  if (!res) return { t: 'Registrar resultado · ' + q, a: 'resultado', insp: I.id, prazo: I.prazo };
+  return { t: 'Registrar decisão · ' + q, a: 'decisao', insp: I.id, prazo: I.prazo }; }
 function benResultado(c, lid, sit, obs, ator) { const quem = cenExigeUm(ator, BEN_QUAL, 'Registrar o resultado do ' + lid); const L = prP(c, 1).lotes[lid]; const I = benInspDe(c, L);
   if (!I) throw new Error((L ? lid : 'Lote') + ' sem inspeção aberta.');
   if (I.res[lid]) throw new Error('Já feito: resultado do ' + lid + ' registrado (' + I.res[lid].sit + ', ' + I.res[lid].quem + ').');

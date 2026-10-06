@@ -7,4 +7,4 @@ Pedido do proprietário (05/10/2026): "coloque também o módulo de beneficiamen
 - `FORA-DE-ESCOPO.md`: o que ficou fora, com condição de retorno.
 - `verificacao/`: contas em `decimal` (`contas.py`), reconferência independente (`verifica.py`, FALHAS: 0), conferência de referências (`confere.py`) e os achados da revisão (`revisao.json`).
 
-Rótulo: **especificado**. Nada foi implementado. Autor: Claude. Revisor: Codex. Ordem: depois da TABELAS-FOCO e do PCM × suprimentos 1a–1c (o cenário compartilhado muda de versão em sequência).
+Rótulo: **BEN-1 executado** (06/10/2026, branch `claude/v44-beneficiamento`): implementação e adaptações à base com a Colheita em `DECISOES.md` §12 e `ESPECIFICACAO.md` §13. BEN-2 a BEN-8: especificado. Autor: Claude. Revisor: Codex. Ordem: depois da TABELAS-FOCO e do PCM × suprimentos 1a–1c (o cenário compartilhado muda de versão em sequência).

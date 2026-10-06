@@ -203,7 +203,8 @@ try:
         t.chk('A-17 a linha do PV-030 diz que a quantidade é o saldo do CT-201', 'saldo 4.000 sc do CT-201' in (J("ROWTXT('PV-030')") or ''), J("ROWTXT('PV-030')"))
         hd = J("[...document.querySelectorAll('[role=columnheader]')].map(x=>N(x.innerText))") or []
         mam = J("ROWTXT('Mamão Formosa · fruta de campo')") or ''
-        t.chk('A-18 Estoque de produto com a coluna Em processo (mamão: 66.250 kg em processo)', any(h.lower().startswith('em processo') for h in hd) and '66.250 kg 0 kg 66.250 kg 0 kg' in mam, [hd, mam[:200]])
+        # BEN-1: a semente ganha 21.270 kg de fruta de campo no packing (saldo de abertura): 66.250 da colheita + 21.270 = 87.520 kg em processo
+        t.chk('A-18 Estoque de produto com a coluna Em processo (mamão: 66.250 kg da colheita + 21.270 kg do packing = 87.520 kg em processo)', any(h.lower().startswith('em processo') for h in hd) and '87.520 kg 0 kg 87.520 kg 0 kg' in mam, [hd, mam[:200]])
         # A-15 · a linha da cultura diz a área da ponderada
         ir('COLH.dc.html', limpa=True); mt = J("ROWTXT('Mamão Formosa')") or ''
         t.chk('A-15 linha do Mamão Formosa: 0,70 t/ha ponderada sobre 137,9 ha colhidos (96,74 t ÷ 137,9 ha)', '0,70 t/ha ponderada' in mt and 'sobre 137,9 ha colhidos' in mt, mt[:300])
