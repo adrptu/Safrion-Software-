@@ -80,7 +80,9 @@ try:
     chk('14 "Abrir talhão ›" do painel do T2 abre o detalhe do T2 (seletor, crumb e primária do T2 na aba Parcelas)', href=='CD-01det.dc.html#talhao=T2' and J("document.querySelector('header select').value")=='T2'
         and 'T2 · 298 ha' in hd and 'Planejar T2 na safra' in mn and erro_js()=='', [href,hd])
     J(f"({SETV})('header select','B1')"); time.sleep(.4); hd=J("document.querySelector('header').innerText.replace(/\\s+/g,' ')")
-    chk('15 detalhe lê o cadastro salvo na lista: B1 inativo', 'Inativo desde 23/09/2026' in hd and 'Inativo desde' in (J("document.querySelector('main').innerText") or ''), hd)
+    # TABELAS-FOCO (06/10/2026): a data da inativação fica só no estado do cabeçalho; a Situação da ficha é o chip "Inativo" com "Reativar B1"
+    mn=J("document.querySelector('main').innerText.replace(/\\s+/g,' ')") or ''
+    chk('15 detalhe lê o cadastro salvo na lista: B1 inativo', 'Inativo desde 23/09/2026' in hd and 'Inativo Reativar B1' in mn, [hd[-120:],mn[:200]])
     c.shot(os.path.join(os.path.dirname(os.path.abspath(__file__)),'_probe','cadf_det_b1.png'))
 finally:
     c.close(); srv.terminate()

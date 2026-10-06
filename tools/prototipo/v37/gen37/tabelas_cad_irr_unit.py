@@ -35,6 +35,10 @@ colsp = json.JSONDecoder().raw_decode(h5[i5 + 7:])[0] if i5 >= 0 else {}
 chk('A1 CD-05: colunas por papel (Fornecedor, Cliente, Parceiro de crédito, Transportador, Prestador) publicadas', set(colsp) == {'Fornecedor', 'Cliente', 'Parceiro de crédito', 'Transportador', 'Prestador'}, list(colsp))
 for papel, cs in colsp.items():
     for c in cs: cols_todas.append(('CD-05 ' + papel, 'g_forn', c))
+# coluna "Motivo da suspensão": entra só quando há parceiro suspenso no filtro (nunca fica sempre vazia)
+im = h5.find('COL_MOT='); colm = json.JSONDecoder().raw_decode(h5[im + 8:])[0] if im >= 0 else {}
+chk('A1 CD-05: coluna dinâmica "Motivo da suspensão" publicada', colm.get('l') == 'Motivo da suspensão', colm)
+if colm: cols_todas.append(('CD-05 suspenso', 'g_forn', colm))
 comp = [(pg, gid, c['l']) for pg, gid, c in cols_todas if R_ROT.search(re.sub(r'\([^)]*\)', '', c.get('l') or ''))]
 chk(f'A2 {len(cols_todas)} colunas: nenhum rótulo composto (" · ", " / ", " e ")', not comp, comp)
 velho = [(pg, gid, c['l']) for pg, gid, c in cols_todas if c.get('t') == 'num' and (c.get('u') or c.get('pre'))]
@@ -47,21 +51,28 @@ semun = [(pg, gid, c['l']) for pg, gid, c in cols_todas if c.get('t') == 'num' a
 chk('A5 colunas de medida (área, lâmina, vazão, custo…) com a unidade na célula (data-un)', not semun, semun)
 dt = {(pg, c['k']) for pg, gid, c in cols_todas if c.get('t') == 'date'}
 chk('A6 datas e instantes tipados como data (ordenam por data): vencimento, plantio, início e fim, quando, atualização, validade',
-    {('CD-01', 'venc'), ('CD-01det', 'plantio'), ('CD-03', 'calv'), ('CD-04', 'habv'), ('CD-06', 'pdata'), ('CD-07', 'ini'), ('CD-07', 'fim'), ('IR-02', 'ini'), ('IR-03', 'fim'),
+    {('CD-01', 'venc'), ('CD-01det', 'plantio'), ('CD-03', 'calv'), ('CD-04', 'habv'), ('CD-06', 'pdata'), ('CD-07', 'ini'), ('CD-07', 'fim'), ('IR-01', 'pps'), ('IR-02', 'ini'), ('IR-03', 'fim'),
      ('IR-03det', 'hora'), ('IR-04', 'at'), ('IR-04', 'venc')} <= dt, sorted(dt))
 
 # ---------------- (B) auxiliares Python ----------------
 from areas import cad_fazendas as CF
+def tenta(f, *a):
+    """chama o auxiliar; ausente ou com erro (ex.: na base 24da80b) vira a mensagem, e a verificação falha em vez de interromper o teste"""
+    try: return f(*a)
+    except Exception as e: return 'ERRO ' + type(e).__name__ + ': ' + str(e)[:120]
+AUS = lambda nome: (lambda *a: (_ for _ in ()).throw(AttributeError(nome + ' ausente')))
 casos = [('180 m³/h', 180.0), ('1,0 L/s', 3.6), ('0,5 L/s', 1.8), ('—', ''), ('', '')]
-r = [(t, CF._vazao_m3h(t)) for t, _ in casos]
-chk('B1 vazão do documento em m³/h para ordenar: 180 m³/h → 180; 1,0 L/s → 3,6; "—" → vazio', all(abs(a - b) < 1e-9 if isinstance(b, float) else a == b for (_, a), (_, b) in zip(r, casos)), r)
-chk('B2 documento do ponto de água: Outorga × Certidão (de uso insignificante); sem tipo fica vazio',
-    [CF._doc_agua(x) for x in ('Outorga', 'Outorga estadual', 'Certidão de uso insignificante', '')] == ['Outorga', 'Outorga', 'Certidão', ''])
-rows, _ = CF._parc_rows(['T1'], 'Santa Rita'); safras = [g['v']['safra'] for g in rows]
-chk('B3 parcelas do T1 (Santa Rita) só com safras da Santa Rita (sem a Safra Mamão da Lagoa Grande)', safras and not any('Mamão' in x for x in safras), safras)
+r = [(t, tenta(getattr(CF, '_vazao_m3h', AUS('_vazao_m3h')), t)) for t, _ in casos]
+chk('B1 vazão do documento em m³/h para ordenar: 180 m³/h → 180; 1,0 L/s → 3,6; "—" → vazio', all(abs(a - b) < 1e-9 if isinstance(b, float) and isinstance(a, float) else a == b for (_, a), (_, b) in zip(r, casos)), r)
+r = [tenta(getattr(CF, '_doc_agua', AUS('_doc_agua')), x) for x in ('Outorga', 'Outorga estadual', 'Certidão de uso insignificante', '')]
+chk('B2 documento do ponto de água: Outorga × Certidão (de uso insignificante); sem tipo fica vazio', r == ['Outorga', 'Outorga', 'Certidão', ''], r)
+pr = tenta(getattr(CF, '_parc_rows', AUS('_parc_rows')), ['T1'], 'Santa Rita')
+safras = [g['v']['safra'] for g in pr[0]] if isinstance(pr, tuple) else [pr]
+chk('B3 parcelas do T1 (Santa Rita) só com safras da Santa Rita (sem a Safra Mamão da Lagoa Grande)', isinstance(pr, tuple) and safras and not any('Mamão' in x for x in safras), safras)
 
 # ---------------- (C) funções JS das páginas, no node ----------------
 def func(html, nome):
+    if 'function ' + nome + '(' not in html: return 'function ' + nome + '(){ throw new Error(' + json.dumps(nome + ' ausente na página') + '); }'
     i = html.index('function ' + nome + '('); j = html.index('{', i); n = 0
     for k in range(j, len(html)):
         n += {'{': 1, '}': -1}.get(html[k], 0)
@@ -69,8 +80,9 @@ def func(html, nome):
     raise ValueError(nome)
 def node(src):
     r = subprocess.run(['node', '-e', src], capture_output=True, text=True, timeout=60)
-    if r.returncode: print(r.stderr[:800])
-    return json.loads(r.stdout or 'null')
+    if r.returncode: print((r.stderr.strip().splitlines() or [''])[-1][:300])
+    try: return json.loads(r.stdout or 'null')
+    except ValueError: return None
 h1 = page('CD-01')
 js1 = "const HOJE='2026-09-23';\n" + '\n'.join(func(h1, f) for f in ('chipc', 'br', 'ddiff', 'sitOk', 'sitInfo', 'sitX', 'aguaDoc', 'aguaSit')) + r"""
 const T=(V)=>{ const s=aguaSit(V); return [s.t,s.p.map(p=>p.t).join(' ')]; };
@@ -100,7 +112,7 @@ chk('C4 cultura × estádio do setor: Milho | V10, Feijão | R5, Mamão | (vazio
     ui.get('ce') == [{'c': 'Milho', 'e': 'V10'}, {'c': 'Feijão', 'e': 'R5'}, {'c': 'Mamão', 'e': ''}, {'c': 'Mamão', 'e': 'produção'}, {'c': 'Mamão', 'e': 'preparo de área'}], ui.get('ce'))
 iso, txt = ui.get('iso') or [], ui.get('txt') or []
 chk('C5 instante ISO ordena no tempo (19/09 < ontem < hoje < amanhã < 25/09) e a célula mostra o texto relativo',
-    m0 is not None and iso == sorted(iso) and iso[0] == '2026-09-19 14:00' and iso[3] == '2026-09-23 20:00' and txt[1:5] == ['ontem 20:00', 'hoje 14:00', 'hoje 20:00', 'amanhã 10:31'] and ui.get('vazio') == '', (iso, txt))
-chk('C6 pelo texto a ordem sairia errada ("amanhã" < "hoje" < "ontem"): por isso o valor que ordena é o ISO', sorted(txt[1:5]) != txt[1:5], sorted(txt[1:5]))
+    m0 is not None and len(iso) == 6 and iso == sorted(iso) and iso[0] == '2026-09-19 14:00' and iso[3] == '2026-09-23 20:00' and txt[1:5] == ['ontem 20:00', 'hoje 14:00', 'hoje 20:00', 'amanhã 10:31'] and ui.get('vazio') == '', (iso, txt))
+chk('C6 pelo texto a ordem sairia errada ("amanhã" < "hoje" < "ontem"): por isso o valor que ordena é o ISO', len(txt) == 6 and sorted(txt[1:5]) != txt[1:5], sorted(txt[1:5]))
 print(f'RESULTADO: {len(OK)}/{len(OK) + len(FAIL)} ok' + (' · FALHAS: ' + '; '.join(FAIL) if FAIL else ''))
 sys.exit(1 if FAIL else 0)

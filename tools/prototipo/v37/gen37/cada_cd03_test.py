@@ -42,8 +42,9 @@ try:
     t.btn('Salvar'); a=t.alerts()
     t.fset('custo_h','90'); t.fset('custo_f','Tabela de referência'); t.btn('Salvar'); time.sleep(.2)
     r=t.rowtxt(0,'Pulverizador PJ-2500') or ''; op=t.isopen(); t.openrow(0,'Pulverizador PJ-2500'); cf=t.fv('custo_f'); t.cancel()
+    # TABELAS-FOCO (06/10/2026): tanque em Capacidade (2.500 L) e barra em Largura de trabalho (30 m), colunas próprias
     t.chk('sem custo por hora o cadastro é barrado no campo; com custo e fonte grava, a linha mostra barra, tanque e R$/h e o painel a fonte',
-          'Informe o custo por hora' in a and not op and 'barra 30 m · tanque 2.500 L' in r and 'R$ 90,00/h' in r and cf=='Tabela de referência', [a,r,cf,t.alerts()])
+          'Informe o custo por hora' in a and not op and '2.500 L 30 m' in r and 'R$ 90,00/h' in r and cf=='Tabela de referência', [a,r,cf,t.alerts()])
     t.chk('estado do cabeçalho é recalculado (nova máquina sem calibração: 3 a resolver)', '1 máquina em manutenção · 3 calibrações a resolver' in t.header(), t.header())
     # conjuntos
     t.aba('Conjuntos'); k2=t.card('Trator T1 + Plantadeira 24 linhas') or ''

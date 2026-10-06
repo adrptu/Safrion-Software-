@@ -2,6 +2,7 @@
 """CD-06 · produtos, unidades e locais (15 verificações no Chrome): grupo cadastrável com natureza de custo, preço de referência com
 data, embalagem estruturada, controle em um campo, situação Ativo/Inativo, unidade-base travada com motivo, locais com fazenda e
 capacidade só em tanque e silo; o cabeçalho mostra pendência do cadastro (não do Estoque)."""
+# TABELAS-FOCO (06/10/2026): natureza, unidade, embalagem e capacidade em colunas próprias (o ativo de origem do silo fica no painel do local)
 from cadc_lib import T
 import time
 t=T(); J=t.J
@@ -15,7 +16,7 @@ try:
     t.openrow(0,'Herbicidas 5 itens'); ti=t.title(); nat=t.fv('nat')
     t.fset('nat','3.1.01 · Fertilizantes e corretivos'); t.btn('Salvar')
     t.chk('linha do grupo abre nome e natureza; a natureza salva aparece no grupo',
-          ti=='Grupo · Herbicidas' and nat=='3.1.02 · Defensivos' and '5 itens · 3.1.01 · Fertilizantes e corretivos' in (t.rowtxt(0,'Herbicidas') or ''), [ti,nat,t.rowtxt(0,'Herbicidas'),t.toast()])
+          ti=='Grupo · Herbicidas' and nat=='3.1.02 · Defensivos' and '5 itens 3.1.01 · Fertilizantes e corretivos' in (t.rowtxt(0,'Herbicidas') or ''), [ti,nat,t.rowtxt(0,'Herbicidas'),t.toast()])
     t.openrow(0,'Glifosato 480'); d=t.dlg()
     t.chk('Glifosato: unidade-base travada com o motivo (saldo); embalagem galão de 20 L; preço em R$/L',
           t.fdis('un') and 'Travada: item com saldo de 1.200 L' in d and t.fv('emb')=='Galão' and t.fv('cont')=='20' and 'R$/L' in d and t.fv('ctrl')=='Lote e validade', d[:400])
@@ -39,7 +40,7 @@ try:
                 ('preco','85'),('pdata','2026-09-20'),('local','Câmara fria')]: t.fset(k,v)
     t.btn('Salvar'); time.sleep(.2)
     t.chk('"Outro grupo…" cria Biológicos (natureza 3.1.02) com o item Trichoderma WP',
-          'Nome do novo grupo' in L and 'Natureza de custo' in L and 'Biológicos 1 item · 3.1.02 · Defensivos' in (t.rowtxt(0,'Biológicos') or '')
+          'Nome do novo grupo' in L and 'Natureza de custo' in L and 'Biológicos 1 item 3.1.02 · Defensivos' in (t.rowtxt(0,'Biológicos') or '')
           and 'kg saco de 1 kg' in (t.rowtxt(0,'Trichoderma') or ''), [L,t.rowtxt(0,'Biológicos'),t.rowtxt(0,'Trichoderma'),t.alerts()])
     t.clk('Cadastrar item'); t.fset('item','MAP 11-52'); t.fset('cont','50'); t.btn('Salvar')
     t.chk('item repetido é barrado', 'Já existe o item MAP 11-52 em Fertilizantes.' in t.alerts(), t.alerts())
@@ -47,7 +48,7 @@ try:
     t.aba('Locais')   # 01/10: locais numa aba própria do mesmo bloco (tabela 0 da aba); cabeçalho em caixa normal
     hd=J("[...document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/\\s+/g,' ').trim().toUpperCase())")
     t.chk('locais: fazenda na tabela, sem coluna Controle; capacidade só no tanque e no silo (do ativo)',
-          any('FAZENDA' in h for h in hd) and not any('CONTROLE' in h for h in hd) and '15.000 L' in (t.rowtxt(0,'Tanque Sede') or '') and '60.000 sc 60 kg · ativo Silo 01' in (t.rowtxt(0,'Silo 01') or '')
+          any('FAZENDA' in h for h in hd) and not any('CONTROLE' in h for h in hd) and '15.000 L' in (t.rowtxt(0,'Tanque Sede') or '') and '60.000 sc de 60 kg' in (t.rowtxt(0,'Silo 01') or '')
           and '—' in (t.rowtxt(0,'Galpão 1') or ''), [hd,t.rowtxt(0,'Silo 01'),t.rowtxt(0,'Galpão 1')])
     t.chk('"Cadastrar local" é a ação da aba Locais (sem "+ Novo local")', J("document.body.innerText.indexOf('Novo local')<0") and t.clk('Cadastrar local')=='ok' and t.title()=='Cadastrar local', t.title())
     t.fset('nome','Galpão BV 2'); t.fset('faz','Boa Vista'); t.fset('tipo','Galpão'); t.btn('Salvar'); time.sleep(.2)

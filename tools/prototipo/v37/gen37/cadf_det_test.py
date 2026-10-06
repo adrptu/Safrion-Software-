@@ -31,7 +31,8 @@ try:
     c.size(1440,1100); c.goto(f'http://127.0.0.1:{p}/CD-01det.dc.html',wait=1.2)
     chk('1 CD-01det sem erro JS e T1 escolhido às claras no seletor', erro_js()=='' and J("document.querySelector('header select').value")=='T1' and 'T1-B sem polígono' in head(), [erro_js(),head()])
     s1=rowtxt(1,'Safra 2026/27'); s2=rowtxt(1,'Safrinha 2027')
-    chk('2 resumo por safra pela área cultivável (312 ha), não pelo polígono (312,4 ha)', '312 de 312 ha' in s1 and 'Área conferida' in s1 and '160 de 312 ha' in s2 and '152 ha livres' in s2 and '312,4' not in s1+s2, [s1,s2])
+    # TABELAS-FOCO (06/10/2026): a linha da safra mostra Área (alocada) e Livre em colunas próprias ("312 ha | 0 ha"), em vez de "312 de 312 ha · Área conferida"
+    chk('2 resumo por safra pela área cultivável (312 ha), não pelo polígono (312,4 ha)', '312 ha 0 ha' in s1 and 'Em planejamento' in s1 and '160 ha 152 ha' in s2 and 'Rascunho' in s2 and '312,4' not in s1+s2, [s1,s2])
     openrow(1,'T1-B'); d=dlg()
     chk('3 T1-B abre em consulta com origem no Planejar safra', 'Parcela · T1-B' in d and 'ORIGEM' in d and 'Planejar safra › Safra 2026/27 › T1-B' in d
         and J("[...document.querySelectorAll('aside[role=dialog] a')].some(a=>a.getAttribute('href')==='SAF.dc.html')"), d)
@@ -53,11 +54,12 @@ try:
     ts=toast(); vs=main()
     chk('9 nova versão v4 atual e v3 em consulta para as O.S. já emitidas', 'v4 do T1 é a atual; a v3 fica em consulta' in ts and 'Atual v4 · 312,4 ha' in vs and 'Consulta v3 · 312,4 ha' in vs and 'Carreador ou estrada' in vs, [ts,vs[-600:]])
     aba('Parcelas'); t1b=rowtxt(1,'T1-B'); hd=head()
-    chk('10 T1-B validada; estado validado e a primária da aba Parcelas é "Planejar T1 na safra"', 'Validada' in t1b and 'Polígono validado' in hd and 'Planejar T1 na safra' in main()
+    chk('10 T1-B validada; estado validado e a primária da aba Parcelas é "Planejar T1 na safra"', 'Polígono validado' in t1b and 'Polígono validado' in hd and 'Planejar T1 na safra' in main()
         and J("(()=>{const a=[...document.querySelectorAll('main a')].find(a=>a.innerText.trim()==='Planejar T1 na safra'); return a&&a.getAttribute('href');})()")=='SAF.dc.html', [t1b,hd])
     # ---------- seletor: outro talhão, sem misturar linhas ----------
     J(f"({SETV})('header select','T4')"); time.sleep(.35); m=main()
-    chk('11 seletor troca para T4: só as safras do T4 e a primária do T4', 'T1-A' not in m and '204 de 204 ha' in m and '0 de 204 ha' in m and '204 ha livres' in m and 'T4 · 204 ha' in head() and 'Planejar T4 na safra' in m, [m[:400],head()])
+    # Área e Livre em colunas próprias (TABELAS-FOCO): Safra 2026/27 204 ha alocados e 0 livre; Safrinha 2027 0 alocado e 204 ha livres
+    chk('11 seletor troca para T4: só as safras do T4 e a primária do T4', 'T1-A' not in m and 'Safra 2026/27 204 ha 0 ha' in m and 'Safrinha 2027 0 ha 204 ha' in m and 'T4 · 204 ha' in head() and 'Planejar T4 na safra' in m, [m[:400],head()])
     J(f"({SETV})('header select','B1')"); time.sleep(.35); aba('Geometria'); J(f"({CLK})('Definir polígono do B1','main button')"); time.sleep(.3)
     J(f"({BTN})('Gerar prévia')"); time.sleep(.2); J(f"({BTN})('Cancelar')"); time.sleep(.2); w=alerts()
     J(f"({BTN})('Continuar editando')"); time.sleep(.2); J(f"({BTN})('Salvar polígono')"); time.sleep(.4)

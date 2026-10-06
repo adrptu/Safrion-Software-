@@ -2,6 +2,7 @@
 """CD-07 · estrutura gerencial (15 verificações no Chrome): árvore Dimensão → código, Cultura e Processo vindos do CD-02 (só a
 tradução edita), vínculos (grupos da natureza, operações do processo, rateio do centro), versão em vigor × rascunho no cabeçalho,
 'Importar do ERP' simulado com prévia, 'Publicar estrutura' e rótulos sem jargão."""
+# TABELAS-FOCO (06/10/2026): origem, código superior (painel) e o que muda no rascunho (coluna No rascunho; a versão v6 está no cabeçalho)
 from cadc_lib import T
 import time
 t=T(); J=t.J
@@ -11,10 +12,12 @@ try:
           'v5 em vigor · rascunho v6 com 3 alterações · 1 tradução pendente' in t.header() and 'Cadastrar código' in t.bloco()
           and 'Importar do ERP' in body and 'Publicar estrutura' in body and 'Publicar estrutura v6' not in body and not t.errs(), t.header())
     t.chk('Cultura vem do CD-02 (5 culturas, com milho) e Processo é etapa (TRAT), sem PULV nem CR-SOJA',
-          '5 códigos · de Culturas e cultivares' in (t.anyrow(0,'Cultura 5') or '') and t.rowtxt(0,'MILHO') and 'operações Pulverização' in (t.rowtxt(0,'TRAT') or '')
+          # TABELAS-FOCO (06/10/2026): a origem (Culturas e cultivares) fica na coluna Origem de cada código
+          'Cultura 5 códigos' in (t.anyrow(0,'Cultura 5') or '') and 'Culturas e cultivares' in (t.rowtxt(0,'MILHO') or '') and 'operações Pulverização' in (t.rowtxt(0,'TRAT') or '')
           and 'PULV' not in body and 'CR-SOJA' not in body, [t.anyrow(0,'Cultura 5'),t.rowtxt(0,'TRAT')])
+    t.openrow(0,'3.1.01'); sup=t.fv('sup'); t.cancel()   # o código superior saiu da célula do código para o painel (TABELAS-FOCO)
     t.chk('natureza mostra grupos do CD-06 e hierarquia; centro de responsabilidade mostra o rateio',
-          'grupos Fertilizantes, Corretivos' in (t.rowtxt(0,'3.1.01') or '') and 'em 3.1' in (t.rowtxt(0,'3.1.01') or '') and 'soma 6 naturezas' in (t.rowtxt(0,'Custo direto') or '')
+          'grupos Fertilizantes, Corretivos' in (t.rowtxt(0,'3.1.01') or '') and sup=='3.1' and 'soma 6 naturezas' in (t.rowtxt(0,'Custo direto') or '')
           and 'rateio por horas de máquina' in (t.rowtxt(0,'CC-OFI') or ''), [t.rowtxt(0,'3.1.01'),t.rowtxt(0,'CC-OFI')])
     t.openrow(0,'SOJA'); d1=t.dlg(); t.cancel(); t.openrow(0,'3.1.05'); d2=t.dlg(); t.cancel()
     t.chk('exclusão bloqueada com motivo (no painel): cultura do CD-02 e natureza usada em grupos',
@@ -23,7 +26,7 @@ try:
     t.chk('código do CD-02 abre só com a tradução editável', all(t.fdis(k) for k in ('cod','nome','dim','ini')) and not t.fdis('trad') and 'só a tradução' in d, d[:200])
     t.fset('trad','Conta do ERP'); t.fset('conta','cultura 01'); t.btn('Salvar'); time.sleep(.2)
     t.chk('tradução salva no rascunho: SOJA mapeada, "alterado na v6" e 4 alterações no cabeçalho',
-          'cultura 01' in (t.rowtxt(0,'SOJA') or '') and 'alterado na v6' in (t.rowtxt(0,'SOJA') or '') and 'rascunho v6 com 4 alterações' in t.header(), [t.rowtxt(0,'SOJA'),t.header()])
+          'cultura 01' in (t.rowtxt(0,'SOJA') or '') and 'Mapeado Alterado' in (t.rowtxt(0,'SOJA') or '') and 'rascunho v6 com 4 alterações' in t.header(), [t.rowtxt(0,'SOJA'),t.header()])
     t.openrow(0,'3.1.02'); L=t.labels()
     t.chk('rótulos sem jargão e grupos de insumo só leitura na natureza',
           'Tradução no ERP' in L and 'Tipo de operação (TOP) no ERP' in L and 'Grupos de insumo' in L and 'Como a integração traduz' not in L and 'TOP do ERP' not in L
@@ -35,7 +38,7 @@ try:
     for k,v in [('cod','CC-MAQ'),('nome','Máquinas · apoio'),('rat','Horas de máquina'),('ini','2026-10-01'),('conta','centro 313')]: t.fset(k,v)
     t.btn('Salvar'); time.sleep(.2)
     t.chk('novo centro: dimensão sem Cultura/Processo, pede o rateio e entra no rascunho',
-          'Cultura' not in ops and 'Processo' not in ops and 'Direcionador de rateio' in L and 'novo na v6' in (t.rowtxt(0,'CC-MAQ') or '') and 'rateio por horas de máquina' in (t.rowtxt(0,'CC-MAQ') or ''),
+          'Cultura' not in ops and 'Processo' not in ops and 'Direcionador de rateio' in L and (t.rowtxt(0,'CC-MAQ') or '').endswith(' Novo') and 'rateio por horas de máquina' in (t.rowtxt(0,'CC-MAQ') or ''),
           [ops,L,t.rowtxt(0,'CC-MAQ'),t.alerts()])
     t.clk('Importar do ERP'); pv=J("(document.querySelector('[aria-label=\"Prévia da importação do ERP\"]')||{}).innerText||''")
     t.chk('Importar do ERP mostra a prévia simulada (novos, nome alterado, sem conta)',

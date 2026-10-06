@@ -2,6 +2,7 @@
 """CD-02 · culturas e operações cadastráveis (15 verificações no Chrome): abas com uma primária cada, árvore Cultura → cultivar,
 formulário da cultura pela linha, 'Outra cultura…', item de semente vinculado, árvore Operação → conjunto, formulário da operação
 (processo e atividades), 'Outra operação…' e rendimento por cultura."""
+# TABELAS-FOCO (06/10/2026): processo, tipo de ciclo e unidade em colunas próprias; no CD-06, Unidade kg e Embalagem "—" em colunas próprias ('sem embalagem' segue no cabeçalho)
 from cadc_lib import T
 import time
 t=T(); J=t.J
@@ -29,8 +30,9 @@ try:
     # Outra cultura…: cria a cultura sem sair do formulário da cultivar
     t.clk('Cadastrar cultivar'); t.fset('cult','Outra cultura…'); L=t.labels()
     t.fset('nome','BRS 373'); t.fset('ncult','Sorgo'); t.fset('tipo','Anual'); t.fset('unid','sc de 60 kg/ha'); t.fset('dias','120'); t.btn('Salvar'); time.sleep(.2)
+    # TABELAS-FOCO (06/10/2026): tipo de ciclo e unidade de produtividade em colunas próprias na linha da cultura
     t.chk('"Outra cultura…" cria Sorgo com a cultivar BRS 373 e a semente vinculada',
-          'Nome da nova cultura' in L and 'Tipo de ciclo' in L and not t.isopen() and 'Sorgo 1 cultivar · sc de 60 kg/ha' in (t.rowtxt(0,'Sorgo') or '')
+          'Nome da nova cultura' in L and 'Tipo de ciclo' in L and not t.isopen() and 'Sorgo 1 cultivar Anual sc de 60 kg/ha' in (t.rowtxt(0,'Sorgo') or '')
           and 'Semente de sorgo BRS 373' in (t.rowtxt(0,'BRS 373') or ''), [L,t.rowtxt(0,'Sorgo'),t.rowtxt(0,'BRS 373'),t.alerts()])
     t.clk('Cadastrar cultivar'); t.fset('cult','Café'); L=t.labels()
     t.chk('cultura perene esconde ciclo em dias e semente; a lista Cultura já tem Sorgo',
@@ -42,11 +44,11 @@ try:
     t.clk('Operações e rendimentos'); time.sleep(.2)
     t.chk('aba Operações: primária "Cadastrar rendimento" e secundária "Comparar com o realizado"',
           'Cadastrar rendimento' in t.bloco() and J("document.body.innerText.indexOf('Comparar com o realizado')>=0 && document.body.innerText.indexOf('apontado')<0"), t.header())
-    t.openrow(0,'Pulverização Tratos culturais')
+    t.openrow(0,'Pulverização 1 conjunto Tratos culturais')   # processo em coluna própria (TABELAS-FOCO)
     t.chk('linha da operação abre processo (etapa de custo) e atividades usuais',
           t.title()=='Operação · Pulverização' and t.fv('proc')=='Tratos culturais' and 'Dessecação pré-plantio' in (t.fv('atvs') or ''), [t.title(),t.fv('proc'),t.fv('atvs')])
     t.fset('proc','Implantação'); t.btn('Salvar')
-    t.chk('processo salvo aparece na linha da operação', 'Pulverização Implantação · 1 conjunto' in (t.rowtxt(0,'Pulverização') or '') and 'atividades usuais' in t.toast(), [t.rowtxt(0,'Pulverização'),t.toast()])
+    t.chk('processo salvo aparece na linha da operação', 'Pulverização 1 conjunto Implantação' in (t.rowtxt(0,'Pulverização') or '') and 'atividades usuais' in t.toast(), [t.rowtxt(0,'Pulverização'),t.toast()])
     # Outra operação…: Calagem com o primeiro rendimento, só para soja
     t.clk('Cadastrar rendimento'); t.fset('op','Outra operação…'); L=t.labels()
     for k,val in [('nop','Calagem'),('nproc','Implantação'),('conj','Trator 03 + Distribuidor de calcário'),('cult','Soja'),('larg','12'),('vel','8'),('efic','70'),
@@ -54,16 +56,16 @@ try:
     t.btn('Salvar'); time.sleep(.2)
     r=t.rowtxt(0,'Distribuidor de calcário') or ''
     t.chk('"Outra operação…" cria Calagem com o rendimento só para Soja (12 × 8 ÷ 10 × 70% = 6,72 ha/h)',
-          'Nome da nova operação' in L and 'Calagem Implantação · 1 conjunto' in (t.rowtxt(0,'Calagem') or '') and 'Soja' in r and '6,72 ha/h' in r and 'Operação Calagem cadastrada' in t.toast(), [L,t.rowtxt(0,'Calagem'),r,t.toast(),t.alerts()])
+          'Nome da nova operação' in L and 'Calagem 1 conjunto Implantação' in (t.rowtxt(0,'Calagem') or '') and 'Soja' in r and '6,72 ha/h' in r and 'Operação Calagem cadastrada' in t.toast(), [L,t.rowtxt(0,'Calagem'),r,t.toast(),t.alerts()])
     t.clk('Cadastrar rendimento'); t.fset('op','Pulverização'); t.fset('conj','Trator 02 MF 7719 + Pulverizador PJ-3030 36 m'); t.fset('cult','Todas')
     for k,val in [('larg','36'),('vel','8'),('efic','75'),('maq','180'),('pess','1'),('vig','2027-06-30')]: t.fset(k,val)
     t.btn('Salvar'); a1=t.alerts(); t.fset('cult','Milho'); t.btn('Salvar'); time.sleep(.2)
     t.chk('mesmo conjunto na mesma operação: repetido para Todas é barrado; para Milho é aceito',
-          'já tem rendimento em Pulverização para todas as culturas' in a1 and not t.isopen() and 'Pulverização Implantação · 2 conjuntos' in (t.rowtxt(0,'Pulverização') or ''), [a1,t.alerts(),t.rowtxt(0,'Pulverização')])
+          'já tem rendimento em Pulverização para todas as culturas' in a1 and not t.isopen() and 'Pulverização 2 conjuntos Implantação' in (t.rowtxt(0,'Pulverização') or ''), [a1,t.alerts(),t.rowtxt(0,'Pulverização')])
     t.shot('cadc_cd02.png')
     t.goto('CD-06.dc.html'); r=t.rowtxt(0,'Semente de soja 64 Z') or ''
     t.chk('os itens criados pelas cultivares (64 Z e BRS 373) aparecem em Produtos › Sementes, pendentes de preço e embalagem',
-          'sem embalagem' in r.lower() and 'sem preço' in r.lower() and t.rowtxt(0,'Semente de sorgo BRS 373') and 'Sementes 6 itens' in (t.anyrow(0,'Sementes 6') or '')
+          ' kg — ' in r and 'sem preço' in r.lower() and t.rowtxt(0,'Semente de sorgo BRS 373') and 'Sementes 6 itens' in (t.anyrow(0,'Sementes 6') or '')
           and '3 itens sem preço · 2 itens sem embalagem' in t.header(), [r,t.anyrow(0,'Sementes'),t.header()])
     t.chk('nenhum erro de JS na jornada', not t.errs(), t.errs())
 finally:
