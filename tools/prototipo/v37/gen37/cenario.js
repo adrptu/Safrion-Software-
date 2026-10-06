@@ -392,7 +392,8 @@ function cenSinal(c, online) {
         if (ap.conf) (c.confs || []).forEach(q => { if (q.os === id && String(q.dia) === dia) q.sinc = true; });
         const e = cenApEntra(c, o, ap, true); if (e.dup.length) ret.push(id + ' dia ' + dia + ' (mesma data do ' + cenApDupTxt(e.dup) + ')');
         if (ap.conf) cenSeloConf(c, id); } }
-    else { const m = c.movs.find(x => x.id === k) || c.ocorr.find(x => x.id === k); if (m && !m.sinc) { m.sinc = true; n++; } } });
+    else { const P = c.producao || {}; const m = c.movs.find(x => x.id === k) || c.ocorr.find(x => x.id === k) || (P.cargas || {})[k] || (P.contagens || []).find(x => x.id === k);   // carga e contagem do app (colheita) entram uma vez
+      if (m && !m.sinc) { m.sinc = true; n++; } } });
   c.app.fila = []; return { msg: (n ? (n + (n > 1 ? ' registros enviados' : ' registro enviado') + ' ao voltar o sinal.') : 'Sinal de volta. Nada pendente.')
     + (ret.length ? ' Em conferência de duplicidade: ' + ret.join('; ') + '. Nada foi somado; ' + CEN_CONF_AP + ' decide.' : '') };
 }
@@ -402,4 +403,5 @@ function cenPodeEncerrar(c, id) { const o = c.ordens[id]; const r = o.req && c.r
   const dp = (o.ap || []).filter(a => a.st === CEN_AP_DUP); if (dp.length) return 'Apontamento em conferência de duplicidade: ' + dp.map(a => 'dia ' + a.dia + ' (' + a.d + ', ' + cenNum(a.ha) + ' ha)').join(', ') + '. ' + CEN_CONF_AP + ' decide se é outro turno.';
   const cf = cenConfAbertas(c, id); if (cf.length) return 'Consumo em conferência: ' + cf.map(k => cenConfTxt(k, c)).join('; ') + '. ' + CEN_CONC_RESP + ' concilia no Estoque.';
   const cust = r ? r.itens.filter(i => i.custodia > 0.001) : []; if (cust.length) return 'Sobra em custódia: ' + cust.map(i => i.prod + ' ' + cenNum(i.custodia) + ' ' + i.un).join(', ') + '. Receba a devolução no Estoque.';
+  if (typeof prPodeEncerrar === 'function') { const pm = prPodeEncerrar(c, id); if (pm) return pm; }   // colheita: nenhuma carga a pesar ou sem sinal (R-18)
   return ''; }

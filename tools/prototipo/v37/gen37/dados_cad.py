@@ -155,8 +155,9 @@ PRECO_EXTRA={'Diesel S10':6.19,'Caixa de mamão 20 kg':4.80}
 ITENS_NOVOS={'Calcário dolomítico':dict(grupo='Corretivos',un='t')}   # corretivo: cadastrável, homologável e cotável
 LOCAIS=[('l1','Galpão 1','Santa Rita','Galpão','',''),('l2','Galpão 2','Santa Rita','Galpão','',''),('l3','Almox. defensivos','Santa Rita','Almoxarifado','',''),
         ('l4','Câmara fria','Santa Rita','Câmara fria','',''),('l5','Tanque Sede','Santa Rita','Tanque',15000,'L'),('l6','Silo 01','Santa Rita','Silo',60000,'sc 60 kg'),
-        ('l7','Armazém Sede','Santa Rita','Armazém','',''),('l8','Packing','Santa Rita','Armazém','',''),('l9','Galpão Boa Vista','Boa Vista','Galpão','',''),
-        ('l10','Almox. Lagoa Grande','Lagoa Grande','Almoxarifado','','')]
+        ('l7','Armazém Sede','Santa Rita','Armazém','',''),('l8','Packing','Santa Rita','Packing','',''),('l9','Galpão Boa Vista','Boa Vista','Galpão','',''),
+        ('l10','Almox. Lagoa Grande','Lagoa Grande','Almoxarifado','',''),('l11','Galpão de frutas Lagoa Grande','Lagoa Grande','Galpão','','')]
+# colheita D-24: o l8 Packing é local de processo (tipo Packing): fruta recebida nele nasce Em processo (R-10); l11 recebe a fruta da Lagoa Grande (D-20)
 
 # ============ CD-07 · estrutura gerencial ============
 DIMS=['Empresa','Natureza','Centro de resultado','Centro de responsabilidade','Cultura','Processo','Projeto']
