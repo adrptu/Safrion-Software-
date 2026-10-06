@@ -105,12 +105,13 @@ def _campos_ativo():
             if o=='live': cap.append(dict(k=f'{k}_{cd}',l=l,ro=True,live=True,u=u,cond=cond('classe',cl),help='Linhas × espaçamento.'))
             else: cap.append(num(f'{k}_{cd}',l,u,cond=cond('classe',cl),**o))
         if cl in MEDIDOR:
-            cont.append(num(f'cont_{cd}','Horímetro atual','h',min=0,cond=cond('classe',cl),help='Não pode ser menor que a última leitura; troca de medidor é registrada na Manutenção.'))
+            cont.append(dict(k=f'cont_{cd}',l='Leitura do horímetro',t='num',u='h',ro=True,cond=cond('classe',cl),help='Só leitura: vem da Manutenção (abastecimento, conclusão da OM, leitura avulsa); troca de contador se decide lá (PCM S3).'))
     return ([sel('classe','Classe',[c for c,_ in CLS],newOnly=True,help='Abre só a capacidade desta classe; fica fixa depois do cadastro.',**{'def':'Trator'}),
              txt('nome','Nome',help='Ex.: Trator 05. Não pode repetir.'),txt('modelo','Modelo',req=False),
-             dict(k='cond_t',l='Condição técnica',t='area',ro=True,help='Vem da Manutenção; não se altera no cadastro.',**{'def':'Apto'})]
+             dict(k='cond_t',l='Condição técnica',t='area',ro=True,help='Vem da Manutenção (condição única); não se altera no cadastro.',**{'def':'Apto'}),
+             dict(k='rt',l='Responsável técnico',ro=True,help='Vem da Manutenção (painel Condição); só leitura no cadastro.')]
             + cap
-            + [num('custo_h','Custo por hora','R$/h',min=0,req=False,help='Combustível, manutenção e depreciação; o operador entra em Pessoas. O rendimento usa este valor.'),
+            + [num('custo_h','Custo R$/h da máquina','R$/h',min=0,req=False,help='Combustível, manutenção e depreciação; o operador entra em Pessoas. O rendimento usa este valor (≠ Custo R$/h da oficina, na OM).'),
                sel('custo_f','Fonte do custo',CFONTES,req=False,**{'def':'Premissa a validar'})]
             + cont
             + [sel('exige','Exige calibração ou aferição?',['Sim','Não'],**{'def':'Não'}),
@@ -134,7 +135,7 @@ def _linhas_ativo():
 def cd03():
     fname='CD-03.dc.html'; E._reset_screen(fname)
     g=grid([dict(k='nome',l='Máquina ou instalação',w=236),dict(k='classe',l='Classe',w=150),dict(k='cap',l='Capacidade',w=190),
-            dict(k='custo_h',l='Custo por hora',t='num',a='r'),dict(k='ncj',l='Conjuntos',t='num',a='r'),dict(k='est',l='Situação',w=290)],
+            dict(k='custo_h',l='Custo R$/h da máquina',t='num',a='r'),dict(k='ncj',l='Conjuntos',t='num',a='r'),dict(k='est',l='Situação',w=290)],
         _linhas_ativo(),gid='g_atv',total=False,frame=False,
         tools=qf_chips('g_atv')+prim('g_atv_new','Cadastrar máquina ou instalação'),
         edit=dict(m='form',title='Máquina',newTitle='Cadastrar máquina ou instalação',
@@ -157,7 +158,8 @@ def cd03():
     dados=dict(cod=COD,impl=IMPL,calib=CALIB_CLS,sem=SEM_IMPL,ophab=OPHAB,subnew=SUB_NEW,
                cond={k:dict(t=c['t'],m=c['om']+' · '+c['det'],ordens=c['ordens'],om=c['om']) for k,c in DC.CONDICAO.items()},
                pes=[dict(v,id=pid) for pid,v in pessoas()])
-    js({},ALOC_JS+'const C3='+json.dumps(dados,ensure_ascii=False)+';\n'+r'''
+    import cenario   # PCM simplificado S3: condição, responsável técnico e leitura do cenário único (c.man)
+    js({},cenario.js_prefixo()+ALOC_JS+'const C3='+json.dumps(dados,ensure_ascii=False)+';\n'+r'''
 function c3v(V,k){ return V[k+'_'+(C3.cod[V.classe]||'')]; }
 function c3n(V,k){ const x=c3v(V,k); return isnum(x)?Number(x):null; }
 function c3larg(V){ const c=V.classe; if(c==='Plantadeira'){ const a=c3n(V,'linhas'), b=c3n(V,'esp'); return (a!==null&&b!==null)?Math.round(a*b*100)/100:null; }
@@ -170,8 +172,14 @@ function c3cap(V){ const n=k=>c3n(V,k), f=(x,u)=>x===null?'—':nfa(x)+' '+u;
     case 'Colhedora': return 'plataforma '+f(n('plat'),'m'); case 'Implemento': return f(n('larg'),'m');
     case 'Irrigação': return f(n('vazao'),'m³/h'); case 'Armazenagem': return f(n('capsc'),'sc de 60 kg');
     default: return f(n('kgh'),'kg/h'); } }
-function c3cond(r){ const V=r.v; if(V.sit==='Inativo') return {t:'Inativo',c:'gray',ok:false,curto:'inativo'}; const x=C3.cond[r.id];
-  if(x) return {t:x.t,c:'red',ok:false,m:x.m,x:x,curto:x.t.toLowerCase()}; return {t:'Apto',c:'green',ok:true}; }
+/* condição única (PCM simplificado S3, F107): lida de c.man do cenário, a mesma da Manutenção e da O.S.; o cadastro não a altera */
+function c3man(id){ try{ return ((cenGet().man||{}).ativos||{})[id]||null; }catch(e){ return null; } }
+function c3cond(r){ const V=r.v; if(V.sit==='Inativo') return {t:'Inativo',c:'gray',ok:false,curto:'inativo'}; const a=c3man(r.id); const x=C3.cond[r.id];
+  if(a&&a.cond==='Bloqueado'){ const i=a.condInfo||{}; const om=i.om||''; const o=om?(cenGet().man.oms||{})[om]:null;
+    const xx={t:'Bloqueado',om,ordens:(x&&x.ordens)||[],m:(om?om+' · ':'')+(i.motivo||'')+(o&&o.ret?' · retorno previsto '+o.ret:'')};
+    return {t:'Bloqueado',c:'red',ok:false,m:xx.m,x:xx,curto:'bloqueado',aid:a.id}; }
+  if(a&&a.cond==='Restrito'){ const i=a.condInfo||{}; return {t:'Restrito',c:'yellow',ok:true,m:(i.lim||i.motivo||'')+(i.ate?' · até '+i.ate.split('-').reverse().slice(0,2).join('/'):''),curto:'restrito',aid:a.id}; }
+  return {t:'Apto',c:'green',ok:true}; }
 function c3calib(V){ if(V.exige!=='Sim') return {p:[{k:'mut',t:'não exige'}],s:'não exige',bad:false};
   if(!V.calib) return {p:[chipc('Aferir','yellow'),{k:'mut',t:'sem registro'}],s:'Aferir',bad:true};
   const venc=addd(V.calib,V.interv||0); const d=ddiff(HOJE,venc);
@@ -197,7 +205,7 @@ function c3conj(self,V){ const atv=RW(self,'g_atv'); const M=atv.find(r=>r.v.nom
 // situação da máquina: um só cálculo para a linha, o filtro "A resolver", a faixa, o ponto da aba e o estado do cabeçalho
 function c3sit(r){ const V=r.v; const C=c3cond(r), K=c3calib(V);
   if(V.sit==='Inativo') return {t:'Inativa',p:[chipc('Inativa','gray')]};
-  if(C.t==='Em manutenção') return {t:'Em manutenção',p:sitX('Em manutenção','red','Ver ordens afetadas','OS.dc.html'),res:'man'};
+  if(C.t==='Bloqueado') return {t:'Bloqueado',p:sitX('Bloqueado','red','Ver ordens afetadas','OS.dc.html'),res:'man'};
   if(K.s==='Vencida') return {t:'Calibração vencida',p:sitX('Calibração vencida','red','Registrar calibração'),res:'cal'};
   if(K.s==='Aferir') return {t:'Sem aferição',p:sitX('Sem aferição','yellow','Registrar aferição'),res:'cal'};
   if(K.s==='Vence') return {t:'Apta',p:sitOk('Apta · calibrar até '+br(addd(V.calib,V.interv||0)))};
@@ -215,7 +223,8 @@ function PREVALS(self,v){ cadActsIni(self); const atv=RW(self,'g_atv'); self._c3
     r.p.nome=[{k:'b',t:V.nome||''}].concat(V.modelo?[{k:'mut',t:V.modelo}]:[]); r.s.nome=(V.nome||'')+' '+(V.modelo||'');
     r.p.classe=[{k:'txt',t:V.classe||'—'}]; r.s.classe=V.classe||'';
     r.p.cap=[{k:'txt',t:c3cap(V)}]; r.s.cap=c3cap(V);
-    V.cond_t=C.m?C.t+' · '+C.m:C.t; r.o=C.x?[{t:'Ver ordens afetadas · '+C.x.ordens.join(' e '),h:'OS.dc.html'},{t:'Abrir '+C.x.om+' na Manutenção',h:'MA.dc.html#om='+C.x.om}]:null;
+    V.cond_t=C.m?C.t+' · '+C.m:C.t; const am=c3man(r.id); if(am){ V.rt=am.rt||'Otávio'; const cd=C3.cod[V.classe]; if(cd&&am.leit) V['cont_'+cd]=am.leit.val; }
+    r.o=(C.x?[{t:'Ver ordens afetadas · '+C.x.ordens.join(' e '),h:'OS.dc.html'}].concat(C.x.om?[{t:'Abrir '+C.x.om+' na Manutenção',h:'MA.dc.html#om='+C.x.om}]:[]):[]).concat(am?[{t:'Abrir '+V.nome+' na Manutenção',h:'MA.dc.html#ativo='+r.id}]:[]);
     r.p.custo_h=isnum(V.custo_h)&&String(V.custo_h)!==''?[{k:'txt',t:'R$ '+nf(V.custo_h,2)+'/h'}]:[{k:'mut',t:'—'}];
     const n=(usos[V.nome]||[]).length; V.ncj=n; r.p.ncj=[{k:(n?'txt':'mut'),t:n?String(n):'—'}]; r.s.ncj=n?String(n):'';
     const S=c3sit(r); r.p.est=S.p; r.s.est=S.t; });
@@ -236,13 +245,13 @@ function PREVALS(self,v){ cadActsIni(self); const atv=RW(self,'g_atv'); self._c3
       rod:'Operadores: '+O.p.map(x=>x.t).join(' · '),verbo:verbo,sitT:'Disponível'}; })); }
 function EXTRAVALS(self,v){
   const atv=RW(self,'g_atv'); const manL=atv.filter(r=>c3sit(r).res==='man'), calL=atv.filter(r=>c3sit(r).res==='cal'); const man=manL.length, cal=calL.length;
-  cadEstado(v,'c3e',[man?man+(man>1?' máquinas em manutenção':' máquina em manutenção'):'',cal?cal+(cal>1?' calibrações a resolver':' calibração a resolver'):''].filter(Boolean).join(' · ')||'Máquinas aptas e calibradas',
+  cadEstado(v,'c3e',[man?man+(man>1?' máquinas bloqueadas':' máquina bloqueada'):'',cal?cal+(cal>1?' calibrações a resolver':' calibração a resolver'):''].filter(Boolean).join(' · ')||'Máquinas aptas e calibradas',
             man?'red':(cal?'yellow':'green'));
   const cjs=RW(self,'g_cj'); const cjBad=cjs.filter(r=>c3conj(self,r.v).bad.length).length, cjAv=cjs.filter(r=>{ const X=c3conj(self,r.v); return !X.bad.length&&(X.cal.length||!c3temR(r.v)); }).length;
   cadAbas(self,v,'c3t','c3aba',[{slug:'maquinas',n:atv.length,cor:man?'red':(cal?'yellow':'')},{slug:'conjuntos',n:cjs.length,cor:cjBad?'red':(cjAv?'yellow':'')}]);
   cadQfPos(self,v,'g_atv','c3qf');
   const res=()=>self.setState({c3qf:'res'}); const venc=calL.some(r=>c3calib(r.v).s==='Vencida');
-  cadFaixa(v,'c3_fx0',[man?{n:man,rot:man>1?'máquinas em manutenção':'máquina em manutenção',reg:manL.map(r=>{ const x=C3.cond[r.id]; return r.v.nome+(x?' · '+x.m:''); }).join(', '),verbo:'Ver ordens afetadas',cor:'red',
+  cadFaixa(v,'c3_fx0',[man?{n:man,rot:man>1?'máquinas bloqueadas':'máquina bloqueada',reg:manL.map(r=>{ const x=c3cond(r); return r.v.nome+(x.m?' · '+x.m:''); }).join(', '),verbo:'Ver ordens afetadas',cor:'red',
                             go:()=>{ location.href='OS.dc.html'; }}:null,
                         cal?{n:cal,rot:cal>1?'calibrações a resolver':'calibração a resolver',reg:calL.map(r=>r.v.nome).join(', '),verbo:'Registrar calibração',cor:venc?'red':'yellow',
                             go:cal===1?()=>g2open(self,GR('g_atv'),calL[0].id,null):res}:null],res);
@@ -261,7 +270,6 @@ function EXTRAVALS(self,v){
         if(p===null) return q===null?'—':'implemento exige '+nfa(q)+' cv'; return nfa(p)+' cv'+(q!==null?(p>=q?' · atende os ':' · abaixo dos ')+nfa(q)+' cv exigidos':''); } }
     return null; };
   valida(self,v,'g_atv',(d,fm)=>{ const e={}; const cd=C3.cod[d.classe]; const c=g2num(d['cont_'+cd]);
-    if(fm.rid&&CONT0[fm.rid]!==undefined&&!isNaN(c)&&c<CONT0[fm.rid]) e['cont_'+cd]='A última leitura foi '+nf(CONT0[fm.rid])+' h. Se o medidor foi trocado, registre a troca na Manutenção.';
     if(d.exige==='Sim'&&d.calib&&d.calib>HOJE) e.calib='A calibração não pode ser em data futura.';
     if(d.classe!=='Armazenagem'&&!String(d.custo_h||'').trim()) e.custo_h='Informe o custo por hora; o rendimento e o custo da O.S. usam este valor.';
     else if(String(d.custo_h||'').trim()&&!d.custo_f) e.custo_f='Informe de onde vem o custo.';

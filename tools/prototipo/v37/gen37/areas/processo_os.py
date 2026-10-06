@@ -146,8 +146,8 @@ SEM_INS={'OS-0419':'Água · 10,81 mm em 1 passada · sem almoxarifado.','OS-042
          'OS-0423':'Água · 4,0 mm por gotejo em 2 h · sem almoxarifado.','OB-0104':'Ordem de processo: entradas e saídas por etapa do beneficiamento, sem dose por hectare.'}
 # impedimento que segura o próximo passo da fase atual: o quê, quem resolve e onde
 BLOQ={
- 'OS-0431':dict(acao='liberar',t='Liberar bloqueado: Trator T1 em manutenção (OM-0233).',q='PCP confirma a máquina substituta antes de 24/09 06:00.'),
- 'OS-0420':dict(acao='apontar',t='Apontamento pausado: Trator T1 bloqueado (OM-0233).',q='O Trator 02 assume a partir de 24/09.',h='CA-01x-os0420.dc.html',hl='Abrir a ordem completa'),
+ 'OS-0431':dict(acao='liberar',aid='a01',t='Liberar bloqueado: Trator T1 bloqueado (OM-0233).',q='PCP confirma a máquina substituta antes de 24/09 06:00.'),   # aid: condição única (c.man), S3
+ 'OS-0420':dict(acao='apontar',aid='a01',t='Apontamento pausado: Trator T1 bloqueado (OM-0233).',q='O Trator 02 assume a partir de 24/09.',h='CA-01x-os0420.dc.html',hl='Abrir a ordem completa'),
  'OS-0422':dict(acao='liberar',tone='yellow',t='Definir janela: as 2 passadas ainda não têm horário.',q='João (irrigante) define a janela na Irrigação.',h='IR-02.dc.html',hl='Definir janela'),
  'OS-0423':dict(acao='liberar',tone='red',t='Resolver conflito: a parada da bomba B3 (14:00–15:00) cai na janela.',q='Caio (PCP) resolve o conflito na Irrigação.',h='IR-02.dc.html',hl='Resolver conflito'),
 }
@@ -265,7 +265,15 @@ function osMerge(b,co,c){ if(!co) return b;
       o.dono='Suprimentos'; o.prazo='receber o insumo no Estoque';
       o.cond=String(o.cond||'').replace('Próximo passo: liberar para execução.','A liberação aguarda '+(pr||'o insumo')+' no Estoque.'); } }
   carMerge(o,co,c);   // carência e destino (MAPA-CARENCIA-LMR-20261003 · dados_carencia.JS)
+  osManCond(o,b,c);   /* condição única do ativo (PCM simplificado S3): o bloqueio da máquina vem de c.man, o mesmo da Manutenção e do CD-03 */
   return o; }
+/* S3 · F107/F108: ordem que depende de um ativo da Manutenção (bloq.aid) lê a condição única do cenário; bloqueado → impedimento com o dono e o
+   link para a OM que trata (MA#om=); apto (CMD-19) → o impedimento sai e a ordem volta à reprogramação do PCP (impedimento derivado: PCMS-A05, Bloco 2) */
+function osManCond(o,b,c){ if(!b||!b.bloq||!b.bloq.aid) return; const a=((c&&c.man&&c.man.ativos)||{})[b.bloq.aid]; if(!a) return;
+  if(a.cond==='Bloqueado'){ const om=a.condInfo&&a.condInfo.om; o.bloq=Object.assign({},b.bloq,{t:String(b.bloq.t).replace(/\(OM-\d+\)/,'('+(om||'sem ordem que trate')+')'),
+      h:'MA.dc.html#'+(om?'om='+om:'ativo='+a.id),hl:om?('Abrir '+om+' na Manutenção'):('Abrir '+a.nome+' na Manutenção')}); return; }
+  o.bloq=null; o.selos=(o.selos||[]).filter(s=>!/bloquead|Falta máquina/i.test(s.t));
+  const h=(a.condHist||[]).slice(-1)[0]||{}; o.cond=a.nome+' '+a.cond.toLowerCase()+' desde '+String(h.em||'').split('-').reverse().slice(0,2).join('/')+(h.om?' ('+h.om+')':'')+' · o PCP reprograma a ordem com o ativo.'; o.dono='PCP'; o.prazo='reprogramar'; }
 function osCondGen(o){ const pend=(o.ap||[]).filter(a=>a.sinc===false).length;
   if(o.etapa==='Liberadas') return 'Liberada'+(o.req?' · '+o.req+' reservou os insumos no Estoque':'')+'. Próximo passo: iniciar na janela '+o.janela+'.';
   if(o.etapa==='Em execução') return 'Em execução · '+nf(o.realizado)+' de '+nf(o.area)+' ha'+(pend?' · '+pend+(pend>1?' apontamentos':' apontamento')+' no aparelho aguardando sinal':'')+'. Registre o apontamento de cada turno.';
