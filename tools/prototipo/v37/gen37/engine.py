@@ -1436,15 +1436,24 @@ ENGINE_JS2=ENGINE_JS2.replace("    return v;\n  }\n}","""    v.g2toast = this.st
     if (typeof PREVALS === 'function') PREVALS(this, v);
     for (const sp of GRIDS) g2vals(this, sp, v, vis[sp.id]);
     if (typeof EXTRAVALS === 'function') EXTRAVALS(this, v);
+    if (typeof assinAvisoVals === 'function') assinAvisoVals(this, v);   // faixa de cobrança (PLAT-01, R11): só as telas da organização têm o buraco
     return v;
   }
   componentDidUpdate(pp, ps) { if (this.state.g2toast && this.state.g2toast !== (ps || {}).g2toast) { clearTimeout(this._g2t); this._g2t = setTimeout(() => this.setState({ g2toast: '' }), 4500); } }
 }""")
 assert 'g2vals' in ENGINE_JS2, 'patch do motor falhou'
 EXTRAJS=['']  # JS específico da tela (function EXTRAVALS(self,v){...}) — processos usam
+# PLAT-01 (RV-01): assinatura (ASSIN0, ASSIN_PAR, ASSIN_CENV + assinatura.js) entra UMA vez em toda tela, antes do JS da tela;
+# só nomes assin*/ASSIN*: não colide com cenario.js e funciona sem ele (assinLer). Montado uma vez por build (dados_assinatura).
+_ASSIN=[None]
+def _assin_prefixo():
+    if _ASSIN[0] is None:
+        import dados_assinatura as _DA
+        _ASSIN[0]=_DA.js_prefixo()
+    return _ASSIN[0]
 def engine():
     spec=json.dumps(WIDGETS,ensure_ascii=False).replace('</','<\\/')
     grids=json.dumps(GRIDS,ensure_ascii=False).replace('</','<\\/')
     nav=json.dumps(NAVSPEC,ensure_ascii=False)
-    return 'const SPEC = '+spec+';\nconst GRIDS = '+grids+';\nconst NAV = '+nav+';\n'+G2LIB+'\n'+(EXTRAJS[0] or '')+'\n'+ENGINE_JS2
+    return 'const SPEC = '+spec+';\nconst GRIDS = '+grids+';\nconst NAV = '+nav+';\n'+G2LIB+'\n'+_assin_prefixo()+(EXTRAJS[0] or '')+'\n'+ENGINE_JS2
 G2_TOAST=f'<div role="status" style="position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(22px + var(--acoes-h, 0px) + env(safe-area-inset-bottom, 0px)); z-index: 70; background: {INK}; color: #fff; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 12px 32px -8px rgba(21,32,26,.4); max-width: min(560px, calc(100vw - 32px)); box-sizing: border-box; {{{{g2toastst}}}}">{{{{g2toast}}}}</div>'

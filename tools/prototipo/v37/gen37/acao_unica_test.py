@@ -388,10 +388,10 @@ try:
         chk('29b controle negativo da verificação: SAF etapa 3 limpa (0 duplicata, 1 primária, 0 avanço fora da área, 0 controle no indicador); com uma cópia do avanço injetada no cabeçalho a medida acusa duplicata, 2 primárias e avanço fora da área',
             limpo['dup']==0 and len(limpo['prims'])==1 and limpo['fora']==0 and limpo['foc']==0 and sujo['dup']>=1 and len(sujo['prims'])==2 and sujo['fora']==1, [limpo,sujo])
         info('duplicatas e primárias por estado',[(m['estado'],m['dup'],m['prims']) for m in M])
-        # 31 · v3.1 em repouso nas 20 páginas que tinham ação repetida no merge (e91a7f4): trilha sem link no nível de área, cadeia sem elo que
+        # 31 · v3.1 em repouso nas páginas que tinham ação repetida no merge (e91a7f4; BO-01det, BO-02det e BO-03det saíram em 06/10, PLAT-01): trilha sem link no nível de área, cadeia sem elo que
         #      repete o primário, índice sem destino repetido, app sem rodapé/cartão em dobro; e estados: AG-01det com a OS-0420 encerrada (o elo
         #      volta a ser link e o primário muda), MB-01 → MB-05 pela âncora da ordem (o selo nomeia a ordem) e o MB-05 sem âncora igual
-        P20=['AG-01det','AG-03det','AG-04det','AG-06','BO-01det','BO-02det','BO-03det','CA-01x-os0420','CD-01det','MB-01','MB-02','MB-09','MB-10','Main',
+        P20=['AG-01det','AG-03det','AG-04det','AG-06','CA-01x-os0420','CD-01det','MB-01','MB-02','MB-09','MB-10','Main',
              'ON-01det','PL-02','PT-02det','PT-04det','PT-05det','SU-02']
         d20={}
         for pg in P20:
@@ -409,7 +409,7 @@ try:
             abre('MB-05',hash=h5.split('MB-05.dc.html')[1],limpa=False); sel=J("(document.querySelector('header')||{innerText:''}).innerText.replace(/\\s+/g,' ')")
         abre('MB-05'); sel0=J("(document.querySelector('header')||{innerText:''}).innerText.replace(/\\s+/g,' ')")
         oid=h5.split('#')[1] if h5 else '?'
-        chk('31 v3.1 · 0 ação repetida nas 20 páginas do merge; AG-01det: 1 link para a OS-0420 em repouso e, com ela encerrada, o elo volta a ser link sem repetir; MB-01 → MB-05#ordem nomeia a ordem e o MB-05 sem âncora não',
+        chk('31 v3.1 · 0 ação repetida nas 17 páginas do merge que seguem geradas; AG-01det: 1 link para a OS-0420 em repouso e, com ela encerrada, o elo volta a ser link sem repetir; MB-01 → MB-05#ordem nomeia a ordem e o MB-05 sem âncora não',
             all(v==0 for v in d20.values()) and os0==1 and fechou=='ok' and dupE==0 and os1==['conteúdo'] and bool(h5) and oid in sel and oid not in sel0,
             [{k:v for k,v in d20.items() if v},os0,fechou,dupE,os1,h5,sel[:120],sel0[:120]])
         ERRL.extend(errs()); chk('30 sem erro de JS (v3)', not ERRL, ERRL[:5])

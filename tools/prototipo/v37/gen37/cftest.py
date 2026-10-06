@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-"""Teste CDP de Configurações (CF-01, CF-02, CF-02det, CF-03, CF-03det, CF-05): DEMO-11 com 40 ha/APT-1187/REC-7741,
-conflito offline separado do ERP, decisão atualiza Estado + cabeçalho + Falta; convite; proposta de revisão; contestação."""
+"""Teste CDP de Configurações (CF-01, CF-02, CF-02det, CF-03, CF-03det; o CF-05 está em assinatura_test.py): DEMO-11 com 40 ha/APT-1187/REC-7741,
+conflito offline separado do ERP, decisão atualiza Estado + cabeçalho + Falta; convite; proposta de revisão."""
 import sys, os, time, subprocess, json
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
 from cdp import Chrome
@@ -72,10 +72,7 @@ try:
     go('CF-02det.dc.html'); clk('Decidir a v3'); chk('decisão abre pela ação primária', J("!!document.querySelector('aside[role=dialog]')"))
     setf('dec','Devolver para ajuste'); btn('Salvar'); chk('motivo exigido ao devolver', 'Informe motivo' in J("document.querySelector('aside[role=dialog]').innerText"))
     setf('motivo','25% amplia demais'); btn('Salvar'); chk('status v3 devolvida', 'v3 devolvida · v2 vigente' in body())
-    # ---------- CF-05 ----------
-    go('CF-05.dc.html'); openrow(1,'T3'); setf('motivo','Área em pousio'); setf('evid','Aditivo 12/09'); btn('Salvar')
-    chk('T3 contestada CT-012', 'Contestada · CT-012' in (rowtxt(1,'T3') or ''), rowtxt(1,'T3'))
-    chk('total elegível 1.165 ha', '1.165 ha' in J("(document.querySelectorAll('[role=table]')[1].querySelector('.g2tot')||{}).innerText||''"))
+    # CF-05 saiu deste teste em 06/10/2026 (PLAT-01): a tela foi refeita em areas/assinatura.py e é coberta por assinatura_test.py
 finally:
     c.close(); srv.terminate()
 print(f'{sum(ok)}/{len(ok)} verificações OK'); sys.exit(0 if all(ok) else 1)

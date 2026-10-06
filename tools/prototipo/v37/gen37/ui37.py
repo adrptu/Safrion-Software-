@@ -38,7 +38,8 @@ MENU2=[('Mapa','map',[('Mapa','IN-04.dc.html')]),
  ('Agrícola','leaf',[('Consulta Agrofit','AG-07.dc.html'),('Planos agronômicos','PA.dc.html'),('Planejar safra','SAF.dc.html'),('Ordem de Serviço','OS.dc.html'),('Pragas e doenças (MIP/MID)','AG-01.dc.html'),('Irrigação','IR-01.dc.html')]),
  ('Manutenção','wrench',[('Planos de manutenção','PM.dc.html'),('Ativos e disponibilidade','MA-01.dc.html'),('Solicitações e inspeções','MA-02.dc.html'),
    ('Vencimentos e paradas','MA-03.dc.html'),('Ordens de manutenção','MA-04.dc.html'),('Abastecimentos e desempenho','MA-05.dc.html')]),
- ('Suprimentos','cart',[('Compra de insumos','CMP.dc.html'),('Estoque','EST.dc.html')])]
+ ('Suprimentos','cart',[('Compra de insumos','CMP.dc.html'),('Estoque','EST.dc.html')]),
+ ('Configurações','grid',[('Assinatura e cobrança','CF-05.dc.html')])]   # 06/10/2026 (PLAT-01): grupo por último; o módulo Configurações usará o mesmo grupo
 MENU_OF={'CA-01det.dc.html':'OS.dc.html','CA-02.dc.html':'OS.dc.html','CA-01x-os0420.dc.html':'OS.dc.html',
  'IR-02.dc.html':'IR-01.dc.html','IR-03.dc.html':'IR-01.dc.html','IR-03det.dc.html':'IR-01.dc.html','IR-04.dc.html':'IR-01.dc.html'}  # detalhes que pertencem a um item do menu
 def menu_item(fname):
@@ -57,7 +58,7 @@ def navbar(fid,fname=None):
     out=[]
     for i,(nome,ic,items) in enumerate(MENU2):
         on=(i==act_i)
-        if len(items)==1:
+        if len(items)==1 and items[0][0]==nome:   # grupo de 1 item vira link só quando o item tem o nome do grupo (Mapa); Configurações abre e mostra o item
             h=items[0][1]
             st=(f'display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 10px; font-size: 13.5px; font-weight: 700; text-decoration: none; '
                 + (f'background: {ACC}; color: #fff;' if on else f'color: {SIDE_TX};'))
@@ -253,6 +254,15 @@ def _macro_html(fname, ctx):
                 f'<button type="button" onClick="{{{{mf_trocar}}}}" title="Voltar à etapa 1 para escolher outra safra" style="border: 0; background: transparent; color: {ACC}; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;">Trocar safra</button>')
     return out + f'<span style="width: 1px; height: 18px; background: {LINE};"></span>'
 
+# Faixa de cobrança (PLAT-01, R11): só nas telas web da organização (fora de BO, ON e PT; não no próprio CF-05, que já mostra o estado e a
+# primária). Amarela em atraso (nada restrito), vermelha inadimplente (ampliar a área suspenso). "Pagar fatura" é link de texto para o CF-05,
+# nunca botão verde (não vira 2ª primária). O app de campo (mobile37) nunca mostra cobrança. Texto e cor vêm de assinAvisoVals (assinatura.js).
+def faixa_cobranca(fid,fname):
+    if fid[:2] in ('BO','ON','PT') or fname.startswith('CF-05'): return ''
+    return (f'<sc-if value="{{{{assin_fx}}}}" hint-placeholder-val="{{{{false}}}}"><div role="note" aria-label="Cobrança" class="assin-fx" style="{{{{assin_fx_st}}}}">'
+            # celular: só o essencial, com o link na mesma linha do texto (revisão PLAT, achado 12: a faixa ocupava 123 px)
+            f'<style>.assin-fx-m{{display:none}}@media (max-width:640px){{.assin-fx-w{{display:none}}.assin-fx-m{{display:inline}}.assin-fx{{display:block!important;padding:6px 10px!important}}.assin-fx>a{{margin-left:6px;white-space:nowrap}}}}</style>'
+            f'<span class="assin-fx-w">{{{{assin_fx_t}}}}</span><span class="assin-fx-m">{{{{assin_fx_m}}}}</span><a href="CF-05.dc.html#pagar" style="color: inherit; font-weight: 800; text-decoration: underline; text-underline-offset: 3px;">Pagar fatura ›</a></div></sc-if>')
 def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=None,crumbs_extra=None,
             ctx=('Fazenda Santa Rita','Safra 2026/27',None),cont=None,chipsrow='',footer=None,
             fname=None,W=1440,H=880,perfil='Ana · Gestora',search=True,steps=None,primary_html=None):
@@ -329,6 +339,7 @@ a{{color:{ACC}}}@media (hover:hover){{a:hover{{color:#15603a}}}}
 {prim}
 </div>
 {f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.35; max-width: 900px; margin-top: -4px;">{esc(subtitle)}</div>' if subtitle else ''}
+{faixa_cobranca(fid,fname)}
 {controw}
 {chipsrow}
 </header>
