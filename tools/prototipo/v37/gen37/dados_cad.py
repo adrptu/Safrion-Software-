@@ -30,6 +30,27 @@ def geo_vers(t):
 UNID_PROD=['sc de 60 kg/ha','t/ha','t/ha/ano','cx de 20 kg/ha','kg/ha']
 CULTURAS=[('Soja','SOJA','Anual','sc de 60 kg/ha'),('Milho','MILHO','Anual','sc de 60 kg/ha'),('Feijão','FEIJAO','Anual','sc de 60 kg/ha'),
           ('Café','CAFE','Perene','sc de 60 kg/ha'),('Mamão Formosa','MAMAO','Perene','t/ha/ano')]
+# Unidade de mercado por cultura (DEC-0510-03; docs/culturas/UNIDADES-DE-MERCADO.md; colheita D-03): fonte ÚNICA do fator de produção,
+# produtividade, estoque de produto e pedido. A tupla CULTURAS não muda (CD-02 e Planejar safra a leem). Quantidade guardada na base:
+# kg (6 casas) · frutos (coco, abacaxi) · L do café da roça (campo). un = unidade de produção e estoque; massa = base por un (decimal em
+# texto); prtv = unidade de produtividade; base = base física da produtividade (coluna "Base física": comercial corrigido no grão,
+# beneficiado no café, massa líquida pesada na fruta e na cana, frutos no coco e no abacaxi); grão: umidade e impureza padrão (R-08);
+# lado = unidade mostrada ao lado; prod = produto de estoque (o item do CD-06 com fator tem de coincidir: Soja em grão e Café beneficiado
+# em sc 60 kg); est = unidade do estoque e do pedido quando não é a de produção; vida = vida útil em dias (perecível, D-21).
+# Laranja, coco e abacaxi seguem a proposta da UNIDADES-DE-MERCADO (D-04); arroz RS/SC em sc 50 kg (só no teste).
+CULTURA_UN={
+ 'Soja':dict(un='sc',massa='60',prtv='sc/ha',base='comercial',grao=True,u='14',imp='1',prod='Soja em grão'),
+ 'Milho':dict(un='sc',massa='60',prtv='sc/ha',base='comercial',grao=True,u='14',imp='1',prod='Milho em grão'),
+ 'Feijão':dict(un='sc',massa='60',prtv='sc/ha',base='comercial',grao=True,u='14',imp='0.5',prod='Feijão em grão'),
+ 'Café':dict(un='sc',massa='60',prtv='sc/ha',base='beneficiado',campo='L',prod='Café beneficiado',proc='Café da roça'),
+ 'Mamão Formosa':dict(un='t',massa='1000',prtv='t/ha',base='massa',prod='Mamão Formosa · fruta de campo',est='kg',vida=7),
+ 'Laranja':dict(un='cx',massa='40.8',prtv='cx/ha',lado='t/ha',base='massa',prod='Laranja'),
+ 'Coco':dict(un='mil frutos',massa='1000',prtv='mil frutos/ha',base='frutos',prod='Coco verde',est='fruto'),
+ 'Abacaxi':dict(un='mil frutos',massa='1000',prtv='mil frutos/ha',base='frutos',prod='Abacaxi',est='fruto'),
+ 'Arroz RS':dict(un='sc',massa='50',prtv='sc/ha',base='comercial',grao=True,u='13',imp='0',prod='Arroz em casca RS'),
+ 'Arroz SC':dict(un='sc',massa='50',prtv='sc/ha',base='comercial',grao=True,u='13',imp='0',prod='Arroz em casca SC'),
+ 'Cana-de-açúcar':dict(un='t',massa='1000',prtv='t/ha',base='massa',prod='Cana-de-açúcar'),
+}
 # processo = etapa de custo (dimensão Processo do CD-07); cada operação aponta o seu
 PROCESSOS=[('IMPL','Implantação'),('TRAT','Tratos culturais'),('COLH','Colheita'),('POSC','Pós-colheita')]
 OP_PROC={'Pulverização':'Tratos culturais','Plantio':'Implantação','Adubação a lanço':'Tratos culturais','Tratamento de sementes':'Implantação',
