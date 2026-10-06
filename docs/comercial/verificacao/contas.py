@@ -58,4 +58,25 @@ ok('KC12 31/08/2026 < 26/09/2026 → limite vencido', dia('2026-08-31') < dia('2
 ok('KC13 CPR R$ 118,84/sc equivalente (fora do preço médio)', q2(D(820000) / 6900) == D('118.84'))
 # KC14 · depois da tarefa da Colheita (L39-133 12.050 kg Liberado; 10.000 kg reservados ao PV-036)
 ok('KC14 mamão estoque: apto 12.050 · compromissos 10.000 · coberto 10.000 · livre 2.050 kg', D(12050) - D(10000) == 2050)
+# ---- v1.1 · revisão por contraexemplo (CE-nn em DECISOES.md) ----
+# KC15 · AC-13: três saídas de uma reserva de 10.000 kg zeram a reserva em decimal; em float sobra resto (CE-17)
+v3 = [valor(D(x), D(1), D('3.05')) for x in ('3333.3', '3333.3', '3333.4')]   # um arredondamento por saída (evento)
+ok('KC15 10.000 − 3.333,3 − 3.333,3 − 3.333,4 = 0 exato (float deixa resto); valores 10.166,57 + 10.166,57 + 10.166,87 = R$ 30.500,01 (centavo do arredondamento por evento)',
+   D(10000) - D('3333.3') - D('3333.3') - D('3333.4') == 0 and (10000 - 3333.3 - 3333.3 - 3333.4) != 0
+   and v3 == [D('10166.57'), D('10166.57'), D('10166.87')] and sum(v3) == D('30500.01'))
+# KC16 · linha Estoque do Painel fecha quando venda futura reserva estoque (CE-12): PV-038 reserva os 2.050 kg livres do L39-133
+apto, pv36, res38 = D(12050), D(10000), D(2050)
+comp = pv36 + res38; livre = (apto - pv36 - res38) - 0
+ok('KC16 mamão estoque: oferta 12.050 − compromissos 12.050 (10.000 do PV-036 + 2.050 reservados ao PV-038) = livre 0; v1.0 dava 12.050 − 10.000 ≠ 0',
+   comp == 12050 and livre == 0 and apto - comp == livre and apto - pv36 != livre)
+# KC17 · em 05/10 (S41 começou), venda futura de período começado conta no estoque e lote vencido sai do livre (CE-02)
+hoje = '2026-10-05'; vence133 = '2026-09-29'; ini_s41 = '2026-10-05'
+livre_v11 = D(0) - 0 - D(30000)          # disponível não vencido 0 − falta das prontas 0 − falta da PV-038 (período começado)
+livre_v10 = D(2050) - 0                  # v1.0: disponível do L39-133 vencido − falta só das prontas; PV-038 fora de tudo
+ok('KC17 05/10: L39-133 vencido (29/09) fora do livre; PV-038 conta no estoque → déficit 30.000 kg (v1.0 mostrava 2.050 kg livres)',
+   dia(vence133) < dia(hoje) and ini_s41 <= hoje and livre_v11 == -30000 and livre_v10 == 2050)
+# KC18 · excesso de peso na saída (CE-03): 10.040 kg pesados para 10.000 reservados ao PV-036; excesso sai do disponível com a gestora
+liq18 = D(10040); exc = liq18 - pv36; disp18 = D(2050) - exc; fis18 = apto - liq18; v18 = valor(liq18, D(1), D('3.05'))
+ok('KC18 excesso 40 kg: disponível do L39-133 2.050 → 2.010 · físico 2.010 · falta 0 · R$ 30.622,00 · exposição 122.092 > 121.970 aprovado (aprova de novo)',
+   exc == 40 and disp18 == 2010 and fis18 == 2010 and pv36 - liq18 <= 0 and v18 == D('30622.00') and ar37 + v18 == D('122092.00') and ar37 + v18 > D('121970'))
 print('FALHAS:', len(F))
