@@ -24,7 +24,7 @@ CTX_BO=('Backoffice da plataforma',None,None); PERFIL_BO='Admin plataforma'
 CTX_ON=('Organização Boa Esperança','Trial · termina 18/10/2026',None); PERFIL_ON='Otávio · Responsável'
 PRIV='Nenhum privilégio administrativo concede consulta indiscriminada a dados agronômicos dos clientes.'
 HIP='Hipótese comercial · não publicável sem decisão'
-TRIAL=dict(coorte='set/2026', dias=30, fim='18/10/2026', area_ha=480)
+from dados_assinatura import TRIAL   # um só trial para ON-01, BO-01 e BO-02 (PLAT-01, RV-09)
 CONTRATANTES=['Grupo Santa Rita','Fazenda Aurora','Sítio Ipê','Coop. Verde Vale','Agro Bela Vista','Rancho Dois Rios','Fertisul','Organização Boa Esperança','Fazenda Três Marias']
 OFERTAS=['Produtor Piloto v3','Patrocínio Cooperativa v2','Parceiro Profissional v1','Trial agricultor v2']
 PLANOS=[  # (id, plano/versão, segmento, moeda, vigência, tarifa, estado)
