@@ -93,17 +93,18 @@ try:
     c.goto(URL.replace('etapa=3', 'etapa=2'), 1.6); TB = TBF('TIPO'); h2 = [x.upper() for x in heads()]; d2 = dicts(); shot('saf2-1440')
     # decisão do proprietário (05/10/2026): a unidade fica junto do valor ("45 t/ha/ano", "62.500 kg"); filtrar unidade não gera valor
     chk('2b etapa 2: Tipo, Área livre, Plano, Versão e Ajustes em colunas próprias; Meta com a unidade junto (sem coluna de unidade)',
-        all(k in h2 for k in ('TALHÃO OU PARCELA', 'TIPO', 'ÁREA', 'ÁREA LIVRE', 'META', 'PLANO AGRONÔMICO', 'VERSÃO', 'AJUSTES LOCAIS')) and 'UNIDADE DA META' not in h2 and not any('PLANO E AJUSTES' == x for x in h2), h2)
+        all(k in h2 for k in ('TALHÃO OU PARCELA', 'TIPO', 'ÁREA', 'ÁREA LIVRE', 'META', 'PLANO AGRONÔMICO', 'VERSÃO', 'AJUSTES LOCAIS', 'SITUAÇÃO', 'LIVRE A PARTIR DE', 'OCUPA ATÉ', 'FIM POR', 'SAFRA')) and 'UNIDADE DA META' not in h2 and not any('PLANO E AJUSTES' == x for x in h2), h2)
     t7 = next((r for r in d2 if r.get('TALHÃO OU PARCELA', '').startswith('T7')), {})
     chk('2b T7: meta "45 t/ha/ano" (valor com a unidade); plano sem a versão colada (v3 na coluna Versão)', t7.get('META') == '45 t/ha/ano' and t7.get('VERSÃO') == 'v3' and 'v3' not in t7.get('PLANO AGRONÔMICO', ''), t7)
     filtra('Meta', ['45 t/ha/ano']); d = [r for r in dicts() if r.get('CULTURA')]
     chk('2b filtro Meta = "45 t/ha/ano" (o filtro mostra o valor com a unidade, como a célula): só o T7', d and all(r.get('META', '') == '45 t/ha/ano' for r in d) and d[0].get('TALHÃO OU PARCELA', '').startswith('T7'), [(r.get('TALHÃO OU PARCELA', ''), r.get('META', '')) for r in d])
-    limpa(); filtra('Tipo', ['Parcela']); d = [r for r in dicts() if r.get('CULTURA')]
+    # etapa 2 nova (todos os talhões): as filhas de outra safra também têm Cultura e Tipo; as desta safra têm Safra "—" (§7.2)
+    limpa(); filtra('Tipo', ['Parcela']); d = [r for r in dicts() if r.get('CULTURA') and not r.get('SAFRA', '').endswith('›')]
     # o filtro tem de cortar: só parcelas e o talhão que as agrupa ("2 parcelas"), nenhum "Talhão inteiro", menos linhas que sem filtro
     chk('2b filtro Tipo = Parcela: as parcelas T1-A e T1-B (com o talhão T1 que as agrupa), sem talhão inteiro',
         sorted(r.get('TALHÃO OU PARCELA', '').split(' ')[0] for r in d if r.get('TIPO', '') == 'Parcela') == ['T1-A', 'T1-B']
         and all(r.get('TIPO', '') == 'Parcela' or re.match(r'^\d+ parcelas?$', r.get('TIPO', '')) for r in d)
-        and len(d) < len([r for r in d2 if r.get('CULTURA')]), [(r.get('TALHÃO OU PARCELA', ''), r.get('TIPO', '')) for r in d])
+        and len(d) < len([r for r in d2 if r.get('CULTURA') and not r.get('SAFRA', '').endswith('›')]), [(r.get('TALHÃO OU PARCELA', ''), r.get('TIPO', '')) for r in d])
     limpa()
     # meta decimal: a célula e o filtro mostram o valor exato com a unidade ("62,5 sc/ha"), sem arredondar
     J(f"(()=>{{const r=[...({TB}).querySelectorAll('[role=row].g2ed')].filter(x=>x.offsetParent).find(x=>/^T2\\b/.test(x.innerText.trim())); r.querySelector('[role=cell]:nth-child(2)').click();}})()"); time.sleep(.5)

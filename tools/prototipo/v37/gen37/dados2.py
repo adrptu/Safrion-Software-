@@ -60,8 +60,8 @@ PLANOS=[
    A('p3','Fertirrigação de potássio','Fertirrigação','DATA',data='2026-11-01',prods=[('Fertilizantes','Nitrato de potássio',35.0,'kg',6.10)])]),
 ]
 PLANO={p['id']:p for p in PLANOS}
-def C(id,local,tipo,cultura,variedade,area,plantio,meta,un_meta,plano,colheita=None,ro=False):
-    return dict(id=id,fazenda='Santa Rita',local=local,tipo=tipo,cultura=cultura,variedade=variedade,area=area,plantio=plantio,meta=meta,un_meta=un_meta,plano=plano,colheita=colheita,ro=ro)
+def C(id,local,tipo,cultura,variedade,area,plantio,meta,un_meta,plano,colheita=None,ro=False,origem=''):
+    return dict(id=id,fazenda='Santa Rita',local=local,tipo=tipo,cultura=cultura,variedade=variedade,area=area,plantio=plantio,meta=meta,un_meta=un_meta,plano=plano,colheita=colheita,ro=ro,origem=origem)
 CULTIVOS={
  'S2627':[C('c1','T1-A','Parcela','Soja','58 W',160,'2026-10-15',64,'sc/ha','SOJA-AT'),
           C('c2','T1-B','Parcela','Soja','62 X',152,'2026-10-25',62,'sc/ha','SOJA-AT'),
@@ -77,7 +77,11 @@ CULTIVOS={
           C('d3','P1','Talhão inteiro','Feijão','Pérola',95,'2027-04-15',50,'sc/ha','FEIJ-PV')],
  'S2526':[C('e1','T1','Talhão inteiro','Soja','58 W',312,'2025-10-12',62,'sc/ha','SOJA-AT',ro=True),
           C('e2','T2','Talhão inteiro','Soja','58 W',298,'2025-10-16',61,'sc/ha','SOJA-AT',ro=True),
-          C('e3','T3','Talhão inteiro','Milho','Híbrido AG 8700',96,'2025-10-20',170,'sc/ha','MILHO-SF',ro=True)],
+          C('e3','T3','Talhão inteiro','Milho','Híbrido AG 8700',96,'2025-10-20',170,'sc/ha','MILHO-SF',ro=True),
+          # lavouras em campo (Mapa, MIP e irrigação as mostram): entram na safra em que foram plantadas, com a colheita prevista informada.
+          # Provisório até a decisão da S2526 encerrada com lavoura em campo (DECISOES etapa 2 §4); o serviço de ocupação lê faixa e período
+          C('e4','P1','Talhão inteiro','Feijão','BRS Estilo',95,'2026-07-05',48,'sc/ha',None,colheita='2026-10-10',ro=True,origem='lavoura em campo'),
+          C('e5','P2','Talhão inteiro','Milho','Híbrido AG 8700',80,'2026-08-10',180,'sc/ha',None,colheita='2026-11-15',ro=True,origem='lavoura em campo')],
 }
 # ajuste exclusivo já existente (T1-B: dose maior de Fungicida A na 1ª aplicação por histórico de ferrugem)
 AJUSTES={'c2':{'a6|0':0.60}}

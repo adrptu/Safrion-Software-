@@ -19,7 +19,7 @@ try:
     print('clicar etapa 4 sem safra:', ir_etapa(4), T())
     print('abrir safra:', clk('Continuar'), T())
     print('etapa agora:', J("document.querySelector('[aria-current=step]').innerText.replace(/\\s+/g,' ')"))
-    print('k2:', J("document.body.innerText.match(/\\d+ cultivos · [^\\n]+/)[0]"))
+    print('k2:', J("(document.body.innerText.match(/Nesta safra [^\\n]+/)||[''])[0]"))
     # selecionar T4,T3,P1,P2
     sel=J("""(()=>{const rows=[...document.querySelectorAll('[role=row].g2ed')]; let n=0; rows.forEach(r=>{const t=r.innerText; if(/\\bT4\\b|\\bT3\\b|\\bP1\\b|\\bP2\\b/.test(t)){ const cb=r.querySelector('input[type=checkbox]'); if(cb){cb.click(); n++;} }}); return n;})()""")
     time.sleep(.4); print('selecionados:', sel, '· form aberto?', J("!!document.querySelector('aside[role=dialog]')"))
@@ -30,7 +30,7 @@ try:
     print('aplicar sem plano:', clk('Aplicar plano','aside[role=dialog]'), J("(document.querySelector('aside [role=alert]')||{}).innerText"))
     J("""(()=>{const i=document.querySelector('#ap_sel'); Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(i,'SOJA-AT'); i.dispatchEvent(new Event('change',{bubbles:true}));})()"""); time.sleep(.3)
     print('aplicar:', clk('Aplicar plano','aside[role=dialog]'), T())
-    print('k2 após:', J("document.body.innerText.match(/\\d+ cultivos · [^\\n]+/)[0]"))
+    print('k2 após:', J("(document.body.innerText.match(/Nesta safra [^\\n]+/)||[''])[0]"))
     # substituição exige confirmação: aplicar individual em T1-A (tem plano) via seleção
     J("""(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>/T1-A/.test(r.innerText)); r.querySelector('input[type=checkbox]').click();})()"""); time.sleep(.3)
     clk('Aplicar plano')
@@ -46,7 +46,7 @@ try:
     J("""(()=>{const i=document.querySelector('#lp_a5_0'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,'0,6'); i.dispatchEvent(new Event('input',{bubbles:true}));})()"""); time.sleep(.3)
     clk('Cancelar','aside[role=dialog]'); print('aviso não salvo:', J("document.querySelector('aside[role=dialog]').innerText.indexOf('Há alterações não salvas')>=0"))
     clk('Continuar editando','aside[role=dialog]'); clk('Salvar','aside[role=dialog]'); print('salvar local:', T())
-    print('k2 ajustes:', J("document.body.innerText.match(/\\d+ cultivos · [^\\n]+/)[0]"))
+    print('k2 ajustes:', J("(document.body.innerText.match(/Nesta safra [^\\n]+/)||[''])[0]"))
     c.shot('_probe/saf_e2.png')
     # etapa 3
     ir_etapa(3); time.sleep(.3)

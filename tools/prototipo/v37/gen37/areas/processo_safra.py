@@ -6,6 +6,7 @@ import engine as E
 from ui37 import shell37, steps_state, HEIGHTS37
 import dados2 as D2
 import dados as D
+import ocupacao_cen as OCEN
 HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE)
 H=lambda s: '{{'+s+'}}'
 F=lambda: H('false')
@@ -26,27 +27,38 @@ def build():
        [dict(id=s['id'],ro=s['ro'],v=dict(nome=s['nome'],ini=s['ini'],fim=s['fim'],periodo=s['periodo'],faz=s['fazenda'],estado=s['estado']),s={},p={}) for s in D2.SAFRAS],
        edit=dict(m='form',title='Safra',newTitle='Nova safra',sub='Altere nome, início, fim e fazenda. Cultivos e planos ficam nas etapas seguintes.',
                  fields=[dict(k='nome',l='Nome da safra',t='txt',req=True,def_='' ),dict(k='ini',l='Início',t='date',req=True),dict(k='fim',l='Fim',t='date',req=True,help='O fim precisa ser depois do início.'),
-                         dict(k='faz',l='Fazenda',t='sel',opts=['Santa Rita','Boa Vista'],req=True,**{'def':'Santa Rita'}),dict(k='estado',l='Estado',t='sel',opts=['Rascunho','Em planejamento'],**{'def':'Rascunho'})]),
+                         dict(k='faz',l='Fazenda',t='sel',opts=OCEN.fazendas(),req=True,**{'def':'Santa Rita'}),dict(k='estado',l='Estado',t='sel',opts=['Rascunho','Em planejamento'],**{'def':'Rascunho'})]),
        add=None,gid='g_saf',total=False)
-    # ---------- etapa 2 · cultivos por safra ----------
-    TALH={t:ha for t,ha,*_ in D.TALHOES}
-    import dados_lagoa_safra as DL
-    TALFAZ={t:'Santa Rita' for t in TALH}; TALFAZ.update(DL.TALFAZ); TALH.update(DL.TALHOES)   # pivôs da Lagoa Grande
-    # TABELAS-FOCO (5983172395): uma variável por coluna (tipo, área livre, versão e ajustes separados; a meta leva a unidade junto)
-    # o plano (e a ação Aplicar plano) fica à vista: logo depois da variedade
-    CULT_COLS=[dict(k='local',l='Talhão ou parcela',w=130),dict(k='tipo',l='Tipo',w=120),dict(k='cult',l='Cultura'),dict(k='var',l='Variedade'),
-               dict(k='plano',l='Plano agronômico',w=190),dict(k='ver',l='Versão'),dict(k='area',l='Área (ha)',t='num',a='r',agg='sum',d=2,dmin=0),dict(k='dt_plantio',l='Plantio',t='num'),
-               dict(k='meta',l='Meta',t='num',a='r'),dict(k='livre',l='Área livre (ha)',t='num',a='r',d=2,dmin=0),dict(k='aj',l='Ajustes locais',t='num',a='r')]
-    CULT_FIELDS=[dict(k='talhao',l='Talhão',t='sel',opts=list(TALH),req=True,newOnly=True,**{'def':'T1'},
-                      help='Áreas: '+' · '.join(f'{t} '+format(ha,'g').replace('.',',')+' ha' for t,ha in TALH.items())),
-                 dict(k='local',l='Parcela',t='txt',help='Em branco: o sistema usa o nome do talhão ou a próxima parcela (ex.: T3-A).'),
-                 dict(k='faz',l='Fazenda',ro=True,**{'def':'Santa Rita'}),
-                 dict(k='cult',l='Cultura',t='sel',opts=['Soja','Milho','Feijão','Café','Mamão Formosa'],req=True,**{'def':'Soja'}),
-                 dict(k='var',l='Variedade',t='txt',req=True),dict(k='area',l='Área',t='num',req=True,min=0.01,max=1000,u='ha'),
-                 dict(k='plantio',l='Plantio',t='date',req=True),dict(k='meta',l='Meta de produtividade',t='num',req=True,min=0),
-                 dict(k='unm',l='Unidade da meta',t='sel',opts=['sc/ha','t/ha/ano','kg/ha'],req=True,**{'def':'sc/ha'}),
+    # ---------- etapa 2 · talhões e cultivos (ESPECIFICACAO etapa-2-talhoes) ----------
+    # todos os talhões Ativos do CD-01 da fazenda da safra (com o B1 da Boa Vista e os pivôs da Lagoa Grande); a ocupação no tempo sai do
+    # serviço único ocupacao.js (ENG-011). Linhas de talhão e de outras safras são só de exibição (safra.js · syncTalhoes); o estado guarda
+    # só os cultivos desta safra.
+    TAL_FAZ=OCEN.talhoes()
+    TALH={t:ha for lst in TAL_FAZ.values() for t,ha in lst}
+    TALFAZ={t:f for f,lst in TAL_FAZ.items() for t,_ in lst}
+    # TABELAS-FOCO (5983172395): uma variável por coluna; as cinco primeiras respondem onde, quanto e quando; Cultura, Ocupa até, Fim por e
+    # Safra logo depois respondem o que ocupa e até quando (§3.1)
+    CULT_COLS=[dict(k='local',l='Talhão ou parcela',w=130),dict(k='sit',l='Situação',w=150,niv0=True),dict(k='livre',l='Área livre (ha)',t='num',a='r',d=2,dmin=0,niv0=True),
+               dict(k='desde',l='Livre a partir de',t='num',w=130,niv0=True),dict(k='area',l='Área (ha)',t='num',a='r',agg='sum',d=2,dmin=0),dict(k='cult',l='Cultura'),
+               dict(k='ate',l='Ocupa até',t='num'),dict(k='fimpor',l='Fim por',w=150,ajuda='Pelo plano e Colheita informada são previsões. Estimado: ciclo da cultivar ou plano mais longo da cultura (CD-02), sem plano no cultivo. Observado: colheita registrada.'),
+               dict(k='saf',l='Safra',w=150),dict(k='var',l='Variedade'),dict(k='plano',l='Plano agronômico',w=190),dict(k='ver',l='Versão'),dict(k='dt_plantio',l='Plantio',t='num'),
+               dict(k='meta',l='Meta',t='num',a='r'),dict(k='aj',l='Ajustes locais',t='num',a='r'),dict(k='tipo',l='Tipo',w=120)]
+    NUNCA_C=dict(k='modo',eq='__nunca'); PLAN=dict(k='modo',ne='vinc'); VINC=dict(k='modo',eq='vinc')
+    # painel "Planejar T1" (§2): contexto herdado no subtítulo; Plano antes do Plantio; Plantio = PlantioMin; Colheita prevista editável só sem
+    # plano; meta na unidade de mercado da cultura (DEC-0510-03). "Vincular ciclo C1" (R-24) mostra o ciclo travado e pede plano e meta.
+    CULT_FIELDS=[dict(k='modo',l='',t='txt',cond=NUNCA_C),dict(k='talhao',l='',t='txt',cond=NUNCA_C),
+                 dict(k='cult',l='Cultura',t='sel',opts=list(OCEN.CULTURAS),req=True,cond=PLAN),dict(k='cult',l='Cultura',ro=True,cond=VINC),
+                 dict(k='var',l='Variedade',t='txt',req=True,cond=PLAN),dict(k='var',l='Variedade',ro=True,cond=VINC),
                  dict(k='plano',l='Plano agronômico',t='sel',dyn=True,opts=[],
-                      help='Planos publicados da cultura escolhida. Trocar o plano descarta os ajustes de insumos deste cultivo.')]
+                      help='Planos publicados da cultura escolhida. Trocar o plano descarta os ajustes de insumos deste cultivo.'),
+                 dict(k='plantio',l='Plantio',t='date',req=True,cond=PLAN),dict(k='pmin_txt',l='Plantio a partir de',ro=True,live=True,cond=PLAN),
+                 dict(k='plantio',l='Plantio real do ciclo',t='date',ro=True,cond=VINC),
+                 dict(k='local',l='Parcela',t='txt',cond=PLAN,help='Sugerida pela faixa que libera nesse dia. Área igual à do talhão vira talhão inteiro.'),
+                 dict(k='area',l='Área',t='num',req=True,min=0.01,max=5000,u='ha',cond=PLAN),dict(k='area',l='Área do ciclo',ro=True,u='ha',cond=VINC),
+                 dict(k='colheita',l='Colheita prevista',t='date',cond=[dict(k='plano',eq=''),PLAN],help='Sem plano: a data que a fazenda prevê. Vazia, o sistema estima pelo ciclo da cultivar (CD-02).'),
+                 dict(k='colh_txt',l='Colheita prevista',ro=True,live=True,cond=dict(k='plano',ne='')),
+                 dict(k='meta',l='Meta de produtividade',t='num',req=True,min=0),dict(k='unm_txt',l='Unidade da meta',ro=True,live=True,help='Unidade de mercado da cultura (CD-02, DEC-0510-03).'),
+                 dict(k='ocup_txt',l='Ocupação prevista',ro=True,live=True,cond=PLAN)]
     def talhao_de(c):
         return c['local'] if c['tipo']!='Parcela' else c['local'].rsplit('-',1)[0]
     def cult_rows(k):
@@ -54,7 +66,8 @@ def build():
         for c in D2.CULTIVOS.get(k,[]):
             t=talhao_de(c)
             r=dict(id=c['id'],ro=c['ro'],v=dict(talhao=t,faz=c['fazenda'],local=c['local'],tipo=c['tipo'],cult=c['cultura'],var=c['variedade'],area=c['area'],
-                   plantio=c['plantio'],meta=c['meta'],unm=c['un_meta'],plano=c['plano'] or '',colheita=c['colheita'] or ''),s={},p={})
+                   plantio=c['plantio'],meta=c['meta'],unm=c['un_meta'],plano=c['plano'] or '',colheita=c['colheita'] or '',colheita_real=c.get('colheita_real') or '',
+                   ciclo=c.get('ciclo') or '',origem=c.get('origem') or ''),s={},p={})
             if c['tipo']=='Parcela':
                 if t not in grp:
                     grp[t]=dict(id='grp_'+t,grp=True,dr='div_'+t,ro=c['ro'],v=dict(talhao=t,faz=c['fazenda'],local=t),s={},p={},kids=[]); out.append(grp[t])
@@ -67,7 +80,7 @@ def build():
         ro=(k=='S2526')
         bulk=f'<button type="button" onClick="{H("ap_bulk")}" style="{_MINIP}">Aplicar plano</button>' if not ro else ''
         g=grid(CULT_COLS,rows,edit=dict(m='form',title='Cultivo',newTitle='Novo cultivo',sub='Altere o cultivo e o plano agronômico e salve.',fields=CULT_FIELDS),
-               sel=not ro,dele=not ro,add=None,bulk=bulk,gid=f'g_cult_{k}',qf=dict(k='cult'),total=True,tree=True,x0={r['id']:True for r in rows if r.get('kids')})
+               sel=not ro,dele=not ro,add=None,bulk=bulk,gid=f'g_cult_{k}',qf=dict(k='sit',l='situação',nivel0=True),total=True,tree=True,x0={})
         cult_html+=f'<sc-if value="{H("cult_"+k)}" hint-placeholder-val="{F()}">{g}</sc-if>'
     # ---------- etapa 3 · rendimentos (uma grade por safra: a edição vale só para a safra aberta; safra encerrada abre só em consulta) ----------
     ops={}
@@ -198,12 +211,14 @@ def build():
        [],edit=dict(m='origin',leafOnly=True,title='Insumo',fields=[dict(k='ins',l='Insumo',t='txt',ro=True),dict(k='un',l='Unidade',t='txt',ro=True)]),tree=True,gid='g_dem',total=True,qf=dict(k='sit',cut=' · ',l='situação'))
     # ---------- JS do processo ----------
     sol0={'S2627':dict(id='SOL-2026-07',at='23/09/2026',itens={n:round(o['liq'],3) for n,o in D2.demanda('S2627').items() if o['liq']>0.001},comp=0)}
-    d2=dict(D2.js_data()); d2['sol']=sol0; d2['talhoes']=TALH; d2['talfaz']=TALFAZ; d2['conj_opts']=conj_opts; d2['hoje']=D2.HOJE_ISO; d2['viavel']=D2.VIAVEL
-    EXTRAJS[0]='const D2 = '+json.dumps(d2,ensure_ascii=False)+';\n'+open(os.path.join(ROOT,'cal01.js')).read()+'\n'+open(os.path.join(ROOT,'safra.js')).read()+'''
-function _safhooks(self){ self.g2after=(gid,rows,r,isNew)=>{ if(gid==='g_saf' && r && String(r.id).indexOf('n')===0 && !self.state.saf){ if(!r.v.estado) r.v.estado='Rascunho'; self.setState({saf:r.id,step:2,g2toast:'Safra criada: '+r.v.nome+'. Defina os cultivos.'}); }
+    d2=dict(D2.js_data()); d2['sol']=sol0; d2['talhoes']=TALH; d2['talfaz']=TALFAZ; d2['talOrd']=TAL_FAZ; d2['culturas']=OCEN.CULTURAS; d2['unMeta']=OCEN.UN_META; d2['cultivares']=OCEN.cultivares(); d2['folga']=OCEN.FOLGA; d2['conj_opts']=conj_opts; d2['hoje']=D2.HOJE_ISO; d2['viavel']=D2.VIAVEL
+    EXTRAJS[0]='const D2 = '+json.dumps(d2,ensure_ascii=False)+';\n'+open(os.path.join(ROOT,'cal01.js')).read()+'\n'+open(os.path.join(ROOT,'ocupacao.js')).read()+'\n'+open(os.path.join(ROOT,'safra.js')).read()+'''
+function _safhooks(self){ self.g2after=(gid,rows,r,isNew)=>{ if(gid==='g_saf' && r && String(r.id).indexOf('n')===0 && !self.state.saf){ if(!r.v.estado) r.v.estado='Rascunho'; self.setState({saf:r.id,step:2,g2toast:'Safra criada: '+r.v.nome+'. Planeje os talhões livres na tabela.'}); }
     if(String(gid).indexOf('g_cult_')===0) cultAfter(self,gid,rows,r,isNew);
     if(String(gid).indexOf('g_rend_')===0&&r) rendAfter(self,gid,rows,r,isNew); };
-  self.g2live=(gid,k,d)=>(String(gid).indexOf('g_rend_')===0?rendLive(k,d):null);
+  self.g2live=(gid,k,d)=>(String(gid).indexOf('g_rend_')===0?rendLive(k,d):(String(gid).indexOf('g_cult_')===0?cultLive(self,gid,k,d):null));
+  self.g2draft=(gid,k,d,fm)=>(String(gid).indexOf('g_cult_')===0?cultDraft(self,gid,k,d,fm):null);
+  self.g2formSub=(gid,r,fm)=>(String(gid).indexOf('g_cult_')===0?cultSub(self,gid,r,fm):null);
   self.g2opts=(gid,k,d,rid)=>(String(gid).indexOf('g_cult_')===0&&k==='plano'?planOpts(d):(String(gid).indexOf('g_rend_')===0&&k==='conj_id'?conjOpts(rid||d.base):null));
   self.g2formActs=(gid,r,fm)=>(String(gid).indexOf('g_cult_')===0?cultActs(self,gid,r):(String(gid).indexOf('g_rend_')===0?rendActs(self,gid,r):null));
   self.g2check=(gid,rows,r,d,isNew)=>(String(gid).indexOf('g_cult_')===0?cultCheck(self,gid,rows,r,d,isNew):(String(gid).indexOf('g_rend_')===0?(self._conjAntes=(r?String(r.v.conj_id||''):null),rendCheck(self,rows,r,d,isNew)):(gid==='g_saf'?safCheck(d):null)));
@@ -215,11 +230,8 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
     # retorno e a primária da etapa ficam na área de ações única ao fim do conteúdo (engine.area_acoes, preenchida em safra.js)
     acoes=lambda extra='': f'<span style="display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">{extra}</span>'
     nova_safra=f'<button type="button" onClick="{H("g_saf_new")}" style="{E.BTN_ST(False,True)}">Nova safra</button>'   # criar é secundário: a tarefa da etapa é escolher
-    # Adicionar cultivo: uma instância, junto da lista; secundário, e primário só na lista vazia (aí é a única ação da etapa)
-    add_cult=(f'<sc-if value="{H("add_sec")}" hint-placeholder-val="{F()}"><button type="button" data-acao="adicionar" onClick="{H("add_fn")}" style="{E.BTN_ST(False,True)}">Adicionar cultivo</button></sc-if>'
-              f'<sc-if value="{H("add_prim")}" hint-placeholder-val="{F()}"><button type="button" data-acao="adicionar" onClick="{H("add_fn")}" style="{E.BTN_ST(True,True)}">Adicionar cultivo</button></sc-if>')
     s1=bloco('Escolha a safra','Clique na safra para continuar de onde parou.',g_saf,acao=nova_safra)
-    s2=bloco('Cultivos e planos',H('k2'),cult_html,acao=acoes(add_cult),desc_hole=True)
+    s2=bloco('Talhões e cultivos',H('k2'),cult_html,desc_hole=True)   # sem botão: planeja-se pela linha do talhão (Planejar ›, Dividir, Vincular ciclo ›)
     s3=bloco('Rendimentos por operação e atividade','Clique numa atividade para ajustar conjunto e rendimento; no formulário, “+ Outra configuração” divide a área dela entre conjuntos diferentes.',rend_html,acao=acoes())   # texto da REND (rendNova)
     # uma visão por vez, no mesmo lugar: por operação (operação → atividade → cultivo) ou por mês (indicadores × meses)
     seg=(f'<div role="group" aria-label="Modo de visão" style="display: inline-flex; flex-shrink: 0; padding: 3px; gap: 2px; border-radius: 999px; background: {BG}; border: 1px solid {LINE};">'
@@ -266,7 +278,7 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
       f'<div style="flex-grow: 1;"></div>'
       f'<sc-if value="{H("ap_confirm")}" hint-placeholder-val="{F()}"><div role="alert" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 12.8px; font-weight: 700;">{H("ap_cmsg")}'
       f'<div style="display: flex; gap: 8px;"><button type="button" onClick="{H("ap_back")}" style="{_MINI}">Voltar</button><button type="button" onClick="{H("ap_yes")}" style="{_MINIP}">Confirmar substituição</button></div></div></sc-if>'
-      f'<sc-if value="{H("ap_normal")}" hint-placeholder-val="{H("true")}"><div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};"><button type="button" onClick="{H("ap_cancel")}" style="{BTN_ST(False,True)}">Cancelar</button><button type="button" onClick="{H("ap_apply")}" style="{BTN_ST(True,True)}">Aplicar plano</button></div></sc-if>'
+      f'<sc-if value="{H("ap_normal")}" hint-placeholder-val="{H("true")}"><div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};"><button type="button" onClick="{H("ap_cancel")}" style="{BTN_ST(False,True)}">Cancelar</button><button type="button" onClick="{H("ap_apply")}" style="{BTN_ST(True,True)}">{H("ap_btn")}</button></div></sc-if>'
       f'</aside></div></sc-if>')
     # ---------- painel: atividades locais do cultivo (Gatilho → Atividades → Produtos e doses) ----------
     prod_row=(f'<div style="display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.6fr) 88px 122px 82px 94px 150px; gap: 10px; align-items: center; padding: 6px 0; border-top: 1px solid {LINE}; font-size: 12.5px;">'

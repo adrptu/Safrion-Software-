@@ -3,7 +3,7 @@
 Pedido do Adrianus: no Planejar safra, clicar nas etapas, usar as setas e clicar em "Definir rendimentos" mudavam a etapa por três
 caminhos; "com tantas opções o usuário fica perdido". Uma tarefa ativa = uma primária e uma rota de avanço; a faixa só informa.
 Modos (cada um < 90 s; capturas em _probe/acao_*.png):
-  python3 acao_unica_test.py saf          1-9   Planejar safra: faixa informativa, uma primária por estado, Adicionar cultivo, falta de
+  python3 acao_unica_test.py saf          1-9   Planejar safra: faixa informativa, uma primária por estado, Planejar › na linha do talhão, falta de
                                                 plano, vazio, filtro sem resultado, Corrigir cultivos → revisão, avançar não envia
   python3 acao_unica_test.py familias     10-16 uma ocorrência por família: CMP, PA, PM, EST (seções), IR/MA (telas), O.S. (Lista/Kanban/
                                                 Recursos com o mesmo filtro), mapa (painel do talhão)
@@ -88,28 +88,33 @@ try:
             all(uma(s) for s in estados.values()) and estados['1 sem safra']['prims']==[] and estados['2 falta plano']['prims']==['Aplicar plano em 4 cultivos'] and estados['2 falta plano']['avancos']==1
             and [estados[k]['prims'] for k in ('3','4','5')]==[['Conferir plano operacional ›'],['Dimensionar recursos ›'],['Conferir demanda de insumos ›']] and estados['6']['prims']==['Abrir Compra de insumos ›'] and sem_copia,
             {k:(v['etapa'],v['prims'],v['area']) for k,v in estados.items()})
-        # 3 · Adicionar cultivo: secundário junto da lista, não avança, preserva o rascunho (Esc → Continuar editando)
-        etapa(2); b=J("(()=>{const b=document.querySelector('main [data-acao=adicionar]'); if(!b) return null; const r=b.getBoundingClientRect(); const sec=b.closest('section'); const h=sec&&sec.querySelector('h3'); return [b.innerText.trim(), getComputedStyle(b).backgroundColor, h?h.innerText.trim():'', document.querySelectorAll('main [data-acao=adicionar]').length];})()")
-        J("document.querySelector('main [data-acao=adicionar]').click()"); time.sleep(.5)
-        campo=J("(()=>{const d=document.querySelector('aside[role=dialog]'); const i=d&&[...d.querySelectorAll('input')].find(x=>/Variedade/i.test(x.getAttribute('aria-label')||'')||/_var$/.test(x.id)); return i?i.id:null;})()")
+        # 3 · etapa 2 nova (todos os talhões): sem "Adicionar cultivo"; "Planejar ›" na linha do talhão abre o painel sem trocar de etapa e
+        #     preserva o rascunho (Esc → Continuar editando)
+        abre('SAF',hash='#saf=S27SF&passo=cultivos'); time.sleep(.4); nadd=J("document.querySelectorAll('[data-acao=adicionar]').length")
+        b=J("(()=>{const r=[...document.querySelectorAll('[role=row]')].find(x=>x.querySelector('.g2c0')&&/^[▾▸]?\\s?T3\\s/.test(x.querySelector('.g2c0').innerText.trim()+' ')); const b=r&&[...r.querySelectorAll('button')].find(b=>b.innerText.trim()==='Planejar ›'); if(!b) return null; const h=b.closest('section')&&b.closest('section').querySelector('h3'); b.click(); return [b.innerText.trim(), h?h.innerText.trim():''];})()"); time.sleep(.5)
+        campo=J("(()=>{const d=document.querySelector('aside[role=dialog]'); const i=d&&[...d.querySelectorAll('input')].find(x=>/_var$/.test(x.id)); return i?i.id:null;})()")
         setv('#'+campo,'Teste ação única') if campo else None; time.sleep(.2); J(f"document.getElementById({json.dumps(campo)}).focus()")
         c.tecla('Escape','Escape',27); time.sleep(.3); aviso='Há alterações não salvas' in (J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText") or '')
-        clk('Continuar editando','aside[role=dialog]'); val=J(f"(document.getElementById({json.dumps(campo)})||{{value:''}}).value") if campo else ''; e3=est(); shot('saf_adicionar_cultivo_rascunho')
+        clk('Continuar editando','aside[role=dialog]'); val=J(f"(document.getElementById({json.dumps(campo)})||{{value:''}}).value") if campo else ''; e3=est(); shot('saf_planejar_rascunho')
         clk('Cancelar','aside[role=dialog]'); clk('Descartar alterações','aside[role=dialog]')
-        chk('3 SAF · "Adicionar cultivo" único, secundário (branco) no cabeçalho da lista de cultivos; abre o formulário sem trocar de etapa; Esc pede confirmação e "Continuar editando" mantém o texto digitado',
-            b and b[0]=='Adicionar cultivo' and b[1]=='rgb(255, 255, 255)' and b[2]=='Cultivos e planos' and b[3]==1 and bool(campo) and aviso and val=='Teste ação única' and e3['etapa']==2, [b,campo,aviso,val,e3['etapa']])
+        chk('3 SAF · sem "Adicionar cultivo" (0); "Planejar ›" do T3 na tabela "Talhões e cultivos" abre o painel sem trocar de etapa; Esc pede confirmação e "Continuar editando" mantém o texto digitado',
+            nadd==0 and b and b[0]=='Planejar ›' and b[1]=='Talhões e cultivos' and bool(campo) and aviso and val=='Teste ação única' and e3['etapa']==2, [nadd,b,campo,aviso,val,e3['etapa']])
         # 4 · falta de plano: causa escrita + passo que resolve; avançar não aplica plano em silêncio
-        e4=est(); k2a=J("(document.body.innerText.match(/\\d+ cultivos · [^\\n]+/)||[''])[0]")
-        acao('avancar'); e4b=est(); etapa(2); k2b=J("(document.body.innerText.match(/\\d+ cultivos · [^\\n]+/)||[''])[0]")
-        chk('4 SAF · falta de plano: nota com a causa e os talhões, "Aplicar plano em 4 cultivos" é a primária (resolver) e "Definir rendimentos ›" o único avanço, secundário; avançar leva à etapa 3 sem aplicar plano (4 sem plano antes e depois)',
+        abre('SAF',hash='#saf=S2627&passo=cultivos'); time.sleep(.3)
+        e4=est(); k2a=' '.join(a for a in e4['area'] if a.startswith('nota:'))
+        acao('avancar'); e4b=est(); etapa(2); k2b=' '.join(a for a in est()['area'] if a.startswith('nota:'))
+        chk('4 SAF · falta de plano: nota com a causa e os talhões, "Aplicar plano em 4 cultivos" é a primária (resolver) e "Definir rendimentos ›" o único avanço, secundário; avançar leva à etapa 3 sem aplicar plano (4 sem plano antes e depois, na nota)',
             any(a.startswith('nota:4 cultivos sem plano agronômico (T4, T3, P1, P2)') for a in e4['area']) and 'resolver:Aplicar plano em 4 cultivos' in e4['area'] and 'avancar:Definir rendimentos ›' in e4['area']
-            and e4b['etapa']==3 and '4 sem plano' in k2a and '4 sem plano' in k2b, [e4['area'],e4b['etapa'],k2a,k2b])
-        # 5 · vazio: safra nova sem cultivos → "Adicionar cultivo" é a única primária; sem avanço indisponível concorrente
+            and e4b['etapa']==3 and '4 cultivos sem plano' in k2a and '4 cultivos sem plano' in k2b, [e4['area'],e4b['etapa'],k2a,k2b])
+        # 5 · vazio: safra nova sem cultivos → nenhuma primária e nenhum avanço; a nota diz o que está livre e a conferir e manda planejar na linha
         abre('SAF'); clk('Nova safra'); time.sleep(.3)
         for k,vl in (('nome','Safra teste ação única'),('ini','2027-01-10'),('fim','2027-08-30')): setv(f'#fx_g_saf_{k}',vl)
         clk('Salvar','aside[role=dialog]'); time.sleep(.6); e5=est(); shot('saf_vazio')
-        chk('5 SAF · safra nova sem cultivos: etapa 2 com nota "Nenhum cultivo…", "Adicionar cultivo" como única primária e nenhum avanço',
-            e5['etapa']==2 and e5['prims']==['Adicionar cultivo'] and e5['avancos']==0 and any('Nenhum cultivo nesta safra' in a for a in e5['area']), e5)
+        tal=J(r"""(()=>{const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent); if(!t) return {}; const o={}; [...t.querySelectorAll('[role=row]')].slice(1).filter(r=>!r.classList.contains('g2kid')).forEach(r=>{ const cs=[...r.querySelectorAll('[role=cell]')]; const c0=r.querySelector('.g2c0'); if(!c0) return; const nm=c0.innerText.replace(/^[▾▸] ?/,'').trim().split(/\s+/)[0]; const sr=r.querySelectorAll('.g2sr'); let txt=cs.map(c=>{ let x=c.innerText; c.querySelectorAll('.g2sr').forEach(e=>{ x=x.replace(e.innerText,''); }); return x.replace(/\s+/g,' ').trim(); }); o[nm]={c0:c0.innerText.replace(/\s+/g,' ').trim(),cs:txt}; }); return o; })()""")
+        t1=tal.get('T1',{}).get('cs',[]); t7=tal.get('T7',{}).get('c0',''); c1=tal.get('C1',{}).get('c0','')
+        chk('5 SAF · safra nova sem cultivos: etapa 2 sem primária e sem avanço, nota "Nenhum cultivo nesta safra…"; T7 e C1 Perene sem Planejar nem Vincular; T1 Livre 152 ha a partir de 21/02/2027',
+            e5['etapa']==2 and e5['prims']==[] and e5['avancos']==0 and any(a.startswith('nota:Nenhum cultivo nesta safra') for a in e5['area'])
+            and 'Planejar' not in t7 and 'Vincular' not in t7 and 'Planejar' not in c1 and 'Vincular' not in c1 and 'Livre' in t1 and '152 ha' in t1 and '21/02/2027' in t1, [e5,t7,c1,t1])
         # 6 · filtro sem resultado: o próximo passo é limpar o filtro, dentro da lista; a área continua com o passo da etapa; uma primária
         abre('SAF',hash='#saf=S2627&etapa=2'); time.sleep(.3)
         r=setv('main input[type=search]','zzz-sem-resultado'); time.sleep(.5)

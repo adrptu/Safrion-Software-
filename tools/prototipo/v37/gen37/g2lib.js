@@ -368,9 +368,10 @@ function g2acoes(v,pre,c){ c=c||{}; const nada=()=>{};
   let volta=c.volta||null, sec=c.sec||null, prim=c.prim||null;
   if(volta&&volta.to!==undefined&&((prim&&prim.to===volta.to)||(sec&&sec.to===volta.to))) volta=null;
   if(sec&&prim&&sec.to!==undefined&&sec.to===prim.to) sec=null;
-  v[pre+'_hasNota']=!!c.nota; v[pre+'_nota']=c.nota||''; v[pre+'_hasCtx']=!!c.ctx; v[pre+'_ctxT']=c.ctx?c.ctx.t:''; v[pre+'_ctxFn']=c.ctx?c.ctx.fn:nada;
+  const lnks=(c.lnks||[]).filter(l=>l&&l.t); v[pre+'_lnks']=lnks.map(l=>({t:l.t,fn:l.fn||nada})); v[pre+'_hasLnks']=lnks.length>0;   // atalhos da nota (um por fato)
+  v[pre+'_hasNota']=!!(c.nota||lnks.length); v[pre+'_nota']=c.nota||''; v[pre+'_hasCtx']=!!c.ctx; v[pre+'_ctxT']=c.ctx?c.ctx.t:''; v[pre+'_ctxFn']=c.ctx?c.ctx.fn:nada;
   v[pre+'_hasVolta']=!!volta; v[pre+'_voltaT']=volta?volta.t:''; v[pre+'_volta']=volta?volta.fn:nada; v[pre+'_voltaA']=(volta&&volta.a)||'voltar';
   v[pre+'_hasSec']=!!sec; v[pre+'_secT']=sec?sec.t:''; v[pre+'_secFn']=sec?sec.fn:nada; v[pre+'_secA']=(sec&&sec.a)||'avancar';
   const lk=!!(prim&&prim.h); v[pre+'_hasPrim']=!!prim&&!lk; v[pre+'_hasLink']=lk; v[pre+'_primT']=prim?prim.t:''; v[pre+'_primFn']=(prim&&prim.fn)||nada; v[pre+'_href']=lk?prim.h:'#';
   v[pre+'_primA']=(prim&&prim.a)||'avancar'; v[pre+'_desc']=c.nota?(pre+'-nota'):'';
-  v[pre+'_has']=!!(c.nota||volta||sec||prim); }
+  v[pre+'_has']=!!(c.nota||lnks.length||volta||sec||prim); }
