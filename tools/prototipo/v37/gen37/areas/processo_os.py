@@ -207,7 +207,11 @@ def _nova_ordem_dados():
         for a in pl['atividades']:
             for x in a['prods']: prods.setdefault(x['prod'],dict(p=x['prod'],un=x['un'],g=x['grupo']))
     for l in cenario.seed()['lotes'].values(): prods.setdefault(l['prod'],dict(p=l['prod'],un=l['un'],g=''))
-    return dict(safs=[dict(id=s['id'],t=s['nome'],mf=s['nome'].replace('Safra ','')) for s in safs],cult=cult,planos=planos,
+    # A-05 (colheita, 06/10): a ordem nova herda a fazenda da safra e o rótulo de safra do filtro do topo ('Safra Mamão 2026/27' → '2026/27');
+    # antes nascia na Santa Rita com saf 'Mamão 2026/27' e sumia do filtro Lagoa Grande · 2026/27
+    import re as _re
+    _mf=lambda n: (_re.search(r'\d{4}/\d{2}',n).group(0) if _re.search(r'\d{4}/\d{2}',n) and not n.startswith('Safrinha') else n.replace('Safra ',''))
+    return dict(safs=[dict(id=s['id'],t=s['nome'],mf=_mf(s['nome']),faz=s.get('fazenda','Santa Rita')) for s in safs],cult=cult,planos=planos,
                 conj={op:dict(conj=c['conj'],rend=c['rend']) for op,c in CJ.items()},emb=cenario.EMB,prods=sorted(prods.values(),key=lambda x:x['p']))
 
 JS_NUCLEO=r'''
@@ -248,6 +252,8 @@ function osMerge(b,co,c){ if(!co) return b;
   // conferência: o encerramento depende do cenário (apontamento aguardando sinal ou sobra em custódia)
   if(co.etapa==='Em conferência'){ o.encM=cenPodeEncerrar(c,co.id);
     if(!o.encM){ o.selos=o.selos.filter(s=>!/Sobras a receber|Aguardando sinal/i.test(s.t)); if(!mine){ o.cond='Apontamentos enviados e nada em custódia. Próximo passo: conferir e encerrar.'; o.dono=o.resp; o.prazo='conferir e encerrar'; } }
+    else if(/^Carga a pesar/.test(o.encM)){ const t='Carga a pesar';   /* colheita (R-18): carga a pesar ou no aparelho; quem recebe pesa em Produção › Cargas e recebimento */
+      if(!o.selos.some(s=>s.t===t)) o.selos=o.selos.concat([{t,c:'yellow'}]); o.dono=(typeof prRec==='function'?prRec(prFazDaOS(c,co)):'Recebimento'); o.prazo='pesar e receber a carga'; }
     else { const sin=/sinal/.test(o.encM); const t=sin?'Aguardando sinal do app':(/duplicidade/.test(o.encM)?'Apontamento em conferência':'Sobras a receber');  // o bloqueio também na lista e no Kanban
       if(!o.selos.some(s=>s.t===t)) o.selos=o.selos.concat([{t,c:'yellow'}]);
       if(sin){ o.dono=o.resp; o.prazo='reconectar o app'; } else if(/duplicidade/.test(o.encM)){ o.dono=CEN_CONF_AP; o.prazo='decidir a duplicidade'; } else if(!/almoxarife/.test(o.dono||'')){ o.dono='Rui (almoxarife)'; o.prazo='receber a devolução'; } } }
@@ -298,6 +304,8 @@ function osTrilha(o,it){ if(!it||o.etapa==='Canceladas'||(!o.reservado&&!(it.ent
 function osLibErro(o,c0){ const c=c0||cenGet(); if(!c.ordens[o.id]) return ''; const k=cenClone(c);
   try { osc_libEfeito(k,o.id,false,o.janela); return ''; } catch (e) { return String(e.message||e); } }   /* o motivo do Estoque, da lei ou da carência; não o perfil */
 function osEncBloq(o){ const m=o.encM;
+  if(/^Carga a pesar/.test(m)){ const g=(/CG-\d+/.exec(m)||[''])[0]; return {acao:'encerrar',t:'Encerrar bloqueado: '+m.replace(/\.$/,'')+'.',q:(o.dono||'Recebimento')+' pesa e recebe a carga (registrada por engano: descarta com motivo na mesma tela); a produção do talhão só fecha com ela.',h:'CARGA.dc.html'+(g?'#'+g:''),hl:'Pesar a carga'}; }   /* colheita (R-18) */
+  if(/^Carga no aparelho/.test(m)) return {acao:'encerrar',t:'Encerrar bloqueado: '+m.replace(/\.$/,'')+'.',q:(typeof prResp==='function'?prResp(o):o.resp)+' reconecta o app; a carga entra uma vez e vai para a pesagem.'};   /* colheita sem sinal (revisão A-11): não é o recebimento que resolve */
   if(/sinal/.test(m)) return {acao:'encerrar',t:'Encerrar bloqueado: há apontamentos no aparelho aguardando sinal.',q:o.resp+' reconecta o app; o envio é automático e não duplica.'};
   if(/duplicidade/.test(m)) return {acao:'encerrar',t:'Encerrar bloqueado: '+m,q:CEN_CONF_AP+' decide na linha do apontamento: mesmo turno conta uma vez; outro turno soma.'};
   const its=(o.r?o.r.itens:[]).filter(i=>i.custodia>0.001); const quem=its.map(i=>i.quem||o.resp).filter((v,i,a)=>a.indexOf(v)===i).join(', ')||o.resp;
@@ -445,10 +453,13 @@ function osc_encerrar(c,id){ const o=osc_o(c,id); if(o.etapa!=='Em conferência'
 // liberada desfeita, com a reserva solta, sem decisão competente e sem autor
 function osc_cancelar(c,id,mot,cx,ator){ const o=osc_o(c,id); const quem=cenExige(ator,'gestor','Cancelar a '+id+' sem execução (CMD-46)');
   if((o.realizado||0)>0||['A liberar','Liberadas'].indexOf(o.etapa)<0) throw new Error('Só ordem sem realizado, em A liberar ou Liberadas, é cancelada sem execução.');
+  { const cg=osCargasVivas(c,id); if(cg.length) throw new Error('Cancelar recusado: a '+id+' tem carga '+cg.map(g=>g.id+' '+String(g.st).toLowerCase()).join(', ')+'. Colheita com carga é fato executado: estorne a carga recebida ou descarte a carga a pesar (com motivo) em Produção › Cargas e recebimento antes de cancelar.'); }
   const r=o.req&&c.reqs[o.req];
   if(r){ if(o.reservado) r.itens.forEach(it=>{ const l=c.lotes[it.prod+'|'+it.lote]; const res=Math.max(0,it.solicitado-it.entregue); if(l&&res>0) l.reservado=Math.max(0,l.reservado-res); }); r.estado='Cancelada'; }
   const hr=cenAgora(); o.etapa='Canceladas'; o.reservado=false; o.selos=[]; osc_txt(o,{canPor:quem,canEm:hr,cond:'Cancelada sem execução por '+quem+' às '+hr+': '+mot+'. '+cx[1],dono:'',prazo:'',insx:cx[2]});
   return {msg:(id+' cancelada sem execução. '+cx[1]).trim()+' Cancelada por '+quem+'.'}; }
+/* cargas da O.S. de colheita que ainda contam (revisão A-04): a pesar (com ou sem sinal) ou recebidas; estornada e descartada não */
+function osCargasVivas(c,id){ return (typeof prCargasOS==='function')?prCargasOS(c,id).filter(g=>g.st==='A pesar'||g.st==='Recebida'):[]; }
 const LIM_DISP=0.20;  /* alçada AL-05: dispensa de saldo até 20 % da área sem a Direção (regra única: comando e texto da tela) */
 function osc_dispensar(c,id,n,mot,ator){ const o=osc_o(c,id); const quem=cenExige(ator,['gestor','agronomo'],'Dispensar saldo da '+id);   /* CMD-47 · AL-05: alçada gerencial e validação agronômica */
   if(o.etapa!=='Em execução') throw new Error(id+' não está em execução.');
@@ -712,7 +723,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
     const col=osApColeta(osApIns(cenGet(),o,n,cur.ced)); if(col.erro){ self.setState({pa:Object.assign({},cur,{err:col.erro})}); return; }
     const d=cur.d.split('-'); osRun(self,c=>osc_apontar(c,o.id,d[2]+'/'+d[1],n,col.cons,col.est,cur.chave),{pa:null}); };   // chave do formulário aberto: duplo clique não soma (OSDIA-03)
   // ação secundária pelo realizado: sem realizado → cancelar sem execução; em execução → dispensar saldo (nunca cancela fato executado)
-  const canCanc=!((o.realizado||0)>0)&&(o.etapa==='A liberar'||o.etapa==='Liberadas');
+  const canCanc=!((o.realizado||0)>0)&&(o.etapa==='A liberar'||o.etapa==='Liberadas')&&!osCargasVivas(cenGet(),o.id).length;   // carga de colheita é execução (revisão A-04)
   const canDisp=o.etapa==='Em execução'&&!!o.area&&(o.saldo||0)>0.001;
   v.pan_hasCanc=canCanc&&gest; v.pan_hasDisp=canDisp&&agr;   /* sem o papel: a ação secundária vira o texto de quem decide (uma das duas, nunca juntas) */
   v.pan_dispQ=(canDisp&&!agr)?('Dispensar saldo: decisão de '+g2quem(DSP)+'.'):((canCanc&&!gest)?('Cancelar sem execução: decisão de '+g2quem('gestor')+'.'):''); v.pan_hasDispQ=!!v.pan_dispQ;
@@ -744,6 +755,8 @@ function EXTRAVALS(self,v){
     const tm=/^#tal=([^|]+)\|(.+)$/.exec(h); if(tm){ const k=tm[1]+'|'+tm[2]; const ex=ords(self).some(o=>o.faz===tm[1]&&(o.talhoes||[]).some(t=>t.id===tm[2])); if(!ex) return;
       const f=Object.assign({},g2st(self,'g_os').f||{}); f.tal=[k]; const st={}; if(mfFaz(self)!=='Todas'&&mfFaz(self)!==tm[1]) st.mf_faz=tm[1];
       setTimeout(()=>{ if(Object.keys(st).length) self.setState(st); g2set(self,'g_os',{f,fmc:null}); },0); return; }
+    const nm=/^#nova:([^:]+):([^:]+):(\d{4}-\d{2}-\d{2})$/.exec(h); if(nm){ const sf=OSD.nova.safs.find(x=>(OSD.nova.cult[x.id]||[]).some(k=>k.id===nm[1])); if(!sf) return;   /* Programar colheita (Produção › Previsão e colheita): só preenche; Ana confirma Emitir */
+      const st={nv:{saf:sf.id,cult:nm[1],atv:nm[2],jan:nm[3],errs:{},warn:false,pre:true},pan:null}; if(mfFaz(self)!=='Todas'&&sf.faz&&sf.faz!==mfFaz(self)) st.mf_faz=sf.faz; setTimeout(()=>self.setState(st),0); return; }
     const m=/^#(O[SB]-\d+)(?::(ajustar))?$/.exec(h); if(!m) return;
     const oh=ords(self).find(o=>o.id===m[1]); if(!oh) return; const f=mfFaz(self); const st={pan:oh.id,pa:null}; if(f!=='Todas'&&oh.faz&&oh.faz!==f) st.mf_faz=oh.faz;
     if(m[2]==='ajustar') self.__ajAuto=oh.id; setTimeout(()=>self.setState(st),0); };
@@ -890,15 +903,20 @@ function EXTRAVALS(self,v){
       else if(!cur.atv) errs.atv='Escolha a atividade.';
       if(!cur.jan) errs.jan='Informe o início da janela.';
       const all=ords(self); let dupId='';
-      if(!Object.keys(errs).length){ const k=cur.cult+'|'+cur.atv; const dup=all.find(x=>(x.keys||[]).indexOf(k)>=0&&x.etapa!=='Canceladas'); if(dup){ errs.atv='Já existe '+dup.id+' para esta atividade neste cultivo.'; dupId=dup.id; } }
+      const a0=pl&&pl.atv.find(x=>x.id===cur.atv); const kc=(typeof PRDC!=='undefined'&&PRDC.cult[cur.cult])||null; const semana=!!(kc&&kc.semanal&&a0&&/^Colheita/.test(a0.op)&&cur.jan);
+      const sw=semana?prSem(cur.jan):''; const sn=semana?prSemN(sw):0;   /* R-18: perene de fruta, uma O.S. de colheita por cultivo e semana (com o ano: a safra cruza o ano, revisão A-19) */
+      const semDe=(x)=>{ const co=cenGet().ordens[x.id]; return co?prSemDaOS(co):(new RegExp('semana '+sn+'\\b').test(String(x.tipo||''))?sw:''); };
+      if(!Object.keys(errs).length){ const k=semana?cur.cult+'|'+sw:cur.cult+'|'+cur.atv;
+        const dup=all.find(x=>x.etapa!=='Canceladas'&&((x.keys||[]).indexOf(k)>=0||(semana&&x.talhao===c.local&&/^Colheita/.test(String(x.tipo||''))&&semDe(x)===sw)));
+        if(dup){ errs.atv='Já existe '+dup.id+(semana?' para a colheita da semana '+sn+' neste talhão.':' para esta atividade neste cultivo.'); dupId=dup.id; } }
       if(Object.keys(errs).length){ self.setState({nv:Object.assign({},cur,{errs,warn:false,dup:dupId})}); return; }
       const a=pl.atv.find(x=>x.id===cur.atv); const s=OSD.nova.safs.find(x=>x.id===cur.saf);
       const num=440+all.filter(x=>x.novo).length; const id='OS-0'+num;
       // insumos da atividade do plano: dose × área do cultivo (a semente leva a variedade do cultivo); nada é reservado antes de liberar
       const ins=(a.ins||[]).map(x=>({g:x.g,p:x.p.replace(/ · (variedade|híbrido) do cultivo$/,' '+c.var),dose:x.dose,un:x.un,tot:cenQtd(x.dose,c.area),sit:'Reserva ao liberar'}));
       const cj=(OSD.nova.conj||{})[a.op]||null;
-      const no={id,novo:true,keys:[cur.cult+'|'+cur.atv],tipo:(a.op===a.nome?a.nome:a.op+' · '+a.nome),talhao:c.local,area:c.area,etapa:'A liberar',selos:[],
-        faz:'Santa Rita',saf:s.mf,cultura:c.cultura||'',obs:'',agua:false,ins,semins:'',bloq:null,aviso:'',dono:OS_AGRO,prazo:'liberar',
+      const no={id,novo:true,jan:cur.jan,keys:[semana?cur.cult+'|'+sw:cur.cult+'|'+cur.atv],tipo:semana?'Colheita · semana '+sn:(a.op===a.nome?a.nome:a.op+' · '+a.nome),talhao:c.local,area:c.area,etapa:'A liberar',selos:[],
+        faz:s.faz||'Santa Rita',saf:s.mf,cult:c.id,cultura:c.cultura||'',obs:'',agua:false,ins,semins:'',bloq:null,aviso:'',dono:OS_AGRO,prazo:'liberar',
         atv:{op:a.op,nome:a.nome,gat:a.gat||'',orig:pl.nome+' v'+pl.versao,conj:cj?cj.conj:'',rend:cj?cj.rend:0},
         realizado:0,saldo:c.area,resp:'—',versao:'v1',janela:'a partir de '+brd(cur.jan),ap:[],nota:'',
         cond:'Ana (agrônoma) confere, ajusta se precisar e libera; liberar exige a prontidão de máquina, equipe e insumos. Próximo passo: liberar para execução.',
