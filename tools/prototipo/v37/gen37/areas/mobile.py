@@ -53,7 +53,8 @@ import dados2 as D2
 import cenario
 
 H=lambda s: '{{'+s+'}}'
-def IF(h,body): return f'<sc-if value="{H(h)}" hint-placeholder-val="{H("false")}">{body}</sc-if>'
+T=lambda: H('true'); F=lambda: H('false')
+def IF(h,body,d=False): return f'<sc-if value="{H(h)}" hint-placeholder-val="{H("true" if d else "false")}">{body}</sc-if>'
 def br(x): return str(x).replace('.',',')
 def nf(n,d=0): return f'{n:,.{d}f}'.replace(',','X').replace('.',',').replace('X','.')
 
@@ -166,7 +167,8 @@ function mbNum(s){ if (s === null || s === undefined) return NaN; let t = String
 function mbIn(n){ return String(Math.round(n * 100) / 100).replace('.', ','); }
 function mbK(o){ return (MBJAN[o.id] || { k: 9999 }).k; }
 function mbJan(o){ return (MBJAN[o.id] || {}).j || 'a definir'; }
-function mbMinhas(c){ return Object.values(c.ordens).filter(o => o.resp === c.app.operador).sort((a, b) => mbK(a) - mbK(b) || a.id.localeCompare(b.id)); }
+// colheita (D-16): a O.S. de colheita não entra na fila do MB-02/MB-03; a área de colheita no app é só pelo MB-10 (cenApDup não compara app × app do mesmo operador)
+function mbMinhas(c){ return Object.values(c.ordens).filter(o => o.resp === c.app.operador && !/^Colheita/.test(String(o.tipo || ''))).sort((a, b) => mbK(a) - mbK(b) || a.id.localeCompare(b.id)); }
 function mbFila(c){ return mbMinhas(c).filter(o => o.etapa === 'Liberadas' || o.etapa === 'Em execução'); }
 function mbReq(c, o){ return (o && o.req && c.reqs[o.req]) || null; }
 function mbProv(o){ return (o.ap || []).filter(a => a.sinc === false).reduce((s, a) => s + (a.ha || 0), 0); }
@@ -333,7 +335,9 @@ def build():
               navcard('Ocorrência','tipo, texto, foto e voz','MB-04','alert'),
               navcard('Almoxarifado','retirar e confirmar','MB-05','box'),
               navcard('Vistoria','rota por pontos','MB-06','leaf'),
-              '<span></span>')   # MB-07..MB-10 só simulam com dados locais (Frente F): fora do app até ligarem ao estado
+              navcard('Contagem de frutos','previsão de colheita','MB-07','grid'),
+              navcard('Cargas e entregas','área e cargas da colheita','MB-10','truck'),
+              '<span></span>')   # MB-07 e MB-10 ligados ao estado (colheita, 06/10); MB-08 e MB-09 ainda simulam (Frente F): fora do app
       + f'<div style="display: flex; justify-content: flex-end;"><button type="button" onClick="{H("restaurar")}" title="Voltar ordens, estoque e app ao início da demonstração" '
         f'style="font-family: inherit; font-size: 12px; font-weight: 600; color: {MUTED}; background: transparent; border: 0; padding: 4px 0; cursor: pointer; text-decoration: underline;">Restaurar demonstração</button></div>')
     js='''const fila=mbFila(c); v.fila=fila.map(o=>mbCard(self,c,o)); v.fila_vazia=!fila.length;
@@ -787,29 +791,58 @@ v.mb_temOutras=v.mb_outras.length>0;"""
     finally:
         JS_BASE=_jb
 
-    # ================= MB-07 · Contagem de frutos (detalhe/coleta) =================
-    pv=D.PREVISAO
+    # ================= MB-07 · Contagem de frutos (no estado: prContar · colheita P6) =================
+    # Talhão por um toque entre os de fruta em produção; +/− por estádio em cada planta (Pintado: colher nesta semana · De vez: próxima ·
+    # Verde desenvolvido: em 2 semanas); peso médio da amostra; "Concluir talhão" grava a contagem (CNT-) e NÃO publica: Ana publica
+    # em Produção › Previsão e colheita. Sem sinal, a contagem fica no aparelho e entra uma vez ao voltar o sinal.
+    est=''.join(
+        f'<div style="display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid {LINE};">'
+        f'<div style="flex-grow: 1; min-width: 0;"><div style="font-size: 14px; font-weight: 700;">{lab}</div><div style="font-size: 12px; color: {MUTED};">{dica}</div></div>'
+        f'<button type="button" onClick="{H("m7_menos_"+k)}" aria-label="Menos um fruto {lab}" title="Menos um fruto {lab}" style="{_BST} width: 44px; height: 44px; justify-content: center; font-size: 20px;">−</button>'
+        f'<span aria-live="polite" style="font-family: {DISP}; font-size: 24px; font-weight: 700; min-width: 40px; text-align: center;">{H("m7_n_"+k)}</span>'
+        f'<button type="button" onClick="{H("m7_mais_"+k)}" aria-label="Mais um fruto {lab}" title="Mais um fruto {lab}" style="{_BST} width: 44px; height: 44px; justify-content: center; font-size: 20px;">+</button></div>'
+        for k,lab,dica in (('pintado','Pintado','colher nesta semana'),('devez','De vez','colher na próxima semana'),('verde','Verde desenvolvido','colher em 2 semanas')))
     corpo=(
-      mcont('Previsão T7 · S39 (v S39-02)',FRUTO['parcela']+' · planta '+H('pl'),H('falta'),'Contar e avançar')
-      + note(kv('Ciclo/parcela','safra '+D.SAFRA+' · '+FRUTO['parcela'])+' · '+kv('Método','contagem total por planta')+' · '+kv('Data','23/09'))
-      + counters(('VERDES',FRUTO['verdes']),('INCHADOS',FRUTO['inchados']),('MADUROS',FRUTO['maduros']))
-      + card('Classe e peso amostral',[
-          kv('Amostra de peso',FRUTO['peso']+' · classe A estimada'),
-          kv('Amostra de plantas',FRUTO['amostra']),
-          note('Amostra e estimativa de população ficam explícitas; a previsão <b>não é publicada</b> a cada planta — só depois da revisão.')],state='gray',
-          desc='Confira amostra e peso antes de concluir a parcela.')
-      + btns(say('Corrigir contagem','Última contagem da planta substituída (46→44 verdes) · histórico preservado.','clock','Corrigir a última contagem'),
-             say('Concluir parcela','Parcela T7-B concluída · 40 plantas · segue para revisão antes de compor a previsão.','check','Fechar a parcela para revisão'),
-             say('Próxima parcela','Parcela T7-C aberta · contadores zerados · mesma amostra rastreável.','grid','Abrir a parcela seguinte'))
-      + btns(lnk('Enviar para revisão','CO-01.dc.html','leaf','Abrir a previsão de colheita para revisão'))
-      + note(f'A revisão compara com a previsão S39, que abastece o {pv["pedido"]} ({br(pv["classeA_t"])} t classe A · rendimento {int(pv["rendA"]*100)}%).'))
-    js=f'''const pl=s.pl||18, T={FRUTO["total"]}; v.pl=pl+' de '+T; v.falta=(T-pl)+' plantas'; v.nxt='Registrar e ir à planta '+(pl+1); v.fim=pl>=T; v.nfim=pl<T;
-DCH(v,'hdr','planta '+pl+' de '+T,'green');
-v.reg=()=>{{ const p=self.state.pl||18; if(p>=T) return; self.setState({{pl:p+1,g2toast:'Planta '+p+' registrada · planta '+(p+1)+' aberta · contadores zerados.'}}); }};
-v.fecha=()=>TOAST(self,'Parcela T7-B concluída · '+T+' plantas · segue para revisão antes de compor a previsão.');'''
-    emit('MB-07','Contagem de frutos','coleta por planta e parcela · estádios do protocolo',None,
-         'Registrar e ir à planta 19',corpo,H_=920,back='MB-01.dc.html',primary_href='MB-07.dc.html',js=js,dyn_status=True,
-         prim=[('nfim','b',H('nxt'),'reg'),('fim','b','Concluir parcela','fecha')])
+      sigbar()
+      + h2('Talhão','Toque no talhão de fruta em produção que vai contar.')
+      + f'<div role="group" aria-label="Talhão" style="display: flex; flex-wrap: wrap; gap: 6px;"><sc-for list="{H("m7_tals")}" as="x" hint-placeholder-count="4"><button type="button" aria-pressed="{H("x.on")}" onClick="{H("x.go")}" title="{H("x.tt")}" style="{H("x.st")}">{H("x.t")}</button></sc-for></div>'
+      + IF('m7_ok',f'<div style="{CARD_ST}"><div style="display: flex; align-items: center; gap: 8px;"><span style="width: 10px; height: 10px; border-radius: 999px; background: {ACC}; flex-shrink: 0;"></span>'
+           f'<div style="font-size: 14.5px; font-weight: 700; flex-grow: 1;">{H("m7_okt")}</div></div><div style="font-size: 13px; color: {MUTED}; line-height: 1.45;">{H("m7_oks")}</div></div>')
+      + IF('m7_tem',
+           f'<div style="{CARD_ST}"><div style="display: flex; align-items: baseline; gap: 8px;"><div style="font-size: 14.5px; font-weight: 700; flex-grow: 1;">{H("m7_pl")}</div>'
+           f'<span style="font-size: 12.5px; color: {MUTED};">{H("m7_falta")}</span></div>{est}</div>'
+           + ffield('Peso médio do fruto da amostra','mb_peso','m7_peso','m7_setpeso','m7_epeso',hint='kg por fruto (pese alguns frutos e divida).',ph='ex.: 1,20')
+           + note(H('m7_amostra'))
+           + IF('m7_err',f'<div role="alert" style="font-size: 12.5px; font-weight: 700; color: {RED};">{H("m7_errt")}</div>')
+           + btns(fnb('Corrigir a última planta','m7_corr','clock','Devolver a última planta registrada para os contadores'),
+                  fnb(H('m7_conct'),'m7_conc','check','Gravar a contagem do talhão (não publica a previsão)'))
+           + note('A previsão não é publicada a cada planta: a contagem vira rascunho e '+'Ana (agrônoma)'+' publica em Produção › Previsão e colheita.')))
+    js='''const tals=Object.keys(PRDC.cult).filter(id=>PRDC.cult[id].semanal&&PRDC.cult[id].prod).sort((a,b)=>String(PRDC.cult[a].local).localeCompare(String(PRDC.cult[b].local),'pt-BR',{numeric:true}));
+let h=''; try{ h=decodeURIComponent(location.hash||'').slice(1); }catch(e){}
+const m=s.m7||{cult:(PRDC.cult[h]?h:''),pl:[],cur:{pintado:0,devez:0,verde:0}}; const cid=m.cult; const k=PRDC.cult[cid];
+const set=(x)=>self.setState({m7:Object.assign({},m,x),m7err:''});
+v.m7_tals=tals.map(id=>({t:PRDC.cult[id].local,on:String(id===cid),st:mbPill(id===cid),tt:'Contar '+PRDC.cult[id].local+' · '+PRDC.cult[id].faz,go:()=>self.setState({m7:{cult:id,pl:[],cur:{pintado:0,devez:0,verde:0}},m7err:'',m7ok:null})}));
+v.m7_tem=!!k; const n=m.pl.length; const ALVO=20;
+v.m7_pl=k?k.local+' · planta '+(n+1)+' de '+ALVO:''; v.m7_falta=n>=ALVO?'amostra completa':(ALVO-n)+(ALVO-n===1?' planta a contar':' plantas a contar');
+['pintado','devez','verde'].forEach(e=>{ v['m7_n_'+e]=String(m.cur[e]||0);
+  v['m7_mais_'+e]=()=>set({cur:Object.assign({},m.cur,{[e]:(m.cur[e]||0)+1})}); v['m7_menos_'+e]=()=>set({cur:Object.assign({},m.cur,{[e]:Math.max(0,(m.cur[e]||0)-1)})}); });
+const tot=e=>m.pl.reduce((a,x)=>a+x[e],0);
+v.m7_amostra=n?('Amostra: '+n+(n>1?' plantas':' planta')+' · Pintado '+tot('pintado')+' · De vez '+tot('devez')+' · Verde desenvolvido '+tot('verde')):'Nenhuma planta registrada ainda.';
+v.m7_peso=s.m7peso||''; v.m7_setpeso=(e)=>self.setState({m7peso:e.target.value,m7err:''}); v.m7_epeso=''; v.m7_epeso_has=false;
+v.m7_err=!!s.m7err; v.m7_errt=s.m7err||'';
+v.m7_reg=()=>{ if(!k) return; self.setState({m7:Object.assign({},m,{pl:m.pl.concat([m.cur]),cur:{pintado:0,devez:0,verde:0}}),m7err:'',g2toast:'Planta '+(n+1)+' registrada · planta '+(n+2)+' aberta · contadores zerados.'}); };
+v.m7_corr=()=>{ if(!n){ TOAST(self,'Nenhuma planta registrada para corrigir.'); return; } const ult=m.pl[n-1]; self.setState({m7:Object.assign({},m,{pl:m.pl.slice(0,-1),cur:ult}),g2toast:'Planta '+n+' de volta aos contadores para corrigir · histórico só grava ao concluir.'}); };
+v.m7_conct='Concluir talhão'+(n?' ('+n+(n>1?' plantas)':' planta)'):'');
+v.m7_conc=()=>{ if(!n){ self.setState({m7err:'Registre ao menos uma planta antes de concluir.'}); return; }
+  const ch='APP-CNT-'+cid+'-'+((cenGet().producao.contagens||[]).filter(x=>x.cult===cid).length+1);
+  const r=cenMudar(self,c=>prContar(c,{cult:cid,plantas:n,pintado:tot('pintado'),devez:tot('devez'),verde:tot('verde'),peso:s.m7peso||'',quem:c.app.operador,via:'app',chave:ch}));
+  if(r.erro){ self.setState({m7err:r.erro}); return; } self.setState({m7:{cult:'',pl:[],cur:{pintado:0,devez:0,verde:0}},m7peso:'',m7ok:{t:r.cnt.id+' · '+PRDC.cult[cid].local,s:r.msg}}); };
+v.m7_ok=!!s.m7ok&&!k; v.m7_okt=s.m7ok?s.m7ok.t:''; v.m7_oks=s.m7ok?s.m7ok.s:'';
+v.m7_pr=!!k; v.m7_prt='Registrar e ir à planta '+(n+2); v.m7_sem=!k;
+DCH(v,'hdr',k?(k.local+' · planta '+(n+1)):(s.m7ok?'contagem gravada':'escolha o talhão'),k?'green':(s.m7ok?'green':'gray'));'''
+    emit('MB-07','Contagem de frutos','previsão de colheita · conta por planta e estádio',None,
+         'Registrar e ir à planta 2',corpo,H_=1180,back='MB-01.dc.html',primary_href='MB-07.dc.html',js=js,dyn_status=True,cen=True,
+         prim=[('m7_pr','b',H('m7_prt'),'m7_reg'),('m7_sem','a','Voltar a Hoje no campo','MB-01.dc.html')])
 
     # ================= MB-08 · Irrigação móvel (detalhe · volta em curso) =================
     exec_txt=f'{br(P["lamina_aplicada"])} mm em ≈{br(AREA_COB)} de {AREA_PIVO} ha ({br(P["cobertura_pct"])}% da volta · estimativa por percentímetro)'
@@ -904,19 +937,39 @@ v.concluir=()=>{ self.setState({conc:true,g2toast:'Serviço concluído · OM-023
          'Concluir serviço',corpo,H_=1000,fname='MB-09det.dc.html',back='MB-09.dc.html',primary_href='MB-09.dc.html',js=js,dyn_status=True,
          prim=[('noc','b','Concluir serviço','concluir'),('conc','a','Voltar às tarefas','MB-09.dc.html')])
 
-    # ================= MB-10 · Cargas e entregas (lista · papéis) =================
+    # ================= MB-10 · Cargas e entregas (nome e papéis do PRD; aba Colheita no estado · colheita P6, D-16) =================
+    # Aba Colheita: um cartão por O.S. de colheita Em execução; "Apontar área" pelo mesmo cenApontar da web (origem app, chave do aparelho)
+    # e "Registrar carga" (prCarga: veículo por toque, caixas ou kg estimados opcionais, talhões e %). Pesar e receber ficam na web (CARGA),
+    # um lugar só: Balança, Recebedor e MB-10det saíram. Aba Motorista: igual (logística, fora do escopo).
     tabs=('<div role="tablist" aria-label="Papel" style="display: inline-flex; flex-wrap: wrap; padding: 3px; border-radius: 999px; background: '+GRAYS+'; gap: 2px; align-self: flex-start;">'
-          + ''.join(f'<button type="button" role="tab" onClick="{H("role"+str(i))}" style="{H("rs"+str(i))}">{esc(t)}</button>' for i,t in enumerate(['Balança','Motorista','Recebedor']))+'</div>')
-    balanca=(
-      card(f'<b>{CG["id"]}</b> · {CG["oc"]} · Mamão Formosa',[
-          kv('Veículo',f'{CG["veic"]} · chegou {CG["hora"]}')+' · '+kv('Rota',f'{CG["origem"]} → {CG["destino"]}'),
-          chips(chip(f'Na balança · {CG["veic"]}','yellow'))],state='yellow')
-      + card(f'{C07["id"]} · expedição · {C07["pedido"]}',[
-          kv('Carga',f'{C07["cliente"]} · {C07["produto"]}'),
-          chips(chip('Impedida · NF pendente','red')),
-          kv('Dono',f'{C07["dono"]} · prazo {C07["prazo"]}'),
-          note('Fica visível e volta à seleção após resolver; não trava os caminhões aptos.')],state='red')
-      + btns(say('Registrar carga e vincular à ordem',f'Carga CG-1208 criada e vinculada à {CG["oc"]} · romaneio ROM-0792 aberto — salvar a carga não conclui a ordem de colheita.','truck','Criar carga ligada à ordem de colheita')))
+          + ''.join(f'<button type="button" role="tab" aria-selected="{H("tab"+str(i)+"_on")}" onClick="{H("tab"+str(i))}" style="{H("ts"+str(i))}">{esc(t)}</button>' for i,t in enumerate(['Colheita','Motorista']))+'</div>')
+    form=(f'<div style="{CARD_ST} border-color: {ACC};"><div style="font-size: 14.5px; font-weight: 700;">{H("f_tt")}</div>'
+          + IF('fa',ffield('Hectares colhidos neste turno','mb_ha','f_ha','f_setha','f_eha',hint=H('f_hha'),big=True,ph='0')
+               + ffield('Horas trabalhadas','mb_h','f_h','f_seth','f_eh',ph='ex.: 8'))
+          + IF('fc',f'<div style="display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 12px; font-weight: 600; color: {MUTED};">Veículo</span>'
+               f'<div role="group" aria-label="Veículo" style="display: flex; flex-wrap: wrap; gap: 6px;"><sc-for list="{H("f_veics")}" as="x" hint-placeholder-count="3"><button type="button" aria-pressed="{H("x.on")}" onClick="{H("x.go")}" title="{H("x.tt")}" style="{H("x.st")}">{H("x.t")}</button></sc-for></div></div>'
+               + ffield('Caixas na carga (estimativa)','mb_cx','f_cx','f_setcx','',hint='Opcional: ajuda a balança; não soma na produção.',ph='ex.: 590')
+               + ffield('Ou kg estimados','mb_kg','f_kg','f_setkg','',ph='opcional')
+               + f'<div style="display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 12px; font-weight: 600; color: {MUTED};">Fruta de mais de um talhão?</span>'
+               f'<div role="group" aria-label="Segundo talhão" style="display: flex; flex-wrap: wrap; gap: 6px;"><sc-for list="{H("f_os2")}" as="x" hint-placeholder-count="1"><button type="button" aria-pressed="{H("x.on")}" onClick="{H("x.go")}" title="{H("x.tt")}" style="{H("x.st")}">{H("x.t")}</button></sc-for></div></div>'
+               + IF('f_mix',ffield('Participação do talhão desta O.S.','mb_pct','f_pct','f_setpct','',hint='O outro talhão fica com o resto (soma 100 %).',ph='ex.: 60')))
+          + IF('f_err',f'<div role="alert" style="font-size: 12.5px; font-weight: 700; color: {RED};">{H("f_errt")}</div>')
+          + btns(fnb('Cancelar','f_cancel','',"Fechar o formulário sem gravar"))+'</div>')
+    colheita=(
+      sigbar()
+      + IF('f_on',form)
+      + h2('Colheita em execução','Aponte a área do turno e registre cada carga que sai do talhão; a balança pesa e recebe.')
+      + IF('c_vazio',card('Nenhuma O.S. de colheita em execução',[note('Quando o escritório liberar e a equipe iniciar a colheita, ela aparece aqui.')]))
+      + f'<sc-for list="{H("ords")}" as="o" hint-placeholder-count="1"><div style="{CARD_ST}">'
+        f'<div style="display: flex; align-items: center; gap: 8px;"><span style="width: 10px; height: 10px; border-radius: 999px; background: {ACC}; flex-shrink: 0;"></span>'
+        f'<div style="font-size: 14.5px; font-weight: 700; flex-grow: 1; min-width: 0;"><b>{H("o.id")}</b> · {H("o.tal")}</div></div>'
+        f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.45;">{H("o.feito")}</div>'
+        f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.45;">{H("o.cargas")}</div>'
+        f'<sc-if value="{H("o.car")}" hint-placeholder-val="{F()}"><div style="font-size: 12.5px; font-weight: 700; color: {RED}; line-height: 1.4;">{H("o.car_t")}</div></sc-if>'
+        f'<div style="display: flex; flex-wrap: wrap; gap: 8px;">'
+        f'<sc-if value="{H("o.bA")}" hint-placeholder-val="{T()}"><button type="button" onClick="{H("o.ga")}" title="{H("o.ttA")}" style="{_BST}">{icon("check",14)}{H("o.tA")}</button></sc-if>'
+        f'<sc-if value="{H("o.bC")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("o.gc")}" title="{H("o.ttC")}" style="{_BST}">{icon("truck",14)}{H("o.tC")}</button></sc-if></div></div></sc-for>'
+      + note('Área não gera produção: a produção do talhão nasce só da carga pesada e recebida.'))
     motorista=(
       card(f'Minha viagem · {VIAGEM["veic"]}',[
           kv('Pedido',f'{VIAGEM["pedido"]} · {VIAGEM["produto"]}'),
@@ -926,50 +979,46 @@ v.concluir=()=>{ self.setState({conc:true,g2toast:'Serviço concluído · OM-023
           kv('Posição',f'saiu da vez após a tolerância de 30 min · entra em {VIAGEM["pos"]} na fila'),
           chips(chip('Atrasado · janela 08:00','red'))],state='red',desc='Informe sua previsão; a chegada só conta na portaria.')
       + note('Aviso do motorista não é check-in. Você vê só a sua viagem, sem preços ou custos internos.'))
-    recebedor=(
-      card(f'<b>{CG["id"]}</b> · chegada no {CG["destino"]}',[
-          kv('Origem',f'{CG["oc"]} · {CG["origem"]} · {CG["veic"]}'),
-          kv('Pesagem',f'{CG["liq"]} líquidos · romaneio {CG["rom"]}'),
-          chips(dchip('rc')),
-          btns(say('Registrar divergência','Avaria térmica parcial registrada · amostra AM-3315 · lote segregado até decisão — recusa não recoloca produto em estoque apto.','alert','Registrar recusa ou avaria'))],
-          state='green',desc='Confira peso e condição antes de confirmar a chegada.'))
-    corpo=(tabs
-      + note('Cada papel vê e confirma só a sua parte. Estados logísticos são separados da etapa da O.S.')
-      + IF('r0',balanca)+IF('r1',motorista)+IF('r2',recebedor))
-    js=f'''const r=s.role||0, rc=!!s.rc; v.r0=r===0; v.r1=r===1; v.r2=r===2; v.r2a=r===2&&!rc; v.r2b=r===2&&rc;
-[0,1,2].forEach(i=>{{ v['role'+i]=()=>self.setState({{role:i}}); v['rs'+i]='font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 6px 14px; border-radius: 999px; border: 0; cursor: pointer; white-space: nowrap; '+(r===i?'background: {SURF}; color: {INK}; box-shadow: 0 1px 2px rgba(21,32,26,.12);':'background: transparent; color: {MUTED};'); }});
+    corpo=(tabs + IF('r0',colheita,d=True) + IF('r1',motorista))
+    js=f'''const r=s.tab10||0; v.r0=r===0; v.r1=r===1;
+[0,1].forEach(i=>{{ v['tab'+i]=()=>self.setState({{tab10:i,m10:null,m10e:''}}); v['tab'+i+'_on']=String(r===i); v['ts'+i]='font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 6px 14px; border-radius: 999px; border: 0; cursor: pointer; white-space: nowrap; '+(r===i?'background: {SURF}; color: {INK}; box-shadow: 0 1px 2px rgba(21,32,26,.12);':'background: transparent; color: {MUTED};'); }});
 v.prev=s.np?'10:20 (informada às 09:55)':'{VIAGEM["prev"]}';
-if(r===0) DCH(v,'hdr','1 na balança · 1 impedida','yellow'); else if(r===1) DCH(v,'hdr','atrasado · prev. '+(s.np?'10:20':'09:10'),'red'); else DCH(v,'hdr',rc?'chegada confirmada':'1 chegada a confirmar',rc?'green':'yellow');
-DCH(v,'rc',rc?'Chegada confirmada · {CG["liq"]}':'Chegada a confirmar',rc?'green':'yellow');
 v.prever=()=>{{ self.setState({{np:true,g2toast:'Nova previsão 10:20 enviada à expedição · a janela original 08:00 segue congelada · você entra na fila ao chegar à portaria (simulado · nenhuma mensagem real enviada).'}}); }};
-v.chegou=()=>{{ self.setState({{rc:true,g2toast:'Chegada confirmada no {CG["destino"]} · {CG["liq"]} · evento único na colheita e no packing · reenvio offline não duplica.'}}); }};'''
-    emit('MB-10','Cargas e entregas','pesagem, romaneio e confirmação de entrega, por papel',None,
-         'Abrir pesagem da CG-1207',corpo,H_=780,back='MB-01.dc.html',primary_href='MB-10det.dc.html',js=js,dyn_status=True,
-         prim=[('r0','a',f'Abrir pesagem da {CG["id"]}','MB-10det.dc.html'),('r1','b','Informar nova previsão','prever'),
-               ('r2a','b',f'Confirmar chegada de {CG["liq"]}','chegou'),('r2b','a','Voltar a Hoje no campo','MB-01.dc.html')])
-
-    # ---- MB-10det · pesagem-âncora CG-1207 ----
-    corpo=(
-      mcont('Cargas · fila da balança',f'{CG["id"]} · balança',H('ct_f'),H('ct_p'))
-      + card('Identificação',[
-          kv('Romaneio',CG['rom']+' · mamão Formosa de campo'),
-          kv('Ordem de colheita',f'{CG["oc"]} · vínculo obrigatório'),
-          kv('Rota',f'{CG["origem"]} → {CG["destino"]}'),
-          kv('Veículo',CG['veic']),
-          kv('Evidência',f'foto do ticket · 23/09 {CG["hora"]} · sincronização ok')],state='gray',desc='Confira veículo, ordem e rota antes de pesar.')
-      + counters(('BRUTO',CG['bruto']),('TARA',CG['tara']),('LÍQUIDO',CG['liq']))
-      + chips(dchip('ps'))
-      + note(f'Ao confirmar: romaneio {CG["rom"]} emitido com {CG["liq"]} · a {CG["oc"]} soma {CG["acum"]} (saldo {CG["saldo"]}) · não conclui a ordem de colheita nem o recebimento no packing.')
-      + btns(say('Registrar divergência','Divergência de 40 kg entre ticket e balança: pendência aberta com dono · a carga não sai até decisão.','alert','Registrar diferença de peso'),
-             say('Próxima carga',f'{CG["veic"]} liberada · Carreta 02 volta ao talhão T7 para a próxima carga (saldo {CG["saldo"]}).','truck','Chamar a próxima carga'))
-      + note('Confirmar a chegada no destino é tarefa do papel Recebedor; recusa registra motivo, quantidade e destinação proposta.'))
-    js=f'''const ok=!!s.ps; v.ps=ok; v.nops=!ok; v.ct_f=ok?'chegada no packing (Recebedor)':'pesar e emitir romaneio'; v.ct_p=ok?'Voltar às cargas':'Confirmar pesagem';
-DCH(v,'hdr',ok?'pesada · {CG["rom"]}':'na balança',ok?'green':'yellow');
-DCH(v,'ps',ok?'Romaneio {CG["rom"]} emitido · {CG["liq"]}':'Pesagem a confirmar',ok?'green':'yellow');
-v.pesar=()=>{{ self.setState({{ps:true,g2toast:'Pesagem confirmada · romaneio {CG["rom"]} emitido com {CG["liq"]} · {CG["oc"]} soma {CG["acum"]} — pesar não conclui a ordem de colheita.'}}); }};'''
-    emit('MB-10',f'{CG["id"]} · pesagem',f'papel Balança · romaneio {CG["rom"]} · vínculo à {CG["oc"]}',None,
-         f'Confirmar pesagem de {CG["liq"]}',corpo,H_=870,fname='MB-10det.dc.html',back='MB-10.dc.html',primary_href='MB-10.dc.html',js=js,dyn_status=True,
-         prim=[('nops','b',f'Confirmar pesagem de {CG["liq"]}','pesar'),('ps','a','Voltar às cargas','MB-10.dc.html')])
+const ords=Object.values(c.ordens).filter(o=>prEhColheita(o)&&o.etapa==='Em execução').sort((a,b)=>a.id.localeCompare(b.id));
+const F=s.m10||null; const f=s.f10||{{}}; const hoje=cenDdMm(CEN_DIA_OP);
+const abre=(o,k)=>{{ const cc=cenGet(); const n=k==='area'?((cc.app.nap||0)+1):((cc.app.ncg||0)+1); self.setState({{m10:{{os:o.id,k,chave:(k==='area'?'APC-':'APP-CG-')+o.id+'-'+n,n}},f10:{{}},m10e:''}}); }};
+v.c_vazio=!ords.length;
+v.ords=ords.map((o,i)=>{{ const cg=prCargas(c,g=>(g.origem||[]).some(x=>x.os===o.id)&&(g.st==='A pesar'||g.dcol===CEN_DIA_OP));
+  const ap=cg.filter(g=>g.st==='A pesar'); const rc=cg.filter(g=>g.st!=='A pesar'); const cb=(typeof carBloqColheita==='function')?carBloqColheita(c,o,'iniciar'):null; const pend=mbProv(o);
+  return {{id:o.id,tal:o.talhao,feito:'Feito '+cenNum(o.realizado,2)+' de '+cenNum(o.area,2)+' ha · saldo '+cenNum(o.saldo,2)+' ha'+(pend?' · +'+cenNum(pend,2)+' ha no aparelho':''),
+    cargas:(ap.length?ap.length+(ap.length>1?' cargas a pesar: ':' carga a pesar: ')+ap.map(g=>g.id+(g.est_cx?' (~'+g.est_cx+' cx)':'')+(g.sinc===false?' · no aparelho':'')).join(', '):'Nada a pesar')+(rc.length?' · '+rc.length+' recebida(s) hoje':''),
+    car:!!cb,car_t:cb?((cb.fim?'Carência até '+carAte(cb.fim):'Carência sem dados')+': novos turnos suspensos · '+cb.q):'',
+    bA:!F,bC:!F&&i>0,tA:'Apontar área · '+o.id,tC:'Registrar carga · '+o.id,ttA:'Apontar hectares e horas do turno na '+o.id,ttC:'Registrar uma carga que saiu do '+o.talhao,
+    ga:()=>abre(o,'area'),gc:()=>abre(o,'carga')}}; }});
+v.f_on=!!F; v.fa=!!F&&F.k==='area'; v.fc=!!F&&F.k==='carga'; v.f_tt=F?((F.k==='area'?'Apontar área · ':'Registrar carga · ')+F.os+' · '+((c.ordens[F.os]||{{}}).talhao||'')):'';
+const fs=(k)=>(e)=>self.setState({{f10:Object.assign({{}},self.state.f10||{{}},{{[k]:e.target.value}}),m10e:''}});
+v.f_ha=f.ha||''; v.f_h=f.h||''; v.f_cx=f.cx||''; v.f_kg=f.kg||''; v.f_pct=f.pct||''; v.f_setha=fs('ha'); v.f_seth=fs('h'); v.f_setcx=fs('cx'); v.f_setkg=fs('kg'); v.f_setpct=fs('pct');
+v.f_eha=''; v.f_eha_has=false; v.f_eh=''; v.f_eh_has=false;
+const oF=F&&c.ordens[F.os]; v.f_hha=oF?('Saldo da ordem: '+cenNum(Math.max(0,oF.saldo-mbProv(oF)),2)+' ha · data '+hoje):'';
+v.f_veics=['Carreta 01','Carreta 02','Caminhão 03'].map(x=>({{t:x,on:String(f.veic===x),st:mbPill(f.veic===x),tt:'Veículo da carga: '+x,go:()=>self.setState({{f10:Object.assign({{}},self.state.f10||{{}},{{veic:x}}),m10e:''}})}}));
+v.f_os2=[{{id:'',t:'Só este talhão'}}].concat(ords.filter(o=>!F||o.id!==F.os).map(o=>({{id:o.id,t:'+ '+o.talhao+' · '+o.id}}))).map(x=>({{t:x.t,on:String((f.os2||'')===x.id),st:mbPill((f.os2||'')===x.id),tt:x.id?'Carga com fruta também do '+x.t.slice(2):'Carga de um talhão só',go:()=>self.setState({{f10:Object.assign({{}},self.state.f10||{{}},{{os2:x.id}}),m10e:''}})}}));
+v.f_mix=!!f.os2; v.f_err=!!s.m10e; v.f_errt=s.m10e||'';
+v.f_cancel=()=>self.setState({{m10:null,f10:{{}},m10e:''}});
+v.grava=()=>{{ if(!F) return; let r;
+  if(F.k==='area'){{ const ha=mbNum(f.ha), h=mbNum(f.h); if(!(ha>0)){{ self.setState({{m10e:'Informe os hectares colhidos (maior que 0).'}}); return; }} if(!(h>0)){{ self.setState({{m10e:'Informe as horas trabalhadas.'}}); return; }}
+    r=cenMudar(null,cc=>{{ cc.app.nap=Math.max(cc.app.nap||0,F.n); const R=cenApontar(cc,{{os:F.os,d:hoje,ha,h,origem:'app',quem:cc.app.operador,chave:F.chave}});
+      return {{msg:R.repetido?'Área já registrada ('+F.os+' · '+cenNum(ha,2)+' ha): nada somado de novo.':('Área apontada: '+cenNum(ha,2)+' ha em '+cenNum(h,1)+' h na '+F.os+(R.ap.sinc?'.':' · salva no aparelho, envia quando houver sinal.')+' A produção só muda com a carga pesada.')}}; }}); }}
+  else {{ if(!f.veic){{ self.setState({{m10e:'Toque no veículo da carga.'}}); return; }} const mix=f.os2?[{{os:F.os,pct:mbNum(f.pct),modo:'estimada'}},{{os:f.os2,pct:100-mbNum(f.pct),modo:'estimada'}}]:null;
+    if(f.os2&&!(mbNum(f.pct)>0&&mbNum(f.pct)<100)){{ self.setState({{m10e:'Informe a participação do talhão desta O.S. (entre 0 e 100 %).'}}); return; }}
+    r=cenMudar(null,cc=>{{ cc.app.ncg=Math.max(cc.app.ncg||0,F.n); return prCarga(cc,{{os:F.os,mix,cx:mbNum(f.cx)||0,kg:mbNum(f.kg)||0,veic:f.veic,via:'app',quem:cc.app.operador,chave:F.chave,dcol:CEN_DIA_OP}}); }}); }}
+  if(r.erro){{ self.setState({{m10e:r.erro}}); return; }} self.setState({{m10:null,f10:{{}},m10e:'',cenrev:Date.now(),g2toast:r.msg}}); }};
+v.p_grava=!!F&&r===0; v.p_gt=F?(F.k==='area'?'Gravar área':'Gravar carga'):''; v.p_carga=!F&&r===0&&ords.length>0; v.p_ct=ords.length?'Registrar carga · '+ords[0].id:''; v.p_cgo=()=>{{ if(ords[0]) abre(ords[0],'carga'); }};
+v.p_volta=!F&&r===0&&!ords.length; v.p_prev=r===1;
+const ap=[].concat(...ords.map(o=>prAPesar(c,o.id)));
+if(r===1) DCH(v,'hdr','atrasado · prev. '+(s.np?'10:20':'09:10'),'red'); else DCH(v,'hdr',ords.length?(ords.length+(ords.length>1?' colheitas em execução':' colheita em execução')+(ap.length?' · '+ap.length+' a pesar':'')):'nenhuma colheita em execução',ords.length?'green':'gray');'''
+    emit('MB-10','Cargas e entregas','colheita: área e cargas do talhão · motorista: viagem',None,
+         'Registrar carga',corpo,H_=1180,back='MB-01.dc.html',primary_href='MB-10.dc.html',js=js,dyn_status=True,cen=True,
+         prim=[('p_grava','b',H('p_gt'),'grava'),('p_carga','b',H('p_ct'),'p_cgo'),('p_volta','a','Voltar a Hoje no campo','MB-01.dc.html'),('p_prev','b','Informar nova previsão','prever')])
 
 
 # ===================== Carência e destino no app de campo (MAPA-CARENCIA-LMR-20261003) =====================

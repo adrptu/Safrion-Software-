@@ -20,7 +20,8 @@ for a in AREAS:
         FALHAS.append((a,repr(ex))); traceback.print_exc()
 if FALHAS: print('MÓDULOS COM FALHA:',FALHAS)
 # telas que deixaram de ser geradas (01/10: O.S. sem revisão; o agrônomo libera na tela O.S.): o arquivo de um build anterior sai do project/ e do canvas
-for _f in ('IN-02det.dc.html','IN-02x-os0420.dc.html'):
+# 06/10 (colheita, D-16): MB-10det (pesagem com dados locais) sai; pesar e receber ficam em Produção › Cargas e recebimento (CARGA)
+for _f in ('IN-02det.dc.html','IN-02x-os0420.dc.html','MB-10det.dc.html'):
     if os.path.exists(os.path.join(E.P,_f)): os.remove(os.path.join(E.P,_f))
 # tudo que foi escrito no project/ com meta conhecida entra no canvas
 from ui37 import HEIGHTS37, _h
@@ -37,7 +38,7 @@ boards={}; order=[]; notes={}
 # ---- página 1 · menu vigente ----
 VIS_ROWS=[('Índice',['Main.dc.html']),('Mapa',['IN-04.dc.html'])]+[(nome,[h for _,h in items]) for nome,ic,items in MENU2 if nome!='Mapa']
 # App de campo (prioridade de teste com os primeiros clientes, DEC-2609-13): mesmo cenário da O.S. e do Estoque
-VIS_ROWS.append(('App de campo',['MB-01.dc.html','MB-02.dc.html','MB-03.dc.html','MB-04.dc.html','MB-05.dc.html']))
+VIS_ROWS.append(('App de campo',['MB-01.dc.html','MB-02.dc.html','MB-03.dc.html','MB-04.dc.html','MB-05.dc.html','MB-07.dc.html','MB-10.dc.html']))   # MB-07 e MB-10 no estado (colheita, 06/10)
 detalhes={'Agrícola':['CA-01det.dc.html','CA-01x-os0420.dc.html','OS-0424-app.dc.html','OS-0424-ficha.dc.html','AG-01det.dc.html','IR-02.dc.html','IR-03.dc.html','IR-03det.dc.html','IR-04.dc.html'],
           'Manutenção':['MA-04det.dc.html'],'Cadastros':[f for f in files if f.startswith('CD-') and 'det' in f]}
 y=0; placed=set()
