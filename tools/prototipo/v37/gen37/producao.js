@@ -147,7 +147,7 @@ function prRascunho(c, cid, par) { const k = PRDC.cult[cid]; if (!k) return null
   if (!k.meta) return null; return { base: 'meta', safra: prMul(prMul(k.area, k.meta), prUn(k.cultura).massa) }; }
 function prSemComecou(sem) { return prSemIni(sem) <= prHoje(); }
 /* semanas publicáveis do rascunho: só as que ainda não começaram e mudam o que está publicado */
-function prPublicavel(c, cid) { const r = prRascunho(c, cid); if (!r) return null; const vs = prP(c).previsoes[cid] || []; const ult = vs[vs.length - 1] || null;
+function prPublicavel(c, cid, par) { const r = prRascunho(c, cid, par); if (!r) return null; const vs = prP(c).previsoes[cid] || []; const ult = vs[vs.length - 1] || null;
   if (r.safra !== undefined) { const ini = (PRDC.cult[cid].colheita || ''); if (ult && ult.safra !== undefined && prCmp(ult.safra, r.safra) === 0) return null; if (ini && ini <= prHoje()) return null; return { safra: r.safra, base: r.base }; }
   const sem = {}; Object.keys(r.sem).filter(s => !prSemComecou(s)).forEach(s => { const v = prVersaoSem(c, cid, s); if (!v || prCmp(v.sem[s], r.sem[s]) !== 0) sem[s] = r.sem[s]; });
   return Object.keys(sem).length ? { sem, base: r.base, par: r.par, cnt: r.cnt ? r.cnt.id : '' } : null; }
@@ -243,8 +243,11 @@ function prContar(c, k) { const P = prP(c, 1); const kk = PRDC.cult[k.cult];
     + '. A previsão só muda quando ' + prQuem('ag') + ' publicar.' + (on ? '' : ' Salvo no aparelho; envia quando houver sinal.'), cnt: x }; }
 
 /* publicar previsão (Ana): congela a versão nova só das semanas que ainda não começaram (R-17) */
-function prPublicar(c, cid, quem) { const kk = PRDC.cult[cid]; if (!kk) throw new Error('Cultivo não encontrado.'); const P = prP(c, 1);
-  const pb = prPublicavel(c, cid); if (!pb) throw new Error('Nada novo a publicar no ' + kk.local + ': a versão vigente já tem as semanas que ainda não começaram.');
+function prPublicar(c, cid, quem, par) { const kk = PRDC.cult[cid]; if (!kk) throw new Error('Cultivo não encontrado.'); const P = prP(c, 1);
+  if (par) { const ph = Number(par.plantas_ha), pe = String(par.perda === undefined ? '' : par.perda).replace(',', '.');
+    if (!(ph > 0 && ph < 10000) || Math.floor(ph) !== ph) throw new Error('Plantas vivas por hectare: número inteiro maior que zero.');
+    if (!prNumOk(pe) || Number(pe) < 0 || Number(pe) >= 1) throw new Error('Perda entre 0 e 100 %.'); par = { plantas_ha: ph, perda: pe }; }
+  const pb = prPublicavel(c, cid, par); if (!pb) throw new Error('Nada novo a publicar no ' + kk.local + ': a versão vigente já tem as semanas que ainda não começaram.');
   const vs = P.previsoes[cid] = P.previsoes[cid] || []; const v = { v: vs.length + 1, d: prHoje(), at: cenAgora(), por: quem || prQuem('ag'), base: pb.base, cnt: pb.cnt || '' };
   if (pb.safra !== undefined) v.safra = pb.safra; else { v.sem = pb.sem; v.plantas_ha = pb.par.plantas_ha; v.perda = pb.par.perda; }
   vs.push(v);

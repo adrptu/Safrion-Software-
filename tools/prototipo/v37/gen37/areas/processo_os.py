@@ -207,7 +207,11 @@ def _nova_ordem_dados():
         for a in pl['atividades']:
             for x in a['prods']: prods.setdefault(x['prod'],dict(p=x['prod'],un=x['un'],g=x['grupo']))
     for l in cenario.seed()['lotes'].values(): prods.setdefault(l['prod'],dict(p=l['prod'],un=l['un'],g=''))
-    return dict(safs=[dict(id=s['id'],t=s['nome'],mf=s['nome'].replace('Safra ','')) for s in safs],cult=cult,planos=planos,
+    # A-05 (colheita, 06/10): a ordem nova herda a fazenda da safra e o rótulo de safra do filtro do topo ('Safra Mamão 2026/27' → '2026/27');
+    # antes nascia na Santa Rita com saf 'Mamão 2026/27' e sumia do filtro Lagoa Grande · 2026/27
+    import re as _re
+    _mf=lambda n: (_re.search(r'\d{4}/\d{2}',n).group(0) if _re.search(r'\d{4}/\d{2}',n) and not n.startswith('Safrinha') else n.replace('Safra ',''))
+    return dict(safs=[dict(id=s['id'],t=s['nome'],mf=_mf(s['nome']),faz=s.get('fazenda','Santa Rita')) for s in safs],cult=cult,planos=planos,
                 conj={op:dict(conj=c['conj'],rend=c['rend']) for op,c in CJ.items()},emb=cenario.EMB,prods=sorted(prods.values(),key=lambda x:x['p']))
 
 JS_NUCLEO=r'''
@@ -721,6 +725,8 @@ function EXTRAVALS(self,v){
     const tm=/^#tal=([^|]+)\|(.+)$/.exec(h); if(tm){ const k=tm[1]+'|'+tm[2]; const ex=ords(self).some(o=>o.faz===tm[1]&&(o.talhoes||[]).some(t=>t.id===tm[2])); if(!ex) return;
       const f=Object.assign({},g2st(self,'g_os').f||{}); f.tal=[k]; const st={}; if(mfFaz(self)!=='Todas'&&mfFaz(self)!==tm[1]) st.mf_faz=tm[1];
       setTimeout(()=>{ if(Object.keys(st).length) self.setState(st); g2set(self,'g_os',{f,fmc:null}); },0); return; }
+    const nm=/^#nova:([^:]+):([^:]+):(\d{4}-\d{2}-\d{2})$/.exec(h); if(nm){ const sf=OSD.nova.safs.find(x=>(OSD.nova.cult[x.id]||[]).some(k=>k.id===nm[1])); if(!sf) return;   /* Programar colheita (Produção › Previsão e colheita): só preenche; Ana confirma Emitir */
+      const st={nv:{saf:sf.id,cult:nm[1],atv:nm[2],jan:nm[3],errs:{},warn:false,pre:true},pan:null}; if(mfFaz(self)!=='Todas'&&sf.faz&&sf.faz!==mfFaz(self)) st.mf_faz=sf.faz; setTimeout(()=>self.setState(st),0); return; }
     const m=/^#(O[SB]-\d+)(?::(ajustar))?$/.exec(h); if(!m) return;
     const oh=ords(self).find(o=>o.id===m[1]); if(!oh) return; const f=mfFaz(self); const st={pan:oh.id,pa:null}; if(f!=='Todas'&&oh.faz&&oh.faz!==f) st.mf_faz=oh.faz;
     if(m[2]==='ajustar') self.__ajAuto=oh.id; setTimeout(()=>self.setState(st),0); };
@@ -866,15 +872,19 @@ function EXTRAVALS(self,v){
       else if(!cur.atv) errs.atv='Escolha a atividade.';
       if(!cur.jan) errs.jan='Informe o início da janela.';
       const all=ords(self); let dupId='';
-      if(!Object.keys(errs).length){ const k=cur.cult+'|'+cur.atv; const dup=all.find(x=>(x.keys||[]).indexOf(k)>=0&&x.etapa!=='Canceladas'); if(dup){ errs.atv='Já existe '+dup.id+' para esta atividade neste cultivo.'; dupId=dup.id; } }
+      const a0=pl&&pl.atv.find(x=>x.id===cur.atv); const kc=(typeof PRDC!=='undefined'&&PRDC.cult[cur.cult])||null; const semana=!!(kc&&kc.semanal&&a0&&/^Colheita/.test(a0.op)&&cur.jan);
+      const sn=semana?prSemN(prSem(cur.jan)):0;   /* R-18: perene de fruta, uma O.S. de colheita por cultivo e semana */
+      if(!Object.keys(errs).length){ const k=semana?cur.cult+'|S'+sn:cur.cult+'|'+cur.atv;
+        const dup=all.find(x=>x.etapa!=='Canceladas'&&((x.keys||[]).indexOf(k)>=0||(semana&&x.talhao===c.local&&/^Colheita/.test(String(x.tipo||''))&&new RegExp('semana '+sn+'\\b').test(String(x.tipo||'')))));
+        if(dup){ errs.atv='Já existe '+dup.id+(semana?' para a colheita da semana '+sn+' neste talhão.':' para esta atividade neste cultivo.'); dupId=dup.id; } }
       if(Object.keys(errs).length){ self.setState({nv:Object.assign({},cur,{errs,warn:false,dup:dupId})}); return; }
       const a=pl.atv.find(x=>x.id===cur.atv); const s=OSD.nova.safs.find(x=>x.id===cur.saf);
       const num=440+all.filter(x=>x.novo).length; const id='OS-0'+num;
       // insumos da atividade do plano: dose × área do cultivo (a semente leva a variedade do cultivo); nada é reservado antes de liberar
       const ins=(a.ins||[]).map(x=>({g:x.g,p:x.p.replace(/ · (variedade|híbrido) do cultivo$/,' '+c.var),dose:x.dose,un:x.un,tot:cenQtd(x.dose,c.area),sit:'Reserva ao liberar'}));
       const cj=(OSD.nova.conj||{})[a.op]||null;
-      const no={id,novo:true,keys:[cur.cult+'|'+cur.atv],tipo:(a.op===a.nome?a.nome:a.op+' · '+a.nome),talhao:c.local,area:c.area,etapa:'A liberar',selos:[],
-        faz:'Santa Rita',saf:s.mf,cultura:c.cultura||'',obs:'',agua:false,ins,semins:'',bloq:null,aviso:'',dono:OS_AGRO,prazo:'liberar',
+      const no={id,novo:true,keys:[semana?cur.cult+'|S'+sn:cur.cult+'|'+cur.atv],tipo:semana?'Colheita · semana '+sn:(a.op===a.nome?a.nome:a.op+' · '+a.nome),talhao:c.local,area:c.area,etapa:'A liberar',selos:[],
+        faz:s.faz||'Santa Rita',saf:s.mf,cult:c.id,cultura:c.cultura||'',obs:'',agua:false,ins,semins:'',bloq:null,aviso:'',dono:OS_AGRO,prazo:'liberar',
         atv:{op:a.op,nome:a.nome,gat:a.gat||'',orig:pl.nome+' v'+pl.versao,conj:cj?cj.conj:'',rend:cj?cj.rend:0},
         realizado:0,saldo:c.area,resp:'—',versao:'v1',janela:'a partir de '+brd(cur.jan),ap:[],nota:'',
         cond:'Ana (agrônoma) confere, ajusta se precisar e libera; liberar exige a prontidão de máquina, equipe e insumos. Próximo passo: liberar para execução.',

@@ -51,11 +51,13 @@ def catalogo():
         cid = next((k for k in de.get(o['talhao'], []) if cult[k]['saf'] == sid), None)
         if cid: oscult[o['id']] = cid
     locais = {i: dict(id=i, nome=n, faz=f, tipo=t) for i, n, f, t, *_ in DC.LOCAIS}
+    # atividade de colheita de cada plano (a primeira, só como modelo de operação da O.S. nova · spec §3.5)
+    colh = {pl['id']: next((a['id'] for a in pl['atividades'] if str(a.get('op', '')).startswith('Colheita')), None) for pl in D2.PLANOS}
     from areas import comercial as CM   # obrigações físicas da soja 26/27 (VE-05; D-19: sc de 60 kg)
     obrig = [dict(id='CT-203', tipo='Contrato', sc=CM.CT203, cont='Coop Grão Sul'), dict(id=CM.CPR['id'], tipo='CPR', sc=CM.CPR['sc'], cont=CM.CPR['contraparte']),
              dict(id=CM.BT['id'], tipo='Barter', sc=CM.BT['sc'], cont='Fornecedor de insumos')]
     return dict(un=DC.CULTURA_UN, safras=safras, cult=cult, cultDe=de, osCult=oscult, locais=locais, recLocal=REC_LOCAL, proc=list(PROC),
-                fruta=FRUTA, quem=QUEM, obrig=[dict(x, prod='Soja em grão', cultura='Soja', saf='2026/27') for x in obrig],
+                fruta=FRUTA, quem=QUEM, colhAtv={k: v for k, v in colh.items() if v}, obrig=[dict(x, prod='Soja em grão', cultura='Soja', saf='2026/27') for x in obrig],
                 dest={'MI-BR': 'Mercado interno · Brasil'})
 
 
