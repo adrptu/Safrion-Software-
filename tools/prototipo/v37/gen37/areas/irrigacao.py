@@ -162,11 +162,14 @@ function irrQ(r,k,m,vazio){ r.v[k]=irrIsoM(m); r.p[k]=[m===null||m===undefined?{
 def ir01():
     fname='IR-01.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1000
     # uma variável por coluna (TABELAS-FOCO, 04/10/2026): cultura, estádio, área, déficit (≈ quando estimado) e a fonte dele, necessidade bruta,
-    # a ordem que cobre, quanto cobre e quanto resta, situação (chip), próximo passo e responsável. Fazenda só com "Todas" no topo
+    # passadas (a lâmina acima do limite por passada vira passadas iguais), a ordem que cobre, quanto cobre e quanto resta, situação (chip), a
+    # pendência que explica a situação (falta insumo, bomba parada, conflito, pausada…), a próxima passada (instante), próximo passo e responsável.
+    # Fazenda só com "Todas" no topo
     g_set=grid([dict(k='setor',l='Setor',w=100),dict(k='faz',l='Fazenda',w=110),dict(k='cult',l='Cultura',w=110),dict(k='estd',l='Estádio',w=120),dict(k='ha',l='Área',t='num',a='r',un='ha'),
                 dict(k='def',l='Déficit hoje',t='num',a='r',un='mm',d=1),dict(k='fon',l='Fonte do déficit',w=140),dict(k='nec',l='Necessidade bruta',t='num',a='r',un='mm',d=2,dmin=1),
-                dict(k='ord',l='Ordem',w=90),dict(k='cob',l='Cobertura',t='num',a='r',un='%'),dict(k='resta',l='Resta',t='num',a='r',un='mm',d=1),
-                dict(k='sit',l='Situação',w=150),dict(k='prox',l='Próximo passo',w=170),dict(k='dono',l='Responsável',w=120)],[],
+                dict(k='np',l='Passadas',t='num',a='r'),dict(k='ord',l='Ordem',w=90),dict(k='cob',l='Cobertura',t='num',a='r',un='%'),dict(k='resta',l='Resta',t='num',a='r',un='mm',d=1),
+                dict(k='sit',l='Situação',w=150),dict(k='pend',l='Pendência',multi=True,w=200),dict(k='pps',l='Próxima passada',t='date',w=130),
+                dict(k='prox',l='Próximo passo',w=170),dict(k='dono',l='Responsável',w=120)],[],
                edit=dict(m='form',title='Setor',sub='Os limites valem para a próxima programação; ordens liberadas não mudam.',
                    fields=[dict(k='defT',l='Déficit hoje',ro=True),dict(k='necT',l='Necessidade',ro=True),dict(k='eqT',l='Equipamento',ro=True),
                            dict(k='lmax',l='Lâmina máxima por passada',t='num',req=True,min=1,max=40,u='mm'),dict(k='imin',l='Intervalo mínimo entre inícios',t='num',req=True,min=6,max=96,u='h'),
@@ -198,15 +201,20 @@ function PREVALS(self,v){ irrOuvir(self); const s=irrGet(); const fz=irrFazK(sel
     const so=irrSonda(s,x); o2.push({t:'Fontes: '+(F.demo?'ETo de referência (demonstrativa)':'Estação Santa Rita')+(so?' · '+so.nome+' '+so.st.toLowerCase()+(so.motivo?' ('+so.motivo+')':''):''),h:'IR-04.dc.html'});
     const eq=(x.tipo==='gotejo'?'Gotejo':'Pivô')+' · '+irrN(x.ha)+' ha · '+irrN(x.vazao)+' L/s · '+x.bnome+' · '+((s.capt[x.capt]||{}).nome||'');
     const r={id:k,rk:RK[si.sit]||9,ro:!b,ac:si.acao,acId:(o?o.id:(top&&top.fert&&!/^Programar/.test((si.acao||[''])[0])?top.fert:x.nome)),fe:!!(top&&top.fert),o:o2.map(z=>typeof z==='string'?{t:z}:z),
-      v:{ha:x.ha,def:temD?si.d:'',nec:temN?n.br:'',cob:cobN,resta:restaN,lmax:x.lmax,imin:x.imin,efic:x.efic,defT:si.d===null?'—':((si.est?'≈':'')+irrN(si.d,1)+' mm · '+si.fon),necT:temN?('líquida '+irrN(n.liq,1)+' mm · bruta '+irrMm(n.br)+' mm · '+n.np+(n.np>1?' passadas de ':' passada de ')+irrMm(n.por)+' mm'):'sem lâmina hoje',eqT:eq},
+      v:{ha:x.ha,def:temD?si.d:'',nec:temN?n.br:'',np:temN?n.np:'',cob:cobN,resta:restaN,lmax:x.lmax,imin:x.imin,efic:x.efic,defT:si.d===null?'—':((si.est?'≈':'')+irrN(si.d,1)+' mm · '+si.fon),necT:temN?('líquida '+irrN(n.liq,1)+' mm · bruta '+irrMm(n.br)+' mm · '+n.np+(n.np>1?' passadas de ':' passada de ')+irrMm(n.por)+' mm'):'sem lâmina hoje',eqT:eq},
       s:{},p:{def}};
     irrTxt(r,'setor',x.nome,true); irrTxt(r,'faz',F.nome); irrTxt(r,'cult',CE.c); irrTxt(r,'estd',CE.e); r.s.def=temD?(si.est?'≈':'')+irrN(si.d,1)+' mm':''; irrTxt(r,'fon',fon);
     r.p.ha=[{k:'txt',t:irrN(x.ha,2,0)}]; r.s.ha=irrN(x.ha,2,0);
-    r.p.nec=[temN?{k:'txt',t:irrMm(n.br)}:{k:'mut',t:'—'}]; r.s.nec=temN?irrMm(n.br):''; irrTxt(r,'ord',ordId);
+    r.p.nec=[temN?{k:'txt',t:irrMm(n.br)}:{k:'mut',t:'—'}]; r.s.nec=temN?irrMm(n.br):''; irrTxt(r,'np',temN?String(n.np):''); irrTxt(r,'ord',ordId);
     // cobertura da ordem sobre o déficit de hoje; ordem do próximo ciclo não cobre o de hoje (a célula diz isso)
     r.p.cob=[cobN!==''?{k:'txt',t:String(cobN)}:(cb&&cb.prox?{k:'mut',t:'próximo ciclo'}:{k:'mut',t:'—'})]; r.s.cob=cobN!==''?String(cobN):(cb&&cb.prox?'próximo ciclo':'');
     r.p.resta=[restaN!==''?{k:'txt',t:irrN(restaN,1)}:{k:'mut',t:'—'}]; r.s.resta=restaN!==''?irrN(restaN,1):'';
     r.p.sit=[{k:'chip',t:si.sit,c:SITC[si.c]||'gray'}]; r.s.sit=si.sit;
+    // pendência e próxima passada do mesmo item que dá a situação e o próximo passo (ordem de água ou fertirrigação da O.S.)
+    let pen=[], pps=null, ppsV='—';
+    if(top&&top.o){ pen=irrSelos(s,top.o); const pp=irrPassProx(top.o); if(pp){ pps=pp.ini; ppsV='a definir'; } }
+    else if(top&&top.fert){ const fb=irrFertBloq(top.fert); pen=fb?[{t:fb.t,c:'red'}]:[]; const f=s.fert[top.fert]; const e2=irrFertEtapa(top.fert); if(f&&f.ini&&(e2==='A liberar'||e2==='Liberadas')) pps=f.ini; }
+    irrLst(r,'pend',pen,'chip'); irrQ(r,'pps',pps,ppsV);
     r.p.prox=si.acao?[{k:'link',t:si.acao[0],h:si.acao[1]}]:[{k:'mut',t:'—'}]; r.s.prox=si.acao?si.acao[0]:''; irrTxt(r,'dono',si.acao?(si.dono||''):'');
     return r; });
   rows.sort((a,b)=>(a.rk-b.rk)||((a.fe?1:0)-(b.fe?1:0))||String(a.id).localeCompare(String(b.id),'pt-BR',{numeric:true}));

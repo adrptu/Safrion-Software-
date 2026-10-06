@@ -56,11 +56,15 @@ try:
     abre('Main.dc.html', .3); J("localStorage.clear(); sessionStorage.clear()")
     # ================= IR-01 =================
     abre('IR-01.dc.html'); g = Grade(J, 0)
-    SET = ['Setor', 'Cultura', 'Estádio', 'Área', 'Déficit hoje', 'Fonte do déficit', 'Necessidade bruta', 'Ordem', 'Cobertura', 'Resta', 'Situação', 'Próximo passo', 'Responsável']
+    SET = ['Setor', 'Cultura', 'Estádio', 'Área', 'Déficit hoje', 'Fonte do déficit', 'Necessidade bruta', 'Passadas', 'Ordem', 'Cobertura', 'Resta', 'Situação', 'Pendência', 'Próxima passada', 'Próximo passo', 'Responsável']
     d = tf03('IR-01 Setores', g, SET, extra=('próximo ciclo',))
     p2 = next((r for r in d if r.get('Setor') == 'Pivô 2'), {}); t7 = next((r for r in d if r.get('Setor') == 'Gotejo T7'), {})
-    chk('IR-01: Pivô 2 = Milho | V10 | 80 ha | 11,2 mm | Medido | 12,44 mm | OS-0419 | 87 % | 1,5 mm | A conferir | Conferir medição | João',
-        [p2.get(k) for k in SET[1:]] == ['Milho', 'V10', '80 ha', '11,2 mm', 'Medido', '12,44 mm', 'OS-0419', '87 %', '1,5 mm', 'A conferir', 'Conferir medição', 'João'], p2)
+    chk('IR-01: Pivô 2 = Milho | V10 | 80 ha | 11,2 mm | Medido | 12,44 mm | 2 | OS-0419 | 87 % | 1,5 mm | A conferir | Divergência · −3,8 % | — | Conferir medição | João',
+        [p2.get(k) for k in SET[1:]] == ['Milho', 'V10', '80 ha', '11,2 mm', 'Medido', '12,44 mm', '2', 'OS-0419', '87 %', '1,5 mm', 'A conferir', 'Divergência · −3,8 %', '—', 'Conferir medição', 'João'], p2)
+    p1 = next((r for r in d if r.get('Setor') == 'Pivô 1'), {})
+    chk('IR-01: a pendência explica a situação e a próxima passada tem coluna própria (Pivô 1 Impedida · Falta insumo · Ureia 45% · amanhã 21:00; Gotejo T7 Conflito · parada da B3 · hoje 14:00)',
+        [p1.get(k) for k in ('Situação', 'Pendência', 'Próxima passada', 'Próximo passo')] == ['Impedida', 'Falta insumo · Ureia 45%', 'amanhã 21:00', 'Programar só água']
+        and [t7.get(k) for k in ('Pendência', 'Próxima passada')] == ['Conflito · parada da B3', 'hoje 14:00'], (p1, t7))
     chk('IR-01: déficit estimado com ≈ e a fonte em coluna própria (Gotejo T7 ≈10,0 mm · Estimativa por ET)', t7.get('Déficit hoje') == '≈10,0 mm' and t7.get('Fonte do déficit') == 'Estimativa por ET', t7)
     qf = J("[...document.querySelectorAll('[role=group][aria-label^=\"Filtro rápido\"] button')].map(b=>b.innerText.replace(/\\s+\\d+$/,'').trim())") or []
     chk('IR-01: o filtro rápido de Situação tem os mesmos textos dos chips da coluna', set(x for x in qf if x != 'Todos') == {r.get('Situação') for r in d}, (qf, [r.get('Situação') for r in d]))
@@ -68,6 +72,8 @@ try:
     chk('IR-01: filtro Fonte do déficit = Estimativa por ET → Gotejo T7 e Pivô 1', sorted(fl) == ['Gotejo T7', 'Pivô 1'], fl)
     limpa(J); g.ordena('Déficit hoje', desc=True); df = [num(x) for x in g.col('Déficit hoje')]
     chk('IR-01: ordenar Déficit hoje (decrescente) pelo número (o ≈ não atrapalha)', crescente(df, True), g.col('Déficit hoje'))
+    limpa(J); g.ordena('Próxima passada'); pp = [r.get('Setor') for r in g.dicts() if r.get('Próxima passada') not in ('', '—')]
+    chk('IR-01: ordenar Próxima passada pelo instante (hoje 14:00 antes de amanhã 21:00)', pp[:2] == ['Gotejo T7', 'Pivô 1'], g.col('Próxima passada'))
     fazenda('Todas'); g = Grade(J, 0); hs = g.labels(); d = g.dicts()
     pv2 = sorted(r.get('Fazenda') for r in d if r.get('Setor') == 'Pivô 2')
     chk('IR-01 Todas: a coluna Fazenda entra (Pivô 2 da Santa Rita e da Lagoa Grande se distinguem) e cada célula fica sob o seu cabeçalho',

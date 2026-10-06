@@ -42,14 +42,16 @@ try:
     # ---------- IR-01 ----------
     goto('IR-01.dc.html'); b = J("document.body.innerText")
     chk('IR-01: título igual ao menu, sem seções explicativas nem rodapé de regra', J("document.querySelector('h1').innerText.trim()") == 'Irrigação' and 'Passagem parcial do pivô' not in b and 'Água sem produto não passa' not in b)
-    chk('IR-01: P2 11,2 mm medido · P1 ≈8,4 mm e T7 ≈10,0 mm por estimativa de ET', '11,2 mm' in ROW('Pivô 2') and 'medido' in ROW('Pivô 2') and '≈8,4 mm' in ROW('Pivô 1') and 'Estimativa por ET' in ROW('Pivô 1') and '≈10,0 mm' in ROW('Gotejo T7'))
-    chk('IR-01: T7 cobre 38 % e resta 6,2 mm; primeiro da lista é o impedido (Resolver conflito)', 'cobre 38 % · resta 6,2 mm' in ROW('Gotejo T7') and J("[...document.querySelectorAll('[role=row].g2ed')][0].innerText").startswith('Gotejo T7') and 'Resolver conflito' in ROW('Gotejo T7'))
+    # TABELAS-FOCO (06/10/2026): uma variável por coluna. A fonte do déficit tem coluna própria ("Medido"), cobertura e resta são colunas
+    # numéricas ("38 %" | "6,2 mm") e as passadas têm a coluna Passadas (antes "12,44 mm brutos em 3 passadas" numa célula)
+    chk('IR-01: P2 11,2 mm medido · P1 ≈8,4 mm e T7 ≈10,0 mm por estimativa de ET', '11,2 mm Medido' in ROW('Pivô 2') and '≈8,4 mm' in ROW('Pivô 1') and 'Estimativa por ET' in ROW('Pivô 1') and '≈10,0 mm' in ROW('Gotejo T7'))
+    chk('IR-01: T7 cobre 38 % e resta 6,2 mm; primeiro da lista é o impedido (Resolver conflito)', '38 % 6,2 mm' in ROW('Gotejo T7') and J("[...document.querySelectorAll('[role=row].g2ed')][0].innerText").startswith('Gotejo T7') and 'Resolver conflito' in ROW('Gotejo T7'))
     rowopen('Pivô 2'); d = DLG()
     chk('IR-01: painel do setor com a memória (irrigação líquida) e a passagem parcial só na área coberta',
         '5,0 + ETc 7 dias 35,1 − chuva efetiva 12,0 − irrigação líquida 16,9 = 11,2 mm' in d and 'faixa de 11,6 ha (OS-0394): 1,8 mm · resto do pivô: 11,2 mm' in d
         and '1.206 m³ em 11,6 ha = 10,4 mm brutos na faixa × 90 % = 9,36 mm líquidos · fora do déficit do pivô · provisório' in d, d[d.find('Passagem parcial'):][:700])
     sv('#fx_g_set_lmax', '4,5'); clk('Salvar', 'aside[role=dialog]'); t = T()
-    chk('IR-01: limite de 4,5 mm vale para a próxima programação; OS-0419 liberada não muda', 'até 4,5 mm por passada' in t and 'OS-0419 não muda' in t and '3 passadas' in ROW('Pivô 2'), [t, ROW('Pivô 2')])
+    chk('IR-01: limite de 4,5 mm vale para a próxima programação; OS-0419 liberada não muda', 'até 4,5 mm por passada' in t and 'OS-0419 não muda' in t and '12,44 mm 3 OS-0419' in ROW('Pivô 2'), [t, ROW('Pivô 2')])
     # ---------- IR-02 ----------
     goto('IR-02.dc.html'); hd = J("[...document.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/\\s+/g,' ').trim())")
     chk('IR-02: cabeçalho "1 conflito · 1 janela a definir"; agenda por captação, sem coluna Ação', '1 conflito · 1 janela a definir' in HDR() and not any(h.startswith('AÇÃO') or h.startswith('Ação') for h in hd) and 'Rio · captação da sede' in J("document.body.innerText"), [HDR(), hd])
