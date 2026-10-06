@@ -232,10 +232,10 @@ function M(self){ sx(self);
       return {f:p.f,nome:fnome(p.f),preco,prazo:p.prazo,frete:p.frete,pag:p.pag,validade:p.validade,fr,unit:preco+fr,hora:got['C_'+gi+'_'+p.f],chega,late:!!(falta&&chega>falta),
         label:fnome(p.f)+' · '+rs(preco)+'/'+it.un+' · '+p.prazo+' dias · '+p.frete}; }).sort((a,b)=>a.unit-b.unit);
     const low=props.length?props[0]:null;                 // menor custo total (selo)
-    const ref=props.find(p=>!p.late)||low;                // menor custo entre as que chegam a tempo: escolha padrão e referência da justificativa
+    const ref=cmpRef(props);                              // DEM-08 (cal01.js): menor custo a tempo; sem nenhuma a tempo, a que chega primeiro
     let ch=s.f?(props.find(p=>p.f===s.f)||null):null; if(!ch) ch=ref;
-    const naoMenor=!!(ch&&(ch.late||(ref&&ch.f!==ref.f&&ch.unit>ref.unit+1e-9))); const just=String(s.just||'');
-    return Object.assign({},it,{gi,rid:'I_'+it.i,ped,props,low,ref,ch,falta,naoMenor,just,justPend:naoMenor&&!just.trim(),tot:ch?ped*ch.unit:0}); });
+    const naoMenor=cmpJust(ch,ref,props); const just=String(s.just||''); const esc=cmpEscolha(ch,ref,low,props);
+    return Object.assign({},it,{gi,rid:'I_'+it.i,ped,props,low,ref,ch,falta,naoMenor,esc,just,justPend:naoMenor&&!just.trim(),tot:ch?ped*ch.unit:0}); });
   const byF={}; items.forEach(it=>{ if(!it.ch||!(it.ped>0)) return; (byF[it.ch.f]||(byF[it.ch.f]=[])).push(it); });
   const pcs=CD.forn.filter(f=>byF[f.id]).map((f,ix)=>{ const its=byF[f.id];
     return {id:'PC-'+(SX.pcIni+ix),f:f.id,nome:f.nome,itens:its,valor:its.reduce((a,x)=>a+x.tot,0),prazo:Math.max.apply(null,its.map(x=>x.ch.prazo)),pag:its[0].ch.pag}; });
@@ -354,11 +354,11 @@ function PREVALS(self,v){
   // ---- etapa 4 · comparação ----
   const spc=GR('g_cmp'); const fm4=g2st(self,'g_cmp').fm;
   if(fm4&&fm4.rid){ const it=m.items.find(x=>x.rid===fm4.rid); if(it){ const FF=spc.edit.fields; FF[0].opts=it.props.map(p=>p.label);
-    FF[0].help=it.falta?('Falta a partir de '+brd(it.falta)+': proposta que chega depois exige justificativa.'):'';
+    const aTempo=it.props.some(x=>!x.late); FF[0].help=it.falta?('Falta a partir de '+brd(it.falta)+(aTempo?': proposta que chega depois exige justificativa.':': nenhuma proposta chega antes; a padrão é a que chega primeiro.')):'';
     FF[1].max=Math.round(it.nec*100)/100; FF[1].u=it.un; FF[1].help='Necessidade na '+SX.sol.id+': '+qt(it.nec,it.un)+'. Use 0 para não comprar agora.';
-    const p=it.props.find(x=>x.label===fm4.draft.venc); FF[2].req=!!(p&&(p.late||(it.ref&&p.f!==it.ref.f&&p.unit>it.ref.unit+1e-9)));
-    FF[2].help=FF[2].req?(p.late?('Obrigatória: '+p.nome+' chega em '+brd(p.chega)+', depois da falta de '+brd(it.falta)+'.'):('Obrigatória: a proposta escolhida não é a de menor custo que chega a tempo ('+it.ref.nome+').'))
-      :'Opcional quando a escolha é a de menor custo que chega a tempo.'; } }
+    const p=it.props.find(x=>x.label===fm4.draft.venc); FF[2].req=cmpJust(p,it.ref,it.props);
+    FF[2].help=FF[2].req?((p.late&&aTempo)?('Obrigatória: '+p.nome+' chega em '+brd(p.chega)+', depois da falta de '+brd(it.falta)+'.'):('Obrigatória: a proposta escolhida custa mais que a '+(aTempo?'de menor custo que chega a tempo':'que chega primeiro')+' ('+it.ref.nome+').'))
+      :(aTempo?'Opcional quando a escolha é a de menor custo que chega a tempo.':'Opcional: nenhuma proposta chega antes da falta.'); } }
   spc.rows=m.env?m.G.map((g,gi)=>{ const its=m.items.filter(x=>x.gi===gi); const tot=its.reduce((a,x)=>a+x.tot,0); const fs=new Set(); its.forEach(x=>x.props.forEach(p=>fs.add(p.f)));
     const wins={}; its.forEach(x=>{ if(x.ch) wins[x.ch.nome]=(wins[x.ch.nome]||0)+1; });
     v['kgt_'+gi]=()=>tog(self,'g_cmp','KG'+gi);
@@ -370,7 +370,7 @@ function PREVALS(self,v){
         const tarde=(p)=>p.late?[CH('Chega depois da falta ('+dm(it.falta)+')','red')]:[];
         if(c){ r.p.frete=fretep(c,it); r.p.pag=[T(c.pag)]; r.p.val=[T(c.validade.slice(0,5))]; r.p.prazo=[T(c.prazo+' dias'),BR(),MU('chega '+dm(c.chega))];
           r.p.venc=[B(c.nome)].concat(it.naoMenor?(it.justPend?[CH('Justificativa pendente','red')]:[CH('Justificada','yellow')])
-            :(it.low&&c.f===it.low.f?[CH('Menor custo total','green')]:[CH('Menor custo a tempo','green')])).concat(tarde(c));
+            :(it.esc.selo?[CH(it.esc.selo,'green')]:[])).concat(tarde(c));
           r.s.frete=c.frete; r.s.pag=c.pag; r.s.val=c.validade; r.s.venc=c.nome; }
         else { r.p.venc=[CH('Sem proposta ainda','gray')]; r.s.venc='Sem proposta'; r.dr='knp_'+it.i;
           const livres=Object.values(m.conv).filter(x=>x.gi===it.gi&&x.homol&&!x.enviado);
@@ -394,7 +394,7 @@ function PREVALS(self,v){
       kids:p.itens.map(it=>({id:'A_'+p.id+'_'+it.i,ro:true,v:{nome:it.nome,qtd:it.ped,preco:it.ch.preco,prazo:it.ch.prazo,tot:it.tot},s:{nome:it.nome,frete:it.ch.frete,pag:it.ch.pag},
         p:{qtd:[T(qt(it.ped,it.un))].concat(it.ped<it.nec-1e-9?[MU('de '+qt(it.nec,it.un))]:[]),frete:[T(it.ch.frete)],pag:[T(it.ch.pag)]},
         o:[{t:'Necessidade na '+SX.sol.id+': '+qt(it.nec,it.un)},{t:'Proposta '+it.ch.nome+' · '+rs(it.ch.preco)+'/'+it.un+' · '+it.ch.frete+' · válida até '+it.ch.validade},
-           {t:it.naoMenor?('Escolha justificada: '+it.just):((it.low&&it.ch.f===it.low.f)?'Escolha: menor custo total':('Escolha: menor custo que chega a tempo'+(it.low?' ('+it.low.nome+' custa menos, mas chega depois da falta)':'')))},
+           {t:it.naoMenor?('Escolha justificada: '+it.just):('Escolha: '+it.esc.txt)},
            {t:'Chega '+brd(it.ch.chega)+(it.falta?' · falta a partir de '+brd(it.falta):' · sem falta prevista')},{t:'Ver origem da demanda no Planejar safra',h:SX.origem.h}]}))})):[];
   GR('g_apr').x0=Object.fromEntries(pcs.map(p=>['A_'+p.id,true]));
 }

@@ -56,3 +56,16 @@ function cal01Memo(r, o){ o=o||{}; const u=' '+(o.un||'');
     :('Sem falta nesta safra · saldo depois do último uso: '+n(r.saldoUlt==null?r.saldo:r.saldoUlt)+u)));
   return out;
 }
+// DEM-08 · Compra, etapa 4: escolha padrão = a de menor custo que chega antes da falta; sem nenhuma a tempo, a que chega primeiro (empate: menor
+// custo), sem justificativa obrigatória — não existe alternativa a tempo a justificar (AGENTS §4); o aviso "chega depois da falta" continua.
+// props em ordem de custo (unit crescente), com {f, unit, chega, late}.
+function cmpRef(props){ const ps=props||[]; const ok=ps.find(p=>!p.late); if(ok) return ok;
+  return ps.slice().sort((a,b)=>(a.chega<b.chega?-1:(a.chega>b.chega?1:0))||(a.unit-b.unit))[0]||null; }
+// justificativa obrigatória: a escolhida chega depois da falta havendo proposta a tempo, ou custa mais que a referência (dano: pagar mais ou faltar sem motivo registrado)
+function cmpJust(ch, ref, props){ return !!(ch&&((ch.late&&(props||[]).some(p=>!p.late))||(ref&&ch.f!==ref.f&&ch.unit>ref.unit+1e-9))); }
+// escolha sem justificativa: selo e motivo escritos (menor custo total; menor custo a tempo; sem nenhuma a tempo, a que chega primeiro)
+function cmpEscolha(ch, ref, low, props){ const aTempo=(props||[]).some(p=>!p.late); if(!ch) return {selo:'',txt:''};
+  if(low&&ch.f===low.f) return {selo:'Menor custo total',txt:'menor custo total'};
+  if(aTempo) return {selo:'Menor custo a tempo',txt:'menor custo que chega a tempo'+(low?' ('+low.nome+' custa menos, mas chega depois da falta)':'')};
+  if(ref&&ch.f===ref.f) return {selo:'Chega primeiro',txt:'a que chega primeiro (nenhuma proposta chega antes da falta)'};
+  return {selo:'',txt:'chega depois da falta, como todas, e custa menos que a primeira a chegar'+(ref?' ('+ref.nome+')':'')}; }
