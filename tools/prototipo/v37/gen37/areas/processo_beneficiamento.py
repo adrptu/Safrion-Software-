@@ -203,4 +203,6 @@ function bnHash(self){ if(self.__bnh) return; self.__bnh=1; const ab=()=>{ let h
   if(/^nova=/.test(h)){ const id=h.slice(5); setTimeout(()=>self.setState({pr_pan:{g:'nova',lote:id},pr_sel:null,pr_form:{lt:id},pr_err:'',pr_modo:null,pr_ch:prChave('W-BNN')}),0); }
   else if(benEh((c.ordens||{})[h])) setTimeout(()=>self.g2pick('g_ob',h),0); }; ab(); try{ window.addEventListener('hashchange',ab); }catch(e){} }
 const _EXV=EXTRAVALS; EXTRAVALS=function(self,v){ bnHash(self); _EXV(self,v); };
+/* gancho de teste, como na O.S. e no Estoque: o teste lê o cenário pelo cenGet quando nada foi gravado ainda */
+try { window.__cen = { cenGet, cenMudar, cenReset }; } catch (e) {}
 '''

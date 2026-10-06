@@ -49,7 +49,7 @@ def row(x): r = J(f"ROW({json.dumps(x)})"); time.sleep(.5); return r
 def pan(): return J("PAN()") or ''
 def toast(): return J("TOAST()") or ''
 def shot(n): t.c.shot(os.path.join(PR, 'ben_' + n + '.png'))
-def cen(expr): return J(f"(()=>{{ const c=CEN()||{{}}; return ({expr}); }})()")
+def cen(expr): return J(f"(()=>{{ const c=CEN()||(window.__cen?window.__cen.cenGet():{{}}); return ({expr}); }})()")   # nada gravado ainda: lê o cenário inicial pelo cenGet
 def perfil(k): J(f"PERFIL({json.dumps(k)})"); time.sleep(.1)
 def rev(): return cen("c.rev||0")
 def est_secao(i): J(f"document.querySelectorAll('nav[aria-label=\"Seções do estoque\"] button')[{i - 1}].click()"); time.sleep(.5)
