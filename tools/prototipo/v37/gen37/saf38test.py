@@ -40,7 +40,7 @@ try:
     c.size(1440, 1000); c.goto(f'http://127.0.0.1:{p}/SAF.dc.html', wait=1.3)
     J("window.__errs=[]; window.addEventListener('error',e=>window.__errs.push(String(e.message)));")
     abrir('Safra 2026/27')
-    etapa(5); oper0 = total_oper(); print('   Operadores e equipe · demanda total antes:', oper0)
+    etapa(3); oper0 = total_oper(); print('   Operadores e equipe · demanda total antes:', oper0)
     # ---------- 01 · etapa 3 em uma linha, dentro da largura ----------
     etapa(3)
     w = J(LARG); chk('01 · tabela da etapa 3 cabe no quadro a 1440 px (sem rolagem lateral)', w['tab'] <= 1116 and w['scroll'] <= w['box'], w)
@@ -61,7 +61,7 @@ try:
     # ---------- 02 · pessoas da equipe → demanda de Operadores ----------
     fset('Pessoas na equipe', '3'); clk('Salvar', 'aside[role=dialog]'); t = toast()
     chk('02 · salvar recalcula custo/h (180 + 140 + 3 × 38 = 434,00)', '434,00' in row('Trator T1 JD 6M 155') and '3 × 38' in row('Trator T1 JD 6M 155'), row('Trator T1 JD 6M 155'))
-    etapa(5); oper1 = total_oper(); print('   Operadores e equipe · demanda total depois:', oper1)
+    etapa(3); oper1 = total_oper(); print('   Operadores e equipe · demanda total depois:', oper1)
     d = num(oper1) - num(oper0)
     chk('02 · demanda de Operadores sobe 1 × horas do plantio (610 ha ÷ 6,8 ha/h ≈ 89,7 h)', 88.5 <= d <= 91, round(d, 1))
     # ---------- 04 · edição vale só para esta safra ----------
@@ -79,7 +79,7 @@ try:
     chk('04 · safra encerrada: rendimento abre só em consulta (sem falar em permissão)', pt.startswith('Rendimento') and semSalvar and todosRO and 'Consulta' in pt and 'permissão' not in pt, pt[:140])
     clk('Fechar', 'aside[role=dialog]')
     # ---------- 06 · data do primeiro uso ----------
-    abrir('Safra 2026/27'); etapa(6)
+    abrir('Safra 2026/27'); etapa(4)
     w = J(LARG); chk('06 · demanda (grupos recolhidos) cabe no quadro a 1440 px', w['tab'] <= 1116 and w['scroll'] <= w['box'], w)
     hs = J("[...[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent).querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/\\s+/g,' ').replace(/ ⇅.*$/,'').trim())")
     chk('06 · coluna "1º uso" logo depois de Grupo · insumo', len(hs) > 2 and hs[1].upper().startswith('1º USO'), hs)
