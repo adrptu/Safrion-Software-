@@ -16,6 +16,7 @@ import dados_assinatura as DA
 import dados_cad as DC
 
 H = lambda s: '{{' + s + '}}'
+PERFIL_CF = DA.GESTORA   # quem age no CF-05 (perfil da casca), gravado em cada ato (revisão PLAT, achado 4)
 F_ = H('false'); T_ = H('true')
 SEC = BTN_ST(False, True)
 PRI = BTN_ST(True, True)
@@ -29,7 +30,7 @@ CSS = ('<style>'
        '.assin-ks{font-size:12.5px;color:#65736A;line-height:1.35}'
        '.assin-esc{font-family:inherit;font-size:13px;font-weight:700;padding:8px 14px;border-radius:999px;border:1px solid #E4E9E5;background:#FFFFFF;color:#15201A;cursor:pointer}'
        '.assin-esc[aria-checked=true]{border-color:#1E7A4C;background:#E4F3E9;color:#1E7A4C}'
-       '.assin-esc:disabled{opacity:.45;cursor:not-allowed}'
+       '.assin-esc:disabled{opacity:.45;cursor:not-allowed}.assin-prim:disabled{opacity:.5;cursor:not-allowed}'
        '.assin [role=group] button[aria-pressed=true]{background:#E4F3E9!important;color:#1E7A4C!important;border-color:#1E7A4C!important}'
        '.assin-lin{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #E4E9E5;font-size:13px;line-height:1.4}'
        '.assin-lin>span:first-child{color:#65736A;flex-shrink:0;max-width:46%}.assin-lin>span:last-child{text-align:right;min-width:0;overflow-wrap:anywhere}'
@@ -92,15 +93,18 @@ function aGrid(id){ return GRIDS.find(g=>g.id===id); }
 function aPainel(self,v,hole,aberto,tit,fechar){ v[hole]=!!aberto; v[hole+'_tit']=tit||''; v[hole+'_fechar']=fechar; v[hole+'_tecla']=(e)=>{ if(e&&e.key==='Escape'){ e.preventDefault(); fechar(); } }; }
 // memória da cobrança de uma fatura (cópia da fatura; a prévia do período aberto é calculada ao vivo)
 function aMemoria(f){ const C=f.copia||{}; const P=assinPlano(C.plano)||{}; const bruto=(C.bruto!==undefined&&C.bruto!==null)?C.bruto:cenQtd(C.preco,C.cobrada);
-  const L=[{t:'Área medida',v:assinHa(C.medida)+(C.ntal===null||C.ntal===undefined?' · informada pela organização':' · '+C.ntal+' talhões')+(f.previa?' · ao vivo até '+assinBrC(C.fechamento):' · fechamento '+assinBrC(C.fechamento))},
-    {t:'Área contratada',v:(P.pago?assinHa(C.contratada)+' · contrato '+C.versao:'— (avaliação)')},
+  const L=[{t:'Área medida',v:assinHa(C.medida)+(C.ntal===null||C.ntal===undefined?' · informada pela organização':' · '+C.ntal+' talhões')+(f.previa?' · ao vivo até '+assinBrC(C.fechamento):' · fechamento '+assinBrC(C.fechamento))}];
+  if(C.abertura!==null&&C.abertura!==undefined) L.push({t:'Medida do período',v:'maior entre a abertura ('+assinBrC(C.abertura_d)+': '+assinHa(C.abertura)+') e '+(f.previa?'hoje ('+assinBrC(C.hoje)+': ':'o fechamento ('+assinBrC(C.fechamento)+': ')+assinHa(C.fech)+')'+(C.piso?' · vale a abertura: inativar talhão não reduz o mês em curso':'')});
+  L.push({t:'Área contratada',v:(P.pago?assinHa(C.contratada)+' · contrato '+C.versao+(C.aceite_por?' · aceite por '+C.aceite_por:''):'— (avaliação)')},
     {t:'Área cobrada',v:'mín(medida; contratada) = '+assinHa(C.cobrada)},
-    {t:'Conta',v:P.pago?('máx('+assinR(C.minimo)+'; '+assinR(C.preco)+'/ha·mês × '+assinHa(C.cobrada)+' = '+assinR(bruto)+') = '+assinR(Math.max(C.minimo,bruto))):'avaliação · sem cobrança'}];
+    {t:'Conta',v:P.pago?('máx('+assinR(C.minimo)+'; '+assinR(C.preco)+'/ha·mês × '+assinHa(C.cobrada)+' = '+assinR(bruto)+') = '+assinR(Math.max(C.minimo,bruto))):'avaliação · sem cobrança'});
   if(C.credito) L.push({t:'Crédito do período',v:'− '+assinR(C.credito)});
+  if(C.saldo) L.push({t:'Saldo de crédito',v:assinR(C.saldo)+' para '+assinComp(C.saldo_comp)+' (o que passou da fatura não se perde)'});
   L.push({t:f.previa?'Prévia do período':'Valor da fatura',v:assinR(f.valor),st:'font-weight:800;'});
   if(P.pago) L.push({t:'Pela área contratada seria',v:assinR(assinMensalidade(C.plano,C.contratada,C.contratada,0).valor)+' (DEC-01, a decidir pelo proprietário)'});
   L.push({t:'Plano',v:(P.nome||'—')+' · '+(P.pago?assinR(P.preco)+'/ha·mês · mínimo '+assinR(P.minimo):'sem cobrança')});
   return L.map(x=>Object.assign({st:''},x)); }
+function aAno(P){ return P&&P.pago?assinR(cenQtd(P.preco,12))+'/ha·ano':'—'; }   /* equivalente anual pela regra decimal única (achado 8) */
 function aEventos(f){ return (f.eventos||[]).slice().sort((a,b)=>(a.d<b.d?-1:(a.d>b.d?1:0))).map(e=>({d:assinBr(e.d),t:e.t})); }
 // baixa a fatura em CSV (gerado no navegador a partir da cópia da fatura); a última fica em window.__assinCsv para conferência
 function aBaixar(self,org,f){ const csv=assinCsv(org,f); try{ window.__assinCsv=csv; }catch(e){}
@@ -114,10 +118,9 @@ function cfMed(){ return assinMedir(ASSIN_CAD0, assinCadSalvo()); }
 function cfSafe(id){ return String(id).replace(/[^A-Za-z0-9]/g,'_'); }
 function cfFaturas(org,A,med){ return (org.faturas||[]).concat([assinPrevia(org,A.hoje,med.ha,med.n)]); }
 function cfAbreFat(self,id){ self.setState({cf_fat:id,cf_chave:assinChave('pag'),cf_forma:'',cf_ferr:'',cf_cts:false,cf_motivo:'',cf_cts_chave:assinChave('cts'),cf_pl:false}); }
-function cfAbrePl(self,plano,ha){ self.setState({cf_pl:true,cf_pl_plano:plano,cf_pl_ha:assinNf(ha,0,2),cf_pl_chave:assinChave('ace'),cf_pl_err:'',cf_fat:null}); }
+function cfAbrePl(self,plano,ha){ self.setState({cf_pl:true,cf_pl_plano:plano,cf_pl_ha:assinNf(ha,0,2),cf_pl_chave:assinChave('ace'),cf_des_chave:assinChave('des'),cf_pl_err:'',cf_fat:null}); }
 function cfFranq(P){ return P.pago?('satélite '+P.sat+' '+P.sat_un+' · IA '+P.ia+' '+P.ia_un):('satélite '+P.sat+' · IA '+P.ia+' no período'); }
-function cfAno(P){ return P.pago?assinR(cenQtd(P.preco,12))+'/ha·ano':'—'; }
-function PREVALS(self,v){ cenOuvir(self); assinOuvir(self);
+function PREVALS(self,v){ cenOuvir(self); assinOuvir(self,true);
   const A=assinLer(), org=A.orgs[A.demo], hoje=A.hoje, med=cfMed(); const k=assinContrato(org,hoje), ag=assinAgendado(org,hoje), P=assinPlano(k.plano);
   const pv=assinPrevia(org,hoje,med.ha,med.n); self._cf={A,org,hoje,med,k,ag,P,pv};
   // bloco 1 · uso medido (lido do cadastro; só leitura; a origem abre o cadastro)
@@ -133,7 +136,7 @@ function PREVALS(self,v){ cenOuvir(self); assinOuvir(self);
     return {id:'pl_'+x.id,dr:'cf_pl_'+x.id,v:{plano:x.nome,mod:x.modulos.join(', '),lim:'até '+assinNf(x.limite,0,0)+' ha',usu:x.usuarios,fr:cfFranq(x),preco:x.preco,min:x.minimo,val:m.valor,sel:seu?'Seu plano':(agd?'Agendado para '+assinBrC(ag.desde):'—')},
       s:{sel:seu?'Seu plano':(agd?'Agendado para '+assinBrC(ag.desde):'—')},
       p:{plano:[{k:'b',t:x.nome}],mod:x.id==='ess'?[{k:'txt',t:'Núcleo: '+x.modulos.join(', ')}]:[{k:'txt',t:'Núcleo + '+ASSIN_PAR.planos.find(y=>y.id==='comp').modulos.filter(md=>ASSIN_PAR.planos.find(y=>y.id==='ess').modulos.indexOf(md)<0).join(', ')}],
-        preco:[{k:'txt',t:assinR(x.preco)},{k:'mut',t:cfAno(x)+' · exemplo'}],min:[{k:'txt',t:assinR(x.minimo)},{k:'mut',t:'exemplo'}],
+        preco:[{k:'txt',t:assinR(x.preco)},{k:'mut',t:aAno(x)+' · exemplo'}],min:[{k:'txt',t:assinR(x.minimo)},{k:'mut',t:'exemplo'}],
         val:[{k:'b',t:assinR(m.valor)},{k:'mut',t:'com '+assinHa(med.ha)}],sel:seu?[aCh('Seu plano','green')]:(agd?[aCh('Agendado para '+assinBrC(ag.desde),'yellow')]:[{k:'mut',t:'—'}])}}; }); }
 function EXTRAVALS(self,v){ const X=self._cf; const {A,org,hoje,med,k,ag,P,pv}=X; const st=self.state;
   const est=assinEstado(org,hoje); aSelo(self,v,'cf_st',est.t+(est.dias?' · '+est.dias+(est.dias===1?' dia':' dias'):''),est.c);
@@ -141,7 +144,8 @@ function EXTRAVALS(self,v){ const X=self._cf; const {A,org,hoje,med,k,ag,P,pv}=X
   // resumo
   v.cf_k0v=P.nome; v.cf_k0s=(P.pago?assinR(P.preco)+'/ha·mês · contrato v'+k.v:'sem cobrança')+(ag?' · '+assinPlano(ag.plano).nome+' agendado para '+assinBrC(ag.desde):'');
   v.cf_k1v=assinHa(med.ha); v.cf_k1s='de '+assinHa(k.ha)+' contratados · '+med.n+' talhões'+(ag&&ag.ha!==k.ha?' · '+assinHa(ag.ha)+' a partir de '+assinBrC(ag.desde):'');
-  v.cf_k2v=assinR(pv.valor); v.cf_k2s=assinComp(pv.comp)+' fecha em '+assinBrC(pv.copia.fechamento)+(pv.copia.credito?' · crédito de '+assinR(pv.copia.credito):'');
+  v.cf_k2v=assinR(pv.valor); v.cf_k2s=assinComp(pv.comp)+' fecha em '+assinBrC(pv.copia.fechamento)+(pv.copia.piso?' · medida da abertura '+assinHa(pv.copia.medida):'')
+    +(pv.copia.credito?' · crédito de '+assinR(pv.copia.credito):'')+(pv.copia.saldo?' · saldo de '+assinR(pv.copia.saldo)+' para '+assinComp(pv.copia.saldo_comp):'');
   if(ab){ const ea=assinFatEstado(ab,hoje); v.cf_k3v=assinR(ab.valor); v.cf_k3s='fatura de '+assinComp(ab.comp)+' · '+(ea==='Vencida'?'vencida em '+assinBrC(ab.venc):'vence '+assinBrC(ab.venc)); }
   else { v.cf_k3v=assinBr(pv.venc); v.cf_k3s='fatura de '+assinComp(pv.comp)+' · Pix, boleto ou cartão (simulado)'; }
   // acima do contratado: não entra na cobrança sem aceite (R2)
@@ -149,8 +153,13 @@ function EXTRAVALS(self,v){ const X=self._cf; const {A,org,hoje,med,k,ag,P,pv}=X
   v.cf_acima=exc>0; v.cf_acima_t=exc>0?(assinHa(exc/100)+' acima da área contratada não entram na cobrança de '+assinComp(pv.comp)+(assinCent(med.ha)>assinCent(lim)||!ag?'; com o aceite da ampliação, entram a partir de '+assinBr(assinMesSeg(hoje))+'.':'; a ampliação já está agendada para '+assinBr(ag.desde)+'.')):'';
   v.cf_pessoas='Pessoas com acesso: '+CF_PESSOAS+' (Cadastros › Pessoas e equipes) · usuários sem limite · não entram na cobrança';
   // primária única (R14)
+  v.cf_prim_dis=false; v.cf_prim_tit='';
   if(prim==='pagar'){ v.cf_prim_t='Pagar fatura'; v.cf_prim_fn=()=>cfAbreFat(self,ab.id); }
-  else if(prim==='ampliar'){ v.cf_prim_t='Ampliar área contratada'; v.cf_prim_fn=()=>cfAbrePl(self,k.plano,Math.ceil(med.ha/100)*100); }
+  else if(prim==='proposta'){ const pr=org.proposta; if(!self.__cfPro) self.__cfPro=assinChave('pro'); const kp=self.__cfPro;
+    v.cf_prim_t=pr?'Proposta empresarial pedida em '+assinBrC(pr.d):'Pedir proposta empresarial'; v.cf_prim_dis=!!pr;
+    v.cf_prim_tit=pr?'Pedido '+pr.recibo+' por '+pr.por+': a plataforma responde; a cobrança segue o contrato de hoje.':'Medida acima de '+assinNf(ASSIN_PAR.limite_ha,0,0)+' ha: os planos vão até esse limite.';
+    v.cf_prim_fn=()=>{ if(!pr) cenMudar(self,c=>assinProposta(c,cfMed().ha,kp,CF_POR)); }; }
+  else if(prim==='ampliar'){ v.cf_prim_t='Ampliar área contratada'; v.cf_prim_fn=()=>cfAbrePl(self,k.plano,assinSugere(med.ha)); }
   else { v.cf_prim_t='Alterar plano ou área'; v.cf_prim_fn=()=>cfAbrePl(self,(ag||k).plano,(ag||k).ha); }
   // linhas: abrir fatura e plano
   cfFaturas(org,A,med).forEach(f=>{ v['cf_fat_'+cfSafe(f.id)]=()=>cfAbreFat(self,f.id); });
@@ -166,10 +175,10 @@ function EXTRAVALS(self,v){ const X=self._cf; const {A,org,hoje,med,k,ag,P,pv}=X
     v.cf_fmem=aMemoria(f); v.cf_fev=aEventos(f); v.cf_temev=v.cf_fev.length>0;
     v.cf_fpag=f.st==='aberta'; v.cf_formas=ASSIN_PAR.formas.map(x=>({t:x+' · simulado',on:String(st.cf_forma===x),go:()=>self.setState({cf_forma:x,cf_ferr:''})}));
     v.cf_ferr=st.cf_ferr||''; v.cf_tferr=!!st.cf_ferr;
-    v.cf_pagar=()=>{ const r=cenMudar(self,c=>assinPagar(c,f.id,self.state.cf_forma,self.state.cf_chave)); self.setState({cf_ferr:r.erro||''}); };
-    v.cf_podects=f.st==='aberta'; v.cf_cts=!!st.cf_cts; v.cf_cts_tog=()=>self.setState({cf_cts:!self.state.cf_cts});
+    v.cf_pagar=()=>{ const r=cenMudar(self,c=>assinPagar(c,f.id,self.state.cf_forma,self.state.cf_chave,CF_POR)); self.setState({cf_ferr:r.erro||''}); };
+    v.cf_podects=assinPodeContestar(f); v.cf_cts=!!st.cf_cts&&v.cf_podects; v.cf_cts_tog=()=>self.setState({cf_cts:!self.state.cf_cts});   /* uma contestação por fatura (achado 1) */
     v.cf_motivo=st.cf_motivo||''; v.cf_setmot=(e)=>self.setState({cf_motivo:e.target.value});
-    v.cf_contestar=()=>{ const r=cenMudar(self,c=>assinContestar(c,f.id,self.state.cf_motivo,self.state.cf_cts_chave)); if(!r.erro) self.setState({cf_cts:false}); };
+    v.cf_contestar=()=>{ const r=cenMudar(self,c=>assinContestar(c,f.id,self.state.cf_motivo,self.state.cf_cts_chave,CF_POR)); if(!r.erro) self.setState({cf_cts:false}); };
     v.cf_csv=()=>aBaixar(self,org,f); }
   else { v.cf_fmem=[]; v.cf_fev=[]; v.cf_formas=[]; }
   // ---- painel do plano ou área (prévia hoje → depois) ----
@@ -177,23 +186,24 @@ function EXTRAVALS(self,v){ const X=self._cf; const {A,org,hoje,med,k,ag,P,pv}=X
   if(st.cf_pl){ const pl=st.cf_pl_plano||k.plano; const P1=assinPlano(pl); const ha=assinNum(st.cf_pl_ha); const desde=assinMesSeg(hoje);
     v.cf_ppl=ASSIN_PAR.planos.filter(x=>x.pago).map(x=>({t:x.nome,on:String(pl===x.id),go:()=>self.setState({cf_pl_plano:x.id,cf_pl_err:'',cf_pl_chave:assinChave('ace')})}));
     v.cf_pha=st.cf_pl_ha||''; v.cf_setha=(e)=>self.setState({cf_pl_ha:e.target.value,cf_pl_err:'',cf_pl_chave:assinChave('ace')});
-    v.cf_pha_aj='medida hoje: '+assinHa(med.ha)+' · o plano vai até '+assinNf(ASSIN_PAR.limite_ha,0,0)+' ha';
+    const teto=assinCent(med.ha)>assinCent(ASSIN_PAR.limite_ha);
+    v.cf_pha_aj='medida hoje: '+assinHa(med.ha)+' · o plano vai até '+assinNf(ASSIN_PAR.limite_ha,0,0)+' ha'+(teto?': acima disso, proposta empresarial (primária)':'');
     const ve=assinValidaArea(st.cf_pl_ha,med.ha); v.cf_pl_err=st.cf_pl_err||''; v.cf_tplerr=!!v.cf_pl_err; v.cf_pha_st='width:160px;font-family:inherit;font-size:14px;padding:9px 11px;border-radius:10px;box-sizing:border-box;border:1px solid '+(v.cf_pl_err?'#B42318':'#E4E9E5')+';';
     v.cf_pini='Início: '+assinBr(desde)+' (dia 1 do próximo ciclo; a mudança nunca retroage)';
     const m0=assinMensalidade(k.plano,med.ha,k.ha,0), m1=(P1&&!ve)?assinMensalidade(pl,med.ha,ha,0):null;
     const mods=(a,b)=>{ const sai=a.modulos.filter(x=>b.modulos.indexOf(x)<0), ent=b.modulos.filter(x=>a.modulos.indexOf(x)<0); return sai.length?'saem: '+sai.join(', '):(ent.length?'entram: '+ent.join(', '):'nenhum'); };
     const dif=m1?(assinCent(m1.valor)-assinCent(m0.valor))/100:null;
-    const L=[['Plano',P.nome,P1?P1.nome:'—'],['Área contratada',assinHa(k.ha),isNaN(ha)?'—':assinHa(ha)],['Preço',assinR(P.preco)+'/ha·mês · '+cfAno(P),P1?assinR(P1.preco)+'/ha·mês · '+cfAno(P1):'—'],
+    const L=[['Plano',P.nome,P1?P1.nome:'—'],['Área contratada',assinHa(k.ha),isNaN(ha)?'—':assinHa(ha)],['Preço',assinR(P.preco)+'/ha·mês · '+aAno(P),P1?assinR(P1.preco)+'/ha·mês · '+aAno(P1):'—'],
       ['Mínimo',assinR(P.minimo)+'/mês',P1?assinR(P1.minimo)+'/mês':'—'],['Franquias',cfFranq(P),P1?cfFranq(P1):'—'],
       ['Mensalidade com a área medida hoje ('+assinHa(med.ha)+')',assinR(m0.valor),m1?assinR(m1.valor):'—'],
       ['Diferença por mês','',dif===null?'—':((dif>0?'+':(dif<0?'−':''))+assinR(Math.abs(dif)).replace('R$ ','R$ '))],
       ['Módulos que mudam','',P1?mods(P,P1):'—'],['Periodicidade','','mensal'],['Prazo e cancelamento','',ASSIN_PAR.cancelamento]];
     v.cf_pv=L.map(x=>({t:x[0],a:x[1],b:x[2],tema:!!x[1]&&x[1]!==x[2]}));   /* só o que muda mostra hoje → depois */
-    const alvo=ag||k; v.cf_pl_pode=!(alvo.plano===pl&&assinCent(alvo.ha)===assinCent(ha));
+    const alvo=ag||k; v.cf_pl_pode=!teto&&!(alvo.plano===pl&&assinCent(alvo.ha)===assinCent(ha));
     v.cf_pl_ok='Aceitar e agendar para '+assinBr(desde);
-    v.cf_aceitar=()=>{ const r=cenMudar(self,c=>assinMudar(c,pl,self.state.cf_pl_ha,cfMed().ha,self.state.cf_pl_chave)); self.setState({cf_pl_err:r.erro||''}); };   /* a chave muda quando o formulário muda (ou ao desfazer): o clique repetido devolve o mesmo recibo (R8) */
-    v.cf_tag=!!ag; v.cf_ag_t=ag?('Mudança agendada: '+assinPlano(ag.plano).nome+' · '+assinHa(ag.ha)+' a partir de '+assinBr(ag.desde)+' (aceite '+assinBrC(ag.aceite)+(ag.recibo?' · '+ag.recibo:'')+').'):'';
-    v.cf_desfazer=()=>{ cenMudar(self,c=>assinDesfazer(c)); self.setState({cf_pl_chave:assinChave('ace')}); }; }
+    v.cf_aceitar=()=>{ const r=cenMudar(self,c=>assinMudar(c,pl,self.state.cf_pl_ha,cfMed().ha,self.state.cf_pl_chave,CF_POR)); self.setState({cf_pl_err:r.erro||''}); };   /* a chave muda quando o formulário muda (ou ao desfazer): o clique repetido devolve o mesmo recibo (R8) */
+    v.cf_tag=!!ag; v.cf_ag_t=ag?('Mudança agendada: '+assinPlano(ag.plano).nome+' · '+assinHa(ag.ha)+' a partir de '+assinBr(ag.desde)+' (aceite '+assinBrC(ag.aceite)+(ag.recibo?' · '+ag.recibo:'')+(ag.por?' · por '+ag.por:'')+').'):'';
+    v.cf_desfazer=()=>{ const r=cenMudar(self,c=>assinDesfazer(c,self.state.cf_des_chave,CF_POR)); if(!r.erro&&!r.repetido) self.setState({cf_pl_chave:assinChave('ace'),cf_des_chave:assinChave('des')}); }; }
   else { v.cf_ppl=[]; v.cf_pv=[]; }
   // ---- demonstração: data simulada da cobrança (só avança) e restaurar ----
   v.cf_hoje=assinBr(hoje);
@@ -276,10 +286,11 @@ def build():
              f'<sc-if value="{H("cf_pl_pode")}" hint-placeholder-val="{T_}"><button type="button" onClick="{H("cf_aceitar")}" style="{PRI}">{H("cf_pl_ok")}</button></sc-if></div>')
     E.EXTRA.append(painel('cf_pp', corpo_p, rod_p, 500))
     pessoas = sum(1 for p in DC.PESSOAS if p.get('login'))
-    EXTRAJS[0] = cenario.js_prefixo() + DA.js_cad0() + f'const CF_PESSOAS = {pessoas};\n' + JS_COMUM + CF_JS
+    EXTRAJS[0] = (cenario.js_prefixo() + DA.js_cad0() + f'const CF_PESSOAS = {pessoas};\nconst CF_POR = {json.dumps(PERFIL_CF, ensure_ascii=False)};\n'
+                  + JS_COMUM + CF_JS)
     HEIGHTS37[fname] = 1700
-    shell37('CF-05', 'Assinatura e cobrança', corpo, fname=fname, search=False,
+    shell37('CF-05', 'Assinatura e cobrança', corpo, fname=fname, search=False, perfil=PERFIL_CF,
             subtitle='Cobrança simulada · nenhum valor é cobrado. Plano, uso medido no cadastro, faturas e mudança de plano ou área com prévia.',
-            primary_html=f'<button type="button" onClick="{H("cf_prim_fn")}" style="{BTN_ST(True)}">{H("cf_prim_t")}</button>',
+            primary_html=f'<button type="button" class="assin-prim" disabled="{H("cf_prim_dis")}" title="{H("cf_prim_tit")}" onClick="{H("cf_prim_fn")}" style="{BTN_ST(True)}">{H("cf_prim_t")}</button>',
             footer='Preços, trial e régua são exemplos a decidir pelo proprietário (DEC-01/05/09). Inadimplência nunca apaga dado.')
     injeta(fname, 'Assinatura e cobrança', chip_dyn('cf_st'))

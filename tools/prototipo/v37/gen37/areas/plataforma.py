@@ -6,6 +6,7 @@ BO-02 Assinaturas e cobrança: todas as organizações do mesmo estado (c.assin)
   (área por fazenda, faturas, eventos, resolver contestação, consulta contratual CF-05). Nunca talhão, cultura, safra, operação ou insumo (R17).
 BO-01 Planos e preços: parâmetros de exemplo (a decidir pelo proprietário) e simulação por área calculada no navegador (assinMensalidade).
 Saíram (PLAT-D02): BO-01det, BO-02det, BO-03, BO-03det e BO-04 (economia por coorte: volta com 3 coortes de 90 dias, PRD 57.3)."""
+import json
 from engine import grid, section, esc, BTN_ST, INK, MUTED, LINE, BG, SURF, ACC, YEL, YELS, RED, EXTRAJS
 import engine as E
 import ui37
@@ -25,13 +26,14 @@ def telas(i):
 BO2_JS = r'''
 function boSafe(id){ return String(id).replace(/[^A-Za-z0-9]/g,'_'); }
 function boProx(org,A,L){ const h=A.hoje; if(L.e.t==='Cancelada') return 'consulta e exportação até '+assinBr(org.consulta_ate);
-  if(L.k.plano==='aval'){ const t=org.trial||{}; return 'avaliação termina '+assinBr(t.fim)+' (dia '+(assinDias(t.inicio,h)+1)+' de '+t.dias+')'; }
+  if(L.k.plano==='aval'){ const t=assinTrial(org,h); return t.acabou?t.t:'avaliação termina '+assinBr(t.fim)+' ('+t.t+')'; }
   const pd=(org.faturas||[]).find(f=>f.st==='pendente'); if(pd) return 'evento do provedor a conciliar ('+assinComp(pd.comp)+')';
   const ct=(org.faturas||[]).find(f=>f.st==='contestada'); if(ct) return 'contestação de '+assinComp(ct.comp)+' a resolver';
+  if(org.proposta) return 'proposta empresarial pedida em '+assinBrC(org.proposta.d)+' ('+assinHa(org.proposta.ha)+' medidos, '+org.proposta.recibo+')';
   const ab=assinAberta(org); if(ab){ const d=assinAtraso(ab,h); return d>0?('vencida há '+d+(d===1?' dia':' dias')+((ab.tent||[]).length>=ASSIN_PAR.tentativas?' · '+(ab.tent||[]).length+' tentativas recusadas':'')):('vence '+assinBrC(ab.venc)); }
   return 'próxima fatura '+assinBr(assinMesSeg(h))+(L.ag?' · '+assinPlano(L.ag.plano).nome+' a partir de '+assinBrC(L.ag.desde):''); }
 function boFila(A){ return (A.fila||[]).map(ev=>({ev,visto:A.vistos.indexOf(ev.evt)>=0})); }
-function PREVALS(self,v){ cenOuvir(self); assinOuvir(self); const A=assinLer(); const cart=assinCarteira(A,ASSIN_CAD0,assinCadSalvo()); self._bo={A,cart};
+function PREVALS(self,v){ cenOuvir(self); assinOuvir(self,true); const A=assinLer(); const cart=assinCarteira(A,ASSIN_CAD0,assinCadSalvo()); self._bo={A,cart};
   aGrid('g_org').rows=cart.linhas.map(L=>{ const o=L.org; const P=assinPlano(L.k.plano)||{}; const ab=L.ab.slice().sort((a,b)=>(a.comp<b.comp?-1:1))[0];
     const fat=ab?(assinComp(ab.comp)+' · '+assinFatEstado(ab,A.hoje)):'—'; const prox=boProx(o,A,L);
     return {id:o.id,dr:'bo_org_'+boSafe(o.id),v:{org:o.nome,plano:P.nome,est:L.e.t,med:L.med,con:L.k.plano==='aval'?'':L.k.ha,mens:L.m?L.m.valor:'',fat:fat,prox:prox},s:{org:o.nome,est:L.e.t},
@@ -48,17 +50,25 @@ function EXTRAVALS(self,v){ const {A,cart}=self._bo; const st=self.state;
   v.bo_k1v=String(cart.linhas.length); v.bo_k1s=['Ativa','Em atraso','Inadimplente','Em avaliação','Cancelada'].filter(t=>n[t]).map(t=>t+' '+n[t]).join(' · ');
   v.bo_k2v=cart.abertas+' · '+assinR(cart.abertasV); v.bo_k2s='a vencer, vencidas, pendentes ou em contestação';
   v.bo_k3v=assinHa(cart.cobrada); v.bo_k3s='medida '+assinHa(cart.medida)+' · cobrada = mín(medida; contratada)';
-  v.bo_conciliar=()=>cenMudar(self,c=>assinConciliar(c,assinChave('con')));
-  cart.linhas.forEach(L=>{ v['bo_org_'+boSafe(L.org.id)]=()=>self.setState({bo_org:L.org.id,bo_res:'',bo_cred:'',bo_rchave:assinChave('res'),bo_rerr:''}); });
+  const abreOrg=(id)=>self.setState({bo_org:id,bo_res:'',bo_cred:'',bo_rchave:assinChave('res'),bo_rerr:''});
+  const ctL=cart.linhas.find(x=>(x.org.faturas||[]).some(f=>f.st==='contestada'));
+  if(!self.__boCon) self.__boCon=assinChave('con'); const kc=self.__boCon;   /* a mesma chave no clique repetido (R8); renova depois do efeito */
+  v.bo_prim_dis=false; v.bo_prim_tit='';
+  if(pend){ v.bo_prim_t='Conciliar pagamentos'; v.bo_prim_fn=()=>{ const r=cenMudar(self,c=>assinConciliar(c,kc,BO_POR)); if(!r.erro&&!r.repetido) self.__boCon=assinChave('con'); }; }
+  else if(ctL){ v.bo_prim_t='Resolver contestação'; v.bo_prim_fn=()=>abreOrg(ctL.org.id); }
+  else { v.bo_prim_t='Conciliar pagamentos'; v.bo_prim_dis=true; v.bo_prim_tit='Nenhum evento do provedor a conciliar e nenhuma contestação a resolver.'; v.bo_prim_fn=()=>{}; }
+  cart.linhas.forEach(L=>{ v['bo_org_'+boSafe(L.org.id)]=()=>abreOrg(L.org.id); });
   // ---- detalhe da organização ----
   const L=st.bo_org?cart.linhas.find(x=>x.org.id===st.bo_org):null;
   aPainel(self,v,'bo_op',!!L,L?L.org.nome:'',()=>self.setState({bo_org:null}));
   if(L){ const o=L.org, P=assinPlano(L.k.plano)||{}; aSelo(self,v,'bo_oest',L.e.t+(L.e.dias?' · '+L.e.dias+(L.e.dias===1?' dia':' dias'):''),L.e.c);
-    const lin=[{t:'Plano',v:P.nome+' · contrato v'+L.k.v+' desde '+assinBr(L.k.desde)},{t:'Área contratada',v:L.k.plano==='aval'?assinHa(L.k.ha)+' declarados (avaliação)':assinHa(L.k.ha)},
+    const lin=[{t:'Plano',v:P.nome+' · contrato v'+L.k.v+' desde '+assinBr(L.k.desde)+(L.k.por?' · aceite '+assinBrC(L.k.aceite)+' por '+L.k.por:'')},{t:'Área contratada',v:L.k.plano==='aval'?assinHa(L.k.ha)+' declarados (avaliação)':assinHa(L.k.ha)},
       {t:'Área medida',v:assinHa(L.med)+(o.demo?' · ao vivo pelo cadastro · '+L.ntal+' talhões':' · informada pela organização (sintética)')},
       {t:'Área cobrada',v:L.m?assinHa(L.m.cobrada):'—'},{t:'Mensalidade vigente',v:L.m?assinR(L.m.valor):'—'},
       {t:'Pagamento',v:o.cartao?'cartão salvo '+o.cartao+' (token simulado) · '+ASSIN_PAR.tentativas+' tentativas em '+ASSIN_PAR.janela_tent+' dias':'sem cartão salvo · paga pela fatura'}];
-    if(L.ag) lin.push({t:'Mudança agendada',v:assinPlano(L.ag.plano).nome+' · '+assinHa(L.ag.ha)+' a partir de '+assinBr(L.ag.desde)});
+    if(L.ag) lin.push({t:'Mudança agendada',v:assinPlano(L.ag.plano).nome+' · '+assinHa(L.ag.ha)+' a partir de '+assinBr(L.ag.desde)+(L.ag.por?' · aceite '+L.ag.recibo+' por '+L.ag.por:'')});
+    const dz=(o.desfeitos||[]).slice(-1)[0]; if(dz) lin.push({t:'Mudança desfeita',v:assinPlano(dz.plano).nome+' · '+assinHa(dz.ha)+' · '+dz.desfeito_recibo+' em '+assinBrC(dz.desfeito)+' por '+dz.desfeito_por});
+    if(o.proposta) lin.push({t:'Proposta empresarial',v:'pedida em '+assinBr(o.proposta.d)+' · '+assinHa(o.proposta.ha)+' medidos · '+o.proposta.recibo+' por '+o.proposta.por});
     if(o.cancelada) lin.push({t:'Cancelamento',v:'a pedido em '+assinBr(o.cancelada)+' · consulta e exportação até '+assinBr(o.consulta_ate)+' · nada é apagado'});
     v.bo_olin=lin.map(x=>Object.assign({st:''},x));
     v.bo_tfaz=!!o.demo; v.bo_ofaz=o.demo?cart.porFaz.map(x=>({t:x.faz,v:assinHa(x.ha)+' · '+x.n+(x.n===1?' talhão':' talhões'),st:''})):[];
@@ -71,7 +81,7 @@ function EXTRAVALS(self,v){ const {A,cart}=self._bo; const st=self.state;
       v.bo_dec=[{k:'manter',t:'Manter o valor'},{k:'creditar',t:'Creditar no próximo período'}].map(x=>({t:x.t,on:String(st.bo_res===x.k),go:()=>self.setState({bo_res:x.k,bo_rerr:''})}));
       v.bo_tcred=st.bo_res==='creditar'; v.bo_cred=st.bo_cred||''; v.bo_setcred=(e)=>self.setState({bo_cred:e.target.value,bo_rerr:''});
       v.bo_rerr=st.bo_rerr||''; v.bo_trerr=!!st.bo_rerr;
-      v.bo_resolver=()=>{ const r=cenMudar(self,c=>assinResolver(c,o.id,ct.id,self.state.bo_res,self.state.bo_cred,self.state.bo_rchave)); self.setState({bo_rerr:r.erro||'',bo_rchave:r.erro?self.state.bo_rchave:assinChave('res')}); }; }
+      v.bo_resolver=()=>{ const r=cenMudar(self,c=>assinResolver(c,o.id,ct.id,self.state.bo_res,self.state.bo_cred,self.state.bo_rchave,BO_POR)); self.setState({bo_rerr:r.erro||'',bo_rchave:r.erro?self.state.bo_rchave:assinChave('res')}); }; }
     else v.bo_dec=[]; }
   else { v.bo_olin=[]; v.bo_ofaz=[]; v.bo_ofat=[]; v.bo_dec=[]; } }
 function aSeloSt(c){ const cc=G2C[c]||G2C.gray; return 'display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;color:'+cc[0]+';background:'+cc[1]+';'; }
@@ -80,14 +90,16 @@ function aSeloDot(c){ const cc=G2C[c]||G2C.gray; return 'width:6px;height:6px;bo
 
 BO1_JS = r'''
 const BO1_AREAS=[20,100,149.5,500,1000,5000];
-function PREVALS(self,v){ cenOuvir(self); assinOuvir(self);
+function PREVALS(self,v){ cenOuvir(self); assinOuvir(self,true);
+  aGrid('g_par').rows.forEach(r=>{ const P=assinPlano(r.id.slice(2)); if(P&&P.pago) r.v.ano=aAno(P); });   /* regra decimal única (achado 8) */
   aGrid('g_sim').rows=BO1_AREAS.map(ha=>{ const r={id:'s'+String(ha).replace('.','_'),v:{ha:ha},s:{},p:{}}; ASSIN_PAR.planos.filter(x=>x.pago).forEach(P=>{ const m=assinMensalidade(P.id,ha,null,0); r.v[P.id]=m.valor;
       r.p[P.id]=[{k:'txt',t:assinR(m.valor)}].concat(m.minimoAplicado?[{k:'mut',t:'mínimo'}]:[]); }); return r; }); }
 function EXTRAVALS(self,v){ const st=self.state; const A=assinLer();
   aPainel(self,v,'bo_sp',!!st.bo_sim,'Simular área',()=>self.setState({bo_sim:false}));
-  v.bo_simular=()=>self.setState({bo_sim:true}); v.bo_sha=st.bo_sha===undefined?'2.570,23':st.bo_sha; v.bo_setsha=(e)=>self.setState({bo_sha:e.target.value});
+  const med=assinMedir(ASSIN_CAD0,assinCadSalvo()).ha;   /* a simulação começa na área medida hoje, não num número fixo (achado 8) */
+  v.bo_simular=()=>self.setState({bo_sim:true}); v.bo_sha=st.bo_sha===undefined?assinNf(med,0,2):st.bo_sha; v.bo_setsha=(e)=>self.setState({bo_sha:e.target.value});
   const ha=assinNum(v.bo_sha); const ok=ha>0&&ha<=ASSIN_PAR.limite_ha;
-  v.bo_serr=!(ha>0)?'Informe a área em ha (ex.: 2.570,23).':(ha>ASSIN_PAR.limite_ha?'Acima de '+assinNf(ASSIN_PAR.limite_ha,0,0)+' ha: proposta empresarial, a decidir pelo proprietário.':''); v.bo_tserr=!!v.bo_serr;
+  v.bo_serr=!(ha>0)?'Informe a área em ha (ex.: '+assinNf(med,0,2)+').':(ha>ASSIN_PAR.limite_ha?'Acima de '+assinNf(ASSIN_PAR.limite_ha,0,0)+' ha: proposta empresarial, a decidir pelo proprietário.':''); v.bo_tserr=!!v.bo_serr;
   v.bo_sres=ok?ASSIN_PAR.planos.filter(x=>x.pago).map(P=>{ const m=assinMensalidade(P.id,ha,null,0); return {t:P.nome+' · '+assinR(P.preco)+'/ha·mês, mínimo '+assinR(P.minimo),
     v:assinR(m.valor)+'/mês'+(m.minimoAplicado?' (mínimo)':' ('+assinR(P.preco)+' × '+assinHa(ha)+')')+' · '+assinR(cenQtd(m.valor,12))+'/ano',st:''}; }):[];
   const tr=A.orgs.boaesp; v.bo_trial='Avaliação em curso: '+tr.nome+' · '+assinHa(tr.contratos[0].ha)+' declarados · '+assinBr(tr.trial.inicio)+' → '+assinBr(tr.trial.fim)+' · sem cartão · '+tr.trial.dias+' dias.'; }
@@ -117,7 +129,7 @@ def bo02():
            f'<sc-if value="{H("bo_tcred")}" hint-placeholder-val="{F_}"><div style="display: flex; align-items: center; gap: 8px;"><label for="bo_cred" style="font-size: 12px; font-weight: 700; color: {MUTED};">Crédito</label>'
            f'<span style="font-size: 13px; color: {MUTED};">R$</span><input id="bo_cred" type="text" inputMode="decimal" value="{H("bo_cred")}" onChange="{H("bo_setcred")}" style="width: 140px; font-family: inherit; font-size: 14px; padding: 8px 10px; border-radius: 10px; border: 1px solid {LINE};"></div></sc-if>'
            f'<sc-if value="{H("bo_trerr")}" hint-placeholder-val="{F_}"><span role="alert" style="font-size: 12.5px; font-weight: 700; color: {RED};">{H("bo_rerr")}</span></sc-if>'
-           f'<div><button type="button" onClick="{H("bo_resolver")}" style="{SEC}">Resolver contestação</button></div></div></sc-if>')
+           f'<div><button type="button" onClick="{H("bo_resolver")}" style="{SEC}">Registrar resolução</button></div></div></sc-if>')
     corpo_o = (f'<div>{chip_dyn("bo_oest")}</div>' + linhas('bo_olin')
                + f'<sc-if value="{H("bo_tfaz")}" hint-placeholder-val="{F_}">{titulo("Área por fazenda (consulta contratual)")}{linhas("bo_ofaz")}</sc-if>'
                + res + titulo('Faturas e eventos') + f'<sc-if value="{H("bo_semfat")}" hint-placeholder-val="{F_}"><span style="font-size: 13px; color: {MUTED};">Sem fatura: avaliação sem cobrança.</span></sc-if>' + fat
@@ -125,11 +137,11 @@ def bo02():
     rod_o = (f'<sc-if value="{H("bo_demo")}" hint-placeholder-val="{F_}"><div style="display: flex; justify-content: flex-end; padding-top: 10px; border-top: 1px solid {LINE};">'
              f'<a href="CF-05.dc.html" style="text-decoration: none; display: inline-block; {SEC}">Consulta contratual (CF-05) ›</a></div></sc-if>')
     E.EXTRA.append(painel('bo_op', corpo_o, rod_o, 520))
-    EXTRAJS[0] = cenario.js_prefixo() + DA.js_cad0() + JS_COMUM + BO2_JS
+    EXTRAJS[0] = cenario.js_prefixo() + DA.js_cad0() + f'const BO_POR = {json.dumps(PERFIL_BO, ensure_ascii=False)};\n' + JS_COMUM + BO2_JS
     HEIGHTS37[fname] = 1150
     shell37('BO-02', 'Assinaturas e cobrança', corpo, fname=fname, ctx=CTX_BO, perfil=PERFIL_BO, steps=telas(1), search=False,
             subtitle='Plataforma · cobrança simulada, nenhum provedor real. Todas as organizações no mesmo estado; a da demonstração é medida ao vivo no cadastro.',
-            primary_html=f'<button type="button" onClick="{H("bo_conciliar")}" style="{BTN_ST(True)}">Conciliar pagamentos</button>',
+            primary_html=f'<button type="button" class="assin-prim" disabled="{H("bo_prim_dis")}" title="{H("bo_prim_tit")}" onClick="{H("bo_prim_fn")}" style="{BTN_ST(True)}">{H("bo_prim_t")}</button>',
             footer='Fatura só fica Paga por evento do provedor (simulado), aplicado uma vez. Nada é apagado.')
     injeta(fname, 'Assinaturas e cobrança', chip_dyn('bo_st'))
 
@@ -142,8 +154,8 @@ def bo01():
     for P in DA.PLANOS:
         pre = 'R$ 0,00' if not P['pago'] else ('R$ ' + f"{P['preco']:.2f}".replace('.', ','))
         mi = 'R$ 0,00' if not P['pago'] else ('R$ ' + f"{P['minimo']:.2f}".replace('.', ','))
-        ano = '—' if not P['pago'] else ('R$ ' + f"{P['preco'] * 12:.2f}".replace('.', ',') + '/ha·ano')
-        lim = 'área declarada (480 ha na Boa Esperança)' if P['limite'] is None else f"até {P['limite']:,} ha".replace(',', '.')
+        ano = '—'   # pago: calculado no navegador pela regra decimal única (aAno → cenQtd), nunca em float aqui
+        lim = f"área declarada ({DA.TRIAL['area_ha']} ha na Boa Esperança)" if P['limite'] is None else f"até {P['limite']:,} ha".replace(',', '.')
         v = dict(plano=P['nome'], mod=', '.join(P['modulos']), lim=lim, usu=P['usuarios'], fr=fr(P), preco=P['preco'], min=P['minimo'], ano=ano,
                  dec=P['dec'] + ' · ' + DA.DECIDIR, obs=P['obs'], pre_t=pre, min_t=mi)
         rows.append(dict(id='p_' + P['id'], v=v, s=dict(preco=pre, min=mi), p=dict(plano=[dict(k='b', t=P['nome'])], preco=[dict(k='txt', t=pre), dict(k='mut', t='exemplo')],
@@ -157,7 +169,7 @@ def bo01():
     cols = [dict(k='ha', l='Área (ha)', t='num', a='r', d=2, dmin=0)] + [dict(k=P['id'], l=P['nome'] + ' (R$)', t='num', a='r', d=2) for P in DA.PLANOS if P['pago']]
     g_sim = grid(cols, [], gid='g_sim', search=True, total=False, edit=dict(m='none'))
     texto = (f'<div style="font-size: 13px; color: {INK}; line-height: 1.6;"><b>PRECO-01:</b> R$ 2,00/ha·mês = R$ 24,00/ha·ano. <b>Mínimo:</b> cobra-se o maior entre o mínimo e preço × área (não se soma). '
-             f'<b>Mudança:</b> vale do dia 1 do próximo ciclo e nunca retroage. <b>Base (DEC-01):</b> área medida no cadastro, limitada pela contratada. '
+             f'<b>Mudança:</b> vale do dia 1 do próximo ciclo e nunca retroage. <b>Base (DEC-01):</b> área medida no cadastro (a maior entre a abertura e o fechamento do mês), limitada pela contratada. '
              f'<span style="color: {YEL}; font-weight: 700;">Todos os valores são exemplo, a decidir pelo proprietário (DEC-01, DEC-05, DEC-09).</span></div>'
              f'<div style="font-size: 12.5px; color: {MUTED}; padding-top: 6px;">{H("bo_trial")}</div>')
     corpo = ('<div class="assin" style="display: flex; flex-direction: column; gap: 18px;">' + CSS
@@ -171,7 +183,7 @@ def bo01():
                + titulo('Mensalidade por plano') + linhas('bo_sres')
                + f'<span style="font-size: 11.5px; color: {MUTED};">Exemplo, a decidir pelo proprietário. Simular não muda nenhum contrato.</span>')
     E.EXTRA.append(painel('bo_sp', corpo_s, '', 460))
-    EXTRAJS[0] = cenario.js_prefixo() + JS_COMUM + BO1_JS
+    EXTRAJS[0] = cenario.js_prefixo() + DA.js_cad0() + JS_COMUM + BO1_JS
     HEIGHTS37[fname] = 1050
     shell37('BO-01', 'Planos e preços', corpo, fname=fname, ctx=CTX_BO, perfil=PERFIL_BO, steps=telas(2), search=False,
             subtitle='Parâmetros de exemplo dos planos (a decidir pelo proprietário) e simulação por área. Nada aqui gera cobrança real.',

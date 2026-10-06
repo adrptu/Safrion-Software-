@@ -98,7 +98,7 @@ def on01():
     acts={i:a for i,_,_,_,_,a in P}
     EXTRAJS[0]='const ON_ACTS='+json.dumps(acts,ensure_ascii=False)+';\n'+ON1_JS
     corpo=(
-      kpis([('TRIAL','dia 5 de 30','até 18/10'),('ÁREA DECLARADA',f'{TRIAL["area_ha"]} ha','limite do trial'),
+      kpis([('TRIAL',H('k_tdia'),H('k_tfim')),('ÁREA DECLARADA',f'{TRIAL["area_ha"]} ha','limite do trial'),
             ('PENDÊNCIAS',H('k_pend'),H('k_pendd')),('MODO','Autônomo','sem integração')])
       + section('Passos do assistente','Continue de onde parou: cada dado é pedido quando for usado e nada fictício é gravado como fato.',
         [idrw('Importar arquivo',d_imp,'doc','Importar planilha ou shapefile com prévia obrigatória'),
@@ -119,7 +119,9 @@ function PREVALS(self,v){ const ad=self.state.added||{}; let pend=['polígono','
     r.p.acao=a.map(x=>{ if(!x.did) return x; if(ad[x.did]) return {k:'chip',t:x.done.split(' · ')[0],c:'green'}; all=false; return x; });
     if(r.id==='p2'){ if(ad[a[0].did]) pend=pend.filter(x=>x!=='polígono'); if(ad[a[1].did]) pend=pend.filter(x=>x!=='CAR'); }
     if(all && ON_EST[r.id]){ r.p.estado=[{k:'chip',t:ON_EST[r.id][0],c:ON_EST[r.id][1]}]; r.s.estado=ON_EST[r.id][0]; } });
-  v.k_pend=String(pend.length); v.k_pendd=pend.join(' · ')||'nenhuma'; }
+  v.k_pend=String(pend.length); v.k_pendd=pend.join(' · ')||'nenhuma';
+  /* dia do trial pela mesma data simulada do BO-02 (PLAT-D19; revisão PLAT, achado 8) */
+  const A=assinLer(), tr=assinTrial(A.orgs.boaesp,A.hoje); v.k_tdia=tr.acabou?'encerrado':tr.t; v.k_tfim='até '+assinBrC(tr.fim); }
 '''
 # =====================================================================================
 ON_JS=r'''

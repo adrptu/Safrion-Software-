@@ -6,11 +6,14 @@ proprietário (DEC-01, DEC-05, DEC-09 do PRD 70.4; docs/plataforma-assinaturas/D
 de pagamento, nenhuma credencial, nenhum campo de cartão. O estado vive em c.assin do cenário salvo (talhao-os-cenario-v1);
 ausente, vale ASSIN0 (PLAT-D12). As telas leem a mesma tabela de planos (ASSIN_PAR) e calculam a mensalidade por assinMensalidade
 (assinatura.js), que usa a regra decimal única cenQtd (cenario.js). Aqui o Python só monta o seed e confere os números dele."""
-import json, os, math
+import json, os, math, hashlib
 from decimal import Decimal, ROUND_HALF_UP
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DECIDIR = 'exemplo · a decidir pelo proprietário'
+# versão do formato do estado da assinatura; ASSIN0.v = VERSAO + resumo do seed: estado salvo de outro build volta ao seed (revisão PLAT, achado 7)
+VERSAO = 2
+GESTORA = 'Ana · Gestora'   # quem aceitou os contratos do seed (sintético); o CF-05 age com o mesmo perfil da casca
 
 # Trial da Organização Boa Esperança (ON-01 importa daqui: um só trial para ON-01, BO-01 e BO-02)
 TRIAL = dict(coorte='set/2026', dias=30, fim='18/10/2026', area_ha=480, inicio_iso='2026-09-19', fim_iso='2026-10-18')
@@ -82,7 +85,7 @@ def _fat(org, comp, plano, contrato, medida, ntal, emitida, st, eventos, paga=No
     fim = {'2026-07': '2026-07-31', '2026-08': '2026-08-31', '2026-09': '2026-09-30'}[comp]
     return dict(id=f'{org}-{comp}', comp=comp, st=st, valor=_r(val), emitida=emitida, venc=emitida, paga=paga, evt=evt, forma=forma, recibo=None,
                 copia=dict(medida=_r(medida), ntal=ntal, contratada=contrato['ha'], cobrada=_r(cob), plano=plano, preco=P['preco'], minimo=P['minimo'],
-                           versao='v' + str(contrato['v']), fechamento=fim, credito=0),
+                           versao='v' + str(contrato['v']), aceite_por=contrato.get('por'), fechamento=fim, credito=0),
                 eventos=eventos, tent=tent or [], contest=None)
 
 
@@ -92,10 +95,13 @@ def seed():
     med_sr, n_sr = medir(base, {'Santa Rita'})          # jul e ago: só a Santa Rita no cadastro (Boa Vista e Lagoa entram em 01/09)
     med_all, _n = medir(base)
     v2 = int(math.ceil(med_all / 100) * 100)            # contrato v2: medida da base arredondada para cima à centena (2.600 ha)
-    c1 = dict(v=1, plano='comp', ha=1200, desde='2026-07-01', aceite='2026-06-28')
-    c2 = dict(v=2, plano='comp', ha=v2, desde='2026-09-01', aceite='2026-08-28')
+    c1 = dict(v=1, plano='comp', ha=1200, desde='2026-07-01', aceite='2026-06-28', por=GESTORA)
+    c2 = dict(v=2, plano='comp', ha=v2, desde='2026-09-01', aceite='2026-08-28', por=GESTORA)
     ev = lambda d, t: dict(d=d, t=t)
+    _n_all = medir(base)[1]
+    # medida na abertura de set/2026 (01/09, entrada de Boa Vista e Lagoa Grande): piso do período (revisão PLAT, achado 3)
     sr = dict(id='sr', nome='Grupo Santa Rita', demo=True, uf='GO · MT · MG', cartao=None, contratos=[c1, c2], medida_inf=None, creditos=[],
+              aberturas={'2026-09': dict(ha=_r(med_all), n=_n_all, d='2026-09-01')},
               faturas=[_fat('sr', '2026-07', 'comp', c1, med_sr, n_sr, '2026-08-01', 'paga',
                             [ev('2026-08-01', 'Emitida · R$ 2.330,00'), ev('2026-08-01', 'Paga · evt_demo_0801 · Pix (simulado)')], '2026-08-01', 'evt_demo_0801', 'Pix'),
                        _fat('sr', '2026-08', 'comp', c1, med_sr, n_sr, '2026-09-01', 'paga',
@@ -126,7 +132,9 @@ def seed():
     fila = [dict(evt='evt_1JKT5', org='bv', fat='bv-2026-08', valor=640.0, ok=True, d='2026-09-22', forma='Boleto', motivo='pagamento confirmado'),
             dict(evt='evt_1JKR9', org='aurora', fat='aurora-2026-08', valor=299.0, ok=False, d='2026-09-22', forma='Cartão novo final 7702', motivo='recusado pelo emissor')]
     vistos = ['evt_demo_0801', 'evt_demo_0901', 'evt_1JKQ3', 'evt_1JKP7']
-    return dict(v=1, hoje='2026-09-23', demo='sr', orgs={o['id']: o for o in (sr, aurora, ipe, bv, boa, dois)}, fila=fila, vistos=vistos, recibos={}, seq={})
+    s = dict(v=None, hoje='2026-09-23', demo='sr', orgs={o['id']: o for o in (sr, aurora, ipe, bv, boa, dois)}, fila=fila, vistos=vistos, recibos={}, seq={})
+    s['v'] = f"{VERSAO}-{hashlib.sha1(json.dumps(s, sort_keys=True, ensure_ascii=False).encode('utf-8')).hexdigest()[:8]}"
+    return s
 
 
 _CACHE = {}

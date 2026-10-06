@@ -86,9 +86,36 @@ Formato: decisão · por quê · como reverter.
 - Por quê: R16 ("linha negativa na próxima fatura") sem reescrever a contestada; o painel Demonstração não passa de 16/10, por isso o crédito se vê na prévia.
 - Reverter: aplicar o crédito no período seguinte ao da fatura contestada (`assinResolver`).
 
+## Decisões das correções da revisão adversarial (06/10/2026)
+
+**PLAT-D21 · Medida do período = a maior entre a da abertura e a do fechamento** (achado 3; muda o "a área do fechamento vale para o mês" do PLAT-D07).
+- Por quê: com a foto só do fechamento, inativar o B1 (120 ha) em 23/09 e reativá-lo em 01/10 tirava 120 ha da cobrança de setembro (contraexemplo executado pelo revisor). Com o piso, inativar não reduz o mês em curso e reativar depois do fechamento entra no mês seguinte. Pousio não muda nada (o talhão segue Ativo, PRD 57.2).
+- Limite conhecido: talhão criado e inativado dentro do mesmo mês não entra (o pico dentro do mês não é medido; medir exigiria gravar a cada edição do cadastro, em arquivos de outras frentes). Com `base='contratada'` (DEC-01) o limite some.
+- Reverter: tirar `aberturas` de `dados_assinatura.py` e de `assinAvancar`; `assinMedPeriodo` passa a devolver a medida do fechamento.
+
+**PLAT-D22 · Uma contestação por fatura; crédito com teto acumulado e saldo que segue.** (achados 1 e 2)
+- A fatura contestada e resolvida não é contestada de novo (a recusa cita o RES-). O crédito somado de uma fatura nunca passa do valor dela. O crédito que passa da fatura do período vira saldo da competência seguinte (memória e CSV mostram "saldo de crédito R$ X para mês/ano"). Fatura de R$ 0,00 nasce quitada pelo crédito: não pede pagamento nem conta atraso.
+- Por quê: sem isso, o ciclo contestar → resolver repetia créditos sem limite e congelava a régua para sempre; e R$ 1.285,11 sumiam entre o BO-02 e o CF-05.
+- Reverter: não se reverte sem outra regra de contestação decidida pelo proprietário.
+
+**PLAT-D23 · Quem age fica gravado em todo ato da assinatura.** (achado 4)
+- Aceite, desfazer, pagamento, contestação, resolução, conciliação e pedido de proposta recusam sem autor e gravam `por` no contrato, no recibo, na fatura e no evento. O CF-05 age como "Ana · Gestora" (perfil da casca) e a plataforma como "Admin plataforma". O contrato desfeito fica guardado com quem desfez (nada se apaga).
+- Por quê: PRD 58.4 (login não dá poder de contratar) e PRECO-04 (aceite). Quem *pode* agir segue fora de escopo (§9); quem *fez* não podia faltar.
+- Reverter (evoluir): trocar as constantes `CF_POR`/`BO_POR` pelo `g2perfil` quando a frente D (CTL-3) integrar.
+
+**PLAT-D24 · Estado salvo da assinatura com versão própria.** (achado 7) `ASSIN0.v` = versão do formato + resumo do seed (ex.: `2-9670ad1a`). Estado salvo de outro build ou de outro cadastro (KML real no Mac) volta ao seed na leitura e na próxima gravação, como o `cenGet` faz com o cenário.
+- Reverter: comparar só a versão do formato (`VERSAO`), sem o resumo.
+
+**PLAT-D25 · Acima de 5.000 ha a primária do CF-05 é "Pedir proposta empresarial".** (achado 10) O pedido é um registro (PRO-0001, com quem pediu), visível no BO-02; nenhuma mensagem real é enviada. Depois do pedido a primária fica desabilitada com a data. A sugestão de "Ampliar área contratada" nunca passa de 5.000 ha.
+- Reverter: tirar o ramo `proposta` de `assinPrimaria`.
+
+**PLAT-D26 · Primária do BO-02 pela próxima ação real.** (achado 9) Evento a conciliar → "Conciliar pagamentos" (chave estável no clique repetido); senão contestação aberta → "Resolver contestação" (abre a organização); senão "Conciliar pagamentos" desabilitado com o motivo. O botão do painel passa a "Registrar resolução", para não ter o mesmo rótulo de abrir e de confirmar (RV-18).
+
+**PLAT-D27 · Faixa curta no celular e redesenho só quando a faixa muda.** (achados 12 e 11) Até 640 px a faixa mostra "Fatura de set/2026 vencida há 15 dias · talhão novo suspenso" com o link na mesma linha (de 123 px para cerca de 48 px). As telas sem medição só redesenham quando estado, dias ou data da cobrança mudam; o cadastro só redesenha CF-05, BO-01 e BO-02.
+
 ## Para o proprietário decidir (sem pressa; o protótipo funciona com os exemplos)
 
-1. Base de cobrança: área contratada ou área medida no cadastro (DEC-01; PLAT-D05).
+1. Base de cobrança: área contratada ou área medida no cadastro (DEC-01; PLAT-D05). Contraexemplo para a decisão: com a área medida, o mês precisa de um piso (PLAT-D21) e mesmo assim um talhão criado e inativado dentro do mês não é cobrado; com a área contratada, nada disso existe.
 2. Preço, mínimo e franquias de cada plano, e se haverá dois planos (DEC-09; PLAT-D03, D04).
 3. Duração do trial, retenção depois do fim e calendário de cobrança (DEC-09; PLAT-D07).
 4. Régua de inadimplência: dias e o que é restringido (PLAT-D08).

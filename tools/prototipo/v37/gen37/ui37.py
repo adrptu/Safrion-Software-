@@ -259,8 +259,10 @@ def _macro_html(fname, ctx):
 # nunca botão verde (não vira 2ª primária). O app de campo (mobile37) nunca mostra cobrança. Texto e cor vêm de assinAvisoVals (assinatura.js).
 def faixa_cobranca(fid,fname):
     if fid[:2] in ('BO','ON','PT') or fname.startswith('CF-05'): return ''
-    return (f'<sc-if value="{{{{assin_fx}}}}" hint-placeholder-val="{{{{false}}}}"><div role="note" aria-label="Cobrança" style="{{{{assin_fx_st}}}}">'
-            f'<span>{{{{assin_fx_t}}}}</span><a href="CF-05.dc.html#pagar" style="color: inherit; font-weight: 800; text-decoration: underline; text-underline-offset: 3px;">Pagar fatura ›</a></div></sc-if>')
+    return (f'<sc-if value="{{{{assin_fx}}}}" hint-placeholder-val="{{{{false}}}}"><div role="note" aria-label="Cobrança" class="assin-fx" style="{{{{assin_fx_st}}}}">'
+            # celular: só o essencial, com o link na mesma linha do texto (revisão PLAT, achado 12: a faixa ocupava 123 px)
+            f'<style>.assin-fx-m{{display:none}}@media (max-width:640px){{.assin-fx-w{{display:none}}.assin-fx-m{{display:inline}}.assin-fx{{display:block!important;padding:6px 10px!important}}.assin-fx>a{{margin-left:6px;white-space:nowrap}}}}</style>'
+            f'<span class="assin-fx-w">{{{{assin_fx_t}}}}</span><span class="assin-fx-m">{{{{assin_fx_m}}}}</span><a href="CF-05.dc.html#pagar" style="color: inherit; font-weight: 800; text-decoration: underline; text-underline-offset: 3px;">Pagar fatura ›</a></div></sc-if>')
 def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=None,crumbs_extra=None,
             ctx=('Fazenda Santa Rita','Safra 2026/27',None),cont=None,chipsrow='',footer=None,
             fname=None,W=1440,H=880,perfil='Ana · Gestora',search=True,steps=None,primary_html=None):
