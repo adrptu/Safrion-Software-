@@ -198,9 +198,10 @@ function eitem(c,r,it0){ const o=c.ordens[r.os]||{}; const sq=Math.min(epCons(o,
   const cf=cenConfAbertas(c,r.os).find(k=>k.req===r.id&&k.prod===it.prod)||null;
   return {id:r.id+'|'+it.prod, rid:r.id, os:r.os, o, it, l, un:it.un, pend, pode, bloq, selo, motivo, resP, livre:l?cenDisp(l)+resP:0, quem:it.quem||o.resp||'', sinal, cf}; }
 // consumo em conferência (CONC-07): relatado × custódia, quem concilia e as duas decisões do almoxarife (CMD-50)
-function ecfCel(k,c,ask,GEST){ const h=[{k:'chip',t:'Consumo em conferência',c:'yellow'},{k:'mut',t:k.id+' · '+cenConfTxt(k,c)+' · '+k.resp}];
+function ecfCel(k,c,ask,PF){ const h=[{k:'chip',t:'Consumo em conferência',c:'yellow'},{k:'mut',t:k.id+' · '+cenConfTxt(k,c)+' · '+k.resp}];
   const exc=k.relatado-cenConfCust(c,k)>1e-9;   /* o excedente da custódia sai do lote: aceite do gestor (padrão 2) */
-  if(ask!==k.id) return h.concat(exc&&!GEST?[{k:'mut',t:'aceite: '+g2quem('gestor')}]:[{k:'act',t:'Aceitar consumo',fn:'cfa:'+k.id}]).concat([{k:'act',t:'Recusar relato',fn:'cfr:'+k.id}]);
+  const AC=['almoxarife','gestor'], pode=exc?g2papel(PF,'gestor'):!!g2umPapel(PF,AC);   /* coberto pela custódia: almoxarife ou gestor (revisão do CTL-3, achado 3) */
+  if(ask!==k.id||!pode) return h.concat(pode?[{k:'act',t:'Aceitar consumo',fn:'cfa:'+k.id}]:[{k:'mut',t:'aceite: '+(exc?g2quem('gestor'):g2quemUm(AC))}]).concat([{k:'act',t:'Recusar relato',fn:'cfr:'+k.id}]);
   let p; try{ p=cenConcPrevia(c,k.id); }catch(e){ p={erro:String(e.message||e)}; }
   if(p.erro) return h.concat([{k:'mut',t:p.erro},{k:'act',t:'Recusar relato',fn:'cfr:'+k.id},{k:'act',t:'Voltar',fn:'cfno:x'}]);
   return h.concat([{k:'txt',t:p.txt},{k:'act',t:'Confirmar aceite',fn:'cfok:'+k.id},{k:'act',t:'Voltar',fn:'cfno:x'}]); }
@@ -233,7 +234,7 @@ function emovTxt(m){ const u=m.un||'';
   if(m.tipo==='entrega') return 'entrega '+m.req+' → '+m.os+': −'+eq(m.qtd,u)+' ('+m.quem+')';
   if(m.tipo==='devolucao') return 'devolução '+m.req+' ('+m.os+'): +'+eq(m.qtd,u)+(m.apto?' apta':' bloqueada para inspeção');
   if(m.tipo==='recebimento-nf') return 'recebimento '+m.doc+': +'+eq(m.qtd,u)+(m.apto?' apto':' em quarentena')+(m.val&&m.val!=='—'?' · validade '+m.val:'');
-  if(m.tipo==='inspecao') return 'quarentena liberada '+(m.doc?'com o laudo '+m.doc+' por '+m.quem:'após inspeção')+': '+eq(m.qtd,u)+' passam a disponível';
+  if(m.tipo==='inspecao') return 'quarentena liberada '+(m.doc?'com o laudo '+m.doc+' por '+m.quem:'após inspeção')+': '+eq(m.qtd,u)+' passam a disponível'+(m.rev?' · '+m.rev:'');
   if(m.tipo==='contagem') return 'contagem '+(m.doc?m.doc+' ':'')+'sem diferença';
   if(m.tipo==='ajuste') return 'ajuste de inventário '+(m.doc?m.doc+' ':'')+'aprovado por '+(m.quem||'gestor')+': '+esig(m.qtd,u)+(m.rev?' · '+m.rev:'');
   return emovTipo(m); }
@@ -270,18 +271,18 @@ function emovDoc(c,m,usados){ if(m.doc||m.tipo!=='ajuste') return m.doc?{doc:m.d
 
 // ---------- mudanças no cenário (sempre dentro de cenMudar) ----------
 // Recebimento: a parte apta e a parte em quarentena entram no mesmo lote (cenReceber); os dados da conferência ficam no movimento.
-function estReceber(c,d){ const n0=c.movs.length; const antes=eitemDisp(c,d.item);
-  if(d.apto>0) cenReceber(c,d.item,d.lote,d.apto,d.un,d.local,d.val,d.nf,true);
-  if(d.quar>0) cenReceber(c,d.item,d.lote,d.quar,d.un,d.local,d.val,d.nf,false);
+function estReceber(c,d,ator){   /* ator: quem confere (perfil); o movimento grava quem agiu (revisão do CTL-3, achado 4) */ const n0=c.movs.length; const antes=eitemDisp(c,d.item);
+  if(d.apto>0) cenReceber(c,d.item,d.lote,d.apto,d.un,d.local,d.val,d.nf,true,ator);
+  if(d.quar>0) cenReceber(c,d.item,d.lote,d.quar,d.un,d.local,d.val,d.nf,false,ator);
   if(c.movs.length===n0) throw new Error('Nada conferido para entrar no estoque.');
   c.movs.slice(n0).forEach(m=>{ m.val=d.val; }); c.movs[n0].estRec=d;
   return {msg:'Recebimento '+d.nf+' conferido: '+eq(d.conf,d.un)+' de '+d.item+' no lote '+d.lote+(d.val&&d.val!=='—'?' (validade '+d.val+')':'')+'. Disponível '+eq(antes,d.un)+' → '+eq(eitemDisp(c,d.item),d.un)+(d.quar?'; '+eq(d.quar,d.un)+' em quarentena ficam fora do disponível.':'.')}; }
 // Entrega: só a reserva desta requisição é baixada (a de outras O.S. fica); a nova entrega aguarda a confirmação no app.
-function estEntregar(c,rid,prod,qtd,quem){ const r0=c.reqs[rid]; const it0=r0&&r0.itens.find(i=>i.prod===prod); const l=it0&&c.lotes[prod+'|'+it0.lote];
+function estEntregar(c,rid,prod,qtd,quem,ator){ const r0=c.reqs[rid]; const it0=r0&&r0.itens.find(i=>i.prod===prod); const l=it0&&c.lotes[prod+'|'+it0.lote];
   const res0=l?l.reservado:0; const own=it0&&l?Math.max(0,Math.min(res0,eresTot(c,rid,prod)-it0.entregue)):0;
-  const r=cenEntregar(c,rid,prod,qtd,quem);
+  const r=cenEntregar(c,rid,prod,qtd,quem,ator);
   if(l) l.reservado=Math.max(0,res0-Math.min(qtd,own)); it0.confirmado=false; return r; }
-function estDevolver(c,rid,prod,qtd,apto,obs){ const r=cenDevolver(c,rid,prod,qtd,apto); if(obs) c.movs[c.movs.length-1].obs=obs;
+function estDevolver(c,rid,prod,qtd,apto,obs,ator){ const r=cenDevolver(c,rid,prod,qtd,apto,ator); if(obs) c.movs[c.movs.length-1].obs=obs;
   const req=c.reqs[rid]; const o=c.ordens[req.os]||{}; const it=req.itens.find(i=>i.prod===prod); const pe=cenPodeEncerrar(c,req.os);
   return {msg:r.msg+' Custódia de '+prod+' na '+req.os+': '+eq(it.custodia+qtd,it.un)+' → '+eq(it.custodia,it.un)+(o.etapa==='Em conferência'&&!pe?' · encerramento liberado.':'.')}; }
 function estContar(c,inv,key,contado,contador,causa,ator){ const l=c.lotes[key]; if(!l) throw new Error('Escolha o lote contado.');
@@ -346,11 +347,11 @@ ESAVE.g_rec=(self,fm)=>{ const d=fm.draft; const p=epedBase(d.ped); const n=k=>e
   const id=fm.rid||('r'+(nfv.replace(/\D/g,'')||String(Date.now()).slice(-6))); const base=E2.recs.find(b=>b.id===id)||{};
   const rec={id,nf:nfv,data:base.data||'',ped:d.ped,item:p.item,un:p.un,qtd_nf:n('qtd_nf'),conf:n('conf'),apto:n('apto'),quar:n('quar'),lote:String(d.lote||'').trim(),
     val:efert(d.ped)?'—':String(d.val||'').trim(),local:d.local,div:d.div||'Sem divergência',obs:String(d.obs||'').trim()};
-  const r=cenMudar(null,c=>estReceber(c,rec)); r.fl=id; return r; };
+  const r=cenMudar(null,c=>estReceber(c,rec,g2perfil())); r.fl=id; return r; };
 ESAVE.g_ent=(self,fm)=>{ const x=eitens(cenGet()).find(y=>y.id===fm.rid); if(!x) return {erro:'Requisição não encontrada.'};
-  return cenMudar(null,c=>estEntregar(c,x.rid,x.it.prod,g2num(fm.draft.qtd),fm.draft.quem)); };
+  return cenMudar(null,c=>estEntregar(c,x.rid,x.it.prod,g2num(fm.draft.qtd),fm.draft.quem,g2perfil())); };
 ESAVE.g_dev=(self,fm)=>{ const x=eitens(cenGet()).find(y=>y.id===fm.rid); if(!x) return {erro:'Requisição não encontrada.'};
-  return cenMudar(null,c=>estDevolver(c,x.rid,x.it.prod,g2num(fm.draft.qtd),fm.draft.cond===E2.conds[0],String(fm.draft.obs||'').trim())); };
+  return cenMudar(null,c=>estDevolver(c,x.rid,x.it.prod,g2num(fm.draft.qtd),fm.draft.cond===E2.conds[0],String(fm.draft.obs||'').trim(),g2perfil())); };
 ESAVE.g_cnt=(self,fm)=>{ const d=fm.draft; const C=cenGet(); const rec=fm.rid?einvRec(C,fm.rid):null; const causa=String(d.causa||'').trim();
   if(econtou(rec)) return cenMudar(null,c=>estCausa(c,rec.id,causa));
   const key=elotKey(C,d.lote); const inv=rec?rec.id:enovoInv(C); const r=cenMudar(null,c=>estContar(c,inv,key,g2num(d.cont),d.contador,causa,g2perfil())); r.fl=inv; return r; };
@@ -382,7 +383,7 @@ function elotRow(c,l,ask,INV,GEST){ const un=l.un; const venc=evenc(l);
     o:(mv.length?mv:[{t:'Sem movimentos desde o início da demonstração.'}]).concat(pend)}; }
 
 function PREVALS(self,v){
-  cenOuvir(self); const C=cenGet(); self._cen=C; const GEST=g2papel(g2perfil(),'gestor');   /* decisões do gestor (DEC-2609-13) */
+  cenOuvir(self); const C=cenGet(); self._cen=C; const PF=g2perfil(), GEST=g2papel(PF,'gestor');   /* quem age; decisões do gestor (DEC-2609-13) */
   const vazio=(v.mf_faz==='Boa Vista'); v.est_vazio=vazio; v.est_tem=!vazio; v.est_versr=()=>self.setState({mf_faz:'Santa Rita',g2toast:'Fazenda: Santa Rita'});
   const IT=eitens(C); const INV=einvs(C);
   // ---- etapa 1: recebimentos ----
@@ -443,7 +444,7 @@ function PREVALS(self,v){
     let pe=''; try{ pe=cenPodeEncerrar(C,x.os); }catch(err){ pe=''; }
     const cOS=IT.filter(y=>y.os===x.os&&y.it.custodia>1e-9).map(y=>eq(y.it.custodia,y.un)).join(' + ');
     let enc,es='';
-    if(x.cf){ r.p.enc=ecfCel(x.cf,C,self.state.est_cfask,GEST); r.s.enc='Consumo em conferência '+x.cf.id; r.p.det=[{k:'mut',t:'—'}]; r.s.det=''; return r; }
+    if(x.cf){ r.p.enc=ecfCel(x.cf,C,self.state.est_cfask,PF); r.s.enc='Consumo em conferência '+x.cf.id; r.p.det=[{k:'mut',t:'—'}]; r.s.det=''; return r; }
     if(o.etapa==='Em conferência'){ if(pe){ enc={k:'chip',t:'Bloqueado',c:'red'}; es=cOS?cOS+' em custódia':pe; } else { enc={k:'chip',t:'Pode encerrar',c:'green'}; es='custódia zero'; } }
     else if(cu&&x.sinal){ enc={k:'chip',t:'Aguardando sinal do app',c:'yellow'}; es='consumo no aparelho · receba a sobra depois do envio'; }
     else if(cu){ enc={k:'chip',t:'Em uso na O.S.',c:'gray'}; es='O.S. '+(EFASE[o.etapa]||String(o.etapa||'').toLowerCase()); }
@@ -451,7 +452,7 @@ function PREVALS(self,v){
     r.p.enc=[enc]; r.s.enc=enc.t; r.v.det=es; r.s.det=es; r.p.det=es?[{k:'txt',t:es}]:[{k:'mut',t:'—'}]; return r; });
   const CFS=cenConfAbertas(C); CFS.filter(k=>!IT.some(x=>x.rid===k.req&&x.it.prod===k.prod)).forEach(k=>GR('g_dev').rows.push({id:'CF|'+k.id,ro:true,
     v:{req:k.req||'—',os:k.os,item:k.prod,lote:'',un:k.un||'',com:'',ent:0,cons:0,dev:0,cust:0,qtd:'',cond:E2.conds[0],obs:''},s:{req:(k.req||''),os:k.os,item:k.prod,lote:'fora da requisição',enc:'Consumo em conferência '+k.id,det:''},
-    p:{req:[{k:'b',t:k.req||'sem requisição'}],os:[{k:'link',t:k.os,h:'OS.dc.html'}],item:[{k:'txt',t:k.prod}],lote:[{k:'mut',t:'fora da requisição'}],ent:[{k:'mut',t:'—'}],cons:[{k:'mut',t:'—'}],dev:[{k:'mut',t:'—'}],cust:[{k:'mut',t:'—'}],com:[{k:'mut',t:'—'}],det:[{k:'mut',t:'—'}],enc:ecfCel(k,C,self.state.est_cfask,GEST)}}));
+    p:{req:[{k:'b',t:k.req||'sem requisição'}],os:[{k:'link',t:k.os,h:'OS.dc.html'}],item:[{k:'txt',t:k.prod}],lote:[{k:'mut',t:'fora da requisição'}],ent:[{k:'mut',t:'—'}],cons:[{k:'mut',t:'—'}],dev:[{k:'mut',t:'—'}],cust:[{k:'mut',t:'—'}],com:[{k:'mut',t:'—'}],det:[{k:'mut',t:'—'}],enc:ecfCel(k,C,self.state.est_cfask,PF)}}));
   const fmD=g2st(self,'g_dev').fm; if(fmD&&fmD.rid){ const x=IT.find(y=>y.id===fmD.rid); if(x){ const fs=GR('g_dev').edit.fields; fs[0].u=x.un; fs[0].help='Em custódia: '+eq(x.it.custodia,x.un)+' com '+x.quem+'.'; } }
   // ---- etapa 4: saldos por lote e local ----
   const loc=self.state.est_loc||''; const LS=elotes(C).filter(l=>!loc||l.local===loc); const itens=[]; LS.forEach(l=>{ if(itens.indexOf(l.prod)<0) itens.push(l.prod); });
@@ -541,6 +542,7 @@ function PREVALS(self,v){
   v.k6=(C.movs||[]).length+((C.movs||[]).length===1?' movimento':' movimentos')+' desde o início da demonstração · '+nsin+' aguardando sinal do app';
 }
 function EXTRAVALS(self,v){
+  self.g2perfilFecha={est_cfask:null,libask:null,lib_laudo:'',lib_err:''};   /* trocar o perfil fecha o aceite do consumo e o laudo da quarentena */
   const st=self.state; const step=st.step||1; const N=6; const C=self._cen||cenGet();
   self.g2live=(gid,k,d)=>{ if(gid==='g_rec'&&k==='val'&&efert(d.ped)) return 'Sem validade'; return undefined; };
   for(let i=1;i<=N;i++) v['s'+i]=(step===i);
@@ -563,7 +565,7 @@ function EXTRAVALS(self,v){
   v.est_locs=[''].concat(E2.locais).map(lc=>({t:lc||'Todos os locais',on:String(loc===lc),st:CH+(loc===lc?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;'),go:()=>self.setState({est_loc:lc})}));
   // liberar quarentena do lote após inspeção (confirmação na linha; repetir não soma de novo)
   // (gestor, com o nº do laudo; sem laudo ou sem papel nada muda e o erro fica no painel, com o laudo digitado preservado)
-  const lk=st.libask; const lq=lk&&C.lotes[lk]; v.lib_on=!!(lq&&lq.quarentena>1e-9);
+  const lk=st.libask; const lq=lk&&C.lotes[lk]; v.lib_on=!!(lq&&lq.quarentena>1e-9)&&g2papel(g2perfil(),'gestor');   /* aberto por outro perfil: não aparece (achado 1) */
   v.lib_t=v.lib_on?('Liberar '+eq(lq.quarentena,lq.un)+' do lote '+lq.lote+' ('+lq.prod+'): informe o laudo que aprova o material.'):'';
   v.lib_laudo=st.lib_laudo||''; v.lib_setlaudo=(e)=>self.setState({lib_laudo:e.target.value,lib_err:''}); v.lib_err=st.lib_err||''; v.lib_hasErr=!!st.lib_err;
   v.libq=(k)=>{ self.setState({libask:k,lib_laudo:'',lib_err:''}); setTimeout(()=>{ const e=document.getElementById('est-laudo'); if(e) e.focus(); },0); };

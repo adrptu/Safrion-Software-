@@ -256,12 +256,16 @@ function g2papel(p,papel){ const q=g2pf(p); return !!q&&[].concat(papel).every(x
 function g2ator(p,papel){ const q=g2pf(p); if(!q) return ''; const n=[].concat(papel).map(x=>q.papeis[x]).filter(Boolean);
   return q.k+' ('+(n.length?n.join(' e '):Object.values(q.papeis)[0])+')'; }   // "Ana (gestora)" · "Ana (gestora e agrônoma)"; fora do cadastro: ''
 function g2quem(papel){ return G2_PERFIS.filter(p=>g2papel(p,papel)).map(p=>g2ator(p,papel)).join(' ou '); }
+function g2umPapel(p,papeis){ const q=g2pf(p); return (q&&papeis.find(x=>!!q.papeis[x]))||''; }   // o primeiro papel da lista que o perfil tem (basta um): '' se nenhum
+function g2quemUm(papeis){ return G2_PERFIS.filter(p=>g2umPapel(p,papeis)).map(p=>g2ator(p,g2umPapel(p,papeis))).join(' ou '); }   // "Ana (gestora) ou Rui (almoxarife) ou …"
 function g2mesma(a,b){ const n=s=>String(s||'').split(/[\s(]/)[0]; return !!n(a)&&n(a)===n(b); }   // "Ana" × "Ana (gestora)"
 // </perfis>
+// trocar o perfil (aqui ou em outra aba) fecha a confirmação ou o formulário de decisão aberto, montado para o perfil anterior (revisão do CTL-3,
+// achado 1; dano evitado: a tela afirmar que decide quem não tem o papel). Cada tela diz o que fecha em self.g2perfilFecha (O.S., Mapa, Estoque)
 function g2navvals(self,v,nav){ const rec=(self.state.menuRec===undefined)?g2menuRec():!!self.state.menuRec;
   const pf=g2perfil(); v.perfil_k=pf.k; v.perfil_ini=pf.k.charAt(0); v.perfil_opts=G2_PERFIS.map(p=>({v:p.k,t:p.t}));
-  v.perfil_set=(e)=>{ const k=e.target.value; G2_PERFIL_MEM=k; try{ localStorage.setItem(G2_PERFIL_KEY,k); }catch(er){} self.setState({perfil:k,g2toast:'Perfil de demonstração: '+((g2pf(k)||{}).t||k)+' (não é segurança de acesso).'}); };
-  if(!self.__g2pf){ self.__g2pf=1; try{ window.addEventListener('storage',(e)=>{ if(e.key===G2_PERFIL_KEY) self.setState({perfil:e.newValue}); }); }catch(er){} }
+  v.perfil_set=(e)=>{ const k=e.target.value; G2_PERFIL_MEM=k; try{ localStorage.setItem(G2_PERFIL_KEY,k); }catch(er){} self.setState(Object.assign({perfil:k,g2toast:'Perfil de demonstração: '+((g2pf(k)||{}).t||k)+' (não é segurança de acesso).'},self.g2perfilFecha||{})); };
+  if(!self.__g2pf){ self.__g2pf=1; try{ window.addEventListener('storage',(e)=>{ if(e.key===G2_PERFIL_KEY) self.setState(Object.assign({perfil:e.newValue},self.g2perfilFecha||{})); }); }catch(er){} }
   const fixa=(n)=>{ if(g2estreito()) return; try{ localStorage.setItem('safrion.menuRecolhido',n?'1':'0'); }catch(e){} };
   if(!self.__g2mq){ self.__g2mq=1; try{ window.matchMedia(G2_ESTREITO).addEventListener('change',(ev)=>self.setState({menuRec:ev.matches?true:undefined})); }catch(e){} }
   v.menu_rec=rec; v.menu_aberto=!rec; v.menu_cls=rec?'rec':''; v.menu_tog_lab=rec?'Expandir menu':'Recolher menu';

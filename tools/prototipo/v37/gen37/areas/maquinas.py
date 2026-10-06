@@ -454,7 +454,7 @@ function EXTRAVALS(self,v){ const c=manGet(); const st=self.state; ma_rstV(self,
     opts:R.map(r=>({t:r,on:String(t.r===r),lab:r+' · '+t.t,go:()=>manMudar(self,c2=>manResp(c2,o.id,i,t.r===r?'':r,undefined,g2perfil())),
       st:'font-family:inherit;font-size:12px;font-weight:700;padding:4px 9px;border-radius:8px;cursor:pointer;white-space:nowrap;'+(t.r===r?(r==='Feito'?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #8A5A00;background:#FFF3D6;color:#8A5A00;'):'border:1px solid #E4E9E5;background:#fff;color:#15201A;')})),
     r:t.r||'Sem resposta',rst:ma_chipSt(t.r==='Feito'?'green':(t.r?'yellow':'gray')),rdot:ma_dotSt(t.r==='Feito'?'green':(t.r?'yellow':'gray')),
-    por:t.por?('por '+t.por+(t.em?' às '+t.em:'')):'',hasPor:!!t.por,mot:t.mot||'',hasMotIn:ed&&!!t.r&&t.r!=='Feito',hasMotTx:!ed&&!!t.mot,motlab:'Motivo · '+t.t,
+    por:t.por?('por '+t.por+(t.em?' às '+t.em:'')+((t.motPor&&t.motPor!==t.por)?' · motivo editado por '+t.motPor+(t.motEm?' às '+t.motEm:''):'')):'',hasPor:!!t.por,mot:t.mot||'',hasMotIn:ed&&!!t.r&&t.r!=='Feito',hasMotTx:!ed&&!!t.mot,motlab:'Motivo · '+t.t,
     setmot:(e)=>{ const val=e.target.value; manMudar(self,c2=>manResp(c2,o.id,i,t.r,val,g2perfil())); }}));
   const nr=o.chk.filter(t=>t.r).length; v.pan_chkn=nr+' de '+o.chk.length+' respondidas';
   // execução: leitura do contador e horas (obrigatória a leitura para concluir)

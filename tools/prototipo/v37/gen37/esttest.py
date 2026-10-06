@@ -3,7 +3,8 @@
   python3 esttest.py 1   recebimento com quarentena e validade do lote, NF duplicada, saldos da etapa 4, liberação da quarentena no lote
   python3 esttest.py 2   entregas (O.S. em conferência e impedida só consulta, saldo = solicitado − consumido − custódia), devoluções reabrindo saldo
   python3 esttest.py 3   contagem cega com recontagem por outro contador e causa exigida na aprovação
-  python3 esttest.py 4   CTL-3 (aprova quem decide): perfil Rui não aprova nem libera; Rui registra a contagem e Ana aprova sem revisão posterior
+  python3 esttest.py 4   CTL-3 (aprova quem decide): perfil Rui não aprova nem libera; Rui registra a contagem e Ana aprova sem revisão posterior;
+                         trocar o perfil fecha o laudo e o aceite abertos; a entrega grava o perfil de quem entrega
 Sem argumento roda as três em sequência (use as partes quando o limite de tempo por comando for curto)."""
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -155,6 +156,24 @@ def parte4(E):
     tt = E.toast(); E.ok('Ajuste INV-2611 (AJ-71) aprovado por Ana (gestora): −20 L no lote G26-14. Físico 1.200 L → 1.180 L.' in tt and 'revisão' not in tt, 'Ana aprova a contagem registrada por Rui: sem revisão posterior', tt)
     E.clk('Confira saldos'); t = E.rowtxt('G26-14'); E.ok('1.180 L' in t, 'G26-14 vai a 1.180 L', t)
     E.shot('est_ctl3_perfil.png')
+    # revisão do CTL-3, achado 1: trocar o perfil fecha o que foi aberto para outro perfil (laudo da quarentena; aceite do excedente)
+    LAUDO = 'informe o laudo que aprova o material'
+    print('liberar K26-11:', E.rowbtn('K26-11', 'Liberar após inspeção')); m0 = E.main()
+    print('perfil Rui:', E.setv(SEL, 'Rui')); m1 = E.main(); t = E.rowtxt('K26-11')
+    E.ok(LAUDO in m0 and LAUDO not in m1 and 'aguarda laudo · Ana (gestora) libera' in t and E.cen("c.lotes['KCl 60%|K26-11'].quarentena") == 10000,
+         'Ana abre o laudo do K26-11 e troca para Rui: o painel do laudo fecha e a linha diz quem libera (quarentena segue 10.000 kg)', [LAUDO in m0, t])
+    E.setv(SEL, 'Ana')
+    print('relato:', E.mudar("cenIniciarTurno(c,'OS-0421'); return cenFecharTurno(c,10,2,{'Fungicida A':85},'',[]);")); E.abrir(); E.clk('Receba devoluções')
+    print('aceitar:', E.rowbtn(['REQ-035', 'Fungicida A'], 'Aceitar consumo')); a0 = E.rowtxt('REQ-035', 'Fungicida A')
+    print('perfil Rui:', E.setv(SEL, 'Rui')); a1 = E.rowtxt('REQ-035', 'Fungicida A')
+    E.ok('Confirmar aceite' in a0 and 'Confirmar aceite' not in a1 and 'aceite: Ana (gestora)' in a1 and 'Recusar relato' in a1 and E.cen("c.lotes['Fungicida A|F26-02'].fisico") == 545,
+         'Ana abre o aceite dos 20 L acima da custódia e troca para Rui: "Confirmar aceite" some, a linha diz "aceite: Ana (gestora)"; F26-02 segue 545 L', [a0, a1])
+    # achado 4: a entrega pela tela grava o perfil de quem entrega (antes: sempre "Rui (almoxarife)")
+    print('perfil Paula:', E.setv(SEL, 'Paula')); E.mudar("return cenLiberar(c,'OS-0430');"); RQ = E.cen("Object.keys(c.reqs).find(k=>c.reqs[k].os==='OS-0430')")
+    E.abrir(); E.clk('Entregue por O.S.'); E.row(RQ, 'Glifosato 480'); E.salvar(); print('toast:', E.toast())
+    q = E.cen("c.movs.filter(m=>m.tipo==='entrega').map(m=>m.quem)")
+    E.ok(q == ['Paula (almoxarife) → Marcos'], 'Paula entrega o Glifosato da OS-0430 pela tela: a trilha grava "Paula (almoxarife) → Marcos"', q)
+    E.setv(SEL, 'Ana')
 
 
 PARTES = {'1': parte1, '2': parte2, '3': parte3, '4': parte4}

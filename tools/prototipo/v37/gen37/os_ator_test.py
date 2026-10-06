@@ -4,6 +4,8 @@ Liberar a O.S. agrícola grava CMD-42 (aprovada por, papel agrônomo) e CMD-06 (
   - Caio (PCP) não vê "Liberar para execução" nem "Ajustar antes de liberar"; a tela diz quem decide; o comando direto é recusado e nada é gravado;
   - Ana (gestora e agrônoma) libera numa confirmação: os dois registros, cada um com o papel que decidiu.
 Duplicidade de apontamento (CMD-09): só quem confere (Paula) vê as três saídas; Rui é recusado no comando; a decisão de Paula grava "Paula (conferência)".
+Revisão do CTL-3: trocar o perfil com a confirmação (ou a dispensa) aberta fecha o que foi montado para o perfil anterior; cancelar sem execução
+(CMD-46, AL-04) só para o gestor.
 Uso (de gen37/, depois de build.py e montar_render.py): python3 os_ator_test.py"""
 import sys, os, time, json, re
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -57,6 +59,24 @@ try:
     T.btn('Mesmo turno: vale o dia 5'); dec = T.cen("(c.ordens['OS-0421'].ap.find(a=>a.dia===6).dec||{}).quem")
     T.ok(dec == 'Paula (conferência)' and T.cen("c.ordens['OS-0421'].realizado") == 240, 'Paula decide: a decisão grava Paula (conferência); 240 ha', dec)
     T.shot('os_ator_paula.png'); T.fechar(); perfil('Ana')
+    # ---- 4 · revisão do CTL-3, achado 1: trocar o perfil fecha a confirmação ou o formulário montado para o perfil anterior; CMD-46 (achado 4) ----
+    T.J("window.__cen.cenReset()"); T.abrir(wait=1.2); perfil('Ana')
+    T.ordem('OS-0430'); T.btn('Liberar para execução'); c0 = T.pan()
+    perfil('Caio'); p = T.pan()
+    T.ok('ao confirmar, Ana (agrônoma) aprova esta versão e Ana (gestora) libera' in c0 and 'Liberar OS-0430 (versão' not in p and 'Caio (PCP) aprova' not in p
+         and not T.temb('Confirmar liberação') and 'Liberar para execução: decisão de Ana (agrônoma e gestora).' in p and T.cen("c.ordens['OS-0430'].etapa") == 'A liberar',
+         'Ana abre a confirmação da OS-0430 e troca para Caio: a confirmação fecha (sem "Caio (PCP) aprova" nem "Confirmar liberação"); fica a pendência; segue A liberar (antes: a tela dizia "Caio (PCP) aprova esta versão e Caio (PCP) libera")',
+         [c0[c0.find('Liberar OS-0430'):][:160], p[p.find('PRÓXIMO'):][:300]])
+    T.shot('os_ator_troca_caio.png'); T.fechar(); perfil('Ana'); T.ordem('OS-0421'); T.btn('Dispensar saldo'); d0 = T.temb('Confirmar dispensa')
+    perfil('Caio'); p = T.pan()
+    T.ok(d0 and not T.temb('Confirmar dispensa') and 'Dispensar saldo: decisão de Ana (gestora e agrônoma).' in p and T.cen("c.ordens['OS-0421'].saldo") == 160,
+         'dispensa aberta por Ana e perfil trocado para Caio: o formulário fecha e a linha diz quem decide; saldo segue 160 ha', p[-300:])
+    T.fechar(); T.ordem('OS-0424'); p = T.pan()
+    r = cmd("X.osc_cancelar(c,'OS-0424','teste',['','',''],{k:'Caio'})")
+    T.ok(not T.temb('Cancelar sem execução') and 'Cancelar sem execução: decisão de Ana (gestora).' in p and T.cen("c.ordens['OS-0424'].etapa") == 'Liberadas'
+         and r == 'Cancelar a OS-0424 sem execução (CMD-46): decisão de Ana (gestora). Nada foi alterado.',
+         'Caio: sem "Cancelar sem execução" (CMD-46, AL-04: o gestor); a linha diz quem decide e o comando direto recusa; OS-0424 segue Liberadas', [r, p[-300:]])
+    T.fechar(); perfil('Ana')
     er = T.erros(); T.ok(not er, 'sem erro de script', er)
 except Exception as ex:
     T.ok(False, 'execução', ex)

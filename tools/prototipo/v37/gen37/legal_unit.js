@@ -19,7 +19,7 @@ for(const d of [1.5,3]){ const c=C(); const r=T(()=>osc_ajustar(c,'OS-0430',160,
   if(!e.erro){ const o=c.ordens[e.os]; const l=cenLote(c,o.ins[0].p); if(l&&cenDisp(l)<o.ins[0].tot) l.fisico+=o.ins[0].tot; }
   const r=e.erro?{ok:false,msg:e.erro}:T(()=>osc_liberar(c,e.os,false,'','Ana'));
   ok('P6 AG-01 → O.S.: VIS-054 (PV02 mamão × mosca-branca) '+(u&&u.nome)+' '+(u&&u.dmin)+' '+(u&&u.un)+'/ha emite e a O.S. libera', r.ok, [e,r]); }
-{ const c=C(); osc_cancelar(c,'OS-0430','teste',['','','']); osc_nova(c,{id:'OS-0440',tipo:'Dessecação pré-plantio · repasse',talhao:'T1-A',area:160,versao:'v1',resp:'Marcos',ins:[{p:'Glifosato 480',dose:2,un:'L',tot:320}],selos:[],saf:'2026/27'});
+{ const c=C(); osc_cancelar(c,'OS-0430','teste',['','',''],'Ana'); osc_nova(c,{id:'OS-0440',tipo:'Dessecação pré-plantio · repasse',talhao:'T1-A',area:160,versao:'v1',resp:'Marcos',ins:[{p:'Glifosato 480',dose:2,un:'L',tot:320}],selos:[],saf:'2026/27'});
   c.ordens['OS-0440'].osc.novo.saf='2026/27'; const r=T(()=>osc_liberar(c,'OS-0440',false,'','Ana')); ok('P7 OS-0430 cancelada sem execução não conta: a nova dessecação no T1-A libera', r.ok, r); }
 { const c=C(); osc_nova(c,{id:'OS-0440',tipo:'Dessecação pré-plantio',talhao:'T3',area:96,versao:'v1',resp:'Marcos',ins:[{p:'Glifosato 480',dose:2,un:'L',tot:192}],selos:[]});
   c.ordens['OS-0440'].osc.novo.saf='2026/27'; const r=T(()=>osc_liberar(c,'OS-0440',false,'','Ana')); ok('P8 OS-0415 (T3, safra 2025/26) não conta para a safra 2026/27: Glifosato no T3 libera', r.ok, r); }
@@ -81,7 +81,7 @@ const nova=(c,id,tal,ins,saf)=>osc_nova(c,{id,tipo:'Teste',talhao:tal,area:160,v
 { const c=cenClone(CEN0); nova(c,'OS-0440','Pivô 6',[{p:'Abamectina 18 EC',dose:0.5,un:'L',tot:31.4}]); const e=T(c,'OS-0440');
   ok('D2 Pivô 6: "2 de 2 (OS-0504, caderno 28/08)"', /2 de 2 \(OS-0504, caderno 28\/08\)/.test(e), e); }
 // D3 · O.S. cancelada sem execução continua fora da conta; A liberar também
-{ const c=cenClone(CEN0); nova(c,'OS-0440','Pivô 6',[{p:'Abamectina 18 EC',dose:0.5,un:'L',tot:31.4}]); osc_cancelar(c,'OS-0504','teste',['','','']);
+{ const c=cenClone(CEN0); nova(c,'OS-0440','Pivô 6',[{p:'Abamectina 18 EC',dose:0.5,un:'L',tot:31.4}]); osc_cancelar(c,'OS-0504','teste',['','',''],'Ana');
   const e=T(c,'OS-0440'); ok('D3 OS-0504 cancelada: Pivô 6 tem 1 de 2 (caderno) e a nova libera', e==='', e); }
 // A1 · alertas recolhidos para a confirmação (antes descartados): produto em reavaliação e uso não conferido (M19 da revisão do CTL-1)
 { const c=cenClone(CEN0); const E='Epoxiconazol + piraclostrobina 50+133 SE'; const o={id:'X',talhao:'T1-A',ins:[{p:'Fungicida A',dose:0.5,un:'L'},{p:E,dose:0.5,un:'L'},{p:'Cletodim 240',dose:0.4,un:'L'}]};

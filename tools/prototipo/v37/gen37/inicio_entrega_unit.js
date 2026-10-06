@@ -15,7 +15,7 @@ const mud = (X, s) => X.__x(`(()=>{const r=cenMudar(null,c=>{${s}});return r.err
 const reset = () => { w('cenReset()'); a('cenReset()'); };   // os dois quadros voltam ao seed (cenReset limpa a memória de cada um)
 const st = s => w(`(()=>{const c=cenGet();return (${s})})()`);
 const lib0430 = () => { reset(); mud(W, "return osc_liberar(c,'OS-0430',false,'','Ana')"); return st("c.ordens['OS-0430'].req"); };
-const ent = (rid, p, q) => mud(W, `return cenEntregar(c,'${rid}','${p}',${q},'Marcos')`);
+const ent = (rid, p, q) => mud(W, `return cenEntregar(c,'${rid}','${p}',${q},'Marcos','Rui')`);
 const conf = rid => mud(A, `return cenConfirmarRecebimento(c,'${rid}')`);
 const fechar = (ha, cons) => mud(A, `return cenFecharTurno(c,${ha},1,${cons ? JSON.stringify(cons) : 'null'},'')`);
 

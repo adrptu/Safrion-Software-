@@ -86,7 +86,7 @@ def js_prefixo():
 
 
 def perfis_js():
-    """Bloco de perfis de demonstração do g2lib.js (G2_PERFIS, g2pf, g2perfil, g2papel, g2ator, g2quem, g2mesma), entre os marcadores
+    """Bloco de perfis de demonstração do g2lib.js (G2_PERFIS, g2pf, g2perfil, g2papel, g2ator, g2quem, g2umPapel, g2quemUm, g2mesma), entre os marcadores
     <perfis> e </perfis>: as decisões do cenário (cenExige) o usam, e os testes sem navegador montam o motor com ele. As telas já o têm (G2LIB)."""
     s = open(os.path.join(HERE, 'g2lib.js'), encoding='utf-8').read()
     i = s.index('// <perfis>'); j = s.index('// </perfis>')

@@ -39,7 +39,7 @@ try:
     st = E.cen("[c.lotes['Semente de soja 58 W|S58-0926'].quarentena, c.movs.filter(m=>m.tipo==='inspecao').length]")
     E.ok(st == [20000, 0], 'cenário: 20.000 kg do lote vencido seguem bloqueados, nenhuma liberação', st)
     # 3 · lote vencido que entra por outra tela (cenReceber, Óleo mineral 07/2026) também fica sem liberação
-    print('cenReceber:', E.mudar("return cenReceber(c,'Óleo mineral','O26-07V',40,'L','Almox. defensivos','07/2026','NF 9001',false);"))
+    print('cenReceber:', E.mudar("return cenReceber(c,'Óleo mineral','O26-07V',40,'L','Almox. defensivos','07/2026','NF 9001',false,'Rui');"))
     E.abrir(); E.etapa(4); t = E.rowtxt('O26-07V'); print('O26-07V:', t)
     sl, vl = E.cel('O26-07V', 'Situação do lote'), E.cel('O26-07V', 'Validade')
     E.ok('Liberar após inspeção' not in t and sl.startswith('Vencido') and vl == '07/2026', 'lote vencido recebido por cenReceber: sem "Liberar após inspeção", Situação do lote "Vencido", Validade 07/2026', (t, sl, vl))

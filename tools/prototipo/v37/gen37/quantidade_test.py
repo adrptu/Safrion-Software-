@@ -62,7 +62,7 @@ function fluxo(c,id,res){ const o=c.ordens[id]; res.area=o.area; res.tot=o.ins[0
   // o assunto aqui é a custódia, não a falta de estoque: completa o lote antes de liberar (só no teste)
   (o.ins||[]).forEach(x=>{ const l=cenLote(c,x.p); if(l&&cenDisp(l)<x.tot) l.fisico+=x.tot; });
   try{ passo('liberar',()=>osc_liberar(c,id,false,'','Ana'));   /* CTL-3: quem aprova e libera */
-    const rq=c.reqs[o.req]; for(const it of rq.itens){ const q=cenSaldoEntregar(it); if(q>1e-9) passo('entregar',()=>cenEntregar(c,o.req,it.prod,q,'X')); }
+    const rq=c.reqs[o.req]; for(const it of rq.itens){ const q=cenSaldoEntregar(it); if(q>1e-9) passo('entregar',()=>cenEntregar(c,o.req,it.prod,q,'X','Rui')); }
     passo('confirmar',()=>cenConfirmarRecebimento(c,o.req)); passo('iniciar',()=>osc_iniciar(c,id));
     passo('apontar o saldo',()=>osc_apontar(c,id,'20/10',o.saldo)); passo('conferência',()=>osc_conferencia(c,id)); }catch(e){}
   const it=o.req&&c.reqs[o.req]&&c.reqs[o.req].itens[0]; res.custodia=it?it.custodia:null; res.etapa=o.etapa; return res; }

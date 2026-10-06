@@ -324,7 +324,8 @@ function osc_aprovLib(o,qa,ql){ const hr=cenAgora(), vn=osVn(o.versao);   /* qa/
 // CTL-3 · ATOR: quem aprova (CMD-42, agrônomo) e quem libera (CMD-06, OS_LIB) vêm do perfil de quem age, conferido no cadastro antes de qualquer
 // gravação (PRD 41.3 l.6864: "o usuário possuir ambas as permissões"; CMD-06 l.2777). Dano evitado: liberação gravada em nome de quem não decidiu.
 function osLibPor(ator,id,vn){ return [cenExige(ator,'agronomo','Aprovar a '+vn+' da '+id+' (CMD-42)'),cenExige(ator,OS_LIB,'Liberar a '+id+' (CMD-06)')]; }
-function osLibTxt(PF){ return g2ator(PF,'agronomo')+' aprova esta versão e '+g2ator(PF,OS_LIB)+' libera'; }   /* confirmação (O.S. e Mapa) */
+function osLibTxt(PF){ const q=(p)=>g2papel(PF,p)?g2ator(PF,p):g2quem(p);   /* sem o papel, nomeia quem decide (revisão do CTL-3, achado 1) */
+  return q('agronomo')+' aprova esta versão e '+q(OS_LIB)+' libera'; }   /* confirmação (O.S. e Mapa) */
 // água só com água (DEC-2609-10) é decidida pela ordem (cadastro de irrigação), não pelo sinal da tela: sem isso o sinal liberaria sem CMD-42
 function osSoAgua(o){ return (typeof OSD!=='undefined'&&(OSD.ords||[]).some(b=>b.id===o.id&&b.agua))||/^Irrigação/i.test(String(o.tipo||'')); }
 // liberar (agrônomo aprova e liberador libera; pode ajustar antes): reserva por lote (cenLiberar); água sem produto libera pela prontidão, sem requisição
@@ -414,7 +415,7 @@ function osc_apontar(c,id,d,ha,cons,est,chave){ const R=cenApontar(c,{os:id,d,ha
   if(R.dup.length) return {msg:'Apontamento do dia '+ap.dia+' ('+nd(ha)+' ha em '+d+') em conferência: já há '+cenApDupTxt(R.dup)+' nesta data. Nada foi somado nem baixado; '+CEN_CONF_AP+' decide se é outro turno.'};
   const un=p=>((o.ins||[]).find(x=>x.p===p)||{}).un||''; const ins=Object.keys(ap.cons||{}).map(p=>p+' '+nd(ap.cons[p])+' '+un(p)).join(', ');
   return {msg:'Apontamento do dia '+ap.dia+': '+nd(ha)+' ha (provisório)'+(ins?' · usado: '+ins:'')+'. Saldo '+nf(o.saldo)+' ha; a ordem continua em execução.'
-    +(R.ks.length?' Consumo em conferência: '+R.ks.map(k=>cenConfTxt(k,c)).join('; ')+' · '+CEN_CONC_RESP+' concilia.':'')}; }
+    +(R.ks.length?' Consumo em conferência: '+R.ks.map(k=>cenConfTxt(k,c)).join('; ')+' · '+cenConcQuem(c,R.ks)+'.':'')}; }
 function osc_apDecidir(c,id,dia,modo,us,ator){ return cenApDecidir(c,id,dia,modo,ator,us); }   /* CMD-09 (quem confere): 'anterior' | 'este' | 'somar'; us = usado informado na conferência */
 // linhas de consumo do formulário (O.S. e Mapa), a mesma regra do MB-03: com o operador, sugere dose × área do trecho (editável, estimativa);
 // fora da requisição nada está em custódia: vazio = 0. q = o que vai ao comando; est = sugestão não editada.
@@ -440,12 +441,14 @@ function osc_encerrar(c,id){ const o=osc_o(c,id); if(o.etapa!=='Em conferência'
   o.etapa='Encerradas'; o.selos=[]; (o.ap||[]).forEach(a=>{ if(a.st==='Provisório') a.st='Conferido'; });
   return {msg:id+' encerrada.'}; }
 // cancelar sem execução: a reserva ainda não entregue volta ao disponível do lote e a requisição fica cancelada
-function osc_cancelar(c,id,mot,cx){ const o=osc_o(c,id);
+// CMD-46 (AL-04: responsável do domínio, o gestor; revisão do CTL-3, achado 4): grava quem cancelou e a hora. Dano evitado: ordem aprovada e
+// liberada desfeita, com a reserva solta, sem decisão competente e sem autor
+function osc_cancelar(c,id,mot,cx,ator){ const o=osc_o(c,id); const quem=cenExige(ator,'gestor','Cancelar a '+id+' sem execução (CMD-46)');
   if((o.realizado||0)>0||['A liberar','Liberadas'].indexOf(o.etapa)<0) throw new Error('Só ordem sem realizado, em A liberar ou Liberadas, é cancelada sem execução.');
   const r=o.req&&c.reqs[o.req];
   if(r){ if(o.reservado) r.itens.forEach(it=>{ const l=c.lotes[it.prod+'|'+it.lote]; const res=Math.max(0,it.solicitado-it.entregue); if(l&&res>0) l.reservado=Math.max(0,l.reservado-res); }); r.estado='Cancelada'; }
-  o.etapa='Canceladas'; o.reservado=false; o.selos=[]; osc_txt(o,{cond:'Cancelada sem execução: '+mot+'. '+cx[1],dono:'',prazo:'',insx:cx[2]});
-  return {msg:id+' cancelada sem execução. '+cx[1]}; }
+  const hr=cenAgora(); o.etapa='Canceladas'; o.reservado=false; o.selos=[]; osc_txt(o,{canPor:quem,canEm:hr,cond:'Cancelada sem execução por '+quem+' às '+hr+': '+mot+'. '+cx[1],dono:'',prazo:'',insx:cx[2]});
+  return {msg:(id+' cancelada sem execução. '+cx[1]).trim()+' Cancelada por '+quem+'.'}; }
 const LIM_DISP=0.20;  /* alçada AL-05: dispensa de saldo até 20 % da área sem a Direção (regra única: comando e texto da tela) */
 function osc_dispensar(c,id,n,mot,ator){ const o=osc_o(c,id); const quem=cenExige(ator,['gestor','agronomo'],'Dispensar saldo da '+id);   /* CMD-47 · AL-05: alçada gerencial e validação agronômica */
   if(o.etapa!=='Em execução') throw new Error(id+' não está em execução.');
@@ -501,7 +504,7 @@ function dotSt(c){ const cc=G2C[c]||G2C.gray; return 'width:6px;height:6px;borde
 // ===== O.S. × cenário compartilhado (cenario.js, o mesmo estado do Estoque e do App) =====
 // Fase, realizado/saldo, apontamentos, requisição e insumos vêm de cenGet(); o que o cenário não tem vem de OSD (registro).
 // Gancho de teste/inspeção (o script da tela roda isolado): os testes os_* leem e mudam o cenário na própria página.
-try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenDevolver, cenConfirmarRecebimento, cenIniciarTurno, cenPausar, cenFecharTurno, cenOcorrencia, cenSinal, cenPodeEncerrar, osc_liberar, osc_ajustar, osc_encerrar, osc_apontar, osc_dispensar, osc_apDecidir }; } catch (e) {}
+try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenDevolver, cenConfirmarRecebimento, cenIniciarTurno, cenPausar, cenFecharTurno, cenOcorrencia, cenSinal, cenPodeEncerrar, osc_liberar, osc_ajustar, osc_encerrar, osc_apontar, osc_dispensar, osc_cancelar, osc_apDecidir }; } catch (e) {}
 // filtros do topo (Fazenda e Safra): lista, Kanban, chips de fase e selo do cabeçalho mostram só as ordens do recorte
 function mfFaz(self){ return self.state.mf_faz||'Santa Rita'; }
 function mfSaf(self){ return self.state.mf_saf||'Todas'; }
@@ -619,8 +622,11 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
   const pa=(st.pa&&st.pa.id===o.id)?st.pa:null;
   const apP=osApPend(o), apMax=Math.max(0,(o.saldo||0)-apP);
   v.pan_go=()=>{ if(P.fn==='apontar'){ const prox=(o.ap||[]).find(x=>x.st==='Previsto'); self.setState({pa:{id:o.id,fn:'apontar',d:CEN_DIA_OP,ha:String(Math.min(apMax,prox?prox.ha:apMax)).replace('.',','),ced:{},chave:'W-'+o.id+'-'+Date.now(),err:''}}); return; } self.setState({pa:{id:o.id,fn:P.fn}}); };
-  v.pan_conf=!!pa&&['liberar','iniciar','conferencia','encerrar'].indexOf(pa.fn)>=0; v.pan_apf=!!pa&&pa.fn==='apontar'; v.pan_ajf=!!pa&&pa.fn==='ajustar'; v.pan_idle=!pa;
-  v.pan_canf=!!pa&&pa.fn==='cancelar'; v.pan_disf=!!pa&&pa.fn==='dispensar';
+  // confirmação e formulários de decisão só com o papel: aberto por outro perfil (troca no seletor ou em outra aba), não aparece (achado 1)
+  const DSP=['gestor','agronomo'], agr=g2papel(PF,DSP), gest=g2papel(PF,'gestor');   /* dispensa: alçada gerencial e validação agronômica (CMD-47; AL-05); cancelar: gestor (CMD-46; AL-04) */
+  const paOk=!!pa&&({ajustar:g2papel(PF,'agronomo'),dispensar:agr,cancelar:gest}[pa.fn]!==false)&&!(pa.fn==='liberar'&&b&&b.papel);
+  v.pan_conf=paOk&&['liberar','iniciar','conferencia','encerrar'].indexOf(pa.fn)>=0; v.pan_apf=paOk&&pa.fn==='apontar'; v.pan_ajf=paOk&&pa.fn==='ajustar'; v.pan_idle=!paOk;
+  v.pan_canf=paOk&&pa.fn==='cancelar'; v.pan_disf=paOk&&pa.fn==='dispensar';
   v.pan_rmot=(pa&&pa.motivo)||''; v.pan_rerr=(pa&&pa.err)||''; v.pan_hasRerr=!!(pa&&pa.err);
   v.pan_setrmot=(e)=>self.setState({pa:Object.assign({},self.state.pa,{motivo:e.target.value,err:''})});
   // ajustar antes de liberar (secundário do passo A liberar com produto, também na confirmação): dose por insumo e área → osc_ajustar
@@ -708,8 +714,8 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
   // ação secundária pelo realizado: sem realizado → cancelar sem execução; em execução → dispensar saldo (nunca cancela fato executado)
   const canCanc=!((o.realizado||0)>0)&&(o.etapa==='A liberar'||o.etapa==='Liberadas');
   const canDisp=o.etapa==='Em execução'&&!!o.area&&(o.saldo||0)>0.001;
-  const DSP=['gestor','agronomo'], agr=g2papel(PF,DSP);   /* dispensa: alçada gerencial e validação agronômica (CMD-47; AL-05) */
-  v.pan_hasCanc=canCanc; v.pan_hasDisp=canDisp&&agr; v.pan_dispQ=(canDisp&&!agr)?('Dispensar saldo: decisão de '+g2quem(DSP)+'.'):''; v.pan_hasDispQ=!!v.pan_dispQ;
+  v.pan_hasCanc=canCanc&&gest; v.pan_hasDisp=canDisp&&agr;   /* sem o papel: a ação secundária vira o texto de quem decide (uma das duas, nunca juntas) */
+  v.pan_dispQ=(canDisp&&!agr)?('Dispensar saldo: decisão de '+g2quem(DSP)+'.'):((canCanc&&!gest)?('Cancelar sem execução: decisão de '+g2quem('gestor')+'.'):''); v.pan_hasDispQ=!!v.pan_dispQ;
   v.pan_cango=()=>self.setState({pa:{id:o.id,fn:'cancelar',motivo:'',err:''}});
   v.pan_disgo=()=>self.setState({pa:{id:o.id,fn:'dispensar',ha:String(apMax).replace('.',','),motivo:'',err:''}});
   // (confirmação, aviso final, nova situação do insumo): a seção Insumos acompanha o que o aviso diz
@@ -717,7 +723,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
   v.pan_cct='Cancelar '+o.id+' sem execução: a ordem sai do quadro e fica em Canceladas. '+cx[0];
   v.pan_cansave=()=>{ const cur=self.state.pa; const mot=String(cur.motivo||'').trim();
     if(!mot){ self.setState({pa:Object.assign({},cur,{err:'Informe o motivo do cancelamento.'})}); return; }
-    osRun(self,c=>osc_cancelar(c,o.id,mot,cx),{pa:null}); };
+    osRun(self,c=>osc_cancelar(c,o.id,mot,cx,g2perfil()),{pa:null}); };
   const lim=(o.area||0)*LIM_DISP;
   v.pan_dsub='Até 20 % da área ('+nd(lim,1)+' ha) sem alçada; acima disso, exige Direção. O realizado de '+nf(o.realizado)+' ha fica preservado.';
   v.pan_dval=agr?('Decisão gerencial e validação agronômica: '+g2ator(PF,DSP)+', registradas ao confirmar.'):'';
@@ -729,6 +735,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
     osRun(self,c=>osc_dispensar(c,o.id,n,mot,g2perfil()),{pa:null}); };
 }
 function EXTRAVALS(self,v){
+  self.g2perfilFecha={pa:null};   /* trocar o perfil fecha a confirmação e os formulários de decisão (liberar, ajustar, dispensar, cancelar) */
   const st=self.state, all=ords(self), os=vis(self);
   // OS.dc.html#OS-0420 (vindo do Mapa ou de outra tela): abre a ordem na tela de trabalho, uma vez
   // #OS-0430:ajustar (vindo do Mapa) abre o formulário de ajuste; ordem de outra fazenda troca o filtro Fazenda para a dela

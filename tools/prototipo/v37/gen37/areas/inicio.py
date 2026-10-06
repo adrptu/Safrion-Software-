@@ -827,7 +827,7 @@ function nxOf(self,o,mo){ const PF=g2perfil(); const pb=osProx(o,PF); const P=pb
   if(!b&&P.btn){ N.isBtn=true; N.btn=P.btn; N.go=()=>{ if(P.fn==='apontar'){ const prox=(o.ap||[]).find(x=>x.st==='Previsto'); const mx=Math.max(0,(o.saldo||0)-osApPend(o));
       self.setState({mpa:{id:o.id,fn:'apontar',d:CEN_DIA_OP,ha:String(Math.min(mx,prox?prox.ha:mx)).replace('.',','),chave:'W-'+o.id+'-'+Date.now(),err:''}}); } else self.setState({mpa:{id:o.id,fn:P.fn,err:''}}); }; }
   if(!b&&o.dono){ N.dono='Pendência com '+o.dono+(o.prazo?' · '+o.prazo:''); N.hasDono=true; }
-  if(pa&&['liberar','iniciar','conferencia','encerrar'].indexOf(pa.fn)>=0){ N.conf=true; N.ct=mapCt(o,pa.fn); N.cbtn={liberar:'Confirmar liberação',iniciar:'Confirmar início',conferencia:'Confirmar envio',encerrar:'Confirmar encerramento'}[pa.fn];
+  if(pa&&['liberar','iniciar','conferencia','encerrar'].indexOf(pa.fn)>=0&&!(pa.fn==='liberar'&&b&&b.papel)){ N.conf=true;   /* aberta por outro perfil: não aparece (revisão do CTL-3, achado 1) */ N.ct=mapCt(o,pa.fn); N.cbtn={liberar:'Confirmar liberação',iniciar:'Confirmar início',conferencia:'Confirmar envio',encerrar:'Confirmar encerramento'}[pa.fn];
     N.yes=()=>{ const F={liberar:c=>osc_liberar(c,o.id,o.agua,o.janela,g2perfil()),iniciar:c=>osc_iniciar(c,o.id),conferencia:c=>osc_conferencia(c,o.id),encerrar:c=>osc_encerrar(c,o.id)}[pa.fn];
       osRun(self,F,{mpa:null},(e)=>self.setState({mpa:Object.assign({},pa,{err:e})})); }; }
   if(pa&&pa.fn==='apontar'){ N.ap=true; const apP=osApPend(o), apMax=Math.max(0,(o.saldo||0)-apP); N.ad=pa.d||''; N.aha=pa.ha||'';
@@ -1307,7 +1307,7 @@ def build_in04(HCARD=742):
                 +'const M = '+json.dumps(MDATA,ensure_ascii=False).replace('</','<\\/')+';\n'+MAP_JS
                 +open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'..','talgeo.js'),encoding='utf-8').read()+'\n'
                 +open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'..','talmapa.js'),encoding='utf-8').read()+r'''
-function EXTRAVALS(self,v){ cenOuvir(self); irrOuvir(self); mipOuvir(self); MAPVALS(self,v); v.r_selm_on=!!self.state.selm?'true':'false'; v.r_medir_on=!!self.state.medir?'true':'false'; v.r_full_on=!!self.state.full?'true':'false'; v.r_pref_on=!!self.state.pref?'true':'false'; v.r_vis_on=!!self.state.cvis?'true':'false'; }
+function EXTRAVALS(self,v){ self.g2perfilFecha={mpa:null}; cenOuvir(self); irrOuvir(self); mipOuvir(self); MAPVALS(self,v); v.r_selm_on=!!self.state.selm?'true':'false'; v.r_medir_on=!!self.state.medir?'true':'false'; v.r_full_on=!!self.state.full?'true':'false'; v.r_pref_on=!!self.state.pref?'true':'false'; v.r_vis_on=!!self.state.cvis?'true':'false'; }
 ''')
     corpo=f'<div class="mapa-corpo" style="display: flex; flex-direction: row; align-items: stretch; min-width: 0; min-height: 0; background: {SURF}; border: 1px solid {LINE}; border-radius: 16px; overflow: hidden;">{_rail()}{_mapcard(None)}</div>'
     # IN-04 no celular/tablet/zoom 200 % (pendência de componentes 03/10): a proposta comp_in04_proposta.css, validada por injeção no

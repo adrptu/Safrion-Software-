@@ -35,7 +35,7 @@ try:
          and re.search(r'v1 liberada por Ana \(gestora\) às \d\d:\d\d · ' + RQ + r' reservada no Estoque \(CMD-06\)', p) and tt.rstrip().endswith('v1 aprovada por Ana (agrônoma) e liberada por Ana (gestora).'),   # CTL-3: CMD-06 pelo papel liberador (gestor)
          'CTL-1: confirmar = aprovar esta versão e liberar; Origem com CMD-42 e CMD-06 separados', (ct[-300:], p[p.find('ORIGEM'):][:500], tt))
     # 3 · Estoque entrega os 3 itens a Marcos (outra tela): o painel mostra entregue, embalagem e a quem, sem recarregar
-    for prod, q in (('Glifosato 480', 320), ('2,4-D 806', 160), ('Óleo mineral', 80)): T.mudar(f"return cenEntregar(c,'{RQ}','{prod}',{q},'Marcos');", avisar=False)
+    for prod, q in (('Glifosato 480', 320), ('2,4-D 806', 160), ('Óleo mineral', 80)): T.mudar(f"return cenEntregar(c,'{RQ}','{prod}',{q},'Marcos','Rui');", avisar=False)
     T.mudar("return {msg:''};"); i = T.ins(); print('  ', i[:400])
     T.ok('Entregue 320 L (16 × galão 20 L) a Marcos' in i and i.count('Aguardando confirmação no app') >= 3 and 'Entregue · aguardando confirmação no app' in i,
          'entregas do Estoque aparecem sem recarregar: 320 L (16 × galão 20 L) a Marcos, aguardando confirmação no app', i[:400])
@@ -60,7 +60,7 @@ try:
          and T.link('Receber devolução no Estoque') == 'EST.dc.html' and not T.temb('Conferir e encerrar'),
          'Em conferência: encerrar bloqueado pela sobra de 20 L com Marcos e link "Receber devolução no Estoque" → EST.dc.html', p[:500])
     # 8 · Estoque recebe a devolução (apta): o bloqueio sai sem recarregar e o botão de encerrar aparece
-    T.mudar(f"return cenDevolver(c,'{RQ}','Glifosato 480',20,true);"); p = T.pan(); i = T.ins()
+    T.mudar(f"return cenDevolver(c,'{RQ}','Glifosato 480',20,true,'Rui');"); p = T.pan(); i = T.ins()
     T.ok('Encerrar bloqueado' not in p and T.temb('Conferir e encerrar') and 'Devolvido 20 L' in i and 'Consumido · sobra devolvida' in i and 'nada em custódia' in p,
          'devolução recebida no Estoque: bloqueio some, trilha mostra Devolvido 20 L e surge Conferir e encerrar', p[:500])
     # 9 · conferir e encerrar grava no cenário (regra atual: Em conferência → Encerradas)

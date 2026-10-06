@@ -49,7 +49,7 @@ caso(()=>{ const c=C(); osc_apontar(c,'OS-0421','26/09',50); turno(c,50);
 caso(()=>{ const c=C(); const w=osc_apontar(c,'OS-0421','26/09',50,{'Fungicida A':27,'Adjuvante espalhante':0},[]);
   ok('W1 web aceita o consumo real informado: 27 L baixados (122 L / 38 L), sem linha 0 do adjuvante fora da requisição', JSON.stringify(fato(c))==='{"real":240,"saldo":110,"cons":122,"cust":38}'&&/usado: Fungicida A 27 L\./.test(w.msg)&&!('Adjuvante espalhante' in O(c).ap.find(a=>a.dia===5).cons), [fato(c),w.msg]); });
 caso(()=>{ const c=C(); const w=osc_apontar(c,'OS-0421','26/09',50,{'Fungicida A':80,'Adjuvante espalhante':0},[]); const cc=(c.confs||[])[0]||{};
-  ok('W2 web informado acima da custódia (80 > 65 L): fica Em conferência com Rui, sem baixa (95 L / 65 L), área soma 240 ha', fato(c).real===240&&FA(c).consumido===95&&FA(c).custodia===65&&cc.estado==='Em conferência'&&cc.relatado===80&&/Rui \(almoxarife\) concilia/.test(w.msg), [fato(c),cc,w.msg]); });
+  ok('W2 web informado acima da custódia (80 > 65 L): fica Em conferência com Rui, sem baixa (95 L / 65 L), área soma 240 ha; o texto diz que Rui confere e Ana (gestora) aceita o excedente (revisão do CTL-3, achado 7)', fato(c).real===240&&FA(c).consumido===95&&FA(c).custodia===65&&cc.estado==='Em conferência'&&cc.relatado===80&&/Rui \(almoxarife\) confere; Ana \(gestora\) aceita o excedente\.$/.test(w.msg), [fato(c),cc,w.msg]); });
 caso(()=>{ const c=C(); FA(c).custodia=10; const x=TRY(()=>osc_apontar(c,'OS-0421','26/09',50,{'Fungicida A':25,'Adjuvante espalhante':0},['Fungicida A']));
   ok('W3 NEGATIVO web com a sugestão não editada acima da custódia (25 > 10 L) é recusada pedindo o usado; nada gravado', /acima do que está em custódia \(10 L\)\. Informe quanto foi usado/.test(x.e)&&O(c).ap.length===7&&fato(c).real===190, x.e); });
 caso(()=>{ const c=C(); const w=osc_apontar(c,'OS-0421','26/09',50);
@@ -73,7 +73,7 @@ const f=c=>{ const it=c.reqs['REQ-035'].itens[0]; return [c.ordens['OS-0421'].re
 caso(()=>{ const c=C(); osc_apontar(c,'OS-0421','26/09',50,undefined,undefined,'W-1'); cenIniciarTurno(c,'OS-0421'); cenFecharTurno(c,50,8,undefined,'',[]);
   const v=view(c,'OS-0421'); ok('C0 retido em Em execução: selo "Apontamento em conferência", dono Paula (conferência), prazo com o dia', v.selos.indexOf('Apontamento em conferência')>=0&&v.dono===CEN_CONF_AP&&v.prazo==='decidir se o dia 6 é outro turno', v); });
 // 2 · retido chega a Em conferência: dono deveria ser a conferência, não o almoxarife
-caso(()=>{ const c=C(); cenEntregar(c,'REQ-035','Fungicida A',15,'Marcos');
+caso(()=>{ const c=C(); cenEntregar(c,'REQ-035','Fungicida A',15,'Marcos','Rui');
   console.log('2a', TRYM(()=>osc_apontar(c,'OS-0421','26/09',50,undefined,undefined,'W-1')));
   cenIniciarTurno(c,'OS-0421'); console.log('2b', TRYM(()=>cenFecharTurno(c,50,8,undefined,'',[])));
   console.log('2c', TRYM(()=>osc_apontar(c,'OS-0421','27/09',110,undefined,undefined,'W-2')), JSON.stringify(f(c)));

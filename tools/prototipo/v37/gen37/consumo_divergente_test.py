@@ -57,8 +57,8 @@ try:
     ok(cs[5] == 'CC-301' and cs[6] == 2 and cs[7] == 1 and cs[8] == 'Em conferência' and cs[9] == 'Rui (almoxarife)' and 'Consumo em conferência' in cs[10] and a.J(ALR) == '',
          f'caso CC-301 Em conferência com relatado × custódia, dono Rui (almoxarife) e selo na O.S.; nenhum erro no app: {cs[5:11]}')
     ok('Turno fechado · OS-0421 · dia 6 · 2 ha em 1 h' in b and 'Consumo em conferência' in b and 'Consumo: nada baixado neste turno' in b
-         and 'Em conferência · Fungicida A 2 L relatados, 1 L em custódia · Rui (almoxarife) concilia' in b,
-         'recibo do turno no app: selo Consumo em conferência, nada baixado e quem concilia')
+         and 'Em conferência · Fungicida A 2 L relatados, 1 L em custódia · Rui (almoxarife) confere; Ana (gestora) aceita o excedente' in b,
+         'recibo do turno no app: selo Consumo em conferência, nada baixado, quem confere e quem aceita o excedente (revisão do CTL-3, achado 7)')
     shot('q_consumo_2_app_recibo.png')
     a.abrir('MB-01'); b = a.body(); i = b.find('OS-0421 ·')
     ok('em conferência · relatado 2 L · com você 1 L' in b[i:i + 600] and 'Devolver sobra' not in b, 'MB-01: cartão da OS-0421 mostra o consumo em conferência e não pede devolução do 1 L')
@@ -78,7 +78,7 @@ try:
     lo = a.J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith('OS-0421')); return r?r.innerText.replace(/\\s+/g,' '):'';})()") or ''
     pe = a.J("window.__cen.cenPodeEncerrar(window.__cen.cenGet(),'OS-0421')")
     pa = a.J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText.replace(/\\s+/g,' ')") or ''
-    ok('Consumo em conferência' in lo and 'Consumo em conferência' in pa and pe.startswith('Consumo em conferência: Fungicida A 2 L relatados, 1 L em custódia. Rui (almoxarife) concilia'),
+    ok('Consumo em conferência' in lo and 'Consumo em conferência' in pa and pe.startswith('Consumo em conferência: Fungicida A 2 L relatados, 1 L em custódia. No Estoque: Rui (almoxarife) confere; Ana (gestora) aceita o excedente'),
          f'O.S.: selo na lista e no painel; encerrar bloqueado pelo caso ({pe[:80]})', lo[:200])
     shot('q_consumo_4_os_selo.png')
     erros += a.erros() or []
@@ -129,7 +129,7 @@ try:
          f'sem sinal: caso só no aparelho; ao voltar o sinal (2 envios) aparece uma vez, com selo: {s0} → {s1}')
     erros += a.erros() or []
     # 7 · reserva própria (OS-0424 · REQ-039, entrega parcial de 20 L): 25 L relatados → os 5 L que faltam saem da reserva da própria requisição
-    a.mudar(f"window.__cen.cenEntregar(c,'REQ-039','{P}',20,'Marcos'); window.__cen.cenConfirmarRecebimento(c,'REQ-039'); return window.__cen.cenIniciarTurno(c,'OS-0424');")
+    a.mudar(f"window.__cen.cenEntregar(c,'REQ-039','{P}',20,'Marcos','Rui'); window.__cen.cenConfirmarRecebimento(c,'REQ-039'); return window.__cen.cenIniciarTurno(c,'OS-0424');")
     a.abrir('MB-03'); a.setv('#ft_ha', '10'); a.setv('#ft_h', '2'); a.setv('#ft_c0', '25'); a.clk('Fechar turno')
     r0 = a.cen(f"[{LOT}.fisico,{LOT}.reservado,{IT9}.custodia,c.confs.slice(-1)[0].id,c.confs.slice(-1)[0].estado]")
     est3(); r = btn_linha(['REQ-039', P], 'Aceitar consumo'); l9 = linha('REQ-039', P)

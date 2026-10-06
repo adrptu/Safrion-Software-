@@ -18,7 +18,7 @@ App de campo ligado ao cenário compartilhado (v3.9, 26/09/2026) — MB-01, MB-0
 - Sem sinal (cenSinal): tudo vai para a fila do aparelho; ao voltar o sinal a fila é enviada uma vez só e o app guarda o recibo
   (mbSinal: c.app.recibos, REC-7742 em diante; REC-7741 = APT-1187, dia 4 da OS-0421, já confirmado).
 - Fechar o turno (cenFecharTurno) não encerra a O.S.; erro junto ao campo só para área acima do saldo. Consumo informado acima do que está
-  com você não é recusado (RN-018; CONC-07): aviso no campo, o fato fica Em conferência sem baixa e Rui (almoxarife) concilia no Estoque.
+  com você não é recusado (RN-018; CONC-07): aviso no campo, o fato fica Em conferência sem baixa; Rui (almoxarife) confere e Ana (gestora) aceita o excedente no Estoque.
   A sugestão dose × área não editada é estimativa (CONC-13): acima do que está com você, o campo pede quanto foi usado (nada abre sozinho).
 - Apontamento único (CTL-2 · AP-ÚNICO): o turno grava pelo mesmo comando da web (cenApontar), com a data operacional e a chave do turno;
   o mesmo dia já apontado pela web fica "Em conferência · duplicidade", sem soma nem baixa, até Paula (conferência) decidir.
@@ -428,7 +428,7 @@ v.d_kv=kv; v.d_424=o.id==='OS-0424';
 v.d_req=r?r.id:'sem requisição'; v.d_hasins=(o.ins||[]).length>0;
 v.d_ins=(o.ins||[]).map(x=>{{ const it=r&&r.itens.find(i=>i.prod===x.p);
   let cst='gray', ct=r?'Peça ao escritório antes de usar':'Reserva ao liberar a ordem';
-  const kc=mbConf(c,o.id,x.p); if(kc){{cst='yellow'; ct='Em conferência · '+cenConfTxt(kc,c)+' · '+kc.resp+' concilia';}}
+  const kc=mbConf(c,o.id,x.p); if(kc){{cst='yellow'; ct='Em conferência · '+cenConfTxt(kc,c)+' · '+cenConcQuem(c,[kc]);}}
   else if(it){{ if(it.custodia>0&&!it.confirmado){{cst='yellow'; ct='Entregue '+cenNum(it.custodia)+' '+it.un+' · confirme a retirada';}} else if(it.custodia>0){{cst='green'; ct='Com você '+cenNum(it.custodia)+' '+it.un;}} else if(cenSaldoEntregar(it)>0){{cst='gray'; ct='Retirar '+cenNum(cenSaldoEntregar(it))+' '+it.un+' com Rui';}} else {{cst='gray'; ct='Nada em custódia';}} }}
   return {{t:x.p+' · '+cenNum(x.dose,2)+' '+x.un+'/ha × '+cenNum(o.area,2)+' ha = '+cenNum(x.tot)+' '+x.un,
           s:it?('lote '+it.lote+(it.emb?' · '+it.emb:'')+' · entregue '+cenNum(it.entregue)+' '+it.un+' · consumido '+cenNum(it.consumido)+' '+it.un):(r?'fora da '+r.id+' · nada com você':'sem requisição'),
@@ -490,7 +490,7 @@ if(L){ const oo=c.ordens[L.os]; const ap=oo&&(oo.ap||[]).find(a=>a.dia===L.dia);
   DCH(v,'lst',dup?'Em conferência · duplicidade':(desc?'Duplicidade · não somado':(env?'Enviado · a ordem continua aberta':'No aparelho · aguardando sinal')),dup?'yellow':(desc?'gray':(env?'green':'yellow')));
   if(dup) v.last_cons='nada baixado: '+CEN_CONF_AP+' decide se é outro turno'; else if(desc) v.last_cons='nada baixado: guardado como duplicidade';
   const cf=(c.confs||[]).filter(k=>k.os===L.os&&k.dia===L.dia); const ab=cf.some(k=>k.estado==='Em conferência'||k.estado===CEN_CC_AGUARDA); v.last_hasConf=cf.length>0;
-  v.last_conf=cf.map(k=>k.estado==='Em conferência'?'Em conferência · '+cenConfTxt(k,c)+' · '+k.resp+' concilia':(k.estado===CEN_CC_AGUARDA?'Aguarda a decisão da duplicidade · '+cenConfTxt(k,c)+' · '+CEN_CONF_AP:k.estado+' por '+k.por+' · '+cenConfTxt(k))).join(' | ');
+  v.last_conf=cf.map(k=>k.estado==='Em conferência'?'Em conferência · '+cenConfTxt(k,c)+' · '+cenConcQuem(c,[k]):(k.estado===CEN_CC_AGUARDA?'Aguarda a decisão da duplicidade · '+cenConfTxt(k,c)+' · '+CEN_CONF_AP:k.estado+' por '+k.por+' · '+cenConfTxt(k))).join(' | ');
   DCH(v,'lcf',ab?'Consumo em conferência':'Conferência resolvida',ab?'yellow':'green'); if(!L.cons&&cf.length&&!dup&&!desc) v.last_cons='nada baixado neste turno'; }
 DCH(v,'hdr',t?(mbPausado(t)?'turno pausado':'turno aberto'):'sem turno aberto',t?(mbPausado(t)?'yellow':'green'):'gray');
 v.t_fe=false; v.t_zero=false;

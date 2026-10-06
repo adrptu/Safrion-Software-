@@ -402,8 +402,12 @@ function manReceber(c,id){ const o=c.oms[id]; if(!o||!o.sc) throw new Error('Est
 function manIniciar(c,id){ const o=c.oms[id]; if(!o||o.etapa!=='Liberadas') throw new Error(id+' não está em Liberadas.'); o.etapa='Em execução'; o.ini=c.hoje;
   return {msg:id+' Em execução · responda o checklist e informe a leitura do contador para concluir.'}; }
 // resposta item a item (PRD 54.2: não pré-marcar; registra usuário/papel e momento)
-function manResp(c,id,i,r,mot,ator){ const o=c.oms[id]; if(!o||o.etapa!=='Em execução') throw new Error('Responda o checklist com a ordem Em execução.'); const t=o.chk[i]; t.r=r; if(mot!==undefined) t.mot=mot;
-  const d=new Date(); t.por=(r&&ator)?g2ator(ator,'mecanico'):''; t.em=r?('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2):''; return {msg:''}; }
+// a resposta guarda quem respondeu; editar só o motivo não troca esse autor e grava à parte quem editou (revisão do CTL-3, achado 2; dano
+// evitado: a trilha dizer que outra pessoa decidiu que o item não foi feito, e o registro de quem respondeu se perder)
+function manResp(c,id,i,r,mot,ator){ const o=c.oms[id]; if(!o||o.etapa!=='Em execução') throw new Error('Responda o checklist com a ordem Em execução.'); const t=o.chk[i];
+  const d=new Date(), hr=('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2), quem=ator?g2ator(ator,'mecanico'):'';
+  if((t.r||'')!==(r||'')){ t.r=r; t.por=r?quem:''; t.em=r?hr:''; }
+  if(mot!==undefined&&mot!==(t.mot||'')){ t.mot=mot; t.motPor=quem; t.motEm=hr; } return {msg:''}; }
 // leitura acima do fisicamente possível desde a última (zero a mais, dedo errado): aviso a confirmar, nunca bloqueio
 function manPlaus(c,a,n){ if(!a||!a.un||!a.leit||isNaN(n)) return ''; const md=(c.maxdia||{h:24,km:1500})[a.un]||24;
   const dias=Math.max(1,manDias(a.leit.data,c.hoje)); const lim=dias*md, d=n-a.leit.val;

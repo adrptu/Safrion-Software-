@@ -57,6 +57,15 @@ try:
     ok(foco=='om-leitura' and 'em conferência' in c and 'sobra a devolver: 4 L Óleo de motor 15W-40' in c, f'corrigir leitura e aplicar 12 de 16 L: sobra de 4 L · {c[:150]}')
     clk('Resolver sobras','aside'); clk('Encerrar ordem','aside'); e=toast()
     ok('encerrada' in e and 'R$ 2.626,00' in e, f'custo com o aplicado (690 + 12 × 28 + 5 h × 320) · {e[:100]}')
+    # 1b · revisão do CTL-3, achado 2: Zé responde "Não feito"; Ana edita só o motivo: a resposta segue de Zé e a edição fica à parte, com quem e hora
+    novo(); t.goto('MA-01.dc.html'); t.goto('MA-04.dc.html#OM-0234'); time.sleep(.4); clk('Liberar serviço','aside'); clk('Liberar mesmo assim','aside'); clk('Iniciar serviço','aside')   # outra tela antes: recarrega o cenário zerado
+    PSEL='[aria-label="Trocar perfil de demonstração"]'; MOT='aside input[aria-label="Motivo · Lubrificar pontos de graxa"]'
+    setv(PSEL,'Zé'); time.sleep(.3); J("document.querySelector('aside [aria-label=\"Não feito · Lubrificar pontos de graxa\"]').click()"); time.sleep(.3)
+    setv(MOT,'sem graxa'); setv(PSEL,'Ana'); time.sleep(.3); setv(MOT,'sem graxa no almoxarifado'); time.sleep(.2)
+    ck=J("__man.manGet().oms['OM-0234'].chk[4]") or {}; p=pan()
+    ok(ck.get('r')=='Não feito' and ck.get('por')=='Zé (mecânico)' and ck.get('mot')=='sem graxa no almoxarifado' and ck.get('motPor')=='Ana (gestora)'
+       and 'por Zé (mecânico) às' in p and 'motivo editado por Ana (gestora) às' in p,
+       f'checklist: Zé responde "Não feito", Ana edita o motivo; a resposta segue de Zé e a linha mostra "motivo editado por Ana (gestora)" (antes: o autor virava Ana) · {ck}')
     # 2 · abastecimento: leitura alta (zero a mais) fica a confirmar e pode ser descartada; leitura menor confirma a troca de contador
     novo(); t.goto('MA-05.dc.html'); sem_erro('MA-05')
     a1=abast('Trator 02 · MF 7719','29880'); r1=linha(0,'AB-1043')
