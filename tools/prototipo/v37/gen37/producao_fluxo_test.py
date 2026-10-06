@@ -9,13 +9,18 @@ Modos (um por vez, cada um abre o Chrome headless do cadc_lib.T):
   erros    recusas e repetição: pesagem sem condição, ticket repetido com outro conteúdo, reserva acima da falta, mesma
            pesagem repetida não duplica, carga sem sinal do app só entra ao voltar o sinal (AC-16).
   celular  AC-19: 390 × 844, cartões, sem rolagem horizontal, ação primária visível e presa ao rodapé nas três telas.
+  revisao  regressões da revisão adversarial (Codex, 06/10): A-01 dia da colheita obrigatório e lote em inspeção sem apontamento,
+           A-02 ponto de milhar, A-03 cancelar e reservar de novo, A-04 O.S. com carga não cancela, A-05 avaria depois da liberação,
+           A-06 descartar carga a pesar (CARGA e MB-10), A-09 toque duplo no MB-07, A-11 carga sem sinal na O.S., A-13 sem "Liberar"
+           quando a pendência é de outro, A-14 MB-10 na carência, A-15 ponderada com a área da conta, A-16 perda inválida,
+           A-17 PV-030 como saldo do CT-201, A-18 coluna Em processo.
 Uso: env CHROME_BIN=… flock /tmp/cdpB.lock env CDP_GL=1 timeout 900 python3 producao_fluxo_test.py [os|fluxo|erros|celular]
 Capturas em _probe/producao_*.png. Dados sintéticos (SAFRION_DADOS=sintetico)."""
 import sys, os, time, json
 os.environ.setdefault('SAFRION_DADOS', 'sintetico')
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from cadc_lib import T
-MODOS = [a for a in sys.argv[1:] if a in ('os', 'fluxo', 'erros', 'celular')] or ['os', 'fluxo', 'erros', 'celular']
+MODOS = [a for a in sys.argv[1:] if a in ('os', 'fluxo', 'erros', 'celular', 'revisao')] or ['os', 'fluxo', 'erros', 'celular', 'revisao']
 PR = os.path.join(HERE, '_probe'); os.makedirs(PR, exist_ok=True)
 t = T(); J = t.J
 LIB = r"""
@@ -180,5 +185,90 @@ try:
             shot('390_' + pg)
         ir('PROD.dc.html', w=390, h=844); clk('L10-031 · Soja em grão'); p = pan()
         t.chk('AC-19 tocar no cartão abre o painel do lote (master-detail no celular)', 'L10-031' in p and '34.545 sc' in p, p[:200])
+    if 'revisao' in MODOS:
+        print('== revisao · regressões da revisão adversarial (A-01..A-18)')
+        alerta = lambda: J("[...document.querySelectorAll('aside [role=alert]')].map(x=>N(x.innerText)).join(' | ')") or ''
+        # A-02 · ponto de milhar como no ticket da balança
+        ir('CARGA.dc.html', limpa=True); row('CG-2108'); setv('#pf_tk', 'TK-4520'); setv('#pf_bruto', '19.250'); setv('#pf_tara', '7.200'); clk('Íntegra', 'aside'); clk('Pesar a CG-2108', 'aside'); p = toast()
+        g = cen("(()=>{ const g=c.producao.cargas['CG-2108']; return [g.st,g.liq,g.lote]; })()")
+        t.chk('A-02 bruto "19.250" e tara "7.200": 12.050 kg líquidos (não 12,05)', g == ['Recebida', 12050, 'L39-133'] and '12.050 kg líquidos' in p, [g, p])
+        # A-03 · reservar, cancelar e reservar de novo
+        ir('PROD.dc.html'); row('L39-133'); clk('Reservar', 'aside'); p1 = toast()
+        ir('PROD.dc.html'); row('PV-036'); clk('Cancelar reserva', 'aside'); setv('#pf_mot', 'cliente adiou'); clk('Cancelar RS-0002', 'aside'); p2 = toast()
+        ir('PROD.dc.html'); row('L39-133'); clk('Reservar', 'aside'); p3 = toast() + ' ' + pan()[-200:]
+        a = cen("Object.values(c.producao.reservas).filter(r=>r.pedido==='PV-036'&&r.st==='Ativa').map(r=>r.id)")
+        t.chk('A-03 reservar → cancelar → reservar de novo: uma reserva ativa nova (RS-0003) e PV-036 coberto', a == ['RS-0003'] and 'RS-0002' in p1 and 'cancelada' in p2 and 'RS-0003' in p3 and 'Coberto' in (J("ROWTXT('PV-036')") or ''), [a, p1, p2, p3])
+        # A-17 · PV-030 diz que é o saldo do CT-201; A-18 · coluna Em processo
+        ir('PROD.dc.html', limpa=True)
+        t.chk('A-17 a linha do PV-030 diz que a quantidade é o saldo do CT-201', 'saldo 4.000 sc do CT-201' in (J("ROWTXT('PV-030')") or ''), J("ROWTXT('PV-030')"))
+        hd = J("[...document.querySelectorAll('[role=columnheader]')].map(x=>N(x.innerText))") or []
+        mam = J("ROWTXT('Mamão Formosa · fruta de campo')") or ''
+        t.chk('A-18 Estoque de produto com a coluna Em processo (mamão: 66.250 kg em processo)', any(h.lower().startswith('em processo') for h in hd) and '66.250 kg 0 kg 66.250 kg 0 kg' in mam, [hd, mam[:200]])
+        # A-15 · a linha da cultura diz a área da ponderada
+        ir('COLH.dc.html', limpa=True); mt = J("ROWTXT('Mamão Formosa')") or ''
+        t.chk('A-15 linha do Mamão Formosa: 0,70 t/ha ponderada sobre 137,9 ha colhidos (96,74 t ÷ 137,9 ha)', '0,70 t/ha ponderada' in mt and 'sobre 137,9 ha colhidos' in mt, mt[:300])
+        # A-16 · perda inválida ao publicar: o painel diz o que corrigir
+        row('Pivô 19'); setv('#pf_pe', 'abc'); clk('Publicar previsão', 'aside'); al = alerta(); n = cen("c.producao.previsoes.lg19.length")
+        t.chk('A-16 perda "abc": erro junto do campo e nada publicado (sem erro de JS)', 'Número de 0 a 99' in al and n == 1 and not t.errs(), [al, n, t.errs()])
+        # A-09 · toque duplo em Concluir talhão (MB-07) grava uma contagem
+        ir('MB-07.dc.html#lg06'); clk('Mais um fruto Pintado'); clk('Registrar e ir à planta 2'); setv('#mb_peso', '1,10')
+        J("(()=>{ const b=[...document.querySelectorAll('button')].filter(VIS).find(b=>N(b.innerText).startsWith('Concluir talhão')); b.click(); b.click(); })()"); time.sleep(.6)
+        n = cen("c.producao.contagens.filter(x=>x.cult==='lg06').length")
+        t.chk('A-09 toque duplo em Concluir talhão (MB-07): uma contagem nova (o Pivô 6 não tinha contagem)', n == 1, cen("c.producao.contagens.filter(x=>x.cult==='lg06').map(x=>[x.id,x.chave])"))
+        # A-01 · dia da colheita obrigatório, sem padrão; dia sem apontamento → lote em inspeção (A-13: Sérgio resolve, sem "Liberar")
+        ir('CARGA.dc.html', limpa=True); clk('Registrar pesagem'); clk('OS-0505 · Pivô 19', 'aside')
+        d0 = J("document.querySelector('#pf_dcol')&&document.querySelector('#pf_dcol').value"); pills = J("[...document.querySelectorAll('aside [role=group][aria-label=\"Dia da colheita\"] button')].map(b=>N(b.innerText))") or []
+        setv('#pf_tk', 'TK-9100'); setv('#pf_bruto', '19200'); setv('#pf_tara', '7200'); clk('Íntegra', 'aside'); clk('Registrar pesagem', 'aside'); e = pan()
+        t.chk('A-01 dia da colheita sem valor padrão, com atalhos (Hoje, Ontem, dias apontados); sem o dia, nada gravado', d0 == '' and pills[:2] == ['Hoje 26/09', 'Ontem 25/09'] and '22/09 · apontado' in pills and 'Informe o dia da colheita' in e
+              and not cen("Object.values(c.producao.cargas).some(g=>g.ticket==='TK-9100')"), [d0, pills, e[-200:]])
+        clk('Hoje 26/09', 'aside'); clk('Registrar pesagem', 'aside'); p = toast()
+        lt = cen("(()=>{ const g=Object.values(c.producao.cargas).find(g=>g.ticket==='TK-9100'); return g?[g.dcol,g.lote]:null; })()") or ['', '']
+        t.chk('A-01 colhida "hoje" (26/09) sem apontamento da OS-0505 nesse dia: lote Em inspeção, não Liberado', lt[0] == '2026-09-26' and 'Em inspeção' in p, [lt, p])
+        ir('PROD.dc.html'); row(lt[1]); pp = pan(); bt = J("[...document.querySelectorAll('aside[role=dialog] button')].filter(VIS).map(b=>N(b.innerText))") or []
+        t.chk('A-13 lote pendente do Sérgio: "Sérgio resolve", sem "Liberar" nem "Reservar" no painel', 'Sérgio resolve' in pp and not any(x.startswith('Liberar') or x.startswith('Reservar') for x in bt), [pp[:300], bt])
+        # A-05 · avaria depois da liberação não entra apta
+        ir('CARGA.dc.html', limpa=True)
+        for tk, br in (('TK-A1', '12000'), ('TK-A2', '15000')):
+            clk('Registrar pesagem'); clk('OS-0505 · Pivô 19', 'aside'); setv('#pf_dcol', '22/09'); setv('#pf_tk', tk); setv('#pf_bruto', br); setv('#pf_tara', '7200'); clk('Com avaria', 'aside'); clk('Registrar pesagem', 'aside')
+            if tk == 'TK-A1':
+                ir('PROD.dc.html'); row('L39-133'); clk('Liberar L39-133', 'aside'); ir('CARGA.dc.html')
+        p = toast(); L = cen("(()=>{ const g=Object.values(c.producao.cargas).filter(g=>/^TK-A/.test(g.ticket)).map(g=>g.lote); return g; })()")
+        t.chk('A-05 2ª carga com avaria depois da liberação vai a lote novo Em inspeção', L and len(L) == 2 and L[0] != L[1] and 'Em inspeção' in p, [L, p])
+        # A-06 · carga do app em dobro: a pesagem nova sugere pesar a do app; descartar no CARGA e no MB-10 destrava
+        ir('MB-10.dc.html', limpa=True); lib()
+        for i in (1, 2): clk('Registrar carga · OS-0505'); setv('#mb_cx', '300'); clk('Carreta 02'); clk('Gravar carga')
+        ids = cen("Object.values(c.producao.cargas).filter(g=>g.st==='A pesar'&&g.via==='app'&&g.id!=='CG-2108').map(g=>g.id)") or []
+        ir('CARGA.dc.html'); clk('Registrar pesagem'); clk('OS-0505 · Pivô 19', 'aside'); pp = pan()
+        bt = J("[...document.querySelectorAll('aside[role=dialog] button')].filter(VIS).map(b=>N(b.innerText))") or []
+        t.chk('A-06 pesagem nova da OS-0505 avisa das cargas do app a pesar e oferece "Pesar a CG-…"', len(ids) == 2 and all(i in pp for i in ids) and ('Pesar a ' + ids[0]) in bt, [ids, pp[:300], bt])
+        clk('Cancelar', 'aside'); row(ids[1]); clk('Descartar', 'aside'); setv('#pf_mot', 'registrada duas vezes no app'); clk('Confirmar descarte', 'aside'); p = toast()
+        st1 = cen(f"c.producao.cargas[{json.dumps(ids[1])}].st")
+        t.chk('A-06 CARGA: Descartar com motivo tira a carga da fila (Descartada, motivo no histórico)', st1 == 'Descartada' and 'descartada' in p, [st1, p])
+        ir('MB-10.dc.html'); lib(); clk('Descartar carga a pesar'); clk(ids[0]); setv('#mb_mot', 'não saiu do campo'); clk('Descartar carga'); p = toast()
+        st0 = cen(f"c.producao.cargas[{json.dumps(ids[0])}].st")
+        t.chk('A-06 MB-10: Descartar carga a pesar (toque na carga + motivo) também descarta', st0 == 'Descartada' and 'descartada' in p, [st0, p])
+        # A-11 · carga sem sinal: a O.S. manda reconectar o app, não pesar
+        ir('CARGA.dc.html', limpa=True); row('CG-2108'); setv('#pf_tk', 'TK-4520'); setv('#pf_bruto', '19250'); setv('#pf_tara', '7200'); clk('Íntegra', 'aside'); clk('Pesar a CG-2108', 'aside')
+        ir('MB-10.dc.html'); lib(); clk('Sem sinal'); clk('Registrar carga · OS-0505'); setv('#mb_cx', '200'); clk('Carreta 02'); clk('Gravar carga')
+        ir('OS.dc.html'); J("window.__car.cenMudar(null,c=>{ const o=c.ordens['OS-0505']; o.etapa='Em conferência'; o.saldo=0; o.ap=o.ap.filter(a=>a.st!=='Previsto'); return {msg:''}; })")
+        ir('OS.dc.html#OS-0505'); pp = pan(); lk = J("[...document.querySelectorAll('aside[role=dialog] a')].filter(VIS).map(a=>N(a.innerText))") or []; rw = J("ROWTXT('OS-0505')") or ''
+        t.chk('A-11 encerrar com carga no aparelho: "Sérgio reconecta o app", sem "Lúcia pesa" nem link de pesar; a linha da O.S. não manda a Lúcia', 'Sérgio reconecta o app' in pp and 'Lúcia pesa' not in pp and not any(x.startswith('Pesar a carga') for x in lk) and 'Lúcia' not in rw, [pp[pp.find('Encerrar bloqueado'):][:300], lk, rw[:200]])
+        # A-14 · MB-10 na carência: aviso sem "turnos" e confirmação explícita para registrar colheita já feita
+        ir('OS.dc.html', limpa=True)
+        J("window.__car.cenMudar(null,c=>{ c.ordens['OS-0999']={id:'OS-0999',tipo:'Pulverização · antracnose',talhao:'Pivô 19',area:75.11,etapa:'Encerradas',versao:'v1',realizado:75.11,saldo:0,resp:'Wesley',ins:[{p:'Tebuconazol 200 EC',dose:1,un:'L',tot:75.11}],req:null,selos:[],ap:[{d:'22/09',dia:1,ha:75.11,st:'Conferido',sinc:true,origem:'web'}],reservado:false,osc:{}}; return {msg:''}; })")
+        ir('MB-10.dc.html'); lib(); cd = J("N(document.querySelector('main').innerText)") or ''
+        clk('Apontar área · OS-0505'); setv('#mb_ha', '5'); setv('#mb_h', '2'); clk('Gravar área'); e = J("[...document.querySelectorAll('[role=alert]')].filter(VIS).map(x=>N(x.innerText)).join(' | ')") or ''
+        n0 = cen("c.ordens['OS-0505'].ap.filter(a=>a.origem==='app').length"); clk('Colheita já feita'); clk('Gravar área'); n1 = cen("c.ordens['OS-0505'].ap.filter(a=>a.origem==='app').length")
+        t.chk('A-14 MB-10 na carência: "não colha agora" (sem "turnos suspensos"); gravar pede "Colheita já feita" e só então registra', 'não colha agora' in cd and 'turnos suspensos' not in cd and 'Colheita já feita' in e and n0 == 0 and n1 == 1, [cd[cd.find('Carência'):][:200], e, n0, n1])
+        # A-04 · O.S. de colheita liberada com carga recebida não oferece "Cancelar sem execução"
+        ir('COLH.dc.html', limpa=True); row('Pivô 19'); clk('Publicar previsão', 'aside'); ir('COLH.dc.html'); clk('Programar colheita S40'); time.sleep(.8); lib(); clk('Emitir ordem', 'aside')
+        nid = cen("(()=>{ const o=Object.values(c.ordens).find(o=>o.talhao==='Pivô 19'&&/semana 40/.test(o.tipo)); return o?o.id:''; })()") or ''
+        ir('OS.dc.html#' + nid); clk('Liberar para execução', 'aside'); clk('Confirmar liberação', 'aside')
+        ir('OS.dc.html#' + nid); a0 = J("[...document.querySelectorAll('aside[role=dialog] button, aside[role=dialog] a')].filter(VIS).map(b=>N(b.innerText))") or []
+        ir('CARGA.dc.html'); clk('Registrar pesagem'); clk(nid + ' · Pivô 19', 'aside'); clk('Hoje 26/09', 'aside'); setv('#pf_tk', 'TK-9001'); setv('#pf_bruto', '19200'); setv('#pf_tara', '7200'); clk('Íntegra', 'aside'); clk('Registrar pesagem', 'aside')
+        ir('OS.dc.html#' + nid); a1 = J("[...document.querySelectorAll('aside[role=dialog] button, aside[role=dialog] a')].filter(VIS).map(b=>N(b.innerText))") or []
+        t.chk('A-04 ' + nid + ' Liberadas: "Cancelar sem execução" some depois da carga recebida (colheita com carga é execução)', 'Cancelar sem execução' in a0 and 'Cancelar sem execução' not in a1 and cen(f"c.ordens[{json.dumps(nid)}].etapa") == 'Liberadas', [nid, a0, a1])
+        t.chk('revisão: nenhuma página com erro de JS', not t.errs(), t.errs())
+        shot('revisao')
 finally:
     t.fim()

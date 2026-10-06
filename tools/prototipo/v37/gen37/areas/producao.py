@@ -160,6 +160,9 @@ function prRun(self,fn,ok){ const r=cenMudar(null,fn); if(r.erro){ self.setState
   self.setState(Object.assign({cenrev:Date.now(),g2toast:r.msg||'Registrado.',pr_err:'',pr_ferr:null},ok||{})); return r; }
 function prPrim(v,p){ v.prim_isB=!!(p&&p.go); v.prim_isA=!!(p&&p.h&&!p.go); v.prim_t=p?p.t:''; v.prim_fn=(p&&p.go)||(()=>{}); v.prim_h=(p&&p.h)||'#'; }
 function prStatus(v,t,c){ v.st_t=t; v.st_st=prChs(c); v.st_dot=prDot(c); }
+/* chave de quem inicia (R-07): nasce quando o formulário abre (estado pr_ch) e morre no sucesso; nunca de contagem do estado,
+   que volta a 1 ao recarregar e repete depois de cancelar ou estornar (revisão A-03, A-10) */
+function prChave(p){ return p+'-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8); }
 function prRst(self,v){ v.rst_no=!self.state.pr_rst; v.rst_ask=!!self.state.pr_rst; v.rst=()=>self.setState({pr_rst:true}); v.rst_cancel=()=>self.setState({pr_rst:false});
   v.rst_ok=()=>{ cenReset(); cenSave(cenGet()); self.setState({pr_rst:false,pr_pan:null,pr_sel:null,pr_form:null,pr_err:'',cenrev:Date.now(),g2toast:'Demonstração restaurada: O.S., estoque, app e produção voltaram ao início.'}); }; }
 /* cartões: as linhas que a grade mostra agora (mesmo filtro, busca e ordem) */
@@ -176,14 +179,15 @@ function prPedidosPara(c,L){ return Object.values(prP(c).pedidos).filter(p=>prCo
 function prLoteProx(c,L,S){ if(S.esgotado) return {t:'sem saldo · rastreio guardado'};
   if(S.q==='Em processo') return {t:'no beneficiamento · fora do vendável'};
   if(S.q==='Bloqueado') return {t:S.dono+' decide · carência'};
-  if(S.q==='Em inspeção') return {t:'Liberar lote · '+(S.dono||prQuem('qual')),a:'liberar'};
+  if(S.q==='Em inspeção'){ const ql=prQuem('qual'); if(!S.dono||S.dono===ql) return {t:'Liberar lote · '+ql,a:'liberar'};
+    return {t:S.dono+' resolve · '+String(S.mot||'').split(':')[0],p:S.dono+' resolve: '+S.mot+'. Liberar fica com a Qualidade depois disso'}; }   /* revisão A-13 */
   if(prCmp(S.disp,0)>0&&prPedidosPara(c,L).length) return {t:'Reservar para pedido · '+prQuem('com'),a:'reservar'};
   return {t:prCmp(S.disp,0)>0?'disponível para venda':'todo reservado'}; }
 function prPedRow(c,p){ const cu=p.cultura; const U=x=>prEstTxt(cu,x); const rs=prResPed(c,p.id); const res=prSoma(rs.map(r=>r.kg)); const falta=prFalta(c,p); const st=prSitPed(c,p);
   const nx=st.t==='Em risco'?('expedição impedida: '+st.imp.map(r=>r.lote).join(', ')):(st.t==='Entregue'?'entregue':(prCmp(falta,0)>0?(p.tipo==='futura'?'oferta da '+(p.sem?prSemTxt(p.sem):'safra')+' · reservar quando houver lote':'Reservar lote · '+prQuem('com')):'aguardar expedição'));
   return {id:p.id,ro:true,v:{ped:p.id,prod:p.prod,tipo:p.tipo==='futura'?'Futura':'Pronta entrega',qtd:p.qtd,res,falta,sit:st.t},
     s:{ped:p.id+' '+p.cliente,prod:p.prod,tipo:(p.tipo==='futura'?'Futura':'Pronta entrega')+' · '+p.janela,qtd:U(p.qtd),res:U(res),falta:U(falta),sit:st.t+' · '+nx},
-    p:{ped:[{k:'b',t:p.id},{k:'mut',t:' · '+p.cliente}],prod:[{k:'txt',t:p.prod}],tipo:[{k:'txt',t:p.tipo==='futura'?'Futura':'Pronta entrega'},{k:'br'},{k:'mut',t:p.janela}],
+    p:{ped:[{k:'b',t:p.id},{k:'mut',t:' · '+p.cliente}],prod:[{k:'txt',t:p.prod}],tipo:[{k:'txt',t:p.tipo==='futura'?'Futura':'Pronta entrega'},{k:'br'},{k:'mut',t:p.janela+(p.obs?' · '+p.obs:'')}],
        qtd:prTx(U(p.qtd)),res:prTx(U(res)),falta:[{k:'b',t:U(falta)}],sit:[{k:'chip',t:st.t,c:st.c},{k:'br'},{k:'mut',t:nx}]}}; }
 function prFormReserva(self,c,L,p,fixo){ /* fixo: 'lote' (vem do lote: escolhe o pedido) ou 'ped' (vem do pedido: escolhe o lote) */
   const P=prP(c); let opcPed=[], opcLot=[];
@@ -192,10 +196,11 @@ function prFormReserva(self,c,L,p,fixo){ /* fixo: 'lote' (vem do lote: escolhe o
   const S=L?prSaldos(c,L):null; const falta=p?prFalta(c,p):0; const sug=(S&&p)?(prCmp(S.disp,falta)<0?S.disp:falta):0; const cu=(L||p||{}).cultura||'Soja'; const un=prEstUn(cu);
   const fields=[]; if(fixo==='lote') fields.push(prFld(self,'ped','Pedido',{t:'opts',v:p?p.id:'',opts:opcPed.map(x=>({v:x.id,t:x.id+' · '+x.cliente+' · falta '+prEstTxt(x.cultura,prFalta(c,x))+(x.tipo==='futura'?' · futura':'')}))}));
   else fields.push(prFld(self,'lot','Lote apto',{t:'opts',v:L?L.id:'',opts:opcLot.map(x=>({v:x.id,t:x.id+' · disponível '+prEstTxt(x.cultura,prSaldos(c,x).disp)}))}));
-  const k='q_'+(L?L.id:'')+'_'+(p?p.id:''); fields.push(prFld(self,k,'Quantidade a reservar',{t:'txt',v:prFmtT(prEstQ(cu,sug),3).replace(/\./g,''),u:un,h:'Sugestão: o menor entre o disponível do lote ('+(S?prEstTxt(cu,S.disp):'—')+') e a falta do pedido ('+prEstTxt(cu,falta)+'). Pode reduzir.'}));
-  const go=()=>{ if(!L||!p){ self.setState({pr_err:'Escolha '+(fixo==='lote'?'o pedido':'o lote')+'.'}); return; } const q=prFval(self,k,prFmtT(prEstQ(cu,sug),3).replace(/\./g,''));
-    const kg=prNumOk(q)?prEstBase(cu,prNum(q)):NaN; const ch='W-RS-'+L.id+'-'+p.id+'-'+(prResPed(c,p.id).length+1);
-    prRun(self,x=>prReservar(x,{pedido:p.id,lote:L.id,kg,chave:ch,quem:prQuem('com')}),{pr_modo:null,pr_form:null}); };
+  const k='q_'+(L?L.id:'')+'_'+(p?p.id:''); const sugT=prFmtT(prPiso(prEstQ(cu,sug),3),3).replace(/\./g,'');   /* para baixo: redigitada, nunca passa do disponível (revisão A-12) */
+  fields.push(prFld(self,k,'Quantidade a reservar',{t:'txt',v:sugT,u:un,h:'Sugestão: o menor entre o disponível do lote ('+(S?prEstTxt(cu,S.disp):'—')+') e a falta do pedido ('+prEstTxt(cu,falta)+'). Pode reduzir.'}));
+  const go=()=>{ if(!L||!p){ self.setState({pr_err:'Escolha '+(fixo==='lote'?'o pedido':'o lote')+'.'}); return; } const q=prFval(self,k,sugT);
+    const kg=q===sugT?sug:(prNumOk(q)?prEstBase(cu,prNum(q)):NaN); const ch=self.state.pr_ch||prChave('W-RS');   /* sem edição: a sugestão exata na base */
+    prRun(self,x=>prReservar(x,{pedido:p.id,lote:L.id,kg,chave:ch,quem:prQuem('com')}),{pr_modo:null,pr_form:null,pr_ch:null}); };
   return {fields,go,L,p}; }
 function prPanPed(self,c,p){ const P=prP(c); const cu=p.cultura; const U=x=>prEstTxt(cu,x); const st=prSitPed(c,p); const falta=prFalta(c,p); const cx=self.state.pr_cx;
   const rs=Object.values(P.reservas).filter(r=>r.pedido===p.id).map(r=>{ const L=P.lotes[r.lote]; const imp=r.st==='Ativa'&&L&&prSaldos(c,L).q!=='Liberado';
@@ -208,7 +213,8 @@ function prPanPed(self,c,p){ const P=prP(c); const cu=p.cultura; const U=x=>prEs
   if(cx){ PPx.form={t:'Cancelar '+cx,h:'O motivo fica no histórico; o disponível do lote volta.',fields:[prFld(self,'mot','Motivo do cancelamento',{t:'txt',im:'text',ph:'ex.: cliente adiou a retirada'})]};
     PPx.prim={t:'Cancelar '+cx,go:()=>prRun(self,x=>prCancelarReserva(x,cx,prFval(self,'mot',''),prQuem('com')),{pr_cx:null,pr_form:null})}; PPx.sec=[{t:'Manter reserva',go:()=>self.setState({pr_cx:null,pr_err:''})}]; return PPx; }
   const a=prCmp(falta,0)>0?Object.values(P.lotes).filter(x=>prCompat(p,x)&&prCmp(prSaldos(c,x).disp,0)>0):[];
-  if(a.length){ const f=prFormReserva(self,c,null,p,'ped'); PPx.form={t:'Reservar lote para o '+p.id+' · '+prQuem('com'),h:'Só lote apto, do mesmo produto e classe. Venda futura reserva sem tocar a oferta publicada além da dedução.',fields:f.fields}; PPx.prim={t:'Reservar',go:f.go}; }
+  if(a.length){ if(self.state.pr_ch){ const f=prFormReserva(self,c,null,p,'ped'); PPx.form={t:'Reservar lote para o '+p.id+' · '+prQuem('com'),h:'Só lote apto, do mesmo produto e classe. Venda futura reserva sem tocar a oferta publicada além da dedução.',fields:f.fields}; PPx.prim={t:'Reservar',go:f.go}; }
+    else PPx.prim={t:'Reservar lote para o '+p.id,go:()=>self.setState({pr_ch:prChave('W-RS'),pr_form:null,pr_err:''})}; }   /* depois de reservar, nova reserva abre outro formulário (outra chave) */
   return PPx; }
 '''
 
@@ -218,7 +224,7 @@ function prPanPed(self,c,p){ const P=prP(c); const cu=p.cultura; const U=x=>prEs
 def prod():
     fname='PROD.dc.html'; E._reset_screen(fname)
     g_lot=grid([dict(k='nome',l='Lote · produto',w=230),dict(k='prod',l='Produto',w=170),dict(k='loc',l='Local · validade',w=190),
-                dict(k='fis',l='Físico',t='num',a='r'),dict(k='blq',l='Bloqueado',t='num',a='r'),dict(k='apto',l='Apto',t='num',a='r'),
+                dict(k='fis',l='Físico',t='num',a='r'),dict(k='blq',l='Bloqueado',t='num',a='r'),dict(k='proc',l='Em processo',t='num',a='r'),dict(k='apto',l='Apto',t='num',a='r'),
                 dict(k='res',l='Reservado',t='num',a='r'),dict(k='disp',l='Disponível',t='num',a='r'),dict(k='q',l='Qualidade · próximo passo',w=260)],
                [],edit=dict(m='pick'),tree=True,gid='g_lot',total=False,qf=dict(k='q',cut=' · ',l='Qualidade',todas='Todos'),
                tools=f'<button type="button" aria-pressed="{H("sl_on")}" onClick="{H("sl_tog")}" style="{H("sl_st")}">Só com saldo</button>')
@@ -236,23 +242,23 @@ def prod():
 PROD_JS=r'''
 function prLoteRow(c,L,S){ const cu=L.cultura; const U=x=>prEstTxt(cu,x); const loc=(PRDC.locais[L.local]||{}).nome||L.local;
   const q=S.esgotado?'Esgotado':S.q; const nx=prLoteProx(c,L,S);
-  return {id:L.id,ro:true,v:{nome:L.id,prod:L.prod,loc,fis:S.fis,blq:S.blq,apto:S.apto,res:S.res,disp:S.disp,q},
-    s:{nome:L.id+' '+L.prod,prod:L.prod,loc:loc+' '+(L.validade?prBr(L.validade):''),q:q+' · '+nx.t,fis:U(S.fis),blq:U(S.blq),apto:U(S.apto),res:U(S.res),disp:U(S.disp)},
+  return {id:L.id,ro:true,v:{nome:L.id,prod:L.prod,loc,fis:S.fis,blq:S.blq,proc:S.proc,apto:S.apto,res:S.res,disp:S.disp,q},
+    s:{nome:L.id+' '+L.prod,prod:L.prod,loc:loc+' '+(L.validade?prBr(L.validade):''),q:q+' · '+nx.t,fis:U(S.fis),blq:U(S.blq),proc:U(S.proc),apto:U(S.apto),res:U(S.res),disp:U(S.disp)},
     p:{nome:[{k:'b',t:L.id},{k:'mut',t:' · '+(L.classe?L.classe+' ':'')+(L.saf||'')}],prod:[{k:'txt',t:L.prod}],
        loc:[{k:'txt',t:loc},{k:'br'},{k:L.validade&&S.vencido?'chip':'mut',t:L.validade?('vence '+prBr(L.validade)+(S.vencido?' · vencido':'')):'—',c:'yellow'}],
-       fis:prTx(U(S.fis)),blq:prTx(U(S.blq)),apto:prTx(U(S.apto)),res:prTx(U(S.res)),disp:[{k:'b',t:U(S.disp)}],
+       fis:prTx(U(S.fis)),blq:prTx(U(S.blq)),proc:prTx(U(S.proc)),apto:prTx(U(S.apto)),res:prTx(U(S.res)),disp:[{k:'b',t:U(S.disp)}],
        q:[{k:'chip',t:q,c:PR_QCOR[q]||'gray'},{k:'br'},{k:'mut',t:nx.t}]}}; }
 const PR_GRIDS={g_lot:1,g_ped:1};
 const _g2rows0=g2rows; g2rows=function(self,sp){ return PR_GRIDS[sp.id]?sp.rows:_g2rows0(self,sp); };
 function PREVALS(self,v){ cenOuvir(self); prTopo(self,v); const c=cenGet(); self._c=c; const P=prP(c);
-  self.g2pick=(gid,rid)=>{ if(String(rid).indexOf('grp:')===0) return; self.setState({pr_sel:{g:gid,id:rid},pr_pan:{g:gid,id:rid},pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null}); };
+  self.g2pick=(gid,rid)=>{ if(String(rid).indexOf('grp:')===0) return; self.setState({pr_sel:{g:gid,id:rid},pr_pan:{g:gid,id:rid},pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null,pr_cx:null,pr_ch:prChave('W-RS')}); };
   const so=self.state.pr_saldo!==false; v.sl_on=String(so); v.sl_st=prPill(so); v.sl_tog=()=>self.setState({pr_saldo:!so});
   const lots=Object.values(P.lotes).filter(L=>prFazOk(self,L.faz)&&prSafOk(self,L.saf)); const prods={};
   lots.forEach(L=>{ const S=prSaldos(c,L); if(so&&S.esgotado) return; (prods[L.prod]=prods[L.prod]||[]).push({L,S}); });
   const rows=Object.keys(prods).sort().map(pr=>{ const ls=prods[pr]; const cu=ls[0].L.cultura; const U=x=>prEstTxt(cu,x); const sm=k=>prSoma(ls.map(x=>x.S[k]));
-    return {id:'grp:'+pr,ro:true,v:{nome:pr,prod:pr,fis:sm('fis'),blq:sm('blq'),apto:sm('apto'),res:sm('res'),disp:sm('disp')},
-      s:{nome:pr,prod:pr,fis:U(sm('fis')),blq:U(sm('blq')),apto:U(sm('apto')),res:U(sm('res')),disp:U(sm('disp'))},
-      p:{nome:[{k:'b',t:pr}],prod:[{k:'mut',t:ls.length+(ls.length>1?' lotes':' lote')}],loc:[{k:'mut',t:''}],fis:prTx(U(sm('fis'))),blq:prTx(U(sm('blq'))),apto:prTx(U(sm('apto'))),res:prTx(U(sm('res'))),disp:[{k:'b',t:U(sm('disp'))}],q:[{k:'mut',t:''}]},
+    return {id:'grp:'+pr,ro:true,v:{nome:pr,prod:pr,fis:sm('fis'),blq:sm('blq'),proc:sm('proc'),apto:sm('apto'),res:sm('res'),disp:sm('disp')},
+      s:{nome:pr,prod:pr,fis:U(sm('fis')),blq:U(sm('blq')),proc:U(sm('proc')),apto:U(sm('apto')),res:U(sm('res')),disp:U(sm('disp'))},
+      p:{nome:[{k:'b',t:pr}],prod:[{k:'mut',t:ls.length+(ls.length>1?' lotes':' lote')}],loc:[{k:'mut',t:''}],fis:prTx(U(sm('fis'))),blq:prTx(U(sm('blq'))),proc:prTx(U(sm('proc'))),apto:prTx(U(sm('apto'))),res:prTx(U(sm('res'))),disp:[{k:'b',t:U(sm('disp'))}],q:[{k:'mut',t:''}]},
       kids:ls.sort((a,b)=>a.L.id.localeCompare(b.L.id)).map(x=>prLoteRow(c,x.L,x.S))}; });
   GR('g_lot').rows=rows; const x0={}; rows.forEach(r=>{ x0[r.id]=true; }); GR('g_lot').x0=x0;
   const peds=Object.values(P.pedidos).filter(p=>{ const L=Object.values(P.lotes).find(x=>x.prod===p.prod); return prFazOk(self,L?L.faz:'')&&prSafOk(self,p.saf||(L&&L.saf)); });
@@ -270,9 +276,9 @@ function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const P=pr
   const sel=st.pr_sel; let alvo=null;
   if(sel&&sel.g==='g_lot'&&P.lotes[sel.id]) alvo={g:'g_lot',id:sel.id}; else if(sel&&sel.g==='g_ped'&&P.pedidos[sel.id]) alvo={g:'g_ped',id:sel.id};
   const acaoLote=(L)=>{ const S=prSaldos(c,L); const nx=prLoteProx(c,L,S); if(nx.a==='liberar') return {t:'Liberar '+L.id,go:()=>self.setState({pr_sel:{g:'g_lot',id:L.id},pr_pan:{g:'g_lot',id:L.id},pr_modo:'liberar',pr_form:null,pr_err:''})};
-    if(nx.a==='reservar') return {t:'Reservar '+L.id+' para pedido',go:()=>self.setState({pr_sel:{g:'g_lot',id:L.id},pr_pan:{g:'g_lot',id:L.id},pr_modo:'reservar',pr_form:null,pr_err:''})}; return null; };
+    if(nx.a==='reservar') return {t:'Reservar '+L.id+' para pedido',go:()=>self.setState({pr_sel:{g:'g_lot',id:L.id},pr_pan:{g:'g_lot',id:L.id},pr_modo:'reservar',pr_form:null,pr_err:'',pr_ch:prChave('W-RS')})}; return null; };
   const acaoPed=(p)=>{ if(prCmp(prFalta(c,p),0)<=0) return null; const ls=Object.values(P.lotes).filter(L=>prCompat(p,L)&&prCmp(prSaldos(c,L).disp,0)>0); if(!ls.length) return null;
-    return {t:'Reservar lote para o '+p.id,go:()=>self.setState({pr_sel:{g:'g_ped',id:p.id},pr_pan:{g:'g_ped',id:p.id},pr_modo:'reservar',pr_form:null,pr_err:''})}; };
+    return {t:'Reservar lote para o '+p.id,go:()=>self.setState({pr_sel:{g:'g_ped',id:p.id},pr_pan:{g:'g_ped',id:p.id},pr_modo:'reservar',pr_form:null,pr_err:'',pr_cx:null,pr_ch:prChave('W-RS')})}; };
   let prim=null; if(alvo) prim=alvo.g==='g_lot'?acaoLote(P.lotes[alvo.id]):acaoPed(P.pedidos[alvo.id]);
   else { const ls=[].concat(...(GR('g_lot').rows||[]).map(r=>r.kids||[])).map(r=>P.lotes[r.id]).filter(Boolean); for(const L of ls){ const a=acaoLote(L); if(a&&/^Reservar/.test(a.t)){ prim=a; break; } } }
   prPrim(v,prim);
@@ -293,12 +299,13 @@ function prPanLote(self,c,L){ const P=prP(c); const S=prSaldos(c,L); const cu=L.
   const dests=[...new Set(Object.values(P.pedidos).filter(p=>prCompat(p,L)).map(p=>p.dest||'MI-BR'))]; const av=[];
   if(typeof carAvaliar==='function') lcs.forEach(lc=>dests.forEach(d=>{ const a=carAvaliar(c,lc,d); av.push({c:[[lc,'b'],[a.rot,a.st==='nao_conforme'?'red':(a.st==='conforme'?'ok':'')],(a.motivos[0]||a.faltas[0]||{}).t||'',((a.motivos[0]||a.faltas[0]||{}).q?'quem resolve: '+(a.motivos[0]||a.faltas[0]).q:'')].filter(Boolean),l:{t:'Ver carência e destino',h:'CO-06.dc.html'}}); }));
   const PPx={title:L.id+' · '+L.prod,chip:[q,PR_QCOR[q]||'gray'],sub:(loc.nome||'')+(L.validade?' · vence '+prBr(L.validade)+(S.vencido?' (vencido: aviso, não trava)':''):'')+' · recebido '+prBr(L.drec),
-    next:nx.t+'. Qualidade: '+(S.mot||'')+'.',nred:S.q==='Bloqueado',
+    next:(nx.p||(nx.t+'. Qualidade: '+(S.mot||'')))+'.',nred:S.q==='Bloqueado',
     kv:[{l:'Físico',v:U(S.fis)},{l:'Bloqueado',v:U(S.blq)},{l:'Apto',v:U(S.apto)},{l:'Reservado',v:U(S.res)},{l:'Disponível',v:U(S.disp)},{l:'Em processo',v:U(S.proc)}],
     secs:[{t:'Origem',rows:orig},{t:'Avaliação do destino dos pedidos',rows:av,vazio:L.abertura?'Saldo de abertura sem lote de campo: o destino é avaliado na expedição.':'Sem lote de campo ainda (o apontamento da data cria o LC-).'},{t:'Reservas',rows:rs,vazio:'Nenhuma reserva.'},{t:'Movimentos',rows:mv}],
     err:self.state.pr_err};
   if(nx.a==='liberar'){ PPx.prim={t:'Liberar '+L.id,go:()=>prRun(self,x=>prLiberarLote(x,L.id,prQuem('qual')),{pr_modo:null})}; PPx.form={t:'Liberar lote · '+prQuem('qual'),h:'Confira a condição do lote. Liberar reavalia carência e ordem de colheita; com pendência, nada muda e a mensagem diz quem resolve.',fields:[]}; }
-  else if(nx.a==='reservar'){ const f=prFormReserva(self,c,L,null,'lote'); PPx.form={t:'Reservar para pedido · '+prQuem('com'),h:'Reserva só de lote apto; a quantidade não passa do disponível nem da falta do pedido.',fields:f.fields}; PPx.prim={t:'Reservar',go:f.go}; }
+  else if(nx.a==='reservar'){ if(self.state.pr_ch){ const f=prFormReserva(self,c,L,null,'lote'); PPx.form={t:'Reservar para pedido · '+prQuem('com'),h:'Reserva só de lote apto; a quantidade não passa do disponível nem da falta do pedido.',fields:f.fields}; PPx.prim={t:'Reservar',go:f.go}; }
+    else PPx.prim={t:'Reservar '+L.id+' para pedido',go:()=>self.setState({pr_ch:prChave('W-RS'),pr_form:null,pr_err:''})}; }   /* depois de reservar, nova reserva abre outro formulário (outra chave) */
   return PPx; }
 /* entrada por link: PROD.dc.html#L39-133 ou #PV-036 abre o registro */
 function prHash(self){ if(self.__prh) return; self.__prh=1; const ab=()=>{ let h=''; try{ h=decodeURIComponent(location.hash||'').slice(1); }catch(e){} const P=prP(cenGet());
@@ -325,9 +332,10 @@ const PR_GRIDS={g_cg:1};
 const _g2rows0=g2rows; g2rows=function(self,sp){ return PR_GRIDS[sp.id]?sp.rows:_g2rows0(self,sp); };
 function prCgSit(c,g){ const P=prP(c); if(g.st==='A pesar') return {t:'A pesar',c:'yellow',nx:'Pesar · '+prRec(g.faz)};
   if(g.st==='Estornada') return {t:'Estornada',c:'gray',nx:'sem efeito · '+((g.estorno||{}).motivo||'')};
+  if(g.st==='Descartada') return {t:'Descartada',c:'gray',nx:'não pesada · '+((g.descarte||{}).motivo||'')};
   const L=P.lotes[g.lote]; const S=L?prSaldos(c,L):null;
   if(S&&S.q==='Bloqueado') return {t:'Bloqueada',c:'red',nx:S.dono+' decide · carência'};
-  if(S&&S.q==='Em inspeção') return {t:'Recebida',c:'yellow',nx:'Qualidade confere · '+(S.dono||prQuem('qual'))};
+  if(S&&S.q==='Em inspeção') return {t:'Recebida',c:'yellow',nx:(!S.dono||S.dono===prQuem('qual'))?'Qualidade confere · '+prQuem('qual'):S.dono+' resolve · '+String(S.mot||'').split(':')[0]};   /* revisão A-13 */
   if(S&&S.q==='Em processo') return {t:'Recebida',c:'blue',nx:'no beneficiamento'};
   return {t:'Recebida',c:'green',nx:'no estoque de produto'}; }
 function prCgOrig(g){ return (g.origem||[]).map(x=>x.tal+' · '+x.os+((g.origem||[]).length>1?' · '+prFmtT(x.pct,2)+' %'+(x.modo==='estimada'?' (estimada)':''):'')); }
@@ -338,12 +346,12 @@ function prCgRow(c,g){ const P=prP(c); const s=prCgSit(c,g); const L=P.lotes[g.l
     s:{cg:g.id+' '+(g.ticket||''),cult:cu,orig:orig.join(' '),liq:g.liq===null?'':kg(g.liq),com:comT,lote:(g.lote||'')+' '+loc,sit:s.t+' · '+s.nx},
     p:{cg:[{k:'b',t:g.id},{k:'mut',t:g.ticket?' · '+g.ticket:(g.via==='app'?' · do app':'')}],cult:[{k:'txt',t:cu}],
        orig:orig.reduce((a,t,i)=>a.concat(i?[{k:'br'},{k:'txt',t}]:[{k:'txt',t}]),[]),
-       dt:[{k:'txt',t:'colhida '+prBr(g.dcol)},{k:'br'},{k:'mut',t:g.drec?('recebida '+prBr(g.drec)+' '+(g.horaRec||g.hora||'')):(g.est_cx?'~'+g.est_cx+' caixas (estimativa)':'a pesar')}],
+       dt:[{k:'txt',t:'colhida '+prBr(g.dcol)},{k:'br'},{k:'mut',t:g.drec?('recebida '+prBr(g.drec)+' '+(g.horaRec||g.hora||'')):(g.st==='Descartada'?'descartada '+prBr((g.descarte||{}).d):(g.est_cx?'~'+g.est_cx+' caixas (estimativa)':'a pesar'))}],
        liq:g.liq===null?[{k:'mut',t:'—'}]:[{k:'txt',t:kg(g.liq)}],com:[{k:g.com===null?'mut':'b',t:comT}],
        lote:g.lote?[{k:'link',t:g.lote,h:'PROD.dc.html#'+g.lote},{k:'br'},{k:'mut',t:loc}]:[{k:'mut',t:'— · '+loc}],
        sit:[{k:'chip',t:s.t,c:s.c},{k:'br'},{k:'mut',t:s.nx}]}}; }
 function PREVALS(self,v){ cenOuvir(self); prTopo(self,v); const c=cenGet(); self._c=c; const P=prP(c);
-  self.g2pick=(gid,rid)=>self.setState({pr_sel:{g:gid,id:rid},pr_pan:{g:gid,id:rid},pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null});
+  self.g2pick=(gid,rid)=>self.setState({pr_sel:{g:gid,id:rid},pr_pan:{g:gid,id:rid},pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null,pr_ch:null});
   const gs=prCargas(c,g=>g.sinc!==false&&prFazOk(self,g.faz)&&prSafOk(self,((PRDC.safras[(PRDC.cult[(g.origem[0]||{}).cult]||{}).saf]||{}).mf)||''));
   GR('g_cg').rows=gs.map(g=>prCgRow(c,g)); self._gs=gs; }
 /* origens possíveis da carga (R-06): O.S. de colheita Liberadas, Em execução ou Em conferência, nas fazendas do filtro */
@@ -354,10 +362,15 @@ function prFormPesar(self,c,g){ const P=prP(c); const nova=!g; const ords=prOrig
   const fs=[];
   if(nova){ fs.push(prFld(self,'os','Origem · O.S. de colheita',{t:'opts',v:os1,opts:ords.map(x=>({v:x.id,t:x.id+' · '+x.talhao+' · '+x.etapa})),h:ords.length?'O talhão, a cultura e o local de recebimento vêm da O.S.':'Nenhuma O.S. de colheita liberada, em execução ou em conferência nesta fazenda.'}));
     fs.push(prFld(self,'mix','Carga de mais de um talhão?',{t:'opts',v:prFval(self,'mix','nao'),opts:[{v:'nao',t:'Um talhão'},{v:'sim',t:'+ talhão'}]}));
-    if(mix){ fs.push(prFld(self,'os2','Segundo talhão · O.S.',{t:'opts',v:os2,opts:ords.filter(x=>x.id!==os1).map(x=>({v:x.id,t:x.id+' · '+x.talhao}))}));
+    if(mix){ const comp=os1?prMixCompat(c,os1).filter(x=>prFazOk(self,prFazDaOS(c,x))):[];   /* mesma cultura e fazenda (revisão A-08) */
+      fs.push(prFld(self,'os2','Segundo talhão · O.S.',{t:'opts',v:os2,opts:comp.map(x=>({v:x.id,t:x.id+' · '+x.talhao})),h:comp.length?'Só O.S. de colheita da mesma cultura e fazenda.':(os1?'Nenhuma outra O.S. de colheita da mesma cultura e fazenda está aberta.':'Escolha antes a O.S. de origem.')}));
       fs.push(prFld(self,'pct','Participação do 1º talhão',{t:'txt',u:'%',h:'O 2º fica com o resto (soma 100 %).'}));
       fs.push(prFld(self,'modo','Participação',{t:'opts',v:prFval(self,'modo','medida'),opts:[{v:'medida',t:'Medida'},{v:'estimada',t:'Estimada'}]})); }
-    fs.push(prFld(self,'dcol','Dia da colheita',{t:'txt',im:'numeric',v:prDdMm(prHoje()),u:'dd/mm',h:'Hoje por padrão; informe se a fruta foi colhida antes.'})); }
+    /* dia da colheita: obrigatório e sem valor padrão (decide a carência, R-12); atalhos Hoje, Ontem e dias apontados na O.S. (revisão A-01) */
+    const hj=prDdMm(prHoje()), on=prDdMm(prDiaMais(prHoje(),-1)); const apd=o?[...new Set((o.ap||[]).filter(cenApSomado).map(a=>a.d))].reverse():[];
+    const at=[{v:hj,t:'Hoje '+hj},{v:on,t:'Ontem '+on}].concat(apd.filter(d=>d!==hj&&d!==on).slice(0,3).map(d=>({v:d,t:d}))).map(x=>({v:x.v,t:x.t+(apd.indexOf(x.v)>=0?' · apontado':'')}));
+    const fd=prFld(self,'dcol','Dia da colheita',{t:'txt',im:'numeric',u:'dd/mm',ph:'dd/mm',opts:at,h:'Obrigatório: toque num atalho ou digite. Dia sem apontamento de área na O.S. deixa o lote em inspeção: a carência é lida nesse dia.'});
+    fd.isOpts=true; fs.push(fd); }
   fs.push(prFld(self,'tk','Ticket da balança',{t:'txt',im:'text',ph:'ex.: TK-4520'}));
   fs.push(prFld(self,'bruto','Peso bruto',{t:'txt',u:'kg'})); fs.push(prFld(self,'tara','Tara',{t:'txt',u:'kg'}));
   if(u.grao){ fs.push(prFld(self,'u','Umidade',{t:'txt',u:'%',h:'Padrão '+prFmtT(u.u,1)+' %: acima disso desconta por matéria seca.'})); fs.push(prFld(self,'imp','Impureza',{t:'txt',u:'%',h:'Padrão '+prFmtT(u.imp,1)+' %: desconta só o que passa.'})); }
@@ -372,17 +385,27 @@ function prFormPesar(self,c,g){ const P=prP(c); const nova=!g; const ords=prOrig
     if(u.grao){ k.u=val('u'); k.imp=val('imp'); } if(u.campo) k.litros=val('lit'); if(u.base==='frutos') k.frutos=val('fr');
     if(g){ k.carga=g.id; k.chave='W-REC-'+g.id; }
     else { if(!os1){ self.setState({pr_err:'Escolha a O.S. de colheita de origem.'}); return; }
-      const d=prIsoDe(prFval(self,'dcol',prDdMm(prHoje()))); if(!d){ self.setState({pr_err:'Informe o dia da colheita (dd/mm).'}); return; } k.dcol=d;
+      const d=prIsoDe(prFval(self,'dcol','')); if(!d){ self.setState({pr_err:'Informe o dia da colheita: toque num atalho ou digite dd/mm.'}); return; } k.dcol=d;
       if(mix){ if(!os2){ self.setState({pr_err:'Escolha o segundo talhão.'}); return; } const p1=prNum(val('pct')); if(!(p1>0&&p1<100)){ self.setState({pr_err:'Informe a participação do 1º talhão (entre 0 e 100 %).'}); return; }
         const md=prFval(self,'modo','medida'); k.mix=[{os:os1,pct:p1,modo:md},{os:os2,pct:prSub(100,p1),modo:md}]; } else k.os=os1;
-      k.chave='W-REC-'+(self.__nrec=(self.__nrec||0)+1)+'-'+String(k.ticket||'').trim(); }
-    const r=prRun(self,x=>prReceber(x,k),{pr_form:null}); if(!r.erro&&r.g) self.setState({pr_sel:{g:'g_cg',id:r.g.id},pr_pan:{g:'g_cg',id:r.g.id}}); };
-  return {fields:fs,go,cu}; }
+      k.chave=self.state.pr_ch||prChave('W-REC'); }   /* chave do formulário aberto (revisão A-10): recarregar a página não a repete */
+    const r=prRun(self,x=>prReceber(x,k),{pr_form:null,pr_ch:null}); if(!r.erro&&r.g) self.setState({pr_sel:{g:'g_cg',id:r.g.id},pr_pan:{g:'g_cg',id:r.g.id}}); };
+  /* cargas do app a pesar desta O.S. (revisão A-06): a pesagem nova sugere pesar a carga que já existe */
+  const apOS=(nova&&os1)?prAPesar(c,os1).filter(x=>x.sinc!==false):[];
+  return {fields:fs,go,cu,apOS,os1}; }
 function prPanCarga(self,c,g){ const P=prP(c); const s=prCgSit(c,g); const cu=g.cultura; const u=prUn(cu); const L=P.lotes[g.lote]; const S=L?prSaldos(c,L):null; const kg=x=>prFmtT(x,2)+' kg';
   const sub=prCgOrig(g).join(' + ')+' · colhida '+prBr(g.dcol)+(g.via==='app'?' · do app ('+(g.quem||'campo')+(g.veic?', '+g.veic:'')+')':'');
-  if(g.st==='A pesar'){ const f=prFormPesar(self,c,g);
+  if(g.st==='Descartada'){ const d=g.descarte||{};
+    return {title:g.id+' · descartada',chip:['Descartada','gray'],sub,next:'Descartada em '+prBr(d.d)+' '+(d.at||'')+' por '+(d.quem||'')+': '+(d.motivo||'')+'. Nada entrou na produção nem no estoque.',
+      secs:[{t:'Chave e recibo',rows:[{c:['chave do campo: '+(g.chave||'—')]}]}],err:self.state.pr_err}; }
+  if(g.st==='A pesar'){
+    if(self.state.pr_modo==='descarte') return {title:g.id+' · descartar',chip:['A pesar','yellow'],sub,next:'Descarte só a carga registrada por engano (em dobro no app ou que não saiu do campo). Nada foi pesado; o registro e o motivo ficam.',
+      form:{t:'Descartar '+g.id+' · '+prRec(g.faz),h:'A carga sai da fila de pesagem e deixa de impedir o encerramento da O.S.',fields:[prFld(self,'mot','Motivo do descarte',{t:'txt',im:'text',ph:'ex.: registrada duas vezes no app'})]},err:self.state.pr_err,
+      prim:{t:'Confirmar descarte',go:()=>prRun(self,x=>prDescartarCarga(x,g.id,prFval(self,'mot',''),prRec(g.faz)),{pr_modo:null,pr_form:null})},sec:[{t:'Manter carga',go:()=>self.setState({pr_modo:null,pr_err:''})}]};
+    const f=prFormPesar(self,c,g);
     return {title:g.id+' · a pesar',chip:['A pesar','yellow'],sub:sub+(g.est_cx?' · estimativa ~'+g.est_cx+' caixas (não soma)':''),next:'Pesar na balança e receber: '+prRec(g.faz)+'. A O.S. de colheita só encerra depois desta pesagem.',
-      form:{t:'Pesar e receber · '+prRec(g.faz),h:'Bruto e tara em kg, sem valor anterior. O líquido, os descontos e o lote são calculados.',fields:f.fields},err:self.state.pr_err,prim:{t:'Pesar a '+g.id,go:f.go}}; }
+      form:{t:'Pesar e receber · '+prRec(g.faz),h:'Bruto e tara em kg, sem valor anterior. O líquido, os descontos e o lote são calculados.',fields:f.fields},err:self.state.pr_err,prim:{t:'Pesar a '+g.id,go:f.go},
+      sec:[{t:'Descartar',go:()=>self.setState({pr_modo:'descarte',pr_form:null,pr_err:''})}]}; }
   const part=(g.origem||[]).map(x=>({c:[[x.tal,'b'],x.os,prFmtT(x.pct,2)+' %',kg(x.kg),x.modo==='estimada'?'participação estimada':'medida',prLc(c,x.os,g.dcol)||'LC- entra quando o apontamento da data existir']}));
   const mv=P.movs.filter(m=>m.carga===g.id).map(m=>({c:[[m.id,'b'],prBr(m.d)+' '+(m.at||''),m.tipo,prEstTxt(cu,m.kg),m.lote,m.quem||'',m.obs||''].filter(Boolean)}));
   const desc=g.desc?('impureza −'+kg(g.desc.dImp)+' · umidade −'+kg(g.desc.dUmid)+' ('+prFmtT(g.u,1)+' % e '+prFmtT(g.impG,1)+' %)'):(u.campo?'sem desconto: café em L':'sem desconto (fruta: massa líquida pesada)');
@@ -398,16 +421,19 @@ function prPanCarga(self,c,g){ const P=prP(c); const s=prCgSit(c,g); const cu=g.
   return PPx; }
 function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const P=prP(c); const st=self.state;
   v.cards_cg=prCards(self,v,'g_cg',id=>{ const g=P.cargas[id]; if(!g) return null; const s=prCgSit(c,g);
-    return prCard({t1:g.id+(g.ticket?' · '+g.ticket:''),num:g.liq===null?'a pesar':prFmtT(g.liq,2)+' kg',t2:prCgOrig(g).join(' + ')+' · colhida '+prBr(g.dcol)+(g.lote?' · '+g.lote:''),chip:[s.t,s.c],nx:s.nx,go:()=>self.g2pick('g_cg',id)}); });
+    return prCard({t1:g.id+(g.ticket?' · '+g.ticket:''),num:g.st==='Descartada'?'descartada':(g.liq===null?'a pesar':prFmtT(g.liq,2)+' kg'),t2:prCgOrig(g).join(' + ')+' · colhida '+prBr(g.dcol)+(g.lote?' · '+g.lote:''),chip:[s.t,s.c],nx:s.nx,go:()=>self.g2pick('g_cg',id)}); });
   const sel=st.pr_sel; const gs=sel&&P.cargas[sel.id]; let prim;
   if(gs&&gs.st==='A pesar'&&gs.sinc!==false) prim={t:'Pesar a '+gs.id,go:()=>self.setState({pr_pan:{g:'g_cg',id:gs.id},pr_form:null,pr_err:''})};
-  else prim={t:'Registrar pesagem',go:()=>self.setState({pr_pan:{g:'nova'},pr_sel:null,pr_form:null,pr_err:''})};
+  else prim={t:'Registrar pesagem',go:()=>self.setState({pr_pan:{g:'nova'},pr_sel:null,pr_form:null,pr_err:'',pr_modo:null,pr_ch:prChave('W-REC')})};
   prPrim(v,prim);
   const ap=(self._gs||[]).filter(g=>g.st==='A pesar').length, rc=(self._gs||[]).filter(g=>g.st==='Recebida').length, bl=(self._gs||[]).filter(g=>prCgSit(c,g).t==='Bloqueada').length;
   prStatus(v,[ap?ap+(ap>1?' cargas a pesar':' carga a pesar'):'nada a pesar',rc+(rc===1?' recebida':' recebidas'),bl?bl+' bloqueada':''].filter(Boolean).join(' · '),bl?'red':(ap?'yellow':'green'));
   const pan=st.pr_pan; let PP=null;
-  if(pan&&pan.g==='nova'){ const f=prFormPesar(self,c,null); PP={title:'Registrar pesagem',chip:['Nova carga','gray'],sub:'Carga que chegou sem registro do app: escolha a O.S. de colheita de origem.',
-      form:{t:'Pesar e receber',h:'Origem por um toque; bruto e tara em kg, sem valor anterior. Umidade e impureza só para grão.',fields:f.fields},err:st.pr_err,prim:{t:'Registrar pesagem',go:f.go}}; }
+  if(pan&&pan.g==='nova'){ const f=prFormPesar(self,c,null); const ap=f.apOS;
+    PP={title:'Registrar pesagem',chip:['Nova carga','gray'],sub:'Carga que chegou sem registro do app: escolha a O.S. de colheita de origem.',
+      next:ap.length?'A '+f.os1+' tem carga do app a pesar: '+ap.map(g=>g.id+' (colhida '+prBr(g.dcol)+(g.est_cx?', ~'+g.est_cx+' caixas':'')+')').join(', ')+'. Se é esta carga, pese-a pelo botão abaixo; registrar outra deixa a do app a pesar e impede o encerramento da O.S.':'',nred:ap.length>0,
+      form:{t:'Pesar e receber',h:'Origem por um toque; bruto e tara em kg, sem valor anterior. Umidade e impureza só para grão.',fields:f.fields},err:st.pr_err,prim:{t:'Registrar pesagem',go:f.go},
+      sec:ap.map(g=>({t:'Pesar a '+g.id,go:()=>self.setState({pr_pan:{g:'g_cg',id:g.id},pr_sel:{g:'g_cg',id:g.id},pr_form:null,pr_err:'',pr_modo:null})}))}; }
   else if(pan&&P.cargas[pan.id]) PP=prPanCarga(self,c,P.cargas[pan.id]);
   prPainel(self,v,PP); }
 function prHash(self){ if(self.__prh) return; self.__prh=1; const ab=()=>{ let h=''; try{ h=decodeURIComponent(location.hash||'').slice(1); }catch(e){} const P=prP(cenGet());
@@ -484,9 +510,10 @@ function PREVALS(self,v){ cenOuvir(self); prTopo(self,v); const c=cenGet(); self
   const grupos=Object.keys(por).map(cu=>{ const xs=por[cu].sort((a,b)=>(PR_SITORD[a.sit]-PR_SITORD[b.sit])||String(a.k.local).localeCompare(String(b.k.local),'pt-BR',{numeric:true}));
     const pd=prPonderada(xs.map(x=>x.R)); const kg=prSoma(xs.map(x=>x.R.kg)); const ha=prSoma(xs.map(x=>x.k.area)); const ord=Math.min.apply(null,xs.map(x=>PR_SITORD[x.sit]));
     const cnt={}; xs.forEach(x=>{ cnt[x.sit]=(cnt[x.sit]||0)+1; }); const sitT=Object.keys(cnt).sort((a,b)=>PR_SITORD[a]-PR_SITORD[b]).map(k=>cnt[k]+' '+k.toLowerCase()).join(' · ');
-    return {ord,cu,row:{id:'grp:'+cu,ro:true,v:{tal:cu,cult:cu,area:ha,colh:kg},s:{tal:cu,cult:cu,colh:prUnTxt(cu,kg),prtv:pd?prPrtvTxt(cu,pd.kg,pd.area):'',sit:''},
+    const pdT=pd?prPrtvTxt(cu,pd.kg,pd.area)+' ponderada':'—'; const pdA=pd?'sobre '+prFmtT(pd.area,2)+' ha colhidos':'';   /* a área da conta, não a da linha (revisão A-15) */
+    return {ord,cu,row:{id:'grp:'+cu,ro:true,v:{tal:cu,cult:cu,area:ha,colh:kg},s:{tal:cu,cult:cu,colh:prUnTxt(cu,kg),prtv:pd?pdT+' '+pdA:'',sit:''},
       p:{tal:[{k:'b',t:cu}],cult:[{k:'mut',t:xs.length+(xs.length>1?' talhões':' talhão')}],prev:[{k:'mut',t:''}],colh:[{k:'b',t:prUnTxt(cu,kg)}],
-         prtv:[{k:pd?'b':'mut',t:pd?prPrtvTxt(cu,pd.kg,pd.area)+' ponderada':'—'}],ref:[{k:'mut',t:''}],sit:[{k:'mut',t:sitT}]},
+         prtv:pd?[{k:'b',t:pdT},{k:'br'},{k:'mut',t:pdA}]:[{k:'mut',t:'—'}],ref:[{k:'mut',t:''}],sit:[{k:'mut',t:sitT}]},
       kids:xs.map(x=>prTalRow(c,x))}}; }).sort((a,b)=>a.ord-b.ord||a.cu.localeCompare(b.cu));
   GR('g_tal').rows=grupos.map(g=>g.row); const x0={}; grupos.forEach(g=>{ x0[g.row.id]=true; }); GR('g_tal').x0=x0;
   /* por semana: fruta semanal por produto; grão por safra */
@@ -523,7 +550,7 @@ function prPanTal(self,c,X){ const k=X.k, R=X.R; const P=prP(c); const U=x=>prUn
   const vers=(P.previsoes[k.id]||[]).slice().reverse().map(v=>({c:[['v'+v.v,'b'],prBr(v.d)+' '+(v.at||''),v.por,v.safra!==undefined?'safra '+U(v.safra):Object.keys(v.sem).sort().map(w=>prSemTxt(w)+' '+U(v.sem[w])).join(' · '),v.base==='meta'?'pela meta':'pela contagem']}));
   const pas=R.passes.map(p=>({c:[[p.os,'b'],prSemTxt(p.sem),p.fase,prFmtT(p.area,2)+' ha',U(p.kg),p.area>0?prPrtvTxt(k.cultura,p.kg,p.area)+(p.final?' final':' parcial'):'sem área apontada',p.refKg?'previsão '+U(p.refKg)+' (v'+p.ref.v+')':'sem previsão antes da semana',p.desv!==null?[prFmt(p.desv,2)+' %',p.desv<0?'red':'ok']:(p.final?'':'sem desvio (parcial)'),p.aPesar.length?[p.aPesar.length+' a pesar: '+p.aPesar.map(g=>g.id).join(', '),'red']:''].filter(Boolean),l:{t:'Abrir '+p.os,h:'OS.dc.html#'+p.os}}));
   const cgs=prCargas(c,g=>g.sinc!==false&&(g.origem||[]).some(x=>x.cult===k.id)).sort((a,b)=>(a.dcol<b.dcol?-1:1)).map(g=>{ const x=g.origem.find(y=>y.cult===k.id);
-    return {c:[[g.id,'b'],'colhida '+prBr(g.dcol),g.st,g.st==='A pesar'?(g.est_cx?'~'+g.est_cx+' caixas (não soma)':'—'):kg(x.kg)+(g.origem.length>1?' ('+prFmtT(x.pct,2)+' %)':''),g.lote||''].filter(Boolean),l:{t:'Ver carga',h:'CARGA.dc.html#'+g.id}}; });
+    return {c:[[g.id,'b'],'colhida '+prBr(g.dcol),g.st,(g.st==='A pesar'||g.st==='Descartada')?(g.est_cx?'~'+g.est_cx+' caixas (não soma)':'—'):kg(x.kg)+(g.origem.length>1?' ('+prFmtT(x.pct,2)+' %)':''),g.lote||''].filter(Boolean),l:{t:'Ver carga',h:'CARGA.dc.html#'+g.id}}; });
   const liq=prSoma([].concat(...R.passes.map(p=>[p.liq]))), com=prSoma([].concat(...R.passes.map(p=>[p.com])));
   const res=[{c:[['Bruto de campo (líquido pesado)','b'],kg(liq)]},{c:[['Descontos','b'],kg(prSub(liq,com))]},{c:[['Comercial','b'],kg(com)+(R.u.grao?' · '+U(com):'')]},
     {c:[['Área colhida','b'],k.semanal?(R.area>0?prFmtT(R.area,2)+' ha (área do cultivo, desde o 1º passe)':'nenhum passe'):prFmtT(R.area,2)+' ha (apontada)']},
@@ -541,14 +568,19 @@ function prPanTal(self,c,X){ const k=X.k, R=X.R; const P=prP(c); const U=x=>prUn
       const fs=k.semanal?[prFld(self,'ph','Plantas vivas por hectare',{t:'txt',im:'numeric',v:par0.plantas_ha,u:'plantas/ha',h:'Do talhão (sintético, D-10); mude se a contagem de estande mostrar outro número.'}),
                            prFld(self,'pe','Perda esperada',{t:'txt',v:prFmtT(prMul(par0.perda,100),2),u:'%',h:'Descarte e queda até a colheita.'})]:[];
       PPx.form={t:'Publicar previsão · '+prQuem('ag'),h:k.semanal?'Congela a versão nova só das semanas que ainda não começaram: '+Object.keys(X.pub.sem||{}).map(prSemTxt).join(' e ')+'. A semana em curso orienta a O.S. aberta.':'Publica a previsão da safra pela meta × área.',fields:fs};
-      PPx.prim={t:'Publicar previsão',go:()=>{ const par=k.semanal?{plantas_ha:prNum(prFval(self,'ph',par0.plantas_ha)),perda:prDiv(prNum(prFval(self,'pe',prFmtT(prMul(par0.perda,100),2))),100)}:null;
+      PPx.prim={t:'Publicar previsão',go:()=>{ let par=null;
+        if(k.semanal){ const ph=prFval(self,'ph',par0.plantas_ha), pe=prFval(self,'pe',prFmtT(prMul(par0.perda,100),2)); const fe={};   /* revisão A-16: o erro fica junto do campo */
+          if(!prNumOk(ph)||!(prNum(ph)>0&&prNum(ph)<10000)||Math.floor(prNum(ph))!==prNum(ph)) fe.ph='Número inteiro maior que zero (ex.: 1.700).';
+          if(!prNumOk(pe)||prNum(pe)<0||prNum(pe)>=100) fe.pe='Número de 0 a 99 (ex.: 5).';
+          if(Object.keys(fe).length){ self.setState({pr_ferr:fe,pr_err:'Corrija o campo marcado: nada foi publicado.'}); return; }
+          par={plantas_ha:prNum(ph),perda:prDiv(prNum(pe),100)}; }
         prRun(self,x=>prPublicar(x,k.id,prQuem('ag'),par),{pr_form:null}); }}; } }
   return PPx; }
 function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const st=self.state; const vis=st.pr_vis||'t';
   v.vt=vis==='t'; v.vs=vis==='s'; v.vt_on=String(vis==='t'); v.vs_on=String(vis==='s'); v.vt_go=()=>self.setState({pr_vis:'t'}); v.vs_go=()=>self.setState({pr_vis:'s'});
   const XS=self._X||[]; const byId={}; XS.forEach(x=>{ byId[x.k.id]=x; });
   v.cards_tal=prCards(self,v,'g_tal',id=>{ if(String(id).indexOf('grp:')===0){ const cu=id.slice(4); const xs=XS.filter(x=>x.k.cultura===cu); const pd=prPonderada(xs.map(x=>x.R));
-      return prCard({grp:true,t1:cu,num:pd?prPrtvTxt(cu,pd.kg,pd.area)+' ponderada':xs.length+' talhões'}); }
+      return prCard({grp:true,t1:cu,num:pd?prPrtvTxt(cu,pd.kg,pd.area)+' ponderada sobre '+prFmtT(pd.area,2)+' ha':xs.length+' talhões'}); }
     const X=byId[id]; if(!X) return null; const R=X.R;
     return prCard({t1:X.k.local+' · '+X.k.cultura,num:R.prtv!==null&&R.area>0?prPrtvTxt(X.k.cultura,R.kg,R.area):(R.comecou?prUnTxt(X.k.cultura,R.kg):'—'),t2:'Previsão '+prPrevTxt(c,X).t+' · colhido '+(R.comecou?prUnTxt(X.k.cultura,R.kg):'—'),chip:[X.sit,PR_SITCOR[X.sit]],nx:X.nx,go:()=>self.g2pick('g_tal',id)}); });
   v.cards_sem=prCards(self,v,'g_sem',id=>{ const r=(self._wrows||[]).find(x=>x.id===id); if(!r) return null; const neg=prCmp(r.v.livre,0)<0;

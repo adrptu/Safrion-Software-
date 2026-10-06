@@ -252,7 +252,7 @@ function osMerge(b,co,c){ if(!co) return b;
   // conferência: o encerramento depende do cenário (apontamento aguardando sinal ou sobra em custódia)
   if(co.etapa==='Em conferência'){ o.encM=cenPodeEncerrar(c,co.id);
     if(!o.encM){ o.selos=o.selos.filter(s=>!/Sobras a receber|Aguardando sinal/i.test(s.t)); if(!mine){ o.cond='Apontamentos enviados e nada em custódia. Próximo passo: conferir e encerrar.'; o.dono=o.resp; o.prazo='conferir e encerrar'; } }
-    else if(/^Carga /.test(o.encM)){ const t='Carga a pesar';   /* colheita (R-18): carga a pesar ou no aparelho; quem recebe pesa em Produção › Cargas e recebimento */
+    else if(/^Carga a pesar/.test(o.encM)){ const t='Carga a pesar';   /* colheita (R-18): carga a pesar ou no aparelho; quem recebe pesa em Produção › Cargas e recebimento */
       if(!o.selos.some(s=>s.t===t)) o.selos=o.selos.concat([{t,c:'yellow'}]); o.dono=(typeof prRec==='function'?prRec(prFazDaOS(c,co)):'Recebimento'); o.prazo='pesar e receber a carga'; }
     else { const sin=/sinal/.test(o.encM); const t=sin?'Aguardando sinal do app':(/duplicidade/.test(o.encM)?'Apontamento em conferência':'Sobras a receber');  // o bloqueio também na lista e no Kanban
       if(!o.selos.some(s=>s.t===t)) o.selos=o.selos.concat([{t,c:'yellow'}]);
@@ -304,7 +304,8 @@ function osTrilha(o,it){ if(!it||o.etapa==='Canceladas'||(!o.reservado&&!(it.ent
 function osLibErro(o,c0){ const c=c0||cenGet(); if(!c.ordens[o.id]) return ''; const k=cenClone(c);
   try { osc_liberar(k,o.id,false,o.janela); return ''; } catch (e) { return String(e.message||e); } }
 function osEncBloq(o){ const m=o.encM;
-  if(/^Carga /.test(m)){ const g=(/CG-\d+/.exec(m)||[''])[0]; return {acao:'encerrar',t:'Encerrar bloqueado: '+m.replace(/\.$/,'')+'.',q:(o.dono||'Recebimento')+' pesa e recebe a carga; a produção do talhão só fecha com ela.',h:'CARGA.dc.html'+(g?'#'+g:''),hl:'Pesar a carga'}; }   /* colheita (R-18) */
+  if(/^Carga a pesar/.test(m)){ const g=(/CG-\d+/.exec(m)||[''])[0]; return {acao:'encerrar',t:'Encerrar bloqueado: '+m.replace(/\.$/,'')+'.',q:(o.dono||'Recebimento')+' pesa e recebe a carga (registrada por engano: descarta com motivo na mesma tela); a produção do talhão só fecha com ela.',h:'CARGA.dc.html'+(g?'#'+g:''),hl:'Pesar a carga'}; }   /* colheita (R-18) */
+  if(/^Carga no aparelho/.test(m)) return {acao:'encerrar',t:'Encerrar bloqueado: '+m.replace(/\.$/,'')+'.',q:(typeof prResp==='function'?prResp(o):o.resp)+' reconecta o app; a carga entra uma vez e vai para a pesagem.'};   /* colheita sem sinal (revisão A-11): não é o recebimento que resolve */
   if(/sinal/.test(m)) return {acao:'encerrar',t:'Encerrar bloqueado: há apontamentos no aparelho aguardando sinal.',q:o.resp+' reconecta o app; o envio é automático e não duplica.'};
   if(/duplicidade/.test(m)) return {acao:'encerrar',t:'Encerrar bloqueado: '+m,q:CEN_CONF_AP+' decide na linha do apontamento: mesmo turno conta uma vez; outro turno soma.'};
   const its=(o.r?o.r.itens:[]).filter(i=>i.custodia>0.001); const quem=its.map(i=>i.quem||o.resp).filter((v,i,a)=>a.indexOf(v)===i).join(', ')||o.resp;
@@ -436,10 +437,13 @@ function osc_encerrar(c,id){ const o=osc_o(c,id); if(o.etapa!=='Em conferência'
 // cancelar sem execução: a reserva ainda não entregue volta ao disponível do lote e a requisição fica cancelada
 function osc_cancelar(c,id,mot,cx){ const o=osc_o(c,id);
   if((o.realizado||0)>0||['A liberar','Liberadas'].indexOf(o.etapa)<0) throw new Error('Só ordem sem realizado, em A liberar ou Liberadas, é cancelada sem execução.');
+  { const cg=osCargasVivas(c,id); if(cg.length) throw new Error('Cancelar recusado: a '+id+' tem carga '+cg.map(g=>g.id+' '+String(g.st).toLowerCase()).join(', ')+'. Colheita com carga é fato executado: estorne a carga recebida ou descarte a carga a pesar (com motivo) em Produção › Cargas e recebimento antes de cancelar.'); }
   const r=o.req&&c.reqs[o.req];
   if(r){ if(o.reservado) r.itens.forEach(it=>{ const l=c.lotes[it.prod+'|'+it.lote]; const res=Math.max(0,it.solicitado-it.entregue); if(l&&res>0) l.reservado=Math.max(0,l.reservado-res); }); r.estado='Cancelada'; }
   o.etapa='Canceladas'; o.reservado=false; o.selos=[]; osc_txt(o,{cond:'Cancelada sem execução: '+mot+'. '+cx[1],dono:'',prazo:'',insx:cx[2]});
   return {msg:id+' cancelada sem execução. '+cx[1]}; }
+/* cargas da O.S. de colheita que ainda contam (revisão A-04): a pesar (com ou sem sinal) ou recebidas; estornada e descartada não */
+function osCargasVivas(c,id){ return (typeof prCargasOS==='function')?prCargasOS(c,id).filter(g=>g.st==='A pesar'||g.st==='Recebida'):[]; }
 function osc_dispensar(c,id,n,mot){ const o=osc_o(c,id); if(o.etapa!=='Em execução') throw new Error(id+' não está em execução.');
   { const dp=(o.ap||[]).filter(a=>a.st===CEN_AP_DUP); if(dp.length) throw new Error('Apontamento em conferência de duplicidade (dia '+dp.map(a=>a.dia).join(', ')+'): '+CEN_CONF_AP+' decide antes de dispensar o saldo.'); }
   const pap=osApPend(o); if(n>o.saldo-pap+0.001) throw new Error('Máximo '+cenNum(Math.max(0,o.saldo-pap))+' ha: é o saldo da ordem'+(pap?' descontando '+cenNum(pap)+' ha ainda no aparelho.':'.'));
@@ -696,7 +700,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{};
     const col=osApColeta(osApIns(cenGet(),o,n,cur.ced)); if(col.erro){ self.setState({pa:Object.assign({},cur,{err:col.erro})}); return; }
     const d=cur.d.split('-'); osRun(self,c=>osc_apontar(c,o.id,d[2]+'/'+d[1],n,col.cons,col.est,cur.chave),{pa:null}); };   // chave do formulário aberto: duplo clique não soma (OSDIA-03)
   // ação secundária pelo realizado: sem realizado → cancelar sem execução; em execução → dispensar saldo (nunca cancela fato executado)
-  const canCanc=!((o.realizado||0)>0)&&(o.etapa==='A liberar'||o.etapa==='Liberadas');
+  const canCanc=!((o.realizado||0)>0)&&(o.etapa==='A liberar'||o.etapa==='Liberadas')&&!osCargasVivas(cenGet(),o.id).length;   // carga de colheita é execução (revisão A-04)
   const canDisp=o.etapa==='Em execução'&&!!o.area&&(o.saldo||0)>0.001;
   v.pan_hasCanc=canCanc; v.pan_hasDisp=canDisp;
   v.pan_cango=()=>self.setState({pa:{id:o.id,fn:'cancelar',motivo:'',err:''}});
@@ -876,9 +880,10 @@ function EXTRAVALS(self,v){
       if(!cur.jan) errs.jan='Informe o início da janela.';
       const all=ords(self); let dupId='';
       const a0=pl&&pl.atv.find(x=>x.id===cur.atv); const kc=(typeof PRDC!=='undefined'&&PRDC.cult[cur.cult])||null; const semana=!!(kc&&kc.semanal&&a0&&/^Colheita/.test(a0.op)&&cur.jan);
-      const sn=semana?prSemN(prSem(cur.jan)):0;   /* R-18: perene de fruta, uma O.S. de colheita por cultivo e semana */
-      if(!Object.keys(errs).length){ const k=semana?cur.cult+'|S'+sn:cur.cult+'|'+cur.atv;
-        const dup=all.find(x=>x.etapa!=='Canceladas'&&((x.keys||[]).indexOf(k)>=0||(semana&&x.talhao===c.local&&/^Colheita/.test(String(x.tipo||''))&&new RegExp('semana '+sn+'\\b').test(String(x.tipo||'')))));
+      const sw=semana?prSem(cur.jan):''; const sn=semana?prSemN(sw):0;   /* R-18: perene de fruta, uma O.S. de colheita por cultivo e semana (com o ano: a safra cruza o ano, revisão A-19) */
+      const semDe=(x)=>{ const co=cenGet().ordens[x.id]; return co?prSemDaOS(co):(new RegExp('semana '+sn+'\\b').test(String(x.tipo||''))?sw:''); };
+      if(!Object.keys(errs).length){ const k=semana?cur.cult+'|'+sw:cur.cult+'|'+cur.atv;
+        const dup=all.find(x=>x.etapa!=='Canceladas'&&((x.keys||[]).indexOf(k)>=0||(semana&&x.talhao===c.local&&/^Colheita/.test(String(x.tipo||''))&&semDe(x)===sw)));
         if(dup){ errs.atv='Já existe '+dup.id+(semana?' para a colheita da semana '+sn+' neste talhão.':' para esta atividade neste cultivo.'); dupId=dup.id; } }
       if(Object.keys(errs).length){ self.setState({nv:Object.assign({},cur,{errs,warn:false,dup:dupId})}); return; }
       const a=pl.atv.find(x=>x.id===cur.atv); const s=OSD.nova.safs.find(x=>x.id===cur.saf);
@@ -886,7 +891,7 @@ function EXTRAVALS(self,v){
       // insumos da atividade do plano: dose × área do cultivo (a semente leva a variedade do cultivo); nada é reservado antes de liberar
       const ins=(a.ins||[]).map(x=>({g:x.g,p:x.p.replace(/ · (variedade|híbrido) do cultivo$/,' '+c.var),dose:x.dose,un:x.un,tot:cenQtd(x.dose,c.area),sit:'Reserva ao liberar'}));
       const cj=(OSD.nova.conj||{})[a.op]||null;
-      const no={id,novo:true,keys:[semana?cur.cult+'|S'+sn:cur.cult+'|'+cur.atv],tipo:semana?'Colheita · semana '+sn:(a.op===a.nome?a.nome:a.op+' · '+a.nome),talhao:c.local,area:c.area,etapa:'A liberar',selos:[],
+      const no={id,novo:true,jan:cur.jan,keys:[semana?cur.cult+'|'+sw:cur.cult+'|'+cur.atv],tipo:semana?'Colheita · semana '+sn:(a.op===a.nome?a.nome:a.op+' · '+a.nome),talhao:c.local,area:c.area,etapa:'A liberar',selos:[],
         faz:s.faz||'Santa Rita',saf:s.mf,cult:c.id,cultura:c.cultura||'',obs:'',agua:false,ins,semins:'',bloq:null,aviso:'',dono:OS_AGRO,prazo:'liberar',
         atv:{op:a.op,nome:a.nome,gat:a.gat||'',orig:pl.nome+' v'+pl.versao,conj:cj?cj.conj:'',rend:cj?cj.rend:0},
         realizado:0,saldo:c.area,resp:'—',versao:'v1',janela:'a partir de '+brd(cur.jan),ap:[],nota:'',

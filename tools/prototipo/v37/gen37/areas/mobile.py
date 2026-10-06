@@ -819,9 +819,12 @@ v.mb_temOutras=v.mb_outras.length>0;"""
            + note('A previsão não é publicada a cada planta: a contagem vira rascunho e '+'Ana (agrônoma)'+' publica em Produção › Previsão e colheita.')))
     js='''const tals=Object.keys(PRDC.cult).filter(id=>PRDC.cult[id].semanal&&PRDC.cult[id].prod).sort((a,b)=>String(PRDC.cult[a].local).localeCompare(String(PRDC.cult[b].local),'pt-BR',{numeric:true}));
 let h=''; try{ h=decodeURIComponent(location.hash||'').slice(1); }catch(e){}
-const m=s.m7||{cult:(PRDC.cult[h]?h:''),pl:[],cur:{pintado:0,devez:0,verde:0}}; const cid=m.cult; const k=PRDC.cult[cid];
+/* chave de quem inicia (R-07): nasce ao escolher o talhão e vale até gravar; nunca da contagem do estado (revisão A-09) */
+const m7ch=(id)=>'APP-CNT-'+id+'-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8);
+if(!s.m7&&PRDC.cult[h]&&!self.__m7ch) self.__m7ch=m7ch(h);
+const m=s.m7||{cult:(PRDC.cult[h]?h:''),pl:[],cur:{pintado:0,devez:0,verde:0},ch:self.__m7ch||''}; const cid=m.cult; const k=PRDC.cult[cid];
 const set=(x)=>self.setState({m7:Object.assign({},m,x),m7err:''});
-v.m7_tals=tals.map(id=>({t:PRDC.cult[id].local,on:String(id===cid),st:mbPill(id===cid),tt:'Contar '+PRDC.cult[id].local+' · '+PRDC.cult[id].faz,go:()=>self.setState({m7:{cult:id,pl:[],cur:{pintado:0,devez:0,verde:0}},m7err:'',m7ok:null})}));
+v.m7_tals=tals.map(id=>({t:PRDC.cult[id].local,on:String(id===cid),st:mbPill(id===cid),tt:'Contar '+PRDC.cult[id].local+' · '+PRDC.cult[id].faz,go:()=>self.setState({m7:{cult:id,pl:[],cur:{pintado:0,devez:0,verde:0},ch:m7ch(id)},m7err:'',m7ok:null})}));
 v.m7_tem=!!k; const n=m.pl.length; const ALVO=20;
 v.m7_pl=k?k.local+' · planta '+(n+1)+' de '+ALVO:''; v.m7_falta=n>=ALVO?'amostra completa':(ALVO-n)+(ALVO-n===1?' planta a contar':' plantas a contar');
 ['pintado','devez','verde'].forEach(e=>{ v['m7_n_'+e]=String(m.cur[e]||0);
@@ -834,9 +837,9 @@ v.m7_reg=()=>{ if(!k) return; self.setState({m7:Object.assign({},m,{pl:m.pl.conc
 v.m7_corr=()=>{ if(!n){ TOAST(self,'Nenhuma planta registrada para corrigir.'); return; } const ult=m.pl[n-1]; self.setState({m7:Object.assign({},m,{pl:m.pl.slice(0,-1),cur:ult}),g2toast:'Planta '+n+' de volta aos contadores para corrigir · histórico só grava ao concluir.'}); };
 v.m7_conct='Concluir talhão'+(n?' ('+n+(n>1?' plantas)':' planta)'):'');
 v.m7_conc=()=>{ if(!n){ self.setState({m7err:'Registre ao menos uma planta antes de concluir.'}); return; }
-  const ch='APP-CNT-'+cid+'-'+((cenGet().producao.contagens||[]).filter(x=>x.cult===cid).length+1);
+  const ch=m.ch||m7ch(cid);
   const r=cenMudar(self,c=>prContar(c,{cult:cid,plantas:n,pintado:tot('pintado'),devez:tot('devez'),verde:tot('verde'),peso:s.m7peso||'',quem:c.app.operador,via:'app',chave:ch}));
-  if(r.erro){ self.setState({m7err:r.erro}); return; } self.setState({m7:{cult:'',pl:[],cur:{pintado:0,devez:0,verde:0}},m7peso:'',m7ok:{t:r.cnt.id+' · '+PRDC.cult[cid].local,s:r.msg}}); };
+  if(r.erro){ self.setState({m7err:r.erro}); return; } self.__m7ch=''; self.setState({m7:{cult:'',pl:[],cur:{pintado:0,devez:0,verde:0}},m7peso:'',m7ok:{t:r.cnt.id+' · '+PRDC.cult[cid].local,s:r.msg}}); };
 v.m7_ok=!!s.m7ok&&!k; v.m7_okt=s.m7ok?s.m7ok.t:''; v.m7_oks=s.m7ok?s.m7ok.s:'';
 v.m7_pr=!!k; v.m7_prt='Registrar e ir à planta '+(n+2); v.m7_sem=!k;
 DCH(v,'hdr',k?(k.local+' · planta '+(n+1)):(s.m7ok?'contagem gravada':'escolha o talhão'),k?'green':(s.m7ok?'green':'gray'));'''
@@ -953,6 +956,11 @@ v.concluir=()=>{ self.setState({conc:true,g2toast:'Serviço concluído · OM-023
                + f'<div style="display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 12px; font-weight: 600; color: {MUTED};">Fruta de mais de um talhão?</span>'
                f'<div role="group" aria-label="Segundo talhão" style="display: flex; flex-wrap: wrap; gap: 6px;"><sc-for list="{H("f_os2")}" as="x" hint-placeholder-count="1"><button type="button" aria-pressed="{H("x.on")}" onClick="{H("x.go")}" title="{H("x.tt")}" style="{H("x.st")}">{H("x.t")}</button></sc-for></div></div>'
                + IF('f_mix',ffield('Participação do talhão desta O.S.','mb_pct','f_pct','f_setpct','',hint='O outro talhão fica com o resto (soma 100 %).',ph='ex.: 60')))
+          + IF('fd',f'<div style="display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 12px; font-weight: 600; color: {MUTED};">Carga a descartar</span>'
+               f'<div role="group" aria-label="Carga a descartar" style="display: flex; flex-wrap: wrap; gap: 6px;"><sc-for list="{H("f_cgs")}" as="x" hint-placeholder-count="1"><button type="button" aria-pressed="{H("x.on")}" onClick="{H("x.go")}" title="{H("x.tt")}" style="{H("x.st")}">{H("x.t")}</button></sc-for></div></div>'
+               + ffield('Motivo do descarte','mb_mot','f_mot','f_setmot','',hint='Só carga registrada por engano (em dobro ou que não saiu). Nada foi pesado; o registro e o motivo ficam.',area=True,ph='ex.: registrada duas vezes'))
+          + IF('f_car',f'<div style="display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 12px; font-weight: 700; color: {RED};">{H("f_cart")}</span>'
+               f'<div role="group" aria-label="Colheita na carência" style="display: flex; flex-wrap: wrap; gap: 6px;"><button type="button" aria-pressed="{H("f_conf_on")}" onClick="{H("f_conf_go")}" style="{H("f_conf_st")}">Colheita já feita</button></div></div>')
           + IF('f_err',f'<div role="alert" style="font-size: 12.5px; font-weight: 700; color: {RED};">{H("f_errt")}</div>')
           + btns(fnb('Cancelar','f_cancel','',"Fechar o formulário sem gravar"))+'</div>')
     colheita=(
@@ -968,7 +976,8 @@ v.concluir=()=>{ self.setState({conc:true,g2toast:'Serviço concluído · OM-023
         f'<sc-if value="{H("o.car")}" hint-placeholder-val="{F()}"><div style="font-size: 12.5px; font-weight: 700; color: {RED}; line-height: 1.4;">{H("o.car_t")}</div></sc-if>'
         f'<div style="display: flex; flex-wrap: wrap; gap: 8px;">'
         f'<sc-if value="{H("o.bA")}" hint-placeholder-val="{T()}"><button type="button" onClick="{H("o.ga")}" title="{H("o.ttA")}" style="{_BST}">{icon("check",14)}{H("o.tA")}</button></sc-if>'
-        f'<sc-if value="{H("o.bC")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("o.gc")}" title="{H("o.ttC")}" style="{_BST}">{icon("truck",14)}{H("o.tC")}</button></sc-if></div></div></sc-for>'
+        f'<sc-if value="{H("o.bC")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("o.gc")}" title="{H("o.ttC")}" style="{_BST}">{icon("truck",14)}{H("o.tC")}</button></sc-if>'
+        f'<sc-if value="{H("o.bD")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("o.gd")}" title="{H("o.ttD")}" style="{_BST}">{H("o.tD")}</button></sc-if></div></div></sc-for>'
       + note('Área não gera produção: a produção do talhão nasce só da carga pesada e recebida.'))
     motorista=(
       card(f'Minha viagem · {VIAGEM["veic"]}',[
@@ -989,13 +998,20 @@ const F=s.m10||null; const f=s.f10||{{}}; const hoje=cenDdMm(CEN_DIA_OP);
 const abre=(o,k)=>{{ const cc=cenGet(); const n=k==='area'?((cc.app.nap||0)+1):((cc.app.ncg||0)+1); self.setState({{m10:{{os:o.id,k,chave:(k==='area'?'APC-':'APP-CG-')+o.id+'-'+n,n}},f10:{{}},m10e:''}}); }};
 v.c_vazio=!ords.length;
 v.ords=ords.map((o,i)=>{{ const cg=prCargas(c,g=>(g.origem||[]).some(x=>x.os===o.id)&&(g.st==='A pesar'||g.dcol===CEN_DIA_OP));
-  const ap=cg.filter(g=>g.st==='A pesar'); const rc=cg.filter(g=>g.st!=='A pesar'); const cb=(typeof carBloqColheita==='function')?carBloqColheita(c,o,'iniciar'):null; const pend=mbProv(o);
+  const ap=cg.filter(g=>g.st==='A pesar'); const rc=cg.filter(g=>g.st==='Recebida'); const cb=(typeof carBloqColheita==='function')?carBloqColheita(c,o,'iniciar'):null; const pend=mbProv(o);
   return {{id:o.id,tal:o.talhao,feito:'Feito '+cenNum(o.realizado,2)+' de '+cenNum(o.area,2)+' ha · saldo '+cenNum(o.saldo,2)+' ha'+(pend?' · +'+cenNum(pend,2)+' ha no aparelho':''),
     cargas:(ap.length?ap.length+(ap.length>1?' cargas a pesar: ':' carga a pesar: ')+ap.map(g=>g.id+(g.est_cx?' (~'+g.est_cx+' cx)':'')+(g.sinc===false?' · no aparelho':'')).join(', '):'Nada a pesar')+(rc.length?' · '+rc.length+' recebida(s) hoje':''),
-    car:!!cb,car_t:cb?((cb.fim?'Carência até '+carAte(cb.fim):'Carência sem dados')+': novos turnos suspensos · '+cb.q):'',
-    bA:!F,bC:!F&&i>0,tA:'Apontar área · '+o.id,tC:'Registrar carga · '+o.id,ttA:'Apontar hectares e horas do turno na '+o.id,ttC:'Registrar uma carga que saiu do '+o.talhao,
-    ga:()=>abre(o,'area'),gc:()=>abre(o,'carga')}}; }});
-v.f_on=!!F; v.fa=!!F&&F.k==='area'; v.fc=!!F&&F.k==='carga'; v.f_tt=F?((F.k==='area'?'Apontar área · ':'Registrar carga · ')+F.os+' · '+((c.ordens[F.os]||{{}}).talhao||'')):'';
+    car:!!cb,car_t:cb?((cb.fim?'Carência até '+carAte(cb.fim):'Carência sem dados')+': não colha agora · '+cb.q):'',
+    bA:!F,bC:!F&&i>0,bD:!F&&ap.some(g=>g.via==='app'),tA:'Apontar área · '+o.id,tC:'Registrar carga · '+o.id,tD:'Descartar carga a pesar',ttA:'Apontar hectares e horas do turno na '+o.id,ttC:'Registrar uma carga que saiu do '+o.talhao,ttD:'Descartar carga registrada por engano na '+o.id,
+    ga:()=>abre(o,'area'),gc:()=>abre(o,'carga'),gd:()=>abre(o,'desc')}}; }});
+v.f_on=!!F; v.fa=!!F&&F.k==='area'; v.fc=!!F&&F.k==='carga'; v.fd=!!F&&F.k==='desc'; v.f_tt=F?((F.k==='area'?'Apontar área · ':(F.k==='carga'?'Registrar carga · ':'Descartar carga a pesar · '))+F.os+' · '+((c.ordens[F.os]||{{}}).talhao||'')):'';
+/* carência na O.S. do formulário (revisão A-14): registrar o que já foi colhido nunca é impedido, mas pede confirmação explícita */
+const oFc=F&&c.ordens[F.os]; const cbF=(F&&F.k!=='desc'&&oFc&&typeof carBloqColheita==='function')?carBloqColheita(c,oFc,'iniciar'):null;
+v.f_car=!!cbF; v.f_cart=cbF?((cbF.fim?'Carência até '+carAte(cbF.fim):'Carência sem dados')+': confirme que é colheita já feita (o lote fica fora da venda até a conferência).'):'';
+v.f_conf_on=String(!!f.conf); v.f_conf_st=mbPill(!!f.conf); v.f_conf_go=()=>self.setState({{f10:Object.assign({{}},self.state.f10||{{}},{{conf:!f.conf}}),m10e:''}});
+const apF=F&&F.k==='desc'?prAPesar(c,F.os).filter(g=>g.via==='app'):[];
+v.f_cgs=apF.map(g=>({{t:g.id+(g.est_cx?' · ~'+g.est_cx+' cx':'')+' · '+cenDdMm(g.dcol),on:String(f.cg===g.id),st:mbPill(f.cg===g.id),tt:'Descartar a '+g.id,go:()=>self.setState({{f10:Object.assign({{}},self.state.f10||{{}},{{cg:g.id}}),m10e:''}})}}));
+v.f_mot=f.mot||''; v.f_setmot=(e)=>self.setState({{f10:Object.assign({{}},self.state.f10||{{}},{{mot:e.target.value}}),m10e:''}});
 const fs=(k)=>(e)=>self.setState({{f10:Object.assign({{}},self.state.f10||{{}},{{[k]:e.target.value}}),m10e:''}});
 v.f_ha=f.ha||''; v.f_h=f.h||''; v.f_cx=f.cx||''; v.f_kg=f.kg||''; v.f_pct=f.pct||''; v.f_setha=fs('ha'); v.f_seth=fs('h'); v.f_setcx=fs('cx'); v.f_setkg=fs('kg'); v.f_setpct=fs('pct');
 v.f_eha=''; v.f_eha_has=false; v.f_eh=''; v.f_eh_has=false;
@@ -1005,14 +1021,17 @@ v.f_os2=[{{id:'',t:'Só este talhão'}}].concat(ords.filter(o=>!F||o.id!==F.os).
 v.f_mix=!!f.os2; v.f_err=!!s.m10e; v.f_errt=s.m10e||'';
 v.f_cancel=()=>self.setState({{m10:null,f10:{{}},m10e:''}});
 v.grava=()=>{{ if(!F) return; let r;
-  if(F.k==='area'){{ const ha=mbNum(f.ha), h=mbNum(f.h); if(!(ha>0)){{ self.setState({{m10e:'Informe os hectares colhidos (maior que 0).'}}); return; }} if(!(h>0)){{ self.setState({{m10e:'Informe as horas trabalhadas.'}}); return; }}
+  if(cbF&&!f.conf){{ self.setState({{m10e:'Carência: toque em "Colheita já feita" para registrar o que já foi colhido.'}}); return; }}
+  if(F.k==='desc'){{ if(!f.cg){{ self.setState({{m10e:'Toque na carga a descartar.'}}); return; }} if(!String(f.mot||'').trim()){{ self.setState({{m10e:'Informe o motivo do descarte.'}}); return; }}
+    r=cenMudar(null,cc=>prDescartarCarga(cc,f.cg,f.mot,cc.app.operador)); }}
+  else if(F.k==='area'){{ const ha=mbNum(f.ha), h=mbNum(f.h); if(!(ha>0)){{ self.setState({{m10e:'Informe os hectares colhidos (maior que 0).'}}); return; }} if(!(h>0)){{ self.setState({{m10e:'Informe as horas trabalhadas.'}}); return; }}
     r=cenMudar(null,cc=>{{ cc.app.nap=Math.max(cc.app.nap||0,F.n); const R=cenApontar(cc,{{os:F.os,d:hoje,ha,h,origem:'app',quem:cc.app.operador,chave:F.chave}});
       return {{msg:R.repetido?'Área já registrada ('+F.os+' · '+cenNum(ha,2)+' ha): nada somado de novo.':('Área apontada: '+cenNum(ha,2)+' ha em '+cenNum(h,1)+' h na '+F.os+(R.ap.sinc?'.':' · salva no aparelho, envia quando houver sinal.')+' A produção só muda com a carga pesada.')}}; }}); }}
   else {{ if(!f.veic){{ self.setState({{m10e:'Toque no veículo da carga.'}}); return; }} const mix=f.os2?[{{os:F.os,pct:mbNum(f.pct),modo:'estimada'}},{{os:f.os2,pct:100-mbNum(f.pct),modo:'estimada'}}]:null;
     if(f.os2&&!(mbNum(f.pct)>0&&mbNum(f.pct)<100)){{ self.setState({{m10e:'Informe a participação do talhão desta O.S. (entre 0 e 100 %).'}}); return; }}
     r=cenMudar(null,cc=>{{ cc.app.ncg=Math.max(cc.app.ncg||0,F.n); return prCarga(cc,{{os:F.os,mix,cx:mbNum(f.cx)||0,kg:mbNum(f.kg)||0,veic:f.veic,via:'app',quem:cc.app.operador,chave:F.chave,dcol:CEN_DIA_OP}}); }}); }}
   if(r.erro){{ self.setState({{m10e:r.erro}}); return; }} self.setState({{m10:null,f10:{{}},m10e:'',cenrev:Date.now(),g2toast:r.msg}}); }};
-v.p_grava=!!F&&r===0; v.p_gt=F?(F.k==='area'?'Gravar área':'Gravar carga'):''; v.p_carga=!F&&r===0&&ords.length>0; v.p_ct=ords.length?'Registrar carga · '+ords[0].id:''; v.p_cgo=()=>{{ if(ords[0]) abre(ords[0],'carga'); }};
+v.p_grava=!!F&&r===0; v.p_gt=F?(F.k==='area'?'Gravar área':(F.k==='carga'?'Gravar carga':'Descartar carga')):''; v.p_carga=!F&&r===0&&ords.length>0; v.p_ct=ords.length?'Registrar carga · '+ords[0].id:''; v.p_cgo=()=>{{ if(ords[0]) abre(ords[0],'carga'); }};
 v.p_volta=!F&&r===0&&!ords.length; v.p_prev=r===1;
 const ap=[].concat(...ords.map(o=>prAPesar(c,o.id)));
 if(r===1) DCH(v,'hdr','atrasado · prev. '+(s.np?'10:20':'09:10'),'red'); else DCH(v,'hdr',ords.length?(ords.length+(ords.length>1?' colheitas em execução':' colheita em execução')+(ap.length?' · '+ap.length+' a pesar':'')):'nenhuma colheita em execução',ords.length?'green':'gray');'''

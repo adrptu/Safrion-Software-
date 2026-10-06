@@ -358,7 +358,7 @@ function EXTRAVALS(self,v){
 const PR_GRIDS={g_rsv:1};
 const _g2rows0=g2rows; g2rows=function(self,sp){ return PR_GRIDS[sp.id]?sp.rows:_g2rows0(self,sp); };
 function PREVALS(self,v){ cenOuvir(self); const c=cenGet(); self._c=c;
-  self.g2pick=(gid,rid)=>{ if(gid==='g_rsv') self.setState({pr_sel:{g:gid,id:rid},pr_pan:{g:gid,id:rid},pr_form:null,pr_err:'',pr_cx:null}); };
+  self.g2pick=(gid,rid)=>{ if(gid==='g_rsv') self.setState({pr_sel:{g:gid,id:rid},pr_pan:{g:gid,id:rid},pr_form:null,pr_err:'',pr_cx:null,pr_ch:prChave('W-RS')}); };   /* chave do formulário aberto (colheita, revisão A-03) */
   GR('g_rsv').rows=Object.values(prP(c).pedidos).sort((a,b)=>a.id.localeCompare(b.id)).map(p=>prPedRow(c,p)); }
 const _EXV_VE=EXTRAVALS; EXTRAVALS=function(self,v){ _EXV_VE(self,v); const c=self._c||cenGet(); const P=prP(c); const pan=self.state.pr_pan;
   prPainel(self,v,(pan&&pan.g==='g_rsv'&&P.pedidos[pan.id])?prPanPed(self,c,P.pedidos[pan.id]):null); };

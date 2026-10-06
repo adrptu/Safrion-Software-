@@ -84,14 +84,24 @@ function prCultDaOS(c, o) { if (!o) return ''; const nv = o.osc && o.osc.novo; i
 function prFazDaOS(c, o) { const k = PRDC.cult[prCultDaOS(c, o)]; return (o && o.osc && o.osc.novo && o.osc.novo.faz) || (k && k.faz) || ''; }
 function prOsCult(c, cid) { return Object.keys(c.ordens || {}).map(k => c.ordens[k]).filter(o => prEhColheita(o) && o.etapa !== 'Canceladas' && prCultDaOS(c, o) === cid); }
 function prDdMm(iso) { const a = String(iso || '').split('-'); return a.length === 3 ? a[2] + '/' + a[1] : ''; }
-function prIsoDe(ddmm) { const m = /^(\d\d)\/(\d\d)$/.exec(String(ddmm || '')); return m ? prHoje().slice(0, 4) + '-' + m[2] + '-' + m[1] : ''; }
+/* dd/mm → ISO no ano de hoje; mais de 180 dias à frente é do ano anterior (30/12 lido em 02/01); 1 dia à frente continua futuro e é recusado */
+function prIsoDe(ddmm, hoje) { const m = /^(\d\d)\/(\d\d)$/.exec(String(ddmm || '').trim()); if (!m) return ''; const h = hoje || prHoje(); let y = Number(h.slice(0, 4));
+  if (y + '-' + m[2] + '-' + m[1] > prDiaMais(h, 180)) y -= 1; return y + '-' + m[2] + '-' + m[1]; }
+/* semana N sem ano (tipo "Colheita · semana 2"): o ano que põe a semana mais perto de hoje (S02 lida em 26/09/2026 = 2027-W02) */
+function prSemAno(n, hoje) { const h = hoje || prHoje(); const y = Number(h.slice(0, 4)); const t = Date.parse(h + 'T12:00:00Z');
+  return [y - 1, y, y + 1].map(a => a + '-W' + String(n).padStart(2, '0')).sort((a, b) => Math.abs(Date.parse(prSemIni(a) + 'T12:00:00Z') - t) - Math.abs(Date.parse(prSemIni(b) + 'T12:00:00Z') - t))[0]; }
+/* responsável da O.S. (ordem nova nasce com '—' até liberar): senão quem colhe (Sérgio, D-14) */
+function prResp(o) { return (o && o.resp && o.resp !== '—') ? o.resp : prQuem('colh'); }
+/* dia da colheita confirmado pela O.S.: apontamento somado (enviado, Provisório ou Conferido) na mesma data */
+function prApDia(o, dcol) { return !!dcol && (o.ap || []).some(a => a.d === prDdMm(dcol) && cenApSomado(a)); }
 /* lote de campo (R-06): O.S. + dia do apontamento da mesma data (o mesmo id do motor de carência, carLid); sem apontamento, vazio */
 function prLc(c, osId, dcol) { const o = (c.ordens || {})[osId]; if (!o || !dcol) return '';
   const a = (o.ap || []).find(x => x.d === prDdMm(dcol) && x.st !== 'Previsto' && x.st !== CEN_AP_DESC && x.st !== CEN_AP_DUP); if (!a) return '';
   if (typeof carLid === 'function') return carLid(osId, a.dia); const m = /^OS-(\d+)$/.exec(osId); return 'LC-' + (m ? m[1] : osId.replace(/[^A-Za-z0-9]/g, '')) + '-' + a.dia; }
 /* semana do passe: "Colheita · semana 39" no tipo; senão a janela da ordem nova; senão o 1º apontamento */
-function prSemDaOS(o) { const m = /semana (\d+)/.exec(String(o.tipo || '')); if (m) return prHoje().slice(0, 4) + '-W' + String(Number(m[1])).padStart(2, '0');
-  const j = /(\d\d)\/(\d\d)/.exec(String((o.osc && o.osc.novo && o.osc.novo.janela) || o.janela || '')); if (j) return prSem(prHoje().slice(0, 4) + '-' + j[2] + '-' + j[1]);
+function prSemDaOS(o) { const jn = o.osc && o.osc.novo && o.osc.novo.jan; if (/^\d{4}-\d\d-\d\d$/.test(String(jn || ''))) return prSem(jn);   /* ordem nova guarda a janela ISO (com ano) */
+  const m = /semana (\d+)/.exec(String(o.tipo || '')); if (m) return prSemAno(Number(m[1]));
+  const j = /(\d\d)\/(\d\d)/.exec(String((o.osc && o.osc.novo && o.osc.novo.janela) || o.janela || '')); if (j) return prSem(prIsoDe(j[1] + '/' + j[2]));
   const a = (o.ap || []).find(x => x.st !== 'Previsto'); return a ? prSem(prIsoDe(a.d)) : prSem(prHoje()); }
 
 /* ---------- cargas, produção e área colhida (R-02 a R-04) ---------- */
@@ -176,7 +186,9 @@ function prQualidade(c, L) {
       if (!o || PR_FEZ.indexOf(o.etapa) < 0) { if (!pior) pior = { q: 'Em inspeção', mot: 'Colheita sem ordem liberada (' + x.os + (o ? ' em ' + o.etapa : ' sem registro') + ')', dono: CARD.quem.ag }; return; }
       carTals(o.talhao).forEach(t => { const e = carEstado(c, t.tid, x.dcol, t.parc, x.dcol);
         if (e.k === 'curso') { const r = e.ativos[0]; pior = { q: 'Bloqueado', mot: 'Colhido em ' + prBr(x.dcol) + ' dentro da carência de ' + r.p + ' (' + r.os + ', aplicado em ' + carBr(r.d) + ', carência até ' + carAte(r.fim) + ')', dono: CARD.quem.ag, fim: r.fim }; }
-        else if (e.k === 'insuf' && !(pior && pior.q === 'Bloqueado')) { const p = e.pend[0]; pior = { q: 'Em inspeção', mot: 'Carência sem dados suficientes: ' + p.t, dono: p.q || CARD.quem.ag }; } }); }); }
+        else if (e.k === 'insuf' && !(pior && pior.q === 'Bloqueado')) { const p = e.pend[0]; pior = { q: 'Em inspeção', mot: 'Carência sem dados suficientes: ' + p.t, dono: p.q || CARD.quem.ag }; } });
+      /* R-12 (revisão A-01): a carência é lida no dia da colheita; dia sem apontamento somado na O.S. não é fato confirmado (data digitada ou padrão errada) */
+      if (!pior && !prApDia(o, x.dcol)) pior = { q: 'Em inspeção', mot: 'Colhido em ' + prBr(x.dcol) + ' sem apontamento de área da ' + x.os + ' nesse dia: confirme o dia da colheita ou aponte a área do dia', dono: prResp(o) }; }); }
   if (pior) return pior;
   if (L.q0 === 'Liberado') return { q: 'Liberado', mot: L.lib ? 'Liberado por ' + L.lib.quem + ' em ' + prBr(L.lib.d) : 'Íntegro no recebimento', dono: '' };
   return { q: 'Em inspeção', mot: 'Recebido ' + String(L.cond || '').toLowerCase() + ': a Qualidade confere e libera', dono: prQuem('qual') }; }
@@ -223,18 +235,24 @@ function prPodeEncerrar(c, id) { const o = (c.ordens || {})[id]; if (!o || !prEh
 function prMov(c, m) { const P = prP(c, 1); P.seq.mp = (P.seq.mp || 1000) + 1; m.id = 'MP-' + P.seq.mp; m.d = m.d || prHoje(); m.at = m.at || cenAgora(); P.movs.push(m); return m; }
 function prConflito(id, ja) { return new Error('Este registro (' + id + ') já foi gravado' + (ja ? ' como ' + ja : '') + ' com outro conteúdo: conflito, nada gravado.'); }
 function prLocalRec(faz, cultura) { const m = (PRDC.recLocal || {})[faz] || {}; return m[cultura] || m['*'] || ''; }
-function prNumOk(x) { return x !== '' && x !== null && x !== undefined && isFinite(Number(String(x).replace(',', '.'))); }
-function prNum(x) { return Number(String(x).replace(',', '.')); }
+/* número digitado (pt-BR): a mesma regra do g2num (vírgula decimal; "19.250" e "1.234.567" com ponto de milhar), sem aceitar letra */
+function prNum(x) { if (typeof x === 'number') return x; let t = String(x === null || x === undefined ? '' : x).replace(/\s/g, ''); if (!/^-?[\d.,]+$/.test(t)) return NaN;
+  if (t.indexOf(',') >= 0) t = t.replace(/\./g, '').replace(',', '.'); else if ((t.match(/\./g) || []).length > 1 || /^-?\d{1,3}(\.\d{3})+$/.test(t)) t = t.replace(/\./g, ''); return Number(t); }
+function prNumOk(x) { return x !== '' && x !== null && x !== undefined && isFinite(prNum(x)); }
+/* ticket da balança comparável: maiúsculas, sem espaço, hífen, ponto ou barra, sem o prefixo TK ("tk-4520", "TK 4520" e "4520" são o mesmo) */
+function prTk(x) { return String(x || '').toUpperCase().replace(/[\s\-_.\/]/g, '').replace(/^TK/, ''); }
+/* arredonda para baixo em d casas (sugestão que nunca passa do disponível) */
+function prPiso(x, d) { const k = 10n ** BigInt(6 - d); const m = prM(x); const q = m >= 0n ? m / k : -((-m + k - 1n) / k); return prN(q * k); }
 
 /* contagem de frutos (MB-07): grava a amostra; não publica (R-17) */
 function prContar(c, k) { const P = prP(c, 1); const kk = PRDC.cult[k.cult];
   if (!kk || !kk.semanal) throw new Error('Escolha um talhão de fruta em produção.');
-  const n = Number(k.plantas); const e = ['pintado', 'devez', 'verde'].map(x => Number(k[x] || 0)); const peso = String(k.peso === undefined ? '' : k.peso).replace(',', '.');
+  const n = Number(k.plantas); const e = ['pintado', 'devez', 'verde'].map(x => Number(k[x] || 0)); const peso = prNumOk(k.peso) ? String(prNum(k.peso)) : String(k.peso === undefined ? '' : k.peso);
   const imp = JSON.stringify([k.cult, n, e, peso, k.d || prHoje()]);
   if (k.chave) { const ja = P.contagens.find(x => x.chave === k.chave); if (ja) { if (ja.imp !== imp) throw prConflito(k.chave, ja.id); return { msg: 'Contagem ' + ja.id + ' já registrada: nada foi gravado de novo.', cnt: ja, repetido: true }; } }
   if (!(n > 0) || Math.floor(n) !== n) throw new Error('Conte ao menos uma planta.');
   if (e.some(x => !(x >= 0) || Math.floor(x) !== x)) throw new Error('Frutos por estádio: números inteiros, 0 ou mais.');
-  if (!prNumOk(peso) || !(Number(peso) > 0 && Number(peso) < 20)) throw new Error('Informe o peso médio do fruto da amostra em kg (ex.: 1,20).');
+  if (!prNumOk(peso) || !(prNum(peso) > 0 && prNum(peso) < 20)) throw new Error('Informe o peso médio do fruto da amostra em kg (ex.: 1,20).');
   P.seq.cnt = (P.seq.cnt || 0) + 1; const id = 'CNT-' + String(P.seq.cnt).padStart(4, '0'); const on = k.via === 'app' ? cenOnline(c) : true;
   const x = { id, cult: k.cult, tal: kk.local, d: k.d || prHoje(), at: cenAgora(), quem: k.quem || '', plantas: n, pintado: e[0], devez: e[1], verde: e[2], peso, chave: k.chave || id, imp, sinc: on, via: k.via || 'web' };
   P.contagens.push(x); if (!on) c.app.fila.push(id);
@@ -244,9 +262,9 @@ function prContar(c, k) { const P = prP(c, 1); const kk = PRDC.cult[k.cult];
 
 /* publicar previsão (Ana): congela a versão nova só das semanas que ainda não começaram (R-17) */
 function prPublicar(c, cid, quem, par) { const kk = PRDC.cult[cid]; if (!kk) throw new Error('Cultivo não encontrado.'); const P = prP(c, 1);
-  if (par) { const ph = Number(par.plantas_ha), pe = String(par.perda === undefined ? '' : par.perda).replace(',', '.');
+  if (par) { const ph = prNum(par.plantas_ha), pe = prNumOk(par.perda) ? String(prNum(par.perda)) : String(par.perda === undefined ? '' : par.perda);
     if (!(ph > 0 && ph < 10000) || Math.floor(ph) !== ph) throw new Error('Plantas vivas por hectare: número inteiro maior que zero.');
-    if (!prNumOk(pe) || Number(pe) < 0 || Number(pe) >= 1) throw new Error('Perda entre 0 e 100 %.'); par = { plantas_ha: ph, perda: pe }; }
+    if (!prNumOk(pe) || prNum(pe) < 0 || prNum(pe) >= 1) throw new Error('Perda entre 0 e 100 %.'); par = { plantas_ha: ph, perda: pe }; }
   const pb = prPublicavel(c, cid, par); if (!pb) throw new Error('Nada novo a publicar no ' + kk.local + ': a versão vigente já tem as semanas que ainda não começaram.');
   const vs = P.previsoes[cid] = P.previsoes[cid] || []; const v = { v: vs.length + 1, d: prHoje(), at: cenAgora(), por: quem || prQuem('ag'), base: pb.base, cnt: pb.cnt || '' };
   if (pb.safra !== undefined) v.safra = pb.safra; else { v.sem = pb.sem; v.plantas_ha = pb.par.plantas_ha; v.perda = pb.par.perda; }
@@ -269,10 +287,17 @@ function prCarga(c, k) { const P = prP(c, 1); const mix = (k.mix && k.mix.length
     + (on ? '' : ' Salvo no aparelho; envia quando houver sinal.'), g }; }
 /* origem da carga (R-06): O.S. de colheita Liberadas, Em execução ou Em conferência; mistura com participação % somando 100 */
 function prMixOrig(c, mix) { const tot = prSoma(mix.map(x => x.pct || 0)); if (prCmp(tot, 100) !== 0) throw new Error('A participação dos talhões tem de somar 100 % (está em ' + prFmtT(tot, 2) + ' %).');
-  return mix.map(x => { const o = (c.ordens || {})[x.os]; if (!o || !prEhColheita(o)) throw new Error('Origem sem O.S. de colheita (' + (x.os || 'vazia') + ').');
+  const out = mix.map(x => { const o = (c.ordens || {})[x.os]; if (!o || !prEhColheita(o)) throw new Error('Origem sem O.S. de colheita (' + (x.os || 'vazia') + ').');
     if (PR_FASES_COLH.indexOf(o.etapa) < 0) throw new Error(x.os + ' está em ' + o.etapa + ': a carga sai de O.S. de colheita liberada, em execução ou em conferência.');
     if (!(Number(x.pct) > 0)) throw new Error('Informe a participação de ' + o.talhao + '.');
-    return { os: x.os, cult: prCultDaOS(c, o), tal: o.talhao, pct: Number(x.pct), modo: x.modo || 'medida' }; }); }
+    return { os: x.os, cult: prCultDaOS(c, o), tal: o.talhao, pct: Number(x.pct), modo: x.modo || 'medida', cultura: (PRDC.cult[prCultDaOS(c, o)] || {}).cultura || '', faz: prFazDaOS(c, o) }; });
+  /* revisão A-08: uma carga é de um produto e de uma fazenda; mistura de culturas ou fazendas poria massa de uma cultura na produção da outra */
+  const d = out.find(x => x.cultura !== out[0].cultura || x.faz !== out[0].faz);
+  if (d) throw new Error('Mistura recusada: ' + d.tal + ' (' + d.os + ', ' + d.cultura + ', ' + d.faz + ') não é da mesma cultura e fazenda de ' + out[0].tal + ' (' + out[0].cultura + ', ' + out[0].faz + '). Registre uma carga por cultura.');
+  return out.map(x => ({ os: x.os, cult: x.cult, tal: x.tal, pct: x.pct, modo: x.modo })); }
+/* O.S. que podem dividir a carga com a primeira: colheita na fase de origem, mesma cultura e mesma fazenda (a mesma regra da recusa) */
+function prMixCompat(c, os1) { const o1 = (c.ordens || {})[os1]; if (!o1) return []; const cu = (PRDC.cult[prCultDaOS(c, o1)] || {}).cultura, fz = prFazDaOS(c, o1);
+  return Object.values(c.ordens || {}).filter(o => o.id !== os1 && prEhColheita(o) && PR_FASES_COLH.indexOf(o.etapa) >= 0 && (PRDC.cult[prCultDaOS(c, o)] || {}).cultura === cu && prFazDaOS(c, o) === fz).sort((a, b) => a.id.localeCompare(b.id)); }
 
 /* pesar e receber (CARGA): ticket, bruto e tara; descontos de grão; lote por produto + local + dia + origem (R-07, R-08, R-10, R-11) */
 const PR_CONDS = ['Íntegra', 'Com avaria', 'Fora do padrão'];
@@ -280,15 +305,15 @@ function prReceber(c, k) { const P = prP(c, 1); const g0 = k.carga ? P.cargas[k.
   if (k.carga && (!g0 || g0.sinc === false)) throw new Error('Carga ' + k.carga + ' não encontrada (no aparelho, sem sinal?).');
   const mix = g0 ? g0.origem.map(x => ({ os: x.os, pct: x.pct, modo: x.modo })) : ((k.mix && k.mix.length) ? k.mix : [{ os: k.os, pct: 100, modo: 'medida' }]);
   const osId = mix[0].os; const o = (c.ordens || {})[osId]; if (!o || !prEhColheita(o)) throw new Error('Escolha a O.S. de colheita de origem.');
-  const tk = String(k.ticket || '').trim(); const dcol = (g0 && g0.dcol) || k.dcol || prHoje();
-  const imp = JSON.stringify([mix.map(x => [x.os, Number(x.pct)]), tk, Number(k.bruto), Number(k.tara), k.u === undefined ? null : String(k.u), k.imp === undefined ? null : String(k.imp), Number(k.litros) || 0, Number(k.frutos) || 0, k.cond || '', k.local || '', dcol]);
+  const tk = String(k.ticket || '').trim(); const tkn = prTk(tk); const dcol = (g0 && g0.dcol) || k.dcol || prHoje();
+  const imp = JSON.stringify([mix.map(x => [x.os, Number(x.pct)]), tkn, prNum(k.bruto), prNum(k.tara), k.u === undefined ? null : String(k.u), k.imp === undefined ? null : String(k.imp), prNum(k.litros) || 0, prNum(k.frutos) || 0, k.cond || '', k.local || '', dcol]);
   if (k.chave) { const ja = Object.values(P.cargas).find(g => g.chaveRec === k.chave); if (ja) { if (ja.impRec !== imp) throw prConflito(k.chave, ja.id); return { msg: 'Pesagem já registrada (' + ja.id + ' · ticket ' + ja.ticket + '): nada foi somado de novo.', g: ja, repetido: true }; } }
   if (g0 && g0.st !== 'A pesar') throw new Error(g0.id + ' já está ' + g0.st.toLowerCase() + '.');
   const faz = prFazDaOS(c, o); const kk = PRDC.cult[prCultDaOS(c, o)] || {}; const cultura = kk.cultura || (g0 && g0.cultura); const u = prUn(cultura);
-  if (!tk) throw new Error('Informe o ticket da balança.');
-  const dupT = Object.values(P.cargas).find(g => g.st === 'Recebida' && g.faz === faz && g.ticket === tk);
+  if (!tkn) throw new Error('Informe o ticket da balança.');
+  const dupT = Object.values(P.cargas).find(g => g.st === 'Recebida' && g.faz === faz && prTk(g.ticket) === tkn);
   if (dupT) { if (dupT.impRec === imp) return { msg: 'Ticket ' + tk + ' já recebido na ' + dupT.id + ' com o mesmo conteúdo: é a mesma carga, nada foi somado de novo.', g: dupT, repetido: true };
-    throw new Error('Ticket ' + tk + ' já recebido na ' + dupT.id + ' (' + prFmtT(dupT.liq, 2) + ' kg líquidos) com outro conteúdo: conflito, nada gravado. Confira o ticket.'); }
+    throw new Error('Ticket ' + tk + ' já recebido na ' + dupT.id + (dupT.ticket !== tk ? ' (como ' + dupT.ticket + ')' : '') + ' (' + prFmtT(dupT.liq, 2) + ' kg líquidos) com outro conteúdo: conflito, nada gravado. Confira o ticket.'); }
   const orig = prMixOrig(c, mix);
   if (!prNumOk(k.bruto) || !(prNum(k.bruto) > 0)) throw new Error('Informe o peso bruto em kg.');
   if (!prNumOk(k.tara) || prNum(k.tara) < 0) throw new Error('Informe a tara em kg (0 ou mais).');
@@ -306,11 +331,13 @@ function prReceber(c, k) { const P = prP(c, 1); const g0 = k.carga ? P.cargas[k.
   const base = u.campo ? prNum(k.litros) : (u.base === 'frutos' ? prNum(k.frutos) : com);
   const pcts = orig.map(x => x.pct); const pLiq = prRateio(liq, pcts), pCom = prRateio(com, pcts), pBase = prRateio(base, pcts);
   const prod = u.campo ? u.proc : u.prod; const drec = prHoje(); const misto = orig.length > 1;
-  let L = misto ? null : Object.values(P.lotes).find(x => !x.misto && x.prod === prod && x.local === local && x.drec === drec && x.cond === k.cond && (x.origem || []).length && x.origem.every(y => y.os === osId && y.dcol === dcol));
+  const q0 = k.cond === 'Íntegra' ? 'Liberado' : 'Em inspeção';
+  /* revisão A-05: lote liberado depois pela Qualidade não recebe carga nova com avaria (ela nasceria apta sem conferência) */
+  let L = misto ? null : Object.values(P.lotes).find(x => !x.misto && x.prod === prod && x.local === local && x.drec === drec && x.cond === k.cond && x.q0 === q0 && !x.lib && (x.origem || []).length && x.origem.every(y => y.os === osId && y.dcol === dcol));
   const novo = !L;
   if (!L) { const w = String(prSemN(prSem(drec))).padStart(2, '0'); P.seq.lote[w] = (P.seq.lote[w] || 130) + 1; const id = 'L' + w + '-' + P.seq.lote[w];
     L = P.lotes[id] = { id, prod, cultura, classe: u.grao ? 'Padrão' : '', saf: (PRDC.safras[kk.saf] || {}).mf || '', faz, local, drec, dcol, validade: u.vida ? prDiaMais(dcol, u.vida) : null,
-      q0: k.cond === 'Íntegra' ? 'Liberado' : 'Em inspeção', cond: k.cond, misto, origem: [], cargas: [] }; }
+      q0, cond: k.cond, misto, origem: [], cargas: [] }; }
   const g = g0 || (P.seq.cg = (P.seq.cg || 2100) + 1, P.cargas['CG-' + P.seq.cg] = { id: 'CG-' + P.seq.cg, os: osId, dcol, via: 'web', sinc: true, chave: k.chave || ('W-CG-' + P.seq.cg), hora: cenAgora() });
   Object.assign(g, { ticket: tk, faz, cultura, os: osId, dcol, drec, bruto: prNum(k.bruto), tara: prNum(k.tara), liq, com, u: u.grao ? String(prNum(k.u)) : null, imp: g.imp,
     impG: u.grao ? String(prNum(k.imp)) : null, desc, litros: u.campo ? prNum(k.litros) : null, frutos: u.base === 'frutos' ? prNum(k.frutos) : null, cond: k.cond, local, st: 'Recebida', lote: L.id,
@@ -331,6 +358,14 @@ function prEstornar(c, id, motivo, quem) { const P = prP(c, 1); const g = P.carg
   prMov(c, { tipo: 'estorno', lote: L.id, kg: -kg, carga: id, quem: quem || prRec(g.faz), obs: mot });
   (L.origem || []).forEach(x => { if (x.carga === id) x.est = true; }); g.st = 'Estornada'; g.estorno = { motivo: mot, quem: quem || prRec(g.faz), d: prHoje(), at: cenAgora() }; g.ticketLivre = g.ticket;
   return { msg: id + ' estornada (' + mot + '): ' + prEstTxt(L.cultura, kg) + ' saem do ' + L.id + '. O ticket ' + g.ticket + ' fica livre para novo registro; o histórico continua.' }; }
+
+/* descartar carga A pesar (revisão A-06): registro do app em dobro ou carga que não saiu; nada pesado, nada a estornar; motivo e trilha ficam */
+function prDescartarCarga(c, id, motivo, quem) { const P = prP(c, 1); const g = P.cargas[id]; if (!g) throw new Error('Carga ' + id + ' não encontrada.');
+  if (g.st !== 'A pesar') throw new Error(id + ' está ' + String(g.st).toLowerCase() + ': só carga a pesar é descartada' + (g.st === 'Recebida' ? ' (carga recebida: estorne com motivo).' : '.'));
+  const mot = String(motivo || '').trim(); if (!mot) throw new Error('Informe o motivo do descarte.');
+  g.st = 'Descartada'; g.descarte = { motivo: mot, quem: quem || prRec(g.faz), d: prHoje(), at: cenAgora() };
+  if (c.app && Array.isArray(c.app.fila)) c.app.fila = c.app.fila.filter(x => x !== id);
+  return { msg: id + ' descartada (' + mot + '): a carga sai da fila de pesagem; nada entra na produção. O registro e o motivo ficam no histórico.' }; }
 
 /* liberar lote (Qualidade, R-13): reavalia carência e ordem; recusa com a pendência e o dono */
 function prLiberarLote(c, lid, quem) { const P = prP(c, 1); const L = P.lotes[lid]; if (!L) throw new Error('Lote não encontrado.'); const S = prSaldos(c, L);
@@ -366,4 +401,4 @@ function prCancelarReserva(c, id, motivo, quem) { const P = prP(c, 1); const r =
   prMov(c, { tipo: 'cancelamento de reserva', lote: r.lote, kg: -r.kg, fis: false, reserva: id, pedido: r.pedido, quem: r.canc.quem, obs: mot });
   const L = P.lotes[r.lote]; return { msg: id + ' cancelada (' + mot + '): ' + prEstTxt(L.cultura, r.kg) + ' voltam ao disponível do ' + r.lote + '.' }; }
 /* gancho de teste/inspeção (o script da tela roda isolado) */
-try { window.__pr = { prResultado, prSaldos, prQualidade, prOfertaSem, prOfertaSafra, prReceber, prReservar, prEstornar, prLiberarLote, prPublicar, prContar, prCarga, prPodeEncerrar }; } catch (e) {}
+try { window.__pr = { prResultado, prSaldos, prQualidade, prOfertaSem, prOfertaSafra, prReceber, prReservar, prEstornar, prLiberarLote, prPublicar, prContar, prCarga, prPodeEncerrar, prDescartarCarga }; } catch (e) {}

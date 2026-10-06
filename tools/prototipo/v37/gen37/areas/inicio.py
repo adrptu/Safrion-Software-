@@ -637,7 +637,8 @@ function mapOrdsCen(){ let c=null; try{ c=cenGet(); }catch(e){ c=null; } MAPC=c;
       if(!cust.length) x.selos=x.selos.filter(s=>!/^Sobras a receber/i.test(s[0])); }
     let bq='';
     if(co&&co.etapa==='Em conferência'){ try{ bq=cenPodeEncerrar(c,o.id)||''; }catch(e){ bq=''; } x.selos=x.selos.filter(s=>!/^Aguardando sinal do app/.test(s[0]));
-      if(/sinal/.test(bq)) x.selos=x.selos.filter(s=>!/^Sobras a receber/i.test(s[0])).concat([['Aguardando sinal do app','yellow']]);
+      if(/^Carga a pesar/.test(bq)){ if(!x.selos.some(s=>s[0]==='Carga a pesar')) x.selos=x.selos.concat([['Carga a pesar','yellow']]); }   /* colheita (R-18): não é sobra em custódia */
+      else if(/sinal/.test(bq)) x.selos=x.selos.filter(s=>!/^Sobras a receber/i.test(s[0])).concat([['Aguardando sinal do app','yellow']]);
       else if(bq&&!x.selos.some(s=>/^Sobras a receber/i.test(s[0]))) x.selos=x.selos.concat([['Sobras a receber','yellow']]); }
     if(x.fase!=='A liberar') x.selos=x.selos.filter(s=>!/^Aguardando(?! sinal do app)/.test(s[0]));
     if(x.fase==='Encerradas'||x.fase==='Canceladas') x.pz='encerrada';

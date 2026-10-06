@@ -224,3 +224,132 @@ function OSX(c, id, tal, etapa, ap, tipo, ins) { c.ordens[id] = { id, tipo: tipo
   ok('U15c contagem sem sinal fica no aparelho (fila) e não entra no rascunho do Pivô 6', !n.erro && n.cnt.sinc === false && c.app.fila.indexOf(n.cnt.id) >= 0 && prContagem(c, 'lg06') === null, [n.erro, c.app.fila]);
   MUD(c, x => cenSinal(x, true)); MUD(c, x => cenSinal(x, true)); const r = MUD(c, x => prContar(x, { cult: 'lg06', plantas: 20, pintado: 9, devez: 10, verde: 11, peso: '1,10', quem: 'Marcos', via: 'app', chave: 'APP-CNT-OFF' }));
   ok('U15d ao voltar o sinal a contagem entra uma vez; reenviar a mesma chave não cria outra', prContagem(c, 'lg06') && prContagem(c, 'lg06').id === n.cnt.id && r.repetido && c.producao.contagens.length === 2, [prContagem(c, 'lg06'), r]); }
+
+// =====================================================================================================================
+// Revisão adversarial (Codex, 06/10/2026) · uma regressão por achado (A-01..A-19) e pelos mutantes que sobreviviam
+// =====================================================================================================================
+const TEB = (c, dap) => { c.ordens['OS-0999'] = { id: 'OS-0999', tipo: 'Pulverização · antracnose', talhao: 'Pivô 19', area: 75.11, etapa: 'Encerradas', versao: 'v1', realizado: 75.11, saldo: 0, resp: 'Wesley',
+  ins: [{ p: 'Tebuconazol 200 EC', dose: 1, un: 'L', tot: 75.11 }], req: null, selos: [], ap: [{ d: dap, dia: 1, ha: 75.11, st: 'Conferido', sinc: true, origem: 'web' }], reservado: false, osc: {} }; };
+// ---- A-01 (S1 cond.) · o dia da colheita decide a carência: dia sem apontamento somado na O.S. deixa o lote Em inspeção ----
+{ const c = NOVO(); TEB(c, '19/09');
+  const r = MUD(c, x => prReceber(x, { os: 'OS-0505', ticket: 'TK-D1', bruto: 19200, tara: 7200, cond: 'Íntegra', dcol: '2026-09-26' })); const S = r.L && prSaldos(c, r.L);
+  ok('R01a carga "colhida" em 26/09 sem apontamento da OS-0505 nesse dia: lote Em inspeção, dono Sérgio (não Liberado)', !r.erro && S.q === 'Em inspeção' && S.dono === 'Sérgio' && /sem apontamento de área da OS-0505/.test(S.mot), [r.erro, S]);
+  const rs = MUD(c, x => prReservar(x, { pedido: 'PV-036', lote: r.L.id, kg: 10000, chave: 'W-R01' })); const lb = MUD(c, x => prLiberarLote(x, r.L.id));
+  ok('R01b esse lote não é reservado e a Qualidade não o libera enquanto o dia não for confirmado (quem resolve: Sérgio)', /não está apto/.test(rs.erro || '') && /Liberar recusado/.test(lb.erro || '') && /Sérgio/.test(lb.erro), [rs.erro, lb.erro]);
+  const c2 = NOVO(); TEB(c2, '19/09'); MUD(c2, x => cenApontar(x, { os: 'OS-0505', d: '25/09', ha: 10, h: 4, origem: 'app', quem: 'Marcos', chave: 'APC-R01-25' }));
+  const r2 = MUD(c2, x => prReceber(x, { os: 'OS-0505', ticket: 'TK-D2', bruto: 19200, tara: 7200, cond: 'Íntegra', dcol: '2026-09-25' }));
+  ok('R01c o dia real (25/09, apontado) cai na carência do Tebuconazol: Bloqueado', !r2.erro && prSaldos(c2, r2.L).q === 'Bloqueado', [r2.erro, r2.L && prSaldos(c2, r2.L)]);
+  MUD(c, x => cenApontar(x, { os: 'OS-0505', d: '26/09', ha: 10, h: 4, origem: 'app', quem: 'Marcos', chave: 'APC-R01-26' }));
+  ok('R01d apontada a área de 26/09 (fato que chega depois), o lote de 26/09 (fora da carência) passa a Liberado sem regravar', prSaldos(c, c.producao.lotes[r.L.id]).q === 'Liberado', prSaldos(c, c.producao.lotes[r.L.id]));
+  const c0 = NOVO(); ok('R01e (M17) o lote de campo só nasce de apontamento somado: 24/09 Previsto (semente) não gera LC-; 22/09 Provisório gera', c0.ordens['OS-0505'].ap.some(x => x.d === '24/09' && x.st === 'Previsto') && prLc(c0, 'OS-0505', '2026-09-24') === '' && /^LC-/.test(prLc(c0, 'OS-0505', '2026-09-22')),
+     [prLc(c0, 'OS-0505', '2026-09-24'), prLc(c0, 'OS-0505', '2026-09-22')]); }
+
+// ---- A-02 (S2) · número pt-BR com ponto de milhar ----
+ok('R02a prNum: "19.250" = 19.250; "1.234.567,8"; "1,20" = 1,2; "1.20" = 1,2; "12abc" e "1,2,3" recusados', prNum('19.250') === 19250 && prNum('1.234.567,8') === 1234567.8 && prNum('1,20') === 1.2 && prNum('1.20') === 1.2 && isNaN(prNum('12abc')) && isNaN(prNum('1,2,3')) && !prNumOk('abc') && prNumOk('7.200'),
+   [prNum('19.250'), prNum('1.234.567,8'), prNum('1,20'), prNum('1.20'), prNum('12abc')]);
+{ const c = NOVO(); const r = MUD(c, x => prReceber(x, { carga: 'CG-2108', ticket: 'TK-4520', bruto: '19.250', tara: '7.200', cond: 'Íntegra', chave: 'W-REC-CG-2108' }));
+  ok('R02b pesar com "19.250" e "7.200" (como no ticket): 12.050 kg líquidos, não 12,05', !r.erro && r.g.liq === 12050 && prFis(c, r.L.id) === 12050, [r.erro, r.g && r.g.liq]); }
+
+// ---- A-03 (S2) · reservar, cancelar e reservar de novo (chave nova do formulário); mesma chave e outro conteúdo = conflito (M34) ----
+{ const c = NOVO(); MUD(c, x => prReceber(x, { carga: 'CG-2108', ticket: 'TK-4520', bruto: 19250, tara: 7200, cond: 'Íntegra' }));
+  const a = MUD(c, x => prReservar(x, { pedido: 'PV-036', lote: 'L39-133', kg: 10000, chave: 'W-RS-k1' }));
+  const x8 = MUD(c, x => prReservar(x, { pedido: 'PV-036', lote: 'L39-133', kg: 8000, chave: 'W-RS-k1' }));
+  ok('R03a (M34) mesma chave com outra quantidade = conflito, nada deduzido', !a.erro && /conflito/.test(x8.erro || '') && prResPed(c, 'PV-036').length === 1, [a.erro, x8]);
+  MUD(c, x => prCancelarReserva(x, a.rs.id, 'cliente adiou'));
+  const b = MUD(c, x => prReservar(x, { pedido: 'PV-036', lote: 'L39-133', kg: 10000, chave: 'W-RS-k2' }));
+  ok('R03b depois de cancelar, a reserva com a chave do novo formulário fica ativa (PV-036 coberto)', !b.erro && !b.repetido && prResPed(c, 'PV-036').length === 1 && prSitPed(c, c.producao.pedidos['PV-036']).t === 'Coberto', [b.erro, b.repetido, prResPed(c, 'PV-036').length]); }
+
+// ---- A-04 (S2) · O.S. de colheita com carga não é cancelada "sem execução" ----
+{ const c = NOVO(); OSX(c, 'OS-0950', 'Pivô 19', 'Liberadas', [], 'Colheita · semana 40'); c.ordens['OS-0950'].saldo = 75.11; c.ordens['OS-0950'].area = 75.11;
+  const r = MUD(c, x => prReceber(x, { os: 'OS-0950', ticket: 'TK-L1', bruto: 19200, tara: 7200, cond: 'Íntegra', dcol: '2026-09-26' }));
+  const k = MUD(c, x => osc_cancelar(x, 'OS-0950', 'engano', ['', 'Cancelada.', '']));
+  ok('R04a cancelar sem execução a OS-0950 com carga recebida é recusado; a ordem continua Liberadas e a produção fica', !r.erro && /Cancelar recusado/.test(k.erro || '') && new RegExp(r.g.id).test(k.erro) && c.ordens['OS-0950'].etapa === 'Liberadas' && prResultado(c, 'lg19').kg === 48420, [r.erro, k.erro, prResultado(c, 'lg19').kg]);
+  MUD(c, x => prEstornar(x, r.g.id, 'ordem errada')); const g = MUD(c, x => prCarga(x, { os: 'OS-0950', cx: 100, veic: 'Carreta 01', chave: 'APP-R04', via: 'app', quem: 'Marcos' }));
+  const k2 = MUD(c, x => osc_cancelar(x, 'OS-0950', 'engano', ['', 'Cancelada.', '']));
+  MUD(c, x => prDescartarCarga(x, g.g.id, 'registrada por engano', 'Marcos')); const k3 = MUD(c, x => osc_cancelar(x, 'OS-0950', 'engano', ['', 'Cancelada.', '']));
+  ok('R04b com carga a pesar também recusa; estornada a recebida e descartada a a pesar, o cancelamento passa', /Cancelar recusado/.test(k2.erro || '') && !k3.erro && c.ordens['OS-0950'].etapa === 'Canceladas', [k2.erro, k3.erro]); }
+
+// ---- A-05 (S2) · carga com avaria não entra apta no lote que a Qualidade liberou; condições diferentes não se juntam (M22) ----
+{ const c = NOVO(); const a = MUD(c, x => prReceber(x, { os: 'OS-0505', ticket: 'TK-A1', bruto: 12000, tara: 7200, cond: 'Com avaria', dcol: '2026-09-22' }));
+  MUD(c, x => prLiberarLote(x, a.L.id, 'Qualidade (Marta)'));
+  const b = MUD(c, x => prReceber(x, { os: 'OS-0505', ticket: 'TK-A2', bruto: 15000, tara: 7200, cond: 'Com avaria', dcol: '2026-09-22' }));
+  ok('R05a 2ª carga com avaria depois da liberação: lote novo Em inspeção; o liberado continua com 4.800 kg aptos', !b.erro && b.L.id !== a.L.id && prSaldos(c, b.L).q === 'Em inspeção' && prSaldos(c, c.producao.lotes[a.L.id]).apto === 4800, [b.erro, b.L && b.L.id, a.L.id]);
+  const d = MUD(c, x => prReceber(x, { os: 'OS-0505', ticket: 'TK-A3', bruto: 9000, tara: 7200, cond: 'Fora do padrão', dcol: '2026-09-22' }));
+  const e = MUD(c, x => prReceber(x, { os: 'OS-0505', ticket: 'TK-A4', bruto: 9000, tara: 7200, cond: 'Com avaria', dcol: '2026-09-22' }));
+  ok('R05b (M22) "Fora do padrão" não entra no lote "Com avaria" do mesmo dia; outra avaria junta-se ao lote em inspeção', !d.erro && d.L.id !== b.L.id && !e.erro && e.L.id === b.L.id, [d.L && d.L.id, e.L && e.L.id, b.L.id]); }
+
+// ---- A-06 (S2) · descartar carga A pesar (registro em dobro) destrava o encerramento ----
+{ const c = NOVO(); MUD(c, x => prReceber(x, { carga: 'CG-2108', ticket: 'TK-4520', bruto: 19250, tara: 7200, cond: 'Íntegra' }));
+  const g = MUD(c, x => prCarga(x, { os: 'OS-0505', cx: 300, veic: 'Carreta 02', chave: 'APP-R06', via: 'app', quem: 'Marcos' }));
+  c.ordens['OS-0505'].etapa = 'Em conferência'; c.ordens['OS-0505'].saldo = 0;
+  const e0 = MUD(c, x => prDescartarCarga(x, g.g.id, '')); const e1 = MUD(c, x => prDescartarCarga(x, 'CG-2108', 'teste'));
+  ok('R06a descartar exige motivo e só vale para carga a pesar (recebida: estorne)', /motivo/.test(e0.erro || '') && /só carga a pesar/.test(e1.erro || '') && /estorne/.test(e1.erro), [e0.erro, e1.erro]);
+  const enc0 = MUD(c, x => osc_encerrar(x, 'OS-0505')); const ds = MUD(c, x => prDescartarCarga(x, g.g.id, 'registrada duas vezes no app', 'Lúcia'));
+  const enc = MUD(c, x => osc_encerrar(x, 'OS-0505'));
+  ok('R06b a carga fantasma impede encerrar; descartada (motivo e trilha), a O.S. encerra e a produção não muda', /Encerrar bloqueado/.test(enc0.erro || '') && !ds.erro && c.producao.cargas[g.g.id].st === 'Descartada' && c.producao.cargas[g.g.id].descarte.motivo === 'registrada duas vezes no app' && !enc.erro && prResultado(c, 'lg19').kg === 48470,
+     [enc0.erro, ds.erro, enc.erro]); }
+
+// ---- A-07 (S2) · ticket com outra grafia não duplica ----
+{ const c = NOVO(); MUD(c, x => prReceber(x, { carga: 'CG-2108', ticket: 'TK-4520', bruto: 19250, tara: 7200, cond: 'Íntegra' }));
+  const a = MUD(c, x => prReceber(x, { os: 'OS-0505', ticket: 'tk-4520', bruto: 24000, tara: 7200, cond: 'Íntegra', dcol: '2026-09-22' }));
+  const b = MUD(c, x => prReceber(x, { os: 'OS-0505', ticket: 'TK 4520', bruto: 19250, tara: 7200, cond: 'Íntegra', dcol: '2026-09-22' }));
+  ok('R07 "tk-4520" (outro peso) = conflito; "TK 4520" (mesmo conteúdo) = a mesma carga; produção do Pivô 19 fica 48.470 kg', /conflito/.test(a.erro || '') && /CG-2108/.test(a.erro) && b.repetido && prResultado(c, 'lg19').kg === 48470 && prTk('tk 45-20') === '4520',
+     [a.erro, b, prResultado(c, 'lg19').kg]); }
+
+// ---- A-08 (S2) · mistura só da mesma cultura e fazenda ----
+{ const c = NOVO(); const soja = Object.keys(PRDC.cult).find(k => PRDC.cult[k].cultura === 'Soja'); OSX(c, 'OS-0960', PRDC.cult[soja].local, 'Em execução', [['25/09', 10]], 'Colheita de grãos'); PRDC.osCult['OS-0960'] = soja;
+  const r = MUD(c, x => prReceber(x, { mix: [{ os: 'OS-0505', pct: 60 }, { os: 'OS-0960', pct: 40 }], ticket: 'TK-MX', bruto: 17200, tara: 7200, cond: 'Íntegra', dcol: '2026-09-22' }));
+  const g = MUD(c, x => prCarga(x, { os: 'OS-0505', mix: [{ os: 'OS-0505', pct: 60 }, { os: 'OS-0960', pct: 40 }], cx: 10, veic: 'Carreta 01', chave: 'APP-MX', via: 'app' }));
+  ok('R08 mamão (Lagoa Grande) + soja (' + PRDC.cult[soja].faz + ') na mesma carga é recusado na web e no app; a soja não ganha kg; a lista do 2º talhão não oferece a O.S. de soja',
+     /Mistura recusada/.test(r.erro || '') && /Mistura recusada/.test(g.erro || '') && prResultado(c, soja).kg === 0 && prMixCompat(c, 'OS-0505').every(o => o.id !== 'OS-0960'), [r.erro, g.erro]);
+  delete PRDC.osCult['OS-0960']; }
+
+// ---- A-11 (S3) · carga sem sinal: quem resolve é quem tem o aparelho, não o recebimento ----
+{ const c = NOVO(); MUD(c, x => prReceber(x, { carga: 'CG-2108', ticket: 'TK-4520', bruto: 19250, tara: 7200, cond: 'Íntegra' }));
+  MUD(c, x => cenSinal(x, false)); MUD(c, x => prCarga(x, { os: 'OS-0505', cx: 200, veic: 'Carreta 02', chave: 'APP-R11', via: 'app', quem: 'Marcos' }));
+  c.ordens['OS-0505'].etapa = 'Em conferência'; c.ordens['OS-0505'].saldo = 0; const m = cenPodeEncerrar(c, 'OS-0505');
+  const b = osEncBloq({ encM: m, dono: 'Lúcia', resp: 'Sérgio', r: null });
+  ok('R11 encerrar com carga no aparelho: "Sérgio reconecta o app", sem link de pesar e sem "Lúcia pesa"', /^Carga no aparelho/.test(m) && /Sérgio reconecta o app/.test(b.q) && !b.h && !/Lúcia/.test(b.q), [m, b]); }
+
+// ---- A-12 (S3) · sugestão de reserva arredondada para baixo nunca passa do disponível ----
+ok('R12 sugestão em sc para baixo: 28.836,65 kg → 480,61 sc (≤ disponível); 59,99 kg → 0,999 sc', prPiso(prEstQ('Soja', 28836.65), 3) === 480.61 && prCmp(prEstBase('Soja', prPiso(prEstQ('Soja', 28836.65), 3)), 28836.65) <= 0 && prPiso(prEstQ('Soja', 59.99), 3) === 0.999 && prPiso(-1.0005, 3) === -1.001,
+   [prPiso(prEstQ('Soja', 28836.65), 3), prPiso(prEstQ('Soja', 59.99), 3)]);
+
+// ---- A-13 (S3) · "Liberar lote" só quando a pendência é da Qualidade ----
+{ const c = NOVO(); const a = MUD(c, x => prReceber(x, { os: 'OS-0505', ticket: 'TK-Q1', bruto: 19200, tara: 7200, cond: 'Íntegra', dcol: '2026-09-26' }));
+  const n1 = prLoteProx(c, a.L, prSaldos(c, a.L)); const b = MUD(c, x => prReceber(x, { os: 'OS-0505', ticket: 'TK-Q2', bruto: 9200, tara: 7200, cond: 'Com avaria', dcol: '2026-09-22' })); const n2 = prLoteProx(c, b.L, prSaldos(c, b.L));
+  ok('R13 pendência do Sérgio (dia sem apontamento): "Sérgio resolve", sem ação; avaria: "Liberar lote · Qualidade (Marta)"', !n1.a && /^Sérgio resolve/.test(n1.t) && n2.a === 'liberar' && /Qualidade \(Marta\)/.test(n2.t), [n1, n2]); }
+
+// ---- A-19 (S4) · ano da semana e do dd/mm ----
+ok('R19 "semana 2" lida em 26/09/2026 = 2027-W02; "semana 39" = 2026-W39; janela ISO da ordem nova vale; 30/12 em 02/01/2027 = 2026-12-30; 27/09 em 26/09 continua futuro',
+   prSemAno(2) === '2027-W02' && prSemAno(39) === '2026-W39' && prSemDaOS({ tipo: 'Colheita · semana 2' }) === '2027-W02' && prSemDaOS({ tipo: 'Colheita · semana 39' }) === '2026-W39' && prSemDaOS({ tipo: 'Colheita · semana 39', osc: { novo: { jan: '2027-10-04' } } }) === '2027-W40' && prIsoDe('30/12', '2027-01-02') === '2026-12-30' && prIsoDe('27/09') === '2026-09-27',
+   [prSemAno(2), prSemAno(39), prSemDaOS({ tipo: 'x', osc: { novo: { jan: '2027-10-04' } } }), prIsoDe('30/12', '2027-01-02')]);
+
+// ---- mutantes que sobreviviam (revisão: M02, M09, M11, M12, M23, M24, M26, M32, M36, M39, M40) ----
+{ const c = NOVO(); OSX(c, 'OS-0961', 'Pivô 24', 'A liberar', [], 'Colheita · semana 40');
+  const m02 = MUD(c, x => prReceber(x, { os: 'OS-0961', ticket: 'TK-M02', bruto: 9200, tara: 7200, cond: 'Íntegra', dcol: '2026-09-22' }));
+  ok('M02 carga de O.S. de colheita em A liberar é recusada (R-06)', /está em A liberar/.test(m02.erro || ''), m02);
+  const m23 = MUD(c, x => prReceber(x, { os: 'OS-0505', ticket: 'TK-M23', bruto: 9200, tara: 7200, cond: 'Íntegra', dcol: '2026-09-27' }));
+  const m24 = MUD(c, x => prReceber(x, { os: 'OS-0505', ticket: 'TK-M24', bruto: 9200, tara: -1, cond: 'Íntegra', dcol: '2026-09-22' }));
+  ok('M23 colheita depois de hoje é recusada; M24 tara negativa é recusada', /depois de hoje/.test(m23.erro || '') && /tara/.test(m24.erro || ''), [m23.erro, m24.erro]);
+  MUD(c, x => prReceber(x, { carga: 'CG-2108', ticket: 'TK-4520', bruto: 19250, tara: 7200, cond: 'Íntegra', chave: 'W-M39a' }));
+  const m39 = MUD(c, x => prReceber(x, { carga: 'CG-2108', ticket: 'TK-4521', bruto: 19250, tara: 7200, cond: 'Íntegra', chave: 'W-M39b' }));
+  ok('M39 pesar de novo uma carga já recebida é recusado', /já está recebida/.test(m39.erro || ''), m39);
+  OSX(c, 'OS-0931', 'T1-A', 'Em execução', [['25/09', 20]], 'Colheita de grãos');
+  const m40 = MUD(c, x => prReceber(x, { os: 'OS-0931', ticket: 'TK-M40', bruto: 45000, tara: 15000, u: '41', imp: '1', cond: 'Íntegra', dcol: '2026-09-25' }));
+  ok('M40 umidade acima de 40 % é recusada', /umidade/.test(m40.erro || ''), m40);
+  const m36a = MUD(c, x => prPublicar(x, 'lg19', 'Ana (agrônoma)', { plantas_ha: 1700, perda: 1.5 })); const m36b = MUD(c, x => prPublicar(x, 'lg19', 'Ana (agrônoma)', { plantas_ha: 1700, perda: -0.1 }));
+  ok('M36 perda fora de 0 a 100 % é recusada ao publicar', /Perda entre/.test(m36a.erro || '') && /Perda entre/.test(m36b.erro || ''), [m36a.erro, m36b.erro]);
+  ok('M26 a falta desconta o expedido: PV-037 (30.490 kg expedidos) sem falta', prFalta(c, c.producao.pedidos['PV-037']) === 0, prFalta(c, c.producao.pedidos['PV-037']));
+  MUD(c, x => prEstornar(x, 'CG-2108', 'teste'));
+  const lg = c.producao.lotes[c.producao.cargas['CG-2108'].lote] || { origem: [] }; const og = lg.origem.find(x => x.carga === 'CG-2108') || {};
+  ok('M32 estorno marca a origem do lote (sai do lote de campo e da qualidade)', og.est === true && prLcs(c, lg).length === 0, lg.origem); }
+{ const c = NOVO(); const sem = c.producao.pedidos['PV-038'].sem; const f0 = prOfertaSem(c, MAM, sem);
+  MUD(c, x => prReceber(x, { carga: 'CG-2108', ticket: 'TK-4520', bruto: 19250, tara: 7200, cond: 'Íntegra' })); MUD(c, x => prReservar(x, { pedido: 'PV-038', lote: 'L39-133', kg: 3000, chave: 'W-M09' }));
+  const f1 = prOfertaSem(c, MAM, sem);
+  ok('M09 reserva de lote para venda futura sai da oferta comprometida: oferta livre ' + sem + ' sobe 3.000 kg', prSub(f1.livre, f0.livre) === 3000 && f1.resKg === 3000, [f0.livre, f1.livre]);
+  const v1 = c.producao.previsoes.lg19[0]; c.producao.previsoes.lg19.push(Object.assign({}, v1, { v: 2, d: prSemIni('2026-W39'), sem: { '2026-W39': 1 } }));
+  ok('M11 versão publicada no 1º dia da semana não é a referência do passe (só a publicada antes)', prVersaoRef(c, 'lg19', '2026-W39').v === 1, prVersaoRef(c, 'lg19', '2026-W39'));
+  const so = Object.keys(PRDC.cult).find(k => PRDC.cult[k].cultura === 'Soja' && !PRDC.cult[k].semanal); const kk = PRDC.cult[so];
+  OSX(c, 'OS-0962', kk.local, 'Em execução', [['20/09', prSoma([kk.area, 10])]], 'Colheita de grãos'); PRDC.osCult['OS-0962'] = so;
+  ok('M12 anual: área colhida limitada à área do cultivo (' + kk.area + ' ha), mesmo com apontamento maior', prResultado(c, so).area === kk.area, prResultado(c, so).area); delete PRDC.osCult['OS-0962']; }
