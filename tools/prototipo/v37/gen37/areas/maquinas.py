@@ -40,11 +40,20 @@ LNK=f'border: 0; background: transparent; padding: 4px 2px; font-family: inherit
 INP=f'font-family: inherit; font-size: 13.5px; padding: 7px 9px; border-radius: 8px; border: 1px solid {LINE}; box-sizing: border-box; background: #fff; color: {INK};'
 
 CSS=('.ma-vis-m{display:none}'
-     '@media (max-width:640px){.ma-vis{display:none!important}.ma-vis-m{display:flex!important}.ma-cards{display:grid!important;grid-template-columns:1fr 1fr!important}'
+     '.ma-vc-s{display:none}'
+     # 390 px (AC-PCM-22): cartões numa faixa que rola de lado, filtros numa linha, "Ver como" curto e botões do cabeçalho menores: ≥ 5 linhas da grade acima da dobra
+     '@media (max-width:640px){.ma-vis{display:none!important}.ma-vis-m{display:flex!important}'
+     '.ma-cards{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto;gap:8px!important;order:9}.ma-cards .ma-card{flex:0 0 auto!important;min-width:132px;padding:6px 10px!important}.ma-sem{order:9}'
+     '.ma-top{gap:6px!important}.ma-top button{padding:4px 9px!important;font-size:12px!important}.ma-top .ma-lbl{font-size:0!important;gap:0!important}'
+     '.g2caixa div[role=group]{flex-wrap:nowrap!important;overflow-x:auto}.g2caixa div[role=group]>button{flex:0 0 auto}.g2rola [role=row][data-rid]>[role=cell]{padding-top:6px!important;padding-bottom:6px!important}'
+     '.ma-gat [role=row][data-rid]>[role=cell] .g2pw>*+*{display:none}.ma-gat [role=row][data-rid]>[role=cell]{min-height:46px;box-sizing:border-box}'   # no celular a linha do ativo mostra o essencial de cada coluna; o resto fica no detalhe
+     '.ma-cards .ma-card>span:last-child{display:none}.ma-cards .ma-card>span:nth-child(2){font-size:18px!important}'
+     '.ma-flt{flex-wrap:nowrap!important;overflow-x:auto;padding-bottom:2px}.ma-flt>*{flex:0 0 auto}'
+     '.ma-vc-l{display:none}.ma-vc-s{display:inline}.ma-hb{padding:7px 12px!important;font-size:13px!important}'
      '.ma-pan{width:100%!important;max-width:100%!important;left:0!important}.ma-hide-m{display:none!important}.ma-flt{flex-wrap:wrap}}'
      '.ma-pan{position:fixed;top:0;right:0;bottom:0;z-index:60;width:620px;max-width:100%;background:#fff;box-shadow:-12px 0 40px -12px rgba(21,32,26,.35);'
      'display:flex;flex-direction:column;box-sizing:border-box;outline:none}'
-     '.ma-pan-c{flex:1 1 auto;overflow-y:auto;padding:18px 22px;display:flex;flex-direction:column;gap:12px;min-height:0}'
+     '.ma-pan-c{flex:1 1 0!important;overflow-y:auto;padding:18px 22px;display:flex;flex-direction:column;gap:12px;min-height:0!important}'   # a primária do rodapé fica à vista (AC-PCM-22)
      '.ma-pan-f{flex:0 0 auto;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 22px 14px;border-top:1px solid #E4E9E5;background:#fff}'
      '@media (min-width:1024px){[data-root]:has(.ma-pan.ma-nm) main[data-scroll]{padding-right:652px}}'
      '.ma-bl{border:1px solid #E4E9E5;border-radius:12px;background:#fff}.ma-bl>button.ma-blh{display:flex;align-items:center;gap:8px;width:100%;border:0;background:transparent;'
@@ -108,7 +117,9 @@ function ma_volta(self){ const k=self.state.pg&&self.state.pg.k; self.setState({
 /* comando: aplica, guarda o comprovante no painel e a "Próxima" (só navega); a chave do registro é renovada depois de cada comando gravado */
 function ma_cmd(self,fn,depois){ const r=manMudar(self,fn); if(!r.erro&&!r.nada) self.setState({pchave:manChave()}); if(!r.erro&&!r.aviso&&!r.avisoTol&&!r.avisoConf&&!r.avisoLeit&&!r.rep&&depois) depois(r); return r; }
 function ma_rec(self,r,prox){ if(r&&!r.erro&&r.msg) self.setState({rec:{msg:r.msg,prox:prox||null},paviso:null}); }
-function ma_proxOm(c,pf,id){ const o=ma_ordFila(c).find(x=>x.id!==id&&ma_espera(c,x,pf)); return o?{t:'Próxima: '+o.id+' ›',k:'om',id:o.id}:null; }
+/* "Próxima": no lote recém-gerado, a próxima dele ainda a liberar (Abrir as 3 › …); fora do lote, a próxima ordem que espera o papel */
+function ma_proxOm(c,pf,id,lote){ if(lote&&lote.indexOf(id)>=0){ const n=lote.find(x=>x!==id&&c.oms[x]&&c.oms[x].etapa==='A liberar'); if(n) return {t:'Próxima: '+n+' ›',k:'om',id:n}; }
+  const o=ma_ordFila(c).find(x=>x.id!==id&&ma_espera(c,x,pf)); return o?{t:'Próxima: '+o.id+' ›',k:'om',id:o.id}:null; }
 /* ---------- linhas das grades (a linha identifica, o painel resolve: nenhum botão de comando na linha; o ID é link) ---------- */
 function ma_selosAtv(c,a){ const s=[]; if(a.cond==='Bloqueado') s.push(ma_ch('Ativo bloqueado','red')); if(a.suspeita) s.push(ma_ch('Leitura a confirmar','yellow'));
   else if(manAntiga(c,a)) s.push(ma_ch('Leitura de '+manBr(a.leit.data),'yellow'));
@@ -134,6 +145,8 @@ function ma_linhasSemOrdem(self,c,st){ const rows=[]; const hz=st.prazo==='venc'
          prox:[{k:'txt',t:op.prim?op.prim.t:'—'}].concat(q.sug!=='Apto'?[{k:'br',t:''},ma_ch('Sugere '+q.sug,q.sug==='Bloqueado'?'red':'yellow')]:[])}}); });
   rows.sort((x,y)=>x.v.prazo-y.v.prazo); return rows; }
 function ma_pendTxt(c,o){ const s=manSelos(c,o); if(!s.length) return null; const p=s[0]; return {t:p.t+(p.dono?' · '+p.dono:'')+(p.prazo?' · '+p.prazo:''),c:p.c,n:s.length-1}; }
+/* filtro "Com conflito" em Ordens (F25/F26): conflito com a produção calculado sobre AL e registro do app a resolver */
+function ma_temConf(c,o){ return !!(((o.etapa==='A liberar'||o.etapa==='Liberadas')&&manConflito(c,o)&&!o.conflitoAceito)||o.conflitoApp); }
 function ma_linhaOm(c,o){ const a=c.ativos[o.aid]; const p=ma_pendTxt(c,o); const fin=o.etapa==='Encerradas'; const custo=fin?manCustoFinal(c,o):manCusto(c,o,'est');
   const tt=o.tipo==='Preventiva'?(o.serv+' · Preventiva · '+o.pid+' v'+o.ver):(o.tipo==='Corretiva'?((o.comp?o.comp:'Corretiva')+' · '+o.crit):'Pendência · '+o.serv);
   const ex=manExecSug(o); const real=o.exec&&o.exec.horas!==undefined?(' · '+manN(o.exec.horas,1)+' h real'):'';
@@ -194,7 +207,7 @@ function PREVALS(self,v){ manOuvir(self); const c=manGet(); const st=self.state;
   const os=Object.values(c.oms).filter(o=>o.etapa!=='Canceladas');
   const fim=(o)=>o.etapa==='Encerradas'; const dom=manAdd(c.hoje,7-new Date(manT(c.hoje)).getUTCDay());
   let oF=os; if(st.fase) oF=oF.filter(o=>o.etapa===st.fase);
-  if(st.rot==='voce') oF=oF.filter(o=>ma_espera(c,o,pf)); else if(st.rot==='semana') oF=oF.filter(o=>!fim(o)&&o.janIso&&o.janIso<=dom);
+  if(st.rot==='voce') oF=oF.filter(o=>ma_espera(c,o,pf)); else if(st.rot==='semana') oF=oF.filter(o=>!fim(o)&&o.janIso&&o.janIso<=dom); else if(st.rot==='conf') oF=oF.filter(o=>ma_temConf(c,o));
   if(st.card==='criticas') oF=oF.filter(o=>!fim(o)&&o.crit==='Alta'); else if(st.card==='sobras') oF=oF.filter(o=>(o.pecas||[]).some(p=>p.sob>0)); else if(st.card==='peca') oF=oF.filter(o=>manFalta(c,o).length);
   const oR=oF.map(o=>ma_linhaOm(c,o)).sort((a,b)=>String(a.v.ord).localeCompare(String(b.v.ord)));
   ma_G('g_om').rows=oR; self.__om=oR;
@@ -273,7 +286,8 @@ function EXTRAVALS(self,v){ const c=manGet(); const st=self.state; const pf=g2pe
     card('sobras','Sobras a receber',os.filter(o=>(o.pecas||[]).some(p=>p.sob>0)).length,'KPI-SUP-06 · ponte até o 1b',st.card==='sobras'),card('peca','Espera por peça',ab.filter(o=>manFalta(c,o).length).length,'tempo médio: não calculável até o 1c',st.card==='peca')];
   v.fchips=[{t:'Todas',n:String(os.length),on:String(!st.fase),go:()=>self.setState({fase:''}),st:ma_pill(!st.fase)}].concat(MAN_FASES.map(f=>({t:f,n:String(os.filter(o=>o.etapa===f).length),on:String(st.fase===f),st:ma_pill(st.fase===f),go:()=>self.setState({fase:st.fase===f?'':f})})));
   const nVoce=os.filter(o=>ma_espera(c,o,pf)).length; const dom=manAdd(c.hoje,7-new Date(manT(c.hoje)).getUTCDay());
-  v.rotinas=[{t:'Aguardam você · '+nVoce,on:String(st.rot==='voce'),st:ma_pill(st.rot==='voce'),go:()=>self.setState({rot:st.rot==='voce'?'':'voce'})},{t:'Esta semana',on:String(st.rot==='semana'),st:ma_pill(st.rot==='semana'),go:()=>self.setState({rot:st.rot==='semana'?'':'semana'})}];
+  v.rotinas=[{t:'Aguardam você · '+nVoce,on:String(st.rot==='voce'),st:ma_pill(st.rot==='voce'),go:()=>self.setState({rot:st.rot==='voce'?'':'voce'})},{t:'Esta semana',on:String(st.rot==='semana'),st:ma_pill(st.rot==='semana'),go:()=>self.setState({rot:st.rot==='semana'?'':'semana'})},
+    {t:'Com conflito · '+os.filter(o=>ma_temConf(c,o)).length,on:String(st.rot==='conf'),st:ma_pill(st.rot==='conf'),go:()=>self.setState({rot:st.rot==='conf'?'':'conf'})}];
   v.om_lista=(st.omodo||'lista')==='lista'; v.om_kanban=st.omodo==='kanban';
   v.om_modos=[['lista','Lista'],['kanban','Kanban']].map(([k,t])=>({t,on:String((st.omodo||'lista')===k),st:ma_pill((st.omodo||'lista')===k),go:()=>self.setState({omodo:k})}));
   v.semana=st.rot==='semana'; const dias={}; os.filter(o=>manAberta(o)&&o.janIso&&o.janIso<=dom).forEach(o=>{ const d=o.janIso<c.hoje?'vencidas':o.janIso; (dias[d]=dias[d]||[]).push(o); });
@@ -394,12 +408,12 @@ function ma_panV(self,v,c,pf){ const st=self.state; const pan=st.pan;
   v.pan_secs=hideP?[]:S; }
 /* ---------- painel da OM: o único detalhe da ordem (web e app) ---------- */
 function ma_omPrim(self,c,o,pf,f){ const a=c.ativos[o.aid]; const P={}; const S=[];
-  const run=(fn,prox)=>ma_cmd(self,fn,(r)=>ma_rec(self,r,prox===undefined?ma_proxOm(manGet(),g2perfil(),o.id):prox));
+  const run=(fn,prox)=>ma_cmd(self,fn,(r)=>ma_rec(self,r,prox===undefined?ma_proxOm(manGet(),g2perfil(),o.id,self.state.gerados):prox));
   if(o.etapa==='A liberar'){ const fl=manFalta(c,o); const cf=manConflito(c,o);
     if(fl.length){ if(!o.sc) return {P:ma_btn('Solicitar compra (simulado · Compras recebe no 1c)',()=>run(c2=>manSolicitar(c2,o.id,g2perfil()),null),manPode(c,pf,'ponte'),true),S};
       return {P:ma_btn('Registrar recebimento (simulado · papel do Almoxarifado)',()=>run(c2=>manReceber(c2,o.id,g2perfil()),null),manPode(c,pf,'ponte'),true),S}; }
     const ex=f.exe!==undefined?f.exe:manExecSug(o); const tp=f.tempo!==undefined?f.tempo:(Number(o.tempo)>0?String(o.tempo).replace('.',','):'');
-    const lib=(forcar)=>{ const r=ma_cmd(self,c2=>manLiberar(c2,o.id,forcar,g2perfil(),{executante:ex,tempo:tp}),(r2)=>ma_rec(self,r2,ma_proxOm(manGet(),g2perfil(),o.id)));
+    const lib=(forcar)=>{ const r=ma_cmd(self,c2=>manLiberar(c2,o.id,forcar,g2perfil(),{executante:ex,tempo:tp}),(r2)=>ma_rec(self,r2,ma_proxOm(manGet(),g2perfil(),o.id,self.state.gerados)));
       if(r.aviso) self.setState({paviso:{t:r.msg,ok:{t:'Liberar mesmo assim',fn:()=>lib(true)},no:'Voltar'}}); };
     const falta=!ex?'Falta: executante':(!(manNum(tp)>0)?'Falta: tempo previsto (h)':''); const pod=manPode(c,pf,'liberar');
     if(cf){ const pl=manProxLivre(c,o); const tl=manTolLim(c,o); const dentro=pl&&(!tl||(!tl.venc&&pl<=tl.dl));
@@ -891,7 +905,7 @@ def _btns(lst):
 
 def _cabecalho():
     vc=(f'<span role="group" aria-label="Ver como (simulação)" style="display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap;">'
-        f'<span style="font-size: 12px; font-weight: 700; color: {MUTED};">Ver como (simulação)</span>'
+        f'<span class="ma-vc-l" style="font-size: 12px; font-weight: 700; color: {MUTED};">Ver como (simulação)</span><span class="ma-vc-s" style="font-size: 12px; font-weight: 700; color: {MUTED};">Ver como</span>'
         + FOR('vc','p',f'<button type="button" aria-pressed="{H("p.on")}" title="{H("p.tit")}" onClick="{H("p.go")}" style="{H("p.st")}">{H("p.t")}</button>',3)
         + IF('vc_fora',f'<span style="font-size: 12px; color: {MUTED};">{H("vc_fora_t")}</span>') + '</span>')
     mais=(f'<span style="position: relative; display: inline-flex;"><button type="button" aria-label="Mais ações" title="Mais ações" aria-expanded="{H("mais_open")}" onClick="{H("mais_tog")}" '
@@ -905,8 +919,8 @@ def _cabecalho():
     return f'<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">{vc}<span style="flex-grow: 1;"></span>{mais}</div>'
 
 def _prim_cab():
-    return (IF('hs_tem',f'<button type="button" onClick="{H("hs_fn")}" style="{SEC}">{H("hs_t")}</button>')
-            + IF('hp_tem',f'<button type="button" disabled="{H("hp_dis")}" title="{H("hp_why")}" aria-describedby="ma-hp-why" onClick="{H("hp_fn")}" style="{H("hp_st")}">{H("hp_t")}</button>'
+    return (IF('hs_tem',f'<button type="button" class="ma-hb" onClick="{H("hs_fn")}" style="{SEC}">{H("hs_t")}</button>')
+            + IF('hp_tem',f'<button type="button" class="ma-hb" disabled="{H("hp_dis")}" title="{H("hp_why")}" aria-describedby="ma-hp-why" onClick="{H("hp_fn")}" style="{H("hp_st")}">{H("hp_t")}</button>'
                  + IF('hp_dis',f'<span id="ma-hp-why" style="font-size: 12px; font-weight: 700; color: {MUTED}; max-width: 160px;">{H("hp_why")}</span>')))
 
 def _visoes():
@@ -933,12 +947,12 @@ def _visoes():
                   + FOR('fchips','fc',f'<button type="button" aria-pressed="{H("fc.on")}" onClick="{H("fc.go")}" style="{H("fc.st")}">{H("fc.t")} <span style="opacity: .75;">{H("fc.n")}</span></button>',6) + '</div>',
                   _chips('rotinas','Rotina'),'<span style="flex-grow: 1;"></span>',_chips('om_modos','Visão das ordens'))
             + semana + IF('om_lista',g_om,True) + IF('om_kanban',_kanban()))
-    ativos=(f'<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;"><label style="display: inline-flex; align-items: center; gap: 6px; {LBL}">Período'
+    ativos=(f'<div class="ma-top" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;"><label class="ma-lbl" style="display: inline-flex; align-items: center; gap: 6px; {LBL}">Período'
             f'<select aria-label="Período" value="{H("per_v")}" onChange="{H("per_set")}" style="{INP}"><option value="mes">Mês atual</option><option value="30d">30 d</option><option value="12m">12 m</option></select></label>'
             f'<span style="flex-grow: 1;"></span>{_chips("at_modos","Modo")}</div>'
             + _card_html('c_at')
-            + IF('at_ativos',flt(_sel('f_grupo','f_setgrupo','f_grupos','Grupo'),_sel('f_pend','f_setpend','f_pends','Pendência'))+g_at,True) + IF('at_abast',g_ab))
-    planos=(IF('tem_sem',f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 12px; border: 1px dashed {LINE}; border-radius: 12px;">'
+            + IF('at_ativos',flt(_sel('f_grupo','f_setgrupo','f_grupos','Grupo'),_sel('f_pend','f_setpend','f_pends','Pendência'))+f'<div class="ma-gat">{g_at}</div>',True) + IF('at_abast',g_ab))
+    planos=(IF('tem_sem',f'<div class="ma-sem" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 12px; border: 1px dashed {LINE}; border-radius: 12px;">'
                f'<span style="font-size: 12.5px; font-weight: 800;">{H("sem_n")}</span>'
                + FOR('sem','a',f'<button type="button" onClick="{H("a.go")}" aria-label="{H("a.lab")}" title="{H("a.lab")}" style="{_MINI}">{H("a.t")} · Criar plano</button>',4) + '</div>')
             + flt(_sel('f_grupo','f_setgrupo','f_grupos','Grupo')) + g_pl)

@@ -30,7 +30,7 @@ def abre(pg,w=1440,h=900,e=1,t=False,rec=None,espera=.6):
     if rec is not None:
         c.goto(f'http://127.0.0.1:{p}/Main.dc.html',.2)
         c.js("localStorage.removeItem('safrion.menuRecolhido')" if rec=='' else f"localStorage.setItem('safrion.menuRecolhido','{rec}')")
-    c.goto(f'http://127.0.0.1:{p}/{pg}.dc.html',espera)
+    c.goto(f'http://127.0.0.1:{p}/'+(pg if '.dc.html' in pg else pg+'.dc.html'),espera)   # pg pode trazer a âncora (ex.: MA.dc.html#vis=ativos)
 def shot(nome): c.shot(os.path.join(PROBE,f'comp_{"anterior_" if os.environ.get("RENDER_DIR") else ""}{nome}.png'))
 def centro(sel):
     return c.js(f"(()=>{{const e={sel}; if(!e) return null; e.scrollIntoView({{block:'center',inline:'nearest'}}); const r=e.getBoundingClientRect(); return [r.left+r.width/2,r.top+r.height/2];}})()")
@@ -236,10 +236,10 @@ try:
           const vaza=[...r.querySelectorAll('[role=cell],[role=columnheader]')].filter(x=>getComputedStyle(x).position==='sticky').flatMap(c=>{const cr=c.getBoundingClientRect(); return [...c.querySelectorAll('*')].filter(e=>e.getClientRects().length&&e.getBoundingClientRect().right>cr.right+1).map(e=>n(e.innerText).slice(0,20));});
           return {caixa:r.clientWidth, c0:Math.round(st.getBoundingClientRect().width), lim:r.hasAttribute('data-c0'), total:row.querySelectorAll('[role=cell]').length, vistas:[...cols].sort((a,b)=>a-b), ruins, vaza:vaza.slice(0,3)};})()"""
         res={}
-        for pg in ('SAF','CMP','CD-06','SU-01','MA-01'):
-            abre(pg,360,800,3,True,rec=''); res[pg]=c.js(TAB); shot(f'{pg}_360x800_tabela')
+        for pg in ('SAF','CMP','CD-06','SU-01','MA.dc.html#vis=ativos'):   # PCM simplificado (S1): MA-01 → MA#vis=ativos (a mesma grade de ativos)
+            nm=pg.split('.')[0]; abre(pg,360,800,3,True,rec=''); res[nm]=c.js(TAB); shot(f'{nm}_360x800_tabela')
         abre('SAF',1440,900,rec=''); d1440=c.js("(()=>{const r=document.querySelector('main .g2rola'); return [r.hasAttribute('data-c0'), getComputedStyle(r.querySelector('[role=table]')).gridTemplateColumns.split(' ').length];})()")
-        chk('26 tabela no celular (SAF, CMP, CD-06, SU-01, MA-01 em 360×800) · 1ª coluna limitada, todas as colunas aparecem ao rolar, todo controle da 1ª linha e do cabeçalho fica inteiro à vista com o foco, nada vaza da coluna presa; 1440 px sem limite',
+        chk('26 tabela no celular (SAF, CMP, CD-06, SU-01, MA#vis=ativos em 360×800) · 1ª coluna limitada, todas as colunas aparecem ao rolar, todo controle da 1ª linha e do cabeçalho fica inteiro à vista com o foco, nada vaza da coluna presa; 1440 px sem limite',
             all(v['lim'] and v['c0']<=v['caixa']*0.62 and v['vistas']==list(range(v['total'])) and not v['ruins'] and not v['vaza'] for v in res.values()) and d1440[0] is False, [res,d1440])
         # 27 · menu com a escolha "aberto" guardada ('0', gravada no computador): no estreito toda tela começa recolhida e com o título
         #      livre; em 1440 fica aberto ao lado. No estreito, aberto pelo botão, Tab depois do último item fecha o menu e o foco segue

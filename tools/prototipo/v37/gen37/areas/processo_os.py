@@ -270,8 +270,8 @@ function osMerge(b,co,c){ if(!co) return b;
 /* S3 · F107/F108: ordem que depende de um ativo da Manutenção (bloq.aid) lê a condição única do cenário; bloqueado → impedimento com o dono e o
    link para a OM que trata (MA#om=); apto (CMD-19) → o impedimento sai e a ordem volta à reprogramação do PCP (impedimento derivado: PCMS-A05, Bloco 2) */
 function osManCond(o,b,c){ if(!b||!b.bloq||!b.bloq.aid) return; const a=((c&&c.man&&c.man.ativos)||{})[b.bloq.aid]; if(!a) return;
-  if(a.cond==='Bloqueado'){ const om=a.condInfo&&a.condInfo.om; o.bloq=Object.assign({},b.bloq,{t:String(b.bloq.t).replace(/\(OM-\d+\)/,'('+(om||'sem ordem que trate')+')'),
-      h:'MA.dc.html#'+(om?'om='+om:'ativo='+a.id),hl:om?('Abrir '+om+' na Manutenção'):('Abrir '+a.nome+' na Manutenção')}); return; }
+  if(a.cond==='Bloqueado'){ const om=a.condInfo&&a.condInfo.om; o.bloq=Object.assign({},b.bloq,{t:String(b.bloq.t).replace(/\(OM-\d+\)/,'('+(om||'sem ordem que trate')+')')},
+      b.bloq.h?{}:{h:'MA.dc.html#'+(om?'om='+om:'ativo='+a.id),hl:om?('Acompanhar '+om):('Abrir '+a.nome+' na Manutenção')}); return; }   /* o link próprio do bloqueio (ex.: ordem completa) fica */
   o.bloq=null; o.selos=(o.selos||[]).filter(s=>!/bloquead|Falta máquina/i.test(s.t));
   const h=(a.condHist||[]).slice(-1)[0]||{}; o.cond=a.nome+' '+a.cond.toLowerCase()+' desde '+String(h.em||'').split('-').reverse().slice(0,2).join('/')+(h.om?' ('+h.om+')':'')+' · o PCP reprograma a ordem com o ativo.'; o.dono='PCP'; o.prazo='reprogramar'; }
 function osCondGen(o){ const pend=(o.ap||[]).filter(a=>a.sinc===false).length;

@@ -22,10 +22,11 @@ try:
     t.chk('Lucas (safrista) com NR-31 vencida aparece "Não alocável em O.S." com o motivo e a vigência do contrato',
           'Não alocável em O.S.' in l and 'NR-31 vencida em 15/08/2026' in l and 'Safrista' in l and 'até 31/07/2027' in l, l)
     t.mainsel('cal'); a=nomes(); t.clk('A resolver'); b=nomes(); t.mainsel(''); b2=nomes(); t.clk('Todas'); c=conta()
-    t.chk('filtros do bloco: Função Caldeiros → Paula e Nilton; com A resolver → nenhum caldeiro; Todas → 10', a==['Paula','Nilton'] and b==[] and c=='10/10', [a,b,c])
+    # PCM simplificado (S1): Otávio, responsável de manutenção, entra no cadastro (Ver como e matriz papel × comando) · 10 → 11 pessoas
+    t.chk('filtros do bloco: Função Caldeiros → Paula e Nilton; com A resolver → nenhum caldeiro; Todas → 11', a==['Paula','Nilton'] and b==[] and c=='11/11', [a,b,c])
     t.clk('A resolver'); a=nomes(); ch=J("(()=>{const b=[...document.querySelectorAll('main .cadx-qf button')].find(b=>b.innerText.trim().startsWith('A resolver')); return !!b&&b.getAttribute('aria-pressed')==='true';})()"); t.clk('Limpar filtros'); c=conta()
-    t.chk('filtro rápido "A resolver" (no bloco) mostra quem precisa de ação (Marcos a renovar, Lucas, Beto) e "Limpar filtros" volta às 10',
-          a==['Marcos','Lucas','Beto'] and b2==['Marcos','Lucas','Beto'] and ch and c=='10/10', [a,b2,ch,c])
+    t.chk('filtro rápido "A resolver" (no bloco) mostra quem precisa de ação (Marcos a renovar, Lucas, Beto) e "Limpar filtros" volta às 11',
+          a==['Marcos','Lucas','Beto'] and b2==['Marcos','Lucas','Beto'] and ch and c=='11/11', [a,b2,ch,c])
     t.openrow(0,'Lucas'); L=t.labels()
     t.chk('formulário: Nome → Equipe → Habilidades → validade da habilitação exigida → vínculo e vigência → calendário → custo com encargos; sem "Função"',
           L==['Nome','Equipe','Habilidades','Validade da NR-31','Vínculo','Admissão','Disponível até','Calendário de trabalho','Custo-hora com encargos','Acesso ao app','Situação'], L)
