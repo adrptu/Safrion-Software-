@@ -51,6 +51,7 @@ from ui37 import mobile37, HEIGHTS37, selo, etapa, ETAPA_COR
 import dados as D
 import dados2 as D2
 import cenario
+import dados_manutencao as DM   # regras da manutenção sobre o cenário único (PCM S4: MB-01, MB-04, MB-09, MB-09det)
 
 H=lambda s: '{{'+s+'}}'
 def IF(h,body): return f'<sc-if value="{H(h)}" hint-placeholder-val="{H("false")}">{body}</sc-if>'
@@ -225,13 +226,19 @@ function mbPrim(c, fila){ const t = mbTurno(c); if (t) return { k: 'fechar', o: 
   for (const k of ['confirmar', 'iniciar', 'retirar', 'devolver']) { const o = fila.find(x => mbPasso(c, x).k === k); if (o) { const p = mbPasso(c, o); return { k, o, lab: p.t + ' · ' + o.id, href: p.href || '' }; } }
   return { k: 'none', o: null, lab: 'Ver minhas ordens' }; }
 function mbDesc(c, k){
+  if (k.indexOf('MAN|') === 0) { const q = manAppFila(c).find(x => 'MAN|' + x.chave === k); return q ? q.desc : 'Registro da manutenção'; }
   if (k.indexOf('AP|') === 0) { const [, id, dia] = k.split('|'); const o = c.ordens[id]; const a = o && (o.ap || []).find(x => String(x.dia) === dia);
     return 'Apontamento ' + id + ' · dia ' + dia + (a ? ' · ' + cenNum(a.ha, 1) + ' ha' + (a.h ? ' em ' + cenNum(a.h, 1) + ' h' : '') + (a.conf ? ' · consumo em conferência' : '') : ''); }
   const oc = (c.ocorr || []).find(x => x.id === k); if (oc) return 'Ocorrência ' + oc.id + ' · ' + oc.os + ' · ' + oc.tipo;
   const m = (c.movs || []).find(x => x.id === k); if (m) return m.tipo === 'recebimento' ? 'Recebimento confirmado · ' + m.req + ' · ' + m.os : m.tipo + ' · ' + (m.os || '');
   return k; }
 // Sinal: usa cenSinal (envia a fila uma vez só) e guarda o recibo do envio; o movimento de consumo segue o apontamento enviado.
-function mbSinal(c, on){ const fila = (c.app.fila || []).slice(); const itens = fila.map(k => mbDesc(c, k)); const r = cenSinal(c, on);
+function mbSinal(c, on){ const fila = (c.app.fila || []).slice(); const itens = fila.map(k => mbDesc(c, k));
+  // manutenção (PCM S4): a fila do aparelho vai uma vez só; OM mudada no escritório vira conflito para o Otávio (nada aplicado em silêncio)
+  const mm = (on && manAppFila(c).length) ? (c.app.online = true, manAppSinal(c)) : null; const r = cenSinal(c, on);
+  if (mm) { const pt = []; if (mm.n) pt.push(mm.n + (mm.n > 1 ? ' registros da manutenção enviados' : ' registro da manutenção enviado'));
+    if (mm.conf.length) pt.push(mm.conf.length + (mm.conf.length > 1 ? ' conflitos a resolver' : ' conflito a resolver') + ' · Otávio (a ordem mudou no escritório; nada foi aplicado em silêncio)');
+    if (pt.length) r.msg = pt.join(' · ') + (/^Sinal de volta\. Nada pendente\./.test(r.msg) ? '.' : ' · ' + r.msg); }
   if (on && fila.length) { (c.movs || []).forEach(m => { if (m.origem === 'app' && m.tipo === 'consumo' && m.sinc === false) m.sinc = true; });
     c.app.recibos = c.app.recibos || []; const id = 'REC-' + (7742 + c.app.recibos.length); c.app.recibos.push({ id, at: cenAgora(), n: fila.length, itens });
     r.msg = r.msg.replace(/\.$/, '') + ' · recibo ' + id + ' · cada registro entrou uma vez.'; }
@@ -262,6 +269,28 @@ def sigbar(envios=True):
             f'<button type="button" aria-pressed="{H("sg_off")}" onClick="{H("sg_sem")}" title="Simular aparelho sem sinal: registros ficam no aparelho" style="{H("sg_st0")}">Sem sinal</button></span>'
             f'<span aria-live="polite" style="{H("sg_tst")}">{H("sg_t")}</span></div>'
             + row2 + '</div>')
+def vercomo():
+    """Ver como (simulação) do app: Marcos · Zé em c.app.usuario (PCM S4); não é login."""
+    return (f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;"><span style="font-size: 12px; font-weight: 600; color: {MUTED};">Ver como (simulação)</span>'
+            f'<span role="group" aria-label="Ver como (simulação)" style="display: inline-flex; padding: 2px; border-radius: 999px; background: {GRAYS}; gap: 2px;">'
+            f'<sc-for list="{H("vc_us")}" as="u" hint-placeholder-count="2"><button type="button" aria-pressed="{H("u.on")}" onClick="{H("u.fn")}" title="{H("u.tt")}" style="{H("u.st")}">{H("u.t")}</button></sc-for></span></div>')
+def pills(lst,label,count=3,a='o'):
+    """Lista curta em pílulas (um toque), com aria-pressed."""
+    return (f'<div role="group" aria-label="{esc(label)}" style="display: flex; flex-wrap: wrap; gap: 6px;"><sc-for list="{H(lst)}" as="{a}" hint-placeholder-count="{count}">'
+            f'<button type="button" aria-pressed="{H(a+".on")}" onClick="{H(a+".fn")}" title="{H(a+".tt")}" style="{H(a+".st")}">{H(a+".t")}</button></sc-for></div>')
+def lab(t): return f'<span style="font-size: 12px; font-weight: 600; color: {MUTED};">{esc(t)}</span>'
+def omcards(lst,a='m',count=1):
+    """Cartões das OMs na Minha fila do mecânico: etapa + passo, tarefas e o próximo passo com verbo (PCM S4)."""
+    return (f'<sc-for list="{H(lst)}" as="{a}" hint-placeholder-count="{count}"><div style="{CARD_ST}">'
+            f'<div style="display: flex; align-items: center; gap: 8px;"><span style="{H(a+".dot")}"></span><div style="font-size: 14.5px; font-weight: 700; flex-grow: 1; min-width: 0;"><b>{H(a+".id")}</b> · {H(a+".tit")}</div></div>'
+            f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.45;">{H(a+".loc")}</div>'
+            f'<div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;"><span style="{H(a+".e_st")}"><span style="{H(a+".e_dot")}"></span>{H(a+".e_t")}</span>'
+            f'<span style="{H(a+".p_st")}"><span style="{H(a+".p_dot")}"></span>{H(a+".p_t")}</span></div>'
+            f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.45;">{H(a+".real")}</div>'
+            f'<div style="display: flex; flex-wrap: wrap; gap: 8px;">'
+            + IF(a+'.isLnk',f'<a href="{H(a+".href")}" onClick="{H(a+".sel")}" title="{H(a+".nx_tt")}" style="{_NXST} text-decoration: none;">{H(a+".nx_t")}</a>')
+            + IF(a+'.isIni',f'<button type="button" onClick="{H(a+".ini")}" title="{H(a+".nx_tt")}" style="{_NXST}">{H(a+".nx_t")}</button>')
+            + f'<a href="{H(a+".href")}" onClick="{H(a+".sel")}" title="{H(a+".tt")}" style="{_BST} text-decoration: none;">{icon("doc",14)}Abrir ordem</a></div></div></sc-for>')
 def qcards(lst,a='q',count=2,abrir=True):
     """Cartões de ordem da fila (sc-for): etapa + passo, realizado/saldo, insumos e o próximo passo com verbo."""
     ab=(f'<a href="MB-02det.dc.html" onClick="{H(a+".sel")}" title="{H(a+".ab_tt")}" style="{_BST} text-decoration: none;">{icon("doc",14)}Abrir ordem</a>' if abrir else '')
@@ -293,7 +322,7 @@ def emit(fid,title,sub,status,primary,body,H_=900,fname=None,back='MB-01.dc.html
     [(condição|None,'a'|'b'|'ac',rótulo,href|função|(href,função))] — link navega, botão executa na própria tela, 'ac' = link que também
     executa (ex.: escolher a ordem antes de abrir o detalhe). cen: tela ligada ao cenário compartilhado (cenario.js_prefixo() + JS do app).
     dyn_head: título do <title> quando título e subtítulo do cabeçalho vêm de v.hdr_ttl / v.hdr_sub."""
-    pre=(cenario.js_prefixo()+JS_BASE+MBAPP_JS) if cen else JS_BASE
+    pre=(cenario.js_prefixo()+DM.js_regras()+JS_BASE+MBAPP_JS) if cen else JS_BASE
     head=' cenOuvir(self); const c=cenGet(); mbSig(self,v,c);' if cen else ''
     EXTRAJS[0]=pre+'const M='+json.dumps(MS,ensure_ascii=False)+';\nfunction EXTRAVALS(self,v){ const s=self.state; SAY(self,v,M);'+head+'\n'+js+'\n}'
     MS.clear()
@@ -323,30 +352,39 @@ def build():
 
     # ================= MB-01 · Hoje no campo (lista · minha fila) =================
     corpo=(
-      sigbar()
-      + h2('Minha fila','Siga a ordem da janela; o botão diz o próximo passo.')
-      + IF('fila_vazia',card('Nada liberado para você',[note('Quando o escritório liberar uma ordem sua, ela aparece aqui com os insumos a retirar.')]))
-      + qcards('fila',count=2)
+      sigbar() + vercomo()
+      + IF('us_mar',h2('Minha fila','Siga a ordem da janela; o botão diz o próximo passo.')
+           + IF('fila_vazia',card('Nada liberado para você',[note('Quando o escritório liberar uma ordem sua, ela aparece aqui com os insumos a retirar.')]))
+           + qcards('fila',count=2))
+      + IF('us_ze',h2('Minha fila','Ordens de manutenção em que você é o executante, pela janela e depois pela criticidade.')
+           + IF('omf_vazia',card('Nenhuma ordem de manutenção para você',[note('Quando o Otávio liberar uma ordem com você de executante, ela aparece aqui.')]))
+           + omcards('omf',count=1))
       + h2('Abrir por tipo de trabalho','Escolha o trabalho para abrir o formulário do seu domínio.')
       + grid2(navcard('Minhas ordens','lista e detalhe da O.S.','MB-02','lista'),
               navcard('Apontamento','turno: início, pausa e fechamento','MB-03','check'),
               navcard('Ocorrência','tipo, texto, foto e voz','MB-04','alert'),
               navcard('Almoxarifado','retirar e confirmar','MB-05','box'),
               navcard('Vistoria','rota por pontos','MB-06','leaf'),
-              '<span></span>')   # MB-07..MB-10 só simulam com dados locais (Frente F): fora do app até ligarem ao estado
-      + f'<div style="display: flex; justify-content: flex-end;"><button type="button" onClick="{H("restaurar")}" title="Voltar ordens, estoque e app ao início da demonstração" '
+              navcard('Máquina','condição, leitura e abastecimento','MB-09','fuel'))   # PCM S4: MB-09 ligado ao cenário; MB-07, MB-08 e MB-10 seguem fora (Frente F)
+      + f'<div style="display: flex; justify-content: flex-end;"><button type="button" onClick="{H("restaurar")}" title="Voltar ordens, estoque, manutenção e app ao início da demonstração" '
         f'style="font-family: inherit; font-size: 12px; font-weight: 600; color: {MUTED}; background: transparent; border: 0; padding: 4px 0; cursor: pointer; text-decoration: underline;">Restaurar demonstração</button></div>')
     js='''const fila=mbFila(c); v.fila=fila.map(o=>mbCard(self,c,o)); v.fila_vazia=!fila.length;
-const pend=(c.app.fila||[]).length;
-DCH(v,'hdr',fila.length+(fila.length===1?' ordem':' ordens')+' · '+(pend?pend+' aguardando sinal':'envios em dia'),pend?'yellow':'green');
-const pk=mbPrim(c,fila); v.pk_isA=!!pk.href; v.pk_ini=pk.k==='iniciar'; v.pk_none=pk.k==='none'; v.pk_lab=pk.lab; v.pk_href=pk.href||'MB-01.dc.html';
+const pend=(c.app.fila||[]).length; const us=mbUsuario(c); mbVerComo(self,v,c); const ze=us==='Zé'; v.us_mar=!ze; v.us_ze=ze;
+v.hdr_ttl='Hoje no campo'; v.hdr_sub=us+' · '+mbPapelUs(us)+' · Santa Rita';
+const mv=mbManView(c); const oms=ze?mbOmsDe(mv,us):[]; v.omf=oms.map(o=>mbOmCard(self,c,mv,o)); v.omf_vazia=ze&&!oms.length;
+const nq=ze?oms.length:fila.length; DCH(v,'hdr',ze?(nq+(nq===1?' ordem':' ordens')+' · '+(pend?pend+' aguardando sinal':'envios em dia')):(fila.length+(fila.length===1?' ordem':' ordens')+' · '+(pend?pend+' aguardando sinal':'envios em dia')),pend?'yellow':'green');
+const o0=oms[0]; const p0=o0?mbOmPasso(mv,o0):null; v.zk_a=ze&&!!p0&&(p0.k==='cont'||p0.k==='apt'); v.zk_b=ze&&!!p0&&p0.k==='ini'; v.zk_none=ze&&!v.zk_a&&!v.zk_b;
+v.zk_lab=p0?p0.t+' · '+o0.id:''; v.zk_href=o0?'MB-09det.dc.html#'+o0.id:'MB-09.dc.html'; v.zk_sel=()=>{ if(o0) mbOmSet(o0.id); };
+v.zk_go=()=>{ if(o0){ mbOmSet(o0.id); mbManCmd(self,'iniciar',{om:o0.id}); } };
+const pk=mbPrim(c,fila); v.pk_isA=!ze&&!!pk.href; v.pk_ini=!ze&&pk.k==='iniciar'; v.pk_none=!ze&&pk.k==='none'; v.pk_lab=pk.lab; v.pk_href=pk.href||'MB-01.dc.html';
 v.pk_sel=()=>{ if(pk.o) mbSelSet(pk.o.id); };
 v.pk_go=()=>{ if(pk.o){ mbSelSet(pk.o.id); cenMudar(self,c=>mbIniciar(c,pk.o.id)); } };
 // cenReset só apaga a chave: grava o cenário inicial para que os outros quadros abertos também voltem ao início (e não regravem o antigo).
-v.restaurar=()=>{ cenReset(); cenSave(cenGet()); mbSelSet(''); self.setState({cenrev:Date.now(),ft:{},ft_err:{},g2toast:'Demonstração restaurada: ordens, estoque e app voltaram ao início.'}); };'''
-    emit('MB-01','Hoje no campo','Marcos · operador · Santa Rita',None,'Abrir próxima tarefa',corpo,H_=1740,back='IN-01.dc.html',
-         js=js,dyn_status=True,cen=True,
-         prim=[('pk_isA','ac',H('pk_lab'),(H('pk_href'),'pk_sel')),('pk_ini','b',H('pk_lab'),'pk_go'),('pk_none','a','Ver minhas ordens','MB-02.dc.html')])
+v.restaurar=()=>{ cenReset(); cenSave(cenGet()); mbSelSet(''); mbOmSet(''); self.setState({cenrev:Date.now(),ft:{},ft_err:{},g2toast:'Demonstração restaurada: ordens, estoque, manutenção e app voltaram ao início.'}); };'''
+    emit('MB-01','Hoje no campo','Marcos · operador · Santa Rita',None,'Abrir próxima tarefa',corpo,H_=1800,back='IN-01.dc.html',
+         js=js,dyn_status=True,cen=True,dyn_head='Hoje no campo',
+         prim=[('pk_isA','ac',H('pk_lab'),(H('pk_href'),'pk_sel')),('pk_ini','b',H('pk_lab'),'pk_go'),('pk_none','a','Ver minhas ordens','MB-02.dc.html'),
+               ('zk_a','ac',H('zk_lab'),(H('zk_href'),'zk_sel')),('zk_b','b',H('zk_lab'),'zk_go'),('zk_none','a','Abrir Máquina','MB-09.dc.html')])
 
     # ================= MB-02 · Minhas ordens (lista) =================
     corpo=(
@@ -581,7 +619,7 @@ v.reenviar=()=>{ const cc=cenGet(); const nn=(cc.app.fila||[]).length; if(!nn) r
 
     # ================= MB-04 · Ocorrência móvel (detalhe/formulário) =================
     corpo=(
-      sigbar()
+      sigbar() + vercomo()
       + mcont('Minha fila',H('oc_aqui'),H('ct_f'),H('ct_p'))
       + IF('oc_novo',
           f'<div style="display: flex; flex-direction: column; gap: 6px;"><span style="font-size: 12px; font-weight: 600; color: {MUTED};">Ordem</span>'
@@ -590,6 +628,13 @@ v.reenviar=()=>{ const cc=cenGet(); const nn=(cc.app.fila||[]).length; if(!nn) r
           f'<div style="display: flex; flex-direction: column; gap: 6px;"><span style="font-size: 12px; font-weight: 600; color: {MUTED};">Tipo</span>'
           f'<div role="group" aria-label="Tipo da ocorrência" style="display: flex; flex-wrap: wrap; gap: 6px;"><sc-for list="{H("oc_tipos")}" as="o" hint-placeholder-count="6">'
           f'<button type="button" aria-pressed="{H("o.on")}" onClick="{H("o.fn")}" title="{H("o.tt")}" style="{H("o.st")}">{H("o.t")}</button></sc-for></div></div>'
+          # PCM S4: Equipamento (e Segurança ligada a máquina) pede a máquina e grava um achado na Manutenção, ligado à O.S.
+          + IF('oc_maq',f'<div style="display: flex; flex-direction: column; gap: 6px;">{lab("Máquina")}' + pills('oc_atvs','Máquina da ocorrência',3) + note(H('oc_maqt')) + '</div>')
+          + IF('oc_ach',f'<div style="display: flex; flex-direction: column; gap: 6px;">{lab("Componente")}' + pills('oc_comps','Componente',7) + '</div>'
+               f'<div style="display: flex; flex-direction: column; gap: 6px;">{lab("Pode operar?")}' + pills('oc_sugs','Pode operar?',3) + '</div>')
+          + IF('oc_hasRep',f'<div role="alert" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 12px; background: {YELS}; color: {YEL}; font-size: 13px; font-weight: 700;">{H("oc_repMsg")}'
+               + btns(fnb('Somar ao achado aberto','oc_somar','check','Somar esta ocorrência ao achado aberto da mesma máquina e componente'),
+                      fnb('Registrar novo','oc_novoAch','alert','Registrar um achado novo mesmo assim')) + '</div>')
           + ffield('Descrição','oc_txt','oc_txt','oc_set','oc_err',area=True,ph='O que aconteceu, onde e o que você fez.')
           + btns(fnb('Ditar (simulado)','voz','users','Transcrever a fala para o texto (simulado)'),
                  f'<button type="button" onClick="{H("foto")}" title="Anexar foto com GPS (simulado)" style="{_BST}">{icon("map",14)}{H("foto_lab")}</button>')
@@ -604,30 +649,57 @@ v.reenviar=()=>{ const cc=cenGet(); const nn=(cc.app.fila||[]).length; if(!nn) r
            f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;"><b style="font-size: 13px;">{H("x.t")}</b><span style="{H("x.st")}"><span style="{H("x.dot")}"></span>{H("x.c")}</span></div>'
            f'<div style="font-size: 12.5px; color: {MUTED}; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{H("x.s")}</div></div></sc-for>'
            + IF('oc_mais',f'<div style="font-size: 12.5px; color: {MUTED}; padding-top: 6px; border-top: 1px solid {LINE};">{H("oc_mais_t")}</div>') + '</div>'))
-    js='''const fila=mbFila(c); const t=mbTurno(c); const sel=mbSelGet();
+    js='''const fila=mbFila(c); const t=mbTurno(c); const sel=mbSelGet(); mbVerComo(self,v,c); const us=mbUsuario(c); const mv=mbManView(c);
 const osSel=s.oc_os||(t?t.os:(fila.find(o=>o.id===sel)?sel:(fila[0]?fila[0].id:'')));
 v.oc_ords=fila.map(o=>({t:o.id+' · '+o.talhao,on:o.id===osSel,st:mbPill(o.id===osSel),fn:()=>self.setState({oc_os:o.id}),tt:'Registrar na '+o.id+' · '+o.tipo}));
 const TIPOS=['Equipamento','Clima','Praga ou doença','Falha de aplicação','Segurança','Outro']; const tipo=s.oc_tipo||'Equipamento';
-v.oc_tipos=TIPOS.map(x=>({t:x,on:x===tipo,st:mbPill(x===tipo),fn:()=>self.setState({oc_tipo:x}),tt:'Tipo: '+x}));
+v.oc_tipos=TIPOS.map(x=>({t:x,on:x===tipo,st:mbPill(x===tipo),fn:()=>self.setState({oc_tipo:x,oc_err:''}),tt:'Tipo: '+x}));
+// PCM S4: máquina da O.S. (alocação) ou do turno; a que veio do MB-09 (#ativo=) já vem escolhida; Segurança pode ser "Sem máquina" (fica na O.S.)
+const hm=(String(location.hash||'').match(/ativo=([\\w-]+)/)||[])[1]; const maq=tipo==='Equipamento'||tipo==='Segurança';
+const rsO=osSel?MAN_AL.aloc.filter(x=>x.os===osSel).map(x=>x.r):[]; const ids=Object.keys(MAN_AL.rec).filter(id=>rsO.indexOf(MAN_AL.rec[id])>=0&&mv.ativos[id]);
+mbAtvCurtos(c,mv,us).ids.forEach(id=>{ if(ids.indexOf(id)<0) ids.push(id); }); if(hm&&mv.ativos[hm]&&ids.indexOf(hm)<0) ids.unshift(hm);
+const aid=s.oc_aid!==undefined?s.oc_aid:((hm&&mv.ativos[hm])?hm:(tipo==='Equipamento'&&ids.length===1?ids[0]:''));
+v.oc_maq=maq; v.oc_atvs=(tipo==='Segurança'?[{id:'',t:'Sem máquina'}]:[]).concat(ids.map(id=>({id,t:mv.ativos[id].nome})))
+  .map(x=>({t:x.t,on:String(x.id===aid),st:mbPill(x.id===aid),fn:()=>self.setState({oc_aid:x.id,oc_err:''}),tt:x.id?'Máquina: '+x.t:'Segurança sem máquina: fica como ocorrência da O.S.'}));
+v.oc_maqt=maq?(aid?'Vai como achado para a Manutenção (Sem ordem)'+(osSel?', ligado à '+osSel:'')+'; o Otávio decide o serviço.':(tipo==='Equipamento'?'Escolha a máquina: a falha vai para a Manutenção.':'Sem máquina: fica como ocorrência da O.S.')):'';
+const ach=maq&&!!aid; v.oc_ach=ach; const sg=s.oc_sug||'', cp=s.oc_comp||'';
+v.oc_sugs=[['Sim','Apto'],['Com restrição','Restrito'],['Não','Bloqueado']].map(([x,k])=>({t:x,on:String(k===sg),st:mbPill(k===sg),fn:()=>self.setState({oc_sug:k,oc_err:''}),tt:'Pode operar? '+x}));
+v.oc_comps=MAN_COMP.map(x=>({t:x,on:String(x===cp),st:mbPill(x===cp),fn:()=>self.setState({oc_comp:x,oc_err:''}),tt:'Componente: '+x}));
+v.oc_hasRep=!!s.oc_repId; v.oc_repMsg=s.oc_repMsg||'';
 v.oc_txt=s.oc_txt||''; v.oc_set=(e)=>self.setState({oc_txt:e.target.value,oc_err:''}); v.oc_err=s.oc_err||''; v.oc_err_has=!!s.oc_err;
 const oo=c.ordens[osSel]; v.foto_lab=s.oc_foto?'Remover foto':'Anexar foto (simulado)'; v.oc_foto_t=s.oc_foto?'1 foto · GPS '+(oo?oo.talhao:'')+' (simulado)':'Sem foto · a foto e a voz são simuladas neste protótipo.';
 v.foto=()=>{ const f=!self.state.oc_foto; self.setState({oc_foto:f,g2toast:f?'Foto anexada (simulado) · GPS do aparelho.':'Foto removida.'}); };
 v.voz=()=>{ const cur=self.state.oc_txt||''; self.setState({oc_txt:(cur?cur+' ':'')+'Seção 3 da barra falhou; troquei o bico e segui.',oc_err:'',g2toast:'Voz transcrita (simulado) · revise o texto.'}); };
 const done=s.oc_done; v.oc_novo=!done; v.oc_feito=!!done;
 v.oc_aqui=done?done:'Nova ocorrência'; v.ct_f=done?'nada nesta ocorrência':'tipo e descrição'; v.ct_p=done?'Voltar à fila':'Registrar ocorrência';
-v.registrar=()=>{ const st=self.state; const txt=String(st.oc_txt||'').trim(); if(!osSel) return TOAST(self,'Nenhuma ordem liberada na sua fila.');
+const regAch=(rep)=>{ const st=self.state; const txt=String(st.oc_txt||'').trim(); if(!txt){ self.setState({oc_err:'Descreva a falha (ou use Ditar).'}); return; }
+  const er=[]; if(!st.oc_comp) er.push('o componente'); if(!st.oc_sug) er.push('se pode operar'); if(er.length){ self.setState({oc_err:'Informe '+er.join(' e ')+'.'}); return; }
+  const k=st.oc_k||self.__ock0||(self.__ock0=manChave()); const tp=st.oc_tipo||'Equipamento';
+  const d={aid,origem:'Relato',comp:st.oc_comp,sint:txt+(tp==='Segurança'?' (segurança)':''),crit:{Apto:'Baixa',Restrito:'Média',Bloqueado:'Alta'}[st.oc_sug],sug:st.oc_sug,evid:st.oc_foto?'1 foto (simulada)':'',os:osSel||''};
+  if(rep) d.rep=rep;
+  const r=mbManCmd(self,'achado',{d},null,k);
+  if(r.nada&&r.rep){ self.setState({oc_repId:r.rep,oc_repMsg:r.msg}); return; }
+  if(!r.erro&&!r.nada){ self.setState({oc_done:'ACH|'+k,oc_achMsg:r.msg,oc_achFila:!!r.fila,oc_txt:'',oc_foto:false,oc_comp:'',oc_sug:'',oc_repId:'',oc_repMsg:'',oc_k:manChave()}); } };
+v.oc_somar=()=>regAch('somar'); v.oc_novoAch=()=>regAch('novo');
+v.registrar=()=>{ const st=self.state; const txt=String(st.oc_txt||'').trim();
+  if(ach) return regAch(''); if(tipo==='Equipamento'){ self.setState({oc_err:'Escolha a máquina: a falha de equipamento vai para a Manutenção.'}); return; }
+  if(!osSel) return TOAST(self,'Nenhuma ordem liberada na sua fila.');
   if(!txt){ self.setState({oc_err:'Descreva a ocorrência (ou use Ditar).'}); return; }
   const r=cenMudar(self,c=>cenOcorrencia(c,osSel,st.oc_tipo||'Equipamento',txt+(st.oc_foto?' · 1 foto (simulada)':'')));
   if(r&&!r.erro){ const cc=cenGet(); const oc=cc.ocorr[cc.ocorr.length-1]; self.setState({oc_done:oc.id,oc_txt:'',oc_foto:false}); } };
-v.nova=()=>self.setState({oc_done:null,oc_err:''});
-if(done){ const oc=(c.ocorr||[]).find(x=>x.id===done); if(oc){ v.d_t=oc.id+' · '+oc.os+' · '+oc.tipo; v.d_txt=oc.texto; DCH(v,'dsc',oc.sinc?'Registrada na O.S. · '+oc.at:'No aparelho · aguardando sinal',oc.sinc?'green':'yellow'); } }
+v.nova=()=>self.setState({oc_done:null,oc_err:'',oc_aid:undefined});
+const achDone=!!done&&String(done).indexOf('ACH|')===0; const achNaFila=achDone&&manAppFila(c).some(q=>'ACH|'+q.chave===done);
+if(achDone){ const rc=(c.man.recibos||{})[String(done).slice(4)]; v.d_t=(rc&&rc.id?rc.id+' · ':'')+'Achado na Manutenção'; v.d_txt=s.oc_achMsg||'';
+  DCH(v,'dsc',achNaFila?'No aparelho · aguardando sinal':(rc?'Na Manutenção · Sem ordem':'Conflito a resolver · Otávio'),achNaFila?'yellow':(rc?'green':'red')); }
+else if(done){ const oc=(c.ocorr||[]).find(x=>x.id===done); if(oc){ v.d_t=oc.id+' · '+oc.os+' · '+oc.tipo; v.d_txt=oc.texto; DCH(v,'dsc',oc.sinc?'Registrada na O.S. · '+oc.at:'No aparelho · aguardando sinal',oc.sinc?'green':'yellow'); } }
 const mine=new Set(mbMinhas(c).map(o=>o.id)); const ocs=(c.ocorr||[]).filter(x=>mine.has(x.os)&&x.id!==done);
 // Teto da lista (quadro de altura fixa): as 2 mais recentes; as demais seguem na O.S. (MB-02det).
 v.has_ocs=ocs.length>0; v.oc_mais=ocs.length>2; v.oc_mais_t=ocs.length>2?'+ '+(ocs.length-2)+(ocs.length-2>1?' anteriores':' anterior')+' no detalhe de cada ordem':'';
 v.ocs=ocs.slice(-2).reverse().map(x=>({t:x.id+' · '+x.os+' · '+x.tipo,s:x.texto,c:x.sinc?'na O.S. · '+x.at:'aguardando sinal',st:mbChs(x.sinc?'green':'yellow'),dot:mbDot(x.sinc?'green':'yellow')}));
-const ocd=done&&(c.ocorr||[]).find(x=>x.id===done); DCH(v,'hdr',done?(ocd&&!ocd.sinc?'no aparelho':'registrada'):'rascunho',done?(ocd&&!ocd.sinc?'yellow':'green'):'gray');'''
+const ocd=done&&(c.ocorr||[]).find(x=>x.id===done); const naf=achDone?achNaFila:!!(ocd&&!ocd.sinc);
+DCH(v,'hdr',done?(naf?'no aparelho':(achDone?'enviada à Manutenção':'registrada')):'rascunho',done?(naf?'yellow':'green'):'gray');'''
     emit('MB-04','Registrar ocorrência','tipo e texto · foto e voz simuladas · funciona sem sinal',None,
-         'Registrar ocorrência',corpo,H_=1180,back='MB-01.dc.html',js=js,dyn_status=True,cen=True,
+         'Registrar ocorrência',corpo,H_=1420,back='MB-01.dc.html',js=js,dyn_status=True,cen=True,
          prim=[('oc_novo','b','Registrar ocorrência','registrar'),('oc_feito','a','Voltar à fila','MB-01.dc.html')])
 
     # ================= MB-05 · Almoxarifado móvel (lista · papéis) =================
@@ -860,49 +932,219 @@ v.fecha=()=>TOAST(self,'Parcela T7-B concluída · '+T+' plantas · segue para r
     emit('MB-08','Irrigação · recibo do término','mapa, lista, quadro e app leem o mesmo evento',('Encerradas','gray'),
          'Voltar à fila do turno',corpo,H_=1120,fname='MB-08x-recibo.dc.html',back='MB-08.dc.html',primary_href='MB-01.dc.html')
 
-    # ================= MB-09 · Manutenção e combustível (lista) =================
-    om=D.OM
-    ABAST=dict(ativo='Trator 02 · MF 7719', litros='180 L', comb='Diesel S10', horim='4.812 h')
+    # ================= MB-09 · Máquina (PCM simplificado S4, §3.7) =================
+    # Ativo herdado do turno (senão lista curta com busca); condição em texto ("Não opere" quando Bloqueado), leitura com data e OM aberta.
+    # Primária "Registrar abastecimento" (com "Salvar e registrar outro"); secundárias "Registrar leitura" e "Reportar falha" (MB-04 com o ativo).
+    # Grava pelas mesmas funções da tela MA (manAbastecer, manLeituraAvulsa) com a chave do aparelho; sem sinal, vai para a fila.
+    recst=f'display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 12px; font-size: 13px; font-weight: 700; line-height: 1.4;'
     corpo=(
-      card(f'<b>{om["id"]}</b> · corretiva · {esc(om["ativo"])}',[
-          kv('Causa',esc(om['causa'])),
-          chips(etapa('Em execução'),chip('Ativo bloqueado','red')),
-          kv('Afeta',f'{om["os_afetada"]} (plantio T4) · substituto: {esc(om["substituto"])} a partir de 24/09 06:00')],state='red')
-      + card('Inspeção preventiva · Colhedora CH-01',[
-          kv('Checklist','250 h · 18 itens · vence 26/09'),
-          chips(etapa('Liberadas')),
-          btns(say('Iniciar serviço','Inspeção iniciada · checklist de 18 itens aberto no aparelho.','check','Iniciar a inspeção preventiva'))],state='green')
-      + card(f'Abastecimento · {esc(ABAST["ativo"])}',[
-          kv('Registro próprio',f'{ABAST["comb"]} · bomba da fazenda · horímetro {ABAST["horim"]}'),
-          btns(say('Registrar abastecimento',f'Abastecidos {ABAST["litros"]} de {ABAST["comb"]} · horímetro {ABAST["horim"]} · documento próprio de combustível — não encerra manutenção nem libera o ativo.','fuel','Registrar litros e horímetro')),
-          note('Abastecer não leva o ativo à oficina nem o libera.')],state='gray')
-      + btns(lnk('Reportar falha','MB-04.dc.html','alert','Abrir a captura de ocorrência'))
-      + note('Combustível fica em registro próprio; a liberação técnica respeita a competência do usuário.'))
-    emit('MB-09','Manutenção e combustível','serviço, inspeção e abastecimento · campos por contexto',('1 ativo bloqueado','red'),
-         'Abrir serviço OM-0233',corpo,H_=900,back='MB-01.dc.html',primary_href='MB-09det.dc.html')
+      sigbar() + vercomo()
+      + h2('Máquina','Herdada do seu turno; toque noutra ou busque pelo nome.')
+      + pills('mq_curtos','Máquinas do turno',2)
+      + f'<input id="mq-busca" type="search" aria-label="Buscar máquina" placeholder="Buscar máquina" value="{H("mq_q")}" onChange="{H("mq_setq")}" style="{INP}">'
+      + IF('mq_hasSug',pills('mq_sug','Máquinas encontradas',3))
+      + IF('mq_sem',card('Escolha a máquina',[note('Toque numa máquina do turno ou busque pelo nome.')]))
+      + IF('mq_tem',f'<div style="{CARD_ST}"><div style="display: flex; align-items: center; gap: 8px;"><span style="{H("mq_dot")}"></span>'
+           f'<div style="font-size: 15px; font-weight: 700; flex-grow: 1; min-width: 0;">{H("mq_nome")}</div></div>'
+           f'<div role="status" style="{H("mq_cst")}">{H("mq_cond")}</div>'
+           f'<div style="font-size: 13px; color: {MUTED};">{H("mq_leit")}</div>'
+           + IF('mq_hasOm',f'<div><a href="{H("mq_omh")}" onClick="{H("mq_omsel")}" title="Abrir a ordem de manutenção aberta desta máquina" style="{_BST} text-decoration: none;">{icon("wrench",14)}{H("mq_omt")}</a></div>')
+           + note(H('mq_her')) + '</div>')
+      + IF('mq_rec',f'<div role="status" style="{recst} {H("mq_recst")}">✓ {H("mq_rect")}</div>')
+      + IF('mq_ab',h2('Registrar abastecimento','Tanque, volume e leitura; a foto do tíquete é a evidência.')
+           + f'<div style="display: flex; flex-direction: column; gap: 6px;">{lab("Tanque · lote")}' + pills('mq_tqs','Tanque e lote',2) + '</div>'
+           + ffield('Volume · L','mq-vol','mq_vol','mq_setvol','',big=True,ph='0')
+           + IF('mq_hasCont',ffield(H('mq_unl'),'mq-leit','mq_leitv','mq_setleit','',hint=H('mq_ult'),ph='leitura no painel'))
+           + btns(f'<button type="button" aria-pressed="{H("mq_cheio")}" onClick="{H("mq_tcheio")}" title="Marque quando completou o tanque: calcula L/h" style="{H("mq_cheiost")}">Tanque cheio · calcula L/h</button>',
+                  f'<button type="button" onClick="{H("mq_foto")}" title="Anexar a foto do tíquete (simulado)" style="{_BST}">{icon("doc",14)}{H("mq_fotol")}</button>')
+           + note(H('mq_fotot'))
+           + f'<div style="font-size: 13px; color: {MUTED};">{kv("Operador",H("mq_op"))} · {kv("Data",H("mq_data"))}</div>'
+           + btns(fnb('Salvar e registrar outro','mq_outro','fuel','Gravar este lançamento e limpar para o próximo tíquete (fica só a data)')))
+      + IF('mq_lt',h2('Registrar leitura','Leitura avulsa do contador, com a data em que foi lida.')
+           + ffield(H('mq_unl'),'mq-lt','mq_ltv','mq_setlt','',big=True,hint=H('mq_ult'),ph='leitura no painel')
+           + f'<div style="display: flex; flex-direction: column; gap: 6px;">{lab("Data da leitura")}' + pills('mq_ltdias','Data da leitura',2) + '</div>')
+      + IF('mq_tem',btns(IF('mq_isAb',IF('mq_hasCont',fnb('Registrar leitura','mq_modoLt','clock','Registrar só a leitura do contador'))),
+                         IF('mq_isLt',fnb('Voltar ao abastecimento','mq_modoAb','fuel','Voltar ao lançamento de abastecimento')),
+                         f'<a href="{H("mq_falhah")}" title="Abrir a ocorrência de equipamento com esta máquina" style="{_BST} text-decoration: none;">{icon("alert",14)}Reportar falha</a>'))
+      + IF('mq_hasHist',f'<div style="{CARD_ST}"><div style="font-size: 14.5px; font-weight: 700;">Últimos registros desta máquina</div>'
+           f'<sc-for list="{H("mq_hist")}" as="x" hint-placeholder-count="2"><div style="display: flex; flex-direction: column; gap: 3px; padding: 6px 0; border-top: 1px solid {LINE};">'
+           f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;"><b style="font-size: 13px;">{H("x.t")}</b><span style="{H("x.st")}"><span style="{H("x.dot")}"></span>{H("x.c")}</span></div>'
+           f'<div style="font-size: 12.5px; color: {MUTED}; line-height: 1.4;">{H("x.s")}</div></div></sc-for></div>'))
+    js='''const mv=mbManView(c); const us=mbUsuario(c); mbVerComo(self,v,c); const cur=mbAtvCurtos(c,mv,us);
+const hm=(String(location.hash||'').match(/ativo=([\\w-]+)/)||[])[1];
+let aid=s.mq_aid; if(!aid) aid=(hm&&mv.ativos[hm])?hm:(cur.ids[0]||''); if(aid==='-') aid=''; const a=aid?mv.ativos[aid]:null;
+v.mq_curtos=cur.ids.map(id=>({t:mv.ativos[id].nome,on:String(id===aid),st:mbPill(id===aid),fn:()=>self.setState({mq_aid:id,mq_rec:null,mq_tq:undefined}),tt:'Escolher '+mv.ativos[id].nome}));
+const q=String(s.mq_q||'').trim().toLowerCase(); v.mq_q=s.mq_q||''; v.mq_setq=(e)=>self.setState({mq_q:e.target.value});
+const sug=q?Object.values(mv.ativos).filter(x=>x.nome.toLowerCase().indexOf(q)>=0||String(x.modelo||'').toLowerCase().indexOf(q)>=0).slice(0,5):[];
+v.mq_sug=sug.map(x=>({t:x.nome,on:String(x.id===aid),st:mbPill(x.id===aid),fn:()=>self.setState({mq_aid:x.id,mq_q:'',mq_rec:null,mq_tq:undefined}),tt:'Escolher '+x.nome})); v.mq_hasSug=sug.length>0;
+v.mq_tem=!!a; v.mq_sem=!a; v.mq_hasCont=!!(a&&a.un);
+const cd=mbCond(a); v.mq_nome=a?manNome(a):''; v.mq_cond=cd.t; v.mq_cst=mbCondSt(cd.c); v.mq_dot='width: 10px; height: 10px; border-radius: 999px; flex-shrink: 0; background: '+(MBC[cd.c]||MBC.gray)[0]+';';
+v.mq_leit=a?(a.un?('Leitura '+manLeitTxt(a)+(a.suspeita?' · leitura a confirmar (Otávio)':'')):'Sem contador'):'';
+const om=a?Object.values(mv.oms).filter(o=>o.aid===a.id&&manAberta(o)).sort((x,y)=>MAN_FASES.indexOf(y.etapa)-MAN_FASES.indexOf(x.etapa))[0]:null;
+v.mq_hasOm=!!om; v.mq_omh=om?'MB-09det.dc.html#'+om.id:'MB-09.dc.html'; v.mq_omt=om?(om.id+' · '+om.etapa+' · abrir ordem'):''; v.mq_omsel=()=>{ if(om) mbOmSet(om.id); };
+v.mq_her=a?((cur.ids.indexOf(a.id)>=0&&cur.de)?('Herdada '+cur.de+' · toque noutra para trocar'):'Escolhida por você'):''; v.mq_falhah=a?'MB-04.dc.html#ativo='+a.id:'MB-04.dc.html';
+DCH(v,'hdr',a?(a.cond==='Bloqueado'?'Não opere':(a.cond==='Restrito'?'Com restrição':'Apto')):'escolha a máquina',a?cd.c:'gray');
+const modo=(s.mq_modo==='lt'&&a&&a.un)?'lt':'ab'; v.mq_ab=!!a&&modo==='ab'; v.mq_lt=!!a&&modo==='lt'; v.mq_isAb=modo==='ab'; v.mq_isLt=modo==='lt';
+v.mq_pab=v.mq_ab; v.mq_plt=v.mq_lt; v.mq_pnone=!a;
+v.mq_modoLt=()=>self.setState({mq_modo:'lt',mq_rec:null}); v.mq_modoAb=()=>self.setState({mq_modo:'ab',mq_rec:null});
+const tqs=a?manTanques(mv,a.id):[]; const tq=(s.mq_tq&&tqs.indexOf(s.mq_tq)>=0)?s.mq_tq:(tqs.length===1?tqs[0]:'');
+v.mq_tqs=tqs.map(x=>({t:x,on:String(x===tq),st:mbPill(x===tq),fn:()=>self.setState({mq_tq:x}),tt:'Tanque e lote: '+x}));
+v.mq_vol=s.mq_vol||''; v.mq_setvol=(e)=>self.setState({mq_vol:e.target.value});
+v.mq_unl=a&&a.un==='km'?'Odômetro · km':'Horímetro · h'; v.mq_leitv=s.mq_leit||''; v.mq_setleit=(e)=>self.setState({mq_leit:e.target.value}); v.mq_ult=a&&a.leit?('Última: '+manLeitTxt(a)):'';
+v.mq_cheio=String(!!s.mq_cheio); v.mq_cheiost=mbPill(!!s.mq_cheio); v.mq_tcheio=()=>self.setState({mq_cheio:!self.state.mq_cheio});
+v.mq_fotol=s.mq_foto?'Remover foto':'Anexar foto (simulado)'; v.mq_fotot=s.mq_foto?'1 foto do tíquete (simulada)':'Sem foto · a foto é simulada neste protótipo.'; v.mq_foto=()=>self.setState({mq_foto:!self.state.mq_foto});
+v.mq_op=us+' (você)'; v.mq_data=manBr(mv.hoje)+' (hoje)';
+const chave=()=>self.state.mq_k||self.__mqk0||(self.__mqk0=manChave());   /* duplo toque no mesmo instante lê a mesma chave: um lançamento só (AC-PCM-16) */
+const salvar=(outro)=>{ if(!a) return TOAST(self,'Escolha a máquina.'); const st=self.state;
+  const d={aid:a.id,tq,vol:st.mq_vol,leit:st.mq_leit,op:us,evid:st.mq_foto?'foto do tíquete (simulada)':'',cheio:!!st.mq_cheio,data:mv.hoje,os:cur.os||''};
+  const r=mbManCmd(self,'abastecer',{d},null,chave());
+  if(!r.erro&&!r.nada){ const base={mq_vol:'',mq_leit:'',mq_foto:false,mq_cheio:false,mq_k:manChave(),mq_rec:{t:r.msg,fila:!!r.fila}}; self.setState(outro?Object.assign(base,{mq_aid:'-',mq_tq:undefined}):base); } };
+v.mq_reg=()=>salvar(false); v.mq_outro=()=>salvar(true);
+v.mq_ltv=s.mq_lt||''; v.mq_setlt=(e)=>self.setState({mq_lt:e.target.value}); const dl=s.mq_ltd||mv.hoje;
+v.mq_ltdias=[['Hoje',mv.hoje],['Ontem',manAdd(mv.hoje,-1)]].map(([t,d])=>({t:t+' · '+manBr(d),on:String(d===dl),st:mbPill(d===dl),fn:()=>self.setState({mq_ltd:d}),tt:'Data da leitura: '+manBr(d)}));
+v.mq_regLt=()=>{ if(!a) return TOAST(self,'Escolha a máquina.'); const st=self.state; const r=mbManCmd(self,'leitura',{aid:a.id,val:st.mq_lt,data:dl},null,chave());
+  if(!r.erro&&!r.nada){ self.setState({mq_lt:'',mq_k:manChave(),mq_rec:{t:r.msg,fila:!!r.fila}}); } };
+v.mq_rec=!!s.mq_rec; v.mq_rect=s.mq_rec?s.mq_rec.t:''; v.mq_recst=s.mq_rec&&s.mq_rec.fila?'background: '+MBTX.yels+'; color: '+MBTX.yel+';':'background: '+MBTX.accs+'; color: '+MBTX.acc+';';
+const F=a?manAppFila(c).filter(x=>manAppAid(c.man,x)===a.id):[]; const CF=a?manAppConfAbertos(c.man,undefined,a.id):[];
+const hist=F.map(x=>({t:x.desc,s:'registrado às '+x.at+' · '+x.por,c:'No aparelho · aguardando sinal',st:mbChs('yellow'),dot:mbDot('yellow')}))
+  .concat(CF.map(x=>({t:x.desc,s:x.mot+' · por '+x.por+' às '+x.at,c:'Conflito a resolver · Otávio',st:mbChs('red'),dot:mbDot('red')})))
+  .concat(a?(c.man.abast||[]).filter(b=>b.aid===a.id).slice(-2).reverse().map(b=>({t:b.id+' · '+(b.tipo?'Estorno de '+b.ref:manN(b.vol)+' L'),s:manBr(b.data)+' '+(b.hora||'')+(b.leit!==null&&b.leit!==undefined?' · '+manQ(b.leit,b.un):'')+' · '+b.op,
+     c:b.qual,st:mbChs(b.qual==='Confirmada'?'green':(b.qual==='Estornado'||b.qual==='Estorno'?'gray':'yellow')),dot:mbDot(b.qual==='Confirmada'?'green':(b.qual==='Estornado'||b.qual==='Estorno'?'gray':'yellow'))})):[]);
+v.mq_hist=hist.slice(0,4); v.mq_hasHist=hist.length>0;'''
+    emit('MB-09','Máquina','condição, leitura e abastecimento · funciona sem sinal',None,
+         'Registrar abastecimento',corpo,H_=1500,back='MB-01.dc.html',js=js,dyn_status=True,cen=True,
+         prim=[('mq_pab','b','Registrar abastecimento','mq_reg'),('mq_plt','b','Registrar leitura','mq_regLt'),('mq_pnone','a','Voltar à fila','MB-01.dc.html')])
 
-    # ---- MB-09det · serviço-âncora OM-0233 ----
+    # ---- MB-09det · Ordem de manutenção: o painel da OM em 390 px, com as mesmas funções (PCM S4) ----
+    rowst=f'display: flex; flex-direction: column; gap: 6px; padding: 10px 0; border-top: 1px solid {LINE};'
+    tk=(f'<div style="{rowst}"><div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">'
+        f'<span style="font-size: 12px; font-weight: 800; color: {MUTED}; width: 18px;">{H("t.n")}</span><span style="font-size: 13.5px; font-weight: 600; flex: 1 1 180px; min-width: 0;">{H("t.t")}</span>'
+        f'<span style="font-size: 11px; font-weight: 700; color: {MUTED}; border: 1px solid {LINE}; border-radius: 999px; padding: 0 7px;">{H("t.tipo")}</span>'
+        + IF('t.nova',f'<span style="{BTN_ST(False,True)} padding: 2px 8px; font-size: 11px; color: {YEL}; background: {YELS}; border: 0;">Tarefa nova</span>') + '</div>'
+        + IF('t.hasVal',f'<label style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: {MUTED};">Valor<input aria-label="{H("t.vlab")}" inputMode="decimal" value="{H("t.val")}" onChange="{H("t.setval")}" style="{INP} width: 120px; text-align: right;">{H("t.un")}</label>')
+        + IF('t.showOpts',f'<span role="group" aria-label="{H("t.t")}" style="display: flex; gap: 6px; flex-wrap: wrap;"><sc-for list="{H("t.opts")}" as="b" hint-placeholder-count="3">'
+             f'<button type="button" aria-pressed="{H("b.on")}" aria-label="{H("b.lab")}" title="{H("b.lab")}" disabled="{H("b.dis")}" onClick="{H("b.go")}" style="{H("b.st")}">{H("b.t")}</button></sc-for></span>')
+        + IF('t.hasMot',f'<input aria-label="{H("t.motlab")}" placeholder="Motivo (obrigatório)" value="{H("t.mot")}" onChange="{H("t.setmot")}" style="{INP}">'
+             + f'<div><button type="button" onClick="{H("t.motgo")}" title="Gravar a resposta com o motivo" style="{_BST}">{H("t.motgot")}</button></div>')
+        + IF('t.ro',f'<span style="{H("t.rst")}"><span style="{H("t.rdot")}"></span>{H("t.r")}</span>')
+        + IF('t.hasPor',f'<span style="font-size: 12px; color: {MUTED};">{H("t.por")}</span>')
+        + IF('t.hasMotTx',f'<span style="font-size: 12.5px; color: {MUTED};">Motivo: {H("t.motTx")}</span>')
+        + IF('t.hasValTx',f'<span style="font-size: 12.5px;">Medido: {H("t.valTx")}</span>')
+        + IF('t.hasTents',f'<div style="display: flex; flex-direction: column; gap: 4px;"><sc-for list="{H("t.tents")}" as="x" hint-placeholder-count="1"><span style="{H("x.st")}"><span style="{H("x.dot")}"></span>{H("x.t")}</span></sc-for></div>')
+        + IF('t.treg',f'<div><button type="button" onClick="{H("t.tgo")}" title="Anexar a foto do teste (simulada) e registrar a tentativa" style="{_NXST}">{icon("doc",14)}{H("t.tgot")}</button></div>')
+        + IF('t.hasWhy',f'<span style="font-size: 12px; font-weight: 700; color: {MUTED};">{H("t.why")}</span>') + '</div>')
     corpo=(
-      mcont('Manutenção · minhas tarefas','OM-0233 · Trator T1',H('ct_f'),H('ct_p'))
-      + IF('noc',vstep([('Diagnóstico','done'),('Peças e serviço','now'),('Teste por pessoa autorizada','todo'),('Liberação técnica do ativo','todo')],
-                'O ativo segue bloqueado para operação até a liberação técnica.'))
-      + IF('conc',vstep([('Diagnóstico','done'),('Peças e serviço','done'),('Teste por pessoa autorizada','now'),('Liberação técnica do ativo','todo')],
-                'Serviço em conferência · o bloqueio só cai com teste e liberação técnica.'))
-      + card('Serviço e horas',[
-          kv('Causa',esc(om['causa'])+' · bomba hidráulica'),
-          kv('Horas apontadas','6,5 h (mecânico Zé)'),
-          kv('Peças','1 bomba hidráulica JD-RE-241 · 2 retentores'),
-          kv('Condição técnica',chip('Bloqueado para operação','red'))],state='red',desc='Registre horas e peças do serviço.')
-      + btns(say('Registrar avanço e peças','Peças aplicadas e 2,0 h somadas · requisição de peça conciliada no almoxarifado.','wrench','Somar horas e peças'),
-             say('Registrar teste · sem permissão','Seu perfil não tem competência de liberação técnica — peça ao mecânico autorizado para registrar o teste; nada foi registrado.','alert','Ver por que não pode registrar o teste'),
-             say('Finalizar apontamento do turno','Turno do mecânico finalizado · o serviço continua Em execução — não conclui o serviço.','clock','Guardar o turno sem concluir'))
-      + note('Concluir serviço leva a manutenção para <b>Em conferência</b>, mas não libera o ativo: o bloqueio só cai com teste e liberação técnica. A OS-0420 só volta com a substituição publicada e a reliberação.'))
-    js='''const c=!!s.conc; v.conc=c; v.noc=!c; v.ct_f=c?'teste e liberação técnica':'peças + teste autorizado'; v.ct_p=c?'Voltar às tarefas':'Concluir serviço';
-DCH(v,'hdr',c?'Em conferência · bloqueado':'Em execução · bloqueado',c?'yellow':'red');
-v.concluir=()=>{ self.setState({conc:true,g2toast:'Serviço concluído · OM-0233 em conferência · o Trator T1 segue bloqueado até teste e liberação técnica por pessoa autorizada.'}); };'''
-    emit('MB-09','OM-0233 · Trator T1','corretiva · pressão hidráulica baixa · afeta OS-0420',None,
-         'Concluir serviço',corpo,H_=1000,fname='MB-09det.dc.html',back='MB-09.dc.html',primary_href='MB-09.dc.html',js=js,dyn_status=True,
-         prim=[('noc','b','Concluir serviço','concluir'),('conc','a','Voltar às tarefas','MB-09.dc.html')])
+      sigbar() + vercomo()
+      + f'<div style="{CARD_ST}"><div role="status" style="{H("dp_cst")}">{H("dp_cond")}</div>'
+        f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; color: {MUTED};"><span>{H("dp_leit")}</span>'
+        f'<a href="{H("dp_ath")}" title="Abrir a máquina desta ordem (condição, leitura e abastecimento)" style="color: {ACC}; font-weight: 700; text-decoration: none;">{H("dp_att")}</a></div>'
+        f'<div role="list" aria-label="Fases da ordem" style="display: flex; flex-wrap: wrap; gap: 4px;"><sc-for list="{H("dp_fases")}" as="f" hint-placeholder-count="5">'
+        f'<span role="listitem" aria-current="{H("f.cur")}" style="{H("f.st")}">{H("f.t")}</span></sc-for></div>'
+        f'<div style="font-size: 12.5px; color: {MUTED};">{H("dp_info")}</div></div>'
+      + IF('dp_hasFila',f'<div role="status" style="{recst} background: {YELS}; color: {YEL};">{H("dp_filat")}</div>')
+      + IF('dp_hasConf',f'<div role="alert" style="{recst} background: {REDS}; color: {RED};"><sc-for list="{H("dp_confs")}" as="x" hint-placeholder-count="1"><div>{H("x.t")}<div style="font-weight: 600;">{H("x.s")}</div></div></sc-for></div>')
+      + IF('dp_hasWhy',f'<div style="{recst} background: {GRAYS}; color: {INK}; font-weight: 600;">{H("dp_why")}</div>')
+      + IF('dp_rec',f'<div role="status" style="{recst} {H("dp_recst")}">✓ {H("dp_rect")}</div>')
+      + IF('dp_aviso',f'<div role="alert" style="{recst} background: {YELS}; color: {YEL};">{H("dp_avisot")}'
+           + btns(fnb('Concluir com esta leitura','dp_forcar','check','Concluir mesmo com a leitura acima do possível'),fnb('Corrigir leitura','dp_corrigir','clock','Voltar e corrigir a leitura')) + '</div>')
+      + h2('Tarefas',H('dp_tkn')) + f'<div style="{CARD_ST} padding-top: 4px;"><sc-for list="{H("dp_tks")}" as="t" hint-placeholder-count="4">{tk}</sc-for>'
+      + IF('dp_incEd',f'<div style="{rowst}">{lab("Incluir tarefa")}' + pills('dp_inct','Tipo da tarefa',4)
+           + f'<input aria-label="Nova tarefa" placeholder="Nova tarefa" value="{H("dp_incx")}" onChange="{H("dp_setincx")}" style="{INP}">'
+           + f'<div><button type="button" onClick="{H("dp_inc")}" title="Incluir a tarefa nesta ordem (corretiva ou pendência)" style="{_BST}">Incluir tarefa</button></div></div>')
+      + IF('dp_incWhy',note(H('dp_incWhy'))) + '</div>'
+      + IF('dp_temPc',h2('Peças','Aplicado: vazio = o planejado.') + f'<div style="{CARD_ST} padding-top: 4px;"><sc-for list="{H("dp_pcs")}" as="p" hint-placeholder-count="2"><div style="{rowst}">'
+           f'<div style="display: flex; gap: 8px; flex-wrap: wrap; font-size: 13px;"><b style="font-weight: 600; flex: 1 1 160px;">{H("p.nome")}</b><span>planejado {H("p.q")}</span></div>'
+           f'<span style="{H("p.st")}"><span style="{H("p.dot")}"></span>{H("p.s")}</span>'
+           + IF('p.ed',f'<label style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: {MUTED};">Aplicado<input aria-label="{H("p.alab")}" inputMode="decimal" placeholder="{H("p.aph")}" value="{H("p.av")}" onChange="{H("p.aset")}" style="{INP} width: 110px; text-align: right;">{H("p.un")}</label>')
+           + IF('p.ro',f'<span style="font-size: 12.5px;">Aplicado: {H("p.apl")}</span>') + '</div></sc-for></div>')
+      + IF('dp_temRet',h2('Peças retiradas','Nunca voltam ao estoque livre: destino e responsável.') + f'<div style="{CARD_ST} padding-top: 4px;"><sc-for list="{H("dp_rets")}" as="r" hint-placeholder-count="2"><div style="{rowst}">'
+           f'<div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: 13px;"><b style="font-weight: 600; flex: 1 1 160px;">{H("r.t")}</b><span style="{H("r.st")}"><span style="{H("r.dot")}"></span>{H("r.d")}</span><span style="color: {MUTED};">{H("r.rs")}</span></div>'
+           + IF('r.ed',pills('r.dests','Destino',3,a='d') + f'<input aria-label="{H("r.rlab")}" placeholder="Responsável pelo destino" value="{H("r.rv")}" onChange="{H("r.setr")}" style="{INP}">'
+                + f'<div><button type="button" onClick="{H("r.go")}" title="Registrar o destino e o responsável pela peça retirada" style="{_BST}">Registrar destino</button></div>') + '</div></sc-for></div>')
+      + IF('dp_conEd',h2('Conclusão','Leitura do contador e horas de oficina.') + f'<div style="{CARD_ST}">'
+           + IF('dp_hasCont',ffield(H('dp_unl'),'dp-leit','dp_leitv','dp_setleit','',big=True,hint=H('dp_ult'),ph='leitura no painel'))
+           + f'<div style="display: flex; flex-direction: column; gap: 6px;">{lab("Horas de oficina · h")}<div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">'
+             f'<button type="button" aria-pressed="{H("dp_prevOn")}" onClick="{H("dp_prev")}" title="Usar o tempo previsto da ordem como horas de oficina" style="{H("dp_prevSt")}">{H("dp_prevt")}</button>'
+             f'<input id="dp-horas" aria-label="Horas de oficina" inputMode="decimal" value="{H("dp_horas")}" onChange="{H("dp_sethoras")}" style="{INP} width: 110px; text-align: right;"></div></div></div>')
+      + IF('dp_exRo',card('Serviço concluído',[H('dp_exTxt')],state='green'))
+      + IF('dp_apt',h2('Aptidão',H('dp_aptSub')) + f'<div style="{CARD_ST}">'
+           + IF('dp_aptMot',note(H('dp_aptMotT')))
+           + IF('dp_manEd',f'<input aria-label="Motivo para manter" placeholder="Motivo para manter (obrigatório)" value="{H("dp_mant")}" onChange="{H("dp_setmant")}" style="{INP}">'
+                + f'<div><button type="button" onClick="{H("dp_man")}" title="Manter a condição do ativo, com o motivo (desfaz o vínculo com esta ordem)" style="{_BST}">{H("dp_manl")}</button></div>') + '</div>'))
+    js='''const mv=mbManView(c); const us=mbUsuario(c); mbVerComo(self,v,c);
+let id=(String(location.hash||'').match(/OM-\\d+/)||[])[0]; if(!id||!mv.oms[id]) id=mbOmGet(); if(!id||!mv.oms[id]){ const f=mbOmsDe(mv,us); id=f[0]?f[0].id:'OM-0233'; }
+const o=mv.oms[id]; const a=mv.ativos[o.aid]; const exe=o.etapa==='Em execução'; const pE=manPode(mv,us,'executar',{o}); const pT=manPode(mv,us,'teste',{o});
+const ff=s.dp||{}; const setF=(k,val)=>self.setState({dp:Object.assign({},self.state.dp||{},{[k]:val})});
+const fim=(r,limpa)=>{ const f2=Object.assign({},self.state.dp||{}); (limpa||[]).forEach(k=>{ delete f2[k]; }); self.setState({dp:f2,dp_aviso:null,dp_rec:r&&r.msg?{t:r.msg,fila:!!r.fila}:null}); };
+const dk=()=>self.state.dp_k||self.__dpk0||(self.__dpk0=manChave());   /* chave do aparelho: o toque repetido no mesmo instante é um efeito só */
+const run=(cmd,args,limpa)=>mbManCmd(self,cmd,Object.assign({om:o.id},args||{}),(r)=>{ self.setState({dp_k:manChave()}); fim(r,limpa); },dk());
+v.hdr_ttl=o.id+' · '+(a?a.nome:''); v.hdr_sub=(String(o.serv||'').indexOf(o.tipo)===0?o.serv:o.tipo+' · '+o.serv)+(o.executante?' · executante '+o.executante:'');
+DCH(v,'hdr',o.etapa+(a&&a.cond==='Bloqueado'&&manAberta(o)?' · ativo bloqueado':''),o.etapa==='Encerradas'?'gray':(a&&a.cond==='Bloqueado'?'red':(MB_ETAPA_COR[o.etapa]==='blue'?'green':(MB_ETAPA_COR[o.etapa]||'gray'))));
+const cd=mbCond(a); v.dp_cond=cd.t; v.dp_cst=mbCondSt(cd.c); v.dp_leit=a&&a.un?'Leitura '+manLeitTxt(a):'Sem contador'; v.dp_ath='MB-09.dc.html#ativo='+o.aid; v.dp_att='Abrir '+(a?a.nome:'máquina')+' ›';
+const cur=MAN_FASES.indexOf(o.etapa); v.dp_fases=MAN_FASES.map((x,i)=>({t:x,cur:i===cur?'step':'false',st:'font-size: 11.5px; font-weight: '+(i===cur?800:600)+'; padding: 3px 8px; border-radius: 999px; white-space: nowrap; '+(i===cur?'background: '+MBTX.accs+'; color: '+MBTX.acc+';':'color: '+MBTX.muted+';')}));
+v.dp_info='Janela '+(o.jan||manBr(o.janIso))+' · criticidade '+(o.crit||'—')+' · retorno '+(o.ret||'—');
+const nf=manAppFila(c).filter(x=>x.om===o.id); v.dp_hasFila=nf.length>0; v.dp_filat=nf.length+(nf.length>1?' registros desta ordem no aparelho':' registro desta ordem no aparelho')+' · aguardando sinal (vai uma vez só)';
+const cf=manAppConfAbertos(c.man,o.id); v.dp_hasConf=cf.length>0; v.dp_confs=cf.map(x=>({t:'Conflito a resolver · Otávio',s:x.desc+' · por '+x.por+' às '+x.at+' · '+x.mot}));
+v.dp_why=o.etapa==='A liberar'?'A liberar: o Otávio (responsável de manutenção) libera a ordem.':((o.etapa==='Liberadas'||exe)&&pE?pE+' · você vê a ordem, sem alterar.':''); v.dp_hasWhy=!!v.dp_why;
+v.dp_rec=!!s.dp_rec; v.dp_rect=s.dp_rec?s.dp_rec.t:''; v.dp_recst=s.dp_rec&&s.dp_rec.fila?'background: '+MBTX.yels+'; color: '+MBTX.yel+';':'background: '+MBTX.accs+'; color: '+MBTX.acc+';';
+/* tarefas pelo tipo: OK grava num toque; fora de OK pede o motivo; Teste com tentativa e foto (D-36); nada vem marcado */
+const nr=o.chk.filter(t=>t.tipo==='Teste'?((t.tent||[]).slice(-1)[0]||{}).r==='Aprovado':!!t.r).length; v.dp_tkn=nr+' de '+o.chk.length+' respondidas';
+const pst=(on,ok,dis)=>'font-family: inherit; font-size: 13px; font-weight: 700; padding: 8px 12px; border-radius: 10px; cursor: '+(dis?'not-allowed':'pointer')+'; white-space: nowrap;'+(dis?' opacity: .55;':'')
+  +(on?(ok?' border: 1px solid '+MBTX.acc+'; background: '+MBTX.acc+'; color: #fff;':' border: 1px solid '+MBTX.yel+'; background: '+MBTX.yels+'; color: '+MBTX.yel+';'):' border: 1px solid '+MBTX.line+'; background: '+MBTX.surf+'; color: '+MBTX.ink+';');
+v.dp_tks=o.chk.map((t,i)=>{ const tp=t.tipo||'Serviço'; const isT=tp==='Teste'; const isM=tp==='Medição'; const why=isT?pT:pE; const ed=exe&&!why;
+  const R=MAN_RESP[tp]||MAN_RESP['Serviço']; const ul=(t.tent||[]).slice(-1)[0]; const rr=isT?(ul?ul.r:''):(t.r||''); const pend=ff['tr'+i]||'';
+  const mval=ff['mv'+i]!==undefined?ff['mv'+i]:(t.val===undefined||t.val===''?'':String(t.val).replace('.',','));
+  const opts=R.map(x=>({t:x,lab:x+' · '+t.t,dis:!ed,on:String(isT||pend?pend===x:t.r===x),st:pst(isT||pend?pend===x:t.r===x,MAN_OK.indexOf(x)>=0,!ed),
+    go:()=>{ if(!ed) return; if(isT){ setF('tr'+i,pend===x?'':x); return; }
+      if(MAN_OK.indexOf(x)>=0){ const a2=isM?{i,r:x,val:mval}:{i,r:x}; run('resp',a2,['tr'+i]); return; } setF('tr'+i,x); }}));
+  const cfr=ff['tr'+i]&&!isT&&MAN_OK.indexOf(ff['tr'+i])<0;
+  const so=exe&&(ed||(isT&&!pE));   /* Teste sem a habilidade: botões desabilitados com o motivo */
+  return {n:String(i+1),t:t.t,tipo:tp,nova:!!(t.nova&&!t.r),showOpts:so,opts,ro:!so,
+    r:rr||'Sem resposta',rst:mbChs(MAN_OK.indexOf(rr)>=0?'green':(rr?(rr==='Reprovado'?'red':'yellow'):'gray')),rdot:mbDot(MAN_OK.indexOf(rr)>=0?'green':(rr?(rr==='Reprovado'?'red':'yellow'):'gray')),
+    por:t.por&&!isT?('por '+t.por+(t.em?' às '+t.em:'')):'',hasPor:!!t.por&&!isT,
+    hasVal:ed&&isM,val:mval,un:t.un||'',vlab:'Valor · '+t.t+(t.un?' ('+t.un+')':''),setval:(e)=>setF('mv'+i,e.target.value),hasValTx:!ed&&isM&&t.val!==''&&t.val!==undefined,valTx:t.val!==''&&t.val!==undefined?manN(t.val,2)+' '+(t.un||''):'',
+    hasMot:ed&&!!cfr,mot:ff['mt'+i]!==undefined?ff['mt'+i]:(t.mot||''),motlab:'Motivo · '+t.t,setmot:(e)=>setF('mt'+i,e.target.value),motgot:'Registrar '+(ff['tr'+i]||'')+' com o motivo',
+    motgo:()=>{ const f2=self.state.dp||{}; const mt=String(f2['mt'+i]||'').trim(); if(!mt) return TOAST(self,'Informe o motivo de “'+t.t+'”.'); run('resp',isM?{i,r:f2['tr'+i],mot:mt,val:mval}:{i,r:f2['tr'+i],mot:mt},['tr'+i,'mt'+i]); },
+    hasMotTx:!!t.mot&&!cfr,motTx:t.mot||'',
+    tents:(t.tent||[]).map((x,j)=>({t:(j+1)+'ª tentativa · '+x.r+' · '+x.evid+' · '+x.por+' · '+x.em,st:mbChs(x.r==='Aprovado'?'green':'red').replace('white-space: nowrap;','white-space: normal; line-height: 1.35; align-items: flex-start;'),dot:mbDot(x.r==='Aprovado'?'green':'red')})),hasTents:isT&&(t.tent||[]).length>0,
+    treg:isT&&ed&&!!pend,tgot:'Anexar foto e registrar '+pend,tgo:()=>run('tentativa',{i,r:pend,evid:'foto (simulada)'},['tr'+i]),
+    hasWhy:exe&&isT&&!pE&&!!pT,why:'Teste: '+pT}; });
+/* incluir tarefa (Corretiva e Pendência, pela matriz) */
+const pI=manPode(mv,us,'incluir',{o}); const incP=['Corretiva','Pendência'].indexOf(o.tipo)>=0&&MAN_ABERTAS.indexOf(o.etapa)>=0; v.dp_incEd=incP&&!pI; v.dp_incWhy=incP&&pI&&exe?'Incluir tarefa: '+pI:'';
+const it=ff.itipo||'Serviço'; v.dp_inct=MAN_TIPOS.map(x=>({t:x,on:String(x===it),st:mbPill(x===it),fn:()=>setF('itipo',x),tt:'Tipo da tarefa: '+x}));
+v.dp_incx=ff.itxt||''; v.dp_setincx=(e)=>setF('itxt',e.target.value); v.dp_inc=()=>{ const f2=self.state.dp||{}; run('incluir',{tipo:f2.itipo||'Serviço',txt:f2.itxt},['itxt']); };
+/* peças (aplicado na conclusão) e retiradas (destino e responsável) */
+v.dp_pcs=(o.pecas||[]).map((p,i)=>{ const st=p.apl&&o.exec?['Aplicado '+manN(p.apl,1)+' '+p.un,'green']:(p.res?['Reservado '+manN(p.res,1)+' '+p.un,'green']:['Sem reserva','gray']);
+  return {nome:p.nome,q:manN(p.qtd,1)+' '+p.un,s:st[0],st:mbChs(st[1]),dot:mbDot(st[1]),ed:exe&&!pE,ro:!(exe&&!pE),av:ff['ap'+i]===undefined?'':ff['ap'+i],aph:'vazio = '+manN(p.qtd,1),alab:'Aplicado · '+p.nome+' ('+p.un+')',un:p.un,
+    apl:o.exec?manN(p.apl,1)+' '+p.un:'—',aset:(e)=>setF('ap'+i,e.target.value)}; }); v.dp_temPc=v.dp_pcs.length>0;
+const pR=(manPode(mv,us,'executar',{o})&&manPode(mv,us,'ponte'))||'';
+v.dp_rets=(o.retiradas||[]).map((r,i)=>{ const ok=!!(r.dest&&r.dest!=='A definir'&&r.resp); const dv=ff['rd'+i]!==undefined?ff['rd'+i]:(r.dest==='A definir'?'':r.dest);
+  return {t:r.nome+' · '+manN(r.qtd)+' '+r.un,d:r.dest||'A definir',rs:r.resp||'sem responsável',st:mbChs(ok?'gray':'red'),dot:mbDot(ok?'gray':'red'),ed:!pR&&manAberta(o)&&o.etapa!=='A liberar'&&o.etapa!=='Liberadas',
+    dests:['Recondicionar','Garantia','Sucata'].map(x=>({t:x,on:String(x===dv),st:mbPill(x===dv),fn:()=>setF('rd'+i,x),tt:'Destino: '+x})),
+    rv:ff['rr'+i]!==undefined?ff['rr'+i]:(r.resp||''),setr:(e)=>setF('rr'+i,e.target.value),rlab:'Responsável · '+r.nome,
+    go:()=>{ const f2=self.state.dp||{}; run('retirada',{i,dest:f2['rd'+i]!==undefined?f2['rd'+i]:(r.dest==='A definir'?'':r.dest),resp:f2['rr'+i]!==undefined?f2['rr'+i]:r.resp},['rd'+i,'rr'+i]); }}; }); v.dp_temRet=v.dp_rets.length>0;
+/* conclusão: leitura pela função única; horas pelo chip "Previsto" ou digitadas (sem valor implícito, D-18) */
+v.dp_conEd=exe&&!pE; v.dp_hasCont=!!(a&&a.un); v.dp_unl=a&&a.un==='km'?'Leitura do odômetro · km':'Leitura do horímetro · h'; v.dp_leitv=ff.leit||''; v.dp_setleit=(e)=>setF('leit',e.target.value);
+v.dp_ult=a&&a.leit?('Última: '+manLeitTxt(a)):''; v.dp_horas=ff.horas||''; v.dp_sethoras=(e)=>setF('horas',e.target.value);
+const prevOn=!!ff.horas&&manNum(ff.horas)===Number(o.tempo); v.dp_prevt='Previsto ('+manN(o.tempo||0,1)+' h)'; v.dp_prevOn=String(prevOn); v.dp_prevSt=mbPill(prevOn); v.dp_prev=()=>setF('horas',String(o.tempo||0).replace('.',','));
+v.dp_exRo=!!o.exec; v.dp_exTxt=o.exec?('Concluída em '+manBr(o.exec.data)+((o.exec.leit!==null&&o.exec.leit!==undefined&&a&&a.un)?' · leitura '+manQ(o.exec.leit,a.un):'')+' · '+manN(o.exec.horas,1)+' h de oficina · por '+o.exec.por):'';
+const conc=(forcar)=>{ const f2=self.state.dp||{}; const ap={}; (o.pecas||[]).forEach((p,i)=>{ if(f2['ap'+i]!==undefined) ap[i]=f2['ap'+i]; });
+  const r=mbManCmd(self,'concluir',{om:o.id,leit:f2.leit,horas:f2.horas,forcar:!!forcar,apl:ap},(r2)=>{ self.setState({dp_k:manChave()}); fim(r2,['leit','horas'].concat((o.pecas||[]).map((p,i)=>'ap'+i))); },dk());
+  if(r.avisoLeit) self.setState({dp_aviso:{t:r.msg}}); };
+v.dp_aviso=!!s.dp_aviso; v.dp_avisot=s.dp_aviso?s.dp_aviso.t:''; v.dp_forcar=()=>conc(true);
+v.dp_corrigir=()=>{ self.setState({dp_aviso:null}); setTimeout(()=>{ const e=document.getElementById('dp-leit'); if(e){ e.focus(); if(e.select) e.select(); } },0); };
+/* aptidão (CMD-19): Declarar apto com teste válido; Manter com motivo; quem decide: Otávio ou o responsável técnico do ativo */
+const podeC=manPode(mv,us,'condicao',{aid:o.aid}); const aptM=manAptoMotivo(mv,o); const decide=o.etapa==='Em conferência'&&o.trata&&!o.aptidao;
+v.dp_apt=decide; v.dp_aptSub=(a?a.nome:'Ativo')+' '+(a?a.cond.toLowerCase():'')+' · quem decide: Otávio ou '+manRtTxt(a)+' (responsável técnico)';
+v.dp_aptMot=decide&&(!!podeC||!!aptM); v.dp_aptMotT=podeC?podeC+'.':(aptM||'');
+v.dp_manEd=decide&&!podeC; v.dp_mant=ff.mant||''; v.dp_setmant=(e)=>setF('mant',e.target.value); v.dp_manl='Manter '+(a?a.cond.toLowerCase():'')+' · com motivo';
+v.dp_man=()=>{ const f2=self.state.dp||{}; run('manter',{motivo:f2.mant},['mant']); };
+v.dp_aptl='Declarar '+(a?a.nome:'ativo')+' apto'; v.dp_apto=()=>run('apto',{});
+/* primária: o próximo passo com verbo, pela fase; sem permissão, volta à fila (o motivo fica no corpo) */
+v.dp_pIni=o.etapa==='Liberadas'&&!pE; v.dp_pCon=exe&&!pE; v.dp_pApt=decide&&!podeC&&!aptM; v.dp_pVolta=!v.dp_pIni&&!v.dp_pCon&&!v.dp_pApt;
+v.dp_ini=()=>run('iniciar',{}); v.dp_con=()=>conc(false);'''
+    emit('MB-09','Ordem de manutenção','',None,'Concluir serviço',corpo,H_=2000,fname='MB-09det.dc.html',back='MB-01.dc.html',js=js,dyn_status=True,cen=True,dyn_head='Ordem de manutenção',
+         prim=[('dp_pIni','b','Iniciar serviço','dp_ini'),('dp_pCon','b','Concluir serviço','dp_con'),('dp_pApt','b',H('dp_aptl'),'dp_apto'),('dp_pVolta','a','Voltar à fila','MB-01.dc.html')])
 
     # ================= MB-10 · Cargas e entregas (lista · papéis) =================
     tabs=('<div role="tablist" aria-label="Papel" style="display: inline-flex; flex-wrap: wrap; padding: 3px; border-radius: 999px; background: '+GRAYS+'; gap: 2px; align-self: flex-start;">'
@@ -983,4 +1225,65 @@ mbIniciar = function (c, id) { const o = c.ordens[id]; const cb = o ? carBloqCol
 mbPasso = function (c, o) { const p = mbPassoSemCar(c, o); if (p.k !== 'iniciar') return p; const cb = carBloqColheita(c, o, 'iniciar'); if (!cb) return p;
   return { k: 'none', t: '', chip: [cb.fim ? 'Carência até ' + carAte(cb.fim) + ' · colheita impedida' : 'Carência sem dados · colheita impedida', 'red'], cor: 'red', tt: cb.t }; };
 try { window.__mb = { mbIniciar, mbDescartar, mbResta }; } catch (e) {}
+'''
+
+# ---------- App × Manutenção (PCM simplificado S4, §3.7): Ver como Marcos · Zé (c.app.usuario); Minha fila do Zé com as OMs;
+# MB-09 "Máquina" (condição em texto, leitura, OM aberta, abastecimento e leitura); MB-09det = painel da OM em 390 px com as mesmas
+# funções (dados_manutencao: manIniciar, manResp, manTentativa, manIncluir, manRetirada, manConcluir, manDeclararApto, manManter);
+# MB-04 "Equipamento" (e "Segurança" com máquina) grava um achado de origem Relato ligado à O.S. (manAchRegistrar).
+# Sem sinal: o comando leva a chave do aparelho e vai para c.app.manFila (manAppCmd); a fila vai uma vez só (manAppSinal, no mbSinal);
+# OM mudada no escritório vira "Conflito a resolver · Otávio" e nunca é aplicada em silêncio.
+MBAPP_JS += r'''
+const MB_US = [{ k: 'Marcos', p: 'operador' }, { k: 'Zé', p: 'mecânico' }];
+function mbUsuario(c){ const u = c && c.app && c.app.usuario; return MB_US.some(x => x.k === u) ? u : 'Marcos'; }
+function mbPapelUs(u){ return (MB_US.find(x => x.k === u) || MB_US[0]).p; }
+// Ver como (simulação, não é login): troca quem usa o app; o estado da demonstração não muda além de c.app.usuario.
+function mbVerComo(self, v, c){ const u = mbUsuario(c);
+  v.vc_us = MB_US.map(x => ({ t: x.k + ' · ' + x.p, on: String(x.k === u), st: mbSeg(x.k === u, false), tt: 'Ver o app como ' + x.k + ' (' + x.p + ') · simulação, não é login',
+    fn: () => { if (mbUsuario(cenGet()) === x.k) return; cenMudar(self, c2 => { c2.app.usuario = x.k; return { msg: 'Ver como ' + x.k + ' (' + x.p + ') · simulação, não é login.' }; });
+      self.setState({ mq_aid: '', mq_rec: null, dp: {}, dp_rec: null, dp_aviso: null, oc_aid: undefined }); } })); }
+// O que o aparelho mostra: o estado do servidor com a fila feita sem sinal aplicada por cima (mesmas funções).
+function mbManView(c){ return manAppProj(c); }
+const MB_CRIT = { 'Alta': 0, 'Média': 1, 'Baixa': 2 };
+function mbCritK(o){ return o.crit in MB_CRIT ? MB_CRIT[o.crit] : 3; }
+// Minha fila do mecânico: OMs em que é o executante (Liberadas, Em execução) e a aptidão a decidir onde é o responsável técnico; pela janela e depois pela criticidade.
+function mbOmsDe(m, u){ return Object.values(m.oms).filter(o => (o.executante === u && (o.etapa === 'Liberadas' || o.etapa === 'Em execução'))
+    || (o.etapa === 'Em conferência' && o.trata && !o.aptidao && !manPode(m, u, 'condicao', { aid: o.aid }) && (o.executante === u || (m.ativos[o.aid] || {}).rt === u)))
+  .sort((a, b) => String(a.janIso || '').localeCompare(String(b.janIso || '')) || (mbCritK(a) - mbCritK(b)) || a.id.localeCompare(b.id)); }
+function mbOmPasso(m, o){ const a = m.ativos[o.aid];
+  if (o.etapa === 'Liberadas') return { k: 'ini', t: 'Iniciar serviço', chip: ['Pronta para iniciar', 'green'] };
+  if (o.etapa === 'Em execução') { const fl = manFaltaConcluir(m, o, 'x', 'x'); const te = fl.some(x => x.indexOf('teste aprovado') === 0);
+    return { k: 'cont', t: 'Continuar serviço', chip: [fl.length ? (te ? 'Teste pendente' : 'Falta: ' + fl.length + (fl.length > 1 ? ' respostas' : ' resposta')) : 'Pronta para concluir', fl.length ? 'yellow' : 'green'] }; }
+  if (o.etapa === 'Em conferência') return { k: 'apt', t: 'Decidir aptidão', chip: ['Decidir aptidão · ' + (a ? a.nome : ''), 'yellow'] };
+  return { k: 'none', t: '', chip: [o.etapa, 'gray'] }; }
+const MB_OM_KEY = 'talhao-os-mb-om';   // ordem aberta no MB-09det (conveniência do aparelho; o cenário não muda)
+function mbOmGet(){ try { return localStorage.getItem(MB_OM_KEY) || ''; } catch (e) { return ''; } }
+function mbOmSet(id){ try { localStorage.setItem(MB_OM_KEY, id || ''); } catch (e) {} }
+// Comando da manutenção pelo app: quem age é o Ver como do app; chave do aparelho (a mesma num toque repetido = um efeito só).
+function mbManCmd(self, cmd, args, depois, chave){ const u = mbUsuario(cenGet()); const q = { chave: chave || manChave(), cmd, args, por: u };
+  const r = manMudar(self, (m, c) => manAppCmd(c, q)); if (!r.erro && !r.nada && depois) depois(r); return r; }
+function mbOmCard(self, c, m, o){ const a = m.ativos[o.aid]; const p = mbOmPasso(m, o); const ec = MB_ETAPA_COR[o.etapa] || 'gray';
+  const nr = o.chk.filter(t => t.tipo === 'Teste' ? ((t.tent || []).slice(-1)[0] || {}).r === 'Aprovado' : !!t.r).length; const nf = manAppFila(c).filter(q => q.om === o.id).length;
+  return { id: o.id, tit: o.tipo + ' · ' + (a ? a.nome : ''), loc: 'Janela ' + (o.jan || manBr(o.janIso)) + ' · criticidade ' + (o.crit || '—') + (o.ret && o.ret !== '—' ? ' · retorno ' + o.ret : ''),
+    e_t: o.etapa, e_st: mbChs(ec), e_dot: mbDot(ec), p_t: p.chip[0], p_st: mbChs(p.chip[1]), p_dot: mbDot(p.chip[1]),
+    dot: 'width: 10px; height: 10px; border-radius: 999px; flex-shrink: 0; background: ' + (MBC[a && a.cond === 'Bloqueado' ? 'red' : p.chip[1]] || MBC.gray)[0] + ';',
+    real: 'Tarefas ' + nr + ' de ' + o.chk.length + (a && a.cond !== 'Apto' ? ' · ' + a.nome + ' ' + a.cond.toLowerCase() : '') + (nf ? ' · ' + nf + ' no aparelho, aguardando sinal' : ''),
+    href: 'MB-09det.dc.html#' + o.id, sel: () => mbOmSet(o.id), isIni: p.k === 'ini', isLnk: p.k === 'cont' || p.k === 'apt', nx_t: p.t,
+    ini: () => { mbOmSet(o.id); mbManCmd(self, 'iniciar', { om: o.id }); }, tt: 'Abrir ' + o.id + ' · tarefas, peças e conclusão', nx_tt: p.t + ' · ' + o.id }; }
+function mbCond(a){ if (!a) return { t: '—', c: 'gray' }; const ci = a.condInfo || {};
+  if (a.cond === 'Bloqueado') return { t: 'Não opere · bloqueado' + (ci.motivo ? ' · ' + ci.motivo : '') + (ci.om ? ' · ' + ci.om : ''), c: 'red' };
+  if (a.cond === 'Restrito') return { t: 'Opere com restrição' + (ci.lim ? ' · ' + ci.lim : (ci.motivo ? ' · ' + ci.motivo : '')) + (ci.ate ? ' · até ' + manBr(ci.ate) : ''), c: 'yellow' };
+  return { t: 'Apto para operar', c: 'green' }; }
+function mbCondSt(k){ const x = MBC[k] || MBC.gray; return 'font-size: 15px; font-weight: 800; line-height: 1.35; padding: 8px 12px; border-radius: 12px; color: ' + x[0] + '; background: ' + x[1] + ';'; }
+// Máquinas herdadas: as da O.S. do turno aberto; sem turno, as da O.S. do usuário alocada hoje (O.S. › Recursos); depois as das OMs do mecânico.
+function mbAtvCurtos(c, m, u){ const hoje = m.hoje; const t = mbTurno(c); let os = t ? [t.os] : [];
+  if (!os.length) { const mine = Object.values(c.ordens).filter(o => o.resp === u && (o.etapa === 'Liberadas' || o.etapa === 'Em execução')).map(o => o.id);
+    os = [...new Set(MAN_AL.aloc.filter(x => x.dia === hoje && mine.indexOf(x.os) >= 0).map(x => x.os))]; }
+  const rs = MAN_AL.aloc.filter(x => x.dia === hoje && os.indexOf(x.os) >= 0).map(x => x.r);
+  const ids = Object.keys(MAN_AL.rec).filter(id => rs.indexOf(MAN_AL.rec[id]) >= 0 && m.ativos[id]);
+  ids.sort((x, y) => (m.ativos[x].classe === 'Trator' ? 0 : 1) - (m.ativos[y].classe === 'Trator' ? 0 : 1));
+  const oms = mbOmsDe(m, u); oms.forEach(o => { if (ids.indexOf(o.aid) < 0 && m.ativos[o.aid]) ids.push(o.aid); });
+  return { ids, os: os[0] || '', de: os.length ? ('do turno da ' + os[0] + ' (alocação de hoje)') : (oms.length ? ('da ' + oms[0].id) : '') }; }
+function mbPillD(on, dis){ return mbPill(on) + (dis ? ' opacity: .55; cursor: not-allowed;' : ''); }
+try { window.__mbman = { mbUsuario, mbOmsDe, mbAtvCurtos, mbManView, mbCond }; } catch (e) {}
 '''

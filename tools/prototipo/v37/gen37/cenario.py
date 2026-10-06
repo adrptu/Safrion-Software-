@@ -81,7 +81,8 @@ def seed():
     # chave própria da manutenção sai. O.S., Estoque, App, CD-03 e a tela MA leem e gravam o mesmo estado; o salvo v=3 volta ao seed (cenGet).
     import dados_manutencao as DM
     return dict(v=4, rev=0, ordens=ordens, reqs=reqs, lotes=lotes, movs=[], ocorr=[],
-                app=dict(online=True, fila=[], turno=None, operador='Marcos'), man=DM.seed())
+                # S4 (PCM §3.7): usuario = Ver como do app (Marcos · Zé, simulação); manFila = comandos da manutenção feitos sem sinal
+                app=dict(online=True, fila=[], turno=None, operador='Marcos', usuario='Marcos', manFila=[]), man=DM.seed())
 
 
 def js_prefixo():

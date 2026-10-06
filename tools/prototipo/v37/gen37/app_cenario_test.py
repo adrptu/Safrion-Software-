@@ -60,7 +60,7 @@ try:
          'fechar 110 ha recusado junto ao campo (saldo 100 ha): ' + al[:90])
 
     a.abrir('MB-04')
-    a.setv('#oc_txt', 'Vento acima de 10 km/h às 10:30; parei a barra 20 min.'); a.clk('Registrar ocorrência')
+    a.clk('Clima'); a.setv('#oc_txt', 'Vento acima de 10 km/h às 10:30; parei a barra 20 min.'); a.clk('Registrar ocorrência')   # PCM S4: Equipamento pede a máquina e vira achado; vento é Clima
     a.ok(a.cen(f"c.ocorr.length===1 && c.ocorr[0].os==='{OS}'") and 'OC-501' in a.body() and 'Registrada na O.S.' in a.body(),
          f'MB-04: ocorrência OC-501 registrada na {OS}')
 

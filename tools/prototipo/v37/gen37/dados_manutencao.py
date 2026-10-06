@@ -456,7 +456,7 @@ function manPor(pf){ const q=manPf(pf); const pa=manPapelDe(q); if(!q.k) return 
 function manRtTxt(a){ return a?(a.rt||'Otávio'):'—'; }
 function manPode(c,pf,cmd,x){ x=x||{}; const q=manPf(pf); const pa=manPapelDe(q); const k=q.k;
   const PCM='Ação do Otávio (responsável de manutenção)';
-  if(cmd==='registrar') return pa?'':'Ação de Otávio, Zé ou Ana';
+  if(cmd==='registrar') return (pa||MAN_OPS.indexOf(k)>=0)?'':'Ação de Otávio, Zé, Ana ou do operador da máquina';   /* operador do app (Marcos, S4) registra achado, leitura e abastecimento */
   if(['decidir','gerar','mover','liberar','encerrar','leituraDecidir','estorno','plano','ponte'].indexOf(cmd)>=0) return pa==='pcm'?'':PCM;
   if(cmd==='condicao'){ const a=x.aid?c.ativos[x.aid]:null; if(pa==='pcm') return ''; if(pa==='mecanico'&&a&&a.rt===k) return ''; return 'Ação do Otávio ou do responsável técnico ('+manRtTxt(a)+')'; }
   const o=x.o;
@@ -557,7 +557,7 @@ function manSelos(c,o){ const s=[]; const a=c.ativos[o.aid];
   if(o.tipo==='Preventiva'&&o.pid&&MAN_ABERTAS.indexOf(o.etapa)>=0){ const l=manLinhaOm(c,o); if(l&&l.x.sit==='Vencida') s.push({t:'Vencida',c:'red',dono:'Otávio'}); }
   if(a&&a.cond==='Bloqueado'&&manAberta(o)&&o.etapa!=='Em conferência') s.push({t:'Ativo bloqueado',c:'red',dono:o.trata?(o.executante||'Otávio'):'Otávio'});
   if(o.etapa==='Em execução'&&(o.chk||[]).some(t=>t.nova&&!t.r)) s.push({t:'Tarefa nova',c:'yellow',dono:o.executante});
-  if(o.etapa==='Em execução'&&o.conflitoApp) s.push({t:'Conflito a resolver',c:'red',dono:'Otávio'});
+  if(o.conflitoApp) s.push({t:'Conflito a resolver',c:'red',dono:'Otávio'});   /* registro do app que chegou depois de a OM mudar (S4) */
   if(o.etapa==='Em conferência'&&o.trata&&!o.aptidao) s.push({t:'Decidir aptidão · '+(a?a.nome:''),c:'yellow',dono:'Otávio ou '+manRtTxt(a)});
   if((o.pecas||[]).some(p=>p.sob>0)) s.push({t:'Sobras a resolver',c:'yellow',dono:'Otávio (simulado · papel do Almoxarifado)'});
   if((o.retiradas||[]).some(r=>!r.dest||r.dest==='A definir'||!r.resp)) s.push({t:'Peça retirada sem destino',c:'yellow',dono:o.executante||'Otávio'});
@@ -912,8 +912,63 @@ function manCustoPeriodo(c,k,aid){ const P=manPeriodo(c,k); let enc=0, and=0;
     else if(manAberta(o)&&o.etapa!=='A liberar') and+=manCusto(c,o,'est'); }); return {enc,and,P}; }
 function manCumprimento(c,k){ const P=manPeriodo(c,k); const os=Object.values(c.oms).filter(o=>o.tipo==='Preventiva'&&o.etapa==='Encerradas'&&o.vencOrig&&o.exec&&o.exec.data>=P.de&&o.exec.data<=P.ate);
   if(!os.length) return null; const ok=os.filter(o=>o.exec.data<=o.vencOrig).length; return {ok,n:os.length,pct:Math.round(ok*100/os.length)}; }
+/* ---------- app de campo (PCM S4, §3.7): o MB-09, o MB-09det e o MB-04 usam as mesmas funções, com a chave gerada no aparelho.
+   Com sinal: aplica já. Sem sinal: valida na cópia do aparelho (mesma regra; erro volta ao campo) e vai para a fila (c.app.manFila).
+   Na volta do sinal a fila vai uma vez só: o cenário revalida fase e o.rv da OM; se mudou, vira "Conflito a resolver · Otávio" e nunca é aplicado em silêncio. ---------- */
+const MAN_APP_CMD={
+  iniciar:(c,a,pf)=>manIniciar(c,a.om,pf),
+  resp:(c,a,pf)=>manResp(c,a.om,a.i,a.r,a.mot,pf,a.val),
+  tentativa:(c,a,pf)=>manTentativa(c,a.om,a.i,a.r,a.evid,pf),
+  incluir:(c,a,pf)=>manIncluir(c,a.om,a.tipo,a.txt,pf),
+  retirada:(c,a,pf)=>manRetirada(c,a.om,a.i,a.dest,a.resp,pf),
+  concluir:(c,a,pf)=>manConcluir(c,a.om,a.leit,a.horas,a.forcar,a.apl,pf),
+  apto:(c,a,pf)=>manDeclararApto(c,a.om,pf),
+  manter:(c,a,pf)=>manManter(c,a.om,a.motivo,pf),
+  abastecer:(c,a,pf,k)=>manAbastecer(c,a.d,pf,k),
+  leitura:(c,a,pf,k)=>manLeituraAvulsa(c,a.aid,a.val,a.data,pf,k),
+  achado:(c,a,pf,k)=>manAchRegistrar(c,a.d,pf,k)};
+const MAN_APP_NOME={iniciar:'Iniciar serviço',resp:'Resposta de tarefa',tentativa:'Teste',incluir:'Tarefa incluída',retirada:'Destino de peça retirada',concluir:'Concluir serviço',
+  apto:'Declarar apto',manter:'Manter condição',abastecer:'Abastecimento',leitura:'Leitura',achado:'Achado'};
+function manAppAplicar(c,q){ const f=MAN_APP_CMD[q.cmd]; if(!f) throw new Error('Comando desconhecido: '+q.cmd+'.'); return manCmd(c,q.chave,'app:'+q.cmd,()=>f(c,q.args||{},q.por,q.chave)); }
+function manAppFila(cc){ return (cc&&cc.app&&cc.app.manFila)||[]; }
+/* cópia do aparelho: o estado do servidor com a fila aplicada por cima (o que o operador vê sem sinal) */
+function manAppProj(cc){ const F=manAppFila(cc); if(!F.length) return cc.man; const m=manClone(cc.man); F.forEach(q=>{ try{ manAppAplicar(m,q); }catch(e){} }); return m; }
+function manAppAid(m,q){ const a=q.args||{}; return a.aid||(a.d&&a.d.aid)||(a.om&&m.oms[a.om]?m.oms[a.om].aid:''); }
+function manAppDesc(m,q){ const a=q.args||{}; const at=m.ativos[manAppAid(m,q)]; const t=a.om&&m.oms[a.om]&&a.i!==undefined?(m.oms[a.om].chk[a.i]||{}).t:'';
+  return (MAN_APP_NOME[q.cmd]||q.cmd)+(a.om?' · '+a.om:'')+(at?' · '+at.nome:'')+(t?' · '+t:'')+(a.r?' · '+a.r:'')+(q.cmd==='abastecer'&&a.d?' · '+manN(manNum(a.d.vol))+' L':'')+(q.cmd==='leitura'?' · '+a.val+' '+(at?at.un:''):''); }
+function manAppCmd(cc,q){ if(!q||!q.chave) throw new Error('Comando sem chave do aparelho.'); const a=q.args||{};
+  if(cc.app.online!==false) return manAppAplicar(cc.man,q);
+  cc.app.manFila=cc.app.manFila||[]; if(cc.app.manFila.some(x=>x.chave===q.chave)) return {nada:true,repetido:true,msg:'Já está no aparelho · aguardando sinal.'};
+  const m=manClone(manAppProj(cc)); const o=a.om?m.oms[a.om]:null;   /* cópia: validar no aparelho nunca grava no servidor */ const rv=o?(o.rv||0):null, fase=o?o.etapa:null; const desc=manAppDesc(m,q);
+  const r=manAppAplicar(m,q); if(r.nada) return r;
+  cc.app.manFila.push({chave:q.chave,cmd:q.cmd,args:a,por:q.por,om:a.om||'',rv,fase,at:cenAgora(),desc}); cc.app.fila=(cc.app.fila||[]).concat(['MAN|'+q.chave]);
+  return {fila:true,id:r.id||'',msg:desc+' · no aparelho, aguardando sinal (vai uma vez só ao voltar).'}; }
+function manAppConflito(m,q,mot){ m.appConf=m.appConf||[]; const id='CA-'+String(m.appConf.length+1).padStart(3,'0');
+  m.appConf.push({id,chave:q.chave,cmd:q.cmd,args:q.args,por:q.por,om:q.om||'',aid:manAppAid(m,q),at:q.at,desc:q.desc,mot,estado:'A resolver'});
+  const o=q.om&&m.oms[q.om]; if(o) o.conflitoApp=(o.conflitoApp||0)+1; return id; }
+/* volta do sinal: cada registro entra uma vez (recibo pela chave); OM mudada desde o registro vira conflito */
+function manAppSinal(cc){ const F=manAppFila(cc).slice(); const m=cc.man; let n=0; const conf=[];
+  F.forEach(q=>{ m.recibos=m.recibos||{}; if(m.recibos[q.chave]){ return; }
+    const o=q.om?m.oms[q.om]:null; let mot='';
+    if(q.om&&!o) mot=q.om+' não existe mais';
+    else if(o&&((o.rv||0)!==q.rv||o.etapa!==q.fase)) mot=q.om+' mudou no escritório depois do registro'+(o.etapa!==q.fase?' (era '+q.fase+', agora '+o.etapa+')':' (outra alteração na mesma fase)');
+    if(!mot){ try{ const r=manAppAplicar(m,q); if(r.nada&&!r.repetido) mot=r.msg||'não aplicado'; else { n++; return; } }catch(e){ mot=String(e.message||e); } }
+    conf.push(manAppConflito(m,q,mot)); });
+  cc.app.manFila=[]; cc.app.fila=(cc.app.fila||[]).filter(k=>String(k).indexOf('MAN|')!==0);
+  return {n,conf}; }
+function manAppConfAbertos(c,om,aid){ return (c.appConf||[]).filter(x=>x.estado==='A resolver'&&(om===undefined||x.om===om)&&(aid===undefined||(!x.om&&x.aid===aid))); }
+function manAppConfBaixa(c,x){ const o=x.om&&c.oms[x.om]; if(o){ o.conflitoApp=Math.max(0,(o.conflitoApp||0)-1); manToca(o); } }
+/* Otávio decide: aplicar o registro sobre o estado de agora (mesma função, autor original, mesma chave) ou descartar com motivo */
+function manAppConfAplicar(c,id,pf){ manExige(c,pf,'decidir'); const x=(c.appConf||[]).find(y=>y.id===id); if(!x||x.estado!=='A resolver') throw new Error('Conflito não encontrado.');
+  let q={chave:x.chave,cmd:x.cmd,args:x.args,por:x.por}; let r=manAppAplicar(c,q);
+  if(r.nada&&r.rep&&x.cmd==='achado'){ q=Object.assign({},q,{args:Object.assign({},x.args,{d:Object.assign({},x.args.d,{rep:'somar'})})}); r=manAppAplicar(c,q); }
+  if(r.nada&&!r.repetido) throw new Error((r.msg||'Não aplicado')+' · descarte com motivo ou peça novo registro.');
+  x.estado='Aplicado'; x.dec={por:manPor(pf),em:c.hoje}; manAppConfBaixa(c,x); return {msg:'Registro do app aplicado: '+x.desc+(r.msg?' · '+String(r.msg).replace(/\.+$/,''):'')+'.'}; }
+function manAppConfDescartar(c,id,motivo,pf){ manExige(c,pf,'decidir'); const x=(c.appConf||[]).find(y=>y.id===id); if(!x||x.estado!=='A resolver') throw new Error('Conflito não encontrado.');
+  if(manVazio(motivo)) throw new Error('Informe o motivo para descartar.'); x.estado='Descartado'; x.dec={por:manPor(pf),em:c.hoje,motivo:String(motivo).trim()}; manAppConfBaixa(c,x);
+  return {msg:'Registro do app descartado: '+x.desc+' ('+String(motivo).trim()+') · fica no histórico da ordem.'}; }
 /* acesso para os testes de navegador (mesmo padrão do window.__cen da O.S.) */
-try { window.__man = { manGet, manClone, manLinhas, manVenc, manGerar, manGerarTodas, manLiberar, manConcluir, manReset, manLeitura, manLeituraOk, manLeituraDescartar, manSolicitar, manReceber, manPlaus, manNum,
+try { window.__man = { manAppCmd, manAppSinal, manAppProj, manAppConfAplicar, manAppConfDescartar, manMudar, manRetirada, manIncluir, manGet, manClone, manLinhas, manVenc, manGerar, manGerarTodas, manLiberar, manConcluir, manReset, manLeitura, manLeituraOk, manLeituraDescartar, manSolicitar, manReceber, manPlaus, manNum,
   manConflito, manProxLivre, manMover, manPode, manAchOpcoes, manCusto, manCustoFinal, manTesteValido, manFaltaEncerrar, manFaltaConcluir, manMarcoSug }; } catch (e) {}
 '''
 

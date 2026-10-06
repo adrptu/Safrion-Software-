@@ -251,7 +251,8 @@ function EXTRAVALS(self,v){ const c=manGet(); const st=self.state; const pf=g2pe
   v.vis_k=vis; v.vis_set=(e)=>ma_vis(self,e.target.value);
   /* selo do cabeçalho: só impedimentos, calculado */
   const conf=Object.values(c.oms).filter(o=>(o.etapa==='A liberar'||o.etapa==='Liberadas')&&manConflito(c,o)&&!o.conflitoAceito).length;
-  const sl=[]; if(bloq) sl.push(bloq+(bloq>1?' ativos bloqueados':' ativo bloqueado')); if(conf) sl.push(conf+(conf>1?' conflitos':' conflito'));
+  const capp=manAppConfAbertos(c).length;   /* registros do app a resolver (S4) */
+  const sl=[]; if(bloq) sl.push(bloq+(bloq>1?' ativos bloqueados':' ativo bloqueado')); if(conf) sl.push(conf+(conf>1?' conflitos':' conflito')); if(capp) sl.push(capp+(capp>1?' registros do app a resolver':' registro do app a resolver'));
   v.st_ma=sl.join(' · ')||'Sem impedimentos'; v.st_ma_st=ma_chipSt(sl.length?'red':'green').replace('padding:2px 9px;','padding:3px 10px;'); v.st_ma_dot=ma_dotSt(sl.length?'red':'green');
   const card=(k,t,n,sub,on)=>({k,t,n:String(n),sub:sub||'',btn:!!k,on:String(!!on),go:()=>self.setState({card:st.card===k?'':k}),lab:t+' · '+n+(k?(on?' · mostrando só estes; toque para ver todos':' · toque para filtrar'):'')});
   /* Sem ordem: 3 cartões-filtro (a mesma base de prazo: início da janela, 10 d) */
@@ -321,6 +322,7 @@ function ma_custoNat(c,aid,per){ const P=manPeriodo(c,per); const n={pecas:0,lub
     n.ofi+=((o.exec&&o.exec.horas)||0)*c.custoh; n.terc+=Number(o.terc)||0; }); return n; }
 function ma_ativoV0(v){ v.at_kv=[]; v.at_blk=[]; v.at_agenda=[]; v.at_hist=[]; v.at_cn=[]; v.at_prim=false; v.at_secs=[]; }
 function ma_ativoV(self,v,c,a,pf){ const st=self.state; const i=a.condInfo||{}; const tr=i.om&&c.oms[i.om];
+  v.at_cas=ma_cas(self,c,manAppConfAbertos(c,undefined,a.id),pf); v.at_hasCa=v.at_cas.length>0;
   v.at_t=a.nome; v.at_sub=a.modelo+' · '+a.local+' · '+a.grupo+' · responsável técnico: '+manRtTxt(a); v.at_cond=ma_condTxt(c,a); v.at_cst=ma_chipSt(ma_cond(a)); v.at_cdot=ma_dotSt(ma_cond(a));
   v.at_leit=a.leit?('Leitura '+manLeitTxt(a)+(a.suspeita?' · '+manQ(a.suspeita.val,a.un)+' a confirmar':'')):'Sem contador'; v.voltar=()=>ma_volta(self);
   const achs=Object.values(c.achados).filter(q=>q.aid===a.id&&q.estado==='Sem ordem');
@@ -417,7 +419,14 @@ function ma_omPrim(self,c,o,pf,f){ const a=c.ativos[o.aid]; const P={}; const S=
     if((o.pecas||[]).some(p=>p.sob>0)) return {P:ma_btn('Resolver sobras (simulado · papel do Almoxarifado)',()=>run(c2=>manSobras(c2,o.id,g2perfil()),null),manPode(c,pf,'ponte'),true),S};
     return {P:ma_btn('Encerrar ordem · '+manRS(custo),()=>run(c2=>manEncerrar(c2,o.id,g2perfil())),manPode(c,pf,'encerrar')||(fe.length?'Falta: '+fe.join(' · '):''),true),S}; }
   return {P:null,S}; }
+/* registros do app que chegaram depois de a OM mudar (S4, §3.7): nunca aplicados em silêncio; Otávio aplica sobre o estado de agora ou descarta com motivo */
+function ma_cas(self,c,lst,pf){ const pd=manPode(c,pf,'decidir');
+  return lst.map(x=>({t:'Conflito a resolver · Otávio · '+x.desc,s:'Registrado no app por '+x.por+' às '+x.at+', sem sinal · '+x.mot,dis:!!pd,why:pd||'',hasWhy:!!pd,
+    ap:()=>ma_cmd(self,c2=>manAppConfAplicar(c2,x.id,g2perfil()),(r)=>ma_rec(self,r)),
+    dmv:(self.state.pf||{})['cad_'+x.id]||'',dset:(e)=>maF(self,'cad_'+x.id,e.target.value),dlab:'Motivo para descartar · '+x.desc,
+    ds:()=>ma_cmd(self,c2=>manAppConfDescartar(c2,x.id,(self.state.pf||{})['cad_'+x.id],g2perfil()),(r)=>ma_rec(self,r))})); }
 function ma_panOm(self,v,c,o,pf){ const st=self.state; const f=st.pf||{}; const a=c.ativos[o.aid]; const cur=MAN_FASES.indexOf(o.etapa);
+  v.om_cas=ma_cas(self,c,manAppConfAbertos(c,o.id),pf); v.om_hasCa=v.om_cas.length>0;
   v.pan_t=o.id+' · '+(a?a.nome:''); v.pan_sub=o.tipo+(o.pid?' · '+o.pid+' v'+o.ver:'')+' · '+o.serv; v.om_ah='#ativo='+o.aid; v.om_at='Abrir '+(a?a.nome:'ativo')+' ›'; v.om_goAt=()=>ma_pg(self,'ativo',o.aid);
   v.om_fases=MAN_FASES.map((x,i)=>({t:x,cur:i===cur?'step':'false',st:'display:flex;flex-direction:column;gap:5px;font-size:11.5px;font-weight:'+(i===cur?'800':'600')+';color:'+(i<=cur?'#15201A':'#8A968E')+';',
     bst:'height:5px;border-radius:999px;background:'+(i<cur?'#9CCBB0':(i===cur?'#1E7A4C':'#E4E9E5'))+';'}));
@@ -934,6 +943,14 @@ def _visoes():
     col=lambda x: f'<div style="display: flex; flex-direction: column; gap: 10px; min-width: 0;">{x}</div>'
     return (IF('lista',col(sel + IF('v_semordem',col(semordem),True) + IF('v_ordens',col(ordens)) + IF('v_ativos',col(ativos)) + IF('v_planos',col(planos))),True))
 
+def _cas(lst):
+    """Conflitos do app (S4): o registro feito sem sinal que encontrou a ordem mudada; Otávio aplica ou descarta com motivo."""
+    return IF(lst.replace('cas','hasCa'),FOR(lst,'x',f'<div role="alert" style="display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: 10px; background: {REDS}; color: {RED}; font-size: 12.8px; font-weight: 700;">{H("x.t")}'
+        f'<span style="font-weight: 600;">{H("x.s")}</span><div style="display: flex; gap: 8px; flex-wrap: wrap;">'
+        f'<button type="button" disabled="{H("x.dis")}" title="{H("x.why")}" onClick="{H("x.ap")}" style="{_MINI}">Aplicar registro do app</button>'
+        f'<input aria-label="{H("x.dlab")}" placeholder="Motivo para descartar" value="{H("x.dmv")}" onChange="{H("x.dset")}" disabled="{H("x.dis")}" style="{INP} flex: 1 1 160px; font-size: 12.5px;">'
+        f'<button type="button" disabled="{H("x.dis")}" title="{H("x.why")}" onClick="{H("x.ds")}" style="{_MINI}">Descartar · motivo</button></div>'
+        + IF('x.hasWhy',f'<span style="font-size: 12px; font-weight: 600;">{H("x.why")}</span>') + '</div>',1))
 def _pag_ativo():
     G=lambda cols,gid,search=False: grid(cols,[],edit=dict(m='pick'),gid=gid,total=False,search=search)
     d_venc=G([dict(k='serv',l='Serviço · plano',w=230),dict(k='sit',l='Situação',w=170),dict(k='prox',l='Próximo',t='num',w=170),dict(k='om',l='Ordem',w=170)],'d_venc')
@@ -956,7 +973,7 @@ def _pag_ativo():
          + IF('at_semAgenda',f'<div style="font-size: 12.8px; color: {MUTED};">Sem alocação nas O.S. a partir de hoje.</div>')
          + _lab('Histórico da condição') + FOR('at_hist','x',f'<div style="font-size: 12.5px; color: {MUTED};">{H("x.t")}</div>',2))
     venc=(d_venc + IF('at_semPl',f'<div><button type="button" onClick="{H("at_semPlGo")}" style="{LNK}">{H("at_semPlt")}</button></div>'))
-    corpo=(cab + _blk('abk_','sit',sit) + _blk('abk_','venc',venc) + _blk('abk_','ach',d_ach) + _blk('abk_','om',d_om) + _blk('abk_','lei',d_lei) + _blk('abk_','cus',_kv('at_cn',3)))
+    corpo=(cab + _cas('at_cas') + _blk('abk_','sit',sit) + _blk('abk_','venc',venc) + _blk('abk_','ach',d_ach) + _blk('abk_','om',d_om) + _blk('abk_','lei',d_lei) + _blk('abk_','cus',_kv('at_cn',3)))
     return IF('pg_ativo',f'<div style="display: flex; flex-direction: column; gap: 10px;">{corpo}</div>')
 
 def _pag_plano():
@@ -1108,7 +1125,7 @@ def _painel():
     ori=(f'<div style="font-size: 13px; font-weight: 600;">{H("om_orig")}</div>'
          + IF('om_temAch',FOR('om_achs','x',f'<div><button type="button" onClick="{H("x.go")}" style="{LNK}">Achado {H("x.t")} ›</button></div>',1))
          + IF('om_hasPl',f'<div><button type="button" onClick="{H("om_goPl")}" style="{LNK}">{H("om_plt")}</button></div>'))
-    om=(fases + faixa + atv + _blk('obk_','jan',jan) + _blk('obk_','tk',tks) + _blk('obk_','pc',pcs) + _blk('obk_','con',con) + _blk('obk_','cus',_kv('om_kv',3)) + _blk('obk_','ori',ori))
+    om=(fases + faixa + atv + _cas('om_cas') + _blk('obk_','jan',jan) + _blk('obk_','tk',tks) + _blk('obk_','pc',pcs) + _blk('obk_','con',con) + _blk('obk_','cus',_kv('om_kv',3)) + _blk('obk_','ori',ori))
     # ---- achado ----
     ach=(f'<div style="display: flex; gap: 6px; flex-wrap: wrap;">' + IF('ac_nova',f'<span style="{ma_chip_st("yellow")}">Nova</span>') + IF('ac_semEvid',f'<span style="{ma_chip_st("yellow")}">Sem evidência</span>') + '</div>'
          + _kv('ac_kv',2)

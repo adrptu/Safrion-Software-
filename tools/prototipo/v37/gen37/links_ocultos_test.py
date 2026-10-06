@@ -27,12 +27,14 @@ for f in sorted(k for k,v in pag.items() if v=='menu'):
     t=open(os.path.join(PJ,f),encoding='utf-8').read()
     for h in {m.split('#')[0] for m in re.findall(r'([A-Z]{2}-[0-9A-Za-z\-]+\.dc\.html(?:#[^"\'\s<]*)?)',t)} & oc: pares.add((f,h))
 p=lambda o,*ds: {(o+'.dc.html',d+'.dc.html') for d in ds}
-ESCOPO=(p('IN-04','PL-05','CA-02','CO-06det')|p('OS','CA-02','CO-06det')|p('MA-01','PL-04')|p('MA-02','PL-05det')|p('MA-03','PL-05')|p('MA-04det','PL-05','PL-05det')
-        |p('MA-05','MB-09')|p('IR-04','GE-07')|p('MB-01','MB-07','MB-08','MB-09','MB-10')|p('MB-02','MB-08')|p('MB-05','MB-05det','SU-03det'))
+# PCM simplificado (05/10, S1): MA-01..MA-05 e MA-04det viram a tela única MA (os endereços antigos só redirecionam); S4: MB-09 deixa de ser oculto
+ESCOPO=(p('IN-04','PL-05','CA-02','CO-06det')|p('OS','CA-02','CO-06det')|p('MA','PL-04','PL-05','PL-05det')
+        |p('IR-04','GE-07')|p('MB-01','MB-07','MB-08','MB-10')|p('MB-02','MB-08')|p('MB-05','MB-05det','SU-03det'))
 ok('L1 nenhum elo do escopo (PL-04/PL-05/PL-05det, CA-02, CO-06det, GE-07, MB-05det, MB-07..MB-10, SU-03det a partir de telas visíveis)', not (pares & ESCOPO), sorted(pares & ESCOPO))
 RESIDUAL={  # por PAR: um elo novo, mesmo numa tela já listada, quebra o teste
  **{x:'índice do protótipo: aponta de propósito para módulos ocultos' for x in p('Main','AG-02','BO-02','CA-01','CA-04','CF-01','CO-01','CO-06','GE-01','IN-01','LO-01','LO-02','ON-01','PL-01','PL-05','PT-01','SU-01','SU-07','VE-01')},
  **{x:'vivo (cenário ou MIP), só falta pôr na página visível (build.py VIS_ROWS)' for x in p('MB-01','MB-02det','MB-03x-recibo','MB-06')|p('MB-02','MB-02det','MB-03x-recibo')
+    |p('MB-09','MB-03x-recibo')|p('MB-09det','MB-03x-recibo')
     |p('MB-03','MB-02det','MB-03x-recibo')|p('MB-04','MB-03x-recibo')|p('MB-05','MB-03x-recibo')|p('AG-01','MB-06')|p('AG-01det','MB-06')|p('IN-04','MB-06','CO-06')},
  ('MB-01.dc.html','IN-01.dc.html'):'"voltar" do app',
  **{x:'cadeia MIP → diagnóstico e recomendação (frente própria)' for x in p('AG-01','AG-03','AG-03det','AG-04det')|p('AG-01det','AG-03det','AG-04det','AG-06','PL-02')|p('AG-07','AG-04det')|p('IN-04','AG-06')},
@@ -41,6 +43,6 @@ fora=sorted(pares-set(RESIDUAL))
 ok('L2 todo o resto da varredura está na lista residual, por par e com motivo', not fora, fora)
 import areas.inicio as I, dados_manutencao as DM
 a420=[a for a in I._ORD_MAPA if a[0]=='OS-0420'][0][4]
-ok('L3 Mapa · OS-0420: o passo vai para a OM-0233 viva (MA-04, visível e com âncora no estado da manutenção), não para PL-05',
-   a420 and a420[1]=='MA-04.dc.html#OM-0233' and 'OM-0233' in DM.seed()['oms'] and pag.get('MA-04.dc.html')=='menu', a420)
+ok('L3 Mapa · OS-0420: o passo vai para a OM-0233 viva (tela MA, visível e com âncora no registro: MA#om=), não para PL-05',
+   a420 and a420[1]=='MA.dc.html#om=OM-0233' and 'OM-0233' in DM.seed()['oms'] and pag.get('MA.dc.html')=='menu', a420)
 print('TOTAL',len(OK)+len(FA),'· falhas',len(FA)); sys.exit(1 if FA else 0)
