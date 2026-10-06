@@ -12,7 +12,7 @@ PERFIS=[('Ana','Gestora · safra, compras e aprovações','SAF.dc.html'),
  ('Rui','Almoxarife · estoque e custódia','EST.dc.html'),
  ('Dora','Comercial e logística','VE-01.dc.html'),
  ('Fertisul','Parceiro credenciado (portal)','PT-01.dc.html'),
- ('Plataforma','Backoffice (admin)','BO-01.dc.html')]
+ ('Plataforma','Backoffice (admin)','BO-02.dc.html')]
 CENARIOS=[('Safra','Planejar safra: aplicar plano em lote, ajustar um cultivo e enviar para cotação','SAF.dc.html'),
  ('Compra','Compra de insumos: da SOL-2026-07 às propostas, aprovação e entrega','CMP.dc.html'),
  ('Estoque','Estoque: recebimento com quarentena, entrega por O.S. e devolução','EST.dc.html'),
@@ -51,7 +51,7 @@ def build():
     from ui37 import menu_item
     ocultos=[(n,[f for f in fs if menu_item(ffile(f))[0] is None]) for n,fs in ocultos if n not in ('Cadastros',)]   # só as telas que continuam fora do menu (01/10)
     oc_html=''.join(f'<a href="{ffile(fs[0])}" style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid {LINE}; border-radius: 999px; font-size: 12.3px; color: {INK}; text-decoration: none; background: {SURF};">{esc(n)} <span style="color: {MUTED};">{len(fs)}</span></a>' for n,fs in ocultos if fs)
-    EXT=[('App móvel','MB-01',10,''),('Portal do parceiro','PT-01',7,''),('Onboarding','ON-01',1,''),('Backoffice','BO-01',4,'')]
+    EXT=[('App móvel','MB-01',10,''),('Portal do parceiro','PT-01',7,''),('Onboarding','ON-01',1,''),('Backoffice','BO-02',2,'')]
     oc_html+=''.join(f'<a href="{fid}.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid {LINE}; border-radius: 999px; font-size: 12.3px; color: {INK}; text-decoration: none; background: {SURF};">{esc(nome)} <span style="color: {MUTED};">{n}</span></a>' for nome,fid,n,ic in EXT)
     NOMENU={h:(nome if len(items)==1 else f'{nome} › {l}') for nome,ic,items in MENU2 for l,h in items}
     NOMENU.update({ffile(fs[0]):f'Módulos ocultos › {n}' for n,fs in ocultos if fs}); NOMENU.update({f'{fid}.dc.html':f'Módulos ocultos › {nome}' for nome,fid,n,ic in EXT})
