@@ -19,6 +19,13 @@ def clk(txt,root=''):
     time.sleep(.4); return r
 def setv(sel,val): r=J(f"({SETV})({json.dumps(sel)},{json.dumps(val)})"); time.sleep(.2); return r
 def pan(): return J("(document.querySelector('aside[role=dialog]')||{}).innerText||''") or ''
+def feitas():   # CTL-3 (R-D4): sem ação em massa; cada tarefa sem resposta recebe "Feito", uma a uma (PRD 54.2), com quem e hora
+    n=0
+    for _ in range(30):
+        r=J("(()=>{const g=[...document.querySelectorAll('aside [role=group]')].find(g=>{const bs=[...g.querySelectorAll('button')]; return bs.some(b=>b.innerText.trim()==='Feito')&&!bs.some(b=>b.getAttribute('aria-pressed')==='true');}); if(!g) return false; [...g.querySelectorAll('button')].find(b=>b.innerText.trim()==='Feito').click(); return true;})()"); time.sleep(.3)
+        if not r: break
+        n+=1
+    return n
 def sem_erro(tela): e=t.errs(); ok(not e, f'{tela}: sem erro de JS {e[:160]}')
 try:
     t.goto('PM.dc.html'); J("localStorage.clear()"); t.goto('PM.dc.html'); sem_erro('PM')
@@ -55,7 +62,7 @@ try:
     clk('Liberar mesmo assim','aside'); b=toast()
     ok('conflito com a OS-0420' in a and avs and 'liberada para a oficina' in b and 'reservado' in b, 'OM-0234: conflito vira aviso; liberar mesmo assim reserva as peças')
     clk('Iniciar serviço','aside'); clk('Concluir serviço','aside'); e1=toast()
-    clk('Marcar pendentes como feitas','aside'); setv('#om-leitura','2900'); clk('Concluir serviço','aside'); e2=toast()
+    feitas(); setv('#om-leitura','2900'); clk('Concluir serviço','aside'); e2=toast()
     ok('5 tarefas sem resposta' in e1 and 'menor que a última' in e2, 'concluir exige checklist respondido e leitura não menor que a última')
     setv('#om-leitura','2995'); clk('Concluir serviço','aside'); c=toast(); p=pan()
     ok('em conferência' in c and 'ciclo fechado' in c and '3.245 h' in c and p.startswith('OM-0234') and 'Em conferência' in p, f'concluir fecha o ciclo: próxima em 3.245 h · {c[:110]}')

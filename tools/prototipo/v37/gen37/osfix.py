@@ -62,7 +62,7 @@ try:
     fechar()
     # iniciar uma ordem muda a contagem de execução (01/10: a OS-0419, só água, saiu da O.S.; usa a OS-0424 num cenário limpo)
     reload(); ST="window.dispatchEvent(new StorageEvent('storage',{key:'talhao-os-cenario-v1'}))"
-    J("(()=>{const X=window.__cen; X.cenMudar(null,c=>{ X.cenEntregar(c,'REQ-039','Fungicida A',65,'Marcos'); return X.cenConfirmarRecebimento(c,'REQ-039'); }); "+ST+";})()"); time.sleep(.4)
+    J("(()=>{const X=window.__cen; X.cenMudar(null,c=>{ X.cenEntregar(c,'REQ-039','Fungicida A',65,'Marcos','Rui'); return X.cenConfirmarRecebimento(c,'REQ-039'); }); "+ST+";})()"); time.sleep(.4)
     abrir('OS-0424'); btn('Iniciar execução'); btn('Confirmar início'); tt=toast(); fechar()
     chk('cabeçalho acompanha o início (OS-0424): 3 em execução', 'OS-0424 em execução' in tt and hdr()=='3 em execução · 3 impedidas', (tt, hdr()))
     # ---------- os-05: Nova ordem não duplica ordens do plano ----------

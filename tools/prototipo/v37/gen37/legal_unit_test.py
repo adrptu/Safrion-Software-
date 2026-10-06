@@ -12,7 +12,7 @@ g2 = [l for l in open(os.path.join(HERE, 'g2lib.js'), encoding='utf-8') if l.sta
 SHIM = ("if(typeof console==='undefined'){ globalThis.console={log:(...a)=>print(...a)}; }\n"
         "const __LS={};globalThis.localStorage={getItem:k=>(k in __LS?__LS[k]:null),setItem:(k,v)=>{__LS[k]=String(v)},removeItem:k=>{delete __LS[k]}};\n"
         "var window={addEventListener(){}}; var location={hash:''};\n")
-src = (PRELUDIO + SHIM + g2 + cenario.js_prefixo() + dados_mip.js_prefixo() + "const OSD={ords:[],nova:{emb:{}}};\n" + JS_NUCLEO
+src = (PRELUDIO + SHIM + g2 + cenario.perfis_js() + cenario.js_prefixo() + dados_mip.js_prefixo() + "const OSD={ords:[],nova:{emb:{}}};\n" + JS_NUCLEO
        + "\nconst MODO='legal';\n" + open(os.path.join(HERE, 'legal_unit.js'), encoding='utf-8').read())
 f = tempfile.NamedTemporaryFile('w', suffix='.js', delete=False, encoding='utf-8'); f.write(src); f.close()
 try:

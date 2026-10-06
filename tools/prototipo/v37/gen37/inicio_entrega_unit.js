@@ -14,8 +14,8 @@ const iniWeb = id => w(`(()=>{const r=cenMudar(null,c=>osc_iniciar(c,'${id}'));r
 const mud = (X, s) => X.__x(`(()=>{const r=cenMudar(null,c=>{${s}});return r.erro||r.msg||''})()`);
 const reset = () => { w('cenReset()'); a('cenReset()'); };   // os dois quadros voltam ao seed (cenReset limpa a memória de cada um)
 const st = s => w(`(()=>{const c=cenGet();return (${s})})()`);
-const lib0430 = () => { reset(); mud(W, "return osc_liberar(c,'OS-0430',false,'')"); return st("c.ordens['OS-0430'].req"); };
-const ent = (rid, p, q) => mud(W, `return cenEntregar(c,'${rid}','${p}',${q},'Marcos')`);
+const lib0430 = () => { reset(); mud(W, "return osc_liberar(c,'OS-0430',false,'','Ana')"); return st("c.ordens['OS-0430'].req"); };
+const ent = (rid, p, q) => mud(W, `return cenEntregar(c,'${rid}','${p}',${q},'Marcos','Rui')`);
 const conf = rid => mud(A, `return cenConfirmarRecebimento(c,'${rid}')`);
 const fechar = (ha, cons) => mud(A, `return cenFecharTurno(c,${ha},1,${cons ? JSON.stringify(cons) : 'null'},'')`);
 
@@ -63,8 +63,8 @@ ok('R7 residual documentado: a 2ª entrega herda a confirmação da 1ª (cenEntr
 ok('N4b app: inicia com os três; fecha 20 ha e o Óleo zera', iniApp('OS-0430') === '' && /^Turno fechado: 20 ha/.test(fechar(20)) && st(`c.reqs['${rid}'].itens.map(i=>i.custodia).join(' ')`) === '240 120 0', st(`c.reqs['${rid}'].itens.map(i=>i.custodia).join(' ')`));
 ok('N4b app: só o Óleo falta: "Óleo mineral 60 L a entregar"', iniApp('OS-0430') === 'Iniciar bloqueado: REQ-041 sem entrega · Óleo mineral 60 L a entregar. ' + Q1, iniApp('OS-0430'));
 
-// N5 · componente esgotado: consumo acima da custódia aceito pelo almoxarife zera o saldo a entregar; a área continua → dono é a agrônoma
-reset(); iniApp('OS-0421'); fechar(100, { 'Fungicida A': 80, 'Adjuvante espalhante': 0 }); mud(W, "return cenConciliar(c,'CC-301',true)");
+// N5 · componente esgotado: consumo acima da custódia aceito pela gestora (CTL-3, padrão 2) zera o saldo a entregar; a área continua → dono é a agrônoma
+reset(); iniApp('OS-0421'); fechar(100, { 'Fungicida A': 80, 'Adjuvante espalhante': 0 }); mud(W, "return cenConciliar(c,'CC-301',true,undefined,'Ana')");
 const it5 = st("(()=>{const i=c.reqs['REQ-035'].itens[0];return [i.solicitado,i.consumido,i.custodia,cenSaldoEntregar(i),c.ordens['OS-0421'].saldo]})()");
 const T5 = 'Iniciar bloqueado: Fungicida A: todo o solicitado na REQ-035 já foi consumido e nada está com Marcos. Ana (agrônoma) decide a área restante: Dispensar saldo na O.S. e, se ainda precisar aplicar, emitir nova ordem.';
 ok('N5 estado: 175 solicitados, 175 consumidos, custódia 0, nada a entregar, 60 ha de saldo', JSON.stringify(it5) === '[175,175,0,0,60]', it5);
@@ -90,7 +90,7 @@ fechar(100, { 'Glifosato 480': 320, '2,4-D 806': 160, 'Óleo mineral': 80 }); co
 ok('P6b web sem sinal: o consumo no aparelho não vira "Insumo esgotado" antes do envio; com o sinal vira, com Ana (60 ha a fazer)', !/Insumo esgotado/.test(m6b[0]) && m6b[1] !== 'Ana (agrônoma)'
    && /Insumo esgotado · Glifosato 480, 2,4-D 806, Óleo mineral\/red/.test(m6c[0]) && m6c[1] === 'Ana (agrônoma)', [m6b, m6c]);
 // P3 · exceções legítimas: ordem sem insumo (inclui água sem produto, DEC-2609-10) não passa pela regra
-reset(); mud(W, "return osc_liberar(c,'OS-0511',false,'')");
+reset(); mud(W, "return osc_liberar(c,'OS-0511',false,'','Ana')");
 ok('P3 sem insumo: OS-0505 (Em execução) e OS-0511 (liberada sem requisição) iniciam', iniApp('OS-0505') === '' && mud(A, 'c.app.turno=null; return {msg:"x"}') === 'x' && iniApp('OS-0511') === '', [iniApp('OS-0505')]);
 // P4 · residual registrado: componente fora da requisição (Adjuvante da OS-0421) não é coberto por esta correção
 reset();

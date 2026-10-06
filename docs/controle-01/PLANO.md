@@ -304,6 +304,12 @@ python3 quantidade_test.py && python3 carencia_test.py unit && python3 mip_unit_
 
 **Aceite:** Caio e Rui são recusados e nada é gravado; Ana grava os dois registros; Paula decide a duplicidade.
 
+**Risco aberto (revisão do CTL-3, achado 5, S3 latente; vai junto do PEND-OS-01):**
+- Com agrônomo e liberador em pessoas diferentes, nenhuma O.S. agrícola é liberada: a ação composta exige os dois papéis na mesma pessoa. Executado com Beto (só agrônomo) e Otávio (só gestor) injetados: os dois são recusados (`os_aprov_lib_unit.js` A8).
+- No cadastro da demonstração não acontece: só Ana tem os dois papéis. No software real, travaria um fluxo essencial.
+- Caminho previsto, sem código nesta entrega (PRD 8.4.1 l.2862 e 41.3 l.6864: "Aprovar sozinho não libera"; selo "Aprovada pelo agrônomo"): o agrônomo grava o CMD-42 e a ordem fica em A liberar, aguardando o liberador; o liberador grava o CMD-06. Entra quando o cadastro tiver os papéis separados (CF-01 ou software real).
+- Observação: a alçada AL-01 do CF-02 (`configuracoes.py`) diz "Liberador do domínio · Caio (PCP)", e o padrão dos agentes é o gestor. Alinhar o texto do CF-02 quando o proprietário decidir o PEND-OS-01.
+
 ### CTL-8 · C1 (demanda única por fazenda)
 
 **Arquivos:**

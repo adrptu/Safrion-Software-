@@ -46,12 +46,13 @@ try:
     E.ok(len(a0) == 1 and 'INV-2609' in a0[0] and 'AJ-71' in a0[0] and '−600 kg' in a0[0], 'ajuste de inventário na trilha com INV-2609 · AJ-71 e −600 kg', a0)
     # 3 · OS-0430 liberada; só Glifosato entregue pela tela; o app confirma: a trilha mostra só o Glifosato
     E.mudar("return cenLiberar(c,'OS-0430');"); RQ = E.cen("Object.keys(c.reqs).find(k=>c.reqs[k].os==='OS-0430')")
+    E.J("localStorage.setItem('safrion.perfilDemo','Rui')")   # CTL-3 (revisão, achado 4): a entrega grava o perfil de quem entrega
     E.abrir(); E.etapa(2); E.row(RQ, 'Glifosato 480'); E.salvar(); print('toast:', E.toast())
     print('app:', E.mudar(f"return cenConfirmarRecebimento(c,'{RQ}');"))
     E.abrir(); E.etapa(6); r = movs(E, 'Recebimento confirmado no app'); print(' ', r)
     E.ok(len(r) == 1 and 'Glifosato 480' in r[0] and '320 L' in r[0] and '2,4-D' not in r[0] and 'Óleo mineral' not in r[0], 'confirmação do app lista só o Glifosato 480 (320 L) entregue', r)
     # 4 · entrega dos outros 2 itens e turno de 5 ha fechado sem sinal: consumo com unidade e chip "Aguardando sinal" inteiro
-    E.mudar(f"cenEntregar(c,'{RQ}','2,4-D 806',160,'Marcos'); return cenEntregar(c,'{RQ}','Óleo mineral',80,'Marcos');")
+    E.mudar(f"cenEntregar(c,'{RQ}','2,4-D 806',160,'Marcos','Rui'); return cenEntregar(c,'{RQ}','Óleo mineral',80,'Marcos','Rui');")
     print('app:', E.mudar(f"cenConfirmarRecebimento(c,'{RQ}'); cenSinal(c,false); cenIniciarTurno(c,'OS-0430'); return cenFecharTurno(c,5,1);"))   # CTL-2 · B: o turno exige o recebimento confirmado
     E.abrir(); E.etapa(6); r = movs(E, 'Consumo apontado no app'); k = E.k(); print(' ', r, '|', k)
     E.ok(len(r) == 1 and all(x in r[0] for x in ('Glifosato 480', '10 L', '2,4-D 806', '5 L', 'Óleo mineral', '2,5 L')) and 'Glifosato 480 10,' not in r[0],
@@ -67,7 +68,7 @@ try:
     E.abrir(); E.etapa(6); r = movs(E, 'Consumo apontado no app'); k = E.k(); print(' ', r, '|', k)
     E.ok(len(r) == 2 and 'Aguardando sinal' in r[0] and 'Aguardando sinal' not in r[1] and '1 aguardando sinal do app' in k and '4 L' in r[0],
          'segundo turno sem sinal: só o consumo novo (4 L de Glifosato) aguarda; o anterior segue enviado', [r, k])
-    q = movs(E, 'Entrega'); E.ok(q and all('Rui (almoxarife)' in x for x in q), 'entregas na trilha por "Rui (almoxarife)", o mesmo papel do contador', q[:1])
+    q = movs(E, 'Entrega'); E.ok(q and all('Rui (almoxarife)' in x for x in q), 'entregas na trilha por "Rui (almoxarife)", quem entregou (perfil Rui na tela; Rui nas chamadas diretas), o mesmo papel do contador', q[:1])
     er = E.erros(); E.ok(not er, 'sem erro de script', er)
 finally:
     ok = E.fim()

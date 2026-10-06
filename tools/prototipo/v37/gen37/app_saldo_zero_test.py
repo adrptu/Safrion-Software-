@@ -11,7 +11,7 @@ try:
     a.abrir('MB-01'); a.clk('Restaurar demonstração')
     # outro turno aberto (OS-0421) e OS-0424 recebida: o cartão da OS-0424 nomeia 'Fechar turno · OS-0421' (link ao MB-03)
     a.clk_sel('button[title="Iniciar turno na OS-0421"]')
-    a.mudar("return cenEntregar(c,'REQ-039','Fungicida A',65,'Marcos');"); a.mudar("return cenConfirmarRecebimento(c,'REQ-039');")
+    a.mudar("return cenEntregar(c,'REQ-039','Fungicida A',65,'Marcos','Rui');"); a.mudar("return cenConfirmarRecebimento(c,'REQ-039');")
     a.abrir('MB-01'); card = a.J(CARD)
     lk = a.J("[...document.querySelectorAll('main a')].filter(x=>x.innerText.trim()==='Fechar turno · OS-0421').map(x=>x.getAttribute('href')).join('|')")
     a.ok('Outro turno aberto · OS-0421' in card and 'Iniciar turno' not in card and lk == 'MB-03.dc.html',

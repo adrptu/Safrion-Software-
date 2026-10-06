@@ -55,7 +55,7 @@ try:
     # 8 · saldos por lote: filtro por local e liberação da quarentena após inspeção
     E.etapa(4); E.clk('Câmara fria'); lot = E.J("[...document.querySelectorAll('[role=row].g2kid')].map(r=>r.innerText.split('\\n')[0].trim())"); E.clk('Todos os locais')
     t = E.rowtxt('O26-05'); print('O26-05:', t, '| Câmara fria:', lot)
-    E.rowbtn('O26-05', 'Liberar após inspeção'); E.rowbtn('O26-05', 'Confirmar liberação'); print('toast:', E.toast())
+    E.rowbtn('O26-05', 'Liberar após inspeção'); E.setv('est-laudo', 'INSP-0042'); E.clk('Liberar com o laudo'); print('toast:', E.toast())   # CTL-3 (R-D2): com o laudo
     st = E.cen("c.lotes['Óleo mineral|O26-05'].quarentena"); t2 = E.rowtxt('O26-05')
     E.ok(lot == ['S58-0801'] and '10 L' in t and st == 0 and 'Liberar após inspeção' not in t2 and '330 L' in t2,
          'filtro Câmara fria mostra só S58-0801; O26-05 liberado após inspeção (bloqueado 10 → 0, disponível 330 L)')

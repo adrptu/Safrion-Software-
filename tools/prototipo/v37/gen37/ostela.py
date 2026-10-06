@@ -74,7 +74,7 @@ try:
     t=pan(); chk('sem insumo entregue, iniciar fica bloqueado e nomeia a entrega no Estoque', 'Iniciar bloqueado: REQ-041 sem entrega' in t and 'Rui (almoxarife) entrega no Estoque' in t
         and not J("[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==='Iniciar execução')"), t[:500])
     # Estoque entrega (outra tela, pelo cenário compartilhado): falta a confirmação no app
-    J("(()=>{const X=window.__cen; const rq=X.cenGet().ordens['OS-0430'].req; X.cenMudar(null,c=>{ X.cenEntregar(c,rq,'Glifosato 480',320,'Marcos'); X.cenEntregar(c,rq,'2,4-D 806',160,'Marcos'); return X.cenEntregar(c,rq,'Óleo mineral',80,'Marcos'); }); "+ST+";})()"); time.sleep(.4)
+    J("(()=>{const X=window.__cen; const rq=X.cenGet().ordens['OS-0430'].req; X.cenMudar(null,c=>{ X.cenEntregar(c,rq,'Glifosato 480',320,'Marcos','Rui'); X.cenEntregar(c,rq,'2,4-D 806',160,'Marcos','Rui'); return X.cenEntregar(c,rq,'Óleo mineral',80,'Marcos','Rui'); }); "+ST+";})()"); time.sleep(.4)
     t=pan(); chk('entregue sem confirmação: iniciar bloqueado até o app confirmar', 'aguardando confirmação no app' in t and 'Marcos confirma o recebimento no app' in t
         and not J("[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==='Iniciar execução')"), t[:500])
     J("(()=>{const X=window.__cen; const rq=X.cenGet().ordens['OS-0430'].req; X.cenMudar(null,c=>X.cenConfirmarRecebimento(c,rq)); "+ST+";})()"); time.sleep(.4)

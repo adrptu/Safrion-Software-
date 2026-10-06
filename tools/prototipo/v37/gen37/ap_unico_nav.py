@@ -74,6 +74,10 @@ def rodar():
         a.ok('Já há dia 5, 50 ha pela web' in p and 'em 26/09. Se for outro turno, salve' in p, 'aviso no formulário antes de salvar (sem clique): ' + p[p.find('Já há'):][:160])
         btn('Cancelar')
         # 4 · painel: selo, pendência com Paula, linha não somada com as três saídas, acumulado 240 (não 290)
+        # CTL-3 (ATOR): as três saídas são de quem confere; com o perfil Ana (padrão) a linha só diz quem decide; com o perfil Paula, elas aparecem
+        p = pan(); semAna = not temb('Outro turno: somar') and not temb('Mesmo turno: vale o dia 5') and 'Quem decide: Paula (conferência).' in p
+        a.ok(semAna, 'CTL-3: perfil Ana não vê as três saídas da duplicidade; a linha diz "Quem decide: Paula (conferência).": ' + p[p.find('Dia 6'):][:220])
+        J("(()=>{const i=document.querySelector('[aria-label=\"Trocar perfil de demonstração\"]'); Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(i,'Paula'); i.dispatchEvent(new Event('change',{bubbles:true}));})()"); time.sleep(.4)
         p = pan()
         a.ok('Apontamento em conferência' in p and 'Paula (conferência)' in p and 'decidir se o dia 6 é outro turno' in p and 'não somado' in p
              and temb('Mesmo turno: vale o dia 5') and temb('Mesmo turno: vale este') and temb('Outro turno: somar') and '240 / 350' in p and '290 / 350' not in p
@@ -106,7 +110,7 @@ def rodar():
              f'AP-06 sem sinal + web: 240 ha, 120 L / 40 L; o turno do app fica retido, baixa desfeita, movimento sem item: {f} · {md} · {t[:120]}')
         guard()
         # 9 · retido até Em conferência: a pendência é de Paula (decidir a duplicidade), não de Rui
-        restaurar(); a.mudar("return cenEntregar(c,'REQ-035','Fungicida A',15,'Marcos');"); web_apontar('50'); app_turno('50'); web_apontar('110', data='2026-09-27')
+        restaurar(); a.mudar("return cenEntregar(c,'REQ-035','Fungicida A',15,'Marcos','Rui');"); web_apontar('50'); app_turno('50'); web_apontar('110', data='2026-09-27')
         web(); ordem(OS); btn('Enviar para conferência'); btn('Confirmar envio'); p = pan(); ln = linha(OS)
         a.ok('Em conferência' in ln and 'Apontamento em conferência' in ln and 'Rui (almoxarife)' not in ln and 'Sobras a receber' not in ln and 'receber a devolução' not in p
              and 'Encerrar bloqueado: Apontamento em conferência de duplicidade: dia 6' in p and 'Quem resolve: Paula (conferência) decide na linha do apontamento' in p,
@@ -147,10 +151,11 @@ def rodar():
         setin(f'Usado de {P} (L)', '8'); btn('Outro turno: somar'); f = a.cen(FATO)
         a.ok(f == [340, 158, 2], f'com 8 L informado: 340 ha, 158 L consumidos, 2 L em custódia: {f}')
         guard()
-        # 16 · S2 (revisão 2): consumo do dia 5 já aceito por Rui → a linha do retido não oferece "vale este" e diz por quê
-        restaurar(); web_apontar('50', usado='70'); a.c.size(390, 1800); a.abrir('MB-01'); ac = cmd("W.cenConciliar(c,'CC-301',true)")
+        # 16 · S2 (revisão 2): consumo do dia 5 já aceito → a linha do retido não oferece "vale este" e diz por quê e por quem
+        # CTL-3 (padrão 2): os 5 L acima da custódia saem do lote: aceite da gestora, e a linha nomeia quem aceitou de fato
+        restaurar(); web_apontar('50', usado='70'); a.c.size(390, 1800); a.abrir('MB-01'); ac = cmd("W.cenConciliar(c,'CC-301',true,undefined,'Ana')")
         web_apontar('50', usado='27'); web(); ordem(OS); p = pan()
-        a.ok('aceito' in ac and '"Vale este" indisponível: consumo já aceito por Rui (almoxarife) (CC-301).' in p and not temb('Mesmo turno: vale este')
+        a.ok('aceito' in ac and '"Vale este" indisponível: consumo já aceito por Ana (gestora) (CC-301).' in p and not temb('Mesmo turno: vale este')
              and temb('Mesmo turno: vale o dia 5') and temb('Outro turno: somar') and a.cen(FATO) == [240, 165, 0],
              f'linha do dia 6 sem "vale este" depois do aceite do CC-301 (240 ha, 165 L): {ac[:60]} · ' + p[p.find('Dia 6'):][:220])
         guard()

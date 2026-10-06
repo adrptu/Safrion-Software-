@@ -57,15 +57,15 @@ try:
     ok(cs[5] == 'CC-301' and cs[6] == 2 and cs[7] == 1 and cs[8] == 'Em conferência' and cs[9] == 'Rui (almoxarife)' and 'Consumo em conferência' in cs[10] and a.J(ALR) == '',
          f'caso CC-301 Em conferência com relatado × custódia, dono Rui (almoxarife) e selo na O.S.; nenhum erro no app: {cs[5:11]}')
     ok('Turno fechado · OS-0421 · dia 6 · 2 ha em 1 h' in b and 'Consumo em conferência' in b and 'Consumo: nada baixado neste turno' in b
-         and 'Em conferência · Fungicida A 2 L relatados, 1 L em custódia · Rui (almoxarife) concilia' in b,
-         'recibo do turno no app: selo Consumo em conferência, nada baixado e quem concilia')
+         and 'Em conferência · Fungicida A 2 L relatados, 1 L em custódia · Rui (almoxarife) confere; Ana (gestora) aceita o excedente' in b,
+         'recibo do turno no app: selo Consumo em conferência, nada baixado, quem confere e quem aceita o excedente (revisão do CTL-3, achado 7)')
     shot('q_consumo_2_app_recibo.png')
     a.abrir('MB-01'); b = a.body(); i = b.find('OS-0421 ·')
     ok('em conferência · relatado 2 L · com você 1 L' in b[i:i + 600] and 'Devolver sobra' not in b, 'MB-01: cartão da OS-0421 mostra o consumo em conferência e não pede devolução do 1 L')
     erros += a.erros() or []
     # 2 · Estoque, etapa 3: o caso com relatado × custódia, dono e decisões; a ação da etapa não oferece devolução fantasma; etapa 4 mostra a exposição
     est3(); k3 = a.J("document.querySelector('main').innerText"); ln = linha(RQ, P)
-    ok('Consumo em conferência: OS-0421 · Fungicida A 2 L relatados, 1 L em custódia · Rui (almoxarife) aceita com a origem ou recusa o relato' in k3
+    ok('Consumo em conferência: OS-0421 · Fungicida A 2 L relatados, 1 L em custódia · Rui (almoxarife) confere ou recusa o relato; Ana (gestora) aceita o excedente' in k3   # CTL-3 (padrão 2)
          and 'Consumo em conferência' in ln and 'CC-301' in ln and 'Aceitar consumo' in ln and 'Recusar relato' in ln and prim() == 'Receber devolução da REQ-031',
          f'EST etapa 3: resumo e linha da REQ-035 com o caso, Aceitar/Recusar; ação da etapa = "{prim()}"', ln[:200])
     shot('q_consumo_3_est_conferencia.png')
@@ -78,11 +78,17 @@ try:
     lo = a.J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith('OS-0421')); return r?r.innerText.replace(/\\s+/g,' '):'';})()") or ''
     pe = a.J("window.__cen.cenPodeEncerrar(window.__cen.cenGet(),'OS-0421')")
     pa = a.J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText.replace(/\\s+/g,' ')") or ''
-    ok('Consumo em conferência' in lo and 'Consumo em conferência' in pa and pe.startswith('Consumo em conferência: Fungicida A 2 L relatados, 1 L em custódia. Rui (almoxarife) concilia'),
+    ok('Consumo em conferência' in lo and 'Consumo em conferência' in pa and pe.startswith('Consumo em conferência: Fungicida A 2 L relatados, 1 L em custódia. No Estoque: Rui (almoxarife) confere; Ana (gestora) aceita o excedente'),
          f'O.S.: selo na lista e no painel; encerrar bloqueado pelo caso ({pe[:80]})', lo[:200])
     shot('q_consumo_4_os_selo.png')
     erros += a.erros() or []
     # 4 · Estoque aceita: primeiro a consequência (nada muda), depois Confirmar aplica uma vez; custódia 0, consumido +2, selo some
+    # CTL-3 (padrão 2): o 1 L acima da custódia sai do lote; com o perfil Rui a linha diz quem aceita, Recusar continua, e o comando direto é recusado
+    est3(); a.setv('[aria-label="Trocar perfil de demonstração"]', 'Rui'); lr = linha(RQ, P)
+    rx = a.J("(()=>{const X=window.__cen; const r=X.cenMudar(null,c=>X.cenConciliar(c,'CC-301',true,undefined,{k:'Rui'})); return r.erro||r.msg;})()")
+    ok('aceite: Ana (gestora)' in lr and 'Aceitar consumo' not in lr and 'Recusar relato' in lr and rx == 'Aceitar 1 L acima da custódia (CC-301): decisão de Ana (gestora). Nada foi alterado.'
+       and a.cen(f"[{LOT}.fisico,c.confs[0].estado]") == [c0[3], 'Em conferência'], f'perfil Rui: "aceite: Ana (gestora)" no lugar de Aceitar consumo; comando direto recusado, lote intacto: {rx} · {lr[-160:]}')
+    a.setv('[aria-label="Trocar perfil de demonstração"]', 'Ana')
     est3(); r = btn_linha([RQ, P], 'Aceitar consumo'); lp = linha(RQ, P)
     cp = a.cen(f"[{LOT}.fisico,c.confs[0].estado,{IT}.custodia]")
     ok(r == 'ok' and 'Baixa 2 L na OS-0421: 1 L da custódia de Marcos · 1 L sai do lote F26-02 (livre).' in lp and 'Confirmar aceite' in lp and 'Voltar' in lp
@@ -123,7 +129,7 @@ try:
          f'sem sinal: caso só no aparelho; ao voltar o sinal (2 envios) aparece uma vez, com selo: {s0} → {s1}')
     erros += a.erros() or []
     # 7 · reserva própria (OS-0424 · REQ-039, entrega parcial de 20 L): 25 L relatados → os 5 L que faltam saem da reserva da própria requisição
-    a.mudar(f"window.__cen.cenEntregar(c,'REQ-039','{P}',20,'Marcos'); window.__cen.cenConfirmarRecebimento(c,'REQ-039'); return window.__cen.cenIniciarTurno(c,'OS-0424');")
+    a.mudar(f"window.__cen.cenEntregar(c,'REQ-039','{P}',20,'Marcos','Rui'); window.__cen.cenConfirmarRecebimento(c,'REQ-039'); return window.__cen.cenIniciarTurno(c,'OS-0424');")
     a.abrir('MB-03'); a.setv('#ft_ha', '10'); a.setv('#ft_h', '2'); a.setv('#ft_c0', '25'); a.clk('Fechar turno')
     r0 = a.cen(f"[{LOT}.fisico,{LOT}.reservado,{IT9}.custodia,c.confs.slice(-1)[0].id,c.confs.slice(-1)[0].estado]")
     est3(); r = btn_linha(['REQ-039', P], 'Aceitar consumo'); l9 = linha('REQ-039', P)
@@ -142,7 +148,7 @@ try:
     a.c.size(390, 1800); a.mudar("c.app.turno={os:'OS-0424',ini:'10:00',pausas:[],fim:null}; return 'turno aberto antes';"); a.abrir('MB-03')   # custódia 0 após §7 (CTL-2 · B)
     a.setv('#ft_ha', '2'); a.setv('#ft_h', '1'); a.setv('#ft_c0', '3'); a.clk('Fechar turno')
     kid = a.cen("c.confs.slice(-1)[0].id")
-    a.J("(()=>{const {cenMudar,cenConciliar}=window.__cen; return cenMudar(null,c=>cenConciliar(c,'%s',false,'registro sem fato físico'));})()" % kid)
+    a.J("(()=>{const {cenMudar,cenConciliar}=window.__cen; return cenMudar(null,c=>cenConciliar(c,'%s',false,'registro sem fato físico','Rui'));})()" % kid)   # CTL-3: quem recusa é Rui (sem perfil, nada é gravado)
     a.clk('Com sinal'); time.sleep(.3); b = a.body(); i = b.find('Turno fechado ·'); rb = b[i:i + 400]
     ok('Conferência resolvida' in rb and 'Recusado por Rui (almoxarife) · Fungicida A 3 L relatados, nada em custódia' in rb and 'Em conferência ·' not in rb,
        f'recibo do app com caso resolvido: "{rb[:220]}"')

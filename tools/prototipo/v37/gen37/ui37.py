@@ -218,6 +218,12 @@ def demo_badge():
 
 def perfil_pill(perfil):
     ini=perfil[0].upper()
+    if perfil=='Ana · Gestora':   # equipe da fazenda: perfil trocável (g2lib.js G2_PERFIS, fonte única); portal e backoffice seguem fixos
+        return (f'<div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; font-size: 12.5px; color: {SIDE_TX}; border-top: 1px solid rgba(255,255,255,.08);">'
+            f'<span style="width: 26px; height: 26px; border-radius: 999px; background: {ACC}; color: #fff; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;">{{{{perfil_ini}}}}</span>'
+            f'<label class="ml-txt" style="display: flex; flex-direction: column; line-height: 1.2; min-width: 0;"><select aria-label="Trocar perfil de demonstração" value="{{{{perfil_k}}}}" onChange="{{{{perfil_set}}}}" style="font-family: inherit; font-size: 12.5px; font-weight: 700; color: #fff; background: transparent; border: 0; padding: 0; cursor: pointer; max-width: 170px;">'
+            f'<sc-for list="{{{{perfil_opts}}}}" as="o" hint-placeholder-count="5"><option value="{{{{o.v}}}}" style="color: {INK};">{{{{o.t}}}}</option></sc-for></select>'
+            f'<span style="color: {SIDE_MUTED}; font-size: 11.5px;">Perfil de demonstração</span></label></div>')
     return (f'<div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; font-size: 12.5px; color: {SIDE_TX}; border-top: 1px solid rgba(255,255,255,.08);">'
             f'<span style="width: 26px; height: 26px; border-radius: 999px; background: {ACC}; color: #fff; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; justify-content: center;">{ini}</span>'
             f'<span class="ml-txt" style="display: flex; flex-direction: column; line-height: 1.2;"><span style="font-weight: 700; color: #fff;">{esc(perfil)}</span><span style="color: {SIDE_MUTED}; font-size: 11.5px;">Trocar perfil de demonstração ▾</span></span></div>')

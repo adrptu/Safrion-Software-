@@ -18,6 +18,13 @@ def clk(txt,root=''):
     time.sleep(.4); return r
 def setv(sel,val): r=J(f"({SETV})({json.dumps(sel)},{json.dumps(val)})"); time.sleep(.2); return r
 def pan(): return J("(document.querySelector('aside[role=dialog]')||{}).innerText||''") or ''
+def feitas():   # CTL-3 (R-D4): sem ação em massa; cada tarefa sem resposta recebe "Feito", uma a uma (PRD 54.2), com quem e hora
+    n=0
+    for _ in range(30):
+        r=J("(()=>{const g=[...document.querySelectorAll('aside [role=group]')].find(g=>{const bs=[...g.querySelectorAll('button')]; return bs.some(b=>b.innerText.trim()==='Feito')&&!bs.some(b=>b.getAttribute('aria-pressed')==='true');}); if(!g) return false; [...g.querySelectorAll('button')].find(b=>b.innerText.trim()==='Feito').click(); return true;})()"); time.sleep(.3)
+        if not r: break
+        n+=1
+    return n
 def key(k,code,vk,shift=False):
     m=8 if shift else 0
     t.c.call('Input.dispatchKeyEvent',{'type':'keyDown','key':k,'code':code,'windowsVirtualKeyCode':vk,'modifiers':m}); t.c.call('Input.dispatchKeyEvent',{'type':'keyUp','key':k,'code':code,'windowsVirtualKeyCode':vk,'modifiers':m}); time.sleep(.05)
@@ -38,7 +45,7 @@ try:
     # 1 · base "vencimento programado": próxima revisão conta do vencimento (20/09/2026 + 365 d), não da execução (23/09)
     t.goto('PM.dc.html#PM-05'); time.sleep(.3); sem_erro('PM#PM-05')
     clk('Revisão pré-plantio','main'); setv('#sv_base','prog'); clk('Salvar','aside'); clk('Revisar e publicar','main'); clk('Publicar v2','main'); clk('Gerar ordem','main'); g=toast()
-    t.goto('MA-04.dc.html#OM-0235'); time.sleep(.4); clk('Liberar serviço','aside'); clk('Iniciar serviço','aside'); clk('Marcar pendentes como feitas','aside')
+    t.goto('MA-04.dc.html#OM-0235'); time.sleep(.4); clk('Liberar serviço','aside'); clk('Iniciar serviço','aside'); feitas()
     setv('#om-leitura','890'); clk('Concluir serviço','aside'); c=toast()
     ok('OM-0235 gerada' in g and 'em 20/09/2027' in c and 'conta do vencimento programado' in c, f'base programada: próxima em 20/09/2027 · {c[:140]}')
     # 2 · atalho Criar plano: o ativo sai de "Sem plano" e o 2º clique não duplica; o endereço passa a #PM-11
