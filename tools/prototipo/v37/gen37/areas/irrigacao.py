@@ -603,7 +603,6 @@ def ir04():
                 dict(k='estado',l='Estado',w=120),dict(k='efe',l='Efeito no balanço',w=190)],[],
                edit=dict(m='form',title='Fonte',newTitle='Cadastrar sensor',sub='O estado vem das leituras validadas.',
                    fields=[dict(k='nome',l='Nome',t='txt',req=True),dict(k='gr',l='Grandeza',t='sel',req=True,newOnly=True,opts=['Umidade do solo','Volume','ET₀ / chuva / vento'],**{'def':'Umidade do solo'}),
-                           dict(k='un',l='Unidade',t='sel',req=True,newOnly=True,opts=['% vol.','m³','mm/dia · mm · km/h'],**{'def':'% vol.'}),
                            dict(k='cob',l='Cobertura',t='sel',req=True,newOnly=True,opts=['Pivô 1','Pivô 2','Gotejo T7','Fazenda'],**{'def':'Pivô 2'}),
                            dict(k='cal',l='Próxima calibração',t='date')]),
                gid='g_src',total=False,add='Cadastrar sensor',search=False)
@@ -627,6 +626,8 @@ def ir04():
     EXTRAJS[0]=prefixo()+JS_COMUM+r'''
 function br(s){ const a=String(s||'').split('-'); return a.length===3?a[2]+'/'+a[1]+'/'+a[0]:s; }
 const ESTC={'Ativa':'green','Suspeita':'red','Sem dado':'yellow','Aguardando 1ª leitura':'gray','Previsão':'gray'};
+// a unidade vem da grandeza (não se pede de novo e não diverge dela): uma unidade por grandeza, na mesma ordem
+const UN_GR={'Umidade do solo':'% vol.','Volume':'m³','ET₀ / chuva / vento':'mm/dia · mm · km/h'};
 function PREVALS(self,v){ irrOuvir(self); const s=irrGet(); const fz=irrFazK(self); irrFazVals(self,v); const c=irrFaixa(v,s,fz);
   const fs=Object.keys(s.fontes).filter(k=>!fz||s.fontes[k].faz===fz);
   irrColsFaz('g_src',fz,v,'src_ncol'); irrColsFaz('g_cap',fz,v,'cap_ncol');
@@ -653,7 +654,7 @@ function EXTRAVALS(self,v){ const fz=irrFazK(self);
   // painel da fonte: o motivo do estado (suspeita, sem dado desde) no subtítulo, fora da célula
   const FS=v.g_src_F, fs0=g2st(self,'g_src').fm; if(FS&&FS.open&&fs0&&fs0.rid){ const f=irrGet().fontes[fs0.rid]; if(f&&f.st!=='Ativa') FS.sub=(f.st==='Previsão'?'Só previsão':f.st)+(f.motivo?' · '+f.motivo:'')+(f.desde!==undefined?' · desde '+irrQuando(f.desde):'')+'. O estado vem das leituras validadas.'; }
   self.g2after=(gid,rows,r,isNew)=>{ if(gid!=='g_src'||!r) return; g2set(self,'g_src',{rows:null,fl:isNew?null:r.id});
-    if(isNew) irrMudar(self,s=>irrFonteNova(s,{faz:fz||'SR',nome:r.v.nome,gr:r.v.gr,un:r.v.un,cob:r.v.cob,cal:r.v.cal}));
+    if(isNew) irrMudar(self,s=>irrFonteNova(s,{faz:fz||'SR',nome:r.v.nome,gr:r.v.gr,un:UN_GR[r.v.gr]||'',cob:r.v.cob,cal:r.v.cal}));
     else irrMudar(self,s=>{ const f=s.fontes[r.id]; if(!f) throw new Error('Fonte não encontrada.'); f.nome=String(r.v.nome||f.nome).trim(); const mudouCal=(r.v.cal||'')!==(f.cal||''); if(mudouCal&&r.v.cal) return irrCalibrar(s,r.id,r.v.cal); return {msg:'Cadastro de '+f.nome+' salvo.'}; }); };
   self.g2formActs=(gid,r)=>{ if(gid!=='g_src') return []; const s=irrGet(); const f=s.fontes[r.id]; if(!f||f.ro) return []; const out=[]; const fechar=()=>g2set(self,'g_src',{fm:null});
     if(f.st==='Ativa'&&f.gr==='Umidade do solo') out.push({t:'Marcar leitura suspeita',h:'Sai do balanço até a inspeção; o setor passa a estimativa por ET em todas as telas.',go:()=>{ fechar(); irrMudar(self,s0=>irrSondaMarcar(s0,r.id,'Suspeita','marcada na conferência')); }});

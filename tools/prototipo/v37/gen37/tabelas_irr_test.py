@@ -172,6 +172,16 @@ try:
     rg = gs.rotulos('Grandeza'); gs.filtra('Grandeza', ['Chuva']); fl = [r.get('Fonte') for r in gs.dicts()]
     chk('IR-04: filtro Grandeza por item (Chuva) → só a estação', 'Chuva' in (rg or []) and fl == ['Estação meteorológica Santa Rita'], (rg, fl))
     limpa(J)
+    # cadastrar sensor: a unidade vem da grandeza (o formulário não pede; não diverge dela)
+    J("(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.offsetParent&&b.innerText.trim().replace(/^\\+\\s*/,'')==='Cadastrar sensor'); b&&b.click();})()"); time.sleep(.5)
+    labs = J("[...document.querySelectorAll('aside[role=dialog] label[for]')].map(l=>l.innerText.trim())") or []
+    for sel, val in (('#fx_g_src_nome', 'Hidrômetro · Pivô 1'), ('#fx_g_src_gr', 'Volume'), ('#fx_g_src_cob', 'Pivô 1')):
+        J(f"""(()=>{{const i=document.querySelector({json.dumps(sel)}); if(!i) return; const P=i.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype;
+          Object.getOwnPropertyDescriptor(P,'value').set.call(i,{json.dumps(val)}); i.dispatchEvent(new Event('input',{{bubbles:true}})); i.dispatchEvent(new Event('change',{{bubbles:true}}));}})()"""); time.sleep(.2)
+    J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Salvar'); b&&b.click();})()"); time.sleep(.8)
+    hn = next((r for r in Grade(J, 0).dicts() if r.get('Fonte') == 'Hidrômetro · Pivô 1'), {})
+    chk('IR-04 cadastrar sensor: o formulário não pede a unidade (vem da grandeza); hidrômetro novo = Volume | m³ | Aguardando 1ª leitura',
+        'Grandeza' in labs and 'Unidade' not in labs and [hn.get(k) for k in ('Grandeza', 'Unidade', 'Estado')] == ['Volume', 'm³', 'Aguardando 1ª leitura'], (labs, hn))
     dc = tf03('IR-04 Captações', gc, ['Captação', 'Outorga', 'Vazão outorgada', 'Regime', 'Vencimento', 'Situação', 'Volume hoje', 'Uso do dia', 'Setores ligados'])
     rio = next((r for r in dc if r.get('Captação', '').startswith('Rio')), {})
     chk('IR-04: Rio demonstrativa | 400 L/s | 21 h/dia | 30/06/2028 | Vigente | 2.390 m³ | 8 % | Pivô 2, Pivô 1',
