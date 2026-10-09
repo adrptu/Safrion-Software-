@@ -1121,6 +1121,26 @@ def area_acoes(pre='aa',rotulo='Ações da etapa'):
             f'<sc-if value="{h("_hasPrim")}" hint-placeholder-val="{F_}"><button type="button" class="acoes-prim" data-acao="{h("_primA")}" aria-describedby="{h("_desc")}" onClick="{h("_primFn")}">{h("_primT")}</button></sc-if>'
             f'<sc-if value="{h("_hasLink")}" hint-placeholder-val="{F_}"><a class="acoes-prim" data-acao="abrir" href="{h("_href")}">{h("_primT")}</a></sc-if>'
             f'</div></div></sc-if>')
+# =====================================================================================
+# DS-SEPARADOR-20261009 (proprietário: "tem telas sem essas linhas separadoras visuais que ficam abaixo do título e do botão no topo à direita
+# como no caso nova safra ... acho melhor ter para organizar a visão e a mente em blocos. Faça em todas telas e padronize no design system"):
+# uma linha de 1 px (#E4E9E5) separa o cabeçalho do resto, em três lugares, sempre pela classe/estrutura comum (nenhum divisor por tela):
+# 1. cabeçalho da página (título + ação do topo à direita): a borda inferior do header da casca (ui37.shell37, engine.mobile); telas fora da
+#    casca (índice, ficha impressa) usam .g2-cab;
+# 2. linha de título do bloco (section: título + descrição + ação à direita): linha recuada 12 px dos lados, como a moldura da tabela da
+#    tela Planejar safra; quando o conteúdo já começa por uma tabela emoldurada (.g2caixa com borda), a borda dela é a linha (sem linha dupla);
+# 3. painel lateral (aside[role=dialog]): abaixo do título e do × do topo à direita.
+DS_SEP=dict(cor='#E4E9E5',recuo='12px',espaco='10px')
+_CAB_BLOCO='main section>div:first-child:not(:last-child):has(>h2,>h3,>div>h2,>div>h3)'
+_SEM_MOLDURA=(':not(:has(+*>.g2caixa[style*="border: 1px"]:first-child))'
+              ':not(:has(+*>sc-if:first-child>.g2caixa[style*="border: 1px"]:first-child))')
+SEP_CSS=(
+    f"{_CAB_BLOCO}{_SEM_MOLDURA}{{background-image:linear-gradient({DS_SEP['cor']},{DS_SEP['cor']})!important;background-size:calc(100% - 2 * {DS_SEP['recuo']}) 1px!important;"
+    "background-position:50% 100%!important;background-repeat:no-repeat!important}"
+    f"{_CAB_BLOCO}{_SEM_MOLDURA}+*{{margin-top:{DS_SEP['espaco']}}}"
+    f"aside[role=dialog]>div:first-child:has(>h2),aside[role=dialog]>h2:first-child{{border-bottom:1px solid {DS_SEP['cor']};padding-bottom:12px}}"
+    f".g2-cab{{border-bottom:1px solid {DS_SEP['cor']};padding-bottom:14px}}"
+)
 G2_CSS=(".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outline:2px solid #1E7A4C;outline-offset:-2px}"
         # hover dos controles pequenos da grade só onde existe ponteiro com hover (no toque o fundo não fica "grudado")
         "@media (hover:hover){.g2fi:hover{background:#F2F8F4}.g2fb:hover,.g2car:hover{background:#E4F3E9}.g2del:hover{background:#FDE8E6;color:#B42318}}"   # DS-HOVER: verde, não cinza
@@ -1156,7 +1176,7 @@ G2_CSS=(".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outlin
         "main section:only-of-type>div:last-child>div>.g2caixa:last-of-type{flex:1 1 0}main section:only-of-type>div:last-child>div>.g2caixa:last-of-type>.g2rola{flex:1 1 0}"
         "main section:only-of-type>div:last-child>div>.rola{flex:1 1 0;min-height:0;overflow:auto}"
         ".g2rola [role=table]>[role=row]:first-child{position:sticky;top:0;z-index:3}"
-        + INTERACAO_CSS + ACOES_CSS)
+        + INTERACAO_CSS + ACOES_CSS + SEP_CSS)
 _TRASH='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>'
 _MINI=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer; white-space: nowrap;'
 _MINIP=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {ACC}; background: {ACC}; color: #fff; cursor: pointer; white-space: nowrap;'
