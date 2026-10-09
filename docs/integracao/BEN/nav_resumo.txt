@@ -1,0 +1,12 @@
+ben_fluxo_test rc=0 · RESULTADO: OK 61/61
+tabelas_ben_test rc=0 · RESULTADO: OK 12/12
+producao_fluxo_test rc=0 · RESULTADO: OK 66/66
+tabelas_est_test rc=0 · RESULTADO: 34/34 ok
+cada_cd04_test rc=0 · RESULTADO: OK 15/15
+est_cenario_test rc=0 · RESULTADO: 15/15 ok
+os_cenario_test rc=1 · RESULTADO: 19/20 ok · FALHAS: A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cená
+cada_cd03_test rc=0 · RESULTADO: OK 14/14
+cadc_cd06_test rc=0 · RESULTADO: OK 14/14
+app_cenario_test rc=0 · 15/15 ok · FALHAS: 0
+acoes_duplicadas rc=0 · RESULTADO: 141 páginas · 0 com ação repetida · erros 0
+FIM

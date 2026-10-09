@@ -1,0 +1,42 @@
+OK    · 1440×900 gravar/editar preparo: café 40 ha plantado em 01/01/2020 na parcela B1-A do B1 (Café antigo BV)
+OK    · 1440×900 gravar/editar Safra BV 2027: B1 Livre 80 ha (o café de 2020 ocupa 40)
+OK    · 1440×900 gravar/editar: gravar soja 90 ha (café 40 + 90 = 130 > 120 ha) é recusado com a mensagem da trava; painel aberto; nada gravado
+OK    · 1440×900 gravar/editar: limite, soja 80 ha (soma = 120 ha) grava
+OK    · 1440×900 gravar/editar: editar a soja para 90 ha é recusado com a mensagem da trava; continua 80 ha
+OK    · 1440×900 gravar/editar: editar só a meta (80 ha, no limite) grava
+OK    · 1440×900 gravar/editar: sem rolagem lateral da página
+OK    · 1440×900 gravar/editar: sem erro de JS
+OK    · 1440×900 dividir preparo: café 40 ha plantado em 01/01/2020 na parcela B1-A do B1 (Café BV 2026/27)
+OK    · 1440×900 dividir Safra BV 2027: B1 Livre 80 ha (o café de 2020 ocupa 40)
+OK    · 1440×900 dividir: gravar soja 90 ha também é recusado (café de 2020 numa safra que cruza)
+OK    · 1440×900 dividir: Dividir B1 abre só a soja desta safra (B1-B, 80 ha)
+     (medido) 1440×900 dividir: nome sugerido para a parcela nova (a do café é B1-A): B1-A
+OK    · 1440×900 dividir: dividir em 50 + 40 ha (café 40 + 90 = 130 > 120): "A divisão travaria a área… Nada foi gravado", com a mensagem da trava na parcela
+OK    · 1440×900 dividir: dividir em 50 + 30 ha (soma = 120 ha) grava
+OK    · 1440×900 dividir: dado antigo (soja 60 + 30 ha + café 40 = 130 ha): B1 em Sobreposição, motivo "somam 130 ha"
+OK    · 1440×900 dividir: faixa mostra o excesso: "· de 120 ha · 10 ha em sobreposição"
+OK    · 1440×900 dividir: nota "Sobreposição em B1: … somam 130 ha …" com "Corrigir B1"
+OK    · 1440×900 dividir: sem rolagem lateral da página
+OK    · 1440×900 dividir: sem erro de JS
+OK    · 390×844 gravar/editar preparo: café 40 ha plantado em 01/01/2020 na parcela B1-A do B1 (Café antigo BV)
+OK    · 390×844 gravar/editar Safra BV 2027: B1 Livre 80 ha (o café de 2020 ocupa 40)
+OK    · 390×844 gravar/editar: gravar soja 90 ha (café 40 + 90 = 130 > 120 ha) é recusado com a mensagem da trava; painel aberto; nada gravado
+OK    · 390×844 gravar/editar: limite, soja 80 ha (soma = 120 ha) grava
+OK    · 390×844 gravar/editar: editar a soja para 90 ha é recusado com a mensagem da trava; continua 80 ha
+OK    · 390×844 gravar/editar: editar só a meta (80 ha, no limite) grava
+OK    · 390×844 gravar/editar: sem rolagem lateral da página
+OK    · 390×844 gravar/editar: sem erro de JS
+OK    · 390×844 dividir preparo: café 40 ha plantado em 01/01/2020 na parcela B1-A do B1 (Café BV 2026/27)
+OK    · 390×844 dividir Safra BV 2027: B1 Livre 80 ha (o café de 2020 ocupa 40)
+OK    · 390×844 dividir: gravar soja 90 ha também é recusado (café de 2020 numa safra que cruza)
+OK    · 390×844 dividir: Dividir B1 abre só a soja desta safra (B1-B, 80 ha)
+     (medido) 390×844 dividir: nome sugerido para a parcela nova (a do café é B1-A): B1-A
+OK    · 390×844 dividir: dividir em 50 + 40 ha (café 40 + 90 = 130 > 120): "A divisão travaria a área… Nada foi gravado", com a mensagem da trava na parcela
+OK    · 390×844 dividir: dividir em 50 + 30 ha (soma = 120 ha) grava
+OK    · 390×844 dividir: dado antigo (soja 60 + 30 ha + café 40 = 130 ha): B1 em Sobreposição, motivo "somam 130 ha"
+OK    · 390×844 dividir: faixa mostra o excesso: "· de 120 ha · 10 ha em sobreposição"
+OK    · 390×844 dividir: nota "Sobreposição em B1: … somam 130 ha …" com "Corrigir B1"
+OK    · 390×844 dividir: sem rolagem lateral da página
+OK    · 390×844 dividir: sem erro de JS
+
+RESULTADO: 38 ok · 0 falhas (tudo)

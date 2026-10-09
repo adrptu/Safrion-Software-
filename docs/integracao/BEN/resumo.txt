@@ -1,0 +1,25 @@
+== base 8c00092 · frente 4459669 4459669
+merge ok: 21e2ad2
+build rc=0 FALHA=0 · 141 artboards → <sp-proto>/tools/prototipo/v37/gen37/project · menu vigente: 46 · ocultos: 95
+render: _render montado: 141 páginas + 20 arquivos do site · dados reais locais: 5/5
+varredura rc=0 · RESULTADO: 141/141 páginas sem erro 
+== testes (HEAD 0644b1b; páginas iguais às de 21e2ad2)
+ben_unit_test · RESULTADO: OK 132/132
+producao_unit_test · RESULTADO: OK 121/121
+aprova_quem_decide_test · RESULTADO 102/102
+os_aprov_lib_test · RESULTADO passou · TOTAL 45 · falhas 0
+ben_mutantes · RESULTADO: OK 56/56
+links_ocultos_test 21e2ad2 · TOTAL 8 · falhas 2 (pré-merge 8c00092: TOTAL 8 · falhas 0)
+links_ocultos_test 0644b1b · TOTAL 9 · falhas 0
+ben_fluxo_test rc=0 · RESULTADO: OK 61/61
+tabelas_ben_test rc=0 · RESULTADO: OK 12/12
+producao_fluxo_test rc=0 · RESULTADO: OK 66/66
+tabelas_est_test rc=0 · RESULTADO: 34/34 ok
+cada_cd04_test rc=0 · RESULTADO: OK 15/15
+est_cenario_test rc=0 · RESULTADO: 15/15 ok
+os_cenario_test rc=1 · RESULTADO: 19/20 ok · FALHAS: A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cená
+cada_cd03_test rc=0 · RESULTADO: OK 14/14
+cadc_cd06_test rc=0 · RESULTADO: OK 14/14
+app_cenario_test rc=0 · 15/15 ok · FALHAS: 0
+acoes_duplicadas rc=0 · RESULTADO: 141 páginas · 0 com ação repetida · erros 0
+FIM
