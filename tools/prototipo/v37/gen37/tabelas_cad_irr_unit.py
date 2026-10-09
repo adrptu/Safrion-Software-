@@ -5,7 +5,7 @@
 (B) Auxiliares Python: vazão do documento em m³/h (L/s × 3,6), Outorga × Certidão, parcelas do talhão só com as safras da fazenda dele.
 (C) Funções JS das páginas geradas, no node: documento e situação do ponto de água (sem a data na situação), situação de cada papel do
     parceiro, cultura × estádio do setor, o instante ISO que ordena "ontem/hoje/amanhã" e a Pendência sem repetir a Situação.
-    (B4: cada grandeza da fonte de clima/sensor com a sua unidade.)
+    (B4: cada grandeza da fonte de clima/sensor com a sua unidade; B5: a unidade do sensor novo vem da grandeza, sem campo no formulário.)
 Uso: python3 tabelas_cad_irr_unit.py   (sai com 1 se alguma regra falhar)"""
 import os, re, sys, json, subprocess
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE); os.chdir(HERE)
@@ -124,5 +124,12 @@ chk('C7 Pendência sem repetir a Situação: "Impedida · bomba parada" → "Bom
 import dados_irrigacao as DI
 desc = [(k, f['gr'], f['un']) for k, f in DI.FONTES.items() if len(f['gr'].split(' / ')) != len(f['un'].split(' · '))]
 chk('B4 cada grandeza da fonte tem a sua unidade, na mesma ordem (a estação: ET₀, chuva e vento → mm/dia, mm e km/h)', not desc, desc)
+# B5: "Cadastrar sensor" não pede a unidade; ela vem da grandeza (UN_GR) e é a mesma da semente para a mesma grandeza (antes: Volume | % vol.)
+h4 = page('IR-04'); ed = ({g['id']: g for g in grids(h4)}.get('g_src') or {}).get('edit') or {}
+fk = [f['k'] for f in ed.get('fields', [])]; ops = next((f.get('opts') for f in ed.get('fields', []) if f['k'] == 'gr'), []) or []
+iu = h4.find('UN_GR='); ung = dict(re.findall(r"'([^']+)':'([^']*)'", h4[iu:h4.index(';', iu)])) if iu >= 0 else {}
+dif = [(k, f['gr'], f['un'], ung.get(f['gr'])) for k, f in DI.FONTES.items() if f['gr'] in ung and ung[f['gr']] != f['un']]
+chk('B5 cadastrar sensor: o formulário não pede Unidade; cada grandeza do seletor tem a sua unidade (UN_GR) e ela é a mesma da semente',
+    'un' not in fk and 'gr' in fk and ops and all(o in ung for o in ops) and not dif, (fk, ops, ung, dif))
 print(f'RESULTADO: {len(OK)}/{len(OK) + len(FAIL)} ok' + (' · FALHAS: ' + '; '.join(FAIL) if FAIL else ''))
 sys.exit(1 if FAIL else 0)
