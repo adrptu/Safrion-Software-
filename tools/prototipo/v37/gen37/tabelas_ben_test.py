@@ -46,7 +46,7 @@ try:
     chk('T07 · 7 colunas, uma variável por coluna: Ordem, Produto, Fase, Condição, Em processo, Próximo passo, Quem resolve',
         hs == ['ORDEM', 'PRODUTO', 'FASE', 'CONDIÇÃO', 'EM PROCESSO', 'PRÓXIMO PASSO', 'QUEM RESOLVE'], hs)
     ep = col('EM PROCESSO')
-    chk('TF03 · Em processo com a unidade na célula ("0 kg", "1.800 kg"), sem coluna de unidade', len(ep) == 2 and all(re.match(QRE, x) for x in ep), ep)
+    chk('TF03 · Em processo com a unidade na célula (semente: "0 kg" nas duas), sem coluna de unidade', ep == ['0 kg', '0 kg'] and all(re.match(QRE, x) for x in ep), ep)
     chk('a semente mostra as duas ordens do packing (OB-0110 Em execução, OB-0112 A liberar)', sorted(col('ORDEM')) == ['OB-0110', 'OB-0112'] and set(col('FASE')) == {'Em execução', 'A liberar'}, linhas())
     # filtro rápido por fase (qf): conta e filtra; "Todas" volta
     chip('A liberar'); o1 = col('ORDEM'); chip('Todas'); o2 = col('ORDEM')
@@ -63,17 +63,21 @@ try:
     busca('OB-0112'); b1 = col('ORDEM'); busca('OB-9999'); b2 = linhas(); vz = J("(document.querySelector('main')||{}).innerText||''") or ''
     busca('')
     chk('TF06 · busca pelo ID acha a OB-0112; busca sem resultado mostra a lista vazia com o caminho de volta', b1 == ['OB-0112'] and b2 == [] and 'Nenhuma linha corresponde aos filtros · Limpar filtros' in vz, [b1, b2, vz[vz.find('Nenhuma'):][:120]])
-    # quantidade em processo ordena pelo número: com a OB-0110 em execução e 1.800 kg a registrar (estorno de S-02), a ordem desc põe 1.800 kg antes de 0 kg
-    # fixture só de exibição (a regra do estorno é testada no ben_unit e no ben_fluxo_test): S-02 estornada deixa 1.800 kg em processo
-    J("(()=>{ const c=window.__cen.cenGet(); const o=c.ordens['OB-0110']; const s=o.ben.sai[1]; s.estorno={quem:'teste',em:'2026-09-26 10:00',motivo:'Pesagem refeita'}; c.rev=(c.rev||0)+1; localStorage.setItem('talhao-os-cenario-v1',JSON.stringify(c)); })()")
+    # quantidade em processo ordena pelo número e não pelo texto (BEN-REV-06): com 900 kg e 1.800 kg a ordem do texto inverte ("900 kg" > "1.800 kg")
+    # fixture só de exibição (a regra do estorno é testada no ben_unit e no ben_fluxo_test): S-02 da OB-0110 estornada deixa 1.800 kg em processo;
+    # a OB-0112 em execução com um descarte de 8.370 kg sobre 9.270 kg deixa 900 kg
+    J("(()=>{ const c=window.__cen.cenGet(); const o=c.ordens['OB-0110']; const s=o.ben.sai[1]; s.estorno={quem:'teste',em:'2026-09-26 10:00',motivo:'Pesagem refeita'};"
+      " const b=c.ordens['OB-0112']; b.etapa='Em execução'; b.ben.nsai=1; b.ben.sai=[Object.assign({},o.ben.sai[2],{id:'S-01',kg:8370,chave:'T-TF04'})];"
+      " c.rev=(c.rev||0)+1; localStorage.setItem('talhao-os-cenario-v1',JSON.stringify(c)); })()")
     c.goto(f'http://127.0.0.1:{p}/BEN.dc.html', 1.4); J("window.__e=[];addEventListener('error',e=>window.__e.push(String(e.message)))")
     ordena('Em processo', desc=True); e1 = col('EM PROCESSO'); ordena('Em processo'); e2 = col('EM PROCESSO')
-    chk('TF04 · Em processo ordena pelo número (1.800 kg > 0 kg), não pelo texto', e1 and num(e1[0]) > num(e1[-1]) and e2 and num(e2[0]) < num(e2[-1]), [e1, e2])
+    chk('TF04 · Em processo ordena pelo número (1.800 kg > 900 kg), não pelo texto (no texto "900 kg" viria antes)', e1 == ['1.800 kg', '900 kg'] and e2 == ['900 kg', '1.800 kg'], [e1, e2])
     lado = J("document.documentElement.scrollWidth>innerWidth+1")
     chk('1440 px sem rolagem lateral da página', lado is False, lado)
     shot('tabelas_ben_1440')
     # 390 px: cartões com o mesmo filtro rápido
-    c.aparelho(390, 844, 2, True); c.goto(f'http://127.0.0.1:{p}/BEN.dc.html', 1.4); J("window.__e=[];addEventListener('error',e=>window.__e.push(String(e.message)))")
+    c.aparelho(390, 844, 2, True); J("localStorage.clear(); sessionStorage.clear()")   # a semente de novo: a fixture do TF04 não passa para o celular
+    c.goto(f'http://127.0.0.1:{p}/BEN.dc.html', 1.4); J("window.__e=[];addEventListener('error',e=>window.__e.push(String(e.message)))")
     cards = lambda: J("[...document.querySelectorAll('.pr-card')].filter(x=>x.offsetParent).map(x=>x.innerText.replace(/\\s+/g,' ').trim().split(' · ')[0])") or []
     k0 = cards(); chip('A liberar'); k1 = cards(); chip('Todas')
     lado = J("document.documentElement.scrollWidth>innerWidth+1")

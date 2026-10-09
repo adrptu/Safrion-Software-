@@ -24,7 +24,7 @@ caso('perfil', () => {
   ok('mesma pessoa pelo nome (Ana × "Ana (gestora)")', g2mesma('Ana', 'Ana (gestora)') && !g2mesma('Ana', 'Paula (almoxarife)') && !g2mesma('', ''));
   ok('papel vem do cadastro: objeto forjado {k:"Caio", papeis:{gestor}} não vira gestor; chave "Ana" vale', !g2papel({ k: 'Caio', papeis: { gestor: 'gestora' } }, 'gestor') && g2papel('Ana', 'gestor') && !g2papel({ k: 'Xyz', papeis: { gestor: 'g' } }, 'gestor'));
   const self = { state: {}, setState(o) { Object.assign(this.state, o); } }; const v = {}; g2navvals(self, v, []);
-  ok('menu lateral: seletor com 7 perfis (Igor e Marta do beneficiamento, BEN-1), Ana marcada', v.perfil_k === 'Ana' && (v.perfil_opts || []).length === 7, [v.perfil_k, (v.perfil_opts || []).length]);
+  ok('menu lateral: seletor com todos os perfis do cadastro (Igor e Marta do beneficiamento entre eles), Ana marcada', v.perfil_k === 'Ana' && (v.perfil_opts || []).length === G2_PERFIS.length && ['Igor', 'Marta'].every(k => (v.perfil_opts || []).some(o => o.v === k)), [v.perfil_k, (v.perfil_opts || []).map(o => o.v)]);
   self.g2perfilFecha = { pa: null }; self.state.pa = { id: 'OS-0430', fn: 'liberar' };   // confirmação aberta pela Ana
   v.perfil_set({ target: { value: 'Caio' } });
   ok('trocar para Caio grava e avisa que não é segurança', __ls['safrion.perfilDemo'] === 'Caio' && g2perfil().k === 'Caio' && /Caio · PCP \(não é segurança de acesso\)/.test(self.state.g2toast || ''), self.state.g2toast);
@@ -222,7 +222,7 @@ caso('dispensa com papéis separados', () => {
   try { for (const k of ['Beto', 'Otávio']) { ini(); const r = cenMudar(null, c => osc_dispensar(c, 'OS-0421', 40, 'x', k)); const o = G().ordens['OS-0421'];
       ok('NEGATIVO ' + k + ' (só ' + (k === 'Beto' ? 'agrônomo' : 'gestor') + ') não dispensa: exige os dois papéis; saldo segue 160 ha', r.erro === 'Dispensar saldo da OS-0421: decisão de Ana (gestora e agrônoma). Nada foi alterado.' && o.saldo === 160 && !(o.osc && o.osc.disp), r.erro || r.msg); } }
   finally { G2_PERFIS.splice(n0); }
-  ok('cadastro restaurado: ' + n0 + ' perfis', G2_PERFIS.length === n0 && n0 === 7);
+  ok('cadastro restaurado: ' + n0 + ' perfis', G2_PERFIS.length === n0 && !G2_PERFIS.some(p => p.k === 'Beto' || p.k === 'Otávio'));   /* sem número fixo: outra frente pode acrescentar perfil (revisão BEN, S4) */
 });
 // achado 2 · checklist: editar o motivo não troca o autor da resposta
 caso('motivo editado', () => {

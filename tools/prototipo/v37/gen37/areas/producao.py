@@ -188,7 +188,8 @@ function prPedidosPara(c,L){ return Object.values(prP(c).pedidos).filter(p=>prCo
 function prLoteProx(c,L,S){ if(S.esgotado) return L.esg?{t:'consumido na '+L.esg+' · rastreio guardado',p:'Consumido na '+L.esg+' (beneficiamento): saldo 0; o rastreio fica em "Para onde foi"'}:{t:'sem saldo · rastreio guardado'};
   /* lote de produção (BEN-1): a Qualidade registra o resultado da inspeção e decide (fechar o processo não libera) */
   if(typeof benProxLote==='function'){ const b=benProxLote(c,L,S); if(b) return b; }
-  if(S.q==='Em processo'){ const b=typeof benProxEntrada==='function'?benProxEntrada(c,L):null; return b||{t:'no beneficiamento · fora do vendável'}; }
+  if(S.q==='Em processo'){ const b=typeof benProxEntrada==='function'?benProxEntrada(c,L):null; if(b&&b.lib) return {t:b.t,a:'liberar'};   /* avaria no local de processo: a Qualidade libera a entrada (BEN-REV-03) */
+    return b||{t:'no beneficiamento · fora do vendável'}; }
   if(S.q==='Bloqueado') return {t:S.dono+' decide · carência'};
   if(S.q==='Em inspeção'){ const ql=prQuem('qual'); if(!S.dono||S.dono===ql) return {t:'Liberar lote · '+ql,a:'liberar'};
     return {t:S.dono+' resolve · '+String(S.mot||'').split(':')[0],p:S.dono+' resolve: '+S.mot+'. Liberar fica com a Qualidade depois disso'}; }   /* revisão A-13 */
@@ -455,7 +456,9 @@ function prPanCarga(self,c,g){ const P=prP(c); const s=prCgSit(c,g); const cu=g.
           {t:'Chave e recibo',rows:[{c:['chave do campo: '+(g.chave||'—')]},{c:['chave da pesagem: '+(g.chaveRec||'—')]}]}],err:self.state.pr_err};
   if(g.st==='Recebida'){ if(self.state.pr_modo==='estorno'){ PPx.form={t:'Estornar '+g.id,h:'Devolve o efeito: sai do '+g.lote+' e da produção do talhão. Recusado se o lote ficar abaixo do reservado.',fields:[prFld(self,'mot','Motivo do estorno',{t:'txt',im:'text',ph:'ex.: ticket trocado na balança'})]};
       PPx.prim={t:'Confirmar estorno',go:()=>prRun(self,x=>prEstornar(x,g.id,prFval(self,'mot',''),prRec(g.faz)),{pr_modo:null,pr_form:null})}; PPx.sec=[{t:'Manter carga',go:()=>self.setState({pr_modo:null,pr_err:''})}]; }
-    else PPx.sec=[{t:'Estornar',go:()=>self.setState({pr_modo:'estorno',pr_form:null,pr_err:''})}]; }
+    else { const ob=L&&typeof benPrende==='function'?benPrende(c,L):null;   /* lote em processo numa ordem liberada: sem estorno (BEN-REV-02, mesma regra do prEstornoImpede); o porquê fica no próximo passo, sem repetir o lote */
+      if(ob) PPx.next=s.nx+'. Sem estorno enquanto a '+ob.id+' não fecha: erro de pesagem entra no balanço da ordem e se justifica na conferência (alçada).';
+      else PPx.sec=[{t:'Estornar',go:()=>self.setState({pr_modo:'estorno',pr_form:null,pr_err:''})}]; } }
   return PPx; }
 function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const P=prP(c); const st=self.state; prFaixaRec(self,v,c);
   v.cards_cg=prCards(self,v,'g_cg',id=>{ const g=P.cargas[id]; if(!g) return null; const s=prCgSit(c,g);

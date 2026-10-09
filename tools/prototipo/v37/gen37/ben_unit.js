@@ -246,8 +246,13 @@ ok('U18 K29 condição do a13: "Apto" da semente; "Restrito · monitorado" → a
 { const c = NOVO(); MUD(c, x => cenDevolver(x, 'REQ-030', CX, 60, true, RU)); MUD(c, x => benRetirar(x, 'OB-0112', 'L39-119', IG)); const l = MUD(c, x => benAutorizarLiberar(x, 'OB-0112', IG));
   ok('U21a K08 liberar a OB-0112 (com a REQ-030 na semente): REQ-041 (maior + 1, piso 41) com 584 un reservadas; CX26-01 disponível 16', !l.erro && O(c, 'OB-0112').req === 'REQ-041' && REQ(c, 'REQ-041').solicitado === 584 && cenDisp(c.lotes[CX + '|CX26-01']) === 16, [l, O(c, 'OB-0112').req]);
   ok('U21b a O.S. segue a mesma sequência: osc_reqId → REQ-042', typeof osc_reqId !== 'function' || osc_reqId(c) === 'REQ-042', typeof osc_reqId === 'function' ? osc_reqId(c) : 'sem osc_reqId');
-  const c2 = NOVO(); const n = MUD(c2, x => benNova(x, { lotes: [{ lote: 'L39-131', kg: 24120 }], cx: 0 }, IG)); const lr = MUD(c2, x => benAutorizarLiberar(x, n.id, IG));
-  ok('U21c ordem sem material (0 caixa) libera sem abrir requisição; todo ID de REQ casa com /^REQ-\\d{3}$/', !n.erro && !lr.erro && !O(c2, n.id).req && Object.keys(c2.reqs).length === Object.keys(CEN0.reqs).length && Object.keys(c.reqs).every(k => /^REQ-\d{3}$/.test(k)), [n, lr]); }
+  /* BEN-REV-05 (09/10): a expectativa antiga ("0 caixa libera sem REQ") prendia a ordem: liberada sem caixa, o Produto é recusado pela custódia
+     e o Concluir exige Produto. Agora 0 caixa é recusado na criação; "sem material libera sem REQ" segue valendo para rota sem caixa (U21d) */
+  const c2 = NOVO(); const n = MUD(c2, x => benNova(x, { lotes: [{ lote: 'L39-131', kg: 24120 }], cx: 0 }, IG));
+  ok('U21c BEN-REV-05 0 caixa na PACK-FRU v3: "Caixas: ao menos 1 un. O Produto da PACK-FRU v3 sai em caixa (sugestão 2292)." e nenhuma ordem nova', n.erro === 'Caixas: ao menos 1 un. O Produto da PACK-FRU v3 sai em caixa (sugestão 2292).' && !O(c2, 'OB-0113'), n);
+  const n2 = MUD(c2, x => benNova(x, { lotes: [{ lote: 'L39-131', kg: 24120 }] }, IG)); (c2.ordens[n2.id] || {}).ins = [];   /* fixture: rota sem material (a SEC-GRA entra no BEN-3) */
+  const lr = MUD(c2, x => benAutorizarLiberar(x, n2.id, IG));
+  ok('U21d ordem sem material libera sem abrir requisição e sem prometer entrega de caixa; todo ID de REQ casa com /^REQ-\\d{3}$/', !n2.erro && !lr.erro && !(O(c2, n2.id) || {}).req && Object.keys(c2.reqs).length === Object.keys(CEN0.reqs).length && !/entrega as caixas/.test(lr.msg) && Object.keys(c.reqs).every(k => /^REQ-\d{3}$/.test(k)), [n2, lr]); }
 
 // ---- U22 · R-G01, R-G02 · parâmetros com fonte; nada real; nenhuma constante de saca ou rendimento ----
 { const src = JSON.stringify(BENC) + JSON.stringify(CEN0.producao.ben);
@@ -302,6 +307,7 @@ ok('U18 K29 condição do a13: "Apto" da semente; "Restrito · monitorado" → a
   ok('U26c2 diferença 120 kg sobre 24.120 kg: Igor recusado pelo teto ("120 kg > alçada de 100 kg (PACK-FRU v3, sintético)"); Ana justifica', ji.erro === '120 kg > alçada de 100 kg (PACK-FRU v3, sintético): decide Ana (gestora). Nada foi alterado.' && !j.erro, [ji, j]);
   ok('U26d fechar: lote L39-133 (mesmo modelo e sequência da Colheita) Em inspeção na INSP-106; genealogia até a carga da O.S. de colheita (LC- herdado para a avaliação do destino)',
      !j.erro && !f.erro && L && L.id === 'L39-133' && L.insp === 'INSP-106' && prSaldos(c, L).q === 'Em inspeção' && L.origem[0].lote === 'L39-131' && lcs.length > 0 && prOrigCampo(c, L).every(x => x.os === 'OS-0505'), [j, f, L && L.id, lcs]);
+  ok('U26d2 BEN-REV-08 a ordem do L39-131 (Lagoa Grande) rodou na linha da rota, no Packing (Santa Rita): o lote embalado fica no l8 e continua da Lagoa Grande', L && L.local === 'l8' && L.faz === 'Lagoa Grande' && O(c, id).talhao === 'Packing', L && [L.local, L.faz, O(c, id).talhao]);
   const rr = MUD(c, x => benResultado(x, L.id, 'Conforme', '', MA)); const dd = MUD(c, x => benDecidir(x, L.id, 'Liberar', {}, MA));
   const L2 = () => LT(c, lid);   /* MUD troca os objetos do estado: reler o lote depois de cada comando */
   ok('U26e liberado pela Qualidade: apto no Estoque de produto (prSaldos) e entrada esgotada', prSaldos(c, L2()).q === 'Liberado' && prSaldos(c, L2()).disp === 20000 && prSaldos(c, LT(c, 'L39-131')).esgotado, [rr, dd, prSaldos(c, L2()), prSaldos(c, LT(c, 'L39-131'))]);
@@ -332,5 +338,111 @@ ok('U18 K29 condição do a13: "Apto" da semente; "Restrito · monitorado" → a
   ok('U29 OB-0112 (A liberar) com 0 kg em processo; L39-131 aponta "Abrir ordem de beneficiamento" (#nova=L39-131) e, criada a OB-0113, "na OB-0113 (A liberar)"; faixa "1 a pesar" e "1 a liberar · 3 lotes a beneficiar" → "2 a liberar · 2 lotes a beneficiar"',
      ep12 === 0 && px && px.h === 'BEN.dc.html#nova=L39-131' && px2 && /^na OB-0113 \(A liberar\)/.test(px2.t) && px2.h === 'BEN.dc.html#OB-0113'
      && pr0.carga === '1 a pesar' && pr0.ben === '1 a liberar · 3 lotes a beneficiar' && pr1.ben === '2 a liberar · 2 lotes a beneficiar', [ep12, px, px2, pr0, pr1, nv.erro]); }
+
+// ===== Revisão adversarial do BEN-1 (BEN-REV-01..09, 09/10/2026): cada achado com proteção de regressão =====
+function OSX(c, id, tal, etapa, ap) { c.ordens[id] = { id, tipo: 'Colheita · semana 39', talhao: tal, area: 0, etapa, versao: 'v1', realizado: 0, saldo: 0, resp: 'Sérgio', ins: [], req: null, selos: [],
+  ap: (ap || []).map((a, i) => ({ d: a[0], dia: i + 1, ha: a[1], st: 'Conferido', sinc: true, origem: 'web' })), reservado: false, osc: {} }; const o = c.ordens[id]; o.realizado = o.ap.reduce((s, a) => s + a.ha, 0); return o; }
+/* carga do T7 (Santa Rita) recebida no Packing (l8) por uma O.S. de colheita sintética (a semente não tem colheita do T7) */
+function T7(c, cond, tk) { if (!c.ordens['OS-0932']) OSX(c, 'OS-0932', 'T7', 'Em execução', [['25/09', 6]]); return MUD(c, x => prReceber(x, { os: 'OS-0932', ticket: tk || 'TK-T7A', bruto: 9400, tara: 3200, cond, dcol: '2026-09-25' })); }
+
+// ---- U30 · BEN-REV-01 · lote de entrada numa ordem liberada: sem decisão da Qualidade (a massa iria a dois destinos); defesa no Fechar ----
+{ const c = NOVO(); const L = 'L39-119';
+  MUD(c, x => benRetirar(x, 'OB-0112', L, IG)); MUD(c, x => benResultado(x, L, 'Conforme', '', MA)); MUD(c, x => benDecidir(x, L, 'Liberar', {}, MA));
+  const n = MUD(c, x => benNova(x, { lotes: [{ lote: L, kg: 3130 }] }, IG)); const d0 = benDecisoes(c, LT(c, L));
+  const l = MUD(c, x => benAutorizarLiberar(x, n.id, IG)); const d1 = benDecisoes(c, LT(c, L)); const n0 = c.producao.movs.length;
+  const ds = MUD(c, x => benDecidir(x, L, 'Destinar', { motivo: 'indústria de polpa' }, MA)); const bq = MUD(c, x => benDecidir(x, L, 'Bloquear', { motivo: 'suspeita de avaria' }, MA));
+  ok('U30a BEN-REV-01 L39-119 liberado e na OB-0113: em A liberar (rascunho) a Qualidade ainda decide (Bloquear, Destinar); liberada a ordem, nenhuma decisão e Destinar/Bloquear recusados sem gravar (3.130 kg no físico)',
+     !n.erro && !l.erro && JSON.stringify(d0) === '["Bloquear","Destinar"]' && JSON.stringify(d1) === '[]'
+     && ds.erro === 'L39-119 em processo na OB-0113 (Liberadas): decida depois do Fechar, sobre os lotes de saída (nascem Em inspeção). Nada foi gravado.' && /em processo na OB-0113/.test(bq.erro || '') && prFis(c, L) === 3130 && c.producao.movs.length === n0, [n, l, d0, d1, ds, bq]);
+  const req = O(c, n.id).req; MUD(c, x => cenEntregar(x, req, CX, 298, 'Igor', RU)); MUD(c, x => benIniciar(x, n.id, IG));
+  MUD(c, x => benSaida(x, n.id, { fluxo: 'Produto', classe: 'A', cx: 290, bruto: 3074 }, IG)); MUD(c, x => benSaida(x, n.id, { fluxo: 'Descarte', destino: 'Compostagem', kg: 230 }, IG));
+  MUD(c, x => benConcluir(x, n.id, IG)); MUD(c, x => benConferir(x, n.id, PA)); MUD(c, x => cenDevolver(x, req, CX, 8, true, RU));
+  /* fixture: massa tirada por fora das regras (movimento gravado direto); o Fechar não pode consumir de novo o que já saiu */
+  c.producao.movs.push({ id: 'MP-T30', tipo: 'destinação', lote: L, kg: -3130, d: '2026-09-26', quem: 'fixture' }); const f = MUD(c, x => benFechar(x, n.id, IG));
+  ok('U30b defesa no Fechar: entrada com 0 kg para 3.130 kg consumidos → "Fechar recusado: o L39-119 tem 0 kg e a OB-0113 consome 3.130 kg…"; segue Em conferência e nenhum lote nasce',
+     f.erro === 'Fechar recusado: o L39-119 tem 0 kg e a OB-0113 consome 3.130 kg (o lote mudou depois da liberação). Nada foi gravado.' && O(c, n.id).etapa === 'Em conferência' && !LT(c, 'L39-133'), f); }
+
+// ---- U31 · BEN-REV-02 · estorno de carga com o lote numa ordem liberada; BEN-REV-09 · carga nova não soma no lote da ordem ----
+{ const c = NOVO(); const r = T7(c, 'Íntegra'); const L = r.L.id; const cg = r.g.id;
+  const n = MUD(c, x => benNova(x, { lotes: [{ lote: L, kg: 6200 }], cx: 500 }, IG)); const r2 = T7(c, 'Íntegra', 'TK-T7C');
+  ok('U31a BEN-REV-09 carga nova do mesmo dia não soma no lote que já está numa ordem (A liberar): vira lote novo; o da ordem continua com 6.200 kg', !n.erro && !r2.erro && r2.L.id !== L && prFis(c, L) === 6200, [n, r2.erro, r2.L && r2.L.id]);
+  MUD(c, x => benAutorizarLiberar(x, n.id, IG)); const imp = prEstornoImpede(c, c.producao.cargas[cg]); const e = MUD(c, x => prEstornar(x, cg, 'ticket errado', 'Rui'));
+  ok('U31b BEN-REV-02 OB-0113 liberada: estornar a CG-2109 é recusado com o caminho (diferença no balanço, alçada); L39-133 segue com 6.200 kg e a carga Recebida',
+     e.erro === 'CG-2109 alimenta o L39-133, em processo na OB-0113 (Liberadas): estorno recusado. Erro de pesagem aparece no balanço da ordem: justifique a diferença na conferência (alçada).' && imp === e.erro && prFis(c, L) === 6200 && c.producao.cargas[cg].st === 'Recebida', [e, imp]);
+  const c2 = NOVO(); const q = T7(c2, 'Íntegra'); const n2 = MUD(c2, x => benNova(x, { lotes: [{ lote: q.L.id, kg: 6200 }], cx: 500 }, IG));
+  const e2 = MUD(c2, x => prEstornar(x, q.g.id, 'ticket errado', 'Rui')); const l2 = MUD(c2, x => benAutorizarLiberar(x, n2.id, IG));
+  ok('U31c em A liberar (rascunho) o estorno passa e a liberação recusa a entrada sem saldo, sem reservar nada', !e2.erro && /L39-133 sem saldo físico/.test(l2.erro || '') && O(c2, n2.id).etapa === 'A liberar' && !O(c2, n2.id).req, [e2, l2]); }
+
+// ---- U32 · BEN-REV-03 · carga com avaria no Packing: a Qualidade libera a entrada e o lote chega ao beneficiamento ----
+{ const c = NOVO(); const r = T7(c, 'Com avaria'); const L = r.L.id; const S = prSaldos(c, LT(c, L)); const px = benProxEntrada(c, LT(c, L));
+  const ig = MUD(c, x => prLiberarLote(x, L, IG)); const n0 = MUD(c, x => benNova(x, { lotes: [{ lote: L, kg: 6200 }] }, IG));
+  ok('U32a BEN-REV-03 avaria no Packing: L39-133 em processo pelo local e entrada em inspeção; o próximo passo é "Liberar lote · Marta (qualidade)"; Igor não libera; a ordem é recusada com a causa e o dono',
+     S.q === 'Em processo' && prLibProc(c, LT(c, L)) && px && px.lib && px.t === 'Liberar lote · Marta (qualidade)' && /decisão de Ana \(agrônoma\) ou Marta \(qualidade\)/.test(ig.erro || '') && n0.erro === 'L39-133 em inspeção · Marta (qualidade)', [S.q, px, ig, n0]);
+  const lm = MUD(c, x => prLiberarLote(x, L, MA)); const S2 = prSaldos(c, LT(c, L)); const px2 = benProxEntrada(c, LT(c, L));
+  ok('U32b Marta libera a entrada: segue em processo (fora do vendável, disponível 0) e abre ordem ("Abrir ordem de beneficiamento · Igor")', !lm.erro && /seguem para o beneficiamento; Igor \(responsável de produção\) abre a ordem/.test(lm.msg) && S2.q === 'Em processo' && S2.disp === 0 && benLotesAptos(c).some(x => x.id === L) && px2 && /^Abrir ordem de beneficiamento/.test(px2.t), [lm, S2.q, px2]);
+  const n = MUD(c, x => benNova(x, { lotes: [{ lote: L, kg: 6200 }], cx: 500 }, IG)); const l2 = MUD(c, x => prLiberarLote(x, L, MA));
+  ok('U32c a ordem nasce; "Liberar lote" de novo é recusado (já liberado para o beneficiamento)', !n.erro && /já liberado para o beneficiamento/.test(l2.erro || ''), [n, l2]); }
+
+// ---- U33 · BEN-REV-04 · o Reabrir não contorna a alçada da correção (R-F07, R-G06; BEN-D16) ----
+{ const c = NOVO(); MUD(c, x => benEstornar(x, 'OB-0110', 'S-03', 'Erro de digitação', '', IG)); MUD(c, x => benConcluir(x, 'OB-0110', IG));
+  const rb = MUD(c, x => benReabrir(x, 'OB-0110', 'pesagem refeita', IG)); MUD(c, x => benSaida(x, 'OB-0110', { fluxo: 'Perda identificada', causa: 'Avaria no manuseio', kg: 600, ticket: 'TK-9' }, IG));
+  const co = MUD(c, x => benConcluir(x, 'OB-0110', IG)); const o = O(c, 'OB-0110'); const cf = MUD(c, x => benConferir(x, 'OB-0110', PA));
+  ok('U33a BEN-REV-04 600 kg (5 %) no Concluir, reabre, lança a perda e conclui com 0 kg → a correção aguarda Ana ("antes de reabrir"); a Paula não confere antes',
+     !rb.erro && !co.erro && o.ben.corr && o.ben.corr.pend && /diferença no concluir antes de reabrir 600 kg, 5,00 %/.test(o.ben.corr.msg) && benProx(c, o).acao === 'confirmar' && /decide Ana \(gestora\) antes da conferência/.test(cf.erro || '') && benSelos(c, o).some(s => s.t === 'Corrigido na conferência'), [co, o.ben.corr, cf]);
+  const ca = MUD(c, x => benConfirmarCorrecao(x, 'OB-0110', AN)); const cf2 = MUD(c, x => benConferir(x, 'OB-0110', PA));
+  ok('U33b Ana confirma e a Paula confere; Ana fica no histórico', !ca.erro && !cf2.erro && O(c, 'OB-0110').ben.hist.some(h => /^Ana/.test(h.quem) && h.ev === 'Correção na conferência confirmada'), [ca, cf2]);
+  const c2 = NOVO(); MUD(c2, x => benEstornar(x, 'OB-0110', 'S-03', 'Erro de digitação', '', IG)); MUD(c2, x => benConcluir(x, 'OB-0110', IG)); MUD(c2, x => benReabrir(x, 'OB-0110', 'pesagem refeita', IG));
+  MUD(c2, x => benSaida(x, 'OB-0110', { fluxo: 'Descarte', destino: 'Compostagem', kg: 550 }, IG)); MUD(c2, x => benConcluir(x, 'OB-0110', IG)); const o2 = () => O(c2, 'OB-0110');
+  const p0 = !!(o2().ben.corr && o2().ben.corr.pend);
+  MUD(c2, x => benSaida(x, 'OB-0110', { fluxo: 'Perda identificada', causa: 'Avaria no manuseio', kg: 50, ticket: 'TK-10', motivo: 'perda pesada' }, IG));
+  ok('U33c reaberta e concluída com 50 kg (fora da faixa de 12, dentro da alçada de 60): sem confirmação no Concluir; a perda de 50 na conferência leva a 0 e pede Ana pelo |dif₀| de 600 kg de antes de reabrir',
+     !p0 && o2().ben.corr && o2().ben.corr.pend && /antes de reabrir 600 kg/.test(o2().ben.corr.msg), [p0, o2().ben.corr]); }
+
+// ---- U34 · BEN-REV-08 · a ordem roda onde a linha da rota está; a fazenda da fruta fica na ordem e nos lotes ----
+{ const c = NOVO(); const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-131', kg: 24120 }] }, IG)); const o = O(c, n.id);
+  ok('U34 BEN-REV-08 L39-131 (Lagoa Grande) entra na ordem da Packing linha 1: local Packing (l8, Santa Rita), fazenda Lagoa Grande, e o histórico diz onde', !n.erro && o.talhao === 'Packing' && o.ben.local === 'l8' && o.ben.faz === 'Lagoa Grande'
+     && /fruta da Lagoa Grande processada na Packing linha 1 · Packing \(Santa Rita\)/.test(o.ben.hist[0].det), [n, o.talhao, o.ben.local, o.ben.hist[0].det]); }
+
+// ---- U35 · BEN-REV-09 · a ordem leva o lote inteiro; a liberação confere a entrada de novo ----
+{ const c = NOVO(); const p = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-131', kg: 1000 }] }, IG)); const g = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-131', kg: 999999 }] }, IG));
+  ok('U35a BEN-REV-09 entrada parcial recusada ("A ordem leva o lote inteiro: L39-131 tem 24.120 kg (informado 1.000 kg)…"); acima do físico, a causa do saldo', p.erro === 'A ordem leva o lote inteiro: L39-131 tem 24.120 kg (informado 1.000 kg). Entrada parcial prenderia o resto do lote até o Fechar.' && g.erro === 'L39-131: 999.999 kg na ordem, 24.120 kg no lote.' && !O(c, 'OB-0113'), [p, g]);
+  const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-131', kg: 24120 }] }, IG)); c.producao.movs.push({ id: 'MP-T35', tipo: 'ajuste', lote: 'L39-131', kg: -100, d: '2026-09-26' });   /* fixture: ajuste gravado por fora */
+  const im = n.id ? benImpedimentos(c, O(c, n.id)) : [n.erro];
+  ok('U35b a liberação confere a entrada de novo: "L39-131: 24.120 kg na ordem, 24.020 kg no lote."', im.some(x => x.t === 'L39-131: 24.120 kg na ordem, 24.020 kg no lote.'), im); }
+
+// ---- U36 · BEN-REV-07 · regras que não tinham proteção (perfil, ordem, fazenda, versão, motivos, fase, tara e classe) ----
+{ const c = NOVO(); fechar110(c); MUD(c, x => benResultado(x, 'L39-120', 'Conforme', '', MA)); MUD(c, x => benDecidir(x, 'L39-120', 'Liberar', {}, MA)); const n0 = c.producao.movs.length;
+  const di = MUD(c, x => benDecidir(x, 'L26-118', 'Destinar', { motivo: 'x' }, IG)); const dp = MUD(c, x => benDecidir(x, 'L26-118', 'Destinar', { motivo: 'x' }, PA));
+  const rc = MUD(c, x => benDecidir(x, 'L39-120', 'Reclassificar', { classe: 'B' }, MA));
+  ok('U36a a decisão do lote é da Qualidade ou da agrônoma: Igor e Paula recusados sem gravar; reclassificar sem motivo recusado', /decisão de Ana \(agrônoma\) ou Marta \(qualidade\)/.test(di.erro || '') && /decisão de Ana \(agrônoma\) ou Marta \(qualidade\)/.test(dp.erro || '') && rc.erro === 'Informe o motivo da reclassificação.' && c.producao.movs.length === n0 && LT(c, 'L26-118').q0 === 'Bloqueado' && LT(c, 'L39-120').classe === 'A', [di, dp, rc]);
+  const c2 = NOVO(); MUD(c2, x => benConcluir(x, 'OB-0110', IG)); MUD(c2, x => benConferir(x, 'OB-0110', PA)); MUD(c2, x => cenDevolver(x, 'REQ-030', CX, 60, true, RU));
+  const fp = MUD(c2, x => benFechar(x, 'OB-0110', PA)); const jd = MUD(c2, x => benJustificar(x, 'OB-0110', 'Erro de medição', 'balança', IG));
+  ok('U36b Paula não fecha (produção); justificar com a diferença dentro da faixa é recusado', /decisão de Igor/.test(fp.erro || '') && O(c2, 'OB-0110').etapa === 'Em conferência' && /dentro da faixa/.test(jd.erro || ''), [fp, jd]);
+  const c3 = NOVO(); const a = MUD(c3, x => benNova(x, { lotes: [{ lote: 'L39-117', kg: 2960 }] }, IG)); const fz = MUD(c3, x => benNova(x, { lotes: [{ lote: 'L39-131', kg: 24120 }, { lote: 'L39-117', kg: 2960 }] }, IG));
+  const ini = MUD(c3, x => benIniciar(x, 'OB-0112', IG)); const rv = MUD(c3, x => benRetirar(x, 'OB-0112', 'L39-119', IG, { ver: 0 }));
+  ok('U36c lote já numa ordem (L39-117 na OB-0112) não entra em outra; fazendas misturadas recusadas; Iniciar em A liberar recusado; Retirar com a versão velha é conflito, nada gravado',
+     a.erro === 'L39-117 já está na OB-0112 (A liberar).' && /^Entradas de fazendas diferentes/.test(fz.erro || '') && /ainda não foi liberada/.test(ini.erro || '') && /A OB-0112 mudou depois que você abriu/.test(rv.erro || '') && O(c3, 'OB-0112').ben.ent.length === 3, [a, fz, ini, rv]);
+  const c4 = NOVO(); MUD(c4, x => benEstornar(x, 'OB-0110', 'S-01', 'Pesagem refeita', '', IG)); MUD(c4, x => benEstornar(x, 'OB-0110', 'S-02', 'Pesagem refeita', '', IG));
+  const cs = MUD(c4, x => benConcluir(x, 'OB-0110', IG)); const sc = MUD(c4, x => benSaida(x, 'OB-0110', { fluxo: 'Produto', classe: '', cx: 10, bruto: 106 }, IG)); const bt = MUD(c4, x => benSaida(x, 'OB-0110', { fluxo: 'Produto', classe: 'A', cx: 10, bruto: 6 }, IG));
+  ok('U36d Concluir sem Produto válido recusado; Produto sem classe e bruto ≤ tara recusados', /Registre ao menos uma saída de Produto com classe/.test(cs.erro || '') && sc.erro === 'Escolha a classe: A ou B.' && bt.erro === 'Bruto 6 kg não passa da tara 6 kg: confira a pesagem.', [cs, sc, bt]);
+  const c5 = NOVO(); MUD(c5, x => benEstornar(x, 'OB-0110', 'S-03', 'Erro de digitação', '', IG)); MUD(c5, x => benConcluir(x, 'OB-0110', IG));
+  const sm = MUD(c5, x => benSaida(x, 'OB-0110', { fluxo: 'Perda identificada', causa: 'Avaria no manuseio', kg: 600, ticket: 'TK-1' }, IG)); const nc = MUD(c5, x => benResultado(x, 'L39-119', 'Não conforme', '  ', MA));
+  ok('U36e correção na conferência sem motivo recusada; resultado "Não conforme" sem observação recusado', sm.erro === 'Correção na conferência: informe o motivo.' && nc.erro === 'Descreva o que não conformou (vai para a decisão).' && !c5.producao.ben.insp['INSP-94'].res['L39-119'], [sm, nc]);
+  /* versão esperada nos comandos sem formulário (S4 da revisão): a Paula confere o balanço que viu; o toque repetido continua "Já feito" */
+  const c6 = NOVO(); MUD(c6, x => benConcluir(x, 'OB-0110', IG)); const v = O(c6, 'OB-0110').ver;
+  MUD(c6, x => benSaida(x, 'OB-0110', { fluxo: 'Perda identificada', causa: 'Avaria no manuseio', kg: 5, ticket: 'TK-2', motivo: 'perda pesada' }, IG));
+  const cv = MUD(c6, x => benConferir(x, 'OB-0110', PA, { ver: v })); const ck = MUD(c6, x => benConferir(x, 'OB-0110', PA, { ver: O(c6, 'OB-0110').ver })); const cd = MUD(c6, x => benConferir(x, 'OB-0110', PA, { ver: v }));
+  ok('U36f Conferir com a versão que a Paula abriu: o balanço mudou (perda de 5 kg) → conflito, nada gravado; com a versão atual confere; o toque repetido é "Já feito"', /A OB-0110 mudou depois que você abriu/.test(cv.erro || '') && !ck.erro && /^Já feito: balanço conferido/.test(cd.erro || ''), [cv, ck, cd]); }
+
+// ---- U37 · BEN-REV-07 · lote reservado para pedido não entra na ordem (cancelar a reserva antes) ----
+{ const c = NOVO(); c.producao.lotes['LX-3'] = Object.assign({}, LT(c, 'L38-131'), { id: 'LX-3', origem: [], abertura: true }); c.producao.movs.push({ id: 'MP-T3', tipo: 'abertura', lote: 'LX-3', kg: 1000, d: '2026-09-25' });
+  c.producao.pedidos['PV-T3'] = { id: 'PV-T3', cliente: 'Teste', prod: LT(c, 'LX-3').prod, cultura: 'Mamão Formosa', classe: '', saf: '', tipo: 'pronta', janela: '—', qtd: 500, dest: 'MI-BR' };
+  const S = prSaldos(c, LT(c, 'LX-3')); const rs = MUD(c, x => prReservar(x, { pedido: 'PV-T3', lote: 'LX-3', kg: 500 })); const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'LX-3', kg: 1000 }] }, IG));
+  ok('U37 lote reservado para pedido não entra na ordem ("LX-3 reservado para pedido: cancele a reserva antes de beneficiar")', S.q === 'Liberado' && !rs.erro && n.erro === 'LX-3 reservado para pedido: cancele a reserva antes de beneficiar.', [S.q, rs, n]); }
+
+// ---- U38 · S4 da revisão · a recusa do Liberar lote diz de onde vem a inspeção (fruta de campo não é "lote do beneficiamento") ----
+{ const c = NOVO(); const a = MUD(c, x => prLiberarLote(x, 'L39-119', MA)); fechar110(c); const b = MUD(c, x => prLiberarLote(x, 'L39-120', MA));
+  ok('U38 S4 Liberar lote: o L39-119 (fruta de campo, INSP-94) "tem a inspeção INSP-94"; o L39-120 "é lote do beneficiamento (OB-0110)" e fechar não libera',
+     a.erro === 'L39-119 tem a inspeção INSP-94: registre o resultado da inspeção INSP-94 e a decisão.' && /^L39-120 é lote do beneficiamento \(OB-0110\): registre o resultado da inspeção INSP-\d+ e a decisão \(fechar o processo não libera\)\.$/.test(b.erro || ''), [a, b]); }
 
 print(JSON.stringify(R));

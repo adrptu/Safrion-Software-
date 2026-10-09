@@ -359,7 +359,9 @@ function prReceber(c, k) { const P = prP(c, 1); const g0 = k.carga ? P.cargas[k.
   const prod = u.campo ? u.proc : u.prod; const drec = prHoje(); const misto = orig.length > 1;
   const q0 = k.cond === 'Íntegra' ? 'Liberado' : 'Em inspeção';
   /* revisão A-05: lote liberado depois pela Qualidade não recebe carga nova com avaria (ela nasceria apta sem conferência) */
-  let L = misto ? null : Object.values(P.lotes).find(x => !x.misto && x.prod === prod && x.local === local && x.drec === drec && x.cond === k.cond && x.q0 === q0 && !x.lib && (x.origem || []).length && x.origem.every(y => y.os === osId && y.dcol === dcol));
+  /* BEN-1 (BEN-REV-09): lote que entrou numa ordem de beneficiamento (mesmo em A liberar) não recebe carga nova; a ordem leva o lote inteiro */
+  let L = misto ? null : Object.values(P.lotes).find(x => !x.misto && x.prod === prod && x.local === local && x.drec === drec && x.cond === k.cond && x.q0 === q0 && !x.lib && !x.ordem && !x.esg
+    && !(typeof benOrdemAberta === 'function' && benOrdemAberta(c, x.id)) && (x.origem || []).length && x.origem.every(y => y.os === osId && y.dcol === dcol));
   const novo = !L;
   if (!L) { const id = prProxLote(c, drec);
     L = P.lotes[id] = { id, prod, cultura, classe: u.grao ? 'Padrão' : '', saf: (PRDC.safras[kk.saf] || {}).mf || '', faz, local, drec, dcol, validade: u.vida ? prDiaMais(dcol, u.vida) : null,
@@ -375,9 +377,14 @@ function prReceber(c, k) { const P = prP(c, 1); const g0 = k.carga ? P.cargas[k.
   return { msg: g.id + ' recebida: ' + prFmtT(liq, 2) + ' kg líquidos (' + prFmtT(prNum(k.bruto), 2) + ' − ' + prFmtT(prNum(k.tara), 2) + ')' + (u.grao ? ' · comercial ' + prFmtT(com, 2) + ' kg = ' + prUnTxt(cultura, com) : '')
     + ' no ' + L.id + (novo ? ' (novo)' : '') + ' · ' + PRDC.locais[local].nome + ' · ' + S.q + '.' + (pa && pa.area > 0 ? ' ' + o.talhao + ': passe ' + prSemTxt(pa.sem) + ' ' + prPrtvTxt(cultura, pa.kg, pa.area) + (pa.final ? '.' : ' (parcial).') : ''), g, L }; }
 
+/* carga cujo lote está em processo numa ordem de beneficiamento liberada (BEN-REV-02): o estorno tiraria do lote a massa que a ordem já
+   consome no Fechar (lote negativo e produto sem origem). Em A liberar a ordem é rascunho: o estorno passa e a liberação confere de novo */
+function prEstornoImpede(c, g) { const L = g && prP(c).lotes[g.lote]; const ob = L && typeof benPrende === 'function' ? benPrende(c, L) : null; if (!ob) return '';
+  return g.id + ' alimenta o ' + L.id + ', em processo na ' + ob.id + ' (' + ob.etapa + '): estorno recusado. Erro de pesagem aparece no balanço da ordem: justifique a diferença na conferência (alçada).'; }
 /* estornar carga recebida (R-19): motivo; devolve o efeito; recusa se o lote ficar abaixo do reservado; o ticket fica livre */
 function prEstornar(c, id, motivo, quem) { const P = prP(c, 1); const g = P.cargas[id]; if (!g || g.st !== 'Recebida') throw new Error('Só carga recebida é estornada.');
   const mot = String(motivo || '').trim(); if (!mot) throw new Error('Informe o motivo do estorno.');
+  const imp = prEstornoImpede(c, g); if (imp) throw new Error(imp);
   const L = P.lotes[g.lote]; const mv = P.movs.find(m => m.tipo === 'recebimento' && m.carga === id); const kg = mv ? mv.kg : 0;
   const fis = prFis(c, L.id), res = prResLote(c, L.id); const fica = prSub(fis, kg);
   if (prCmp(fica, res) < 0) throw new Error('Estorno recusado: o ' + L.id + ' ficaria com ' + prEstTxt(L.cultura, fica) + ', abaixo do reservado (' + prEstTxt(L.cultura, res) + '). Cancele ou reduza a reserva antes.');
@@ -395,14 +402,20 @@ function prDescartarCarga(c, id, motivo, quem) { const P = prP(c, 1); const g = 
 
 /* liberar lote (Qualidade, R-13): reavalia carência e ordem; recusa com a pendência e o dono */
 /* ator = perfil de quem age (CTL-3): só a Qualidade ou a agrônoma libera lote (BEN-1 (d)); dano evitado: liberação gravada em nome de quem não decidiu */
+/* recebido fora do íntegro num local de processo ou com pós-colheita (BEN-REV-03): o lote está "em processo" pelo local, mas a qualidade do
+   recebimento (a que vale para entrar numa ordem, R-A03) ainda espera a Qualidade. Sem ordem que o prenda, a Qualidade confere e libera essa
+   qualidade; o lote continua fora do vendável e vai ao beneficiamento */
+function prLibProc(c, L) { if (!L || L.insp || L.benef || L.q0 === 'Liberado') return false; if (L.ordem && (c.ordens || {})[L.ordem] && ['Encerradas', 'Canceladas'].indexOf(c.ordens[L.ordem].etapa) < 0) return false;
+  const S = prSaldos(c, L); if (S.q !== 'Em processo' || S.esgotado) return false; const B = prQualidade(c, L, { base: true }); return B.q === 'Em inspeção' && (!B.dono || B.dono === prQuem('qual')); }
 function prLiberarLote(c, lid, ator) { const quem = cenExigeUm(ator, ['qualidade', 'agronomo'], 'Liberar o lote ' + lid); const P = prP(c, 1); const L = P.lotes[lid]; if (!L) throw new Error('Lote não encontrado.'); const S = prSaldos(c, L);
-  if (L.insp) throw new Error(lid + ' é lote do beneficiamento: registre o resultado da inspeção ' + L.insp + ' e a decisão (fechar o processo não libera).');
+  if (L.insp) throw new Error(lid + (L.benef ? ' é lote do beneficiamento (' + L.benef + ')' : ' tem a inspeção ' + L.insp) + ': registre o resultado da inspeção ' + L.insp + ' e a decisão' + (L.benef ? ' (fechar o processo não libera).' : '.'));
   if (S.q === 'Liberado') throw new Error(lid + ' já está liberado.');
-  if (S.q === 'Em processo') throw new Error(lid + ' está em processo (' + S.mot + '): o beneficiamento libera o lote de saída.');
+  const proc = S.q === 'Em processo' && prLibProc(c, L);
+  if (S.q === 'Em processo' && !proc) throw new Error(lid + ' está em processo (' + S.mot + '): ' + (L.q0 === 'Liberado' ? 'já liberado para o beneficiamento; ' : '') + 'o beneficiamento libera o lote de saída.');
   if (S.q === 'Bloqueado') throw new Error('Liberar recusado: ' + S.mot + '. Lote bloqueado por carência só sai pela Qualidade com laudo (fora desta etapa). Quem decide: ' + S.dono + '.');
-  const Q = prQualidade(c, Object.assign({}, L, { q0: 'Liberado' })); if (Q.q !== 'Liberado') throw new Error('Liberar recusado: ' + Q.mot + '. Quem resolve: ' + Q.dono + '.');
-  L.q0 = 'Liberado'; L.lib = { quem, d: prHoje(), at: cenAgora() }; prMov(c, { tipo: 'liberação', lote: lid, kg: 0, fis: false, quem: L.lib.quem });
-  return { msg: lid + ' liberado por ' + L.lib.quem + ': ' + prEstTxt(L.cultura, S.fis) + ' aptos para reserva e venda.' }; }
+  const Q = prQualidade(c, Object.assign({}, L, { q0: 'Liberado' }), proc ? { base: true } : undefined); if (Q.q !== 'Liberado') throw new Error('Liberar recusado: ' + Q.mot + '. Quem resolve: ' + Q.dono + '.');
+  L.q0 = 'Liberado'; L.lib = { quem, d: prHoje(), at: cenAgora() }; prMov(c, { tipo: 'liberação', lote: lid, kg: 0, fis: false, quem: L.lib.quem, obs: proc ? 'qualidade do recebimento; segue em processo (' + S.mot + ')' : '' });
+  return { msg: lid + ' liberado por ' + L.lib.quem + ': ' + prEstTxt(L.cultura, S.fis) + (proc ? ' seguem para o beneficiamento; ' + ((typeof BENC !== 'undefined' && BENC.quem.prod) || 'o beneficiamento') + ' abre a ordem.' : ' aptos para reserva e venda.') }; }
 
 /* reservar lote apto para pedido (R-15): mesma classe, avaliação do destino, ≤ disponível e ≤ falta; dedução única */
 function prReservar(c, k) { const P = prP(c, 1); const kg = prNumOk(k.kg) ? prNum(k.kg) : NaN; const imp = JSON.stringify([k.pedido, k.lote, kg]);

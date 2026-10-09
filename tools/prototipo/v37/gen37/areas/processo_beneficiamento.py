@@ -72,10 +72,9 @@ function bnFldOpts(self,k,l,opts,h,multi,def){ const val=prFval(self,k,def||'');
 function bnNovaForm(self,c,pre){ const aptos=benLotesAptos(c).filter(L=>prFazOk(self,L.faz)); const P=prP(c);
   const def=pre&&aptos.some(L=>L.id===pre)?pre:''; const sel=prFval(self,'lt',def).split(',').filter(x=>P.lotes[x]);
   const fs=[bnFldOpts(self,'lt','Lotes de entrada',aptos.map(L=>({v:L.id,t:L.id+' · '+benKg(prFis(c,L.id))+' · '+((PRDC.locais[L.local]||{}).nome||L.local)+' · '+L.faz})),
-    aptos.length?'Só lotes elegíveis: recebidos ou liberados, fora de outra ordem e sem reserva. A quantidade vem do saldo do lote (corrigível).':'Nenhum lote elegível sem ordem: os lotes em inspeção, bloqueados ou já numa ordem não entram.',true)];
-
-  let tot=0, ok=true; const ents=sel.map(id=>{ const fis=prFis(c,id); const kv=prFval(self,'kg_'+id,prFmtT(fis,3).replace(/\./g,'')); const n=prNumOk(kv)?prNum(kv):NaN;
-    fs.push(prFld(self,'kg_'+id,'Quantidade do '+id,{t:'txt',v:prFmtT(fis,3).replace(/\./g,''),u:'kg',h:'Saldo do lote: '+benKg(fis)+'.'})); if(isFinite(n)&&n>0) tot=prSoma([tot,n]); else ok=false; return {lote:id,kg:kv}; });
+    aptos.length?'Só lotes elegíveis: recebidos ou liberados, fora de outra ordem e sem reserva. A ordem leva o lote inteiro (o saldo ao lado).':'Nenhum lote elegível sem ordem: os lotes em inspeção, bloqueados ou já numa ordem não entram.',true)];
+  /* lote inteiro (BEN-D17): a quantidade é o saldo físico do lote, sem campo a digitar */
+  let tot=0, ok=true; const ents=sel.map(id=>{ const fis=prFis(c,id); if(prCmp(fis,0)>0) tot=prSoma([tot,fis]); else ok=false; return {lote:id,kg:fis}; });
   const prods=sel.map(id=>P.lotes[id].prod).filter((x,i,a)=>a.indexOf(x)===i); const ks=prods.length===1?benRotasPara(prods[0]):[]; let rk='';
   if(ks.length>1){ fs.push(bnFldOpts(self,'rota','Rota',ks.map(k=>({v:k,t:benRotaTxt(benRota(k))})),'Versões aprovadas para '+prods[0]+'.')); rk=prFval(self,'rota',''); } else rk=ks[0]||'';
   const r=benRota(rk); const sug=r&&ok?benCaixas(tot,r):0;
@@ -161,7 +160,8 @@ function bnPainel(self,c,o){ const r=benRota(o.ben.rota); const b=benBal(o); con
   const PAP={liberar:'producao',iniciar:'producao',saida:'producao',concluir:'producao',confirmar:'gestor',conferir:'conferente',fechar:'producao',
     justificar:benAlcada(o,b.dif).passa?'gestor':['producao','gestor']}[nx.acao]; const pf=g2perfil();
   const semPapel=PAP&&!(Array.isArray(PAP)?g2umPapel(pf,PAP):g2papel(pf,PAP)) ? ' Seu perfil ('+pf.k+') não registra este passo: escolha '+(Array.isArray(PAP)?g2quemUm(PAP):g2quem(PAP))+' no seletor de perfil.' : '';
-  const PPx={title:o.id+' · '+bnProdTxt(o)+' · '+benRotaTxt(r),chip:[at,BN_FCOR[at]||'gray'],sub:o.talhao+' · '+o.ben.faz+' · janela '+prBr(o.ben.ini)+'–'+prBr(o.ben.fim)+' · '+benProdQ(),
+  const lc=PRDC.locais[o.ben.local]||{}; const onde=lc.faz&&lc.faz!==o.ben.faz?o.talhao+' ('+lc.faz+') · fruta da '+o.ben.faz:o.talhao+' · '+o.ben.faz;   /* BEN-D18: onde a linha roda e de quem é a fruta */
+  const PPx={title:o.id+' · '+bnProdTxt(o)+' · '+benRotaTxt(r),chip:[at,BN_FCOR[at]||'gray'],sub:onde+' · janela '+prBr(o.ben.ini)+'–'+prBr(o.ben.fim)+' · '+benProdQ(),
     next:nx.t+(nx.quem?' · '+nx.quem:'')+(nx.nota?'. '+nx.nota:'')+semPapel,nred:!!nx.red||!!semPapel,kv,secs,err:self.state.pr_err,sec};
   /* modos do painel: formulário de saída, estorno, justificativa, reabertura */
   if(modo==='saida'){ const f=bnSaidaForm(self,c,o); PPx.form={t:(self.state.bn_sub?'Relançar '+self.state.bn_sub.id:'Registrar saída')+' · '+benProdQ(),h:f.h,fields:f.fields}; PPx.prim={t:'Registrar',go:f.go}; return PPx; }
@@ -184,13 +184,13 @@ function bnPainel(self,c,o){ const r=benRota(o.ben.rota); const b=benBal(o); con
   const abreSaida=()=>self.setState({pr_modo:'saida',pr_form:null,pr_err:'',pr_ch:prChave('W-BNS'),bn_sub:null,bn_ver:o.ver});
   const k={ver:o.ver};
   if(nx.acao==='liberar') PPx.prim={t:'Autorizar rota e liberar',go:()=>bnRun(self,x=>benAutorizarLiberar(x,o.id,g2perfil(),k),{})};
-  else if(nx.acao==='iniciar') PPx.prim={t:'Iniciar processo',go:()=>bnRun(self,x=>benIniciar(x,o.id,g2perfil()),{})};
+  else if(nx.acao==='iniciar') PPx.prim={t:'Iniciar processo',go:()=>bnRun(self,x=>benIniciar(x,o.id,g2perfil(),k),{})};
   else if(nx.acao==='saida') PPx.prim={t:'Registrar saída',go:abreSaida};
-  else if(nx.acao==='concluir'){ PPx.prim={t:'Concluir execução',go:()=>bnRun(self,x=>benConcluir(x,o.id,g2perfil()),{})}; sec.push({t:'+ Registrar saída',go:abreSaida}); }
+  else if(nx.acao==='concluir'){ PPx.prim={t:'Concluir execução',go:()=>bnRun(self,x=>benConcluir(x,o.id,g2perfil(),k),{})}; sec.push({t:'+ Registrar saída',go:abreSaida}); }
   else if(nx.acao==='justificar'){ PPx.prim={t:'Justificar diferença',go:()=>self.setState({pr_modo:'just',pr_form:null,pr_err:'',pr_ch:prChave('W-BNJ'),bn_ver:o.ver})}; }
   else if(nx.acao==='confirmar') PPx.prim={t:'Confirmar correção',go:()=>bnRun(self,x=>benConfirmarCorrecao(x,o.id,g2perfil()),{})};
-  else if(nx.acao==='conferir') PPx.prim={t:'Conferir balanço',go:()=>bnRun(self,x=>benConferir(x,o.id,g2perfil()),{})};
-  else if(nx.acao==='fechar') PPx.prim={t:'Fechar processo',go:()=>bnRun(self,x=>benFechar(x,o.id,g2perfil()),{})};
+  else if(nx.acao==='conferir') PPx.prim={t:'Conferir balanço',go:()=>bnRun(self,x=>benConferir(x,o.id,g2perfil(),k),{})};
+  else if(nx.acao==='fechar') PPx.prim={t:'Fechar processo',go:()=>bnRun(self,x=>benFechar(x,o.id,g2perfil(),k),{})};
   if(at==='Em conferência'){ sec.push({t:'Reabrir execução',go:()=>self.setState({pr_modo:'reabrir',pr_form:null,pr_err:''})}); if(!o.ben.conf) sec.push({t:'+ Registrar perda',go:abreSaida}); }
   return PPx; }
 function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const st=self.state; const ords=self._ords||[]; prFaixaRec(self,v,c);

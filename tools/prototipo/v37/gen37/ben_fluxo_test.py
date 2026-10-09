@@ -12,13 +12,17 @@ Modos (um por vez, cada um abre o Chrome headless do cadc_lib.T; o cenário come
   celular  390 × 844: cartões, sem rolagem lateral, ação primária visível e painel inteiro (BEN e Estoque de produto); fluxo a 390 px:
            Concluir e Conferir com o aviso da mudança de fase visível, Fechar recusado com a causa no painel, toque duplo no Retirar
            grava uma vez e Autorizar e liberar recusado sem gravar.
-Uso: env CHROME_BIN=… flock /tmp/cdpB.lock env CDP_GL=1 timeout 900 python3 ben_fluxo_test.py [fluxo|erros|celular]
+  revisao  achados da revisão adversarial de 09/10 pela tela: (B1) lote de entrada numa ordem liberada sem "Registrar decisão" no
+           Estoque de produto (BEN-REV-01); (B2) carga cujo lote está numa ordem liberada sem "Estornar" em Cargas, com o porquê, e a
+           ordem da Lagoa Grande no Packing da Santa Rita (BEN-REV-02, BEN-REV-08); (B3) carga com avaria no Packing: "Liberar lote" da
+           Marta no Estoque de produto e o lote passa a abrir ordem (BEN-REV-03); a ordem nova leva o lote inteiro, sem campo de kg (BEN-REV-09).
+Uso: env CHROME_BIN=… flock /tmp/cdpB.lock env CDP_GL=1 timeout 900 python3 ben_fluxo_test.py [fluxo|erros|celular|revisao]
 Capturas em _probe/ben_*.png. Dados sintéticos (SAFRION_DADOS=sintetico)."""
 import sys, os, time, json
 os.environ.setdefault('SAFRION_DADOS', 'sintetico')
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from cadc_lib import T
-MODOS = [a for a in sys.argv[1:] if a in ('fluxo', 'erros', 'celular')] or ['fluxo', 'erros', 'celular']
+MODOS = [a for a in sys.argv[1:] if a in ('fluxo', 'erros', 'celular', 'revisao')] or ['fluxo', 'erros', 'celular', 'revisao']
 PR = os.path.join(HERE, '_probe'); os.makedirs(PR, exist_ok=True)
 t = T(); J = t.J
 LIB = r"""
@@ -223,6 +227,45 @@ try:
         ir('PROD.dc.html', w=390, h=844); m = J("({lado:document.documentElement.scrollWidth>innerWidth+1, cards:[...document.querySelectorAll('.pr-card')].filter(VIS).length})")
         t.chk('Estoque de produto a 390 px com os lotes do packing: sem rolagem lateral, cartões', m and not m['lado'] and m['cards'] > 0, m)
         t.chk('celular sem erro de JS', not t.errs(), t.errs())
+    if 'revisao' in MODOS:
+        print('== revisao · achados BEN-REV-01, 02, 03, 08 e 09 pela tela')
+        BTNS = "[...document.querySelectorAll('aside[role=dialog] button')].filter(VIS).map(b=>N(b.innerText))"
+        # B1 (BEN-REV-01): L39-119 sai da OB-0112, a Marta libera, o Igor abre e libera a OB-0113 só com ele
+        ir('BEN.dc.html#OB-0112', limpa=True); perfil('Igor'); ir('BEN.dc.html#OB-0112'); clk('Retirar L39-119 da ordem', 'aside')
+        perfil('Marta'); ir('PROD.dc.html#L39-119'); clk('Conforme', 'aside'); clk('Registrar resultado', 'aside'); clk('Liberar', 'aside'); clk('Registrar decisão', 'aside')
+        t.chk('B1 · Marta registra Conforme e libera o L39-119 no Estoque de produto', cen("c.producao.lotes['L39-119'].q0") == 'Liberado', toast())
+        perfil('Igor'); ir('BEN.dc.html'); clk('+ Nova ordem'); clk('L39-119', 'aside'); p = pan()
+        t.chk('B1 · BEN-REV-09: a ordem nova leva o lote inteiro (sem campo "Quantidade do"; o saldo vem na opção do lote)', 'Quantidade do' not in p and 'A ordem leva o lote inteiro' in p and J("!!document.querySelector('aside [id^=pf_kg_]')") is False, p[:400])
+        clk('Criar ordem', 'aside'); ir('BEN.dc.html#OB-0113'); clk('Autorizar rota e liberar', 'aside')
+        t.chk('B1 · OB-0113 liberada com o L39-119 (em processo nela)', cen("[c.ordens['OB-0113']&&c.ordens['OB-0113'].etapa, c.producao.lotes['L39-119'].ordem]") == ['Liberadas', 'OB-0113'], toast())
+        perfil('Marta'); ir('PROD.dc.html#L39-119'); r0 = rev(); p = pan(); bt = J(BTNS) or []
+        t.chk('B1 · BEN-REV-01: no Estoque de produto o L39-119 não oferece "Registrar decisão"; o próximo passo aponta a OB-0113; nada gravado',
+              'Registrar decisão' not in bt and 'em processo na OB-0113' in p and rev() == r0 and cen("c.producao.movs.filter(m=>m.lote==='L39-119'&&m.fis!==false).reduce((a,m)=>a+m.kg,0)") == 3130, [bt, p[:400]])
+        shot('rev_b1')
+        # B2 (BEN-REV-02, BEN-REV-08): OB-0113 com o L39-132 (Lagoa Grande), liberada; a CG-2107 não estorna
+        ir('BEN.dc.html', limpa=True); perfil('Igor'); ir('BEN.dc.html'); clk('+ Nova ordem'); clk('L39-132', 'aside')
+        cx = J("(document.querySelector('aside [id^=pf_cx_]')||{}).id"); setv('#' + cx, '200'); clk('Criar ordem', 'aside'); ir('BEN.dc.html#OB-0113'); p = pan()
+        t.chk('B2 · BEN-REV-08: a OB-0113 roda no Packing (Santa Rita) com a fruta da Lagoa Grande (linha, balança e caixas do mesmo lugar)', 'Packing (Santa Rita) · fruta da Lagoa Grande' in p and cen("c.ordens['OB-0113'].ben.local") == 'l8', p[:300])
+        clk('Autorizar rota e liberar', 'aside')
+        ir('CARGA.dc.html'); row('CG-2107'); p = pan(); bt = J(BTNS) or []; r0 = rev()
+        t.chk('B2 · BEN-REV-02: a CG-2107 (L39-132 em processo na OB-0113) não oferece "Estornar"; o próximo passo diz por quê e o caminho (balanço, alçada), sem repetir o lote',
+              cen("c.ordens['OB-0113'].etapa") == 'Liberadas' and 'Estornar' not in bt and 'Sem estorno enquanto a OB-0113 não fecha' in p and 'se justifica na conferência (alçada)' in p and 'Lote L39-132: Em processo' not in p and cen("c.producao.cargas['CG-2107'].st") == 'Recebida', [bt, p[:500]])
+        shot('rev_b2')
+        # B3 (BEN-REV-03): carga com avaria do T7 no Packing (fixture: O.S. de colheita do T7, que a semente não tem, e a pesagem pela regra)
+        # o cenário da fixture sai do mesmo motor das telas (node): a pesagem passa pela regra prReceber, não por JSON escrito à mão
+        from ben_unit_test import motor, node
+        fx = node(motor() + """ const c = cenClone(CEN0); c.ordens['OS-0932'] = { id: 'OS-0932', tipo: 'Colheita · semana 39', talhao: 'T7', area: 0, etapa: 'Em execução', versao: 'v1', realizado: 6, saldo: 0, resp: 'Sérgio', ins: [], req: null, selos: [],
+          ap: [{ d: '25/09', dia: 1, ha: 6, st: 'Conferido', sinc: true, origem: 'web' }], reservado: false, osc: {} };
+          prReceber(c, { os: 'OS-0932', ticket: 'TK-T7A', bruto: 9400, tara: 3200, cond: 'Com avaria', dcol: '2026-09-25' }); c.rev = (c.rev || 0) + 1; print(JSON.stringify(c));""", 'ben_rev_b3.js')
+        ir('PROD.dc.html', limpa=True); J(f"localStorage.setItem('talhao-os-cenario-v1', {json.dumps(fx.stdout.strip().splitlines()[-1])})")
+        perfil('Marta'); ir('PROD.dc.html#L39-133'); p = pan(); pp = J("PPRIM()") or []
+        t.chk('B3 · BEN-REV-03: L39-133 (avaria, Packing) em processo com "Liberar lote · Marta (qualidade)" e a primária "Liberar L39-133"', 'Liberar lote · Marta (qualidade)' in p and 'Liberar L39-133' in pp, [pp, p[:300]])
+        clk('Liberar L39-133', 'aside'); tc = toast()
+        t.chk('B3 · Marta libera: "seguem para o beneficiamento; Igor (responsável de produção) abre a ordem"; o lote continua em processo', 'seguem para o beneficiamento' in tc and cen("c.producao.lotes['L39-133'].q0") == 'Liberado', tc)
+        ir('PROD.dc.html#L39-133'); p = pan()
+        t.chk('B3 · o próximo passo do L39-133 passa a "Abrir ordem de beneficiamento · Igor"', 'Abrir ordem de beneficiamento' in p, p[:300])
+        shot('rev_b3')
+        t.chk('revisao sem erro de JS', not t.errs(), t.errs())
 finally:
     t.fim()
 sys.exit(0 if all(t.ok) else 1)   # juízo pela linha RESULTADO e pelo código de saída
