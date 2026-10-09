@@ -18,6 +18,14 @@ allowBuilds:
   # Otimização de imagem do Next (dependência opcional com script nativo): a F0-c não tem imagem para otimizar.
   sharp: false
 
+# Pisos de segurança de transitivas acusadas pelo Trivy. Cada um sai quando quem depende exigir a versão corrigida.
+# - sharp: opcional do Next 16.3.8 (^0.35.4); GHSA-wq5f-xc86-pv6w (HIGH) na 0.35.4, corrigida na 0.35.5 (imagem web).
+# - source-map-js: do postcss (Next e Vite) e do magicast (^1.2.1); CVE-2026-93749 (HIGH) na 1.2.1, corrigida na
+#   1.2.2 (Trivy FS sobre o pnpm-lock.yaml).
+overrides:
+  sharp: 0.35.5
+  source-map-js: 1.2.2
+
 # Correção local do conector do Cloud SQL 1.12.0 (revisão do Codex de eb90a5f; ADR 0006): a renovação do certificado
 # que falha antes da 1ª conexão deixava promessas rejeitadas sem consumidor (o Next as imprimia com a URL da API), e,
 # depois dela, o conector não renovava mais. Com versão nova do pacote, o pnpm recusa a instalação até o patch ser

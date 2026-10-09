@@ -15,7 +15,7 @@ Sistema **"Do Talhão à O.S."**: plataforma de gestão agrícola integrada. Vai
 - **Decisões:** [`docs/DECISIONS.md`](docs/DECISIONS.md) e [`docs/adr/`](docs/adr/).
 - **Design system:** [`docs/design-system/`](docs/design-system/). O capítulo 74 do PRD está em revisão.
 - **Fluxogramas:** [`docs/prd/fluxogramas/`](docs/prd/fluxogramas/).
-- **Protótipo navegável** (validação, não é produção): https://claude.ai/artifact/WPDgqGvKX6CYTCdPjidBLo
+- **Protótipo navegável** (validação, não é produção): https://claude.ai/artifact/HqspGRcrX1wcayCVMe9emm. Segue o regime leve da seção 3.5.
 
 ## 2. Autoridade e limites (não negociáveis)
 - **O proprietário é Adrianus.** Só ele decide escopo, custo, estratégia e mudanças materiais de negócio. Decisões dele valem quando registradas no PRD (cap. 72 e sucessores) ou em `docs/DECISIONS.md`.
@@ -36,7 +36,7 @@ Sistema **"Do Talhão à O.S."**: plataforma de gestão agrícola integrada. Vai
 - **Papéis:**
   - Claude lidera implementação, integração, especificação técnica e contratos.
   - Codex lidera produto, organização do projeto, backlog, critérios de aceite, QA e revisão.
-  - Cada artefato tem **um autor e um revisor**; os dois não são autores do mesmo artefato.
+  - Cada artefato tem **um autor e um revisor**; os dois não são autores do mesmo artefato. No protótipo, a revisão não bloqueia (3.5).
 - **Ciclo:** tarefa com critérios → branch própria → pull request pequeno → revisão do outro agente → correção → nova verificação → merge. Ninguém aprova nem integra o próprio pull request.
 - **Canal entre agentes:** `docs/parceria/rodadas/`, um arquivo por rodada, e os comentários do pull request. Revisão só conta quando existe registro escrito do outro agente (autor, versão, data, parecer).
 - **Evidência** é commit, comando executado, saída e captura. Rotule sempre "especificado" ou "executado".
@@ -113,6 +113,14 @@ Sistema **"Do Talhão à O.S."**: plataforma de gestão agrícola integrada. Vai
 - **Corte do supérfluo** em PRD, código, fluxograma, testes e mensagens: cada trecho ajuda a entender, decidir, implementar, verificar ou operar. Regra repetida vira referência à fonte única; IDs e rastreabilidade são preservados.
 - **Mensagem enviada não é trabalho integrado.** Pedido entre agentes leva caminho, versão, decisão necessária e impedimento.
 - Protocolo completo: [`docs/parceria/protocolo.md`](docs/parceria/protocolo.md).
+
+### 3.5 Protótipo: regime leve (proprietário, 05/10/2026)
+O protótipo (`tools/prototipo/`) valida telas e regras; não é produto. O rigor das seções 3.1 e 3.2 vale para o software real.
+- **Versionamento:** commit e push na branch única `claude/prototipo-v44`, com um único PR rascunho como janela de revisão. Sem PR por incremento, sem reserva de arquivo em commit, sem pacote de evidências com checksum.
+- **Testes por mudança:** unidade das regras que vão para o produto (aprovação, dose, unidade, estoque, carência), geração e varredura das páginas e os testes do módulo mexido. Bateria completa só a cada marco.
+- **Revisão:** o Codex revisa pela branch e pelo artefato quando puder, sem bloquear. Achado vira correção na mesma branch.
+- **Entrega:** artefato atualizado a cada melhoria, com uma linha do que mudou.
+- **Continua valendo:** dados sintéticos e sem segredo (ENG-017), nunca declarar teste não executado, proteção de regressão para defeito corrigido.
 
 ## 4. Regras de produto que o código não pode quebrar
 - **Master-detail** (Menu → Listagem → Detalhe → Sub-detalhe), uma ação primária por tela, estado sempre visível e próximo passo com verbo (PRD 4.2 e 4.3).
