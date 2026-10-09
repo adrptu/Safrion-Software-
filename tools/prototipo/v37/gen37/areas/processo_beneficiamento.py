@@ -78,11 +78,11 @@ function bnNovaForm(self,c,pre){ const aptos=benLotesAptos(c).filter(L=>prFazOk(
   const prods=sel.map(id=>P.lotes[id].prod).filter((x,i,a)=>a.indexOf(x)===i); const ks=prods.length===1?benRotasPara(prods[0]):[]; let rk='';
   if(ks.length>1){ fs.push(bnFldOpts(self,'rota','Rota',ks.map(k=>({v:k,t:benRotaTxt(benRota(k))})),'Versões aprovadas para '+prods[0]+'.')); rk=prFval(self,'rota',''); } else rk=ks[0]||'';
   const r=benRota(rk); const pad=r&&ok?benCaixasPadrao(c,tot,r):{sug:0,livre:0,cx:0}; const sug=pad.sug;
-  /* valor inicial de benCaixasPadrao (a sugestão dentro do livre no Estoque): com ele a ordem libera; acima do livre, o aviso vem antes do toque */
+  /* valor inicial: a necessidade da rota (benCaixasPadrao, BEN-D23), nunca reduzida ao livre; acima do livre o aviso vem antes do toque,
+     com a saída (nota a conferir e quem confere): a ordem nasce e a liberação fica impedida até o Estoque receber as caixas */
   if(r){ const vx=prNum(prFval(self,'cx_'+sug,String(pad.cx)));
-    const lv=pad.cx<sug?' Livres no Estoque: '+benUn(pad.livre)+': a ordem vem com '+pad.cx+' un (embala até '+benKg(prMul(pad.cx,BENC.cx.massa))+'; para a sugestão inteira, '+benQuem('almoxarife')+' traz as caixas: a compra entra no BEN-2).':'';
-    const ac=Number.isInteger(vx)&&vx>pad.livre?' Acima das '+benUn(pad.livre)+' livres no Estoque: a liberação fica impedida até o Estoque ter as caixas.':'';
-    fs.push(prFld(self,'cx_'+sug,'Caixas',{t:'txt',im:'numeric',v:String(pad.cx),u:'un',h:'Sugestão: ⌈'+benKg(tot)+' × '+prFmtT(prMul(r.par.frac_vend,100),2)+' % previstos ÷ '+prFmtT(BENC.cx.massa,3)+' kg por caixa⌉ = '+sug+' un ('+benRotaTxt(r)+', sintético).'+lv+ac+' Confirme ou ajuste: '+BENC.cx.item+'.'})); }
+    const ac=Number.isInteger(vx)&&vx>pad.livre?' Acima das '+benUn(pad.livre)+' livres no Estoque: a liberação fica impedida até o Estoque receber as caixas ('+benCaixasVem(c)+').':'';
+    fs.push(prFld(self,'cx_'+sug,'Caixas',{t:'txt',im:'numeric',v:String(pad.cx),u:'un',h:'Sugestão: ⌈'+benKg(tot)+' × '+prFmtT(prMul(r.par.frac_vend,100),2)+' % previstos ÷ '+prFmtT(BENC.cx.massa,3)+' kg por caixa⌉ = '+sug+' un ('+benRotaTxt(r)+', sintético).'+ac+' Confirme ou ajuste: '+BENC.cx.item+'.'})); }
   const hj=prHoje(), am=prDiaMais(prHoje(),1); fs.push(bnFldOpts(self,'ini','Início',[{v:hj,t:'Hoje '+prBr(hj)},{v:am,t:'Amanhã '+prBr(am)}],'Janela de 2 dias a partir do início.',false,hj));
   const rotaTxt=r?('Rota: '+benRotaTxt(r)+' (única versão aprovada para '+r.ent+': '+r.aprov.quem+', '+prBr(r.aprov.em)+'). '):'';
   const go=()=>{ if(!(self.state.pr_pan&&self.state.pr_pan.g==='nova')) return;   /* toque num formulário já fechado (duplo toque): nada a fazer, o aviso do 1º fica */

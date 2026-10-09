@@ -16,19 +16,22 @@ Modos (um por vez, cada um abre o Chrome headless do cadc_lib.T; o cenário come
            Estoque de produto (BEN-REV-01); (B2) carga cujo lote está numa ordem liberada sem "Estornar" em Cargas, com o porquê, e a
            ordem da Lagoa Grande no Packing da Santa Rita (BEN-REV-02, BEN-REV-08); (B3) carga com avaria no Packing: "Liberar lote" da
            Marta no Estoque de produto e o lote passa a abrir ordem (BEN-REV-03); a ordem nova leva o lote inteiro, sem campo de kg (BEN-REV-09).
-  roteiro  integração BEN (09/10): a tarefa do proprietário com o valor inicial das caixas (Igor cria e libera a ordem do L39-132;
-           a CG-2107 sem "Estornar"; a Marta sem "Registrar decisão"): o valor inicial fica dentro das caixas livres no Estoque.
+  roteiro  integração BEN, rodada 1 (a 1440; roteiro390 = o mesmo a 390 com toque real): Igor cria a ordem do L39-132 com as caixas da
+           necessidade (1.169 un), vê o impedimento de caixas com quem resolve; o Rui confere a NF 7731 das caixas no Estoque; o Igor
+           libera, o Rui entrega no balcão; saídas, conferência (Paula) e Fechar fecham os 12.300 kg sem diferença fictícia; a CG-2107
+           sem "Estornar" com o porquê; a Marta sem "Registrar decisão" no L39-132.
   cancelar integração BEN (09/10): ordem em A liberar que não libera (caixas acima do livre; entrada que mudou com o estorno da carga)
            tem saída: "Cancelar a ordem" com motivo (nada reservado) e o lote abre outra ordem.
   faixa390 integração BEN (09/10): a 390 px, Cargas › faixa de telas › Beneficiamento por toque real (a lista aberta fica acima da
-           primária presa ao rodapé) e o roteiro com o valor inicial das caixas.
-Uso: env CHROME_BIN=… flock /tmp/cdpB.lock env CDP_GL=1 timeout 900 python3 ben_fluxo_test.py [fluxo|erros|celular|revisao|roteiro|cancelar|faixa390]
+           primária presa ao rodapé); a ordem nasce com a necessidade de caixas e a falta aparece com a saída.
+Uso: env CHROME_BIN=… flock /tmp/cdpB.lock env CDP_GL=1 timeout 900 python3 ben_fluxo_test.py [fluxo|erros|celular|revisao|roteiro|roteiro390|cancelar|faixa390]
 Capturas em _probe/ben_*.png. Dados sintéticos (SAFRION_DADOS=sintetico)."""
 import sys, os, time, json
 os.environ.setdefault('SAFRION_DADOS', 'sintetico')
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from cadc_lib import T
-MODOS = [a for a in sys.argv[1:] if a in ('fluxo', 'erros', 'celular', 'revisao', 'roteiro', 'cancelar', 'faixa390')] or ['fluxo', 'erros', 'celular', 'revisao', 'roteiro', 'cancelar', 'faixa390']
+TODOS = ('fluxo', 'erros', 'celular', 'revisao', 'roteiro', 'roteiro390', 'cancelar', 'faixa390')
+MODOS = [a for a in sys.argv[1:] if a in TODOS] or list(TODOS)
 PR = os.path.join(HERE, '_probe'); os.makedirs(PR, exist_ok=True)
 t = T(); J = t.J
 LIB = r"""
@@ -46,9 +49,14 @@ window.TOAST=()=>[...document.querySelectorAll('[role=status]')].map(x=>N(x.inne
 window.PRIM=()=>{ const b=[...document.querySelectorAll('header .pr-prim, header button, header a')].filter(e=>VIS(e)&&getComputedStyle(e).backgroundColor==='rgb(30, 122, 76)'); return b.map(e=>N(e.innerText)); };
 window.PPRIM=()=>{ const a=[...document.querySelectorAll('aside[role=dialog]')].find(VIS); if(!a) return []; return [...a.querySelectorAll('button,a')].filter(e=>VIS(e)&&getComputedStyle(e).backgroundColor==='rgb(30, 122, 76)').map(e=>N(e.innerText)); };
 window.CEN=()=>JSON.parse(localStorage.getItem('talhao-os-cenario-v1')||'null');
+window.ACHA=(t,root)=>{ const r=root?document.querySelector(root):document; if(!r) return null; const els=[...r.querySelectorAll('button,a,[role=tab],[role=button],[role=row],.pr-card,label')].filter(VIS);
+  return els.find(x=>N(x.innerText)===t)||els.find(x=>N(x.innerText).startsWith(t))||els.find(x=>(x.getAttribute('aria-label')||'')===t)||null; };
+window.PTO=(t,root)=>{ const e=ACHA(t,root); if(!e) return null; e.scrollIntoView({block:'center',inline:'nearest'}); const r=e.getBoundingClientRect(); const x=Math.round(r.left+Math.min(r.width/2,40)), y=Math.round(r.top+r.height/2);
+  const top=document.elementFromPoint(x,y); return {x,y,cob:!(top&&(top===e||e.contains(top))),aviso:!!(top&&top.closest&&top.closest('[role=status]')),top:top?top.tagName+' '+N(top.innerText).slice(0,40):''}; };
 window.PERFIL=(k)=>{ localStorage.setItem('safrion.perfilDemo',k); return k; };
 'ok'"""
 def lib(): J(LIB)
+CONC = 'Concluir execução'
 def ir(pg, limpa=False, w=1440, h=1000):
     t.c.size(w, h)
     if limpa:
@@ -69,6 +77,25 @@ FAIXA = "[...document.querySelectorAll('nav[aria-label=\"Telas de recebimento e 
 BTNS = "[...document.querySelectorAll('aside[role=dialog] button')].filter(VIS).map(b=>N(b.innerText))"
 def nav_clk(x, root):   # toque que navega (link): conta o toque e recarrega o apoio na página nova
     cl, tx = J("[window.__cl||0, window.__tx||0]") or [0, 0]; r = J(f"CLK({json.dumps(x)},{json.dumps(root)})"); time.sleep(1.4); lib(); J(f"window.__cl={cl + 1}; window.__tx={tx};"); return r
+MOBILE = [False]
+def tamanho(w, h):   # a 390 px o Chrome emula toque (Input.dispatchTouchEvent); no desktop, mouse
+    MOBILE[0] = w < 500; t.c.size(w, h); t.c.call('Emulation.setTouchEmulationEnabled', {'enabled': MOBILE[0], 'maxTouchPoints': 5 if MOBILE[0] else 1})
+def tocar(x, root=None, w=.6, nav=False):
+    """toque (390) ou clique (desktop) real no ponto do elemento, como a pessoa: recusa se outro elemento cobre o ponto; conta o toque"""
+    p = J(f"PTO({json.dumps(x)},{json.dumps(root)})")
+    if not p: return 'NÃO ACHEI: ' + x
+    n = 0
+    while p and p['cob'] and p.get('aviso') and n < 10:   # o aviso (role=status) por cima do alvo: a pessoa espera ele sair
+        time.sleep(1); n += 1; p = J(f"PTO({json.dumps(x)},{json.dumps(root)})")
+    if n: print(f'   (esperou {n} s o aviso sair de cima de "{x}")')
+    if not p: return 'NÃO ACHEI: ' + x
+    if p['cob']: return 'COBERTO: ' + x + ' por ' + p['top']
+    cl, tx = J("[window.__cl||0, window.__tx||0]") or [0, 0]
+    if MOBILE[0]:
+        t.c.call('Input.dispatchTouchEvent', {'type': 'touchStart', 'touchPoints': [{'x': p['x'], 'y': p['y']}]}); t.c.call('Input.dispatchTouchEvent', {'type': 'touchEnd', 'touchPoints': []})
+    else:
+        for tp in ('mouseMoved', 'mousePressed', 'mouseReleased'): t.c.call('Input.dispatchMouseEvent', {'type': tp, 'x': p['x'], 'y': p['y'], 'button': 'left', 'clickCount': 1})
+    time.sleep(1.4 if nav else w); lib(); J(f"window.__cl={cl + 1}; window.__tx={tx};"); return 'ok'
 def est_secao(i): J(f"document.querySelectorAll('nav[aria-label=\"Seções do estoque\"] button')[{i - 1}].click()"); time.sleep(.5)
 
 try:
@@ -98,8 +125,9 @@ try:
         shot('lista')
         # (2) OB-0112: autorizar e liberar recusa com as duas causas e quem resolve (Igor age)
         perfil('Igor'); r0 = rev(); clk('Autorizar rota e liberar · OB-0112'); p = pan()
-        t.chk('(2) painel da OB-0112 lista as duas causas antes do toque, cada uma com dono e atalho', 'L39-119 em inspeção (INSP-94) · Marta (qualidade)' in p and 'Caixa de mamão Formosa 10 kg: 540 un disponíveis para 881 un · Estoque' in p
-              and 'Receber a devolução da OB-0110 no Estoque' in p and 'Retirar L39-119 da ordem' in p, p[:900])
+        # rodada 1 (BEN-D23): a falta de 341 caixas tem saída real: a NF 7731 a conferir no Estoque (a sobra de 60 da OB-0110 não cobre)
+        t.chk('(2) painel da OB-0112 lista as duas causas antes do toque, cada uma com dono e atalho (caixas: conferir a NF 7731; a sobra da OB-0110 citada)', 'L39-119 em inspeção (INSP-94) · Marta (qualidade)' in p and 'Caixa de mamão Formosa 10 kg: 540 un disponíveis para 881 un · Estoque' in p
+              and 'Conferir a NF 7731 das caixas no Estoque' in p and 'A OB-0110 tem 60 un em custódia' in p and 'Retirar L39-119 da ordem' in p, p[:900])
         t.chk('(2) OB-0112 A liberar: balanço sem diferença nem recuperação antes de começar ("Entrada a processar"; nada "acima da faixa" nem 100,00 %)',
               'Entrada a processar' in p and 'acima da faixa' not in p and '100,00 %' not in p and 'Em processo 0 kg' not in p, p[p.find('BALANÇO'):][:300] if 'BALANÇO' in p else p[:600])
         clk('Autorizar rota e liberar', 'aside'); p = pan()
@@ -152,15 +180,16 @@ try:
         ir('PROD.dc.html#L39-131'); time.sleep(.4); p = pan()
         t.chk('Colheita → Beneficiamento: L39-131 em processo no Estoque de produto com o atalho "Abrir ordem de beneficiamento" (só navega)', 'Abrir ordem de beneficiamento' in p and rev() == cen("c.rev||0"), p[:400])
         r0 = rev(); clk('Abrir ordem de beneficiamento', 'aside', w=1.0); lib(); time.sleep(.4); p = pan()
-        # BEN-D21 (integração, 09/10): o valor inicial das caixas fica dentro do livre no Estoque. A OB-0112 reservou 584 das 600 un: ficam 16
-        # livres para a sugestão de 2.292 (antes o campo vinha com 2.292 e a ordem não liberava); o campo diz a sugestão, o livre e o que embala
-        t.chk('o atalho abre a ordem nova com o L39-131 marcado, a rota única (PACK-FRU v3) e as caixas dentro do livre (16 de 2.292 sugeridas, com o porquê); navegar não gravou',
-              'Nova ordem' in p and 'PACK-FRU v3' in p and J("(document.querySelector('aside [id^=pf_cx_]')||{}).value||''") == '16' and '= 2292 un' in p and 'Livres no Estoque: 16 un: a ordem vem com 16 un (embala até 160 kg' in p and rev() == r0,
-              [p[:500], J("(document.querySelector('aside [id^=pf_cx_]')||{}).value")])
+        # rodada 1 (BEN-D23 supera a BEN-D21): as caixas vêm com a necessidade da rota (2.292); a OB-0112 reservou 584 das 600 un e ficam 16
+        # livres: o campo avisa antes do toque que a liberação fica impedida até o Estoque receber as caixas, com a nota e quem confere
+        t.chk('o atalho abre a ordem nova com o L39-131 marcado, a rota única (PACK-FRU v3) e as caixas da necessidade (2.292, com a falta e a saída à vista); navegar não gravou',
+              'Nova ordem' in p and 'PACK-FRU v3' in p and J("(document.querySelector('aside [id^=pf_cx_]')||{}).value||''") == '2292' and '= 2292 un' in p
+              and 'Acima das 16 un livres no Estoque: a liberação fica impedida até o Estoque receber as caixas (NF 7731 do PC-096, 1.200 un a conferir' in p and rev() == r0,
+              [p[:700], J("(document.querySelector('aside [id^=pf_cx_]')||{}).value")])
         perfil('Igor'); J("(()=>{ const b=[...document.querySelectorAll('aside button')].find(x=>N(x.innerText)==='Criar ordem'); window.__cl++; b.click(); b.click(); })()"); time.sleep(.6)
         st = cen("c.ordens['OB-0113']&&[c.ordens['OB-0113'].etapa,c.ordens['OB-0113'].ben.ent[0].lote,c.ordens['OB-0113'].ins[0].tot,!!c.ordens['OB-0114']]"); tc = toast()
-        t.chk('Criar ordem (toque duplo): uma OB-0113 só, A liberar, com o L39-131 e 16 caixas (o livre); nada reservado antes de liberar; o aviso "OB-0113 criada" fica',
-              st == ['A liberar', 'L39-131', 16, False] and not cen("c.producao.lotes['L39-131'].ordem") and 'OB-0113 criada' in tc, [st, tc])
+        t.chk('Criar ordem (toque duplo): uma OB-0113 só, A liberar, com o L39-131 e 2.292 caixas (a necessidade); nada reservado antes de liberar; o aviso "OB-0113 criada" fica',
+              st == ['A liberar', 'L39-131', 2292, False] and not cen("c.producao.lotes['L39-131'].ordem") and 'OB-0113 criada' in tc, [st, tc])
         ir('CARGA.dc.html'); cg = J("ROWTXT('L39-131')") or ''
         t.chk('Cargas depois de criar: a carga do L39-131 aponta a ordem "na OB-0113 (A liberar)"', 'na OB-0113 (A liberar)' in cg, cg)
         shot('fluxo_fim')
@@ -275,35 +304,83 @@ try:
         t.chk('B3 · o próximo passo do L39-133 passa a "Abrir ordem de beneficiamento · Igor"', 'Abrir ordem de beneficiamento' in p, p[:300])
         shot('rev_b3')
         t.chk('revisao sem erro de JS', not t.errs(), t.errs())
-    if 'roteiro' in MODOS:
-        # integração BEN (09/10), achado 1: a sugestão de caixas (1.169 un do L39-132) passava das 540 livres e a ordem criada com o valor
-        # inicial nunca liberava; o roteiro do proprietário falhava no passo 1. Agora o valor inicial fica dentro do livre, com o porquê escrito
-        print('== roteiro · tarefa do proprietário com o valor inicial das caixas (Igor cria e libera; CG-2107 sem Estornar; Marta sem decisão)')
-        ir('CARGA.dc.html', limpa=True); perfil('Igor'); ir('CARGA.dc.html')
-        itens = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].map(a=>[N(a.innerText),a.getAttribute('href')]).filter(x=>['COLH.dc.html','CARGA.dc.html','BEN.dc.html','PROD.dc.html'].indexOf(x[1])>=0)") or []
-        t.chk('R1 · menu Produção com 3 itens (Previsão e colheita · Recebimento e beneficiamento · Estoque de produto)', [x[0] for x in itens] == ['Previsão e colheita', 'Recebimento e beneficiamento', 'Estoque de produto'], itens)
-        nav_clk('Beneficiamento', 'nav[aria-label="Telas de recebimento e beneficiamento"]'); clk('+ Nova ordem'); clk('L39-132', 'aside'); p = pan()
-        cxv = J("(document.querySelector('aside [id^=pf_cx_]')||{}).value")
-        t.chk('R1 · Nova ordem com o L39-132: Caixas vem com 540 (o livre no Estoque) e o porquê está escrito (sugestão 1169 un; 540 un livres)', cxv == '540' and '= 1169 un' in p and 'Livres no Estoque: 540 un: a ordem vem com 540 un' in p, [cxv, p[:800]])
-        r0 = rev(); clk('Criar ordem', 'aside'); tc = toast()
-        t.chk('R1 · Criar ordem com o valor inicial: OB-0113 em A liberar com 540 un de caixa e sem aviso de impedimento', 'OB-0113 criada (A liberar)' in tc and '540 un de caixa' in tc and 'Atenção' not in tc and rev() == r0 + 1, tc)
-        ir('BEN.dc.html#OB-0113'); p = pan()
-        t.chk('R1 · painel da OB-0113 sem impedimento antes do toque', 'Nenhum: a ordem pode ser autorizada e liberada.' in p, p[:900])
-        clk('Autorizar rota e liberar', 'aside'); tc = toast(); st = cen("[c.ordens['OB-0113'].etapa, c.ordens['OB-0113'].req, c.producao.lotes['L39-132'].ordem]")
-        t.chk('R1 · Autorizar rota e liberar: OB-0113 Liberadas com a REQ-041 (CMD-42 e CMD-06) e o L39-132 preso à ordem', st == ['Liberadas', 'REQ-041', 'OB-0113'] and 'autorizada (CMD-42) e liberada (CMD-06)' in tc, [st, tc])
-        ir('CARGA.dc.html'); row('CG-2107'); p = pan(); bt = J(BTNS) or []
-        t.chk('R2 · a CG-2107 não oferece "Estornar" e o próximo passo diz por quê', 'Estornar' not in bt and 'Sem estorno enquanto a OB-0113 não fecha' in p, [bt, p[:500]])
-        perfil('Marta'); ir('PROD.dc.html#L39-132'); p = pan(); bt = J(BTNS) or []
-        t.chk('R3 · Marta: o L39-132 no Estoque de produto sem "Registrar decisão"; o próximo passo aponta a OB-0113', 'Registrar decisão' not in bt and 'OB-0113' in p, [bt, p[:400]])
-        shot('roteiro')
-        t.chk('roteiro sem erro de JS', not t.errs(), t.errs())
+    def roteiro(W):
+        # integração BEN, rodada 1 (Codex 6089909749): a tarefa do proprietário como está escrita, por toque real (390) ou clique real (1440).
+        # Igor cria a ordem do L39-132 com as caixas da necessidade (1.169 un), vê o impedimento de caixas com quem resolve, o Rui confere a
+        # NF 7731 das caixas no Estoque (fluxo existente), o Igor libera, o Rui entrega no balcão, e a execução e o balanço fecham os 12.300 kg
+        # sem diferença fictícia; a CG-2107 sem Estornar com o porquê; a Marta sem "Registrar decisão" no L39-132
+        T_ = str(W); H = 844 if W < 500 else 1000; tamanho(W, H)
+        print(f'== roteiro {T_} · tarefa do proprietário com as caixas da necessidade, recebimento no Estoque e balanço fechado')
+        ir('CARGA.dc.html', limpa=True, w=W, h=H); perfil('Igor'); ir('CARGA.dc.html', w=W, h=H); J("window.__cl=0; window.__tx=0;"); time.sleep(.6)
+        if W < 500: tocar('Cargas e recebimento', 'nav[aria-label="Telas de recebimento e beneficiamento"]')   # a 390 a faixa é uma lista que abre no toque
+        r = tocar('Beneficiamento', 'nav[aria-label="Telas de recebimento e beneficiamento"]', nav=True)
+        t.chk(T_ + ' R1 · Cargas › faixa › Beneficiamento pelo toque', r == 'ok' and J("location.pathname.split('/').pop()") == 'BEN.dc.html', [r, J("location.pathname")])
+        tocar('+ Nova ordem'); tocar('L39-132', 'aside'); p = pan(); cxv = J("(document.querySelector('aside [id^=pf_cx_]')||{}).value")
+        t.chk(T_ + ' R1 · Nova ordem com o L39-132: Caixas vem com a necessidade da rota (1169) e o campo avisa a falta no Estoque e como se resolve (NF 7731 a conferir, quem confere)',
+              cxv == '1169' and '= 1169 un' in p and 'Acima das 540 un livres no Estoque: a liberação fica impedida até o Estoque receber as caixas (NF 7731 do PC-096, 1.200 un a conferir · Rui (almoxarife) ou Paula (almoxarife)).' in p, [cxv, p[:900]])
+        r0 = rev(); r = tocar('Criar ordem', 'aside'); tc = toast()
+        t.chk(T_ + ' R1 · Criar ordem: OB-0113 em A liberar com 1.169 un (sugestão confirmada) e o aviso de que a liberação fica impedida até o Estoque receber as caixas',
+              r == 'ok' and 'OB-0113 criada (A liberar)' in tc and '1.169 un de caixa (sugestão confirmada)' in tc and 'Atenção: 540 un livres no Estoque para 1.169 un' in tc and rev() == r0 + 1 and cen("c.ordens['OB-0113'].ins[0].tot") == 1169, [r, tc])
+        ir('BEN.dc.html#OB-0113', w=W, h=H); p = pan()
+        t.chk(T_ + ' R2 · impedimento das caixas à vista antes do toque, com quem resolve e a recuperação (conferir a NF 7731 no Estoque)',
+              'Caixa de mamão Formosa 10 kg: 540 un disponíveis para 1.169 un · Estoque' in p and 'resolve: Rui (almoxarife) ou Paula (almoxarife)' in p and 'Conferir a NF 7731 das caixas no Estoque' in p and 'Faltam 629 un' in p, p[:1100])
+        r0 = rev(); r = tocar('Autorizar rota e liberar', 'aside'); p = pan()
+        t.chk(T_ + ' R2 · Autorizar rota e liberar recusado (540 para 1.169), nada gravado', r == 'ok' and 'Liberação recusada · 1 causa' in p and rev() == r0 and cen("c.ordens['OB-0113'].etapa") == 'A liberar', [r, p[-400:]])
+        perfil('Rui'); r = tocar('Conferir a NF 7731 das caixas no Estoque', 'aside', nav=True); time.sleep(.4); lib()
+        t.chk(T_ + ' R3 · o atalho leva ao Estoque (Confira recebimentos) sem gravar', r == 'ok' and J("location.pathname.split('/').pop()") == 'EST.dc.html' and rev() == r0 and 'NF 7731' in (J("ROWTXT('NF 7731')") or ''), [r, J("ROWTXT('NF 7731')")])
+        r = tocar('NF 7731'); time.sleep(.3)
+        un = J("[...document.querySelectorAll('aside[role=dialog] label')].filter(l=>/Quantidade conferida|Apta para uso/.test(l.innerText)).map(l=>N(l.parentElement.innerText))") or []
+        setv('#fx_g_rec_conf', '1200'); setv('#fx_g_rec_apto', '1200'); setv('#fx_g_rec_quar', '0')
+        fx = J("[ (document.querySelector('#fx_g_rec_local')||{}).value, (document.querySelector('#fx_g_rec_val')||{}).value, (document.querySelector('#fx_g_rec_lote')||{}).value ]")
+        r2 = tocar('Salvar', 'aside[role=dialog]'); tc = toast(); st = cen("[ (c.lotes['Caixa de mamão Formosa 10 kg|CX26-02']||{}).fisico, (c.lotes['Caixa de mamão Formosa 10 kg|CX26-02']||{}).local ]")
+        t.chk(T_ + ' R3 · Rui confere a NF 7731 (unidade un, lote CX26-02 no Packing, sem validade): 1.200 un entram no disponível',
+              r == 'ok' and r2 == 'ok' and all(' un' in x for x in un) and fx == ['Packing', 'Sem validade', 'CX26-02'] and 'Recebimento NF 7731 conferido: 1.200 un de Caixa de mamão Formosa 10 kg no lote CX26-02' in tc and st == [1200, 'Packing'], [r, r2, un, fx, tc, st])
+        perfil('Igor'); ir('BEN.dc.html#OB-0113', w=W, h=H); p = pan()
+        t.chk(T_ + ' R4 · recebida a nota, o painel da OB-0113 fica sem impedimento', 'Nenhum: a ordem pode ser autorizada e liberada.' in p, p[:800])
+        r = tocar('Autorizar rota e liberar', 'aside'); tc = toast()
+        st = cen("[c.ordens['OB-0113'].etapa, c.ordens['OB-0113'].req, c.producao.lotes['L39-132'].ordem, c.reqs['REQ-041']&&c.reqs['REQ-041'].itens[0].solicitado, c.reqs['REQ-041']&&c.reqs['REQ-041'].itens[0].lote]")
+        t.chk(T_ + ' R4 · Igor libera: Liberadas, REQ-041 com a necessidade inteira (1.169 un do CX26-02) e o L39-132 preso à ordem', r == 'ok' and st == ['Liberadas', 'REQ-041', 'OB-0113', 1169, 'CX26-02'] and 'autorizada (CMD-42) e liberada (CMD-06)' in tc, [r, st, tc])
+        ir('CARGA.dc.html', w=W, h=H); tocar('CG-2107'); p = pan(); bt = J(BTNS) or []
+        t.chk(T_ + ' R5 · a CG-2107 não oferece "Estornar" e o próximo passo diz por quê', 'Estornar' not in bt and 'Sem estorno enquanto a OB-0113 não fecha' in p, [bt, p[:500]])
+        perfil('Marta'); ir('PROD.dc.html#L39-132', w=W, h=H); p = pan(); bt = J(BTNS) or []
+        t.chk(T_ + ' R5 · Marta: o L39-132 no Estoque de produto sem "Registrar decisão"; o próximo passo aponta a OB-0113', 'Registrar decisão' not in bt and 'OB-0113' in p, [bt, p[:400]])
+        perfil('Rui'); ir('EST.dc.html', w=W, h=H)
+        if W < 500: tocar('Confira recebimentos', 'nav[aria-label="Seções do estoque"]')
+        tocar('Entregue por O.S.', 'nav[aria-label="Seções do estoque"]'); r = tocar('REQ-041'); q = J("[(document.querySelector('#fx_g_ent_qtd')||{}).value,(document.querySelector('#fx_g_ent_quem')||{}).value]")
+        r2 = tocar('Salvar', 'aside[role=dialog]'); tc = toast(); st = cen("[c.reqs['REQ-041'].itens[0].entregue, c.reqs['REQ-041'].itens[0].custodia, c.reqs['REQ-041'].itens[0].quem]")
+        t.chk(T_ + ' R6 · Rui entrega no balcão a REQ-041 inteira (1.169 un) ao Igor', r == 'ok' and r2 == 'ok' and q == ['1169', 'Igor'] and st == [1169, 1169, 'Igor'], [r, r2, q, st, tc])
+        perfil('Igor'); ir('BEN.dc.html#OB-0113', w=W, h=H); r = tocar('Iniciar processo', 'aside')
+        t.chk(T_ + ' R7 · Igor inicia: Em execução', r == 'ok' and cen("c.ordens['OB-0113'].etapa") == 'Em execução', [r, toast()])
+        def saida(fl, op, kg=None, cx=None, br=None):
+            ir('BEN.dc.html#OB-0113', w=W, h=H); a = tocar('+ Registrar saída', 'aside')
+            if a != 'ok': a = tocar('Registrar saída', 'aside')
+            tocar(fl, 'aside'); tocar(op, 'aside')
+            if cx: setv('#pf_cx', cx); setv('#pf_br', br)
+            else: setv('#pf_kg', kg)
+            b = tocar('Registrar', 'aside'); return [a, b, toast()]
+        s1 = saida('Produto', 'A', cx='1000', br='10600'); s2 = saida('Produto', 'B', cx='169', br='1791,4'); s3 = saida('Descarte', 'Compostagem', kg='610')
+        st = cen("[c.ordens['OB-0113'].ben.sai.filter(s=>!s.estorno).map(s=>s.kg), c.reqs['REQ-041'].itens[0].custodia]")
+        t.chk(T_ + ' R7 · saídas pesadas: A 1.000 cx (10.000 kg), B 169 cx (1.690 kg) e descarte 610 kg; as 1.169 caixas usadas, custódia 0', st == [[10000, 1690, 610], 0], [st, s1, s2, s3])
+        ir('BEN.dc.html#OB-0113', w=W, h=H); r = tocar(CONC, 'aside'); tc = toast()
+        t.chk(T_ + ' R8 · ' + CONC + ': Em conferência com diferença 0 kg (0,00 %), sem justificativa', r == 'ok' and cen("c.ordens['OB-0113'].etapa") == 'Em conferência' and 'diferença 0 kg (0,00 %)' in tc, [r, tc])
+        perfil('Paula'); r = tocar('Conferir balanço', 'aside'); perfil('Igor'); r2 = tocar('Fechar processo', 'aside'); tc = toast()
+        st = cen("(()=>{ const o=c.ordens['OB-0113']; const P=c.producao; const nv=Object.values(P.lotes).filter(L=>L.benef==='OB-0113').map(L=>L.id+':'+P.movs.filter(m=>m.lote===L.id&&m.fis!==false).reduce((a,m)=>a+m.kg,0)).join(',');"
+                 " return [o.etapa, (o.ben.just||[]).length, o.ben.sai.filter(s=>s.fluxo==='Perda identificada').length, P.movs.filter(m=>m.lote==='L39-132'&&m.fis!==false).reduce((a,m)=>a+m.kg,0), nv, c.reqs['REQ-041'].itens[0].custodia]; })()")
+        t.chk(T_ + ' R8 · Paula confere e Igor fecha: Encerradas; L39-133 (A) 10.000 kg e L39-134 (B) 1.690 kg Em inspeção; descarte 610 kg; L39-132 esgotado; diferença 0 sem justificativa nem perda',
+              r == 'ok' and r2 == 'ok' and st == ['Encerradas', 0, 0, 0, 'L39-133:10000,L39-134:1690', 0] and 'diferença 0 kg' in tc and 'descarte 610 kg' in tc, [r, r2, st, tc])
+        cl, tx = J("[window.__cl, window.__tx]"); print(f'MEDIDA roteiro {T_}: {cl} toques/cliques e {tx} campos digitados (Igor, Rui, Paula; inclui as saídas pesadas)')
+        shot('roteiro_' + T_)
+        t.chk(T_ + ' roteiro sem erro de JS', not t.errs(), t.errs())
+        tamanho(1440, 1000)
+    if 'roteiro' in MODOS: roteiro(1440)
+    if 'roteiro390' in MODOS: roteiro(390)
     if 'cancelar' in MODOS:
         # integração BEN (09/10), achado 2: ordem em A liberar que não libera (caixas acima do livre; entrada que mudou com o estorno da carga)
         # prendia o lote sem saída (sem Cancelar, sem editar, sem incluir entrada). Agora "Cancelar a ordem" (rascunho: nada reservado)
         print('== cancelar · ordem em A liberar sem como liberar tem saída: Cancelar a ordem (motivo) e o lote abre outra ordem')
         ir('BEN.dc.html', limpa=True); perfil('Igor'); ir('BEN.dc.html'); clk('+ Nova ordem'); clk('L39-132', 'aside')
         cx = J("(document.querySelector('aside [id^=pf_cx_]')||{}).id"); setv('#' + cx, '1169'); p = pan()
-        t.chk('C1 · 1.169 caixas (acima das 540 livres): o aviso aparece no campo antes do toque', 'Acima das 540 un livres no Estoque: a liberação fica impedida até o Estoque ter as caixas.' in p, p[:900])
+        t.chk('C1 · 1.169 caixas (acima das 540 livres): o aviso aparece no campo antes do toque', 'Acima das 540 un livres no Estoque: a liberação fica impedida até o Estoque receber as caixas (NF 7731' in p, p[:900])
         clk('Criar ordem', 'aside'); tc = toast()
         t.chk('C1 · a ordem nasce com o aviso de que a liberação fica impedida e quem resolve', 'OB-0113 criada (A liberar)' in tc and 'Atenção: 540 un livres no Estoque para 1.169 un' in tc, tc)
         ir('BEN.dc.html#OB-0113'); r0 = rev(); clk('Autorizar rota e liberar', 'aside'); p = pan(); bt = J(BTNS) or []
@@ -316,8 +393,8 @@ try:
         p = pan(); kb = J("ROWTXT('OB-0113')") or ''
         t.chk('C1 · painel e lista: Canceladas, sem ação primária nem "Atrasada", motivo à vista', 'Canceladas' in kb and 'Atrasada' not in kb and J("PPRIM()") == [] and 'caixas insuficientes no Estoque' in p, [kb, J("PPRIM()"), p[:500]])
         clk('Fechar', 'aside'); clk('+ Nova ordem'); clk('L39-132', 'aside'); cxv = J("(document.querySelector('aside [id^=pf_cx_]')||{}).value"); clk('Criar ordem', 'aside')
-        ir('BEN.dc.html#OB-0114'); clk('Autorizar rota e liberar', 'aside'); st = cen("[c.ordens['OB-0114']&&c.ordens['OB-0114'].etapa, c.producao.lotes['L39-132'].ordem]")
-        t.chk('C1 · o L39-132 abre a OB-0114 com o valor inicial (540) e ela libera', cxv == '540' and st == ['Liberadas', 'OB-0114'], [cxv, st, toast()])
+        st = cen("[c.ordens['OB-0114']&&c.ordens['OB-0114'].etapa, c.ordens['OB-0114']&&c.ordens['OB-0114'].ins[0].tot, c.producao.lotes['L39-132'].ordem||'']")
+        t.chk('C1 · o L39-132 abre a OB-0114 com a necessidade (1.169), em A liberar (as caixas chegam pela NF 7731: modo roteiro)', cxv == '1169' and st == ['A liberar', 1169, ''], [cxv, st, toast()])
         # (C2) carga estornada com a ordem em A liberar (a BEN-D19 permite: rascunho): a entrada não confere mais e a ordem tinha só uma entrada
         ir('BEN.dc.html', limpa=True); perfil('Igor'); ir('BEN.dc.html'); clk('+ Nova ordem'); clk('L39-131', 'aside')
         cx = J("(document.querySelector('aside [id^=pf_cx_]')||{}).id"); setv('#' + cx, '500'); clk('Criar ordem', 'aside')
@@ -345,8 +422,8 @@ try:
         time.sleep(1.6); lib(); loc = J("location.pathname.split('/').pop()"); p = pan()
         t.chk('F1 · o toque no item leva ao Beneficiamento (não abre a pesagem)', loc == 'BEN.dc.html' and 'Registrar pesagem' not in p, [loc, p[:200]])
         clk('+ Nova ordem'); clk('L39-132', 'aside'); cxv = J("(document.querySelector('aside [id^=pf_cx_]')||{}).value"); clk('Criar ordem', 'aside')
-        ir('BEN.dc.html#OB-0113', w=390, h=844); clk('Autorizar rota e liberar', 'aside'); st = cen("[c.ordens['OB-0113']&&c.ordens['OB-0113'].etapa, c.producao.lotes['L39-132'].ordem]")
-        t.chk('F2 · 390 px: o roteiro com o valor inicial (540 caixas) cria e libera a OB-0113', cxv == '540' and st == ['Liberadas', 'OB-0113'], [cxv, st, toast()])
+        ir('BEN.dc.html#OB-0113', w=390, h=844); clk('Autorizar rota e liberar', 'aside'); p = pan(); st = cen("[c.ordens['OB-0113']&&c.ordens['OB-0113'].etapa, c.producao.lotes['L39-132'].ordem||'']")
+        t.chk('F2 · 390 px: a OB-0113 nasce com a necessidade (1.169 caixas) e a liberação mostra a falta com a saída (o roteiro inteiro a 390: modo roteiro390)', cxv == '1169' and st == ['A liberar', ''] and 'Conferir a NF 7731 das caixas no Estoque' in p, [cxv, st, p[-300:]])
         clk('Fechar', 'aside'); J("(()=>{ const l=document.querySelector('nav[aria-label=\"Telas de recebimento e beneficiamento\"] label.etp-atual'); l&&l.click(); })()"); time.sleep(.6)
         pv = J("(()=>{ const b=document.querySelector('.pr-prim'); return b?getComputedStyle(b).visibility:'sem'; })()")
         J("(()=>{ const l=document.querySelector('nav[aria-label=\"Telas de recebimento e beneficiamento\"] label.etp-atual'); l&&l.click(); })()"); time.sleep(.6)

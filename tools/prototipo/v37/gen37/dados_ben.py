@@ -48,6 +48,18 @@ ROTAS = {
 }
 
 
+# caixas para a ordem nova (integração BEN, rodada 1, BEN-D23): o pedido de compra PC-096 e a NF 7731 que chegou ao packing e espera a
+# conferência no Estoque (Confira recebimentos, o fluxo existente). Com a necessidade da rota inteira na ordem (1.169 un do L39-132 contra
+# 540 livres), a falta de caixa é impedimento da liberação e se resolve conferindo esta nota (ou recebendo a sobra em custódia). Planejar e
+# emitir compra de caixa é do BEN-2: até lá o pedido é dado da semente, lido pelo Estoque (recebimento) e pelo BEN (impedimento); Compras e
+# Suprimentos não o listam (lista de insumos da safra). Dados sintéticos (ENG-017)
+FORN_CX = 'Embalagens Açu'
+PEDIDOS_CX = [dict(id='PC-096', f=FORN_CX, item=CX, grupo='Embalagens', un='un', qtd=1200, recebido=0, apto=0, quarentena=0, a_entregar=1200,
+                   preco=DC.PRECO_EXTRA.get(CX), previsao='25/09/2026', estado='Confirmado')]
+NFS_CX = [dict(id='NF 7731', pedido='PC-096', f=FORN_CX, item=CX, un='un', qtd_nf=1200, qtd_conf=None, apto=None, quarentena=None, lote='CX26-02',
+               data='25/09/2026', local='Packing', estado='A conferir')]
+
+
 def catalogo():
     import dados_manutencao as DM
     at = {a['id']: dict(nome=a['nome'], kgh=a.get('kgh'), custo_h=a.get('custo_h')) for a in DC.ATIVOS if a['id'] in ('a13',)}
@@ -56,7 +68,9 @@ def catalogo():
                 quem=dict(prod=QUEM_PROD, qual=QUEM_QUAL), local=LOCAL, emb=EMBAL,
                 # onde cada linha roda (BEN-D18): a ordem fica no local da linha; a Packing linha 1 é a do Packing da Santa Rita (l8). O CD-03
                 # guarda o local da máquina em texto livre ("Armazém Sede", também Santa Rita); linha nova por fazenda entra pelo CD-03
-                linhas={'a13': LOCAL})
+                linhas={'a13': LOCAL},
+                # notas de caixa a conferir no Estoque (BEN-D23): o impedimento da liberação aponta a nota; a conferida sai da lista
+                nfcx=[dict(id=n['id'], rid='r' + n['id'].split()[-1], ped=n['pedido'], forn=n['f'], qtd=n['qtd_nf'], lote=n['lote']) for n in NFS_CX])
 
 
 def _lote(i, prod, kg, drec, q0, cond, obs, classe='', **x):

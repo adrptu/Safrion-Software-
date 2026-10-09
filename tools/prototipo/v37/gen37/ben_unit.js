@@ -284,7 +284,8 @@ ok('U18 K29 condição do a13: "Apto" da semente; "Restrito · monitorado" → a
   const rt = MUD(c, x => benRetirar(x, 'OB-0112', 'L39-119', IG)); const im2 = benImpedimentos(c, O(c, 'OB-0112'));
   ok('U25c K07 retirar o L39-119: v2, 6.140 kg, 584 un (sugestão acompanha); ainda recusa 540 de 584 com a I4', !rt.erro && O(c, 'OB-0112').versao === 'v2' && benEntrada(O(c, 'OB-0112')) === 6140 && O(c, 'OB-0112').ins[0].tot === 584 && im2.length === 1 && /540 un disponíveis para 584 un/.test(im2[0].t) && /devolução da OB-0110/.test(im2[0].link.t), [rt, im2]);
   const c2 = NOVO(); MUD(c2, x => cenDevolver(x, 'REQ-030', CX, 60, true, RU)); const im3 = benImpedimentos(c2, O(c2, 'OB-0112'));
-  ok('U25d K07 depois da devolução e sem retirar: as duas causas, agora "600 un disponíveis para 881 un" e a I4b (sem sobra em custódia)', im3.length === 2 && /600 un disponíveis para 881 un/.test(im3[1].t) && im3[1].link.t === 'Ver saldo de caixas no Estoque', im3);
+  /* rodada 1 da integração (BEN-D23): sem sobra em custódia, a saída da falta é a NF 7731 de caixas a conferir no Estoque (antes: "Ver saldo", sem saída) */
+  ok('U25d K07 depois da devolução e sem retirar: as duas causas, agora "600 un disponíveis para 881 un", e a saída é conferir a NF 7731 (sem sobra em custódia)', im3.length === 2 && /600 un disponíveis para 881 un/.test(im3[1].t) && im3[1].link.t === 'Conferir a NF 7731 das caixas no Estoque' && /^Faltam 281 un\. A NF 7731/.test(im3[1].link.why) && !/custódia/.test(im3[1].link.why), im3);
   MUD(c2, x => benRetirar(x, 'OB-0112', 'L39-119', IG)); const l = MUD(c2, x => benAutorizarLiberar(x, 'OB-0112', IG)); const h = O(c2, 'OB-0112').ben.hist.slice(-2); const hr = benHoras(O(c2, 'OB-0112'));
   ok('U25e K08 liberar: 2 eventos (CMD-42: v2, 6.140 kg, 584 un, PACK-FRU v3; CMD-06: REQ-041); L39-117 e L39-118 reservados à ordem; h-linha 2,56; HH 15,35',
      !l.erro && /\(CMD-42\)$/.test(h[0].ev) && /PACK-FRU v3 · L39-117, L39-118 · 6.140 kg · 584 un/.test(h[0].det) && /\(CMD-06\)$/.test(h[1].ev) && /^REQ-041 reservou 584 un/.test(h[1].det)
@@ -446,19 +447,37 @@ function T7(c, cond, tk) { if (!c.ordens['OS-0932']) OSX(c, 'OS-0932', 'T7', 'Em
      a.erro === 'L39-119 tem a inspeção INSP-94: registre o resultado da inspeção INSP-94 e a decisão.' && /^L39-120 é lote do beneficiamento \(OB-0110\): registre o resultado da inspeção INSP-\d+ e a decisão \(fechar o processo não libera\)\.$/.test(b.erro || ''), [a, b]); }
 
 // ===== Integração BEN na branch única (09/10/2026): achados dos revisores, cada um com proteção de regressão =====
-// ---- U39 · caixas da ordem nova dentro do livre no Estoque: o roteiro do proprietário (L39-132 com o valor inicial) libera ----
+// ---- U39 · caixas da ordem nova = a necessidade da rota (rodada 1 da integração, S2 do bc0e76f): a falta de caixa aparece como impedimento
+//      com recuperação real (NF de caixas a conferir no Estoque); recebida a nota, a ordem libera e o balanço fecha os 12.300 kg sem perda fictícia ----
+/* Rui confere a NF 7731 no Estoque: o mesmo cenReceber do estReceber (Confira recebimentos), com a conferência gravada no movimento */
+function RECEBE_NF(c, conf) { const r = MUD(c, x => { const n0 = x.movs.length; const m = cenReceber(x, CX, 'CX26-02', conf, 'un', 'Packing', '—', 'NF 7731', true, RU);
+  x.movs[n0].estRec = { id: 'r7731', nf: 'NF 7731', ped: 'PC-096 · ' + CX + ' · Embalagens Açu', conf, apto: conf, quar: 0, lote: 'CX26-02' }; return m; }); return r; }
 { const c = NOVO(); const r = benRota('PACK-FRU|3'); const pd = benCaixasPadrao(c, 12300, r);
-  ok('U39a L39-132 (12.300 kg): sugestão 1.169 un, 540 livres no Estoque (CX26-01), valor inicial 540', pd.sug === 1169 && pd.livre === 540 && pd.cx === 540 && benCaixasLivres(c) === 540, pd);
+  ok('U39a L39-132 (12.300 kg): o valor inicial é a necessidade da rota, 1.169 un, mesmo com só 540 livres no Estoque (CX26-01)', pd.sug === 1169 && pd.livre === 540 && pd.cx === 1169 && benCaixasLivres(c) === 540, pd);
   const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }] }, IG)); const o = O(c, n.id || 'OB-0113') || { ins: [{}], ben: { hist: [{}] } };
-  ok('U39b criar sem informar caixas usa o valor inicial: 540 un, o histórico diz a sugestão e o livre, sem aviso de impedimento',
-     !n.erro && o.ins[0].tot === 540 && /540 un de caixa \(sugestão 1169; 540 un livres no Estoque\)/.test(o.ben.hist[0].det) && !/Atenção/.test(n.msg), [n, o.ins, o.ben.hist]);
-  const im = n.id ? benImpedimentos(c, o) : ['sem ordem']; const l = MUD(c, x => benAutorizarLiberar(x, n.id, IG));
-  const o2 = O(c, n.id) || {}; ok('U39c a ordem criada com o valor inicial libera: sem impedimento, REQ-041 com 540 un, L39-132 preso à ordem', !im.length && !l.erro && o2.etapa === 'Liberadas' && o2.req === 'REQ-041' && REQ(c, 'REQ-041').solicitado === 540 && LT(c, 'L39-132').ordem === n.id, [im, l]);
-  const c2 = NOVO(); const a = MUD(c2, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }], cx: 1169 }, IG));
-  ok('U39d acima do livre a ordem nasce com o aviso de que a liberação fica impedida e quem resolve', !a.erro && /Atenção: 540 un livres no Estoque para 1\.169 un: a liberação fica impedida até o Estoque ter as caixas \(Rui \(almoxarife\) ou Paula \(almoxarife\)\)\./.test(a.msg), a);
-  const c3 = NOVO(); MUD(c3, x => cenReceber(x, CX, 'CX26-02', 3000, 'un', 'Packing', '—', 'NF-90011', true, RU)); const p3 = benCaixasPadrao(c3, 12300, r);
+  ok('U39b criar sem informar caixas: 1.169 un (sugestão confirmada) e o aviso diz que a liberação fica impedida até o Estoque receber as caixas, com a NF 7731 e quem confere',
+     !n.erro && o.ins[0].tot === 1169 && /1\.169 un de caixa \(sugestão confirmada\)/.test(o.ben.hist[0].det)
+     && /Atenção: 540 un livres no Estoque para 1\.169 un: a liberação fica impedida até o Estoque receber as caixas \(NF 7731 do PC-096, 1\.200 un a conferir · Rui \(almoxarife\) ou Paula \(almoxarife\)\)\./.test(n.msg || ''), [n, o.ins, o.ben.hist]);
+  const im = n.id ? benImpedimentos(c, o) : []; const x = im.find(y => y.cx) || {}; const r0 = c.rev || 0; const l = MUD(c, y => benAutorizarLiberar(y, n.id, IG));
+  ok('U39c impedimento das caixas com quem resolve e a recuperação real (conferir a NF 7731 no Estoque); a liberação é recusada e nada é gravado',
+     x.t === CX + ': 540 un disponíveis para 1.169 un · Estoque' && x.dono === 'Rui (almoxarife) ou Paula (almoxarife)' && x.link && x.link.t === 'Conferir a NF 7731 das caixas no Estoque' && x.link.h === 'EST.dc.html'
+     && /Faltam 629 un\. A NF 7731 \(PC-096 · Embalagens Açu\) traz 1\.200 un: Rui \(almoxarife\) ou Paula \(almoxarife\) confere em Estoque › Confira recebimentos\./.test(x.link.why || '')
+     && /540 un disponíveis para 1\.169 un/.test(l.erro || '') && O(c, n.id).etapa === 'A liberar' && !O(c, n.id).req && (c.rev || 0) === r0, [x, l]);
+  const rc = RECEBE_NF(c, 1200); const im2 = benImpedimentos(c, O(c, n.id)); const l2 = MUD(c, y => benAutorizarLiberar(y, n.id, IG)); const o2 = O(c, n.id) || {};
+  ok('U39d recebida a NF 7731 (1.200 un no CX26-02): sem impedimento; a ordem libera com a necessidade inteira (REQ-041 1.169 un do CX26-02) e o L39-132 preso à ordem',
+     !rc.erro && !im2.length && !l2.erro && o2.etapa === 'Liberadas' && o2.req === 'REQ-041' && REQ(c, 'REQ-041').solicitado === 1169 && REQ(c, 'REQ-041').lote === 'CX26-02' && LT(c, 'L39-132').ordem === n.id, [rc, im2, l2]);
+  const id = n.id; const st = [MUD(c, y => cenEntregar(y, 'REQ-041', CX, 1169, null, RU)), MUD(c, y => benIniciar(y, id, IG)),
+    MUD(c, y => benSaida(y, id, { fluxo: 'Produto', classe: 'A', cx: 1000, bruto: 10600 }, IG)), MUD(c, y => benSaida(y, id, { fluxo: 'Produto', classe: 'B', cx: 169, bruto: 1791.4 }, IG)),
+    MUD(c, y => benSaida(y, id, { fluxo: 'Descarte', destino: 'Compostagem', kg: 610 }, IG)), MUD(c, y => benConcluir(y, id, IG)), MUD(c, y => benConferir(y, id, PA)), MUD(c, y => benFechar(y, id, IG))];
+  const of = O(c, id); const b = benBal(of); const nv = Object.values(c.producao.lotes).filter(L => L.benef === id);
+  ok('U39e execução e balanço fecham os 12.300 kg: A 10.000 + B 1.690 + descarte 610, diferença 0, sem justificativa nem perda; custódia 0; Encerradas; L39-132 esgotado',
+     st.every(y => !y.erro) && of.etapa === 'Encerradas' && b.dif === 0 && b.proc === 12300 && b.prod === 11690 && b.desc === 610 && b.perda === 0 && !(of.ben.just || []).length
+     && REQ(c, 'REQ-041').custodia === 0 && REQ(c, 'REQ-041').consumido === 1169 && prFis(c, 'L39-132') === 0 && prSoma(nv.map(L => prFis(c, L.id))) === 11690, [st.map(y => y.erro || ''), b, REQ(c, 'REQ-041')]);
   const c4 = NOVO(); c4.lotes[CX + '|CX26-01'].reservado = c4.lotes[CX + '|CX26-01'].fisico; const p4 = benCaixasPadrao(c4, 12300, r);
-  ok('U39e com caixas suficientes vale a sugestão (3.000 un recebidas); sem caixa livre fica a sugestão (a liberação mostra a falta)', p3.cx === 1169 && p3.livre === 3000 && p4.livre === 0 && p4.cx === 1169, [p3, p4]); }
+  const c5 = NOVO(); RECEBE_NF(c5, 1200); MUD(c5, y => cenDevolver(y, 'REQ-030', CX, 60, true, RU)); const n5 = MUD(c5, y => benNova(y, { lotes: [{ lote: 'L39-131', kg: 24120 }] }, IG)); const x5 = benImpedimentos(c5, O(c5, n5.id)).find(y => y.cx) || {};
+  ok('U39f sem caixa livre a necessidade continua inteira; com a NF já conferida e sem sobra em custódia, a falta (2.292 para 1.200) diz que a compra de caixas é do BEN-2 e que a ordem pode ser cancelada',
+     p4.livre === 0 && p4.cx === 1169 && n5.id && O(c5, n5.id).ins[0].tot === 2292 && x5.link && x5.link.t === 'Ver saldo de caixas no Estoque'
+     && /Faltam 1\.092 un e não há nota de caixas a conferir nem sobra em custódia: a compra de caixas entra no BEN-2\. Sem caixa, Cancelar a ordem \(nada foi reservado\)\./.test(x5.link.why || ''), [p4, n5, x5]); }
 
 // ---- U40 · BEN-D22 · ordem em A liberar que não libera tem saída: Cancelar a ordem (motivo; rascunho, nada reservado) ----
 { const c = NOVO(); const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }], cx: 1169 }, IG)); const id = n.id || 'OB-0113';
@@ -475,8 +494,8 @@ function T7(c, cond, tk) { if (!c.ordens['OS-0932']) OSX(c, 'OS-0932', 'T7', 'Em
   const et = benEtapas(c, o).find(e => e.nome === 'Recepção'); const pr = benPendRec(c);
   ok('U40c cancelada: o L39-132 volta aos aptos; sem passo (acao null) com o motivo à vista; nunca "Atrasada"; Recepção não cumprida; a faixa não conta a cancelada',
      ap.indexOf('L39-132') >= 0 && p.acao === null && p.t === 'Cancelada: caixas insuficientes' && !ss.some(x => x.t === 'Atrasada') && et && et.sit !== 'Cumprida' && /^1 a liberar/.test(pr.ben), [ap, p, ss, et, pr]);
-  const n2 = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }] }, IG)); const l2 = MUD(c, x => benAutorizarLiberar(x, n2.id, IG));
-  ok('U40d a ordem nova do L39-132 (OB-0114, valor inicial 540) libera', n2.id === 'OB-0114' && !l2.erro && O(c, 'OB-0114').etapa === 'Liberadas' && LT(c, 'L39-132').ordem === 'OB-0114', [n2, l2]);
+  const n2 = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }] }, IG)); const l1 = MUD(c, x => benAutorizarLiberar(x, n2.id, IG)); RECEBE_NF(c, 1200); const l2 = MUD(c, x => benAutorizarLiberar(x, n2.id, IG));
+  ok('U40d a ordem nova do L39-132 (OB-0114) vem com a necessidade (1.169 un): impedida até a NF 7731 ser conferida; depois libera', n2.id === 'OB-0114' && O(c, 'OB-0114').ins[0].tot === 1169 && /540 un disponíveis para 1\.169 un/.test(l1.erro || '') && !l2.erro && O(c, 'OB-0114').etapa === 'Liberadas' && LT(c, 'L39-132').ordem === 'OB-0114', [n2, l1, l2]);
   const fx = MUD(c, x => benCancelar(x, 'OB-0110', 'teste', IG)); const fl = MUD(c, x => benCancelar(x, 'OB-0114', 'teste', IG)); const an = MUD(c, x => benCancelar(x, 'OB-0112', 'rota trocada', AN));
   ok('U40e só em A liberar: OB-0110 (Em execução) e OB-0114 (Liberadas) recusadas ("o cancelamento entra no BEN-6"); a OB-0112 (A liberar) a Ana (gestora) cancela',
      /^Cancele só em A liberar \(OB-0110 está em Em execução\)/.test(fx.erro || '') && /^Cancele só em A liberar \(OB-0114 está em Liberadas\)/.test(fl.erro || '') && !an.erro && O(c, 'OB-0112').etapa === 'Canceladas' && O(c, 'OB-0112').ben.canc.quem === 'Ana (gestora)', [fx, fl, an]); }

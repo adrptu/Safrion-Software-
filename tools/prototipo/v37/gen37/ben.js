@@ -63,9 +63,26 @@ function benTara(cx, pallets, r) { return prSoma([prMul(cx || 0, BENC.cx.tara), 
 function benCaixas(kg, r) { const N = prM(kg) * prM(r.par.frac_vend), D = prM(BENC.cx.massa) * PR_S; if (N <= 0n) return 0; return Number((N + D - 1n) / D); }
 /* caixas livres para uma ordem: o mesmo lote e a mesma conta da liberação (cenLiberar reserva do cenLote; benImpedimentos confere cenDisp) */
 function benCaixasLivres(c) { const l = cenLote(c, BENC.cx.item); return l ? Math.floor(cenDisp(l) + 1e-9) : 0; }
-/* caixas da ordem nova: a sugestão dentro do livre no Estoque, com o motivo à vista; sem caixa livre fica a sugestão (a liberação mostra a
-   falta e quem resolve). Dano evitado (integração BEN): a sugestão acima do livre (1.169 un do L39-132 contra 540) criava ordem que não liberava */
-function benCaixasPadrao(c, kg, r) { const sug = benCaixas(kg, r), livre = benCaixasLivres(c); return { sug, livre, cx: livre >= 1 && sug > livre ? livre : sug }; }
+/* caixas da ordem nova: a necessidade da rota (a sugestão), nunca reduzida ao livre no Estoque (BEN-D23 supera a BEN-D21). Dano evitado
+   (rodada 1 da integração): 540 caixas no L39-132 liberavam a ordem, embalavam 5.400 de 12.300 kg e o resto virava "diferença" no Fechar.
+   A falta de caixa é impedimento da liberação, com a nota a conferir ou a sobra em custódia como saída (benCaixasRec) */
+function benCaixasPadrao(c, kg, r) { const sug = benCaixas(kg, r), livre = benCaixasLivres(c); return { sug, livre, cx: sug }; }
+/* notas de caixa a conferir no Estoque (BENC.nfcx): a conferida (movimento recebimento-nf com a conferência da nota) sai da lista */
+function benNfCx(c) { const feitas = {}; (c.movs || []).forEach(m => { if (m.tipo === 'recebimento-nf' && m.estRec && m.estRec.id) feitas[m.estRec.id] = true; });
+  return (BENC.nfcx || []).filter(n => !feitas[n.rid]); }
+/* de onde vêm as caixas que faltam (impedimento da liberação): a sobra em custódia de outra ordem (Receba devoluções) e a nota de caixa a
+   conferir (Confira recebimentos), o que cobrir a falta primeiro; sem nenhuma, a compra é do BEN-2 e a ordem pode ser cancelada (BEN-D22) */
+function benCaixasRec(c, o, d, tot) { const falta = Math.ceil(tot - d - 1e-9); const al = benQuem('almoxarife'); const it = BENC.cx.item;
+  const sob = benOrdens(c).filter(b => b.id !== (o && o.id) && b.req && c.reqs[b.req] && c.reqs[b.req].itens.some(i => i.prod === it && i.custodia > 1e-9));
+  const cu = sob.length ? c.reqs[sob[0].req].itens.find(i => i.prod === it).custodia : 0; const nf = benNfCx(c)[0] || null;
+  const tDev = sob.length ? 'A ' + sob[0].id + ' tem ' + prFmtT(cu, 0) + ' un em custódia (Receba devoluções).' : '';
+  const tNf = nf ? 'A ' + nf.id + ' (' + nf.ped + ' · ' + nf.forn + ') traz ' + prFmtT(nf.qtd, 0) + ' un: ' + al + ' confere em Estoque › Confira recebimentos.' : '';
+  const base = 'Faltam ' + prFmtT(falta, 0) + ' un. ';
+  if (sob.length && (cu + 1e-9 >= falta || !nf)) return { t: 'Receber a devolução da ' + sob[0].id + ' no Estoque', h: 'EST.dc.html', why: base + tDev + (tNf ? ' ' + tNf : '') };
+  if (nf) return { t: 'Conferir a ' + nf.id + ' das caixas no Estoque', h: 'EST.dc.html', why: base + tNf + (tDev ? ' ' + tDev : '') };
+  return { t: 'Ver saldo de caixas no Estoque', h: 'EST.dc.html', why: 'Faltam ' + prFmtT(falta, 0) + ' un e não há nota de caixas a conferir nem sobra em custódia: a compra de caixas entra no BEN-2. Sem caixa, Cancelar a ordem (nada foi reservado).' }; }
+/* texto curto do que traz as caixas (aviso da ordem nova): a nota a conferir e quem confere */
+function benCaixasVem(c) { const nf = benNfCx(c)[0]; return nf ? nf.id + ' do ' + nf.ped + ', ' + benUn(nf.qtd) + ' a conferir · ' + benQuem('almoxarife') : benQuem('almoxarife') + ' · a compra de caixas entra no BEN-2'; }
 /* faixa de conferência da parte pesada (R-F02): tol_pesado × processado, 6 casas */
 function benFaixa(proc, r) { return prMul(proc, r.par.tol_pesado); }
 /* balanço (R-F01): processado − (produto + outro destino + descarte + perdas identificadas), só registros válidos, base física sem tara */
@@ -122,11 +139,7 @@ function benImpedimentos(c, o) { const out = []; const r = benRota(o.ben.rota); 
   (o.ben.ent || []).forEach(e => { const x = benElegErro(c, P.lotes[e.lote], r, o.id, e.kg);
     if (x) out.push(Object.assign({ lote: e.lote, ret: (o.ben.ent || []).length > 1 }, x)); });
   (o.ins || []).forEach(x => { if (!(x.tot > 0)) return; const l = cenLote(c, x.p); const d = l ? cenDisp(l) : 0; if (d + 1e-9 >= x.tot) return;
-    const sob = benOrdens(c).filter(b => b.id !== o.id && b.req && c.reqs[b.req] && c.reqs[b.req].itens.some(i => i.prod === x.p && i.custodia > 1e-9));
-    const cu = sob.length ? c.reqs[sob[0].req].itens.find(i => i.prod === x.p).custodia : 0;
-    out.push({ t: x.p + ': ' + prFmtT(d, 0) + ' un disponíveis para ' + prFmtT(x.tot, 0) + ' un · Estoque', dono: benQuem('almoxarife'), cx: true,
-      link: sob.length ? { t: 'Receber a devolução da ' + sob[0].id + ' no Estoque', h: 'EST.dc.html', why: prFmtT(d, 0) + ' un livres para ' + prFmtT(x.tot, 0) + ' un. A ' + sob[0].id + ' tem ' + prFmtT(cu, 0) + ' un em custódia (Receba devoluções).' }
-                       : { t: 'Ver saldo de caixas no Estoque', h: 'EST.dc.html', why: 'Nenhuma ordem tem sobra em custódia. A compra de caixas entra no BEN-2.' } }); });
+    out.push({ t: x.p + ': ' + prFmtT(d, 0) + ' un disponíveis para ' + prFmtT(x.tot, 0) + ' un · Estoque', dono: benQuem('almoxarife'), cx: true, link: benCaixasRec(c, o, d, x.tot) }); });
   return out; }
 
 /* próximo passo do lote de entrada em processo (Estoque de produto e Cargas): a ordem aberta ou o atalho da ordem nova (só navega) */
@@ -238,10 +251,10 @@ function benNova(c, k, ator) { const quem = cenExige(ator, 'producao', 'Criar or
     resp: (typeof g2pf === 'function' && g2pf(ator) ? g2pf(ator).k : quem), ins: cx > 0 ? [{ g: 'Embalagem', p: BENC.cx.item, dose: 0, un: 'un', tot: cx, emb: BENC.cx.emb }] : [], req: null, selos: [], ap: [], reservado: false,
     ben: { rota: rk, faz: Ls[0].faz, local: lloc, ini, fim: prDiaMais(ini, 1), cxSug: sug, insp: '', nsai: 0, ent: ents.map(e => ({ lote: e.lote, kg: prN(prM(e.kg)) })), sai: [], conc: null, conf: null, just: [], corr: null, hist: [] } };
   const det = benRotaTxt(r) + ' · ' + ents.map(e => e.lote).join(', ') + ' · ' + benKg(proc) + ' · ' + benUn(cx) + ' de caixa'
-    + (cx === sug ? ' (sugestão confirmada)' : ' (sugestão ' + sug + (cx === pad.livre ? '; ' + benUn(pad.livre) + ' livres no Estoque' : '') + ')') + benOndeTxt(o);
+    + (cx === sug ? ' (sugestão confirmada)' : ' (sugestão ' + sug + ')') + benOndeTxt(o);
   benHist(o, quem, 'Ordem criada · v1', det);
   /* acima do livre a ordem nasce, mas a liberação fica impedida até o Estoque ter as caixas: o aviso diz isso agora, não na liberação */
-  const av = cx > pad.livre ? ' Atenção: ' + benUn(pad.livre) + ' livres no Estoque para ' + benUn(cx) + ': a liberação fica impedida até o Estoque ter as caixas (' + benQuem('almoxarife') + ').' : '';
+  const av = cx > pad.livre ? ' Atenção: ' + benUn(pad.livre) + ' livres no Estoque para ' + benUn(cx) + ': a liberação fica impedida até o Estoque receber as caixas (' + benCaixasVem(c) + ').' : '';
   const msg = id + ' criada (A liberar): ' + det + '. Próximo passo: Autorizar rota e liberar.' + av; benGravaRecibo(c, k, 'benNova', imp, msg); return { msg, id }; }
 /* retirar entrada antes de liberar (I3): grava a versão seguinte; a sugestão de caixas acompanha a entrada quando estava confirmada */
 function benRetirar(c, id, lote, ator, k) { const quem = cenExige(ator, 'producao', 'Retirar ' + lote + ' da ' + id); const o = benO(c, id);
