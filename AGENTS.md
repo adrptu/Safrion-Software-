@@ -24,6 +24,7 @@ Sistema **"Do Talhão à O.S."**: plataforma de gestão agrícola integrada. Vai
 - **Estado autorizado em 27/09/2026:**
   - Repositório privado com documentação, estrutura de desenvolvimento e CI (resposta direta do proprietário ao Claude).
   - Decisões técnicas delegadas aos dois agentes, que devem chegar a acordo com testes e revisão independente. Fonte: mensagem do proprietário no canal do Codex, colada por ele no canal do Claude.
+  - **Merge na `main` entre os agentes** (proprietário, 09/10/2026: "Faça o merge entre voce e claude, nao quero trabalho pra mim", corrigido em seguida para "entre vc e codex"). O revisor integra o PR do outro com a CI verde no HEAD e um parecer favorável escrito no PR. O proprietário não é chamado para integrar. Ninguém integra o próprio PR (DEC-0910-02).
 - **Continuam com o proprietário:**
   - o que gera custo, contrato ou conta em nome dele;
   - dados reais de clientes;
@@ -37,7 +38,7 @@ Sistema **"Do Talhão à O.S."**: plataforma de gestão agrícola integrada. Vai
   - Claude lidera implementação, integração, especificação técnica e contratos.
   - Codex lidera produto, organização do projeto, backlog, critérios de aceite, QA e revisão.
   - Cada artefato tem **um autor e um revisor**; os dois não são autores do mesmo artefato. No protótipo, a revisão não bloqueia (3.5).
-- **Ciclo:** tarefa com critérios → branch própria → pull request pequeno → revisão do outro agente → correção → nova verificação → merge. Ninguém aprova nem integra o próprio pull request.
+- **Ciclo:** tarefa com critérios → branch própria → pull request pequeno → revisão do outro agente → correção → nova verificação → merge pelo revisor (2, DEC-0910-02). Ninguém aprova nem integra o próprio pull request. PR que a `main` já absorveu é fechado com a prova (arquivo a arquivo), pelo autor ou, com aviso, pelo outro agente.
 - **Canal entre agentes:** `docs/parceria/rodadas/`, um arquivo por rodada, e os comentários do pull request. Revisão só conta quando existe registro escrito do outro agente (autor, versão, data, parecer).
 - **Evidência** é commit, comando executado, saída e captura. Rotule sempre "especificado" ou "executado".
 - **Severidade e prioridade são coisas diferentes:**
@@ -124,6 +125,7 @@ O protótipo (`tools/prototipo/`) valida telas e regras; não é produto. O rigo
 
 ## 4. Regras de produto que o código não pode quebrar
 - **Master-detail** (Menu → Listagem → Detalhe → Sub-detalhe), uma ação primária por tela, estado sempre visível e próximo passo com verbo (PRD 4.2 e 4.3).
+- **Design system único** (PRD cap. 74 e [`docs/design-system/`](docs/design-system/), padrões do proprietário de 09/10/2026): botões BOT-01 a BOT-09 (um verde por contexto; lugar, verbo, tamanho e ícone fixos; componente comum), seleção que abre detalhe (SEL-01/02), etapa futura neutra (ETP-01), separador, hover verde, retorno visual e dica (VIS-01 a VIS-04). Vale para toda tela nova e para a correção das existentes, no protótipo e no software real.
 - **Toda O.S. agrícola tem aprovação agronômica individual**, inclusive operação mecânica (PRD 41 e 73.9).
   - Exceções expressas: irrigação só com água (DEC-2609-10), manutenção e beneficiamento com responsável próprio.
   - Aprovar não libera; liberar é o CMD-06.
