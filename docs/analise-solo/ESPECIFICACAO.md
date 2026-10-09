@@ -478,6 +478,8 @@ Autor: Claude, na branch `claude/v44-solo`. Rótulo: tudo o que está nesta seç
 | `629c168` | Merge da `claude/prototipo-v44` (`0644b1b`: BEN, SAF-C01, NAV). Conflitos resolvidos por função em `ui37.py`, `cenario.py`, `dados_cad.py` e `cad_produtos_estrutura.py` |
 | `77843e0` | `solo_regressao_test.py`: os dois defeitos da base, reproduzidos na `ecc8b00` (0/2) e corrigidos aqui (2/2) |
 | `d1506fb` | Merge da `claude/prototipo-v44` (`2678481`: correções da integração do BEN), sem conflito: nenhum arquivo em comum com o SOLO |
+| `eafb888` | Esta seção, §3.6 (água no solo), R23-R24, AC-SOLO-22..24 e D-32..D-36 |
+| `edea9e6` | Merge da `claude/prototipo-v44` (`3b1e7e2`: integração BEN rodada 1, S2-S4), sem conflito. Toca dois arquivos que o SOLO também mexe: `areas/processo_os.py` (dois textos de caminho do menu) e `links_ocultos_test.py` (E1d/E1e/E4 novos) |
 
 **Defeitos da base corrigidos, com regressão** (`SAFRION_DADOS=sintetico python3 solo_regressao_test.py [pasta gen37]`):
 - D1 (FX-002, D-22): a OS-0502 dizia "Calagem pela análise de solo" com a dose fixa do plano.
@@ -486,7 +488,19 @@ Autor: Claude, na branch `claude/v44-solo`. Rótulo: tudo o que está nesta seç
 
 **Como rodar.** Build `SAFRION_DADOS=sintetico python3 build.py > /tmp/SOLO-build.log; grep -c FALHA /tmp/SOLO-build.log`, depois `python3 montar_render.py`. Navegador um por vez: `env CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdpC.lock env CDP_GL=1 SAFRION_DADOS=sintetico timeout 900 python3 <teste>`. Sem navegador: `SAFRION_DADOS=sintetico python3 <teste>`.
 
-**Rodada 2, sobre o merge `d1506fb` (HEAD desta entrega).** Build: 0 FALHA, 141 artboards, menu vigente 47, ocultos 94. `montar_render.py`: 141 páginas.
+**Rodada 3, sobre o merge `edea9e6` (HEAD desta entrega).** Build: 0 FALHA, 141 artboards, menu vigente 47, ocultos 94. `montar_render.py`: 141 páginas. A máquina reiniciou às ~22:53 no meio da rodada 2; a rodada 3 retoma dela o que faltava e repete os testes do módulo sobre o merge novo.
+
+| Teste | Resultado |
+|---|---|
+| `solo_unit_test.py` · `solo_regressao_test.py` (sem navegador) | OK 89/89 · OK 2/2 |
+| Sem navegador: `legal_unit_test` 35/35, `mip_unit_test` 34/34, `producao_unit_test` 121/121, `assinatura_unit_test` 76/76, `capacidade_unit` 76/76, `rend_multiconjuntos_unit` 106/106, `ocupacao_unit` 117/117, `ben_unit_test` 156/156, `quantidade_test` 14/14, `aprova_quem_decide_test` 102/102, `inicio_entrega_test` 26/26, `os_aprov_lib_test` 45/45 | todos verdes |
+| `links_ocultos_test.py` | TOTAL 11 · falhas 0 (E1e e E4 novos do BEN incluídos) |
+| `solo_os_test.py` desktop · celular | OK 16/16 · OK 2/2 |
+| `solo_ag02_test.py` desktop · celular | OK 27/27 · OK 5/5 |
+| `solo_saf_test.py` desktop | OK 33/33 |
+| Demais (celular do SAF, varredura, `acoes_duplicadas` e os existentes que tocam os arquivos mexidos) | em execução neste commit; o resultado entra no commit seguinte |
+
+**Rodada 2, sobre o merge `d1506fb`.** Build: 0 FALHA, 141 artboards, menu vigente 47, ocultos 94. `montar_render.py`: 141 páginas.
 
 | Teste | Resultado |
 |---|---|
@@ -496,7 +510,9 @@ Autor: Claude, na branch `claude/v44-solo`. Rótulo: tudo o que está nesta seç
 | `solo_saf_test.py` desktop · celular | OK 33/33 · OK 3/3 |
 | `solo_os_test.py` desktop · celular | OK 16/16 · OK 2/2 |
 | Sem navegador: `legal_unit_test` 35/35, `mip_unit_test` 34/34, `producao_unit_test` 121/121, `assinatura_unit_test` 76/76, `capacidade_unit` 76/76, `rend_multiconjuntos_unit` 106/106, `ocupacao_unit` 117/117, `ben_unit_test` 144/144, `quantidade_test` 14/14, `aprova_quem_decide_test` 102/102, `inicio_entrega_test` 26/26, `os_aprov_lib_test` 45/45 | todos verdes |
-| Demais testes da rodada 2 (varredura, `acoes_duplicadas` e os existentes que tocam os arquivos mexidos) | em execução neste commit; o resultado entra no commit seguinte |
+| `varredura.py` · `../ferramentas/acoes_duplicadas.py . /tmp/SOLO-dup.json` | 141/141 páginas sem erro · 141 páginas, 0 com ação repetida, erros 0 |
+| `map_irrig_filtro_test.py` · `irr_estado_test.py` | 15 ok · 0 falhas · 38 ok · 0 falhas |
+| `os_irrig_filtro_test.py` em diante | interrompidos pelo reinício da máquina (~22:53); passaram para a rodada 3 |
 
 **Rodada 1, sobre `77843e0`** (antes do merge `d1506fb`, que só traz arquivos do BEN). Build: 0 FALHA, 141 artboards, menu 47.
 
