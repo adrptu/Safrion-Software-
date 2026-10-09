@@ -139,10 +139,13 @@ try:
         kb = J("[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] > *')].filter(VIS).map(x=>N(x.innerText).slice(0,40))")
         t.chk('Kanban com exatamente 5 fases e a contagem da semente (A liberar 1, Em execução 1)', len(kb or []) == 5 and kb[0].lower().startswith('a liberar 1') and kb[2].lower().startswith('em execução 1') and kb[4].lower().startswith('encerradas 0'), kb)
         J("window.__cl=1"); clk('Lista')   # a medida conta o toque da faixa e deixa de fora o Kanban (só conferência do teste)
-        t.chk('sem seleção, a ação primária do cabeçalho é a da 1ª ordem com passo: "Autorizar rota e liberar · OB-0112"', J("PRIM()") == ['Autorizar rota e liberar · OB-0112'], J("PRIM()"))
+        # rodada 1 (S4, BOT-01/BOT-08): a primária do cabeçalho só abria o painel (navegação) e repetia o verde do painel: sai do cabeçalho
+        t.chk('sem verde no cabeçalho do Beneficiamento (navegar não é primária; a decisão fica no painel da ordem)', J("PRIM()") == [], J("PRIM()"))
         shot('lista')
         # (2) OB-0112: autorizar e liberar recusa com as duas causas e quem resolve (Igor age)
-        perfil('Igor'); r0 = rev(); clk('Autorizar rota e liberar · OB-0112'); p = pan()
+        perfil('Igor'); r0 = rev(); row('OB-0112'); p = pan()
+        gr = J("[...document.querySelectorAll('button,a')].filter(e=>VIS(e)&&!e.closest('nav[aria-label=Menu]')&&getComputedStyle(e).backgroundColor==='rgb(30, 122, 76)').map(e=>N(e.innerText))")   # o item atual do menu lateral não é botão
+        t.chk('(2) com a OB-0112 aberta há um verde só na página, o do painel ("Autorizar rota e liberar"; BOT-01)', gr == ['Autorizar rota e liberar'], gr)
         # rodada 1 (BEN-D23): a falta de 341 caixas tem saída real: a NF 7731 a conferir no Estoque (a sobra de 60 da OB-0110 não cobre)
         t.chk('(2) painel da OB-0112 lista as duas causas antes do toque, cada uma com dono e atalho (caixas: conferir a NF 7731; a sobra da OB-0110 citada)', 'L39-119 em inspeção (INSP-94) · Marta (qualidade)' in p and 'Caixa de mamão Formosa 10 kg: 540 un disponíveis para 881 un · Estoque' in p
               and 'Conferir a NF 7731 das caixas no Estoque' in p and 'A OB-0110 tem 60 un em custódia' in p and 'Retirar L39-119 da ordem' in p, p[:900])
@@ -150,6 +153,8 @@ try:
               'Entrada a processar' in p and 'acima da faixa' not in p and '100,00 %' not in p and 'Em processo 0 kg' not in p, p[p.find('BALANÇO'):][:300] if 'BALANÇO' in p else p[:600])
         clk('Autorizar rota e liberar', 'aside'); p = pan()
         t.chk('(2) "Autorizar rota e liberar" recusa com as 2 causas; nada gravado (fase e revisão iguais)', 'Liberação recusada · 2 causas' in p and cen("c.ordens['OB-0112'].etapa") == 'A liberar' and rev() == r0, [p[-400:], rev(), r0])
+        bt = J(BTNS) or []
+        t.chk('(2) depois da recusa o rodapé fecha com "Fechar" (não "Cancelar", ao lado de "Cancelar a ordem")', 'Fechar' in bt and 'Cancelar' not in bt and 'Cancelar a ordem' in bt, bt)
         clk('Fechar', 'aside')
         # (3) OB-0110: concluir, conferir (Paula), fechar recusado pela custódia
         row('OB-0110'); p = pan()
@@ -217,6 +222,8 @@ try:
         ir('BEN.dc.html#OB-0110', limpa=True); time.sleep(.3)
         r0 = rev(); perfil('Ana'); clk(CONC, 'aside'); p = pan()
         t.chk('perfil sem o papel (Ana) recusado: "decisão de Igor (responsável de produção)", nada gravado', 'decisão de Igor (responsável de produção)' in p and rev() == r0 and cen("c.ordens['OB-0110'].etapa") == 'Em execução', p[-200:])
+        bt = J(BTNS) or []
+        t.chk('recusa na OB-0110 (em execução, não se cancela): o rodapé fecha com "Fechar", nunca "Cancelar" (rodada 1, S4)', 'Fechar' in bt and 'Cancelar' not in bt, bt)
         perfil('Igor'); clk('+ Registrar saída', 'aside'); clk('Produto', 'aside'); clk('A', 'aside'); setv('#pf_cx', '10'); setv('#pf_br', '106'); clk('Registrar', 'aside'); p = pan()
         t.chk('massa pesada não se cria: +100 kg de A recusado com as parcelas, nada gravado', 'Saídas pesadas 12.100 kg > entrada 12.000 kg + tolerância 12 kg' in p and rev() == r0, p[-300:])
         setv('#pf_cx', '61'); setv('#pf_br', '600'); clk('Registrar', 'aside'); p = pan()
@@ -255,7 +262,7 @@ try:
         ir('BEN.dc.html', limpa=True, w=390, h=844); time.sleep(.4)
         m = J("(()=>{ const vw=innerWidth; return {lado:document.documentElement.scrollWidth>vw+1||document.body.scrollWidth>vw+1, cards:[...document.querySelectorAll('.pr-card')].filter(VIS).length,"
               "prim:(()=>{ const b=document.querySelector('.pr-prim'); if(!b||!VIS(b)) return null; const r=b.getBoundingClientRect(); return r.bottom<=innerHeight&&r.right<=vw&&r.left>=0; })()}; })()")
-        t.chk('BEN a 390 px: sem rolagem lateral; lista em cartões (2 ordens); ação primária visível presa ao rodapé', m and not m['lado'] and m['cards'] == 2 and m['prim'], m)
+        t.chk('BEN a 390 px: sem rolagem lateral; lista em cartões (2 ordens); sem primária presa ao rodapé (navegar não é primária: o cartão abre a ordem, BOT-08)', m and not m['lado'] and m['cards'] == 2 and m['prim'] is None, m)
         shot('celular_lista')
         J("(()=>{ const k=[...document.querySelectorAll('.pr-card')].find(x=>N(x.innerText).indexOf('OB-0110')>=0); k&&k.click(); })()"); time.sleep(.6)
         d = J("(()=>{ const a=[...document.querySelectorAll('aside[role=dialog]')].find(VIS); if(!a) return null; const r=a.getBoundingClientRect(); const b=[...a.querySelectorAll('button')].filter(VIS).find(x=>N(x.innerText)==='Enviar para conferência'); "
@@ -520,11 +527,12 @@ try:
         clk('+ Nova ordem'); clk('L39-132', 'aside'); cxv = J("(document.querySelector('aside [id^=pf_cx_]')||{}).value"); clk('Criar ordem', 'aside')
         ir('BEN.dc.html#OB-0113', w=390, h=844); clk('Autorizar rota e liberar', 'aside'); p = pan(); st = cen("[c.ordens['OB-0113']&&c.ordens['OB-0113'].etapa, c.producao.lotes['L39-132'].ordem||'']")
         t.chk('F2 · 390 px: a OB-0113 nasce com a necessidade (1.169 caixas) e a liberação mostra a falta com a saída (o roteiro inteiro a 390: modo roteiro390)', cxv == '1169' and st == ['A liberar', ''] and 'Conferir a NF 7731 das caixas no Estoque' in p, [cxv, st, p[-300:]])
-        clk('Fechar', 'aside'); J("(()=>{ const l=document.querySelector('nav[aria-label=\"Telas de recebimento e beneficiamento\"] label.etp-atual'); l&&l.click(); })()"); time.sleep(.6)
+        # rodada 1 (S4, BOT-08): o Beneficiamento não tem primária no cabeçalho; a folha da faixa e a primária presa ao rodapé se conferem em Cargas
+        clk('Fechar', 'aside'); ir('CARGA.dc.html', w=390, h=844); time.sleep(1); J("(()=>{ const l=document.querySelector('nav[aria-label=\"Telas de recebimento e beneficiamento\"] label.etp-atual'); l&&l.click(); })()"); time.sleep(.6)
         pv = J("(()=>{ const b=document.querySelector('.pr-prim'); return b?getComputedStyle(b).visibility:'sem'; })()")
         J("(()=>{ const l=document.querySelector('nav[aria-label=\"Telas de recebimento e beneficiamento\"] label.etp-atual'); l&&l.click(); })()"); time.sleep(.6)
         pv2 = J("(()=>{ const b=document.querySelector('.pr-prim'); return b&&VIS(b)?getComputedStyle(b).visibility:'sem'; })()")
-        t.chk('F3 · no Beneficiamento a 390 px a primária presa ao rodapé some só com a lista aberta e volta ao fechar', pv == 'hidden' and pv2 == 'visible', [pv, pv2])
+        t.chk('F3 · em Cargas a 390 px a primária presa ao rodapé some só com a lista da faixa aberta e volta ao fechar', pv == 'hidden' and pv2 == 'visible', [pv, pv2])
         shot('faixa390')
         t.chk('faixa390 sem erro de JS', not t.errs(), t.errs())
 finally:

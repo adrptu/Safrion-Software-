@@ -209,7 +209,7 @@ function bnPainel(self,c,o){ const r=benRota(o.ben.rota); const b=benBal(o); con
   if(modo==='reabrir'){ PPx.form={t:'Reabrir execução · '+benProdQ(),h:'Volta a Em execução: a declaração do envio para conferência, a conferência e a justificativa caem. Para corrigir um registro, estorne na conferência.',fields:[prFld(self,'mr','Motivo',{t:'txt',im:'text',ph:'ex.: faltou registrar a classe B do turno da tarde'})]};
     PPx.prim={t:'Reabrir execução',go:()=>self.state.pr_modo==='reabrir'&&bnRun(self,x=>benReabrir(x,o.id,prFval(self,'mr',''),g2perfil()),{pr_form:null,pr_modo:null})}; PPx.sec=[{t:'Voltar',go:()=>self.setState({pr_modo:null,pr_err:''})}]; return PPx; }
   /* recusa de um comando sem formulário aberto (autorizar, concluir, conferir, fechar): a causa fica no painel, junto da ação */
-  if(self.state.pr_err&&!modo) PPx.form={t:'Não gravado',h:'Nada foi alterado. Resolva a causa e toque de novo.',fields:[]};
+  if(self.state.pr_err&&!modo) PPx.form={t:'Não gravado',h:'Nada foi alterado. Resolva a causa e toque de novo.',fields:[],aviso:true};   /* aviso, não formulário: o rodapé fecha com "Fechar" */
   /* uma ação primária por estado (§5.3); secundárias à esquerda */
   const abreSaida=()=>self.setState({pr_modo:'saida',pr_form:null,pr_err:'',pr_ch:prChave('W-BNS'),bn_sub:null,bn_ver:o.ver});
   const k={ver:o.ver};
@@ -232,11 +232,9 @@ function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const st=s
   v.nova_go=()=>self.setState({pr_pan:{g:'nova'},pr_sel:null,pr_form:null,pr_err:'',pr_modo:null,pr_ch:prChave('W-BNN')});
   v.cards_ob=prCards(self,v,'g_ob',id=>{ const o=c.ordens[id]; if(!benEh(o)) return null; const nx=benProx(c,o);
     return prCard({t1:o.id+' · '+bnProdTxt(o),num:benKg(benEntrada(o)),t2:benRotaTxt(benRota(o.ben.rota))+' · '+o.talhao+' · '+bnQtdTxt(o),chip:[o.etapa,BN_FCOR[o.etapa]||'gray'],nx:nx.t+(nx.quem?' · '+nx.quem:''),go:()=>self.g2pick('g_ob',id)}); });
-  /* ação primária do cabeçalho: a da ordem selecionada; sem seleção, a da 1ª ordem da lista (fase) que tem passo */
-  const sel=st.pr_sel; let o=sel&&c.ordens[sel.id]&&benEh(c.ordens[sel.id])?c.ordens[sel.id]:null; let suf='';
-  if(!o){ o=ords.slice().sort((a,b)=>BEN_FASES.indexOf(a.etapa)-BEN_FASES.indexOf(b.etapa)).find(x=>benProx(c,x).acao)||null; if(o) suf=' · '+o.id; }
-  const nx=o?benProx(c,o):null; prPrim(v,nx&&nx.acao?{t:({liberar:'Autorizar rota e liberar',iniciar:'Iniciar processo',saida:'Registrar saída',concluir:'Enviar para conferência',justificar:'Justificar diferença',confirmar:'Confirmar correção',conferir:'Conferir balanço',fechar:'Fechar processo'})[nx.acao]+suf,
-    go:()=>self.setState({pr_sel:{g:'g_ob',id:o.id},pr_pan:{g:'g_ob',id:o.id},pr_form:null,pr_err:'',pr_modo:null})}:null);
+  /* sem primária no cabeçalho (rodada 1, S4; BOT-01 e BOT-08): ela só abria o painel da ordem (navegação) e repetia o verde do painel com
+     o mesmo verbo; a decisão fica no painel, e a lista diz o próximo passo de cada ordem */
+  prPrim(v,null);
   const n=f=>ords.filter(x=>x.etapa===f).length; const imp=ords.filter(x=>benSelos(c,x).some(s=>s.c==='red')).length; const ap=benLotesAptos(c).filter(L=>prFazOk(self,L.faz)).length;
   prStatus(v,[n('A liberar')?n('A liberar')+' a liberar':'',n('Em execução')?n('Em execução')+' em execução':'',n('Em conferência')?n('Em conferência')+' em conferência':'',ap?ap+(ap>1?' lotes a beneficiar':' lote a beneficiar'):''].filter(Boolean).join(' · ')||'nada a processar',imp?'red':(n('A liberar')||n('Em conferência')?'yellow':'green'));
   const pan=st.pr_pan; let PP=null;
