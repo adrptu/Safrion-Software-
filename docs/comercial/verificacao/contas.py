@@ -79,4 +79,13 @@ ok('KC17 05/10: L39-133 vencido (29/09) fora do livre; PV-038 conta no estoque �
 liq18 = D(10040); exc = liq18 - pv36; disp18 = D(2050) - exc; fis18 = apto - liq18; v18 = valor(liq18, D(1), D('3.05'))
 ok('KC18 excesso 40 kg: disponível do L39-133 2.050 → 2.010 · físico 2.010 · falta 0 · R$ 30.622,00 · exposição 122.092 > 121.970 aprovado (aprova de novo)',
    exc == 40 and disp18 == 2010 and fis18 == 2010 and pv36 - liq18 <= 0 and v18 == D('30622.00') and ar37 + v18 == D('122092.00') and ar37 + v18 > D('121970'))
+# KC19 · A-17 (Codex 6070584991): a massa da saca dos contratos legados de soja não é decidida pela semente; com 50 kg ou 60 kg registrados,
+# os compromissos 26/27 (19.900 sc) e a oferta livre fecham em kg pela massa de cada contrato, nunca pelo cadastro atual da cultura
+oferta2627 = D(4090800); comp_sc = D(12000) + D(6900) + D(1000)
+c60, c50 = comp_sc * 60, comp_sc * 50
+ok('KC19 19.900 sc × 60 kg = 1.194.000 kg (livre 2.896.800 kg = 48.280 sc); × 50 kg = 995.000 kg (livre 3.095.800 kg = 51.596,67 sc de 60 kg; +199.000 kg); CT-203 12.000 sc 50 kg × R$ 132,00 = R$ 1.584.000,00 (o valor do acordo não depende da massa)',
+   c60 == 1194000 and oferta2627 - c60 == 2896800 and (oferta2627 - c60) / SC == 48280 and c50 == 995000 and oferta2627 - c50 == 3095800
+   and q2((oferta2627 - c50) / SC) == D('51596.67') and c60 - c50 == 199000 and q2(D(12000) * D('132')) == D('1584000.00'))
+# KC20 · PV-030 com 50 kg: 4.000 sc = 200.000 kg; a RS-0001 (232.500 kg) fica 32.500 kg acima da venda = 650 sc de 50 kg (Em risco: cancelar e reservar de novo)
+ok('KC20 PV-030 com 50 kg: 200.000 kg; RS-0001 232.500 kg acima em 32.500 kg = 650 sc 50 kg', D(4000) * 50 == 200000 and (rs1 - D(4000) * 50) / 50 == 650)
 print('FALHAS:', len(F))
