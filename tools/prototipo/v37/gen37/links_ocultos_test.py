@@ -15,10 +15,34 @@ cl=sorted(f for f,s in src.items() if re.search(r'\bcenLiberar\(c',s) and not f.
 ok('E1b só osc_liberar (processo_os) e a liberação da ordem de beneficiamento (ben.js, BEN-D05) chamam cenLiberar: nenhum atalho libera sem gravar CMD-42/CMD-06', cl==['areas/processo_os.py','ben.js'], cl)
 # BEN-D05 (integração BEN, 09/10): a OB (fam 'BEN', responsável próprio: Igor) reaproveita cenLiberar. Em ben.js a única função que chama
 # cenLiberar é benAutorizarLiberar, que exige o perfil de produção, recusa ordem que não é de beneficiamento (benO) e grava CMD-42 e CMD-06.
-_bf=[x for x in re.split(r'\nfunction ',src.get('ben.js','')) if re.search(r'\bcenLiberar\(c',x)]
-ok('E1d em ben.js só benAutorizarLiberar chama cenLiberar, com perfil de produção, recusa de ordem que não é OB (benO) e registros CMD-42 e CMD-06',
-   len(_bf)==1 and _bf[0].startswith('benAutorizarLiberar(') and all(t in _bf[0] for t in ("cenExige(ator, 'producao'",'benO(c, id)',"benHist(o, quem, 'Versão ' + o.versao + ' da ordem autorizada (CMD-42)'","benHist(o, quem, 'Liberada (CMD-06)'")),
-   [x[:60] for x in _bf])
+# rodada 1 da integração (S4): o E1d antigo dividia o arquivo em "\nfunction " e procurava "cenLiberar(c": um atalho logo depois de
+# benAutorizarLiberar (const x = (c, id) => cenLiberar(c, id)) ficava no mesmo pedaço, e uma chamada com outra variável escapava. Agora,
+# sem comentários, o nome cenLiberar aparece exatamente uma vez em ben.js, como cenLiberar(c, id), dentro do corpo (chaves casadas) de
+# benAutorizarLiberar; e nenhuma outra fonte do Beneficiamento o cita
+def _sem_coment(t): return re.sub(r'^[ \t]*//[^\n]*', '', re.sub(r'/\*.*?\*/', '', t, flags=re.S), flags=re.M)
+def _corpo(t, nome):
+    i = t.find('function ' + nome + '('); j = t.find('{', i) if i >= 0 else -1
+    if j < 0: return (-1, -1)
+    n = 0
+    for k in range(j, len(t)):
+        n += {'{': 1, '}': -1}.get(t[k], 0)
+        if n == 0: return (j, k)
+    return (-1, -1)
+def e1d(texto):
+    t = _sem_coment(texto); usos = [m.start() for m in re.finditer(r'\bcenLiberar\b', t)]; a, b = _corpo(t, 'benAutorizarLiberar'); f = t[a:b + 1] if a >= 0 else ''
+    return (len(usos) == 1 and a < usos[0] < b and t[usos[0]:usos[0] + len('cenLiberar(c, id)')] == 'cenLiberar(c, id)'
+            and all(x in f for x in ("cenExige(ator, 'producao'", 'benO(c, id)', "benHist(o, quem, 'Versão ' + o.versao + ' da ordem autorizada (CMD-42)'", "benHist(o, quem, 'Liberada (CMD-06)'")), usos)
+_ok, _usos = e1d(src.get('ben.js', ''))
+def _sem_coment_py(t): return _sem_coment(re.sub(r'^[ \t]*#[^\n]*', '', re.sub(r'\"\"\".*?\"\"\"', '', t, flags=re.S), flags=re.M))   # docstrings e # fora; o JS da tela (r''') fica
+_outros = [f for f in ('areas/processo_beneficiamento.py', 'dados_ben.py') if re.search(r'\bcenLiberar\b', _sem_coment_py(src.get(f, '')))]
+ok('E1d em ben.js o nome cenLiberar aparece uma vez só, como cenLiberar(c, id) dentro de benAutorizarLiberar (perfil de produção, benO, CMD-42 e CMD-06); a tela e a semente do BEN não o citam',
+   _ok and not _outros, [_usos, _outros])
+_b = src.get('ben.js', ''); _m = _b.find('\nfunction benIniciar(')
+_mut = [('atalho logo depois de benAutorizarLiberar', _b[:_m] + '\nconst benLibDireto = (c, id) => cenLiberar(c, id);' + _b[_m:]),
+        ('chamada com outra variável', _b.replace("o.etapa = 'Em execução'; const it = benReqItem(c, o);", "o.etapa = 'Em execução'; cenLiberar(x, id); const it = benReqItem(c, o);", 1)),
+        ('apelido do nome', _b[:_m] + '\nconst benL = cenLiberar;' + _b[_m:])]
+ok('E1e o E1d derruba os atalhos de cenLiberar entre funções do ben.js (3 mutantes: atalho colado, outra variável, apelido)',
+   _m > 0 and all(not e1d(t)[0] for _, t in _mut) and all(t != _b for _, t in _mut), [(n, e1d(t)[1]) for n, t in _mut])
 ef=[(f,len(re.findall(r'\bosc_libEfeito\(',s))) for f,s in src.items() if re.search(r'\bosc_libEfeito\(',s)]   # CTL-3: definição + 2 chamadas
 ok('E1c o efeito sem o registro de quem decide (osc_libEfeito) só é chamado por osc_liberar e pela prévia osLibErro (cópia)', ef==[('areas/processo_os.py',3)], ef)
 seed=cenario.seed()['ordens']
