@@ -6,7 +6,8 @@ Atualizado em 29/09/2026 por Claude, sobre a `main` `15e53d27`. PR aberto não s
 
 | Frente | Estado | Evidência |
 |---|---|---|
-| PRD | v3.9 vigente; v3.10 em revisão, com propostas de edição por tema aguardando as três IAs | `docs/PRD.md`, `docs/DECISIONS.md` |
+| PRD | **v3.11** (27/09/2026), vigente a partir do merge do PR desta atualização: 40.5 e 40.6, produto fixo ou troca de marca pelo mesmo ingrediente ativo; API de integração com credencial por integração; sobre a **v3.10**: caps. 73 (confiabilidade transacional, offline, desempenho), 74 (design system) e 75 (melhoria contínua), com as seções existentes reconciliadas. Decisões pendentes continuam pendentes em 73.12, 74.12 e 75.8 | `docs/PRD.md`; `docs/prd/v3_10-reconciliacao.md`; `docs/DECISIONS.md` |
+| Fluxogramas | v3.10: 14 dos 63 fluxos alterados, mesmas raias; v3.9 mantida ao lado | `docs/prd/fluxogramas/` |
 | Protótipo | Navegável; sem banco ou login reais | https://claude.ai/artifact/WPDgqGvKX6CYTCdPjidBLo |
 | Repositório | Privado; PRs #2 a #15 integrados | https://github.com/adrptu/Safrion-Software- |
 | Fundação | Domínio (decimal, unidades e saldo por lote); PostgreSQL/PostGIS com RLS e isolamento entre organizações; login OIDC com sessões; concessão e revogação de acesso; primeira interface de estoque e cadastros; imagens de homologação verificadas na CI | PRs #5, #7, #8, #9, #10 e #11 |
@@ -27,7 +28,7 @@ Atualizado em 29/09/2026 por Claude, sobre a `main` `15e53d27`. PR aberto não s
 1. Feito em 29/09: os 10 checks obrigatórios estão no ruleset existente, conferidos na leitura do servidor.
 2. Ensaio remoto da homologação, com autorização de custo e destino do proprietário: restauração do backup em instância isolada, logs sem dados pessoais, acesso e revogação.
 3. Antes do primeiro usuário externo: teste de todas as rotas com usuário de outra organização e inventário dos dados pessoais tratados.
-4. PRD v3.10: revisão das propostas por tema pelas três IAs.
+4. PRD v3.11: revisão do Codex da versão montada (v3.10 + v3.11) no PR desta atualização; o merge pelo proprietário a torna vigente. As decisões pendentes (73.12, 74.12, 75.8) continuam com ele.
 5. Codex e Claude conduzem a homologação técnica e funcional. Adrianus recebe a candidata verificada e dá feedback; produção exige o aceite explícito dele para a versão.
 
 ### Segurança estática — FERR-06

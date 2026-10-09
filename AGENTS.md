@@ -10,10 +10,10 @@ Fazer diferença real na melhoria, na evolução e no sucesso contínuo da agric
 ## 1. O que é este repositório
 Sistema **"Do Talhão à O.S."**: plataforma de gestão agrícola integrada. Vai do planejamento da safra à ordem de serviço, ao almoxarifado, ao app de campo e aos custos.
 
-- **Contrato do produto:** [`docs/PRD.md`](docs/PRD.md). Versão vigente: **3.9**, de 26/09/2026. A v3.10 está em revisão e entra por pull request.
+- **Contrato do produto:** [`docs/PRD.md`](docs/PRD.md). Versão vigente: **3.11**, de 27/09/2026, que inclui a v3.10 (registro em [`docs/prd/v3_10-reconciliacao.md`](docs/prd/v3_10-reconciliacao.md)). As decisões pendentes do proprietário (73.12, 74.12 e 75.8) continuam pendentes e não valem como aprovadas.
 - **Estado atual:** [`docs/STATUS.md`](docs/STATUS.md). Leia antes de começar qualquer sessão.
 - **Decisões:** [`docs/DECISIONS.md`](docs/DECISIONS.md) e [`docs/adr/`](docs/adr/).
-- **Design system:** [`docs/design-system/`](docs/design-system/). O capítulo 74 do PRD está em revisão.
+- **Design system:** [`docs/design-system/`](docs/design-system/). É o capítulo 74 do PRD; `tokens.json`, espécime e tabela de contraste ainda não estão no repositório.
 - **Fluxogramas:** [`docs/prd/fluxogramas/`](docs/prd/fluxogramas/).
 - **Protótipo navegável** (validação, não é produção): https://claude.ai/artifact/WPDgqGvKX6CYTCdPjidBLo
 
@@ -116,11 +116,11 @@ Sistema **"Do Talhão à O.S."**: plataforma de gestão agrícola integrada. Vai
 
 ## 4. Regras de produto que o código não pode quebrar
 - **Master-detail** (Menu → Listagem → Detalhe → Sub-detalhe), uma ação primária por tela, estado sempre visível e próximo passo com verbo (PRD 4.2 e 4.3).
-- **Toda O.S. agrícola tem aprovação agronômica individual**, inclusive operação mecânica (PRD 41; revisão v3.10, 73.9).
+- **Toda O.S. agrícola tem aprovação agronômica individual**, inclusive operação mecânica (PRD 41 e 73.9).
   - Exceções expressas: irrigação só com água (DEC-2609-10), manutenção e beneficiamento com responsável próprio.
   - Aprovar não libera; liberar é o CMD-06.
 - **O servidor é a autoridade** para saldo, reserva, custódia, aprovação e encerramento (PRD 24).
-  - Cada comando carrega a chave de idempotência gerada por quem inicia a ação (ENG-021/022; revisão v3.10, 73.3).
+  - Cada comando carrega a chave de idempotência gerada por quem inicia a ação (ENG-021/022; PRD 73.3).
   - Grava o efeito, o recibo e a outbox na mesma transação.
 - **Kanban da O.S. com 5 fases** (A liberar, Liberadas, Em execução, Em conferência, Encerradas). Não criar coluna nova.
 - **Fórmula agronômica ou econômica** existe num único serviço de domínio (ENG-011). Unidades explícitas; decimal para dinheiro e quantidade (ENG-013).

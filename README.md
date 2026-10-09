@@ -7,7 +7,7 @@ Plataforma de gestão agrícola integrada: planejamento da safra, planos agronô
 ## Onde está cada coisa
 | O quê | Onde |
 |---|---|
-| Contrato do produto (PRD v3.9 vigente) | [`docs/PRD.md`](docs/PRD.md) |
+| Contrato do produto (PRD v3.11 vigente; versões anteriores no histórico) | [`docs/PRD.md`](docs/PRD.md) |
 | Fluxogramas com raias | [`docs/prd/fluxogramas/`](docs/prd/fluxogramas/) |
 | Decisões e ADRs | [`docs/DECISIONS.md`](docs/DECISIONS.md), [`docs/adr/`](docs/adr/) |
 | Design system | [`docs/design-system/`](docs/design-system/) |

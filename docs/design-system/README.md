@@ -1,6 +1,6 @@
 # Design system
 
-**Situação:** em revisão. O design system entra no PRD v3.10 como **capítulo 74** e chega a este repositório pelo pull request da v3.10, junto com:
+**Situação:** o design system é o **capítulo 74** do PRD (v3.10, vigente na v3.11). Ainda faltam neste repositório:
 - `tokens.json`: fonte única dos tokens, para gerar variáveis CSS e o tema do código;
 - a página de espécime visual, gerada dos mesmos tokens;
 - a tabela de contraste medida (WCAG 2.2 AA).
