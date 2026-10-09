@@ -4,7 +4,8 @@
     uma variável (sem " · ", " / ", " e "), unidade na célula (data-un) e não no cabeçalho, sem "u"/"pre" antigos, custo como "Custo R$/h".
 (B) Auxiliares Python: vazão do documento em m³/h (L/s × 3,6), Outorga × Certidão, parcelas do talhão só com as safras da fazenda dele.
 (C) Funções JS das páginas geradas, no node: documento e situação do ponto de água (sem a data na situação), situação de cada papel do
-    parceiro, cultura × estádio do setor e o instante ISO que ordena "ontem/hoje/amanhã".
+    parceiro, cultura × estádio do setor, o instante ISO que ordena "ontem/hoje/amanhã" e a Pendência sem repetir a Situação.
+    (B4: cada grandeza da fonte de clima/sensor com a sua unidade.)
 Uso: python3 tabelas_cad_irr_unit.py   (sai com 1 se alguma regra falhar)"""
 import os, re, sys, json, subprocess
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE); os.chdir(HERE)
@@ -114,5 +115,14 @@ iso, txt = ui.get('iso') or [], ui.get('txt') or []
 chk('C5 instante ISO ordena no tempo (19/09 < ontem < hoje < amanhã < 25/09) e a célula mostra o texto relativo',
     m0 is not None and len(iso) == 6 and iso == sorted(iso) and iso[0] == '2026-09-19 14:00' and iso[3] == '2026-09-23 20:00' and txt[1:5] == ['ontem 20:00', 'hoje 14:00', 'hoje 20:00', 'amanhã 10:31'] and ui.get('vazio') == '', (iso, txt))
 chk('C6 pelo texto a ordem sairia errada ("amanhã" < "hoje" < "ontem"): por isso o valor que ordena é o ISO', len(txt) == 6 and sorted(txt[1:5]) != txt[1:5], sorted(txt[1:5]))
+jsp = func(hi, 'irrPend') + '\n' + func(hi, 'irrPendFert') + r"""
+console.log(JSON.stringify({p:irrPend([{t:'Impedida · bomba parada',c:'red'},{t:'Falta insumo · Ureia 45%',c:'red'},{t:'Conflito · parada da B3',c:'red'},{t:'Janela a definir',c:'yellow'}]).map(x=>[x.t,x.c]),
+  f:irrPendFert({t:'Impedida · bomba parada',dono:'Manutenção'}).map(x=>x.t), n:irrPendFert(null)}));"""
+up = node(jsp) or {}
+chk('C7 Pendência sem repetir a Situação: "Impedida · bomba parada" → "Bomba parada" (cor mantida); falta insumo, conflito e janela ficam como estão; sem bloqueio = lista vazia',
+    up.get('p') == [['Bomba parada', 'red'], ['Falta insumo · Ureia 45%', 'red'], ['Conflito · parada da B3', 'red'], ['Janela a definir', 'yellow']] and up.get('f') == ['Bomba parada'] and up.get('n') == [], up)
+import dados_irrigacao as DI
+desc = [(k, f['gr'], f['un']) for k, f in DI.FONTES.items() if len(f['gr'].split(' / ')) != len(f['un'].split(' · '))]
+chk('B4 cada grandeza da fonte tem a sua unidade, na mesma ordem (a estação: ET₀, chuva e vento → mm/dia, mm e km/h)', not desc, desc)
 print(f'RESULTADO: {len(OK)}/{len(OK) + len(FAIL)} ok' + (' · FALHAS: ' + '; '.join(FAIL) if FAIL else ''))
 sys.exit(1 if FAIL else 0)

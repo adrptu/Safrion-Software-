@@ -4,8 +4,9 @@ TF03 por grade: colunas próprias (sem rótulo composto), unidade junto do valor
 ordenação em todas as colunas (inclusive as passadas do detalhe), filtro pelo texto da célula e por item de lista (avisos, setores),
 Início/Fim/Quando ordenados pelo instante (ontem < hoje < amanhã, que pelo texto sairia ao contrário), Situação/Etapa em chip; Fazenda
 só com "Todas" no topo (Pivô 2 existe nas duas fazendas) com cada célula sob o seu cabeçalho; 390 px rolando dentro da caixa.
-Fluxo no mesmo estado (irrigacao_estado.js): definir a janela da OS-0422 no detalhe → IR-03 mostra Início/Fim e ordena por eles (normal);
-passada sem hora é recusada e nada muda (recusa); salvar de novo não duplica a ordem (repetição).
+Fluxo no mesmo estado (irrigacao_estado.js), a 1440 e a 390 px: definir a janela da OS-0422 no detalhe → IR-03 mostra Início/Fim e ordena
+por eles (normal); passada sem hora é recusada e nada muda (recusa); salvar de novo não duplica a ordem (repetição). A 390 px, com toque:
+filtro e ordem pelo menu da coluna, filtro + busca sem resultado (aviso) e o mesmo filtro duas vezes.
 Uso: python3 tabelas_irr_test.py [pasta de capturas]   (< 3 min)"""
 import sys, os, re, time, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -51,6 +52,28 @@ def por_grupo(g, col):
         elif cur is not None: cur.append(cells[k])
     return out
 
+def fluxo_janela(tam):
+    """janela da OS-0422 no mesmo estado da irrigação: normal (salvar a sugerida), recusa (passada sem hora) e repetição (salvar de novo)."""
+    abre('IR-03det.dc.html#OS-0422:janela', 1.8)
+    dlg = lambda: J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText.replace(/\\s+/g,' ')") or ''
+    clk = lambda t: J(f"(()=>{{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==={json.dumps(t)}); if(!b) return false; b.click(); return true;}})()")
+    toast = lambda: J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')") or ''
+    d0 = dlg(); clk('Usar janela sugerida'); time.sleep(.4); clk('Salvar janela'); time.sleep(.8); t = toast()
+    abre('IR-03.dc.html'); g = Grade(J, 0); o22 = next((r for r in g.dicts() if r.get('Ordem') == 'OS-0422'), {})
+    g.ordena('Início'); ini = g.col('Início'); ords = g.col('Ordem'); k22 = ords.index('OS-0422') if 'OS-0422' in ords else -1
+    chk(f'fluxo {tam} (normal): janela sugerida salva no detalhe (libera pela prontidão) → IR-03 mostra Início e Fim da OS-0422 e ordena por eles',
+        'Definir janela' in d0 and 'OS-0422' in t and ('Janela salva' in t or 'Liberadas' in t) and instante(o22.get('Início')) and instante(o22.get('Fim')) and crescente([instante(x) for x in ini if instante(x)]) and k22 >= 0 and instante(ini[k22]), (d0[:80], t, o22))
+    ini22 = o22.get('Início')
+    abre('IR-03det.dc.html#OS-0422:janela', 1.8); pan = 'Definir janela' in dlg() or 'janela' in dlg().lower()
+    J("""(()=>{const i=document.querySelector('#jn_h1'); if(!i) return; Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,''); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})()"""); time.sleep(.3)
+    clk('Salvar janela'); time.sleep(.6); t2 = toast()
+    clk('Cancelar'); time.sleep(.3)
+    abre('IR-03.dc.html'); o22b = next((r for r in Grade(J, 0).dicts() if r.get('Ordem') == 'OS-0422'), {})
+    chk(f'fluxo {tam} (recusa): passada sem hora → "Informe data e hora da passada 1." e a janela gravada não muda', pan and 'Informe data e hora da passada 1' in t2 and o22b.get('Início') == ini22, (pan, t2, o22b.get('Início'), ini22))
+    abre('IR-03det.dc.html#OS-0422:janela', 1.8); clk('Salvar janela'); time.sleep(.8)
+    abre('IR-03.dc.html'); g = Grade(J, 0); n22 = g.col('Ordem').count('OS-0422'); o22c = next((r for r in g.dicts() if r.get('Ordem') == 'OS-0422'), {})
+    chk(f'fluxo {tam} (repetição): salvar a mesma janela de novo não cria outra ordem nem muda o Início', n22 == 1 and o22c.get('Início') == ini22, (n22, o22c.get('Início')))
+
 try:
     c.aparelho(1440, 900, 1, False)
     abre('Main.dc.html', .3); J("localStorage.clear(); sessionStorage.clear()")
@@ -78,6 +101,10 @@ try:
     pv2 = sorted(r.get('Fazenda') for r in d if r.get('Setor') == 'Pivô 2')
     chk('IR-01 Todas: a coluna Fazenda entra (Pivô 2 da Santa Rita e da Lagoa Grande se distinguem) e cada célula fica sob o seu cabeçalho',
         hs[:2] == ['Setor', 'Fazenda'] and pv2 == ['Lagoa Grande', 'Santa Rita'] and alinhada(g) == 0, (hs[:3], pv2, alinhada(g)))
+    p5 = next((r for r in d if r.get('Setor') == 'Pivô 5' and r.get('Fazenda') == 'Lagoa Grande'), {})
+    rep = [(r.get('Setor'), r.get('Situação'), r.get('Pendência')) for r in d if r.get('Situação') and r.get('Pendência', '').startswith(r.get('Situação'))]
+    chk('IR-01 Todas: a Pendência diz o que segura sem repetir a Situação (Pivô 5 Impedida | Bomba parada; antes "Impedida · bomba parada")',
+        p5.get('Situação') == 'Impedida' and p5.get('Pendência') == 'Bomba parada' and not rep, (p5.get('Situação'), p5.get('Pendência'), rep[:3]))
     lg = next((r for r in d if r.get('Fazenda') == 'Lagoa Grande' and r.get('Estádio') not in ('', '—')), {})
     chk('IR-01 Todas: Lagoa Grande com Cultura Mamão e a fase do mamão em Estádio (antes "Mamão · produção" numa célula)', lg.get('Cultura') == 'Mamão' and lg.get('Estádio') in ('formação inicial', 'pré-florada', 'produção', 'preparo de área'), lg)
     fazenda('Santa Rita'); g = Grade(J, 0)
@@ -90,6 +117,9 @@ try:
     rio = next((r for r in d if r.get('Captação › ordem', '').startswith('Rio')), {}); o19 = next((r for r in d if r.get('Captação › ordem') == 'OS-0419'), {})
     chk('IR-02: captação com o pico de hoje na Vazão (166 L/s); OS-0419 Água | Pivô 2 | Bomba B2 | 166 L/s | hoje 20:00 | amanhã 10:31 | 10,81 mm | 1 | Liberadas',
         rio.get('Vazão') == '166 L/s' and [o19.get(k) for k in AG[1:10]] == ['Água', 'Pivô 2', 'Bomba B2', '166 L/s', 'hoje 20:00', 'amanhã 10:31', '10,81 mm', '1', 'Liberadas'], (rio, o19))
+    tipos = {r.get('Tipo') for r in d if r.get('Tipo')}
+    chk('IR-02: Tipo com uma variável: Água ou Fertirrigação (antes "Fertirrigação · O.S." e "Fertirrigação v2"; a versão e a O.S. ficam no detalhe e no próximo passo)',
+        tipos == {'Água', 'Fertirrigação'}, tipos)
     g.ordena('Início'); bl = por_grupo(g, 'Início')
     ok_ = all(crescente([instante(x) for x in b]) or len([x for x in b if instante(x)]) < 2 for b in bl) and any(len([x for x in b if instante(x)]) > 1 for b in bl)
     chk('IR-02: ordenar Início pelo instante dentro da captação; "a definir" no fim', ok_ and all(b.index('a definir') == len(b) - 1 for b in bl if 'a definir' in b), bl)
@@ -111,6 +141,9 @@ try:
     chk('IR-03: filtro Avisos por item (Ponta parcial) → OS-0419', 'Ponta parcial (20–21 h)' in (rr or []) and fl == ['OS-0419'], (rr, fl))
     limpa(J)
     fazenda('Todas'); g = Grade(J, 0); d = g.dicts()
+    o507 = next((r for r in d if r.get('Ordem') == 'OS-0507'), {}); rep = [(r.get('Ordem'), r.get('Pendência')) for r in d if r.get('Pendência', '').startswith('Impedida')]
+    chk('IR-03 Todas: OS-0507 Fertirrigação com Pendência "Bomba parada" (sem "Impedida ·"); Tipo só Água ou Fertirrigação',
+        o507.get('Tipo') == 'Fertirrigação' and o507.get('Pendência') == 'Bomba parada' and not rep and {r.get('Tipo') for r in d} == {'Água', 'Fertirrigação'}, (o507, rep))
     chk('IR-03 Todas: coluna Fazenda (3ª) com Santa Rita e Lagoa Grande; células alinhadas', g.labels()[2] == 'Fazenda' and {r.get('Fazenda') for r in d} == {'Santa Rita', 'Lagoa Grande'} and alinhada(g) == 0, (g.labels()[:4], alinhada(g)))
     fazenda('Santa Rita'); shot('ir03-1440')
     # ================= IR-03det =================
@@ -133,6 +166,12 @@ try:
     sub = J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText.replace(/\\s+/g,' ')") or ''
     chk('IR-04: o painel da sonda P1 diz o motivo da suspeita (salto de 18 p.p.)', 'Suspeita · salto de 18 p.p.' in sub, sub[:200])
     J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Cancelar'); b&&b.click();})()"); time.sleep(.3)
+    es = next((r for r in ds if r.get('Fonte', '').startswith('Estação meteorológica')), {})
+    chk('IR-04: a estação lista grandezas e unidades na mesma ordem (ET₀, Chuva, Vento | mm/dia, mm, km/h; antes "ET₀ / chuva / vento" e "mm/dia · mm" sem a do vento); o hidrômetro credita as irrigações (a Cobertura diz onde)',
+        [es.get('Grandeza'), es.get('Unidade')] == ['ET₀, Chuva, Vento', 'mm/dia, mm, km/h'] and hp.get('Efeito no balanço') == 'crédito das irrigações', (es.get('Grandeza'), es.get('Unidade'), hp.get('Efeito no balanço')))
+    rg = gs.rotulos('Grandeza'); gs.filtra('Grandeza', ['Chuva']); fl = [r.get('Fonte') for r in gs.dicts()]
+    chk('IR-04: filtro Grandeza por item (Chuva) → só a estação', 'Chuva' in (rg or []) and fl == ['Estação meteorológica Santa Rita'], (rg, fl))
+    limpa(J)
     dc = tf03('IR-04 Captações', gc, ['Captação', 'Outorga', 'Vazão outorgada', 'Regime', 'Vencimento', 'Situação', 'Volume hoje', 'Uso do dia', 'Setores ligados'])
     rio = next((r for r in dc if r.get('Captação', '').startswith('Rio')), {})
     chk('IR-04: Rio demonstrativa | 400 L/s | 21 h/dia | 30/06/2028 | Vigente | 2.390 m³ | 8 % | Pivô 2, Pivô 1',
@@ -147,25 +186,7 @@ try:
     chk('IR-04 Todas: Fazenda nas fontes e nas captações, com as células alinhadas', gs.labels()[1] == 'Fazenda' and gc.labels()[1] == 'Fazenda' and alinhada(gs) == 0 and alinhada(gc) == 0, (gs.labels()[:3], gc.labels()[:3]))
     fazenda('Santa Rita'); shot('ir04-1440')
     # ================= fluxo no mesmo estado: janela da OS-0422 =================
-    abre('IR-03det.dc.html#OS-0422:janela', 1.8)
-    dlg = lambda: J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText.replace(/\\s+/g,' ')") or ''
-    clk = lambda t: J(f"(()=>{{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==={json.dumps(t)}); if(!b) return false; b.click(); return true;}})()")
-    toast = lambda: J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')") or ''
-    d0 = dlg(); clk('Usar janela sugerida'); time.sleep(.4); clk('Salvar janela'); time.sleep(.8); t = toast()
-    abre('IR-03.dc.html'); g = Grade(J, 0); o22 = next((r for r in g.dicts() if r.get('Ordem') == 'OS-0422'), {})
-    g.ordena('Início'); ini = g.col('Início'); ords = g.col('Ordem'); k22 = ords.index('OS-0422') if 'OS-0422' in ords else -1
-    chk('fluxo (normal): janela sugerida salva no detalhe (libera pela prontidão) → IR-03 mostra Início e Fim da OS-0422 e ordena por eles',
-        'Definir janela' in d0 and 'OS-0422' in t and ('Janela salva' in t or 'Liberadas' in t) and instante(o22.get('Início')) and instante(o22.get('Fim')) and crescente([instante(x) for x in ini if instante(x)]) and k22 >= 0 and instante(ini[k22]), (d0[:80], t, o22))
-    ini22 = o22.get('Início')
-    abre('IR-03det.dc.html#OS-0422:janela', 1.8); pan = 'Definir janela' in dlg() or 'janela' in dlg().lower()
-    J("""(()=>{const i=document.querySelector('#jn_h1'); if(!i) return; Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,''); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})()"""); time.sleep(.3)
-    clk('Salvar janela'); time.sleep(.6); t2 = toast()
-    clk('Cancelar'); time.sleep(.3)
-    abre('IR-03.dc.html'); o22b = next((r for r in Grade(J, 0).dicts() if r.get('Ordem') == 'OS-0422'), {})
-    chk('fluxo (recusa): passada sem hora → "Informe data e hora da passada 1." e a janela gravada não muda', pan and 'Informe data e hora da passada 1' in t2 and o22b.get('Início') == ini22, (pan, t2, o22b.get('Início'), ini22))
-    abre('IR-03det.dc.html#OS-0422:janela', 1.8); clk('Salvar janela'); time.sleep(.8)
-    abre('IR-03.dc.html'); g = Grade(J, 0); n22 = g.col('Ordem').count('OS-0422'); o22c = next((r for r in g.dicts() if r.get('Ordem') == 'OS-0422'), {})
-    chk('fluxo (repetição): salvar a mesma janela de novo não cria outra ordem nem muda o Início', n22 == 1 and o22c.get('Início') == ini22, (n22, o22c.get('Início')))
+    fluxo_janela('1440')
     ERRS.extend(J("window.__errs") or []); chk('sem erro de script (1440)', not ERRS, ERRS[:3])
     # ================= 390 px =================
     c.aparelho(390, 844, 2, True); J("localStorage.removeItem('talhao-os-irrigacao-v1')"); r390 = []
@@ -178,6 +199,16 @@ try:
     ruim = [x for x in r390 if not (x[1] and x[2] and x[3])]
     chk(f'390 px: {len(r390)} grades sem rolagem lateral da página; cada grade cabe ou rola dentro da caixa, com a 1ª coluna à vista', r390 and not ruim, ruim or r390[:3])
     chk('390 px: as grades largas rolam dentro da caixa', sum(1 for x in r390 if x[4]) >= len(r390) - 2, [x[0] for x in r390 if not x[4]])
+    fluxo_janela('390 px')
+    abre('IR-03.dc.html'); g = Grade(J, 0); n0 = len(g.dicts())
+    g.filtra('Etapa', ['A liberar']); a1 = [r.get('Ordem') for r in g.dicts()]; g.ordena('Início'); ini = [instante(x) for x in g.col('Início') if instante(x)]
+    chk('390 px (normal): filtro Etapa = A liberar pelo menu da coluna e ordem por Início (instante), com toque', a1 and all(r.get('Etapa') == 'A liberar' for r in g.dicts()) and crescente(ini), (a1, g.col('Início')))
+    J("""(()=>{const i=[...document.querySelectorAll('input[aria-label="Buscar nesta tabela"]')].find(x=>x.offsetParent); if(!i) return; Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,'Pivô 9');
+      i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})()"""); time.sleep(.5)
+    vaz = J("[...document.querySelectorAll('main div')].some(x=>x.offsetParent&&/^Nenhuma linha corresponde aos filtros/.test(x.innerText.trim()))")
+    chk('390 px (recusa): Etapa = A liberar + busca "Pivô 9" (setor da Lagoa Grande) → nenhuma linha e o aviso "Nenhuma linha corresponde aos filtros"', g.dicts() == [] and vaz, len(g.dicts()))
+    limpa(J); g.filtra('Etapa', ['A liberar']); b1 = [r.get('Ordem') for r in g.dicts()]; g.filtra('Etapa', ['A liberar']); b2 = [r.get('Ordem') for r in g.dicts()]; limpa(J)
+    chk('390 px (repetição): o mesmo filtro duas vezes dá o mesmo recorte; Limpar filtros volta a todas', b1 == b2 and sorted(b1) == sorted(a1) and len(g.dicts()) == n0, (b1, b2, n0))
     ERRS.extend(J("window.__errs") or []); chk('sem erro de script (390)', not ERRS, ERRS[:3])
 finally:
     c.close(); srv.terminate()

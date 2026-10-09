@@ -48,7 +48,7 @@ CAPT = {
 }
 
 FONTES = {
-    'EST-SR': dict(faz='SR', nome='Estação meteorológica Santa Rita', gr='ET₀ / chuva / vento', un='mm/dia · mm', at=m(0, '06:00'), cal='2027-02-28', cob='Raio 8 km', st='Ativa'),
+    'EST-SR': dict(faz='SR', nome='Estação meteorológica Santa Rita', gr='ET₀ / chuva / vento', un='mm/dia · mm · km/h', at=m(0, '06:00'), cal='2027-02-28', cob='Raio 8 km', st='Ativa'),
     'HID-P2': dict(faz='SR', nome='Hidrômetro · Pivô 2', gr='Volume', un='m³', at=m(0, '06:00'), cal='2026-09-30', cob='Pivô 2', st='Ativa'),
     'SO-P2': dict(faz='SR', nome='Sonda de umidade · P2 (20 cm)', gr='Umidade do solo', un='% vol.', at=m(0, '05:40'), cal='2027-01-31', cob='Pivô 2', st='Ativa', setor='P2'),
     'SO-P1': dict(faz='SR', nome='Sonda de umidade · P1 (20 cm)', gr='Umidade do solo', un='% vol.', at=m(0, '05:40'), cal='2027-01-31', cob='Pivô 1', st='Suspeita',

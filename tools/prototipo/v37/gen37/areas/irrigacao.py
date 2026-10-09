@@ -155,6 +155,9 @@ function irrColsFaz(gid,fz,v,hole){ const sp=IRG(gid); if(!sp.colsAll) sp.colsAl
 function irrTxt(r,k,t,b){ r.p[k]=[t?{k:b?'b':'txt',t:t}:{k:'mut',t:'—'}]; r.s[k]=t||''; }
 function irrLst(r,k,a,kind){ r.m=r.m||{}; r.m[k]=a.map(x=>({id:x.t,l:x.t})); r.s[k]=a.map(x=>x.t).join(', ');
   r.p[k]=!a.length?[{k:'mut',t:'—'}]:(kind==='chip'?a.map(x=>({k:'chip',t:x.t,c:x.c||'gray'})):[{k:'txt',t:r.s[k]}]); }
+// coluna Pendência: o que segura a ordem, sem repetir "Impedida" (já é a Situação/Etapa ao lado): "Impedida · bomba parada" → "Bomba parada"
+function irrPend(a){ return (a||[]).map(x=>{ const t=String(x.t||'').replace(/^Impedida · /,''); return Object.assign({},x,{t:t.charAt(0).toUpperCase()+t.slice(1)}); }); }
+function irrPendFert(fb){ return irrPend(fb?[{t:fb.t,c:'red'}]:[]); }
 function irrQ(r,k,m,vazio){ r.v[k]=irrIsoM(m); r.p[k]=[m===null||m===undefined?{k:'mut',t:vazio||'—'}:{k:'txt',t:irrQuando(m)}]; r.s[k]=m===null||m===undefined?(vazio||''):irrQuando(m); }
 '''
 
@@ -212,8 +215,8 @@ function PREVALS(self,v){ irrOuvir(self); const s=irrGet(); const fz=irrFazK(sel
     r.p.sit=[{k:'chip',t:si.sit,c:SITC[si.c]||'gray'}]; r.s.sit=si.sit;
     // pendência e próxima passada do mesmo item que dá a situação e o próximo passo (ordem de água ou fertirrigação da O.S.)
     let pen=[], pps=null, ppsV='—';
-    if(top&&top.o){ pen=irrSelos(s,top.o); const pp=irrPassProx(top.o); if(pp){ pps=pp.ini; ppsV='a definir'; } }
-    else if(top&&top.fert){ const fb=irrFertBloq(top.fert); pen=fb?[{t:fb.t,c:'red'}]:[]; const f=s.fert[top.fert]; const e2=irrFertEtapa(top.fert); if(f&&f.ini&&(e2==='A liberar'||e2==='Liberadas')) pps=f.ini; }
+    if(top&&top.o){ pen=irrPend(irrSelos(s,top.o)); const pp=irrPassProx(top.o); if(pp){ pps=pp.ini; ppsV='a definir'; } }
+    else if(top&&top.fert){ pen=irrPendFert(irrFertBloq(top.fert)); const f=s.fert[top.fert]; const e2=irrFertEtapa(top.fert); if(f&&f.ini&&(e2==='A liberar'||e2==='Liberadas')) pps=f.ini; }
     irrLst(r,'pend',pen,'chip'); irrQ(r,'pps',pps,ppsV);
     r.p.prox=si.acao?[{k:'link',t:si.acao[0],h:si.acao[1]}]:[{k:'mut',t:'—'}]; r.s.prox=si.acao?si.acao[0]:''; irrTxt(r,'dono',si.acao?(si.dono||''):'');
     return r; });
@@ -273,16 +276,16 @@ function PREVALS(self,v){ irrOuvir(self); const s=irrGet(); const fz=irrFazK(sel
       // início da 1ª passada e fim da última; passada sem janela deixa o fim "a definir" (a janela de cada passada fica no detalhe da ordem)
       const ps=o.passadas; const def=ps.every(q=>q.ini!==null&&q.ini!==undefined); const fim=def?Math.max.apply(null,ps.map(q=>irrFimP(o,q))):null;
       const r={id:o.id,dr:'go_'+o.id,v:{ls:x.vazao,lam:o.lam,np:ps.length,href:'IR-03det.dc.html#'+o.id},s:{},p:{}};
-      irrTxt(r,'item',o.id,true); irrTxt(r,'tipo',o.fert?'Fertirrigação v2':'Água'); irrTxt(r,'setor',x.nome); irrTxt(r,'bomba',x.bnome);
+      irrTxt(r,'item',o.id,true); irrTxt(r,'tipo',o.fert?'Fertirrigação':'Água'); irrTxt(r,'setor',x.nome); irrTxt(r,'bomba',x.bnome);
       irrQ(r,'ini',irrIni(o),'a definir'); irrQ(r,'fim',fim,'a definir');
-      r.p.etapa=[{k:'chip',t:et,c:IRR_COR[et]||'gray'}]; r.s.etapa=et; irrLst(r,'pend',sel,'chip');
+      r.p.etapa=[{k:'chip',t:et,c:IRR_COR[et]||'gray'}]; r.s.etapa=et; irrLst(r,'pend',irrPend(sel),'chip');
       irrTxt(r,'prox',p?p.t:'',true); irrTxt(r,'dono',p?(p.dono||''):''); irrLst(r,'avs',av);
       kids.push(r); });
     Object.keys(s.fert).filter(k=>!s.ordens[k]&&s.setores[s.fert[k].setor].capt===cid).forEach(k=>{ const f=s.fert[k]; const et=irrFertEtapa(k); if(!et||['Encerradas','Canceladas'].indexOf(et)>=0) return; const x=s.setores[f.setor]; const fb=irrFertBloq(k);
       const r={id:k,dr:'go_'+k,v:{ls:x.vazao,lam:f.lam||'',np:'',href:'OS.dc.html#'+k},s:{},p:{}};
-      irrTxt(r,'item',k,true); irrTxt(r,'tipo','Fertirrigação · O.S.'); irrTxt(r,'setor',x.nome); irrTxt(r,'bomba',x.bnome);
+      irrTxt(r,'item',k,true); irrTxt(r,'tipo','Fertirrigação'); irrTxt(r,'setor',x.nome); irrTxt(r,'bomba',x.bnome);
       irrQ(r,'ini',f.ini?f.ini:null); irrQ(r,'fim',f.ini?f.fim:null);
-      r.p.etapa=[{k:'chip',t:et,c:IRR_COR[et]||'gray'}]; r.s.etapa=et; irrLst(r,'pend',fb?[{t:fb.t,c:'red'}]:[],'chip');
+      r.p.etapa=[{k:'chip',t:et,c:IRR_COR[et]||'gray'}]; r.s.etapa=et; irrLst(r,'pend',irrPendFert(fb),'chip');
       irrTxt(r,'prox',fb?fb.passo:(et==='A liberar'?'Liberar na O.S.':'Abrir na O.S.'),true); irrTxt(r,'dono',fb?fb.dono:(et==='A liberar'?'Ana (agrônoma)':(irrFertResp(k)||''))); irrLst(r,'avs',[]);
       kids.push(r); });
     const u=irrUsoDia(s,cid,0);
@@ -349,17 +352,17 @@ function PREVALS(self,v){ irrOuvir(self); const s=irrGet(); const fz=irrFazK(sel
     const ps=o.passadas; const i0=(q)=>(q.iniReal!==undefined&&q.iniReal!==null)?q.iniReal:q.ini; const def=ps.every(q=>q.ini!==null&&q.ini!==undefined);
     const ini=ps.filter(q=>q.ini!==null&&q.ini!==undefined).map(i0); const fim=def?Math.max.apply(null,ps.map(q=>irrFimP(o,q))):null;
     const r={id:o.id,dr:'go_'+o.id,rk:ORD.indexOf(et),q:irrIni(o),v:{lam:o.lam,np:ps.length,href:'IR-03det.dc.html#'+o.id},s:{},p:{}};
-    irrTxt(r,'ordem',o.id,true); irrTxt(r,'tipo',o.fert?'Fertirrigação v2':'Água'); irrTxt(r,'faz',s.faz[x.faz].nome); irrTxt(r,'setor',x.nome); irrTxt(r,'cult',irrCultEst(x).c);
+    irrTxt(r,'ordem',o.id,true); irrTxt(r,'tipo',o.fert?'Fertirrigação':'Água'); irrTxt(r,'faz',s.faz[x.faz].nome); irrTxt(r,'setor',x.nome); irrTxt(r,'cult',irrCultEst(x).c);
     irrQ(r,'ini',ini.length?Math.min.apply(null,ini):null,'a definir'); irrQ(r,'fim',fim,'a definir');
-    r.p.etapa=[{k:'chip',t:et,c:IRR_COR[et]||'gray'}]; r.s.etapa=et; irrLst(r,'pend',sel,'chip'); irrLst(r,'avs',av);
+    r.p.etapa=[{k:'chip',t:et,c:IRR_COR[et]||'gray'}]; r.s.etapa=et; irrLst(r,'pend',irrPend(sel),'chip'); irrLst(r,'avs',av);
     irrTxt(r,'prox',p?p.t:'',true); irrTxt(r,'dono',p?(p.dono||''):''); rows.push(r); });
   // fertirrigações da O.S. (cenário compartilhado): só leitura aqui
   Object.keys(s.fert).filter(k=>!s.ordens[k]&&(!fz||s.setores[s.fert[k].setor].faz===fz)).forEach(k=>{ const f=s.fert[k]; const et=irrFertEtapa(k)||'—'; const x=s.setores[f.setor]; const fb=irrFertBloq(k);
     const px=fb?[fb.passo,fb.dono]:(et==='A liberar'?['Liberar na O.S.','Ana (agrônoma)']:['Abrir na O.S.',irrFertResp(k)||'']);
     const r={id:k,dr:'go_'+k,rk:ORD.indexOf(et),q:f.ini,v:{lam:f.lam||'',np:'',href:'OS.dc.html#'+k},s:{},p:{}};
-    irrTxt(r,'ordem',k,true); irrTxt(r,'tipo','Fertirrigação · O.S.'); irrTxt(r,'faz',s.faz[x.faz].nome); irrTxt(r,'setor',x.nome); irrTxt(r,'cult',irrCultEst(x).c);
+    irrTxt(r,'ordem',k,true); irrTxt(r,'tipo','Fertirrigação'); irrTxt(r,'faz',s.faz[x.faz].nome); irrTxt(r,'setor',x.nome); irrTxt(r,'cult',irrCultEst(x).c);
     irrQ(r,'ini',f.ini?f.ini:null); irrQ(r,'fim',f.ini?f.fim:null);
-    r.p.etapa=[{k:'chip',t:et,c:IRR_COR[et]||'gray'}]; r.s.etapa=et; irrLst(r,'pend',fb?[{t:fb.t,c:'red'}]:[],'chip'); irrLst(r,'avs',[]);
+    r.p.etapa=[{k:'chip',t:et,c:IRR_COR[et]||'gray'}]; r.s.etapa=et; irrLst(r,'pend',irrPendFert(fb),'chip'); irrLst(r,'avs',[]);
     irrTxt(r,'prox',px[0],true); irrTxt(r,'dono',px[1]); rows.push(r); });
   rows.sort((a,b)=>(a.rk-b.rk)||((a.q===null||a.q===undefined?1e9:a.q)-(b.q===null||b.q===undefined?1e9:b.q)));
   IRG('g_os').rows=rows;
@@ -593,14 +596,14 @@ function EXTRAVALS(self,v){ const s=irrGet(); const id=detId(self); const o=s.or
 # =====================================================================================
 def ir04():
     fname='IR-04.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1000
-    # uma variável por coluna (TABELAS-FOCO, 04/10/2026): grandeza e unidade da fonte, atualização (ordena como data), calibração (chip) e a
+    # uma variável por coluna (TABELAS-FOCO, 04/10/2026): grandezas e unidades da fonte (listas na mesma ordem: a estação mede ET₀, chuva e vento), atualização (ordena como data), calibração (chip) e a
     # validade dela (data), cobertura, estado (chip; o motivo da suspeita vai para o painel) e efeito no balanço. Fazenda só com "Todas"
-    g_src=grid([dict(k='nome',l='Fonte',w=200),dict(k='faz',l='Fazenda',w=110),dict(k='gr',l='Grandeza',w=150),dict(k='un',l='Unidade',w=100),dict(k='at',l='Atualização',t='date',w=110),
+    g_src=grid([dict(k='nome',l='Fonte',w=200),dict(k='faz',l='Fazenda',w=110),dict(k='gr',l='Grandeza',multi=True,w=150),dict(k='un',l='Unidade',multi=True,w=110),dict(k='at',l='Atualização',t='date',w=110),
                 dict(k='calst',l='Calibração',w=120),dict(k='cal',l='Validade da calibração',t='date'),dict(k='cob',l='Cobertura',w=100),
                 dict(k='estado',l='Estado',w=120),dict(k='efe',l='Efeito no balanço',w=190)],[],
                edit=dict(m='form',title='Fonte',newTitle='Cadastrar sensor',sub='O estado vem das leituras validadas.',
                    fields=[dict(k='nome',l='Nome',t='txt',req=True),dict(k='gr',l='Grandeza',t='sel',req=True,newOnly=True,opts=['Umidade do solo','Volume','ET₀ / chuva / vento'],**{'def':'Umidade do solo'}),
-                           dict(k='un',l='Unidade',t='sel',req=True,newOnly=True,opts=['% vol.','m³','mm/dia · mm'],**{'def':'% vol.'}),
+                           dict(k='un',l='Unidade',t='sel',req=True,newOnly=True,opts=['% vol.','m³','mm/dia · mm · km/h'],**{'def':'% vol.'}),
                            dict(k='cob',l='Cobertura',t='sel',req=True,newOnly=True,opts=['Pivô 1','Pivô 2','Gotejo T7','Fazenda'],**{'def':'Pivô 2'}),
                            dict(k='cal',l='Próxima calibração',t='date')]),
                gid='g_src',total=False,add='Cadastrar sensor',search=False)
@@ -629,9 +632,9 @@ function PREVALS(self,v){ irrOuvir(self); const s=irrGet(); const fz=irrFazK(sel
   irrColsFaz('g_src',fz,v,'src_ncol'); irrColsFaz('g_cap',fz,v,'cap_ncol');
   IRG('g_src').rows=fs.map(k=>{ const f=s.fontes[k]; let cs; if(!f.cal) cs=['Não se aplica','gray']; else { const d=irrDeIso(f.cal); cs=d<0?['Vencida','red']:(d<=7?[(f.calAg?'Agendada':'Vence em 7 dias'),'yellow']:['Em dia','green']); }
     const stT=f.st==='Previsão'?'Só previsão':f.st;
-    const x=f.setor?s.setores[f.setor]:null; const efe=f.st==='Previsão'?'não entra como chuva':(f.gr==='Volume'?'crédito das irrigações · '+f.cob:(f.gr.indexOf('ET')===0?'ETc dos setores':(x?(f.st==='Ativa'?x.nome+' medido':x.nome+' por estimativa de ET (≈)'):(f.st==='Aguardando 1ª leitura'?'nada sem leitura validada':'balanço da fazenda'))));
+    const x=f.setor?s.setores[f.setor]:null; const efe=f.st==='Previsão'?'não entra como chuva':(f.gr==='Volume'?'crédito das irrigações':(f.gr.indexOf('ET')===0?'ETc dos setores':(x?(f.st==='Ativa'?x.nome+' medido':x.nome+' por estimativa de ET (≈)'):(f.st==='Aguardando 1ª leitura'?'nada sem leitura validada':'balanço da fazenda'))));
     const r={id:k,ro:!!f.ro,v:{nome:f.nome,gr:f.gr,un:f.un,cob:f.cob,cal:f.cal||''},s:{},p:{}};
-    irrTxt(r,'nome',f.nome,true); irrTxt(r,'faz',s.faz[f.faz].nome); irrTxt(r,'gr',f.gr); irrTxt(r,'un',f.un); irrQ(r,'at',(f.at===null||f.at===undefined)?null:f.at);
+    irrTxt(r,'nome',f.nome,true); irrTxt(r,'faz',s.faz[f.faz].nome); irrLst(r,'gr',String(f.gr||'').split(' / ').filter(Boolean).map(t=>({t:t.charAt(0).toUpperCase()+t.slice(1)}))); irrLst(r,'un',String(f.un||'').split(' · ').filter(Boolean).map(t=>({t}))); irrQ(r,'at',(f.at===null||f.at===undefined)?null:f.at);
     r.p.calst=[cs[0]==='Não se aplica'?{k:'tag',t:cs[0]}:{k:'chip',t:cs[0],c:cs[1]}]; r.s.calst=cs[0];
     r.p.cal=[f.cal?{k:'txt',t:br(f.cal)}:{k:'mut',t:'—'}]; r.s.cal=f.cal?br(f.cal):''; irrTxt(r,'cob',f.cob);
     r.p.estado=[{k:'chip',t:stT,c:ESTC[f.st]||'gray'}]; r.s.estado=stT; r.p.efe=[{k:f.st==='Ativa'?'mut':'txt',t:efe}]; r.s.efe=efe;
