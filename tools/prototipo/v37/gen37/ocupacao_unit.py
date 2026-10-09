@@ -40,7 +40,7 @@ for(const j of jobs){ const ctx=X.ocCtx(j.ctx.culturas,j.ctx.cultivares,j.ctx.pl
   if(j.op==='occ'){ out.push(X.ocOcupacoes(ctx,j.safras,j.cults).map(o=>ser(o,ctx))); continue; }
   if(j.op==='tab'){ const occ=X.ocOcupacoes(ctx,j.safras,j.cults); const [L,b]=X.ocTabela(ctx,j.safra,occ,j.talhoes,j.safras);
     out.push({band:b,faixa:X.ocFaixaTxt(b,L,j.tot),chips:X.ocChips(L),linhas:L.map(v=>({t:v.t,sit:v.sit,A:v.A,livre:v.livre,conf:v.conf,area_livre:v.area_livre,desde:v.desde,est:v.est,
-      own:v.own.map(o=>o.id),vis:v.vis.map(o=>o.id),seq:v.seq,linhas:v.linhas,vinc:v.vinc,planejar:v.planejar,trav:v.trav,pend:v.pend}))}); continue; }
+      own:v.own.map(o=>o.id),vis:v.vis.map(o=>o.id),seq:v.seq,linhas:v.linhas,vinc:v.vinc,planejar:v.planejar,trav:v.trav,pend:v.pend,exc:v.exc||0}))}); continue; }
   if(j.op==='chk'){ const r=X.ocChecar(ctx,j.safras,j.antes,j.depois,j.sid,j.alvo,j.T);
     const o={trav:r.trav,pend:r.pend,aviso:r.aviso.map(y=>y.id),ini:r.o?r.o.ini:null,fim:r.o?r.o.fim:null,classe:r.o?r.o.classe:null};
     if(r.o){ o.mt=r.trav.length?X.ocMsgTrava(ctx,r,j.sid,j.T,j.pmin===undefined?null:j.pmin):''; o.mp=X.ocMsgPend(ctx,r,j.sid,j.pmin===undefined?null:j.pmin); o.ma=X.ocMsgAviso(ctx,r); }
@@ -67,7 +67,7 @@ def py(jobs):
             occ = OC.ocupacoes(ctx, j['safras'], j['cults']); L, b = OC.tabela(ctx, j['safra'], occ, j['talhoes'], j['safras'])
             out.append(dict(band=b, faixa=OC.faixa_txt(b, L, j['tot']), chips=OC.chips(L), linhas=[dict(t=v['t'], sit=v['sit'], A=v['A'], livre=v['livre'], conf=v['conf'],
                 area_livre=v['area_livre'], desde=v['desde'], est=v['est'], own=[o['id'] for o in v['own']], vis=[o['id'] for o in v['vis']], seq=lst(v['seq']), linhas=v['linhas'],
-                vinc=v['vinc'], planejar=v['planejar'], trav=lst(v['trav']), pend=lst(v['pend'])) for v in L])); continue
+                vinc=v['vinc'], planejar=v['planejar'], trav=lst(v['trav']), pend=lst(v['pend']), exc=v.get('exc', 0)) for v in L])); continue
         if j['op'] == 'chk':
             r = OC.checa(ctx, j['safras'], j['antes'], j['depois'], j['sid'], j['alvo'], j['T'])
             o = dict(trav=lst(r['trav']), pend=lst(r['pend']), aviso=[y['id'] for y in r['aviso']], ini=r['o']['ini'] if r['o'] else None,
@@ -280,6 +280,128 @@ if __name__ == '__main__':
     o7 = OC.mk(ctx1, dict(c7, plano='SOJA-AT'), dict(S['S2627'])); seg = next(o for o in occP if o['id'] == 'm2')
     p3 = OC.msg_sem_janela(ctx1, o7, seg, D('2026-11-16'), 'S2627')
     chk('OC-U4 P3 (sem janela)', p3 == 'P2 tem Milho da Safrinha 2027 a partir de 24/03/2027. Para a soja com Soja alta tecnologia começar depois do cultivo anterior (16/11/2026), replaneje esse milho para 04/04/2027 ou depois.', p3)
+    # ---------- SAF-C01 · soma com perene ou ocupação antiga no talhão (Codex + Gemini, PR #47, comentário 6079770308) ----------
+    # Os 3 casos do harness do Codex (mesmo contexto e números) e 4 do autor (anual antiga; perene + perene, antiga e recente; mesma faixa), pelo serviço da tela (JS) e pelo espelho (Python).
+    CTXC = dict(culturas={'Café': 'Perene', 'Soja': 'Anual'}, cultivares=[['Soja', 'Teste', 112]], folga=1,
+                planos=[dict(id='PTEST', cultura='Soja', estado='Publicado', atividades=[dict(op='Colheita', nome='Colheita', g=dict(tipo='DAP', dias=120))])])
+    SC01 = dict(nova=dict(id='nova', nome='Safra teste 2027', ini='2027-01-01', fim='2027-12-31', faz='Fictícia'),
+                sf=dict(id='sf', nome='Safrinha teste 2027', ini='2027-03-01', fim='2027-08-31', faz='Fictícia'))
+    def c01(velha, area_nova, extra=(), nova=None):
+        ano = velha['plantio'][:4]
+        safs = dict(SC01, velha=dict(id='velha', nome='Perene original', ini=ano + '-01-01', fim=ano + '-12-31', faz='Fictícia'))
+        base = dict(saf='velha', faz='Fictícia', talhao='T1', tipo='Parcela', var='Teste')
+        soja = dict(base, id='soja', ciclo='soja', saf='nova', faixa='T1-B', area=area_nova, cult='Soja', plantio='2027-06-01', plano='PTEST'); soja.update(nova or {})
+        antes = [dict(base, ciclo=x['id'], **x) for x in [velha] + list(extra)]; depois = antes + [soja]
+        return [dict(op='chk', ctx=CTXC, safras=safs, antes=antes, depois=depois, sid='nova', alvo='soja', T=100),
+                dict(op='tab', ctx=CTXC, safra=safs['nova'], safras=safs, cults=depois, talhoes=[['T1', 100]], tot=100)]
+    CAFE = lambda d: dict(id='cafe', faixa='T1-A', area=40, cult='Café', plantio=d)
+    EXC_A, LIM_A, EXC_R = ('PERENE-ANTIGO-EXCESSO (café 2020 40 ha + soja 2027 70 ha)', 'PERENE-ANTIGO-LIMITE (café 2020 40 ha + soja 2027 60 ha)',
+                           'PERENE-RECENTE-EXCESSO (café 2026 40 ha + soja 2027 70 ha)')
+    ANUAL = 'ANUAL-ANTIGA-EXCESSO (soja 2020 em T1-C + soja 40 ha da safrinha + soja 70 ha)'
+    MF = 'PERENE-ANTIGO-MESMA-FAIXA (café 2020 40 ha em T1-A + soja 2027 30 ha em T1-A)'
+    PP = ['PERENE-PERENE %s (café %s 40 ha + café 2027 70 ha)' % (r, d[:4]) for r, d in (('ANTIGO', '2020-01-01'), ('RECENTE', '2026-01-01'))]
+    C01 = [(EXC_A, c01(CAFE('2020-01-01'), 70)), (LIM_A, c01(CAFE('2020-01-01'), 60)), (EXC_R, c01(CAFE('2026-01-01'), 70)),
+           (ANUAL, c01(dict(id='velha20', faixa='T1-C', area=30, cult='Soja', plantio='2020-06-01', plano='PTEST'), 70,
+                       [dict(id='sojaA', saf='sf', faixa='T1-A', area=40, cult='Soja', plantio='2027-05-15', plano='PTEST')])),
+           (PP[0], c01(CAFE('2020-01-01'), 70, nova=dict(cult='Café', plano=None))), (PP[1], c01(CAFE('2026-01-01'), 70, nova=dict(cult='Café', plano=None))),
+           (MF, c01(CAFE('2020-01-01'), 30, nova=dict(faixa='T1-A')))]
+    r01 = roda([j for _, js_ in C01 for j in js_], 'SAF-C01 (3 casos do Codex + 4 do autor)')
+    R01 = {rot: (r01[2 * i], r01[2 * i + 1]) for i, (rot, _) in enumerate(C01)}
+    def resumo(ch, tb):
+        L1 = tb['linhas'][0]
+        return dict(trav=ch['trav'], pend=ch['pend'], sit=L1['sit'], exc=L1['exc'], band=tb['band'], faixa=tb['faixa'])
+    EXC = dict(trav=[['soma', 'cafe', 'soja', D('2027-06-01'), 110]], pend={'soja': [['soma', 'cafe', D('2027-09-21'), D('2027-09-29'), 9]]}, sit='Sobreposição', exc=10,
+               band={'nesta': 70, 'livre': 0, 'conf': 0, 'perene': 30, 'ocup': 0}, faixa='Nesta safra 70 · Perene 30 · de 100 ha · 10 ha em sobreposição')
+    MT = 'De 01/06/2027 a 29/09/2027, 40 ha de T1 estão com Café (T1-A, Perene original). Máximo 60 ha nesse período.'
+    for rot, esp, mt in ((EXC_A, EXC, MT), (EXC_R, EXC, MT),
+                         (LIM_A, dict(trav=[], pend={}, sit='Planejado', exc=0, band={'nesta': 60, 'livre': 0, 'conf': 0, 'perene': 40, 'ocup': 0}, faixa='Nesta safra 60 · Perene 40 · de 100 ha'), '')):
+        got = canon(resumo(*R01[rot]))
+        chk('SAF-C01 %s: trava, pendência R-15, Situação, faixa e excesso' % rot, got == canon(esp), got)
+        chk('SAF-C01 %s: mensagem da trava' % rot, R01[rot][0]['mt'] == mt, R01[rot][0]['mt'])
+    for rot in PP:
+        ch, tb = R01[rot]
+        chk('SAF-C01 %s: trava de soma, Situação Sobreposição e mensagem "A partir de" (o período não tem fim; o laço antigo da mensagem ia até 10^8 dias)' % rot,
+            (ch['trav'], tb['linhas'][0]['sit'], ch['mt']) == ([['soma', 'cafe', 'soja', D('2027-06-01'), 110]], 'Sobreposição',
+                                                             'A partir de 01/06/2027, 40 ha de T1 estão com Café (T1-A, Perene original). Máximo 60 ha nesse período.'), (ch['trav'], tb['linhas'][0]['sit'], ch['mt']))
+    ch, tb = R01[MF]
+    chk('SAF-C01 controle %s: trava de faixa (M3), sem soma (70 ha cabem), como antes' % MF,
+        (ch['trav'], ch['mt'], tb['linhas'][0]['sit'], tb['linhas'][0]['exc']) == ([['faixa', 'cafe', 'soja', D('2027-06-01')]],
+        'T1-A tem Café perene, sem fim registrado. O plano geraria insumo e O.S. sobre o cafezal. O encerramento do ciclo ainda não existe no sistema.', 'Sobreposição', 0),
+        (ch['trav'], ch['mt'], tb['linhas'][0]['sit'], tb['linhas'][0]['exc']))
+    ch, tb = R01[ANUAL]
+    chk('SAF-C01 %s: a soja de 2020 não esconde a soma de 110 ha em 2027 (ocChecar e tabela)' % ANUAL,
+        ch['trav'] == [['soma', 'sojaA', 'soja', D('2027-06-01'), 110]] and tb['linhas'][0]['sit'] == 'Sobreposição', (ch['trav'], tb['linhas'][0]['sit']))
+    # ---------- SAF-C01 · varredura por eventos = laço dia a dia sem teto (referência) ----------
+    def soma_dia_a_dia(ctx, occs, T, alvo=None):
+        """Referência: o laço dia a dia da soma (R-14/R-15) de antes, sem o teto d0 + 900, até o último ponto finito (depois dele nada muda)."""
+        trav, pend = [], {}
+        if not occs: return trav, pend
+        d0 = min(o['ini'] for o in occs)
+        d1 = max([d0] + [x for o in occs for x in (o['plantio'] + 1, OC.nuc_lib(o), OC.liberacao(ctx, o, 'est')) if x < OC.INF])
+        vis_t, vis_p, ordp = set(), {}, []
+        cruz = lambda l: any(OC.mesma_area(a, b) and a['ciclo'] != b['ciclo'] for k2, a in enumerate(l) for b in l[k2 + 1:])
+        for x in range(d0, d1 + 1):
+            nu = [o for o in occs if OC.nuc_ativo(o, x)]
+            if sum(o['area'] for o in nu) > T + 0.005 and any(OC.com_plano(o) for o in nu) and not cruz(nu):
+                last = max(nu, key=lambda o: (o['plantio'], o['id']))
+                if not alvo or alvo in [o['id'] for o in nu]:
+                    k = ('+'.join(sorted(o['id'] for o in nu if o is not last)), last['id'])
+                    if k not in vis_t: vis_t.add(k); trav.append(('soma', k[0], last['id'], x, OC.r2(sum(o['area'] for o in nu))))
+            else:
+                pv = [o for o in occs if o['ini'] <= x < OC.liberacao(ctx, o, 'est')]
+                if sum(o['area'] for o in pv) > T + 0.005 and not cruz(pv):
+                    last = max(pv, key=lambda o: (o['plantio'], o['id']))
+                    key = (last['id'], '+'.join(sorted(o['id'] for o in pv if o is not last)))
+                    if key not in vis_p: vis_p[key] = []; ordp.append(key)
+                    vis_p[key].append(x)
+        for lid, causa in ordp:
+            if alvo and alvo != lid and alvo not in causa.split('+'): continue
+            d = vis_p[(lid, causa)]; pend.setdefault(lid, []).append(('soma', causa, d[0], d[-1], len(d)))
+        return trav, pend
+    def mt_dia_a_dia(ctx, chk, T):
+        """Referência da M1 (soma/safra) com o laço dia a dia de antes. None: sem outros, ou período sem fim (o laço antigo ia até 10^8 dias)."""
+        o = chk['o']; outros = [x for x in chk['mesmo'] if x is not o and OC.intersec(o['ini'], OC.liberacao(ctx, o, 'est'), x['ini'], OC.liberacao(ctx, x, 'est'))]
+        if not outros: return None
+        ini = max([o['ini']] + [x['ini'] for x in outros]); fim = min([o['fim'] if o['fim'] is not None else o['plantio']] + [x['fim'] for x in outros if x['fim'] is not None])
+        if fim >= OC.INF: return None
+        pior = max(sum(x['area'] for x in outros if x['ini'] <= ini + k < OC.liberacao(ctx, x, 'est')) for k in range(max(1, fim - ini + 1)))
+        quem = ' e '.join('%s (%s, %s)' % (x['cult'], x['faixa'], x['safnome']) for x in outros)
+        return 'De %s a %s, %s ha de %s estão com %s. Máximo %s ha nesse período.' % (BR(ini), BR(fim), OC.ha(pior), o['t'], quem, OC.ha(max(0.0, T - pior)))
+    def so_soma(tr, pe): return lst([t for t in tr if t[0] == 'soma']), lst({k: [p for p in v if p[0] == 'soma'] for k, v in pe.items() if any(p[0] == 'soma' for p in v)})
+    rnd = random.Random(20261009); ctxr = OC.ctx_de(CULT, CVS, D2.PLANOS, 1); dif = []; nconj = ntrav = npend = nmsg = 0; jobs_r = []; grupos = {}
+    for o in OC.ocupacoes(ctxr, S, CU): grupos.setdefault((o['faz'], o['t']), []).append(o)
+    for (fz, t), g in grupos.items():
+        T = dict(TAL[fz])[t]
+        if so_soma(*OC.avalia(ctxr, g, T)) != so_soma(*soma_dia_a_dia(ctxr, g, T)): dif.append(('base', fz, t))
+    CR = [('Soja', '58 W', 'SOJA-AT'), ('Soja', '62 X', None), ('Milho', 'Híbrido AG 8700', 'MILHO-SF'), ('Feijão', 'Pérola', None), ('Sorgo', 'Sem ciclo', None),
+          ('Café', 'Catuaí 144', None), ('Mamão Formosa', 'Formosa', None)]
+    for k in range(300):
+        T = rnd.choice([100.0, 150.0]); n = rnd.randint(2, 7); cults = []; safs = {}
+        for i in range(n):
+            cu, vr, pid = rnd.choice(CR); pl = D('2026-06-01') + rnd.randrange(-400, 600) if rnd.random() < 0.75 else D('2012-01-01') + rnd.randrange(0, 3650)
+            inteiro = rnd.random() < 0.15; fx = 'T1' if inteiro else rnd.choice(['T1-A', 'T1-B', 'T1-C'])
+            sid = 'R%d' % i; safs[sid] = dict(id=sid, nome='Safra %d' % i, ini=OC.iso(pl - 30), fim=OC.iso(pl + 330), faz='F', ro=False)
+            c = dict(id='o%d' % i, saf=sid, faz='F', talhao='T1', faixa=fx, tipo='Talhão inteiro' if inteiro else 'Parcela', area=(T if inteiro else OC.r2(rnd.uniform(10, T * 0.8))),
+                     cult=cu, var=vr, plantio=OC.iso(pl), plano=pid, colheita=None, colheita_real=None, ciclo=None, origem='')
+            u = rnd.random()
+            if not pid and u < 0.25: c['colheita'] = OC.iso(pl + rnd.randrange(60, 200))
+            elif u > 0.85: c['colheita_real'] = OC.iso(pl + rnd.randrange(40, 200))
+            cults.append(c)
+        occs = OC.ocupacoes(ctxr, safs, cults); alvo = rnd.choice([None, cults[-1]['id']]); nconj += 1
+        a_, b_ = so_soma(*OC.avalia(ctxr, occs, T, alvo)), so_soma(*soma_dia_a_dia(ctxr, occs, T, alvo))
+        ntrav += bool(a_[0]); npend += bool(a_[1])
+        if a_ != b_: dif.append((k, a_, b_))
+        rc = OC.checa(ctxr, safs, cults[:-1], cults, cults[-1]['saf'], cults[-1]['id'], T)
+        if any(x[0] in ('soma', 'safra') for x in rc['trav']):
+            ref = mt_dia_a_dia(ctxr, rc, T)
+            if ref is not None:
+                nmsg += 1
+                if OC.msg_trava(ctxr, rc, cults[-1]['saf'], T, None) != ref: dif.append((k, 'msg', OC.msg_trava(ctxr, rc, cults[-1]['saf'], T, None), ref))
+        if k < 120: jobs_r.append(dict(op='chk', ctx=ctxa(1), safras=safs, antes=cults[:-1], depois=cults, sid=cults[-1]['saf'], alvo=cults[-1]['id'], T=T))
+    print('     (SAF-C01) conjuntos aleatórios %d · com trava de soma %d · com pendência de soma %d · mensagens M1 com período finito %d · grupos fazenda × talhão da base %d'
+          % (nconj, ntrav, npend, nmsg, len(grupos)))
+    chk('SAF-C01 varredura por eventos = laço dia a dia sem teto, e mensagem M1 = laço dia a dia (base + %d conjuntos aleatórios, plantios de 2012 a 2027, com e sem alvo)' % nconj, not dif, dif[:2])
+    roda(jobs_r, 'SAF-C01 conjuntos aleatórios (ocChecar e mensagens)')
     # ---------- OC-U5 · propriedades ----------
     random.seed(20261005)
     VAR = {'Soja': '58 W', 'Milho': 'Híbrido AG 8700', 'Feijão': 'Pérola'}
@@ -310,9 +432,8 @@ if __name__ == '__main__':
                 for B in m[i + 1:]:
                     if A['ciclo'] != B['ciclo'] and OC.mesma_area(A, B) and (OC.com_plano(A) or OC.com_plano(B)) and OC.intersec(A['plantio'], OC.nuc_lib(A), B['plantio'], OC.nuc_lib(B)):
                         falha('núcleos cruzados aceitos')
-            x0 = min(o2['plantio'] for o2 in m)
-            for j in range(0, 400, 3):
-                nu = [o2 for o2 in m if OC.nuc_ativo(o2, x0 + j)]
+            for x in sorted({o2['plantio'] for o2 in m}):   # SAF-C01: a soma dos núcleos só cresce num plantio; todos, sem horizonte (antes: 400 dias a cada 3)
+                nu = [o2 for o2 in m if OC.nuc_ativo(o2, x)]
                 if sum(o2['area'] for o2 in nu) > T + 0.005 and any(OC.com_plano(o2) for o2 in nu): falha('soma certa > área aceita'); break
             for o2 in m:
                 if o2['classe'] == 'estimado' and OC.P(ctx, o2) < o2['fim']: falha('P < fim estimado')

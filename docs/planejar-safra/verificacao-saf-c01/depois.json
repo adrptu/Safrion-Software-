@@ -1,0 +1,541 @@
+{
+  "source_sha256": "e5c3759e16e7d21a96b7dad6cbf63ba5a77059e15708958c4ff9155597d1ed37",
+  "scenarios": [
+    {
+      "id": "PERENE-ANTIGO-EXCESSO",
+      "fixture": {
+        "plantio_perene": "2020-01-01",
+        "area_perene": 40,
+        "plantio_anual": "2027-06-01",
+        "area_anual": 70,
+        "area_talhao": 100,
+        "faixas_distintas": true
+      },
+      "expected_block": true,
+      "actual_block": true,
+      "pass": true,
+      "raw": {
+        "trav": [
+          [
+            "soma",
+            "cafe",
+            "soja",
+            20970,
+            110
+          ]
+        ],
+        "pend": {
+          "soja": [
+            [
+              "soma",
+              "cafe",
+              21082,
+              21090,
+              9
+            ]
+          ]
+        },
+        "aviso": [],
+        "table": [
+          [
+            {
+              "t": "T1",
+              "T": 100,
+              "A": 70,
+              "sit": "Sobreposição",
+              "livre": 0,
+              "conf": 0,
+              "area_livre": 0,
+              "desde": null,
+              "est": false,
+              "own": [
+                {
+                  "id": "soja",
+                  "ciclo": "soja",
+                  "saf": "nova",
+                  "safs": [
+                    "nova"
+                  ],
+                  "safnome": "Safra teste 2027",
+                  "faz": "Fictícia",
+                  "t": "T1",
+                  "faixa": "T1-B",
+                  "tipo": "Parcela",
+                  "area": 70,
+                  "cult": "Soja",
+                  "var": "Teste",
+                  "plantio": 20970,
+                  "plano": "PTEST",
+                  "safini": 20819,
+                  "safim": 21183,
+                  "ro": false,
+                  "colh_inf": null,
+                  "colh_real": null,
+                  "origem": "",
+                  "avisos": [],
+                  "folga": 1,
+                  "ini": 20970,
+                  "fim": 21090,
+                  "classe": "plano",
+                  "nuc": 21081
+                }
+              ],
+              "fora": [
+                {
+                  "id": "cafe",
+                  "ciclo": "cafe",
+                  "saf": "velha",
+                  "safs": [
+                    "velha"
+                  ],
+                  "safnome": "Perene original",
+                  "faz": "Fictícia",
+                  "t": "T1",
+                  "faixa": "T1-A",
+                  "tipo": "Parcela",
+                  "area": 40,
+                  "cult": "Café",
+                  "var": "Teste",
+                  "plantio": 18262,
+                  "plano": null,
+                  "safini": 18262,
+                  "safim": 18627,
+                  "ro": false,
+                  "colh_inf": null,
+                  "colh_real": null,
+                  "origem": "",
+                  "avisos": [],
+                  "folga": 1,
+                  "ini": 18262,
+                  "fim": 100000000,
+                  "classe": "perene",
+                  "nuc": 100000000
+                }
+              ],
+              "vis": [
+                {
+                  "id": "cafe",
+                  "ciclo": "cafe",
+                  "saf": "velha",
+                  "safs": [
+                    "velha"
+                  ],
+                  "safnome": "Perene original",
+                  "faz": "Fictícia",
+                  "t": "T1",
+                  "faixa": "T1-A",
+                  "tipo": "Parcela",
+                  "area": 40,
+                  "cult": "Café",
+                  "var": "Teste",
+                  "plantio": 18262,
+                  "plano": null,
+                  "safini": 18262,
+                  "safim": 18627,
+                  "ro": false,
+                  "colh_inf": null,
+                  "colh_real": null,
+                  "origem": "",
+                  "avisos": [],
+                  "folga": 1,
+                  "ini": 18262,
+                  "fim": 100000000,
+                  "classe": "perene",
+                  "nuc": 100000000
+                }
+              ],
+              "seq": [],
+              "pend": {
+                "soja": [
+                  [
+                    "soma",
+                    "cafe",
+                    21082,
+                    21090,
+                    9
+                  ]
+                ]
+              },
+              "pend_own": {
+                "soja": [
+                  [
+                    "soma",
+                    "cafe",
+                    21082,
+                    21090,
+                    9
+                  ]
+                ]
+              },
+              "trav": [
+                [
+                  "soma",
+                  "cafe",
+                  "soja",
+                  20970,
+                  110
+                ]
+              ],
+              "exc": 10,
+              "fix": [],
+              "linhas": 3,
+              "vinc": [
+                "cafe"
+              ],
+              "planejar": false
+            }
+          ],
+          {
+            "nesta": 70,
+            "livre": 0,
+            "conf": 0,
+            "perene": 30,
+            "ocup": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "PERENE-ANTIGO-LIMITE",
+      "fixture": {
+        "plantio_perene": "2020-01-01",
+        "area_perene": 40,
+        "plantio_anual": "2027-06-01",
+        "area_anual": 60,
+        "area_talhao": 100,
+        "faixas_distintas": true
+      },
+      "expected_block": false,
+      "actual_block": false,
+      "pass": true,
+      "raw": {
+        "trav": [],
+        "pend": {},
+        "aviso": [],
+        "table": [
+          [
+            {
+              "t": "T1",
+              "T": 100,
+              "A": 60,
+              "sit": "Planejado",
+              "livre": 0,
+              "conf": 0,
+              "area_livre": 0,
+              "desde": null,
+              "est": false,
+              "own": [
+                {
+                  "id": "soja",
+                  "ciclo": "soja",
+                  "saf": "nova",
+                  "safs": [
+                    "nova"
+                  ],
+                  "safnome": "Safra teste 2027",
+                  "faz": "Fictícia",
+                  "t": "T1",
+                  "faixa": "T1-B",
+                  "tipo": "Parcela",
+                  "area": 60,
+                  "cult": "Soja",
+                  "var": "Teste",
+                  "plantio": 20970,
+                  "plano": "PTEST",
+                  "safini": 20819,
+                  "safim": 21183,
+                  "ro": false,
+                  "colh_inf": null,
+                  "colh_real": null,
+                  "origem": "",
+                  "avisos": [],
+                  "folga": 1,
+                  "ini": 20970,
+                  "fim": 21090,
+                  "classe": "plano",
+                  "nuc": 21081
+                }
+              ],
+              "fora": [
+                {
+                  "id": "cafe",
+                  "ciclo": "cafe",
+                  "saf": "velha",
+                  "safs": [
+                    "velha"
+                  ],
+                  "safnome": "Perene original",
+                  "faz": "Fictícia",
+                  "t": "T1",
+                  "faixa": "T1-A",
+                  "tipo": "Parcela",
+                  "area": 40,
+                  "cult": "Café",
+                  "var": "Teste",
+                  "plantio": 18262,
+                  "plano": null,
+                  "safini": 18262,
+                  "safim": 18627,
+                  "ro": false,
+                  "colh_inf": null,
+                  "colh_real": null,
+                  "origem": "",
+                  "avisos": [],
+                  "folga": 1,
+                  "ini": 18262,
+                  "fim": 100000000,
+                  "classe": "perene",
+                  "nuc": 100000000
+                }
+              ],
+              "vis": [
+                {
+                  "id": "cafe",
+                  "ciclo": "cafe",
+                  "saf": "velha",
+                  "safs": [
+                    "velha"
+                  ],
+                  "safnome": "Perene original",
+                  "faz": "Fictícia",
+                  "t": "T1",
+                  "faixa": "T1-A",
+                  "tipo": "Parcela",
+                  "area": 40,
+                  "cult": "Café",
+                  "var": "Teste",
+                  "plantio": 18262,
+                  "plano": null,
+                  "safini": 18262,
+                  "safim": 18627,
+                  "ro": false,
+                  "colh_inf": null,
+                  "colh_real": null,
+                  "origem": "",
+                  "avisos": [],
+                  "folga": 1,
+                  "ini": 18262,
+                  "fim": 100000000,
+                  "classe": "perene",
+                  "nuc": 100000000
+                }
+              ],
+              "seq": [],
+              "pend": {},
+              "pend_own": {},
+              "trav": [],
+              "exc": 0,
+              "fix": [],
+              "linhas": 3,
+              "vinc": [
+                "cafe"
+              ],
+              "planejar": false
+            }
+          ],
+          {
+            "nesta": 60,
+            "livre": 0,
+            "conf": 0,
+            "perene": 40,
+            "ocup": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "PERENE-RECENTE-EXCESSO",
+      "fixture": {
+        "plantio_perene": "2026-01-01",
+        "area_perene": 40,
+        "plantio_anual": "2027-06-01",
+        "area_anual": 70,
+        "area_talhao": 100,
+        "faixas_distintas": true
+      },
+      "expected_block": true,
+      "actual_block": true,
+      "pass": true,
+      "raw": {
+        "trav": [
+          [
+            "soma",
+            "cafe",
+            "soja",
+            20970,
+            110
+          ]
+        ],
+        "pend": {
+          "soja": [
+            [
+              "soma",
+              "cafe",
+              21082,
+              21090,
+              9
+            ]
+          ]
+        },
+        "aviso": [],
+        "table": [
+          [
+            {
+              "t": "T1",
+              "T": 100,
+              "A": 70,
+              "sit": "Sobreposição",
+              "livre": 0,
+              "conf": 0,
+              "area_livre": 0,
+              "desde": null,
+              "est": false,
+              "own": [
+                {
+                  "id": "soja",
+                  "ciclo": "soja",
+                  "saf": "nova",
+                  "safs": [
+                    "nova"
+                  ],
+                  "safnome": "Safra teste 2027",
+                  "faz": "Fictícia",
+                  "t": "T1",
+                  "faixa": "T1-B",
+                  "tipo": "Parcela",
+                  "area": 70,
+                  "cult": "Soja",
+                  "var": "Teste",
+                  "plantio": 20970,
+                  "plano": "PTEST",
+                  "safini": 20819,
+                  "safim": 21183,
+                  "ro": false,
+                  "colh_inf": null,
+                  "colh_real": null,
+                  "origem": "",
+                  "avisos": [],
+                  "folga": 1,
+                  "ini": 20970,
+                  "fim": 21090,
+                  "classe": "plano",
+                  "nuc": 21081
+                }
+              ],
+              "fora": [
+                {
+                  "id": "cafe",
+                  "ciclo": "cafe",
+                  "saf": "velha",
+                  "safs": [
+                    "velha"
+                  ],
+                  "safnome": "Perene original",
+                  "faz": "Fictícia",
+                  "t": "T1",
+                  "faixa": "T1-A",
+                  "tipo": "Parcela",
+                  "area": 40,
+                  "cult": "Café",
+                  "var": "Teste",
+                  "plantio": 20454,
+                  "plano": null,
+                  "safini": 20454,
+                  "safim": 20818,
+                  "ro": false,
+                  "colh_inf": null,
+                  "colh_real": null,
+                  "origem": "",
+                  "avisos": [],
+                  "folga": 1,
+                  "ini": 20454,
+                  "fim": 100000000,
+                  "classe": "perene",
+                  "nuc": 100000000
+                }
+              ],
+              "vis": [
+                {
+                  "id": "cafe",
+                  "ciclo": "cafe",
+                  "saf": "velha",
+                  "safs": [
+                    "velha"
+                  ],
+                  "safnome": "Perene original",
+                  "faz": "Fictícia",
+                  "t": "T1",
+                  "faixa": "T1-A",
+                  "tipo": "Parcela",
+                  "area": 40,
+                  "cult": "Café",
+                  "var": "Teste",
+                  "plantio": 20454,
+                  "plano": null,
+                  "safini": 20454,
+                  "safim": 20818,
+                  "ro": false,
+                  "colh_inf": null,
+                  "colh_real": null,
+                  "origem": "",
+                  "avisos": [],
+                  "folga": 1,
+                  "ini": 20454,
+                  "fim": 100000000,
+                  "classe": "perene",
+                  "nuc": 100000000
+                }
+              ],
+              "seq": [],
+              "pend": {
+                "soja": [
+                  [
+                    "soma",
+                    "cafe",
+                    21082,
+                    21090,
+                    9
+                  ]
+                ]
+              },
+              "pend_own": {
+                "soja": [
+                  [
+                    "soma",
+                    "cafe",
+                    21082,
+                    21090,
+                    9
+                  ]
+                ]
+              },
+              "trav": [
+                [
+                  "soma",
+                  "cafe",
+                  "soja",
+                  20970,
+                  110
+                ]
+              ],
+              "exc": 10,
+              "fix": [],
+              "linhas": 3,
+              "vinc": [
+                "cafe"
+              ],
+              "planejar": false
+            }
+          ],
+          {
+            "nesta": 70,
+            "livre": 0,
+            "conf": 0,
+            "perene": 30,
+            "ocup": 0
+          }
+        ]
+      }
+    }
+  ]
+}
