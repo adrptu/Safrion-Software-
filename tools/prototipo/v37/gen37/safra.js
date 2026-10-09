@@ -526,18 +526,29 @@ function letra(i){ let s=''; i++; while(i>0){ const m=(i-1)%26; s=String.fromCha
 function nextNome(t,usados){ for(let i=0;;i++){ const n=t+'-'+letra(i); if(usados.indexOf(n)<0) return n; } }
 function copyAdj(self,id){ const a=adjOf(self)[id]; return a?JSON.parse(JSON.stringify(a)):null; }
 function adjOf(self){ return self.state.adj||D2.ajustes; }
-function ocorr(self,saf,poolsX){ const out=[]; const adj=adjOf(self); const pools=poolsX||poolsOf(self);
+/* ---- análise de solo (SOLO-01): aceites do cenário compartilhado, uma leitura por cenrev; a dose efetiva de cada chave (ajuste manual da
+   sessão, senão aceite, senão padrão), as atividades incluídas e as retiradas pela análise vêm de soloAtividades (solo.js, R14/R16) ---- */
+function soloSaf(self){ const k=self.state.cenrev||0; if(!self.__sac||self.__sac.k!==k){ const c=cenGet(); self.__sac={k,c,ac:((c.solo||{}).aceites)||{},ls:soloLaudos(c,SOLO0)}; } return self.__sac; }
+function soloCu(self,saf,c){ const pl=planById(c.v.plano); if(!pl||pl.cultura!==c.v.cult) return null; const S=safList(self)[saf]||{};
+  return {id:c.id,saf,faz:S.faz||'Santa Rita',local:c.v.local,tal:c.v.talhao||c.v.local,cultura:c.v.cult,area:Number(c.v.area)||0,meta:c.v.meta,plano:pl,plantio:c.v.plantio,dt:(a)=>dataAtv(c,a,pl)}; }
+function soloAlvoSaf(self){ const S=safList(self); const cs=[]; const sn={};
+  Object.keys(S).forEach(id=>{ sn[id]={nome:S[id].nome,ro:S[id].ro}; if(S[id].ro) return; cultsDe(self,id).forEach(c=>cs.push({faz:S[id].faz,tal:c.v.talhao||c.v.local,saf:id,plantio:c.v.plantio})); });
+  return soloAlvo(cs,sn); }
+/* limpo: sem aceites e sem sessão (a sugestão crua de cada chave, para o painel de insumos comparar com o rascunho); senão, contra a dose efetiva */
+function soloSugsSaf(self,saf,c,limpo){ const cu=soloCu(self,saf,c); if(!cu) return {sug:[],info:[],cu:null}; const x=soloSaf(self);
+  const R=soloSugestoes({S0:SOLO0,ls:x.ls,aceites:limpo?{}:x.ac,c:x.c,adj:limpo?{}:(adjOf(self)[c.id]||{}),alvo:soloAlvoSaf(self),todas:!!limpo},cu); R.cu=cu; return R; }
+function soloNacSaf(self,c){ return soloAcAtivos(soloSaf(self).ac,c.id,c.v.plano).length; }
+function ocorr(self,saf,poolsX){ const out=[]; const adj=adjOf(self); const pools=poolsX||poolsOf(self); const AC=soloSaf(self).ac;
   cultRows(self,saf).forEach(c=>{ const pl=planById(c.v.plano); if(!pl||pl.cultura!==c.v.cult) return; const area=Number(c.v.area)||0;
-    pl.atividades.forEach(a=>{ const dt=dataAtv(c,a,pl); const cfs=cfgsOf(self,saf,a.op,a.nome);
+    soloAtividades({id:c.id,plano:pl},adj[c.id]||{},AC).atvs.forEach(x=>{ const a=x.a; const dt=dataAtv(c,a,pl); const cfs=cfgsOf(self,saf,a.op,a.nome);
       // a área da ocorrência se divide entre as configurações do formulário Rendimento; os insumos seguem dose × área e não mudam com a divisão
-      const rp=repartir(area,cfs.map(cfgIn),pools); const horas=rp.hconj||0; const aj=adj[c.id]||{}; const A=String(a.id);
+      const rp=repartir(area,cfs.map(cfgIn),pools); const horas=rp.hconj||0;
       // recursos (capacidade da etapa 3): horas × multiplicador = Σ horas de cada configuração × unidades dela (máquinas por grupo e pessoas)
-      const rec={}; if(horas>0) rp.itens.forEach((x,i)=>{ const rc=(cfs[i]&&cfs[i].rec)||{}; Object.keys(rc).forEach(k=>{ rec[k]=(rec[k]||0)+x.h*rc[k]/horas; }); });
-      const prods=a.prods.map((p,i)=>{ const key=A+'|'+i; if(aj[key]==='-') return null; const dose=(aj[key]!==undefined)?Number(aj[key]):p.dose;
-        return {nome:prodNome(p.prod,c),grupo:p.grupo,un:p.un,preco:p.preco,dose,q:dose*area}; }).filter(Boolean)
-        .concat(Object.keys(aj).filter(k=>k.indexOf(A+'|+')===0).map(k=>{ const x=aj[k]; return {nome:prodNome(x.prod,c),grupo:x.grupo,un:x.un,preco:x.preco,dose:Number(x.dose),q:Number(x.dose)*area}; }));
-      out.push({c,a,pl,dt,mi:mesIdx(dt),area,horas,dec:rp.decorrido,cop:rp.custo,cins:prods.reduce((s,p)=>s+p.q*p.preco,0),prods,rec,rp,cfs,
-        saldo:rp.saldo,diesel:rp.diesel,hh:rp.hh,pend:rp.pendente}); }); });
+      const rec={}; if(horas>0) rp.itens.forEach((x2,i)=>{ const rc=(cfs[i]&&cfs[i].rec)||{}; Object.keys(rc).forEach(k=>{ rec[k]=(rec[k]||0)+x2.h*rc[k]/horas; }); });
+      // dose efetiva por chave (R14): sessão > aceite da análise > padrão; a origem segue para a memória da demanda (R21)
+      const prods=x.prods.filter(q=>q.dose!=='-').map(q=>{ const p=q.p; const dose=Number(q.dose); return {nome:prodNome(p.prod,c),grupo:p.grupo,un:p.un,preco:p.preco,dose,q:dose*area,orig:q.orig,laudo:q.ac?q.ac.laudo:''}; });
+      out.push({c,a,pl,dt,mi:mesIdx(dt),area,horas,dec:rp.decorrido,cop:rp.custo,cins:prods.reduce((s2,p)=>s2+p.q*p.preco,0),prods,rec,rp,cfs,
+        saldo:rp.saldo,diesel:rp.diesel,hh:rp.hh,pend:rp.pendente,incl:!!x.incl}); }); });
   return out; }
 // demanda por produto (CAL-01, cal01.js): uso = 1º uso de hoje em diante; a necessidade sai da projeção datada do insumo com as outras
 // origens do mesmo estoque — safras abertas da mesma fazenda (agregadas por data), reservas para outros destinos e recebimentos com data.
@@ -546,7 +557,7 @@ function demanda(self,saf){ const m={}; const safRows=g2rows(self,GR('g_saf')); 
   const ordem=(id)=>{ const i=safRows.findIndex(r=>r.id===id); return i<0?99:i; };
   ocorr(self,saf).forEach(o=>o.prods.forEach(p=>{ const d=m[p.nome]||(m[p.nome]={nome:p.nome,grupo:p.grupo,un:p.un,preco:p.preco,bruta:0,uso:'',evs:[]});
    d.bruta+=p.q; if(o.dt&&o.dt>=(D2.hoje||'')&&(!d.uso||o.dt<d.uso)) d.uso=o.dt;
-   d.evs.push({dt:o.dt||'',q:p.q,tipo:'dem',own:true,ord:ordem(saf),chave:o.c.id+'|'+o.a.id,t:o.c.v.local+' · '+o.a.nome,calc:nf(p.dose,2)+' '+p.un+'/ha × '+nfa(o.area)+' ha'}); }));   // área com até 2 casas (PRE-REV R5)
+   d.evs.push({dt:o.dt||'',q:p.q,tipo:'dem',own:true,ord:ordem(saf),chave:o.c.id+'|'+o.a.id,t:o.c.v.local+' · '+o.a.nome,calc:nf(p.dose,2)+' '+p.un+'/ha'+(p.orig==='análise'?' (pela análise · '+p.laudo+')':(p.orig==='sessão'?' (ajustado pelo usuário)':''))+' × '+nfa(o.area)+' ha'}); }));   // área com até 2 casas (PRE-REV R5)
   const vistos={}; vistos[sk(saf)]=1;
   safRows.forEach(r=>{ if(r.id===saf||r.ro||(r.v.faz||'Santa Rita')!==faz||vistos[sk(r.id)]) return; vistos[sk(r.id)]=1; const ag={}, ks=[];
     ocorr(self,r.id).forEach(o=>o.prods.forEach(p=>{ if(!m[p.nome]) return; const k=p.nome+'|'+o.dt; if(!ag[k]){ ag[k]={nome:p.nome,dt:o.dt||'',q:0,n:0,chaves:[]}; ks.push(k); }
@@ -1183,7 +1194,8 @@ function proxSaf(self,r){ if(r.ro) return ['Consultar safra',2];
   const sp=semPlano(cs).length; if(sp) return ['Continuar: aplicar plano em '+sp+(sp>1?' cultivos':' cultivo'),2];
   if(!solMap(self)[r.id]) return ['Continuar: enviar demanda para cotação',4];
   return ['Continuar: dimensionar operações e recursos',3]; }
-function PREVALS(self,v){ compRend(self,self.state.saf||null);
+function PREVALS(self,v){ cenOuvir(self); compRend(self,self.state.saf||null);
+  { const gs=GR('g_sug'); if(gs) gs.rows=sgRows(self); }   /* Sugestões pelas análises (SOLO-01 §3.4) */
   const st=self.state; const saf=st.saf||null; const safObj=saf?(g2rows(self,GR('g_saf')).find(r=>r.id===saf)):null; const ro=!!(safObj&&safObj.ro);
   // ---- etapa 1: contagens por safra ----
   g2rows(self,GR('g_saf')).forEach(r=>{ const cs=cultsDe(self,r.id); r.v.n=cs.length; r.v.area=cs.reduce((s,c)=>s+(Number(c.v.area)||0),0);
@@ -1270,13 +1282,18 @@ function EXTRAVALS(self,v){ try{ window.__safSelf=self; }catch(e){}   // testes 
   v.planejar=(t)=>abrirPlanejar(self,t); v.vincular=(arg)=>{ const a=String(arg).split('|'); abrirVincular(self,a[0],a[1]); };
   v.abrirsaf=(arg)=>{ const a=String(arg).split('|'); abrirCultivo(self,a[0],a[1]||''); };
   // painéis
-  apVals(self,v); lpVals(self,v); divVals(self,v);
+  apVals(self,v); lpVals(self,v); divVals(self,v); sgVals(self,v); pqSafVals(self,v);
+  try{ window.__solo={cen:()=>cenGet(),aceitarLote:(itens,ch,a)=>cenMudar(self,c=>soloAceitarLote(c,itens,ch,a||'Ana')),desfazer:(k,ch,a)=>cenMudar(self,c=>soloDesfazer(c,k,'desfeito',ch,a||'Ana')),
+    sugs:(saf)=>sgSugs(self,saf||self.state.saf).map(x=>x.s),
+    ocorr:(saf)=>ocorr(self,saf||self.state.saf).map(o=>({cid:o.c.id,local:o.c.v.local,atv:String(o.a.id),nome:o.a.nome,op:o.a.op,dt:o.dt,incl:o.incl,horas:o.horas,prods:o.prods.map(p=>({nome:p.nome,dose:p.dose,q:p.q,orig:p.orig,laudo:p.laudo}))})),
+    dem:(saf)=>{ const m=demanda(self,saf||self.state.saf); const o={}; Object.keys(m).forEach(k=>{ o[k]={bruta:m[k].plano,un:m[k].un,preco:m[k].preco,memo:m[k].memo}; }); return o; },salvar:(c)=>{ cenSave(c); self.setState({cenrev:Date.now()}); }}; }catch(e){}
   // SAF.dc.html#saf=S27SF&passo=demanda (vindo da Compra de insumos): abre a safra na etapa pedida, uma vez e a cada troca de endereço
   // endereço por nome (#saf=<id>&passo=safra|cultivos|operacoes|demanda[&cult=<id>]); o antigo etapa=N continua lido (SAF_PASSO)
   const abrirHash=()=>{ let h=''; try{ h=decodeURIComponent(location.hash||''); }catch(e){ h=''; } const ms=/[#&]saf=([^&]+)/.exec(h); if(!ms) return;
     const me=/[#&]etapa=(\d+)/.exec(h), mp=/[#&]passo=([a-z]+)/.exec(h), mc=/[#&]cult=([^&]+)/.exec(h);
     const r=g2rows(self,GR('g_saf')).find(x=>x.id===ms[1]); if(!r) return; const e=safPasso(mp?mp[1]:'',me?Number(me[1]):null);
-    setTimeout(()=>{ self.setState({saf:r.id,step:e,atv:null,rec:null,corr:null,cap:null,rsOpen:false,g2toast:'Safra aberta: '+r.v.nome+' · '+SAF_CURTO[e-1]}); if(mc&&e===2) setTimeout(()=>abrirCultivo(self,r.id,mc[1]),90); },0); };
+    const msg=/[#&]sug=1/.test(h);   /* vindo do AG-02 (Ver no plano): abre as Sugestões pelas análises */
+    setTimeout(()=>{ self.setState({saf:r.id,step:e,atv:null,rec:null,corr:null,cap:null,rsOpen:false,g2toast:'Safra aberta: '+r.v.nome+' · '+SAF_CURTO[e-1]}); if(mc&&e===2) setTimeout(()=>abrirCultivo(self,r.id,mc[1]),90); if(msg&&e===2) setTimeout(()=>{ if(sgN(self,r.id)) sgAbrir(self); },120); },0); };
   if(!self.__hashIni){ self.__hashIni=1; abrirHash(); try{ window.addEventListener('hashchange',abrirHash); }catch(e){} }
 }
 // ---- UX-ACAO-UNICA-20261003 · área de ações do Planejar safra (DS-02, DS-33 §74.5.7.1, DS-61) ----
@@ -1391,8 +1408,9 @@ function apVals(self,v){ const ap=self.state.ap; v.ap_open=!!ap; if(!ap) return;
   v.ap_opts=[{v:'',t:'Escolha o plano'}].concat(opts.map(p=>({v:p.id,t:p.nome+' v'+p.versao+' · '+p.atividades.length+' atividades'}))); v.ap_plan=ap.plan; v.ap_has_opts=opts.length>0; v.ap_no_opts=(culturas.length===1&&!opts.length);
   v.ap_setplan=(e)=>self.setState({ap:Object.assign({},self.state.ap,{plan:e.target.value,confirm:false,err:''})});
   const adj=adjOf(self); const subst=rows.filter(r=>r.v.plano); const najs=rows.reduce((a,r)=>a+Object.keys(adj[r.id]||{}).length,0);
+  const nac=rows.reduce((a,r)=>a+soloNacSaf(self,r),0);   /* R16 (A13): o aceite guarda o plano; trocar o plano faz o uso da análise deixar de valer, sem apagá-lo */
   v.ap_confirm=!!ap.confirm; v.ap_normal=!ap.confirm; v.ap_err=ap.err||''; v.ap_haserr=!!ap.err;
-  v.ap_cmsg='Isto substitui o plano de '+subst.length+(subst.length===1?' cultivo':' cultivos')+(najs?' e descarta '+najs+(najs===1?' ajuste local':' ajustes locais'):'')+'. O plano padrão e os demais cultivos não mudam.';
+  v.ap_cmsg='Isto substitui o plano de '+subst.length+(subst.length===1?' cultivo':' cultivos')+(najs?' e descarta '+najs+(najs===1?' ajuste local':' ajustes locais'):'')+(nac?'; '+nac+(nac===1?' uso da análise deixa':' usos da análise deixam')+' de valer (ficam gravados no laudo)':'')+'. O plano padrão e os demais cultivos não mudam.';
   v.ap_cancel=()=>self.setState({ap:null});
   v.ap_apply=()=>{ const a=self.state.ap; if(culturas.length>1) return; if(!a.plan){ self.setState({ap:Object.assign({},a,{err:'Escolha o plano a aplicar.'})}); return; }
     if(!nOk){ self.setState({ap:Object.assign({},a,{err:'Nenhum cultivo pode receber este plano: todos travam pela ocupação do talhão.'})}); return; }
@@ -1415,43 +1433,67 @@ function lpAc(self,A,cat,pk,upd,ERR,c,o){ const itens=cat.map(p=>({v:p.prod, t:p
     {ph:'Buscar insumo no cadastro', err:!!ERR('pick'+A), enter:()=>o.pkOk(), esc:()=>o.pkNo()}); }
 function catalogo(){ if(catalogo._c) return catalogo._c; const m={}; D2.planos.forEach(pl=>pl.atividades.forEach(a=>a.prods.forEach(p=>{ if(!m[p.prod]) m[p.prod]={prod:p.prod,grupo:p.grupo,un:p.un,preco:p.preco}; })));
   catalogo._c=Object.values(m).sort((a,b)=>(a.grupo+' '+a.prod).localeCompare(b.grupo+' '+b.prod,'pt-BR')); return catalogo._c; }
-function cultActs(self,gid,r){ if(!r||r.grp) return []; const pl=planById(r.v.plano); const na=Object.keys(adjOf(self)[r.id]||{}).length; const ro=!!r.ro;
+function cultActs(self,gid,r){ if(!r||r.grp) return []; const pl=planById(r.v.plano); const na=Object.keys(adjOf(self)[r.id]||{}).length+soloNacSaf(self,r); const ro=!!r.ro;
   const t=(ro?'Ver insumos e doses de ':'Ajustar insumos e doses de ')+r.v.local;
   if(!pl||pl.cultura!==r.v.cult) return [{t, h:'Escolha um plano agronômico de '+r.v.cult+' e salve; depois ajuste os insumos só deste talhão.',
     go:()=>self.setState({g2toast:'Escolha e salve um plano agronômico de '+r.v.cult+' antes de ajustar os insumos.'})}];
   return [{t, h:(na?(na+(na>1?' ajustes deste talhão':' ajuste deste talhão')+' · '):'')+'Mude dose, retire ou inclua insumos só neste talhão; o plano padrão não muda.',
     go:()=>{ const cur=g2st(self,gid).fm; if(cur&&!cur.ro&&g2dirty(cur)){ self.setState({g2toast:'Salve ou descarte as alterações do cultivo antes de ajustar os insumos.'}); return; } g2set(self,gid,{fm:null}); openLP(self,r.id); }}]; }
-function openLP(self,cid){ const saf=self.state.saf; const c=cultRows(self,saf).find(r=>r.id===cid); if(!c) return; const a=adjOf(self)[cid]||{}; const d={}, rm={}, add={};
+/* painel de insumos (PRD 40): o rascunho marca a origem de cada dose (src: pela análise). Os aceites gravados entram no rascunho com a origem
+   e nunca viram ajuste da sessão (R14); "Usar", "Retirar pela análise" e "Incluir calagem" só preenchem o rascunho; o Salvar grava (D-25) */
+function openLP(self,cid){ const saf=self.state.saf; const c=cultRows(self,saf).find(r=>r.id===cid); if(!c) return; const a=adjOf(self)[cid]||{}; const d={}, rm={}, add={}, src={};
   Object.keys(a).forEach(k=>{ const val=a[k]; const parts=k.split('|'); const A=parts[0], pi=parts[1]||'';
     if(pi.charAt(0)==='+'){ (add[A]||(add[A]=[])).push({prod:val.prod,grupo:val.grupo,un:val.un,preco:val.preco,dose:String(val.dose).replace('.',',')}); }
     else if(val==='-') rm[k]=true; else d[k]=String(val).replace('.',','); });
-  self.setState({lp:{cid,draft:d,rm,add,pick:{},orig:JSON.stringify({d,rm,add}),warn:false,err:{}},lpx:{}}); }
+  const pl=planById(c.v.plano);
+  if(pl) soloAcAtivos(soloSaf(self).ac,cid,pl.id).forEach(x=>{ if(x.tipo==='incluir') return; const at=pl.atividades.find(q=>String(q.id)===String(x.atv.id)); const i=at?at.prods.findIndex(q=>q.prod===x.prod):-1; if(i<0) return;
+    const key=String(at.id)+'|'+i; if(a[key]!==undefined) return; if(x.dose==='-') rm[key]=true; else d[key]=String(x.dose).replace('.',','); src[key]={laudo:x.laudo,dose:x.dose,ac:x.k}; });
+  self.setState({lp:{cid,draft:d,rm,add,src,incl:{},inclRm:{},chave:'LP-'+cid+'-'+Date.now(),pick:{},orig:JSON.stringify({d,rm,add,incl:{},inclRm:{}}),warn:false,err:{},cmdErr:''},lpx:{},pq:null}); }
 function lpVals(self,v){ const lp=self.state.lp; v.lp_open=!!lp; if(!lp) return; const saf=self.state.saf; const c=cultRows(self,saf).find(r=>r.id===lp.cid); if(!c){ v.lp_open=false; return; }
   const pl=planById(c.v.plano); const safObj=g2rows(self,GR('g_saf')).find(r=>r.id===saf); const ro=!!(c.ro||(safObj&&safObj.ro));
+  const SG=soloSugsSaf(self,saf,c,true); const area=Number(c.v.area)||0; const sugBy={}; SG.sug.forEach(s=>{ if(s.tipo!=='incluir'&&!s.nega) sugBy[s.atv.id+'|'+s.prod]=s; });
+  const acSt=soloAcAtivos(soloSaf(self).ac,c.id,c.v.plano); const acDe=(A,prod)=>acSt.find(x=>x.tipo!=='incluir'&&String(x.atv.id)===A&&x.prod===prod)||null;
+  /* dose da análise mudada à mão (R15): o aceite ativo sobrescrito no rascunho ou o já substituído por ajuste manual → "ajustado pelo usuário" */
+  const acMan=(A,prod)=>{ const x=soloSaf(self).ac[c.id+'|'+A+'|'+prod]; return !!(x&&(x.st==='ativo'||x.st==='substituído por ajuste manual')); };
   v.lp_titulo='Insumos e doses de '+c.v.local+' · '+c.v.cult+' '+c.v.var+', '+nf(c.v.area)+' ha';
   v.lp_sub='Plano padrão: '+pl.nome+' v'+pl.versao+' · plantio '+br(c.v.plantio)+'. '+(ro?'Safra encerrada: somente consulta.':'Mude a dose, retire ou inclua insumos só neste talhão. O plano padrão e os outros talhões não mudam.');
+  /* laudo validado sem regra ou correção em outra safra (R17): uma frase só aqui, com o caminho para o laudo */
+  v.lp_info=SG.info.map(t=>{ const m=/LAU-\d+/.exec(t); return {t, h:m?'AG-02.dc.html#'+m[0]:'AG-02.dc.html'}; }); v.lp_hasInfo=v.lp_info.length>0;
   v.lp_ro=ro; v.lp_edit=!ro; const ex=self.state.lpx||{};
-  const upd=(patch)=>{ const cur=self.state.lp; self.setState({lp:Object.assign({},cur,patch,{warn:false})}); };
+  const upd=(patch)=>{ const cur=self.state.lp; self.setState({lp:Object.assign({},cur,patch,{warn:false,cmdErr:''})}); };
   const ERR=(k)=>(lp.err||{})[k]||'';
-  const doseSt=(k,aj,dis)=>'width:84px;font-family:inherit;font-size:13px;padding:5px 7px;border-radius:8px;border:1px solid '+(ERR(k)?'#B42318':(aj?'#8A5A00':'#E4E9E5'))+';background:'+(dis?'#F4F6F3':(aj?'#FFF8E6':'#fff'))+';text-align:right;';
+  const doseSt=(k,aj,dis,an)=>'width:84px;font-family:inherit;font-size:13px;padding:5px 7px;border-radius:8px;border:1px solid '+(ERR(k)?'#B42318':(an?'#1E5F8F':(aj?'#8A5A00':'#E4E9E5')))+';background:'+(dis?'#F4F6F3':(an?'#E3F0FB':(aj?'#FFF8E6':'#fff')))+';text-align:right;';
+  const chipSt=(c0)=>'display:inline-block;padding:1px 7px;border-radius:999px;font-size:11px;font-weight:700;color:'+(G2C[c0]||G2C.gray)[0]+';background:'+(G2C[c0]||G2C.gray)[1]+';';
+  const pqAbre=(s,fid)=>{ self.__pqFoco=fid; self.setState({pq:{k:s.k,from:'lp'}}); };
+  const usar=(s,key)=>{ const cur=self.state.lp; const d=Object.assign({},cur.draft), rr=Object.assign({},cur.rm||{}), sr=Object.assign({},cur.src||{}), er=Object.assign({},cur.err||{}); delete er[key];
+    if(s.tipo==='retirar'){ rr[key]=true; delete d[key]; } else { d[key]=String(s.sug).replace('.',','); delete rr[key]; } sr[key]={laudo:s.laudo.id,dose:s.tipo==='retirar'?'-':s.sug,s}; upd({draft:d,rm:rr,src:sr,err:er}); };
   const grupos={}; pl.atividades.forEach(a=>{ const g=grupoGat(a.g.tipo); ((grupos[g]||(grupos[g]={}))[gatLabel(a.g)+'||'+gatOrder(a.g)]||(grupos[g][gatLabel(a.g)+'||'+gatOrder(a.g)]=[])).push(a); });
   const order=['DAP','DAC','DATA'].filter(g=>grupos[g]);
   v.lp_grupos=order.map(g=>({t:GLABEL[g],gats:Object.keys(grupos[g]).sort((x,y)=>{ const a=x.split('||')[1], b=y.split('||')[1]; return g==='DATA'? (a<b?-1:1) : (Number(a)-Number(b)); }).map(key=>{
       const atvs=grupos[g][key]; const gid=g+key; const open=ex[gid]!==false;
       return {t:key.split('||')[0], dt:br(dataAtv(c,atvs[0],pl)), sym:open?'▾':'▸', open, lab:(open?'Recolher ':'Expandir ')+key.split('||')[0], tog:()=>{ const x=Object.assign({},self.state.lpx||{}); x[gid]=!open; self.setState({lpx:x}); },
-        atvs:atvs.map(a=>{ const aid='a'+a.id; const ao=ex[aid]!==false; const A=String(a.id); const rmMap=lp.rm||{}; const adds=((lp.add||{})[A])||[];
+        atvs:atvs.map(a=>{ const aid='a'+a.id; const ao=ex[aid]!==false; const A=String(a.id); const rmMap=lp.rm||{}; const adds=((lp.add||{})[A])||[]; const SRC=lp.src||{};
           const prods=a.prods.map((p,i)=>{ const key=A+'|'+i; const removed=!!rmMap[key]; const dv=lp.draft[key]; const local=removed?0:((dv!==undefined&&dv!=='')?g2num(dv):p.dose);
-              const aj=!removed&&dv!==undefined&&dv!==''&&Math.abs(local-p.dose)>1e-9;
+              const an=!!SRC[key]; const a0=acDe(A,p.prod); const aj=!removed&&dv!==undefined&&dv!==''&&Math.abs(local-p.dose)>1e-9;
+              const ajT=an?('pela análise · '+SRC[key].laudo):((a0||acMan(A,p.prod))?'ajustado pelo usuário':'dose deste talhão');
+              /* linha "Análise sugere" (§3.2): só quando a sugestão difere do rascunho; ações secundárias que preenchem o rascunho */
+              const s=sugBy[A+'|'+p.prod]; let sg=null;
+              if(s&&!ro){ const curD=removed?0:(isNaN(local)?null:local);
+                if(s.tipo==='retirar'&&!removed) sg={d:'retirar ('+(s.motivo||'pela análise')+')',q:soloQtdTxt(-cenQtd(curD||0,area),p.un,true)+(s.unico?' · a '+a.nome+' sai do '+c.v.local+' (único insumo)':''),u:'Retirar pela análise'};
+                else if(s.tipo==='dose'&&(removed||curD===null||prCmp(curD,s.sug)!==0)) sg={d:soloDoseTxt(s.sug,s.un),q:soloQtdTxt(Math.round((cenQtd(s.sug,area)-cenQtd(curD||0,area))*100)/100,p.un,true)+' no talhão',u:'Usar '+soloDoseTxt(s.sug,s.un)}; }
+              const fid='lp_'+key.replace('|','_');
               return {grupo:p.grupo, nome:prodNome(p.prod,c), padrao:nf(p.dose,2)+' '+p.un+'/ha', v:removed?'':(dv!==undefined?dv:String(p.dose).replace('.',',')), un:p.un+'/ha', preco:rs(p.preco)+'/'+p.un,
-                custo:removed?'—':(rs((isNaN(local)?0:local)*p.preco)+'/ha'), aj, rmv:removed, novo:false, err:ERR(key), hasErr:!!ERR(key), dis:ro||removed, fid:'lp_'+key.replace('|','_'), ist:doseSt(key,aj,ro||removed),
+                custo:removed?'—':(rs((isNaN(local)?0:local)*p.preco)+'/ha'), aj:aj||(an&&!removed), ajT, ajSt:chipSt(an?'blue':'yellow'), rmv:removed, rmT:an?('retirado pela análise · '+SRC[key].laudo):'retirado deste talhão', novo:false,
+                err:ERR(key), hasErr:!!ERR(key), dis:ro||removed, fid, ist:doseSt(key,aj,ro||removed,an&&!removed),
                 podeRet:!ro&&!removed, podeDesf:!ro&&removed, podeRest:!ro&&aj,
-                set:(e)=>{ const cur=self.state.lp; const d=Object.assign({},cur.draft,{[key]:e.target.value}); const er=Object.assign({},cur.err||{}); delete er[key]; upd({draft:d,err:er}); },
-                reset:()=>{ const cur=self.state.lp; const d=Object.assign({},cur.draft); delete d[key]; upd({draft:d}); },
-                ret:()=>{ const cur=self.state.lp; const rr=Object.assign({},cur.rm||{},{[key]:true}); const d=Object.assign({},cur.draft); delete d[key]; const er=Object.assign({},cur.err||{}); delete er[key]; upd({rm:rr,draft:d,err:er}); },
-                desf:()=>{ const cur=self.state.lp; const rr=Object.assign({},cur.rm||{}); delete rr[key]; upd({rm:rr}); } }; })
+                hasSug:!!sg, sugD:sg?sg.d:'', sugQ:sg?sg.q:'', sugU:sg?sg.u:'', sugPq:()=>{ if(s) pqAbre(s,'pq_'+fid); }, pqId:'pq_'+fid, sugGo:()=>{ if(s) usar(s,key); },
+                set:(e)=>{ const cur=self.state.lp; const d=Object.assign({},cur.draft,{[key]:e.target.value}); const er=Object.assign({},cur.err||{}); delete er[key]; const sr=Object.assign({},cur.src||{}); delete sr[key]; upd({draft:d,err:er,src:sr}); },
+                reset:()=>{ const cur=self.state.lp; const d=Object.assign({},cur.draft); delete d[key]; const sr=Object.assign({},cur.src||{}); delete sr[key]; upd({draft:d,src:sr}); },
+                ret:()=>{ const cur=self.state.lp; const rr=Object.assign({},cur.rm||{},{[key]:true}); const d=Object.assign({},cur.draft); delete d[key]; const er=Object.assign({},cur.err||{}); delete er[key]; const sr=Object.assign({},cur.src||{}); delete sr[key]; upd({rm:rr,draft:d,err:er,src:sr}); },
+                desf:()=>{ const cur=self.state.lp; const rr=Object.assign({},cur.rm||{}); delete rr[key]; const sr=Object.assign({},cur.src||{}); delete sr[key]; const d=Object.assign({},cur.draft); delete d[key]; upd({rm:rr,src:sr,draft:d}); } }; })
             .concat(adds.map((x,j)=>{ const key=A+'|+'+j; const n=g2num(x.dose);
-              return {grupo:x.grupo, nome:prodNome(x.prod,c), padrao:'—', v:x.dose, un:x.un+'/ha', preco:rs(x.preco)+'/'+x.un, custo:(x.dose===''||isNaN(n))?'—':(rs(n*x.preco)+'/ha'), aj:false, rmv:false, novo:true,
-                err:ERR(key), hasErr:!!ERR(key), dis:ro, fid:'lp_'+A+'_n'+j, ist:doseSt(key,true,ro), podeRet:!ro, podeDesf:false, podeRest:false,
+              return {grupo:x.grupo, nome:prodNome(x.prod,c), padrao:'—', v:x.dose, un:x.un+'/ha', preco:rs(x.preco)+'/'+x.un, custo:(x.dose===''||isNaN(n))?'—':(rs(n*x.preco)+'/ha'), aj:false, ajT:'', ajSt:'', rmv:false, rmT:'', novo:true,
+                err:ERR(key), hasErr:!!ERR(key), dis:ro, fid:'lp_'+A+'_n'+j, ist:doseSt(key,true,ro,false), podeRet:!ro, podeDesf:false, podeRest:false, hasSug:false, sugD:'', sugQ:'', sugU:'', sugPq:()=>{}, pqId:'', sugGo:()=>{},
                 set:(e)=>{ const cur=self.state.lp; const ad=Object.assign({},cur.add||{}); ad[A]=(ad[A]||[]).slice(); ad[A][j]=Object.assign({},ad[A][j],{dose:e.target.value}); const er=Object.assign({},cur.err||{}); delete er[key]; upd({add:ad,err:er}); },
                 reset:()=>{}, desf:()=>{},
                 ret:()=>{ const cur=self.state.lp; const ad=Object.assign({},cur.add||{}); ad[A]=(ad[A]||[]).filter((_,q)=>q!==j); if(!ad[A].length) delete ad[A]; upd({add:ad,err:{}}); } }; }));
@@ -1466,22 +1508,93 @@ function lpVals(self,v){ const lp=self.state.lp; v.lp_open=!!lp; if(!lp) return;
               if(!p){ upd({err:Object.assign({},cur.err||{},{['pick'+A]:'Escolha o insumo a incluir.'})}); return; }
               const ad=Object.assign({},cur.add||{}); ad[A]=(ad[A]||[]).concat([{prod:p.prod,grupo:p.grupo,un:p.un,preco:p.preco,dose:''}]); const pkm=Object.assign({},cur.pick||{}); delete pkm[A]; upd({add:ad,pick:pkm}); },
             pkNo:()=>{ const cur=self.state.lp; const pkm=Object.assign({},cur.pick||{}); delete pkm[A]; const er=Object.assign({},cur.err||{}); delete er['pick'+A]; upd({pick:pkm,err:er}); } }); }) }; }) }));
-  const dirty=()=>{ const cur=self.state.lp; return JSON.stringify({d:cur.draft,rm:cur.rm||{},add:cur.add||{}})!==cur.orig; };
-  v.lp_warn=!!lp.warn; v.lp_nerr=Object.keys(lp.err||{}).length>0;
-  v.lp_close=()=>{ if(!ro && dirty()){ self.setState({lp:Object.assign({},self.state.lp,{warn:true})}); return; } self.setState({lp:null}); };
-  v.lp_discard=()=>self.setState({lp:null}); v.lp_keep=()=>self.setState({lp:Object.assign({},self.state.lp,{warn:false})});
-  v.lp_save=()=>{ const cur=self.state.lp; const er={}; const out={};
-    pl.atividades.forEach(a=>{ const A=String(a.id);
-      a.prods.forEach((p,i)=>{ const key=A+'|'+i; if((cur.rm||{})[key]){ out[key]='-'; return; } const dv=cur.draft[key]; if(dv===undefined||dv==='') return; const n=g2num(dv);
-        if(isNaN(n)||n<0){ er[key]='Use um número ≥ 0'; return; } if(Math.abs(n-p.dose)>1e-9) out[key]=n; });
-      (((cur.add||{})[A])||[]).forEach((x,j)=>{ const key=A+'|+'+j; const n=g2num(x.dose); if(String(x.dose).trim()===''||isNaN(n)||n<=0){ er[key]='Informe a dose por hectare (maior que zero)'; return; }
-        out[key]={prod:x.prod,grupo:x.grupo,un:x.un,preco:x.preco,dose:n}; }); });
-    if(Object.keys(er).length){ self.setState({lp:Object.assign({},cur,{err:er})}); return; }
-    const adj=JSON.parse(JSON.stringify(adjOf(self))); if(Object.keys(out).length) adj[cur.cid]=out; else delete adj[cur.cid];
-    const vals=Object.values(out); const nr=vals.filter(x=>x==='-').length, ni=vals.filter(x=>x&&typeof x==='object').length, nd=vals.length-nr-ni;
-    const partes=[nd?nd+(nd>1?' doses alteradas':' dose alterada'):'', nr?nr+(nr>1?' insumos retirados':' insumo retirado'):'', ni?ni+(ni>1?' insumos incluídos':' insumo incluído'):''].filter(Boolean);
-    self.setState({adj,lp:null,g2toast:(partes.length?partes.join(' · ')+' em '+c.v.local:'Sem ajustes em '+c.v.local+': vale o plano padrão')+'. Plano operacional, recursos e demanda recalculados; o plano padrão e os outros talhões não mudaram.'}); };
-}
+  /* operação incluída pela análise (R18): gravada (aceite) ou a salvar (rascunho), no topo do painel; e a sugestão de incluir */
+  const tipoInc=(s)=>/:ges$/.test(s.atv.id)?'gessagem':'calagem';
+  const incG=acSt.filter(x=>x.tipo==='incluir'&&!(lp.inclRm||{})[x.k]); const incP=Object.values(lp.incl||{});
+  v.lp_incl=incG.map(x=>({t:x.atv.nome+' · '+x.prod, d:soloDoseTxt(x.dose,x.un)+' · '+soloBr(x.dt)+' · '+soloQtdTxt(cenQtd(x.dose,area),x.un,false), chip:'incluída pela análise · '+x.laudo,
+      podeDesf:!ro, desf:()=>upd({inclRm:Object.assign({},self.state.lp.inclRm||{},{[x.k]:true})}), desfT:'Desfazer inclusão'}))
+    .concat(incP.map(s=>({t:s.atv.nome+' · '+s.prod, d:soloDoseTxt(s.sug,s.un)+' · '+soloBr(s.dt)+' · '+soloQtdTxt(cenQtd(s.sug,area),s.un,false), chip:'incluída pela análise · '+s.laudo.id+' (a salvar)',
+      podeDesf:!ro, desf:()=>{ const x=Object.assign({},self.state.lp.incl||{}); delete x[s.k]; upd({incl:x}); }, desfT:'Desfazer'})));
+  v.lp_hasIncl=v.lp_incl.length>0;
+  v.lp_incSug=ro?[]:SG.sug.filter(s=>s.tipo==='incluir'&&!s.nega&&!(lp.incl||{})[s.k]).filter(s=>{ const g0=incG.find(x=>soloTipoAtv(x.incl)===soloTipoAtv(s.incl)); return !g0||prCmp(g0.dose,s.sug)!==0; })
+    .map(s=>{ const g0=incG.find(x=>soloTipoAtv(x.incl)===soloTipoAtv(s.incl)); const fid='lp_inc_'+tipoInc(s);
+      return {d:(g0?s.atv.nome+' '+soloDoseTxt(s.sug,s.un)+' (incluída '+soloDoseTxt(g0.dose,g0.un)+')':'incluir '+s.atv.nome+' · '+s.prod+' '+soloDoseTxt(s.sug,s.un)+' em '+soloBr(s.dt)),
+        q:soloQtdTxt(g0?Math.round((cenQtd(s.sug,area)-cenQtd(g0.dose,area))*100)/100:cenQtd(s.sug,area),s.un,true), u:g0?'Usar '+soloDoseTxt(s.sug,s.un):'Incluir '+tipoInc(s), pqId:'pq_'+fid,
+        pq:()=>pqAbre(s,'pq_'+fid), go:()=>{ const x=Object.assign({},self.state.lp.incl||{},{[s.k]:s}); const r0=Object.assign({},self.state.lp.inclRm||{}); if(g0) r0[g0.k]=true; upd({incl:x,inclRm:r0}); }}; });
+  v.lp_hasIncSug=v.lp_incSug.length>0;
+  const dirty=()=>{ const cur=self.state.lp; return JSON.stringify({d:cur.draft,rm:cur.rm||{},add:cur.add||{},incl:Object.keys(cur.incl||{}),inclRm:cur.inclRm||{}})!==JSON.stringify(Object.assign(JSON.parse(cur.orig),{incl:[]})); };
+  v.lp_warn=!!lp.warn; v.lp_nerr=Object.keys(lp.err||{}).length>0; v.lp_cmdErr=lp.cmdErr||''; v.lp_hasCmdErr=!!lp.cmdErr;
+  v.lp_close=()=>{ if(!ro && dirty()){ self.setState({lp:Object.assign({},self.state.lp,{warn:true})}); return; } self.setState({lp:null,pq:null}); };
+  v.lp_discard=()=>self.setState({lp:null,pq:null}); v.lp_keep=()=>self.setState({lp:Object.assign({},self.state.lp,{warn:false})});
+  v.lp_save=()=>lpSalvar(self,c,pl); }
+/* Salvar do painel: sessão (ajuste manual) e cenário (aceites) com uma dose por chave (R14). Nada se copia do aceite para a sessão; mudar à mão a
+   dose da análise desfaz o aceite ("substituído por ajuste manual", R15); Restaurar dose volta ao padrão e desfaz o aceite */
+function lpSalvar(self,c,pl){ const cur=self.state.lp; const er={}; const out={}; const aceitar=[], desfazer=[]; const SRC=cur.src||{};
+  const acSt=soloAcAtivos(soloSaf(self).ac,c.id,c.v.plano); 
+  pl.atividades.forEach(a=>{ const A=String(a.id);
+    a.prods.forEach((p,i)=>{ const key=A+'|'+i; const a0=acSt.find(x=>x.tipo!=='incluir'&&String(x.atv.id)===A&&x.prod===p.prod)||null; const sr=SRC[key];
+      const rmv=!!(cur.rm||{})[key]; const dv=cur.draft[key]; const n=(dv===undefined||dv==='')?p.dose:g2num(dv);
+      if(!rmv&&(isNaN(n)||n<0)){ er[key]='Use um número ≥ 0'; return; }
+      const val=rmv?'-':n;
+      if(sr){ const igual=(sr.dose==='-'&&val==='-')||(sr.dose!=='-'&&val!=='-'&&Math.abs(Number(sr.dose)-val)<1e-9);
+        if(igual){ if(sr.s&&!(a0&&String(a0.dose)===String(sr.dose))) aceitar.push(Object.assign({},sr.s,{local:c.v.local})); return; } }   /* pela análise: fica no cenário, nunca na sessão */
+      if(rmv){ out[key]='-'; if(a0) desfazer.push({k:a0.k,motivo:'substituído por ajuste manual'}); return; }
+      if(Math.abs(n-p.dose)>1e-9){ out[key]=n; if(a0) desfazer.push({k:a0.k,motivo:'substituído por ajuste manual'}); return; }
+      if(a0) desfazer.push({k:a0.k,motivo:'desfeito: dose do plano restaurada'}); });
+    (((cur.add||{})[A])||[]).forEach((x,j)=>{ const key=A+'|+'+j; const n=g2num(x.dose); if(String(x.dose).trim()===''||isNaN(n)||n<=0){ er[key]='Informe a dose por hectare (maior que zero)'; return; }
+      out[key]={prod:x.prod,grupo:x.grupo,un:x.un,preco:x.preco,dose:n}; }); });
+  if(Object.keys(er).length){ self.setState({lp:Object.assign({},cur,{err:er})}); return; }
+  Object.values(cur.incl||{}).forEach(s=>aceitar.push(Object.assign({},s,{local:c.v.local})));
+  Object.keys(cur.inclRm||{}).forEach(k=>{ if(!aceitar.some(s=>s.substitui===k)) desfazer.push({k,motivo:'desfeito'}); });
+  let msgSolo='';
+  if(aceitar.length||desfazer.length){ const r=cenMudar(null,cc=>soloAceitar(cc,{cid:c.id,aceitar,desfazer},cur.chave,g2perfil().k));
+    if(r.erro){ self.setState({lp:Object.assign({},cur,{cmdErr:r.erro})}); return; } msgSolo=r.msg; }
+  const adj=JSON.parse(JSON.stringify(adjOf(self))); if(Object.keys(out).length) adj[cur.cid]=out; else delete adj[cur.cid];
+  const vals=Object.values(out); const nr=vals.filter(x=>x==='-').length, ni=vals.filter(x=>x&&typeof x==='object').length, nd=vals.length-nr-ni;
+  const partes=[nd?nd+(nd>1?' doses alteradas':' dose alterada'):'', nr?nr+(nr>1?' insumos retirados':' insumo retirado'):'', ni?ni+(ni>1?' insumos incluídos':' insumo incluído'):''].filter(Boolean);
+  self.setState({adj,lp:null,pq:null,cenrev:Date.now(),g2toast:(partes.length?partes.join(' · ')+' em '+c.v.local+'. ':'')+(msgSolo?msgSolo.replace(/\.$/,'')+' em '+c.v.local+'. ':'')+(!partes.length&&!msgSolo?'Sem ajustes em '+c.v.local+': vale o plano padrão. ':'')+'Plano operacional, recursos e demanda recalculados; o plano padrão e os outros talhões não mudaram.'}); }
+/* ---- Sugestões pelas análises (safra, §3.4): lista lado a lado padrão × sugestão; nada vem marcado (D-16); usa só as escolhidas, uma chave por envio ---- */
+function sgSugs(self,saf,manter){ const out=[]; cultRows(self,saf).forEach(c=>{ const R=soloSugsSaf(self,saf,c,false); R.sug.forEach(s=>{ if(!s.nega||(manter&&manter[s.k])) out.push({s,c,cu:R.cu}); }); }); return out; }   /* manter: linha negada no último envio continua com o motivo */
+function sgN(self,saf){ if(!saf) return 0; const k=(self.state.cenrev||0)+'|'+saf+'|'+JSON.stringify(adjOf(self))+'|'+cultRows(self,saf).map(c=>c.id+c.v.meta+c.v.plano+c.v.area).join(',');
+  if(self.__sgn&&self.__sgn.k===k) return self.__sgn.n; const n=sgSugs(self,saf).length; self.__sgn={k,n}; return n; }
+function sgAbrir(self){ const saf=self.state.saf; if(!saf) return; g2set(self,'g_sug',{sel:{},rows:null,q:'',f:{},qv:''}); self.setState({sg:{saf,chave:'LOTE-'+saf+'-'+Date.now(),neg:{}},pq:null}); }
+function sgRows(self){ const sg=self.state.sg; if(!sg) return []; const L=sgSugs(self,sg.saf,sg.neg); self.__sgL=L;
+  return L.map(x=>{ const s=x.s, c=x.c; const r={id:s.k,v:{},s:{},p:{}}; const tp={dose:'Outra dose',retirar:'Retirar',incluir:'Incluir'}[s.tipo];
+    r.p.tal=[{k:'b',t:c.v.local},{k:'mut',t:nf(c.v.area)+' ha'}]; r.s.tal=c.v.local; r.p.item=[{k:'txt',t:s.atv.nome},{k:'br'},{k:'mut',t:s.prod}]; r.s.item=s.atv.nome+' · '+s.prod;
+    r.p.pad=[{k:'txt',t:s.padrao===null?'—':soloDoseTxt(s.ef!==null&&s.ef!=='-'&&s.efOrig!=='padrão'?s.ef:s.padrao,s.un)}].concat(s.efOrig&&s.efOrig!=='padrão'?[{k:'br'},{k:'mut',t:s.efOrig==='análise'?'pela análise':'ajustado pelo usuário'}]:[]); r.s.pad=r.p.pad[0].t;
+    r.p.sug=[{k:'b',t:s.tipo==='retirar'?'retirar':(s.tipo==='incluir'?'incluir '+soloDoseTxt(s.sug,s.un):soloDoseTxt(s.sug,s.un))}]; r.s.sug=r.p.sug[0].t;
+    r.v.dif=s.dif; r.p.dif=[{k:'txt',t:soloQtdTxt(s.dif,s.un,true)}]; r.s.dif=r.p.dif[0].t; r.p.tipo=[{k:'txt',t:tp}]; r.s.tipo=tp;
+    r.p.lau=[{k:'act',t:s.laudo.id+' · Por quê',fn:'sgpq:'+s.k,lk:true,al:'Por quê: '+s.atv.nome+' · '+s.prod+' no '+c.v.local}]; r.s.lau=s.laudo.id;
+    const ng=(sg.neg||{})[s.k]; r.p.res=ng?[{k:'chip',t:'não gravada: '+ng,c:'red'}]:[{k:'mut',t:'—'}]; r.s.res=ng?'não gravada':''; return r; }); }
+function sgVals(self,v){ const sg=self.state.sg; v.sg_open=!!sg; const saf=self.state.saf; const n=(saf&&(self.state.step||1)===2)?sgN(self,saf):0; v.sg_has=n>0; v.sg_lnk='Sugestões pelas análises · '+n; v.sg_abrir=()=>sgAbrir(self);
+  v.sgpq=(k)=>{ self.__pqFoco='sg_x'; self.setState({pq:{k,from:'sg'}}); };
+  if(!sg) return; const S=safList(self)[sg.saf]||{}; const sel=(g2st(self,'g_sug').sel)||{}; const L=self.__sgL||[]; const ks=L.filter(x=>sel[x.s.k]&&!(sg.neg||{})[x.s.k]&&!x.s.nega).map(x=>x.s.k);
+  v.sg_titulo='Sugestões pelas análises · '+(S.nome||sg.saf); v.sg_sub='Padrão ao lado da sugestão, por talhão. Marque as que quer usar; as outras seguem como estão.';
+  v.sg_pe='Os demais talhões seguem a dose do plano.'; v.sg_closeT='Fechar'; v.sg_sec=[]; v.sg_hasPA=false; v.sg_ph='#';
+  v.sg_hasPB=true; v.sg_pt='Usar '+ks.length+(ks.length===1?' sugestão':' sugestões'); v.sg_pdis=!ks.length; v.sg_pst=ks.length?'':'opacity:.5;cursor:not-allowed;';
+  v.sg_err=sg.err||''; v.sg_hasErr=!!sg.err;
+  v.sg_close=()=>self.setState({sg:null,pq:null}); v.sg_key=(e)=>{ if(e&&e.key==='Escape'&&!self.state.pq){ e.preventDefault(); v.sg_close(); } };
+  v.sg_pgo=()=>{ if(!ks.length){ self.setState({sg:Object.assign({},self.state.sg,{err:'Marque ao menos uma sugestão.'})}); return; }
+    const itens=L.filter(x=>ks.indexOf(x.s.k)>=0).map(x=>Object.assign({},x.s,{local:x.c.v.local}));
+    const r=cenMudar(null,cc=>soloAceitarLote(cc,itens,self.state.sg.chave,g2perfil().k));
+    if(r.erro){ self.setState({sg:Object.assign({},self.state.sg,{err:r.erro})}); return; }
+    /* R14: gravar o aceite apaga o ajuste manual da sessão naquela chave */
+    const neg={}; (r.neg||[]).forEach(x=>{ neg[x.k]=x.motivo; }); const adj=JSON.parse(JSON.stringify(adjOf(self)));
+    itens.filter(it=>!neg[it.k]&&it.i>=0&&it.tipo!=='incluir').forEach(it=>{ const k0=it.atv.id+'|'+it.i; if(adj[it.cid]&&adj[it.cid][k0]!==undefined){ delete adj[it.cid][k0]; if(!Object.keys(adj[it.cid]).length) delete adj[it.cid]; } });
+    g2set(self,'g_sug',{sel:{},rows:null});
+    if(Object.keys(neg).length) self.setState({adj,cenrev:Date.now(),g2toast:r.msg,sg:Object.assign({},self.state.sg,{neg,err:'',chave:'LOTE-'+sg.saf+'-'+Date.now()})});
+    else self.setState({adj,cenrev:Date.now(),g2toast:r.msg,sg:null}); }; }
+/* Por quê (no painel de insumos ou no lote): a primária pelo contexto; negada pela R11, sem primária */
+function pqSafVals(self,v){ const pq=self.state.pq; let s=null, cu=null, prim=null;
+  if(pq&&pq.from==='lp'&&self.state.lp){ const c=cultRows(self,self.state.saf).find(r=>r.id===self.state.lp.cid); if(c){ const R=soloSugsSaf(self,self.state.saf,c,true); s=R.sug.find(x=>x.k===pq.k)||null; cu=R.cu; }
+    if(s&&!s.nega) prim={t:s.tipo==='retirar'?'Retirar pela análise':(s.tipo==='incluir'?'Incluir '+(/:ges$/.test(s.atv.id)?'gessagem':'calagem'):'Usar '+soloDoseTxt(s.sug,s.un)),go:()=>{ lpUsarPq(self,s); }}; }
+  if(pq&&pq.from==='sg'){ const x=(self.__sgL||[]).find(q=>q.s.k===pq.k); if(x){ s=x.s; cu=x.cu; prim={t:'Marcar esta sugestão',go:()=>{ const sel=Object.assign({},(g2st(self,'g_sug').sel)||{}); sel[s.k]=true; g2set(self,'g_sug',{sel}); self.setState({pq:null}); }}; } }
+  soloPqVals(self,v,s,{cu,prim,ver:s?'AG-02.dc.html#'+s.laudo.id:'',fechar:()=>self.setState({pq:null})}); }
+function lpUsarPq(self,s){ const lp=self.state.lp; if(!lp) return; if(s.tipo==='incluir'){ const x=Object.assign({},lp.incl||{},{[s.k]:s}); self.setState({lp:Object.assign({},lp,{incl:x,warn:false}),pq:null}); return; }
+  const c=cultRows(self,self.state.saf).find(r=>r.id===lp.cid); const pl=c&&planById(c.v.plano); const a=pl&&pl.atividades.find(q=>String(q.id)===String(s.atv.id)); const i=a?a.prods.findIndex(q=>q.prod===s.prod):-1; if(i<0){ self.setState({pq:null}); return; }
+  const key=String(a.id)+'|'+i; const d=Object.assign({},lp.draft), rr=Object.assign({},lp.rm||{}), sr=Object.assign({},lp.src||{});
+  if(s.tipo==='retirar'){ rr[key]=true; delete d[key]; } else { d[key]=String(s.sug).replace('.',','); delete rr[key]; } sr[key]={laudo:s.laudo.id,dose:s.tipo==='retirar'?'-':s.sug,s};
+  self.setState({lp:Object.assign({},lp,{draft:d,rm:rr,src:sr,warn:false}),pq:null}); }
 function enviar(self){ const saf=self.state.saf; const safObj=g2rows(self,GR('g_saf')).find(r=>r.id===saf); if(safObj&&safObj.ro){ self.setState({g2toast:'Safra encerrada: não gera solicitações.'}); return; }
   const dm=demanda(self,saf); const sols=Object.assign({},solMap(self)); const sol=sols[saf];
   const itens=Object.values(dm).filter(d=>d.liq>0.001);

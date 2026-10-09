@@ -140,7 +140,7 @@ function soloAtividades(cu, adj, aceites) {
   return { atvs: out, orf, ref }; }
 
 /* ---------- sugestões (a única fonte da linha, do lote, do Por quê e do "Uso no plano") ---------- */
-/* ctx: {S0, ls (soloLaudos), aceites, c (cenário, para a fase da O.S.), adj (sessão do cultivo), alvo(faz, tal) → {saf, nome} (R17)}
+/* ctx: {S0, ls (soloLaudos), aceites, c (cenário, para a fase da O.S.), adj (sessão do cultivo), alvo(faz, tal) → {saf, nome} (R17), todas (não omite a igual à efetiva)}
    cu: {id, saf, faz, local, tal, cultura, area, meta, plano (objeto), plantio, dt(a) → data ISO da atividade}
    Devolve {sug: [...], info: [...]}: cada sugestão diz o tipo (dose, retirar, incluir), a dose sugerida, a efetiva, a diferença no talhão,
    o laudo, a regra, as entradas e a conta; nega = motivo da R11 (a linha some no plano; o AG-02 diz por quê). */
@@ -158,7 +158,7 @@ function soloSugestoes(ctx, cu) {
   const push = (s) => { s.k = cu.id + '|' + s.atv.id + '|' + s.prod; s.cid = cu.id; s.plano = { id: pl.id, versao: pl.versao };
     s.ef = s.efX === undefined ? null : s.efX; delete s.efX;
     const efN = (s.ef === null || s.ef === '-') ? 0 : Number(s.ef); const sgN = s.tipo === 'retirar' ? 0 : s.sug;
-    if (s.tipo === 'retirar' ? s.ef === '-' : (s.ef !== null && s.ef !== '-' && prCmp(s.ef, s.sug) === 0)) return;   /* igual à efetiva: nada (37.2) */
+    if (!ctx.todas && (s.tipo === 'retirar' ? s.ef === '-' : (s.ef !== null && s.ef !== '-' && prCmp(s.ef, s.sug) === 0))) return;   /* igual à efetiva: nada (37.2); todas: o painel compara com o rascunho */
     if (s.tipo === 'incluir' && s.ef === null) s.dif = cenQtd(sgN, area); else s.dif = Math.round((cenQtd(sgN, area) - cenQtd(efN, area)) * 100) / 100;
     s.custo = Math.round(s.dif * (Number(s.preco) || 0) * 100) / 100; s.rot = R.rotulo; s.nega = negaDe(s.atv.id, s.dt); sug.push(s); };
   /* ---- calagem (R06), só com o 0–20 cm e T em cmolc/dm³ ---- */
