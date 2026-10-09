@@ -1,0 +1,41 @@
+name: Revisão do Codex (reacionar)
+
+# Quando o app do Codex cria ou atualiza o resumo da revisão num PR, roda de novo o check "Revisão do Codex no commit
+# atual" do head desse PR. Comentário não dispara workflow no commit do PR, por isso o re-run.
+# Só usa o número do PR e o login do autor do comentário; o texto do comentário nunca entra no shell.
+on:
+  issue_comment:
+    types: [created, edited]
+
+permissions: {}
+
+jobs:
+  reacionar:
+    name: Reacionar o portão do Codex
+    if: github.event.issue.pull_request && github.event.comment.user.login == 'chatgpt-codex-connector[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+      pull-requests: read
+    steps:
+      - name: Rodar de novo o portão no head do PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.issue.number }}
+        run: |
+          head="$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR" --jq .head.sha)"
+          # Espera a execução do push terminar (normalmente segundos); depois, re-run só se não passou.
+          id='' estado='' conclusao=''
+          for _ in $(seq 1 20); do
+            read -r id estado conclusao < <(gh api \
+              "repos/$GITHUB_REPOSITORY/actions/workflows/revisao-codex.yml/runs?head_sha=$head&event=pull_request&per_page=1" \
+              --jq '.workflow_runs[0] // empty | "\(.id) \(.status) \(.conclusion)"') || true
+            [ -z "$id" ] && { echo "Nenhuma execução do portão em $head."; exit 0; }
+            [ "$estado" = completed ] && break
+            sleep 10
+          done
+          [ "$estado" = completed ] || { echo "Portão ainda rodando em $head; nada a fazer."; exit 0; }
+          [ "$conclusao" = success ] && { echo "Portão já verde em $head."; exit 0; }
+          gh api --method POST "repos/$GITHUB_REPOSITORY/actions/runs/$id/rerun-failed-jobs"
+          echo "Portão do Codex reexecutado em $head (run $id)."

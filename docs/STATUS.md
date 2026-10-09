@@ -12,7 +12,7 @@ Atualizado em 29/09/2026 por Claude, sobre a `main` `15e53d27`. PR aberto não s
 | Repositório | Privado; PRs #2 a #15 integrados | https://github.com/adrptu/Safrion-Software- |
 | Fundação | Domínio (decimal, unidades e saldo por lote); PostgreSQL/PostGIS com RLS e isolamento entre organizações; login OIDC com sessões; concessão e revogação de acesso; primeira interface de estoque e cadastros; imagens de homologação verificadas na CI | PRs #5, #7, #8, #9, #10 e #11 |
 | Homologação | Terraform, conexão ao banco por IP privado e fila de vínculo integrados e validados na CI, sem plan nem apply. **Nenhum ambiente hospedado**: provisionar depende de autorização concreta de custo e destino | PR #14; `infra/terraform/`; `docs/OPERACAO.md` |
-| Proteção da `main` | Ruleset `24154464` ativo, conferido na leitura do servidor (alterado em 29/09, 10:13 de Brasília): exclusão e force push bloqueados, pull request obrigatório e os 10 checks obrigatórios do app GitHub Actions, com branch atualizada antes do merge. Sem exceção de bypass | PR #15; `tools/github/` |
+| Proteção da `main` | Ruleset `24154464` ativo, conferido na leitura do servidor (alterado em 29/09, 10:13 de Brasília): exclusão e force push bloqueados, pull request obrigatório e os 10 checks obrigatórios do app GitHub Actions, com branch atualizada antes do merge. Sem exceção de bypass. **Merge automático com o Codex** (09/10): o portão "Revisão do Codex no commit atual" e a resolução obrigatória das conversas estão no arquivo do ruleset, mas só valem depois que o proprietário autorizar aplicar o ruleset e ligar o auto-merge do repositório | PR #15; `tools/github/`; AGENTS.md §3 |
 | Produção | Não existe | — |
 
 ## Verificação executada e limite

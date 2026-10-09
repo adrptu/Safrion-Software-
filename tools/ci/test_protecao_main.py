@@ -24,6 +24,7 @@ JOBS_REAIS = [
     'Terraform — bootstrap',
     'Terraform — hml',
     'Estoque e cadastros no navegador (desktop e celular)',
+    'Revisão do Codex no commit atual',
     'Semgrep (regras, fixtures e inventário)',
 ]
 # Leitura do ruleset 24154464 em 29/09/2026 (GET, campos graváveis e metadados), antes dos checks obrigatórios.
@@ -65,7 +66,19 @@ class ChecksObrigatorios(unittest.TestCase):
         p = carregar()
         self.assertEqual(protecao.problemas(p, ATUAL, JOBS_REAIS), [])
         self.assertEqual([d.split(':', 1)[0] for d in protecao.diferencas(ATUAL, p)],
-                         ['regra nova'], 'o arquivo só pode acrescentar a regra de checks')
+                         ['regra alterada', 'regra nova'], 'só a regra de checks e a resolução das conversas mudam')
+        self.assertEqual([d for d in protecao.diferencas(ATUAL, p) if d.startswith('regra alterada')],
+                         ['regra alterada: pull_request ' + json.dumps(next(
+                             r for r in ATUAL['rules'] if r['type'] == 'pull_request')['parameters'],
+                             ensure_ascii=False) + ' -> ' + json.dumps(
+                             {**next(r for r in ATUAL['rules'] if r['type'] == 'pull_request')['parameters'],
+                              'required_review_thread_resolution': True}, ensure_ascii=False)])
+
+    def test_reaplicar_depois_de_ligar_a_resolucao_das_conversas(self):
+        ja = json.loads(json.dumps(ATUAL))
+        next(r for r in ja['rules'] if r['type'] == 'pull_request')['parameters'][
+            'required_review_thread_resolution'] = True
+        self.assertEqual(protecao.problemas(carregar(), ja, JOBS_REAIS), [])
 
     def test_contraprovas_do_arquivo(self):
         casos = {
@@ -81,6 +94,10 @@ class ChecksObrigatorios(unittest.TestCase):
                                                          'bypass_mode': 'always'}]),
             'alvo genérico': lambda p: p['conditions']['ref_name'].update(include=['~DEFAULT_BRANCH']),
             'outro nome de ruleset': lambda p: p.update(name='Proteção da main'),
+            'resolução das conversas desligada': lambda p: next(r for r in p['rules'] if r['type'] == 'pull_request')[
+                'parameters'].update(required_review_thread_resolution=False),
+            'resolução das conversas omitida': lambda p: next(r for r in p['rules'] if r['type'] == 'pull_request')[
+                'parameters'].pop('required_review_thread_resolution'),
             'aprovação alterada': lambda p: next(r for r in p['rules'] if r['type'] == 'pull_request')[
                 'parameters'].update(required_approving_review_count=1),
             'parâmetro existente omitido': lambda p: next(r for r in p['rules'] if r['type'] == 'pull_request')[

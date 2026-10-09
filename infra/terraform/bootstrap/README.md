@@ -74,7 +74,7 @@ O `cloudshell.sh` executa e confere estes passos: `state` cria e ajusta; `planej
 Numa cópia limpa da `main` (`gh auth login` pelo código de dispositivo, digitado pelo próprio Adrianus; `gh repo clone adrptu/Safrion-Software-`):
 
 ```sh
-infra/terraform/cloudshell.sh conferir                 # a cópia é a main atual do GitHub, com os 10 checks obrigatórios verdes
+infra/terraform/cloudshell.sh conferir                 # a cópia é a main atual do GitHub, com os checks obrigatórios verdes
 infra/terraform/cloudshell.sh state <projeto>          # bucket do state do bootstrap, conferido no servidor (seção acima)
 infra/terraform/cloudshell.sh planejar <projeto>       # Terraform e TFLint pelo SHA-256 do infra.yml, travas e plan
 infra/terraform/cloudshell.sh aplicar <projeto> <hash> # só depois dos pareceres pelo hash, e sem veto do Adrianus

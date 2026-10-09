@@ -1,0 +1,40 @@
+name: Revisão do Codex
+
+# Portão do merge automático: o check só fica verde quando o Codex concluiu a revisão do commit atual do PR.
+# Enquanto o Codex não termina, o check falha com o motivo; revisao-codex-reacionar.yml roda de novo quando o
+# resumo do Codex muda. Na main (push), passa direto: a revisão já foi exigida no PR (cloudshell.sh conferir lê os
+# checks obrigatórios no commit da main).
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+concurrency:
+  group: revisao-codex-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  codex:
+    name: Revisão do Codex no commit atual
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Conferir o resumo do Codex
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENTO: ${{ github.event_name }}
+          PR: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [ "$EVENTO" = pull_request ]; then
+            gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments?per_page=100" --jq '.[]' >"$RUNNER_TEMP/comentarios.jsonl"
+            python3 tools/github/revisao_codex.py --evento "$EVENTO" --head "$HEAD_SHA" --comentarios "$RUNNER_TEMP/comentarios.jsonl"
+          else
+            python3 tools/github/revisao_codex.py --evento "$EVENTO"
+          fi
