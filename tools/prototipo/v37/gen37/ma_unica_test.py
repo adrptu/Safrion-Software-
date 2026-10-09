@@ -28,9 +28,15 @@ try:
              ('MA-04.dc.html#OM-0234', 'om=OM-0234'), ('PM.dc.html#PM-01', 'plano=PM-01'), ('MA-01.dc.html#novo:a14', 'vis=planos&novo=plano:a14')]
     ruim = []
     for de, para in rotas:
-        m.c.call('Page.navigate', {'url': f'http://127.0.0.1:{m.t.p}/{de}'}); time.sleep(1.3)
-        h = J("location.pathname.split('/').pop()+location.hash")
-        got = set(h.split('#', 1)[1].split('&')) if h.startswith('MA.dc.html#') else set()
+        # sob carga a tela MA demora a montar: passa por about:blank (nada da navegação anterior pendente) e espera o destino até 10 s, em vez de 1,3 s fixos
+        m.c.call('Page.navigate', {'url': 'about:blank'}); time.sleep(.15)
+        m.c.call('Page.navigate', {'url': f'http://127.0.0.1:{m.t.p}/{de}'}); t0 = time.time(); h = ''
+        while True:
+            time.sleep(.25)
+            try: h = J("document.readyState==='complete'?location.pathname.split('/').pop()+location.hash:''") or ''
+            except Exception: h = ''
+            got = set(h.split('#', 1)[1].split('&')) if h.startswith('MA.dc.html#') else set()
+            if set(para.split('&')) <= got or time.time() - t0 > 10: break
         if not set(para.split('&')) <= got: ruim.append((de, h))   # a visão de Ordens a ≥ 1024 px ainda acrescenta &om= do painel aberto sozinho
     pag = {k: v.get('page') for k, v in json.load(open(os.path.join(PJ, 'canvas.json')))['boards'].items()}
     m.ok(not ruim and not any(f in pag for f in REDIRECIONA), 'AC-PCM-02 · PM, MA-01..05 e MA-04det (com #OM-, #PM-, #novo:) levam ao endereço novo; fora do canvas', ruim)
@@ -137,8 +143,18 @@ try:
     m.ir('om=OM-0234'); pw = J("(()=>{const p=document.querySelector('#ma-painel'); const r=p.getBoundingClientRect(); const pr=[...p.querySelectorAll('button')].find(b=>getComputedStyle(b).backgroundColor==='rgb(30, 122, 76)'&&b.getClientRects().length); const q=pr?pr.getBoundingClientRect():null; return [Math.round(r.width), q?Math.round(q.bottom):-1];})()")
     m.ok(all(v[0] <= 0 for v in r390.values()) and all(v[1] >= min(5, v[2]) for k, v in r390.items() if k != 'ativo=a01') and pw[0] >= 380 and 0 < pw[1] <= 844,
          'AC-PCM-22 · 390 px: sem rolagem lateral; ≥ 5 linhas acima da dobra; painel em tela cheia com a primária sem rolar', [r390, pw])
-    m.ir('om=OM-0234'); m.clk('Liberar mesmo assim', '#ma-painel'); m.clk('Liberar mesmo assim', '#ma-painel')
-    m.ok(m.man("m.oms['OM-0234'].etapa") == 'Liberadas' and m.largura() <= 0, 'fluxo a 390 px · com conflito, "Liberar mesmo assim" (ponte até o 1b) libera uma vez')
+    # recusa a 390 px: Ana (agrônoma e gestora) não tem o papel do PCM; vê os comandos da OM desabilitados, com o motivo, e nada muda
+    m.ir('om=OM-0234', perfil='Ana')
+    r = J("(()=>{const bs=[...document.querySelectorAll('#ma-painel button')].filter(b=>b.getClientRects().length&&/^(Liberar|Mover janela)/.test(b.innerText.trim())); bs.forEach(b=>b.click()); return bs.map(b=>[b.innerText.trim(),b.disabled]);})()"); time.sleep(.4)
+    m.ok(bool(r) and all(x[1] for x in r) and 'Ação do Otávio' in m.pan() and m.man("m.oms['OM-0234'].etapa") == 'A liberar' and m.largura() <= 0,
+         'fluxo a 390 px · recusa: Ana vê "Mover janela"/"Liberar" desabilitados com o motivo (Ação do Otávio); tocar não muda a OM-0234', r)
+    # normal e repetição a 390 px: Otávio libera com o conflito aceito; duplo toque reserva as peças uma vez só
+    m.ir('om=OM-0234', perfil='Otávio')
+    RES = "Object.values(m.itens).reduce((s,i)=>s+(+i.reservado||0),0)"
+    res0 = m.man(RES); q = m.man("(m.oms['OM-0234'].pecas||[]).filter(p=>p.item).reduce((s,p)=>s+(+p.qtd||0),0)")
+    m.clk('Liberar mesmo assim', '#ma-painel'); m.clk('Liberar mesmo assim', '#ma-painel'); res1 = m.man(RES)
+    m.ok(m.man("m.oms['OM-0234'].etapa") == 'Liberadas' and m.largura() <= 0 and abs((res1 or 0) - (res0 or 0) - (q or 0)) < 1e-9,
+         'fluxo a 390 px · com conflito, "Liberar mesmo assim" (ponte até o 1b) libera uma vez; duplo toque reserva as peças uma vez só', [res0, res1, q])
     m.c.size(1280, 900); m.ir('vis=ordens', perfil='Otávio', limpa=True); time.sleep(.4)
     role = J("(document.querySelector('#ma-painel')||{}).getAttribute&&document.querySelector('#ma-painel').getAttribute('role')")
     J("document.body.focus()")

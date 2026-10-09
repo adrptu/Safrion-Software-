@@ -135,7 +135,7 @@ Funções que os juízes apontaram como perdidas e onde ficaram:
 
 ## 7. Implementação (executado, 05/10 a 09/10/2026) e próximos passos
 
-Rótulo desta seção: **executado** na branch `claude/v44-pcm` (base `99537ca`; junção com `claude/prototipo-v44` em `ecc8b00`). Autor Claude; revisão do Codex sem bloquear (AGENTS §3.5).
+Rótulo desta seção: **executado** na branch `claude/v44-pcm` (base `99537ca`; junções com `claude/prototipo-v44` em `ecc8b00` e `cdc185f`). Autor Claude; revisão do Codex sem bloquear (AGENTS §3.5).
 
 **Passos feitos, na ordem da §7.2 (o 1b e o 1c ficam para depois, ver abaixo):**
 
@@ -144,7 +144,7 @@ Rótulo desta seção: **executado** na branch `claude/v44-pcm` (base `99537ca`;
 | S1 + S2 + 1a | `f9ea51a`, `eba72ba` | menu com 1 item; tela `MA` com 4 visões; painel único da OM; redirecionamentos (D-24); estado `v=4` da manutenção dentro do cenário único (`c.man`, sem a chave `talhao-os-manutencao-v1`) |
 | S3 | `a89a05d` | CD-03 e O.S. leem condição, responsável técnico e leitura de `c.man` |
 | S4 | `5f4ff11` | MB-01 (Minha fila do Zé), MB-09, MB-09det e MB-04 → achado, com Ver como Marcos · Zé e sem sinal |
-| testes | `a88d51f`, `0725404`, `0c68f18` | testes antigos no endereço novo; `ma_unica`, `ma_rastreio` (F01–F111), `ma_atrito`, `ma_app`; item 12 e horímetro único em `ma_regras` |
+| testes | `a88d51f`, `0725404`, `0c68f18` e o da retomada de 09/10 | testes antigos no endereço novo; `ma_unica`, `ma_rastreio` (F01–F111), `ma_atrito`, `ma_app`; item 12 e horímetro único em `ma_regras`; na retomada, `ma_unica` ganha recusa e repetição a 390 px (reserva uma vez) e espera o redirecionamento em vez de 1,3 s fixos |
 
 **Decisões tomadas na implementação (delegadas; o Codex revisa):**
 
