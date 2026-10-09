@@ -132,3 +132,55 @@ Funções que os juízes apontaram como perdidas e onde ficaram:
 | D-47 | Estado `v=3` no S1 e `v=4` no S2; `c.achados` substitui `c.ach`; estado antigo volta ao seed (DM:272) | estado salvo `v=2` quebraria a leitura de `c.achados` (R08) | migração campo a campo | — |
 | D-48 | Prefixo por origem: Relato e Alerta → SM; Inspeção → INSP; Não conforme do checklist da OM → NC; número = maior do prefixo + 1 | "o prefixo da origem" não estava definido, e um contador ingênuo repetia INSP-105 (R25) | um prefixo só | — |
 | D-49 | Responsável técnico nos dados de manutenção do ativo (DM), semeado do `RESP` de M:126 (a01, a02, a05 → Zé; a11, a15, a12 → Equipe elétrica; demais → Otávio); editável no painel Condição; só leitura no CD-03 (S3) | a fonte era um mapa local da tela que sai (PCM-R17) | campo no CD-03 já no S1 (amplia o escopo) | mover para o CD-03 no S3 |
+
+## 7. Implementação (executado, 05/10 a 09/10/2026) e próximos passos
+
+Rótulo desta seção: **executado** na branch `claude/v44-pcm` (base `99537ca`; junção com `claude/prototipo-v44` em `ecc8b00`). Autor Claude; revisão do Codex sem bloquear (AGENTS §3.5).
+
+**Passos feitos, na ordem da §7.2 (o 1b e o 1c ficam para depois, ver abaixo):**
+
+| Passo | Commit | O que ficou no protótipo |
+|---|---|---|
+| S1 + S2 + 1a | `f9ea51a`, `eba72ba` | menu com 1 item; tela `MA` com 4 visões; painel único da OM; redirecionamentos (D-24); estado `v=4` da manutenção dentro do cenário único (`c.man`, sem a chave `talhao-os-manutencao-v1`) |
+| S3 | `a89a05d` | CD-03 e O.S. leem condição, responsável técnico e leitura de `c.man` |
+| S4 | `5f4ff11` | MB-01 (Minha fila do Zé), MB-09, MB-09det e MB-04 → achado, com Ver como Marcos · Zé e sem sinal |
+| testes | `a88d51f`, `0725404`, `0c68f18` | testes antigos no endereço novo; `ma_unica`, `ma_rastreio` (F01–F111), `ma_atrito`, `ma_app`; item 12 e horímetro único em `ma_regras` |
+
+**Decisões tomadas na implementação (delegadas; o Codex revisa):**
+
+| ID | O quê | Por quê | Como reverter |
+|---|---|---|---|
+| D-50 | Portões da §0.2 que dependiam do Codex: adotados os padrões já registrados e seguido, por ordem do proprietário ("concluir à noite", 05/10): Ver como pelo `G2_PERFIS`/`g2perfil` da frente D (CTL-3), com Otávio como 6º perfil; Aprovar e liberar (PEND-OS-01) fica no 1b, como a §3.3 manda | sem o registro, o S1 não entraria; o dono pediu a entrega | — |
+| D-51 | O perfil injetado nos testes antigos "Otávio · Gestor" passou a "Gil · Gestor" | Otávio passou a ser o responsável de manutenção no `G2_PERFIS`; o nome repetido misturaria papéis | voltar o nome quando o teste não usar mais o cadastro |
+| D-52 | "Propor substituto (simulado · o PCP decide)" fica como ponte no bloco Janela e equipe da OM que trata o ativo bloqueado, só para Otávio | a §0.1 tira a função só com a PCMS-M09b (1b); sem a ponte, a OM-0233 ficava sem saída para a produção | sai no 1b, com "Pedir decisão da gerência" |
+| D-53 | Na junção com a Colheita, o estado do cenário passa a `v=5`, com `c.man` e `c.producao` | as duas frentes tinham subido para `v=4` com conteúdos diferentes; um salvo `v=4` de qualquer uma quebraria a outra | — |
+| D-54 | A 390 px, cartões e "sem plano" vão para depois da grade; o conteúdo do painel rola e o rodapé com a primária fica à vista | AC-PCM-22 (5 linhas acima da dobra e primária sem rolar) | — |
+
+**Item 12 (Codex 6064114787 §2, S2: "receber, aplicar, devolver e estornar material da manutenção geram movimentos na fonte única, sem saldo ou custo duplicado"):**
+- **O 1a garante (executado, `ma_regras_test` caso "Item 12"):**
+  - um estado: a manutenção vive em `CEN0.man`;
+  - um saldo por item: nenhum item da manutenção tem lote em `c.lotes`;
+  - um custo: `manCusto`, contado uma vez no período;
+  - conservação no ciclo da OM-0235 pelas pontes: saldo final = inicial + recebido − aplicado; reservado volta ao inicial;
+  - receber, liberar e devolver de novo não somam de novo.
+- **O 1a não fecha (dito sem disfarce):** o saldo da manutenção ainda é próprio (`c.man.itens`, fora do Estoque). Receber, aplicar e devolver ainda não gravam movimento em `c.movs`, e o Estoque não vê as peças da oficina. É o "estoque paralelo" do achado. Não diverge de outro saldo porque o item só existe num lugar, mas o Estoque e o custo geral ainda não o enxergam.
+- **Fecha no 1b** (PCMS §11.2; depende de `cenMudar(cmd)`, que nasce no SUP-2a, e do SUP-2b):
+  - lotes do Almox. oficina em `c.lotes` e REQ com `dom:'man'`;
+  - recebimento, entrega, consumo, devolução e estorno de reserva como movimentos em `c.movs` (PCMS §3.2), com chave e versão;
+  - saem `ITENS.saldo` e `ITENS.reservado` e as pontes "Registrar recebimento", "Resolver sobras" e "Solicitar compra".
+  - **Aceite:** `pcm_sup_test` mais o caso "Item 12" adaptado: o saldo passa a ser a soma dos lotes, com as mesmas igualdades.
+
+**Horímetro único e "Gerar ordem" sem repetição (CTL-01 PLANO (d); Codex 6064114787 §3), confirmados:**
+- **No código:**
+  - `manLeitura` é a única entrada de leitura (abastecimento, achado, leitura avulsa e conclusão), com histórico em `c.leituras`;
+  - o CD-03 só lê;
+  - "Gerar" existe só em Sem ordem (lote), no painel do vencimento e no painel do achado, pela mesma regra (`manGerar`).
+- **Nos testes:** `ma_regras_test` (casos AC-PCM-15 e "CTL-01 (d)"), `cada_cd03_test` e `ma_rastreio_test` (F73, F74, F97, F107 e F108).
+
+**Próximos passos (nesta ordem, Codex 6064114787 §3):**
+1. SUP-1 → SUP-2a → SUP-2b (outra frente).
+2. PCM 1b: um estoque, aprovar, Aprovar e liberar, conflito pela gerência e Canceladas.
+3. PCM 1c: compra e recebimento reais; C2 e C11 completos.
+4. Depois: PCMS Blocos 2 a 7.
+
+**Fora desta frente:** o retorno visual na troca de tela e de etapa ("flash" de mudança de contexto, pedido do proprietário) é da frente DS, no estilo comum do engine. A tela `MA` não tem estilo próprio para isso e herda o padrão quando ele entrar.
