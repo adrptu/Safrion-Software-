@@ -128,12 +128,33 @@ caso('B16 DEM-06 o uso do plano antes de hoje sem O.S. continua fora da demanda:
                           {k:ca[k] for k in ('real','bruta','liq','falta','rup','cob')}))(lg['Calcário dolomítico filler']))
 caso('B17 OS-0420 com a chave de origem c4|a3 (processo_os: "REC-014 v2 · Plantio e adubação de base"; campo: 1ª onda de 100 ha da NEC-028)',
      lambda: (next(x for x in D2.os_dem() if x['id']=='OS-0420')['chaves']==['c4|a3'],))
+def b18():
+    c=copy.deepcopy(cenario.seed()); c['ordens']['OS-0418']['etapa']='Canceladas'; dx=D2.demanda('S2627',osd=D2.os_dem(c))
+    return ('Ureia 45%' not in dx and nins(dx)==13 and perto(tot(dx),426721.00,0.005),(nins(dx),round(tot(dx),2)))
+caso('B18 O.S. cancelada no cenário (OS-0418): a Ureia sai da demanda · 13 insumos · R$ 426.721,00',b18)
+NOVA=dict(id='OS-0440',novo=True,jan='2026-10-01',keys=['c1|a7'],tipo='Pulverização · Fungicida 2ª aplicação + inseticida',talhao='T1-A',area=160,etapa='A liberar',
+          faz='Santa Rita',saf='2026/27',atv=dict(nome='Fungicida 2ª aplicação + inseticida'))
+def cen_nova():
+    c=copy.deepcopy(cenario.seed())
+    c['ordens']['OS-0440']=dict(id='OS-0440',tipo=NOVA['tipo'],talhao='T1-A',area=160,etapa='A liberar',versao='v1',realizado=0,saldo=160,resp='—',
+        ins=[dict(p='Fungicida A',dose=0.5,un='L',tot=80.0),dict(p='Inseticida B',dose=0.3,un='L',tot=48.0)],req=None,selos=[],ap=[],reservado=False,osc=dict(novo=NOVA))
+    return c
+def b19():
+    dx=D2.demanda('S2627',osd=D2.os_dem(cen_nova())); ev=[e for e in dx['Fungicida A']['evs'] if e['tipo']=='dem' and e.get('own')]
+    return (not any(e.get('chave')=='c1|a7' for e in ev) and any(e.get('chave')=='OS-0440' and e['dt']=='2026-10-01' and e['q']==80 for e in ev) and perto(tot(dx),tot(d),0.005),
+            [(e.get('chave'),e['dt'],e['q']) for e in ev])
+caso('B19 O.S. nova emitida no cenário (OS-0440, c1|a7, janela 01/10): substitui a parte do plano (80 L de 14/12 viram 80 L em 01/10), sem somar os dois; o total não muda',b19)
 # ---------------- C · paridade JS × Python (a mesma conta nos dois lados) ----------------
 print('== C · paridade cal01.js/cenario.js × dados2')
 def c1():
     js=runjs(PRE+'\n'+CAL+f"\nconsole.log(JSON.stringify(cenOsDem(CEN0,{json.dumps(D2.os_base(),ensure_ascii=False)})));"); py=D2.os_dem()
     return (json.loads(json.dumps(py))==js,[(a['id'],b['id']) for a,b in zip(py,js) if a!=b][:3] or (len(py),len(js)))
 caso('C1 cenOsDem(CEN0) (JS) = dados2.os_dem() (Python): mesmas ordens, chaves, datas, pendentes e contas',c1)
+def c1b():
+    cn=cen_nova(); cn['ordens']['OS-0418']['etapa']='Canceladas'; cn['reqs']['REQ-035']['itens'][0]['custodia']=40
+    js=runjs(PRE+'\n'+CAL+f"\nconsole.log(JSON.stringify(cenOsDem({json.dumps(cn,ensure_ascii=False)},{json.dumps(D2.os_base(),ensure_ascii=False)})));"); py=D2.os_dem(cn)
+    return (json.loads(json.dumps(py))==js and any(o['id']=='OS-0440' for o in js) and not any(o['id']=='OS-0418' for o in js),[(a['id'],b['id']) for a,b in zip(py,js) if a!=b][:3] or (len(py),len(js)))
+caso('C1b paridade num cenário alterado (ordem nova, ordem cancelada, custódia mudada): cenOsDem = os_dem',c1b)
 def c2():
     dif=[]
     for saf,px in (('S2627',None),('S27SF',None),('LG2627',None),('S2627',{'c4':'SOJA-AT','c5':'SOJA-AT','c6':'SOJA-AT','c7':'SOJA-AT'})):
