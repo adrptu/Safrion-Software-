@@ -62,7 +62,7 @@ window.PTO=(t,root)=>{ const e=ACHA(t,root); if(!e) return null; e.scrollIntoVie
 window.PERFIL=(k)=>{ localStorage.setItem('safrion.perfilDemo',k); return k; };
 'ok'"""
 def lib(): J(LIB)
-CONC = 'Concluir execução'
+CONC = 'Enviar para conferência'   # NAV-CLAREZA 3 (rodada 1): o verbo do efeito, como a O.S.
 def ir(pg, limpa=False, w=1440, h=1000):
     t.c.size(w, h)
     if limpa:
@@ -153,12 +153,12 @@ try:
         clk('Fechar', 'aside')
         # (3) OB-0110: concluir, conferir (Paula), fechar recusado pela custódia
         row('OB-0110'); p = pan()
-        t.chk('(3) OB-0110 Em execução: balanço com as razões de K01 (A 80,00 %, B 15,00 %, descarte 5,00 %, recuperação 95,00 %) e primária "Concluir execução"', all(x in p for x in ('80,00 %', '15,00 %', '5,00 %', '95,00 %')) and J("PPRIM()") == ['Concluir execução'] and 'Fechar processo' not in p, [J("PPRIM()"), p[:600]])
-        clk('Concluir execução', 'aside'); et = cen("c.ordens['OB-0110'].etapa"); tc = toast(); ch = J(CHIP)
+        t.chk('(3) OB-0110 Em execução: balanço com as razões de K01 (A 80,00 %, B 15,00 %, descarte 5,00 %, recuperação 95,00 %) e primária "Enviar para conferência"', all(x in p for x in ('80,00 %', '15,00 %', '5,00 %', '95,00 %')) and J("PPRIM()") == [CONC] and 'Fechar processo' not in p, [J("PPRIM()"), p[:600]])
+        clk(CONC, 'aside'); et = cen("c.ordens['OB-0110'].etapa"); tc = toast(); ch = J(CHIP)
         t.chk('(3) retorno da mudança de fase: o aviso diz "OB-0110 em conferência" com a diferença e quem confere; o selo do painel passa a "Em conferência"',
               'OB-0110 em conferência' in tc and 'Paula (conferência) confere o balanço' in tc and ch == 'Em conferência', [tc, ch])
         perfil('Paula'); clk('Conferir balanço', 'aside'); cf = cen("(c.ordens['OB-0110'].ben.conf||{}).quem")
-        t.chk('(3) Concluir (Igor) → Em conferência; Conferir balanço gravado em nome da Paula (conferência), diferença 0', et == 'Em conferência' and cf == 'Paula (conferência)', [et, cf, toast()])
+        t.chk('(3) Enviar para conferência (Igor) → Em conferência; Conferir balanço gravado em nome da Paula (conferência), diferença 0', et == 'Em conferência' and cf == 'Paula (conferência)', [et, cf, toast()])
         perfil('Igor'); clk('Fechar processo', 'aside'); p = pan()
         t.chk('(3) Fechar recusado: "Sobra em custódia: Caixa de mamão Formosa 10 kg 60 un. Receba a devolução no Estoque."', 'Sobra em custódia: Caixa de mamão Formosa 10 kg 60 un. Receba a devolução no Estoque.' in p and cen("c.ordens['OB-0110'].etapa") == 'Em conferência', p[-300:])
         # devolução no Estoque (Rui, almoxarife)
@@ -215,7 +215,7 @@ try:
     if 'erros' in MODOS:
         print('== erros · recusas, estorno e repetição pela tela')
         ir('BEN.dc.html#OB-0110', limpa=True); time.sleep(.3)
-        r0 = rev(); perfil('Ana'); clk('Concluir execução', 'aside'); p = pan()
+        r0 = rev(); perfil('Ana'); clk(CONC, 'aside'); p = pan()
         t.chk('perfil sem o papel (Ana) recusado: "decisão de Igor (responsável de produção)", nada gravado', 'decisão de Igor (responsável de produção)' in p and rev() == r0 and cen("c.ordens['OB-0110'].etapa") == 'Em execução', p[-200:])
         perfil('Igor'); clk('+ Registrar saída', 'aside'); clk('Produto', 'aside'); clk('A', 'aside'); setv('#pf_cx', '10'); setv('#pf_br', '106'); clk('Registrar', 'aside'); p = pan()
         t.chk('massa pesada não se cria: +100 kg de A recusado com as parcelas, nada gravado', 'Saídas pesadas 12.100 kg > entrada 12.000 kg + tolerância 12 kg' in p and rev() == r0, p[-300:])
@@ -227,14 +227,14 @@ try:
         t.chk('estorno com motivo: S-02 riscada, 180 cx voltam à custódia (240), MV estorno-consumo; o relançamento abre herdando fluxo e classe', st == ['Pesagem refeita', 240, 'estorno-consumo'] and 'relançar s-02' in p.lower()
               and J("[...document.querySelectorAll('aside button[aria-pressed=true]')].map(b=>N(b.innerText)).join('|')") == 'Produto|B', [st, J("[...document.querySelectorAll('aside button[aria-pressed=true]')].map(b=>N(b.innerText)).join('|')"), p[p.lower().find('relançar'):][:120]])
         bl = J("(()=>{ const a=[...document.querySelectorAll('aside[role=dialog]')].find(VIS); const s=a&&[...a.querySelectorAll('section')].find(x=>/balanço de massa/i.test(x.getAttribute('aria-label')||'')); return s?N(s.innerText):''; })()") or ''
-        t.chk('em execução com 1.800 kg ainda não registrados: o balanço mostra "Em processo" e a diferença "apurada no Concluir" (não "acima da faixa")',
-              'Em processo 1.800 kg' in bl and 'apurada no Concluir' in bl and 'acima da faixa' not in bl, bl)
+        t.chk('em execução com 1.800 kg ainda não registrados: o balanço mostra "Em processo" e a diferença "apurada no envio para conferência" (não "acima da faixa")',
+              'Em processo 1.800 kg' in bl and 'apurada no envio para conferência' in bl and 'acima da faixa' not in bl, bl)
         setv('#pf_cx', '180'); setv('#pf_br', '1808'); J("(()=>{ const b=[...document.querySelectorAll('aside button')].find(x=>N(x.innerText)==='Registrar'); b.click(); b.click(); })()"); time.sleep(.6)
         n = cen("c.ordens['OB-0110'].ben.sai.filter(s=>!s.estorno).length"); nm = cen("c.movs.filter(m=>m.tipo==='consumo').length")
         tc = toast(); p = pan()
         t.chk('toque duplo no Registrar (mesma chave): 1 registro novo e 1 MV de consumo; o aviso do registro fica (sem "Não gravado")', n == 3 and nm == 1 and 'S-04 registrada' in tc and 'não gravado' not in p.lower(), [n, nm, tc, p[:200]])
-        row('OB-0110'); r0 = rev(); J("(()=>{ const b=[...document.querySelectorAll('aside button')].find(x=>N(x.innerText)==='Concluir execução'); b.click(); b.click(); })()"); time.sleep(.6); p = pan(); tc = toast()
-        t.chk('toque duplo em "Concluir execução": grava uma vez e o retorno não vira erro (sem "Não gravado"; o aviso diz em conferência ou "Já feito")',
+        row('OB-0110'); r0 = rev(); J("(()=>{ const b=[...document.querySelectorAll('aside button')].find(x=>N(x.innerText)==='Enviar para conferência'); b.click(); b.click(); })()"); time.sleep(.6); p = pan(); tc = toast()
+        t.chk('toque duplo em "Enviar para conferência": grava uma vez e o retorno não vira erro (sem "Não gravado"; o aviso diz em conferência ou "Já feito")',
               cen("c.ordens['OB-0110'].etapa") == 'Em conferência' and rev() == r0 + 1 and 'não gravado' not in p.lower() and ('em conferência' in tc or 'Já feito' in tc), [tc, p[:300]])
         clk('Justificar diferença', 'aside'); clk('Perda não identificada', 'aside'); setv('#pf_tj', 'fruta caída na esteira'); clk('Justificar diferença', 'aside'); p = pan()
         t.chk('diferença de 100 kg (0,83 %): Igor recusado "0,83 % > alçada de 0,5 %: decide Ana (gestora)"', '0,83 % > alçada de 0,5 %: decide Ana (gestora)' in p, p[-300:])
@@ -258,14 +258,14 @@ try:
         t.chk('BEN a 390 px: sem rolagem lateral; lista em cartões (2 ordens); ação primária visível presa ao rodapé', m and not m['lado'] and m['cards'] == 2 and m['prim'], m)
         shot('celular_lista')
         J("(()=>{ const k=[...document.querySelectorAll('.pr-card')].find(x=>N(x.innerText).indexOf('OB-0110')>=0); k&&k.click(); })()"); time.sleep(.6)
-        d = J("(()=>{ const a=[...document.querySelectorAll('aside[role=dialog]')].find(VIS); if(!a) return null; const r=a.getBoundingClientRect(); const b=[...a.querySelectorAll('button')].filter(VIS).find(x=>N(x.innerText)==='Concluir execução'); "
+        d = J("(()=>{ const a=[...document.querySelectorAll('aside[role=dialog]')].find(VIS); if(!a) return null; const r=a.getBoundingClientRect(); const b=[...a.querySelectorAll('button')].filter(VIS).find(x=>N(x.innerText)==='Enviar para conferência'); "
               "a.scrollTop=a.scrollHeight; const br=b&&b.getBoundingClientRect(); return {w:Math.round(r.width), fora:r.left<-1||r.right>innerWidth+1, prim:!!b&&br.bottom<=innerHeight+1&&br.top>=0}; })()")
-        t.chk('painel da OB-0110 a 390 px: largura toda, sem corte, primária "Concluir execução" alcançável', d and d['w'] >= 380 and not d['fora'] and d['prim'], d)
+        t.chk('painel da OB-0110 a 390 px: largura toda, sem corte, primária "Enviar para conferência" alcançável', d and d['w'] >= 380 and not d['fora'] and d['prim'], d)
         shot('celular_painel')
         # fluxo a 390 px: avançar (Concluir, Conferir), recusa (Fechar com caixas em custódia) e repetição (toque duplo no Retirar)
         TV = "(()=>{ const e=[...document.querySelectorAll('[role=status]')].find(x=>N(x.innerText)); if(!e) return null; const r=e.getBoundingClientRect(); return r.top>=0&&r.bottom<=innerHeight&&r.left>=0&&r.right<=innerWidth; })()"
-        perfil('Igor'); r0 = rev(); clk('Concluir execução', 'aside'); tc = toast(); ch = J(CHIP); tv = J(TV)
-        t.chk('390 px · Concluir: o aviso "OB-0110 em conferência" aparece inteiro na tela e o selo do painel muda para "Em conferência"', 'OB-0110 em conferência' in tc and ch == 'Em conferência' and tv and rev() == r0 + 1, [tc, ch, tv])
+        perfil('Igor'); r0 = rev(); clk(CONC, 'aside'); tc = toast(); ch = J(CHIP); tv = J(TV)
+        t.chk('390 px · Enviar para conferência: o aviso "OB-0110 em conferência" aparece inteiro na tela e o selo do painel muda para "Em conferência"', 'OB-0110 em conferência' in tc and ch == 'Em conferência' and tv and rev() == r0 + 1, [tc, ch, tv])
         perfil('Paula'); clk('Conferir balanço', 'aside'); tc = toast()
         t.chk('390 px · Conferir balanço gravado pela Paula; o aviso diz o próximo passo', 'conferido por Paula (conferência)' in tc and 'Próximo passo: Fechar processo' in tc, tc)
         perfil('Igor'); r1 = rev(); clk('Fechar processo', 'aside'); p = pan()

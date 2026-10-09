@@ -186,7 +186,7 @@ function benProx(c, o) { const b = benBal(o); const it = benReqItem(c, o);
   if (o.etapa === 'Liberadas') { const falta = it && cenSaldoEntregar(it) > 1e-9 && !(it.custodia > 1e-9);
     return { t: 'Iniciar processo', quem: benProdQ(), acao: 'iniciar', nota: falta ? 'Caixas da ' + o.req + ' ainda no Estoque: ' + benQuem('almoxarife') + ' entrega no balcão (' + benUn(cenSaldoEntregar(it)) + ').' : '' }; }
   if (o.etapa === 'Em execução') { const pr = benValidos(o).some(s => s.fluxo === 'Produto');
-    const ep = benEmProc(o); return pr ? { t: 'Concluir execução', quem: benProdQ(), acao: 'concluir', nota: prCmp(ep, 0) > 0 ? 'O que não foi registrado (' + benKg(ep) + ') vira diferença na conferência.' : '' } : { t: 'Registrar saída', quem: benProdQ(), acao: 'saida' }; }
+    const ep = benEmProc(o); return pr ? { t: 'Enviar para conferência', quem: benProdQ(), acao: 'concluir', nota: prCmp(ep, 0) > 0 ? 'O que não foi registrado (' + benKg(ep) + ') vira diferença na conferência.' : '' } : { t: 'Registrar saída', quem: benProdQ(), acao: 'saida' }; }
   if (o.etapa === 'Em conferência') {
     if (o.ben.corr && o.ben.corr.pend) return { t: 'Confirmar correção', quem: benQuem('gestor'), acao: 'confirmar', nota: 'Correção na conferência ' + o.ben.corr.msg + ': decide ' + benQuem('gestor') + '.', red: true };
     if (o.ben.conf) { const pe = cenPodeEncerrar(c, o.id); return { t: 'Fechar processo', quem: benProdQ(), acao: 'fechar', nota: pe, red: !!pe, quemNota: pe ? benQuem('almoxarife') : '' }; }
@@ -219,7 +219,7 @@ function benDif0(o) { const a = o.ben.conc ? o.ben.conc.dif0 : null, b = o.ben.d
 function benCorrMsg(o, al, d0, onde) { const r = benRota(o.ben.rota); return 'acima da alçada de ' + (al.porPct ? prFmtT(r.par.alcada_pct, 2) + ' %' : prFmtT(r.par.alcada_kg, 3) + ' kg') + ' (diferença ' + onde + ' ' + benKg(d0) + ', ' + benPct(al.pct) + ')'; }
 function benCorrecao(o, quem, ator, b0, b1, motivo) { o.ben.corrigido = true; const d0 = benDif0(o); const al = benAlcada(o, d0 !== null ? d0 : b1.dif);
   if (!b0.dentro && b1.dentro && al.passa && !(typeof g2papel === 'function' && g2papel(ator, 'gestor')))
-    o.ben.corr = { pend: true, quem, em: benEm(), motivo, antes: b0.dif, depois: b1.dif, msg: benCorrMsg(o, al, d0, d0 === o.ben.dif0r && !(o.ben.conc && o.ben.conc.dif0 === d0) ? 'no concluir antes de reabrir' : 'no concluir') };
+    o.ben.corr = { pend: true, quem, em: benEm(), motivo, antes: b0.dif, depois: b1.dif, msg: benCorrMsg(o, al, d0, d0 === o.ben.dif0r && !(o.ben.conc && o.ben.conc.dif0 === d0) ? 'no envio para conferência antes de reabrir' : 'no envio para conferência') };
   else if (o.ben.corr && o.ben.corr.pend && !b1.dentro) o.ben.corr.pend = false; }
 
 /* ---------- comandos (sempre dentro de cenMudar ou benMudar); quem age é o perfil (cenExige); recusa não grava nada ---------- */
@@ -383,18 +383,19 @@ function benEstornar(c, id, sid, motivo, texto, ator, k) { const quem = cenExige
   const b1 = benBal(o); benBalMudou(o, quem); if (o.etapa === 'Em conferência') benCorrecao(o, quem, ator, b0, b1, mot);
   const det = mot + ' · diferença ' + benKg(b0.dif) + ' (' + benPct(b0.pct) + ') → ' + benKg(b1.dif) + ' (' + benPct(b1.pct) + ')' + (s.cx ? ' · ' + benUn(s.cx) + ' de caixa voltam à custódia' : '');
   benHist(o, quem, 'Estorno de ' + sid, det, mv); benToca(o); const msg = sid + ' estornado: ' + det + '.'; benGravaRecibo(c, k, 'benEstornar', imp, msg); return { msg }; }
-/* concluir execução (R-A08): ≥ 1 saída de Produto com classe; no avanço "no Concluir" o não registrado vira diferença; grava dif₀ */
-function benConcluir(c, id, ator, k) { const quem = cenExige(ator, 'producao', 'Concluir a execução da ' + id); const o = benO(c, id);
+/* enviar para conferência (R-A08; o comando era "Concluir execução": verbo do efeito na rodada 1, como a O.S.): ≥ 1 saída de Produto com classe;
+   no avanço "no Concluir" da rota o não registrado vira diferença; grava dif₀ */
+function benConcluir(c, id, ator, k) { const quem = cenExige(ator, 'producao', 'Enviar a ' + id + ' para conferência'); const o = benO(c, id);
   if (o.etapa !== 'Em execução') throw new Error(BEN_FASES.indexOf(o.etapa) > 2 ? 'Já feito: ' + id + ' está em ' + o.etapa + '.' : id + ' não está em execução.'); benVer(o, k);
-  if (!benValidos(o).some(s => s.fluxo === 'Produto' && s.classe)) throw new Error('Registre ao menos uma saída de Produto com classe antes de concluir.');
+  if (!benValidos(o).some(s => s.fluxo === 'Produto' && s.classe)) throw new Error('Registre ao menos uma saída de Produto com classe antes de enviar para conferência.');
   const b = benBal(o); o.ben.conc = { quem, em: benEm(), dif0: b.dif }; o.etapa = 'Em conferência';
   /* reaberta (BEN-REV-04, BEN-D16): se o Concluir anterior estava fora da faixa e acima da alçada de quem corrige e agora entra na faixa,
      a correção feita pelo Reabrir só vale com a confirmação da gestão, como a correção na conferência (R-F07) */
   const d0 = o.ben.dif0r; let pend = '';
   if (d0 !== undefined && d0 !== null && prCmp(benAbs(d0), b.faixa) > 0 && b.dentro) { const al = benAlcada(o, d0);
     if (al.passa && !(typeof g2papel === 'function' && g2papel(ator, 'gestor'))) { o.ben.corrigido = true;
-      o.ben.corr = { pend: true, quem, em: benEm(), motivo: 'execução reaberta e concluída de novo', antes: d0, depois: b.dif, msg: benCorrMsg(o, al, d0, 'no concluir antes de reabrir') }; pend = o.ben.corr.msg; } }
-  benHist(o, quem, 'Execução concluída', 'Entrada declarada processada; diferença no concluir ' + benKg(b.dif) + ' (' + benPct(b.pct) + '), faixa ' + benKg(b.faixa) + (pend ? '; correção ' + pend + ': decide ' + benQuem('gestor') : '')); benToca(o);
+      o.ben.corr = { pend: true, quem, em: benEm(), motivo: 'execução reaberta e concluída de novo', antes: d0, depois: b.dif, msg: benCorrMsg(o, al, d0, 'no envio para conferência antes de reabrir') }; pend = o.ben.corr.msg; } }
+  benHist(o, quem, 'Enviada para conferência', 'Entrada declarada processada; diferença no envio ' + benKg(b.dif) + ' (' + benPct(b.pct) + '), faixa ' + benKg(b.faixa) + (pend ? '; correção ' + pend + ': decide ' + benQuem('gestor') : '')); benToca(o);
   return { msg: id + ' em conferência: diferença ' + benKg(b.dif) + ' (' + benPct(b.pct) + ') contra a faixa de ' + benKg(b.faixa) + '. ' + (pend ? 'Correção ' + pend + ': decide ' + benQuem('gestor') + '.' : (b.dentro ? benQuem('conferente') + ' confere o balanço.' : 'Fora da faixa: justifique (alçada) ou corrija.')) }; }
 const BEN_MOT_JUST = ['Erro de medição', 'Perda não identificada', 'Outro'];
 function benJustificar(c, id, motivo, texto, ator, k) { const o = benO(c, id);
@@ -427,7 +428,7 @@ function benReabrir(c, id, motivo, ator) { const quem = cenExige(ator, 'producao
   if (o.etapa !== 'Em conferência') throw new Error(o.etapa === 'Em execução' ? 'Já feito: ' + id + ' está em Em execução.' : 'Reabra só em Em conferência (' + id + ' está em ' + o.etapa + ').');
   const mot = String(motivo || '').trim(); if (!mot) throw new Error('Informe o motivo para reabrir a execução.');
   const d0 = benDif0(o); benBalMudou(o, quem); o.ben.dif0r = d0; o.ben.conc = null; o.ben.corr = null; o.etapa = 'Em execução';
-  benHist(o, quem, 'Execução reaberta', mot + ' · a declaração do Concluir cai; a diferença declarada (' + benKg(d0) + ') segue valendo para a alçada da correção'); benToca(o); return { msg: id + ' volta a Em execução (' + mot + ').' }; }
+  benHist(o, quem, 'Execução reaberta', mot + ' · a declaração do envio para conferência cai; a diferença declarada (' + benKg(d0) + ') segue valendo para a alçada da correção'); benToca(o); return { msg: id + ' volta a Em execução (' + mot + ').' }; }
 /* fechar processo (CMD-23; R-A09, R-A10): conferido, sem custódia, etapas exigidas cumpridas; cria os lotes Em inspeção com a
    genealogia, abre a inspeção, esgota as entradas e destina descarte e outro destino. Fechar não libera (R-E01) */
 function benFechar(c, id, ator, k) { const quem = cenExige(ator, 'producao', 'Fechar a ' + id); const o = benO(c, id);

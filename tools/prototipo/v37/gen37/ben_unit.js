@@ -389,7 +389,7 @@ function T7(c, cond, tk) { if (!c.ordens['OS-0932']) OSX(c, 'OS-0932', 'T7', 'Em
   const rb = MUD(c, x => benReabrir(x, 'OB-0110', 'pesagem refeita', IG)); MUD(c, x => benSaida(x, 'OB-0110', { fluxo: 'Perda identificada', causa: 'Avaria no manuseio', kg: 600, ticket: 'TK-9' }, IG));
   const co = MUD(c, x => benConcluir(x, 'OB-0110', IG)); const o = O(c, 'OB-0110'); const cf = MUD(c, x => benConferir(x, 'OB-0110', PA));
   ok('U33a BEN-REV-04 600 kg (5 %) no Concluir, reabre, lança a perda e conclui com 0 kg → a correção aguarda Ana ("antes de reabrir"); a Paula não confere antes',
-     !rb.erro && !co.erro && o.ben.corr && o.ben.corr.pend && /diferença no concluir antes de reabrir 600 kg, 5,00 %/.test(o.ben.corr.msg) && benProx(c, o).acao === 'confirmar' && /decide Ana \(gestora\) antes da conferência/.test(cf.erro || '') && benSelos(c, o).some(s => s.t === 'Corrigido na conferência'), [co, o.ben.corr, cf]);
+     !rb.erro && !co.erro && o.ben.corr && o.ben.corr.pend && /diferença no envio para conferência antes de reabrir 600 kg, 5,00 %/.test(o.ben.corr.msg) && benProx(c, o).acao === 'confirmar' && /decide Ana \(gestora\) antes da conferência/.test(cf.erro || '') && benSelos(c, o).some(s => s.t === 'Corrigido na conferência'), [co, o.ben.corr, cf]);
   const ca = MUD(c, x => benConfirmarCorrecao(x, 'OB-0110', AN)); const cf2 = MUD(c, x => benConferir(x, 'OB-0110', PA));
   ok('U33b Ana confirma e a Paula confere; Ana fica no histórico', !ca.erro && !cf2.erro && O(c, 'OB-0110').ben.hist.some(h => /^Ana/.test(h.quem) && h.ev === 'Correção na conferência confirmada'), [ca, cf2]);
   const c2 = NOVO(); MUD(c2, x => benEstornar(x, 'OB-0110', 'S-03', 'Erro de digitação', '', IG)); MUD(c2, x => benConcluir(x, 'OB-0110', IG)); MUD(c2, x => benReabrir(x, 'OB-0110', 'pesagem refeita', IG));
@@ -548,5 +548,13 @@ function OB113(c) { const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132'
 // ---- U42 · rodada 1 (S3): o recibo da ordem nova guarda o número; o toque repetido devolve a mesma ordem (a tela abre a criada) ----
 { const c = NOVO(); const k = { lotes: [{ lote: 'L39-132', kg: 12300 }], chave: 'W-BNN-T42' }; const a = MUD(c, x => benNova(x, k, IG)); const b = MUD(c, x => benNova(x, k, IG));
   ok('U42a criar com a mesma chave: a 2ª vez é "Já feito" sem gravar e devolve o mesmo número (OB-0113), sem OB-0114', a.id === 'OB-0113' && b.nada && b.id === 'OB-0113' && /^Já feito: OB-0113 criada/.test(b.msg) && !c.ordens['OB-0114'], [a, b]); }
+
+// ---- U43 · rodada 1 (NAV-CLAREZA 3): o verbo do efeito — "Enviar para conferência", como a O.S.; nada de "Concluir" na tela ----
+{ const c = NOVO(); const p = benProx(c, O(c, 'OB-0110')); const an = MUD(c, x => benConcluir(x, 'OB-0110', AN)); const c2 = NOVO(); MUD(c2, x => benEstornar(x, 'OB-0110', 'S-01', 'Erro de digitação', '', IG)); MUD(c2, x => benEstornar(x, 'OB-0110', 'S-02', 'Erro de digitação', '', IG));
+  const sp = MUD(c2, x => benConcluir(x, 'OB-0110', IG)); const ok1 = MUD(c, x => benConcluir(x, 'OB-0110', IG)); const h = O(c, 'OB-0110').ben.hist.slice(-1)[0];
+  const rb = MUD(c, x => benReabrir(x, 'OB-0110', 'faltou a classe B', IG)); const h2 = O(c, 'OB-0110').ben.hist.slice(-1)[0];
+  ok('U43a OB-0110 em execução: próximo passo "Enviar para conferência"; sem papel: "Enviar a OB-0110 para conferência: decisão de Igor"; sem Produto: "antes de enviar para conferência"; histórico "Enviada para conferência"; o Reabrir fala do envio',
+     p.t === 'Enviar para conferência' && p.acao === 'concluir' && /^Enviar a OB-0110 para conferência: decisão de Igor/.test(an.erro || '') && /antes de enviar para conferência\.$/.test(sp.erro || '')
+     && !ok1.erro && h.ev === 'Enviada para conferência' && /diferença no envio 0 kg/.test(h.det) && !rb.erro && /a declaração do envio para conferência cai/.test(h2.det), [p, an, sp, h, h2]); }
 
 print(JSON.stringify(R));
