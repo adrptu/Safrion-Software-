@@ -38,13 +38,14 @@ MENU2=[('Mapa','map',[('Mapa','IN-04.dc.html')]),
  ('Cadastros','layers',[('Fazendas, áreas e talhões','CD-01.dc.html'),('Culturas, cultivares e operações','CD-02.dc.html'),('Máquinas, instalações e setores','CD-03.dc.html'),
    ('Pessoas e equipes','CD-04.dc.html'),('Parceiros e fornecedores','CD-05.dc.html'),('Produtos, unidades e locais','CD-06.dc.html'),('Estrutura gerencial','CD-07.dc.html')]),
  ('Agrícola','leaf',[('Consulta Agrofit','AG-07.dc.html'),('Planos agronômicos','PA.dc.html'),('Análises de solo','AG-02.dc.html'),('Planejar safra','SAF.dc.html'),('Ordem de Serviço','OS.dc.html'),('Pragas e doenças (MIP/MID)','AG-01.dc.html'),('Irrigação','IR-01.dc.html')]),
- ('Produção','Colheita',[('Previsão e colheita','COLH.dc.html'),('Cargas e recebimento','CARGA.dc.html'),('Estoque de produto','PROD.dc.html')]),
+ ('Produção','Colheita',[('Previsão e colheita','COLH.dc.html'),('Recebimento e beneficiamento','CARGA.dc.html'),('Estoque de produto','PROD.dc.html')]),   # 3 itens (colheita D-01); Beneficiamento é tela irmã de Cargas (BEN-D14)
  ('Manutenção','wrench',[('Planos de manutenção','PM.dc.html'),('Ativos e disponibilidade','MA-01.dc.html'),('Solicitações e inspeções','MA-02.dc.html'),
    ('Vencimentos e paradas','MA-03.dc.html'),('Ordens de manutenção','MA-04.dc.html'),('Abastecimentos e desempenho','MA-05.dc.html')]),
  ('Suprimentos','cart',[('Compra de insumos','CMP.dc.html'),('Estoque','EST.dc.html')]),
  ('Configurações','grid',[('Assinatura e cobrança','CF-05.dc.html')])]   # 06/10/2026 (PLAT-01): grupo por último; o módulo Configurações usará o mesmo grupo
 MENU_OF={'CA-01det.dc.html':'OS.dc.html','CA-02.dc.html':'OS.dc.html','CA-01x-os0420.dc.html':'OS.dc.html',
- 'IR-02.dc.html':'IR-01.dc.html','IR-03.dc.html':'IR-01.dc.html','IR-03det.dc.html':'IR-01.dc.html','IR-04.dc.html':'IR-01.dc.html'}  # detalhes que pertencem a um item do menu
+ 'IR-02.dc.html':'IR-01.dc.html','IR-03.dc.html':'IR-01.dc.html','IR-03det.dc.html':'IR-01.dc.html','IR-04.dc.html':'IR-01.dc.html',
+ 'BEN.dc.html':'CARGA.dc.html'}  # detalhes e telas irmãs que pertencem a um item do menu
 def menu_item(fname):
     f=MENU_OF.get(fname,fname)
     for i,(nome,ic,items) in enumerate(MENU2):

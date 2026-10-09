@@ -42,7 +42,7 @@ VIS_ROWS=[('Índice',['Main.dc.html']),('Mapa',['IN-04.dc.html'])]+[(nome,[h for
 # App de campo (prioridade de teste com os primeiros clientes, DEC-2609-13): mesmo cenário da O.S. e do Estoque
 VIS_ROWS.append(('App de campo',['MB-01.dc.html','MB-02.dc.html','MB-03.dc.html','MB-04.dc.html','MB-05.dc.html','MB-07.dc.html','MB-10.dc.html']))   # MB-07 e MB-10 no estado (colheita, 06/10)
 detalhes={'Agrícola':['CA-01det.dc.html','CA-01x-os0420.dc.html','OS-0424-app.dc.html','OS-0424-ficha.dc.html','AG-01det.dc.html','IR-02.dc.html','IR-03.dc.html','IR-03det.dc.html','IR-04.dc.html'],
-          'Manutenção':['MA-04det.dc.html'],'Cadastros':[f for f in files if f.startswith('CD-') and 'det' in f]}
+          'Manutenção':['MA-04det.dc.html'],'Produção':['BEN.dc.html'],'Cadastros':[f for f in files if f.startswith('CD-') and 'det' in f]}
 y=0; placed=set()
 for nome,fs in VIS_ROWS:
     fs=[f for f in fs+detalhes.get(nome,[]) if f in files]
@@ -54,6 +54,7 @@ for nome,fs in VIS_ROWS:
         if f=='Main.dc.html': boards[f]['title']='Índice central · comece aqui'
         if f=='OS-0424-app.dc.html': boards[f]['title']='Agrícola › Ordem de Serviço › OS-0424 · ficha no app (funciona sem internet)'
         if f=='OS-0424-ficha.dc.html': boards[f]['title']='Agrícola › Ordem de Serviço › OS-0424 · ficha impressa'
+        if f=='BEN.dc.html': boards[f]['title']='Produção › Recebimento e beneficiamento › Beneficiamento'   # tela irmã de Cargas (BEN-D14)
         if nome=='App de campo': boards[f]['title']='App de campo › '+boards[f]['title']
         for nm,ic,items in MENU2:
             for l,hh in items:

@@ -36,7 +36,7 @@ def main():
     # nenhum nome global de solo.js é redefinido pelas telas que carregam o prefixo (SAF: safra.js, cal01.js, ocupacao.js)
     defs = lambda t: set(re.findall(r'^(?:function|const|let|var)\s+([A-Za-z_$][\w$]*)', t, re.M))
     so = defs(open(os.path.join(HERE, 'solo.js'), encoding='utf-8').read())
-    for f in ('safra.js', 'cal01.js', 'ocupacao.js', 'cenario.js', 'producao.js', 'g2lib.js', 'irrigacao_estado.js', 'mip.js'):
+    for f in ('safra.js', 'cal01.js', 'ocupacao.js', 'cenario.js', 'producao.js', 'ben.js', 'g2lib.js', 'irrigacao_estado.js', 'mip.js'):
         dup = sorted(so & defs(open(os.path.join(HERE, f), encoding='utf-8').read())); ok(f'nomes de solo.js não colidem com {f}', not dup, dup)
     print('RESULTADO:', 'OK' if all(OK) else 'FALHOU', f'{sum(OK)}/{len(OK)}')
     return all(OK)
