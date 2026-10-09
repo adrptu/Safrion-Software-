@@ -1,0 +1,77 @@
+$ date -u +%Y-%m-%dT%H:%M:%SZ
+2026-10-03T20:35:32Z
+[exit 0]
+
+$ uname -srm
+Linux 6.18.44-fc-v64 x86_64
+[exit 0]
+
+$ hostname
+vm
+[exit 0]
+
+$ pwd
+/home/user/Safrion-Software-
+[exit 0]
+
+$ git rev-parse HEAD
+0dac3be54dfb9ed98022cd2ea8462694c0798baa
+[exit 0]
+
+$ git branch --show-current
+claude/modest-pascal-h3xg96
+[exit 0]
+
+$ git status --short --branch
+## claude/modest-pascal-h3xg96
+[exit 0]
+
+$ wc -l AGENTS.md docs/parceria/protocolo.md
+  142 AGENTS.md
+  268 docs/parceria/protocolo.md
+  410 total
+[exit 0]
+
+$ sha256sum AGENTS.md docs/parceria/protocolo.md
+137b94b6fbc741c7c77ab27836bb4ddca57f9aa8b894b28b384d2856a4196ab8  AGENTS.md
+b616ac133a9da2319dbaa9aa8858df847216241ff6ad305d7700b6847d0034c5  docs/parceria/protocolo.md
+[exit 0]
+
+$ head -3 docs/parceria/protocolo.md
+# Produto, projeto e qualidade — Codex, Claude e Gemini
+
+## Responsabilidades
+[exit 0]
+
+$ git ls-remote origin refs/heads/main refs/heads/prototipo/v43
+0dac3be54dfb9ed98022cd2ea8462694c0798baa	refs/heads/main
+d22da69c3b36e9ba0955ead1b954db8cb6e07384	refs/heads/prototipo/v43
+[exit 0]
+
+$ git cat-file -t d22da69c3b36e9ba0955ead1b954db8cb6e07384
+fatal: git cat-file: could not get object info
+[exit 128]
+
+$ git fetch --no-write-fetch-head --depth=1 origin d22da69c3b36e9ba0955ead1b954db8cb6e07384
+[exit 0]
+
+$ git cat-file -t d22da69c3b36e9ba0955ead1b954db8cb6e07384
+commit
+[exit 0]
+
+$ git log -1 --format="%H %cI %s" d22da69c3b36e9ba0955ead1b954db8cb6e07384
+d22da69c3b36e9ba0955ead1b954db8cb6e07384 2026-10-03T14:34:30-03:00 chore(prototipo): portabilidade do gerador v43 para execução fora do Mac
+[exit 0]
+
+$ git rev-parse HEAD; git status --short --branch
+0dac3be54dfb9ed98022cd2ea8462694c0798baa
+## claude/modest-pascal-h3xg96
+[exit 0]
+
+$ [MCP github] issue_read get_comments adrptu/Safrion-Software- #1 (somente leitura)
+14 comentários; id 5858061746 autor adrptu created 2026-09-27T17:22:10Z updated 2026-10-03T20:31:29Z
+Cabeçalho: "### Checkpoint vigente — 2026-10-03 20:31 UTC: C2 corrigida em parte; revisão devolvida e decisões resolvidas"
+[ok]
+$ git status --porcelain | wc -l
+0
+[exit 0]
