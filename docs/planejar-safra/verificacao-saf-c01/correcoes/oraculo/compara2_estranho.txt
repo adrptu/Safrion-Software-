@@ -1,0 +1,29 @@
+CONTAGENS
+  fisico_sem_trava:sem plano/perene no dia                2
+  fixtures                                                1204
+  js_ef0:nao_trava_e_devia                                23
+  js_ef0:pend_soma_difere                                 40
+  js_ef0:trav_soma_difere                                 46
+  js_novo:m1_conferidas                                   343
+  novo_trava_soma_ok                                      187
+  oraculo:pend_soma                                       178
+  oraculo:trava_soma                                      187
+  py_ef0:nao_trava_e_devia                                23
+  py_ef0:pend_soma_difere                                 40
+  py_ef0:trav_soma_difere                                 46
+  py_novo:m1_conferidas                                   343
+DIVERGÊNCIAS (classe: n)
+  ef0×novo:pend_nao_soma                                  8
+  ef0×novo:trav_nao_soma                                  39
+
+== ef0×novo:pend_nao_soma (até 3) ==
+   ["F0077.1", 0, {"o1": [["prevista", "parte1", 36291, 36365, 75]]}, {}]
+   ["F0079.1", 0, {"parte1": [["prevista", "o0", 27601, 27627, 27]], "o3": [["prevista", "parte1", 27619, 27718, 100]]}, {"parte1": [["prevista", "o0", 27601, 27627, 27]]}]
+   ["F0295.0", 0, {"alvo": [["naoconf", "o4", 27405, 27554, 150]], "o2": [["prevista", "alvo", 27513, 27554, 42]]}, {"alvo": [["naoconf", "o4", 27405, 27554, 150]]}]
+
+== ef0×novo:trav_nao_soma (até 3) ==
+   ["F0019.0", 0, [["safra", "nova", "alvo", 21010, 127.85]], [["safra", "nova", "alvo", 21010, 127.85], ["faixa", "alvo", "o4", 21092]]]
+   ["F0072.0", 0, [], [["faixa", "o2", "alvo", 20840]]]
+   ["F0077.1", 0, [["safra", "nova", "parte1", 36237, 47.5]], [["safra", "nova", "parte1", 36237, 47.5], ["faixa", "parte1", "o1", 36291]]]
+
+tempo: oraculo 31654 ms · js_novo 2735.7 ms · py_novo 3005.1 ms · js_ef0 1788.5 ms · py_ef0 2140.7 ms

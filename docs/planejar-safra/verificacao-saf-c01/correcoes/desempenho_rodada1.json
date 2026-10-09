@@ -1,0 +1,379 @@
+{
+  "node": "v22.22.0",
+  "execucoes": 50,
+  "aquecimento": 5,
+  "fontes": {
+    "base_ecc8b00": {
+      "fonte": "ocupacao_ecc8b00.js",
+      "sha256": "ca3061319ae0e98223128eb724eaaf6a53e25a2c6196b4e44ed37f22095ea154",
+      "medidas": {
+        "LG ocTabela LG2627 (23 pivôs)": {
+          "mediana_ms": 17.4453,
+          "min_ms": 13.2602,
+          "max_ms": 89.7238,
+          "n": 50
+        },
+        "LG ocTabela Nova Lagoa 2027/28": {
+          "mediana_ms": 14.7573,
+          "min_ms": 12.8459,
+          "max_ms": 47.1768,
+          "n": 50
+        },
+        "LG ocChecar lg01 (editar, Pivô 1)": {
+          "mediana_ms": 1.8696,
+          "min_ms": 1.5237,
+          "max_ms": 74.1155,
+          "n": 50
+        },
+        "SR ocTabela S27SF": {
+          "mediana_ms": 3.0531,
+          "min_ms": 2.7324,
+          "max_ms": 32.1059,
+          "n": 50
+        },
+        "SR ocChecar T1-B 152 ha 21/02/2027": {
+          "mediana_ms": 3.3145,
+          "min_ms": 2.3069,
+          "max_ms": 52.2204,
+          "n": 50
+        },
+        "SR ocPlantioMin T1-B desde 21/02/2027": {
+          "mediana_ms": 1.7822,
+          "min_ms": 1.6258,
+          "max_ms": 16.4783,
+          "n": 50
+        },
+        "EXT ocChecar soja X1-C 400 ha (perene 1996 + 20)": {
+          "mediana_ms": 4.7526,
+          "min_ms": 4.2924,
+          "max_ms": 29.2737,
+          "n": 50
+        },
+        "EXT ocTabela 2027/28 (perene 1996 + 20)": {
+          "mediana_ms": 0.8566,
+          "min_ms": 0.7532,
+          "max_ms": 7.3207,
+          "n": 50
+        }
+      },
+      "conferencia": {
+        "EXT X1-C 410 ha (soma 510 > 500) trava": [],
+        "EXT X1-C 400 ha (soma 500, limite) trava": []
+      },
+      "historico_longo": {
+        "k=0 (1 ocupações)": {
+          "trava_410": "",
+          "plantioMin_410": 21082,
+          "plantioMin_ms_mediana3": 1.1,
+          "plantioMin_400_limite": 21082,
+          "ocChecar_410": {
+            "mediana_ms": 1.0361,
+            "min_ms": 0.9429,
+            "max_ms": 1.5363,
+            "n": 50
+          }
+        },
+        "k=3 (10 ocupações)": {
+          "trava_410": "",
+          "plantioMin_410": 21082,
+          "plantioMin_ms_mediana3": 3.2,
+          "plantioMin_400_limite": 21082,
+          "ocChecar_410": {
+            "mediana_ms": 2.4181,
+            "min_ms": 2.2775,
+            "max_ms": 6.8198,
+            "n": 50
+          }
+        },
+        "k=7 (22 ocupações)": {
+          "trava_410": "",
+          "plantioMin_410": 21082,
+          "plantioMin_ms_mediana3": 4.6,
+          "plantioMin_400_limite": 21082,
+          "ocChecar_410": {
+            "mediana_ms": 4.6598,
+            "min_ms": 4.2488,
+            "max_ms": 25.318,
+            "n": 50
+          }
+        },
+        "k=15 (46 ocupações)": {
+          "trava_410": "",
+          "plantioMin_410": 21082,
+          "plantioMin_ms_mediana3": 8.8,
+          "plantioMin_400_limite": 21082,
+          "ocChecar_410": {
+            "mediana_ms": 9.7389,
+            "min_ms": 8.2348,
+            "max_ms": 55.5909,
+            "n": 50
+          }
+        },
+        "k=30 (91 ocupações)": {
+          "trava_410": "",
+          "plantioMin_410": 21082,
+          "plantioMin_ms_mediana3": 24.7,
+          "plantioMin_400_limite": 21082,
+          "ocChecar_410": {
+            "mediana_ms": 19.2509,
+            "min_ms": 17.2463,
+            "max_ms": 77.7565,
+            "n": 50
+          }
+        }
+      }
+    },
+    "anterior_ef0d7b2": {
+      "fonte": "ocupacao_ef0d7b2.js",
+      "sha256": "e5c3759e16e7d21a96b7dad6cbf63ba5a77059e15708958c4ff9155597d1ed37",
+      "medidas": {
+        "LG ocTabela LG2627 (23 pivôs)": {
+          "mediana_ms": 5.0598,
+          "min_ms": 3.3112,
+          "max_ms": 144.9323,
+          "n": 50
+        },
+        "LG ocTabela Nova Lagoa 2027/28": {
+          "mediana_ms": 4.6086,
+          "min_ms": 3.5916,
+          "max_ms": 18.0823,
+          "n": 50
+        },
+        "LG ocChecar lg01 (editar, Pivô 1)": {
+          "mediana_ms": 0.8447,
+          "min_ms": 0.695,
+          "max_ms": 2.4633,
+          "n": 50
+        },
+        "SR ocTabela S27SF": {
+          "mediana_ms": 1.9161,
+          "min_ms": 1.0909,
+          "max_ms": 9.046,
+          "n": 50
+        },
+        "SR ocChecar T1-B 152 ha 21/02/2027": {
+          "mediana_ms": 1.0672,
+          "min_ms": 0.7218,
+          "max_ms": 20.9153,
+          "n": 50
+        },
+        "SR ocPlantioMin T1-B desde 21/02/2027": {
+          "mediana_ms": 0.1763,
+          "min_ms": 0.1633,
+          "max_ms": 2.6217,
+          "n": 50
+        },
+        "EXT ocChecar soja X1-C 400 ha (perene 1996 + 20)": {
+          "mediana_ms": 3.4367,
+          "min_ms": 1.7284,
+          "max_ms": 22.0679,
+          "n": 50
+        },
+        "EXT ocTabela 2027/28 (perene 1996 + 20)": {
+          "mediana_ms": 0.3118,
+          "min_ms": 0.2819,
+          "max_ms": 0.8772,
+          "n": 50
+        }
+      },
+      "conferencia": {
+        "EXT X1-C 410 ha (soma 510 > 500) trava": [
+          [
+            "soma",
+            21092,
+            510
+          ]
+        ],
+        "EXT X1-C 400 ha (soma 500, limite) trava": []
+      },
+      "historico_longo": {
+        "k=0 (1 ocupações)": {
+          "trava_410": "soma",
+          "plantioMin_410": null,
+          "plantioMin_ms_mediana3": 35.8,
+          "plantioMin_400_limite": 21082,
+          "ocChecar_410": {
+            "mediana_ms": 0.0365,
+            "min_ms": 0.0335,
+            "max_ms": 0.0732,
+            "n": 50
+          }
+        },
+        "k=3 (10 ocupações)": {
+          "trava_410": "soma",
+          "plantioMin_410": null,
+          "plantioMin_ms_mediana3": 215,
+          "plantioMin_400_limite": 21082,
+          "ocChecar_410": {
+            "mediana_ms": 0.47,
+            "min_ms": 0.4182,
+            "max_ms": 0.7489,
+            "n": 50
+          }
+        },
+        "k=7 (22 ocupações)": {
+          "trava_410": "soma",
+          "plantioMin_410": null,
+          "plantioMin_ms_mediana3": 883.3,
+          "plantioMin_400_limite": 21082,
+          "ocChecar_410": {
+            "mediana_ms": 1.7129,
+            "min_ms": 1.4319,
+            "max_ms": 2.6909,
+            "n": 50
+          }
+        },
+        "k=15 (46 ocupações)": {
+          "trava_410": "soma",
+          "plantioMin_410": null,
+          "plantioMin_ms_mediana3": 3941.4,
+          "plantioMin_400_limite": 21082,
+          "ocChecar_410": {
+            "mediana_ms": 11.0272,
+            "min_ms": 6.2021,
+            "max_ms": 83.7892,
+            "n": 50
+          }
+        },
+        "k=30 (91 ocupações)": {
+          "trava_410": "soma",
+          "plantioMin_410": null,
+          "plantioMin_ms_mediana3": 15415.9,
+          "plantioMin_400_limite": 21082,
+          "ocChecar_410": {
+            "mediana_ms": 26.8167,
+            "min_ms": 23.2415,
+            "max_ms": 125.1423,
+            "n": 50
+          }
+        }
+      }
+    },
+    "correcao": {
+      "fonte": "ocupacao_correcao.js",
+      "sha256": "f7a81789a8823cca3d82d47ba3081334643b3f12a1fdc53f801dd1a3b1041734",
+      "medidas": {
+        "LG ocTabela LG2627 (23 pivôs)": {
+          "mediana_ms": 4.4622,
+          "min_ms": 3.5472,
+          "max_ms": 47.6653,
+          "n": 50
+        },
+        "LG ocTabela Nova Lagoa 2027/28": {
+          "mediana_ms": 7.8563,
+          "min_ms": 3.4233,
+          "max_ms": 70.487,
+          "n": 50
+        },
+        "LG ocChecar lg01 (editar, Pivô 1)": {
+          "mediana_ms": 0.7764,
+          "min_ms": 0.6794,
+          "max_ms": 74.5536,
+          "n": 50
+        },
+        "SR ocTabela S27SF": {
+          "mediana_ms": 1.2758,
+          "min_ms": 1.049,
+          "max_ms": 65.4563,
+          "n": 50
+        },
+        "SR ocChecar T1-B 152 ha 21/02/2027": {
+          "mediana_ms": 0.9455,
+          "min_ms": 0.7261,
+          "max_ms": 109.8121,
+          "n": 50
+        },
+        "SR ocPlantioMin T1-B desde 21/02/2027": {
+          "mediana_ms": 0.0729,
+          "min_ms": 0.0666,
+          "max_ms": 6.0916,
+          "n": 50
+        },
+        "EXT ocChecar soja X1-C 400 ha (perene 1996 + 20)": {
+          "mediana_ms": 1.3339,
+          "min_ms": 0.9888,
+          "max_ms": 17.9709,
+          "n": 50
+        },
+        "EXT ocTabela 2027/28 (perene 1996 + 20)": {
+          "mediana_ms": 0.6085,
+          "min_ms": 0.3075,
+          "max_ms": 23.9988,
+          "n": 50
+        }
+      },
+      "conferencia": {
+        "EXT X1-C 410 ha (soma 510 > 500) trava": [
+          [
+            "soma",
+            21092,
+            510
+          ]
+        ],
+        "EXT X1-C 400 ha (soma 500, limite) trava": []
+      },
+      "historico_longo": {
+        "k=0 (1 ocupações)": {
+          "trava_410": "soma",
+          "plantioMin_410": null,
+          "plantioMin_ms_mediana3": 40,
+          "plantioMin_400_limite": 21082,
+          "ocChecar_410": {
+            "mediana_ms": 0.0337,
+            "min_ms": 0.0323,
+            "max_ms": 5.0458,
+            "n": 50
+          }
+        },
+        "k=3 (10 ocupações)": {
+          "trava_410": "soma",
+          "plantioMin_410": null,
+          "plantioMin_ms_mediana3": 37.6,
+          "plantioMin_400_limite": 21082,
+          "ocChecar_410": {
+            "mediana_ms": 0.2943,
+            "min_ms": 0.2401,
+            "max_ms": 8.6417,
+            "n": 50
+          }
+        },
+        "k=7 (22 ocupações)": {
+          "trava_410": "soma",
+          "plantioMin_410": null,
+          "plantioMin_ms_mediana3": 14.9,
+          "plantioMin_400_limite": 21082,
+          "ocChecar_410": {
+            "mediana_ms": 0.8202,
+            "min_ms": 0.7134,
+            "max_ms": 75.3733,
+            "n": 50
+          }
+        },
+        "k=15 (46 ocupações)": {
+          "trava_410": "soma",
+          "plantioMin_410": null,
+          "plantioMin_ms_mediana3": 12.4,
+          "plantioMin_400_limite": 21082,
+          "ocChecar_410": {
+            "mediana_ms": 4.3692,
+            "min_ms": 2.118,
+            "max_ms": 102.7159,
+            "n": 50
+          }
+        },
+        "k=30 (91 ocupações)": {
+          "trava_410": "soma",
+          "plantioMin_410": null,
+          "plantioMin_ms_mediana3": 30.1,
+          "plantioMin_400_limite": 21082,
+          "ocChecar_410": {
+            "mediana_ms": 8.1243,
+            "min_ms": 6.196,
+            "max_ms": 76.6751,
+            "n": 50
+          }
+        }
+      }
+    }
+  }
+}
