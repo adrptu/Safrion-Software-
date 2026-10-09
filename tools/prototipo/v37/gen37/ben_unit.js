@@ -445,4 +445,19 @@ function T7(c, cond, tk) { if (!c.ordens['OS-0932']) OSX(c, 'OS-0932', 'T7', 'Em
   ok('U38 S4 Liberar lote: o L39-119 (fruta de campo, INSP-94) "tem a inspeção INSP-94"; o L39-120 "é lote do beneficiamento (OB-0110)" e fechar não libera',
      a.erro === 'L39-119 tem a inspeção INSP-94: registre o resultado da inspeção INSP-94 e a decisão.' && /^L39-120 é lote do beneficiamento \(OB-0110\): registre o resultado da inspeção INSP-\d+ e a decisão \(fechar o processo não libera\)\.$/.test(b.erro || ''), [a, b]); }
 
+// ===== Integração BEN na branch única (09/10/2026): achados dos revisores, cada um com proteção de regressão =====
+// ---- U39 · caixas da ordem nova dentro do livre no Estoque: o roteiro do proprietário (L39-132 com o valor inicial) libera ----
+{ const c = NOVO(); const r = benRota('PACK-FRU|3'); const pd = benCaixasPadrao(c, 12300, r);
+  ok('U39a L39-132 (12.300 kg): sugestão 1.169 un, 540 livres no Estoque (CX26-01), valor inicial 540', pd.sug === 1169 && pd.livre === 540 && pd.cx === 540 && benCaixasLivres(c) === 540, pd);
+  const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }] }, IG)); const o = O(c, n.id || 'OB-0113') || { ins: [{}], ben: { hist: [{}] } };
+  ok('U39b criar sem informar caixas usa o valor inicial: 540 un, o histórico diz a sugestão e o livre, sem aviso de impedimento',
+     !n.erro && o.ins[0].tot === 540 && /540 un de caixa \(sugestão 1169; 540 un livres no Estoque\)/.test(o.ben.hist[0].det) && !/Atenção/.test(n.msg), [n, o.ins, o.ben.hist]);
+  const im = n.id ? benImpedimentos(c, o) : ['sem ordem']; const l = MUD(c, x => benAutorizarLiberar(x, n.id, IG));
+  const o2 = O(c, n.id) || {}; ok('U39c a ordem criada com o valor inicial libera: sem impedimento, REQ-041 com 540 un, L39-132 preso à ordem', !im.length && !l.erro && o2.etapa === 'Liberadas' && o2.req === 'REQ-041' && REQ(c, 'REQ-041').solicitado === 540 && LT(c, 'L39-132').ordem === n.id, [im, l]);
+  const c2 = NOVO(); const a = MUD(c2, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }], cx: 1169 }, IG));
+  ok('U39d acima do livre a ordem nasce com o aviso de que a liberação fica impedida e quem resolve', !a.erro && /Atenção: 540 un livres no Estoque para 1\.169 un: a liberação fica impedida até o Estoque ter as caixas \(Rui \(almoxarife\) ou Paula \(almoxarife\)\)\./.test(a.msg), a);
+  const c3 = NOVO(); MUD(c3, x => cenReceber(x, CX, 'CX26-02', 3000, 'un', 'Packing', '—', 'NF-90011', true, RU)); const p3 = benCaixasPadrao(c3, 12300, r);
+  const c4 = NOVO(); c4.lotes[CX + '|CX26-01'].reservado = c4.lotes[CX + '|CX26-01'].fisico; const p4 = benCaixasPadrao(c4, 12300, r);
+  ok('U39e com caixas suficientes vale a sugestão (3.000 un recebidas); sem caixa livre fica a sugestão (a liberação mostra a falta)', p3.cx === 1169 && p3.livre === 3000 && p4.livre === 0 && p4.cx === 1169, [p3, p4]); }
+
 print(JSON.stringify(R));

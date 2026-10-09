@@ -64,6 +64,8 @@ M = [
  ('M55 S4 Conferir sem versão esperada', "if (o.ben.conf) throw new Error('Já feito: balanço conferido por ' + o.ben.conf.quem + '.'); benVer(o, k);", "if (o.ben.conf) throw new Error('Já feito: balanço conferido por ' + o.ben.conf.quem + '.');"),
  ('M56 S4 versão antes do "já feito" (toque repetido vira conflito)', "const quem = cenExige(ator, 'conferente', 'Conferir o balanço da ' + id); const o = benO(c, id);", "const quem = cenExige(ator, 'conferente', 'Conferir o balanço da ' + id); const o = benO(c, id); benVer(o, k);"),
  ('M57 S4 recusa do Liberar lote chama fruta de campo de lote do beneficiamento', "if (L.insp) throw new Error(lid + (L.benef ? ' é lote do beneficiamento (' + L.benef + ')' : ' tem a inspeção ' + L.insp)", "if (L.insp) throw new Error(lid + (true ? ' é lote do beneficiamento (' + L.benef + ')' : ' tem a inspeção ' + L.insp)"),
+ # integração BEN na branch única (09/10): achados dos revisores
+ ('M58 caixas da ordem nova pela sugestão, sem olhar o livre no Estoque', "return { sug, livre, cx: livre >= 1 && sug > livre ? livre : sug }; }", "return { sug, livre, cx: sug }; }"),
 ]
 U = open(os.path.join(HERE, 'ben_unit.js'), encoding='utf-8').read()
 base = motor(); OK = []

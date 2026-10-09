@@ -61,6 +61,11 @@ function benReqItem(c, o) { const r = o.req && c.reqs[o.req]; return r ? r.itens
 function benTara(cx, pallets, r) { return prSoma([prMul(cx || 0, BENC.cx.tara), prMul(pallets || 0, r.par.tara_pallet)]); }
 /* caixas sugeridas = ⌈entrada × fração vendável prevista ÷ conteúdo da caixa⌉, inteiro; confirmadas e editáveis, nunca o último valor */
 function benCaixas(kg, r) { const N = prM(kg) * prM(r.par.frac_vend), D = prM(BENC.cx.massa) * PR_S; if (N <= 0n) return 0; return Number((N + D - 1n) / D); }
+/* caixas livres para uma ordem: o mesmo lote e a mesma conta da liberação (cenLiberar reserva do cenLote; benImpedimentos confere cenDisp) */
+function benCaixasLivres(c) { const l = cenLote(c, BENC.cx.item); return l ? Math.floor(cenDisp(l) + 1e-9) : 0; }
+/* caixas da ordem nova: a sugestão dentro do livre no Estoque, com o motivo à vista; sem caixa livre fica a sugestão (a liberação mostra a
+   falta e quem resolve). Dano evitado (integração BEN): a sugestão acima do livre (1.169 un do L39-132 contra 540) criava ordem que não liberava */
+function benCaixasPadrao(c, kg, r) { const sug = benCaixas(kg, r), livre = benCaixasLivres(c); return { sug, livre, cx: livre >= 1 && sug > livre ? livre : sug }; }
 /* faixa de conferência da parte pesada (R-F02): tol_pesado × processado, 6 casas */
 function benFaixa(proc, r) { return prMul(proc, r.par.tol_pesado); }
 /* balanço (R-F01): processado − (produto + outro destino + descarte + perdas identificadas), só registros válidos, base física sem tara */
@@ -220,8 +225,8 @@ function benNova(c, k, ator) { const quem = cenExige(ator, 'producao', 'Criar or
   Ls.forEach((L, i) => { const x = benElegErro(c, L, r, null, ents[i].kg); if (x) throw new Error(x.t); const ob = benOrdemAberta(c, L.id); if (ob) throw new Error(L.id + ' já está na ' + ob.id + ' (' + ob.etapa + ').');
     /* lote inteiro (BEN-D17): entrada parcial prenderia o resto do lote em processo até o Fechar, fora do vendável e de outra ordem */
     const fis = prFis(c, L.id); if (prCmp(ents[i].kg, fis) !== 0) throw new Error('A ordem leva o lote inteiro: ' + L.id + ' tem ' + benKg(fis) + ' (informado ' + benKg(ents[i].kg) + '). Entrada parcial prenderia o resto do lote até o Fechar.'); });
-  const proc = prSoma(ents.map(e => e.kg)); const sug = benCaixas(proc, r);
-  const cx = (k.cx === undefined || k.cx === null || k.cx === '') ? sug : benNum(k.cx); if (!(Number.isInteger(cx) && cx >= 0)) throw new Error('Caixas: número inteiro de unidades (sugestão ' + sug + ').');
+  const proc = prSoma(ents.map(e => e.kg)); const pad = benCaixasPadrao(c, proc, r); const sug = pad.sug;
+  const cx = (k.cx === undefined || k.cx === null || k.cx === '') ? pad.cx : benNum(k.cx); if (!(Number.isInteger(cx) && cx >= 0)) throw new Error('Caixas: número inteiro de unidades (sugestão ' + sug + ').');
   /* dano evitado (BEN-REV-05): ordem liberada sem caixa não registra Produto nem conclui, e a entrada fica presa em processo */
   if (cx < 1 && (r.saidas || []).some(s => s.fluxo === 'Produto' && s.caixa)) throw new Error('Caixas: ao menos 1 un. O Produto da ' + benRotaTxt(r) + ' sai em caixa (sugestão ' + sug + ').');
   const ini = k.ini || prHoje(); if (!/^\d{4}-\d\d-\d\d$/.test(ini)) throw new Error('Informe o início da ordem.');
@@ -230,9 +235,12 @@ function benNova(c, k, ator) { const quem = cenExige(ator, 'producao', 'Criar or
   const o = c.ordens[id] = { id, fam: 'BEN', tipo: 'Beneficiamento · ' + (r.nome || r.id), talhao: loc, area: 0, etapa: 'A liberar', versao: 'v1', ver: 1, realizado: 0, saldo: 0,
     resp: (typeof g2pf === 'function' && g2pf(ator) ? g2pf(ator).k : quem), ins: cx > 0 ? [{ g: 'Embalagem', p: BENC.cx.item, dose: 0, un: 'un', tot: cx, emb: BENC.cx.emb }] : [], req: null, selos: [], ap: [], reservado: false,
     ben: { rota: rk, faz: Ls[0].faz, local: lloc, ini, fim: prDiaMais(ini, 1), cxSug: sug, insp: '', nsai: 0, ent: ents.map(e => ({ lote: e.lote, kg: prN(prM(e.kg)) })), sai: [], conc: null, conf: null, just: [], corr: null, hist: [] } };
-  const det = benRotaTxt(r) + ' · ' + ents.map(e => e.lote).join(', ') + ' · ' + benKg(proc) + ' · ' + benUn(cx) + ' de caixa' + (cx === sug ? ' (sugestão confirmada)' : ' (sugestão ' + sug + ')') + benOndeTxt(o);
+  const det = benRotaTxt(r) + ' · ' + ents.map(e => e.lote).join(', ') + ' · ' + benKg(proc) + ' · ' + benUn(cx) + ' de caixa'
+    + (cx === sug ? ' (sugestão confirmada)' : ' (sugestão ' + sug + (cx === pad.livre ? '; ' + benUn(pad.livre) + ' livres no Estoque' : '') + ')') + benOndeTxt(o);
   benHist(o, quem, 'Ordem criada · v1', det);
-  const msg = id + ' criada (A liberar): ' + det + '. Próximo passo: Autorizar rota e liberar.'; benGravaRecibo(c, k, 'benNova', imp, msg); return { msg, id }; }
+  /* acima do livre a ordem nasce, mas a liberação fica impedida até o Estoque ter as caixas: o aviso diz isso agora, não na liberação */
+  const av = cx > pad.livre ? ' Atenção: ' + benUn(pad.livre) + ' livres no Estoque para ' + benUn(cx) + ': a liberação fica impedida até o Estoque ter as caixas (' + benQuem('almoxarife') + ').' : '';
+  const msg = id + ' criada (A liberar): ' + det + '. Próximo passo: Autorizar rota e liberar.' + av; benGravaRecibo(c, k, 'benNova', imp, msg); return { msg, id }; }
 /* retirar entrada antes de liberar (I3): grava a versão seguinte; a sugestão de caixas acompanha a entrada quando estava confirmada */
 function benRetirar(c, id, lote, ator, k) { const quem = cenExige(ator, 'producao', 'Retirar ' + lote + ' da ' + id); const o = benO(c, id);
   const imp = JSON.stringify([id, lote]); const ja = benRecibo(c, k, 'benRetirar', imp); if (ja) return ja; benVer(o, k);
