@@ -2,7 +2,7 @@
 """Beneficiamento BEN-1 · teste de navegador do fluxo principal (docs/beneficiamento/ESPECIFICACAO.md §11.3 E01-E12, §11.7; DECISOES §12).
 Modos (um por vez, cada um abre o Chrome headless do cadc_lib.T; o cenário começa limpo):
   fluxo    tarefa do proprietário (§11.7) no desktop, com cliques e campos digitados medidos (linha de base, AC-36): menu Produção ›
-           Beneficiamento; OB-0112 recusa com as duas causas e quem resolve; OB-0110 concluir, conferir (Paula), fechar recusado pela
+           Recebimento e beneficiamento e a faixa de telas até Beneficiamento (BEN-D14); OB-0112 recusa com as duas causas e quem resolve; OB-0110 concluir, conferir (Paula), fechar recusado pela
            custódia; devolução no Estoque (Rui); fechar: L39-120 e L39-121 em inspeção; no Estoque de produto a Qualidade (Marta) registra
            o resultado e libera; o Comercial reserva a sugestão para o PV-031 e a falta aparece; retirar o L39-119 e liberar a OB-0112
            (REQ-041 no Estoque); e a integração com a Colheita: o L39-131 (recebido em processo) abre uma ordem nova pelo atalho.
@@ -52,21 +52,34 @@ def shot(n): t.c.shot(os.path.join(PR, 'ben_' + n + '.png'))
 def cen(expr): return J(f"(()=>{{ const c=CEN()||(window.__cen?window.__cen.cenGet():{{}}); return ({expr}); }})()")   # nada gravado ainda: lê o cenário inicial pelo cenGet
 def perfil(k): J(f"PERFIL({json.dumps(k)})"); time.sleep(.1)
 def rev(): return cen("c.rev||0")
+FAIXA = "[...document.querySelectorAll('nav[aria-label=\"Telas de recebimento e beneficiamento\"] a')].map(a=>[N(a.innerText),a.getAttribute('href'),a.getAttribute('aria-current')])"
+def nav_clk(x, root):   # toque que navega (link): conta o toque e recarrega o apoio na página nova
+    cl, tx = J("[window.__cl||0, window.__tx||0]") or [0, 0]; r = J(f"CLK({json.dumps(x)},{json.dumps(root)})"); time.sleep(1.4); lib(); J(f"window.__cl={cl + 1}; window.__tx={tx};"); return r
 def est_secao(i): J(f"document.querySelectorAll('nav[aria-label=\"Seções do estoque\"] button')[{i - 1}].click()"); time.sleep(.5)
 
 try:
     if 'fluxo' in MODOS:
         print('== fluxo · tarefa do proprietário (§11.7) de ponta a ponta, com cliques e campos medidos')
-        ir('BEN.dc.html', limpa=True)
-        t.chk('BEN abre sem erro de JS', not t.errs(), t.errs())
+        # (1) BEN-D14 (09/10): Produção com 3 itens (colheita D-01); o Beneficiamento é tela irmã de Cargas em "Recebimento e beneficiamento"
+        ir('CARGA.dc.html', limpa=True); J("window.__cl=0")
         m = J("N(document.querySelector('nav[aria-label=Menu]').innerText)") or ''
         itens = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].map(a=>[N(a.innerText),a.getAttribute('href')]).filter(x=>['COLH.dc.html','CARGA.dc.html','BEN.dc.html','PROD.dc.html'].indexOf(x[1])>=0)") or []
-        t.chk('(1) menu: Produção › Beneficiamento entre Cargas e recebimento e Estoque de produto (4 itens, no fluxo do recebido ao estoque)',
-              [x[0] for x in itens] == ['Previsão e colheita', 'Cargas e recebimento', 'Beneficiamento', 'Estoque de produto'] and m.find('Produção') < m.find('Manutenção'), itens)
+        t.chk('(1) menu: Produção com 3 itens (Previsão e colheita, Recebimento e beneficiamento, Estoque de produto), antes de Manutenção',
+              [x[0] for x in itens] == ['Previsão e colheita', 'Recebimento e beneficiamento', 'Estoque de produto'] and m.find('Produção') < m.find('Manutenção'), itens)
+        fx = J(FAIXA) or []
+        t.chk('(1) Cargas mostra a faixa de telas: Cargas e recebimento (atual) | Beneficiamento, com a pendência escrita (1 a liberar)',
+              len(fx) == 2 and fx[0][1] == 'CARGA.dc.html' and fx[0][2] == 'page' and fx[1][1] == 'BEN.dc.html' and fx[1][0].startswith('Beneficiamento') and '1 a liberar' in fx[1][0], fx)
+        cg = J("ROWTXT('L39-131')") or ''
+        t.chk('(1) Cargas: a carga recebida em processo (L39-131) diz o próximo passo "Abrir ordem de beneficiamento · Igor"', 'Abrir ordem de beneficiamento · Igor' in cg, cg)
+        nav_clk('Beneficiamento', 'nav[aria-label="Telas de recebimento e beneficiamento"]')
+        t.chk('BEN abre sem erro de JS', not t.errs(), t.errs())
+        fx = J(FAIXA) or []; sub = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].filter(a=>getComputedStyle(a).backgroundColor==='rgb(30, 122, 76)').map(a=>N(a.innerText))") or []
+        t.chk('(1) no Beneficiamento: faixa com Beneficiamento atual (aria-current) e o item do menu "Recebimento e beneficiamento" em destaque; título Beneficiamento',
+              len(fx) == 2 and fx[1][2] == 'page' and fx[0][2] is None and sub == ['Recebimento e beneficiamento'] and J("N(document.querySelector('h1').innerText)") == 'Beneficiamento', [fx, sub])
         clk('Kanban', '[aria-label="Visão das ordens"]', w=.7)
         kb = J("[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] > *')].filter(VIS).map(x=>N(x.innerText).slice(0,40))")
         t.chk('Kanban com exatamente 5 fases e a contagem da semente (A liberar 1, Em execução 1)', len(kb or []) == 5 and kb[0].lower().startswith('a liberar 1') and kb[2].lower().startswith('em execução 1') and kb[4].lower().startswith('encerradas 0'), kb)
-        J("window.__cl=0"); clk('Lista')
+        J("window.__cl=1"); clk('Lista')   # a medida conta o toque da faixa e deixa de fora o Kanban (só conferência do teste)
         t.chk('sem seleção, a ação primária do cabeçalho é a da 1ª ordem com passo: "Autorizar rota e liberar · OB-0112"', J("PRIM()") == ['Autorizar rota e liberar · OB-0112'], J("PRIM()"))
         shot('lista')
         # (2) OB-0112: autorizar e liberar recusa com as duas causas e quem resolve (Igor age)
@@ -116,7 +129,7 @@ try:
         ir('EST.dc.html'); est_secao(2); t.chk('(5) a REQ-041 da OB-0112 aparece em Entregue por O.S.', 'OB-0112' in (J("ROWTXT('REQ-041')") or ''), J("ROWTXT('REQ-041')"))
         cl, tx = J("[window.__cl, window.__tx]")
         print(f'MEDIDA tarefa do proprietário (§11.7): {cl} cliques/toques e {tx} campos digitados (linha de base, AC-36)')
-        t.chk('(medida) tarefa do proprietário em até 30 toques e sem campo digitado (só toques: a quantidade e as caixas vêm sugeridas)', cl <= 30 and tx == 0, [cl, tx])
+        t.chk('(medida) tarefa do proprietário, desde Recebimento e beneficiamento, em até 30 toques e sem campo digitado (só toques: a quantidade e as caixas vêm sugeridas)', cl <= 30 and tx == 0, [cl, tx])
         # integração com a Colheita: o L39-131 (recebido em processo, pós-colheita do CAR0) abre uma ordem pelo atalho do Estoque de produto
         ir('PROD.dc.html#L39-131'); time.sleep(.4); p = pan()
         t.chk('Colheita → Beneficiamento: L39-131 em processo no Estoque de produto com o atalho "Abrir ordem de beneficiamento" (só navega)', 'Abrir ordem de beneficiamento' in p and rev() == cen("c.rev||0"), p[:400])
@@ -125,6 +138,8 @@ try:
               [p[:500], J("(document.querySelector('aside [id^=pf_cx_]')||{}).value")])
         perfil('Igor'); clk('Criar ordem', 'aside'); st = cen("c.ordens['OB-0113']&&[c.ordens['OB-0113'].etapa,c.ordens['OB-0113'].ben.ent[0].lote,c.ordens['OB-0113'].ins[0].tot]")
         t.chk('Criar ordem: OB-0113 A liberar com o L39-131 e 2.292 caixas; nada reservado antes de liberar', st == ['A liberar', 'L39-131', 2292] and not cen("c.producao.lotes['L39-131'].ordem"), [st, toast()])
+        ir('CARGA.dc.html'); cg = J("ROWTXT('L39-131')") or ''
+        t.chk('Cargas depois de criar: a carga do L39-131 aponta a ordem "na OB-0113 (A liberar)"', 'na OB-0113 (A liberar)' in cg, cg)
         shot('fluxo_fim')
         t.chk('fluxo sem erro de JS', not t.errs(), t.errs())
     if 'erros' in MODOS:

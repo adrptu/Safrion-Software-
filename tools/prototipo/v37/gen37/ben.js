@@ -116,6 +116,19 @@ function benImpedimentos(c, o) { const out = []; const r = benRota(o.ben.rota); 
                        : { t: 'Ver saldo de caixas no Estoque', h: 'EST.dc.html', why: 'Nenhuma ordem tem sobra em custódia. A compra de caixas entra no BEN-2.' } }); });
   return out; }
 
+/* próximo passo do lote de entrada em processo (Estoque de produto e Cargas): a ordem aberta ou o atalho da ordem nova (só navega) */
+function benProxEntrada(c, L) { const S = prSaldos(c, L);
+  if (S.ordem) return { t: 'em processo na ' + S.ordem + ' · ' + benProdQ(), h: 'BEN.dc.html#' + S.ordem, lk: 'Abrir a ' + S.ordem };
+  const ob = benOrdemAberta(c, L.id); if (ob) return { t: 'na ' + ob.id + ' (' + ob.etapa + ') · ' + benProdQ(), h: 'BEN.dc.html#' + ob.id, lk: 'Abrir a ' + ob.id };
+  if (benLotesAptos(c).some(x => x.id === L.id)) return { t: 'Abrir ordem de beneficiamento · ' + benProdQ(), h: 'BEN.dc.html#nova=' + L.id, lk: 'Abrir ordem de beneficiamento' };
+  return null; }
+/* pendência das telas irmãs Cargas | Beneficiamento (faixa de Recebimento e beneficiamento, BEN-D14): só contagens, do mesmo estado */
+function benPendRec(c, ok) { ok = ok || (() => true); const P = prP(c);
+  const ap = Object.values(P.cargas || {}).filter(g => g.st === 'A pesar' && g.sinc !== false && ok(g.faz)).length;
+  const os = benOrdens(c).filter(o => ok(o.ben.faz)); const n = f => os.filter(o => o.etapa === f).length; const lt = benLotesAptos(c).filter(L => ok(L.faz)).length;
+  return { carga: ap ? ap + ' a pesar' : '',
+    ben: [n('A liberar') ? n('A liberar') + ' a liberar' : '', n('Em conferência') ? n('Em conferência') + ' em conferência' : '', lt ? lt + (lt > 1 ? ' lotes a beneficiar' : ' lote a beneficiar') : ''].filter(Boolean).join(' · ') }; }
+
 /* ---------- etapas da rota (R-A09): a aba Etapas e a trava do Fechar usam a mesma função ---------- */
 function benEtapas(c, o) { const r = benRota(o.ben.rota); const v = benValidos(o); const pr = v.filter(s => s.fluxo === 'Produto');
   return ((r && r.etapas) || []).map(e => { if (e.pert !== 'Exigida') return { nome: e.nome, pert: e.pert, sit: 'Não se aplica', ev: e.mot || '' };

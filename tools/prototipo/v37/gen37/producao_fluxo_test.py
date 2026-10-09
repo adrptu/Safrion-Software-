@@ -95,8 +95,9 @@ try:
         m = J("(()=>{ const nav=document.querySelector('nav[aria-label=Menu]'); const t=N(nav.innerText); return t; })()") or ''
         i_ag, i_pr, i_ma = m.find('Agrícola'), m.find('Produção'), m.find('Manutenção')
         t.chk('AC-01 grupo Produção logo depois de Agrícola (antes de Manutenção)', 0 <= i_ag < i_pr < i_ma, m[:300])
-        itens = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].map(a=>[N(a.innerText),a.getAttribute('href')]).filter(x=>['COLH.dc.html','CARGA.dc.html','PROD.dc.html'].indexOf(x[1])>=0)") or []
-        t.chk('AC-01 Produção com 3 itens: Previsão e colheita, Cargas e recebimento, Estoque de produto', [x[0] for x in itens] == ['Previsão e colheita', 'Cargas e recebimento', 'Estoque de produto'], itens)
+        # BEN-D14 (09/10): o grupo continua com 3 itens (D-01); o Beneficiamento é tela irmã de Cargas, dentro de "Recebimento e beneficiamento"
+        itens = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].map(a=>[N(a.innerText),a.getAttribute('href')]).filter(x=>['COLH.dc.html','CARGA.dc.html','BEN.dc.html','PROD.dc.html'].indexOf(x[1])>=0)") or []
+        t.chk('AC-01 Produção com 3 itens: Previsão e colheita, Recebimento e beneficiamento, Estoque de produto', [x[0] for x in itens] == ['Previsão e colheita', 'Recebimento e beneficiamento', 'Estoque de produto'], itens)
         for pg in ('COLH', 'CARGA', 'PROD'):
             ir(pg + '.dc.html'); t.chk(f'AC-01 {pg} abre sem erro de JS', not t.errs(), t.errs())
         ir('COLH.dc.html', limpa=True)
@@ -273,3 +274,4 @@ try:
         shot('revisao')
 finally:
     t.fim()
+sys.exit(0 if all(t.ok) else 1)   # FALHOU com saída 0 escondia a falha (09/10, achado ao endurecer o AC-01)

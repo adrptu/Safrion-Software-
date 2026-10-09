@@ -9,7 +9,7 @@ Regras, contas e comandos: ben.js (ben*), sobre producao.js e cenario.js; esta �
 A casca, o painel, os cartões do celular e o restaurar são os da Produção (areas/producao.py); o Kanban é o da O.S. (mesmo componente)."""
 from engine import (grid, esc, INK, MUTED, LINE, BG, SURF, ACC, BTN_ST, EXTRAJS, _MINI)
 import engine as E
-from areas.producao import (bloco, cartoes, _shell, _js, IF, H)
+from areas.producao import (bloco, cartoes, _shell, _js, IF, H, faixa_rec)
 from areas.processo_os import _kanban
 
 
@@ -28,7 +28,8 @@ def build():
                    IF('vl', g_ob + cartoes('cards_ob'), d=True) + IF('vk', kb), acao=f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">{vis}{nova}</div>'))
     _shell('BEN', 'Beneficiamento', 'Processe as ordens: autorize a rota, registre as saídas pesadas, confira o balanço e feche. Fechar não libera o lote: a Qualidade libera.',
            corpo, fname, 1100,
-           'Massa pesada não se cria; embalagem não é fruta; correção é estorno com motivo. Os lotes embalados vão para o Estoque de produto em inspeção (R-A07, R-C01, R-A15, R-E01).')
+           'Massa pesada não se cria; embalagem não é fruta; correção é estorno com motivo. Os lotes embalados vão para o Estoque de produto em inspeção (R-A07, R-C01, R-A15, R-E01).',
+           steps=faixa_rec(2))
 
 
 BEN_JS = r'''
@@ -181,7 +182,7 @@ function bnPainel(self,c,o){ const r=benRota(o.ben.rota); const b=benBal(o); con
   else if(nx.acao==='fechar') PPx.prim={t:'Fechar processo',go:()=>bnRun(self,x=>benFechar(x,o.id,g2perfil()),{})};
   if(at==='Em conferência'){ sec.push({t:'Reabrir execução',go:()=>self.setState({pr_modo:'reabrir',pr_form:null,pr_err:''})}); if(!o.ben.conf) sec.push({t:'+ Registrar perda',go:abreSaida}); }
   return PPx; }
-function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const st=self.state; const ords=self._ords||[];
+function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const st=self.state; const ords=self._ords||[]; prFaixaRec(self,v,c);
   const vis=st.bn_vis||'l'; v.vl=vis==='l'; v.vk=vis==='k'; v.vl_on=String(vis==='l'); v.vk_on=String(vis==='k'); v.vl_go=()=>self.setState({bn_vis:'l'}); v.vk_go=()=>self.setState({bn_vis:'k'});
   v.kb=bnKanban(self,c,ords);
   v.nova_go=()=>self.setState({pr_pan:{g:'nova'},pr_sel:null,pr_form:null,pr_err:'',pr_modo:null,pr_ch:prChave('W-BNN')});

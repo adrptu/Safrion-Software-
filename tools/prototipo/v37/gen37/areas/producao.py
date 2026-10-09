@@ -109,11 +109,18 @@ def _status(fname):
     assert s.count(old)==1, 'selo do cabeçalho não encontrado em '+fname
     open(p,'w',encoding='utf-8').write(s.replace(old,f'<span style="{H("st_st")}"><span style="{H("st_dot")}"></span>{H("st_t")}</span>'))
 
-def _shell(fid,title,sub,corpo,fname,altura,foot):
+def _shell(fid,title,sub,corpo,fname,altura,foot,steps=None):
     EXTRA.append('<style>'+CSS+'</style>'); EXTRA.append(painel()); corpo=corpo+restaurar()
     HEIGHTS37[fname]=altura
-    shell37(fid,title,corpo,fname=fname,subtitle=sub,status=(H('st_t'),'yellow'),primary_html=prim_html(),search=False,footer=foot)
+    shell37(fid,title,corpo,fname=fname,subtitle=sub,status=(H('st_t'),'yellow'),primary_html=prim_html(),search=False,footer=foot,steps=steps)
     _status(fname)
+
+# Recebimento e beneficiamento (BEN-D14, 09/10): o grupo Produção fica com 3 itens (colheita D-01); Cargas e Beneficiamento são telas
+# irmãs do mesmo item, ligadas pela faixa de telas (o mesmo componente da Irrigação: navegação, sem número de etapa, pendência escrita)
+REC_TELAS=[('Cargas e recebimento','CARGA.dc.html'),('Beneficiamento','BEN.dc.html')]
+def faixa_rec(cur):
+    itens=''.join(ui37.secao_item(t,i==cur,href=h,why_hole=f'rs{i}') for i,(t,h) in enumerate(REC_TELAS,1))
+    return ui37.secoes_nav(itens,len(REC_TELAS),cur,REC_TELAS[cur-1][0],'Telas de recebimento e beneficiamento')
 
 def _js(tela):
     return cenario.js_prefixo()+DCAR.js_nucleo()+PR_UI_JS+tela
@@ -170,6 +177,8 @@ function prCards(self,v,gid,mk){ const ids=(v[gid+'_rows']||[]).map(r=>r.id); co
 function prCard(o){ return {grp:!!o.grp,reg:!o.grp,t1:o.t1||'',num:o.num||'',t2:o.t2||'',ct:(o.chip||['',''])[0],cst:prChs((o.chip||['','gray'])[1]),cdot:prDot((o.chip||['','gray'])[1]),nx:o.nx||'',go:o.go||(()=>{}),cur:'false'}; }
 /* números com unidade na célula (decisão de 05/10/2026): valor tipado em v (base kg) para ordenar, texto em p */
 function prTx(t){ return [{k:'txt',t}]; }
+/* faixa de Recebimento e beneficiamento (CARGA | BEN, BEN-D14): a pendência de cada tela, lida do mesmo estado e do filtro de fazenda */
+function prFaixaRec(self,v,c){ const W=benPendRec(c,f=>prFazOk(self,f)); v.rs1_why=W.carga; v.rs1_has=!!W.carga; v.rs2_why=W.ben; v.rs2_has=!!W.ben; }
 '''
 
 # pedidos e reservas: as mesmas funções no Estoque de produto (PROD) e no VE-04 oculto (vínculo pedido ↔ lote, spec §3.5)
@@ -179,10 +188,7 @@ function prPedidosPara(c,L){ return Object.values(prP(c).pedidos).filter(p=>prCo
 function prLoteProx(c,L,S){ if(S.esgotado) return L.esg?{t:'consumido na '+L.esg+' · rastreio guardado',p:'Consumido na '+L.esg+' (beneficiamento): saldo 0; o rastreio fica em "Para onde foi"'}:{t:'sem saldo · rastreio guardado'};
   /* lote de produção (BEN-1): a Qualidade registra o resultado da inspeção e decide (fechar o processo não libera) */
   if(typeof benProxLote==='function'){ const b=benProxLote(c,L,S); if(b) return b; }
-  if(S.q==='Em processo'){ if(S.ordem) return {t:'em processo na '+S.ordem+' · '+benProdQ(),h:'BEN.dc.html#'+S.ordem,lk:'Abrir a '+S.ordem};
-    if(typeof benOrdemAberta==='function'){ const ob=benOrdemAberta(c,L.id); if(ob) return {t:'na '+ob.id+' ('+ob.etapa+') · '+benProdQ(),h:'BEN.dc.html#'+ob.id,lk:'Abrir a '+ob.id};
-      if(benLotesAptos(c).some(x=>x.id===L.id)) return {t:'Abrir ordem de beneficiamento · '+benProdQ(),h:'BEN.dc.html#nova='+L.id,lk:'Abrir ordem de beneficiamento'}; }
-    return {t:'no beneficiamento · fora do vendável'}; }
+  if(S.q==='Em processo'){ const b=typeof benProxEntrada==='function'?benProxEntrada(c,L):null; return b||{t:'no beneficiamento · fora do vendável'}; }
   if(S.q==='Bloqueado') return {t:S.dono+' decide · carência'};
   if(S.q==='Em inspeção'){ const ql=prQuem('qual'); if(!S.dono||S.dono===ql) return {t:'Liberar lote · '+ql,a:'liberar'};
     return {t:S.dono+' resolve · '+String(S.mot||'').split(':')[0],p:S.dono+' resolve: '+S.mot+'. Liberar fica com a Qualidade depois disso'}; }   /* revisão A-13 */
@@ -357,7 +363,7 @@ def carga():
     corpo=bloco('Cargas','O que chegou de cada talhão, quanto pesou e em que lote está. Clique numa carga a pesar para pesar; numa recebida, para ver descontos, lote e trilha.',
                 g_cg+cartoes('cards_cg'))
     _shell('CARGA','Cargas e recebimento','Pese e receba a carga do campo: o talhão vem da O.S., o lote nasce na hora e a produção do talhão muda só com a carga recebida.',corpo,fname,1000,
-           'Produção só nasce de carga recebida; caixas ou kg estimados no campo nunca somam. Ticket repetido não duplica (R-03, R-07).')
+           'Produção só nasce de carga recebida; caixas ou kg estimados no campo nunca somam. Ticket repetido não duplica (R-03, R-07).',steps=faixa_rec(1))
 
 CARGA_JS=r'''
 const PR_GRIDS={g_cg:1};
@@ -368,7 +374,7 @@ function prCgSit(c,g){ const P=prP(c); if(g.st==='A pesar') return {t:'A pesar',
   const L=P.lotes[g.lote]; const S=L?prSaldos(c,L):null;
   if(S&&S.q==='Bloqueado') return {t:'Bloqueada',c:'red',nx:S.dono+' decide · carência'};
   if(S&&S.q==='Em inspeção') return {t:'Recebida',c:'yellow',nx:(!S.dono||S.dono===prQuem('qual'))?'Qualidade confere · '+prQuem('qual'):S.dono+' resolve · '+String(S.mot||'').split(':')[0]};   /* revisão A-13 */
-  if(S&&S.q==='Em processo') return {t:'Recebida',c:'blue',nx:'no beneficiamento'};
+  if(S&&S.q==='Em processo'){ const b=typeof benProxEntrada==='function'?benProxEntrada(c,L):null; return {t:'Recebida',c:'blue',nx:b?b.t:'no beneficiamento',h:b?b.h:''}; }   /* BEN-1: a ordem ou o atalho (só navega) */
   return {t:'Recebida',c:'green',nx:'no estoque de produto'}; }
 function prCgOrig(g){ return (g.origem||[]).map(x=>x.tal+' · '+x.os+((g.origem||[]).length>1?' · '+prFmtT(x.pct,2)+' %'+(x.modo==='estimada'?' (estimada)':''):'')); }
 function prCgRow(c,g){ const P=prP(c); const s=prCgSit(c,g); const L=P.lotes[g.lote]; const cu=g.cultura||'Mamão Formosa'; const u=prUn(cu); const kg=x=>prFmtT(x,2)+' kg';
@@ -381,7 +387,7 @@ function prCgRow(c,g){ const P=prP(c); const s=prCgSit(c,g); const L=P.lotes[g.l
        dt:[{k:'txt',t:'colhida '+prBr(g.dcol)},{k:'br'},{k:'mut',t:g.drec?('recebida '+prBr(g.drec)+' '+(g.horaRec||g.hora||'')):(g.st==='Descartada'?'descartada '+prBr((g.descarte||{}).d):(g.est_cx?'~'+g.est_cx+' caixas (estimativa)':'a pesar'))}],
        liq:g.liq===null?[{k:'mut',t:'—'}]:[{k:'txt',t:kg(g.liq)}],com:[{k:g.com===null?'mut':'b',t:comT}],
        lote:g.lote?[{k:'link',t:g.lote,h:'PROD.dc.html#'+g.lote},{k:'br'},{k:'mut',t:loc}]:[{k:'mut',t:'— · '+loc}],
-       sit:[{k:'chip',t:s.t,c:s.c},{k:'br'},{k:'mut',t:s.nx}]}}; }
+       sit:[{k:'chip',t:s.t,c:s.c},{k:'br'},s.h?{k:'link',t:s.nx,h:s.h}:{k:'mut',t:s.nx}]}}; }
 function PREVALS(self,v){ cenOuvir(self); prTopo(self,v); const c=cenGet(); self._c=c; const P=prP(c);
   self.g2pick=(gid,rid)=>self.setState({pr_sel:{g:gid,id:rid},pr_pan:{g:gid,id:rid},pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null,pr_ch:null});
   const gs=prCargas(c,g=>g.sinc!==false&&prFazOk(self,g.faz)&&prSafOk(self,((PRDC.safras[(PRDC.cult[(g.origem[0]||{}).cult]||{}).saf]||{}).mf)||''));
@@ -451,7 +457,7 @@ function prPanCarga(self,c,g){ const P=prP(c); const s=prCgSit(c,g); const cu=g.
       PPx.prim={t:'Confirmar estorno',go:()=>prRun(self,x=>prEstornar(x,g.id,prFval(self,'mot',''),prRec(g.faz)),{pr_modo:null,pr_form:null})}; PPx.sec=[{t:'Manter carga',go:()=>self.setState({pr_modo:null,pr_err:''})}]; }
     else PPx.sec=[{t:'Estornar',go:()=>self.setState({pr_modo:'estorno',pr_form:null,pr_err:''})}]; }
   return PPx; }
-function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const P=prP(c); const st=self.state;
+function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const P=prP(c); const st=self.state; prFaixaRec(self,v,c);
   v.cards_cg=prCards(self,v,'g_cg',id=>{ const g=P.cargas[id]; if(!g) return null; const s=prCgSit(c,g);
     return prCard({t1:g.id+(g.ticket?' · '+g.ticket:''),num:g.st==='Descartada'?'descartada':(g.liq===null?'a pesar':prFmtT(g.liq,2)+' kg'),t2:prCgOrig(g).join(' + ')+' · colhida '+prBr(g.dcol)+(g.lote?' · '+g.lote:''),chip:[s.t,s.c],nx:s.nx,go:()=>self.g2pick('g_cg',id)}); });
   const sel=st.pr_sel; const gs=sel&&P.cargas[sel.id]; let prim;
