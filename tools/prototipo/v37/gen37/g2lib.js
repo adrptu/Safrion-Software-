@@ -538,7 +538,7 @@ function g2dicaEl(){ let d=document.getElementById(G2_DICA_ID);
   return d; }
 function g2dicaPos(){ const d=document.getElementById(G2_DICA_ID), el=G2D.el; if(!d||d.hidden||!el) return;
   if(!g2vis(el)){ g2dicaFecha(); return; }
-  const r=el.getBoundingClientRect(), W=window.innerWidth, H=window.innerHeight; d.style.maxWidth=Math.min(320,W-16)+'px'; d.style.left='0px'; d.style.top='0px';
+  const r=(el.closest('.g2ind')||el).getBoundingClientRect(), W=window.innerWidth, H=window.innerHeight;   /* botão com motivo visível (acao_motivo): a dica fica fora do par e não cobre o motivo */ d.style.maxWidth=Math.min(320,W-16)+'px'; d.style.left='0px'; d.style.top='0px';
   const w=d.offsetWidth, h=d.offsetHeight; let x=Math.round(r.left+r.width/2-w/2); x=Math.max(8,Math.min(x,W-w-8));
   let y=Math.round(r.top-h-8), lado='cima'; if(y<8){ y=Math.round(r.bottom+8); lado='baixo'; } if(y+h>H-8) y=Math.max(8,H-h-8);
   d.style.left=x+'px'; d.style.top=y+'px'; d.dataset.lado=lado; }

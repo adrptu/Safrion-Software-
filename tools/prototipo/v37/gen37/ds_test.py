@@ -351,6 +351,11 @@ try:
             chk(f'G2 {w} px · tudo conciliado: o motivo fica visível em texto junto do botão (sem ponteiro, sem foco, sem dica aberta), na cor do texto secundário e dentro da tela',
                 bool(m1) and m1['dis'] == 'true' and not m1['dica'] and len(m1['m']) == 1 and m1['m'][0]['cor'] == 'rgb(101, 115, 106)' and m1['m'][0]['fs'] >= 12
                 and m1['m'][0]['perto'] and m1['m'][0]['cabe'], m1)
+            J("[...document.querySelectorAll('header button')].find(x=>x.innerText.trim()==='Conciliar pagamentos').focus()"); time.sleep(.3)
+            sob = J("""(()=>{const d=document.getElementById('g2-dica'), m=document.querySelector('header .g2motivo'); if(!d||d.hidden||!m) return null;
+              const a=d.getBoundingClientRect(), b=m.getBoundingClientRect(); return {cobre:!(a.right<=b.left||b.right<=a.left||a.bottom<=b.top||b.bottom<=a.top), t:d.textContent};})()""")
+            chk(f'G2b {w} px · a dica do botão (foco) abre fora do par botão + motivo: não cobre o motivo visível', bool(sob) and not sob['cobre'] and 'Nenhum evento' in sob['t'], sob)
+            c.tecla('Escape', 'Escape', 27); J("document.activeElement&&document.activeElement.blur&&document.activeElement.blur()"); time.sleep(.2)
             n5 = nreal()
             if toque:
                 p = centro("[...document.querySelectorAll('header button')].find(x=>x.innerText.trim()==='Conciliar pagamentos')"); c.toque(p[0], p[1])
