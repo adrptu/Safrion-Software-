@@ -225,7 +225,8 @@ def build():
                 dict(k='cob',l='Coberta em',t='num',w=110),dict(k='preco',l='Preço',t='num',a='r',w=120)],   # preço com a unidade do insumo junto: "R$ 3,90/kg"
        [],edit=dict(m='origin',leafOnly=True,title='Insumo',fields=[dict(k='ins',l='Insumo',t='txt',ro=True),dict(k='un',l='Unidade',t='txt',ro=True)]),tree=True,gid='g_dem',total=True,qf=dict(k='sit',cut=' · ',l='situação'))
     # ---------- JS do processo ----------
-    sol0={'S2627':dict(id='SOL-2026-07',at='23/09/2026',itens={n:round(o['liq'],3) for n,o in D2.demanda('S2627').items() if o['liq']>0.001},comp=0)}
+    sol0={'S2627':dict(id='SOL-2026-07',at='23/09/2026',em=D2.SOL_INICIAL['enviada'],por=D2.SOL_INICIAL['por'],   # envio original (a atualização grava atu e hist, revisão do CTL-4)
+                       itens={n:round(o['liq'],3) for n,o in D2.demanda('S2627').items() if o['liq']>0.001},comp=0)}
     d2=dict(D2.js_data()); d2['sol']=sol0; d2['talhoes']=TALH; d2['talfaz']=TALFAZ; d2['talOrd']=TAL_FAZ; d2['culturas']=OCEN.CULTURAS; d2['unMeta']=OCEN.UN_META; d2['cultivares']=OCEN.cultivares(); d2['folga']=OCEN.FOLGA; d2['conj_opts']=conj_opts; d2['hoje']=D2.HOJE_ISO; d2['viavel']=D2.VIAVEL
     # CTL-4: o cenário compartilhado (O.S., requisições) entra na demanda da etapa 4 (cenOsDem): emitir, liberar, apontar ou cancelar uma O.S. muda a conta
     import cenario

@@ -10,6 +10,7 @@ from engine import (grid,esc,MUTED,LINE,BG,SURF,ACC,YEL,YELS,RED,REDS,BTN_ST,EXT
 import engine as E
 from ui37 import shell37, steps_state, HEIGHTS37
 import dados2 as D2
+import cenario
 
 H=lambda s: '{{'+s+'}}'
 F=lambda: H('false')
@@ -54,7 +55,9 @@ def _cd():
     nf_prev={r['pedido']:r['id'] for r in D2.RECEBIMENTOS if r['qtd_conf'] is None}
     for p in peds: p['nfprev']=nf_prev.get(p['id'],'')
     p26=[dict(id=p['id'],f=p['f'],forn=_forn(p['f']),item=p['item'],un=p['un'],qtd=p['qtd'],preco=p['preco'],prev=p['previsao']) for p in PED_2526]
-    return dict(hojeIso=_iso(D2.HOJE),viavel=D2.VIAVEL,sol=D2.SOL_INICIAL,itens=itens,dem=dm,ref=ref,safras=safras,sol2526=SOL_2526,
+    # CTL-4 (revisão, achado 2): partes fixas da demanda das safras abertas; a tela junta ordens e estoque do cenário vivo (cenDemEntradas)
+    viva=dict(x={s['id']:D2.dem_fixas(s['id']) for s in D2.SAFRAS if not s['ro']},b=dict(osb=D2.os_base(),est=D2.est_base()))
+    return dict(hojeIso=_iso(D2.HOJE),viavel=D2.VIAVEL,sol=D2.SOL_INICIAL,itens=itens,dem=dm,ref=ref,safras=safras,sol2526=SOL_2526,viva=viva,
                 forn=[dict(id=f['id'],nome=f['nome'],grupos=f['grupos'],email=f['email'],whats=f['whats'],homologado=f['homologado'],motivo=MOTIVO_NH.get(f['id'],''),
                            contato=f.get('contato',''),canais=f.get('canais') or ['E-mail']) for f in D2.FORNECEDORES],
                 props=D2.PROPOSTAS,alcada=D2.ALCADA,perfil=PERFIL,fob=FRETE_FOB,prazos=PRAZOS,prazoPadrao=PRAZO_PADRAO,pcIni=PC_INI,pedidos=peds,ped2526=p26)
@@ -107,7 +110,7 @@ def build():
                     fields=[dict(k='prev',l='Previsão de entrega',t='date',req=True),dict(k='obs',l='Motivo da reprogramação',t='area',help='Ex.: fornecedor confirmou nova data de embarque.')]),
                tree=True,gid='g_ent',total=True,qf=dict(k='sit',cut=' · '))
     root=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    EXTRAJS[0]='const CD = '+json.dumps(_cd(),ensure_ascii=False)+';\n'+open(os.path.join(root,'cal01.js'),encoding='utf-8').read()+'\n'+JS
+    EXTRAJS[0]=cenario.js_prefixo()+'const CD = '+json.dumps(_cd(),ensure_ascii=False)+';\n'+open(os.path.join(root,'cal01.js'),encoding='utf-8').read()+'\n'+JS
     # ---------- corpo ----------
     trail=(f'<sc-if value="{H("tr_on")}" hint-placeholder-val="{F()}"><div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 12.5px;">'
            f'<span style="font-size: 10.5px; font-weight: 800; letter-spacing: .06em; color: {MUTED};">DOCUMENTOS DA COMPRA</span>'
@@ -171,10 +174,22 @@ function solDe(saf){ if(!saf) return null; const rec=solLer()[saf]; if(!rec&&saf
   else { const det={}; (rec.det||[]).forEach(d=>{ det[d.nome]=d; }); if(saf==='S2627'&&!(rec.det||[]).length) CD.dem.forEach(d=>{ if(!det[d.nome]) det[d.nome]=d; });   // CTL-4 (DEM-09): o registro com a demanda da versão vale inteiro; a semente só completa registro sem demanda
     const itens=Object.keys(rec.itens||{}).map(n=>{ const d=det[n]||{}; return {nome:n,grupo:d.grupo||'—',un:d.un||'',preco:Number(d.preco)||0,nec:Math.round(Number(rec.itens[n])*100)/100}; })
       .sort((a,b)=>pt(a.grupo,b.grupo)||pt(a.nome,b.nome)); itens.forEach((it,i)=>{ it.i=i; });
-    x={safra:saf,nome:rec.nome||safNome(saf),sol:{id:rec.id,enviada:rec.em||rec.at||'',por:rec.por||''},itens,dem:Object.values(det),ref:itens.reduce((a,it)=>a+it.nec*it.preco,0),comp:rec.comp||0}; }
+    x={safra:saf,nome:rec.nome||safNome(saf),sol:{id:rec.id,enviada:rec.em||rec.at||'',por:rec.por||'',atu:rec.atu||null,pedEmit:!!rec.pedEmit},ent:rec.ent||null,itens,dem:Object.values(det),ref:itens.reduce((a,it)=>a+it.nec*it.preco,0),comp:rec.comp||0}; }
   x.key=key; x.pcIni=CD.pcIni+10*Math.max(0,safras().findIndex(s=>s.id===saf)); x.origem={t:'Planejar safra · '+x.nome+' · demanda de insumos',h:safHref(saf)};
   SOLC[saf]=x; return x; }
 function sx(self){ SX=solDe(self.state.saf||null); return SX; }
+// CTL-4 (revisão, achado 2) · a SOL × a demanda de agora (DEM-09) também aqui: a mesma conta do Planejar safra (demFazenda com ordens e estoque do
+// cenário vivo, cenDemEntradas) e a mesma regra (demSolAcima, cal01.js). Só avisa: quem atualiza a SOL é o Planejar safra. ACIMA: {insumo: {dif, liq}}
+let ACIMA={};
+// plano: o da versão da SOL (ent, gravado pelo Planejar safra com os ajustes da tela) ou, na SOL da semente, o da semente (dem_fixas)
+function acimaDe(saf){ if(!SX||SX.safra!==saf) return {}; const X=SX.ent||((CD.viva||{}).x||{})[saf]; if(!X) return {};
+  let raw=''; try{ raw=localStorage.getItem(CEN_KEY)||''; }catch(e){} const k=raw+'|'+saf+'|'+SX.key; if(acimaDe._k===k) return acimaDe._v;
+  const v=demSolAcima(demFazenda(cenDemEntradas(cenGet(),X,CD.viva.b)),SX.itens); acimaDe._k=k; acimaDe._v=v; return v; }
+// com pedido emitido (desta versão ou de uma anterior, pedEmit) a SOL não baixa (DEM-09): o aviso diz para onde vai o excedente
+let ACIMA_PED=false;
+function acimaTxt(){ return ACIMA_PED?'pedido já emitido: o excedente entra no estoque':'o Planejar safra atualiza a '+SX.sol.id; }
+function acimaCh(nome,un){ const a=ACIMA[nome]; return a?[CH('Acima da demanda · '+qt(a.dif,un),'red'),MU(acimaTxt())]:[]; }
+function solAtu(x){ return x.sol.atu?' · atualizada em '+x.sol.atu.em+' por '+x.sol.atu.por:''; }
 // memória CAL-01 do insumo (a mesma função do Planejar safra)
 const OPT={hoje:CD.hojeIso,viavel:CD.viavel};   // uso antes de hoje = realizado; compra nova chega a partir da data viável
 function calDe(d){ return cal01(d.est,d.evs||[],0,OPT); }
@@ -269,12 +284,12 @@ function sitDem(self,m,d,fa){ const apr=aprOf(self.state);
   if(m.env) return [CH('Em cotação','blue'),MU(it.props.length+(it.props.length===1?' proposta':' propostas'))];
   return [CH('A cotar','gray')]; }
 function PREVALS(self,v){
-  const st=self.state; const saf=st.saf||null; sx(self); const m=M(self); self._m=m; const apr=aprOf(st);
+  const st=self.state; const saf=st.saf||null; sx(self); const m=M(self); self._m=m; const apr=aprOf(st); cenOuvir(self); ACIMA=acimaDe(saf); ACIMA_PED=!!(apr||(SX&&SX.sol.pedEmit));
   // ---- etapa 1 · safras ----
   GR('g_saf').rows=safras().map(s=>{ const on=(saf===s.id); const r={id:s.id,ro:true,v:{nome:s.nome},s:{nome:s.nome},p:{}};
     r.p.nome=[B(s.nome),MU(s.periodo)].concat(on?[CH('Selecionada','blue')]:[]);
     const x=solDe(s.id);
-    if(x){ r.p.sol=[B(x.sol.id),MU(x.itens.length+' insumos · '+rs(x.ref)+(x.comp?' · '+x.comp+(x.comp>1?' complementos':' complemento'):'')),BR(),MU('enviada '+x.sol.enviada+' por '+x.sol.por)]; r.s.sol=x.sol.id;
+    if(x){ r.p.sol=[B(x.sol.id),MU(x.itens.length+' insumos · '+rs(x.ref)+(x.comp?' · '+x.comp+(x.comp>1?' complementos':' complemento'):'')),BR(),MU('enviada '+x.sol.enviada+' por '+x.sol.por+solAtu(x))]; r.s.sol=x.sol.id;
       r.p.orig=[T('Planejar safra · demanda de insumos'),LK('Ver origem',x.origem.h)]; r.s.orig='Planejar safra';
       const e=estadoCompra(self,m,s.id); r.p.comp=[e]; r.s.comp=e.t; r.p.acao=[{k:'act',t:'Abrir compra',fn:'pick:'+s.id}]; }
     else if(s.id==='S2526'){ r.p.sol=[B(CD.sol2526),MU('concluída')]; r.s.sol=CD.sol2526; r.p.orig=[T('Planejar safra · 2025/26')]; r.s.orig='Planejar safra';
@@ -314,7 +329,7 @@ function PREVALS(self,v){
   GR('g_dem').rows=Object.keys(byG).sort(pt).map((g,gi)=>{ const its=byG[g].slice().sort((a,b)=>pt(a.nome,b.nome)); const val=its.reduce((a,d)=>a+d.valor,0);
     const fas=its.map(d=>faltaDe(st,d.nome,null)); const fg=fas.filter(Boolean).sort()[0]||'';
     return {id:'DG'+gi,v:{ins:g,valor:val,falta:fg},s:{ins:g},p:{ins:[B(g),MU(its.length+(its.length>1?' insumos':' insumo'))],falta:fg?[MU(brd(fg))]:[MU('')]},
-      kids:its.map((d,ix)=>{ const dc=d.un==='L'?1:0; const fa=fas[ix]; const sit=sitDem(self,m,d,fa); const c=calDe(d);
+      kids:its.map((d,ix)=>{ const dc=d.un==='L'?1:0; const fa=fas[ix]; const sit=acimaCh(d.nome,d.un).concat(sitDem(self,m,d,fa)); const c=calDe(d);
         return {id:'DG'+gi+'_'+ix,ro:true,v:{ins:d.nome,bruta:d.bruta,est:d.est,rec:d.rec,liq:d.liq,un:d.un,falta:fa||'',preco:d.preco,valor:d.valor},s:{sit:sit.map(x=>x.t).join(' ')},
           p:{bruta:[T(nf(d.bruta,dc))].concat(c.real>0.001?[BR(),MU('antes de hoje sem O.S.: '+nf(c.real,dc))]:[]),est:[T(nf(d.est,dc))].concat((d.liq>0.001&&c.antes>0.001)?[BR(),MU('usado antes: '+nf(c.antes,dc))]:(d.res?[BR(),MU('res. '+nf(d.res,dc))]:[])),
              rec:[T(nf(d.rec,dc))].concat(d.liq>0.001&&c.tarde>0.001?[BR(),MU(nf(c.tarde,dc)+' após a falta')]:[]),
@@ -365,7 +380,7 @@ function PREVALS(self,v){
     return {id:'KG'+gi,dr:'kgt_'+gi,v:{nome:g,tot},s:{nome:g,venc:''},p:{nome:[B(g),MU(fs.size+(fs.size===1?' fornecedor':' fornecedores'))],
         venc:[MU(Object.keys(wins).map(k=>k+' em '+wins[k]+' de '+its.length).join(' · ')||'sem propostas ainda')]},
       kids:its.map(it=>{ const c=it.ch; const r={id:it.rid,v:{nome:it.nome,ped:it.ped,preco:c?c.preco:'',prazo:c?c.prazo:'',tot:it.tot,venc:c?c.label:'',just:it.just},s:{nome:it.nome},
-          p:{nome:[B(it.nome)].concat(it.falta?[BR(),MU('falta a partir de '+dm(it.falta))]:[])}};
+          p:{nome:[B(it.nome)].concat(it.falta?[BR(),MU('falta a partir de '+dm(it.falta))]:[]).concat(ACIMA[it.nome]?[BR()].concat(acimaCh(it.nome,it.un)):[])}};
         r.p.ped=[B(qt(it.ped,it.un))].concat(it.ped<it.nec-1e-9?[MU('de '+qt(it.nec,it.un))]:[]);
         const tarde=(p)=>p.late?[CH('Chega depois da falta ('+dm(it.falta)+')','red')]:[];
         if(c){ r.p.frete=fretep(c,it); r.p.pag=[T(c.pag)]; r.p.val=[T(c.validade.slice(0,5))]; r.p.prazo=[T(c.prazo+' dias'),BR(),MU('chega '+dm(c.chega))];
@@ -392,7 +407,7 @@ function PREVALS(self,v){
       p:{nome:[B(p.id+(apr?'':' (prévia)')),MU(p.nome)],prazo:[T('até '+p.prazo)]},
       o:[{t:'Fornecedor '+p.nome+' · homologado'},{t:SX.nome+' · '+SX.sol.id+' · '+p.itens.length+(p.itens.length>1?' insumos':' insumo')},{t:'Propostas recebidas em 23/09/2026 (simuladas)'}],
       kids:p.itens.map(it=>({id:'A_'+p.id+'_'+it.i,ro:true,v:{nome:it.nome,qtd:it.ped,preco:it.ch.preco,prazo:it.ch.prazo,tot:it.tot},s:{nome:it.nome,frete:it.ch.frete,pag:it.ch.pag},
-        p:{qtd:[T(qt(it.ped,it.un))].concat(it.ped<it.nec-1e-9?[MU('de '+qt(it.nec,it.un))]:[]),frete:[T(it.ch.frete)],pag:[T(it.ch.pag)]},
+        p:{qtd:[T(qt(it.ped,it.un))].concat(it.ped<it.nec-1e-9?[MU('de '+qt(it.nec,it.un))]:[]).concat(acimaCh(it.nome,it.un)),frete:[T(it.ch.frete)],pag:[T(it.ch.pag)]},
         o:[{t:'Necessidade na '+SX.sol.id+': '+qt(it.nec,it.un)},{t:'Proposta '+it.ch.nome+' · '+rs(it.ch.preco)+'/'+it.un+' · '+it.ch.frete+' · válida até '+it.ch.validade},
            {t:it.naoMenor?('Escolha justificada: '+it.just):('Escolha: '+(it.esc?it.esc.txt:((it.low&&it.ch.f===it.low.f)?'menor custo total':'menor custo que chega a tempo')))},   /* pedido emitido antes da DEM-08 não guardou esc */
            {t:'Chega '+brd(it.ch.chega)+(it.falta?' · falta a partir de '+brd(it.falta):' · sem falta prevista')},{t:'Ver origem da demanda no Planejar safra',h:SX.origem.h}]}))})):[];
@@ -511,7 +526,9 @@ function EXTRAVALS(self,v){ hooks(self);
   // resumos por etapa
   const MUT='color:#65736A;'; const WARN='color:#8A5A00;font-weight:700;'; const BAD='color:#B42318;font-weight:700;'; const OK='color:#1E7A4C;font-weight:700;';
   const ncob=SX?SX.dem.filter(d=>d.liq<=0.001).length:0;
-  v.k2=SX?(SX.sol.id+' · '+SX.nome+' · enviada em '+SX.sol.enviada+' por '+SX.sol.por+' · '+SX.itens.length+' insumos a comprar · '+rs(SX.ref)+' a preço de referência · '+ncob+' insumos cobertos por estoque e pedidos'):''; v.k2st=MUT;
+  const nac=Object.keys(ACIMA).length;
+  v.k2=SX?(SX.sol.id+' · '+SX.nome+' · enviada em '+SX.sol.enviada+' por '+SX.sol.por+solAtu(SX)+' · '+SX.itens.length+' insumos a comprar · '+rs(SX.ref)+' a preço de referência · '+ncob+' insumos cobertos por estoque e pedidos'
+    +(nac?' · '+nac+(nac>1?' insumos':' insumo')+' acima da demanda de agora: '+acimaTxt():'')):''; v.k2st=MUT;
   if(m.env){ const fim=m.nresp>=m.esperadas; v.k3='Convites simulados: nenhuma mensagem real foi enviada · enviados em '+m.env.em+(m.env.adic?(' · '+m.env.adic+(m.env.adic>1?' adicionais':' adicional')):'')+' · '+m.nresp+' de '+m.env.n+' convites responderam'+(fim?'':' · respostas chegando…')+(m.nadic?(' · '+m.nadic+(m.nadic>1?' convites adicionais a enviar':' convite adicional a enviar')):''); v.k3st=WARN; }
   else { v.k3=m.nconv+' convites prontos em '+(m.G.length-m.semForn.length)+' grupos'+(m.semForn.length?(' · sem fornecedor homologado: '+m.semForn.join(', ')+' (ficam sem cotação)'):'')
       +' · só fornecedores homologados do grupo podem ser convidados · o envio é simulado'; v.k3st=m.semForn.length?WARN:MUT; }

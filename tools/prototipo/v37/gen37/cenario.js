@@ -83,6 +83,31 @@ function cenOsDem(c, b) { b = b || {}; const out = []; const vistos = {}; const 
     const faz = no.faz || 'Santa Rita'; const saf = safDe(faz, no.saf || ''); if (!saf) return;
     um({ id: k, faz, saf, chaves: (no.keys || []).slice(), loc: [no.talhao], ini: no.jan || '', t: no.talhao + ' · ' + k + ' · ' + (((no.atv || {}).nome) || no.tipo || '') }, co); });
   return out; }
+// ---------- CTL-4 (revisão, achado 1, S2) · o estoque da demanda vem do MESMO cenário das ordens: físico apto da fazenda (lote − quarentena;
+// inclui as reservas), quarentena, reservas ativas e recebimentos previstos sem o que o Estoque já conferiu da nota do pedido. Entregar move do
+// lote para a custódia, devolver faz o inverso, cancelar solta a reserva e receber troca "a receber" por estoque: nada disso muda a compra
+// (dano evitado: 8.000 kg de NPK a menos depois de uma entrega comum; 24,5 L de Fungicida A a mais depois de uma devolução). Espelho: dados2.est_dem.
+// b (dados2.est_base): {rec:[{item,q,dt,ref,faz,t}] pedidos em aberto da semente, locFaz:{local: fazenda}, faz0 (local fora do mapa), hoje}.
+// osd: cenOsDem do mesmo cenário (data da reserva = data da ordem). Reserva = a mesma conta do Estoque (cenResPropria), só de requisição não
+// cancelada de O.S. em A liberar, Liberadas ou Em execução; chave = ID da O.S. (DEM-04: conta uma vez com a ordem). Recebido = o 1º registro de
+// cada recebimento do Estoque (movimento recebimento-nf com estRec: pedido no rótulo "PC-090 · …" e quantidade conferida, apta + quarentena).
+function cenEstDem(c, faz, b, osd) { b = b || {}; const lf = b.locFaz || {}; const fz = (l) => lf[l.local] || b.faz0 || 'Santa Rita';
+  const fisico = {}, quar = {}, reservas = [], recebDt = []; const lotes = (c && c.lotes) || {};
+  Object.values(lotes).forEach(l => { if (fz(l) !== faz) return; fisico[l.prod] = (fisico[l.prod] || 0) + (l.fisico || 0) - (l.quarentena || 0);
+    if ((l.quarentena || 0) > 0) quar[l.prod] = (quar[l.prod] || 0) + l.quarentena; });
+  Object.keys((c && c.reqs) || {}).forEach(rid => { const r = c.reqs[rid]; const o = ((c && c.ordens) || {})[r.os];
+    if (!o || r.estado === 'Cancelada' || ['A liberar', 'Liberadas', 'Em execução'].indexOf(o.etapa) < 0) return; const od = (osd || []).find(x => x.id === r.os);
+    (r.itens || []).forEach(it => { const l = lotes[it.prod + '|' + it.lote]; if (!l || fz(l) !== faz) return; const q = cenResPropria(c, rid, it, l); if (!(q > 1e-9)) return;
+      reservas.push({ item: it.prod, q, dt: od ? od.dt : (b.hoje || ''), t: 'Reserva ' + rid + ' · ' + r.os + (o.talhao ? ' (' + o.talhao + ')' : ''), chave: r.os, faz }); }); });
+  const rc = {}, vis = {};
+  ((c && c.movs) || []).forEach(m => { const e = m.tipo === 'recebimento-nf' && m.estRec; if (!e || vis[e.id]) return; vis[e.id] = 1;
+    const p = String(e.ped || '').split(' · ')[0].trim(); if (p) rc[p] = (rc[p] || 0) + (Number(e.conf) || 0); });
+  (b.rec || []).forEach(r => { if (r.faz !== faz) return; const q = Math.max(0, r.q - (r.ref ? (rc[r.ref] || 0) : 0)); if (q > 1e-9) recebDt.push(Object.assign({}, r, { q })); });
+  return { fisico, quar, reservas, recebDt }; }
+// entradas vivas da demanda única (Planejar safra, Mapa › Insumos e Compra de insumos): x = partes fixas (safra, fazenda, hoje, viavel, ordem e
+// nomes das safras, ocorrências do plano); b = {osb: dados2.os_base, est: dados2.est_base}. Ordens, estoque, reservas e recebimentos: o cenário c.
+function cenDemEntradas(c, x, b) { b = b || {}; const osd = cenOsDem(c, b.osb);
+  return Object.assign({}, x, cenEstDem(c, x.faz, Object.assign({ hoje: x.hoje || (b.osb || {}).hoje || '' }, b.est), osd), { osd }); }
 function cenMov(c, m) { m.id = 'MV-' + (1000 + c.movs.length + 1); m.at = m.at || cenAgora(); c.movs.push(m); return m; }
 // Decisão que exige papel (PRD 2.1; DEC-2609-13; CMD-47): o comando recebe quem age (no protótipo, o perfil de demonstração de g2lib.js;
 // no software, o ator da sessão no servidor) e confere o papel no cadastro (g2pf). Sem o papel, recusa e nada muda (dano: decisão gravada

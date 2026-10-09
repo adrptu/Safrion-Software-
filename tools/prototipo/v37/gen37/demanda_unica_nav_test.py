@@ -8,6 +8,9 @@ mais do que a demanda de agora aparece como "Acima da demanda" e o Planejar safr
   repetição · recarregar não duplica nem perde nada; cancelar de novo é recusado; atualizar a SOL de novo não muda nada; restaurar a
               demonstração volta aos números da semente
   390 px    · as mesmas leituras no celular, sem rolagem horizontal da página
+  revisão do c5d337a · V1/V2 entregar no Estoque não muda a compra (estoque do mesmo cenário); C1/C2 a Compra avisa a SOL acima da
+              demanda; Q1/Q2 só gestor ou agrônomo atualiza a SOL e a versão grava quem e quando; P1 pedido emitido antes do complemento
+              continua impedindo a redução
 Uso: python3 demanda_unica_nav_test.py   (≈ 120 s; capturas q_ctl4_*.png em _probe/)"""
 import sys, os, time, subprocess, json
 HERE=os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0,HERE)
@@ -129,6 +132,23 @@ try:
     chk('P2 repetição: a OS-0418 cancelada não oferece cancelar de novo; o comando repetido é recusado e a demanda não muda',not temc and 'Só ordem sem realizado' in r2 and t6e==t6y,(temc,r2,t6e))
     os_painel('OS-0418'); J("window.__cen.cenReset()"); saf(); t6f=k6()
     chk('P3 restaurar a demonstração volta aos números da semente (R$ 430.255,00 · 14 insumos)',t6f.startswith('Valor da necessidade líquida R$ 430.255,00 · 14 insumos a comprar'),t6f)
+    # ================= revisão do CTL-4, achado 1 (S2): estoque, reservas e recebimentos do MESMO cenário das O.S. =================
+    J("localStorage.removeItem('talhao-os-compras-v1')"); mapa(); tap('C1'); c0=pan('C1'); tap('C1')
+    from est_lib import FIND
+    ir('EST.dc.html',w=1.6); J("document.querySelectorAll('nav[aria-label=\"Seções do estoque\"] button')[1].click()"); time.sleep(.5)
+    re_=J(f"(()=>{{const r=({FIND})(['REQ-040','NPK 20-05-20']); if(!r) return 'sem linha'; (r.querySelector('[role=cell] span')||r).click(); return 'ok';}})()"); time.sleep(.5)
+    clk('Salvar','aside[role=dialog]',w=.8); te=T()
+    saf(); t6v=k6(); nv=[cel('NPK 20-05-20',k) for k in ('Necessidade líquida','Estoque apto','Situação')]; pv=prim(); foto('10_saf_entrega_npk')
+    chk('V1 entrega comum no Estoque (8.000 kg de NPK da REQ-040 para a OS-0425) não muda a compra: NPK "14.800 kg", estoque apto "0 kg", sem "Acima da demanda"; R$ 430.255,00 e a primária segue "Abrir Compra de insumos ›" (na base: 6.800 kg e "Atualizar SOL-2026-07" cortava R$ 27.200)',
+        re_=='ok' and 'entregues' in te and t6v==t6f and nv[0]=='14.800 kg' and nv[1]=='0 kg' and 'Acima' not in nv[2] and pv=='Abrir Compra de insumos ›',(re_,te,t6v,nv,pv))
+    mapa(); tap('C1'); c1=pan('C1'); tap('C1')
+    chk('V2 Mapa › Insumos depois da entrega: C1 continua "Falta 14.800 kg" (o mesmo de antes)','Falta 14.800 kg' in c0 and 'Falta 14.800 kg' in c1,(c0[:300],c1[:300]))
+    # ================= achado 2 (S3): a Compra mostra a SOL acima da demanda de agora (sem trava) =================
+    ir('OS.dc.html',w=1.6); rc=J("(()=>{ const X=window.__cen; const r=X.cenMudar(null,c=>X.osc_cancelar(c,'OS-0418','fertirrigação adiada (teste CTL-4)',['','',''],{k:'Ana'})); return r.erro||r.msg||''; })()") or ''
+    ir('CMP.dc.html#sol=SOL-2026-07&saf=S2627',w=1.6); clk('Expandir tudo',w=.6); uc=J("(()=>{const r=[...document.querySelectorAll('[role=row]')].find(r=>r.innerText.indexOf('Ureia 45%')>=0); return r?r.innerText.replace(/\\s+/g,' '):'';})()") or ''
+    k2c=J("(document.body.innerText.match(/SOL-2026-07 · [^\\n]*enviada em[^\\n]*/)||[''])[0]") or ''; foto('11_cmp_acima')
+    chk('C1 Compra › etapa 2 com a OS-0418 cancelada: a Ureia mostra "Acima da demanda · 1.140 kg · o Planejar safra atualiza a SOL-2026-07" e a faixa conta "1 insumo acima da demanda de agora" (o NPK entregue não aparece)',
+        'cancelada' in rc and 'Acima da demanda · 1.140 kg' in uc and 'o Planejar safra atualiza a SOL-2026-07' in uc and '1 insumo acima da demanda de agora' in k2c,(rc,uc,k2c))
     # ================= recusa na Compra (DEM-08): sem proposta a tempo, a padrão é a que chega primeiro; mais cara e mais tardia exige justificativa =================
     J("localStorage.removeItem('talhao-os-compras-v1')"); ir('CMP.dc.html#sol=SOL-2026-07&saf=S2627',w=1.6)
     from comp_lib import IR_ETAPA
@@ -139,6 +159,44 @@ try:
     chk('R2 Compra › etapa 4 (DEM-08): Ureia sai em Casa do Adubo "Chega primeiro", sem justificativa pendente; escolher a Coop. Vale (mais cara e mais tardia) é recusado sem justificativa',
         'Casa do Adubo' in tu and 'Chega primeiro' in tu and 'Justificativa pendente' not in tu and rr=='ok' and 'Informe justificativa' in al2,(tu,rr,al2))
     clk('Cancelar','aside[role=dialog]'); clk('Descartar alterações','aside[role=dialog]'); foto('6_cmp_etapa4')
+    J(f"({IR_ETAPA})(5)"); time.sleep(.6); clk('Expandir tudo',w=.6); u5=J("(()=>{const r=[...document.querySelectorAll('[role=row]')].filter(r=>r.offsetParent).find(r=>r.innerText.indexOf('Ureia 45%')>=0); return r?r.innerText.replace(/\\s+/g,' '):'';})()") or ''
+    chk('C2 a mesma Ureia avisa na etapa 4 (comparação) e na 5 (aprovação): "Acima da demanda · 1.140 kg", sem trava',
+        'Acima da demanda · 1.140 kg' in tu and 'Acima da demanda · 1.140 kg' in u5,(tu,u5))
+    # ================= achado 3 (S3): quem atualiza a SOL — papel exigido e autor gravado =================
+    rec=lambda: J("(()=>{try{const o=JSON.parse(localStorage.getItem('talhao-os-compras-v1')); const s=o&&o.sols&&o.sols.S2627; return s?{por:s.por||'',em:s.em||'',atu:s.atu||null,hist:(s.hist||[]).length,ureia:(s.itens||{})['Ureia 45%']||null}:null;}catch(e){return 'erro '+e.message}})()")
+    J("localStorage.setItem('safrion.perfilDemo','Zé')"); saf(); pz0=prim(); r0=rec(); clk('Atualizar SOL-2026-07',w=.8); tz=T(); r1=rec()
+    chk('Q1 o perfil Zé (mecânico) não atualiza a SOL: "Atualizar a SOL-2026-07: decisão de Ana (gestora). Nada foi alterado." e o registro não muda',
+        pz0=='Atualizar SOL-2026-07' and 'decisão de Ana (gestora)' in tz and 'Nada foi alterado' in tz and r1==r0,(pz0,tz,r0,r1))
+    J("localStorage.setItem('safrion.perfilDemo','Ana')"); saf(); clk('Atualizar SOL-2026-07',w=.8); ta=T(); r2=rec()
+    ir('CMP.dc.html#sol=SOL-2026-07&saf=S2627',w=1.6); k2q=J("(document.body.innerText.match(/SOL-2026-07 · [^\\n]*enviada em[^\\n]*/)||[''])[0]") or ''
+    chk('Q2 Ana (gestora) atualiza: o envio original fica (23/09/2026 10:40 por Ana (gestora)), a versão nova grava quem e quando ("Ureia 45% −1.140 kg"), o toast avisa que a cotação em andamento recomeça e a Compra mostra "atualizada em … por Ana (gestora)" sem aviso de acima da demanda',
+        'Atualizada por Ana (gestora)' in ta and 'recomeça nesta versão' in ta and r2 and r2['por']=='Ana (gestora)' and r2['em']=='23/09/2026 10:40' and r2['atu'] and r2['atu']['por']=='Ana (gestora)'
+        and r2['atu']['txt']=='Ureia 45% −1.140 kg' and r2['hist']==1 and r2['ureia'] is None and 'atualizada em 23/09/2026 ' in k2q and 'por Ana (gestora)' in k2q and 'acima da demanda' not in k2q,(ta,r2,k2q))
+    # ================= risco lido 1 da revisão: pedido emitido antes de um complemento continua impedindo a redução (pedEmit na versão nova) =================
+    J("localStorage.clear(); sessionStorage.clear()"); import dados2 as _D2
+    _it={n:round(o['liq'],3) for n,o in _D2.demanda('S2627').items() if o['liq']>0.001}; _it['MAP 11-52']=62500
+    _reg={'v':1,'sols':{'S2627':{'id':'SOL-2026-07','safra':'S2627','nome':'Safra 2026/27','faz':'Santa Rita','at':'23/09/2026','em':'23/09/2026 10:40','por':'Ana (gestora)','itens':_it,'comp':0,'estado':'Pedidos emitidos · PC-2026-101'}},
+          'proc':{'S2627':{'sol':'SOL-2026-07','key':'x','comp':0,'estado':'Pedidos emitidos · PC-2026-101'}}}
+    J(f"localStorage.setItem('talhao-os-compras-v1',{json.dumps(json.dumps(_reg,ensure_ascii=False))})"); saf(); pe0=prim(); mpc=cel('MAP 11-52','Situação')
+    clk('Enviar para cotação',w=.8); tpc=T(); rpe=J("(()=>{const s=JSON.parse(localStorage.getItem('talhao-os-compras-v1')).sols.S2627; return {comp:s.comp,pedEmit:s.pedEmit,ureia:s.itens['Ureia 45%'],map:s.itens['MAP 11-52']};})()")
+    ir('OS.dc.html',w=1.6); rc2=J("(()=>{ const X=window.__cen; const r=X.cenMudar(null,c=>X.osc_cancelar(c,'OS-0418','fertirrigação adiada (teste CTL-4, pedido emitido)',['','',''],{k:'Ana'})); return r.erro||r.msg||''; })()") or ''
+    saf(); upe=cel('Ureia 45%','Situação'); ppe=prim(); rowclick('Ureia 45%'); mpe=(J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText") or '').split('\n'); fechar(); rpe2=J("JSON.parse(localStorage.getItem('talhao-os-compras-v1')).sols.S2627.itens['Ureia 45%']")
+    ir('CMP.dc.html#sol=SOL-2026-07&saf=S2627',w=1.6); clk('Expandir tudo',w=.6); uce=J("(()=>{const r=[...document.querySelectorAll('[role=row]')].find(r=>r.innerText.indexOf('Ureia 45%')>=0); return r?r.innerText.replace(/\\s+/g,' '):'';})()") or ''
+    foto('12_saf_pedido_emitido')
+    chk('P1 pedido emitido e depois complemento (MAP 62.500 → 80.000 kg): a versão nova guarda o pedido emitido; com a OS-0418 cancelada a Ureia fica "Acima da demanda · 1.140 kg" com "Pedido já emitido", a primária é "Abrir Compra de insumos ›" (não "Atualizar"), a SOL mantém os 1.140 kg e a Compra avisa "pedido já emitido: o excedente entra no estoque"',
+        pe0=='Enviar para cotação' and 'Complemento' in mpc and 'Complemento SOL-2026-07-C1' in tpc and rpe=={'comp':1,'pedEmit':True,'ureia':1140,'map':80000} and 'cancelada' in rc2
+        and upe=='Acima da demanda · 1.140 kg' and ppe=='Abrir Compra de insumos ›' and any('Pedido já emitido' in x for x in mpe) and rpe2==1140
+        and 'Acima da demanda · 1.140 kg' in uce and 'pedido já emitido: o excedente entra no estoque' in uce,(pe0,mpc,tpc,rpe,rc2,upe,ppe,mpe[:3],rpe2,uce))
+    # ================= plano mudado na tela: a Compra avisa pela conta da versão (ent), nunca pelo plano da semente =================
+    J("localStorage.clear(); sessionStorage.clear()"); ir('SAF.dc.html#saf=S2627&passo=cultivos',w=1.6); ap1=clk('Aplicar plano em 4 cultivos',w=.6); ap2=clk('Aplicar plano','aside[role=dialog]',w=.8); tap_=T()
+    J(f"({IR_ETAPA})(4)"); time.sleep(.6); clk('Expandir tudo',w=.6); t6p=k6(); ep=clk('Enviar para cotação',w=.8)
+    if ep!='ok': ep=clk('Atualizar SOL-2026-07',w=.8)
+    tep=T()
+    rent=J("(()=>{const s=JSON.parse(localStorage.getItem('talhao-os-compras-v1')).sols.S2627; return {comp:s.comp,occ:((s.ent||{}).occ||[]).length,n:Object.keys(s.itens).length};})()")
+    ir('CMP.dc.html#sol=SOL-2026-07&saf=S2627',w=1.6); k2p=J("(document.body.innerText.match(/SOL-2026-07 · [^\\n]*enviada em[^\\n]*/)||[''])[0]") or ''; foto('13_cmp_plano_tela')
+    chk('A1 "Aplicar plano em 4 cultivos" na tela e complemento enviado: a versão da SOL guarda o plano da conta e a Compra não avisa "acima da demanda" (com o plano da semente avisaria os insumos do complemento à toa)',
+        ap1=='ok' and ap2=='ok' and 'Complemento SOL-2026-07-C1' in tep and rent['comp']==1 and rent['occ']>0 and 'enviada em' in k2p and 'acima da demanda' not in k2p,(ap1,ap2,tap_,t6p,tep,rent,k2p))
+    J("localStorage.clear(); sessionStorage.clear()")
     # ================= 390 px =================
     c.size(390,844); saf(); w1=pagw(); t390=k6(); u390=cel('Ureia 45%','Necessidade líquida'); rowclick('MAP 11-52'); m390=memo(); fechar(); foto('7_saf_390')
     chk('M1 390 px · Planejar safra etapa 4: a página não rola na horizontal; mesma conta (R$ 430.255,00 · 14 insumos), Ureia 1.140 kg e a memória do MAP igual à do desktop',

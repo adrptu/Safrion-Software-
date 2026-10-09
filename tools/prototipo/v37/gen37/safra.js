@@ -540,16 +540,20 @@ function ocorr(self,saf,poolsX){ const out=[]; const adj=adjOf(self); const pool
         saldo:rp.saldo,diesel:rp.diesel,hh:rp.hh,pend:rp.pendente}); }); });
   return out; }
 // demanda por produto (CTL-4): a conta única demFazenda (cal01.js) com as ocorrências do plano desta safra e das outras safras abertas da mesma
-// fazenda (ocorr, com os ajustes da tela), as O.S. lidas do cenário compartilhado (cenOsDem: o que cada ordem ainda tira do almoxarifado; a parte
-// do plano que ela cobre sai do plano), reservas, recebimentos e o físico apto da própria fazenda. A Compra e o Mapa › Insumos leem a mesma conta.
+// fazenda (ocorr, com os ajustes da tela) e, do MESMO cenário compartilhado (cenDemEntradas), as O.S. (cenOsDem: o que cada ordem ainda tira do
+// almoxarifado; a parte do plano que ela cobre sai do plano), o físico apto da própria fazenda, as reservas e os recebimentos (cenEstDem).
+// A Compra e o Mapa › Insumos leem a mesma conta.
 function demanda(self,saf){ const safRows=g2rows(self,GR('g_saf')); const me=safRows.find(r=>r.id===saf); const faz=(me&&me.v.faz)||'Santa Rita';
   const ordem={}, nomes={}; safRows.forEach((r,i)=>{ ordem[r.id]=i; nomes[r.id]=r.v.nome; });
   const occ=[]; const vistos={}; vistos[sk(saf)]=1;
   const add=(s)=>ocorr(self,s).forEach(o=>occ.push({saf:s,k:o.c.id+'|'+o.a.id,a:String(o.a.id),local:o.c.v.local,tal:o.c.v.talhao||ocTalhaoDe(o.c.v.local,o.c.v.tipo),
     area:o.area,dt:o.dt||'',nome:o.a.nome,prods:o.prods}));   // área com até 2 casas na conta escrita (PRE-REV R5)
   add(saf); safRows.forEach(r=>{ if(r.id===saf||r.ro||(r.v.faz||'Santa Rita')!==faz||vistos[sk(r.id)]) return; vistos[sk(r.id)]=1; add(r.id); });
-  const m=demFazenda({saf,faz,hoje:D2.hoje,viavel:D2.viavel,ordem,nomes,occ,osd:cenOsDem(cenGet(),D2.osb),reservas:D2.reservas,recebDt:D2.recebDt,fisico:(D2.fisico||{})[faz]||{}});
-  Object.values(m).forEach(d=>{ d.quar=(D2.quar||{})[d.nome]||0; d.memo=cal01Memo(d.cal,{un:d.un,res:d.res,quar:d.quar}); }); return m; }
+  const X=cenDemEntradas(cenGet(),{saf,faz,hoje:D2.hoje,viavel:D2.viavel,ordem,nomes,occ},{osb:D2.osb,est:D2.estb}); const m=demFazenda(X);   // ordens e estoque do mesmo cenário (revisão, achado 1)
+  Object.values(m).forEach(d=>{ d.quar=(X.quar||{})[d.nome]||0; d.memo=cal01Memo(d.cal,{un:d.un,res:d.res,quar:d.quar}); });
+  // partes fixas desta conta (plano da tela, sem ordens e estoque): a versão da SOL as guarda e a Compra refaz a conta com o cenário de agora
+  const ent={saf,faz,hoje:D2.hoje,viavel:D2.viavel,ordem,nomes,occ:occ.map(o=>Object.assign({},o,{prods:(o.prods||[]).map(p=>({nome:p.nome,grupo:p.grupo,un:p.un,preco:p.preco,dose:p.dose,q:p.q}))}))};
+  Object.defineProperty(m,'_ent',{value:ent,enumerable:false}); return m; }
 // produtividade da colheita (kg/ha) por cultura, a partir dos cultivos da safra aberta cujo plano (compatível) usa a operação; média ponderada pela área
 const KG_UN={'sc/ha':60,'t/ha/ano':1000,'kg/ha':1};
 function prodColheita(self,saf,op){ const by={};
@@ -1171,6 +1175,10 @@ function solMap(self){ if(self.state.sol) return self.state.sol; if(!self._sol0)
 function solEstado(saf,sol){ try{ const o=JSON.parse(localStorage.getItem(SOL_KEY)||'null'); const p=o&&o.proc&&o.proc[saf];
   return (p&&sol&&p.sol===sol.id&&(p.comp||0)===(sol.comp||0)&&p.estado&&p.estado!=='A cotar')?p.estado:''; }catch(e){ return ''; } }
 function solHref(saf,sol){ return 'CMP.dc.html#sol='+encodeURIComponent(sol.id)+'&saf='+encodeURIComponent(saf); }
+// DEM-09 · pedido já emitido para esta solicitação: nada baixa. Vale o andamento da versão de agora ou o de uma anterior, guardado na versão nova
+// (pedEmit): o complemento muda a versão e a Compra recomeça o andamento, mas o pedido emitido antes continua valendo (revisão do CTL-4, risco 1:
+// sem isto, depois de um complemento a redução tirava da solicitação um insumo já comprado)
+function solPedEmit(saf,sol){ return !!(sol&&(sol.pedEmit||/^Pedidos emitidos/.test(solEstado(saf,sol)))); }
 function proxSaf(self,r){ if(r.ro) return ['Consultar safra',2];
   const cs=cultsDe(self,r.id); if(!cs.length) return ['Continuar: planejar talhões',2];
   const sp=semPlano(cs).length; if(sp) return ['Continuar: aplicar plano em '+sp+(sp>1?' cultivos':' cultivo'),2];
@@ -1198,7 +1206,7 @@ function PREVALS(self,v){ compRend(self,self.state.saf||null);
   ['g_recp_maq','g_recp_pes'].forEach(g=>{ const sp=GR(g); if(sp) g2rows(self,sp).forEach(r=>{ r.ro=ro; }); });
   if((st.step||1)===3) etapa3(self,v,saf,ro);
   // ---- etapa 4: demanda de insumos ----
-  const dm=demanda(self,saf); const sol=solMap(self)[saf]; const grupos={}; const est=sol?solEstado(saf,sol):''; const pedEmit=/^Pedidos emitidos/.test(est);
+  const dm=demanda(self,saf); const sol=solMap(self)[saf]; const grupos={}; const est=sol?solEstado(saf,sol):''; const pedEmit=solPedEmit(saf,sol);
   const dmx=Object.assign({},dm); if(sol&&sol.itens) Object.keys(sol.itens).forEach(n=>{ if(!dmx[n]&&(Number(sol.itens[n])||0)>0.01) dmx[n]=demFora(self,saf,n,sol); });
   Object.values(dmx).forEach(d=>{ (grupos[d.grupo]||(grupos[d.grupo]=[])).push(d); });
   let tot=0, nliq=0, npend=0, nexc=0, ncomp=0;
@@ -1255,7 +1263,8 @@ function EXTRAVALS(self,v){ try{ window.__safSelf=self; }catch(e){}   // testes 
   const cultSp={}; sp.forEach(c=>{ (cultSp[c.v.cult]||(cultSp[c.v.cult]=[])).push(c.id); }); const cuK=Object.keys(cultSp).sort((a,b)=>cultSp[b].length-cultSp[a].length)[0];
   const apIds=cuK?cultSp[cuK]:[]; const apT='Aplicar plano em '+apIds.length+(apIds.length>1?' cultivos':' cultivo')+(Object.keys(cultSp).length>1?' de '+cuK.toLowerCase():'');
   const solA=saf?solMap(self)[saf]:null; const enviado=!!solA;
-  const p6=(enviado&&!v.k6pend)?{t:'Abrir Compra de insumos ›',h:solHref(saf,solA),a:'abrir'}:((enviado&&v.k6exc&&!v.k6comp)?{t:'Atualizar '+solA.id,fn:()=>enviar(self),a:'comando'}:{t:'Enviar para cotação',fn:()=>enviar(self),a:'comando'});
+  // com SOL enviada e insumo acima da demanda, a primária diz "Atualizar" também quando há complemento junto (ela baixa e sobe na mesma versão)
+  const p6=(enviado&&!v.k6pend)?{t:'Abrir Compra de insumos ›',h:solHref(saf,solA),a:'abrir'}:((enviado&&v.k6exc)?{t:'Atualizar '+solA.id,fn:()=>enviar(self),a:'comando'}:{t:'Enviar para cotação',fn:()=>enviar(self),a:'comando'});
   v.sol_link=v.sol_link&&!p6.h;   // "Abrir em Compra de insumos ›" do bloco só quando a primária é enviar (complemento pendente): sem cópia do mesmo link
   safAcoes(self,v,{step,saf,ro,cs,sp,apIds,apT,cultSp,temPlano,p6});
   // escolher safra (botão da linha)
@@ -1484,35 +1493,44 @@ function enviar(self){ const saf=self.state.saf; const safObj=g2rows(self,GR('g_
   const dm=demanda(self,saf); const sols=Object.assign({},solMap(self)); const sol=sols[saf];
   const itens=Object.values(dm).filter(d=>d.liq>0.001);
   if(!itens.length&&!sol){ self.setState({g2toast:'Nada a cotar: o estoque e os recebimentos cobrem a demanda.'}); return; }   // com SOL enviada, a demanda que zerou ainda baixa a SOL (DEM-09)
+  // revisão do CTL-4, achado 3: enviar, complementar ou baixar a solicitação é decisão de quem planeja (gestor ou agrônomo; padrão do CTL-3, cenExigeUm):
+  // grava quem agiu (perfil de demonstração) e quando; sem o papel, recusa e nada muda (dano: compra reduzida ou aumentada em nome de quem não decidiu)
+  const quem=(acao)=>{ try{ return cenExigeUm(g2perfil(),['gestor','agronomo'],acao); }catch(e){ self.setState({g2toast:String(e.message||e)}); return ''; } };
   // registro único da solicitação: o que a Compra de insumos mostra (mesmos itens, quantidades, valores e memória CAL-01)
   const det=Object.values(dm).map(d=>({nome:d.nome,grupo:d.grupo,un:d.un,preco:d.preco,bruta:d.bruta,est:d.est,res:d.res,rec:d.rec,liq:d.liq,valor:d.valor,falta:d.falta,uso:d.uso,quar:d.quar,evs:d.evs}));
   const EM='23/09/2026 11:05';   // horário do cenário de demonstração (a SOL-2026-07 inicial é de 10:40)
-  const base={safra:saf,nome:safObj.v.nome,faz:safObj.v.faz||'Santa Rita',estado:'Enviada · a cotar',por:'Ana (gestora)',
-    origem:{t:'Planejar safra · '+safObj.v.nome+' · demanda de insumos',h:'SAF.dc.html#saf='+encodeURIComponent(saf)+'&passo=demanda'},det};
+  const base={safra:saf,nome:safObj.v.nome,faz:safObj.v.faz||'Santa Rita',estado:'Enviada · a cotar',
+    origem:{t:'Planejar safra · '+safObj.v.nome+' · demanda de insumos',h:'SAF.dc.html#saf='+encodeURIComponent(saf)+'&passo=demanda'},det,ent:dm._ent};
   const grava=(rec)=>{ const ok=solGravar(rec); return ok?'':' Atenção: este navegador não guarda dados; a Compra de insumos não verá a solicitação.'; };
   if(!sol){ const ids={S27SF:'SOL-2027-02',S2627:'SOL-2026-07',LG2627:'SOL-2026-09'}; const usados=Object.values(sols).map(x=>x.id); let id=ids[saf];
     for(let k=10;!id||usados.indexOf(id)>=0;k++) id='SOL-2026-'+k;
+    const por=quem('Enviar a solicitação '+id); if(!por) return;
     const it={}; itens.forEach(d=>{ it[d.nome]=d.liq; }); const tot=itens.reduce((a,d)=>a+d.valor,0);
-    sols[saf]=Object.assign({},base,{id,at:'23/09/2026',em:EM,itens:it,comp:0,total:tot});
+    sols[saf]=Object.assign({},base,{id,at:'23/09/2026',em:EM,por,itens:it,comp:0,total:tot});
     const av=grava(sols[saf]);
     self.setState({sol:sols,g2toast:'Solicitação '+id+' enviada a Compras: '+itens.length+' insumos, '+rs(tot)+'. Origem: '+safObj.v.nome+' · Planejar safra, demanda de insumos.'+av}); return; }
   // DEM-09 (cal01.js): sobe o que a demanda pede a mais (complemento) e baixa o que ela pede a menos; com pedido emitido nada baixa
-  const R=demSolRevisar(sol.itens,dm,/^Pedidos emitidos/.test(solEstado(saf,sol)));
+  const pe=solPedEmit(saf,sol); const R=demSolRevisar(sol.itens,dm,pe);
   if(!R.novos.length&&!R.menos.length){ self.setState({g2toast:'Nada novo para cotar: tudo já está na '+sol.id+'. Nenhuma solicitação duplicada foi criada.'}); return; }
+  const por=quem('Atualizar a '+sol.id); if(!por) return; const est0=solEstado(saf,sol); const agora='23/09/2026 '+cenAgora();
   const it=R.it; const comp=(sol.comp||0)+(R.novos.length?1:0);
   const pr=(n)=>{ const x=dm[n]||demFora(self,saf,n,sol); return {un:x.un,preco:Number(x.preco)||0,dec:x.un==='L'?1:0}; };
   const val=R.novos.reduce((a,n)=>a+(it[n]-(sol.itens[n]||0))*pr(n).preco,0);
   const dif=R.menos.map(n=>{ const x=pr(n), q=(sol.itens[n]||0)-(it[n]||0); return {n,q,v:q*x.preco,t:nf(q,x.dec)+' '+x.un,sai:!(it[n]>0)}; }); const valM=dif.reduce((a,x)=>a+x.v,0);
   // insumo que fica na solicitação sem estar na demanda (pedido emitido): a Compra lê grupo, unidade e preço do registro
   const detX=det.concat(Object.keys(it).filter(n=>!dm[n]).map(n=>{ const x=demFora(self,saf,n,sol); return {nome:n,grupo:x.grupo,un:x.un,preco:x.preco,bruta:0,est:x.est,res:0,rec:0,liq:0,valor:0,falta:'',uso:'',quar:0,evs:[]}; }));
-  sols[saf]=Object.assign({},base,sol,{estado:'Enviada · a cotar',itens:it,comp,det:detX,total:Object.keys(it).reduce((a,n)=>a+it[n]*pr(n).preco,0),em:sol.em||(saf==='S2627'?'23/09/2026 10:40':EM)});
+  // versão nova: o envio original (por, em) fica; a atualização grava quem, quando e o que subiu ou baixou (a Compra mostra "atualizada em … por …")
+  const txt=R.novos.map(n=>n+' +'+nf((it[n]||0)-(sol.itens[n]||0),pr(n).dec)+' '+pr(n).un).concat(dif.map(x=>x.n+' −'+x.t)).join('; ');
+  const atu={por,em:agora,txt}; const hist=(sol.hist||[]).concat([Object.assign({v:(sol.hist||[]).length+2},atu)]);
+  sols[saf]=Object.assign({},base,sol,{estado:'Enviada · a cotar',itens:it,comp,det:detX,total:Object.keys(it).reduce((a,n)=>a+it[n]*pr(n).preco,0),em:sol.em||(saf==='S2627'?'23/09/2026 10:40':EM),atu,hist,pedEmit:pe,ent:dm._ent});
   const av=grava(sols[saf]); if(R.menos.length&&!R.novos.length) solProcLimpar(saf);
   const tC=R.novos.length?'Complemento '+sol.id+'-C'+comp+' enviado com só a diferença: '+R.novos.length+' insumos, '+rs(val)+'. A solicitação original não foi duplicada.':'';
   const tM=dif.length?(sol.id+' atualizada: '+(dif.length===1?(dif[0].n+(dif[0].sai?' sai (':' baixa ')+dif[0].t+(dif[0].sai?' · ':' · −')+rs(dif[0].v)+(dif[0].sai?')':'')):
-    (dif.length+' insumos a menos ('+dif.map(x=>x.n+' −'+x.t).join('; ')+') · −'+rs(valM)))+', porque a demanda de agora pede menos. A Compra de insumos cota a versão nova.'):'';
-  self.setState({sol:sols,g2toast:[tC,tM].filter(Boolean).join(' ')+av}); }
+    (dif.length+' insumos a menos ('+dif.map(x=>x.n+' −'+x.t).join('; ')+') · −'+rs(valM)))+', porque a demanda de agora pede menos. A Compra de insumos cota a versão nova.'
+    +((est0&&!R.novos.length)?' O andamento da compra da versão anterior ('+est0+') recomeça nesta versão.':'')):'';
+  self.setState({sol:sols,g2toast:[tC,tM].filter(Boolean).join(' ')+' Atualizada por '+por+'.'+av}); }
 // insumo que a solicitação pede e a demanda de agora não pede mais (DEM-09): linha própria, para a diferença não sumir da tela
 function demFora(self,saf,n,sol){ const me=g2rows(self,GR('g_saf')).find(r=>r.id===saf); const faz=(me&&me.v.faz)||'Santa Rita';
   const k=((D2.osb||{}).cat||{})[n]||{}; const dt=((sol&&sol.det)||[]).find(x=>x.nome===n)||{};
-  return {nome:n,grupo:dt.grupo||k.g||'—',un:dt.un||k.un||'',preco:Number(dt.preco||k.preco)||0,bruta:0,real:0,est:Number(((D2.fisico||{})[faz]||{})[n])||0,antes:0,res:0,rec:0,tarde:0,
+  return {nome:n,grupo:dt.grupo||k.g||'—',un:dt.un||k.un||'',preco:Number(dt.preco||k.preco)||0,bruta:0,real:0,est:Number(cenEstDem(cenGet(),faz,D2.estb,[]).fisico[n])||0,antes:0,res:0,rec:0,tarde:0,
     liq:0,valor:0,rup:0,falta:'',cob:'',uso:'',quar:0,memo:['Nenhum uso do plano desta safra nem O.S. aberta pede '+n+' agora (a O.S. que pedia foi cancelada ou o plano mudou).']}; }

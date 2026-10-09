@@ -195,7 +195,8 @@ PROD = re.compile(r'(?:\b[\w.]*dose\s*\*\s*[\w.(\[\'\]]+|[\w.)\]]+\s*\*\s*[\w.]*
                   r'|\b(?:[\w.]*area|ar|ajA)\s*\*\s*(?:[\w.]*dose|d)\b|c\[\'area\'\]\s*\*\s*\w*dose)')   # nos dois sentidos (PRE-REV Z5)
 EXC = {('areas/inicio.py', 'x.dose*p'): 'custo por ha', ('areas/processo_os.py', 'x.dose*ac'): 'carga do tanque', ('areas/processo_planos.py', 'x.dose*x.preco'): 'custo',
        ('areas/suprimentos.py', "dose*c['area']"): 'demanda do planejamento', ('dados2.py', "dose*c['area']"): 'demanda do planejamento',
-       ('safra.js', 'dose*area'): 'demanda do planejamento (CAL-01)'}
+       ('safra.js', 'dose*area'): 'demanda do planejamento (CAL-01)',
+       ('cal01.js', 'p.dose*ar'): 'demanda do planejamento (CAL-01; CTL-4 DEM-01: a parte do plano sem O.S. saiu do safra.js para demFazenda)'}
 bd = F['borda']
 chk('11 borda: a liberação reserva com estoque igual à regra única e recusa com 0,01 a menos; dose > 0 com total 0 é recusada; o aviso de compra do MIP usa o lote da liberação',
     bd['exato'] == 'ok' and 'Saldo insuficiente' in bd['falta'] and 'dá 0' in bd['zero'] and 'dá 0' in bd['zero2']

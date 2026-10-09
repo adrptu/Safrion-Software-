@@ -73,6 +73,9 @@ DIESEL=dict(ped='PC-093',ctr='CT-2026-03',q=15000,preco=5.84,tanque=12400,res=30
 PLANO_FA=round(D2.demanda('S2627')['Fungicida A']['bruta'],1)            # 625,2 L
 SOL_FA=round(D2.demanda('S2627')['Fungicida A']['liq'],1)                 # 145,2 L
 LIVRE_FA=F02['fisico']-F02['quarentena']-F02['reservado']                  # 480 L
+# revisão do CTL-4 (S4): com a demanda única (O.S. pelo pendente, plano sem a parte delas) o Fungicida A não tem pendência na SOL-2026-07 e o
+# DEMO-18 deixa de ter conflito; SU-03 e SU-03det mostram a reserva da OS-0424 e o uso da safra que o lote cobre (nunca "pendência 0 L")
+CONFL_FA=SOL_FA>0.05
 
 # ======================= blocos, botões e KPIs =======================
 def bloco(titulo,desc,corpo,acao='',tit_hole=False):
@@ -376,7 +379,7 @@ def su03():
            dict(t=f"Retido {nq(l['quarentena'])} {un}" + (f" · {l['ret']}" if l['ret'] else '')),
            dict(t=f"Utilizável {nq(util)} − reservado {nq(l['reservado'])} = disponível {nq(disp)} {un}"),
            dict(t=(f"Custódia em campo {nq(l['cust'])} {un} com a {l['cos']} — fora do físico do depósito" if l['cust'] else 'Sem custódia em campo'))]
-        if l['lote']=='F26-02': o.append(dict(t='Reserva planejada da safra em conflito',h='SU-03det.dc.html'))
+        if l['lote']=='F26-02': o.append(dict(t='Reserva planejada da safra em conflito' if CONFL_FA else 'Reservas do lote e uso da safra',h='SU-03det.dc.html'))
         o+= [dict(t='Ver movimentos do lote',h='SU-08.dc.html'),dict(t='Requisitar para uma O.S.',h='SU-07.dc.html')]
         if l['ret']: o.append(dict(t='Inspecionar',h='SU-06.dc.html'))
         pit=[b(f"{l['item']} · {l['lote']}")]+([mut('consignado')] if 'consignado' in l['prop'] else [])
@@ -406,7 +409,7 @@ function PREVALS(self,v){ RW(self,'g_sal').forEach(r=>{ const V=r.v, u=' '+V.un;
 function EXTRAVALS(self,v){ pnVals(self,v); }''' % (R35['solicitado']-R35['entregue']))
     painel()
     ncust=len([l for l in _lotes() if l['cust']])
-    corpo=(kpis([('Conflito de reserva','1',f'F26-02 · pendência {nq(SOL_FA)} L'),('Lotes retidos','3','K26-11 · M26-05 · L27-013'),
+    corpo=(kpis([('Conflito de reserva','1',f'F26-02 · pendência {nq(SOL_FA)} L') if CONFL_FA else ('Conflito de reserva','0','F26-02 cobre o uso da safra'),('Lotes retidos','3','K26-11 · M26-05 · L27-013'),
                  ('Custódia em campo',f'{ncust} ordens','OS-0417 · OS-0421 · OS-0420'),('Valor em insumos',f'R$ {nf(tot/1e6,2)} mi','próprio · sem café e consignado')])
            + bloco('Estoque por item, lote, proprietário e local','Confira físico, retido, reservado e disponível de cada lote; clique na linha para ver a origem do saldo.',
                    g+nota('Físico ≠ utilizável ≠ disponível. Custódia em campo fica fora do físico do depósito e não soma duas vezes; consignado aparece identificado e obedece à autorização do proprietário.'),
@@ -414,12 +417,13 @@ function EXTRAVALS(self,v){ pnVals(self,v); }''' % (R35['solicitado']-R35['entre
     HEIGHTS37[fname]=1000
     shell37('SU-03','Saldos e lotes de materiais',corpo,fname=fname,
       subtitle='Estoque por item, lote, proprietário e local com custódias; cada saldo mostra fonte e documento de origem.',
-      status=('1 conflito de reserva · 3 lotes retidos','red'),primary_html=primb('open_res','Reservar para ordem','box'),
+      status=('1 conflito de reserva · 3 lotes retidos','red') if CONFL_FA else ('3 lotes retidos','yellow'),primary_html=primb('open_res','Reservar para ordem','box'),
       footer='Os saldos são os mesmos do processo Estoque; requisitar, transferir e inspecionar abrem o registro de destino (SU-07, SU-08, SU-06).')
 
 # ---- SU-03det · F26-02 · reserva em conflito (DEMO-18 nos saldos de dados2) ----
 def su03det():
     fname='SU-03det.dc.html'; E._reset_screen(fname); PARENT37[fname]='SU-03.dc.html'
+    if not CONFL_FA: return su03det_sem_conflito(fname)
     org=_origens()['Fungicida A']
     a1=round(sum(x['q'] for x in org if '1ª' in x['t']),1); a2=round(sum(x['q'] for x in org if '2ª' in x['t']),1)
     rows=[R('fis',dict(m='Físico no lote',q=F02['fisico']),dict(q=[b(f"{nq(F02['fisico'])} L")],sit=[txt('validade 03/2028 · NF 4390')]),o=[dict(t='Almox. defensivos · sem quarentena'),dict(t='Movimentos do lote',h='SU-08.dc.html')]),
@@ -463,6 +467,37 @@ function EXTRAVALS(self,v){ const dec=self.state.dec;
     shell37('SU-03','Lote F26-02 · conflito de reserva',corpo,fname=fname,crumbs_extra=['Fungicida A · F26-02'],
       subtitle=f"Reserva concorrente: {nq(F02['fisico'])} L no lote; a OS-0424 confirmou {nq(F02['reservado'])} L e a reserva planejada da safra recebeu conflito.",
       status=(MARK,'gray'),primary_html=prim,
+      footer='DEMO-18 · várias reservas válidas podem coexistir em partes do lote; reenvio devolve o mesmo recibo; vencimento retira elegibilidade sem apagar histórico (ESTOS-02/03).')
+    dyn_status(fname)
+
+def su03det_sem_conflito(fname):
+    """SU-03det sem conflito (revisão do CTL-4, S4): o lote F26-02 cobre a OS-0424 (reserva confirmada) e o uso da safra de hoje em diante pela
+    demanda única (dados2.demanda: O.S. abertas pelo pendente + plano sem a parte delas); nada a decidir, nenhuma pendência na SOL-2026-07."""
+    d=D2.demanda('S2627')['Fungicida A']; own=[e for e in d['evs'] if e['tipo']=='dem' and e.get('own')]
+    q_os=sum(e['q'] for e in own if str(e.get('chave','')).startswith('OS-')); q_pl=sum(e['q'] for e in own if not str(e.get('chave','')).startswith('OS-'))
+    oss=', '.join(f"{e['chave']} {nq(e['q'])} L" for e in own if str(e.get('chave','')).startswith('OS-'))
+    rows=[R('fis',dict(m='Físico no lote',q=F02['fisico']),dict(q=[b(f"{nq(F02['fisico'])} L")],sit=[txt('validade 03/2028 · NF 4390')]),o=[dict(t='Almox. defensivos · sem quarentena'),dict(t='Movimentos do lote',h='SU-08.dc.html')]),
+          R('os24',dict(m='Reserva confirmada · OS-0424 (fungicida T1-B)',q=F02['reservado']),dict(q=[txt(f"{nq(F02['reservado'])} L")],sit=[ch('Confirmada · recibo RS-7741','green')]),o=[dict(t='Requisição REQ-039 · separar pelo FEFO',h='SU-07.dc.html')]),
+          R('uso',dict(m='Uso da safra 2026/27 de hoje em diante',q=round(d['bruta'],1)),dict(q=[txt(f"{nq(round(d['bruta'],1))} L")],sit=[ch('Coberto pelo lote','green')]),
+            o=[dict(t=f'O.S. abertas pelo que falta tirar do almoxarifado: {nq(round(q_os,1))} L ({oss})'),dict(t=f'Plano sem O.S. (sem a parte que as ordens já cobrem): {nq(round(q_pl,1))} L'),
+               dict(t='Abrir a demanda no Planejar safra',h='SAF.dc.html#saf=S2627&passo=demanda')]),
+          R('disp',dict(m='Disponível no lote',q=LIVRE_FA),dict(q=[b(f"{nq(LIVRE_FA)} L")],sit=[txt('livre para outras ordens; nunca fica negativo')]),o=[dict(t=f"Físico {nq(F02['fisico'])} − reservado {nq(F02['reservado'])} = {nq(LIVRE_FA)} L")]),
+          R('pend',dict(m='Pendência de compra',q=0),dict(q=[mut('—')],sit=[ch('Sem pendência na SOL-2026-07','green')]),o=[dict(t='A Compra de insumos e o Planejar safra leem a mesma demanda: o estoque apto cobre o Fungicida A desta safra'),dict(t='Abrir a Compra de insumos',h='CMP.dc.html')])]
+    g=grid([dict(k='m',l='Medida',w=600),dict(k='q',l='Quantidade',t='num',a='r'),dict(k='sit',l='Situação',w=600)],rows,gid='g_lot',search=False,total=False,
+        edit=dict(m='origin',title='Saldo do lote',fields=[fs('m','Medida',ro=True)]))
+    js({},r"""
+function PREVALS(self,v){}
+function EXTRAVALS(self,v){ hstatus(v,'Sem conflito · livre %s L','green'); v.ct_falta='Nada a decidir'; v.ct_prox='Acompanhar as O.S. da safra';
+  v.tl=[{t:'23/09 10:02:01 · OS-0424 pede 65 L → confirmada (recibo RS-7741)'},{t:'23/09 10:04 · reenvio da OS-0424 devolve o mesmo recibo RS-7741, sem nova dedução'},
+        {t:'23/09 · demanda única: o uso da safra de hoje em diante (%s L) cabe no lote; nenhuma reserva planejada em conflito'}]; }""" % (nq(LIVRE_FA),nq(round(d['bruta'],1))))
+    tl=f'<div style="display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: {MUTED}; line-height: 1.5;"><sc-for list="{H("tl")}" as="x" hint-placeholder-count="3"><div>{H("x.t")}</div></sc-for></div>'
+    corpo=(continuity('Reservas do lote','Lote F26-02 · Fungicida A',H('ct_falta'),H('ct_prox'))
+           + bloco('Saldo do lote','Confira o reservado, o uso da safra e o disponível; clique na linha para ver a origem.',g)
+           + bloco('Linha do tempo das reservas','Confira a ordem dos pedidos de reserva: reenvio devolve o mesmo recibo, sem saldo negativo.',tl))
+    HEIGHTS37[fname]=760
+    shell37('SU-03','Lote F26-02 · reservas',corpo,fname=fname,crumbs_extra=['Fungicida A · F26-02'],
+      subtitle=f"{nq(F02['fisico'])} L no lote; a OS-0424 confirmou {nq(F02['reservado'])} L e o uso da safra de hoje em diante cabe no lote, sem pendência de compra.",
+      status=(MARK,'gray'),primary_html=prima('SAF.dc.html#saf=S2627&passo=demanda','Ver a demanda no Planejar safra'),
       footer='DEMO-18 · várias reservas válidas podem coexistir em partes do lote; reenvio devolve o mesmo recibo; vencimento retira elegibilidade sem apagar histórico (ESTOS-02/03).')
     dyn_status(fname)
 

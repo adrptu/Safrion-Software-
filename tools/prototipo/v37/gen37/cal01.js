@@ -153,6 +153,11 @@ function demSolRevisar(itens, dm, pedEmit){ const it=Object.assign({},itens||{})
   Object.keys(dm||{}).forEach(n=>{ if(L(n)>0.001&&L(n)>(Number(it[n])||0)+0.01){ novos.push(n); it[n]=L(n); } });
   if(!pedEmit) Object.keys(itens||{}).forEach(n=>{ if((Number(itens[n])||0)>L(n)+0.01){ menos.push(n); if(L(n)>0.001) it[n]=L(n); else delete it[n]; } });
   return {it,novos,menos}; }
+// DEM-09 na Compra (revisão do CTL-4, achado 2) · insumos que a solicitação pede acima da demanda de agora, pela mesma regra do Planejar safra
+// (demSolSit), para a Compra avisar nas etapas 2, 4 e 5 — sem trava: quem atualiza a solicitação é o Planejar safra (dano evitado: aprovar a
+// compra do que a demanda já não pede, ex.: a Ureia da OS-0418 cancelada, R$ 3.534,00). m: demFazenda; itens: [{nome, nec}] da solicitação.
+function demSolAcima(m, itens){ const out={}; (itens||[]).forEach(it=>{ const d=(m||{})[it.nome]; const s=demSolSit(d,it.nec,true,false);
+  if(s.t==='Acima da demanda') out[it.nome]={dif:s.dif,liq:Number(d&&d.liq)||0}; }); return out; }
 // DEM-08 · Compra, etapa 4: escolha padrão = a de menor custo que chega antes da falta; sem nenhuma a tempo, a que chega primeiro (empate: menor
 // custo), sem justificativa obrigatória — não existe alternativa a tempo a justificar (AGENTS §4); o aviso "chega depois da falta" continua.
 // props em ordem de custo (unit crescente), com {f, unit, chega, late}.

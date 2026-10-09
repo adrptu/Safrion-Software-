@@ -107,6 +107,6 @@ chk('Mamão 2026/27 · calcário: 1.185,68 t do plano antes de hoje sem O.S. fic
     perto(ca['real'],1185680) and perto(ca['bruta'],96940) and perto(ca['liq'],0) and ca['falta']=='2026-09-25' and perto(ca['rup'],36940) and ca['cob']=='2026-09-30',
     {k:ca[k] for k in ('real','bruta','liq','falta','rup','cob')})
 chk('Mamão 2026/27 · nenhuma falta antes de hoje',all(not o['falta'] or o['falta']>=D2.HOJE_ISO for o in lg.values()),[(n,o['falta']) for n,o in lg.items() if o['falta'] and o['falta']<D2.HOJE_ISO])
-chk('RESERVAS fecham com LOTES.reservado; disponível por lote fecha com ESTOQUE',not D2.checa_reservas() and not D2.checa_coerencia(),(D2.checa_reservas(),D2.checa_coerencia()))
+chk('reservas da demanda (est_dem, cenário da semente) fecham com o reservado dos lotes; disponível por lote fecha com ESTOQUE',not D2.checa_reservas() and not D2.checa_coerencia(),(D2.checa_reservas(),D2.checa_coerencia()))
 print(f'\nRESULTADO: {len(OK)} ok · {len(FAIL)} falhas'); [print('  -',f) for f in FAIL]
 sys.exit(1 if FAIL else 0)

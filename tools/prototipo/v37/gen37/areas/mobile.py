@@ -673,8 +673,10 @@ const ocd=done&&(c.ocorr||[]).find(x=>x.id===done); DCH(v,'hdr',done?(ocd&&!ocd.
           kv('Saldo',f'{nf(F02["fisico"])} L físicos · {F02["reservado"]} L reservados (OS-0424) · <b>{nf(F02_LIVRE)} L livres</b>'),
           kv('Conflito',f'reserva planejada da safra pediu {nf(PLAN_FA,1)} L → nada reservado · pendência de {nf(PEND_FA,1)} L na SOL-2026-07') if PEND_FA>0.05 else
           kv('Safra',f'uso de hoje em diante {nf(PLAN_FA,1)} L (O.S. abertas pelo pendente + plano sem O.S.) · sem pendência na SOL-2026-07: o estoque apto cobre'),
-          chips(chip('Conflito · decide o planejamento','red') if PEND_FA>0.05 else chip('Sem pendência de compra','green')),
-          btns(say('Registrar divergência','Divergência registrada com dono (planejamento) e prazo · reservas congeladas até a decisão — nada foi entregue.','alert','Registrar a divergência física do lote'))],state='red' if PEND_FA>0.05 else 'green')
+          chips(chip('Conflito · decide o planejamento','red') if PEND_FA>0.05 else chip('Sem pendência de compra','green'))]
+          # revisão do CTL-4 (S4): sem pendência não há conflito a registrar; congelar reservas sem conflito travaria a entrega da OS-0424 à toa
+          +([btns(say('Registrar divergência','Divergência registrada com dono (planejamento) e prazo · reservas congeladas até a decisão — nada foi entregue.','alert','Registrar a divergência física do lote'))] if PEND_FA>0.05 else []),
+          state='red' if PEND_FA>0.05 else 'green')
       + note(f'<b style="color:{INK};">{O419["id"]} · água</b> não aparece aqui: água só-água não cria fila nem documento de movimentação de produtos.'))
     corpo=tabs+IF('r0',operador)+IF('r1',almox)
     js=f'''const r0=(s.role||0)===0; v.r0=r0; v.r1=!r0;

@@ -327,3 +327,21 @@ Contraprovas:
 4. **Espelho JS/Python (ENG-011).** É o padrão do protótipo, com teste de paridade. O pendente só existe no Python (`os_dem`).
 5. **Leitura estática da semente.** Não regride em relação ao HEAD; fica como fatia seguinte.
 6. **NEC-028, bloqueio da Nova ordem e `cenLote` entre fazendas.** São problemas reais, mas de outra origem. Vão para tarefas próprias e não entram nesta frente.
+---
+
+## 9. Revisão adversarial do `c5d337a` (09/10): correções
+
+A recusa 5 acima ("leitura estática da semente") caiu: com as O.S. vivas e o estoque fixo, a demanda misturava dois estados. Agora tudo vem do mesmo cenário.
+
+| Achado | Correção | Regressão |
+|---|---|---|
+| **1 · S2** Entregar 8.000 kg de NPK cortava 8.000 kg da compra (R$ 27.200); devolver 30 L de Fungicida A comprava 24,5 L a mais; cancelar a OS-0424 deixava 24 L na Safrinha. | **DEM-07 ampliada.** `cenEstDem` (cenario.js) lê do mesmo cenário das O.S.: físico apto da fazenda (lote − quarentena), reservas ativas (`cenResPropria`, só de O.S. em A liberar, Liberadas ou Em execução; chave = ID da O.S.) e recebimentos previstos menos o que o Estoque já conferiu da nota do pedido. `cenDemEntradas` junta ordens e estoque para Planejar safra, Mapa › Insumos e Compra. Espelho Python: `dados2.est_dem`, paridade testada. | `demanda_unica_test` G0–G7 (G1–G5 vermelhos no `c5d337a` com os números da revisão); nav V1, V2 |
+| **2 · S3** A Compra seguia cotando a Ureia da OS-0418 cancelada, sem aviso. | DEM-09 na Compra: `demSolAcima` (cal01.js). A conta é a da versão da SOL: o plano que o Planejar safra usou fica gravado na versão (`ent`, com os ajustes da tela), e as ordens e o estoque vêm do cenário de agora. Aviso sem trava nas etapas 2, 4 e 5: "Acima da demanda · 1.140 kg · o Planejar safra atualiza a SOL-2026-07". Com pedido emitido: "pedido já emitido: o excedente entra no estoque". | F4, F5; nav C1, C2, A1 |
+| **3 · S3** "Atualizar SOL" gravava em nome de Ana e qualquer perfil reduzia a compra. | Enviar, complementar ou baixar a solicitação exige gestor ou agrônomo (`cenExigeUm`, padrão do CTL-3); sem o papel, recusa e nada muda. A versão nova guarda quem, quando e o que mudou (`atu`, `hist`); o envio original fica. A Compra mostra "atualizada em … por …". | nav Q1, Q2 |
+| **4 · S4** SU-03 e SU-03det com "pendência 0 L"; MB-05 verde oferecendo "Registrar divergência". | SU-03 e SU-03det sem conflito quando a SOL não tem pendência (reserva da OS-0424 e uso da safra que o lote cobre); MB-05 só oferece a divergência quando há conflito. | `sutest` (SU-03det) |
+| **5 · S4** Mutantes sobreviventes. | Asserções novas: rateio pela área (H1), limite de 30 dias (H2), desempate pelo custo (H3), outra fazenda não cobre (H4), reserva só de requisição ativa (H5), 1º uso no C2 (C2b). J2, J9 e J16 são equivalentes (revisão). | H1–H5, C2b |
+| Risco lido 1 | Pedido emitido antes de um complemento deixa de ser esquecido: a versão nova guarda `pedEmit`, e nada baixa. | nav P1 |
+| Risco lido 2 | Reduzir com a compra em andamento avisa: "O andamento da compra da versão anterior (…) recomeça nesta versão." | nav Q2 |
+| Risco lido 3 | Com complemento e redução juntos, a primária diz "Atualizar <SOL>". | lido no código |
+
+**Limite que fica:** os ajustes de plano feitos na tela do Planejar safra só ficam na tela. A Compra os lê da versão da SOL, mas o Mapa › Insumos continua com o plano da semente. Ao recarregar, o Planejar safra também volta ao plano da semente.

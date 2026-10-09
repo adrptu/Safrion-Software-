@@ -48,7 +48,7 @@ import cenario
 CAL=open(os.path.join(HERE,'cal01.js'),encoding='utf-8').read(); PRE=cenario.js_prefixo()
 def mapa_js(dem,extra=''):
     return runjs(PRE+'\n'+CAL+f"""\nconst X={json.dumps(dem,ensure_ascii=False)}; const R={{}};
-Object.keys(X.faz).forEach(f=>{{ const F=X.faz[f]; const m=demFazenda(Object.assign({{}},F,{{osd:cenOsDem(CEN0,X.osb)}})); const tid=(t)=>X.tid[t]||demTal(t);
+Object.keys(X.faz).forEach(f=>{{ const F=X.faz[f]; const m=demFazenda(cenDemEntradas(CEN0,F,X.b)); const tid=(t)=>X.tid[t]||demTal(t);
   R[f]={{st:{{'Safra toda':demSituacao(m,null,F.hoje,F.viavel),'Próximos 30 dias':demSituacao(m,X.lim30,F.hoje,F.viavel)}},nec:demPorLocal(m,tid,F.areaT,F.hoje),
     liq:Object.fromEntries(Object.values(m).map(x=>[x.nome,x.liq])),own:Object.fromEntries(Object.values(m).map(x=>[x.nome,x.evs.filter(e=>e.tipo==='dem'&&e.own&&e.dt>=F.hoje).reduce((a,e)=>a+e.q,0)]))}}; }});
 {extra}console.log(JSON.stringify(R));""")
@@ -175,15 +175,17 @@ def c2():
     for saf,px in (('S2627',None),('S27SF',None),('LG2627',None),('S2627',{'c4':'SOJA-AT','c5':'SOJA-AT','c6':'SOJA-AT','c7':'SOJA-AT'})):
         x=D2.dem_entradas(saf,planos_extra=px); py=D2.demanda(saf,planos_extra=px)
         js=runjs(PRE+'\n'+CAL+f"\nconst x={json.dumps(x,ensure_ascii=False)}; x.osd=cenOsDem(CEN0,{json.dumps(D2.os_base(),ensure_ascii=False)}); const m=demFazenda(x);"
-                 "console.log(JSON.stringify(Object.values(m).map(d=>[d.nome,d.liq,d.falta,d.bruta,d.real,d.est,d.rup,d.cob,d.evs.map(e=>[e.dt,Math.round(e.q*1e6)/1e6,e.tipo,e.t,e.calc||'']),cal01Memo(d.cal,{un:d.un,res:d.res})])));")
-        for nm,liq,falta,bruta,real,est,rup,cob,evs,memo in js:
+                 "console.log(JSON.stringify(Object.values(m).map(d=>[d.nome,d.liq,d.falta,d.bruta,d.real,d.est,d.rup,d.cob,d.evs.map(e=>[e.dt,Math.round(e.q*1e6)/1e6,e.tipo,e.t,e.calc||'']),cal01Memo(d.cal,{un:d.un,res:d.res}),d.uso])));")
+        for nm,liq,falta,bruta,real,est,rup,cob,evs,memo,uso in js:
             o=py.get(nm)
             pe=[[e['dt'],round(e['q'],6),e['tipo'],e['t'],e.get('calc') or ''] for e in o['evs']] if o else None
-            if not o or not perto(o['liq'],liq) or o['falta']!=falta or not perto(o['bruta'],bruta) or not perto(o['real'],real) or o['estoque']!=est or not perto(o['rup'],rup) or o['cob']!=cob or pe!=evs:
+            if not o or not perto(o['liq'],liq) or o['falta']!=falta or not perto(o['bruta'],bruta) or not perto(o['real'],real) or o['estoque']!=est or not perto(o['rup'],rup) or o['cob']!=cob or pe!=evs or o['uso']!=uso:
                 dif.append((saf,nm,(o or {}).get('liq'),liq,[(a,b) for a,b in zip(pe or [],evs) if a!=b][:2]))
         if [n for n,*_ in js]!=list(py): dif.append((saf,'ordem dos insumos',list(py)[:5],[n for n,*_ in js][:5]))
     return (not dif,dif[:4])
-caso('C2 demFazenda (JS) = dados2.demanda (Python) nas 3 safras abertas e com "Aplicar plano em 4 cultivos": líquida, falta, bruta, antes de hoje, estoque, ruptura e cada evento (data, quantidade, texto, conta)',c2)
+caso('C2 demFazenda (JS) = dados2.demanda (Python) nas 3 safras abertas e com "Aplicar plano em 4 cultivos": líquida, falta, bruta, antes de hoje, estoque, ruptura, 1º uso e cada evento (data, quantidade, texto, conta)',c2)
+caso('C2b 1º uso desta safra de hoje em diante: Fungicida A da Safra 2026/27 em 23/09/2026 (OS-0421 pelo pendente), nunca o 25/05/2027 da Safrinha',
+     lambda: (d['Fungicida A']['uso']=='2026-09-23' and s27['Fungicida A']['uso']=='2027-05-25',(d['Fungicida A']['uso'],s27['Fungicida A']['uso'])))
 def c3():
     m=runjs(CAL+"""\nconst M=cal01Memo(cal01(60,[{dt:'2026-01-09',q:500,tipo:'dem',own:true,ord:0},{dt:'2026-09-25',q:110,tipo:'dem',own:true,ord:0},{dt:'2026-09-30',q:50,tipo:'rec',own:false,ord:0,t:'Recebimento previsto'}],0,{hoje:'2026-09-23',viavel:'2026-09-30'}),{un:'kg'}); console.log(JSON.stringify(M));""")
     return (m[1]=='Antes de 23/09/2026 sem O.S. · 1 uso · 500 kg · fora da demanda (histórico do plano; se ainda vai acontecer, emita a O.S.)' and not any('Realizado' in l for l in m),m[:2])
@@ -246,5 +248,131 @@ def f3():
     a,b=r
     return (sorted(a['novos'])==['MAP 11-52','Ureia 45%'] and a['menos']==['Óleo mineral'] and a['it']=={'MAP 11-52':80000,'Óleo mineral':150,'Ureia 45%':1140} and b['novos']==[] and b['menos']==[],r)
 caso('F3 complemento e redução na mesma atualização: MAP sobe para 80.000 kg e a Ureia entra (novos), o Óleo baixa para 150 L (menos); repetir com a SOL igual à demanda não muda nada',f3)
+def f4():
+    # a Compra (etapas 2, 4 e 5) lê a demanda viva como o Planejar safra (dem_fixas + cenDemEntradas) e avisa pela mesma regra (demSolAcima)
+    if not hasattr(D2,'dem_fixas'): return (False,'dados2.dem_fixas não existe (base)')
+    sol0=[dict(nome=n,nec=round(o['liq'],2)) for n,o in d.items() if o['liq']>0.001]
+    r=runjs(cenario.perfis_js()+PRE+'\n'+CAL+f"""\nconst X={json.dumps(D2.dem_fixas('S2627'),ensure_ascii=False)}, B={{osb:{json.dumps(D2.os_base(),ensure_ascii=False)},est:{json.dumps(D2.est_base(),ensure_ascii=False)}}};
+const S={json.dumps(sol0,ensure_ascii=False)}; const A=(c)=>demSolAcima(demFazenda(cenDemEntradas(c,X,B)),S);
+const c1=JSON.parse(JSON.stringify(CEN0)); c1.ordens['OS-0418'].etapa='Canceladas';
+const c2=JSON.parse(JSON.stringify(CEN0)); cenEntregar(c2,'REQ-040','NPK 20-05-20',8000,'Carlos',{{k:'Paula'}});
+console.log(JSON.stringify([A(CEN0),A(c1),A(c2),demSolAcima({{P:{{liq:30}},Q:{{liq:0}}}},[{{nome:'P',nec:30.005}},{{nome:'Q',nec:5}},{{nome:'R',nec:2}}])]));""")
+    a0,a1,a2,a3=r
+    return (a0=={} and a1=={'Ureia 45%':{'dif':1140,'liq':0}} and a2=={} and a3=={'Q':{'dif':5,'liq':0},'R':{'dif':2,'liq':0}},r)
+caso('F4 Compra × demanda de agora (achado 2): na semente nada acima; com a OS-0418 cancelada só a Ureia 45% fica "Acima da demanda · 1.140 kg" (a mesma conta do Planejar safra); a entrega de 8.000 kg de NPK não cria aviso; dentro de 0,01 não avisa; insumo que saiu da demanda avisa a quantidade inteira',f4)
+def f5():
+    # a SOL enviada depois de "Aplicar plano em 4 cultivos" (plano da tela) guarda as partes fixas da conta (ent); a Compra refaz a conta com elas e
+    # o cenário de agora: nada acima. Com o plano da semente no lugar (o que a Compra fazia antes de ler ent) avisaria 13 insumos à toa.
+    px={'c4':'SOJA-AT','c5':'SOJA-AT','c6':'SOJA-AT','c7':'SOJA-AT'}
+    ent={k:v for k,v in D2.dem_entradas('S2627',planos_extra=px).items() if k not in ('fisico','quar','reservas','recebDt')}
+    sol=[dict(nome=n,nec=round(o['liq'],2)) for n,o in D2.demanda('S2627',planos_extra=px).items() if o['liq']>0.001]
+    r=runjs(cenario.perfis_js()+PRE+'\n'+CAL+f"""\nconst E={json.dumps(ent,ensure_ascii=False)}, X0={json.dumps(D2.dem_fixas('S2627'),ensure_ascii=False)};
+const B={{osb:{json.dumps(D2.os_base(),ensure_ascii=False)},est:{json.dumps(D2.est_base(),ensure_ascii=False)}}}; const S={json.dumps(sol,ensure_ascii=False)};
+const A=(c,x)=>demSolAcima(demFazenda(cenDemEntradas(c,x,B)),S); const c1=JSON.parse(JSON.stringify(CEN0)); c1.ordens['OS-0418'].etapa='Canceladas';
+console.log(JSON.stringify([A(CEN0,E),Object.keys(A(CEN0,X0)).length,A(c1,E)]));""")
+    a,n0,a1=r
+    return (a=={} and n0>0 and list(a1)==['Ureia 45%'] and a1['Ureia 45%']['dif']==1140,(a,n0,a1))
+caso('F5 SOL de um plano mudado na tela (Aplicar plano em 4 cultivos): a Compra lê o plano gravado na versão (ent) e não avisa nada; só a OS-0418 cancelada depois avisa a Ureia 1.140 kg (com o plano da semente avisaria insumos à toa)',f5)
+# ---------------- G · estoque vivo (revisão do CTL-4, achado 1, S2): físico, reservas e recebimentos do MESMO cenário das O.S. ----------------
+# Vermelho no c5d337a: as telas liam as O.S. do cenário vivo e o físico, as reservas e os recebimentos da semente fixa. ENT é o que as telas
+# fazem: cenDemEntradas (depois da correção) ou, na base, estoque fixo + cenOsDem vivo. Comandos reais do cenário (cenEntregar, cenDevolver,
+# cenReceber); o cancelamento repete o efeito de osc_cancelar (processo_os.py: a reserva não entregue volta ao lote, a requisição fica cancelada).
+print('== G · estoque, reservas e recebimentos do cenário vivo (revisão, achado 1)')
+GX={s:D2.dem_entradas(s) for s in ('S2627','S27SF','LG2627')}
+GB=D2.os_base(); GE=D2.est_base() if hasattr(D2,'est_base') else {}
+NF4533="cenReceber(c,'Semente de soja 58 W','S58-0926',{q},'kg','Câmara fria','06/2027','NF 4533',{apto},{{k:'Paula'}}); c.movs[c.movs.length-1].estRec={{id:'r4533',nf:'NF 4533',ped:'PC-090 · Semente de soja 58 W · Coop. Vale',item:'Semente de soja 58 W',conf:{q},apto:{qa},quar:{qq}}};"
+CANC24="(()=>{ const o=c.ordens['OS-0424'], r=c.reqs[o.req]; r.itens.forEach(it=>{ const l=c.lotes[it.prod+'|'+it.lote]; const x=Math.max(0,it.solicitado-it.entregue); if(l&&x>0) l.reservado=Math.max(0,l.reservado-x); }); r.estado='Cancelada'; o.etapa='Canceladas'; o.reservado=false; })();"
+def viva(mut):
+    return runjs(cenario.perfis_js()+PRE+'\n'+CAL+f"""\nconst XS={json.dumps(GX,ensure_ascii=False)}, B={json.dumps(GB,ensure_ascii=False)}, EB={json.dumps(GE,ensure_ascii=False)};
+const ENT=(c,x)=>typeof cenDemEntradas==='function'?cenDemEntradas(c,x,{{osb:B,est:EB}}):Object.assign({{}},x,{{osd:cenOsDem(c,B)}});
+const c=JSON.parse(JSON.stringify(CEN0)); {mut}
+const R={{c}}; Object.keys(XS).forEach(s=>{{ const m=demFazenda(ENT(c,XS[s]));
+  R[s]={{tot:Math.round(Object.values(m).reduce((a,d)=>a+d.valor,0)*100)/100,liq:Object.fromEntries(Object.values(m).map(d=>[d.nome,d.liq])),est:Object.fromEntries(Object.values(m).map(d=>[d.nome,d.est])),
+    res:Object.fromEntries(Object.values(m).map(d=>[d.nome,d.res])),rec:Object.fromEntries(Object.values(m).map(d=>[d.nome,d.rec]))}}; }});
+console.log(JSON.stringify(R));""")
+G0=viva('')
+def g0():
+    r=G0; return (r['S2627']['tot']==430255.00 and r['S27SF']['tot']==1094947.10 and r['LG2627']['tot']==1614202.84 and r['S2627']['liq']['NPK 20-05-20']==14800,
+                  {s:(r[s]['tot'],r[s]['liq'].get('NPK 20-05-20')) for s in GX})
+caso('G0 semente: as telas dão os mesmos totais de dados2 (R$ 430.255,00 · R$ 1.094.947,10 · R$ 1.614.202,84) e NPK 14.800 kg',g0)
+def g1():
+    r=viva("cenEntregar(c,'REQ-040','NPK 20-05-20',8000,'Carlos',{k:'Paula'});"); s=r['S2627']; lt=r['c']['lotes']['NPK 20-05-20|N26-03']
+    return (lt['fisico']==0 and lt['reservado']==0 and s['liq']['NPK 20-05-20']==14800 and s['est']['NPK 20-05-20']==0 and s['tot']==430255.00,
+            (lt['fisico'],lt['reservado'],s['liq'].get('NPK 20-05-20'),s['est'].get('NPK 20-05-20'),s['tot']))
+caso('G1 entrega comum no Estoque: 8.000 kg de NPK da REQ-040 (OS-0425) saem do lote para a custódia e a compra não muda — NPK 14.800 kg, estoque apto 0, R$ 430.255,00 (na base: 6.800 kg, a primária cortava 8.000 kg · R$ 27.200)',g1)
+def g2():
+    r=viva("cenDevolver(c,'REQ-035','Fungicida A',30,true,{k:'Paula'});"); return (r['S27SF']['liq']['Fungicida A']==22.98 and r['S27SF']['tot']==1094947.10 and r['S2627']['liq']['Fungicida A']==0,
+                                                                              (r['S27SF']['liq'].get('Fungicida A'),r['S27SF']['tot'],r['S2627']['liq'].get('Fungicida A')))
+caso('G2 devolução: 30 L de Fungicida A da REQ-035 (OS-0421) voltam ao lote; a Safrinha 2027 segue 22,98 L · R$ 1.094.947,10 e a Safra 2026/27 0 L (na base: 47,5 L, +R$ 3.555,40)',g2)
+def g3():
+    r=viva(CANC24); s=r['S27SF']; return (s['liq'].get('Fungicida A',0)==0 and s['tot']==1091615.00 and r['c']['lotes']['Fungicida A|F26-02']['reservado']==0,
+                                         (s['liq'].get('Fungicida A'),s['tot'],r['c']['lotes']['Fungicida A|F26-02']['reservado']))
+caso('G3 OS-0424 cancelada: a reserva de 65 L volta ao livre e a Safrinha 2027 passa a 0 L de Fungicida A · R$ 1.091.615,00 (na base: 24,0 L, a reserva solta contava como outro destino)',g3)
+def g4():
+    r=viva(NF4533.format(q=20000,apto='true',qa=20000,qq=0)); s=r['S2627']; b=G0['S2627']
+    n='Semente de soja 58 W'; return (all(r[x]['liq']==G0[x]['liq'] and r[x]['tot']==G0[x]['tot'] for x in GX) and s['est'][n]==32000 and b['rec'][n]==20000 and s['rec'][n]==0,
+                                      (s['tot'],s['est'].get(n),b['rec'].get(n),s['rec'].get(n)))
+caso('G4 recebimento da NF 4533 (PC-090, 20.000 kg de Semente de soja 58 W aptos): o estoque sobe 12.000 → 32.000 kg e o "a receber" do PC-090 cai 20.000 → 0 — a compra das três safras não muda (sem isto, os 20.000 kg contariam duas vezes)',g4)
+def g5():
+    rq=viva(NF4533.format(q=20000,apto='false',qa=0,qq=20000)); rl=viva(NF4533.format(q=20000,apto='false',qa=0,qq=20000)+" cenLiberarQuarentena(c,'Semente de soja 58 W|S58-0926','LAB-77',{k:'Ana'});")
+    b=G0['S2627']; n='Semente de soja 58 W'
+    return (rq['S2627']['liq'][n]>b['liq'][n]+1e-6 and rq['S2627']['est'][n]==12000 and rl['S2627']['liq']==b['liq'] and rl['S2627']['tot']==b['tot'],
+            (b['liq'].get(n),rq['S2627']['liq'].get(n),rq['S2627']['est'].get(n),rl['S2627']['liq'].get(n)))
+caso('G5 a mesma nota inteira em quarentena: os 20.000 kg saem do pedido e não entram no estoque apto até o laudo (CAL-01: quarentena não conta); liberada com o laudo, a compra volta à da semente',g5)
+def g6():
+    if not hasattr(D2,'est_dem'): return (False,'dados2.est_dem não existe (base)')
+    dif=[]
+    for mut in ('',"cenEntregar(c,'REQ-040','NPK 20-05-20',8000,'Carlos',{k:'Paula'});","cenDevolver(c,'REQ-035','Fungicida A',30,true,{k:'Paula'});",CANC24,NF4533.format(q=20000,apto='true',qa=20000,qq=0)):
+        r=viva(mut); cn=r['c']
+        for s in GX:
+            py=D2.demanda(s,cen=cn); pl={n:o['liq'] for n,o in py.items()}
+            if pl!=r[s]['liq'] or not perto(tot(py),r[s]['tot'],0.005) or {n:o['estoque'] for n,o in py.items()}!=r[s]['est'] or {n:o['reservado'] for n,o in py.items()}!=r[s]['res'] or {n:o['receb'] for n,o in py.items()}!=r[s]['rec']:
+                dif.append((mut[:30],s,[(n,pl.get(n),r[s]['liq'].get(n)) for n in set(pl)|set(r[s]['liq']) if pl.get(n)!=r[s]['liq'].get(n)][:3]))
+    js=runjs(PRE+f"\nconst B={json.dumps(GB,ensure_ascii=False)}, EB={json.dumps(GE,ensure_ascii=False)}; const osd=cenOsDem(CEN0,B); console.log(JSON.stringify(['Santa Rita','Lagoa Grande'].map(f=>cenEstDem(CEN0,f,EB,osd))));")
+    py=[D2.est_dem(None,f) for f in ('Santa Rita','Lagoa Grande')]
+    if json.loads(json.dumps(py))!=js: dif.append(('est_dem × cenEstDem',[k for k in js[0] if js[0][k]!=json.loads(json.dumps(py[0]))[k]]))
+    return (not dif,dif[:4])
+caso('G6 paridade: dados2.est_dem(semente) = cenEstDem(CEN0) nas duas fazendas e dados2.demanda(cen=…) = telas nos cenários G1–G4 (líquida, total, estoque, reserva e a receber)',g6)
+def g7():
+    if not hasattr(D2,'est_dem'): return (False,'dados2.est_dem não existe (base)')
+    sr=D2.est_dem(None,'Santa Rita'); lg_=D2.est_dem(None,'Lagoa Grande')
+    rs=[(r['item'],r['q'],r['chave'],r['dt']) for r in sr['reservas']]
+    return (rs==[('Fungicida A',65,'OS-0424','2026-09-24'),('NPK 20-05-20',8000,'OS-0425','2026-10-15')] and sr['fisico']['KCl 60%']==50000 and sr['quar']=={'KCl 60%':10000}
+            and 'Glifosato 480' not in lg_['fisico'] and lg_['fisico']['Muda de mamão Formosa']==95275 and [r['chave'] for r in lg_['reservas']]==['OS-0503','OS-0503']
+            and [r['ref'] for r in lg_['recebDt']]==[None] and all(r['faz']=='Santa Rita' for r in sr['recebDt']),(rs,sr['quar'],[r['chave'] for r in lg_['reservas']]))
+caso('G7 estoque por fazenda na semente: reservas ativas REQ-039 (65 L, OS-0424) e REQ-040 (8.000 kg, OS-0425) na Santa Rita, REQ-021 (OS-0503) na Lagoa Grande; KCl apto 50.000 kg com 10.000 em quarentena; Glifosato só na Santa Rita',g7)
+# ---------------- H · lacunas da revisão (achado 5, S4): asserções que matam os mutantes sobreviventes ----------------
+print('== H · asserções que faltavam (revisão, achado 5)')
+def h1():
+    m=MP or _mapa(); n=m['Santa Rita']['nec']; s_=lambda t: round(sum(x['q'] for x in n.get(t,[]) if x['p']=='Fungicida A'),2)
+    o21=[round(x['q'],2) for t in ('T1','T2') for x in n.get(t,[]) if x['p']=='Fungicida A' and x['orig'].startswith('T1+T2 · OS-0421')]
+    return (s_('T1')==300.64 and s_('T2')==219.84 and o21==[7.67,7.33],(s_('T1'),s_('T2'),o21))
+caso('H1 rateio do Mapa pela área (J1, I1, I2): a OS-0421 (15 L em T1 e T2) divide 7,67 L / 7,33 L por 312 / 298 ha; Fungicida A T1 = 300,64 L e T2 = 219,84 L (meio a meio daria 300,47 / 220,0)',h1)
+def h2():
+    r=runjs(CAL+"""\nconst ev=(dt)=>({P:{nome:'P',un:'kg',est:0,evs:[{dt,q:10,tipo:'dem',own:true,ord:0}]}}); const L='2026-10-23', H='2026-09-23', V='2026-09-30';
+console.log(JSON.stringify([demSituacao(ev(L),L,H,V).P||null,demSituacao(ev('2026-10-24'),L,H,V).P||null,demSituacao(ev('2026-09-22'),L,H,V).P||null,demSituacao(ev('2026-10-24'),null,H,V).P||null]));""")
+    return (r[0] and r[0][0]=='Falta 10 kg' and r[1] is None and r[2] is None and r[3] and r[3][0]=='Falta 10 kg',r)
+caso('H2 período de 30 dias do Mapa (J12): uso exatamente no último dia (23/10) entra ("Falta 10 kg"); no dia seguinte fica fora; antes de hoje não entra; sem limite (safra toda) entra',h2)
+def h3():
+    P=[dict(f='FA',nome='A',unit=3.20,chega='2026-10-01',late=True),dict(f='FB',nome='B',unit=3.10,chega='2026-10-01',late=True),dict(f='FC',nome='C',unit=3.00,chega='2026-10-03',late=True)]
+    r=runjs(CAL+f"\nconst P={json.dumps(P)}; const ref=cmpRef(P); console.log(JSON.stringify([ref.f,cmpEscolha(ref,ref,P[2],P).selo]));")
+    return (r==['FB','Chega primeiro'],r)
+caso('H3 desempate da escolha padrão (J8): duas propostas atrasadas chegando no mesmo dia (01/10) — vence a de menor custo (B, R$ 3,10), mesmo fora de ordem; a mais barata que chega depois (C) não é a padrão',h3)
+def h4():
+    x=dict(saf='S',faz='Santa Rita',hoje='2026-09-23',viavel='2026-09-30',ordem={'S':0},nomes={'S':'S'},osd=[],fisico={'P':0},
+           occ=[dict(saf='S',k='c|a',a='a',local='T9',tal='T9',area=10,dt='2026-10-10',nome='Uso',prods=[dict(nome='P',grupo='G',un='kg',preco=1,dose=10,q=100)])],
+           recebDt=[dict(item='P',q=100,dt='2026-10-01',ref='PX',faz='Lagoa Grande',t='Recebimento de outra fazenda')],
+           reservas=[dict(item='P',q=50,dt='2026-09-24',chave='OS-X',faz='Lagoa Grande',t='Reserva de outra fazenda')])
+    r=runjs(PRE+'\n'+CAL+f"""\nconst x={json.dumps(x,ensure_ascii=False)}; const m=demFazenda(x); const c=JSON.parse(JSON.stringify(CEN0));
+c.lotes['Glifosato 480|LG-X']={{prod:'Glifosato 480',lote:'LG-X',local:'Almox. Lagoa Grande',un:'L',fisico:500,quarentena:0,reservado:0,validade:''}}; const EB={json.dumps(GE,ensure_ascii=False)};
+console.log(JSON.stringify([m.P.liq,m.P.rec,m.P.res,cenEstDem(c,'Santa Rita',EB,[]).fisico['Glifosato 480'],cenEstDem(c,'Lagoa Grande',EB,[]).fisico['Glifosato 480']]));""")
+    py=D2.dem_fazenda(json.loads(json.dumps(x)))['P']
+    return (r==[100,0,0,1200,500] and py['liq']==100 and py['rec']==0 and py['res']==0,(r,py['liq'],py['rec'],py['res']))
+caso('H4 outra fazenda não cobre (J17, P3): recebimento e reserva da Lagoa Grande de um insumo comum não mudam a Santa Rita (100 kg a comprar, 0 a receber, 0 reservado, JS = Python); lote no Almox. Lagoa Grande conta só na Lagoa Grande (Glifosato SR 1.200 L, LG 500 L)',h4)
+def h5():
+    r=runjs(PRE+f"""\nconst EB={json.dumps(GE,ensure_ascii=False)}; const B={json.dumps(GB,ensure_ascii=False)}; const R=(f)=>{{ const c=JSON.parse(JSON.stringify(CEN0)); f(c); return cenEstDem(c,'Santa Rita',EB,cenOsDem(c,B)).reservas.map(x=>x.chave); }};
+console.log(JSON.stringify([R(c=>{{}}),R(c=>{{ c.reqs['REQ-039'].estado='Cancelada'; }}),R(c=>{{ c.ordens['OS-0424'].etapa='Em conferência'; }}),R(c=>{{ c.ordens['OS-0424'].etapa='Canceladas'; }})]));""")
+    return (r==[['OS-0424','OS-0425'],['OS-0425'],['OS-0425'],['OS-0425']],r)
+caso('H5 reserva só de requisição ativa (E3): com o lote ainda marcando 65 L, a REQ-039 cancelada, ou a OS-0424 em conferência ou cancelada, não conta como reserva (sobra a da OS-0425)',h5)
 print(f'\nRESULTADO: {len(OK)} ok · {len(FAIL)} falhas'); [print('  -',f) for f in FAIL]
 sys.exit(1 if FAIL else 0)

@@ -437,19 +437,20 @@ _SEMPLANO={t:(not any(c['plano'] for c in D2.CULTIVOS['S2627'] if c['local'].spl
 _PLANT=sum(x for x in (95,80,42,38,30)); _PRE=312+298+174
 _LG_ROT={p['rot'].replace('P','Pivô ',1):p['id'] for p in LG['pivos']}   # 'Pivô 1' (local do cultivo) → PV01
 _SEMPLANO.update({t:(not any(c['plano'] for c in D2.CULTIVOS[DLS.SAFRA['id']] if _LG_ROT.get(c['local'])==t)) for t in LG_IDS})
-# ---- insumos (CTL-4 · DEM-05): o Mapa calcula com a mesma conta do Planejar safra e da Compra (demFazenda, cal01.js) e com as O.S. do cenário
-# vivo (cenOsDem); aqui só vão as entradas por fazenda: ocorrências do plano das safras abertas, reservas, recebimentos, físico apto da fazenda e a
-# área dos cultivos por talhão (rateio da O.S. de vários talhões). Antes havia uma conta própria (estoque das duas fazendas, reserva contada duas vezes).
+# ---- insumos (CTL-4 · DEM-05): o Mapa calcula com a mesma conta do Planejar safra e da Compra (demFazenda, cal01.js) com ordens, físico apto,
+# reservas e recebimentos do MESMO cenário vivo (cenDemEntradas); aqui só vão as partes fixas por fazenda: ocorrências do plano das safras abertas
+# e a área dos cultivos por talhão (rateio da O.S. de vários talhões). Antes havia uma conta própria (estoque das duas fazendas, reserva contada
+# duas vezes) e, depois, estoque fixo da semente ao lado das ordens vivas (revisão do CTL-4, achado 1).
 def _dem_mapa():
     tid={**{t:t for t in TIDS},**_LG_ROT}; faz={}
     for f,saf in (('Santa Rita','S2627'),('Lagoa Grande',DLS.SAFRA['id'])):
-        x=D2.dem_entradas(saf); aT={}; vistos=set()
+        x=D2.dem_fixas(saf); aT={}; vistos=set()
         for o in x['occ']:
             cid=o['k'].split('|')[0]
             if o['saf']!=saf or cid in vistos: continue
             vistos.add(cid); k=tid.get(o['local'],o['local'].split('-')[0]); aT[k]=aT.get(k,0)+o['area']
         x['areaT']=aT; faz[f]=x
-    return dict(faz=faz,osb=D2.os_base(),tid=tid)
+    return dict(faz=faz,b=dict(osb=D2.os_base(),est=D2.est_base()),tid=tid)
 SEMCULT.update({t:'preparo de área · sem lavoura' for t in LG_IDS if LAV[t]['c']=='gray'})
 _GEO_TXT=_geo(); _GEO_TXT.update({p['id']:f"círculo pelo centro do KML e pela área declarada · raio {nfb(p['r_m'])} m" for p in LG['pivos']})
 import dados_cad as DC
@@ -664,10 +665,10 @@ function satEstado(t,f){ const v=satVal(f.dt,t,f.idx); const nt=(M.sat[f.dt].nt|
   if(ms.length||(dv!==null&&dv<-10)) return ['Atenção','yellow'];
   return ['Normal','green']; }
 // ---- insumos: necessidade do talhão × situação da fazenda (estoque compartilhado não é dividido por talhão) ----
-// CTL-4 (DEM-05): a mesma conta do Planejar safra e da Compra (demFazenda, cal01.js) com as O.S. do cenário vivo (cenOsDem): liberar, apontar,
-// cancelar ou emitir uma O.S. muda a necessidade e a situação; recalcula só quando as ordens mudam
-function insFaz(){ const D=M.dem; const F=D.faz[FAZ]; if(!F) return {nec:{},st:{}}; const osd=cenOsDem(cenGet(),D.osb); const k=FAZ+'|'+JSON.stringify(osd);
-  if(insFaz._k===k) return insFaz._v; const m=demFazenda(Object.assign({},F,{osd})); const tid=(t)=>D.tid[t]||demTal(t);
+// CTL-4 (DEM-05): a mesma conta do Planejar safra e da Compra (demFazenda, cal01.js) com ordens e estoque do cenário vivo (cenDemEntradas):
+// liberar, apontar, cancelar ou emitir uma O.S. muda a necessidade e a situação; entregar, devolver e receber não mudam a compra (revisão, achado 1)
+function insFaz(){ const D=M.dem; const F=D.faz[FAZ]; if(!F) return {nec:{},st:{}}; const X=cenDemEntradas(cenGet(),F,D.b);
+  const k=FAZ+'|'+JSON.stringify([X.osd,X.fisico,X.reservas,X.recebDt]); if(insFaz._k===k) return insFaz._v; const m=demFazenda(X); const tid=(t)=>D.tid[t]||demTal(t);
   const v={nec:demPorLocal(m,tid,F.areaT,F.hoje),st:{'Safra toda':demSituacao(m,null,F.hoje,F.viavel),'Próximos 30 dias':demSituacao(m,M.lim30,F.hoje,F.viavel)}};
   insFaz._k=k; insFaz._v=v; return v; }
 function necAgg(t,per){ const m={}; (insFaz().nec[t]||[]).filter(x=>per==='Safra toda'||x.dt<=M.lim30).forEach(x=>{ const a=m[x.p]||(m[x.p]={p:x.p,q:0,un:x.un,dt:x.dt,orig:[]}); a.q+=x.q; if(x.dt<a.dt) a.dt=x.dt; a.orig.push(x.orig); });
