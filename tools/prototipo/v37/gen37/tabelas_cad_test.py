@@ -3,8 +3,8 @@
 TF03 por grade: colunas próprias (sem rótulo composto), unidade junto do valor nas colunas com data-un ("160,0 ha", "R$ 14,49/ha"),
 "Custo R$/h" e "Custo R$/ha", filtro e ordenação em todas as colunas, filtro pelo texto da célula, ordem pelo número e pela data,
 Situação em chip; 390 px rolando dentro da caixa. Defeitos reproduzidos: outorga aparecia como "Certidão" (CD-01 Água) e a Safra Mamão
-da Lagoa Grande aparecia nas parcelas de talhão da Santa Rita (CD-01det). Fluxo do cadastro na grade (CD-03): normal (salvar o custo e a
-célula/ordem acompanham), recusa (número inválido não grava) e repetição (salvar de novo não duplica). Vazio continua vazio.
+da Lagoa Grande aparecia nas parcelas de talhão da Santa Rita (CD-01det). Fluxo do cadastro na grade (CD-03), a 1440 e a 390 px (toque): normal
+(salvar o custo e a célula/ordem acompanham), recusa (número inválido não grava) e repetição (salvar de novo não duplica). Vazio continua vazio.
 Uso: python3 tabelas_cad_test.py [pasta de capturas]   (< 3 min)"""
 import sys, os, re, time, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -50,6 +50,25 @@ def tf03(nome, g, esperado, ficha=False, extra=()):
         col = 'Situação' if 'Situação' in ls else 'Situação do papel'; ch = [x for x in g.chips(col) if x is not None]
         chk(f'{nome}: {col} em chip em todas as linhas com valor ({len(ch)})', ch and all(ch), g.chips(col)[:6])
     return d
+
+def fluxo_custo(g, tam, val, cel):
+    """CD-03: salvar o custo do Trator 03 → célula e ordem por custo acompanham (normal); "abc" mostra "Use um número" e não grava (recusa);
+    salvar de novo sem mudar não duplica a linha nem muda o valor (repetição)."""
+    def abre_linha(nome): J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(x=>x.innerText.indexOf({json.dumps(nome)})===0); r&&r.querySelector('[role=cell] span').click();}})()"); time.sleep(.5)
+    def campo(fid, v): J(f"""(()=>{{const i=document.querySelector('#{fid}'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,{json.dumps(v)}); i.dispatchEvent(new Event('input',{{bubbles:true}}));}})()"""); time.sleep(.2)
+    def salvar(): J("[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Salvar').click()"); time.sleep(.6)
+    linha = lambda: next((r for r in g.dicts() if r.get('Máquina ou instalação') == 'Trator 03'), {})
+    abre_linha('Trator 03'); campo('fx_g_atv_custo_h', val); salvar(); t3 = linha()
+    g.ordena('Custo R$/h', desc=True); ordem = [r.get('Máquina ou instalação') for r in g.dicts()]; ch = [num(x) for x in g.col('Custo R$/h') if x != '—']
+    chk(f'CD-03 fluxo {tam} (normal): salvar {val} → célula "{cel}" e a ordem por custo põe o Trator 03 entre os de 180 e os de 150',
+        t3.get('Custo R$/h') == cel and crescente(ch, True) and ordem.index('Trator 03') == ordem.index('Trator 02') + 1, (t3.get('Custo R$/h'), ordem[:6]))
+    abre_linha('Trator 03'); campo('fx_g_atv_custo_h', 'abc'); salvar()
+    err = J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText") or ''
+    J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Cancelar'); b&&b.click();})()"); time.sleep(.3)
+    J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Descartar alterações'); b&&b.click();})()"); time.sleep(.3)
+    chk(f'CD-03 fluxo {tam} (recusa): custo "abc" mostra "Use um número" e não grava (célula segue {cel})', 'Use um número' in err and linha().get('Custo R$/h') == cel, (err[-160:], linha().get('Custo R$/h')))
+    abre_linha('Trator 03'); salvar(); n3 = [r.get('Máquina ou instalação') for r in g.dicts()].count('Trator 03')
+    chk(f'CD-03 fluxo {tam} (repetição): salvar de novo sem mudar não duplica a linha nem muda o valor', n3 == 1 and linha().get('Custo R$/h') == cel, n3)
 
 try:
     c.aparelho(1440, 900, 1, False)
@@ -140,22 +159,7 @@ try:
     for _ in range(2): g.cabecalho_ordena('Capacidade')
     chk('CD-03 (repetição): três cliques no título (crescente → decrescente → sem ordem) voltam à ordem original', [r.get('Máquina ou instalação') for r in g.dicts()] == base, base[:4])
     # fluxo do cadastro na grade: salvar o custo do Trator 03 → célula e ordem acompanham; número inválido não grava; salvar de novo não duplica
-    def abre_linha(nome): J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(x=>x.innerText.indexOf({json.dumps(nome)})===0); r&&r.querySelector('[role=cell] span').click();}})()"); time.sleep(.5)
-    def campo(fid, val): J(f"""(()=>{{const i=document.querySelector('#{fid}'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,{json.dumps(val)}); i.dispatchEvent(new Event('input',{{bubbles:true}}));}})()"""); time.sleep(.2)
-    def salvar(): J("[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Salvar').click()"); time.sleep(.6)
-    abre_linha('Trator 03'); campo('fx_g_atv_custo_h', '172,5'); salvar()
-    t3 = next((r for r in g.dicts() if r.get('Máquina ou instalação') == 'Trator 03'), {})
-    g.ordena('Custo R$/h', desc=True); ordem = [r.get('Máquina ou instalação') for r in g.dicts()]
-    chk('CD-03 fluxo (normal): salvar 172,5 → célula "R$ 172,50/h" e a ordem por custo põe o Trator 03 entre os de 180 e os de 150',
-        t3.get('Custo R$/h') == 'R$ 172,50/h' and ordem.index('Trator 03') == ordem.index('Trator 02') + 1, (t3.get('Custo R$/h'), ordem[:6]))
-    abre_linha('Trator 03'); campo('fx_g_atv_custo_h', 'abc'); salvar()
-    err = J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText") or ''
-    J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Cancelar'); b&&b.click();})()"); time.sleep(.3)
-    J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Descartar alterações'); b&&b.click();})()"); time.sleep(.3)
-    t3b = next((r for r in g.dicts() if r.get('Máquina ou instalação') == 'Trator 03'), {})
-    chk('CD-03 fluxo (recusa): custo "abc" mostra "Use um número" e não grava (célula segue R$ 172,50/h)', 'Use um número' in err and t3b.get('Custo R$/h') == 'R$ 172,50/h', (err[-160:], t3b.get('Custo R$/h')))
-    abre_linha('Trator 03'); salvar(); n3 = [r.get('Máquina ou instalação') for r in g.dicts()].count('Trator 03')
-    chk('CD-03 fluxo (repetição): salvar de novo sem mudar não duplica a linha nem muda o valor', n3 == 1 and next((r for r in g.dicts() if r.get('Máquina ou instalação') == 'Trator 03'), {}).get('Custo R$/h') == 'R$ 172,50/h', n3)
+    fluxo_custo(g, '1440', '172,5', 'R$ 172,50/h')
     shot('cd03-1440')
     # ================= CD-04 =================
     abre('CD-04.dc.html'); aba('Pessoas'); g = Grade(J, 0)
@@ -232,6 +236,14 @@ try:
     ruim = [x for x in r390 if not (x[1] and x[2] and x[3])]
     chk(f'390 px: {len(r390)} grades sem rolagem lateral da página; cada grade cabe ou rola dentro da caixa, com a 1ª coluna à vista', r390 and not ruim, ruim or r390[:3])
     chk('390 px: as grades largas rolam dentro da caixa (pelo menos as de muitas colunas)', sum(1 for x in r390 if x[4]) >= len(r390) - 3, [x[0] for x in r390 if not x[4]])
+    # fluxo a 390 px, com toque: o mesmo cadastro na grade (normal, recusa, repetição) e o filtro pelo menu da coluna
+    abre('CD-03.dc.html'); g = Grade(J, 0); fluxo_custo(g, '390 px', '165', 'R$ 165,00/h'); limpa(J)
+    n0 = len(g.dicts()); g.filtra('Classe', ['Irrigação']); a1 = [r.get('Máquina ou instalação') for r in g.dicts()]
+    J("""(()=>{const i=[...document.querySelectorAll('input[aria-label="Buscar nesta tabela"]')].find(x=>x.offsetParent); if(!i) return; Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,'Silo');
+      i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})()"""); time.sleep(.5)
+    vaz = J("[...document.querySelectorAll('main div')].some(x=>x.offsetParent&&/^Nenhuma linha corresponde aos filtros/.test(x.innerText.trim()))")
+    chk('CD-03 390 px (filtro): Classe = Irrigação → 3 linhas; + busca "Silo" → nenhuma linha e o aviso; Limpar filtros volta a todas',
+        len(a1) == 3 and g.dicts() == [] and vaz and (limpa(J) or True) and len(g.dicts()) == n0, (a1, n0))
     ERRS.extend(J("window.__errs") or []); chk('sem erro de script (390)', not ERRS, ERRS[:3])
 finally:
     c.close(); srv.terminate()
