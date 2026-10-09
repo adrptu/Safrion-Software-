@@ -317,4 +317,20 @@ ok('U18 K29 condição do a13: "Apto" da semente; "Restrito · monitorado" → a
 { const c = NOVO(); const a = MUD(c, x => benConcluir(x, 'OB-0110', AN)); MUD(c, x => benConcluir(x, 'OB-0110', IG)); const b = MUD(c, x => benConferir(x, 'OB-0110', IG)); const d = MUD(c, x => benConferir(x, 'OB-0110', RU));
   ok('U27 Ana não conclui (produção); Igor e Rui não conferem (conferência: Paula)', /decisão de Igor/.test(a.erro || '') && /decisão de Paula \(conferência\)/.test(b.erro || '') && /decisão de Paula/.test(d.erro || ''), [a, b, d]); }
 
+// ---- U28 · R-A08 reabrir a execução: motivo obrigatório, só produção; conferência e Concluir caem; repetido é "Já feito" sem gravar ----
+{ const c = NOVO(); MUD(c, x => benConcluir(x, 'OB-0110', IG)); MUD(c, x => benConferir(x, 'OB-0110', PA));
+  const s0 = MUD(c, x => benReabrir(x, 'OB-0110', '', IG)); const a = MUD(c, x => benReabrir(x, 'OB-0110', 'faltou a classe B da tarde', AN));
+  const r = MUD(c, x => benReabrir(x, 'OB-0110', 'faltou a classe B da tarde', IG)); const o = O(c, 'OB-0110'); const ev = o.ben.hist.slice(-2).map(h => h.ev); const n = o.ben.hist.length;
+  const rep = MUD(c, x => benReabrir(x, 'OB-0110', 'faltou a classe B da tarde', IG));
+  ok('U28 reabrir: sem motivo recusado; Ana (sem papel de produção) recusada; Igor reabre → Em execução, conferência e Concluir caem com linha no histórico; repetido "Já feito" sem gravar',
+     /Informe o motivo/.test(s0.erro || '') && /decisão de Igor/.test(a.erro || '') && !r.erro && o.etapa === 'Em execução' && !o.ben.conf && !o.ben.conc
+     && JSON.stringify(ev) === '["Caiu: conferência","Execução reaberta"]' && /^Já feito: OB-0110 está em Em execução/.test(rep.erro || '') && O(c, 'OB-0110').ben.hist.length === n, [s0, a, r, ev, rep]); }
+
+// ---- U29 · BEN-D15 e BEN-D14: em processo só entre Iniciar e Concluir; próximo passo do lote de entrada e pendências da faixa, do mesmo estado ----
+{ const c = NOVO(); const ep12 = benEmProc(O(c, 'OB-0112')); const pr0 = benPendRec(c); const px = benProxEntrada(c, LT(c, 'L39-131'));
+  const nv = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-131', kg: 24120 }] }, IG)); const px2 = benProxEntrada(c, LT(c, 'L39-131')); const pr1 = benPendRec(c);
+  ok('U29 OB-0112 (A liberar) com 0 kg em processo; L39-131 aponta "Abrir ordem de beneficiamento" (#nova=L39-131) e, criada a OB-0113, "na OB-0113 (A liberar)"; faixa "1 a pesar" e "1 a liberar · 3 lotes a beneficiar" → "2 a liberar · 2 lotes a beneficiar"',
+     ep12 === 0 && px && px.h === 'BEN.dc.html#nova=L39-131' && px2 && /^na OB-0113 \(A liberar\)/.test(px2.t) && px2.h === 'BEN.dc.html#OB-0113'
+     && pr0.carga === '1 a pesar' && pr0.ben === '1 a liberar · 3 lotes a beneficiar' && pr1.ben === '2 a liberar · 2 lotes a beneficiar', [ep12, px, px2, pr0, pr1, nv.erro]); }
+
 print(JSON.stringify(R));

@@ -339,7 +339,7 @@ function benConferir(c, id, ator) { const quem = cenExige(ator, 'conferente', 'C
   benHist(o, quem, 'Balanço conferido', 'diferença ' + benKg(b.dif) + ' (' + benPct(b.pct) + ')' + (b.dentro ? (b.ganho ? ', ganho aparente' : '') + ' dentro da faixa de ' + benKg(b.faixa) : ', justificada')); benToca(o);
   return { msg: 'Balanço da ' + id + ' conferido por ' + quem + ': diferença ' + benKg(b.dif) + ' (' + benPct(b.pct) + '). Próximo passo: Fechar processo.' }; }
 function benReabrir(c, id, motivo, ator) { const quem = cenExige(ator, 'producao', 'Reabrir a execução da ' + id); const o = benO(c, id);
-  if (o.etapa !== 'Em conferência') throw new Error('Reabra só em Em conferência (' + id + ' está em ' + o.etapa + ').');
+  if (o.etapa !== 'Em conferência') throw new Error(o.etapa === 'Em execução' ? 'Já feito: ' + id + ' está em Em execução.' : 'Reabra só em Em conferência (' + id + ' está em ' + o.etapa + ').');
   const mot = String(motivo || '').trim(); if (!mot) throw new Error('Informe o motivo para reabrir a execução.');
   benBalMudou(o, quem); o.ben.conc = null; o.ben.corr = null; o.etapa = 'Em execução';
   benHist(o, quem, 'Execução reaberta', mot + ' · a declaração do Concluir cai'); benToca(o); return { msg: id + ' volta a Em execução (' + mot + ').' }; }

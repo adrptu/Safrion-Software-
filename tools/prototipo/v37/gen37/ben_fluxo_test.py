@@ -143,8 +143,10 @@ try:
         r0 = rev(); clk('Abrir ordem de beneficiamento', 'aside', w=1.0); lib(); time.sleep(.4); p = pan()
         t.chk('o atalho abre a ordem nova com o L39-131 marcado, a rota única (PACK-FRU v3) e as caixas sugeridas (2.292); navegar não gravou', 'Nova ordem' in p and 'PACK-FRU v3' in p and '2292' in J("(document.querySelector('aside [id^=pf_cx_]')||{}).value||''") and rev() == r0,
               [p[:500], J("(document.querySelector('aside [id^=pf_cx_]')||{}).value")])
-        perfil('Igor'); clk('Criar ordem', 'aside'); st = cen("c.ordens['OB-0113']&&[c.ordens['OB-0113'].etapa,c.ordens['OB-0113'].ben.ent[0].lote,c.ordens['OB-0113'].ins[0].tot]")
-        t.chk('Criar ordem: OB-0113 A liberar com o L39-131 e 2.292 caixas; nada reservado antes de liberar', st == ['A liberar', 'L39-131', 2292] and not cen("c.producao.lotes['L39-131'].ordem"), [st, toast()])
+        perfil('Igor'); J("(()=>{ const b=[...document.querySelectorAll('aside button')].find(x=>N(x.innerText)==='Criar ordem'); window.__cl++; b.click(); b.click(); })()"); time.sleep(.6)
+        st = cen("c.ordens['OB-0113']&&[c.ordens['OB-0113'].etapa,c.ordens['OB-0113'].ben.ent[0].lote,c.ordens['OB-0113'].ins[0].tot,!!c.ordens['OB-0114']]"); tc = toast()
+        t.chk('Criar ordem (toque duplo): uma OB-0113 só, A liberar, com o L39-131 e 2.292 caixas; nada reservado antes de liberar; o aviso "OB-0113 criada" fica',
+              st == ['A liberar', 'L39-131', 2292, False] and not cen("c.producao.lotes['L39-131'].ordem") and 'OB-0113 criada' in tc, [st, tc])
         ir('CARGA.dc.html'); cg = J("ROWTXT('L39-131')") or ''
         t.chk('Cargas depois de criar: a carga do L39-131 aponta a ordem "na OB-0113 (A liberar)"', 'na OB-0113 (A liberar)' in cg, cg)
         shot('fluxo_fim')
@@ -168,8 +170,12 @@ try:
               'Em processo 1.800 kg' in bl and 'apurada no Concluir' in bl and 'acima da faixa' not in bl, bl)
         setv('#pf_cx', '180'); setv('#pf_br', '1808'); J("(()=>{ const b=[...document.querySelectorAll('aside button')].find(x=>N(x.innerText)==='Registrar'); b.click(); b.click(); })()"); time.sleep(.6)
         n = cen("c.ordens['OB-0110'].ben.sai.filter(s=>!s.estorno).length"); nm = cen("c.movs.filter(m=>m.tipo==='consumo').length")
-        t.chk('toque duplo no Registrar (mesma chave): 1 registro novo e 1 MV de consumo', n == 3 and nm == 1, [n, nm, toast()])
-        row('OB-0110'); clk('Concluir execução', 'aside'); clk('Justificar diferença', 'aside'); clk('Perda não identificada', 'aside'); setv('#pf_tj', 'fruta caída na esteira'); clk('Justificar diferença', 'aside'); p = pan()
+        tc = toast(); p = pan()
+        t.chk('toque duplo no Registrar (mesma chave): 1 registro novo e 1 MV de consumo; o aviso do registro fica (sem "Não gravado")', n == 3 and nm == 1 and 'S-04 registrada' in tc and 'não gravado' not in p.lower(), [n, nm, tc, p[:200]])
+        row('OB-0110'); r0 = rev(); J("(()=>{ const b=[...document.querySelectorAll('aside button')].find(x=>N(x.innerText)==='Concluir execução'); b.click(); b.click(); })()"); time.sleep(.6); p = pan(); tc = toast()
+        t.chk('toque duplo em "Concluir execução": grava uma vez e o retorno não vira erro (sem "Não gravado"; o aviso diz em conferência ou "Já feito")',
+              cen("c.ordens['OB-0110'].etapa") == 'Em conferência' and rev() == r0 + 1 and 'não gravado' not in p.lower() and ('em conferência' in tc or 'Já feito' in tc), [tc, p[:300]])
+        clk('Justificar diferença', 'aside'); clk('Perda não identificada', 'aside'); setv('#pf_tj', 'fruta caída na esteira'); clk('Justificar diferença', 'aside'); p = pan()
         t.chk('diferença de 100 kg (0,83 %): Igor recusado "0,83 % > alçada de 0,5 %: decide Ana (gestora)"', '0,83 % > alçada de 0,5 %: decide Ana (gestora)' in p, p[-300:])
         perfil('Ana'); clk('Justificar diferença', 'aside'); p = toast()
         t.chk('Ana (gestora) justifica; a Paula confere depois', 'justificada por Ana (gestora)' in p, p)
@@ -208,7 +214,9 @@ try:
         J("(()=>{ const k=[...document.querySelectorAll('.pr-card')].find(x=>N(x.innerText).indexOf('OB-0112')>=0); k&&k.click(); })()"); time.sleep(.6)
         r2 = rev(); J("(()=>{ const a=[...document.querySelectorAll('aside[role=dialog]')].find(VIS); const b=a&&[...a.querySelectorAll('button')].find(x=>N(x.innerText)==='Retirar L39-119 da ordem'); if(b){ b.click(); b.click(); } })()"); time.sleep(.6)
         st = cen("[c.ordens['OB-0112'].versao, c.ordens['OB-0112'].ben.ent.map(e=>e.lote).join(','), c.ordens['OB-0112'].ben.hist.filter(h=>/Entrada retirada/.test(h.ev)).length]")
-        t.chk('390 px · toque duplo em "Retirar L39-119 da ordem": uma retirada só (v2, uma linha no histórico, revisão +1)', st == ['v2', 'L39-117,L39-118', 1] and rev() == r2 + 1, [st, rev(), r2, toast()])
+        p = pan(); tc = toast()
+        t.chk('390 px · toque duplo em "Retirar L39-119 da ordem": uma retirada só (v2, uma linha no histórico, revisão +1) e o retorno não vira conflito nem erro',
+              st == ['v2', 'L39-117,L39-118', 1] and rev() == r2 + 1 and 'não gravado' not in p.lower() and 'mudou depois' not in p and 'L39-119 sai da ordem' in tc, [st, rev(), r2, tc, p[:300]])
         r3 = rev(); clk('Autorizar rota e liberar', 'aside'); p = pan()
         t.chk('390 px · Autorizar e liberar recusado por 1 causa (540 un livres para 584 un) com atalho de devolução; nada gravado', 'Liberação recusada · 1 causa' in p and '540 un disponíveis para 584 un' in p and rev() == r3, p[-400:])
         shot('celular_fluxo')
