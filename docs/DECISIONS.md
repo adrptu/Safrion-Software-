@@ -86,3 +86,9 @@ Ficam em `docs/adr/`, uma por arquivo, no modelo `0000-modelo.md`. As escolhas j
 | 0002 | Repositório privado com documentação e CI antes do código de produto | Aceita (proprietário, 27/09/2026) |
 | 0005 | Hospedar a HML em southamerica-east1 (São Paulo) | Proposta (revisão do Codex pendente) |
 | 0006 | Ligar o banco da HML só por rede privada (PSA, Direct VPC e conector `PRIVATE`) | Proposta (revisão do Codex pendente) |
+
+## Decisões de design do proprietário
+
+| ID | Decisão | Fonte |
+|---|---|---|
+| DEC-0910-01 | Padronizar o design system para tudo o que existe e o que vier: botões (BOT-01 a BOT-09), seleção que abre detalhe (SEL-01/02), etapa futura neutra (ETP-01), separador, hover verde, retorno visual e dica (VIS-01 a VIS-04), conforme `docs/design-system/README.md`, refinando o PRD cap. 74 | Chat do proprietário, 09/10/2026: "ok, padronize todo esse design system para tudo que temos e faremos" |
