@@ -74,6 +74,10 @@ try{
     out.fil=R1.filter(x=>g2match(x,sp,{f:{alvo:[FN]}},null,{})).map(x=>x.id);
     out.filVazio=R1.filter(x=>g2match(x,sp,{f:{alvo:['(vazio)']}},null,{})).map(x=>x.id);
     out.ops=R1.slice(0,3).map(x=>[x.id,x.dr]);
+    // chips de classe e de orgânicos contam usos, a mesma unidade da lista
+    const V9=agVisUso({agf_cul:String(SJ)});
+    out.u19={cntF:V9.cnt['Fungicida']||0,semCls:V9.semCls,nAll:V9.rows.length,orgN:V9.orgN,
+      nF:agVisUso({agf_cul:String(SJ),agf_cls:'Fungicida'}).rows.length,nOrg:agVisUso({agf_cul:String(SJ),agf_org:true}).rows.length};
   }
 }catch(e){ out.erro=String(e&&e.stack||e); }
 console.log('JSON:'+JSON.stringify(out));
@@ -165,5 +169,8 @@ chk(f'U17 FILTRO "(vazio)" na Praga-alvo = os {len(EV)} usos sem nome comum', id
 ops = O.get('ops') or []
 chk('U18 cada linha de uso abre a ficha do registro com a cultura e o alvo do uso (id = registro@cultura@alvo; dr = agf_op_<id>)',
     len(ops) == 3 and all(len(i.split('@')) == 3 and d == 'agf_op_' + i for i, d in ops), ops)
+u19 = O.get('u19') or {}
+chk(f'U19 com a lista por uso, os chips contam usos (Soja): Fungicida = a lista com o chip, "Todas" = a lista sem chip ({len(E1)}), orgânicos = a lista com "Aprovados para orgânicos"',
+    0 < u19.get('cntF', 0) == u19.get('nF') < u19.get('semCls', 0) == u19.get('nAll') == len(E1) and 0 < u19.get('orgN', 0) == u19.get('nOrg'), u19)
 print(f'\nRESULTADO {len(OK)}/{len(OK) + len(FAIL)}')
 sys.exit(1 if FAIL else 0)

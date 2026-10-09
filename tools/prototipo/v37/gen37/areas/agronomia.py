@@ -1346,7 +1346,7 @@ function agVis(st){ const q=st.agf_q||'', cul=st.agf_cul||'', al=st.agf_alvo||''
   const orgN=pre.filter(i=>okCls(P[i])&&P[i].org==='S').length;
   const semCls=pre.filter(i=>!org||P[i].org==='S').length;
   const nTD=cul!==''?ids.filter(i=>!P[i].culSet.has(Number(cul))).length:0;
-  AGX.vis={ids:ids,cnt:cnt,bio:bio,orgN:orgN,semCls:semCls,nTD:nTD,semUsos:incomp&&!uOk}; AGX.vk=k; return AGX.vis; }
+  AGX.vis={ids:ids,pre:pre,cnt:cnt,bio:bio,orgN:orgN,semCls:semCls,nTD:nTD,semUsos:incomp&&!uOk}; AGX.vk=k; return AGX.vis; }
 // ---------- na fazenda (ao vivo): mesmo ingrediente ativo das fichas da fazenda ----------
 function agFaz(p,c){ const refs=AGX.FK[p.key]||[]; if(!refs.length) return null;
   const nf=agUni([].concat.apply([],refs.map(r=>r.nomes_fazenda)));
@@ -1385,14 +1385,20 @@ function agUsoLeaf(p,c,a){ const k=p.i+'|'+c+'|'+a; let L=AGX.uleaf[k]; if(L) re
   return (AGX.uleaf[k]=L); }
 // usos visíveis: os produtos que passam nos filtros da lista (agVis) × os alvos deles na cultura (e em "Todas as culturas", salvo "só os de");
 // a busca vale palavra a palavra no produto OU na praga-alvo do MESMO uso (cultura, nome científico e nomes comuns)
+// os chips de classe e de orgânicos contam usos (a mesma unidade da lista), com os demais filtros
 function agVisUso(st){ const V=agVis(st), k=AGX.vk; if(AGX.uvk===k&&AGX.uvis) return AGX.uvis;
-  const I=AGX.I, TD=I.todasCulturas, cul=Number(st.agf_cul), al=st.agf_alvo||'', semTD=!!st.agf_semTD;
-  const ws=g2norm(st.agf_q||'').split(/\s+/).filter(Boolean).slice(0,30), ok=new Set(V.ids), por={};
+  const I=AGX.I, TD=I.todasCulturas, cul=Number(st.agf_cul), al=st.agf_alvo||'', semTD=!!st.agf_semTD, cls=st.agf_cls||'', org=!!st.agf_org;
+  const ws=g2norm(st.agf_q||'').split(/\s+/).filter(Boolean).slice(0,30), ok=new Set(V.pre), por={};
   [cul].concat(cul!==TD&&!semTD?[TD]:[]).forEach(c=>agUA(c).forEach((ps,a)=>{ if(al!==''&&a!==Number(al)) return; ps.forEach(i=>{ if(ok.has(i)) (por[i]=por[i]||[]).push([c,a]); }); }));
-  const rows=[]; V.ids.forEach(i=>{ const L=por[i]; if(!L) return; const p=AGX.P[i];
+  const okCls=(p)=>!cls||(cls==='Biológico'?p.bio:p.comp.indexOf(cls)>=0);
+  const rows=[], cnt={}; let bio=0, orgN=0, semCls=0;
+  V.pre.forEach(i=>{ const L=por[i]; if(!L) return; const p=AGX.P[i];
     L.sort((x,y)=>((x[0]===cul?0:1)-(y[0]===cul?0:1))||AGC.compare(agAT(x[1]),agAT(y[1])));
-    L.forEach(x=>{ if(ws.length&&!ws.every(w=>p.hay.indexOf(w)>=0||agUH(x[0],x[1]).indexOf(w)>=0)) return; rows.push(agUsoLeaf(p,x[0],x[1])); }); });
-  AGX.uvis={rows:rows,nCul:rows.filter(r=>r.uc===cul).length}; AGX.uvk=k; return AGX.uvis; }
+    const M=ws.length?L.filter(x=>ws.every(w=>p.hay.indexOf(w)>=0||agUH(x[0],x[1]).indexOf(w)>=0)):L; if(!M.length) return; const n=M.length;
+    if(!org||p.org==='S'){ p.comp.forEach(c=>{ cnt[c]=(cnt[c]||0)+n; }); if(p.bio) bio+=n; semCls+=n; }
+    if(okCls(p)&&p.org==='S') orgN+=n;
+    if(okCls(p)&&(!org||p.org==='S')) M.forEach(x=>rows.push(agUsoLeaf(p,x[0],x[1]))); });
+  AGX.uvis={rows:rows,nCul:rows.filter(r=>r.uc===cul).length,cnt:cnt,bio:bio,orgN:orgN,semCls:semCls}; AGX.uvk=k; return AGX.uvis; }
 // total de usos da cultura (com "Todas as culturas", salvo "só os de"): o "de N usos em <cultura>" da contagem
 function agUsoTot(st){ const TD=AGX.I.todasCulturas, cul=Number(st.agf_cul); let n=0;
   [cul].concat(cul!==TD&&!st.agf_semTD?[TD]:[]).forEach(c=>agUA(c).forEach(ps=>{ n+=ps.length; })); return n; }
@@ -1524,15 +1530,15 @@ function PREVALS(self,v){
   v.aga=agAc(self,'agf_alvo',alItems,al,(x)=>{ agSetF(self,{agf_alvo:x}); },{ph:AGX.uSt==='ok'?('Todos os alvos de '+(cul!==''?I.culturas[Number(cul)][0]:'')+' · digite para buscar'):'Carregando alvos…'});
   const chip=(t,n,on,go,lab)=>({t:t,n:agNf(n),on:String(!!on),go:go,lab:lab,st:AG_QST+(on?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;')});
   // classes principais em chips (contagem com os demais filtros); as outras num seletor compacto
-  const nCls=(k)=>k==='Biológico'?V.bio:(V.cnt[k]||0);
-  v.agf_clsL=[chip('Todas',V.semCls,!cls,()=>agSetF(self,{agf_cls:''}),'Mostrar todas as classes')]
+  const CN=mu?VU:V, nCls=(k)=>k==='Biológico'?CN.bio:(CN.cnt[k]||0);
+  v.agf_clsL=[chip('Todas',CN.semCls,!cls,()=>agSetF(self,{agf_cls:''}),'Mostrar todas as classes')]
     .concat(AG_CLS_PRI.map(k=>chip(k,nCls(k),cls===k,()=>agSetF(self,{agf_cls:cls===k?'':k}),cls===k?'Mostrar todas as classes':'Mostrar só '+k)));
-  const outras=Object.keys(V.cnt).filter(k=>AG_CLS_PRI.indexOf(k)<0).sort((a,b)=>(V.cnt[b]-V.cnt[a])||AGC.compare(a,b)); if(cls&&AG_CLS_PRI.indexOf(cls)<0&&outras.indexOf(cls)<0) outras.push(cls);
+  const outras=Object.keys(CN.cnt).filter(k=>AG_CLS_PRI.indexOf(k)<0).sort((a,b)=>(CN.cnt[b]-CN.cnt[a])||AGC.compare(a,b)); if(cls&&AG_CLS_PRI.indexOf(cls)<0&&outras.indexOf(cls)<0) outras.push(cls);
   const oOn=cls&&AG_CLS_PRI.indexOf(cls)<0; v.agf_temClsO=outras.length>0; v.agf_clsO=oOn?cls:'';
   v.agf_clsOs=[{v:'',t:'Outras classes'}].concat(outras.map(k=>({v:k,t:k+' · '+agNf(nCls(k))})));
   v.agf_setClsO=(e)=>agSetF(self,{agf_cls:e.target.value});
   v.agf_clsOSt=AG_QST+'padding:4px 8px;'+(oOn?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;');
-  const org=!!st.agf_org; v.agf_orgOn=String(org); v.agf_orgN=agNf(V.orgN); v.agf_orgTog=()=>agSetF(self,{agf_org:!org});
+  const org=!!st.agf_org; v.agf_orgOn=String(org); v.agf_orgN=agNf(CN.orgN); v.agf_orgTog=()=>agSetF(self,{agf_org:!org});
   v.agf_orgSt=AG_QST+(org?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;')+'padding:6px 12px;';
   // faixa "Da fazenda" (link antigo #<id da ficha>) e aviso de registro fora do arquivo (#reg-<n>)
   const r=st.agf_ref?AG_REF[st.agf_ref]:null;
