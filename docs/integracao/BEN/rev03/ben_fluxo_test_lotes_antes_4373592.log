@@ -1,0 +1,15 @@
+== lotes · complemento em outro lote: linha própria por lote; estorno e devolução no lote de origem
+OK  L0 · fixture pelo motor das telas (a reprodução do Codex): OB-0113 com 540 caixas do CX26-01 usadas na S-01; 1.000 caixas novas no QA-CX-02 · ['Em execução', 'CX26-01', 540, [0, 1000, 0]]
+FALHOU L1 · Pedir mais caixas (100) sem caixa livre no CX26-01: a REQ-042 nasce no QA-CX-02 e a REQ-041 segue no CX26-01; o aviso diz o porquê e o painel mostra as duas linhas com o lote · [['QA-CX-02', None, None, None], '100 un de Caixa de mamão Formosa 10 kg pedidas para a OB-0113 do QA-CX-02 (o CX26-01 tinha 0 un livres): REQ-041 com 640 un. Rui (almoxarife) ou Paula (almoxarife) entrega no balcão (Estoque › Entregue por O.S.).', 'CAIXAS · REQ-041 Caixa de mamão Formosa 10 kg soli
+RESULTADO: FALHOU 1/2
+Traceback (most recent call last):
+  File "/home/user/sp-proto/tools/prototipo/v37/gen37/ben_fluxo_test.py", line 479, in <module>
+    st = cen("(()=>{ const m=c.movs.filter(x=>x.tipo==='estorno-consumo').slice(-1)[0]||{}; const o=c.movs.find(x=>x.id===m.ref)||{}; return [m.lote, m.req, o.lote, c.reqs['REQ-041'].itens[0].custodia, c.reqs['REQ-042'].itens[0].custodia]; })()")
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-proto/tools/prototipo/v37/gen37/ben_fluxo_test.py", line 83, in cen
+    def cen(expr): return J(f"(()=>{{ const c=CEN()||(window.__cen?window.__cen.cenGet():{{}}); return ({expr}); }})()")   # nada gravado ainda: lê o cenário inicial pelo cenGet
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-proto/tools/prototipo/v37/gen37/cdp.py", line 95, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught

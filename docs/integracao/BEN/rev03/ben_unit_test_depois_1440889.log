@@ -1,0 +1,164 @@
+OK    motor JS (node) executou sem erro
+OK    U01 K27 entrada 0, NaN e 1e999: "Informe a quantidade de entrada" e nenhuma ordem nova
+OK    U02a fruta de campo: só a PACK-FRU v3 é oferecida (a v4 é rascunho)
+OK    U02b criar com a PACK-FRU v4 (Rascunho) é recusado
+OK    U02c outra fruta: "Sem rota aprovada para Laranja · fruta de campo. Dono: Igor"
+OK    U02d grão já tem rota como dado, mas entra no BEN-3 (uma fatia por vez)
+OK    U02e produtos diferentes na mesma ordem são recusados
+OK    U03a K01 tara A 960 × 0,6 = 576 → 9.600 kg; tara B 180 × 0,6 = 108 → 1.800 kg; pela fórmula única (benTara)
+OK    U03b K01 Σ 12.000 kg; diferença 0; recuperação 95,00 %; A 80,00 %; B 15,00 %; descarte 5,00 %
+OK    U04 K19 960 cx e 8 pallets, bruto 10.376: tara 576 + 200 = 776, líquido 9.600; sem o pallet daria 9.800 (10,208333 kg/cx, +2,08 %), dentro do aviso de ±5 % (a R-C04 não pega)
+OK    U05 K03/K06/K07 caixas: ⌈12.000 × 0,95 ÷ 10⌉ = 1.140; ⌈9.270 × 0,95 ÷ 10⌉ = 881; ⌈6.140 × 0,95 ÷ 10⌉ = 584
+OK    U05b semente: OB-0110 com 1.200 un (1.140 sugeridas e confirmadas em 1.200); OB-0112 com 881 (sugestão)
+OK    U06a K02 L39-120 = 2.408 + 2.384 + 2.392 + 2.416; L39-121 = 451,5 + 447 + 448,5 + 453; descarte = 150,5 + 149 + 149,5 + 151
+OK    U06b propriedade (300 casos, semente fixa): Σ genealogia = saída válida em 6 casas, sem tolerância
+OK    U08a K09 +100 kg de A: Σ 12.100 > 12.000 + 12 → recusa com as parcelas; nada gravado (sem MV de caixa)
+OK    U08b K10 A com bruto 10.177: líquido 9.601; diferença −1 kg (−0,01 %); faixa 12 kg → dentro, "ganho aparente"
+OK    U08c a tolerância vale: +11 kg ainda cabe (Σ 12.012 ≤ 12.012); mais 2 kg não (12.014)
+OK    U08d ganho de 50 kg (−0,42 %) passa da faixa de 11,95 kg: selo "Ganho aparente acima da faixa", conferir recusado; Igor justifica "Erro de medição" (50 ≤ 59,75 kg)
+OK    U09a K13 bruto 1.868: líquido 1.760; diferença 40 kg (0,333333 %) > faixa 12 kg; limite do Igor = mín(60; 100) = 60 kg
+OK    U09b fora da faixa: conferir recusado antes; Igor justifica dentro da alçada; depois a Paula confere
+OK    U09c K14 diferença 100 kg (0,83 %): Igor recusado "0,83 % > alçada de 0,5 %: decide Ana (gestora)"; Ana justifica
+OK    U09d K16 teto: 40.000 kg e diferença 150 kg (0,375 %): o % permitiria 200; o teto de 100 kg dispara e a mensagem diz qual
+OK    U10a perda sem ticket: "Sem pesagem não é perda identificada. Justifique a diferença (alçada)."
+OK    U10b perda com ticket por Igor: diferença 0, mas a correção aguarda a gestão (dif₀ 100 kg = 0,83 % > 0,5 %); selo "Corrigido na conferência"
+OK    U10c conferir antes da gestão é recusado; Igor não confirma a própria correção; Ana confirma e a Paula confere
+OK    U11a K11 estornar S-02: em processo 1.800 kg; custódia 60 → 240 un; MV estorno-consumo; S-02 fica riscada (não some)
+OK    U11b relançar B 90 cx (bruto 954 → 900 kg): em processo 900; estornar e relançar 1.908: em processo 0, custódia 60; 4 MV (estorno, consumo, estorno, consumo)
+OK    U11c recusas: registro já estornado; "Outro" sem texto
+OK    U11d K12 estornar S-03 na conferência: diferença 600 kg (5,00 %), conferência derrubada, primária "Justificar diferença"; a ordem continua Em conferência
+OK    U11e na conferência, saída nova só substitui o estornado (sem subst: recusa); relançado: diferença 0, sem alçada (dif₀ = 0), "Conferir balanço" de novo
+OK    U11f K12 o Fechar destina só o descarte relançado (S-04), sem a linha estornada
+OK    U11g recusas por fase: A liberar e Encerradas ("ajuste vinculado com alçada (BEN-7)")
+OK    U12 propriedade (40 casos, semente fixa): lançar X e estornar X devolve diferença, custódia e consumido
+OK    U13a próximo ID da semana 39 na semente: L39-133 (a Colheita já usou até L39-132; a sequência é única)
+OK    U13b saída da OB-0112 vai ao L39-133; o Fechar da OB-0110 cria L39-120 e L39-121 (sem colisão)
+OK    U13c ID de saída estornada não volta: a classe B nova ganha o L39-134
+OK    U13e K28 gerador que olha só os lotes falha: um destino de saída ainda sem lote (L39-140) também conta; o próximo é L39-141
+OK    U13d Fechar com ID que já existe para outra origem é recusado
+OK    U14a mesma chave e mesmo conteúdo: 1 registro, rev +1; a segunda resposta é "Já feito" sem gravar
+OK    U14b mesma chave com outro conteúdo: conflito, nada gravado
+OK    U14c dois quadros abertos na mesma versão: o segundo recebe conflito de versão
+OK    U14d Fechar e Autorizar e liberar repetidos: "Já feito"
+OK    U14e reservar 1.000 e depois 500 para um pedido de 1.000 kg: a segunda é recusada pela falta (0 kg); disponível 8.600
+OK    U15a K21 L39-120 Em inspeção: reserva recusada
+OK    U15b K21 liberado: disponível 9.600, falta 10.000 → sugestão mín = 9.600; 10.000 recusado ("Acima do disponível do L39-120: 9.600 kg.")
+OK    U15c K21 reservado 9.600; falta 400 kg; disponível 0; RS-0002 (a RS-0001 é da soja)
+OK    U15d classe diferente recusada ("Classe B ≠ A do PV-031"); classe vazia no pedido recusada ("Classe não informada")
+OK    U16a K22 bloquear exige motivo; bloqueado: RS-0002 continua Ativa com expedição impedida; PV-031 Em risco; falta 400; disponível 0
+OK    U16b K22 liberar de novo: o impedimento some sem reativar nada; nova reserva recusada (disponível 0)
+OK    U16c K23 reclassificar A → B: físico 9.600 antes e depois; Σ do mamão igual; RS-0002 Ativa com expedição impedida (classe B ≠ A); PV-031 Em risco
+OK    U16d K24 cancelar sem motivo recusado; com motivo: Cancelada, L39-120 disponível 9.600 (classe B), PV-031 falta 10.000, MP de cancelamento
+OK    U17a K20 liberar sem resultado recusado ("Registre o resultado (INSP-92)"); Igor não registra resultado; o "Liberar lote" da Colheita não pula a inspeção
+OK    U17b K20 resultado Conforme e Liberar (Marta): L39-120 Liberado; a OB-0110 continua Encerradas (a decisão não reabre a ordem)
+OK    U17c K25 L26-118 não conforme: Liberar recusado com as três saídas; destinar sem motivo recusado; com motivo: físico 0, Destinado, MP destinação, rastreio fica
+OK    U17e as opções da decisão seguem o resultado: Não conforme sem "Liberar"; Conforme sem "Liberar como classe atingida"
+OK    U17f "Liberar lote" da Colheita: Igor (produção) recusado ("decisão de Ana (agrônoma) ou Marta (qualidade)"); Marta libera e o nome gravado é o do perfil
+OK    U17d "Liberar como classe atingida" (B): grava a classe e o MP de reclassificação sem mudar a massa, e libera
+OK    U18 K29 condição do a13: "Apto" da semente; "Restrito · monitorado" → aviso; "Bloqueado" e "Aguardando teste" → impedimento com o texto literal
+OK    U19a K04 Fechar recusado pela custódia: "Sobra em custódia: Caixa de mamão Formosa 10 kg 60 un. Receba a devolução no Estoque."
+OK    U19b K04 devolução apta de 60 → CX26-01 com 600 un
+OK    U19c K05 L39-120 9.600 kg 960 cx e L39-121 1.800 kg 180 cx Em inspeção; INSP-92 aberta (Marta, prazo 28/09)
+OK    U19d K05 MP: 2 produção, 1 destinação, 4 consumo no processo; L38-115..118 esgotados; descarte destinado com rastreio; disponível 0
+OK    U19e K02 genealogia: L39-120 vem dos 4 lotes (2.408 + 2.384 + 2.392 + 2.416); para frente de L38-118 (saldo 0): L39-120, L39-121 e descarte
+OK    U19f K05 etapas exigidas cumpridas; as não pertinentes dizem por quê
+OK    U19g fixture com etapa exigida pendente (Produto sem classe): Fechar recusado
+OK    U19h Fechar sem conferência recusado; e só em Em conferência
+OK    U20a todo item de requisição: entregue − devolvido = consumido + custódia ≤ solicitado
+OK    U20b REQ-030: solicitado = ins.tot = 1.200, entregue 1.200, consumido 1.140 (960 + 180), custódia 60, a entregar 0
+OK    U20c físico de cada entrada Em processo = o entregue à ordem; Σ 12.000
+OK    U20d Kanban da semente (só ordens de beneficiamento): A liberar 1 · Liberadas 0 · Em execução 1 · Em conferência 0 · Encerradas 0
+OK    U20e Fechar: o físico do mamão muda só pelo que saiu do vendável (descarte e diferença): Σ antes − Σ depois = descarte + perdas + diferença
+OK    U21a K08 liberar a OB-0112 (com a REQ-030 na semente): REQ-041 (maior + 1, piso 41) com 584 un reservadas; CX26-01 disponível 16
+OK    U21b a O.S. segue a mesma sequência: osc_reqId → REQ-042
+OK    U21c BEN-REV-05 0 caixa na PACK-FRU v3: "Caixas: ao menos 1 un. O Produto da PACK-FRU v3 sai em caixa (sugestão 2292)." e nenhuma ordem nova
+OK    U21d ordem sem material libera sem abrir requisição e sem prometer entrega de caixa; todo ID de REQ casa com /^REQ-\d{3}$/
+OK    U22a todo parâmetro de rota tem fonte "sintético · vN"
+OK    U22b semente sem CPF, CNPJ, e-mail ou telefone
+OK    U22c caixa com massa declarada da fonte única (dados_cad.EMB_PACK): formosa 10 kg, tara 0,6 kg
+OK    U23a K17 saída antes de iniciar recusada; depois da entrega de 584: 585 cx → "Caixas acima da custódia: 584 un, e a REQ-041 já foi toda entregue. Peça mais caixas na ordem"; 500 cx baixam a custódia com MV consumo
+OK    U23b a entrega no balcão fica confirmada ao iniciar (sem "aguardando confirmação no app" para a ordem de processo)
+OK    U23c K18 líquido por caixa fora de ±5 % gera aviso, não trava (900 kg em 80 cx = 11,25 kg/cx, +12,5 %)
+OK    U24 primeira inspeção gerada no cenário limpo: INSP-106
+OK    U25a K06 duas causas juntas, cada uma com dono e atalho: "L39-119 em inspeção (INSP-94) · Marta (qualidade)" e "…: 540 un disponíveis para 881 un · Estoque" (I4: devolução da OB-0110)
+OK    U25b liberar com causas: recusa com as duas e nada gravado; Ana não autoriza (decisão do responsável de produção)
+OK    U25c K07 retirar o L39-119: v2, 6.140 kg, 584 un (sugestão acompanha); ainda recusa 540 de 584 com a I4
+OK    U25d K07 depois da devolução e sem retirar: as duas causas, agora "600 un disponíveis para 881 un", e a saída é conferir a NF 7731 (sem sobra em custódia)
+OK    U25e K08 liberar: 2 eventos (CMD-42: v2, 6.140 kg, 584 un, PACK-FRU v3; CMD-06: REQ-041); L39-117 e L39-118 reservados à ordem; h-linha 2,56; HH 15,35
+OK    U26a lotes da Colheita em processo (L38-132, L39-131, L39-132: pós-colheita do CAR0) aparecem como entrada possível; os do packing já estão em ordem ou em inspeção
+OK    U26b ordem nova do L39-131 (Colheita, Lagoa Grande): OB-0113, PACK-FRU v3 (única aprovada, I1), 2.292 caixas sugeridas; nada reservado antes de liberar
+OK    U26c o lote em processo numa ordem não entra em outra
+OK    U26c2 diferença 120 kg sobre 24.120 kg: Igor recusado pelo teto ("120 kg > alçada de 100 kg (PACK-FRU v3, sintético)"); Ana justifica
+OK    U26d fechar: lote L39-133 (mesmo modelo e sequência da Colheita) Em inspeção na INSP-106; genealogia até a carga da O.S. de colheita (LC- herdado para a avaliação do destino)
+OK    U26d2 BEN-REV-08 a ordem do L39-131 (Lagoa Grande) rodou na linha da rota, no Packing (Santa Rita): o lote embalado fica no l8 e continua da Lagoa Grande
+OK    U26e liberado pela Qualidade: apto no Estoque de produto (prSaldos) e entrada esgotada
+OK    U26f carência herdada pela genealogia (lei): aplicação no Pivô 19 em 05/09 e bula corrigida para 30 dias depois do fechamento → o lote embalado passa a Bloqueado, como o de campo
+OK    U27 Ana não conclui (produção); Igor e Rui não conferem (conferência: Paula)
+OK    U28 reabrir: sem motivo recusado; Ana (sem papel de produção) recusada; Igor reabre → Em execução, conferência e Concluir caem com linha no histórico; repetido "Já feito" sem gravar
+OK    U29 OB-0112 (A liberar) com 0 kg em processo; L39-131 aponta "Abrir ordem de beneficiamento" (#nova=L39-131) e, criada a OB-0113, "na OB-0113 (A liberar)"; faixa "1 a pesar" e "1 a liberar · 3 lotes a beneficiar" → "2 a liberar · 2 lotes a beneficiar"
+OK    U30a BEN-REV-01 L39-119 liberado e na OB-0113: em A liberar (rascunho) a Qualidade ainda decide (Bloquear, Destinar); liberada a ordem, nenhuma decisão e Destinar/Bloquear recusados sem gravar (3.130 kg no físico)
+OK    U30b defesa no Fechar: entrada com 0 kg para 3.130 kg consumidos → "Fechar recusado: o L39-119 tem 0 kg e a OB-0113 consome 3.130 kg…"; segue Em conferência e nenhum lote nasce
+OK    U31a BEN-REV-09 carga nova do mesmo dia não soma no lote que já está numa ordem (A liberar): vira lote novo; o da ordem continua com 6.200 kg
+OK    U31b BEN-REV-02 OB-0113 liberada: estornar a CG-2109 é recusado com o caminho (diferença no balanço, alçada); L39-133 segue com 6.200 kg e a carga Recebida
+OK    U31c em A liberar (rascunho) o estorno passa e a liberação recusa a entrada sem saldo, sem reservar nada
+OK    U32a BEN-REV-03 avaria no Packing: L39-133 em processo pelo local e entrada em inspeção; o próximo passo é "Liberar lote · Marta (qualidade)"; Igor não libera; a ordem é recusada com a causa e o dono
+OK    U32b Marta libera a entrada: segue em processo (fora do vendável, disponível 0) e abre ordem ("Abrir ordem de beneficiamento · Igor")
+OK    U32c a ordem nasce; "Liberar lote" de novo é recusado (já liberado para o beneficiamento)
+OK    U33a BEN-REV-04 600 kg (5 %) no Concluir, reabre, lança a perda e conclui com 0 kg → a correção aguarda Ana ("antes de reabrir"); a Paula não confere antes
+OK    U33b Ana confirma e a Paula confere; Ana fica no histórico
+OK    U33c reaberta e concluída com 50 kg (fora da faixa de 12, dentro da alçada de 60): sem confirmação no Concluir; a perda de 50 na conferência leva a 0 e pede Ana pelo |dif₀| de 600 kg de antes de reabrir
+OK    U34 BEN-REV-08 L39-131 (Lagoa Grande) entra na ordem da Packing linha 1: local Packing (l8, Santa Rita), fazenda Lagoa Grande, e o histórico diz onde
+OK    U35a BEN-REV-09 entrada parcial recusada ("A ordem leva o lote inteiro: L39-131 tem 24.120 kg (informado 1.000 kg)…"); acima do físico, a causa do saldo
+OK    U35b a liberação confere a entrada de novo: "L39-131: 24.120 kg na ordem, 24.020 kg no lote."
+OK    U36a a decisão do lote é da Qualidade ou da agrônoma: Igor e Paula recusados sem gravar; reclassificar sem motivo recusado
+OK    U36b Paula não fecha (produção); justificar com a diferença dentro da faixa é recusado
+OK    U36c lote já numa ordem (L39-117 na OB-0112) não entra em outra; fazendas misturadas recusadas; Iniciar em A liberar recusado; Retirar com a versão velha é conflito, nada gravado
+OK    U36d Concluir sem Produto válido recusado; Produto sem classe e bruto ≤ tara recusados
+OK    U36e correção na conferência sem motivo recusada; resultado "Não conforme" sem observação recusado
+OK    U36f Conferir com a versão que a Paula abriu: o balanço mudou (perda de 5 kg) → conflito, nada gravado; com a versão atual confere; o toque repetido é "Já feito"
+OK    U37 lote reservado para pedido não entra na ordem ("LX-3 reservado para pedido: cancele a reserva antes de beneficiar")
+OK    U38 S4 Liberar lote: o L39-119 (fruta de campo, INSP-94) "tem a inspeção INSP-94"; o L39-120 "é lote do beneficiamento (OB-0110)" e fechar não libera
+OK    U39a L39-132 (12.300 kg): o valor inicial é a necessidade da rota, 1.169 un, mesmo com só 540 livres no Estoque (CX26-01)
+OK    U39b criar sem informar caixas: 1.169 un (sugestão confirmada) e o aviso diz que a liberação fica impedida até o Estoque receber as caixas, com a NF 7731 e quem confere
+OK    U39c impedimento das caixas com quem resolve e a recuperação real (conferir a NF 7731 no Estoque); a liberação é recusada e nada é gravado
+OK    U39d recebida a NF 7731 (1.200 un no CX26-02): sem impedimento; a ordem libera com a necessidade inteira (REQ-041 1.169 un do CX26-02) e o L39-132 preso à ordem
+OK    U39e execução e balanço fecham os 12.300 kg: A 10.000 + B 1.690 + descarte 610, diferença 0, sem justificativa nem perda; custódia 0; Encerradas; L39-132 esgotado
+OK    U39f sem caixa livre a necessidade continua inteira; com a NF já conferida e sem sobra em custódia, a falta (2.292 para 1.200) diz que a compra de caixas é do BEN-2 e que a ordem pode ser cancelada
+OK    U40a 1.169 caixas: liberação recusada; cancelar sem motivo, com o perfil da conferência ou com a versão velha é recusado e nada muda
+OK    U40b Igor cancela com motivo: Canceladas, quem e quando gravados, uma linha no histórico; nada reservado (sem REQ) e o L39-132 sem ordem; o toque repetido é "Já feito" sem gravar
+OK    U40c cancelada: o L39-132 volta aos aptos; sem passo (acao null) com o motivo à vista; nunca "Atrasada"; Recepção não cumprida; a faixa não conta a cancelada
+OK    U40d a ordem nova do L39-132 (OB-0114) vem com a necessidade (1.169 un): impedida até a NF 7731 ser conferida; depois libera
+OK    U40e só em A liberar: OB-0110 (Em execução) e OB-0114 (Liberadas) recusadas ("o cancelamento entra no BEN-6"); a OB-0112 (A liberar) a Ana (gestora) cancela
+OK    U40f CG-2106 estornada com a OB-0113 em A liberar: impedimento "24.120 kg na ordem, 12.180 kg no lote" sem Retirar, e o próximo passo oferece cancelar
+OK    U40g cancelada a ordem, o L39-131 abre outra com o saldo de agora (12.180 kg)
+OK    U41a fruta rendeu mais: com as 1.169 caixas usadas, mais 20 cx de B são recusadas com a saída escrita (Pedir mais caixas na ordem; quem entrega)
+OK    U41b pedir caixas: perfil sem papel, 0, fração e versão antiga recusados sem gravar
+OK    U41c complemento de 20 un: a REQ-041 passa de 1.169 a 1.189 un (reserva no CX26-02, movimento de reserva, linha no histórico); o toque repetido devolve o mesmo recibo sem gravar
+OK    U41d o Estoque entrega as 20 un no balcão (custódia), o Igor embala, e o balanço fecha 12.300 kg (A 11.000 + B 890 + descarte 410) com diferença 0, sem perda nem justificativa; custódia 0 no Fechar
+OK    U41e com 10 un em custódia e 31 livres no CX26-02, pedir 40: saem do CX26-01 (540 livres) na REQ-042, requisição própria da ordem; a REQ-041 continua no CX26-02 com as 10 un e a mensagem diz o porquê
+OK    U41g a entrega das 40 un da REQ-042 baixa o CX26-01 (físico 500, reserva 0) e vira custódia da ordem (10 da REQ-041 + 40 da REQ-042)
+OK    U41h ordem em A liberar: pedir caixas é recusado (as caixas da ordem se ajustam antes de liberar; a reserva nasce na liberação)
+OK    U42a criar com a mesma chave: a 2ª vez é "Já feito" sem gravar e devolve o mesmo número (OB-0113), sem OB-0114
+OK    U43a OB-0110 em execução: próximo passo "Enviar para conferência"; sem papel: "Enviar a OB-0110 para conferência: decisão de Igor"; sem Produto: "antes de enviar para conferência"; histórico "Enviada para conferência"; o Reabrir fala do envio
+OK    U44a liberar (outra aba), iniciar e confirmar correção numa ordem Cancelada: recusa com o motivo e o caminho (nunca "Já feito"); nada gravado
+OK    U45a sem caixa livre no CX26-01 (lote da REQ-041), 100 un saem do QA-CX-02 numa requisição própria (REQ-042, linha por lote); a REQ-041 continua no CX26-01 com o consumo dela; reserva 100 no QA-CX-02
+OK    U45b estorno da S-01 (Pesagem refeita): o estorno-consumo volta ao CX26-01 e à REQ-041 (o lote e a requisição do consumo, ref ao movimento original); a REQ-042 fica intacta
+OK    U45c devolvidas as 540 un da REQ-041: o CX26-01 volta a 540 e o QA-CX-02 continua com 1.000 (reserva 100 da REQ-042); a trilha de cada lote fecha
+OK    U45d caixas misturadas (540 do CX26-01 de volta pelo estorno + 100 do QA-CX-02): 600 cx consomem por lote, a requisição mais antiga primeiro (REQ-041 540 · CX26-01, REQ-042 60 · QA-CX-02), um movimento por lote
+OK    U45e estorno da saída misturada: cada parte volta ao seu lote e à sua requisição (540 → CX26-01 · REQ-041, 60 → QA-CX-02 · REQ-042), com ref ao movimento de cada parte
+OK    U45f o complemento seguinte cabe no QA-CX-02 e soma à REQ-042 (sem REQ nova); com 10 un dela em custódia o Fechar é recusado com a REQ e o lote, e o próximo passo diz o mesmo
+OK    U45g devolvidas as 10 un ao QA-CX-02, o Fechar encerra os 12.300 kg (A 5.400 + B 6.900) com diferença 0, sem perda nem justificativa; CX26-01 0 e QA-CX-02 310 sem reserva; a trilha de cada lote fecha
+OK    U45h complemento em outro lote: o toque repetido devolve o mesmo recibo (sem REQ-043), conteúdo diferente com a mesma chave é conflito; versão vencida e perfil sem papel recusados; nada gravado
+OK    espelho Decimal (ben_massa.py) = JS (BigInt) em 400 casos: tara, caixas, faixa, diferença, alçada e rateio
+OK    nomes de ben.js não são redefinidos em cenario.js
+OK    nomes de ben.js não são redefinidos em producao.js
+OK    nomes de ben.js não são redefinidos em dados_carencia.JS
+OK    nomes de ben.js não são redefinidos em areas/producao.py:CARGA_JS
+OK    nomes de ben.js não são redefinidos em areas/producao.py:COLH_JS
+OK    nomes de ben.js não são redefinidos em areas/producao.py:PROD_JS
+OK    nomes de ben.js não são redefinidos em areas/producao.py:PR_PED_JS
+OK    nomes de ben.js não são redefinidos em areas/producao.py:PR_UI_JS
+OK    nomes de ben.js não são redefinidos em areas/processo_beneficiamento.py:BEN_JS
+OK    ben.js sem "/60", sem 20 kg nem tara literal (a caixa vem do cadastro)
+OK    CD-04: Igor (responsável de produção) e Marta (qualidade) no cadastro, equipe e8; Igor sem homônimo
+RESULTADO: OK 163/163

@@ -1,0 +1,15 @@
+ben_fluxo_test.py:fluxo,erros,celular,revisao rc=0 132s :: RESULTADO: OK 64/64
+ben_fluxo_test.py:roteiro,roteiro390 rc=0 138s :: RESULTADO: OK 34/34
+ben_fluxo_test.py:complemento,lotes,duplo,criada rc=0 94s :: RESULTADO: OK 26/26
+ben_fluxo_test.py:teclado,cancelar,faixa390 rc=0 93s :: RESULTADO: OK 28/28
+tabelas_ben_test.py rc=0 20s :: RESULTADO: OK 12/12
+producao_fluxo_test.py rc=0 250s :: RESULTADO: OK 66/66
+tabelas_est_test.py rc=0 33s :: RESULTADO: 34/34 ok
+links_ocultos_test.py rc=0 1s :: TOTAL 11 · falhas 0
+est_cenario_test.py rc=0 25s :: RESULTADO: 15/15 ok
+cada_cd04_test.py rc=0 16s :: RESULTADO: OK 15/15
+esttest.py rc=0 64s :: RESULTADO: OK
+ap_unico_test.py rc=0 171s :: RESULTADO nav: 23/23
+varredura.py rc=0 366s :: RESULTADO: 141/141 páginas sem erro
+DUP rc=0 235s :: RESULTADO: 141 páginas · 0 com ação repetida · erros 0
+FIM
