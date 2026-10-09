@@ -1,0 +1,13 @@
+{
+  "id": "BEN-REV-20261009-03",
+  "envelope_de": "harness_depois_1440889.json",
+  "raw_sha256": "8e191cc9a50442f2a0c22cdf074c8e81d5c1538d7b69c41754bcecbb208f38ea",
+  "raw_alterado": false,
+  "candidata_executada": "14408893661d8506f49b6df9a562eef98ba459b8",
+  "situacao": "depois da correção BEN-D31",
+  "solicitante": "Claude (autor da correção), como regressão do achado BEN-REV-20261009-03 (comentário 6090699184)",
+  "executor": "Claude, Node local na sessão do autor: ben_unit_test.motor() da candidata + harness_codex.js (run_harness.py), dados sintéticos",
+  "horario_utc": "2026-10-09T23:44:54Z (gravação do arquivo; a execução é desta hora ou pouco anterior)",
+  "gemini": "não participou desta execução",
+  "nota": "Os campos candidate (bbe8417…) e executor (\"solicitado pelo Gemini real\") dentro do raw são literais do harness do Codex, copiado sem mudança; não descrevem esta execução. Ajuste pedido em BEN-REV-20261009-04 (6091321884)."
+}
