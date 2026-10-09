@@ -292,7 +292,7 @@ try:
             J("(()=>{const r=[...document.querySelectorAll('main [role=row]')].find(r=>/Safra 2026\\/27/.test(r.innerText)); [...r.querySelectorAll('button')].find(b=>/^Continuar/.test(b.innerText.trim())).click(); return 1;})()"); time.sleep(.15)
             fe.append(recorte('realce-etapa.png', "document.querySelector('.g2-realce')", 8, 170))
             chk('F2 amostras do design system em docs/design-system/amostras (separador, hover, dica, realce)', all(fe), fe)
-        telas = ['SAF.dc.html', 'OS.dc.html', 'EST.dc.html', 'CD-01.dc.html', 'BO-02.dc.html', 'PA.dc.html']
+        telas = ['OS.dc.html', 'PA.dc.html', 'PM.dc.html', 'AG-01.dc.html', 'AG-01det.dc.html', 'AG-07.dc.html']   # telas do menu (e um detalhe) onde o censo da base achou título de bloco sem linha: o antes/depois mostra a mudança
         bases = [('depois', U)]
         if ANTES:
             p2, srv2 = servir(ANTES); bases.append(('antes', lambda f, p2=p2: f'http://127.0.0.1:{p2}/{f}'))
@@ -303,6 +303,11 @@ try:
                     abre(f, w, h, toque=toque, base=base); time.sleep(.7)
                     c.shot(os.path.join(PROBE, f"{nome}_{f.replace('.dc.html', '')}_{w}.png")); feitas += 1
         chk(f'F1 capturas em _probe/ds/ ({feitas}: {len(telas)} telas × 1440 e 390 px{" × antes/depois" if ANTES else ""})', feitas == len(telas) * 2 * len(bases), feitas)
+        if ANTES:   # a captura "antes" tem de vir de outro _render: idênticas byte a byte = o antes não mostra nada
+            import hashlib
+            md = lambda n: hashlib.md5(open(os.path.join(PROBE, n), 'rb').read()).hexdigest()
+            iguais = [f for f in telas if md(f"antes_{f.replace('.dc.html', '')}_1440.png") == md(f"depois_{f.replace('.dc.html', '')}_1440.png")]
+            chk('F3 antes ≠ depois a 1440 px nas 6 telas (a linha nova aparece na captura)', not iguais, iguais)
     # ======================= E · 390 px com toque =======================
     if 'E' in PARTES:
         abre('SAF.dc.html', 390, 844, toque=True); n0 = nreal()
