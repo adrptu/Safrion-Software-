@@ -635,14 +635,15 @@ function divVals(self,v){ const dv=self.state.dv; v.dv_open=!!dv; if(!dv){ v.dv_
 function semPlano(cs){ return cs.filter(c=>{ const pl=planById(c.v.plano); return !(pl&&pl.cultura===c.v.cult); }); }
 // CAL-01 na etapa 6, 2ª linha do estoque apto: quanto dele outras origens usam antes (safra anterior, reserva de outro destino) ou, sem isso, o reservado
 function notaEst(d,dec){ return (d.liq>0.001&&d.antes>0.001)?[{k:'br'},{k:'mut',t:'usado antes: '+nf(d.antes,dec)}]:(d.res>0.001?[{k:'br'},{k:'mut',t:'res. '+nf(d.res,dec)}]:[]); }
-// solicitações enviadas: as iniciais (D2.sol) + as gravadas no navegador (mesmo registro que a Compra de insumos lê)
+// solicitações enviadas: as iniciais (D2.sol) + as gravadas no navegador (mesmo registro que Compras lê)
 const SOL_KEY='talhao-os-compras-v1';
 function solLer(){ try{ const o=JSON.parse(localStorage.getItem(SOL_KEY)||'null'); return (o&&o.sols)||{}; }catch(e){ return {}; } }
 function solGravar(rec){ try{ const o=JSON.parse(localStorage.getItem(SOL_KEY)||'null')||{v:1,sols:{}}; o.sols=o.sols||{}; o.sols[rec.safra]=rec; localStorage.setItem(SOL_KEY,JSON.stringify(o)); return true; }catch(e){ return false; } }
 function solMap(self){ if(self.state.sol) return self.state.sol; if(!self._sol0) self._sol0=Object.assign({},D2.sol,solLer()); return self._sol0; }
-// andamento gravado pela Compra de insumos (talhao-os-compras-v1 · proc): o planejamento vê em que pé está a compra da mesma solicitação
+// andamento gravado por Compras (talhao-os-compras-v1 · proc): o planejamento vê em que pé está a compra da mesma solicitação
+// SUP §7 (06/10): a situação é a de Compras (estado() em processo_compras), lida daqui; recusa da Direção = nada contratado e a necessidade segue aberta
 function solEstado(saf,sol){ try{ const o=JSON.parse(localStorage.getItem(SOL_KEY)||'null'); const p=o&&o.proc&&o.proc[saf];
-  return (p&&sol&&p.sol===sol.id&&(p.comp||0)===(sol.comp||0)&&p.estado&&p.estado!=='A cotar')?p.estado:''; }catch(e){ return ''; } }
+  const e=(p&&sol&&p.sol===sol.id&&(p.comp||0)===(sol.comp||0)&&p.estado&&p.estado!=='A cotar')?p.estado:''; return e==='Recusada'?'Não contratado · necessidade aberta':e; }catch(e){ return ''; } }
 function solHref(saf,sol){ return 'CMP.dc.html#sol='+encodeURIComponent(sol.id)+'&saf='+encodeURIComponent(saf); }
 function proxSaf(self,r){ if(r.ro) return ['Consultar safra',2];
   const cs=leaves(g2rows(self,GR('g_cult_'+sk(r.id)))); if(!cs.length) return ['Continuar: cadastrar cultivos',2];
@@ -803,7 +804,7 @@ function PREVALS(self,v){ compRend(self,self.state.saf||null);
           p:{grp:[{k:'mut',t:d.grupo}],bruta:q(d.bruta),real:z(d.real),est:q(d.est),antes:z(d.liq>0.001?d.antes:0),res:z((d.liq>0.001&&d.antes>0.001)?0:d.res),rec:q(d.rec),
              tarde:z(((d.liq>0.001||d.rup>0.001)&&d.tarde>0.001)?d.tarde:0),liq:[{k:'b',t:qt(d.liq)}],sit:[sit],sol:sid?[{k:'txt',t:sid}]:[{k:'mut',t:'—'}],
              comp:sit.t==='Complemento'?q(d.liq-sent):[{k:'mut',t:'—'}],preco:[{k:'txt',t:rs(d.preco)+'/'+d.un}]},
-          o:d.memo.map(t=>({t})).concat(sol?[{t:'Ver '+sol.id+' na Compra de insumos',h:solHref(saf,sol)}]:[]) }; dcol(kr,'uso',d.uso);
+          o:d.memo.map(t=>({t})).concat(sol?[{t:'Ver '+sol.id+' em Compras',h:solHref(saf,sol)}]:[]) }; dcol(kr,'uso',d.uso);
         // filtro e busca leem o mesmo texto da célula (com a unidade)
         ['bruta','real','est','antes','res','rec','tarde','liq','comp','preco'].forEach(f=>{ const c=kr.p[f]&&kr.p[f][0]; kr.s[f]=(c&&c.t!=='—')?c.t:''; });
         // falta: quando o estoque acaba (com necessidade líquida ou só ruptura coberta por recebimento); coberta em: o recebimento que cobre a ruptura
@@ -837,8 +838,9 @@ function EXTRAVALS(self,v){
   const cultSp={}; sp.forEach(c=>{ (cultSp[c.v.cult]||(cultSp[c.v.cult]=[])).push(c.id); }); const cuK=Object.keys(cultSp).sort((a,b)=>cultSp[b].length-cultSp[a].length)[0];
   const apIds=cuK?cultSp[cuK]:[]; const apT='Aplicar plano em '+apIds.length+(apIds.length>1?' cultivos':' cultivo')+(Object.keys(cultSp).length>1?' de '+cuK.toLowerCase():'');
   const solA=saf?solMap(self)[saf]:null; const enviado=!!solA;
-  const p6=(enviado&&!v.k6pend)?{t:'Abrir Compra de insumos ›',h:solHref(saf,solA),a:'abrir'}:{t:'Enviar para cotação',fn:()=>enviar(self),a:'comando'};
-  v.sol_link=v.sol_link&&!p6.h;   // "Abrir em Compra de insumos ›" do bloco só quando a primária é enviar (complemento pendente): sem cópia do mesmo link
+  // SUP §7 (06/10): o atalho nomeia a solicitação que abre em Compras (antes "Abrir Compra de insumos ›")
+  const p6=(enviado&&!v.k6pend)?{t:'Abrir '+solA.id+' ›',h:solHref(saf,solA),a:'abrir'}:{t:'Enviar para cotação',fn:()=>enviar(self),a:'comando'};
+  v.sol_link=v.sol_link&&!p6.h;   // "Abrir em Compras ›" do bloco só quando a primária é enviar (complemento pendente): sem cópia do mesmo link
   safAcoes(self,v,{step,saf,ro,cs,sp,apIds,apT,cultSp,temPlano,p6});
   // escolher safra (botão da linha)
   v.pick=(id)=>{ g2etapa(self,{saf:id,step:2,atv:null,rec:null,corr:null,g2toast:'Safra aberta: '+((safRows.find(r=>r.id===id)||{v:{}}).v.nome||'')}); };
@@ -1009,7 +1011,7 @@ function enviar(self){ const saf=self.state.saf; const safObj=g2rows(self,GR('g_
   const EM='23/09/2026 11:05';   // horário do cenário de demonstração (a SOL-2026-07 inicial é de 10:40)
   const base={safra:saf,nome:safObj.v.nome,faz:safObj.v.faz||'Santa Rita',estado:'Enviada · a cotar',por:'Ana (gestora)',
     origem:{t:'Planejar safra · '+safObj.v.nome+' · etapa 6',h:'SAF.dc.html#saf='+encodeURIComponent(saf)+'&etapa=6'},det};
-  const grava=(rec)=>{ const ok=solGravar(rec); return ok?'':' Atenção: este navegador não guarda dados; a Compra de insumos não verá a solicitação.'; };
+  const grava=(rec)=>{ const ok=solGravar(rec); return ok?'':' Atenção: este navegador não guarda dados; Compras não verá a solicitação.'; };
   if(!sol){ const ids={S27SF:'SOL-2027-02',S2627:'SOL-2026-07',LG2627:'SOL-2026-09'}; const usados=Object.values(sols).map(x=>x.id); let id=ids[saf];
     for(let k=10;!id||usados.indexOf(id)>=0;k++) id='SOL-2026-'+k;
     const it={}; itens.forEach(d=>{ it[d.nome]=d.liq; }); const tot=itens.reduce((a,d)=>a+d.valor,0);

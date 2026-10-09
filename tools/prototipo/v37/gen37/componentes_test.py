@@ -84,12 +84,13 @@ try:
         # 5 · rotação com filtro e etapa: O.S. safra escolhida; CMP etapa 2 e foco na etapa atual (faixa completa → compacta)
         abre('OS',768,1024,2,True); c.js("(()=>{const s=document.querySelector('select[aria-label=\"Filtrar por safra\"]'); s.value='2026/27'; s.dispatchEvent(new Event('change',{bubbles:true}));})()"); time.sleep(.4)
         c.aparelho(1024,768,2,True); time.sleep(.4); s1=c.js("document.querySelector('select[aria-label=\"Filtrar por safra\"]').value"); c.aparelho(768,1024,2,True); time.sleep(.3); s2=c.js("document.querySelector('select[aria-label=\"Filtrar por safra\"]').value")
-        abre('CMP',1440,900); c.js(f"[...document.querySelectorAll('main button,main a')].find(b=>{N}(b.innerText)==='Abrir compra').click()"); time.sleep(.5)
+        # SUP (06/10): Compras não tem mais etapas (lista → detalhe na fase); o processo guiado de referência passa a ser o Planejar safra, etapa 2
+        abre('SAF',1440,900); c.goto(f'http://127.0.0.1:{p}/SAF.dc.html#saf=S2627&etapa=2',.7)
         c.js("document.querySelector('[data-acoes] [data-acao=avancar]').focus()"); f1=c.js("[document.activeElement.innerText.replace(/\\s+/g,' ').trim(), (document.querySelector('.etp-itens [aria-current=step]')||{innerText:''}).innerText.replace(/\\s+/g,' ').trim()]")
-        c.aparelho(390,844,3,True); time.sleep(.6); f2=c.js("[document.activeElement.innerText.replace(/\\s+/g,' ').trim(), (document.querySelector('.etp-atual:not([style*=none])')||{innerText:''}).innerText.replace(/\\s+/g,' ').trim()]"); shot('CMP_390_foco_apos_girar')
+        c.aparelho(390,844,3,True); time.sleep(.6); f2=c.js("[document.activeElement.innerText.replace(/\\s+/g,' ').trim(), (document.querySelector('.etp-atual:not([style*=none])')||{innerText:''}).innerText.replace(/\\s+/g,' ').trim()]"); shot('SAF_390_foco_apos_girar')
         c.aparelho(1440,900); time.sleep(.4); f3=c.js("[document.activeElement.innerText.replace(/\\s+/g,' ').trim(), (document.querySelector('.etp-itens [aria-current=step]')||{innerText:''}).innerText.replace(/\\s+/g,' ').trim()]")
-        chk('5 rotação/redimensionamento · safra escolhida na O.S. continua; CMP mantém a etapa 2 e o foco no avanço da área de ações ("Solicitar cotações ›") em 1440 → 390 → 1440, com "Etapa 2 de 6" na faixa compacta (UX-ACAO-UNICA)',
-            s1=='2026/27' and s2=='2026/27' and f1[0].startswith('Solicitar cotações') and f1[1].startswith('2 ') and f2[0].startswith('Solicitar cotações') and f2[1].startswith('Etapa 2 de 6') and f3[0].startswith('Solicitar cotações') and f3[1].startswith('2 '), [s1,s2,f1,f2,f3])
+        chk('5 rotação/redimensionamento · safra escolhida na O.S. continua; o Planejar safra mantém a etapa 2 e o foco no avanço da área de ações em 1440 → 390 → 1440, com "Etapa 2 de 6" na faixa compacta (UX-ACAO-UNICA)',
+            s1=='2026/27' and s2=='2026/27' and f1[0]!='' and f1[1].startswith('2 ') and f2[0]==f1[0] and f2[1].startswith('Etapa 2 de 6') and f3[0]==f1[0] and f3[1].startswith('2 '), [s1,s2,f1,f2,f3])
         # 6 · O.S.: painel da ordem no celular em pé e deitado (largura, fechar e ação alcançáveis)
         res={}
         for tag,w,h,e,t in (MAT[0],MAT[1],MAT[6]):
@@ -205,11 +206,11 @@ try:
         c.call('Emulation.setEmulatedMedia',{'features':[]}); c.goto(f'http://127.0.0.1:{p}/CMP.dc.html',.4); rn=c.js("getComputedStyle(document.querySelector('.menu-lat')).transitionDuration")
         chk('16 menos movimento · com redução pedida a transição do menu cai a ~0 s; sem pedido continua 0,18 s', all(float(x.split(',')[0].rstrip('s'))<0.001 for x in rm) and rn.startswith('0.18'), [rm,rn])
         # 17 · folha de etapas pelo teclado (390 px): Enter abre, Esc fecha com o foco no rótulo; escolher etapa pelo teclado devolve o foco ao rótulo
-        abre('CMP',390,844,3,False); c.js(f"[...document.querySelectorAll('main button,main a')].find(b=>{N}(b.innerText)==='Abrir compra').click()"); time.sleep(.4)
+        abre('SAF',390,844,3,False); c.goto(f'http://127.0.0.1:{p}/SAF.dc.html#saf=S2627&etapa=2',.6)   # SUP: guiado de referência = Planejar safra
         c.js("[...document.querySelectorAll('.etp-chk')].find(x=>x.getClientRects().length).focus()"); c.tecla('Enter','Enter',13,text='\r'); time.sleep(.25)
         f1=c.js("[...document.querySelectorAll('.etp-chk')].find(x=>x.getClientRects().length).checked"); c.tecla('Escape','Escape',27); time.sleep(.25)
         f2=c.js("(()=>{const k=[...document.querySelectorAll('.etp-chk')].find(x=>x.getClientRects().length); return [k.checked, document.activeElement===k];})()")
-        c.tecla('Enter','Enter',13,text='\r'); time.sleep(.25); shot('CMP_390_folha_teclado'); c.tab()
+        c.tecla('Enter','Enter',13,text='\r'); time.sleep(.25); shot('SAF_390_folha_teclado'); c.tab()
         dentro=c.js("!!(document.activeElement&&document.activeElement.closest('.etp-itens'))"); c.tecla('Escape','Escape',27); time.sleep(.25)
         f3=c.js("(()=>{const k=[...document.querySelectorAll('.etp-chk')].find(x=>x.getClientRects().length); return [k.checked, (document.querySelector('.etp-atual:not([style*=none])')||{innerText:''}).innerText.replace(/\\s+/g,' ').trim().slice(0,30), document.querySelectorAll('.etp-itens button,.etp-itens a,.etp-itens [tabindex]').length];})()")
         chk('17 folha de etapas pelo teclado · Enter abre, Esc fecha e o foco fica no rótulo; a lista só informa: o Tab não entra nela, nenhum item é botão/link e a etapa continua a 2 (UX-ACAO-UNICA)', f1 and f2==[False,True] and not dentro and f3[0]==False and f3[1].startswith('Etapa 2 de 6') and f3[2]==0, [f1,f2,dentro,f3])

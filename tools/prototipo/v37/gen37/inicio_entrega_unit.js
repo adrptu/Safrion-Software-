@@ -23,7 +23,8 @@ const fechar = (ha, cons) => mud(A, `return cenFecharTurno(c,${ha},1,${cons ? JS
 let rid = lib0430(); ent(rid, 'Glifosato 480', 320); conf(rid);
 const T1 = 'Iniciar bloqueado: REQ-041 sem entrega · 2,4-D 806 160 L, Óleo mineral 80 L a entregar.', Q1 = 'Rui (almoxarife) entrega no Estoque; Marcos confirma o recebimento no app.';
 let rev0 = st('c.rev'), mv0 = st('c.movs.length'); let e = web('OS-0430'), ea = iniApp('OS-0430'), ew = iniWeb('OS-0430');
-ok('N1 web: entrega parcial bloqueia o início com dono e atalho Entregar no Estoque', JSON.stringify(e) === JSON.stringify([T1, Q1, 'EST.dc.html', 'Entregar no Estoque']), e);
+// SUP §7 (06/10): o atalho abre a requisição no Estoque (#req=), não a seção 1 · antes 'EST.dc.html'
+ok('N1 web: entrega parcial bloqueia o início com dono e atalho Entregar no Estoque (abre a REQ-041)', JSON.stringify(e) === JSON.stringify([T1, Q1, 'EST.dc.html#req=REQ-041', 'Entregar no Estoque']), e);
 ok('N1 web: osc_iniciar recusa com o mesmo texto', ew === T1, ew);
 ok('N1 app: mbIniciar recusa com o texto da web + dono (uma regra, dois canais)', ea === T1 + ' ' + Q1, ea);
 ok('N1 app: cartão pede retirada ("Entrega parcial · REQ-041"), não "Iniciar turno"', JSON.stringify(passo('OS-0430')) === JSON.stringify(['retirar', 'Entrega parcial · REQ-041']), passo('OS-0430'));

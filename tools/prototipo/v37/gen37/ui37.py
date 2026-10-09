@@ -38,7 +38,7 @@ MENU2=[('Mapa','map',[('Mapa','IN-04.dc.html')]),
  ('Agrícola','leaf',[('Consulta Agrofit','AG-07.dc.html'),('Planos agronômicos','PA.dc.html'),('Planejar safra','SAF.dc.html'),('Ordem de Serviço','OS.dc.html'),('Pragas e doenças (MIP/MID)','AG-01.dc.html'),('Irrigação','IR-01.dc.html')]),
  ('Manutenção','wrench',[('Planos de manutenção','PM.dc.html'),('Ativos e disponibilidade','MA-01.dc.html'),('Solicitações e inspeções','MA-02.dc.html'),
    ('Vencimentos e paradas','MA-03.dc.html'),('Ordens de manutenção','MA-04.dc.html'),('Abastecimentos e desempenho','MA-05.dc.html')]),
- ('Suprimentos','cart',[('Compra de insumos','CMP.dc.html'),('Estoque','EST.dc.html')]),
+ ('Suprimentos','cart',[('Compras','CMP.dc.html'),('Estoque','EST.dc.html')]),   # 06/10/2026 (SUP): "Compras" (safra, manutenção e beneficiamento), não "Compra de insumos"
  ('Configurações','grid',[('Assinatura e cobrança','CF-05.dc.html')])]   # 06/10/2026 (PLAT-01): grupo por último; o módulo Configurações usará o mesmo grupo
 MENU_OF={'CA-01det.dc.html':'OS.dc.html','CA-02.dc.html':'OS.dc.html','CA-01x-os0420.dc.html':'OS.dc.html',
  'IR-02.dc.html':'IR-01.dc.html','IR-03.dc.html':'IR-01.dc.html','IR-03det.dc.html':'IR-01.dc.html','IR-04.dc.html':'IR-01.dc.html'}  # detalhes que pertencem a um item do menu
@@ -233,7 +233,7 @@ MACRO = {
     'IN-04.dc.html': dict(faz='filtro'),
     'OS.dc.html': dict(faz='filtro', saf='filtro'),
     'SAF.dc.html': dict(faz='contexto', saf='contexto'),
-    'CMP.dc.html': dict(faz='contexto', saf='contexto'),
+    'CMP.dc.html': dict(faz='contexto'),   # SUP: a safra é Origem e filtro da lista de solicitações (sem "Trocar safra")
     'EST.dc.html': dict(faz='filtro'),
 }
 FAZENDAS = ['Lagoa Grande', 'Santa Rita', 'Boa Vista']
@@ -500,7 +500,9 @@ def secoes_state(names,pre='stp',label='Seções'):
     n=len(names); items=''
     for i,t in enumerate(names,1):
         h=lambda k,i=i: '{{'+f'{pre}{i}_{k}'+'}}'
+        # contador neutro do que espera ação (SUP §2.2; preenchido pela tela em {pre}{i}_cnt): vermelho fica só para impedimento (why)
         items+=(f'<button type="button" onClick="{h("go")}" aria-current="{h("cur")}" style="{h("st")}"><span>{esc(t)}</span>'
+                f'<sc-if value="{h("hasCnt")}" hint-placeholder-val="{{{{false}}}}"><span class="sec-cnt" style="font-size: 11px; font-weight: 700; color: {MUTED};">{h("cnt")}</span></sc-if>'
                 f'<sc-if value="{h("hasWhy")}" hint-placeholder-val="{{{{false}}}}"><span style="font-size: 11px; font-weight: 700; color: {RED};">{h("why")}</span></sc-if></button>')
     abre=''.join(f'<sc-if value="{{{{{pre}{i}_cur === \'true\'}}}}" hint-placeholder-val="{{{{false}}}}">{_etp_abre(i,n,t,secao=True)}</sc-if>' for i,t in enumerate(names,1))
     return _etp_telas(label,n,_etp_lista(abre,items))

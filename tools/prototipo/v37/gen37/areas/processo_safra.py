@@ -248,7 +248,7 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
                 f'<span style="font-size: 12.8px; color: {MUTED};">Atividades que consomem as horas deste recurso em cada mês.</span></div>{g_resd}</sc-if></sc-if>',
                 acao=acoes(rec_ctl),tit_hole=True,desc_hole=True))
     s6=bloco('Demanda de insumos por grupo',H('k6'),g_dem,desc_hole=True,
-                acao=f'<span style="display: inline-flex; align-items: center; gap: 8px;"><sc-if value="{H("sol_link")}" hint-placeholder-val="{F()}"><a href="{H("sol_href")}" style="{_MINI} text-decoration: none;">Abrir em Compra de insumos ›</a></sc-if></span>')
+                acao=f'<span style="display: inline-flex; align-items: center; gap: 8px;"><sc-if value="{H("sol_link")}" hint-placeholder-val="{F()}"><a href="{H("sol_href")}" style="{_MINI} text-decoration: none;">Abrir em Compras ›</a></sc-if></span>')
     corpo=''.join(f'<sc-if value="{H("s"+str(i))}" hint-placeholder-val="{H("true") if i==1 else F()}"><div style="display: flex; flex-direction: column; gap: 14px;">{s}</div></sc-if>'
                   for i,s in enumerate([s1,s2,s3,s4,s5,s6],1)) + E.area_acoes('aa','Ações da etapa')
     # ---------- painel: aplicar plano ----------

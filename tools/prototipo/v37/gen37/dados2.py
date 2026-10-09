@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Mundo de dados dos processos (menu vigente): Planejar safra → Compra de insumos → Estoque; Planos agronômicos; O.S.
+"""Mundo de dados dos processos (menu vigente): Planejar safra → Compras → Estoque; Planos agronômicos; O.S.
 Fonte única: telas geradas e cálculo em JS (SAF) usam estes dados; a demanda calculada aqui (Python) espelha a do JS."""
 import datetime as _dt, json
 HOJE='23/09/2026'

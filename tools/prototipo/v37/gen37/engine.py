@@ -1266,7 +1266,7 @@ def _g2form(gid):
             f'<aside role="dialog" aria-label="{F("title")}" onKeyDown="{F("key")}" style="position: relative; width: 460px; max-width: 100%; height: 100%; overflow-y: auto; background: {SURF}; box-shadow: -12px 0 40px -12px rgba(21,32,26,.35); padding: 22px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px;">'
             f'<div style="display: flex; align-items: flex-start; gap: 10px;"><h2 style="margin: 0; font-family: {DISP}; font-size: 19px; font-weight: 700; letter-spacing: -.02em; flex-grow: 1;">{F("title")}</h2>'
             f'<button type="button" aria-label="Fechar" title="Fechar" onClick="{F("close")}" style="border: 0; background: {BG}; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 18px; color: {MUTED}; flex-shrink: 0;">×</button></div>'
-            f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.45;">{F("sub")}</div>'
+            f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.45; white-space: pre-line;">{F("sub")}</div>'
             f'<sc-if value="{F("hasErr")}" hint-placeholder-val="{{{{false}}}}"><div role="alert" style="padding: 8px 12px; border-radius: 10px; background: {REDS}; color: {RED}; font-size: 12.5px; font-weight: 700;">Corrija os campos destacados; o que você preencheu foi mantido.</div></sc-if>'
             f'<sc-for list="{F("fields")}" as="f" hint-placeholder-count="3"><div style="display: flex; flex-direction: column; gap: 4px;">'
             f'<label for="{_h("f.fid")}" style="font-size: 12px; font-weight: 600; color: {MUTED};">{_h("f.l")}</label><div style="display: flex; align-items: center; gap: 8px;">'
@@ -1283,7 +1283,7 @@ def _g2form(gid):
             f'<div style="flex-grow: 1;"></div>'
             f'<sc-if value="{F("warn")}" hint-placeholder-val="{{{{false}}}}"><div role="alert" class="saida" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 12.5px; font-weight: 700;">Há alterações não salvas.<div style="display: flex; gap: 8px;"><button type="button" onClick="{F("discard")}" style="{_MINI}">Descartar alterações</button><button type="button" onClick="{F("keep")}" style="{_MINIP}">Continuar editando</button></div></div></sc-if>'
             f'<div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};">'
-            f'<sc-if value="{F("edit")}" hint-placeholder-val="{{{{true}}}}"><button type="button" onClick="{F("cancel")}" style="{BTN_ST(False,True)}">Cancelar</button><button type="button" onClick="{F("save")}" style="{BTN_ST(True,True)}">Salvar</button></sc-if>'
+            f'<sc-if value="{F("edit")}" hint-placeholder-val="{{{{true}}}}"><button type="button" onClick="{F("cancel")}" style="{BTN_ST(False,True)}">Cancelar</button><button type="button" onClick="{F("save")}" style="{BTN_ST(True,True)}">{F("savel")}</button></sc-if>'
             f'<sc-if value="{F("ro")}" hint-placeholder-val="{{{{false}}}}"><button type="button" onClick="{F("discard")}" style="{BTN_ST(False,True)}">Fechar</button></sc-if></div>'
             f'</aside></div></sc-if>')
 # ---------- partes de célula (API para telas novas) ----------

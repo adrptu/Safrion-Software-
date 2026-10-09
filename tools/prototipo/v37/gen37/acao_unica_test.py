@@ -141,12 +141,15 @@ try:
         ERRL.extend(errs()); chk('9 sem erro de JS (SAF)', not ERRL, ERRL[:5])
     elif MODO=='familias':
         fam={}
-        # 10 · CMP: etapa 2 avanço único; 3 antes do envio só o comando; avançar até 6 não aprova
-        abre('CMP'); clk('Abrir compra'); a2=est(); etapa(3); a3=est(); clk('Enviar convites (simulado)'); time.sleep(6.8); etapa(4); etapa(5); a5=est(); shot('cmp_etapa5')
-        acao('avancar',.6); a6=est(); b=J("document.body.innerText")
-        chk('10 CMP · etapa 2: "Solicitar cotações ›" único; etapa 3 antes do envio: só o comando "Enviar convites (simulado)" com a causa; etapa 5: comando "Enviar à Direção" + avanço secundário; ir à etapa 6 não aprova (sem "Compra aprovada", sem PC-101)',
-            a2['prims']==['Solicitar cotações ›'] and a2['avancos']==1 and a3['prims']==['Enviar convites (simulado)'] and a3['avancos']==0 and a5['prims']==['Enviar à Direção'] and a5['avancos']==1 and a6['etapa']==6 and 'Compra aprovada' not in b and 'PC-101' not in b,
-            [a2,a3,a5,a6['etapa']])
+        # 10 · CMP (SUP §5, 06/10: lista → detalhe na fase; eram 6 etapas): na lista nenhuma primária; no detalhe "A cotar" só o comando de envio;
+        #      na fase Decida acima da alçada só "Enviar à Direção"; ir a Acompanhe pedidos e voltar não aprova
+        abre('CMP'); a1=est(); J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>/SOL-2026-07/.test(r.innerText)); r&&(r.querySelector('[role=cell] b')||r.querySelector('[role=cell] span')).click();})()"); time.sleep(.5)
+        a3=est(); acao('comando',.6); time.sleep(6.8); a5=est(); shot('cmp_decida')
+        clk('Acompanhe pedidos','nav[aria-label="Seções de compras"]'); clk('Atenda solicitações','nav[aria-label="Seções de compras"]'); b=J("document.body.innerText")
+        ap=J("(()=>{ try{ const o=JSON.parse(localStorage.getItem('talhao-os-compras-v1')||'null')||{}; return ((o.proc||{}).S2627||{}).aprov||null; }catch(e){ return 'erro'; } })()")
+        chk('10 CMP · lista sem primária; detalhe "A cotar": só o comando "Enviar 15 convites (simulado)", sem avanço; Decida acima da alçada: só "Enviar à Direção · R$ …"; ir a Acompanhe pedidos e voltar não aprova',
+            a1['prims']==[] and a3['prims']==['Enviar 15 convites (simulado)'] and a3['avancos']==0 and len(a5['prims'])==1 and a5['prims'][0].startswith('Enviar à Direção · R$') and a5['avancos']==0 and not ap and 'PC-101' not in b,
+            [a1,a3,a5,ap])
         # 11 · PA: Novo plano secundário; etapa 2: Incluir atividade secundário, banner sem "Revisar e publicar", avanço na área; etapa 3 sem rascunho: nada a publicar
         abre('PA'); p1=est(); novo=J(f"(()=>{{const b=[...document.querySelectorAll('main button')].find(b=>{N}(b.innerText)==='Novo plano'); return b?getComputedStyle(b).backgroundColor:null;}})()")
         J("document.querySelector('main .g2card').click()"); time.sleep(.5); p2=est(); inc=J(f"[...document.querySelectorAll('main button')].filter(b=>b.getClientRects().length&&{N}(b.innerText)==='Incluir atividade').map(b=>getComputedStyle(b).backgroundColor)")
@@ -162,8 +165,9 @@ try:
         # 13 · EST: trabalho paralelo → seções (navegação em qualquer ordem), sem número de etapa e sem setas; seção sem trabalho não ganha "ir para a próxima"
         abre('EST'); s0=J(r"""(()=>{const n=document.querySelector('nav[aria-label="Seções do estoque"]'); const bs=n?[...n.querySelectorAll('.etp-itens>button')]:[]; return {n:bs.length, nums:bs.filter(b=>/^\d/.test(b.innerText.trim())).length, cur:(n&&n.querySelector('[aria-current=true]')||{innerText:''}).innerText.trim(), setas:document.querySelectorAll('[aria-label^="Etapa anterior"],[aria-label^="Próxima etapa"]').length, ind:!!document.querySelector('.etp-ind')};})()""")
         clk('Faça contagens','nav[aria-label="Seções do estoque"]'); s5=est(); clk('Confira saldos','nav[aria-label="Seções do estoque"]'); s4=est(); cur4=J("(document.querySelector('nav.etp-sec [aria-current=true]')||{innerText:''}).innerText.trim()"); shot('est_secoes')
-        chk('13 EST · "Seções do estoque": 6 seções sem número e sem setas, atual com aria-current; ir direto a Contagens e a Saldos; Saldos (consulta) sem primária de navegação',
-            s0['n']==6 and s0['nums']==0 and s0['setas']==0 and not s0['ind'] and s0['cur']=='Confira recebimentos' and len(s5['prims'])<=1 and s4['prims']==[] and cur4=='Confira saldos', [s0,s5,s4,cur4])
+        # SUP §2 (06/10): 4 seções (eram 6); Ana (gestora) abre em Receba e inspecione (laudo pendente); o contador neutro vem junto do nome
+        chk('13 EST · "Seções do estoque": 4 seções sem número e sem setas, atual com aria-current; ir direto a Contagens e a Saldos; Saldos (consulta) sem primária de navegação',
+            s0['n']==4 and s0['nums']==0 and s0['setas']==0 and not s0['ind'] and s0['cur'].startswith('Receba e inspecione') and len(s5['prims'])<=1 and s4['prims']==[] and cur4.startswith('Confira saldos'), [s0,s5,s4,cur4])
         # 14 · IR e MA: telas irmãs (navegação, aria-current=page), sem setas e sem número; pendência escrita
         tel={}
         for pg,lab,n in (('IR-02','Telas da irrigação',4),('MA-03','Telas da manutenção',5)):
@@ -224,15 +228,15 @@ try:
           const t=document.querySelector('[role=status]'); const rt=t?t.getBoundingClientRect():null; out.toastSobre=!!(rt&&rt.height>2&&out.pos==='sticky'&&rt.bottom>a.getBoundingClientRect().top+1&&rt.top<a.getBoundingClientRect().bottom); return out;})()"""
         res={}; ruins={}
         for tag,w,h,e,t in MAT:
-            for pg,hs,alvo in (('SAF','#saf=S2627&etapa=6',6),('CMP','#saf=S2627',3)):
+            # SUP §5 (06/10): CMP #saf=S2627 abre o detalhe da SOL-2026-07 (fase Cote), sem faixa de etapas: "Etapa i de n" só vale para o SAF
+            for pg,hs,alvo in (('SAF','#saf=S2627&etapa=6',6),('CMP','#saf=S2627',0)):
                 abre(pg,w,h,e,t,hash=hs,espera=.6,limpa=(tag=='360x800'));
-                if pg=='CMP': etapa(alvo)
                 time.sleep(.2); m=J(AREA); res[f'{pg} {tag}']=m
-                ruim=m.get('semArea') or not m['alcanca'] or m['cobreUltima'] or m['focoCoberto'] or m['lado'] or m['avancos']>1 or m['toastSobre'] or (w<=800 and not m['etapa'].startswith('Etapa '))
+                ruim=m.get('semArea') or not m['alcanca'] or m['cobreUltima'] or m['focoCoberto'] or m['lado'] or m['avancos']>1 or m['toastSobre'] or (w<=800 and pg=='SAF' and not m['etapa'].startswith('Etapa '))
                 if ruim: ruins[f'{pg} {tag}']=m
                 if tag in ('360x800','800x360','zoom200'): shot(f'{pg.lower()}_{tag}')
         info('área de ações por dimensão',{k:(v.get('pos'),v.get('cmd'),v.get('etapa','')[:22]) for k,v in res.items()})
-        chk('17 matriz RESPONSIVIDADE (7 dimensões × SAF etapa 6 e CMP etapa 3) · área de ações alcançável, não cobre a última linha nem o foco nem o aviso, sem rolagem lateral, um avanço; no estreito "Etapa i de n"', not ruins, ruins)
+        chk('17 matriz RESPONSIVIDADE (7 dimensões × SAF etapa 6 e CMP detalhe Cote) · área de ações alcançável, não cobre a última linha nem o foco nem o aviso, sem rolagem lateral, um avanço; no estreito "Etapa i de n"', not ruins, ruins)
         # 18 · teclado virtual aberto (360×800 → 360×420, janela redimensionada pelo teclado): campo focado e comando alcançáveis
         abre('SAF',360,800,3,True,hash='#saf=S2627&etapa=2'); J("(()=>{const i=document.querySelector('main input[type=search]'); i.scrollIntoView({block:'center'}); i.focus();})()")
         c.aparelho(360,420,3,True); time.sleep(.5)

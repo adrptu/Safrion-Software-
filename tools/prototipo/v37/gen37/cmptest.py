@@ -1,204 +1,142 @@
 # -*- coding: utf-8 -*-
-"""Teste CDP do processo Compra de insumos (CMP.dc.html) com a SOL-2026-07: safra → demanda → convites → propostas → aprovação → pedidos.
-Uso: python3 cmptest.py [rapido]   (rapido = só o caminho da Direção)"""
-import sys, os, time, subprocess, json
-sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
-from cdp import Chrome
-from journeys import free
-R=os.path.join(os.path.dirname(os.path.abspath(__file__)),'_render'); p=free()
-srv=subprocess.Popen(['python3','-m','http.server',str(p),'--bind','127.0.0.1','--directory',R],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL); time.sleep(0.8)
-c=None; FAL=[]
-CLK="""((t,root)=>{const r=root?document.querySelector(root):document; if(!r) return 'SEM RAIZ'; const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...r.querySelectorAll('button,a')]; const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok';})"""
-SETV="""((sel,val)=>{const i=document.querySelector(sel); if(!i) return 'sem campo '+sel; const P=i.tagName==='SELECT'?HTMLSelectElement.prototype:(i.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:HTMLInputElement.prototype); Object.getOwnPropertyDescriptor(P,'value').set.call(i,val); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true})); return 'ok';})"""
-ROWCLK="""((t)=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.replace(/\\s+/g,' ').indexOf(t)>=0); if(!r) return 'sem linha '+t; const s=r.querySelector('[role=cell] b')||r.querySelector('[role=cell] span'); s.click(); return 'ok';})"""
-# linha-filha t dentro do grupo g (árvore): devolve o texto ou clica
-KID="""((g,t,click)=>{const rows=[...document.querySelectorAll('[role=row].g2r')]; const i=rows.findIndex(r=>!r.classList.contains('g2kid')&&r.innerText.replace(/\\s+/g,' ').replace(/^[\\s▾▸]+/,'').startsWith(g)); if(i<0) return 'sem grupo '+g;
-  for(let k=i+1;k<rows.length&&rows[k].classList.contains('g2kid');k++){ const x=rows[k]; if(x.innerText.replace(/\\s+/g,' ').indexOf(t)>=0){ if(click){ (x.querySelector('[role=cell] b')||x.querySelector('[role=cell] span')).click(); return 'ok'; } return x.innerText.replace(/\\s+/g,' '); } } return 'sem linha '+t;})"""
-def chk(nome,cond,extra=''):
-    print(('OK   ' if cond else 'FALHA')+' · '+nome+(' · '+str(extra) if extra!='' else ''));
+"""Teste CDP de Compras (CMP.dc.html) com a SOL-2026-07, na forma do SUP (docs/suprimentos-simplificado §5 e §9.3): lista de solicitações →
+detalhe na fase (Cote → Decida) → Direção → Acompanhe pedidos. A forma mudou (eram 6 etapas numeradas); ficam as regras: só homologado
+recebe convite, canal só entre os autorizados, justificativa da escolha que não é a de menor custo a tempo, quantidade até a necessidade,
+convite adicional sem duplicar, sig (mudar depois do envio invalida), navegar não aprova, aprovar não duplica pedido, reprogramar com motivo.
+Uso: python3 cmptest.py"""
+import sys, os, time, json
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from est_lib import Est
+
+a = Est(copiar=False); J = a.J; FAL = []; NOK = [0]
+
+
+def chk(nome, cond, extra=''):
+    print(('OK   ' if cond else 'FALHA') + ' · ' + nome + (' · ' + str(extra)[:300] if extra != '' and not cond else ''))
     if not cond: FAL.append(nome)
+    else: NOK[0] += 1
+
+
+def ir(h='', wait=1.4):
+    a.c.goto('about:blank', wait=.1)   # recarrega sempre: o mesmo endereço duas vezes não dispara hashchange
+    a.c.goto(f'http://127.0.0.1:{a.p}/CMP.dc.html{h}', wait=wait)
+    J("window.__errs=window.__errs||[]; if(!window.__ouve){ window.__ouve=1; window.addEventListener('error',e=>window.__errs.push(e.message)); }"); time.sleep(.3)
+
+
+T = a.toast
+body = lambda: J("document.body.innerText")
+prim = lambda: J("(()=>{const b=[...document.querySelectorAll('.acoes-prim')].find(b=>b.offsetParent); return b?b.innerText.trim():'';})()")
+faixa = lambda: J("(document.querySelector('[aria-label=\"Situação da solicitação\"]')||{innerText:''}).innerText.replace(/\\s+/g,' ')")
+reg = lambda: J("(()=>{ try{ return JSON.parse(localStorage.getItem('talhao-os-compras-v1')||'null')||{}; }catch(e){ return {}; } })()") or {}
+aprov = lambda: ((reg().get('proc') or {}).get('S2627') or {}).get('aprov') or {}
+opts = lambda k: J(f"[...document.querySelectorAll('[id$=_{k}] option')].map(o=>o.value)")
+fid = lambda k: J(f"(document.querySelector('[id$=_{k}]')||{{id:''}}).id")
+sub = lambda: a.aside()
+
+
+def clk_prim():
+    r = J("(()=>{const b=[...document.querySelectorAll('.acoes-prim')].find(b=>b.offsetParent); if(!b) return 'sem primária'; b.click(); return 'ok';})()"); time.sleep(.6); return r
+
+
+def kid(g, t, click=False):
+    """Linha-filha t no grupo g da grade de convites (Grupo › fornecedor) visível: texto ou clique."""
+    r = J(f"""(()=>{{const tb=[...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent).find(t=>/^Grupo › fornecedor/i.test(((t.querySelector('[role=columnheader]')||{{}}).innerText||'').trim()))||document; const rows=[...tb.querySelectorAll('[role=row]')].filter(r=>r.offsetParent); const i=rows.findIndex(r=>!r.classList.contains('g2kid')&&r.innerText.replace(/\\s+/g,' ').replace(/^[\\s▾▸]+/,'').startsWith({json.dumps(g)})); if(i<0) return 'sem grupo';
+      for(let k=i+1;k<rows.length&&rows[k].classList.contains('g2kid');k++){{ const x=rows[k]; if(x.innerText.indexOf({json.dumps(t)})>=0){{ if({json.dumps(click)}){{ (x.querySelector('[role=cell] b')||x.querySelector('[role=cell] span')).click(); return 'ok'; }} return x.innerText.replace(/\\s+/g,' '); }} }} return 'sem linha'; }})()""")
+    if click: time.sleep(.4)
+    return r
+
+
+def expandir():
+    J("(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.offsetParent&&/^Expandir tudo/.test(b.innerText.trim())); if(b) b.click();})()"); time.sleep(.3)
+
+
+def esperar(t=12):
+    for _ in range(int(t / .5)):
+        if 'Em cotação' not in faixa(): break
+        time.sleep(.5)
+    time.sleep(.4)
+
+
+def env_n():
+    return len((((reg().get('proc') or {}).get('S2627') or {}).get('env') or {}).get('conv') or [])
+
+
 try:
-    c=Chrome(port=free()); J=c.js
-    # ouvinte de erros instalado antes de cada documento (window.__err não existe sem ele)
-    c.call('Page.addScriptToEvaluateOnNewDocument',{'source':"window.__err=[];addEventListener('error',e=>window.__err.push(String(e.message)));addEventListener('unhandledrejection',e=>window.__err.push(String(e.reason)));"})
-    T=lambda: J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')")
-    def clk(t,root=None,w=.45): r=J(f"({CLK})({json.dumps(t)},{json.dumps(root)})"); time.sleep(w); return r
-    from comp_lib import IR_ETAPA
-    def ir_etapa(n): r=J(f"({IR_ETAPA})({n})"); time.sleep(.45); return r   # a faixa só informa: anda pela área de ações
-    def setv(sel,val): r=J(f"({SETV})({json.dumps(sel)},{json.dumps(val)})"); time.sleep(.25); return r
-    def row(t): r=J(f"({ROWCLK})({json.dumps(t)})"); time.sleep(.4); return r
-    def kid(g,t,click=False): r=J(f"({KID})({json.dumps(g)},{json.dumps(t)},{json.dumps(click)})"); time.sleep(.4 if click else 0); return r
-    def rowtxt(t): return J(f"(()=>{{const r=[...document.querySelectorAll('[role=row]')].find(r=>r.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(t)})>=0); return r?r.innerText.replace(/\\s+/g,' '):'sem linha';}})()")
-    def after(t,u): return J(f"(()=>{{const rows=[...document.querySelectorAll('[role=row]')]; const i=rows.findIndex(r=>r.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(t)})>=0); const k=rows.slice(i+1).find(r=>r.innerText.indexOf({json.dumps(u)})>=0); return k?k.innerText.replace(/\\s+/g,' '):'sem linha';}})()")
-    opts=lambda k: J(f"[...document.querySelectorAll('[id$=_{k}] option')].map(o=>o.value)")
-    sub=lambda: J("(()=>{const a=document.querySelector('aside[role=dialog]'); if(!a) return ''; const d=a.querySelector('h2').parentElement.nextElementSibling; return d?d.innerText:'';})()")
-    body=lambda: J("document.body.innerText")
-    cur=lambda: J("(document.querySelector('[aria-current=step]')||{innerText:''}).innerText.replace(/\\s+/g,' ')")
-    aside=lambda: J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText")
-    def fid(k): return J(f"(document.querySelector('[id$=_{k}]')||{{id:''}}).id")
-    c.size(1440,1000); c.goto(f'http://127.0.0.1:{p}/CMP.dc.html'); time.sleep(.6)
-    chk('sem erro JS', J("(window.__err&&window.__err.length)?window.__err:'nenhum'")=='nenhum', J("window.__err||''"))
-    chk('abre na etapa 1', cur().startswith('1 Escolha a safra'), cur())
-    chk('nenhuma safra escolhida sozinha', 'Nenhuma safra escolhida' in body())
-    chk('impedimentos visíveis', J("[...document.querySelectorAll('.etp-ind .etp-itens>li')].filter(b=>/Escolha a safra/.test(b.innerText)).length")>=5)
-    b=body(); chk('Safrinha sem solicitação', 'Solicitação ainda não enviada pelo planejamento' in b)
-    chk('link Ver origem para SAF (etapa 6 da Safra 2026/27)', J("[...document.querySelectorAll('a')].some(a=>a.innerText.trim()==='Ver origem'&&a.getAttribute('href')==='SAF.dc.html#saf=S2627&etapa=6')"))
-    chk('link Planejar safra na Safrinha (etapa 6 da Safrinha)', J("[...document.querySelectorAll('a')].some(a=>/Abrir Planejar safra/.test(a.innerText)&&a.getAttribute('href')==='SAF.dc.html#saf=S27SF&etapa=6')"))
-    print('  etapa 4 sem safra:', ir_etapa(4), T()); chk('etapa bloqueada sem safra', cur().startswith('1 '))
-    # Safrinha: fica na etapa 1, etapas impedidas
-    row('Safrinha 2027'); chk('Safrinha selecionada fica na etapa 1', cur().startswith('1 ') and 'Sem solicitação' in J("document.querySelector('.etp-ind').innerText"), T())
-    # 2025/26 consulta
-    clk('Consultar pedidos'); chk('2025/26 abre pedidos em consulta', cur().startswith('6 ') and 'PC-061' in body() and 'Entregue' in body(), cur())
-    clk('Trocar safra')
-    # Safra 2026/27
-    print('  abrir compra:', clk('Abrir compra'), T())
-    chk('etapa 2 · demanda', cur().startswith('2 Confira a demanda'))
-    b=body(); chk('SOL-2026-07 e total igual ao Planejar safra', 'SOL-2026-07' in b and 'R$ 379.580,00' in b and '379.580,00' in J("[...document.querySelectorAll('.g2tot')].map(x=>x.innerText).join(' ')"))
-    clk('Expandir tudo'); b=body()
-    chk('MAP 11-52 62.500 e KCl coberto com quarentena', '62.500' in b and 'em quarentena não contam' in b)
-    row('MAP 11-52'); a=aside(); chk('origem do insumo abre (consulta)', 'T1-A' in a and 'Ver no Planejar safra' in a, a[:80]); clk('Fechar','aside[role=dialog]')
-    # compras-estoque-01 · etapa 2: falta a partir de (demanda datada × estoque apto + pedidos previstos)
-    chk('coluna Falta a partir de', 'falta a partir de' in body().lower())
-    t=rowtxt('2,4-D 806'); chk('2,4-D falta a partir de 28/09/2026', '28/09/2026' in t, t)
-    t=rowtxt('Nitrato de cálcio'); chk('Nitrato de cálcio falta a partir de 01/10/2026', '01/10/2026' in t, t)
-    t=rowtxt('KCl 60%'); chk('KCl coberto mostra —', '—' in t and '/20' not in t, t)
-    t=rowtxt('Semente de soja 58 W'); chk('58 W coberto (PC-090 chega antes) mostra —', '—' in t and '/20' not in t, t)
-    row('2,4-D 806'); a=aside(); chk('origem com data no início da linha', '25/09/2026 · T1-A · Dessecação' in a and '28/09/2026 · T2 · Dessecação' in a, a[:300]); clk('Fechar','aside[role=dialog]')
-    # etapa 3
-    clk('Solicitar cotações'); chk('etapa 3', cur().startswith('3 '))
-    b=body(); chk('Química Centro-Oeste desabilitada com motivo', 'Não homologado' in b and 'documentação fiscal pendente' in b)
-    chk('link homologar CD-05', J("[...document.querySelectorAll('a')].some(a=>a.getAttribute('href')==='CD-05.dc.html')"))
-    row('Química Centro-Oeste'); chk('não homologado não abre edição', not J("!!document.querySelector('aside[role=dialog]')") and 'não é homologado' in T(), T())
-    time.sleep(.2)
-    # compras-estoque-06 · canal só entre os autorizados; destinatário e escopo no subtítulo
-    print('  convite Casa do Adubo (Fertilizantes):', kid('Fertilizantes','Casa do Adubo',True))
-    o=opts('canal'); s=sub(); print('  canais:', o, '| sub:', s[:200])
-    chk('Casa do Adubo só com E-mail autorizado', o==['E-mail'], o)
-    chk('subtítulo mostra destinatário e itens do convite', 'Destinatário: e-mail vendas@casadoadubo.com.br' in s and 'Itens do convite (Fertilizantes)' in s and 'MAP 11-52 · 62.500 kg' in s and 'simulado' in s, s)
-    chk('ajuda explica o canal único', 'único canal autorizado' in aside(), aside()[:300])
-    clk('Cancelar','aside[role=dialog]')
-    print('  editar convite Coop. Vale (Fertilizantes):', row('Coop. Vale'))
-    chk('form do convite abre pela linha', 'Convite' in aside(), aside()[:60])
-    chk('Coop. Vale tem E-mail e WhatsApp autorizados', opts('canal')==['E-mail','WhatsApp'], opts('canal'))
-    setv('#'+fid('canal'),'WhatsApp'); chk('destinatário acompanha o canal escolhido', 'Destinatário: WhatsApp 65 99466-7788' in sub(), sub()[:120])
-    setv('#'+fid('prazo'),'29/09/2026'); clk('Salvar','aside[role=dialog]')
-    chk('convite salvo', 'WhatsApp' in body() and 'Convite atualizado' in T(), T())
-    J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>/Fertisul/.test(r.innerText)); r.focus(); r.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));})()"); time.sleep(.4)
-    chk('teclado (Enter) abre o convite', 'Convite · Fertisul' in aside(), aside()[:40]); clk('Cancelar','aside[role=dialog]')
-    J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>/Fertilizantes/.test(r.innerText)); r.querySelector('[role=cell] b').click();})()"); time.sleep(.4)
-    chk('linha de grupo recolhe (não edita)', not J("!!document.querySelector('aside[role=dialog]')") and 'cotacoes@fertisul' not in body())
-    J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>/Fertilizantes/.test(r.innerText)); r.querySelector('[role=cell] b').click();})()"); time.sleep(.4)
-    print('  enviar:', clk('Enviar convites (simulado)'), T())
-    chk('aviso simulado', 'nenhuma mensagem real foi enviada' in T())
-    time.sleep(6.5)
-    b=body(); chk('respostas chegaram', 'Proposta recebida' in b and 'Sem resposta até agora' in b, J("document.body.innerText.match(/\\d+ de \\d+ convites responderam/)"))
-    print('  enviar de novo:', clk('Comparar propostas'))
-    # etapa 4
-    chk('etapa 4', cur().startswith('4 '))
-    b=body(); chk('menor custo total destacado', 'Menor custo total' in b and 'Escolhida' in b)
-    k4=J("document.body.innerText.match(/\\d+ propostas · custo total escolhido [^\\n]+/)"); print('  k4:', k4)
-    # quantidade acima da necessidade
-    row('MAP 11-52'); chk('form da escolha abre', 'Proposta escolhida' in aside())
-    setv('#'+fid('ped'),'70000'); clk('Salvar','aside[role=dialog]')
-    chk('valida ≤ necessidade', 'Máximo' in aside(), J("[...document.querySelectorAll('aside [role=alert]')].map(x=>x.innerText).join(' | ')"))
-    setv('#'+fid('ped'),'40000'); clk('Salvar','aside[role=dialog]'); chk('quantidade parcial salva', 'de 62.500 kg' in body(), T())
-    # vencedor que não é o menor: clicar na proposta da Santa Rita Insumos para o Inoculante
-    clk('Expandir tudo')
-    r=J("""(()=>{const rows=[...document.querySelectorAll('[role=row].g2ed')]; const i=rows.findIndex(r=>/Inoculante líquido/.test(r.innerText)); const k=rows.slice(i+1).find(r=>/Santa Rita Insumos/.test(r.innerText)); if(!k) return 'sem proposta'; k.querySelector('[role=cell] span').click(); return 'ok';})()"""); time.sleep(.4)
-    a=aside(); chk('proposta abre escolha pré-preenchida', 'Santa Rita Insumos' in J(f"document.querySelector('#{fid('venc')}').value"), r)
-    clk('Salvar','aside[role=dialog]'); chk('justificativa obrigatória', 'Informe justificativa' in aside(), J("[...document.querySelectorAll('aside [role=alert]')].map(x=>x.innerText).join(' | ')"))
-    clk('Cancelar','aside[role=dialog]'); chk('aviso de alteração não salva', 'Há alterações não salvas' in aside()); clk('Continuar editando','aside[role=dialog]')
-    setv('#'+fid('just'),'Entrega em 4 dias para o tratamento de sementes'); clk('Salvar','aside[role=dialog]')
-    chk('escolha justificada', 'Justificada' in body(), T())
-    # compras-estoque-01 · etapa 4: chega dd/mm, selo de atraso, escolha padrão = menor custo que chega a tempo
-    t=rowtxt('2,4-D 806'); print('  2,4-D:', t)
-    chk('2,4-D: padrão Agro Norte (menor custo que chega a tempo)', 'falta a partir de 28/09' in t and 'Agro Norte' in t and 'Menor custo a tempo' in t and 'chega 28/09' in t, t)
-    t=after('2,4-D 806','Santa Rita Insumos'); print('  Santa Rita p/ 2,4-D:', t)
-    chk('Santa Rita: menor custo total, mas chega depois da falta', 'Menor custo total' in t and 'Chega depois da falta (28/09)' in t and 'chega 30/09' in t, t)
-    r=J("""(()=>{const rows=[...document.querySelectorAll('[role=row].g2ed')]; const i=rows.findIndex(r=>/2,4-D 806/.test(r.innerText)); const k=rows.slice(i+1).find(r=>/Santa Rita Insumos/.test(r.innerText)); if(!k) return 'sem proposta'; k.querySelector('[role=cell] span').click(); return 'ok';})()"""); time.sleep(.4)
-    a=aside(); chk('escolher a atrasada: justificativa obrigatória com as datas', 'chega em 30/09/2026, depois da falta de 28/09/2026' in a, a[:400])
-    clk('Salvar','aside[role=dialog]'); chk('atrasada sem justificativa não salva', 'Informe justificativa' in aside())
-    clk('Cancelar','aside[role=dialog]'); clk('Descartar alterações','aside[role=dialog]')
-    t=rowtxt('Nitrato de cálcio'); chk('Nitrato de cálcio: padrão Casa do Adubo (Fertisul chega depois)', 'Casa do Adubo' in t and 'Menor custo a tempo' in t, t)
-    # etapa 5 · Direção (total acima de 300 mil?) → depende da quantidade; primeiro volta MAP ao total
-    row('MAP 11-52'); setv('#'+fid('ped'),'62500'); clk('Salvar','aside[role=dialog]')
-    clk('Revisar aprovação'); chk('etapa 5', cur().startswith('5 '))
-    b=body(); chk('alçada: Direção exigida', 'Exigida para' in b and 'Acima da sua alçada' in b, J("document.body.innerText.match(/Valor da compra[^\\n]+/)"))
-    chk('prévia de pedidos PC-101…', 'PC-101 (prévia)' in b)
-    ir_etapa(6); b=body(); chk('navegar não aprova', 'PC-101' not in b and 'PC-088' in b and 'Parcial' in b)
-    chk('PC-088 60/100 t, 10 t quarentena, 40 t a entregar', '60 de 100 t recebidas' in b and '10 t em quarentena' in b and '40.000 kg' in b)
-    ir_etapa(5)
-    print('  enviar à Direção:', clk('Enviar à Direção'), T()); chk('pendente com a Direção', 'Aguardando Direção' in body())
-    # mudança material invalida o envio: reduz MAP para 40 t (fica na alçada da Ana)
-    ir_etapa(4); row('MAP 11-52'); setv('#'+fid('ped'),'40000'); clk('Salvar','aside[role=dialog]')
-    chk('aviso de reenvio', 'reenviada' in T(), T())
-    ir_etapa(5); b=body(); chk('dentro da alçada da Ana', 'Valor dentro da sua alçada' in b and 'perdeu a validade' in b, J("document.body.innerText.match(/Valor da compra[^\\n]+/)"))
-    clk('Aprovar compra'); chk('pede confirmação', 'Confirmar aprovação' in body())
-    clk('Confirmar aprovação'); t=T(); chk('aprovada gera PCs', 'Compra aprovada' in t and 'PC-101' in t, t)
-    print('  aprovar de novo:', clk('Acompanhar entrega'))
-    b=body(); chk('etapa 6 com novos pedidos', cur().startswith('6 ') and ('PC-101' in b and 'PC-088' in b and 'Fertisul' in b))
-    chk('link Estoque', J("[...document.querySelectorAll('a')].some(a=>a.getAttribute('href')==='EST.dc.html')"))
-    print('  confirmar fornecedor:', clk('Confirmar fornecedor'), T()); chk('confirmação simulada', 'Confirmado pelo fornecedor' in body())
-    row('PC-102'); chk('pedido abre reprogramação', 'Previsão de entrega' in aside(), aside()[:60])
-    setv('#'+fid('prev'),'2026-09-01'); clk('Salvar','aside[role=dialog]'); chk('data passada recusada', 'a partir de hoje' in aside())
-    setv('#'+fid('prev'),'2026-10-09'); t=T(); clk('Salvar','aside[role=dialog]'); t=T(); chk('previsão reprogramada', '09/10/2026' in body(), t)
-    # compras-estoque-01 · etapa 6: aviso sem bloquear quando a nova data passa da falta do item
-    t=rowtxt('PC-102'); print('  PC-102:', t); chk('PC-102 (Nitrato de cálcio) avisa: nova data depois da falta de 01/10', 'Nova data depois da falta de 01/10' in t, t)
-    row('PC-090'); setv('#'+fid('prev'),'2026-10-20'); clk('Salvar','aside[role=dialog]'); t=T()
-    chk('PC-090 depois do plantio de T2: aviso sem bloquear', 'nova data depois da falta de 18/10/2026' in t and 'Nova data depois da falta de 18/10' in rowtxt('PC-090'), t)
-    c.shot('_probe/cmp_e6.png')
-    ir_etapa(2); b=body(); clk('Expandir tudo'); b=body(); chk('demanda mostra pedidos', 'Parcial · PC-101' in b and 'Pedido PC-' in b)
-    t=rowtxt('Semente de soja 58 W'); chk('58 W passa a faltar em 18/10/2026 com o PC-090 reprogramado', '18/10/2026' in t and 'chega depois da falta' in t, t)
-    clk('Trocar safra'); chk('safra mostra pedidos emitidos', 'Pedidos emitidos' in body())
-    # caminho Direção numa página nova (sem o andamento gravado: talhao-os-compras-v1 guarda a compra entre recargas)
-    J("localStorage.removeItem('talhao-os-compras-v1')"); c.goto(f'http://127.0.0.1:{p}/CMP.dc.html'); time.sleep(.6)
-    clk('Abrir compra'); ir_etapa(3); clk('Enviar convites (simulado)'); time.sleep(6.5)
-    clk('Comparar propostas'); clk('Revisar aprovação'); clk('Enviar à Direção')
-    chk('pendente: ações secundárias de devolução e recusa', 'Registrar devolução' in body() and 'Registrar recusa' in body())
-    print('  registrar decisão:', clk('Registrar aprovação da Direção'), T())
-    b=body(); chk('Direção aprova (simulado) e emite pedidos', 'Aprovada por Direção (simulado)' in b and 'Pedidos emitidos' in b)
-    chk('aprovada: sem devolução/recusa', 'Registrar devolução' not in b)
-    c.shot('_probe/cmp_e5.png')
-    # ---- compras-estoque-05 · convite adicional depois do envio · compras-estoque-02 · devolução e recusa da Direção ----
-    J("localStorage.removeItem('talhao-os-compras-v1')"); c.goto(f'http://127.0.0.1:{p}/CMP.dc.html'); time.sleep(.6)
-    clk('Abrir compra'); ir_etapa(3)
-    for f in ['Agro Norte','Santa Rita Insumos']:
-        kid('Fungicidas',f,True); setv('#'+fid('conv'),'Não convidar'); clk('Salvar','aside[role=dialog]')
-    chk('Fungicidas só com a Coop. Vale convidada', 'Não convidar' in kid('Fungicidas','Agro Norte') and 'Convidar' in kid('Fungicidas','Coop. Vale'), kid('Fungicidas','Agro Norte'))
-    clk('Enviar convites (simulado)'); time.sleep(6.5)
-    ir_etapa(4); t=rowtxt('Fungicida A'); chk('Fungicida A sem proposta', 'Sem proposta ainda' in t, t)
-    row('Fungicida A'); t=T(); chk('aviso aponta o convite adicional', 'Enviar convites adicionais' in t and 'Agro Norte' in t, t)
-    ir_etapa(3); r=kid('Fungicidas','Agro Norte',True); a=aside()
-    chk('não convidado abre o formulário depois do envio', 'Convite · Agro Norte' in a and 'Convite adicional' in sub(), sub()[:160])
-    setv('#'+fid('conv'),'Convidar'); clk('Salvar','aside[role=dialog]')
-    chk('ação primária vira Enviar 1 convite adicional', 'Enviar 1 convite adicional (simulado)' in body(), J("[...document.querySelectorAll('main button, header button')].map(b=>b.innerText).filter(t=>/Enviar|Comparar/.test(t)).join('|')"))
-    kid('Fungicidas','Coop. Vale',True); t=T(); chk('já convidado continua só consulta', 'Convite simulado enviado a Coop. Vale' in t and not J("!!document.querySelector('aside[role=dialog]')"), t)
-    nenv=J("document.body.innerText.match(/(\\d+) de (\\d+) convites responderam/)"); print('  antes:', nenv)
-    clk('Enviar 1 convite adicional'); t=T(); chk('envio adicional simulado, sem reenviar', 'Convites adicionais simulados' in t and 'nenhuma mensagem real' in t and 'Quem já recebeu não recebe de novo' in t, t)
-    time.sleep(2.5); t=kid('Fungicidas','Agro Norte'); print('  Agro Norte:', t); chk('Agro Norte respondeu', 'Proposta recebida' in t, t)
-    depois=J("document.body.innerText.match(/(\\d+) de (\\d+) convites responderam/)"); print('  depois:', depois)
-    chk('só 1 convite a mais', nenv and depois and int(depois[2])==int(nenv[2])+1, f'{nenv} → {depois}')
-    clk('Comparar propostas'); t=rowtxt('Fungicida A'); chk('Fungicida A agora tem proposta da Agro Norte', 'Agro Norte' in t and 'Sem proposta' not in t, t)
-    clk('Revisar aprovação'); clk('Enviar à Direção'); chk('pendente com a Direção', 'Aguardando Direção' in body())
-    clk('Registrar devolução'); chk('abre motivo da devolução', 'Confirmar devolução' in body())
-    clk('Confirmar devolução'); chk('devolução exige motivo', 'Informe o motivo da devolução' in body())
-    J("(()=>{const i=document.querySelector('textarea[aria-label=\"Motivo da decisão\"]'); const P=HTMLTextAreaElement.prototype; Object.getOwnPropertyDescriptor(P,'value').set.call(i,'Negociar MAP com prazo de 60 dias'); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})()"); time.sleep(.3)
-    clk('Confirmar devolução'); b=body(); t=T()
-    chk('devolvida: motivo na etapa 5 e trilha', 'Devolvida pela Direção' in b and 'Devolvida · Negociar MAP com prazo de 60 dias' in b, t)
-    chk('primário vira Ajustar escolhas (sem reenvio sem mudança)', 'Ajustar escolhas' in b and 'Reenviar à Direção' not in b)
-    clk('Ajustar escolhas'); b=body(); chk('etapa 4 mostra o motivo no topo', cur().startswith('4 ') and 'Devolvida pela Direção (simulado): Negociar MAP com prazo de 60 dias' in b)
-    row('MAP 11-52'); setv('#'+fid('ped'),'62000'); clk('Salvar','aside[role=dialog]'); chk('aviso de reenvio após mudança', 'Reenvie à Direção' in T(), T())
-    ir_etapa(5); chk('depois da mudança: Reenviar à Direção', 'Reenviar à Direção' in body())
-    clk('Reenviar à Direção'); chk('reenviada e pendente de novo', 'Aguardando Direção' in body() and 'Reenviado' in T(), T())
-    clk('Registrar recusa'); J("(()=>{const i=document.querySelector('textarea[aria-label=\"Motivo da decisão\"]'); const P=HTMLTextAreaElement.prototype; Object.getOwnPropertyDescriptor(P,'value').set.call(i,'Orçamento da safra cortado'); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})()"); time.sleep(.3)
-    clk('Confirmar recusa'); b=body(); t=T()
-    chk('recusada: trilha mostra Recusada · motivo', 'Recusada · Orçamento da safra cortado' in b and 'Não contratado' in b, t)
-    chk('recusada: nenhum pedido emitido', 'Pedidos emitidos' not in b and 'necessidade da SOL-2026-07 continua aberta' in b)
-    clk('Conferir demanda aberta'); clk('Expandir tudo'); t=rowtxt('MAP 11-52'); chk('etapa 2: insumos Não contratado, necessidade aberta', cur().startswith('2 ') and 'Não contratado' in t and 'necessidade aberta' in t, t)
-    clk('Trocar safra'); chk('etapa 1: Recusada · não contratado', 'Recusada · não contratado' in body())
-    c.shot('_probe/cmp_recusa.png')
-    chk('sem erro JS no fim', J("(window.__err&&window.__err.length)?window.__err:'nenhum'")=='nenhum', J("window.__err||''"))
+    ir('', 1.8)
+    chk('sem erro JS', not a.erros(), a.erros())
+    # ---- lista: SOL-2026-07 da Safra 2026/27; a origem leva ao Planejar safra ----
+    chk('lista abre com a SOL-2026-07 "A cotar" e o valor de referência do Planejar safra', a.cel('SOL-2026-07', 'Situação') == 'A cotar' and a.cel('SOL-2026-07', 'Valor ref.') == 'R$ 379.580,00',
+        [a.cel('SOL-2026-07', 'Situação'), a.cel('SOL-2026-07', 'Valor ref.')])
+    a.row('SOL-2026-07'); f = faixa()
+    chk('detalhe: Veio de → Está → Falta → Próxima, com a origem no Planejar safra', 'Veio de' in f and J("[...document.querySelectorAll('[aria-label=\"Situação da solicitação\"] a')].some(x=>(x.getAttribute('href')||'').startsWith('SAF.dc.html#saf=S2627'))"), f)
+    # ---- só homologado recebe convite ----
+    J("(()=>{const r=[...document.querySelectorAll('[role=row]')].find(r=>r.offsetParent&&/Química Centro-Oeste/.test(r.innerText)); r&&(r.querySelector('[role=cell] b')||r.querySelector('[role=cell] span')).click();})()"); time.sleep(.4)
+    chk('não homologado não abre edição; o aviso diz como homologar', not a.aberto() and 'não é homologado' in T(), T())
+    # ---- canal só entre os autorizados; destinatário e escopo no subtítulo ----
+    kid('Fertilizantes', 'Casa do Adubo', True); o = opts('canal'); s = sub()
+    chk('Casa do Adubo só com E-mail autorizado', o == ['E-mail'], o)
+    chk('subtítulo mostra destinatário e itens do convite', 'Destinatário: e-mail vendas@casadoadubo.com.br' in s and 'Itens do convite (Fertilizantes)' in s and 'MAP 11-52 · 62.500 kg' in s and 'simulado' in s, s[:300])
+    a.clk('Cancelar', 'aside[role=dialog]')
+    kid('Fertilizantes', 'Coop. Vale', True)
+    chk('Coop. Vale tem E-mail e WhatsApp autorizados', opts('canal') == ['E-mail', 'WhatsApp'], opts('canal'))
+    a.setv('#' + fid('canal'), 'WhatsApp'); chk('destinatário acompanha o canal escolhido', 'Destinatário: WhatsApp 65 99466-7788' in sub(), sub()[:160])
+    a.setv('#' + fid('prazo'), '29/09/2026'); a.clk('Salvar convite', 'aside[role=dialog]')
+    chk('convite salvo', 'Convite atualizado' in T(), T())
+    # ---- convite adicional: Fungicidas só com a Coop. Vale; depois do envio, Agro Norte entra sem reenviar a quem já recebeu ----
+    for fz in ['Agro Norte', 'Santa Rita Insumos']:
+        kid('Fungicidas', fz, True); a.setv('#' + fid('conv'), 'Não convidar'); a.clk('Salvar convite', 'aside[role=dialog]')
+    chk('Fungicidas só com a Coop. Vale convidada', 'Não convidar' in kid('Fungicidas', 'Agro Norte') and 'Convidar' in kid('Fungicidas', 'Coop. Vale'), kid('Fungicidas', 'Agro Norte'))
+    p0 = prim(); clk_prim(); t = T(); n0 = env_n()
+    chk('enviar: aviso simulado, nenhuma mensagem real', p0.startswith('Enviar ') and 'nenhuma mensagem real foi enviada' in t, [p0, t])
+    esperar()
+    chk('respostas trocam para Decida sem clique', 'Em cotação' not in faixa() and 'A cotar' not in faixa(), faixa()[:200])
+    expandir(); t = a.rowtxt('Fungicida A'); chk('Fungicida A sem proposta (Fungicidas só com a Coop. Vale)', 'sem proposta' in t.lower(), t)
+    a.clk('Convidar outro fornecedor'); kid('Fungicidas', 'Agro Norte', True)
+    chk('não convidado abre o formulário depois do envio (convite adicional)', 'Convite adicional' in sub(), sub()[:160])
+    a.setv('#' + fid('conv'), 'Convidar'); a.clk('Salvar convite', 'aside[role=dialog]')
+    chk('primária vira "Enviar 1 convite adicional (simulado)"', prim() == 'Enviar 1 convite adicional (simulado)', prim())
+    clk_prim(); t = T(); time.sleep(2.5); n1 = env_n()
+    chk('envio adicional simulado, sem reenviar a quem já recebeu; só 1 convite a mais', 'Quem já recebeu não recebe de novo' in t and n1 == n0 + 1, [t, n0, n1])
+    expandir(); t = a.rowtxt('Fungicida A'); chk('Fungicida A agora tem proposta da Agro Norte', 'Agro Norte' in t, t)
+    # ---- escolha: quantidade até a necessidade; justificativa da escolha que chega depois da falta ----
+    a.row('MAP 11-52'); chk('formulário da escolha abre pela linha do insumo', 'Proposta escolhida' in a.aside(), a.aside()[:80])
+    a.setv('#' + fid('ped'), '70000'); a.clk('Salvar escolha', 'aside[role=dialog]')
+    chk('quantidade acima da necessidade é recusada no campo', 'Máximo 62.500 kg' in a.err(), a.err())
+    a.setv('#' + fid('ped'), '62500'); a.clk('Salvar escolha', 'aside[role=dialog]')
+    r = J("""(()=>{const rows=[...document.querySelectorAll('[role=row]')].filter(r=>r.offsetParent); const i=rows.findIndex(r=>/2,4-D 806/.test(r.innerText)); const k=rows.slice(i+1).find(r=>/Santa Rita Insumos/.test(r.innerText)); if(!k) return 'sem proposta'; (k.querySelector('[role=cell] b')||k.querySelector('[role=cell] span')).click(); return 'ok';})()""")
+    time.sleep(.4); s = a.aside()
+    chk('escolher a proposta que chega depois da falta pede justificativa com as datas', r == 'ok' and 'depois da falta de 28/09/2026' in s, [r, s[:300]])
+    a.clk('Salvar escolha', 'aside[role=dialog]'); chk('sem justificativa não salva', a.err() != '' and a.aberto(), a.err())
+    a.setv('#' + fid('just'), 'Entrega única com o restante do pedido'); a.clk('Salvar escolha', 'aside[role=dialog]')
+    chk('escolha justificada salva', 'Escolha salva' in T() and not a.aberto(), T())
+    # ---- navegar não aprova; Ana acima da alçada envia à Direção; sig invalida o envio ----
+    a.clk('Acompanhe pedidos'); a.clk('Atenda solicitações'); ir('#sol=SOL-2026-07&saf=S2627', 1.4)
+    chk('navegar não aprova nem emite pedido', not aprov() and not (reg().get('ped') or {}), aprov())
+    p = prim(); chk('acima de R$ 300.000: a primária é "Enviar à Direção"', p.startswith('Enviar à Direção · R$') and 'Aprovar e emitir' not in body(), p)
+    clk_prim(); chk('enviada: Aguardando Direção', aprov().get('estado') == 'pendente' and 'Aguardando Direção' in faixa(), faixa()[:120])
+    expandir(); a.row('MAP 11-52'); a.setv('#' + fid('ped'), '40000'); a.clk('Salvar escolha', 'aside[role=dialog]')
+    chk('mudar depois do envio invalida o envio (sig)', 'perdeu a validade' in T() or 'a compra mudou' in faixa(), [T(), faixa()[:160]])
+    # MAP 40 t: total dentro da alçada da Ana → ela aprova e emite; tocar de novo não duplica
+    p = prim(); chk('dentro da alçada da Ana: "Aprovar e emitir N pedidos · R$ …"', p.startswith('Aprovar e emitir'), p)
+    chk('prévia dos pedidos visível antes do toque', 'PEDIDOS QUE SERÃO EMITIDOS' in body().upper())
+    clk_prim(); ap = aprov(); pcs = (ap.get('emi') or {}).get('pcs') or []
+    chk('aprovada gera os pedidos com a decisão e a emissão registradas', ap.get('estado') == 'aprovada' and bool(pcs) and str((ap.get('dec') or {}).get('por', '')).startswith('Ana'), [ap.get('estado'), pcs])
+    J("(()=>{const b=[...document.querySelectorAll('.acoes-prim,.acoes-sec')].find(b=>b.offsetParent&&/^Aprovar e emitir/.test(b.innerText)); if(b) b.click();})()"); time.sleep(.4)
+    chk('sem pedido duplicado', ((aprov().get('emi') or {}).get('pcs') or []) == pcs, aprov().get('emi'))
+    # ---- Acompanhe pedidos: confirmar (simulado), reprogramar com motivo ----
+    a.clk('Acompanhe pedidos'); time.sleep(.3); pc = pcs[-1] if pcs else 'PC-?'
+    a.row(pc); chk(f'{pc} abre o painel do pedido', f'Pedido · {pc}' in a.aside(), a.aside()[:80])
+    a.clk('Confirmar com', 'aside[role=dialog]'); t = T(); chk('confirmação simulada', 'simulada' in t and pc in t, t)
+    a.row(pc); a.clk(f'Reprogramar {pc} ›', 'aside[role=dialog]'); a.setv('#' + fid('prev'), '2026-09-01'); a.clk(f'Reprogramar {pc}', 'aside[role=dialog]')
+    chk('data passada recusada', 'a partir de hoje' in a.err(), a.err())
+    a.setv('#' + fid('prev'), '2026-12-20'); a.clk(f'Reprogramar {pc}', 'aside[role=dialog]'); chk('motivo obrigatório', 'motivo' in a.err().lower(), a.err())
+    a.setv('#' + fid('obs'), 'fornecedor sem caminhão'); a.clk(f'Reprogramar {pc}', 'aside[role=dialog]'); t = T()
+    pv = (reg().get('ped') or {}).get(pc) or {}
+    chk('reprogramada: versão anterior guardada com o motivo', pv.get('prev') == '2026-12-20' and len(pv.get('prevs') or []) == 1 and pv['prevs'][0].get('motivo') == 'fornecedor sem caminhão', pv)
+    a.shot('cmp_pedidos.png')
+    chk('sem erro JS no fim', not a.erros(), a.erros())
 finally:
-    if c: c.close()
-    srv.terminate()
-print('\nFALHAS:', FAL if FAL else 'nenhuma')
+    try: a.c.close()
+    finally: a.srv.terminate()
+print(f'\nRESULTADO: {NOK[0]}/{NOK[0] + len(FAL)} ok · FALHAS:', FAL if FAL else 'nenhuma')
+sys.exit(1 if FAL else 0)

@@ -1,45 +1,56 @@
 # -*- coding: utf-8 -*-
-"""Suprimentos › Estoque — processo em 6 etapas numa só tela de trabalho (EST.dc.html).
-1 Confira recebimentos → 2 Entregue por O.S. → 3 Receba devoluções → 4 Confira saldos → 5 Faça contagens → 6 Acompanhe movimentos.
-Saldos, lotes, reservas, requisições, entregas, devoluções, contagens e movimentos vêm do cenário compartilhado (cenario.js/cenario.py,
-o mesmo estado das telas O.S. e App) e só mudam por cenMudar. Os registros de base (notas, pedidos, contagens antigas) vêm de dados2.
-Funções próprias da tela que mexem no cenário têm prefixo est (estReceber, estEntregar, estContar, estRecontar, estAprovar, estCausa)."""
-import json
+"""Suprimentos › Estoque (EST.dc.html) · Suprimentos simplificado (docs/suprimentos-simplificado; pedido do proprietário de 05/10/2026:
+"simplifique também o fluxo do processo e botões de ação que resolvam tudo em menos telas").
+4 seções em qualquer ordem (eram 6), cada uma com o contador neutro do que espera ação:
+  Atenda requisições (entrega, devolução e consumo em conferência no mesmo registro) · Receba e inspecione (nota prevista e parcela em quarentena,
+  com laudo) · Faça contagens (cega; ajuste decidido pela gestora) · Confira saldos (Lotes | Movimentos | Produção, só consulta).
+A linha identifica, o painel resolve (SUP §2.3): nenhuma linha de grade carrega botão de comando; o painel do registro tem uma primária com o rótulo
+que confirma o quê, quanto, lote e para quem, e um comando com chave de quem inicia (toque duplo não repete; mudança de outra tela é conflito).
+Endereços: #sec=<seção ou apelido>, #req=, #os=, #nf=, #lote= (abrir nunca muda o cenário). Sem endereço, abre pelo perfil de quem age (menu lateral,
+G2_PERFIS do CTL-3): contador com contagem atribuída → Faça contagens; gestora → 1ª seção com decisão dela; almoxarife → 1ª com pendência.
+Regras e leitura do cenário em est.js (o mesmo arquivo da tela e dos testes em node); mudanças só por cenMudar. Os registros de base (notas, pedidos,
+contagens antigas) vêm de dados2; locais e pessoas da fonte única (dados_cad)."""
+import json, os
 from engine import (grid,esc,INK,MUTED,LINE,BG,SURF,ACC,ACCS,YEL,YELS,RED,REDS,DISP,BTN_ST,EXTRA,EXTRAJS,_MINI,_MINIP)
 import engine as E
 from ui37 import shell37, secoes_state, HEIGHTS37
 import dados2 as D2
+import dados_cad as DC
 import cenario
 
+HERE=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 H=lambda s: '{{'+s+'}}'
 F=lambda: H('false')
-NOMES=['Confira recebimentos','Entregue por O.S.','Receba devoluções','Confira saldos','Faça contagens','Acompanhe movimentos']
+NOMES=['Atenda requisições','Receba e inspecione','Faça contagens','Confira saldos']
+# apelidos de endereço (#sec=…): os nomes das 6 seções antigas e os usados pela BEN e pelo PCM levam à seção nova; desconhecido → regra sem endereço
+SEC={'requisicoes':1,'requisições':1,'entregas':1,'devolucoes':1,'devoluções':1,'atenda':1,'recebimentos':2,'receba':2,'inspecao':2,'laudos':2,
+     'contagens':3,'contagem':3,'saldos':4,'lotes':4,'movimentos':4,'producao':4,'produção':4}
+SEC_MODO={'movimentos':'movs','producao':'prod','produção':'prod','lotes':'lotes','saldos':'lotes'}
 
 # ---------------- constantes locais (coerentes com dados2/cenário) ----------------
-LOCAIS=['Galpão 1','Galpão 2','Câmara fria','Almox. defensivos']
 LOCAL_REC={'KCl 60%':'Galpão 2','Semente de soja 58 W':'Câmara fria','Semente de soja 62 X':'Câmara fria'}
-PESSOAS=['Paula','Marcos','Carlos','João']
 # mesma palavra para a mesma pessoa em toda a tela: Rui é o almoxarife que entrega e recebe (cenario.js) e também conta
 CONTADORES=['Paula (almoxarife)','Rui (almoxarife)']
 CONDS=['Apta · volta ao disponível','Bloqueada para inspeção · vai para quarentena']
 DIVS=['Sem divergência','Falta','Sobra','Avaria','Item diferente do pedido']
+RESULTADOS=['Aprovado','Reprovado']
 CAUSA_BASE={'INV-2609':'Sacaria rasgada na pilha 3'}
 SEM_VALIDADE=['Fertilizantes','Corretivos']    # grupos recebidos sem validade de lote
 CONTADOR_BASE={'INV-2609':'Rui (almoxarife)','INV-2610':'Paula (almoxarife)'}
 # O.S. impedida (selo "Impedida" no cenário): a ordem de manutenção que impede vem do registro da manutenção
 IMPED={'OS-0420':dict(selo='O.S. impedida · OM-0233',
                       txt='OS-0420 impedida pela OM-0233 (Trator T1 bloqueado): entregue quando o ativo for liberado ou substituído na O.S.')}
+# locais estocáveis de insumo, da fonte única (dados_cad.LOCAIS; com Packing e Armazém Sede); tanque e silo têm controle próprio (diesel, grão)
+TIPOS_ESTOQUE=('Galpão','Almoxarifado','Câmara fria','Armazém')
 
 def _forn(fid): return next((f['nome'] for f in D2.FORNECEDORES if f['id']==fid),fid)
 def _ped_label(p): return f"{p['id']} · {p['item']} · {_forn(p['f'])}"
 
 def bloco(titulo,desc,corpo,acao=''):
     return (f'<section style="background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; display: flex; flex-direction: column; min-width: 0;">'
-            f'<div style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px 10px;"><div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">'
+            f'<div style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px 10px; flex-wrap: wrap;"><div style="display: flex; flex-direction: column; gap: 2px; flex: 1 1 220px; min-width: 0;">'
             f'<h3 style="margin: 0; font-size: 15px; font-weight: 800; letter-spacing: -.01em;">{esc(titulo)}</h3><div style="font-size: 12.8px; color: {MUTED};">{esc(desc)}</div></div>{acao}</div>'
             f'<div style="padding: 0 12px 12px;">{corpo}</div></section>')
-def kline(hole):
-    return f'<div style="font-size: 13px; color: {MUTED};">{H(hole)}</div>'
 def navpe():
     lk=f'border: 0; background: transparent; color: {MUTED}; font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; padding: 4px;'
     return (f'<div style="display: flex; align-items: center; gap: 10px; padding-top: 4px;">'
@@ -48,6 +59,9 @@ def navpe():
             f'<sc-if value="{H("est_rst_ask")}" hint-placeholder-val="{F()}"><span style="font-size: 12px; color: {MUTED};">Volta O.S., estoque e app ao início da demonstração.</span>'
             f'<button type="button" onClick="{H("est_rst_ok")}" style="{_MINI} color: {RED}; border-color: {RED};">Restaurar</button><button type="button" onClick="{H("est_rst_cancel")}" style="{_MINI}">Manter</button></sc-if>'
             + '</div>')
+def chips(lista,rotulo):
+    return (f'<div role="group" aria-label="{esc(rotulo)}" style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px;">'
+            f'<sc-for list="{H(lista)}" as="ch" hint-placeholder-count="3"><button type="button" aria-pressed="{H("ch.on")}" onClick="{H("ch.go")}" style="{H("ch.st")}">{H("ch.t")}</button></sc-for></div>')
 
 def _dados_js():
     peds=[dict(id=p['id'],item=p['item'],un=p['un'],grupo=p.get('grupo',''),forn=_forn(p['f']),a_entregar=p['a_entregar'],label=_ped_label(p)) for p in D2.PEDIDOS]
@@ -60,550 +74,490 @@ def _dados_js():
     chave={l['lote']:l['item']+'|'+l['lote'] for l in D2.LOTES}
     conts=[dict(id=c['id'],key=chave[c['lote']],sis=(c['sistema'] if c['contado'] is not None else None),cont=c['contado'],
                 contador=CONTADOR_BASE.get(c['id'],CONTADORES[0]),causa=CAUSA_BASE.get(c['id'],''),aj=None,hist=[]) for c in D2.CONTAGENS]
-    return dict(hoje=D2.HOJE,pedidos=peds,recs=recs,contagens=conts,conds=CONDS,contadores=CONTADORES,sem_validade=SEM_VALIDADE,imped=IMPED,locais=LOCAIS)
+    locais=[dict(nome=l[1],faz=l[2],tipo=l[3]) for l in DC.LOCAIS]
+    pessoas=[p['nome'] for p in DC.PESSOAS]
+    return dict(hoje=D2.HOJE,pedidos=peds,recs=recs,contagens=conts,conds=CONDS,contadores=CONTADORES,sem_validade=SEM_VALIDADE,imped=IMPED,
+                locais=locais,tipos_estoque=list(TIPOS_ESTOQUE),pessoas=pessoas,sec=SEC,sec_modo=SEC_MODO,nomes=NOMES,divs=DIVS,resultados=RESULTADOS)
 
 def build():
     fname='EST.dc.html'; E._reset_screen(fname)
-    # ---------- etapa 1 · recebimentos (linhas: notas de base + recebimentos gravados no cenário) ----------
-    ped_opts=[_ped_label(p) for p in D2.PEDIDOS]
-    # larguras (w) contidas: pedido, item e situação quebram em linhas e a grade cabe em 1440 px sem rolagem horizontal
-    # TABELAS-FOCO (5983172395): uma variável por coluna em todas as etapas; a unidade fica junto da quantidade ("60.000 kg"):
-    # decisão do proprietário de 05/10/2026 (mais intuitivo; filtrar unidade não gera valor). O valor tipado (v) continua número para ordenar
-    g_rec=grid([dict(k='nf',l='Nota fiscal',w=100),dict(k='data',l='Data da nota',t='date',w=110),dict(k='cfd',l='Conferida em',t='date',w=110),dict(k='ped',l='Pedido',w=110),dict(k='forn',l='Fornecedor',w=130),dict(k='item',l='Item',w=170),dict(k='lote',l='Lote'),
-                dict(k='qtd_nf',l='Na nota',t='num',a='r'),dict(k='conf',l='Conferida',t='num',a='r'),dict(k='apto',l='Apta',t='num',a='r'),
-                dict(k='quar',l='Quarentena',t='num',a='r'),dict(k='sit',l='Situação',w=150),dict(k='divg',l='Divergência',w=150),dict(k='vali',l='Validade',t='date')],
-        [],edit=dict(m='form',title='Recebimento',newTitle='Registrar recebimento',sub='Confira a nota contra o pedido e o material. Só a parte apta entra no disponível.',
-            fields=[dict(k='ped',l='Pedido',t='sel',opts=ped_opts,req=True,**{'def':ped_opts[0]}),
-                    dict(k='nf',l='Nota fiscal',t='txt',req=True,help='Documento já lançado não cria segunda entrada.'),
-                    dict(k='qtd_nf',l='Quantidade na nota',t='num',req=True,min=0.01,u='kg'),
-                    dict(k='conf',l='Quantidade conferida',t='num',req=True,min=0,u='kg'),
-                    dict(k='apto',l='Apta para uso',t='num',req=True,min=0,u='kg'),
-                    dict(k='quar',l='Em quarentena',t='num',req=True,min=0,u='kg',help='Fica fora do disponível até a inspeção liberar.',**{'def':'0'}),
-                    dict(k='lote',l='Lote',t='txt',req=True),
-                    dict(k='val',l='Validade do lote',t='txt',live=True,help='Mês/ano (ex.: 06/2027). Lote vencido entra todo em quarentena.'),
-                    dict(k='local',l='Local',t='sel',opts=LOCAIS,req=True,**{'def':'Galpão 2'}),
-                    dict(k='div',l='Divergência',t='sel',opts=DIVS,req=True,**{'def':'Sem divergência'}),
-                    dict(k='obs',l='Motivo da quarentena ou da divergência',t='area',help='Obrigatório quando houver quarentena ou divergência.')]),
+    # ---------- Atenda requisições · requisição › item (funde as antigas "Entregue por O.S." e "Receba devoluções"; sem coluna de ação) ----------
+    # uma variável por coluna; a quantidade leva a unidade junto ("65 L"); fase, solicitado, entregue, consumido, embalagem e detalhe vão para o painel
+    g_req=grid([dict(k='req',l='Requisição › item',w=190),dict(k='sit',l='Situação',w=200),dict(k='ent',l='A entregar',t='num',a='r'),dict(k='cust',l='Em custódia',t='num',a='r'),
+                dict(k='com',l='Com quem'),dict(k='os',l='O.S.'),dict(k='lote',l='Lote')],
+        [],edit=dict(m='form',title='',sub='',
+            fields=[dict(k='quemr',l='Recebedor',t='sel',dyn=True,cond=dict(k='modo',eq='req'),help='Herdado do responsável da O.S.; troque se outra pessoa retira.'),
+                    dict(k='qtd',l='Quantidade a entregar',t='num',min=0.001,cond=dict(k='modo',eq='ent')),
+                    dict(k='quem',l='Recebedor',t='sel',dyn=True,cond=dict(k='modo',eq='ent')),
+                    dict(k='dqtd',l='Quantidade conferida',t='num',min=0.001,cond=dict(k='modo',eq='dev')),
+                    dict(k='cond',l='Condição',t='sel',opts=CONDS,cond=dict(k='modo',eq='dev')),
+                    dict(k='obs',l='Observação',t='area',cond=dict(k='modo',eq='dev'),help='Obrigatória quando bloqueada para inspeção.'),
+                    dict(k='mot',l='Motivo da recusa',t='area',cond=dict(k='modo',eq='rec'),help='O relato fica no histórico com o porquê; o saldo não muda.')]),
+        tree=True,gid='g_req',total=False,qf=dict(k='sit',cut=' · '))
+    # ---------- Receba e inspecione · nota prevista e parcela em quarentena (só trabalho do almoxarife e da gestora; o pedido fica em Compras) ----------
+    g_rec=grid([dict(k='doc',l='Documento › item',w=170),dict(k='sit',l='Situação',w=150),dict(k='item',l='Item',w=170),dict(k='qtd_nf',l='Na nota',t='num',a='r'),
+                dict(k='quar',l='Em quarentena',t='num',a='r'),dict(k='prev',l='Previsão',t='date'),dict(k='forn',l='Fornecedor',w=130)],
+        [],edit=dict(m='form',title='',newTitle='Registrar NF recebida',sub='',
+            fields=[dict(k='ped',l='Pedido',t='sel',dyn=True,cond=dict(k='modo',eq='nf')),
+                    dict(k='nf',l='Nota fiscal',t='txt',cond=dict(k='modo',eq='nf'),help='Documento já lançado não cria segunda entrada.'),
+                    dict(k='qtd_nf',l='Quantidade na nota',t='num',min=0.01,cond=dict(k='modo',eq='nf')),
+                    dict(k='conf',l='Quantidade conferida',t='num',min=0,cond=dict(k='modo',eq='nf')),
+                    dict(k='quar',l='Em quarentena',t='num',min=0,cond=dict(k='modo',eq='nf'),help='Começa em 0; o que ficar aqui só sai com o laudo.'),
+                    dict(k='apto',l='Apta (calculada)',t='num',ro=True,live=True,cond=dict(k='modo',eq='nf'),help='Conferida − quarentena: entra no disponível.'),
+                    dict(k='lote',l='Lote',t='txt',cond=dict(k='modo',eq='nf')),
+                    dict(k='val',l='Validade do lote',t='txt',live=True,cond=dict(k='modo',eq='nf'),help='Mês/ano (ex.: 06/2027). Lote vencido entra todo em quarentena.'),
+                    dict(k='local',l='Local',t='sel',dyn=True,cond=dict(k='modo',eq='nf')),
+                    dict(k='div',l='Divergência',t='sel',opts=DIVS,cond=dict(k='modo',eq='nf')),
+                    dict(k='obs',l='Motivo da quarentena ou da divergência',t='area',cond=dict(k='modo',eq='nf'),help='Obrigatório quando houver quarentena ou divergência.'),
+                    dict(k='laudo',l='Nº do laudo',t='txt',cond=dict(k='modo',eq='laudo')),
+                    dict(k='res',l='Resultado',t='sel',dyn=True,cond=dict(k='modo',eq='laudo')),
+                    dict(k='dest',l='Destino (reprovado)',t='txt',cond=dict(k='modo',eq='laudo'),help='Ex.: devolver ao fornecedor, descartar com laudo.')]),
         gid='g_rec',total=False,qf=dict(k='sit',cut=' · '))
-    # ---------- etapa 2 · entregas por O.S. (uma linha por item de requisição) ----------
-    g_ent=grid([dict(k='req',l='Requisição'),dict(k='os',l='O.S.'),dict(k='fase',l='Fase da O.S.'),dict(k='item',l='Item',w=170),dict(k='lote',l='Lote'),dict(k='emb',l='Embalagem',w=120),
-                dict(k='sol',l='Solicitado',t='num',a='r'),dict(k='ent',l='Entregue',t='num',a='r'),dict(k='pend',l='A entregar',t='num',a='r',w=110),
-                dict(k='pk',l='A entregar em embalagens',w=150),dict(k='sit',l='Situação',w=170),dict(k='det',l='Detalhe',w=230)],
-        [],edit=dict(m='form',title='Entrega',sub='',
-            fields=[dict(k='lote',l='Lote reservado',t='txt',ro=True),dict(k='qtd',l='Quantidade a entregar',t='num',req=True,min=0.001),
-                    dict(k='quem',l='Entregar a',t='sel',opts=PESSOAS,req=True)]),
-        gid='g_ent',total=False,qf=dict(k='sit',cut=' · '))
-    # ---------- etapa 3 · custódia e devoluções ----------
-    g_dev=grid([dict(k='req',l='Requisição'),dict(k='os',l='O.S.'),dict(k='item',l='Item'),dict(k='lote',l='Lote'),dict(k='ent',l='Entregue',t='num',a='r'),dict(k='cons',l='Consumido',t='num',a='r'),
-                dict(k='dev',l='Devolvido',t='num',a='r'),dict(k='cust',l='Em custódia',t='num',a='r'),dict(k='com',l='Com quem'),dict(k='enc',l='Encerramento da O.S.',w=200),dict(k='det',l='Detalhe',w=220)],
-        [],edit=dict(m='form',title='Receber devolução',sub='',
-            fields=[dict(k='qtd',l='Quantidade conferida',t='num',req=True,min=0.001),dict(k='cond',l='Condição',t='sel',opts=CONDS,req=True),
-                    dict(k='obs',l='Observação',t='area',help='Obrigatória quando bloqueada para inspeção.')]),
-        gid='g_dev',total=False)
-    # ---------- etapa 4 · saldos por item e lote, com filtro por local ----------
-    chips=(f'<span style="font-size: 12px; font-weight: 700; color: {MUTED};">Local</span>'
-           f'<sc-for list="{H("est_locs")}" as="lc" hint-placeholder-count="5"><button type="button" aria-pressed="{H("lc.on")}" onClick="{H("lc.go")}" style="{H("lc.st")}">{H("lc.t")}</button></sc-for>')
-    # árvore item › lote: cada linha é uma entidade do seu nível (item ou lote), com o item em coluna própria para filtrar
-    g_lot=grid([dict(k='nome',l='Item › lote',w=170),dict(k='prod',l='Item',w=150),dict(k='local',l='Local'),dict(k='fis',l='Físico',t='num',a='r'),dict(k='res',l='Reservado',t='num',a='r'),
-                dict(k='blq',l='Bloqueado',t='num',a='r',w=170),dict(k='disp',l='Disponível',t='num',a='r'),dict(k='expo',l='Em conferência',t='num',a='r'),dict(k='cust',l='Em custódia (fora do depósito)',t='num',a='r'),
-                dict(k='cos',l='O.S. com custódia'),dict(k='sitl',l='Situação do lote',w=140),dict(k='vali',l='Validade',t='date')],
-        [],edit=dict(m='origin',leafOnly=False,title='Saldo',fields=[dict(k='nome',l='Item ou lote',t='txt',ro=True),dict(k='local',l='Local',t='txt',ro=True)]),
-        tree=True,gid='g_lot',total=False,tools=chips)
-    # ---------- etapa 5 · contagens (cegas) ----------
-    g_cnt=grid([dict(k='inv',l='Contagem'),dict(k='aj',l='Ajuste'),dict(k='prod',l='Item',w=160),dict(k='lote',l='Lote'),dict(k='local',l='Local'),dict(k='sis',l='Sistema na data de corte',t='num',a='r'),
-                dict(k='cont',l='Contado',t='num',a='r'),dict(k='dif',l='Diferença',t='num',a='r'),dict(k='sit',l='Situação',w=230),dict(k='acao',l='Ação',w=120)],
-        [],edit=dict(m='form',title='Contagem',newTitle='Nova contagem',sub='',
-            fields=[dict(k='lote',l='Item · lote',t='sel',opts=[],req=True),dict(k='cont',l='Quantidade contada',t='num',req=True,min=0),
-                    dict(k='contador',l='Contador',t='sel',opts=CONTADORES,req=True,**{'def':CONTADORES[0]}),
-                    dict(k='causa',l='Causa da diferença',t='area',help='Obrigatória para aprovar o ajuste quando houver diferença.')]),
-        gid='g_cnt',total=False,qf=dict(k='sit',cut=' · '),tools=f'<sc-if value="{H("cnt_add")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("g_cnt_new")}" style="{_MINI}">+ Nova contagem</button></sc-if>')
-    # ---------- etapa 6 · movimentos (trilha do cenário) ----------
-    g_mov=grid([dict(k='hora',l='Hora',w=70),dict(k='mid',l='Registro'),dict(k='tipo',l='Movimento',w=150),dict(k='cond',l='Condição'),dict(k='doc',l='Documento'),dict(k='os',l='O.S.'),
-                dict(k='item',l='Item',w=180),dict(k='lote',l='Lote'),dict(k='qtd',l='Quantidade',t='num',a='r'),dict(k='quem',l='Quem',w=150),dict(k='orig',l='Origem',w=90),dict(k='sinal',l='Sinal do app')],
-        [],edit=dict(m='origin',title='Movimento',fields=[dict(k='tipo',l='Movimento',t='txt',ro=True),dict(k='quem',l='Quem',t='txt',ro=True)]),
-        gid='g_mov',total=False,qf=dict(k='tipo',cut=' · ',todas='Todos'))
-    # ---------- JS: cenário compartilhado + processo ----------
+    # ---------- Faça contagens · contagem cega (sistema e diferença só depois de salvar) ----------
+    g_cnt=grid([dict(k='inv',l='Contagem'),dict(k='sit',l='Situação',w=170),dict(k='prod',l='Item',w=160),dict(k='lote',l='Lote'),dict(k='local',l='Local'),
+                dict(k='cont',l='Contado',t='num',a='r'),dict(k='dif',l='Diferença',t='num',a='r')],
+        [],edit=dict(m='form',title='',sub='',
+            fields=[dict(k='cont',l='Quantidade contada',t='num',min=0,cond=dict(k='modo',eq='contar')),
+                    dict(k='causa',l='Causa da diferença',t='area',cond=dict(k='modo',eq='causa'),help='Obrigatória: vai com o ajuste para a gestora.')]),
+        gid='g_cnt',total=False,qf=dict(k='sit',cut=' · '))
+    # ---------- Confira saldos · Lotes (uma linha por lote), Movimentos (trilha) e Produção (produto acabado da Colheita) ----------
+    g_lot=grid([dict(k='prod',l='Item',w=170),dict(k='lote',l='Lote'),dict(k='fis',l='Físico',t='num',a='r'),dict(k='res',l='Reservado',t='num',a='r'),
+                dict(k='blq',l='Bloqueado',t='num',a='r'),dict(k='disp',l='Disponível',t='num',a='r'),dict(k='vali',l='Validade',t='date')],
+        [],edit=dict(m='origin',title='Lote',fields=[]),gid='g_lot',total=False,tools=chips('est_locs','Filtrar por local'))
+    g_mov=grid([dict(k='hora',l='Data e hora',w=90),dict(k='tipo',l='Movimento',w=170),dict(k='doc',l='Documento'),dict(k='item',l='Item',w=170),dict(k='lote',l='Lote'),
+                dict(k='qtd',l='Quantidade',t='num',a='r'),dict(k='quem',l='Quem',w=150)],
+        [],edit=dict(m='origin',title='Movimento',fields=[]),gid='g_mov',total=False,qf=dict(k='tipo',sep=' · ',todas='Todos'))
+    g_prod=grid([dict(k='nome',l='Produto › lote',w=170),dict(k='sit',l='Situação',w=130),dict(k='cult',l='Cultura'),dict(k='qtd',l='Quantidade',t='num',a='r'),
+                 dict(k='local',l='Local'),dict(k='orig',l='Origem',w=150),dict(k='saf',l='Safra')],
+        [],edit=dict(m='origin',title='Produto acabado',fields=[]),gid='g_prod',total=False)
+    # ---------- JS: cenário compartilhado + regras do Estoque (est.js) + tela ----------
     EXTRAJS[0]=cenario.js_prefixo()+'const E2 = '+json.dumps(_dados_js(),ensure_ascii=False).replace('</','<\\/')+';\n'+JS
     # ---------- corpo ----------
-    acao_bloco=f'<button type="button" onClick="{H("prim_fn")}" style="{H("prim_st")}">{H("prim_t")}</button>'   # ação da etapa no bloco onde age
-    s1=kline('k1')+bloco('Recebimentos','Confira a nota contra o pedido e o material; clique na linha para conferir.',g_rec,acao=acao_bloco)
-    s2=kline('k2')+bloco('Entregas por O.S.','Entregue por item, do lote reservado, só para O.S. liberada ou em execução.',g_ent,acao=acao_bloco)
-    s3=kline('k3')+bloco('Custódia e devoluções','Confira a sobra e receba: apta volta ao disponível, bloqueada vai para quarentena.',g_dev,acao=acao_bloco)
-    # liberar quarentena: o pedido nasce na linha do lote (gestor); o nº do laudo é digitado aqui, junto da confirmação
-    libq=(f'<sc-if value="{H("lib_on")}" hint-placeholder-val="{F()}"><div role="group" aria-label="Liberar quarentena com laudo" style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; padding: 10px 12px; border-radius: 10px; background: {YELS}; border: 1px solid {LINE};">'
-          f'<span style="font-size: 13px; font-weight: 600; flex: 1 1 280px;">{H("lib_t")}</span>'
-          f'<label style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 600; color: {MUTED};">Nº do laudo ou relatório de inspeção'
-          f'<input id="est-laudo" value="{H("lib_laudo")}" onChange="{H("lib_setlaudo")}" style="font-family: inherit; font-size: 14px; padding: 7px 9px; border-radius: 8px; border: 1px solid {LINE}; width: 220px;"></label>'
-          f'<button type="button" onClick="{H("lib_ok")}" style="{_MINIP}">Liberar com o laudo</button><button type="button" onClick="{H("libno")}" style="{_MINI}">Manter bloqueado</button>'
-          f'<sc-if value="{H("lib_hasErr")}" hint-placeholder-val="{F()}"><span role="alert" style="flex-basis: 100%; font-size: 12px; font-weight: 700; color: {RED};">{H("lib_err")}</span></sc-if></div></sc-if>')
-    s4=kline('k4')+libq+bloco('Saldos por lote e local','Confira físico, reservado, bloqueado e disponível; clique num lote para ver os movimentos.',g_lot,acao=acao_bloco)
-    s5=kline('k5')+bloco('Contagens','Conte sem ver o saldo; a diferença vira ajuste para o gestor aprovar.',g_cnt,acao=acao_bloco)
-    s6=kline('k6')+bloco('Movimentos','Acompanhe cada movimento de estoque, da web e do app.',
-                         f'<sc-if value="{H("mov_tem")}" hint-placeholder-val="{H("true")}">{g_mov}</sc-if>'
-                         f'<sc-if value="{H("mov_nada")}" hint-placeholder-val="{F()}"><div style="padding: 14px 4px; font-size: 13px; color: {MUTED};">Nenhum movimento desde o início da demonstração.</div></sc-if>',acao=acao_bloco)
-    etapas=''.join(f'<sc-if value="{H("s"+str(i))}" hint-placeholder-val="{H("true") if i==1 else F()}"><div style="display: flex; flex-direction: column; gap: 14px;">{s}{navpe()}</div></sc-if>'
-                   for i,s in enumerate([s1,s2,s3,s4,s5,s6],1))
+    # celular (≤ 700 px): o selo da Situação quebra linha para Requisição e Situação ficarem à vista sem rolar a grade (SUP §2.4, AC-SUP-12)
+    E.EXTRA.append('<style>@media (max-width:700px){.est-req [role=row] [role=cell]:nth-child(2) span{white-space:normal!important}}</style>')
+    s1=bloco('Requisições das O.S.','Toque na requisição: o painel mostra a conta, o que separar e a ação (entregar, receber a sobra ou conciliar o consumo).',f'<div class="est-req">{g_req}</div>')
+    nf_btn=f'<button type="button" onClick="{H("est_nf_new")}" style="{_MINI}">Registrar NF recebida</button>'
+    s2=bloco('Notas e parcelas em quarentena','Confira a nota contra o pedido e o material; a parcela em quarentena só sai com o laudo, documento por documento.',g_rec,nf_btn)
+    cl=(f'<div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;"><label style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: {MUTED};">Local'
+        f'<select aria-label="Local a contar" value="{H("cl_v")}" onChange="{H("cl_set")}" style="font-family: inherit; font-size: 12px; padding: 4px 8px; border-radius: 8px; border: 1px solid {LINE};">'
+        f'<sc-for list="{H("cl_opts")}" as="o" hint-placeholder-count="3"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select></label>'
+        f'<button type="button" onClick="{H("cl_go")}" style="{_MINI}">Contar local</button></div>')
+    s3=bloco('Contagens','Conte sem ver o saldo; a diferença vai à gestora com a causa. Quem contou e aprova fica com revisão posterior.',g_cnt,cl)
+    vazio_prod=(f'<sc-if value="{H("prod_nada")}" hint-placeholder-val="{F()}"><div style="padding: 14px 4px; font-size: 13px; color: {MUTED};">Nenhum lote de produto acabado nesta fazenda. '
+                f'A Colheita registra aqui o que colhe, na unidade de mercado da cultura (sc, t, cx).</div></sc-if>'
+                f'<sc-if value="{H("prod_tem")}" hint-placeholder-val="{F()}">{g_prod}</sc-if>')
+    s4=(chips('est_modos','Modo de Confira saldos')
+        + f'<sc-if value="{H("m_lotes")}" hint-placeholder-val="{H("true")}">'+bloco('Saldos por lote','Físico − reservado − bloqueado = disponível; toque no lote para ver reservas, custódias, parcelas e o extrato.',g_lot)+'</sc-if>'
+        + f'<sc-if value="{H("m_movs")}" hint-placeholder-val="{F()}">'+bloco('Movimentos','Cada movimento do estoque, da web e do app, com quem agiu.',
+              f'<sc-if value="{H("mov_tem")}" hint-placeholder-val="{H("true")}">{g_mov}</sc-if>'
+              f'<sc-if value="{H("mov_nada")}" hint-placeholder-val="{F()}"><div style="padding: 14px 4px; font-size: 13px; color: {MUTED};">Nenhum movimento desde o início da demonstração.</div></sc-if>')+'</sc-if>'
+        + f'<sc-if value="{H("m_prod")}" hint-placeholder-val="{F()}">'+bloco('Produção','Produto acabado da Colheita, por lote, na unidade da cultura.',vazio_prod)+'</sc-if>')
+    secoes=''.join(f'<sc-if value="{H("s"+str(i))}" hint-placeholder-val="{H("true") if i==1 else F()}"><div style="display: flex; flex-direction: column; gap: 14px;">{s}{navpe()}</div></sc-if>'
+                   for i,s in enumerate([s1,s2,s3,s4],1))
     vazio=(f'<sc-if value="{H("est_vazio")}" hint-placeholder-val="{F()}"><div style="background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; padding: 28px 24px; display: flex; align-items: center; gap: 8px; font-size: 14px;">'
            f'<span>Nenhum estoque na Boa Vista</span><span style="color: {MUTED};">·</span>'
            f'<button type="button" onClick="{H("est_versr")}" style="border: 0; background: transparent; color: {ACC}; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; padding: 0;">Ver Santa Rita</button></div></sc-if>')
-    corpo=vazio+f'<sc-if value="{H("est_tem")}" hint-placeholder-val="{H("true")}">{etapas}</sc-if>'
-    prim=f'<button type="button" onClick="{H("prim_fn")}" style="{H("prim_st")}">{H("prim_t")}</button>'
+    corpo=vazio+f'<sc-if value="{H("est_tem")}" hint-placeholder-val="{H("true")}">{secoes}</sc-if>'
     HEIGHTS37[fname]=1180
-    shell37('EST','Estoque',corpo,fname=fname,subtitle='Receba, entregue por O.S., receba devoluções e conte; cada movimento atualiza saldos, O.S. e app.',
+    shell37('EST','Estoque',corpo,fname=fname,subtitle='Atenda requisições, receba e inspecione, conte e confira saldos; cada movimento atualiza O.S., Compras e app.',
             steps=secoes_state(NOMES,label='Seções do estoque'),primary_html=None,ctx=('Fazenda Santa Rita','Todos os depósitos',None),search=False)   # trabalho paralelo: seções em qualquer ordem, não etapas (UX-ACAO-UNICA-20261003)
 
-JS=r'''
-// ===== Processo · Estoque (6 etapas numa só tela; lê e muda o cenário compartilhado com O.S. e App) =====
+JS_TELA=r'''
+// ===== Estoque · tela (4 seções; a linha identifica, o painel do registro resolve) =====
 function GR(id){ return GRIDS.find(g=>g.id===id); }
 // Gancho de teste/inspeção (o script da tela roda isolado): os testes est_* leem e mudam o cenário na própria página.
-try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenDevolver, cenReceber, cenLiberarQuarentena, cenContar, cenAprovarAjuste, cenConfirmarRecebimento, cenIniciarTurno, cenFecharTurno, cenSinal, cenPodeEncerrar, cenConciliar }; } catch (e) {}
-function nf(n,d){ return Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:d||0,maximumFractionDigits:d||0}); }
-function eq(n,un){ n=Number(n)||0; const d=Math.abs(n-Math.round(n))<1e-6?0:(Math.abs(n*10-Math.round(n*10))<1e-6?1:2); return nf(n,d)+(un?' '+un:''); }
-function esig(n,un){ return (n>0?'+':(n<0?'−':''))+eq(Math.abs(n),un); }
-function eblank(x){ return x===null||x===undefined||String(x).trim()===''; }
-function elotId(s){ return String(s||'').split(' · ')[0].trim(); }
-// datas tipadas (TABELAS-FOCO): ISO no valor (ordena), dd/mm/aaaa ou mm/aaaa no texto; "previsto 24/09" usa o ano de hoje
-function eiso(s){ const t=String(s||'').replace(/^previsto /,'').replace(/ \(previsto\)$/,'').trim(); let m=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(t); if(m) return m[3]+'-'+m[2]+'-'+m[1];
-  m=/^(\d{2})\/(\d{2})$/.exec(t); return m?String(E2.hoje).split('/')[2]+'-'+m[2]+'-'+m[1]:''; }
-function edmy(iso){ const a=String(iso||'').split('-'); return a.length===3?a[2]+'/'+a[1]+'/'+a[0]:'—'; }
-function eym(s){ const m=/^(\d{2})\/(\d{4})$/.exec(String(s||'')); return m?m[2]+'-'+m[1]:''; }
-function eval_(s){ const m=/^(\d{2})\/(\d{4})$/.exec(String(s||'')); return m?Number(m[2])*100+Number(m[1]):999999; }
-function ehojeYM(){ const a=String(E2.hoje).split('/'); return Number(a[2])*100+Number(a[1]); }
-function ereqN(id){ return Number(String(id||'').replace(/\D/g,''))||0; }
-const EOK=['Liberadas','Em execução'];
-const FCOR={'A liberar':'gray','Liberadas':'green','Em execução':'green','Em conferência':'yellow','Encerradas':'gray'};
-const EFASE={'A liberar':'a liberar','Liberadas':'liberada','Em execução':'em execução','Em conferência':'em conferência','Encerradas':'encerrada'};
-// embalagem: "galão 20 L" → 16 galões
-function eemb(emb){ const m=/^(.*?)\s*(\d[\d.]*)\s*(kg|L)\b/.exec(String(emb||'')); return m?{nome:m[1].trim(),n:Number(m[2].replace(/\./g,'')),un:m[3]}:null; }
-function eplur(nome,k){ if(k===1) return nome; return nome.split(' ').map((w,i,a)=>i<a.length-1?w:(/ão$/.test(w)?w.replace(/ão$/,'ões'):w+'s')).join(' '); }
-function epk(q,emb){ const e=eemb(emb); if(!e||!(q>1e-9)||!(e.n>0)) return ''; const w=Math.floor(q/e.n+1e-9), r=q-w*e.n; if(!w) return 'menos de 1 '+e.nome; return w+' '+eplur(e.nome,w)+(r>1e-6?' + '+eq(r,e.un):''); }
+try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenDevolver, cenReceber, cenLaudo, cenContar, cenAprovarAjuste, cenConfirmarRecebimento, cenIniciarTurno, cenFecharTurno,
+  cenSinal, cenPodeEncerrar, cenConciliar, cenVer, cenDisp, cenQuar, cenResTot, estEntregarReq, estFila, estContadores, estAbertura, estProducao }; } catch (e) {}
+function efaz(self){ return self.state.mf_faz||'Santa Rita'; }
+function eAlvo(rid){ const a=String(rid||'').split('|'); return {t:a[0],a:a[1]||'',b:a.slice(2).join('|')}; }
+function eNovaChave(m){ return 'EST-'+m+'-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7); }
+function eRecebedores(C){ const s=new Set(E2.pessoas||[]); Object.values(C.ordens||{}).forEach(o=>{ if(o.resp) s.add(o.resp); }); return [...s].sort((a,b)=>a.localeCompare(b,'pt-BR')); }
 
-// ---------- leitura do cenário ----------
-// reserva feita para o item (na liberação da O.S. ou no início da demonstração); só ela pode ser consumida pela entrega
-function eresTot(c,rid,prod){ return cenResTot(c,rid,prod); }
-// turno fechado sem sinal: o consumo ainda está no aparelho; o Estoque vê consumo e custódia mudarem só quando o app envia
-// (cenFecharTurno já baixou a custódia no aparelho; o item exibido devolve essa baixa até o envio · CEN_BAIXA_NO_SINAL desliga)
-function epCons(o,prod){ if(typeof CEN_BAIXA_NO_SINAL!=='undefined') return 0;
-  return (o.ap||[]).filter(a=>a.sinc===false).reduce((s,a)=>s+(Number((a.cons||{})[prod])||0),0); }
-function eitem(c,r,it0){ const o=c.ordens[r.os]||{}; const sq=Math.min(epCons(o,it0.prod),it0.consumido||0);
-  const it=sq>1e-9?Object.assign({},it0,{consumido:it0.consumido-sq,custodia:it0.custodia+sq}):it0;
-  const l=c.lotes[it.prod+'|'+it.lote]||null; const pend=cenSaldoEntregar(it);
-  const imp=(o.selos||[]).find(s=>/impedida/i.test(s.t||'')); const im=E2.imped[r.os]||null;
-  const bloq=imp?(im?im.txt:(r.os+' '+String(imp.t).toLowerCase())):''; const selo=imp?(im?im.selo:'O.S. impedida'):'';
-  const pode=!bloq&&EOK.indexOf(o.etapa)>=0;
-  let motivo=bloq;
-  if(!motivo&&!pode) motivo=(o.etapa==='A liberar')?(r.os+' aguarda a liberação na O.S. (agrônomo)'):(r.os+' '+(EFASE[o.etapa]||String(o.etapa||'').toLowerCase())+': sem nova entrega');
-  const resP=l?Math.max(0,Math.min(l.reservado,eresTot(c,r.id,it.prod)-it.entregue)):0;
-  const sinal=(o.ap||[]).some(a=>a.sinc===false);  // apontamento no aparelho: a sobra só é conferida depois do envio
-  const cf=cenConfAbertas(c,r.os).find(k=>k.req===r.id&&k.prod===it.prod)||null;
-  return {id:r.id+'|'+it.prod, rid:r.id, os:r.os, o, it, l, un:it.un, pend, pode, bloq, selo, motivo, resP, livre:l?cenDisp(l)+resP:0, quem:it.quem||o.resp||'', sinal, cf}; }
-// consumo em conferência (CONC-07): relatado × custódia, quem concilia e as duas decisões do almoxarife (CMD-50)
-function ecfCel(k,c,ask,PF){ const h=[{k:'chip',t:'Consumo em conferência',c:'yellow'},{k:'mut',t:k.id+' · '+cenConfTxt(k,c)+' · '+k.resp}];
-  const exc=k.relatado-cenConfCust(c,k)>1e-9;   /* o excedente da custódia sai do lote: aceite do gestor (padrão 2) */
-  const AC=['almoxarife','gestor'], pode=exc?g2papel(PF,'gestor'):!!g2umPapel(PF,AC);   /* coberto pela custódia: almoxarife ou gestor (revisão do CTL-3, achado 3) */
-  if(ask!==k.id||!pode) return h.concat(pode?[{k:'act',t:'Aceitar consumo',fn:'cfa:'+k.id}]:[{k:'mut',t:'aceite: '+(exc?g2quem('gestor'):g2quemUm(AC))}]).concat([{k:'act',t:'Recusar relato',fn:'cfr:'+k.id}]);
-  let p; try{ p=cenConcPrevia(c,k.id); }catch(e){ p={erro:String(e.message||e)}; }
-  if(p.erro) return h.concat([{k:'mut',t:p.erro},{k:'act',t:'Recusar relato',fn:'cfr:'+k.id},{k:'act',t:'Voltar',fn:'cfno:x'}]);
-  return h.concat([{k:'txt',t:p.txt},{k:'act',t:'Confirmar aceite',fn:'cfok:'+k.id},{k:'act',t:'Voltar',fn:'cfno:x'}]); }
-function eitens(c){ const out=[]; Object.keys(c.reqs||{}).sort((a,b)=>ereqN(a)-ereqN(b)).forEach(k=>{ const r=c.reqs[k]; (r.itens||[]).forEach(it=>out.push(eitem(c,r,it))); }); return out; }
-function econta(x){ return eq(x.it.solicitado,x.un)+' solicitado − '+eq(x.it.consumido,x.un)+' consumido − '+eq(x.it.custodia,x.un)+' em custódia'; }
-function elotes(c){ return Object.keys(c.lotes).map(k=>Object.assign({key:k},c.lotes[k])); }
-function eitemDisp(c,prod){ return Object.values(c.lotes).filter(l=>l.prod===prod).reduce((a,l)=>a+cenDisp(l),0); }
-function elotLbl(l){ return l.lote+' · '+l.prod+' · '+l.local; }
-function elotKey(c,lbl){ const a=String(lbl||'').split(' · '); const k=(a[1]||'').trim()+'|'+(a[0]||'').trim(); return c.lotes[k]?k:null; }
-// recebimentos: notas de base + recebimentos gravados (movimento recebimento-nf com os dados da conferência)
-function erecs(c){ const mv={}; (c.movs||[]).forEach(m=>{ if(m.tipo==='recebimento-nf'&&m.estRec&&!mv[m.estRec.id]) mv[m.estRec.id]=m.estRec; });
-  const out=E2.recs.map(b=>mv[b.id]?Object.assign({},b,mv[b.id],{ok:true,hoje:true}):b);
-  Object.keys(mv).forEach(k=>{ if(!E2.recs.some(b=>b.id===k)) out.push(Object.assign({},mv[k],{ok:true,hoje:true})); }); return out; }
-function epedBase(lbl){ const id=elotId(lbl); return E2.pedidos.find(p=>p.id===id)||null; }
-function epeds(c){ const RC=erecs(c); return E2.pedidos.map(p=>{ const x=Object.assign({},p); RC.forEach(r=>{ if(r.hoje&&elotId(r.ped)===p.id) x.a_entregar=Math.max(0,x.a_entregar-(Number(r.conf)||0)); }); return x; }); }
-function efert(lbl){ const p=epedBase(lbl); return !!(p&&E2.sem_validade.indexOf(p.grupo)>=0); }
-// contagens: registros de base + os gravados no cenário (c.estInv)
-function einvs(c){ const S=c.estInv||{}; const out=E2.contagens.map(b=>S[b.id]||b); Object.keys(S).sort().forEach(k=>{ if(!E2.contagens.some(b=>b.id===k)) out.push(S[k]); }); return out; }
-function einvRec(c,id){ const r=einvs(c).find(x=>x.id===id); return r?cenClone(r):null; }
-function eput(c,rec){ c.estInv=c.estInv||{}; c.estInv[rec.id]=rec; }
-function eajuste(c,rec){ return rec&&rec.aj?((c.ajustes||[]).find(a=>a.id===rec.aj)||null):null; }
-function econtou(rec){ return !!rec&&rec.cont!==null&&rec.cont!==undefined&&rec.cont!==''; }
-function enovoInv(c){ let n=2612; const ids=einvs(c).map(x=>x.id); while(ids.indexOf('INV-'+n)>=0) n++; return 'INV-'+n; }
-const MTIPO={'reserva':'Reserva','entrega':'Entrega','recebimento':'Recebimento confirmado no app','consumo':'Consumo apontado no app','devolucao':'Devolução',
-  'recebimento-nf':'Recebimento de nota','inspecao':'Quarentena liberada','contagem':'Contagem sem diferença','ajuste':'Ajuste de inventário'};
-function emovQtd(m){ const u=m.un||''; switch(m.tipo){ case 'entrega': return '−'+eq(m.qtd,u); case 'devolucao': case 'recebimento-nf': return '+'+eq(m.qtd,u);
-  case 'ajuste': return esig(m.qtd,u); case 'reserva': return eq(m.qtd,u)+' reservados'; case 'inspecao': return eq(m.qtd,u)+' liberados'; default: return ''; } }
-function emovTxt(m){ const u=m.un||'';
-  if(m.tipo==='reserva') return 'reserva '+m.req+' → '+m.os+': '+eq(m.qtd,u)+' reservados';
-  if(m.tipo==='entrega') return 'entrega '+m.req+' → '+m.os+': −'+eq(m.qtd,u)+' ('+m.quem+')';
-  if(m.tipo==='devolucao') return 'devolução '+m.req+' ('+m.os+'): +'+eq(m.qtd,u)+(m.apto?' apta':' bloqueada para inspeção');
-  if(m.tipo==='recebimento-nf') return 'recebimento '+m.doc+': +'+eq(m.qtd,u)+(m.apto?' apto':' em quarentena')+(m.val&&m.val!=='—'?' · validade '+m.val:'');
-  if(m.tipo==='inspecao') return 'quarentena liberada '+(m.doc?'com o laudo '+m.doc+' por '+m.quem:'após inspeção')+': '+eq(m.qtd,u)+' passam a disponível'+(m.rev?' · '+m.rev:'');
-  if(m.tipo==='contagem') return 'contagem '+(m.doc?m.doc+' ':'')+'sem diferença';
-  if(m.tipo==='ajuste') return 'ajuste de inventário '+(m.doc?m.doc+' ':'')+'aprovado por '+(m.quem||'gestor')+': '+esig(m.qtd,u)+(m.rev?' · '+m.rev:'');
-  return emovTipo(m); }
-// consumo: o canal do apontamento (app ou web) ou o aceite do almoxarife (conf = o caso conciliado)
-function emovTipo(m){ if(m.tipo==='consumo'&&m.origem!=='app') return typeof m.conf==='string'?'Consumo aceito na conferência':'Consumo apontado na web'; return MTIPO[m.tipo]||m.tipo; }
-// lote vencido: validade (mês/ano) anterior ao mês de hoje; entra todo em quarentena e não volta ao disponível
-function evenc(l){ return !!l&&!!l.validade&&l.validade!=='—'&&eval_(l.validade)<ehojeYM(); }
-// consumo apontado no app: "Glifosato 480 10, 2,4-D 806 5" (cenFecharTurno) → itens com a unidade da requisição ou da O.S.
-function econsDet(c,m){ const r=m.req&&c.reqs[m.req]; const o=c.ordens[m.os]||{};
-  return String(m.det||'').split(', ').map(s=>{ const x=/^(.*)\s(-?[\d.]+(?:,\d+)?)$/.exec(s.trim()); if(!x) return null; const prod=x[1];
-    const it=r&&r.itens.find(i=>i.prod===prod); const ins=(o.ins||[]).find(i=>i.p===prod);
-    return {prod,qtd:Number(x[2].replace(/\./g,'').replace(',','.')),un:(it&&it.un)||(ins&&ins.un)||''}; }).filter(Boolean); }
-// itens de cada movimento do app: a confirmação vale só para o que estava entregue e ainda sem confirmação naquele momento
-// (mesma regra de cenConfirmarRecebimento, refeita pela trilha); usa m.itens quando o cenário gravar a lista no movimento
-function eappItens(c){ const st={}, out={};
-  const S=(rid,prod)=>{ const k=rid+'|'+prod; if(!st[k]){ const r0=CEN0.reqs[rid]; const i0=r0&&r0.itens.find(i=>i.prod===prod); st[k]={cust:i0?i0.custodia:0,conf:!!(i0&&i0.confirmado)}; } return st[k]; };
-  (c.movs||[]).forEach(m=>{
-    if(m.tipo==='entrega'){ const s=S(m.req,m.prod); s.cust+=m.qtd; s.conf=false; }
-    else if(m.tipo==='devolucao'){ S(m.req,m.prod).cust-=m.qtd; }
-    else if(m.tipo==='consumo'){ const cs=econsDet(c,m); out[m.id]=cs; if(m.req) cs.forEach(x=>{ S(m.req,x.prod).cust-=x.qtd; }); }
-    else if(m.tipo==='recebimento'){ const r=c.reqs[m.req]; const l=[];
-      (r?r.itens:[]).forEach(it=>{ const s=S(m.req,it.prod); if(s.cust>1e-9&&!s.conf){ l.push({prod:it.prod,qtd:s.cust,un:it.un}); s.conf=true; } });
-      out[m.id]=Array.isArray(m.itens)?m.itens:l; } });
-  return out; }
-// consumo sem sinal: o apontamento é enviado por cenSinal (fila AP|…); o movimento fica pendente só enquanto a O.S. tiver apontamento sem envio
-function esemSinal(c){ const sem={}, porOS={};
-  (c.movs||[]).forEach(m=>{ if(m.sinc!==false) return; if(m.tipo==='consumo') (porOS[m.os]=porOS[m.os]||[]).push(m.id); else sem[m.id]=true; });
-  Object.keys(porOS).forEach(os=>{ const o=c.ordens[os]||{}; const n=(o.ap||[]).filter(a=>a.sinc===false).length; const ids=porOS[os]; ids.slice(Math.max(0,ids.length-n)).forEach(id=>{ sem[id]=true; }); });
-  return sem; }
-// documento do ajuste aprovado fora desta tela: o ajuste do cenário com o mesmo lote e a mesma diferença
-function emovDoc(c,m,usados){ if(m.doc||m.tipo!=='ajuste') return m.doc?{doc:m.doc,aj:m.aj||''}:null;
-  const aj=(c.ajustes||[]).find(a=>a.estado==='Aprovado'&&a.prod===m.prod&&a.lote===m.lote&&Math.abs(a.dif-m.qtd)<1e-9&&!usados[a.id]); if(!aj) return null;
-  usados[aj.id]=true; return {doc:aj.inv||aj.id,aj:aj.inv?aj.id:''}; }
+// ---------- painel do registro: modo, alvo e rascunho; a chave do comando nasce aqui (quem inicia) ----------
+// g_req: req (Entregar REQ inteira) · ent (Entregar parte) · dev (Registrar devolução) · conc (Aceitar/Aprovar consumo) · rec (Recusar relato) · cons (consulta)
+function eReqItem(C,rid,prod){ return eitens(C).find(x=>x.rid===rid&&x.it.prod===prod)||null; }
+function eReqLinha(C,rid){ return estFila(C,'Todas').find(y=>y.rid===rid)||null; }
+function eConf(C,id){ return (C.confs||[]).find(k=>k.id===id)||null; }
+function ePodeConc(C,k,PF){ return estSitCf(C,k)==='Aguardando gestora'?g2papel(PF,'gestor'):!!g2umPapel(PF,['almoxarife','gestor']); }
+function eDevOk(x){ return x.it.custodia>1e-9&&!x.sinal&&!x.cf; }
+function eModoReq(C,rid,PF){ const a=eAlvo(rid);
+  if(a.t==='K') return {modo:'conc',k:a.a};
+  if(a.t==='S'){ const k=(C.confs||[]).find(z=>z.os===a.a&&!z.req&&z.estado==='Em conferência'); return k?{modo:'conc',k:k.id}:{modo:'cons',os:a.a}; }
+  if(a.t==='I'){ const x=eReqItem(C,a.a,a.b); if(!x) return {modo:'cons',rid:a.a};
+    if(x.parte>1e-9) return {modo:'ent',rid:a.a,prod:a.b}; if(x.cf) return {modo:'conc',k:x.cf.id}; if(eDevOk(x)) return {modo:'dev',rid:a.a,prod:a.b}; return {modo:'cons',rid:a.a,prod:a.b}; }
+  const L=eReqLinha(C,a.a); if(!L) return {modo:'cons',rid:a.a};
+  if(L.inteira) return {modo:'req',rid:a.a};
+  const xp=L.itens.find(x=>x.parte>1e-9); if(xp) return {modo:'ent',rid:a.a,prod:xp.it.prod};
+  const kc=L.confs.find(k=>ePodeConc(C,k,PF))||L.confs[0]; if(kc) return {modo:'conc',k:kc.id};
+  const xd=L.itens.find(x=>eDevOk(x)&&x.sit==='Sobra a receber')||L.itens.find(eDevOk); if(xd) return {modo:'dev',rid:a.a,prod:xd.it.prod};
+  return {modo:'cons',rid:a.a}; }
+function eDraftReq(C,al){ const d={modo:al.modo};
+  if(al.modo==='req'){ const L=eReqLinha(C,al.rid); d.quemr=(L&&L.quem)||''; }
+  if(al.modo==='ent'){ const x=eReqItem(C,al.rid,al.prod); d.qtd=''; d.quem=x?x.quem:''; }
+  if(al.modo==='dev'){ d.dqtd=''; d.cond=E2.conds[0]; d.obs=''; }   /* devolução digitada, em branco: conferir é de propósito (PRD 42.4; CMD-45) */
+  if(al.modo==='rec') d.mot='';
+  return d; }
+function eLocalPadrao(p){ const nome=p?p.item:''; return {'KCl 60%':'Galpão 2','Semente de soja 58 W':'Câmara fria','Semente de soja 62 X':'Câmara fria'}[nome]||'Galpão 2'; }
+function eParcela(C,key,doc){ return estParcelas(C,'Todas').find(p=>p.key===key&&p.doc===doc)||null; }
+function eDraftRec(C,al){ const d={modo:al.modo};
+  if(al.modo==='nf'){ const b=al.rec||null; const ab=epeds(C).filter(x=>x.a_entregar>0); const ped=b?b.ped:((ab[0]||E2.pedidos[0]||{}).label||''); const p=epedBase(ped);
+    Object.assign(d,{ped,nf:b?b.nf:'',qtd_nf:b&&b.qtd_nf!=null?String(b.qtd_nf).replace('.',','):'',conf:'',quar:'0',apto:'',lote:b?b.lote:'',val:'',
+      local:b?b.local:eLocalPadrao(p),div:'Sem divergência',obs:''}); }
+  if(al.modo==='laudo'){ const p=eParcela(C,al.key,al.doc); d.laudo=''; d.res=(p&&p.venc)?'Reprovado':'Aprovado'; d.dest=''; }
+  return d; }
+function eModoRec(C,rid,PF){ const a=eAlvo(rid);
+  if(a.t==='N'){ const r=erecs(C).find(x=>x.id===a.a); if(!r) return {modo:'cons'}; return r.ok?{modo:'cons',rec:r}:{modo:'nf',rec:r}; }
+  if(a.t==='P'){ const ps=String(rid).split('|'); const key=ps[1]+'|'+ps[2], doc=ps.slice(3).join('|'); const p=eParcela(C,key,doc); if(!p) return {modo:'cons',key,doc};   /* a chave do lote já tem "|" (produto|lote) */
+    return (!p.laudo&&g2papel(PF,'gestor'))?{modo:'laudo',key,doc}:{modo:'cons',key,doc}; }
+  return {modo:'cons'}; }
+function eModoCnt(C,rid,PF){ const rec=einvRec(C,rid); if(!rec) return {modo:'cons',inv:rid}; const s=estInvSit(C,rec); const lote=rec.grupo||'';
+  if(s==='A contar'||s==='Recontar') return {modo:'contar',inv:rid,lote}; if(s==='Informar causa') return {modo:'causa',inv:rid,lote};
+  if(s==='Aguardando gestora') return g2papel(PF,'gestor')?{modo:'aprov',inv:rid}:{modo:'aguarda',inv:rid}; return {modo:'cons',inv:rid}; }
+const ERO={cons:1,aguarda:1};
+// consumo em conferência: sem o papel da decisão (excedente → gestora; coberto → almoxarife ou gestora) o painel é consulta, com "Recusar relato"
+function eRoConc(C,al,PF){ const k=eConf(C,al.k); if(!k||k.estado!=='Em conferência') return true; let p; try{ p=cenConcPrevia(C,k.id); }catch(e){ return true; } if(p.erro) return true; return !ePodeConc(C,k,PF); }
+function eFm(C,gid,rid,al,isNew){ const d=gid==='g_req'?eDraftReq(C,al):(gid==='g_rec'?eDraftRec(C,al):{modo:al.modo,cont:'',causa:''});
+  const obj=gid==='g_req'?(al.k||al.rid||''):(gid==='g_rec'?(al.key||''):(al.inv?((einvRec(C,al.inv)||{}).key||''):''));
+  const ro=!!ERO[al.modo]||(gid==='g_req'&&al.modo==='conc'&&eRoConc(C,al,g2perfil()));
+  return {rid,draft:d,orig:Object.assign({},d),errs:{},warn:false,ro,isNew:!!isNew,mode:'form',al,chave:eNovaChave(al.modo),obj,ver:obj?cenVer(C,obj):undefined}; }
+// um painel por vez: abrir o registro de uma grade fecha o painel das outras (o endereço pode trocar de seção)
+function eSoUm(self,gid){ const all=Object.assign({},self.state.g2||{}); ['g_req','g_rec','g_cnt','g_lot','g_mov','g_prod'].forEach(g=>{ if(g!==gid&&all[g]&&all[g].fm) all[g]=Object.assign({},all[g],{fm:null}); }); return all; }
+// abre o painel de um registro: um único setState (a tela junta a seção e a fazenda do endereço no mesmo patch)
+function ePatch(self,gid,rid,al,isNew,extra){ const all=eSoUm(self,gid); all[gid]=Object.assign({},all[gid]||{},{fm:eFm(cenGet(),gid,rid,al,isNew),fl:null,fmc:null});
+  return Object.assign({g2:all},extra||{}); }
+function eAbrir(self,gid,rid,al,isNew,extra){ self.setState(ePatch(self,gid,rid,al,isNew,extra)); }
+const EMODO={g_req:eModoReq,g_rec:eModoRec,g_cnt:eModoCnt};
+const _g2open0=g2open;
+g2open=function(self,sp,rid,e){ if(!EMODO[sp.id]) return _g2open0(self,sp,rid,e);
+  if(e&&e.target&&e.target.closest&&e.target.closest('a,button,input,select,textarea,label,[data-noedit]')) return;
+  const C=cenGet(); eAbrir(self,sp.id,rid,EMODO[sp.id](C,rid,g2perfil())); };
+// trocar de modo no mesmo painel (ação secundária): só navega, nunca executa; a chave nova nasce com o novo modo
+function eModo(self,gid,al){ const fm=g2st(self,gid).fm; if(!fm) return; eAbrir(self,gid,fm.rid,al); }
 
-// ---------- mudanças no cenário (sempre dentro de cenMudar) ----------
-// Recebimento: a parte apta e a parte em quarentena entram no mesmo lote (cenReceber); os dados da conferência ficam no movimento.
-function estReceber(c,d,ator){   /* ator: quem confere (perfil); o movimento grava quem agiu (revisão do CTL-3, achado 4) */ const n0=c.movs.length; const antes=eitemDisp(c,d.item);
-  if(d.apto>0) cenReceber(c,d.item,d.lote,d.apto,d.un,d.local,d.val,d.nf,true,ator);
-  if(d.quar>0) cenReceber(c,d.item,d.lote,d.quar,d.un,d.local,d.val,d.nf,false,ator);
-  if(c.movs.length===n0) throw new Error('Nada conferido para entrar no estoque.');
-  c.movs.slice(n0).forEach(m=>{ m.val=d.val; }); c.movs[n0].estRec=d;
-  return {msg:'Recebimento '+d.nf+' conferido: '+eq(d.conf,d.un)+' de '+d.item+' no lote '+d.lote+(d.val&&d.val!=='—'?' (validade '+d.val+')':'')+'. Disponível '+eq(antes,d.un)+' → '+eq(eitemDisp(c,d.item),d.un)+(d.quar?'; '+eq(d.quar,d.un)+' em quarentena ficam fora do disponível.':'.')}; }
-// Entrega: só a reserva desta requisição é baixada (a de outras O.S. fica); a nova entrega aguarda a confirmação no app.
-function estEntregar(c,rid,prod,qtd,quem,ator){ const r0=c.reqs[rid]; const it0=r0&&r0.itens.find(i=>i.prod===prod); const l=it0&&c.lotes[prod+'|'+it0.lote];
-  const res0=l?l.reservado:0; const own=it0&&l?Math.max(0,Math.min(res0,eresTot(c,rid,prod)-it0.entregue)):0;
-  const r=cenEntregar(c,rid,prod,qtd,quem,ator);
-  if(l) l.reservado=Math.max(0,res0-Math.min(qtd,own)); it0.confirmado=false; return r; }
-function estDevolver(c,rid,prod,qtd,apto,obs,ator){ const r=cenDevolver(c,rid,prod,qtd,apto,ator); if(obs) c.movs[c.movs.length-1].obs=obs;
-  const req=c.reqs[rid]; const o=c.ordens[req.os]||{}; const it=req.itens.find(i=>i.prod===prod); const pe=cenPodeEncerrar(c,req.os);
-  return {msg:r.msg+' Custódia de '+prod+' na '+req.os+': '+eq(it.custodia+qtd,it.un)+' → '+eq(it.custodia,it.un)+(o.etapa==='Em conferência'&&!pe?' · encerramento liberado.':'.')}; }
-function estContar(c,inv,key,contado,contador,causa,ator){ const l=c.lotes[key]; if(!l) throw new Error('Escolha o lote contado.');
-  const rec=einvRec(c,inv)||{id:inv,key,hist:[]}; const sis=l.fisico; const n0=(c.ajustes||[]).length;
-  const m0=c.movs.length; cenContar(c,key,contado); const aj=(c.ajustes||[]).length>n0?c.ajustes[c.ajustes.length-1]:null; const reg=ator?g2ator(ator,'almoxarife'):''; if(aj){ aj.inv=inv; aj.causa=causa; aj.contador=contador; aj.reg=reg; }   /* reg: quem registrou (perfil) */
-  c.movs.slice(m0).forEach(m=>{ if(m.tipo==='contagem'){ m.doc=inv; m.quem=contador; } });   // contagem sem diferença: documento e contador na trilha
-  Object.assign(rec,{key,sis,cont:contado,contador,reg,causa,aj:aj?aj.id:null}); eput(c,rec); const d=contado-sis;
-  return {msg:Math.abs(d)<1e-9?('Contagem '+inv+' conferida: sem diferença.'):('Contagem '+inv+' registrada: diferença '+esig(d,l.un)+' · '+aj.id+' aguarda o gestor. O saldo não muda até aprovar'+(causa?'.':' · informe a causa antes da aprovação.'))}; }
-function estCausa(c,inv,causa){ const rec=einvRec(c,inv); rec.causa=causa; const aj=eajuste(c,rec); if(aj) aj.causa=causa; eput(c,rec);
-  return {msg:'Causa da diferença de '+inv+' registrada'+(causa?': '+causa:'')+'. Quantidade e contador seguem travados; o ajuste aguarda aprovação.'}; }
-function estRecontar(c,inv){ const rec=einvRec(c,inv); if(!econtou(rec)) throw new Error(inv+' ainda não foi contada.');
-  const aj=eajuste(c,rec); if(aj&&aj.estado==='Aprovado') throw new Error('Ajuste '+inv+' já aprovado: não há recontagem.');
-  if(aj&&aj.estado==='Aguardando gestor') cenAprovarAjuste(c,aj.id,false);
-  rec.hist=(rec.hist||[]).concat([{cont:rec.cont,contador:rec.contador,causa:rec.causa||'',dif:rec.cont-rec.sis}]);
-  const outro=E2.contadores.find(x=>x!==rec.contador)||rec.contador;
-  Object.assign(rec,{cont:null,sis:null,causa:'',contador:outro,reg:'',aj:null}); eput(c,rec);
-  return {msg:'Recontagem de '+inv+' aberta: outro contador conta sem ver o saldo; a contagem anterior fica registrada na origem da linha.'}; }
-// Aprovar: a diferença contada é aplicada sobre o físico atual (movimentos depois da contagem continuam valendo).
-function estAprovar(c,inv,ator){ const rec=einvRec(c,inv); const l=rec&&c.lotes[rec.key]; if(!l||!econtou(rec)) throw new Error('Nada a aprovar nesta contagem.');
-  const d=rec.cont-rec.sis; if(Math.abs(d)<1e-9) throw new Error('Nada a aprovar nesta contagem.');
-  if(!String(rec.causa||'').trim()) throw new Error('Informe a causa da diferença de '+inv+' na contagem antes de aprovar o ajuste.');
-  let aj=eajuste(c,rec); if(aj&&aj.estado==='Aprovado') throw new Error('Ajuste '+inv+' já aprovado · nada aplicado de novo.');
-  const antes=l.fisico;
-  if(!aj){ const n0=(c.ajustes||[]).length; cenContar(c,rec.key,l.fisico+d); aj=c.ajustes[n0]; aj.inv=inv; aj.contador=rec.contador; aj.reg=rec.reg||''; rec.aj=aj.id; }   // contagem anterior ao cenário (INV-2609)
-  aj.contado=l.fisico+d; aj.dif=d; aj.causa=rec.causa; const m0=c.movs.length; cenAprovarAjuste(c,aj.id,true,ator); eput(c,rec);
-  c.movs.slice(m0).forEach(m=>{ if(m.tipo==='ajuste'){ m.doc=inv; m.aj=aj.id; } });   // documento do ajuste na trilha de movimentos
-  return {msg:'Ajuste '+inv+' ('+aj.id+') aprovado por '+aj.por+': '+esig(d,l.un)+' no lote '+l.lote+'. Físico '+eq(antes,l.un)+' → '+eq(l.fisico,l.un)+'.'+(aj.rev?' Fica '+aj.rev+'.':'')}; }
-
-// ---------- validação dos formulários (erro junto ao campo; o preenchido é mantido) ----------
+// ---------- validação e gravação (erro junto ao campo; o preenchido é mantido) ----------
+function enum_(d,k){ return eblank(d[k])?NaN:g2num(d[k]); }
 const ESTV={};
-ESTV.g_rec=(self,fm)=>{ const C=cenGet(); const e={}, d=fm.draft; const n=(k)=>g2num(d[k]); const conf=n('conf'), apto=n('apto'), quar=eblank(d.quar)?0:n('quar'), qnf=n('qtd_nf');
-  const p=epeds(C).find(x=>x.id===elotId(d.ped));
-  if(!isNaN(conf)&&!isNaN(apto)&&!isNaN(quar)&&Math.abs(apto+quar-conf)>1e-6) e.apto='Apta + quarentena deve somar a conferida ('+eq(conf,'kg')+').';
-  if(!isNaN(conf)&&!isNaN(qnf)&&Math.abs(conf-qnf)>1e-6&&d.div==='Sem divergência') e.div='A conferida difere da nota em '+eq(Math.abs(conf-qnf),'kg')+': indique a divergência.';
-  if(p&&!isNaN(conf)&&conf>p.a_entregar+1e-6&&d.div!=='Sobra') e.conf='Acima do saldo do pedido '+p.id+' ('+eq(p.a_entregar,'kg')+' a entregar): registre como sobra.';
+ESTV.g_req=(self,fm)=>{ const e={}, d=fm.draft, al=fm.al||{}, C=cenGet();
+  if(al.modo==='req'){ if(eblank(d.quemr)) e.quemr='Informe quem recebe.'; }
+  if(al.modo==='ent'){ const x=eReqItem(C,al.rid,al.prod); const n=enum_(d,'qtd'); if(eblank(d.quem)) e.quem='Informe quem recebe.';
+    if(isNaN(n)||!(n>0)) e.qtd='Informe a quantidade a entregar.';
+    else if(x&&n>x.pend+1e-9) e.qtd='Acima do saldo a entregar: '+eq(x.pend,x.un)+' ('+econta(x)+').';
+    else if(x&&n>x.ent+1e-9) e.qtd='Acima do reservado para a '+x.rid+': '+eq(x.ent,x.un)+'. Entregue só o que a liberação reservou.';
+    else if(x&&n>x.livreReq+1e-9) e.qtd='Lote insuficiente: o lote '+x.it.lote+' tem '+eq(x.livreReq,x.un)+' para a '+x.rid+'.'; }
+  if(al.modo==='dev'){ const x=eReqItem(C,al.rid,al.prod); const n=enum_(d,'dqtd');
+    if(x&&x.sinal){ e.dqtd='Apontamento de '+x.os+' no aparelho, aguardando sinal: receba a sobra depois do envio.'; return e; }
+    if(x&&x.cf){ e.dqtd='Consumo em conferência ('+x.cf.id+'): aceite ou recuse o relato antes de receber devolução.'; return e; }
+    if(isNaN(n)||!(n>0)) e.dqtd='Informe a quantidade conferida (o que voltou de fato).';
+    else if(x&&n>x.it.custodia+1e-9) e.dqtd='Acima da custódia: só '+eq(x.it.custodia,x.un)+' estão com '+x.quem+'.';
+    if(d.cond!==E2.conds[0]&&!String(d.obs||'').trim()) e.obs='Descreva a condição (ex.: embalagem aberta).'; }
+  if(al.modo==='rec'&&!String(d.mot||'').trim()) e.mot='Informe o motivo da recusa.';
+  return e; };
+ESTV.g_rec=(self,fm)=>{ const C=cenGet(); const e={}, d=fm.draft, al=fm.al||{};
+  if(al.modo==='laudo'){ if(!String(d.laudo||'').trim()) e.laudo='Informe o nº do laudo. Sem laudo a parcela continua bloqueada.'; return e; }
+  if(al.modo!=='nf') return e;
+  const n=(k)=>enum_(d,k); const conf=n('conf'), quar=eblank(d.quar)?0:n('quar'), qnf=n('qtd_nf'); const p=epeds(C).find(x=>x.id===elotId(d.ped)); const un=p?p.un:'';
+  if(!String(d.nf||'').trim()) e.nf='Informe a nota fiscal.';
+  if(isNaN(qnf)||!(qnf>0)) e.qtd_nf='Informe a quantidade na nota.';
+  if(isNaN(conf)) e.conf='Informe a quantidade conferida.';
+  if(!String(d.lote||'').trim()) e.lote='Informe o lote.';
+  if(!isNaN(conf)&&!isNaN(quar)&&quar>conf+1e-6) e.quar='A quarentena não passa da conferida ('+eq(conf,un)+').';
+  if(!isNaN(conf)&&!isNaN(qnf)&&Math.abs(conf-qnf)>1e-6&&d.div==='Sem divergência') e.div='A conferida difere da nota em '+eq(Math.abs(conf-qnf),un)+': indique a divergência.';
+  if(p&&!isNaN(conf)&&conf>p.a_entregar+1e-6&&d.div!=='Sobra') e.conf='Acima do saldo do pedido '+p.id+' ('+eq(p.a_entregar,un)+' a entregar): registre como sobra.';
   if(((!isNaN(quar)&&quar>0)||(d.div&&d.div!=='Sem divergência'))&&!String(d.obs||'').trim()) e.obs='Informe o motivo da quarentena ou da divergência.';
-  const nfn=String(d.nf||'').replace(/\D/g,''); if(nfn){ const dup=erecs(C).find(r=>r.id!==fm.rid&&String(r.nf||'').replace(/\D/g,'')===nfn); if(dup) e.nf=dup.nf+' já foi lançada: documento duplicado não cria segunda entrada.'; }
+  const nfn=String(d.nf||'').replace(/\D/g,''); if(nfn){ const dup=erecs(C).find(r=>r.ok&&r.id!==(al.rec?al.rec.id:'')&&String(r.nf||'').replace(/\D/g,'')===nfn); if(dup) e.nf=dup.nf+' já foi lançada: documento duplicado não cria segunda entrada.'; }
   const lt=String(d.lote||'').trim(); const outro=Object.values(C.lotes).find(l=>l.lote===lt&&p&&l.prod!==p.item); if(outro) e.lote='O lote '+lt+' é de '+outro.prod+'. Use outro código de lote.';
-  if(!efert(d.ped)){ const vv=String(d.val||'').trim();
+  if(!efert(d.ped)){ const vv=String(d.val||'').trim(); const apto=(isNaN(conf)?0:conf)-(isNaN(quar)?0:quar);
     if(!vv) e.val='Informe a validade do lote (mês/ano, ex.: 06/2027).';
     else if(!/^(0[1-9]|1[0-2])\/\d{4}$/.test(vv)) e.val='Use mês/ano com 4 dígitos no ano (ex.: 06/2027).';
-    else if(eval_(vv)<ehojeYM()){ if(!isNaN(apto)&&apto>1e-9) e.apto='Lote vencido em '+vv+': registre toda a quantidade em quarentena (Apta para uso = 0).';
+    else if(eval_(vv)<ehojeYM()){ if(apto>1e-9) e.quar='Lote vencido em '+vv+': registre toda a quantidade em quarentena (apta = 0).';
       if(!String(d.obs||'').trim()) e.obs='Informe o motivo (lote vencido em '+vv+').'; } }
   return e; };
-ESTV.g_ent=(self,fm)=>{ const e={}; const x=eitens(cenGet()).find(y=>y.id===fm.rid); if(!x) return e; const n=g2num(fm.draft.qtd); if(isNaN(n)) return e;
-  if(n>x.pend+1e-9) e.qtd='Acima do saldo a entregar: '+eq(x.pend,x.un)+' ('+econta(x)+').';
-  else if(x.l&&n>x.livre+1e-9) e.qtd='Acima do livre no lote '+x.l.lote+': '+eq(x.livre,x.un)+' (físico '+eq(x.l.fisico,x.un)+' − bloqueado '+eq(x.l.quarentena,x.un)+' − reservado para outras O.S. '+eq(Math.max(0,x.l.reservado-x.resP),x.un)+').';
+ESTV.g_cnt=(self,fm)=>{ const e={}, d=fm.draft, al=fm.al||{};
+  if(al.modo==='contar'){ const n=enum_(d,'cont'); if(isNaN(n)||n<0) e.cont='Informe a quantidade contada.'; }
+  if(al.modo==='causa'&&!String(d.causa||'').trim()) e.causa='Informe a causa da diferença.';
   return e; };
-ESTV.g_dev=(self,fm)=>{ const e={}; const x=eitens(cenGet()).find(y=>y.id===fm.rid); if(!x) return e; const n=g2num(fm.draft.qtd);
-  if(x.sinal){ e.qtd='Apontamento de '+x.os+' no aparelho, aguardando sinal: receba a sobra depois do envio.'; return e; }
-  if(x.cf){ e.qtd='Consumo em conferência ('+x.cf.id+'): aceite ou recuse o relato antes de receber devolução.'; return e; }
-  if(!isNaN(n)&&n>x.it.custodia+1e-9) e.qtd='Acima da custódia: só '+eq(x.it.custodia,x.un)+' estão com '+x.quem+'.';
-  if(fm.draft.cond!==E2.conds[0]&&!String(fm.draft.obs||'').trim()) e.obs='Descreva a condição (ex.: embalagem aberta).';
-  return e; };
-ESTV.g_cnt=(self,fm)=>{ const e={}; const C=cenGet(); if(!elotKey(C,fm.draft.lote)){ e.lote='Escolha o lote contado.'; return e; }
-  const rec=fm.rid?einvRec(C,fm.rid):null; const h=(rec&&rec.hist)||[]; const ant=h.length?h[h.length-1]:null;
-  if(ant&&!econtou(rec)&&fm.draft.contador===ant.contador) e.contador='Recontagem exige outro contador: '+ant.contador+' fez a contagem anterior.';
-  return e; };
-// ---------- gravação: cada formulário vira uma mudança no cenário ----------
-const ESAVE={}, ECAMPO={g_rec:'lote',g_ent:'qtd',g_dev:'qtd',g_cnt:'cont'};
-ESAVE.g_rec=(self,fm)=>{ const d=fm.draft; const p=epedBase(d.ped); const n=k=>eblank(d[k])?0:g2num(d[k]); const nfv=String(d.nf||'').trim();
-  const id=fm.rid||('r'+(nfv.replace(/\D/g,'')||String(Date.now()).slice(-6))); const base=E2.recs.find(b=>b.id===id)||{};
-  const rec={id,nf:nfv,data:base.data||'',ped:d.ped,item:p.item,un:p.un,qtd_nf:n('qtd_nf'),conf:n('conf'),apto:n('apto'),quar:n('quar'),lote:String(d.lote||'').trim(),
+function eComprovante(self,gid,fm,r){ const all=Object.assign({},self.state.g2||{}); all[gid]=Object.assign({},all[gid]||{},{fm:Object.assign({},fm,{ro:true,rcb:r.msg||'',errs:{},warn:false})});
+  self.setState({g2:all,cenrev:Date.now(),g2toast:(r.repetido?'Já registrado: ':'')+(r.msg||'Registrado.')}); }
+function eErro(self,gid,fm,campo,msg){ g2set(self,gid,{fm:Object.assign({},fm,{errs:{[campo]:msg},warn:false})}); }
+const ESAVE={};
+ESAVE.g_req=(self,fm)=>{ const d=fm.draft, al=fm.al||{}, PF=g2perfil(); const cmd=(nome,payload)=>({chave:fm.chave,nome,obj:fm.obj,ver:fm.ver,payload});
+  if(al.modo==='req'){ const q=d.quemr; const rot=estRotuloReq(cenGet(),al.rid,q);
+    return [cenMudar(null,c=>estEntregarReq(c,al.rid,q,PF),cmd('entregar-req',rot.itens)),'quemr']; }
+  if(al.modo==='ent'){ const n=g2num(d.qtd); return [cenMudar(null,c=>estEntregar(c,al.rid,al.prod,n,d.quem,PF),cmd('entregar',[al.prod,n,d.quem])),'qtd']; }
+  if(al.modo==='dev'){ const n=g2num(d.dqtd), apto=d.cond===E2.conds[0], obs=String(d.obs||'').trim();
+    return [cenMudar(null,c=>estDevolver(c,al.rid,al.prod,n,apto,obs,PF),cmd('devolver',[al.prod,n,apto,obs])),'dqtd']; }
+  if(al.modo==='conc') return [cenMudar(null,c=>cenConciliar(c,al.k,true,undefined,PF),cmd('conciliar',[al.k,true])),'_'];
+  if(al.modo==='rec'){ const m=String(d.mot||'').trim(); return [cenMudar(null,c=>cenConciliar(c,al.k,false,m,PF),cmd('conciliar',[al.k,false,m])),'mot']; }
+  return [{erro:'Consulta: nada a registrar.'},'_']; };
+ESAVE.g_rec=(self,fm)=>{ const d=fm.draft, al=fm.al||{}, PF=g2perfil(); const cmd=(nome,payload)=>({chave:fm.chave,nome,obj:fm.obj,ver:fm.ver,payload});
+  if(al.modo==='laudo'){ const num=String(d.laudo||'').trim(), res=d.res, dest=String(d.dest||'').trim();
+    return [cenMudar(null,c=>cenLaudo(c,al.key,al.doc,num,res,PF,dest),cmd('laudo',[al.key,al.doc,num,res,dest])),'laudo']; }
+  const p=epedBase(d.ped)||{}; const n=k=>eblank(d[k])?0:g2num(d[k]); const nfv=String(d.nf||'').trim();
+  const id=(al.rec&&al.rec.id)||('r'+(nfv.replace(/\D/g,'')||String(Date.now()).slice(-6))); const base=E2.recs.find(b=>b.id===id)||{};
+  const conf=n('conf'), quar=n('quar');
+  const rec={id,nf:nfv,data:base.data||'',ped:d.ped,item:p.item,un:p.un,qtd_nf:n('qtd_nf'),conf,apto:Math.max(0,conf-quar),quar,lote:String(d.lote||'').trim(),
     val:efert(d.ped)?'—':String(d.val||'').trim(),local:d.local,div:d.div||'Sem divergência',obs:String(d.obs||'').trim()};
-  const r=cenMudar(null,c=>estReceber(c,rec,g2perfil())); r.fl=id; return r; };
-ESAVE.g_ent=(self,fm)=>{ const x=eitens(cenGet()).find(y=>y.id===fm.rid); if(!x) return {erro:'Requisição não encontrada.'};
-  return cenMudar(null,c=>estEntregar(c,x.rid,x.it.prod,g2num(fm.draft.qtd),fm.draft.quem,g2perfil())); };
-ESAVE.g_dev=(self,fm)=>{ const x=eitens(cenGet()).find(y=>y.id===fm.rid); if(!x) return {erro:'Requisição não encontrada.'};
-  return cenMudar(null,c=>estDevolver(c,x.rid,x.it.prod,g2num(fm.draft.qtd),fm.draft.cond===E2.conds[0],String(fm.draft.obs||'').trim(),g2perfil())); };
-ESAVE.g_cnt=(self,fm)=>{ const d=fm.draft; const C=cenGet(); const rec=fm.rid?einvRec(C,fm.rid):null; const causa=String(d.causa||'').trim();
-  if(econtou(rec)) return cenMudar(null,c=>estCausa(c,rec.id,causa));
-  const key=elotKey(C,d.lote); const inv=rec?rec.id:enovoInv(C); const r=cenMudar(null,c=>estContar(c,inv,key,g2num(d.cont),d.contador,causa,g2perfil())); r.fl=inv; return r; };
-function efields(sp,fm){ const e={}; (sp.edit.fields||[]).forEach(f=>{ if(f.ro||(f.newOnly&&!fm.isNew)) return; const val=String(fm.draft[f.k]===undefined?'':fm.draft[f.k]).trim();
-  if(f.req&&!val){ e[f.k]='Informe '+f.l.toLowerCase()+'.'; return; }
+  return [cenMudar(null,c=>estReceber(c,rec,PF),cmd('receber',[rec.nf,rec.conf,rec.quar,rec.lote])),'lote']; };
+ESAVE.g_cnt=(self,fm)=>{ const d=fm.draft, al=fm.al||{}, PF=g2perfil(); const C=cenGet(); const rec=einvRec(C,al.inv); const cmd=(nome,payload)=>({chave:fm.chave,nome,obj:fm.obj,ver:fm.ver,payload});
+  if(al.modo==='contar'){ const n=g2num(d.cont); const contador=g2ator(PF,'almoxarife'); return [cenMudar(null,c=>estContar(c,al.inv,rec.key,n,contador,'',PF),cmd('contar',[al.inv,n,contador])),'cont']; }
+  if(al.modo==='causa'){ const causa=String(d.causa||'').trim(); return [cenMudar(null,c=>estCausa(c,al.inv,causa),cmd('causa',[al.inv,causa])),'causa']; }
+  if(al.modo==='aprov') return [cenMudar(null,c=>estAprovar(c,al.inv,PF),cmd('aprovar',[al.inv])),'_'];
+  return [{erro:'Consulta: nada a registrar.'},'_']; };
+function efields(sp,fm){ const e={}; (sp.edit.fields||[]).forEach(f=>{ if(f.ro||(f.cond&&String(fm.draft[f.cond.k])!==String(f.cond.eq))) return; const val=String(fm.draft[f.k]===undefined?'':fm.draft[f.k]).trim();
   if(f.t==='num'&&val){ const n=g2num(val); if(isNaN(n)){ e[f.k]='Use um número (ex.: 12,5).'; return; } if(f.min!==undefined&&n<f.min) e[f.k]=(f.min>0?'Informe um valor maior que zero.':'Não use valor negativo.'); } }); return e; }
 const _g2save0=g2save;
 g2save=function(self,sp){ const fm=g2st(self,sp.id).fm; if(!fm||fm.ro||!ESAVE[sp.id]) return _g2save0(self,sp);
   const e=Object.assign({},ESTV[sp.id]?(ESTV[sp.id](self,fm)||{}):{},efields(sp,fm));
   if(Object.keys(e).length){ g2set(self,sp.id,{fm:Object.assign({},fm,{errs:e,warn:false})}); return; }
-  const r=ESAVE[sp.id](self,fm)||{};
-  if(r.erro){ g2set(self,sp.id,{fm:Object.assign({},fm,{errs:{[ECAMPO[sp.id]]:r.erro},warn:false})}); return; }
-  g2set(self,sp.id,{fm:null,fl:r.fl||fm.rid}); self.setState({cenrev:Date.now(),g2toast:r.msg||'Salvo.'}); };
+  const out=ESAVE[sp.id](self,fm)||[{},'_']; const r=out[0]||{};
+  if(r.erro){ if(out[1]==='_') self.setState({g2toast:r.erro}); else eErro(self,sp.id,fm,out[1],r.erro); return; }
+  // contagem com diferença: o mesmo painel pede a causa (sem fechar); demais: comprovante no mesmo registro, a primária some
+  if(sp.id==='g_cnt'&&(fm.al||{}).modo==='contar'){ const C=cenGet(); const rec=einvRec(C,fm.al.inv); if(rec&&estInvSit(C,rec)==='Informar causa'){
+      const all=Object.assign({},self.state.g2||{}); all[sp.id]=Object.assign({},all[sp.id]||{},{fm:eFm(C,sp.id,fm.rid,{modo:'causa',inv:fm.al.inv,lote:fm.al.lote})});
+      self.setState({g2:all,cenrev:Date.now(),g2toast:r.msg||''}); return; } }
+  eComprovante(self,sp.id,fm,r); };
 // as grades desta tela são sempre recalculadas do cenário (nada fica preso no estado local da grade)
-const ECEN={g_rec:1,g_ent:1,g_dev:1,g_lot:1,g_cnt:1,g_mov:1};
+const ECEN={g_req:1,g_rec:1,g_lot:1,g_cnt:1,g_mov:1,g_prod:1};
 const _g2rows0=g2rows;
 g2rows=function(self,sp){ return ECEN[sp.id]?sp.rows:_g2rows0(self,sp); };
 
-function elotRow(c,l,ask,INV,GEST){ const un=l.un; const venc=evenc(l);
-  const mv=(c.movs||[]).filter(m=>m.prod===l.prod&&m.lote===l.lote).map(m=>({t:m.at+' · '+emovTxt(m)}));
-  const pend=INV.filter(x=>x.key===l.key&&econtou(x)&&Math.abs(x.cont-x.sis)>1e-9&&!(eajuste(c,x)&&eajuste(c,x).estado==='Aprovado')).map(x=>({t:'Ajuste '+x.id+' '+esig(x.cont-x.sis,un)+' aguardando aprovação · não aplicado ao saldo'}));
-  // lote vencido não volta ao disponível: sem "Liberar após inspeção"
-  const blq=l.quarentena>1e-9?[{k:'chip',t:eq(l.quarentena,un),c:'yellow'}].concat(venc?[]:(!GEST?[{k:'mut',t:'aguarda laudo · '+g2quem('gestor')+' libera'}]:(ask===l.key?[{k:'mut',t:'informe o laudo acima'},{k:'act',t:'Manter',fn:'libno:x'}]:[{k:'act',t:'Liberar após inspeção',fn:'libq:'+l.key}]))):[{k:'mut',t:'—'}];
-  return {id:'L|'+l.key,ro:true,v:{nome:l.lote,prod:l.prod,un,local:l.local,fis:l.fisico,res:l.reservado,blq:l.quarentena,disp:cenDisp(l),expo:'',cust:'',cos:'',val:l.validade,vali:eym(l.validade),sitl:(venc?'Vencido':(l.quarentena>1e-9?'Em quarentena':'Disponível'))},
-    s:{nome:l.lote,prod:l.prod,un,vali:(l.validade&&l.validade!=='—'?l.validade:''),sitl:(venc?'Vencido':(l.quarentena>1e-9?'Em quarentena':'Disponível'))},
-    p:{prod:[{k:'mut',t:l.prod}],fis:[{k:'txt',t:eq(l.fisico,un)}],res:l.reservado>1e-9?[{k:'txt',t:eq(l.reservado,un)}]:[{k:'mut',t:'—'}],blq,disp:[{k:'b',t:eq(cenDisp(l),un)}],expo:[{k:'mut',t:''}],cust:[{k:'mut',t:''}],cos:[{k:'mut',t:''}],
-       vali:[{k:(l.validade&&l.validade!=='—')?'txt':'mut',t:l.validade||'—'}],
-       sitl:[venc?{k:'chip',t:'Vencido',c:'red'}:(l.quarentena>1e-9?{k:'chip',t:'Em quarentena',c:'yellow'}:{k:'txt',t:'Disponível'})].concat(venc?[{k:'mut',t:'não volta ao disponível'}]:[])},
-    o:(mv.length?mv:[{t:'Sem movimentos desde o início da demonstração.'}]).concat(pend)}; }
+// ---------- linhas (uma variável por coluna; unidade junto do valor; sem comando na linha) ----------
+const SCOR={'O.S. impedida':'red','Aguarda liberação':'gray','Lote insuficiente':'red','Reserva parcial':'yellow','A entregar':'blue','Aguarda confirmação no app':'yellow',
+  'Consumo em conferência':'yellow','Aguardando gestora':'yellow','Sobra a receber':'yellow','Em uso':'gray','Concluída':'green','Nota prevista':'blue','Aguarda laudo':'yellow',
+  'Reprovada':'red','Vencida':'red','Conferida':'green','A contar':'blue','Recontar':'blue','Informar causa':'yellow','Ajustada':'green','Em estoque':'green'};
+function eChip(t){ const b=Object.keys(SCOR).find(k=>String(t).indexOf(k)===0); return {k:'chip',t,c:SCOR[b]||'gray'}; }
+function eLnkOS(os){ return {k:'link',t:os,h:'OS.dc.html#'+os}; }
+function eSoma(xs,f){ const us=[...new Set(xs.map(x=>x.un))]; if(us.length!==1) return null; return {q:xs.reduce((a,x)=>a+f(x),0),un:us[0]}; }
+function eRowsReq(C,faz){ const F=estFila(C,faz); const x0={};
+  const rows=F.map(L=>{ const its=L.itens; const id=L.semReq?'S|'+L.os:'R|'+L.rid; const ent=eSoma(its,x=>x.ent), cu=eSoma(its,x=>x.it.custodia);
+    const lot=[...new Set(its.map(x=>x.it.lote))]; const r={id,v:{req:L.semReq?L.os+' · sem requisição':L.rid,sit:L.sit,ent:ent?ent.q:'',cust:cu?cu.q:'',com:L.quem,os:L.os,lote:lot.join(', ')},s:{},p:{}};
+    r.p.req=L.semReq?[{k:'b',t:L.os},{k:'mut',t:'sem requisição'}]:[{k:'b',t:L.rid}].concat(its.length===1?[{k:'mut',t:its[0].it.prod}]:[{k:'mut',t:its.length+' itens'}]);
+    r.s.req=L.semReq?L.os+' sem requisição':L.rid+' '+its.map(x=>x.it.prod).join(' ');
+    r.p.sit=[eChip(L.sit)]; r.s.sit=L.sit;
+    r.p.ent=ent?[{k:ent.q>1e-9?'b':'mut',t:ent.q>1e-9?eq(ent.q,ent.un):'—'}]:[{k:'mut',t:'por item'}];   /* unidades diferentes não se somam: a quantidade fica nas linhas dos itens */ r.s.ent=ent&&ent.q>1e-9?eq(ent.q,ent.un):'';
+    r.p.cust=cu?[{k:cu.q>1e-9?'txt':'mut',t:cu.q>1e-9?eq(cu.q,cu.un):'—'}]:[{k:'mut',t:'—'}]; r.s.cust=cu&&cu.q>1e-9?eq(cu.q,cu.un):'';
+    r.p.com=L.quem?[{k:'txt',t:L.quem}]:[{k:'mut',t:'—'}]; r.s.com=L.quem; r.p.os=[eLnkOS(L.os)]; r.s.os=L.os;
+    r.p.lote=lot.length?[{k:'txt',t:lot.join(', ')}]:[{k:'mut',t:'—'}]; r.s.lote=lot.join(', ');
+    /* consumo em conferência da própria requisição também vira linha filha (o relato e quem decide à vista, sem abrir o painel) */
+    const kids=(its.length>1?its.map(x=>eRowItem(C,x)):[]).concat(L.confs.filter(k=>L.fora.indexOf(k)<0).map(k=>eRowFora(C,k,false))).concat(L.fora.map(k=>eRowFora(C,k,true)));
+    if(kids.length){ r.kids=kids; if(L.acao) x0[id]=true; }
+    return r; });
+  return {rows,x0}; }
+function eRowItem(C,x){ const it=x.it; const r={id:'I|'+x.rid+'|'+it.prod,v:{req:it.prod,sit:x.sit,ent:x.ent,cust:it.custodia,com:x.quem,os:x.os,lote:it.lote},s:{},p:{}};
+  r.p.req=[{k:'txt',t:it.prod}]; r.s.req=it.prod; r.p.sit=[eChip(x.sit)]; r.s.sit=x.sit;
+  r.p.ent=x.ent>1e-9?[{k:'b',t:eq(x.ent,x.un)}]:[{k:'mut',t:'—'}]; r.s.ent=x.ent>1e-9?eq(x.ent,x.un):'';
+  r.p.cust=it.custodia>1e-9?[{k:'txt',t:eq(it.custodia,x.un)}]:[{k:'mut',t:'—'}]; r.s.cust=it.custodia>1e-9?eq(it.custodia,x.un):'';
+  r.p.com=[{k:'txt',t:x.quem||'—'}]; r.s.com=x.quem; r.p.os=[eLnkOS(x.os)]; r.s.os=x.os; r.p.lote=[{k:'txt',t:it.lote}]; r.s.lote=it.lote; return r; }
+function eRowFora(C,k,fora){ if(fora===undefined) fora=true; const s=estSitCf(C,k); const rot=fora?'fora da requisição':'consumo relatado';
+  const r={id:'K|'+k.id,v:{req:k.prod+' · '+rot,sit:s,ent:'',cust:'',com:k.quem,os:k.os,lote:fora?'':k.lote},s:{},p:{}};
+  r.p.req=[{k:'txt',t:k.prod},{k:'mut',t:rot}]; r.s.req=k.prod+' '+rot; r.p.sit=[eChip(s),{k:'mut',t:k.id}]; r.s.sit=s;
+  r.p.ent=[{k:'mut',t:'—'}]; r.p.cust=[{k:'mut',t:'—'}]; r.s.ent=''; r.s.cust=''; r.p.com=[{k:'txt',t:k.quem||'—'}]; r.s.com=k.quem||''; r.p.os=[eLnkOS(k.os)]; r.s.os=k.os; r.p.lote=fora?[{k:'mut',t:'—'}]:[{k:'txt',t:k.lote}]; r.s.lote=fora?'':k.lote; return r; }
+function eRowsRec(C,faz){ const PD=epeds(C); const out=[];
+  estNotas(C,faz).forEach(x=>{ const p=PD.find(y=>y.id===elotId(x.ped)); const prev=/previsto/.test(String(x.data||''));
+    if(x.ok&&!x.hoje) return;   /* nota conferida antes de hoje: história no Movimentos e em Acompanhe pedidos */
+    const sit=x.ok?'Conferida':'Nota prevista'; const dt=eiso(x.data);
+    out.push({id:'N|'+x.id,v:{doc:x.nf+' ('+(p?p.id:'')+')',sit,item:x.item,qtd_nf:x.qtd_nf,quar:x.ok?(Number(x.quar)||0):'',prev:prev?dt:'',forn:p?p.forn:''},
+      s:{doc:x.nf+' '+(p?p.id:''),sit,item:x.item,qtd_nf:eq(x.qtd_nf,x.un),quar:x.ok&&x.quar?eq(x.quar,x.un):'',prev:prev&&dt?edmy(dt):'',forn:p?p.forn:''},
+      p:{doc:[{k:'b',t:x.nf},{k:'mut',t:p?p.id:''}],sit:[eChip(sit)],item:[{k:'txt',t:x.item}],qtd_nf:[{k:'txt',t:eq(x.qtd_nf,x.un)}],quar:x.ok&&x.quar?[{k:'txt',t:eq(x.quar,x.un)}]:[{k:'mut',t:'—'}],
+         prev:prev&&dt?[{k:'txt',t:edmy(dt)}]:[{k:'mut',t:'—'}],forn:[{k:'txt',t:p?p.forn:'—'}]}}); });
+  estParcelas(C,faz).forEach(pc=>{ const sit=pc.laudo?'Reprovada':(pc.venc?'Vencida · aguarda laudo':'Aguarda laudo'); const b=erecs(C).find(x=>x.nf===pc.doc); const p=b?PD.find(y=>y.id===elotId(b.ped)):null;
+    const req=/^REQ-/.test(pc.doc); const docT=pc.doc+(pc.ped?' ('+pc.ped+')':(p?' ('+p.id+')':''));
+    out.push({id:'P|'+pc.key+'|'+pc.doc,v:{doc:docT,sit,item:pc.prod,qtd_nf:b?b.qtd_nf:'',quar:pc.qtd,prev:'',forn:p?p.forn:''},
+      s:{doc:docT+' '+pc.lote,sit,item:pc.prod,qtd_nf:b?eq(b.qtd_nf,b.un):'',quar:eq(pc.qtd,pc.un),prev:'',forn:p?p.forn:(req?'devolução':'')},
+      p:{doc:[{k:'b',t:pc.doc},{k:'mut',t:'› '+pc.lote+(req?' · devolução':'')}],sit:[eChip(sit)],item:[{k:'txt',t:pc.prod}],qtd_nf:b?[{k:'txt',t:eq(b.qtd_nf,b.un)}]:[{k:'mut',t:'—'}],
+         quar:[{k:'b',t:eq(pc.qtd,pc.un)}],prev:[{k:'mut',t:'—'}],forn:[{k:p?'txt':'mut',t:p?p.forn:(req?'devolução da O.S.':'—')}]}}); });
+  return out; }
+function eRowsCnt(C,faz){ return estContagens(C,faz).map(rec=>{ const l=C.lotes[rec.key]; const un=l?l.un:''; const s=estInvSit(C,rec); const has=econtou(rec); const d=has?rec.cont-rec.sis:null;
+  const r={id:rec.id,v:{inv:rec.id,sit:s,prod:l?l.prod:'',lote:l?l.lote:'',local:l?l.local:'',cont:has?rec.cont:'',dif:d===null?'':d},s:{inv:rec.id,sit:s,prod:l?l.prod:'',lote:l?l.lote:'',local:l?l.local:'',cont:has?eq(rec.cont,un):'',dif:d===null?'':(Math.abs(d)<1e-9?'0':esig(d,un))},p:{}};
+  r.p.inv=[{k:'b',t:rec.id}]; r.p.sit=[eChip(s)].concat((s==='A contar'||s==='Recontar')&&rec.contador?[{k:'mut',t:'atribuída a '+String(rec.contador).split(' ')[0]}]:[]);
+  r.p.prod=[{k:'txt',t:l?l.prod:''}]; r.p.lote=[{k:'txt',t:l?l.lote:''}]; r.p.local=[{k:'txt',t:l?l.local:''}];
+  r.p.cont=has?[{k:'txt',t:eq(rec.cont,un)}]:[{k:'mut',t:'a contar'}]; r.p.dif=d===null?[{k:'mut',t:'—'}]:[{k:'chip',t:(Math.abs(d)<1e-9?'0':esig(d,un)),c:(Math.abs(d)<1e-9?'green':'red')}];
+  r.o=has?(rec.hist||[]).map(h=>({t:'Contagem anterior: '+eq(h.cont,un)+' por '+h.contador+' · diferença '+esig(h.dif,un)+(h.causa?' · causa: '+h.causa:'')})):[]; return r; }); }
+// contagem cega também na consulta: quem tem contagem aberta atribuída do lote não vê físico nem disponível (SUP §3; AC-SUP-08)
+function eCego(C,key,PF){ return einvs(C).some(r=>r.key===key&&!econtou(r)&&g2mesma(PF.k,r.contador)); }
+function eRowsLot(C,faz,loc,PF){ const INV=einvs(C); return elotes(C).filter(l=>estNaFaz(estFazLocal(l.local),faz)&&(!loc||l.local===loc)).sort((a,b)=>a.prod.localeCompare(b.prod,'pt-BR')||a.lote.localeCompare(b.lote)).map(l=>{
+  const un=l.un; const venc=evenc(l); const cego=eCego(C,l.key,PF); const vl=l.validade&&l.validade!=='—'?l.validade:'';
+  const r={id:'L|'+l.key,v:{prod:l.prod,lote:l.lote,fis:cego?'':l.fisico,res:l.reservado,blq:l.quarentena,disp:cego?'':cenDisp(l),vali:eym(vl)},s:{prod:l.prod,lote:l.lote,vali:vl},p:{}};
+  r.p.prod=[{k:'txt',t:l.prod}].concat(venc?[{k:'chip',t:'Vencido',c:'red'}]:[]); r.p.lote=[{k:'txt',t:l.lote}];
+  r.p.fis=cego?[{k:'mut',t:'— (contagem aberta)'}]:[{k:'txt',t:eq(l.fisico,un)}]; r.s.fis=cego?'':eq(l.fisico,un);
+  r.p.res=l.reservado>1e-9?[{k:'txt',t:eq(l.reservado,un)}]:[{k:'mut',t:'—'}]; r.s.res=l.reservado>1e-9?eq(l.reservado,un):'';
+  r.p.blq=l.quarentena>1e-9?[{k:'chip',t:eq(l.quarentena,un),c:'yellow'}]:[{k:'mut',t:'—'}]; r.s.blq=l.quarentena>1e-9?eq(l.quarentena,un):'';
+  r.p.disp=cego?[{k:'mut',t:'— (contagem aberta)'}]:[{k:'b',t:eq(cenDisp(l),un)}]; r.s.disp=cego?'':eq(cenDisp(l),un);
+  r.p.vali=[{k:vl?'txt':'mut',t:vl||'—'}];
+  // painel (consulta): a conta do disponível, local, reservas e custódias por O.S., parcelas com "Registrar laudo ›" e o extrato
+  const its=eitens(C).filter(x=>x.it.prod===l.prod&&x.it.lote===l.lote);
+  r.o=(cego?[{t:'Contagem aberta atribuída a você neste lote: físico e disponível ficam ocultos até contar.'}]:[{t:'Disponível = físico − reservado − bloqueado = '+eq(l.fisico,un)+' − '+eq(l.reservado,un)+' − '+eq(l.quarentena,un)+' = '+eq(cenDisp(l),un)}])
+    .concat([{t:'Local: '+l.local+(vl?' · validade '+vl:'')+(venc?' · vencido, não volta ao disponível':'')}])
+    .concat(its.filter(x=>x.resP>1e-9).map(x=>({t:'Reservado para a '+x.rid+' ('+x.os+'): '+eq(x.resP,un),h:'#req='+x.rid})))
+    .concat(its.filter(x=>x.it.custodia>1e-9).map(x=>({t:'Em custódia (fora do depósito): '+x.rid+' · '+x.os+' · '+eq(x.it.custodia,un)+' com '+x.quem,h:'#req='+x.rid})))
+    .concat((C.confs||[]).filter(k=>k.estado==='Em conferência'&&k.prod===l.prod&&k.lote===l.lote&&k.relatado-cenConfCust(C,k)>1e-9).map(k=>({t:'Exposição: '+eq(k.relatado-cenConfCust(C,k),un)+' em conferência ('+k.id+') podem sair deste lote se a gestora aceitar',h:'#req='+(k.req||'')})))
+    .concat(cenQuar(cenClone(l)).map(p=>({t:(p.laudo?'Parcela reprovada ('+p.laudo.num+'): ':'Registrar laudo da parcela ')+p.doc+' · '+eq(p.qtd,un)+(p.motivo?' · '+p.motivo:''),h:'#nf='+encodeURIComponent(p.doc)})))
+    .concat((C.movs||[]).filter(m=>m.prod===l.prod&&m.lote===l.lote).map(m=>({t:m.at+' · '+emovTxt(m)})))
+    .concat(INV.filter(x=>x.key===l.key&&econtou(x)&&Math.abs(x.cont-x.sis)>1e-9&&!(eajuste(C,x)&&eajuste(C,x).estado==='Aprovado')).map(x=>({t:'Ajuste '+x.id+' '+esig(x.cont-x.sis,un)+' aguardando a gestora · não aplicado ao saldo'})));
+  return r; }); }
+function eRowsMov(C){ const SEM=esemSinal(C), APPI=eappItens(C), AJU={}; (C.movs||[]).forEach(m=>{ if(m.aj) AJU[m.aj]=true; }); const dia=String(E2.hoje).slice(0,5);
+  return (C.movs||[]).slice().reverse().map(m=>{ const app=m.origem==='app'; const sem=!!SEM[m.id];
+    const li=APPI[m.id]||null; const tp=emovTipo(m); const dc=emovDoc(C,m,AJU); const dd=m.req||(dc&&dc.doc)||'';
+    const r={id:m.id,v:{hora:dia+' '+(m.at||''),tipo:tp,doc:dd,item:m.prod||'',lote:m.lote||'',qtd:'',quem:m.quem||''},s:{hora:dia+' '+(m.at||''),tipo:tp+(sem?' · Aguardando sinal':''),doc:dd,lote:m.lote||'',quem:m.quem||''},p:{}};
+    r.p.hora=[{k:'txt',t:dia+' '+(m.at||'')}]; r.p.tipo=[{k:'txt',t:tp}].concat(sem?[{k:'chip',t:'Aguardando sinal',c:'yellow'}]:[]);
+    r.p.doc=dd?[{k:'b',t:dd}]:[{k:'mut',t:'—'}]; r.p.lote=m.lote?[{k:'txt',t:m.lote}]:[{k:'mut',t:'—'}]; r.p.quem=[{k:'txt',t:m.quem||'—'}];
+    const lin=(a)=>a.reduce((o,p,i)=>o.concat(i?[{k:'br'},p]:[p]),[]);
+    r.p.item=m.prod?[{k:'txt',t:m.prod}]:(li&&li.length?lin(li.map(x=>({k:'txt',t:x.prod}))):(m.det?[{k:'mut',t:m.det}]:[{k:'mut',t:'—'}]));
+    r.s.item=m.prod||(li?li.map(x=>x.prod).join(', '):'')||m.det||'';
+    if(li&&li.length){ r.p.qtd=lin(li.map(x=>({k:'txt',t:eq(x.qtd,x.un)}))); r.s.qtd=li.map(x=>eq(x.qtd,x.un)).join(', '); const us=[...new Set(li.map(x=>x.un))]; r.v.qtd=us.length===1?li.reduce((a,x)=>a+(Number(x.qtd)||0),0):NaN; }
+    else { const q=emovQtd(m); const mq=String(q||'').match(/^([+−-]?[\d.]+(?:,\d+)?)\s*(\S*)/); if(mq){ r.v.qtd=Number(mq[1].replace(/\./g,'').replace(',','.').replace('−','-').replace('+','')); r.p.qtd=[{k:'txt',t:mq[1]+(mq[2]?' '+mq[2]:'')}]; r.s.qtd=r.p.qtd[0].t; }
+      else { r.p.qtd=[{k:'mut',t:'—'}]; r.s.qtd=''; } }
+    const cond=m.tipo==='devolucao'?(m.apto?'apta':'bloqueada para inspeção'):(m.tipo==='recebimento-nf'?(m.apto?'apto':'em quarentena'):(m.tipo==='reserva'?'reservados':''));
+    r.o=[{t:'Registro '+m.id+' · '+(app?'app':'web')+(cond?' · '+cond:'')}].concat(m.os?[{t:(m.req?'Requisição '+m.req+' da ':'Ordem ')+m.os,h:'OS.dc.html#'+m.os}]:[])
+      .concat(sem?[{t:'Registrado no aparelho às '+m.at+'; chega ao servidor quando o app tiver sinal.'}]:[]).concat(m.obs?[{t:'Observação: '+m.obs}]:[]).concat(m.rev?[{t:m.rev}]:[]);
+    return r; }); }
+function eRowsProd(C,faz){ return estProducao(C,faz).map(p=>{ const o=p.origem||{}; const orig=[o.os,o.talhao].filter(Boolean).join(' · ');
+  return {id:'Q|'+p.key,v:{nome:p.prod+' › '+p.lote,sit:p.sit,cult:p.cultura||'',qtd:p.qtd,local:p.local,orig,saf:o.safra||''},s:{nome:p.prod+' '+p.lote,sit:p.sit,qtd:p.qtdTxt,orig,saf:o.safra||''},
+    p:{nome:[{k:'b',t:p.lote},{k:'mut',t:p.prod}],sit:[eChip(p.sit)],qtd:[{k:'b',t:p.qtdTxt}],orig:orig?[{k:'txt',t:orig}]:[{k:'mut',t:'—'}]},
+    o:[{t:'Lote de produto acabado registrado pela Colheita · '+p.qtdTxt+' em '+p.local}].concat(o.os?[{t:'Ordem '+o.os,h:'OS.dc.html#'+o.os}]:[])}; }); }
 
 function PREVALS(self,v){
-  cenOuvir(self); const C=cenGet(); self._cen=C; const PF=g2perfil(), GEST=g2papel(PF,'gestor');   /* quem age; decisões do gestor (DEC-2609-13) */
-  const vazio=(v.mf_faz==='Boa Vista'); v.est_vazio=vazio; v.est_tem=!vazio; v.est_versr=()=>self.setState({mf_faz:'Santa Rita',g2toast:'Fazenda: Santa Rita'});
-  const IT=eitens(C); const INV=einvs(C);
-  // ---- etapa 1: recebimentos ----
-  const RC=erecs(C), PD=epeds(C); let npend=0;
-  GR('g_rec').rows=RC.map(x=>{ const ok=!!x.ok; if(!ok) npend++; const p=PD.find(y=>y.id===elotId(x.ped)); const quar=ok?(Number(x.quar)||0):0;
-    const l=C.lotes[x.item+'|'+x.lote]; const vl=x.val&&x.val!=='—'?x.val:'';
-    const prev=/previsto/.test(String(x.data||'')); const dt=eiso(x.data); const cf=ok&&x.hoje?eiso(E2.hoje):'';   // data da nota (ou prevista) × data da conferência
-    const r={id:x.id,ro:ok,v:{nf:x.nf,data:dt,cfd:cf,vali:eym(vl),ped:x.ped,forn:p?p.forn:'',item:x.item,un:x.un||'kg',qtd_nf:x.qtd_nf,conf:ok?x.conf:'',apto:ok?x.apto:'',quar:ok?x.quar:'',lote:x.lote,val:vl,local:x.local,div:x.div||'Sem divergência',obs:x.obs||''},s:{},p:{}};
-    r.p.nf=[{k:'b',t:x.nf}]; r.s.nf=x.nf; r.s.data=dt?edmy(dt):''; r.p.data=[{k:dt?'txt':'mut',t:dt?edmy(dt):'—'}];
-    r.s.cfd=cf?edmy(cf):''; r.p.cfd=[{k:cf?'txt':'mut',t:cf?edmy(cf):'—'}];
-    r.p.ped=p?[{k:'b',t:p.id},{k:'link',t:'Ver pedido',h:'CMP.dc.html'}]:[{k:'mut',t:'—'}]; r.s.ped=p?p.id:''; r.s.forn=p?p.forn:''; r.p.forn=[{k:'txt',t:p?p.forn:'—'}];
-    r.p.item=[{k:'txt',t:x.item}]; r.s.item=x.item; r.s.lote=x.lote; r.s.vali=vl; r.p.vali=[{k:vl?'txt':'mut',t:vl||'—'}];
-    ['qtd_nf','conf','apto','quar'].forEach(f=>{ const q=r.v[f]; r.p[f]=(q===''||q===null||q===undefined)?[{k:'mut',t:'—'}]:[{k:'txt',t:eq(q,r.v.un)}]; });
-    // nota que ainda não chegou fica "Prevista"; conferida com lote vencido fica "Vencido" (não volta ao disponível)
-    let sit; if(!ok) sit=prev?{k:'chip',t:'Prevista',c:'gray'}:{k:'chip',t:'A conferir',c:'yellow'};
-    else if(quar>0&&l&&l.quarentena>1e-9&&evenc(l)) sit={k:'chip',t:'Vencido',c:'red'};
-    else if(quar>0&&l&&l.quarentena>1e-9) sit={k:'chip',t:'Aguarda laudo',c:'yellow'};
-    else if(quar>0) sit={k:'chip',t:'Quarentena liberada',c:'green'}; else sit={k:'chip',t:'Conferido',c:'green'};
-    const dv=ok&&x.div&&x.div!=='Sem divergência'; r.p.sit=[sit]; r.s.sit=sit.t; r.v.divg=dv?x.div:''; r.p.divg=dv?[{k:'chip',t:x.div,c:'red'}]:[{k:'mut',t:'—'}]; r.s.divg=dv?x.div:''; return r; });
-  const fmR=g2st(self,'g_rec').fm; const fV=GR('g_rec').edit.fields.find(f=>f.k==='val');
-  if(fmR){ const fe=efert(fmR.draft.ped); fV.ro=fe; fV.help=fe?'Fertilizantes e corretivos: sem validade de lote.':'Mês/ano (ex.: 06/2027). Lote vencido entra todo em quarentena.'; }
-  // ---- etapa 2: entregas por O.S. ----
-  let nent=0,nag=0,ncons=0,nimp=0;
-  const eord=x=>(x.pode&&x.l&&x.pend>1e-9)?0:(x.pode?1:2);
-  GR('g_ent').rows=IT.slice().sort((a,b)=>(eord(a)-eord(b))||(ereqN(a.rid)-ereqN(b.rid))).map(x=>{ const u=x.un, it=x.it, o=x.o; const ag=it.custodia>1e-9&&!it.confirmado;
-    if(eord(x)===0) nent++; if(ag) nag++; if(x.bloq) nimp++; else if(!x.pode) ncons++;
-    const r={id:x.id,ro:eord(x)!==0,v:{req:x.rid,os:x.os,un:u,emb:it.emb||'',fase:o.etapa||'',item:it.prod,sol:it.solicitado,ent:it.entregue,pend:x.pend,
-      lote:x.l?(x.l.lote+' · '+x.l.local+(x.l.validade&&x.l.validade!=='—'?' · validade '+x.l.validade:'')):'Sem lote no estoque',qtd:x.pend>1e-9?x.pend:'',quem:x.quem},s:{},p:{}};
-    r.p.req=[{k:'b',t:x.rid}]; r.s.req=x.rid; r.p.os=[{k:'link',t:x.os,h:'OS.dc.html'}]; r.s.os=x.os;
-    r.p.fase=[{k:'chip',t:o.etapa||'—',c:FCOR[o.etapa]||'gray'}]; r.s.fase=o.etapa||'';
-    r.p.item=[{k:'txt',t:it.prod}]; r.s.item=it.prod; r.s.lote=x.l?x.l.lote:'sem lote'; r.p.lote=[{k:x.l?'txt':'mut',t:x.l?x.l.lote:'sem lote'}];
-    r.s.emb=it.emb||''; r.p.emb=[{k:it.emb?'txt':'mut',t:it.emb||'—'}];
-    r.p.sol=[{k:'txt',t:eq(it.solicitado,u)}]; r.p.ent=[{k:'txt',t:eq(it.entregue,u)}];
-    const pk=x.pode?epk(x.pend,it.emb):''; r.v.pk=pk; r.s.pk=pk; r.p.pk=pk?[{k:'txt',t:pk}]:[{k:'mut',t:'—'}];
-    r.p.pend=x.pend>1e-9?[x.pode?{k:'b',t:eq(x.pend,u)}:{k:'txt',t:eq(x.pend,u)}]:[{k:'mut',t:'—'}];
-    let sit,sub='';
-    if(x.bloq){ sit={k:'chip',t:'Bloqueada',c:'red'}; sub=x.bloq; }
-    else if(!x.pode){ sit={k:'chip',t:'O.S. '+(EFASE[o.etapa]||String(o.etapa||'').toLowerCase())+' · sem nova entrega',c:'gray'}; sub=(o.etapa==='A liberar'?x.motivo:(x.pend>1e-9?econta(x):'')); }   // saldo sem nova entrega: a conta fica à vista (Entregue inclui o que voltou)
-    else if(!x.l) sit={k:'chip',t:'Sem lote no estoque',c:'red'};
-    else if(x.pend<=1e-9) sit={k:'chip',t:'Entrega completa',c:'green'};
-    else if(it.entregue>0) sit={k:'chip',t:'Parcial',c:'yellow'}; else sit={k:'chip',t:'A entregar',c:'gray'};
-    if(x.pode&&x.l&&x.pend>1e-9) sub=(x.livre<x.pend-1e-9?'lote cobre só '+eq(x.livre,u)+' dos '+eq(x.pend,u):(it.entregue>0?'faltam '+eq(x.pend,u):''));
-    const tot=((o.ins||[]).find(i=>i.p===it.prod)||{}).tot; if(x.pode&&tot&&tot>it.solicitado+1e-9) sub=(sub?sub+' · ':'')+'O.S. pede '+eq(tot,u)+', reservado '+eq(it.solicitado,u);
-    // situação (chips do estado) e detalhe (o porquê, com quantidades) em colunas próprias
-    r.p.sit=[sit].concat(ag?[{k:'chip',t:'Aguardando confirmação no app',c:'yellow'}]:[]).concat(x.selo?[{k:'chip',t:x.selo,c:'yellow'}]:[]);
-    r.s.sit=sit.t+(ag?' · Aguardando confirmação no app':''); r.v.det=sub; r.s.det=sub; r.p.det=sub?[{k:'txt',t:sub}]:[{k:'mut',t:'—'}]; return r; });
-  const fmE=g2st(self,'g_ent').fm; if(fmE&&fmE.rid){ const x=IT.find(y=>y.id===fmE.rid); if(x){ const fs=GR('g_ent').edit.fields; const pk=epk(x.pend,x.it.emb);
-      fs[1].u=x.un; fs[1].help='A entregar: '+eq(x.pend,x.un)+' = '+econta(x)+'.'+(pk?' Em '+x.it.emb+': '+pk+'.':''); } }
-  // ---- etapa 3: custódia e devoluções ----
-  const custs=[];
-  GR('g_dev').rows=IT.filter(x=>x.it.entregue>1e-9||x.it.custodia>1e-9).sort((a,b)=>((b.it.custodia>1e-9)-(a.it.custodia>1e-9))||(ereqN(a.rid)-ereqN(b.rid))).map(x=>{
-    const u=x.un, it=x.it, o=x.o; const cu=it.custodia>1e-9; if(cu) custs.push(x);
-    const r={id:x.id,ro:!cu||x.sinal||!!x.cf,v:{req:x.rid,os:x.os,item:it.prod,lote:it.lote,un:u,com:cu?x.quem:'',ent:it.entregue,cons:it.consumido,dev:it.devolvido,cust:it.custodia,qtd:cu?it.custodia:'',cond:E2.conds[0],obs:''},s:{},p:{}};
-    r.p.req=[{k:'b',t:x.rid}]; r.s.req=x.rid; r.p.os=[{k:'link',t:x.os,h:'OS.dc.html'}]; r.s.os=x.os;
-    r.p.item=[{k:'txt',t:it.prod}]; r.s.item=it.prod; r.s.lote=it.lote;
-    r.p.ent=[{k:'txt',t:eq(it.entregue,u)}]; r.p.cons=[{k:'txt',t:eq(it.consumido,u)}]; r.p.dev=[{k:'txt',t:eq(it.devolvido,u)}];
-    r.p.cust=cu?[{k:'b',t:eq(it.custodia,u)}]:[{k:'mut',t:'—'}]; r.s.com=cu?x.quem:''; r.p.com=cu?[{k:'txt',t:x.quem}]:[{k:'mut',t:'—'}];
-    let pe=''; try{ pe=cenPodeEncerrar(C,x.os); }catch(err){ pe=''; }
-    const cOS=IT.filter(y=>y.os===x.os&&y.it.custodia>1e-9).map(y=>eq(y.it.custodia,y.un)).join(' + ');
-    let enc,es='';
-    if(x.cf){ r.p.enc=ecfCel(x.cf,C,self.state.est_cfask,PF); r.s.enc='Consumo em conferência '+x.cf.id; r.p.det=[{k:'mut',t:'—'}]; r.s.det=''; return r; }
-    if(o.etapa==='Em conferência'){ if(pe){ enc={k:'chip',t:'Bloqueado',c:'red'}; es=cOS?cOS+' em custódia':pe; } else { enc={k:'chip',t:'Pode encerrar',c:'green'}; es='custódia zero'; } }
-    else if(cu&&x.sinal){ enc={k:'chip',t:'Aguardando sinal do app',c:'yellow'}; es='consumo no aparelho · receba a sobra depois do envio'; }
-    else if(cu){ enc={k:'chip',t:'Em uso na O.S.',c:'gray'}; es='O.S. '+(EFASE[o.etapa]||String(o.etapa||'').toLowerCase()); }
-    else enc={k:'chip',t:'Sem custódia',c:'gray'};
-    r.p.enc=[enc]; r.s.enc=enc.t; r.v.det=es; r.s.det=es; r.p.det=es?[{k:'txt',t:es}]:[{k:'mut',t:'—'}]; return r; });
-  const CFS=cenConfAbertas(C); CFS.filter(k=>!IT.some(x=>x.rid===k.req&&x.it.prod===k.prod)).forEach(k=>GR('g_dev').rows.push({id:'CF|'+k.id,ro:true,
-    v:{req:k.req||'—',os:k.os,item:k.prod,lote:'',un:k.un||'',com:'',ent:0,cons:0,dev:0,cust:0,qtd:'',cond:E2.conds[0],obs:''},s:{req:(k.req||''),os:k.os,item:k.prod,lote:'fora da requisição',enc:'Consumo em conferência '+k.id,det:''},
-    p:{req:[{k:'b',t:k.req||'sem requisição'}],os:[{k:'link',t:k.os,h:'OS.dc.html'}],item:[{k:'txt',t:k.prod}],lote:[{k:'mut',t:'fora da requisição'}],ent:[{k:'mut',t:'—'}],cons:[{k:'mut',t:'—'}],dev:[{k:'mut',t:'—'}],cust:[{k:'mut',t:'—'}],com:[{k:'mut',t:'—'}],det:[{k:'mut',t:'—'}],enc:ecfCel(k,C,self.state.est_cfask,PF)}}));
-  const fmD=g2st(self,'g_dev').fm; if(fmD&&fmD.rid){ const x=IT.find(y=>y.id===fmD.rid); if(x){ const fs=GR('g_dev').edit.fields; fs[0].u=x.un; fs[0].help='Em custódia: '+eq(x.it.custodia,x.un)+' com '+x.quem+'.'; } }
-  // ---- etapa 4: saldos por lote e local ----
-  const loc=self.state.est_loc||''; const LS=elotes(C).filter(l=>!loc||l.local===loc); const itens=[]; LS.forEach(l=>{ if(itens.indexOf(l.prod)<0) itens.push(l.prod); });
-  const quarTxt=[], inspTxt=[], vencTxt=[]; const x0={}; const ask=self.state.libask;
-  const eexp=(pr)=>{ const g={}; CFS.filter(k=>k.prod===pr).forEach(k=>{ const kk=(k.req||'')+'|'+k.os; g[kk]=g[kk]||{rel:0,cu:cenConfCust(C,k),ids:[]}; g[kk].rel+=k.relatado; g[kk].ids.push(k.id); });
-    return Object.values(g).reduce((a,x)=>({q:a.q+Math.max(0,x.rel-x.cu),ids:a.ids.concat(x.ids)}),{q:0,ids:[]}); };
-  GR('g_lot').rows=itens.map(pr=>{ const ls=LS.filter(l=>l.prod===pr); const un=ls[0].un; const S=f=>ls.reduce((a,l)=>a+f(l),0);
-    const cr=IT.filter(x=>x.it.prod===pr&&x.it.custodia>1e-9); const ck=cr.reduce((a,x)=>a+x.it.custodia,0);
-    const fis=S(l=>l.fisico), blq=S(l=>l.quarentena), res=S(l=>l.reservado), dp=S(cenDisp); if(blq>1e-9) quarTxt.push(pr+' '+eq(blq,un));
-    const bv=S(l=>evenc(l)?l.quarentena:0); if(blq-bv>1e-9) inspTxt.push(pr+' '+eq(blq-bv,un)); if(bv>1e-9) vencTxt.push(pr+' '+eq(bv,un));
-    const id='I|'+pr; x0[id]=true; const locs=[...new Set(ls.map(l=>l.local))].join(', '); const ex=eexp(pr);
-    const o=[{t:'Disponível = físico − reservado − bloqueado = '+eq(fis,un)+' − '+eq(res,un)+' − '+eq(blq,un)+' = '+eq(dp,un)}]
-      .concat(cr.map(x=>({t:'Em custódia (fora do depósito, não soma no físico): '+x.rid+' · '+x.os+' · '+eq(x.it.custodia,un)+' com '+x.quem,h:'OS.dc.html'})))
-      .concat(ex.q>1e-9?[{t:'Em conferência (exposição, fora do saldo até a decisão): '+ex.ids.join(', ')+' · '+eq(ex.q,un)+' além da custódia'}]:[]);
-    const cos=cr.map(x=>x.os).join(', ');
-    return {id,v:{nome:pr,prod:pr,un,local:locs,fis,res,blq,disp:dp,expo:ex.q>1e-9?ex.q:'',cust:ck,cos,val:''},s:{nome:pr,prod:pr,local:locs,un,cos},
-      p:{nome:[{k:'b',t:pr},{k:'mut',t:ls.length+(ls.length>1?' lotes':' lote')}],prod:[{k:'mut',t:pr}],fis:[{k:'txt',t:eq(fis,un)}],res:res>1e-9?[{k:'txt',t:eq(res,un)}]:[{k:'mut',t:'—'}],
-         blq:blq>1e-9?[{k:'chip',t:eq(blq,un),c:'yellow'}]:[{k:'mut',t:'—'}],disp:[{k:'b',t:eq(dp,un)}],expo:ex.q>1e-9?[{k:'txt',t:eq(ex.q,un)}]:[{k:'mut',t:'—'}],
-         cust:ck>1e-9?[{k:'txt',t:eq(ck,un)}]:[{k:'mut',t:'—'}],cos:cos?[{k:'txt',t:cos}]:[{k:'mut',t:'—'}],vali:[{k:'mut',t:''}],sitl:[{k:'mut',t:''}]},o,
-      kids:ls.map(l=>elotRow(C,l,ask,INV,GEST))}; });
-  GR('g_lot').x0=x0;
-  // ---- etapa 5: contagens ----
-  let nacontar=0,naprov=0;
-  const cntOpts=elotes(C).map(elotLbl);
-  GR('g_cnt').rows=INV.map(rec=>{ const l=C.lotes[rec.key]; const un=l?l.un:''; const has=econtou(rec); const d=has?rec.cont-rec.sis:null; const aj=eajuste(C,rec); const apr=!!(aj&&aj.estado==='Aprovado');
-    const r={id:rec.id,ro:apr||(d!==null&&Math.abs(d)<1e-9),v:{inv:rec.id,aj:aj?aj.id:'',prod:l?l.prod:'',un,lote:l?elotLbl(l):rec.key,local:l?l.local:'',sis:has?rec.sis:'',cont:has?rec.cont:'',dif:d===null?'':d,contador:rec.contador||E2.contadores[0],causa:rec.causa||''},s:{},p:{}};
-    // contagens anteriores ficam na origem da linha, visíveis só depois da nova contagem (a recontagem também é cega)
-    r.o=has?(rec.hist||[]).map(h=>({t:'Contagem anterior: '+eq(h.cont,un)+' por '+h.contador+' · diferença '+esig(h.dif,un)+(h.causa?' · causa: '+h.causa:'')})):[];
-    r.p.inv=[{k:'b',t:rec.id}]; r.s.inv=rec.id; r.s.aj=aj?aj.id:''; r.p.aj=aj?[{k:'txt',t:aj.id}]:[{k:'mut',t:'—'}];
-    r.p.prod=[{k:'txt',t:l?l.prod:''}]; r.s.prod=l?l.prod:''; r.p.lote=[{k:'txt',t:l?l.lote:''}]; r.s.lote=l?l.lote:'';
-    r.p.sis=has?[{k:'txt',t:eq(rec.sis,un)}]:[{k:'mut',t:'oculto até contar'}]; r.s.sis=has?eq(rec.sis,un):'oculto até contar';
-    r.p.cont=has?[{k:'txt',t:eq(rec.cont,un)}]:[{k:'mut',t:'a contar'}];
-    r.p.dif=d===null?[{k:'mut',t:'—'}]:[{k:'chip',t:(Math.abs(d)<1e-9?'0':esig(d,un)),c:(Math.abs(d)<1e-9?'green':'red')}];
-    let sit; if(d===null){ sit={k:'chip',t:'A contar',c:'gray'}; nacontar++; } else if(Math.abs(d)<1e-9) sit={k:'chip',t:'Conferido',c:'green'};
-    else if(apr) sit={k:'chip',t:'Ajuste aprovado',c:'green'}; else { sit={k:'chip',t:'Ajuste aguardando aprovação',c:'yellow'}; naprov++; }
-    const semCausa=(d!==null&&Math.abs(d)>1e-9&&!apr&&!String(rec.causa||'').trim());
-    r.p.sit=[sit].concat(semCausa?[{k:'mut',t:'informe a causa'}]:[]).concat(apr?[{k:'mut',t:'aplicado ao saldo'}]:[]).concat(apr&&aj.rev?[{k:'mut',t:aj.rev}]:[]); r.s.sit=sit.t;
-    r.p.acao=(d!==null&&Math.abs(d)>1e-9&&!apr)?[{k:'act',t:'Recontar',fn:'recont:'+rec.id}].concat(GEST?[{k:'act',t:'Aprovar ajuste',fn:'aprova:'+rec.id}]:[{k:'mut',t:'aprova: '+g2quem('gestor')}]):[]; r.s.acao=''; return r; });
-  const fmC=g2st(self,'g_cnt').fm; const fsC=GR('g_cnt').edit.fields; fsC[0].opts=cntOpts; fsC[0].def=cntOpts[0]||''; fsC[0].ro=!!(fmC&&!fmC.isNew);
-  // contagem salva fica travada (quantidade e contador); só a causa continua editável
-  const rC=fmC&&fmC.rid?GR('g_cnt').rows.find(x=>x.id===fmC.rid):null; const trav=!!(rC&&!eblank(rC.v.cont));
-  fsC[1].ro=trav; fsC[2].ro=trav; fsC[1].help=trav?'Travada depois de salvar: para conferir de novo, use Recontar na linha.':'';
-  // ---- etapa 6: movimentos ----
-  let nsin=0; const SEM=esemSinal(C), APPI=eappItens(C), AJU={}; (C.movs||[]).forEach(m=>{ if(m.aj) AJU[m.aj]=true; });
-  GR('g_mov').rows=(C.movs||[]).slice().reverse().map(m=>{ const app=m.origem==='app'; const sem=!!SEM[m.id]; if(sem) nsin++;
-    // itens do app (confirmação e consumo): um por linha, com a quantidade e a unidade na coluna Quantidade
-    const li=APPI[m.id]||null; const q=li?li.map(x=>eq(x.qtd,x.un)).join(', '):emovQtd(m); const tp=emovTipo(m);
-    const dc=emovDoc(C,m,AJU);
-    // TABELAS-FOCO: registro, condição, documento, O.S., item, lote, quantidade, unidade e sinal em colunas próprias (itens do app: um por linha dentro da célula)
-    const cond=m.tipo==='devolucao'?(m.apto?'apta':'bloqueada'):(m.tipo==='recebimento-nf'?(m.apto?'apto':'em quarentena'):'');
-    const r={id:m.id,v:{hora:m.at,mid:m.id,tipo:tp,cond,doc:m.req||(dc&&dc.doc)||'',os:m.os||'',item:m.prod||'',lote:m.lote||'',qtd:'',un:'',quem:m.quem||'',orig:app?'App':'Web',sinal:sem?'Aguardando sinal':''},s:{},p:{}};
-    r.p.hora=[{k:'b',t:m.at||''}]; r.s.hora=m.at||''; r.s.mid=m.id; r.s.cond=cond; r.p.cond=cond?[{k:'txt',t:cond}]:[{k:'mut',t:'—'}];
-    r.p.tipo=[{k:'txt',t:tp}]; r.s.tipo=tp;
-    const dd=m.req||(dc&&dc.doc)||''; r.p.doc=dd?[{k:'b',t:dd}].concat(!m.req&&dc&&dc.aj?[{k:'mut',t:dc.aj}]:[]):[{k:'mut',t:'—'}]; r.s.doc=[dd,!m.req&&dc&&dc.aj].filter(Boolean).join(' ');
-    r.p.os=m.os?[{k:'link',t:m.os,h:'OS.dc.html'}]:[{k:'mut',t:'—'}]; r.s.os=m.os||'';
-    const lin=(a)=>a.reduce((o,p,i)=>o.concat(i?[{k:'br'},p]:[p]),[]);
-    r.p.lote=m.lote?[{k:'txt',t:m.lote}]:[{k:'mut',t:'—'}]; r.s.lote=m.lote||'';
-    r.p.item=m.prod?[{k:'txt',t:m.prod}]:(li&&li.length?lin(li.map(x=>({k:'txt',t:x.prod}))):(m.det?[{k:'mut',t:m.det}]:[{k:'mut',t:'—'}]));
-    if(Array.isArray(m.conf)){ const ks=(C.confs||[]).filter(k=>m.conf.indexOf(k.id)>=0); r.p.item=(li&&li.length?r.p.item.concat([{k:'br'}]):[]).concat(ks.map(k=>({k:'mut',t:k.prod+' '+eq(k.relatado,k.un)+' em conferência ('+k.id+')'}))); }
-    r.s.item=m.prod||(li?li.map(x=>x.prod).join(', '):'')||m.det||'';
-    // quantidade com a unidade junto (decisão do proprietário, 05/10/2026); v.qtd numérico ordena; vários itens do app → uma linha por item
-    if(li&&li.length){ r.p.qtd=lin(li.map(x=>({k:'txt',t:eq(x.qtd,x.un)}))); r.s.qtd=li.map(x=>eq(x.qtd,x.un)).join(', ');
-      // valor para ordenar: a soma quando todos os itens têm a mesma unidade; com unidades diferentes não há soma (NaN: vai para o fim)
-      const us=[...new Set(li.map(x=>x.un))]; r.v.qtd=us.length===1?li.reduce((a,x)=>a+(Number(x.qtd)||0),0):NaN;
-      if(li.length===1) r.v.qtd=li[0].qtd; }
-    else { const mq=String(q||'').match(/^([+−-]?[\d.]+(?:,\d+)?)\s*(.*)$/); if(mq){ const ut=String(mq[2]||'').split(' '), u0=ut[0]||'', resto=ut.slice(1).join(' ');   // "320 L reservados": unidade L, condição reservados
-        r.v.qtd=Number(mq[1].replace(/\./g,'').replace(',','.').replace('−','-').replace('+','')); r.v.un=u0; r.p.qtd=[{k:'txt',t:mq[1]+(u0?' '+u0:'')}]; r.s.qtd=r.p.qtd[0].t;
-        if(resto&&!cond){ r.v.cond=resto; r.s.cond=resto; r.p.cond=[{k:'txt',t:resto}]; } }
-      else { r.p.qtd=q?[{k:'txt',t:q}]:[{k:'mut',t:'—'}]; r.s.qtd=q; } }
-    r.p.orig=[{k:'chip',t:app?'App':'Web',c:app?'blue':'gray'}]; r.s.orig=app?'App':'Web'; r.p.sinal=sem?[{k:'chip',t:'Aguardando sinal',c:'yellow'}]:[{k:'mut',t:'—'}]; r.s.sinal=sem?'Aguardando sinal':'';
-    r.o=(m.os?[{t:(m.req?'Requisição '+m.req+' da ':'Ordem ')+m.os,h:'OS.dc.html'}]:[]).concat(sem?[{t:'Registrado no aparelho às '+m.at+'; chega ao servidor quando o app tiver sinal.'}]:[]).concat(m.obs?[{t:'Observação: '+m.obs}]:[]);
-    return r; });
-  // filtro e busca das quantidades leem o mesmo texto da célula, com a unidade ("60.000 kg"); a ordenação usa o número (v)
-  const esq=(rows,fs)=>(rows||[]).forEach(r=>{ fs.forEach(f=>{ const c=((r.p||{})[f]||[])[0]; if(c&&(r.s||{})[f]===undefined){ r.s=r.s||{}; r.s[f]=(c.k==='mut'||c.t==='—')?'':c.t; } }); esq(r.kids,fs); });   // '—' na célula = vazio no filtro
-  esq(GR('g_rec').rows,['qtd_nf','conf','apto','quar']); esq(GR('g_ent').rows,['sol','ent','pend']); esq(GR('g_dev').rows,['ent','cons','dev','cust']);
-  esq(GR('g_lot').rows,['fis','res','blq','disp','expo','cust']); esq(GR('g_cnt').rows,['cont','dif']);
-  v.mov_tem=GR('g_mov').rows.length>0; v.mov_nada=!v.mov_tem;
-  // ---- resumos por etapa ----
-  const pdTxt=PD.filter(p=>p.a_entregar>0).map(p=>p.id+' '+eq(p.a_entregar,p.un));
-  v.k1=(npend?npend+(npend>1?' notas a conferir':' nota a conferir'):'Nenhuma nota a conferir')+' · '+(quarTxt.length?'em quarentena: '+quarTxt.join(', '):'nenhum lote em quarentena')+' · pedidos com saldo a entregar: '+(pdTxt.join(', ')||'nenhum');
-  v.k2=nent+(nent===1?' item a entregar':' itens a entregar')+' · '+nag+' aguardando confirmação no app · '+ncons+' só consulta (O.S. fora de Liberadas e Em execução)'
-    +(nimp?' · '+nimp+(nimp===1?' bloqueado por O.S. impedida':' bloqueados por O.S. impedida'):'');
-  v.k3=(CFS.length?'Consumo em conferência: '+CFS.map(k=>k.os+' · '+cenConfTxt(k,C)).join(' · ')+' · '+CFS[0].resp+' confere ou recusa o relato; '+g2quem('gestor')+' aceita o excedente · ':'')+(custs.length?('Em custódia: '+custs.map(x=>x.rid+' '+eq(x.it.custodia,x.un)+' de '+x.it.prod+' com '+x.quem+' ('+x.os+')').join(' · ')):'Nenhum material em custódia. Todas as O.S. podem conciliar materiais.');
-  v.k4=(inspTxt.length?'Bloqueado para inspeção: '+inspTxt.join(', '):(vencTxt.length?'Nenhum lote aguardando inspeção':'Nenhum lote bloqueado'))
-    +(vencTxt.length?' · vencido, fora do disponível: '+vencTxt.join(', '):'')+' · custódia fica fora do depósito e não soma no físico';
-  v.k5=nacontar+(nacontar===1?' contagem a fazer':' contagens a fazer')+' · '+naprov+(naprov===1?' ajuste aguardando aprovação':' ajustes aguardando aprovação');
-  v.k6=(C.movs||[]).length+((C.movs||[]).length===1?' movimento':' movimentos')+' desde o início da demonstração · '+nsin+' aguardando sinal do app';
+  cenOuvir(self); const C=cenGet(); self._cen=C; const PF=g2perfil(); const faz=efaz(self);
+  const vazio=(faz==='Boa Vista'); v.est_vazio=vazio; v.est_tem=!vazio; v.est_versr=()=>self.setState({mf_faz:'Santa Rita',g2toast:'Fazenda: Santa Rita'});
+  const R=eRowsReq(C,faz); GR('g_req').rows=R.rows; GR('g_req').x0=R.x0;
+  GR('g_rec').rows=eRowsRec(C,faz); GR('g_cnt').rows=eRowsCnt(C,faz);
+  GR('g_lot').rows=eRowsLot(C,faz,self.state.est_loc||'',PF); GR('g_mov').rows=eRowsMov(C); GR('g_prod').rows=eRowsProd(C,faz);
+  v.mov_tem=GR('g_mov').rows.length>0; v.mov_nada=!v.mov_tem; v.prod_tem=GR('g_prod').rows.length>0; v.prod_nada=!v.prod_tem;
+  // opções dinâmicas dos painéis: recebedor (pessoas do cadastro e responsáveis das O.S.), pedido aberto, local da fazenda, resultado do laudo
+  self.g2opts=(gid,k,draft)=>{ const o=x=>({v:x,t:x});
+    if(gid==='g_req'&&(k==='quemr'||k==='quem')) return eRecebedores(C).map(o);
+    if(gid==='g_rec'&&k==='ped'){ const ab=epeds(C).filter(x=>x.a_entregar>0||x.label===draft.ped); return ab.map(x=>({v:x.label,t:x.label+' · '+eq(x.a_entregar,x.un)+' a entregar'})); }
+    if(gid==='g_rec'&&k==='local'){ const fz=faz==='Todas'?'':faz; return (E2.locais||[]).filter(l=>(E2.tipos_estoque||[]).indexOf(l.tipo)>=0&&(!fz||l.faz===fz||l.nome===draft.local)).map(l=>o(l.nome)); }
+    if(gid==='g_rec'&&k==='res'){ const fm=g2st(self,'g_rec').fm; const al=(fm&&fm.al)||{}; const p=eParcela(C,al.key,al.doc); return (p&&p.venc?['Reprovado']:E2.resultados).map(o); }
+    return []; };
+  // unidade dos campos de quantidade = unidade do item (nunca "kg" fixo)
+  const fq=GR('g_req').edit.fields, fmQ=g2st(self,'g_req').fm; if(fmQ&&fmQ.al){ const x=fmQ.al.prod?eReqItem(C,fmQ.al.rid,fmQ.al.prod):null; const u=x?x.un:'';
+    fq.forEach(f=>{ if(f.k==='qtd'||f.k==='dqtd') f.u=u; });
+    const fd=fq.find(f=>f.k==='dqtd'); fd.help=x?('Esperado: '+eq(x.it.custodia,x.un)+' com '+x.quem+'. Digite o que voltou de fato.'):''; const fe=fq.find(f=>f.k==='qtd'); fe.help=x?('Até '+eq(Math.min(x.ent,x.livreReq),x.un)+': '+econta(x)+'.'):''; }
+  const fr=GR('g_rec').edit.fields, fmR=g2st(self,'g_rec').fm; if(fmR&&fmR.draft){ const p=epedBase(fmR.draft.ped); const u=p?p.un:''; fr.forEach(f=>{ if(['qtd_nf','conf','quar','apto'].indexOf(f.k)>=0) f.u=u; });
+    const fV=fr.find(f=>f.k==='val'); const fe=efert(fmR.draft.ped); fV.ro=fe; fV.help=fe?'Fertilizantes e corretivos: sem validade de lote.':'Mês/ano (ex.: 06/2027). Lote vencido entra todo em quarentena.'; }
+  const fc=GR('g_cnt').edit.fields, fmC=g2st(self,'g_cnt').fm; if(fmC&&fmC.al){ const rec=einvRec(C,fmC.al.inv); const l=rec&&C.lotes[rec.key]; fc[0].u=l?l.un:''; }
 }
 function EXTRAVALS(self,v){
-  self.g2perfilFecha={est_cfask:null,libask:null,lib_laudo:'',lib_err:''};   /* trocar o perfil fecha o aceite do consumo e o laudo da quarentena */
-  const st=self.state; const step=st.step||1; const N=6; const C=self._cen||cenGet();
-  self.g2live=(gid,k,d)=>{ if(gid==='g_rec'&&k==='val'&&efert(d.ped)) return 'Sem validade'; return undefined; };
+  const st=self.state; const C=self._cen||cenGet(); const PF=g2perfil(); const faz=efaz(self);
+  // trocar o perfil (menu lateral) reabre pelo papel e fecha os painéis montados para o perfil anterior (revisão do CTL-3, achado 1)
+  const g2f=Object.assign({},st.g2||{}); ['g_req','g_rec','g_cnt','g_lot','g_mov','g_prod'].forEach(g=>{ if(g2f[g]) g2f[g]=Object.assign({},g2f[g],{fm:null}); });
+  self.g2perfilFecha={step:undefined,g2:g2f};
+  self.g2live=(gid,k,d)=>{ if(gid==='g_rec'&&k==='val'&&efert(d.ped)) return 'Sem validade';
+    if(gid==='g_rec'&&k==='apto'){ const a=enum_(d,'conf'), q=eblank(d.quar)?0:enum_(d,'quar'); return isNaN(a)?'':String(Math.max(0,a-(isNaN(q)?0:q))).replace('.',','); } return undefined; };
+  // ---- endereço (#sec, #req, #os, #nf, #lote): abre o lugar certo; nunca grava nada ----
+  const abrirHash=()=>{ let h=''; try{ h=decodeURIComponent(location.hash||''); }catch(e){ h=''; } if(!h) return; const C0=cenGet(), P0=g2perfil();
+    const m=(k)=>{ const x=new RegExp('[#&]'+k+'=([^&]+)').exec(h); return x?x[1]:''; };
+    const sec=m('sec').toLowerCase(), req=m('req'), os=m('os'), nf=m('nf'), lote=m('lote'); let patch=null;
+    const fz=(f)=>{ const cur=self.state.mf_faz||'Santa Rita'; return (f&&cur!=='Todas'&&cur!==f)?{mf_faz:f}:{}; };
+    if(req&&C0.reqs[req]){ const o=C0.ordens[C0.reqs[req].os]||{}; patch=ePatch(self,'g_req','R|'+req,eModoReq(C0,'R|'+req,P0),false,Object.assign({step:1},fz(o.faz))); }
+    else if(os&&C0.ordens[os]){ const o=C0.ordens[os]; const rid=o.req&&C0.reqs[o.req]?'R|'+o.req:'S|'+os; patch=ePatch(self,'g_req',rid,eModoReq(C0,rid,P0),false,Object.assign({step:1},fz(o.faz))); }
+    else if(nf){ const pcs=estParcelas(C0,'Todas'); const pc=pcs.find(p=>p.doc===nf&&!p.laudo)||pcs.find(p=>p.doc===nf); const rc=erecs(C0).find(x=>x.nf===nf);
+      if(pc){ const rid='P|'+pc.key+'|'+pc.doc; patch=ePatch(self,'g_rec',rid,eModoRec(C0,rid,P0),false,Object.assign({step:2},fz(estFazLocal(pc.local)))); }
+      else if(rc){ const rid='N|'+rc.id; patch=ePatch(self,'g_rec',rid,eModoRec(C0,rid,P0),false,Object.assign({step:2},fz(estFazLocal(rc.local)))); } }
+    else if(lote){ const k=Object.keys(C0.lotes).find(x=>C0.lotes[x].lote===lote); if(k){ const all=eSoUm(self,'g_lot'); all.g_lot=Object.assign({},all.g_lot||{},{fm:{rid:'L|'+k,draft:{},orig:{},errs:{},warn:false,ro:true,isNew:false,mode:'origin'},fl:null});
+      patch=Object.assign({g2:all,step:4,est_modo:'lotes',est_loc:''},fz(estFazLocal(C0.lotes[k].local))); } }
+    else if(sec){ const n=E2.sec[sec]; if(n) patch=Object.assign({step:n},n===4&&E2.sec_modo[sec]?{est_modo:E2.sec_modo[sec]}:{}); }   /* desconhecido: regra sem endereço, sem gravar */
+    if(patch) setTimeout(()=>self.setState(patch),0); };
+  if(!self.__hashIni){ self.__hashIni=1; abrirHash(); try{ window.addEventListener('hashchange',abrirHash); }catch(e){} }
+  // ---- seção: escolhida, do endereço, ou a abertura pelo perfil (calculada uma vez por perfil e fazenda; abrir não muda o cenário) ----
+  if(self.__abPf!==PF.k||self.__abFaz!==faz){ self.__abPf=PF.k; self.__abFaz=faz; self.__ab=estAbertura(C,PF.k,faz); }
+  const step=st.step||self.__ab||1; const N=4;
   for(let i=1;i<=N;i++) v['s'+i]=(step===i);
-  // seções do Estoque (UX-ACAO-UNICA-20261003): trabalho paralelo, navegação em qualquer ordem pela faixa de seções (único caminho);
-  // sem setas e sem "ir para a próxima seção" como ação principal: a ação do bloco é o próximo trabalho da própria seção, ou nenhuma
   g2secoes(self,v,'stp',N,step,{},(i)=>g2etapa(self,{step:i}));
-  const IT=eitens(C); let prim;
-  if(v.est_vazio) prim=['Ver Santa Rita',v.est_versr];
-  else if(step===1){ const r=GR('g_rec').rows.find(x=>!x.ro); prim=r?['Conferir '+r.v.nf,()=>g2open(self,GR('g_rec'),r.id,null)]:['Registrar recebimento',()=>v.g_rec_new&&v.g_rec_new()]; }
-  else if(step===2){ const r=GR('g_ent').rows.find(x=>!x.ro); prim=r?['Entregar '+r.v.req+' · '+r.v.item,()=>g2open(self,GR('g_ent'),r.id,null)]:null; }
-  else if(step===3){ const xs=IT.filter(y=>y.it.custodia>1e-9&&!y.sinal&&!y.cf).sort((a,b)=>((a.o.etapa==='Em conferência'?0:1)-(b.o.etapa==='Em conferência'?0:1))||(ereqN(a.rid)-ereqN(b.rid))); const x=xs[0];
-    prim=x?['Receber devolução da '+x.rid,()=>g2open(self,GR('g_dev'),x.id,null)]:null; }
-  else if(step===4) prim=null;   // saldos: consulta (sem primária)
-  else if(step===5){ const r=GR('g_cnt').rows.find(x=>eblank(x.v.cont)); prim=r?['Contar '+r.v.inv,()=>g2open(self,GR('g_cnt'),r.id,null)]:['Nova contagem',()=>v.g_cnt_new&&v.g_cnt_new()]; v.cnt_add=!!r; }
-  else prim=null;   // movimentos: consulta
-  v.prim_t=prim?prim[0]:''; v.prim_fn=prim?prim[1]:(()=>{});
-  v.prim_st='padding:7px 14px;border-radius:9px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap;background:#1E7A4C;color:#fff;border:1px solid #1E7A4C;flex-shrink:0;'+((v.est_vazio||!prim)?'display:none;':'');   // sem estoque: o próximo passo é o link do estado vazio
-  // filtro por local (etapa 4)
-  const loc=st.est_loc||''; const CH='font-family:inherit;font-size:12px;font-weight:700;padding:4px 11px;border-radius:999px;cursor:pointer;';
-  v.est_locs=[''].concat(E2.locais).map(lc=>({t:lc||'Todos os locais',on:String(loc===lc),st:CH+(loc===lc?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;'),go:()=>self.setState({est_loc:lc})}));
-  // liberar quarentena do lote após inspeção (confirmação na linha; repetir não soma de novo)
-  // (gestor, com o nº do laudo; sem laudo ou sem papel nada muda e o erro fica no painel, com o laudo digitado preservado)
-  const lk=st.libask; const lq=lk&&C.lotes[lk]; v.lib_on=!!(lq&&lq.quarentena>1e-9)&&g2papel(g2perfil(),'gestor');   /* aberto por outro perfil: não aparece (achado 1) */
-  v.lib_t=v.lib_on?('Liberar '+eq(lq.quarentena,lq.un)+' do lote '+lq.lote+' ('+lq.prod+'): informe o laudo que aprova o material.'):'';
-  v.lib_laudo=st.lib_laudo||''; v.lib_setlaudo=(e)=>self.setState({lib_laudo:e.target.value,lib_err:''}); v.lib_err=st.lib_err||''; v.lib_hasErr=!!st.lib_err;
-  v.libq=(k)=>{ self.setState({libask:k,lib_laudo:'',lib_err:''}); setTimeout(()=>{ const e=document.getElementById('est-laudo'); if(e) e.focus(); },0); };
-  v.libno=()=>self.setState({libask:null,lib_laudo:'',lib_err:''});
-  v.lib_ok=()=>{ const k=self.state.libask; const c0=cenGet(); const l0=c0.lotes[k]; const antes=l0?eitemDisp(c0,l0.prod):0;
-    const r=cenMudar(null,c=>{ const lv=c.lotes[k]; if(evenc(lv)) throw new Error('Lote '+lv.lote+' vencido em '+lv.validade+': fica bloqueado e não volta ao disponível.');
-      const r=cenLiberarQuarentena(c,k,self.state.lib_laudo,g2perfil()); const L=c.lotes[k]; return {msg:r.msg+' Disponível de '+L.prod+': '+eq(antes,L.un)+' → '+eq(eitemDisp(c,L.prod),L.un)+'.'}; });
-    if(r.erro){ self.setState({lib_err:r.erro}); return; }
-    self.setState({libask:null,lib_laudo:'',lib_err:'',cenrev:Date.now(),g2toast:r.msg}); };
-  // aprovar ajuste (causa obrigatória; aplica uma vez) e recontar (outro contador, contagem cega)
-  v.aprova=(id)=>{ const rec=einvRec(cenGet(),id);
-    if(rec&&econtou(rec)&&!String(rec.causa||'').trim()){ g2open(self,GR('g_cnt'),id,null); self.setState({g2toast:'Informe a causa da diferença de '+id+' na contagem antes de aprovar o ajuste.'}); return; }
-    cenMudar(self,c=>estAprovar(c,id,g2perfil())); };
-  v.recont=(id)=>{ const r=cenMudar(self,c=>estRecontar(c,id)); if(r.erro) return; const c1=cenGet(); const rec=einvRec(c1,id); const l=c1.lotes[rec.key];
-    const draft={lote:l?elotLbl(l):'',cont:'',contador:rec.contador,causa:''};
-    g2set(self,'g_cnt',{fm:{rid:id,draft,orig:Object.assign({},draft),errs:{},warn:false,ro:false,isNew:false,mode:'form'},fl:null,fmc:null}); };
-  v.cfa=(id)=>self.setState({est_cfask:id}); v.cfno=()=>self.setState({est_cfask:null});
-  v.cfok=(id)=>{ const r=cenMudar(self,c=>cenConciliar(c,id,true,undefined,g2perfil())); if(!r.erro) self.setState({est_cfask:null}); };
-  v.cfr=(id)=>{ cenMudar(self,c=>cenConciliar(c,id,false,'registro sem fato físico',g2perfil())); self.setState({est_cfask:null}); };
+  const K=estContadores(C,faz); [K.req,K.rec,K.cnt,''].forEach((t,i)=>{ v['stp'+(i+1)+'_cnt']=t; v['stp'+(i+1)+'_hasCnt']=!!t; });
+  // ---- Confira saldos: modos e chips de local (fonte única, da fazenda do filtro) ----
+  const modo=st.est_modo||'lotes'; v.m_lotes=modo==='lotes'; v.m_movs=modo==='movs'; v.m_prod=modo==='prod';
+  const CH='font-family:inherit;font-size:12px;font-weight:700;padding:4px 11px;border-radius:999px;cursor:pointer;';
+  const chs=(on)=>CH+(on?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;');
+  v.est_modos=[['lotes','Lotes'],['movs','Movimentos'],['prod','Produção']].map(([k,t])=>({t,on:String(modo===k),st:chs(modo===k),go:()=>self.setState({est_modo:k})}));
+  const loc=st.est_loc||''; const fzl=faz==='Todas'?'':faz;
+  const locs=(E2.locais||[]).filter(l=>(E2.tipos_estoque||[]).indexOf(l.tipo)>=0&&(!fzl||l.faz===fzl)).map(l=>l.nome);
+  v.est_locs=[''].concat(locs).map(lc=>({t:lc||'Todos os locais',on:String(loc===lc),st:chs(loc===lc),go:()=>self.setState({est_loc:lc})}));
+  // ---- Contar local: uma contagem cega por lote do local, atribuída a quem age; o painel anda por "Contar o próximo" ----
+  const clv=(st.cl_v&&locs.indexOf(st.cl_v)>=0)?st.cl_v:(locs[0]||''); v.cl_v=clv; v.cl_opts=locs.map(x=>({v:x,t:x})); v.cl_set=(e)=>self.setState({cl_v:e.target.value});
+  v.cl_go=()=>{ const quem=g2ator(PF,'almoxarife'); const ids=[];
+    const r=cenMudar(null,c=>{ const ls=Object.keys(c.lotes).filter(k=>c.lotes[k].local===clv); if(!ls.length) throw new Error('Nenhum lote em '+clv+'.');
+      ls.forEach(k=>{ const id=enovoInv(c); ids.push(id); eput(c,{id,key:k,sis:null,cont:null,contador:quem,causa:'',aj:null,hist:[],grupo:'CL-'+clv}); });
+      return {msg:'Contar '+clv+': '+ls.length+(ls.length>1?' lotes':' lote')+' para '+quem+', sem ver o saldo.'}; });
+    if(r.erro){ self.setState({g2toast:r.erro}); return; } eAbrir(self,'g_cnt',ids[0],{modo:'contar',inv:ids[0],lote:'CL-'+clv},false,{step:3,cenrev:Date.now(),g2toast:r.msg}); };
+  v.est_nf_new=()=>eAbrir(self,'g_rec',null,{modo:'nf'},true);
+  // ---- textos, rótulo da primária e ações secundárias de cada painel (o painel aberto assume a tarefa: uma primária) ----
+  ePainelReq(self,v,C,PF); ePainelRec(self,v,C,PF); ePainelCnt(self,v,C,PF);
+  const Fl=v.g_lot_F; if(Fl&&Fl.open){ Fl.title='Lote · '+String((g2st(self,'g_lot').fm||{}).rid||'').split('|').pop(); Fl.sub='Consulta: o saldo muda só por movimento (receber, entregar, devolver, contar).'; }
+  const Fm=v.g_mov_F; const fmM=g2st(self,'g_mov').fm; if(Fm&&Fm.open&&fmM){ const m=(C.movs||[]).find(x=>x.id===fmM.rid); if(m){ Fm.title='Movimento · '+m.id; Fm.sub=emovTxt(m)+(esemSinal(C)[m.id]?' · aguardando sinal.':'.'); } }
+  const Fp=v.g_prod_F; if(Fp&&Fp.open) Fp.sub='Consulta: o lote de produto acabado vem da Colheita.';
   // restaurar a demonstração (cenário compartilhado volta ao início)
   v.est_rst_ask=!!st.est_rst; v.est_rst_no=!st.est_rst;
   v.est_rst=()=>self.setState({est_rst:true}); v.est_rst_cancel=()=>self.setState({est_rst:false});
-  v.est_rst_ok=()=>{ cenReset(); self.setState({est_rst:false,g2:{},libask:null,est_loc:'',cenrev:Date.now(),g2toast:'Demonstração restaurada: O.S., estoque e app voltaram ao início.'}); };
-  // textos do formulário conforme o registro aberto
-  const Fr=v.g_rec_F; if(Fr&&Fr.open&&Fr.ro) Fr.sub='Recebimento conferido: consulta. Documento já lançado não cria segunda entrada; a quarentena é liberada no lote, em Confira saldos.';
-  const Fe=v.g_ent_F; const fmE=g2st(self,'g_ent').fm; if(Fe&&Fe.open&&fmE){ const x=IT.find(y=>y.id===fmE.rid); if(x){
-      const bq=String(x.bloq).replace(/\.$/,'');
-      if(x.bloq) Fe.sub=x.it.entregue>0?('Bloqueada: '+bq+'. Nova entrega só com a O.S. apta; o que já foi entregue continua registrado.'):('Bloqueada: '+bq+'. Só O.S. liberada ou em execução recebe material; nada foi entregue.');
-      else if(!x.pode) Fe.sub='Consulta: '+x.motivo+'. Entregue só para O.S. liberada ou em execução; sobras e custódia ficam em Receba devoluções.';
-      else if(!x.l) Fe.sub='Sem lote de '+x.it.prod+' no estoque: receba a nota antes de entregar.';
-      else if(x.pend<=1e-9) Fe.sub='Entrega completa: '+econta(x)+' = 0. Sobras e custódia ficam em Receba devoluções.';
-      else Fe.sub='Entregue '+x.it.prod+' à '+x.os+' ('+(x.o.tipo||'')+'), do lote '+x.l.lote+(x.it.emb?' em '+x.it.emb:'')+'. O material fica com quem recebe e aguarda a confirmação no app.'; } }
-  const Fd=v.g_dev_F; const fmD=g2st(self,'g_dev').fm; if(Fd&&Fd.open&&fmD){ const x=IT.find(y=>y.id===fmD.rid); if(x){
-      Fd.sub=x.it.custodia<=1e-9?'Sem material em custódia neste item.':x.sinal?('Em custódia: '+eq(x.it.custodia,x.un)+' de '+x.it.prod+' com '+x.quem+' ('+x.os+'). O apontamento do turno está no aparelho, aguardando sinal: receba a sobra depois do envio.'):('Em custódia: '+eq(x.it.custodia,x.un)+' de '+x.it.prod+' com '+x.quem+' ('+x.os+'). Confira e receba: só o conferido volta ao lote '+x.it.lote+'.'); } }
-  const Fc=v.g_cnt_F; const fmC=g2st(self,'g_cnt').fm; if(Fc&&Fc.open&&fmC){ const rc=fmC.rid?GR('g_cnt').rows.find(x=>x.id===fmC.rid):null;
-    Fc.sub=fmC.ro?'Contagem encerrada: consulta.':((rc&&!eblank(rc.v.cont))?'Contagem registrada: quantidade e contador ficam travados. Informe a causa da diferença; para conferir de novo, use Recontar na linha.'
-      :'Contagem cega: informe só o que contou. A diferença para o sistema aparece depois de salvar e vira ajuste para aprovação.'); }
-  const Fl=v.g_lot_F; if(Fl&&Fl.open) Fl.sub='Saldo calculado pelos movimentos abaixo. Para mudar, receba, entregue, devolva ou conte.';
-  const Fm=v.g_mov_F; const fmM=g2st(self,'g_mov').fm; if(Fm&&Fm.open&&fmM){ const m=(C.movs||[]).find(x=>x.id===fmM.rid); if(m) Fm.sub='Movimento '+m.id+' registrado '+(m.origem==='app'?'no app':'na web')+' às '+m.at+(esemSinal(C)[m.id]?' · aguardando sinal.':'.'); }
+  v.est_rst_ok=()=>{ cenReset(); self.__abPf=undefined; self.setState({est_rst:false,g2:{},est_loc:'',est_modo:'lotes',step:undefined,cenrev:Date.now(),g2toast:'Demonstração restaurada: O.S., estoque e app voltaram ao início.'}); };
 }
+function eActs(lista){ return lista.filter(Boolean).map(a=>({t:a.t,h:a.h||'',go:a.go})); }
+function ePainelReq(self,v,C,PF){ const F=v.g_req_F; const fm=g2st(self,'g_req').fm; if(!F||!F.open||!fm||!fm.al) return; const al=fm.al, d=fm.draft||{};
+  const k=al.k?eConf(C,al.k):null; const rid=al.rid||(k&&k.req)||''; const L=rid?eReqLinha(C,rid):null; const o=L?L.o:(k?C.ordens[k.os]||{}:{});
+  const modo=(nm,x)=>()=>eModo(self,'g_req',Object.assign({modo:nm},x));
+  const acts=[]; const conta=(x)=>x.it.prod+': solicitado '+eq(x.it.solicitado,x.un)+' · entregue '+eq(x.it.entregue,x.un)+' · consumido '+eq(x.it.consumido,x.un)+(x.it.devolvido>1e-9?' · devolvido '+eq(x.it.devolvido,x.un):'')+' · em custódia '+eq(x.it.custodia,x.un)+(cenAtiva(x.o)?' · a entregar '+eq(x.pend,x.un):'');   /* O.S. fora de Liberadas/Em execução não recebe entrega: sem "a entregar" */
+  const prox=()=>{ const n=estFila(C,efaz(self)).find(y=>y.acao&&y.rid&&y.rid!==rid&&(y.entregar||y.sobra||y.confs.length)); return n?{t:'Próxima: '+n.rid+' ›',go:()=>{ try{ location.hash='#req='+n.rid; }catch(e){} }}:null; };
+  if(fm.rcb){ F.title='Comprovante · '+(rid||al.k||''); F.sub=fm.rcb; F.acts=eActs([prox()]); F.hasActs=F.acts.length>0; F.origins=[]; F.hasOrigins=false; return; }
+  const cab=(rid?rid+' · ':'')+(o.id||'')+(o.etapa?' '+o.etapa:'');
+  if(L) L.itens.forEach(x=>{ if(!(al.modo==='ent'&&al.prod===x.it.prod)&&x.parte>1e-9) acts.push({t:'Entregar parte de '+x.it.prod+' ›',go:modo('ent',{rid,prod:x.it.prod})});
+    if(!(al.modo==='dev'&&al.prod===x.it.prod)&&eDevOk(x)) acts.push({t:'Registrar devolução de '+x.it.prod+' ›',go:modo('dev',{rid,prod:x.it.prod})}); });
+  if(L&&L.inteira&&al.modo!=='req') acts.unshift({t:'‹ Entregar a '+rid+' inteira',go:modo('req',{rid})});
+  if(L) L.confs.forEach(c2=>{ if(!((al.modo==='conc'||al.modo==='rec')&&al.k===c2.id)) acts.push({t:'Conciliar '+c2.id+' ('+c2.prod+') ›',go:modo('conc',{k:c2.id})}); });
+  let sub=[], savel='', ro=!!fm.ro;
+  if(al.modo==='req'&&L){ const R=estRotuloReq(C,rid,d.quemr); F.title='Requisição · '+cab;
+    sub=L.itens.map(conta).concat(['Separe:'].concat(R.separe.map(t=>'· '+t)));
+    L.itens.filter(x=>/^Reserva parcial/.test(x.sit)).forEach(x=>{ const tot=((o.ins||[]).find(i=>i.p===x.it.prod)||{}).tot; sub.push(x.os+' pede '+eq(tot||x.pend,x.un)+' de '+x.it.prod+'; a '+rid+' reservou '+eq(x.it.solicitado,x.un)+': a falta fica com Compras (pedido ou solicitação).'); });
+    savel=R.rotulo; }
+  else if(al.modo==='ent'&&eReqItem(C,rid,al.prod)){ const x=eReqItem(C,rid,al.prod); F.title='Entregar parte · '+rid+' › '+al.prod; const n=enum_(d,'qtd');
+    sub=[conta(x),'Separe: '+x.it.lote+(x.l&&x.l.validade&&x.l.validade!=='—'?' · val. '+x.l.validade:'')+(x.l?' · '+x.l.local:'')+(x.insuf?' · lote insuficiente: o lote tem '+eq(x.livreReq,x.un)+' para esta requisição':''),'A O.S. só inicia com a mistura completa entregue e confirmada no app (ESTOS-03).'];
+    savel='Entregar '+(n>0?eq(n,x.un)+' de ':'parte de ')+x.it.prod+' (lote '+x.it.lote+')'+(d.quem?' a '+d.quem:''); }
+  else if(al.modo==='dev'&&eReqItem(C,rid,al.prod)){ const x=eReqItem(C,rid,al.prod); F.title='Devolução · '+rid+' › '+al.prod; const n=enum_(d,'dqtd');
+    sub=[conta(x),'Em custódia: '+eq(x.it.custodia,x.un)+' de '+x.it.prod+' com '+x.quem+' ('+x.os+(x.o.etapa?' '+x.o.etapa.toLowerCase():'')+').','Confira e digite o que voltou: só o conferido volta ao lote '+x.it.lote+(cenAtiva(x.o)?' e à reserva da '+rid:'')+'; bloqueada vai para quarentena até o laudo.'];
+    savel='Registrar devolução'+(n>0?' · '+eq(n,x.un):'')+' de '+x.it.prod; }
+  else if(al.modo==='conc'||al.modo==='rec'){ F.title=(al.modo==='rec'?'Recusar relato · ':'Consumo em conferência · ')+(k?k.id:al.k);
+    if(!k||k.estado!=='Em conferência'){ ro=true; sub=['Este consumo não está mais em conferência.']; }
+    else { let p; try{ p=cenConcPrevia(C,k.id); }catch(e){ p={erro:String(e.message||e)}; } const exc=estSitCf(C,k)==='Aguardando gestora';
+      sub=[k.prod+': '+cenConfTxt(k,C)+' · relatado por '+k.quem+' ('+k.os+(k.req?' · '+k.req:' · sem requisição')+(k.lote==='—'?' · fora da requisição':'')+').', p.erro?p.erro:p.txt];
+      if(al.modo==='rec'){ savel='Recusar relato '+k.id; acts.unshift({t:'‹ Voltar ao aceite',go:modo('conc',{k:k.id})}); }
+      else { acts.unshift({t:'Recusar relato '+k.id+' ›',go:modo('rec',{k:k.id})});
+        if(p.erro){ ro=true; sub.push('Conte o lote ou recuse o relato.'); }
+        else if(exc&&!g2papel(PF,'gestor')){ ro=true; sub.push('O que passa da custódia sai do lote: aceite de '+g2quem('gestor')+' (padrão 2). Você pode recusar o relato com o motivo.'); }
+        else if(!exc&&!g2umPapel(PF,['almoxarife','gestor'])){ ro=true; sub.push('Aceite de '+g2quemUm(['almoxarife','gestor'])+'.'); }
+        else savel=exc?('Aprovar consumo · '+eq(p.falta,k.un)+' além da custódia'):('Aceitar consumo · '+eq(k.relatado,k.un)+' de '+k.prod); } } }
+  else { F.title='Requisição · '+cab; const x0=L&&L.itens[0]; const mot=x0?(x0.bloq||x0.motivo):''; sub=(L?L.itens.map(conta):[]).concat(mot?[mot]:[]).concat(L&&L.sit==='Concluída'?['Nada a entregar nem a receber.']:[]); ro=true; }
+  if(ro!==!!fm.ro){ setTimeout(()=>{ const f2=g2st(self,'g_req').fm; if(f2&&f2.chave===fm.chave&&!!f2.ro!==ro) g2set(self,'g_req',{fm:Object.assign({},f2,{ro})}); },0); }
+  F.sub=sub.join('\n'); F.savel=savel||'Registrar'; F.acts=eActs(acts); F.hasActs=F.acts.length>0; F.origins=[]; F.hasOrigins=false; }
+function ePainelRec(self,v,C,PF){ const F=v.g_rec_F; const fm=g2st(self,'g_rec').fm; if(!F||!F.open||!fm||!fm.al) return; const al=fm.al, d=fm.draft||{};
+  if(fm.rcb){ F.title='Comprovante'; F.sub=fm.rcb; F.acts=[]; F.hasActs=false; return; }
+  if(al.modo==='nf'){ F.title=fm.isNew?'Registrar NF recebida':('Conferir '+((al.rec||{}).nf||'')); F.sub='Confira a nota contra o pedido e o material: só a parte apta entra no disponível; a quarentena vira parcela da nota e sai com o laudo.';
+    F.savel=fm.isNew?'Registrar NF'+(d.nf?' '+d.nf:''):('Conferir '+((al.rec||{}).nf||'NF')); return; }
+  if(al.modo==='laudo'||al.modo==='cons'){ const pc=al.key?eParcela(C,al.key,al.doc):null;
+    if(pc){ F.title='Parcela '+pc.doc+' › '+pc.lote; const L=C.lotes[pc.key];
+      F.sub=[pc.prod+': '+eq(pc.qtd,pc.un)+' em quarentena'+(pc.motivo?' · '+pc.motivo:'')+(pc.por?' · registrada por '+pc.por:''),'Lote '+pc.lote+' · '+pc.local+(L&&L.validade&&L.validade!=='—'?' · validade '+L.validade:'')+(pc.venc?' · vencido: não volta ao disponível':'')]
+        .concat(pc.laudo?['Laudo '+pc.laudo.num+' reprovado por '+pc.laudo.por+(pc.laudo.destino?' · destino: '+pc.laudo.destino:'')]:[])
+        .concat(al.modo==='cons'&&!pc.laudo?['Laudo: decisão de '+g2quem('gestor')+'. O laudo libera só esta parcela.']:[]).join('\n');
+      if(al.modo==='laudo') F.savel=d.res==='Reprovado'?'Manter bloqueada · laudo reprovado':('Liberar parcela · '+eq(pc.qtd,pc.un));
+      F.acts=eActs([{t:'Ver o lote '+pc.lote+' em Confira saldos ›',go:()=>{ try{ location.hash='#lote='+pc.lote; }catch(e){} }}]); F.hasActs=true; return; }
+    const r=al.rec; if(r){ F.title='Nota '+r.nf; F.sub='Conferida: '+eq(r.conf,r.un)+' de '+r.item+' no lote '+r.lote+(r.quar?' · '+eq(r.quar,r.un)+' em quarentena (parcela da nota)':'')+'. Documento já lançado não cria segunda entrada.'; } } }
+function ePainelCnt(self,v,C,PF){ const F=v.g_cnt_F; const fm=g2st(self,'g_cnt').fm; if(!F||!F.open||!fm||!fm.al) return; const al=fm.al;
+  const rec=einvRec(C,al.inv)||{}; const l=C.lotes[rec.key]||{}; const un=l.un||''; const aj=eajuste(C,rec); const quem=g2ator(PF,'almoxarife');
+  const nxt=()=>{ if(!al.lote) return null; return einvs(C).find(r=>r.grupo===al.lote&&r.id!==al.inv&&!econtou(r))||null; };
+  F.title='Contagem '+(rec.id||al.inv)+' · '+(l.lote||'')+' · '+(l.prod||'');
+  if(fm.rcb){ F.sub=fm.rcb; const n=nxt(); F.acts=eActs([n?{t:'Contar o próximo: '+n.id+' ('+(C.lotes[n.key]||{}).lote+') ›',go:()=>eAbrir(self,'g_cnt',n.id,{modo:'contar',inv:n.id,lote:al.lote})}:null]); F.hasActs=F.acts.length>0; return; }
+  const acts=[];
+  if(al.modo==='contar'){ F.sub=['Contagem cega: informe só o que contou, na unidade do lote ('+un+'). O sistema e a diferença aparecem depois de salvar.','Local '+(l.local||'')+' · contador: '+quem+(rec.contador&&!g2mesma(quem,rec.contador)?' (atribuída a '+rec.contador+')':'')]
+      .concat((rec.hist||[]).length?['Recontagem: quem contou antes não reconta.']:[]).join('\n'); F.savel='Salvar contagem'; }
+  else if(al.modo==='causa'){ const dif=rec.cont-rec.sis; F.sub=['Contado '+eq(rec.cont,un)+' · sistema na data '+eq(rec.sis,un)+' · diferença '+esig(dif,un)+'.','Informe a causa: o ajuste vai à gestora; o saldo não muda até a aprovação.'].concat(aj&&aj.afeta&&aj.afeta.length?['Atinge a reserva da '+aj.afeta.join(', ')+'.']:[]).join('\n');
+    F.savel='Enviar ajuste à gestora'; acts.push({t:'Pedir recontagem',go:()=>eRecontar(self,al.inv)}); }
+  else if(al.modo==='aprov'||al.modo==='aguarda'){ const dif=rec.cont-rec.sis; const afeta=(aj&&aj.afeta)||[];
+    F.sub=['Contado '+eq(rec.cont,un)+' por '+rec.contador+' · sistema '+eq(rec.sis,un)+' · diferença '+esig(dif,un)+'.','Causa: '+(rec.causa||'—')+'.']
+      .concat(afeta.length?['Afeta a reserva da '+afeta.join(', ')+': depois do ajuste, a requisição fica "Lote insuficiente" e só entrega parte.']:[])
+      .concat(al.modo==='aguarda'?['Aprova: '+g2quem('gestor')+'.']:(g2mesma(PF.k,rec.contador)?['Você contou: a aprovação vale e fica revisão posterior pendente (padrão 2).']:[])).join('\n');
+    F.savel='Aprovar ajuste · '+esig(dif,un); acts.push({t:'Pedir recontagem',go:()=>eRecontar(self,al.inv)}); }
+  else { F.sub=(rec.cont!=null?'Contado '+eq(rec.cont,un)+' · sistema '+eq(rec.sis,un)+(aj&&aj.estado==='Aprovado'?' · ajuste aprovado por '+aj.por+(aj.rev?' · '+aj.rev:''):''):'Consulta')+'.'; }
+  F.acts=eActs(acts); F.hasActs=F.acts.length>0; }
+function eRecontar(self,inv){ const r=cenMudar(null,c=>estRecontar(c,inv)); if(r.erro){ self.setState({g2toast:r.erro}); return; }
+  eAbrir(self,'g_cnt',inv,{modo:'contar',inv},false,{cenrev:Date.now(),g2toast:r.msg}); }
 '''
+JS=open(os.path.join(HERE,'est.js'),encoding='utf-8').read()+'\n'+JS_TELA

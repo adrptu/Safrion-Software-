@@ -100,10 +100,11 @@ def chk(nome,cond,info=''):
     (OK if cond else FAIL).append(nome); print(('OK   ' if cond else 'FALHA'),nome,('' if cond else str(info)[:900]),flush=True)
 p,srv=serve(os.path.join(HERE,'_render')); srv2=None; time.sleep(.6)
 c=None
-NOMES={'CMP':['Escolha a safra','Confira a demanda','Solicite cotações','Compare propostas','Aprove a compra','Acompanhe a entrega'],
-       'SAF':['Escolha a safra'],'PA':['Escolha o plano'],'EST':['Confira recebimentos'],'IR-02':['Confira a necessidade','Programe a irrigação'],'MA-01':['Confira os ativos']}
-GUIADO=('CMP','SAF','PA')   # progresso informativo; EST, IR e MA são telas/seções de trabalho paralelo (navegação, sem número de etapa)
-ATUAL={'CMP':(1,6),'SAF':(1,6),'PA':(1,3),'EST':(1,6),'IR-02':(2,4),'MA-01':(1,5)}
+# SUP (06/10): Compras deixou de ser processo guiado (2 seções + detalhe) e o Estoque tem 4 seções; Ana (gestora) abre em Receba e inspecione
+NOMES={'CMP':['Atenda solicitações','Acompanhe pedidos'],
+       'SAF':['Escolha a safra'],'PA':['Escolha o plano'],'EST':['Atenda requisições','Receba e inspecione','Faça contagens','Confira saldos'],'IR-02':['Confira a necessidade','Programe a irrigação'],'MA-01':['Confira os ativos']}
+GUIADO=('SAF','PA')   # progresso informativo; CMP, EST, IR e MA são telas/seções de trabalho paralelo (navegação, sem número de etapa)
+ATUAL={'CMP':(1,2),'SAF':(1,6),'PA':(1,3),'EST':(2,4),'IR-02':(2,4),'MA-01':(1,5)}
 P8=['CMP','SAF','PA','EST','OS','IR-02','MA-01','AG-07']
 CLK="""((t,root)=>{const r=root?document.querySelector(root):document; if(!r) return 'SEM RAIZ'; const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...r.querySelectorAll('button,a,label')].filter(e=>e.getClientRects().length); const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok';})"""
 try:
@@ -129,7 +130,7 @@ try:
         print('     (informativo) campos cortados pela própria caixa da área:', {g:len(v) for g,v in inp.items() if v})
         # 5 · quadro do site (325 px), o caso da revisão
         m=abre('CMP',325,700); shot('CMP_325')
-        chk('5 325 px (quadro do site) · Compras sem sobreposição, "Etapa 1 de 6 · Escolha a safra", título inteiro', m['sobrepoe']==0 and not m['vazam'] and m['progresso'].startswith(exp['CMP']) and not m['h1Cortado'] and not m['headerFora'], m)
+        chk('5 325 px (quadro do site) · Compras sem sobreposição, seção "Atenda solicitações", título inteiro', m['sobrepoe']==0 and not m['vazam'] and m['progresso'].startswith(exp['CMP']) and not m['h1Cortado'] and not m['headerFora'], m)
         # 6 · menu aberto em 390: passa por cima, não espreme; recolher devolve. Desde 03/10 (verificação de componentes, item
         #     "menu aberto guardado") a tela estreita sempre começa com o menu recolhido, mesmo com "aberto" guardado: abre pelo botão
         abre('CMP',rec='0'); ini=J("Math.round(document.querySelector('.menu-lat').getBoundingClientRect().width)")
@@ -145,25 +146,26 @@ try:
         za={pg:abre_menu(pg) for pg in ['CMP','SAF']}; zw=J("Math.round(document.querySelector('.menu-lat').getBoundingClientRect().width)"); shot('SAF_zoom200_menu_aberto')
         chk('8 zoom 200 % com menu aberto (pelo botão) · CMP e SAF sem sobreposição', zw==232 and all(za[g]['sobrepoe']==0 and not za[g]['vazam'] and za[g]['progresso'] for g in za), [zw,{g:(za[g]['sobrepoe'],za[g]['vazam'],za[g]['progresso']) for g in za}])
         # 9 · teclado: Tab chega à etapa atual, Espaço abre a lista com as 6 etapas; o próximo Tab entra na lista
-        abre('CMP'); J("document.activeElement&&document.activeElement.blur()")
+        abre('SAF'); J("document.activeElement&&document.activeElement.blur()")   # SUP: o guiado de referência é o Planejar safra (Compras sem etapas)
         def tab(): c.call('Input.dispatchKeyEvent',{'type':'keyDown','key':'Tab','code':'Tab','windowsVirtualKeyCode':9}); c.call('Input.dispatchKeyEvent',{'type':'keyUp','key':'Tab','code':'Tab','windowsVirtualKeyCode':9}); time.sleep(.05)
         k=0
         while k<60 and not J("document.activeElement&&document.activeElement.classList.contains('etp-chk')"): tab(); k+=1
         c.call('Input.dispatchKeyEvent',{'type':'keyDown','key':' ','code':'Space','windowsVirtualKeyCode':32,'text':' '}); c.call('Input.dispatchKeyEvent',{'type':'keyUp','key':' ','code':'Space','windowsVirtualKeyCode':32}); time.sleep(.3)
-        m=J(MEDIR); tab(); dent=J("(()=>{const a=document.activeElement; return !!(a&&a.closest('.etp-itens'))&&a.innerText.replace(/\\s+/g,' ').trim();})()"); shot('CMP_390_lista_teclado')
+        m=J(MEDIR); tab(); dent=J("(()=>{const a=document.activeElement; return !!(a&&a.closest('.etp-itens'))&&a.innerText.replace(/\\s+/g,' ').trim();})()"); shot('SAF_390_lista_teclado')
         chk('9 teclado · Tab chega ao rótulo da etapa atual, Espaço abre a lista em folha (6 etapas, sem sobreposição) e o Tab seguinte não entra nela: a lista só informa (UX-ACAO-UNICA)', k<60 and m['folha'] and m['etapasVis']==6 and m['sobrepoe']==0 and not m['vazam'] and not dent, [k,m['folha'],m['etapasVis'],m['sobrepoe'],m['vazam'],dent])
-        # 10 · toque: escolher a safra, abrir a lista, ir à etapa 3; a lista fecha sozinha e a safra continua no contexto
-        abre('CMP'); clk('Abrir compra'); m1=J(MEDIR)
-        clk('Etapa 2 de 6'); aberta=J(MEDIR)['etapasVis']; r=clk('3 Solicite cotações','.etp-itens'); m15=J(MEDIR)
+        # 10 · toque (SUP: no Planejar safra; Compras não tem mais etapas): safra aberta na etapa 2, a lista aberta só informa; o avanço da área leva à etapa 3
+        abre('SAF'); c.goto(f'http://127.0.0.1:{p}/SAF.dc.html#saf=S2627&etapa=2',wait=.8); m1=J(MEDIR)
+        clk('Etapa 2 de 6'); aberta=J(MEDIR)['etapasVis']; r=J("(()=>{const e=[...document.querySelectorAll('.etp-itens>*')][2]; if(!e) return 'sem item'; const a=e.closest('button,a'); return a?'alvo':'não é alvo';})()"); m15=J(MEDIR)
+        J("(()=>{const k=[...document.querySelectorAll('.etp-chk')].find(x=>x.getClientRects().length&&x.checked); if(k) k.click();})()"); time.sleep(.2)
         r2=J("(()=>{const b=document.querySelector('[data-acoes] [data-acao=avancar]'); if(!b) return 'sem avanço'; b.scrollIntoView({block:'center'}); b.click(); return b.innerText.trim();})()"); time.sleep(.5)
-        m2=J(MEDIR); hd=J("document.querySelector('header').innerText.replace(/\\s+/g,' ')"); shot('CMP_390_etapa3')
-        chk('10 toque · Abrir compra → "Etapa 2 de 6 · Confira a demanda"; a lista aberta só informa (a etapa 3 não é alvo de toque e a etapa não muda); o avanço "Solicitar cotações ›" da área de ações leva à etapa 3, sem texto sobre texto; Safra 2026/27 no contexto (UX-ACAO-UNICA)',
-            m1['progresso'].startswith('Etapa 2 de 6 · Confira a demanda') and aberta==6 and r!='ok' and m15['progresso'].startswith('Etapa 2 de 6') and r2.startswith('Solicitar cotações') and m2['progresso'].startswith('Etapa 3 de 6 · Solicite cotações') and m2['etapasVis']==0 and not m2['textoSobreTexto'] and 'Safra 2026/27' in hd, [m1['progresso'],aberta,r,m15['progresso'],r2,m2['progresso'],m2['etapasVis'],m2['textoSobreTexto'],hd[:120]])
+        m2=J(MEDIR); hd=J("document.querySelector('header').innerText.replace(/\\s+/g,' ')"); shot('SAF_390_etapa3')
+        chk('10 toque · SAF na "Etapa 2 de 6"; a lista aberta só informa (a etapa 3 não é alvo de toque e a etapa não muda); o avanço da área de ações leva à etapa 3, sem texto sobre texto; Safra 2026/27 no contexto (UX-ACAO-UNICA)',
+            m1['progresso'].startswith('Etapa 2 de 6') and aberta==6 and r!='alvo' and m15['progresso'].startswith('Etapa 2 de 6') and r2!='sem avanço' and m2['progresso'].startswith('Etapa 3 de 6') and m2['etapasVis']==0 and not m2['textoSobreTexto'] and 'Safra 2026/27' in hd, [m1['progresso'],aberta,r,m15['progresso'],r2,m2['progresso'],hd[:120]])
         # 11 · ‹ volta uma etapa; mudar de 390 para 1440 e voltar mantém etapa e safra (troca de zoom não perde contexto)
         J("document.querySelector('[data-acoes] [data-acao=voltar]').click()"); time.sleep(.4); m3=J(MEDIR)
-        vp(1440,900); m4=J(MEDIR); cur=J("(document.querySelector('[aria-current=step]')||{innerText:''}).innerText.replace(/\\s+/g,' ')"); shot('CMP_1440_mesma_sessao')
+        vp(1440,900); m4=J(MEDIR); cur=J("(document.querySelector('[aria-current=step]')||{innerText:''}).innerText.replace(/\\s+/g,' ')"); shot('SAF_1440_mesma_sessao')
         vp(390,844); m5=J(MEDIR); hd=J("document.querySelector('header').innerText.replace(/\\s+/g,' ')")
-        chk('11 "‹ Demanda" (área de ações) volta à etapa 2; em 1440 a faixa completa mostra a etapa 2 e em 390 volta "Etapa 2 de 6", com a Safra 2026/27', m3['progresso'].startswith('Etapa 2 de 6') and m4['etapasVis']==6 and not m4['progresso'] and cur.startswith('2 Confira a demanda') and m5['progresso'].startswith('Etapa 2 de 6') and 'Safra 2026/27' in hd, [m3['progresso'],m4['etapasVis'],cur,m5['progresso']])
+        chk('11 o retorno da área de ações volta à etapa 2; em 1440 a faixa completa mostra a etapa 2 e em 390 volta "Etapa 2 de 6", com a Safra 2026/27', m3['progresso'].startswith('Etapa 2 de 6') and m4['etapasVis']==6 and not m4['progresso'] and cur.startswith('2 ') and m5['progresso'].startswith('Etapa 2 de 6') and 'Safra 2026/27' in hd, [m3['progresso'],m4['etapasVis'],cur,m5['progresso']])
         # 12 · rascunho no painel lateral (IR-02 · Programar irrigação): cobre a faixa no celular e o texto digitado sobrevive à troca de zoom
         abre('IR-02'); r=clk('Programar irrigação'); cob=J(COBRE); shot('IR-02_390_painel')
         # painel novo da Irrigação (03/10) abre só com o Setor: escolhe o 1º setor e o rascunho passa a ter os demais campos

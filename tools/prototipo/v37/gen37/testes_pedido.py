@@ -80,9 +80,10 @@ def t04(t):
     # 01/10: com tudo já enviado, a etapa 6 não oferece novo envio (não há como duplicar) e a ação principal abre a Compra
     tem_env=t.js("[...document.querySelectorAll('button')].some(b=>b.innerText.trim()==='Enviar para cotação')")
     if tem_env: t.clk('Enviar para cotação'); t.check('Envio não duplica solicitação existente',('Nenhuma solicitação duplicada' in t.aviso()) or ('enviada' in t.aviso()),t.aviso())
-    else: t.check('Envio não duplica solicitação existente (nada a enviar: só "Abrir Compra de insumos")',t.js("[...document.querySelectorAll('button,a')].some(b=>/^Abrir Compra de insumos/.test(b.innerText.trim()))"),'')   # AÇÃO: ir a outra tela é link (área de ações)
-    t.clk('Abrir Compra de insumos'); time.sleep(1.2)
-    t.check('Abriu Compra de insumos',t.js("location.pathname").endswith('CMP.dc.html'))
+    # SUP §7 (06/10): o atalho nomeia a solicitação ("Abrir SOL-2026-07 ›", antes "Abrir Compra de insumos ›") e abre o detalhe em Compras
+    else: t.check('Envio não duplica solicitação existente (nada a enviar: só "Abrir SOL-2026-07")',t.js("[...document.querySelectorAll('button,a')].some(b=>/^Abrir SOL-2026-07/.test(b.innerText.trim()))"),'')   # AÇÃO: ir a outra tela é link (área de ações)
+    t.clk('Abrir SOL-2026-07'); time.sleep(1.2)
+    t.check('Abriu Compras',t.js("location.pathname").endswith('CMP.dc.html'))
     t.check('Compras mostra a SOL-2026-07',t.js("document.body.innerText.indexOf('SOL-2026-07')>=0"))
     t.check('Compras mostra a origem (Planejar safra · Safra 2026/27)',t.js("/Planejar safra/.test(document.body.innerText) && /2026\\/27/.test(document.body.innerText)"))
     t.foto('compras-origem')

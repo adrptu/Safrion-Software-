@@ -220,7 +220,7 @@ function g2vals(self,sp,v,mask){
     F.isTot=!!fm.tot; F.isRec=!fm.tot;
     F.title=fm.tot?('Composição do total'):(fm.isNew?(ed.newTitle||'Novo registro'):((ed.title?ed.title+' · ':'')+(r?g2text(r,sp.cols[0]):'')));
     F.sub=fm.tot?'Linhas que formam o total, com os filtros atuais. Totais são calculados: altere os registros de origem.':(fm.ro?(fm.mode==='origin'?'Valor calculado — consulte a origem abaixo. Para mudar, altere o registro de origem.':(r&&r.ro?'Consulta: você não tem permissão para editar este registro.':'Consulta')):(ed.sub||'Altere os campos e salve. Os cálculos da tabela são refeitos ao salvar.'));
-    F.ro=!!fm.ro; F.edit=!fm.ro; F.warn=!!fm.warn;
+    F.ro=!!fm.ro; F.edit=!fm.ro; F.warn=!!fm.warn; F.savel=ed.savel||'Salvar';   // rótulo da primária do painel: a tela pode dizer o que confirma (SUP §2.3)
     F.items=fm.tot? flat.filter(x=>x.lvl===0).map(x=>({t:g2text(x.r,sp.cols[0]), v:sp.cols.filter(c=>c.agg).map(c=>c.l+': '+g2text(x.r,c)).join(' · ')})):[];
     F.origins=(r&&r.o)?r.o.map(o=>({t:o.t,h:o.h||'#',isLink:!!o.h,isTxt:!o.h})):[]; F.hasOrigins=F.origins.length>0;
     F.acts=(!fm.tot&&!fm.isNew&&r&&self.g2formActs)?(self.g2formActs(id,r,fm)||[]):[]; F.hasActs=F.acts.length>0;
@@ -248,7 +248,8 @@ function g2menuRec(){ if(g2estreito()) return true; try{ return localStorage.get
 // demonstra a experiência, não é segurança (no software o servidor tira o ator da sessão). Pessoas e papéis: CF-01 e telas vizinhas.
 // O papel vem sempre desta lista (g2pf), nunca do objeto que o comando recebe. Bloco único, lido também pelos testes sem navegador.
 const G2_PERFIS=[{k:'Ana',t:'Ana · Gestora e RT',papeis:{gestor:'gestora',agronomo:'agrônoma'}},{k:'Caio',t:'Caio · PCP',papeis:{pcp:'PCP'}},
-  {k:'Rui',t:'Rui · Almoxarife',papeis:{almoxarife:'almoxarife'}},{k:'Paula',t:'Paula · Conferência',papeis:{almoxarife:'almoxarife',conferente:'conferência'}},{k:'Zé',t:'Zé · Mecânico',papeis:{mecanico:'mecânico'}}];
+  {k:'Rui',t:'Rui · Almoxarife',papeis:{almoxarife:'almoxarife'}},{k:'Paula',t:'Paula · Conferência',papeis:{almoxarife:'almoxarife',conferente:'conferência'}},{k:'Zé',t:'Zé · Mecânico',papeis:{mecanico:'mecânico'}},
+  {k:'Helena',t:'Helena · Direção',papeis:{direcao:'Direção'}}];   // SUP §2.2: a Direção decide a compra acima da alçada da gestora (dados2.ALCADA); quem envia não decide
 const G2_PERFIL_KEY='safrion.perfilDemo'; let G2_PERFIL_MEM='';
 function g2pf(p){ const k=(typeof p==='string')?p:(p&&p.k); return G2_PERFIS.find(x=>x.k===k)||null; }   // perfil do cadastro pela chave ("Ana" ou {k:'Ana'})
 function g2perfil(){ let k=G2_PERFIL_MEM; try{ k=localStorage.getItem(G2_PERFIL_KEY)||k; }catch(e){} return g2pf(k)||G2_PERFIS[0]; }

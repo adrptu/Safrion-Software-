@@ -38,7 +38,7 @@ observacoes (dados locais coerentes com dados.py / dados2.py / telas vizinhas):
   (Liberar para execução), com "Ajustar antes de liberar" opcional na O.S.; a REQ-038 reserva a Ureia ao liberar. Mapa e O.S. leem a
   fase no cenário compartilhado: liberada, a ordem sai da contagem "A liberar (agrônomo)".
   Custo dos 30 ha preservados da OS-0420: semente 1.560 kg × R$ 9,50 + KCl 3.600 kg × R$ 2,40 = R$ 23.460.
-- Sobras: "Receber sobras"/"Receber devolução" levam ao Estoque do menu (EST.dc.html · etapa Receba devoluções), que grava no cenário.
+- Sobras: "Receber sobras"/"Receber devolução" levam ao registro no Estoque (EST.dc.html#req=REQ-…, seção Atenda requisições), que grava no cenário.
 """
 import json
 from engine import (grid,esc,icon,chip,btn,Pt,INK,MUTED,LINE,BG,SURF,YEL,YELS,RED,REDS,GRAYS,DISP,
@@ -124,7 +124,7 @@ _ORD_MAPA=[  # id, talhões da geometria, complemento do realizado, prazo, açã
  ('OS-0424',['T1'],'T1-B','até 3 dias',None),
  ('OS-0422',['P2'],'2 passadas de 6,75 mm','até 3 dias',('Definir janela','IR-03det.dc.html#OS-0422:janela','op',None)),
  ('OS-0418',['P1'],'Ureia 12 kg/ha','vence hoje',('Ajustar antes de liberar','OS.dc.html#OS-0418','lib','ag')),
- ('OS-0417',['P1'],'','até 3 dias',('Receber sobras','EST.dc.html','op','cust')),
+ ('OS-0417',['P1'],'','até 3 dias',('Receber sobras','EST.dc.html#req=REQ-031','op','cust')),
  ('OS-0415',['T3'],'','encerrada',None),
  ('OS-0423',['T7'],'estimativa por ET','vence hoje',('Resolver conflito','IR-03det.dc.html#OS-0423:conflito','op',None)),
  ('OS-0425',['C1'],'','no prazo',None),
@@ -638,11 +638,12 @@ function mapOrdsCen(){ let c=null; try{ c=cenGet(); }catch(e){ c=null; } MAPC=c;
     let bq='';
     if(co&&co.etapa==='Em conferência'){ try{ bq=cenPodeEncerrar(c,o.id)||''; }catch(e){ bq=''; } x.selos=x.selos.filter(s=>!/^Aguardando sinal do app/.test(s[0]));
       if(/sinal/.test(bq)) x.selos=x.selos.filter(s=>!/^Sobras a receber/i.test(s[0])).concat([['Aguardando sinal do app','yellow']]);
+      else if(/^Consumo em conferência/.test(bq)) x.selos=x.selos.filter(s=>!/^Sobras a receber/i.test(s[0]));
       else if(bq&&!x.selos.some(s=>/^Sobras a receber/i.test(s[0]))) x.selos=x.selos.concat([['Sobras a receber','yellow']]); }
     if(x.fase!=='A liberar') x.selos=x.selos.filter(s=>!/^Aguardando(?! sinal do app)/.test(s[0]));
     if(x.fase==='Encerradas'||x.fase==='Canceladas') x.pz='encerrada';
     const a=o.act; x.act=(!a||(a.c==='ag'&&!inPendLib(c,o.id))||(a.c==='cust'&&co&&!cust.length))?null:a;
-    if(bq&&!/sinal/.test(bq)&&cust.length&&!x.act) x.act={t:'Receber sobras',h:'EST.dc.html',k:'op',c:'cust'};
+    if(bq&&!/sinal/.test(bq)&&cust.length&&!x.act) x.act={t:'Receber sobras',h:'EST.dc.html#'+(co&&co.req?'req='+co.req:'os='+o.id),k:'op',c:'cust'};
     return x; }); }
 function realCurto(id){ const o=M.ord.find(x=>x.id===id); return o?o.real.split(' · ')[0]:''; }
 // irrigação no Integrado: conflito (vermelho) e pendência de água (amarelo) vêm do estado da irrigação, não de texto fixo
@@ -894,13 +895,13 @@ function panelTal(self,l,f,t){ const T=M.tal[t]; const c=cls(l,f,t); const lv=M.
   // insumos
   { const fi=flt(self,'Insumos'); const its=necAgg(t,fi.per); const st=M.fazst[fi.per]||{};
     const items=its.map(x=>{ const s=st[x.p]||['—','gray','']; return {t:x.p+' · '+nfx(x.q,x.q%1?1:0)+' '+x.un,sub:'a partir de '+brIso(x.dt)+' · '+x.orig[0]+(x.orig.length>1?' +'+(x.orig.length-1):'')+' · '+s[2],ch:[CH(s[0],s[1]==='ok'?'green':s[1])],
-      acts:s[1]==='red'?[A('Comprar',{h:'CMP.dc.html',ic:'cart',tt:'Abrir Compra de insumos'})]:[]}; });
+      acts:s[1]==='red'?[A('Comprar',{h:'CMP.dc.html#saf=S2627',ic:'cart',tt:'Abrir a solicitação da safra em Compras'})]:[]}; });
     const reqs=[]; osMapa(t).forEach(o=>{ if(!o.r||!o.r.itens||!o.r.itens.length||['Encerradas','Canceladas'].indexOf(o.etapa)>=0) return;
       o.r.itens.forEach(i=>reqs.push({t:o.r.id+' · '+o.id+' · '+i.prod,sub:'reservado '+nd(i.solicitado)+' '+i.un+' · lote '+i.lote+' · entregue '+nd(i.entregue)+' · em custódia '+nd(i.custodia)+' · consumido '+nd(i.consumido),ch:[CH(i.custodia>0.001?'em custódia':(i.entregue>0?'entregue':'reservado'),i.custodia>0.001?'yellow':'gray')],acts:[]})); });
     const fal=items.filter(x=>x.ch[0].t.indexOf('Falta')===0).length;
     const sum=its.length?(its.length+(its.length>1?' insumos':' insumo')+' · '+(fal?fal+(fal>1?' faltas':' falta'):'sem falta')+' · '+fi.per.toLowerCase()):(M.semplano[t]?'Sem plano na safra 2026/27':'Sem necessidade no período');
     P.secs.push(SEC(self,l,'ins','Insumos',sum,{items:items.concat(reqs),kv:[{l:'Período',t:fi.per+' (filtro da camada Insumos)'},{l:'Estoque',t:'compartilhado da fazenda · não é dividido por talhão'}],
-      note:M.semplano[t]?'Cultivo da safra 2026/27 sem plano: a necessidade vem só das O.S. abertas.':'',lk:'CMP.dc.html',lkt:'Abrir Compra de insumos'})); }
+      note:M.semplano[t]?'Cultivo da safra 2026/27 sem plano: a necessidade vem só das O.S. abertas.':'',lk:'CMP.dc.html#saf=S2627',lkt:'Abrir em Compras'})); }
   // custos
   { const Pv=M.prev[t]; const R=cusReal(t); const kv=[];
     if(Pv.fonte){ kv.push({l:'Previsto',t:money(Pv.tot)+' · '+money(Pv.tot/Pv.base)+'/ha'}); kv.push({l:'Área-base',t:nfx(Pv.base)+' ha · '+Pv.orig}); kv.push({l:'Composição',t:'insumos '+money(Pv.ins)+' · operação '+money(Pv.op)}); }
@@ -1367,7 +1368,7 @@ def build_in01():
      ('f1','OS-0420 · plantio','Santa Rita · T4',f'Substituir {t1} bloqueado','vence hoje','Carlos',(f'Ativo bloqueado · {OM["id"]}','red'),('Reprogramar saldo','PL-05.dc.html')),
      ('f2','OS-0418 · fertirrigação','Santa Rita · P1','Liberar a fertirrigação (pode ajustar)','vence hoje','Ana',('Falta insumo · Ureia 45%','red'),('Liberar','OS.dc.html#OS-0418')),
      ('f3','OS-0430 · dessecação','Santa Rita · T1-A','Liberar a dessecação (pode ajustar)','até 3 dias','Ana',None,('Liberar','OS.dc.html#OS-0430')),
-     ('f4','OS-0417 · cobertura','Santa Rita · P1',f'Receber devolução de sobras ({D.REQ["custodia"]} sc)','vence hoje','Rui',None,('Receber devolução','EST.dc.html')),
+     ('f4','OS-0417 · cobertura','Santa Rita · P1',f'Receber devolução de sobras ({D.REQ["custodia"]} sc)','vence hoje','Rui',None,('Receber devolução',f'EST.dc.html#req={D.REQ["id"]}')),
      ('f5','Fila de expedição','Sede · doca 1','Chamar o próximo apto da fila (T2)','vence hoje','Equipe expedição',('T1 atrasado · prev. 09:10','red'),('Abrir fila','LO-02.dc.html')),
      ('f6','OS-0421 · fungicida','Santa Rita · T1+T2',f'Conferir o apontamento do dia 4 ({D.OS[0]["dias"][3]} ha)','até 3 dias','Paula',None,('Conferir apontamentos','CA-02.dc.html')),
      ('f7','INSP-88 · qualidade','Armazém Sede',f'Decidir o lote {D.LOTE_BLOQ["id"]}','até 3 dias','Equipe qualidade',('Lote bloqueado','red'),('Abrir inspeção','CO-06det.dc.html')),
@@ -1402,7 +1403,7 @@ def build_in03():
     AG=[ # id, data, objeto, resp, prioridade, compromisso, bloqueio(t,c)|None, prazo limite, (ação,h)
      ('g1','2026-09-23',f'Conferir apontamento dia 4 · {D.OS[0]["id"]}','Paula','Alta','conferência diária',None,'23/09 18:00',('Abrir origem','CA-02.dc.html')),
      ('g6','2026-09-23','Resolver conflito da OS-0423 com a parada da B3','Caio','Alta','irrigação do T7 hoje 14:00–16:00',('Conflito · parada da B3','red'),'23/09 14:00',('Resolver conflito','IR-03det.dc.html#OS-0423:conflito')),
-     ('g2','2026-09-23',f'Receber devolução {D.REQ["id"]} ({D.REQ["custodia"]} sc)','Rui','Alta','custódia zerada para encerrar',None,'24/09',('Receber devolução','EST.dc.html')),
+     ('g2','2026-09-23',f'Receber devolução {D.REQ["id"]} ({D.REQ["custodia"]} sc)','Rui','Alta','custódia zerada para encerrar',None,'24/09',('Receber devolução',f'EST.dc.html#req={D.REQ["id"]}')),
      ('g3','2026-09-24',f'Substituir {OM["ativo"].split(" · ")[0]} na {OM["os_afetada"]} (T4)','Carlos','Alta','início programado',(f'{OM["id"]} em execução','red'),'24/09 06:00',('Reprogramar','PL-05.dc.html')),
      ('g4','2026-09-25',f'Decidir INSP-88 · lote {D.LOTE_BLOQ["id"]}','Equipe qualidade','Normal','liberação comercial',('Lote bloqueado','red'),'25/09',('Abrir origem','CO-06det.dc.html')),
      ('g5','2026-09-26','Amostragem de solo · T2 (0–20 cm)','Sem responsável','Normal','recomendação de plantio',None,'28/09',('Abrir origem','AG-02.dc.html')),

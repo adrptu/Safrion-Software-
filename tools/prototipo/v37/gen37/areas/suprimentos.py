@@ -249,7 +249,7 @@ def su01():
               *([dict(t=f'Se o laudo de 27/09 aprovar: {nf(min(cond,falta),d)} {un} cobertos e a falta firme cai para {nf(falta-min(cond,falta),d)} {un} (carga 4 do CT-2026-11)',h='SU-06.dc.html')] if cond and falta>0.001 else []),
               dict(t=f'Falta firme = {nf(tot,d)} − {nf(disp,d)} − {nf(firm,d)} = {nf(falta,d)} {un}' if falta>0.001 else f'Sem falta firme · sobra {nf(disp+firm-tot,d)} {un}'),
               dict(t=f'Pedir até = data necessária − prazo do fornecedor ({lead-SEG} d) − segurança ({SEG} d)')]
-        if falta>0.001: memo.append(dict(t='Liberar a carga 4 do CT-2026-11 · abrir o contrato',h='SU-05det.dc.html') if cond else dict(t=f'Na SOL-2026-07 · abrir em Compra de insumos',h='CMP.dc.html'))
+        if falta>0.001: memo.append(dict(t='Liberar a carga 4 do CT-2026-11 · abrir o contrato',h='SU-05det.dc.html') if cond else dict(t=f'Na SOL-2026-07 · abrir em Compras',h='CMP.dc.html'))
         rows.append(R(nm,dict(item=nm,data=data,dem=round(tot,1),disp=disp,firm=firm,cond=cond,falta=round(falta,1),un=un),
             dict(item=[b(nm),mut(f"{o['grupo']} · {len(oo)} {'origem' if len(oo)==1 else 'origens'}")],dem=[txt(f'{nq(tot)} {un}')],
                  disp=[txt(f'{nq(disp)} {un}')]+([mut(f'res. {nq(res)}')] if res else []),
@@ -425,7 +425,7 @@ def su03det():
           R('os24',dict(m='Reserva confirmada · OS-0424 (fungicida T1-B)',q=F02['reservado']),dict(q=[txt(f"{nq(F02['reservado'])} L")],sit=[ch('Confirmada · recibo RS-7741','green')]),o=[dict(t='Requisição REQ-039 · separar pelo FEFO',h='SU-07.dc.html')]),
           R('plano',dict(m='Reserva planejada · Safra 2026/27',q=PLANO_FA),dict(),o=[dict(t=f'1ª aplicação (DAP 45) · T1-A, T1-B e T2 = {nq(a1)} L'),dict(t=f'2ª aplicação (DAP 60) · T1-A, T1-B e T2 = {nq(a2)} L'),dict(t='Abrir em Planejar safra',h='SAF.dc.html')]),
           R('disp',dict(m='Disponível no lote',q=LIVRE_FA),dict(),o=[dict(t=f"Físico {nq(F02['fisico'])} − reservado {nq(F02['reservado'])} = {nq(LIVRE_FA)} L; nunca fica negativo")]),
-          R('pend',dict(m='Pendência sem saldo',q=0),dict(),o=[dict(t=f'Coberta pela SOL-2026-07 (líquido de Fungicida A = {nq(SOL_FA)} L)'),dict(t='Abrir em Compra de insumos',h='CMP.dc.html')])]
+          R('pend',dict(m='Pendência sem saldo',q=0),dict(),o=[dict(t=f'Coberta pela SOL-2026-07 (líquido de Fungicida A = {nq(SOL_FA)} L)'),dict(t='Abrir em Compras',h='CMP.dc.html#saf=S2627')])]
     g=grid([dict(k='m',l='Medida',w=600),dict(k='q',l='Quantidade',t='num',a='r'),dict(k='sit',l='Situação',w=600)],rows,gid='g_lot',search=False,total=False,
         edit=dict(m='origin',title='Saldo do lote',fields=[fs('m','Medida',ro=True)]))
     js({},r'''
@@ -491,7 +491,7 @@ def su04():
                  melhor=([txt(f"R$ {nf(best['tot'])}"),mut(best['nome'])] if best else [mut('—')]),
                  estado=[ch('Pronta','green') if nresp==len(conv) else ch(f'Falta {len(conv)-nresp} resposta','yellow')]),
             ro=True,o=[dict(t=f"{c['nome']}: mercadoria R$ {nf(c['merc'])} + frete R$ {nf(c['frete'])} = R$ {nf(c['tot'])} · {c['prazo']} d · {c['cond']}") for c in cot]
-                     +[dict(t='Convites enviados em 23/09 10:40 por Ana (gestora) · só a homologados do grupo'),dict(t='Abrir em Compra de insumos',h='CMP.dc.html')]))
+                     +[dict(t='Convites enviados em 23/09 10:40 por Ana (gestora) · só a homologados do grupo'),dict(t='Abrir em Compras',h='CMP.dc.html#saf=S2627')]))
     rows.append(R('COT-113',dict(cot='COT-113 · Rolamento 6310 2RS',itens=1,forn=3,resp=0,melhor=0,estado='rascunho',tipo='Rascunho',esp='Rolamento 6310 2RS · colhedora',qtd=3,ent='2026-10-02',local='Almox. oficina',dest='; '.join(FORN_PECAS)),
         dict(cot=[b('COT-113 · Rolamento 6310 2RS'),mut('Necessidades · falta firme 3 un')],itens=[txt('1 item'),mut('3 un')],forn=[txt('3 sugeridos')],resp=[mut('—')],melhor=[mut('—')]),
         o=[dict(t='Origem: falta firme do rolamento 6310 (PCM · OM-0234)',h='SU-01.dc.html')]))
@@ -524,7 +524,7 @@ function EXTRAVALS(self,v){
   v.env113=()=>{ if(self.state.env113) return toast(self,'COT-113 já foi enviada · nada reenviado'); const c=RF(self,'g_cot','COT-113'); const n=String(c.v.dest||'').split(';').filter(x=>x.trim()).length;
     if(!n) return toast(self,'Escolha ao menos um destinatário: clique na linha da COT-113'); self.setState({env113:true,g2toast:'COT-113 enviada a '+n+' convidados · respostas até 26/09 (simulado · nenhuma mensagem real enviada)'}); }; }''' % (json.dumps(dict(id=best['f'],nome=best['nome'],tot=round(best['tot']))),json.dumps(_alcada(best['tot']))))
     corpo=(bloco('Cotações em andamento','Confira as respostas de cada cotação; clique no rascunho para revisar destinatários antes de enviar.',g
-                 + nota('O fornecedor responde pelo portal externo com convite próprio, nunca por esta lista. A SOL-2026-07 veio de Planejar safra e é a mesma de Compra de insumos.'),
+                 + nota('O fornecedor responde pelo portal externo com convite próprio, nunca por esta lista. A SOL-2026-07 veio de Planejar safra e é a mesma de Compras.'),
                  acao=mini('env113','Enviar COT-113','Envia o rascunho aos destinatários escolhidos (simulado)','doc'))
            + bloco(f'Comparação equalizada · SOL-2026-07 · Fertilizantes','Compare mercadoria, frete, prazo e condição no mesmo critério e selecione a proposta.',gc
                    + nota('Itens: '+', '.join(n+' '+nf(o['qtd'])+' '+o['un'] for n,o in fert.items())+f". Alçada pelo valor: {_alcada(best['tot'])} (até R$ 300 mil)."),

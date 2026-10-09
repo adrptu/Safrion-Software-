@@ -250,7 +250,7 @@ function EXTRAVALS(self,v){
         _acoes(ilnk('Ver grade de cultivo','PL-01.dc.html','grid','Abrir a grade de cultivo da safra'),
                imsg('Simular antecipação do plantio',f'Simulação: antecipar o plantio do T1-A para 10/10 move 7 operações dependentes · a {OS_DES["id"]} (DAP −20) já emitida é ajustada pelo agrônomo ao liberar · nada muda até publicar.','calendar','Simular antecipação sem alterar o plano'),
                ilnk('Ver capacidade','PL-03.dc.html','trend','Abrir Capacidade e recursos'),
-               ilnk('Ver compra de insumos','CMP.dc.html','cart','Abrir Compra de insumos (SOL-2026-07)')),
+               ilnk('Ver em Compras','CMP.dc.html#saf=S2627','cart','Abrir a SOL-2026-07 em Compras')),
         _nota(f'“20 dias antes do plantio · DAP −20 · previsto para {d_des}” — o produtor não digita sinal negativo. '
               f'“Dias antes da colheita” e “dias após a colheita” são opções distintas, com a colheita escolhida. '
               f'Operação vencida exige consulta ao realizado e decisão sobre a pendência, não descarte automático.'),state='gray'))

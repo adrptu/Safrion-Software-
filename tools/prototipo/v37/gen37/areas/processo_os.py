@@ -248,9 +248,13 @@ function osMerge(b,co,c){ if(!co) return b;
   // conferência: o encerramento depende do cenário (apontamento aguardando sinal ou sobra em custódia)
   if(co.etapa==='Em conferência'){ o.encM=cenPodeEncerrar(c,co.id);
     if(!o.encM){ o.selos=o.selos.filter(s=>!/Sobras a receber|Aguardando sinal/i.test(s.t)); if(!mine){ o.cond='Apontamentos enviados e nada em custódia. Próximo passo: conferir e encerrar.'; o.dono=o.resp; o.prazo='conferir e encerrar'; } }
-    else { const sin=/sinal/.test(o.encM); const t=sin?'Aguardando sinal do app':(/duplicidade/.test(o.encM)?'Apontamento em conferência':'Sobras a receber');  // o bloqueio também na lista e no Kanban
+    else { const sin=/sinal/.test(o.encM), dup=/duplicidade/.test(o.encM), conf=/^Consumo em conferência/.test(o.encM);
+      // o bloqueio também na lista e no Kanban: consumo em conferência não é sobra (SUP §0.2, achado D-R10: antes dizia "Sobras a receber")
+      const t=sin?'Aguardando sinal do app':(dup?'Apontamento em conferência':(conf?'Consumo em conferência':'Sobras a receber'));
+      if(conf) o.selos=o.selos.filter(s=>s.t!=='Sobras a receber');
       if(!o.selos.some(s=>s.t===t)) o.selos=o.selos.concat([{t,c:'yellow'}]);
-      if(sin){ o.dono=o.resp; o.prazo='reconectar o app'; } else if(/duplicidade/.test(o.encM)){ o.dono=CEN_CONF_AP; o.prazo='decidir a duplicidade'; } else if(!/almoxarife/.test(o.dono||'')){ o.dono='Rui (almoxarife)'; o.prazo='receber a devolução'; } } }
+      if(sin){ o.dono=o.resp; o.prazo='reconectar o app'; } else if(dup){ o.dono=CEN_CONF_AP; o.prazo='decidir a duplicidade'; }
+      else if(conf){ o.dono=CEN_CONC_RESP; o.prazo='conciliar o consumo'; } else { o.dono='Rui (almoxarife)'; o.prazo='receber a devolução'; } } }
   // A liberar: o Estoque (reserva por lote) pode segurar a liberação desde a abertura → selo vermelho e dono na lista, no Kanban e no painel
   if(co.etapa==='A liberar'&&!o.agua&&(co.ins||[]).length){ const e=osLibErro(o,c);
     const z=e&&/Dose × área de (.+?) dá 0/.exec(e);   // total 0: quem resolve é o agrônomo, não o Estoque (PRE-REV Y3)
@@ -297,12 +301,15 @@ function osTrilha(o,it){ if(!it||o.etapa==='Canceladas'||(!o.reservado&&!(it.ent
 // liberar sem gravar (cópia do cenário): o erro de saldo ou de lote vira o motivo do bloqueio antes do clique
 function osLibErro(o,c0){ const c=c0||cenGet(); if(!c.ordens[o.id]) return ''; const k=cenClone(c);
   try { osc_libEfeito(k,o.id,false,o.janela); return ''; } catch (e) { return String(e.message||e); } }   /* o motivo do Estoque, da lei ou da carência; não o perfil */
+function osEstReq(o){ return 'EST.dc.html#'+(o.req?'req='+o.req:'os='+o.id); }   /* SUP §7: o atalho abre o registro no Estoque (só navega) */
 function osEncBloq(o){ const m=o.encM;
   if(/sinal/.test(m)) return {acao:'encerrar',t:'Encerrar bloqueado: há apontamentos no aparelho aguardando sinal.',q:o.resp+' reconecta o app; o envio é automático e não duplica.'};
   if(/duplicidade/.test(m)) return {acao:'encerrar',t:'Encerrar bloqueado: '+m,q:CEN_CONF_AP+' decide na linha do apontamento: mesmo turno conta uma vez; outro turno soma.'};
+  if(/^Consumo em conferência/.test(m)){ const cf=cenConfAbertas(cenGet(),o.id); const k=cf.find(x=>x.req)||cf[0];
+    return {acao:'encerrar',t:'Encerrar bloqueado: '+m.charAt(0).toLowerCase()+m.slice(1),q:CEN_CONC_RESP+' concilia o consumo no Estoque.',h:k&&k.req?'EST.dc.html#req='+k.req:'EST.dc.html#os='+o.id,hl:'Conciliar o consumo no Estoque'}; }
   const its=(o.r?o.r.itens:[]).filter(i=>i.custodia>0.001); const quem=its.map(i=>i.quem||o.resp).filter((v,i,a)=>a.indexOf(v)===i).join(', ')||o.resp;
   return {acao:'encerrar',t:'Encerrar bloqueado: sobra em custódia · '+its.map(i=>{ const pk=osPk(i.custodia,i.emb); return i.prod+' '+nd(i.custodia)+' '+i.un+(pk?' ('+pk+')':''); }).join(', ')+' com '+quem+'.',
-    q:'Rui (almoxarife) recebe a devolução no Estoque.',h:'EST.dc.html',hl:'Receber devolução no Estoque'}; }
+    q:'Rui (almoxarife) recebe a devolução no Estoque.',h:osEstReq(o),hl:'Receber devolução no Estoque'}; }
 // mudança pela tela: grava no cenário (cenMudar) e redesenha; o erro fica junto ao botão (pa.err) ou vai para onErr
 function osRun(self,fn,ok,onErr){ const r=cenMudar(null,fn);
   if(r.erro){ if(onErr) onErr(r.erro); else self.setState({pa:Object.assign({},self.state.pa||{},{err:r.erro})}); return r; }
@@ -401,8 +408,10 @@ function osUsoAtencao(c,id){ const co=c.ordens[id], al=[]; if(co) osUsoErro(c,co
 function osc_reqId(c){ const n=Object.keys(c.reqs||{}).reduce((m,k)=>Math.max(m,parseInt(String(k).replace(/\D/g,''),10)||0),0)+1;
   return 'REQ-'+String(n).padStart(3,'0'); }
 // iniciar exige os insumos com o operador: entregues no Estoque e confirmados no app (água e ordem sem insumo não passam por aqui)
+// falta de saldo na liberação: o atalho abre o lote do insumo em Confira saldos (#lote=); sem lote, a seção de saldos
+function osEstLote(e){ const m=/(?:insuficiente de|Sem lote de) (.+?)(?::| no Estoque)/.exec(String(e||'')); const l=m?cenLote(cenGet(),m[1]):null; return l?'EST.dc.html#lote='+encodeURIComponent(l.lote):'EST.dc.html#sec=saldos'; }
 function osIniErro(o,r){ const f=cenIniFalta(o,r); if(!f) return null;   // regra única (cenario.js), a mesma do app
-  const L={entregar:['EST.dc.html','Entregar no Estoque'],confirmar:['MB-05.dc.html','Ver no app']}[f.k]||[];
+  const L={entregar:['EST.dc.html#req='+r.id,'Entregar no Estoque'],confirmar:['MB-05.dc.html','Ver no app']}[f.k]||[];   /* SUP §7: abre a requisição */
   return {acao:'iniciar',t:'Iniciar bloqueado: '+f.t,q:f.q,h:L[0],hl:L[1]}; }
 function osc_iniciar(c,id){ const o=osc_o(c,id); if(o.etapa!=='Liberadas') throw new Error(id+' não está liberada.');
   { const cb=carBloqColheita(c,o,'iniciar'); if(cb) throw new Error(cb.t); }   // carência (MAPA-CARENCIA-LMR-20261003)
@@ -485,7 +494,7 @@ function osProx(o,PF){
   // impedimento do próximo passo: do registro (máquina, janela, conflito) ou do cenário (saldo no Estoque; sinal ou sobra no encerramento)
   let b=(o.bloq&&o.bloq.fase===o.etapa&&o.bloq.acao===P.fn)?o.bloq:null;
   if(!b&&P.fn==='liberar'&&!o.agua){ const e=o.libErr||''; if(e) b=o.legal?{acao:'liberar',t:'Liberar bloqueado: '+e,q:OS_AGRO+', ajustando produto ou dose antes de liberar.',legal:true}:o.total0?{acao:'liberar',t:'Liberar bloqueado: '+e.charAt(0).toLowerCase()+e.slice(1),q:'Ana (agrônoma), ajustando a dose ou a área antes de liberar.',total0:true}
-      :{acao:'liberar',t:'Liberar bloqueado: '+e.charAt(0).toLowerCase()+e.slice(1),q:'Suprimentos, recebendo o insumo no Estoque.',h:'EST.dc.html',hl:'Ver saldos no Estoque'}; }
+      :{acao:'liberar',t:'Liberar bloqueado: '+e.charAt(0).toLowerCase()+e.slice(1),q:'Suprimentos, recebendo o insumo no Estoque.',h:osEstLote(e),hl:'Ver saldos no Estoque'}; }
   if(!b&&P.fn==='encerrar'&&o.encM) b=osEncBloq(o);
   if(!b&&P.fn==='iniciar'&&!o.agua) b=osIniErro(o,o.r);
   if(!b&&P.fn==='apontar'&&o.esg) b=o.esg;   // componente esgotado: Dispensar saldo segue no painel
@@ -605,7 +614,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
   // retirada: o link ao almoxarifado só enquanto houver saldo a entregar; entregue e confirmado, ficam só as fichas de carga
   const exe=(o.ins||[]).length>0&&['Liberadas','Em execução'].indexOf(o.etapa)>=0;
   v.pan_retLink=exe&&(!o.r||!o.r.itens.length||o.r.itens.some(i=>cenSaldoEntregar(i)>1e-6));
-  v.pan_hasRet=exe&&(v.pan_retLink||v.pan_hasPrep||v.pan_fichas); v.pan_retT=v.pan_retLink?'Retirada e fichas de execução':'Fichas de execução';
+  v.pan_retH=osEstReq(o); v.pan_hasRet=exe&&(v.pan_retLink||v.pan_hasPrep||v.pan_fichas); v.pan_retT=v.pan_retLink?'Retirada e fichas de execução':'Fichas de execução';
   v.pan_hasIns=v.pan_ins.length>0; v.pan_semIns=!v.pan_hasIns; v.pan_semInsT=o.semins||'Sem insumos: a atividade é só operação.';
   // próximo passo por fase e impedimento (osProx, o mesmo do Mapa)
   const pb=osProx(o,PF); const P=pb.P; let b=pb.b;
@@ -613,7 +622,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
   v.pan_pt=P.t; v.pan_pbtn=P.btn; v.pan_hasBtn=!!P.btn&&!b; v.pan_bloq=!!b; v.pan_bt=b?b.t:''; v.pan_bq=b?('Quem resolve: '+b.q):'';
   v.pan_hasBl=!!(b&&b.h); v.pan_bh=(b&&b.h)||'#'; v.pan_bhl=(b&&b.hl)||'';
   carOsVals(self,v,o,b);   // carência: Rever programação da colheita (MAPA-CARENCIA-LMR-20261003)
-  if(v.pan_retLink&&b&&b.h==='EST.dc.html'){ v.pan_retLink=false; v.pan_retT='Fichas de execução'; v.pan_hasRet=v.pan_hasPrep||v.pan_fichas; }  // o impedimento já leva ao Estoque: sem link duplicado
+  if(v.pan_retLink&&b&&/^EST\.dc\.html/.test(b.h||'')){ v.pan_retLink=false; v.pan_retT='Fichas de execução'; v.pan_hasRet=v.pan_hasPrep||v.pan_fichas; }  // o impedimento já leva ao Estoque: sem link duplicado
   v.pan_aviso=(o.aviso&&o.etapa==='Liberadas')?o.aviso:''; v.pan_hasAviso=!!v.pan_aviso;
   v.pan_obs=o.obs?(o.obs.charAt(0).toUpperCase()+o.obs.slice(1)+' (não bloqueia).'):''; v.pan_hasObs=!!o.obs&&o.etapa==='A liberar';
   const bam=b&&b.tone==='yellow';  // pendência que não é impedimento (ex.: janela a definir) fica amarela
@@ -631,7 +640,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
   v.pan_setrmot=(e)=>self.setState({pa:Object.assign({},self.state.pa,{motivo:e.target.value,err:''})});
   // ajustar antes de liberar (secundário do passo A liberar com produto, também na confirmação): dose por insumo e área → osc_ajustar
   v.pan_hasAj=!!P.sec&&g2papel(PF,'agronomo'); v.pan_hasAjc=v.pan_hasAj&&!b&&!!pa&&pa.fn==='liberar'; v.pan_ajbtn=P.sec?P.sec.btn:'';
-  const ajLib=!b||b.h==='EST.dc.html'||!!b.total0||!!b.legal;   // falta no Estoque: o ajuste pode resolver e libera; máquina, janela ou conflito: só grava a versão
+  const ajLib=!b||/^EST\.dc\.html/.test(b.h||'')||!!b.total0||!!b.legal;   // falta no Estoque: o ajuste pode resolver e libera; máquina, janela ou conflito: só grava a versão
   v.pan_ajsbtn=ajLib?'Salvar e liberar':'Salvar ajuste';
   const vcur=osVn(o.versao); const vnx='v'+(Number(vcur.slice(1))+1);
   v.pan_ajgo=()=>{ const ds={}; (o.ins||[]).forEach(x=>{ ds[x.p]=nd(x.dose,4); }); self.setState({pa:{id:o.id,fn:'ajustar',area:nd(o.area,4),doses:ds,rem:{},add:[],q:'',qerr:'',errs:{},err:''}});
@@ -1093,7 +1102,7 @@ def _painel():
       f'<sc-if value="{H("pan_semIns")}" hint-placeholder-val="{F()}"><div style="font-size: 12.8px; color: {MUTED}; padding: 6px 0;">{H("pan_semInsT")}</div></sc-if>'
       f'<sc-if value="{H("pan_hasRet")}" hint-placeholder-val="{F()}"><div style="display: flex; flex-direction: column; gap: 6px; padding-top: 6px;">{lab(H("pan_retT"))}'
       f'<sc-if value="{H("pan_hasPrep")}" hint-placeholder-val="{F()}"><div style="font-size: 13px; line-height: 1.45;">{H("pan_prep")}</div></sc-if>'
-      f'<div style="display: flex; gap: 8px; flex-wrap: wrap;"><sc-if value="{H("pan_retLink")}" hint-placeholder-val="{T()}"><a href="EST.dc.html" style="{_MINI} text-decoration: none;">Retirar no almoxarifado ›</a></sc-if>'
+      f'<div style="display: flex; gap: 8px; flex-wrap: wrap;"><sc-if value="{H("pan_retLink")}" hint-placeholder-val="{T()}"><a href="{H("pan_retH")}" style="{_MINI} text-decoration: none;">Retirar no almoxarifado ›</a></sc-if>'
       f'<sc-if value="{H("pan_fichas")}" hint-placeholder-val="{F()}"><a href="OS-0424-app.dc.html" style="{_MINI} text-decoration: none;">Ficha no app (sem internet) ›</a><a href="OS-0424-ficha.dc.html" style="{_MINI} text-decoration: none;">Ficha impressa ›</a></sc-if></div></div></sc-if>')
       + sec('ap','Apontamentos diários',f'<sc-if value="{H("pan_hasAp")}" hint-placeholder-val="{T()}">{aphead}<sc-for list="{H("pan_ap")}" as="a" hint-placeholder-count="4">{aprow}</sc-for>'
       f'<sc-if value="{H("pan_hasAcum")}" hint-placeholder-val="{T()}"><div style="padding: 8px 0 0; border-top: 2px solid {INK}; font-size: 13px; font-weight: 800;">{H("pan_acum")}</div></sc-if>'

@@ -14,7 +14,7 @@ PERFIS=[('Ana','Gestora · safra, compras e aprovações','SAF.dc.html'),
  ('Fertisul','Parceiro credenciado (portal)','PT-01.dc.html'),
  ('Plataforma','Backoffice (admin)','BO-02.dc.html')]
 CENARIOS=[('Safra','Planejar safra: aplicar plano em lote, ajustar um cultivo e enviar para cotação','SAF.dc.html'),
- ('Compra','Compra de insumos: da SOL-2026-07 às propostas, aprovação e entrega','CMP.dc.html'),
+ ('Compras','Compras: solicitações da safra (e da manutenção) cotadas, decididas na alçada e acompanhadas até a entrega','CMP.dc.html'),
  ('Estoque','Estoque: recebimento com quarentena, entrega por O.S. e devolução','EST.dc.html'),
  ('Planos','Planos agronômicos: gatilho → atividades → produtos e doses','PA.dc.html'),
  ('Mapa','Mapa: trocar camada, filtrar e clicar no talhão','IN-04.dc.html'),

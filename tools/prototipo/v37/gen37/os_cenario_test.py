@@ -57,8 +57,8 @@ try:
     # 7 · em conferência, encerrar fica bloqueado pela sobra, com o atalho para receber a devolução no Estoque
     T.btn('Enviar para conferência'); T.btn('Confirmar envio'); p = T.pan(); print('  ', p[p.find('PRÓXIMO'):][:300])
     T.ok('Em conferência' in T.linha(OS) and 'Encerrar bloqueado: sobra em custódia · Glifosato 480 20 L (1 × galão 20 L) com Marcos.' in p
-         and T.link('Receber devolução no Estoque') == 'EST.dc.html' and not T.temb('Conferir e encerrar'),
-         'Em conferência: encerrar bloqueado pela sobra de 20 L com Marcos e link "Receber devolução no Estoque" → EST.dc.html', p[:500])
+         and (T.link('Receber devolução no Estoque') or '').startswith('EST.dc.html#req=') and not T.temb('Conferir e encerrar'),
+         'Em conferência: encerrar bloqueado pela sobra de 20 L com Marcos e link "Receber devolução no Estoque" → EST.dc.html#req= (SUP §7: abre a requisição)', p[:500])
     # 8 · Estoque recebe a devolução (apta): o bloqueio sai sem recarregar e o botão de encerrar aparece
     T.mudar(f"return cenDevolver(c,'{RQ}','Glifosato 480',20,true,'Rui');"); p = T.pan(); i = T.ins()
     T.ok('Encerrar bloqueado' not in p and T.temb('Conferir e encerrar') and 'Devolvido 20 L' in i and 'Consumido · sobra devolvida' in i and 'nada em custódia' in p,
@@ -77,7 +77,7 @@ try:
     # 11 · liberar bloqueado pelo Estoque: OS-0418 A liberar, sem lote de Ureia 45% → motivo no próximo passo desde a abertura, sem botão de liberar
     T.ordem('OS-0418'); p = T.pan()
     # 01/10: bloqueada pelo Estoque, a ordem segue sem "Liberar", mas o agrônomo pode ajustar (trocar o produto ou a dose) e liberar no mesmo passo
-    T.ok('Liberar bloqueado: sem lote de Ureia 45% no Estoque.' in p and T.link('Ver saldos no Estoque') == 'EST.dc.html' and not T.temb('Liberar para execução')
+    T.ok('Liberar bloqueado: sem lote de Ureia 45% no Estoque.' in p and (T.link('Ver saldos no Estoque') or '').startswith('EST.dc.html') and not T.temb('Liberar para execução')
          and T.temb('Ajustar antes de liberar') and T.cen("c.ordens['OS-0418'].etapa") == 'A liberar',
          'OS-0418 A liberar: liberar bloqueado com o motivo do Estoque (sem lote de Ureia 45%) e atalho aos saldos', p[p.find('PRÓXIMO'):][:300])
     T.fechar()

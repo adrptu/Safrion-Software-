@@ -64,7 +64,7 @@ try:
     J("[...document.querySelectorAll('aside[aria-label^=\"P1\"] [role=radio]')].find(b=>b.innerText.indexOf('OS-0417')>=0).click()"); time.sleep(.35)
     lk2=links('P1'); pr2=prim('P1')
     chk('5 P1: OS-0418 com Liberar bloqueado pelo Estoque · primário "Ajustar antes de liberar" → O.S. da OS-0418 · OS-0417: "Receber devolução no Estoque" (EST) · sem IN-02det · nenhum destino repetido',
-        'Liberar bloqueado' in p1 and pr==['Ajustar antes de liberar','OS.dc.html#OS-0418:ajustar'] and pr2==['Receber devolução no Estoque','EST.dc.html'] and unico(lk) and unico(lk2)
+        'Liberar bloqueado' in p1 and pr==['Ajustar antes de liberar','OS.dc.html#OS-0418:ajustar'] and pr2==['Receber devolução no Estoque','EST.dc.html#req=REQ-031'] and unico(lk) and unico(lk2)
         and not any(h in ('SU-07.dc.html','IN-02det.dc.html') for _,h in lk+lk2), [pr,lk,pr2,lk2])
     tap('P1'); tap('T4'); lk=links('T4'); pr=prim('T4')
     # CTL-1 (Frente F): PL-05 é oculta e fixa; o passo vai para a OM-0233 viva no MA-04 (âncora abre o painel)
@@ -78,7 +78,10 @@ try:
         l7=='T7: sem ordem' and 'OS-0423' not in t7 and r=='ok' and pr==['Resolver conflito',H7] and [h for _,h in lk].count(H7)==1, [l7,t7[:160],r,pr,lk])
     tap('T7')
     # 8-9 · a devolução recebida pela tela Estoque tira custódia, selo e atalho da OS-0417 no mapa
-    c.size(1440,1000); c.goto(f'http://127.0.0.1:{p}/EST.dc.html',wait=1.2); clk('Receba devoluções'); clk('Receber devolução da REQ-031'); clk('Salvar','aside[role=dialog]'); t=T()
+    # SUP §3 (06/10): o endereço abre o painel da sobra; a quantidade é digitada (o que voltou de fato), sem padrão
+    c.size(1440,1000); c.goto(f'http://127.0.0.1:{p}/EST.dc.html#req=REQ-031',wait=1.4)
+    J("(()=>{const i=document.querySelector('#fx_g_req_dqtd'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,'500'); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})()"); time.sleep(.3)
+    clk('Registrar devolução · 500 kg','aside[role=dialog]'); t=T()
     chk('8 Estoque: devolução da REQ-031 recebida (500 kg → 0 kg)', '500 kg → 0 kg' in t, t)
     mapa('O.S./prazos'); tap('P1'); t1=pan('P1'); i=t1.find('OS-0417'); o17=t1[i:i+260]
     chk('9 mapa (Ordens de serviço) após a devolução: OS-0417 sem "Sobras a receber", sem custódia e sem "Receber sobras"',

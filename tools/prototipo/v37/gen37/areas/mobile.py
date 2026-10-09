@@ -61,10 +61,6 @@ def nf(n,d=0): return f'{n:,.{d}f}'.replace(',','X').replace('.',',').replace('X
 O421,O420,O419=D.OS[0],D.OS[1],D.OS[2]
 APT=dict(id='APT-1187', os='OS-0421', dia=4, ha=O421['dias'][3], recibo='REC-7741', uuid='c9e2-…-4f1a')
 REQ=next(r for r in D2.REQUISICOES if r['id']=='REQ-031')
-R38=next(r for r in D2.REQUISICOES if r['id']=='REQ-038')
-F02=next(l for l in D2.LOTES if l['lote']=='F26-02')
-F02_LIVRE=F02['fisico']-F02['quarentena']-F02['reservado']                            # 480 L
-PLAN_FA=625.2; PEND_FA=round(PLAN_FA-F02_LIVRE,1)                                    # reserva planejada da safra · pendência 145,2 L
 EQ421='Marcos · Pulverizador PJ-3030 + Trator 03'
 CALDA=dict(litros='2.000', vazao='120 L/ha', dose='0,5 L/ha de Fungicida A', cobre='16,7 ha', por_tanque='8,3 L')
 P,POL=D.PIVO,D.POLITICA_AGUA
@@ -630,9 +626,9 @@ const ocd=done&&(c.ocorr||[]).find(x=>x.id===done); DCH(v,'hdr',done?(ocd&&!ocd.
          'Registrar ocorrência',corpo,H_=1180,back='MB-01.dc.html',js=js,dyn_status=True,cen=True,
          prim=[('oc_novo','b','Registrar ocorrência','registrar'),('oc_feito','a','Voltar à fila','MB-01.dc.html')])
 
-    # ================= MB-05 · Almoxarifado móvel (lista · papéis) =================
-    tabs=('<div role="tablist" aria-label="Papel" style="display: inline-flex; flex-wrap: wrap; padding: 3px; border-radius: 999px; background: '+GRAYS+'; gap: 2px; align-self: flex-start;">'
-          + ''.join(f'<button type="button" role="tab" onClick="{H("role"+str(i))}" style="{H("rs"+str(i))}">{esc(t)}</button>' for i,t in enumerate(['Minhas retiradas','Almoxarife']))+'</div>')
+    # ================= MB-05 · Minhas retiradas (operador) =================
+    # SUP §0.2 (06/10): a aba "Almoxarife" (dados fixos e contraditórios com o cenário) saiu do caminho visível;
+    # o almoxarife atende em Estoque › Atenda requisições. Volta quando for a mesma fila em cartões, com as funções do est.js.
     operador=(
       sigbar()
       + IF('has_conf',h2('Entregue por Rui · confirme','Confira itens, lote e embalagem antes de confirmar.')
@@ -654,24 +650,8 @@ const ocd=done&&(c.ocorr||[]).find(x=>x.id===done); DCH(v,'hdr',done?(ocd&&!ocd.
              f'<div style="font-size: 12.5px; color: {MUTED};">{H("i.l")}</div></div></sc-for></div>')
       + IF('nada',card('Nada a retirar',[note('Quando o escritório liberar uma ordem sua com insumos, a reserva aparece aqui.')]))
       + note('Confirmar o recebimento põe o material sob sua custódia; o apontamento do turno baixa o consumo.'))
-    almox=(
-      card(f'Receber devolução · <b>{REQ["id"]}</b> · {REQ["os"]}',[
-          kv('Produto',f'{REQ["item"]} · {REQ["un"]}'),
-          kv('Conta',f'entregue {REQ["entregue"]} · consumo {REQ["consumido"]} · devolvido {REQ["dev_recebida"]} · <b>custódia {REQ["custodia"]} sc com Paula</b>'),
-          chips(chip(f'{REQ["custodia"]} sc a receber · OS-0417 em conferência','yellow'))],state='yellow')   # MB-05det só simula o DV-0912 (Frente F)
-      + card(f'Conferir e entregar · <b>{R38["id"]}</b> · {R38["os"]} fertirrigação',[
-          kv('Produto',f'{R38["item"]} · {nf(R38["solicitado"])} kg (12 kg/ha × 95 ha)'),
-          chips(chip('Aguardando liberação da O.S.','yellow'),chip('Saldo apto 0 kg','red')),
-          btns(say('Conferir e entregar · bloqueado',f'Bloqueado: a {R38["os"]} aguarda a liberação por Ana (agrônoma) e a {R38["item"]} não tem saldo apto (0 kg) — nada foi separado.','alert','Ver por que não pode entregar'))],state='yellow')
-      + card(f'Conflito de reserva · lote {F02["lote"]} · {F02["item"]}',[
-          kv('Saldo',f'{nf(F02["fisico"])} L físicos · {F02["reservado"]} L reservados (OS-0424) · <b>{nf(F02_LIVRE)} L livres</b>'),
-          kv('Conflito',f'reserva planejada da safra pediu {nf(PLAN_FA,1)} L → nada reservado · pendência de {nf(PEND_FA,1)} L na SOL-2026-07'),
-          chips(chip('Conflito · decide o planejamento','red')),
-          btns(say('Registrar divergência','Divergência registrada com dono (planejamento) e prazo · reservas congeladas até a decisão — nada foi entregue.','alert','Registrar a divergência física do lote'))],state='red')
-      + note(f'<b style="color:{INK};">{O419["id"]} · água</b> não aparece aqui: água só-água não cria fila nem documento de movimentação de produtos.'))
-    corpo=tabs+IF('r0',operador)+IF('r1',almox)
-    js=f'''const r0=(s.role||0)===0; v.r0=r0; v.r1=!r0;
-[0,1].forEach(i=>{{ v['role'+i]=()=>self.setState({{role:i}}); v['rs'+i]='font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 6px 14px; border-radius: 999px; border: 0; cursor: pointer; white-space: nowrap; '+(((s.role||0)===i)?'background: {SURF}; color: {INK}; box-shadow: 0 1px 2px rgba(21,32,26,.12);':'background: transparent; color: {MUTED};'); }});
+    corpo=operador
+    js=f'''const r0=true;
 // vindo do passo de uma ordem (MB-01 · MB-05.dc.html#OS-…): essa ordem vem primeiro e o selo a nomeia; sem âncora, a fila de sempre (AÇÃO v3.1)
 const foco=(typeof location!=='undefined'&&/^#OS-[0-9]+$/.test(location.hash||''))?location.hash.slice(1):''; const fila0=mbFila(c);
 const fila=foco?fila0.filter(o=>o.id===foco).concat(fila0.filter(o=>o.id!==foco)):fila0; const reqs=fila.map(o=>mbReq(c,o)).filter(Boolean);
@@ -688,9 +668,8 @@ v.cust=cust; v.has_cust=cust.length>0; v.res=res; v.has_res=res.length>0; v.nada
 v.p_conf=r0&&pend.length>0; v.p_back=r0&&!pend.length;
 v.pc_lab='Confirmar recebimento'+(pend.length>1?' · '+pend[0].id:'');
 v.pc_go=()=>{{ if(pend[0]) cenMudar(self,c=>cenConfirmarRecebimento(c,pend[0].id)); }};
-if(r0) DCH(v,'hdr',(foco&&c.ordens[foco]?foco+' · ':'')+(pend.length?pend.length+(pend.length>1?' entregas a confirmar':' entrega a confirmar'):(cust.length?'insumos com você':'nada a confirmar')),pend.length?'yellow':'green');
-else DCH(v,'hdr','1 devolução hoje','yellow');'''
-    emit('MB-05','Almoxarifado móvel','retiradas do operador e tarefas do almoxarife · por lote e embalagem',None,
+DCH(v,'hdr',(foco&&c.ordens[foco]?foco+' · ':'')+(pend.length?pend.length+(pend.length>1?' entregas a confirmar':' entrega a confirmar'):(cust.length?'insumos com você':'nada a confirmar')),pend.length?'yellow':'green');'''
+    emit('MB-05','Minhas retiradas','o que retirar e confirmar · por lote e embalagem',None,
          'Confirmar recebimento',corpo,H_=1220,back='MB-01.dc.html',js=js,dyn_status=True,cen=True,
          prim=[('p_conf','b',H('pc_lab'),'pc_go'),('p_back','a','Voltar à fila','MB-01.dc.html')])
 

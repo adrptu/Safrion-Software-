@@ -118,6 +118,6 @@ caso('A8 papéis separados',()=>{ G2_PERFIS.push({k:'Beto',t:'Beto · Agrônomo'
     const bb=osProx(o,P_('Beto')).b||{}, bo=osProx(o,P_('Otávio')).b||{};
     ok('A8c a tela (osProx) não oferece "Liberar para execução" a quem tem só um dos papéis (pendência de papel)', !!bb.papel&&!!bo.papel, [bb,bo]);
     ok('A8d confirmação com Beto: "Beto (agrônomo) aprova esta versão e Ana (gestora) ou Otávio (gestor) libera"', osLibTxt(P_('Beto'))==='Beto (agrônomo) aprova esta versão e Ana (gestora) ou Otávio (gestor) libera', osLibTxt(P_('Beto')));
-  } finally { G2_PERFIS.splice(5); }
-  ok('A8e cadastro restaurado (5 perfis)', G2_PERFIS.length===5); });
+  } finally { G2_PERFIS.splice(6); }   // SUP §5 (06/10): 6 perfis com Helena · Direção
+  ok('A8e cadastro restaurado (6 perfis)', G2_PERFIS.length===6); });
 print('TOTAL '+R.length+' · falhas '+(ok.f||0));

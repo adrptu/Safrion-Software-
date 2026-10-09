@@ -153,7 +153,7 @@ function irrFertBloq(id) {
   const c = irrCen(); const co = c && c.ordens ? c.ordens[id] : null; if (!co) return null;
   const imp = (co.selos || []).find(x => /^Impedida/.test(x.t || '')); if (imp) return { t: /bomba/.test(imp.t) ? 'Impedida · bomba parada' : imp.t, dono: 'Manutenção', passo: 'Abrir ' + id, h: 'OS.dc.html#' + id };
   if (co.etapa === 'A liberar' && (co.ins || []).length && typeof cenLote === 'function') {
-    for (const z of co.ins) { const l = cenLote(c, z.p); if (!l || cenDisp(l) + 1e-9 < (z.tot || 0)) return { t: 'Falta insumo · ' + z.p, dono: 'Suprimentos', passo: 'Receber o insumo no Estoque', h: 'EST.dc.html' }; } }
+    for (const z of co.ins) { const l = cenLote(c, z.p); if (!l || cenDisp(l) + 1e-9 < (z.tot || 0)) return { t: 'Falta insumo · ' + z.p, dono: 'Suprimentos', passo: 'Receber o insumo no Estoque', h: l ? 'EST.dc.html#lote=' + encodeURIComponent(l.lote) : 'EST.dc.html#sec=saldos' }; } }
   return null;
 }
 // janelas comprometidas na bomba: ordens Liberadas/Em execução (passadas ainda não feitas); a v2 segura a janela desde a criação

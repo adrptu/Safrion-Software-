@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """Teste CDP · QUALIDADE-ARTEFATO-20261003-FLUXO item 1 (continuidade SAF → CMP) e item 2 (CAL-01 na tela).
 Safrinha 2027 → etapa 6 → Enviar para cotação gera SOL-2027-02 com o registro único (talhao-os-compras-v1: ID, fazenda, safra, itens,
-estado e origem) → Abrir Compra de insumos abre a MESMA solicitação (CMP.dc.html#sol=…&saf=…) na etapa 2 com os mesmos itens, valor e
-memória CAL-01 → recarregar mantém → Ver origem volta ao Planejar safra na etapa 6. Cada safra guarda o próprio andamento da compra, que
+estado e origem) → "Abrir SOL-2027-02 ›" abre a MESMA solicitação (CMP.dc.html#sol=…&saf=…) no detalhe com os mesmos itens, valor e a
+necessidade do CAL-01 (a memória fica só no Planejar safra, SUP §7) → recarregar mantém → a origem volta ao Planejar safra. Cada safra guarda o próprio andamento da compra, que
 sobrevive à ida e volta (registro proc) e aparece no Planejar safra. Lagoa Grande: realizado fora da demanda, fazenda certa, grupos sem
 homologado não travam os convites. Paridade da tela (safra.js) com dados2.demanda e bordas de endereço. Erros JS por ouvinte próprio.
 Uso: python3 saf_cmp_continuidade_test.py [pasta_png]   (≈ 100 s; capturas q_saf-cmp_*.png em _probe/)"""
@@ -75,49 +75,55 @@ try:
         and len(s.get('itens') or {})==8 and s.get('estado')=='Enviada · a cotar' and (s.get('origem') or {}).get('h')=='SAF.dc.html#saf=S27SF&etapa=6' and abs((s.get('total') or 0)-1098502.5)<0.01,
         {k:s.get(k) for k in ['id','safra','nome','faz','estado','origem','total']})
     clk('Enviar para cotação') if J("[...document.querySelectorAll('button')].some(b=>b.offsetParent&&b.innerText.trim()==='Enviar para cotação')") else None
-    chk('7 SAF: tudo enviado, a ação principal vira "Abrir Compra de insumos ›" (sem duplicar)',J("[...document.querySelectorAll('button,a')].filter(b=>b.offsetParent).some(b=>b.innerText.trim()==='Abrir Compra de insumos ›')") and len((ls() or {}).get('sols',{}))==1)
+    # SUP §7 (06/10): o atalho nomeia a solicitação (antes "Abrir Compra de insumos ›")
+    chk('7 SAF: tudo enviado, a ação principal vira "Abrir SOL-2027-02 ›" (sem duplicar)',J("[...document.querySelectorAll('button,a')].filter(b=>b.offsetParent).some(b=>b.innerText.trim()==='Abrir SOL-2027-02 ›')") and len((ls() or {}).get('sols',{}))==1)
     foto('2_saf_enviado')
-    # ---------------- Compra de insumos · a mesma solicitação ----------------
-    nav('Abrir Compra de insumos ›','CMP.dc.html')
-    chk('8 CMP abre a mesma solicitação: #sol=SOL-2027-02&saf=S27SF, etapa 2, contexto "Safrinha 2027 · SOL-2027-02"',url()=='/CMP.dc.html#sol=SOL-2027-02&saf=S27SF' and cur().startswith('2 Confira a demanda') and 'Safrinha 2027 · SOL-2027-02' in body(),(url(),cur()))
-    k2=J("(document.body.innerText.match(/SOL-2027-02 · Safrinha 2027[^\\n]+/)||[''])[0]"); tot=J("[...document.querySelectorAll('.g2tot')].filter(x=>x.offsetParent).map(x=>x.innerText).join(' ')") or ''
-    chk('9 CMP etapa 2: mesmos 8 insumos e R$ 1.098.502,50 (resumo e total da tabela)','8 insumos a comprar · R$ 1.098.502,50 a preço de referência' in k2 and '1.098.502,50' in tot,(k2,tot))
-    clk('Expandir tudo'); mp2=rowtxt('MAP 11-52')
-    chk('10 CMP MAP 11-52: 101.440 · falta a partir de 20/02/2027 · estoque usado antes: 90.000',all(x in mp2 for x in ['101.440','20/02/2027','usado antes: 90.000']),mp2)
-    rowclick('MAP 11-52'); m_cmp=memo(); lk=J("[...document.querySelectorAll('aside[role=dialog] a')].map(a=>[a.innerText.trim(),a.getAttribute('href')])") or []; foto('3b_cmp_memoria_cal01'); fechar()
-    chk('11 mesma memória CAL-01 nas duas telas (MAP 11-52, linha a linha)',m_cmp==m_saf and len(m_saf)>=6,{'saf':m_saf,'cmp':m_cmp})
-    chk('12 origem do insumo volta ao Planejar safra na etapa 6 da Safrinha',any(t.startswith('Ver no Planejar safra · etapa 6') and h=='SAF.dc.html#saf=S27SF&etapa=6' for t,h in lk),lk)
-    foto('3_cmp_etapa2')
+    # ---------------- Compras · a mesma solicitação (SUP: lista de solicitações → detalhe na fase; eram 6 etapas) ----------------
+    faixa=lambda: (J("(document.querySelector('[aria-label=\"Situação da solicitação\"]')||{innerText:''}).innerText.replace(/\\s+/g,' ')") or '')
+    prim=lambda: (J("(()=>{const b=[...document.querySelectorAll('.acoes-prim')].find(b=>b.offsetParent); return b?b.innerText.trim():'';})()") or '')
+    def clk_prim(): J("(()=>{const b=[...document.querySelectorAll('.acoes-prim')].find(b=>b.offsetParent); if(b) b.click();})()"); time.sleep(.6)
+    def lista(): clk('‹ Solicitações'); time.sleep(.3)
+    def abre_sol(sol): rowclick(sol); time.sleep(.4)
+    def ccel(lin,col): return J(f"(()=>{{const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent); const hs=[...t.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴]/g,'').replace(/\\s+/g,' ').trim().toUpperCase()); const r=[...t.querySelectorAll('[role=row]')].filter(x=>x.offsetParent).find(x=>x.innerText.indexOf({json.dumps(lin)})>=0); if(!r) return 'sem linha'; const c=[...r.querySelectorAll('[role=cell]')][hs.indexOf({json.dumps(col.upper())})]; return c?c.innerText.replace(/\\s+/g,' ').trim():'sem coluna';}})()") or ''
+    def respostas(t=14):
+        for _ in range(int(t/.5)):
+            if 'Em cotação' not in faixa(): break
+            time.sleep(.5)
+        time.sleep(.4)
+    nav('Abrir SOL-2027-02 ›','CMP.dc.html')
+    chk('8 Compras abre a mesma solicitação: #sol=SOL-2027-02&saf=S27SF, detalhe "A cotar" com a origem Safrinha 2027',url()=='/CMP.dc.html#sol=SOL-2027-02&saf=S27SF' and 'SOL-2027-02' in faixa() and 'Safrinha 2027' in faixa() and 'A cotar' in faixa(),(url(),faixa()[:200]))
+    lista(); it_=ccel('SOL-2027-02','Itens'); vl_=ccel('SOL-2027-02','Valor ref.')
+    chk('9 lista de Compras: SOL-2027-02 com os mesmos 8 insumos e R$ 1.098.502,50',it_=='8' and vl_=='R$ 1.098.502,50',(it_,vl_))
+    foto('3_cmp_lista')
     ir('CMP.dc.html#sol=SOL-2027-02&saf=S27SF',w=1.4)
-    chk('13 recarregar a Compra mantém SOL-2027-02 na etapa 2',cur().startswith('2 Confira a demanda') and 'Safrinha 2027 · SOL-2027-02' in body() and '1.098.502,50' in body(),(cur(),url()))
-    etapa(1); sf=rowtxt('Safrinha 2027'); s7=rowtxt('Safra 2026/27')
-    chk('14 CMP etapa 1: Safrinha com SOL-2027-02 · 8 insumos · R$ 1.098.502,50 · A cotar; 2026/27 continua SOL-2026-07 · R$ 379.580,00',
-        all(x in sf for x in ['SOL-2027-02','8 insumos · R$ 1.098.502,50','A cotar','Abrir compra']) and 'Sem solicitação' not in sf and 'SOL-2026-07' in s7 and 'R$ 379.580,00' in s7,(sf,s7))
-    foto('4_cmp_etapa1')
+    chk('13 recarregar Compras mantém a SOL-2027-02 aberta',url()=='/CMP.dc.html#sol=SOL-2027-02&saf=S27SF' and 'SOL-2027-02' in faixa() and 'Safrinha 2027' in faixa(),(url(),faixa()[:160]))
     # cada safra guarda o próprio andamento: convites da 2026/27 não aparecem na Safrinha
-    J("""(()=>{const r=[...document.querySelectorAll('[role=row]')].find(x=>x.innerText.indexOf('Safra 2026/27')>=0); [...r.querySelectorAll('button')].find(b=>b.innerText.trim()==='Abrir compra').click();})()"""); time.sleep(.5)
-    etapa(3); clk('Enviar convites (simulado)'); time.sleep(2.5)
-    k3a=J("(document.body.innerText.match(/Convites simulados[^\\n]+/)||[''])[0]")
-    etapa(1); J("""(()=>{const r=[...document.querySelectorAll('[role=row]')].find(x=>x.innerText.indexOf('Safrinha 2027')>=0); [...r.querySelectorAll('button')].find(b=>b.innerText.trim()==='Abrir compra').click();})()"""); time.sleep(.5)
-    etapa(3); k3b=J("(document.body.innerText.match(/\\d+ convites prontos[^\\n]+/)||[''])[0]"); ctx=J("(document.body.innerText.match(/Safrinha 2027 · SOL-2027-02/)||[''])[0]")
-    chk('15 Safrinha não herda os convites da 2026/27 (convites prontos, nada enviado) e o endereço acompanha a safra',bool(k3a) and bool(k3b) and ctx and url()=='/CMP.dc.html#sol=SOL-2027-02&saf=S27SF',(k3a,k3b,url()))
-    clk('Enviar convites (simulado)'); time.sleep(3.5); etapa(4); k4=J("(document.body.innerText.match(/\\d+ propostas? · custo total[^\\n]+/)||[''])[0]")
-    chk('16 cotação da SOL-2027-02 segue: convites enviados e propostas comparadas na etapa 4',cur().startswith('4 ') and bool(k4) and 'Semente de milho AG 8700' in body(),(cur(),k4))
-    etapa(1); J("""(()=>{const r=[...document.querySelectorAll('[role=row]')].find(x=>x.innerText.indexOf('Safra 2026/27')>=0); [...r.querySelectorAll('button')].find(b=>b.innerText.trim()==='Abrir compra').click();})()"""); time.sleep(.5)
-    etapa(3); k3c=J("(document.body.innerText.match(/Convites simulados[^\\n]+/)||[''])[0]")
-    chk('17 de volta à 2026/27: os convites dela continuam enviados',bool(k3c) and 'SOL-2026-07' in body(),k3c)
+    lista(); abre_sol('SOL-2026-07'); clk_prim(); k3a=T(); time.sleep(2.5)
+    lista(); abre_sol('SOL-2027-02'); p3=prim()
+    chk('15 Safrinha não herda os convites da 2026/27 (segue "A cotar" com os convites prontos) e o endereço acompanha a safra','Convites simulados' in k3a and 'A cotar' in faixa() and p3.startswith('Enviar ') and url()=='/CMP.dc.html#sol=SOL-2027-02&saf=S27SF',(k3a[:80],faixa()[:120],p3,url()))
+    n13=p3; clk_prim(); respostas(); clk('Expandir tudo')
+    mp2=[ccel('MAP 11-52',k) for k in ('A pedir','Falta em')]
+    chk('16 cotação da SOL-2027-02 segue: propostas chegam e a fase vira Decida (Semente de milho AG 8700 na comparação)','Em cotação' not in faixa() and 'Semente de milho AG 8700' in body(),(faixa()[:160]))
+    chk('10 Compras MAP 11-52: 101.440 kg a pedir com falta em 20/02/2027 (mesmo número do CAL-01 no Planejar safra)',mp2==['101.440 kg','20/02/2027'],mp2)
+    rowclick('MAP 11-52'); og=(J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText") or ''); lk=J("[...document.querySelectorAll('aside[role=dialog] a')].map(a=>[a.innerText.trim(),a.getAttribute('href')])") or []; fechar()
+    chk('11 a necessidade em Compras = resultado da memória CAL-01 do Planejar safra (101.440 kg); a memória fica só lá (SUP §7)','= 101.440 kg' in og and m_saf[-1].startswith('Necessidade líquida = soma das faltas desta safra = 101.440 kg'),(og[:300],m_saf[-1:]))
+    chk('12 "Ver memória no Planejar safra" volta à demanda da Safrinha',any(t=='Ver memória no Planejar safra' and (h or '').startswith('SAF.dc.html#saf=S27SF') for t,h in lk),lk)
+    foto('3b_cmp_decida')
+    lista(); abre_sol('SOL-2026-07'); e7=faixa()
+    chk('17 de volta à 2026/27: os convites dela continuam enviados (não volta a "A cotar")','A cotar' not in e7 and 'SOL-2026-07' in e7,e7[:160])
     # ---------------- volta à origem ----------------
-    etapa(1); J("""(()=>{const r=[...document.querySelectorAll('[role=row]')].find(x=>x.innerText.indexOf('Safrinha 2027')>=0); [...r.querySelectorAll('button')].find(b=>b.innerText.trim()==='Abrir compra').click();})()"""); time.sleep(.5)
-    h=J("(()=>{const a=[...document.querySelectorAll('a')].find(a=>a.offsetParent&&a.innerText.trim()==='Ver origem · etapa 6 ›'); return a?a.getAttribute('href'):'';})()")
-    chk('18 trilha da compra oferece "Ver origem · etapa 6 ›" para a Safrinha',h=='SAF.dc.html#saf=S27SF&etapa=6',h)
-    tr0=trail(); nav('Ver origem · etapa 6 ›','SAF.dc.html')
+    lista(); abre_sol('SOL-2027-02')
+    h=J("(()=>{const a=[...document.querySelectorAll('[aria-label=\"Situação da solicitação\"] a')].find(a=>a.offsetParent); return a?a.getAttribute('href'):'';})()") or ''
+    chk('18 a faixa do detalhe oferece a origem (Planejar safra da Safrinha)',h.startswith('SAF.dc.html#saf=S27SF'),h)
+    g0=ls() or {}; e0=(g0.get('proc') or {}).get('S27SF',{}).get('estado','')
+    col(); J("(()=>{const a=[...document.querySelectorAll('[aria-label=\"Situação da solicitação\"] a')].find(a=>a.offsetParent); a&&a.click();})()"); esperar('SAF.dc.html')
     k6b=J("(document.body.innerText.match(/Valor da necessidade[^\\n]+/)||[''])[0]")
-    chk('19 SAF volta na etapa 6 da Safrinha e mostra o andamento da compra (registro proc): SOL-2027-02 · Em cotação · N de 13 respostas',cur().startswith('6 ') and 'Safrinha 2027' in J("document.body.innerText.slice(0,600)") and 'solicitação SOL-2027-02 · Em cotação · ' in k6b and 'de 13 respostas' in k6b,(cur(),k6b))
+    chk('19 SAF volta na Safrinha e mostra o andamento da compra lido do registro (proc): "solicitação SOL-2027-02 · <situação de Compras>"',e0 not in ('','A cotar') and ('solicitação SOL-2027-02 · '+e0) in k6b,(e0,k6b))
     foto('5_saf_volta')
-    nav('Abrir Compra de insumos ›','CMP.dc.html'); tr1=trail(); g=ls() or {}
-    chk('26 Compra → origem → Compra: convites e propostas da SOL-2027-02 continuam (trilha igual) e o registro guarda o estado',
-        '13 convites enviados' in tr1 and ' 0 propostas' not in tr1 and tr1==tr0 and (g.get('proc') or {}).get('S27SF',{}).get('estado','').startswith('Em cotação') and (g.get('sols') or {}).get('S27SF',{}).get('estado','').startswith('Em cotação'),
-        {'antes':tr0,'depois':tr1,'proc':(g.get('proc') or {}).get('S27SF',{}).get('estado'),'sol':(g.get('sols') or {}).get('S27SF',{}).get('estado')})
+    nav('Abrir SOL-2027-02 ›','CMP.dc.html'); g=ls() or {}
+    chk('26 Compras → origem → Compras: convites e propostas da SOL-2027-02 continuam e o registro guarda o estado',
+        'Em cotação' not in faixa() and 'A cotar' not in faixa() and (g.get('proc') or {}).get('S27SF',{}).get('estado','')==e0 and (g.get('sols') or {}).get('S27SF',{}).get('estado','')==e0,
+        {'faixa':faixa()[:120],'proc':(g.get('proc') or {}).get('S27SF',{}).get('estado'),'sol':(g.get('sols') or {}).get('S27SF',{}).get('estado')})
     ir('SAF.dc.html'); px=rowtxt('Safrinha 2027')
     chk('20 SAF recarregada sem endereço: a Safrinha não volta a "enviar demanda" (registro mantido)','enviar demanda' not in px and 'Continuar' in px,px)
     # ---------------- mesma memória na Safra 2026/27 (reserva de outro destino) ----------------
@@ -136,14 +142,14 @@ try:
     chk('24 memória como extrato por data, com a origem de sempre: "25/09/2026 · T1-A · Dessecação pré-plantio · 2,00 L/ha × 160 ha = 320,0 L"; 1º uso intacto',
         any(l.startswith('25/09/2026 · T1-A · Dessecação pré-plantio · 2,00 L/ha × 160 ha = 320,0 L → saldo') for l in gm) and cel('Glifosato 480','1º uso')=='25/09/2026',(gl,gm[:3]))
     rowclick('Fungicida A'); fs=memo(); fechar(); fa=fa+' | '+' · '.join(cel('Fungicida A',k) for k in ('Estoque apto','Usado antes da compra','Necessidade líquida'))
-    ir('CMP.dc.html#sol=SOL-2026-07&saf=S2627',w=1.4); clk('Expandir tudo'); fa2=rowtxt('Fungicida A'); rowclick('Fungicida A'); fc=memo(); fechar()
-    chk('21 Fungicida A (2026/27): estoque apto 545 (65 reservados à OS-0424, usados antes); 145,2 L como antes; memória igual nas duas telas',
-        fa.endswith(' | 545,0 L · 65,0 L · 145,2 L') and 'usado antes: 65,0' in fa2 and '145,2' in fa2 and fs==fc and any(l.startswith('24/09/2026 · Reserva REQ-039 · OS-0424 (T1-B) · −65,0 L') for l in fs),{'fa':fa,'fa2':fa2,'iguais':fs==fc,'saf':fs[-2:],'cmp':fc[-2:]})
+    ir('CMP.dc.html#sol=SOL-2026-07&saf=S2627',w=1.4); respostas(); clk('Expandir tudo'); fa2=ccel('Fungicida A','A pedir'); rowclick('Fungicida A'); fc=(J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText") or ''); fechar()
+    chk('21 Fungicida A (2026/27): estoque apto 545 (65 reservados à OS-0424, usados antes); 145,2 L no Planejar safra e a pedir em Compras',
+        fa.endswith(' | 545,0 L · 65,0 L · 145,2 L') and fa2=='145,2 L' and '= 145,2 L' in fc and any(l.startswith('24/09/2026 · Reserva REQ-039 · OS-0424 (T1-B) · −65,0 L') for l in fs),{'fa':fa,'fa2':fa2,'cmp':fc[:200],'saf':fs[-2:]})
     # safra criada no Planejar safra (fora do cadastro da Compra): a solicitação gravada aparece na lista e abre com contexto próprio
     J("""(()=>{const o=JSON.parse(localStorage.getItem('talhao-os-compras-v1')); const r=JSON.parse(JSON.stringify(o.sols.S27SF)); r.safra='n9'; r.nome='Safra nova teste'; r.id='SOL-2026-10'; o.sols.n9=r; localStorage.setItem('talhao-os-compras-v1',JSON.stringify(o));})()""")
-    ir('CMP.dc.html#sol=SOL-2026-10&saf=n9',w=1.4); ctxn=J("(document.body.innerText.match(/Safra nova teste · SOL-2026-10/)||[''])[0]"); cn=cur()
-    etapa(1); rn=rowtxt('Safra nova teste')
-    chk('25 solicitação de safra nova (só no Planejar safra) aparece na Compra e abre com o próprio contexto',ctxn=='Safra nova teste · SOL-2026-10' and cn.startswith('2 ') and 'SOL-2026-10' in rn and 'Abrir compra' in rn,(ctxn,cn,rn))
+    ir('CMP.dc.html#sol=SOL-2026-10&saf=n9',w=1.4); fxn=faixa()
+    lista(); rn=rowtxt('SOL-2026-10')
+    chk('25 solicitação de safra nova (só no Planejar safra) aparece na lista de Compras e abre com o próprio contexto','SOL-2026-10' in fxn and 'Safra nova teste' in fxn and 'Safra nova teste' in rn,(fxn[:160],rn))
     # ---------------- paridade da tela (safra.js + cal01.js) com dados2.demanda (Python) ----------------
     par=[]
     for saf in ['S2627','S27SF','LG2627']:
@@ -172,18 +178,18 @@ try:
         len(mc)>2 and mc[1].startswith('Realizado antes de 23/09/2026 · ') and any(l.startswith('30/09/2026 · ') and l.endswith('cobre a ruptura') for l in mc)
         and mc[-1]==f"Sem compra nova · ruptura de {nk(cdm['rup'])} kg de {dm_(cdm['falta'])}/{cdm['falta'][:4]} a {dm_(cdm['cob'])}/{cdm['cob'][:4]}, coberta pelo recebimento"
         and calagem_ok(mc),mc)
-    clk('Enviar para cotação'); tl=T(); nav('Abrir Compra de insumos ›','CMP.dc.html')
+    clk('Enviar para cotação'); tl=T(); nav('Abrir SOL-2026-09 ›','CMP.dc.html')
     fz2=J("[...document.querySelectorAll('span')].filter(s=>s.children.length===0&&/^Fazenda /.test(s.innerText.trim())).map(s=>s.innerText.trim())")
-    etapa(3); cg=[rowtxt('Corretivos'),rowtxt('Mudas')]; clk('Enviar convites (simulado)'); tc=T(); time.sleep(3.5); trl=trail(); foto('8_cmp_lg_etapa3')
-    chk('30 Compra da SOL-2026-09: Fazenda Lagoa Grande; Corretivos e Mudas "Sem fornecedor homologado" com link de cadastro; convites dos outros grupos saem e as propostas chegam',
+    cg=[rowtxt('Corretivos'),rowtxt('Mudas')]; clk_prim(); tc=T(); respostas(); fx=faixa(); foto('8_cmp_lg_cote')
+    chk('30 Compras da SOL-2026-09: Fazenda Lagoa Grande; Corretivos e Mudas "Sem fornecedor homologado" com link de cadastro; convites dos outros grupos saem e as propostas chegam',
         tl.startswith('Solicitação SOL-2026-09 enviada a Compras: 12 insumos') and fz2==['Fazenda Lagoa Grande'] and all('Sem fornecedor homologado' in x and 'Cadastrar em Parceiros e fornecedores' in x for x in cg)
-        and tc.startswith('Convites simulados') and tc.endswith('Sem cotação (sem fornecedor homologado): Corretivos, Mudas.') and 'convites enviados' in trl and ' 0 propostas' not in trl,(tl,fz2,cg,tc,trl))
+        and tc.startswith('Convites simulados') and tc.endswith('Sem cotação (sem fornecedor homologado): Corretivos, Mudas.') and 'A cotar' not in fx and 'Em cotação' not in fx,(tl,fz2,cg,tc,fx[:160]))
     # ---------------- bordas de endereço ----------------
-    ir('CMP.dc.html#sol=SOL-9999&saf=S27SF',w=1.4); b1=(url(),cur(),T())
-    ir('CMP.dc.html#saf=S2526',w=1.4); b2=(url(),cur(),T())
-    chk('31 endereço com SOL de outra safra abre a SOL da safra e corrige o endereço; safra encerrada por endereço abre a consulta (etapa 6)',
-        b1[0]=='/CMP.dc.html#sol=SOL-2027-02&saf=S27SF' and b1[1].startswith('2 ') and b1[2]=='SOL-9999 não é a solicitação da Safrinha 2027: aberta a SOL-2027-02.'
-        and b2[1].startswith('6 ') and 'encerrada' in b2[2] and 'não está gravada' not in b2[2],(b1,b2))
+    ir('CMP.dc.html#sol=SOL-9999&saf=S27SF',w=1.4); b1=(url(),faixa(),T())
+    ir('CMP.dc.html#saf=S2526',w=1.4); b2=(url(),J("(document.querySelector('nav[aria-label=\"Seções de compras\"] button[aria-current=true]')||{innerText:''}).innerText.trim()") or '',T())
+    chk('31 endereço com SOL de outra safra abre a SOL da safra e corrige o endereço; safra encerrada por endereço abre Acompanhe pedidos',
+        b1[0]=='/CMP.dc.html#sol=SOL-2027-02&saf=S27SF' and 'SOL-2027-02' in b1[1] and b1[2]=='SOL-9999 não é a solicitação da Safrinha 2027: aberta a SOL-2027-02.'
+        and b2[1].startswith('Acompanhe pedidos') and 'encerrada' in b2[2] and 'não está gravada' not in b2[2],(b1,b2))
     c.size(390,844); ir('CMP.dc.html#sol=SOL-2027-02&saf=S27SF',w=1.4); foto('6_cmp_390'); col()
     chk('22 sem erro JS (ouvinte de error e unhandledrejection em cada página aberta)', ERR==[], ERR[:5])
 finally:

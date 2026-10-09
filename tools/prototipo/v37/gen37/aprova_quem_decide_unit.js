@@ -24,7 +24,8 @@ caso('perfil', () => {
   ok('mesma pessoa pelo nome (Ana × "Ana (gestora)")', g2mesma('Ana', 'Ana (gestora)') && !g2mesma('Ana', 'Paula (almoxarife)') && !g2mesma('', ''));
   ok('papel vem do cadastro: objeto forjado {k:"Caio", papeis:{gestor}} não vira gestor; chave "Ana" vale', !g2papel({ k: 'Caio', papeis: { gestor: 'gestora' } }, 'gestor') && g2papel('Ana', 'gestor') && !g2papel({ k: 'Xyz', papeis: { gestor: 'g' } }, 'gestor'));
   const self = { state: {}, setState(o) { Object.assign(this.state, o); } }; const v = {}; g2navvals(self, v, []);
-  ok('menu lateral: seletor com 5 perfis, Ana marcada', v.perfil_k === 'Ana' && (v.perfil_opts || []).length === 5, [v.perfil_k, (v.perfil_opts || []).length]);
+  // SUP §5 (06/10): entra Helena · Direção (decide compra acima da alçada da gerência) · antes 5 perfis
+  ok('menu lateral: seletor com 6 perfis, Ana marcada', v.perfil_k === 'Ana' && (v.perfil_opts || []).length === 6, [v.perfil_k, (v.perfil_opts || []).length]);
   self.g2perfilFecha = { pa: null }; self.state.pa = { id: 'OS-0430', fn: 'liberar' };   // confirmação aberta pela Ana
   v.perfil_set({ target: { value: 'Caio' } });
   ok('trocar para Caio grava e avisa que não é segurança', __ls['safrion.perfilDemo'] === 'Caio' && g2perfil().k === 'Caio' && /Caio · PCP \(não é segurança de acesso\)/.test(self.state.g2toast || ''), self.state.g2toast);
@@ -77,31 +78,33 @@ caso('INV-2609', () => {
 });
 ok('contadores sem mudança (est_fix1_test.py:56)', JSON.stringify(E2.contadores) === JSON.stringify(['Paula (almoxarife)', 'Rui (almoxarife)']), E2.contadores);
 
-console.log('\n— R-D2 · quarentena (KCl 60% K26-11: 10.000 kg em quarentena, disponível 50.000 kg)');
+console.log('\n— R-D2 · quarentena (KCl 60% K26-11: parcela NF 4501 com 10.000 kg aguardando laudo, disponível 50.000 kg)');
+// SUP §6 (06/10): cenLiberarQuarentena (lote inteiro, sem resultado) saiu; entra cenLaudo por parcela, com nº e resultado. A regra fica: só a gestora decide e sem laudo nada sai.
 const KK = 'KCl 60%|K26-11';
 for (const [ator, nome] of [[RUI, 'Rui (almoxarife)'], [PAULA, 'Paula (almoxarife)'], [CAIO, 'Caio (PCP)'], [undefined, 'sem ator']]) caso('quarentena ' + nome, () => {
-  ini(); const r = cenMudar(null, c => cenLiberarQuarentena(c, KK, 'LAB-0917', ator));
-  ok('NEGATIVO ' + nome + ' não libera, mesmo com laudo; disponível segue 50.000 kg', r.erro === 'Liberar a quarentena do lote K26-11: decisão de Ana (gestora). Nada foi alterado.' && G().lotes[KK].quarentena === 10000 && disp(KK) === 50000, r.erro || r.msg);
+  ini(); const r = cenMudar(null, c => cenLaudo(c, KK, 'NF 4501', 'LAB-0917', 'Aprovado', ator));
+  ok('NEGATIVO ' + nome + ' não registra o laudo, mesmo com nº; disponível segue 50.000 kg', r.erro === 'Registrar o laudo da parcela NF 4501 do lote K26-11: decisão de Ana (gestora). Nada foi alterado.' && G().lotes[KK].quarentena === 10000 && disp(KK) === 50000, r.erro || r.msg);
 });
 for (const laudo of ['', '   ', undefined]) caso('laudo ' + JSON.stringify(laudo), () => {
-  ini(); const r = cenMudar(null, c => cenLiberarQuarentena(c, KK, laudo, ANA));
-  ok('NEGATIVO Ana sem laudo (' + JSON.stringify(laudo) + '): continua bloqueado', r.erro === 'Informe o nº do laudo ou relatório de inspeção do lote K26-11. Sem laudo o lote continua bloqueado.' && G().lotes[KK].quarentena === 10000, r.erro || r.msg);
+  ini(); const r = cenMudar(null, c => cenLaudo(c, KK, 'NF 4501', laudo, 'Aprovado', ANA));
+  ok('NEGATIVO Ana sem laudo (' + JSON.stringify(laudo) + '): continua bloqueado', r.erro === 'Informe o nº do laudo da parcela NF 4501 (lote K26-11). Sem laudo a parcela continua bloqueada.' && G().lotes[KK].quarentena === 10000, r.erro || r.msg);
 });
 caso('quarentena Ana', () => {
-  ini(); const r = cenMudar(null, c => cenLiberarQuarentena(c, KK, ' LAB-0917 ', ANA)); const m = G().movs[G().movs.length - 1];
-  ok('Ana com o laudo LAB-0917: quarentena 10.000 → 0; disponível 50.000 → 60.000 kg', G().lotes[KK].quarentena === 0 && disp(KK) === 60000, disp(KK));
-  ok('movimento grava laudo, quem e quantidade', m.tipo === 'inspecao' && m.doc === 'LAB-0917' && m.quem === 'Ana (gestora)' && !('rev' in m) && m.qtd === 10000, m);
-  ok('trilha com laudo e quem', emovTxt(m) === 'quarentena liberada com o laudo LAB-0917 por Ana (gestora): 10.000 kg passam a disponível', emovTxt(m));
-  ok('mensagem', r.msg === '10.000 kg do lote K26-11 liberados com o laudo LAB-0917 por Ana (gestora).', r.msg || r.erro);
-  const r2 = cenMudar(null, c => cenLiberarQuarentena(c, KK, 'LAB-0917', ANA));
-  ok('NEGATIVO repetir não soma de novo (60.000 kg)', r2.erro === 'Nada bloqueado neste lote.' && disp(KK) === 60000, r2.erro);
+  ini(); const r = cenMudar(null, c => cenLaudo(c, KK, 'NF 4501', ' LAB-0917 ', 'Aprovado', ANA)); const m = G().movs[G().movs.length - 1];
+  ok('Ana com o laudo LAB-0917 aprovado: quarentena 10.000 → 0; disponível 50.000 → 60.000 kg', G().lotes[KK].quarentena === 0 && disp(KK) === 60000, disp(KK));
+  ok('movimento grava laudo, parcela, quem e quantidade', m.tipo === 'inspecao' && m.doc === 'LAB-0917' && m.parcela === 'NF 4501' && m.quem === 'Ana (gestora)' && !('rev' in m) && m.qtd === 10000, m);
+  ok('trilha com laudo, parcela e quem', emovTxt(m) === 'quarentena liberada com o laudo LAB-0917 por Ana (gestora) (parcela NF 4501): 10.000 kg passam a disponível', emovTxt(m));
+  ok('mensagem', r.msg === '10.000 kg da parcela NF 4501 (lote K26-11) liberados com o laudo LAB-0917 por Ana (gestora).', r.msg || r.erro);
+  const r2 = cenMudar(null, c => cenLaudo(c, KK, 'NF 4501', 'LAB-0917', 'Aprovado', ANA));
+  ok('NEGATIVO repetir não soma de novo (60.000 kg)', r2.erro === 'Nenhuma parcela de NF 4501 aguardando laudo no lote K26-11.' && disp(KK) === 60000, r2.erro);
 });
 caso('devolução bloqueada', () => {
+  // SUP §6 (06/10): a semente reserva 15 L da REQ-035 no F26-02 (res0, 72.3 item 2): reservado 65 → 80 L, disponível 480 → 465 L
   ini(); const KF = 'Fungicida A|F26-02'; cenMudar(null, c => cenDevolver(c, 'REQ-035', 'Fungicida A', 10, false, RUI)); const l = G().lotes[KF];
-  ok('devolução bloqueada de 10 L (REQ-035): F26-02 físico 555, quarentena 10, disponível 480 L', l.fisico === 555 && l.quarentena === 10 && disp(KF) === 480, [l.fisico, l.quarentena, disp(KF)]);
-  const rn = cenMudar(null, c => cenLiberarQuarentena(c, KF, 'INSP-0042', RUI)); ok('NEGATIVO Rui, que recebeu a devolução, não libera (480 L)', !!rn.erro && disp(KF) === 480, rn.erro || rn.msg);
-  cenMudar(null, c => cenLiberarQuarentena(c, KF, 'INSP-0042', ANA)); const m = G().movs[G().movs.length - 1];
-  ok('Ana libera com INSP-0042: disponível 480 → 490 L', disp(KF) === 490 && !('rev' in m), [disp(KF), m.rev]);
+  ok('devolução bloqueada de 10 L (REQ-035): F26-02 físico 555, quarentena 10 (parcela REQ-035), disponível 465 L', l.fisico === 555 && l.quarentena === 10 && disp(KF) === 465 && cenQuar(l).some(p => p.doc === 'REQ-035' && p.qtd === 10), [l.fisico, l.quarentena, disp(KF)]);
+  const rn = cenMudar(null, c => cenLaudo(c, KF, 'REQ-035', 'INSP-0042', 'Aprovado', RUI)); ok('NEGATIVO Rui, que recebeu a devolução, não libera (465 L)', !!rn.erro && disp(KF) === 465, rn.erro || rn.msg);
+  cenMudar(null, c => cenLaudo(c, KF, 'REQ-035', 'INSP-0042', 'Aprovado', ANA)); const m = G().movs[G().movs.length - 1];
+  ok('Ana libera com INSP-0042: disponível 465 → 475 L', disp(KF) === 475 && !('rev' in m), [disp(KF), m.rev]);
 });
 
 console.log('\n— R-D3 · dispensa de saldo (OS-0421: 350 ha, realizado 190, saldo 160; limite 20 % = 70 ha)');
@@ -136,7 +139,8 @@ for (const [ator, nome] of [[RUI, 'Rui (almoxarife)'], [CAIO, 'Caio (PCP)'], [un
 });
 caso('excedente Ana', () => {
   const k = relato(85); const r = cenMudar(null, c => cenConciliar(c, k.id, true, undefined, ANA)); const c = G(); const ms = c.movs.slice(-2);
-  ok('Ana (gestora) aceita: F26-02 545 → 525 L; caso Aceito por Ana (gestora)', r.msg === 'CC-301 aceito: Fungicida A 85 L baixados na OS-0421 · 20 L regularizados do lote F26-02.' && c.lotes[KF].fisico === 525 && c.confs[0].por === 'Ana (gestora)', [r.msg || r.erro, c.lotes[KF].fisico, c.confs[0].por]);
+  // SUP §6 (06/10): a mensagem diz de onde saiu o excedente (a REQ-035 agora tem reserva própria no F26-02)
+  ok('Ana (gestora) aceita: F26-02 545 → 525 L; caso Aceito por Ana (gestora)', r.msg === 'CC-301 aceito: Fungicida A 85 L baixados na OS-0421 · 20 L regularizados do lote F26-02 (reserva da REQ-035).' && c.lotes[KF].fisico === 525 && c.confs[0].por === 'Ana (gestora)', [r.msg || r.erro, c.lotes[KF].fisico, c.confs[0].por]);
   ok('movimentos com quem decidiu', ms[0].quem === 'Ana (gestora) → Marcos · regularização CC-301' && ms[1].quem === 'Ana (gestora) · aceite CC-301', ms.map(m => m.quem));
 });
 caso('recusa e coberto', () => {
@@ -198,11 +202,11 @@ caso('entrega e devolução', () => {
 });
 caso('quarentena com acúmulo', () => {
   const KU = 'Ureia 45%|U26-09'; const rec = (ator, doc) => cenMudar(null, c => cenReceber(c, 'Ureia 45%', 'U26-09', 500, 'kg', 'Galpão 1', '12/2027', doc, false, ator));
-  ini(); rec(ANA, 'NF-7001'); const r = cenMudar(null, c => cenLiberarQuarentena(c, KU, 'LAB-1', ANA)); const m = G().movs[G().movs.length - 1];
+  ini(); rec(ANA, 'NF-7001'); const r = cenMudar(null, c => cenLaudo(c, KU, 'NF-7001', 'LAB-1', 'Aprovado', ANA)); const m = G().movs[G().movs.length - 1];
   ok('Ana registra o recebimento bloqueado e libera a quarentena: a decisão vale e fica revisão posterior (padrão 2; antes a entrada gravava "Rui (almoxarife)" e o acúmulo não aparecia)',
     !r.erro && G().lotes[KU].quarentena === 0 && m.rev === 'revisão posterior pendente (Ana registrou a entrada bloqueada e decidiu)' && / Fica revisão posterior pendente \(Ana registrou a entrada bloqueada e decidiu\)\.$/.test(r.msg)
     && / · revisão posterior pendente/.test(emovTxt(m)), [r.erro || r.msg, m.rev]);
-  ini(); rec(RUI, 'NF-7002'); const r2 = cenMudar(null, c => cenLiberarQuarentena(c, KU, 'LAB-2', ANA)); const m2 = G().movs[G().movs.length - 1];
+  ini(); rec(RUI, 'NF-7002'); const r2 = cenMudar(null, c => cenLaudo(c, KU, 'NF-7002', 'LAB-2', 'Aprovado', ANA)); const m2 = G().movs[G().movs.length - 1];
   ok('Rui recebe bloqueado e Ana libera: sem revisão posterior', !r2.erro && !('rev' in m2) && !/revisão/.test(r2.msg), [r2.erro || r2.msg, m2.rev]);
 });
 for (const [ator, nome] of [[CAIO, 'Caio (PCP)'], [RUI, 'Rui (almoxarife)'], [undefined, 'sem ator']]) caso('cancelar ' + nome, () => {
@@ -221,8 +225,8 @@ caso('dispensa com papéis separados', () => {
   G2_PERFIS.push({ k: 'Beto', t: 'Beto · Agrônomo', papeis: { agronomo: 'agrônomo' } }, { k: 'Otávio', t: 'Otávio · Gestor', papeis: { gestor: 'gestor' } });
   try { for (const k of ['Beto', 'Otávio']) { ini(); const r = cenMudar(null, c => osc_dispensar(c, 'OS-0421', 40, 'x', k)); const o = G().ordens['OS-0421'];
       ok('NEGATIVO ' + k + ' (só ' + (k === 'Beto' ? 'agrônomo' : 'gestor') + ') não dispensa: exige os dois papéis; saldo segue 160 ha', r.erro === 'Dispensar saldo da OS-0421: decisão de Ana (gestora e agrônoma). Nada foi alterado.' && o.saldo === 160 && !(o.osc && o.osc.disp), r.erro || r.msg); } }
-  finally { G2_PERFIS.splice(5); }
-  ok('cadastro restaurado: 5 perfis', G2_PERFIS.length === 5);
+  finally { G2_PERFIS.splice(6); }
+  ok('cadastro restaurado: 6 perfis', G2_PERFIS.length === 6);
 });
 // achado 2 · checklist: editar o motivo não troca o autor da resposta
 caso('motivo editado', () => {
