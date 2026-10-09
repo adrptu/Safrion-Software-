@@ -7,7 +7,8 @@
 **Rótulos.**
 - **Executado** (nesta sessão, sobre `ecc8b00`): contas da semente em `decimal`, com cultivos, metas, áreas e datas lidos de `dados2` (`verificacao/conta_semente.py`); 0 colisões de nome entre `cenario.js_prefixo()` e os scripts do SAF (168 × 239 nomes).
 - **Executado na revisão por contraexemplo (06/10/2026, feita pelo autor):** leitura do código em `ecc8b00` para cada achado do §10. Exemplos: lote LG26-03 com 60.000 kg no cenário; `CARD.prod` sem o "Calcário dolomítico"; `PROPOSTAS` sem o grupo Corretivos; testes do CD-02 e do CD-06 que leem o calcário sem preço. **A revisão independente do Codex continua pendente.**
-- **Especificado:** proposta, ainda sem código.
+- **Executado na implementação (09/10/2026, autor):** código nos commits da §11, build com 0 FALHA, `montar_render`, varredura, `acoes_duplicadas`, unidade (`solo_unit_test.py`) e navegador (`solo_ag02_test.py`, `solo_saf_test.py`, `solo_os_test.py`, desktop e 390 px), mais os testes existentes que tocam os arquivos mexidos (§11).
+- **Especificado:** o que a §11 lista como fora ou não feito.
 - Dados sintéticos, inclusive os da Lagoa Grande (Pivô 12 = 48,47 ha na base sintética da nuvem). Decisões tomadas sem o proprietário: [DECISOES.md](DECISOES.md) (D-nn); nenhuma é aprovação dele.
 
 ```text
@@ -16,7 +17,7 @@ Requisitos do PRD e fora do escopo: 37 (FX-001…008, ACFX-01…08), 38.3 e 38.5
 Autor / revisor / integrador: Claude / Codex / integrador da branch do protótipo (claude/prototipo-v44)
 Base / arquivos: ecc8b00 / gen37: solo.js e dados_solo.py (novos), agronomia.py (AG-02; AG-03 e AG-04 no §0), safra.js (ocorr, doseEf, painel de insumos, doApply, abrirHash), processo_safra.py, processo_os.py (origem, Nova ordem, selo, osc_nova), cenario.py (prefixo), dados_cad.py e cad_produtos_estrutura.py (garantia e preço), dados_carencia.py (corretivo novo), dados_lagoa_safra.py:157, inicio.py (IN-01 e IN-03), ui37.py:39, testes do §8
 Aceite e verificação: §8; solo_unit.js + build com 0 FALHA + varredura + acoes_duplicadas + testes do módulo, sem vermelho novo contra os vermelhos conhecidos da base
-Estado / impedimento / próximo passo: especificado; revisado por contraexemplo pelo autor (§10); revisão do Codex pendente / P4 toca ocorr e o painel de insumos, também editados pelas frentes do Planejar safra (reserva por função) / P1
+Estado / impedimento / próximo passo: implementado na branch claude/v44-solo (§11); revisado por contraexemplo pelo autor (§10); revisão do Codex pendente / P4 toca ocorr e o painel de insumos, também editados pelas frentes do Planejar safra (o integrador junta por função) / integrar na claude/prototipo-v44 e publicar o artefato
 ```
 
 ## 0. Mapa do que fica, muda, sai e entra
@@ -49,7 +50,8 @@ Estado / impedimento / próximo passo: especificado; revisado por contraexemplo 
 | Texto da OS-0502 | `dados_lagoa_safra.py:157` | "Calagem pela análise de solo" passa a "Calagem · dose do plano 2 t/ha". Hoje a origem é falsa (FX-002) |
 | Prefixo do cenário | `cenario.py:87-90` | concatena `solo.js` (só as funções) depois de `cenario.js`, como o `producao.js`. `SOLO0` e `SOLO_REGRA` entram só no AG-02 e no SAF |
 | Testes | `agtest.py:47-50`; `links_ocultos_test.py:34`, `:39`; `cadc_fix_cd06.py:12-22`; `cadc_cd06_test.py:11`, `:26-29`; `cadc_cd02_test.py:67` | AG-02 em painel. O AG-02 sai da lista de ocultos, e o par AG-02 → AG-03det (DIA-007) entra no residual "cadeia MIP". O calcário passa a ter preço e data (§7 P1) |
-| Fluxo | `fluxos37_md.py:11` | `FL-AG-02`: `['AG-02','SAF']`; `FL-AG-05`: + `'SAF'`. A etapa "RT aprova versão?" do FL-AG-02 fica a cargo do agrônomo, que aprova na O.S. (desenho do proprietário) |
+| Fluxo | `fluxos37_md.py:11` | **Não mudou (§11):** o script gera o documento histórico da entrega v3.7 a partir do `catalogo.json` v3.7, que não tem a tela SAF; incluir `'SAF'` quebraria a geração. A etapa "RT aprova versão?" do FL-AG-02 fica a cargo do agrônomo, que aprova na O.S. (desenho do proprietário) |
+| Irrigação IR-01 (formulário do setor) | `areas/irrigacao.py:152-189` | + campo de leitura "Água disponível no solo (referência)", com a CAD da medição mais recente do talhão (§3.6). Nenhum cálculo de lâmina muda |
 
 | Sai | Onde | Por quê |
 |---|---|---|
@@ -58,7 +60,7 @@ Estado / impedimento / próximo passo: especificado; revisado por contraexemplo 
 | REC-018 (calagem do T2 "aguarda laudo"), as opções Calagem e Gessagem e o campo "Dose informada" (t/ha, "Sugerida 2,1 t/ha (aguarda laudo)") no formulário do AG-04 | `agronomia.py:283-285`, `:292-294` | A calagem do T2 passa a vir do LAU-2063 no plano: um lugar por fato (D-14). Sem a REC-018, o `g_rec` não tem linha editável e fica só em consulta |
 | Tarefa "Amostragem de solo · T2" nas telas ocultas IN-01 (f8) e IN-03 (g5) | `inicio.py:1375`, `:1409` | O T2 já tem o LAU-2063. A tarefa pedia um laudo que existe e apontava para o PLA-104, que sai (R01) |
 
-**Novo** (`gen37/`): `solo.js` (regras puras e comandos sobre `c.solo`, com a aritmética `pr*` e o `prUn` do prefixo); `dados_solo.py` (semente de laudos, regra de demonstração e produto padrão de correção por fazenda); testes `solo_unit.js` (node), `solo_ag02_test.py`, `solo_saf_test.py` e `solo_os_test.py` (navegador).
+**Novo** (`gen37/`): `solo.js` (regras puras e comandos sobre `c.solo`, com a aritmética `pr*` e o `prUn` do prefixo); `dados_solo.py` (semente de laudos, regra de demonstração, produto padrão de correção por fazenda e medições de água no solo); `areas/analise_solo.py` (AG-02 e os painéis comuns Por quê); testes `solo_unit.js` com `solo_unit_test.py` (node), `solo_ag02_test.py`, `solo_saf_test.py` e `solo_os_test.py` (navegador).
 
 ## 1. Missão e princípios
 **Missão.** O produtor planeja com a dose do plano. Quem tem laudo vê, na própria linha da dose, o que a análise indica e por quê, e decide com um toque. A fazenda ganha correção e adubação ajustadas ao solo sem tela nova, sem segunda demanda e sem segunda aprovação.
@@ -191,6 +193,16 @@ O laudo nasce **Aguardando validação**; o OCR nunca valida. Se já existe laud
   - `osc_nova` guarda o grupo de cada insumo (`g`). O Calcário dolomítico vai como corretivo, e a regra legal não o trava como agrotóxico sem registro.
   - Sem lote na Santa Rita, o liberar fica bloqueado por estoque, e o dono é Suprimentos.
 
+### 3.6 Água no solo (pedido do proprietário 05–09/10: "teste de capacidade de campo para balizar água em cada talhão")
+**Pergunta:** quanto de água o solo deste talhão segura para as raízes, medido como e por quem?
+
+- **Lugar:** bloco "Água no solo" no AG-02, abaixo dos laudos. Sem tela nova e sem cadastro paralelo: talhão e fazenda vêm do cadastro de áreas (`OCEN.talhoes()`); a zona é opcional (texto, ex.: "Z1 (baixada)"). Fica na mesma tela porque é propriedade do solo, como o laudo.
+- **Grade `g_agua`** com busca, filtro e ordenação (Data, da mais recente). Colunas: Medição (AGS-nnn), Talhão · zona, Data, Profundidade ("0–40 cm · raízes até 40 cm"), Método, Capacidade de campo, Ponto de murcha ("não medido" quando vazio), CAD ("56 mm" ou "não calculável" com o motivo) e Fonte · responsável.
+- **Registrar medição** é ação secundária da grade; a primária da tela continua **Registrar laudo**. Campos: fazenda, talhão (lista do cadastro), zona, data, profundidade amostrada, profundidade efetiva das raízes (cm), método (curva de retenção em laboratório, anel volumétrico, capacidade de campo no campo), unidade (% volume ou mm/cm), CC, PMP (opcional), fonte ou laboratório e responsável. A CAD aparece como prévia ao preencher, com a conta.
+- **Conta (uma fórmula, `soloCAD` em `solo.js`, decimal):** CAD = (CC − PMP) × profundidade efetiva. Em % volume: (CC − PMP) ÷ 100 × z (cm) × 10 mm/cm. Em mm/cm: (CC − PMP) × z (cm). Resultado em mm.
+- **Irrigação (IR-01, só leitura):** o formulário do setor mostra "Água disponível no solo (referência)" ao lado de "Equipamento" e "Necessidade", com a medição, a profundidade, o método e a data. A ajuda diz que é propriedade do solo, não a capacidade do equipamento nem a lâmina recomendada; a lâmina segue a política de água (PA-07) e o responsável técnico.
+- **Semente sintética:** AGS-001 T7 (32 e 18 % vol., 40 cm → 56 mm); AGS-002 P1 (28 e 15 % vol., 30 cm → 39 mm); AGS-003 P2 zona Z1 (3,1 e 1,6 mm/cm, 30 cm → 45 mm); AGS-004 Pivô 12 só com CC de campo (30 % vol., sem PMP → "não calculável").
+
 ## 4. Regras (testáveis; o dano que cada trava evita)
 - **R01 Sem laudo.** Vale a dose do plano. Nenhuma tela do Planejar safra ou da O.S. mostra "sem análise" ou "sem laudo"; nada bloqueia (FX-005, ACFX-01/04). *Dano evitado: ruído repetido que ensina a ignorar avisos reais.*
 - **R02 Elegível.** A sugestão só sai de laudo que cumpra tudo isto:
@@ -272,12 +284,14 @@ O laudo nasce **Aguardando validação**; o OCR nunca valida. Se já existe laud
 - **R20 Aprovação única.** Aceitar não cria recomendação, diagnóstico nem aprovação. A O.S. continua com a aprovação individual do agrônomo (CMD-42) e o liberar (CMD-06). A O.S. em A liberar com dose diferente da do plano recebe o selo da §3.5. Liberar com a dose da O.S. registra a decisão do agrônomo (o CMD-42 grava a dose). *Dano evitado: mudar uma dose aprovada ou reservada sem o agrônomo (S1).*
 - **R21 Origem visível.** A linha de insumo da O.S., a memória da demanda e o "Uso no plano" dizem uma destas: "padrão do plano vN", "pela análise · LAU-xxxx", "ajustado pelo usuário" ou "ajustado pelo agrônomo na O.S. vN". Sem análise, nada de selo científico (FX-002, AJUSTE-07).
 - **R22 Meta viva.** A regra de K lê a meta do cultivo (etapa 2). A linha "Análise sugere" volta a aparecer quando a sugestão atual difere do aceite, porque a meta, o laudo ou o laudo vigente (R02) mudou.
+- **R23 Medição de água no solo.** Comando `soloMedir` com a chave de quem inicia (R13). Exige fazenda, talhão, data (não futura), profundidade amostrada, profundidade efetiva, método, unidade, CC numérica, fonte e responsável; PMP é opcional. Medição repetida (mesmo talhão, zona, data, profundidade e método) é recusada. Sem PMP, com PMP ≥ CC ou com unidade sem conversão para lâmina (ex.: g/g), a CAD fica "não calculável", nunca 0. *Dano evitado: lâmina balizada por número inventado ou por medição duplicada.*
+- **R24 Propriedade, equipamento e recomendação separados.** A CAD é referência de leitura: não muda a lâmina máxima, o intervalo, a eficiência, a necessidade nem a programação da Irrigação, e nenhuma lâmina recomendada é calculada a partir dela. Vale a medição mais recente do talhão (empate na data: o talhão inteiro antes da zona). *Dano evitado: uma medição isolada virar prescrição de irrigação sem o responsável técnico.*
 
 ## 5. Integração com o estado único e os outros módulos
 
 | Quem | Lê | Grava |
 |---|---|---|
-| `c.solo` no cenário (`talhao-os-cenario-v1`; o acessor `cenSolo(c)` cria o que faltar, sem subir versão, D-05) | — | `laudos` (novos e correções), `val` (validações), `aceites[cid\|atv\|prod]` = {dose \| '-' \| atividade incluída, plano, laudo, regra, entradas, por, em, chave, hist}, `recibos[chave]` |
+| `c.solo` no cenário (`talhao-os-cenario-v1`; o acessor `cenSolo(c)` cria o que faltar, sem subir versão, D-05) | — | `laudos` (novos), `corr` (correções), `st` (validações), `aceites[cid\|atv\|prod]` = {dose \| '-' \| atividade incluída, plano, laudo, regra, entradas, por, em, chave, hist}, `agua` (medições), `recibos[chave]` |
 | AG-02 | `SOLO0` (`dados_solo`), `c.solo`, cultivos e planos (`D2`), ordens (fase por chave) | `soloRegistrar`, `soloCorrigir`, `soloValidar` |
 | Planejar safra (etapa 2 e painéis) | `c.solo`, cultivo (área, meta, plantio, plano), plano (dose padrão, versão), `GARANTIA`, `preco_ref`, `PRDC`, fase da O.S.; `cenOuvir`; a leitura de `c.solo` é uma por `cenrev`, não uma por chamada de `ocorr` | `soloAceitar` (Salvar do painel de insumos), `soloAceitarLote`, `soloDesfazer` |
 | Etapas 3 e 4 | `ocorr` com a dose efetiva | nada novo |
@@ -286,6 +300,7 @@ O laudo nasce **Aguardando validação**; o OCR nunca valida. Se já existe laud
 | Compra de insumos | a mesma demanda e a mesma solicitação; o Calcário dolomítico aparece como "Sem fornecedor homologado em Corretivos", com link para o CD-05 (comportamento de hoje) | — |
 | MIP (AG-03/AG-04) | DIA-007 → LAU-2043/2044 (link para o AG-02) | — |
 | CD-06 | `GARANTIA` e `preco_ref` (fonte única) | — |
+| Irrigação (IR-01) | medições de água no solo (`SOLO0.agua` + `c.solo.agua`), via `soloAguaDo` e `soloCAD` | nada |
 
 ## 6. Semente sintética (executado: `verificacao/conta_semente.py`)
 **Laudos.** Cátions em cmolc/dm³; K em mg/dm³, com cmolc/dm³ entre parênteses. Validados por Ana (agrônoma) em 20/09/2026, salvo indicação.
@@ -396,6 +411,9 @@ O laudo nasce **Aguardando validação**; o OCR nunca valida. Se já existe laud
 | AC-SOLO-19 | Build com 0 FALHA; varredura sem erro; vermelhos só os conhecidos da base | comandos do P7 |
 | AC-SOLO-20 | Nova ordem da Calagem incluída no T2 → OS em A liberar com Calcário dolomítico (grupo Corretivos), 1,20 t/ha × 298 ha = 357,6 t. A regra legal não trava. O liberar fica bloqueado só por estoque ("Sem lote de Calcário dolomítico"), e o dono é Suprimentos | `solo_os_test.py` |
 | AC-SOLO-21 | Dois laudos validados do T2 a 0–20 cm → vale o de coleta mais recente; o outro aparece "Substituído" e não sugere | `solo_unit.js` |
+| AC-SOLO-22 | CAD: T7 56 mm (% vol.), P1 39 mm, P2 zona 45 mm (mm/cm); Pivô 12 só com CC → "não calculável"; PMP ≥ CC e unidade g/g → "não calculável" | `solo_unit.js` |
+| AC-SOLO-23 | Registrar a medição do Pivô 12 (CC 30, PMP 16 % vol., 40 cm) → AGS-005, CAD 56 mm na prévia e no aviso; repetida → recusada junto ao campo; sem CC → recusada; nada gravado nos dois casos | `solo_ag02_test.py`, `solo_unit.js` |
+| AC-SOLO-24 | IR-01: o setor do T7 mostra "CAD 56 mm em 0–40 cm" como referência, com o texto de que não é a capacidade do equipamento nem a lâmina. Uma medição nova do T7 com CAD 120 mm muda só essa referência: lâmina máxima, intervalo, eficiência, déficit, necessidade e equipamento continuam iguais (R24) | `solo_ag02_test.py` |
 
 ## 9. Fora de escopo e condição de retorno
 
@@ -443,3 +461,79 @@ Autor: Claude, sobre `ea130ca`. Rótulo: cada achado foi conferido no código e 
 | A22 | S4 | Fonte de "talhão irrigado" (validade de 12 meses) e do mapa parcela → talhão não nomeadas; "<LD" sem regra; correção de laudo validado sem efeito definido | R02, R04 e §3.1 |
 | A23 | S4 | A R09 citava ACFX-02 (conta de 10 ha × 200 kg/ha), que não trata de sugestão igual à efetiva | R09 cita 37.2 (sem ruído) |
 | A24 | S4 | A R08 não dizia o que fazer com uma gessagem do plano quando o 20–40 cm não tem gatilho | R08: nada é sugerido, nem retirar |
+
+## 11. Implementação (09/10/2026)
+Autor: Claude, na branch `claude/v44-solo`. Rótulo: tudo o que está nesta seção foi **executado** nesta branch, salvo o que diz "especificado". A revisão do Codex continua pendente; nenhuma linha aqui é aceite do proprietário.
+
+**Commits.**
+
+| Commit | O que entra |
+|---|---|
+| `58487cd` | P1-P2: `solo.js` (índices, conversões, calagem, potássio, gesso, CAD, dose efetiva, sugestões, comandos com recibo), `dados_solo.py` (semente, regra de demonstração, produto padrão de correção, água no solo), `GARANTIA` e `preco_ref` em `dados_cad`, `_produtos()` com `ITENS_NOVOS`, `solo.js` no prefixo do cenário; `solo_unit.js` + `solo_unit_test.py` |
+| `7d5e697` | Merge da `claude/prototipo-v44` (`cdc185f`) |
+| `69dfeda` | P3: AG-02 "Análises de solo" no menu Agrícola (`areas/analise_solo.py`), bloco Água no solo, CAD de referência no IR-01, limpeza do AG-04 (REC-018), do AG-03 (ajuda) e do IN-01/IN-03 (tarefa de amostragem); `solo_ag02_test.py` |
+| `d068db1` | P4-P5: dose efetiva (R14) e atividades incluídas e retiradas em `ocorr`; linha "Análise sugere", Por quê, "Sugestões pelas análises" (lote) e `sug=1` no `abrirHash`; `solo_saf_test.py` |
+| `d0304e5` | P6: O.S. com a origem da dose, selo "Plano mudou pela análise", primário "Ajustar antes de liberar", Nova ordem com as atividades incluídas e o grupo do insumo; texto da OS-0502; `solo_os_test.py` |
+| `72df88c` | Teste da R24 no IR-01 (outra CAD não muda lâmina, intervalo, eficiência, déficit, necessidade nem equipamento) |
+| `629c168` | Merge da `claude/prototipo-v44` (`0644b1b`: BEN, SAF-C01, NAV). Conflitos resolvidos por função em `ui37.py`, `cenario.py`, `dados_cad.py` e `cad_produtos_estrutura.py` |
+| `77843e0` | `solo_regressao_test.py`: os dois defeitos da base, reproduzidos na `ecc8b00` (0/2) e corrigidos aqui (2/2) |
+| `d1506fb` | Merge da `claude/prototipo-v44` (`2678481`: correções da integração do BEN), sem conflito: nenhum arquivo em comum com o SOLO |
+
+**Defeitos da base corrigidos, com regressão** (`SAFRION_DADOS=sintetico python3 solo_regressao_test.py [pasta gen37]`):
+- D1 (FX-002, D-22): a OS-0502 dizia "Calagem pela análise de solo" com a dose fixa do plano.
+- D2 (A4): `dados_carencia._produtos()` não lia `dados_cad.ITENS_NOVOS`; o Calcário dolomítico contava como agrotóxico sem registro.
+- Na cópia da `ecc8b00`: `RESULTADO: FALHOU 0/2`, exit 1. Nesta branch: `RESULTADO: OK 2/2`, exit 0.
+
+**Como rodar.** Build `SAFRION_DADOS=sintetico python3 build.py > /tmp/SOLO-build.log; grep -c FALHA /tmp/SOLO-build.log`, depois `python3 montar_render.py`. Navegador um por vez: `env CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdpC.lock env CDP_GL=1 SAFRION_DADOS=sintetico timeout 900 python3 <teste>`. Sem navegador: `SAFRION_DADOS=sintetico python3 <teste>`.
+
+**Rodada 2, sobre o merge `d1506fb` (HEAD desta entrega).** Build: 0 FALHA, 141 artboards, menu vigente 47, ocultos 94. `montar_render.py`: 141 páginas.
+
+| Teste | Resultado |
+|---|---|
+| `solo_unit_test.py` (node, sem navegador) | OK 89/89 |
+| `solo_regressao_test.py` | OK 2/2 |
+| `solo_ag02_test.py` desktop · celular | OK 27/27 · OK 5/5 |
+| `solo_saf_test.py` desktop · celular | OK 33/33 · OK 3/3 |
+| `solo_os_test.py` desktop · celular | OK 16/16 · OK 2/2 |
+| Sem navegador: `legal_unit_test` 35/35, `mip_unit_test` 34/34, `producao_unit_test` 121/121, `assinatura_unit_test` 76/76, `capacidade_unit` 76/76, `rend_multiconjuntos_unit` 106/106, `ocupacao_unit` 117/117, `ben_unit_test` 144/144, `quantidade_test` 14/14, `aprova_quem_decide_test` 102/102, `inicio_entrega_test` 26/26, `os_aprov_lib_test` 45/45 | todos verdes |
+| Demais testes da rodada 2 (varredura, `acoes_duplicadas` e os existentes que tocam os arquivos mexidos) | em execução neste commit; o resultado entra no commit seguinte |
+
+**Rodada 1, sobre `77843e0`** (antes do merge `d1506fb`, que só traz arquivos do BEN). Build: 0 FALHA, 141 artboards, menu 47.
+
+| Teste | Resultado |
+|---|---|
+| `solo_unit_test.py` · `solo_regressao_test.py` | OK 89/89 · OK 2/2 |
+| `solo_ag02_test.py` desktop · celular | OK 27/27 · OK 5/5 |
+| `solo_saf_test.py` desktop · celular | OK 33/33 · OK 3/3 |
+| `solo_os_test.py` desktop · celular | OK 16/16 · OK 2/2 |
+| `varredura.py` | 141/141 páginas sem erro |
+| `../ferramentas/acoes_duplicadas.py . /tmp/SOLO-dup.json` | 141 páginas · 0 com ação repetida · erros 0 |
+| `agtest.py` | 16/16 |
+| `links_ocultos_test.py` | TOTAL 9 · falhas 0 |
+| `acao_unica_test.py` (saf) | 10 ok · 0 falhas |
+| `cadc_cd02_test.py` · `cadc_cd06_test.py` · `cadc_fix_cd06.py` | OK 15/15 · OK 14/14 · OK 13/13 |
+| `os_cenario_test.py` | 19/20: o vermelho conhecido da base (PEND-OS-01, "A liberar sem revisão: Liberar para execução + Ajustar antes de liberar"), a mesma verificação que falha sem o SOLO |
+| `os_v39_liberar_test.py` | 20/20 |
+| `saf_operacoes_test.py` | 87 ok · 0 falhas |
+| `tabelas_saf_test.py` | 24/24 |
+| `irtest.py` · `irr_fluxo_test.py` | sem falha (exit 0) · 33 ok · 0 falhas |
+| `carencia_test.py` | 91/91 |
+| `mip_correcoes_test.py` · `mip_fluxo_test.py` | 14/14 · 15/15 |
+| Sem navegador: os mesmos da rodada 2 (com `ben_unit_test` 132/132, antes do merge) | todos verdes |
+
+**Expectativas de testes antigos mudadas (com o motivo no commit).**
+- `cadc_cd06_test.py`, `cadc_cd02_test.py` e `cadc_fix_cd06.py`: o Calcário dolomítico ganhou preço de referência e data (D-10). O CD-06 abre sem pendência de preço; o CD-02 conta "2 itens sem preço"; o caso "item sem preço" usa só a Semente de soja 64 Z; a trava "preço sem data" limpa a data do calcário antes de salvar.
+- `agtest.py`: a correção do K do LAU-2048 passa ao painel do laudo no AG-02, com o mesmo resultado (Aguardando validação); a evidência do diagnóstico novo cita o LAU-2063 (o PLA-104 saiu, D-13).
+- `links_ocultos_test.py`: o AG-02 sai da lista de ocultos e o par AG-02 → AG-03det (DIA-007) entra no residual "cadeia MIP" (A7).
+
+**Fora desta entrega ou não feito** (especificado, sem código):
+- `fluxos37_md.py` não muda (D-36).
+- Tudo o que o §9 lista (tabela regional, gessagem fora da demonstração, laudo por zona, foliar com regra, fornecedor de Corretivos, demanda lendo a dose liberada na O.S., ajuste manual gravado no estado único).
+- Ficha do pivô e a "lâmina 21 h" (alinhamento do Codex, 08/10, §4): são da frente de Irrigação. Aqui só a água no solo (§3.6), sem lâmina recomendada (R24).
+- Separadores, hover verde e retorno visual são da frente DS; nada de estilo foi mexido aqui.
+
+**Riscos para o integrador.**
+- `safra.js` (`ocorr`, `adjOf`/`doseEf`, painel de insumos, `doApply`, `abrirHash`) e `areas/processo_safra.py` também são editados pelas frentes do Planejar safra: juntar por função e rodar de novo `solo_saf_test.py` e `saf_operacoes_test.py`.
+- `areas/processo_os.py` (`osProx`, `osc_nova`, selo) é editado pelas frentes de O.S. e CONTROLE: rodar de novo `solo_os_test.py`, `os_cenario_test.py` e `os_v39_liberar_test.py`.
+- `cenario.py js_prefixo` concatena `producao.js`, `ben.js` e `solo.js`: outra frente que acrescentar regras ali precisa manter o `solo.js` (só funções) e a checagem de colisão de nomes do `solo_unit_test.py`.
+- Menu Agrícola com 7 itens (D-01). Se a frente NAV enxugar o menu, a "Análises de solo" pode virar acesso pelo plano sem mudar a tela.
