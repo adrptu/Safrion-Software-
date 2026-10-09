@@ -1,0 +1,7 @@
+OK    20 (a) app · a faixa inferior nomeia a ordem do comando ("verbo · OS-…"); a fila reordenada por outro quadro troca o rótulo antes do toque, e o toque age na ordem escrita (não na anterior) 
+     (informativo) faixa do app antes/depois da reordenação e turno aberto ['Iniciar turno · OS-0421', 'Retirar no almoxarifado · OS-0424', ['', 'A liberar', 'MB-05.dc.html#OS-0424', True]]
+OK    21 (b) lote por IDs · 2 selecionados (T1-A e P1); com o T1 recolhido e a busca "T1" a barra diz "2 selecionados · 1 fora da vista…" (recolher não mudou o conjunto); "Aplicar plano" abre a prévia com os 2 incluídos, inclusive o oculto 
+OK    22 (c) teclado · Tab chega a "Corrigir cultivos" na nota da revisão; Enter leva à etapa 2 (correção); Tab chega a "Voltar à revisão ›"; Enter volta direto à etapa 4 (sem percorrer a etapa 3) 
+     (informativo) erros de JS (gemini) []
+
+RESULTADO: 3 ok · 0 falhas (gemini)
