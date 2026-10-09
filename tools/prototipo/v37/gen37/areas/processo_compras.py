@@ -394,7 +394,7 @@ function PREVALS(self,v){
       kids:p.itens.map(it=>({id:'A_'+p.id+'_'+it.i,ro:true,v:{nome:it.nome,qtd:it.ped,preco:it.ch.preco,prazo:it.ch.prazo,tot:it.tot},s:{nome:it.nome,frete:it.ch.frete,pag:it.ch.pag},
         p:{qtd:[T(qt(it.ped,it.un))].concat(it.ped<it.nec-1e-9?[MU('de '+qt(it.nec,it.un))]:[]),frete:[T(it.ch.frete)],pag:[T(it.ch.pag)]},
         o:[{t:'Necessidade na '+SX.sol.id+': '+qt(it.nec,it.un)},{t:'Proposta '+it.ch.nome+' · '+rs(it.ch.preco)+'/'+it.un+' · '+it.ch.frete+' · válida até '+it.ch.validade},
-           {t:it.naoMenor?('Escolha justificada: '+it.just):('Escolha: '+it.esc.txt)},
+           {t:it.naoMenor?('Escolha justificada: '+it.just):('Escolha: '+(it.esc?it.esc.txt:((it.low&&it.ch.f===it.low.f)?'menor custo total':'menor custo que chega a tempo')))},   /* pedido emitido antes da DEM-08 não guardou esc */
            {t:'Chega '+brd(it.ch.chega)+(it.falta?' · falta a partir de '+brd(it.falta):' · sem falta prevista')},{t:'Ver origem da demanda no Planejar safra',h:SX.origem.h}]}))})):[];
   GR('g_apr').x0=Object.fromEntries(pcs.map(p=>['A_'+p.id,true]));
 }
@@ -434,7 +434,7 @@ function enviarAdic(self){ const st=self.state; const env=st.env; if(!env) retur
     g2toast:'Convites adicionais simulados: nenhuma mensagem real foi enviada · '+novos.length+' para '+[...new Set(novos.map(c=>c.f.nome))].join(', ')+'. Quem já recebeu não recebe de novo.'});
   tickResp(self); }
 function emitir(self,m,por){ const pcs=JSON.parse(JSON.stringify(m.pcs.map(p=>({id:p.id,f:p.f,nome:p.nome,valor:p.valor,prazo:p.prazo,pag:p.pag,prev:addd(CD.hojeIso,p.prazo),
-    itens:p.itens.map(it=>({i:it.i,nome:it.nome,grupo:it.grupo,un:it.un,nec:it.nec,ped:it.ped,tot:it.tot,naoMenor:it.naoMenor,just:it.just,ch:it.ch,low:it.low,falta:it.falta}))}))));
+    itens:p.itens.map(it=>({i:it.i,nome:it.nome,grupo:it.grupo,un:it.un,nec:it.nec,ped:it.ped,tot:it.tot,naoMenor:it.naoMenor,just:it.just,ch:it.ch,low:it.low,esc:it.esc,falta:it.falta}))}))));
   self.setState({aprov:{estado:'aprovada',por,em:'23/09/2026',total:m.total,sig:m.sig,pcs},conf5:false,
     g2toast:'Compra aprovada por '+por+' · emitidos '+pcIds(pcs)+' vinculados à '+SX.nome+', à '+SX.sol.id+' e às propostas escolhidas.'}); }
 function podeAprovar(self,m){ if(!m.pcs.length){ toast(self,'Nada a aprovar: escolha propostas com quantidade a pedir na etapa 4.'); return false; }
