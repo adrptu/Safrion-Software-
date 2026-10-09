@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Área Agronomia — no menu: AG-01 Pragas e doenças (MIP/MID) e AG-07 Consulta Agrofit (Agrícola). Ligados ao item Pragas e doenças:
 AG-01det Rota e evidências (#VIS-xxx) · AG-03 Diagnósticos (+ AG-03det DIA-007) · AG-04 Recomendações (+ AG-04det REC-014).
-Módulos ocultos, preservados: AG-02 Análises e amostras · AG-05 Biblioteca e planos técnicos · AG-06 Eficácia e histórico.
+AG-02 Análises de solo (menu Agrícola) em areas/analise_solo.py. Módulos ocultos, preservados: AG-05 Biblioteca e planos técnicos · AG-06 Eficácia e histórico.
 
 Pragas e doenças (02/10/2026, pedido do proprietário: autoanálise do MIP/MID): UMA base para o Mapa, o AG-01, o AG-01det, o AG-03/AG-04
 e o app (MB-06) — dados_mip.py (protocolos, talhões das duas fazendas, vistorias VIS-006…017 e VIS-051…060, DIA/REC, aplicações) +
@@ -142,58 +142,7 @@ function agNovo(self,rows,r,idk,pref,base,parts,msg){
 def build():
     ag01(); ag01det()   # Pragas e doenças (MIP/MID): funções próprias, abaixo
 
-    # ================= AG-02 · Análises e amostras =================
-    fname='AG-02.dc.html'; E._reset_screen(fname)
-    c2=[dict(k='id',l='Laudo · amostra'),dict(k='local',l='Local · área representada',w=170),dict(k='prof',l='Profund.'),dict(k='data',l='Data',t='date'),
-        dict(k='lab',l='Laboratório',w=120),dict(k='met',l='Método · extrator',w=120),dict(k='val',l='Validação',w=150),dict(k='acao',l='Próxima ação',w=150)]
-    rows2=[
-      R('LAU-2043',ro=True,id=[Pt.b('LAU-2043'),Pt.mut('solo')],local='T4 · 204 ha · composta por zona (3 zonas)',prof='0–20 cm',data='2026-09-12',lab='Lab Solo Vale',met='Mehlich-1',
-        val=[Pt.chip('Validado','green')],acao=[Pt.cta('Abrir diagnóstico','AG-03det.dc.html')]),
-      R('LAU-2044',ro=True,id=[Pt.b('LAU-2044'),Pt.mut('solo')],local='T4 · 204 ha · composta por zona (3 zonas)',prof='20–40 cm',data='2026-09-12',lab='Lab Solo Vale',met='Mehlich-1',
-        val=[Pt.chip('Validado','green')],acao=[Pt.cta('Abrir diagnóstico','AG-03det.dc.html')]),
-      R('LAU-2048',ro=True,id=[Pt.b('LAU-2048'),Pt.mut('folha')],local='P1 · 95 ha · terço médio R5',prof='—',data='2026-09-18',lab='Agrolab',met='digestão nítrico-perclórica',
-        val=[Pt.chip('Inconsistente','red'),Pt.br(),Pt.mut('K sem unidade')],acao=[Pt.mut('corrija o K no painel abaixo')]),
-      R('LAU-2050',ro=True,id=[Pt.b('LAU-2050'),Pt.mut('solo')],local='C1 · 38 ha · composta',prof='0–20 cm',data='2026-09-19',lab='Agrolab',met='Resina',
-        val=[Pt.chip('Aguardando validação','yellow')],
-        acao=[Pt.act('Validar dados','LAU-2050 validado por Ana · original preservado ao lado dos valores extraídos · liberado para diagnóstico.')]),
-      R('PLA-104',id=[Pt.b('PLA-104'),Pt.mut('plano')],local='T2 · 298 ha · grade 16 pontos',prof='0–20 cm',data='2026-09-26',lab='Lab Solo Vale',met='Mehlich-1',
-        val=[Pt.chip('Coleta até 26/09','yellow')],acao=[Pt.cta('Coletar','MB-06.dc.html')]),
-      R('PLA-105',id=[Pt.b('PLA-105'),Pt.mut('plano')],local='C1 · 38 ha · nematoide',prof='0–20 cm',data='2026-09-30',lab='Embrapa Solos (convênio)',met='extração de cistos',
-        val=[Pt.chip('Planejada','gray')],acao=[Pt.cta('Coletar','MB-06.dc.html')]),
-    ]
-    g2=grid(c2,rows2,edit=dict(m='form',title='Amostra',newTitle='Planejar coleta',
-             sub='Planeje a coleta por grade ou zona; a amostra composta representa a área declarada, sem resolução espacial inventada. Laudo recebido fica em consulta.',
-             fields=[F('local','Local · área representada','txt',req=True,help='Ex.: T2 · 298 ha · grade 16 pontos'),F('prof','Profundidade','sel',opts=['0–20 cm','20–40 cm','0–10 cm','40–60 cm'],req=True,def_='0–20 cm'),
-                     F('data','Data','date',req=True),F('lab','Laboratório','sel',opts=['Lab Solo Vale','Agrolab','Embrapa Solos (convênio)'],req=True,def_='Lab Solo Vale'),
-                     F('met','Método · extrator','sel',opts=['Mehlich-1','Resina','DTPA','extração de cistos','digestão nítrico-perclórica'],req=True,def_='Mehlich-1')]),
-             add='Planejar coleta',gid='g_lau',so=dict(k='data',d=True),total=False)
-    c2e=[dict(k='atr',l='Atributo'),dict(k='val',l='Valor',t='num',a='r',d=1),dict(k='un',l='Unidade',chips={'sem unidade':'red'}),dict(k='ld',l='LD')]
-    ext=[R('N',atr='N',val=48.2,un='g/kg',ld='0,1'),R('P',atr='P',val=3.1,un='g/kg',ld='0,1'),
-         R('K',atr='K',val=17.4,un=('sem unidade',[Pt.chip('sem unidade','red')]),ld='—'),R('B',atr='B',val=42,un='mg/kg',ld='1')]
-    g2e=grid(c2e,ext,edit=dict(m='form',title='Valor extraído',sub='Corrija o valor ou a unidade lida pelo OCR; o PDF original não se altera e o laudo volta para validação humana.',
-             fields=[F('val','Valor','num',req=True,min=0),F('un','Unidade','sel',opts=['sem unidade','g/kg','mg/kg','dag/kg'],req=True),F('ld','Limite de detecção','txt')]),
-             search=False,gid='g_ext',total=False)
-    EXTRAJS[0]=JS_NOVO+'''
-function EXTRAVALS(self,v){ self.g2after=(gid,rows,r)=>{
-  if(gid==='g_lau') agNovo(self,rows,r,'id','PLA-',106,{val:[{k:'chip',t:'Planejada',c:'gray'}],acao:[{k:'cta',t:'Coletar',h:'MB-06.dc.html'}]},'{id} planejado · pontos enviados ao app do coletor.');
-  if(gid==='g_ext' && r.id==='K' && r.v.un && r.v.un!=='sem unidade'){
-    const sp=GRIDS.find(g=>g.id==='g_lau'); const x=g2find(g2rows(self,sp),'LAU-2048');
-    if(x){ x.p.val=[{k:'chip',t:'Aguardando validação',c:'yellow'}]; x.s.val='Aguardando validação'; x.p.acao=[{k:'mut',t:'mapeamento salvo · aguarda validação humana'}]; x.s.acao=''; }
-    self.setState({g2toast:'K corrigido para '+r.v.un+' · mapeamento salvo para o Agrolab · LAU-2048 volta à validação humana.'}); } }; }'''
-    orig=(f'<div style="border: 1px solid {LINE}; border-radius: 12px; padding: 12px 14px; background: {BG};"><div style="font-size: 11px; font-weight: 700; color: {MUTED}; letter-spacing: .06em;">ORIGINAL · PDF DO LABORATÓRIO</div>'
-          f'<div style="height: 150px; margin-top: 8px; border: 1px dashed {LINE}; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 6px; color: {MUTED}; font-size: 12.5px;">{icon("doc",18,MUTED)}laudo_agrolab_P1_folha.pdf · pág. 1/2</div></div>')
-    corpo=(
-      bloco('Planos de amostragem, amostras e laudos','Planeje coletas e acompanhe a validação; clique na linha para ajustar um plano ou consultar o laudo.',g2,
-          idrawer('Importar laudo',dict(title='Importar laudo',sub='O original fica ao lado dos valores extraídos; OCR nunca aprova o laudo.',
-             fields=[('Laboratório','Lab Solo Vale'),('Arquivo do laudo (PDF)',''),('Talhão','T2 · 298 ha'),('Profundidade','0–20 cm'),('Mapeamento de colunas','Lab Solo Vale · padrão v3')],
-             confirm='Importar e abrir prévia',done='Prévia aberta · erros por linha destacados'),'doc','Importar o PDF do laboratório e abrir a prévia com erros por linha',primary=True))
-      + bloco('Original ao lado do extraído · LAU-2048','Compare o PDF com os valores extraídos e corrija a unidade do K pela linha.',
-          f'<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start;">{orig}{g2e}</div>',tone='red'))
-    HEIGHTS37[fname]=980
-    shell37('AG-02','Análises e amostras',corpo,fname=fname,
-      subtitle='Planos de amostragem, amostras e laudos com método, extrator, profundidade e limite de detecção.',
-      status=('1 laudo inconsistente','yellow'),
-      footer='OCR não aprova laudo; o original é preservado; laudo inconsistente não bloqueia o controle de pragas.')
+    # AG-02 · Análises de solo: areas/analise_solo.py (SOLO-01; menu Agrícola). Os planos de amostragem saíram (D-13): a coleta é operação do plano.
 
     # ================= AG-03 · Diagnósticos (MIP do estado compartilhado: DIA-007…010 e os novos, DIA-011 em diante) =================
     import cenario, dados_mip as DM
@@ -204,7 +153,7 @@ function EXTRAVALS(self,v){ self.g2after=(gid,rows,r)=>{
         dict(k='risco',l='Risco',chips={'alto':'red','médio':'yellow','baixo':'green'}),
         dict(k='sit',l='Situação · decisão',w=150),dict(k='acao',l='Próximo passo',w=160)]
     g3=grid(c3,[],edit=dict(m='form',title='Diagnóstico',newTitle='Criar diagnóstico',
-             fields=[F('parc','Talhão · cultura','sel',opts=PARC,req=True,def_='T2 · Soja'),F('evid','Evidências (vistoria · laudo)','txt',req=True,help='Ex.: VIS-017 · PLA-104'),
+             fields=[F('parc','Talhão · cultura','sel',opts=PARC,req=True,def_='T2 · Soja'),F('evid','Evidências (vistoria · laudo)','txt',req=True,help='Ex.: VIS-017 · LAU-2063'),
                      F('hip','Hipótese · causa','area',req=True),F('meta','Meta','txt',req=True),F('risco','Risco','sel',opts=['baixo','médio','alto'],req=True,def_='médio'),
                      F('acp','Ação proposta','area',req=True),F('resp','Responsável','sel',opts=['Ana','Marcos'],req=True,def_='Ana')]),
              add='Criar diagnóstico',gid='g_dia',total=False)
@@ -280,18 +229,15 @@ function EXTRAVALS(self,v){ const s=mipGet(), c=agC(); const osDe=(d)=>{ const r
       R('REC-017',ro=True,id=[Pt.b('REC-017'),Pt.mut('v2')],parc='P1 · Feijão',orig='OS-0418 reclassificada (água → fertirrigação)',op='Fertirrigação · ureia',
         prod=('Ureia 45 % 12 kg/ha',[Pt.txt('Ureia 45 % 12 kg/ha'),Pt.br(),Pt.mut('janela: esta semana')]),jan='esta semana',fonte='protocolo do plano técnico',
         sit=[Pt.chip('Submetida','yellow'),Pt.br(),Pt.mut('liberação na OS-0418')],acao=[Pt.cta('Liberar OS-0418','OS.dc.html#OS-0418')]),
-      R('REC-018',id=[Pt.b('REC-018'),Pt.mut('rascunho')],parc='T2 · Soja',orig='PLA-104 · coleta do T2 em 26/09',op='Calagem · saturação por bases',
-        prod=('Calcário PRNT 80 · dose por zona',[Pt.txt('Calcário PRNT 80 · dose por zona'),Pt.br(),Pt.mut('janela: pré-plantio · até 20/10')]),dose='',jan='pré-plantio · até 20/10',fonte='CQFS-RS/SC',
-        sit=[Pt.chip('Rascunho','gray'),Pt.br(),Pt.mut('aguarda laudo do T2')],acao=[]),
+      # REC-018 (calagem do T2 'aguarda laudo') saiu (SOLO-01, D-14): a calagem do T2 vem do LAU-2063 como sugestão na dose do plano
     ]
     for r_ in rows4:   # operação + talhão (linha de baixo); a versão vai para baixo do número
         r_['p']['op']=[Pt.txt(r_['v']['op']),Pt.br(),Pt.mut(r_['v']['parc'])]; r_['s']['op']=r_['v']['op']+' '+r_['v']['parc']
         if len(r_['p'].get('id',[]))==2: r_['p']['id']=[r_['p']['id'][0],Pt.br(),r_['p']['id'][1]]
     rows4[0]['dr']='a4go_REC-014'
     g4=grid(c4,rows4,edit=dict(m='form',title='Recomendação',
-             fields=[F('op','Operação · alvo','sel',opts=['Calagem · saturação por bases','Gessagem','Plantio · nematoide + K','Pulverização · ferrugem asiática','Fertirrigação · ureia'],req=True),
+             fields=[F('op','Operação · alvo','sel',opts=['Plantio · nematoide + K','Pulverização · ferrugem asiática','Fertirrigação · ureia'],req=True),
                      F('parc','Talhão','sel',opts=PARC,req=True),F('prod','Produto · dose','txt',req=True),
-                     F('dose','Dose informada','num',min=0,max=10,u='t/ha',help='Sugerida 2,1 t/ha (aguarda laudo); o desvio fica registrado.'),
                      F('jan','Janela','txt',req=True),F('fonte','Fonte','sel',opts=['CQFS-RS/SC','IAC Boletim 100','Embrapa Cerrados','CFSEMG 5ª aproximação'],req=True)]),
              gid='g_rec',total=False)
     EXTRAJS[0]=cenario.js_prefixo()+DM.js_prefixo()+JS_AG01.split('function agRow(')[0]+r'''

@@ -152,10 +152,14 @@ def ir01():
                 dict(k='sit',l='Situação',w=210),dict(k='prox',l='Próximo passo',w=150)],[],
                edit=dict(m='form',title='Setor',sub='Os limites valem para a próxima programação; ordens liberadas não mudam.',
                    fields=[dict(k='defT',l='Déficit hoje',ro=True),dict(k='necT',l='Necessidade',ro=True),dict(k='eqT',l='Equipamento',ro=True),
+                           dict(k='cadT',l='Água disponível no solo (referência)',ro=True,help='Propriedade do solo medida em Agrícola › Análises de solo. Não é a capacidade do equipamento nem a lâmina recomendada: a lâmina segue a política de água e o responsável técnico.'),
                            dict(k='lmax',l='Lâmina máxima por passada',t='num',req=True,min=1,max=40,u='mm'),dict(k='imin',l='Intervalo mínimo entre inícios',t='num',req=True,min=6,max=96,u='h'),
                            dict(k='efic',l='Eficiência do sistema',t='num',req=True,min=50,max=100,u='%')]),
                gid='g_set',total=False,qf=dict(k='sit',l='Situação',todas='Todos'))
-    EXTRAJS[0]=prefixo()+JS_COMUM+r"""
+    import dados_solo as DSO   # água no solo do talhão (SOLO-01): só leitura, a CAD medida como referência
+    EXTRAJS[0]=prefixo()+'const SOLO_AGUA0='+json.dumps(DSO.AGUA,ensure_ascii=False)+';\n'+JS_COMUM+r"""
+function irrCadTxt(F,k,x){ const tal=x.faz==='SR'?k:x.nome; const m=soloAguaDo({agua:SOLO_AGUA0},cenGet(),F.nome,tal); if(!m) return 'sem medição de água no solo neste talhão';
+  const cad=soloCAD(m); return (cad.v===null?'CAD não calculável ('+cad.nc+')':'CAD '+prFmtT(cad.v,1)+' mm em '+m.prof+' cm (raízes até '+prFmtT(m.z,1)+' cm)')+' · '+m.id+(m.zona?' · zona '+m.zona:'')+' · '+m.met.toLowerCase()+' · '+soloBr(m.data); }
 const RK={'Impedida':1,'A conferir':2,'A programar':3,'A liberar':3,'Irrigando':4,'Programada':5,'Sem necessidade':6,'Sem irrigação':7};
 function PREVALS(self,v){ irrOuvir(self); const s=irrGet(); const fz=irrFazK(self); irrFazVals(self,v); irrFaixa(v,s,fz);
   irrHashOuvir(self,(h)=>{ if(h.indexOf('faz=')===0){ const f=h.slice(4); if(['Santa Rita','Lagoa Grande','Boa Vista','Todas'].indexOf(f)>=0) irrFazSet(self,f,''); try{ history.replaceState(null,'',location.pathname); }catch(e){} return; }
@@ -182,7 +186,7 @@ function PREVALS(self,v){ irrOuvir(self); const s=irrGet(); const fz=irrFazK(sel
     const so=irrSonda(s,x); o2.push({t:'Fontes: '+(F.demo?'ETo de referência (demonstrativa)':'Estação Santa Rita')+(so?' · '+so.nome+' '+so.st.toLowerCase()+(so.motivo?' ('+so.motivo+')':''):''),h:'IR-04.dc.html'});
     const eq=(x.tipo==='gotejo'?'Gotejo':'Pivô')+' · '+irrN(x.ha)+' ha · '+irrN(x.vazao)+' L/s · '+x.bnome+' · '+((s.capt[x.capt]||{}).nome||'');
     return {id:k,rk:RK[si.sit]||9,ro:!b,ac:si.acao,acId:(o?o.id:(top&&top.fert&&!/^Programar/.test((si.acao||[''])[0])?top.fert:x.nome)),fe:!!(top&&top.fert),o:o2.map(z=>typeof z==='string'?{t:z}:z),
-      v:{def:si.d===null?'':si.d,lmax:x.lmax,imin:x.imin,efic:x.efic,defT:si.d===null?'—':((si.est?'≈':'')+irrN(si.d,1)+' mm · '+si.fon),necT:n&&n.liq>0.05?('líquida '+irrN(n.liq,1)+' mm · bruta '+irrMm(n.br)+' mm · '+n.np+(n.np>1?' passadas de ':' passada de ')+irrMm(n.por)+' mm'):'sem lâmina hoje',eqT:eq},
+      v:{def:si.d===null?'':si.d,lmax:x.lmax,imin:x.imin,efic:x.efic,defT:si.d===null?'—':((si.est?'≈':'')+irrN(si.d,1)+' mm · '+si.fon),necT:n&&n.liq>0.05?('líquida '+irrN(n.liq,1)+' mm · bruta '+irrMm(n.br)+' mm · '+n.np+(n.np>1?' passadas de ':' passada de ')+irrMm(n.por)+' mm'):'sem lâmina hoje',eqT:eq,cadT:irrCadTxt(F,k,x)},
       s:{setor:x.nome+' · '+x.cult,sit:si.sit,nec:nec.map(p=>p.t).join(' '),prox:si.acao?si.acao[0]:''},
       p:{setor:[{k:'b',t:x.nome},{k:'br',t:''},{k:'mut',t:x.cult+' · '+irrN(x.ha)+' ha'+(fz?'':' · '+F.nome)}],def,nec,sit,prox}}; });
   rows.sort((a,b)=>(a.rk-b.rk)||((a.fe?1:0)-(b.fe?1:0))||String(a.id).localeCompare(String(b.id),'pt-BR',{numeric:true}));

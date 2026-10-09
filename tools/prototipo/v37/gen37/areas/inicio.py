@@ -1372,7 +1372,7 @@ def build_in01():
      ('f5','Fila de expedição','Sede · doca 1','Chamar o próximo apto da fila (T2)','vence hoje','Equipe expedição',('T1 atrasado · prev. 09:10','red'),('Abrir fila','LO-02.dc.html')),
      ('f6','OS-0421 · fungicida','Santa Rita · T1+T2',f'Conferir o apontamento do dia 4 ({D.OS[0]["dias"][3]} ha)','até 3 dias','Paula',None,('Conferir apontamentos','CA-02.dc.html')),
      ('f7','INSP-88 · qualidade','Armazém Sede',f'Decidir o lote {D.LOTE_BLOQ["id"]}','até 3 dias','Equipe qualidade',('Lote bloqueado','red'),('Abrir inspeção','CO-06det.dc.html')),
-     ('f8','Amostragem de solo','Santa Rita · T2','Coletar 0–20 cm para a recomendação de plantio','no prazo','Sem responsável',None,('Abrir análises','AG-02.dc.html')),
+     # f8 (amostragem de solo do T2) saiu (SOLO-01, R01/A16): o T2 já tem o LAU-2063; a coleta é operação do plano
     ]
     PZ={'vence hoje':'red','até 3 dias':'yellow','no prazo':'green'}
     rows=[R(i,ob=[Pt.b(o),Pt.br(),Pt.mut(l)],tar=t,pz=(p,[Pt.chip(p,PZ[p])]),resp=r,imp=([Pt.chip(*im)] if im else [Pt.mut('—')]),acao=[Pt.cta(a[0],a[1])]) for i,o,l,t,p,r,im,a in FILA]
@@ -1406,7 +1406,7 @@ def build_in03():
      ('g2','2026-09-23',f'Receber devolução {D.REQ["id"]} ({D.REQ["custodia"]} sc)','Rui','Alta','custódia zerada para encerrar',None,'24/09',('Receber devolução','EST.dc.html')),
      ('g3','2026-09-24',f'Substituir {OM["ativo"].split(" · ")[0]} na {OM["os_afetada"]} (T4)','Carlos','Alta','início programado',(f'{OM["id"]} em execução','red'),'24/09 06:00',('Reprogramar','PL-05.dc.html')),
      ('g4','2026-09-25',f'Decidir INSP-88 · lote {D.LOTE_BLOQ["id"]}','Equipe qualidade','Normal','liberação comercial',('Lote bloqueado','red'),'25/09',('Abrir origem','CO-06det.dc.html')),
-     ('g5','2026-09-26','Amostragem de solo · T2 (0–20 cm)','Sem responsável','Normal','recomendação de plantio',None,'28/09',('Abrir origem','AG-02.dc.html')),
+     # g5 (amostragem de solo do T2) saiu (SOLO-01, R01/A16): o T2 já tem o LAU-2063
      ('g7','2026-09-24','Definir janela da OS-0422 · Pivô 2 (2 passadas de 6,75 mm)','João','Normal','próximo ciclo de irrigação',('Janela a definir','yellow'),'25/09',('Definir janela','IR-03det.dc.html#OS-0422:janela')),
     ]
     PR={'Alta':'red','Normal':'gray','Baixa':'gray'}

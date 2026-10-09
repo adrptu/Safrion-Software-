@@ -32,11 +32,12 @@ PARENT37={}   # fname -> fname de volta
 # 01/10/2026: Consulta Agrofit (antes de Planos), Pragas e doenças (MIP/MID) e Irrigação voltam dentro de Agrícola; Manutenção volta logo abaixo de Agrícola (pedidos do proprietário).
 # 02/10/2026: Manutenção ganha "Planos de manutenção" (PM) como 1º item; MA-03 vira "Vencimentos e paradas" (sem dois itens com o mesmo nome).
 # 06/10/2026: grupo Produção logo depois de Agrícola (colheita de ponta a ponta, docs/colheita · D-01): no máximo 3 itens.
+# 09/10/2026 (SOLO-01, D-01): Análises de solo (AG-02) em Agrícola, entre Planos agronômicos e Planejar safra (o laudo vira sugestão nas doses do plano).
 # Os demais módulos ficam ocultos do menu, preservados no canvas (página "Módulos ocultos").
 MENU2=[('Mapa','map',[('Mapa','IN-04.dc.html')]),
  ('Cadastros','layers',[('Fazendas, áreas e talhões','CD-01.dc.html'),('Culturas, cultivares e operações','CD-02.dc.html'),('Máquinas, instalações e setores','CD-03.dc.html'),
    ('Pessoas e equipes','CD-04.dc.html'),('Parceiros e fornecedores','CD-05.dc.html'),('Produtos, unidades e locais','CD-06.dc.html'),('Estrutura gerencial','CD-07.dc.html')]),
- ('Agrícola','leaf',[('Consulta Agrofit','AG-07.dc.html'),('Planos agronômicos','PA.dc.html'),('Planejar safra','SAF.dc.html'),('Ordem de Serviço','OS.dc.html'),('Pragas e doenças (MIP/MID)','AG-01.dc.html'),('Irrigação','IR-01.dc.html')]),
+ ('Agrícola','leaf',[('Consulta Agrofit','AG-07.dc.html'),('Planos agronômicos','PA.dc.html'),('Análises de solo','AG-02.dc.html'),('Planejar safra','SAF.dc.html'),('Ordem de Serviço','OS.dc.html'),('Pragas e doenças (MIP/MID)','AG-01.dc.html'),('Irrigação','IR-01.dc.html')]),
  ('Produção','Colheita',[('Previsão e colheita','COLH.dc.html'),('Cargas e recebimento','CARGA.dc.html'),('Estoque de produto','PROD.dc.html')]),
  ('Manutenção','wrench',[('Planos de manutenção','PM.dc.html'),('Ativos e disponibilidade','MA-01.dc.html'),('Solicitações e inspeções','MA-02.dc.html'),
    ('Vencimentos e paradas','MA-03.dc.html'),('Ordens de manutenção','MA-04.dc.html'),('Abastecimentos e desempenho','MA-05.dc.html')]),
