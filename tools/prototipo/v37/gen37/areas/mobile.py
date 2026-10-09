@@ -475,9 +475,10 @@ v.d_go=()=>cenMudar(self,c=>mbIniciar(c,o.id));
     turno_off=(
       IF('has_last',f'<div style="{CARD_ST}"><div style="display: flex; align-items: center; gap: 8px;"><span style="width: 10px; height: 10px; border-radius: 999px; background: {ACC}; flex-shrink: 0;"></span>'
          f'<div style="font-size: 14.5px; font-weight: 700; flex-grow: 1;">Turno fechado · {H("last_t")}</div></div>'
-         f'<div style="display: flex; flex-wrap: wrap; gap: 6px;">{hchip("lst")}'+IF('last_hasConf',hchip('lcf'))+'</div>'
+         f'<div style="display: flex; flex-wrap: wrap; gap: 6px;">{hchip("lst")}'+IF('last_hasConf',hchip('lcf'))+IF('last_hasDiv',hchip('ldv'))+'</div>'
          f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.45;">Consumo: {H("last_cons")}</div>'
          + IF('last_hasConf',f'<div style="font-size: 13px; color: {INK}; line-height: 1.45;">{H("last_conf")}</div>')
+         + IF('last_hasDiv',f'<div style="font-size: 13px; color: {INK}; line-height: 1.45;">{H("last_div")}</div>')
          + f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.45;">{H("last_real")}</div></div>')
       + h2('Nenhum turno aberto','Inicie o turno na ordem em que vai trabalhar.')
       + qcards('lista',a='l',count=2))
@@ -495,7 +496,11 @@ if(L){ const oo=c.ordens[L.os]; const ap=oo&&(oo.ap||[]).find(a=>a.dia===L.dia);
   if(dup) v.last_cons='nada baixado: '+CEN_CONF_AP+' decide se é outro turno'; else if(desc) v.last_cons='nada baixado: guardado como duplicidade';
   const cf=(c.confs||[]).filter(k=>k.os===L.os&&k.dia===L.dia); const ab=cf.some(k=>k.estado==='Em conferência'||k.estado===CEN_CC_AGUARDA); v.last_hasConf=cf.length>0;
   v.last_conf=cf.map(k=>k.estado==='Em conferência'?'Em conferência · '+cenConfTxt(k,c)+' · '+cenConcQuem(c,[k]):(k.estado===CEN_CC_AGUARDA?'Aguarda a decisão da duplicidade · '+cenConfTxt(k,c)+' · '+CEN_CONF_AP:k.estado+' por '+k.por+' · '+cenConfTxt(k))).join(' | ');
-  DCH(v,'lcf',ab?'Consumo em conferência':'Conferência resolvida',ab?'yellow':'green'); if(!L.cons&&cf.length&&!dup&&!desc) v.last_cons='nada baixado neste turno'; }
+  DCH(v,'lcf',ab?'Consumo em conferência':'Conferência resolvida',ab?'yellow':'green'); if(!L.cons&&cf.length&&!dup&&!desc) v.last_cons='nada baixado neste turno';
+  /* B-R8: dose diferente da planejada fica como informada e vai para revisão técnica do agrônomo (o operador vê no recibo) */
+  const dva=(ap&&(ap.div||[]).length&&!desc)?ap:null; v.last_hasDiv=!!dva;
+  v.last_div=dva?(dva.div.map(cenDivTxt).join('; ')+(dva.rev?' · '+dva.rev.dec.toLowerCase()+' por '+dva.rev.quem:' · revisão técnica de '+g2quem('agronomo'))):'';
+  DCH(v,'ldv',dva&&dva.rev?'Dose revisada':CEN_DIV,dva&&dva.rev?'green':'red'); }
 DCH(v,'hdr',t?(mbPausado(t)?'turno pausado':'turno aberto'):'sem turno aberto',t?(mbPausado(t)?'yellow':'green'):'gray');
 v.t_fe=false; v.t_zero=false;
 if(t){ const pz=mbPausado(t);

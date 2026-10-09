@@ -4,11 +4,11 @@ unit: monta o JS real (perfis + cenario.js + OSD do gerador + núcleo da O.S. co
 nav:  Chrome real sobre o mesmo cenário (localStorage): app MB-03 a 390 px fecha o turno com dose divergente e mostra o recibo;
       O.S. (1440 px e 390 px) mostra o selo na lista, no Kanban e no painel, a linha do apontamento com planejado × informado,
       recusa de quem não é agrônomo, motivo obrigatório, aceite de Ana, repetição sem efeito e o encerramento só depois da revisão.
-Uso (de gen37/, depois do build e do montar_render): python3 dose_divergente_test.py [unit|nav]   (sem argumento: unit; sai 1 se alguma falhar)"""
+Uso (de gen37/, depois do build e do montar_render): python3 dose_divergente_test.py [unit|nav]   (sem argumento: as duas; sai 1 se alguma falhar)"""
 import os, sys, json, subprocess, tempfile, time
 os.environ.setdefault('SAFRION_DADOS', 'sintetico')
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE); os.chdir(HERE)
-MODOS = sys.argv[1:] or ['unit']
+MODOS = sys.argv[1:] or ['unit', 'nav']
 FALHAS = 0
 
 

@@ -751,7 +751,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
     osRun(self,c=>osc_dispensar(c,o.id,n,mot,g2perfil()),{pa:null}); };
 }
 function EXTRAVALS(self,v){
-  self.g2perfilFecha={pa:null};   /* trocar o perfil fecha a confirmação e os formulários de decisão (liberar, ajustar, dispensar, cancelar) */
+  self.g2perfilFecha={pa:null,dvr:null};   /* trocar o perfil fecha a confirmação e os formulários de decisão (liberar, ajustar, dispensar, cancelar, revisão de dose) */
   const st=self.state, all=ords(self), os=vis(self);
   // OS.dc.html#OS-0420 (vindo do Mapa ou de outra tela): abre a ordem na tela de trabalho, uma vez
   // #OS-0430:ajustar (vindo do Mapa) abre o formulário de ajuste; ordem de outra fazenda troca o filtro Fazenda para a dela
@@ -859,13 +859,23 @@ function EXTRAVALS(self,v){
     const usOf=(dia)=>{ const u=apus[dia]||{}; const r={}; Object.keys(u).forEach(p=>{ const n=g2num(u[p]); if(String(u[p]).trim()!==''&&!isNaN(n)) r[p]=n; }); return r; };
     const apDec=(dia,modo)=>osRun(self,c=>osc_apDecidir(c,o.id,dia,modo,usOf(dia),g2perfil()),{apus:null},(e)=>self.setState({g2toast:e}));
     const CONF=g2papel(g2perfil(),'conferente');   /* CMD-09: as três saídas só para quem confere (CTL-3 · ATOR) */
+    /* B-R8: divergência de consumo/dose na linha do apontamento; a revisão técnica (aceitar com motivo ou registrar a correção) só com o papel agronomo */
+    const AGRd=g2papel(g2perfil(),'agronomo'); const dvr=(st.dvr&&st.dvr.id===o.id)?st.dvr:{id:o.id};
+    const dvSet=(dia,patch)=>{ const cur=(self.state.dvr&&self.state.dvr.id===o.id)?self.state.dvr:{id:o.id}; self.setState({dvr:Object.assign({},cur,{[dia]:Object.assign({},cur[dia]||{},patch)})}); };
+    const dvGo=(dia,dec)=>{ const cur=(self.state.dvr&&self.state.dvr.id===o.id)?self.state.dvr:{}; const t=(cur[dia]||{}).t||'';
+      osRun(self,c=>cenDivRever(c,o.id,dia,dec,t,g2perfil()),{dvr:null},(e)=>dvSet(dia,{err:e})); };
     let ac=0; v.pan_ap=(o.ap||[]).map(x=>{ const prev=x.st==='Previsto'; const sem=x.sinc===false; const som=!prev&&cenApSomado(x); if(som) ac+=x.ha; const s=sem?'Aguardando sinal':x.st;
       const dup=x.st===CEN_AP_DUP&&!!cgo; const viv=dup?cenApDupVivos(cgo,x):[]; const de=viv.map(a=>a.dia).join(', ');
       const K=viv.length===1&&cenApSomado(viv[0])?viv[0]:null; const uso=K?cenApUsoK(cg,cgo,K):'';
       const fal=dup?cenApDecCons(cgo,x,cenApDecBase(cg,cgo,null),null).falta:[];
       const usx=fal.map(f=>({lab:'Usado de '+f.p+' ('+f.un+')',v:(apus[x.dia]||{})[f.p]||'',hint:'Estimativa '+nd(f.q)+' '+f.un+' passa da custódia ('+nd(f.cust)+' '+f.un+'): informe o usado'+(x.quem?' com '+x.quem:''),
         set:(e)=>{ const cur=self.state.apus&&self.state.apus.id===o.id?self.state.apus:{id:o.id}; self.setState({apus:Object.assign({},cur,{[x.dia]:Object.assign({},cur[x.dia]||{},{[f.p]:e.target.value})})}); }}));
-      return {d:x.d,dia:'Dia '+x.dia+(x.origem==='app'?' · app':''),ha:(prev?'prev. ':'')+nf(x.ha)+' ha'+(x.h?' · '+nd(x.h,1)+' h':''),ac:(prev?'—':(!som?'não somado':nf(ac)+' / '+nf(o.area)+' ha')),t:s,st:chipSt(STCOR[s]),dot:dotSt(STCOR[s]),rst:prev?'color:#8A968E;':'',
+      const dv=!prev&&(x.div||[]).length>0, dvAb=dv&&som&&!x.rev, dvS=dvr[x.dia]||{};
+      const dvQ=(dvAb&&!AGRd)?'Revisão técnica pendente: decisão de '+g2quem('agronomo')+' (aceitar com motivo ou registrar a correção).':((dv&&!som&&!x.rev)?'A revisão técnica abre quando o apontamento somar.':'');
+      return {div:dv,divT:dv?CEN_DIV+' · '+x.div.map(cenDivTxt).join('; '):'',hasRev:dv&&!!x.rev,revT:x.rev?'Revisão técnica: '+x.rev.dec.toLowerCase()+' por '+x.rev.quem+' às '+x.rev.at+' · '+x.rev.txt+(x.rev.rp?' · '+x.rev.rp:''):'',
+        divQ:dvQ,hasDivQ:!!dvQ,dvPode:dvAb&&AGRd,dvfid:'dv_'+x.dia,dvlab:'Motivo ou correção decidida · dia '+x.dia,dvv:dvS.t||'',dverr:dvS.err||'',hasDverr:!!dvS.err,
+        dvset:(e)=>dvSet(x.dia,{t:e.target.value,err:''}),dvAc:()=>dvGo(x.dia,'aceitar'),dvCo:()=>dvGo(x.dia,'corrigir'),
+        d:x.d,dia:'Dia '+x.dia+(x.origem==='app'?' · app':''),ha:(prev?'prev. ':'')+nf(x.ha)+' ha'+(x.h?' · '+nd(x.h,1)+' h':''),ac:(prev?'—':(!som?'não somado':nf(ac)+' / '+nf(o.area)+' ha')),t:s,st:chipSt(STCOR[s]),dot:dotSt(STCOR[s]),rst:prev?'color:#8A968E;':'',
         dup,dupT:!dup?'':(viv.length?'Mesma data e talhão do dia '+de+'. É outro turno? Quem decide: '+CEN_CONF_AP+'.':'O dia '+(x.dupDe||[]).join(', ')+' já não vale: este só pode ser somado como outro turno. Quem decide: '+CEN_CONF_AP+'.')
           +(uso?' "Vale este" indisponível: '+uso+'.':''),
         vant:'Mesmo turno: vale o dia '+de,hasAnt:viv.length>0,hasEste:!!K&&!uso,usx,hasUs:CONF&&usx.length>0,pode:CONF,
@@ -1011,7 +1021,17 @@ def _painel():
            f'<sc-if value="{H("a.pode")}" hint-placeholder-val="{T()}"><div style="display: flex; gap: 6px; flex-wrap: wrap;">'
            f'<sc-if value="{H("a.hasAnt")}" hint-placeholder-val="{T()}"><button type="button" onClick="{H("a.ant")}" style="{_MINI}">{H("a.vant")}</button></sc-if>'
            f'<sc-if value="{H("a.hasEste")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("a.este")}" style="{_MINI}">Mesmo turno: vale este</button></sc-if>'
-           f'<button type="button" onClick="{H("a.somar")}" style="{_MINI}">Outro turno: somar</button></div></sc-if></div></sc-if>')
+           f'<button type="button" onClick="{H("a.somar")}" style="{_MINI}">Outro turno: somar</button></div></sc-if></div></sc-if>'
+           # B-R8: divergência de consumo/dose (planejado × informado) e a revisão técnica do agrônomo na mesma linha
+           f'<sc-if value="{H("a.div")}" hint-placeholder-val="{F()}"><div role="group" aria-label="Revisão técnica da dose" style="display: flex; flex-direction: column; gap: 6px; padding: 0 0 8px;">'
+           f'<span style="font-size: 12.5px; color: {RED}; font-weight: 700; line-height: 1.4;">{H("a.divT")}</span>'
+           f'<sc-if value="{H("a.hasRev")}" hint-placeholder-val="{F()}"><span style="font-size: 12.5px; color: {MUTED}; line-height: 1.4;">{H("a.revT")}</span></sc-if>'
+           f'<sc-if value="{H("a.hasDivQ")}" hint-placeholder-val="{F()}"><span style="font-size: 12.5px; color: #8A5A00; font-weight: 600; line-height: 1.4;">{H("a.divQ")}</span></sc-if>'
+           f'<sc-if value="{H("a.dvPode")}" hint-placeholder-val="{F()}"><div style="display: flex; flex-direction: column; gap: 6px;">'
+           f'<textarea id="{H("a.dvfid")}" aria-label="{H("a.dvlab")}" placeholder="Motivo para aceitar, ou a correção/reaplicação decidida" value="{H("a.dvv")}" onChange="{H("a.dvset")}" style="font-family: inherit; font-size: 13px; padding: 7px 9px; border-radius: 8px; border: 1px solid {LINE}; min-height: 48px; resize: vertical; box-sizing: border-box; width: 100%;"></textarea>'
+           f'<sc-if value="{H("a.hasDverr")}" hint-placeholder-val="{F()}"><span role="alert" style="font-size: 12px; font-weight: 700; color: {RED};">{H("a.dverr")}</span></sc-if>'
+           f'<div style="display: flex; gap: 6px; flex-wrap: wrap;"><button type="button" onClick="{H("a.dvAc")}" style="{_MINI}">Aceitar com motivo</button>'
+           f'<button type="button" onClick="{H("a.dvCo")}" style="{_MINI}">Registrar correção</button></div></div></sc-if></div></sc-if>')
     aphead=(f'<div style="display: grid; grid-template-columns: 64px 84px 1fr 1.3fr auto; gap: 8px; padding: 4px 0; font-size: 10.5px; font-weight: 700; letter-spacing: .04em; color: {MUTED}; text-transform: uppercase;">'
             f'<span>Data</span><span>Turno</span><span style="text-align: right;">Realizado</span><span style="text-align: right;">Acumulado</span><span>Situação</span></div>')
     IC='minmax(0,1.6fr) 96px 110px 110px minmax(0,1.5fr)'
