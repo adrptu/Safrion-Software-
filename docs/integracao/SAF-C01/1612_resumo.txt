@@ -1,0 +1,5 @@
+== base cdc185f · frente ef0d7b2 ef0d7b2
+merge ok: 9fb09a5
+build rc=0 FALHA=0 · 140 artboards → <sp-proto>/tools/prototipo/v37/gen37/project · menu vigente: 45 · ocultos: 95
+render: _render montado: 140 páginas + 20 arquivos do site · dados reais locais: 5/5
+varredura rc=0 · RESULTADO: 140/140 páginas sem erro 

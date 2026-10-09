@@ -1,0 +1,34 @@
+Merge made by the 'ort' strategy.
+ .../etapa-2-talhoes/ESPECIFICACAO.md               |   5 +-
+ docs/planejar-safra/verificacao-saf-c01/antes.json | 492 +++++++++++++++++++
+ .../planejar-safra/verificacao-saf-c01/bateria.txt |  15 +
+ .../planejar-safra/verificacao-saf-c01/depois.json | 541 +++++++++++++++++++++
+ .../verificacao-saf-c01/desempenho.js              |  41 ++
+ .../verificacao-saf-c01/desempenho.json            | 392 +++++++++++++++
+ .../verificacao-saf-c01/desempenho_fixture.py      |  32 ++
+ .../harness_codex_6079770308.js                    |  26 +
+ .../verificacao-saf-c01/mensagem_perene_perene.js  |   9 +
+ .../verificacao-saf-c01/mensagem_perene_perene.txt |  13 +
+ .../verificacao-saf-c01/navegador_antes.txt        |  65 +++
+ .../verificacao-saf-c01/navegador_depois.txt       |  47 ++
+ .../verificacao-saf-c01/ocupacao_unit_antes.txt    | 119 +++++
+ .../verificacao-saf-c01/ocupacao_unit_depois.txt   | 122 +++++
+ tools/prototipo/v37/gen37/ocupacao.js              |  31 +-
+ tools/prototipo/v37/gen37/ocupacao.py              |  38 +-
+ tools/prototipo/v37/gen37/ocupacao_unit.py         | 131 ++++-
+ tools/prototipo/v37/gen37/saf_c01_test.py          | 106 ++++
+ 18 files changed, 2195 insertions(+), 30 deletions(-)
+ create mode 100644 docs/planejar-safra/verificacao-saf-c01/antes.json
+ create mode 100644 docs/planejar-safra/verificacao-saf-c01/bateria.txt
+ create mode 100644 docs/planejar-safra/verificacao-saf-c01/depois.json
+ create mode 100644 docs/planejar-safra/verificacao-saf-c01/desempenho.js
+ create mode 100644 docs/planejar-safra/verificacao-saf-c01/desempenho.json
+ create mode 100644 docs/planejar-safra/verificacao-saf-c01/desempenho_fixture.py
+ create mode 100644 docs/planejar-safra/verificacao-saf-c01/harness_codex_6079770308.js
+ create mode 100644 docs/planejar-safra/verificacao-saf-c01/mensagem_perene_perene.js
+ create mode 100644 docs/planejar-safra/verificacao-saf-c01/mensagem_perene_perene.txt
+ create mode 100644 docs/planejar-safra/verificacao-saf-c01/navegador_antes.txt
+ create mode 100644 docs/planejar-safra/verificacao-saf-c01/navegador_depois.txt
+ create mode 100644 docs/planejar-safra/verificacao-saf-c01/ocupacao_unit_antes.txt
+ create mode 100644 docs/planejar-safra/verificacao-saf-c01/ocupacao_unit_depois.txt
+ create mode 100644 tools/prototipo/v37/gen37/saf_c01_test.py

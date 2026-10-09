@@ -16,13 +16,19 @@ Modos (um por vez, cada um abre o Chrome headless do cadc_lib.T; o cenário come
            Estoque de produto (BEN-REV-01); (B2) carga cujo lote está numa ordem liberada sem "Estornar" em Cargas, com o porquê, e a
            ordem da Lagoa Grande no Packing da Santa Rita (BEN-REV-02, BEN-REV-08); (B3) carga com avaria no Packing: "Liberar lote" da
            Marta no Estoque de produto e o lote passa a abrir ordem (BEN-REV-03); a ordem nova leva o lote inteiro, sem campo de kg (BEN-REV-09).
-Uso: env CHROME_BIN=… flock /tmp/cdpB.lock env CDP_GL=1 timeout 900 python3 ben_fluxo_test.py [fluxo|erros|celular|revisao]
+  roteiro  integração BEN (09/10): a tarefa do proprietário com o valor inicial das caixas (Igor cria e libera a ordem do L39-132;
+           a CG-2107 sem "Estornar"; a Marta sem "Registrar decisão"): o valor inicial fica dentro das caixas livres no Estoque.
+  cancelar integração BEN (09/10): ordem em A liberar que não libera (caixas acima do livre; entrada que mudou com o estorno da carga)
+           tem saída: "Cancelar a ordem" com motivo (nada reservado) e o lote abre outra ordem.
+  faixa390 integração BEN (09/10): a 390 px, Cargas › faixa de telas › Beneficiamento por toque real (a lista aberta fica acima da
+           primária presa ao rodapé) e o roteiro com o valor inicial das caixas.
+Uso: env CHROME_BIN=… flock /tmp/cdpB.lock env CDP_GL=1 timeout 900 python3 ben_fluxo_test.py [fluxo|erros|celular|revisao|roteiro|cancelar|faixa390]
 Capturas em _probe/ben_*.png. Dados sintéticos (SAFRION_DADOS=sintetico)."""
 import sys, os, time, json
 os.environ.setdefault('SAFRION_DADOS', 'sintetico')
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from cadc_lib import T
-MODOS = [a for a in sys.argv[1:] if a in ('fluxo', 'erros', 'celular', 'revisao')] or ['fluxo', 'erros', 'celular', 'revisao']
+MODOS = [a for a in sys.argv[1:] if a in ('fluxo', 'erros', 'celular', 'revisao', 'roteiro', 'cancelar', 'faixa390')] or ['fluxo', 'erros', 'celular', 'revisao', 'roteiro', 'cancelar', 'faixa390']
 PR = os.path.join(HERE, '_probe'); os.makedirs(PR, exist_ok=True)
 t = T(); J = t.J
 LIB = r"""
@@ -60,6 +66,7 @@ def perfil(k): J(f"PERFIL({json.dumps(k)})"); time.sleep(.1)
 def rev(): return cen("c.rev||0")
 CHIP = "(()=>{ const a=[...document.querySelectorAll('aside[role=dialog]')].find(VIS); const h=a&&a.querySelector('h2'); const b=h&&h.parentElement.querySelector('span[style*=\"border-radius\"]'); return b?N(b.innerText):''; })()"
 FAIXA = "[...document.querySelectorAll('nav[aria-label=\"Telas de recebimento e beneficiamento\"] a')].map(a=>[N(a.innerText),a.getAttribute('href'),a.getAttribute('aria-current')])"
+BTNS = "[...document.querySelectorAll('aside[role=dialog] button')].filter(VIS).map(b=>N(b.innerText))"
 def nav_clk(x, root):   # toque que navega (link): conta o toque e recarrega o apoio na página nova
     cl, tx = J("[window.__cl||0, window.__tx||0]") or [0, 0]; r = J(f"CLK({json.dumps(x)},{json.dumps(root)})"); time.sleep(1.4); lib(); J(f"window.__cl={cl + 1}; window.__tx={tx};"); return r
 def est_secao(i): J(f"document.querySelectorAll('nav[aria-label=\"Seções do estoque\"] button')[{i - 1}].click()"); time.sleep(.5)
@@ -145,12 +152,15 @@ try:
         ir('PROD.dc.html#L39-131'); time.sleep(.4); p = pan()
         t.chk('Colheita → Beneficiamento: L39-131 em processo no Estoque de produto com o atalho "Abrir ordem de beneficiamento" (só navega)', 'Abrir ordem de beneficiamento' in p and rev() == cen("c.rev||0"), p[:400])
         r0 = rev(); clk('Abrir ordem de beneficiamento', 'aside', w=1.0); lib(); time.sleep(.4); p = pan()
-        t.chk('o atalho abre a ordem nova com o L39-131 marcado, a rota única (PACK-FRU v3) e as caixas sugeridas (2.292); navegar não gravou', 'Nova ordem' in p and 'PACK-FRU v3' in p and '2292' in J("(document.querySelector('aside [id^=pf_cx_]')||{}).value||''") and rev() == r0,
+        # BEN-D21 (integração, 09/10): o valor inicial das caixas fica dentro do livre no Estoque. A OB-0112 reservou 584 das 600 un: ficam 16
+        # livres para a sugestão de 2.292 (antes o campo vinha com 2.292 e a ordem não liberava); o campo diz a sugestão, o livre e o que embala
+        t.chk('o atalho abre a ordem nova com o L39-131 marcado, a rota única (PACK-FRU v3) e as caixas dentro do livre (16 de 2.292 sugeridas, com o porquê); navegar não gravou',
+              'Nova ordem' in p and 'PACK-FRU v3' in p and J("(document.querySelector('aside [id^=pf_cx_]')||{}).value||''") == '16' and '= 2292 un' in p and 'Livres no Estoque: 16 un: a ordem vem com 16 un (embala até 160 kg' in p and rev() == r0,
               [p[:500], J("(document.querySelector('aside [id^=pf_cx_]')||{}).value")])
         perfil('Igor'); J("(()=>{ const b=[...document.querySelectorAll('aside button')].find(x=>N(x.innerText)==='Criar ordem'); window.__cl++; b.click(); b.click(); })()"); time.sleep(.6)
         st = cen("c.ordens['OB-0113']&&[c.ordens['OB-0113'].etapa,c.ordens['OB-0113'].ben.ent[0].lote,c.ordens['OB-0113'].ins[0].tot,!!c.ordens['OB-0114']]"); tc = toast()
-        t.chk('Criar ordem (toque duplo): uma OB-0113 só, A liberar, com o L39-131 e 2.292 caixas; nada reservado antes de liberar; o aviso "OB-0113 criada" fica',
-              st == ['A liberar', 'L39-131', 2292, False] and not cen("c.producao.lotes['L39-131'].ordem") and 'OB-0113 criada' in tc, [st, tc])
+        t.chk('Criar ordem (toque duplo): uma OB-0113 só, A liberar, com o L39-131 e 16 caixas (o livre); nada reservado antes de liberar; o aviso "OB-0113 criada" fica',
+              st == ['A liberar', 'L39-131', 16, False] and not cen("c.producao.lotes['L39-131'].ordem") and 'OB-0113 criada' in tc, [st, tc])
         ir('CARGA.dc.html'); cg = J("ROWTXT('L39-131')") or ''
         t.chk('Cargas depois de criar: a carga do L39-131 aponta a ordem "na OB-0113 (A liberar)"', 'na OB-0113 (A liberar)' in cg, cg)
         shot('fluxo_fim')
@@ -229,7 +239,6 @@ try:
         t.chk('celular sem erro de JS', not t.errs(), t.errs())
     if 'revisao' in MODOS:
         print('== revisao · achados BEN-REV-01, 02, 03, 08 e 09 pela tela')
-        BTNS = "[...document.querySelectorAll('aside[role=dialog] button')].filter(VIS).map(b=>N(b.innerText))"
         # B1 (BEN-REV-01): L39-119 sai da OB-0112, a Marta libera, o Igor abre e libera a OB-0113 só com ele
         ir('BEN.dc.html#OB-0112', limpa=True); perfil('Igor'); ir('BEN.dc.html#OB-0112'); clk('Retirar L39-119 da ordem', 'aside')
         perfil('Marta'); ir('PROD.dc.html#L39-119'); clk('Conforme', 'aside'); clk('Registrar resultado', 'aside'); clk('Liberar', 'aside'); clk('Registrar decisão', 'aside')
@@ -266,6 +275,85 @@ try:
         t.chk('B3 · o próximo passo do L39-133 passa a "Abrir ordem de beneficiamento · Igor"', 'Abrir ordem de beneficiamento' in p, p[:300])
         shot('rev_b3')
         t.chk('revisao sem erro de JS', not t.errs(), t.errs())
+    if 'roteiro' in MODOS:
+        # integração BEN (09/10), achado 1: a sugestão de caixas (1.169 un do L39-132) passava das 540 livres e a ordem criada com o valor
+        # inicial nunca liberava; o roteiro do proprietário falhava no passo 1. Agora o valor inicial fica dentro do livre, com o porquê escrito
+        print('== roteiro · tarefa do proprietário com o valor inicial das caixas (Igor cria e libera; CG-2107 sem Estornar; Marta sem decisão)')
+        ir('CARGA.dc.html', limpa=True); perfil('Igor'); ir('CARGA.dc.html')
+        itens = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].map(a=>[N(a.innerText),a.getAttribute('href')]).filter(x=>['COLH.dc.html','CARGA.dc.html','BEN.dc.html','PROD.dc.html'].indexOf(x[1])>=0)") or []
+        t.chk('R1 · menu Produção com 3 itens (Previsão e colheita · Recebimento e beneficiamento · Estoque de produto)', [x[0] for x in itens] == ['Previsão e colheita', 'Recebimento e beneficiamento', 'Estoque de produto'], itens)
+        nav_clk('Beneficiamento', 'nav[aria-label="Telas de recebimento e beneficiamento"]'); clk('+ Nova ordem'); clk('L39-132', 'aside'); p = pan()
+        cxv = J("(document.querySelector('aside [id^=pf_cx_]')||{}).value")
+        t.chk('R1 · Nova ordem com o L39-132: Caixas vem com 540 (o livre no Estoque) e o porquê está escrito (sugestão 1169 un; 540 un livres)', cxv == '540' and '= 1169 un' in p and 'Livres no Estoque: 540 un: a ordem vem com 540 un' in p, [cxv, p[:800]])
+        r0 = rev(); clk('Criar ordem', 'aside'); tc = toast()
+        t.chk('R1 · Criar ordem com o valor inicial: OB-0113 em A liberar com 540 un de caixa e sem aviso de impedimento', 'OB-0113 criada (A liberar)' in tc and '540 un de caixa' in tc and 'Atenção' not in tc and rev() == r0 + 1, tc)
+        ir('BEN.dc.html#OB-0113'); p = pan()
+        t.chk('R1 · painel da OB-0113 sem impedimento antes do toque', 'Nenhum: a ordem pode ser autorizada e liberada.' in p, p[:900])
+        clk('Autorizar rota e liberar', 'aside'); tc = toast(); st = cen("[c.ordens['OB-0113'].etapa, c.ordens['OB-0113'].req, c.producao.lotes['L39-132'].ordem]")
+        t.chk('R1 · Autorizar rota e liberar: OB-0113 Liberadas com a REQ-041 (CMD-42 e CMD-06) e o L39-132 preso à ordem', st == ['Liberadas', 'REQ-041', 'OB-0113'] and 'autorizada (CMD-42) e liberada (CMD-06)' in tc, [st, tc])
+        ir('CARGA.dc.html'); row('CG-2107'); p = pan(); bt = J(BTNS) or []
+        t.chk('R2 · a CG-2107 não oferece "Estornar" e o próximo passo diz por quê', 'Estornar' not in bt and 'Sem estorno enquanto a OB-0113 não fecha' in p, [bt, p[:500]])
+        perfil('Marta'); ir('PROD.dc.html#L39-132'); p = pan(); bt = J(BTNS) or []
+        t.chk('R3 · Marta: o L39-132 no Estoque de produto sem "Registrar decisão"; o próximo passo aponta a OB-0113', 'Registrar decisão' not in bt and 'OB-0113' in p, [bt, p[:400]])
+        shot('roteiro')
+        t.chk('roteiro sem erro de JS', not t.errs(), t.errs())
+    if 'cancelar' in MODOS:
+        # integração BEN (09/10), achado 2: ordem em A liberar que não libera (caixas acima do livre; entrada que mudou com o estorno da carga)
+        # prendia o lote sem saída (sem Cancelar, sem editar, sem incluir entrada). Agora "Cancelar a ordem" (rascunho: nada reservado)
+        print('== cancelar · ordem em A liberar sem como liberar tem saída: Cancelar a ordem (motivo) e o lote abre outra ordem')
+        ir('BEN.dc.html', limpa=True); perfil('Igor'); ir('BEN.dc.html'); clk('+ Nova ordem'); clk('L39-132', 'aside')
+        cx = J("(document.querySelector('aside [id^=pf_cx_]')||{}).id"); setv('#' + cx, '1169'); p = pan()
+        t.chk('C1 · 1.169 caixas (acima das 540 livres): o aviso aparece no campo antes do toque', 'Acima das 540 un livres no Estoque: a liberação fica impedida até o Estoque ter as caixas.' in p, p[:900])
+        clk('Criar ordem', 'aside'); tc = toast()
+        t.chk('C1 · a ordem nasce com o aviso de que a liberação fica impedida e quem resolve', 'OB-0113 criada (A liberar)' in tc and 'Atenção: 540 un livres no Estoque para 1.169 un' in tc, tc)
+        ir('BEN.dc.html#OB-0113'); r0 = rev(); clk('Autorizar rota e liberar', 'aside'); p = pan(); bt = J(BTNS) or []
+        t.chk('C1 · liberação recusada (540 de 1.169), nada gravado; o próximo passo e o painel oferecem "Cancelar a ordem"', 'Liberação recusada · 1 causa' in p and rev() == r0 and 'Cancelar a ordem' in bt and 'Cancelar a ordem (nada foi reservado)' in p, [bt, p[:600]])
+        clk('Cancelar a ordem', 'aside'); r1 = rev(); clk('Confirmar cancelamento da OB-0113', 'aside'); p = pan()
+        t.chk('C1 · sem motivo o cancelamento é recusado e nada é gravado', 'Informe o motivo do cancelamento.' in p and rev() == r1 and cen("c.ordens['OB-0113'].etapa") == 'A liberar', p[-300:])
+        setv('#pf_mc', 'caixas insuficientes no Estoque'); clk('Confirmar cancelamento da OB-0113', 'aside'); tc = toast()
+        st = cen("[c.ordens['OB-0113'].etapa, (c.ordens['OB-0113'].ben.canc||{}).quem, c.producao.lotes['L39-132'].ordem||'', c.ordens['OB-0113'].req||'']")
+        t.chk('C1 · OB-0113 Canceladas por Igor, com o motivo; nada reservado e o L39-132 livre', st == ['Canceladas', 'Igor (responsável de produção)', '', ''] and 'OB-0113 cancelada por Igor' in tc, [st, tc])
+        p = pan(); kb = J("ROWTXT('OB-0113')") or ''
+        t.chk('C1 · painel e lista: Canceladas, sem ação primária nem "Atrasada", motivo à vista', 'Canceladas' in kb and 'Atrasada' not in kb and J("PPRIM()") == [] and 'caixas insuficientes no Estoque' in p, [kb, J("PPRIM()"), p[:500]])
+        clk('Fechar', 'aside'); clk('+ Nova ordem'); clk('L39-132', 'aside'); cxv = J("(document.querySelector('aside [id^=pf_cx_]')||{}).value"); clk('Criar ordem', 'aside')
+        ir('BEN.dc.html#OB-0114'); clk('Autorizar rota e liberar', 'aside'); st = cen("[c.ordens['OB-0114']&&c.ordens['OB-0114'].etapa, c.producao.lotes['L39-132'].ordem]")
+        t.chk('C1 · o L39-132 abre a OB-0114 com o valor inicial (540) e ela libera', cxv == '540' and st == ['Liberadas', 'OB-0114'], [cxv, st, toast()])
+        # (C2) carga estornada com a ordem em A liberar (a BEN-D19 permite: rascunho): a entrada não confere mais e a ordem tinha só uma entrada
+        ir('BEN.dc.html', limpa=True); perfil('Igor'); ir('BEN.dc.html'); clk('+ Nova ordem'); clk('L39-131', 'aside')
+        cx = J("(document.querySelector('aside [id^=pf_cx_]')||{}).id"); setv('#' + cx, '500'); clk('Criar ordem', 'aside')
+        ir('CARGA.dc.html'); row('CG-2106'); clk('Estornar', 'aside'); setv('#pf_mot', 'ticket trocado na balança'); clk('Confirmar estorno', 'aside')
+        t.chk('C2 · a CG-2106 é estornada com a ordem ainda em A liberar (BEN-D19): o L39-131 fica com 12.180 kg', cen("c.producao.cargas['CG-2106'].st") == 'Estornada' and cen("c.producao.movs.filter(m=>m.lote==='L39-131'&&m.fis!==false).reduce((a,m)=>a+m.kg,0)") == 12180, toast())
+        ir('BEN.dc.html#OB-0113'); clk('Autorizar rota e liberar', 'aside'); p = pan(); bt = J(BTNS) or []
+        t.chk('C2 · liberação recusada ("24.120 kg na ordem, 12.180 kg no lote") e a ordem de uma entrada só oferece "Cancelar a ordem"', 'L39-131: 24.120 kg na ordem, 12.180 kg no lote.' in p and 'Cancelar a ordem' in bt and cen("c.ordens['OB-0113'].etapa") == 'A liberar', [bt, p[:600]])
+        clk('Cancelar a ordem', 'aside'); setv('#pf_mc', 'carga CG-2106 estornada'); clk('Confirmar cancelamento da OB-0113', 'aside')
+        clk('Fechar', 'aside'); clk('+ Nova ordem'); p = pan()
+        t.chk('C2 · cancelada a OB-0113, o L39-131 volta à ordem nova com o saldo de agora (12.180 kg)', cen("c.ordens['OB-0113'].etapa") == 'Canceladas' and 'L39-131 · 12.180 kg' in p, p[:600])
+        shot('cancelar')
+        t.chk('cancelar sem erro de JS', not t.errs(), t.errs())
+    if 'faixa390' in MODOS:
+        # integração BEN (09/10), achado 3: a 390 px a lista aberta da faixa de telas (z-index 31) ficava sob a primária presa ao rodapé
+        # (z-index 40) e o toque em "Beneficiamento" abria a pesagem; é o único caminho do menu até o Beneficiamento. Toque real (CDP), não .click()
+        print('== faixa390 · 390 × 844: Cargas › faixa › Beneficiamento por toque real e o roteiro do proprietário com o valor inicial')
+        ir('CARGA.dc.html', limpa=True, w=390, h=844); perfil('Igor'); ir('CARGA.dc.html', w=390, h=844); time.sleep(1.5)
+        J("(()=>{ const l=document.querySelector('nav[aria-label=\"Telas de recebimento e beneficiamento\"] label.etp-atual'); l&&l.click(); })()"); time.sleep(.6)
+        m = J("(()=>{ const a=[...document.querySelectorAll('nav[aria-label=\"Telas de recebimento e beneficiamento\"] a')].find(x=>x.getAttribute('href')==='BEN.dc.html'); if(!a||!VIS(a)) return null; const r=a.getBoundingClientRect();"
+              " const pts=[[.15,.5],[.5,.5],[.85,.5],[.5,.2],[.5,.8]].map(([fx,fy])=>{ const e=document.elementFromPoint(r.left+r.width*fx,r.top+r.height*fy); return e&&(e===a||a.contains(e))?'livre':'coberto por '+N(e&&e.innerText).slice(0,30); });"
+              " return {x:Math.round(r.left+r.width/2), y:Math.round(r.top+r.height/2), pts}; })()")
+        t.chk('F1 · 390 px: lista da faixa aberta e o item "Beneficiamento" livre nos 5 pontos (nada por cima, nem a primária presa ao rodapé)', m and all(x == 'livre' for x in m['pts']), m)
+        if m:
+            for tp in ('mousePressed', 'mouseReleased'): t.c.call('Input.dispatchMouseEvent', {'type': tp, 'x': m['x'], 'y': m['y'], 'button': 'left', 'clickCount': 1})
+        time.sleep(1.6); lib(); loc = J("location.pathname.split('/').pop()"); p = pan()
+        t.chk('F1 · o toque no item leva ao Beneficiamento (não abre a pesagem)', loc == 'BEN.dc.html' and 'Registrar pesagem' not in p, [loc, p[:200]])
+        clk('+ Nova ordem'); clk('L39-132', 'aside'); cxv = J("(document.querySelector('aside [id^=pf_cx_]')||{}).value"); clk('Criar ordem', 'aside')
+        ir('BEN.dc.html#OB-0113', w=390, h=844); clk('Autorizar rota e liberar', 'aside'); st = cen("[c.ordens['OB-0113']&&c.ordens['OB-0113'].etapa, c.producao.lotes['L39-132'].ordem]")
+        t.chk('F2 · 390 px: o roteiro com o valor inicial (540 caixas) cria e libera a OB-0113', cxv == '540' and st == ['Liberadas', 'OB-0113'], [cxv, st, toast()])
+        clk('Fechar', 'aside'); J("(()=>{ const l=document.querySelector('nav[aria-label=\"Telas de recebimento e beneficiamento\"] label.etp-atual'); l&&l.click(); })()"); time.sleep(.6)
+        pv = J("(()=>{ const b=document.querySelector('.pr-prim'); return b?getComputedStyle(b).visibility:'sem'; })()")
+        J("(()=>{ const l=document.querySelector('nav[aria-label=\"Telas de recebimento e beneficiamento\"] label.etp-atual'); l&&l.click(); })()"); time.sleep(.6)
+        pv2 = J("(()=>{ const b=document.querySelector('.pr-prim'); return b&&VIS(b)?getComputedStyle(b).visibility:'sem'; })()")
+        t.chk('F3 · no Beneficiamento a 390 px a primária presa ao rodapé some só com a lista aberta e volta ao fechar', pv == 'hidden' and pv2 == 'visible', [pv, pv2])
+        shot('faixa390')
+        t.chk('faixa390 sem erro de JS', not t.errs(), t.errs())
 finally:
     t.fim()
 sys.exit(0 if all(t.ok) else 1)   # juízo pela linha RESULTADO e pelo código de saída

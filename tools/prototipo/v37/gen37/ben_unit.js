@@ -445,4 +445,47 @@ function T7(c, cond, tk) { if (!c.ordens['OS-0932']) OSX(c, 'OS-0932', 'T7', 'Em
   ok('U38 S4 Liberar lote: o L39-119 (fruta de campo, INSP-94) "tem a inspeção INSP-94"; o L39-120 "é lote do beneficiamento (OB-0110)" e fechar não libera',
      a.erro === 'L39-119 tem a inspeção INSP-94: registre o resultado da inspeção INSP-94 e a decisão.' && /^L39-120 é lote do beneficiamento \(OB-0110\): registre o resultado da inspeção INSP-\d+ e a decisão \(fechar o processo não libera\)\.$/.test(b.erro || ''), [a, b]); }
 
+// ===== Integração BEN na branch única (09/10/2026): achados dos revisores, cada um com proteção de regressão =====
+// ---- U39 · caixas da ordem nova dentro do livre no Estoque: o roteiro do proprietário (L39-132 com o valor inicial) libera ----
+{ const c = NOVO(); const r = benRota('PACK-FRU|3'); const pd = benCaixasPadrao(c, 12300, r);
+  ok('U39a L39-132 (12.300 kg): sugestão 1.169 un, 540 livres no Estoque (CX26-01), valor inicial 540', pd.sug === 1169 && pd.livre === 540 && pd.cx === 540 && benCaixasLivres(c) === 540, pd);
+  const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }] }, IG)); const o = O(c, n.id || 'OB-0113') || { ins: [{}], ben: { hist: [{}] } };
+  ok('U39b criar sem informar caixas usa o valor inicial: 540 un, o histórico diz a sugestão e o livre, sem aviso de impedimento',
+     !n.erro && o.ins[0].tot === 540 && /540 un de caixa \(sugestão 1169; 540 un livres no Estoque\)/.test(o.ben.hist[0].det) && !/Atenção/.test(n.msg), [n, o.ins, o.ben.hist]);
+  const im = n.id ? benImpedimentos(c, o) : ['sem ordem']; const l = MUD(c, x => benAutorizarLiberar(x, n.id, IG));
+  const o2 = O(c, n.id) || {}; ok('U39c a ordem criada com o valor inicial libera: sem impedimento, REQ-041 com 540 un, L39-132 preso à ordem', !im.length && !l.erro && o2.etapa === 'Liberadas' && o2.req === 'REQ-041' && REQ(c, 'REQ-041').solicitado === 540 && LT(c, 'L39-132').ordem === n.id, [im, l]);
+  const c2 = NOVO(); const a = MUD(c2, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }], cx: 1169 }, IG));
+  ok('U39d acima do livre a ordem nasce com o aviso de que a liberação fica impedida e quem resolve', !a.erro && /Atenção: 540 un livres no Estoque para 1\.169 un: a liberação fica impedida até o Estoque ter as caixas \(Rui \(almoxarife\) ou Paula \(almoxarife\)\)\./.test(a.msg), a);
+  const c3 = NOVO(); MUD(c3, x => cenReceber(x, CX, 'CX26-02', 3000, 'un', 'Packing', '—', 'NF-90011', true, RU)); const p3 = benCaixasPadrao(c3, 12300, r);
+  const c4 = NOVO(); c4.lotes[CX + '|CX26-01'].reservado = c4.lotes[CX + '|CX26-01'].fisico; const p4 = benCaixasPadrao(c4, 12300, r);
+  ok('U39e com caixas suficientes vale a sugestão (3.000 un recebidas); sem caixa livre fica a sugestão (a liberação mostra a falta)', p3.cx === 1169 && p3.livre === 3000 && p4.livre === 0 && p4.cx === 1169, [p3, p4]); }
+
+// ---- U40 · BEN-D22 · ordem em A liberar que não libera tem saída: Cancelar a ordem (motivo; rascunho, nada reservado) ----
+{ const c = NOVO(); const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }], cx: 1169 }, IG)); const id = n.id || 'OB-0113';
+  const l = MUD(c, x => benAutorizarLiberar(x, id, IG)); const r0 = c.rev || 0;
+  const sm = MUD(c, x => benCancelar(x, id, '  ', IG, { chave: 'W-BNC-T1' })); const pa = MUD(c, x => benCancelar(x, id, 'caixas insuficientes', PA)); const vv = MUD(c, x => benCancelar(x, id, 'caixas insuficientes', IG, { ver: 0 }));
+  ok('U40a 1.169 caixas: liberação recusada; cancelar sem motivo, com o perfil da conferência ou com a versão velha é recusado e nada muda',
+     /540 un disponíveis para 1\.169 un/.test(l.erro || '') && sm.erro === 'Informe o motivo do cancelamento.' && /^Cancelar a OB-0113: decisão de Ana \(gestora\) ou Igor \(responsável de produção\)\. Nada foi alterado\.$/.test(pa.erro || '') && /A OB-0113 mudou depois que você abriu/.test(vv.erro || '') && O(c, id).etapa === 'A liberar' && (c.rev || 0) === r0, [l, sm, pa, vv]);
+  const k = { chave: 'W-BNC-T2', ver: O(c, id).ver }; const cc = MUD(c, x => benCancelar(x, id, 'caixas insuficientes', IG, k)); const rp = MUD(c, x => benCancelar(x, id, 'caixas insuficientes', IG, k)); const r2 = MUD(c, x => benCancelar(x, id, 'outro', IG));
+  const o = O(c, id); const h = o.ben.hist[o.ben.hist.length - 1];
+  ok('U40b Igor cancela com motivo: Canceladas, quem e quando gravados, uma linha no histórico; nada reservado (sem REQ) e o L39-132 sem ordem; o toque repetido é "Já feito" sem gravar',
+     !cc.erro && o.etapa === 'Canceladas' && o.ben.canc.quem === 'Igor (responsável de produção)' && o.ben.canc.motivo === 'caixas insuficientes' && /^\d{4}-\d\d-\d\d \d\d:\d\d$/.test(o.ben.canc.em) && /^Ordem cancelada · v1$/.test(h.ev)
+     && !o.req && !LT(c, 'L39-132').ordem && rp.nada && /^Já feito/.test(rp.msg || '') && r2.erro === 'Já feito: OB-0113 cancelada.' && o.ben.hist.filter(x => /cancelada/.test(x.ev)).length === 1, [cc, rp, r2, o.ben.canc, h]);
+  const ap = benLotesAptos(c).map(L => L.id); const p = benProx(c, o); const ss = benSelos(c, Object.assign({}, o, { ben: Object.assign({}, o.ben, { fim: '2026-01-01' }) }));
+  const et = benEtapas(c, o).find(e => e.nome === 'Recepção'); const pr = benPendRec(c);
+  ok('U40c cancelada: o L39-132 volta aos aptos; sem passo (acao null) com o motivo à vista; nunca "Atrasada"; Recepção não cumprida; a faixa não conta a cancelada',
+     ap.indexOf('L39-132') >= 0 && p.acao === null && p.t === 'Cancelada: caixas insuficientes' && !ss.some(x => x.t === 'Atrasada') && et && et.sit !== 'Cumprida' && /^1 a liberar/.test(pr.ben), [ap, p, ss, et, pr]);
+  const n2 = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }] }, IG)); const l2 = MUD(c, x => benAutorizarLiberar(x, n2.id, IG));
+  ok('U40d a ordem nova do L39-132 (OB-0114, valor inicial 540) libera', n2.id === 'OB-0114' && !l2.erro && O(c, 'OB-0114').etapa === 'Liberadas' && LT(c, 'L39-132').ordem === 'OB-0114', [n2, l2]);
+  const fx = MUD(c, x => benCancelar(x, 'OB-0110', 'teste', IG)); const fl = MUD(c, x => benCancelar(x, 'OB-0114', 'teste', IG)); const an = MUD(c, x => benCancelar(x, 'OB-0112', 'rota trocada', AN));
+  ok('U40e só em A liberar: OB-0110 (Em execução) e OB-0114 (Liberadas) recusadas ("o cancelamento entra no BEN-6"); a OB-0112 (A liberar) a Ana (gestora) cancela',
+     /^Cancele só em A liberar \(OB-0110 está em Em execução\)/.test(fx.erro || '') && /^Cancele só em A liberar \(OB-0114 está em Liberadas\)/.test(fl.erro || '') && !an.erro && O(c, 'OB-0112').etapa === 'Canceladas' && O(c, 'OB-0112').ben.canc.quem === 'Ana (gestora)', [fx, fl, an]); }
+{ /* carga estornada com a ordem em A liberar (BEN-D19 deixa: rascunho): a entrada não confere; uma entrada só, sem Retirar; Cancelar solta o lote */
+  const c = NOVO(); const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-131', kg: 24120 }], cx: 500 }, IG)); const e = MUD(c, x => prEstornar(x, 'CG-2106', 'ticket trocado na balança', 'Lúcia'));
+  const im = benImpedimentos(c, O(c, n.id)); const pr = benProx(c, O(c, n.id));
+  ok('U40f CG-2106 estornada com a OB-0113 em A liberar: impedimento "24.120 kg na ordem, 12.180 kg no lote" sem Retirar, e o próximo passo oferece cancelar',
+     !e.erro && im.some(x => x.t === 'L39-131: 24.120 kg na ordem, 12.180 kg no lote.' && !x.ret) && /Sem como resolver: Cancelar a ordem \(nada foi reservado\) e abrir outra/.test(pr.nota || ''), [e, im, pr]);
+  MUD(c, x => benCancelar(x, n.id, 'carga CG-2106 estornada', IG)); const n2 = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-131', kg: 12180 }] }, IG));
+  ok('U40g cancelada a ordem, o L39-131 abre outra com o saldo de agora (12.180 kg)', O(c, n.id).etapa === 'Canceladas' && !n2.erro && benEntrada(O(c, n2.id)) === 12180, [n2]); }
+
 print(JSON.stringify(R));

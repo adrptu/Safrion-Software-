@@ -1,0 +1,7 @@
+== faixa390 · 390 × 844: Cargas › faixa › Beneficiamento por toque real e o roteiro do proprietário com o valor inicial
+OK  F1 · 390 px: lista da faixa aberta e o item "Beneficiamento" livre nos 5 pontos (nada por cima, nem a primária presa ao rodapé) · {'x': 195, 'y': 813, 'pts': ['livre', 'livre', 'livre', 'livre', 'livre']}
+OK  F1 · o toque no item leva ao Beneficiamento (não abre a pesagem) · ['BEN.dc.html', '']
+OK  F2 · 390 px: o roteiro com o valor inicial (540 caixas) cria e libera a OB-0113 · ['540', ['Liberadas', 'OB-0113'], 'OB-0113 v1 autorizada (CMD-42) e liberada (CMD-06) por Igor (responsável de produção): REQ-041 reservou 540 un de Caixa de mamão Formosa 10 kg; entradas reservadas à ordem. O Estoque entrega as caixas no balcão.']
+OK  F3 · no Beneficiamento a 390 px a primária presa ao rodapé some só com a lista aberta e volta ao fechar · ['hidden', 'visible']
+OK  faixa390 sem erro de JS
+RESULTADO: OK 5/5

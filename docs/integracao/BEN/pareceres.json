@@ -1,0 +1,297 @@
+{
+ "candidata": "a47578f",
+ "pre_merge": "8c00092",
+ "frente": "4459669",
+ "nota": "Pareceres das lentes A e B (agentes Claude independentes). lente-v1 = sobre 0644b1b, antes das 3 correções; lente-v2 = reverificação sobre a47578f (a outra lente da v2 ainda roda).",
+ "agentes": [
+  {
+   "agente": "integrador",
+   "resultado": {
+    "pre_merge": "8c00092",
+    "head": "0644b1b",
+    "build_ok": true,
+    "varredura": "141/141 páginas sem erro (varredura.py com o lock I, rc=0, em 21e2ad2). O commit 0644b1b só muda um teste, então as páginas são as mesmas. acoes_duplicadas: 141 páginas, 0 com ação repetida, 0 erros. prep_site.sh rodou: o mapa tem 166 arquivos e o _render 141 páginas.",
+    "testes": [
+     {
+      "nome": "ben_unit_test.py",
+      "resultado": "132/132"
+     },
+     {
+      "nome": "ben_mutantes.py",
+      "resultado": "56/56 mortos"
+     },
+     {
+      "nome": "producao_unit_test.py",
+      "resultado": "121/121"
+     },
+     {
+      "nome": "aprova_quem_decide_test.py",
+      "resultado": "102/102"
+     },
+     {
+      "nome": "os_aprov_lib_test.py",
+      "resultado": "45/45"
+     },
+     {
+      "nome": "ben_fluxo_test.py fluxo erros celular revisao",
+      "resultado": "61/61 (51 + 10 do modo revisao: B1 REV-01/09, B2 REV-02/08 com CG-2107 sem Estornar e o porquê, B3 REV-03)"
+     },
+     {
+      "nome": "tabelas_ben_test.py",
+      "resultado": "12/12"
+     },
+     {
+      "nome": "producao_fluxo_test.py",
+      "resultado": "66/66 (menu Produção com 3 itens)"
+     },
+     {
+      "nome": "tabelas_est_test.py",
+      "resultado": "34/34"
+     },
+     {
+      "nome": "cada_cd04_test.py",
+      "resultado": "15/15 (contagem lida, não o código de saída)"
+     },
+     {
+      "nome": "est_cenario_test.py",
+      "resultado": "15/15"
+     },
+     {
+      "nome": "os_cenario_test.py",
+      "resultado": "19/20",
+      "na_base": "vermelho conhecido da base (PEND-OS-01, lista do contexto). A falha é a mesma verificação, 'A liberar sem revisão'. A verificação que o BEN mudou (Restaurar com 12 requisições) passa."
+     },
+     {
+      "nome": "cada_cd03_test.py",
+      "resultado": "14/14"
+     },
+     {
+      "nome": "cadc_cd06_test.py",
+      "resultado": "14/14"
+     },
+     {
+      "nome": "app_cenario_test.py",
+      "resultado": "15/15"
+     },
+     {
+      "nome": "links_ocultos_test.py (em 21e2ad2, só o merge)",
+      "resultado": "6/8: E1b (ben.js também chama cenLiberar) e E2 (OB-0112 em A liberar na semente)",
+      "na_base": "8/8 no pré-merge 8c00092, rodado em worktree temporária, já removida. É vermelho novo, vindo do BEN (a frente não rodou esse teste)."
+     },
+     {
+      "nome": "links_ocultos_test.py (em 0644b1b, depois do commit de integração)",
+      "resultado": "9/9"
+     }
+    ],
+    "vermelhos_novos": [],
+    "pronto": true,
+    "linha": "No protótipo, o menu Produção mostra agora \"Recebimento e beneficiamento\", que leva ao packing do mamão: o Igor cria e libera a ordem com o lote colhido, a Paula confere o balanço e a Marta libera as caixas prontas para vender. Enquanto a ordem está aberta, o sistema não deixa estornar a carga nem decidir de novo o destino da mesma fruta.",
+    "resumo": "HEAD de partida era 8c00092, como esperado, com só gerados sujos (_render, project, __pycache__, _probe). O merge de 4459669 entrou sem conflito em 21e2ad2: os arquivos que a base mudou desde cdc185f (ocupacao.js/py e docs) não se cruzam com os do BEN, e areas/producao.py e areas/cad_ativos_pessoas.py fundiram sozinhos. build.py deu 0 FALHA (141 telas), montar_render.py montou 141 páginas e a varredura deu 141/141. O menu Produção ficou com exatamente 3 itens (Previsão e colheita · Recebimento e beneficiamento · Estoque de produto), conferido em ui37.MENU2 e no producao_fluxo_test.\n\nAchei um vermelho novo que a frente não viu: links_ocultos_test.py (trava da CTL-1) dava 6/8 depois do merge e 8/8 no pré-merge. As duas falhas vêm de decisões registradas do BEN:\n- E1b: a BEN-D05 reaproveita cenLiberar para a ordem de beneficiamento, e a própria CTL-1 diz que o beneficiamento não passa por osc_liberar.\n- E2: a OB-0112 está em \"A liberar\" na semente.\n\nCorrigi num commit separado, 0644b1b (\"Integração BEN: ...\"), deixando o teste mais estrito:\n- E1b aceita só processo_os.py e ben.js.\n- E1d, novo: em ben.js só benAutorizarLiberar chama cenLiberar, e ela tem de exigir o perfil de produção, recusar ordem que não é OB (benO) e gravar CMD-42 e CMD-06 no histórico. Cinco mutantes derrubam essa verificação.\n- E2: ordem de manutenção em \"A liberar\" continua proibida. Ordem de beneficiamento em \"A liberar\" só com fam 'BEN' e fora da lista da O.S. (P._ordens), para a O.S. nunca oferecer osc_liberar a ela. Os mutantes derrubam.\n\nResultado: 9/9. Como a mudança toca uma trava S1, vale o Codex confirmar.\n\nTodos os testes do módulo e da regressão passaram. O único vermelho é o os_cenario 19/20, já conhecido da base (PEND-OS-01). Não rodei de novo os outros vermelhos que a frente atribuiu à base (ostest, cadp_fix_test, cotest): eles cobrem telas fora da intenção deste diff.\n\nRoteiro do proprietário conferido pela tela no modo revisao do ben_fluxo_test:\n- Igor cria a ordem com o L39-132 e a libera.\n- A CG-2107 aparece sem Estornar e com o porquê.\n- A Marta não vê \"Registrar decisão\" no lote de entrada preso à ordem.\n\nSem push, sem publicação do artefato e sem tocar em outras worktrees. A worktree temporária do pré-merge foi removida.\n\nPara desfazer: git -C <sp-proto> reset --hard 8c00092, depois build.py, montar_render.py e prep_site.sh.",
+    "logs": "<scratchpad>/integ/BEN-1711 (resumo.txt, merge.log, build.log, render.log, varredura.log, nav_resumo.txt, um .log por teste, base_links_ocultos_test.log do pré-merge)",
+    "conflitos": [],
+    "paginas": 141
+   }
+  },
+  {
+   "agente": "lente-v1",
+   "resultado": {
+    "aprovado": false,
+    "achados": [
+     {
+      "sev": "S2",
+      "titulo": "Ordem em 'A liberar' fica sem saída e prende o lote inteiro. O roteiro do proprietário cai nisso quando a sugestão de caixas é mantida",
+      "repro": "Executado no _render integrado, uma cópia de 0644b1b em scratchpad/integ-ver/BEN-v1-B/head (diff -rq contra sp-proto/_render vazio). (A) Comando: env CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdpI.lock env CDP_GL=1 SAFRION_DADOS=sintetico python3 p_beco.py 1440 A. Como Igor: '+ Nova ordem', L39-132, Criar, mantendo a sugestão. Saída: 'OB-0113 criada (A liberar): ... L39-132 · 12.300 kg · 1.169 un de caixa (sugestão confirmada)'. Em 'Autorizar rota e liberar': 'Liberação recusada · 1 causa: Caixa de mamão Formosa 10 kg: 540 un disponíveis para 1.169 un · Estoque (resolve: Rui (almoxarife) ou Paula (almoxarife))'. Botões do painel: ['×','Receber a devolução da OB-0110 no Estoque ›','Ver no Estoque de produto ›','Cancelar','Autorizar rota e liberar']. A devolução traz só 60 un (540+60=600<1.169), e não há compra no BEN-1. Na ordem nova, 'lotes oferecidos: []'. node_beco.js na mesma fonte: retirar → 'A OB-0113 ficaria sem entrada: inclua outro lote antes de retirar o L39-132.'; nova ordem → 'L39-132 já está na OB-0113 (A liberar).'; nenhuma função de cancelar ou editar. (B) Comando: p_beco_b2.py 1440. Ordem com o L39-131 e 500 cx. Em Cargas, a CG-2106 oferece 'Estornar' (a ordem está em A liberar); Lúcia estorna. Ao autorizar: 'L39-131: 24.120 kg na ordem, 12.180 kg no lote. resolve: Igor', com botões ['×','Ver no Estoque de produto ›','Cancelar','Autorizar rota e liberar']. O L39-131 fica com 12.180 kg 'Em processo' (fora do vendável) e sem ordem possível. A 390 o resultado é o mesmo (beco_390A). A saída de node_beco_front.js em 4459669 é idêntica.",
+      "origem": "frente",
+      "causa": "A ordem leva o lote inteiro (BEN-D17, sem campo de kg). benRetirar exige mais de 1 entrada, e não há Cancelar nem edição de caixas em A liberar. benNova aceita caixas acima do disponível sem avisar. prEstornar é permitido com a ordem em A liberar. benImpedimentos aponta um dono ('resolve: Igor/Rui/Paula') que não tem ação para resolver. É a mesma classe do REV-05 ('presa para sempre', S2); a correção do REV-05 cobriu só cx=0. Dano: lote perecível (vence em 29/09) parado sem beneficiamento e sem venda."
+     },
+     {
+      "sev": "S2",
+      "titulo": "A 390×844, em Cargas, o item 'Beneficiamento' da faixa de telas fica por baixo da primária 'Registrar pesagem'; o toque abre a pesagem",
+      "repro": "Comando: env CHROME_BIN=… flock /tmp/cdpI.lock … python3 p_faixa390b.py. Em CARGA, ao tocar o rótulo 'Cargas e recebimento ▾', a lista abre. O item 'Beneficiamento 1 a liberar · 3 lotes…' fica em [9,791,372,44] e os 5 pontos medidos dão 'coberto por BUTTON \"Registrar pesagem\"'. A primária 'Registrar pesagem' fica em [12,788,366,44], position fixed, z-index 40. No IR-01 (base, mesmo componente) os itens ficam livres, porque a primária está no cabeçalho. No roteiro a 390 (p_roteiro.py 390, rot7_390.log): 'faixa → Beneficiamento: COBERTO: Beneficiamento por SPAN Registrar pesagem', mesmo esperando 7 s; 'FALHOU 390 faixa leva ao Beneficiamento'. É o único caminho do menu (Produção tem 3 itens) até o Beneficiamento; o ben_fluxo_test celular abre BEN.dc.html pelo endereço e não pega o caso. O build de 4459669 dá o mesmo resultado (p_faixa390b_front.py).",
+      "origem": "frente",
+      "causa": "A faixa CARGA|BEN (BEN-D14) reaproveita o componente da Irrigação. A lista aberta é fixa no rodapé (z-index 31), mas nas telas da Produção a primária também fica presa ao rodapé, com z-index 40. Pela regra, é fluxo essencial bloqueado no celular. Existe um caminho indireto (Estoque de produto › lote › 'Abrir ordem de beneficiamento'), mas só quando há lote apto."
+     },
+     {
+      "sev": "S3",
+      "titulo": "Duplo clique em 'Autorizar rota e liberar' também executa 'Iniciar processo'",
+      "repro": "Comando: p_duplo.py 1440, com mousePressed/Released no mesmo ponto e 120 ms entre os cliques. Fase antes: 'A liberar'. Depois: ['Em execução','REQ-041'], com o aviso 'OB-0113 em execução: … Caixas da REQ-041 ainda no Estoque.'. Histórico: ['17:55 Igor: Versão v1 da ordem autorizada (CMD-42)','17:55 Igor: Liberada (CMD-06)','17:55 Igor: Iniciada']. Em 4459669 (duplo_1440_front.log) acontece igual. A 390 com toque duplo não ocorreu.",
+      "origem": "frente",
+      "causa": "A proteção do BEN-1h (recibo e 'Já feito') cobre só a repetição do mesmo comando. A primária da fase seguinte ('Iniciar processo') aparece no mesmo lugar e recebe o segundo clique. Resultado: um início registrado em nome do Igor sem intenção, e não há como desfazer o Iniciar. Classifiquei S3 porque não há efeito em massa nem em estoque."
+     },
+     {
+      "sev": "S3",
+      "titulo": "NAV-CLAREZA 3: 'Concluir execução' só envia a ordem para conferência",
+      "repro": "Comando: p_rev04.py 1440 (rev04d.log). Tocar 'Concluir execução' na OB-0110 dá o aviso 'OB-0110 em conferência: diferença 600 kg (5,00 %) … Fora da faixa: justifique (alçada) ou corrija.' (ou 'Paula (conferência) confere o balanço.'). A O.S. usa 'Enviar para conferência' (processo_os.py:491) para a mesma transição do mesmo Kanban de 5 fases.",
+      "origem": "frente",
+      "causa": "O rótulo vem de benProx/processo_beneficiamento.py (prim 'Concluir execução'). O critério 3 do Codex (6080540795) proíbe 'Concluir' que só envia para conferência. Também há dois verbos para a mesma transição (critério 7)."
+     },
+     {
+      "sev": "S3",
+      "titulo": "Depois de 'Criar ordem', a ordem criada some da vista e a primária do cabeçalho aponta outra ordem com o mesmo verbo",
+      "repro": "Comando: p_roteiro.py 1440 (rot4_1440.log). Aviso: 'OB-0113 criada (A liberar) … Próximo passo: Autorizar rota e liberar.'. Logo depois: 'depois de criar · painel: \"\" | hprim: [\"Autorizar rota e liberar · OB-0112\"] | linha selecionada: []'. Quem segue o verbo do aviso abre a OB-0112 (outra ordem, com impedimentos), e não a OB-0113 recém-criada.",
+      "origem": "frente",
+      "causa": "bnNovaForm fecha o painel (pr_pan:null) sem selecionar a ordem nova, e EXTRAVALS escolhe para o cabeçalho a primeira ordem com passo. Viola os critérios 5 (estado junto do objeto) e 3."
+     },
+     {
+      "sev": "S4",
+      "titulo": "Duas primárias verdes para o mesmo comando; a do cabeçalho só abre o painel",
+      "repro": "Comando: p_xctx.py. Com a OB-0112 aberta, os verdes visíveis são ['Recebimento e beneficiamento','Autorizar rota e liberar','Autorizar rota e liberar'] (HPRIM e PPRIM). O botão do cabeçalho tem verbo de comando, mas só navega. Na OB-0110 o mesmo acontece com 'Concluir execução' duas vezes (p_rev04: verdes ['Recebimento e beneficiamento','Concluir execução','Concluir execução']).",
+      "origem": "frente",
+      "causa": "O BEN repete o padrão prPrim do PROD da base (cabeçalho 'Liberar L39-xxx' abre o painel). Afeta os critérios 2, 3 e 7; não leva a efeito errado."
+     },
+     {
+      "sev": "S4",
+      "titulo": "Depois de uma recusa, o fechar do painel vira 'Cancelar' numa ordem que não pode ser cancelada",
+      "repro": "Comando: p_beco.py 1440 A. Antes da recusa os botões são ['×','Ver no Estoque de produto ›','Fechar','Autorizar rota e liberar']. Depois de 'Liberação recusada' ficam ['×','Receber a devolução da OB-0110 no Estoque ›','Ver no Estoque de produto ›','Cancelar','Autorizar rota e liberar']. 'Cancelar' só fecha o painel; a ordem continua em A liberar.",
+      "origem": "frente",
+      "causa": "pp_closeT = P.form ? 'Cancelar' : 'Fechar', e o bloco 'Não gravado' conta como formulário. O rótulo fica ambíguo (critério 5), sobretudo junto do achado de ordem sem saída."
+     },
+     {
+      "sev": "S4",
+      "titulo": "O aviso (role=status) cobre por cerca de 4 s a primária e 'Reabrir execução' do painel",
+      "repro": "Comando: p_toast.py. A 1440, logo após Concluir: cobertos ['Reabrir execução ← AVISO','Conferir balanço ← AVISO'] em t+0 e [] em t+4s. A 390, depois de 'Criar ordem', o probe esperou 4 s até o aviso sair de cima de 'Autorizar rota e liberar'. É transitório: o aviso some em 4,5 s.",
+      "origem": "base",
+      "causa": "O G2_TOAST do motor (engine.py:1461) fica fixo no rodapé por 4,5 s, sobre o rodapé do painel. O toque nesse intervalo cai no aviso."
+     }
+    ],
+    "testes_executados": [
+     "Render integrado: git archive 0644b1b → scratchpad/integ-ver/BEN-v1-B/head; build.py 141 telas; montar_render.py 141 páginas; diff -rq contra sp-proto/_render vazio",
+     "ben_fluxo_test.py fluxo erros celular revisao (lock cdpI) → RESULTADO: OK 61/61, EXIT 0",
+     "tabelas_ben_test.py → OK 12/12",
+     "producao_fluxo_test.py → OK 66/66",
+     "tabelas_est_test.py → 34/34 ok",
+     "cada_cd04_test.py → OK 15/15 (contagem lida, 15 linhas OK)",
+     "links_ocultos_test.py → TOTAL 9 · falhas 0",
+     "ben_unit_test.py → OK 132/132; producao_unit_test.py → OK 121/121; aprova_quem_decide_test.py → 102/102; os_aprov_lib_test.py → 45 falhas 0; ben_mutantes.py → OK 56/56",
+     "p_roteiro.py 1440, clique real por coordenada (rot4_1440): menu Produção com 3 itens, menu→Cargas→faixa→Beneficiamento, nova ordem sem erro antes da escolha, REV-09 sem campo de kg, REV-05 recusa 0/-5/2,5/abc, toque duplo no Criar grava 1 ordem, REV-08 'Packing (Santa Rita) · fruta da Lagoa Grande', CG-2107 sem Estornar e com o porquê, Marta sem 'Registrar decisão' → 15/16 (a falha é o duplo clique que inicia o processo)",
+     "p_roteiro.py 390, toque com touch emulation (rot7_390): mesmos aceites → 15/16 (a falha é a faixa coberta pela primária; o resto foi feito abrindo o BEN pelo endereço)",
+     "p_beco.py 1440 A / 390 A, p_beco_b2.py 1440 e node_beco.js (head e 4459669): ordem em A liberar sem saída",
+     "p_rev04.py 1440 (rev04d): REV-04 pela tela → 4/4 (Ana exigida após reabrir; Paula não confere antes; Ana no histórico); node_rev04.js com variantes V1–V4",
+     "node_rev03.js: CG-2108 com avaria ou fora do padrão → Marta libera → lote apto → ordem criada",
+     "p_duplo.py 1440 / 390 / 1440 em 4459669: duplo clique em Autorizar",
+     "p_faixa390b.py (head e 4459669): cobertura da faixa a 390 em CARGA, BEN e IR-01",
+     "p_toast.py 1440/390: aviso sobre os botões do painel ao longo do tempo",
+     "p_xctx.py: X-CTX (link #OB e #nova com seleção de outra fazenda; PROD com Santa Rita e #L39-132; CARGA→BEN→voltar)",
+     "p_vizinhas.py: BEN, BEN#OB-0110, BEN#OB-0112, BEN#nova, CARGA, PROD, PROD#L39-131, PROD#L39-119, COLH, CD-04, EST, OS, IN-01 a 1440×900 e 390×844 → 26/26 sem erro de JS e sem nada além da largura",
+     "git diff --stat 4459669 0644b1b nos arquivos de tela e regra (ben.js, producao.js, areas/, ui37.py, engine.py, g2lib.js, cenario.py, dados_ben.py, dados_producao.py) → vazio: o merge só trouxe a SAF-C01 e docs"
+    ],
+    "resumo": "Não aprovado. O BEN tem dois S2 de origem frente, já presentes em 4459669 e intactos no merge.\n\nO merge 21e2ad2+0644b1b está limpo: entre 4459669 e 0644b1b, os arquivos de tela e regra não mudaram (diff vazio). Por isso nenhum achado é de origem integração. Os harnesses da frente passam contra o _render integrado: ben_fluxo 61/61, tabelas_ben 12/12, producao_fluxo 66/66, tabelas_est 34/34, cd04 15/15, links_ocultos 9/9, unit 132/121/102/45 e mutantes 56/56. Pela tela, os 5 S2 da revisão se confirmaram corrigidos:\n- REV-01/02: a Marta não vê 'Registrar decisão'; a CG-2107 não tem 'Estornar' e diz o porquê.\n- REV-03: pela fixture do teste e pelo caminho da CG-2108.\n- REV-04: a Ana é exigida depois de Reabrir (4/4 pela tela).\n- REV-05: 0, -5, 2,5 e abc são recusados.\n- REV-08/09: conferidos.\n\nO menu Produção tem exatamente 3 itens a 1440 e a 390. As telas vizinhas, a 1440 e a 390, não têm erro de JS nem nada além da largura (26/26).\n\nOs dois S2:\n1. Uma ordem em 'A liberar' fica sem saída e prende o lote inteiro. Isso acontece no próprio roteiro do proprietário quando ele mantém a sugestão de 1.169 caixas para o L39-132 (só há 540 livres). Também acontece quando a carga do lote é estornada com a ordem em A liberar. Não há Retirar da entrada única, nem Cancelar, nem edição de caixas, e o lote não entra em outra ordem. O impedimento diz 'resolve: Rui/Paula/Igor', mas nenhum deles tem ação para resolver.\n2. A 390, em Cargas, o item 'Beneficiamento' da faixa fica 100 % coberto pela primária fixa 'Registrar pesagem'. É o único caminho do menu até o Beneficiamento no celular.\n\nOs S3 são três:\n- Duplo clique em 'Autorizar rota e liberar' também registra 'Iniciada'.\n- 'Concluir execução' só envia para conferência, o que fere o critério 3 da NAV-CLAREZA.\n- Depois de criar, a ordem nova não fica à vista e a primária do cabeçalho aponta a OB-0112.\n\nHá ainda S4 de clareza.\n\nX-CTX: o BEN não tem seletor de fazenda e mostra todas. Os links #OB e #nova abrem o registro. O PROD com Santa Rita abre o L39-132 da Lagoa Grande sem trocar a seleção. A CARGA mantém o filtro ao voltar. Não achei violação.\n\nNão reverifiquei os vermelhos de base listados no contexto. Sondas, logs e capturas estão em <scratchpad>/integ-ver/BEN-v1-B/. Nenhum arquivo versionado foi alterado; sp-proto segue em 0644b1b, sem mudança rastreada."
+   }
+  },
+  {
+   "agente": "lente-v1",
+   "resultado": {
+    "aprovado": false,
+    "achados": [
+     {
+      "sev": "S2",
+      "titulo": "A ordem criada com a sugestão de caixas nunca é liberada, não pode ser cancelada e prende o lote; o roteiro do proprietário falha no passo 1 e, por isso, no passo 2",
+      "repro": "EXECUTADO no navegador, HEAD 0644b1b (probe/p_roteiro.py, log hp_roteiro3.log). Igor › menu Produção (3 itens: Previsão e colheita, Recebimento e beneficiamento, Estoque de produto) › Recebimento e beneficiamento › faixa Beneficiamento › + Nova ordem › L39-132. O campo Caixas vem preenchido com 1169. Criar ordem gera a OB-0113 (A liberar). 'Autorizar rota e liberar' mostra: 'Liberação recusada · 1 causa: Caixa de mamão Formosa 10 kg: 540 un disponíveis para 1.169 un · Estoque (resolve: Rui (almoxarife) ou Paula (almoxarife)). Nada foi gravado.' A ordem fica em A liberar e L39-132.ordem continua null. Passo 2: a CG-2107 ainda oferece ['×','Abrir no estoque ›','Estornar','Fechar']. Beco sem saída (p_beco.py, hp_beco.log): o painel da OB-0113 só oferece 'Receber a devolução da OB-0110' (60 un, chega a 600, menos que 1.169), e 'Cancelar' só fecha o painel; a Nova ordem deixa de listar o L39-132. No node (probe/n_beco.py), com saída idêntica em 4459669 e em 0644b1b (md5 01dcd709…): para L39-132, L39-131 e L38-132, a sugestão de 1169, 2292 e 2834 caixas, com 540 em estoque, tem a liberação recusada. Retirar a única entrada é recusado com 'inclua outro lote antes de retirar' (não existe comando de incluir), outra ordem com o mesmo lote é recusada com 'já está na OB-0113 (A liberar)', e não há comando de cancelar nem de editar as caixas. Só 'Restaurar demonstração' sai desse estado. Contraprova: com 200 caixas (CX=200, hp_roteiro_cx200.log) os três passos passam: REQ-041, CMD-42/CMD-06; a CG-2107 fica sem Estornar e mostra 'Sem estorno enquanto a OB-0113 não fecha…'; Marta não vê 'Registrar decisão'.",
+      "origem": "frente",
+      "causa": "ben.js benNova aceita qualquer número de caixas maior ou igual a 1, mesmo acima do disponível (CX26-01 tem 540 un e a compra é BEN-2). O formulário (processo_beneficiamento.py:81) sugere ⌈kg×0,95÷10⌉ sem avisar do estoque. A OB em A liberar não tem cancelar (BEN-6), editar caixas ou incluir entrada, e benOrdemAberta bloqueia o lote em qualquer outra ordem. Pelo próprio DECISOES.md §7 ('ordem presa → S2, fluxo essencial bloqueado') e pelo precedente REV-05, a classificação é S2. O roteiro da frente omite o ajuste das caixas, e o teste B2 (ben_fluxo_test revisao) digita 200 e esconde o defeito. Correção sugerida: recusar ou avisar na criação quando as caixas passam do disponível (sugestão limitada ao livre, com o motivo), ou permitir editar caixas ou cancelar a ordem em A liberar; corrigir o roteiro do proprietário; acrescentar teste de navegador com o valor padrão. Cai para S3 se houver cancelar ou editar."
+     },
+     {
+      "sev": "S4",
+      "titulo": "O E1d novo do links_ocultos_test (commit 0644b1b) não pega atalho de cenLiberar colocado entre funções do ben.js",
+      "repro": "EXECUTADO: numa cópia do gen37 (scratchpad/integ-ver/BEN-v1-A/mut/gen37) inseri `const benAtalhoLib = (c, id) => cenLiberar(c, id);` antes de `function benIniciar` no ben.js e rodei `SAFRION_DADOS=sintetico python3 links_ocultos_test.py`. Saída: E1b OK, E1d OK, 'TOTAL 9 · falhas 0'. O atalho libera qualquer ordem, inclusive agrícola, sem CMD-42/CMD-06. Contexto: com o teste do pré-merge (8c00092) sobre o código integrado dá 'TOTAL 8 · falhas 2' (E1b: ['areas/processo_os.py','ben.js']; E2), o que prova que a frente quebrou a CTL-1 e não rodou o teste. A adaptação do integrador segue a BEN-D05 e a exceção 'beneficiamento com responsável próprio'.",
+      "origem": "integracao",
+      "causa": "O E1d divide o ben.js por '\\nfunction ' e aceita o pedaço que começa com benAutorizarLiberar. Código de topo depois dessa função cai no mesmo pedaço, e o E1b passou a aceitar qualquer chamada vinda do ben.js. Correção sugerida: exigir exatamente 1 ocorrência de 'cenLiberar(' no ben.js e que ela esteja dentro do corpo da benAutorizarLiberar (chaves balanceadas). O commit diz que o teste fica 'mais estrito'; isso não vale para este caso."
+     },
+     {
+      "sev": "S4",
+      "titulo": "vetest: 'OF-103 editada' falha, igual no pré-merge, e não está na lista de vermelhos conhecidos",
+      "repro": "EXECUTADO: `env CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdpI.lock env CDP_GL=1 SAFRION_DADOS=sintetico timeout 900 python3 vetest.py` no HEAD dá 'FALHA OF-103 editada: OF-103 · enviada Mamão Formosa A 2.000 kg …' e 'RESULTADO: 1 FALHA(S)'. A mesma assinatura sai em 8c00092 (worktree temporária; a assinatura das falhas é igual nas duas).",
+      "origem": "base",
+      "causa": "Tela VE-03, fora do menu e do BEN: a edição do volume para 1.500 kg não aparece na linha. Não nasce do merge."
+     }
+    ],
+    "testes_executados": [
+     "Integridade do merge: `git merge-tree --write-tree 8c00092 4459669` = 1e648fd…, igual à árvore do merge 21e2ad2 (resolução sem nenhuma edição manual). Os 31 arquivos da frente têm patch-id IGUAL entre cdc185f..4459669 e 8c00092..21e2ad2. Os arquivos da base desde cdc185f (SAF-C01 e docs/navegacao) não foram tocados pelo merge (diff vazio). O 0644b1b só altera links_ocultos_test.py.",
+     "build.py (HEAD): 141 telas, 0 FALHA, menu vigente 46. montar_render: 141 páginas. Na base 8c00092 são 140 páginas; a única página nova é BEN.dc.html.",
+     "ben_unit_test.py → RESULTADO: OK 132/132",
+     "ben_mutantes.py → RESULTADO: OK 56/56",
+     "producao_unit_test.py → OK 121/121 (base 121/121)",
+     "aprova_quem_decide_test.py → 102/102 (base 102/102)",
+     "os_aprov_lib_test.py → TOTAL 45 · falhas 0 (base 45/0)",
+     "links_ocultos_test.py → TOTAL 9 · falhas 0 (base 8/0). O teste do pré-merge sobre o código integrado dá 8 · falhas 2, de origem frente, já tratado no 0644b1b.",
+     "ocupacao_unit.py (SAF-C01) → 117 OK · 0 FALHA",
+     "quantidade_test 14/14 · legal_unit_test 35/35 · capacidade_unit 76 OK · inicio_entrega_test 26/26 · ap_unico_test unit 80/80 + nav 23/23",
+     "Navegador (lock I, um por vez): ben_fluxo_test fluxo erros celular → OK 51/51; revisao → OK 10/10",
+     "tabelas_ben_test 12/12 · producao_fluxo_test 66/66 · tabelas_est_test 34/34 · cada_cd04_test 15/15 (contagem lida) · est_cenario_test 15/15",
+     "Regressão das áreas tocadas: os_irrig_filtro 15/0 · map_irrig_filtro 15/0 · tabelas_os 38/38 · saf_c01_test 38 ok · os_v39_liberar 20/20 · map_decisoes 18/0 · app_cenario 15/15 · cadc_cd06 14/14 · mbtest 0 falhas",
+     "varredura.py (HEAD, completa, uma vez) → RESULTADO: 141/141 páginas sem erro (sem página vazia e sem erro de JS)",
+     "Vermelhos comparados no pré-merge 8c00092 (worktree temporária, removida), com a mesma assinatura de falhas: os_cenario 19/20, ostest 32/33, cotest 41/53, cadp_fix_test 11/15, vetest 1 FALHA. Todos são da base.",
+     "Sonda do roteiro do proprietário (p_roteiro.py): menu Produção com 3 itens confirmado. Com a sugestão de 1169 caixas a liberação é recusada (achado S2). Com 200 caixas (p_roteiro_cx.py) os passos 1, 2 e 3 passam.",
+     "REV-05 pela tela (p_rev45.py): 0 caixa → 'Caixas: ao menos 1 un', nenhuma OB criada, rev 0→0",
+     "REV-04 pela tela (p_rev45.py): estorno S-03 → Concluir (600 kg, 5 %) → Reabrir → perda de 600 kg com ticket → Concluir com 0 kg → corr.pend com 'antes de reabrir 600 kg'; primária 'Confirmar correção · Ana'; Paula não confere (rev 5→5, conf null)",
+     "REV-01/02/03/08/09 pela tela cobertos pelo ben_fluxo_test revisao 10/10 (executado). Node 4459669 = HEAD no roteiro e no beco (n_roteiro.py, n_beco.py).",
+     "Mutante do E1d (cópia do gen37) → links_ocultos 9/0: o mutante sobrevive"
+    ],
+    "resumo": "Não aprovo a integração do BEN: o merge está íntegro, mas a frente traz um S2.\n\n**Integridade do merge.** A árvore do merge 21e2ad2 é exatamente a do merge automático de 8c00092 com 4459669. Os 31 arquivos da frente entraram com patch idêntico, e nada da base (SAF-C01 e docs/navegacao) foi desfeito. O conflito previsto em producao.py e cad_ativos_pessoas.py não ocorreu, porque a frente já tinha cdc185f e a base não mexeu nesses arquivos depois disso. O 0644b1b só adapta o links_ocultos_test.\n\n**Testes.** Rodei eu mesmo (node e navegador, lock I) os testes do módulo e a regressão das áreas tocadas; tudo verde, com as mesmas contagens do relato. A varredura completa deu 141/141 páginas sem erro e sem página vazia. Os vermelhos (os_cenario 19/20, ostest 32/33, cotest 41/53, cadp_fix 11/15 e vetest 1 falha) saem com a mesma assinatura no pré-merge 8c00092, então são da base.\n\n**Aceite.** REV-04 e REV-05 foram refeitos pela tela e estão corrigidos. O menu Produção tem os 3 itens pedidos.\n\n**S2 da frente (o motivo da reprovação).** O passo 1 do roteiro do proprietário ('criar a ordem com o L39-132 e liberar'), feito como está escrito, falha: o campo Caixas vem com a sugestão de 1169 e o estoque tem 540. A liberação é recusada e a OB-0113 fica presa em A liberar, sem cancelar, sem editar caixas e sem incluir entrada. O L39-132 sai da lista de nova ordem e a CG-2107 continua com Estornar, então o passo 2 também falha. O mesmo vale para os três lotes aptos da semente (L39-132, L39-131 e L38-132). Só passa se a pessoa digitar 540 caixas ou menos (a contraprova com 200 passa nos três passos). O mesmo resultado sai em 4459669, por isso a origem é a frente. Pelo critério da própria frente (DECISOES §7, 'ordem presa → S2') e pelo precedente do REV-05, é S2.\n\n**Outros achados.**\n- S4 da integração: o E1d novo do links_ocultos_test não pega um atalho de cenLiberar colocado entre funções do ben.js (mutante sobrevive, 9/0).\n- S4 da base: vetest OF-103, fora da lista de vermelhos conhecidos.\n\n**Execução.** Fiz tudo em worktrees temporárias no scratchpad (HEAD, 4459669 e 8c00092), já removidas. Não editei nem fiz commit na sp-proto, e não rodei o acoes_duplicadas. Logs e sondas ficam em <scratchpad>/integ-ver/BEN-v1-A/ (hn_*, hp_*, bn_*, probe/)."
+   }
+  },
+  {
+   "agente": "corretor",
+   "resultado": {
+    "head": "a47578f",
+    "revertido": false,
+    "resumo": "I fixed all three S2 findings in separate local commits on claude/prototipo-v44 (bc0e76f, 17ce6d2, a47578f; pre-merge 8c00092, previous HEAD 0644b1b). Nothing was pushed and no artifact was published. I ran the new browser tests against the old _render first and they reproduced the three defects (FALHOU 6/24). Now they pass.\n\nCommit 1 (bc0e76f, BEN-D21): the number of boxes on a new order now starts within what the Estoque has free (540 for the L39-132, sugestão 1.169). The field says why and how much the order can pack (embala até 5.400 kg). Above the free amount, a warning appears before the tap and in the creation message. One old test expectation changed: in the fluxo mode, the L39-131 order now starts with 16 boxes (584 of the 600 were already reserved by the OB-0112) instead of 2.292, which would not liberate. I amended this commit locally, before any push, to add that expectation and the clearer hint, then replayed commits 2 and 3.\n\nCommit 2 (17ce6d2, BEN-D22): \"Cancelar a ordem\", only in A liberar (draft, nothing reserved), by Igor or Ana, with a reason, receipt and expected version. The order goes to Canceladas (outside the 5-phase Kanban, last in the list, read-only) and its lots can open another order. A liberated order still cannot be cancelled (that stays in BEN-6). The blocked order's next step names the way out.\n\nCommit 3 (a47578f): at 390 px, while the screen strip's sheet is open, the fixed footer button hides, so tapping \"Beneficiamento\" leads to Beneficiamento instead of opening the weighing.\n\nFinal checks on HEAD a47578f:\n- build.py 0 FALHA (141 telas); montar_render.py 141 páginas; varredura (lock I) 141/141 pages without error.\n- ben_unit_test 144/144 (new U39, U40); ben_mutantes 61/61 killed (new M58-M62).\n- ben_fluxo_test, all 7 modes: 85/85, including the new modes roteiro, cancelar and faixa390. The owner's task: 20 taps, 0 typed fields.\n- tabelas_ben 12/12, producao_fluxo 66/66, tabelas_est 34/34, cada_cd04 15/15 (I read the count), est_cenario 15/15.\n- producao_unit 121/121, aprova_quem_decide 102/102, os_aprov_lib 45/45, links_ocultos 9/9.\n- prep_site.sh: 166 files in the site map.\n\nThe owner's roteiro (Igor creates and liberates the order with the L39-132; CG-2107 without Estornar; Marta without \"Registrar decisão\") now works as written, using the starting values, on desktop and at 390 px.",
+    "corrigidos": [
+     "S2: a ordem criada com a sugestão de caixas (1.169 para 540 livres) não liberava e o roteiro do proprietário falhava no passo 1. Agora o valor inicial fica dentro do livre, com o motivo escrito, e um aviso aparece quando passa do livre (commit bc0e76f, BEN-D21; U39a-e, M58, modo roteiro)",
+     "S2: ordem em A liberar sem saída prendia o lote, tanto com caixas acima do livre quanto com a carga CG-2106 estornada. Agora há \"Cancelar a ordem\" com motivo, e o lote volta a abrir ordem (commit 17ce6d2, BEN-D22; U40a-g, M59-M62, modo cancelar)",
+     "S2: a 390 px o item Beneficiamento da faixa ficava sob a primária presa ao rodapé (Registrar pesagem). Agora a primária some enquanto a lista está aberta, e um toque real leva ao BEN.dc.html (commit a47578f; modo faixa390 com Input.dispatchMouseEvent)"
+    ],
+    "nao_corrigidos": [
+     "S4 (não corrigido, fora do achado): no filtro rápido por fase da lista do Beneficiamento, o chip \"Canceladas\" aparece em ordem alfabética (antes de \"Em execução\") e o \"Todas\" conta as canceladas; na O.S. o chip Canceladas vem por último e o Todas não as conta",
+     "Limite conhecido: com poucas caixas livres, o valor inicial pode ficar bem baixo (16 caixas para os 24.120 kg do L39-131). O campo mostra a sugestão, o livre e quanto embala (até 160 kg); quem cria pode digitar a sugestão, e a ordem fica impedida até o Estoque ter as caixas (o aviso diz isso) ou pode ser cancelada"
+    ]
+   }
+  },
+  {
+   "agente": "lente-v2",
+   "resultado": {
+    "aprovado": false,
+    "achados": [
+     {
+      "sev": "S2",
+      "titulo": "O valor inicial das caixas (bc0e76f) libera uma ordem que só consegue embalar 44% do L39-132. Os outros 6.900 kg de fruta vendável viram diferença ou desvio, e depois da liberação não há como trazer mais caixas nem cancelar.",
+      "repro": "Executado no navegador, no _render de a47578f: `env CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdpI.lock env CDP_GL=1 SAFRION_DADOS=sintetico timeout 900 python3 <scratch>/integ-ver/BEN-v2-A/probe/b_caixas.py <scratch>/integ-ver/BEN-v2-A/head/tools/prototipo/v37/gen37`. Saída (probe/b_caixas.log): '2 Caixas (valor inicial): 540'; ajuda do campo: 'a ordem vem com 540 un (embala até 5.400 kg; para a sugestão inteira, Rui ... traz as caixas: a compra entra no BEN-2)'; '5 OB-0113 v1 autorizada (CMD-42) e liberada (CMD-06) ... REQ-041 reservou 540 un'; '8 Produto 540 cx: S-01 ... 5.400 kg → L39-133'; '9 Produto +1 cx: Caixas acima da custódia: 0 un. Peça a entrega no Estoque.'; '11 Rui recebe 1.000 caixas: ... recebidos no lote CX26-01'; '12 Rui entrega +100 na REQ-041: Acima do saldo a entregar: 0 un.'; '13 próximo passo: Concluir execução ... O que não foi registrado (6.900 kg) vira diferença na conferência.'; '14 OB-0113 em conferência: diferença 6.900 kg (56,10 %)'; '15 Justificar diferença · Ana (gestora) ... 56,10 % > alçada de 0,5 %'. No node, com o mesmo motor das telas (probe/p1.js), a sequência vai até o Fechar: 'fechar :: OB-0113 fechada: L39-133 5.400 kg Em inspeção ... entradas esgotadas; diferença 6.900 kg' e 'L39-132 fisico depois :: 0'. Na mesma ordem liberada, 'cancelar liberada (Igor/Ana)' é recusado com 'Cancele só em A liberar', e 'retirar' também (probe/p3.js). Com o L39-131 da semente o valor inicial é 540 para 24.120 kg (sugestão 2292). O próprio commit registra 16 caixas para 24.120 kg depois da OB-0112 liberada. Comparação de origem (probe/p4.js): na frente 4459669 o valor inicial era 1.169 e a liberação era recusada ('540 un disponíveis para 1.169 un'); no HEAD a ordem nasce com [540] e libera.",
+      "origem": "integracao",
+      "causa": "Em bc0e76f, `benCaixasPadrao` (ben.js:68) devolve min(sugestão, livre), e o `benNova` e o formulário Nova ordem (processo_beneficiamento.py:82-86) usam esse valor quando nada é digitado. Isso se combina com três regras da frente: a ordem leva o lote inteiro (BEN-D17), a REQ fica fixa na liberação (cenEntregar recusa acima do solicitado) e não há cancelamento depois de liberar (BEN-6). O texto 'Rui traz as caixas' induz ao erro, porque depois da liberação as caixas não chegam mais a esta ordem. Dano: o estoque vendável fica materialmente errado, com 56% (L39-132) a 99% (L39-131) da fruta lançados como diferença ou desvio. Para corrigir, o valor inicial volta a ser a sugestão, já que o Cancelar de 17ce6d2 basta para soltar a ordem impedida. Se o valor inicial reduzido for mantido, falta uma trava ou confirmação explícita na liberação quando caixas × 10 kg < entrada × frac_vend, além da REQ complementar. Para o roteiro do proprietário passar, a semente precisa ter caixas suficientes, ou o roteiro inclui o recebimento de caixas."
+     },
+     {
+      "sev": "S3",
+      "titulo": "Falta de caixa durante a execução não tem saída: a recusa manda pedir no Estoque, e o Estoque recusa porque a REQ já foi toda entregue.",
+      "repro": "Executado (probe/b_caixas.log, passos 9-12): 'Caixas acima da custódia: 0 un. Peça a entrega no Estoque.' e, no Estoque, 'Acima do saldo a entregar: 0 un.' mesmo com 1.000 caixas livres recém-recebidas no CX26-01. Igual na frente 4459669 sempre que a fração vendável real passa dos 95% previstos.",
+      "origem": "frente",
+      "causa": "benSaida (ben.js:~300) remete ao Estoque, mas não existe requisição complementar. A spec adia 'Falta caixa · SC' para o BEN-2. Com a sugestão como valor inicial, a falta é pequena e limitada, mas a mensagem forma um ciclo de recusas sem saída."
+     },
+     {
+      "sev": "S4",
+      "titulo": "Um comando sobre ordem já Cancelada responde 'Já feito: OB-0113 está em Canceladas.', e a tela mostra isso como aviso, não como recusa.",
+      "repro": "Executado em node (probe/p5.js): depois de benCancelar, 'liberar a cancelada (outra aba) :: Já feito: OB-0113 está em Canceladas.' e 'iniciar a cancelada :: Já feito: ...'. O bnRun trata /^Já feito/ como toast de sucesso. Nada é gravado.",
+      "origem": "integracao",
+      "causa": "benAutorizarLiberar e benIniciar testam a etapa antes do benVer e usam o prefixo 'Já feito' para qualquer etapa diferente. A etapa Canceladas, nova em 17ce6d2, precisa de recusa própria ('cancelada por X')."
+     },
+     {
+      "sev": "S4",
+      "titulo": "Textos da O.S. e da Colheita ainda apontam o caminho 'Produção › Cargas e recebimento', mas o item do menu agora é 'Recebimento e beneficiamento'.",
+      "repro": "Executado: `grep -n 'Cargas e recebimento' producao.js areas/processo_os.py` no HEAD encontra producao.js:249 ('pesa em Produção › Cargas e recebimento') e processo_os.py:456 (recusa do Cancelar). No ui37.py o MENU2 tem 'Recebimento e beneficiamento' (BEN-D14). A tela CARGA e a faixa continuam com o título 'Cargas e recebimento'.",
+      "origem": "frente",
+      "causa": "A renomeação BEN-D14 não atualizou as mensagens da base que citam o caminho do menu."
+     }
+    ],
+    "testes_executados": [
+     "Integridade do merge: `git merge-tree --write-tree 8c00092 4459669` dá a árvore 1e648fd, igual à de 21e2ad2 (merge automático, sem resolução manual). Os 31 arquivos da frente são idênticos a 4459669 no merge. Os 19 arquivos da base (SAF-C01 e docs/navegacao) são idênticos a 8c00092 no merge e no HEAD a47578f. Não há arquivo em comum. 8c00092..21e2ad2 contém exatamente os arquivos da frente. Os commits seguintes mexem só em arquivos do BEN, em areas/producao.py (CSS) e no links_ocultos_test.py.",
+     "Unidade no HEAD (executado): ben_unit_test 144/144; ben_mutantes 61/61 mortos; producao_unit_test 121/121; aprova_quem_decide_test 102/102; os_aprov_lib_test 45/45; links_ocultos_test 9/9; legal_unit_test 35/35; quantidade_test 14/14; inicio_entrega_test 26/26; capacidade_unit 76/76; ocupacao_unit 117/117; assinatura_unit_test 76/0 falhas.",
+     "Navegador no HEAD (lock I, executado): ben_fluxo_test com os 7 modos (fluxo, erros, celular, revisao, roteiro, cancelar, faixa390) 85/85; tabelas_ben_test 12/12; producao_fluxo_test 66/66; tabelas_est_test 34/34; cada_cd04_test 15/15 (contagem lida); est_cenario_test 15/15; ap_unico_test 23/23 + 80/80; saf_c01_test 38/0 falhas; cadc_cd06_test 14/14; mbtest 0 falhas; app_cenario_test 15/15; tabelas_os_test 38/38.",
+     "varredura.py no HEAD: 141/141 páginas sem erro de JS e sem página vazia (a base tem 140; a página nova é BEN.dc.html).",
+     "Vermelhos comparados com o pré-merge 8c00092: os_cenario 19/20, mesma verificação nos dois (espera c.v==2; base 4, HEAD 5); ostest 32/33, mesma falha; cotest, as mesmas 12 linhas FALHOU (diff vazio); cadp_fix_test 11/15, mesmas falhas; etapas_celular_test faixa, a mesma falha 16 nos dois (CMP, PA, PM, SAF com 3 larguras cada, diff idêntico, rodado agora em base/). Todos esses vermelhos são da base.",
+     "Achados S1/S2 da rodada anterior, conferidos de novo: (1) com o valor inicial o roteiro libera a OB-0113 (modo roteiro R1-R3 OK), mas a correção abriu o S2 novo descrito acima; (2) Cancelar em A liberar: modo cancelar C1/C2 OK, e no node (p5.js) Marta, Paula, Rui, Caio e Zé são recusados, Ana e Igor cancelam, versão antiga dá conflito e o lote volta aos aptos; (3) faixa a 390: modo faixa390 F1-F3 OK, e a sonda b_faixa.py mostra o item não atual livre nos 5 pontos em CARGA e BEN (COLH e PROD não têm faixa compacta), primária hidden com a folha aberta.",
+     "Sondas da revisão (executadas): probe/p1.js, p3.js, p4.js (frente × HEAD), p5.js e p6.js (REV-05: 0 caixa recusada; REV-09: entrada parcial recusada) no motor das telas via mk.py; probe/b_caixas.py e b_faixa.py no navegador (lock I)."
+    ],
+    "resumo": "Não aprovado: a integração do BEN (HEAD a47578f) tem um S2 novo, introduzido pelo commit bc0e76f.\n\n**O defeito.**\n- O valor inicial das caixas da ordem nova passou a ser o saldo livre no Estoque (540), e não mais a sugestão (1.169 para o L39-132).\n- O roteiro do proprietário cria e libera a ordem, mas ela só consegue embalar 5.400 dos 12.300 kg.\n- Depois de liberada, a ordem não recebe mais caixas: o Estoque responde 'Acima do saldo a entregar: 0 un'.\n- Também não pode ser cancelada nem ter a entrada retirada.\n- Os 6.900 kg de fruta vendável restantes (56%) viram diferença que só a Ana pode justificar, ou precisam ir para Indústria ou Compostagem. O Fechar zera o lote.\n- No L39-131 a falta chega a 99%.\n- Reproduzi no navegador (probe/b_caixas.py) e no motor das telas (p1.js, p3.js). Na frente 4459669 o valor inicial era 1.169 e a liberação era recusada (p4.js), por isso a origem é a integração.\n\n**Integridade do merge: correta.**\n- 21e2ad2 é o merge automático exato, com árvore igual à do `git merge-tree`.\n- Nada da frente sumiu e nada da base (SAF-C01, docs/navegacao) foi alterado.\n- Os commits seguintes mexem só no BEN, no CSS de areas/producao.py e no links_ocultos_test, que ficou mais estrito.\n\n**Regressão: nenhuma nova.**\n- Os testes do módulo e das áreas tocadas passam.\n- A varredura dá 141/141, sem erro de JS e sem página vazia.\n- Os vermelhos (os_cenario 19/20, ostest 32/33, cotest, cadp_fix 11/15 e etapas_celular faixa) reproduzem iguais no pré-merge 8c00092.\n\n**Achados da rodada anterior.**\n- Corrigidos: o Cancelar em A liberar e a faixa a 390 px.\n- O roteiro com o valor inicial passa, mas a correção dele é justamente o S2 novo.\n\n**Achados menores.**\n- S3 (frente): a falta de caixa na execução não tem saída; a recusa manda ao Estoque e o Estoque recusa.\n- S4 (integração): um comando sobre ordem Cancelada aparece como aviso 'Já feito', não como recusa.\n- S4 (frente): textos da O.S. e da Colheita ainda citam 'Produção › Cargas e recebimento'.\n\n**Correções sugeridas.**\n- Voltar o valor inicial para a sugestão; o Cancelar já resolve a ordem que não libera.\n- Ou travar ou pedir confirmação explícita na liberação quando as caixas não cobrem a entrada.\n- Ajustar a semente ou o roteiro para que haja caixas suficientes.\n\nNão editei nem fiz commit de nenhum arquivo versionado. Tudo ficou em <scratchpad>/integ-ver/BEN-v2-A/."
+   }
+  }
+ ]
+}

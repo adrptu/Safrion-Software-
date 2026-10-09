@@ -29,7 +29,10 @@ CSS=('.pr-cards{display:none;flex-direction:column;gap:8px}'
      '.pr-card .pr-grp{font-size:11px;font-weight:800;letter-spacing:.05em;color:#65736A;text-transform:uppercase}'
      '@media (max-width:479px){.pr-lista .g2rola{display:none!important}.pr-cards{display:flex}'
      '.pr-prim{position:fixed!important;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:40;justify-content:center;text-align:center;white-space:normal!important;box-shadow:0 10px 24px -8px rgba(21,32,26,.45)!important;padding:12px 16px!important;font-size:14.5px!important}'
-     'main[data-scroll]{padding-bottom:92px!important}main[data-scroll]+div{padding-bottom:84px!important}.pp-kv{grid-template-columns:minmax(0,1fr)!important}}'
+     'main[data-scroll]{padding-bottom:92px!important}main[data-scroll]+div{padding-bottom:84px!important}.pp-kv{grid-template-columns:minmax(0,1fr)!important}'
+     # folha da faixa de telas aberta (ui37, z-index 31 sob a primária presa, 40): a primária some enquanto a folha está aberta, senão cobre
+     # o item "Beneficiamento" e o toque abre a pesagem (integração BEN, 09/10); fechada a folha, a primária volta
+     'body:has(.etp-chk:checked) .pr-prim{visibility:hidden!important}}'
      '.pr-vis{display:inline-flex;padding:3px;border-radius:999px;background:#EEF1EE;gap:2px}'
      '.pr-vis button{font-family:inherit;font-size:12.5px;font-weight:700;padding:6px 14px;border-radius:999px;border:0;cursor:pointer;background:transparent;color:#65736A}'
      '.pr-vis button[aria-pressed=true]{background:#FFFFFF;color:#15201A;box-shadow:0 1px 2px rgba(21,32,26,.12)}')
