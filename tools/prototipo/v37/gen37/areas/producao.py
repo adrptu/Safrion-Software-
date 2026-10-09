@@ -182,6 +182,9 @@ function prLoteProx(c,L,S){ if(S.esgotado) return {t:'sem saldo · rastreio guar
   if(S.q==='Em inspeção'){ const ql=prQuem('qual'); if(!S.dono||S.dono===ql) return {t:'Liberar lote · '+ql,a:'liberar'};
     return {t:S.dono+' resolve · '+String(S.mot||'').split(':')[0],p:S.dono+' resolve: '+S.mot+'. Liberar fica com a Qualidade depois disso'}; }   /* revisão A-13 */
   if(prCmp(S.disp,0)>0&&prPedidosPara(c,L).length) return {t:'Reservar para pedido · '+prQuem('com'),a:'reservar'};
+  /* Comercial A-17: venda compatível sem a massa da saca não reserva; o próximo passo é dela, em Contratos e pedidos */
+  const amb=prCmp(S.disp,0)>0?Object.values(prP(c).pedidos).filter(p=>prAmb(p)&&prCompat(p,L)).map(p=>p.id):[];
+  if(amb.length) return {t:'Registrar a saca do '+amb.join(', ')+' em Contratos e pedidos · '+prQuem('com'),p:amb.join(', ')+' com a saca do contrato a conferir: a reserva fica suspensa até registrar a massa com a fonte em Comercial › Contratos e pedidos ('+prQuem('com')+')'};
   return {t:prCmp(S.disp,0)>0?'disponível para venda':'todo reservado'}; }
 function prPedRow(c,p){ const cu=p.cultura; const U=x=>prEstTxt(cu,x); const rs=prResPed(c,p.id); const res=prSoma(rs.map(r=>r.kg)); const falta=prFalta(c,p); const st=prSitPed(c,p);
   const nx=st.t==='Em risco'?('expedição impedida: '+st.imp.map(r=>r.lote).join(', ')):(st.t==='Entregue'?'entregue':(prCmp(falta,0)>0?(p.tipo==='futura'?'oferta da '+(p.sem?prSemTxt(p.sem):'safra')+' · reservar quando houver lote':'Reservar lote · '+prQuem('com')):'aguardar expedição'));

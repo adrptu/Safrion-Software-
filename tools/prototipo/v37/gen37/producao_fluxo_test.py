@@ -178,6 +178,13 @@ try:
         print('== celular · AC-19 em 390 × 844')
         for pg in ('COLH', 'CARGA', 'PROD'):
             ir(pg + '.dc.html', limpa=True, w=390, h=844)
+            if pg == 'PROD':   # Comercial A-17 (expectativa nova): na semente o PV-030 tem a saca a conferir, nenhum lote tem reserva a fazer e o cartão diz o próximo passo
+                cd = J("(()=>{ const e=[...document.querySelectorAll('.pr-card')].filter(VIS).find(x=>N(x.innerText).indexOf('L10-031')>=0); return e?N(e.innerText):''; })()") or ''
+                t.chk('AC-19 PROD na semente (Comercial A-17): sem reserva a fazer, sem primária; o cartão do L10-031 diz "Registrar a saca do PV-030 em Contratos e pedidos"',
+                      not J("[...document.querySelectorAll('.pr-prim')].some(VIS)") and 'Registrar a saca do PV-030 em Contratos e pedidos' in cd, cd)
+                ir('VEN.dc.html', w=390, h=844)   # registrada a saca de 60 kg pelo comando da tela (comercial.js só carrega no grupo Comercial), a reserva volta a ser a primária
+                J("(()=>{ const {comConverterSaca}=window.__com; const r=window.__car.cenMudar(null,c=>comConverterSaca(c,{venda:'PV-030',fat:'60',fonte:'Contrato CT-201 (teste)',ator:'Ana',chave:'T-SACA-PV-030'})); return r.erro||'ok'; })()")
+                ir('PROD.dc.html', w=390, h=844)
             m = J("(()=>{ const m=document.querySelector('main'); return [document.documentElement.scrollWidth, m.scrollWidth-m.clientWidth, [...document.querySelectorAll('.pr-card')].filter(VIS).length, [...document.querySelectorAll('.g2rola')].filter(VIS).length]; })()")
             b = J("(()=>{ const b=[...document.querySelectorAll('.pr-prim')].find(VIS); if(!b) return null; const r=b.getBoundingClientRect(); return [N(b.innerText), Math.round(r.top), Math.round(r.bottom), innerHeight, getComputedStyle(b).position]; })()")
             t.chk(f'AC-19 {pg}: cartões no lugar da tabela, sem rolagem horizontal', m and m[0] <= 390 and m[1] <= 0 and m[2] > 0 and m[3] == 0, m)
