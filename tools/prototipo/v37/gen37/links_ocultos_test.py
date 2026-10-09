@@ -45,6 +45,10 @@ ok('E1e o E1d derruba os atalhos de cenLiberar entre funções do ben.js (3 muta
    _m > 0 and all(not e1d(t)[0] for _, t in _mut) and all(t != _b for _, t in _mut), [(n, e1d(t)[1]) for n, t in _mut])
 ef=[(f,len(re.findall(r'\bosc_libEfeito\(',s))) for f,s in src.items() if re.search(r'\bosc_libEfeito\(',s)]   # CTL-3: definição + 2 chamadas
 ok('E1c o efeito sem o registro de quem decide (osc_libEfeito) só é chamado por osc_liberar e pela prévia osLibErro (cópia)', ef==[('areas/processo_os.py',3)], ef)
+# rodada 1 da integração (S4): o caminho escrito nas mensagens é o do menu (BEN-D14: Produção › Recebimento e beneficiamento); "Produção ›
+# Cargas e recebimento" não existe mais no menu. Só o texto que a pessoa lê conta (comentários e docstrings ficam de fora)
+_vel = sorted(f for f, t in src.items() if 'Produção › Cargas e recebimento' in (_sem_coment_py(t) if f.endswith('.py') else _sem_coment(t)))
+ok('E4 nenhuma mensagem de produto aponta "Produção › Cargas e recebimento" (o menu diz "Produção › Recebimento e beneficiamento")', not _vel, _vel)
 seed=cenario.seed()['ordens']
 # BEN-D05: a OB em A liberar da semente (OB-0112) é de beneficiamento (fam 'BEN') e fica fora da lista da O.S.: libera pelo Beneficiamento, nunca por osc_liberar
 _os_ids={o['id'] for o in P._ordens()}

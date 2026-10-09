@@ -252,7 +252,7 @@ function osMerge(b,co,c){ if(!co) return b;
   // conferência: o encerramento depende do cenário (apontamento aguardando sinal ou sobra em custódia)
   if(co.etapa==='Em conferência'){ o.encM=cenPodeEncerrar(c,co.id);
     if(!o.encM){ o.selos=o.selos.filter(s=>!/Sobras a receber|Aguardando sinal/i.test(s.t)); if(!mine){ o.cond='Apontamentos enviados e nada em custódia. Próximo passo: conferir e encerrar.'; o.dono=o.resp; o.prazo='conferir e encerrar'; } }
-    else if(/^Carga a pesar/.test(o.encM)){ const t='Carga a pesar';   /* colheita (R-18): carga a pesar ou no aparelho; quem recebe pesa em Produção › Cargas e recebimento */
+    else if(/^Carga a pesar/.test(o.encM)){ const t='Carga a pesar';   /* colheita (R-18): carga a pesar ou no aparelho; quem recebe pesa em Produção › Recebimento e beneficiamento (Cargas) */
       if(!o.selos.some(s=>s.t===t)) o.selos=o.selos.concat([{t,c:'yellow'}]); o.dono=(typeof prRec==='function'?prRec(prFazDaOS(c,co)):'Recebimento'); o.prazo='pesar e receber a carga'; }
     else { const sin=/sinal/.test(o.encM); const t=sin?'Aguardando sinal do app':(/duplicidade/.test(o.encM)?'Apontamento em conferência':'Sobras a receber');  // o bloqueio também na lista e no Kanban
       if(!o.selos.some(s=>s.t===t)) o.selos=o.selos.concat([{t,c:'yellow'}]);
@@ -453,7 +453,7 @@ function osc_encerrar(c,id){ const o=osc_o(c,id); if(o.etapa!=='Em conferência'
 // liberada desfeita, com a reserva solta, sem decisão competente e sem autor
 function osc_cancelar(c,id,mot,cx,ator){ const o=osc_o(c,id); const quem=cenExige(ator,'gestor','Cancelar a '+id+' sem execução (CMD-46)');
   if((o.realizado||0)>0||['A liberar','Liberadas'].indexOf(o.etapa)<0) throw new Error('Só ordem sem realizado, em A liberar ou Liberadas, é cancelada sem execução.');
-  { const cg=osCargasVivas(c,id); if(cg.length) throw new Error('Cancelar recusado: a '+id+' tem carga '+cg.map(g=>g.id+' '+String(g.st).toLowerCase()).join(', ')+'. Colheita com carga é fato executado: estorne a carga recebida ou descarte a carga a pesar (com motivo) em Produção › Cargas e recebimento antes de cancelar.'); }
+  { const cg=osCargasVivas(c,id); if(cg.length) throw new Error('Cancelar recusado: a '+id+' tem carga '+cg.map(g=>g.id+' '+String(g.st).toLowerCase()).join(', ')+'. Colheita com carga é fato executado: estorne a carga recebida ou descarte a carga a pesar (com motivo) em Produção › Recebimento e beneficiamento (Cargas) antes de cancelar.'); }
   const r=o.req&&c.reqs[o.req];
   if(r){ if(o.reservado) r.itens.forEach(it=>{ const l=c.lotes[it.prod+'|'+it.lote]; const res=Math.max(0,it.solicitado-it.entregue); if(l&&res>0) l.reservado=Math.max(0,l.reservado-res); }); r.estado='Cancelada'; }
   const hr=cenAgora(); o.etapa='Canceladas'; o.reservado=false; o.selos=[]; osc_txt(o,{canPor:quem,canEm:hr,cond:'Cancelada sem execução por '+quem+' às '+hr+': '+mot+'. '+cx[1],dono:'',prazo:'',insx:cx[2]});
