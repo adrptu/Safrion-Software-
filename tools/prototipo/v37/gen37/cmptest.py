@@ -184,7 +184,7 @@ try:
     chk('ação primária vira Enviar 1 convite adicional', 'Enviar 1 convite adicional (simulado)' in body(), J("[...document.querySelectorAll('main button, header button')].map(b=>b.innerText).filter(t=>/Enviar|Comparar/.test(t)).join('|')"))
     kid('Fungicidas','Coop. Vale',True); t=T(); chk('já convidado continua só consulta', 'Convite simulado enviado a Coop. Vale' in t and not J("!!document.querySelector('aside[role=dialog]')"), t)
     nenv=J("document.body.innerText.match(/(\\d+) de (\\d+) convites responderam/)"); print('  antes:', nenv)
-    clk('Enviar 1 convite adicional'); t=T(); chk('envio adicional simulado, sem reenviar', 'Convites adicionais simulados' in t and 'nenhuma mensagem real' in t and 'Quem já recebeu não recebe de novo' in t, t)
+    clk('Enviar 1 convite adicional',w=.1); t=T(); chk('envio adicional simulado, sem reenviar', 'Convites adicionais simulados' in t and 'nenhuma mensagem real' in t and 'Quem já recebeu não recebe de novo' in t, t)
     time.sleep(2.5); t=kid('Fungicidas','Agro Norte'); print('  Agro Norte:', t); chk('Agro Norte respondeu', 'Proposta recebida' in t, t)
     depois=J("document.body.innerText.match(/(\\d+) de (\\d+) convites responderam/)"); print('  depois:', depois)
     chk('só 1 convite a mais', nenv and depois and int(depois[2])==int(nenv[2])+1, f'{nenv} → {depois}')
