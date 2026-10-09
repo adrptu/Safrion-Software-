@@ -5,7 +5,7 @@ Python sobre as mesmas ocorrências (dados2.ocorr_op, repartir com os grupos de 
 capacidade, ocupação, necessárias, falta, soma das safras abertas da mesma fazenda, "<1 %", invariância da demanda, sobrescrita de
 configuração (cfg_override), custo por cultura (resumo_cultura), partição do calendário e o texto do veredito. JS = Python (C11).
 Uso: python3 capacidade_unit.py"""
-import sys, os, json, copy, random, subprocess, re
+import sys, os, json, copy, random, subprocess, re, datetime
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import dados2 as D2
 OK, FAIL = [], []
@@ -21,7 +21,7 @@ const X=globalThis.CX; const jobs=JSON.parse(fs.readFileSync(0,'utf8')); const o
 for(const j of jobs){ if(j.op==='fmt'){ out.push(j.v.map(x=>X.fmtOcup(x))); continue; } if(j.op==='cls'){ out.push(j.v.map(x=>X.classeOc(...x))); continue; }
   const G=X.capSaf(j.oc,j.outras,j.recursos,j.meses,j.dias); const g={};
   Object.keys(G).forEach(k=>{ const x=G[k]; g[k]={un:x.un,cells:x.cells.map(c=>({d:c.d,dThis:c.dThis,dOth:c.dOth,cap:c.cap,ocup:c.ocup,nec:c.nec,red:c.red,soma:c.soma,own:c.own})),
-    max:x.max?{mes:x.max.mes,ocup:x.max.ocup}:null,reds:x.reds.map(c=>c.mes),horas:x.horasSafra,txt:x.max?X.fmtOcup(x.max.ocup):'—'}; });
+    max:x.max?{mes:x.max.mes,ocup:x.max.ocup}:null,reds:x.reds.map(c=>c.mes),horas:x.horasSafra,txt:x.max?X.fmtOcup(x.max.ocup):'—',fo:(x.fora||[]).map(f=>[f.sid,f.cls,f.mi,f.h,f.n])}; });
   const r={G:g,carga:j.oc.map(i=>Object.fromEntries(Object.keys(G).map(k=>[k,X.cargaRec(i,k)])))}; if(j.ver) r.ver=X.capVeredito(G,j.oc,j.ver); out.push(r); }
 process.stdout.write(JSON.stringify(out));
 """
@@ -56,7 +56,8 @@ def ver_in(safra, oc, recursos):
 def job(safra, recursos=None, planos=None, cfg=None, ver=False, outras_off=False):
     rs = recursos or D2.RECURSOS
     oc = D2.ocorr_op(safra, planos, cfg, rs)
-    outras = [] if outras_off else [dict(id=sid, nome=SAF[sid]['nome'], oc=[oc_json(o) for o in D2.ocorr_op(sid, None, None, rs)]) for sid in D2.outras_safras(safra)]
+    # outras com o período de cada uma (SAF-C02): a classe de cada ocorrência delas sai da safra de origem, dentro do capSaf
+    outras = [] if outras_off else [dict(id=sid, nome=SAF[sid]['nome'], ini=SAF[sid]['ini'], fim=SAF[sid]['fim'], oc=[oc_json(o) for o in D2.ocorr_op(sid, None, None, rs)]) for sid in D2.outras_safras(safra)]
     j = dict(op='cap', oc=[oc_json(o, safra) for o in oc], outras=outras, recursos=rec_js(rs), meses=D2.MESES, dias=D2.DIAS_UTEIS)
     if ver: j['ver'] = ver_in(safra, oc, rs)
     return j, oc
@@ -198,6 +199,143 @@ if __name__ == '__main__':
         chk('S3.1 classe_oc (Python) = classeOc (tela): antes · depois · fora · cal', [D2.classe_oc(*x) for x in casos] == cj == ['antes', 'depois', 'fora', 'cal'], cj)
     finally:
         D2.CULTIVOS['S27SF'][:] = _orig
+    # ================= SAF-C02 (Codex, 09/10/2026) · capacidade simétrica entre safras abertas =================
+    # Regra: a elegibilidade de cada ocorrência na capacidade sai do período da safra de ORIGEM (classeOc), qualquer que seja a safra
+    # aberta; a carga de outra safra que fica fora da conta aparece no veredito com número, motivo e horas (sem verde enganoso). Antes,
+    # a ocorrência de outra safra entrava como estava: com o mesmo período, abrir A dava 340 h (R2) e abrir B, 140 h (R4).
+    MF = [['2027-02', 'fev/27']]; DF = {'2027-02': 20}; RF = [dict(id='trator', nome='Tratores', un=1, jornada=8, turnos=1, disp=100, pes=False)]
+    def ocf(i, h, dt, rec=None, mi=0):   # ocorrência da fixture do harness do Codex (nh = h = nq; janela 2000 h)
+        return dict(id=i, mi=mi, dt=dt, a=dict(op='Teste', nome=i), rp=dict(itens=[dict(nh=h, h=h, nq=h, Hin=2000)], falta=dict(semHoras=0)), cfs=[dict(rec=rec or dict(trator=1))])
+    def vista(sid, ocs, per, recs=RF, meses=MF, dias=DF, ver=True):
+        """job com a safra sid aberta: as ocorrências dela com cls pelo período dela (o capCalc da tela); as outras com o período de cada uma"""
+        oc = [dict(o, cls=D2.classe_oc(o['dt'], o['mi'], *per[sid])) for o in ocs[sid]]
+        cl = dict(antes=0, fora=0, depois=0, cal=0)
+        for o in oc: cl[o['cls']] += 1
+        j = dict(op='cap', oc=oc, outras=[dict(id=x, nome=x, ini=per[x][0], fim=per[x][1], oc=ocs[x]) for x in ocs if x != sid], recursos=recs, meses=meses, dias=dias)
+        if ver: j['ver'] = dict(semPlano=[], aPlano=100, cls=cl, ini=br(per[sid][0]), outras={x: x for x in ocs}, pend=0, semHoras=0, incompleto='', periodoCal=meses[0][1])
+        return j
+    def py_vista(j):
+        f = getattr(D2, 'cap_saf', None)
+        return f(j['oc'], j['outras'], j['recursos'], j['meses'], j['dias']) if f else None
+    def par(rj, pg):
+        if pg is None: return ['sem dados2.cap_saf']
+        dif = []
+        for k, x in rj['G'].items():
+            for i_, (a, b) in enumerate(zip(x['cells'], pg[k]['cells'])):
+                for f in ('d', 'dThis', 'dOth', 'nec'):
+                    if abs((a[f] or 0) - (b[f] or 0)) > 1e-9: dif.append((k, i_, f, a[f], b[f]))
+                if a['red'] != b['red']: dif.append((k, i_, 'red'))
+            if x['fo'] != [[f['sid'], f['cls'], f['mi'], f['h'], f['n']] for f in pg[k].get('fora', [])]: dif.append((k, 'fora', x['fo'], pg[k].get('fora')))
+        return dif
+    OCS = dict(A=[ocf('A1', 100, '2027-02-10')], B=[ocf('B1', 40, '2027-02-10'), ocf('B2', 200, '2027-02-28')])
+    PER = dict(A=('2027-02-01', '2027-02-15'), B=('2027-02-01', '2027-02-15'))
+    PER_CTL = dict(A=('2027-02-01', '2027-02-28'), B=('2027-02-01', '2027-02-28'))   # controle: B2 dentro do período das duas
+    OCS3 = dict(A=[ocf('A1', 100, '2027-02-10'), ocf('A2', 50, '2027-02-20')], B=[ocf('B1', 40, '2027-02-10'), ocf('B2', 200, '2027-02-28')])
+    PER3 = dict(A=('2027-02-11', '2027-02-28'), B=('2027-02-11', '2027-02-28'))       # antes do início: A1 e B1 fora nas duas vistas
+    JF = [vista('A', OCS, PER), vista('B', OCS, PER), vista('A', OCS, PER_CTL), vista('B', OCS, PER_CTL), vista('A', OCS3, PER3), vista('B', OCS3, PER3)]
+    RFX = js(JF); PFX = [py_vista(j) for j in JF]
+    ca, cb = RFX[0]['G']['trator']['cells'][0], RFX[1]['G']['trator']['cells'][0]
+    chk('SAF-C02 A↔B com o mesmo período (01 a 15/02/2027): 140 h nas duas vistas (A1 100 + B1 40), cabe com 1; era 340 h com a A aberta',
+        near(ca['d'], 140) and near(cb['d'], 140) and (ca['dThis'], ca['dOth'], cb['dThis'], cb['dOth']) == (100, 40, 40, 100) and ca['nec'] == cb['nec'] == 1 and not ca['red'] and not cb['red'], (ca, cb))
+    va, vb = RFX[0]['ver'], RFX[1]['ver']
+    chk('SAF-C02 vista A: a B2 (200 h) fica fora da conta com número, motivo e horas; amarelo (R4), nunca verde',
+        va['R'] == 'R4' and va['txt'] == 'Na estimativa mensal, cabe nos 100 ha com plano. Fora da conta: 1 ocorrência da B depois do fim dela (Tratores 200,0 h).', va)
+    chk('SAF-C02 vista B: a B2 fora da conta como "depois do fim da safra" (R4), sem citar a A',
+        vb['R'] == 'R4' and vb['txt'] == 'Na estimativa mensal, cabe nos 100 ha com plano. Fora da conta: 1 ocorrência depois do fim da safra.', vb)
+    chk('SAF-C02 capSaf guarda a carga excluída da outra safra (B2: depois do fim, fev/27, 200 h)', [f[:4] for f in RFX[0]['G']['trator']['fo']] == [['B', 'depois', 0, 200]], RFX[0]['G']['trator']['fo'])
+    c1, c2 = RFX[2]['G']['trator']['cells'][0], RFX[3]['G']['trator']['cells'][0]
+    chk('SAF-C02 controle (B2 dentro do período, 01 a 28/02/2027): 340 h nas duas vistas, precisa de 3, tem 1',
+        near(c1['d'], 340) and near(c2['d'], 340) and c1['nec'] == c2['nec'] == 3 and c1['red'] and c2['red'] and not RFX[2]['G']['trator']['fo'] and not RFX[3]['G']['trator']['fo'], (c1, c2))
+    chk('SAF-C02 controle: R2 nas duas; a A soma a B (240,0 h), a B falta sozinha',
+        RFX[2]['ver']['txt'] == 'Falta recurso: Tratores precisam de 3 em fev/27 e você tem 1, somando a B (240,0 h).' and RFX[3]['ver']['txt'] == 'Falta recurso: Tratores precisam de 3 em fev/27 e você tem 1.', (RFX[2]['ver'], RFX[3]['ver']))
+    c1, c2 = RFX[4]['G']['trator']['cells'][0], RFX[5]['G']['trator']['cells'][0]
+    chk('SAF-C02 antes do início (11 a 28/02/2027 nas duas): 250 h nas duas vistas (A2 50 + B2 200); A1 e B1 fora',
+        near(c1['d'], 250) and near(c2['d'], 250) and (c1['dThis'], c2['dThis']) == (50, 200), (c1, c2))
+    chk('SAF-C02 antes do início: cada vista cita a própria e a da outra com o motivo "antes do início dela"',
+        RFX[4]['ver']['txt'] == 'Falta recurso: Tratores precisam de 2 em fev/27 e você tem 1, somando a B (200,0 h). Fora da conta: 1 ocorrência antes do início da safra (11/02/2027); 1 ocorrência da B antes do início dela (Tratores 40,0 h).'
+        and RFX[5]['ver']['txt'] == 'Falta recurso: Tratores precisam de 2 em fev/27 e você tem 1. Fora da conta: 1 ocorrência antes do início da safra (11/02/2027); 1 ocorrência da A antes do início dela (Tratores 100,0 h).',
+        (RFX[4]['ver']['txt'], RFX[5]['ver']['txt']))
+    dif = [(n, par(r, g)) for n, r, g in zip(('A', 'B', 'A ctl', 'B ctl', 'A antes', 'B antes'), RFX, PFX) if par(r, g)]
+    chk('SAF-C02 paridade JS = Python (dados2.cap_saf) nas 6 vistas da fixture, com a carga excluída', not dif, dif[:3])
+    _saf0 = list(D2.SAFRAS)
+    try:
+        D2.SAFRAS.extend([dict(id='XA', nome='Teste A', ini='2027-02-01', fim='2027-02-15', fazenda='Santa Rita', ro=False),
+                          dict(id='XF', nome='Teste F', ini='2027-02-01', fim='2027-02-15', fazenda='Boa Vista', ro=False),
+                          dict(id='XE', nome='Teste E', ini='2027-02-01', fim='2027-02-15', fazenda='Santa Rita', ro=True)])
+        o1, o2, o3 = D2.outras_safras('S2627'), D2.outras_safras('XE'), D2.outras_safras('XF')
+        chk('SAF-C02 outras safras: só abertas e da mesma fazenda (S27SF, XA); outra fazenda (XF, LG2627) e encerrada (XE, S2526) fora; com a encerrada aberta na tela, nada soma',
+            o1 == ['S27SF', 'XA'] and o2 == [] and o3 == [], (o1, o2, o3))
+    finally:
+        D2.SAFRAS[:] = _saf0
+    # cenário real, o mesmo do teste de navegador (saf_capacidade_simetrica_test.py): S2627 e S27SF com o MESMO período, 01/09/2026 a
+    # 12/07/2027. A colheita da Safrinha em 14 e 15/07 (P1 e T2) cai depois do fim; em jul/27 a S2627 tem a poda do C1 (04/07)
+    _per = {s: (SAF[s]['ini'], SAF[s]['fim']) for s in ('S2627', 'S27SF')}; cop0 = D2.plano_op('S27SF')['cop']
+    try:
+        for s in ('S2627', 'S27SF'): SAF[s]['ini'], SAF[s]['fim'] = '2026-09-01', '2027-07-12'
+        jA, ocA = job('S2627', ver=True); jB, ocB = job('S27SF', ver=True); rA, rB = js([jA, jB]); gA, gB = D2.capacidade('S2627'), D2.capacidade('S27SF')
+        jul = MI['jul/27']
+        dj = {k: (rA['G'][k]['cells'][jul]['d'], rB['G'][k]['cells'][jul]['d'], gA[k]['cells'][jul]['d'], gB[k]['cells'][jul]['d']) for k in ('trator', 'oper', 'colh')}
+        chk('SAF-C02 real: jul/27 Tratores 61,7 h nas duas vistas e no espelho (poda 25,3 + dessecação 4,4 + colheita T1-A 32,0); era 140,3 h com a S2627 aberta',
+            all(near(x, 61.7, .06) for x in dj['trator']), dj)
+        tudo = [(k, i) for k in rA['G'] for i in range(12) if len({round(x, 9) for x in (rA['G'][k]['cells'][i]['d'], rB['G'][k]['cells'][i]['d'], gA[k]['cells'][i]['d'], gB[k]['cells'][i]['d'])}) > 1]
+        chk('SAF-C02 real: demanda de todo recurso × mês igual nas duas vistas (JS e Python)', not tudo, tudo[:6])
+        chk('SAF-C02 real: veredito da S2627 identifica a colheita da Safrinha fora da conta (número, motivo e horas dos recursos que a S2627 usa em jul/27)',
+            '2 ocorrências da Safrinha 2027 depois do fim dela (Tratores 78,6 h e Operadores e equipe 157,2 h)' in rA['ver']['txt'] and rA['ver']['R'] != 'R5', rA['ver'])
+        chk('SAF-C02 real: veredito da S27SF diz "2 ocorrências depois do fim da safra" e não cita a S2627 (nada dela fora em jul/27)',
+            'Fora da conta: 2 ocorrências depois do fim da safra' in rB['ver']['txt'] and 'Safra 2026/27' not in rB['ver']['txt'], rB['ver'])
+        dep = [o for o in ocB if D2.classe_oc(o['dt'], o['mi'], '2026-09-01', '2027-07-12') == 'depois']
+        cop1 = D2.plano_op('S27SF')['cop']
+        chk('SAF-C02 real: custo preservado — o custo de operação da S27SF não muda com o período e inclui as 2 colheitas fora da conta',
+            near(cop1, cop0, .001) and len(dep) == 2 and all((o['cop'] or 0) > 0 for o in dep) and near(sum(o['cop'] or 0 for o in ocB), cop1, .01), (cop0, cop1, [(o['c']['local'], str(o['dt']), o['cop']) for o in dep]))
+        dif = [(n, k) for n, r, g in (('S2627', rA, gA), ('S27SF', rB, gB)) for k in r['G'] if r['G'][k]['fo'] != [[f['sid'], f['cls'], f['mi'], f['h'], f['n']] for f in g[k].get('fora', [])]]
+        chk('SAF-C02 real: paridade JS = Python da carga fora da conta (g.fora, desta safra e das outras)', not dif, dif[:4])
+    finally:
+        for s in ('S2627', 'S27SF'): SAF[s]['ini'], SAF[s]['fim'] = _per[s]
+    # S3.1 com a S2627 aberta: a colheita da Safrinha depois do fim dela (d3 em 20/05/2027 → ago/27) não entra mais em ago/27 da S2627
+    # (antes entrava: 19 h de Colhedoras e 42,4 h de Operadores); a S2627 não tem demanda em ago/27, então o veredito não muda (V1)
+    _orig = copy.deepcopy(D2.CULTIVOS['S27SF'])
+    try:
+        for c_ in D2.CULTIVOS['S27SF']:
+            if c_['id'] == 'd3': c_['plantio'] = '2027-05-20'
+        jx, _ = job('S2627', ver=True); rx = js([jx])[0]; gx = D2.capacidade('S2627'); ago = MI['ago/27']
+        chk('SAF-C02 S3.1 com a S2627 aberta: nenhuma hora da Safrinha depois do fim dela em ago/27 (JS e Python); veredito igual ao V1',
+            all(rx['G'][k]['cells'][ago]['dOth'] == 0 and gx[k]['cells'][ago]['dOth'] == 0 for k in rx['G']) and rx['ver']['txt'] == V['base S2627'],
+            ({k: (rx['G'][k]['cells'][ago]['dOth'], gx[k]['cells'][ago]['dOth']) for k in rx['G']}, rx['ver']['txt']))
+    finally:
+        D2.CULTIVOS['S27SF'][:] = _orig
+    # propriedade: 150 sorteios de 2 ou 3 safras abertas da mesma fazenda (períodos e ocorrências ao acaso, inclusive fora do calendário):
+    # a demanda de cada recurso × mês é a mesma com qualquer safra aberta, igual à soma das ocorrências elegíveis pela safra de origem
+    # (oráculo independente), e JS = Python
+    random.seed(20261009)
+    MP = [['2027-01', 'jan/27'], ['2027-02', 'fev/27'], ['2027-03', 'mar/27']]; DP = {'2027-01': 21, '2027-02': 19, '2027-03': 22}
+    RP = [dict(id='trator', nome='Tratores', un=2, jornada=8, turnos=1, disp=90, pes=False), dict(id='oper', nome='Operadores', un=3, jornada=8, abs=10, pes=True)]
+    D0 = datetime.date(2026, 12, 15)
+    def mi_de(dt): return next((i for i, (m, _) in enumerate(MP) if m == dt[:7]), -1)
+    JP, CASOS = [], []
+    for _k in range(150):
+        ids = ['A', 'B', 'C'][:random.choice([2, 3])]; per = {}; ocs = {}
+        for x in ids:
+            a, b = sorted(random.sample(range(120), 2)); per[x] = ((D0 + datetime.timedelta(a)).isoformat(), (D0 + datetime.timedelta(b)).isoformat())
+            ocs[x] = []
+            for n in range(random.randint(1, 4)):
+                dt = (D0 + datetime.timedelta(random.randrange(0, 120))).isoformat()
+                ocs[x].append(ocf(x + str(n), random.choice([5, 12.5, 40, 80, 200]), dt, random.choice([dict(trator=1), dict(oper=2), dict(trator=1, oper=1)]), mi_de(dt)))
+        CASOS.append((ids, per, ocs))
+        for x in ids: JP.append(vista(x, ocs, per, RP, MP, DP, ver=False))
+    RPX = js(JP); bad = []; i_ = 0; nviews = 0
+    for ids, per, ocs in CASOS:
+        orac = {}
+        for x in ids:
+            for o in ocs[x]:
+                if o['mi'] < 0 or D2.classe_oc(o['dt'], o['mi'], *per[x]) != 'cal': continue
+                for c_ in D2.carga_itens(o): orac[(c_['k'], o['mi'])] = orac.get((c_['k'], o['mi']), 0) + c_['h']
+        for x in ids:
+            r = RPX[i_]; pg = py_vista(JP[i_]); i_ += 1; nviews += 1
+            for kk in ('trator', 'oper'):
+                for mi in range(3):
+                    dj = r['G'][kk]['cells'][mi]['d']; dp = pg[kk]['cells'][mi]['d'] if pg else None
+                    if abs(dj - orac.get((kk, mi), 0)) > 1e-9 or dp is None or abs(dp - dj) > 1e-9: bad.append((x, kk, mi, dj, dp, orac.get((kk, mi), 0)))
+    chk('SAF-C02 propriedade: 150 sorteios (%d vistas) — demanda igual com qualquer safra aberta, = Σ elegíveis pela origem, JS = Python' % nviews, not bad, (len(bad), bad[:4]))
     # C11 · 200 combinações sorteadas de unidades, jornada, turnos, disponibilidade e absenteísmo (e sobrescrita de configuração), JS = Python
     random.seed(20261005); J2 = []; P2 = []
     for k in range(200):

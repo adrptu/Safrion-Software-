@@ -249,6 +249,7 @@ Uma função `veredito` dá o texto e a cor do `<span role="status">`, com cor e
 - **Demanda da célula** = Σ `cargaRec` das ocorrências desta safra no mês + as de `outrasSafras(self, saf)`.
   - `outrasSafras` usa o predicado de safra.js:344: outra safra, não encerrada (`!r.ro`), da mesma fazenda. É a mesma regra do estoque; espelho em dados2.py:806-809.
   - A LG2627 (outra fazenda) e a S2526 (encerrada) não entram na S2627.
+  - **Elegibilidade pela safra de origem (SAF-C02, 09/10/2026):** a etiqueta de cada ocorrência (antes do início, depois do fim, fora), desta e das outras safras, sai do período da safra dela, qualquer que seja a aberta; a carga das outras que fica fora vai ao "Fora da conta" do veredito (número, motivo e horas, nos meses com demanda desta safra), à linha do filtro e ao `aria-label`. Dano evitado: o mesmo mês dar falta de recurso numa safra e folga na outra só pela navegação.
 - **Ocupação** = demanda ÷ capacidade. Capacidade 0 com demanda: "não calculável" (53.2); nunca divide por zero.
 - **Necessárias** = max(teto(demanda ÷ horas de uma unidade), maior `rc[k]` de uma configuração com área necessária no mês). É o "postos simultâneos" do PRD 44.4 e a mesma regra do motivo de safra.js:65.
 - **Falta** quando necessárias > unidades.

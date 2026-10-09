@@ -301,16 +301,19 @@ function classeOc(dt,mi,ini,fim){ if(ini&&dt<ini) return 'antes'; if(fim&&dt>fim
 function fmtOcup(o){ if(o===null||o===undefined) return 'não calculável'; if(o<=0) return '—'; if(o<1) return '<1 %'; return Math.round(o).toLocaleString('pt-BR')+' %'; }
 // atividades em uso de uma operação nesta safra (fonte única do "N atividades" da g_op e do alcance do "Todas")
 function atvEmUso(oc,op){ const s=new Set(); oc.forEach(i=>{ if(i.a&&i.a.op===op) s.add(i.a.nome); }); return s; }
-// capSaf(oc, outras, recursos, meses, dias): oc = ocorrências desta safra; outras = [{id, nome, oc}] das safras abertas da mesma fazenda.
-// Ocorrência desta safra com etiqueta do calendário (i.cls de classeOc: antes do início, depois do fim, fora) conta no custo e não na
-// capacidade (§3.4, FORA-DE-ESCOPO "Regra A"; revisão SAF, S3.1). As das outras safras entram como estão: são a carga real do mês.
-function capSaf(oc,outras,recursos,meses,dias){ const M=meses.length; const Z=()=>new Array(M).fill(0); const G={};
-  recursos.forEach(r=>{ G[r.id]=Object.assign(capRec(r,meses,dias),{dThis:Z(),dThisAt:Z(),dOth:Z(),oth:{},sim:Z(),semH:Z(),pendSR:Z()}); });
-  const add=(i,own,sid)=>{ if(!(i.mi>=0)||(own&&i.cls&&i.cls!=='cal')) return; const cs=cargaItens(i);
+// capSaf(oc, outras, recursos, meses, dias): oc = ocorrências desta safra, com i.cls (classeOc pelo período dela); outras = [{id, nome,
+// ini, fim, oc}] das safras abertas da mesma fazenda. Ocorrência com etiqueta do calendário (antes do início, depois do fim, fora) conta
+// no custo e não na capacidade (§3.4, FORA-DE-ESCOPO "Regra A"; revisão SAF, S3.1). SAF-C02: a etiqueta de cada ocorrência sai do
+// período da safra de ORIGEM, a desta e a de cada outra, qualquer que seja a safra aberta: a demanda do mês não depende da navegação.
+// g.fora = carga que ficou fora da conta num mês do calendário ({sid: null = desta safra, cls, mi, h, n = ocorrência}), para o veredito.
+function capSaf(oc,outras,recursos,meses,dias){ const M=meses.length; const Z=()=>new Array(M).fill(0); const G={}; let n=0;
+  recursos.forEach(r=>{ G[r.id]=Object.assign(capRec(r,meses,dias),{dThis:Z(),dThisAt:Z(),dOth:Z(),oth:{},sim:Z(),semH:Z(),pendSR:Z(),fora:[]}); });
+  const add=(i,own,s)=>{ const sid=own?null:s.id, ix=n++; if(!(i.mi>=0)) return; const cl=own?i.cls:classeOc(i.dt,i.mi,s.ini,s.fim);
+    if(cl&&cl!=='cal'){ cargaItens(i).forEach(c=>{ const g=G[c.k]; if(g&&c.h>0) g.fora.push({sid,cls:cl,mi:i.mi,h:c.h,n:ix}); }); return; } const cs=cargaItens(i);
     cs.forEach(c=>{ const g=G[c.k]; if(!g) return; if(own){ g.dThis[i.mi]+=c.h; g.dThisAt[i.mi]+=c.ha; if(c.semRec) g.pendSR[i.mi]++; } else { g.dOth[i.mi]+=c.h; (g.oth[sid]||(g.oth[sid]=Z()))[i.mi]+=c.h; }
       g.sim[i.mi]=Math.max(g.sim[i.mi],c.sim); });
     if(own&&i.rp&&i.rp.falta&&i.rp.falta.semHoras>1e-9){ const ks={}; cs.forEach(c=>{ ks[c.k]=1; }); Object.keys(ks).forEach(k=>{ if(G[k]) G[k].semH[i.mi]+=i.rp.falta.semHoras; }); } };
-  (oc||[]).forEach(i=>add(i,true,null)); (outras||[]).forEach(s=>(s.oc||[]).forEach(i=>add(i,false,s.id)));
+  (oc||[]).forEach(i=>add(i,true,null)); (outras||[]).forEach(s=>(s.oc||[]).forEach(i=>add(i,false,s)));
   Object.values(G).forEach(g=>{ g.cells=meses.map((m,mi)=>{ const d=g.dThis[mi]+g.dOth[mi], cap=g.cap[mi], pu=g.porUn[mi];
       const nc=(h)=>h>1e-4?(pu>0?Math.max(Math.ceil(h/pu-1e-9),g.sim[mi]):-1):0;   // −1: sem horas de uma unidade no mês (guarda)
       const nec=nc(d), necThis=nc(g.dThis[mi]); const falta=(n)=>n<0||n>g.un; const red=d>1e-4&&falta(nec);
@@ -326,6 +329,11 @@ function capJanelas(oc){ const A={}; oc.forEach(i=>{ if(!(i.mi>=0)) return; cons
   const ks=Object.keys(A); return {M:ks.length,J:ks.filter(k=>A[k].sem).length}; }
 function capNomes(l){ return l.length>1?l.slice(0,-1).join(', ')+' e '+l[l.length-1]:l.join(''); }
 function capH(n){ return Number(n).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1}); }
+// carga de outras safras fora da conta (SAF-C02) nas células com demanda desta safra: por safra e motivo, ocorrências e horas por recurso
+function capForaOutras(G){ const by={}, ord=[]; Object.values(G).forEach(g=>(g.fora||[]).forEach(f=>{ if(f.sid===null||!g.cells[f.mi].own) return;
+    const k=f.sid+'|'+f.cls; let x=by[k]; if(!x){ x=by[k]={sid:f.sid,cls:f.cls,oc:{},h:{},rec:[]}; ord.push(x); } x.oc[f.n]=1;
+    if(!(g.nome in x.h)){ x.h[g.nome]=0; x.rec.push(g.nome); } x.h[g.nome]+=f.h; }));
+  return ord.map(x=>({sid:x.sid,cls:x.cls,n:Object.keys(x.oc).length,h:x.rec.map(r=>[r,x.h[r]])})); }
 // veredito (§3.1): o único lugar de "cabe", do que falta e do que ficou fora da conta. x = {semPlano:[{local,area}], aPlano, cls (contagens antes/
 // fora/depois/cal), ini (dd/mm/aaaa), outras {id: nome}, pend (ocorrências sem alocação), semHoras (ha), incompleto (texto do R3)}
 function capVeredito(G,oc,x){ const nfa0=(n)=>Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:2});
@@ -333,6 +341,7 @@ function capVeredito(G,oc,x){ const nfa0=(n)=>Number(n||0).toLocaleString('pt-BR
   if(x.cls.antes) fora.push(x.cls.antes+(x.cls.antes>1?' ocorrências':' ocorrência')+' antes do início da safra ('+x.ini+')');
   if(x.cls.fora) fora.push(x.cls.fora+(x.cls.fora>1?' ocorrências':' ocorrência')+' fora do calendário');
   if(x.cls.depois) fora.push(x.cls.depois+(x.cls.depois>1?' ocorrências':' ocorrência')+' depois do fim da safra');
+  capForaOutras(G).forEach(f=>fora.push(f.n+(f.n>1?' ocorrências da ':' ocorrência da ')+(x.outras[f.sid]||f.sid)+(f.cls==='antes'?' antes do início':' depois do fim')+' dela ('+capNomes(f.h.map(r=>r[0]+' '+capH(r[1])+' h'))+')'));
   const foraTxt=fora.length?' Fora da conta: '+fora.join('; ')+'.':'';
   const jn=capJanelas(oc); const prazo=jn.J?' Prazo por talhão não verificado: '+jn.J+' de '+jn.M+(jn.M>1?' atividades':' atividade')+' sem janela.':'';
   if(!x.aPlano) return {R:'R0',cor:'',txt:''};
@@ -913,7 +922,7 @@ function recursosDe(self,rid,dv){ const o=[]; ['g_recp_maq','g_recp_pes'].forEac
 function poolsDe(recs){ const o={}; recs.forEach(r=>{ o[r.id]={un:Number(r.un)||0,nome:r.nome}; }); return o; }
 // outras safras que dividem os recursos: abertas (não encerradas) e da mesma fazenda; a própria encerrada não soma nada (o predicado do estoque)
 function outrasSafras(self,saf,pools){ const S=safList(self); const me=S[saf]; if(!me||me.ro) return [];
-  return Object.keys(S).filter(id=>id!==saf&&!S[id].ro&&S[id].faz===me.faz).map(id=>({id,nome:S[id].nome,oc:ocorr(self,id,pools)})); }
+  return Object.keys(S).filter(id=>id!==saf&&!S[id].ro&&S[id].faz===me.faz).map(id=>({id,nome:S[id].nome,ini:S[id].ini,fim:S[id].fim,oc:ocorr(self,id,pools)})); }   // período: a etiqueta de cada uma sai dela (SAF-C02)
 function capCalc(self,saf,rid,dv){ const recs=recursosDe(self,rid,dv); const pools=poolsDe(recs); const oc=ocorr(self,saf,pools); const outras=outrasSafras(self,saf,pools);
   const me=safList(self)[saf]||{}; oc.forEach(i=>{ i.cls=classeOc(i.dt,i.mi,me.ini,me.fim); });   // etiqueta antes da conta: a mesma na tela, no veredito e na capacidade
   return {oc,outras,recs,pools,G:capSaf(oc,outras,recs,D2.meses,D2.dias)}; }
@@ -942,8 +951,12 @@ function e3Incompleto(oc){ const by={}, ord=[]; oc.forEach(i=>{ const rp=i.rp; c
     return op+' com '+t.join(', '); }).join('; '); }
 // texto, aria-label e estado de uma célula recurso × mês (o mesmo fmtOcup da célula, do filtro, dos atalhos e do espelho)
 function e3CelTxt(g,c){ return (c.ge?'≥ ':'')+(c.red?('precisa '+(c.nec<0?'horas':c.nec)):fmtOcup(c.ocup)); }
+// carga fora da conta numa célula (SAF-C02), desta safra e de cada outra, com o motivo: a mesma etiqueta do capSaf
+function e3Fora(g,c,outN){ const by={}, ord=[]; (g.fora||[]).forEach(f=>{ if(f.mi!==c.mi) return; const k=(f.sid||'')+'|'+f.cls; if(!by[k]){ by[k]={sid:f.sid,cls:f.cls,h:0}; ord.push(by[k]); } by[k].h+=f.h; });
+  return ord.map(x=>(x.sid?(outN[x.sid]||x.sid):'desta safra')+' '+capH(x.h)+' h '+(x.cls==='antes'?'antes do início':'depois do fim')+(x.sid?' dela':'')).join('; '); }
 function e3CelAria(g,c,outN){ let t=g.nome+', '+c.mes+': '+fmtOcup(c.ocup)+', '+capH(c.d)+' h de '+capH(c.cap)+' h';
   if(c.dOth>1e-4) t+=' (desta safra '+capH(c.dThis)+' h; '+Object.keys(g.oth).filter(o=>g.oth[o][c.mi]>1e-4).map(o=>(outN[o]||o)+' '+capH(g.oth[o][c.mi])+' h').join('; ')+')';
+  const fo=e3Fora(g,c,outN); if(fo) t+=', fora da conta: '+fo;
   t+=', precisa de '+(c.nec<0?'horas':c.nec)+', tem '+nfa(g.un); if(c.ge) t+=', mais '+nfa(g.semH[c.mi])+' ha sem horas calculáveis'; return t; }
 function e3Aperto(g){ const c=g.necMax; return c.nec<0?Infinity:c.nec/Math.max(g.un,1e-9); }
 function etapa3(self,v,saf,ro){ const st=self.state; const S=safList(self); const me=S[saf]||{}; const E=capCalc(self,saf); const oc=E.oc, G=E.G;
@@ -984,7 +997,7 @@ function etapa3(self,v,saf,ro){ const st=self.state; const S=safList(self); cons
   // linha de filtro (recurso × mês escolhido): números da célula, com o que vem de cada outra safra
   v.v3_fil=!!capF; v.v3_filx=()=>capSel(self,null,null);
   if(capF){ const g=G[capF.rec], c=g.cells[capF.mi]; const oth=Object.keys(g.oth).filter(o=>g.oth[o][c.mi]>1e-4);
-    v.v3_filn=g.nome+' · '+c.mes; v.v3_filt=capH(c.d)+' h de '+capH(c.cap)+' h ('+fmtOcup(c.ocup)+')'+(oth.length?' · desta safra '+capH(c.dThis)+' h · '+oth.map(o=>(outN[o]||o)+' '+capH(g.oth[o][c.mi])+' h').join(' · '):'')
+    const fo=e3Fora(g,c,outN); v.v3_filn=g.nome+' · '+c.mes; v.v3_filt=capH(c.d)+' h de '+capH(c.cap)+' h ('+fmtOcup(c.ocup)+')'+(oth.length?' · desta safra '+capH(c.dThis)+' h · '+oth.map(o=>(outN[o]||o)+' '+capH(g.oth[o][c.mi])+' h').join(' · '):'')+(fo?' · fora da conta: '+fo:'')
       +' · precisa de '+(c.nec<0?'horas':c.nec)+', tem '+nfa(g.un)+(c.ge?' · mais '+nfa(g.semH[c.mi])+' ha sem horas calculáveis':''); }
   else { v.v3_filn=''; v.v3_filt=''; }
   e3Op(self,saf,oc,G,capF);

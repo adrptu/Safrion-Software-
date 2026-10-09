@@ -22,6 +22,7 @@ Decisões técnicas e de produto delegadas aos agentes; o Codex revisa.
 - **Ordem dos PRs** (§10): PR 1 e PR 2a antes da cadeia; PR 3 ainda com 6 etapas; PR 4 com a renumeração. Assim `acao_unica` e `etapas_celular` mudam uma vez só e não existe etapa provisória.
 - **`g_cap` sem filtro nem ordenação no cabeçalho** (exceção registrada à regra "toda tabela com filtro e ordenação", revisão SAF de 06/10/2026, S4). É uma matriz de 6 recursos × meses, de leitura: a coluna Maior uso já é a ordenação útil, e o filtro é o toque na célula, que filtra a `g_op` pelo recurso e pelo mês (§3.3). Cabeçalho com ferramentas em 15 colunas tiraria a linha de dados que a `g_op` precisa a 1280 × 800 (§2.1). Volta quando o G2 ganhar navegação por setas ou se o proprietário pedir.
 - **Meses da `g_cap` pelos dados** (revisão SAF, S3.1): os do calendário dentro do período da safra (`capMeses`), sem lista fixa por safra. Como a demanda desta safra fora do período não conta na capacidade, nenhum mês com demanda dela fica fora da grade.
+- **Capacidade simétrica entre safras abertas** (SAF-C02, achado e decisão proposta pelo Codex em 09/10/2026, aplicada): `capSaf` recebe o período de cada outra safra e etiqueta cada ocorrência pela safra de origem; fato, custo e datas ficam, e a carga de fora aparece no veredito, no filtro e no `aria-label`. Evita total do mês dependente da safra aberta (340 h × 140 h no harness) e verde enganoso.
 - **IDs de teste renumerados na v2:** C1–C24, N1–N7, O1–O19, V1–V14, L1–L4, P1–P8, M1. O mapa de cada achado está na seção 5.
 
 ## 2. Cortei
