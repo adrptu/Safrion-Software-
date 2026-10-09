@@ -1,8 +1,8 @@
 # Beneficiamento (grãos, frutas/HF e café) · v2
 
-**Resultado útil:** a ordem de processo entra no menu em Produção › Beneficiamento. No BEN-1, o packing de mamão vai da ordem ao lote vendável reservado, com caixas, balanço, qualidade e estoque no mesmo cenário da O.S., do Estoque e da Manutenção. Grãos e café vêm nos blocos seguintes.
+**Resultado útil:** a ordem de processo entra no menu em Produção › Recebimento e beneficiamento › Beneficiamento (tela irmã de Cargas; DECISOES.md BEN-D14). No BEN-1, o packing de mamão vai da ordem ao lote vendável reservado, com caixas, balanço, qualidade e estoque no mesmo cenário da O.S., do Estoque e da Manutenção. Grãos e café vêm nos blocos seguintes.
 
-- **Rótulo:** especificado. Nada foi implementado. Só o que traz "(executado)" saiu de comando rodado em 05/10/2026: contas em `verificacao/contas.py` (Python `decimal`) e buscas no código (DECISOES.md §8).
+- **Rótulo:** especificado (v2, 05/10/2026). O BEN-1 foi executado depois, em 06 e 09/10/2026 (§13; DECISOES.md §12). Neste texto, só o que traz "(executado)" saiu de comando rodado em 05/10/2026: contas em `verificacao/contas.py` (Python `decimal`) e buscas no código (DECISOES.md §8).
 - **Versão 2**, de 05/10/2026. Aplica os 42 achados confirmados da revisão adversarial (DECISOES.md §9).
 - **Papéis:** autor Claude · revisor Codex (produto, aceite, QA) · integrador quem não for o autor (AGENTS §3).
 - **Contrato:** PRD v3.9. "l.N" é a linha de `docs/PRD.md`. A reserva de material segue a **DEC-2609-13** (l.12227: reserva na liberação).
@@ -11,6 +11,12 @@
 - **Arquivos irmãos:** `FORA-DE-ESCOPO.md` e `DECISOES.md`.
 - **Fonte única:** números só no §10 (casos K-nn); regras só no §4; testes só no §11; aceite no §12, como matriz AC → regra → caso → teste.
 - **Dados:** todos sintéticos (ENG-017; DEC-2709-01). Pessoa nova só com zero ocorrências no `v37/` (§2.3).
+
+**Leitura com a base atual (09/10/2026).** Esta v2 foi escrita antes da Colheita (`docs/colheita/`). Onde o texto abaixo diz:
+- `c.ben.*` (lotes, movimentos MP-, pedidos, reservas, sequência de lote): leia `c.producao.*` e `producao.js` (colheita D-05; BEN-D01). Só inspeções, recibos e a sequência de inspeção ficam em `c.producao.ben`. Reservar é `prReservar`.
+- OC-* ou "colheita = O.S. com massa": a ordem de colheita é a O.S. de colheita que já existe (colheita D-02).
+- fator da saca "do item do CD-06" (R-B05): a fonte é `CULTURA_UN`/`prUn` (colheita D-03); quantidade (t, kg, sc) e produtividade (t/ha, sc/ha) são grandezas diferentes (DEC-0510-03).
+- menu "Produção › Beneficiamento" (P1, AC-01, §5.1): o grupo Produção tem 3 itens (colheita D-01) e o Beneficiamento é tela irmã de Cargas em "Recebimento e beneficiamento" (BEN-D14).
 
 ---
 
@@ -949,7 +955,7 @@ Negativos marcados com −. Toda recusa confere o que a R-G05 pede.
 
 | AC | Critério | Regra | Caso | Teste |
 |---|---|---|---|---|
-| AC-01 | Menu com "Produção › Beneficiamento" entre Manutenção e Suprimentos; abre `BEN.dc.html`; o canvas põe a tela na página "menu" | P1 | — | E01, `varredura.py` |
+| AC-01 | Menu Produção com 3 itens; "Recebimento e beneficiamento" abre Cargas e a faixa de telas leva ao `BEN.dc.html` (BEN-D14); o canvas põe a tela na página "menu" | P1 | — | E01, `varredura.py` |
 | AC-02 | A O.S. não lista a OB-0104; contagens, Kanban e seletor de talhão como no §11.5; o filtro (vazio) segue coberto | §0.3 | — | §11.5 |
 | AC-03 | Kanban com exatamente 5 colunas e a contagem da semente | R-A01 | §10.2 | U20, E01 |
 | AC-04 | Recorte por Segmento sobrevive a abrir, voltar e recarregar | R-G04 | — | E08 |
@@ -1023,3 +1029,13 @@ Negativos marcados com −. Toda recusa confere o que a R-G05 pede.
 | AC-74 − | Teto da CAF-BEN | R-G06 | K74 | unitário |
 | AC-75 − | Umidade do beneficiado obrigatória; acima do limite, aviso | R-B06 | K75 | unitário |
 | AC-76 | Fluxo FL-BEN-03 percorrido | §2 | — | fluxo |
+
+## 13. Implementação do BEN-1 (executado em 06/10/2026, branch `claude/v44-beneficiamento`)
+
+- **Rótulo:** executado. Decisões e adaptações à base (a Colheita já cria lote, MP-, pedido e reserva): `DECISOES.md` §12 (BEN-D01 a BEN-D13).
+- **Arquivos novos (`gen37/`):** `ben.js` (regras e comandos `ben*`), `dados_ben.py` (rotas, caixa, semente), `ben_massa.py` (espelho Decimal das contas, só para teste), `areas/processo_beneficiamento.py` (`BEN.dc.html`), `ben_unit.js` + `ben_unit_test.py` (node), `ben_mutantes.py` (mutantes do §11.4), `ben_fluxo_test.py` (navegador).
+- **Editados:** `producao.js` (qualidade do lote beneficiado, carência e LC- pela genealogia, classe obrigatória no produto classificado, `prProxLote`, liberar lote pelo perfil), `areas/producao.py` (Estoque de produto: inspeção, resultado e decisão do lote de produção, atalhos ao Beneficiamento), `cenario.py` (cenário v5 com a semente e `ben.js` no prefixo), `dados_cad.py` (caixa de 10 kg com tara, Igor e Marta, equipe e8), `g2lib.js` (perfis Igor e Marta), `ui37.py` (Produção › Beneficiamento), `areas/cadastros.py` e `areas/cad_produtos_estrutura.py` (texto da caixa pela fonte única).
+- **Casos com a caixa de 10 kg:** os números do §10.3 valem com as caixas dobradas e a massa igual (K01 tara 576 kg = 960 × 0,6; K03 1.140 sugeridas e 1.200 confirmadas; K06 881; K07 584; K08 REQ-041 com 584 un e 16 livres; K17 584 un em custódia); o próximo lote na semente é o L39-133 (K28; sequência única da Produção).
+- **Fora (inalterado):** BEN-2 a BEN-8 (§11.8), a OB-0104 em consulta e a saída dela da O.S. (fica no Kanban da O.S., como antes), as abas do painel (o painel usa seções na mesma rolagem), colunas configuráveis (plano B do §5.2: 7 colunas visíveis), indicadores agregados da seção (só o selo do cabeçalho e as razões do balanço).
+- **Retomada de 09/10/2026 (executado):** merge da branch do protótipo em `ecc8b00`; menu com 3 itens e a faixa de telas Cargas | Beneficiamento (BEN-D14); Cargas mostra o próximo passo do lote em processo com atalho à ordem (`benProxEntrada`, a mesma regra do Estoque de produto); balanço sem diferença nem recuperação antes do Iniciar e diferença "apurada no Concluir" enquanto há massa a registrar (BEN-D15). Testes: `ben_fluxo_test.py` (fluxo, erros e celular, este com o fluxo a 390 px) e `tabelas_ben_test.py` (T01-T07 da g_ob); a medida da tarefa do proprietário passou de 19 para 20 toques (o toque da faixa).
+- **Correções da revisão adversarial de 09/10/2026 (executado):** BEN-REV-01 e 02 (lote preso à ordem liberada, sem decisão nem estorno; Fechar reconfere o físico, BEN-D19), 03 (avaria no Packing liberada pela Qualidade, BEN-D20), 04 (Reabrir guarda a alçada, BEN-D16, lacuna da R-A12 para o revisor), 05 (ao menos 1 caixa), 06 (TF04 com 900 e 1.800 kg), 07 (regras sem proteção: U36, U37, M40-M54), 08 (ordem no local da linha, BEN-D18), 09 (lote inteiro, BEN-D17) e S4 (versão esperada em Iniciar, Concluir, Conferir e Fechar; mensagem do Liberar lote; contagem de perfis sem número fixo). Testes: `ben_unit_test.py` (U30-U37), `ben_mutantes.py` (M28-M56) e `ben_fluxo_test.py revisao` (B1-B3).

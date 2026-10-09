@@ -90,7 +90,7 @@ try:
             chk(f'seção 2: filtro Item = {it0} corta as outras ({len(its)} itens antes)', len(its) > 1 and r2 and all(r.get('ITEM') == it0 for r in r2), [(r.get('ITEM'), r.get('LOTE')) for r in r2][:4])
             limpa(); ordena('Solicitado', desc=True); v2 = [num(r['SOLICITADO'].split(' ')[0]) for r in dicts() if re.match(NUMRE, r.get('SOLICITADO', '').split(' ')[0])]
             chk('seção 2: ordenar Solicitado decrescente pelo número (a unidade junto não atrapalha)', len(v2) > 1 and v2 == sorted(v2, reverse=True), v2)
-            os_ = [r.get('O.S.') for r in dicts()]; chk('seção 2: O.S. em coluna própria (OS-…), separada da requisição (REQ-…)', all((o or '').startswith('OS-') for o in os_) and all((r.get('REQUISIÇÃO') or '').startswith('REQ-') for r in dicts()), os_[:3])
+            os_ = [r.get('O.S.') for r in dicts()]; chk('seção 2: O.S. em coluna própria (OS-… ou a ordem de beneficiamento OB-…, BEN-D05), separada da requisição (REQ-…)', all(re.match(r'^(OS|OB)-', o or '') for o in os_) and all((r.get('REQUISIÇÃO') or '').startswith('REQ-') for r in dicts()), os_[:3])
         if i == 4:
             kcl = next((r for r in d if r.get('ITEM › LOTE', '').startswith('KCl 60%')), {}); lote = next((r for r in d if r.get('ITEM › LOTE') == 'K26-11'), {})
             chk('seção 4: árvore item › lote; KCl 60% físico 60.000 kg, disponível 50.000 kg; lote K26-11 com Item = KCl 60% e situação "Em quarentena"',

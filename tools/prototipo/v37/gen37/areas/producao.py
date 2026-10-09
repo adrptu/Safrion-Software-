@@ -109,11 +109,18 @@ def _status(fname):
     assert s.count(old)==1, 'selo do cabeçalho não encontrado em '+fname
     open(p,'w',encoding='utf-8').write(s.replace(old,f'<span style="{H("st_st")}"><span style="{H("st_dot")}"></span>{H("st_t")}</span>'))
 
-def _shell(fid,title,sub,corpo,fname,altura,foot):
+def _shell(fid,title,sub,corpo,fname,altura,foot,steps=None):
     EXTRA.append('<style>'+CSS+'</style>'); EXTRA.append(painel()); corpo=corpo+restaurar()
     HEIGHTS37[fname]=altura
-    shell37(fid,title,corpo,fname=fname,subtitle=sub,status=(H('st_t'),'yellow'),primary_html=prim_html(),search=False,footer=foot)
+    shell37(fid,title,corpo,fname=fname,subtitle=sub,status=(H('st_t'),'yellow'),primary_html=prim_html(),search=False,footer=foot,steps=steps)
     _status(fname)
+
+# Recebimento e beneficiamento (BEN-D14, 09/10): o grupo Produção fica com 3 itens (colheita D-01); Cargas e Beneficiamento são telas
+# irmãs do mesmo item, ligadas pela faixa de telas (o mesmo componente da Irrigação: navegação, sem número de etapa, pendência escrita)
+REC_TELAS=[('Cargas e recebimento','CARGA.dc.html'),('Beneficiamento','BEN.dc.html')]
+def faixa_rec(cur):
+    itens=''.join(ui37.secao_item(t,i==cur,href=h,why_hole=f'rs{i}') for i,(t,h) in enumerate(REC_TELAS,1))
+    return ui37.secoes_nav(itens,len(REC_TELAS),cur,REC_TELAS[cur-1][0],'Telas de recebimento e beneficiamento')
 
 def _js(tela):
     return cenario.js_prefixo()+DCAR.js_nucleo()+PR_UI_JS+tela
@@ -127,7 +134,7 @@ function GR(id){ return GRIDS.find(g=>g.id===id); }
 const PRK={green:['#1E7A4C','#E4F3E9'],yellow:['#8A5A00','#FFF3D6'],red:['#B42318','#FDE8E6'],gray:['#5B6660','#EEF1EE'],blue:['#1E5F8F','#E3F0FB']};
 function prChs(c){ const k=PRK[c]||PRK.gray; return 'display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;color:'+k[0]+';background:'+k[1]+';'; }
 function prDot(c){ const k=PRK[c]||PRK.gray; return 'width:6px;height:6px;border-radius:999px;flex-shrink:0;background:'+k[0]+';'; }
-const PR_QCOR={'Liberado':'green','Em inspeção':'yellow','Bloqueado':'red','Em processo':'blue','Esgotado':'gray'};
+const PR_QCOR={'Liberado':'green','Em inspeção':'yellow','Bloqueado':'red','Em processo':'blue','Esgotado':'gray','Destinado':'gray'};
 function prPill(on){ return 'font-family:inherit;font-size:13px;font-weight:700;padding:7px 12px;border-radius:999px;cursor:pointer;white-space:nowrap;min-height:36px;border:1px solid '+(on?'#1E7A4C':'#E4E9E5')+';background:'+(on?'#E4F3E9':'#FFFFFF')+';color:'+(on?'#1E6B47':'#15201A')+';'; }
 function prInSt(err){ return 'font-family:inherit;font-size:15px;padding:9px 11px;border-radius:10px;box-sizing:border-box;width:100%;max-width:240px;background:#FFFFFF;color:#15201A;border:1px solid '+(err?'#B42318':'#E4E9E5')+';'; }
 function prCel(t,k){ return {t:String(t==null?'':t), st:k==='b'?'font-weight:800;color:#15201A;':(k==='mut'?'color:#65736A;':(k==='red'?'color:#B42318;font-weight:700;':(k==='ok'?'color:#1E7A4C;font-weight:700;':'color:#15201A;')))}; }
@@ -170,14 +177,19 @@ function prCards(self,v,gid,mk){ const ids=(v[gid+'_rows']||[]).map(r=>r.id); co
 function prCard(o){ return {grp:!!o.grp,reg:!o.grp,t1:o.t1||'',num:o.num||'',t2:o.t2||'',ct:(o.chip||['',''])[0],cst:prChs((o.chip||['','gray'])[1]),cdot:prDot((o.chip||['','gray'])[1]),nx:o.nx||'',go:o.go||(()=>{}),cur:'false'}; }
 /* números com unidade na célula (decisão de 05/10/2026): valor tipado em v (base kg) para ordenar, texto em p */
 function prTx(t){ return [{k:'txt',t}]; }
+/* faixa de Recebimento e beneficiamento (CARGA | BEN, BEN-D14): a pendência de cada tela, lida do mesmo estado e do filtro de fazenda */
+function prFaixaRec(self,v,c){ const W=benPendRec(c,f=>prFazOk(self,f)); v.rs1_why=W.carga; v.rs1_has=!!W.carga; v.rs2_why=W.ben; v.rs2_has=!!W.ben; }
 '''
 
 # pedidos e reservas: as mesmas funções no Estoque de produto (PROD) e no VE-04 oculto (vínculo pedido ↔ lote, spec §3.5)
 PR_PED_JS=r'''
 /* próximo passo do lote (texto da linha) e ação primária (R-13, R-15) */
 function prPedidosPara(c,L){ return Object.values(prP(c).pedidos).filter(p=>prCompat(p,L)&&prCmp(prFalta(c,p),0)>0).sort((a,b)=>(a.tipo==='pronta'?0:1)-(b.tipo==='pronta'?0:1)||a.id.localeCompare(b.id)); }
-function prLoteProx(c,L,S){ if(S.esgotado) return {t:'sem saldo · rastreio guardado'};
-  if(S.q==='Em processo') return {t:'no beneficiamento · fora do vendável'};
+function prLoteProx(c,L,S){ if(S.esgotado) return L.esg?{t:'consumido na '+L.esg+' · rastreio guardado',p:'Consumido na '+L.esg+' (beneficiamento): saldo 0; o rastreio fica em "Para onde foi"'}:{t:'sem saldo · rastreio guardado'};
+  /* lote de produção (BEN-1): a Qualidade registra o resultado da inspeção e decide (fechar o processo não libera) */
+  if(typeof benProxLote==='function'){ const b=benProxLote(c,L,S); if(b) return b; }
+  if(S.q==='Em processo'){ const b=typeof benProxEntrada==='function'?benProxEntrada(c,L):null; if(b&&b.lib) return {t:b.t,a:'liberar'};   /* avaria no local de processo: a Qualidade libera a entrada (BEN-REV-03) */
+    return b||{t:'no beneficiamento · fora do vendável'}; }
   if(S.q==='Bloqueado') return {t:S.dono+' decide · carência'};
   if(S.q==='Em inspeção'){ const ql=prQuem('qual'); if(!S.dono||S.dono===ql) return {t:'Liberar lote · '+ql,a:'liberar'};
     return {t:S.dono+' resolve · '+String(S.mot||'').split(':')[0],p:S.dono+' resolve: '+S.mot+'. Liberar fica com a Qualidade depois disso'}; }   /* revisão A-13 */
@@ -244,7 +256,7 @@ function prLoteRow(c,L,S){ const cu=L.cultura; const U=x=>prEstTxt(cu,x); const 
   const q=S.esgotado?'Esgotado':S.q; const nx=prLoteProx(c,L,S);
   return {id:L.id,ro:true,v:{nome:L.id,prod:L.prod,loc,fis:S.fis,blq:S.blq,proc:S.proc,apto:S.apto,res:S.res,disp:S.disp,q},
     s:{nome:L.id+' '+L.prod,prod:L.prod,loc:loc+' '+(L.validade?prBr(L.validade):''),q:q+' · '+nx.t,fis:U(S.fis),blq:U(S.blq),proc:U(S.proc),apto:U(S.apto),res:U(S.res),disp:U(S.disp)},
-    p:{nome:[{k:'b',t:L.id},{k:'mut',t:' · '+(L.classe?L.classe+' ':'')+(L.saf||'')}],prod:[{k:'txt',t:L.prod}],
+    p:{nome:[{k:'b',t:L.id},{k:'mut',t:' · '+(L.classe?'classe '+L.classe+' ':'')+(L.cx?'· '+L.cx+' cx ':'')+(L.saf||'')}],prod:[{k:'txt',t:L.prod}],
        loc:[{k:'txt',t:loc},{k:'br'},{k:L.validade&&S.vencido?'chip':'mut',t:L.validade?('vence '+prBr(L.validade)+(S.vencido?' · vencido':'')):'—',c:'yellow'}],
        fis:prTx(U(S.fis)),blq:prTx(U(S.blq)),proc:prTx(U(S.proc)),apto:prTx(U(S.apto)),res:prTx(U(S.res)),disp:[{k:'b',t:U(S.disp)}],
        q:[{k:'chip',t:q,c:PR_QCOR[q]||'gray'},{k:'br'},{k:'mut',t:nx.t}]}}; }
@@ -276,6 +288,7 @@ function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const P=pr
   const sel=st.pr_sel; let alvo=null;
   if(sel&&sel.g==='g_lot'&&P.lotes[sel.id]) alvo={g:'g_lot',id:sel.id}; else if(sel&&sel.g==='g_ped'&&P.pedidos[sel.id]) alvo={g:'g_ped',id:sel.id};
   const acaoLote=(L)=>{ const S=prSaldos(c,L); const nx=prLoteProx(c,L,S); if(nx.a==='liberar') return {t:'Liberar '+L.id,go:()=>self.setState({pr_sel:{g:'g_lot',id:L.id},pr_pan:{g:'g_lot',id:L.id},pr_modo:'liberar',pr_form:null,pr_err:''})};
+    if(nx.a==='resultado'||nx.a==='decisao') return {t:(nx.a==='resultado'?'Registrar resultado do ':'Registrar decisão do ')+L.id,go:()=>self.setState({pr_sel:{g:'g_lot',id:L.id},pr_pan:{g:'g_lot',id:L.id},pr_modo:nx.a,pr_form:null,pr_err:''})};
     if(nx.a==='reservar') return {t:'Reservar '+L.id+' para pedido',go:()=>self.setState({pr_sel:{g:'g_lot',id:L.id},pr_pan:{g:'g_lot',id:L.id},pr_modo:'reservar',pr_form:null,pr_err:'',pr_ch:prChave('W-RS')})}; return null; };
   const acaoPed=(p)=>{ if(prCmp(prFalta(c,p),0)<=0) return null; const ls=Object.values(P.lotes).filter(L=>prCompat(p,L)&&prCmp(prSaldos(c,L).disp,0)>0); if(!ls.length) return null;
     return {t:'Reservar lote para o '+p.id,go:()=>self.setState({pr_sel:{g:'g_ped',id:p.id},pr_pan:{g:'g_ped',id:p.id},pr_modo:'reservar',pr_form:null,pr_err:'',pr_cx:null,pr_ch:prChave('W-RS')})}; };
@@ -292,21 +305,47 @@ function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const P=pr
   prPainel(self,v,PP); }
 function prPanLote(self,c,L){ const P=prP(c); const S=prSaldos(c,L); const cu=L.cultura; const U=x=>prEstTxt(cu,x); const q=S.esgotado?'Esgotado':S.q; const nx=prLoteProx(c,L,S); const modo=self.state.pr_modo;
   const loc=(PRDC.locais[L.local]||{}); const lcs=prLcs(c,L);
-  const orig=(L.origem||[]).map(x=>({c:[[x.carga||'abertura','b'],x.tal||'',x.os||'',x.dcol?'colhido '+prBr(x.dcol):'',U(x.kg)+(x.modo==='estimada'?' (estimada)':''),x.est?['estornada','red']:''].filter(Boolean),l:{t:'Ver carga',h:'CARGA.dc.html#'+(x.carga||'')}}));
-  if(L.abertura) orig.push({c:[['Saldo de abertura','b'],'safra '+L.saf+' · anterior ao sistema, sem talhão (não entra na produção por talhão)']});
-  const rs=Object.values(P.reservas).filter(r=>r.lote===L.id).map(r=>({c:[[r.id,'b'],r.pedido,U(r.kg),r.st,(r.st==='Ativa'&&S.q!=='Liberado')?['Expedição impedida','red']:'',r.canc?'cancelada: '+r.canc.motivo:''].filter(Boolean)}));
+  const orig=(L.origem||[]).map(x=>x.lote?({c:[[x.lote,'b'],U(x.kg),x.modo==='rateio'?'rateio acumulado da ordem '+(L.benef||''):x.modo],l:{t:'Abrir lote',h:'PROD.dc.html#'+x.lote}})
+    :({c:[[x.carga||'abertura','b'],x.tal||'',x.os||'',x.dcol?'colhido '+prBr(x.dcol):'',U(x.kg)+(x.modo==='estimada'?' (estimada)':''),x.est?['estornada','red']:''].filter(Boolean),l:{t:'Ver carga',h:'CARGA.dc.html#'+(x.carga||'')}}));
+  if(L.abertura) orig.push({c:[['Saldo de abertura','b'],L.obs?L.obs+' (não entra na produção por talhão)':'safra '+L.saf+' · anterior ao sistema, sem talhão (não entra na produção por talhão)']});
+  const rs=Object.values(P.reservas).filter(r=>r.lote===L.id).map(r=>({c:[[r.id,'b'],r.pedido,U(r.kg),r.st,(r.st==='Ativa'&&(S.q!=='Liberado'||!prCompat(P.pedidos[r.pedido]||{},L)))?['Expedição impedida','red']:'',r.canc?'cancelada: '+r.canc.motivo:''].filter(Boolean)}));
   const mv=P.movs.filter(m=>m.lote===L.id).slice().reverse().map(m=>({c:[[m.id,'b'],prBr(m.d)+' '+(m.at||''),m.tipo,m.fis===false?['sem efeito no físico','mut']:U(m.kg),m.carga||m.pedido||m.reserva||'',m.quem||'',m.obs||''].filter(Boolean)}));
   const dests=[...new Set(Object.values(P.pedidos).filter(p=>prCompat(p,L)).map(p=>p.dest||'MI-BR'))]; const av=[];
   if(typeof carAvaliar==='function') lcs.forEach(lc=>dests.forEach(d=>{ const a=carAvaliar(c,lc,d); av.push({c:[[lc,'b'],[a.rot,a.st==='nao_conforme'?'red':(a.st==='conforme'?'ok':'')],(a.motivos[0]||a.faltas[0]||{}).t||'',((a.motivos[0]||a.faltas[0]||{}).q?'quem resolve: '+(a.motivos[0]||a.faltas[0]).q:'')].filter(Boolean),l:{t:'Ver carência e destino',h:'CO-06.dc.html'}}); }));
   const PPx={title:L.id+' · '+L.prod,chip:[q,PR_QCOR[q]||'gray'],sub:(loc.nome||'')+(L.validade?' · vence '+prBr(L.validade)+(S.vencido?' (vencido: aviso, não trava)':''):'')+' · recebido '+prBr(L.drec),
     next:(nx.p||(nx.t+'. Qualidade: '+(S.mot||'')))+'.',nred:S.q==='Bloqueado',
     kv:[{l:'Físico',v:U(S.fis)},{l:'Bloqueado',v:U(S.blq)},{l:'Apto',v:U(S.apto)},{l:'Reservado',v:U(S.res)},{l:'Disponível',v:U(S.disp)},{l:'Em processo',v:U(S.proc)}],
-    secs:[{t:'Origem',rows:orig},{t:'Avaliação do destino dos pedidos',rows:av,vazio:L.abertura?'Saldo de abertura sem lote de campo: o destino é avaliado na expedição.':'Sem lote de campo ainda (o apontamento da data cria o LC-).'},{t:'Reservas',rows:rs,vazio:'Nenhuma reserva.'},{t:'Movimentos',rows:mv}],
+    secs:[{t:L.benef?'De onde veio':'Origem',rows:orig},{t:'Avaliação do destino dos pedidos',rows:av,vazio:L.abertura?'Saldo de abertura sem lote de campo: o destino é avaliado na expedição.':'Sem lote de campo ainda (o apontamento da data cria o LC-).'},{t:'Reservas',rows:rs,vazio:'Nenhuma reserva.'},{t:'Movimentos',rows:mv}],
     err:self.state.pr_err};
-  if(nx.a==='liberar'){ PPx.prim={t:'Liberar '+L.id,go:()=>prRun(self,x=>prLiberarLote(x,L.id,prQuem('qual')),{pr_modo:null})}; PPx.form={t:'Liberar lote · '+prQuem('qual'),h:'Confira a condição do lote. Liberar reavalia carência e ordem de colheita; com pendência, nada muda e a mensagem diz quem resolve.',fields:[]}; }
+  if(typeof benInspDe==='function'&&prBenLote(self,c,L,S,nx,PPx)) return PPx;
+  if(nx.h) PPx.prim={t:nx.lk||'Abrir',h:nx.h};   /* atalho ao beneficiamento: só navega (R-G07) */
+  if(nx.a==='liberar'){ PPx.prim={t:'Liberar '+L.id,go:()=>prRun(self,x=>prLiberarLote(x,L.id,g2perfil()),{pr_modo:null})}; PPx.form={t:'Liberar lote · '+prQuem('qual'),h:'Confira a condição do lote. Liberar reavalia carência e ordem de colheita; com pendência, nada muda e a mensagem diz quem resolve.',fields:[]}; }
   else if(nx.a==='reservar'){ if(self.state.pr_ch){ const f=prFormReserva(self,c,L,null,'lote'); PPx.form={t:'Reservar para pedido · '+prQuem('com'),h:'Reserva só de lote apto; a quantidade não passa do disponível nem da falta do pedido.',fields:f.fields}; PPx.prim={t:'Reservar',go:f.go}; }
     else PPx.prim={t:'Reservar '+L.id+' para pedido',go:()=>self.setState({pr_ch:prChave('W-RS'),pr_form:null,pr_err:''})}; }   /* depois de reservar, nova reserva abre outro formulário (outra chave) */
   return PPx; }
+/* lote de produção (BEN-1): inspeção, genealogia para frente, ordem de origem; resultado e decisão da Qualidade (o perfil de quem age) */
+function prBenLote(self,c,L,S,nx,PPx){ const I=benInspDe(c,L); const U=x=>prEstTxt(L.cultura,x); const fr=benParaFrente(c,L.id); const modo=self.state.pr_modo;
+  if(fr.length) PPx.secs.splice(1,0,{t:'Para onde foi',rows:fr.map(x=>({c:[[x.lote||x.prod,'b'],x.lote?x.prod:'',U(x.kg),x.modo==='rateio'?'rateio':x.modo].filter(Boolean),l:x.lote?{t:'Abrir lote',h:'PROD.dc.html#'+x.lote}:null}))});
+  const ob=L.benef&&/^OB-/.test(L.benef)?L.benef:(L.esg||L.ordem||''); if(ob) PPx.secs.splice(1,0,{t:'Ordem de beneficiamento',rows:[{c:[[ob,'b'],L.benef===ob?'lote gerado no fechamento':'entrada da ordem'],l:{t:'Abrir a ordem',h:'BEN.dc.html#'+ob}}]});
+  if(!I) return false; const res=I.res[L.id]; const venc=I.prazo&&I.prazo<prHoje(), hoje=I.prazo===prHoje();
+  PPx.secs.unshift({t:'Inspeção · '+I.id,rows:[{c:[[I.padrao,'b'],'prazo '+prBr(I.prazo),venc?['vencida','red']:(hoje?['vence hoje','red']:''),I.resp].filter(Boolean)},
+    {c:res?[['Resultado','b'],[res.sit,res.sit==='Conforme'?'ok':'red'],res.obs||'',res.quem+' · '+prBr(res.d)+' '+res.at].filter(Boolean):[['Resultado','b'],'sem resultado']},
+    {c:[['Decisão','b'],L.q0==='Liberado'?'Liberado'+(L.lib?' por '+L.lib.quem:''):(L.q0==='Bloqueado'?'Bloqueado: '+((L.bloq||{}).motivo||''):(L.q0==='Destinado'?'Destinado: '+((L.dest||{}).motivo||''):'pendente'))]}]});
+  const qual=benQualQ(); const ds=benDecisoes(c,L);
+  if(nx.a==='resultado'){ const sit=prFval(self,'rs','');
+    PPx.form={t:'Registrar resultado · '+qual,h:'Contra o padrão da inspeção ('+I.padrao+'). O resultado não libera: a decisão vem depois.',fields:[prFld(self,'rs','Resultado',{t:'opts',opts:[{v:'Conforme',t:'Conforme'},{v:'Não conforme',t:'Não conforme'}]}),
+      prFld(self,'ro','Observação',{t:'txt',im:'text',ph:sit==='Não conforme'?'ex.: maturação avançada em 30 % da amostra':'opcional'})]};
+    PPx.prim={t:'Registrar resultado',go:()=>prRunB(self,x=>benResultado(x,L.id,prFval(self,'rs',''),prFval(self,'ro',''),g2perfil()))}; return true; }
+  if(nx.a==='decisao'||(modo==='decisao'&&ds.length)){ const dec=prFval(self,'dd',''); const fs=[prFld(self,'dd','Decisão',{t:'opts',opts:ds.map(x=>({v:x,t:x}))})];
+    const cs=benClassesDe(L).filter(x=>x!==L.classe);
+    if(dec==='Liberar como classe atingida'||dec==='Reclassificar') fs.push(prFld(self,'dc','Classe',{t:'opts',opts:cs.map(x=>({v:x,t:'Classe '+x}))}));
+    if(['Bloquear','Manter bloqueio','Destinar','Reclassificar'].indexOf(dec)>=0) fs.push(prFld(self,'dm','Motivo',{t:'txt',im:'text',ph:dec==='Destinar'?'ex.: indústria de polpa':'ex.: reclamação no transporte'}));
+    PPx.form={t:'Registrar decisão · '+qual,h:res?'Resultado '+res.sit+' ('+I.id+'). '+(res.sit==='Conforme'?'Liberar só com Conforme.':'Não conforme: libere como classe atingida, mantenha o bloqueio ou destine.'):'Lote liberado: bloquear, reclassificar ou destinar, com motivo. A reserva já feita fica com expedição impedida.',fields:fs};
+    PPx.prim={t:'Registrar decisão',go:()=>prRunB(self,x=>benDecidir(x,L.id,prFval(self,'dd',''),{classe:prFval(self,'dc',''),motivo:prFval(self,'dm','')},g2perfil()),{pr_modo:null})};
+    if(nx.a!=='decisao') PPx.sec=[{t:'Voltar',go:()=>self.setState({pr_modo:null,pr_form:null,pr_err:''})}]; return true; }
+  if(ds.length&&L.q0==='Liberado') PPx.sec=(PPx.sec||[]).concat([{t:'Registrar decisão',go:()=>self.setState({pr_modo:'decisao',pr_form:null,pr_err:'',pr_ch:null})}]);
+  return false; }
+function prRunB(self,fn,ok){ return prRun(self,fn,Object.assign({pr_form:null},ok||{})); }
 /* entrada por link: PROD.dc.html#L39-133 ou #PV-036 abre o registro */
 function prHash(self){ if(self.__prh) return; self.__prh=1; const ab=()=>{ let h=''; try{ h=decodeURIComponent(location.hash||'').slice(1); }catch(e){} const P=prP(cenGet());
   if(P.lotes[h]) setTimeout(()=>self.g2pick('g_lot',h),0); else if(P.pedidos[h]) setTimeout(()=>self.g2pick('g_ped',h),0); }; ab(); try{ window.addEventListener('hashchange',ab); }catch(e){} }
@@ -325,7 +364,7 @@ def carga():
     corpo=bloco('Cargas','O que chegou de cada talhão, quanto pesou e em que lote está. Clique numa carga a pesar para pesar; numa recebida, para ver descontos, lote e trilha.',
                 g_cg+cartoes('cards_cg'))
     _shell('CARGA','Cargas e recebimento','Pese e receba a carga do campo: o talhão vem da O.S., o lote nasce na hora e a produção do talhão muda só com a carga recebida.',corpo,fname,1000,
-           'Produção só nasce de carga recebida; caixas ou kg estimados no campo nunca somam. Ticket repetido não duplica (R-03, R-07).')
+           'Produção só nasce de carga recebida; caixas ou kg estimados no campo nunca somam. Ticket repetido não duplica (R-03, R-07).',steps=faixa_rec(1))
 
 CARGA_JS=r'''
 const PR_GRIDS={g_cg:1};
@@ -336,7 +375,7 @@ function prCgSit(c,g){ const P=prP(c); if(g.st==='A pesar') return {t:'A pesar',
   const L=P.lotes[g.lote]; const S=L?prSaldos(c,L):null;
   if(S&&S.q==='Bloqueado') return {t:'Bloqueada',c:'red',nx:S.dono+' decide · carência'};
   if(S&&S.q==='Em inspeção') return {t:'Recebida',c:'yellow',nx:(!S.dono||S.dono===prQuem('qual'))?'Qualidade confere · '+prQuem('qual'):S.dono+' resolve · '+String(S.mot||'').split(':')[0]};   /* revisão A-13 */
-  if(S&&S.q==='Em processo') return {t:'Recebida',c:'blue',nx:'no beneficiamento'};
+  if(S&&S.q==='Em processo'){ const b=typeof benProxEntrada==='function'?benProxEntrada(c,L):null; return {t:'Recebida',c:'blue',nx:b?b.t:'no beneficiamento',h:b?b.h:''}; }   /* BEN-1: a ordem ou o atalho (só navega) */
   return {t:'Recebida',c:'green',nx:'no estoque de produto'}; }
 function prCgOrig(g){ return (g.origem||[]).map(x=>x.tal+' · '+x.os+((g.origem||[]).length>1?' · '+prFmtT(x.pct,2)+' %'+(x.modo==='estimada'?' (estimada)':''):'')); }
 function prCgRow(c,g){ const P=prP(c); const s=prCgSit(c,g); const L=P.lotes[g.lote]; const cu=g.cultura||'Mamão Formosa'; const u=prUn(cu); const kg=x=>prFmtT(x,2)+' kg';
@@ -349,7 +388,7 @@ function prCgRow(c,g){ const P=prP(c); const s=prCgSit(c,g); const L=P.lotes[g.l
        dt:[{k:'txt',t:'colhida '+prBr(g.dcol)},{k:'br'},{k:'mut',t:g.drec?('recebida '+prBr(g.drec)+' '+(g.horaRec||g.hora||'')):(g.st==='Descartada'?'descartada '+prBr((g.descarte||{}).d):(g.est_cx?'~'+g.est_cx+' caixas (estimativa)':'a pesar'))}],
        liq:g.liq===null?[{k:'mut',t:'—'}]:[{k:'txt',t:kg(g.liq)}],com:[{k:g.com===null?'mut':'b',t:comT}],
        lote:g.lote?[{k:'link',t:g.lote,h:'PROD.dc.html#'+g.lote},{k:'br'},{k:'mut',t:loc}]:[{k:'mut',t:'— · '+loc}],
-       sit:[{k:'chip',t:s.t,c:s.c},{k:'br'},{k:'mut',t:s.nx}]}}; }
+       sit:[{k:'chip',t:s.t,c:s.c},{k:'br'},s.h?{k:'link',t:s.nx,h:s.h}:{k:'mut',t:s.nx}]}}; }
 function PREVALS(self,v){ cenOuvir(self); prTopo(self,v); const c=cenGet(); self._c=c; const P=prP(c);
   self.g2pick=(gid,rid)=>self.setState({pr_sel:{g:gid,id:rid},pr_pan:{g:gid,id:rid},pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null,pr_ch:null});
   const gs=prCargas(c,g=>g.sinc!==false&&prFazOk(self,g.faz)&&prSafOk(self,((PRDC.safras[(PRDC.cult[(g.origem[0]||{}).cult]||{}).saf]||{}).mf)||''));
@@ -417,9 +456,11 @@ function prPanCarga(self,c,g){ const P=prP(c); const s=prCgSit(c,g); const cu=g.
           {t:'Chave e recibo',rows:[{c:['chave do campo: '+(g.chave||'—')]},{c:['chave da pesagem: '+(g.chaveRec||'—')]}]}],err:self.state.pr_err};
   if(g.st==='Recebida'){ if(self.state.pr_modo==='estorno'){ PPx.form={t:'Estornar '+g.id,h:'Devolve o efeito: sai do '+g.lote+' e da produção do talhão. Recusado se o lote ficar abaixo do reservado.',fields:[prFld(self,'mot','Motivo do estorno',{t:'txt',im:'text',ph:'ex.: ticket trocado na balança'})]};
       PPx.prim={t:'Confirmar estorno',go:()=>prRun(self,x=>prEstornar(x,g.id,prFval(self,'mot',''),prRec(g.faz)),{pr_modo:null,pr_form:null})}; PPx.sec=[{t:'Manter carga',go:()=>self.setState({pr_modo:null,pr_err:''})}]; }
-    else PPx.sec=[{t:'Estornar',go:()=>self.setState({pr_modo:'estorno',pr_form:null,pr_err:''})}]; }
+    else { const ob=L&&typeof benPrende==='function'?benPrende(c,L):null;   /* lote em processo numa ordem liberada: sem estorno (BEN-REV-02, mesma regra do prEstornoImpede); o porquê fica no próximo passo, sem repetir o lote */
+      if(ob) PPx.next=s.nx+'. Sem estorno enquanto a '+ob.id+' não fecha: erro de pesagem entra no balanço da ordem e se justifica na conferência (alçada).';
+      else PPx.sec=[{t:'Estornar',go:()=>self.setState({pr_modo:'estorno',pr_form:null,pr_err:''})}]; } }
   return PPx; }
-function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const P=prP(c); const st=self.state;
+function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const P=prP(c); const st=self.state; prFaixaRec(self,v,c);
   v.cards_cg=prCards(self,v,'g_cg',id=>{ const g=P.cargas[id]; if(!g) return null; const s=prCgSit(c,g);
     return prCard({t1:g.id+(g.ticket?' · '+g.ticket:''),num:g.st==='Descartada'?'descartada':(g.liq===null?'a pesar':prFmtT(g.liq,2)+' kg'),t2:prCgOrig(g).join(' + ')+' · colhida '+prBr(g.dcol)+(g.lote?' · '+g.lote:''),chip:[s.t,s.c],nx:s.nx,go:()=>self.g2pick('g_cg',id)}); });
   const sel=st.pr_sel; const gs=sel&&P.cargas[sel.id]; let prim;

@@ -95,8 +95,9 @@ try:
         m = J("(()=>{ const nav=document.querySelector('nav[aria-label=Menu]'); const t=N(nav.innerText); return t; })()") or ''
         i_ag, i_pr, i_ma = m.find('Agrícola'), m.find('Produção'), m.find('Manutenção')
         t.chk('AC-01 grupo Produção logo depois de Agrícola (antes de Manutenção)', 0 <= i_ag < i_pr < i_ma, m[:300])
-        itens = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].map(a=>[N(a.innerText),a.getAttribute('href')]).filter(x=>['COLH.dc.html','CARGA.dc.html','PROD.dc.html'].indexOf(x[1])>=0)") or []
-        t.chk('AC-01 Produção com 3 itens: Previsão e colheita, Cargas e recebimento, Estoque de produto', [x[0] for x in itens] == ['Previsão e colheita', 'Cargas e recebimento', 'Estoque de produto'], itens)
+        # BEN-D14 (09/10): o grupo continua com 3 itens (D-01); o Beneficiamento é tela irmã de Cargas, dentro de "Recebimento e beneficiamento"
+        itens = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].map(a=>[N(a.innerText),a.getAttribute('href')]).filter(x=>['COLH.dc.html','CARGA.dc.html','BEN.dc.html','PROD.dc.html'].indexOf(x[1])>=0)") or []
+        t.chk('AC-01 Produção com 3 itens: Previsão e colheita, Recebimento e beneficiamento, Estoque de produto', [x[0] for x in itens] == ['Previsão e colheita', 'Recebimento e beneficiamento', 'Estoque de produto'], itens)
         for pg in ('COLH', 'CARGA', 'PROD'):
             ir(pg + '.dc.html'); t.chk(f'AC-01 {pg} abre sem erro de JS', not t.errs(), t.errs())
         ir('COLH.dc.html', limpa=True)
@@ -150,7 +151,7 @@ try:
         setv('#pf_bruto', '19250'); clk('Com avaria', 'aside'); clk('Registrar pesagem', 'aside'); p = toast()
         t.chk('a mesma pesagem por outro formulário (mesmo ticket e conteúdo) = a mesma carga, nada somado', 'mesma carga' in p and cen("c.producao.movs.length") == n, [p, cen("c.producao.movs.length"), n])
         ir('PROD.dc.html'); row('L39-133'); clk('Liberar L39-133', 'aside'); p = toast()
-        t.chk('Liberar lote (Qualidade) passa a Liberado', 'liberado por Qualidade' in p, p)
+        t.chk('Liberar lote (Qualidade ou agrônoma, pelo perfil de quem age: a Ana do perfil padrão) passa a Liberado', 'liberado por Ana (agrônoma)' in p, p)   # BEN-1 (d): perfil, não nome fixo
         row('L39-133'); setv('[id^=pf_q_L39-133_PV-036]', '10001'); clk('Reservar', 'aside'); p = pan()
         t.chk('reserva acima da falta do pedido é recusada junto ao formulário', 'Acima da falta' in p, p[-300:])
         ir('MB-10.dc.html'); lib(); clk('Sem sinal'); clk('Registrar carga · OS-0505'); setv('#mb_cx', '300'); clk('Carreta 02'); clk('Gravar carga'); p = toast()
@@ -203,7 +204,8 @@ try:
         t.chk('A-17 a linha do PV-030 diz que a quantidade é o saldo do CT-201', 'saldo 4.000 sc do CT-201' in (J("ROWTXT('PV-030')") or ''), J("ROWTXT('PV-030')"))
         hd = J("[...document.querySelectorAll('[role=columnheader]')].map(x=>N(x.innerText))") or []
         mam = J("ROWTXT('Mamão Formosa · fruta de campo')") or ''
-        t.chk('A-18 Estoque de produto com a coluna Em processo (mamão: 66.250 kg em processo)', any(h.lower().startswith('em processo') for h in hd) and '66.250 kg 0 kg 66.250 kg 0 kg' in mam, [hd, mam[:200]])
+        # BEN-1: a semente ganha 21.270 kg de fruta de campo no packing (saldo de abertura): 66.250 da colheita + 21.270 = 87.520 kg em processo
+        t.chk('A-18 Estoque de produto com a coluna Em processo (mamão: 66.250 kg da colheita + 21.270 kg do packing = 87.520 kg em processo)', any(h.lower().startswith('em processo') for h in hd) and '87.520 kg 0 kg 87.520 kg 0 kg' in mam, [hd, mam[:200]])
         # A-15 · a linha da cultura diz a área da ponderada
         ir('COLH.dc.html', limpa=True); mt = J("ROWTXT('Mamão Formosa')") or ''
         t.chk('A-15 linha do Mamão Formosa: 0,70 t/ha ponderada sobre 137,9 ha colhidos (96,74 t ÷ 137,9 ha)', '0,70 t/ha ponderada' in mt and 'sobre 137,9 ha colhidos' in mt, mt[:300])
@@ -272,3 +274,4 @@ try:
         shot('revisao')
 finally:
     t.fim()
+sys.exit(0 if all(t.ok) else 1)   # FALHOU com saída 0 escondia a falha (09/10, achado ao endurecer o AC-01)

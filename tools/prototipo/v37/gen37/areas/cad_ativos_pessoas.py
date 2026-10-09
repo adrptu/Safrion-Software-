@@ -25,7 +25,8 @@ for _f in ('CD-03.dc.html','CD-04.dc.html'): ui37.H_OVR.pop(_f,None)   # layout 
 
 # ---------------- pessoas, habilidades e habilitações (fonte do CD-04; o CD-03 lê para os operadores do conjunto) ----------------
 CALDA='Preparar calda (caldeiro)'; AGRO='Liberar O.S. (agrônomo)'
-HABILIDADES=['Operar trator','Operar pulverizador','Operar plantadeira','Operar colhedora',CALDA,'Irrigar','Almoxarifado',AGRO,'Conferir','Manutenção de máquinas']
+HABILIDADES=['Operar trator','Operar pulverizador','Operar plantadeira','Operar colhedora',CALDA,'Irrigar','Almoxarifado',AGRO,'Conferir','Manutenção de máquinas',
+             'Autorizar rota e liberar ordem de processo','Liberar lote (qualidade)']   # BEN-1: Igor e Marta (dados_cad, docs/beneficiamento §2.3)
 HAB_EXIGE={'Operar trator':'NR-31','Operar pulverizador':'NR-31','Operar plantadeira':'NR-31','Operar colhedora':'NR-31',CALDA:'NR-31',
            'Irrigar':'NR-10','Manutenção de máquinas':'NR-12',AGRO:'CREA'}
 HABIL=[('NR-31','v31','Validade da NR-31'),('NR-10','v10','Validade da NR-10'),('NR-12','v12','Validade da NR-12'),('CREA','vcrea','Validade do registro no CREA')]
@@ -35,7 +36,7 @@ _REN={'Preparar calda':CALDA}
 _OVR={'p6':dict(funcao='Caldeiro',equipe='Campo 1',hab=[CALDA,'Conferir'],v31='2027-04-30'),
       'p7':dict(funcao='Almoxarife',hab=['Almoxarifado','Conferir']),
       'p10':dict(equipe='Campo 2')}
-_ORDEM=['p1','p2','p3','p6','p10','p4','p5','p7','p8','p9']
+_ORDEM=['p1','p2','p3','p6','p10','p4','p5','p7','p8','p9','p12','p13']   # p12 Igor e p13 Marta: equipe e8 Beneficiamento e qualidade (BEN-1)
 def pessoas():
     by={p['id']:dict(p,**_OVR.get(p['id'],{})) for p in DC.PESSOAS}
     out=[]
