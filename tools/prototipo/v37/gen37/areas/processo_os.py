@@ -863,8 +863,12 @@ function EXTRAVALS(self,v){
     /* B-R8: divergência de consumo/dose na linha do apontamento; a revisão técnica (aceitar com motivo ou registrar a correção) só com o papel agronomo */
     const AGRd=g2papel(g2perfil(),'agronomo'); const dvr=(st.dvr&&st.dvr.id===o.id)?st.dvr:{id:o.id};
     const dvSet=(dia,patch)=>{ const cur=(self.state.dvr&&self.state.dvr.id===o.id)?self.state.dvr:{id:o.id}; self.setState({dvr:Object.assign({},cur,{[dia]:Object.assign({},cur[dia]||{},patch)})}); };
-    const dvGo=(dia,dec)=>{ const cur=(self.state.dvr&&self.state.dvr.id===o.id)?self.state.dvr:{}; const t=(cur[dia]||{}).t||'';
-      osRun(self,c=>cenDivRever(c,o.id,dia,dec,t,g2perfil()),{dvr:null},(e)=>dvSet(dia,{err:e})); };
+    /* DOM-REV-20261009-01 (S3): gravar a revisão de um dia limpa só o rascunho desse dia; o dos outros dias da mesma ordem fica,
+       e o foco vai para o próximo dia ainda em revisão (quem usa o teclado continua de onde estava) */
+    const dvGo=(dia,dec)=>{ const cur=(self.state.dvr&&self.state.dvr.id===o.id)?self.state.dvr:{id:o.id}; const t=(cur[dia]||{}).t||'';
+      const resto=Object.assign({},cur); delete resto[dia];
+      const r=osRun(self,c=>cenDivRever(c,o.id,dia,dec,t,g2perfil()),{dvr:resto},(e)=>dvSet(dia,{err:e}));
+      if(!r.erro) setTimeout(()=>{ const el=document.querySelector('aside[role=dialog] textarea[id^="dv_"]'); if(el) el.focus(); },60); };
     let ac=0; v.pan_ap=(o.ap||[]).map(x=>{ const prev=x.st==='Previsto'; const sem=x.sinc===false; const som=!prev&&cenApSomado(x); if(som) ac+=x.ha; const s=sem?'Aguardando sinal':x.st;
       const dup=x.st===CEN_AP_DUP&&!!cgo; const viv=dup?cenApDupVivos(cgo,x):[]; const de=viv.map(a=>a.dia).join(', ');
       const K=viv.length===1&&cenApSomado(viv[0])?viv[0]:null; const uso=K?cenApUsoK(cg,cgo,K):'';
