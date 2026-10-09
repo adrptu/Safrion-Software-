@@ -249,4 +249,42 @@ caso('Propor substituto (ponte até o 1b)', () => {
   ok('§0.1 · só para ativo bloqueado com ordem aberta (Trator 02 apto: recusado)', e.erro && /bloqueado/.test(e.erro), e);
 });
 
+// Item 12 (Codex 6064114787 §2, S2): receber, aplicar, devolver e estornar material da manutenção sem saldo nem custo duplicado.
+// O 1a garante um estado, um saldo por item e um custo; os movimentos em c.movs sobre lotes do Almox. oficina são o 1b (DECISOES §7).
+caso('Item 12 · 1a: um saldo, um custo, conservação e repetição', () => {
+  const nomes = Object.values(MAN0.itens).map(x => x.nome), lotes = Object.values(CEN0.lotes).map(l => l.prod);
+  ok('Item 12 · 1a · um estado: a manutenção vive em CEN0.man (sem chave própria) e manGet lê o cenário único', MAN0 === CEN0.man && manGet() === cenGet().man && !/talhao-os-manutencao/.test(String(manGet) + String(manMudar)), Object.keys(CEN0));
+  ok('Item 12 · 1a · um saldo por item: nenhum item da manutenção tem lote no estoque geral (c.lotes) até o 1b', nomes.every(n => lotes.indexOf(n) < 0), nomes.filter(n => lotes.indexOf(n) >= 0));
+  const c = S(); manGerarTodas(c, null, OT); const id = 'OM-0235'; const s0 = JSON.parse(JSON.stringify(c.itens)); const fil = 'FIL-MF4292', ol = 'OL-1540';
+  const sc = run(c, x => manSolicitar(x, id, OT)); const rc = run(c, x => manReceber(x, id, OT)); const rc2 = run(c, x => manReceber(x, id, OT));
+  ok('Item 12 · receber (ponte simulada): +1 un do filtro uma vez só; repetir não soma de novo', !sc.erro && !rc.erro && rc2.nada && c.itens[fil].saldo === s0[fil].saldo + 1 && /simulado/.test(rc.msg), [sc, rc, rc2, c.itens[fil]]);
+  const lb = run(c, x => manLiberar(x, id, false, OT, {})); const lb2 = run(c, x => manLiberar(x, id, false, OT, {}));
+  ok('Item 12 · liberar reserva 100 % (1 un + 12 L) uma vez; repetir é recusado sem reservar de novo', !lb.erro && /não está em A liberar/.test(lb2.erro || '') && c.itens[fil].reservado === s0[fil].reservado + 1 && c.itens[ol].reservado === s0[ol].reservado + 12, [lb, lb2]);
+  run(c, x => manIniciar(x, id, ZE)); feitas(c, id, ZE);
+  const cc = run(c, x => manConcluir(x, id, '5124', '4', false, { 1: '9' }, ZE));
+  ok('Item 12 · aplicar 9 L de 12: a reserva sai, o saldo baixa o entregue e a sobra de 3 L fica a devolver', !cc.erro && c.itens[ol].reservado === s0[ol].reservado && c.itens[ol].saldo === s0[ol].saldo - 12 && c.oms[id].pecas[1].sob === 3 && c.oms[id].pecas[1].apl === 9, [cc, c.itens[ol]]);
+  const dv = run(c, x => manSobras(x, id, OT)); const dv2 = run(c, x => manSobras(x, id, OT));
+  ok('Item 12 · devolver: +3 L uma vez só; repetir não soma de novo', !dv.erro && dv2.nada && c.itens[ol].saldo === s0[ol].saldo - 9, [dv, dv2, c.itens[ol]]);
+  const cp0 = manCustoPeriodo(c, 'mes'); const en = run(c, x => manEncerrar(x, id, OT)); const cp1 = manCustoPeriodo(c, 'mes');
+  const conserva = Object.keys(s0).every(k => { const rec = k === fil ? 1 : 0; const apl = k === fil ? 1 : (k === ol ? 9 : 0); return c.itens[k].saldo === s0[k].saldo + rec - apl && c.itens[k].reservado === s0[k].reservado; });
+  ok('Item 12 · conservação: saldo final = inicial + recebido − aplicado em todo item; reservado volta ao inicial', !en.erro && conserva, [en, c.itens]);
+  ok('Item 12 · um custo: OM-0235 encerra a R$ 1.692,00 (1 × 160 + 9 L × 28 + 4 h × 320), pela função única, e entra uma vez no custo do período', c.oms[id].custo === 1692 && manCusto(c, c.oms[id]) === 1692
+    && Math.abs(cp1.enc - cp0.enc - 1692) < 1e-9 && Math.abs(cp0.and - cp1.and - manCusto(c, c.oms[id], 'est')) < 1e-9, [c.oms[id].custo, cp0, cp1]);
+  const it0 = JSON.stringify(c.itens); const ab = run(c, x => manAbastecer(x, { aid: 'a03', tq: 'Comboio CB-01 · D-118', vol: '120', leit: '5130', op: 'Marcos' }, OT, 'k12')); const es = run(c, x => manEstornar(x, ab.id, 'volume errado', OT, 'k12e'));
+  ok('Item 12 · abastecimento e estorno não mexem em saldo de peça nem de lote (diesel como lote é o Bloco 6)', !ab.erro && !es.erro && JSON.stringify(c.itens) === it0, [ab, es]);
+});
+
+// CTL-01 PLANO (d) e Codex 6064114787 §3: "Horímetro único" e "Gerar ordem" sem repetição, confirmados no código.
+caso('CTL-01 (d) horímetro único e Gerar ordem', () => {
+  const c = S();
+  run(c, x => manAbastecer(x, { aid: 'a04', tq: 'Comboio CB-01 · D-118', vol: '80', leit: '3420', op: 'Marcos' }, OT, 'h1'));
+  run(c, x => manAchRegistrar(x, { aid: 'a04', origem: 'Relato', comp: 'Motor', sint: 'Fumaça preta', crit: 'Média', sug: 'Apto', leit: '3425' }, OT, 'h2'));
+  run(c, x => manLeituraAvulsa(x, 'a04', '3430', '', OT, 'h3'));
+  run(c, x => manLiberar(x, 'OM-0234', true, OT)); run(c, x => manIniciar(x, 'OM-0234', ZE)); feitas(c, 'OM-0234', ZE); run(c, x => manConcluir(x, 'OM-0234', '2995', '5', false, {}, ZE));
+  const org = c.leituras.slice(MAN0.leituras.length).map(l => (l.origem || '').split(' ')[0]);
+  ok('Horímetro único · abastecimento, achado, leitura avulsa e conclusão gravam pela mesma função no histórico c.leituras (4 origens)', ['Abastecimento', 'Achado', 'Leitura', 'Conclusão'].every(o => org.indexOf(o) >= 0) && c.ativos.a04.leit.val === 3430 && c.ativos.a02.leit.val === 2995, org);
+  const g = S(); const r = manGerarTodas(g, null, OT); const l = manLinhas(g, null).find(x => x.om && x.om.id === 'OM-0235'); const r2 = l ? run(g, x => manGerar(x, l.pid + '|' + l.aid, l.sid, OT)) : { erro: 'sem linha' };
+  ok('Gerar ordem · lote (Sem ordem) e painel do vencimento usam a mesma regra: gerar de novo o ciclo do Trator 03 devolve a OM-0235, sem OM nova', r.ids.length === 3 && r2.nada && r2.id === 'OM-0235' && /Já existe a OM-0235/.test(r2.msg) && Object.keys(g.oms).length === Object.keys(MAN0.oms).length + 3, [r, r2]);
+});
+
 print(JSON.stringify(R));
