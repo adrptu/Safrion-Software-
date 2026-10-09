@@ -74,6 +74,7 @@ M = [
  ('M65 complemento de caixas sem reserva no Estoque (rodada 1, S3)', "  l.reservado += n; it.solicitado += n; const ins", "  it.solicitado += n; const ins"),
  ('M66 complemento troca de lote com caixa em custódia', "    if (it.custodia > 1e-9 || pend > 1e-9) throw new Error('Pedir '", "    if (false) throw new Error('Pedir '"),
  ('M67 recusa por custódia sem a saída (complemento da ordem)', "' já foi toda entregue. Peça mais caixas na ordem (\"Pedir mais caixas\"); '", "' já foi toda entregue. Peça a entrega no Estoque; '"),
+ ('M68 comando sobre ordem Cancelada vira "Já feito" (rodada 1, S4)', "function benViva(o, verbo) { if (o.etapa !== 'Canceladas') return;", "function benViva(o, verbo) { return;"),
  ('M62 cancelar sem perfil', "const quem = cenExigeUm(ator, ['producao', 'gestor'], 'Cancelar a ' + id);", "const quem = 'Igor (responsável de produção)';"),
 ]
 U = open(os.path.join(HERE, 'ben_unit.js'), encoding='utf-8').read()

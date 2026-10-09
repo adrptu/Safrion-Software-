@@ -202,6 +202,9 @@ function benRecibo(c, k, nome, imp) { if (!k || !k.chave) return null; const ja 
   return { msg: 'Já feito: ' + ja.msg, nada: true, repetido: true, id: ja.id || '' }; }
 function benGravaRecibo(c, k, nome, imp, msg, id) { if (!k || !k.chave) return; benB(c, 1).recibos[k.chave] = Object.assign({ nome, imp, msg, at: cenAgora() }, id ? { id } : {}); }
 function benEstadoTxt(o) { const b = benBal(o); return o.etapa + ' · ' + benValidos(o).length + ' registros válidos · diferença ' + benKg(b.dif); }
+/* ordem cancelada (BEN-D22): todo comando sobre ela é recusa com o motivo e o caminho, nunca aviso de sucesso "Já feito" (rodada 1, S4) */
+function benViva(o, verbo) { if (o.etapa !== 'Canceladas') return; const k = o.ben.canc || {};
+  throw new Error(o.id + ' cancelada' + (k.motivo ? ' (' + k.motivo + ')' : '') + ': nada a ' + verbo + '. As entradas abrem outra ordem.'); }
 function benVer(o, k) { if (k && k.ver !== undefined && k.ver !== null && Number(k.ver) !== Number(o.ver || 1))
   throw new Error('A ' + o.id + ' mudou depois que você abriu: ' + benEstadoTxt(o) + '. Confira e registre de novo.'); }
 function benToca(o) { o.ver = (o.ver || 1) + 1; }
@@ -280,7 +283,7 @@ function benCancelar(c, id, motivo, ator, k) { const quem = cenExigeUm(ator, ['p
   benGravaRecibo(c, k, 'benCancelar', imp, msg); return { msg }; }
 /* autorizar rota e liberar (R-A05): todas as causas de uma vez; sem causa, CMD-42 e CMD-06 em eventos separados no mesmo cenMudar */
 function benAutorizarLiberar(c, id, ator, k) { const quem = cenExige(ator, 'producao', 'Autorizar rota e liberar a ' + id); const o = benO(c, id);
-  if (o.etapa !== 'A liberar') throw new Error('Já feito: ' + id + ' está em ' + o.etapa + '.'); benVer(o, k);
+  benViva(o, 'liberar'); if (o.etapa !== 'A liberar') throw new Error('Já feito: ' + id + ' está em ' + o.etapa + '.'); benVer(o, k);
   const im = benImpedimentos(c, o);
   if (im.length) throw new Error('Liberação recusada · ' + (im.length > 1 ? im.length + ' causas: ' : '1 causa: ') + im.map(x => x.t + (x.dono ? ' (resolve: ' + x.dono + ')' : '')).join(' · ') + '. Nada foi gravado.');
   const r = benRota(o.ben.rota); const tot = (o.ins || []).reduce((a, x) => a + (x.tot || 0), 0);
@@ -292,7 +295,7 @@ function benAutorizarLiberar(c, id, ator, k) { const quem = cenExige(ator, 'prod
   benHist(o, quem, 'Liberada (CMD-06)', det); benToca(o);
   return { msg: id + ' ' + o.versao + ' autorizada (CMD-42) e liberada (CMD-06) por ' + quem + ': ' + det + '.' + (o.req ? ' O Estoque entrega as caixas no balcão.' : '') }; }
 function benIniciar(c, id, ator, k) { const quem = cenExige(ator, 'producao', 'Iniciar a ' + id); const o = benO(c, id);
-  if (o.etapa !== 'Liberadas') throw new Error(o.etapa === 'A liberar' ? id + ' ainda não foi liberada: Autorizar rota e liberar.' : 'Já feito: ' + id + ' está em ' + o.etapa + '.'); benVer(o, k);
+  benViva(o, 'iniciar'); if (o.etapa !== 'Liberadas') throw new Error(o.etapa === 'A liberar' ? id + ' ainda não foi liberada: Autorizar rota e liberar.' : 'Já feito: ' + id + ' está em ' + o.etapa + '.'); benVer(o, k);
   o.etapa = 'Em execução'; const it = benReqItem(c, o); if (it && it.custodia > 1e-9) it.confirmado = 'balcao';   /* recebida no balcão por quem executa (PCMS-M14) */
   benHist(o, quem, 'Iniciada', 'Entradas ' + o.ben.ent.map(e => e.lote).join(', ') + ' em processo'); benToca(o);
   return { msg: id + ' em execução: registre as saídas pesadas (produto com caixas e bruto, descarte, outro destino e perda identificada).' + (it && !(it.custodia > 1e-9) ? ' Caixas da ' + o.req + ' ainda no Estoque.' : '') }; }
@@ -352,7 +355,7 @@ function benSaida(c, id, k, ator) { const quem = cenExige(ator, 'producao', 'Reg
    parte da fruta e o resto virava diferença no Fechar (perda fictícia) */
 function benComplementar(c, id, qtd, ator, k) { const quem = cenExige(ator, 'producao', 'Pedir caixas para a ' + id); const o = benO(c, id); k = k || {};
   const n = benNum(qtd); const imp = JSON.stringify([id, String(qtd)]); const ja = benRecibo(c, k, 'benComplementar', imp); if (ja) return ja;
-  if (o.etapa === 'Canceladas') throw new Error(id + ' cancelada: nada a pedir.'); benVer(o, k);
+  benViva(o, 'pedir'); benVer(o, k);
   if (['Liberadas', 'Em execução'].indexOf(o.etapa) < 0 || o.ben.conc) throw new Error('Peça caixas com a ordem liberada ou em execução (' + id + ' está em ' + o.etapa + '): ' + (o.etapa === 'A liberar' ? 'antes de liberar, ajuste as caixas da ordem; a reserva nasce na liberação.' : 'na conferência não entra embalagem nova; reabra a execução se faltou registrar Produto.'));
   if (!(Number.isInteger(n) && n >= 1)) throw new Error('Caixas: número inteiro de unidades (ao menos 1).');
   const r = c.reqs[o.req]; const it = benReqItem(c, o); if (!r || !it) throw new Error(id + ' sem requisição de caixas.');
@@ -412,7 +415,7 @@ function benJustificar(c, id, motivo, texto, ator, k) { const o = benO(c, id);
   benHist(o, quem, 'Diferença justificada', motivo + ': ' + tx + ' · ' + benKg(b.dif) + ' (' + benPct(b.pct) + ')' + (al.passa ? ' · acima da alçada do responsável de produção (' + al.msg + ')' : '')); benToca(o);
   const msg = 'Diferença de ' + benKg(b.dif) + ' da ' + id + ' justificada por ' + quem + ' (' + motivo + '). ' + benQuem('conferente') + ' confere o balanço.'; benGravaRecibo(c, k, 'benJustificar', imp, msg); return { msg }; }
 function benConfirmarCorrecao(c, id, ator) { const quem = cenExige(ator, 'gestor', 'Confirmar a correção na conferência da ' + id); const o = benO(c, id);
-  if (!o.ben.corr || !o.ben.corr.pend) throw new Error('Já feito: nenhuma correção aguarda a gestão na ' + id + '.');
+  benViva(o, 'confirmar'); if (!o.ben.corr || !o.ben.corr.pend) throw new Error('Já feito: nenhuma correção aguarda a gestão na ' + id + '.');
   o.ben.corr.pend = false; o.ben.corr.conf = { quem, em: benEm() };
   benHist(o, quem, 'Correção na conferência confirmada', o.ben.corr.msg + ' · ' + o.ben.corr.motivo + ' (' + o.ben.corr.quem + ')'); benToca(o);
   return { msg: 'Correção da ' + id + ' confirmada por ' + quem + '. ' + benQuem('conferente') + ' confere o balanço.' }; }

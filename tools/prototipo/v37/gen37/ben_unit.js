@@ -557,4 +557,10 @@ function OB113(c) { const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132'
      p.t === 'Enviar para conferência' && p.acao === 'concluir' && /^Enviar a OB-0110 para conferência: decisão de Igor/.test(an.erro || '') && /antes de enviar para conferência\.$/.test(sp.erro || '')
      && !ok1.erro && h.ev === 'Enviada para conferência' && /diferença no envio 0 kg/.test(h.det) && !rb.erro && /a declaração do envio para conferência cai/.test(h2.det), [p, an, sp, h, h2]); }
 
+// ---- U44 · rodada 1 (S4): comando sobre ordem Cancelada é recusa (com o motivo), não aviso de sucesso "Já feito" ----
+{ const c = NOVO(); const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }] }, IG)); const v0 = O(c, n.id).ver; MUD(c, x => benCancelar(x, n.id, 'caixas insuficientes', IG)); const r0 = c.rev || 0;
+  const r = [MUD(c, x => benAutorizarLiberar(x, n.id, IG, { ver: v0 })), MUD(c, x => benIniciar(x, n.id, IG)), MUD(c, x => benConfirmarCorrecao(x, n.id, AN))];
+  ok('U44a liberar (outra aba), iniciar e confirmar correção numa ordem Cancelada: recusa com o motivo e o caminho (nunca "Já feito"); nada gravado',
+     r.every(x => x.erro && !/^Já feito/.test(x.erro) && /^OB-0113 cancelada \(caixas insuficientes\): nada a /.test(x.erro) && /As entradas abrem outra ordem\.$/.test(x.erro)) && (c.rev || 0) === r0 && O(c, n.id).etapa === 'Canceladas', r); }
+
 print(JSON.stringify(R));
