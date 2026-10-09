@@ -20,6 +20,8 @@ Modos (um por vez, cada um abre o Chrome headless do cadc_lib.T; o cenário come
            necessidade (1.169 un), vê o impedimento de caixas com quem resolve; o Rui confere a NF 7731 das caixas no Estoque; o Igor
            libera, o Rui entrega no balcão; saídas, conferência (Paula) e Fechar fecham os 12.300 kg sem diferença fictícia; a CG-2107
            sem "Estornar" com o porquê; a Marta sem "Registrar decisão" no L39-132.
+  complemento rodada 1 (S3): falta de caixa durante a execução: a recusa diz a saída, "Pedir mais caixas" faz o complemento da
+           mesma REQ (toque duplo grava uma vez), o Rui entrega no balcão e o balanço fecha com diferença 0.
   cancelar integração BEN (09/10): ordem em A liberar que não libera (caixas acima do livre; entrada que mudou com o estorno da carga)
            tem saída: "Cancelar a ordem" com motivo (nada reservado) e o lote abre outra ordem.
   faixa390 integração BEN (09/10): a 390 px, Cargas › faixa de telas › Beneficiamento por toque real (a lista aberta fica acima da
@@ -30,7 +32,7 @@ import sys, os, time, json
 os.environ.setdefault('SAFRION_DADOS', 'sintetico')
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from cadc_lib import T
-TODOS = ('fluxo', 'erros', 'celular', 'revisao', 'roteiro', 'roteiro390', 'cancelar', 'faixa390')
+TODOS = ('fluxo', 'erros', 'celular', 'revisao', 'roteiro', 'roteiro390', 'complemento', 'cancelar', 'faixa390')
 MODOS = [a for a in sys.argv[1:] if a in TODOS] or list(TODOS)
 PR = os.path.join(HERE, '_probe'); os.makedirs(PR, exist_ok=True)
 t = T(); J = t.J
@@ -202,7 +204,7 @@ try:
         perfil('Igor'); clk('+ Registrar saída', 'aside'); clk('Produto', 'aside'); clk('A', 'aside'); setv('#pf_cx', '10'); setv('#pf_br', '106'); clk('Registrar', 'aside'); p = pan()
         t.chk('massa pesada não se cria: +100 kg de A recusado com as parcelas, nada gravado', 'Saídas pesadas 12.100 kg > entrada 12.000 kg + tolerância 12 kg' in p and rev() == r0, p[-300:])
         setv('#pf_cx', '61'); setv('#pf_br', '600'); clk('Registrar', 'aside'); p = pan()
-        t.chk('caixas acima da custódia: "Caixas acima da custódia: 60 un. Peça a entrega no Estoque."', 'Caixas acima da custódia: 60 un. Peça a entrega no Estoque.' in p and rev() == r0, p[-300:])
+        t.chk('caixas acima da custódia: "Caixas acima da custódia: 60 un, e a REQ-030 já foi toda entregue. Peça mais caixas na ordem"', 'Caixas acima da custódia: 60 un, e a REQ-030 já foi toda entregue. Peça mais caixas na ordem ("Pedir mais caixas")' in p and rev() == r0, p[-300:])
         clk('Cancelar', 'aside'); row('OB-0110'); clk('Estornar S-02', 'aside'); clk('Confirmar estorno de S-02', 'aside'); p = pan()
         t.chk('estorno sem motivo recusado', 'motivo do estorno' in p and rev() == r0, p[-300:])
         clk('Pesagem refeita', 'aside'); clk('Confirmar estorno de S-02', 'aside'); p = pan(); st = cen("[c.ordens['OB-0110'].ben.sai[1].estorno&&c.ordens['OB-0110'].ben.sai[1].estorno.motivo, c.reqs['REQ-030'].itens[0].custodia, c.movs.slice(-1)[0].tipo]")
@@ -374,6 +376,43 @@ try:
         tamanho(1440, 1000)
     if 'roteiro' in MODOS: roteiro(1440)
     if 'roteiro390' in MODOS: roteiro(390)
+    if 'complemento' in MODOS:
+        # rodada 1 (S3): falta de caixa durante a execução tinha só a recusa ("peça no Estoque") e o Estoque recusava (REQ toda entregue).
+        # Agora a ordem pede o complemento da mesma REQ (recibo, reserva, entrega no balcão, custódia) e o balanço fecha sem perda fictícia
+        print('== complemento · falta de caixa na execução: Pedir mais caixas, entrega no balcão e balanço fechado')
+        from ben_unit_test import motor, node
+        fx = node(motor() + """ const c = cenClone(CEN0); const IG = 'Igor', RU = 'Rui', CX = BENC.cx.item;
+          function M(fn) { const x = cenClone(c); const r = fn(x) || {}; Object.keys(c).forEach(k => delete c[k]); Object.assign(c, x); return r; }
+          M(x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }] }, IG));
+          M(x => { const n0 = x.movs.length; cenReceber(x, CX, 'CX26-02', 1200, 'un', 'Packing', '—', 'NF 7731', true, RU); x.movs[n0].estRec = { id: 'r7731', nf: 'NF 7731', ped: 'PC-096', conf: 1200, apto: 1200, quar: 0, lote: 'CX26-02' }; });
+          M(x => benAutorizarLiberar(x, 'OB-0113', IG)); M(x => cenEntregar(x, 'REQ-041', CX, 1169, null, RU)); M(x => benIniciar(x, 'OB-0113', IG));
+          M(x => benSaida(x, 'OB-0113', { fluxo: 'Produto', classe: 'A', cx: 1100, bruto: 11660 }, IG)); M(x => benSaida(x, 'OB-0113', { fluxo: 'Produto', classe: 'B', cx: 69, bruto: 731.4 }, IG));
+          c.rev = (c.rev || 0) + 1; print(JSON.stringify(c));""", 'ben_complemento.js')
+        ir('BEN.dc.html', limpa=True); J(f"localStorage.setItem('talhao-os-cenario-v1', {json.dumps(fx.stdout.strip().splitlines()[-1])})"); perfil('Igor'); ir('BEN.dc.html#OB-0113')
+        st = cen("[c.ordens['OB-0113'].etapa, c.reqs['REQ-041'].itens[0].custodia, c.reqs['REQ-041'].itens[0].solicitado]")
+        t.chk('X0 · fixture pelo motor das telas: OB-0113 em execução, 1.169 caixas usadas (custódia 0) e 610 kg a registrar', st == ['Em execução', 0, 1169], st)
+        r0 = rev(); clk('+ Registrar saída', 'aside'); clk('Produto', 'aside'); clk('B', 'aside'); setv('#pf_cx', '20'); setv('#pf_br', '212'); clk('Registrar', 'aside'); p = pan()
+        t.chk('X1 · a fruta rendeu mais: 20 cx de B recusadas com a saída escrita (Pedir mais caixas na ordem; quem entrega), nada gravado',
+              'Caixas acima da custódia: 0 un, e a REQ-041 já foi toda entregue. Peça mais caixas na ordem ("Pedir mais caixas"); Rui (almoxarife) ou Paula (almoxarife) entrega no balcão.' in p and rev() == r0, p[-400:])
+        clk('Cancelar', 'aside'); row('OB-0113'); bt = J(BTNS) or []; clk('Pedir mais caixas', 'aside'); p = pan(); qv = J("(document.querySelector('#pf_qx')||{}).value")
+        t.chk('X2 · "Pedir mais caixas" no painel em execução abre o complemento da REQ-041 com a sugestão pelo que falta processar (58 un para 610 kg) e o que acontece depois',
+              'Pedir mais caixas' in bt and qv == '58' and 'Complemento da REQ-041: o Estoque reserva no CX26-02 e entrega no balcão' in p, [bt, qv, p[:600]])
+        setv('#pf_qx', '20'); r0 = rev(); J("(()=>{ const b=[...document.querySelectorAll('aside button')].find(x=>N(x.innerText)==='Pedir caixas'); if(!b) return; window.__cl++; b.click(); b.click(); })()"); time.sleep(.7); tc = toast()
+        st = cen("[c.reqs['REQ-041'].itens[0].solicitado, c.movs.filter(m=>m.tipo==='reserva'&&m.req==='REQ-041').length, c.lotes['Caixa de mamão Formosa 10 kg|CX26-02'].reservado, c.ordens['OB-0113'].ben.hist.filter(h=>/Caixas pedidas/.test(h.ev)).length]")
+        t.chk('X2 · Pedir caixas (toque duplo): um complemento só (REQ-041 1.169 → 1.189, uma reserva nova de 20 no CX26-02, uma linha no histórico); o aviso diz quem entrega',
+              st == [1189, 2, 20, 1] and rev() == r0 + 1 and '20 un de Caixa de mamão Formosa 10 kg pedidas para a OB-0113: REQ-041 com 1.189 un' in tc, [st, rev(), r0, tc])
+        perfil('Rui'); ir('EST.dc.html'); est_secao(2); rw = J("ROWTXT('REQ-041')") or ''
+        r = J("(()=>{ const rw=[...document.querySelectorAll('[role=row]')].find(x=>N(x.innerText).indexOf('REQ-041')>=0); if(!rw) return 'sem linha'; (rw.querySelector('[role=cell] span')||rw).click(); return 'ok'; })()"); time.sleep(.5)
+        q = J("[(document.querySelector('#fx_g_ent_qtd')||{}).value,(document.querySelector('#fx_g_ent_quem')||{}).value]"); clk('Salvar', 'aside[role=dialog]'); tc = toast()
+        st = cen("[c.reqs['REQ-041'].itens[0].entregue, c.reqs['REQ-041'].itens[0].custodia]")
+        t.chk('X3 · no Estoque a REQ-041 mostra 20 un a entregar; o Rui entrega ao Igor no balcão (custódia 20)', r == 'ok' and '20 un' in rw and q == ['20', 'Igor'] and st == [1189, 20], [rw, q, st, tc])
+        perfil('Igor'); ir('BEN.dc.html#OB-0113'); clk('+ Registrar saída', 'aside'); clk('Produto', 'aside'); clk('B', 'aside'); setv('#pf_cx', '20'); setv('#pf_br', '212'); clk('Registrar', 'aside'); a = toast()
+        ir('BEN.dc.html#OB-0113'); clk('+ Registrar saída', 'aside'); clk('Descarte', 'aside'); clk('Compostagem', 'aside'); setv('#pf_kg', '410'); clk('Registrar', 'aside'); b = toast()
+        ir('BEN.dc.html#OB-0113'); clk(CONC, 'aside'); tc = toast(); st = cen("[c.ordens['OB-0113'].etapa, c.reqs['REQ-041'].itens[0].custodia, (c.ordens['OB-0113'].ben.just||[]).length]")
+        t.chk('X4 · com as 20 caixas o Igor embala o resto e envia para conferência: diferença 0 kg (0,00 %), custódia 0, sem justificativa',
+              'S-03 registrada' in a and 'S-04 registrada' in b and st == ['Em conferência', 0, 0] and 'diferença 0 kg (0,00 %)' in tc, [a, b, st, tc])
+        shot('complemento')
+        t.chk('complemento sem erro de JS', not t.errs(), t.errs())
     if 'cancelar' in MODOS:
         # integração BEN (09/10), achado 2: ordem em A liberar que não libera (caixas acima do livre; entrada que mudou com o estorno da carga)
         # prendia o lote sem saída (sem Cancelar, sem editar, sem incluir entrada). Agora "Cancelar a ordem" (rascunho: nada reservado)

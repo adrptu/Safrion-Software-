@@ -266,8 +266,8 @@ ok('U18 K29 condição do a13: "Apto" da semente; "Restrito · monitorado" → a
   MUD(c, x => cenEntregar(x, 'REQ-041', CX, 584, 'Igor', RU)); MUD(c, x => benIniciar(x, 'OB-0112', IG));
   const a = MUD(c, x => benSaida(x, 'OB-0112', { fluxo: 'Produto', classe: 'A', cx: 585, bruto: 6201 }, IG)); const n0 = c.movs.length;
   const b = MUD(c, x => benSaida(x, 'OB-0112', { fluxo: 'Produto', classe: 'A', cx: 500, bruto: 5300 }, IG));
-  ok('U23a K17 saída antes de iniciar recusada; depois da entrega de 584: 585 cx → "Caixas acima da custódia: 584 un. Peça a entrega no Estoque."; 500 cx baixam a custódia com MV consumo',
-     /Registre saídas só em Em execução/.test(sem.erro || '') && a.erro === 'Caixas acima da custódia: 584 un. Peça a entrega no Estoque.' && !b.erro && REQ(c, 'REQ-041').custodia === 84 && c.movs[n0].tipo === 'consumo' && c.movs[n0].det === CX + ' 500', [sem, a, b.erro]);
+  ok('U23a K17 saída antes de iniciar recusada; depois da entrega de 584: 585 cx → "Caixas acima da custódia: 584 un, e a REQ-041 já foi toda entregue. Peça mais caixas na ordem"; 500 cx baixam a custódia com MV consumo',
+     /Registre saídas só em Em execução/.test(sem.erro || '') && a.erro === 'Caixas acima da custódia: 584 un, e a REQ-041 já foi toda entregue. Peça mais caixas na ordem ("Pedir mais caixas"); Rui (almoxarife) ou Paula (almoxarife) entrega no balcão.' && !b.erro && REQ(c, 'REQ-041').custodia === 84 && c.movs[n0].tipo === 'consumo' && c.movs[n0].det === CX + ' 500', [sem, a, b.erro]);
   ok('U23b a entrega no balcão fica confirmada ao iniciar (sem "aguardando confirmação no app" para a ordem de processo)', REQ(c, 'REQ-041').confirmado === 'balcao', REQ(c, 'REQ-041'));
   const av = MUD(c, x => benSaida(x, 'OB-0112', { fluxo: 'Produto', classe: 'B', cx: 80, bruto: 948 }, IG));
   ok('U23c K18 líquido por caixa fora de ±5 % gera aviso, não trava (900 kg em 80 cx = 11,25 kg/cx, +12,5 %)', !av.erro && /11,25 kg por caixa contra 10 kg \(\+12,50 %\)/.test(av.msg), av); }
@@ -506,5 +506,43 @@ function RECEBE_NF(c, conf) { const r = MUD(c, x => { const n0 = x.movs.length; 
      !e.erro && im.some(x => x.t === 'L39-131: 24.120 kg na ordem, 12.180 kg no lote.' && !x.ret) && /Sem como resolver: Cancelar a ordem \(nada foi reservado\) e abrir outra/.test(pr.nota || ''), [e, im, pr]);
   MUD(c, x => benCancelar(x, n.id, 'carga CG-2106 estornada', IG)); const n2 = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-131', kg: 12180 }] }, IG));
   ok('U40g cancelada a ordem, o L39-131 abre outra com o saldo de agora (12.180 kg)', O(c, n.id).etapa === 'Canceladas' && !n2.erro && benEntrada(O(c, n2.id)) === 12180, [n2]); }
+
+// ---- U41 · rodada 1 (S3): falta de caixa durante a execução tem saída pelo mecanismo de requisição existente: complemento da mesma ordem
+//      (Pedir mais caixas), com recibo, reserva no Estoque, entrega no balcão e custódia; sem perda fictícia ----
+/* OB-0113 do L39-132 liberada com a NF 7731 conferida, entregue (1.169 un) e iniciada */
+function OB113(c) { const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }] }, IG)); RECEBE_NF(c, 1200); MUD(c, x => benAutorizarLiberar(x, n.id, IG));
+  MUD(c, x => cenEntregar(x, 'REQ-041', CX, 1169, null, RU)); MUD(c, x => benIniciar(x, n.id, IG)); return n.id; }
+{ const c = NOVO(); const id = OB113(c);
+  const a = MUD(c, x => benSaida(x, id, { fluxo: 'Produto', classe: 'A', cx: 1100, bruto: 11660 }, IG)); const b = MUD(c, x => benSaida(x, id, { fluxo: 'Produto', classe: 'B', cx: 69, bruto: 731.4 }, IG));
+  const f = MUD(c, x => benSaida(x, id, { fluxo: 'Produto', classe: 'B', cx: 20, bruto: 212 }, IG));
+  ok('U41a fruta rendeu mais: com as 1.169 caixas usadas, mais 20 cx de B são recusadas com a saída escrita (Pedir mais caixas na ordem; quem entrega)',
+     !a.erro && !b.erro && f.erro === 'Caixas acima da custódia: 0 un, e a REQ-041 já foi toda entregue. Peça mais caixas na ordem ("Pedir mais caixas"); Rui (almoxarife) ou Paula (almoxarife) entrega no balcão.', [a, b, f]);
+  const r0 = c.rev || 0; const pa = MUD(c, x => benComplementar(x, id, 20, PA, { chave: 'W-BNX-T0' })); const z = MUD(c, x => benComplementar(x, id, 0, IG, { chave: 'W-BNX-T1' }));
+  const fr = MUD(c, x => benComplementar(x, id, 1.5, IG, { chave: 'W-BNX-T2' })); const vv = MUD(c, x => benComplementar(x, id, 20, IG, { chave: 'W-BNX-T3', ver: 1 }));
+  ok('U41b pedir caixas: perfil sem papel, 0, fração e versão antiga recusados sem gravar', /decisão de Igor \(responsável de produção\)/.test(pa.erro || '') && /número inteiro de unidades \(ao menos 1\)/.test(z.erro || '') && /número inteiro/.test(fr.erro || '')
+     && /mudou depois que você abriu/.test(vv.erro || '') && (c.rev || 0) === r0, [pa, z, fr, vv]);
+  const k = { chave: 'W-BNX-T4', ver: O(c, id).ver }; const l0 = c.lotes[CX + '|CX26-02'].reservado; const cp = MUD(c, x => benComplementar(x, id, 20, IG, k)); const rp = MUD(c, x => benComplementar(x, id, 20, IG, k));
+  const it = REQ(c, 'REQ-041'); const mv = c.movs.filter(m => m.tipo === 'reserva' && m.req === 'REQ-041');
+  ok('U41c complemento de 20 un: a REQ-041 passa de 1.169 a 1.189 un (reserva no CX26-02, movimento de reserva, linha no histórico); o toque repetido devolve o mesmo recibo sem gravar',
+     !cp.erro && it.solicitado === 1189 && cenSaldoEntregar(it) === 20 && c.lotes[CX + '|CX26-02'].reservado === l0 + 20 && mv.length === 2 && mv[1].qtd === 20 && mv[1].lote === 'CX26-02'
+     && O(c, id).ins[0].tot === 1189 && /Caixas pedidas · REQ-041 \+20 un/.test(O(c, id).ben.hist.slice(-1)[0].ev) && rp.nada && rp.msg === 'Já feito: ' + cp.msg, [cp, rp, it, mv]);
+  const e = MUD(c, x => cenEntregar(x, 'REQ-041', CX, 20, null, RU)); const g = MUD(c, x => benSaida(x, id, { fluxo: 'Produto', classe: 'B', cx: 20, bruto: 212 }, IG));
+  const d = MUD(c, x => benSaida(x, id, { fluxo: 'Descarte', destino: 'Compostagem', kg: 410 }, IG));
+  const fim = [MUD(c, x => benConcluir(x, id, IG)), MUD(c, x => benConferir(x, id, PA)), MUD(c, x => benFechar(x, id, IG))]; const bb = benBal(O(c, id));
+  ok('U41d o Estoque entrega as 20 un no balcão (custódia), o Igor embala, e o balanço fecha 12.300 kg (A 11.000 + B 890 + descarte 410) com diferença 0, sem perda nem justificativa; custódia 0 no Fechar',
+     !e.erro && !g.erro && !d.erro && fim.every(x => !x.erro) && O(c, id).etapa === 'Encerradas' && bb.dif === 0 && bb.prod === 11890 && bb.desc === 410 && bb.perda === 0 && !(O(c, id).ben.just || []).length
+     && REQ(c, 'REQ-041').custodia === 0 && REQ(c, 'REQ-041').consumido === 1189, [e, g, d, fim, bb]); }
+{ /* o lote da REQ sem caixa livre: com custódia e entrega zeradas o complemento sai do lote com caixas livres (o item passa a ele); com caixa em custódia, use-a antes */
+  const c = NOVO(); const id = OB113(c); MUD(c, x => benSaida(x, id, { fluxo: 'Produto', classe: 'A', cx: 1159, bruto: 12285.4 }, IG));
+  const m1 = MUD(c, x => benComplementar(x, id, 40, IG, { chave: 'W-BNX-T5' }));
+  ok('U41e com 10 un em custódia e 31 livres no CX26-02, pedir 40 é recusado com o porquê (use a custódia antes; o complemento sai do lote da REQ)',
+     /^Pedir 40 un: o CX26-02 \(lote da REQ-041\) tem 31 un livres e há 10 un em custódia com a ordem\. Use as caixas em custódia e peça de novo; o complemento muda de lote só sem caixa em custódia nem a entregar\. Nada foi gravado\.$/.test(m1.erro || ''), m1);
+  MUD(c, x => benSaida(x, id, { fluxo: 'Produto', classe: 'A', cx: 10, bruto: 106 }, IG)); const m2 = MUD(c, x => benComplementar(x, id, 40, IG, { chave: 'W-BNX-T6' })); const it = REQ(c, 'REQ-041');
+  ok('U41f sem custódia nem entrega pendente, 40 un saem do CX26-01 (540 livres): o item da REQ-041 passa ao CX26-01, a reserva fica nele e a mensagem diz a troca',
+     !m2.erro && it.lote === 'CX26-01' && it.solicitado === 1209 && c.lotes[CX + '|CX26-01'].reservado === 40 && /do CX26-01 \(o CX26-02 tinha 31 un livres\)/.test(m2.msg || ''), [m2, it]);
+  const e = MUD(c, x => cenEntregar(x, 'REQ-041', CX, 40, null, RU)); const l1 = c.lotes[CX + '|CX26-01'];
+  ok('U41g a entrega das 40 un baixa o CX26-01 (físico 500, reserva 0) e vira custódia da ordem', !e.erro && l1.fisico === 500 && l1.reservado === 0 && REQ(c, 'REQ-041').custodia === 40, [e, l1]);
+  const c2 = NOVO(); const n2 = MUD(c2, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }] }, IG)); const a2 = MUD(c2, x => benComplementar(x, n2.id, 10, IG, { chave: 'W-BNX-T7' }));
+  ok('U41h ordem em A liberar: pedir caixas é recusado (as caixas da ordem se ajustam antes de liberar; a reserva nasce na liberação)', /^Peça caixas com a ordem liberada ou em execução \(OB-0113 está em A liberar\)/.test(a2.erro || ''), a2); }
 
 print(JSON.stringify(R));

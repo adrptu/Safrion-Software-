@@ -318,8 +318,10 @@ function benSaida(c, id, k, ator) { const quem = cenExige(ator, 'producao', 'Reg
     if (!(Number.isInteger(cx) && cx > 0) || !(isFinite(bruto) && bruto > 0)) throw new Error('Informe caixas e bruto.');
     let pal = 0; if (r.par.pesagem === 'pallet') { pal = benNum(k.pallets); if (!(Number.isInteger(pal) && pal >= 0)) throw new Error('Informe os pallets pesados (0 ou mais).'); }
     const tara = benTara(cx, pal, r); const liq = prSub(bruto, tara); if (prCmp(liq, 0) <= 0) throw new Error('Bruto ' + benKg(bruto) + ' não passa da tara ' + benKg(tara) + ': confira a pesagem.');
-    it = benReqItem(c, o); const cust = it ? it.custodia : 0;
-    if (cx > cust + 1e-9) throw new Error('Caixas acima da custódia: ' + benUn(cust) + '. Peça a entrega no Estoque.');
+    it = benReqItem(c, o); const cust = it ? it.custodia : 0; const pend = it ? cenSaldoEntregar(it) : 0;
+    /* a recusa diz a saída (rodada 1, S3): a entrega pendente no balcão, ou o complemento da mesma ordem quando a REQ já foi toda entregue */
+    if (cx > cust + 1e-9) throw new Error('Caixas acima da custódia: ' + benUn(cust) + (pend > 1e-9 ? '. A ' + o.req + ' tem ' + benUn(pend) + ' a entregar: ' + benQuem('almoxarife') + ' entrega no balcão (Estoque › Entregue por O.S.).'
+      : ', e a ' + (o.req || 'requisição') + ' já foi toda entregue. Peça mais caixas na ordem ("Pedir mais caixas"); ' + benQuem('almoxarife') + ' entrega no balcão.'));
     Object.assign(s, { classe: k.classe, prod: def.prod, cx, pallets: pal, bruto: prN(prM(bruto)), tara, kg: liq });
     const pc = prDiv(liq, cx); const nom = BENC.cx.massa; const desv = prDiv(prMul(prSub(pc, nom), 100), nom);
     if (prCmp(benAbs(prSub(pc, nom)), prMul(nom, r.par.aviso_cx)) > 0) aviso = ' Atenção: ' + prFmtT(pc, 3) + ' kg por caixa contra ' + prFmtT(nom, 3) + ' kg (' + (prCmp(desv, 0) > 0 ? '+' : '') + prFmt(desv, 2) + ' %): confira a contagem ou a pesagem.'; }
@@ -343,6 +345,29 @@ function benSaida(c, id, k, ator) { const quem = cenExige(ator, 'producao', 'Reg
   benHist(o, quem, 'Saída ' + s.id + ' registrada', det, s.mv || ''); benToca(o);
   const msg = s.id + ' registrada na ' + id + ': ' + det + '.' + (o.ben.corr && o.ben.corr.pend ? ' Correção ' + o.ben.corr.msg + ': decide ' + benQuem('gestor') + '.' : '') + aviso;
   benGravaRecibo(c, k, 'benSaida', imp, msg); return { msg, s }; }
+/* pedir mais caixas (rodada 1 da integração, S3): falta de caixa na execução se resolve pelo mecanismo de requisição existente, o
+   complemento da mesma ordem. Reserva no Estoque (movimento de reserva), soma à REQ e às caixas da ordem; o Estoque entrega no balcão e as
+   caixas viram custódia de quem executa; recibo pela chave de quem pede e versão esperada. Sai do lote da REQ; se ele não tem, e a ordem não
+   tem caixa em custódia nem a entregar, o item passa ao lote com caixas livres (a devolução volta a ele). Dano evitado: a ordem embalava só
+   parte da fruta e o resto virava diferença no Fechar (perda fictícia) */
+function benComplementar(c, id, qtd, ator, k) { const quem = cenExige(ator, 'producao', 'Pedir caixas para a ' + id); const o = benO(c, id); k = k || {};
+  const n = benNum(qtd); const imp = JSON.stringify([id, String(qtd)]); const ja = benRecibo(c, k, 'benComplementar', imp); if (ja) return ja;
+  if (o.etapa === 'Canceladas') throw new Error(id + ' cancelada: nada a pedir.'); benVer(o, k);
+  if (['Liberadas', 'Em execução'].indexOf(o.etapa) < 0 || o.ben.conc) throw new Error('Peça caixas com a ordem liberada ou em execução (' + id + ' está em ' + o.etapa + '): ' + (o.etapa === 'A liberar' ? 'antes de liberar, ajuste as caixas da ordem; a reserva nasce na liberação.' : 'na conferência não entra embalagem nova; reabra a execução se faltou registrar Produto.'));
+  if (!(Number.isInteger(n) && n >= 1)) throw new Error('Caixas: número inteiro de unidades (ao menos 1).');
+  const r = c.reqs[o.req]; const it = benReqItem(c, o); if (!r || !it) throw new Error(id + ' sem requisição de caixas.');
+  let l = c.lotes[it.prod + '|' + it.lote]; const livreReq = l ? Math.floor(cenDisp(l) + 1e-9) : 0; let troca = '';
+  if (livreReq < n) { const pend = cenSaldoEntregar(it);
+    if (it.custodia > 1e-9 || pend > 1e-9) throw new Error('Pedir ' + benUn(n) + ': o ' + it.lote + ' (lote da ' + o.req + ') tem ' + benUn(livreReq) + ' livres e há ' + benUn(it.custodia + pend) + ' ' + (it.custodia > 1e-9 ? 'em custódia com a ordem' : 'a entregar') + '. Use as caixas ' + (it.custodia > 1e-9 ? 'em custódia' : 'a entregar') + ' e peça de novo; o complemento muda de lote só sem caixa em custódia nem a entregar. Nada foi gravado.');
+    const b = cenLote(c, it.prod); const lb = b ? Math.floor(cenDisp(b) + 1e-9) : 0;
+    if (!b || lb < n) throw new Error('Pedir ' + benUn(n) + ': ' + benUn(Math.max(livreReq, lb)) + ' livres no Estoque. ' + benCaixasRec(c, o, Math.max(livreReq, lb), n).why + ' Nada foi gravado.');
+    troca = ' do ' + b.lote + ' (o ' + it.lote + ' tinha ' + benUn(livreReq) + ' livres)'; it.lote = b.lote; l = b; }
+  l.reservado += n; it.solicitado += n; const ins = (o.ins || []).find(x => x.p === it.prod); if (ins) ins.tot += n;
+  const mv = cenMov(c, { tipo: 'reserva', req: o.req, os: id, prod: it.prod, lote: it.lote, qtd: n, un: it.un, quem, origem: 'web', det: 'complemento da ' + id });
+  const det = o.req + ' ' + prFmtT(it.solicitado - n, 0) + ' → ' + benUn(it.solicitado) + ' · reserva' + (troca || ' no ' + it.lote) + ' · ' + benQuem('almoxarife') + ' entrega no balcão';
+  benHist(o, quem, 'Caixas pedidas · ' + o.req + ' +' + benUn(n), det, mv.id); benToca(o);
+  const msg = benUn(n) + ' de ' + it.prod + ' pedidas para a ' + id + troca + ': ' + o.req + ' com ' + benUn(it.solicitado) + '. ' + benQuem('almoxarife') + ' entrega no balcão (Estoque › Entregue por O.S.).';
+  benGravaRecibo(c, k, 'benComplementar', imp, msg); return { msg }; }
 /* estornar registro (R-A15): não apaga; o original fica riscado com quem, quando e motivo; caixas voltam à custódia (MV estorno-consumo) */
 const BEN_MOT_EST = ['Erro de digitação', 'Pesagem refeita', 'Outro'];
 function benEstornar(c, id, sid, motivo, texto, ator, k) { const quem = cenExige(ator, 'producao', 'Estornar ' + sid + ' da ' + id); const o = benO(c, id);

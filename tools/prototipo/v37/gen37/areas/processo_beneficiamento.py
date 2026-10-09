@@ -190,6 +190,12 @@ function bnPainel(self,c,o){ const r=benRota(o.ben.rota); const b=benBal(o); con
       fields:[prFld(self,'mc','Motivo',{t:'txt',im:'text',ph:'ex.: caixas insuficientes no Estoque'})]};
     PPx.prim={t:'Confirmar cancelamento da '+o.id,go:()=>self.state.pr_modo==='cancelar'&&bnRun(self,x=>benCancelar(x,o.id,prFval(self,'mc',''),g2perfil(),{chave:self.state.pr_ch,ver:self.state.bn_ver}),{pr_form:null,pr_ch:null,pr_modo:null})};
     PPx.sec=[{t:'Voltar',go:()=>self.setState({pr_modo:null,pr_err:''})}]; return PPx; }
+  /* pedir mais caixas (rodada 1, S3): complemento da mesma REQ; sugestão pelo que falta processar menos o que já está em custódia ou a entregar */
+  if(modo==='caixas'){ const cu=it?it.custodia:0, pe=it?cenSaldoEntregar(it):0; const ne=benCaixas(ep,r); const sx=Math.max(1,ne-Math.ceil(cu+pe-1e-9));
+    PPx.form={t:'Pedir mais caixas · '+benProdQ(),h:'Complemento da '+o.req+': o Estoque reserva'+(it?' no '+it.lote:'')+' e entrega no balcão; as caixas viram custódia da ordem. Em custódia '+benUn(cu)+' · a entregar '+benUn(pe)+' · em processo '+benKg(ep)+' (⌈'+benKg(ep)+' × '+prFmtT(prMul(r.par.frac_vend,100),2)+' % ÷ '+prFmtT(BENC.cx.massa,3)+' kg⌉ = '+ne+' un). Confirme ou ajuste.',
+      fields:[prFld(self,'qx','Caixas',{t:'txt',im:'numeric',v:String(sx),u:'un'})]};
+    PPx.prim={t:'Pedir caixas',go:()=>self.state.pr_modo==='caixas'&&bnRun(self,x=>benComplementar(x,o.id,prNum(prFval(self,'qx',String(sx))),g2perfil(),{chave:self.state.pr_ch,ver:self.state.bn_ver}),{pr_form:null,pr_ch:null,pr_modo:null})};
+    PPx.sec=[{t:'Voltar',go:()=>self.setState({pr_modo:null,pr_err:''})}]; return PPx; }
   if(modo==='reabrir'){ PPx.form={t:'Reabrir execução · '+benProdQ(),h:'Volta a Em execução: a declaração do Concluir, a conferência e a justificativa caem. Para corrigir um registro, estorne na conferência.',fields:[prFld(self,'mr','Motivo',{t:'txt',im:'text',ph:'ex.: faltou registrar a classe B do turno da tarde'})]};
     PPx.prim={t:'Reabrir execução',go:()=>self.state.pr_modo==='reabrir'&&bnRun(self,x=>benReabrir(x,o.id,prFval(self,'mr',''),g2perfil()),{pr_form:null,pr_modo:null})}; PPx.sec=[{t:'Voltar',go:()=>self.setState({pr_modo:null,pr_err:''})}]; return PPx; }
   /* recusa de um comando sem formulário aberto (autorizar, concluir, conferir, fechar): a causa fica no painel, junto da ação */
@@ -207,6 +213,7 @@ function bnPainel(self,c,o){ const r=benRota(o.ben.rota); const b=benBal(o); con
   else if(nx.acao==='fechar') PPx.prim={t:'Fechar processo',go:()=>bnRun(self,x=>benFechar(x,o.id,g2perfil(),k),{})};
   /* A liberar é rascunho (nada reservado): quem cria pode cancelar, com motivo (BEN-D22) */
   if(at==='A liberar') sec.push({t:'Cancelar a ordem',go:()=>self.setState({pr_modo:'cancelar',pr_form:null,pr_err:'',pr_ch:prChave('W-BNC'),bn_ver:o.ver})});
+  if(at==='Em execução'&&o.req) sec.push({t:'Pedir mais caixas',go:()=>self.setState({pr_modo:'caixas',pr_form:null,pr_err:'',pr_ch:prChave('W-BNX'),bn_ver:o.ver})});
   if(at==='Em conferência'){ sec.push({t:'Reabrir execução',go:()=>self.setState({pr_modo:'reabrir',pr_form:null,pr_err:''})}); if(!o.ben.conf) sec.push({t:'+ Registrar perda',go:abreSaida}); }
   return PPx; }
 function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const st=self.state; const ords=self._ords||[]; prFaixaRec(self,v,c);
