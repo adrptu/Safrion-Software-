@@ -152,13 +152,17 @@ try:
         chk('10 CMP · etapa 2: "Solicitar cotações ›" único; etapa 3 antes do envio: só o comando "Enviar convites (simulado)" com a causa; etapa 5: comando "Enviar à Direção" + avanço secundário; ir à etapa 6 não aprova (sem "Compra aprovada", sem PC-101)',
             a2['prims']==['Solicitar cotações ›'] and a2['avancos']==1 and a3['prims']==['Enviar convites (simulado)'] and a3['avancos']==0 and a5['prims']==['Enviar à Direção'] and a5['avancos']==1 and a6['etapa']==6 and 'Compra aprovada' not in b and 'PC-101' not in b,
             [a2,a3,a5,a6['etapa']])
-        # 11 · PA: Novo plano secundário; etapa 2: Incluir atividade secundário, banner sem "Revisar e publicar", avanço na área; etapa 3 sem rascunho: nada a publicar
-        abre('PA'); p1=est(); novo=J(f"(()=>{{const b=[...document.querySelectorAll('main button')].find(b=>{N}(b.innerText)==='Novo plano'); return b?getComputedStyle(b).backgroundColor:null;}})()")
+        # 11 · PA (NAV-1: lista → detalhe, sem etapas; design system 09/10, BOT-01/02/03/06): lista com o único verde "Criar plano" no
+        #      cabeçalho; detalhe sem rascunho sem primária ("Incluir atividade" secundário no bloco); com rascunho, "Publicar versão v7"
+        #      a única primária, no Próximo passo; nenhum avanço que só navega ("Revisar e publicar", "Ver versões e cultivos")
+        abre('PA'); p1=est(); novo=J(f"(()=>{{const b=[...document.querySelectorAll('header button')].find(b=>{N}(b.innerText)==='Criar plano'); return b?getComputedStyle(b).backgroundColor:null;}})()")
         J("document.querySelector('main .g2card').click()"); time.sleep(.5); p2=est(); inc=J(f"[...document.querySelectorAll('main button')].filter(b=>b.getClientRects().length&&{N}(b.innerText)==='Incluir atividade').map(b=>getComputedStyle(b).backgroundColor)")
-        rp=J(f"[...document.querySelectorAll('main button')].filter(b=>b.getClientRects().length&&/Revisar e publicar/.test(b.innerText)&&!b.closest('[data-acoes]')).length")
-        acao('avancar'); p3=est(); shot('pa_etapa3')
-        chk('11 PA · Novo plano secundário (etapa 1 sem primária); etapa 2: "Incluir atividade" secundário, nenhum "Revisar e publicar" fora da área, avanço "Ver versões e cultivos ›"; etapa 3 sem rascunho: só retorno e a nota "Nada a publicar"',
-            p1['prims']==[] and novo=='rgb(255, 255, 255)' and p2['etapa']==2 and inc==['rgb(255, 255, 255)'] and rp==0 and p2['prims']==['Ver versões e cultivos ›'] and p3['etapa']==3 and p3['prims']==[] and any('Nada a publicar' in a for a in p3['area']),
+        rp=J(f"[...document.querySelectorAll('main button,[data-acoes] button')].filter(b=>b.getClientRects().length&&/Revisar e publicar|Ver versões e cultivos/.test(b.innerText)).length")
+        J("(()=>{const b=[...document.querySelectorAll('main button')].find(b=>(b.getAttribute('aria-label')||'').startsWith('Mostrar insumos de Fungicida 1ª aplicação')); b.click();})()"); time.sleep(.3)
+        J("[...document.querySelectorAll('main button.pa-dose')][0].click()"); time.sleep(.3); c.call('Input.insertText',{'text':'0,6'}); c.tecla('Enter','Enter',13,text='\r'); time.sleep(.5); p3=est(); shot('pa_detalhe_rascunho')
+        chk('11 PA · lista: "Criar plano" o único verde, no cabeçalho; detalhe sem rascunho: sem primária, "Incluir atividade" secundário e só "‹ Biblioteca de planos" na área; com rascunho: "Publicar versão v7" a única primária, como comando; nenhum avanço que só navega',
+            p1['prims']==['Criar plano'] and novo=='rgb(30, 122, 76)' and p1['etapa']==0 and p2['etapa']==0 and inc==['rgb(255, 255, 255)'] and rp==0 and p2['prims']==[] and p2['avancos']==0 and p2['area']==['voltar:‹ Biblioteca de planos']
+            and p3['prims']==['Publicar versão v7'] and p3['avancos']==0 and 'comando:Publicar versão v7' in p3['area'],
             [p1,novo,p2,inc,rp,p3])
         # 12 · PM: mesma regra (Novo plano secundário; avanço e retorno na área)
         abre('PM'); m1=est(); r=J("(()=>{const b=[...document.querySelectorAll('main button[aria-label]')].find(b=>/^Abrir /.test(b.getAttribute('aria-label'))); if(!b) return 'sem cartão'; b.click(); return b.getAttribute('aria-label');})()"); time.sleep(.5); m2=est(); shot('pm_etapa2')
@@ -342,25 +346,25 @@ try:
         campo=J("(()=>{const d=document.querySelector('aside[role=dialog]'); const i=d&&[...d.querySelectorAll('input:not([type=checkbox]),textarea')].find(x=>x.getClientRects().length&&!x.readOnly); if(!i) return null; if(!i.id) i.id='v3campo'; return i.id;})()")
         setv('#'+campo,'Teste saída') if campo else None; time.sleep(.2)
         J("(()=>{const b=document.querySelector('aside[role=dialog] [aria-label=Fechar]'); if(b) b.click();})()"); time.sleep(.4)
-        m=medida('PA · decisão de saída aberta'); M.append(m); sal=J("[...document.querySelectorAll('aside[role=dialog] button')].filter(b=>b.getClientRects().length&&/^(Salvar|Cancelar)$/.test(b.innerText.trim())).length"); shot('v3_decisao_saida')
-        clk('Continuar editando','aside[role=dialog]'); sal2=J("[...document.querySelectorAll('aside[role=dialog] button')].filter(b=>b.getClientRects().length&&/^(Salvar|Cancelar)$/.test(b.innerText.trim())).length")
+        m=medida('PA · decisão de saída aberta'); M.append(m); sal=J("[...document.querySelectorAll('aside[role=dialog] button')].filter(b=>b.getClientRects().length&&/^(Salvar|Incluir atividade|Cancelar)$/.test(b.innerText.trim())).length"); shot('v3_decisao_saida')
+        clk('Continuar editando','aside[role=dialog]'); sal2=J("[...document.querySelectorAll('aside[role=dialog] button')].filter(b=>b.getClientRects().length&&/^(Salvar|Incluir atividade|Cancelar)$/.test(b.innerText.trim())).length")
         val=J(f"(document.getElementById({json.dumps(campo)})||{{value:''}}).value") if campo else ''
-        chk('25 decisão de saída (PA · Incluir atividade): "Continuar editando" a única primária, "Descartar alterações" separado e Salvar/Cancelar fora enquanto a decisão está aberta; continuar editando devolve Salvar/Cancelar e o texto',
+        chk('25 decisão de saída (PA · Incluir atividade): "Continuar editando" a única primária, "Descartar alterações" separado e o rodapé (Cancelar · Incluir atividade) fora enquanto a decisão está aberta; continuar editando devolve o rodapé e o texto',
             m['prims']==['Continuar editando'] and sal==0 and sal2==2 and val=='Teste saída', [campo,m,sal,sal2,val])
         J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Cancelar'); if(b) b.click();})()"); time.sleep(.3); clk('Descartar alterações','aside[role=dialog]')
-        # 26 · impedimento e consulta: PA etapa 3 sem rascunho (nada a publicar) e SAF encerrada (S2526) na revisão: zero primária
-        acao('avancar'); m1=medida('PA etapa 3 · nada a publicar'); M.append(m1)
+        # 26 · impedimento e consulta: PA detalhe sem rascunho (nada a publicar; NAV-1 tirou a etapa 3) e SAF encerrada (S2526) na revisão: zero primária
+        m1=medida('PA detalhe sem rascunho · nada a publicar'); M.append(m1)
         abre('SAF',hash='#saf=S2526&etapa=6'); time.sleep(.4); m2=medida('SAF S2526 etapa 6 · consulta'); M.append(m2); shot('v3_consulta')
-        chk('26 impedimento (PA etapa 3 sem rascunho) e consulta (SAF S2526 encerrada, etapa 6): 0 primária e 0 duplicata',
+        chk('26 impedimento (PA detalhe sem rascunho) e consulta (SAF S2526 encerrada, etapa 6): 0 primária e 0 duplicata',
             m1['prims']==[] and m1['dup']==0 and m2['prims']==[] and m2['dup']==0, [m1,m2])
         # 27 · celular, tablet e zoom de 200 %: SAF etapa 2 e 6, CMP etapa 2, PA, O.S.: 0 duplicata, no máximo uma primária, sem setas
         ruins=[]
         for tag,w,h,es,t in (('360x800',360,800,3,True),('768x1024',768,1024,2,True),('zoom200',720,450,2,False)):
-            for pg,hs in (('SAF','#saf=S2627&etapa=2'),('SAF','#saf=S2627&etapa=6'),('CMP','#saf=S2627'),('PA',''),('OS','')):
+            for pg,hs in (('SAF','#saf=S2627&etapa=2'),('SAF','#saf=S2627&etapa=6'),('CMP','#saf=S2627'),('PA',''),('PA','#plano=SOJA-AT'),('OS','')):
                 abre(pg,w,h,es,t,hash=hs,espera=.6,limpa=False); time.sleep(.2); m=medida(f'{pg}{hs} @{tag}'); M.append(m)
                 if m['dup'] or len(m['prims'])>1 or m['setas']: ruins.append(m)
         shot('v3_os_zoom200')
-        chk('27 360×800, 768×1024 e zoom 200 % (SAF etapas 2 e 6, CMP etapa 2, PA, O.S.): 0 duplicata, no máximo uma primária e nenhuma seta', not ruins, ruins)
+        chk('27 360×800, 768×1024 e zoom 200 % (SAF etapas 2 e 6, CMP etapa 2, PA lista e detalhe, O.S.): 0 duplicata, no máximo uma primária e nenhuma seta', not ruins, ruins)
         # 28 · v3.1: selecionar → buscar outro registro → somar à seleção → abrir o detalhe e voltar: seleção, busca e contexto preservados;
         #      a seleção não desmontou o campo de busca nem trocou a barra inteira
         abre('SAF',hash='#saf=S2627&etapa=2'); time.sleep(.3); marca('Selecionar T1-A'); time.sleep(.3)
