@@ -42,8 +42,8 @@ const BN_FCOR={'A liberar':'gray','Liberadas':'blue','Em execução':'green','Em
    absorvido: o aviso repete o recibo do 1º toque e nada roda. Dano evitado: iniciar o processo (ou liberar a ordem) sem a pessoa decidir */
 const BN_REP_MS=400;
 function bnAgora(){ return typeof performance!=='undefined'&&performance.now?performance.now():Date.now(); }
-function bnGuarda(self,fn){ return (e)=>{ const u=self._bnUlt||null; const t=bnAgora();
-  if((e&&e.detail>=2)||(u&&t-u.t<BN_REP_MS)){ if(u&&u.msg) self.setState({g2toast:/^Já feito/.test(u.msg)?u.msg:'Já feito: '+u.msg,pr_err:''}); return; }
+function bnGuarda(self,fn,mudo){ return (e)=>{ const u=self._bnUlt||null; const t=bnAgora();
+  if((e&&e.detail>=2)||(u&&t-u.t<BN_REP_MS)){ if(u&&u.msg&&!mudo) self.setState({g2toast:/^Já feito/.test(u.msg)?u.msg:'Já feito: '+u.msg,pr_err:''}); return; }
   self._bnUlt={t,msg:''}; return fn(e); }; }
 function bnRun(self,fn,ok){ const r=benMudar(fn); self._bnUlt={t:bnAgora(),msg:r.erro?(/^Já feito/.test(r.erro)?r.erro:''):(r.msg||'')};
   /* toque repetido (duplo toque, outra aba): o efeito já existe; o retorno é aviso, não erro, e não apaga o aviso do primeiro toque */
@@ -243,7 +243,29 @@ function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const st=s
   /* toda ação do painel (primária, secundárias, ações das linhas e o fechar) passa pela guarda da repetição */
   if(PP){ if(PP.prim&&PP.prim.go) PP.prim.go=bnGuarda(self,PP.prim.go); (PP.sec||[]).forEach(b=>{ b.go=bnGuarda(self,b.go); });
     (PP.secs||[]).forEach(s=>(s.rows||[]).forEach(r=>{ if(r.a&&r.a.go) r.a.go=bnGuarda(self,r.a.go); })); }
-  prPainel(self,v,PP); if(PP) v.pp_close=bnGuarda(self,v.pp_close); }
+  prPainel(self,v,PP);
+  /* fechar: o toque logo depois de uma ação é absorvido calado (toque duplo na linha cai no fundo do painel); o Esc (sem evento) fecha sempre */
+  if(PP){ const fc=v.pp_close, fg=bnGuarda(self,fc,true); v.pp_close=(e)=>e?fg(e):fc(); }
+  /* foco do painel (teclado, rodada 1): ao abrir uma ordem (ou a ordem nova), o foco entra no painel pelo "Fechar" do topo, para a leitura
+     começar do título; ao fechar, volta para quem abriu. Sem isso o foco ficava fora do painel (Tab percorria a página) ou, depois do
+     "Criar ordem", parava em "Autorizar rota e liberar" (o mesmo botão, reaproveitado), a um Enter de liberar */
+  /* o botão com o foco pode sumir depois de uma ação (o painel se refaz): o foco volta ao painel, não ao início da página; e o Esc fecha o
+     painel mesmo sem foco dentro dele */
+  if(PP) setTimeout(()=>{ try{ const ae=document.activeElement; if(ae&&ae!==document.body) return; const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.getClientRects().length);
+    const b=a&&a.querySelector('button[aria-label="Fechar"]'); if(b) b.focus({preventScroll:true}); }catch(e){} },0);
+  if(!self.__bnEsc){ self.__bnEsc=1; try{ window.addEventListener('keydown',(e)=>{ if(e.key!=='Escape'||e.defaultPrevented||!self.state.pr_pan) return; const ae=document.activeElement;
+    if(ae&&ae.closest&&ae.closest('aside[role=dialog],[role=dialog]')) return; e.preventDefault(); self.setState({pr_pan:null,pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null}); }); }catch(e){} }
+  const pn=st.pr_pan, pk=PP&&pn?(pn.g+'|'+(pn.id||'')):'';
+  if(pk!==(self._bnPk||'')){ const ant=self._bnPk||''; self._bnPk=pk;
+    if(pk){ self._bnVoltaId=pn.id||''; if(!ant){ try{ const ae=document.activeElement; self._bnVolta=ae&&ae!==document.body&&!(ae.closest&&ae.closest('aside[role=dialog]'))?ae:null; }catch(e){ self._bnVolta=null; } }
+      setTimeout(()=>{ try{ const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.getClientRects().length); const b=a&&(a.querySelector('button[aria-label="Fechar"]')||a.querySelector('button,[href],input')); if(b) b.focus({preventScroll:true}); }catch(e){} },0); }
+    else { const v0=self._bnVolta, vid=self._bnVoltaId||''; self._bnVolta=null;
+      /* a linha da mesma ordem primeiro (a lista reordena depois de cancelar e o nó de quem abriu passa a mostrar outra ordem); senão quem
+         abriu; senão "+ Nova ordem" */
+      setTimeout(()=>{ try{ if(document.querySelector('aside[role=dialog]')) return; const vis=x=>!!x&&x.isConnected&&x.getClientRects().length>0;
+        const lin=vid&&[...document.querySelectorAll('[role=row][data-rid]')].find(x=>x.getAttribute('data-rid')===vid&&vis(x));
+        const nv=[...document.querySelectorAll('main button')].find(x=>x.innerText.trim()==='+ Nova ordem'&&vis(x));
+        const alvo=lin||(vis(v0)?v0:nv); if(alvo) alvo.focus({preventScroll:true}); }catch(e){} },0); } } }
 /* entrada por link: BEN.dc.html#OB-0110 abre a ordem; #nova=L39-131 abre a ordem nova com o lote (vindo do Estoque de produto) */
 function bnHash(self){ if(self.__bnh) return; self.__bnh=1; const ab=()=>{ let h=''; try{ h=decodeURIComponent(location.hash||'').slice(1); }catch(e){} const c=cenGet();
   if(/^nova=/.test(h)){ const id=h.slice(5); setTimeout(()=>self.setState({pr_pan:{g:'nova',lote:id},pr_sel:null,pr_form:{lt:id},pr_err:'',pr_modo:null,pr_ch:prChave('W-BNN')}),0); }

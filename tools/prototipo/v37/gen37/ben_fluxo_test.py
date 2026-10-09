@@ -26,6 +26,8 @@ Modos (um por vez, cada um abre o Chrome headless do cadc_lib.T; o cenário come
            absorvida (o aviso repete o recibo) e não dispara a operação seguinte.
   criada   rodada 1 (S3): depois de "Criar ordem" (toque duplo) a ordem criada fica selecionada e aberta com o próximo passo dela; o 2º
            toque não a libera e o cabeçalho não aponta outra ordem.
+  teclado  rodada 1: o roteiro principal só com Tab/Shift+Tab/Enter/Espaço/Esc (criar a ordem, ver o impedimento de caixas, Rui
+           confere a NF 7731, liberar, cancelar a OB-0112 em A liberar, fechar o painel com Esc), com o foco visível a cada passo.
   cancelar integração BEN (09/10): ordem em A liberar que não libera (caixas acima do livre; entrada que mudou com o estorno da carga)
            tem saída: "Cancelar a ordem" com motivo (nada reservado) e o lote abre outra ordem.
   faixa390 integração BEN (09/10): a 390 px, Cargas › faixa de telas › Beneficiamento por toque real (a lista aberta fica acima da
@@ -36,7 +38,7 @@ import sys, os, time, json
 os.environ.setdefault('SAFRION_DADOS', 'sintetico')
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from cadc_lib import T
-TODOS = ('fluxo', 'erros', 'celular', 'revisao', 'roteiro', 'roteiro390', 'complemento', 'duplo', 'criada', 'cancelar', 'faixa390')
+TODOS = ('fluxo', 'erros', 'celular', 'revisao', 'roteiro', 'roteiro390', 'complemento', 'duplo', 'criada', 'teclado', 'cancelar', 'faixa390')
 MODOS = [a for a in sys.argv[1:] if a in TODOS] or list(TODOS)
 PR = os.path.join(HERE, '_probe'); os.makedirs(PR, exist_ok=True)
 t = T(); J = t.J
@@ -114,6 +116,20 @@ def duplo(x, root='aside', gap=.12):
             for tp in ('mousePressed', 'mouseReleased'): t.c.call('Input.dispatchMouseEvent', {'type': tp, 'x': p['x'], 'y': p['y'], 'button': 'left', 'clickCount': i + 1})
         if i == 0: time.sleep(gap)
     time.sleep(1); lib(); return 'ok'
+# teclado (rodada 1): só Tab, Shift+Tab, Enter, Espaço e Esc navegam e acionam; os valores dos campos são digitados (Input.insertText)
+_KC = {'Tab': ('Tab', 9, ''), 'Enter': ('Enter', 13, '\r'), 'Escape': ('Escape', 27, ''), ' ': ('Space', 32, ' ')}
+def tecla(k, shift=False):
+    code, vk, txt = _KC[k]; mod = 8 if shift else 0
+    t.c.call('Input.dispatchKeyEvent', dict({'type': 'keyDown', 'key': k, 'code': code, 'windowsVirtualKeyCode': vk, 'modifiers': mod}, **({'text': txt} if txt else {})))
+    t.c.call('Input.dispatchKeyEvent', {'type': 'keyUp', 'key': k, 'code': code, 'windowsVirtualKeyCode': vk, 'modifiers': mod}); time.sleep(.1)
+FOCO = "(()=>{ const e=document.activeElement; if(!e||e===document.body) return null; const cs=getComputedStyle(e); return {tag:e.tagName, id:e.id||'', t:N(e.innerText||e.getAttribute('aria-label')||e.value||'').slice(0,60), anel:cs.outlineStyle!=='none'&&parseFloat(cs.outlineWidth)>=2, painel:!!e.closest('aside[role=dialog]')}; })()"
+def tab_ate(alvo, max_=90, shift=False):
+    """Tab (ou Shift+Tab) até o foco chegar ao alvo (texto exato, começo do texto ou #id); devolve o foco (com o anel visível) ou None"""
+    for _ in range(max_):
+        tecla('Tab', shift); f = J(FOCO)
+        if f and ((alvo.startswith('#') and f['id'] == alvo[1:]) or f['t'] == alvo or (not alvo.startswith('#') and f['t'].startswith(alvo))): return f
+    return None
+def digita(txt): t.c.call('Input.insertText', {'text': txt}); time.sleep(.2); J("window.__tx=(window.__tx||0)+1")
 def est_secao(i): J(f"document.querySelectorAll('nav[aria-label=\"Seções do estoque\"] button')[{i - 1}].click()"); time.sleep(.5)
 
 try:
@@ -477,6 +493,41 @@ try:
                   h2.startswith('OB-0113') and 'PRÓXIMO PASSO Autorizar rota e liberar · Igor' in p and not any('OB-0112' in x for x in hp), [h2, p[:300], hp])
             t.chk(T_ + ' criada sem erro de JS', not t.errs(), t.errs())
         tamanho(1440, 1000)
+    if 'teclado' in MODOS:
+        # rodada 1 (teclado, pendente desde a integração): o roteiro principal só com Tab, Shift+Tab, Enter, Espaço e Esc, com o foco visível.
+        # Igor cria a ordem do L39-132, vê o impedimento de caixas, o Rui confere a NF 7731, o Igor libera, cancela a OB-0112 (A liberar)
+        # e fecha o painel com Esc
+        print('== teclado · roteiro principal só com Tab/Shift+Tab/Enter/Espaço/Esc, foco visível')
+        ir('BEN.dc.html', limpa=True); perfil('Igor'); ir('BEN.dc.html'); J("document.activeElement&&document.activeElement.blur()")
+        f = tab_ate('+ Nova ordem'); tecla('Enter'); time.sleep(.5); f2 = J(FOCO)
+        t.chk('K1 · Tab até "+ Nova ordem" (anel visível) e Enter: o painel abre e o foco entra nele', f and f['anel'] and f2 and f2['painel'] and 'Nova ordem de beneficiamento' in pan(), [f, f2])
+        f = tab_ate('L39-132'); tecla(' '); time.sleep(.4); on = J("[...document.querySelectorAll('aside [aria-pressed=true]')].map(b=>N(b.innerText).slice(0,8))") or []; cxv = J("(document.querySelector('aside [id^=pf_cx_]')||{}).value")
+        t.chk('K2 · Tab até o lote L39-132 (anel visível) e Espaço: marcado; Caixas com a necessidade (1169)', f and f['anel'] and 'L39-132 ' in on and cxv == '1169', [f, on, cxv])
+        f = tab_ate('Criar ordem'); tecla('Enter'); time.sleep(.7); p = pan(); f2 = J(FOCO)
+        t.chk('K3 · Tab até "Criar ordem" e Enter: OB-0113 criada e aberta no painel, com o foco no painel', f and f['anel'] and cen("c.ordens['OB-0113']&&c.ordens['OB-0113'].etapa") == 'A liberar' and p.startswith('OB-0113') and f2 and f2['painel'], [f, f2, p[:120]])
+        t.chk('K4 · o impedimento de caixas está no painel com quem resolve e a saída (NF 7731)', 'Caixa de mamão Formosa 10 kg: 540 un disponíveis para 1.169 un · Estoque' in p and 'resolve: Rui (almoxarife) ou Paula (almoxarife)' in p and 'Conferir a NF 7731 das caixas no Estoque' in p, p[:900])
+        r0 = rev(); f = tab_ate('Autorizar rota e liberar'); tecla('Enter'); time.sleep(.7); p = pan()
+        t.chk('K4 · Tab até "Autorizar rota e liberar" e Enter: recusado (540 para 1.169), nada gravado', f and f['anel'] and 'Liberação recusada · 1 causa' in p and rev() == r0, [f, p[-300:]])
+        tecla('Escape'); time.sleep(.5); f2 = J(FOCO)
+        t.chk('K4 · Esc fecha o painel e o foco volta à página (fora do painel)', not pan() and f2 and not f2['painel'], f2)
+        perfil('Rui'); ir('EST.dc.html'); J("document.activeElement&&document.activeElement.blur()")
+        f = tab_ate('NF 7731'); tecla('Enter'); time.sleep(.6)
+        a = tab_ate('#fx_g_rec_conf'); digita('1200'); b = tab_ate('#fx_g_rec_apto'); digita('1200'); q = tab_ate('#fx_g_rec_quar'); digita('0')
+        sv = tab_ate('Salvar'); tecla('Enter'); time.sleep(.7); tc = toast()
+        t.chk('K5 · Rui confere a NF 7731 pelo teclado (Tab até a linha, Enter, campos, Salvar): 1.200 un no CX26-02', f and a and b and q and sv and sv['anel'] and 'Recebimento NF 7731 conferido: 1.200 un' in tc, [f, a, b, q, sv, tc])
+        perfil('Igor'); ir('BEN.dc.html#OB-0113'); time.sleep(.3); f0 = J(FOCO); f = tab_ate('Autorizar rota e liberar'); tecla('Enter'); time.sleep(.7)
+        st = cen("[c.ordens['OB-0113'].etapa, c.ordens['OB-0113'].req]")
+        t.chk('K6 · aberta pelo endereço, o foco já está no painel; Tab até "Autorizar rota e liberar" e Enter: Liberadas com a REQ-041', f0 and f0['painel'] and f and f['anel'] and st == ['Liberadas', 'REQ-041'], [f0, f, st])
+        tecla('Escape'); time.sleep(.5)
+        f = tab_ate('OB-0112', shift=True) or tab_ate('OB-0112'); tecla('Enter'); time.sleep(.6); p = pan()
+        t.chk('K7 · Esc, Shift+Tab até a linha da OB-0112 (anel visível) e Enter: o painel da OB-0112 abre', f and f['anel'] and p.startswith('OB-0112'), [f, p[:100]])
+        f = tab_ate('Cancelar a ordem'); tecla('Enter'); time.sleep(.5); m = tab_ate('#pf_mc'); digita('rota trocada para o lote seguinte')
+        c2 = tab_ate('Confirmar cancelamento da OB-0112'); tecla('Enter'); time.sleep(.7); tc = toast()
+        st = cen("[c.ordens['OB-0112'].etapa, (c.ordens['OB-0112'].ben.canc||{}).motivo]")
+        t.chk('K7 · Tab até "Cancelar a ordem", motivo, Tab até "Confirmar cancelamento" e Enter: OB-0112 Canceladas com o motivo', f and m and c2 and c2['anel'] and st == ['Canceladas', 'rota trocada para o lote seguinte'] and 'OB-0112 cancelada por Igor' in tc, [f, m, c2, st, tc])
+        tecla('Escape'); time.sleep(.5); f2 = J(FOCO)
+        t.chk('K8 · Esc fecha o painel; o foco volta à linha da OB-0112 (agora Canceladas) com o anel visível', not pan() and f2 and not f2['painel'] and f2['anel'] and f2['t'].startswith('OB-0112') and 'Canceladas' in f2['t'], f2)
+        t.chk('teclado sem erro de JS', not t.errs(), t.errs())
     if 'cancelar' in MODOS:
         # integração BEN (09/10), achado 2: ordem em A liberar que não libera (caixas acima do livre; entrada que mudou com o estorno da carga)
         # prendia o lote sem saída (sem Cancelar, sem editar, sem incluir entrada). Agora "Cancelar a ordem" (rascunho: nada reservado)
