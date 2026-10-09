@@ -10,7 +10,13 @@ t=T(); falhas=[]
 try:
     for p in pags:
         t.goto(p); time.sleep(.4)
-        e=t.errs(); txt=t.J("(document.body&&document.body.innerText||'').slice(0,400)") or ''
+        # Sob carga a página pode demorar a montar: espera haver texto (até 8 s) antes de julgar "página vazia".
+        txt=''; t0=time.time()
+        while True:
+            txt=t.J("(document.body&&document.body.innerText||'').slice(0,400)") or ''
+            if len(txt.strip())>=20 or time.time()-t0>8: break
+            time.sleep(.25)
+        e=t.errs()
         ban=t.J("(()=>{const b=[...document.querySelectorAll('body *')].find(x=>/^[A-Z][A-Za-z0-9-]*: (Unexpected|.*is not defined|Cannot read|.*is not a function|Invalid)/.test((x.innerText||'').trim())&&x.children.length===0); return b?b.innerText.trim().slice(0,200):'';})()") or ''
         vazio=len(txt.strip())<20
         if e or ban or vazio: falhas.append((p,(ban or '')+(' | '+e if e else '')+(' | página vazia' if vazio else ''))); print('FALHA',p,falhas[-1][1][:300],flush=True)
