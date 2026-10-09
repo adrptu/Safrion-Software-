@@ -97,7 +97,7 @@
 
 ### 0.1 Comando para validação e posterior construção no Claude Code
 
-> Atualize primeiro o protótipo “Do Talhão à O.S.” conforme esta revisão v3.10, os 63 fluxos e as reconciliações dos capítulos 71, 72 e 73. Mostre etapas contínuas, responsabilidades, estados, impedimentos e próximos passos, preservando o mesmo registro entre módulos. Mantenha visível apenas o recorte de menus da seção 71.6. Valide as jornadas com o proprietário. Não inicie a construção de produção até receber seu comando explícito. Após esse comando, implemente o produto completo pelos contratos RN/CAL/CMD/FO e pelos requisitos de engenharia deste PRD, incluindo ambientes separados, controles transacionais, testes e recuperação; não trate o protótipo como backend homologado. Não invente resultados de testes nem prometa zero bugs.
+> Atualize primeiro o protótipo “Do Talhão à O.S.” conforme esta revisão v3.11 (com 40.5 e 40.6), os 63 fluxos, as reconciliações dos capítulos 71, 72 e 73 e os capítulos 74 e 75. Mostre etapas contínuas, responsabilidades, estados, impedimentos e próximos passos, preservando o mesmo registro entre módulos. Mantenha visível apenas o recorte de menus da seção 71.6. Valide as jornadas com o proprietário. Não inicie a construção de produção até receber seu comando explícito. Após esse comando, implemente o produto completo pelos contratos RN/CAL/CMD/FO e pelos requisitos de engenharia deste PRD, incluindo ambientes separados, controles transacionais, testes e recuperação; não trate o protótipo como backend homologado. Não invente resultados de testes nem prometa zero bugs.
 
 ### 0.2 Fonte única e leitura
 
