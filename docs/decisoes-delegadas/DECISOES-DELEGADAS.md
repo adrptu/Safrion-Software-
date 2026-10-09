@@ -238,7 +238,7 @@ Nos registros (PRD e `docs/DECISIONS.md`), cada linha decidida leva a frase "dec
 
 | ID | Decisão | Padrão | Por quê (dano evitado · base) | O que muda | Como reverter |
 |---|---|---|---|---|---|
-| PRC-01 | Juntar as frentes prontas uma por vez, na ordem da seção 5. Antes de qualquer teste seu, consertar "Restaurar dados iniciais" e "Entrar como". | As branches das frentes sobem ao GitHub privado só para revisão do Codex, sem PR, e são apagadas depois da junção. É uma exceção temporária à branch única de 05/10. | Evita o senhor testar com dados alterados e perfil errado, e evita uma frente desfazer a outra. | Protótipo: uma junção por commit, com os testes das duas frentes que mexem nos mesmos arquivos. | Reverter o commit de junção. |
+| PRC-01 | Juntar as frentes prontas uma por vez, na ordem da seção 5. Antes de qualquer teste seu, consertar "Restaurar dados iniciais" e "Entrar como". | A fonte de cada frente ainda não integrada vai para revisão do Codex como pacote de patches em `docs/integracao/<ID>/` na própria branch única (como a DOM em `7386172`), sem branch nova no GitHub: a branch única de 05/10 continua sem exceção. | Evita o senhor testar com dados alterados e perfil errado, e evita uma frente desfazer a outra. | Protótipo: uma junção por commit, com os testes das duas frentes que mexem nos mesmos arquivos. | Reverter o commit de junção. |
 | PRC-02 (revisada) | As correções do passo 2 entram em cada frente logo depois da junção dela. As únicas exceções são defeitos da própria frente. As frentes novas do passo 3 só começam depois do passo 1, uma por vez: 3.1 Aplicação segura e legal, 3.2 Planejamento confiável, 3.3 Irrigação medida, 3.4 Cadastro que alimenta os processos. | Na 3.1: família, reentrada, ocorrências com destino, receituário ligado, sobra de calda e EPI. | Evita várias frentes abertas e nenhuma terminada; lei e pessoas vêm primeiro. | Seção 5. | A ordem muda sem desfazer nada. |
 | PRC-03 | Já agora: aviso "Demonstração: o que salvar aqui ainda não muda os outros módulos" nas telas de cadastro. Na 3.4, só três ligações: talhão inativo fora do planejamento novo, fornecedor homologado lido pela Compra e identidade única da máquina. | — | Evita o senhor validar um cadastro que não muda nada. | Protótipo: o aviso sai de cada tela quando a ligação dela fica pronta. | Tirar o aviso. |
 | PRC-04 (revisada) | Registrar já: os seus pedidos, com texto literal e data; as decisões dos agentes nas frentes, ratificadas frente a frente quando o Codex revisar a junção; e a delegação de 09/10, com texto, canal, hora e prova. O Codex registra que leu a prova. Nenhum registro diz "aprovado pelo proprietário". | Autor do registro: o Codex. Se ele não puder, o Claude escreve, e o Codex revisa e integra. | Evita desfazer decisão não registrada e evita declarar aprovação sua que não houve. | Real: PR na `main` (DECISIONS e PRD 3.12). | Outro PR. |
@@ -321,7 +321,7 @@ Nos registros (PRD e `docs/DECISIONS.md`), cada linha decidida leva a frase "dec
 - "Entrar como" passa a trocar de verdade o perfil;
 - aviso de demonstração nas telas de cadastro (PRC-03);
 - texto de ajuda do custo da terra corrigido (SUP-12);
-- branches das frentes no GitHub privado, só para a revisão do Codex.
+- fonte das frentes ainda não integradas como pacote de patches em `docs/integracao/<ID>/` na branch única, para a revisão do Codex.
 
 ### Passo 2. Encaixes nas frentes, logo depois da junção de cada uma
 
@@ -409,7 +409,7 @@ As observações menores também entraram:
 - frente 3.2 dividida se ficar grande;
 - registro de fato em área nova mesmo com atraso de pagamento;
 - "Liberar" recusado com cancelamento pendente;
-- branches de revisão como exceção temporária;
+- fonte para revisão por pacote de patches na branch única (sem branch nova);
 - "gravidade estimada pelo Claude" nas correções vindas do parecer.
 
 Ao consolidar, alinhamos mais três decisões à regra do passo 2: a OPE-10 (só a parte 1 antes da junção), a MAN-08 (diesel em dobro e impedimento depois da junção revisada) e a PLA-06 (depois da junção do design).
