@@ -64,9 +64,9 @@ function comNatTxt(v) { return comNat(v) === 'Venda' ? 'Venda' : comNat(v) + ' �
 # =====================================================================================================================
 def ven():
     fname = 'VEN.dc.html'; E._reset_screen(fname)
-    g = grid([dict(k='ven', l='Venda · cliente', w=210), dict(k='prod', l='Produto', w=180), dict(k='tipo', l='Tipo · janela', w=190),
+    g = grid([dict(k='ven', l='Venda · cliente', w=210), dict(k='prod', l='Produto', w=180), dict(k='tipo', l='Tipo · janela', w=170),
               dict(k='qtd', l='Quantidade', t='num', a='r'), dict(k='preco', l='Preço', t='num', a='r', w=120), dict(k='ent', l='Entregue', t='num', a='r'),
-              dict(k='res', l='Reservado', t='num', a='r'), dict(k='falta', l='Falta', t='num', a='r'), dict(k='sit', l='Situação · próximo passo', w=280)],
+              dict(k='res', l='Reservado', t='num', a='r'), dict(k='falta', l='Falta', t='num', a='r'), dict(k='sit', l='Situação · próximo passo', w=250)],
              [], edit=dict(m='pick'), gid='g_ven', total=False, qf=dict(k='sit', cut=' · ', l='Situação', todas='Todas'))
     EXTRAJS[0] = _js(VEN_JS)
     corpo = AP.bloco('Vendas', 'Pronta entrega reserva lote apto; venda futura compromete a previsão do período, não o estoque. Clique numa venda para reservar, aprovar crédito, programar carga ou encerrar o saldo.',
@@ -94,10 +94,11 @@ function comProx(c, v, st) { const P = prP(c); const cu = comCultura(v); const U
   if (tran) return { t: 'Confirmar entrega da ' + tran.id + ' · Expedição', p: tran.id + ' em trânsito: ' + comDono('saida') + ' confirma a entrega (data e devolução, se houver).', rm: tran.id };
   if (prog) return { t: 'Confirmar saída da ' + prog.id + ' · Expedição' + venc, p: prog.id + ' programada para ' + prBr(prog.dprev) + ': ' + comDono('saida') + ' confirma a saída com a pesagem.', rm: prog.id };
   const np = comNaoProg(c, v.id); const ls = prCmp(st.falta, 0) > 0 ? comLotesPara(c, v) : [];
+  /* ordem do §3.1: reservar o que falta antes de programar a carga (a carga sai cheia, um romaneio a menos) */
+  if (prCmp(st.falta, 0) > 0 && ls.length) return { t: 'Reservar lote · ' + COM_PAPT.vender + venc, p: 'Falta ' + U(st.falta) + ': reservar lote apto (' + ls.map(L => L.id + ' ' + U(prSaldos(c, L).disp)).join(', ') + ').' + (prCmp(np, 0) > 0 ? ' Depois, programar a carga de ' + U(prSoma([np, st.falta])) + '.' : ''), a: 'reservar', at: 'Reservar lote para o ' + v.id };
   if (prCmp(np, 0) > 0 && (v.tipo === 'pronta' || comPeriodoComecou(c, v))) { const pp = { t: 'Programar carga · ' + COM_PAPT.carga + venc, p: U(np) + ' reservados sem carga: ' + comDono('carga') + ' programa a carga (veículo, placa e data).', a: 'programar', at: 'Programar carga do ' + v.id };
     if (!COM_TEM_EXPED) { pp.t = 'aguardar programação da carga' + venc; pp.a = ''; } return pp; }
   if (prCmp(st.falta, 0) > 0) {
-    if (ls.length) return { t: 'Reservar lote · ' + COM_PAPT.vender + venc, p: 'Falta ' + U(st.falta) + ': reservar lote apto (' + ls.map(L => L.id + ' ' + U(prSaldos(c, L).disp)).join(', ') + ').', a: 'reservar', at: 'Reservar lote para o ' + v.id };
     if (v.tipo === 'futura') return { t: 'compromete a previsão · reservar na colheita', p: 'Venda futura: compromete a oferta da ' + (v.sem ? prSemTxt(v.sem) : 'safra ' + v.saf) + '; reservar lote quando houver colheita apta (o físico não muda antes).' };
     return { t: 'sem lote apto · aguardar colheita ou liberação' + venc, p: 'Falta ' + U(st.falta) + ' e nenhum lote apto do produto tem disponível' + (v.ini ? ' que não vença antes de ' + prBr(v.ini) : '') + '.', red: !!venc }; }
   if (prCmp(np, 0) > 0) return { t: 'coberto · programar carga na janela', p: 'Coberto por reserva; a carga sai no período da venda futura (' + v.janela + ').' };
@@ -118,11 +119,12 @@ function PREVALS(self, v) { cenOuvir(self); prTopo(self, v); const c = cenGet();
   const vs = Object.values(P.pedidos).filter(x => comFazVendaOk(self, c, x) && comSafVendaOk(self, x)).sort((a, b) => a.id.localeCompare(b.id));
   GR('g_ven').rows = vs.map(x => comVenRow(c, x)); self._vs = vs; }
 /* formulário Registrar venda (§3.1): só quantidade e preço digitados; cliente, produto, tipo, janela, condição e modalidade por toque */
-function comFormVenda(self, c) { const hoje = prHoje(); const nat = prFval(self, 'nat', 'Venda'); const papel = nat === 'Venda' ? 'Cliente' : 'Fornecedor';
+function comFormVenda(self, c) { const FS = Object.assign({}, self.state.pr_form || {}); const fv = (k, d) => FS[k] !== undefined ? FS[k] : (d === undefined ? '' : String(d)); const ch0 = self.state.pr_ch;   /* valores do formulário e chave lidos no desenho: o 2º clique repete o mesmo conteúdo e a mesma chave (R-C03) */
+  const hoje = prHoje(); const nat = fv('nat', 'Venda'); const papel = nat === 'Venda' ? 'Cliente' : 'Fornecedor';
   const cps = Object.values(COMC.cp).filter(p => p.papeis.indexOf(papel) >= 0).sort((a, b) => a.nome.localeCompare(b.nome));
-  const cli = prFval(self, 'cli', ''); const cp = comCp(cli); const prods = comProdutos(c); const doCli = comProdCp(cp).filter(p => prods.indexOf(p) >= 0);
-  const ordP = doCli.concat(prods.filter(p => doCli.indexOf(p) < 0)); const pro = prFval(self, 'pro', doCli[0] || (ordP.length === 1 ? ordP[0] : '')); const cu = comCulturaProd(pro);
-  const tipo = prFval(self, 'tipo', 'pronta'); const fs = [];
+  const cli = fv('cli', ''); const cp = comCp(cli); const prods = comProdutos(c); const doCli = comProdCp(cp).filter(p => prods.indexOf(p) >= 0);
+  const ordP = doCli.concat(prods.filter(p => doCli.indexOf(p) < 0)); const pro = fv('pro', doCli[0] || (ordP.length === 1 ? ordP[0] : '')); const cu = comCulturaProd(pro);
+  const tipo = fv('tipo', 'pronta'); const fs = [];
   fs.push(prFld(self, 'nat', 'Natureza', { t: 'opts', v: nat, opts: [{ v: 'Venda', t: 'Venda' }, { v: 'CPR', t: 'CPR' }, { v: 'Barter', t: 'Barter' }], h: nat === 'Venda' ? '' : 'CPR e barter: com fornecedor, liquidação em produto (sem a receber).' }));
   fs.push(prFld(self, 'cli', nat === 'Venda' ? 'Cliente (CD-05)' : 'Fornecedor (CD-05)', { t: 'opts', v: cli, opts: cps.map(p => ({ v: p.nome, t: p.nome })),
     h: cp ? [cp.cond ? 'condição ' + cp.cond : '', cp.lim ? 'limite ' + comRS(cp.lim) + (cp.limv ? ' até ' + prBr(cp.limv) + '/' + cp.limv.slice(2, 4) : '') : '', cp.entrega].filter(Boolean).join(' · ') : 'Cliente novo: cadastre no CD-05 (Parceiros e fornecedores).' }));
@@ -131,33 +133,34 @@ function comFormVenda(self, c) { const hoje = prHoje(); const nat = prFval(self,
   let jan = { ini: '', fim: '', sem: '', saf: '' };
   if (tipo === 'pronta') { const s0 = prSem(hoje); const fimS = prDiaMais(prSemIni(s0), 6); const p1 = prSemIni(prSemMais(s0, 1));
     const op = [{ v: 'esta', t: 'Esta semana · ' + prBr(hoje) + '–' + prBr(fimS), ini: hoje, fim: fimS }, { v: 'prox', t: 'Próxima semana · ' + prBr(p1) + '–' + prBr(prDiaMais(p1, 6)), ini: p1, fim: prDiaMais(p1, 6) }, { v: 'datas', t: 'Outras datas' }];
-    const j = prFval(self, 'jan', ''); fs.push(prFld(self, 'jan', 'Janela de entrega', { t: 'opts', v: j, opts: op.map(o => ({ v: o.v, t: o.t })) }));
+    const j = fv('jan', ''); fs.push(prFld(self, 'jan', 'Janela de entrega', { t: 'opts', v: j, opts: op.map(o => ({ v: o.v, t: o.t })) }));
     const o = op.find(x => x.v === j); if (o && o.ini) { jan.ini = o.ini; jan.fim = o.fim; }
     if (j === 'datas') { fs.push(prFld(self, 'di', 'De', { t: 'txt', im: 'numeric', u: 'dd/mm', ph: 'dd/mm' })); fs.push(prFld(self, 'df', 'Até', { t: 'txt', im: 'numeric', u: 'dd/mm', ph: 'dd/mm' }));
-      jan.ini = prIsoFut(prFval(self, 'di', '')); jan.fim = prIsoFut(prFval(self, 'df', '')) || jan.ini; } }
+      jan.ini = prIsoFut(fv('di', '')); jan.fim = prIsoFut(fv('df', '')) || jan.ini; } }
   else if (cu && comSemanal(cu)) { const ws = comSemanasFut(hoje, 4);
-    fs.push(prFld(self, 'sem', 'Semana (ainda não começou)', { t: 'opts', v: prFval(self, 'sem', ''), opts: ws.map(w => { const o = prOfertaSem(c, pro, w); return { v: w, t: prSemTxt(w) + ' · ' + (o.tem ? 'livre ' + comTxt(cu, o.livre) : 'sem versão publicada') }; }),
-      h: 'A semana em curso já está no estoque: venda como pronta entrega.' })); jan.sem = prFval(self, 'sem', ''); }
+    fs.push(prFld(self, 'sem', 'Semana (ainda não começou)', { t: 'opts', v: fv('sem', ''), opts: ws.map(w => { const o = prOfertaSem(c, pro, w); return { v: w, t: prSemTxt(w) + ' · ' + (o.tem ? 'livre ' + comTxt(cu, o.livre) : 'sem versão publicada') }; }),
+      h: 'A semana em curso já está no estoque: venda como pronta entrega.' })); jan.sem = fv('sem', ''); }
   else if (cu) { const sfs = comSafrasFut(c, pro);
-    fs.push(prFld(self, 'saf', 'Safra (ainda não colhida)', { t: 'opts', v: prFval(self, 'saf', sfs.length === 1 ? sfs[0] : ''), opts: sfs.map(sf => { const o = prOfertaSafra(c, pro, sf); return { v: sf, t: 'Safra ' + sf + ' · ' + (o.tem ? 'livre ' + comTxt(cu, o.livre) : 'sem versão publicada') }; }) }));
-    jan.saf = prFval(self, 'saf', sfs.length === 1 ? sfs[0] : ''); }
+    fs.push(prFld(self, 'saf', 'Safra (ainda não colhida)', { t: 'opts', v: fv('saf', sfs.length === 1 ? sfs[0] : ''), opts: sfs.map(sf => { const o = prOfertaSafra(c, pro, sf); return { v: sf, t: 'Safra ' + sf + ' · ' + (o.tem ? 'livre ' + comTxt(cu, o.livre) : 'sem versão publicada') }; }) }));
+    jan.saf = fv('saf', sfs.length === 1 ? sfs[0] : ''); }
   const ref = (COMC.ref || {})[pro];
   fs.push(prFld(self, 'q', 'Quantidade', { t: 'txt', u: cu ? comUn(cu) : '', h: cu ? 'Na unidade comercial (' + comUn(cu) + ').' : '' }));
   fs.push(prFld(self, 'pr', 'Preço', { t: 'txt', u: cu ? 'R$/' + comUn(cu) : 'R$', h: ref ? 'Referência de mercado: ' + comPrecoTxt(cu, ref.p) + ' · ' + ref.fonte + '.' : (pro ? 'Sem cotação de referência (ausente ≠ zero).' : '') }));
-  if (nat === 'Venda') { const cd = prFval(self, 'cond', cp ? cp.cond : '');
+  if (nat === 'Venda') { const cd = fv('cond', cp ? cp.cond : '');
     fs.push(prFld(self, 'cond', 'Condição de pagamento', { t: 'opts', v: cd, opts: COMC.cond.map(x => ({ v: x.t, t: x.t })), h: cd ? 'Vencimento: ' + ((comCond(cd) || {}).ev || '') + '.' + (cd === 'Antecipado' ? ' A saída exige a gestora conferir o pagamento.' : '') : 'Herdada do CD-05; o acordo manda (corrija por toque).' })); }
-  const md = prFval(self, 'mod', cp ? comModalCp(cp) : '');
+  const md = fv('mod', cp ? comModalCp(cp) : '');
   fs.push(prFld(self, 'mod', 'Modalidade', { t: 'opts', v: md, opts: [{ v: 'retira', t: COM_MODAL.retira }, { v: 'entrega', t: COM_MODAL.entrega }], h: cp && cp.entrega ? 'Local: ' + cp.entrega : '' }));
   /* avisos ao vivo: crédito do cliente e déficit da oferta do período */
   const av = []; if (cp && nat === 'Venda') { const a = comAvisoCred(cli); if (a) av.push('Aviso de crédito: ' + a + '.'); }
-  if (tipo === 'futura' && cu && (jan.sem || jan.saf) && prNumOk(prFval(self, 'q', ''))) { const o = jan.sem ? prOfertaSem(c, pro, jan.sem) : prOfertaSafra(c, pro, jan.saf); const liv = prSub(o.livre, prEstBase(cu, prNum(prFval(self, 'q', ''))));
+  if (tipo === 'futura' && cu && (jan.sem || jan.saf) && prNumOk(fv('q', ''))) { const o = jan.sem ? prOfertaSem(c, pro, jan.sem) : prOfertaSafra(c, pro, jan.saf); const liv = prSub(o.livre, prEstBase(cu, prNum(fv('q', ''))));
     if (prCmp(liv, 0) < 0) av.push('Aviso: com esta venda a oferta da ' + (jan.sem ? prSemTxt(jan.sem) : 'safra ' + jan.saf) + ' fica em déficit de ' + comTxt(cu, prSub(0, liv)) + ' (não trava, D-C16).'); }
-  return { fields: fs, av, go: () => { const ch = self.state.pr_ch || prChave('W-VEN'); const r = prRun(self, x => comVender(x, { cliente: cli, natureza: nat, prod: pro, tipo, ini: jan.ini, fim: jan.fim, sem: jan.sem, saf: jan.saf, qtd: prFval(self, 'q', ''), preco: prFval(self, 'pr', ''),
-      cond: nat === 'Venda' ? prFval(self, 'cond', cp ? cp.cond : '') : '', modal: md, ator: g2perfil(), chave: ch }), { pr_form: null, pr_ch: null });
+  return { fields: fs, av, go: () => { const ch = ch0 || prChave('W-VEN'); const r = prRun(self, x => comVender(x, { cliente: cli, natureza: nat, prod: pro, tipo, ini: jan.ini, fim: jan.fim, sem: jan.sem, saf: jan.saf, qtd: fv('q', ''), preco: fv('pr', ''),
+      cond: nat === 'Venda' ? fv('cond', cp ? cp.cond : '') : '', modal: md, ator: g2perfil(), chave: ch }), { pr_form: null, pr_ch: null });
     if (!r.erro && r.v) self.setState({ pr_sel: { g: 'g_ven', id: r.v.id }, pr_pan: { g: 'g_ven', id: r.v.id }, pr_ch: prChave('W-RS') }); } }; }
 /* dd/mm → ISO a partir de hoje (janela de venda: data de hoje em diante; 1 dia antes de hoje é do ano seguinte só se passar de 180 dias) */
 function prIsoFut(t) { const m = /^(\d\d)\/(\d\d)$/.exec(String(t || '').trim()); if (!m) return ''; const h = prHoje(); let y = Number(h.slice(0, 4)); const d = y + '-' + m[2] + '-' + m[1]; return d < prDiaMais(h, -180) ? (y + 1) + '-' + m[2] + '-' + m[1] : d; }
-function comPanVenda(self, c, v) { const P = prP(c); const cu = comCultura(v); const U = x => comTxt(cu, x); const st = comSitVenda(c, v); const nx = comProx(c, v, st); const md = self.state.pr_modo; const cx = self.state.pr_cx;
+function comPanVenda(self, c, v) { const FS = Object.assign({}, self.state.pr_form || {}); const fv = (k, d) => FS[k] !== undefined ? FS[k] : (d === undefined ? '' : String(d)); const ch0 = self.state.pr_ch;   /* valores do formulário e chave lidos no desenho: o 2º clique repete o mesmo conteúdo e a mesma chave (R-C03) */
+  const P = prP(c); const cu = comCultura(v); const U = x => comTxt(cu, x); const st = comSitVenda(c, v); const nx = comProx(c, v, st); const md = self.state.pr_modo; const cx = self.state.pr_cx;
   const cp = comCp(v.cliente) || {}; const tt = comTitulos(c, t => t.venda === v.id); const k = comCond(v.cond) || {};
   const ar = comAReceber(c, t => t.cliente === v.cliente); const cred = comNat(v) !== 'Venda' ? 'liquidação em produto' : ((cp.lim ? 'limite ' + comRS(cp.lim) + (cp.limv ? ' até ' + prBr(cp.limv) + '/' + cp.limv.slice(2, 4) : '') : 'sem limite') + ' · a receber ' + comRS(ar)
     + (v.cred ? ' · ' + (v.cred.ant ? 'pagamento antecipado conferido' : 'aprovado até ' + comRS(v.cred.ate)) + ' por ' + v.cred.quem + (v.cred.rev ? ' (' + v.cred.rev + ')' : '') : ''));
@@ -177,12 +180,12 @@ function comPanVenda(self, c, v) { const P = prP(c); const cu = comCultura(v); c
     secs: [{ t: 'Atendimento · reservas por lote', rows: rs, vazio: 'Nenhuma reserva.' }, { t: 'Cargas de saída', rows: cg, vazio: 'Nenhuma carga.' }, { t: 'Financeiro · a receber', rows: fin, vazio: comNat(v) === 'Venda' ? 'Nada a receber ainda (nasce na saída).' : 'Liquidação em produto (GE-08).' },
       { t: 'Movimentos', rows: mv, vazio: 'Nenhum movimento.' }], err: self.state.pr_err };
   if (cx) { PPx.form = { t: 'Cancelar ' + cx, h: 'O motivo fica no histórico; o disponível do lote volta.', fields: [prFld(self, 'mot', 'Motivo do cancelamento', { t: 'txt', im: 'text', ph: 'ex.: cliente adiou a retirada' })] };
-    PPx.prim = { t: 'Cancelar ' + cx, go: () => prRun(self, x => prCancelarReserva(x, cx, prFval(self, 'mot', ''), g2perfil()), { pr_cx: null, pr_form: null }) }; PPx.sec = [{ t: 'Manter reserva', go: () => self.setState({ pr_cx: null, pr_err: '' }) }]; return PPx; }
+    PPx.prim = { t: 'Cancelar ' + cx, go: () => prRun(self, x => prCancelarReserva(x, cx, fv('mot', ''), g2perfil()), { pr_cx: null, pr_form: null }) }; PPx.sec = [{ t: 'Manter reserva', go: () => self.setState({ pr_cx: null, pr_err: '' }) }]; return PPx; }
   if (md === 'encerrar') { PPx.form = { t: 'Encerrar saldo do ' + v.id + ' · ' + COM_PAPT.vender, h: 'A quantidade vigente passa ao entregue; as reservas ativas são canceladas na mesma operação. Carga programada: cancele antes.', fields: [prFld(self, 'mot', 'Motivo', { t: 'txt', im: 'text', ph: 'ex.: cliente reduziu o contrato' })] };
-    PPx.prim = { t: 'Encerrar saldo', go: () => prRun(self, x => comEncerrar(x, { venda: v.id, motivo: prFval(self, 'mot', ''), ator: g2perfil(), chave: self.state.pr_ch }), { pr_modo: null, pr_form: null }) };
+    PPx.prim = { t: 'Encerrar saldo', go: () => prRun(self, x => comEncerrar(x, { venda: v.id, motivo: fv('mot', ''), ator: g2perfil(), chave: ch0 }), { pr_modo: null, pr_form: null }) };
     PPx.sec = [{ t: 'Manter venda', go: () => self.setState({ pr_modo: null, pr_err: '' }) }]; return PPx; }
   if (nx.a === 'credito' && comPode('credito')) { PPx.form = { t: nx.at + ' · Ana (gestora)', h: st.cred.ant ? 'Confirme que o pagamento antecipado entrou: a saída fica liberada no crédito e a venda não entra no a receber.' : 'A aprovação vale até ' + comRS(comExpo(c, v.cliente, { [v.id]: st.res })) + ' (a receber de ' + v.cliente + ' + reservado não expedido do ' + v.id + ').', fields: [] };
-    PPx.prim = { t: nx.at, go: () => prRun(self, x => comAprovarCredito(x, { venda: v.id, ator: g2perfil(), chave: self.state.pr_ch }), { pr_form: null }) }; }
+    PPx.prim = { t: nx.at, go: () => prRun(self, x => comAprovarCredito(x, { venda: v.id, ator: g2perfil(), chave: ch0 }), { pr_form: null }) }; }
   else if (nx.a === 'reservar' && comPode('vender')) { const f = prFormReserva(self, c, null, v, 'ped', comLotesPara(c, v));
     PPx.form = { t: 'Reservar lote para o ' + v.id + ' · ' + COM_PAPT.vender, h: 'Só lote apto, do mesmo produto e classe, que não vence antes do início da janela' + (comIni(v) ? ' (' + prBr(comIni(v)) + ')' : '') + '.', fields: f.fields }; PPx.prim = { t: 'Reservar', go: f.go }; }
   else if (nx.a === 'programar' && comPode('carga')) PPx.prim = { t: nx.at, h: 'EXPED.dc.html#nova:' + v.id };
@@ -224,8 +227,8 @@ const _EXV = EXTRAVALS; EXTRAVALS = function (self, v) { comHashVen(self); _EXV(
 def exped():
     fname = 'EXPED.dc.html'; E._reset_screen(fname)
     g = grid([dict(k='rm', l='Carga · romaneio', w=150), dict(k='ven', l='Venda · cliente', w=200), dict(k='prod', l='Produto · lotes', w=210),
-              dict(k='prev', l='Previsto', t='num', a='r'), dict(k='sai', l='Saída', t='num', a='r'), dict(k='mod', l='Modalidade · veículo', w=220),
-              dict(k='dt', l='Data', t='date', w=110), dict(k='sit', l='Situação · próximo passo', w=290)],
+              dict(k='prev', l='Previsto', t='num', a='r'), dict(k='sai', l='Saída', t='num', a='r'), dict(k='mod', l='Modalidade · veículo', w=190),
+              dict(k='dt', l='Data', t='date', w=110), dict(k='sit', l='Situação · próximo passo', w=260)],
              [], edit=dict(m='pick'), gid='g_rm', total=False, qf=dict(k='sit', cut=' · ', l='Situação', todas='Todas'), so=dict(k='dt', d=True),
              tools=(f'<span role="group" aria-label="Período" style="display: inline-flex; gap: 6px;">'
                     f'<button type="button" aria-pressed="{H("dh_on")}" onClick="{H("dh")}" style="{H("dh_st")}">Hoje</button>'
@@ -274,28 +277,32 @@ function PREVALS(self, v) { cenOuvir(self); prTopo(self, v); const c = cenGet();
     && (dq === 't' || (dq === 'h' ? comRmData(rm) === hoje : prSem(comRmData(rm)) === s0))).sort((a, b) => b.id.localeCompare(a.id));
   GR('g_rm').rows = rms.map(rm => comRmRow(c, rm)); self._rms = rms; }
 /* formulário Programar carga (§3.2): venda com reserva não programada; veículo por toque; placa; data; previsto pré-preenchido */
-function comFormProg(self, c, vid0) { const P = prP(c); const hoje = prHoje();
-  const vs = Object.values(P.pedidos).filter(x => !x.enc && prCmp(comNaoProg(c, x.id), 0) > 0 && (x.tipo === 'pronta' || comPeriodoComecou(c, x))).sort((a, b) => a.id.localeCompare(b.id));
-  const vid = prFval(self, 'ven', vid0 || (vs.length === 1 ? vs[0].id : '')); const v = P.pedidos[vid]; const fs = [];
+/* vendas com reserva ainda sem carga (as que o "Programar carga" oferece): sem nenhuma, a tela não oferece a ação */
+function comVendasProg(c) { return Object.values(prP(c).pedidos).filter(x => !x.enc && prCmp(comNaoProg(c, x.id), 0) > 0 && (x.tipo === 'pronta' || comPeriodoComecou(c, x))).sort((a, b) => a.id.localeCompare(b.id)); }
+function comFormProg(self, c, vid0) { const FS = Object.assign({}, self.state.pr_form || {}); const fv = (k, d) => FS[k] !== undefined ? FS[k] : (d === undefined ? '' : String(d)); const ch0 = self.state.pr_ch;   /* valores do formulário e chave lidos no desenho: o 2º clique repete o mesmo conteúdo e a mesma chave (R-C03) */
+  const P = prP(c); const hoje = prHoje();
+  const vs = comVendasProg(c);
+  const vid = fv('ven', vid0 || (vs.length === 1 ? vs[0].id : '')); const v = P.pedidos[vid]; const fs = [];
   fs.push(prFld(self, 'ven', 'Venda com reserva sem carga', { t: 'opts', v: vid, opts: vs.map(x => ({ v: x.id, t: x.id + ' · ' + x.cliente + ' · ' + comTxt(comCultura(x), comNaoProg(c, x.id)) })), h: vs.length ? '' : 'Nenhuma venda com reserva sem carga: reserve lote em Contratos e pedidos.' }));
   if (!v) return { fields: fs, go: () => self.setState({ pr_err: 'Escolha a venda.' }) };
   const cu = comCultura(v); const modal = v.modal || 'retira'; let transp = '';
-  if (modal === 'entrega') { transp = prFval(self, 'tr', ''); fs.push(prFld(self, 'tr', 'Transportador (CD-05)', { t: 'opts', v: transp, opts: comTransps().map(t => ({ v: t, t })), h: transp ? 'Frete de referência: ' + ((COMC.frete || {})[transp] || 'sem cotação registrada') + '.' : 'Agricultor organiza a entrega.' })); }
-  const vcs = comVeicsPara(cu, modal === 'entrega' ? transp : ''); const veic = prFval(self, 'vc', vcs.length === 1 ? vcs[0] : '');
+  if (modal === 'entrega') { transp = fv('tr', ''); fs.push(prFld(self, 'tr', 'Transportador (CD-05)', { t: 'opts', v: transp, opts: comTransps().map(t => ({ v: t, t })), h: transp ? 'Frete de referência: ' + ((COMC.frete || {})[transp] || 'sem cotação registrada') + '.' : 'Agricultor organiza a entrega.' })); }
+  const vcs = comVeicsPara(cu, modal === 'entrega' ? transp : ''); const veic = fv('vc', vcs.length === 1 ? vcs[0] : '');
   fs.push(prFld(self, 'vc', 'Veículo' + (modal === 'retira' ? ' do cliente' : ''), { t: 'opts', v: veic, opts: vcs.map(t => ({ v: t, t })), h: (prUn(cu).vida ? 'Fruta: só baú refrigerado.' : 'Grão: só graneleiro.') + (modal === 'retira' ? ' Frete do cliente (retira na fazenda).' : '') }));
   fs.push(prFld(self, 'pl', 'Placa', { t: 'txt', im: 'text', ph: 'ex.: QZA1B23' }));
   const dts = [{ v: hoje, t: 'Hoje ' + prBr(hoje) }, { v: prDiaMais(hoje, 1), t: 'Amanhã ' + prBr(prDiaMais(hoje, 1)) }];
-  fs.push(prFld(self, 'dp', 'Data prevista', { t: 'opts', v: prFval(self, 'dp', hoje), opts: dts }));
+  fs.push(prFld(self, 'dp', 'Data prevista', { t: 'opts', v: fv('dp', hoje), opts: dts }));
   const ls = [...new Set(prResPed(c, v.id).map(r => r.lote))].filter(l => prCmp(comNaoProg(c, v.id, l), 0) > 0); const x = comVeic(veic); let cap = x ? x.cap : null; const sug = {};
   ls.forEach(l => { const np = comNaoProg(c, v.id, l); const s0 = cap === null ? np : (prCmp(np, cap) > 0 ? cap : np); sug[l] = s0; if (cap !== null) cap = prSub(cap, s0); });
   ls.forEach(l => fs.push(prFld(self, 'pv_' + l + '_' + (veic || 'x'), 'Previsto do ' + l, { t: 'txt', u: 'kg', v: prFmtT(sug[l], 3).replace(/\./g, ''), h: 'Reserva sem carga ' + comTxt(cu, comNaoProg(c, v.id, l)) + (x ? ' · capacidade ' + prFmtT(x.cap, 0) + ' kg' : '') + ' · sugestão = ' + prFmtT(sug[l], 2) + ' kg (' + comTxt(cu, sug[l]) + '). 0 tira o lote.' })));
-  const ch = self.state.pr_ch || prChave('W-PG');
-  const go = () => { const lotes = ls.map(l => { const t = prFval(self, 'pv_' + l + '_' + (veic || 'x'), prFmtT(sug[l], 3).replace(/\./g, '')); return { lote: l, prev: t === prFmtT(sug[l], 3).replace(/\./g, '') ? sug[l] : (prNumOk(t) ? prNum(t) : t) }; });
-    const r = prRun(self, y => comProgramar(y, { venda: v.id, lotes, veic, transp, placa: prFval(self, 'pl', ''), dprev: prFval(self, 'dp', hoje), ator: g2perfil(), chave: ch }), { pr_form: null, pr_ch: null });
+  const ch = ch0 || prChave('W-PG');
+  const go = () => { const lotes = ls.map(l => { const t = fv('pv_' + l + '_' + (veic || 'x'), prFmtT(sug[l], 3).replace(/\./g, '')); return { lote: l, prev: t === prFmtT(sug[l], 3).replace(/\./g, '') ? sug[l] : (prNumOk(t) ? prNum(t) : t) }; });
+    const r = prRun(self, y => comProgramar(y, { venda: v.id, lotes, veic, transp, placa: fv('pl', ''), dprev: fv('dp', hoje), ator: g2perfil(), chave: ch }), { pr_form: null, pr_ch: null });
     if (!r.erro && r.rm) { self.setState({ pr_sel: { g: 'g_rm', id: r.rm.id }, pr_pan: { g: 'g_rm', id: r.rm.id }, pr_ch: prChave('W-RM') }); try { history.replaceState(null, '', '#' + r.rm.id); } catch (e) {} } };
   return { fields: fs, go, v }; }
-function comPanRm(self, c, rm) { const P = prP(c); const v = P.pedidos[rm.pedido] || {}; const cu = comCultura(v); const U = x => comTxt(cu, x); const s = comRmSit(c, rm); const md = self.state.pr_modo; const hoje = prHoje();
-  const ch = self.state.pr_ch || prChave('W-RM'); const kgT = x => prFmtT(x, 2) + ' kg';
+function comPanRm(self, c, rm) { const FS = Object.assign({}, self.state.pr_form || {}); const fv = (k, d) => FS[k] !== undefined ? FS[k] : (d === undefined ? '' : String(d)); const ch0 = self.state.pr_ch;   /* valores do formulário e chave lidos no desenho: o 2º clique repete o mesmo conteúdo e a mesma chave (R-C03) */
+  const P = prP(c); const v = P.pedidos[rm.pedido] || {}; const cu = comCultura(v); const U = x => comTxt(cu, x); const s = comRmSit(c, rm); const md = self.state.pr_modo; const hoje = prHoje();
+  const ch = ch0 || prChave('W-RM'); const kgT = x => prFmtT(x, 2) + ' kg';
   const lotes = rm.lotes.map(l => { const rv = prSoma(prResPed(c, v.id).filter(r => r.lote === l.lote).map(r => r.kg)); return { c: [[l.lote, 'b'], 'previsto ' + U(l.prev), 'reservado da venda ' + U(rv), rm.saida ? 'saída ' + U(l.kg) : ''].filter(Boolean), l: { t: 'Abrir lote', h: 'PROD.dc.html#' + l.lote } }; });
   const ver = []; if (rm.st === 'Programada') { rm.lotes.forEach(l => { const I = comImpede(c, v, P.lotes[l.lote]);
       I.imp.forEach(i => ver.push({ c: [[l.lote, 'b'], ['impede: ' + i.t, 'red'], 'quem resolve: ' + i.q], l: { t: 'Abrir lote', h: 'PROD.dc.html#' + l.lote } }));
@@ -319,33 +326,33 @@ function comPanRm(self, c, rm) { const P = prP(c); const v = P.pedidos[rm.pedido
       { t: 'Entrega', rows: ent, vazio: rm.modal === 'retira' ? 'Cliente retira: a saída é a entrega.' : 'Entrega a confirmar.' }, { t: 'Devoluções', rows: devs, vazio: 'Nenhuma devolução.' }, { t: 'Movimentos', rows: mv, vazio: 'Nenhum movimento.' }],
     err: self.state.pr_err };
   if (md === 'cancelar') { PPx.form = { t: 'Cancelar ' + rm.id, h: 'As reservas do ' + rm.pedido + ' continuam; nada sai do estoque.', fields: [prFld(self, 'mot', 'Motivo', { t: 'txt', im: 'text', ph: 'ex.: caminhão não veio' })] };
-    PPx.prim = { t: 'Cancelar carga', go: () => prRun(self, x => comCancelarCarga(x, { rm: rm.id, motivo: prFval(self, 'mot', ''), ator: g2perfil(), chave: ch }), { pr_modo: null, pr_form: null }) };
+    PPx.prim = { t: 'Cancelar carga', go: () => prRun(self, x => comCancelarCarga(x, { rm: rm.id, motivo: fv('mot', ''), ator: g2perfil(), chave: ch }), { pr_modo: null, pr_form: null }) };
     PPx.sec = [{ t: 'Manter carga', go: () => self.setState({ pr_modo: null, pr_err: '' }) }]; return PPx; }
-  if (md === 'devolver') { const fs = []; if (rm.lotes.length > 1) fs.push(prFld(self, 'dl', 'Lote', { t: 'opts', v: prFval(self, 'dl', rm.lotes[0].lote), opts: rm.lotes.map(l => ({ v: l.lote, t: l.lote })) }));
+  if (md === 'devolver') { const fs = []; if (rm.lotes.length > 1) fs.push(prFld(self, 'dl', 'Lote', { t: 'opts', v: fv('dl', rm.lotes[0].lote), opts: rm.lotes.map(l => ({ v: l.lote, t: l.lote })) }));
     fs.push(prFld(self, 'dq', 'Quantidade devolvida', { t: 'txt', u: comUn(cu) })); fs.push(prFld(self, 'dm', 'Motivo', { t: 'opts', opts: COMC.motivos.map(t => ({ v: t, t })) }));
     PPx.form = { t: 'Registrar devolução · ' + COM_PAPT.saida, h: 'Volta como lote novo Em inspeção; só a Qualidade libera. O entregue e o a receber caem.', fields: fs };
-    PPx.prim = { t: 'Registrar devolução', go: () => prRun(self, x => comDevolver(x, { rm: rm.id, lote: prFval(self, 'dl', rm.lotes[0].lote), kg: prNumOk(prFval(self, 'dq', '')) ? prEstBase(cu, prNum(prFval(self, 'dq', ''))) : prFval(self, 'dq', ''), motivo: prFval(self, 'dm', ''), ator: g2perfil(), chave: ch }), { pr_modo: null, pr_form: null }) };
+    PPx.prim = { t: 'Registrar devolução', go: () => prRun(self, x => comDevolver(x, { rm: rm.id, lote: fv('dl', rm.lotes[0].lote), kg: prNumOk(fv('dq', '')) ? prEstBase(cu, prNum(fv('dq', ''))) : fv('dq', ''), motivo: fv('dm', ''), ator: g2perfil(), chave: ch }), { pr_modo: null, pr_form: null }) };
     PPx.sec = [{ t: 'Voltar', go: () => self.setState({ pr_modo: null, pr_err: '' }) }]; return PPx; }
   if (s.a === 'sair' && comPode('saida')) { const fs = [prFld(self, 'br', 'Peso bruto', { t: 'txt', u: 'kg' }), prFld(self, 'ta', 'Tara', { t: 'txt', u: 'kg' })];
-    const b = prFval(self, 'br', ''), t = prFval(self, 'ta', ''); let liq = null; if (prNumOk(b) && prNumOk(t)) liq = prSub(prNum(b), prNum(t));
+    const b = fv('br', ''), t = fv('ta', ''); let liq = null; if (prNumOk(b) && prNumOk(t)) liq = prSub(prNum(b), prNum(t));
     if (rm.lotes.length > 1) rm.lotes.forEach(l => fs.push(prFld(self, 'kl_' + l.lote, 'kg do ' + l.lote, { t: 'txt', u: 'kg', v: prFmtT(l.prev, 3).replace(/\./g, ''), h: 'A soma dos lotes é o líquido.' })));
     const h = []; if (liq !== null && prCmp(liq, 0) > 0) { h.push('Líquido ' + kgT(liq) + (prUn(cu).est ? '' : ' = ' + U(liq)) + '.');
-      const kl = rm.lotes.length === 1 ? [{ lote: rm.lotes[0].lote, kg: liq }] : rm.lotes.map(l => ({ lote: l.lote, kg: prNum(prFval(self, 'kl_' + l.lote, prFmtT(l.prev, 3).replace(/\./g, ''))) || 0 }));
+      const kl = rm.lotes.length === 1 ? [{ lote: rm.lotes[0].lote, kg: liq }] : rm.lotes.map(l => ({ lote: l.lote, kg: prNum(fv('kl_' + l.lote, prFmtT(l.prev, 3).replace(/\./g, ''))) || 0 }));
       kl.forEach(x => { const rv = prSoma(prResPed(c, v.id).filter(r => r.lote === x.lote).map(r => r.kg)); if (prCmp(x.kg, rv) > 0) h.push('Excesso de ' + U(prSub(x.kg, rv)) + ' sobre a reserva no ' + x.lote + ': sai do disponível do lote com ' + g2quem('gestor') + ' (ajuste autorizado).'); });
       const cr = comCredito(c, v, liq); if (!cr.ok) { h.push('Crédito: ' + cr.prob + ' · decisão de ' + g2quem('gestor') + '.');
         if (comPode('credito')) PPx.sec = [{ t: 'Aprovar crédito desta saída', go: () => prRun(self, x => comAprovarCredito(x, { venda: v.id, kg: liq, ator: g2perfil(), chave: ch + '-CR' }), {}) }]; } }
     PPx.form = { t: 'Confirmar saída da ' + rm.id + ' · ' + COM_PAPT.saida, h: 'Bruto e tara da balança em kg, sem valor anterior. ' + (h.length ? h.join(' ') : 'O líquido sai do ' + rm.lotes.map(l => l.lote).join(' + ') + ' uma única vez.'), fields: fs };
-    const kgs = () => { if (rm.lotes.length < 2) return null; const o = {}; rm.lotes.forEach(l => { o[l.lote] = prFval(self, 'kl_' + l.lote, prFmtT(l.prev, 3).replace(/\./g, '')); }); return o; };
-    PPx.prim = { t: 'Confirmar saída da ' + rm.id, go: () => prRun(self, x => comSair(x, { rm: rm.id, bruto: prFval(self, 'br', ''), tara: prFval(self, 'ta', ''), kgs: kgs(), ator: g2perfil(), chave: ch }), { pr_form: null, pr_ch: prChave('W-RM') }) }; }
+    const kgs = () => { if (rm.lotes.length < 2) return null; const o = {}; rm.lotes.forEach(l => { o[l.lote] = fv('kl_' + l.lote, prFmtT(l.prev, 3).replace(/\./g, '')); }); return o; };
+    PPx.prim = { t: 'Confirmar saída da ' + rm.id, go: () => prRun(self, x => comSair(x, { rm: rm.id, bruto: fv('br', ''), tara: fv('ta', ''), kgs: kgs(), ator: g2perfil(), chave: ch }), { pr_form: null, pr_ch: prChave('W-RM') }) }; }
   else if (s.a === 'entregar' && comPode('saida')) { const dts = [{ v: hoje, t: 'Hoje ' + prBr(hoje) }, { v: prDiaMais(hoje, -1), t: 'Ontem ' + prBr(prDiaMais(hoje, -1)) }].filter(x => x.v >= rm.saida.d && x.v <= hoje);
-    const dv = prFval(self, 'rc', 'tudo') === 'dev'; const fs = [prFld(self, 'de', 'Data da entrega', { t: 'opts', v: prFval(self, 'de', dts.length === 1 ? dts[0].v : ''), opts: dts }),
-      prFld(self, 'rc', 'Recebido', { t: 'opts', v: prFval(self, 'rc', 'tudo'), opts: [{ v: 'tudo', t: 'Recebido tudo' }, { v: 'dev', t: 'Com devolução' }] })];
-    if (dv) { if (rm.lotes.length > 1) fs.push(prFld(self, 'dl', 'Lote', { t: 'opts', v: prFval(self, 'dl', rm.lotes[0].lote), opts: rm.lotes.map(l => ({ v: l.lote, t: l.lote })) }));
+    const dv = fv('rc', 'tudo') === 'dev'; const fs = [prFld(self, 'de', 'Data da entrega', { t: 'opts', v: fv('de', dts.length === 1 ? dts[0].v : ''), opts: dts }),
+      prFld(self, 'rc', 'Recebido', { t: 'opts', v: fv('rc', 'tudo'), opts: [{ v: 'tudo', t: 'Recebido tudo' }, { v: 'dev', t: 'Com devolução' }] })];
+    if (dv) { if (rm.lotes.length > 1) fs.push(prFld(self, 'dl', 'Lote', { t: 'opts', v: fv('dl', rm.lotes[0].lote), opts: rm.lotes.map(l => ({ v: l.lote, t: l.lote })) }));
       fs.push(prFld(self, 'dq', 'Quantidade devolvida', { t: 'txt', u: comUn(cu) })); fs.push(prFld(self, 'dm', 'Motivo', { t: 'opts', opts: COMC.motivos.map(t => ({ v: t, t })) })); }
     fs.push(prFld(self, 'cp', 'Comprovante (opcional)', { t: 'txt', im: 'text', ph: 'ex.: canhoto assinado' }));
     PPx.form = { t: 'Confirmar entrega da ' + rm.id + ' · ' + COM_PAPT.saida, h: 'O vencimento conta da data da entrega (' + ((comCond(v.cond) || {}).ev || '') + '). Devolução volta como lote em inspeção.', fields: fs };
-    PPx.prim = { t: 'Confirmar entrega da ' + rm.id, go: () => prRun(self, x => comEntregar(x, { rm: rm.id, d: prFval(self, 'de', dts.length === 1 ? dts[0].v : ''), comp: prFval(self, 'cp', ''), ator: g2perfil(), chave: ch,
-      dev: dv ? { lote: prFval(self, 'dl', rm.lotes[0].lote), kg: prNumOk(prFval(self, 'dq', '')) ? prEstBase(cu, prNum(prFval(self, 'dq', ''))) : prFval(self, 'dq', ''), motivo: prFval(self, 'dm', '') } : null }), { pr_form: null, pr_ch: prChave('W-RM') }) }; }
+    PPx.prim = { t: 'Confirmar entrega da ' + rm.id, go: () => prRun(self, x => comEntregar(x, { rm: rm.id, d: fv('de', dts.length === 1 ? dts[0].v : ''), comp: fv('cp', ''), ator: g2perfil(), chave: ch,
+      dev: dv ? { lote: fv('dl', rm.lotes[0].lote), kg: prNumOk(fv('dq', '')) ? prEstBase(cu, prNum(fv('dq', ''))) : fv('dq', ''), motivo: fv('dm', '') } : null }), { pr_form: null, pr_ch: prChave('W-RM') }) }; }
   if (rm.st === 'Programada' && comPode('carga') && !PPx.sec) PPx.sec = [{ t: 'Cancelar carga', go: () => self.setState({ pr_modo: 'cancelar', pr_form: null, pr_err: '' }) }];
   if ((rm.st === 'Entregue' || rm.st === 'Entregue com devolução') && comPode('saida') && prCmp(comRmLiq(rm), 0) > 0) PPx.sec = [{ t: 'Registrar devolução', go: () => self.setState({ pr_modo: 'devolver', pr_form: null, pr_err: '' }) }];
   return PPx; }
@@ -356,10 +363,10 @@ function EXTRAVALS(self, v) { prRst(self, v); const c = self._c || cenGet(); con
   if (rm) { const s = comRmSit(c, rm);
     if (s.a === 'sair') prim = { t: 'Confirmar saída da ' + rm.id, papel: 'saida', go: () => self.setState({ pr_pan: { g: 'g_rm', id: rm.id }, pr_form: null, pr_err: '', pr_modo: null }) };
     else if (s.a === 'entregar') prim = { t: 'Confirmar entrega da ' + rm.id, papel: 'saida', go: () => self.setState({ pr_pan: { g: 'g_rm', id: rm.id }, pr_form: null, pr_err: '', pr_modo: null }) }; }
-  else prim = { t: 'Programar carga', papel: 'carga', go: () => self.setState({ pr_pan: { g: 'nova' }, pr_sel: null, pr_form: null, pr_err: '', pr_modo: null, pr_ch: prChave('W-PG') }) };
+  else if (comVendasProg(c).length) prim = { t: 'Programar carga', papel: 'carga', go: () => self.setState({ pr_pan: { g: 'nova' }, pr_sel: null, pr_form: null, pr_err: '', pr_modo: null, pr_ch: prChave('W-PG') }) };
   comPrim(v, prim);
   const rms = self._rms || []; const sits = rms.map(x => comRmSit(c, x)); const np = sits.filter(x => x.t === 'Programada').length, nt = sits.filter(x => x.t === 'Em trânsito').length, ni = sits.filter(x => x.c === 'red').length;
-  prStatus(v, [np ? np + (np > 1 ? ' programadas' : ' programada') : 'nada programado', nt ? nt + ' em trânsito' : '', ni ? ni + (ni > 1 ? ' impedidas' : ' impedida') : ''].filter(Boolean).join(' · '), ni ? 'red' : (np || nt ? 'yellow' : 'green'));
+  prStatus(v, [np ? np + (np > 1 ? ' programadas' : ' programada') : (comVendasProg(c).length ? 'nada programado' : 'nada a programar: reserve lote em Contratos e pedidos'), nt ? nt + ' em trânsito' : '', ni ? ni + (ni > 1 ? ' impedidas' : ' impedida') : ''].filter(Boolean).join(' · '), ni ? 'red' : (np || nt ? 'yellow' : 'green'));
   const pan = st.pr_pan; let PP = null;
   if (pan && pan.g === 'nova') { const f = comFormProg(self, c, pan.ven);
     PP = { title: 'Programar carga', chip: ['Nova carga', 'gray'], sub: f.v ? f.v.id + ' · ' + f.v.cliente + ' · ' + (COM_MODAL[f.v.modal] || '') + (f.v.local ? ' · ' + f.v.local : '') : 'Venda com lote reservado',
@@ -425,7 +432,7 @@ function PREVALS(self, v) { cenOuvir(self); prTopo(self, v); const c = cenGet();
   v.hz4_on = String(hz === '4'); v.hzs_on = String(hz === 's'); v.hz4_st = prPill(hz === '4'); v.hzs_st = prPill(hz === 's'); v.hz4 = () => self.setState({ pr_hz: '4' }); v.hzs = () => self.setState({ pr_hz: 's' });
   const rows = comPainel(c, prHoje(), hz); self._of = rows; const por = {}; rows.forEach(r => { (por[r.prod] = por[r.prod] || []).push(r); });
   GR('g_of').rows = Object.keys(por).sort().map(pr => { const rs = por[pr]; const def = rs.filter(r => r.sit === 'Déficit').length;
-    return { id: 'grp:' + pr, ro: true, v: { per: pr, sit: def ? 'Déficit' : 'Livre' }, s: { per: pr, sit: def ? def + ' em déficit' : '' },
+    return { id: 'grp:' + pr, ro: true, v: { per: pr, sit: def ? 'Déficit' : 'Livre' }, s: { per: pr, sit: '' },   /* o resumo do grupo não vira chip do filtro rápido */
       p: { per: [{ k: 'b', t: pr }], of: [{ k: 'mut', t: '' }], comp: [{ k: 'mut', t: '' }], cob: [{ k: 'mut', t: '' }], livre: [{ k: 'mut', t: '' }], sit: [{ k: 'mut', t: def ? def + (def > 1 ? ' períodos em déficit' : ' período em déficit') : '' }] },
       kids: rs.map(comOfRow) }; });
   const x0 = {}; Object.keys(por).forEach(pr => { x0['grp:' + pr] = true; }); GR('g_of').x0 = x0;

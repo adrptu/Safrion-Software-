@@ -198,8 +198,9 @@ function prFormReserva(self,c,L,p,fixo,lotes){ /* fixo: 'lote' (vem do lote: esc
   else fields.push(prFld(self,'lot','Lote apto',{t:'opts',v:L?L.id:'',opts:opcLot.map(x=>({v:x.id,t:x.id+' · disponível '+prEstTxt(x.cultura,prSaldos(c,x).disp)}))}));
   const k='q_'+(L?L.id:'')+'_'+(p?p.id:''); const sugT=prFmtT(prPiso(prEstQ(cu,sug),3),3).replace(/\./g,'');   /* para baixo: redigitada, nunca passa do disponível (revisão A-12) */
   fields.push(prFld(self,k,'Quantidade a reservar',{t:'txt',v:sugT,u:un,h:'Sugestão: o menor entre o disponível do lote ('+(S?prEstTxt(cu,S.disp):'—')+') e a falta do pedido ('+prEstTxt(cu,falta)+'). Pode reduzir.'}));
-  const go=()=>{ if(!L||!p){ self.setState({pr_err:'Escolha '+(fixo==='lote'?'o pedido':'o lote')+'.'}); return; } const q=prFval(self,k,sugT);
-    const kg=q===sugT?sug:(prNumOk(q)?prEstBase(cu,prNum(q)):NaN); const ch=self.state.pr_ch||prChave('W-RS');   /* sem edição: a sugestão exata na base */
+  const q0=prFval(self,k,sugT); const ch0=self.state.pr_ch||prChave('W-RS');   /* lidos no desenho: o 2º clique repete a mesma chave e o mesmo conteúdo (R-07) */
+  const go=()=>{ if(!L||!p){ self.setState({pr_err:'Escolha '+(fixo==='lote'?'o pedido':'o lote')+'.'}); return; } const q=q0;
+    const kg=q===sugT?sug:(prNumOk(q)?prEstBase(cu,prNum(q)):NaN); const ch=ch0;   /* sem edição: a sugestão exata na base */
     prRun(self,x=>prReservar(x,{pedido:p.id,lote:L.id,kg,chave:ch,ator:g2perfil()}),{pr_modo:null,pr_form:null,pr_ch:null}); };   /* quem age: o perfil (Comercial CE-10) */
   return {fields,go,L,p}; }
 function prPanPed(self,c,p){ const P=prP(c); const cu=p.cultura; const U=x=>prEstTxt(cu,x); const st=prSitPed(c,p); const falta=prFalta(c,p); const cx=self.state.pr_cx;
@@ -282,7 +283,8 @@ function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const P=pr
   prPainel(self,v,PP); }
 function prPanLote(self,c,L){ const P=prP(c); const S=prSaldos(c,L); const cu=L.cultura; const U=x=>prEstTxt(cu,x); const q=S.esgotado?'Esgotado':S.q; const nx=prLoteProx(c,L,S); const modo=self.state.pr_modo;
   const loc=(PRDC.locais[L.local]||{}); const lcs=prLcs(c,L);
-  const orig=(L.origem||[]).map(x=>({c:[[x.carga||'abertura','b'],x.tal||'',x.os||'',x.dcol?'colhido '+prBr(x.dcol):'',U(x.kg)+(x.modo==='estimada'?' (estimada)':''),x.est?['estornada','red']:''].filter(Boolean),l:{t:'Ver carga',h:'CARGA.dc.html#'+(x.carga||'')}}));
+  /* origem de lote devolvido (Comercial R-C10, CE-11): sem carga e sem kg (a produção do talhão não conta de novo) */
+  const orig=(L.origem||[]).map(x=>({c:[[x.carga||(x.dev?'devolução':'abertura'),'b'],x.tal||'',x.os||'',x.dcol?'colhido '+prBr(x.dcol):'',x.kg===undefined?'':U(x.kg)+(x.modo==='estimada'?' (estimada)':''),x.est?['estornada','red']:''].filter(Boolean),l:x.carga?{t:'Ver carga',h:'CARGA.dc.html#'+x.carga}:null}));
   if(L.abertura) orig.push({c:[['Saldo de abertura','b'],'safra '+L.saf+' · anterior ao sistema, sem talhão (não entra na produção por talhão)']});
   if(L.dev) orig.unshift({c:[['Devolução','b'],'devolvido na '+L.dev.rm+' ('+L.dev.motivo+') · lote de saída '+L.dev.lote,'a produção do talhão não conta de novo'],l:{t:'Abrir carga',h:'EXPED.dc.html#'+L.dev.rm}});   /* Comercial R-C10 */
   const rs=Object.values(P.reservas).filter(r=>r.lote===L.id).map(r=>({c:[[r.id,'b'],r.pedido,U(r.kg),r.st,(r.st==='Ativa'&&S.q!=='Liberado')?['Expedição impedida','red']:'',r.canc?'cancelada: '+r.canc.motivo:''].filter(Boolean),l:{t:'Abrir venda',h:'VEN.dc.html#'+r.pedido}}));   /* Comercial P5: a venda vive em Contratos e pedidos */
