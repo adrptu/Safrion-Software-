@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
-"""Agrícola › Planejar safra — processo em 6 etapas numa só tela de trabalho (SAF.dc.html)."""
+"""Agrícola › Planejar safra — processo em 4 etapas numa só tela de trabalho (SAF.dc.html): safra, talhões e cultivos, operações e
+recursos (etapa única que juntou as antigas 3, 4 e 5, pedido do proprietário de 05/10/2026) e demanda de insumos."""
 import json, os
 from engine import (grid,section,esc,icon,chip,btn,INK,MUTED,LINE,BG,SURF,ACC,ACCS,YEL,YELS,RED,REDS,GRAYS,SH,DISP,BTN_ST,EXTRA,EXTRAJS,_MINI,_MINIP)
 import engine as E
 from ui37 import shell37, steps_state, HEIGHTS37
 import dados2 as D2
 import dados as D
+import ocupacao_cen as OCEN
 HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE)
 H=lambda s: '{{'+s+'}}'
 F=lambda: H('false')
-NOMES=['Escolha a safra','Defina cultivos e planos','Defina os rendimentos','Confira o plano operacional','Dimensione os recursos','Confira a demanda de insumos']
+NOMES=['Escolha a safra','Defina cultivos e planos','Dimensione operações e recursos','Confira a demanda de insumos']
 def bloco(titulo,desc,corpo,acao='',tit_hole=False,desc_hole=False):
     t=titulo if tit_hole else esc(titulo); desc=desc if desc_hole else esc(desc)
     return (f'<section style="background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; display: flex; flex-direction: column; min-width: 0;">'
@@ -26,27 +28,38 @@ def build():
        [dict(id=s['id'],ro=s['ro'],v=dict(nome=s['nome'],ini=s['ini'],fim=s['fim'],periodo=s['periodo'],faz=s['fazenda'],estado=s['estado']),s={},p={}) for s in D2.SAFRAS],
        edit=dict(m='form',title='Safra',newTitle='Nova safra',sub='Altere nome, início, fim e fazenda. Cultivos e planos ficam nas etapas seguintes.',
                  fields=[dict(k='nome',l='Nome da safra',t='txt',req=True,def_='' ),dict(k='ini',l='Início',t='date',req=True),dict(k='fim',l='Fim',t='date',req=True,help='O fim precisa ser depois do início.'),
-                         dict(k='faz',l='Fazenda',t='sel',opts=['Santa Rita','Boa Vista'],req=True,**{'def':'Santa Rita'}),dict(k='estado',l='Estado',t='sel',opts=['Rascunho','Em planejamento'],**{'def':'Rascunho'})]),
+                         dict(k='faz',l='Fazenda',t='sel',opts=OCEN.fazendas(),req=True,**{'def':'Santa Rita'}),dict(k='estado',l='Estado',t='sel',opts=['Rascunho','Em planejamento'],**{'def':'Rascunho'})]),
        add=None,gid='g_saf',total=False)
-    # ---------- etapa 2 · cultivos por safra ----------
-    TALH={t:ha for t,ha,*_ in D.TALHOES}
-    import dados_lagoa_safra as DL
-    TALFAZ={t:'Santa Rita' for t in TALH}; TALFAZ.update(DL.TALFAZ); TALH.update(DL.TALHOES)   # pivôs da Lagoa Grande
-    # TABELAS-FOCO (5983172395): uma variável por coluna (tipo, área livre, versão e ajustes separados; a meta leva a unidade junto)
-    # o plano (e a ação Aplicar plano) fica à vista: logo depois da variedade
-    CULT_COLS=[dict(k='local',l='Talhão ou parcela',w=130),dict(k='tipo',l='Tipo',w=120),dict(k='cult',l='Cultura'),dict(k='var',l='Variedade'),
-               dict(k='plano',l='Plano agronômico',w=190),dict(k='ver',l='Versão'),dict(k='area',l='Área (ha)',t='num',a='r',agg='sum',d=2,dmin=0),dict(k='dt_plantio',l='Plantio',t='num'),
-               dict(k='meta',l='Meta',t='num',a='r'),dict(k='livre',l='Área livre (ha)',t='num',a='r',d=2,dmin=0),dict(k='aj',l='Ajustes locais',t='num',a='r')]
-    CULT_FIELDS=[dict(k='talhao',l='Talhão',t='sel',opts=list(TALH),req=True,newOnly=True,**{'def':'T1'},
-                      help='Áreas: '+' · '.join(f'{t} '+format(ha,'g').replace('.',',')+' ha' for t,ha in TALH.items())),
-                 dict(k='local',l='Parcela',t='txt',help='Em branco: o sistema usa o nome do talhão ou a próxima parcela (ex.: T3-A).'),
-                 dict(k='faz',l='Fazenda',ro=True,**{'def':'Santa Rita'}),
-                 dict(k='cult',l='Cultura',t='sel',opts=['Soja','Milho','Feijão','Café','Mamão Formosa'],req=True,**{'def':'Soja'}),
-                 dict(k='var',l='Variedade',t='txt',req=True),dict(k='area',l='Área',t='num',req=True,min=0.01,max=1000,u='ha'),
-                 dict(k='plantio',l='Plantio',t='date',req=True),dict(k='meta',l='Meta de produtividade',t='num',req=True,min=0),
-                 dict(k='unm',l='Unidade da meta',t='sel',opts=['sc/ha','t/ha/ano','kg/ha'],req=True,**{'def':'sc/ha'}),
+    # ---------- etapa 2 · talhões e cultivos (ESPECIFICACAO etapa-2-talhoes) ----------
+    # todos os talhões Ativos do CD-01 da fazenda da safra (com o B1 da Boa Vista e os pivôs da Lagoa Grande); a ocupação no tempo sai do
+    # serviço único ocupacao.js (ENG-011). Linhas de talhão e de outras safras são só de exibição (safra.js · syncTalhoes); o estado guarda
+    # só os cultivos desta safra.
+    TAL_FAZ=OCEN.talhoes()
+    TALH={t:ha for lst in TAL_FAZ.values() for t,ha in lst}
+    TALFAZ={t:f for f,lst in TAL_FAZ.items() for t,_ in lst}
+    # TABELAS-FOCO (5983172395): uma variável por coluna; as cinco primeiras respondem onde, quanto e quando; Cultura, Ocupa até, Fim por e
+    # Safra logo depois respondem o que ocupa e até quando (§3.1)
+    CULT_COLS=[dict(k='local',l='Talhão ou parcela',w=130),dict(k='sit',l='Situação',w=150,niv0=True),dict(k='livre',l='Área livre (ha)',t='num',a='r',d=2,dmin=0,niv0=True),
+               dict(k='desde',l='Livre a partir de',t='num',w=130,niv0=True),dict(k='area',l='Área (ha)',t='num',a='r',agg='sum',d=2,dmin=0),dict(k='cult',l='Cultura'),
+               dict(k='ate',l='Ocupa até',t='num'),dict(k='fimpor',l='Fim por',w=150,ajuda='Pelo plano e Colheita informada são previsões. Estimado: ciclo da cultivar ou plano mais longo da cultura (CD-02), sem plano no cultivo. Observado: colheita registrada.'),
+               dict(k='saf',l='Safra',w=150),dict(k='var',l='Variedade'),dict(k='plano',l='Plano agronômico',w=190),dict(k='ver',l='Versão'),dict(k='dt_plantio',l='Plantio',t='num'),
+               dict(k='meta',l='Meta',t='num',a='r'),dict(k='aj',l='Ajustes locais',t='num',a='r'),dict(k='tipo',l='Tipo',w=120)]
+    NUNCA_C=dict(k='modo',eq='__nunca'); PLAN=dict(k='modo',ne='vinc'); VINC=dict(k='modo',eq='vinc')
+    # painel "Planejar T1" (§2): contexto herdado no subtítulo; Plano antes do Plantio; Plantio = PlantioMin; Colheita prevista editável só sem
+    # plano; meta na unidade de mercado da cultura (DEC-0510-03). "Vincular ciclo C1" (R-24) mostra o ciclo travado e pede plano e meta.
+    CULT_FIELDS=[dict(k='modo',l='',t='txt',cond=NUNCA_C),dict(k='talhao',l='',t='txt',cond=NUNCA_C),
+                 dict(k='cult',l='Cultura',t='sel',dyn=True,opts=[],req=True,cond=PLAN),dict(k='cult',l='Cultura',ro=True,cond=VINC),
+                 dict(k='var',l='Variedade',t='txt',req=True,cond=PLAN),dict(k='var',l='Variedade',ro=True,cond=VINC),
                  dict(k='plano',l='Plano agronômico',t='sel',dyn=True,opts=[],
-                      help='Planos publicados da cultura escolhida. Trocar o plano descarta os ajustes de insumos deste cultivo.')]
+                      help='Planos publicados da cultura escolhida. Trocar o plano descarta os ajustes de insumos deste cultivo.'),
+                 dict(k='plantio',l='Plantio',t='date',req=True,cond=PLAN),dict(k='pmin_txt',l='Plantio a partir de',ro=True,live=True,cond=PLAN),
+                 dict(k='plantio',l='Plantio real do ciclo',t='date',ro=True,cond=VINC),
+                 dict(k='local',l='Parcela',t='txt',cond=PLAN,help='Sugerida pela faixa que libera nesse dia. Área igual à do talhão vira talhão inteiro.'),
+                 dict(k='area',l='Área',t='num',req=True,min=0.01,max=5000,u='ha',cond=PLAN),dict(k='area',l='Área do ciclo',ro=True,u='ha',cond=VINC),
+                 dict(k='colheita',l='Colheita prevista',t='date',cond=[dict(k='plano',eq=''),PLAN],help='Sem plano: a data que a fazenda prevê. Vazia, o sistema estima pelo ciclo da cultivar (CD-02).'),
+                 dict(k='colh_txt',l='Colheita prevista',ro=True,live=True,cond=dict(k='plano',ne='')),
+                 dict(k='meta',l='Meta de produtividade',t='num',req=True,min=0),dict(k='unm_txt',l='Unidade da meta',ro=True,live=True,help='Unidade de mercado da cultura (CD-02, DEC-0510-03).'),
+                 dict(k='ocup_txt',l='Ocupação prevista',ro=True,live=True,cond=PLAN)]
     def talhao_de(c):
         return c['local'] if c['tipo']!='Parcela' else c['local'].rsplit('-',1)[0]
     def cult_rows(k):
@@ -54,7 +67,8 @@ def build():
         for c in D2.CULTIVOS.get(k,[]):
             t=talhao_de(c)
             r=dict(id=c['id'],ro=c['ro'],v=dict(talhao=t,faz=c['fazenda'],local=c['local'],tipo=c['tipo'],cult=c['cultura'],var=c['variedade'],area=c['area'],
-                   plantio=c['plantio'],meta=c['meta'],unm=c['un_meta'],plano=c['plano'] or '',colheita=c['colheita'] or ''),s={},p={})
+                   plantio=c['plantio'],meta=c['meta'],unm=c['un_meta'],plano=c['plano'] or '',colheita=c['colheita'] or '',colheita_real=c.get('colheita_real') or '',
+                   ciclo=c.get('ciclo') or '',origem=c.get('origem') or ''),s={},p={})
             if c['tipo']=='Parcela':
                 if t not in grp:
                     grp[t]=dict(id='grp_'+t,grp=True,dr='div_'+t,ro=c['ro'],v=dict(talhao=t,faz=c['fazenda'],local=t),s={},p={},kids=[]); out.append(grp[t])
@@ -67,7 +81,7 @@ def build():
         ro=(k=='S2526')
         bulk=f'<button type="button" onClick="{H("ap_bulk")}" style="{_MINIP}">Aplicar plano</button>' if not ro else ''
         g=grid(CULT_COLS,rows,edit=dict(m='form',title='Cultivo',newTitle='Novo cultivo',sub='Altere o cultivo e o plano agronômico e salve.',fields=CULT_FIELDS),
-               sel=not ro,dele=not ro,add=None,bulk=bulk,gid=f'g_cult_{k}',qf=dict(k='cult'),total=True,tree=True,x0={r['id']:True for r in rows if r.get('kids')})
+               sel=not ro,dele=not ro,add=None,bulk=bulk,gid=f'g_cult_{k}',qf=dict(k='sit',l='situação',nivel0=True),total=True,tree=True,x0={})
         cult_html+=f'<sc-if value="{H("cult_"+k)}" hint-placeholder-val="{F()}">{g}</sc-if>'
     # ---------- etapa 3 · rendimentos (uma grade por safra: a edição vale só para a safra aberta; safra encerrada abre só em consulta) ----------
     ops={}
@@ -125,10 +139,11 @@ def build():
     NUNCA=dict(k='multi',eq='__nunca')   # campo só de rascunho: guarda contexto do formulário e não aparece
     MULTI=dict(k='multi',eq='sim'); UMA=dict(k='multi',eq='não')
     SEQ_T='Em sequência: divide trator, implemento ou operador'; PAR_T='Ao mesmo tempo, com recursos próprios'
+    SO=dict(k='esc',eq='Só esta atividade'); NSO=dict(k='esc',ne='Só esta atividade'); COLH=dict(k='colh',eq='sim')
     REND_EDIT=dict(m='form',title='Rendimento',newTitle='Nova configuração',leafOnly=True,sub='Informe como o conjunto trabalha e quanto custa por hora; rendimento e custo por hectare são recalculados (na colheita, também por quilo). Vale só para esta safra.',
-            fields=[dict(k='multi',l='',t='txt',cond=NUNCA),dict(k='base',l='',t='txt',cond=NUNCA),
+            fields=[dict(k='multi',l='',t='txt',cond=NUNCA),dict(k='base',l='',t='txt',cond=NUNCA),dict(k='colh',l='',t='txt',cond=NUNCA),dict(k='ctx',l='',t='txt',cond=NUNCA),
                     dict(k='opatv',l='Operação · atividade',t='txt',ro=True),
-                    dict(k='esc',l='Aplicar em',t='sel',opts=['Todas as atividades da operação','Só esta atividade'],cond=UMA,help='Todas: conjunto, rendimento e custos vão para as outras atividades da mesma operação nesta safra (as divididas entre conjuntos ficam como estão).'),
+                    dict(k='esc',l='Aplicar em',t='sel',opts=['Todas as atividades da operação','Só esta atividade'],cond=UMA,help='Todas: conjunto, rendimento, custos e diesel vão para as outras atividades desta operação em uso nesta safra. As divididas entre conjuntos e as de planos ainda não aplicados ficam como estão. A janela é de cada atividade.'),
                     dict(k='conj_id',l='Conjunto',t='sel',dyn=True,opts=[],help='Do cadastro, só tratores com a potência que o implemento exige (trocar usa os custos por hora do cadastro). Por classe ou prestador: planeja sem escolher patrimônio; o prestador traz máquina, operador e diesel.'),
                     dict(k='nome',l='Descrição do conjunto',t='txt',req=True,cond=dict(k='conj_id',eq='classe'),help='Ex.: Trator 100–140 cv + plantadeira 12 linhas. A O.S. escolhe a máquina depois.'),
                     dict(k='nome',l='Prestador e equipamento',t='txt',req=True,cond=dict(k='conj_id',eq='prestador'),help='Ex.: Prestador · plantadeira 12 linhas. A tarifa por hora do prestador vai em Máquina; não usa máquinas nem pessoas da fazenda.'),
@@ -141,28 +156,43 @@ def build():
                     dict(k='maq',l='Máquina',t='num',req=True,min=0,u='R$/h',help='Inclua combustível, manutenção e depreciação; o operador entra em Pessoas.'),dict(k='impl',l='Implemento',t='num',min=0,u='R$/h'),
                     dict(k='pess',l='Pessoas na equipe',t='num',req=True,min=0,u='pessoas'),dict(k='pess_rs',l='Custo por pessoa',t='num',min=0,u='R$/h'),
                     dict(k='custo_c',l='Custo por hora',ro=True,live=True,u='R$/h',help='Máquina + implemento + pessoas × custo por pessoa.'),
+                    dict(k='custo_ha_c',l='Custo R$/ha',ro=True,live=True,help='Custo por hora ÷ rendimento (a mesma conta da tabela).'),
+                    dict(k='custo_kg_c',l='Custo R$/kg',ro=True,live=True,cond=COLH,help='Por cultura, com a meta de produtividade dos cultivos desta safra; sem média entre culturas.'),
+                    dict(k='origem_c',l='Origem',ro=True,live=True,help='"Padrão do cadastro (CD-02)" quando a configuração é igual ao conjunto padrão da operação; senão, "Ajustado nesta safra".'),
                     dict(k='diesel',l='Consumo de diesel',t='num',min=0,max=200,u='L/h',help='Opcional. Estima os litros pelas horas do conjunto; o custo do combustível já está no custo da máquina.'),
-                    dict(k='jan',l='Horas disponíveis na janela',t='num',min=0,max=2000,u='h por talhão',help='Opcional. Prazo, contado do início da ocorrência, para este conjunto terminar em cada talhão ou parcela; em sequência, cada configuração termina dentro da própria janela, e a janela maior de outra não amplia a dela. A área que não couber fica sem conjunto, à vista no plano operacional.'),
-                    dict(k='part',l='Parte da área',t='num',min=0,max=100,u='%',cond=MULTI,help='Vazio = divide pelo rendimento, partindo das mesmas horas para as sem %; a que para na própria janela ou na da sequência passa o resto às outras. Estimativa: não garante término no mesmo horário nem a capacidade máxima. Com %, a parte fica fixa.'),
+                    dict(k='jan',l='Horas disponíveis na janela',t='num',min=0,max=2000,u='h por talhão',cond=MULTI,help='Opcional. Prazo, contado do início da ocorrência, para este conjunto terminar em cada talhão ou parcela; em sequência, cada configuração termina dentro da própria janela, e a janela maior de outra não amplia a dela. A área que não couber fica sem conjunto, à vista na Situação.'),
+                    dict(k='jan',l='Horas disponíveis na janela',t='num',min=0,max=2000,u='h por talhão',cond=[UMA,SO],help='Opcional. Prazo, contado do início da ocorrência, para o conjunto terminar em cada talhão ou parcela desta atividade. A área que não couber fica sem conjunto, à vista na Situação.'),
+                    dict(k='jan_op',l='Janela por talhão',ro=True,live=True,cond=[UMA,NSO]),
+                    dict(k='part',l='Parte da área',t='num',min=0,max=100,u='%',cond=MULTI,help='Vazio = divide pelo rendimento, partindo das mesmas horas para as sem %; a que para na própria janela ou na da sequência passa o resto às outras. Estimativa: não garante término no mesmo horário nem a capacidade máxima. Com %, a parte fixa.'),
                     dict(k='seq',l='Trabalha com as outras configurações',t='sel',opts=[PAR_T,SEQ_T],cond=MULTI,**{'def':PAR_T},help='Mesmo trator do cadastro obriga a sequência; falta de máquina ou pessoa na fazenda faz a estimativa considerar as configurações em sequência.'),
-                    dict(k='troca',l='Troca entre configurações',t='num',min=0,max=24,u='h',cond=MULTI,help='Opcional. Tempo para trocar para esta configuração quando trabalham em sequência; entra no tempo decorrido e ocupa a janela. O decorrido estimado começa pela de menor troca; para cumprir os prazos, a de janela menor pode precisar ir antes.')])
-    rend_html=''
+                    dict(k='troca',l='Troca entre configurações',t='num',min=0,max=24,u='h',cond=MULTI,help='Opcional. Tempo para trocar para esta configuração quando trabalham em sequência; entra no tempo decorrido e ocupa a janela. O decorrido estimado começa pela de menor troca; para cumprir os prazos, a de janela menor pode precisar ir antes.'),
+                    dict(k='neste_c',l='Neste talhão',ro=True,live=True,t='area',cond=dict(k='ctx',eq='talhao')),
+                    dict(k='nesta_c',l='Nesta configuração',ro=True,live=True,cond=dict(k='ctx',eq='cfg'))])
+    # uma g_rend por safra: é a fonte das configurações e o formulário Rendimento (EXTRA); a tabela sai do corpo (largura e velocidade só
+    # no formulário, padrão adotado da PEND-SAF-01) e a g_op abre a folha certa (safra.js · abrirRend)
     for k in ['S2627','S27SF','S2526','LG2627','NOVA']:
         rrows=rend_rows(k)
         x0={r['id']:True for r in rrows}; x0.update({a['id']:True for r in rrows for a in r['kids'] if a.get('grp')})
-        g=grid(REND_COLS,rrows,edit=(dict(REND_EDIT,m='ro') if k=='S2526' else REND_EDIT),gid=f'g_rend_{k}',total=False,tree=True,x0=x0)
-        rend_html+=f'<sc-if value="{H("rend_"+k)}" hint-placeholder-val="{F()}">{g}</sc-if>'
-    # ---------- etapa 4 · plano operacional ----------
-    # TABELAS-FOCO: a 1ª coluna é a árvore (cada linha é uma entidade do seu nível: operação › atividade › cultivo › configuração);
-    # gatilho (regra da atividade) e data (da ocorrência) separados; parte, janela e talhão em colunas próprias
-    g_op=grid([dict(k='nome',l='Operação › atividade › cultivo',w=280),dict(k='gat',l='Gatilho',w=120),dict(k='data',l='Data',t='num',w=100),dict(k='mes',l='Mês'),dict(k='area',l='Área (ha)',t='num',a='r',agg='sum',d=2,dmin=0),
-               dict(k='horas',l='Horas-conjunto (h)',t='num',a='r',d=1,agg='sum'),dict(k='dec',l='Decorrido (h)',t='num',a='r',d=1),
-               dict(k='cop',l='Operação (R$)',t='num',a='r',agg='sum'),dict(k='cins',l='Insumos (R$)',t='num',a='r',agg='sum'),
-               dict(k='ctot',l='Total (R$)',t='num',a='r',agg='sum'),dict(k='rha',l='R$/ha',t='num',a='r',d=2),dict(k='diesel',l='Diesel (L)',t='num',a='r',agg='sum'),
-               dict(k='part',l='Parte da área (%)',t='num',a='r',w=140),dict(k='jan',l='Janela (h por talhão)',t='num',a='r',w=140),dict(k='tal',l='Talhão',w=90)],
-       [],edit=dict(m='pick',leafOnly=False),tree=True,gid='g_op',total=True)
-    MCOLS=[dict(k='ind',l='Indicador',w=190)]+[dict(k=f'm{i}',l=lab,t='num',a='r') for i,(_,lab) in enumerate(meses)]+[dict(k='tot',l='Total do período',t='num',a='r')]
-    g_mat=grid(MCOLS,[],edit=dict(m='none'),search=False,gid='g_mat',total=False,headtools=False)
+        grid(REND_COLS,rrows,edit=(dict(REND_EDIT,m='ro') if k=='S2526' else REND_EDIT),gid=f'g_rend_{k}',total=False,tree=True,x0=x0)
+    # ---------- etapa 3 · Dimensione operações e recursos (ESPECIFICACAO etapa-unica-3-4-5 §2-§3) ----------
+    # g_op: 8 colunas, uma variável por coluna e a unidade na célula (ha-op na operação, ha nos demais níveis); a árvore é a lista e o
+    # formulário Rendimento é o sub-detalhe. Situação: Com pendência · Janela não informada · Cabe na janela (só chips, sem números).
+    g_op=grid([dict(k='nome',l='Operação › atividade › talhão',w=172),dict(k='sit',l='Situação',w=164),dict(k='data',l='Data',t='num',w=104),dict(k='conj',l='Conjunto',w=150),
+               dict(k='rend',l='Rendimento',t='num',a='r'),dict(k='area',l='Área trabalhada',t='num',a='r',ajuda='ha-op = hectares-operação: cada passada conta; 3 passadas em 10 ha = 30 ha-op (PRD 44.1)'),
+               dict(k='horas',l='Horas-conjunto (h)',t='num',a='r',d=1,agg='sum'),dict(k='rha',l='Custo R$/ha',t='num',a='r')],
+       [],edit=dict(m='pick',leafOnly=False),tree=True,gid='g_op',total=True,qf=dict(k='sit',l='situação',nivel0=True))
+    # g_cap: capacidade por mês (recurso × mês, ocupação), uma por safra para mostrar só os meses do período dela; recolhida por padrão.
+    # Recurso, Maior uso e Mês abrem o formulário do recurso; as células de mês (nr) só filtram (toque na célula com demanda desta safra)
+    def cap_cols(mis):
+        return ([dict(k='rec',l='Recurso',w=170),dict(k='maior',l='Maior uso',t='num',a='r'),dict(k='mes',l='Mês',t='num')]+
+                [dict(k=f'm{i}',l=meses[i][1],t='num',a='r',nr=True) for i in mis])
+    # meses do período de cada safra no calendário (sem interseção, o calendário inteiro): a regra é a capMeses de safra.js, que também
+    # recorta a g_cap_NOVA em tempo de execução; aqui só dimensiona a grade de cada safra fixa pelos dados (revisão SAF, S3.1)
+    CAP_MIS={s['id']:([i for i,(m,_) in enumerate(meses) if s['ini'][:7]<=m<=s['fim'][:7]] or list(range(len(meses)))) for s in D2.SAFRAS}
+    cap_html=''
+    for k in ['S2627','S27SF','S2526','LG2627','NOVA']:
+        g=grid(cap_cols(CAP_MIS.get(k,list(range(len(meses))))),[],edit=dict(m='pick',leafOnly=False),search=False,gid=f'g_cap_{k}',total=False,headtools=False)
+        cap_html+=f'<sc-if value="{H("cap_"+k)}" hint-placeholder-val="{F()}">{g}</sc-if>'
     # ---------- etapa 5 · recursos ----------
     # recursos em duas classes, cada uma com a sua grade: máquinas e implementos × pessoas ('oper')
     # perdas: máquinas usam disponibilidade (%, multiplica); pessoas usam absenteísmo (%, desconta)
@@ -175,7 +205,9 @@ def build():
            [dict(id=r['id'],v={**dict(nome=r['nome'],un=r['un'],jornada=r['jornada']),**({'turnos':r['turnos']} if turnos else {}),perda['k']:r[perda['k']]},s={},p={}) for r in rs],
            edit=dict(m='form',title='Recurso',sub=sub,
                 fields=[dict(k='un',l=unid+' que você tem',t='num',req=True,min=0,max=50),dict(k='jornada',l='Jornada',t='num',req=True,min=1,max=24,u='h/dia')]+fT+
-                       [dict(k=perda['k'],l=perda['l'],t='num',req=True,min=perda['min'],max=perda['max'],u='%',help=perda['ajuda'])]),
+                       [dict(k=perda['k'],l=perda['l'],t='num',req=True,min=perda['min'],max=perda['max'],u='%',help=perda['ajuda']),
+                        dict(k='h1_c',l='Horas de uma unidade no mês de maior uso',ro=True,live=True),dict(k='hs_c',l='Horas na safra no calendário',ro=True,live=True),
+                        dict(k='prev_c',l='Prévia',ro=True,live=True,t='area',help='Prévia desta safra, somando as safras abertas desta fazenda. Ao salvar, todas as safras são recalculadas.')]),
            search=False,gid=gid,total=False)
     g_recp_maq=recp_grid('g_recp_maq',[r for r in D2.RECURSOS if r['id']!='oper'],'Unidades',
                          dict(k='disp',l='Disponibilidade',min=1,max=100,ajuda='Parte do tempo em que a máquina fica apta: desconta manutenção, quebras e espera por peças. A eficiência de campo já está no rendimento; não desconte de novo.'),
@@ -183,11 +215,7 @@ def build():
     g_recp_pes=recp_grid('g_recp_pes',[r for r in D2.RECURSOS if r['id']=='oper'],'Pessoas',
                          dict(k='abs',l='Absenteísmo',min=0,max=90,ajuda='Horas perdidas com faltas, atestados, afastamentos e férias.'),
                          'A capacidade mensal é pessoas × dias úteis × jornada × (1 − absenteísmo). Necessárias = horas da demanda ÷ horas de uma pessoa no mês, arredondado para cima. Dois turnos pedem mais pessoas, não mais horas por pessoa.',False)
-    RCOLS=[dict(k='ind',l='Recurso · indicador',w=190)]+[dict(k=f'm{i}',l=lab,t='num',a='r') for i,(_,lab) in enumerate(meses)]+[dict(k='tot',l='Total',t='num',a='r')]
-    g_res=grid(RCOLS,[],edit=dict(m='pick',leafOnly=False),tree=True,search=False,gid='g_res',total=False,headtools=False,x0={f'R_{r["id"]}':True for r in D2.RECURSOS})
-    g_resd=grid([dict(k='ind',l='Atividade',w=240)]+[dict(k=f'm{i}',l=lab,t='num',a='r',d=1) for i,(_,lab) in enumerate(meses)]+[dict(k='tot',l='Total (h)',t='num',a='r',d=1)],
-                [],edit=dict(m='none'),search=False,gid='g_resd',total=False,headtools=False)
-    # ---------- etapa 6 · demanda ----------
+    # ---------- etapa 4 · demanda de insumos ----------
     # TABELAS-FOCO (5983172395): uma variável por coluna; a árvore grupo → insumo continua. A unidade (kg, L) fica junto da quantidade
     # (decisão do proprietário, 05/10/2026: mais intuitivo e filtrar unidade não gera valor). "1º uso" logo depois do insumo (v3.8)
     g_dem=grid([dict(k='grp',l='Grupo',w=130),dict(k='ins',l='Insumo',w=200),dict(k='uso',l='1º uso',t='num'),dict(k='liq',l='Necessidade líquida',t='num',a='r',w=128),dict(k='falta',l='Falta em',t='num',w=110),
@@ -198,59 +226,65 @@ def build():
        [],edit=dict(m='origin',leafOnly=True,title='Insumo',fields=[dict(k='ins',l='Insumo',t='txt',ro=True),dict(k='un',l='Unidade',t='txt',ro=True)]),tree=True,gid='g_dem',total=True,qf=dict(k='sit',cut=' · ',l='situação'))
     # ---------- JS do processo ----------
     sol0={'S2627':dict(id='SOL-2026-07',at='23/09/2026',itens={n:round(o['liq'],3) for n,o in D2.demanda('S2627').items() if o['liq']>0.001},comp=0)}
-    d2=dict(D2.js_data()); d2['sol']=sol0; d2['talhoes']=TALH; d2['talfaz']=TALFAZ; d2['conj_opts']=conj_opts; d2['hoje']=D2.HOJE_ISO; d2['viavel']=D2.VIAVEL
-    EXTRAJS[0]='const D2 = '+json.dumps(d2,ensure_ascii=False)+';\n'+open(os.path.join(ROOT,'cal01.js')).read()+'\n'+open(os.path.join(ROOT,'safra.js')).read()+'''
-function _safhooks(self){ self.g2after=(gid,rows,r,isNew)=>{ if(gid==='g_saf' && r && String(r.id).indexOf('n')===0 && !self.state.saf){ if(!r.v.estado) r.v.estado='Rascunho'; self.setState({saf:r.id,step:2,g2toast:'Safra criada: '+r.v.nome+'. Defina os cultivos.'}); }
+    d2=dict(D2.js_data()); d2['sol']=sol0; d2['talhoes']=TALH; d2['talfaz']=TALFAZ; d2['talOrd']=TAL_FAZ; d2['culturas']=OCEN.CULTURAS; d2['unMeta']=OCEN.UN_META; d2['cultivares']=OCEN.cultivares(); d2['folga']=OCEN.FOLGA; d2['conj_opts']=conj_opts; d2['hoje']=D2.HOJE_ISO; d2['viavel']=D2.VIAVEL
+    EXTRAJS[0]='const D2 = '+json.dumps(d2,ensure_ascii=False)+';\n'+open(os.path.join(ROOT,'cal01.js')).read()+'\n'+open(os.path.join(ROOT,'ocupacao.js')).read()+'\n'+open(os.path.join(ROOT,'safra.js')).read()+'''
+function _safhooks(self){ self.g2after=(gid,rows,r,isNew)=>{ if(gid==='g_saf' && r && String(r.id).indexOf('n')===0 && !self.state.saf){ if(!r.v.estado) r.v.estado='Rascunho'; self.setState({saf:r.id,step:2,g2toast:'Safra criada: '+r.v.nome+'. Planeje os talhões livres na tabela.'}); }
     if(String(gid).indexOf('g_cult_')===0) cultAfter(self,gid,rows,r,isNew);
-    if(String(gid).indexOf('g_rend_')===0&&r) rendAfter(self,gid,rows,r,isNew); };
-  self.g2live=(gid,k,d)=>(String(gid).indexOf('g_rend_')===0?rendLive(k,d):null);
-  self.g2opts=(gid,k,d,rid)=>(String(gid).indexOf('g_cult_')===0&&k==='plano'?planOpts(d):(String(gid).indexOf('g_rend_')===0&&k==='conj_id'?conjOpts(rid||d.base):null));
+    if(String(gid).indexOf('g_rend_')===0&&r) rendAfter(self,gid,rows,r,isNew);
+    if(String(gid).indexOf('g_recp_')===0&&r) recAfter(self,gid,rows,r); };
+  self.g2live=(gid,k,d)=>(String(gid).indexOf('g_rend_')===0?rendLive(k,d,self):(String(gid).indexOf('g_cult_')===0?cultLive(self,gid,k,d):(String(gid).indexOf('g_recp_')===0?recLive(self,gid,k,d):null)));
+  self.g2draft=(gid,k,d,fm)=>(String(gid).indexOf('g_cult_')===0?cultDraft(self,gid,k,d,fm):null);
+  self.g2formSub=(gid,r,fm)=>(String(gid).indexOf('g_cult_')===0?cultSub(self,gid,r,fm):(String(gid).indexOf('g_recp_')===0?recSub(self):null));
+  self.g2opts=(gid,k,d,rid)=>(String(gid).indexOf('g_cult_')===0&&k==='plano'?planOpts(d):(String(gid).indexOf('g_cult_')===0&&k==='cult'?cultOpts(d):(String(gid).indexOf('g_rend_')===0&&k==='conj_id'?conjOpts(rid||d.base):null)));
   self.g2formActs=(gid,r,fm)=>(String(gid).indexOf('g_cult_')===0?cultActs(self,gid,r):(String(gid).indexOf('g_rend_')===0?rendActs(self,gid,r):null));
-  self.g2check=(gid,rows,r,d,isNew)=>(String(gid).indexOf('g_cult_')===0?cultCheck(self,gid,rows,r,d,isNew):(String(gid).indexOf('g_rend_')===0?(self._conjAntes=(r?String(r.v.conj_id||''):null),rendCheck(self,rows,r,d,isNew)):(gid==='g_saf'?safCheck(d):null)));
-  self.g2pick=(gid,rid,r)=>{ if(gid==='g_op'){ const pid=String(rid).split('_')[0]; self.setState({atv:pid,opv:'mes'}); } if(gid==='g_res'){ const k=String(rid).replace('R_','').replace(/_(d|c|n|u)$/,''); self.setState({rec:(self.state.rec===k?null:k)}); } }; }
+  self.g2check=(gid,rows,r,d,isNew)=>(String(gid).indexOf('g_cult_')===0?cultCheck(self,gid,rows,r,d,isNew):(String(gid).indexOf('g_rend_')===0?(self._conjAntes=(r?String(r.v.conj_id||''):null),opAntes(self,r),rendCheck(self,rows,r,d,isNew)):(String(gid).indexOf('g_recp_')===0?(opAntes(self,r),null):(gid==='g_saf'?safCheck(d):null))));
+  self.g2pick=(gid,rid,r)=>{ if(gid==='g_op') abrirRend(self,rid); if(String(gid).indexOf('g_cap_')===0) abrirRec(self,rid); }; }
 const _EV=EXTRAVALS; EXTRAVALS=function(self,v){ _safhooks(self); _EV(self,v); v.ap_bulk=()=>openApply(self,null); };
-const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)=>rendNova(self,rid); };   // + Outra configuração (etapa 3)'''
+const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)=>rendNova(self,rid); resumoVals(self,v); };   // + Outra configuração e Resumo da safra (etapa 3)'''
     # ---------- corpo ----------
     # UX-ACAO-UNICA-20261003: o cabeçalho do bloco só tem comandos do próprio conteúdo (criar, adicionar, modo de visão); avanço,
     # retorno e a primária da etapa ficam na área de ações única ao fim do conteúdo (engine.area_acoes, preenchida em safra.js)
     acoes=lambda extra='': f'<span style="display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">{extra}</span>'
     nova_safra=f'<button type="button" onClick="{H("g_saf_new")}" style="{E.BTN_ST(False,True)}">Nova safra</button>'   # criar é secundário: a tarefa da etapa é escolher
-    # Adicionar cultivo: uma instância, junto da lista; secundário, e primário só na lista vazia (aí é a única ação da etapa)
-    add_cult=(f'<sc-if value="{H("add_sec")}" hint-placeholder-val="{F()}"><button type="button" data-acao="adicionar" onClick="{H("add_fn")}" style="{E.BTN_ST(False,True)}">Adicionar cultivo</button></sc-if>'
-              f'<sc-if value="{H("add_prim")}" hint-placeholder-val="{F()}"><button type="button" data-acao="adicionar" onClick="{H("add_fn")}" style="{E.BTN_ST(True,True)}">Adicionar cultivo</button></sc-if>')
     s1=bloco('Escolha a safra','Clique na safra para continuar de onde parou.',g_saf,acao=nova_safra)
-    s2=bloco('Cultivos e planos',H('k2'),cult_html,acao=acoes(add_cult),desc_hole=True)
-    s3=bloco('Rendimentos por operação e atividade','Clique numa atividade para ajustar conjunto e rendimento; no formulário, “+ Outra configuração” divide a área dela entre conjuntos diferentes.',rend_html,acao=acoes())   # texto da REND (rendNova)
-    # uma visão por vez, no mesmo lugar: por operação (operação → atividade → cultivo) ou por mês (indicadores × meses)
-    seg=(f'<div role="group" aria-label="Modo de visão" style="display: inline-flex; flex-shrink: 0; padding: 3px; gap: 2px; border-radius: 999px; background: {BG}; border: 1px solid {LINE};">'
-         f'<button type="button" aria-pressed="{H("vis_op")}" onClick="{H("ver_op")}" style="{H("vis_op_st")}">Por operação</button>'
-         f'<button type="button" aria-pressed="{H("vis_mes")}" onClick="{H("ver_mes")}" style="{H("vis_mes_st")}">Por mês</button></div>')
-    filtro=(f'<sc-if value="{H("mat_sel")}" hint-placeholder-val="{F()}"><div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 0 4px 8px; font-size: 12.8px;">'
-            f'<span style="color: {MUTED};">Mostrando só</span><b>{H("mat_nome")}</b><button type="button" onClick="{H("mat_todas")}" style="{_MINI}">Ver todas as operações</button></div></sc-if>')
-    s4=bloco(H('op_titulo'),H('k4'),
-                f'<sc-if value="{H("vis_op")}" hint-placeholder-val="{H("true")}">{g_op}</sc-if><sc-if value="{H("vis_mes")}" hint-placeholder-val="{F()}">{filtro}{g_mat}</sc-if>',
-                acao=acoes(seg),tit_hole=True,desc_hole=True)
-    dias=' · '.join(f'{lab} {D2.DIAS_UTEIS[k]}' for k,lab in meses)
-    # uma visão por vez: classe (máquinas e implementos | pessoas) × modo (parâmetros | por mês)
-    def seg2(aria,a_on,a_go,a_st,a_t,b_on,b_go,b_st,b_t):
-        return (f'<div role="group" aria-label="{aria}" style="display: inline-flex; flex-shrink: 0; padding: 3px; gap: 2px; border-radius: 999px; background: {BG}; border: 1px solid {LINE};">'
-                f'<button type="button" aria-pressed="{H(a_on)}" onClick="{H(a_go)}" style="{H(a_st)}">{a_t}</button>'
-                f'<button type="button" aria-pressed="{H(b_on)}" onClick="{H(b_go)}" style="{H(b_st)}">{b_t}</button></div>')
-    rec_ctl=(f'<div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">'
-             + seg2('Classe de recurso','cl_maq','ver_maq','cl_maq_st','Máquinas e implementos','cl_pes','ver_pes','cl_pes_st','Pessoas')
-             + seg2('Modo de visão dos recursos','vis_par','ver_par','vis_par_st','Parâmetros','vis_rmes','ver_rmes','vis_rmes_st','Por mês') + '</div>')
-    s5=(f'<div style="font-size: 13px;"><span style="{H("k5st")}">{H("k5")}</span></div>'
-        + bloco(H('rec_titulo'),H('rec_sub'),
-                f'<sc-if value="{H("vis_par")}" hint-placeholder-val="{H("true")}"><div style="font-size: 12px; color: {MUTED}; padding: 0 4px 8px;">Dias úteis por mês: {dias}</div>'
-                f'<sc-if value="{H("cl_maq")}" hint-placeholder-val="{H("true")}">{g_recp_maq}</sc-if><sc-if value="{H("cl_pes")}" hint-placeholder-val="{F()}">{g_recp_pes}</sc-if></sc-if>'
-                f'<sc-if value="{H("vis_rmes")}" hint-placeholder-val="{F()}">{g_res}'
-                f'<sc-if value="{H("resd_sel")}" hint-placeholder-val="{F()}"><div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 4px 6px;"><b style="font-size: 14px;">{H("resd_titulo")}</b>'
-                f'<span style="font-size: 12.8px; color: {MUTED};">Atividades que consomem as horas deste recurso em cada mês.</span></div>{g_resd}</sc-if></sc-if>',
-                acao=acoes(rec_ctl),tit_hole=True,desc_hole=True))
-    s6=bloco('Demanda de insumos por grupo',H('k6'),g_dem,desc_hole=True,
+    s2=bloco('Talhões e cultivos',H('k2'),cult_html,desc_hole=True)   # sem botão: planeja-se pela linha do talhão (Planejar ›, Dividir, Vincular ciclo ›)
+    # etapa 3: título com o custo de operação e o link "Resumo da safra"; veredito (role=status) e, fora dele, a linha de capacidade;
+    # g_cap recolhida; linha de filtro (só com recurso × mês escolhido); g_op por último (estica e só a área de dados rola)
+    custo=(f'<span style="display: inline-flex; align-items: baseline; gap: 6px; flex-wrap: wrap; justify-content: flex-end; font-size: 12.8px; color: {MUTED};">'
+           f'<span>Custo de operação <b style="color: {INK};">{H("v3_cop")}</b> · {H("v3_copq")}</span>'
+           f'<button type="button" class="acoes-lnk" data-acao="resumo" onClick="{H("rs_abrir")}" style="min-height: 24px;">Resumo da safra</button></span>')
+    linha_cap=(f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 0 4px 8px;">'
+               f'<sc-for list="{H("v3_atalhos")}" as="at" hint-placeholder-count="1"><button type="button" class="acoes-lnk" data-acao="atalho" aria-label="{H("at.al")}" onClick="{H("at.go")}" style="{H("at.st")}">{H("at.t")}</button></sc-for>'
+               f'<span style="flex-grow: 1;"></span><button type="button" class="acoes-lnk" aria-expanded="{H("v3_capexp")}" onClick="{H("v3_captog")}">{H("v3_capt")}</button></div>')
+    filtro=(f'<sc-if value="{H("v3_fil")}" hint-placeholder-val="{F()}"><div role="status" tabIndex="-1" id="saf-cap-filtro" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 0 4px 8px; font-size: 12.8px;">'
+            f'<span>Mostrando <b>{H("v3_filn")}</b>: {H("v3_filt")}</span><button type="button" onClick="{H("v3_filx")}" style="{_MINI}">Ver todas</button></div></sc-if>')
+    corpo3=(f'<p id="saf-v3-ver" style="margin: 0 4px 8px; font-size: 13.4px; line-height: 1.45;"><span role="status" style="{H("v3_vst")}">{H("v3_ver")}</span></p>'
+            + linha_cap + f'<sc-if value="{H("v3_capab")}" hint-placeholder-val="{F()}"><div id="saf-cap" style="padding-bottom: 10px;">{cap_html}</div></sc-if>' + filtro + g_op)
+    s3=bloco('Operações e recursos','',corpo3,acao=custo)
+    s4=bloco('Demanda de insumos por grupo',H('k6'),g_dem,desc_hole=True,
                 acao=f'<span style="display: inline-flex; align-items: center; gap: 8px;"><sc-if value="{H("sol_link")}" hint-placeholder-val="{F()}"><a href="{H("sol_href")}" style="{_MINI} text-decoration: none;">Abrir em Compra de insumos ›</a></sc-if></span>')
     corpo=''.join(f'<sc-if value="{H("s"+str(i))}" hint-placeholder-val="{H("true") if i==1 else F()}"><div style="display: flex; flex-direction: column; gap: 14px;">{s}</div></sc-if>'
-                  for i,s in enumerate([s1,s2,s3,s4,s5,s6],1)) + E.area_acoes('aa','Ações da etapa')
+                  for i,s in enumerate([s1,s2,s3,s4],1)) + E.area_acoes('aa','Ações da etapa')
+    # ---------- painel: Resumo da safra (§4.3) ----------
+    rs_lin=(f'<div style="display: grid; grid-template-columns: minmax(0,1.2fr) 90px minmax(0,1fr) minmax(0,1fr) minmax(0,1.1fr); gap: 8px; padding: 7px 0; border-top: 1px solid {LINE}; font-size: 12.8px; align-items: baseline;">'
+            f'<b>{H("rl.cult")}</b><span style="text-align: right;">{H("rl.area")}</span><span style="text-align: right;">{H("rl.cop")}</span><span style="text-align: right;">{H("rl.cins")}</span><span style="text-align: right; font-weight: 700;">{H("rl.rha")}</span>'
+            f'<sc-if value="{H("rl.temNota")}" hint-placeholder-val="{F()}"><span style="grid-column: 1 / -1; font-size: 11.8px; color: {MUTED};">{H("rl.nota")}</span></sc-if></div>')
+    EXTRA.append(
+      f'<sc-if value="{H("rs_open")}" hint-placeholder-val="{F()}"><div style="position: fixed; inset: 0; z-index: 60; display: flex; justify-content: flex-end;">'
+      f'<button type="button" aria-label="Fechar" onClick="{H("rs_fechar")}" style="position: absolute; inset: 0; border: 0; background: rgba(21,32,26,.32); cursor: pointer;"></button>'
+      f'<aside role="dialog" aria-label="Resumo da safra" onKeyDown="{H("rs_key")}" style="position: relative; width: 620px; max-width: 100%; height: 100%; overflow-y: auto; background: {SURF}; box-shadow: -12px 0 40px -12px rgba(21,32,26,.35); padding: 22px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px;">'
+      f'<div style="display: flex; gap: 10px; align-items: flex-start;"><h2 style="margin: 0; font-family: {DISP}; font-size: 19px; flex-grow: 1;">Resumo da safra · {H("rs_saf")}</h2><button type="button" aria-label="Fechar" onClick="{H("rs_fechar")}" style="border: 0; background: {BG}; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 18px; color: {MUTED};">×</button></div>'
+      f'<div style="font-size: 11px; font-weight: 800; letter-spacing: .06em; color: {MUTED}; text-transform: uppercase;">Custo por cultura</div>'
+      f'<div style="display: grid; grid-template-columns: minmax(0,1.2fr) 90px minmax(0,1fr) minmax(0,1fr) minmax(0,1.1fr); gap: 8px; font-size: 10.5px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: {MUTED};">'
+      f'<span>Cultura</span><span style="text-align: right;">Área com plano</span><span style="text-align: right;">Custo de operação</span><span style="text-align: right;">Insumos do plano</span><span style="text-align: right;">Custo total R$/ha</span></div>'
+      f'<sc-for list="{H("rs_lin")}" as="rl" hint-placeholder-count="3">{rs_lin}</sc-for>'
+      f'<div style="font-size: 12.5px; color: {MUTED}; line-height: 1.45;">{H("rs_nota")}</div>'
+      f'<div style="font-size: 11px; font-weight: 800; letter-spacing: .06em; color: {MUTED}; text-transform: uppercase; padding-top: 4px;">Trabalho da safra</div>'
+      f'<div style="font-size: 13px; line-height: 1.45;">{H("rs_trab")}</div>'
+      f'<div style="font-size: 11px; font-weight: 800; letter-spacing: .06em; color: {MUTED}; text-transform: uppercase; padding-top: 4px;">Como a conta é feita</div>'
+      f'<ul style="margin: 0; padding-left: 18px; font-size: 12.5px; color: {MUTED}; line-height: 1.5;"><sc-for list="{H("rs_conta")}" as="rc" hint-placeholder-count="3"><li>{H("rc.t")}</li></sc-for></ul>'
+      f'<div style="flex-grow: 1;"></div><div style="display: flex; justify-content: flex-end; padding-top: 6px; border-top: 1px solid {LINE};"><button type="button" onClick="{H("rs_fechar")}" style="{BTN_ST(False,True)}">Fechar</button></div>'
+      f'</aside></div></sc-if>')
     # ---------- painel: aplicar plano ----------
     EXTRA.append(
       f'<sc-if value="{H("ap_open")}" hint-placeholder-val="{F()}"><div style="position: fixed; inset: 0; z-index: 60; display: flex; justify-content: flex-end;">'
@@ -266,7 +300,7 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
       f'<div style="flex-grow: 1;"></div>'
       f'<sc-if value="{H("ap_confirm")}" hint-placeholder-val="{F()}"><div role="alert" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 12.8px; font-weight: 700;">{H("ap_cmsg")}'
       f'<div style="display: flex; gap: 8px;"><button type="button" onClick="{H("ap_back")}" style="{_MINI}">Voltar</button><button type="button" onClick="{H("ap_yes")}" style="{_MINIP}">Confirmar substituição</button></div></div></sc-if>'
-      f'<sc-if value="{H("ap_normal")}" hint-placeholder-val="{H("true")}"><div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};"><button type="button" onClick="{H("ap_cancel")}" style="{BTN_ST(False,True)}">Cancelar</button><button type="button" onClick="{H("ap_apply")}" style="{BTN_ST(True,True)}">Aplicar plano</button></div></sc-if>'
+      f'<sc-if value="{H("ap_normal")}" hint-placeholder-val="{H("true")}"><div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};"><button type="button" onClick="{H("ap_cancel")}" style="{BTN_ST(False,True)}">Cancelar</button><button type="button" onClick="{H("ap_apply")}" style="{BTN_ST(True,True)}">{H("ap_btn")}</button></div></sc-if>'
       f'</aside></div></sc-if>')
     # ---------- painel: atividades locais do cultivo (Gatilho → Atividades → Produtos e doses) ----------
     prod_row=(f'<div style="display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.6fr) 88px 122px 82px 94px 150px; gap: 10px; align-items: center; padding: 6px 0; border-top: 1px solid {LINE}; font-size: 12.5px;">'
@@ -316,7 +350,7 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
             f'<input aria-label="Variedade de {H("r.lab")}" value="{H("r.var")}" onChange="{H("r.s_var")}" readOnly="{H("r.dis")}" style="{H("r.st_var")}">'
             f'<input type="date" aria-label="Plantio de {H("r.lab")}" value="{H("r.plantio")}" onChange="{H("r.s_plantio")}" readOnly="{H("r.dis")}" style="{H("r.st_plantio")}">'
             f'<input aria-label="Meta de {H("r.lab")}" inputMode="decimal" value="{H("r.meta")}" onChange="{H("r.s_meta")}" readOnly="{H("r.dis")}" style="{H("r.st_meta")}">'
-            f'<select aria-label="Unidade da meta de {H("r.lab")}" value="{H("r.unm")}" onChange="{H("r.s_unm")}" disabled="{H("r.dis")}" style="{H("r.st_unm")}"><sc-for list="{H("r.ou")}" as="o" hint-placeholder-count="2"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select>'
+            f'<span data-un="meta" style="font-size: 13px; color: {MUTED}; white-space: nowrap;">{H("r.unm")}</span>'   # unidade de mercado da cultura (DEC-0510-03), sem escolha
             f'<span style="display: flex; flex-direction: column; gap: 3px; min-width: 0;"><select aria-label="Plano agronômico de {H("r.lab")}" value="{H("r.planoId")}" onChange="{H("r.s_plano")}" disabled="{H("r.dis")}" style="{H("r.st_plano")}"><sc-for list="{H("r.op")}" as="o" hint-placeholder-count="2"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select>'
             f'<sc-if value="{H("r.temNota")}" hint-placeholder-val="{F()}"><span style="{H("r.pst")}">{H("r.plano")}</span></sc-if></span>'
             f'<span><sc-if value="{H("r.notAsk")}" hint-placeholder-val="{H("true")}"><button type="button" class="g2del" aria-label="Excluir parcela {H("r.lab")}" title="Excluir parcela" onClick="{H("r.rm")}">×</button></sc-if></span></div>'

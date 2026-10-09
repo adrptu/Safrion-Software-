@@ -1090,7 +1090,8 @@ def area_acoes(pre='aa',rotulo='Ações da etapa'):
     F_='{{false}}'
     return (f'<sc-if value="{h("_has")}" hint-placeholder-val="{F_}"><div class="acoes" role="group" aria-label="{rotulo}" data-acoes="{pre}">'
             f'<sc-if value="{h("_hasNota")}" hint-placeholder-val="{F_}"><p class="acoes-nota" id="{pre}-nota"><span>{h("_nota")}</span>'
-            f'<sc-if value="{h("_hasCtx")}" hint-placeholder-val="{F_}"><button type="button" class="acoes-lnk" data-acao="corrigir" onClick="{h("_ctxFn")}">{h("_ctxT")}</button></sc-if></p></sc-if>'
+            f'<sc-if value="{h("_hasCtx")}" hint-placeholder-val="{F_}"><button type="button" class="acoes-lnk" data-acao="corrigir" onClick="{h("_ctxFn")}">{h("_ctxT")}</button></sc-if>'
+            f'<sc-for list="{h("_lnks")}" as="al" hint-placeholder-count="0"><button type="button" class="acoes-lnk" data-acao="atalho" onClick="{{{{al.fn}}}}">{{{{al.t}}}}</button></sc-for></p></sc-if>'
             f'<div class="acoes-linha">'
             f'<sc-if value="{h("_hasVolta")}" hint-placeholder-val="{F_}"><button type="button" class="acoes-sec" data-acao="{h("_voltaA")}" onClick="{h("_volta")}">{h("_voltaT")}</button></sc-if>'
             f'<span class="acoes-esp"></span>'
@@ -1102,6 +1103,7 @@ G2_CSS=(".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outlin
         # hover dos controles pequenos da grade só onde existe ponteiro com hover (no toque o fundo não fica "grudado")
         "@media (hover:hover){.g2fi:hover{background:#F2F8F4}.g2fb:hover,.g2car:hover{background:#E4E9E5}.g2del:hover{background:#FDE8E6;color:#B42318}}"
         ".g2kid{background:#FBFCFA}.g2flash{background:#E4F3E9}.g2tot{cursor:pointer}"
+        ".g2sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}"   # texto só para leitor de tela (motivo do chip)
         ".g2hb{display:inline-flex;align-items:center;gap:4px;border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#65736A;padding:7px 2px 7px 0;text-align:left;white-space:normal;max-width:104px;line-height:1.2}"
         ".g2fb{border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:10px;font-weight:700;padding:4px 3px;border-radius:6px}"
         ".g2car{width:22px;height:22px;border:0;border-radius:6px;background:transparent;cursor:pointer;font-size:13px;color:#15201A;flex-shrink:0;padding:0}"
@@ -1140,11 +1142,11 @@ _PARTS=(f'<sc-if value="{{{{p.isTxt}}}}" hint-placeholder-val="{{{{false}}}}"><s
         f'<sc-if value="{{{{p.isCn}}}}" hint-placeholder-val="{{{{false}}}}"><span style="{{{{p.st}}}}">{{{{p.t}}}}</span></sc-if>'
         f'<sc-if value="{{{{p.isB}}}}" hint-placeholder-val="{{{{false}}}}"><b>{{{{p.t}}}}</b></sc-if>'
         f'<sc-if value="{{{{p.isMut}}}}" hint-placeholder-val="{{{{false}}}}"><span style="color: {MUTED}; font-size: 12px;">{{{{p.t}}}}</span></sc-if>'
-        f'<sc-if value="{{{{p.isChip}}}}" hint-placeholder-val="{{{{false}}}}"><span style="{{{{p.st}}}}"><span style="{{{{p.dot}}}}"></span>{{{{p.t}}}}</span></sc-if>'
+        f'<sc-if value="{{{{p.isChip}}}}" hint-placeholder-val="{{{{false}}}}"><span title="{{{{p.dica}}}}" style="{{{{p.st}}}}"><span style="{{{{p.dot}}}}"></span>{{{{p.t}}}}<sc-if value="{{{{p.hasDica}}}}" hint-placeholder-val="{{{{false}}}}"><span class="g2sr">: {{{{p.dica}}}}</span></sc-if></span></sc-if>'
         f'<sc-if value="{{{{p.isTag}}}}" hint-placeholder-val="{{{{false}}}}"><span style="display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; color: {MUTED}; border: 1px solid {LINE}; white-space: nowrap;">{{{{p.t}}}}</span></sc-if>'
         f'<sc-if value="{{{{p.isLink}}}}" hint-placeholder-val="{{{{false}}}}"><a href="{{{{p.href}}}}" style="color: {ACC}; font-weight: 700; text-decoration: none;">{{{{p.t}}}}</a></sc-if>'
         f'<sc-if value="{{{{p.isCta}}}}" hint-placeholder-val="{{{{false}}}}"><a class="{{{{p.cls}}}}" href="{{{{p.href}}}}" style="{{{{p.st}}}}">{{{{p.t}}}}</a></sc-if>'
-        f'<sc-if value="{{{{p.isAct}}}}" hint-placeholder-val="{{{{false}}}}"><button type="button" class="{{{{p.cls}}}}" onClick="{{{{p.fn}}}}" style="{{{{p.st}}}}">{{{{p.t}}}}</button></sc-if>'
+        f'<sc-if value="{{{{p.isAct}}}}" hint-placeholder-val="{{{{false}}}}"><button type="button" class="{{{{p.cls}}}}" aria-label="{{{{p.al}}}}" onClick="{{{{p.fn}}}}" style="{{{{p.st}}}}">{{{{p.t}}}}</button></sc-if>'
         f'<sc-if value="{{{{p.isBr}}}}" hint-placeholder-val="{{{{false}}}}"><span style="flex-basis: 100%; height: 0;"></span></sc-if>')
 def _h(x): return '{{'+x+'}}'
 # Unidade junto do valor (decisão do proprietário, 05/10/2026): coluna numérica com unidade fixa no cabeçalho ("Área (ha)") passa a mostrar a
@@ -1221,7 +1223,7 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     hsel=f'<div role="columnheader" style="padding: 6px 4px 6px 12px; display: flex; align-items: center;"><button type="button" aria-label="{H("_selallLab")}" title="{H("_selallLab")}" onClick="{H("_selall")}" style="border: 1px solid {LINE}; background: {SURF}; width: 16px; height: 16px; border-radius: 4px; cursor: pointer; padding: 0;"></button></div>' if sel else ''
     hdel=f'<div role="columnheader"></div>' if dele else ''
     head=(f'<div role="row" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; background: {BG}; border-radius: 0;">{hsel}'
-          f'<sc-for list="{H("_head")}" as="h" hint-placeholder-count="{len(cols)}"><div role="columnheader" class="{_h("h.cls")}" data-un="{_h("h.un")}" style="{_h("h.st")} padding: 0 4px 0 8px;">'
+          f'<sc-for list="{H("_head")}" as="h" hint-placeholder-count="{len(cols)}"><div role="columnheader" class="{_h("h.cls")}" data-un="{_h("h.un")}" title="{_h("h.tt")}" style="{_h("h.st")} padding: 0 4px 0 8px;">'
           + (f'<button type="button" class="g2hb" onClick="{_h("h.sort")}" aria-label="{_h("h.sortLabel")}">{_h("h.l")} <span aria-hidden="true" style="{_h("h.astyle")} font-size: 9px;">{_h("h.arrow")}</span></button>'
              f'<button type="button" class="g2fb" onClick="{_h("h.fmenu")}" aria-label="{_h("h.flabel")}" title="{_h("h.flabel")}" style="color: {_h("h.fcolor")};">▾{_h("h.fil")}</button>' if headtools else
              f'<span class="g2hb" style="cursor: default;">{_h("h.l")}</span>')
@@ -1272,7 +1274,7 @@ def _g2form(gid):
             f'<label for="{_h("f.fid")}" style="font-size: 12px; font-weight: 600; color: {MUTED};">{_h("f.l")}</label><div style="display: flex; align-items: center; gap: 8px;">'
             f'<sc-if value="{_h("f.isSel")}" hint-placeholder-val="{{{{false}}}}"><select id="{_h("f.fid")}" value="{_h("f.v")}" onChange="{_h("f.set")}" disabled="{_h("f.dis")}" style="{_h("f.ist")}"><sc-for list="{_h("f.opts")}" as="o" hint-placeholder-count="2"><option value="{_h("o.v")}">{_h("o.t")}</option></sc-for></select></sc-if>'
             f'<sc-if value="{_h("f.isMulti")}" hint-placeholder-val="{{{{false}}}}"><div style="display: flex; flex-wrap: wrap; gap: 6px;"><sc-for list="{_h("f.mopts")}" as="mo" hint-placeholder-count="3"><label style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border: 1px solid {LINE}; border-radius: 999px; font-size: 12.5px; cursor: pointer;"><input type="checkbox" checked="{_h("mo.on")}" disabled="{_h("mo.dis")}" onChange="{_h("mo.tog")}" style="accent-color: {ACC};">{_h("mo.t")}</label></sc-for></div></sc-if>'
-            f'<sc-if value="{_h("f.isTxt")}" hint-placeholder-val="{{{{true}}}}"><input id="{_h("f.fid")}" type="{_h("f.type")}" value="{_h("f.v")}" onChange="{_h("f.set")}" readOnly="{_h("f.dis")}" style="{_h("f.ist")}"></sc-if>'
+            f'<sc-if value="{_h("f.isTxt")}" hint-placeholder-val="{{{{true}}}}"><input id="{_h("f.fid")}" type="{_h("f.type")}" inputMode="{_h("f.im")}" value="{_h("f.v")}" onChange="{_h("f.set")}" readOnly="{_h("f.dis")}" style="{_h("f.ist")}"></sc-if>'
             f'<sc-if value="{_h("f.isArea")}" hint-placeholder-val="{{{{false}}}}"><textarea id="{_h("f.fid")}" value="{_h("f.v")}" onChange="{_h("f.set")}" readOnly="{_h("f.dis")}" style="{_h("f.ist")} min-height: 64px; resize: vertical;"></textarea></sc-if>'
             f'<sc-if value="{_h("f.hasU")}" hint-placeholder-val="{{{{false}}}}"><span style="font-size: 12.5px; color: {MUTED}; white-space: nowrap;">{_h("f.u")}</span></sc-if></div>'
             f'<sc-if value="{_h("f.err")}" hint-placeholder-val="{{{{false}}}}"><span role="alert" style="font-size: 12px; font-weight: 700; color: {RED};">{_h("f.errMsg")}</span></sc-if>'

@@ -53,7 +53,7 @@ try:
     J("window.__errs=[]; window.addEventListener('error',e=>window.__errs.push(String(e.message)));")
     abrir('Safra 2026/27')
     # ---------- A · etapa 6: ordenar por 1º uso ----------
-    etapa(6); clk('Expandir tudo'); sortby('1º uso')
+    etapa(4); clk('Expandir tudo'); sortby('1º uso')
     rs = J(ROWS); grupos = [x['t'] for x in rs if not x['kid'] and not x['t'].startswith('Total')]
     dg = datas(grupos)
     chk('A · grupos em ordem de calendário (crescente)', dg == sorted(dg) and grupos[0].startswith(('Adjuvantes', 'Herbicidas')) and grupos[1].startswith(('Adjuvantes', 'Herbicidas')), [g.split(' ')[0] + ' ' + re.search(r'\d{2}/\d{2}/\d{4}', g)[0] for g in grupos])

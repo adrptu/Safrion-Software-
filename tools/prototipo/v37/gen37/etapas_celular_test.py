@@ -103,7 +103,7 @@ c=None
 NOMES={'CMP':['Escolha a safra','Confira a demanda','Solicite cotações','Compare propostas','Aprove a compra','Acompanhe a entrega'],
        'SAF':['Escolha a safra'],'PA':['Escolha o plano'],'EST':['Confira recebimentos'],'IR-02':['Confira a necessidade','Programe a irrigação'],'MA-01':['Confira os ativos']}
 GUIADO=('CMP','SAF','PA')   # progresso informativo; EST, IR e MA são telas/seções de trabalho paralelo (navegação, sem número de etapa)
-ATUAL={'CMP':(1,6),'SAF':(1,6),'PA':(1,3),'EST':(1,6),'IR-02':(2,4),'MA-01':(1,5)}
+ATUAL={'CMP':(1,6),'SAF':(1,4),'PA':(1,3),'EST':(1,6),'IR-02':(2,4),'MA-01':(1,5)}
 P8=['CMP','SAF','PA','EST','OS','IR-02','MA-01','AG-07']
 CLK="""((t,root)=>{const r=root?document.querySelector(root):document; if(!r) return 'SEM RAIZ'; const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...r.querySelectorAll('button,a,label')].filter(e=>e.getClientRects().length); const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok';})"""
 try:

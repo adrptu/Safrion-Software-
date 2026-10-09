@@ -4,3 +4,7 @@
 - `etapa-2-talhoes/`: pedido do proprietário (05/10/2026) "não faz sentido o botão adicionar cultivo…". A etapa 2 lista todos os talhões ativos das fazendas da safra (inclui o B1) com a situação no período (planejado, perene, ocupado por outra safra, a conferir, livre), por um serviço único de ocupação; sem "Adicionar cultivo". Trava só onde a data é certa (área acima do talhão, lavoura plantada até o ciclo mínimo, perene, colheita real); sobreposição só prevista vira pendência visível. 30 achados de revisão adversarial aplicados; scripts em `verificacao/` (1.200 salvamentos no teste de propriedades, sem falha).
 
 Rótulo: **especificado**. Autor: Claude. Revisor: Codex.
+
+Implementação no protótipo (branch `claude/v44-saf`, autor Claude, revisão do Codex pendente): etapa 2 com todos os talhões e o
+serviço único de ocupação; etapa única 3-4-5 com veredito, capacidade por mês, operações e os formulários Rendimento e Recurso;
+processo com 4 etapas e endereços por nome (`passo=`). Testes e limitações na mensagem de cada commit.
