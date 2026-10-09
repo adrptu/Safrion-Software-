@@ -185,10 +185,10 @@ function prLoteProx(c,L,S){ if(S.esgotado) return {t:'sem saldo · rastreio guar
   return {t:prCmp(S.disp,0)>0?'disponível para venda':'todo reservado'}; }
 function prPedRow(c,p){ const cu=p.cultura; const U=x=>prEstTxt(cu,x); const rs=prResPed(c,p.id); const res=prSoma(rs.map(r=>r.kg)); const falta=prFalta(c,p); const st=prSitPed(c,p);
   const nx=st.t==='Em risco'?('expedição impedida: '+st.imp.map(r=>r.lote).join(', ')):(st.t==='Entregue'?'entregue':(prCmp(falta,0)>0?(p.tipo==='futura'?'oferta da '+(p.sem?prSemTxt(p.sem):'safra')+' · reservar quando houver lote':'Reservar lote · '+prQuem('com')):'aguardar expedição'));
-  return {id:p.id,ro:true,v:{ped:p.id,prod:p.prod,tipo:p.tipo==='futura'?'Futura':'Pronta entrega',qtd:p.qtd,res,falta,sit:st.t},
-    s:{ped:p.id+' '+p.cliente,prod:p.prod,tipo:(p.tipo==='futura'?'Futura':'Pronta entrega')+' · '+p.janela,qtd:U(p.qtd),res:U(res),falta:U(falta),sit:st.t+' · '+nx},
+  return {id:p.id,ro:true,v:{ped:p.id,prod:p.prod,tipo:p.tipo==='futura'?'Futura':'Pronta entrega',qtd:p.qtd||0,res,falta,sit:st.t},
+    s:{ped:p.id+' '+p.cliente,prod:p.prod,tipo:(p.tipo==='futura'?'Futura':'Pronta entrega')+' · '+p.janela,qtd:prQtdTxt(p),res:U(res),falta:U(falta),sit:st.t+' · '+nx},
     p:{ped:[{k:'b',t:p.id},{k:'mut',t:' · '+p.cliente}],prod:[{k:'txt',t:p.prod}],tipo:[{k:'txt',t:p.tipo==='futura'?'Futura':'Pronta entrega'},{k:'br'},{k:'mut',t:p.janela+(p.obs?' · '+p.obs:'')}],
-       qtd:prTx(U(p.qtd)),res:prTx(U(res)),falta:[{k:'b',t:U(falta)}],sit:[{k:'chip',t:st.t,c:st.c},{k:'br'},{k:'mut',t:nx}]}}; }
+       qtd:prTx(prQtdTxt(p)),res:prTx(U(res)),falta:[{k:'b',t:U(falta)}],sit:[{k:'chip',t:st.t,c:st.c},{k:'br'},{k:'mut',t:nx}]}}; }
 function prFormReserva(self,c,L,p,fixo,lotes){ /* fixo: 'lote' (vem do lote: escolhe o pedido) ou 'ped' (vem do pedido: escolhe o lote); lotes: lista já filtrada (Contratos e pedidos, R-C05) */
   const P=prP(c); let opcPed=[], opcLot=[];
   if(fixo==='lote'){ opcPed=prPedidosPara(c,L); p=P.pedidos[prFval(self,'ped',(opcPed[0]||{}).id||'')]||opcPed[0]||null; }
@@ -206,9 +206,9 @@ function prFormReserva(self,c,L,p,fixo,lotes){ /* fixo: 'lote' (vem do lote: esc
 function prPanPed(self,c,p){ const P=prP(c); const cu=p.cultura; const U=x=>prEstTxt(cu,x); const st=prSitPed(c,p); const falta=prFalta(c,p); const cx=self.state.pr_cx;
   const rs=Object.values(P.reservas).filter(r=>r.pedido===p.id).map(r=>{ const L=P.lotes[r.lote]; const imp=r.st==='Ativa'&&L&&prSaldos(c,L).q!=='Liberado';
     return {c:[[r.id,'b'],r.lote,U(r.kg),r.st,imp?['Expedição impedida','red']:'',r.canc?'motivo: '+r.canc.motivo:''].filter(Boolean),a:r.st==='Ativa'?{t:'Cancelar reserva',go:()=>self.setState({pr_cx:r.id,pr_form:null,pr_err:''})}:null}; });
-  let ofTxt=''; if(p.tipo==='futura'&&p.sem){ const of=prOfertaSem(c,p.prod,p.sem); ofTxt='Oferta publicada da '+prSemTxt(p.sem)+': '+U(of.pub)+' · vendas futuras '+U(of.futKg)+' · oferta livre '+U(of.livre)+(prCmp(of.livre,0)<0?' (déficit)':''); }
+  let ofTxt=''; if(p.tipo==='futura'&&p.sem){ const of=prOfertaSem(c,p.prod,p.sem); ofTxt='Oferta publicada da '+prSemTxt(p.sem)+': '+U(of.pub)+' · vendas futuras '+U(of.futKg)+' · oferta livre '+(of.livre===null?'suspensa (saca a conferir)':U(of.livre)+(prCmp(of.livre,0)<0?' (déficit)':'')); }
   const PPx={title:p.id+' · '+p.cliente,chip:[st.t,st.c],sub:p.prod+' · '+(p.tipo==='futura'?'venda futura':'pronta entrega')+' · '+p.janela+(p.ref?' · '+p.ref:''),
-    kv:[{l:'Quantidade',v:U(p.qtd)},{l:'Expedido',v:U(prExpedido(c,p.id))},{l:'Reservado',v:U(prSoma(prResPed(c,p.id).map(r=>r.kg)))},{l:'Falta',v:U(falta)},{l:'Destino',v:PRDC.dest[p.dest||'MI-BR']||p.dest},{l:'Observação',v:p.obs||'—'}],
+    kv:[{l:'Quantidade',v:prQtdTxt(p)},{l:'Expedido',v:U(prExpedido(c,p.id))},{l:'Reservado',v:U(prSoma(prResPed(c,p.id).map(r=>r.kg)))},{l:'Falta',v:U(falta)},{l:'Destino',v:PRDC.dest[p.dest||'MI-BR']||p.dest},{l:'Observação',v:p.obs||'—'}],
     next:ofTxt||(st.t==='Em risco'?'Expedição impedida: o lote reservado deixou de ser apto. '+prQuem('qual')+' confere; '+prQuem('com')+' troca o lote ou cancela a reserva.':(prCmp(falta,0)>0?'Reservar lote apto para cobrir '+U(falta)+'.':'Coberto: aguardar a expedição.')),nred:st.t==='Em risco',
     secs:[{t:'Reservas',rows:rs,vazio:'Nenhuma reserva.'}],err:self.state.pr_err};
   if(cx){ PPx.form={t:'Cancelar '+cx,h:'O motivo fica no histórico; o disponível do lote volta.',fields:[prFld(self,'mot','Motivo do cancelamento',{t:'txt',im:'text',ph:'ex.: cliente adiou a retirada'})]};

@@ -48,6 +48,9 @@ def catalogo():
                 motivos=['Maturação avançada', 'Avaria no transporte', 'Fora do padrão contratado', 'Quantidade a mais'])
 
 
+AMB = 'VE-05 (oculto): "%s · sc 50 kg"; Colheita D-19 contou sc 60 kg (pergunta 4 ao proprietário)'
+
+
 def completar(seed):
     """Semente §6.2-§6.3 (contas em docs/comercial/verificacao/contas.py). Quantidades na base (kg); preço por unidade comercial."""
     from areas import comercial as CM
@@ -62,13 +65,19 @@ def completar(seed):
     }
     for k, x in com.items():
         ped[k].update(x, d='2026-09-15', at='09:00', quem=QUEM, chave='SEM-' + k, imp='')
+    # A-17 (Codex 6070584991; DEC-0510-03 dimensional): cada venda guarda a quantidade na unidade do contrato (qc), a massa dessa unidade (fat)
+    # e a origem. Mamão: kg (fat 1). Soja do CT-201 (PV-030): o VE-05 oculto diz "sc 50 kg" e a Colheita (D-19) contou 60 kg; a semente não
+    # decide: fica ambígua (fatAmb, qtd sem kg) até alguém registrar a massa com a fonte (comConverterSaca)
+    for k in ('PV-036', 'PV-037', 'PV-038'):
+        ped[k].update(qc=ped[k]['qtd'], un='kg', fat='1', fatOrig='unidade da cultura no registro: kg')
+    ped['PV-030'].update(qc=4000, un='sc', fat=None, qtd=None, fatAmb=['50', '60'], fatOrig=AMB % 'Soja 25/26')
     soja = dict(prod='Soja em grão', cultura='Soja', classe='Padrão', saf='2026/27', tipo='futura', janela='safra 2026/27', dest='MI-BR', ini='', fim='',
-                d='2026-09-15', at='09:00', quem=QUEM, imp='')
-    ped['CT-203'] = dict(soja, id='CT-203', cliente='Coop Grão Sul', qtd=CM.CT203 * 60, preco='132.00', natureza='Venda', cond='À vista na entrega',
+                d='2026-09-15', at='09:00', quem=QUEM, imp='', un='sc', fat=None, fatAmb=['50', '60'], fatOrig=AMB % 'Soja 26/27')
+    ped['CT-203'] = dict(soja, id='CT-203', cliente='Coop Grão Sul', qtd=None, qc=CM.CT203, preco='132.00', natureza='Venda', cond='À vista na entrega',
                          modal='retira', local='Armazém Sede (FOB)', chave='SEM-CT-203')
-    ped['CRE-0095'] = dict(soja, id='CRE-0095', cliente=CM.CPR['contraparte'], qtd=CM.CPR['sc'] * 60, preco='118.84', natureza='CPR', cond='Liquidação em produto',
+    ped['CRE-0095'] = dict(soja, id='CRE-0095', cliente=CM.CPR['contraparte'], qtd=None, qc=CM.CPR['sc'], preco='118.84', natureza='CPR', cond='Liquidação em produto',
                            modal='retira', local='Armazém Sede (FOB)', chave='SEM-CRE-0095', obs='R$ 820.000 em defensivos · equivalente R$ 118,84/sc (GE-08)')
-    ped['BT-090'] = dict(soja, id='BT-090', cliente='Fertisul', qtd=CM.BT['sc'] * 60, preco='%.2f' % CM.BT['eq'], natureza='Barter', cond='Liquidação em produto',
+    ped['BT-090'] = dict(soja, id='BT-090', cliente='Fertisul', qtd=None, qc=CM.BT['sc'], preco='%.2f' % CM.BT['eq'], natureza='Barter', cond='Liquidação em produto',
                          modal='retira', local='Armazém Sede (FOB)', chave='SEM-BT-090', obs='barter de insumos 26/27 (GE-08)')
     for r in P['reservas'].values():
         r.setdefault('kg0', r['kg']); r.setdefault('exp', 0)

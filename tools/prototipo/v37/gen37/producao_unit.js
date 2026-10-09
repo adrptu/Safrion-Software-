@@ -123,13 +123,20 @@ function OSX(c, id, tal, etapa, ap, tipo, ins) { c.ordens[id] = { id, tipo: tipo
   ok('U07g Com avaria → Em inspeção (dono Qualidade); Liberar lote pela Qualidade → Liberado', S3.q === 'Em inspeção' && /Qualidade/.test(S3.dono) && !l3.erro && S3b.q === 'Liberado', [S3, l3.erro, S3b.q]);
   c3.ordens['OS-0505'].etapa = 'Canceladas'; ok('U07h colheita sem ordem liberada (O.S. cancelada) → Em inspeção', prSaldos(c3, c3.producao.lotes[r3.L.id]).q === 'Em inspeção', prSaldos(c3, c3.producao.lotes[r3.L.id])); }
 
+/* Comercial A-17 (Codex 6070584991): a saca dos contratos de soja legados (PV-030 do CT-201, CT-203, CRE-0095, BT-090) está ambígua na semente
+   (VE-05 oculto: sc 50 kg; Colheita D-19: 60 kg) e nada é convertido em silêncio. Os casos que medem falta e oferta registram antes a massa de
+   60 kg com a fonte, pelo mesmo comando da tela (comConverterSaca) */
+function SACA60(c, ids) { (ids || ['PV-030', 'CT-203', 'CRE-0095', 'BT-090']).forEach(id => { const r = MUD(c, x => comConverterSaca(x, { venda: id, fat: '60', fonte: 'Contrato ' + id + ' (teste)', ator: 'Ana', chave: 'T-SACA-' + id })); if (r.erro) throw new Error(r.erro); }); return c; }
+
 // ---- U08 · saldos do L10-031 (AC-09) ----
 { const c = NOVO(); const S = prSaldos(c, c.producao.lotes['L10-031']); const T = x => prEstTxt('Soja', x);
   ok('U08 L10-031: físico 38.420 sc · bloqueado 0 · apto 38.420 · reservado 3.875 · disponível 34.545 sc', T(S.fis) === '38.420 sc' && S.blq === 0 && T(S.apto) === '38.420 sc' && T(S.res) === '3.875 sc' && T(S.disp) === '34.545 sc', S);
-  ok('U08b PV-030: falta 7.500 kg depois da RS-0001 (4.000 sc = 240.000 kg)', prFalta(c, c.producao.pedidos['PV-030']) === 7500, prFalta(c, c.producao.pedidos['PV-030'])); }
+  /* expectativa mudada no Comercial (A-17): na semente a falta do PV-030 fica suspensa (saca a conferir); com 60 kg registrados, 7.500 kg */
+  const s0 = prSitPed(c, c.producao.pedidos['PV-030']).t; SACA60(c, ['PV-030']);
+  ok('U08b PV-030: na semente "Saca a conferir" (falta suspensa); com a saca de 60 kg registrada, falta 7.500 kg depois da RS-0001 (4.000 sc = 240.000 kg)', s0 === 'Saca a conferir' && prFalta(c, c.producao.pedidos['PV-030']) === 7500, [s0, prFalta(c, c.producao.pedidos['PV-030'])]); }
 
 // ---- U09 · reserva: recusas (AC-10) ----
-{ const c = NOVO(); const e1 = MUD(c, x => prReservar(x, { pedido: 'PV-036', lote: 'L39-131', kg: 1000, ator: 'Ana' }));
+{ const c = SACA60(NOVO(), ['PV-030']); const e1 = MUD(c, x => prReservar(x, { pedido: 'PV-036', lote: 'L39-131', kg: 1000, ator: 'Ana' }));
   ok('U09a lote Em processo (CAR0: mistura LM-39-01) não reserva', /não está apto/.test(e1.erro || '') && /Em processo/.test(e1.erro), e1);
   const e2 = MUD(c, x => prReservar(x, { pedido: 'PV-030', lote: 'L10-031', kg: 7501, ator: 'Ana' }));
   ok('U09b acima da falta do pedido (7.500 kg) é recusado', /Acima da falta/.test(e2.erro || ''), e2);
@@ -149,13 +156,22 @@ function OSX(c, id, tal, etapa, ap, tipo, ins) { c.ordens[id] = { id, tipo: tipo
   ok('U09g venda futura (PV-038) aceita reserva de lote apto (R-15)', !k7.erro && prSaldos(c, c.producao.lotes['L39-133']).disp === 9050, k7); }
 
 // ---- U10 · venda futura não muda o físico; oferta livre (AC-11, K10, K14) ----
-{ const c = NOVO(); const of = prOfertaSafra(c, 'Soja em grão', '2026/27'); const T = x => prEstTxt('Soja', x);
-  /* expectativa mudada no Comercial P1 (D-C04): CT-203, CRE-0095 e BT-090 saem do catálogo e entram no estado como vendas futuras; a oferta livre é a mesma */
+{ const c = NOVO(); const of0 = prOfertaSafra(c, 'Soja em grão', '2026/27'); SACA60(c); const of = prOfertaSafra(c, 'Soja em grão', '2026/27'); const T = x => prEstTxt('Soja', x);
+  /* expectativa mudada no Comercial P1 (D-C04): CT-203, CRE-0095 e BT-090 saem do catálogo e entram no estado como vendas futuras; a oferta livre é a mesma.
+     Comercial A-17: na semente a oferta livre fica suspensa (null) até registrar a saca dos três contratos; com 60 kg, 48.280 sc */
+  ok('U10a0 soja 26/27 na semente: oferta livre suspensa (saca a conferir de CT-203, CRE-0095 e BT-090), nunca convertida pela unidade atual', of0.livre === null && of0.amb.join() === 'CT-203,CRE-0095,BT-090' && T(of0.pub) === '68.180 sc', of0);
   ok('U10a soja 26/27: oferta publicada 68.180 sc; vendas futuras do estado (CT-203, CRE-0095, BT-090) 19.900 sc; oferta livre 48.280 sc', T(of.pub) === '68.180 sc' && T(of.futKg) === '19.900 sc' && T(of.livre) === '48.280 sc' && of.fut.map(p => p.id).sort().join() === 'BT-090,CRE-0095,CT-203' && of.ob === undefined, [T(of.pub), T(of.futKg), T(of.livre), of.fut.map(p => p.id)]);
   ok('U10b o L10-031 continua com 34.545 sc disponíveis (a venda futura não desconta o físico)', T(prSaldos(c, c.producao.lotes['L10-031']).disp) === '34.545 sc');
   const s41 = prOfertaSem(c, MAM, '2026-W41'); ok('U10c S41 sem versão publicada: PV-038 aparece como déficit de 30.000 kg', s41.livre === -30000 && !s41.tem, s41);
   const pb = MUD(c, x => prPublicar(x, 'lg19', 'Ana (agrônoma)')); const s41b = prOfertaSem(c, MAM, '2026-W41');
   ok('U10d publicada a v2 do Pivô 19: oferta livre S41 = 57.337,908 kg (K14)', !pb.erro && s41b.livre === 57337.908 && pb.v.v === 2, [pb.erro, s41b]); }
+
+// ---- U10e · Comercial A-17: o texto do compromisso usa a massa gravada nele, nunca a do cadastro atual (Estoque e VE-04 oculto, sem comercial.js) ----
+{ const c = NOVO(); const ct = c.producao.pedidos['CT-203']; const t0 = prQtdTxt(ct);
+  const r = MUD(c, x => comConverterSaca(x, { venda: 'CT-203', fat: '50', fonte: 'Contrato CT-203 (teste)', ator: 'Ana', chave: 'T-50' })); const ct2 = c.producao.pedidos['CT-203'];
+  const m0 = PRDC.un['Soja'].massa; let t2 = ''; try { PRDC.un['Soja'].massa = 50; t2 = prQtdTxt(ct2); } finally { PRDC.un['Soja'].massa = m0; }
+  ok('U10e CT-203: semente "12.000 sc (saca de 50 ou 60 kg a conferir)"; com 50 kg registrados, "12.000 sc 50 kg" (600.000 kg); com o cadastro da soja em 50 kg, "12.000 sc"; PV-036 continua "10.000 kg"',
+     t0 === '12.000 sc (saca de 50 ou 60 kg a conferir)' && !r.erro && ct2.qtd === 600000 && prQtdTxt(ct2) === '12.000 sc 50 kg' && t2 === '12.000 sc' && prQtdTxt(c.producao.pedidos['PV-036']) === '10.000 kg', [t0, r.erro, ct2.qtd, prQtdTxt(ct2), t2]); }
 
 // ---- U11 · contagem não publica; publicar congela só as semanas não começadas (AC-12, K08) ----
 { const c = NOVO(); const r0 = prRascunho(c, 'lg19');
