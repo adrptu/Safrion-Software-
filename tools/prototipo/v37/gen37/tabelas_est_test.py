@@ -64,7 +64,7 @@ try:
     J("[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Salvar').click()"); time.sleep(.6)
     # trilha com movimentos de vários itens: OS-0430 liberada, 3 itens entregues e confirmados no app, turno de 5 ha fechado (consumo de 3 itens em L)
     J("""(()=>{const X=window.__cen; with(X){ cenMudar(null,c=>cenLiberar(c,'OS-0430')); const c0=cenGet(); const rq=Object.keys(c0.reqs).find(k=>c0.reqs[k].os==='OS-0430');
-      cenMudar(null,c=>cenEntregar(c,rq,'Glifosato 480',320,'Marcos')); cenMudar(null,c=>cenEntregar(c,rq,'2,4-D 806',160,'Marcos')); cenMudar(null,c=>cenEntregar(c,rq,'Óleo mineral',80,'Marcos'));
+      cenMudar(null,c=>cenEntregar(c,rq,'Glifosato 480',320,'Marcos','Rui')); cenMudar(null,c=>cenEntregar(c,rq,'2,4-D 806',160,'Marcos','Rui')); cenMudar(null,c=>cenEntregar(c,rq,'Óleo mineral',80,'Marcos','Rui'));
       cenMudar(null,c=>cenConfirmarRecebimento(c,rq)); cenMudar(null,c=>cenIniciarTurno(c,'OS-0430')); return cenMudar(null,c=>cenFecharTurno(c,5,1)).erro||''; } })()""")
     c.goto(f'http://127.0.0.1:{p}/EST.dc.html', 1.4); J("window.__e=[];addEventListener('error',e=>window.__e.push(String(e.message)))")
     for i in range(1, 7):

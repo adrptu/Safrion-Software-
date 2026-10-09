@@ -79,7 +79,7 @@ try:
     for val,exp in [('0','Informe a área a dispensar (maior que 0 ha).'),('abc','Informe a área a dispensar (maior que 0 ha).'),('71','Máximo 70 ha: é o saldo da ordem.'),('-5','Informe a área a dispensar (maior que 0 ha).')]:
         setv('aside[role=dialog] input[aria-label="Área a dispensar em hectares"]',val); btn('Confirmar dispensa'); a=J("[...document.querySelectorAll('aside[role=dialog] [role=alert]')].map(x=>x.innerText).join(' | ')")
         chk(f'dispensa {val!r}: {exp}', exp in (a or ''), a)
-    setv('aside[role=dialog] input[aria-label="Área a dispensar em hectares"]','70'); setv('aside[role=dialog] textarea[aria-label="Motivo da dispensa"]','Faixa já tratada'); marca('Validação agronômica'); btn('Confirmar dispensa')
+    setv('aside[role=dialog] input[aria-label="Área a dispensar em hectares"]','70'); setv('aside[role=dialog] textarea[aria-label="Motivo da dispensa"]','Faixa já tratada'); btn('Confirmar dispensa')
     tt=toast(); t=pan(); print('   toast disp:', tt)
     chk('dispensa até zerar o saldo: toast pede conferência', 'saldo 0 ha' in tt and 'Envie a ordem para conferência' in tt, tt)
     chk('saldo 0: próximo passo vira Enviar para conferência', temb('Enviar para conferência') and not temb('Registrar apontamento') and not temb('Dispensar saldo'), t[:400])
@@ -90,7 +90,7 @@ try:
     fechar(); l=linha('OS-0421'); print('   linha:', l)
     kanban(); print('   cartao:', cartao('OS-0421')); lista()
     # 7) dispensa decimal
-    reload(); abrir('OS-0421'); btn('Dispensar saldo'); setv('aside[role=dialog] input[aria-label="Área a dispensar em hectares"]','10,5'); setv('aside[role=dialog] textarea[aria-label="Motivo da dispensa"]','x'); marca('Validação agronômica'); btn('Confirmar dispensa')
+    reload(); abrir('OS-0421'); btn('Dispensar saldo'); setv('aside[role=dialog] input[aria-label="Área a dispensar em hectares"]','10,5'); setv('aside[role=dialog] textarea[aria-label="Motivo da dispensa"]','x'); btn('Confirmar dispensa')
     tt=toast(); chk('dispensa decimal 10,5 aceita', 'Dispensados 10,5 ha' in tt and 'saldo 149,5 ha' in tt, tt)
     t=pan(); print('   acum dec:', t[t.find('Realizado 190'):][:90])
     fechar(); print('   linha dec:', linha('OS-0421')); kanban(); print('   cartao dec:', cartao('OS-0421')); lista()

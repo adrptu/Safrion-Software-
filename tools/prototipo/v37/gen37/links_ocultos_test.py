@@ -13,6 +13,8 @@ cham=sorted(f for f,s in src.items() if re.search(r'\bosc_liberar\(',s))
 ok('E1 em todo o código de produto, só a O.S. e o Mapa chamam osc_liberar', cham==['areas/inicio.py','areas/processo_os.py'], cham)
 cl=sorted(f for f,s in src.items() if re.search(r'\bcenLiberar\(c',s) and not f.endswith('cenario.js'))
 ok('E1b só osc_liberar (processo_os) chama cenLiberar: nenhum atalho libera sem gravar CMD-42/CMD-06', cl==['areas/processo_os.py'], cl)
+ef=[(f,len(re.findall(r'\bosc_libEfeito\(',s))) for f,s in src.items() if re.search(r'\bosc_libEfeito\(',s)]   # CTL-3: definição + 2 chamadas
+ok('E1c o efeito sem o registro de quem decide (osc_libEfeito) só é chamado por osc_liberar e pela prévia osLibErro (cópia)', ef==[('areas/processo_os.py',3)], ef)
 seed=cenario.seed()['ordens']
 ok('E2 nenhuma ordem de beneficiamento ou manutenção em A liberar no cenário (OB-0104 Encerradas)', not [k for k,o in seed.items() if re.match(r'O[BM]-',k) and o['etapa']=='A liberar'])
 ops={a['op'] for p in P._nova_ordem_dados()['planos'].values() for a in p['atv']}
@@ -31,7 +33,8 @@ ok('L1 nenhum elo do escopo (PL-04/PL-05/PL-05det, CA-02, CO-06det, GE-07, MB-05
 RESIDUAL={  # por PAR: um elo novo, mesmo numa tela já listada, quebra o teste
  **{x:'índice do protótipo: aponta de propósito para módulos ocultos' for x in p('Main','AG-02','BO-02','CA-01','CA-04','CF-01','CO-01','CO-06','GE-01','IN-01','LO-01','LO-02','ON-01','PL-01','PL-05','PT-01','SU-01','SU-07','VE-01')},
  **{x:'vivo (cenário ou MIP), só falta pôr na página visível (build.py VIS_ROWS)' for x in p('MB-01','MB-02det','MB-03x-recibo','MB-06')|p('MB-02','MB-02det','MB-03x-recibo')
-    |p('MB-03','MB-02det','MB-03x-recibo')|p('MB-04','MB-03x-recibo')|p('MB-05','MB-03x-recibo')|p('AG-01','MB-06')|p('AG-01det','MB-06')|p('IN-04','MB-06','CO-06')},
+    |p('MB-03','MB-02det','MB-03x-recibo')|p('MB-04','MB-03x-recibo')|p('MB-05','MB-03x-recibo')|p('AG-01','MB-06')|p('AG-01det','MB-06')|p('IN-04','MB-06','CO-06')
+    |p('PROD','CO-06')|p('MB-07','MB-03x-recibo')|p('MB-10','MB-03x-recibo')},   # colheita (06/10): a avaliação de carência e destino do lote vive na CO-06; MB-07 e MB-10 (no estado) levam aos envios do aparelho como as outras telas do app
  ('MB-01.dc.html','IN-01.dc.html'):'"voltar" do app',
  **{x:'cadeia MIP → diagnóstico e recomendação (frente própria)' for x in p('AG-01','AG-03','AG-03det','AG-04det')|p('AG-01det','AG-03det','AG-04det','AG-06','PL-02')|p('AG-07','AG-04det')|p('IN-04','AG-06')},
  **{x:'detalhe fixo na página visível (frente própria)' for x in p('CA-01det','AG-04','CA-02','CA-04','PL-05','SU-07')|p('CA-01x-os0420','AG-04det','CA-02','CA-03det','PL-05','SU-07')}}

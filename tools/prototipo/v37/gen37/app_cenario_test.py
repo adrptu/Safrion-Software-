@@ -15,7 +15,7 @@ try:
     r1 = a.mudar(f"return cenLiberar(c,'{OS}');")
     rid = a.cen(f"c.ordens['{OS}'].req")
     for prod, q in (('Glifosato 480', 320), ('2,4-D 806', 160), ('Óleo mineral', 80)):
-        a.mudar(f"return cenEntregar(c,'{rid}','{prod}',{q},'Marcos');")
+        a.mudar(f"return cenEntregar(c,'{rid}','{prod}',{q},'Marcos','Rui');")
     print('   pré-carga:', r1[:90], '·', rid)
     a.abrir('MB-01'); b = a.body()
     a.ok(f'{OS} · Dessecação pré-plantio' in b and 'Entregue por Rui · ' + rid in b and a.foot() == f'Confirmar recebimento · {OS}',

@@ -27,13 +27,13 @@ try:
     # ---- encerramento bloqueado pela sobra (OS-0430) ----
     T.ordem(OS); T.btn('Liberar para execução'); T.btn('Confirmar liberação'); T.fechar()
     RQ = T.cen(f"c.ordens['{OS}'].req")
-    for prod, q in (('Glifosato 480', 320), ('2,4-D 806', 160), ('Óleo mineral', 80)): T.mudar(f"return cenEntregar(c,'{RQ}','{prod}',{q},'Marcos');", avisar=False)
+    for prod, q in (('Glifosato 480', 320), ('2,4-D 806', 160), ('Óleo mineral', 80)): T.mudar(f"return cenEntregar(c,'{RQ}','{prod}',{q},'Marcos','Rui');", avisar=False)
     T.mudar(f"cenConfirmarRecebimento(c,'{RQ}'); cenIniciarTurno(c,'{OS}'); return cenFecharTurno(c,160,12,{{'Glifosato 480':300}});")
     T.ordem(OS); T.btn('Enviar para conferência'); T.btn('Confirmar envio'); T.fechar(); l = T.linha(OS)
     T.ok('Sobras a receber' in l and cor(OS, 'Sobras a receber') == AMAR and T.cel(OS, 'Quem resolve') == 'Rui (almoxarife)' and T.cel(OS, 'Próxima ação') == 'receber a devolução', 'lista da OS-0430: Sobras a receber + Rui (almoxarife)', l)
     tab('Kanban'); k = card(OS); tab('Lista')
     T.ok('Sobras a receber' in k and 'Rui (almoxarife) · receber a devolução' in k, 'Kanban da OS-0430 com o mesmo selo e dono', k)
-    T.mudar(f"return cenDevolver(c,'{RQ}','Glifosato 480',20,true);"); l = T.linha(OS)
+    T.mudar(f"return cenDevolver(c,'{RQ}','Glifosato 480',20,true,'Rui');"); l = T.linha(OS)
     T.ok('Sobras a receber' not in l and T.cel(OS, 'Quem resolve') == 'Marcos' and T.cel(OS, 'Próxima ação') == 'conferir e encerrar', 'devolução recebida: selo sai e o dono volta a ser Marcos', l)
     T.ordem(OS); T.btn('Conferir e encerrar'); T.btn('Confirmar encerramento'); T.fechar()
     # CTL-2 · A (AP-02): o turno do app grava a data operacional (CEN_DIA_OP = 26/09), não o relógio do aparelho → o período fecha em 26/09

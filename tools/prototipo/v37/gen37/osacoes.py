@@ -77,7 +77,7 @@ try:
     # ---------- os-04: dispensar saldo ----------
     abrir('OS-0420'); chk('OS-0420 (com realizado): Dispensar saldo, nunca Cancelar', temb('Dispensar saldo') and not temb('Cancelar sem execução'))
     btn('Dispensar saldo'); t=pan(); chk('formulário de dispensa com limite de 20 %', 'Até 20 % da área (20 ha)' in t and 'realizado de 30 ha fica preservado' in t, t[:500])
-    setv('aside[role=dialog] textarea[aria-label="Motivo da dispensa"]','Área alagada na baixada'); marca('Validação agronômica')
+    setv('aside[role=dialog] textarea[aria-label="Motivo da dispensa"]','Área alagada na baixada')   # CTL-3 (R-D3): sem caixa; quem decide é o perfil
     btn('Confirmar dispensa'); t=pan()
     chk('OS-0420: 70 ha recusados (70 % acima de 20 % · exige Direção)', '70 ha = 70 % acima de 20 % · exige Direção.' in t, t[:600])
     btn('Voltar'); chk('recusa não muda o saldo (70 ha)', 'saldo 70 ha' in linha('OS-0420') and 'dispensado' not in linha('OS-0420'), linha('OS-0420'))
@@ -85,17 +85,23 @@ try:
     btn('Dispensar saldo'); setv('aside[role=dialog] input[aria-label="Área a dispensar em hectares"]','40')
     btn('Confirmar dispensa'); chk('motivo obrigatório', 'Informe o motivo da dispensa.' in pan())
     setv('aside[role=dialog] textarea[aria-label="Motivo da dispensa"]','Faixa de 40 ha já tratada na aplicação anterior')
-    btn('Confirmar dispensa'); chk('validação agronômica obrigatória', 'Marque a validação agronômica.' in pan())
-    marca('Validação agronômica'); btn('Confirmar dispensa'); tt=toast(); t=pan()
+    chk('CTL-3: sem caixa a marcar; o formulário diz quem decide e valida (perfil Ana)', 'Decisão gerencial e validação agronômica: Ana (gestora e agrônoma), registradas ao confirmar.' in pan() and not J("!!document.querySelector('aside[role=dialog] input[type=checkbox]')"), pan()[:600])
+    btn('Confirmar dispensa'); tt=toast(); t=pan()
     chk('dispensa dentro do limite registrada', 'Dispensados 40 ha da OS-0421' in tt and 'realizado 190 ha preservado' in tt and 'saldo 120 ha' in tt, tt)
     chk('painel: Realizado 190 · Dispensado 40 · Saldo 120', 'Realizado 190 ha · Dispensado 40 ha · Saldo 120 ha (de 350 ha)' in t, t[t.find('APONTAMENTOS'):][:700])
     ap=J("[...document.querySelectorAll('aside[role=dialog] [style*=\"grid-template-columns: 64px\"]')].slice(1).map(r=>r.innerText.replace(/\\s+/g,' '))") or []
     pv=[x for x in ap if 'Previsto' in x]
     chk('turnos previstos acompanham o saldo (50 + 50 + 20)', len(pv)==3 and 'prev. 50 ha' in pv[0] and 'prev. 50 ha' in pv[1] and 'prev. 20 ha' in pv[2], ap)
     chk('lista: saldo 120 ha e dispensado 40 ha', '190 / 350 ha · 54 % saldo 120 ha dispensado 40 ha' in linha('OS-0421'), linha('OS-0421'))
-    btn('Dispensar saldo'); setv('aside[role=dialog] input[aria-label="Área a dispensar em hectares"]','31'); setv('aside[role=dialog] textarea[aria-label="Motivo da dispensa"]','x'); marca('Validação agronômica'); btn('Confirmar dispensa')
+    btn('Dispensar saldo'); setv('aside[role=dialog] input[aria-label="Área a dispensar em hectares"]','31'); setv('aside[role=dialog] textarea[aria-label="Motivo da dispensa"]','x'); btn('Confirmar dispensa')
     chk('limite é acumulado (40 + 31 = 71 ha > 70 ha)', '71 ha = 20,3 % acima de 20 % · exige Direção.' in pan(), pan()[:500])
     btn('Voltar'); fechar()
+    # CTL-3 (R-D3): com o perfil Caio (PCP) a dispensa não aparece; a linha diz quem decide; o comando direto é recusado
+    setv('[aria-label="Trocar perfil de demonstração"]','Caio'); abrir('OS-0421'); t=pan()
+    r=J("(()=>{const X=window.__cen; const r=X.cenMudar(null,c=>X.osc_dispensar(c,'OS-0421',10,'x',{k:'Caio'})); return r.erro||r.msg;})()")
+    chk('CTL-3: perfil Caio vê "Dispensar saldo: decisão de Ana (gestora e agrônoma)." e não tem o botão; comando direto recusado', 'Dispensar saldo: decisão de Ana (gestora e agrônoma).' in t and not temb('Dispensar saldo')
+        and r=='Dispensar saldo da OS-0421: decisão de Ana (gestora e agrônoma). Nada foi alterado.', (t[:300],r))
+    fechar(); setv('[aria-label="Trocar perfil de demonstração"]','Ana')
     # ---------- os-05: Nova ordem não duplica ordem gerada pelo plano ----------
     n0=len(ids())
     J("(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Nova ordem'); b.click();})()"); time.sleep(.4)

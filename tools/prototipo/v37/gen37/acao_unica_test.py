@@ -3,7 +3,7 @@
 Pedido do Adrianus: no Planejar safra, clicar nas etapas, usar as setas e clicar em "Definir rendimentos" mudavam a etapa por três
 caminhos; "com tantas opções o usuário fica perdido". Uma tarefa ativa = uma primária e uma rota de avanço; a faixa só informa.
 Modos (cada um < 90 s; capturas em _probe/acao_*.png):
-  python3 acao_unica_test.py saf          1-9   Planejar safra: faixa informativa, uma primária por estado, Adicionar cultivo, falta de
+  python3 acao_unica_test.py saf          1-9   Planejar safra: faixa informativa, uma primária por estado, Planejar › na linha do talhão, falta de
                                                 plano, vazio, filtro sem resultado, Corrigir cultivos → revisão, avançar não envia
   python3 acao_unica_test.py familias     10-16 uma ocorrência por família: CMP, PA, PM, EST (seções), IR/MA (telas), O.S. (Lista/Kanban/
                                                 Recursos com o mesmo filtro), mapa (painel do talhão)
@@ -67,8 +67,8 @@ try:
         for _ in range(45):
             c.tab(); paradas.append(J("(()=>{const a=document.activeElement; return a?(a.closest('.etp-ind')?'FAIXA':(a.closest('[data-acoes]')?'AREA':'')):'';})()"))
         shot('saf_faixa_1440')
-        chk('1 SAF · faixa só informa: lista ordenada de 6 etapas sem botão/link/handler/Tab (0 controles), palavra do estado (concluída/etapa atual/pendente), cursor comum, clicar na etapa 3 não navega, nenhuma seta ‹ › e 45 Tabs nunca param na faixa',
-            fx['tag']=='DIV' and fx['ol'] and fx['n']==6 and fx['li'] and fx['ctl']==0 and fx['atual'].startswith('2 ') and 'concluída' in ' '.join(fx['sr']) and 'etapa atual' in ' '.join(fx['sr']) and 'pendente' in ' '.join(fx['sr'])
+        chk('1 SAF · faixa só informa: lista ordenada de 4 etapas sem botão/link/handler/Tab (0 controles), palavra do estado (concluída/etapa atual/pendente), cursor comum, clicar na etapa 3 não navega, nenhuma seta ‹ › e 45 Tabs nunca param na faixa',
+            fx['tag']=='DIV' and fx['ol'] and fx['n']==4 and fx['li'] and fx['ctl']==0 and fx['atual'].startswith('2 ') and 'concluída' in ' '.join(fx['sr']) and 'etapa atual' in ' '.join(fx['sr']) and 'pendente' in ' '.join(fx['sr'])
             and fx['cursor']!='pointer' and fx['setas']==0 and e1['etapa']==2 and 'FAIXA' not in paradas, [fx,e1,paradas])
         # 2 · uma primária e uma rota de avanço por estado, sem cópia do mesmo comando (cabeçalho, bloco, faixa, área)
         estados={}
@@ -79,37 +79,42 @@ try:
           return {tabela:Math.round(r.getBoundingClientRect().height), linhas:r.querySelectorAll('[role=row]').length, area:Math.round(ra.height), folga:Math.round(rm.bottom-ra.bottom), mainRola:m.scrollHeight>m.clientHeight+1};})()""")
         chk('2b SAF · a tabela de cultivos estica até a área de ações (≥ 300 px, todas as linhas cabem ou rolam dentro dela) e a área fica no pé do conteúdo (≤ 40 px do fim, altura ≤ 140 px), sem rolagem dupla',
             lay['tabela']>=300 and lay['area']<=140 and 0<=lay['folga']<=40 and not lay['mainRola'], lay)
-        for i in (3,4,5,6): etapa(i); estados[f'{i}']=est()
-        shot('saf_etapa6_revisao')
+        for i in (3,4): etapa(i); estados[f'{i}']=est()
+        shot('saf_etapa4_revisao')
         def uma(s): return len(s['prims'])<=1 and s['avancos']<=1 and all(s['prims'].count(x)==1 for x in s['prims'])
         rotulos={k:[a.split(':',1)[1] for a in v['area'] if a.startswith(('avancar:','resolver:','comando:','abrir:'))] for k,v in estados.items()}
-        sem_copia=all(sum(1 for x in J(f"[...document.querySelectorAll('header button,header a,main button,main a')].filter(e=>e.getClientRects().length).map(e=>{N}(e.innerText))") if x==t)<=1 for t in rotulos['6'])
-        chk('2 SAF · no máximo uma primária e uma rota de avanço em cada estado (sem safra, falta de plano, etapas 3-6), sem cópia do mesmo comando; Nova safra secundária',
+        sem_copia=all(sum(1 for x in J(f"[...document.querySelectorAll('header button,header a,main button,main a')].filter(e=>e.getClientRects().length).map(e=>{N}(e.innerText))") if x==t)<=1 for t in rotulos['4'])
+        chk('2 SAF · no máximo uma primária e uma rota de avanço em cada estado (sem safra, falta de plano, etapas 3 e 4), sem cópia do mesmo comando; Nova safra secundária',
             all(uma(s) for s in estados.values()) and estados['1 sem safra']['prims']==[] and estados['2 falta plano']['prims']==['Aplicar plano em 4 cultivos'] and estados['2 falta plano']['avancos']==1
-            and [estados[k]['prims'] for k in ('3','4','5')]==[['Conferir plano operacional ›'],['Dimensionar recursos ›'],['Conferir demanda de insumos ›']] and estados['6']['prims']==['Abrir Compra de insumos ›'] and sem_copia,
+            and estados['3']['prims']==['Conferir demanda de insumos ›'] and estados['4']['prims']==['Abrir Compra de insumos ›'] and sem_copia,
             {k:(v['etapa'],v['prims'],v['area']) for k,v in estados.items()})
-        # 3 · Adicionar cultivo: secundário junto da lista, não avança, preserva o rascunho (Esc → Continuar editando)
-        etapa(2); b=J("(()=>{const b=document.querySelector('main [data-acao=adicionar]'); if(!b) return null; const r=b.getBoundingClientRect(); const sec=b.closest('section'); const h=sec&&sec.querySelector('h3'); return [b.innerText.trim(), getComputedStyle(b).backgroundColor, h?h.innerText.trim():'', document.querySelectorAll('main [data-acao=adicionar]').length];})()")
-        J("document.querySelector('main [data-acao=adicionar]').click()"); time.sleep(.5)
-        campo=J("(()=>{const d=document.querySelector('aside[role=dialog]'); const i=d&&[...d.querySelectorAll('input')].find(x=>/Variedade/i.test(x.getAttribute('aria-label')||'')||/_var$/.test(x.id)); return i?i.id:null;})()")
+        # 3 · etapa 2 nova (todos os talhões): sem "Adicionar cultivo"; "Planejar ›" na linha do talhão abre o painel sem trocar de etapa e
+        #     preserva o rascunho (Esc → Continuar editando)
+        abre('SAF',hash='#saf=S27SF&passo=cultivos'); time.sleep(.4); nadd=J("document.querySelectorAll('[data-acao=adicionar]').length")
+        b=J("(()=>{const r=[...document.querySelectorAll('[role=row]')].find(x=>x.querySelector('.g2c0')&&/^[▾▸]?\\s?T3\\s/.test(x.querySelector('.g2c0').innerText.trim()+' ')); const b=r&&[...r.querySelectorAll('button')].find(b=>b.innerText.trim()==='Planejar ›'); if(!b) return null; const h=b.closest('section')&&b.closest('section').querySelector('h3'); b.click(); return [b.innerText.trim(), h?h.innerText.trim():''];})()"); time.sleep(.5)
+        campo=J("(()=>{const d=document.querySelector('aside[role=dialog]'); const i=d&&[...d.querySelectorAll('input')].find(x=>/_var$/.test(x.id)); return i?i.id:null;})()")
         setv('#'+campo,'Teste ação única') if campo else None; time.sleep(.2); J(f"document.getElementById({json.dumps(campo)}).focus()")
         c.tecla('Escape','Escape',27); time.sleep(.3); aviso='Há alterações não salvas' in (J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText") or '')
-        clk('Continuar editando','aside[role=dialog]'); val=J(f"(document.getElementById({json.dumps(campo)})||{{value:''}}).value") if campo else ''; e3=est(); shot('saf_adicionar_cultivo_rascunho')
+        clk('Continuar editando','aside[role=dialog]'); val=J(f"(document.getElementById({json.dumps(campo)})||{{value:''}}).value") if campo else ''; e3=est(); shot('saf_planejar_rascunho')
         clk('Cancelar','aside[role=dialog]'); clk('Descartar alterações','aside[role=dialog]')
-        chk('3 SAF · "Adicionar cultivo" único, secundário (branco) no cabeçalho da lista de cultivos; abre o formulário sem trocar de etapa; Esc pede confirmação e "Continuar editando" mantém o texto digitado',
-            b and b[0]=='Adicionar cultivo' and b[1]=='rgb(255, 255, 255)' and b[2]=='Cultivos e planos' and b[3]==1 and bool(campo) and aviso and val=='Teste ação única' and e3['etapa']==2, [b,campo,aviso,val,e3['etapa']])
+        chk('3 SAF · sem "Adicionar cultivo" (0); "Planejar ›" do T3 na tabela "Talhões e cultivos" abre o painel sem trocar de etapa; Esc pede confirmação e "Continuar editando" mantém o texto digitado',
+            nadd==0 and b and b[0]=='Planejar ›' and b[1]=='Talhões e cultivos' and bool(campo) and aviso and val=='Teste ação única' and e3['etapa']==2, [nadd,b,campo,aviso,val,e3['etapa']])
         # 4 · falta de plano: causa escrita + passo que resolve; avançar não aplica plano em silêncio
-        e4=est(); k2a=J("(document.body.innerText.match(/\\d+ cultivos · [^\\n]+/)||[''])[0]")
-        acao('avancar'); e4b=est(); etapa(2); k2b=J("(document.body.innerText.match(/\\d+ cultivos · [^\\n]+/)||[''])[0]")
-        chk('4 SAF · falta de plano: nota com a causa e os talhões, "Aplicar plano em 4 cultivos" é a primária (resolver) e "Definir rendimentos ›" o único avanço, secundário; avançar leva à etapa 3 sem aplicar plano (4 sem plano antes e depois)',
-            any(a.startswith('nota:4 cultivos sem plano agronômico (T4, T3, P1, P2)') for a in e4['area']) and 'resolver:Aplicar plano em 4 cultivos' in e4['area'] and 'avancar:Definir rendimentos ›' in e4['area']
-            and e4b['etapa']==3 and '4 sem plano' in k2a and '4 sem plano' in k2b, [e4['area'],e4b['etapa'],k2a,k2b])
-        # 5 · vazio: safra nova sem cultivos → "Adicionar cultivo" é a única primária; sem avanço indisponível concorrente
+        abre('SAF',hash='#saf=S2627&passo=cultivos'); time.sleep(.3)
+        e4=est(); k2a=' '.join(a for a in e4['area'] if a.startswith('nota:'))
+        acao('avancar'); e4b=est(); etapa(2); k2b=' '.join(a for a in est()['area'] if a.startswith('nota:'))
+        chk('4 SAF · falta de plano: nota com a causa e os talhões, "Aplicar plano em 4 cultivos" é a primária (resolver) e "Dimensionar operações ›" o único avanço, secundário; avançar leva à etapa 3 sem aplicar plano (4 sem plano antes e depois, na nota)',
+            any(a.startswith('nota:4 cultivos sem plano agronômico (T4, T3, P1, P2)') for a in e4['area']) and 'resolver:Aplicar plano em 4 cultivos' in e4['area'] and 'avancar:Dimensionar operações ›' in e4['area']
+            and e4b['etapa']==3 and '4 cultivos sem plano' in k2a and '4 cultivos sem plano' in k2b, [e4['area'],e4b['etapa'],k2a,k2b])
+        # 5 · vazio: safra nova sem cultivos → nenhuma primária e nenhum avanço; a nota diz o que está livre e a conferir e manda planejar na linha
         abre('SAF'); clk('Nova safra'); time.sleep(.3)
         for k,vl in (('nome','Safra teste ação única'),('ini','2027-01-10'),('fim','2027-08-30')): setv(f'#fx_g_saf_{k}',vl)
         clk('Salvar','aside[role=dialog]'); time.sleep(.6); e5=est(); shot('saf_vazio')
-        chk('5 SAF · safra nova sem cultivos: etapa 2 com nota "Nenhum cultivo…", "Adicionar cultivo" como única primária e nenhum avanço',
-            e5['etapa']==2 and e5['prims']==['Adicionar cultivo'] and e5['avancos']==0 and any('Nenhum cultivo nesta safra' in a for a in e5['area']), e5)
+        tal=J(r"""(()=>{const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent); if(!t) return {}; const o={}; [...t.querySelectorAll('[role=row]')].slice(1).filter(r=>!r.classList.contains('g2kid')).forEach(r=>{ const cs=[...r.querySelectorAll('[role=cell]')]; const c0=r.querySelector('.g2c0'); if(!c0) return; const nm=c0.innerText.replace(/^[▾▸] ?/,'').trim().split(/\s+/)[0]; const sr=r.querySelectorAll('.g2sr'); let txt=cs.map(c=>{ let x=c.innerText; c.querySelectorAll('.g2sr').forEach(e=>{ x=x.replace(e.innerText,''); }); return x.replace(/\s+/g,' ').trim(); }); o[nm]={c0:c0.innerText.replace(/\s+/g,' ').trim(),cs:txt}; }); return o; })()""")
+        t1=tal.get('T1',{}).get('cs',[]); t7=tal.get('T7',{}).get('c0',''); c1=tal.get('C1',{}).get('c0','')
+        chk('5 SAF · safra nova sem cultivos: etapa 2 sem primária e sem avanço, nota "Nenhum cultivo nesta safra…"; T7 e C1 Perene sem Planejar nem Vincular; T1 Livre 152 ha a partir de 21/02/2027',
+            e5['etapa']==2 and e5['prims']==[] and e5['avancos']==0 and any(a.startswith('nota:Nenhum cultivo nesta safra') for a in e5['area'])
+            and 'Planejar' not in t7 and 'Vincular' not in t7 and 'Planejar' not in c1 and 'Vincular' not in c1 and 'Livre' in t1 and '152 ha' in t1 and '21/02/2027' in t1, [e5,t7,c1,t1])
         # 6 · filtro sem resultado: o próximo passo é limpar o filtro, dentro da lista; a área continua com o passo da etapa; uma primária
         abre('SAF',hash='#saf=S2627&etapa=2'); time.sleep(.3)
         r=setv('main input[type=search]','zzz-sem-resultado'); time.sleep(.5)
@@ -129,15 +134,15 @@ try:
         clk('Aplicar plano','aside[role=dialog]'); time.sleep(.5); clk('Confirmar substituição','aside[role=dialog]',.4)
         e7b=est(); r2=acao('avancar',.9); e7c=est(); y1=rolagem(); q=J("(document.querySelector('main input[type=search]')||{value:''}).value"); nota1=[a for a in e7c['area'] if a.startswith('nota:')]
         f2=J("(()=>{const a=document.activeElement; return a?(a.dataset.acao||a.tagName):'';})()"); shot('saf_volta_revisao')
-        chk('7 SAF · "Corrigir cultivos" na revisão leva à etapa 2 com o foco no 1º cultivo sem plano e "Aplicar plano" + "Voltar à revisão ›"; depois de aplicar, volta direto à etapa 6 na mesma posição de rolagem (±4 px), com a busca "o" e a pendência recalculada (1280×640)',
+        chk('7 SAF · "Corrigir cultivos" na revisão leva à etapa 2 com o foco no 1º cultivo sem plano e "Aplicar plano" + "Voltar à revisão ›"; depois de aplicar, volta direto à etapa 4 na mesma posição de rolagem (±4 px), com a busca "o" e a pendência recalculada (1280×640)',
             r=='Corrigir cultivos' and e7['etapa']==2 and foco in ('T4','T3','P1','P2') and any('Correção pedida pela revisão' in a for a in e7['area']) and 'avancar:Voltar à revisão ›' in e7['area']
-            and r2.startswith('Voltar à revisão') and e7c['etapa']==6 and y0>0 and abs(y1-y0)<=4 and q=='o' and nota1!=nota0, [r,e7['area'],foco,ok_sel,e7b['area'],r2,e7c['etapa'],y0,y1,q,nota0,nota1,f2])
-        # 8 · avançar não envia: Safrinha 2027 (não enviada) → etapa 6 com "Enviar para cotação" (comando) distinto; andar 6→2→6 não cria solicitação
+            and r2.startswith('Voltar à revisão') and e7c['etapa']==4 and y0>0 and abs(y1-y0)<=4 and q=='o' and nota1!=nota0, [r,e7['area'],foco,ok_sel,e7b['area'],r2,e7c['etapa'],y0,y1,q,nota0,nota1,f2])
+        # 8 · avançar não envia: Safrinha 2027 (não enviada) → etapa 4 com "Enviar para cotação" (comando) distinto; andar 6→2→6 não cria solicitação
         abre('SAF'); r=J("(()=>{const r=[...document.querySelectorAll('[role=row]')].find(x=>x.innerText.indexOf('Safrinha 2027')>=0); const b=r&&[...r.querySelectorAll('button')].find(b=>/^Continuar/.test(b.innerText.trim())); if(!b) return 'sem'; b.click(); return b.innerText.trim();})()"); time.sleep(.6)
-        e8=est(); etapa(2); etapa(6); e8b=est(); ls=J("localStorage.getItem('talhao-os-compras-v1')"); k6=J("(document.body.innerText.match(/Valor da necessidade[^\\n]+/)||[''])[0]")
+        e8=est(); etapa(2); etapa(4); e8b=est(); ls=J("localStorage.getItem('talhao-os-compras-v1')"); k6=J("(document.body.innerText.match(/Valor da necessidade[^\\n]+/)||[''])[0]")
         abr=J(f"[...document.querySelectorAll('main a,main button')].filter(e=>e.getClientRects().length&&/Abrir Compra de insumos/.test({N}(e.innerText))).length"); shot('saf_enviar_distinto')
-        chk('8 SAF · avançar só troca de etapa: Safrinha 2027 na etapa 6 tem "Enviar para cotação" como comando (não avanço); 6→2→6 pela área não envia (nada gravado, "ainda não enviada") e não mostra "Abrir Compra de insumos"',
-            e8['etapa']==6 and 'comando:Enviar para cotação' in e8['area'] and e8b['etapa']==6 and 'comando:Enviar para cotação' in e8b['area'] and not ls and 'ainda não enviada' in k6 and abr==0, [r,e8,e8b['area'],ls,k6,abr])
+        chk('8 SAF · avançar só troca de etapa: Safrinha 2027 na etapa 4 tem "Enviar para cotação" como comando (não avanço); 4→2→4 pela área não envia (nada gravado, "ainda não enviada") e não mostra "Abrir Compra de insumos"',
+            e8['etapa']==4 and 'comando:Enviar para cotação' in e8['area'] and e8b['etapa']==4 and 'comando:Enviar para cotação' in e8b['area'] and not ls and 'ainda não enviada' in k6 and abr==0, [r,e8,e8b['area'],ls,k6,abr])
         ERRL.extend(errs()); chk('9 sem erro de JS (SAF)', not ERRL, ERRL[:5])
     elif MODO=='familias':
         fam={}
@@ -291,8 +296,8 @@ try:
         c.tecla('Enter','Enter',13,text='\r'); time.sleep(.7); e2=est(); k2=0
         while k2<120 and J("(document.activeElement&&document.activeElement.innerText||'').trim()")!='Voltar à revisão ›': c.tab(); k2+=1
         c.tecla('Enter','Enter',13,text='\r'); time.sleep(.8); e6=est(); shot('saf_corrigir_teclado')
-        chk('22 (c) teclado · Tab chega a "Corrigir cultivos" na nota da revisão; Enter leva à etapa 2 (correção); Tab chega a "Voltar à revisão ›"; Enter volta direto à etapa 6 (sem percorrer 3-5)',
-            k<120 and e2['etapa']==2 and any('Correção pedida pela revisão' in a for a in e2['area']) and k2<120 and e6['etapa']==6, [k,e2['area'],k2,e6['etapa']])
+        chk('22 (c) teclado · Tab chega a "Corrigir cultivos" na nota da revisão; Enter leva à etapa 2 (correção); Tab chega a "Voltar à revisão ›"; Enter volta direto à etapa 4 (sem percorrer a etapa 3)',
+            k<120 and e2['etapa']==2 and any('Correção pedida pela revisão' in a for a in e2['area']) and k2<120 and e6['etapa']==4, [k,e2['area'],k2,e6['etapa']])
         ERRL.extend(errs()); info('erros de JS (gemini)',ERRL[:5])
     elif MODO=='v3':
         import re as _re

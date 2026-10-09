@@ -17,8 +17,8 @@ const H=CARD.hoje;   // 2026-09-23
   ok('1b em 24/09 o prazo está cumprido, mas o rótulo diz "destino a avaliar" (não é conforme)', e24.k==='cumprida'&&/destino a avaliar/.test(carRot(e24)), carRot(e24));
   const b=carBloqColheita(c,c.ordens['OS-C'],'liberar');
   ok('1c liberar a colheita OS-C (janela 21–22/09) é impedido no comando, com motivo (até 24/09, OS-A) e dono', !!b&&b.fim==='2026-09-24'&&/OS-A/.test(b.t)&&/Ana/.test(b.q), b);
-  const er=TRY(()=>osc_liberar(c,'OS-C',false,'')); ok('1d osc_liberar recusa com o mesmo motivo; a O.S. continua A liberar', /carência em curso/.test(er)&&c.ordens['OS-C'].etapa==='A liberar', er);
-  const m=carc_janela(c,'OS-C','2026-09-24'); const er2=TRY(()=>osc_liberar(c,'OS-C',false,''));
+  const er=TRY(()=>osc_liberar(c,'OS-C',false,'','Ana')); ok('1d osc_liberar recusa com o mesmo motivo; a O.S. continua A liberar', /carência em curso/.test(er)&&c.ordens['OS-C'].etapa==='A liberar', er);
+  const m=carc_janela(c,'OS-C','2026-09-24'); const er2=TRY(()=>osc_liberar(c,'OS-C',false,'','Ana'));
   ok('1e Rever programação: janela a partir de 24/09 → liberar passa; histórico da reprogramação guardado', er2===''&&c.ordens['OS-C'].etapa==='Liberadas'&&(c.ordens['OS-C'].osc.carh||[]).length===1, [er2,m]); }
 
 // ---- 2 · aplicação parcial só na parcela A; O.S. apenas planejada na parcela B ----
@@ -116,9 +116,9 @@ const H=CARD.hoje;   // 2026-09-23
 { // 8c carência não conferida na bula com prazo provisório já vencido: não autoriza a colheita; conferida (10 dias) libera
   const c=CEN({'OS-Z':O('OS-Z','Pulverização · antracnose','Pivô 23','Encerradas',['Azoxistrobina 250 SC'],[['05/09',60]]),
                'OS-K':O('OS-K','Colheita · semana 39','Pivô 23','A liberar',[],[],{janela:'24/09'})});
-  const er=TRY(()=>osc_liberar(c,'OS-K',false,'')); const b=carBloqColheita(c,c.ordens['OS-K'],'liberar');
+  const er=TRY(()=>osc_liberar(c,'OS-K',false,'','Ana')); const b=carBloqColheita(c,c.ordens['OS-K'],'liberar');
   ok('8c prazo provisório vencido (7 dias não conferidos): liberar a colheita recusado, motivo "não conferidos na bula"', /bloqueado/.test(er)&&/não conferidos na bula/.test(er)&&c.ordens['OS-K'].etapa==='A liberar'&&b.pk==='bula', [er,b]);
-  carc_bula(c,'Azoxistrobina 250 SC','Mamão',10); const er2=TRY(()=>osc_liberar(c,'OS-K',false,''));
+  carc_bula(c,'Azoxistrobina 250 SC','Mamão',10); const er2=TRY(()=>osc_liberar(c,'OS-K',false,'','Ana'));
   ok('8d carência conferida (10 dias → 15/09): liberar passa; a conferência fica registrada com quem e quando', er2===''&&c.ordens['OS-K'].etapa==='Liberadas'&&c.car.bula['Azoxistrobina 250 SC|Mamão'][0].por===CARD.quem.ag, [er2,c.car.bula]); }
 { // 8e mercado interno com laudo acima do LMR ANVISA: Não conforme (contraprova vale mesmo sem exigência de laudo)
   const c=CEN({'OS-T':O('OS-T','Pulverização · antracnose','Pivô 23','Encerradas',['Tebuconazol 200 EC'],[['05/09',60]]),

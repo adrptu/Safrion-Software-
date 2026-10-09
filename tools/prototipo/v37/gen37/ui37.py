@@ -31,11 +31,13 @@ PARENT37={}   # fname -> fname de volta
 # Menu vigente por decisão do proprietário (25/09/2026): Mapa · Cadastros · Agrícola · Suprimentos.
 # 01/10/2026: Consulta Agrofit (antes de Planos), Pragas e doenças (MIP/MID) e Irrigação voltam dentro de Agrícola; Manutenção volta logo abaixo de Agrícola (pedidos do proprietário).
 # 02/10/2026: Manutenção ganha "Planos de manutenção" (PM) como 1º item; MA-03 vira "Vencimentos e paradas" (sem dois itens com o mesmo nome).
+# 06/10/2026: grupo Produção logo depois de Agrícola (colheita de ponta a ponta, docs/colheita · D-01): no máximo 3 itens.
 # Os demais módulos ficam ocultos do menu, preservados no canvas (página "Módulos ocultos").
 MENU2=[('Mapa','map',[('Mapa','IN-04.dc.html')]),
  ('Cadastros','layers',[('Fazendas, áreas e talhões','CD-01.dc.html'),('Culturas, cultivares e operações','CD-02.dc.html'),('Máquinas, instalações e setores','CD-03.dc.html'),
    ('Pessoas e equipes','CD-04.dc.html'),('Parceiros e fornecedores','CD-05.dc.html'),('Produtos, unidades e locais','CD-06.dc.html'),('Estrutura gerencial','CD-07.dc.html')]),
  ('Agrícola','leaf',[('Consulta Agrofit','AG-07.dc.html'),('Planos agronômicos','PA.dc.html'),('Planejar safra','SAF.dc.html'),('Ordem de Serviço','OS.dc.html'),('Pragas e doenças (MIP/MID)','AG-01.dc.html'),('Irrigação','IR-01.dc.html')]),
+ ('Produção','Colheita',[('Previsão e colheita','COLH.dc.html'),('Cargas e recebimento','CARGA.dc.html'),('Estoque de produto','PROD.dc.html')]),
  ('Manutenção','wrench',[('Planos de manutenção','PM.dc.html'),('Ativos e disponibilidade','MA-01.dc.html'),('Solicitações e inspeções','MA-02.dc.html'),
    ('Vencimentos e paradas','MA-03.dc.html'),('Ordens de manutenção','MA-04.dc.html'),('Abastecimentos e desempenho','MA-05.dc.html')]),
  ('Suprimentos','cart',[('Compra de insumos','CMP.dc.html'),('Estoque','EST.dc.html')]),
@@ -218,6 +220,12 @@ def demo_badge():
 
 def perfil_pill(perfil):
     ini=perfil[0].upper()
+    if perfil=='Ana · Gestora':   # equipe da fazenda: perfil trocável (g2lib.js G2_PERFIS, fonte única); portal e backoffice seguem fixos
+        return (f'<div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; font-size: 12.5px; color: {SIDE_TX}; border-top: 1px solid rgba(255,255,255,.08);">'
+            f'<span style="width: 26px; height: 26px; border-radius: 999px; background: {ACC}; color: #fff; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;">{{{{perfil_ini}}}}</span>'
+            f'<label class="ml-txt" style="display: flex; flex-direction: column; line-height: 1.2; min-width: 0;"><select aria-label="Trocar perfil de demonstração" value="{{{{perfil_k}}}}" onChange="{{{{perfil_set}}}}" style="font-family: inherit; font-size: 12.5px; font-weight: 700; color: #fff; background: transparent; border: 0; padding: 0; cursor: pointer; max-width: 170px;">'
+            f'<sc-for list="{{{{perfil_opts}}}}" as="o" hint-placeholder-count="5"><option value="{{{{o.v}}}}" style="color: {INK};">{{{{o.t}}}}</option></sc-for></select>'
+            f'<span style="color: {SIDE_MUTED}; font-size: 11.5px;">Perfil de demonstração</span></label></div>')
     return (f'<div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; font-size: 12.5px; color: {SIDE_TX}; border-top: 1px solid rgba(255,255,255,.08);">'
             f'<span style="width: 26px; height: 26px; border-radius: 999px; background: {ACC}; color: #fff; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; justify-content: center;">{ini}</span>'
             f'<span class="ml-txt" style="display: flex; flex-direction: column; line-height: 1.2;"><span style="font-weight: 700; color: #fff;">{esc(perfil)}</span><span style="color: {SIDE_MUTED}; font-size: 11.5px;">Trocar perfil de demonstração ▾</span></span></div>')
@@ -229,6 +237,9 @@ MACRO = {
     'SAF.dc.html': dict(faz='contexto', saf='contexto'),
     'CMP.dc.html': dict(faz='contexto', saf='contexto'),
     'EST.dc.html': dict(faz='filtro'),
+    'COLH.dc.html': dict(faz='filtro', saf='filtro'),
+    'CARGA.dc.html': dict(faz='filtro', saf='filtro'),
+    'PROD.dc.html': dict(faz='filtro', saf='filtro'),
 }
 FAZENDAS = ['Lagoa Grande', 'Santa Rita', 'Boa Vista']
 SAFRAS_MF = ['2026/27', 'Safrinha 2027', '2025/26']

@@ -20,7 +20,7 @@ def ok(cond, msg, extra=''):
 def unit():
     import cenario
     from areas.processo_os import JS_NUCLEO
-    src = PRELUDIO + cenario.js_prefixo() + JS_NUCLEO + open(os.path.join(HERE, 'carencia_unit.js'), encoding='utf-8').read()
+    src = PRELUDIO + cenario.perfis_js() + cenario.js_prefixo() + JS_NUCLEO + open(os.path.join(HERE, 'carencia_unit.js'), encoding='utf-8').read()
     p = os.path.join(HERE, '_probe', 'carencia_unit_all.js'); open(p, 'w', encoding='utf-8').write(src)
     r = subprocess.run(MOTOR + [p], capture_output=True, text=True, timeout=60)
     out = r.stdout.strip().splitlines()
@@ -110,7 +110,7 @@ def fluxo():
            'colheita OS-0440 (Pivô 23, a partir de 25/09): Liberar bloqueado com motivo (OS-0508, carência até 26/09) e quem resolve (colheita a partir de 27/09)', [oid, p[:700]])
         ok(not J("[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==='Liberar para execução')") and 'Rever programação' in p and 'Carência até 26/09' in p and 'a colheita pode começar em 27/09' in p,
            'sem botão Liberar; Rever programação junto ao impedimento; selo "Carência até 26/09"', p[:400])
-        er = J("(()=>{const X=window.__car; const r=X.cenMudar(null,c=>{ const o=c.ordens['OS-0440']; if(!o) throw new Error('sem OS-0440'); return window.__cen.osc_liberar(c,'OS-0440',false,''); }); return r.erro||'';})()") or ''
+        er = J("(()=>{const X=window.__car; const r=X.cenMudar(null,c=>{ const o=c.ordens['OS-0440']; if(!o) throw new Error('sem OS-0440'); return window.__cen.osc_liberar(c,'OS-0440',false,'','Ana'); }); return r.erro||'';})()") or ''
         ok('carência em curso' in er and cen("c.ordens['OS-0440'].etapa") == 'A liberar', 'o próprio comando recusa a liberação (não é só a cor do mapa)', er)
         shot('carencia_os_impedida.png')
         # o mapa mostra o mesmo impedimento e leva à O.S. (Rever programação)
