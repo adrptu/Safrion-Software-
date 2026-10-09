@@ -91,8 +91,14 @@ NOTA = """(()=>{const n=document.querySelector('[data-acoes] .acoes-nota'); cons
   const r=n.getBoundingClientRect(), rb=b?b.getBoundingClientRect():null; return {txt:n.innerText.replace(/\\s+/g,' ').trim(), naTela:r.height>0&&r.top>=0&&r.bottom<=innerHeight,
   pubNaTela:!!rb&&rb.top>=0&&rb.bottom<=innerHeight, desc:b?(b.getAttribute('aria-describedby')||''):'', dis:!!(b&&b.disabled)};})()"""
 CLIQUES = [0]
-def centro(sel):
-    return J(f"(()=>{{const e={sel}; if(!e) return null; e.scrollIntoView({{block:'center',inline:'nearest'}}); const r=e.getBoundingClientRect(); return [r.left+r.width/2,r.top+r.height/2];}})()")
+def centro(sel, limite=2.0):
+    """centro do elemento depois de trazê-lo à tela; espera (até o limite) nada estar por cima dele no ponto do clique, como uma
+    lista de busca que ainda está fechando (revisão T1: o clique não cai em outra camada)"""
+    fim = time.time() + limite
+    while True:
+        r = J(f"(()=>{{const e={sel}; if(!e) return null; e.scrollIntoView({{block:'center',inline:'nearest'}}); const r=e.getBoundingClientRect(); const x=r.left+r.width/2, y=r.top+r.height/2; const t=document.elementFromPoint(x,y); return [x,y,!!t&&(e===t||e.contains(t))];}})()")
+        if not r or r[2] or time.time() >= fim: return r[:2] if r else None
+        time.sleep(.15)
 def clique(sel, toque=False, w=.45):
     """clique (ou toque) de verdade no centro do elemento, contado; sel é uma expressão JS que devolve o elemento"""
     xy = centro(sel)
