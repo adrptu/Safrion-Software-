@@ -4,6 +4,7 @@
 - **Pedido junto (repassado a esta frente em 09/10):** conferir se os botões de incluir em branco seguem o design system padronizado (lugar, prioridade e estilo), sem conflitar com os demais botões. Resposta na seção 3, contra os padrões BOT-01 a BOT-09 que o proprietário aprovou em 09/10 (`docs/design-system/README.md`, commit `cb74290` da main).
 - **Autor / revisor / integrador:** Claude / Codex / Claude. **Base:** `cdc185f`, branch `claude/v44-nav`.
 - **Arquivos:** `tools/prototipo/v37/gen37/areas/processo_planos.py`, `patest.py`, `pa_lista_test.py` (novo), `pa_regras_test.py` (novo); linhas da PA em `acao_unica_test.py` e `componentes_test.py` (seção 5).
+- **Revisão:** parecer adversarial do Codex de 09/10 sobre `cdc185f..0e1c368`; as correções estão na seção 7.
 - **Fora do escopo:** adoção de versão por cultivo no Planejar safra (PRD 40.3), já registrada como pendência da frente Planejar safra em `sp-solo/docs/analise-solo/ESPECIFICACAO.md:411`.
 
 ## 1. O que mudou na tela (executado)
@@ -14,14 +15,19 @@
 - **Lista:** a biblioteca por cultura, com o filtro por cultura e a posição guardada. "Criar plano" fica no cabeçalho e herda a cultura do filtro.
 - **Detalhe (`PA.dc.html#plano=<id>`):** nome, estado e versão; a faixa do rascunho com "Descartar rascunho"; os blocos Atividades (dose e insumo na tabela), Cultivos que usam este plano e Versões (recolhido, com o resumo visível).
   - Com rascunho, o bloco "Alterações do rascunho vN em relação à vM" (diferenças, custo/ha e impacto nos cultivos) é o último antes do Próximo passo.
-  - **Próximo passo:** "‹ Biblioteca de planos" e, só com rascunho, "Publicar versão vN".
+  - **Próximo passo:** "‹ Biblioteca de planos" e, só com rascunho, "Publicar versão vN". A nota ao lado do botão resume as alterações ("1 alteração na v7: Fungicida 1ª aplicação (Fungicida A: 0,5 → 0,6 L/ha).", até 2 itens e "e mais N") e leva ao bloco completo por "Ver alterações". A área é fixa no pé da tela, então o resumo fica à vista junto do botão a 1440 e a 390 px.
 - **Endereço:** lido ao carregar e no `hashchange`, gravado ao abrir. F5 reabre o mesmo plano; um id inexistente abre a lista com um aviso, sem erro.
 - **Voltar** ("‹ Biblioteca de planos" ou Esc sem painel aberto) devolve a rolagem e o foco ao cartão aberto por último.
-- **Publicar:**
-  - não muda nenhum cultivo (PRD 40.3); o foco vai aos cultivos, onde está o próximo passo (a adoção);
+  - Com a dose ou a inclusão de insumo digitadas e não concluídas, voltar ou trocar o endereço não sai: a nota avisa e oferece "Descartar e voltar à biblioteca" (ou "Descartar e abrir <plano>") e "Continuar editando".
+  - Com o painel aberto, trocar o endereço não troca de plano: o endereço volta e o painel continua no plano em que foi aberto.
+  - O Esc fecha só a camada de cima (painel, filtro de coluna, lista de busca, menu sobreposto); só sem nenhuma delas volta à lista.
+- **Publicar** (a versão publicada é imutável; cada trava abaixo evita publicar algo diferente do que a pessoa vê):
+  - não muda nenhum cultivo (PRD 40.3); o foco vai aos cultivos;
   - fica desabilitado com o motivo, na nota e na dica (VIS-04), quando o rascunho não tem atividade;
-  - também fica desabilitado enquanto uma inclusão de insumo está aberta. **Dano evitado:** publicar uma versão sem o insumo que está sendo digitado.
-- **X-AGR-6:** cultivo de safra aberta numa versão anterior mostra "Na v6 · v7 publicada" e o link "Abrir cultivo no Planejar safra ›" → `SAF.dc.html#saf=<safra>&passo=cultivos&cult=<id>`, que abre a etapa 2 com o painel do cultivo. O texto de impacto continua dizendo que a adoção é por cultivo, no Planejar safra.
+  - também enquanto uma inclusão de insumo está aberta. **Dano evitado:** publicar uma versão sem o insumo que está sendo digitado;
+  - também enquanto uma dose está em edição ("Confirme (Enter) ou cancele (Esc) a dose de X…"). **Dano evitado:** publicar uma dose que não apareceu nas alterações. Se o clique começa com o botão desabilitado e a saída do campo grava a dose no meio dele, o clique não publica: a dose entra no rascunho e no resumo, e o aviso pede para conferir e clicar de novo;
+  - também quando o rascunho voltou a ficar igual à versão publicada. **Dano evitado:** uma versão nova vazia, que marcaria os cultivos como desatualizados sem mudança nenhuma.
+- **X-AGR-6:** cultivo de safra aberta numa versão anterior mostra "Na v6 · v7 publicada" e o link "Abrir cultivo no Planejar safra ›" → `SAF.dc.html#saf=<safra>&passo=cultivos&cult=<id>`, que abre a etapa 2 com o painel do cultivo. O texto de impacto diz que a troca de versão é por cultivo, no Planejar safra (PRD 40.3), e que no protótipo ela ainda não existe; o aviso de publicação diz que a versão publicada aqui ainda não chega ao Planejar safra.
 - **Painéis:** abrem com o foco no 1º campo, e o Esc fecha. Antes, o foco ficava no botão atrás do véu e o Esc não fechava.
 
 **Cliques medidos** no mesmo cenário (mudar a dose do Fungicida A de 0,5 para 0,6 L/ha e publicar), contados pelo `pa_lista_test.py` L12 na execução real:
@@ -38,7 +44,7 @@ O clique que sai é "Revisar e publicar ›". As 4 teclas são "0,6" e Enter.
 | ID | Decisão | Por quê |
 |---|---|---|
 | NAV-D1 | O Planejar safra mantém "Escolha a safra" como etapa 1, por ora (X-AGR-3, não aplicar) | O proprietário citou o SAF como modelo. A pergunta segue para o Codex na rodada |
-| NAV-D2 | Publicar a PA com um clique, com as diferenças visíveis logo acima do botão | Sem tela de confirmação: as alterações já estão à vista, e publicar não muda cultivos (decisão do autor, registrada no §3.1) |
+| NAV-D2 | Publicar a PA com um clique, com o resumo das diferenças na nota ao lado do botão | Sem tela de confirmação: o resumo fica à vista junto do botão (área fixa no pé da tela), o bloco completo está a um clique ("Ver alterações"), e publicar não muda cultivos. Ajustado na revisão (R1): antes, o bloco ficava fora da tela depois de mudar uma dose |
 | NAV-D3 | X-CTX: a fazenda só acompanha quando a pessoa escolhe | Abrir uma tela não grava contexto (CONSOLIDADO §2.2) |
 | NAV-D4 | "Criar plano" no cabeçalho, em vez de "Novo plano" no bloco, como primária só na lista | BOT-02 (tela do menu: no cabeçalho), BOT-03 (Criar, nunca "Novo") e BOT-05 ("+"). O §3.1 pedia "Novo plano como primária"; o design system de 09/10, aprovado pelo proprietário, é mais novo e prevalece |
 
@@ -67,8 +73,9 @@ Conferidos contra os padrões BOT-01 a BOT-09 do design system de 09/10 (`docs/d
 - **PCM (PM):** "Incluir serviço" verde com o plano vazio contraria BOT-01 depois desta mudança.
 - **O.S.:** "Nova ordem" no bloco contraria BOT-02/03.
 - **CTL5:** AG-07 "PL-xx ›" → `PA.dc.html#plano=<id>` (o endereço já existe).
-- **Planejar safra:** adoção de versão por cultivo (PRD 40.3).
-- **Integrador (`etapas_celular_test.py`, linha 142):** tirar a `'PA'` da lista do item 7 (e o rótulo passa a "5 telas"). Com essa troca feita só em memória, sem editar o arquivo, o teste deu 14 ok · 0 falhas (executado, §6).
+- **Planejar safra (adoção, PRD 40.3; revisão R5):** a troca de versão por cultivo não existe no protótipo, e a PA não grava no `cenario.js` (o seletor do Planejar safra continua mostrando a v6). Aceite proposto para a frente dona: publicar a v7 da Soja alta tecnologia na PA; o link "Abrir cultivo no Planejar safra ›" do c1 abre o painel do cultivo com "Na v6 · v7 publicada" e um comando para adotar a v7, que grava a troca no cenário; de volta à PA, o c1 aparece "Na versão em vigor" e os demais continuam na v6. Depende de a PA gravar os planos no estado único (item abaixo).
+- **Quem publica (AG-05, já na base, fora desta frente):** publicar não grava quem publicou nem confere o perfil (`g2perfil`); qualquer perfil do "Ver como" publica uma dose. O PRD prevê o aprovador técnico. Vai para a frente de perfis (CTL-3/CONF), com aceite: só o perfil agrônomo publica, e a versão guarda quem e quando.
+- **Integrador (`etapas_celular_test.py`, linha 143):** a correção preferida (revisão T2) mantém a PA no zoom de 200 %, que continua conferindo cabeçalho, título e comando: no item 7, ler `z[g].get('sobrepoe',0)` e `z[g].get('vazam')` no lugar de `z[g]['sobrepoe']` e `z[g]['vazam']`, como no `etapas_celular_alt_codex.py` do revisor. Hoje o teste aborta no item 7 com `KeyError: 'sobrepoe'`, e os itens 7 a 14 não rodam. Esta frente não edita o arquivo (§3.1); a troca, rodada numa cópia contra o build corrigido, deu o resultado da §7.
 - **Estado único:** a PA guarda os planos no estado da tela (como na base), não no `cenario.js`. Um plano criado some no F5; o endereço dele então abre a lista com aviso.
 
 ## 5. Testes antigos com expectativa mudada (motivo: a PA deixou de ter etapas)
@@ -83,7 +90,8 @@ Conferidos contra os padrões BOT-01 a BOT-09 do design system de 09/10 (`docs/d
   - 11 e 12: "abriu o plano" passa a ser `#plano=`, no lugar de "Etapa 2 de 3".
   - 14: "Criar plano" no cabeçalho; a etapa inerte passa a ser medida no Planejar safra, porque a PA não tem mais faixa.
   - Atenção ao integrar: a frente DS mexe nas mesmas linhas do item 14.
-- **`etapas_celular_test.py`:** não editado (fora desta frente). **Fica vermelho:** o item 7 (linha 142) mede a PA no zoom de 200 % como tela com etapas e quebra com `KeyError: 'sobrepoe'`, porque a PA não tem mais faixa. Os itens 1 a 6 já tiram a PA pelo `temEtapas` (linha 122). Correção para o integrador, depois da PCM e da SUP (§4).
+- **`etapas_celular_test.py`:** não editado (fora desta frente). **Fica vermelho:** o item 7 (linha 143) mede a PA no zoom de 200 % como tela com etapas e quebra com `KeyError: 'sobrepoe'`, porque a PA não tem mais faixa; o teste aborta ali e os itens 7 a 14 não rodam. Os itens 1 a 6 já tiram a PA pelo `temEtapas` (linha 122). Correção para o integrador, depois da PCM e da SUP (§4).
+- **`pa_regras_test.py` U5 (revisão R1):** com rascunho e alterações, a nota do Próximo passo deixa de ser vazia e passa a ter o resumo das alterações.
 
 ## 6. Evidência (executada em 09/10, 16:03–17:00 UTC)
 
@@ -106,3 +114,22 @@ Build do commit `19aeb94` (`build.py` → 0 FALHA, 140 artboards; `montar_render
 | `python3 links_ocultos_test.py` | 8 · 0 falhas (nenhum par novo) | 8 · 0 falhas |
 | `python3 ../ferramentas/acoes_duplicadas.py . /tmp/NAV1-dup.json` | 140 páginas · 0 com ação repetida | — |
 | `python3 verif_pa.py` (diagnóstico, sem asserção) | roda no detalhe sem mudança; limites do gatilho iguais; sem erro de JS | — |
+
+## 7. Revisão adversarial do Codex (09/10) e correções
+
+Parecer do Codex (papel revisor) sobre `cdc185f..0e1c368`: não integrar antes de corrigir o R1 (S2), estabilizar o `pa_lista_test.py` (T1) e resolver o `etapas_celular_test.py` (T2). Correções no commit "NAV1: correções da revisão". Cada achado tem proteção de regressão; os casos novos falham no `0e1c368` e passam depois (executado, §7.1).
+
+| Achado | Sev. | O que mudou | Regressão |
+|---|---|---|---|
+| R1 · dose digitada sem Enter entrava na versão publicada sem aparecer nas diferenças | S2 | "Publicar" desabilitado com o motivo enquanto a dose está em edição. O desabilitar sozinho não basta: no Chrome, o blur da dose grava ao apertar o botão, o botão se habilita antes de soltar e o clique passa (executado: 12 de 12 combinações de tempo). Por isso o clique que começa com o botão desabilitado, ou que vem até 1 s depois de a saída do campo gravar uma dose, não publica: a dose entra no rascunho e no resumo, e o aviso pede para conferir e clicar de novo. O resumo das alterações fica na nota ao lado do botão (área fixa no pé da tela) | `pa_regras_test` U5, U13, U14; `pa_lista_test` L5 (nota na tela a 1440 × 900), L11 (390 × 844), L14a e L14b (clique de verdade) |
+| R2 · dose inválida + Publicar publicava sem a mudança, com o erro na tela | S3 | A mesma trava: o campo continua aberto com o erro e o botão desabilitado | U14; L14c |
+| R3 · rascunho igual à versão publicada virava uma versão vazia e marcava os cultivos | S3 | Desabilitado com "O rascunho vN está igual à vM: altere algo ou descarte o rascunho." (tela e regra pura); salvar o painel sem mudar nada não cria rascunho | U5, U7, U17; L15 |
+| R4 · trocar o endereço com o painel aberto gravava no plano errado | S3 | Com o painel aberto, o endereço volta e nada muda ("Feche o painel antes de trocar de plano."); o painel guarda o plano em que foi aberto, e salvar em outro plano ou numa atividade que não existe fecha sem gravar | U16; L16 |
+| R5 · o link prometia a adoção, que não existe no destino | S3 | Os textos dizem que a troca de versão é por cultivo no Planejar safra (PRD 40.3) e que no protótipo ela ainda não existe; a pendência tem aceite na §4 | L6 (textos), §4 |
+| R6 · Esc com o filtro de coluna ou o menu sobreposto voltava à lista | S4 | O Esc da PA passa à fase de bolha e respeita quem já tratou o Esc; isenta qualquer `[role=dialog]`, lista, menu e o menu sobreposto | L17 |
+| R7 · aviso com o id interno depois do F5 | S4 | "Plano do endereço não encontrado (no protótipo, um plano criado aqui não fica guardado ao recarregar): escolha um plano da biblioteca." | L18 |
+| R8 · voltar descartava sem aviso a inclusão de insumo digitada | S4 | Voltar, ou trocar o endereço, com a dose ou a inclusão digitadas não sai: a nota avisa, com "Descartar e voltar à biblioteca" (ou "Descartar e abrir <plano>") e "Continuar editando" | U15; L19 |
+| T1 · `pa_lista_test.py` instável (L7, L8) | S3 | Esperas pela condição (até 6 a 8 s) no lugar das esperas fixas, também nos casos novos | rodadas da §7.1 |
+| T2 · `etapas_celular_test.py` vermelho | S3 | Arquivo fora desta frente (§3.1 do CONSOLIDADO): a correção do revisor está na §4 para o integrador e foi rodada numa cópia (§7.1) | — |
+| T3 · lacunas dos testes | S4 | U4 com "retira"; U8b com d1 (S27SF) e lg01 (LG2627); U10 com a base em rascunho; U13 com 0, vazio, "−2" e "-2"; mutação: 18 de 18 mutantes mortos (§7.1) | — |
+| Fora do escopo · quem publica (AG-05) | S3, já na base | Registrado na §4 para a frente de perfis | — |

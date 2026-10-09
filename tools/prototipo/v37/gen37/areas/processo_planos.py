@@ -130,19 +130,39 @@ function paHashSet(id){ try{ const h=id?'#plano='+encodeURIComponent(id):''; if(
 function paOpen(self,id,o){ o=o||{}; const p=paPlan(self,id); if(!p) return;
   if(!self.state.pid){ try{ self.__paPos=[...document.querySelectorAll('main[data-scroll],.ml-tog+div')].map(e=>[e,e.scrollTop]); }catch(e){} }
   if(o.hash!==false) paHashSet(id);
-  g2etapa(self,{pid:id,ult:id,del:null,disc:false,flash:null,ied:null,iadd:null,rmv:null,g2toast:o.msg||('Plano aberto: '+p.nome+(p.rasc?' · rascunho v'+p.rasc.v:''))}); }
-function paLista(self,msg){ paHashSet(''); self.__paVolta=true; const patch={pid:null,del:null,disc:false,flash:null,ied:null,iadd:null,rmv:null}; if(msg) patch.g2toast=msg; self.setState(patch); }
-// Esc no detalhe (sem painel, edição ou confirmação aberta e fora de campo) volta à lista; em fase de captura, antes de qualquer fechamento
+  g2etapa(self,{pid:id,ult:id,del:null,disc:false,flash:null,ied:null,iadd:null,rmv:null,saiAv:null,g2toast:o.msg||('Plano aberto: '+p.nome+(p.rasc?' · rascunho v'+p.rasc.v:''))}); }
+function paLista(self,msg){ paHashSet(''); self.__paVolta=true; const patch={pid:null,del:null,disc:false,flash:null,ied:null,iadd:null,rmv:null,saiAv:null}; if(msg) patch.g2toast=msg; self.setState(patch); }
+// sair do detalhe com a dose ou a inclusão de insumo digitadas e não concluídas avisa antes de descartar (aceite comum NAV: "formulário
+// alterado avisa antes de descartar"); o aviso fica na nota do Próximo passo, ao lado do botão que levou a sair (dano evitado: perder o
+// que foi digitado sem saber). A dose aberta sem mudança e a inclusão aberta em branco saem sem aviso.
+function paPend(st){ const ad=st.iadd; if(ad&&(String(ad.prod||'').trim()||String(ad.dose||'').trim())) return 'a inclusão de insumo';
+  const ed=st.ied; if(ed) return 'a dose de '+ed.prod; return ''; }
+function paSair(self,dest){ const pd=paPend(self.state); if(!pd){ if(dest.pid) paOpen(self,dest.pid,{hash:dest.hash}); else paLista(self); return; }
+  paHashSet(self.state.pid||''); self.setState({saiAv:{pid:dest.pid||null,o:pd}}); }
+function paSaiOk(self){ const d=self.state.saiAv; if(!d) return; self._paEsc=true; self.setState({saiAv:null,ied:null,iadd:null}); if(d.pid) paOpen(self,d.pid); else paLista(self); }
+function paSaiNao(self){ self.setState({saiAv:null}); const st=self.state; if(st.ied) paFoco(paDoseId(st.ied.aid,st.ied.prod)); else if(st.iadd) paFoco(st.iadd.prod?('pa-add-dose-'+st.iadd.aid):paAcId('pa-add-'+st.iadd.aid)); }
+// Esc no detalhe (sem painel, edição, confirmação, filtro de coluna ou menu sobreposto abertos e fora de campo) volta à lista.
+// Fase de bolha, depois de quem fecha a própria camada (painel, filtro da grade e o menu do g2glob chamam preventDefault ou param o
+// evento): o Esc fecha só a camada de cima (revisão NAV-1, R6)
 function paEsc(self,e){ if(e.key!=='Escape'||e.defaultPrevented||!self.state.pid) return; const st=self.state;
-  if(st.fm||st.np||st.ied||st.iadd||st.disc||st.del||st.g2ac) return; const t=e.target;
-  if(t&&t.closest&&(t.closest('aside[role=dialog]')||t.closest('[role=listbox]')||/^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName))) return;
-  if(document.querySelector('aside[role=dialog]')) return; e.preventDefault(); paLista(self); }
+  if(st.fm||st.np||st.ied||st.iadd||st.disc||st.del||st.g2ac||st.saiAv) return; const t=e.target; const vis=(x)=>!!x&&x.getClientRects().length>0;
+  if(t&&t.closest&&(t.closest('[role=dialog]')||t.closest('[role=listbox]')||t.closest('[role=menu]')||t.closest('.menu-lat')||/^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName))) return;
+  if([...document.querySelectorAll('[role=dialog],[role=listbox],[role=menu]')].some(vis)) return;
+  const m=document.querySelector('.menu-lat:not(.rec)'); if(m&&getComputedStyle(m).position==='absolute') return;
+  e.preventDefault(); paLista(self); }
 function paHashIni(self){ if(self.__paHash) return; self.__paHash=1;
-  const aplica=()=>{ let h=''; try{ h=location.hash||''; }catch(e){} const id=paHashId(h); const cur=self.state.pid||''; if(id===cur) return;
-    if(!id){ if(cur) paLista(self); return; }
-    if(paPlan(self,id)){ paOpen(self,id,{hash:false}); return; }
-    paHashSet(''); if(cur) paLista(self); self.setState({g2toast:'Plano “'+id+'” não encontrado neste navegador: escolha um plano da biblioteca.'}); };
-  setTimeout(aplica,0); try{ window.addEventListener('hashchange',aplica); document.addEventListener('keydown',(e)=>paEsc(self,e),true); }catch(e){} }
+  // trocar o endereço com o painel aberto não troca de plano (o endereço volta; R4); com a dose ou a inclusão digitadas, avisa antes (R8);
+  // id inexistente abre a lista com um aviso sem o id interno (R7)
+  const aplica=()=>{ let h=''; try{ h=location.hash||''; }catch(e){} let id=paHashId(h); const cur=self.state.pid||''; if(id===cur) return;
+    const st=self.state; if(st.fm||st.np){ paHashSet(cur); self.setState({g2toast:'Feche o painel antes de trocar de plano.'}); return; }
+    let msg=''; if(id&&!paPlan(self,id)){ msg='Plano do endereço não encontrado (no protótipo, um plano criado aqui não fica guardado ao recarregar): escolha um plano da biblioteca.'; id=''; paHashSet(cur); }
+    if(id||cur) paSair(self,{pid:id||null,hash:false}); if(msg) self.setState({g2toast:msg}); };
+  setTimeout(aplica,0);
+  try{ window.addEventListener('hashchange',aplica); document.addEventListener('keydown',(e)=>paEsc(self,e));
+    /* gesto que começa com "Publicar" desabilitado (dose ou inclusão abertas) não publica, mesmo que o botão se habilite no meio do
+       clique (o blur da dose grava ao apertar o botão; revisão NAV-1, R1); teclado zera a marca */
+    window.addEventListener('pointerdown',(e)=>{ const b=e.target&&e.target.closest&&e.target.closest('[data-acoes] [data-acao=comando]'); self.__paPubDis=!!(b&&b.disabled); },true);
+    window.addEventListener('keydown',()=>{ self.__paPubDis=false; },true); }catch(e){} }
 // ---------- biblioteca ----------
 // Filtro rápido por cultura: "Todas" ou uma cultura; tocar de novo na cultura escolhida volta a "Todas".
 const PA_QCH='font-family:inherit;font-size:12px;font-weight:700;padding:4px 11px;border-radius:999px;cursor:pointer;';
@@ -189,13 +209,15 @@ function paRasc(self,aid,fn){ return paRascNo(paPlans(self),self.state.pid,aid,f
 function paFoco(id,sel){ setTimeout(()=>{ const el=document.getElementById(id); if(el){ el.focus(); if(sel&&el.select) el.select(); } },0); }
 function paDoseId(aid,prod){ return 'pa-dose-'+aid+'-'+String(prod).replace(/[^A-Za-z0-9]/g,'_'); }
 function paDoseIni(self,a,x){ self._paEsc=false; self.setState({ied:{aid:a.id,prod:x.prod,val:paQ(x.dose),err:''},iadd:null}); paFoco(paDoseId(a.id,x.prod),true); }
-// Enter ou sair do campo grava; Esc cancela (a marca evita que o blur da saída grave o que foi cancelado)
-function paDoseOk(self){ if(self._paEsc){ self._paEsc=false; return; } const ed=self.state.ied; if(!ed) return; const n=paNum(ed.val);
+// Enter ou sair do campo grava; Esc cancela (a marca evita que o blur da saída grave o que foi cancelado). Gravar pela saída do campo
+// marca a hora (__paSaiT): um "Publicar" no mesmo gesto é recusado (paPub), porque a pessoa não viu essa dose nas alterações (R1)
+function paDoseOk(self,o){ o=o||{}; if(self._paEsc){ self._paEsc=false; return; } const ed=self.state.ied; if(!ed) return; const n=paNum(ed.val);
   if(String(ed.val).trim()===''||isNaN(n)||n<=0){ self.setState({ied:Object.assign({},ed,{err:'Informe a dose por hectare, maior que zero.'})}); return; }
   const a0=paWork(paPlan(self,self.state.pid)).find(y=>y.id===ed.aid); const x0=a0&&a0.prods.find(y=>y.prod===ed.prod);
   if(!x0||Math.abs(x0.dose-n)<1e-9){ self.setState({ied:null}); return; }
-  const r=paRasc(self,ed.aid,(a)=>{ const x=a.prods.find(y=>y.prod===ed.prod); if(x) x.dose=n; });
-  self.setState({pl:r.ps,ied:null,g2toast:'Dose de '+ed.prod+': '+paQ(x0.dose)+' → '+paQ(n)+' '+x0.un+'/ha.'+r.fim}); }
+  const r=paRasc(self,ed.aid,(a)=>{ const x=a.prods.find(y=>y.prod===ed.prod); if(x) x.dose=n; }); const mud=ed.prod+': '+paQ(x0.dose)+' → '+paQ(n)+' '+x0.un+'/ha';
+  if(o.sai){ self.__paSaiT=Date.now(); self.__paSaiTxt=mud; }
+  self.setState({pl:r.ps,ied:null,g2toast:'Dose de '+mud+'.'+r.fim}); }
 function paProdV(self,p,a,x,i,o){ const ed=self.state.ied; const em=!!ed&&ed.aid===a.id&&ed.prod===x.prod; const x0=o?o.prods.find(y=>y.prod===x.prod):null;
   const marca=(o&&!x0)?'novo':((x0&&Math.abs(x0.dose-x.dose)>1e-9)?'dose alterada':''); const dt=paQ(x.dose)+' '+x.un+'/ha';
   return {grupo:x.grupo, prod:x.prod, dose:dt, preco:paRS(x.preco)+'/'+x.un, custo:paRS(x.dose*x.preco)+'/ha',
@@ -204,7 +226,7 @@ function paProdV(self,p,a,x,i,o){ const ed=self.state.ied; const em=!!ed&&ed.aid
     fid:paDoseId(a.id,x.prod), val:em?ed.val:'', un:x.un+'/ha', ist:PA_DOSE_ST+'border:1px solid '+(em&&ed.err?'#B42318':'#1E7A4C')+';',
     setv:(e)=>self.setState({ied:Object.assign({},self.state.ied,{val:e.target.value,err:''})}),
     tecla:(e)=>{ if(e.key==='Enter'){ e.preventDefault(); paDoseOk(self); } else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); self._paEsc=true; self.setState({ied:null}); } },
-    sai:()=>paDoseOk(self), err:em?ed.err:'', temErr:em&&!!ed.err,
+    sai:()=>paDoseOk(self,{sai:true}), err:em?ed.err:'', temErr:em&&!!ed.err,
     tlab:'Retirar '+x.prod+' da atividade '+a.nome, tirar:()=>paTirar(self,a,i) }; }
 // retirar não pergunta: vai para o rascunho e o "Desfazer" fica no próprio drill-down
 function paTirar(self,a,i){ const x=a.prods[i]; const r=paRasc(self,a.id,(aa)=>{ aa.prods=aa.prods.filter(y=>y.prod!==x.prod); });
@@ -273,12 +295,14 @@ function paEdit(self,aid){ const p=paPlan(self,self.state.pid); if(!p) return; c
   const antes=!!a&&a.g.tipo==='DAP'&&Number(a.g.dias)<0;
   const d=a?{op:a.op,nome:a.nome,outra:(PA0.atvs[a.op]||[]).indexOf(a.nome)<0,tipo:(antes?'DAPA':a.g.tipo),dias:(a.g.tipo==='DATA'?'':String(Math.abs(Number(a.g.dias)))),data:(a.g.data||'')}
            :{op:paOpf(self,paOps(paWork(p))),nome:'',outra:false,tipo:'DAP',dias:'',data:''};
-  self.setState({fm:{aid:aid||null,draft:d,orig:JSON.stringify(d),errs:{},warn:false,rm:null},del:null,ied:null,iadd:null}); paFoco('fm_op'); }
+  self.setState({fm:{pid:p.id,aid:aid||null,draft:d,orig:JSON.stringify(d),errs:{},warn:false,rm:null},del:null,ied:null,iadd:null}); paFoco('fm_op'); }
 function paFmUpd(self,patch,errk){ const cur=self.state.fm; const nd=Object.assign({},cur.draft,patch); const ne=Object.assign({},cur.errs||{}); (errk||Object.keys(patch)).forEach(k=>{ delete ne[k]; });
   self.setState({fm:Object.assign({},cur,{draft:nd,errs:ne,warn:false})}); }
 function paIst(err,w){ return 'font-family:inherit;font-size:14px;padding:8px 10px;border-radius:10px;box-sizing:border-box;'+(w?'width:'+w+';':'width:100%;')+'border:1px solid '+(err?'#B42318':'#E4E9E5')+';background:#fff;color:#15201A;'; }
-function paFm(self,v){ const fm=self.state.fm; v.fm_open=!!fm; if(!fm) return; const p=paPlan(self,self.state.pid); if(!p){ v.fm_open=false; return; } const d=fm.draft; const er=fm.errs||{};
-  const nv=p.rasc?p.rasc.v:p.versao+1; const nc=paCults(p.id).length; const a0=fm.aid?paWork(p).find(x=>x.id===fm.aid):null;
+function paFm(self,v){ const fm=self.state.fm; v.fm_open=!!fm; if(!fm) return; const p=paPlan(self,self.state.pid); const a0=(p&&fm.aid)?paWork(p).find(x=>x.id===fm.aid):null;
+  /* o painel vale só para o plano e a atividade em que foi aberto: se não existem mais aqui, fecha sem gravar (R4) */
+  if(!p||fm.pid!==p.id||(fm.aid&&!a0)){ v.fm_open=false; setTimeout(()=>{ if(self.state.fm===fm) self.setState({fm:null}); },0); return; } const d=fm.draft; const er=fm.errs||{};
+  const nv=p.rasc?p.rasc.v:p.versao+1; const nc=paCults(p.id).length;
   v.fm_titulo=a0?('Atividade · '+a0.nome):'Nova atividade'; v.fm_savet=a0?'Salvar':'Incluir atividade';
   v.fm_sub=p.nome+' · salvar grava no rascunho v'+nv+(p.versao?('; a v'+p.versao+' publicada'+(nc?paUsam(nc):'')+' não mudam.'):'.');
   v.fm_tipos=PA_TIPOS; v.fm_tipo=d.tipo; v.fm_settipo=(e)=>paFmUpd(self,{tipo:e.target.value},['g']);
@@ -311,11 +335,15 @@ function paSave(self){ const fm=self.state.fm; const d=fm.draft; const er={}; le
     else if(n<0) er.g='Use zero ou mais: o sentido já está no tipo.'; else if(n>lim) er.g='Use de 0 a '+lim+' dias.'; else dias=((d.tipo==='DAPA'&&n>0)?-n:n); }
   if(!String(d.nome||'').trim()) er.nome=d.outra?'Informe o nome da nova atividade.':(d.op?'Escolha a atividade.':'Escolha a operação e depois a atividade.');
   if(!d.op) er.op='Escolha a operação.';
+  if(fm.pid!==self.state.pid){ self.setState({fm:null,g2toast:'O painel era de outro plano: nada foi gravado.'}); return; }
   const a0=fm.aid?paWork(paPlan(self,self.state.pid)).find(x=>x.id===fm.aid):null; const prods=a0?paClone(a0.prods):[];
+  if(fm.aid&&!a0){ self.setState({fm:null,g2toast:'A atividade não existe mais neste plano: nada foi gravado.'}); return; }
   if(Object.keys(er).length){ self.setState({fm:Object.assign({},fm,{errs:er,warn:false})}); return; }
+  const atv={id:fm.aid||('n'+Date.now().toString(36)),nome:String(d.nome).trim(),op:d.op,g:{tipo:(d.tipo==='DAPA'?'DAP':d.tipo),dias,data},prods};
+  /* salvar sem mudar nada não cria rascunho (seria um rascunho igual à versão publicada; revisão NAV-1, R3) */
+  if(a0&&paNorm(atv)===paNorm(a0)){ self.setState({fm:null,g2toast:'Nada mudou em “'+a0.nome+'”: o plano continua como estava.'}); return; }
   const ps=paClone(paPlans(self)); const p=ps.find(x=>x.id===self.state.pid); const novo=!p.rasc;
   if(novo) p.rasc={v:p.versao+1,atividades:paClone(p.atividades)};
-  const atv={id:fm.aid||('n'+Date.now().toString(36)),nome:String(d.nome).trim(),op:d.op,g:{tipo:(d.tipo==='DAPA'?'DAP':d.tipo),dias,data},prods};
   const L=p.rasc.atividades; const ix=L.findIndex(a=>a.id===fm.aid); if(ix>=0) L[ix]=atv; else L.push(atv);
   const xg=Object.assign({},self.state.xg||{}); xg[paGkey(atv.g)]=true; const xa=Object.assign({},self.state.xa||{}); xa[atv.id]=true;
   const nc=paCults(p.id).length;
@@ -352,22 +380,46 @@ function paNovoFaz(ps,dd,id){ const nome=String(dd.nome||'').trim(); const base=
   const atv=base?paClone(base.atividades).map((a,i)=>Object.assign(a,{id:id+'_'+i})):[];
   return {id,nome,base,ps:ps.concat([{id,nome,cultura:dd.cultura,versao:0,atividades:[],rasc:{v:1,atividades:atv},hist:[]}])}; }
 // ---------- publicar ----------
-// Próximo passo do detalhe (BOT-01/02): "Publicar versão vN" só com rascunho; desabilitado com o motivo (VIS-04) sem atividade ou com a
-// inclusão de insumo aberta (dano evitado: publicar uma versão sem o insumo que está sendo digitado); sem rascunho, nenhuma primária
+// Próximo passo do detalhe (BOT-01/02): "Publicar versão vN" só com rascunho; sem rascunho, nenhuma primária. Desabilitado com o
+// motivo (VIS-04) quando publicar sairia diferente do que a pessoa vê (a versão publicada é imutável):
+// - sem atividade;
+// - com a dose em edição (R1/R2: a dose digitada e não confirmada não aparece nas alterações);
+// - com a inclusão de insumo aberta (o insumo que está sendo digitado ficaria de fora);
+// - com o rascunho igual à versão publicada (R3: uma versão vazia marcaria os cultivos como desatualizados sem mudança nenhuma).
+// Habilitado, a nota resume as alterações ao lado do botão (paResumo).
 function paAcoes(p,ui){ ui=ui||{}; if(!p||!p.rasc) return {prim:null,nota:''}; const v=p.rasc.v; const t='Publicar versão v'+v;
-  if(!p.rasc.atividades.length){ const w='Inclua ao menos uma atividade para publicar a v'+v+'.'; return {prim:{t,dis:w},nota:w}; }
-  if(ui.iadd){ const w='Conclua ou cancele a inclusão do insumo para publicar a v'+v+'.'; return {prim:{t,dis:w},nota:w}; }
-  return {prim:{t,dis:''},nota:''}; }
+  const no=(w)=>({prim:{t,dis:w},nota:w});
+  if(!p.rasc.atividades.length) return no('Inclua ao menos uma atividade para publicar a v'+v+'.');
+  if(ui.ied) return no('Confirme (Enter) ou cancele (Esc) a dose de '+ui.ied.prod+' para publicar a v'+v+'.');
+  if(ui.iadd) return no('Conclua ou cancele a inclusão do insumo para publicar a v'+v+'.');
+  if(p.versao>0&&!paDiff(p).length) return no('O rascunho v'+v+' está igual à v'+p.versao+': altere algo ou descarte o rascunho.');
+  return {prim:{t,dis:''},nota:paResumo(p)}; }
+// resumo das alterações na nota do Próximo passo, ao lado de "Publicar" (R1): até 2 itens e "e mais N"; o bloco "Alterações" tem todas,
+// o custo e o impacto nos cultivos
+function paResumo(p){ const d=paDiff(p); if(!p||!p.rasc||!d.length) return ''; const n=d.length;
+  if(!p.versao) return 'A v'+p.rasc.v+' publica '+n+(n>1?' atividades.':' atividade.');
+  const it=d.map(x=>x.k==='Alterada'?(x.n+' ('+x.t+')'):((x.k==='Incluída'?'inclui ':'exclui ')+x.n));
+  return n+(n>1?' alterações':' alteração')+' na v'+p.rasc.v+': '+it.slice(0,2).join('; ')+(n>2?'; e mais '+(n-2):'')+'.'; }
 // publicar (puro): a versão do rascunho vira a vigente e entra no histórico; os cultivos (PA0.cultivos) não mudam (PRD 40.3)
 function paPubFaz(ps0,pid,hoje){ const ps=paClone(ps0); const p=ps.find(x=>x.id===pid); if(!p||!p.rasc) return {erro:'Sem rascunho para publicar.'};
   const w=paAcoes(p).prim.dis; if(w) return {erro:w};
   p.versao=p.rasc.v; p.atividades=p.rasc.atividades; p.rasc=null; p.hist=[{v:p.versao,at:hoje}].concat(p.hist||[]); return {ps,p}; }
-function paPub(self){ const pid=self.state.pid; const ac=paAcoes(paPlan(self,pid),{iadd:!!self.state.iadd}); if(!ac.prim||ac.prim.dis) return;
+// clique em "Publicar" (R1): recusa se o gesto começou com o botão desabilitado (__paPubDis) ou se a saída do campo acabou de gravar uma
+// dose (__paSaiT, até 1 s: o mesmo clique). A dose fica no rascunho e aparece na nota; a pessoa confere e clica de novo
+const PA_SAI_MS=1000;
+function paPubAgora(self,agora){ const tarde=!self.__paSaiT||(agora-self.__paSaiT)>=PA_SAI_MS; if(!self.__paPubDis&&tarde) return '';
+  const txt=self.__paSaiTxt; self.__paPubDis=false; self.__paSaiT=0; self.__paSaiTxt='';
+  return (txt?'A dose de '+txt+' entrou no rascunho agora':'O rascunho mudou neste clique')+': confira as alterações ao lado de Publicar e clique de novo.'; }
+function paPub(self){ const pid=self.state.pid; const st=self.state; const ac=paAcoes(paPlan(self,pid),{iadd:!!st.iadd,ied:st.ied}); if(!ac.prim||ac.prim.dis) return;
+  const ag=paPubAgora(self,Date.now()); if(ag){ self.setState({g2toast:ag}); return; }
   const r=paPubFaz(paPlans(self),pid,PA0.hoje); if(r.erro){ self.setState({g2toast:r.erro}); return; } const apl=paApl(pid);
-  self.setState({pl:r.ps,disc:false,del:null,g2toast:'Versão v'+r.p.versao+' publicada.'+(apl?' Os cultivos continuam como estavam ('+apl+'); decida a adoção em Planejar safra.':' Já pode ser aplicada em Planejar safra.')});
-  /* o comando sai da tela com o rascunho: o foco vai aos cultivos (onde está a adoção) ou, sem cultivos, ao nome do plano */
+  self.setState({pl:r.ps,disc:false,del:null,g2toast:'Versão v'+r.p.versao+' publicada.'+(apl?' Os cultivos continuam como estavam ('+apl+').':'')+' '+PA_PROTO});
+  /* o comando sai da tela com o rascunho: o foco vai aos cultivos (onde se vê quem ficou na versão anterior) ou, sem cultivos, ao nome do plano */
   setTimeout(()=>{ try{ const h=document.getElementById(apl?'pa-cv-tit':'pa-det-tit'); if(h){ h.setAttribute('tabindex','-1'); h.focus({preventScroll:true}); h.scrollIntoView({block:'start'}); } }catch(e){} },40); }
-// situação do cultivo no plano (X-AGR-6): versão aplicada × publicada; a adoção é por cultivo no Planejar safra, aberto no próprio cultivo
+// R5: a troca de versão por cultivo (PRD 40.3) ainda não existe no Planejar safra do protótipo, e a PA não grava no cenário: o texto
+// diz isso em vez de prometer a adoção (pendência da frente Planejar safra, docs/navegacao/ESPECIFICACAO.md §4)
+const PA_PROTO='No protótipo, a versão publicada aqui ainda não chega ao Planejar safra.';
+// situação do cultivo no plano (X-AGR-6): versão aplicada × publicada; o link abre o próprio cultivo no Planejar safra
 function paSitCult(c,p){ const lk=(!c.ro&&c.ver<p.versao)?[{k:'link',t:'Abrir cultivo no Planejar safra ›',h:'SAF.dc.html#saf='+c.safra+'&passo=cultivos&cult='+c.id}]:[];
   if(c.ro) return [{k:'chip',t:'Safra encerrada · fica na v'+c.ver,c:'gray'}];
   if(p.rasc) return [{k:'chip',t:'Continua na v'+c.ver+' ao publicar',c:'yellow'}].concat(lk);
@@ -381,7 +433,7 @@ function paDet(self,v,p){ const nd=paDiff(p); v.alt_tem=!!p.rasc;
   const c0=paCt(p.atividades), c1=p.rasc?paCt(p.rasc.atividades):c0, dl=c1-c0;
   v.dif_custo=p.versao?('Custo de insumos: '+paRS(c0)+'/ha na v'+p.versao+' → '+paRS(c1)+'/ha na v'+nv+(Math.abs(dl)>0.004?' ('+(dl>0?'+':'−')+paRS(Math.abs(dl))+'/ha)':' (sem mudança)')):('Custo de insumos: '+paRS(c1)+'/ha');
   const apl=paApl(p.id);
-  v.imp=apl?('Aplicado em '+apl+' — não serão alterados. '+(p.rasc?'Depois de publicar a v'+nv+', decida a adoção por cultivo em Planejar safra.':'A adoção de uma versão nova é decidida por cultivo em Planejar safra.')):'Nenhum cultivo usa este plano; publicar não altera nenhuma safra.';
+  v.imp=apl?('Aplicado em '+apl+' — não serão alterados. A troca de versão é decidida por cultivo, no Planejar safra (PRD 40.3); no protótipo, ela ainda não existe.'):'Nenhum cultivo usa este plano; publicar não altera nenhuma safra.';
   v.imp_st='padding:9px 12px;border-radius:10px;font-size:12.8px;font-weight:700;'+(apl?'background:#FFF3D6;color:#8A5A00;':'background:#EEF1EE;color:#5B6660;');
   v.tem_cv=paCults(p.id).length>0; v.cv_vazio=!v.tem_cv; v.imp_cv=v.tem_cv&&!p.rasc;
   const bv=paByVer(p.id);
@@ -404,8 +456,12 @@ function EXTRAVALS(self,v){ paHashIni(self); const st=self.state; const pid=st.p
   paFm(self,v); paNp(self,v);
   // Criar plano (lista, cabeçalho) e Incluir atividade (bloco Atividades) são as entradas dos painéis; Publicar é o Próximo passo do detalhe
   v.pa_novo=()=>paNewPlan(self); v.pa_incl=()=>paEdit(self,null);
-  let A={}; const ac=p?paAcoes(p,{iadd:!!st.iadd}):null;
-  if(p) A={volta:{t:'‹ Biblioteca de planos',fn:()=>paLista(self),a:'voltar'},nota:ac.nota,prim:ac.prim?{t:ac.prim.t,fn:()=>paPub(self),a:'comando'}:null};
+  let A={}; const ac=p?paAcoes(p,{iadd:!!st.iadd,ied:st.ied}):null; const sa=(p&&st.saiAv&&paPend(st))?st.saiAv:null;
+  if(p){ A={volta:{t:'‹ Biblioteca de planos',fn:()=>paSair(self,{pid:null}),a:'voltar'},nota:ac.nota,prim:ac.prim?{t:ac.prim.t,fn:()=>paPub(self),a:'comando'}:null};
+    /* aviso de saída (R8) no lugar da nota, ao lado do botão que levou a sair; sem ele, com alterações, o atalho para o bloco completo */
+    if(sa){ const pd=paPend(st); const pp=sa.pid?paPlan(self,sa.pid):null; A.nota=pd.charAt(0).toUpperCase()+pd.slice(1)+' não foi concluída: o que foi digitado se perde ao sair.';
+      A.lnks=[{t:pp?'Descartar e abrir '+pp.nome:'Descartar e voltar à biblioteca',fn:()=>paSaiOk(self)},{t:'Continuar editando',fn:()=>paSaiNao(self)}]; }
+    else if(ac.prim&&!ac.prim.dis&&ac.nota) A.lnks=[{t:'Ver alterações',fn:()=>{ try{ const h=document.getElementById('pa-alt-tit'); if(h){ h.setAttribute('tabindex','-1'); h.scrollIntoView({block:'start'}); h.focus({preventScroll:true}); } }catch(e){} }}]; }
   g2acoes(v,'aa',A); v.aa_pdis=!!(ac&&ac.prim&&ac.prim.dis); v.aa_pwhy=(ac&&ac.prim&&ac.prim.dis)||''; }
 '''
 
@@ -561,7 +617,7 @@ def build():
                            f'<span><span style="{H("d.st")}">{H("d.k")}</span></span><span><b>{H("d.n")}</b> <span style="color: {MUTED};">· {H("d.t")}</span></span></div>', 2)
            + IF('dif_vazio', f'<div style="font-size: 13px; color: {MUTED};">O rascunho está igual à versão publicada.</div>')
            + f'<div style="font-size: 13px; font-weight: 700; padding-top: 6px; border-top: 1px solid {LINE};">{H("dif_custo")}</div>' + imp)
-    cultivos = bloco('<span id="pa-cv-tit">Cultivos que usam este plano</span>', 'Confira quem continua na versão em que foi aplicado; a troca de versão é decidida por cultivo em Planejar safra.',
+    cultivos = bloco('<span id="pa-cv-tit">Cultivos que usam este plano</span>', 'Confira quem continua na versão em que foi aplicado; a troca de versão é decidida por cultivo, no Planejar safra.',
                      IF('imp_cv', imp) + IF('tem_cv', g_cv) + IF('cv_vazio', f'<div style="font-size: 13px; color: {MUTED};">Nenhum cultivo usa este plano.</div>'), hole=True)
     linha_v = (f'<div style="display: grid; grid-template-columns: 48px 180px 110px minmax(0, 1fr); gap: 10px; align-items: center; padding: 6px 0; border-top: 1px solid {LINE}; font-size: 13px;">'
                f'<b>{H("h.t")}</b><span style="color: {MUTED};">{H("h.at")}</span><span><span style="{H("h.stst")}">{H("h.st")}</span></span><span>{H("h.uso")}</span></div>')
@@ -570,7 +626,7 @@ def build():
                f'<button type="button" class="pa-disc" aria-expanded="{H("hist_open")}" aria-controls="pa-versoes" aria-label="{H("hist_lab")}" onClick="{H("hist_tog")}"><span aria-hidden="true" style="width: 12px;">{H("hist_sym")}</span>Versões</button></h3>'
                f'<div style="font-size: 12.8px; color: {MUTED};">{H("hist_res")}</div></div>'
                + IF('hist_open', f'<div id="pa-versoes" style="padding: 0 16px 14px;">' + FOR('hist', 'h', linha_v, 2) + '</div>') + '</section>')
-    alteracoes = IF('alt_tem', bloco(H('dif_tit'), 'Confira cada alteração antes de publicar; publicar cria a nova versão sem mudar os cultivos.', dif, hole=True))
+    alteracoes = IF('alt_tem', bloco(f'<span id="pa-alt-tit">{H("dif_tit")}</span>', 'Confira cada alteração antes de publicar; publicar cria a nova versão sem mudar os cultivos.', dif, hole=True))
     s2 = head2 + banner + atividades + cultivos + versoes + alteracoes
 
     # Próximo passo do detalhe (BOT-01/02): "‹ Biblioteca de planos" à esquerda e "Publicar versão vN" à direita, com o motivo quando
