@@ -1,0 +1,8 @@
+classe: ('ok', 'Na estimativa mensal, cabe nos 690 ha com plano. Fora da conta: T4, T3, P1 e P2 (475 ha), sem plano. Prazo por talhão não verificado: 17 de 17 atividades sem janela. | Configuração incluída em Adubação de cobertura · Classe distribuidor 12 m: 6,72 ha/h. A área de Adubação de cobertura agora se divide entre 2 configurações. Adubação a lanço: 40,2 → 55,7 h · Distribuidores nov/26: 16 % → 23 %.')
+OK    · B5a "Ao mesmo tempo" posta em sequência pelo grupo da fazenda: "Distribuidores: ao mesmo tempo precisariam de 2, a fazenda tem 1"
+troca 2 h na 1ª: ('ok', 'Na estimativa mensal, cabe nos 690 ha com plano. Fora da conta: T4, T3, P1 e P2 (475 ha), sem plano. Prazo por talhão não verificado: 17 de 17 atividades sem janela. | Rendimento de Adubação de cobertura · Trator 03 + Distribuidor 3 t: 18,00 ha/h · R$ 12,94/ha. Horas e capacidade não mudaram.')
+OK    · B5b troca informada na 1ª configuração entra no decorrido (decorrido = horas-conjunto + 2 h)
+OK    · B6a prestador incluído pelo formulário (Pessoas vinha 1, copiado): horas-homem do Resumo = horas de Operadores na safra
+OK    · B6b o aviso diz que a tarifa do prestador é a de Máquina e que implemento e pessoas da fazenda não entram
+OK    · B7 sem erros de JS
+RESULTADO: 5/5 OK

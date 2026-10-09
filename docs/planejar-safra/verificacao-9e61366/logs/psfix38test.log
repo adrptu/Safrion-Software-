@@ -1,0 +1,7 @@
+  ok  A · grupos em ordem de calendário (crescente) · ['Adjuvantes 25/09/2026', 'Herbicidas 25/09/2026', 'Fertilizantes 01/10/2026', 'Fungicidas 14/10/2026', 'Inoculantes 14/10/2026', 'Inseticidas 15/10/2026', 'Sementes 15/10/2026']
+  ok  A · insumos em ordem de calendário dentro de cada grupo · []
+Traceback (most recent call last):
+  File "<sp-saf>/tools/prototipo/v37/gen37/psfix38test.py", line 67, in <module>
+    fa, fc = [i for i, x in enumerate(rs) if x['t'].startswith('Fungicida A')][0], [i for i, x in enumerate(rs) if x['t'].startswith('Fungicida C')][0]
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+IndexError: list index out of range

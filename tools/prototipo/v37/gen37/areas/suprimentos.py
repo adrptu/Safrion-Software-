@@ -486,7 +486,7 @@ def su04():
         its=grupos[gname]; cot=_cotacao(gname,its); conv=[f['nome'] for f in D2.FORNECEDORES if f['homologado'] and gname in f['grupos']]
         best=cot[0] if cot else None; nresp=len(cot)
         rows.append(R('G'+gname,dict(cot=f'SOL-2026-07 · {gname}',itens=len(its),forn=len(conv),resp=nresp,melhor=round(best['tot']) if best else 0,estado='enviada',tipo='Enviada em 23/09 · consulta'),
-            dict(cot=[b(f'SOL-2026-07 · {gname}'),mut('Planejar safra · etapa 6')],itens=[txt(f'{len(its)} {"item" if len(its)==1 else "itens"}'),mut(', '.join(list(its)[:2])+('…' if len(its)>2 else ''))],
+            dict(cot=[b(f'SOL-2026-07 · {gname}'),mut('Planejar safra · demanda de insumos')],itens=[txt(f'{len(its)} {"item" if len(its)==1 else "itens"}'),mut(', '.join(list(its)[:2])+('…' if len(its)>2 else ''))],
                  forn=[txt(f'{len(conv)} homologados')],resp=[ch(f'{nresp}/{len(conv)}','green' if nresp==len(conv) else 'yellow')],
                  melhor=([txt(f"R$ {nf(best['tot'])}"),mut(best['nome'])] if best else [mut('—')]),
                  estado=[ch('Pronta','green') if nresp==len(conv) else ch(f'Falta {len(conv)-nresp} resposta','yellow')]),

@@ -1,0 +1,6 @@
+OK    · 10 S27SF: Total de horas-conjunto e custo = espelho dados2.plano_op (uma configuração por atividade)
+OK    · 10 LG2627: Total de horas-conjunto e custo = espelho dados2.plano_op (uma configuração por atividade)
+OK    · 10b LG2627 Operadores nov/26: aria-label, Total da g_op e espelho capSaf com as mesmas horas
+OK    · 11 Safra 2025/26 (encerrada): formulário só em consulta, sem "+ Outra configuração" nem Salvar
+OK    · 9 celular 390 px: etapa 3 sem rolagem lateral da página (a tabela rola dentro da caixa) e sem erros
+RESULTADO: 5/5 OK

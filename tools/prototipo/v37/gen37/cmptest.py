@@ -42,8 +42,8 @@ try:
     chk('nenhuma safra escolhida sozinha', 'Nenhuma safra escolhida' in body())
     chk('impedimentos visíveis', J("[...document.querySelectorAll('.etp-ind .etp-itens>li')].filter(b=>/Escolha a safra/.test(b.innerText)).length")>=5)
     b=body(); chk('Safrinha sem solicitação', 'Solicitação ainda não enviada pelo planejamento' in b)
-    chk('link Ver origem para SAF (etapa 6 da Safra 2026/27)', J("[...document.querySelectorAll('a')].some(a=>a.innerText.trim()==='Ver origem'&&a.getAttribute('href')==='SAF.dc.html#saf=S2627&etapa=6')"))
-    chk('link Planejar safra na Safrinha (etapa 6 da Safrinha)', J("[...document.querySelectorAll('a')].some(a=>/Abrir Planejar safra/.test(a.innerText)&&a.getAttribute('href')==='SAF.dc.html#saf=S27SF&etapa=6')"))
+    chk('link Ver origem para SAF (demanda de insumos da Safra 2026/27, passo=demanda)', J("[...document.querySelectorAll('a')].some(a=>a.innerText.trim()==='Ver origem'&&a.getAttribute('href')==='SAF.dc.html#saf=S2627&passo=demanda')"))
+    chk('link Planejar safra na Safrinha (demanda de insumos da Safrinha, passo=demanda)', J("[...document.querySelectorAll('a')].some(a=>/Abrir Planejar safra/.test(a.innerText)&&a.getAttribute('href')==='SAF.dc.html#saf=S27SF&passo=demanda')"))
     print('  etapa 4 sem safra:', ir_etapa(4), T()); chk('etapa bloqueada sem safra', cur().startswith('1 '))
     # Safrinha: fica na etapa 1, etapas impedidas
     row('Safrinha 2027'); chk('Safrinha selecionada fica na etapa 1', cur().startswith('1 ') and 'Sem solicitação' in J("document.querySelector('.etp-ind').innerText"), T())
