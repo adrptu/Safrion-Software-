@@ -144,6 +144,21 @@ def b19():
     return (not any(e.get('chave')=='c1|a7' for e in ev) and any(e.get('chave')=='OS-0440' and e['dt']=='2026-10-01' and e['q']==80 for e in ev) and perto(tot(dx),tot(d),0.005),
             [(e.get('chave'),e['dt'],e['q']) for e in ev])
 caso('B19 O.S. nova emitida no cenário (OS-0440, c1|a7, janela 01/10): substitui a parte do plano (80 L de 14/12 viram 80 L em 01/10), sem somar os dois; o total não muda',b19)
+def b20():   # o realizado sai da demanda pelos comandos reais do cenário (cenApontar → duplicidade retida → cenApDecidir 'somar' por Paula), sem recomprar o aplicado
+    js=runjs(cenario.perfis_js()+PRE+'\n'+CAL+f"""\nconst B={json.dumps(D2.os_base(),ensure_ascii=False)}; const c=JSON.parse(JSON.stringify(CEN0)); const o=c.ordens['OS-0421'];
+const pd=()=>Object.fromEntries(cenOsDem(c,B).find(x=>x.id==='OS-0421').itens.map(i=>[i.p,[i.q,i.calc]]));
+const p0=pd(); const R=cenApontar(c,{{os:'OS-0421',d:'23/09',ha:10,origem:'web'}}); const p1=pd(); const st1=R.ap.st;
+cenApDecidir(c,'OS-0421',R.ap.dia,'somar','Paula'); const p2=pd(); const R2=cenApontar(c,{{os:'OS-0421',d:'23/09',ha:10,origem:'web',chave:R.ap.chave}}); const p3=pd();
+console.log(JSON.stringify({{p0,p1,p2,p3,st1,rep:!!R2.repetido,real:o.realizado,saldo:o.saldo,cust:c.reqs[o.req].itens.find(i=>i.prod==='Fungicida A').custodia,
+  fis:Object.values(c.lotes).filter(l=>l.prod==='Fungicida A').reduce((a,l)=>a+l.fisico,0),c}}));""")
+    c=js.pop('c'); py={i['p']:[i['q'],i['calc']] for i in next(o for o in D2.os_dem(c) if o['id']=='OS-0421')['itens']}; dx=D2.demanda('S2627',osd=D2.os_dem(c))
+    return (js['p1']==js['p0'] and js['st1']=='Duplicidade a conferir' and js['real']==200 and js['saldo']==150 and js['cust']==60 and js['fis']==545
+            and js['p2']['Fungicida A']==[15,'0,50 L/ha × 150 ha − 60 L em custódia'] and js['p2']['Adjuvante espalhante']==[37.5,'0,25 L/ha × 150 ha']
+            and js['rep'] and js['p3']==js['p2'] and py==js['p2'] and L(dx,'Fungicida A')==0.0 and perto(dx['Adjuvante espalhante']['bruta'],d['Adjuvante espalhante']['bruta']-2.5)
+            and perto(tot(dx),430255.00,0.005),(js,py,round(tot(dx),2)))
+caso('B20 realizado (pedido do Codex, 6064114787 §3): apontar 10 ha na OS-0421 retido como duplicidade não muda nada; somado por Paula, realizado 200 ha e saldo 150 ha — '
+     'Fungicida A continua 15 L (0,50 × 150 − 60 L em custódia: os 5 L aplicados saíram da custódia, não são recomprados nem contados duas vezes; físico 545 L), '
+     'Adjuvante 40 → 37,5 L (os 10 ha feitos saem da demanda); reenvio com a mesma chave não muda; Python = JS; total R$ 430.255,00',b20)
 # ---------------- C · paridade JS × Python (a mesma conta nos dois lados) ----------------
 print('== C · paridade cal01.js/cenario.js × dados2')
 def c1():
