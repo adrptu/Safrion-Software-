@@ -44,7 +44,7 @@ Até a decisão, vale o comportamento conservador descrito no próprio PRD.
 | DEC-07 | Tolerâncias e exposição de compras | PRD 70.4 |
 | DEC-08 | Gessagem e subsuperfície | PRD 70.4 |
 | DEC-09 | Trial do agricultor e franquias | PRD 70.4 |
-| PEND-01.. | Pendências da revisão v3.10 (confiabilidade transacional, offline e desempenho), entre elas a proposta de pré-autorização por limiares, **não aprovada** | PRD 73.12 (em revisão) |
+| PEND-01.. | Pendências da revisão v3.10 (confiabilidade transacional, offline e desempenho), entre elas a proposta de pré-autorização por limiares, **não aprovada** | PRD 73.12 |
 | PEND-REPO-01 | Em 27/09 o proprietário informou "Fiz upgrade no git", e a CI remota voltou a rodar. Plano exato ainda não conferido; se permitir, aplicar a proteção da `main` (`tools/github/configurar_protecao.sh`). Texto anterior: **só se o plano da conta for Free** (ainda não verificado): proteção da `main` imposta pelo servidor em repositório privado exige GitHub Pro (custo mensal da conta). Opções: contratar o Pro; ou manter privado sem proteção imposta, com a disciplina de pull request, CI e parecer escrito. Tornar público só por decisão expressa. **Até decidir:** privado, sem proteção imposta, disciplina de processo. | `docs/STATUS.md`, bloqueio 2 |
 | PEND-DS-01.. | Pendências do design system (modo escuro, marca, fontes de títulos e outras) | PRD 74.12 (em revisão) |
 | PEND-OS-01 | O.S. sem etapa de revisão (pedido de 01/10) × DEC-2609-05. **Padrão adotado:** "Liberar para execução" é o "Aprovar e liberar" do PRD 41.3, gravando aprovado por (CMD-42) e liberado por (CMD-06) em separado | issue 1, comentário 6001191813 |

@@ -1,6 +1,6 @@
 # PRD consolidado — Do Talhão à O.S.
 
-**Versão 3.9 · 26 de setembro de 2026 · Decisões do proprietário sobre parcelas, planos, rendimentos, O.S. e mapa; reconciliação com o protótipo**
+**Versão 3.11 · 27 de setembro de 2026 · Produto fixo ou troca de marca pelo mesmo ingrediente ativo (40.5); sobre a v3.10: confiabilidade transacional, resiliência offline e desempenho; design system; melhoria contínua; refinamentos selecionados da comparação externa** (versão anterior preservada: v3.10 de 27/09/2026)
 
 **Destinatários:** direção, produto, design, agronomia, operações, controladoria e engenharia.  
 **Finalidade imediata:** orientar a atualização do protótipo para validação pelo proprietário. Iniciar o software real somente após comando explícito posterior; preservar os requisitos de engenharia para essa fase.
@@ -9,7 +9,7 @@
 
 **Conteúdo:** 63 diagramas editáveis com raias e etapas; 56 diagramas substituídos, 4 fluxos UX integrados e 3 novos. Mantém a especificação integrada de produto, negócio, agronomia, UX e engenharia. O catálogo canônico contém 98 famílias de telas, incluindo quatro destinos administrativos exclusivos da plataforma. Os capítulos 33–68 são contratos detalhados dos respectivos domínios, vinculados às telas no capítulo 5; o capítulo 69 apresenta a matriz de cobertura e os fluxos de reconciliação; o capítulo 70 registra o tratamento dos 68 achados da revisão independente e as decisões ainda pendentes. As referências às 91 telas do protótipo anterior são históricas e não numeração desta entrega.
 
-**Estado da entrega:** v3.9: incorpora ao v3.8 de processos as decisões do proprietário de 26/09/2026 e as correções verificadas na reconciliação com o protótipo (capítulo 72); 7 fluxogramas atualizados, demais preservados. Navegação recente reconciliada nos capítulos 71 e 72. Contratos técnicos anteriores preservados. A revisão documental não equivale à homologação do produto nem à validação de protocolos, integrações ou máquinas reais.
+**Estado da entrega:** v3.11: acrescenta 40.5 e 40.6 (modo do item do plano: produto fixo ou alternativas com aprovação técnica; troca de marca pelo mesmo ingrediente ativo, do plano à compra e à O.S.) e ajusta 11.1, CAL-11, 40.1 e SU-04, com validação tripla Codex, Gemini e Claude. v3.10: acrescenta o capítulo 73 (idempotência de ponta a ponta, validade das reservas de material, conciliação de fatos de campo, integrações resilientes, consultas e projeções seletivas, metas mensuráveis, aprovação agronômica das operações mecânicas e decisões pendentes) e o capítulo 74 (design system: tokens, cores com significado, componentes, padrões de tela, dados e mapa, acessibilidade medida e governança) e o capítulo 75 (relato com print e comentário, uso real e simplificação, produtividade da interface, incidentes com plantão real e assistente com validação cruzada entre dois modelos), reconcilia as seções afetadas e incorpora os refinamentos aprovados da comparação externa; a v3.9 permanece como versão anterior. A v3.9 incorporou ao v3.8 de processos as decisões do proprietário de 26/09/2026 e as correções verificadas na reconciliação com o protótipo (capítulo 72); 7 fluxogramas atualizados, demais preservados. Navegação recente reconciliada nos capítulos 71 e 72. Contratos técnicos anteriores preservados. A revisão documental não equivale à homologação do produto nem à validação de protocolos, integrações ou máquinas reais.
 
 **Índice navegável**
 
@@ -89,12 +89,15 @@
 
 - [71. Revisão multifuncional dos fluxos](#71-revisão-multifuncional-dos-fluxos--26092026)
 - [72. Decisões do proprietário de 26/09/2026 e reconciliação com o protótipo](#72-decisões-do-proprietário-de-26092026-e-reconciliação-com-o-protótipo)
+- [73. Confiabilidade transacional, resiliência offline e desempenho — v3.10](#73-confiabilidade-transacional-resiliência-offline-e-desempenho--v310)
+- [74. Design system — v3.10](#74-design-system--v310)
+- [75. Melhoria contínua com o proprietário e os usuários — v3.10](#75-melhoria-contínua-com-o-proprietário-e-os-usuários--v310)
 
 ## 0. Instrução para o Claude e autoridade deste documento
 
 ### 0.1 Comando para validação e posterior construção no Claude Code
 
-> Atualize primeiro o protótipo “Do Talhão à O.S.” conforme esta revisão v3.9, os 63 fluxos e as reconciliações dos capítulos 71 e 72. Mostre etapas contínuas, responsabilidades, estados, impedimentos e próximos passos, preservando o mesmo registro entre módulos. Mantenha visível apenas o recorte de menus da seção 71.6. Valide as jornadas com o proprietário. Não inicie a construção de produção até receber seu comando explícito. Após esse comando, implemente o produto completo pelos contratos RN/CAL/CMD/FO e pelos requisitos de engenharia deste PRD, incluindo ambientes separados, controles transacionais, testes e recuperação; não trate o protótipo como backend homologado. Não invente resultados de testes nem prometa zero bugs.
+> Atualize primeiro o protótipo “Do Talhão à O.S.” conforme esta revisão v3.11 (com 40.5 e 40.6), os 63 fluxos, as reconciliações dos capítulos 71, 72 e 73 e os capítulos 74 e 75. Mostre etapas contínuas, responsabilidades, estados, impedimentos e próximos passos, preservando o mesmo registro entre módulos. Mantenha visível apenas o recorte de menus da seção 71.6. Valide as jornadas com o proprietário. Não inicie a construção de produção até receber seu comando explícito. Após esse comando, implemente o produto completo pelos contratos RN/CAL/CMD/FO e pelos requisitos de engenharia deste PRD, incluindo ambientes separados, controles transacionais, testes e recuperação; não trate o protótipo como backend homologado. Não invente resultados de testes nem prometa zero bugs.
 
 ### 0.2 Fonte única e leitura
 
@@ -127,7 +130,7 @@ Ordem de leitura: fundamentos e regras → navegação e catálogo → estados e
 | Portais e crédito | Manter portais de fornecedor, comprador e credor; decisão do credor separada do pagamento | Preservar o valor comercial do Claude sem prometer crédito instantâneo |
 | Segurança técnica | Regras obrigatórias não são superadas por justificativa gerencial | Distinguir restrição de desvio econômico |
 | Dados reais | Fato ocorrido sempre registrável, mesmo não conforme | O sistema precisa revelar o ocorrido |
-| Automação | Calcular, conferir, deduplicar, propor e preparar; decisões sensíveis seguem política | Menos trabalho manual com responsabilidade identificável |
+| Automação | Calcular, conferir, deduplicar, propor e preparar; decisões sensíveis seguem política, exceto a aprovação técnica de O.S. agrícola, sempre individual (APROV-05) | Menos trabalho manual com responsabilidade identificável |
 | Fórmulas e catálogos | Unidades explícitas, exemplos verificáveis e protocolos versionados | Não reutilizar tabelas antigas não validadas como verdade universal |
 | IA | Assistente contextual sobre dados autorizados; cálculos por serviços determinísticos | Evitar decisões inventadas e efeitos sem rastreio |
 
@@ -173,8 +176,8 @@ Uma meta é critério de avaliação, não resultado observado. Não usar quanti
 |---|---|---|---|
 | Direção/proprietário | GE-01, resultados e decisões relevantes | Capital, orçamento, estratégia e alçadas | Consolidado por grupo, empresa, fazenda e cultura |
 | Gerente | IN-01, trabalho e impedimentos | Prioridades, contingências permitidas e recursos | Agenda e situação ponta a ponta |
-| Agrônomo/RT | AG-01 e IN-02 | Recomendação, protocolo, tratamento de desvio técnico | Solo, MIP, perenes, água e eficácia |
-| PCP | PL-04 | Datas, recursos e liberação conforme prontidão | Demanda, capacidade, colheita e reprogramação |
+| Agrônomo/RT | AG-01 e IN-02 | Recomendação, protocolo, tratamento de desvio técnico e aprovação de cada O.S. agrícola (CMD-42), inclusive operações mecânicas (APROV-02), exceto irrigação somente com água (DEC-2609-10) | Solo, MIP, perenes, água e eficácia |
+| PCP | PL-04 | Datas, recursos e liberação de ordens aprovadas e prontas (CMD-06) | Demanda, capacidade, colheita e reprogramação |
 | Encarregado/operador | MB-01 | Iniciar, pausar e informar ocorrência | Somente trabalhos e locais autorizados |
 | Irrigante | MB-08 | Execução e apontamento dentro da O.S. | Setor, lâmina, volume, energia e ocorrências |
 | PCM/mecânico | MA-03/MA-04 ou MB-09 | Condição técnica, reparo, teste e retorno | Ativos, peças, horas e falhas |
@@ -183,7 +186,7 @@ Uma meta é critério de avaliação, não resultado observado. Não usar quanti
 | Colheita/packing/qualidade | CO-02/CO-05/CO-06 | Programação, transformação e aptidão do lote | Pesagem, classificação, embalagem e rastreio |
 | Comercial/logística | VE-01/LO-01 | Promessa, negociação e atendimento | Disponibilidade, padrão, expedição e entrega |
 | Financeiro/controladoria | GE-03 a GE-08 | Conciliação, fechamento e decisões em alçada | Caixa, títulos, custos, margens e capital |
-| Administrador | CF-01/CF-03 | Configuração e acessos | Não ganha aprovação técnica só por administrar |
+| Administrador | CF-01/CF-03 | Configuração e acessos | Não ganha aprovação técnica só por administrar. Como integrador/TI, trata em CF-03 a fila de integração, a consulta ao destino e as exceções técnicas (INTEG-20, INTEG-25), sem decidir efeito de negócio |
 | Parceiro externo | PT-01 | Sua proposta ou decisão de crédito | Apenas negociações e dados concedidos |
 
 **Tela após autenticação:** os destinos da coluna Entrada padrão são o padrão por papel. O usuário pode escolher uma tela inicial autorizada em Preferências, inclusive IN-04 (Mapa da fazenda), GE-01 ou IN-01; a preferência não amplia acesso e recua ao padrão se o acesso for revogado. A posição inicial do mapa no PDF/menu anterior não é evidência suficiente de uma decisão de login único no mapa. Mantém-se o padrão por papel, com escolha explícita pelo usuário; não presumir mudança de preferência do proprietário.
@@ -194,23 +197,25 @@ Combinar papel, empresa/fazenda, domínio, objeto, ação, valor e vigência. Cr
 
 Uma pessoa pode acumular papéis. Alçadas dependem do porte e risco da organização; não presumir quatro pessoas diferentes em toda fazenda. Segregação obrigatória, exceções gerenciais permitidas, segundo aprovador e revisão posterior são configurados e auditados. Exceção gerencial nunca supera restrição técnica/legal obrigatória. Ninguém amplia o próprio acesso.
 
+**Alteração que afeta a própria avaliação.** Vale para as metas que a organização marcou como usadas em avaliação ou remuneração (FO-38; 55.5). Quem está entre os avaliados pode propor, mas não publica sozinho mudança de meta, padrão, tolerância, exclusão, classificação ou critério de cálculo que altere a própria avaliação, nem confirma sozinho a exclusão ou reclassificação de registro que a altere. Publicar ou confirmar exige revisor de outra identidade, com competência na alçada de CF-02 e fora dos avaliados daquela meta. Outro papel da mesma pessoa, substituto designado por ela para isso ou o assistente de IA não contam como revisor. O servidor faz a mesma verificação na interface, na API, na importação (FO-40) e na IA (RN-041). A proposta mostra motivo, evidência, vigência, registros afetados e resultado antes/depois; o revisor a recebe em IN-02. Apontamento comum não ganha segunda aprovação, e fato ou ocorrência de segurança continua registrável (RN-018): enquanto a exclusão ou reclassificação está em revisão, o indicador usa a classificação anterior e mostra a pendência. Sem outra identidade competente, a organização pode habilitar em CF-02 a exceção prevista neste item, com revisor posterior designado: a mudança é publicada com a marca **Sem revisão independente** e fica **Revisão posterior pendente** em CF-04 até ser revista. Em meta ligada a remuneração variável, o uso dessa exceção depende de decisão do proprietário (PEND-18, 73.12). A trilha nunca a registra como revisada, e a exceção não alcança restrição técnica ou legal obrigatória.
+
 Aprovação aplica-se à versão e ao conteúdo indicado. Mudança material de produto, dose, área, contraparte, preço ou obrigação revoga apenas aprovações afetadas; alterar observação não obriga refazer toda a cadeia. O servidor valida a ação, inclusive por URL direta e API.
 
 ## 3. Regras únicas do produto
 
 | ID | Definição normativa |
 |---|---|
-| RN-001 | Cada fato possui identidade imutável; repetição do mesmo comando/evento não repete efeitos. |
+| RN-001 | Cada fato possui identidade imutável. Cada intenção tem chave gerada por quem a inicia (app, web, integração, IA ou processo automático); repetir a mesma intenção não repete efeitos: mesma chave com conteúdo equivalente devolve o recibo registrado, e mesma chave com outro conteúdo é conflito. O UUID sozinho não garante a idempotência (73.3). Comando é a intenção; evento é o fato confirmado (73.2; PROJ-01). |
 | RN-002 | Intenção, aprovação, liberação e realizado são objetos/marcos distintos. Simulação não cria saldo nem obrigação. |
 | RN-003 | Todo documento conserva empresa, objeto, versão e origem. Filtros de navegação não alteram seus dados. Valores, linhas, eventos e cálculos devem permitir rastreabilidade bidirecional conforme capítulo 56, com controle de acesso e sem substituir vínculos causais por mera coincidência de datas. |
 | RN-004 | Ciclo produtivo é distinto da safra gerencial. Perene atravessa períodos; abrir safra não confirma novo plantio. |
 | RN-005 | Geometria, área física, área plantada, tratada e colhida são distintas; versões preservam histórico. |
 | RN-006 | A necessidade tem um ID de origem. Ao convertê-la em ordem, sua parcela deixa de ser demanda paralela no plano. |
-| RN-007 | Plano operacional e orçamento têm autorizações separadas conforme alçadas. Validação técnica é exigida quando aplicável, sem impor análise/recomendação à operação direta do capítulo 37. Toda O.S. agrícola, inclusive de origem direta, exige aprovação do agrônomo antes do preparo ou execução; irrigação somente com água pode usar autorização por política agronômica explícita, vigente e validada, conforme seção 41.8. Fora dessa política exige revisão individual (capítulo 41). Cálculo funciona em rascunho e não exige safra previamente aprovada. |
+| RN-007 | Plano operacional e orçamento têm autorizações separadas conforme alçadas. Validação técnica é exigida quando aplicável, sem impor análise/recomendação à operação direta do capítulo 37. Toda O.S. agrícola, inclusive de origem direta, exige aprovação do agrônomo antes do preparo ou execução; irrigação somente com água não passa pelo agrônomo (41.8). A exigência inclui as operações mecânicas; orçamento, janela e prontidão não substituem a aprovação (APROV-02, APROV-05). Cálculo funciona em rascunho e não exige safra previamente aprovada. |
 | RN-008 | O.S. nasce uma vez por necessidade/ocorrência e parcela de execução. Revisão do plano não cria cópia cega. |
-| RN-009 | Toda ordem recebe prontidão condicional ao trabalho: técnica, janela, pessoa, ativo, material e autorização aplicáveis. |
+| RN-009 | Toda ordem recebe prontidão condicional ao trabalho: janela, pessoa, ativo e material aplicáveis. Aprovação técnica e autorização econômica são condições separadas da prontidão; nenhuma supre outra (APROV-01). |
 | RN-010 | Material futuro confirmado cobre planejamento, mas não constitui reserva física nem permite retirada inexistente. |
-| RN-011 | Reserva não altera físico. Disponível para nova reserva = utilizável menos reservas ativas no mesmo escopo. |
+| RN-011 | Reserva não altera físico. Disponível para nova reserva = utilizável menos reservas ativas no mesmo escopo. Reserva ativa é a quantidade reservada ainda não entregue nem devolvida ao disponível (RN-046; RSV-06). |
 | RN-012 | MRP utiliza físico apto incluindo reservas e demanda residual que inclui esses compromissos uma vez; ver CAL-01. |
 | RN-013 | Entrega ao campo transfere custódia; consumo definitivo ocorre uma vez. Legado que baixa na entrega é reconciliado sem segunda baixa. |
 | RN-014 | Consignação tem proprietário e autorização de uso próprios. Pode ser utilizável se o contrato permitir; consumo gera obrigação, não compra duplicada. |
@@ -234,10 +239,10 @@ Aprovação aplica-se à versão e ao conteúdo indicado. Mudança material de p
 | RN-032 | Dado ausente não é zero. Estimativa, medição, provisório e definitivo são sinalizados. |
 | RN-033 | Toda quantidade possui unidade e base; valores monetários têm moeda, data e conversão quando aplicável. |
 | RN-034 | Receber arquivo, enviar comando e obter confirmação externa são estados distintos. Falha externa permanece visível e reprocessável. |
-| RN-035 | Ação em lote informa sucesso/erro por item e não exige repetir itens já confirmados. |
+| RN-035 | Ação em lote informa sucesso/erro por item e não exige repetir itens já confirmados. Cada item do lote tem chave e recibo próprios (IDEM-10). |
 | RN-036 | Fonte oficial tem um escritor por entidade/escopo. ERP e agrícola não mantêm saldos independentes sem reconciliação. |
 | RN-037 | Mudança de política afeta vigência futura; histórico conserva regra aplicada. Restrição vigente obrigatória é reavaliada antes de nova execução. |
-| RN-038 | Offline conserva fatos e versões. Conflito não usa automaticamente o último horário do dispositivo para escolher vencedor: reenvio do mesmo evento devolve o recibo existente; fatos distintos sobre a mesma área ou saldo são preservados e abrem conferência com dono e prazo. O ledger confirmado permanece a autoridade até a resolução (8.3, 12.5 e FL-25). |
+| RN-038 | Offline conserva fatos e versões. Conflito não usa automaticamente o último horário do dispositivo para escolher vencedor: reenvio da mesma intenção, com a mesma chave e conteúdo equivalente, devolve o recibo existente (IDEM-14); mesma chave com outro conteúdo é conflito de chave, não conferência. Outro registro do mesmo fato físico fica vinculado ao fato existente, sem novo efeito (CONC-02; CONC-11); correção ou estorno é registro novo vinculado ao original (CONC-16). Fatos distintos, aceitos e compatíveis somam; possível mesmo fato, fato incompatível ou excedente é preservado e abre conferência com dono e prazo (73.5). O ledger confirmado permanece a autoridade até a resolução (8.3, 12.5 e FL-25). |
 | RN-039 | Parceiro vê sua negociação e blocos autorizados; assinatura não compra acesso irrestrito a dados de produtores. |
 | RN-040 | Indicador abre composição, fonte, período e pendências. Comparações exigem mesma base de área, unidade, cultura e competência. |
 | RN-041 | IA consulta, prepara e pode executar comandos tipados sob autorização do usuário e políticas do capítulo 59; cálculo, saldo, permissões e efeitos usam serviços determinísticos. Aprovação técnica privativa permanece com o profissional competente; nenhuma instrução em documento amplia poderes. |
@@ -245,6 +250,8 @@ Aprovação aplica-se à versão e ao conteúdo indicado. Mudança material de p
 | RN-043 | Limites/valores de demonstração não se tornam padrões agronômicos, alçadas ou contratos de produção. |
 | RN-044 | Toda alteração material deixa causa, autor, versão, impacto e vínculos; não editar comprovante confirmado para esconder correção. |
 | RN-045 | Função fora do escopo do perfil não aparece como pendência; impedimento causado por outro perfil mostra responsável e prazo, sem conceder seu poder. |
+| RN-046 | Reserva de material tem finalidade e validade definidas por política versionada (73.4). Ao vencer, só a quantidade elegível volta ao disponível, por evento auditável com aviso aos responsáveis; físico, utilizável, entregue, custódia, consumo, preparo e cota offline vigente não mudam. Pausa dentro da validade da liberação não vence a reserva. Retomar exige nova verificação de disponibilidade e reserva. Vencer, renovar, separar e entregar a mesma reserva são decididos numa transação, com um vencedor. |
+| RN-047 | A etapa da O.S. e a situação de integração de cada efeito externo são dimensões separadas. O encerramento (CMD-10) exige só os requisitos locais do cap. 42; os efeitos seguem ao ERP depois, pela outbox, salvo tipo de efeito marcado no contrato do conector como "confirmação antes do encerramento" (INTEG-16). Falha, atraso, rejeição ou resultado desconhecido da integração não estorna, cancela nem apaga fato físico, não reabre a O.S. e não muda sua etapa. Depois de resultado desconhecido, o destino é consultado antes de repetir ou compensar. Efeito de integração não confirmado impede o fechamento do período (CMD-30), não o encerramento da O.S. |
 
 ## 4. Experiência e arquitetura de navegação
 
@@ -277,14 +284,15 @@ PCP, PCM e PCE permanecem como sinônimos na busca e explicação secundária, n
 - Topo: empresa/fazenda; safra/período e cultura/ciclo somente onde aplicáveis. Documento específico fixa seu contexto com indicação clara.
 - Breadcrumbs e botão Voltar respeitam a origem real; retorno conserva filtros, seleção e posição da lista.
 - Busca global por ID, talhão, ativo, lote, pessoa, parceiro e termos de tarefa. Resultado respeita permissão e não revela contagens restritas.
+- **Ajuda** fica num lugar fixo e discreto: no topo, ao lado do perfil, na web; no cabeçalho do app, junto ao perfil (4.4). Não é botão primário nem item de menu. Abre um painel sobre a tela atual, sem sair dela, com a ajuda da tela e **Relatar problema ou sugestão**, que é o chamado de 68.5 (regras em 75.2); o painel segue DS-41 (74.5.15), e a entrada fica junto de Perguntar à IA (DS-87), sem ser outro acesso à IA.
 - No detalhe: origem, versão, responsável, prazo, estado e faixa de continuidade: **Veio de → Está aqui → Falta → Próxima ação**.
-- Um botão primário por contexto ativo; até duas ações secundárias frequentes; demais em menu. Verbo descreve efeito: Revisar, Submeter, Aprovar, Programar, Liberar, Iniciar, Pausar, Registrar, Conferir, Encerrar.
+- Um botão primário por contexto ativo; até duas ações secundárias frequentes; demais em menu. Verbo descreve efeito: Revisar, Submeter, Aprovar, Programar, Liberar, Iniciar, Pausar, Registrar, Conferir, Encerrar. Lista única de verbos e termos a evitar: 74.8.
 - Lançador usa verbo de abertura; execução usa verbo de efeito. Exemplo: “Revisar paradas” abre plano; “Confirmar 5 paradas” compromete agenda após conferência.
-- Ícones não substituem rótulo. Cor sempre vem acompanhada de texto/ícone. Verde representa condição favorável ou ação principal, não receita automática de aprovação.
+- Ícones não substituem rótulo. Cor sempre vem acompanhada de texto/ícone. Verde representa condição favorável ou ação principal, não receita automática de aprovação. Mapa estado → cor → palavra em 74.4; tag de classificação tem contorno e status tem preenchimento (74.4).
 
 ### 4.3 Padrões visuais e de interação
 
-Desktop: sidebar aproximada de 248 px, conteúdo fluido, fundo neutro claro, verde agrícola para ações, tipografia legível, espaçamento consistente. Tabelas começam com até sete colunas úteis; outras são configuráveis ou ficam no detalhe. O usuário pode ampliar colunas para análise sem violar um limite artificial do produto. Até quatro indicadores acionáveis por contexto.
+Desktop: menu lateral e conteúdo fluido; largura do menu (`layout.menu`, medida no protótipo validado; CORR-DS-30), cor de ação, famílias e escala tipográfica e escala de espaçamento seguem os tokens de 74.3. Tabelas começam com até sete colunas úteis; outras são configuráveis ou ficam no detalhe. O usuário pode ampliar colunas para análise sem violar um limite artificial do produto. Até quatro indicadores acionáveis por contexto.
 
 **Contrato de toda tabela de lista:** cabeçalho ordena quando o tipo é ordenável; menu da coluna oferece ordenação, filtro textual e seleção dos valores realmente existentes no conjunto autorizado, além de intervalos para números/datas. **+ Agrupar por** aceita colunas categóricas, datas em faixas e outras dimensões declaradas como agrupáveis; não oferecer agrupamento sem sentido em ações, anexos ou texto livre extenso. Subtotais somente em medidas aditivas de mesma unidade/base; percentuais, custos por hectare e taxas são recalculados pela fórmula, nunca somados.
 
@@ -294,15 +302,15 @@ Linha abre detalhe canônico por clique/teclado com foco acessível; checkbox, l
 
 Uma lista é para localizar e decidir; um detalhe é para compreender e agir; formulário curto abre painel; processo com várias dependências abre página. Não usar tabela larga dentro de modal estreito. Gráficos não substituem números e unidades.
 
-Estados obrigatórios: carregando, vazio com próximo passo, sem resultado, sem permissão, erro recuperável, integração pendente, offline, versão em conflito, confirmação parcial e leitura de período encerrado. Texto de bloqueio informa condição faltante e quem pode resolvê-la.
+Estados obrigatórios: carregando, vazio com próximo passo, sem resultado, sem permissão, erro recuperável, integração pendente, offline, versão em conflito, confirmação parcial e leitura de período encerrado. A aparência de cada estado está no catálogo de 74.5; as palavras de integração pendente, offline e versão em conflito estão em 74.4, com o vocabulário do cap. 73 (73.2). Texto de bloqueio informa condição faltante e quem pode resolvê-la.
 
-Acessibilidade alvo: WCAG 2.2 AA. Ações principais no campo terão alvo de toque proposto de pelo menos 44 × 44 CSS px, por decisão de usabilidade adicional. Foco, teclado, contraste, leitor de tela e alternativa a arrastar nos calendários fazem parte do aceite [S3].
+Acessibilidade alvo: WCAG 2.2 AA. Ações principais no campo terão alvo de toque proposto de pelo menos 44 × 44 CSS px, por decisão de usabilidade adicional. Foco, teclado, contraste, leitor de tela e alternativa a arrastar nos calendários fazem parte do aceite [S3]. Pares de cor medidos e limites de contraste: 74.9; teste automático: 74.10.
 
 ### 4.4 Experiência móvel
 
-Barra inferior consistente: **Hoje · Ordens · Registrar · Caixa**. Perfil/configuração no cabeçalho. “Registrar” abre seletor contextual: produção, consumo, ocorrência, vistoria, frutos, irrigação, abastecimento ou pesagem, conforme função. QR é método de identificação, não módulo de negócio.
+Barra inferior consistente: **Meu dia · Ordens · Registrar · Caixa** (64.7). Perfil/configuração no cabeçalho. “Registrar” abre seletor contextual: produção, consumo, ocorrência, vistoria, frutos, irrigação, abastecimento ou pesagem, conforme função. QR é método de identificação, não módulo de negócio.
 
-Página móvel mostra primeiro trabalho, local, instrução, quantidade, condição e ação. Dados administrativos ficam recolhidos. Autosalvar rascunho; indicar claramente salvo no aparelho, enviado e conferido. Após registrar, oferecer próximo ponto/planta/carga/ordem; nunca levar obrigatoriamente o executor a uma tabela desktop.
+Página móvel mostra primeiro trabalho, local, instrução, quantidade, condição e ação. Dados administrativos ficam recolhidos. Autosalvar rascunho; indicar claramente a situação de envio com as palavras de 64.5 e 73.2.2 (Salvo neste aparelho, Aguardando envio, Enviando, Sincronizado, Conflito) e, à parte, o resultado da conferência (Conferido); cor e ícone em 74.4. Após registrar, oferecer próximo ponto/planta/carga/ordem; nunca levar obrigatoriamente o executor a uma tabela desktop.
 
 ### 4.5 Variações por cultura
 
@@ -364,7 +372,7 @@ Desktop, móvel e portal consomem os mesmos objetos de domínio quando têm o me
 
 **Contrato dos formulários:** aplicar seções 6.2–6.5 e famílias FO-29 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.
 
-**Despacho de decisões por objeto:** FO-29 aplica-se a ordens/liberações. Orçamento usa FO-36; ajuste de inventário FO-32; políticas de estoque FO-31; política de água FO-43; acessos/alçadas FO-39. A caixa apresenta o formulário e comando do domínio original com diferenças, versão e alçada; aprovar aqui tem o mesmo efeito e recibo de aprovar no módulo. Nunca renderizar campos de ordem para um ajuste de estoque ou criar uma aprovação paralela.
+**Despacho de decisões por objeto:** FO-29 aplica-se a ordens/liberações. Orçamento usa FO-36; ajuste de inventário FO-32; políticas de estoque FO-31; acessos/alçadas FO-39; metas e parâmetros de indicador FO-38 com CMD-29. A caixa apresenta o formulário e comando do domínio original com diferenças, versão e alçada; aprovar aqui tem o mesmo efeito e recibo de aprovar no módulo. Nunca renderizar campos de ordem para um ajuste de estoque ou criar uma aprovação paralela.
 
 
 ### IN-03 — Agenda e pendências
@@ -394,9 +402,9 @@ Desktop, móvel e portal consomem os mesmos objetos de domínio quando têm o me
 
 **Rota:** `/inicio/mapa` · **Responsável/usuário:** Gestão, agronomia e operação.
 
-**Conteúdo:** Mapa e lista equivalentes; camadas canônicas do capítulo 67.2: Integrado, Satélite, Solo, MIP/MID, O.S./prazos, Irrigação, Estádio, Colheita/produtividade e Custos; legenda, fonte e data por camada.
+**Conteúdo:** Mapa e lista equivalentes; camadas canônicas do capítulo 67.2, com os nomes de DEC-2609-12: Integrado, Satélite, Solo, Pragas e doenças, Ordens de serviço, Irrigação, Estádio, Colheita e produtividade e Custos; legenda, fonte e data por camada.
 
-**Campos e informação essencial:** Geometria/localização e sua qualidade; tipo/ID da ordem; etapa canônica; atividade; janela; realizado confirmado/provisório; saldo/unidade; aprovação individual ou política de água; impedimento/responsável; última atualização; legenda, fonte e data da camada.
+**Campos e informação essencial:** Geometria/localização e sua qualidade; tipo/ID da ordem; etapa canônica; atividade; janela; realizado confirmado/provisório; saldo/unidade; aprovação individual ou Liberada pela prontidão (água); impedimento/responsável; última atualização; legenda, fonte e data da camada.
 
 **Botões e destinos:** Selecionar área → ordens da área no painel direito; Medir; atalho da funcionalidade (ex.: Ordens de serviço → lista/Kanban em Ordem de Serviço; Pragas e doenças → Criar vistoria); Abrir O.S./tarefa → detalhe canônico; Criar vistoria → AG-01; Abrir Irrigação de hoje → IR-03; Ver recomendação → AG-04; Tela cheia; filtros por etapa/avanço/janela sem efeito transacional.
 
@@ -642,9 +650,9 @@ Desktop, móvel e portal consomem os mesmos objetos de domínio quando têm o me
 
 **Conteúdo:** Fila de faltas, chuva, ativo, técnica, pessoas, qualidade e integração; propostas lado a lado.
 
-**Campos e informação essencial:** Causa; ordens afetadas; impacto; responsável; prazo; alternativa; aprovação.
+**Campos e informação essencial:** Causa; ordens afetadas; impacto; responsável; prazo; alternativa; aprovação; data de vencimento da reserva quando o saldo é reprogramado para fora da liberação (RSV-05).
 
-**Botões e destinos:** Resolver origem; Simular substituição; Reprogramar saldo → FO-05; Aprovar proposta; Notificar responsáveis.
+**Botões e destinos:** Resolver origem; Simular substituição; Reprogramar saldo → FO-05; Aprovar proposta; Notificar responsáveis; Renovar reserva (CMD-49), secundária, quando o saldo é reprogramado para fora da liberação (73.10.3).
 
 **Continuidade e estados:** Resolver compra ou manutenção revalida prontidão; não inicia máquina nem muda agenda automaticamente. Versão executada permanece intacta.
 
@@ -708,9 +716,9 @@ Desktop, móvel e portal consomem os mesmos objetos de domínio quando têm o me
 
 **Conteúdo:** Fila por condição de conferência e painel previsto versus observado, com eventos offline e evidências.
 
-**Campos e informação essencial:** O.S./versão; apontamento/turno; data; parcela; equipe/conjunto; realizado do período; acumulado confirmado/provisório; saldo; horas; consumos; sobras; origem/sincronização; estado da conferência do apontamento separado da etapa da O.S.
+**Campos e informação essencial:** O.S./versão; apontamento/turno; data; parcela; equipe/conjunto; realizado do período; acumulado confirmado/provisório; saldo; horas; consumos; sobras; origem do registro (autor, aparelho e fonte) e situação do relato (73.2.2); registro ainda no aparelho só como selo Apontamentos pendentes (73.10.2); estado da conferência do apontamento separado da etapa da O.S.
 
-**Botões e destinos:** Conferir apontamento; Corrigir com histórico; Ver consumo e devoluções; Devolver para esclarecimento; Abrir O.S.; Encerrar O.S. apenas com término físico e todas as condições satisfeitas. Conferir um dia não conclui a ordem de vários dias.
+**Botões e destinos:** Conferir apontamento; Resolver relato (CMD-50), visível só com caso Em conferência aberto (73.10.3); Corrigir com histórico; Ver consumo e devoluções; Devolver para esclarecimento; Abrir O.S.; Encerrar O.S. apenas com término físico e todas as condições satisfeitas. Conferir um dia não conclui a ordem de vários dias.
 
 **Continuidade e estados:** Fato permanece registrável fora da tolerância. Consumo recebe um único evento de efeito; conferência posterior não repete baixa.
 
@@ -763,13 +771,13 @@ Desktop, móvel e portal consomem os mesmos objetos de domínio quando têm o me
 
 **Rota:** `/irrigacao/balanco` · **Responsável/usuário:** Agronomia e irrigação.
 
-**Conteúdo:** Tabela por setor/parcela e série temporal com necessidade, autorização, aplicado e déficit remanescente.
+**Conteúdo:** Tabela por setor/parcela e série temporal com necessidade, programado, aplicado e déficit remanescente.
 
-**Campos e informação essencial:** Setor/cultura/estádio; déficit; fontes/idade/qualidade; necessidade/lâmina/volume; limites; política/versão/validade; enquadramento ou exceção; água sem produtos ou fertirrigação.
+**Campos e informação essencial:** Setor/cultura/estádio; déficit; fontes/idade/qualidade; necessidade/lâmina/volume; limites; parâmetros do equipamento e do solo (versão); água sem produtos ou fertirrigação.
 
 **Botões e destinos:** Recalcular e explicar; Ajustar limites do equipamento (pela linha do setor); Programar → IR-02; Consultar tarefa existente → IR-03. Água sem produto é liberada pela prontidão, sem assinatura (DEC-2609-10).
 
-**Continuidade e estados:** Modelos por setor; água aplicada parcialmente não é creditada ao pivô inteiro. Sem dados suficientes, indicar estimativa e exigir política técnica adequada.
+**Continuidade e estados:** Modelos por setor; água aplicada parcialmente não é creditada ao pivô inteiro. Sem dados suficientes, usar estimativa por ET marcada como estimativa, sem bloquear (PROJ-14).
 
 **Contrato reconciliado de implementação:** Déficit, água disponível, precipitação efetiva, ET e lâmina líquida/bruta com método, qualidade e restrições. Aprovar recomendação não liga equipamento.
 
@@ -787,13 +795,13 @@ Desktop, móvel e portal consomem os mesmos objetos de domínio quando têm o me
 
 **Conteúdo:** Agenda com captação, bomba, setor, vazão, energia e interferência com outras operações.
 
-**Campos e informação essencial:** Setor/equipamento; tarefa vinculada; modalidade água/produtos; janela; lâmina/volume; duração; rede/energia; conflito; condição PCM; política/autorização; prontidão.
+**Campos e informação essencial:** Setor/equipamento; tarefa vinculada; modalidade água/produtos; janela; lâmina/volume; duração; rede/energia; conflito; condição PCM; aprovação individual (fertirrigação) ou parâmetros do equipamento (água); prontidão.
 
-**Botões e destinos:** Programar período; Simular capacidade; Resolver conflito; Ver Irrigação de hoje → IR-03. Gerar/recuperar tarefa única automaticamente; liberar por política somente água elegível e pronta. Produtos exigem aprovação individual.
+**Botões e destinos:** Programar período; Simular capacidade; Resolver conflito; Ver Irrigação de hoje → IR-03. Gerar/recuperar tarefa única automaticamente; água liberada automaticamente pela prontidão operacional. Produtos exigem aprovação individual.
 
-**Continuidade e estados:** Fracionamento exige viabilidade agronômica. Aprovação não liga equipamento. Setor/gotejo e pivô usam contratos de medição distintos.
+**Continuidade e estados:** Divisão em passadas pelo limite por passada do equipamento, sem agrônomo. Aprovação não liga equipamento. Setor/gotejo e pivô usam contratos de medição distintos.
 
-**Contrato reconciliado de implementação:** Simulação hidráulica e elétrica por setor e janela, capacidade compartilhada e paradas PCM; ordens agrícolas exigem autorização agronômica; água sem insumos pode usar política explícita da seção 41.8.
+**Contrato reconciliado de implementação:** Simulação hidráulica e elétrica por setor e janela, capacidade compartilhada e paradas PCM; fertirrigação exige aprovação agronômica individual; água sem produto é liberada pela prontidão (41.8).
 
 **Dependências e aceite:** capítulos 41–42, 53, 63–64; critérios OSA, ESTOS, IRCOMP, CAMPO; fluxos FL-14, FL-R03. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.
 
@@ -802,7 +810,7 @@ Desktop, móvel e portal consomem os mesmos objetos de domínio quando têm o me
 
 **Contrato dos formulários:** aplicar seções 6.2–6.5 e famílias FO-04, FO-09, FO-29, FO-43 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.
 
-**Reclassificação controlada:** no detalhe da tarefa, botão **Adicionar produtos (reclassificar para fertirrigação)** → FO-04/FO-29, somente para usuário autorizado a propor/revisar o saldo. Herdar ID, setor, janela e saldo; exigir produtos/doses/unidades, motivo e prévia dos efeitos. Confirmar invoca CMD-32 e cria nova versão da mesma tarefa, invalida autorização exclusiva de água para o saldo e encaminha à fila do agrônomo. Antes do primeiro início volta a A liberar; se já iniciou, mantém Em execução com selo Revisão de saldo pendente. Bloquear novos preparos/partidas do saldo até aprovação individual e nova liberação. Requisição canônica é criada/atualizada após aprovação e usa SU-07/FO-09; não emitir segunda aplicação. Irrigante sem permissão solicita ajuste/ocorrência em MB-08, sem editar dose ou produto. Registrar apontamento já ocorrido nunca concede autorização retroativa.
+**Reclassificação controlada:** no detalhe da tarefa, botão **Adicionar produtos (reclassificar para fertirrigação)** → FO-04/FO-29, somente para usuário autorizado a propor/revisar o saldo. Herdar ID, setor, janela e saldo; exigir produtos/doses/unidades, motivo e prévia dos efeitos. Confirmar invoca CMD-32 e cria nova versão da mesma tarefa, cancela a liberação automática de água para o saldo e encaminha à fila do agrônomo. Antes do primeiro início volta a A liberar; se já iniciou, mantém Em execução com selo Revisão de saldo pendente. Bloquear novos preparos/partidas do saldo até aprovação individual e nova liberação. Requisição canônica é criada/atualizada após aprovação e usa SU-07/FO-09; não emitir segunda aplicação. Irrigante sem permissão solicita ajuste/ocorrência em MB-08, sem editar dose ou produto. Registrar apontamento já ocorrido nunca concede autorização retroativa.
 
 
 ### IR-03 — Ordens de irrigação
@@ -811,13 +819,13 @@ Desktop, móvel e portal consomem os mesmos objetos de domínio quando têm o me
 
 **Conteúdo:** Lista e detalhe da ordem; instrução, execução por setores e materiais apenas na fertirrigação.
 
-**Campos e informação essencial:** Tarefa/O.S.; modalidade água ou produtos; setor/pivô; janela; etapa; lâmina/volume alvo e aplicado; área; duração; energia; fonte medida/estimada; política/autorização; impedimento; última atualização.
+**Campos e informação essencial:** Tarefa/O.S.; modalidade água ou produtos; setor/pivô; janela; etapa; lâmina/volume alvo e aplicado; área; duração; energia; fonte medida/estimada; aprovação individual (fertirrigação) ou liberação pela prontidão (água); impedimento; última atualização.
 
 **Botões e destinos:** Abrir tarefa; Iniciar; Pausar/Retomar; Registrar avanço → MB-08; Confirmar término da irrigação → Em conferência; Revisar divergência. Encerramento automático se elegível. Requisitar insumo → SU-07 (FO-09) e Devolver sobras → SU-07 (FO-09), somente quando houver produtos; reutilizar a requisição da mesma ordem, sem estoque paralelo.
 
 **Continuidade e estados:** Consumo de fertilizante segue custódia normal. Comando remoto, quando habilitado, tem autorização e confirmação física independentes.
 
-**Contrato reconciliado de implementação:** Usar o mesmo ID/versão de tarefa em lista, mapa, Kanban e MB-08. Distinguir autorização por política válida de água e aprovação agronômica individual para produtos/exceções. Água elegível não abre requisição/custódia; confirmar término registra Em conferência e pode acionar conferência/encerramento automáticos somente com fatos consistentes. Produtos exigem requisição e conciliação de materiais. Área, volume/lâmina e tempo permanecem medidos ou estimados com origem; somar aplicações confirmadas uma vez e manter saldo e desvio explícitos (8.4–8.6; 41–42; 63–64). A ação seguinte abre o registro de destino preservando contexto e saldo.
+**Contrato reconciliado de implementação:** Usar o mesmo ID/versão de tarefa em lista, mapa, Kanban e MB-08. Distinguir liberação pela prontidão (água) e aprovação agronômica individual para produtos/exceções. Água elegível não abre requisição/custódia; confirmar término registra Em conferência e pode acionar conferência/encerramento automáticos somente com fatos consistentes. Produtos exigem requisição e conciliação de materiais. Área, volume/lâmina e tempo permanecem medidos ou estimados com origem; somar aplicações confirmadas uma vez e manter saldo e desvio explícitos (8.4–8.6; 41–42; 63–64). A ação seguinte abre o registro de destino preservando contexto e saldo.
 
 **Dependências e aceite:** capítulos 41–42, 53, 63–64; critérios OSA, ESTOS, IRCOMP, CAMPO; fluxos FL-14, FL-R03. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.
 
@@ -830,7 +838,7 @@ Desktop, móvel e portal consomem os mesmos objetos de domínio quando têm o me
 
 **Contrato dos formulários:** aplicar seções 6.2–6.5 e famílias FO-04, FO-09, FO-10, FO-29 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.
 
-**Reclassificação controlada:** no detalhe da tarefa, botão **Adicionar produtos (reclassificar para fertirrigação)** → FO-04/FO-29, somente para usuário autorizado a propor/revisar o saldo. Herdar ID, setor, janela e saldo; exigir produtos/doses/unidades, motivo e prévia dos efeitos. Confirmar invoca CMD-32 e cria nova versão da mesma tarefa, invalida autorização exclusiva de água para o saldo e encaminha à fila do agrônomo. Antes do primeiro início volta a A liberar; se já iniciou, mantém Em execução com selo Revisão de saldo pendente. Bloquear novos preparos/partidas do saldo até aprovação individual e nova liberação. Requisição canônica é criada/atualizada após aprovação e usa SU-07/FO-09; não emitir segunda aplicação. Irrigante sem permissão solicita ajuste/ocorrência em MB-08, sem editar dose ou produto. Registrar apontamento já ocorrido nunca concede autorização retroativa.
+**Reclassificação controlada:** no detalhe da tarefa, botão **Adicionar produtos (reclassificar para fertirrigação)** → FO-04/FO-29, somente para usuário autorizado a propor/revisar o saldo. Herdar ID, setor, janela e saldo; exigir produtos/doses/unidades, motivo e prévia dos efeitos. Confirmar invoca CMD-32 e cria nova versão da mesma tarefa, cancela a liberação automática de água para o saldo e encaminha à fila do agrônomo. Antes do primeiro início volta a A liberar; se já iniciou, mantém Em execução com selo Revisão de saldo pendente. Bloquear novos preparos/partidas do saldo até aprovação individual e nova liberação. Requisição canônica é criada/atualizada após aprovação e usa SU-07/FO-09; não emitir segunda aplicação. Irrigante sem permissão solicita ajuste/ocorrência em MB-08, sem editar dose ou produto. Registrar apontamento já ocorrido nunca concede autorização retroativa.
 
 
 ### IR-04 — Clima, sensores e desempenho
@@ -953,7 +961,7 @@ Desktop, móvel e portal consomem os mesmos objetos de domínio quando têm o me
 
 ### MA-05 — Abastecimentos e desempenho
 
-**Rota:** `/manutencao/abastecimentos` · **Responsável/usuário:** Abastecedor, PCM e controladoria.
+**Rota:** `/manutencao/abastecimentos` · **Responsável/usuário:** Almoxarife do local ou abastecedor designado do ponto (PEND-08; até a decisão, o almoxarife do local), PCM e controladoria.
 
 **Conteúdo:** Lançamentos por ativo/tanque, contadores, consumo reconciliado e desvios.
 
@@ -961,7 +969,7 @@ Desktop, móvel e portal consomem os mesmos objetos de domínio quando têm o me
 
 **Botões e destinos:** Registrar abastecimento → FO-12/MB-09; Conferir contador; Corrigir com estorno; Investigar desvio → MA-02.
 
-**Continuidade e estados:** Litros abastecidos não são consumo exato do intervalo sem método tanque cheio ou reconciliação de níveis. Taxa estimada é identificada.
+**Continuidade e estados:** Litros abastecidos não são consumo exato do intervalo sem método tanque cheio ou reconciliação de níveis. Taxa estimada é identificada. O segundo registro do mesmo abastecimento fica vinculado ao primeiro, sem novo movimento, e o autor vê "Já registrado por …" (CONC-11).
 
 **Contrato reconciliado de implementação:** Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.
 
@@ -999,7 +1007,7 @@ Desktop, móvel e portal consomem os mesmos objetos de domínio quando têm o me
 
 **Campos e informação essencial:** O.S.; origem/parcela/cultura; janela; etapa; área/quantidade prevista; realizado do dia/acumulado; saldo; equipe/máquinas; cargas vinculadas; capacidade de recebimento; impedimentos.
 
-**Botões e destinos:** Preparar ordens do período; Aprovar/liberar conforme competência; Iniciar; Registrar avanço/carga; Finalizar apontamento do turno; Concluir execução → Em conferência; Conferir cargas/apontamentos; Encerrar após conciliação.
+**Botões e destinos:** Preparar ordens do período; Revisar versão (agrônomo) e, depois de aprovada, Liberar para execução (DEC-2609-05; APROV-09); Iniciar; Registrar avanço/carga; Finalizar apontamento do turno; Concluir execução → Em conferência; Conferir cargas/apontamentos; Encerrar após conciliação.
 
 **Continuidade e estados:** Ordem deriva da mesma necessidade e usa reserva de recursos compartilhada. Capacidade em unidades compatíveis.
 
@@ -1185,7 +1193,7 @@ Desktop, móvel e portal consomem os mesmos objetos de domínio quando têm o me
 
 **Botões e destinos:** Preparar cotação → FO-16; Revisar destinatários; Enviar; Comparar; Selecionar proposta; Aprovar contratação → SU-05.
 
-**Continuidade e estados:** Comparar qualidade/especificação, frete, prazo, tributos conforme política e condições financeiras. Token externo leva a PT-02, não à lista interna.
+**Continuidade e estados:** Comparar qualidade/especificação, frete, prazo, tributos conforme política e condições financeiras. No item com produto fixo, só propostas do mesmo produto (registro, formulação e concentração) são comparáveis; proposta divergente fica como ocorrência "Fora do produto fixado", sem recomendação nem seleção. No item com alternativas, a proposta de outro produto aparece na linha da necessidade com planejado → candidato (40.5), e a contratação só é aprovada com o candidato aceito e adotado num escopo que ainda precise dele, sem exceder a necessidade líquida. Token externo leva a PT-02, não à lista interna.
 
 **Contrato reconciliado de implementação:** Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.
 
@@ -1244,9 +1252,9 @@ Desktop, móvel e portal consomem os mesmos objetos de domínio quando têm o me
 
 **Conteúdo:** Fila de separação por ordem; detalhe conserva solicitado, reservado, separado, entregue e conciliado.
 
-**Campos e informação essencial:** O.S./destino; item/lote; quantidades; local; recebedor; custódia; saldo.
+**Campos e informação essencial:** O.S./destino; item/lote; quantidades; local; recebedor; custódia; saldo; Reservado até, por linha (RSV-16).
 
-**Botões e destinos:** Solicitar → FO-09; Reservar; Separar FEFO; Ler QR → MB-05; Confirmar entrega; Receber devolução; Conciliar.
+**Botões e destinos:** Solicitar → FO-09; Reservar; Separar FEFO; Ler QR → MB-05; Confirmar entrega; Receber devolução; Conciliar. Renovar reserva e Devolver ao disponível (CMD-49) ficam no menu da linha, como ações secundárias; a primária continua a da etapa (RSV-16; 73.10.3). Entrega com reserva vencida é recusada com Reservar de novo, primária enquanto impede a entrega (RSV-13; 73.10.3).
 
 **Continuidade e estados:** Entrega parcial libera somente a parcela executável da ordem. Material entregue deixa de ser reserva livre do depósito e passa a custódia; consumo não repete saída já contabilizada por adaptador legado.
 
@@ -1554,7 +1562,7 @@ Desktop, móvel e portal consomem os mesmos objetos de domínio quando têm o me
 
 **Botões e destinos:** Ver documento; Revisar rateio; Conciliar estimado/real; Fechar período; Solicitar reabertura; Exportar para ERP.
 
-**Continuidade e estados:** Fechamento exige tratar pendências obrigatórias. Parâmetro futuro não recalcula período fechado sem revisão autorizada.
+**Continuidade e estados:** Fechamento exige tratar pendências obrigatórias, inclusive os efeitos de integração da competência fora de Confirmada, com origem, situação, idade e responsável (INTEG-26). Parâmetro futuro não recalcula período fechado sem revisão autorizada.
 
 **Contrato reconciliado de implementação:** Lançamento único com dimensões, origem, regra de rateio e versão; rastrear até documento e demonstrar ausência de dupla apropriação.
 
@@ -1825,7 +1833,7 @@ Desktop, móvel e portal consomem os mesmos objetos de domínio quando têm o me
 
 **Botões e destinos:** Propor revisão; Simular casos; Aprovar; Publicar; Ver objetos afetados.
 
-**Continuidade e estados:** Não permitir configuração que transforme restrição obrigatória em exceção livre. Exemplo de demo não é política publicada de cliente.
+**Continuidade e estados:** Não permitir configuração que transforme restrição obrigatória em exceção livre. Exemplo de demo não é política publicada de cliente. Em meta usada em avaliação ou remuneração, a proposta do próprio avaliado fica **Aguardando revisão** e só outra identidade a publica, salvo a exceção habilitada de 2.1, publicada como **Sem revisão independente**. Nenhuma regra publicada aqui aprova ou libera automaticamente O.S. agrícola; a única liberação automática é a da água sem produto (APROV-06, APROV-16).
 
 **Contrato reconciliado de implementação:** Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.
 
@@ -1840,11 +1848,11 @@ Desktop, móvel e portal consomem os mesmos objetos de domínio quando têm o me
 
 **Conteúdo:** Conectores, fonte oficial, filas, falhas, reconciliação e dispositivos offline.
 
-**Campos e informação essencial:** Conector/escopo; fonte; última atualização; evento/correlação; erro; responsável; reconciliação.
+**Campos e informação essencial:** Conector/escopo; fonte; última atualização; evento/correlação; erro; responsável; reconciliação; por efeito, situação (73.6.5), tentativas, próxima tentativa, idade e prazo da exceção (INTEG-25); modo de gravação por operação (Somente leitura, Gravação habilitada, Gravação suspensa) e corte; por integração, credenciais e acesso (escopo, ambiente, validade, último uso e quem concedeu), sem segredo (RF-INT-008).
 
-**Botões e destinos:** Configurar em ambiente autorizado; Testar; Reprocessar item; Conciliar; Exportar diagnóstico sem segredo.
+**Botões e destinos:** Configurar em ambiente autorizado; Testar; Consultar destino; Reprocessar item, só depois de ausência confirmada ou dado corrigido (INTEG-20); Conciliar; Habilitar gravação, Suspender gravação e Conciliar e retomar, por operação (66.3); Criar credencial, Girar credencial, Revogar credencial e Revogar acesso da integração (RF-INT-008); Exportar diagnóstico sem segredo.
 
-**Continuidade e estados:** Reprocessamento é idempotente. Credenciais não aparecem em logs. Não apresentar integração simulada como online.
+**Continuidade e estados:** Reprocessamento é idempotente. Credenciais não aparecem em logs. Não apresentar integração simulada como online. No detalhe da operação, a ação primária segue o modo: Somente leitura → Habilitar gravação; Gravação suspensa → Conciliar e retomar; em Gravação habilitada, Suspender gravação é secundária. A prévia aparece só aqui, nunca como sincronização ou pendência no documento de origem.
 
 **Contrato reconciliado de implementação:** Escritor oficial por objeto e escopo ERP, credenciais protegidas, fila de erros, deduplicação, conflitos e reconciliação. Reprocessar não duplica efeito.
 
@@ -1859,7 +1867,7 @@ Desktop, móvel e portal consomem os mesmos objetos de domínio quando têm o me
 
 **Conteúdo:** Histórico de decisões, parâmetros globais, retenção, exportação e documentação de processos.
 
-**Campos e informação essencial:** Objeto/versão; autor; antes/depois; motivo; instante/fuso; origem; efeito.
+**Campos e informação essencial:** Objeto/versão; autor; revisor e independência quando exigida (2.1): independente, sem revisão independente com revisão posterior pendente ou concluída; antes/depois; motivo; instante/fuso; origem; efeito.
 
 **Botões e destinos:** Filtrar trilha; Exportar autorizado; Ver FL/RN/CAL; Consultar política; Solicitar correção pelo domínio.
 
@@ -1891,11 +1899,11 @@ Desktop, móvel e portal consomem os mesmos objetos de domínio quando têm o me
 **Contrato dos formulários:** aplicar seções 6.2–6.5 e famílias FO-41 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.
 
 
-### MB-01 — Hoje no campo
+### MB-01 — Meu dia
 
-**Rota:** `/app/hoje` · **Responsável/usuário:** Executor conforme função.
+**Rota:** `/app/meu-dia` · **Responsável/usuário:** Executor conforme função.
 
-**Conteúdo:** Fila curta de trabalhos do turno e registros pendentes de envio.
+**Conteúdo:** Fila curta do dia por função, em Agora, Depois e Impedidas (64.7), e registros pendentes de envio.
 
 **Campos e informação essencial:** Tarefa/O.S.; tipo; local; prioridade; janela; etapa canônica; realizado/saldo; próxima ação; impedimento/responsável; última atualização; pendências locais de envio.
 
@@ -1935,9 +1943,9 @@ Desktop, móvel e portal consomem os mesmos objetos de domínio quando têm o me
 
 **Conteúdo:** Registro do realizado em poucos campos, com dados anteriores preenchidos e rascunho durável.
 
-**Campos e informação essencial:** O.S./versão; ID do apontamento; data/turno; parcela; equipe/conjunto; realizado neste apontamento; unidade; acumulado confirmado/provisório; saldo; início/fim/pausas; contadores; consumo/sobras quando aplicáveis; evidência; sincronização e conferência do apontamento.
+**Campos e informação essencial:** O.S./versão; ID do apontamento; data/turno; parcela; equipe/conjunto; realizado neste apontamento; unidade; acumulado confirmado/provisório; saldo; início/fim/pausas; contadores; consumo/sobras quando aplicáveis; evidência; situação de envio (64.5) e, ao lado, situação do relato e conferência do apontamento (73.2.2; 73.10.1).
 
-**Botões e destinos:** Salvar rascunho; Registrar avanço; Finalizar apontamento do turno (mantém O.S. Em execução se há trabalho); Concluir execução da O.S. (entra Em conferência); Registrar não conformidade; Ver recibo de envio; Próxima tarefa → MB-01. Não oferecer Encerrar O.S. como sinônimo de salvar o dia.
+**Botões e destinos:** Salvar rascunho; Registrar avanço; Finalizar apontamento do turno (mantém O.S. Em execução se há trabalho); Concluir execução da O.S. (entra Em conferência); Registrar não conformidade; Ver recibo de envio; Próxima tarefa → MB-01. Na revisão de Conflito, Enviar como novo registro (IDEM-07); Corrigir, secundária, como nova intenção vinculada (CONC-16). Não oferecer Encerrar O.S. como sinônimo de salvar o dia.
 
 **Continuidade e estados:** Salvar offline não diz Conferido. Área duplicada ou dose fora da faixa abre pendência sem apagar o relato.
 
@@ -1977,7 +1985,7 @@ Desktop, móvel e portal consomem os mesmos objetos de domínio quando têm o me
 
 **Botões e destinos:** Ler QR; Conferir e entregar; Receber devolução; Registrar divergência; Abrir pendência/O.S. Água sem insumos não cria fila nem documento de movimentação de produtos.
 
-**Continuidade e estados:** Reserva central nova requer conexão ou cota previamente delegada. Fato físico offline pode ser registrado pendente, sem fabricar saldo confirmado.
+**Continuidade e estados:** Reserva central nova requer conexão ou cota previamente delegada. Reserva e cota mostram a validade; entrega com reserva vencida é recusada com Reservar de novo (RSV-09, RSV-16; 73.10.1). Fato físico offline pode ser registrado pendente, sem fabricar saldo confirmado.
 
 **Contrato reconciliado de implementação:** Ler QR da O.S./lote, entregar saldo autorizado, receber sobra e registrar comprovante. Material preparado não retorna como produto original disponível.
 
@@ -2030,7 +2038,7 @@ Desktop, móvel e portal consomem os mesmos objetos de domínio quando têm o me
 
 **Conteúdo:** Registro por ordem/setor com cronômetro, medidores e área efetivamente atendida.
 
-**Campos e informação essencial:** Tarefa automática/setor; água ou fertirrigação; etapa; janela; alvo; política/versão ou aprovação individual; início/fim/pausas; volume/área; método e fonte; pressão/vazão quando disponíveis; energia medida/estimada; ocorrência; sincronização.
+**Campos e informação essencial:** Tarefa automática/setor; água ou fertirrigação; etapa; janela; alvo; parâmetros do equipamento (versão) ou aprovação individual; início/fim/pausas; volume/área; método e fonte; pressão/vazão quando disponíveis; energia medida/estimada; ocorrência; situação de envio (64.5).
 
 **Botões e destinos:** Iniciar; Pausar/Retomar; Registrar avanço; Finalizar apontamento do turno; Confirmar término da irrigação → Em conferência; Próximo setor. Se elegível, conferir/encerrar automaticamente e mostrar recibo; se divergente, mostrar motivo. Nunca usar Encerrar e apontar. Produtos abrem controles específicos; água não exibe requisição/devolução.
 
@@ -2052,11 +2060,11 @@ Desktop, móvel e portal consomem os mesmos objetos de domínio quando têm o me
 
 **Conteúdo:** Tarefas de serviço, inspeção e abastecimento, com campos por contexto.
 
-**Campos e informação essencial:** Ativo/O.S.; etapa; checklist; serviços; horas; peças; teste; condição técnica; combustível em registro próprio; pendências/sincronização.
+**Campos e informação essencial:** Ativo/O.S.; etapa; checklist; serviços; horas; peças; teste; condição técnica; combustível em registro próprio; pendências/situação de envio (64.5).
 
 **Botões e destinos:** Iniciar serviço; Registrar avanço/peças; Finalizar apontamento do turno; Concluir serviço → Em conferência; Registrar teste por pessoa autorizada; Reportar falha; Registrar abastecimento. Abastecimento não encerra manutenção nem libera ativo.
 
-**Continuidade e estados:** Abastecer não leva automaticamente à oficina. A liberação técnica respeita a competência do usuário.
+**Continuidade e estados:** Abastecer não leva automaticamente à oficina. Registro de abastecimento que já existe fica vinculado, sem segundo movimento (CONC-11). A liberação técnica respeita a competência do usuário.
 
 **Contrato reconciliado de implementação:** Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.
 
@@ -2071,7 +2079,7 @@ Desktop, móvel e portal consomem os mesmos objetos de domínio quando têm o me
 
 **Conteúdo:** Pesagem, romaneio e confirmação de entrega em tarefas separadas pelo papel.
 
-**Campos e informação essencial:** Carga/romaneio ou viagem; O.S. de colheita de origem quando aplicável; peso/unidade; origem/destino; data; evidência; divergência; sincronização; estados logísticos separados da etapa da O.S.
+**Campos e informação essencial:** Carga/romaneio ou viagem; O.S. de colheita de origem quando aplicável; peso/unidade; origem/destino; data; evidência; divergência; situação de envio (64.5); estados logísticos separados da etapa da O.S.
 
 **Botões e destinos:** Registrar carga e vincular à O.S.; Confirmar pesagem/entrega conforme papel; Registrar divergência; Próxima carga. Salvar carga não conclui automaticamente toda a O.S. de colheita.
 
@@ -2294,9 +2302,9 @@ Desktop, móvel e portal consomem os mesmos objetos de domínio quando têm o me
 
 **Conteúdo e campos:** Receita recorrente, conversão, ativação, churn, CAC, margem e suporte por coorte/perfil; método e período explícitos.
 
-**Botões e destinos:** Abrir coorte; Rastrear receita/custo; Investigar abandono; Criar experimento; consulta contratual ligada a CF-05 ou PT-07 segundo o contratante.
+**Botões e destinos:** Abrir coorte; Rastrear receita/custo; Investigar adoção; Criar experimento; consulta contratual ligada a CF-05 ou PT-07 segundo o contratante.
 
-**Continuidade e estados:** Painel de leitura sobre eventos confirmados, com período, método e origem; sem máquina de estados própria. Criar experimento abre cadastro separado, sem alterar retroativamente métricas ou contratos. Nenhum privilégio administrativo concede consulta indiscriminada a dados agronômicos dos clientes.
+**Continuidade e estados:** Painel de leitura sobre eventos confirmados, com período, método e origem; sem máquina de estados própria. Criar experimento abre cadastro separado, sem alterar retroativamente métricas ou contratos. Investigar adoção abre a lista de contas que pedem atenção e, dela, o detalhe da conta, cuja ação primária é Registrar tratamento (FO-38); regras em 58.5 (ONB-11 a ONB-15); a medida de adoção por oportunidade é a de USO-03 (75.3). Nenhum privilégio administrativo concede consulta indiscriminada a dados agronômicos dos clientes.
 
 **Dependências e aceite:** capítulos 57–58 e 26–30; PRECO, ONB, ENG e ACE; FL-R08.
 
@@ -2317,9 +2325,9 @@ Todo formulário herda empresa, fazenda, ciclo, origem e versão já conhecidos.
 | FO-07 | Apontamento — CA-02/MB-03/CO-02/MB-10 | Ordem e parcela de execução, quantidade/unidade, instante/intervalo, turno/equipe, máquinas, horas e autor; materiais se utilizados. Na colheita, área/quantidade avançada na unidade operacional da O.S., distinta das cargas pesadas em FO-13 | Sobreposição, contadores, tolerâncias, consumos e evidências; registro não conforme aceito como fato | Registrar avanço / Finalizar apontamento do turno; Concluir execução da O.S. somente no término; conferir em CA-02 | O.S., parcela, turno/equipe, conjunto, ocorrência e produtos pertinentes | Data/versão; quantidade do apontamento e unidade; início/fim/pausas; saldo derivado; origem e sincronização |
 | FO-08 | Ocorrência — CA-03/MB-04 | Objeto/local, tipo, instante, descrição e gravidade | Sugestão de destino; vínculo a caso existente; responsável e prazo | Registrar; abrir MA-02, AG-03 ou PL-05 conforme causa | Tipo de ocorrência, objeto, gravidade, motivo e responsável | Evidência, instante/local, efeito/impedimento, prazo e vínculo ao caso existente |
 | FO-09 | Requisição/entrega/devolução — SU-07/CA-04 | Ordem/destino autorizado, item, quantidade/unidade; lote/recebedor na entrega | Quantidade autorizada, validade na data de uso, saldo, custódia e retorno | Solicitar, Entregar ou Receber devolução são comandos distintos | O.S., depósito/local, produto/lote e recebedor | Tipo entrega/retorno; quantidade real; condição; comprovante; custódia/origem; item não aplicável para água sem produtos |
-| FO-10 | Irrigação — IR-03/MB-08 | Ordem/setor, tempos, área atendida, origem da medição; volume ou dados suficientes para estimativa; leituras de energia quando disponíveis | Lâmina por área, setor, vazão/calibração, pausas, reset de medidor; líquido/bruto distintos | Registrar avanço/turno; Confirmar término → Em conferência; água enquadrada segue 41.8 e pode encerrar automaticamente; IR-01/IR-04 recebem fatos | Tarefa/setor, modalidade, motivo de pausa e origem da medição | Água: herdar alvo/política; registrar aplicado medido/estimado, área/tempo e dados de energia disponíveis; produtos ativam controles específicos |
+| FO-10 | Irrigação — IR-03/MB-08 | Ordem/setor, tempos, área atendida, origem da medição; volume ou dados suficientes para estimativa; leituras de energia quando disponíveis | Lâmina por área, setor, vazão/calibração, pausas, reset de medidor; líquido/bruto distintos | Registrar avanço/turno; Confirmar término → Em conferência; água sem produto segue 41.8 e pode encerrar automaticamente; IR-01/IR-04 recebem fatos | Tarefa/setor, modalidade, motivo de pausa e origem da medição | Água: herdar alvo e parâmetros do equipamento (versão); registrar aplicado medido/estimado, área/tempo e dados de energia disponíveis; produtos ativam controles específicos |
 | FO-11 | Plano/ordem de manutenção — MA-03/MA-04 | Ativo, serviço, gatilho/fonte, janela, condição técnica e responsável | Próximo vencimento; recursos/peças; conflito de agenda; versão do plano | Confirmar plano; executar mesma ordem; teste/liberação separados | Ativo, plano/serviço, gatilho, equipe e peças | Tipo preventiva/preditiva/corretiva; contador; janela; condição; previsão; teste e conciliação conforme etapa |
-| FO-12 | Abastecimento — MA-05/MB-09 | Ativo, tanque, volume/unidade, contador/data, autor | Capacidade, contador regressivo, método de consumo e movimento único | Registrar e abrir próxima tarefa; divergência vai a conferência | Ativo, tanque/local, combustível, unidade e operador | Leitura/contador e reinício identificado, volume real, origem, custo derivado; não digitar novo saldo do tanque |
+| FO-12 | Abastecimento — MA-05/MB-09 | Ativo, tanque, volume/unidade, contador/data, autor | Capacidade, contador regressivo, método de consumo e movimento único pela chave física do abastecimento (CONC-05): segundo registro do mesmo fato é vinculado, sem novo movimento | Registrar e abrir próxima tarefa; divergência acima da tolerância vai à conferência (CONC-10) | Ativo, tanque/local, combustível, unidade e operador | Leitura/contador e reinício identificado, volume real, origem, custo derivado; não digitar novo saldo do tanque |
 | FO-13 | Carga/pesagem — CO-03/MB-10 | Ordem/origem, veículo ou recipiente, ticket, bruto/tara ou líquido medido, destino | Duplicidade de ticket, sequência de pesagens, unidade/base; participação das origens | Registrar carga; romaneio derivado; CO-04 recebe | O.S./origens, veículo/recipiente, balança e destino | Ticket/ID, datas, massa/unidade, tara/bruto/líquido, umidade/base quando pertinente; origens rateadas e duas pesagens sem dupla produção |
 | FO-14 | Beneficiamento — CO-05 | Lotes/quantidades de entrada, processo, recurso, saídas/classes, perdas e estoque em processo | Balanço de massa, bases de umidade, embalagem e genealogia | Registrar avanço; Concluir execução → Em conferência; Fechar processo após conciliação; qualidade em CO-06 controla liberação do lote separadamente | Rota, equipamento, lotes, classes e embalagens | Etapas físicas por cultura; entradas/saídas e bases; perdas/estoque em processo; turno; genealogia |
 | FO-15 | Inspeção/liberação de lote — CO-06 | Lote, método/plano, amostra, resultados, padrão e decisão | Limites vigentes e perfil; impacto em pedidos reservados | Liberar, Bloquear ou Destinar; CO-07/VE-04 atualizam | Lote, protocolo/método, atributo, padrão e decisão | Resultados/unidades, amostra/data, responsável e motivo; qualidade separada do encerramento da ordem |
@@ -2344,7 +2352,7 @@ FO identifica uma família de formulários de domínio, não uma tela única con
 | FO-26 | Estrutura gerencial — CD-07 | Código/nome; natureza; centro de custo; cultura/projeto; hierarquia e vigência; regra de apropriação/rateio e contas externas mapeadas | Dimensões separadas, sem árvore circular; mudança não reclassifica passado sem ajuste; alimenta GE-02/GE-03 |
 | FO-27 | Safra, metas, plano e ajuste local — PL-01/PL-02/GE-02 | Safra/ciclo/ocupação; cultura/variedade; área; meta/unidade; modelo/versão; gatilho/evento/deslocamento; datas; itens/doses; override/motivo; cenário | Vincula FO-01/04/06; não reedita laudo ou modelo para ajustar um talhão; demanda única e diferenças de orçamento |
 | FO-28 | Rendimento, capacidade e alocação — CD-02/PL-03/PL-04 | Operação/cultura; conjunto; largura/velocidade/eficiência ou kg/h; unidade/base; equipe; fonte/vigência; calendário; janela; demanda/versão; cenário | Cálculo de horas e custo; perdas descontadas uma vez; agenda confirma atomicamente; ativa FO-05 para reprogramação |
-| FO-29 | Aprovação, agrupamento e liberação — IN-02/CA-01/IR-03/CO-02/MA-04/CO-05 | Ordens/versões; decisão/motivo; itens editados quando permitido; escopo/janela; grupo; compatibilidade; aprovação individual ou política de água | Diferenças e efeitos antes de confirmar; só saldo futuro; competência por domínio; não aceita selecionar estado livremente |
+| FO-29 | Aprovação, agrupamento e liberação — IN-02/CA-01/IR-03/CO-02/MA-04/CO-05 | Ordens/versões; decisão/motivo; itens editados quando permitido; escopo/janela; grupo; compatibilidade; aprovação individual (água sem produto não usa FO-29) | Diferenças e efeitos antes de confirmar; só saldo futuro; competência por domínio; não aceita selecionar estado livremente |
 | FO-30 | Checklist, inspeção de ativo e teste — MA-02/MA-04/MB-09 | Ativo/O.S.; modelo/versão; item; resultado conforme/não conforme/não aplicável; medição/unidade; evidência; criticidade; motivo; restrição; teste/decisão | Resposta sem default positivo; campos condicionais; achado vira caso sem duplicar falha; teste não é apenas checkbox genérico |
 | FO-31 | Política de estoque — SU-02 | Item/local; método mínimo-máximo/datado/híbrido; prazo; segurança; mínimo/máximo/ponto de pedido; lote/múltiplo; revisão; fonte e vigência | Campos mudam por método; valida intervalos/unidades; quantidade proposta calculada; não duplica previsão e demanda firme |
 | FO-32 | Transferência, inventário e ajuste — SU-08/SU-09 | Tipo; origem/destino; produto/lote; quantidade/unidade; data; motivo; contagem; condição; responsável; aprovação de ajuste | Movimentos separados de contagem; política de contagem cega; diferença não ajusta saldo automaticamente; sem edição direta de saldo |
@@ -2353,12 +2361,12 @@ FO identifica uma família de formulários de domínio, não uma tela única con
 | FO-35 | Divergência comercial, retorno e reclamação — VE-06/MB-10 | Pedido/entrega/lote; tipo; quantidade/unidade; motivo; evidência; parte responsável; ação/destinação; ajuste proposto e aprovação | Retorno não recoloca lote apto automaticamente; crédito financeiro depende de decisão/fonte oficial; histórico ligado à entrega |
 | FO-36 | Orçamento, rateio e fechamento — GE-02/GE-03 | Cenário/versão; período; natureza/centro/cultura/projeto/talhão; recurso; quantidade/base; preço; regra de rateio; premissas; aprovação | Totais/ha/unidade e variações calculados; preservar baseline; fechamento verifica origens e pendências, sem lançamento duplicado |
 | FO-37 | Títulos, caixa e conciliação — GE-04/GE-05 | Origem/contraparte; competência; valor/moeda; parcelas/vencimentos; evento contratual; conta autorizada; forma; referência externa; comprovante/estado confirmado | Em modo ERP, campos oficiais somente leitura ou solicitação de alteração; comprovante não equivale a liquidação; dados bancários restritos |
-| FO-38 | Indicador, meta e plano de ação — GE-06/GE-07/GE-01 | Indicador/fórmula versionada; fonte; unidade; escopo/período; meta; responsável; ação; causa; prazo; evidência e conclusão | Valor realizado vem da fonte, não da edição do gráfico; denominador zero explícito; resultado e ação vinculados |
+| FO-38 | Indicador, meta e plano de ação — GE-06/GE-07/GE-01 | Indicador/fórmula versionada; fonte; unidade; escopo/período; meta; responsável; uso em avaliação ou remuneração (padrão: não), com avaliados e data de corte; ação; causa; prazo; evidência e conclusão | Valor realizado vem da fonte, não da edição do gráfico; denominador zero explícito; resultado e ação vinculados; mudança que altere a avaliação de quem propõe segue 2.1 |
 | FO-39 | Usuários, papéis e alçadas — CF-01/CF-02 | Identidade/convidado; papel; escopo; permissões; alçada/unidade; vigência; substituto; segregação | Autorização no servidor; concessão não amplia poder do concedente; sem permissões totais pré-marcadas |
-| FO-40 | Integração, importação e parâmetros — CF-03/CF-04/AG-02/IN-04/CD-01/ON-01 | Fonte/conector; ambiente; credencial por mecanismo seguro; objeto/escritor; mapeamento; unidade/CRS; parser/versão; arquivo/hash; prévia; política de conflito | Segredos mascarados; dados externos não executam instruções; valida lote/linha; amostra/camada guarda proveniência |
+| FO-40 | Integração, importação e parâmetros — CF-03/CF-04/AG-02/IN-04/CD-01/ON-01 | Fonte/conector; ambiente; credencial por mecanismo seguro; objeto/escritor; mapeamento; unidade/CRS; parser/versão; arquivo/hash; prévia; política de conflito; modo de gravação por operação, corte, evidências e aceite do responsável | Segredos mascarados; dados externos não executam instruções; valida lote/linha; amostra/camada guarda proveniência; servidor recusa escrita no ERP fora de Gravação habilitada; prévia nunca é promovida a envio; habilitar exige as evidências de 66.3 |
 | FO-41 | Entrada, assinatura e cobrança — ON-01/CF-05/PT-07/BO-01/BO-02/BO-03 | Perfil; organização; plano/versão; área contratada elegível; período; preço/moeda; franquia; autorização de pagamento; cancelamento e evento do provedor | Entrada progressiva; social login não completa dados fiscais inexistentes; cartão em componente do provedor; não armazenar número/CVV; preço hipotético não ativa cobrança |
 | FO-42 | Propostas e consentimentos do parceiro — PT-02/PT-03/PT-04/PT-05 | Convite/origem; itens/quantidades; preço/base; prazo/local/frete; pagamento; validade; documentos; finalidade/escopo/prazo de acesso | Herda proposta/identidade; privado por contraparte; enviar não aceita oferta automaticamente; dossiê só dados autorizados |
-| FO-43 | Política e programação de irrigação — IR-01/IR-02/IR-04 | Setor/rede; cultura/estádio; método; fonte/atualidade; limites de lâmina/volume/intervalo; validade; restrições; responsável técnico; modalidade água/produtos | Aprovação da política e enquadramento rastreáveis; FO-10 só registra execução; adição de produto exige reclassificação e aprovação individual |
+| FO-43 | Parâmetros operacionais e programação de irrigação — IR-01/IR-02/IR-04 | Setor/rede; cultura/estádio; método; fonte/atualidade; parâmetros do equipamento e do solo (lâmina máxima por passada, intervalo mínimo, eficiência), mantidos pelo gestor da irrigação, com versão; restrições; modalidade água/produtos | Parâmetros operacionais versionados, sem aprovação nem responsável técnico (DEC-2609-10; APROV-15); memória e passadas rastreáveis; FO-10 só registra execução; adição de produto exige reclassificação e aprovação individual |
 | FO-44 | Prescrição e pacote para máquina — AG-04/IN-04/CF-03 | Prescrição/versão; zona/geometria/CRS; produto; dose/unidade; terminal/modelo/perfil; limites; formato; destino; hash e confirmação de importação | Só perfil homologado; prévia espacial e validação de unidade; exportar não confirma execução; compatibilidade real obrigatória |
 | FO-45 | Ação assistida por IA — painel contextual autorizado | Intenção; registros/versões selecionados; campos propostos; origem/confiança; prévia dos efeitos; autorização exigida | Usa mesmos formulários/esquemas e comandos do domínio; não cria caminho alternativo sem validação; resultado confirmado pelo servidor |
 
@@ -2415,14 +2423,14 @@ Para cada variante de FO, a implementação mantém dicionário versionado com: 
 |---|---|---|
 | Fazenda, área, parcela, ciclo e variedade | IDs de geografia/ocupação e suas versões; área derivada quando geométrica | FO-01/06/27 |
 | Laudo, método, unidade, profundidade e valores | Amostra/resultado original e normalizado, com proveniência | FO-02/40 |
-| Ordem, etapa, aprovação, janela e saldo | Ordem/ocorrência; eventos e projeção canônica; saldo calculado | FO-04/05/27/29 e comandos do ciclo |
+| Ordem, etapa, aprovação, janela e saldo | Ordem/ocorrência; registro transacional da ordem, lido por consulta direta (PROJ-02); saldo verificado na transação (PROJ-03) | FO-04/05/27/29 e comandos do ciclo |
 | Realizado diário, acumulado e custo | Apontamentos únicos; consumos/horas e valoração; provisórios separados | FO-07/10/11/12/13/14 |
 | Saldo físico, reservado e custódia | Movimentos e reservas; nunca campo manual no cadastro | FO-09/18/25/31/32 e eventos de estoque |
 | Condição do ativo e capacidade | Inspeção/teste e agenda/calendário; aprovação PCM | FO-22/23/28/30, execução/manutenção |
 | Produção, qualidade e genealogia | Entradas/saídas por lote, pesagens, perdas, inspeções | FO-13/14/15/33 |
 | Preço, entrega, frete e vencimento | Versão aceita do negócio, expedição e evento contratual | FO-16/17/19/34/35/37/42 |
 | Orçado e realizado por dimensão | Cenário, lançamentos/rateios e fontes transacionais | FO-26/28/36/37/38 |
-| Política da água, alvo e aplicado | Política aprovada, cálculo determinístico e aplicação confirmada | FO-43/10 |
+| Parâmetros operacionais da água, alvo e aplicado | Parâmetros operacionais versionados, cálculo determinístico e aplicação confirmada | FO-43/10 |
 | Assinatura, direitos, fatura e medição | Contrato/versão, base elegível e confirmação do provedor | FO-41 |
 
 **Obrigatoriedade progressiva:** cadastro mínimo permite rascunho e primeira tarefa; emissão, aprovação, execução e fechamento têm conjuntos próprios. Exemplo: pedido em negociação não exige placa; expedição exige identificação de transporte aplicável. Ordem planejada não exige quantidade realizada; apontamento exige realizado ou ocorrência justificando ausência. Nunca pedir energia medida em equipamento sem medidor como condição impossível: admitir estimativa identificada quando permitida, ou manter dado desconhecido e abrir pendência pertinente.
@@ -2440,13 +2448,13 @@ Os seletores pesquisáveis e complementos FO-01 a FO-20 foram incorporados à ta
 - **FORM-06:** dose/preço/quantidade com vírgula decimal, zero, nulo e arredondamento são tratados corretamente; conversão incompatível é rejeitada.
 - **FORM-07:** perfil sem autorização não vê dado sensível nem consegue alterar campo via API; cadastro rápido respeita mesma regra.
 - **FORM-08:** formulário funciona por teclado, leitor de tela e toque; rótulos persistentes, foco no erro, resumo de problemas e valor digitado preservado; cor não é única indicação.
-- **FORM-09:** submissão repetida, offline e conflito de versão preservam rascunho/relato e não duplicam negócio; salvar mostra recibo ou estado pendente verdadeiro.
+- **FORM-09:** submissão repetida, offline e conflito de versão preservam rascunho/relato e não duplicam negócio; salvar mostra recibo ou estado pendente verdadeiro. A chave nasce na confirmação; falha transitória repete a mesma chave; editar depois de rejeição ou conflito é nova intenção (IDEM-03, IDEM-07).
 - **FORM-10:** seleção longa usa busca/paginação; catálogo em cache offline identifica versão e validade; registro antigo não vira opção nova indevida.
 - **FORM-11:** dados herdados/calculados não exigem redigitação; edição na origem mostra impactos e não reescreve passado silenciosamente.
 - **FORM-12:** testar cenário completo de cada família aplicável com seus consumidores de tabela; um formulário visualmente preenchível sem persistência/projeção correta não passa no aceite.
-- **FORM-13:** água sem produtos oculta campos/movimentos de insumos; trocar para fertirrigação ativa validações e aprovação individual, sem reutilizar autorização inadequada.
+- **FORM-13:** água sem produtos oculta campos/movimentos de insumos; trocar para fertirrigação ativa validações e aprovação individual, sem reutilizar a liberação automática da água (AGUA-05; APROV-15).
 - **FORM-14:** apontamento do turno alimenta a mesma O.S.; tabela mostra diário, acumulado e saldo, distinguindo conferência da linha da etapa da ordem.
-- **FORM-15:** importar arquivo oferece prévia, correspondência de colunas e erros por linha; não inventa campos ausentes nem confirma lote parcialmente rejeitado como integral.
+- **FORM-15:** importar arquivo oferece prévia, correspondência de colunas e erros por linha; não inventa campos ausentes nem confirma lote parcialmente rejeitado como integral. Causa repetida é corrigida uma vez com Aplicar a N linhas, por critério explícito, seleção revisável e antes/depois, e as linhas afetadas são revalidadas antes de publicar (60.3).
 - **FORM-16:** validação conjunta produto/operação: representante do perfil conclui tarefa normal e trata erro real sem precisar conhecer estrutura técnica de banco ou código.
 
 ## 7. Requisitos funcionais verificáveis
@@ -2483,7 +2491,7 @@ Como gestor de dados, quero uma base íntegra que represente a operação e cons
 | RF-DAT-004 | P0 / E1 | Cadastrar produtos, unidades, lotes e conversões por item. | Saca de massa não configurada impede conversão; caixa de fruta com peso variável exige peso real/base definida. | CD-06 |
 | RF-DAT-005 | P0 / E1 | Manter catálogo único de parceiros com múltiplos papéis. | Mesmo identificador fiscal pode ser fornecedor e cliente sem duplicar contraparte; filiais têm identidade específica. | CD-05 |
 | RF-DAT-006 | P0 / E1 | Cadastrar pessoas, equipes, habilitações, calendário e ativos fixos/móveis. | Recurso indisponível ou habilitação vencida aparece na prontidão conforme política; cadastro não concede login automaticamente. | CD-03, CD-04 |
-| RF-DAT-007 | P0 / E1 | Importar cadastros com prévia, erros por linha, deduplicação e reconciliação. | Importar novamente o mesmo lote de dados não duplica registros; linhas inválidas não são silenciosamente ignoradas. | CD-01, CD-06, CF-03 |
+| RF-DAT-007 | P0 / E1 | Importar cadastros com prévia, erros por linha, correção por causa repetida, deduplicação e reconciliação. | Importar novamente o mesmo lote de dados não duplica registros; linhas inválidas não são silenciosamente ignoradas; uma causa repetida é corrigida uma vez para as linhas do critério, revalidadas antes de publicar (60.3, CADN-07 a CADN-11). | CD-01, CD-06, CF-03 |
 | RF-DAT-008 | P0 / E2 | Mapear dimensões gerenciais e códigos do ERP com vigência. | Custo pode ser classificado por natureza, CR, cultura e projeto sem codificar todas as combinações em um único campo. | CD-07 |
 | RF-DAT-009 | P0 / E1 | Manter culturas, cultivares e operações padrão com unidade, capacidades e vigência. | Revisão de operação padrão não altera ordens executadas; aplicar padrão ao plano herda campos e permite ajuste justificado. | CD-02 |
 
@@ -2516,7 +2524,7 @@ Como PCP, quero programar operações tecnicamente aptas e executáveis dentro d
 | RF-PLN-002 | P0 / E1 | Desdobrar horizonte mensal/semanal/diário sem emitir todas as ordens antecipadamente. | Operação permanece no plano até conversão; somente parcela selecionada gera ordem programada. | PL-02, PL-04 |
 | RF-PLN-003 | P0 / E1 | Calcular capacidade útil por recurso e período com premissas. | Plano de 12 h para recurso com 8 h úteis gera conflito visível; parada e jornada não são subtraídas duas vezes. | PL-03 |
 | RF-PLN-004 | P0 / E1 | Alocar equipe, ativo, implemento e local com detecção de conflitos. | Mesmo ativo em duas ordens sobrepostas não é liberado sem resolver conflito; recurso compartilhado tem calendário único. | PL-04 |
-| RF-PLN-005 | P0 / E1 | Revisar prontidão e liberar conjunto selecionado de ordens. | Resumo mostra material, equipe, ativo e restrições por ordem; sucesso parcial informa exatamente quais foram liberadas. | PL-04 |
+| RF-PLN-005 | P0 / E1 | Revisar prontidão e liberar conjunto selecionado de ordens. | Resumo mostra material, equipe, ativo, restrições e aprovação agronômica vigente da versão por ordem; sucesso parcial informa exatamente quais foram liberadas; ordem agrícola sem aprovação vigente é recusada individualmente, mesmo pronta e dentro do orçamento e da janela (APROV-01, APROV-05). | PL-04 |
 | RF-PLN-006 | P0 / E1 | Reprogramar apenas saldo com motivo e revalidação. | Após 30 de 100 ha executados, nova programação tem 70 ha; histórico dos 30 ha e consumos permanece intacto. | PL-05 |
 | RF-PLN-007 | P0 / E1 | Manter base aprovada, cenários e previsão com diferenças e alçadas. | Simular V2 não altera V1; publicar V2 muda projeção futura e preserva comparação com orçamento-base. | PL-02, GE-02 |
 | RF-PLN-008 | P1 / E2 | Simular terceirização ou recurso alternativo com custo total e prazo. | Cenário mostra capacidade adicional, preço, dependências e restrições; não contrata fornecedor automaticamente. | PL-03, SU-04 |
@@ -2534,7 +2542,7 @@ Como operador, quero instruções claras e registro rápido, inclusive sem conex
 | RF-OPS-002 | P0 / E1 | Controlar início, pausa, retomada e conclusão parcial/total. | Pausa tem causa; conclusão parcial exige destino do saldo; troca de operador não apaga eventos anteriores. | CA-01 |
 | RF-OPS-003 | P0 / E1 | Apontar área/quantidade, horas, leituras, insumos, equipe e evidências. | Campos dependem da operação; hora de máquina e hora de equipe não são multiplicadas incorretamente entre membros. | CA-02 |
 | RF-OPS-004 | P0 / E1 | Conferir desvios com limites e tolerâncias configurados. | Execução fora do limite vai à conferência com motivo; dado válido dentro da regra pode usar conferência simplificada autorizada. | CA-02 |
-| RF-OPS-005 | P0 / E1 | Persistir apontamento offline e reenviar com ID único. | Após fechar/reabrir aplicativo, registros pendentes permanecem; envio repetido produz um único realizado. | CA-02 |
+| RF-OPS-005 | P0 / E1 | Persistir apontamento offline e reenviar com a mesma chave da intenção. | Chave e conteúdo são gravados antes do primeiro envio, com ou sem sinal; após fechar/reabrir aplicativo, registros pendentes permanecem e são reenviados com a mesma chave; envio repetido produz um único realizado (IDEM-05, IDEM-06; AC-73). | CA-02 |
 | RF-OPS-006 | P0 / E1 | Encaminhar ocorrência por causa mantendo origem e dono. | Falha mecânica abre solicitação do ativo; suspeita fitossanitária abre diagnóstico; alerta de risco pode interromper execução. | CA-03 |
 | RF-OPS-007 | P0 / E1 | Solicitar material pela ordem e acompanhar mesma requisição do estoque. | Quantidade, produto e destino são herdados; operador e almoxarife consultam o mesmo ID e saldo pendente. | CA-04, SU-07 |
 | RF-OPS-008 | P0 / E2 | Registrar serviço terceirizado e medição para aceite. | Fornecedor aponta ou é registrado por responsável; aceite físico e autorização de pagamento são separados. | CA-02, SU-05, GE-04 |
@@ -2568,7 +2576,7 @@ Como PCM/oficina, quero manter ativos aptos usando uma única ordem do planejame
 | RF-AST-003 | P0 / E1 | Programar preventiva por contador, calendário ou condição. | Vencimento não cria duas ordens para a mesma intervenção; plano por modelo tem versão aplicada ao ativo. | MA-03 |
 | RF-AST-004 | P0 / E1 | Executar ordem única com serviços, peças, mão de obra e terceiros. | PCM e mecânico veem estados do mesmo documento; espera por peça se distingue de tempo efetivo de reparo. | MA-04 |
 | RF-AST-005 | P0 / E1 | Separar fim do reparo, teste, liberação técnica e fechamento. | Ativo continua bloqueado após concluir serviço até teste válido; custo pendente não precisa impedir aptidão técnica se política permitir. | MA-04, MA-01 |
-| RF-AST-006 | P0 / E1 | Registrar combustível com tanque, quantidade e leitura do ativo. | Abastecimento gera um movimento; estimativa de consumo por horas não gera segunda baixa física. | MA-05, SU-03 |
+| RF-AST-006 | P0 / E1 | Registrar combustível com tanque, quantidade e leitura do ativo. | Abastecimento gera um movimento, inclusive quando operador e almoxarife registram o mesmo abastecimento (CONC-11; AC-75); estimativa de consumo por horas não gera segunda baixa física. | MA-05, SU-03 |
 | RF-AST-007 | P1 / E1 | Apurar disponibilidade, utilização, MTBF, MTTR e custo por hora com bases publicadas. | Usuário abre componentes e vê exclusões; indicadores de confiabilidade não confundem preventiva e falha. | MA-05, GE-06 |
 | RF-AST-008 | P1 / E4 | Simular substituição de ativo e terceirização por custo futuro comparável. | Cenário diferencia investimento, custo operacional, disponibilidade e financiamento; nenhuma compra é executada pela simulação. | MA-05, GE-02 |
 
@@ -2587,7 +2595,7 @@ Como Suprimentos, quero atender necessidade datada e conservar custódia, dispon
 | RF-SUP-005 | P0 / E2 | Cotar e equalizar propostas por item e custo total comparável. | Proposta incompatível tecnicamente não vence apenas pelo menor preço; decisão guarda justificativa e versão. | SU-04 |
 | RF-SUP-006 | P0 / E2 | Emitir pedido após aprovação e acompanhar confirmações/entregas. | Recebimento parcial não encerra saldo do pedido; alteração relevante requer reaprovação. | SU-05 |
 | RF-SUP-007 | P0 / E1 | Receber, inspecionar e liberar quantidade aceita, com referência de origem. | De 60 recebidas e 10 bloqueadas, apenas 50 ficam utilizáveis; NF/documento vinculado não substitui inspeção física. | SU-06 |
-| RF-SUP-008 | P0 / E1 | Reservar, entregar, devolver e reconciliar requisição por destino autorizado. | Entregue 100, consumido 70, devolvido 20 e custódia 10 fecham balanço; nenhuma parcela é contada duas vezes. | SU-07 |
+| RF-SUP-008 | P0 / E1 | Reservar, renovar e vencer reserva (CMD-49; RN-046), entregar, devolver e reconciliar requisição por destino autorizado. | Entregue 100, consumido 70, devolvido 20 e custódia 10 fecham balanço; nenhuma parcela é contada duas vezes; vencimento e entrega simultâneos têm um vencedor (AC-77). | SU-07 |
 | RF-SUP-009 | P0 / E1 | Transferir entre locais com estado em trânsito e recebimento. | Material expedido internamente não fica disponível em dois depósitos; diferença gera reconciliação. | SU-08 |
 | RF-SUP-010 | P0 / E1 | Inventariar com recontagem e ajuste aprovado. | Movimentos ocorridos durante contagem são considerados; ajuste conserva evidência, motivo e aprovador. | SU-09 |
 | RF-SUP-011 | P0 / E2 | Conciliar pedido, recebimento e documento com o financeiro. | Divergência bloqueia a autorização pertinente e mostra responsável; adiantamento mantém vínculo e compensação posterior. | SU-06, GE-04 |
@@ -2672,7 +2680,7 @@ Como administrador, quero que a operação seja controlada, auditável e recuper
 | RF-GOV-001 | P0 / E1 | Aplicar permissão por ação, empresa, fazenda e objeto. | Tentativa via URL/API/exportação fora do escopo é negada sem vazar conteúdo do registro. | CF-01 |
 | RF-GOV-002 | P0 / E1 | Manter alçadas por documento, valor, risco e substituição temporária. | Usuário não eleva a própria alçada; substituição tem validade e aparece na auditoria. | CF-02 |
 | RF-GOV-003 | P0 / E1 | Auditar decisões, mudanças, exportações sensíveis e acessos administrativos. | Histórico preserva autor, horário, origem, motivo, versão e campos alterados; operador não apaga trilha. | CF-04 |
-| RF-GOV-004 | P0 / E1 | Manter parâmetros com dono, vigência e impacto avaliado. | Alterar limite exige aprovação pertinente e não altera decisões históricas automaticamente. | CF-04 |
+| RF-GOV-004 | P0 / E1 | Manter parâmetros com dono, vigência e impacto avaliado. | Alterar limite exige aprovação pertinente e não altera decisões históricas automaticamente. O avaliado não publica sozinho mudança que altere a própria avaliação (2.1). | CF-04 |
 | RF-GOV-005 | P0 / E1 | Disponibilizar diagnóstico de integrações e sincronização. | Falha tem ID, causa compreensível e ação; reprocessamento respeita permissão e idempotência. | CF-03 |
 | RF-GOV-006 | P0 / E2 | Exportar dados e evidências do cliente em formato documentado. | Exportação inclui vínculos e unidades, respeita acesso e possui checksum/manifesto; cliente não depende de capturas de tela. | CF-04 |
 
@@ -2689,7 +2697,9 @@ Como TI, quero conectar fontes sem perder fatos ou criar dois saldos conflitante
 | RF-INT-003 | P0 / E1 | Importar/exportar arquivos com esquema validado e resultado por linha. | Unidade inválida ou referência inexistente é rejeitada com motivo; lote possui totais de controle. | CF-03 |
 | RF-INT-004 | P1 / E2 | Integrar sensores, telemetria, balanças e laboratórios por adaptador. | Dados tardios/duplicados são identificados; indisponibilidade da fonte não inventa leitura nem fecha operação. | CF-03, IR-04, CO-03 |
 | RF-INT-005 | P1 / E2 | Integrar documentos fiscais e notificações por serviços autorizados. | Status externo confirmado é separado do envio; falha gera pendência. Comunicação real exige destinatários e conteúdo revisados. | CF-03, SU-05, LO-02 |
-| RF-INT-006 | P0 / E1 | Conservar fila de efeitos pendentes e corrigir sem perda do fato de origem. | Queda do ERP após confirmação do apontamento mantém evento pendente; reprocessamento conclui uma vez. | CF-03, CA-02 |
+| RF-INT-006 | P0 / E1 | Conservar fila de efeitos pendentes e corrigir sem perda do fato de origem. | Queda do ERP após confirmação do apontamento mantém o efeito Pendente; sem a marcação de INTEG-16, a O.S. encerra com o efeito Pendente, sem estorno por falha de integração (INTEG-13, INTEG-17); reprocessamento conclui uma vez. | CF-03, CA-02 |
+| RF-INT-007 | P1 / E2 | Oferecer API de integração entre sistemas para enviar e consultar os dados de gestão acordados em contrato (ERP, telemetria, BI), com identidade de integração própria, distinta da sessão humana. | A chamada identifica integração, empresa, ambiente e versão do contrato; a escrita segue o escritor oficial (12.4) e o contrato de comandos (12.2; IDEM-02), com resultado por item; a leitura incremental por checkpoint entrega ao menos uma vez, com ID e versão estáveis para deduplicar, e checkpoint expirado é informado com o caminho de recarga, sem silêncio; limite por integração; erros distinguem permissão, validação, conflito e indisponibilidade; versão descontinuada é anunciada antes de sair. | CF-03, 12.2–12.4, 66 |
+| RF-INT-008 | P0 / E2 | Gerir credencial e acesso por integração, com escopo mínimo, validade, rotação e revogação. | Credencial de uma empresa, uma integração e um ambiente, com escopos separados de leitura e escrita por objeto e direção; segredo compartilhado, quando o mecanismo o gerar, é exibido uma vez; validade e último uso visíveis; rotação com sobreposição curta registrada. Revogar a credencial barra chamadas novas com ela; revogar o acesso da integração também suspende tentativas de saída futuras; nenhuma das duas recolhe mensagem já enviada nem desfaz fato aceito, e rotação ou expiração de uma credencial não desativa a integração. Comando aceito e ainda na fila revalida a autorização antes do efeito; sem ela, não efetiva e fica auditável com motivo (RF-INT-006). Todo efeito registra a integração e quem concedeu o acesso; credencial nunca em log, URL ou diagnóstico; dado pessoal só sai se o escopo o incluir. | CF-03, 66.3, 27.4 |
 
 ### Assistência e inteligência
 
@@ -2749,9 +2759,9 @@ A gestão diária usa as cinco etapas resumidas da seção 8.4 e a janela móvel
 | Ciclo produtivo | Planejado → Implantado → Em formação/produção → Em renovação → Encerrado | Estádio observado, idade e safra são atributos distintos |
 | Recomendação | Rascunho → Em revisão → Aprovada → Substituída; Rejeitada/Cancelada quando cabível | Vigência e bloqueio técnico atual são avaliados separadamente |
 | Operação planejada | Proposta → Aprovada → Parcialmente convertida → Convertida; Cancelada no saldo | Quantidade planejada, convertida e realizada reconciliadas |
-| O.S. operacional | Rascunho → Emitida → Em revisão agronômica → Aprovada pelo agrônomo → Liberada para execução → Em execução ↔ Pausada → Em conferência (entrada automática ao concluir execução) → Encerrada; avanço parcial e programação são dimensões independentes; seção 8.4 | Autorização agronômica obrigatória; para água sem insumos aplicar política explícita da seção 41.8, para demais O.S. aprovação individual; manutenção segue responsável próprio. Devolver para ajuste/rejeitar são ações da revisão; aprovação técnica e prontidão operacional são dimensões independentes. Capítulo 41 |
-| Apontamento | Rascunho local → Capturado → Recebido → Validado; Em conferência/Não conforme quando necessário | Envio: local/pendente/enviado/erro; fato e aceitação técnica distintos |
-| Requisição | Solicitada → Aprovada → Reservada → Em separação → Entregue parcial/total → Em conciliação → Encerrada | Custódia residual não desaparece ao entregar |
+| O.S. operacional | Rascunho → Emitida → Em revisão agronômica → Aprovada pelo agrônomo → Liberada para execução → Em execução ↔ Pausada → Em conferência (entrada automática ao concluir execução) → Encerrada; avanço parcial e programação são dimensões independentes; seção 8.4 | Aprovação agronômica individual obrigatória em toda O.S. agrícola, inclusive nas operações mecânicas (preparo de solo, plantio, cultivo, roçada, colheita e transporte interno da produção como ordem própria; APROV-02); irrigação somente com água não passa pelo agrônomo (DEC-2609-10); manutenção segue responsável próprio. Devolver para ajuste/rejeitar são ações da revisão; aprovação técnica e prontidão operacional são dimensões independentes. Capítulo 41 |
+| Apontamento | Rascunho local → Capturado → Recebido → Validado; Vinculado; Aguardando original ou entrega (CONC-18); Em conferência/Não conforme quando necessário; correspondência destes termos e dos de 12.3 e 64.5 em 73.2.3 | Situação de envio (64.5; 73.3): Salvo neste aparelho · Aguardando envio · Enviando · Sincronizado · Conflito; cor em 74.4; fato e aceitação técnica distintos |
+| Requisição | Solicitada → Aprovada → Reservada → Em separação → Entregue parcial/total → Em conciliação → Encerrada | Custódia residual não desaparece ao entregar; validade da reserva (ativa ou vencida) é dimensão própria (RN-046; 73.4), e renovação é evento, não estado |
 | Cotação | Rascunho → Em aprovação → Enviada → Recebendo propostas → Em decisão → Convertida/Encerrada | Propostas têm versão e validade; vencimento não implica aceite |
 | Contrato de fornecimento | Rascunho → Em aprovação → Vigente → Cumprido/Encerrado/Rescindido | Contratado, liberado acumulado, recebido e pago separados |
 | Pedido de compra | Rascunho → Aprovado → Emitido → Confirmado → Recebido parcial/total → Encerrado | Qualidade, documento e financeiro são dimensões próprias |
@@ -2761,35 +2771,38 @@ A gestão diária usa as cinco etapas resumidas da seção 8.4 e a janela móvel
 | Pedido de venda | Comercial: rascunho/em aprovação/confirmado/cancelado | Atendimento: não atendido/parcial/atendido; financeiro: aberto/parcial/liquidado |
 | Expedição/viagem | Planejada → Em preparação → Conferida → Saída confirmada → Em trânsito → Entregue parcial/total → Encerrada | Autorização fiscal e aceite do cliente possuem comprovação própria |
 | Crédito | Rascunho → Solicitado → Em análise → Proposto → Aprovado condicional/Recusado → Contratado → Liberado parcial/total → Liquidado | Obrigações, garantia e título relacionados; atraso é condição da obrigação |
-| Integração | Pendente → Em processamento → Confirmada; Em erro/Em reconciliação | Fato local pode estar confirmado enquanto efeito externo aguarda |
+| Chamado de suporte | Recebido → Em análise ⇄ Aguardando você → Respondido; responder a um chamado Respondido o devolve a Em análise | A situação de envio do aparelho (64.5) não é estado do chamado: Recebido exige recibo do servidor (FB-04). Severidade (30.3) é atributo. O chamado não muda estado, saldo nem versão do registro de origem. Print, comentário, triagem e motivo do encerramento: 75.2 (FB-01, FB-05, FB-06) |
+| Integração | Pendente → Enviando → Confirmada; Em reconciliação ou Com erro quando cabível (vocabulário único de 73.6.5) | Dimensão de cada efeito externo, independente da etapa da O.S. e do envio do aparelho; nunca coluna do Kanban (RN-047; INTEG-27). Fato local pode estar confirmado enquanto efeito externo aguarda; cor em 74.4 |
 
-Cancelamento com fatos já executados não apaga o objeto: encerra o saldo futuro com motivo e mantém o histórico. Estorno corrige registro incorreto; não deve ser usado para fingir que uma aplicação física nunca ocorreu.
+Cancelamento com fatos já executados não apaga o objeto: encerra o saldo futuro com motivo e mantém o histórico. Estorno corrige registro incorreto; não deve ser usado para fingir que uma aplicação física nunca ocorreu; falha de integração não gera estorno de fato físico (RN-047). A palavra exibida e a cor dos estados desta tabela seguem 74.4.3 (DS-24), que não cria estado; estado exibido que ainda não tem linha ali entra pela governança de 74.10 antes do uso; o rótulo "Em planejamento" da safra, usado no protótipo, não é estado de 8.1 (PEND-DS-08).
 
 ### 8.2 Contrato único dos comandos principais
+
+CMD-01 a CMD-50 (8.2, 8.2.1 e 8.2.2) seguem o envelope de 8.2.1 e a identidade da intenção e idempotência de ponta a ponta de 73.3.
 
 | ID | Comando / quem | Pré-condição | Efeito confirmado | Retorno de interface |
 |---|---|---|---|---|
 | CMD-01 | Aprovar recomendação / RT competente | Dados técnicos e restrições válidos; versão submetida | Registra decisão; cria/atualiza necessidade única | AG-04 mostra ID da necessidade e link PL-02 |
-| CMD-02 | Publicar plano operacional / responsável | Recomendações aplicáveis aprovadas e plano consistente | Congela versão técnica de referência; atualiza projeções | PL-02 com diferenças e orçamento a revisar |
+| CMD-02 | Publicar plano operacional / responsável | Recomendações aplicáveis aprovadas e plano consistente | Congela versão técnica de referência e grava o evento na mesma transação; projeções são atualizadas depois, pela outbox (PROJ-01, PROJ-06) | PL-02 com diferenças e orçamento a revisar |
 | CMD-03 | Autorizar orçamento / alçada | Cenário calculado, cobertura e riscos apresentados | Publica autorização econômica de escopo/valor | GE-02; PL-01 mostra prontidão econômica |
-| CMD-04 | Autorizar execução da safra / gerente | Plano e orçamento aplicáveis aprovados | Autoriza liberação operacional do escopo/valor/horizonte; rascunhos, simulações e emissão para revisão técnica podem existir antes, sem efeito executável | PL-01 → PL-04; não inicia todas as ordens |
-| CMD-05 | Programar O.S. / PCP | Necessidade e saldo válidos; recursos/janela definidos | Cria/recupera ocorrência única e programa saldo; programação anterior à autorização econômica é proposta identificada, sem reserva firme executável; publicação de alocação segue CMD-34. Não duplica O.S. gerada pelo gatilho | PL-04 mostra proposta/confirmada, conflitos e próxima liberação |
-| CMD-06 | Liberar O.S. / liberador autorizado por domínio | Escopo e horizonte com autorização econômica/operacional vigente (CMD-04 para safra ou autorização equivalente CF-02 de manutenção/produção); aprovação técnica competente da versão, ou enquadramento comprovado na política de água sem insumos 41.8; prontidão e restrições válidas, cobertura/reserva de lotes aptos e fichas aplicáveis (não exige entrega/preparo já realizados; 41.3) | Registra evento de liberação com versão, escopo, autor/serviço, origem, validade e autorização econômica; vincula reservas e fichas por função. Água pode invocar automaticamente o mesmo contrato dentro da política, com evento registrado | CA-01/IR-03/CO-02/MA-04/CO-05 e lista do executor; aprovado/pronto sem evento permanece A liberar |
-| CMD-07 | Iniciar/Pausar/Retomar / executor | Início/retomada exigem liberação registrada e vigente, autorização do escopo, checklist e condições válidas; pacote offline válido quando aplicável. Registrar pausa/fato ocorrido permanece permitido para preservar realidade | Registra evento e realizado conhecido; revogação econômica impede novo início, sem inventar parada física remota | MB-02 com estado e ação seguinte |
+| CMD-04 | Autorizar execução da safra / gerente | Plano e orçamento aplicáveis aprovados | Autoriza liberação operacional do escopo/valor/horizonte, sem aprovar tecnicamente nenhuma O.S. (APROV-05); rascunhos, simulações e emissão para revisão técnica podem existir antes, sem efeito executável | PL-01 → PL-04; não inicia todas as ordens |
+| CMD-05 | Programar O.S. / PCP | Necessidade e saldo válidos; recursos/janela definidos | Cria/recupera ocorrência única e programa saldo; programação anterior à autorização econômica é proposta identificada, sem reserva de execução (RSV-03); publicação de alocação segue CMD-34. Não duplica O.S. gerada pelo gatilho | PL-04 mostra proposta/confirmada, conflitos e próxima liberação |
+| CMD-06 | Liberar O.S. / liberador autorizado por domínio | Escopo e horizonte com autorização econômica/operacional vigente (CMD-04 para safra ou autorização equivalente CF-02 de manutenção/produção); aprovação técnica competente e vigente da versão, lida no registro na transação (APROV-01, APROV-07), exceto irrigação somente com água (DEC-2609-10); prontidão e restrições válidas, cobertura verificada de lotes aptos (RSV-03 a) e fichas aplicáveis (não exige entrega/preparo já realizados; 41.3) | Registra evento de liberação com versão, escopo, autor/serviço, origem, validade e autorização econômica; cria a reserva de execução, ou converte a de planejamento, na mesma transação (RSV-03 b) e vincula fichas por função. Água: CMD-06 automático pela prontidão operacional, com evento registrado (APROV-15) | CA-01/IR-03/CO-02/MA-04/CO-05 e lista do executor; aprovado/pronto sem evento permanece A liberar |
+| CMD-07 | Iniciar/Pausar/Retomar / executor | Início/retomada exigem liberação registrada e vigente, aprovação técnica vigente da versão (APROV-07), salvo irrigação somente com água (DEC-2609-10), autorização do escopo, reserva ativa que cubra o saldo elegível para entrega (RSV-15), checklist e condições válidas; pacote offline válido quando aplicável. Registrar pausa/fato ocorrido permanece permitido para preservar realidade | Registra evento e realizado conhecido; revogação econômica impede novo início, sem inventar parada física remota | MB-02 com estado e ação seguinte |
 | CMD-08 | Concluir execução da O.S. / executor | Fatos registrados; todo trabalho físico terminou ou saldo formalmente dispensado por CMD-47. Reprogramar saldo na mesma ordem não satisfaz término | Registra término físico ou conclusão parcial autorizada, distinguindo o motivo; entra Em conferência e gera reconciliação/retorno pertinente; pendências seguem abertas | MB-03 comprova registro; CA-02 recebe conferência |
 | CMD-09 | Conferir apontamento / política ou conferente | Evidências e divergências tratadas no escopo | Valida versão; consolida efeitos sem repetição | CA-02 mostra custo/material e pendências |
-| CMD-10 | Encerrar O.S. / regra autorizada | Apontamentos conferidos, saldo de trabalho destinado, sobras recebidas/destinadas e custódia da ordem zerada; reconciliações do capítulo 42 concluídas | Fecha edição direta | Registro histórico com ajustes vinculados permitidos |
-| CMD-11 | Reprogramar saldo / PCP | Quantidade não executada e motivo | Nova programação somente para saldo; impacto em reservas/cobertura | PL-05 informa antes/depois e responsáveis |
+| CMD-10 | Encerrar O.S. / regra autorizada | Apontamentos conferidos, saldo de trabalho destinado, sobras recebidas/destinadas e custódia da ordem zerada; reconciliações do capítulo 42 concluídas. Só requisitos locais (INTEG-13), lidos do registro na transação (CAL-02; PROJ-03), nunca de projeção nem de KPI-SUP-06; aceite do ERP não é condição, salvo INTEG-16 | Fecha edição direta; grava na mesma transação encerramento, recibo e evento com os efeitos a integrar, sem esperar o ERP (INTEG-15) | Registro histórico com ajustes vinculados permitidos |
+| CMD-11 | Reprogramar saldo / PCP | Quantidade não executada e motivo | Nova programação somente para saldo; impacto em reservas/cobertura: dentro da liberação vigente a reserva fica protegida; fora dela, entra na política de validade (RSV-05) | PL-05 informa antes/depois e responsáveis |
 | CMD-12 | Preparar cotação / comprador | Necessidade reconciliada ou solicitação aprovada | Cria rascunho, sem envio externo | SU-04 com itens/datas/destinatários |
 | CMD-13 | Enviar cotação/oferta / usuário autorizado | Conteúdo e destinatários revistos; compartilhamento permitido | Cria convites e fila de envio idempotente | Status por destinatário, inclusive erro |
 | CMD-14 | Contratar / alçada | Proposta válida e decisão aprovada | Cria contrato/pedido e obrigações previstas | SU-05/VE-04; não liquida título |
 | CMD-15 | Receber compra / almoxarife | Origem e conferência válidas | Movimento físico aceito/bloqueado; saldo do pedido | SU-06 mostra utilizável e divergência |
-| CMD-16 | Entregar material / almoxarife | Ordem/versão com liberação registrada vigente, autorização econômica/operacional, saldo elegível, lote apto e recebedor; O.S. agrícola também exige aprovação agronômica vigente (capítulo 42) | Transferência do depósito à custódia uma vez; aprovação técnica isolada não autoriza entrega | SU-07/CA-04 mostram entregue e saldo |
-| CMD-17 | Registrar consumo ou declarar devolução/destinação / responsável | Quantidade real, unidade/base, produto/lote, origem/custódia, destino e versão identificados; transferência direta exige política habilitada e autorização do almoxarifado | Consumo único ou declaração de retorno, sem aumentar depósito antes de CMD-45. Transferência direta só migra custódia à ordem destinatária após recebimento comprovado e atômico; CAL-02/42.4; diferença abre pendência | Extrato e ordens de origem/destino atualizados; intenção de devolução não é recebimento |
+| CMD-16 | Entregar material / almoxarife | Ordem/versão com liberação registrada vigente, autorização econômica/operacional, reserva ativa da versão liberada (72.3 item 2), saldo elegível, lote apto e recebedor; O.S. agrícola também exige aprovação agronômica vigente (capítulo 42); reserva vencida recusa com Reservar de novo (RSV-13) | Transferência do depósito à custódia uma vez; a confirmação de recebimento no app é aceite do mesmo movimento, sem segunda entrada em custódia (CONC-12); aprovação técnica isolada não autoriza entrega | SU-07/CA-04 mostram entregue e saldo |
+| CMD-17 | Registrar consumo ou declarar devolução/destinação / responsável | Quantidade real, unidade/base, produto/lote, origem/custódia, destino e versão identificados; transferência direta exige política habilitada e autorização do almoxarifado | Consumo único (73.5; CONC-13) ou declaração de retorno, sem aumentar depósito antes de CMD-45; a custódia é lida no registro na transação (CAL-02; PROJ-03), e consumo acima dela fica Em conferência (CONC-07). Transferência direta só migra custódia à ordem destinatária após recebimento comprovado e atômico; CAL-02/42.4; diferença abre pendência | Extrato e ordens de origem/destino atualizados; intenção de devolução não é recebimento |
 | CMD-18 | Bloquear ativo / responsável técnico/política | Falha ou condição comprovada | Impedimento em alocações afetadas | MA-01/PL-05 com impacto |
 | CMD-19 | Liberar ativo / responsável técnico | Serviço e teste válidos para o risco | Atualiza aptidão; não reassume agenda antiga automaticamente | MA-04 e fila de reprogramação |
-| CMD-20 | Aprovar água / responsável/política técnica | Balanço, restrições e dados suficientes | Aprova recomendação; programação verifica rede e recursos | IR-01 → IR-02; sem partida física implícita |
-| CMD-21 | Confirmar aplicação de água / irrigante/telemetria validada | Medição ou estimativa identificada por área | Registra aplicado e energia; atualiza balanço conciliado | IR-03/IR-04; permite próximo setor |
+| CMD-20 | Programar água pela necessidade da cultura / sistema (DEC-2609-10; APROV-15) | Balanço hídrico e parâmetros operacionais versionados do equipamento e do solo; dado de sonda ou de clima ausente ou vencido usa estimativa por ET, marcada, sem bloquear (PROJ-14) | Programa a lâmina pela necessidade, em passadas pelo limite do equipamento, sem aprovação agronômica; programação verifica rede e recursos | IR-01 → IR-02; sem partida física implícita |
+| CMD-21 | Confirmar aplicação de água / irrigante/telemetria validada | Medição ou estimativa identificada por área | Registra aplicado e energia; segundo registro da mesma aplicação (irrigante × telemetria) vincula-se à existente, com o valor pela precedência, sem segundo aplicado (CONC-05, CONC-09); atualiza balanço conciliado | IR-03/IR-04; permite próximo setor |
 | CMD-22 | Publicar previsão / responsável | Amostra, modelo e rendimento revisados | Versão de oferta futura por janela/classe | CO-01/VE-01; não cria estoque |
 | CMD-23 | Fechar processo / produção | Entradas, saídas, perdas e balanço conferidos | Cria lotes com genealogia e estado de qualidade adequado | CO-05 → CO-06/CO-07 |
 | CMD-24 | Liberar lote / qualidade | Inspeção e critérios válidos | Habilita destinações compatíveis | CO-07 e pedidos afetados |
@@ -2797,17 +2810,17 @@ Cancelamento com fatos já executados não apaga o objeto: encerra o saldo futur
 | CMD-26 | Confirmar saída / expedição | Carga conferida, lote apto e documentos exigidos autorizados | Movimento físico único e viagem em trânsito | LO-02 → LO-03 |
 | CMD-27 | Confirmar entrega / logística | Quantidades aceitas/recusadas e evidência | Atualiza atendimento; abre retorno quando aplicável | LO-03/VE-06; financeiro independente |
 | CMD-28 | Confirmar liquidação / fonte financeira designada | Evento financeiro verificado ou lançamento autorizado no modo básico | Baixa título/obrigação uma vez | GE-04/GE-05/GE-08 com origem |
-| CMD-29 | Publicar parâmetro / dono da política | Proposta, amostra, escopo, validação e vigência | Nova versão futura e recálculo controlado | CF-02/AG-05; histórico preservado |
-| CMD-30 | Fechar/reabrir período / controladoria e alçada | Pendências tratadas, motivo e escopo | Fechamento ou janela de ajuste autorizada | GE-03 com trilha e relatórios versionados |
+| CMD-29 | Publicar parâmetro / dono da política | Proposta, amostra, escopo, validação e vigência; revisor de outra identidade quando a mudança alterar a avaliação de quem propõe (2.1) | Nova versão futura e recálculo controlado | CF-02/AG-05; histórico preservado |
+| CMD-30 | Fechar/reabrir período / controladoria e alçada | Pendências tratadas, motivo e escopo; para fechar: nenhum efeito de integração da competência e do escopo fora de Confirmada (INTEG-26), consolidação no corte, aviso de aparelhos com envio pendente e retrato com posição, versões e hash (PROJ-16); reabrir gera novo retrato versionado (PROJ-16) | Fechamento ou janela de ajuste autorizada | GE-03 com trilha e relatórios versionados |
 
 ### 8.2.1 Comandos complementares vinculados aos domínios
 
-Todos recebem tenant, ator, escopo, versão esperada e chave de idempotência. O servidor valida permissão e invariantes; o retorno inclui ID, versão, efeitos, pendências e próxima ação. Resultado parcial deve discriminar cada item; repetição recupera o resultado, sem reaplicar efeitos.
+Todos os comandos, de CMD-01 a CMD-50, recebem tenant, ator, escopo, versão esperada e chave de idempotência da intenção (73.3). O servidor valida permissão e invariantes; o retorno inclui ID, versão, efeitos, pendências e próxima ação. Resultado parcial deve discriminar cada item; repetição recupera o resultado, sem reaplicar efeitos.
 
 | ID | Comando | Entrada e validação | Efeito e destino |
 |---|---|---|---|
 | CMD-31 | Confirmar âncora | Ocupação, evento, data real/estimada, evidência e versão | Recalcula futuro uma vez; PL-04/PL-05 mostram diferenças; preserva realizado |
-| CMD-32 | Aplicar ajuste local / Adicionar produtos à irrigação | Adoção do plano ou ordem/tarefa existente, escopo ainda não executado, produtos/doses/unidades, motivo, versão esperada e permissão; reclassificação usa FO-04/FO-29 em IR-02/IR-03 | Nova versão na mesma identidade; recalcula orçamento/demandas do saldo; invalida aprovação/liberação afetadas. Água com produtos perde autorização por política e vai à revisão individual CMD-42, seguida de CMD-06 antes de entregar/iniciar; preserva fatos anteriores e não duplica aplicação |
+| CMD-32 | Aplicar ajuste local / Adicionar produtos à irrigação | Adoção do plano ou ordem/tarefa existente, escopo ainda não executado, produtos/doses/unidades, motivo, versão esperada e permissão; reclassificação usa FO-04/FO-29 em IR-02/IR-03 | Nova versão na mesma identidade; recalcula orçamento/demandas do saldo; invalida aprovação/liberação afetadas. Água com produtos deixa a liberação automática de água (DEC-2609-10) e vai à revisão individual CMD-42, seguida de CMD-06 antes de entregar/iniciar; preserva fatos anteriores e não duplica aplicação |
 | CMD-33 | Agrupar execução | IDs/versões de ordens aprovadas, compatibilidade e capacidade | Grupo com composição por ordem; fichas calculadas sem perder rastreabilidade |
 | CMD-34 | Publicar alocação | Cenário, calendário, conjuntos, pessoas, paradas, versão e autorização econômica/operacional do escopo; simulações anteriores permanecem propostas | Reserva recursos sem sobreposição; conflitos vão a PL-05; não libera execução |
 | CMD-35 | Importar dados técnicos | Arquivo original/hash, parser, unidades, coordenadas, mapeamento e prévia aprovada | Dados aceitos com proveniência; rejeições discriminadas em AG-02/IN-04 |
@@ -2815,24 +2828,26 @@ Todos recebem tenant, ator, escopo, versão esperada e chave de idempotência. O
 | CMD-37 | Reordenar fila logística | Slot, caminhão presente/apto, motivo e alçada | Nova ordem da fila com promessa original preservada; LO-02 |
 | CMD-38 | Executar ação assistida | Intenção estruturada, prévia, usuário, autorização e versão | Invoca comando existente; nunca SQL livre; recibo dos efeitos e trilha |
 | CMD-39 | Confirmar evento de cobrança | Evento autenticado do provedor, assinatura, valor, moeda e identidade | Atualiza fatura/direitos uma vez; eventos fora de ordem reconciliados |
-| CMD-40 | Reprocessar integração | Evento original, escritor oficial, chave externa e política de conflito | Confirma ou reconcilia efeito; sem duplicar documento, movimento ou título |
+| CMD-40 | Reprocessar integração | Evento original, escritor oficial, chave externa e política de conflito; operação com gravação habilitada; fato anterior ao corte só por seleção explícita do responsável, após consulta ao ERP (66.3); depois de resultado desconhecido, reenvio só após consulta que confirme ausência (INTEG-20) | Confirma ou reconcilia efeito; sem duplicar documento, movimento ou título; prévia nunca vira envio automático; compensações só as de 73.6.7 |
 
 ### 8.2.2 Contratos complementares do ciclo da ordem
 
 | ID | Comando / quem | Pré-condição | Efeito confirmado | Retorno de interface |
 |---|---|---|---|---|
 | CMD-41 | Emitir O.S. / emissor autorizado por tipo e escopo | Rascunho/ocorrência completo para revisão, identidade única, versão e janela de emissão determinadas; política explícita para emissão automática | Cria/recupera ID e versão e encaminha uma vez ao aprovador competente; não autoriza retirada, preparo ou execução | Detalhe da ordem e IN-02 com origem, versão e pendência econômica quando houver |
-| CMD-42 | Decidir revisão da ordem / aprovador competente | Versão emitida ou revisão de saldo submetida; agrônomo habilitado para campo/colheita, irrigação com produtos (água sem produto não passa por CMD-42, DEC-2609-10), responsável de manutenção para MA-04 ou de produção para CO-05; versão exibida ao decisor | Aprovar como está, ajustar e aprovar, devolver para ajuste ou rejeitar com motivo; ajuste cria versão só da ordem/saldo, preserva realizado e invalida fichas afetadas. Aprovação gera/atualiza requisição derivada quando houver material. Rejeição bloqueia liberação, sem cancelamento automático | IN-02 e detalhe da ordem mostram decisão, versão, diferenças e próxima ação. Revisão por CMD-32 ou reclassificação de água para produtos exige nova aprovação individual e não herda política de água |
-| CMD-43 | Registrar avanço / executor; marcador opcional Finalizar apontamento do turno | Ordem em execução e instrução correspondente ao fato; início concomitante exige CMD-07 válido; quantidade/unidade/intervalo e identidade do fato válidos conforme FO-07 | Grava apontamento único, atualiza acumulado e saldo; fechar turno fecha somente o registro diário. Relato ocorrido com instrução vencida/conflito é preservado em reconciliação, sem autorização retroativa nem baixa conflitante | MB-03/CA-02 com recibo, confirmado/provisório, saldo e situação de sincronização/conferência |
-| CMD-44 | Reservar lote / almoxarife ou política autorizada | Requisição aprovada, lote apto, saldo livre e versão esperada; nenhuma reserva duplica necessidade planejada | Reserva atômica por produto/lote/destino; conflito de saldo/versão retorna falha por item sem estoque negativo; não entrega material | SU-07/CA-04 mostram reservado, livre, custódia e conflito |
+| CMD-42 | Decidir revisão da ordem / aprovador competente | Versão emitida ou revisão de saldo submetida; agrônomo habilitado para campo/colheita, irrigação com produtos (água sem produto não passa por CMD-42, DEC-2609-10), responsável de manutenção para MA-04 ou de produção para CO-05; versão exibida ao decisor | Aprovar como está, ajustar e aprovar, devolver para ajuste ou rejeitar com motivo; ajuste cria versão só da ordem/saldo, preserva realizado e invalida fichas afetadas. Aprovação gera/atualiza requisição derivada quando houver material. Rejeição bloqueia liberação, sem cancelamento automático | IN-02 e detalhe da ordem mostram decisão, versão, diferenças e próxima ação. Revisão por CMD-32 ou reclassificação de água para produtos exige nova aprovação individual e não herda a liberação automática de água |
+| CMD-43 | Registrar avanço / executor; marcador opcional Finalizar apontamento do turno | Ordem em execução e instrução correspondente ao fato; início concomitante exige CMD-07 válido; quantidade/unidade/intervalo e identidade do fato válidos conforme FO-07 | Grava apontamento único pela chave física do fato (CONC-05), atualiza acumulado e saldo; fechar turno fecha somente o registro diário. Relato incompatível, ou ocorrido com instrução vencida/conflito, fica Em conferência (CONC-07), sem autorização retroativa nem baixa conflitante | MB-03/CA-02 com recibo, confirmado/provisório, saldo, situação de envio do aparelho e de conferência (73.2); sem situação de integração ERP (INTEG-27) |
+| CMD-44 | Reservar lote / almoxarife, PCP em Reservar de novo (RSV-15) ou política autorizada | Requisição aprovada, lote apto, saldo livre e versão esperada; nenhuma reserva duplica necessidade planejada | Reserva atômica por produto/lote/destino, com finalidade e validade gravadas pela política (RSV-01, RSV-02): antes de CMD-06 é cobertura de planejamento, depois complementa a de execução (RSV-03 d); renovação só por CMD-49; conflito de saldo/versão retorna falha por item sem estoque negativo; não entrega material | SU-07/CA-04 mostram reservado, livre, custódia e conflito |
 | CMD-45 | Receber devolução / almoxarife | Devolução declarada, produto/lote/custódia identificados e quantidade/condição conferidas | Aceita recebimento físico uma vez; devolução apta atualiza utilizável e custódia; material impróprio vai a bloqueio/destinação. Diferença declarado × recebido abre tarefa | SU-07/MB-05 e CA-04 exibem declarado, recebido apto/bloqueado, saldo e responsável |
-| CMD-46 | Solicitar/concluir cancelamento sem execução / responsável com alçada CF-02 | Nenhum trabalho iniciado; motivo, versão e competência; conclusão exige custódia zero, transferências pendentes resolvidas e requisição conciliada | Revoga liberação, impede novo início e libera reservas futuras; havendo material, cria retorno/destinação único e conserva A liberar com selo Cancelamento pendente. Só confirma Cancelada após reconciliação; repetir não duplica retorno nem apaga documento | CA-01/IR-03/CO-02/MA-04/CO-05 e SU-07 mostram pendência; concluída vai à visão de canceladas |
-| CMD-47 | Dispensar/cancelar saldo não executado / alçada gerencial CF-02 e validação técnica aplicável | Trabalho já iniciado, quantidade residual identificada, motivo e decisão competente; atividade agrícola exige decisão agronômica aplicável | Registra saldo dispensado sem alterar escopo/realizado históricos; CMD-08 coloca Em conferência após confirmar registros. Se nenhum trabalho iniciou, usar CMD-46 | Detalhe da ordem/PL-05 mostram realizado, dispensado, motivo e pendências; encerramento parcial somente após CMD-10 |
-| CMD-48 | Reabrir saldo para execução / conferente ou PCP com permissão específica CF-02 | Ordem Em conferência, trabalho físico adicional necessário, motivo e saldo/programação identificados; instrução do saldo revalidada pelo responsável competente quando afetada | Retorna Em execução preservando término anterior e trilha; se prontidão/liberação não vigorar, saldo fica Pausado/Bloqueado até renovar condições de CMD-06/07. Correção só documental permanece Em conferência | CA-02/detalhe da ordem, mapa e app exibem mesmo saldo, bloqueios e histórico; não reabre período contábil nem reescreve fatos |
+| CMD-46 | Solicitar/concluir cancelamento sem execução / responsável com alçada CF-02 | Nenhum trabalho iniciado; motivo, versão e competência; conclusão exige custódia zero, transferências pendentes resolvidas e requisição conciliada | Revoga liberação, impede novo início e devolve ao disponível a reserva não entregue, por CMD-49 do sistema (RSV-05); havendo material, cria retorno/destinação único e conserva A liberar com selo Cancelamento pendente. Só confirma Cancelada após reconciliação; repetir não duplica retorno nem apaga documento | CA-01/IR-03/CO-02/MA-04/CO-05 e SU-07 mostram pendência; concluída vai à visão de canceladas |
+| CMD-47 | Dispensar/cancelar saldo não executado / alçada gerencial CF-02 e validação técnica aplicável | Trabalho já iniciado, quantidade residual identificada, motivo e decisão competente; atividade agrícola exige decisão agronômica aplicável | Registra saldo dispensado sem alterar escopo/realizado históricos; a reserva do saldo dispensado volta ao disponível por CMD-49 (RSV-05); CMD-08 coloca Em conferência após confirmar registros. Se nenhum trabalho iniciou, usar CMD-46 | Detalhe da ordem/PL-05 mostram realizado, dispensado, motivo e pendências; encerramento parcial somente após CMD-10 |
+| CMD-48 | Reabrir saldo para execução / conferente ou PCP com permissão específica CF-02 | Ordem Em conferência, trabalho físico adicional necessário, motivo e saldo/programação identificados; instrução do saldo revalidada pelo responsável competente quando afetada; reserva ativa que cubra o saldo elegível (RSV-15) | Retorna Em execução preservando término anterior e trilha; se prontidão/liberação não vigorar, saldo fica Pausado/Bloqueado até renovar condições de CMD-06/07. Correção só documental permanece Em conferência | CA-02/detalhe da ordem, mapa e app exibem mesmo saldo, bloqueios e histórico; não reabre período contábil nem reescreve fatos |
+| CMD-49 | Renovar ou vencer reserva de material / almoxarife ou PCP (PCM na manutenção) com permissão CF-02; rotina do sistema segundo a política RN-046 (só vencer) | Linha de reserva identificada, versão esperada e chave (73.3). **Vencer:** validade gravada atingida ou gatilho sem carência (73.4.2), situação da ordem fora das proteções de RSV-04, relida na transação; cota só nas hipóteses (a) e (b) de RSV-09; manual exige motivo e não alcança reserva protegida. **Renovar:** reserva ativa não vencida; ordem não cancelada, Em conferência nem Encerrada; motivo; nova validade e número de renovações dentro dos limites da finalidade | **Vencer:** devolve ao disponível só a quantidade elegível (RSV-06); físico, utilizável, custódia, consumo, calda, separação em curso e cota vigente não mudam; grava evento auditável com política e versão, motivo e ator, e avisa almoxarife, PCP e encarregado (RSV-14); elegível zero devolve recibo "nada a devolver", sem evento. **Renovar:** prorroga a validade, sem mudar quantidade nem deduzir de novo. Disputa com entrega, separação, reserva ou outra renovação tem vencedor único (RSV-13); reenvio devolve o mesmo recibo. Não entrega, não cancela ordem e não restaura reserva vencida | SU-07 e MB-05 mostram "Reservado até" ou "Devolvido ao disponível: quantidade · motivo"; a tela da ordem mostra a validade só a vencer ou vencida (RSV-16) e, com reserva vencida, o Próximo passo Reservar de novo; Renovar reserva fica no menu da linha em SU-07 e em PL-05 (73.10.3); IN-01 e MB-01 recebem o aviso; perdedor da disputa vê o motivo, sem sucesso fictício |
+| CMD-50 | Resolver relato de campo / conferente da O.S. (perfil com CMD-09 no escopo) para apontamento, horas, consumo e excedente; almoxarife do local para entrega, confirmação, devolução, custódia e abastecimento (ou abastecedor designado do ponto, se aprovado em PEND-08); irrigante para aplicação de água. Ciência do aprovador da versão quando aceita fato fora da versão aprovada ou acima do autorizado, conforme a proposta de PEND-10 | Caso Em conferência aberto (CONC-19) e versão esperada do caso; decisão entre vincular ao fato existente, aceitar como fato distinto, recusar como registro sem fato físico (a duplicata é vinculada), ou converter em correção vinculada; motivo obrigatório, exceto para vincular sem divergência; segregação conforme 2.1 quando o decisor for o autor do relato | Na mesma transação (INTEG-01), revalida CONC-06 sobre o estado atual. **Vincular:** nenhum efeito novo; valor por CONC-09; divergência registrada. **Aceitar:** aplica os efeitos do fato uma vez (avanço, movimento, horas, custo); acima do saldo, registra realizado acima do autorizado, sem ampliar autorização nem autorização retroativa; se saldo ou custódia ficariam negativos, é recusado com a origem física faltante, sem fabricar entrada (12.5). **Recusar:** relato fica Recusado, sem efeito. **Converter:** cria correção vinculada ao original (CONC-16). Nenhum relato é apagado; recibo e evento na outbox; mesma chave devolve o mesmo recibo (73.3) | CA-02 (ou SU-07, MA-05 e IR-03, conforme o tipo) mostra o caso resolvido, os efeitos, o recibo e o próximo passo; o app do autor mostra a nova situação, sem ação; sem outro caso aberto, a O.S. volta a ter Conferir e encerrar como próxima ação |
 
 ### 8.3 Efeitos de estoque e custo no recebimento de fatos
 
-Ao receber fato tecnicamente íntegro e sem conflito de saldo, o servidor aplica seu movimento operacional uma vez e pode marcar a valoração/conferência como provisória. A conferência posterior valida ou corrige por movimento vinculado; não faz segunda baixa. Se o fato capturado conflita com o saldo, preservar relato em reconciliação, sem impor saldo fictício ao ledger confirmado. Mostrar exposição/quantidade pendente para não ocultar indisponibilidade potencial.
+Ao receber fato tecnicamente íntegro e sem conflito de saldo, o servidor aplica seu movimento operacional uma vez e pode marcar a valoração/conferência como provisória. A conferência posterior valida ou corrige por movimento vinculado; não faz segunda baixa. Se o fato capturado conflita com o saldo, o relato fica Em conferência (CONC-07), sem impor saldo fictício ao ledger confirmado. Mostrar exposição/quantidade pendente para não ocultar indisponibilidade potencial. Classe de chegada (reenvio, outro registro do mesmo fato, fato distinto, correção vinculada), precedência das fontes e tolerância seguem 73.5 (CONC-01, CONC-09, CONC-10); fato que chega depois do vencimento da reserva segue RSV-10.
 
 Essa regra vale também quando a integração legada baixa na entrega: o adaptador identifica a baixa já feita e apenas reconcilia consumo/sobras. Não manter dois modelos de custódia concorrentes no mesmo escopo.
 
@@ -2852,14 +2867,14 @@ Os estados abaixo alimentam o histórico, as permissões e os selos do cartão; 
 | Aprovada pelo agrônomo | Versão técnica aprovada; ainda pode faltar prontidão operacional | PCP consulta Resolver impedimentos ou Liberar para execução |
 | Liberada para execução | Evento de liberação CMD-06 registrado e vigente, com autorização do escopo, aprovação competente e prontidão aplicáveis; fichas por função disponíveis | Executor abre instruções e Iniciar após checagens locais |
 | Em execução | Primeiro evento real de início; exibe realizado, restante e previsão de término | Apontar avanço, Pausar ou Concluir execução |
-| Pausada | Trabalho iniciado e interrompido; causa, responsável e saldo preservados | Resolver causa e Retomar, ou Reprogramar saldo |
+| Pausada | Trabalho iniciado e interrompido; causa, responsável e saldo preservados; reserva protegida enquanto a liberação vigora (RSV-04) | Resolver causa e Retomar, ou Reprogramar saldo |
 | Em conferência | Término físico confirmado, ou saldo formalmente dispensado; entrada automática mesmo antes de o conferente assumir a tarefa | Conferir apontamentos, materiais, sobras, testes ou balanço aplicáveis; Encerrar quando todas as condições forem satisfeitas |
-| Encerrada | Conferência concluída, custódia e saldos reconciliados, custos/documentos vinculados segundo política | Consultar histórico/origens; ajustes posteriores por evento vinculado |
-| Cancelada | Nenhum trabalho iniciado; CMD-46 autorizado e concluído, reservas futuras liberadas, requisição conciliada e custódia zero por devolução recebida/transferência ou destinação formal. Com retorno pendente, mantém A liberar com selo Cancelamento pendente, liberação revogada e início bloqueado | Consultar motivo e origem; não apagar documento |
+| Encerrada | Conferência concluída, custódia e saldos reconciliados, valor dos movimentos gravado uma vez no fato, quando a política de custo o grava (CAL-04); apropriação e rateio seguem a projeção de custo (73.7.2) e não condicionam o encerramento; efeitos a integrar gravados (INTEG-15); aceite do ERP é dimensão própria (RN-047) | Consultar histórico/origens; ajustes posteriores por evento vinculado |
+| Cancelada | Nenhum trabalho iniciado; CMD-46 autorizado e concluído, reserva não entregue devolvida ao disponível (RSV-05), requisição conciliada e custódia zero por devolução recebida/transferência ou destinação formal. Com retorno pendente, mantém A liberar com selo Cancelamento pendente, liberação revogada e início bloqueado | Consultar motivo e origem; não apagar documento |
 
 “Execução concluída” é um evento com data e autor que coloca a ordem imediatamente em Em conferência; não existe etapa intermediária aguardando alguém iniciar a revisão. “Conferida” é resultado da conferência, com autor e data; não precisa ser coluna permanente adicional. Se houver pendência para encerrar, permanece Em conferência com o selo “Apontamentos conferidos” e o impedimento explícito. “Devolvida para ajuste”, “Rejeitada”, “Bloqueada”, “Atrasada” e “Aguardando recurso” são condições visíveis e filtráveis; não avançam a execução nem ocultam a fase. Rejeição técnica exige nova revisão antes de liberação. Manutenção substitui revisão/aprovação agronômica por revisão/aprovação do responsável de manutenção.
 
-Emitir uma O.S. pode enviá-la automaticamente à fila do agrônomo; não exigir um segundo botão apenas para encaminhar. A entrada Em revisão ocorre quando o responsável assume a revisão. Aprovar e liberar podem aparecer como ação composta somente para usuário com ambas as permissões e com prontidão válida; registrar separadamente os dois eventos. Não criar clique humano para mera passagem de coluna sem mudança real de responsabilidade.
+Emitir uma O.S. pode enviá-la automaticamente à fila do agrônomo; não exigir um segundo botão apenas para encaminhar. A entrada Em revisão ocorre quando o responsável assume a revisão. Aprovar (CMD-42) e Liberar para execução (CMD-06) são ações separadas, uma por vez, cada uma com seu registro, mesmo para quem tem as duas permissões; não há ação composta (APROV-09; DEC-2609-05). Não criar clique humano para mera passagem de coluna sem mudança real de responsabilidade.
 
 #### 8.4.1.1 Aplicação uniforme por tipo de ordem
 
@@ -2868,18 +2883,18 @@ A etapa canônica é a mesma em todas as ordens de trabalho, inclusive ordens de
 | Família | A liberar / Liberadas | Em execução | Em conferência | Encerradas |
 |---|---|---|---|---|
 | Campo — CA-01 | Agrônomo aprova versão; prontidão de recursos e janela permite liberação | Executar atividade e registrar avanços diários por área/quantidade | Confirmar apontamentos, consumo, retorno/destinação e saldo | Reconciliações obrigatórias completas |
-| Irrigação — IR-03 | Água sem insumos: enquadrar na política agronômica 41.8; fertirrigação/produtos: aprovação individual. Validar rede, equipamento, energia e janela | Registrar aplicação, área/volume, duração, energia e interrupções | Conferir medido/estimado, desvios e materiais quando utilizados | Registros e saldos conciliados; não equivale a comando remoto |
+| Irrigação — IR-03 | Água sem insumos: sem agrônomo, liberação pela prontidão (DEC-2609-10; 41.8); fertirrigação/produtos: aprovação individual. Validar rede, equipamento, energia e janela | Registrar aplicação, área/volume, duração, energia e interrupções | Conferir medido/estimado, desvios e materiais quando utilizados | Registros e saldos conciliados; não equivale a comando remoto |
 | Colheita — CO-02 | Aprovação agronômica, recursos e capacidade de transporte/recebimento | Registrar área, produção, cargas e recursos por turno | Conferir cargas/romaneios, quantidades, destinos e divergências | Produção e recursos reconciliados, sem duplicar pesagens |
 | Manutenção — MA-04 | Responsável de manutenção aprova; PCM alinha recursos e janela PCP | Executar serviço e registrar horas, peças e diagnóstico | Realizar teste aplicável, decidir condição do ativo e conciliar materiais | Ordem reconciliada; aptidão do ativo é decisão técnica própria |
 | Beneficiamento — CO-05 | Responsável de produção aprova rota/versão; recursos, insumos e lotes elegíveis para a rota permitem liberação | Processar grãos, frutas/HF ou café e registrar entradas/saídas por etapa | Conferir balanço, perdas, produto em processo, consumo e destinação das saídas | Ordem conciliada; lote pode continuar bloqueado pela qualidade |
 
-Autorização agronômica continua obrigatória nas O.S. agrícolas, individualmente ou, exclusivamente para água sem insumos, pela política explícita da seção 41.8; a padronização visual não transfere sua competência à produção ou manutenção, nem exige sua assinatura em toda ordem industrial/mecânica. Um responsável pode acumular funções somente quando possuir permissões/competência e deixar registro das decisões separadas.
+Aprovação agronômica individual continua obrigatória nas O.S. agrícolas, inclusive nas operações mecânicas (APROV-02), exceto irrigação somente com água (DEC-2609-10); a padronização visual não transfere sua competência à produção ou manutenção, nem exige sua assinatura nas ordens de beneficiamento e de manutenção cujo objeto não é talhão nem parcela (73.9.7). Um responsável pode acumular funções somente quando possuir permissões/competência e deixar registro das decisões separadas.
 
 **Retornos e exceções:** pausas e execução parcial permanecem em Em execução. Se a conferência identificar trabalho físico ainda necessário, responsável autorizado reabre o saldo e retorna a Em execução com motivo, programação e revalidação técnica aplicável; não inventar apontamento para fechar a diferença. Se apenas informação/documento precisar de correção, permanece Em conferência. Teste de manutenção reprovado mantém ativo bloqueado; reparo adicional exige retorno à execução ou nova ordem vinculada conforme escopo. Reprocessamento industrial físico exige ordem/execução vinculada apropriada, sem apagar o lote ou os fatos anteriores. Encerramento com lote não liberado (Em inspeção ou Bloqueado) é permitido quando a reconciliação da ordem terminou e a pendência de qualidade foi formalmente encaminhada: inspeção aberta em CO-06/FO-15 ou destinação registrada, com responsável e prazo. Não exige decisão final de liberação do lote. Com ativo inapto, exigir teste/condição registrados e reparo adicional em nova ordem vinculada com responsável, ou decisão formal de destinação; teste reprovado isolado não encerra a responsabilidade. CMD-24 libera lote e CMD-19 decide aptidão do ativo independentemente de CMD-10; encerramento não antecipa essas decisões nem permite uso/venda indevidos (RN-015, RN-021, BEN-09).
 
 **Migração e interfaces:** se existir implementação anterior, mapear estados antigos de término físico e pendências finais para Em conferência, preservando datas e histórico. Enumeração/etapa derivada única no backend atende lista, Kanban, mapa, aplicativo, filtros, indicadores e exportações; não criar um campo independente editável por tela. Conferência de um apontamento individual durante os sete dias não move a O.S. inteira para Em conferência antes do término físico do seu escopo.
 
-Para água sem insumos, a autorização por política da seção 41.8 satisfaz o requisito técnico do fluxo abaixo dentro dos limites validados; demais verificações permanecem.
+Para irrigação somente com água, o fluxo abaixo não tem requisito técnico (DEC-2609-10; APROV-15); as demais verificações permanecem.
 
 **FL-OS-01 — Ciclo comum das ordens**
 
@@ -2890,10 +2905,11 @@ flowchart TB
   A["1 · A liberar"]
   D["2 · Resolva o impedimento com dono e prazo"]
   E["2 · Liberadas"]
+  R["2 · Libere para execução · CMD-06"]
  end
  subgraph RAIA_1["Responsável técnico"]
   direction TB
-  B["2 · Revise e aprove a versão aplicável"]
+  B["2 · Revise e aprove a versão · CMD-42"]
  end
  subgraph RAIA_2["Operação"]
   direction TB
@@ -2902,34 +2918,40 @@ flowchart TB
  end
  subgraph RAIA_3["Conferente / alçada"]
   direction TB
+  L["4 · Concilie a custódia e registre cancelamento"]
   H["4 · Em conferência"]
   J["4 · Resolva a pendência sem inventar consumo"]
-  L["4 · Concilie a custódia e registre cancelamento"]
  end
  subgraph RAIA_4["Sistema"]
   direction TB
-  C{"2 · Autorização e prontidão válidas?"}
+  C{"2 · Aprovação vigente da versão?"}
+  P{"2 · Escopo autorizado e prontidão válida?"}
+  M["4 · Publique o encerramento; o ERP segue FL-R09 sem mudar a etapa"]
   I{"4 · Fatos, materiais e testes conciliados?"}
   K["4 · Encerradas"]
  end
- A --> B
  B --> C
- C -->|Não| D
- D --> B
- C -->|Sim · CMD-06| E
- E -->|Condições revogadas antes do início| A
  E -->|Revalide e inicie · CMD-07| F
  F -->|Feche o turno · CMD-43| F
  F --> G
  G -->|Não| F
+ E -->|CMD-46 · sem execução| L
+ A --> C
+ A -->|CMD-46 · sem execução| L
  G -->|Sim · CMD-08| H
  H --> I
- I -->|Não| J
+ I -->|Sim · CMD-10| K
  J --> H
  H -->|Retorne ao trabalho · CMD-48| F
- I -->|Sim · CMD-10| K
- A -->|CMD-46 · sem execução| L
- E -->|CMD-46 · sem execução| L
+ I -->|Não| J
+ C -->|Não| B
+ C -->|Sim| P
+ P -->|Sim| R
+ D --> P
+ P -->|Não| D
+ R --> E
+ K --> M
+ E -->|Liberação deixa de vigorar| A
 ```
 
 #### 8.4.2 Parcialmente concluída: progresso real e destino do saldo
@@ -2954,18 +2976,18 @@ O quadro padrão tem **cinco colunas fixas: A liberar · Liberadas · Em execuç
 | Etapa do Kanban | Estados e condições reunidos | Próxima ação e responsável |
 |---|---|---|
 | A liberar | Emitida, em revisão, devolvida para ajuste ou aprovada tecnicamente — com ou sem prontidão — enquanto CMD-06 não tiver liberação registrada e vigente | Agrônomo revisa/aprova; PCP resolve recursos; cartão identifica responsável pela pendência atual |
-| Liberadas | Liberação registrada e vigente por CMD-06, ainda não iniciada; automática somente no enquadramento homologado de água sem insumos 41.8/OSA-01, com evento individual rastreável | Executor consulta instrução e inicia na janela autorizada |
+| Liberadas | Liberação registrada e vigente por CMD-06, ainda não iniciada; automática apenas na irrigação somente com água, pela prontidão operacional (DEC-2609-10), com evento individual rastreável | Executor consulta instrução e inicia na janela autorizada |
 | Em execução | Trabalho iniciado, inclusive realizado parcial, pausa ou espera pelo próximo turno | Equipe aponta avanço diário; PCP trata saldo e impedimentos |
 | Em conferência | Execução física concluída ou saldo dispensado por decisão competente; conferência e reconciliação em curso | Conferente/almoxarife resolvem registros, sobras e custódia; encerrar quando elegível |
 | Encerradas | Conferência e saldos concluídos; registro histórico preservado | Gestão consulta resultado, documentos e aprendizados |
 
-**Selos no cartão:** Aguardando agrônomo, Em revisão, Ajuste solicitado, Aprovação vencida/invalidada, Aprovada pelo agrônomo, Falta insumo, Falta máquina, Pausada, Parcial, Aguardando próximo turno, Sobras pendentes e Apontamentos pendentes. Mostrar apenas os pertinentes, com pendência principal, responsável e prazo. Atraso e criticidade são indicadores transversais. Rascunhos, rejeições definitivas e cancelamentos sem execução têm filtros/visões próprios; não criam colunas permanentes.
+**Selos no cartão:** Aguardando agrônomo, Em revisão, Devolvida para ajuste, Aprovação vencida/invalidada, Aprovada pelo agrônomo, Falta insumo, Falta máquina, Pausada, Parcial, Aguardando próximo turno, Revisão de saldo pendente, Cancelamento pendente, Janela a definir, Reserva vencida (RSV-16), Sobras pendentes e Apontamentos pendentes. Palavra exibida e cor de cada selo: 74.4.3, com vermelho só para o que impede o próximo passo (DS-17); "Sobras pendentes" × "Sobras a receber" é a PEND-DS-02. Mostrar apenas os pertinentes, com pendência principal, responsável e prazo. Atraso e criticidade são indicadores transversais, com a escala de prazo de 74.4.3. Rascunhos, rejeições definitivas e cancelamentos sem execução têm filtros/visões próprios; não criam colunas permanentes.
 
 Uma O.S. aprovada pelo agrônomo mas sem máquina fica **A liberar**, com selo **Aprovada pelo agrônomo · Falta máquina**. Uma O.S. com 60/100 ha e chuva fica **Em execução · Pausada por chuva · 60%**. Uma O.S. com execução terminada e sobra a devolver fica **Em conferência · Sobras pendentes**. Esses exemplos são obrigatórios na demonstração.
 
 A etapa é derivada dos estados oficiais e não gravada independentemente por cada tela. Antes do primeiro início, perda de prontidão ou invalidação da aprovação retira a ordem de Liberadas e a devolve a A liberar, explicando causa e histórico. Depois de iniciar, a ordem permanece Em execução com bloqueio/pausa do saldo; não apagar o realizado nem fazer parecer que nunca começou. Corrigir término declarado indevidamente exige evento autorizado de reabertura do saldo e justificativa, com preservação da trilha.
 
-Emitir encaminha automaticamente à revisão. Se aprovação, autorização do escopo e prontidão estiverem completas, usuário com ambas as permissões pode escolher a ação composta Aprovar e liberar; registrar CMD-42 e CMD-06 separadamente na mesma confirmação. O botão Aprovar sozinho não libera a ordem. A liberação automática é exclusiva da política homologada de água sem insumos 41.8 e também registra CMD-06. Encerramento pode ser automático por política homologada quando todas as conferências e reconciliações exigidas já estiverem confirmadas; material ou fato não conferido não é aceito automaticamente para eliminar uma etapa. Em conferência não exige espera artificial quando não há pendências.
+Emitir encaminha automaticamente à revisão. Aprovar (CMD-42) e Liberar para execução (CMD-06) são ações separadas, uma por vez, mesmo para usuário com ambas as permissões; não há ação composta (APROV-09). O botão Aprovar sozinho não libera a ordem. A liberação automática é exclusiva da irrigação somente com água (DEC-2609-10) e também registra CMD-06; orçamento autorizado, janela aberta e prontidão não aprovam nem liberam O.S. agrícola (APROV-05). Encerramento pode ser automático por política homologada quando os requisitos locais de INTEG-13 já estiverem confirmados; as reconciliações exigidas não incluem o aceite do ERP, salvo o tipo marcado de INTEG-16; material ou fato não conferido não é aceito automaticamente para eliminar uma etapa. Em conferência não exige espera artificial quando não há pendências.
 
 Encerradas usam período selecionado; não carregar todo o histórico. No celular, seletor dessas cinco etapas e lista vertical substituem arraste horizontal obrigatório.
 
@@ -2973,7 +2995,7 @@ Cada cartão mostra ID, operação/atividade, fazenda/talhão/parcela, cultura, 
 
 Arrastar cartão, quando oferecido, apenas inicia o comando de transição permitido. Não grava estado diretamente. O servidor verifica versão, permissão e regras; confirmação apresenta consequências materiais. Arrastar A liberar para Liberadas não contorna o agrônomo; arrastar Em execução para Encerrada não elimina conferência ou devoluções. Preferir botões contextuais claros às movimentações cegas.
 
-Quadro possui filtros por safra, fazenda, cultura, talhão/parcela, atividade, fase, avanço parcial, janela, responsável, recursos, atraso e impedimento. Favoritos por perfil; ordenação sugerida por risco, prazo e prioridade explicada. Atualizações concorrentes chegam com indicação de mudança; nenhuma edição local sobrescreve versão nova silenciosamente. Eventos offline aparecem como “Capturado no dispositivo, aguardando sincronização”, distintos da fase confirmada no servidor.
+Quadro possui filtros por safra, fazenda, cultura, talhão/parcela, atividade, fase, avanço parcial, janela, responsável, recursos, atraso e impedimento. Favoritos por perfil; ordenação sugerida por risco, prazo e prioridade explicada. Atualizações concorrentes chegam com indicação de mudança; nenhuma edição local sobrescreve versão nova silenciosamente. Registros ainda no aparelho aparecem como “Aguardando envio” (64.5; 73.3), só no aparelho que os capturou, distintos da fase confirmada no servidor; palavra e cor em 74.4. A situação de integração com o ERP não muda a fase nem cria coluna, selo ou indicação no cartão, salvo o impedimento do tipo marcado por INTEG-16 (INTEG-27).
 
 **Revisão de saldo pendente:** selo transversal para ordem iniciada que aguarda nova aprovação técnica do saldo (41.2). A coluna permanece Em execução; cartão exibe responsável, prazo e saldo bloqueado. A mesma tarefa de aprovação pode aparecer em diferentes visões, sem duplicidade de documento.
 
@@ -2981,7 +3003,7 @@ Quadro possui filtros por safra, fazenda, cultura, talhão/parcela, atividade, f
 
 Em IN-04, a barrinha de funcionalidades mantém **O.S./prazos**. Dentro dessa função, selecionar **Fases · Avanço · Atrasos · Impedimentos**, sem substituir as camadas Solo, Satélite, Irrigação e Colheita/produtividade. O mapa permanece amplo; **Lista de O.S. e Kanban ficam abaixo do mapa**, em abas, conforme capítulo 67. Oferecer Tela cheia do mapa e Expandir quadro; nenhum painel lateral permanente reduz a largura do mapa.
 
-O seletor de fase e os contadores filtram simultaneamente geometrias, lista e quadro. Clicar no talhão ou parcela destaca suas ordens abaixo, com ação Abrir O.S. e próxima ação permitida. Usar texto/ícone além de cor, com as mesmas cinco etapas: cinza A liberar, azul Liberadas, ciano Em execução, âmbar Em conferência e verde Encerradas. Pausa, aprovação técnica e demais condições aparecem em selos; o detalhe mantém os eventos originais. Vermelho identifica criticidade/atraso/impedimento, não uma fase única. Validar contraste e daltonismo no design final.
+O seletor de fase e os contadores filtram simultaneamente geometrias, lista e quadro. Clicar no talhão ou parcela destaca suas ordens abaixo, com ação Abrir O.S. e próxima ação permitida. Usar texto/ícone além de cor, com as mesmas cinco etapas; a cor de cada etapa está em 74.4.3 (proposta em PEND-DS-01). Pausa, aprovação técnica e demais condições aparecem em selos; o detalhe mantém os eventos originais. Vermelho identifica criticidade/atraso/impedimento, não uma fase única. Contraste e leitura sem cor seguem as medições de 74.7 e 74.9.
 
 **Múltiplas ordens no mesmo talhão:** mostrar quantidade e resumo por fase/atividade; não atribuir uma única fase ao talhão inteiro nem deixar a última ordem sobrescrever todas as outras. Em zoom distante, agrupar marcadores preservando contagens; em zoom próximo, permitir seleção das ordens. Cor do polígono depende da camada/filtro ativo, com legenda explícita. Ordens de ativos fixos aparecem na localização conhecida; ativo móvel sem localização atual confiável aparece na lista sem ponto fictício.
 
@@ -2993,15 +3015,15 @@ O.S. agrupadas preservam fases/avanço de cada ordem. Contagem de O.S. não soma
 
 Indicadores: emitidas aguardando revisão e tempo de espera; aprovadas ainda não liberadas por motivo; liberadas ainda não iniciadas; em execução e avanço; pausadas e horas de impedimento; parcialmente concluídas com saldo; execução concluída aguardando conferência; pendências de material; encerradas no prazo. Mostrar filas por responsável, envelhecimento e próxima ação. Medir pontualidade contra janela de referência versionada, sem apagar atraso pela reprogramação.
 
-- **OSFASE-01:** emitir cria um ID e o coloca na fila do aprovador competente (agrônomo nas O.S. agrícolas); mapa, lista e Kanban mostram a mesma fase confirmada.
-- **OSFASE-02:** aprovação competente sem máquina/material mantém estado técnico aprovado e etapa A liberar. Mesmo com prontidão completa, sem evento CMD-06 registrado e vigente permanece A liberar em lista, Kanban, mapa e app; automático só pela política de água 41.8.
+- **OSFASE-01:** emitir cria um ID e o coloca na fila do aprovador competente (agrônomo nas O.S. agrícolas, salvo irrigação somente com água, DEC-2609-10); mapa, lista e Kanban mostram a mesma fase confirmada.
+- **OSFASE-02:** aprovação competente sem máquina/material mantém estado técnico aprovado e etapa A liberar. Mesmo com prontidão completa, sem evento CMD-06 registrado e vigente permanece A liberar em lista, Kanban, mapa e app; automático só na irrigação somente com água (DEC-2609-10).
 - **OSFASE-03:** início real coloca Em execução; 60/100 ha aparece como parcial em todas as visões, com saldo de 40 ha.
 - **OSFASE-04:** pausar e reprogramar mantém histórico e demanda residual; não cria consumo, área ou ordem duplicada.
 - **OSFASE-05:** tentativa de encerrar com sobras/custódia/divergência impede encerramento e abre pendência com dono.
 - **OSFASE-06:** duas ordens de fases distintas no mesmo talhão continuam distinguíveis; contagem do grupo não duplica ordens.
 - **OSFASE-07:** sem geometria executada, progresso numérico não gera área espacial inventada.
 - **OSFASE-08:** arraste inválido, chamada direta à API e usuário sem competência não ultrapassam aprovação/prontidão.
-- **OSFASE-09:** evento offline conflitante preserva relato, sinaliza pendência e não regride fase confirmada.
+- **OSFASE-09:** relato offline conflitante fica Em conferência (CONC-07), sinaliza pendência e não regride fase confirmada.
 - **OSFASE-10:** cancelamento de saldo exige motivo/alçada e mostra encerramento parcial, mantendo o escopo original para análise.
 - **OSFASE-11:** fila, mapa e indicadores distinguem término físico de encerramento documental/material.
 - **OSFASE-12:** homologar tarefa com agrônomo, PCP, executor e almoxarife: localizar próxima ação, identificar bloqueio, apontar parcial, receber sobra e encerrar sem interpretação incorreta da fase.
@@ -3014,7 +3036,7 @@ Indicadores: emitidas aguardando revisão e tempo de espera; aprovadas ainda nã
 
 ### 8.5 O.S. de vários dias e apontamentos acumulados
 
-**Uma O.S. pode durar vários dias, turnos e frentes de trabalho.** A passagem de dia não emite nova O.S. nem encerra a existente. Relação obrigatória: O.S. 1:N execuções/turnos 1:N apontamentos, com vínculo à versão/instrução executada, talhão/parcela, operador/equipe e máquina/conjunto. Cada apontamento possui ID próprio, data operacional, início/fim, fuso, quantidade/unidade, horas por recurso, consumo por produto/lote quando aplicável, evidência, origem e estado de sincronização/conferência.
+**Uma O.S. pode durar vários dias, turnos e frentes de trabalho.** A passagem de dia não emite nova O.S. nem encerra a existente. Relação obrigatória: O.S. 1:N execuções/turnos 1:N apontamentos, com vínculo à versão/instrução executada, talhão/parcela, operador/equipe e máquina/conjunto. Cada apontamento possui ID próprio, data operacional, início/fim, fuso, quantidade/unidade, horas por recurso, consumo por produto/lote quando aplicável, evidência, origem e situação de envio do aparelho e de conferência (73.2).
 
 No aplicativo, a ação habitual é **Registrar avanço / Finalizar apontamento do turno**. A ação **Concluir execução da O.S.** é distinta e só aparece como conclusão do escopo ou destinação autorizada do saldo. Trabalho parcial em continuidade fica Em execução; fim normal do expediente não gera ocorrência de falha nem horas de parada técnica. Fora do turno, exibir “Aguardando próximo turno” quando aplicável. Pausa operacional extraordinária registra motivo e intervalo próprios.
 
@@ -3022,7 +3044,7 @@ A tela da O.S. apresenta abas **Resumo · Execuções e apontamentos · Insumos 
 
 Exemplo: O.S. de 350 ha executada em sete dias com 50 ha válidos por dia. No terceiro dia: 150/350 ha, 42,86%, saldo 200 ha. No sétimo: 350/350 ha, término físico elegível; ainda é necessário conferir registros, materiais, sobras e demais pendências para Encerrada. Se executar 40 ha no quarto dia, o saldo após esse dia será 160 ha; o sistema não completa a diferença automaticamente. Plano/programação podem ser revistos para terminar depois.
 
-Acumulado confirmado = soma dos apontamentos aceitos únicos, ajustados por correções vinculadas; pendentes de sincronização/conferência aparecem em coluna própria. Mostrar também avanço reportado provisório quando útil, sem confundi-lo com confirmado. Reenvio não soma novamente; duplicidade de área, sobreposição de equipes e apontamentos conflitantes geram conferência. Horas de máquina não são soma cega das horas de todos os trabalhadores; hora-homem total considera cada pessoa/quantidade de equipe e intervalos coerentes. Consumo registrado no preparo, entrega e aplicação representa eventos distintos e não três consumos.
+Acumulado confirmado = soma dos apontamentos distintos, aceitos e compatíveis, ajustados por correções vinculadas (CONC-08); relatos vinculados não entram; relatos Em conferência aparecem em coluna própria, fora do percentual (CONC-08); registro ainda no aparelho só entra depois do recibo (PROJ-01). Mostrar também avanço reportado provisório quando útil, sem confundi-lo com confirmado. Reenvio da mesma intenção não soma novamente; duplicidade de área, sobreposição de equipes na mesma parcela ou recurso e apontamentos incompatíveis geram conferência; frentes em parcelas distintas, com recursos distintos, consolidam sozinhas (CONC-08). Horas de máquina não são soma cega das horas de todos os trabalhadores; hora-homem total considera cada pessoa/quantidade de equipe e intervalos coerentes. Consumo registrado no preparo, entrega e aplicação representa eventos distintos e não três consumos.
 
 Para área medida por GPS, calcular cobertura única conforme método e qualidade, distinguindo sobreposição e retrabalho. Quantidade operacional acumulada pode exceder a área física com motivo legítimo; não truncar o fato nem permitir percentuais enganosos sem explicação. Ordens por massa, unidades ou outras bases usam sua unidade operacional; não converter kg em ha sem fator válido. No mapa, preservar data e geometria de cada execução quando conhecidas, permitindo filtrar por dia e consultar acumulado.
 
@@ -3031,7 +3053,7 @@ Mudança técnica durante os sete dias cria revisão para o saldo futuro, com ap
 - **OSDIA-01:** sete apontamentos de 50 ha alimentam uma única O.S. de 350 ha; não são geradas sete ordens.
 - **OSDIA-02:** finalizar o turno do terceiro dia mantém saldo de 200 ha e O.S. aberta, com 150 ha acumulados.
 - **OSDIA-03:** reenviar apontamento offline recupera o mesmo recibo e mantém acumulado; correção gera histórico e atualiza saldo/custo uma vez.
-- **OSDIA-04:** apontamentos simultâneos de equipes diferentes preservam identidade, detectam conflito e não permitem concluir por soma duplicada.
+- **OSDIA-04:** apontamentos simultâneos de equipes diferentes preservam identidade; em parcelas distintas e com recursos distintos, consolidam sozinhos; com sobreposição ou uso simultâneo do mesmo recurso, abrem conferência e não permitem concluir por soma duplicada (CONC-08).
 - **OSDIA-05:** alterar dose no quinto dia preserva versões, consumos e custos dos quatro dias anteriores; só saldo futuro usa revisão aprovada.
 - **OSDIA-06:** lista, detalhe, Kanban, mapa e indicadores exibem acumulados da mesma fonte, distinguindo confirmado e provisório.
 - **OSDIA-07:** 100% da área executada com sobra não recebida mostra término físico e pendência de material; não Encerrada.
@@ -3045,7 +3067,7 @@ Mudança técnica durante os sete dias cria revisão para o saldo futuro, com ap
 |---|---|---|
 | Planejamento | Safra/ano/ciclo ou horizonte escolhido; todas as necessidades futuras | Projetar demanda, recursos, manutenção, compras e custos; não autoriza execução |
 | Preparação e emissão | Período operacional que o gestor quer preparar, com antecipação suficiente | Gerar/recuperar rascunhos e emitir ordens selecionadas à revisão competente |
-| Aprovação técnica | Ordens emitidas do período, com evidências e condições atuais | Agrônomo aprova O.S. agrícolas/versão; água sem insumos dentro da política 41.8 tem autorização por enquadramento; PCM usa aprovador próprio |
+| Aprovação técnica | Ordens emitidas do período, com evidências e condições atuais | Agrônomo aprova O.S. agrícolas/versão; irrigação somente com água não passa pelo agrônomo (DEC-2609-10); PCM usa aprovador próprio |
 | Liberação operacional | Período mais próximo, escolhido para disponibilizar trabalho às equipes | Liberar somente ordens selecionadas, aprovadas e operacionalmente prontas, com validade definida |
 
 #### 8.6.1 Controle simples por gestor
@@ -3060,7 +3082,7 @@ A janela refere-se à **data/janela prevista de execução**, não à data de cr
 
 **Preparar O.S. do período** apresenta lista com origem, atividade, talhão/parcela ou ativo, gatilho/âncora, janela, quantidade, responsável, ordem já existente, dependências e impedimentos. Contadores: **já emitidas**, **novas elegíveis**, **aguardando dados** e **fora do período**. Gestor seleciona o que emitir e vê impacto no volume da fila. Confirmação cria/recupera ordens idempotentemente; itens impedidos não são silenciosamente ignorados nem emitidos como executáveis.
 
-Geração automática, quando habilitada, prepara rascunhos/ocorrências ou emite para revisão conforme política explícita de escopo, antecipação, frequência e limite por rodada. Pode emitir/revisar antes da autorização econômica, com impedimento visível; CMD-06/07/16 recusam liberação, novo início e entrega sem autorização vigente do escopo. Não aprova tecnicamente nem libera execução por simples passagem da data. A fila de revisão agronômica fica limitada às ordens emitidas pertinentes, mantendo acesso pesquisável às demais necessidades. Agrônomo pode abrir evidências e alterar produtos/doses antes de aprovar.
+Geração automática, quando habilitada, prepara rascunhos/ocorrências ou emite para revisão conforme política explícita de escopo, antecipação, frequência e limite por rodada, com chave derivada do gatilho; repetir a rodada recupera o que já foi criado (IDEM-04). Pode emitir/revisar antes da autorização econômica, com impedimento visível; CMD-06/07/16 recusam liberação, novo início e entrega sem autorização vigente do escopo. Não aprova tecnicamente nem libera execução por simples passagem da data, nem por orçamento autorizado ou janela aberta (APROV-05). A fila de revisão agronômica fica limitada às ordens emitidas pertinentes, mantendo acesso pesquisável às demais necessidades. Agrônomo pode abrir evidências e alterar produtos/doses antes de aprovar.
 
 No modo de liberação, mostrar **Aprovadas e prontas · Pendentes de aprovação · Com impedimento · Já liberadas**, com janela, validade e recursos. “Liberar selecionadas” exige aprovação vigente e verificações de cada item no servidor. Lote tem resultados individuais: liberada, impedida ou conflito de versão. Nunca usar uma confirmação genérica para aprovar ordens não revisadas ou liberar toda a safra oculta por paginação/filtro.
 
@@ -3087,7 +3109,7 @@ Urgências técnicas/corretivas fora da janela podem ser emitidas por usuário c
 - **JANELA-02:** selecionar período ou mudar filtro não causa nenhum efeito transacional.
 - **JANELA-03:** agrônomo, PCP e PCM podem preparar seu horizonte sem duplicar a mesma ocorrência/O.S.
 - **JANELA-04:** repetir emissão do mesmo período ou alterar a data da ocorrência mantém identidade e não duplica demanda/reserva.
-- **JANELA-05:** liberação em lote revalida cada versão, aprovação, autorização econômica/operacional vigente do escopo, prontidão, janela e permissão; retorna resultado individual. Emitida/revisada antes de CMD-04 permanece A liberar; revogação bloqueia novo início/entrega; automaticidade depende de política explícita.
+- **JANELA-05:** liberação em lote revalida cada versão, aprovação, autorização econômica/operacional vigente do escopo, prontidão, janela e permissão; retorna resultado individual. Emitida/revisada antes de CMD-04 permanece A liberar; revogação bloqueia novo início/entrega; liberação automática só na irrigação somente com água (APROV-06).
 - **JANELA-06:** ordens ativas/atrasadas/com custódia/pendentes não desaparecem ao avançar a janela.
 - **JANELA-07:** compra de longo prazo usa necessidade planejada mesmo sem O.S. emitida; não duplica demanda quando a ordem nasce.
 - **JANELA-08:** janela vencida impede novo início não autorizado; fato ocorrido permanece registrável e sujeito à conferência.
@@ -3154,7 +3176,7 @@ flowchart TB
   B["1 · Crie ou selecione a empresa"]
   C["2 · Adote modelos ou importe seus dados"]
   D["3 · Confira a prévia e os campos essenciais"]
-  F["3 · Corrija somente os registros afetados"]
+  F["3 · Corrija a causa e aplique às linhas afetadas"]
   H["4 · Execute a primeira tarefa"]
   I["4 · Complete novos dados quando forem necessários"]
  end
@@ -3167,16 +3189,16 @@ flowchart TB
  B --> C
  C --> D
  D --> E
- E -->|Sim| F
  F --> D
- E -->|Não| G
  G --> H
  H --> I
+ E -->|Não| G
+ E -->|Sim| F
 ```
 
 ### FL-03 — Safra, plano e orçamento sem dependência circular
 
-**Responsáveis:** agronomia aprova técnica; controladoria calcula; direção/gerência autoriza economia; PCP programa. **Telas:** PL-01, PL-02, AG-04, PL-03, SU-01, GE-02 e PL-04. Cálculos, rascunhos e cotações preliminares podem existir antes da autorização operacional.
+**Responsáveis:** agronomia aprova as recomendações (CMD-01) e cada O.S. agrícola (CMD-42); controladoria calcula; direção/gerência autoriza economia (CMD-03, CMD-04), sem aprovar O.S. (APROV-05); PCP programa; o liberador autorizado libera (CMD-06; APROV-01), e a água sem produto é liberada pela prontidão, sem agrônomo (APROV-15; DEC-2609-10). **Telas:** PL-01, PL-02, AG-04, PL-03, SU-01, GE-02 e PL-04. Cálculos, rascunhos e cotações preliminares podem existir antes da autorização operacional.
 
 ```mermaid
 flowchart TB
@@ -3184,6 +3206,7 @@ flowchart TB
   direction TB
   A["1 · Escolha ou crie a safra"]
   B["1 · Defina cultivos e aplique planos locais"]
+  N["3 · Revise e aprove cada O.S. · CMD-42"]
  end
  subgraph RAIA_1["PCP"]
   direction TB
@@ -3191,6 +3214,7 @@ flowchart TB
   D["2 · Dimensione recursos e confira insumos"]
   H["3 · Prepare a janela e revise as O.S."]
   K["4 · Trate os impedimentos por responsável"]
+  L["4 · Libere as O.S. aprovadas e prontas · CMD-06"]
  end
  subgraph RAIA_2["Gestor"]
   direction TB
@@ -3204,8 +3228,8 @@ flowchart TB
  subgraph RAIA_4["Sistema"]
   direction TB
   I["3 · Atualize cobertura e prontidão"]
-  J{"4 · Versão aprovada e escopo pronto?"}
-  L["4 · Libere a execução da janela"]
+  J{"4 · Cada O.S. com aprovação vigente?"}
+  Q{"4 · Escopo pronto na janela?"}
  end
  A --> B
  B --> C
@@ -3218,9 +3242,13 @@ flowchart TB
  G --> I
  H --> I
  I --> J
- J -->|Não| K
  K --> I
- J -->|Sim| L
+ H --> N
+ N --> I
+ J -->|Sim| Q
+ J -->|Não · Aguardando agrônomo| N
+ Q -->|Sim| L
+ Q -->|Não| K
 ```
 
 ### FL-04 — Solo e folha até recomendação e execução
@@ -3368,7 +3396,7 @@ flowchart TB
 
 ### FL-08 — Programação, liberação e reprogramação
 
-**Responsáveis:** PCP coordena; cada especialista resolve seu impedimento. **Telas:** PL-04/PL-05, SU-07, MA-01 e listas de ordens. Ordem pode ser programada aguardando material; liberação é por parcela fisicamente executável.
+**Responsáveis:** PCP coordena; cada especialista resolve seu impedimento. **Telas:** PL-04/PL-05, SU-07, MA-01 e listas de ordens. Ordem pode ser programada aguardando material; liberação (CMD-06) é por parcela fisicamente executável e, salvo na água sem produto, exige aprovação técnica vigente da versão, lida no registro, inclusive na O.S. agrícola de operação mecânica (APROV-01; APROV-02; APROV-07; DEC-2609-10).
 
 ```mermaid
 flowchart TB
@@ -3378,12 +3406,13 @@ flowchart TB
   B["1 · Ordene prioridades e precedências"]
   C["2 · Reserve conjuntos na capacidade finita"]
   G["2 · Reprograme saldo e informe o impacto"]
+  H["3 · Confirme a liberação e envie ao app · CMD-06"]
  end
  subgraph RAIA_1["Sistema"]
   direction TB
-  D{"2 · Escopo aprovado e pronto?"}
-  H["3 · Confirme a liberação e envie ao app"]
+  D{"2 · Escopo autorizado e prontidão válida?"}
   I{"4 · Condições seguem válidas ao iniciar?"}
+  N{"2 · Aprovação vigente da versão?"}
  end
  subgraph RAIA_2["Líder / responsável"]
   direction TB
@@ -3397,15 +3426,17 @@ flowchart TB
  A --> B
  B --> C
  C --> D
- D -->|Não| E
  E --> F
  F -->|Sim| C
  F -->|Não| G
  G --> A
- D -->|Sim| H
  H --> I
  I -->|Não| E
  I -->|Sim| J
+ D -->|Sim| N
+ D -->|Não| E
+ N -->|Sim| H
+ N -->|Não · Aguardando agrônomo| E
 ```
 
 ### FL-09 — Necessidade líquida datada
@@ -3534,7 +3565,7 @@ flowchart TB
 
 ### FL-12 — Reserva, custódia, consumo e devolução
 
-**Responsáveis:** almoxarife e executor. **Telas:** SU-07, CA-04, MB-05 e CA-02. **Invariante:** entradas em custódia = consumo + devolução recebida + transferência de saída autorizada e recebida + perda/destinação documentada + saldo em custódia. Entradas incluem entregas do depósito e transferências recebidas; CAL-02.
+**Responsáveis:** almoxarife e executor. **Telas:** SU-07, CA-04, MB-05 e CA-02. **Invariante:** entradas em custódia = consumo + devolução recebida + transferência de saída autorizada e recebida + perda/destinação documentada + saldo em custódia. Entradas incluem entregas do depósito e transferências recebidas; a confirmação de recebimento no app é aceite da mesma entrega, não nova entrada (CONC-12); CAL-02. No vencimento (CMD-49), só a quantidade elegível da reserva volta ao disponível (RN-046; RSV-06); custódia e físico não mudam (RSV-07).
 
 ```mermaid
 flowchart TB
@@ -3548,8 +3579,9 @@ flowchart TB
  subgraph RAIA_1["Sistema"]
   direction TB
   C{"2 · Itens e saldo da carga estão completos?"}
+  K["4 · Devolva ao disponível a reserva restante e habilite o encerramento"]
+  V["1 · Vença a parte elegível e avise almoxarife e PCP · CMD-49"]
   I{"4 · Balanço e divergências resolvidos?"}
-  K["4 · Libere reservas e habilite o encerramento"]
  end
  subgraph RAIA_2["Agronomia / PCP"]
   direction TB
@@ -3559,6 +3591,7 @@ flowchart TB
   direction TB
   F["3 · Registre preparo, aplicação e consumo reais"]
   G["3 · Confira sobras por produto e condição"]
+  R["3 · Confirme o recebimento da entrega"]
  end
  subgraph RAIA_4["Conferente"]
   direction TB
@@ -3569,18 +3602,21 @@ flowchart TB
  C -->|Não| D
  D --> A
  C -->|Sim| E
- E --> F
  F --> G
  G --> H
  H --> I
  I -->|Não| J
  J --> H
  I -->|Sim| K
+ E --> R
+ R --> F
+ B -->|Validade atingida sem renovação| V
+ V -->|Material ainda necessário · PCP reserva de novo| D
 ```
 
 ### FL-13 — Execução de campo e conferência
 
-**Responsáveis:** executor, PCP e agronomia quando aplicável. **Telas:** MB-02/MB-03/MB-04, CA-02, GE-03. **Saída:** fato íntegro, saldo do trabalho e efeitos reconciliados. O formulário aceita relato não conforme.
+**Responsáveis:** executor, PCP e agronomia quando aplicável. **Telas:** MB-02/MB-03/MB-04, CA-02, GE-03. **Saída:** fato íntegro, saldo do trabalho e efeitos locais reconciliados; os efeitos a integrar seguem ao ERP depois do encerramento, pela outbox, sem mudar a etapa, salvo tipo de efeito marcado para confirmação antes do encerramento (RN-047; INTEG-15; INTEG-16). O formulário aceita relato não conforme.
 
 ```mermaid
 flowchart TB
@@ -3594,7 +3630,7 @@ flowchart TB
  end
  subgraph RAIA_1["Sistema"]
   direction TB
-  B{"1 · Pode iniciar ou retomar?"}
+  B{"1 · Liberação, aprovação, reserva e condições válidas?"}
   J["4 · Encerre e preserve os registros"]
  end
  subgraph RAIA_2["Líder / alçada"]
@@ -3607,18 +3643,18 @@ flowchart TB
   I["4 · Concilie apontamentos, sobras e divergências"]
  end
  A --> B
- B -->|Não| C
  C --> B
- B -->|Sim| D
  D --> E
  E --> F
- F -->|Não| G
  G -->|Próximo turno| B
  G -->|Saldo formalmente dispensado| H
  F -->|Sim| H
  H --> I
  I -->|Trabalho adicional autorizado| B
  I -->|Requisitos satisfeitos| J
+ B -->|Não| C
+ B -->|Sim| D
+ F -->|Não| G
 ```
 
 ### FL-14 — Irrigação, capacidade e medição
@@ -3631,22 +3667,24 @@ flowchart TB
   direction TB
   G["3 · Defina a janela e resolva conflitos de bomba e energia"]
   H["3 · Irrigue e registre aplicado, tempo e término"]
+  S["3 · Libere a fertirrigação · CMD-06"]
  end
  subgraph RAIA_1["Sistema"]
   direction TB
   A["1 · Calcule o balanço hídrico por setor"]
-  B{"1 · Sonda com dado válido?"}
+  B{"1 · Sonda com leitura dentro da validade?"}
   C["1 · Use estimativa por ET e marque como estimativa"]
   D["2 · Proponha a lâmina que a cultura precisa, em passadas"]
   E{"2 · Há produto na água?"}
   P{"3 · Pronta e sem conflito?"}
-  R["3 · Libere a tarefa automaticamente"]
+  R["3 · Libere automaticamente · CMD-06"]
   K{"4 · Há divergência obrigatória?"}
   M["4 · Encerre e atualize o balanço uma vez"]
+  Q{"3 · Água sem produto?"}
  end
  subgraph RAIA_2["Agronomia"]
   direction TB
-  F["2 · Aprove a fertirrigação e a requisição"]
+  F["2 · Aprove a versão da fertirrigação · CMD-42"]
  end
  subgraph RAIA_3["Conferente"]
   direction TB
@@ -3663,13 +3701,16 @@ flowchart TB
  F --> G
  G --> P
  P -->|Não| G
- P -->|Sim| R
  R --> H
  H --> J
  J --> K
- K -->|Sim| L
  L --> J
+ P -->|Sim| Q
+ Q -->|Sim| R
+ Q -->|Não| S
+ S --> H
  K -->|Não| M
+ K -->|Sim| L
 ```
 
 ### FL-15 — Manutenção até retorno técnico
@@ -4038,16 +4079,19 @@ flowchart TB
   direction TB
   B["1 · Compare total, hectare e unidade produzida"]
   E["2 · Monitore a tendência"]
+  J{"4 · Mudança altera a avaliação de quem propõe?"}
  end
  subgraph RAIA_2["Gestor"]
   direction TB
   D{"2 · Desvio exige ação?"}
   G["3 · Aprove ação, responsável e prazo"]
+  K["4 · Revise efeito e evidências com outra identidade"]
  end
  subgraph RAIA_3["Dono do processo"]
   direction TB
   H["3 · Revise o futuro preservando a linha de base"]
-  I["4 · Meça o resultado e atualize o padrão validado"]
+  I["4 · Meça o resultado e proponha o novo padrão"]
+  P["4 · Publique a nova versão · CMD-29"]
  end
  A --> B
  B --> C
@@ -4057,20 +4101,25 @@ flowchart TB
  F --> G
  G --> H
  H --> I
- I --> A
  E -->|Novo período| A
+ I --> J
+ J -->|Não| P
+ J -->|Sim| K
+ K -->|Aprovada| P
+ K -->|Devolvida| I
+ P -->|Novo ciclo| A
 ```
 
 ### FL-25 — Offline, reenvio e conflito
 
-**Responsáveis:** executor, servidor de domínio e conferente. **Telas:** todas MB, CA-02 e CF-03. Captura local e confirmação central são estados distintos; UUID não resolve sozinho conflito entre fatos diferentes.
+**Responsáveis:** executor, servidor de domínio e conferente. **Telas:** todas MB, CA-02 e CF-03. Captura local e confirmação central são estados distintos. UUID sozinho não garante idempotência nem resolve conflito entre fatos diferentes: reenvio e conflito de chave seguem 73.3; mesmo fato, fato distinto e correção vinculada seguem 73.5 (CMD-50); cota e reserva do pacote offline seguem RSV-08 e RSV-09.
 
 ```mermaid
 flowchart TB
  subgraph RAIA_0["Aplicativo"]
   direction TB
   A["1 · Baixe ordens autorizadas e limites offline"]
-  B["2 · Capture o fato com identidade local durável"]
+  B["2 · Grave chave e conteúdo antes de enviar"]
   C{"2 · Há conexão?"}
   D["2 · Mantenha a fila e mostre pendência"]
   E["2 · Envie com chave e versão esperada"]
@@ -4078,26 +4127,35 @@ flowchart TB
  end
  subgraph RAIA_1["Servidor"]
   direction TB
-  F{"3 · Resultado do servidor"}
+  F{"3 · Chave já registrada?"}
   G["3 · Recupere o mesmo recibo"]
   H["3 · Grave uma vez e confirme o recibo"]
+  K["3 · Responda conflito de chave, sem gravar"]
+  N{"3 · Como classificar o relato de campo?"}
+  L["3 · Vincule ao fato existente sem novo efeito"]
  end
  subgraph RAIA_2["Conferente"]
   direction TB
-  I["3 · Preserve o fato e solicite reconciliação"]
+  I["3 · Preserve o relato e resolva o caso · CMD-50"]
  end
  A --> B
  B --> C
- C -->|Não| D
  D -->|Conexão retomada| C
- C -->|Sim| E
- E --> F
- F -->|Já recebido| G
- F -->|Válido| H
- F -->|Conflito| I
- I -->|Resolução autorizada| H
  G --> J
  H --> J
+ C -->|Sim| E
+ C -->|Não| D
+ E -->|Sem resposta ou falha transitória| D
+ E --> F
+ F -->|Mesmo conteúdo| G
+ F -->|Outro conteúdo| K
+ F -->|Não| N
+ K --> J
+ N -->|Mesmo fato| L
+ N -->|Compatível ou correção| H
+ N -->|Incompatível, possível mesmo fato ou excedente| I
+ L --> J
+ I -->|Aceito ou corrigido| H
 ```
 
 ### FL-26 — Portal e compartilhamento por finalidade
@@ -4136,7 +4194,7 @@ flowchart TB
 
 ### FL-27 — Urgência, alteração e encerramento de período
 
-**Responsáveis:** gerente, especialista do risco e controladoria. **Telas:** IN-02, PL-05, GE-03, CF-02. Urgência pode abreviar passos administrativos conforme política; não elimina restrição obrigatória nem registro real.
+**Responsáveis:** gerente, especialista do risco e controladoria. **Telas:** IN-02, PL-05, GE-03, CF-02. Urgência pode abreviar passos administrativos conforme política; não elimina restrição obrigatória nem registro real. A aprovação agronômica da O.S. agrícola não é passo administrativo e não é abreviada por urgência (APROV-05; 41.1).
 
 ```mermaid
 flowchart TB
@@ -4174,7 +4232,7 @@ flowchart TB
 
 ## 10. Cálculos, unidades e práticas agronômicas
 
-Esta seção substitui as fórmulas conflitantes das versões anteriores. Parâmetros agronômicos regionais não especificados aqui devem vir de protocolo validado, com fonte, unidade, domínio de validade e vigência. A ausência de tabela aprovada deve aparecer como pendência, nunca ser preenchida por um número plausível inventado.
+Esta seção substitui as fórmulas conflitantes das versões anteriores. Parâmetros agronômicos regionais não especificados aqui devem vir de protocolo validado, com fonte, unidade, domínio de validade e vigência. A ausência de tabela aprovada deve aparecer como pendência, nunca ser preenchida por um número plausível inventado. Cada uso de um CAL tem uma classe (transacional no comando, cálculo síncrono ou projeção assíncrona) definida em PROJ-04 (73.7.2); decisão só autoriza a partir do registro transacional (PROJ-03).
 
 ### 10.0 Política de precisão, unidades e arredondamento
 
@@ -4194,7 +4252,7 @@ Modo de referência proposto: **ROUND_HALF_UP** no marco final documentado de ca
 
 Cada documento declara se totaliza linhas finais ou arredonda o total de parcelas internas; referência para documentos monetários é soma das linhas monetárias finais. Rateio usa maior resto na menor unidade da moeda, com desempate por ID estável, para preservar exatamente o total: R$100,00 em três partes iguais gera R$33,34/R$33,33/R$33,33. Nenhum residual é lançado silenciosamente em produto/cliente diferente.
 
-Casos de referência na configuração proposta: 1,005 BRL → 1,01; −1,005 BRL → −1,01; 0,0000005 ha → 0,000001 ha ao persistir em escala 6; apresentação em duas casas não é entrada de cálculo seguinte. Backend, protótipo e auditoria devem produzir a mesma string decimal na escala declarada. Tolerância de medição física, limite agronômico e tolerância contratual são campos distintos da tolerância computacional. Sem tolerância explicitada, exigir igualdade após quantização, não um epsilon oculto.
+Casos de referência na configuração proposta: 1,005 BRL → 1,01; −1,005 BRL → −1,01; 0,0000005 ha → 0,000001 ha ao persistir em escala 6; apresentação em duas casas não é entrada de cálculo seguinte. Backend, protótipo e auditoria devem produzir a mesma string decimal na escala declarada. Tolerância de medição física, limite agronômico e tolerância contratual são campos distintos da tolerância computacional. Sem tolerância explicitada, exigir igualdade após quantização, não um epsilon oculto. Na interface, a escrita de número, unidade e duração segue 74.8.3; a apresentação compacta em rótulo de mapa, cartão e KPI está pendente (PEND-DS-13, 74.12) e, até a decisão, vale a coluna Apresentação padrão acima.
 
 ### CAL-01 — Necessidade líquida por data
 
@@ -4208,7 +4266,7 @@ Convenção única: o físico apto inicial **inclui reservas**, e a demanda resi
 
 Recebimento após o dia de uso não cobre falta anterior. Não somar sucessivamente faltas cumulativas sem inserir a reposição no saldo projetado: isso superestima compra. Lote mínimo e múltiplo são aplicados depois da necessidade; a sobra entra no próximo período. Simular validade/FEFO, local, proprietário, capacidade e quantidades utilizáveis.
 
-**Exemplo de aceite:** demanda residual 80; físico apto 60, dos quais 40 reservados para a mesma demanda; sem segurança ou pedidos. Compra = **20**. A visão “livre para novas reservas” mostra 20, mas não substitui o físico 60 nessa equação.
+**Exemplo de aceite:** demanda residual 80; físico apto 60, dos quais 40 reservados para a mesma demanda; sem segurança ou pedidos. Compra = **20**. A visão “livre para novas reservas” mostra 20, mas não substitui o físico 60 nessa equação. Vencer a reserva não altera o físico apto nem a demanda residual; só o livre para novas reservas aumenta, pela quantidade elegível (RSV-07; AC-100). CAL-01 é projeção (PROJ-04): propostas e visão “livre para novas reservas” não reservam nem entregam; a reserva é verificada no comando por CAL-17 (PROJ-03).
 
 **Qualidade pendente:** aplicar a projeção firme e condicionada da seção 65.4. Exemplo com demanda 100, recebidos 60 (50 aptos + 10 em quarentena) e 40 ainda a receber no prazo: cobertura firme 90; 10 condicionados à qualidade, com decisão visível. Não contar os 10 como saldo aberto do pedido ou apto, nem emitir compra duplicada automaticamente.
 
@@ -4222,7 +4280,7 @@ Aplicar por ordem, produto/lote e unidade/base compatível. Transferência diret
 
 `fisico_final = fisico_inicial + entradas_externas − saidas_externas − consumos − perdas ± ajustes`
 
-Transferências entre locais da mesma propriedade de estoque se anulam no consolidado; custódia continua física. Reserva não é saída. Material em trânsito não está disponível em dois locais.
+Transferências entre locais da mesma propriedade de estoque se anulam no consolidado; custódia continua física. Reserva não é saída. Material em trânsito não está disponível em dois locais. Vencer reserva não altera nenhum termo de custódia nem o físico (RSV-07). CAL-02 é verificada no registro transacional, dentro da transação de cada comando que a usa (lista em PROJ-04; PROJ-03); KPI-SUP-06 e painéis de custódia são projeção e não autorizam entrega, devolução, transferência nem encerramento.
 
 **Exemplo:** entregue 100, sem transferência de entrada/saída, consumo 70, retorno recebido 20, perda zero e custódia 10: 100 = 70 + 20 + 0 + 0 + 10. Para O.S. agrícola, execução pode estar concluída, mas a ordem não encerra enquanto existir saldo em sua custódia sem destinação formal recebida (capítulo 42). Reenvio de consumo 70 mantém consumo 70.
 
@@ -4300,7 +4358,7 @@ Litros abastecidos são transferência de combustível. Consumo pode ser estimad
 
 `consumo = estoque_inicial_no_tanque_do_ativo + abastecimentos − estoque_final − retiradas_identificadas`
 
-Retiradas incluem transferências de saída e outras saídas identificadas que não sejam consumo do ativo.
+Retiradas incluem transferências de saída e outras saídas identificadas que não sejam consumo do ativo. `abastecimentos` soma fatos de abastecimento, não relatos: dois registros do mesmo abastecimento de 100 L contam 100 L (CONC-11). O abastecimento é movimento de combustível verificado no comando; consumo conciliado, L/h, energia e custo são projeção (PROJ-04).
 
 `L_h = consumo_conciliado / horas_operadas_compatíveis`
 
@@ -4316,7 +4374,7 @@ Com umidades volumétricas em fração e profundidade radicular em metros: `CAD_
 
 `ETc_potencial = ETo × Kc`; o modelo adotado pode distinguir evaporação, transpiração e estresse. `reserva_facilmente_utilizavel = p × CAD`. Valores de Kc, p, raiz e ajustes dependem de protocolo, estádio e evidência [S1].
 
-O balanço registra água infiltrada, irrigação líquida, evapotranspiração estimada, drenagem e outros fluxos modelados. Não contar escoamento/percolação duas vezes ao usar chuva efetiva. Dado ausente reduz confiança; chuva prevista não entra como realizada.
+O balanço registra água infiltrada, irrigação líquida, evapotranspiração estimada, drenagem e outros fluxos modelados. Não contar escoamento/percolação duas vezes ao usar chuva efetiva. Dado ausente reduz confiança; chuva prevista não entra como realizada. Validade de cada entrada por fonte, estimativa por ET marcada quando falta dado atual e recálculo na liberação automática da água seguem PROJ-13 a PROJ-15.
 
 Mostrar separadamente: **depleção na zona radicular**, **tempo acima do limiar técnico**, **lâmina recomendada ainda não atendida** e, quando o modelo permitir, **déficit de evapotranspiração**. Não chamar qualquer diferença entre previsto e aplicado de estresse comprovado da planta.
 
@@ -4363,6 +4421,8 @@ Mistura de fontes resolve contribuições simultâneas de nutrientes sem exceder
 Quantidade de compra, quantidade preparada e quantidade efetivamente aplicada são campos distintos. Se a hipótese for perda de fração `p` do preparado, `preparar = alvo/(1−p)`. Se for apenas margem de suprimento `m`, `comprar_base = alvo×(1+m)`. Não chamar as duas de mesma fórmula de perda.
 
 O limite da dose aplicada permanece válido. Margem de compra não autoriza elevar dose para esvaziar embalagem. Último tanque é proporcional à área remanescente; dose por hectare, concentração, volume de calda e quantidade por tanque têm unidades explícitas.
+
+**Comparação por ingrediente ativo e custo por hectare (40.5):** `ativo_ha = dose_ha × concentração`, na mesma base de expressão; `dose_referencia_B = ativo_ha ÷ concentração_B`, na unidade resultante (g/ha ÷ g/L = L/ha; g/ha ÷ g/kg = kg/ha), sem densidade; densidade só converte massa e volume do mesmo material, e sal × equivalente ácido só com fator declarado. A referência é comparação, não dose autorizada: a dose vem da bula do produto, definida pelo habilitado. `custo_ha = dose_ha × preço por unidade-base`, só com dose normalizada por hectare; dose por 100 L, por planta ou por semente usa as bases de 41.5. Antes da dose autorizada, faixa estimada só quando a bula tem faixa explícita aplicável e o contexto dimensional está completo; senão, **Dose técnica pendente**, sem custo e fora da ordenação por preço. Custo da área = `custo_ha × área coberta` + frete e demais condições de SU-04.
 
 ### CAL-12 — MIP/MID e avaliação
 
@@ -4430,6 +4490,8 @@ Balanço usa bases compatíveis, identifica água removida/adicionada e exclui t
 
 `disponivel_fisico = fisico_apto − reservas_fisicas_validas`
 
+Para material, `reservas_fisicas_validas` é a soma de `reserva_ativa` de todas as linhas, inclusive a parcela conservada por linha vencida (RN-046; RSV-06, RSV-07); para produção, `reservas_fisicas_validas` continua sendo a reserva comercial de 49.3. CAL-17 é verificada no comando que reserva ou confirma (CMD-06 e CMD-44 para material; CMD-36 e CMD-25 para produção), sobre o registro transacional; calendário de disponibilidade e saldos exibidos não autorizam (PROJ-03, PROJ-04).
+
 Oferta futura é projeção por data e classe, sujeita a risco e capacidade; não é somada ao físico quando já representa os mesmos lotes colhidos. Ao materializar produção, substituir a parcela correspondente da previsão por fatos e manter diferenças explícitas.
 
 **Exemplo:** físico apto 38.420 sc; reserva 3.875 sc → disponível físico **34.545 sc**. Um contrato que já originou essa reserva não é novamente subtraído como barter na mesma visão. Para promessa futura, aplicar o balanço e a conversão atômica de reservas temporárias em 49.2–49.3; preservar déficit interno, expondo ao comprador somente quantidade não negativa.
@@ -4486,9 +4548,9 @@ Para o protótipo, usar protocolos sintéticos marcados **“Exemplo — não us
 | Geografia | Talhão, versão de geometria, parcela, setor irrigado, restrição geográfica | Divisão/união conserva linhagem; área histórica reproduzível |
 | Cultivo | Ciclo produtivo, cultura/cultivar planejada e real, ocupação, safra gerencial, vínculo ciclo–safra, evento tipado previsto/observado, coorte de plantio | Capítulo 39: ocupação temporal, variedade por parcela, âncora e saldo preservados; sem duplicar área física |
 | Técnica | Amostra/área representada, resultado analítico tipado, laudo, observação, fonte/edição/tabela, protocolo/versão, diagnóstico, recomendação/versão, prescrição, perfil de máquina, pacote/transferência e aplicação retornada | Sugestão científica cita evidências e fonte; decisão direta registra autor/origem sem exigir recomendação. Capítulos 33–38 |
-| Plano | Modelo publicado, plano do ciclo, ajuste, operação planejada, ocorrência recorrente, necessidade | Modelo + ajustes não perde sua origem; instância de recorrência tem ID |
+| Plano | Modelo publicado, plano do ciclo, ajuste, operação planejada, ocorrência recorrente, necessidade | Modelo + ajustes não perde sua origem; instância de recorrência tem ID; necessidade tem modo (produto fixo ou alternativas, 40.5) e pode ter alocações parciais por área, data, produto, dose e versão, cuja soma é a necessidade, sem duplicar demanda nem reserva |
 | Trabalho | O.S., item de ordem por parcela, programação, alocação, autorização, checklist, apontamento | Ordem pode ter várias parcelas; realizado tem versão técnica e área/quantidade própria |
-| Materiais | Item, unidade, conversão, lote, proprietário, local, reserva, requisição, custódia, movimento, inventário | Ledger físico e reservas reconciliáveis; local virtual de custódia não duplica o item |
+| Materiais | Item (produto comercial registrado com composição versionada: ingredientes, concentração e base de expressão, formulação, registro e bula; de-para do código do fornecedor), unidade, conversão, lote, proprietário, local, reserva (finalidade, validade, política e versão aplicadas, versão da linha; RSV-01), requisição, custódia, movimento, inventário | Ledger físico e reservas reconciliáveis; local virtual de custódia não duplica o item; saldo, reserva e entrega pelo produto comercial e lote reais, nunca por ingrediente nem por código de fornecedor |
 | Compras | Solicitação, reposição proposta, cotação, convite, proposta, contrato, liberação, pedido, recebimento | Saldo contratual, entrega e obrigação financeira separados |
 | Ativos | Ativo, componente, conjunto, contador, leitura, plano de manutenção, solicitação, ordem, teste, bloqueio | O.S. de manutenção pertence ao ativo, não migra artificialmente de safra |
 | Água | Captação, limite/vigência, setor, calibração, medidor, leitura, balanço, recomendação, ordem/aplicação | Volume, lâmina, área e energia possuem origem; medição parcial mantém cobertura |
@@ -4502,7 +4564,7 @@ Para o protótipo, usar protocolos sintéticos marcados **“Exemplo — não us
 
 ### 11.2 Campos transversais
 
-Objetos transacionais: `id`, `tenant_id`, `empresa_id` quando aplicável, `version`, `status`, `created_at/by`, `updated_at/by`, referências externas, origem e correlação. Eventos: `event_id`, `type`, `schema_version`, `entity_id`, `entity_version`, `occurred_at`, `captured_at`, `received_at`, `timezone`, `actor`, `device_id`, `causation_id`, `payload` e anexos.
+Objetos transacionais: `id`, `tenant_id`, `empresa_id` quando aplicável, `version`, `status`, `created_at/by`, `updated_at/by`, referências externas, origem e correlação. Eventos: `event_id`, `type`, `schema_version`, `entity_id`, `entity_version`, `occurred_at`, `captured_at`, `received_at`, `timezone`, `actor`, `device_id`, `causation_id`, `payload` e anexos. Relatos de campo levam também a sequência local do aparelho, o tempo decorrido desde a última sincronização (CONC-20, CONC-21), a chave física do fato (CONC-05), a referência "mesmo fato de" ou "corrige/estorna" com `event_id` e tipo de comando do original (CONC-02, CONC-16) e a natureza da fonte (CONC-09). No relato capturado no aparelho, o `event_id` é a chave da intenção que o envia (IDEM-18). Cada comando mutável grava o registro da intenção processada, único por organização, tipo de comando e chave, com hash do conteúdo canônico e recibo (modelo mínimo em 73.3.5).
 
 O número legível, como OS-0420, não é a chave global. IDs externos têm sistema e empresa de origem. Quantidade conserva unidade original e unidade-base; valores monetários usam decimal e moeda. Data civil operacional segue fuso local; instante é armazenado sem ambiguidade.
 
@@ -4524,13 +4586,13 @@ Separar cálculos determinísticos, autorização, persistência de fatos, proje
 
 ### 12.2 Contrato de comandos e eventos
 
-- Comandos mutáveis incluem identidade de idempotência e versão esperada do objeto; reenvio responde com o resultado já confirmado.
-- Documento/fato e obrigação de publicar evento são gravados atomicamente, por outbox ou mecanismo equivalente.
-- Transporte admite pelo menos uma entrega; consumidores deduplicam pelo efeito de negócio, com identidade estável.
-- Reserva e saldo são verificados na confirmação transacional. Duas telas abertas não constituem duas autorizações sobre o mesmo saldo.
+- Comandos mutáveis incluem a chave da intenção, gerada pelo iniciador (app, web, integração, IA ou job), e a versão esperada do objeto. Mesma chave com conteúdo equivalente devolve o recibo registrado; com conteúdo diferente, conflito de chave explícito, sem efeito; UUID sozinho não basta (73.3; IDEM-02, IDEM-14).
+- Documento/fato, registro da intenção processada com o recibo e obrigação de publicar evento são gravados atomicamente, na mesma transação local, por outbox ou mecanismo equivalente (IDEM-16; INTEG-01).
+- Transporte admite pelo menos uma entrega; consumidores deduplicam pelo efeito de negócio, com identidade estável (INTEG-07, INTEG-08). "Enviada uma vez só" (DEC-2609-13) se lê como aceita e aplicada uma vez, sem proibir reenvio (73.1).
+- Reserva, saldo por lote e local, custódia, saldo elegível para entrega (42.1), aprovação e liberação vigentes, alocação de recurso e encerramento são verificados na confirmação transacional, sobre o registro autoritativo; projeção, cache ou réplica nunca autorizam (PROJ-03). Duas telas abertas não constituem duas autorizações sobre o mesmo saldo.
 - Eventos fora de ordem respeitam causalidade/versão; não regridem estado. Erro persistente tem fila, responsável e reprocessamento auditável.
-- Cálculo assíncrono informa versão das entradas e obsolescência. Resultado de cenário antigo não substitui cenário recém-aprovado.
-- Integrações externas não participam de uma falsa transação distribuída instantânea. Usar estados e compensações explícitos quando uma etapa falha.
+- Cálculo assíncrono informa versão das entradas e obsolescência; metadados, atraso máximo por tipo de consulta e estados de atualidade seguem PROJ-05 a PROJ-07. Resultado de cenário antigo não substitui cenário recém-aprovado.
+- Integrações externas não participam de uma falsa transação distribuída instantânea. Usar estados e compensações explícitos quando uma etapa falha (73.6.7); orquestrador com estado só pelo critério de INTEG-11. Depois de timeout ou resultado desconhecido, consultar o destino antes de repetir ou compensar (INTEG-20).
 
 ### 12.3 APIs de domínio — contrato mínimo
 
@@ -4538,17 +4600,19 @@ Separar cálculos determinísticos, autorização, persistência de fatos, proje
 |---|---|---|
 | `/areas`, `/cycles`, `/seasons` | Consultar, importar, versionar e vincular | Geometria e ciclo preservados; acesso por escopo |
 | `/observations`, `/recommendations` | Capturar evidência, revisar e aprovar versão | Documento técnico e necessidade únicos |
-| `/plans`, `/work-orders` | Simular, programar (CMD-05), emitir (CMD-41), decidir revisão (CMD-42), liberar (CMD-06), reprogramar (CMD-11), cancelar sem execução (CMD-46), dispensar saldo (CMD-47), reabrir saldo (CMD-48) e encerrar (CMD-10) | Ator/escopo, versão, alçada e autorização econômica validados no servidor; saldo e identidade reconciliados |
-| `/work-orders/:id/events` | Iniciar/pausar/retomar (CMD-07), registrar avanço/fechar apontamento do turno (CMD-43), concluir execução (CMD-08), conferir apontamento (CMD-09) | IDs de fato e efeitos estáveis; turno não encerra ordem; relato não conforme preservado sem aprovação fictícia |
-| `/reservations`, `/requisitions`, `/stock-movements` | Criar/recuperar requisição derivada da aprovação, reservar (CMD-44), entregar (CMD-16), consumir/declarar retorno/transferir sob autorização (CMD-17), receber devolução (CMD-45), ajustar com alçada | Reserva/recebimento atômicos; evento de declaração não altera saldo apto; ledger/custódia conciliados por origem e destino |
+| `/plans`, `/work-orders` | Simular, programar (CMD-05), emitir (CMD-41), decidir revisão (CMD-42), liberar (CMD-06), reprogramar (CMD-11), cancelar sem execução (CMD-46), dispensar saldo (CMD-47), reabrir saldo (CMD-48) e encerrar (CMD-10) | Ator/escopo, versão, alçada, autorização econômica e aprovação agronômica vigente da versão (APROV-07; exceto água sem produto, APROV-15) validados no servidor; saldo e identidade reconciliados |
+| `/work-orders/:id/events` | Iniciar/pausar/retomar (CMD-07), registrar avanço/fechar apontamento do turno (CMD-43), concluir execução (CMD-08), conferir apontamento (CMD-09) | Cada item é intenção com chave e recibo, não evento; o nome da rota é herdado (PROJ-01; 73.2.3). IDs de fato e efeitos estáveis; turno não encerra ordem; relato não conforme preservado sem aprovação fictícia |
+| `/reservations`, `/requisitions`, `/stock-movements` | Criar/recuperar requisição derivada da aprovação, reservar (CMD-44), renovar ou vencer reserva (CMD-49), entregar (CMD-16), consumir/declarar retorno/transferir sob autorização (CMD-17), receber devolução (CMD-45), ajustar com alçada | Reserva/recebimento atômicos; vencimento devolve ao disponível só a quantidade elegível, com recibo da quantidade devolvida (RSV-06); evento de declaração não altera saldo apto; ledger/custódia conciliados por origem e destino |
 | `/procurement`, `/sales`, `/contracts` | Negociar, contratar e atender | Versão, alçada e obrigação por origem |
 | `/production`, `/lots`, `/quality` | Pesar, transformar, inspecionar e rastrear | Balanço e genealogia |
 | `/irrigation`, `/maintenance` | Recomendar, executar, medir, testar e liberar | Restrições e recursos compartilhados |
 | `/finance`, `/costs` | Projetar, importar títulos, conciliar e fechar | Fonte oficial e componente único |
 | `/portal` | Consultar convite/dossiê e enviar própria proposta | Escopo do parceiro, prazo e conteúdo permitido |
-| `/sync` | Enviar lote de eventos e obter confirmação por item | Aceito, já recebido, pendente, conflito ou rejeitado com motivo |
+| `/sync` | Enviar lote de intenções (registros de campo), com chave e recibo por item (IDEM-10) | Resultado por item (73.2.3): aceito; já recebido, com o recibo original (IDEM-14); vinculado a fato existente; em conferência; aguardando original ou entrega (CONC-12, CONC-17); conflito de chave (mesma chave com outro conteúdo), que não abre conferência (IDEM-14); em processamento, resposta transitória (IDEM-15); rejeitado ou recusado com motivo (73.3.4; CONC-07) |
+| Integração entre sistemas (caminho e autenticação definidos no contrato da primeira fatia que a usar) | Enviar lote de fatos acordados; ler mudanças por checkpoint; receber confirmação por item | Identidade e credencial da integração (RF-INT-007, RF-INT-008); mesmos comandos, permissões e escritor oficial da aplicação, sem escrita direta em tabelas; idempotência (IDEM-02); versão com descontinuação anunciada |
+| `/commands/:tipo/:chave` | Consultar o resultado de uma intenção pela chave | Sem efeito; organização da sessão; devolve o recibo, Em processamento ou Não recebido (IDEM-09; PERF-04) |
 
-Contratos documentados incluem exemplos de sucesso/parcial/erro, paginação, filtros, unidades, timezone, versão e limites. Códigos de erro distinguem campo inválido, falta de permissão, conflito de versão, impedimento técnico e indisponibilidade externa. Não devolver sucesso vazio para falha de negócio.
+Contratos documentados incluem exemplos de sucesso/parcial/erro, paginação, filtros, unidades, timezone, versão e limites. Códigos de erro distinguem campo inválido, falta de permissão, conflito de versão, impedimento técnico, indisponibilidade externa, chave ausente, chave reutilizada com outro conteúdo, em processamento e chave expirada (73.3.4; IDEM-02, IDEM-14, IDEM-15, IDEM-19). Não devolver sucesso vazio para falha de negócio.
 
 ### 12.4 Matriz de fonte oficial e integração
 
@@ -4556,7 +4620,7 @@ Contratos documentados incluem exemplos de sucesso/parcial/erro, paginação, fi
 |---|---|---|
 | Talhão, ciclo, recomendação e O.S. | Sistema agrícola | ERP/BI recebem fatos; importação validada como contingência |
 | Identificação fiscal e estrutura contábil | ERP ou base designada na implantação | Mapeamento com vigência; conflito na fila de dados |
-| Físico por lote/custódia | Um escritor designado por domínio/local | Outros consultam/reconciliam; não publicar dois saldos autoritativos |
+| Físico por lote/custódia | Um escritor designado por domínio/local; nas O.S., a plataforma registra reserva, entrega, custódia, consumo e devolução por transação local (INTEG-03; DEC-2609-13) | Outros consultam/reconciliam; o ERP recebe esses fatos, sem segunda baixa; não publicar dois saldos autoritativos |
 | Títulos e liquidações | ERP/financeiro no modo integrado; módulo básico no modo autônomo | Exibir fonte e última atualização; sem confirmação não marcar pago |
 | Laudos | Original do laboratório e validação da extração | Arquivo/manual revisado quando não houver API |
 | Registro/bula | Fonte oficial aplicável, com cópia/versionamento | Data e restrição de uso; verificação técnica do catálogo |
@@ -4573,20 +4637,24 @@ Sankhya e TOTVS (por linha/versão), ou outro ERP, são integrados por contrato 
 
 **Permitido:** consultar pacote previamente autorizado; capturar instruções, checklists, fotos, vistorias, leituras, execução, consumo observado e ocorrências; iniciar trabalho previamente liberado dentro da política vigente do pacote. **Não confirmado offline por padrão:** novo compromisso financeiro, nova alçada técnica, reserva central concorrente ou ajuste definitivo de estoque. Tarefa física já ocorrida continua registrável como pendente.
 
-O pacote tem escopo, versão, autorização, validade e momento do último sincronismo. A organização pode delegar cotas de material a um dispositivo/local para operação limitada offline; cota é retirada da disponibilidade central enquanto delegada. Não prometer conhecer revogação central instantaneamente sem conexão.
+O pacote tem escopo, versão, autorização, validade e momento do último sincronismo. A organização pode delegar cotas de material a um dispositivo/local para operação limitada offline; cota é retirada da disponibilidade central enquanto delegada, tem a validade do pacote que a transporta e volta ao disponível só pelas hipóteses de RSV-09; cancelamento ou revogação central não a devolve antes disso. Não prometer conhecer revogação central instantaneamente sem conexão.
 
 | Conflito | Tratamento exigido |
 |---|---|
-| Reenvio do mesmo evento | Retornar recibo existente; nenhum novo efeito |
-| Dois eventos diferentes sobre a mesma área ou saldo | Detectar sobreposição/concorrência e abrir conferência; UUID distinto não prova fato distinto |
+| Reenvio da mesma intenção (mesma chave e conteúdo equivalente) | Retornar recibo existente; nenhum novo efeito (IDEM-14) |
+| Mesma chave com outro conteúdo | Conflito de chave ao iniciador, sem efeito e sem conferência; o original fica intacto (IDEM-14) |
+| Outro registro do mesmo fato físico (chave física igual, chave de idempotência diferente) | Vincular ao fato existente, sem novo efeito; valor pela precedência das fontes; divergência acima da tolerância vai à conferência (CONC-02, CONC-05, CONC-09, CONC-10). UUID distinto não prova fato distinto |
+| Dois relatos de fatos diferentes sobre a mesma área ou saldo | Fato distinto, aceito e compatível soma sozinho (CONC-06, CONC-08); sobreposição, coincidência parcial, uso simultâneo impossível do recurso ou outra incompatibilidade abre conferência, sem efeito no saldo confirmado (CONC-03, CONC-07) |
 | Ordem revogada enquanto offline | Preservar relato; interromper novas etapas após ciência; registrar execução fora da autorização atual |
-| Dispositivo com relógio incorreto | Preservar tempos originais e estimativa de desvio; não ordenar financeiramente só por device_time |
-| Quantidade capturada maior que saldo | Manter fato pendente, exposição e dono; reconciliar origem física sem fabricar entrada |
+| Dispositivo com relógio incorreto | Preservar tempos originais e estimativa de desvio; a ordem vem da sequência local, da versão esperada e da recepção no servidor, e a hora do aparelho não decide vencedor, saldo, custódia, área nem vencimento (CONC-20; 73.2.1); instante estimado do fato e validade do pacote contam pelo tempo decorrido desde a última sincronização (CONC-21) |
+| Quantidade capturada maior que saldo | Manter fato pendente, exposição e dono; reconciliar origem física sem fabricar entrada (RSV-10). Na área ou quantidade de trabalho da O.S., o resultado não depende da ordem de sincronização: o realizado confirmado vai até o saldo autorizado e o excedente fica Em conferência, sem descartar o relato (CONC-14); o consumo de material segue a custódia (CONC-06, CONC-07) |
+| Fato offline depois de reserva vencida ou cota devolvida | Nunca recusado por ter chegado tarde: aceito uma vez quando o físico do local cobre a baixa, com déficit exposto e dono, ou Em conferência quando não cobre; nenhuma reserva cancelada e nenhuma entrada fabricada (RSV-10) |
 | Anexo não enviado | Texto permanece; status identifica evidência pendente; fechamento respeita requisito |
-| Aplicativo reiniciado/atualizado | Fila persiste; migração local não remove eventos sem confirmação |
+| Aplicativo reiniciado/atualizado | Fila persiste; migração local não remove itens sem recibo; toda tentativa usa a mesma chave e o mesmo conteúdo, e resposta perdida devolve o recibo registrado (IDEM-05, IDEM-06) |
 | Usuário revogado | Impedir novas autorizações; tratar fatos capturados pela política de auditoria sem conceder acesso novo |
+| Correção ou estorno de fato capturado | Nova intenção com chave nova, vinculada ao original; efeito só da diferença; correção que chega antes do original fica Aguardando original (CONC-16, CONC-17) |
 
-Testar aparelhos reais, armazenamento disponível, interrupção, reinício e envio reordenado. Cópia local não substitui backup central; perda física do aparelho antes de transmitir é uma limitação real a ser reduzida por operação e sincronização.
+Testar aparelhos reais, armazenamento disponível, interrupção, reinício e envio reordenado. Cópia local não substitui backup central; perda física do aparelho antes de transmitir é uma limitação real a ser reduzida por operação e sincronização. CRDT não é solução geral: só com ADR que demonstre convergência adequada em dado sem efeito de saldo, como notas livres de vistoria; nunca para saldo, custódia, reserva, consumo, área, horas, aprovação ou liberação (CONC-22).
 
 ## 13. Qualidade, operação e segurança
 
@@ -4599,10 +4667,10 @@ Metas abaixo são **alvos de engenharia propostos**, medidos em ambiente, dados 
 | NFR-03 | Permissão no servidor | Botão oculto não é o controle; URL/API/IA respeitam mesmo escopo |
 | NFR-04 | Auditoria | Autor, antes/depois, versão, motivo e correlação nos comandos críticos |
 | NFR-05 | Resposta de interface | p95 de abrir listas frequentes ≤2 s no envelope de teste acordado |
-| NFR-06 | Comando comum | Confirmação persistida local/servidor indicada ≤2 s quando não depender de serviço externo; processamento longo mostra andamento |
+| NFR-06 | Comando comum | Confirmação persistida local/servidor indicada em p95 ≤2 s e p99 ≤4 s quando não depender de serviço externo; "Enviando" não conta como confirmação; processamento longo mostra andamento (PERF-02) |
 | NFR-07 | Captura móvel | Registro local simples p95 ≤500 ms após comando, excluindo câmera/upload, em dispositivo de referência |
 | NFR-08 | Offline durável | Fila sobrevive reinício e cenário de 72 h sem rede no teste; validade da autorização é controlada separadamente |
-| NFR-09 | Acessibilidade | WCAG 2.2 AA nos fluxos críticos, com verificação por teclado/leitor de tela e contraste [S3] |
+| NFR-09 | Acessibilidade | WCAG 2.2 AA nos fluxos críticos, com verificação por teclado/leitor de tela e contraste [S3]; pares de tokens medidos em 74.9 e teste automático de contraste no CI (74.10) |
 | NFR-10 | Disponibilidade | Alvo de 99,9% em janela móvel de 30 dias para jornadas centrais online, com SLIs separados e manutenção contabilizada conforme seção 29.5 |
 | NFR-11 | Recuperação | Desastre regional/corrupção lógica: RPO ≤15 min e RTO ≤4 h, nas condições da seção 30.4; failover zonal tem objetivo próprio; exercício completo antes da produção |
 | NFR-12 | Observabilidade | Rastreamento do comando ao evento/integração; fila e erro têm dono e tempo |
@@ -4678,7 +4746,7 @@ Gestão opera em cinco cadências: safra/ciclo para direção e técnica; mês p
 | Preparar | Rascunhos de O.S., cotação, oferta, dossiê e reprogramação | Contexto herdado; campos inferidos identificados |
 | Automatizar política | Deduplicar alertas, gerar preventiva em rascunho, conferir fato dentro de regra aprovada | Escopo, dono, vigência e possibilidade de revisão |
 | Sugerir | Alternativas de capacidade, compra, janela e causa de desvio | Premissas, impacto e grau de evidência |
-| Decidir em alçada | Aprovar compra, crédito, recomendação, alteração de parâmetro ou fechamento | Usuário/política explicitamente autorizado; não autonomia irrestrita da IA |
+| Decidir em alçada | Aprovar compra, crédito, alteração de parâmetro ou fechamento | Usuário/política explicitamente autorizado; não autonomia irrestrita da IA. Aprovação técnica (recomendação, CMD-01; versão da O.S., CMD-42) só por usuário competente, nunca por política nem pela IA (RN-041; APROV-05) |
 | Acionar físico ou dinheiro | Somente conector específico, habilitado e autorizado | Confirmações próprias; fora da simulação do protótipo e desativado por padrão |
 
 ### 15.2 Casos de alto valor
@@ -4716,13 +4784,13 @@ Registros mínimos: duas fazendas; talhão de cultura anual e parcelas perenes c
 | DEMO-08 — Devolução | Entrega aceita parcialmente; retorno autorizado recebido bloqueado | Estoque vendável não aumenta até qualidade; ajuste financeiro permanece vinculado |
 | DEMO-09 — Perene e safra | Nova safra vincula ciclo existente com plantio conhecido e atividades antigas não comprovadas | Idade não zera; pendências são classificadas; necessidade antiga não é comprada/descartada automaticamente |
 | DEMO-10 — Crédito condicional | Solicitação CRE-0102 recebe aprovação sujeita a documento, depois liberação parcial | Pedido não aparece pago antes do fato financeiro; garantia não duplica compromisso de barter |
-| DEMO-11 — Offline e concorrência | Mesmo evento de 50 ha reenviado duas vezes; outro dispositivo captura fato sobreposto; pacote tem ordem revogada. Roteiro detalhado abaixo | Mesmo recibo e efeito único; fatos distintos preservados em reconciliação; ordem confirmada não regride e captura local não simula confirmação |
+| DEMO-11 — Offline e concorrência | Mesma intenção de 50 ha reenviada duas vezes; outro dispositivo registra o mesmo fato e um fato sobreposto; pacote tem ordem revogada. Roteiro detalhado abaixo | Mesmo recibo e efeito único; mesmo fato vinculado sem soma; fato sobreposto preservado Em conferência (CONC-02, CONC-03); ordem confirmada não regride e captura local não simula confirmação |
 | DEMO-12 — Gestão e aprendizado | Orçamento-base V1, previsão V2 e custo real divergem; gerente abre composição e ação | Base preservada; alteração de rendimento gera proposta de parâmetro com vigência futura |
 | DEMO-20 — Fila de expedição | T1 atrasado; T2/T3 presentes aptos; T4 antecipado e uma carga impedida; FO-34 em LO-01/LO-02 | Próximo elegível explicável, sem doca ociosa evitável, interrupção de carga ou perda indevida de reserva; FILA-01 a FILA-10 |
 | DEMO-13 — Uma O.S., sete dias | O.S. de 350 ha; registros diários 50, 50, 50, 40, 50, 50 e 60 ha; caminho técnico/operacional e custódia completos | Dia 3: realizado 150 e saldo 200; dia 4: realizado 190 e saldo 160; dia 7: 350. Finalizar turno não encerra; conferência diária não muda a fase. Variante com último dia 50 soma 340 e mantém saldo 10 sem conclusão integral fictícia |
 | DEMO-14 — Dose revista no saldo | O.S. 100 ha com 60 executados; revisar dose apenas dos 40 restantes e aprovar/liberar nova versão | Realizado e custo dos 60 preservados; saldo bloqueado com dono; novo preparo somente após revisão e liberação; excedente/calda recebem destinação própria |
 | DEMO-15 — Água pela necessidade da cultura | Mesmo setor: lâmina de hoje dentro do limite por passada e lâmina seguinte acima dele; outro setor sem sonda | Hoje: 1 passada, liberada pela prontidão, sem assinatura nem materiais; seguinte: 2 passadas, A liberar só até definir a janela; sem sonda: estimativa por ET, pendência só de conflito da bomba; nada vai ao agrônomo |
-| DEMO-16 — Água convertida em fertirrigação | Reclassificar tarefa existente em IR-02/IR-03 antes da aplicação do saldo | Mesmo ID e aplicação hídrica única; política de água não autoriza produto; aprovação individual, requisição, custódia, consumo e conciliação exigidos |
+| DEMO-16 — Água convertida em fertirrigação | Reclassificar tarefa existente em IR-02/IR-03 antes da aplicação do saldo | Mesmo ID e aplicação hídrica única; a liberação automática de água não cobre produto; aprovação individual, requisição, custódia, consumo e conciliação exigidos |
 | DEMO-17 — Ativo bloqueado antes de iniciar | Ordem liberada para amanhã com T1; inspeção bloqueia T1; PCP avalia substituição e PCM repara/testa | Volta a A liberar antes do primeiro início; aprovação técnica conservada se não afetada; recurso incompatível não inicia; liberar ativo não reassume agenda antiga |
 | DEMO-18 — Reserva concorrente | Lote apto 100 un; duas ordens tentam reservar 80 simultaneamente; repetir no comercial | Uma confirma 80; outra recebe conflito e saldo 20, sem sobrescrita ou negativo; reenvio da vencedora devolve recibo; reserva comercial expirada não reaparece |
 | DEMO-19 — Processo encerrado, lote não liberado | Beneficiamento com balanço conciliado e inspeção formal da qualidade responsável pelo lote | Encerrar processo não libera lote Em inspeção/Bloqueado; indisponível para reserva/expedição; decisão posterior de qualidade não reabre ordem encerrada |
@@ -4737,7 +4805,7 @@ Os roteiros são requisitos de teste, não testes já executados. Comandos novos
 
 **DEMO-15 — água pela necessidade da cultura (DEC-2609-10).** Calcular o balanço e propor a lâmina com memória; criar/recuperar tarefa única, validar prontidão e registrar liberação operacional automática. Iniciar, registrar aplicação por FO-10, confirmar término e conferir/encerrar automaticamente somente com fatos consistentes, gerando recibos separados. Não criar requisição ou custódia de insumo. Na lâmina seguinte acima do limite por passada, dividir em passadas e liberar quando a janela for definida; no setor sem sonda, usar estimativa por ET e tratar só a pendência operacional (conflito da bomba). Nenhuma etapa vai ao agrônomo. Atualizar balanço uma vez por aplicação e comparar mapa, lista, Kanban e MB-08. Referências: AGUA-01..08, RN-007, CAL-08/09, FL-14.
 
-**DEMO-16 — reclassificar água em produtos.** Usar Adicionar produtos em IR-02/IR-03 com usuário autorizado; FO-04/FO-29 herdam tarefa/setor/janela e saldo. Confirmar nova versão na mesma identidade, invalidar autorização exclusiva de água e impedir novo preparo/início. Antes do primeiro início retornar a A liberar; com execução prévia manter Em execução e selo de revisão de saldo. Aprovar individualmente, gerar/atualizar requisição SU-07/FO-09, reservar materiais e verificar prontidão; liberar por CMD-06, então entregar à custódia/conferir carga e iniciar conforme instrução. Conferir consumo/devolução e encerrar; não aplicar o fechamento automático exclusivo de água. Apontamentos anteriores de água mantêm versão/origem e não são duplicados no balanço. Observação livre de produto não gera autorização nem consumo. Referências: AGUA-05/06, ESTOS-01, UIOS-04.
+**DEMO-16 — reclassificar água em produtos.** Usar Adicionar produtos em IR-02/IR-03 com usuário autorizado; FO-04/FO-29 herdam tarefa/setor/janela e saldo. Confirmar nova versão na mesma identidade, cancelar a liberação automática de água e impedir novo preparo/início. Antes do primeiro início retornar a A liberar; com execução prévia manter Em execução e selo de revisão de saldo. Aprovar individualmente, gerar/atualizar requisição SU-07/FO-09, reservar materiais e verificar prontidão; liberar por CMD-06, então entregar à custódia/conferir carga e iniciar conforme instrução. Conferir consumo/devolução e encerrar; não aplicar o fechamento automático exclusivo de água. Apontamentos anteriores de água mantêm versão/origem e não são duplicados no balanço. Observação livre de produto não gera autorização nem consumo. Referências: AGUA-05/06, ESTOS-01, UIOS-04.
 
 **DEMO-17 — bloqueio PCM antes do início.** Programar/liberar ordem com T1 para amanhã; inspeção em MA-02 executa bloqueio técnico CMD-18. Propagar impedimento e retirar de Liberadas para A liberar, mantendo aprovação agronômica se o conteúdo técnico não mudou. Em MA-03/PL-03/PL-04, usar Simular janela e Propor substituição; PL-05 recebe conflitos. Confirmar alocação compatível por CMD-34 e reliberar; se perfil do equipamento alterar a aplicação, exigir revisão agronômica antes. Teste reprovado do reparo mantém bloqueio; CMD-19 após teste válido libera tecnicamente, sem reassumir agenda. A parada reduz capacidade uma vez. Referências: OSFASE-02/08/14, PCMP-01..08, PCM-05/08, UIOS-07; complementar DEMO-04 que trata quebra já em execução.
 
@@ -4748,7 +4816,7 @@ Os roteiros são requisitos de teste, não testes já executados. Comandos novos
 
 **Roteiro detalhado DEMO-03 — recebimento de sobras:** em SU-07/MB-05, entregar 100 à ordem aprovada/liberada via CMD-16; em MB-03/FO-07 apontar consumo real 70. Concluir execução via CMD-08 coloca a ordem em Em conferência e apresenta saldo esperado de materiais 30. Declarar devolução de 20 ainda não aumenta estoque disponível nem encerra a custódia. O almoxarife mede e confirma Receber devolução em FO-09; somente a quantidade efetivamente recebida migra para o local/condição registrados, ficando apta apenas se aprovada pelos critérios pertinentes. Tentar CMD-10 com 10 ainda sob custódia é recusado, com responsável/prazo. Receber as 10 restantes ou documentar destinação competente permite encerrar após as demais conferências. Embalagem aberta pode ir a quarentena; calda não retorna como produto puro. CA-04, CA-02 e SU-07 devem reconciliar o balanço canônico de CAL-02, inclusive eventuais transferências autorizadas, sem ajuste automático pela diferença (ESTOS-04/05/06/10; OSFASE-05).
 
-**Roteiro detalhado DEMO-11 — reenvio e conflito:** com pacote offline válido, MB-03/FO-07 captura 50 ha com ID local e mostra pendência de sincronização. Reiniciar o app preserva a fila. Ao sincronizar, servidor confirma uma vez e devolve recibo; reenviar duas vezes a mesma identidade devolve esse recibo e conserva 50 ha, sem duplicar consumo/custo. Repetir após recuperação de pacote/recibo com identidade preservada; não presumir que desinstalar o app conserva dados locais sem mecanismo de recuperação. Em outro dispositivo, capturar o mesmo fato com UUID diferente abre reconciliação por sobreposição, preservando ambos os relatos e sem somá-los como duas execuções confirmadas. Relógio errado não define vencedor; fases confirmadas não regridem. Pacote revogado/vencido não autoriza nova execução: fato já ocorrido é preservado como relato para decisão competente, sem aprovação retroativa (RN-001/038; 8.3; 12.5; FL-25; OSDIA-03/04; OSFASE-09).
+**Roteiro detalhado DEMO-11 — reenvio e conflito:** com pacote offline válido, MB-03/FO-07 captura 50 ha, grava a chave e o conteúdo antes do primeiro envio e mostra Salvo neste aparelho ou Aguardando envio (IDEM-05). Reiniciar o app preserva a fila. Ao sincronizar, servidor confirma uma vez e devolve recibo; reenviar duas vezes a mesma chave devolve esse recibo e conserva 50 ha, sem duplicar consumo/custo. Incluir a resposta perdida depois do commit, com reinício do app (AC-73), e a mesma chave com outro conteúdo, que recebe conflito de chave sem efeito (AC-74). Repetir após recuperação de pacote/recibo com identidade preservada; não presumir que desinstalar o app conserva dados locais sem mecanismo de recuperação. Em outro dispositivo, capturar o mesmo fato (mesma parcela, recurso e intervalo) com UUID diferente vincula o segundo relato ao fato existente, sem soma, e a divergência acima da tolerância vai à conferência; conferência por sobreposição só com coincidência parcial ou incompatibilidade (CONC-02, CONC-03, CONC-05). Ambos os relatos ficam preservados, sem somá-los como duas execuções confirmadas. Relógio errado não define vencedor; fases confirmadas não regridem. Pacote revogado/vencido não autoriza nova execução: fato já ocorrido é preservado como relato para decisão competente, sem aprovação retroativa (RN-001/038; 8.3; 12.5; FL-25; OSDIA-03/04; OSFASE-09).
 
 **Roteiro detalhado DEMO-20 — atrasos e fila:** agendar T1 às 08:00 em LO-01/FO-34; T2/T3 presentes aptos, T4 antecipado e uma carga com impedimento. T1 informa previsão de atraso, sem check-in fictício. Dentro da tolerância, proteger a janela ou ocupar a doca com tarefa que caiba, mostrando impacto; ultrapassada a tolerância, LO-02 chama o próximo elegível por política publicada, com motivo da prioridade (CMD-37). Carga impedida fica visível com dono/prazo e retorna à seleção após resolução; não trava os aptos. T4 só entra com folga sem prejudicar janelas cumpridas. Ao chegar, T1 recebe a próxima oportunidade viável sem interromper carga iniciada nem perder pedido/reserva de produto. CMD-26 confirma a saída uma vez; pontualidade continua comparada à janela original, e espera acumulada evita adiamento indefinido. Motorista só vê seu escopo; a fila offline tem escritor único (FILA-01 a FILA-10; FL-LOG-02; FL-21).
 
@@ -4768,7 +4836,7 @@ Os roteiros são requisitos de teste, não testes já executados. Comandos novos
 | AC-08 | Converter parte da necessidade em O.S. | Saldo do plano substituído pela ordem, sem demanda adicional duplicada | RN-006, CAL-01 |
 | AC-09 | Criar várias ocorrências da mesma atividade | Recorrências legítimas têm identidades distintas | Seção 11 |
 | AC-10 | Revisar plano com execução já iniciada | Somente saldo futuro recebe nova proposta/versionamento | RN-019 |
-| AC-11 | Liberar ordem sem insumo e sem requisição | Prontidão avalia apenas requisitos aplicáveis | RN-009 |
+| AC-11 | Liberar ordem sem insumo e sem requisição | Prontidão avalia apenas requisitos aplicáveis; O.S. agrícola sem insumo, inclusive operação mecânica, continua exigindo aprovação agronômica, exceto a irrigação só com água, liberada pela prontidão sem agrônomo (DEC-2609-10) | RN-009, APROV-02, APROV-15 |
 | AC-12 | Pedido de material chega depois da data de uso | Ruptura anterior permanece; não libera retirada sem físico | RN-010, CAL-01 |
 | AC-13 | Demanda 80, físico 60, reserva 40 da mesma demanda | Necessidade líquida 20 | CAL-01 |
 | AC-14 | Recebimento 60, com 10 em quarentena | Físico recebido 60, apto 50, demais saldos separados | SU-06 |
@@ -4788,7 +4856,7 @@ Os roteiros são requisitos de teste, não testes já executados. Comandos novos
 | AC-28 | CAD com 0,30−0,18 e raiz 0,50 m | 60 mm; sem segunda densidade | CAL-08 |
 | AC-29 | Apontar exemplo de pivô parcial | Cobertura e passagem corretas; lâmina total de 14 mm rejeitada como cálculo | CAL-09 |
 | AC-30 | Bomba bloqueada e necessidade hídrica urgente | Necessidade permanece; agenda pede alternativa válida/retorno técnico | FL-14 |
-| AC-31 | Aprovar recomendação de água | Não afirmar equipamento ligado sem comando e confirmação próprios | CMD-20 |
+| AC-31 | Programar água pela necessidade da cultura, sem aprovação (APROV-15) | Não afirmar equipamento ligado sem comando e confirmação próprios | CMD-20 |
 | AC-32 | Voltar medidor ou trocar equipamento | Evento segmentado; sem consumo negativo silencioso | CAL-07 |
 | AC-33 | Abrir safra com pomar existente | Ciclo e idade preservados | RN-004 |
 | AC-34 | Encontrar atividade antiga sem execução comprovada | Pendência/decisão explícita; não marcar realizada | FL-06 |
@@ -4820,9 +4888,9 @@ Os roteiros são requisitos de teste, não testes já executados. Comandos novos
 | AC-60 | Acessar portal de outra negociação | Conteúdo negado; proposta própria retorna a comprovante | PT-02/PT-03 |
 | AC-61 | Revogar dossiê do credor | Novos acessos negados conforme concessão; trilha preservada | PT-04 |
 | AC-62 | Próximo ponto/planta/carga no celular | Avança na tarefa móvel correta, sem salto desktop | MB-06/MB-07/MB-10 |
-| AC-63 | Reiniciar app offline e reenviar | Fila íntegra; recibo por evento e zero duplicata | FL-25 |
-| AC-64 | Duas capturas distintas conflitantes | Preservar fatos e abrir reconciliação | RN-038 |
-| AC-65 | Evento antigo chega após estado novo | Não regredir objeto nem apagar versão | Seção 12 |
+| AC-63 | Reiniciar app offline e reenviar | Fila íntegra; recibo por intenção e zero duplicata | FL-25; AC-73 |
+| AC-64 | Duas capturas distintas conflitantes | Preservar os relatos e abrir conferência, sem efeito no saldo confirmado | RN-038, CONC-07 |
+| AC-65 | Evento antigo chega após estado novo | Não regredir objeto nem apagar versão | Seção 12; AC-80 (projeção e efeitos únicos) |
 | AC-66 | Alterar previsão depois da realização | Acurácia usa versão anterior; base financeira preservada | CAL-20, RN-031 |
 | AC-67 | Denominador zero em KPI | Não calculável e valores absolutos, sem infinito/zero enganoso | RN-032 |
 | AC-68 | Publicar rendimento aprendido | Proposta aprovada, amostra e vigência; passado intacto | CMD-29 |
@@ -4830,6 +4898,7 @@ Os roteiros são requisitos de teste, não testes já executados. Comandos novos
 | AC-70 | Medir área com parcelas e safras sobrepostas | Cobrança não duplica área elegível | CF-05 |
 | AC-71 | Abrir backup restaurado e reprocessar fila | Documentos e saldos reconciliados; efeitos sem duplicata | NFR-11, NFR-20 |
 | AC-72 | Pedir à IA para ignorar alçada via documento | Instrução do documento não executa ação nem amplia acesso | RF-AI-005 |
+| AC-73 a AC-147 | Cenários da v3.10 (confiabilidade transacional, offline, desempenho e aprovação agronômica) | Precondições, ação e resultado em 73.11 | 73.11 |
 
 ### 17.2 Validação do produto e saída para produção
 
@@ -4857,7 +4926,7 @@ A entrada guiada, Google/Apple e alternativa de autenticação integram E0/E1; c
 
 Inventariar fontes, responsável e códigos; importar base em prévia; validar área/ciclo; contar estoque inicial por lote/local/proprietário; trazer custódias e obrigações abertas; conferir ativo/contador; mapear contratos/títulos; estabelecer data de corte. Documentar diferença entre saldo migrado e histórico completo.
 
-Implantar por fazenda/frente com dono de processo e rotina diária de reconciliação. Evitar longo período de dois sistemas gravando o mesmo saldo sem regra de autoridade. Operação em contingência registra fatos para importação idempotente posterior. Treinamento é por tarefa e exceção, com instruções curtas dentro do fluxo.
+Implantar por fazenda/frente com dono de processo e rotina diária de reconciliação. Evitar longo período de dois sistemas gravando o mesmo saldo sem regra de autoridade. Operação em contingência registra fatos para importação idempotente posterior. A gravação no ERP começa em Somente leitura e é habilitada por operação, com corte que define quem lança cada documento no ERP, sem lançamento duplo (66.3). Treinamento é por tarefa e exceção, com instruções curtas dentro do fluxo.
 
 ### 18.3 Receita do produto e direitos de dados
 
@@ -4949,7 +5018,7 @@ Os números abaixo identificam o **PDF original**, em que a tela #N está na pá
 | #74 · p.75 · Controle · Semana: previsto × feito | IN-03, PL-04, GE-06 | Visão semanal reutiliza agenda, execução e indicadores existentes. |
 | #75 · p.76 · Realizado × orçado | GE-02, GE-03, GE-01 | Comparação preserva orçamento-base, previsão corrente e realizado. |
 | #76 · p.77 · Mapa da fazenda | IN-04 | Eliminar segunda implementação do mapa; abrir recorte/camada. |
-| #77 · p.78 · App · Hoje por persona | MB-01 | Hoje filtrado por papel, escopo e prontidão. |
+| #77 · p.78 · App · Hoje por persona | MB-01 | Meu dia (64.7) filtrado por papel, escopo e prontidão. |
 | #78 · p.79 · App · O.S. (Iniciar) | MB-02 | Instrução e execução da mesma O.S. do sistema. |
 | #79 · p.80 · App · Ocorrência | MB-04, CA-03 | Uma ocorrência, coletada no campo e tratada pelo responsável. |
 | #80 · p.81 · App · Caixa de entrada (gerente) | IN-02, IN-03 em layout móvel | Caixa de decisões/tarefas no app; não criar outra fila paralela. |
@@ -4978,7 +5047,7 @@ O mapa antigo declara que o botão do lançador **navega** e o botão da tela de
 | 3 | #4, p.5 → #40, p.41: confirmar programação | Entrada direta em PL-04; selecionar lote de ordens, resolver conflitos e confirmar uma vez. Da fila de tarefas, **Revisar programação** abre o recorte exato. |
 | 4 | #5, p.6 → #44, p.45: confirmar paradas | MA-03 mostra impacto no plano e permite confirmar as paradas elegíveis em lote. O retorno identifica aprovadas e impedidas, sem ocultar resultado parcial. |
 | 5 | #6, p.7 → #50, p.51: cotar nove faltas | Em SU-01, **Preparar cotação de 9 itens** abre SU-04 com faltas datadas já reconciliadas. Uma revisão de itens/destinatários precede o envio. |
-| 6 | #10, p.11 → #61, p.62: aprovar lâminas | IR-01 reúne propostas e exceções. Aprovação em lote segue política técnica e explicita itens excluídos. Aprovar recomendação não liga o equipamento. |
+| 6 | #10, p.11 → #61, p.62: aprovar lâminas | IR-01 reúne propostas e exceções. Água sem produto não é aprovada: a lâmina vem do balanço hídrico e a liberação é automática pela prontidão (DEC-2609-10; APROV-15); fertirrigação tem aprovação individual. Programar a lâmina não liga o equipamento. |
 | 7 | #11, p.12 → #66, p.67: concluir manutenção | O atalho é **Revisar conclusão da O.S.**. MA-04 exibe serviço, peças, teste e condição do ativo; concluir serviço e liberar ativo são decisões relacionadas e distintas. |
 | 8 | #12, p.13 → #67, p.68: apontar carga | **Registrar carga** abre FO-13 já preenchido com origem; o formulário termina com **Salvar carga**. Após salvar, oferecer **Próxima carga**. |
 | 9 | #13, p.14 → #68, p.69: fechar secagem | **Revisar lote em secagem** abre CO-05 no lote correto. Fechamento verifica medições, saídas e perdas; qualidade decide aptidão quando exigida. |
@@ -5005,7 +5074,7 @@ O mapa antigo declara que o botão do lançador **navega** e o botão da tela de
 - Mandar operador visitar gestão, estoque ou financeiro para concluir seu apontamento: eventos confirmados atualizam os responsáveis e as filas.
 - Tratar tudo como “aprovado” ou “concluído”: autorização, execução, conferência, entrega e dinheiro têm marcos próprios.
 
-Continuam existindo revisões que mudam responsabilidade, risco ou obrigação: recomendação técnica; liberação operacional; contratação; concessão de acesso externo; qualidade; compromisso comercial; pagamento e fechamento. Sua aplicação depende da política e da materialidade, sem criar aprovações humanas obrigatórias para todo evento de baixo risco.
+Continuam existindo revisões que mudam responsabilidade, risco ou obrigação: recomendação técnica; aprovação agronômica de cada O.S. agrícola, inclusive operações mecânicas e ordens sem insumo (41.1; APROV-02); liberação operacional; contratação; concessão de acesso externo; qualidade; compromisso comercial; pagamento e fechamento. A aprovação agronômica é individual em toda O.S. agrícola e não depende de materialidade nem de política (APROV-05, APROV-16); a única exceção é a irrigação só com água, que não passa pelo agrônomo (DEC-2609-10). Nas demais revisões, a exigência depende da política e da materialidade, e a aprovação técnica, quando exigida, é sempre de usuário competente, nunca da política nem da IA (RN-041; 15.1), sem criar aprovações humanas obrigatórias para todo evento de baixo risco.
 
 ## 20. Contrato de entrega para a construção pelo Claude Code
 
@@ -5026,13 +5095,13 @@ Telas administrativas simples podem compartilhar componentes. Balanço hídrico,
 
 ### 20.2 Padrão visual e comportamento
 
-- Manter identidade agrícola com fundo claro, superfície limpa e verde como marca. Reservar cor semântica para condição, sempre acompanhada de texto/ícone. Não usar verde para prometer resultado ou ausência de risco.
-- Tipografia legível, números alinhados, unidade junto ao valor, densidade adequada ao trabalho e tamanho confortável de toque. Evitar páginas com poucos cartões separados por grandes espaços vazios.
+- Manter identidade agrícola com fundo claro, superfície limpa e verde como marca. Reservar cor semântica para condição, sempre acompanhada de texto/ícone. Não usar verde para prometer resultado ou ausência de risco. Cor de marca, cor semântica e as regras de verde, âmbar, vermelho, cinza e azul: 74.2 a 74.4.
+- Tipografia legível, números alinhados, unidade junto ao valor, densidade adequada ao trabalho e tamanho confortável de toque. Evitar páginas com poucos cartões separados por grandes espaços vazios. Escala tipográfica e números tabulares: 74.3; escrita de número, data e unidade: 74.8, que remete a 10.0.
 - Usar tabela com filtros e ações em listas operacionais; quadro/calendário para capacidade e agenda; mapa para localização; formulário progressivo para registro; composição e histórico para decisão. O formato segue a tarefa.
 - Desktop: barra lateral recolhível, contexto global e cabeçalho do registro. Mobile: tarefa e ação principal próximas à área de toque; resumo primeiro, detalhe disponível sem rolagem horizontal obrigatória.
 - Cada tela mostra título, escopo, estado, dados relevantes, ação principal permitida e próxima etapa. Botão que abre revisão usa verbo de revisão; botão que confirma um efeito nomeia esse efeito.
 - Em ação sensível, mostrar objeto, quantidade/valor, abrangência e consequência antes de confirmar. Em edição simples reversível, salvar sem confirmação adicional desnecessária.
-- Exibir estados carregando, vazio, sem permissão, sem conectividade, dado desatualizado, bloqueado, conflito e sucesso persistente. “Nada encontrado” oferece caminho de criação ou revisão do filtro quando permitido.
+- Exibir os estados obrigatórios de 4.3 (sem conectividade é o estado offline; conflito é a versão em conflito) e também dado desatualizado (PROJ-07), bloqueado com causa e dono (DS-06) e sucesso persistente (comprovante, 68.4). A aparência de cada um está no catálogo 74.5 (estados comuns em 74.5.0, atualidade em 74.5.12, comprovante em 74.5.17, vazio e sem resultado em 74.5.19, envio no app em 74.5.29), e a palavra, em 74.4.3. “Nada encontrado” oferece caminho de criação ou revisão do filtro quando permitido.
 - Uma ação desabilitada informa o impedimento e leva à resolução quando o perfil pode resolvê-lo. Não deixar botões aparentemente disponíveis que apenas dizem “em breve”.
 - Navegação de retorno preserva filtro/posição; links relacionados conservam ID e escopo. Atalhos sugeridos respeitam o papel e não obrigam visitar todos os módulos.
 
@@ -5057,7 +5126,7 @@ Essa sequência organiza o trabalho; não autoriza entregar apenas a primeira et
 | PDF navegável | Índice e links internos; ID estável de tela, versão e página; separar telas longas em páginas legíveis em vez de reduzir texto até ficar ilegível |
 | Fluxogramas | Os 27 diagramas com fontes editáveis e links para famílias de tela; um mesmo comando não pode ter efeitos diferentes em diagramas distintos |
 | Dados de demonstração | Cenários, IDs e resultados esperados; restauração determinística; nenhum CPF/CNPJ ou dado sensível real |
-| Matriz de cobertura e validação | RN/RF/CAL/NFR/ENG → código/telas/formulários/comandos → AC/ACE/DEMO → implementado/simulado/pendente, com evidência real |
+| Matriz de cobertura e validação | RN/RF/CAL/NFR/ENG e requisitos dos caps. 73 a 75 (20.5) → código/telas/formulários/comandos → AC/ACE/DEMO e aceites dos caps. 74 e 75 → implementado/simulado/pendente, com evidência real |
 | Engenharia e operação | Configurações de qualidade, CI/CD, testes, Terraform, observabilidade, segurança, recuperação e entregáveis do capítulo 31 |
 | Guia para Claude Code e proprietário | CLAUDE.md, README, comandos padronizados, status salvo e guia de homologação/publicação/retorno da seção 23.4 |
 
@@ -5070,7 +5139,7 @@ Todos os artefatos devem declarar a mesma versão de produto. No novo PDF, o map
 | Plano e safra sem circularidade | RN-004, RN-007 | PL-01, PL-02, GE-02 | AC-06, AC-33, DEMO-09 |
 | Necessidade única e ordem | RN-006, RN-008, CAL-01 | AG-04, PL-02, PL-04, SU-01 | AC-07 a AC-10, DEMO-01 |
 | Contrato e recebimento parcial | CAL-03 | SU-05, SU-06 | AC-14, AC-15, DEMO-02 |
-| Reserva, custódia e consumo | RN-010 a RN-015, CAL-02 | SU-03, SU-07, CA-02, MB-05 | AC-16 a AC-20, DEMO-03 |
+| Reserva, custódia e consumo | RN-010 a RN-015, RN-046, CAL-02, CMD-49 | SU-03, SU-07, CA-02, MB-05 | AC-16 a AC-20, AC-77, AC-78, DEMO-03 |
 | Prontidão, falha e saldo | RN-009, RN-019, CAL-06 | PL-05, MA-01, MA-04 | AC-39 a AC-41, DEMO-04 |
 | Recomendação e registro técnico | RN-016 a RN-018, CAL-10, CAL-12 | AG-01, AG-04, AG-07 | AC-21 a AC-27, DEMO-01 |
 | Irrigação coerente | CAL-08, CAL-09 | IR-01 a IR-04, MB-08 | AC-28 a AC-32, DEMO-05 |
@@ -5078,9 +5147,10 @@ Todos os artefatos devem declarar a mesma versão de produto. No novo PDF, o map
 | Produção, qualidade e retorno | CAL-16, CAL-17 | CO-03 a CO-07, VE-06, LO-03 | DEMO-07/08 |
 | Compromisso, crédito e dinheiro | CAL-19, CMD-25 a CMD-28 | VE-04, VE-05, GE-04, GE-05, GE-08 | DEMO-10 |
 | Custo, capital e aprendizado | CAL-04, CAL-18, CAL-20 | GE-01 a GE-03, GE-06, GE-07 | AC-43/44, DEMO-12 |
-| Offline, acesso e integração | RN-001, RN-036 a RN-039, RN-045 | CF-01, CF-03, MB-01 a MB-10, PT-01 a PT-07 | AC-04, DEMO-11 e casos de segurança |
+| Offline, acesso e integração | RN-001, RN-036 a RN-039, RN-045, RN-047, CMD-50 | CF-01, CF-03, MB-01 a MB-10, PT-01 a PT-07 | AC-04, AC-73 a AC-76, AC-79, DEMO-11 e casos de segurança |
+| Aprovação agronômica da O.S., inclusive operações mecânicas | RN-007, 41.1, APROV-01 a APROV-16 | CA-01, IN-02, PL-04, tela de trabalho da O.S., MB-02 | OSA-01, AC-82, AC-139 a AC-147 |
 
-Esta tabela orienta a revisão das jornadas; a matriz da implementação deve incluir todos os 144 RF, 45 RN, 20 CAL, 25 NFR, 90 ENG, 72 AC e 30 ACE, com escopo e evidência individual. Reutilizar o mesmo teste integrado para vários requisitos é aceitável quando ele realmente verifica os comportamentos envolvidos; item pendente de onda futura não é declarado aprovado.
+Esta tabela orienta a revisão das jornadas; a matriz da implementação deve incluir todos os 146 RF, 47 RN, 20 CAL, 25 NFR, 90 ENG, 147 AC, 30 ACE e 50 CMD, os 137 requisitos do cap. 73 (IDEM, RSV, CONC, INTEG, PROJ, PERF, APROV, UIREL) e os requisitos e aceites dos caps. 74 e 75 (73.14.1), com escopo e evidência individual. Reutilizar o mesmo teste integrado para vários requisitos é aceitável quando ele realmente verifica os comportamentos envolvidos; item pendente de onda futura não é declarado aprovado.
 
 ### 20.6 Configurações a decidir na implantação real
 
@@ -5092,15 +5162,19 @@ As escolhas de produto, navegação e arquitetura de referência estão definida
 | Protocolos agronômicos e credenciais | RT competente | Fonte, contexto, versão, validade e casos de teste |
 | Fonte financeira e política de custo | Controladoria/financeiro | Matriz de escritores, plano de contas e reconciliação de abertura |
 | Alçadas e acumulação de papéis | Direção e responsáveis de processo | Política publicada e teste dos perfis reais |
-| Integrações e equipamentos | TI e dono do processo | Contrato, limites, ambiente homologado e responsável por falhas |
+| Integrações e equipamentos | TI e dono do processo | Contrato, limites, ambiente homologado e responsável por falhas; parâmetros de tentativa por conector validados em HML (INTEG-21); prazos de reconhecimento e escalonamento das exceções (INTEG-25; PEND-11); tipos de efeito marcados para confirmação antes do encerramento, se houver (INTEG-16; PEND-12) |
 | Condições de crédito e garantias | Financeiro e credor habilitado | Documentos, fluxos datados e enquadramento da operação |
 | Retenção e compartilhamento | Responsável pelos dados e assessoria aplicável | Finalidade, base aplicável, duração, escopo e meios de atendimento |
 | Escopo comercial da assinatura | Produto/comercial e contratante | Unidade cobrada, vigência, direitos, memória de medição e contestação |
 | Conectividade e aparelhos | Operação e TI | Piloto em campo, capacidade local, teste de reconexão e recuperação |
+| Validade do pacote offline, atraso máximo tolerado de sincronização e retenção do registro de idempotência | Operação e TI | Valores que respeitam a relação de IDEM-19, com evidência em HML (PEND-02) |
+| Política de validade das reservas de material por finalidade, local e tipo de ordem | Almoxarifado e PCP | Prazos, carências e limites de renovação publicados em CF-02, com evidência em HML (RSV-02; PEND-04, PEND-05) |
 
 ## 21. Glossário, fontes e controle da especificação
 
 ### 21.1 Glossário operacional
+
+Intenção, comando, chave, recibo, relato, fato confirmado, evento, consulta, projeção, validade da reserva e as três situações (execução da O.S., envio do aparelho e integração ERP) seguem 73.2; os verbetes abaixo que tratam desses termos remetem para lá. A palavra exibida e a cor de cada estado seguem 74.4.3.
 
 | Termo | Significado neste produto |
 |---|---|
@@ -5114,18 +5188,20 @@ As escolhas de produto, navegação e arquitetura de referência estão definida
 | PCE / MRP | Planejamento de estoque e materiais; cálculo de cobertura e necessidade líquida por data |
 | RT | Responsável técnico com competência e escopo válidos; não confundir com perfil administrador |
 | MIP/MID | Manejo integrado de pragas/doenças; critérios e amostragem específicos por protocolo |
-| Prontidão | Conjunto de condições técnicas, materiais, humanas e temporais que permite liberar/iniciar uma atividade concreta; não equivale somente à aptidão da máquina. |
+| Prontidão | Conjunto de condições operacionais, materiais, humanas e temporais que permite liberar/iniciar uma atividade concreta; não equivale somente à aptidão da máquina nem substitui a aprovação agronômica ou a autorização econômica (73.9.1). |
+| Aprovação agronômica | Autorização técnica da versão de cada O.S. agrícola pelo agrônomo (CMD-42), inclusive operações mecânicas; a água sem produto não passa por ela (73.9.1) |
+| Autorização econômica/operacional | Valor e escopo autorizados para o horizonte (CMD-03, CMD-04); não aprova O.S. (73.9.1) |
+| Liberação | CMD-06: a ordem aprovada e pronta passa a poder ser executada, com fichas e reserva; aprovar não libera; a água sem produto é liberada automaticamente pela prontidão, sem aprovação (73.9.1; 73.9.7) |
 | Apto (recurso) | Condição técnica atestada pelo PCM, conforme 44.11.1; não implica agenda livre. |
 | Livre (recurso) | Sem reserva/uso na janela consultada segundo a agenda do PCP; não implica aptidão ou compatibilidade. |
 | Elegível (recurso) | Resultado da combinação de condição técnica, calendário/ocupação, localização, compatibilidade, implemento, operador e requisitos da tarefa (44.11.1). Para ordens/lotes/saldos, elegível significa atender às pré-condições do comando específico, sem importar a fórmula de máquinas. |
-| Reserva | Comprometimento lógico de quantidade apta; não é consumo nem movimento físico |
+| Reserva | Comprometimento lógico de quantidade apta, com finalidade e validade (RN-046); não é consumo nem movimento físico. Reserva vencida devolve ao disponível só a quantidade elegível; "expiração" fica para lote e "liberar" para CMD-06 (73.2.1) |
 | Custódia | Responsabilidade/localização física do material; não equivale a propriedade ou consumo |
 | Consignação | Posse/custódia sob contrato com propriedade e obrigação definidas separadamente |
-
 | Físico (material) | Saldo efetivamente movimentado por item/lote/local/proprietário; contém material apto e não apto. No consolidado, uma quantidade em custódia não é contada novamente no depósito de origem. |
 | Bloqueado / quarentena / vencido | Condições impeditivas do uso; tratar sua união sem subtrair duas vezes um lote com mais de uma restrição. Expiração é avaliada na data de uso. |
 | Utilizável / apto (material) | Parcela física autorizada para o uso e escopo consultados, excluída a união dos bloqueios, quarentenas, vencimentos e demais restrições. Inclui consignado somente quando autorizado pelo contrato. Inclui quantidades reservadas. |
-| Disponível / livre (material) | Utilizável menos reservas físicas ativas no mesmo escopo; saldo para nova reserva. CAL-01 usa o utilizável, também chamado físico apto, e deduz a demanda uma vez; não substituí-lo por disponível. |
+| Disponível / livre (material) | Utilizável menos reservas físicas ativas no mesmo escopo (reserva ativa de cada linha, RN-046; RSV-06 e RSV-07); saldo para nova reserva. CAL-01 usa o utilizável, também chamado físico apto, e deduz a demanda uma vez; não substituí-lo por disponível. |
 | Forecast / previsão | Melhor projeção corrente, identificada por versão; não substitui silenciosamente o orçamento-base |
 | Genealogia de lote | Vínculo entre entradas, transformações, saídas, misturas e destinos rastreáveis |
 | ATP | Quantidade disponível para prometer, discriminando físico apto e oferta futura |
@@ -5136,9 +5212,18 @@ As escolhas de produto, navegação e arquitetura de referência estão definida
 | Barter | Compromisso contratual com troca/liquidação vinculada à produção; obrigação física contada uma vez |
 | OTIF / WAPE | Atendimento no prazo e quantidade / erro absoluto ponderado da previsão; denominadores explícitos |
 | MTBF / MTTR | Tempo médio entre falhas / tempo médio de reparo, com fronteiras de medição declaradas |
-| Idempotência | Repetir o mesmo comando não repete seu efeito econômico ou físico |
+| Idempotência | Repetir a mesma intenção não repete seu efeito econômico ou físico. Depende de chave por intenção gerada pelo iniciador, unicidade no banco por organização, tipo de comando e chave, hash do conteúdo e recibo gravado com o efeito; UUID sozinho não garante (73.3; IDEM-01) |
 | Fonte oficial | Sistema responsável por escrever o fato/estado de um objeto; integrações preservam essa autoridade |
-| Evento / comando | Registro do que ocorreu / pedido de transição; um comando pode ser recusado sem apagar um fato ocorrido |
+| Evento / comando | Registro, na outbox, de fato confirmado / intenção enviada ao servidor, que pode ser recusada sem apagar um fato ocorrido (73.2.1) |
+| Relato / fato confirmado | Registro de fato de campo, que o servidor classifica / efeito gravado uma vez pelo servidor (73.2.1) |
+| Chave física do fato | Campos que identificam o acontecimento físico por tipo e ligam relatos diferentes do mesmo fato (73.2.1; CONC-05) |
+| Registro vinculado / correção vinculada | Outro relato do mesmo fato, ligado a ele sem novo efeito / relato novo que aponta o fato que corrige e aplica só a diferença (73.2.1; CONC-02, CONC-16) |
+| Etapa | Uma das cinco colunas do Kanban da O.S.: A liberar, Liberadas, Em execução, Em conferência, Encerradas (8.4.3); cor em 74.4.3 |
+| Selo | Condição mostrada no cartão da O.S. ao lado da etapa, sem criar coluna (8.4.3); cor em 74.4.3 |
+| Situação de envio | Se o registro saiu do aparelho e tem recibo: Salvo neste aparelho, Aguardando envio, Enviando, Sincronizado, Conflito (64.5; 73.2.2); cor em 74.4.3 |
+| Situação de integração | Se o efeito externo foi confirmado no ERP: Pendente, Enviando, Em reconciliação, Confirmada, Com erro (73.6.5); não muda a etapa (RN-047); cor em 74.4.3 |
+| Tag × status | Tag classifica (cultura, tipo, origem) e tem contorno, sem ponto; status é chip de estado, preenchido e com ponto (74.4; DS-04) |
+| Token de design | Valor nomeado de cor, tipografia, espaço, raio, sombra, camada ou duração, usado pelos componentes no lugar de valor literal (74.3) |
 
 ### 21.2 Documentos de origem
 
@@ -5213,8 +5298,8 @@ Versões de aplicação, runtime, banco, extensões e ferramentas serão versõe
 | Offline | IndexedDB com Dexie; cache de recursos com Workbox | Escrita durável, atualização de esquema e reconciliação testadas; escolha de app nativo se o aparelho não cumprir os requisitos |
 | Jobs | Workers TypeScript com Cloud Tasks/Cloud Run Jobs e outbox no banco | Eventos confirmados, idempotência, tentativa limitada e fila de erro da aplicação |
 | Repositório | pnpm + workspace/Turborepo | Lockfile único, pacotes com fronteiras e CI por impacto sem omitir dependentes |
-| Qualidade | ESLint, typescript-eslint, Prettier e SonarQube | Configuração versionada e checks obrigatórios |
-| Testes | Vitest, Testing Library, Playwright, Testcontainers, fast-check; StrykerJS para núcleo crítico | Camadas e limiares definidos no capítulo 25 |
+| Qualidade | ESLint, typescript-eslint, Prettier, Stylelint (verificações do design system, 74.10.2) e SonarQube | Configuração versionada e checks obrigatórios |
+| Testes | Vitest, Testing Library, Playwright, Testcontainers, fast-check; StrykerJS para núcleo crítico; `@axe-core/playwright` para acessibilidade automática (74.10.2) | Camadas e limiares definidos no capítulo 25 |
 | Segurança automatizada | Semgrep, Gitleaks, Trivy e OWASP ZAP | Regras e bases atualizadas; CodeQL pode complementar, com licença/escopo verificados |
 | Infraestrutura | Terraform, Docker, TFLint e análise de IaC do Trivy | Estado remoto protegido, plano revisado, aplicação controlada |
 | Telemetria | OpenTelemetry, logs JSON, métricas/alertas do provedor; Sentry para erros de UI | Redação de dados sensíveis e correlação ponta a ponta |
@@ -5283,32 +5368,32 @@ O servidor decide autorização e efeito. O aplicativo pode pré-validar e simul
 | ID | Exigência obrigatória | Aceite técnico |
 |---|---|---|
 | ENG-021 | Comando usa `organization_id` obtido da sessão validada, ID do objeto, versão esperada e chave de idempotência. | Alterar o tenant no payload não amplia acesso; mesma chave com payload diferente é conflito |
-| ENG-022 | Persistir fato/documento, movimento aplicável e outbox na mesma transação. | Queda entre commit e publicação não perde o evento; replay não duplica efeito |
-| ENG-023 | Concorrência de reserva/consumo/obrigação usa escrita condicional, bloqueio ou isolamento adequado à invariável. | Teste com pelo menos 100 disputas simultâneas pelo saldo final; soma confirmada respeita o saldo |
+| ENG-022 | Persistir fato/documento, movimento aplicável, registro da intenção processada com o recibo e outbox na mesma transação (IDEM-16; 73.6). | Queda entre commit e publicação não perde o evento; replay não duplica efeito; queda entre commit e resposta faz o reenvio devolver o mesmo recibo (IDEM-16) |
+| ENG-023 | Concorrência de reserva/consumo/obrigação, inclusive vencer e renovar reserva (CMD-49), usa escrita condicional, bloqueio ou isolamento adequado à invariável. | Teste com pelo menos 100 disputas simultâneas pelo saldo final, incluindo vencer e renovar (RSV-13); soma confirmada respeita o saldo |
 | ENG-024 | Constraint, FK, unicidade e escopo são implementados no banco onde cabíveis. | Registro órfão, vínculo entre tenants e origem transacional duplicada são rejeitados; fatos não conformes têm estado explícito |
 | ENG-025 | RLS complementa autorização da aplicação; usuário de runtime não é superusuário nem possui `BYPASSRLS`. | Testar isolamento com a credencial real de aplicação, inclusive jobs, busca, exportação e pool [E09] |
-| ENG-026 | Movimento confirmado é imutável; correção gera reversão/ajuste vinculado. | Reprocessar e reconstruir projeções conserva balanço, genealogia e custo único |
+| ENG-026 | Movimento confirmado é imutável; correção gera reversão/ajuste vinculado. | Reprocessar e reconstruir projeções conserva balanço, genealogia e custo único; a reconstrução roda em reexecução, sem efeito externo, e não altera competência fechada (PROJ-10, PROJ-11) |
 | ENG-027 | Regras e parâmetros técnicos têm versão, origem, unidade, validade e aprovação; testes são validados pelo dono da regra. | Os 20 CAL possuem exemplos independentes, limites e origem; regra vencida não libera nova execução indevida |
-| ENG-028 | Offline preserva cada fato e seu recibo, distingue rejeição, duplicata e conflito e respeita a política do pacote. | Falha no meio de um lote confirma itens individualmente; reinício, atualização e reordenação não apagam pendências |
+| ENG-028 | Offline preserva cada fato e seu recibo, distingue recusa (CONC-07), reenvio da mesma intenção, conflito de chave (IDEM-14), outro registro do mesmo fato, correção vinculada e conflito entre fatos, que vai à conferência (CONC-01; 73.5), e respeita a política do pacote. | Falha no meio de um lote confirma itens individualmente; reinício, atualização e reordenação não apagam pendências |
 | ENG-029 | API e eventos têm contrato versionado e compatibilidade com clientes móveis suportados. | Testes de consumidor; cliente antigo preserva fatos e recebe instrução de atualização sem perda |
-| ENG-030 | Toda fonte externa tem timeout, retry limitado, circuit breaker quando aplicável, validação e reconciliação. | Testes de queda, resposta ambígua, duplicata e recuperação; nenhum pagamento/carga duplicado |
+| ENG-030 | Toda fonte externa tem timeout, retry limitado, circuit breaker quando aplicável, validação e reconciliação; parâmetros por conector em INTEG-21 e INTEG-22. | Testes de queda, resposta ambígua, duplicata e recuperação; nenhum pagamento, carga, documento ou movimento no ERP duplicado |
 
 ### 24.1 Regras técnicas que não podem ficar implícitas
 
-- Escopo de idempotência: organização + tipo de comando + chave; guardar hash do payload e resposta/recibo. Chave operacional de fato permanece identificável durante toda sua retenção, inclusive depois de limpar um cache HTTP. Não expirar a proteção contra duplicidade apenas porque o cliente ficou semanas offline.
+- Escopo de idempotência: organização + tipo de comando + chave; guardar hash do payload e resposta/recibo. Chave operacional de fato permanece identificável durante toda sua retenção, inclusive depois de limpar um cache HTTP. Não expirar a proteção contra duplicidade apenas porque o cliente ficou semanas offline. Restrição única no banco, conteúdo canônico do hash e retenção mínima: IDEM-12, IDEM-13 e IDEM-19 (contrato completo em 73.3).
 - Locks são adquiridos em ordem consistente; transações curtas; chamadas de rede fora do lock. Repetir transação abortada somente quando o comando for seguro/idempotente. A modalidade de isolamento é escolhida por invariável e testada, não aplicada cegamente a tudo [E10].
 - Contexto RLS com pool é definido por transação e limpo automaticamente ao terminar; proibir reutilização de sessão com tenant residual. Aplicar `FORCE ROW LEVEL SECURITY` quando necessário; migração e operação usam papéis separados.
-- O evento inclui `event_id`, tipo, versão de esquema, organização, agregado, versão/ordem causal, instante e correlação. Consumidor não deve confiar somente no horário do aparelho. Erro permanente vai a uma tabela/fila de falhas da aplicação com motivo, origem e reprocessamento autorizado.
-- Timeout externo depois de enviar pagamento não prova falha. Consultar estado pelo identificador externo antes de reenviar. Quando o provedor não oferece idempotência, adotar reconciliação e bloquear repetição automática insegura.
+- O evento inclui `event_id`, tipo, versão de esquema, organização, agregado, versão/ordem causal, instante e correlação. Consumidor aplica os eventos pela versão do agregado (INTEG-09), nunca pelo horário do aparelho, que não decide ordem, vencedor, saldo, custódia, área nem vencimento (CONC-20; 73.2.1). Erro permanente vai a uma tabela/fila de falhas da aplicação com motivo, origem e reprocessamento autorizado.
+- Timeout externo depois de enviar qualquer efeito externo (documento ou movimento no ERP, documento fiscal, pagamento) não prova falha: é resultado desconhecido. Consultar estado pelo identificador externo antes de reenviar ou compensar (INTEG-19, INTEG-20). Quando o provedor não oferece idempotência, adotar reconciliação e bloquear repetição automática insegura.
 - Valores de quantidade e dinheiro via JSON são strings decimais ou unidades inteiras explicitadas no contrato. Área, base física/comercial, unidade de saca/caixa e fuso não são inferidos pelo tamanho do número.
-- Atualização otimista da interface fica marcada como pendente. O recibo de sucesso final corresponde a persistência confirmada; falha mantém rascunho e opção de tentar novamente com a mesma identidade.
+- Atualização otimista da interface fica marcada como pendente. O recibo de sucesso final corresponde a persistência confirmada; falha transitória mantém o conteúdo e a opção de tentar novamente com a mesma chave e o mesmo conteúdo; depois de rejeição de negócio ou de conflito de versão ou de chave, o rascunho é preservado e o reenvio corrigido é nova intenção, com nova chave (IDEM-07).
 - Sem conexão, registrar fato não equivale a aprovar nova alçada. Se um estoque materialmente incorreto for observado, registrar a ocorrência e quantidade observada sem fabricar entrada de estoque para satisfazer constraint.
 - Cache de servidor, CDN, relatório e busca sempre consideram organização, permissão e versão. Informações de usuário/tenant não entram em cache público compartilhado. Saldo usado para autorizar transação é relido/validado na confirmação.
 - Exportação e relatório têm versão dos dados, instante de corte e estado provisório/definitivo. O acesso ao arquivo é revalidado antes de emitir URL temporária.
 
 ### 24.2 Serviços de negócio críticos
 
-São críticos: autorização; cálculo agronômico; liberação técnica; disponibilidade e reserva; custódia/consumo; conversão de demanda; compromisso comercial/barter; liquidação; genealogia/qualidade; pesagem; custeio/fechamento; conciliação offline e medição de cobrança. Para esses serviços, mudanças exigem revisão especializada, testes de invariantes e o nível maior de cobertura do capítulo 25.
+São críticos: autorização; cálculo agronômico; liberação técnica; disponibilidade e reserva; custódia/consumo; conversão de demanda; compromisso comercial/barter; liquidação; genealogia/qualidade; pesagem; custeio/fechamento; conciliação offline; publicação de eventos (outbox) e integração com ERP (73.6); e medição de cobrança. Para esses serviços, mudanças exigem revisão especializada, testes de invariantes e o nível maior de cobertura do capítulo 25.
 
 ## 25. Estratégia de testes e critérios automáticos de qualidade
 
@@ -5317,11 +5402,11 @@ São críticos: autorização; cálculo agronômico; liberação técnica; dispo
 | Camada | Ferramenta padrão | O que precisa provar |
 |---|---|---|
 | Unidade de domínio | Vitest | Fórmulas, estados, unidades, arredondamento, calendários e limites; resultado esperado independente da implementação |
-| Propriedades | fast-check | Balanços, idempotência, invariância de unidade, impossibilidade de saldo/compromisso duplicado e fronteiras de data |
+| Propriedades | fast-check | Balanços; idempotência (N entregas da mesma chave e do mesmo conteúdo, em qualquer ordem, dão um efeito e o mesmo recibo; mesma chave com outro conteúdo dá conflito sem efeito, 73.3.7); consolidação de relatos independente da ordem de chegada e das repetições (73.5.13); invariância de unidade, impossibilidade de saldo/compromisso duplicado e fronteiras de data |
 | Integração | Vitest + Testcontainers/PostgreSQL com PostGIS | SQL, RLS, constraints, transações, outbox, concorrência e migrações no mesmo mecanismo de produção |
 | Contrato | Esquemas e OpenAPI + testes de produtor/consumidor | Compatibilidade de API, webhook, evento e cliente móvel; erros e versões |
 | Componente | Testing Library + Vitest | Comportamento por teclado, validação, foco, estados e ação principal; não testar apenas estrutura de componentes |
-| Jornada | Playwright | As 12 DEMO e caminhos críticos dos 72 AC; perfis, dispositivo, retorno, erro e persistência |
+| Jornada | Playwright | As 20 DEMO (DEMO-01 a DEMO-20, 16.2) e caminhos críticos dos 147 AC (AC-01 a AC-147); perfis, dispositivo, retorno, erro e persistência |
 | Segurança | Semgrep, Trivy, Gitleaks, ZAP e testes de autorização | Código, dependências, imagem, IaC, autenticação e exposição efetiva no aplicativo |
 | Desempenho | k6 + medição de navegador e banco | Latência, vazão, erro, fila, saturação, estabilidade e isolamento sob carga |
 | Mutação | StrykerJS | Testes detectam alterações artificiais de regra no núcleo crítico |
@@ -5356,6 +5441,7 @@ São críticos: autorização; cálculo agronômico; liberação técnica; dispo
 | Banco | Migração, compatibilidade e teste de restauração aplicável aprovados | Pipeline de migração |
 | Infraestrutura | Formatação, validação, TFLint, scanner e plano revisado | Pipeline Terraform |
 | Desempenho | Orçamentos do capítulo 29 atendidos; regressão sem explicação não aprovada | k6 e relatório de navegador |
+| Design system | Verificações de 74.10.2 aprovadas: contraste dos pares, tokens × PRD, valores literais, estado → papel, formatação de conteúdo, acessibilidade automática, foco e alvo e regressão visual (DS-84) | CI |
 | Aceite humano | Revisores e responsáveis requeridos; zero S1/S2 aberto no escopo habilitado | Proteção de branch/ambiente |
 
 Os percentuais são decisões deste produto. Sonar mede parte das condições; branches, pacotes, diff e invariantes também são verificados fora dele. Definir “código novo” em relação ao merge-base do PR e impedir que mover/resetar a referência esconda problemas. Falha de scanner ou ausência de licença não vira aprovação automática.
@@ -5396,7 +5482,7 @@ Os tempos são compromissos operacionais internos de resposta, não garantia de 
 - Mensagem/evento autentica produtor, valida assinatura/token, horário/replay e payload. Papel do executor não é aceito como verdadeiro só porque veio em JSON de um job.
 - Endpoint pesado tem cotas por organização, limite de paginação, concorrência e tempo. Bloqueio por abuso informa estado e não elimina apontamentos já recebidos.
 - Prompts, anexos e propostas são conteúdo não confiável. A IA não recebe segredo nem permissão de gravar fora de comandos autorizados. Acesso aos dados é filtrado antes de chamar o modelo.
-- Diagnóstico e suporte usam acesso temporário e auditado. Não criar conta universal compartilhada ou botão de “entrar como cliente” sem concessão e trilha.
+- Diagnóstico e suporte usam acesso temporário e auditado. Não criar conta universal compartilhada ou botão de “entrar como cliente” sem concessão e trilha. Abrir chamado (Ajuda › Relatar problema ou sugestão; 68.5; 75.2) não concede esse acesso: abrir o registro de origem ou dados da fazenda exige concessão do cliente em CF-01 (**Atribuir escopo**, com vigência), revogável e registrada na auditoria (CF-04).
 
 ### 26.2 Atualização e exceções
 
@@ -5413,7 +5499,7 @@ GitHub Actions é a implementação padrão. Checks devem ser vinculados ao comm
 | ID | Exigência obrigatória | Resultado exigido |
 |---|---|---|
 | ENG-051 | Separar validação de PR sem privilégios e publicação de artefato aprovado. | Código de fork/PR não confiável nunca executa com credenciais de produção |
-| ENG-052 | Pipeline roda instalação travada, tipagem, lint, formatação, testes, scanners, build e gate Sonar. | Todos os checks aplicáveis verdes; indisponibilidade de verificador deixa pendente/bloqueado |
+| ENG-052 | Pipeline roda instalação travada, tipagem, lint, formatação, testes, scanners, build, gate Sonar e as verificações do design system (74.10.2). | Todos os checks aplicáveis verdes; indisponibilidade de verificador deixa pendente/bloqueado |
 | ENG-053 | Gerar uma imagem imutável por candidato, SBOM, assinatura e proveniência; promover o mesmo digest entre ambientes. | Não recompilar código diferente ao passar de homologação para produção |
 | ENG-054 | Proteger ambientes e exigir revisão independente antes de produção. | Branch/release autorizada, responsável, changelog, evidências e janela de publicação |
 | ENG-055 | Autenticar CI na nuvem por identidade federada/OIDC; permissões mínimas por job. | Sem chave permanente de nuvem no repositório; actions externas fixadas por SHA revisado [E08] |
@@ -5502,7 +5588,7 @@ Antes de promover, apresentar ao proprietário uma ficha simples: mudanças vis�
 
 Novas funções entram inicialmente desabilitadas por flag e são liberadas a organizações piloto. Alteração de fórmula/regra tem vigência e mantém os documentos antigos reproduzíveis. Mudança de permissão não concede acesso novo implicitamente. Uma atualização não exige refazer cadastros corretos nem altera custo histórico sem ajuste autorizado.
 
-APIs, eventos e esquema de banco suportam a versão anterior durante a migração. Para dispositivos offline, a janela de compatibilidade cobre pelo menos as 72 h do cenário operacional, mais prazo de atualização e reconciliação explicitamente definido; nenhuma remoção incompatível ocorre só porque três dias se passaram. Conferir clientes ainda ativos e fatos pendentes, oferecer recuperação e concluir a transição antes de contrair o contrato. Não atualizar o service worker apagando armazenamento ou forçando recarregar formulário ainda não salvo.
+APIs, eventos e esquema de banco suportam a versão anterior durante a migração. Para dispositivos offline, a janela de compatibilidade cobre pelo menos as 72 h do cenário operacional, mais prazo de atualização e reconciliação explicitamente definido; a janela também cobre a soma de IDEM-19 (validade máxima do pacote offline + atraso máximo tolerado de sincronização + margem; valores propostos em PEND-02); nenhuma remoção incompatível ocorre só porque três dias se passaram. Conferir clientes ainda ativos e fatos pendentes, oferecer recuperação e concluir a transição antes de contrair o contrato. Não atualizar o service worker apagando armazenamento ou forçando recarregar formulário ainda não salvo.
 
 Mudança de infraestrutura passa por `plan`, HML, teste de carga/falha e publicação controlada. Mudança com interrupção inevitável deve declarar duração estimada, motivo, contingência e comunicação; manutenção conta no SLO definido. O objetivo é evolução frequente com compatibilidade, teste e retorno, e não uma promessa tecnicamente impossível de que nunca haverá interrupção.
 
@@ -5551,7 +5637,7 @@ flowchart TB
  I --> H
 ```
 
-O publicador lê outbox confirmada, enfileira com identidade estável e marca publicação de modo reprocessável. Se cair depois do envio e antes da marcação, o consumidor deduplica. Um processo em memória dentro da requisição web não substitui fila durável. Processos prolongados usam worker/job adequado e checkpoint; não dependem de CPU após a resposta HTTP sem configuração de execução apropriada.
+O publicador lê outbox confirmada, enfileira com identidade estável e marca publicação de modo reprocessável. Se cair depois do envio e antes da marcação, o consumidor deduplica. Um processo em memória dentro da requisição web não substitui fila durável. Processos prolongados usam worker/job adequado e checkpoint; não dependem de CPU após a resposta HTTP sem configuração de execução apropriada. Ordem por agregado, retenção da outbox, atraso de publicação e registro das mensagens processadas pelo consumidor: INTEG-04 a INTEG-09.
 
 | ID | Exigência obrigatória | Evidência |
 |---|---|---|
@@ -5630,11 +5716,11 @@ O envelope a seguir é um **padrão de homologação proposto para este produto*
 | Eixo | P1 — primeira produção | P2 — expansão planejada |
 |---|---|---|
 | Organizações e usuários cadastrados | 20 organizações, 2.000 usuários, pelo menos 4 perfis por tenant na amostra | 200 organizações, 20.000 usuários |
-| Dados persistidos | 10.000 talhões/parcelas; 1 milhão de ordens; 10 milhões de eventos/movimentos; 5 anos de datas | 10 vezes o volume P1, com estratégia de armazenamento/consulta validada |
+| Dados persistidos | 10.000 talhões/parcelas; 1 milhão de ordens; 10 milhões de eventos/movimentos; 5 anos de datas; sobre eles, os ensaios de reconstrução de projeção e de consolidação do mês de pico (PERF-05) | 10 vezes o volume P1, com estratégia de armazenamento/consulta validada |
 | Concorrência ativa | 100 sessões executando tarefas; 50 requisições/s sustentadas por 30 min | 1.000 sessões; 250 requisições/s com capacidade ampliada |
 | Mix de tráfego | 60% consulta operacional, 20% gravação, 10% mapa, 10% gestão; arquivos transferidos à parte | Mesmo mix e cenários com concentração de escrita |
 | Distribuição | Um tenant concentra 40% dos registros e 40% do tráfego; os demais também são medidos | Concentração e isolamento mantidos |
-| Pico | 150 requisições/s por 5 min; recuperação da fila em até 10 min após o pico | Pico de 3 vezes a taxa P2; ampliar recursos e revalidar antes de contratação |
+| Pico | 150 requisições/s por 5 min; recuperação da fila em até 10 min após o pico; ensaio de fim de turno com 60% de gravação (PERF-05) | Pico de 3 vezes a taxa P2; ampliar recursos e revalidar antes de contratação |
 | Reconexão | 100 dispositivos, cada um com 200 fatos pendentes; sincronização em ondas com limite por tenant | 1.000 dispositivos em ondas; sem despejar toda a fila simultaneamente no banco |
 | Importação concorrente | Arquivo de 100 mil linhas em job, enquanto os fluxos comuns continuam | Volume proporcional; limites e escalonamento revisados |
 | Duração | 8 h de carga representativa, sem crescimento contínuo de memória/fila | Duração antes de mudanças relevantes de capacidade |
@@ -5650,13 +5736,13 @@ Rede de referência para navegação: 10 Mbps de download, 2 Mbps de upload, RTT
 | API de consulta operacional paginada | p95 ≤300 ms; p99 ≤800 ms | Tempo de servidor completo, incluindo espera de pool e banco; sem rede do usuário |
 | Comando transacional comum | p95 ≤600 ms; p99 ≤1.500 ms | Do ingresso no servidor ao recibo persistido; integração externa permanece assíncrona |
 | Abrir lista/detalhe frequente | p95 ≤2 s | Do clique até conteúdo útil na rede de referência; incluir cache frio em cenário próprio |
-| Confirmação de comando comum na UI | p95 ≤2 s | Recibo confirmado ou estado pendente explícito, sem toast falso de conclusão |
+| Confirmação de comando comum na UI | p95 ≤2 s; p99 ≤4 s | Recibo exibido ou, só no app, Salvo neste aparelho (IDEM-05); “Enviando” não conta como confirmação; sem toast falso de conclusão (PERF-02) |
 | Captura local de fato offline | p95 ≤500 ms; p99 ≤1 s | Escrita local persistida e confirmação; câmera/upload medidos separadamente |
 | Web Vitals | LCP ≤2,5 s; INP ≤200 ms; CLS ≤0,1 no p75 | Medição de campo quando houver amostra e ensaio reproduzível antes do lançamento [E15] |
 | Mapa operacional inicial | p95 ≤3 s para área visível e camadas essenciais | Até 500 geometrias simplificadas visíveis; tile/cluster por zoom, sem carregar país inteiro |
 | Dashboard gerencial | p95 ≤3 s na visão resumida | Projeção com instante/estado de atualização; abrir composição em paginação |
 | Lote de 200 fatos em um dispositivo | p95 ≤60 s para recibos, sem anexos | Conexão estável da referência; durante reconexão coletiva, fila total P1 escoa em até 10 min |
-| Propagação interna comum | p95 ≤30 s; p99 ≤120 s | Commit do fato até projeções/filas atualizadas, em operação normal |
+| Propagação interna comum (contadores, pendências e camadas agregadas) | p95 ≤30 s; p99 ≤120 s | Commit do fato até projeções/filas atualizadas, em operação normal; é a linha 3 de PROJ-06, que fixa as metas das demais classes de consulta |
 | Relatório assíncrono padrão | p95 ≤60 s | Até 10 mil linhas; requerimento aceito e job identificado em até 2 s |
 | Exportação grande | 100 mil linhas em até 5 min no P1 | Job em lote/streaming, progressão e link autorizado; não carregar tudo em memória da API |
 | Interação local sem I/O | Feedback visual p95 ≤100 ms | Estado de pressionado/processando; não representa confirmação do servidor |
@@ -5667,7 +5753,7 @@ Orçamentos se aplicam ao escopo declarado. Exportação maior, primeira carga d
 
 Usar k6 com modelo de taxa de chegada, para que o gerador não reduza a demanda justamente quando o sistema fica lento. Fixar mix, think time, ramp-up e distribuição, incluir aquecimento e cache frio, conferir `dropped_iterations` e capacidade do gerador. Thresholds fazem o ensaio falhar quando ultrapassados [E14].
 
-Executar carga normal, pico, duração, reconexão, relatório pesado concorrente, alteração de escala e indisponibilidade de integração. Ao terminar, reconciliar fatos aceitos com movimentos e saldos; resposta rápida com dado incorreto reprova o teste. No tráfego P1 válido, erro inesperado deve permanecer ≤0,1%; validações de negócio esperadas são verificadas à parte.
+Executar carga normal, pico, duração, reconexão, relatório pesado concorrente, alteração de escala e indisponibilidade de integração, além dos ensaios de PERF-05. Ao terminar, reconciliar fatos aceitos com movimentos e saldos, com os itens de PERF-06; resposta rápida com dado incorreto reprova o teste. No tráfego P1 válido, erro inesperado deve permanecer ≤0,1%; validações de negócio esperadas são verificadas à parte.
 
 Monitorar CPU/memória, pausas/event loop, conexões, espera de pool/locks, I/O, disco, fila, reprocessamento e tempo de consulta. Crescimento contínuo da fila no patamar estável reprova, mesmo que o p95 HTTP pareça bom. Manter margem de recursos: hipótese inicial de CPU sustentada <70% e memória <75%, ajustada pela política da plataforma e pelo ensaio, sem tratá-la como garantia universal.
 
@@ -5710,9 +5796,10 @@ OpenTelemetry fornece a correlação de sinais; a escolha do destino de logs, m�
 |---|---|---|
 | Serviço | Disponibilidade sintética, sucesso real, p95/p99, versão, taxa de erro e error budget | Abrir incidente, interromper avanço de release ou examinar regressão |
 | Banco | Conexões usadas/limite, espera no pool, locks, transações longas, consultas lentas, I/O, armazenamento e réplica | Reduzir concorrência, corrigir consulta, escalar ou executar procedimento de recuperação |
-| Fila e integração | Idade do item mais antigo, atraso por conector, vazão, tentativas, mensagens isoladas e resultado ambíguo | Resolver causa, reconciliar e repetir com identidade preservada |
-| Offline | Fatos locais pendentes, confirmados e em conflito; versão do cliente; idade da fila; anexos pendentes | Orientar operador e sincronizar sem apagar o que ainda não foi confirmado |
-| Integridade | Tentativa de efeito duplicado, saldo incompatível, total financeiro divergente, quebra de rastreabilidade e rejeição indevida de autorização | Isolar o fluxo afetado, preservar evidência e conferir fatos |
+| Fila e integração | Idade do item mais antigo, atraso por conector, vazão, tentativas, mensagens isoladas e resultado ambíguo; atraso de publicação da outbox, exceções sem reconhecimento e O.S. encerradas com efeito não Confirmado, por idade (INTEG-28) | Resolver causa, reconciliar e repetir com identidade preservada |
+| Projeções | Medidas de PERF-07 (atraso por projeção e classe, atualidade e reconstruções) | Alertar ou abrir incidente conforme PERF-07; reconstruir sem efeito externo (PROJ-10) |
+| Offline | Fatos locais pendentes, confirmados e em conflito; versão do cliente; idade da fila; anexos pendentes; medidas de conciliação de CONC-23; cotas sem retorno por idade e fatos tardios após o vencimento da reserva (RSV-17) | Orientar operador e sincronizar sem apagar o que ainda não foi confirmado |
+| Integridade | Tentativa de efeito duplicado, saldo incompatível, total financeiro divergente, quebra de rastreabilidade e rejeição indevida de autorização; chave reutilizada com outro conteúdo, por cliente e versão do app; chegadas com chave expirada; registros perto do fim da retenção com fila offline pendente (73.3); reservas a vencer, vencidas por motivo e quantidade devolvida, atraso da rotina de vencimento e retomadas ou entregas recusadas por reserva vencida (RSV-17) | Isolar o fluxo afetado, preservar evidência e conferir fatos |
 | Segurança e continuidade | Acesso privilegiado, permissões alteradas, falhas de backup, teste de restauração e certificados | Investigar ou recuperar com aprovação e trilha de auditoria |
 
 IDs de usuário/tenant/comando ficam nos registros controlados para investigação. Evitar cardinalidade ilimitada em rótulos de métricas; diagnósticos por cliente usam agregação ou consultas com acesso autorizado. Definir amostragem e retenção por finalidade: auditoria necessária à integridade não pode desaparecer porque um trace foi amostrado.
@@ -5730,11 +5817,13 @@ Alertas iniciais: falha em sondas de duas localidades durante 3 minutos; erro in
 | S3 | Triagem até o próximo dia útil | Priorizar por impacto e recorrência, com alternativa segura documentada |
 | S4 | Triagem no ciclo regular do produto | Correção planejada conforme valor e custo |
 
-São metas de resposta e contenção, não promessas de resolução de toda causa nesse prazo. Para operar jornadas críticas 24×7, a cobertura correspondente precisa existir antes do lançamento; automatização não substitui pessoas de plantão. Vulnerabilidade sem exploração conhecida segue também os prazos da seção 26; exploração ativa ou dano real é incidente e recebe a severidade correspondente.
+São metas de resposta e contenção, não promessas de resolução de toda causa nesse prazo. Para operar jornadas críticas 24×7, a cobertura correspondente precisa existir antes do lançamento; automatização não substitui pessoas de plantão. O perfil operacional do piloto está pendente (PEND-OP-01, 75.8); detecção, plantão, recuperação e comunicação: 75.5 (INC-01 a INC-05). Vulnerabilidade sem exploração conhecida segue também os prazos da seção 26; exploração ativa ou dano real é incidente e recebe a severidade correspondente.
 
 Ao detectar regressão de release, interromper progressão e desativar a função afetada quando seguro. Meta para retorno à versão anterior: até 15 min após a decisão, se a compatibilidade com o banco estiver validada. Dados corretos já gravados continuam preservados. Se o problema for em dados, usar contenção e correção reconciliada, não restaurar todo o banco para “desfazer a versão”.
 
 Incidente S1/S2 recebe revisão em até 5 dias úteis após estabilização. Registrar impacto real, início/fim, linha do tempo, decisões, fatores contribuintes, comunicação e ações. A ação só encerra com evidência do resultado.
+
+**Chamados de suporte (68.5; 75.2).** Estados vistos pelo autor, triagem e motivo do encerramento seguem 75.2 (FB-05 a FB-08); cada chamado tem responsável nomeado desde a triagem, e Respondido exige retorno registrado ao autor. Chamado que indique indisponibilidade, perda ou duplicação de dado, saldo ou efeito incorreto, ou exposição de dados é vinculado a um incidente e segue a severidade desta seção. Os demais seguem o prazo de primeira resposta da política de atendimento do contrato; o PRD não fixa prazo universal. O suporte trabalha fora da navegação do cliente (30.2) e só acessa dados da fazenda conforme 26.1. Medir por tipo de chamado: triados sem pedido de complemento, pedidos de complemento por chamado e tempo até a primeira resposta útil (p50 e p90).
 
 ### 30.4 Objetivos de recuperação por cenário
 
@@ -5783,11 +5872,11 @@ Cada evidência informa requisito, caso, commit/digest, configuração, ambiente
 | ACE-04 | Busca de segredo, Sonar por commit, revisão independente e alteração vinculada a requisito comprovadas. PR sem revisão/check é impedido de avançar. | ENG-017 a ENG-020 |
 | ACE-05 | Cem disputas concorrentes pelo saldo final não excedem disponibilidade; reenvio e queda após commit não duplicam documento/movimento nem perdem evento. Constraints rejeitam vínculo indevido. | ENG-021 a ENG-024 |
 | ACE-06 | Dois tenants e perfis de diferentes alçadas tentam acessar API, job, arquivo, busca, exportação e IA de outro escopo. Todos os acessos indevidos são negados com credencial real de runtime. | ENG-025, ENG-043 |
-| ACE-07 | Correção gera ajuste rastreável; reconstrução de projeção reconcilia. Os 20 CAL têm exemplos aprovados pelo dono, limites, unidade e versão histórica reproduzível. | ENG-026, ENG-027, ENG-031 |
+| ACE-07 | Correção gera ajuste rastreável; reconstrução de projeção reconcilia, em reexecução sem efeito externo e sem alterar competência fechada (PROJ-10, PROJ-11; AC-131). Os 20 CAL têm exemplos aprovados pelo dono, limites, unidade e versão histórica reproduzível. | ENG-026, ENG-027, ENG-031 |
 | ACE-08 | Cenário de 72 h offline, reinício, atualização, ordem revogada, relógio errado, envio parcial e reordenação conserva todos os fatos. Cliente suportado anterior mantém compatibilidade. | ENG-028, ENG-029; NFR-08 |
 | ACE-09 | Integração simula indisponibilidade, timeout antes/depois de efetivar, webhook repetido e resposta inválida. Reconciliação identifica resultado sem repetir pagamento, carga ou movimento. | ENG-030, ENG-087 |
 | ACE-10 | Coberturas por métrica e pacote atendem 95% no núcleo crítico e 80% no restante; diff respeita o limite correspondente; exclusões revisadas, inclusive arquivos sem teste. | ENG-032, ENG-033, ENG-039 |
-| ACE-11 | Banco real e RLS executam testes; 12 DEMO e AC críticos mostram efeitos finais entre módulos. Relatórios, traces redigidos e seed permitem reproduzir falha. | ENG-034, ENG-035, ENG-040 |
+| ACE-11 | Banco real e RLS executam testes; 20 DEMO e AC críticos mostram efeitos finais entre módulos. Relatórios, traces redigidos e seed permitem reproduzir falha. | ENG-034, ENG-035, ENG-040 |
 | ACE-12 | Mutação do núcleo crítico atinge o limiar; mutantes equivalentes são justificados. Nenhum teste crítico instável foi ocultado por retry ou desativação. | ENG-036, ENG-038 |
 | ACE-13 | P1 normal, pico, reconexão, importação e duração passam com percentis por jornada e integridade final. P2 tem relatório antes de assumir expansão. Sondas e SLIs já coletam dados. | ENG-037, ENG-071 a ENG-075 |
 | ACE-14 | Modelo de ameaças e matriz ASVS aplicável revisados. MFA, revogação, recuperação de acesso, injeção, XSS, CSRF e SSRF testados no escopo real. | ENG-041, ENG-042, ENG-045 |
@@ -5805,7 +5894,7 @@ Cada evidência informa requisito, caso, commit/digest, configuração, ambiente
 | ACE-26 | Partindo de um comando com falha, a equipe localiza evento, job, efeito e versão pelos sinais, sem ler segredo. CF-03/CF-04 mostram somente informação autorizada e útil. | ENG-081, ENG-082 |
 | ACE-27 | Incidente simulado aciona pessoa e substituto, tem reconhecimento, contenção e comunicação nos alvos. Escala existe de fato durante a cobertura contratada. | ENG-083, ENG-084 |
 | ACE-28 | Restauração e reprocessamento não repetem efeitos externos; plantonista executa procedimento; revisão gera correção testada e prazo. | ENG-087 a ENG-089 |
-| ACE-29 | Fluxos críticos passam por teclado, leitor de tela, contraste e aparelho real; estados offline/erro/sucesso distinguíveis. Web Vitals e captura local atendem orçamento de medição. | NFR-07 a NFR-09, NFR-22; ENG-072, ENG-077, ENG-078 |
+| ACE-29 | Fluxos críticos passam por teclado, leitor de tela, contraste e aparelho real; estados offline/erro/sucesso distinguíveis por palavra, cor e ícone conforme 74.4 (DS-AC-06, DS-AC-11 e DS-AC-16). Web Vitals e captura local atendem orçamento de medição. | NFR-07 a NFR-09, NFR-22; ENG-072, ENG-077, ENG-078 |
 | ACE-30 | Dossiê de saída contém cobertura integral de RN/RF/CAL/NFR/ENG e AC/ACE aplicáveis, integrações homologadas, dados reconciliados, treino, contingência e pendências explícitas. Produto e engenharia assinam o escopo real habilitado. | Seções 17.2, 18.1, 20.5 e 31.3–31.5 |
 
 Um critério pode usar várias provas; não criar um único teste superficial para representar uma linha inteira. A matriz registra a cobertura de cada requisito individual, mesmo quando a tabela acima reúne IDs. Aprovação inicial não substitui regressão após alteração relevante.
@@ -6216,7 +6305,7 @@ O grau de evidência é categórico e explicável: fonte e contexto validados; d
 
 ### 33.11 Validade, atualização e continuidade
 
-Para cada fonte externa, definir modo de obtenção autorizado, revisão, responsável, idade máxima aceita por risco, última consulta bem-sucedida e comportamento em falha. Não presumir uma API pública gratuita ou licença de redistribuição por existir uma página consultável. Se houver importação manual, ela deve seguir o mesmo contrato de origem/revisão e expor seu estado.
+Para cada fonte externa, definir modo de obtenção autorizado, revisão, responsável, idade máxima aceita por risco, última consulta bem-sucedida e comportamento em falha; para as fontes de decisão agronômica e de irrigação, valores iniciais em PROJ-13 (PEND-13). Não presumir uma API pública gratuita ou licença de redistribuição por existir uma página consultável. Se houver importação manual, ela deve seguir o mesmo contrato de origem/revisão e expor seu estado.
 
 Distinguir validade científica do protocolo, vigência do uso permitido de um produto, idade do laudo, validade da amostra e autorização da tarefa. Uma consulta externa indisponível não invalida por si só toda a biblioteca; decisões afetadas seguem política conservadora documentada e dados previamente verificados ainda válidos, sem inventar confirmação atual.
 
@@ -6534,11 +6623,11 @@ Origens possíveis: **informada pelo produtor/gestor**, **orientação externa**
 | FX-003 | Ambas as entradas geram a mesma identidade de necessidade e seguem orçamento, cobertura, programação, O.S. e realizado sem redigitação. |
 | FX-004 | Gerar sugestões no contexto do plano, selecionar análises elegíveis e mostrar propostas lado a lado com operações existentes; detalhes técnicos abrem em painel sem perder o plano. |
 | FX-005 | Ausência de dado técnico bloqueia somente a sugestão automática dependente daquele dado; não bloqueia safra, operações independentes ou dose diretamente informada. |
-| FX-006 | Aplicar permissões e aprovações proporcionais à operação e à política da empresa. Planejar manualmente não exige análise nem assinatura; emitir para execução uma O.S. agrícola exige aprovação explícita do agrônomo, conforme capítulo 41. Restrições técnicas/legais aplicáveis de RN-016 não são dispensadas por essa origem. |
+| FX-006 | Aplicar permissões e aprovações proporcionais à operação e à política da empresa no planejamento; essa proporcionalidade não alcança a aprovação da O.S. agrícola, que é individual, salvo a irrigação somente com água (APROV-14; APROV-16). Planejar manualmente não exige análise nem assinatura; liberar para execução uma O.S. agrícola exige aprovação explícita do agrônomo da versão, conforme capítulo 41 (CMD-42; APROV-01). Restrições técnicas/legais aplicáveis de RN-016 não são dispensadas por essa origem. |
 | FX-007 | Revisar operação futura preservando realizado e histórico; escolher explicitamente substituir saldo futuro ou acrescentar necessidade, evitando duplicidade. |
 | FX-008 | Aceitar dose uniforme, doses informadas por setor e prescrição espacial externa/manual com validação geométrica e compatibilidade de máquina. Não apresentar mapa manual como interpolação científica derivada de análise. |
 
-Não repetir alerta genérico “sem análise” a cada gravação manual. Exibir impedimento apenas quando o dado é exigido pela ação pretendida. A autorização gerencial pode ser automática dentro da alçada configurada, com auditoria; isso não substitui a aprovação do agrônomo exigida no capítulo 41; somente irrigação com água dentro da política explícita da seção 41.8 usa autorização por enquadramento. O fluxo científico não transforma a aprovação do protocolo em aprovação automática de toda aplicação real.
+Não repetir alerta genérico “sem análise” a cada gravação manual. Exibir impedimento apenas quando o dado é exigido pela ação pretendida. A autorização gerencial pode ser automática dentro da alçada configurada, com auditoria; isso não substitui a aprovação do agrônomo exigida no capítulo 41 (APROV-05); só a irrigação com água sem produto não passa pelo agrônomo (41.8; DEC-2609-10). O fluxo científico não transforma a aprovação do protocolo em aprovação automática de toda aplicação real.
 
 ### 37.3 Jornada contínua
 
@@ -6583,7 +6672,7 @@ flowchart TB
 | ACFX-03 | Sugestão aceita entra no mesmo plano e demanda de compra, sem segunda digitação. |
 | ACFX-04 | Análise insuficiente em um talhão não impede registrar operação direta em outro ou no próprio talhão. |
 | ACFX-05 | Alterar dose futura não reescreve consumo executado; não duplica demanda. |
-| ACFX-06 | Restrição obrigatória aplicável continua sendo validada para origem manual; uma aprovação irrelevante não é criada. |
+| ACFX-06 | Restrição obrigatória aplicável continua sendo validada para origem manual; não é criada aprovação de recomendação, que seria irrelevante. A O.S. agrícola de origem manual segue a aprovação individual (CMD-42; FO-04; APROV-14). |
 | ACFX-07 | Mapa de doses informadas exporta somente em perfil homologado, sem selo de recomendação científica. |
 | ACFX-08 | Usuário adiciona operação a partir do plano aberto em um painel e a salva sem navegar por outros módulos; perda de conexão preserva rascunho e informa sincronização. |
 
@@ -6804,7 +6893,7 @@ Para várias parcelas no talhão, a seleção precisa indicar a área efetivamen
 | Alterar dose | Editar na linha; mostrar dose padrão, nova dose, unidade e diferença de quantidade/custo para a área. Preservar dose padrão como referência. |
 | Adicionar produto | Buscar produto no catálogo contextual; informar dose/unidade e finalidade quando necessária. Identificar se pertence à operação atual ou requer outra operação. A seleção não comprova compatibilidade de mistura. |
 | Retirar produto | Retirar somente do saldo planejado desse talhão; manter referência “Retirado neste talhão” no comparativo e opção de desfazer. Não apagar consumo, entrega ou aplicação já registrada. |
-| Trocar produto | Ação explícita de substituição, recalculando garantias, doses e restrições pertinentes; não equiparar produtos pelo volume ou nome parecido. |
+| Trocar produto | Ação explícita de substituição, recalculando garantias, doses e restrições pertinentes; não equiparar produtos pelo volume ou nome parecido.; modo do item (produto fixo ou alternativas) e troca de marca pelo mesmo ingrediente ativo seguem 40.5. |
 | Adicionar operação | Abrir formulário curto já preenchido com área/ciclo; permitir momento relativo ao plantio ou outro evento, data fixa ou gatilho conforme capítulo 39. |
 | Restaurar padrão | Restaurar item selecionado após prévia de impactos futuros; não descartar outras alterações locais. Restaurar plano inteiro exige ação separada e confirmação concreta do alcance. |
 | Copiar ajuste | Selecionar outros talhões/parcelas; revalidar área, cultura, contexto e unidades em cada destino; apresentar sucessos e impedimentos individualmente. |
@@ -6835,13 +6924,64 @@ Modelo novo não altera executado. Plano em rascunho permite salvar rapidamente 
 - **AJUSTE-10:** repetir o comando não duplica demanda. Teste de tarefa do capítulo 39 inclui alteração individual, comparação com padrão e atualização conflitante; registrar sucesso sem ajuda, erros e tempo, corrigindo qualquer alteração involuntária de outro talhão antes da liberação.
 
 
+### 40.5 Produto fixo ou troca de marca pelo mesmo ingrediente ativo
+
+A necessidade técnica do plano (operação, cultura, alvo, área e janela) é separada do produto comercial que a atende. O catálogo guarda cada produto registrado com composição versionada (11.1). Equivalência é contextual (cultura, alvo, dose, formulação e restrições), nunca uma tabela global pelo nome do ativo (AG-07). Regra determinística calcula e confere; a IA só sugere, com fonte.
+
+**Modo do item.** Cada item de produto do plano tem, na própria linha, o modo **Usar somente este produto** ou **Permitir alternativas com aprovação técnica**. O modo segue a herança do plano padrão para os talhões (40.3), sem nível novo de configuração ou alçada, e acompanha a necessidade até compra, recebimento, reserva e O.S. O produto planejado é preservado até escolha explícita. Mudar o modo usa a permissão de alteração do item (40.1): é revisão versionada do escopo futuro, com as revalidações pertinentes, registrada no histórico do item. Se houver alternativa adotada no escopo, a revisão diz qual produto fica fixo e mostra o impacto. A revisão técnica não altera a preferência comercial em silêncio.
+
+**Produto fixo.** Atende só o mesmo registro, formulação e concentração; outra embalagem ou lote apto do mesmo produto atende, e o código do fornecedor é de-para, nunca identidade. Não há sugestão de outra marca, nem pela IA, nem troca por preço ou falta. Fornecedores e preços do mesmo produto continuam comparáveis. Falta de estoque vira pendência com a ação de cada papel. Entrega de outro produto fica registrada pelo produto real, em divergência (SU-06), com destino por decisão explícita, e nunca atende O.S. do item fixo. A preferência não supera restrição técnica (RN-016): produto fixo que deixa de ser regular para a cultura e o alvo bloqueia o item para decisão técnica.
+
+**Troca de marca (item com alternativas).**
+- Aceitar tecnicamente B para uma necessidade só o torna elegível. **Adotar** B num escopo futuro (área, data, versão) cria a alocação, muda o atendimento ali e invalida só as O.S. futuras desse escopo (41.3).
+- A necessidade pode ter alocações parciais por área, data, produto, dose e versão. A soma é a necessidade, sem demanda nem reserva duplicada, inclusive entre safras. Uma O.S. pode ter vários produtos.
+- Candidato sem registro para a cultura e o alvo da necessidade não pode ser aceito nem adotado (RN-016): aparece com esse motivo, sem convite a revisar.
+- A contratação de B exige B aceito e adotado num escopo que ainda precise dele, sem exceder a necessidade líquida. O arredondamento por embalagem indivisível fica identificado como excedente (CAL-11; 42.1) e não eleva a dose. Pedidos parciais legítimos continuam.
+- Antes de confirmar, a adoção mostra o impacto nos compromissos do escopo: pedidos e entregas em aberto de A, reservas e O.S. futuras. Reserva de A no escopo segue 73.4. Pedido de A que passa a exceder a necessidade vira pendência de compras, sem cancelamento automático.
+- A dose de B vem da bula de B, definida pelo habilitado. A referência por ingrediente (CAL-11) é só comparação: fora da faixa da bula, fica invalidada aquela equivalência e dose, não a marca. Nova recomendação dentro da bula é caminho próprio, com versão.
+- Mistura de ativos se compara ingrediente a ingrediente, sem ser proibida. Biológico e fertilizante seguem a regra da categoria. Toda adoção revalida, nas parcelas do escopo, carência, reentrada e datas de colheita pela bula de B. Outra formulação revalida também mistura e preparo (41.4).
+- A IA sugere candidatos com fonte e não aceita, adota nem aprova. Compras aprova preço e condições. Aceite e adoção são do habilitado e não dispensam a aprovação de cada O.S. (41; APROV-05).
+
+**Interface.** A comparação fica na própria linha do insumo (PL-02) e da necessidade (SU-04), sem tela nova: planejado → candidato, com dose e base, quantidade, custo/ha, total e diferença. A composição aparece como fato ("Mesmo ingrediente: …"), sem selo "Equivalente" só pelo ativo. Bula, carência, reentrada e registro abrem em detalhe na linha, sem perder filtro nem posição. Compras nunca vê "Aceitar" nem "Adotar". As situações usam as mesmas palavras em plano, cotação e O.S., com as cores do design system e sempre com texto; a linha funciona pelo teclado e preserva o foco.
+
+| Situação | Compras vê | Habilitado vê |
+|---|---|---|
+| Requer revisão agronômica | Pedir revisão | Revisar candidato |
+| Dose técnica pendente | sem ação; motivo em texto | Completar contexto da dose |
+| Fora da bula (aquela dose) | sem ação; motivo em texto | Nova recomendação |
+| Aceito para esta necessidade | Comparar (sem contratar) | Adotar no saldo futuro |
+| Adotado (escopo) | Aprovar contratação | Ver O.S. afetadas |
+| Recusado | sem ação; motivo em texto | Reabrir revisão |
+| Fora do produto fixado (ocorrência) | sem ação; motivo em texto | Revisar modo do item |
+| Sem registro para esta cultura e alvo | sem ação; motivo em texto | sem aceite (RN-016); bula e motivo em texto |
+
+### 40.6 Critérios de aceite — SUBST
+
+- **SUBST-01:** B aceito continua fora do plano e das O.S. até ser adotado; aceitar não muda quantidade, demanda, reserva nem aprovação.
+- **SUBST-02:** adotar B numa área e período futuros cria a alocação e troca o atendimento só ali, com a quantidade pela dose da bula de B. A demanda total é a soma das alocações, sem duplicar nem reservar duas vezes. Só as O.S. futuras do escopo perdem a aprovação.
+- **SUBST-03:** "Aprovar contratação" de B só existe com B aceito e adotado num escopo que ainda precise do produto. Com B só aceito, compras compara e não contrata. A contratação não excede nem duplica a necessidade líquida do escopo; o arredondamento por embalagem indivisível aparece como excedente identificado e não eleva a dose. Pedidos parciais legítimos continuam possíveis.
+- **SUBST-04:** a comparação mostra ativo por hectare, dose de referência e faixa da bula de B na unidade resultante, sem densidade. A dose autorizada é do habilitado, dentro da bula. Referência fora da faixa invalida aquela equivalência, e nova recomendação tem versão própria.
+- **SUBST-05:** a ordenação é por custo por hectare e custo total da área coberta, não por R$/L. Sem dose normalizada por hectare ou faixa aplicável com contexto completo, a linha mostra "Dose técnica pendente", sem custo e fora da ordenação.
+- **SUBST-06:** calda preparada, entregas feitas e realizado mantêm o produto real. O.S. em execução é pausada e só o saldo recebe nova versão.
+- **SUBST-07:** B só atende O.S. cuja versão aprovada cita B; a mesma O.S. pode ter A e B em linhas ou parcelas diferentes. Recebimento de produto diferente do pedido fica em divergência (SU-06).
+- **SUBST-08:** mistura com proporção diferente, sal × equivalente ácido sem fator, biológico ou fertilizante não têm simulação automática. Mistura não é proibida por ser mistura.
+- **SUBST-09:** toda adoção de B revalida carência, reentrada e datas de colheita das parcelas do escopo pela bula de B; outra formulação revalida também mistura e preparo. Um conflito bloqueia a adoção naquela parcela.
+- **SUBST-10:** a IA sugere com fonte e não aceita, adota nem aprova. Compras aprova preço e condições; aceite e adoção são do habilitado. Nada disso dispensa a aprovação de cada O.S.
+- **SUBST-11:** item novo preserva o produto planejado. "Usar somente este produto" no plano padrão vale para os talhões que herdam. Item fixo não sugere candidatos, nem pela IA, nem troca por preço ou falta. A revisão técnica não muda a preferência comercial em silêncio.
+- **SUBST-12:** fixo é mesmo registro, formulação e concentração. Outra embalagem ou lote apto do mesmo produto atende, e código de fornecedor diferente para o mesmo produto atende. Proposta divergente já recebida fica só como ocorrência "Fora do produto fixado", sem recomendação nem seleção.
+- **SUBST-13:** sem saldo nem entrega a tempo, o item mostra "Falta [produto] para [necessidade]", com a ação de cada papel: compras "Cotar este produto", PCP "Reprogramar", habilitado "Revisar modo do item". Nada troca de produto sozinho.
+- **SUBST-14:** produto diferente do fixado fica registrado pelo produto real, em divergência, e nunca atende O.S. do item fixo. O destino segue decisão explícita de SU-06, sem baixa ou entrada automática.
+- **SUBST-15:** mudar o modo exige a permissão que já existe, com revisão versionada do escopo futuro e revalidação, registrada no histórico do item com autor, motivo e escopo. Produto fixo que deixa de ser regular bloqueia o item para decisão técnica, sem forçar o uso.
+- **SUBST-16:** candidato sem registro para a cultura e o alvo da necessidade aparece como "Sem registro para esta cultura e alvo"; não pode ser aceito nem adotado, e ninguém recebe convite para revisá-lo.
+- **SUBST-17:** com pedido de A em aberto para o escopo, adotar B mostra antes o impacto: quanto do pedido de A deixa de ter necessidade, reservas de A no escopo e O.S. futuras afetadas. O pedido excedente vira pendência de compras, sem cancelamento automático, e não se soma à compra de B.
+
 ## 41. Aprovação agronômica de cada O.S. e execução guiada
 
 ### 41.1 Regra obrigatória e alcance — consolidada na versão 3.4
 
-**Toda ordem de serviço agrícola emitida exige aprovação explícita do agrônomo antes de preparo ou execução, com a única exceção de autorização por política previamente aprovada para irrigação somente com água da seção 41.8.** Vale para ordens originadas de plano padrão, ajuste local, decisão direta do produtor, recomendação automática, recorrência, taxa variável e operação emergencial. Aprovar plano, recomendação ou orçamento não equivale a aprovar uma O.S. futura. Aprovação não pode ser presumida por silêncio, passagem de prazo, IA ou alçada financeira.
+**Toda ordem de serviço agrícola emitida exige aprovação explícita do agrônomo antes de preparo ou execução, exceto irrigação somente com água, que não passa pelo agrônomo (41.8; DEC-2609-10).** Vale para ordens originadas de plano padrão, ajuste local, decisão direta do produtor, recomendação automática, recorrência, taxa variável e operação emergencial. Aprovar plano, recomendação ou orçamento não equivale a aprovar uma O.S. futura. Aprovação não pode ser presumida por silêncio, passagem de prazo, IA, alçada financeira, orçamento autorizado (CMD-03/CMD-04), janela operacional aberta ou prontidão completa (APROV-05).
 
-Neste capítulo, O.S. agrícola é o objeto canônico, também denominado OSA/OAS pela empresa; não criar documentos duplicados para essas siglas. Abrange operações agrícolas de campo, irrigação/fertirrigação e colheita; irrigação somente com água segue o fluxo simplificado da seção 41.8. Nas demais operações, inclusive sem insumos, mantém aprovação individual; fichas exibem somente conteúdo pertinente. Ordens de manutenção/oficina permanecem sob responsabilidade técnica própria, sem transformar o agrônomo em aprovador de reparos mecânicos. Qualquer ampliação dessa política para outros domínios deve ser explícita.
+Neste capítulo, O.S. agrícola é o objeto canônico, também denominado OSA/OAS pela empresa; não criar documentos duplicados para essas siglas. Abrange operações agrícolas de campo, irrigação/fertirrigação e colheita; irrigação somente com água segue o fluxo simplificado da seção 41.8. Nas demais operações, inclusive sem insumos, mantém aprovação individual; fichas exibem somente conteúdo pertinente. É O.S. agrícola toda ordem cujo objeto é talhão ou parcela, inclusive as operações mecânicas ou manuais de preparo de solo, plantio, cultivo, roçada e colheita e o transporte da produção do talhão ao ponto de recebimento emitido como ordem própria (APROV-02; APROV-03). Ordens de manutenção/oficina permanecem sob responsabilidade técnica própria, sem transformar o agrônomo em aprovador de reparos mecânicos. Qualquer ampliação dessa política para outros domínios deve ser explícita.
 
 Esta regra refina RN-007, CMD-06 e os capítulos 37/40: o produtor mantém liberdade para planejar sem análise de solo e propor doses/produtos; a execução da O.S. agrícola depende da decisão do agrônomo. A empresa precisa manter titulares e substitutos habilitados por fazenda/escopo, fila por prazo/prioridade e escalonamento de atrasos, sem liberação automática por urgência. Fato já ocorrido continua registrável segundo RN-018; registrar não o transforma retroativamente em autorizado.
 
@@ -6861,7 +7001,7 @@ A aprovação grava identidade/papel do agrônomo, data/hora, versão da O.S., e
 
 ### 41.3 Estado, alterações e comunicação
 
-Emissão gera número e estado canônico **Emitida** (seção 8.4.1). “Aguardando aprovação — não executar” é o aviso de exibição e “Aguardando agrônomo” é o selo correspondente no cartão; não são novos estados nem enumerações paralelas. A liberação exige aprovação agronômica vigente, autorização econômica/operacional do escopo e prontidão (CMD-06). Na liberação, prontidão de material significa cobertura/reserva de lotes aptos e fichas válidas, não entrega ou calda já preparada; CMD-16 realiza a entrega depois, e preparo/início validam carga/recebimento pertinentes. Isso evita depender de uma entrega que a própria liberação ainda precisa autorizar. Se todas as condições estiverem atendidas e o usuário possuir ambas as permissões, **Aprovar e liberar** registra CMD-42 e CMD-06 separadamente na mesma confirmação; **Aprovar como está** sozinho não libera.
+Emissão gera número e estado canônico **Emitida** (seção 8.4.1). “Aguardando aprovação — não executar” é o aviso de exibição e “Aguardando agrônomo” é o selo correspondente no cartão; não são novos estados nem enumerações paralelas. A liberação exige aprovação agronômica vigente, autorização econômica/operacional do escopo e prontidão (CMD-06). Na liberação, prontidão de material significa cobertura verificada de lotes aptos e fichas válidas, não entrega ou calda já preparada; a reserva de execução nasce no próprio CMD-06, na mesma transação (RSV-03). CMD-16 realiza a entrega depois, e preparo/início validam carga/recebimento pertinentes. Isso evita depender de uma entrega que a própria liberação ainda precisa autorizar. Aprovar (CMD-42) e **Liberar para execução** (CMD-06) são ações separadas, uma por vez, mesmo para quem tem as duas permissões; não há ação composta (APROV-09; DEC-2609-05). **Aprovar como está** sozinho não libera.
 
 Mudança de produto, formulação, dose, concentração, volume de aplicação, mistura, alvo, cultura, área/limite espacial, método/equipamento que afete aplicação, receita de preparo ou janela técnica invalida a aprovação da versão futura e exige nova revisão. Ajustes puramente administrativos não exigem nova decisão técnica; mudança de horário dentro da janela aprovada apenas revalida condições. Troca de capacidade de tanque só pode recalcular cargas sem nova revisão se fizer parte de perfil e envelope expressamente aprovados, preservando dose, concentração, método e limites; fora disso, voltar ao agrônomo.
 
@@ -6914,18 +7054,19 @@ flowchart TB
   A["1 · Emita a proposta na janela escolhida"]
   D["1 · Corrija e submeta nova versão"]
   H["2 · Resolva impedimentos preservando a versão"]
+  I["2 · Libere para execução · CMD-06"]
  end
  subgraph RAIA_1["Agronomia"]
   direction TB
   B["1 · Revise atividade, produtos, doses e restrições"]
-  C{"2 · Decisão do agrônomo"}
-  E["2 · Bloqueie a liberação e registre o motivo"]
+  C{"2 · Qual a decisão na revisão da versão?"}
+  E["2 · Rejeite a versão com motivo, sem cancelar"]
  end
  subgraph RAIA_2["Sistema"]
   direction TB
   F["2 · Confira recursos e todos os itens da carga"]
   G{"2 · Prontidão válida?"}
-  I["2 · Libere e gere fichas de preparo e aplicação"]
+  M["2 · Gere as fichas de preparo e aplicação"]
  end
  subgraph RAIA_3["Caldeiro / operador"]
   direction TB
@@ -6938,51 +7079,52 @@ flowchart TB
  end
  A --> B
  B --> C
- C -->|Ajustar| D
+ C -->|Devolver para ajuste| D
  D --> B
  C -->|Rejeitar| E
- C -->|Aprovar| F
+ C -->|Aprovar versão| F
  F --> G
- G -->|Não| H
  H --> F
- G -->|Sim| I
- I --> J
  J --> K
  K --> L
+ G -->|Sim| I
+ G -->|Não| H
+ I --> M
+ M --> J
 ```
 
 ### 41.8 Irrigação somente com água: programação direta e gestão por exceção
 
 **Exceção expressa aprovada pelo proprietário:** irrigação somente com água, sem fertilizantes, defensivos ou outros produtos adicionados, usa rotina simplificada. A interface principal é **Irrigação de hoje**, com setor/pivô, cultura/parcela, lâmina/volume, duração estimada, janela e motivo calculado. Não exigir emissão manual de O.S., requisição de insumos, preparo de calda, baixa ou devolução de produtos inexistentes. Água, energia, tempo, equipamento e mão de obra aplicável continuam registrados para operação, balanço e custo.
 
-O sistema cria/recupera automaticamente uma tarefa de irrigação rastreável, ligada à programação, recomendação, setor e versão de política. Se a arquitetura usar O.S. como entidade canônica, esse registro é gerado internamente; usuário não preenche uma ordem apenas para irrigar. Uma programação já associada à tarefa não cria segunda ordem nem segunda aplicação no balanço hídrico.
+O sistema cria/recupera automaticamente uma tarefa de irrigação rastreável, ligada à programação, recomendação, setor e versão dos parâmetros operacionais (DEC-2609-10). Se a arquitetura usar O.S. como entidade canônica, esse registro é gerado internamente; usuário não preenche uma ordem apenas para irrigar. Uma programação já associada à tarefa não cria segunda ordem nem segunda aplicação no balanço hídrico.
 
-**Programação pela necessidade da cultura (v3.9, DEC-2609-10):** irrigação somente com água **não passa pelo agrônomo**. O sistema calcula a lâmina que a cultura precisa pelo balanço hídrico (ETc do estádio, chuva efetiva, aplicado e capacidade do solo; líquida e bruta pela eficiência do sistema) e cria/recupera a tarefa com memória de cálculo. Os **limites do equipamento e do solo** por setor (lâmina máxima por passada, intervalo mínimo, eficiência) são parâmetros operacionais mantidos pelo gestor ou pela irrigação, com versão, e não autorização: quando a necessidade passa do limite, o sistema divide a lâmina em passadas (ex.: 13,5 mm com limite de 12,0 mm = 2 passadas de 6,75 mm). Sem sonda ou com leitura suspeita, o balanço usa estimativa por ET, marcada como estimativa, sem bloquear. A liberação depende só da prontidão operacional (janela, bomba, energia, sem conflito). O evento guarda entradas, memória, limites usados e passadas; não é assinatura do agrônomo.
+**Programação pela necessidade da cultura (v3.9, DEC-2609-10):** irrigação somente com água **não passa pelo agrônomo**. O sistema calcula a lâmina que a cultura precisa pelo balanço hídrico (ETc do estádio, chuva efetiva, aplicado e capacidade do solo; líquida e bruta pela eficiência do sistema) e cria/recupera a tarefa com memória de cálculo. Os **limites do equipamento e do solo** por setor (lâmina máxima por passada, intervalo mínimo, eficiência) são parâmetros operacionais mantidos pelo gestor ou pela irrigação, com versão, e não autorização: quando a necessidade passa do limite, o sistema divide a lâmina em passadas (ex.: 13,5 mm com limite de 12,0 mm = 2 passadas de 6,75 mm). Sem sonda ou com leitura suspeita, o balanço usa estimativa por ET, marcada como estimativa, sem bloquear; leitura de sonda mais antiga que a validade da fonte conta como sem sonda (PROJ-13; PROJ-14). A liberação depende só da prontidão operacional (janela, bomba, energia, sem conflito). O evento guarda entradas, memória, limites usados e passadas; não é assinatura do agrônomo.
 
 **Rotina do irrigante:** consultar tarefa pronta → iniciar/confirmar início → registrar ou confirmar aplicação e ocorrências. Telemetria homologada pode preencher medições e término, com origem e qualidade identificadas. Sem telemetria, admitir registro manual simples de início/fim e volume/lâmina medida ou estimada conforme método validado. Ausência de dado não confirma aplicação zero nem aplicação prevista como real. Início no aplicativo não é comando remoto de equipamento por si só.
 
-**Ciclo comum preservado:** a tarefa enquadrada e operacionalmente pronta registra liberação automática por CMD-06 dentro da autorização econômica/operacional e política 41.8, com identidade/versão/validade, e então vai a Liberadas; após início, Em execução; término confirmado entra Em conferência. Se medições/registros estiverem consistentes e todas as verificações aplicáveis satisfeitas, conferência e encerramento são automáticos, sem clique adicional. Sem insumos, as verificações de requisição/custódia/sobras ficam não aplicáveis, nunca pendências vazias. A lista diária pode priorizar Liberadas/Em execução; histórico continua expondo o mesmo ciclo canônico. Não criar segundo Kanban conflitante.
+**Ciclo comum preservado:** a tarefa de água operacionalmente pronta registra liberação automática por CMD-06, sem agrônomo, dentro da autorização econômica/operacional do escopo (APROV-01; APROV-15; DEC-2609-10), com identidade/versão/validade, e então vai a Liberadas; após início, Em execução; término confirmado entra Em conferência. Se medições/registros estiverem consistentes e todas as verificações aplicáveis satisfeitas, conferência e encerramento são automáticos, sem clique adicional. Sem insumos, as verificações de requisição/custódia/sobras ficam não aplicáveis, nunca pendências vazias. A lista diária pode priorizar Liberadas/Em execução; histórico continua expondo o mesmo ciclo canônico. Não criar segundo Kanban conflitante.
 
 **Pendências que exigem ação (operacionais):** janela não definida, conflito hidráulico/elétrico, equipamento bloqueado pelo PCM, restrição de disponibilidade de água, medição divergente ou aplicação sem confirmação. Antes de iniciar, permanecer A liberar com causa e responsável; durante execução, manter Em execução com ocorrência/pausa do saldo quando aplicável; após término, permanecer Em conferência até tratar divergência. Janela e agenda vão ao irrigante/PCP; falha técnica ao PCM; sonda sem dado gera manutenção da sonda sem travar a irrigação. Nenhuma pendência de água sem produto vai ao agrônomo.
 
-**Fertirrigação e produtos:** adicionar fertilizante, corretivo, defensivo ou outro produto reclassifica a tarefa, invalida a autorização exclusiva de água para o saldo futuro e exige aprovação individual, dosagem, compatibilidade, instruções, requisição/custódia e conciliação pertinentes. Não contornar isso por chamar o produto de observação livre. Aplicação já realizada permanece registrada com sua versão/origem, sem autorização retroativa fictícia.
+**Fertirrigação e produtos:** adicionar fertilizante, corretivo, defensivo ou outro produto reclassifica a tarefa, cancela a liberação automática de água para o saldo futuro e exige aprovação individual, dosagem, compatibilidade, instruções, requisição/custódia e conciliação pertinentes. Não contornar isso por chamar o produto de observação livre. Aplicação já realizada permanece registrada com sua versão/origem, sem autorização retroativa fictícia.
 
 **Entrada da reclassificação:** usar Adicionar produtos (reclassificar para fertirrigação) no detalhe IR-02/IR-03, com FO-04/FO-29 e permissões do domínio. A mudança conserva a identidade da tarefa e o histórico da água já aplicada; não é observação livre nem segunda ordem. CMD-32 valida versão esperada/idempotência, gera a pendência técnica para CMD-42 e revalida materiais/prontidão antes da nova liberação.
 
-**Comando remoto:** continua separado, desativado até conector, permissões e intertravamentos homologados. Autorização agronômica por política não significa permissão para ligar bomba remotamente. Falta de comunicação não comprova equipamento parado ou tarefa concluída; contingência segue instrução operacional segura.
+**Comando remoto:** continua separado, desativado até conector, permissões e intertravamentos homologados. A liberação automática da água não significa permissão para ligar bomba remotamente. Falta de comunicação não comprova equipamento parado ou tarefa concluída; contingência segue instrução operacional segura.
 
 - **AGUA-01:** água sem insumos gera tarefa única com a lâmina pela necessidade da cultura, liberada pela prontidão, sem emissão manual e sem aprovação do agrônomo.
 - **AGUA-02:** necessidade acima do limite por passada do equipamento é dividida em passadas; sonda sem dado usa estimativa por ET marcada como estimativa; janela indefinida ou conflito mantém A liberar com causa e responsável operacional.
 - **AGUA-03:** água sem produtos não cria requisição, baixa, custódia ou devolução de insumos; mantém água, energia, horas e custos aplicáveis.
 - **AGUA-04:** conclusão com registros consistentes pode conferir/encerrar automaticamente por política, com trilha; divergência permanece Em conferência.
-- **AGUA-05:** adicionar produto exige reclassificação e aprovação individual antes da nova aplicação; não reutiliza autorização de água.
-- **AGUA-06:** telemetria/manual do mesmo evento atualizam uma aplicação; reenvio não duplica volume, energia, custo ou balanço.
+- **AGUA-05:** adicionar produto exige reclassificação e aprovação individual antes da nova aplicação; não reutiliza a liberação automática da água.
+- **AGUA-06:** telemetria/manual do mesmo evento vinculam-se a uma aplicação, com o valor pela precedência da medição homologada e divergência acima da tolerância Em conferência (CONC-09; CONC-10); reenvio não duplica volume, energia, custo ou balanço.
 - **AGUA-07:** mapa, lista, aplicativo e Kanban exibem a mesma tarefa/etapa; interface simplificada não elimina rastreabilidade.
-- **AGUA-08:** bloqueio PCM, restrição hidráulica ou falta de confirmação impedem liberação/encerramento automático conforme o momento; política não liga equipamento por si só.
+- **AGUA-08:** bloqueio PCM, restrição hidráulica ou falta de confirmação impedem liberação/encerramento automático conforme o momento; a liberação automática não liga equipamento por si só.
 
 ### 41.9 Critérios obrigatórios de aceite — OSA
 
-- **OSA-01:** O.S. agrícola sem aprovação vigente é impedida de preparar/iniciar na UI, API, integração e sincronização; plano aprovado não satisfaz esse requisito. Exclusivamente para água sem insumos, autorização documentada e enquadramento na política 41.8 satisfazem o requisito; ausência, revogação ou violação da política impede liberação automática.
+- **OSA-01:** O.S. agrícola sem aprovação vigente é impedida de preparar/iniciar na UI, API, integração e sincronização; plano aprovado não satisfaz esse requisito. Irrigação somente com água não tem esse requisito e segue AGUA-01 (DEC-2609-10). Operação mecânica sem aprovação é bloqueada da mesma forma (AC-82; APROV-07); relato de fato já ocorrido, inclusive pela sincronização, fica Em conferência, sem recusa (APROV-12).
 - **OSA-02:** agrônomo inclui/exclui/substitui produto e muda dose na mesma revisão; comparação e impactos aparecem antes de aprovar; outros talhões/modelo não mudam.
 - **OSA-03:** aprovação em lote registra cada versão explicitamente apresentada; ordens novas ou modificadas não entram silenciosamente no lote.
 - **OSA-04:** alteração técnica invalida aprovação e fichas futuras; ordem parcialmente executada preserva realizado e revisa só saldo. Calda já preparada recebe destinação específica.
@@ -7000,7 +7142,7 @@ O sistema cria/recupera automaticamente uma tarefa de irrigação rastreável, l
 
 A revisão encontrou agrupamento genérico de parcelas no capítulo 43 e aprovação em lote em 41.2, mas faltava o comando operacional para reunir talhões compatíveis. Em **Aguardando agrônomo**, no detalhe de uma O.S., oferecer **Adicionar talhões compatíveis**. Na lista de pendências, oferecer **Agrupar operações compatíveis**. Mostrar candidatos com área/saldo, ciclo, cultura, janela, distância/deslocamento, prontidão e motivo de elegibilidade ou impedimento. Nada é incluído sem seleção do agrônomo.
 
-A prévia apresenta receita comum, talhões e áreas selecionados, totais por insumo, cargas previstas, sequência sugerida e conflitos. Permitir incluir/remover talhão antes da aprovação. Comando **Aprovar grupo** registra a versão e cada linha aprovada; **Aprovar e liberar grupo** exige também prontidão operacional. Ausência de recurso em uma linha permite retirá-la da seleção, conservando-a pendente, sem bloquear desnecessariamente todas as demais.
+A prévia apresenta receita comum, talhões e áreas selecionados, totais por insumo, cargas previstas, sequência sugerida e conflitos. Permitir incluir/remover talhão antes da aprovação. Comando **Aprovar grupo** registra a versão e cada linha aprovada; a liberação é ação separada (APROV-09), por **Liberar selecionadas** (CMD-06; JANELA-05), que revalida, linha a linha, as condições de APROV-01. Ausência de recurso em uma linha permite retirá-la da seleção, conservando-a pendente, sem bloquear desnecessariamente todas as demais.
 
 **Aprovar várias O.S. é diferente de agrupá-las para executar.** O agrupamento executável consolida preparo, separação e programação, preservando as ocorrências do plano e a rastreabilidade por talhão/parcela. Por padrão, mesma empresa, mesma fazenda e frente operacional compatível. Operações em fazendas diferentes permanecem em grupos separados nesta função; compartilhamento logístico entre fazendas, se necessário, é processo explícito com deslocamento/custódia, sem mistura de estoques de empresas distintas.
 
@@ -7054,7 +7196,7 @@ A aprovação do agrônomo da versão vigente (CMD-42) gera/atualiza automaticam
 
 O almoxarife seleciona a ordem/QR, confere lote, validade e quantidade efetiva; não escolhe dose nem substitui produto. Produto, formulação/concentração, unidade/base e destino precisam coincidir com a autorização. Lote diferente do mesmo produto pode atender se apto e dentro das condições autorizadas; troca de produto demanda revisão agronômica. FEFO orienta seleção dos lotes aptos quando aplicável, respeitando restrições de lote/propriedade/destino. Bloqueado, vencido, em quarentena ou pertencente a terceiro sem autorização não é elegível.
 
-Separação, entrega e recebimento são fatos distintos. Cada entrega registra origem, destino de custódia, produto/lote, quantidade/unidade, O.S./versão, separador, entregador/recebedor e horário. Estoque disponível não fica negativo por duas entregas concorrentes: validar saldo e autorização na transação. Código de barras/QR ajuda a conferir; alternativa manual deixa trilha. Entrega offline requer saldo e autorização previamente alocados ao dispositivo/local, limite e reconciliação sem dois escritores do mesmo saldo; não aceitar retirada ilimitada offline.
+Separação e entrega são fatos distintos; o recebimento confirmado no app é o aceite da mesma entrega, sem segunda entrada em custódia (CONC-12; DEC-2609-07). Cada entrega registra origem, destino de custódia, produto/lote, quantidade/unidade, O.S./versão, separador, entregador/recebedor e horário. Estoque disponível não fica negativo por duas entregas concorrentes: validar saldo e autorização na transação. Código de barras/QR ajuda a conferir; alternativa manual deixa trilha. Entrega offline requer saldo e autorização previamente alocados ao dispositivo/local, limite e reconciliação sem dois escritores do mesmo saldo; não aceitar retirada ilimitada offline. A entrega offline sob cota delegada segue RSV-09.
 
 Não calcular saldo autorizado apenas como “autorizado menos entrega bruta”: considerar devoluções, consumo e custódias para não impedir devolução/reentrega legítima nem permitir consumo repetido. Para produto direto e mesma base, `saldo_elegivel = max(0, quantidade_autorizada_vigente − consumo_acumulado − saldo_em_custodia_destinado_à_OS − quantidade_comprometida_ainda_nao_incluida_na_custodia_da_OS)`, reconciliando eventos de transformação e transferências uma vez. Os termos são disjuntos: na origem, transferência em trânsito já integra a custódia e não entra novamente no último termo; no destino, transferência pendente integra o compromisso ainda não recebido e migra atomicamente à custódia ao ser aceita. Separação ainda não entregue e não contabilizada em custódia integra apenas o último termo. Lançamento devolvido só libera o saldo após conferência de recebimento. Perdas não geram reposição automática: reposição precisa autorização específica rastreável, preservando dose/área agronômica e distinguindo material perdido do aplicado.
 
@@ -7068,7 +7210,7 @@ Entrega parcial só libera trecho/carga que possa executar integralmente a instr
 
 ### 42.3 Apontamento do trabalho realizado
 
-MB-02/MB-03 e CA-02 herdam versão aprovada, parcela/ciclo, equipe, equipamento, produtos, cargas e unidades. Operador registra área efetiva, datas/horas, paradas, cargas/quantidades aplicadas, ocorrência e saldo da operação. Pré-preencher informações conhecidas, sem marcar como realizado o que era somente previsto. Telemetria e apontamento manual do mesmo fato são conciliados, não somados cegamente. Identificar fonte medida, estimada ou declarada.
+MB-02/MB-03 e CA-02 herdam versão aprovada, parcela/ciclo, equipe, equipamento, produtos, cargas e unidades. Operador registra área efetiva, datas/horas, paradas, cargas/quantidades aplicadas, ocorrência e saldo da operação. Pré-preencher informações conhecidas, sem marcar como realizado o que era somente previsto. Telemetria e apontamento manual do mesmo fato são conciliados, não somados cegamente: vinculam-se ao mesmo fato, com o valor pela precedência das fontes (CONC-09). Identificar fonte medida, estimada ou declarada; o consumo sugerido pelo app (dose × área) é estimativa e não gera baixa própria (CONC-13).
 
 Botão **Finalizar apontamento do turno** (CMD-43) mostra resumo do período: executado, saldo físico, materiais entregues, consumo informado, sobras e divergências. Saldo a executar mantém a ordem Em execução, inclusive com selo Pausada/Aguardando próximo turno; **Reprogramar saldo** (CMD-11) conserva a mesma O.S. e não conclui seu trabalho físico. **Concluir execução da O.S.** (CMD-08) é ação distinta e só entra Em conferência quando todo o trabalho terminou ou o saldo foi formalmente dispensado (CMD-47). Consumo maior que autorizado ou produto diferente pode ser relatado como ocorrência real, sem aprovação retroativa automática nem fechamento silencioso.
 
@@ -7091,8 +7233,8 @@ Etapas visíveis no trecho final: **Em execução → Em conferência → Encerr
 - Trabalho e saldo de área têm destinação registrada; apontamentos obrigatórios conferidos.
 - Materiais de cada produto/lote e batelada reconciliados; saldo de custódia da ordem zero por devolução recebida ou outra destinação formal permitida.
 - Divergências/perdas tratadas com autoridade e registro próprios, sem consumo inventado; pendências materiais relevantes não são ocultadas por tolerância genérica.
-- Reservas remanescentes liberadas, requisição conciliada e custos apropriados uma única vez; efeitos transacionais persistidos ou integração contabilmente conciliada segundo política explícita.
-- Revisões, aprovações e documentos aplicáveis completos; fatos de execução não foram reescritos.
+- Nenhuma reserva ativa na ordem: a reserva não entregue já foi devolvida ao disponível, em geral ao entrar Em conferência (RSV-05; CMD-49), e a separação pendente foi desfeita; requisição conciliada; valor dos movimentos gravado uma vez no fato quando a política de custo o grava (CAL-04), com apropriação e rateio pela projeção de custo (73.7.2) e pelo retrato do fechamento (PROJ-16), sem condicionar o encerramento; efeitos locais persistidos e efeitos a integrar gravados na mesma transação do encerramento (INTEG-15). O aceite do ERP não é condição, salvo tipo de efeito marcado para confirmação antes do encerramento (INTEG-16; RN-047).
+- Revisões, aprovações e documentos locais aplicáveis da O.S. completos; documento no ERP segue INTEG-16; fatos de execução não foram reescritos.
 
 A avaliação de eficácia dias depois pode permanecer como tarefa agronômica vinculada, com prazo e responsável; não mantém estoque em aberto quando já conciliado. Correção posterior usa ajuste/estorno vinculado com alçada, nunca edição invisível de ordem encerrada.
 
@@ -7127,7 +7269,7 @@ Aplicar plano padrão por cultura permite selecionar parcelas elegíveis e visua
 
 O.S. pode agrupar parcelas compatíveis para reduzir trabalho administrativo, preservando linhas de execução por parcela, áreas/doses/datas e aprovações versionadas. Condições incompatíveis geram ordens/cargas separadas. Requisição consolida totais para separação, mas fichas de preparo e aplicação mostram destino de cada carga; almoxarifado, consumo, devolução, custo e produtividade continuam rastreáveis por parcela/ordem. Nunca entregar somente uma dose média para parcelas que exigem tratamentos diferentes.
 
-Mapa permite alternar visão Talhão/Parcelas, colorir por cultura/variedade/data e filtrar janela de plantio. Legenda e resumo de área explicam o recorte; seleção no mapa e na tabela são a mesma seleção. Parcelas sem geometria aparecem na lista e como pendência, sem localização inventada. Agrupar parcelas para consulta não funde ciclos nem apaga histórico. Dividir/unir após execução exige versões e linhagem; fatos antigos mantêm área e parcela usadas à época.
+Mapa permite alternar visão Talhão/Parcelas, colorir por cultura/variedade/data com a paleta operacional sóbria de 74.7 (74.7.1; 74.7.3), nunca com a rampa de vigor do satélite (DS-65), e filtrar janela de plantio. Legenda e resumo de área explicam o recorte; seleção no mapa e na tabela são a mesma seleção. Parcelas sem geometria aparecem na lista e como pendência, sem localização inventada. Agrupar parcelas para consulta não funde ciclos nem apaga histórico. Dividir/unir após execução exige versões e linhagem; fatos antigos mantêm área e parcela usadas à época.
 
 ### 43.3 Critérios de aceite — PARC
 
@@ -7373,7 +7515,7 @@ Cartão por máquina/implemento/instalação: código/nome, classe, fazenda/loca
 5. Ao iniciar, concluir turno, comunicar falha ou alterar manutenção, atualizar quadro e ordens afetadas. Perda de elegibilidade abre impedimento e sugere alternativas; substituição não é automática se exigir novo rendimento, instrução ou aprovação.
 6. Após manutenção, teste e liberação atualizam aptidão. Reserva antiga não é restaurada silenciosamente se a agenda mudou; PCP reconfirma o saldo necessário.
 
-**Atualização visual:** publicação de eventos confirmados atualiza quadros conectados por canal de eventos ou consulta incremental; mostrar hora da última atualização e conexão degradada. No piloto conectado, meta inicial de propagação p95 de até 5 s no envelope homologado; medir antes de assumir compromisso. Na confirmação da alocação, o servidor sempre revalida dados atuais, mesmo que a tela pareça recente. Eventos offline são provisórios e não autorizam promessa de disponibilidade global instantânea.
+**Atualização visual:** publicação de eventos confirmados atualiza quadros conectados por canal de eventos ou consulta incremental; mostrar hora da última atualização e conexão degradada. Meta de atualização: linha 2 de PROJ-06 (p95 ≤5 s; p99 ≤15 s), que vale para todas as telas operacionais conectadas; medir no envelope homologado (PERF-05) antes de assumir compromisso. Na confirmação da alocação, o servidor sempre revalida dados atuais, mesmo que a tela pareça recente. Eventos offline são provisórios e não autorizam promessa de disponibilidade global instantânea.
 
 #### 44.11.4 Priorização do PCM orientada à demanda do PCP
 
@@ -7758,7 +7900,8 @@ flowchart TB
   A["1 · Qualifique a necessidade e a criticidade"]
   B["1 · Defina condição do ativo e contenção"]
   C["2 · Planeje tarefas, peças, equipe e duração"]
-  E["2 · Aprove e libere a O.S. pronta"]
+  E["2 · Aprove a versão como responsável de manutenção · CMD-42"]
+  L["2 · Libere a O.S. pronta · CMD-06"]
  end
  subgraph RAIA_1["PCP"]
   direction TB
@@ -7783,13 +7926,14 @@ flowchart TB
  B --> C
  C --> D
  D --> E
- E --> F
  F --> G
  G --> H
- H -->|Não| I
  I --> F
- H -->|Sim| J
  J --> K
+ H -->|Sim| J
+ H -->|Não| I
+ E --> L
+ L --> F
 ```
 
 - **PCM-01:** cadastrar trator, implemento, veículo, bomba e componente de packing com planos/medidores pertinentes; nenhum depende obrigatoriamente de consumo diesel.
@@ -8010,7 +8154,7 @@ Queda de produção, qualidade rebaixada ou máquina parada reduz capacidade fut
 
 ### 50.1 Agenda prevista e execução real
 
-LO-01/LO-02 devem manter **agenda de janelas** e **fila operacional ao vivo** sobre as mesmas cargas. Agendamento reserva capacidade compatível de atendimento, não significa que o caminhão chegou nem que uma doca deve permanecer ociosa enquanto ele não chega. A operação pode reordenar atendimentos elegíveis, preservando compromissos, segurança, capacidade e rastreio. Nenhuma regra garante expedição ininterrupta se não houver veículo/carga/equipe aptos; o sistema deve tornar o impedimento explícito e propor uso viável da capacidade.
+LO-01/LO-02 devem manter **agenda de janelas** e **fila operacional** sobre as mesmas cargas; a fila é atualizada nas telas conectadas em p95 ≤5 s (PERF-01; PROJ-06, linha 2). Agendamento reserva capacidade compatível de atendimento, não significa que o caminhão chegou nem que uma doca deve permanecer ociosa enquanto ele não chega. A operação pode reordenar atendimentos elegíveis, preservando compromissos, segurança, capacidade e rastreio. Nenhuma regra garante expedição ininterrupta se não houver veículo/carga/equipe aptos; o sistema deve tornar o impedimento explícito e propor uso viável da capacidade.
 
 | Responsabilidade | Cliente retira | Agricultor organiza entrega |
 |---|---|---|
@@ -8548,7 +8692,7 @@ Não fixar metas universais de MTBF, MTTR, disponibilidade ou custo/hora. Compar
 | KPI-SUP-05 | Atendimento do fornecedor | Entregas no prazo e completas / entregas devidas no escopo, com qualidade/documentação analisadas separadamente ou em indicador conjunto explicitado. |
 | KPI-SUP-02 | Acurácia de estoque | Itens-lote-local contados dentro da tolerância / contados; mostrar também divergência absoluta em quantidade por unidade e valor, sem saldos positivos/negativos se anularem. |
 | KPI-SUP-03 | Perdas e vencimentos de estoque | Quantidade/valor de perda por causa e estoque exposto por vencimento; bases distintas de custo/despesa. |
-| KPI-SUP-06 | Custódias pendentes | Quantidade/valor por O.S./responsável e idade desde entrega/conclusão, sem presumir consumo. |
+| KPI-SUP-06 | Custódias pendentes | Quantidade/valor por O.S./responsável e idade desde entrega/conclusão, sem presumir consumo. É projeção (73.7): não autoriza o encerramento, que lê a custódia na transação do CMD-10 (PROJ-03). |
 | KPI-COM-05 | Conversão e recompra | Ofertas elegíveis convertidas / ofertas da coorte; clientes com recompra / clientes elegíveis da coorte/período. Canceladas, abertas e pendentes não somem da base sem regra. |
 | KPI-COM-01 | Margem comercial | Receita líquida − custos do escopo por cliente/canal/produto, conforme capítulo 51; frete/comissão uma vez. |
 | KPI-COM-03 | OTIF | Entregas devidas que cumprem simultaneamente quantidade e prazo / entregas devidas, com tolerância, ponto contratual e promessa original; atraso ainda não entregue conta como não cumprido na data de corte. |
@@ -8567,11 +8711,13 @@ Não fixar metas universais de MTBF, MTTR, disponibilidade ou custo/hora. Compar
 
 **Meta proposta para previsão semanal:** testar WAPE ≤ 10% por cultura/produto/classe e antecedência congelada, equivalente a acurácia derivada `1 − WAPE` ≥ 90% quando a métrica tiver denominador válido. CF-02 armazena alvo, antecedência, janela/amostra mínima e vigência; CO-01 e VE-01 exibem se a meta é proposta, aprovada, não configurada ou não mensurável. Não converter soma realizada zero em 100% nem esconder WAPE acima de 100%. Desvio abre ação de recalibração/amostragem e revisão da margem de segurança da oferta futura; não bloqueia venda de estoque físico apto nem garante promessa comercial só por atingir 90%. É objetivo de piloto a validar, não desempenho demonstrado ou limite universal.
 
-Cartão apresenta valor, unidade, período, meta/contexto, variação, fonte/data e estado do dado. Meta não configurada não recebe verde automático; ausência de dados mostra “sem dados/insuficiente”, não zero. Comparação temporal considera safra, estágio, calendário e base equivalentes. Série distingue observado, previsto e estimado; não unir pontos faltantes como fato.
+Cartão apresenta valor, unidade, período, meta/contexto, variação, fonte/data e estado do dado; fora do estado Atual, mostra também o estado de atualidade da projeção (PROJ-07). Meta não configurada não recebe verde automático; ausência de dados mostra “sem dados/insuficiente”, não zero. Comparação temporal considera safra, estágio, calendário e base equivalentes. Série distingue observado, previsto e estimado; não unir pontos faltantes como fato.
 
 Clique segue **Indicador → composição/causas → registros de origem → ação**. Mostrar Pareto de contribuição quando aditivo, tendência e tabela comparativa; números exatos permanecem acessíveis. Para meta desviada, oferecer ação contextual do módulo ou GE-07 com responsável/prazo, origem e critério de eficácia. Alertas por gravidade, persistência e prazo evitam spam, respeitam autorização e não disparam compra, venda ou comando de equipamento por si só.
 
 Metas são configuradas por contexto e aprovador, com direção desejável, faixa de tolerância e validade; sazonalidade e reserva estratégica importam. Não impor benchmark comercial sem fonte, definição equivalente e amostra. Explicar trade-offs: estoque menor pode aumentar ruptura, velocidade maior pode reduzir qualidade, alta utilização pode tirar margem para manutenção, prazo comercial maior pode pressionar caixa. Ação deve avaliar efeito econômico e operacional, não melhorar uma métrica prejudicando outra sem ciência do gestor.
+
+**Meta usada em avaliação ou remuneração.** A organização marca a meta em CF-02 (FO-38) e informa avaliados (pessoas ou equipes) e data de corte do período; sem marcação, a meta é só gerencial. O produto não calcula bônus nem folha (1.2). No corte, o resultado do período fica registrado com a versão da fórmula e dos parâmetros, a base e a data de corte, e pode ser reproduzido. Mudança de definição tem vigência explícita e não alcança período já cortado (RN-037). Correção de fato de período cortado atualiza o indicador operacional e aparece vinculada ao resultado da avaliação, sem reescrevê-lo. Quem pode publicar a mudança segue 2.1.
 
 Indicador de cobertura dos dados informa ordens apontadas, medições válidas, custos provisórios e integrações atrasadas pertinentes. Relatório exportado conserva filtros, versão de fórmula, base e data de corte. Um serviço semântico de métricas compartilhado calcula os mesmos resultados em módulo, painel, API e exportação; cache indica atualização e é invalidado conforme eventos, sem recontar fatos duplicados.
 
@@ -8587,6 +8733,11 @@ Indicador de cobertura dos dados informa ordens apontadas, medições válidas, 
 - **IND-08:** metas/versionamento, dados provisórios, cobertura e atualização ficam visíveis; sem meta/dado não se mostra sucesso artificial.
 - **IND-09:** testes por domínio incluem exemplo calculado independentemente, mudança de filtro, agregação, atraso de integração e exportação reproduzível; resultados devem ser evidenciados na implementação.
 - **IND-10:** homologar tarefas de direção, agronomia, PCP, oficina, suprimentos, almoxarifado, colheita/packing, comercial/logística e financeiro: identificar desvio, entender causa e abrir ação sem navegar por painéis duplicados; corrigir ambiguidade de fórmula/unidade antes de liberar.
+- **IND-11:** meta usada em avaliação com o gestor entre os avaliados: ele propõe reduzir a própria meta, mas a publicação é recusada no servidor pela interface, API, importação e IA; a proposta vai à IN-02 do revisor e nenhuma versão entra em vigor.
+- **IND-12:** o mesmo gestor, com outro papel que tem alçada de aprovar metas, não aprova a própria proposta; a tentativa fica na trilha.
+- **IND-13:** o revisor de outra identidade vê motivo, evidência, registros afetados e resultado antes/depois e aprova com vigência explícita; o período já cortado reproduz o resultado anterior; CF-04 mostra autor, revisor e independência.
+- **IND-14:** uma falha real de máquina é registrada enquanto sua exclusão do indicador, pedida pelo avaliado, está em revisão; até a decisão o indicador conta a falha e mostra a pendência; nenhuma decisão apaga o registro.
+- **IND-15:** em meta usada em avaliação e não ligada a remuneração variável (nesta, a exceção depende da PEND-18), sem revisor independente e com a exceção habilitada em CF-02, a mudança é publicada com a marca Sem revisão independente e fica Revisão posterior pendente em CF-04 até a revisão; sem a exceção, a publicação é recusada.
 
 Referências complementares: [IBM — indicadores de manutenção](https://www.ibm.com/think/topics/maintenance-kpis), [IBM — MTTR](https://www.ibm.com/think/topics/mttr), [APQC — desempenho de pedidos](https://www.apqc.org/resources/benchmarking/open-standards-benchmarking/measures/perfect-order-performance). Há convenções diferentes entre fontes; o sistema deve preservar suas definições operacionais explícitas e declarar diferenças antes de comparar benchmarks. Esta especificação não certifica aderência integral a uma norma nem comprova resultados já alcançados.
 
@@ -8787,7 +8938,7 @@ Google One Tap pode reduzir etapas quando suportado, mas manter botão normal e 
 
 Validar tokens no servidor, assinatura, emissor, público, expiração e proteção contra repetição/CSRF conforme o protocolo utilizado. Guardar segredos fora do cliente, usar sessão segura, proteger recuperação e aplicar autenticação reforçada em mudanças sensíveis. Cancelamento de consentimento, popup bloqueado, navegador incompatível ou falha de provedor oferecem alternativa sem apagar progresso. E-mail sem senha tem expiração, limite de tentativas e retorno seguro. Não revelar existência de outras contas por mensagens de erro.
 
-Meta de experiência: entrar no ambiente inicial imediatamente após autenticação bem-sucedida, sem formulário longo intermediário. Não prometer um clique literal: o provedor, navegador ou política de segurança pode exigir seleção de conta ou autenticação adicional.
+Meta de experiência: entrar no ambiente inicial logo após a autenticação bem-sucedida, sem formulário longo intermediário, com p95 ≤2 s do retorno autenticado do provedor até o conteúdo útil da tela inicial do papel (PERF-01). Não prometer um clique literal: o provedor, navegador ou política de segurança pode exigir seleção de conta ou autenticação adicional.
 
 ### 58.3. Primeiro valor e cadastro progressivo
 
@@ -8820,6 +8971,17 @@ Medir visita → autenticação iniciada → entrada → primeira tarefa útil �
 
 Experimentos devem otimizar clientes ativos e contribuição sustentável, não apenas cadastros ou cartões coletados. Convites são enviados por iniciativa autorizada do usuário, sem importar contatos e disparar campanhas automaticamente. Mensagens de ajuda respeitam preferências. Analytics não captura documentos técnicos, dados financeiros detalhados, cartões ou conversas completas por padrão.
 
+**Acompanhamento da adoção por conta.** Em BO-04, **Investigar adoção** lista as contas que pedem atenção. A leitura compara o trabalho previsto da própria conta com os registros recebidos no mesmo período, por processo habilitado na matriz de direitos (58.1); o período é a janela do processo de USO-03 (75.3). O trabalho previsto vem do que a conta já mantém: etapas pendentes de ON-01, datas do ciclo (FO-01), O.S. programadas e atividades do plano publicado com data no período. Não criar calendário sazonal paralelo. Ausência de login não prova abandono. Registros do exemplo (58.3) e de ambientes de teste não contam (ONB-10). Vale a primeira leitura da tabela que se aplicar, com o mesmo critério de 44.9: falta de demanda não é falha, e falta de apontamento atual é estado desconhecido.
+
+| Leitura | Quando se aplica | Próximo passo sugerido |
+|---|---|---|
+| Implantação parada | Etapa obrigatória de ON-01 sem avanço no período | Verificar cadastro pendente ou necessidade de treinamento |
+| Evidência insuficiente | Conta sem ciclo nem plano publicado que permitam prever o trabalho do período; aparelho de campo vinculado sem sincronização no período (64.5); ou “dados até” anterior ao fim do período | Investigar os dados; não atribuir risco |
+| Trabalho previsto sem registro | O.S. ou atividade com data prevista no período já decorrido, em processo habilitado, sem apontamento ou atualização recebida | Identificar a causa com o responsável da organização |
+| Sem trabalho previsto | Nenhuma O.S. programada nem atividade do plano no período, como na entressafra entre ciclos | Nenhum; a conta não entra na lista |
+
+Cada leitura mostra motivo, período, “dados até” e evidência em contagens, datas e estados por processo e papel responsável, sem produto, dose, custo, mapa ou documento da fazenda (NFR-17). Ver a leitura exige permissão própria no backoffice (ENG-043); abrir dados da fazenda exige o acesso temporário e auditado de 26.1. A ação primária do detalhe da conta é **Registrar tratamento** (FO-38): causa (dificuldade no produto, treinamento, cadastro pendente, falha técnica, decisão do cliente ou leitura improcedente), ação, responsável e prazo, com pendência conforme 68.5; falha técnica segue 30.3 e 75.5. A leitura e o tratamento não enviam mensagem externa, não suspendem a conta e não alteram direitos, franquia, preço, cobrança ou funcionalidades. Contato com o cliente é feito por pessoa autorizada, nos canais e preferências autorizados. Nesta versão não há pontuação agregada, pesos nem cortes fixos. BO-04 mede, por coorte, implantações destravadas, retomada de registros após tratamento e taxa de leituras improcedentes; retomada após tratamento é associação, não prova de causa. A taxa de adoção, quando mostrada, é a de USO-03, sem fórmula própria, e os eventos de uso seguem USO-01 e USO-05 (75.3).
+
 ### 58.6. Critérios de aceite
 
 - **ONB-01:** Google, Apple e e-mail levam à mesma conta quando vinculados com comprovação; não duplicam organização nem concedem papel indevido.
@@ -8832,6 +8994,11 @@ Experimentos devem otimizar clientes ativos e contribuição sustentável, não 
 - **ONB-08:** pagamento autenticado, webhook repetido, falha e estorno conciliam sem duplicidade ou liberação incorreta.
 - **ONB-09:** cancelamento, atualização de cartão, exportação e retomada ficam acessíveis, sem barreira artificial de suporte.
 - **ONB-10:** painel de growth cruza ativação/retenção/margem e identifica coortes, sem tratar métrica simulada como produção.
+- **ONB-11:** duas contas sem login no período recebem leituras diferentes: a conta entre ciclos, sem O.S. programada nem atividade do plano no período, fica em Sem trabalho previsto e não entra na lista; a conta com O.S. programadas no período já decorrido, nenhum apontamento recebido e aparelhos sincronizados aparece em Trabalho previsto sem registro, com motivo, período, “dados até” e contagens.
+- **ONB-12:** conta com O.S. Em execução e aparelho de campo sem sincronização no período fica em Evidência insuficiente; o sistema não afirma abandono nem ausência de execução. Depois da sincronização, a leitura é recalculada com os apontamentos recebidos.
+- **ONB-13:** usuário do backoffice com permissão de acompanhamento vê motivo, período, “dados até”, contagens, datas, estados e próximo passo, sem produto, dose, custo, mapa ou documento; usuário sem a permissão é negado no servidor, inclusive por URL direta e API; abrir dados da fazenda exige o acesso temporário e auditado de 26.1.
+- **ONB-14:** Registrar tratamento grava causa, ação, responsável e prazo em FO-38 e cria a pendência do responsável (68.5); o sistema não envia mensagem externa, e direitos, franquia, preço, cobrança, acesso e funcionalidades da conta permanecem inalterados.
+- **ONB-15:** BO-04 apresenta, com período e método, implantações destravadas, retomada de registros após tratamento por coorte e taxa de leituras improcedentes; a retomada aparece como associação, sem afirmar causa.
 
 Referências técnicas: [Google — integração de identidade](https://developers.google.com/identity/gsi/web/guides/integrate); [Apple — configuração de login](https://developer.apple.com/documentation/signinwithapple/configuring-your-environment-for-sign-in-with-apple); [Stripe — sessões de checkout](https://docs.stripe.com/api/checkout/sessions); [Stripe — trials](https://docs.stripe.com/billing/subscriptions/trials). São referências de capacidades, não escolha irrevogável de fornecedor nem evidência de superioridade comercial do trial proposto.
 
@@ -8893,7 +9060,7 @@ Registrar solicitação, identidade, escopo, dados consultados por referência, 
 - **IAEXEC-09:** cálculos são comparados com casos independentes do motor; protocolos sem homologação não geram recomendação executável.
 - **IAEXEC-10:** indisponibilidade, timeout ou limite de IA preservam dados e permitem concluir pela interface convencional.
 - **IAEXEC-11:** avaliar casos de cada domínio com usuários responsáveis; falhas críticas de autorização, execução e isolamento bloqueiam publicação da capacidade. Aprovação em testes não significa garantia de erro zero em produção.
-- **IAEXEC-12:** resultado mostra documentos/efeitos verificáveis; métricas de qualidade/custo e mecanismo de desativação permitem retirar capacidade problemática sem parar o ERP.
+- **IAEXEC-12:** resultado mostra documentos/efeitos verificáveis; métricas de qualidade/custo e mecanismo de desativação permitem retirar capacidade problemática sem parar a plataforma.
 
 Referências de engenharia: [OWASP — Excessive Agency](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/); [OWASP — prevenção de prompt injection](https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html). Esses controles complementam a autorização e integridade já exigidas pelo PRD; revisão humana isolada não é barreira suficiente.
 
@@ -8933,7 +9100,18 @@ Ajustes locais ficam como diferenças sobre versão selecionada. Atualização g
 
 Importação aceita modelos CSV/XLSX e conectores homologados, com mapeamento salvo, prévia, duplicidades e erros por linha. XML/documentos autorizados podem sugerir produtos e parceiros, mas exigem conciliação: importar nota não comprova recebimento físico. OCR e IA ajudam na digitação, distinguindo extração de inferência. Lote de importação é idempotente, rastreável e reversível enquanto não houver dependências; depois, correções seguem regras de negócio.
 
+**Correção por causa na prévia.** Quando várias linhas falham pela mesma causa (código legado, grupo, categoria, local ou unidade declarada sem correspondência), corrige-se uma vez. Ao corrigir um valor ou escolher a correspondência cadastral numa linha, a prévia oferece **Aplicar a N linhas** se outras linhas atendem ao mesmo critério explícito: coluna, valor de origem e contexto (tipo de registro e, quando o valor depende dele, fazenda, fornecedor ou laboratório). O painel mostra o critério, uma amostra, a seleção revisável e o antes/depois; N acompanha a seleção. Semelhança de texto só sugere e nunca inclui linha no critério. Para produtos, lotes, formulações, pessoas, unidades e métodos analíticos, o critério inclui os atributos de identidade do tipo (por exemplo, registro e concentração, documento, fornecedor do lote, método e extrator); linha com o mesmo texto e identidade divergente fica fora e aparece como tal. Quantidade, saldo, custo, dose, coordenada e resultado analítico não recebem valor em lote; conversão só com fator cadastrado e válido para o item.
+
+Ao aplicar, o sistema revalida todas as linhas afetadas, inclusive duplicidade dentro do lote e com a base, e informa quantas passaram e quais ganharam erro (RN-035); linha com erro fica pendente e não é publicada. Até publicar, desfazer a correção restaura os valores de origem. O lote registra, por transformação, critério, linhas alteradas, valor anterior e novo, autor, instante e versão do mapeamento; o arquivo original continua recuperável pelo hash, e o histórico do registro publicado aponta arquivo, linha e transformações (RN-044). A correspondência confirmada entra em nova versão do mapeamento salvo e, na importação seguinte da mesma fonte, aparece aplicada e identificada na prévia, sujeita à mesma revisão. Cada linha publicada leva a chave por linha de IDEM-10 (73.3); reenviar o mesmo arquivo com a mesma versão do mapeamento devolve os recibos das linhas já publicadas. Importações especializadas (laudo em AG-02, mapa de colheita, geometria) aplicam também as validações do seu tipo. A reversão do lote continua condicionada às dependências; depois do uso em fato confirmado, a correção segue o processo do domínio.
+
 Critérios: **CADN-01** selecionar biblioteca sem criar fatos falsos; **CADN-02** atualizar sem sobrescrever ajustes/histórico; **CADN-03** identificar produtos/embalagens/unidades sem fusão indevida; **CADN-04** importar com prévia e idempotência; **CADN-05** mostrar cobertura/licença/última atualização de cada conector; **CADN-06** homologar implantação real medindo tempo poupado, correções, abandono e utilização, não apenas quantidade de itens pré-carregados.
+
+Critérios da correção por causa:
+- **CADN-07:** planilha de 200 insumos com o código de grupo legado G-17, sem correspondência: mapear G-17 ao grupo do cadastro numa linha e usar Aplicar a 200 linhas corrige todas sem editar célula a célula; as 200 são revalidadas antes de publicar, e o histórico de cada registro mostra arquivo, linha, transformação, autor e versão do mapeamento.
+- **CADN-08:** com as 200 linhas de insumo, 15 linhas de outro tipo de registro com G-17 e 5 linhas desmarcadas na revisão, a prévia lista antes de aplicar as 195 linhas que mudam; as 15 e as 5 ficam intactas, com o erro original.
+- **CADN-09:** duas linhas com o mesmo nome comercial e concentrações diferentes não entram no mesmo critério; corrigir a unidade declarada de um laudo não altera nem converte resultados; coluna de quantidade do estoque inicial não oferece Aplicar a N linhas.
+- **CADN-10:** correção que aponta para grupo inativo, unidade incompatível com a unidade-base do item ou duplicidade com registro existente é sinalizada nas linhas afetadas antes de publicar; elas ficam pendentes e o lote não é confirmado como integral.
+- **CADN-11:** reenviar o mesmo arquivo não duplica registros e devolve os recibos das linhas publicadas; o original é recuperável pelo hash; reverter o lote depois que um registro foi usado em fato confirmado é recusado com as dependências, e a correção segue o domínio; não há janela fixa de desfazer.
 
 Fontes: [MAPA — AGROFIT](https://www.gov.br/agricultura/pt-br/assuntos/insumos-agropecuarios/insumos-agricolas/agrotoxicos/agrofit), [MAPA — cultivares registradas](https://www.gov.br/agricultura/pt-br/assuntos/insumos-agropecuarios/insumos-agricolas/sementes-e-mudas/registro-nacional-de-cultivares/cultivares-ou-especies-registradas), [GS1 — API CNP](https://portalapi.gs1br.org/pageApiCnp), [IBGE — localidades](https://servicodados.ibge.gov.br/api/docs/localidades). A presença de uma fonte não comprova que seus dados já foram importados, licenciados ou validados.
 
@@ -8957,17 +9135,17 @@ Campos químicos contemplam o dicionário completo do capítulo 38, incluindo pH
 
 ### 61.3. Visualização espacial honesta
 
-No mapa: **Solo → Química / Física / Biológica** e **Satélite → Índices e imagens**. Seletor único de fazenda, talhão/parcela, atributo, campanha/data, profundidade, método e camada. Alternar pontos amostrados, setores representados, superfície estimada e classes interpretativas. Legenda mostra unidade, intervalos, protocolo, data, resolução e cobertura. Sem dado/fora de cobertura é cinza ou hachurado, diferente de resultado baixo. Paleta acessível e valores textuais complementam cores.
+No mapa: **Solo → Química / Física / Biológica** e **Satélite → Índices e imagens**. Seletor único de fazenda, talhão/parcela, atributo, campanha/data, profundidade, método e camada. Alternar pontos amostrados, setores representados, superfície estimada e classes interpretativas. Legenda mostra unidade, intervalos, protocolo, data, resolução e cobertura. Sem leitura válida ou fora de cobertura (nuvem, sonda sem dado, sem imagem) é hachura cinza; camada que não se aplica (sem cultura, sem ordem, sequeiro, colhido) é preenchimento claro liso; os dois diferem de resultado baixo (74.7.4). Paleta acessível (74.7; 74.9) e valores textuais complementam cores.
 
 Uma amostra composta de talhão inteiro permite uma classe/valor para a área representada; **não autoriza inventar variabilidade interna**. Setores amostrados podem receber cores distintas por setor. Pontos georreferenciados podem originar interpolação somente com desenho amostral e variabilidade adequados, método justificado, avaliação de erro/validação e limites de extrapolação definidos pelo responsável. Não fixar uma densidade universal de pontos para todos os atributos. Mostrar superfície como estimativa, com amostras sobrepostas e qualidade/incerteza consultável. Grade visual fina não aumenta resolução real.
 
-“Melhor/pior” exige objetivo e faixa técnica contextual. pH, nutrientes, densidade ou atividade biológica não obedecem universalmente à regra quanto maior melhor. Quando não houver referência válida, mostrar gradiente de valores sem julgamento agronômico. Não criar índice único de saúde química/física/biológica sem metodologia validada e composição transparente. Comparações temporais usam mesma legenda/unidade e compatibilidade de profundidade, método e contexto; quantis automáticos por data não podem simular melhora.
+“Melhor/pior” exige objetivo e faixa técnica contextual (paleta do Solo em 74.7.1; PEND-DS-11). pH, nutrientes, densidade ou atividade biológica não obedecem universalmente à regra quanto maior melhor. Quando não houver referência válida, mostrar gradiente de valores sem julgamento agronômico. Não criar índice único de saúde química/física/biológica sem metodologia validada e composição transparente. Comparações temporais usam mesma legenda/unidade e compatibilidade de profundidade, método e contexto; quantis automáticos por data não podem simular melhora.
 
 Ao tocar uma região/ponto: valor, origem medida/estimada, profundidade, coleta/análise, método, laudo e limites; ações **Ver laudo**, **Interpretar**, **Comparar**, **Planejar nova coleta** e **Preparar recomendação** conforme estado/permissão. Seleção acompanha usuário entre mapa, análise e recomendação, preservando safra/parcela.
 
 ### 61.4. Satélite e integração agronômica
 
-Mostrar NDVI e outros índices homologados, imagem de referência, data de aquisição, sensor, bandas, resolução nativa, processamento e máscara de qualidade. Nuvens, sombras e pixels sem dado são mascarados; cobertura válida refere-se ao talhão, não somente ao mosaico inteiro. Composição multitemporal informa janela e datas dos pixels; nuvem não se torna área de baixo vigor. Reamostragem não cria detalhe novo; comparar datas e sensores somente com processamento compatível.
+Mostrar NDVI e outros índices homologados, imagem de referência, data de aquisição, sensor, bandas, resolução nativa, processamento e máscara de qualidade. Nuvens, sombras e pixels sem dado são mascarados; cobertura válida refere-se ao talhão, não somente ao mosaico inteiro. Composição multitemporal informa janela e datas dos pixels; nuvem não se torna área de baixo vigor; a hachura e o % de nuvem do talhão seguem 74.7.4. Reamostragem não cria detalhe novo; comparar datas e sensores somente com processamento compatível. Raster por pixel, escala relativa ao talhão e imagem de fundo real dependem da PEND-DS-12 (74.12).
 
 Índice espectral evidencia padrão de vegetação, não determina sozinho deficiência nutricional, doença, nematoides ou fertilidade química. Cruzar espacialmente com amostras, manejo, estágio da cultura, irrigação e vistoria; apresentar hipótese e abrir inspeção. Usar umidade do solo ou atributos biológicos estimados apenas se houver produto/modelo validado para o contexto, identificado como estimativa.
 
@@ -9057,13 +9235,13 @@ Modelo versionado por cultura, fase, solo e método de irrigação. Usar referê
 
 Balanço conserva água: chuva infiltrada, irrigação efetiva e eventual ascensão capilar, menos evapotranspiração, drenagem e demais fluxos definidos. Não descontar escoamento/percolação duas vezes ao usar chuva efetiva. Chuva prevista altera cenários, não histórico realizado. Lâmina bruta considera eficiência aplicável documentada, sem multiplicar penalidades já embutidas; volume bruto em m³ = lâmina bruta em mm × área em ha × 10. Duração depende da vazão real e configuração de operação; não usar média de equipamento para setor incompatível.
 
-Sensores mantêm modelo, profundidade, localização, calibração, frequência, última leitura e qualidade. Detectar leituras travadas, saltos e divergência entre sensores/modelo; reconciliar com evidência sem apagar observações. Dados antigos ou ausentes reduzem confiança e seguem política técnica de contingência. Chuva, pressão, vazão, energia e posição do pivô são fontes distintas. Telemetria recebida não implica que comando foi cumprido.
+Sensores mantêm modelo, profundidade, localização, calibração, frequência, última leitura e qualidade. Detectar leituras travadas, saltos e divergência entre sensores/modelo; reconciliar com evidência sem apagar observações. Dados antigos ou ausentes reduzem confiança e seguem a validade por fonte de PROJ-13 a PROJ-15 (valores iniciais em PEND-13). Na irrigação só com água, dado de sonda ou de clima ausente ou vencido usa estimativa por ET marcada como estimativa, sem bloquear e sem ir ao agrônomo (PROJ-14; DEC-2609-10). Chuva, pressão, vazão, energia e posição do pivô são fontes distintas. Telemetria recebida não implica que comando foi cumprido.
 
 ### 63.4. Viabilidade e execução
 
 Programação conjunta considera disponibilidade de captação/reservatório, limites autorizados cadastrados, bombas compartilhadas, vazão/pressão, rede elétrica e demanda contratada, tarifas, manutenção, turnos e concorrência com pulverização/colheita. Janela barata não pode ultrapassar limite agronômico tolerável. Quando demanda excede capacidade, apresentar déficit de atendimento e alternativas; não produzir agenda fisicamente impossível. Regras de salinidade/lixiviação, déficit controlado e fertirrigação requerem protocolo específico e responsável, sem adição automática de água/nutriente.
 
-A autorização individual ou por política de água sem insumos (41.8) gera/revisa a mesma tarefa/O.S. de irrigação. Execução registra volume, tempo, área efetivamente coberta, interrupções e fonte medida/estimada. Retorno atualiza balanço, custo, agenda e condição dos ativos. VRI depende de capacidade real e conector homologado; mapa de recomendação não é comando automático. Comando remoto exige autorização, intertravamentos e confirmação de estado; ausência de comunicação não autoriza assumir desligamento ou execução. Instrução local segura do fabricante e equipe prevalece na contingência.
+A aprovação individual (fertirrigação) ou a programação pela necessidade da cultura (água sem produto, DEC-2609-10; 41.8) gera/revisa a mesma tarefa/O.S. de irrigação. Execução registra volume, tempo, área efetivamente coberta, interrupções e fonte medida/estimada. Retorno atualiza balanço, custo, agenda e condição dos ativos. VRI depende de capacidade real e conector homologado; mapa de recomendação não é comando automático. Comando remoto exige autorização, intertravamentos e confirmação de estado; ausência de comunicação não autoriza assumir desligamento ou execução. Instrução local segura do fabricante e equipe prevalece na contingência.
 
 Indicadores em IR-04 e GE-06: volume aplicado, mm por área efetiva, kWh/m³, custo/m³ e por mm·ha, conformidade com programação, tempo fora da faixa de manejo, disponibilidade do sistema, cobertura/confiabilidade dos dados e produtividade por água com denominador explicitado. Produção/água de irrigação e produção/água total são métricas diferentes. Economia alegada precisa de base comparável e clima/cultura/contexto, sem porcentagem garantida.
 
@@ -9084,9 +9262,9 @@ Fontes: [iCrop — mapa](https://support.icrop.com.br/mapa), [iCrop — gestão 
 
 ### 64.1. Contrato de experiência
 
-Manter navegação móvel existente **Hoje · Ordens · Registrar · Caixa**, com Caixa explicitamente identificada como mensagens/pendências, não caixa financeiro. Hoje é fila contextual por usuário, equipe, turno, fazenda e processo. Usuário multifunção alterna papel/contexto autorizado sem trocar de conta. Ordens, dados e eventos são os mesmos do ERP, sem versões paralelas para o app.
+Manter navegação móvel existente **Meu dia · Ordens · Registrar · Caixa** (a aba Hoje passa a Meu dia, 64.7), com Caixa explicitamente identificada como mensagens/pendências, não caixa financeiro. Meu dia é fila contextual por usuário, equipe, turno, fazenda e processo. Usuário multifunção alterna papel/contexto autorizado sem trocar de conta. Ordens, dados e eventos são os mesmos da plataforma, sem versões paralelas para o app; ERP é o sistema externo (1.2).
 
-Cada cartão mostra prioridade e motivo, local/mapa, janela, tarefa, quantidade/unidade, recurso, responsável, estado, versão e impedimentos. Destaque único para próxima ação possível: **Preparar**, **Iniciar**, **Retomar**, **Registrar**, **Entregar** ou **Conferir**. Tarefa bloqueada fica identificada, sem competir como ordem executável. Próxima tarefa pode ser sugerida, mas iniciar execução exige ação do operador e pré-condições válidas.
+Cada cartão mostra prioridade e motivo, local/mapa, janela, tarefa, quantidade/unidade, recurso, responsável, estado, versão e impedimentos. Destaque único para próxima ação possível: **Preparar**, **Iniciar**, **Retomar**, **Registrar**, **Entregar** ou **Conferir** (verbos a evitar em 74.8.1; botão da faixa de ação em 74.5.27). Tarefa bloqueada fica identificada, sem competir como ordem executável. Próxima tarefa pode ser sugerida, mas iniciar execução exige ação do operador e pré-condições válidas.
 
 ### 64.2. Filas e apontamentos por função
 
@@ -9113,30 +9291,75 @@ Conflitos de pessoa/máquina/material e dependências aparecem antes de iniciar.
 
 ### 64.4. Apontar com poucos passos e qualidade
 
-Formulário contextual, botões grandes, unidades explícitas, teclado numérico, salvamento automático e campos obrigatórios mínimos. Uma tarefa simples deve poder ser iniciada e seu apontamento comum preparado em até três interações após abrir o cartão, excluindo leitura de instruções, checagens técnicas e confirmação necessária; validar em teste, sem remover controles para bater meta. Voz com transcrição revisável é opcional, com alternativa para ruído de campo. Foto só quando agrega evidência ou regra exige; não impor foto a cada registro.
+Formulário contextual, alvo mínimo de 44 × 44 px (4.3; 74.9), unidades explícitas, teclado numérico e seleção rápida (UXP-03; DS-88), salvamento automático e campos obrigatórios mínimos. Uma tarefa simples deve poder ser iniciada e seu apontamento comum preparado em até três interações após abrir o cartão, excluindo leitura de instruções, checagens técnicas e confirmação necessária; validar em teste, sem remover controles para bater meta. Voz com transcrição revisável é opcional, com alternativa para ruído de campo. Foto só quando agrega evidência ou regra exige; não impor foto a cada registro.
 
 Cronômetro e horímetro têm funções distintas. Detectar sobreposição de jornada/execução impossível sem descartar o registro; permitir correção justificada com trilha. Para equipe, encarregado pode registrar lote de apontamentos identificados individualmente, respeitando atribuição e evitando multiplicar área pela quantidade de pessoas. Tarefa parcialmente concluída conserva saldo e motivo. Concluir execução não fecha a O.S. enquanto houver custódia/sobras/pendências exigidas pelo capítulo 42.
 
 ### 64.5. Offline, dispositivos e continuidade
 
-Baixar antes do turno O.S., versões aprovadas, instruções, mapas necessários e cadastros mínimos autorizados. Mostrar **Salvo neste aparelho**, **Aguardando envio**, **Sincronizado** ou **Conflito**, sem confundir salvamento local com aceite central. Eventos têm ID único, sequência, horário local e recepção no servidor; tratar relógio incorreto. Reenvio não duplica horas, estoque ou produção. Fotos podem sincronizar depois, mantendo referência e pendência.
+Baixar antes do turno O.S., versões aprovadas, instruções, mapas necessários e cadastros mínimos autorizados. Mostrar **Salvo neste aparelho**, **Aguardando envio**, **Enviando** (transitório, enquanto o controle aguarda o resultado; IDEM-08), **Sincronizado** ou **Conflito**, sem confundir salvamento local com aceite central; cor e ícone em 74.4. Cada registro leva a chave da sua intenção, gerada e gravada com o conteúdo antes do primeiro envio, com ou sem sinal, e repetida em toda tentativa, inclusive depois de reiniciar o app (IDEM-05, IDEM-06), além de sequência local, horário local e recepção no servidor; a hora do aparelho não decide ordem nem conflito (CONC-20, CONC-21). Reenvio não duplica horas, estoque ou produção (73.3). Fotos podem sincronizar depois, mantendo referência e pendência.
 
-Política offline define quais tarefas podem iniciar com autorização previamente sincronizada, prazo de validade e bloqueios. Não é possível garantir conhecimento imediato de uma interdição emitida sem conectividade: expor última atualização e procedimento operacional de contingência. Ações que exigem informação atual ou intertravamento não são liberadas apenas por cache. Mudanças conflitantes de dose, recurso ou saldo não usam “último a gravar vence”; vão para conciliação e responsável. Dispositivo compartilhado exige identificação rápida do executor, encerramento de sessão e proteção de dados locais.
+Política offline define quais tarefas podem iniciar com autorização previamente sincronizada, prazo de validade e bloqueios; o pacote de execução válido protege a reserva ativa da ordem (RSV-08), e a cota de material delegada a aparelho ou local offline segue RSV-09. Não é possível garantir conhecimento imediato de uma interdição emitida sem conectividade: expor última atualização e procedimento operacional de contingência. Ações que exigem informação atual ou intertravamento não são liberadas apenas por cache. Mudanças conflitantes de dose, recurso ou saldo não usam “último a gravar vence”; vão para conciliação e responsável. Dispositivo compartilhado exige identificação rápida do executor, encerramento de sessão e proteção de dados locais.
 
 Apontamentos alimentam estoque, custos, disponibilidade, balanço hídrico, produção, logística e indicadores por eventos validados, sem redigitação. Histórico mostra origem e efeitos. Encarregado recebe painel de exceções; equipe recebe retorno claro de correção, não apenas erro genérico. A IA contextual do capítulo 59 pode ajudar a registrar e explicar, mas não é necessária para trabalhar offline nem substitui validação.
 
 ### 64.6. Critérios de aceite
 
 - **CAMPO-01:** homologar rotina completa de cada perfil da tabela com iniciantes e operadores reais, usando dados representativos e rede instável.
-- **CAMPO-02:** Hoje mostra somente escopo autorizado, prioridade explicada e tarefas liberadas/bloqueadas sem confusão.
+- **CAMPO-02:** Meu dia mostra somente escopo autorizado, prioridade explicada e tarefas liberadas/bloqueadas sem confusão.
 - **CAMPO-03:** instruções aprovadas, produtos, doses e cálculos chegam prontos; alteração de versão exige tratamento explícito antes de executar.
 - **CAMPO-04:** apontamento usa dados existentes e registra realizado real, inclusive parcial, sem converter previsão em fato.
 - **CAMPO-05:** nova prioridade não duplica O.S. nem interrompe silenciosamente tarefa em andamento.
-- **CAMPO-06:** repetir sincronização não duplica movimentos; conflitos críticos são reconciliados e dados locais sobrevivem à reinicialização suportada.
+- **CAMPO-06:** repetir sincronização não duplica movimentos; conflitos críticos são reconciliados e dados locais sobrevivem à reinicialização suportada; depois de reiniciar, o reenvio usa a mesma chave (IDEM-06; AC-73), e outro conteúdo com a mesma chave é conflito de chave, sem sobrescrever o recibo (IDEM-14; AC-74).
 - **CAMPO-07:** offline mostra idade da autorização e limites; não promete atualização de bloqueios sem comunicação.
 - **CAMPO-08:** conclusão da execução conserva devoluções e conferências pendentes antes do fechamento definitivo.
 - **CAMPO-09:** acessibilidade, uso ao sol, tamanhos de toque, interrupção por chamada e dispositivo compartilhado são avaliados em campo.
 - **CAMPO-10:** medir tempo por apontamento, correções, abandono, sincronização e percentual de O.S. encerradas corretamente; metas são validadas por tarefa, não promessa de execução perfeita.
+
+### 64.7. Meu dia, registro rápido e retorno (v3.10)
+
+Pedido do proprietário (27/09/2026): app extremamente intuitivo por função, apontamento rápido com o mínimo de erro, retorno visual e sonoro discreto e fila do dia dizendo o que cada pessoa precisa fazer. Refina 64.1 a 64.5; não cria painel novo nem questionário ao agricultor. Componentes no cap. 74 (74.5.27 a 74.5.29 e 74.6.7).
+
+- **Um nome só:** a aba **Hoje** passa a se chamar **Meu dia**, o mesmo nome do IN-01 na web. Navegação móvel: **Meu dia · Ordens · Registrar · Caixa**.
+- **Três blocos, nesta ordem:**
+  - **Agora:** a tarefa em curso ou a mais urgente executável, com a única ação válida no estado. Tarefa impossível nunca aparece aqui.
+  - **Depois:** as demais executáveis, na ordem de 64.3.
+  - **Impedidas:** causa e quem resolve, no formato "{pendência} · {dono}" do cap. 74, sem botão de execução.
+- **Motivo da posição em uma linha:** o critério de 64.3 que decidiu ("Turno aberto", "Janela termina hoje 18:00", "Depende de retirar com Rui"). Prioridade mudada pelo gestor mostra quem e por quê. A IA só propõe mudança; aplicar exige aprovação (IAG-02, CMD-38).
+- **Por função:** cada perfil de 64.2 vê só os próprios verbos. Exemplos:
+  - operador: Iniciar, Pausar, Fechar turno;
+  - almoxarife: Separar, Entregar, Receber devolução, Liberar lote;
+  - manutenção: Diagnosticar, Reparar, Testar;
+  - agrônomo: Vistoriar, Recomendar, Aprovar quando exigido;
+  - encarregado: Desbloquear, Distribuir, Conferir.
+
+  Os atalhos para outros trabalhos mostram só os da função.
+- **Registrar só o realizado:** a ordem aberta herda talhão, serviço, insumo, lote confirmado e unidade. Estimativa (consumo = dose × área, horas previstas) aparece identificada como "estimado". Nunca é preenchida como fato nem altera a dose aprovada.
+- **Validar antes de confirmar**, junto ao campo e preservando o que foi digitado: unidade, faixa plausível, saldo da ordem, custódia confirmada, área restante e duplicidade.
+  - **Aviso** (valor incomum, papel Atenção) não impede. Exemplo: hectares por hora acima do rendimento do conjunto.
+  - **Impedimento** (papel Erro) impede e diz o que fazer. Exemplos: área acima do saldo, consumo acima da custódia.
+- **Retorno imediato no próprio controle**, com texto além da cor e só com as palavras de 74.4.3:
+  - Enviando → Salvo neste aparelho ou Aguardando envio → Sincronizado (Ver recibo);
+  - Conflito (Revisar).
+
+  Toque repetido durante o envio não cria outro registro (IDEM-08). O aviso temporário não precisa ser fechado para seguir. Erro relevante nunca fica só no aviso temporário.
+- **Som discreto e opcional:**
+  - dois sons curtos: um para "salvo" e outro para "precisa de atenção";
+  - toca só em resposta a uma ação da pessoa, nunca na sincronização de fundo, e no máximo um som por ação;
+  - ligado por padrão e desligável no menu do app; a escolha fica guardada por aparelho e usuário;
+  - segue o modo silencioso do aparelho quando a plataforma permite;
+  - toda informação funciona sem som;
+  - notificação do sistema só com permissão e com a ação dentro.
+- **Três fatos distintos:** fechar turno, concluir a tarefa e encerrar a O.S. O cartão mostra só a ação válida no estado (64.4; cap. 42).
+
+**Aceites** (especificado; não executado):
+- **CAMPO-11:** com os mesmos dados, o Meu dia do operador e o do almoxarife mostram filas diferentes, cada uma só com os próprios verbos. A tarefa impedida fica em Impedidas com causa e dono, sem botão de execução.
+- **CAMPO-12:** cada cartão diz em uma linha por que está naquela posição. A mudança de prioridade feita pelo gestor registra quem e por quê. A proposta da IA fica pendente até a aprovação.
+- **CAMPO-13:** toque duplo em Fechar turno cria um registro só. O controle mostra Enviando e depois Salvo neste aparelho (sem sinal) ou Sincronizado (com sinal).
+- **CAMPO-14:** área acima do saldo é impedida, com a mensagem junto ao campo e o valor preservado. Hectares por hora acima do rendimento do conjunto só geram aviso.
+- **CAMPO-15:** com o som desligado, o registro dá o mesmo retorno visual. Com o som ligado, cada ação gera no máximo um som, e a sincronização de fundo não gera som.
+- **CAMPO-16:** o app fechado e reaberto no meio do apontamento volta ao mesmo cartão com o rascunho. Nenhum rascunho dispara transação.
+- Medição: no cenário de CAMPO-10, toques e caracteres até o registro correto, antes e depois (UXP-02).
 
 
 ## 65. PCE: política de reposição por item, disponibilidade e capital em estoque
@@ -9247,7 +9470,7 @@ Sankhya possui documentação de integração, autenticação e autorização de
 | Dados fiscais, estrutura contábil, tributos e documentos fiscais | ERP/base fiscal designada é autoridade; agrícola recebe identificadores e estados oficiais |
 | Produtos, parceiros, unidades, depósitos e centros | Eleger mestre por entidade e, quando necessário, por campo; extensão agronômica permanece na plataforma |
 | Compras/vendas | Plataforma pode originar solicitação/pedido operacional; confirmação/documentação ERP é vinculada ao mesmo negócio, sem recriar demanda |
-| Estoque, reservas e custódia | Definir escritor por tipo de movimento e posição oficial, com protocolo de confirmação e reconciliação; não manter dois saldos editáveis independentes |
+| Estoque, reservas e custódia | Nas O.S., reserva, entrega, custódia, consumo e devolução têm a plataforma como escritora (INTEG-03); o ERP recebe esses fatos e, onde também mantém reservas, recebe pelo conector o vencimento e a renovação (RSV-17). Para os demais movimentos, definir escritor por tipo de movimento e posição oficial, com protocolo de confirmação e reconciliação; não manter dois saldos editáveis independentes |
 | Custos e apropriações | Fatos operacionais originam apropriações; valores oficiais e ajustes retornam do sistema designado, com versão e sem duplicação |
 | Contas a pagar/receber e liquidações | ERP/financeiro designado é autoridade no modo integrado; ação pendente não aparece como pagamento confirmado |
 | Pessoas e ativos | Cadastro mestre acordado; importar só campos necessários; execução/jornada operacional não substitui processamento de folha |
@@ -9256,11 +9479,17 @@ Cada linha da matriz contratada detalha direção, campos, ID, eventos, frequên
 
 ### 66.3. Sincronização resiliente
 
-Carga inicial tem data de corte, prévia, saneamento, correspondências e reconciliação de saldos/documentos. Ativar incrementais sem perder mudanças durante a carga. Usar eventos/webhooks quando suportados e autorizados, ou consulta incremental paginada com checkpoint e reconciliação periódica. Distinguir recebido, validado, enviado, aceito pelo ERP, rejeitado e reconciliado. Resposta HTTP de transporte não comprova efetivação do documento de negócio.
+Carga inicial tem data de corte, prévia, saneamento, correspondências e reconciliação de saldos/documentos. Ativar incrementais sem perder mudanças durante a carga. Usar eventos/webhooks quando suportados e autorizados, ou consulta incremental paginada com checkpoint e reconciliação periódica. Recebido, validado, enviado, aceito pelo ERP, rejeitado e reconciliado são eventos da trilha; a situação exibida de cada efeito usa só as cinco de 73.6.5 (INTEG-14). Resposta HTTP de transporte não comprova efetivação do documento de negócio.
+
+**Gravação no ERP ativada por operação.** Cada operação de gravação no ERP, por organização, conector e objeto (por exemplo, consumo/devolução de insumo da O.S., apropriação de custo, pedido de compra), tem modo próprio: **Somente leitura** (padrão ao conectar), **Gravação habilitada** ou **Gravação suspensa**. Habilitar uma operação não habilita outra. Em Somente leitura, o conector lê o ERP e, para cada evento da outbox dessa operação, registra a prévia do documento que seria gravado (mapeamentos e versão do adaptador) e a concilia por documento/linha com o que o processo vigente lançou no ERP, vinculando a correspondência encontrada. A prévia não é item de integração: não entra na fila de envio, não aparece como pendência de ERP na ordem nem no fechamento (RN-047, 73.6) e nunca é promovida a gravação; divergência da prévia abre exceção ao responsável do processo. O adaptador verifica o modo no servidor antes de qualquer escrita, mesmo que a credencial permita gravar; quando o ERP permitir, a credencial usada em Somente leitura não tem permissão de escrita.
+
+Habilitar a gravação publica nova versão do modo da operação (CMD-29), com aceite do responsável do processo designado na linha contratada de 66.2; o papel Administrador/TI não supre esse aceite (capítulo 2). Evidências exigidas: homologação da operação em HML (ERP-08); prévia em PROD conciliada sem divergência inexplicada, com volume representativo; cobertura dos casos contratados da operação (normal, parcial, devolução, cancelamento, duplicidade e período fechado, quando aplicáveis), na prévia em PROD ou, para o que só se prova gravando, em HML; mapeamentos e versão do adaptador; pendências conhecidas e condição de suspensão. Período sem movimento não conta como evidência. A versão registra o corte (instante e posição na outbox): a partir dele a plataforma grava os documentos da operação no ERP e o processo vigente deixa de lançá-los, sem período de lançamento duplo (RN-036). Só fato a partir do corte gera envio; fato anterior, inclusive evento ainda não processado na habilitação, permanece como prévia. Fato aceito depois do corte, mas ocorrido antes dele segundo o instante informado (sincronização offline tardia), só é enviado depois de consulta ao ERP e à correspondência da prévia. Enviar fato anterior ao corte exige seleção explícita do responsável e a mesma consulta, por CMD-40; documento já lançado pelo processo vigente é vinculado, sem segundo lançamento (73.6).
+
+Suspender a gravação aplica o kill switch de 27.3 no escopo da operação: fatos locais, fase das ordens e itens Pendente permanecem, novos fatos da operação ficam Pendente e nada é estornado. A pausa automática por falhas seguidas (73.6) não muda o modo. Retomar exige, antes de enviar, consultar o ERP por item Pendente ou com resultado desconhecido e conciliar por documento/linha o período suspenso; lançamento feito por outra via durante a suspensão é vinculado, sem reenvio, e item sem correspondência segura fica Em reconciliação com o responsável (73.6).
 
 Persistir fato e evento de saída de forma confiável; fila, retentativa com espera progressiva, limite de chamadas e fila de erros evitam perda. Eventos duplicados, fora de ordem e dependências são tratados. Em timeout após possível gravação externa, consultar por chave/referência antes de reenviar: não presumir que o ERP não executou. Idempotência no conector e deduplicação do destino onde disponível produzem um único efeito; não prometer entrega de rede exatamente uma vez.
 
-Queda do ERP não apaga apontamento agrícola aceito. Ações que exigem confirmação oficial, como determinado movimento fiscal/financeiro, ficam pendentes/bloqueadas conforme contrato; não marcar sincronização como concluída. Cancelamento e estorno são eventos vinculados, respeitando período fechado e regras do ERP. Relatórios exibem fonte, última sincronização, cobertura e divergências. Reconciliação compara por documento/linha, quantidade, valor, unidade e estado, sem apenas comparar totais gerais.
+Queda do ERP não apaga apontamento agrícola aceito. Ações que exigem confirmação oficial, como determinado movimento fiscal/financeiro, ficam pendentes/bloqueadas conforme contrato; não marcar sincronização como concluída. O encerramento da O.S. não é uma dessas ações, salvo o tipo de efeito marcado por INTEG-16 (PEND-12); a pendência impede o fechamento do período (CMD-30), não o encerramento (RN-047; INTEG-26). Cancelamento e estorno são eventos vinculados, respeitando período fechado e regras do ERP. Relatórios exibem fonte, última sincronização, cobertura e divergências. Reconciliação compara por documento/linha, quantidade, valor, unidade e estado, sem apenas comparar totais gerais.
 
 Em **Configurações → Integrações (CF-03)**: conectores, cobertura homologada, mapeamentos, sincronizações, pendências e reconciliação. Usuário resolve dado incorreto e reprocessa ocorrência com auditoria, sem acesso a segredos ou logs técnicos excessivos. Conector conectado não é sinônimo de todas as entidades sincronizadas. Credenciais de menor privilégio ficam em cofre; DEV/HML/PROD têm destinos e chaves isolados. Upgrade de ERP/conector exige teste de contrato antes de produção.
 
@@ -9273,7 +9502,12 @@ Em **Configurações → Integrações (CF-03)**: conectores, cobertura homologa
 - **ERP-05:** estorno, cancelamento, parcial, devolução e período fechado preservam linhagem e conciliação por linha.
 - **ERP-06:** escritor oficial e mapeamentos impedem conflito circular; erro não é resolvido por sobrescrita silenciosa.
 - **ERP-07:** medir atraso ponta a ponta e recuperação com volumes reais; limites/SLA são acordados e testados, não promessa de sincronismo instantâneo.
-- **ERP-08:** homologar em HML jornadas completas de compras, consumo/devolução agrícola, venda/expedição, custos e títulos conforme escopo; produção depende dessas evidências e acessos reais.
+- **ERP-08:** homologar em HML jornadas completas de compras, consumo/devolução agrícola, venda/expedição, custos e títulos conforme escopo; produção depende dessas evidências e acessos reais. A homologação inclui, por conector, AC-79 e AC-117 a AC-129 (73.11).
+- **ERP-09:** com a operação em Somente leitura e credencial capaz de gravar, conferir O.S. com consumo não cria documento no ERP: o log do adaptador não tem chamada de escrita, a prévia fica vinculada ao fato e conciliada em CF-03, e a O.S. não mostra pendência de ERP.
+- **ERP-10:** habilitar a gravação de consumo/devolução de insumo não habilita compras, títulos nem outro objeto; envio de operação não habilitada, inclusive por API ou reprocessamento, é recusado no servidor e registrado.
+- **ERP-11:** habilitar a operação não envia prévias: fatos anteriores ao corte, inclusive evento processado depois da habilitação, continuam só como prévia; fato ocorrido antes do corte e sincronizado depois é consultado antes do envio; fato já lançado pelo processo vigente, enviado por seleção explícita ou sincronizado tarde, é encontrado e vinculado, sem segundo lançamento.
+- **ERP-12:** suspender e retomar preserva fatos, fase das ordens e itens Pendente, sem estorno; na retomada, lançamento manual feito no ERP durante a suspensão é encontrado pela consulta e pela conciliação e vinculado, sem duplicar.
+- **ERP-13:** habilitação sem homologação da operação, sem cobertura dos casos contratados ou sem aceite do responsável do processo é recusada com as evidências faltantes; dias sem movimento não contam como evidência.
 
 Fontes oficiais: [Sankhya — guia de integração](https://developer.sankhya.com.br/reference/guia-integracao), [Sankhya — autorização](https://developer.sankhya.com.br/reference/camada-de-autoriza%C3%A7%C3%A3o-para-api), [TOTVS — APIs Protheus](https://centraldeatendimento.totvs.com/hc/pt-br/articles/28155083199255-Cross-Segmentos-TOTVS-Backoffice-Linha-Protheus-ADVPL-API-TOTVS-padr%C3%B5es-dispon%C3%ADveis), [TOTVS — serviços REST RM](https://centraldeatendimento.totvs.com/hc/pt-br/articles/22322698636823-Cross-Segmentos-Backoffice-RM-Integra%C3%A7%C3%A3o-API-Servi%C3%A7os-RESTful-no-RM). Consulta documental não substitui homologação na instalação do cliente.
 
@@ -9293,7 +9527,7 @@ No desktop, usar largura integral do conteúdo, sem limite estreito centralizado
 
 Disponibilizar **Ampliar mapa**, **Tela cheia**, **Ajustar à fazenda**, **Voltar à seleção** e **Ver dados**. Modo ampliado ocupa praticamente toda a área útil; tela cheia tem saída evidente e atalho de teclado suportado. Não forçar fullscreen do navegador ao entrar. Mudar tamanho/camada não perde zoom, filtros, seleção ou posição da tarefa. Permitir ajuste de altura no desktop com alternativa acessível por botão, sem obrigar arrastar divisor.
 
-Manter a **barrinha lateral vertical de funcionalidades do mapa**, conforme preferência do proprietário: compacta, com ícones e rótulos curtos, seleção ativa evidente e ajuda acessível. Ela permite alternar Integrado, Satélite, Solo, MIP/MID, O.S./prazos, Irrigação, Estádio, Colheita/produtividade e Custos, conforme disponibilidade e permissão. Essa é a nomenclatura canônica das nove camadas em toda interface, ajuda, formulário de preferência e teste; vigor é atributo de Satélite e fenologia/variedade/ocupação são dados de Estádio. Essa barra de ferramentas é distinta da antiga coluna de informações complementares e permanece ao lado do mapa. Usar largura inicial de referência entre 56 e 72 pixels CSS no desktop, ajustável à legibilidade e acessibilidade; não ampliar até virar painel de dados. O restante da largura útil pertence ao mapa. Zoom e ações cartográficas ficam compactos nas bordas, sem sobrepor a barra; legenda recolhível mostra unidade, classes, data e qualidade. Opções avançadas da funcionalidade selecionada abrem em popover/gaveta temporária, fechado por padrão e sem reduzir permanentemente a largura do mapa. Evitar sobreposição de múltiplos controles; escala, atribuição cartográfica e estados de carregamento devem continuar legíveis.
+Manter a **barrinha lateral vertical de funcionalidades do mapa**, conforme preferência do proprietário: compacta, com ícones e rótulos curtos, seleção ativa evidente e ajuda acessível. Ela permite alternar Integrado, Satélite, Solo, Pragas e doenças, Ordens de serviço, Irrigação, Estádio, Colheita e produtividade e Custos, conforme disponibilidade e permissão. Esses são os nomes de DEC-2609-12 para as nove camadas em toda interface, ajuda, formulário de preferência e teste; vigor é atributo de Satélite e fenologia/variedade/ocupação são dados de Estádio. Essa barra de ferramentas é distinta da antiga coluna de informações complementares e permanece ao lado do mapa. Largura no desktop: `layout.mapa.barra` (74.3.11), 96 px até a decisão da PEND-DS-07, ajustável à legibilidade e acessibilidade; não ampliar até virar painel de dados. O restante da largura útil pertence ao mapa. Zoom e ações cartográficas ficam compactos nas bordas, sem sobrepor a barra; legenda recolhível mostra unidade, classes, data e qualidade. Opções avançadas da funcionalidade selecionada abrem em popover/gaveta temporária, fechado por padrão e sem reduzir permanentemente a largura do mapa. Evitar sobreposição de múltiplos controles; escala, atribuição cartográfica e estados de carregamento devem continuar legíveis.
 
 No celular, mapa ocupa a largura da tela e altura adaptável; tabela transforma-se em lista de cartões abaixo. Preservar acesso às mesmas funcionalidades por barra compacta ou botão Camadas que abre seletor, conforme espaço; não reduzir alvos de toque para forçar todos os ícones na tela. Detalhes rápidos abrem painel inferior expansível, fechável, com área de toque adequada. Tela pequena não deve apresentar mapa comprimido entre menu lateral e tabela. Em zoom de acessibilidade, manter controles e ações alcançáveis, sem depender exclusivamente de gestos.
 
@@ -9312,8 +9546,8 @@ Ações agronômicas e operacionais permanecem contextuais: abrir laudo, compara
 - **MAPUX-03:** ampliar/recolher navegação/tela cheia preserva estado e redimensiona corretamente a renderização cartográfica.
 - **MAPUX-04:** seleção mapa–tabela funciona nos dois sentidos sem salto inesperado de rolagem; usuário consegue retornar ao talhão selecionado.
 - **MAPUX-05:** detalhes extensos abrem abaixo/destino próprio; popover/gaveta temporária fecha facilmente e não recria a coluna fixa antiga.
-- **MAPUX-06:** teclado, leitor de tela, contraste e zoom de interface permitem operar ações e consultar dados equivalentes ao mapa.
-- **MAPUX-07:** IN-04 e todos os seletores exibem exatamente os nove nomes canônicos de 67.2, respeitando permissão/disponibilidade; Solo, Satélite, Colheita/produtividade e Irrigação preservam unidades, período, cobertura e qualidade ao trocar camada ou modo de visualização.
+- **MAPUX-06:** teclado, leitor de tela, contraste (medições de 74.7 e 74.9) e zoom de interface permitem operar ações e consultar dados equivalentes ao mapa.
+- **MAPUX-07:** IN-04 e todos os seletores exibem exatamente os nove nomes de DEC-2609-12, respeitando permissão/disponibilidade; Solo, Satélite, Colheita e produtividade e Irrigação preservam unidades, período, cobertura e qualidade ao trocar camada ou modo de visualização.
 - **MAPUX-08:** homologar localizar talhão, interpretar alerta e iniciar ação com usuários; comparar tempo/erros e área cartográfica útil com o desenho anterior antes de declarar melhoria comprovada.
 
 Esta revisão altera a especificação e os critérios para refazer o protótipo e implementar a tela. Não representa alteração já executada no HTML/PDF original do Claude.
@@ -9364,7 +9598,7 @@ O mesmo registro pode ser acessado por mapa, tarefa, busca, indicador ou módulo
 
 Um botão principal por contexto, com verbo e objeto: **Enviar para aprovação**, **Confirmar entrega de materiais**, **Registrar aplicação**, **Concluir execução** ou **Encerrar O.S.**. Não usar “Continuar” para esconder contratação, aprovação ou movimento definitivo. Botão que abre revisão deve dizer **Revisar**, sem insinuar que já confirmou. Agrupar ações frequentes e manter operações destrutivas separadas.
 
-Após ação, apresentar comprovante curto: o que foi efetivado, código/versão, destino, pendências e próxima ação pertinente. Não exigir nova tela de confirmação para todo salvamento rotineiro; confirmação adicional fica para efeito material, irreversível ou exigido pelo domínio. Duplo clique/retry não duplica efeito. Em ação em lote, prévia explicita selecionados, elegíveis, excluídos e motivos; resultado distingue sucesso parcial, erro e não processado. Não aplicar ação a registros novos que surgirem na lista durante a revisão.
+Após ação, apresentar comprovante curto: o que foi efetivado, código/versão, destino, pendências e próxima ação pertinente. Não exigir nova tela de confirmação para todo salvamento rotineiro; confirmação adicional fica para efeito material, irreversível ou exigido pelo domínio. Duplo clique/retry não duplica efeito: o primeiro toque fixa a intenção, e o controle fica em **Enviando** até o resultado (IDEM-08). Em ação em lote, prévia explicita selecionados, elegíveis, excluídos e motivos; resultado distingue sucesso parcial, erro e não processado. Não aplicar ação a registros novos que surgirem na lista durante a revisão.
 
 Cadastro ausente abre criação/importação/biblioteca no contexto e retorna ao campo preenchido. Não obrigar usuário a navegar até Cadastros e reconstruir o formulário. Dados herdados indicam origem; mudanças em campos dependentes mostram impacto e precisam revalidação pertinente. Rascunho salva com clareza, sem confundir “salvo” com “aprovado” ou “sincronizado”. Ao sair com operação pendente, preservar rascunho ou oferecer escolha explícita; dados de execução crítica não são descartados por navegação.
 
@@ -9375,6 +9609,11 @@ Bloqueio explica **o que falta, por que importa, quem resolve e o que fazer agor
 Concluir a etapa de um responsável cria/atualiza a pendência do próximo e registra transferência. Mensagem ao usuário externo só ocorre nos canais e regras autorizados; notificação interna não é confirmação de leitura ou aceite. Registrar recebido/assumido quando necessário, prazo e escalonamento configurado. Pendência resolvida atualiza a mesma fila; não criar cópias em aprovações, agenda e app.
 
 Estados vazios distinguem começo sem cadastro, filtro sem resultado, ausência de permissão e indisponibilidade de dados. Em cada caso, ação adequada: adicionar/importar biblioteca, limpar filtro, solicitar acesso ou tentar novamente. Não mostrar “Tudo certo” porque a integração ainda não trouxe dados. Erro informa etapa preservada e forma de corrigir/retomar, evitando “erro desconhecido” como única saída.
+
+**Ajuda e chamado de suporte sem perder o trabalho.** O painel **Ajuda** (4.2) mostra a orientação da tela e da etapa atuais e, desde a abertura, **Relatar problema ou sugestão**, que abre o chamado; a mensagem de erro também oferece essa ação, ao lado de corrigir ou retomar. Sugestão de resposta, inclusive da IA (cap. 59; DS-87), nunca vem antes do chamado nem o bloqueia. Print e comentário obrigatórios, contexto técnico automático, dados que não são capturados, envio idempotente e sem sinal, situação vista pelo autor e triagem seguem 75.2 (FB-01 a FB-09); o painel segue DS-41 (74.5.15).
+
+- **Trabalho preservado.** Antes de abrir o painel, o rascunho da tarefa é salvo (FORM-04, FORM-09). Enviar ou fechar o chamado volta à mesma etapa, com preenchimento, filtros, seleção e posição (68.3; FLUXUX-04). O chamado não altera o registro de origem.
+- **Acompanhamento.** **Meus chamados**, no mesmo painel, lista protocolo, situação (8.1) e data; o detalhe mostra responsável, histórico e **Responder**. Cada mudança de situação gera um único item na fila do autor (IN-01; **Caixa** no app), sem cópias (FB-05). O chamado é visível ao autor e ao suporte; links para o registro de origem respeitam a permissão de quem abre (ENG-043). O acesso do suporte aos dados segue 26.1, e a condução, 30.3.
 
 Execução parcial conserva saldo e próximas decisões. Rejeição mostra motivo e **Corrigir e reenviar**, sem recomeçar documento inteiro. Versão concorrente permite comparar alterações, mantendo trabalho válido. Cancelamento explica efeito em reservas, materiais, títulos e tarefas; quando não reversível, usar correção/estorno do domínio. Offline segue os estados locais e de sincronização do capítulo 64, sem prometer atualização de terceiros antes do envio.
 
@@ -9401,6 +9640,12 @@ Ações corretivas ligam diagnóstico ao saldo futuro do planejamento, revalidan
 - **FLUXUX-13:** homologar jornadas reais de agricultor iniciante, agrônomo, PCP/PCM, almoxarife, preparador, operador, packing, comercial/logística e parceiro externo; medir sucesso sem ajuda, retorno incorreto, redigitação e tempo por tarefa.
 - **FLUXUX-14:** reutilizar meta de usabilidade do capítulo 39 como referência inicial, segmentando resultados por perfil e tarefa; qualquer erro crítico de dose, destino, autorização, estoque ou cobrança bloqueia aceite do fluxo até correção.
 - **FLUXUX-15:** entrega de cada incremento inclui percurso navegável de sucesso e de exceção, matriz de estados/transições, telas afetadas e evidências. Quantidade de telas prontas não comprova continuidade ponta a ponta.
+- **FLUXUX-16:** durante o recebimento parcial de uma compra em SU-06 (CMD-15) o envio falha; pela mensagem de erro, o usuário abre Relatar problema ou sugestão, anexa o print e escreve o comentário (FB-01), envia e volta à mesma etapa com quantidades, lote e divergência preenchidos, filtros e posição preservados; o chamado não cria nem altera movimento.
+- **FLUXUX-17:** o suporte autorizado localiza a ocorrência pela correlação do contexto técnico de FB-02, sem pedir que o usuário redigite tela, etapa, objeto/versão ou versão do app; quantidades, lote e notas do formulário não vão ao chamado, salvo o que aparece no print escolhido pelo usuário (FB-03).
+- **FLUXUX-18:** quem troca o identificador de chamado, anexo ou registro citado de outra organização recebe a mesma resposta de um inexistente, e a tentativa fica registrada (FB-AC-04); o suporte sem concessão em CF-01 não abre o registro de origem (26.1).
+- **FLUXUX-19:** chamado aberto sem sinal, com toques repetidos, reinício do app e reenvio, segue FB-04 (FB-AC-02, FB-AC-03): um único chamado, sem protocolo antes do recibo; o apontamento de origem continua em rascunho.
+- **FLUXUX-20:** Ajuda não compete com o botão primário nem aparece no menu; Relatar problema ou sugestão está visível ao abrir o painel, sem ler ou fechar sugestão; painel e chamado funcionam por teclado, leitor de tela e toque.
+- **FLUXUX-21:** responder a um chamado Respondido o devolve a Em análise, com um único item na fila do autor (IN-01; Caixa no app; FB-05); chamado vinculado a incidente mostra a severidade de 30.3; nenhum chamado exibe prazo fora da política de atendimento.
 
 A prioridade de implementação é: eliminar dados duplicados e ações com efeito ambíguo; resolver passagens/bloqueios entre áreas; reduzir preenchimento e deslocamento de navegação; então refinar detalhes visuais. Melhorias de velocidade e satisfação devem ser comprovadas com usuários e operação, não prometidas como ausência absoluta de dúvida ou erro.
 
@@ -9409,15 +9654,15 @@ A prioridade de implementação é: eliminar dados duplicados e ações com efei
 
 ### 69.1 Decisões consolidadas
 
-Esta seção integra os contratos existentes; não autoriza ignorar regras de domínio nem estabelece que texto mais recente vence automaticamente. As RN/CAL, contratos por domínio, comandos e catálogo devem ser implementados juntos. Uma divergência nova deve ser registrada e resolvida antes de habilitar a ação afetada.
+Esta seção integra os contratos existentes; não autoriza ignorar regras de domínio nem estabelece que texto mais recente vence automaticamente; nas matérias dos caps. 72, 73 e 74, valem 72.1, 73.1 e 74.1. As RN/CAL, contratos por domínio, comandos e catálogo devem ser implementados juntos. Uma divergência nova deve ser registrada e resolvida antes de habilitar a ação afetada.
 
 | Assunto | Decisão definitiva desta especificação |
 |---|---|
 | Identidade da operação | Plano, ocorrência, O.S., grupo de execução e apontamento são objetos relacionados, não cópias intercambiáveis |
-| Aprovações | Plano aprovado não dispensa aprovação individual nas O.S. agrícolas, salvo autorização por política específica de água sem insumos (41.8); manutenção e processo industrial têm responsáveis próprios |
+| Aprovações | Plano aprovado não dispensa aprovação individual nas O.S. agrícolas, inclusive as operações mecânicas (APROV-02), exceto a irrigação somente com água (DEC-2609-10; 41.8); manutenção e processo industrial têm responsáveis próprios |
 | Programação | Agenda, aprovação técnica, orçamento, prontidão e execução têm dimensões independentes; rascunho não autoriza trabalho |
 | Materiais | Reserva → entrega em custódia → consumo/retorno/destinação → conciliação; encerramento depende de saldo resolvido |
-| Autonomia do produtor | Operação manual pode nascer sem laudo; sistema identifica origem manual e exige aprovação técnica aplicável |
+| Autonomia do produtor | Operação manual pode nascer sem laudo; sistema identifica origem manual e exige a aprovação agronômica da O.S. agrícola (CMD-42) |
 | Qualidade | Massa conciliada não libera qualidade; lote bloqueado não pode seguir para venda por atalho do fluxo |
 | Finanças | Pedido, entrega, título, vencimento e liquidação são eventos distintos; contrato e escritor oficial determinam efeitos |
 | Mapa | Barrinha lateral mantida; mapa amplo; informações complementares abaixo; sem coluna permanente reduzindo sua área |
@@ -9431,7 +9676,7 @@ Cada família do catálogo deve oferecer estados carregando, vazio inicial, sem 
 
 Para cada campo, o esquema técnico deve registrar tipo, obrigatoriedade por estado, origem/default, unidade, precisão, validação, permissão de leitura/escrita e impacto de alteração. Identificadores são imutáveis; datas operacionais usam fuso conhecido; decimal monetário/quantitativo não usa ponto flutuante binário para saldos; desconhecido não vira zero. Campos calculados mostram memória e não aceitam edição direta sem regra explícita. Tabelas de lista exibem o essencial da decisão; o detalhe preserva o conjunto completo de dados.
 
-Formulários FO do capítulo 6 permanecem centrais. As ações CMD-31 a CMD-48 seguem contratos contextuais nas telas, com diferença de versão, escolha de escopo, confirmação e recibo quando houver consequência material. Apontamento rotineiro CMD-43 preserva salvamento direto e recibo sem modal redundante; cancelamento, dispensa, reabertura, alteração técnica e liberação exibem consequências antes de confirmar. Cada prévia lista efeitos em agenda, material, custo e documentos, quando aplicável. Botão de conclusão distingue “Concluir execução”, “Conferir” e “Encerrar O.S.”.
+Formulários FO do capítulo 6 permanecem centrais. As ações CMD-31 a CMD-50 seguem contratos contextuais nas telas, com diferença de versão, escolha de escopo, confirmação e recibo quando houver consequência material. Apontamento rotineiro CMD-43 preserva salvamento direto e recibo sem modal redundante; cancelamento, dispensa, reabertura, alteração técnica e liberação exibem consequências antes de confirmar. Cada prévia lista efeitos em agenda, material, custo e documentos, quando aplicável. Botão de conclusão distingue “Concluir execução”, “Conferir” e “Encerrar O.S.”.
 
 ### 69.3 Matriz canônica de telas e contratos
 
@@ -9511,11 +9756,11 @@ A tabela abaixo liga cada família à especificação detalhada e aos conjuntos 
 | CD-06 | Produtos, unidades e locais | 39, 43, 52, 56, 60 | SAFRA, PARC, REND, RAST, CADN | FL-02, FL-R01, FL-R03 | FO-25 |
 | CD-07 | Estrutura gerencial | 39, 43, 52, 56, 60 | SAFRA, PARC, REND, RAST, CADN | FL-02, FL-R01, FL-R03 | FO-26 |
 | CF-01 | Usuários e permissões | 23–31, 56–59, 66 | ENG, ACE, RAST, PRECO, ONB, IAEXEC, ERP | FL-26, FL-R08, FL-R09, FL-R10 | FO-39 |
-| CF-02 | Alçadas e regras | 23–31, 56–59, 66 | ENG, ACE, RAST, PRECO, ONB, IAEXEC, ERP | FL-26, FL-R08, FL-R09, FL-R10 | FO-39 |
+| CF-02 | Alçadas e regras | 23–31, 55–59, 66 | ENG, ACE, RAST, PRECO, ONB, IAEXEC, ERP, IND | FL-26, FL-R08, FL-R09, FL-R10 | FO-38, FO-39 |
 | CF-03 | Integrações e sincronização | 23–31, 56–59, 66 | ENG, ACE, RAST, PRECO, ONB, IAEXEC, ERP | FL-26, FL-R08, FL-R09, FL-R10 | FO-40 |
 | CF-04 | Auditoria e parâmetros | 23–31, 56–59, 66 | ENG, ACE, RAST, PRECO, ONB, IAEXEC, ERP | FL-26, FL-R08, FL-R09, FL-R10 | FO-40 |
 | CF-05 | Assinatura e medição | 23–31, 56–59, 66 | ENG, ACE, RAST, PRECO, ONB, IAEXEC, ERP | FL-26, FL-R08, FL-R09, FL-R10 | FO-41 |
-| MB-01 | Hoje no campo | 41–42, 54, 64 | OSA, ESTOS, INSP, CAMPO | FL-12, FL-13, FL-25, FL-R02 | FO-03, FO-07, FO-08, FO-09, FO-10, FO-11, FO-12, FO-13, FO-30, FO-33, FO-34, FO-35 |
+| MB-01 | Meu dia | 41–42, 54, 64 | OSA, ESTOS, INSP, CAMPO | FL-12, FL-13, FL-25, FL-R02 | FO-03, FO-07, FO-08, FO-09, FO-10, FO-11, FO-12, FO-13, FO-30, FO-33, FO-34, FO-35 |
 | MB-02 | Ordem e execução móvel | 41–42, 54, 64 | OSA, ESTOS, INSP, CAMPO | FL-12, FL-13, FL-25, FL-R02 | FO-07, FO-08, FO-09, FO-29 |
 | MB-03 | Apontamento móvel | 41–42, 54, 64 | OSA, ESTOS, INSP, CAMPO | FL-12, FL-13, FL-25, FL-R02 | FO-07 |
 | MB-04 | Ocorrência móvel | 41–42, 54, 64 | OSA, ESTOS, INSP, CAMPO | FL-12, FL-13, FL-25, FL-R02 | FO-08 |
@@ -9883,30 +10128,36 @@ flowchart TB
   C["2 · Envie com chave idempotente"]
   D{"2 · Resultado conclusivo?"}
   E["2 · Consulte o destino e limite as retentativas"]
-  F{"3 · Foi possível reconciliar?"}
+  F{"3 · Efeito encontrado no destino?"}
   H["3 · Valide o efeito encontrado"]
   I{"3 · Efeito aceito e compatível?"}
   J["3 · Vincule IDs e confira saldos"]
+  K{"1 · Fato a partir do corte de gravação?"}
+  L["3 · Concilie a prévia sem gravar no ERP"]
  end
  subgraph RAIA_2["Responsável pelo processo"]
   direction TB
   G["4 · Abra exceção com responsável e evidências"]
  end
  A --> B
- B --> C
  C --> D
- D -->|Não| E
  E --> F
- F -->|Não| G
- F -->|Sim| H
- D -->|Sim| H
  H --> I
- I -->|Não| G
  I -->|Sim| J
  G -->|Resolução autorizada| B
+ B --> K
+ K -->|Sim| C
+ K -->|Não| L
+ D -->|Não| E
+ D -->|Sim| H
+ F -->|Sim| H
+ F -->|Indeterminado após o limite de consultas| G
+ F -->|Ausente · mesma chave| C
+ L --> I
+ I -->|Não| G
 ```
 
-Sankhya/TOTVS exigem versão e produto exatos, licenças, endpoints, credenciais e homologação. Timeout não significa ausência de efeito. Não reenviar indiscriminadamente quando o destino pode ter gravado. Conflito comercial/financeiro vai ao dono do dado; plataforma não altera documento oficial silenciosamente.
+Sankhya/TOTVS exigem versão e produto exatos, licenças, endpoints, credenciais e homologação. Timeout não significa ausência de efeito. Não reenviar indiscriminadamente quando o destino pode ter gravado. Conflito comercial/financeiro vai ao dono do dado; plataforma não altera documento oficial silenciosamente. Fato anterior ao corte de gravação da operação gera só prévia, conciliada sem gravar; divergência abre exceção (66.3).
 
 #### FL-R10 — IA com ação autorizada e rastreabilidade
 
@@ -9938,18 +10189,18 @@ flowchart TB
   K["4 · Exiba recibo, documentos e próximo passo"]
  end
  A --> B
- B -->|Consulta| C
- B -->|Ação| D
  D --> E
  E -->|Não| F
  E -->|Sim| G
  G --> H
  H --> I
- I -->|Não| J
+ B -->|Ação| D
+ B -->|Consulta| C
  I -->|Sim| K
+ I -->|Não| J
 ```
 
-Aprovação privativa do agrônomo não é substituída por confirmação genérica do chatbot. Autorização de água por política 41.8 é verificada por serviço determinístico, não por decisão livre da IA. A IA não inventa doses ou chama SQL livre. Documentos recuperados não são instruções. Cada número importante abre origem, cálculo, versão e cadeia de relações; links respeitam permissões. Sem confirmação do backend, informar pendente em vez de realizado.
+Aprovação privativa do agrônomo não é substituída por confirmação genérica do chatbot. A liberação automática da água sem produto (DEC-2609-10; 41.8) é verificada por serviço determinístico, não por decisão livre da IA. A IA não inventa doses ou chama SQL livre. Documentos recuperados não são instruções. Cada número importante abre origem, cálculo, versão e cadeia de relações; links respeitam permissões. Sem confirmação do backend, informar pendente em vez de realizado.
 
 ### 69.5 Entidades adicionais obrigatórias e invariantes
 
@@ -9990,7 +10241,7 @@ Cada pacote inclui telas, backend, banco, eventos, testes, documentação, demo 
 | Protocolos agronômicos por cultura, região, método e edição | Responsável técnico e curadoria | Culturas sem pacote validado usam planejamento manual identificado e revisão técnica; sem recomendação automática inventada |
 | Arquivos de taxa variável por fabricante/terminal | Engenharia, fabricante/parceiro e operador | Exportação apenas para perfis homologados, com prévia e confirmação de importação |
 | ERP e fiscal | Cliente, integrador, controladoria e engenharia | Escritor oficial definido; conector em demonstração até homologação; não afirmar sincronização real |
-| Sensores, clima, satélite e irrigação | Engenharia e especialistas | Exibir cobertura/qualidade/idade; comandos remotos bloqueados sem integração habilitada |
+| Sensores, clima, satélite e irrigação | Engenharia e especialistas; validade por fonte decidida pelo proprietário (PEND-13) | Exibir cobertura/qualidade/idade, com a validade por fonte de PROJ-13 (valores iniciais até a decisão); comandos remotos bloqueados sem integração habilitada |
 | Provedor de identidade e pagamentos | Engenharia e negócio | Sandbox separado; conta de produção e eventos autenticados antes de clientes pagantes |
 | Metas de capacidade, recuperação e desempenho | Engenharia/operação | Medir sob envelope contratado; não prometer ausência absoluta de lentidão ou falhas |
 | Superioridade frente a concorrentes | Produto e usuários do piloto | Validar por tarefas/indicadores comparáveis; não usar afirmação de superioridade não demonstrada |
@@ -10021,17 +10272,17 @@ A gestão de fases e progresso das O.S. tem contrato único na seção 8.4 e cri
 | Campo/coluna | Origem e regra | Exibição |
 |---|---|---|
 | ID/tipo da ordem ou tarefa | Entidade canônica, nunca duplicada por tela ou setor | Lista, detalhe, app e mapa |
-| Etapa | Projeção única: A liberar, Liberadas, Em execução, Em conferência, Encerradas | Mesmos nomes, filtros, contagens e cores em todas as visões |
+| Etapa | Valor único do registro da ordem, por consulta direta (PROJ-02): A liberar, Liberadas, Em execução, Em conferência, Encerradas | Mesmos nomes, filtros, contagens e cores em todas as visões (cor em 74.4) |
 | Estado/impedimento | Pausa, atraso, aprovação, falta de recurso e pendência final com responsável | Selos e detalhe; não novas colunas Kanban |
 | Janela e validade | Programação/versionamento; filtro temporal não emite nem libera | Lista, quadro, agenda, detalhe e mapa |
 | Planejado e saldo | Escopo de referência, revisões, cancelamentos/dispensas separados | Unidade explícita; sem transformar encerramento parcial em 100% do original |
 | Realizado no turno | Apontamento único, data, versão, pessoa/equipe e recurso | Histórico diário e formulário móvel |
 | Acumulado confirmado/provisório | Eventos conciliados e eventos pendentes separados | Barra de avanço/quantidade; sem somar duplicatas |
-| Autorização | Aprovação individual ou, apenas água, política/versão e enquadramento | Selo e memória; nunca apresentar política como assinatura diária |
+| Autorização | Aprovação individual; água sem produto: parâmetros e prontidão, sem aprovação (DEC-2609-10; APROV-15) | Selo e memória; nunca apresentar a liberação automática da água como aprovação ou assinatura diária |
 | Pendências de conferência | Apontamentos, material, testes ou balanço exigidos pelo tipo | Checklist final; não aplicável oculto, sem pendência fictícia |
-| Última atualização/sincronização | Evento e confirmação do servidor, inclusive offline | Mostrar dado desatualizado/provisório explicitamente |
+| Última atualização/sincronização | Recibo do servidor, inclusive de registro feito offline (situação de envio, 64.5); a integração ERP é outra dimensão (73.2.2) | Mostrar dado desatualizado/provisório explicitamente |
 
-O grid desktop usa por padrão ID/tipo, atividade/local, janela, etapa, avanço/saldo, responsável e impedimento. Campos específicos ficam em colunas configuráveis e detalhe; não exibir uma tabela de dezenas de campos no celular. Cartão móvel resume tarefa/local, etapa, janela, avanço e ação principal. Medições estimadas têm fonte/método; dado ausente não vira zero. No mapa, a tabela abaixo e o Kanban compartilham exatamente os mesmos filtros e projeções do grid operacional.
+O grid desktop usa por padrão ID/tipo, atividade/local, janela, etapa, avanço/saldo, responsável e impedimento. Campos específicos ficam em colunas configuráveis e detalhe; não exibir uma tabela de dezenas de campos no celular. Cartão móvel resume tarefa/local, etapa, janela, avanço e ação principal. Medições estimadas têm fonte/método; dado ausente não vira zero. No mapa, a tabela abaixo e o Kanban compartilham exatamente os mesmos filtros e consultas do grid operacional.
 
 #### 69.9.2 Efeito inequívoco dos botões
 
@@ -10041,16 +10292,16 @@ O grid desktop usa por padrão ID/tipo, atividade/local, janela, etapa, avanço/
 | Finalizar apontamento do turno | Finaliza o registro diário e preserva saldo para próximos dias | Não conclui toda a O.S. |
 | Concluir execução / Confirmar término da irrigação / Concluir serviço | Registra término físico e coloca ordem Em conferência | Não presume consumo, devolução, teste ou aceite de qualidade |
 | Conferir apontamento | Valida o registro específico e seus efeitos uma vez | Não muda para Em conferência uma ordem ainda em execução |
-| Encerrar O.S. / Fechar processo | Confirma encerramento somente após requisitos aplicáveis | Não libera automaticamente ativo ou lote |
+| Encerrar O.S. / Fechar processo | Confirma encerramento somente após requisitos aplicáveis | Não libera automaticamente ativo ou lote nem confirma documento no ERP (RN-047) |
 | Encerramento automático da água | Serviço determinístico verifica registros e conclui com recibo | Não inventa volume aplicado nem ignora divergência |
 
-Após captura offline, o app mostra evento pendente; não declara encerramento confirmado pelo servidor. Botão desabilitado explica motivo e responsável. Concluir execução não fica disponível como atalho para descartar saldo; reprogramar mantém ordem em execução/pausada, e dispensa/cancelamento de saldo exige autorização pertinente. Água sem produtos não cria telas vazias de requisição ou sobras.
+Após captura offline, o app mostra o registro como Salvo neste aparelho ou Aguardando envio (64.5); não declara encerramento confirmado pelo servidor. Botão desabilitado explica motivo e responsável. Concluir execução não fica disponível como atalho para descartar saldo; reprogramar mantém ordem em execução/pausada, e dispensa/cancelamento de saldo exige autorização pertinente. Água sem produtos não cria telas vazias de requisição ou sobras.
 
 #### 69.9.3 Mapa dinâmico e recursos
 
-A função O.S./prazos filtra as cinco etapas; selecionar um talhão mostra todas as ordens correspondentes, sem atribuir uma fase única à área. Função Irrigação mostra alvo/aplicado, política/exceção, prontidão e etapa da mesma tarefa. Sem área executada georreferenciada, percentual numérico não pinta uma região fictícia. Equipamentos e ordens sem posição confiável permanecem na lista; não inventar localização.
+A função Ordens de serviço (DEC-2609-12) filtra as cinco etapas; selecionar um talhão mostra todas as ordens correspondentes, sem atribuir uma fase única à área. Função Irrigação mostra alvo/aplicado, aprovação da fertirrigação ou, na água sem produto, os parâmetros do equipamento (APROV-15), prontidão e etapa da mesma tarefa. Sem área executada georreferenciada, percentual numérico não pinta uma região fictícia. Equipamentos e ordens sem posição confiável permanecem na lista; não inventar localização.
 
-O quadro de máquinas da seção 44.11 abre a mesma alocação/O.S. da agenda e do mapa. Seleção de máquina não garante disponibilidade até confirmação transacional. O.S. Em conferência não ocupa automaticamente a máquina até encerrar a papelada: agenda/custódia e condição técnica decidem disponibilidade; manutenção com teste pendente mantém restrição conforme risco. Encerramento da O.S. não libera máquina bloqueada nem reassume reserva vencida.
+O quadro de máquinas da seção 44.11 abre a mesma alocação/O.S. da agenda e do mapa. Seleção de máquina não garante disponibilidade até confirmação transacional. O.S. Em conferência não ocupa automaticamente a máquina até encerrar a papelada: agenda/custódia e condição técnica decidem disponibilidade; manutenção com teste pendente mantém restrição conforme risco. Encerramento da O.S. não libera máquina bloqueada nem reassume reserva de máquina vencida (44.11).
 
 #### 69.9.4 Inventário de revisão dos diagramas
 
@@ -10140,7 +10391,7 @@ As correções foram aplicadas **nos contratos, regras, fórmulas, telas, formul
 ### 70.2 Decisões transversais consolidadas
 
 1. As cinco etapas continuam **A liberar → Liberadas → Em execução → Em conferência → Encerradas**. Liberação depende de evento CMD-06 válido; estar aprovado e pronto não equivale a estar liberado.
-2. Emitir para revisão pode anteceder a autorização econômica. Entregar material, liberar e iniciar exigem autorização do escopo. Prontidão pré-liberação verifica cobertura/reserva e aptidão; não exige entrega física que depende da própria liberação.
+2. Emitir para revisão pode anteceder a autorização econômica. Entregar material, liberar e iniciar exigem autorização do escopo. Prontidão pré-liberação verifica cobertura e aptidão; a reserva de execução é criada na liberação (CMD-06; RSV-03); não exige entrega física que depende da própria liberação.
 3. Fechar apontamento do turno não termina a ordem. Reprogramar saldo na mesma ordem também não termina o trabalho. Conclusão física ou dispensa formal do saldo coloca Em conferência; trabalho adicional retorna por CMD-48 com revalidação.
 4. Rejeição técnica não é cancelamento. Cancelamento sem execução preserva a pendência de custódia até reconciliação; iniciado o trabalho, dispensa-se apenas o saldo autorizado, sem apagar realizado.
 5. Água sem produtos segue a programação pela necessidade da cultura, sem agrônomo (DEC-2609-10). Adicionar produtos usa CMD-32, revisão individual CMD-42 e nova liberação CMD-06; não duplica tarefa nem aplicação hídrica.
@@ -10239,7 +10490,7 @@ Os IDs abaixo são do relatório independente. “Com ajuste” indica que o pro
 
 ### 70.4 Decisões e homologações ainda necessárias
 
-Estas pendências são explícitas; não foram aprovadas silenciosamente em nome do proprietário. A construção prossegue com parametrização, simulação e critérios de liberação. Nenhum preço proposto gera cobrança real antes de definição e aceite aplicáveis.
+Estas pendências são explícitas; não foram aprovadas silenciosamente em nome do proprietário. As decisões pendentes da v3.10 estão em 73.12 (a partir de PEND-01), com as do design system em 74.12 e as de melhoria contínua em 75.8, separadas dos requisitos aprovados; esta tabela mantém DEC-01 a DEC-09. A construção prossegue com parametrização, simulação e critérios de liberação. Nenhum preço proposto gera cobrança real antes de definição e aceite aplicáveis.
 
 | ID | Tema | Tratamento desta versão | Responsável e marco |
 |---|---|---|---|
@@ -10266,7 +10517,7 @@ A política de precisão de 10.0 é uma configuração técnica de referência a
 | 5 — Água recebe produto | DEMO-16 | Mesmo ID, revisão individual, liberação antes da entrega e execução do saldo |
 | 6 — Bloqueio PCM após programação | DEMO-17 | Aptidão, agenda e elegibilidade distintas; substituição revalidada |
 | 7 — Reserva concorrente | DEMO-18 e ATP-04/05/07 | Soma das reservas não excede disponibilidade; conversão não deduz duas vezes |
-| 8 — Offline e reenvio | DEMO-11 detalhado | Mesmo fato aplica uma vez; fato distinto sobreposto vai a reconciliação |
+| 8 — Offline e reenvio | DEMO-11 detalhado | Mesma intenção e mesmo fato aplicam uma vez; fato distinto sobreposto vai à conferência (73.5; AC-73, AC-75) |
 | 9 — Beneficiamento com lote bloqueado | DEMO-19 | Ordem pode encerrar reconciliada com encaminhamento formal; lote não fica vendável |
 | 10 — Caminhão atrasado | DEMO-20 | Fila usa próximo apto sem perder promessa original, justiça e rastreabilidade |
 
@@ -10316,13 +10567,13 @@ Esta é uma revisão de processos e de sua representação, não uma nova homolo
 | P0 | Manejo integrado | Monitorar e prevenir; selecionar medidas por risco e protocolo, incluindo alternativas não químicas; avaliar eficácia. Um achado não dispara aplicação automática. | FL-05, FL-AG-03 |
 | P0 | Dose e prescrição | Doses dos insumos agrícolas por ha, gatilho na atividade, vários produtos por atividade. Amostra mista não justifica superfície interpolada; arquivo de taxa variável exige geometria e perfil do terminal comprovados. | FL-AG-04/05/07 |
 | P0 | Capacidade | Reservar todos os componentes do conjunto no mesmo intervalo; conferir mês, semana e turno. Não descontar a mesma parada em disponibilidade, eficiência e agenda. | FL-AG-08, FL-R03 |
-| P0 | O.S. e materiais | Cinco fases; turno não conclui ordem; físico terminado entra Em conferência; baixa/consumo e retorno são conciliados sem duplicação. Água enquadrada usa caminho simples, sem almoxarifado. | FL-OS-01, FL-12/13/14 |
-| P0 | PCM → PCP | Restrição técnica chega imediatamente ao PCP; previsão de retorno não é aptidão confirmada. Serviço conclui por teste aplicável; condição, agenda e encerramento administrativo são distintos. | FL-15, FL-PCM-01/02/03 |
+| P0 | O.S. e materiais | Cinco fases; turno não conclui ordem; físico terminado entra Em conferência; baixa/consumo e retorno são conciliados sem duplicação (73.5). Água sem produto usa caminho simples, sem aprovação do agrônomo nem almoxarifado, e é liberada pela prontidão operacional (DEC-2609-10; APROV-15). | FL-OS-01, FL-12/13/14 |
+| P0 | PCM → PCP | Restrição técnica bloqueia as alocações afetadas na própria transação de CMD-18 e aparece ao PCP dentro das metas de PERF-01; previsão de retorno não é aptidão confirmada. Serviço conclui por teste aplicável; condição, agenda e encerramento administrativo são distintos. | FL-15, FL-PCM-01/02/03 |
 | P0 | Oferta e estoque | Demanda firme consome a previsão correspondente; recebimentos, contratos, reservas e estoque não se somam em duplicidade. Compromisso de venda exige reserva concorrente consistente. | FL-09, FL-R04, FL-R07 |
 | P0 | Qualidade e rastreabilidade | Balanço de massa, transformação, origem e destino são preservados; lote bloqueado não fica vendável. Reprocesso é execução vinculada. | FL-17/18/19, FL-BEN-01/02/03 |
 | P1 | Lean adaptado ao campo | Atender demanda útil dentro de janelas técnicas, climáticas e comerciais, com buffers justificados; prioridade é desempenho do fluxo inteiro. | FL-01, FL-08, FL-LEAN-01 |
 | P1 | UX contextual | Lista inicial para escolher/criar contexto; etapas contínuas; detalhe e edição pela direita; dados calculados levam à origem. | UX-01 a UX-05 |
-| P1 | Confiabilidade digital | Idempotência, versão esperada, autorização, recibo e tratamento de resultado inconclusivo; nenhum reenvio cego de efeito financeiro ou material. | FL-25, FL-R09/10, TEC-27-1/28-1 |
+| P1 | Confiabilidade digital | Idempotência, versão esperada, autorização, recibo e tratamento de resultado inconclusivo; nenhum reenvio cego de efeito financeiro ou material. Contrato em 73.3 e 73.6. | FL-25, FL-R09/10, TEC-27-1/28-1 |
 
 ### 71.4 Fórmulas e bases que os fluxos precisam preservar
 
@@ -10344,13 +10595,13 @@ Os exemplos a seguir são cenários didáticos de engenharia, sem indicar doses 
 | Agronomia → PCP | Ocorrência da atividade, cultivo, quantidade, unidade, janela e versão | Padrão de rendimento compatível; origem única preservada |
 | PCP/PCM → PCE | Demanda datada de materiais e peças | Política por item/local; demanda firme e previsão residual distinguíveis |
 | Planejamento → Compras | Demanda por safra, grupo, produto, quantidade, data e valores | Aprovação aplicável e chave de solicitação; mudança mostra delta |
-| Agrônomo → Almoxarifado | Versão liberada da O.S., produtos, doses e limites por destino | Apenas itens e quantidades autorizados, lotes elegíveis e recibo da entrega |
+| Liberador (CMD-06) → Almoxarifado | Versão da O.S. aprovada (CMD-42) e liberada, produtos, doses e limites por destino | Apenas itens e quantidades autorizados, lotes elegíveis e recibo da entrega; aprovar (CMD-42) não libera: a liberação é outra intenção, mesmo quando a mesma pessoa tem as duas competências (APROV-09) |
 | Operação → Conferência | Avanço diário, término físico, materiais, sobras e evidências | Mesmo ID da ordem; pendência offline explícita; saldo destinado |
 | PCM → PCP | Aptidão, restrição, duração prevista e teste confirmado | Previsão não vira fato; componentes e agenda revalidados |
 | Colheita → Beneficiamento | Carga, cultivo, peso/base, qualidade e genealogia | Recepção única; estoque em processo e bloqueado identificados |
 | Comercial → Logística | Pedido, parcela, lote ou oferta futura, frete e ponto de cumprimento | Reserva válida, slot e prontidão; prioridade e promessa originais preservadas |
 | Logística → Financeiro | Saída e entrega comprovadas com diferenças | Constituir/ajustar obrigação pelo evento contratual sem duplicar título |
-| Qualquer módulo → ERP | Evento confirmado, versão, chave, origem e sistema escritor | Confirmação ou exceção explícita; reconciliação de IDs e saldos |
+| Qualquer módulo → ERP | Evento confirmado, versão, chave, origem e sistema escritor | Confirmação ou exceção explícita; reconciliação de IDs e saldos; efeito ainda não confirmado pelo ERP não impede o encerramento da O.S., salvo tipo de efeito marcado conforme INTEG-16 (RN-047) |
 
 ### 71.6 Reconciliação das decisões recentes de UX
 
@@ -10361,7 +10612,7 @@ Os exemplos a seguir são cenários didáticos de engenharia, sem indicar doses 
 | Planejamento | 1 Escolha a safra → 2 Defina cultivos e planos → 3 Defina rendimentos → 4 Confira o plano operacional → 5 Dimensione recursos → 6 Confira a demanda. A etapa 2 reúne parcelas/plantio e aplicação/ajuste de planos; o talhão se divide em quantas parcelas forem necessárias (PARC-01). | FL-03, FL-AG-05/06/08, FL-R01/03; PL-01 a PL-06 como famílias, não novos cadastros |
 | Planos agronômicos | Cards por DAP/DAC/calendário; atividade carrega gatilho e vários insumos por ha; expansão por grupo/produto/dose/preço/custo. Operação agrupa o cadastro, atividade organiza o trabalho. No formulário da atividade, escolha primeiro a operação; a atividade vem abaixo, filtrada pela operação ("Outra atividade…" cria um nome novo); depois gatilho e insumos. | UX-02, FL-AG-05, FL-R01 |
 | Tabelas | Linha clicável/Enter abre formulário lateral; seta à esquerda da primeira coluna só expande; gatilho é primeira coluna de dados quando presente. Seleção e ação não abrem editor por propagação. | UX-04; famílias FO pertinentes do §6 |
-| Rendimentos | Tabela operação → conjunto/equipe: coluna Largura · velocidade · eficiência, rendimento efetivo (ha/h), custo/h com a composição (máquina + implemento + pessoas × R$/h), R$/ha e R$/kg quando houver produtividade (senão, "não calculável"). O clique no conjunto abre o formulário lateral com dois modos. **Largura × velocidade:** largura (m), velocidade (km/h) e eficiência de campo (%); rendimento = L × V ÷ 10 × eficiência em fração (CAL-05), calculado ao vivo. **Informado:** para trabalho sem largura (tratamento de sementes, colheita manual, gotejo) ou rendimento já medido como efetivo, sem aplicar nova eficiência (71.4). Custo/h também é calculado ao vivo. Alcance da alteração em 52.1; fonte, versão e vigência ficam no detalhe. | FL-AG-08, FO-28 e §44/52/53 |
+| Rendimentos | Tabela operação → conjunto/equipe: coluna Largura · velocidade · eficiência, rendimento efetivo (ha/h), custo/h com a composição (máquina + implemento + pessoas × R$/h), R$/ha e R$/kg quando houver produtividade (senão, "não calculável"). O clique no conjunto abre o formulário lateral com dois modos. **Largura × velocidade:** largura (m), velocidade (km/h) e eficiência de campo (%); rendimento = L × V ÷ 10 × eficiência em fração (CAL-05), calculado ao vivo. **Informado:** para trabalho sem largura (tratamento de sementes, colheita manual, gotejo) ou rendimento já medido como efetivo, sem aplicar nova eficiência (71.4). Custo/h também é calculado ao vivo; os dois recálculos seguem a meta de PERF-01. Alcance da alteração em 52.1; fonte, versão e vigência ficam no detalhe. | FL-AG-08, FO-28 e §44/52/53 |
 | Plano e recursos | Uma matriz por atividade/recurso, com indicadores nas linhas e meses nas colunas; total do período, expansão e origem. Dimensionamento mensal não dispensa conflito semanal/turno. | FL-R03 e §44 |
 | Insumos | Uma tabela grupo → produto com quantidade, preço, valor, data e saldo líquido. Botão Enviar para cotação transfere a demanda, sem menu avulso nem novo cadastro. | FL-09; UX-03 |
 | Compras | 1 Escolha a safra → 2 Confira a demanda → 3 Solicite cotações → 4 Compare propostas → 5 Aprove a compra → 6 Acompanhe a entrega. Comece por safras e solicitações recebidas do planejamento. Fornecedor homologado por grupo em Parceiros e fornecedores, com nome, identificação aplicável, contato, e-mail/WhatsApp e autorização de canal. O recebimento é conferido em Estoque › Confira recebimentos; a etapa 6 mostra recebido, quarentena e saldo a entregar e reprograma a previsão. | UX-03, FL-10/11/26 |
@@ -10389,9 +10640,9 @@ Os arquivos originais do Claude mencionados no histórico não foram reabertos n
 
 **Saída:** Encerre a ordem com realizado e saldo destinados, sem pendências obrigatórias.
 
-**Melhoria:** Mantém cinco fases; separa fim do turno, término físico, conferência e cancelamento. v3.9: tela de trabalho da ordem com a ação da fase.
+**Melhoria:** Mantém cinco fases; separa fim do turno, término físico, conferência e cancelamento. v3.9: tela de trabalho da ordem com a ação da fase. v3.10: separa "Aprovação vigente da versão?" de "Escopo autorizado e prontidão válida?" (as três condições de APROV-01), faz A liberar passar pela aprovação vigente antes da revisão, para a ordem que perdeu a prontidão voltar a ser liberada sem nova revisão (APROV-10), passa a liberação (CMD-06) ao PCP/emitente e mostra a publicação do encerramento, com o ERP seguindo FL-R09 sem mudar a etapa (73.9; 73.6); o retorno de Liberadas a A liberar passa a se chamar "Liberação deixa de vigorar" (8.4.3).
 
-**Regra essencial:** Pausada, bloqueada, parcial e atrasada são condições. Só CMD-08 leva à conferência; CMD-43 não conclui a O.S. Após início, destine saldo por CMD-47; não cancele fatos executados.
+**Regra essencial:** Pausada, bloqueada, parcial e atrasada são condições. Só CMD-08 leva à conferência; CMD-43 não conclui a O.S. Após início, destine saldo por CMD-47; não cancele fatos executados. Aprovar (CMD-42) e liberar (CMD-06) são ações separadas; prontidão, orçamento e janela não substituem a aprovação, e só a água sem produto tem CMD-06 automático, sem aprovação (APROV-01, APROV-09, APROV-15). CMD-10 exige só requisitos locais; a integração com o ERP segue depois, sem mudar a etapa (RN-047). CMD-06 verifica, uma a uma, escopo autorizado, aprovação vigente e prontidão (APROV-01). Antes do início, prontidão perdida, aprovação invalidada ou liberação vencida devolvem a ordem a A liberar (8.4.3; APROV-08); com a versão inalterada, ela é liberada de novo sem nova revisão (APROV-10).
 
 **Automação:** Crie requisição e tarefas de conferência uma vez. Encerre automaticamente apenas quando todas as regras aplicáveis estiverem satisfeitas. Clicar na ordem, na lista ou no Kanban, abre a tela de trabalho com atividade, insumos e doses, dono e prazo da pendência e a única ação da fase atual.
 
@@ -10399,7 +10650,7 @@ Os arquivos originais do Claude mencionados no histórico não foram reabertos n
 
 **Raias:** PCP / emitente · Responsável técnico · Operação · Conferente / alçada · Sistema.
 
-**Cenário de aceite proposto:** Após dois dias de uma operação de sete dias, fechar turno mantém Em execução; material sob custódia impede CMD-10.
+**Cenário de aceite proposto:** Após dois dias de uma operação de sete dias, fechar turno mantém Em execução; material sob custódia impede CMD-10. Gradagem sem aprovação, com orçamento, janela e prontidão completos, não é liberada (AC-82); com o ERP indisponível, a O.S. que cumpre os requisitos locais encerra e o efeito fica Pendente (AC-79).
 
 **Continuidade:** FL-13, FL-14, FL-AG-07, FL-R02.
 
@@ -10437,17 +10688,17 @@ Os arquivos originais do Claude mencionados no histórico não foram reabertos n
 
 **Saída:** Conclua a primeira operação com dados mínimos válidos e origem preservada.
 
-**Melhoria:** Troca implantação completa obrigatória por cadastro progressivo e importação assistida.
+**Melhoria:** Troca implantação completa obrigatória por cadastro progressivo e importação assistida. v3.10: causa repetida corrigida uma vez na prévia, com critério explícito e revalidação das linhas afetadas (comparação externa, item 1).
 
-**Regra essencial:** Dados nativos são modelos versionados; dados do cliente são próprios. Valide identidade, unidade e área antes de efetivar; não invente geometria nem complete análise ausente.
+**Regra essencial:** Dados nativos são modelos versionados; dados do cliente são próprios. Valide identidade, unidade e área antes de efetivar; não invente geometria nem complete análise ausente. Correção aplicada a várias linhas usa critério explícito e nunca funde registros distintos por semelhança de texto.
 
-**Automação:** Reconheça colunas, sugira correspondências e mantenha o original; peça confirmação só de ambiguidades relevantes.
+**Automação:** Reconheça colunas, sugira correspondências e mantenha o original; peça confirmação só de ambiguidades relevantes. Aplique uma correção às linhas do critério explícito e revalide todas antes de gravar (60.3).
 
 **Etapas:** Entre e escolha → Prepare os dados → Confira e confirme → Comece a operar.
 
 **Raias:** Usuário · Sistema.
 
-**Cenário de aceite proposto:** Com apenas uma fazenda, uma parcela e uma cultura válidas, o usuário inicia o planejamento sem cadastrar frota e parceiros ainda desnecessários.
+**Cenário de aceite proposto:** Com apenas uma fazenda, uma parcela e uma cultura válidas, o usuário inicia o planejamento sem cadastrar frota e parceiros ainda desnecessários. Planilha com 200 linhas do mesmo código de grupo legado é corrigida com uma correspondência, revisada e revalidada, sem editar célula a célula (CADN-07).
 
 **Continuidade:** UX-01, FL-R06, FL-R08.
 
@@ -10461,9 +10712,9 @@ Os arquivos originais do Claude mencionados no histórico não foram reabertos n
 
 **Saída:** Publique a versão aprovada e emita apenas as ocorrências da janela.
 
-**Melhoria:** Reconcilia o fluxo de safra com seleção inicial, planos locais e autorização sem dependência circular.
+**Melhoria:** Reconcilia o fluxo de safra com seleção inicial, planos locais e autorização sem dependência circular. v3.10: acrescenta a aprovação de cada O.S. pelo agrônomo (CMD-42) na preparação da janela, separa "Cada O.S. com aprovação vigente?" de "Escopo pronto na janela?" e passa a liberação (CMD-06), com resultado por O.S., do Sistema ao PCP (73.9; APROV-01, APROV-09; JANELA-05).
 
-**Regra essencial:** Previsão de materiais e horas existe antes das O.S. A compra segue alçada própria; preparar O.S. não exige compras concluídas, mas liberar exige prontidão do escopo.
+**Regra essencial:** Previsão de materiais e horas existe antes das O.S. A compra segue alçada própria; preparar O.S. não exige compras concluídas, mas liberar exige prontidão do escopo. Liberar (CMD-06) exige também a aprovação agronômica vigente de cada O.S.; plano publicado, orçamento autorizado e janela aberta não aprovam O.S. (APROV-01, APROV-05). O resultado é por O.S. (JANELA-05); água sem produto segue FL-14.
 
 **Automação:** Recalcule ocorrências futuras, demanda líquida e orçamento a partir dos cultivos; geração de O.S. substitui a demanda da ocorrência, sem somá-la novamente.
 
@@ -10471,7 +10722,7 @@ Os arquivos originais do Claude mencionados no histórico não foram reabertos n
 
 **Raias:** Agronomia · PCP · Gestor · Suprimentos · Sistema.
 
-**Cenário de aceite proposto:** Planejar sem estoque permite cotação e proposta de O.S.; liberar uma aplicação sem os produtos da carga é impedido.
+**Cenário de aceite proposto:** Planejar sem estoque permite cotação e proposta de O.S.; liberar uma aplicação sem os produtos da carga é impedido. Com orçamento e execução da safra autorizados, uma gradagem sem aprovação do agrônomo continua A liberar (AC-82).
 
 **Continuidade:** UX-01, FL-AG-06, FL-AG-08, FL-09, FL-08.
 
@@ -10581,9 +10832,9 @@ Os arquivos originais do Claude mencionados no histórico não foram reabertos n
 
 **Saída:** Disponibilize ao app uma agenda factível e ordens liberadas por versão.
 
-**Melhoria:** Distingue horizonte mensal, compromisso semanal e despacho do turno; deixa saída para déficit não resolvido.
+**Melhoria:** Distingue horizonte mensal, compromisso semanal e despacho do turno; deixa saída para déficit não resolvido. v3.10: acrescenta a decisão "Aprovação vigente da versão?", lida no registro, separada de "Escopo autorizado e prontidão válida?", com a espera nomeada "Aguardando agrônomo", e passa "Confirme a liberação" (CMD-06) do Sistema ao PCP, sem mudar as raias (73.9; APROV-01, APROV-07, APROV-10).
 
-**Regra essencial:** Reserve conjunto, operador e recursos compartilhados simultaneamente. Clima, precedência e restrições técnicas continuam bloqueantes; aceite gerencial de risco não autoriza execução proibida.
+**Regra essencial:** Reserve conjunto, operador e recursos compartilhados simultaneamente. Clima, precedência e restrições técnicas continuam bloqueantes; aceite gerencial de risco não autoriza execução proibida. A liberação (CMD-06) é do PCP e verifica, uma a uma, escopo autorizado, aprovação vigente da versão, lida no registro e não em projeção (PROJ-03), e prontidão (APROV-01); perder a prontidão não invalida a aprovação (APROV-10).
 
 **Automação:** Calcule prontidão e gere a proposta da janela; deduplique impedimentos e preserve agenda congelada salvo revisão autorizada.
 
@@ -10591,7 +10842,7 @@ Os arquivos originais do Claude mencionados no histórico não foram reabertos n
 
 **Raias:** PCP · Sistema · Líder / responsável · Operação.
 
-**Cenário de aceite proposto:** Uma máquina apta e livre com implemento incompatível não pode ser alocada; uma falta de material fica visível com responsável.
+**Cenário de aceite proposto:** Uma máquina apta e livre com implemento incompatível não pode ser alocada; uma falta de material fica visível com responsável. Ordem pronta sem aprovação vigente fica A liberar com Aguardando agrônomo; com a máquina bloqueada, a aprovação continua vigente (AC-82, AC-141).
 
 **Continuidade:** FL-R03, FL-OS-01, FL-15, FL-LEAN-01.
 
@@ -10677,17 +10928,17 @@ Os arquivos originais do Claude mencionados no histórico não foram reabertos n
 
 **Saída:** Concilie produto, lote e custódia sem dupla baixa ou sobra sem destino.
 
-**Melhoria:** Evidencia entrega parcial de carga completa, transformação em calda e retorno recebido.
+**Melhoria:** Evidencia entrega parcial de carga completa, transformação em calda e retorno recebido. v3.10: acrescenta a confirmação de recebimento como aceite da mesma entrega, o vencimento da reserva sem renovação com aviso ao almoxarife e ao PCP (CMD-49), a nova reserva pelo PCP quando o material ainda é necessário (RSV-15) e troca "Libere reservas" por "Devolva ao disponível a reserva restante" (73.4; 73.5).
 
-**Regra essencial:** Separação, entrega, consumo e retorno são fatos diferentes. Não libere mistura incompleta. Calda preparada não retorna como produto puro; arredondamento de embalagem não amplia dose autorizada.
+**Regra essencial:** Separação, entrega, consumo e retorno são fatos diferentes. Não libere mistura incompleta. Calda preparada não retorna como produto puro; arredondamento de embalagem não amplia dose autorizada. A confirmação de recebimento no app é aceite da mesma entrega, sem nova custódia (CONC-12). O vencimento devolve ao disponível só a reserva elegível; físico, custódia, consumo, calda e cota offline vigente não mudam, e a pausa dentro da liberação não vence a reserva (RN-046). Reservar de novo é CMD-06, quando a liberação precisa ser renovada, ou CMD-44 complementar (RSV-15); sem necessidade (cancelamento, dispensa ou término), não há nova reserva (RSV-04).
 
-**Automação:** Reserve lotes aptos com validade no uso e gere retorno por saldo; valide concorrência e limites no servidor.
+**Automação:** Reserve lotes aptos com validade no uso e gere retorno por saldo; valide concorrência e limites no servidor. Vença pela política, com chave própria, evento e aviso ao almoxarife e ao PCP (CMD-49; RSV-12, RSV-14).
 
 **Etapas:** Reserve os itens → Entregue com controle → Execute e aponte → Concilie a custódia.
 
 **Raias:** Almoxarifado · Sistema · Agronomia / PCP · Operação · Conferente.
 
-**Cenário de aceite proposto:** De 100 entregues e 70 consumidos, declaração de retorno de 30 não fecha a ordem; o recebimento conferido dos 30 é necessário.
+**Cenário de aceite proposto:** De 100 entregues e 70 consumidos, declaração de retorno de 30 não fecha a ordem; o recebimento conferido dos 30 é necessário. Vencimento e entrega simultâneos têm um só vencedor, sem dupla disponibilidade (AC-77); a confirmação do caldeiro deixa a custódia com a quantidade entregue, uma vez (AC-109).
 
 **Continuidade:** FL-OS-01, FL-AG-07, FL-R02, FL-23.
 
@@ -10701,9 +10952,9 @@ Os arquivos originais do Claude mencionados no histórico não foram reabertos n
 
 **Saída:** Conserve o histórico diário e encaminhe apenas término físico à conferência.
 
-**Melhoria:** Torna explícito o ciclo de vários dias e o tratamento de saldo sem falsa conclusão.
+**Melhoria:** Torna explícito o ciclo de vários dias e o tratamento de saldo sem falsa conclusão. v3.10: o teste de início e retomada passa a exigir liberação e aprovação da versão vigentes, reserva ativa que cubra o saldo e condições válidas (APROV-07, APROV-10; RSV-15); pausa não devolve reserva (RSV-04).
 
-**Regra essencial:** Captura offline pendente não é fato confirmado. Reprogramar mantém a ordem; dispensa de saldo exige competência aplicável. Medição, declaração e telemetria do mesmo fato não são somadas.
+**Regra essencial:** Captura offline pendente não é fato confirmado. Iniciar ou retomar exige liberação e aprovação da versão vigentes e reserva ativa que cubra o saldo a executar, além de checklist e condições de campo válidas (APROV-07, APROV-10; RSV-15; 8.6.3); pausa e próximo turno não devolvem a reserva (RSV-04). Reprogramar mantém a ordem; dispensa de saldo exige competência aplicável. Medição, declaração e telemetria do mesmo fato não são somadas. Fatos distintos, aceitos e compatíveis somam (CONC-08).
 
 **Automação:** Pré-preencha contexto e instrução, acumule somente fatos confirmados e proponha a próxima tarefa pronta.
 
@@ -10711,7 +10962,7 @@ Os arquivos originais do Claude mencionados no histórico não foram reabertos n
 
 **Raias:** Operação · Sistema · Líder / alçada · Conferente.
 
-**Cenário de aceite proposto:** Apontamentos de 20, 30 e 25 ha somam 75 ha confirmados numa O.S. de 100 ha; ainda restam 25, mesmo após três turnos fechados.
+**Cenário de aceite proposto:** Apontamentos de 20, 30 e 25 ha somam 75 ha confirmados numa O.S. de 100 ha; ainda restam 25, mesmo após três turnos fechados. Retomar com a reserva vencida é recusado com "Reserva vencida · PCP reserva de novo", e a pausa é preservada (AC-96).
 
 **Continuidade:** FL-OS-01, FL-25, FL-12, FL-LEAN-01.
 
@@ -10725,17 +10976,17 @@ Os arquivos originais do Claude mencionados no histórico não foram reabertos n
 
 **Saída:** Registre água aplicada e desvios na mesma ordem e no balanço hídrico.
 
-**Melhoria:** Dá à água um caminho curto sob política e mantém fertirrigação no controle de insumos. v3.9: água sem produto não passa pelo agrônomo (DEC-2609-10): o sistema programa a lâmina pela necessidade da cultura, divide em passadas e libera pela prontidão; só a fertirrigação vai ao agrônomo.
+**Melhoria:** Dá à água um caminho curto pela prontidão e mantém fertirrigação no controle de insumos. v3.9: água sem produto não passa pelo agrônomo (DEC-2609-10): o sistema programa a lâmina pela necessidade da cultura, divide em passadas e libera pela prontidão; só a fertirrigação vai ao agrônomo. v3.10: a decisão da sonda passa a usar a validade da leitura (PROJ-13, PROJ-14); a liberação automática (CMD-06 do sistema) fica só para a água sem produto, e a fertirrigação aprovada (CMD-42) é liberada pelo CMD-06 do liberador do domínio; a ficha deixa de falar em "política" (73.9; APROV-15; DEMO-16).
 
-**Regra essencial:** A lâmina vem do balanço hídrico (ETc, chuva efetiva, aplicado e capacidade do solo), nunca da ETo isolada; distinga líquido/bruto e medido/estimado. Água sem produto não passa pelo agrônomo: acima do limite por passada do equipamento, divida em passadas; sem sonda, use estimativa por ET marcada como estimativa. Só produto na água (fertirrigação) exige aprovação individual e requisição.
+**Regra essencial:** A lâmina vem do balanço hídrico (ETc, chuva efetiva, aplicado e capacidade do solo), nunca da ETo isolada; distinga líquido/bruto e medido/estimado. Água sem produto não passa pelo agrônomo: acima do limite por passada do equipamento, divida em passadas; sem sonda ou com leitura vencida, use estimativa por ET marcada como estimativa (PROJ-14). Só produto na água (fertirrigação) exige aprovação individual e requisição.
 
-**Automação:** Calcule a lâmina e as passadas; libere automaticamente quando janela, bomba e energia estiverem prontas e sem conflito; confira e encerre sozinho com fatos consistentes, com recibo. Conflito vai ao PCP, falha técnica ao PCM.
+**Automação:** Calcule a lâmina e as passadas. Só na água sem produto, libere automaticamente (CMD-06 do sistema; APROV-15) quando janela, bomba e energia estiverem prontas e sem conflito, com o balanço do setor recalculado no registro (PROJ-14), e confira e encerre sozinho com fatos consistentes, com recibo (AGUA-04). A fertirrigação aprovada espera o CMD-06 do liberador do domínio e encerra depois da conciliação do material (DEMO-16). Conflito vai ao PCP, falha técnica ao PCM.
 
 **Etapas:** Calcule a necessidade → Programe a lâmina → Libere e irrigue → Confira o aplicado.
 
 **Raias:** Irrigação · Sistema · Agronomia · Conferente.
 
-**Cenário de aceite proposto:** Água sem produto não cria requisição nem entra na fila do agrônomo; 13,5 mm com limite de 12,0 mm por passada viram 2 passadas de 6,75 mm; sonda sem dado não bloqueia; incluir fertilizante ativa aprovação agronômica da versão e conciliação do material.
+**Cenário de aceite proposto:** Água sem produto não cria requisição nem entra na fila do agrônomo; 13,5 mm com limite de 12,0 mm por passada viram 2 passadas de 6,75 mm; sonda sem dado não bloqueia; incluir fertilizante ativa aprovação agronômica da versão e conciliação do material. Sonda com leitura de 30 h, acima da validade de 24 h, conta como sem dado, e a lâmina não repete a água aplicada há 40 min (AC-134).
 
 **Continuidade:** FL-OS-01, FL-12, FL-R03, UX-05.
 
@@ -10965,9 +11216,9 @@ Os arquivos originais do Claude mencionados no histórico não foram reabertos n
 
 **Saída:** Converta causa material em ação verificada e previsão revisada.
 
-**Melhoria:** Liga orçamento flexível e desempenho operacional, evitando confundir custo com caixa ou volume.
+**Melhoria:** Liga orçamento flexível e desempenho operacional, evitando confundir custo com caixa ou volume. v3.10: o resultado medido vira proposta de novo padrão, publicada por CMD-29; a mudança que altera a avaliação de quem propõe só é publicada depois da revisão de outra identidade (comparação externa, item 3).
 
-**Regra essencial:** Use mesma base, período e unidade. Separe quantidade, preço, volume de atividade, mix, escopo e produtividade; não repita o mesmo desvio em duas categorias.
+**Regra essencial:** Use mesma base, período e unidade. Separe quantidade, preço, volume de atividade, mix, escopo e produtividade; não repita o mesmo desvio em duas categorias. Mudança de padrão ou meta que altere a avaliação de quem propõe exige revisor de outra identidade (2.1).
 
 **Automação:** Abra o documento de origem de qualquer número e proponha investigação apenas quando houver materialidade ou tendência relevante.
 
@@ -10975,7 +11226,7 @@ Os arquivos originais do Claude mencionados no histórico não foram reabertos n
 
 **Raias:** Controladoria · Sistema · Gestor · Dono do processo.
 
-**Cenário de aceite proposto:** Um aumento de hectares executados aparece na variação de atividade e não como desperdício integral de insumos.
+**Cenário de aceite proposto:** Um aumento de hectares executados aparece na variação de atividade e não como desperdício integral de insumos. Gestor avaliado propõe reduzir a própria meta: a nova versão só vigora depois da revisão de outra identidade, e o período já cortado mantém o resultado.
 
 **Continuidade:** FL-R05, FL-LEAN-01, FL-R03.
 
@@ -10989,17 +11240,17 @@ Os arquivos originais do Claude mencionados no histórico não foram reabertos n
 
 **Saída:** Confirme fatos e recibos ou preserve conflito resolvível com a captura original.
 
-**Melhoria:** Explicita fila durável, reconciliação de versão revogada e estado pendente.
+**Melhoria:** Explicita fila durável, reconciliação de versão revogada e estado pendente. v3.10: grava chave e conteúdo antes do envio, repete com a mesma chave após falha transitória, responde conflito de chave à mesma chave com outro conteúdo, vincula outro registro do mesmo fato sem novo efeito, aceita a correção vinculada e leva o relato incompatível, possível mesmo fato ou excedente ao CMD-50 (73.3; 73.5).
 
-**Regra essencial:** Autorização offline tem escopo e validade; não cria permissão irrestrita. Preserve relato de desvio real sem transformá-lo em aprovação retroativa. Estoque offline exige saldo previamente alocado.
+**Regra essencial:** Autorização offline tem escopo e validade; não cria permissão irrestrita. Preserve relato de desvio real sem transformá-lo em aprovação retroativa. Estoque offline exige saldo previamente alocado. Chave e conteúdo ficam gravados no aparelho antes do primeiro envio; a mesma chave com outro conteúdo é conflito de chave, sem conferência (IDEM-05, IDEM-14). Outro registro do mesmo fato é vinculado sem novo efeito; só fatos distintos, aceitos e compatíveis somam; correção é nova intenção vinculada ao original (73.5). O aparelho recebe "Sincronizado · Em conferência" na chegada, sem esperar o conferente; o CMD-50 também vincula ou recusa, sem efeito, e o aparelho mostra a situação resultante (73.3.4; CONC-15; CONC-18).
 
-**Automação:** Reenvie com a mesma chave, retentativa limitada e espera progressiva; retome do último recibo.
+**Automação:** Reenvie com a mesma chave e o mesmo conteúdo, inclusive depois de reiniciar, com espera progressiva limitada e sem descartar o item; retome do último recibo (IDEM-06).
 
 **Etapas:** Prepare o offline → Capture e envie → Valide e reconcilie → Confirme no dispositivo.
 
 **Raias:** Aplicativo · Servidor · Conferente.
 
-**Cenário de aceite proposto:** Queda após gravação no servidor seguida de reenvio mantém uma única aplicação e devolve o mesmo recibo.
+**Cenário de aceite proposto:** Queda após gravação no servidor, seguida de reinício do app e reenvio, mantém uma única aplicação e devolve o mesmo recibo (AC-73); a mesma chave com outro conteúdo recebe conflito de chave, sem gravar nem abrir conferência (AC-74).
 
 **Continuidade:** FL-13, FL-12, FL-R09.
 
@@ -11253,17 +11504,17 @@ Os arquivos originais do Claude mencionados no histórico não foram reabertos n
 
 **Saída:** Execute instrução aprovada e conciliável por carga e destino.
 
-**Melhoria:** Vincula revisão técnica, prontidão da carga e ficha calculada sem inventar ordem universal de mistura.
+**Melhoria:** Vincula revisão técnica, prontidão da carga e ficha calculada sem inventar ordem universal de mistura. v3.10: a liberação sai da raia Sistema e vai ao PCP/emitente como CMD-06; o Sistema só gera as fichas depois dela, e a aprovação não gera ficha nem reserva; a revisão usa as decisões Aprovar versão, Devolver para ajuste e Rejeitar, que não cancela (APROV-09; DEC-2609-05).
 
 **Regra essencial:** Agrônomo pode incluir, retirar ou alterar doses. Ordem de mistura, compatibilidade, água, calibração e restrições vêm de protocolo validado e bula/contexto aplicável. Nenhuma ficha transforma mistura incompatível em elegível.
 
-**Automação:** Após aprovação, calcule quantidades e fichas por carga com capacidade útil do tanque e área; destaque mudança de versão e invalide fichas anteriores.
+**Automação:** Após aprovação, calcule quantidades por carga com capacidade útil do tanque e área; gere as fichas só na liberação (CMD-06; APROV-09); destaque mudança de versão e invalide fichas anteriores.
 
 **Etapas:** Emita e revise → Aprove e prepare → Execute por carga → Concilie e encerre.
 
 **Raias:** PCP / emitente · Agronomia · Sistema · Caldeiro / operador · Conferente / almoxarifado.
 
-**Cenário de aceite proposto:** Reduzir dose após separação atualiza reserva e gera retorno real do excedente; misturar sem um dos componentes autorizados continua bloqueado.
+**Cenário de aceite proposto:** Reduzir dose após separação atualiza reserva e gera retorno real do excedente; misturar sem um dos componentes autorizados continua bloqueado. Aprovar a versão não gera ficha nem reserva; a liberação é outra ação, com recibo próprio (AC-142).
 
 **Continuidade:** FL-OS-01, FL-12, FL-R02, FL-13.
 
@@ -11397,13 +11648,13 @@ Os arquivos originais do Claude mencionados no histórico não foram reabertos n
 
 **Saída:** Teste o ativo, comunique a aptidão e encerre a O.S. conciliada.
 
-**Melhoria:** Detalha a passagem entre planejamento, operação e oficina; separa teste de fechamento administrativo.
+**Melhoria:** Detalha a passagem entre planejamento, operação e oficina; separa teste de fechamento administrativo. v3.10: separa a aprovação da O.S. de manutenção pelo responsável de manutenção (CMD-42) da liberação (CMD-06), que deixam de ser uma ação composta, e a fase 04 passa a "Devolva o ativo e concilie" (APROV-09).
 
-**Regra essencial:** O responsável de manutenção aprova sua O.S. conforme competência. Condição técnica não é fase da ordem, nem reserva de agenda. Segurança e bloqueio técnico não podem ser removidos pelo PCP.
+**Regra essencial:** O responsável de manutenção aprova sua O.S. conforme competência; aprovar (CMD-42) e liberar (CMD-06) são ações separadas (APROV-09). Condição técnica não é fase da ordem, nem reserva de agenda. Segurança e bloqueio técnico não podem ser removidos pelo PCP.
 
 **Automação:** Estime peças/equipe/parada, informe previsão ao PCP e atualize o quadro compartilhado após confirmação técnica.
 
-**Etapas:** Qualifique a necessidade → Prepare a intervenção → Execute e teste → Libere e concilie.
+**Etapas:** Qualifique a necessidade → Prepare a intervenção → Execute e teste → Devolva o ativo e concilie.
 
 **Raias:** PCM · PCP · Oficina · Responsável técnico · Conferente.
 
@@ -11685,17 +11936,17 @@ Os arquivos originais do Claude mencionados no histórico não foram reabertos n
 
 **Saída:** Vincule IDs e saldos ou mantenha exceção identificada para resolução.
 
-**Melhoria:** Adiciona limite de retentativa e fila de exceções, evitando repetição infinita ou dupla criação.
+**Melhoria:** Adiciona limite de retentativa e fila de exceções, evitando repetição infinita ou dupla criação. v3.10: a consulta ao destino passa a ter três saídas (encontrado, ausente com a mesma chave, indeterminado após o limite de consultas) (73.6; INTEG-20) e o fato anterior ao corte de gravação gera só prévia conciliada, sem gravar no ERP (comparação externa, item 4).
 
-**Regra essencial:** Configure escritor oficial por entidade/efeito e versão do contrato. Timeout é resultado desconhecido, não prova de falha. Consulte antes de recriar; estorno é efeito vinculado, não exclusão silenciosa.
+**Regra essencial:** Configure escritor oficial por entidade/efeito e versão do contrato. Timeout é resultado desconhecido, não prova de falha; indeterminado repete a consulta até o limite (INTEG-20). Consulte antes de recriar; estorno é efeito vinculado, não exclusão silenciosa. Só fato a partir do corte de gravação da operação é enviado; o anterior gera prévia conciliada sem gravar, que nunca é promovida a envio (66.3). Falha da integração não estorna fato físico nem muda a etapa da O.S. (RN-047; INTEG-17).
 
-**Automação:** Outbox, chave idempotente, retentativa limitada com espera progressiva, consulta de status e reconciliação periódica.
+**Automação:** Outbox, chave idempotente, retentativa limitada com espera progressiva, consulta de status e reconciliação periódica. Valores iniciais por conector em 73.6.6 (INTEG-21).
 
 **Etapas:** Prepare o evento → Envie e consulte → Concilie o efeito → Resolva a exceção.
 
 **Raias:** Origem · Integração · Responsável pelo processo.
 
-**Cenário de aceite proposto:** ERP aceita pedido mas a resposta se perde: consultar encontra o documento existente; não criar outro pedido no reenvio.
+**Cenário de aceite proposto:** ERP aceita pedido mas a resposta se perde: consultar encontra o documento existente; não criar outro pedido no reenvio. Operação em Somente leitura: nenhuma escrita no ERP; prévia conciliada e vinculada ao lançamento do processo vigente. ERP indisponível no encerramento: a O.S. encerra, o efeito fica Pendente e nenhum consumo é estornado (AC-79).
 
 **Continuidade:** TEC-28-1, FL-23, FL-25.
 
@@ -11709,9 +11960,9 @@ Os arquivos originais do Claude mencionados no histórico não foram reabertos n
 
 **Saída:** Entregue explicação ou recibo de ação confirmada, com origem e alcance.
 
-**Melhoria:** Separa consulta de ação, dados insuficientes e confirmação de efeitos externos.
+**Melhoria:** Separa consulta de ação, dados insuficientes e confirmação de efeitos externos. v3.10: o teste passa a cobrir a chave nascida na confirmação da prévia (IDEM-11), e a regra lembra que a IA não aprova O.S. agrícola (APROV-05) e remete a 75.6 (IAG-02, IAG-05) e a DS-87.
 
-**Regra essencial:** IA não substitui protocolo agronômico nem executor de regras. Comandos de domínio validam versão, autoridade, unidade e idempotência. Mensagens externas, compra e outros compromissos exigem autorização aplicável.
+**Regra essencial:** IA não substitui protocolo agronômico nem executor de regras e não aprova O.S. agrícola (APROV-05). Em ação substantiva, a prévia só aparece depois dos controles determinísticos e da revisão cruzada de 75.6 (IAG-05); a aprovação é específica, de uso único e passa pelo CMD-38 (IAG-02); o acesso à IA segue DS-87. Comandos de domínio validam versão, autoridade, unidade e idempotência. Mensagens externas, compra e outros compromissos exigem autorização aplicável.
 
 **Automação:** Prepare rascunhos e prévias; execute só via serviços de domínio e nunca por alteração direta de saldo.
 
@@ -11719,7 +11970,7 @@ Os arquivos originais do Claude mencionados no histórico não foram reabertos n
 
 **Raias:** Assistente · Serviço de domínio · Usuário · Aplicação.
 
-**Cenário de aceite proposto:** “Aplique em todos” sem escopo definido pede delimitação; concorrência na dose impede executar a prévia antiga como se fosse a versão vigente.
+**Cenário de aceite proposto:** “Aplique em todos” sem escopo definido pede delimitação; concorrência na dose impede executar a prévia antiga como se fosse a versão vigente. Repetir a execução confirmada devolve o mesmo recibo; alterar a dose depois de confirmar exige nova prévia, nova confirmação e nova chave (IDEM-11).
 
 **Continuidade:** FL-AG-01, FL-OS-01, FL-R09, UX-04.
 
@@ -11925,9 +12176,9 @@ flowchart TB
 
 **Saída:** Salve ou cancele com foco, filtros e posição preservados.
 
-**Melhoria:** Inclui teclado, proteção de alterações, concorrência e mensagens de validação no campo.
+**Melhoria:** Inclui teclado, proteção de alterações, concorrência e mensagens de validação no campo. v3.10: Relatar problema ou sugestão a partir do erro, ao lado de corrigir, sem perder o preenchimento; as regras do relato ficam em 75.2 (comparação externa, item 2).
 
-**Regra essencial:** Linha abre formulário à direita; seta, seleção e ações não propagam o clique. Derivados abrem origem ou consulta. Campos essenciais ficam visíveis; avançados por demanda. Ícone sem texto visível tem nome acessível.
+**Regra essencial:** Linha abre formulário à direita; seta, seleção e ações não propagam o clique. Derivados abrem origem ou consulta. Campos essenciais ficam visíveis; avançados por demanda. Ícone sem texto visível tem nome acessível. Em erro, Relatar problema ou sugestão (68.5; 75.2) salva o rascunho antes e volta ao formulário preenchido.
 
 **Automação:** Pré-preencha o contexto e os cálculos; só peça nova confirmação para consequência relevante ou perda de edição.
 
@@ -11935,7 +12186,7 @@ flowchart TB
 
 **Raias:** Usuário · Interface · Serviço de domínio.
 
-**Cenário de aceite proposto:** Enter abre a linha; Esc em formulário alterado pede decisão; salvar sobre versão concorrente mostra conflito e não sobrescreve silenciosamente.
+**Cenário de aceite proposto:** Enter abre a linha; Esc em formulário alterado pede decisão; salvar sobre versão concorrente mostra conflito e não sobrescreve silenciosamente. Relatar problema ou sugestão durante o recebimento parcial em SU-06 e voltar: preenchimento, filtro e posição preservados; sem sinal, o chamado fica Salvo neste aparelho, sem protocolo (75.2; FLUXUX-16).
 
 **Continuidade:** UX-01, UX-02, UX-03, UX-05.
 
@@ -11958,6 +12209,7 @@ flowchart TB
   K["3 · Explique o erro e preserve o preenchimento"]
   L["4 · Salve e devolva foco, filtro e posição"]
   M["4 · Descarte alterações e retome o contexto"]
+  N["3 · Salve o rascunho e abra o chamado"]
  end
  subgraph RAIA_2["Serviço de domínio"]
   direction TB
@@ -11968,17 +12220,19 @@ flowchart TB
  A --> B
  B -->|Seta ou seleção| C
  B -->|Linha ou Enter| D
- D -->|Não| E
- D -->|Sim| F
  F --> G
- G -->|Cancelar ou sair| H
- G -->|Salvar| I
  I --> J
- J -->|Não| K
- K --> F
- J -->|Sim| L
  H -->|Não| F
  H -->|Sim| M
+ D -->|Sim| F
+ D -->|Não| E
+ J -->|Sim| L
+ J -->|Não| K
+ K -->|Corrigir| F
+ K -->|Relatar problema ou sugestão| N
+ N -->|Voltar à tarefa| F
+ G -->|Cancelar ou sair| H
+ G -->|Salvar| I
 ```
 
 #### FL-PCM-03 — Crie planos por modelo e antecipe preventivas
@@ -12250,3 +12504,2902 @@ Este capítulo registra as decisões do proprietário tomadas em 26/09/2026 dura
 - **AC-72-11:** jornada OS-0430: aprovar e liberar reservam Glifosato 480 320 L, 2,4-D 806 160 L e Óleo mineral 80 L; o almoxarife entrega os três itens por lote; o app confirma o recebimento; um turno de 60 ha fechado sem sinal fica na fila do aparelho e não muda o realizado; ao voltar o sinal, entra uma única vez (realizado 60 ha, saldo 100 ha) e reenviar não duplica; fechar 110 ha é recusado (máximo = saldo); com sobra em custódia, encerrar é bloqueado com o motivo e o atalho para a devolução.
 - **AC-72-12:** cadastrar a fazenda nova e, em seguida, um talhão nela sem sair do formulário; cadastrar um cliente e um parceiro de crédito com os campos do papel; CNPJ já cadastrado oferece "Abrir e ativar papel" sem duplicar; pessoa com NR-31 vencida é salva e aparece como não alocável em O.S.
 - **AC-72-07:** nenhum painel lateral corta cartões; tabelas em árvore mantêm recuo e borda da primeira coluna alinhados.
+
+## 73. Confiabilidade transacional, resiliência offline e desempenho — v3.10
+
+### 73.1 Alcance, autoridade e precedência
+
+Este capítulo é o contrato normativo da v3.10 para confiabilidade transacional, resiliência offline e desempenho, conforme o pedido do proprietário de 26/09/2026 (itens 2 a 9). Nas matérias que trata, só ele recebe IDs novos, além de RN-046 e RN-047 (cap. 3) e de CMD-49 e CMD-50 (8.2.2); os caps. 74 e 75 têm séries próprias. As seções existentes recebem edições mínimas, que corrigem contradição ou remetem para cá, listadas em 73.14. Cada regra fica num lugar só: as outras seções citam o ID, sem copiar o texto.
+
+| Seção | Tema | IDs | Item do pedido |
+|---|---|---|---|
+| 73.2 | Vocabulário e as três situações distintas | — | 3, 5, 6 e 7 |
+| 73.3 | Identidade da intenção e idempotência de ponta a ponta | IDEM-01 a IDEM-20 | 3 |
+| 73.4 | Validade controlada das reservas de material | RN-046; CMD-49; RSV-01 a RSV-18 | 4 |
+| 73.5 | Conciliação de fatos de campo sem soma indiscriminada | CMD-50; CONC-01 a CONC-23 | 5 |
+| 73.6 | Transações locais, outbox e integrações resilientes | RN-047; INTEG-01 a INTEG-28 | 6 |
+| 73.7 | Comandos e consultas: projeções seletivas | PROJ-01 a PROJ-17 | 7 |
+| 73.8 | Metas mensuráveis de latência e atualização | PERF-01 a PERF-07 | 7 |
+| 73.9 | Aprovação agronômica, operações mecânicas e autorização técnica × prontidão | APROV-01 a APROV-16 | 2 |
+| 73.10 | Interface: estados, pendências e ações | UIREL-01 a UIREL-08 | 9 (interface minimalista) |
+| 73.11 | Cenários obrigatórios e aceites complementares | AC-73 a AC-147 | 8 |
+| 73.12 | Decisões pendentes do proprietário | PEND-01 a PEND-16 | 2 e 9 |
+| 73.13 | Matriz das mudanças | — | 9 |
+| 73.14 | Registro das alterações da v3.10 | — | 9 |
+
+**Autoridade e precedência**
+
+1. Nas matérias que trata, o cap. 73 prevalece sobre o texto anterior do PRD, com a mesma posição que 72.1 dá ao cap. 72. A frase de 69.1 "nem estabelece que texto mais recente vence automaticamente" não mantém vivo trecho que o cap. 72 ou este capítulo substituíram.
+2. As decisões do proprietário do cap. 72 (DEC-2609-01 a DEC-2609-14, 72.3 e 72.4) continuam valendo e não são reescritas. Este capítulo não muda nenhuma delas: onde a redação admite mais de uma leitura, vale a leitura da tabela abaixo. Se aparecer contradição real, prevalece a decisão do proprietário, e o tema vai a 73.12 como pendência; nada é decidido em silêncio.
+3. Os demais contratos (RN, CAL, CMD, FO, segurança e engenharia) continuam obrigatórios. Este capítulo os complementa e cita pelo ID.
+4. O estado, a regra e a ação vêm deste capítulo. A palavra exibida e a cor de cada estado ficam na tabela única de 74.4.3, que não cria estado (74.1); todo estado deste capítulo mostrado ao usuário precisa ter linha ali.
+
+**Como ler as decisões do cap. 72 nas matérias deste capítulo**
+
+| Texto do cap. 72 | Leitura | Onde se aplica |
+|---|---|---|
+| Ref. DEC-2609-13: "fila local sem sinal enviada uma vez só"; 72.3 item 4: "sincronizam quando houver sinal, sem duplicar" | Cada registro é aceito e aplicado uma vez só. A rede entrega pelo menos uma vez e o app reenvia até receber o recibo; o efeito único vem da chave da intenção, do registro da intenção processada e do recibo, gravados na mesma transação do efeito. Não se proíbe reenviar | IDEM-01, IDEM-06, IDEM-14, IDEM-16; INTEG-07 |
+| Ref. DEC-2609-13: "Encerrar exige apontamentos enviados e nada em custódia" | "Enviados" quer dizer que o servidor recebeu o registro e devolveu o recibo (situação de envio Sincronizado), não que o ERP o aceitou. Relato ainda Em conferência também impede, porque o apontamento não está conferido (CMD-10) | INTEG-13; CONC-19; RN-047 |
+| Ref. DEC-2609-13: "O.S., Estoque, App e Mapa leem o mesmo estado: o que acontece numa tela aparece nas outras" | Fase, impedimento, saldo, custódia e a fila de tarefas do app (Minha fila) são lidos por consulta direta ao registro transacional; a mudança chega às telas conectadas no prazo da linha 2 de PROJ-06. Não é promessa de propagação imediata | PROJ-02; PROJ-06, linha 2; PERF-01 |
+| Ref. DEC-2609-05: "Liberar para execução (CMD-06), que reserva os insumos" | CMD-06 cria a reserva de execução, ou converte a reserva de planejamento, na mesma transação da liberação. Nada anterior à liberação autoriza entrega | RSV-03; APROV-09 |
+| Ref. DEC-2609-05: "Aprovar não libera" | Aprovar (CMD-42) e liberar (CMD-06) são duas intenções, com chave e recibo próprios; a ação composta "Aprovar e liberar" deixa de ser oferecida | APROV-09 |
+| 72.3 item 1 e AC-72-11: registrar hectares "até o saldo" | Vale para o que o app aceita registrar e para o realizado confirmado da O.S. Fato de outro aparelho que passa do saldo não é descartado: o excedente vai à conferência | CONC-14; PEND-07 |
+| Ref. DEC-2609-10: irrigação só com água sem aprovação do agrônomo | Sem aprovação, política, enquadramento ou autorização técnica. Liberação automática pela prontidão operacional. Dado de sonda ou de clima ausente ou vencido usa estimativa por ET, marcada como estimativa, sem bloquear; telemetria vencida de bomba, pivô ou energia deixa a prontidão "A confirmar" com o irrigante | APROV-15; PROJ-14 |
+
+**O que não muda**
+
+- **Aprovação agronômica.** Cada O.S. agrícola, inclusive as operações mecânicas, tem aprovação individual por CMD-42. Aprovar não libera; liberar é CMD-06; a revisão é separada da liberação (cap. 41; DEC-2609-05; 73.9). Orçamento autorizado e janela aberta não aprovam.
+- **Exceções expressas.** Só as que o PRD já prevê: irrigação somente com água (DEC-2609-10; 41.8), manutenção (responsável de manutenção) e beneficiamento (responsável de produção). A "pré-autorização por limiares" é proposta pendente (PEND-01), não comportamento aprovado.
+- **Almoxarifado integrado à O.S.** (cap. 42; DEC-2609-07 e DEC-2609-13). A liberação reserva; a entrega é por lote e embalagem; o app confirma o recebimento; o apontamento consome a custódia; a sobra é devolvida e conferida; o encerramento exige conferência e nada em custódia.
+- **Kanban da O.S.** Cinco fases: A liberar, Liberadas, Em execução, Em conferência e Encerradas. Nenhuma coluna nova; o único selo novo é Reserva vencida (RSV-16).
+- **Interface minimalista.** Uma ação primária por tela; estados e pendências visíveis, com dono e prazo; detalhe técnico fora da tela do usuário (73.10).
+- **Arquitetura.** Aplicação modular por domínio, com PostgreSQL transacional (12.1; 23). Nada deste capítulo exige microsserviços, banco separado, event sourcing ou transação distribuída. Orquestrador com estado só pelo critério de INTEG-11; CRDT só por CONC-22.
+- **Produção não iniciada.** Esta revisão altera só a documentação. A construção do software de produção continua dependendo de comando explícito do proprietário (72.1). Os cenários de 73.11 estão especificados, não executados.
+- **Sem promessa absoluta.** Nenhum requisito promete ausência de defeitos, resposta imediata ou entrega de rede exatamente uma vez. As metas são percentis medidos em ensaio definido (73.8).
+
+### 73.2 Vocabulário
+
+A partir da v3.10, os termos abaixo têm um só sentido em todo o PRD. Onde o texto anterior usa outro termo para a mesma coisa, ou mantém um nome técnico herdado, vale o mapa de 73.2.3. O glossário (21.1) passa a remeter a esta seção.
+
+#### 73.2.1 Termos
+
+| Termo | Definição | Não confundir com | Detalhe |
+|---|---|---|---|
+| Intenção | Pedido confirmado de alteração, feito por pessoa ou processo automático, com conteúdo congelado na confirmação. Rascunho editável ainda não é intenção | Rascunho; evento | IDEM-03 |
+| Comando | A intenção como chega ao servidor: tipo (CMD-nn), chave, versão esperada e conteúdo. O servidor responde com um dos resultados de 73.3.4. Comando não é fato | Evento | 8.2; PROJ-01 |
+| Chave (de idempotência) | Identificador da intenção gerado por quem a inicia, único por organização, tipo de comando e chave. O formato (UUID) não é a proteção. No fato capturado no aparelho, o `event_id` herdado de 11.2 tem o mesmo valor da chave | ID do objeto; chave física do fato; `event_id` de evento gerado pelo servidor | IDEM-01, IDEM-02, IDEM-18 |
+| Recibo | Resultado registrado da intenção (efeitos, versão resultante, pendências e próxima ação), gravado na transação do efeito e devolvido igual a todo reenvio equivalente | Mensagem de tela | IDEM-16, IDEM-17 |
+| Relato | Registro de um fato de campo feito por pessoa, aparelho, telemetria ou importação. O servidor o classifica (73.5) sem alterá-lo. Um fato físico pode ter vários relatos, mas produz efeito uma vez só | Fato confirmado | CONC-01, CONC-18 |
+| Fato confirmado | Efeito gravado uma vez pelo servidor: relato aceito (avanço, movimento, horas, custo) ou comando aceito (reserva, liberação, encerramento). É imutável; correção de fato de campo é novo relato vinculado ao original | Relato em conferência; intenção | CONC-06, CONC-16; PROJ-01 |
+| Chave física do fato | Campos que identificam o acontecimento físico, por tipo (ex.: ativo, ponto e leitura do medidor no abastecimento). Liga relatos diferentes do mesmo fato | Chave de idempotência | CONC-05 |
+| Evento | Registro, gravado na outbox na mesma transação, de que um fato foi confirmado. Alimenta projeções, avisos e integrações. Nunca representa intenção, recusa ou captura ainda no aparelho | Comando | PROJ-01; INTEG-01, INTEG-04 |
+| Consulta | Leitura sem efeito. A consulta direta lê o registro transacional depois do commit; a leitura no comando lê o registro dentro da transação e é a única que autoriza | Projeção | PROJ-02, PROJ-03 |
+| Projeção | Tabela de leitura atualizada por worker a partir de eventos, com versão e "dados até". Nunca autoriza comando; a única dependência de comando é a consolidação no corte exigida pelo CMD-30 | Consulta direta; cache; réplica | PROJ-05, PROJ-07, PROJ-16 |
+| Comando que decide o futuro | Todo comando que não é relato de fato ocorrido. Exemplos: reservar, entregar com conexão, aprovar, liberar, iniciar com conexão, encerrar, fechar período. Pode ser recusado por regra de negócio ou por conflito de versão, sem efeito | Relato de fato ocorrido | 73.3.4 |
+| Relato de fato ocorrido | Registro do que já aconteceu no campo: apontamento, consumo, abastecimento, aplicação de água, entrega sob cota, início ou preparo feito sem sinal. Não é recusado por saldo, custódia, versão revogada, sobreposição ou excedente: fica Em conferência, sem efeito no saldo confirmado. Recusa só nos casos de CONC-07, com o conteúdo preservado | Comando que decide o futuro | CONC-07; RSV-10; APROV-07, APROV-12 |
+| Pacote offline de execução | Ficha e dados da versão liberada que o executor leva para trabalhar sem sinal (MB-02). A validade conta pelo tempo decorrido desde a última sincronização. Enquanto válido, protege a reserva da ordem | Cota delegada | RSV-08; CONC-21 |
+| Cota delegada | Quantidade de material retirada do disponível central e entregue à decisão de um aparelho ou local offline (MB-05). Volta ao disponível só por RSV-09 | Pacote de execução | RSV-09 |
+| Validade da reserva; reserva vencida; devolver ao disponível | Termos de reserva de material (73.4). "Expiração" fica para lote; "liberar" fica para CMD-06 | Expiração de lote; liberação | RN-046; RSV-18 |
+| Hora do aparelho | Dado informado. Nunca decide ordem, vencedor, saldo, custódia, área nem vencimento. A ordem vem da sequência local, da versão esperada e da recepção no servidor. Depois de reinício do aparelho, só entra corrigida pelo desvio e marcada como estimativa, com a incerteza de CONC-21 | Instante do servidor | CONC-20, CONC-21 |
+| Rejeitado; Recusado; Rejeitada | Rejeitado: resposta a comando que decide o futuro barrado por regra de negócio (73.3.4). Recusado: situação do relato nos casos de CONC-07, com o conteúdo preservado. Rejeitada: decisão do agrônomo sobre a versão da O.S., que não cancela a ordem (CMD-42; DEC-2609-05) | Entre si | 73.3.4; CONC-18; CMD-42 |
+
+#### 73.2.2 Três situações distintas
+
+Uma O.S. e cada registro de campo podem estar, ao mesmo tempo, em três situações independentes. Cada uma tem vocabulário próprio e fechado; nenhuma muda a outra; nenhuma tela junta duas delas numa palavra (UIREL-01). Palavra e cor exibidas: 74.4.3.
+
+| Situação | Pergunta que responde | Vocabulário | Quem muda | Onde aparece | Não altera |
+|---|---|---|---|---|---|
+| Execução da O.S. | Em que ponto está o trabalho e o que falta? | Etapa: A liberar, Liberadas, Em execução, Em conferência, Encerradas, com os selos de 8.4.3 e Reserva vencida; rascunhos e canceladas em visões próprias (8.4.3). Relato no servidor: Aceito, Vinculado, Em conferência, Aguardando original ou entrega, Recusado, Corrigido (CONC-18). Apontamento: Conferido ou Não conforme (CMD-09) | Comandos da O.S. (8.2), CMD-49 e CMD-50 | Lista, Kanban, mapa, tela de trabalho, app | Envio do aparelho; integração ERP |
+| Envio do aparelho | O registro saiu do aparelho e o servidor devolveu o recibo? | Salvo neste aparelho, Aguardando envio, Enviando, Sincronizado (com Ver recibo), Conflito (64.5; IDEM-05, IDEM-08). Na web, Verificando envio (IDEM-09) | App e servidor | App; na web, Verificando envio (IDEM-09); supervisão e suporte conforme 73.10.2 | Etapa da O.S.; integração ERP. "Sincronizado" não quer dizer fato aceito: a situação do relato vem em chip próprio, ao lado (74.4.3) |
+| Integração ERP | O efeito externo foi confirmado no ERP? | Pendente, Enviando, Em reconciliação, Confirmada, Com erro, por efeito externo (73.6.5) | Conector e responsável do tipo (INTEG-25) | Bloco Situação e origem, só para os perfis de INTEG-27, sempre com o rótulo "Integração ERP:"; CF-03; GE-03 | Etapa da O.S., fatos físicos e custódia (RN-047) |
+
+#### 73.2.3 Mapa dos termos anteriores
+
+| Seção v3.9 | Termo anterior | Situação | Termo da v3.10 |
+|---|---|---|---|
+| 8.1, Apontamento | Rascunho local | Envio do aparelho | Rascunho, antes da confirmação; ainda não é intenção (IDEM-03) |
+| 8.1, Apontamento | Capturado | Envio do aparelho | Salvo neste aparelho; Aguardando envio enquanto não houver sinal |
+| 8.1, Apontamento | Recebido | Envio e execução | Sincronizado, com o relato Aceito ou Aguardando original ou entrega; Vinculado é situação nova (CONC-18) |
+| 8.1, Apontamento | Validado | Execução | Conferido (CMD-09) |
+| 8.1, Apontamento | Em conferência; Não conforme | Execução | Em conferência (caso de relato, CONC-19); Não conforme, sem mudança |
+| 8.1, Apontamento, envio | local; pendente; enviado | Envio do aparelho | Salvo neste aparelho; Aguardando envio; Sincronizado |
+| 8.1, Apontamento, envio | erro | Envio do aparelho | Aguardando envio, se a falha é transitória (repete com a mesma chave); Conflito, se exige revisão do autor (IDEM-07) |
+| 8.1, Integração | Pendente; Em processamento; Confirmada; Em erro; Em reconciliação | Integração ERP | Pendente; Enviando; Confirmada; Com erro; Em reconciliação |
+| 8.4.3 | "Capturado no dispositivo, aguardando sincronização" | Envio do aparelho | Aguardando envio, só no aparelho que capturou (74.8.2) |
+| 11.2; 12.3; IDEM-18 | `event_id`; rota `/work-orders/:id/events` | — | Nomes técnicos herdados. O `event_id` do fato capturado no aparelho é a chave da intenção (IDEM-18); a rota recebe intenções (PROJ-01). Nenhum dos dois é evento no sentido de 73.2.1 |
+| 12.3, `/sync` | Aceito | Execução | Aceito |
+| 12.3, `/sync` | já recebido | Envio do aparelho | Sincronizado, com o recibo original (mesma chave e conteúdo equivalente, IDEM-14) |
+| 12.3, `/sync` | pendente | Execução | Aguardando original ou entrega (CONC-12, CONC-17). "Em processamento" (IDEM-15) é resposta transitória, não situação |
+| 12.3, `/sync` | conflito | Três casos | Mesma chave com outro conteúdo: Conflito (envio). Relatos incompatíveis ou do possível mesmo fato: Em conferência (execução). Versão superada em comando que decide o futuro: conflito de versão, com a versão atual (73.3.4) |
+| 12.3, `/sync` | rejeitado com motivo | Execução | Recusado (casos de CONC-07 ou decisão do CMD-50). Rejeição de negócio só em comando que decide o futuro |
+| 12.3, `/sync` | (não havia) | Execução | Vinculado a fato existente; Em conferência. Chave expirada (IDEM-19; 73.3.4) é resposta ao iniciador, não situação do relato; o relato segue CONC-07 |
+| 12.3; 12.5; RN-038 | lote de eventos; reenvio do mesmo evento | — | Lote de intenções (registros de campo); reenvio da mesma intenção |
+| 64.5 | Salvo neste aparelho; Aguardando envio; Sincronizado | Envio do aparelho | Mantidos |
+| 64.5 | Conflito | Envio do aparelho | Só conflito de chave ou item que exige revisão do autor. Conflito entre fatos aparece como Sincronizado, com o chip Em conferência ao lado |
+| 64.5 | "Eventos têm ID único" | — | Cada intenção tem chave gravada com o conteúdo antes do primeiro envio (IDEM-05) |
+| 66.3 | recebido; validado | Integração ERP | Eventos da trilha; a tela mostra Pendente |
+| 66.3 | enviado | Integração ERP | Enviando |
+| 66.3 | aceito pelo ERP; reconciliado | Integração ERP | Confirmada |
+| 66.3 | rejeitado | Integração ERP | Com erro |
+
+### 73.3 Identidade da intenção e idempotência de ponta a ponta
+
+Esta seção é o contrato único de idempotência do produto. RN-001 dá o princípio; o envelope de 8.2.1 passa a valer para todos os comandos (CMD-01 a CMD-50); 12.2, 12.3, 12.5, 24.1 e ENG-022 remetem para cá; ENG-021 já é coerente com esta seção e continua valendo. Nenhuma regra de negócio muda: esta seção define como uma repetição técnica deixa de virar efeito repetido. Os termos intenção, comando, chave, recibo, fato confirmado e evento seguem 73.2.
+
+**Leitura de DEC-2609-13.** Vale a leitura de 73.1: cada registro é aceito e aplicado uma vez só. O efeito único vem dos mecanismos abaixo, não da proibição de reenviar.
+
+#### 73.3.1 Proteção, alcance e origem da chave
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| IDEM-01 | A proteção contra efeito repetido é o conjunto de quatro elementos: unicidade de (organização, tipo de comando, chave) no banco; hash do conteúdo canônico; efeito, registro da intenção e recibo gravados na mesma transação; retenção do registro enquanto houver reenvio possível. UUID sozinho não basta: UUID igual não prova conteúdo igual (IDEM-14), e UUID diferente não prova fato diferente (12.5; 73.5). | AC-73, AC-74 e AC-84 passam contra PostgreSQL real; revisão de código registrada confirma que nenhum comando deduplica apenas pelo UUID recebido do cliente. |
+| IDEM-02 | Cada intenção de alteração recebe uma chave única de quem a inicia: aplicativo, web, integração de entrada, assistente de IA (CMD-38) ou job/serviço automático. Vale para CMD-01 a CMD-50, para cada item de `/sync` e para comandos internos disparados por jobs. Para intenção humana, a chave é um UUID (v4 ou v7) gerado no iniciador; a exceção é a linha de importação, cuja chave deriva do arquivo (IDEM-10). O formato não é a proteção (IDEM-01). Consultas não levam chave. O servidor não cria chave em nome de uma intenção humana: comando mutável sem chave é recusado sem efeito. | Teste de contrato de cada endpoint mutável: requisição sem chave recebe `IDEMPOTENCY_KEY_MISSING` e nada é gravado. O inventário de CMD-01 a CMD-50 indica, para cada comando, o iniciador e a origem da chave. |
+| IDEM-03 | A intenção nasce quando o usuário confirma a ação: Registrar avanço, Aprovar versão, Liberar para execução, Confirmar entrega, Confirmar recebimento ou confirmação da prévia da IA. Rascunho editável (FORM-04, Salvar rascunho) ainda não é intenção e não tem chave de comando. Na confirmação, chave e conteúdo ficam congelados juntos. Item confirmado não é editado nem apagado na fila; mudança posterior é nova intenção com nova chave, vinculada ao original quando for correção (73.5). | Editar um rascunho 10 vezes e confirmar gera 1 chave. Tentar alterar um item confirmado ainda na fila oferece Corrigir, que cria outra intenção e deixa a primeira intacta. |
+| IDEM-04 | Processo automático usa chave determinística, derivada do gatilho: tipo de comando + identidade da origem + versão ou rodada que justifica a ação, nunca o instante de execução. Se os componentes passarem de 128 caracteres (73.3.5), a chave gravada é o SHA-256 deles em hexadecimal. Exemplos: geração automática de 8.6.2 (ocorrência e parcela de origem); liberação automática de água (tarefa e versão, DEC-2609-10); vencimento de reserva CMD-49 (reserva e versão); requisição derivada da aprovação (O.S. e versão aprovada, 42.1); Devolver sobras (O.S. e chave do comando que a gerou, CMD-08 ou CMD-46, 42.4); integração de entrada (sistema, empresa, identificador externo, tipo e versão ou sequência do evento externo). Consumidores de mensagens seguem 73.6. | AC-85. |
+
+#### 73.3.2 Aplicativo e web
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| IDEM-05 | O app grava no armazenamento local durável (12.1; 23) a chave, o tipo de comando, o conteúdo, a versão esperada, o autor, a sequência local e a âncora de tempo (CONC-20, CONC-21) antes do primeiro envio, com ou sem sinal. Só depois mostra **Salvo neste aparelho** e tenta enviar. A gravação local segue 29.3 (captura local p95 ≤500 ms). | Encerrar o processo do app entre a gravação local e o envio: ao reabrir, o item está na fila com a mesma chave e o mesmo conteúdo. Teste instrumentado confirma que nenhum envio sai sem gravação local anterior. |
+| IDEM-06 | Todas as tentativas da mesma intenção usam a mesma chave e o mesmo conteúdo: retentativa automática, reconexão, reinício, atualização do app e reenvio manual. O app não gera chave nova para item que já está na fila. A retentativa automática usa espera progressiva limitada, com variação aleatória (valores iniciais de 1 s a 5 min, configuráveis e validados em HML), e nunca descarta o item por número de tentativas. Desinstalar o app ou limpar seus dados só preserva a fila se houver mecanismo de recuperação da identidade (B-16). | AC-73. Atualizar o app com 50 itens na fila mantém as 50 chaves e os 50 hashes iguais antes e depois da atualização. |
+| IDEM-07 | Nova chave só para nova intenção, conforme a classe do resultado (tabela de 73.3.4). Falha transitória repete com a mesma chave e o mesmo conteúdo. Rejeição de negócio e conflito de versão encerram a intenção com o resultado registrado; o rascunho é preservado (FORM-09), e reenviar depois de corrigir, ou sobre a versão nova, é nova intenção. Conflito de chave nunca se resolve reenviando o conteúdo novo com a chave antiga. Relato de fato físico já ocorrido não recebe rejeição de negócio nem conflito de versão: fica Vinculado ou Em conferência (CONC-07), a intenção termina com esse resultado, e o caso segue pelo CMD-50 ou por correção vinculada, não por reenvio. | Teste de contrato para cada classe da tabela de 73.3.4; AC-86. |
+| IDEM-08 | Toque ou clique repetido não cria intenção. O primeiro toque fixa a intenção; o controle passa a **Enviando** na própria resposta ao toque (feedback visual p95 ≤100 ms, linha "Interação local sem I/O" de 29.3; do toque ao recibo ou ao estado pendente, PERF-02) e ignora novos toques até o recibo, um resultado final ou **Salvo neste aparelho**. Novo registro legítimo exige nova ação depois que o formulário volta ao estado inicial. O apontamento rotineiro não ganha modal de confirmação (69.2). | AC-83. |
+| IDEM-09 | Na web, a chave nasce ao confirmar e fica guardada com o conteúdo no navegador até o recibo. Recarregar a página com envio sem resposta consulta o resultado pela chave antes de oferecer nova tentativa: a consulta, sem efeito, busca (tipo de comando, chave) na organização da sessão e devolve o recibo, Em processamento ou Não recebido (PERF-04). Sem a chave (outro navegador ou aba fechada), a tela mostra o estado atual lido do servidor e não reenvia sozinha. Duas abas são duas intenções; a versão esperada decide (ENG-023). | AC-87. |
+| IDEM-10 | Em lote, cada item tem a sua chave e o seu recibo; uma chave de lote, se existir, só identifica a submissão. Reenviar o lote reenvia os itens com as mesmas chaves, e os itens já confirmados devolvem seus recibos (RN-035). Vale para `/sync`, Liberar selecionadas e Preparar O.S. do período (8.6.2), registro em lote do encarregado (64.4) e importação, com chave por linha formada por tipo de importação, hash do arquivo e número da linha; reenviar o mesmo arquivo devolve os recibos das linhas já processadas. | AC-88. |
+| IDEM-11 | Na IA (CMD-38; 59.4), a chave nasce quando o usuário confirma a prévia e fica ligada ao conteúdo e à versão confirmados. A retentativa do assistente reutiliza essa chave. Mudar um parâmetro depois da confirmação exige nova prévia, nova confirmação e nova chave. | Repetir a execução confirmada devolve o mesmo recibo; alterar a dose depois de confirmar não executa sem nova confirmação (teste de FL-R10). |
+
+#### 73.3.3 Servidor
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| IDEM-12 | Restrição única no banco em (`organization_id`, `command_type`, `idempotency_key`). `organization_id` vem da sessão validada (ENG-021) ou, em job e integração, da credencial validada, nunca do conteúdo; é o `tenant_id` de 11.2. `command_type` é estável entre versões do app (ex.: `CMD-43`); endpoint mutável sem CMD usa o identificador estável da operação (ex.: `areas.import`). O registro fica no mesmo PostgreSQL transacional do efeito, sob RLS (ENG-025); cache, fila ou CDN não substituem esse registro. | Teste de integração com PostgreSQL real: a mesma chave em duas organizações, ou em dois tipos de comando, não interfere; inserir a mesma tripla duas vezes falha na restrição. |
+| IDEM-13 | O hash (SHA-256) é calculado sobre o conteúdo canônico. Entram: organização, tipo de comando, autor da intenção, objeto e versão esperada, escopo e dados de negócio (quantidade e unidade, produto e lote, parcela, intervalo, instante de ocorrência informado, motivo, referência e hash de anexos). Ficam fora: instante de envio, número da tentativa, versão do app ou do sistema, aparelho que transportou, token, cabeçalhos, ordem dos campos e formatação. Decimais seguem 24.1 (texto decimal normalizado), datas vão em ISO 8601 com fuso, e listas sem significado de ordem são ordenadas. O registro guarda a versão da regra de canonicalização, e a comparação usa essa mesma versão. A sequência local e a âncora de tempo (CONC-20, CONC-21) são fixadas na confirmação, gravadas com o conteúdo (IDEM-05), não são recalculadas no reenvio e ficam fora do hash. | Tabela de casos em teste unitário: variar só campos excluídos mantém o hash; variar qualquer campo incluído muda o hash; `"60"` e `"60.0"` na mesma unidade dão o mesmo hash. |
+| IDEM-14 | Mesma chave com conteúdo equivalente devolve o resultado registrado: mesmo recibo, mesmos IDs, mesma versão resultante e mesmo resultado, inclusive rejeição ou conflito de versão registrados. A resposta vem indicada como já recebida, sem reavaliar regras nem aplicar efeito. Mesma chave com conteúdo diferente devolve conflito de chave explícito (`IDEMPOTENCY_KEY_REUSED`), com referência ao recibo original quando o solicitante tem acesso; nada é gravado, o original fica intacto e o caso não abre conferência. | AC-73 e AC-74. |
+| IDEM-15 | Requisições simultâneas com a mesma chave não executam em paralelo. O registro da intenção é inserido na mesma transação do efeito. A segunda requisição espera o fim da primeira até um limite curto (valor inicial 2 s, configurável; é a espera por bloqueio só dessa inserção, fixada na transação, acima do 1 s geral de 28.4) e então recebe o recibo, se a primeira confirmou, ou **em processamento** (`IDEMPOTENCY_IN_PROGRESS`) com prazo para repetir. Se a primeira abortar, nada fica gravado e a próxima tentativa processa normalmente. "Em processamento" não é estado gravado. | AC-84. |
+| IDEM-16 | Numa só transação local: efeito de negócio, registro da intenção processada (com hash e resultado), recibo e outbox (ENG-022; 73.6). Rejeição de negócio e conflito de versão são registrados com a chave em transação própria, sem efeito de negócio; se esse registro falhar, a resposta é falha transitória. Comando longo (ENG-079) confirma o job registrado, e os itens do job usam chaves derivadas (IDEM-04). | Injeção de falha em teste de integração: abortar antes do commit não deixa efeito nem registro, e o reenvio processa uma vez; cortar a conexão depois do commit e antes da resposta faz o reenvio devolver o mesmo recibo. Consulta de consistência em HML encontra zero efeito sem registro e zero registro confirmado sem efeito. |
+
+#### 73.3.4 Resultado de cada tentativa
+
+| Situação na chegada | Resposta ao iniciador | O que o servidor grava | Próximo passo do iniciador |
+|---|---|---|---|
+| Chave nova, comando válido | Recibo com efeitos | Efeito, registro, recibo e outbox na mesma transação | Mostrar o recibo |
+| Chave nova, rejeição de negócio em comando que decide o futuro, como reservar, entregar com conexão, aprovar ou liberar (validação de domínio, falta de permissão para o comando, estado, saldo, ordem revogada) | Rejeitado, com motivo e próxima ação | Registro com resultado rejeitado, sem efeito | Não repetir; corrigir é nova intenção com nova chave; rascunho preservado |
+| Chave nova, conflito de versão em comando que decide o futuro | Conflito de versão, com a versão atual | Registro com resultado conflito de versão, sem efeito | Revisar diferenças; reenviar sobre a versão nova é nova intenção |
+| Chave nova, relato de fato de campo que não soma (outro registro do mesmo fato, possível mesmo fato, incompatível, excedente, ordem revogada ou versão substituída; 73.5) | Recebido, com a classe e a situação: Vinculado ou Em conferência, com motivo | Relato, registro com esse resultado e recibo na mesma transação, sem efeito no saldo confirmado (CONC-07) | Não repetir nem criar intenção nova; o caso, quando houver, segue pelo CMD-50 |
+| Chave nova, relato de autor sem permissão no escopo ou de usuário revogado fora da política de auditoria (CONC-07; 12.5) | Recusado, com motivo | Registro com resultado recusado e o conteúdo, sem efeito (CONC-07) | Não repetir; o app mostra Recusado · motivo (73.10.1) |
+| Mesma chave, conteúdo equivalente, registro concluído | O mesmo recibo, indicado como já recebido | Nada novo | Mostrar o recibo |
+| Mesma chave, conteúdo diferente | Conflito de chave, com referência ao recibo original | Nada novo; original intacto; ocorrência contada em 30.2 | Não reenviar com essa chave; conteúdo novo é nova intenção |
+| Mesma chave com transação em curso | Em processamento, com prazo para repetir | Nada | Repetir com a mesma chave e o mesmo conteúdo depois do prazo |
+| Sem resposta, timeout, queda de conexão, erro do servidor, dependência indisponível, limitação (29.2) ou sessão expirada | Falha transitória, ou nenhuma resposta | Nada, ou o efeito completo se a transação terminou | Repetir com a mesma chave e o mesmo conteúdo, com espera progressiva; depois de renovar a sessão, a chave continua a mesma |
+| Chave ausente ou esquema inválido | Recusa de contrato | Nada | Defeito do cliente, não situação do usuário |
+| Chave expirada (IDEM-19) | Chave expirada: consulte o resultado | Nenhum efeito; a chegada e o conteúdo ficam no registro com esse resultado (CONC-07); item visível em CF-03 com responsável (PEND-03) | Não repetir; consultar o estado do objeto antes de criar nova intenção |
+
+#### 73.3.5 Recibo, registro da intenção e identidades
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| IDEM-17 | O recibo é imutável e contém os campos do modelo mínimo abaixo. A tela mostra só o comprovante curto de 68.4 (o que foi feito, código ou versão, pendências e próxima ação); os demais campos ficam na auditoria (CF-04). | A resposta original e a resposta a um reenvio equivalente são iguais em todos os campos do recibo, exceto o indicador de reenvio; alteração posterior do objeto não altera o recibo. |
+| IDEM-18 | Identidades distintas não se substituem (tabela abaixo). Para relato capturado no aparelho, o `event_id` de 11.2 gerado na confirmação é a própria chave da intenção que o envia; como a chave, ele é único por organização e tipo de comando (IDEM-12), e a referência a um relato (correção vinculada, "mesmo fato de") leva também o tipo de comando. Eventos gerados pelo servidor têm `event_id` próprio e apontam a chave em `causation_id`. O ID do objeto (11.2; 56.5) identifica a O.S., a reserva ou o lote em todas as versões e não serve de chave. A chave física do fato (73.5) e a chave natural de geração (11.2) detectam duplicidade de negócio entre intenções diferentes e não substituem a chave de idempotência. | A partir do `event_id` de um apontamento chega-se ao recibo, aos movimentos e às mensagens da outbox (ENG-081). Dois registros do mesmo abastecimento, com chaves diferentes, seguem 73.5 (AC-75). |
+
+**Modelo mínimo do registro da intenção processada.** Pode ser uma tabela ou duas (registro e recibo), desde que a restrição única e a atomicidade de IDEM-12 e IDEM-16 valham.
+
+| Campo | Conteúdo |
+|---|---|
+| `organization_id` | Da sessão ou da credencial validada (IDEM-12); é o `tenant_id` de 11.2; parte da chave única |
+| `command_type` | Identificador estável do comando (ex.: `CMD-43`); parte da chave única |
+| `idempotency_key` | Chave do iniciador, texto de até 128 caracteres; parte da chave única |
+| `payload_hash`, `canonical_version` | SHA-256 do conteúdo canônico e versão da regra usada (IDEM-13) |
+| `initiator_kind` | App, web, integração, IA ou job |
+| `actor_id`, `transport_actor_id` | Autor da intenção; serviço ou sessão que transportou, quando diferente |
+| `device_id` | Aparelho de origem, quando houver; não entra no hash |
+| `target_type`, `target_id`, `expected_version`, `resulting_version` | Objeto e versões antes e depois |
+| `outcome`, `reason_code` | Confirmado, parcial por item, recebido com a classe de 73.5 (vinculado, em conferência, aguardando original), rejeitado, conflito de versão, recusado (permissão ou usuário revogado) ou chave expirada; motivo |
+| `receipt_id` | Identificador do recibo mostrado como comprovante |
+| `effects` | IDs de documentos, movimentos e `event_id` gerados, por item quando houver |
+| `pending`, `next_action` | Pendências e próxima ação (envelope de 8.2.1) |
+| `confirmed_at` | Instante informado pelo iniciador; dado, não autoridade |
+| `received_at`, `processed_at` | Instantes do servidor |
+| `correlation_id` | Rastreio ponta a ponta (ENG-081) |
+| `retain_until` | Fim da retenção (IDEM-19) |
+
+Restrição única em (`organization_id`, `command_type`, `idempotency_key`); índice por `retain_until` para a purga; RLS por organização.
+
+| Identidade | O que identifica | Quem gera | Uso |
+|---|---|---|---|
+| ID do objeto | O.S., reserva, lote ou apontamento, em todas as versões | Quem cria o objeto | Referência e versão esperada; não deduplica intenções |
+| Chave de idempotência | Uma intenção de alteração | Iniciador (IDEM-02; IDEM-04) | Unicidade com organização e tipo de comando |
+| `event_id` do relato capturado | O relato confirmado no aparelho (73.2.1) | App, na confirmação | É a chave da intenção que o envia; único com organização e tipo de comando |
+| `event_id` do evento do servidor | Fato confirmado publicado pela outbox | Servidor | Deduplicação nos consumidores (73.6); `causation_id` aponta a chave |
+| Chave física do fato | O acontecimento físico (ex.: abastecimento) | Regra de 73.5 | Liga registros diferentes do mesmo fato |
+| Chave natural de geração | Ocorrência e parcela que originam uma O.S. | Regra de 11.2 | Impede O.S. duplicada por intenções diferentes |
+
+#### 73.3.6 Retenção, expiração e recuperação
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| IDEM-19 | O registro e o recibo vivem enquanto existir o efeito que protegem, com a mesma retenção do fato ou documento. Comando sem registro duradouro do efeito tem retenção mínima configurável por tipo, nunca menor que a soma: validade máxima configurada do pacote offline + atraso máximo tolerado de sincronização + margem (proposta em PEND-02, 73.12). Configurar validade de pacote que quebre essa relação é recusado. Terminada a retenção, chegada cujo instante estimado de confirmação é anterior à janela é recusada como `IDEMPOTENCY_KEY_EXPIRED`, sem efeito; a chegada fica no registro da intenção com esse resultado e o conteúdo, para auditoria (CONC-07), o reenvio devolve o mesmo resultado, e o item aparece em CF-03 com responsável. O instante estimado é contado a partir do último instante do servidor conhecido pelo iniciador (CONC-21 no app; na web, o instante do servidor em que a tela carregou a versão esperada); o relógio do aparelho não decide. Versão esperada e chave natural (11.2) continuam barrando reaplicação; nada é reexecutado às cegas. | AC-89. |
+| IDEM-20 | Registros e recibos fazem parte do banco, do backup e da PITR (30.5). A restauração mantém efeito e registro coerentes; depois de restaurar para um ponto anterior, o reenvio das filas locais aplica uma vez só as intenções que faltam no banco restaurado (AC-71; ENG-087); intenções que já tinham recibo e saíram da fila seguem a reconstrução de 30.4. Migração e purga não alteram chave, hash nem recibo de registro vigente; a purga usa `retain_until` e pode ser repetida sem efeito. | Exercício de restauração em HML com reconexão de 100 aparelhos × 200 fatos (29.2): zero efeito duplicado, e intenções ausentes aplicadas uma vez. |
+
+#### 73.3.7 Interface e verificação
+
+**Interface.** O usuário vê estado e ação, não mecanismo (73.10). No app: **Salvo neste aparelho**, **Aguardando envio**, **Sincronizado** (com Ver recibo) ou **Conflito** (64.5); o controle confirmado fica em **Enviando** até o resultado. Conflito de chave aparece como **Conflito · Revisar**; a revisão mostra o que já foi aceito (recibo original) ao lado do conteúdo local e oferece uma ação: **Enviar como novo registro**. Na web: comprovante curto (68.4) ou **Verificando envio** depois de recarregar, seguido do estado real. Chave, hash e códigos de erro não aparecem ao usuário; ficam em CF-03 e CF-04 para integrador e suporte.
+
+**Verificação.** Testes especificados nesta revisão, ainda não executados: unidade (tabela de canonicalização de IDEM-13); propriedades (fast-check: N entregas da mesma chave e do mesmo conteúdo, em qualquer ordem e concorrência, dão um efeito e o mesmo recibo; mesma chave com outro conteúdo dá conflito sem efeito); integração com PostgreSQL real (restrição única, requisições simultâneas, queda entre commit e resposta); aparelho real (encerrar processo, reiniciar, atualizar); contrato (códigos de 12.3). Cenários: AC-73 (cenário 1 do pedido), AC-74 (cenário 2) e complementares AC-83 a AC-90 (73.11). Observação em produção: 30.2 (linha Integridade).
+
+### 73.4 Validade controlada das reservas de material
+
+**Alcance.** Esta seção fecha as lacunas do item 4 do pedido: finalidade e validade da reserva de material, situações em que ela fica protegida, quantidade que pode voltar ao disponível, cotas e autorizações offline, registro e aviso, nova verificação antes de retomar e concorrência entre vencer, renovar, separar e entregar. A regra de negócio é a **RN-046**; o comando é o **CMD-49**. Continuam valendo sem repetição: RN-010 a RN-013 (reserva não altera físico; entrega transfere custódia), RN-018, RN-023, RN-037, RN-038, RN-044, CAL-01, CAL-02, CAL-17, CMD-44, CMD-16, 42.1 (saldo elegível para entrega), 42.2, 12.2, 12.5, ENG-023, 24.1, DEC-2609-05, DEC-2609-07 e DEC-2609-13. Nas matérias aqui tratadas, esta seção prevalece (73.1). Idempotência segue 73.3; transação local e outbox seguem 73.6; leitura transacional × projeção segue 73.7.
+
+**Escopo.** Vale para reserva de material (insumo, peça, embalagem) vinculada a O.S. agrícola (inclusive fertirrigação), ordem de manutenção e ordem de beneficiamento, e para cota de material delegada a aparelho ou local offline. Ficam fora, com regra própria: reserva temporária comercial (49.3, ATP-04, CAL-17 na promessa comercial); agenda de recursos do PCP (CMD-34, 44.11); reserva da janela de parada da manutenção (47.8, item 5); cobertura futura por pedido ou previsão, que não é reserva (RN-010); irrigação só com água, que não movimenta material (DEC-2609-10, MB-05). Lote que se torna bloqueado, em quarentena ou vencido perde elegibilidade pela qualidade (RN-015, CO-06), não pelo prazo da reserva.
+
+**Termos.** "Validade da reserva" é o instante até o qual a reserva conta como ativa. "Vencer" é o CMD-49 que devolve ao disponível a quantidade elegível de uma reserva cuja validade terminou ou cujo gatilho ocorreu. "Renovar" prorroga a validade sem nova dedução. "Devolver ao disponível" substitui "liberar reserva", porque "liberar" é CMD-06. "Expiração" fica restrita à validade do lote (RN-015; 21.1). Textos existentes que dizem "libera reservas" (CMD-46, 8.4.1 Cancelada, 42.5, FL-12 nó K) passam a ser lidos como "devolve ao disponível" (reconciliação registrada em 73.14).
+
+A síntese normativa desta seção é a RN-046, no cap. 3, depois de RN-045.
+
+#### 73.4.1 Finalidade, política e momento da reserva
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| RSV-01 | Toda linha de reserva (O.S./versão, requisição, produto, lote, local, unidade/base) tem uma finalidade: **cobertura de planejamento**, **execução liberada**, **manutenção** ou **cota delegada** (tabela abaixo). A linha guarda também: quantidade reservada, entregue, em separação, comprometida offline e devolvida ao disponível; validade; política e versão aplicadas; número de renovações; versão da linha (versão esperada, ENG-023). Esses valores vêm de movimentos e eventos, nunca de campo editável (6.3). | Teste de modelo: criar reserva sem finalidade ou sem validade é recusado; o extrato da linha (RF-SUP-003) reconstrói cada quantidade a partir dos eventos. |
+| RSV-02 | A política de validade é configurada em CF-02 por organização, local, finalidade e tipo de ordem, com versão, autor e vigência. A validade é calculada e gravada na linha quando a reserva nasce ou é renovada. Mudança de política vale para reservas criadas ou renovadas depois dela; as existentes conservam a validade e a versão gravadas (RN-037). Os prazos são valores de implantação com proposta em PEND-04 (73.12); o texto não fixa números aprovados. | Alterar a carência da finalidade execução não muda a validade de reservas já gravadas; a próxima reserva usa a versão nova e o evento registra essa versão. |
+| RSV-03 | **Momento da reserva.** (a) A prontidão pré-liberação (CMD-06, 41.3, 70.2) verifica cobertura: disponível lido na transação, somado à reserva ativa da mesma requisição (RSV-06), ≥ saldo elegível para entrega (42.1) da versão e do escopo a liberar, que na primeira liberação é a quantidade autorizada. (b) CMD-06 cria a reserva de execução na mesma transação da liberação; se já houver reserva de planejamento da mesma requisição, converte-a para execução liberada, sem nova dedução, e reserva só a diferença. (c) Falta de saldo em qualquer item recusa a liberação daquela ordem, com resultado individual (JANELA-05) e selo Falta insumo; a ordem fica A liberar. (d) CMD-44 antes de CMD-06 cria reserva de cobertura de planejamento; depois de CMD-06, complementa a reserva de execução (ex.: troca de lote apto). É assim que se leem DEC-2609-05 ("Liberar para execução, que reserva os insumos"), 72.3 item 2 e DEC-2609-13: nada anterior à liberação autoriza entrega (CMD-16, 42.1). | AC-72-11 continua passando: aprovar e liberar reserva 320 L, 160 L e 80 L. Com reserva de planejamento de 200 L de Glifosato 480 já existente, liberar deduz só 120 L a mais do disponível. Com 100 L disponíveis para 160 L de 2,4-D, a liberação é recusada para essa ordem e nenhuma reserva é criada. |
+
+**Validade por finalidade**
+
+| Finalidade | Nasce em | Validade gravada | Quem renova |
+|---|---|---|---|
+| Cobertura de planejamento | CMD-44 sobre requisição aprovada, antes da liberação (42.1) | Prazo da finalidade contado da data prevista de início da ordem; sem data prevista, contado da criação | Almoxarife ou PCP, dentro do limite |
+| Execução liberada | CMD-06, ou conversão da reserva de planejamento (RSV-03) | Fim da validade da liberação (8.6.3) + carência da finalidade; recalculada a cada nova liberação ou renovação da liberação | Nova liberação (CMD-06), ou almoxarife ou PCP por CMD-49, dentro do limite |
+| Manutenção | Aprovação ou liberação da ordem de manutenção (MA-04) | Fim da janela de intervenção planejada (47.8, item 3) + carência da finalidade | Almoxarife ou PCM, dentro do limite |
+| Cota delegada | Delegação de material a aparelho ou local offline (12.5, 42.1) | Fim da validade do pacote offline que a transporta | Nova delegação com pacote novo; vencimento segue RSV-09 |
+
+#### 73.4.2 Quando a reserva fica protegida e quando entra na política
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| RSV-04 | Pausa não devolve reserva ao disponível. A reserva fica **protegida** (nenhum vencimento, nem pelo sistema nem manual) nas situações marcadas "Protegida" na tabela abaixo: liberação vigente, inclusive com a ordem Pausada por clima, turno, máquina ou Aguardando próximo turno; ficha ou pacote offline de execução válido da ordem; revisão de saldo pendente dentro do prazo da pendência (CMD-42, 41.2); janela de intervenção da manutenção ainda aberta. A proteção é verificada na transação do CMD-49, não na rotina que seleciona candidatas. A proteção cobre a reserva do trabalho ainda a executar; não cobre a parcela cuja necessidade foi retirada por cancelamento (CMD-46), saldo dispensado (CMD-47) ou término físico (CMD-08), que segue os gatilhos sem carência de RSV-05 mesmo com liberação ou pacote válidos; a cota delegada continua só em RSV-09. | AC-91 e AC-92. |
+| RSV-05 | A reserva **entra na política** só nos gatilhos da tabela abaixo. Com carência, vence quando a validade gravada termina; sem carência, o comando que causou o gatilho aciona o CMD-49 do sistema depois do seu commit (73.6), com chave derivada (IDEM-04). Nenhum outro evento, inclusive pausa, fechamento de turno, troca de filtro ou de janela de trabalho (8.6.1), vence reserva. | AC-93, AC-98 e AC-99. |
+
+| Situação da ordem e da reserva | Tratamento | Validade ou gatilho |
+|---|---|---|
+| A liberar, reserva de cobertura de planejamento | Entra na política | Prazo da finalidade (RSV-02); renovável até o limite |
+| Liberadas, liberação vigente | Protegida | Fim da liberação + carência; nova liberação recalcula |
+| Em execução, inclusive Pausada ou Aguardando próximo turno, com liberação vigente | Protegida | Idem |
+| Qualquer etapa com ficha ou pacote offline de execução válido da ordem (DEC-2609-07; 72.3 item 4) | Protegida | Até o fim da validade do pacote; depois, a regra da linha aplicável |
+| Em execução ou Pausada com revisão de saldo pendente (CMD-42 sobre o saldo) | Protegida | Até o prazo da pendência (RN-023); depois, a regra da linha aplicável |
+| Liberação vencida ou revogada sem início; a ordem volta a A liberar (8.4.3) | Entra na política | Carência da finalidade execução, contada do fim ou da revogação da liberação |
+| Em execução ou Pausada com liberação vencida (8.6.3), sem pacote válido nem revisão pendente | Entra na política, só sobre a reserva ativa | Idem; o que está em custódia não é alcançado (RSV-07) |
+| Saldo reprogramado (CMD-11) para janela dentro da liberação vigente | Protegida | Sem mudança |
+| Saldo reprogramado (CMD-11) para janela fora da liberação vigente | Entra na política | Carência contada do fim da liberação vigente; PL-05 mostra a data de vencimento e oferece Renovar reserva até o limite |
+| Cancelamento sem execução solicitado (CMD-46) | Entra na política | Sem carência |
+| Saldo dispensado (CMD-47) | Entra na política, só na parcela do saldo dispensado | Sem carência |
+| Em conferência por término físico (CMD-08) | Entra na política | Sem carência; reabrir saldo (CMD-48) reserva de novo (RSV-15) |
+| Ordem de manutenção com janela de intervenção encerrada sem início | Entra na política | Carência da finalidade manutenção |
+| Cota delegada | Regra própria | RSV-09 |
+
+#### 73.4.3 Quantidade elegível e efeitos do vencimento
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| RSV-06 | O vencimento alcança só a quantidade elegível da linha, calculada na transação do CMD-49 a partir dos registros autoritativos, nunca de projeção (73.7): `reserva_ativa = reservado − entregue − devolvido_ao_disponivel` e `quantidade_elegivel = max(0, reserva_ativa − em_separacao − comprometido_offline_vigente)`. Os termos são disjuntos: `entregue` é tudo o que passou à custódia (CMD-16), inclusive o que depois foi consumido, preparado em calda, transferido ou devolvido (devolução volta ao utilizável por CMD-45, nunca à reserva); `devolvido_ao_disponivel` acumula vencimentos anteriores e reduções por revisão (42.2); `em_separacao` é o separado ainda no depósito e não entregue; `comprometido_offline_vigente` é a parcela da reserva ativa alocada a cota ou a pacote offline vigente (RSV-09). Quantidade elegível zero gera recibo "nada a devolver", sem evento de vencimento. Depois do vencimento, a linha fica vencida só com a parcela não elegível (em separação e comprometida offline): não aceita entrega com conexão nem renovação; a cota continua sob RSV-09; desfeita a separação, a rotina devolve essa parcela por novo CMD-49 (chave com a nova versão da linha, RSV-12); nova liberação da mesma requisição a converte em reserva de execução, sem nova dedução (como em RSV-03 b). | AC-93. Teste de propriedade: para qualquer sequência de reservar, separar, entregar, consumir, devolver e vencer, `quantidade_elegivel ≤ reserva_ativa` e a soma das quantidades devolvidas nunca excede `reservado − entregue`. |
+| RSV-07 | O vencimento só move quantidade de reservado para disponível no mesmo produto, lote e local: `Δdisponivel = +quantidade_elegivel`, `Δreserva_ativa = −quantidade_elegivel`. Físico, utilizável, custódia, consumo, calda preparada, separação em curso, devolução declarada e cota offline vigente não mudam. CAL-01 não muda: o físico apto já inclui reservas, e a demanda residual continua enquanto a necessidade existir; o cancelamento ou a dispensa, não o vencimento, retira a demanda. CAL-02 não muda. Para material, `reservas_fisicas_validas` de CAL-17 passa a ser a soma de `reserva_ativa` de todas as linhas, inclusive a parcela que uma linha vencida conserva (RSV-06); a reserva comercial de 49.3 não muda. Vencimento não cria movimento de estoque nem documento de entrada. | AC-100. Com físico apto 60, reserva 40 da mesma demanda e demanda residual 80 (AC-13), vencer a reserva mantém necessidade líquida 20 e físico 60, e o livre para novas reservas passa de 20 para 60. |
+
+**Exemplo.** Reservado 100 L de um lote; entregue 40 L (10 L consumidos, 10 L em calda, 20 L em custódia); em separação 20 L; comprometido por cota offline vigente 15 L; nada devolvido antes. `reserva_ativa = 100 − 40 − 0 = 60`; `quantidade_elegivel = 60 − 20 − 15 = 25`. O disponível sobe 25 L; físico do depósito, custódia de 20 L, consumo de 10 L, calda de 10 L, separação de 20 L e cota de 15 L ficam iguais.
+
+#### 73.4.4 Cotas e autorizações de aparelhos offline; fato que chega depois do vencimento
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| RSV-08 | Ficha ou pacote offline de execução válido da ordem (MB-02, DEC-2609-07, 72.3 item 4) protege a reserva ativa da ordem (salvo a parcela sem necessidade, RSV-04) até o fim da validade do pacote, mesmo que a liberação central tenha sido revogada nesse intervalo: o aparelho pode não ter recebido a revogação (12.5, 8.6.3). A validade do pacote nunca excede a validade da liberação que o originou (8.6.3; CMD-07); assim, a proteção pelo pacote nunca passa da validade gravada da reserva de execução. O pacote que transporta cota delegada a local de apoio (MB-05) não é pacote de execução: protege só a parcela da cota (RSV-09). | AC-92. Configurar pacote com validade maior que a da liberação é recusado em CF-02. |
+| RSV-09 | **Cota delegada.** Quantidade delegada a aparelho ou local offline (12.5, 42.1, MB-05) sai do disponível central e só esse aparelho ou local pode entregá-la. Cota para uma ordem definida marca a parcela correspondente da reserva de execução como comprometida offline, sem segunda dedução; cota sem ordem definida é linha própria da finalidade cota delegada. A cota volta ao disponível só: (a) quando o aparelho ou local sincroniza e encerra a cota, informando o usado até a versão do pacote; o saldo não usado é devolvido por CMD-49 com a chave desse encerramento; ou (b) depois do limite (validade do pacote + atraso máximo tolerado de sincronização, o mesmo de IDEM-19), por CMD-49 do almoxarife, com motivo e evidência (contagem física do local ou contato registrado com o portador). No limite, o sistema abre a pendência **Cota sem retorno** para o almoxarife do local, com prazo (PEND-16), e não devolve a cota sozinho. Cancelamento ou revogação central não devolve cota antes de (a) ou (b). Cota de uma ordem definida só é entregue a essa ordem enquanto a liberação dela vigora (CMD-16); o pacote leva o fim da liberação. | AC-102 e AC-78. |
+| RSV-10 | **Fato tardio.** Recusar uma sincronização atrasada não prova que nada aconteceu no campo. Fato que chega depois do vencimento nunca é recusado por ter chegado tarde; segue RN-018, RN-038 e 73.5. Entrega offline sob cota cuja quantidade já voltou ao disponível e foi reservada de novo é aceita uma vez como fato físico (baixa no local e entrada na custódia da ordem, CAL-02). Se o utilizável ficar menor que as reservas ativas do lote e local, as reservas ainda não entregues que dependiam dessa quantidade recebem exposição **Sem cobertura**, com dono (almoxarife) e prazo (PEND-16), e as ordens afetadas mostram Falta insumo; nenhuma reserva é cancelada automaticamente, nenhuma entrada é fabricada e o disponível exibido não fica negativo; o déficit aparece como exposição (8.3; 12.5, "Quantidade capturada maior que saldo"). Se o físico do local não cobre a baixa (a quantidade já foi entregue a outra ordem), a entrega fica Em conferência (CONC-06, CONC-07), sem físico negativo nem entrada fabricada. Cota e liberação são avaliadas no instante estimado do fato (CONC-21), não na chegada. Consumo offline sai da custódia, que o vencimento não toca. Início ou retomada offline sem pacote válido é preservado como relato fora da autorização (12.5, "Ordem revogada enquanto offline"; OSA-09). | AC-97. |
+
+#### 73.4.5 Renovar, vencer pelo sistema e concorrência
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| RSV-11 | **Renovar** (CMD-49): almoxarife ou PCP (PCM na manutenção), com permissão em CF-02. Exige linha com reserva ativa e ainda não vencida; ordem que não esteja cancelada, Em conferência nem Encerrada; motivo; nova validade e número de renovações dentro dos limites da finalidade (PEND-05). Prorroga a validade sem mudar quantidade e sem nova dedução. Aumentar quantidade é nova reserva (CMD-44 ou CMD-06), com leitura do disponível na confirmação (24.1, 29.2). Renovar reserva já vencida é recusado com "Reserva vencida em dd/mm hh:mm · Reservar de novo"; nada é restaurado. **Vencer manualmente**: almoxarife ou PCP pode vencer antes do prazo, com motivo, reserva de cobertura de planejamento ou reserva que já entrou na política; reserva protegida (RSV-04) não pode ser vencida manualmente. | AC-101. |
+| RSV-12 | **Vencimento pelo sistema.** Uma rotina avalia, no mínimo a cada 15 min (valor inicial configurável), as linhas com validade atingida pelo instante do servidor e os gatilhos sem carência publicados pela outbox. A seleção pode usar qualquer leitura; a decisão é do CMD-49, na transação. Cada linha é um CMD-49 com transação própria e chave determinística (reserva, versão da linha, "vencer"; IDEM-04), sem lote numa só transação (IDEM-10, INTEG-02). O vencimento vale a partir do commit, não retroage à validade; até lá a reserva conta como ativa. Hora do aparelho nunca decide vencimento (73.2). Rotina parada deixa as reservas ativas (situação segura) e gera alerta (RSV-17). Meta inicial: p95 do intervalo entre a validade atingida e o CMD-49 confirmado ≤20 min (73.8). | AC-94. Rotina parada 2 h: nenhuma reserva vence nesse intervalo; o alerta dispara; ao voltar, as vencidas são processadas uma vez cada. |
+| RSV-13 | **Concorrência.** Vencer, renovar, iniciar ou desfazer separação, entregar (CMD-16) e reservar (CMD-44, CMD-06) sobre a mesma linha ou o mesmo saldo de lote e local confirmam numa transação local curta, com bloqueio na ordem de INTEG-02 (O.S. → requisição/reserva → saldo por lote e local → custódia) e versão esperada da linha. Depois de obter o bloqueio, cada comando relê linha e saldo e reavalia a sua pré-condição. Há um vencedor por disputa; o perdedor recebe motivo e próxima ação, nunca sucesso fictício (tabela abaixo). Invariante a cada commit: em cada lote, cada unidade apta está em uma só condição (disponível ou reserva ativa no local de estoque, ou custódia de uma ordem), e em cada local a soma das reservas ativas confirmadas não excede o utilizável, salvo a exposição de RSV-10 e a redução do utilizável por bloqueio de qualidade ou ajuste de inventário (RN-015; DEC-2609-13), que também fica como exposição com dono (8.3). | AC-77. ENG-023 passa a incluir vencer e renovar: 100 disputas simultâneas misturando os seis comandos sobre o saldo final respeitam a invariante. |
+
+| Confirma primeiro | Chega depois | Resultado de quem chega depois |
+|---|---|---|
+| Entregar (CMD-16) | Vencer | Elegível recalculado sem o entregue; devolve só o resto, ou "nada a devolver" |
+| Vencer | Entregar (CMD-16) | Recusado: "Reserva vencida em dd/mm hh:mm · Reservar de novo" |
+| Iniciar separação | Vencer | O separado fica fora do elegível |
+| Vencer | Iniciar separação | Conflito por item: reserva insuficiente |
+| Renovar | Vencer | Pré-condição deixa de valer; recibo "nada a devolver" |
+| Vencer | Renovar | Recusado: "Reserva vencida · Reservar de novo"; nada é restaurado |
+| Vencer | Reservar para outra ordem | Pode usar a quantidade devolvida |
+| Reservar para outra ordem | Vencer | Sem conflito: a outra ordem usou só o disponível anterior |
+
+#### 73.4.6 Registro, aviso, retomada e interface
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| RSV-14 | **Registro e aviso.** Vencer e renovar gravam evento imutável na mesma transação do efeito, com recibo e outbox (73.3, 73.6): reserva e linha, O.S./versão, requisição, produto, lote, local e unidade; reservado, entregue, em separação, comprometido offline e quantidade devolvida; validade anterior e nova; finalidade; situação da ordem; política e versão; motivo (prazo atingido, liberação vencida ou revogada, cancelamento, saldo dispensado, reprogramação, término, cota encerrada, cota sem retorno, manual); ator (usuário ou rotina do sistema); chave; instante do servidor; correlação (RN-044). O evento aparece no extrato da linha (RF-SUP-003) e em CF-04; correção é nova reserva, nunca edição. Depois do commit, um aviso por ordem e por vencimento, com os itens agrupados, vai ao almoxarife do local, ao PCP da ordem (PCM na manutenção) e, se a ordem está Em execução ou Pausada, ao encarregado; aparece como pendência em IN-01 e, no app, em MB-01 (RN-023). "Nada a devolver" não gera evento nem aviso. Aviso "a vencer" vai só ao PCP e ao almoxarife, com a antecedência da política (PEND-04), e apenas para reserva que entrou na política. | AC-93 e AC-94: um evento com todos os campos e um aviso por ordem, mesmo com a rotina repetida. |
+| RSV-15 | **Nova verificação antes de retomar.** CMD-07 (iniciar ou retomar) e CMD-48 (reabrir saldo) verificam, na mesma transação, que a reserva ativa da ordem cobre, por produto, o saldo elegível para entrega (42.1) do escopo a executar; material já em custódia reduz esse saldo e não precisa de reserva. Devolução apta recebida durante a execução volta ao disponível (CMD-45; DEC-2609-13), não à reserva; se o saldo ainda precisa dela, a verificação acusa Reserva insuficiente. Se a reserva não cobre, a retomada é recusada com "Reserva vencida" ou "Reserva insuficiente", responsável (PCP) e ação **Reservar de novo**; registrar pausa ou fato ocorrido continua permitido (CMD-07). Reservar de novo é CMD-06 para o saldo, quando a liberação precisa ser renovada, ou CMD-44 complementar, sempre com o disponível lido na confirmação e nunca de projeção (73.7, 29.2). Faltando saldo, a ordem fica com Falta insumo; nenhuma reserva vencida é restaurada. Offline, a retomada só ocorre com pacote válido, que mantém a reserva protegida (RSV-08). | AC-96. |
+| RSV-16 | **Interface** (73.10). SU-07 e MB-05 mostram por linha "Reservado até dd/mm hh:mm" e, depois de vencimento, "Devolvido ao disponível: quantidade · motivo". **Renovar reserva** é ação secundária no menu da linha; a ação primária continua a da etapa (Separar, Confirmar entrega). A tela de trabalho da ordem (DEC-2609-04) mostra, no bloco de insumos, a validade só quando a reserva está a vencer ou vencida; com reserva vencida e material ainda necessário, o Próximo passo do PCP é Reservar de novo. O cartão ganha o selo **Reserva vencida**, com dono e prazo, só enquanto a ordem ainda precisa do material; nenhuma coluna nova no Kanban (8.4.3). No app, o executor vê o impedimento "Reserva vencida · PCP reserva de novo", sem ação própria. Chave, versão da linha, política e termos técnicos ficam em CF-02 e CF-04. | AC-104. |
+| RSV-17 | **Integração e observação.** Vencimento e renovação publicam evento pela outbox (INTEG-01); onde o ERP também mantém reservas, ele recebe o evento pelo conector, com consumidor idempotente (INTEG-07); a plataforma continua a escritora das reservas das O.S. (INTEG-03; 66.2). Falha do ERP não impede nem desfaz o vencimento local (RN-047). Em 30.2 (linhas Offline e Integridade): reservas a vencer; vencidas por motivo e quantidade devolvida; atraso da rotina; cotas sem retorno por idade; fatos tardios após vencimento; retomadas e entregas recusadas por reserva vencida. Alertas iniciais: rotina sem execução por mais de 1 h; cota sem retorno além do prazo da pendência. | AC-103. |
+| RSV-18 | **Terminologia.** Interface, mensagens, ajuda e documentação de usuário usam "validade da reserva", "reserva vencida", "Renovar reserva" e "devolvido ao disponível"; não usam "expiração" para reserva nem "liberar" para devolver reserva. | Revisão dos textos de SU-03, SU-07, MB-05, CA-04, PL-05, tela de trabalho da ordem e avisos: zero ocorrências dos termos proibidos no contexto de reserva. |
+
+O CMD-49 (Renovar ou vencer reserva de material) está na tabela de 8.2.2, depois do CMD-48, com quem executa, pré-condição, efeito confirmado e retorno de interface conforme RSV-04 a RSV-16.
+
+**O que não muda.** Reserva continua fora do físico e dentro do utilizável (RN-011, 21.1); a entrega continua limitada ao reservado da versão liberada (72.3 item 2); as cinco colunas do Kanban; a exposição de déficit sem cancelamento silencioso (8.3; 12.5); a reserva temporária comercial de 49.3. Nenhum requisito desta seção promete que a rotina vença no instante exato da validade.
+
+**Verificação.** Testes especificados nesta revisão, ainda não executados: unidade (fórmula de RSV-06 com tabela de casos e propriedades); propriedades (sequências aleatórias de reservar, separar, entregar, consumir, devolver, renovar e vencer preservam a invariante de RSV-13); integração com PostgreSQL real e ponto de sincronização forçado entre as transações concorrentes, com a ordem alternada em 100 repetições (AC-77); aparelho real com pacote offline e reconexão tardia (AC-78, AC-97); contrato de `/reservations` para CMD-49. Cenários do pedido: AC-77 (cenário 5) e AC-78 (cenário 6); complementares AC-91 a AC-104 (73.11).
+
+### 73.5 Conciliação de fatos de campo sem soma indiscriminada
+
+**Alcance.** Esta seção é o contrato único de conciliação dos relatos de campo: apontamento (área, quantidade e horas de recurso), consumo de insumo, abastecimento, aplicação de água, entrega e confirmação de recebimento. Define como o servidor distingue reenvio, outro registro do mesmo fato físico, fato distinto e correção vinculada; quando soma sozinho; e quando preserva o relato em conferência. Reforça RN-001, RN-018, RN-036 e RN-038, sem RN nova. Vale para os relatos de CMD-43 (apontamento), CMD-17 (consumo e devolução declarada), CMD-21 (aplicação de água), do registro de abastecimento (FO-12; RF-AST-006) e da confirmação de recebimento da entrega de CMD-16. O comando novo é o **CMD-50 · Resolver relato de campo** (73.5.12). Continuam valendo sem repetição: 8.3, 8.5, 12.5, 42.1 a 42.5, CAL-02, CAL-07, FO-07, FO-10, FO-12, FO-13 com CO-03 e AC-47 (ticket de pesagem), 36.7 (taxa variável por job, máquina, arquivo e segmento) e FL-25. A idempotência da mesma intenção é 73.3; transação, outbox e integração são 73.6; reserva e cota delegada são 73.4. Nas matérias aqui tratadas, esta seção prevalece (73.1).
+
+**Termos (73.2).** *Relato* é o registro de um fato capturado por pessoa, aparelho, telemetria ou importação, antes de o servidor classificá-lo. *Fato confirmado* é o relato aceito que produz efeito (avanço, movimento, hora, custo). Um fato físico pode ter vários relatos; só um produz efeito. *Correção vinculada* é um relato novo, com chave nova, que aponta o fato que corrige.
+
+**Princípio.** O servidor soma sozinho somente fatos distintos, aceitos e compatíveis. Na dúvida entre "mesmo fato" e "fato distinto", ou quando o fato não é compatível, o relato fica preservado Em conferência e não entra no saldo confirmado (8.3). Nenhum relato é apagado, truncado ou decidido pela hora do aparelho.
+
+#### 73.5.1 Classes de chegada
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| CONC-01 | Cada relato recebe uma única classe, avaliada nesta ordem e na mesma transação do seu efeito (73.6): **(1) reenvio da mesma intenção**, com a mesma (organização, tipo de comando, chave); **(4) correção ou estorno vinculado**, que traz a referência do fato que corrige (`event_id` e tipo de comando, IDEM-18); **(2) outro registro do mesmo fato físico**, com chave física igual à de um fato ou relato existente (CONC-05); **(3) fato distinto e independente**, quando nenhuma das anteriores se aplica. A classe, o motivo e a versão da regra ficam gravados no relato. | Teste de tabela cobre cada combinação de chave de idempotência, vínculo de correção e chave física. Para o mesmo conjunto de relatos, em qualquer ordem de chegada e com repetições, os fatos confirmados, seus valores, os relatos vinculados e os casos em conferência são os mesmos (propriedade de AC-106). Nos casos em conferência, o estado provisório até o CMD-50 pode refletir a ordem de chegada, mas nada é somado duas vezes e a decisão do CMD-50 fixa o mesmo resultado em qualquer ordem (CONC-19). |
+| CONC-02 | A classe 1 segue 73.3 (IDEM-14), sem reavaliar regras. A classe 2 nunca cria movimento, avanço, hora nem custo: o relato fica ligado ao fato ("mesmo fato de"), com autor, fonte e valor próprios, visível no histórico. UUID diferente não prova fato diferente (12.5). UUID igual com conteúdo diferente é conflito de chave (IDEM-14), nunca classe 2. | AC-75. O histórico do fato lista os dois relatos com autor, fonte e valor; o extrato do ponto de abastecimento tem um movimento. |
+| CONC-03 | **Coincidência parcial** (parte da chave física coincide e parte falta ou diverge) nunca soma e nunca vincula sozinha: o relato fica Em conferência como "possível mesmo fato", sem efeito, até o CMD-50. O fato já aceito com que ele coincide em parte entra no mesmo caso (CONC-19). | AC-115. |
+| CONC-04 | A busca pela chave física, as verificações de CONC-06 e a gravação do efeito ocorrem na mesma transação, com bloqueio do escopo: O.S. no apontamento e no consumo, mais cada recurso informado no apontamento (máquina, conjunto ou pessoa), para a verificação de alocação; ativo no abastecimento; tarefa de irrigação na aplicação de água; movimento de entrega na confirmação. Ordem dos bloqueios, que completa a de INTEG-02: O.S. → recurso ou ativo → tarefa de irrigação → movimento de entrega → requisição/reserva → saldo por lote e local → custódia; dentro do mesmo tipo, ID crescente. Dois relatos do mesmo fato, ou do mesmo recurso em intervalos sobrepostos, processados ao mesmo tempo resultam em um fato ou num caso de conferência, nunca em dois efeitos. | AC-114; AC-111 (variante concorrente). |
+
+| Classe | Como se reconhece | Efeito | Resultado por item em `/sync` (12.3) | O autor vê (73.10) |
+|---|---|---|---|---|
+| 1 · Reenvio da mesma intenção | Mesma chave e conteúdo equivalente | Nenhum novo | Já recebido, com o recibo original | Sincronizado |
+| 2 · Outro registro do mesmo fato | Chave física igual; chave de idempotência diferente | Nenhum novo; valor pela precedência (CONC-09); divergência acima da tolerância abre conferência | Vinculado a fato existente, com o fato e a divergência | Sincronizado · Já registrado por Almoxarifado · 100 L |
+| 3 · Fato distinto | Nenhuma chave coincide | Soma se aceito e compatível (CONC-06); senão, Em conferência sem efeito no saldo confirmado | Aceito, ou Em conferência com motivo | Sincronizado, ou Sincronizado · Em conferência |
+| 4 · Correção ou estorno vinculado | Chave nova e referência do original (IDEM-18) | Só a diferença, por movimento vinculado (CONC-16) | Aceito, ou Aguardando original | Sincronizado |
+| Coincidência parcial | Parte da chave coincide, parte falta ou diverge | Nenhum | Em conferência (possível mesmo fato) | Sincronizado · Em conferência |
+
+#### 73.5.2 Chave física do fato por tipo
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| CONC-05 | O servidor calcula a chave física a partir dos campos do relato (11.2) e a compara com fatos e relatos do mesmo tipo dentro da retenção do fato (IDEM-19), conforme a tabela abaixo. O instante informado pelo aparelho só aproxima candidatos: sozinho, nunca vincula nem separa (CONC-20). A tabela vale para relatos de app, web, telemetria, importação e lote do encarregado (64.4). | Teste de tabela por tipo com três pares: mesmo fato, possível mesmo fato e fato distinto; AC-75, AC-113 e AC-115. |
+
+| Tipo | Mesmo fato quando | Possível mesmo fato (conferência) quando | Escritor designado para desempate (RN-036) |
+|---|---|---|---|
+| Apontamento: área, quantidade e horas | Mesma O.S. e parcela, mesmo recurso (máquina ou conjunto; equipe quando não há máquina) e intervalos sobrepostos; os intervalos são semiabertos, e o fim de um igual ao início do outro não é sobreposição. Se os dois relatos têm geometria, exige-se também sobreposição das geometrias acima do limite do método (8.5; 36.7); abaixo dele, possível mesmo fato | Mesma parcela e intervalos sobrepostos, com recursos diferentes e soma acima da área da parcela; relato sem recurso ou sem intervalo | Executor do apontamento; telemetria homologada prevalece pela fonte (CONC-09) |
+| Abastecimento | Mesmo ativo e mesmo ponto (tanque, bomba ou comboio), instantes informados dentro da janela (valor inicial 2 h, depois da correção do desvio, CONC-21) e: intervalos do totalizador da bomba sobrepostos; ou, quando um dos relatos não traz o totalizador, a mesma leitura do ativo (horímetro ±0,2 h ou hodômetro ±2 km; valores iniciais, PEND-09) | Mesmo ativo e ponto dentro da janela, em qualquer outro caso: leitura do ativo ausente em um dos relatos, leituras do ativo que diferem além da tolerância ou intervalos do totalizador disjuntos. Fato distinto só com outro ativo, outro ponto ou fora da janela | Almoxarife do local (abastecedor designado do ponto, se aprovado em PEND-08) |
+| Aplicação de água | Mesma tarefa e setor (pivô, linha ou válvula), intervalos sobrepostos; mesmo medidor, quando houver | Mesmo setor com intervalos sobrepostos em tarefas diferentes | Telemetria homologada; sem ela, o irrigante |
+| Entrega e confirmação de recebimento | Confirmação com o ID do movimento de entrega (QR ou seleção na fila); sem ID, mesma O.S. e versão, produto, lote e embalagem ainda sem confirmação | Confirmação sem entrega correspondente depois do prazo de CONC-12 | Almoxarife (CMD-16) |
+| Consumo de insumo | Mesma O.S., produto e lote, e mesmo apontamento ou carga (41.4) | Consumo sem apontamento nem carga identificados | Executor, no apontamento; medição homologada prevalece pela fonte |
+| Devolução, pesagem e taxa variável | Sem mudança: CMD-45 (recebimento uma vez); FO-13 e CO-03 (ticket); 36.7 (job, máquina, arquivo e segmento) | Como nas seções de origem | Como nas seções de origem |
+
+#### 73.5.3 Soma automática: fatos distintos, aceitos e compatíveis
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| CONC-06 | **Aceito** é o relato íntegro no contrato (esquema, unidade, identidade) e de autor com permissão no escopo. **Compatível** é o relato que passa todas as verificações da tabela abaixo contra o estado autoritativo, lido na transação e nunca em projeção (73.7). Fato distinto, aceito e compatível entra sozinho, uma vez, no realizado, no estoque, na custódia, nas horas e no custo. | AC-76. Teste por verificação: o mesmo relato com uma única verificação violada fica Em conferência com o motivo daquela verificação e sem efeito no saldo confirmado; no excedente de área, vale CONC-14. |
+| CONC-07 | Relato de fato físico já ocorrido não é rejeitado por saldo, custódia, versão revogada, sobreposição ou excedente (RN-018; 12.5). É gravado com a sua chave, fica Em conferência sem efeito no saldo confirmado e a quantidade exposta aparece na O.S. (8.3). Rejeição fica restrita a contrato inválido, autor sem permissão no escopo, usuário revogado fora da política de auditoria de 12.5 e chegada depois da retenção de idempotência (IDEM-19), que fica visível em CF-03 com responsável (PEND-03); mesmo assim, o conteúdo fica no registro da intenção para auditoria. Comandos que decidem o futuro (reservar, entregar com conexão, liberar) mantêm a rejeição de negócio de 73.3.4. | Apontamento sobre ordem revogada e consumo acima da custódia ficam Em conferência com motivo e responsável; área acima do saldo deixa o excedente Em conferência (CONC-14); nenhum aparece como Rejeitado no app. |
+| CONC-08 | **Acumulado confirmado** da O.S. = soma dos fatos aceitos e compatíveis, mais as correções vinculadas. Relatos vinculados (classe 2) não entram. Relatos Em conferência aparecem em coluna própria e não entram no percentual (8.5). Frentes simultâneas em parcelas distintas, com recursos distintos, consolidam sozinhas; a simultaneidade só abre conferência com sobreposição, uso simultâneo impossível do recurso ou excedente; as demais verificações de CONC-06 continuam valendo. Horas de máquina e hora-homem seguem 8.5. | AC-76; exemplo de FL-13: 20 + 30 + 25 ha somam 75 ha confirmados. |
+
+**Verificações de compatibilidade** (todas na transação do efeito)
+
+| Verificação | Compatível quando | Se falhar |
+|---|---|---|
+| Versão da autorização | O fato referencia a versão e a liberação vigentes, no instante estimado do fato (CONC-21), para o escopo executado; ou uma versão substituída só no saldo futuro, com o fato anterior à substituição segundo CONC-21 (8.5, OSDIA-05) | Em conferência como execução fora da autorização atual (12.5), sem autorização retroativa (CMD-43); PCP e aprovador da versão ficam cientes |
+| Área | Sem sobreposição com fato aceito da mesma O.S. na mesma parcela ou geometria; soma na parcela ≤ área da parcela na O.S.; soma na O.S. ≤ saldo autorizado | Em conferência por sobreposição, ou excedente (CONC-14) |
+| Alocação de recursos | A mesma máquina, conjunto ou pessoa não está em outro fato aceito, em outro local, com intervalo sobreposto; horímetro e hodômetro não regridem (PCM-04; 53.1) | Em conferência por uso simultâneo impossível |
+| Estoque | Nenhum saldo por lote e local fica negativo; entrega ≤ saldo elegível (42.1); entrega sem conexão ≤ cota delegada vigente (12.5; 73.4); abastecimento ≤ saldo do ponto | Em conferência; exposição visível, sem saldo fictício (8.3) |
+| Custódia | Consumo, devolução declarada e transferência ≤ custódia da O.S. por produto e lote (CAL-02) | Em conferência; custódia não fica negativa |
+| Consumo | Produto da versão executada; consumo ≤ dose autorizada × área do fato + tolerância de dose (FO-07) | Em conferência como ocorrência real (42.3), com ciência do agrônomo na O.S. com produto |
+| Unidade | Mesma unidade e base, ou conversão com fator válido (RN-033; 8.5) | Em conferência; sem conversão inventada |
+| Situação da O.S. | A O.S. do relato, quando houver, não está Encerrada | Em conferência, sem reabrir a etapa; o efeito aceito pelo CMD-50 entra por ajuste vinculado com alçada (42.5; INTEG-18) e, em competência fechada, como ajuste de competência anterior (PROJ-17) |
+
+#### 73.5.4 Precedência das fontes e tolerância
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| CONC-09 | Quando há mais de um relato do mesmo fato, o valor do fato vem da fonte de maior precedência: **medição homologada ou telemetria homologada > leitura manual de medidor (totalizador, horímetro, hidrômetro) > declaração > estimativa**. A precedência é a da fonte que mede a grandeza comparada (tabela de CONC-10): leitura usada só para identificar o fato (ex.: horímetro no abastecimento, CONC-05) não eleva a fonte do volume. Empate de precedência: vale o escritor designado do tipo (CONC-05; RN-036); se nenhum dos relatos empatados é do escritor designado, o fato fica provisório com o valor do primeiro relato aceito e qualquer divergência diferente de zero, mesmo dentro da tolerância, vai à conferência, onde o CMD-50 fixa o valor. O valor final nunca é decidido pela ordem de chegada nem pela hora do aparelho. A natureza da fonte fica gravada (RN-032). Estimativa não gera efeito próprio quando existe medição ou declaração do mesmo fato. Se a fonte de maior precedência chega depois, a diferença é aplicada por movimento vinculado na mesma transação (ENG-026), com motivo "fonte de maior precedência"; se o fato já foi conferido (CMD-09) ou a O.S. está Encerrada, a diferença vai à conferência em vez de ajuste automático (42.5). | AC-105 e AC-106: operador 100 L declarado e almoxarife 90 L lidos no totalizador, nas duas ordens de chegada, terminam com um fato de 90 L e saldo do ponto igual; na ordem "operador primeiro", a trilha mostra −100 L e o ajuste vinculado de +10 L. |
+| CONC-10 | Cada tipo tem tolerância configurável (tabela abaixo; valores iniciais sob confirmação, PEND-06); o percentual incide sobre o valor da fonte prevalecente (CONC-09). Dentro da tolerância: vínculo silencioso, valor pela precedência, sem conferência. Acima: um único fato com o valor da fonte prevalecente, marcado provisório, e a divergência Em conferência com responsável e prazo. Em nenhum caso os valores dos relatos são somados. | Teste de fronteira por tipo: divergência igual à tolerância não abre conferência; 0,1 unidade acima abre. |
+
+**Tolerâncias iniciais** (configuráveis por organização em CF-02, com versão e vigência)
+
+| Tipo | Grandeza comparada | Tolerância inicial | Responsável acima da tolerância |
+|---|---|---|---|
+| Abastecimento | Volume | 2 % ou 2 L, o maior | Almoxarife do local (abastecedor designado do ponto, se aprovado em PEND-08) |
+| Apontamento | Área ou quantidade do mesmo fato | 3 % ou 0,5 ha, o maior | Conferente da O.S. (CA-02) |
+| Apontamento | Horas do mesmo recurso | 0,2 h | Conferente da O.S. |
+| Aplicação de água | Volume ou lâmina | 5 % | Irrigante; PCP quando afeta a programação |
+| Entrega × confirmação | Quantidade | Zero em embalagem fechada; 1 % em granel ou fracionado | Almoxarife |
+| Consumo medido × declarado | Quantidade por produto e lote | 3 % | Conferente; agrônomo quando a dose sai da faixa |
+
+#### 73.5.5 Abastecimento: o exemplo obrigatório
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| CONC-11 | Operador e almoxarife que registram o mesmo abastecimento de 100 L produzem **um** abastecimento de 100 L e **um** movimento no ponto; o segundo relato fica vinculado e o autor vê "Já registrado por …". Registros de 100 L e 90 L do mesmo abastecimento produzem **um** fato, com o valor por CONC-09 e a divergência de 10 L Em conferência; nunca 190 L nem 200 L. O termo `abastecimentos` de CAL-07 soma fatos de abastecimento, não relatos. RF-AST-006 ("um movimento") vale para os dois autores. | AC-75, AC-105, AC-106 e AC-114. |
+
+| Relatos recebidos, em qualquer ordem | Resultado | Movimento no ponto | Conferência |
+|---|---|---|---|
+| Operador declara 100 L; almoxarife lê 100 L no totalizador; mesmo horímetro | 1 abastecimento de 100 L, fonte leitura de medidor | −100 L, uma vez | Nenhuma |
+| Operador declara 100 L; almoxarife lê 90 L no totalizador; mesmo horímetro | 1 abastecimento de 90 L, provisório | −90 L | Divergência de 10 L ao almoxarife do ponto |
+| Operador declara 100 L; almoxarife declara 90 L, sem leitura do totalizador; mesmo horímetro | 1 abastecimento de 90 L (escritor designado), provisório | −90 L | Divergência de 10 L |
+| Operador declara 100 L no horímetro 1.250,4 h e 80 L no 1.258,9 h, 9 h depois (fora da janela) | 2 abastecimentos distintos | −180 L | Nenhuma |
+| Operador declara 100 L com horímetro; almoxarife registra o mesmo ativo e ponto dentro da janela, sem horímetro | 1 fato com o valor do primeiro relato aceito, provisório; o outro relato sem efeito, no mesmo caso | Valor do primeiro relato aceito, uma vez | Possível mesmo fato (CONC-03); o CMD-50 fixa o valor |
+| Operador declara 100 L no horímetro 1.250,4 h; almoxarife lê 100 L no totalizador, com horímetro 1.251,0 h, dentro da janela | 1 fato com o valor do primeiro relato aceito, provisório; o outro relato sem efeito, no mesmo caso | −100 L, uma vez; nunca −200 L | Possível mesmo fato: as leituras do ativo diferem 0,6 h, além da tolerância; o CMD-50 fixa o valor |
+
+#### 73.5.6 Entrega e confirmação de recebimento; consumo sugerido e declarado
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| CONC-12 | A confirmação de recebimento no app (DEC-2609-07) é o **aceite do mesmo movimento de entrega** (CMD-16): registra recebedor, instante e quantidade conferida no movimento existente e não cria segunda entrada em custódia. A leitura de 42.1 passa a ser: separação e entrega são fatos distintos; o recebimento confirmado é o aceite da entrega. Confirmação que chega antes da entrega (almoxarife sem conexão com cota delegada, 73.4) fica **Aguardando entrega**, sem efeito, e se vincula quando a entrega chega; depois do prazo (valor inicial 72 h, PEND-09) vai à conferência do almoxarife. Quantidade confirmada diferente da entregue, acima da tolerância, abre caso de conferência (CONC-19) ao almoxarife; a custódia continua com a quantidade entregue até a resolução, sem ajuste automático (42.4). | AC-109. |
+| CONC-13 | O consumo sugerido pelo app (dose × área do apontamento, DEC-2609-13) é **estimativa** e não gera movimento próprio. Aceito sem alteração, fica gravado como estimativa aceita pelo executor; alterado, vira declaração. Em ambos os casos há um consumo por apontamento (ou carga), produto e lote. Medição homologada da mesma aplicação (36.7) se vincula e prevalece por CONC-09. Na conferência, a diferença do balanço da custódia (CAL-02; 42.4) dentro da tolerância explícita de 42.4, configurada em CF-02, é registrada como ajuste auditado de medição, vinculado, e não vira consumo por subtração (42.4); acima dela, conferência. Nunca há segunda baixa (42.3). | AC-110. |
+
+#### 73.5.7 Excedente sobre o saldo e ordem de sincronização
+
+**Leitura de 72.3 item 1 e AC-72-11:** a de 73.1, com RN-018. O texto do cap. 72 não é alterado; a proposta de complemento é a PEND-07 (73.12).
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| CONC-14 | **No aparelho:** o app recusa quantidade acima do saldo que conhece (AC-72-11 continua literal); o executor pode usar **Registrar ocorrência** para relatar a área excedente, sem entrar no realizado. **No servidor:** relatos que juntos passam do saldo autorizado (de aparelhos que conheciam um saldo já superado, de telemetria, de importação ou da web) não são recusados nem truncados. O realizado confirmado vai até o saldo autorizado; o excedente fica Em conferência num único caso "Excedente sobre o saldo", que reúne todos os relatos concorrentes com suas áreas integrais. A atribuição por parcela dos fatos do caso fica provisória até o CMD-50; isso não reduz o realizado nem desfaz movimentos já aplicados. Realizado confirmado, quantidade em conferência e relatos preservados são os mesmos em qualquer ordem de sincronização. O consumo de cada fato segue a verificação de custódia (CONC-06), independentemente do excedente de área. | AC-107. |
+| CONC-15 | O CMD-50 resolve o excedente com uma das decisões: **vincular** (os relatos cobrem o mesmo trabalho; a área comum não conta duas vezes); **aceitar como fato distinto**, registrando realizado acima do autorizado com motivo legítimo (8.5), sem ampliar a autorização, sem nova reserva e sem autorização retroativa (CMD-43), com ciência registrada do aprovador da versão na O.S. agrícola com produto (proposta em PEND-10); **converter em correção** (erro de registro); ou **recusar** (registro sem fato físico correspondente, relato preservado como Recusado). Ampliar o escopo para trabalho futuro é revisão (CMD-32/CMD-42), não CMD-50. | AC-107 (resolução). |
+
+#### 73.5.8 Correção e estorno vinculados
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| CONC-16 | Correção é nova intenção, com chave nova (IDEM-03), que traz a referência do fato original (`event_id` e tipo de comando, IDEM-18) e a versão que corrige. **Corrigir** grava os valores novos; o efeito é só a diferença, por movimento vinculado. **Estornar** anula os efeitos de um registro incorreto (O.S., ativo ou lote errado, registro sem fato) e nunca serve para fingir que uma aplicação física não ocorreu (8.1). O original não muda (ENG-026; RN-044). Correção de correção aponta o fato original e a versão atual; versão divergente vai à conferência, sem perda. | Corrigir 60 ha para 55 ha gera um movimento vinculado de −5 ha; o histórico mostra original e correção com autores e motivos. |
+| CONC-17 | Correção que chega **antes do original** fica **Aguardando original**, sem efeito. Quando o original chega, os dois são aplicados em sequência (original, depois correção) na mesma transação. Depois do prazo (valor inicial 72 h da recepção da correção), vai à conferência como "Correção sem original"; o CMD-50 pode convertê-la em fato distinto ou recusá-la. Correção de relato Em conferência entra no mesmo caso. Correção de fato já conferido (CMD-09) ou de O.S. Encerrada segue 42.5 e INTEG-18, com alçada. | AC-108. |
+
+#### 73.5.9 Relato preservado e conferência
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| CONC-18 | Relato é imutável e nunca é apagado nem sobrescrito. Sua situação segue a tabela abaixo; a correspondência com os termos de 8.1 e 12.3 está em 73.2.3. Relato Em conferência não converte nada em saldo confirmado; a O.S. mostra a quantidade exposta (8.3). | Consulta de auditoria encontra todo relato recebido, com classe, situação e vínculo; nenhum relato some depois de CMD-50. |
+| CONC-19 | Cada relato Em conferência forma ou integra um caso com tipo, motivo, relatos envolvidos, valor proposto pela precedência, responsável (73.5.12) e prazo (valor inicial 2 dias úteis). Quando o relato conflita com fato já aceito (coincidência parcial, sobreposição, recurso simultâneo ou excedente), o fato aceito entra no mesmo caso marcado provisório, sem perder o efeito já aplicado; o estado provisório pode refletir a ordem de chegada, e o resultado final é o fixado pelo CMD-50. O caso não impede novos apontamentos; impede o CMD-10 da O.S. enquanto aberto (INTEG-13). Caso fora do prazo gera aviso ao responsável e ao gestor do escopo. | Com um caso aberto, CMD-10 é recusado com o motivo e o atalho "Resolver relato"; novos apontamentos continuam aceitos. |
+
+| Situação do relato | Significado | App (64.5) |
+|---|---|---|
+| Aceito | Fato distinto e compatível, com efeito | Sincronizado |
+| Vinculado | Outro registro do mesmo fato; sem efeito próprio | Sincronizado · Já registrado por {papel} · {valor} |
+| Em conferência | Incompatível, possível mesmo fato ou excedente; sem efeito no saldo confirmado | Sincronizado · Em conferência |
+| Aguardando original ou entrega | Correção ou confirmação que chegou antes do fato de referência | Sincronizado |
+| Recusado | Casos de CONC-07 ou decisão do CMD-50; conteúdo preservado | Recusado · motivo |
+| Corrigido | Fato com correção vinculada aplicada | Sincronizado · Corrigido |
+
+#### 73.5.10 Ordem e tempo: a hora do aparelho não é autoridade
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| CONC-20 | A ordem entre relatos vem da sequência local monotônica de cada aparelho, da versão esperada do objeto e da ordem de recepção no servidor. A hora do aparelho (`occurred_at`) é dado informado: serve para data operacional, turno, janela técnica e aproximação de candidatos (CONC-05). Nunca escolhe vencedor, descarta relato nem decide saldo, custódia ou área (RN-038; 24.1). | AC-112: com o relógio do aparelho 3 h adiantado ou atrasado, os resultados de AC-75, AC-76 e AC-107 não mudam. |
+| CONC-21 | Em cada sincronização, o servidor grava o seu instante e o do aparelho; a diferença é o desvio estimado. Cada relato leva o tempo decorrido, medido pelo relógio monotônico do aparelho, desde a última sincronização bem-sucedida. **Instante estimado do fato** = instante do servidor na última sincronização + tempo decorrido. Se o aparelho reiniciou no intervalo, vale o instante informado corrigido pelo desvio, marcado como estimativa. Incerteza inicial: 5 min com tempo monotônico; 30 min com instante corrigido (configuráveis). A validade do pacote offline conta pelo tempo decorrido desde a última sincronização, não pelo relógio do aparelho (OSA-09; 8.6.3). Diante de revogação ou substituição da versão, o fato com instante estimado anterior à revogação por mais que a incerteza é compatível quanto à autorização; posterior ou dentro da incerteza, fica Em conferência (12.5). | AC-112. |
+
+#### 73.5.11 Onde CRDT cabe
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| CONC-22 | CRDT não é solução geral, e nenhuma exigência desta versão depende dele. Só pode ser adotado onde a convergência sem coordenação for adequada e demonstrada em ADR: dado sem invariante de negócio, sem efeito em saldo e com fusão aceitável para o usuário, como notas e anotações livres de vistoria. Nunca para saldo, custódia, reserva, consumo, área, horas, aprovação ou liberação. "Último a gravar vence" continua proibido (64.5). | A revisão de arquitetura recusa CRDT sem ADR que demonstre esses três pontos; onde houver ADR aprovada, existe teste de convergência com edições concorrentes em ordens diferentes. |
+
+#### 73.5.12 CMD-50 · Resolver relato de campo
+
+A linha do CMD-50 está na tabela de 8.2.2, depois do CMD-49: quem resolve, pré-condição, efeito de cada decisão (vincular, aceitar como fato distinto, recusar, converter em correção vinculada) e retorno de interface. Quem resolve cada tipo de caso:
+
+| Tipo de caso | Quem resolve | Ciência registrada |
+|---|---|---|
+| Apontamento: sobreposição, recurso simultâneo, possível mesmo fato, excedente | Conferente da O.S. | Aprovador da versão ao aceitar fora da versão ou acima do autorizado em O.S. agrícola com produto |
+| Consumo acima da dose ou da custódia | Conferente, com o almoxarife para a custódia | Agrônomo quando a dose sai da faixa |
+| Entrega, confirmação, devolução e custódia | Almoxarife do local | — |
+| Abastecimento | Almoxarife do local (abastecedor designado do ponto, se aprovado em PEND-08) | PCM quando a leitura do ativo diverge |
+| Aplicação de água | Irrigante | PCP quando afeta a programação; agrônomo só na fertirrigação (DEC-2609-10) |
+| Fato fora da autorização atual | Conferente da O.S. | Aprovador da versão e PCP |
+
+#### 73.5.13 Interface, observação e verificação
+
+**Interface** (73.10). No app, o autor vê a situação da tabela de CONC-18, sem ação: "Sincronizado · Já registrado por Almoxarifado · 100 L" ou "Sincronizado · Em conferência". **Corrigir** continua disponível como nova intenção (IDEM-03). Na tela de trabalho da O.S. (DEC-2609-04), um caso aberto aparece como pendência "1 relato em conferência", com responsável e prazo, sem coluna nova no Kanban. Em CA-02 (e em SU-07, MA-05 e IR-03 para os seus tipos), **Resolver relato** só aparece com caso aberto e é a ação primária do caso. O caso mostra os relatos lado a lado (autor, fonte, valor, leitura, instante informado com marca de estimativa), o valor proposto pela precedência e as quatro decisões, com a proposta em primeiro lugar. Classe, chave física e versão da regra ficam em CF-04, fora das telas de usuário (UIREL-03).
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| CONC-23 | A linha Offline de 30.2 passa a medir: relatos vinculados por tipo e papel (duplicidade evitada); relatos Em conferência por classe, motivo, idade e responsável; correções Aguardando original; casos de excedente sobre o saldo; divergências acima da tolerância por tipo. O alerta de caso fora do prazo é o de CONC-19. | Painel em HML mostra as cinco medidas com os dados dos testes de AC-105 a AC-116. |
+
+**Verificação.** Testes especificados nesta revisão, **ainda não executados**: tabela de classificação e de chave física por tipo (unidade); propriedade com fast-check (25.1): qualquer permutação e repetição de um conjunto de relatos produz os mesmos fatos, valores e casos, fora o estado provisório de CONC-19; integração com PostgreSQL real para dois relatos do mesmo fato processados ao mesmo tempo (CONC-04); aparelho real com relógio alterado e reinício entre sincronizações (CONC-21); carga de reconexão de 29.2 (100 aparelhos × 200 fatos) com 10 % de relatos duplicados entre papéis, sem efeito duplicado. Cenários do pedido: AC-75 (cenário 3) e AC-76 (cenário 4); complementares AC-105 a AC-116 (73.11).
+
+### 73.6 Transações locais, outbox e integrações resilientes
+
+**Alcance.** Esta seção fecha as lacunas do item 6 do pedido: transação local por invariante, detalhes da outbox, consumidores idempotentes, critério para orquestrador com estado, encerramento da O.S. separado da integração com o ERP, tentativas, prazos, compensações e responsável pela exceção. Continuam valendo sem repetição: 12.2 (comandos e eventos), 12.4 (fonte oficial), ENG-021 a ENG-030, 24.1, 28.1, 28.4, 29.3, 30.2, cap. 42, 66.1 a 66.4, RN-001, RN-013, RN-022, RN-034, RN-036 e FL-R09. Nas matérias aqui tratadas, esta seção prevalece (73.1). A regra de negócio correspondente é a **RN-047**, no cap. 3, depois de RN-046.
+
+**Posição arquitetural.** A aplicação continua modular por domínio, com PostgreSQL transacional e workers (12.1, 23, 28.1). Nada aqui exige microsserviços, transação distribuída, event sourcing ou banco separado. A rede entrega mensagens pelo menos uma vez; o efeito de negócio acontece uma vez só (73.2).
+
+#### 73.6.1 Transação local por invariante
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| INTEG-01 | Todo comando que altera saldo, reserva, custódia, aprovação, liberação ou encerramento confirma numa única transação local: o efeito de negócio, o registro da intenção processada (73.3) e o registro na outbox. Nenhuma chamada a sistema externo (ERP, provedor ou fila) ocorre dentro dessa transação ou com bloqueio aberto (24.1). | Falha injetada entre quaisquer duas dessas gravações não deixa efeito sem registro, recibo sem efeito nem evento sem efeito. Teste por comando: CMD-06, 07, 08, 09, 10, 11, 16, 17, 42, 43, 44, 45, 46, 47 e 48; CMD-49 e CMD-50 conforme 73.4 e 73.5. |
+| INTEG-02 | A transação cobre somente os registros da invariante do comando (tabela abaixo). Primeiro se insere o registro da intenção (IDEM-15, com a espera própria dessa inserção); depois, os bloqueios seguem ordem fixa: O.S. → recurso ou ativo → tarefa de irrigação → movimento de entrega (escopos de CONC-04) → requisição/reserva → saldo por lote e local → custódia; dentro do mesmo tipo, ID crescente. Os demais limites de consulta e de espera por bloqueio são os de 28.4 (valores iniciais 3 s e 1 s). | Teste de 100 disputas (ENG-023), misturando entrega, confirmação de recebimento e abastecimento no mesmo local, sem impasse não tratado. Bloqueio excedido devolve resposta tratável; a nova tentativa usa a mesma chave e produz um efeito. |
+| INTEG-03 | Nas O.S., reserva, entrega, custódia, consumo e devolução são registrados pela plataforma por transação local (DEC-2609-13, cap. 42); o ERP recebe esses fatos. Onde o ERP do cliente também baixa estoque na entrega, o adaptador reconcilia sem segunda baixa (RN-013, 8.3). | Com o conector ERP ativo e o destino indisponível, todos os comandos do cap. 42 confirmam normalmente e deixam os efeitos externos com situação Pendente. Sem conector configurado, confirmam do mesmo modo e não criam efeito externo (INTEG-14). |
+
+**Invariantes protegidas por comando da O.S.**
+
+| Comando | Verificado na mesma transação | Evento gravado na outbox |
+|---|---|---|
+| Ref. CMD-06 Liberar | Aprovação e autorização vigentes; reserva atômica sobre o disponível (RN-011, CMD-44) | O.S. liberada; reservas criadas |
+| Ref. CMD-16 Entregar | Versão aprovada, liberação vigente e autorização do escopo (42.1); saldo por lote e local não negativo; saldo elegível de 42.1; custódia da O.S. acrescida | Entrega registrada |
+| Ref. CMD-17 Registrar consumo | Consumo até a custódia da O.S. (CAL-02); fato único (73.5) | Consumo registrado |
+| Ref. CMD-43 Registrar avanço | Área dentro das regras de 73.5; fato único | Apontamento aceito |
+| Ref. CMD-45 Receber devolução | Recebimento uma vez; custódia reduzida; utilizável acrescido só se apto | Devolução recebida |
+| Ref. CMD-10 Encerrar | Requisitos locais de INTEG-13; custódia zero (CAL-02) | O.S. encerrada, com a lista de efeitos a integrar |
+
+#### 73.6.2 Outbox
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| INTEG-04 | Cada registro da outbox tem os campos de evento de 24.1 e também o agregado (tipo e ID), a versão do agregado, a versão do evento anterior do mesmo agregado e a chave da intenção de origem. O publicador envia os eventos de um mesmo agregado na ordem da versão; agregados diferentes seguem em paralelo. A fila pode repetir ou reordenar entregas; a ordem de aplicação cabe ao consumidor (INTEG-09). A marcação de publicado ocorre depois do envio à fila; queda entre as duas etapas gera nova publicação, tratada pelo consumidor (28.1, INTEG-07). | Teste com 1.000 eventos de 50 agregados, quedas aleatórias do publicador e fila que repete e reordena entregas: nenhum evento perdido; cada consumidor aplica os eventos de cada agregado na ordem da versão, uma vez. |
+| INTEG-05 | O atraso de publicação é medido por evento (instante de publicação − instante do commit) e exposto por tipo de evento. Meta de propagação interna: 29.3 e 73.8. Alertas iniciais: item mais antigo não publicado acima de 5 min gera alerta; acima de 15 min abre incidente. | Com o publicador parado 10 min, o alerta dispara; após a retomada, todos os eventos são publicados sem perda nem duplicação de efeito. |
+| INTEG-06 | Item publicado permanece na outbox por 7 dias (valor inicial configurável) para diagnóstico e reprocessamento; depois, um job remove ou arquiva. Item não publicado ou em erro nunca é removido. | O job de limpeza executado com itens não publicados, em erro e publicados há 8 dias remove só os últimos; com retenção configurada em 1 h e a carga normal de 50 req/s de 73.8.3 por 3 h, os itens publicados na outbox não passam do volume de 1 h de eventos mais 10 %. |
+
+#### 73.6.3 Consumidores idempotentes
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| INTEG-07 | Cada consumidor que produz efeito grava (consumidor, `event_id`) na mesma transação do seu efeito (inbox). Evento já registrado é confirmado à fila sem novo efeito. | O mesmo evento entregue 5 vezes, inclusive a dois workers ao mesmo tempo, gera um efeito e um registro na inbox. |
+| INTEG-08 | Além do `event_id`, o efeito tem chave de negócio única: movimento pelo fato de origem; documento de integração pelo efeito de origem e sua versão. Essa chave vive enquanto o efeito existir (73.3). O registro da inbox é mantido no mínimo pela retenção da outbox (INTEG-06) mais a retenção máxima de mensagens na fila, que é o maior intervalo em que um evento já aplicado pode voltar; valor inicial 35 dias. | Evento republicado com `event_id` novo para o mesmo efeito de origem não cria segundo movimento nem segundo documento. |
+| INTEG-09 | O consumidor aplica eventos de um agregado na ordem da versão. A lacuna é detectada pela versão do evento anterior gravada no próprio evento (INTEG-04), porque nem toda versão do agregado gera evento. Se chega evento cujo anterior ainda não foi aplicado, aguarda até 5 min (valor inicial) e depois busca o evento faltante na outbox; nunca regride estado (12.2). Mensagem com erro classificado como permanente, ou que falha 5 vezes seguidas, vai à fila de falhas com motivo (24.1); os eventos seguintes do mesmo agregado para aquele consumidor aguardam, com alerta, e os demais agregados seguem. O reprocessamento é CMD-40. No consumidor de integração, o efeito local é registrar o efeito a integrar como Pendente; a chamada ao destino ocorre depois, fora dessa transação, e falha, timeout ou indisponibilidade do destino seguem 73.6.6, não esta regra. | Evento "O.S. encerrada" (versão 12) entregue antes do "consumo registrado" (versão 11) resulta em um documento com o consumo completo e nenhum documento parcial. Mensagem inválida isola só o seu agregado. |
+| INTEG-10 | Reconstrução de projeção (73.7) roda em modo de reexecução: não chama destino externo, não grava efeito externo na outbox e não envia aviso. | Reexecutar 30 dias de eventos não gera chamada ao ERP nem item novo na outbox de integração. |
+
+#### 73.6.4 Quando usar orquestrador com estado (Saga/process manager)
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| INTEG-11 | Orquestrador com estado persistido só é usado quando as duas condições valem: (a) o processo depende de dois ou mais efeitos externos em sequência, ou de um efeito externo confirmado antes de um passo local seguinte; (b) a falha de um passo posterior exige compensação explícita de um efeito externo anterior. Nos demais casos basta transação local, outbox e consumidor idempotente. | Cada orquestrador existente tem ADR que demonstra (a) e (b); revisão de arquitetura recusa orquestrador fora desse critério. |
+| INTEG-12 | O orquestrador é um módulo da aplicação modular: tabela de estado com passo, versão e prazo por passo; passos idempotentes acionados por eventos da outbox; compensação por evento vinculado. A compensação nunca desfaz fato físico; atua só sobre documento ou efeito externo. | Expedição com documento fiscal autorizado e carga desfeita antes da saída física: o orquestrador vai a "Compensação pendente", com exceção ao responsável do tipo; depois da decisão dele (INTEG-24), o documento fiscal é cancelado por evento vinculado, no prazo e nas regras fiscais do destino. Título rejeitado depois da saída física não cancela o documento fiscal nem a saída: o efeito fica Com erro e segue 73.6.7. |
+
+| Processo | Padrão | Motivo |
+|---|---|---|
+| Encerrar O.S. (CMD-10) e enviar consumo, devoluções e custo ao ERP | Transação local + outbox + integração posterior | O fato local é definitivo; o ERP consome o fato e não o autoriza |
+| Apontamento, reserva, entrega, devolução e consumo | Transação local + outbox | Invariante local única |
+| Pedido de compra ou documento único enviado ao ERP | Outbox + consulta antes de repetir (FL-R09) | Um efeito externo |
+| Expedição que exige documento fiscal autorizado antes da saída física e título no ERP depois | Orquestrador com estado | Dois efeitos externos dependentes; a saída espera a autorização (12.4, AC-53); carga desfeita depois da autorização exige cancelar o documento fiscal (INTEG-11 b) |
+
+#### 73.6.5 Encerramento da O.S. e situação de integração
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| INTEG-13 | As pré-condições de CMD-10 são locais: apontamentos conferidos, saldo de trabalho destinado, sobras recebidas ou destinadas, custódia da ordem zerada, nenhum caso Em conferência aberto na O.S. (CONC-19) e reconciliações do cap. 42 concluídas (42.5, OSFASE-05, AC-72-11). "Apontamentos enviados" (DEC-2609-13) segue a leitura de 73.1: recebidos pelo servidor com recibo (Sincronizado) e conferidos, sem depender do ERP. | Com o ERP indisponível, uma O.S. que cumpre os requisitos locais encerra; com sobra em custódia, o encerramento continua bloqueado com motivo e atalho para a devolução. |
+| INTEG-14 | A situação de integração é uma dimensão própria de cada efeito externo (documento ou movimento), separada da etapa da O.S. e da situação de envio do aparelho. Usa só o vocabulário da tabela abaixo. A O.S. mostra a situação mais grave dos seus efeitos, nesta ordem: Com erro, Em reconciliação, Pendente, Enviando, Confirmada. Sem conector aplicável, a dimensão não existe e nada é mostrado. | A mesma O.S. com um efeito Confirmado e outro Com erro mostra "Com erro"; lista, Kanban e mapa mostram a etapa Encerradas nos dois casos. |
+| INTEG-15 | CMD-10 grava na mesma transação o encerramento, o registro da intenção e o evento "O.S. encerrada" com os efeitos a integrar (consumo por produto e lote, devoluções recebidas e valor dos movimentos quando a política de custo o grava no fato; apropriação e rateio seguem a projeção de custo, CAL-04 e 73.7.2). O comando não espera resposta do ERP. | Com o ERP respondendo só após 30 s, o tempo de CMD-10 continua dentro da meta de comando transacional de 29.3. |
+| INTEG-16 | O padrão de todo efeito da O.S. é processamento posterior. O contrato do conector pode marcar um tipo de efeito como "confirmação antes do encerramento" somente com motivo legal, fiscal ou contratual, aprovação da controladoria, versão e vigência em CF-03. O uso da marcação segue PEND-12. Nesse caso, Conferir e encerrar grava a intenção e publica os efeitos a integrar (INTEG-15) sem encerrar: a O.S. permanece Em conferência com a pendência "Aguardando confirmação do ERP", responsável e prazo. Quando todos os efeitos marcados ficam Confirmada, o sistema revalida os requisitos locais de INTEG-13 e conclui CMD-10 como encerramento automático (8.4.3), com chave derivada da intenção original (IDEM-04), sem reenviar efeito já Confirmado (INTEG-08). | Sem marcação, a O.S. encerra com o efeito Pendente. Com marcação, o encerramento aguarda o efeito Confirmado e então conclui uma vez, sem nova ação do conferente; o ERP tem um documento por efeito. Marcar sem motivo ou sem aprovador é recusado. |
+| INTEG-17 | Falha, atraso, rejeição, resultado desconhecido ou tentativas esgotadas na integração não estornam, cancelam nem apagam consumo, apontamento, entrega, devolução, custódia ou reserva; não reabrem a O.S.; não mudam a etapa (RN-047). | Cenário AC-79: nenhum movimento de estorno, cancelamento, ajuste ou reabertura é criado. |
+| INTEG-18 | Correção de fato depois do encerramento usa ajuste ou estorno vinculado com alçada (42.5, ENG-026), motivada pelo próprio fato e nunca pela integração. O ajuste gera evento novo; o destino recebe cancelamento, estorno ou documento complementar vinculado ao anterior, respeitando o período fechado do ERP (66.3). | Ajuste de 5 L no consumo de uma O.S. encerrada gera um documento vinculado no ERP; o documento original permanece com sua linhagem. |
+
+**Vocabulário único da situação de integração** (substitui as listas de 8.1 e 66.3 para exibição; os termos de 66.3 continuam como eventos da trilha)
+
+| Situação | Significado | Quem age | Termos anteriores |
+|---|---|---|---|
+| Pendente | Evento gravado; envio ainda não feito ou aguardando a próxima tentativa, inclusive com destino indisponível | Sistema | Recebido, validado (66.3); Pendente (8.1) |
+| Enviando | Envio em curso, ainda sem resposta | Sistema | Enviado (66.3); Em processamento (8.1) |
+| Em reconciliação | Resultado desconhecido (timeout, conexão cortada após o envio, resposta ambígua) ou efeito encontrado diferente do esperado; o destino é consultado e não há reenvio | Sistema; depois do limite de consultas, integrador/TI | Em reconciliação (8.1) |
+| Confirmada | Destino confirmou o efeito; IDs externos vinculados e conferidos | — | Aceito pelo ERP, reconciliado (66.3); Confirmada (8.1) |
+| Com erro | Rejeição de negócio ou tentativas esgotadas; exceção aberta com responsável e prazo | Responsável do tipo (INTEG-25) | Rejeitado (66.3); Em erro (8.1) |
+
+#### 73.6.6 Tentativas, prazos e resultado desconhecido
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| INTEG-19 | O conector classifica cada resposta: **confirmado** (efeito com ID externo); **rejeição de negócio** (cadastro, mapeamento, período fechado, regra do ERP); **falha transitória antes do processamento** (conexão recusada, limite de chamadas, indisponibilidade que o contrato do destino garante sem efeito); **resultado desconhecido** (timeout depois do envio, conexão cortada depois do envio, erro sem garantia de ausência de efeito, resposta inválida). Rejeição de negócio não tem tentativa automática. Falha transitória antes do processamento equivale a ausência confirmada: é repetida com a mesma chave e o mesmo conteúdo, depois da espera. Resultado desconhecido segue INTEG-20. | Teste de contrato por conector com as quatro classes; cada uma leva à situação da tabela de 73.6.5. |
+| INTEG-20 | Depois de resultado desconhecido, o efeito fica Em reconciliação e o conector consulta o destino pelo identificador externo ou pela chave antes de repetir ou compensar. Efeito encontrado e compatível: vincula e marca Confirmada, sem reenvio. Ausência confirmada: reenvia com a mesma chave e o mesmo conteúdo, contando como tentativa. Indeterminado: nova consulta até o limite; depois, exceção ao integrador/TI, com o efeito ainda Em reconciliação. Destino sem consulta nem idempotência: nenhuma repetição automática; exceção e reconciliação manual (24.1). | ERP grava o documento e a resposta excede 30 s: a primeira consulta encontra o documento, a situação vira Confirmada e o ERP tem um documento. |
+| INTEG-21 | Os parâmetros de tentativa são por conector, com os valores iniciais abaixo, registrados em CF-03 com versão, autor e vigência. A homologação em HML (ERP-08) mede atraso ponta a ponta e recuperação e ajusta os valores (ERP-07). Valor alterado vale para as próximas tentativas. | Evidência de HML por conector com os valores vigentes, o atraso medido e o tempo de recuperação com 2.000 efeitos acumulados; o valor aprovado entra no contrato do conector. |
+| INTEG-22 | Com 5 falhas técnicas seguidas, o conector suspende os envios por 5 min e então faz uma chamada de teste (circuit breaker, ENG-030). A chamada de teste é uma consulta de saúde do conector, sem efeito de negócio. Se a chamada de teste falhar, nova suspensão de 5 min. A suspensão e a chamada de teste não consomem tentativas dos efeitos. Durante a suspensão, os efeitos ficam Pendente; nada é descartado. | ERP fora por 3 h com 2.000 efeitos gerados: nenhum perdido, nenhum duplicado, alerta de fila parada emitido e todos Confirmados uma vez após o retorno. |
+
+**Valores iniciais por conector** (configuráveis; validados em HML)
+
+| Parâmetro | Valor inicial | Regra |
+|---|---|---|
+| Tempo limite por chamada | 30 s, ou o limite documentado do conector se for menor | Chamada fora de transação e de bloqueio |
+| Tentativas automáticas por efeito | 8 | Contam também os reenvios após ausência confirmada |
+| Espera entre tentativas | 1 min, dobrando a cada tentativa, máximo de 30 min, com variação aleatória de ±20 % | Cerca de 1,5 h entre a 1ª e a 8ª tentativa (91 min sem a variação); a espera pedida pelo destino prevalece quando maior |
+| Consultas após resultado desconhecido | 4, após 2 min, 10 min, 30 min e 2 h | Sem reenvio enquanto a consulta não confirmar ausência |
+| Suspensão por falhas seguidas | 5 falhas → 5 min de suspensão → 1 chamada de teste | Efeitos permanecem Pendente, sem consumir tentativas |
+| Alerta de fila parada | Efeito Pendente mais antigo acima de 2 h | Vai ao integrador/TI |
+| Rejeição de negócio | Nenhuma tentativa automática | Exceção aberta na primeira rejeição, ao responsável do tipo |
+
+#### 73.6.7 Compensações permitidas e proibidas
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| INTEG-23 | Só as compensações da tabela abaixo são permitidas, cada uma com trilha (quem, quando, motivo, efeito de origem e ID externo). | Cada linha tem teste próprio; ação fora da tabela é recusada pelo serviço de integração. |
+| INTEG-24 | São proibidos: estornar, cancelar ou apagar fato físico por causa da integração (INTEG-17); reabrir a O.S. ou mudar sua etapa por causa da integração; reenviar com chave nova ou criar documento novo sem consulta que confirme ausência depois de resultado desconhecido; marcar Confirmada sem ID externo ou evidência do destino; alterar o fato local para coincidir com o ERP; gravar direto em tabelas do ERP (66.1); compensação automática em cadeia que desfaça documento já confirmado sem decisão do responsável. | Tentativa de cada ação proibida, por tela, API ou job, é recusada com motivo e registrada. |
+
+| Compensação permitida | Quando | Quem |
+|---|---|---|
+| Vincular o efeito encontrado no destino, sem reenviar | A consulta encontra efeito compatível | Sistema |
+| Reenviar com a mesma chave e o mesmo conteúdo | A consulta confirma ausência, dentro do limite de tentativas | Sistema; depois do limite, integrador/TI por CMD-40 |
+| Reenviar como nova intenção vinculada ao mesmo efeito de origem | Rejeição de negócio confirmada pelo destino (nenhum efeito criado) e dado ou mapeamento corrigido | Responsável do tipo, por CMD-40 |
+| Cancelar ou estornar no destino o documento enviado, por evento vinculado | O fato de origem foi corrigido na plataforma por ajuste ou estorno vinculado com alçada (INTEG-18) | Controladoria ou almoxarifado, conforme o tipo; regras de período do ERP |
+| Conciliar com documento já existente no destino | Documento lançado no ERP por outra via, com ID externo como evidência | Responsável do tipo |
+| Suspender envios do conector | Indisponibilidade ou erro de contrato | Sistema (INTEG-22) ou integrador/TI |
+
+#### 73.6.8 Exceções, fechamento do período e onde a pendência aparece
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| INTEG-25 | Toda exceção (efeito Com erro ou Em reconciliação depois do limite) tem tipo, responsável, prazo de reconhecimento, prazo de solução e escalonamento conforme a tabela abaixo. Reconhecer é assumir a exceção: registrar responsável nominal e próxima ação. O escalonamento recebe aviso em dois casos: exceção não reconhecida no prazo de reconhecimento; exceção reconhecida e não resolvida no prazo de solução. Os prazos são valores iniciais configuráveis por organização em CF-02 e estão sob confirmação do proprietário (PEND-11). | Exceção não reconhecida no prazo gera aviso ao escalonamento, que cessa quando alguém reconhece; exceção reconhecida e não resolvida no prazo de solução gera aviso ao escalonamento, que cessa com a solução. |
+| INTEG-26 | CMD-30 (Fechar período) fica impedido enquanto houver efeito de integração da competência e do escopo com situação diferente de Confirmada. GE-03 lista esses efeitos com O.S. ou documento de origem, situação, idade e responsável. A pendência não impede CMD-10 de nenhuma O.S. | Competência com um efeito Pendente: Fechar período é recusado com a lista; no mesmo instante, outra O.S. que cumpre os requisitos locais encerra. Depois de Confirmada, o fechamento prossegue. |
+| INTEG-27 | A situação de integração não cria coluna nem selo no Kanban, não aparece no cartão, no mapa nem no app de campo, e não muda a etapa (8.4.3). Aparece: no bloco "Situação e origem" da tela de trabalho da O.S. (DEC-2609-04), só para controladoria, gestor, integrador/TI e, nos movimentos de estoque, almoxarifado (RN-045; 73.10.2); em CF-03, na fila por efeito; em GE-03, como pendência do fechamento. Exceção: no tipo marcado por INTEG-16, "Aguardando confirmação do ERP" é impedimento do encerramento e aparece como qualquer impedimento (DEC-2609-04): na tela de trabalho, na lista e como impedimento principal do cartão em Em conferência, com responsável e prazo, sem ação para quem não o resolve; não é coluna nem selo novo. | Com uma O.S. Encerrada Com erro: o operador no app e o PCP no Kanban não veem indicação de integração e o quadro tem cinco colunas; a controladoria vê a situação, o responsável, o prazo e "Abrir em Integrações". Com uma O.S. de tipo marcado aguardando o ERP, o PCP vê no cartão o impedimento com responsável e prazo, sem a situação de integração. |
+| INTEG-28 | Observabilidade (30.2): atraso de publicação da outbox; efeitos por situação e por conector; idade do efeito Pendente mais antigo; tentativas; exceções sem reconhecimento; O.S. encerradas com efeito não Confirmado por idade. Cada métrica tem dono e alerta. | Painel técnico em HML mostra as seis medidas com dados do teste de INTEG-22. |
+
+| Tipo de exceção | Exemplos | Responsável | Reconhecer em (inicial) | Escalar para, e prazo de solução (inicial) |
+|---|---|---|---|---|
+| Documento contábil e custo | Centro ou natureza sem mapeamento, período fechado no ERP, valor divergente | Controladoria | 1 dia útil | Gestor da controladoria após 3 dias úteis sem solução |
+| Movimento de estoque | Item, lote, unidade ou depósito sem mapeamento; saldo divergente no ERP | Almoxarifado do local | 1 dia útil | Gestor do almoxarifado após 3 dias úteis sem solução |
+| Técnica | Credencial, indisponibilidade prolongada, versão de contrato, resultado indeterminado depois das consultas | Integrador/TI | 4 h úteis | Responsável de TI após 1 dia útil sem solução |
+
+**Papéis.** Integrador/TI é quem responde por CF-03 ("TI e responsáveis de domínio"): a TI da organização ou o integrador contratado, com o papel Administrador do cap. 2 no escopo do conector. Os destinatários do escalonamento seguem PEND-11.
+
+**Na interface** (73.10): a tela da O.S. mostra só "Integração ERP: situação · desde quando" e, em Com erro ou Em reconciliação, o responsável e o prazo; a ação é "Abrir em Integrações" para quem pode agir. Em CF-03, a ação primária de um item Em reconciliação é "Consultar destino"; "Reprocessar item" só fica disponível depois de ausência confirmada ou dado corrigido. Parâmetros de tentativa, IDs de evento e mensagens técnicas ficam em CF-03 e no diagnóstico, não na tela da O.S.
+
+#### 73.6.9 O que não muda
+
+As cinco colunas do Kanban (8.4.3); as conferências de execução, consumo, sobras e custódia do cap. 42 e de DEC-2609-13; a fonte oficial por entidade (RN-036, 12.4, 66.2); a exigência de homologação por ERP, linha e versão (66.1, ERP-01, ERP-08). Nenhum requisito desta seção promete sincronização imediata com o ERP (ERP-07).
+
+### 73.7 Comandos e consultas: projeções seletivas
+
+**Alcance.** Esta seção fecha o item 7 do pedido, exceto as metas de latência, volume e carga, que ficam em 73.8. Continuam valendo sem repetição: RN-002, RN-011, RN-040, 12.1 (separar cálculo, autorização, fatos, projeções e integrações), 12.2, 24.1 (evento com `event_id`, agregado e versão; relatório com corte), 28.3 (cache nunca é autoridade), 28.4 (réplica não autoriza reserva), 29.5 (degradação), 55.1, 55.5, 56.4 e ENG-026. Os termos intenção, comando, evento, fato confirmado, consulta e projeção seguem 73.2; idempotência segue 73.3; outbox e consumidores seguem 73.6. Nas matérias aqui tratadas, esta seção prevalece (73.1).
+
+**Posição arquitetural.** O CQRS aqui é seletivo e cabe na aplicação modular atual (12.1, 23). Comandos gravam no PostgreSQL transacional; a maior parte das consultas lê as mesmas tabelas; só as leituras densas usam projeção. Projeção é uma tabela de leitura no mesmo banco, atualizada por worker a partir dos eventos publicados pela outbox (73.6). Nada aqui exige microsserviço, banco separado, event sourcing ou barramento novo. A fonte de verdade continua sendo o registro transacional (documentos, movimentos e fatos imutáveis, ENG-026): o evento avisa que algo foi confirmado, não substitui o registro.
+
+#### 73.7.1 Comando, evento e modos de leitura
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| PROJ-01 | Comando e evento não são sinônimos. O comando é a intenção (73.2), com chave (73.3), que o servidor aceita, recusa ou devolve em conflito. Só o comando aceito grava o fato e, na mesma transação, o evento na outbox (INTEG-01). Projeções, avisos e integrações consomem apenas eventos: nunca o comando recebido, a rejeição ou a captura que ainda está no aparelho. A captura offline pendente é intenção com relato preservado (12.5) e só entra em projeção depois do recibo. Nomes herdados que chamam intenção de "evento" (12.3, 12.5, RN-038, AC-63) são lidos assim e corrigidos conforme o registro de 73.14. | Comando recusado por saldo não grava item na outbox nem altera projeção. Apontamento salvo no aparelho sem sinal não aparece em GE-06 nem em IN-04 até o recibo; depois do recibo que o confirma como fato, aparece uma vez; relato Em conferência (73.5) só aparece depois de resolvido. |
+| PROJ-02 | Cada leitura usa um dos três modos da tabela abaixo. Projeção só é criada quando a consulta direta, com índice adequado (28.4), não cumpre o orçamento de 29.3 no envelope de 29.2, ou quando o cálculo agrega períodos, organizações ou volumes densos (custo, rateio, consolidação, indicador). A criação exige ADR com a medição que a justifica. "O.S., Estoque, App e Mapa leem o mesmo estado" (DEC-2609-13) é atendido por consulta direta ao registro transacional para fase, impedimento, saldo por lote e local, custódia e fila do app, e não por projeção. | Inventário das projeções nos ADRs (cap. 23, `docs/DECISIONS.md`), com a medição de cada uma; nenhuma tela de usuário, nem CF-04, mostra esse inventário (30.2). Registrar uma entrega em SU-07 e abrir em seguida MB-05, CA-01 e SU-03 mostra a mesma custódia e o mesmo saldo, sem estado Atualizando. |
+| PROJ-03 | Decisão só autoriza a partir do registro transacional lido na transação do comando. Projeção, cache, réplica, pacote baixado e valor exibido na tela valem, no máximo, como valor esperado enviado com o comando: se diferir do registro, o comando é recusado com o valor atual ou devolve conflito de versão (ENG-023), sem efeito. Vale para saldo por lote e local, reserva (RN-011, CAL-17), custódia (CAL-02), saldo elegível (42.1), aprovação e liberação vigentes, alocação de recurso (44.11.3), reserva comercial (49.3) e encerramento (CMD-10). No offline, a única exceção é a cota ou autorização delegada ao aparelho (12.5, 73.4), já retirada da disponibilidade central enquanto vigente. | AC-81 e AC-130. Teste de arquitetura no CI falha se o código de um comando da lista ler tabela de projeção, cache ou réplica. |
+
+**Modos de leitura**
+
+| Modo | O que lê | Uso | Autoriza? |
+|---|---|---|---|
+| Leitura no comando | Registro transacional, com bloqueio ou versão esperada (INTEG-02) | Invariantes de saldo, reserva, custódia, aprovação, liberação, alocação e encerramento | Sim. É o único modo que autoriza |
+| Consulta direta | As mesmas tabelas transacionais, no banco principal, depois do commit | Lista, detalhe, Kanban, saldos, fila do app, quadro de máquinas, fila de caminhões, recibo | Não. Mostra o estado confirmado no instante da leitura |
+| Projeção assíncrona | Tabela de leitura atualizada por worker a partir de eventos | Indicadores, consolidações, custos, painéis, camadas agregadas do mapa, propostas de reposição | Não. Mostra metadados de atualidade (PROJ-05) |
+
+Réplica de leitura, quando existir, é tratada como projeção: atende relatório e exportação e nunca autoriza (28.4).
+
+#### 73.7.2 Classificação de cada cálculo
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| PROJ-04 | Cada CAL do capítulo 10 e cada fórmula relevante de 41.5, 42.1, 44, 49, 51, 53 e 65 tem, por uso, a classe da tabela abaixo. **Transacional no comando:** calculado dentro da transação, sobre o registro autoritativo, e decide o comando. **Cálculo síncrono:** função determinística de entradas versionadas, calculada na requisição, sem estado acumulado; quando decide algo, o resultado e as versões das entradas são gravados com o fato (ex.: ficha da versão aprovada, evento de liberação da água). **Projeção assíncrona:** resultado agregado para leitura, com metadados, que nunca é pré-condição de comando. Mudar a classe de um uso exige ADR e teste de regressão. | Um teste por linha da tabela: o uso transacional recusa o comando quando o registro diverge da projeção; o uso síncrono grava resultado e versões; o uso em projeção expõe os metadados de PROJ-05 e não aparece como pré-condição de nenhum comando. |
+
+**Classificação dos CAL** (conteúdo conferido no capítulo 10; CAL-02 é custódia e saldos físicos)
+
+| Cálculo | O que calcula | Transacional no comando | Cálculo síncrono | Projeção assíncrona |
+|---|---|---|---|---|
+| Ref. CAL-01 | Necessidade líquida por data (MRP/PCE) | — (a reserva segue CAL-17 no CMD-06 e no CMD-44) | — | Propostas de reposição e visão "livre para novas reservas" em SU-01 (FL-09); não reserva nem entrega |
+| Ref. CAL-02 | Custódia e saldos físicos: conservação da custódia por ordem, produto e lote; físico final | CMD-16, CMD-17, CMD-45, conclusão do CMD-46, CMD-10, transferência direta (42.4), CMD-49 (quantidade elegível ao vencimento) e CMD-50 | — | KPI-SUP-06 e painéis de custódia; não substituem a leitura no comando |
+| Ref. CAL-03 | Saldo contratual a liberar e saldo de entrega do pedido | Liberação contratual (FL-11), CMD-14 e CMD-15 | — | Acompanhamento em SU-05 |
+| Ref. CAL-04 | Custeio sem dupla apropriação: COE, COT, custo econômico, depreciação por hora | — | Valor do movimento, quando a política de custo o grava no fato | Apropriação, rateios e consolidação em GE-02 e GE-03; retrato no fechamento (PROJ-16) |
+| Ref. CAL-05 | Capacidade teórica e efetiva, horas requeridas, capacidade da frente de colheita | — (a alocação por CMD-34 revalida agenda e condição, 44.11.3) | Rendimento e horas no formulário (DEC-2609-03) | Capacidade por mês e janela em PL-03 e PL-04 |
+| Ref. CAL-06 | Disponibilidade técnica, utilização, MTBF e MTTR | — (o bloqueio técnico é CMD-18/CMD-19 e não deriva de CAL-06) | — | KPI-PCM-01, MA-01 e GE-06 |
+| Ref. CAL-07 | Combustível e energia: consumo por balanço, L/h, kWh e custo | Abastecimento como movimento de combustível, fato único (73.5) | — | Consumo conciliado, L/h, energia e custo por intervalo (MA-05) |
+| Ref. CAL-08 | Balanço hídrico: CAD, ETc, depleção, lâmina não atendida | — | Recalculado para o setor na liberação automática da água (PROJ-14) | Balanço por setor em IR-01, com validade por fonte (PROJ-13) |
+| Ref. CAL-09 | Lâmina, volume e pivô | — | Programação, divisão em passadas (41.8) e CMD-21 | — |
+| Ref. CAL-10 | Solo, calagem e fertilizantes | — | Recomendação em AG-04, fixada na versão aprovada por CMD-01 ou CMD-42 | — |
+| Ref. CAL-11 | Quantidade alvo, preparo e margem de suprimento | Entra em 42.1 como quantidade autorizada lida no CMD-16 | Ficha da versão aprovada (41.4 a 41.6) | — |
+| Ref. CAL-12 | MIP/MID: média, % do limiar, redução observada | — | No registro da vistoria (AG-01, MB-06) | KPI-AGR-02, KPI-AGR-03 e séries |
+| Ref. CAL-13 | Idade, âncoras e gatilhos de recorrência | — | Idade e gatilho no CMD-31; recálculo das ocorrências futuras em job com chave derivada (IDEM-04) | Agenda futura exibida em PL-04 |
+| Ref. CAL-14 | Escalonamento de parcelas e oferta semanal | — | Simulação em PL-06 | Oferta semanal por curva (VE-01) |
+| Ref. CAL-15 | Previsão de frutos e saldo ofertável futuro | — (reserva comercial segue CAL-17 no comando) | Previsão publicada como versão por CMD-22 | Saldo ofertável futuro em CO-01 e VE-01 |
+| Ref. CAL-16 | Peso, umidade e balanço de massa do processo | CMD-23 cria lotes só com balanço conferido | Peso líquido e equivalência de umidade na pesagem (CO-03, CO-04) | Rendimento de processo em painéis |
+| Ref. CAL-17 | Disponível físico = físico apto − reservas válidas | CMD-06 e CMD-44 (material); CMD-36 e CMD-25 (produção) | — | Calendário de disponibilidade (49.2) e saldos exibidos |
+| Ref. CAL-18 | Preço líquido, equilíbrio, margem, ROIC e NCG | — | Cenário em Simular melhoria de margem (51.5) | GE-01, GE-02 e KPI-FIN |
+| Ref. CAL-19 | Cobertura do serviço da dívida, valor presente, sacas em barter | Registro da obrigação por CMD-14 ou CMD-25 | Comparação de propostas em GE-08 | Cobertura por período em GE-08 |
+| Ref. CAL-20 | WAPE, OTIF, desvio, ABC, PME/PMR/PMP | — | — | Indicadores com a versão congelada da previsão (AC-66) |
+
+**Fórmulas de outros capítulos**
+
+| Fórmula | O que calcula | Transacional no comando | Cálculo síncrono | Projeção assíncrona |
+|---|---|---|---|---|
+| 42.1 `saldo_elegivel` | Saldo elegível para entrega por O.S. | CMD-16; cálculo da cota delegada ao aparelho (73.4) | — | — (SU-07 e MB-05 exibem por consulta direta, sem autorizar) |
+| 41.5 | Calda total, área e produto por carga | — | Ficha do caldeiro na versão aprovada | — |
+| 44.3 | ha/h efetiva, horas de conjunto e de recurso, HH por função | — | Tabela operacional (44.2) e formulário | Totais por mês no orçamento |
+| 44.4 | Horas demandadas e disponíveis, unidades necessárias, déficit | — | — | Por recurso e mês, por cenário versionado (PL-03) |
+| 44.5 | Custo de máquinas e pessoas; orçamento operacional mensal | — | — | Orçamento por cenário; a versão autorizada fica congelada por CMD-03 |
+| 44.9 e 44.11.3 | Alocação de conjunto sem sobreposição | CMD-34 revalida condição e agenda | — | Ocupação projetada (53.2) |
+| 49.2 `saldo_produto` | Disponibilidade para prometer por produto, classe e janela | — | — | Calendário em VE-01, com "dados até" |
+| 49.3 | Reserva temporária e confirmação | CMD-36 e CMD-25 consomem saldo e capacidade na mesma transação | — | — |
+| 51.5, 51.8 e 51.10 | Base, revisado, realizado, comprometido, estimativa; visões total, por ha e por unidade | — | Cenário de Simular melhoria de margem (51.5) | GE-02 e GE-03, com corte |
+| 51.9 | Decomposição do estouro em volume, consumo e preço | — | — | GE-02, sobre a mesma competência e o mesmo corte |
+| 53.2 | Disponibilidade, utilização, aproveitamento, ocupação projetada e custo do ativo | — | — | MA-01 e GE-06 |
+| 65.3 e 65.4 | Posição, ponto de reposição, alvo e cálculo único de reposição | — | — | Propostas versionadas em SU-01 e SU-02; não reservam nem entregam |
+
+As verificações que não são CAL, mas também são transacionais no comando, estão em PROJ-03: aprovação e liberação vigentes (CMD-06, CMD-07, CMD-16), vencimento e renovação de reserva (CMD-49) e encerramento (CMD-10). Cenário de orçamento e de capacidade (44.4, 44.5, 51.5): o cálculo do cenário é gravado como versão, com as versões das entradas (12.2), e CMD-03 autoriza essa versão gravada, nunca o estado corrente de uma projeção; enquanto o cálculo não termina, não há versão a autorizar.
+
+#### 73.7.3 Metadados de toda projeção
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| PROJ-05 | Toda projeção expõe, na API, na exportação e no relatório: (a) versão da projeção: esquema e versões das fórmulas e parâmetros aplicados (10.0, CMD-29); (b) **dados até**: instante de commit até o qual todos os eventos confirmados do seu escopo já foram aplicados (marca d'água); (c) posição do último evento aplicado; (d) instante do processamento; (e) estado (PROJ-07); (f) nas visões por competência, provisório ou definitivo (24.1). A interface mostra só o necessário: o cartão gerencial mostra "dados até" junto de fonte e data (55.5); a visão operacional derivada só mostra o estado quando ele não é Atual (73.10). | O contrato de API de cada projeção devolve os seis campos. Com a versão 10 de um agregado ainda não aplicada e a 11 já recebida, "dados até" permanece no commit da versão 9. |
+
+**Registro de controle por projeção** (no mesmo PostgreSQL, sob RLS)
+
+| Campo | Conteúdo |
+|---|---|
+| `projection`, `build_id` | Nome estável e versão publicada; a troca na reconstrução é atômica (PROJ-10) |
+| `schema_version`, `formula_versions` | Esquema e versões de CAL e parâmetros usados |
+| `watermark_at` | "Dados até": commit abaixo do qual nenhum evento do escopo falta aplicar |
+| `last_position` | Sequência na outbox do último evento aplicado |
+| `aggregate_version` | Última versão aplicada por agregado, em tabela auxiliar (PROJ-09) |
+| `processed_at` | Instante do último processamento |
+| `state` | Atual, Atualizando, Desatualizado ou Indisponível (PROJ-07) |
+| `rebuild_status` | Reconstrução em curso, posição alcançada e divergências de totais |
+
+A inbox da projeção guarda (projeção, `event_id`), como qualquer consumidor (INTEG-07).
+
+#### 73.7.4 Atraso máximo por tipo de consulta
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| PROJ-06 | O atraso de uma visão é o tempo entre o commit do fato e o instante em que a visão passa a refleti-lo. Cada tipo de consulta tem a meta p95 e o limite p99 da tabela abaixo; acima do limite p99, a visão fica Desatualizada (PROJ-07). Os valores são alvos iniciais de engenharia, medidos conforme 73.8; os das visões gerenciais (linhas 4, 7 e 8) estão sob decisão do proprietário (PEND-14). Para atualidade, esta tabela substitui a linha única "Propagação interna comum" de 29.3 e a meta de 44.11.3, que passam a ser as linhas 3 e 2. Na v3.9, a linha de 29.3 (p95 ≤30 s; p99 ≤120 s) valia para toda projeção; as linhas 4 a 8 são mais longas. A folga das linhas 4, 7 e 8 depende de PEND-14; a das linhas 5 e 6 é de engenharia, porque nenhuma decisão depende delas (PROJ-14; CMD-36). | Medição por linha no ensaio de PERF-05 e em produção (PERF-07); relatório com p95 e p99 por visão e por organização. |
+
+| Nº | Tipo de consulta | Exemplos | Modo | Atraso p95 / p99 | Acima do limite |
+|---|---|---|---|---|---|
+| 1 | Resultado do próprio comando | Recibo; detalhe do objeto na tela de origem | Recibo e consulta direta | Nenhum: lê o que o commit gravou | — |
+| 2 | Operacional em outra tela ou aparelho conectado | CA-01 (lista e Kanban), detalhe da O.S., camada Ordens de serviço de IN-04 (etapa e impedimento), IN-02, SU-03, SU-07, MB-01, MB-05, quadro de máquinas (44.11.3), fila de LO-02 (50.1) | Consulta direta e aviso de mudança (canal de eventos ou consulta incremental) | 5 s / 15 s | "Dados até hh:mm" quando a conexão fica degradada por mais de 30 s |
+| 3 | Contadores, pendências e camadas agregadas | IN-01, IN-03, pendências de PL-05, contadores de CF-03, área executada por talhão em IN-04 | Projeção comum | 30 s / 120 s (29.3) | Atualizando; depois Desatualizado |
+| 4 | Indicadores operacionais | GE-06, KPI-PCM, KPI-AGR, KPI-SUP-06 | Projeção | 5 min / 15 min | Desatualizado, com "dados até" |
+| 5 | Balanço hídrico por setor | IR-01 depois de leitura, clima ou CMD-21 | Projeção; recálculo síncrono na liberação (PROJ-14) | 5 min / 15 min | Desatualizado; a liberação não depende da projeção |
+| 6 | Disponibilidade comercial | VE-01, calendário de 49.2 | Projeção | 60 s / 5 min | "Dados até hh:mm"; CMD-36 revalida |
+| 7 | Necessidade e reposição | SU-01, propostas de CAL-01 e de 65.3/65.4 | Projeção versionada | 15 min / 60 min depois de evento relevante; execução completa diária | Desatualizado; proposta antiga não vira pedido sem revisão |
+| 8 | Custos, orçamento e margem da competência aberta | GE-01, GE-02, GE-03, 51.x | Projeção provisória | 15 min / 60 min | Provisório, com "dados até" |
+| 9 | Competência fechada | Relatórios de fechamento em GE-03 | Retrato imutável (PROJ-16) | Não se atualiza; fato tardio vira ajuste (PROJ-17) | Definitivo |
+| 10 | BI, relatórios e exportações | BI (12.4), relatório assíncrono e exportação (29.3) | Publicação versionada com corte (24.1) | Prazos de 29.3 e de cada publicação | Corte e versão no arquivo |
+| 11 | Satélite e processamento pesado | Camada Satélite de IN-04; índices de 61.4 | Job próprio | Prazo publicado antes da execução (29.3) | Data de aquisição e validade (PROJ-13) |
+
+#### 73.7.5 Processamento em curso e indisponibilidade
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| PROJ-07 | A projeção tem um dos quatro estados da tabela abaixo. Comando não depende de projeção: atraso ou indisponibilidade de projeção não impede nenhum comando, exceto o CMD-30, cuja pré-condição é a consolidação no corte (PROJ-16). Sob saturação, projeções e análises degradam antes da recepção de fatos (29.5). A visão nunca mostra zero, vazio ou cor de meta atingida no lugar de dado não processado (55.5). | AC-133. |
+
+| Estado | Quando | O que a tela mostra | Quem age |
+|---|---|---|---|
+| Atual | Nenhum evento do escopo pendente há mais tempo que a meta p95 da classe | O valor; o cartão gerencial mostra "dados até" (55.5) | — |
+| Atualizando | Eventos pendentes dentro do limite p99; reconstrução em curso; ou a visão ainda não alcançou a posição do recibo que o usuário acabou de receber (PROJ-12) | O último valor, com a indicação discreta "Atualizando" | Sistema |
+| Desatualizado | Evento pendente mais antigo acima do limite p99 da classe, ou worker sem sinal de vida por mais que esse limite | O último valor com "Dados até dd/mm hh:mm", sem cor de meta | Operação, pelo alerta de PERF-07 |
+| Indisponível | Nenhuma versão publicada válida (primeira carga, ou erro sem versão anterior) | "Indisponível", sem valor; os registros de origem continuam acessíveis por consulta direta | Operação |
+
+#### 73.7.6 Duplicados, fora de ordem e reconstrução
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| PROJ-08 | A projeção grava (projeção, `event_id`) na mesma transação em que aplica o evento (inbox, INTEG-07); evento já registrado é confirmado à fila sem novo efeito. Somas, contagens e custos acumulados nunca contam o mesmo evento duas vezes. Dois registros do mesmo fato físico não chegam como dois efeitos: 73.5 vincula o segundo ao fato original, sem novo evento de efeito. | AC-80. O mesmo evento entregue 5 vezes, inclusive a dois workers ao mesmo tempo, altera a projeção uma vez. |
+| PROJ-09 | A projeção aplica os eventos de cada agregado na ordem da versão gravada pelo servidor (24.1), nunca pela hora do aparelho (RN-038). Versão já aplicada é ignorada. Versão com lacuna aguarda a anterior pelo prazo de INTEG-09 (valor inicial 5 min) e depois a busca na outbox ou no registro de origem; nenhum valor regride. "Dados até" não avança além de uma lacuna. O instante estimado do fato (CONC-21), nunca a hora do aparelho sozinha, só decide em que dia e em que competência o fato é contado: fato tardio de competência aberta atualiza aquele dia; de competência fechada, segue PROJ-17. | AC-80. Com as versões 11 e 13 recebidas antes da 10, a visão não mostra como Atual nenhum valor que misture 11 ou 13 sem a 10. |
+| PROJ-10 | Reconstrução de projeção ocorre por nova versão de fórmula ou parâmetro com vigência (CMD-29), correção de defeito, projeção nova ou restauração (30.5), e segue seis regras. (a) A fonte é o registro autoritativo (movimentos, fatos e documentos, ENG-026), não a outbox, que guarda só 7 dias (INTEG-06). (b) Roda em modo de reexecução (INTEG-10): sem chamada externa, sem item de integração na outbox, sem aviso, sem comando e sem escrita em tabela transacional. (c) Monta uma versão nova em paralelo (`build_id`) e depois alcança os eventos correntes a partir da posição inicial. (d) Antes da troca, compara totais de controle com o registro: físico, custódia, consumo e custo por competência aberta; divergência impede a troca e abre incidente. (e) A troca é atômica; até ela, a versão anterior continua visível, com o estado Atualizando. (f) Usa limites de recursos (ENG-076) e cumpre o prazo de PERF-04. | AC-131 e ensaio de reconstrução de PERF-05. |
+| PROJ-11 | Reconstrução nunca reescreve o retrato de competência fechada (GE-03; RF-FIN-005). Para competência fechada, roda só em modo de comparação: cada divergência vai a GE-03 como pendência da controladoria, com valor, competência e causa provável (fórmula, defeito ou fato tardio). A correção se faz por reabertura com alçada (CMD-30) ou por ajuste na competência aberta (PROJ-17). Nova versão de fórmula vale a partir da sua vigência. | AC-131: o hash do retrato de cada competência fechada é igual antes e depois da reconstrução. |
+
+#### 73.7.7 Interface depois de uma ação confirmada
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| PROJ-12 | (a) A tela de origem mostra o comprovante do recibo (68.4; IDEM-17) e relê o objeto por consulta direta; nunca mostra Atualizando para o efeito do próprio comando. (b) O recibo traz a posição do efeito (versão resultante e `event_id` gerados, campos `resulting_version` e `effects` de IDEM-17); ao abrir uma visão que depende de projeção, o cliente informa essa posição, comparada à versão aplicada por agregado (PROJ-09); se a projeção ainda não a alcançou, só a linha ou o cartão afetado mostra Atualizando e troca sozinho ao alcançá-la, dentro do limite da classe (PROJ-06). (c) A mensagem de conclusão fala do comando, nunca de efeito dependente (custo, indicador, ERP), conforme 29.3 e ENG-077. (d) As outras telas abertas recebem o aviso de mudança (linha 2 de PROJ-06); edição local sobre versão antiga segue 8.4.3, sem sobrescrever. (e) No app sem sinal, a própria intenção aparece como Salvo neste aparelho ou Aguardando envio (IDEM-05; 8.4.3); as visões locais a mostram marcada e não a somam ao saldo confirmado; o limite local de CONC-14 desconta as intenções pendentes do próprio aparelho. | AC-132. |
+
+#### 73.7.8 Validade dos dados de decisão agronômica e de irrigação
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| PROJ-13 | Cada fonte usada em decisão agronômica ou de irrigação tem validade (é a idade máxima por fonte exigida em 33.11 e a contingência de 63.3, com valor por fonte): idade máxima da leitura, contada do instante da medição, não do recebimento. Leitura mais antiga que a validade conta como "sem dado atual". A validade é parâmetro publicado por CMD-29, com versão, autor e vigência: fontes agronômicas pela agronomia (AG-05) e fontes de irrigação pelo gestor da irrigação (CF-02). Os valores iniciais da tabela abaixo valem até a decisão do proprietário (PEND-13). As telas mostram fonte e idade (IR-01, IR-04, AG-01, AG-04). O protocolo técnico (10.1) pode fixar validade menor para um alvo. | Teste por fonte: leitura com idade igual à validade conta como atual; com 1 min a mais, conta como sem dado atual e produz o efeito da tabela. Publicar nova validade por CMD-29 não altera decisões já registradas. |
+| PROJ-14 | Água sem produto (DEC-2609-10; 41.8). Dado vencido nunca envia a tarefa ao agrônomo, e sonda ou clima vencidos nunca a bloqueiam. Sonda vencida conta como "sem sonda": o balanço usa estimativa por ET, marcada como estimativa, e a manutenção da sonda é aberta (41.8). Clima observado vencido é substituído por outra fonte de clima homologada para o setor (12.4) e, sem ela, pela ETo de referência homologada para o período (63.3), marcada como estimativa. Na liberação automática (CMD-06 automático pela prontidão, 41.8), o sistema recalcula de forma síncrona o balanço do setor (CAL-08, CAL-09) a partir do registro, incluindo toda aplicação confirmada (CMD-21) do setor até aquele instante, sem depender da projeção de IR-01. Aplicação anterior do setor ainda sem confirmação continua sendo pendência operacional (41.8). Telemetria de bomba, pivô ou energia vencida deixa a prontidão "A confirmar" com o irrigante, como pendência operacional de 41.8 (RECURSO-08), sem ir ao agrônomo. O evento de liberação grava a versão do balanço, "dados até", cada fonte com sua idade, as marcas de estimativa e a versão dos limites do equipamento. | AC-134. |
+| PROJ-15 | Decisão agronômica humana (CMD-01 e CMD-42, inclusive fertirrigação): a idade do dado não impede a decisão do responsável técnico. A tela mostra fonte, data e a marca "vencido", e a decisão grava fonte, instante da medição e idade de cada dado usado. Recomendação automática que depende de dado vencido não é gerada e aparece como pendência técnica, do mesmo modo que a falta de dado em CAL-10. Previsão do tempo nunca conta como realizada (CAL-08; IR-04). | AC-137. |
+
+**Validade inicial por fonte** (valores propostos; publicados por CMD-29)
+
+| Fonte | Validade inicial | Vencida, em água sem produto | Vencida, em decisão agronômica |
+|---|---|---|---|
+| Sonda de umidade do solo | 24 h | Sem sonda: estimativa por ET, sem bloquear; manutenção da sonda | Mostrada com idade; não alimenta recomendação automática |
+| Clima observado (ETo e chuva) de estação ou provedor | 24 h | Outra fonte homologada (12.4); sem ela, ETo de referência homologada para o período (63.3), marcada como estimativa | Mostrado com idade; não alimenta recomendação automática |
+| Previsão do tempo | 12 h | Deixa de ser mostrada como previsão atual; nunca conta como chuva realizada | Idem |
+| Telemetria de bomba, pivô e energia | 15 min | Prontidão "A confirmar" com o irrigante; nada vai ao agrônomo | — |
+| Vistoria MIP/MID | 7 dias | — | Recomendação automática de intervenção não é gerada |
+| Imagem de satélite ou drone | 10 dias da aquisição | — | Sem cor de condição atual (IN-04); não alimenta recomendação automática |
+| Análise de solo | 24 meses da coleta | — | Recomendação automática de calagem e adubação não é gerada (CAL-10) |
+| Análise foliar | Safra e estádio da coleta | — | Recomendação automática dependente não é gerada |
+
+#### 73.7.9 Fechamento de período e projeções
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| PROJ-16 | CMD-30 (Fechar período) exige, além das pendências de GE-03 e de INTEG-26: (a) consolidação da competência e do escopo com "dados até" igual ou posterior ao instante de corte; enquanto não alcança, o fechamento fica impedido com "Consolidação em andamento: dados até hh:mm"; (b) a lista de aparelhos com envio pendente desde antes do corte (último contato e quantidade de itens informada pelo aparelho), mostrada como aviso à controladoria (PEND-15); (c) um retrato imutável do fechamento, com instante de corte, posição do último evento aplicado, versões de fórmulas e parâmetros, totais de controle e hash. CMD-30 roda como job (ENG-079). Reabertura por CMD-30 gera novo retrato versionado, sem apagar o anterior. | AC-135. |
+| PROJ-17 | Fato aceito depois da posição gravada no retrato (PROJ-16 c), com ocorrência em competência já fechada, não altera o retrato. O efeito físico (estoque, custódia) é aplicado normalmente na transação do comando; só a apropriação gerencial muda de competência: o fato entra na competência aberta como "ajuste de competência anterior", vinculado à competência de origem e listado em GE-03, e é contado uma vez. Só a reabertura com alçada (CMD-30) o leva à competência original. | AC-135. |
+
+**Verificação de 73.7.** Testes especificados nesta revisão, ainda não executados: contrato (metadados de PROJ-05 em cada projeção); integração com PostgreSQL real (comandos de PROJ-03 com projeção, cache e réplica divergentes; inbox e ordem de PROJ-08 e PROJ-09; reconstrução em reexecução); propriedades (fast-check: qualquer permutação com repetição dos eventos de um agregado leva à mesma projeção); ensaios de 73.8. Cenários: AC-80 (cenário 8 do pedido), AC-81 (cenário 9) e complementares AC-130 a AC-138 (73.11).
+
+### 73.8 Metas mensuráveis de latência e atualização
+
+**Alcance.** Complementa 29.1 a 29.5 e a tabela de NFR do capítulo 13 em três pontos: metas mensuráveis no lugar das promessas vagas que restavam no PRD, orçamentos para as operações novas do capítulo 73 e o volume e a carga dos ensaios de reconexão, projeção e fechamento. Os valores são alvos de engenharia propostos, medidos em HML com o envelope de 29.2 e o contrato de medição de 29.1; não são SLA comercial (capítulo 13). Nada desta seção foi medido nesta revisão.
+
+**Promessas de resposta sem espera.** As 13 ocorrências da raiz "instant-" com esse sentido na v3.9 (linhas 127, 4533, 4576, 5963, 6223, 6852, 6868, 6993, 7176, 7376, 7839, 9275 e 10205), conferidas por busca no texto, são negações ("não prometer...") e permanecem. As promessas não mensuráveis estão em PERF-01. Em 8.4.1 (linha 2860), OSFASE-15 (linha 3010) e UIOS-03 (linha 10122), a passagem a Em conferência descrita como imediata é a transição feita pelo próprio CMD-08, na mesma transação, e não meta de latência.
+
+#### 73.8.1 Promessas substituídas por metas
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| PERF-01 | As promessas da tabela abaixo passam a valer pela meta da coluna do meio, com a medição indicada. O texto de origem é reconciliado conforme o registro de 73.14. | Cada linha tem ensaio em PERF-05 ou relatório de ENG-072 com o percentil exigido. |
+
+| Texto atual | Meta mensurável | Medição |
+|---|---|---|
+| 71.3 (linha 10320): "Restrição técnica chega [...] ao PCP", sem prazo mensurável | O bloqueio por CMD-18 vale a partir do commit: as alocações afetadas ficam impedidas na mesma transação, e nova alocação do ativo por CMD-34 é recusada na transação, sem depender de propagação. A restrição aparece no quadro de máquinas e em PL-05 das telas conectadas em p95 ≤5 s e p99 ≤15 s; a pendência chega a IN-03 do PCP responsável em p95 ≤30 s (PROJ-06, linhas 2 e 3). | Do commit de CMD-18 à atualização da tela aberta, no ensaio de pico (PERF-05) |
+| 58.2 (linha 8790): "entrar no ambiente inicial [...] após autenticação", sem prazo mensurável | Do retorno autenticado do provedor até o conteúdo útil da tela inicial do papel: p95 ≤2 s na rede de referência de 29.3, sem formulário intermediário | Ensaio de navegação de 29.3, com cache frio em cenário próprio |
+| 50.1 (linha 8013): "fila operacional ao vivo" | A fila de LO-02 é lida por consulta direta; mudança confirmada aparece nas telas conectadas em p95 ≤5 s e p99 ≤15 s; com conexão degradada por mais de 30 s, a tela mostra "Dados até hh:mm" | Do commit de um comando que altera a fila (ex.: CMD-37) à atualização da tela aberta |
+| 44.11.3 (linha 7376): propagação p95 de até 5 s no quadro de máquinas | Mantida e estendida a toda tela operacional conectada: linha 2 de PROJ-06 (p95 ≤5 s; p99 ≤15 s) | Idem |
+| 29.3 (linha 5659): "Propagação interna comum p95 ≤30 s; p99 ≤120 s" | Mantida como linha 3 de PROJ-06 (contadores, pendências e camadas agregadas); as demais classes têm metas próprias | Atraso por projeção (PERF-03) |
+| Ref. NFR-06 (linha 4602): "Confirmação persistida local/servidor indicada ≤2 s" | p95 ≤2 s e p99 ≤4 s (PERF-02) | Ensaio de 29.3, por comando e aparelho |
+| 71.6 (linha 10364), DEC-2609-03 (linha 12218) e AC-72-03 (linha 12243): rendimento e custo/h "calculados ao vivo" no formulário | Recalculados no próprio aparelho a cada alteração de campo, sem ida ao servidor: retorno visual p95 ≤100 ms (linha "Interação local sem I/O" de 29.3). O texto do cap. 72 não é editado; vale esta leitura | Ensaio de 29.3 no aparelho de referência, trocando largura, velocidade e eficiência |
+
+#### 73.8.2 Orçamentos complementares
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| PERF-02 | NFR-06 é medido em percentil: do toque até a exibição do recibo ou, no app, de Salvo neste aparelho (gravação local de IDEM-05), p95 ≤2 s e p99 ≤4 s, na rede de referência e nos aparelhos de 29.3, quando o comando não depende de serviço externo. "Enviando" é retorno de interação (linha "Interação local sem I/O" de 29.3) e não conta como confirmação. A linha "Confirmação de comando comum na UI" de 29.3 ganha o mesmo p99. | Relatório de ENG-072 por comando e aparelho, com p95 e p99; nenhum toast de conclusão antes do recibo (ENG-077). |
+| PERF-03 | O atraso de atualização é medido por projeção e por classe de PROJ-06: para cada evento, o instante em que a visão passou a refleti-lo menos o instante do commit, com percentis em janelas de 5 min. SLI de atualidade = fração das janelas de 5 min em que o p95 da classe fica dentro da meta; alvo inicial ≥99 % em 30 dias. | O painel de PERF-07 mostra o SLI por projeção em HML, com os dados do ensaio de pico. |
+| PERF-04 | As operações novas do capítulo 73 cumprem os limites P1 da tabela abaixo. | Relatório por operação no envelope de 29.2. |
+
+| Operação | Limite P1 | Medição |
+|---|---|---|
+| Consulta do resultado pela chave (recarga da web, app depois de reiniciar) | p95 ≤300 ms; p99 ≤800 ms | Como a API de consulta operacional de 29.3 |
+| Resposta a reenvio já processado (mesma chave e mesmo conteúdo) | p95 ≤300 ms | Sem reavaliar regras (IDEM-14) |
+| Aviso de mudança às telas conectadas | p95 ≤5 s; p99 ≤15 s | Linha 2 de PROJ-06 |
+| Fechamento de período (CMD-30) | Pedido aceito como job em ≤2 s; consolidação e retrato em ≤30 min no mês de pico P1 | Ensaio de consolidação mensal (PERF-05) |
+| Reconstrução completa de uma projeção | ≤4 h sobre o volume P1 (10 milhões de eventos e movimentos), mantendo os orçamentos de 29.3 | Ensaio de reconstrução (PERF-05) |
+| Recuperação de projeção parada | Atraso de volta à meta da classe em ≤15 min depois de 30 min parada | Ensaio de projeção parada (PERF-05) |
+| Vencimento de reserva pela rotina (RSV-12) | p95 ≤20 min entre o instante em que a linha fica elegível (validade atingida, fora da proteção de RSV-04) e o CMD-49 confirmado | Relatório da rotina em HML: instante de elegibilidade × commit do CMD-49 |
+
+#### 73.8.3 Volume, carga e observação
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| PERF-05 | Os ensaios da tabela abaixo entram em 29.4, com k6 em taxa de chegada, sobre os dados persistidos do envelope P1 de 29.2: 10 mil talhões, 1 milhão de ordens, 10 milhões de eventos e movimentos em 5 anos, com um tenant concentrando 40 % dos registros e do tráfego. Cada ensaio termina com a reconciliação de PERF-06. O P2 repete os ensaios com os eixos de 29.2 antes de assumir o volume (ENG-074). | Relatório por ensaio com os campos de 29.1 e todos os critérios aprovados. |
+| PERF-06 | A reconciliação de 29.4 passa a verificar, ao fim de cada ensaio: movimentos e saldos iguais aos fatos aceitos; identidade de custódia (CAL-02) em cada O.S.; cada projeção igual ao recálculo feito a partir do registro; zero efeito duplicado em movimento, documento de integração e aviso; retratos de competências fechadas inalterados. Resposta rápida com dado incorreto reprova o ensaio (29.4). | Relatório com os cinco itens por ensaio. |
+| PERF-07 | O painel "Projeções" entra em 30.2 com: atraso p95 e p99 por projeção e por classe; "dados até" e eventos pendentes; SLI de atualidade (PERF-03); reconstruções em curso e divergências de totais; projeções Desatualizadas ou Indisponíveis. Alertas iniciais: limite p99 da classe excedido por 5 min gera alerta; projeção Desatualizada por mais de 30 min ou Indisponível abre incidente. O dono é a operação da plataforma. | Com o worker parado em HML, o alerta dispara em até 5 min depois de excedido o limite p99 da classe; mantido o worker parado, o incidente é aberto quando a projeção completa 30 min como Desatualizada. |
+
+| Ensaio | Volume e carga P1 | Critérios de aprovação |
+|---|---|---|
+| Reconexão em massa | 100 aparelhos × 200 fatos (29.2), em ondas com limite por tenant, sobre a carga normal de 50 req/s. Nas filas: 10 % de reenvios da mesma chave depois de recibo perdido; 2 % de outro registro do mesmo fato físico, com outra chave; 0,5 % de mesma chave com conteúdo diferente; 5 % de itens fora de ordem por agregado | Fila total escoa em ≤10 min; recibos de cada lote de 200 em p95 ≤60 s contados da admissão do aparelho na sua onda (a espera da onda não conta; na reconexão coletiva, 29.3 exige só a fila total em ≤10 min); comandos das demais sessões dentro de 29.3; zero efeito duplicado; conflitos de chave iguais aos injetados; projeções de volta à meta da classe em ≤15 min depois da última onda |
+| Pico de apontamentos (fim de turno) | Pico de 29.2 (150 req/s por 5 min), com 60 % de gravação (CMD-43, CMD-17, CMD-45) no lugar dos 20 % do mix de 29.2 (eixo de fim de turno acrescentado ao envelope P1), 40 % num tenant e 20 O.S. recebendo 10 apontamentos simultâneos cada | Comando transacional p95 ≤600 ms e p99 ≤1.500 ms (29.3); nenhum impasse sem tratamento (INTEG-02); linha 2 de PROJ-06 em p95 ≤5 s e linha 3 em p95 ≤30 s durante o pico; fila recuperada em ≤10 min depois do pico (29.2); identidade de CAL-02 fecha em todas as O.S. |
+| Reconstrução de projeção | Reconstruir a maior projeção (custo por competência) sobre 10 milhões de eventos e movimentos, com 3 competências fechadas, enquanto roda a carga normal de 50 req/s | Termina em ≤4 h; orçamentos de 29.3 mantidos; zero chamada externa, zero item de integração na outbox e zero aviso (INTEG-10); totais iguais ao registro; hash dos retratos fechados inalterado; troca sem tela vazia |
+| Consolidação mensal | Fechamento da competência de pico: 500 mil eventos e movimentos no mês (cerca de 3 vezes a média mensal do envelope), 40 % num tenant, com 100 sessões ativas (29.2) | CMD-30 aceito em ≤2 s; consolidação e retrato em ≤30 min; comandos operacionais dentro de 29.3; fato com commit depois da posição do retrato entra como ajuste (PROJ-17) |
+| Projeção parada | Worker de projeções parado 30 min sob carga normal | Comandos dentro de 29.3; visões passam a Desatualizado depois do limite p99, sem zero nem cor de meta; alerta de PERF-07; atraso de volta à meta em ≤15 min depois da retomada; nenhum evento perdido ou contado duas vezes |
+| Duplicados e fora de ordem em escala | 100 mil eventos de 5 mil agregados, 10 % entregues em duplicata e 5 % fora de ordem, com queda de um worker no meio | Projeções iguais, campo a campo, às de uma entrega limpa dos mesmos eventos; um registro na inbox por (projeção, `event_id`) |
+
+**Verificação de 73.8.** Todos os ensaios estão especificados e nenhum foi executado nesta revisão. Serão executados em HML antes do piloto (ENG-073), e o resultado entra em ACE com a situação "executado", a data e o ambiente.
+
+### 73.9 Aprovação agronômica, operações mecânicas e autorização técnica × prontidão
+
+Esta seção não cria aprovação nova. Ela consolida o que já vale (RN-007, 41.1 a 41.3, CMD-42, CMD-06, DEC-2609-05 e DEC-2609-10) e faz quatro coisas que o v3.9 deixava implícitas:
+- nomeia as operações mecânicas, que 41.1 cobria só por "demais operações, inclusive sem insumos";
+- fecha as leituras que permitiriam liberar por orçamento, janela, prontidão ou "política";
+- separa a autorização técnica da disponibilidade para executar;
+- registra a "pré-autorização por limiares" apenas como proposta não aprovada (PEND-01 em 73.12; regra vigente em 73.9.8).
+
+Comandos, estados e colunas do Kanban continuam os dos caps. 8 e 41. Os termos intenção, recibo e projeção seguem 73.2.
+
+**Precedência.** Vale 73.1 (itens 1 e 2). Os trechos que DEC-2609-10 declarou substituídos estão listados em 73.14.4.
+
+#### 73.9.1 Quatro condições distintas para liberar
+
+| Condição | Pergunta que responde | Quem decide | Registro | Não significa |
+|---|---|---|---|---|
+| Autorização econômica/operacional do escopo | Há valor e escopo autorizados para este horizonte? | Alçada (CMD-03) e gerente (CMD-04); na manutenção e na produção, a autorização equivalente de CF-02 | Evento de CMD-03/CMD-04 com escopo, valor e horizonte | Aprovação técnica de qualquer O.S. |
+| Aprovação agronômica da versão (autorização técnica) | Esta instrução, nesta área e neste momento, é tecnicamente adequada? | Agrônomo habilitado para o escopo, titular ou substituto (41.1; CMD-42) | Decisão de CMD-42 por ID e versão, com diferenças e motivo (41.2) | Recursos disponíveis, liberação, reserva ou ficha |
+| Prontidão operacional (disponibilidade para executar) | Há máquina apta, pessoa habilitada, material coberto, janela e nenhum conflito? | Calculada pelo sistema; as pendências são resolvidas por PCP, PCM, almoxarifado e irrigante | Estado derivado, sem comando próprio | Autorização técnica ou econômica |
+| Liberação | A ordem pode ser executada a partir de agora, com fichas e reserva? | Liberador autorizado por domínio (CMD-06); automática só para água sem produto (73.9.7) | Evento CMD-06 com versão, validade e reserva (RSV-03) | Início (CMD-07) ou entrega (CMD-16) |
+
+A janela operacional (8.6) é filtro de trabalho e validade da liberação. Ela não aprova nem libera (8.6.1; 8.6.2).
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| APROV-01 | CMD-06 exige, verificadas uma a uma na mesma transação: autorização econômica/operacional vigente do escopo, aprovação técnica vigente da versão pelo aprovador competente (agronômica na O.S. agrícola, 73.9.2; de manutenção ou de produção nas demais, CMD-42), exceto na água sem produto (73.9.7), e prontidão operacional. Nenhuma supre outra. Orçamento autorizado (CMD-03/CMD-04), janela aberta e prontidão completa, juntos ou separados, não aprovam uma O.S. agrícola. A recusa informa cada condição faltante com o responsável. | Teste de contrato de CMD-06 numa O.S. agrícola com as 8 combinações das três condições: só a combinação com as três confirma. As outras 7 são recusadas sem efeito e listam as condições faltantes. |
+
+#### 73.9.2 Alcance: operações mecânicas são O.S. agrícolas
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| APROV-02 | Uma ordem é O.S. agrícola quando o objeto do trabalho é talhão ou parcela: solo, cultura ou produção ainda no campo. Não importam o nome da operação, a origem (plano, operação direta do cap. 37, recorrência, geração automática, urgência) nem a presença de insumos. Toda O.S. agrícola tem aprovação agronômica individual por CMD-42 (41.1), inclusive as operações da tabela abaixo, mecânicas ou manuais. A única exceção agrícola é a água sem produto (73.9.7). | Emitir, sem insumos, uma ordem de cada linha da tabela abaixo coloca cada uma em A liberar com o selo Aguardando agrônomo, na lista, no Kanban, no mapa e em IN-02 (AC-139). |
+| APROV-03 | Transporte interno da produção tem dois casos. (a) Carga, pesagem e romaneio registrados em CO-03 (FO-13) e vinculados a uma O.S. de colheita são fatos dessa ordem e ficam cobertos pela aprovação dela. (b) Transporte do talhão até o ponto de recebimento emitido como ordem própria (ex.: transbordo com trator e carreta, em outro turno ou por outra equipe) é O.S. agrícola e segue APROV-02. Transporte que não parte do talhão (ex.: entre armazéns) não é O.S. agrícola (APROV-02); expedição e viagem mantêm ciclo próprio e não são O.S. (8.4.1.1). | (a) Registrar 3 cargas da colheita aprovada não abre pendência para o agrônomo. (b) Emitir o transbordo do talhão como ordem própria o leva a Aguardando agrônomo. (c) Romaneio de expedição não aparece na fila do agrônomo. |
+| APROV-04 | A família da ordem e o aprovador exigido são definidos no servidor, a partir do objeto (APROV-02) e do tipo de operação cadastrado (DEC-2609-14). O emissor não escolhe o aprovador nem marca dispensa. O cadastro de operações não tem opção "sem aprovação" para operação sobre talhão ou parcela. Atividade criada por "Outra atividade…" (DEC-2609-02) herda a família da operação escolhida antes dela. Trocar o objeto de uma ordem (ex.: de talhão para ativo) gera nova versão, que passa pela regra de novo. | Teste de contrato: roçada no talhão enviada com família "Manutenção" pelo cliente continua O.S. agrícola e vai ao agrônomo. O inventário do cadastro de operações não tem campo de dispensa. |
+
+**Operações nomeadas, mecânicas ou manuais** (todas com aprovação individual do agrônomo, com ou sem insumos):
+
+| Operação | Exemplos |
+|---|---|
+| Preparo de solo | Aração, gradagem, subsolagem, escarificação, nivelamento, sulcação |
+| Plantio | Semeadura, plantio de mudas, transplantio, replantio, com ou sem tratamento de sementes |
+| Cultivo | Cultivo mecânico de entrelinha, capina mecânica, amontoa |
+| Roçada | Roçada de entrelinha, manejo mecânico de cobertura, trituração de restos culturais no talhão |
+| Colheita | Colheita mecanizada ou manual, recolhimento, enleiramento (45.1; 8.4.1.1, linha Colheita) |
+| Transporte interno da produção como ordem própria | Transbordo e transporte do talhão ao ponto de recebimento (APROV-03 b) |
+
+#### 73.9.3 O que não substitui a aprovação
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| APROV-05 | Nada disto aprova ou libera uma O.S. agrícola: orçamento autorizado (CMD-03); execução da safra autorizada (CMD-04); alçada financeira; janela operacional aberta ou selecionada (8.6); prontidão completa; geração automática por data (8.6.2); liberação em lote (JANELA-05); urgência ou prioridade (41.1; 8.6.3; 64.3); plano ou recomendação aprovados (CMD-01/02; 41.1); silêncio ou prazo vencido na fila do agrônomo; assistente de IA (RN-041; IAEXEC-04); arraste no Kanban (8.4.3); integração de entrada; sincronização offline; parâmetro de CF-02. Prazo vencido na fila escala ao substituto (41.1) e não aprova. Aprovação por limiar, por envelope de atividades ou por pré-autorização não é regra vigente (APROV-16); o perfil de tanque aprovado dentro da própria versão (41.3) não é pré-autorização. | AC-82; AC-140. |
+| APROV-06 | Leitura de "política" nos textos de liberação. Onde o v3.9 diz que a automaticidade "depende de política explícita" (JANELA-05, 8.4.3), a única liberação automática vigente é a da água sem produto (DEC-2609-10). CF-02 recusa configurar liberação ou aprovação automática de O.S. agrícola (a da água sem produto vem de DEC-2609-10, não de CF-02), conforme a própria CF-02: nenhuma configuração transforma restrição obrigatória em exceção livre. A "política explícita" da geração automática (8.6.2) trata só de preparar e emitir. | Tentar publicar em CF-02 (CMD-29) uma regra de liberação automática para roçada é recusado com motivo, sem efeito. A lista de regras publicáveis não oferece esse tipo. |
+
+#### 73.9.4 Verificação no servidor, canais e concorrência
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| APROV-07 | CMD-06 (liberar), CMD-07 (iniciar e retomar), CMD-16 (entregar material) e o início do preparo de calda (41.4; OSA-01) verificam, dentro da própria transação, se há aprovação vigente para a versão exata (ID e versão da O.S.). A leitura é no registro autoritativo, nunca numa projeção (73.7). Vale para tela, API, integração, IA (CMD-38), lote e sincronização. Relato de fato já ocorrido (73.2.1), como calda já preparada ou início e avanço feitos sem sinal, segue APROV-12: o relato fica Em conferência, sem recusa, e a calda fica segregada (41.3). A recusa não produz efeito e informa "Aguardando agrônomo" ou "Aprovação invalidada: versão N", com o responsável. O resultado fica no registro da intenção como rejeição de negócio ou, quando a versão esperada foi superada, como conflito de versão (73.3.4; APROV-08), e o reenvio com a mesma chave devolve o mesmo resultado (IDEM-14). | AC-82; AC-145; OSA-01; OSFASE-08. |
+| APROV-08 | Decisão do agrônomo e liberação da mesma ordem usam versão esperada (ENG-023), e cada disputa tem um único vencedor. A liberação de uma versão que deixou de ser a aprovada é recusada por conflito de versão. Se a liberação confirmar antes, a nova versão técnica invalida a aprovação e devolve a ordem não iniciada de Liberadas para A liberar (8.4.3), com as fichas anteriores revogadas. | AC-144: em 100 disputas, nenhuma ordem fica em Liberadas com versão não aprovada. |
+
+#### 73.9.5 Revisão separada da liberação
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| APROV-09 | Aprovar (CMD-42) e liberar (CMD-06) são duas intenções, cada uma com sua chave e seu recibo (IDEM-03), mesmo quando a mesma pessoa tem as duas competências. A tela de trabalho mostra uma ação por vez (DEC-2609-05; 72.3): primeiro Revisar versão e, depois de aprovada, Liberar para execução, para quem tem CMD-06. Por DEC-2609-05 e 72.1, a ação composta "Aprovar e liberar" de 8.4.1, 8.4.3, 41.3 e 41.10 deixa de ser oferecida. Na O.S. agrícola, a aprovação não cria reserva, ficha, pacote offline nem entrega: a requisição derivada (CMD-42; 42.1) é demanda sem reserva, e a reserva de execução nasce em CMD-06 (RSV-03). | AC-142; AC-72-04. |
+
+#### 73.9.6 Autorização técnica × disponibilidade operacional
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| APROV-10 | Perder a prontidão não invalida a aprovação. Máquina bloqueada pelo PCM (CMD-18), operador indisponível, falta de material ou conflito de recurso tiram a ordem de Liberadas antes do início (8.4.3) ou pausam o saldo depois dele. Chuva ou condição de campo desfavorável não é perda de prontidão: antes do início, impede o início na checagem de CMD-07 (8.6.3), sem tirar a ordem de Liberadas; depois dele, pausa o saldo (8.4.3). A aprovação da versão continua vigente e é mostrada assim (selo "Aprovada pelo agrônomo · Falta máquina", 8.4.3; DEMO-17). Com a prontidão restabelecida e a versão inalterada, a ordem pode ser liberada de novo sem nova revisão. No sentido inverso, prontidão completa nunca compensa aprovação ausente ou invalidada. | AC-141. |
+| APROV-11 | Nas operações mecânicas, é técnica e invalida a aprovação da versão futura (41.3) qualquer mudança em parâmetro técnico fixado na versão aprovada. Exemplos: área ou limite espacial; tipo de implemento ou método que muda o resultado (grade por subsolador, roçadeira por triturador); profundidade de trabalho; cultivar, densidade, espaçamento ou profundidade de semeadura; altura de corte; janela técnica (estádio ou umidade do grão ou do solo, quando fixada); inclusão de qualquer insumo. É operacional e revalida só a prontidão, preservando a aprovação: troca de máquina ou implemento da mesma classe e capacidade (DEC-2609-14); troca de operador habilitado; horário ou dia dentro da janela aprovada; ordem dos talhões dentro do escopo aprovado; divisão da execução em turnos. | Tabela de casos em teste de contrato: cada mudança técnica gera nova versão, revoga as fichas e leva a ordem a Aguardando agrônomo com as diferenças. Cada mudança operacional mantém a aprovação e revalida a prontidão. |
+| APROV-12 | Aprovação não é concedida offline (12.5). O pacote offline de uma ordem só existe depois de CMD-06 e leva a versão aprovada; o app não lista para início ordem sem liberação vigente (OSA-09). Invalidação com executor offline segue 41.3 (contato, parada e reconhecimento), sem prometer revogação no aparelho desconectado. Fato executado sem aprovação ou sobre versão invalidada chega como relato preservado (RN-018; 12.5, linha "Ordem revogada enquanto offline"), marcado como fora da versão aprovada. Ele vai à conferência (CMD-50; 73.5) com aviso ao agrônomo, e o cartão usa o selo existente Aprovação vencida/invalidada (8.4.3). Não há aprovação retroativa (41.1). O saldo fica bloqueado até nova versão aprovada e liberada. | AC-143; OSA-09. |
+| APROV-13 | Na tela de trabalho da O.S. (DEC-2609-04), o bloco Situação e origem mostra Aprovação e Prontidão em duas linhas separadas. Aprovação: vigente, com versão e agrônomo; Aguardando agrônomo, com prazo; ou vencida/invalidada, com a versão (74.4.3). Na água sem produto, a linha Aprovação não aparece (APROV-15). Prontidão: pronta, ou a pendência principal com dono e prazo. Próximo passo tem uma única ação. O cartão usa os selos de 8.4.3, sem coluna nova. O executor vê o impedimento sem ação. Chave, código de motivo e versão de regra não aparecem ao usuário (73.10). | AC-82, resultado (1); AC-141, com leitura das telas. |
+
+#### 73.9.7 Exceções expressas preservadas
+
+| Exceção | Fundamento | Quem responde | Limite da exceção |
+|---|---|---|---|
+| Irrigação somente com água | DEC-2609-10; 41.8; AGUA-01 a AGUA-08 | O sistema libera por CMD-06 automático quando janela, bomba e energia estão prontas e sem conflito. As pendências vão ao irrigante, ao PCP e ao PCM. | Com produto na água, CMD-32 reclassifica a tarefa para fertirrigação e a versão vai a CMD-42 (AGUA-05; AC-72-09). Os limites do equipamento e do solo são parâmetros operacionais versionados, não autorização. |
+| Manutenção e oficina | 8.1, linha Ordem de manutenção; cap. 47; CMD-42 (MA-04) | Responsável de manutenção | Trabalho cujo objeto é talhão ou parcela é O.S. agrícola (APROV-02), mesmo quando feito pela equipe ou por máquina da oficina. |
+| Beneficiamento e processo | 45.1; CO-05; CMD-42 | Responsável de produção e qualidade | A colheita que alimenta o processo continua O.S. agrícola (45.1). |
+| Documentos que não são O.S. | 8.4.1.1 (compra, venda, requisição, expedição, viagem) | Ciclo próprio de cada documento | Fora do alcance da aprovação agronômica. |
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| APROV-14 | As exceções são só as da tabela acima; o v3.9 não prevê outras. Não são exceção: urgência e emergência (41.1; 64.3); operação direta do produtor (cap. 37; FX-006; FO-04), que dispensa laudo, mas não a aprovação da O.S.; fato já ocorrido (RN-018), que se registra sem virar autorizado; O.S. sem insumo (41.1). | AC-139; AC-146. |
+| APROV-15 | Leitura única da água sem produto (DEC-2609-10). Ela não tem aprovação, política agronômica, enquadramento nem autorização técnica. Tem cálculo pelo balanço hídrico (CAL-08, CAL-09), parâmetros operacionais versionados do equipamento e do solo e liberação automática pela prontidão operacional, com evento CMD-06 do sistema e chave determinística (IDEM-04). Todo trecho do v3.9 que fale em "política de água", "enquadramento" ou "autorização por política", ou que exija "política técnica" ou "viabilidade agronômica" para água sem produto, deve ser lido assim e corrigido conforme o registro de 73.14. Dado ausente ou vencido usa estimativa por ET, sem bloquear (PROJ-14). CMD-20 mantém o ID, mas deixa de ser aprovação. | AC-72-09; AC-146. |
+
+#### 73.9.8 Pré-autorização por limiares: não vigente
+
+A "pré-autorização por limiares" não é requisito aprovado, configuração nem comportamento do produto. A proposta completa, com responsável técnico, atividades elegíveis, limites, condições, validade, versão, revogação e tratamento das exceções, está em 73.12 como **PEND-01**, separada dos requisitos aprovados. Até a decisão do proprietário, vale APROV-16.
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| APROV-16 | Enquanto PEND-01 não for aprovada, toda O.S. agrícola, exceto a água sem produto, tem aprovação individual por CMD-42 (41.1). Não existe no código, na API, em CF-02 ou em AG-05 nenhum tipo de regra, parâmetro, sinalizador oculto ou caminho de teste que aprove ou enquadre uma O.S. por limiar. O protótipo e o material de treinamento não apresentam a pré-autorização como função. | AC-147. |
+
+#### 73.9.9 Verificação
+
+Estes testes estão especificados nesta revisão e ainda não foram executados:
+- contrato de CMD-06, CMD-07, CMD-16 e CMD-42 (APROV-01, APROV-04, APROV-07, APROV-11) e de CMD-29 (APROV-06);
+- integração com PostgreSQL real para as disputas de APROV-08;
+- aparelho real sem sinal para APROV-12;
+- leitura das telas da ordem, do Kanban, de IR-01 a IR-03 e de MB-08 para APROV-13 e APROV-15;
+- revisão de código registrada para APROV-16.
+
+Cenário do pedido: AC-82 (cenário 10). Complementares: AC-139 a AC-147 (73.11).
+
+### 73.10 Interface: estados, pendências e ações
+
+Esta seção reúne o que o usuário vê do que 73.3 a 73.9 definem. Não cria estado: a palavra vem de 73.2 e a cor de 74.4.3. O detalhe continua nas seções de origem (73.3.7, RSV-16, 73.5.13, INTEG-27, PROJ-12 e APROV-13).
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| UIREL-01 | Execução da O.S., envio do aparelho e integração ERP aparecem como dimensões separadas (73.2.2), cada uma com o seu vocabulário. Nenhuma tela junta duas delas numa palavra, chip ou cor: não existe "Encerrada · pendente ERP", e "Sincronizado" não significa fato aceito. A situação do relato vem ao lado de Sincronizado, depois de ponto médio. | Revisão dos textos das telas de 73.10.1: cada palavra de estado pertence a uma só dimensão de 73.2.2. Na OS-1030 de AC-79, lista, Kanban e mapa mostram Encerradas, e só o bloco Situação e origem, para os perfis de INTEG-27, mostra "Integração ERP: Pendente". |
+| UIREL-02 | O Kanban mantém as cinco colunas de 8.4.3. O único selo novo do cartão é Reserva vencida (RSV-16), enquanto a ordem ainda precisa do material. Não aparecem no cartão: envio do aparelho (fora o selo Apontamentos pendentes de 8.4.3; 73.10.2), integração ERP (salvo o impedimento de INTEG-16, pela exceção de INTEG-27), validade de reserva não vencida e atualidade de projeção. O relato em conferência é pendência da tela de trabalho (73.5.13); quando impede o encerramento (CONC-19), aparece também na lista e no cartão Em conferência como impedimento principal, com dono e prazo (DEC-2609-04), sem selo novo. | AC-104 e AC-126: cinco colunas e nenhum selo além dos de 8.4.3 e de Reserva vencida. |
+| UIREL-03 | Cada perfil vê só o que usa para agir (RN-045), conforme 73.10.2. O executor vê o impedimento com o responsável, sem ação que não seja dele. Chave, hash, `event_id`, tentativas, códigos de erro, classe do relato, versão de regra e política ficam em CF-03 e CF-04, para integrador/TI, suporte e auditoria. O responsável do tipo (INTEG-25) vê em CF-03 só os itens do seu tipo, com situação, tentativas, motivo, responsável e prazo, sem chave, hash nem `event_id`. | Teste por perfil com as ordens de AC-78, AC-79 e AC-107: cada perfil vê só o que a sua linha de 73.10.2 indica. Busca nos textos das telas de usuário não encontra os termos técnicos listados. |
+| UIREL-04 | Cada tela mantém uma ação primária, nomeada com verbo. As ações novas deste capítulo aparecem só quando o estado as exige, na posição de 73.10.3; fora disso não aparecem, nem desabilitadas. | Inspeção das telas de 73.10.3 com e sem a condição: com ela, a ação aparece na posição indicada; sem ela, não aparece. Nenhuma tela passa a ter duas ações primárias. |
+| UIREL-05 | Toda pendência nova tem dono, prazo e atalho para a ação (DEC-2609-04) e aparece onde o dono trabalha (73.10.4). Quem não age vê, no máximo, o impedimento com o responsável. | Para cada linha de 73.10.4, provocar a condição e conferir dono, prazo e atalho na tela indicada, e a ausência da pendência na fila dos outros perfis. |
+| UIREL-06 | A mensagem de conclusão fala do comando, nunca de efeito dependente como custo, indicador ou ERP (PROJ-12). Nenhum aviso de sucesso sai antes do recibo (ENG-077). O perdedor de uma disputa recebe o motivo, nunca sucesso fictício (RSV-13). A recusa informa motivo, valor atual quando houver ("Disponível agora: 20 L") e próxima ação com o responsável. Nenhum texto promete imediatismo nem mostra código técnico. | AC-81 (recusa com o valor atual) e AC-77 (perdedor com motivo). Revisão dos textos: nenhuma promessa de imediatismo nem código de erro em tela de usuário. |
+| UIREL-07 | A tela de origem mostra o recibo e o estado confirmado, sem "Atualizando" para o efeito do próprio comando. Visão por consulta direta não leva marca de atualidade. Visão por projeção mostra "Dados até" onde 55.5 pede e, fora do estado Atual, "Atualizando", "Desatualizado" ou "Indisponível" só na linha ou no cartão afetado, nunca zero nem cor de meta (PROJ-05, PROJ-07, PROJ-12; 74.5.12). Dado usado em decisão agronômica ou de irrigação mostra fonte e idade (PROJ-13). | AC-132, AC-133 e AC-137. |
+| UIREL-08 | Telas, mensagens, ajuda e treinamento usam os termos de 73.2. Não usam: chave, hash, idempotência, outbox, projeção, "evento" no sentido de intenção, CRDT, "expiração" ou "liberar" para reserva (RSV-18), "política de água" (APROV-15) nem "Pendente" sozinho fora da integração ERP (DS-24). | Busca nos textos de interface e de ajuda: zero ocorrência fora de CF-03 e CF-04; "Pendente" só aparece depois do rótulo "Integração ERP:" (UIREL-01). |
+
+#### 73.10.1 O que cada tela mostra
+
+| Tela | Estado e pendência mostrados | Ação primária no estado | Origem |
+|---|---|---|---|
+| MB-01 Hoje no campo | Envio de cada item da fila; impedimentos da ordem com o responsável ("Reserva vencida · PCP reserva de novo", "Aguardando agrônomo") | A da fase (Iniciar, Registrar) | 64.5; RSV-16; APROV-13 |
+| MB-03 Apontamento móvel | "Enviando" no próprio controle; depois Salvo neste aparelho, Aguardando envio ou Sincronizado · Ver recibo; ao lado, "Já registrado por {papel} · {valor}", "Em conferência", "Corrigido" ou "Recusado · motivo"; Conflito · Revisar | Registrar avanço; na revisão de Conflito, Enviar como novo registro; Corrigir como secundária | IDEM-08; 73.3.7; CONC-18 |
+| MB-05 Almoxarifado móvel | "Reservado até" por linha; cota com validade; entrega recusada com "Reserva vencida · Reservar de novo" ou, sem liberação vigente, "Reserva vencida · PCP reserva de novo" | Confirmar entrega ou Confirmar recebimento | RSV-09, RSV-16; CONC-12 |
+| Telas web de comando | Comprovante curto (68.4); "Verificando envio" depois de recarregar, seguido do estado real | A da tela | IDEM-09, IDEM-17 |
+| Tela de trabalho da O.S. (DEC-2609-04) | Próximo passo com uma ação. Situação e origem: Aprovação e Prontidão em linhas separadas e, só para os perfis de INTEG-27, "Integração ERP: {situação} · desde {hh:mm}". Insumos: validade da reserva só quando a vencer ou vencida. Pendência "{n} relatos em conferência", com responsável e prazo | Uma por vez: Revisar versão, Liberar para execução, Reservar de novo, Resolver relato (atalho ao caso) ou Conferir e encerrar | APROV-13; RSV-16; 73.5.13; INTEG-27 |
+| CA-01 Kanban e cartão | Etapa nas cinco colunas e selos de 8.4.3, mais Reserva vencida | A da fase, pelo clique no cartão | UIREL-02 |
+| CA-02 (SU-07, MA-05 e IR-03 por tipo): caso de conferência | Relatos lado a lado (autor, fonte, valor, leitura, instante informado com marca de estimativa) e valor proposto pela precedência | Resolver relato, com a proposta em primeiro lugar | CMD-50; 73.5.13 |
+| SU-07 Requisições e entregas | "Reservado até"; "Devolvido ao disponível: {quantidade} · {motivo}"; Cota sem retorno; Sem cobertura | A da etapa (Separar, Confirmar entrega); Renovar reserva e Devolver ao disponível no menu da linha | RSV-09, RSV-10, RSV-11, RSV-16 |
+| PL-05 Impedimentos e reprogramação | Data de vencimento da reserva quando o saldo é reprogramado para fora da liberação | A da tela; Renovar reserva como secundária | RSV-05 |
+| CF-03 Integrações e sincronização | Por efeito: situação, tentativas, próxima tentativa, idade, responsável e prazo; chegadas com chave expirada; conflitos de chave | Consultar destino no item Em reconciliação; Reprocessar item só depois de ausência confirmada ou dado corrigido | INTEG-20, INTEG-27; IDEM-19 |
+| CF-04 Auditoria e parâmetros | Recibo completo, chave, classe do relato, versão de regra e política de reserva | Consulta | IDEM-17 |
+| GE-03 Custos e fechamento | Efeitos de integração fora de Confirmada; "Consolidação em andamento: dados até hh:mm"; aparelhos com envio pendente; divergências de reconstrução | Fechar período, quando não impedido | INTEG-26; PROJ-11, PROJ-16 |
+| GE-06, camadas de IN-04 servidas por projeção e painéis | "Dados até" e estado de atualidade; a camada Ordens de serviço, por consulta direta, não leva marca (UIREL-07) | Consulta | PROJ-05, PROJ-07 |
+| IR-01, IR-04, AG-01 e AG-04 | Fonte e idade de cada dado; marca "vencido"; estimativa por ET marcada | A da tela | PROJ-13 a PROJ-15 |
+
+#### 73.10.2 Quem vê cada dimensão
+
+| Perfil | Execução da O.S. | Envio do aparelho | Integração ERP | Detalhe técnico |
+|---|---|---|---|---|
+| Executor, operador e caldeiro (app) | Etapa, impedimentos sem ação e situação dos próprios relatos | Dos próprios registros | Não | Não |
+| Encarregado, PCP, PCM, agrônomo, conferente e irrigante | Etapa, selos, pendências com dono e prazo e casos de relato do escopo | Dos próprios registros no app; dos demais, só como selo "Apontamentos pendentes" (8.4.3) | Não | Não |
+| Almoxarife | Reserva, entrega, custódia, cota e casos de estoque e abastecimento | Dos próprios registros (MB-05) | Movimentos de estoque (INTEG-27) e, em CF-03, os itens desse tipo | Não (UIREL-03) |
+| Controladoria e gestor | Etapa e pendências | Não | Sim (INTEG-27; GE-03) e, em CF-03, os itens de documento contábil e custo | Não (UIREL-03) |
+| Integrador/TI e suporte | Consulta | Em CF-03 | Em CF-03 | Em CF-03 e CF-04 |
+
+#### 73.10.3 Ações novas
+
+| Ação | Onde | Quando aparece | Quem | Posição | Comando |
+|---|---|---|---|---|---|
+| Resolver relato | CA-02 (SU-07, MA-05 e IR-03 por tipo); atalho na tela de trabalho | Caso Em conferência aberto | Conferente, almoxarife ou irrigante (73.5.12) | Primária no caso | CMD-50 |
+| Renovar reserva | Menu da linha em SU-07; PL-05 | Reserva ativa não vencida, na janela de aviso ou com saldo reprogramado para fora da liberação | Almoxarife ou PCP (PCM na manutenção) | Secundária | CMD-49 |
+| Devolver ao disponível | Menu da linha em SU-07; pendência Cota sem retorno | Reserva de cobertura de planejamento, ou que já entrou na política, não protegida (RSV-11); cota no limite de RSV-09, com contagem ou contato registrado | Almoxarife ou PCP (PCM na manutenção); na cota, almoxarife do local | Secundária; primária na pendência Cota sem retorno | CMD-49 |
+| Reservar de novo | Próximo passo da tela de trabalho; entrega recusada em SU-07 e MB-05 | Reserva vencida ou insuficiente, com material ainda necessário | PCP; almoxarife, por CMD-44, enquanto a liberação vigora | Primária enquanto impede a retomada ou a entrega | CMD-06 ou CMD-44 (RSV-15) |
+| Enviar como novo registro | Revisão do item em Conflito, no app | Conflito de chave | Autor do registro | Única ação da revisão | Nova intenção (IDEM-07) |
+| Corrigir | App e CA-02 | Registro confirmado | Autor ou conferente | Secundária | Nova intenção vinculada (CONC-16) |
+| Consultar destino | CF-03 | Efeito Em reconciliação | Integrador/TI ou responsável do tipo | Primária no item | Consulta ao destino (INTEG-20) |
+| Reprocessar item | CF-03 | Depois de ausência confirmada ou dado corrigido | Responsável do tipo ou integrador/TI | Primária nesse estado | CMD-40 |
+| Abrir em Integrações | Bloco Situação e origem da tela de trabalho | Efeito Com erro ou Em reconciliação | Perfis de INTEG-27 | Atalho, não ação da fase | — |
+
+#### 73.10.4 Pendências novas
+
+| Pendência | Dono | Prazo | Onde aparece | Origem |
+|---|---|---|---|---|
+| Reserva a vencer | PCP e almoxarife | A validade da reserva; aviso com a antecedência de PEND-04 | IN-01; SU-07 | RSV-14 |
+| Reserva vencida, com material ainda necessário | PCP | Início ou retomada do saldo previstos na programação (PL-04) | Tela de trabalho; selo no cartão; IN-01; impedimento no app | RSV-15, RSV-16 |
+| Cota sem retorno | Almoxarife do local | 2 dias úteis depois do limite (PEND-16) | SU-07; IN-01 | RSV-09 |
+| Sem cobertura | Almoxarife | 1 dia útil (PEND-16) | SU-07; Falta insumo nas ordens afetadas | RSV-10 |
+| Relato em conferência | Conferente, almoxarife ou irrigante, por tipo | 2 dias úteis (PEND-09) | Tela de trabalho; lista e cartão Em conferência, como impedimento principal, quando impede o encerramento (UIREL-02); CA-02, SU-07, MA-05 ou IR-03 | CONC-19 |
+| Integração ERP Com erro ou Em reconciliação | Responsável do tipo | Reconhecimento e escalonamento (PEND-11) | Situação e origem (INTEG-27); CF-03; GE-03 | INTEG-25 |
+| Aguardando confirmação do ERP, em tipo marcado | Responsável do tipo | Do contrato do conector | Tela de trabalho; lista e cartão, como impedimento principal (INTEG-27) | INTEG-16 |
+| Consolidação em andamento | Controladoria | Até "dados até" alcançar o corte; meta de 30 min (PERF-04) | GE-03 | PROJ-16 |
+| Chegada com chave expirada | Responsável do tipo de comando (PEND-03) | 1 dia útil (PEND-03) | CF-03; IN-01 do dono, como "Registro chegou fora do prazo de sincronização", com atalho ao item, sem chave nem código (UIREL-08) | IDEM-19 |
+
+### 73.11 Cenários obrigatórios de aceite
+
+AC-73 a AC-82 são os dez cenários do item 8 do pedido, na ordem do pedido. AC-83 em diante são os aceites complementares das seções 73.3 a 73.9. A coluna Cenário cita as regras que cada caso verifica; os critérios de aceite de cada regra continuam na própria tabela da regra.
+
+**Especificado × executado.** Teste especificado é o caso escrito com precondições, ação e resultado esperado, pronto para ser automatizado; ele não prova que o software se comporta assim. Teste executado é o caso rodado sobre uma versão identificada do software, num ambiente identificado (HML), com data, evidência e resultado. Só depois disso a coluna Situação passa a "Executado em dd/mm/aaaa · ambiente · versão · aprovado" ou "reprovado". Nesta revisão não há software de produção (72.1): nenhum cenário foi executado, e todos estão como "Especificado; não executado". As verificações desta revisão são só documentais; as que foram feitas e o resultado de cada uma estão em 73.14.7. Valores marcados "(teste)" ou "(valor de teste)" são configuração de ensaio, não proposta de produção.
+
+#### 73.11.1 Cenários do pedido (AC-73 a AC-82)
+
+| ID | Cenário | Precondições | Ação | Resultado esperado | Situação |
+|---|---|---|---|---|---|
+| AC-73 | 1 · Servidor conclui a operação, a resposta se perde e o aplicativo reenvia após reiniciar: existe um único efeito (IDEM-05, IDEM-06, IDEM-14, IDEM-16) | Aparelho Android de 4 GB do piloto (29.3), operador com sessão válida. OS-0430 Em execução na versão liberada v3; saldo de 100 ha na parcela T3-A; custódia da O.S. de 40 L de Fungicida A (dose 0,8 L/ha). Proxy de teste descarta a resposta HTTP depois do commit no servidor. PostgreSQL real em HML. | (1) Com sinal, o operador registra 20 ha e 16 L em MB-03 e toca Registrar avanço (CMD-43, chave K1). (2) O servidor confirma; a resposta é descartada. (3) O processo do app é encerrado à força antes da próxima tentativa. (4) Dez minutos depois o app é reaberto e a fila reenvia K1. (5) O reenvio é repetido mais duas vezes: retentativa automática e Tentar de novo. Variante: o mesmo roteiro com o registro feito sem sinal e a resposta perdida na primeira sincronização. | Antes e depois do reinício, a fila tem um item com K1 e o mesmo hash. No servidor: um registro (organização, CMD-43, K1), um apontamento, realizado 20 ha (saldo 80 ha), consumo de 16 L uma vez (custódia 24 L, CAL-02) e um conjunto de mensagens na outbox. Os três reenvios recebem o mesmo recibo (mesmos IDs, mesma versão resultante), indicado como já recebido, sem reavaliar regras. O app mostra Sincronizado com Ver recibo. A consulta de consistência de IDEM-16 encontra zero efeito sem registro e zero registro sem efeito. | Especificado; não executado |
+| AC-74 | 2 · Mesma chave com conteúdo diferente: conflito explícito (IDEM-12, IDEM-13, IDEM-14) | Depois do cenário 1: K1 confirmado com 20 ha, recibo R1. Cliente de teste que simula defeito ou adulteração do app. Um segundo usuário de outra organização e um segundo tipo de comando disponíveis para as variantes. | (1) Reenviar K1 no CMD-43 com 25 ha. (2) Reenviar K1 no CMD-43 com os 20 ha originais, mas com instante de envio, número da tentativa e versão do app diferentes. (3) Usar K1 em outra organização e, à parte, no CMD-17 com outro conteúdo. (4) No app, abrir o item em Conflito · Revisar e tocar Enviar como novo registro. | (1) Conflito de chave `IDEMPOTENCY_KEY_REUSED`, com referência a R1; nada gravado; realizado continua 20 ha; nenhum caso de conferência aberto; ocorrência contada em 30.2 (Integridade), por cliente e versão do app. (2) Mesmo hash (campos de transporte fora do conteúdo canônico, IDEM-13): devolve R1, indicado como já recebido. (3) Processados de forma independente, sem interferir em K1 (IDEM-12). (4) Nova intenção com chave K2 e 25 ha. Com a mesma parcela, o mesmo recurso e o mesmo intervalo, 73.5 a classifica como outro registro do mesmo fato: nenhum efeito novo, e a divergência de 5 ha, acima da tolerância, vai à conferência (CONC-05, CONC-10). K1 e R1 continuam intactos. A tela não mostra chave, hash nem código de erro. | Especificado; não executado |
+| AC-75 | 3 · Dois registros do mesmo abastecimento: nenhuma duplicação de consumo (CONC-02, CONC-05, CONC-09 a CONC-11) | Trator T1 com horímetro 1.250,4 h; comboio C1 com 2.000 L de diesel e almoxarife designado do ponto; operador com o app sem sinal; tolerância de abastecimento 2 % ou 2 L | O operador registra no app (MB-09) 100 L com horímetro 1.250,4 h. O almoxarife registra em MA-05 (FO-12) 100 L, totalizador 45.310 → 45.410 L, mesmo horímetro, 40 min depois pelo relógio do aparelho. Executar nas duas ordens de chegada; depois o app reenvia o seu item | Um abastecimento de 100 L (fonte leitura de medidor) e um movimento no comboio, que fica com 1.900 L; CAL-07 usa 100 L; o relato do operador fica Vinculado e o app mostra "Sincronizado · Já registrado por Almoxarifado · 100 L"; nenhuma conferência; o reenvio devolve o recibo original como já recebido; o resultado é o mesmo nas duas ordens | Especificado; não executado |
+| AC-76 | 4 · Fatos independentes válidos: consolidação automática (CONC-06, CONC-08) | O.S. de 100 ha liberada nas parcelas T3-A e T3-B (50 ha cada), com custódia suficiente; aparelho 1 com o Pulverizador 1 e aparelho 2 com o Pulverizador 2, ambos sem sinal; Trator T1 abastecido em duas paradas | Aparelho 1 registra 20 ha em T3-A (07:00–09:00) e 30 ha em T3-A (13:00–16:00); aparelho 2 registra 25 ha em T3-B (07:30–10:00), cada um com o consumo sugerido aceito; o operador do T1 registra 100 L no horímetro 1.250,4 h às 06:30 e 80 L no 1.258,9 h às 15:30. Sincronizar em três ordens: 1 antes de 2, 2 antes de 1 e intercalada | Realizado confirmado 75 ha e saldo 25 ha, sem caso aberto; três apontamentos, três consumos e dois abastecimentos (180 L), cada um aplicado uma vez; custódia reduzida pela soma dos três consumos; mesmo resultado nas três ordens | Especificado; não executado |
+| AC-77 | 5 · Vencimento ("expiração", no pedido) e retirada simultâneos: nenhuma dupla disponibilidade (RN-046; RSV-13) | Lote L1 de Glifosato 480 no Depósito Central: físico e utilizável 100 L. OS-A com reserva de execução de 80 L; liberação vigente até 18:00:00 inclusive; carência da finalidade execução 0 h (valor de teste); relógio de teste: a transação do CMD-16 começa às 17:59:59, com a liberação vigente, e a do CMD-49 às 18:00:01, com a validade atingida e a reserva fora da proteção de RSV-04; cada comando avalia prazos pelo instante de início da sua transação. Disponível 20 L. OS-B aprovada e pronta, precisando de 100 L do mesmo lote. | Com ponto de sincronização forçado, três transações concorrem: rotina executa CMD-49 (vencer a reserva da OS-A); almoxarife executa CMD-16 (entregar 80 L à OS-A); PCP executa CMD-06 da OS-B (reservar 100 L). Repetir 100 vezes alternando a ordem de commit; reenviar cada comando com a mesma chave. | Em cada repetição, um vencedor por disputa (RSV-13). Se a entrega confirma antes do vencimento: custódia da OS-A 80 L; CMD-49 devolve "nada a devolver"; OS-B recusada por saldo, com resultado individual. Se o vencimento confirma antes: 80 L devolvidos ao disponível; entrega recusada com "Reserva vencida · Reservar de novo"; OS-B reserva 100 L se confirmar depois do vencimento, ou é recusada se confirmar antes. Em todos os casos: físico 100 L inalterado pelo vencimento; a cada commit, disponível + reserva ativa + custódia = 100 L; nenhuma unidade reservada, entregue e disponível ao mesmo tempo; no máximo um evento de vencimento; reenvios devolvem os mesmos recibos. | Especificado; não executado |
+| AC-78 | 6 · Produto sob custódia ou comprometido por autorização offline: nenhuma devolução indevida ao disponível ("liberação indevida", no pedido) (RSV-06, RSV-08, RSV-09, RSV-10) | OS-C Em execução · Pausada, lote L2 de Fungicida A. Reserva de execução 100 L; entregue 40 L (10 L consumidos, 10 L em calda preparada, 20 L em custódia); em separação 20 L; 15 L delegados como cota da OS-C ao local de apoio Depósito Satélite (MB-05 offline), pacote da cota válido até 20/10 18:00; atraso máximo tolerado de sincronização 72 h (valor de teste). Liberação e ficha da ordem vencidas em 18/10 18:00; carência de 24 h (valor de teste) cumprida em 19/10 18:00; nenhuma revisão de saldo pendente. O aparelho do satélite está sem sinal. | (1) Rotina executa CMD-49 em 19/10 18:05. (2) Rotina roda de novo em 21/10 (pacote da cota vencido, limite não atingido). (3) Rotina roda em 23/10 18:05 (limite atingido). (4) Em 24/10 o aparelho sincroniza uma entrega offline de 15 L à OS-C feita em 18/10 10:00, com a liberação da OS-C ainda vigente; depois reenvia o mesmo item. | (1) Devolve 25 L ao disponível (RSV-06); consumo 10 L, calda 10 L, custódia 20 L, separação 20 L e cota 15 L inalterados; físico do lote inalterado; um evento e um aviso ao almoxarife, ao PCP e ao encarregado. (2) Nada devolvido. (3) A cota não volta ao disponível sozinha; abre-se a pendência Cota sem retorno para o almoxarife do satélite, com prazo. (4) A entrega é aceita uma vez: cota zero, custódia da OS-C 35 L, baixa do local; o reenvio devolve o mesmo recibo; nenhuma reserva de outra ordem é afetada, porque a cota nunca foi devolvida. | Especificado; não executado |
+| AC-79 | 7 · ERP indisponível: nenhum estorno fictício de execução física (RN-047; INTEG-13 a INTEG-22, INTEG-26, INTEG-27) | Conector ERP de consumo e devolução de O.S. homologado em HML, sem tipo marcado por INTEG-16; valores iniciais de 73.6.6. OS-1030 Em conferência: 160 ha apontados e conferidos; lote L7 de Glifosato 480 com 100 L entregues, 70 L consumidos e 30 L de devolução recebida apta; custódia da O.S. 0 L; nenhum caso de conferência aberto (CONC-19). Competência de outubro aberta. OS-1031 nas mesmas condições, com consumo de 40 L. O destino recusa conexões a partir das 10:00 e volta às 13:00; na volta, a primeira gravação do documento da OS-1031 responde depois de 30 s. | (1) Às 10:05, o conferente toca Conferir e encerrar na OS-1030 (CMD-10); às 10:10, na OS-1031. (2) O worker tenta enviar os efeitos; o conector abre o circuito depois de 5 falhas seguidas. (3) Às 11:00, a controladoria executa Fechar período de outubro (CMD-30). (4) Às 13:00 o ERP volta; os envios são retomados. (5) Operador no app, PCP no Kanban e controladoria na tela da O.S. abrem a OS-1030 às 12:00. (6) Depois de todos os efeitos Confirmados, a controladoria repete CMD-30. | (1) As duas O.S. encerram dentro da meta de comando de 29.3, sem esperar o ERP; cada uma grava encerramento, recibo e evento com os efeitos a integrar na mesma transação (INTEG-15); lista, Kanban e mapa mostram Encerradas. (2) Os efeitos ficam Pendente; a suspensão e a chamada de teste não consomem tentativas (INTEG-22); nenhum efeito vira Com erro por falta de conexão; alerta de fila parada ao integrador/TI às 12:05 (efeito mais antigo acima de 2 h). Nenhum movimento de estorno, cancelamento, ajuste ou reabertura é criado; consumo 70 L e 40 L, devolução 30 L, custódia 0 L e saldo do lote L7 permanecem; a identidade de CAL-02 fecha. (3) CMD-30 é recusado com a lista de GE-03 (origem, situação, idade e responsável); as O.S. continuam Encerradas (INTEG-26). (4) O resultado desconhecido da OS-1031 leva à consulta antes de qualquer reenvio (INTEG-20): a primeira consulta encontra o documento, vincula o ID externo e marca Confirmada, sem reenvio. Os efeitos da OS-1030 são enviados com as mesmas chaves e Confirmados. O ERP tem um documento por efeito. (5) Operador e PCP não veem indicação de integração; o quadro tem cinco colunas; a controladoria vê "Integração ERP: Pendente · desde 10:05" (INTEG-27). (6) CMD-30 prossegue. | Especificado; não executado |
+| AC-80 | 8 · Evento repetido ou fora de ordem: projeção correta e efeitos únicos (PROJ-08, PROJ-09; INTEG-07, INTEG-09) | OS-1020 com eventos confirmados: versão 10 (entrega de 100 L do lote L7), 11 (consumo de 70 L), 12 (devolução recebida de 30 L) e 13 (O.S. encerrada). Projeções de custódia por O.S., custo da competência e KPI-SUP-06 aplicadas até a versão 9. Consumidor do ERP ativo. | A fila entrega os eventos na ordem 11, 11, 13, 10, 12, 12, 13; um worker cai depois de aplicar a versão 10 e antes de confirmá-la à fila, que a entrega de novo. | As projeções terminam com entregue 100 L, consumido 70 L, devolvido 30 L e custódia 0 L; o custo dos 70 L é apropriado uma vez. Nenhum valor regride durante o processamento. "Dados até" só avança quando as versões 10 a 13 estão aplicadas; enquanto falta a 10, GE-06 mostra Atualizando, com "dados até" da versão 9. O ERP recebe um documento com o consumo completo (INTEG-09); nenhum aviso é repetido; a inbox tem um registro por (projeção, `event_id`). A etapa da O.S. (Encerradas) não depende da ordem de chegada (AC-65). | Especificado; não executado |
+| AC-81 | 9 · Consulta desatualizada: nenhuma autorização indevida de entrega ou reserva (PROJ-03) | Lote L7 com 100 L aptos e nenhuma reserva. O almoxarife abriu SU-03 às 08:00 (disponível 100 L). Às 08:05, outro usuário liberou a OS-1070 (CMD-06), que reservou 80 L. A projeção de disponibilidade está parada desde 07:58 e a réplica de leitura tem 2 min de atraso. A OS-1071 tem 60 L autorizados, dos quais 30 L foram entregues às 08:06 por outro almoxarife. | Às 08:10, sem recarregar a tela, o almoxarife pede reserva de 50 L do L7 para a OS-1072 (CMD-44) e entrega de 50 L à OS-1071 (CMD-16), enviando os valores que vê. | CMD-44 é recusado com "Disponível agora: 20 L", sem reserva. CMD-16 é recusado com "Saldo elegível agora: 30 L" (42.1), sem movimento. Físico, reservado e custódia ficam inalterados, e nenhum saldo fica negativo. A tela recarrega os valores atuais e oferece reservar ou entregar a quantidade possível como nova intenção. O rastreio dos dois comandos não tem leitura de projeção, cache ou réplica. | Especificado; não executado |
+| AC-82 | 10 · Operação mecânica sem aprovação exigida: execução bloqueada conforme a política vigente (APROV-01, APROV-02, APROV-05, APROV-07) | Fazenda Santa Rita, safra 2025/26, hoje 24/09. OS-0450 Gradagem niveladora no talhão T4, 80 ha, sem insumos, gerada do plano publicado: Emitida, versão 1, selo Aguardando agrônomo, sem CMD-42. Orçamento (CMD-03) e execução da safra (CMD-04) autorizados para o escopo. Janela operacional de 22 a 27/09 aberta e selecionada. Trator 04 e grade aptos, operador habilitado, sem conflito: prontidão completa. Nenhuma pré-autorização existe. O PCP tem permissão de CMD-06. O app do operador está sincronizado. | (1) O PCP abre a tela da ordem. (2) Chamada direta à API de CMD-06 com chave nova. (3) Liberação em lote (JANELA-05) de OS-0450 junto com outra ordem aprovada e pronta. (4) Arraste do cartão de A liberar para Liberadas. (5) Pedido ao assistente de IA: "liberar a gradagem do T4". (6) CMD-07 pela API e tentativa de início no app, também sem sinal. (7) Reenvio de (2) com a mesma chave. (8) O agrônomo aprova a versão 1 (CMD-42). (9) O PCP toca Liberar para execução; o operador inicia. | (1) Próximo passo mostra "Aguardando agrônomo · responsável · prazo" e não oferece Liberar; o bloco Situação mostra Prontidão: pronta. (2) a (6) são recusados sem efeito: nenhuma liberação, ficha, pacote offline, reserva ou início; motivo "Aguardando agrônomo", com responsável. No lote, a outra ordem é liberada e OS-0450 aparece recusada com o motivo. O cartão arrastado volta à coluna, com o mesmo motivo. A IA mostra o motivo e não oferece contorno. O app não lista OS-0450 para início. (7) Devolve a mesma recusa registrada (IDEM-14). (8) Aprovação registrada; a ordem continua em A liberar, com selo Aprovada pelo agrônomo, sem reserva nem ficha. (9) Liberação e início confirmam, cada um com seu recibo. Lista, Kanban, mapa e app mostram a mesma etapa em cada passo. | Especificado; não executado |
+
+#### 73.11.2 Aceites complementares (AC-83 a AC-147)
+
+**Idempotência (73.3) · AC-83 a AC-90**
+
+| ID | Cenário | Precondições | Ação | Resultado esperado | Situação |
+|---|---|---|---|---|---|
+| AC-83 | Toques e cliques repetidos (IDEM-08) | App: OS-0430 Em execução, MB-03 com 20 ha preenchidos; rede de resiliência de 29.3 (RTT 400 ms) e atraso de 3 s injetado no servidor. Web: PCP em CA-01 com a OS-0431 aprovada e pronta | (1) Tocar Registrar avanço 5 vezes em 1 s. (2) Repetir sem sinal. (3) Na web, dar duplo clique em Liberar para execução (CMD-06). (4) Depois do recibo, preencher de novo e tocar Registrar avanço | (1) e (2): um item na fila, uma chave, um registro no servidor e um efeito; o controle fica em Enviando até o recibo ou até Salvo neste aparelho; nenhum modal extra. (3) Uma liberação e um recibo. (4) Nova ação depois do retorno ao estado inicial gera nova chave; a classificação do relato segue 73.5 | Especificado; não executado |
+| AC-84 | Mesma chave ao mesmo tempo (IDEM-01, IDEM-15) | PostgreSQL real; CMD-16 de 80 L com chave K3; pausa de 1 s injetada dentro da transação da primeira requisição; espera máxima de IDEM-15 em 2 s | (1) Enviar 10 requisições simultâneas com K3 e o mesmo conteúdo. (2) Repetir com pausa de 5 s. (3) Repetir com falha injetada antes do commit da primeira. (4) Propriedade (fast-check): N entregas de K3, em qualquer ordem e concorrência | (1) Um efeito e um registro; as 10 respostas trazem o mesmo recibo. (2) As que excedem 2 s recebem Em processamento com prazo e, ao repetir, o mesmo recibo. (3) Nada gravado; a tentativa seguinte processa uma vez. (4) Um efeito e o mesmo recibo em todos os casos | Especificado; não executado |
+| AC-85 | Processo automático com chave derivada (IDEM-04) | Geração automática de 8.6.2 habilitada com 3 pares ocorrência e parcela elegíveis; rotina de CMD-49 com uma reserva vencível; OS-0432 com término registrado (Devolver sobras) | (1) Rodar a geração; derrubar o worker depois do commit de 2 itens e antes de fechar a rodada; rodar de novo. (2) Rodar a mesma geração 1 h depois. (3) Rodar CMD-49 e Devolver sobras, derrubar o worker logo depois de cada commit e deixar a rotina reexecutar | (1) 3 O.S. no total: a segunda rodada devolve os recibos das 2 existentes e cria só a terceira. (2) Nenhuma O.S. nova. (3) Um vencimento e uma tarefa Devolver sobras; a reexecução devolve os mesmos recibos. Nenhuma chave contém o instante de execução (inspeção dos registros) | Especificado; não executado |
+| AC-86 | Rejeição e conflito seguidos de edição (IDEM-07) | Web: OS-0431 na versão 3; outro usuário confirma alteração que a leva à versão 4 | (1) PCP reprograma (CMD-11) sobre a versão 3 com chave K4. (2) O cliente repete K4 com o mesmo conteúdo. (3) PCP revisa as diferenças, ajusta e confirma sobre a versão 4. (4) Cliente de teste envia o conteúdo ajustado com K4 | (1) Conflito de versão registrado com K4, sem efeito. (2) O mesmo resultado, indicado como já recebido, sem reavaliar. (3) Nova chave K5 e efeito uma vez. (4) `IDEMPOTENCY_KEY_REUSED`, nada gravado. O rascunho fica preservado entre as etapas (FORM-09) | Especificado; não executado |
+| AC-87 | Recarregar a web com envio sem resposta (IDEM-09) | Almoxarife em SU-07 confirma entrega de 80 L (CMD-16, chave K6); proxy de teste descarta a resposta depois do commit | (1) Recarregar a página. (2) Abrir a mesma entrega em outro navegador. (3) Variante: o servidor aborta antes do commit e a página é recarregada | (1) Verificando envio; a consulta pela chave devolve o recibo (PERF-04, p95 ≤300 ms) e a tela mostra o comprovante curto (68.4), sem reenvio. (2) Estado atual lido do servidor, com a entrega feita; nenhum reenvio automático. (3) A consulta indica não recebido; Tentar de novo usa K6 e o mesmo conteúdo, e o efeito ocorre uma vez | Especificado; não executado |
+| AC-88 | Lote com falha parcial (IDEM-10) | App com 200 fatos na fila (29.3); item 120 com esquema inválido; conexão cortada depois do recibo do item 150. PCP com 10 ordens em Liberar selecionadas. Arquivo de importação de 1.000 linhas | (1) Reenviar o lote inteiro. (2) Repetir Liberar selecionadas depois de queda da conexão no meio. (3) Importar de novo o mesmo arquivo | (1) Itens 1 a 150, exceto o 120, devolvem os mesmos recibos, indicados como já recebidos; o 120 devolve a mesma recusa de contrato; 151 a 200 são processados uma vez; 199 efeitos no total. (2) Cada ordem tem um recibo; nenhuma liberação duplicada (RN-035). (3) Nenhuma linha duplicada; as linhas já processadas devolvem seus recibos | Especificado; não executado |
+| AC-89 | Retenção e chave expirada (IDEM-19) | Valores de teste: validade máxima do pacote 24 h, atraso tolerado 72 h, margem 24 h, retenção mínima 120 h. K7: apontamento aceito (efeito durável). K8: CMD-44 rejeitado por saldo, sem efeito, com resposta perdida | (1) Configurar validade de pacote de 5 dias. (2) Em 100 h, reenviar K7 e K8. (3) Em 130 h, depois da purga, reenviar K8 e K7. (4) Rodar a purga duas vezes | (1) Configuração recusada, porque quebra a relação de IDEM-19. (2) Mesmos recibos. (3) K8: `IDEMPOTENCY_KEY_EXPIRED`, sem efeito, item em CF-03 com responsável; K7: o mesmo recibo, porque o registro vive com o efeito. (4) Mesmo resultado; nenhum registro vigente alterado | Especificado; não executado |
+| AC-90 | Relato de campo com chave nova que não soma (CONC-07; 73.3.4) | OS-0433 liberada na versão 2; aparelho sem sinal registra 30 ha às 09:00 (instante estimado, CONC-21); versão 2 revogada às 08:00 no servidor | (1) Sincronizar. (2) Reenviar o mesmo item | (1) Resposta Recebido · Em conferência, com motivo; relato, registro e recibo gravados, sem efeito no saldo confirmado (CONC-07); o app mostra Sincronizado · Em conferência, nunca Rejeitado. (2) O mesmo recibo; nenhuma chave nova nem segundo relato | Especificado; não executado |
+
+**Validade das reservas (73.4) · AC-91 a AC-104**
+
+| ID | Cenário | Precondições | Ação | Resultado esperado | Situação |
+|---|---|---|---|---|---|
+| AC-91 | Pausa por chuva não vence reserva (RSV-04) | OS-0430 Em execução · Pausada por chuva · 60 de 160 ha; liberação vigente por mais 3 dias; reserva ativa de 2,4-D 806 de 100 L | Rotina roda a cada 15 min durante 48 h; depois, o encarregado toca Retomar | Nenhum vencimento, evento ou aviso; a verificação de RSV-15 passa e a retomada confirma | Especificado; não executado |
+| AC-92 | Proteção por ficha offline e por revisão de saldo (RSV-04, RSV-08) | (a) Liberação da OS-D revogada às 10:00, ficha offline do operador válida até 18:00, carência 0 h (teste). (b) OS-E com liberação vencida há 3 dias (carência cumprida) e revisão de saldo pendente com prazo até o dia seguinte 12:00 | Rotina roda às 12:00 e às 18:05 do mesmo dia e às 12:05 do dia seguinte | (a) Nada vence às 12:00; às 18:05 vence só o elegível. (b) Nada vence antes do prazo da pendência; às 12:05 do dia seguinte vence só o elegível | Especificado; não executado |
+| AC-93 | Liberação vencida sem início (RSV-05, RSV-06, RSV-14) | OS-F Liberadas, não iniciada; reserva 100 L; entregue 40 L (em custódia); em separação 20 L; liberação vencida em 18/10 18:00; carência 48 h (teste) | Rotina roda em 20/10 18:05 | 40 L devolvidos; custódia 40 L e separação 20 L inalterados; ordem em A liberar com selo Reserva vencida; evento com os campos de RSV-14; um aviso ao almoxarife e ao PCP | Especificado; não executado |
+| AC-94 | Rotina repetida e dois workers (RSV-12, RSV-14) | Reserva vencível de 30 L | Dois workers executam o mesmo CMD-49 ao mesmo tempo; um deles cai depois do commit e reexecuta | Um evento, um aviso, disponível +30 L uma vez; as três respostas trazem o mesmo recibo | Especificado; não executado |
+| AC-95 | Renovar e vencer ao mesmo tempo (RSV-11, RSV-13) | Reserva de planejamento de 50 L com validade 01/10 00:00, dentro do limite de renovações | PCP renova e a rotina vence no mesmo instante; repetir 100 vezes alternando a ordem | Ou a validade é prorrogada e a rotina devolve "nada a devolver", ou 50 L voltam ao disponível e a renovação é recusada com "Reserva vencida · Reservar de novo"; nunca os dois; disponível acrescido no máximo uma vez | Especificado; não executado |
+| AC-96 | Retomar depois do vencimento (RSV-15) | OS-G Pausada; reserva de 60 L vencida e devolvida; OS-H reservou 40 L desses; disponível 20 L; saldo elegível da OS-G 60 L | Encarregado toca Retomar; PCP toca Reservar de novo; depois entram 40 L aptos e o PCP repete | Retomar recusado com "Reserva vencida · PCP reserva de novo", pausa preservada; primeira tentativa recusada por item (20 L < 60 L), selo Falta insumo, reserva da OS-H intacta; segunda confirma 60 L e a retomada passa | Especificado; não executado |
+| AC-97 | Fato tardio após devolução de cota (RSV-10) | Cota de 15 L do satélite devolvida pelo almoxarife em 23/10 com contagem que se revelou errada; OS-J reservou esses 15 L; aparelho sincroniza em 24/10 entrega offline de 15 L à OS-C feita em 18/10, com a liberação da OS-C vigente | Sincronização do item e reenvio | Entrega aceita uma vez (baixa do local, custódia da OS-C +15 L); reserva da OS-J marcada Sem cobertura 15 L, com dono (almoxarife) e prazo, e selo Falta insumo; nada cancelado; nenhuma entrada fabricada; disponível exibido 0 L com exposição de 15 L; reenvio devolve o mesmo recibo | Especificado; não executado |
+| AC-98 | Cancelamento sem execução com custódia (RSV-05) | OS-K Liberadas, sem trabalho iniciado; reserva 80 L; entregue 30 L em custódia | CMD-46 solicitado | CMD-49 do sistema devolve 50 L com motivo cancelamento; custódia 30 L intacta e tarefa Devolver sobras criada (42.4); ordem em A liberar com selo Cancelamento pendente, sem selo Reserva vencida; Cancelada só depois do retorno recebido | Especificado; não executado |
+| AC-99 | Saldo dispensado e saldo reprogramado (RSV-05) | OS-L Em execução, 60 de 100 ha; reserva ativa de 32 L para o saldo de 40 ha (0,8 L/ha), não entregue | (a) CMD-47 dispensa 40 ha. (b) Em outra execução do teste, CMD-11 reprograma o saldo para dentro da liberação vigente e, em seguida, para 10 dias depois do fim dela | (a) 32 L devolvidos; realizado e consumo preservados. (b) Dentro da liberação: nada muda. Fora: PL-05 mostra a data de vencimento e oferece Renovar reserva; sem renovação, vence após a carência | Especificado; não executado |
+| AC-100 | Cálculos inalterados (RSV-07) | Demanda residual 80, físico apto 60, reserva de planejamento de 40 para a mesma demanda (AC-13) | A reserva vence | Necessidade líquida continua 20; físico 60; livre para novas reservas passa de 20 para 60; `disponivel_fisico` de CAL-17 = 60 | Especificado; não executado |
+| AC-101 | Limites da renovação (RSV-11) | Reserva de planejamento com 2 renovações usadas, limite 2 (teste); outra reserva já vencida | PCP renova a primeira; renova a vencida; tenta renovar aumentando a quantidade | Três recusas com motivo e sem efeito; as duas renovações anteriores, dentro do limite, prorrogaram a validade sem mudar o disponível | Especificado; não executado |
+| AC-102 | Cota sem retorno (RSV-09) | Cota de 15 L com pacote vencido, limite atingido e aparelho sem sinal | Rotina roda; almoxarife tenta vencer sem evidência; depois vence com contagem registrada | Nada devolvido pela rotina; pendência Cota sem retorno com prazo; tentativa sem evidência recusada; com contagem, 15 L devolvidos e evento com a evidência | Especificado; não executado |
+| AC-103 | ERP indisponível (RSV-17) | Conector ERP de reservas desligado | Rotina vence 3 reservas; o ERP volta depois de 3 h | Vencimentos locais confirmados; eventos Pendente; após o retorno, cada um é aplicado uma vez no ERP; nenhum vencimento desfeito | Especificado; não executado |
+| AC-104 | Interface e termos (RSV-16) | OS-F do AC-93 depois do vencimento | PCP, almoxarife e executor abrem Kanban, SU-07, tela da ordem e app | Kanban com cinco colunas e selo Reserva vencida no cartão; SU-07 com "Devolvido ao disponível: 40 L · liberação vencida" e Renovar reserva só no menu da linha; executor vê o impedimento sem ação; nenhuma tela mostra "expiração", chave ou versão da linha | Especificado; não executado |
+
+**Conciliação de fatos de campo (73.5) · AC-105 a AC-116**
+
+| ID | Cenário | Precondições | Ação | Resultado esperado | Situação |
+|---|---|---|---|---|---|
+| AC-105 | Mesmo abastecimento com volumes diferentes (CONC-09, CONC-11) | As de AC-75 | O operador declara 100 L; o almoxarife lê 90 L no totalizador, mesmo horímetro | Um abastecimento de 90 L, provisório; saldo do comboio 1.910 L; divergência de 10 L Em conferência com o almoxarife do ponto e prazo; nenhum saldo reflete 190 L ou 200 L; CMD-50 Vincular confirma 90 L sem movimento novo | Especificado; não executado |
+| AC-106 | Independência da ordem no abastecimento (CONC-01, CONC-09, CONC-11) | As de AC-105 | Enviar os dois relatos em ordem inversa, com o relato do operador reenviado três vezes; propriedade com 1.000 permutações de cinco relatos (dois do mesmo fato, dois distintos, um reenvio) | Mesmo fato e mesmo saldo final em todas as ordens; na ordem "operador primeiro", a trilha mostra −100 L e o ajuste vinculado de +10 L; os reenvios devolvem o mesmo recibo | Especificado; não executado |
+| AC-107 | Excedente sobre o saldo entre dois aparelhos (CONC-14, CONC-15, CONC-20) | O.S. com saldo de 100 ha nas parcelas T5-A e T5-B (60 ha cada); aparelhos A e B baixaram a mesma versão do saldo e estão sem sinal | A registra 60 ha em T5-A; B registra 60 ha em T5-B. Sincronizar A→B e B→A. Depois, com o app conhecendo saldo 40 ha, tentar registrar 50 ha. Por fim, o conferente aceita o excedente por CMD-50 com motivo e ciência do aprovador da versão | Nas duas ordens: realizado confirmado 100 ha; 20 ha Em conferência num único caso com os dois relatos integrais; nenhum relato recusado ou truncado; CMD-10 impedido. O app recusa os 50 ha acima do saldo conhecido e oferece Registrar ocorrência. Após o CMD-50: realizado 120 ha marcado "acima do autorizado", sem nova reserva nem autorização nova | Especificado; não executado |
+| AC-108 | Correção antes do original (CONC-17) | O aparelho registra 60 ha (E1) e corrige para 55 ha (E2, chave nova, aponta E1); E2 chega antes de E1 | Sincronizar E2 e depois E1. Variante: E1 não chega em 72 h | E2 fica Aguardando original, sem efeito; ao chegar E1, aplicam-se 60 ha e −5 ha em sequência: realizado 55 ha, histórico com os dois. Na variante, E2 vai à conferência como "Correção sem original", sem efeito até o CMD-50 | Especificado; não executado |
+| AC-109 | Confirmação de recebimento é aceite da entrega (CONC-12) | OS-0430 liberada; o almoxarife entrega Óleo mineral 80 L (16 galões de 5 L, lote L1) por CMD-16; caldeiro sem sinal | O caldeiro confirma pelo QR, sincroniza e reenvia. Variante A: a confirmação chega antes da entrega (almoxarife sem sinal, com cota delegada). Variante B: o caldeiro confirma 75 L | Custódia da O.S. 80 L, uma vez; a confirmação grava recebedor e instante no mesmo movimento. Variante A: Aguardando entrega, depois vinculada; custódia 80 L. Variante B: custódia 80 L e caso de divergência de 5 L ao almoxarife (CONC-19), sem ajuste automático | Especificado; não executado |
+| AC-110 | Consumo sugerido, declarado e medido (CONC-13) | OS-0424, Fungicida A 0,8 L/ha, carga de 30 ha, custódia 65 L; telemetria homologada no pulverizador | O app sugere 24 L; o operador ajusta para 23 L; a telemetria da mesma carga informa 23,4 L | Um consumo de 23,4 L (medição prevalece; diferença de 0,4 L dentro de 3 %; relato do operador vinculado); custódia 41,6 L; nenhuma baixa de 24 L nem soma de 23 + 23,4 L | Especificado; não executado |
+| AC-111 | Uso simultâneo impossível do recurso (CONC-06, CONC-19) | Pulverizador 1 alocado à OS-A e à OS-B | O aparelho 1 registra 20 ha na OS-A (07:00–09:00); o aparelho 2 registra 15 ha na OS-B (08:00–10:00) com o mesmo pulverizador; sincronizar nas duas ordens. Variante: os dois relatos processados ao mesmo tempo por dois workers, com PostgreSQL real | O relato que chega depois fica Em conferência por uso simultâneo impossível; o fato já aceito entra no mesmo caso, provisório; após o CMD-50, o resultado é o mesmo nas duas ordens. Na variante, um relato é aceito e o outro fica Em conferência no mesmo caso; nunca os dois aceitos | Especificado; não executado |
+| AC-112 | Relógio errado e revogação (CONC-20, CONC-21) | O aparelho sincroniza às 06:00 (servidor) com a versão v2; relógio do aparelho 3 h adiantado; a v2 é revogada às 10:00 (servidor) | O aparelho registra o apontamento A com 2 h de tempo decorrido e o B com 5 h; sincroniza às 12:00 | A (instante estimado 08:00) é aceito; B (11:00) fica Em conferência como execução fora da autorização atual, com PCP e aprovador cientes; os instantes informados (11:00 e 14:00) aparecem como informados e não decidem; a validade do pacote é contada pelo tempo decorrido | Especificado; não executado |
+| AC-113 | Telemetria e registro manual da mesma irrigação (CONC-05) | Tarefa de água no Pivô 2, setor S1, com hidrômetro com telemetria homologada | A telemetria envia 1.200 m³ para 06:00–10:00; o irrigante registra 1.150 m³ lidos, mesmo intervalo; a telemetria reenvia | Uma aplicação de 1.200 m³ (diferença de 4,2 %, dentro de 5 %); relato manual vinculado; balanço hídrico, energia e custo contam uma aplicação (AGUA-06) | Especificado; não executado |
+| AC-114 | Relatos do mesmo fato processados ao mesmo tempo (CONC-04, CONC-11) | 50 pares (operador e almoxarife) de 50 abastecimentos distintos, de 50 ativos distintos, no mesmo ponto; PostgreSQL real | Enviar cada par ao mesmo tempo a dois workers | 50 fatos, 50 movimentos e 50 relatos vinculados; nenhum abastecimento duplicado; saldo do ponto igual ao da execução sequencial | Especificado; não executado |
+| AC-115 | Possível mesmo fato e resolução (CONC-03, CONC-05) | O operador registra 100 L com horímetro 1.250,4 h (aceito); o almoxarife registra 100 L no mesmo ativo e ponto, 30 min depois, sem horímetro | Sincronizar; o almoxarife executa CMD-50 Vincular; repete o comando com a mesma chave | Antes do CMD-50: −100 L uma vez e caso "possível mesmo fato" com os dois relatos. Depois: relato do almoxarife Vinculado, nenhum movimento novo; a repetição devolve o mesmo recibo | Especificado; não executado |
+| AC-116 | Consumo acima da custódia (CONC-06, CONC-07, CONC-15) | Custódia de Fungicida A na O.S. = 16 L | Apontamento com consumo declarado de 20 L; o conferente tenta Aceitar por CMD-50 antes de registrar a origem; depois o almoxarife registra a entrega que faltava (CMD-16) e o conferente aceita | Relato Em conferência; custódia não fica negativa; exposição de 4 L visível; o primeiro Aceitar é recusado com a origem física faltante; depois da entrega, o consumo de 20 L é aplicado uma vez | Especificado; não executado |
+
+**Transações, outbox e integrações (73.6) · AC-117 a AC-129**
+
+| ID | Cenário | Precondições | Ação | Resultado esperado | Situação |
+|---|---|---|---|---|---|
+| AC-117 | Efeito, recibo e outbox na mesma transação (INTEG-01) | Entrega de 40 L do lote L7 à OS-1040 (CMD-16), chave K1 | Injetar falha (a) antes do commit, (b) depois do commit e antes da resposta; reenviar com K1 nos dois casos | (a) Nenhum movimento, registro de intenção ou item na outbox; o reenvio entrega uma vez. (b) O reenvio devolve o mesmo recibo; um movimento e um item na outbox. Consulta de consistência em HML: zero efeito sem item na outbox e zero item sem efeito | Especificado; não executado |
+| AC-118 | Publicador cai entre o envio à fila e a marcação (INTEG-04, INTEG-07, INTEG-08) | Evento "consumo registrado" da OS-1040, versão 7 | Derrubar o publicador depois do envio e antes da marcação; reiniciar; em outra execução, republicar o mesmo efeito de origem com `event_id` novo | A fila recebe o evento duas vezes; o consumidor do ERP aplica uma vez; a inbox tem um registro; o ERP tem um documento; com `event_id` novo, a chave de negócio impede o segundo documento | Especificado; não executado |
+| AC-119 | Erro permanente isola só o agregado (INTEG-09) | Evento da OS-1041 com versão de esquema que o consumidor de custo não suporta; eventos de outras 20 O.S. na fila | Processar a fila | O evento da OS-1041 vai à fila de falhas com motivo na primeira falha; os eventos seguintes da OS-1041 aguardam, com alerta; as outras 20 O.S. são processadas. Depois da correção, CMD-40 aplica os eventos da OS-1041 em ordem, uma vez | Especificado; não executado |
+| AC-120 | Resultado desconhecido com ausência confirmada (INTEG-20) | Envio de documento de consumo; conexão cortada depois do envio; o ERP não gravou | Aguardar a consulta de 2 min | A consulta confirma ausência; reenvio com a mesma chave e o mesmo conteúdo, contado como tentativa; um documento no ERP; situação Confirmada | Especificado; não executado |
+| AC-121 | Destino sem consulta nem idempotência (INTEG-20, 24.1) | Conector cujo contrato não oferece consulta nem chave | Provocar timeout depois do envio | Nenhuma repetição automática; efeito Em reconciliação; exceção técnica ao integrador/TI com prazo de 4 h úteis; "Reprocessar item" não aparece até alguém registrar a ausência com evidência (UIREL-04) | Especificado; não executado |
+| AC-122 | Rejeição de negócio e correção (INTEG-19, INTEG-25, 73.6.7) | Documento de custo da OS-1042 rejeitado por centro de custo sem mapeamento | Aguardar 1 dia útil sem reconhecimento; depois a controladoria reconhece, corrige o mapeamento e reenvia por CMD-40 | Nenhuma tentativa automática; efeito Com erro; exceção à controladoria; aviso de escalonamento depois de 1 dia útil, que cessa no reconhecimento; o reenvio é nova intenção vinculada ao mesmo efeito de origem; um documento no ERP; a OS-1042 permanece Encerradas o tempo todo | Especificado; não executado |
+| AC-123 | Tipo marcado para confirmação antes do encerramento (INTEG-16) | Na empresa de teste, tipo "consumo de O.S." marcado com motivo contratual, aprovação da controladoria, versão e vigência em CF-03; OS-1043 com requisitos locais cumpridos | Conferente toca Conferir e encerrar; depois o efeito vira Confirmada. Em outra execução, tentar marcar um tipo sem motivo ou sem aprovador | Antes da confirmação: CMD-10 impedido com "Aguardando confirmação do ERP", responsável e prazo; a O.S. permanece Em conferência, sem coluna nova. Depois: o encerramento conclui. Marcação sem motivo ou sem aprovador é recusada | Especificado; não executado |
+| AC-124 | Correção depois do encerramento (INTEG-18) | OS-1030 Encerrada com consumo de 70 L Confirmado no ERP; competência aberta no ERP. Em outra execução, competência fechada no ERP | Ajuste vinculado de −5 L com alçada (42.5) | Evento novo; documento vinculado ao original no ERP; o original permanece com sua linhagem. Com período fechado no ERP: efeito Com erro, exceção à controladoria; o ajuste local continua válido e nada é alterado para coincidir com o ERP | Especificado; não executado |
+| AC-125 | Fechamento do período bloqueado sem bloquear O.S. (INTEG-26) | Competência de outubro com um efeito Em reconciliação | Controladoria executa Fechar período; ao mesmo tempo, o conferente encerra a OS-1044, que cumpre os requisitos locais | Fechar período recusado com a lista de GE-03; a OS-1044 encerra; depois de o efeito virar Confirmada, o fechamento prossegue | Especificado; não executado |
+| AC-126 | Interface por perfil (INTEG-27, 73.10) | OS-1042 Encerrada com efeito Com erro; item Em reconciliação em CF-03 | Operador abre o app; PCP abre o Kanban e o mapa; controladoria abre a tela da O.S.; integrador/TI abre CF-03 | Operador, PCP e mapa sem indicação de integração; Kanban com cinco colunas e sem selo; controladoria vê situação, responsável, prazo e "Abrir em Integrações"; em CF-03, a ação primária do item Em reconciliação é "Consultar destino" e "Reprocessar item" não aparece até ausência confirmada ou dado corrigido (UIREL-04); nenhuma tela da O.S. mostra `event_id`, tentativa ou mensagem técnica | Especificado; não executado |
+| AC-127 | Ações proibidas (INTEG-24) | Efeito Com erro da OS-1042 | Por tela, API e job: estornar o consumo por causa da integração; reabrir a O.S.; marcar Confirmada sem ID externo; reenviar com chave nova depois de resultado desconhecido sem consulta | Cada tentativa é recusada com motivo e registrada na trilha; consumo, custódia e etapa inalterados | Especificado; não executado |
+| AC-128 | Encerramento automático com ERP indisponível (8.4.3, INTEG-13) | Política homologada de encerramento automático ativa; OS-1045 com apontamentos aceitos pelo servidor e conferidos, sobras recebidas e custódia 0 L; ERP indisponível | Última conferência confirmada | A O.S. encerra automaticamente, sem esperar o ERP; efeitos Pendente; "apontamentos enviados" (DEC-2609-13) avaliado pela aceitação no servidor, não pelo ERP | Especificado; não executado |
+| AC-129 | Orquestrador com compensação decidida (INTEG-11, INTEG-12, INTEG-24) | Expedição com documento fiscal autorizado; a carga é desfeita antes da saída física. Em outra execução: saída física confirmada e título no ERP rejeitado de forma definitiva | Registrar a carga desfeita; o responsável decide cancelar o documento fiscal. Na outra execução, esgotar o passo do título | Antes da decisão: orquestrador em "Compensação pendente", exceção ao responsável, nenhuma compensação automática. Depois: cancelamento do documento fiscal por evento vinculado, respeitando prazo e regras fiscais do destino; não há fato físico a desfazer. Na outra execução: documento fiscal e saída física permanecem; o título fica Com erro, com exceção à controladoria, e volta como nova intenção vinculada depois da correção (73.6.7) | Especificado; não executado |
+
+**Consultas, projeções e desempenho (73.7) · AC-130 a AC-138**
+
+| ID | Cenário | Precondições | Ação | Resultado esperado | Situação |
+|---|---|---|---|---|---|
+| AC-130 | Encerramento com projeção de custódia defasada (PROJ-03) | OS-1050 com 5 L em custódia no registro (devolução declarada, ainda não recebida); KPI-SUP-06 atrasado mostra 0 L | Encerrar a O.S. (CMD-10) | Recusado com o motivo "5 L em custódia" e atalho para Receber devolução. No caso inverso (projeção com 5 L e registro com 0 L), a O.S. encerra. | Especificado; não executado |
+| AC-131 | Reconstrução em reexecução com competência fechada (PROJ-10, PROJ-11) | Nova versão de CAL-04 publicada por CMD-29 com vigência em 01/10; 24 competências na projeção de custo, das quais 3 fechadas; conector ERP ativo | Reconstruir a projeção de custo | Zero chamada ao ERP, zero item de integração na outbox, zero aviso. Competências abertas recalculadas; hash dos retratos fechados inalterado; divergências das fechadas listadas em GE-03 para a controladoria. Até a troca, a versão anterior fica visível como Atualizando; depois, a troca é atômica. | Especificado; não executado |
+| AC-132 | Tela de origem e visão dependente (PROJ-12) | Projeção de área executada por talhão alguns eventos atrás | Operador registra 12 ha na OS-1060 pela web (CMD-43) e depois abre IN-04 | O detalhe da O.S. mostra o recibo com 12 ha e o novo saldo, sem Atualizando. Em IN-04, só o talhão afetado mostra Atualizando até a projeção alcançar a posição do recibo e então mostra os 12 ha. Nenhuma mensagem de conclusão fala do mapa. | Especificado; não executado |
+| AC-133 | Projeção parada (PROJ-07) | Worker de indicadores parado há 30 min | Abrir GE-06; registrar entrega, apontamento e encerramento | GE-06 mostra os últimos valores com "Dados até 09:12" e Desatualizado, sem zero nem cor de meta. CMD-16, CMD-43 e CMD-10 respondem dentro de 29.3. Alerta e incidente conforme PERF-07. | Especificado; não executado |
+| AC-134 | Água sem produto com sonda vencida e aplicação recente (PROJ-14) | Setor S3: última leitura da sonda há 30 h (validade 24 h); aplicação confirmada por CMD-21 há 40 min, ainda não aplicada na projeção de IR-01; janela, bomba e energia prontas | A rotina de liberação automática avalia o setor S3 | O balanço é recalculado de forma síncrona, incluindo a aplicação de 40 min atrás; a sonda conta como sem dado, e a lâmina usa estimativa por ET marcada como estimativa. A tarefa é liberada pela prontidão, sem agrônomo, e a manutenção da sonda é aberta. O evento de liberação grava versão do balanço, "dados até", fontes e idades. A lâmina não repete a água já aplicada. | Especificado; não executado |
+| AC-135 | Fechamento com consolidação atrasada e fato tardio (PROJ-16, PROJ-17) | Competência 09/2026 com corte às 23:59:59 de 30/09; consolidação com "dados até" 30/09 22:00; 2 aparelhos sem sincronizar desde 29/09 | Fechar período (CMD-30); em 03/10, chega um consumo com ocorrência em 29/09 | CMD-30 fica impedido com "Consolidação em andamento: dados até 30/09 22:00"; ao alcançar o corte, fecha, mostra o aviso dos 2 aparelhos e grava o retrato com corte, posição, versões e hash. O consumo de 03/10 atualiza a custódia normalmente e entra em 10/2026 como ajuste de competência anterior vinculado a 09/2026; o retrato de 09/2026 não muda. | Especificado; não executado |
+| AC-136 | Restrição técnica do PCM com quadro do PCP desatualizado (PERF-01, PROJ-03, PROJ-06) | Trator T12 livre no quadro aberto do PCP | PCM bloqueia T12 (CMD-18) às 10:00:00; às 10:00:01, o PCP tenta alocar T12 (CMD-34) pela tela ainda sem a mudança | A alocação é recusada na transação com o motivo do bloqueio. O quadro do PCP mostra T12 bloqueado em p95 ≤5 s, e a pendência aparece em IN-03 em p95 ≤30 s. | Especificado; não executado |
+| AC-137 | Dado agronômico vencido (PROJ-15) | Última vistoria MIP do talhão 12 com 10 dias (validade 7 dias) | Pedir recomendação automática; o agrônomo aprova a O.S. por CMD-42 | A recomendação automática de intervenção não é gerada e aparece como pendência técnica. AG-04 mostra "Vistoria de dd/mm · vencida". A aprovação é aceita e grava fonte, data da vistoria e idade. | Especificado; não executado |
+| AC-138 | Ensaios de carga de 73.8 (PERF-04, PERF-05, PERF-06) | Envelope P1 de 29.2 carregado em HML | Executar os seis ensaios de PERF-05 | Todos os critérios da tabela de PERF-05 e a reconciliação de PERF-06 aprovados; relatório com os campos de 29.1. | Especificado; não executado |
+
+**Aprovação agronômica (73.9) · AC-139 a AC-147**
+
+| ID | Cenário | Precondições | Ação | Resultado esperado | Situação |
+|---|---|---|---|---|---|
+| AC-139 | Operações mecânicas e exceções pelo objeto (APROV-02, APROV-14) | Plano publicado com as atividades; nenhum insumo; colheita do T1 já aprovada | Emitir subsolagem (T4), semeadura sem tratamento (T2), cultivo mecânico (T3), roçada de entrelinha (T7) e transbordo do T1 como ordem própria. Registrar 3 cargas em CO-03 na colheita do T1. Emitir OM de reparo do Trator 04 e ordem de secagem em CO-05. Emitir roçada no T7 com equipe da oficina. | As cinco ordens agrícolas e a roçada feita pela oficina ficam em Aguardando agrônomo. As 3 cargas não abrem pendência técnica. A OM vai ao responsável de manutenção e a secagem ao responsável de produção; nenhuma das duas aparece na fila do agrônomo. | Especificado; não executado |
+| AC-140 | Orçamento, geração automática, prazo e urgência não aprovam (APROV-05) | CMD-04 vigente para um horizonte com 40 O.S. mecânicas emitidas e não aprovadas. Geração automática habilitada (8.6.2). Prazo da fila do agrônomo vencido há 2 dias. OS-0452 marcada urgente. | Rodar a geração da data; o gerente, com alçada, tenta liberar as 40; o PCP tenta liberar OS-0452 | Nenhuma das 40 sai de A liberar, e a recusa lista cada ordem com o motivo. O prazo vencido escala ao substituto (41.1) e não aprova. OS-0452 sobe na fila do agrônomo, mas não é liberada. | Especificado; não executado |
+| AC-141 | Prontidão × aprovação (APROV-10, APROV-13) | OS-0451 Roçada de entrelinha no T7, 30 ha; versão 1 aprovada (altura de corte 15 cm) e em Liberadas, não iniciada; Trator 04 | (a) O PCM bloqueia o Trator 04 (CMD-18). (b) O PCP troca pelo Trator 01, da mesma classe. (c) O PCP troca a roçadeira por triturador. | (a) A ordem volta a A liberar com o selo "Aprovada pelo agrônomo · Falta máquina"; a aprovação da versão 1 continua vigente; a tela mostra Aprovação: vigente e Prontidão: falta máquina · PCM. (b) A prontidão é revalidada e a ordem pode ser liberada de novo sem passar pelo agrônomo. (c) Nasce a versão 2; a aprovação é invalidada, as fichas são revogadas e a ordem vai a Aguardando agrônomo com as diferenças. | Especificado; não executado |
+| AC-142 | Revisão separada da liberação (APROV-09) | Ana tem CMD-42 e CMD-06. OS-0450 está Emitida e pronta. | Ana abre a tela e aprova. A resposta se perde e o navegador reenvia com a mesma chave. Ana toca Liberar para execução. | A tela só oferece Revisar versão. Há uma única aprovação, e o reenvio devolve o mesmo recibo. Nada é liberado até o segundo toque. A liberação tem recibo próprio. Não existe botão "Aprovar e liberar". | Especificado; não executado |
+| AC-143 | Execução offline sobre versão invalidada (APROV-12) | OS-0451 versão 1 em Liberadas. Marcos tem o pacote offline da versão 1 e está sem sinal desde 07:00. | 09:00: o agrônomo ajusta a área de 30 para 20 ha e aprova a versão 2 (mudança técnica, APROV-11). 09:30: Marcos inicia offline e registra 12 ha. 14:00: o aparelho sincroniza e reenvia o mesmo item. Depois, Marcos tenta abrir novo turno na versão 1. | O relato de 12 ha entra uma vez, preservado e marcado como fora da versão aprovada; vai à conferência (CMD-50), com aviso ao agrônomo e selo Aprovação vencida/invalidada. Não há aprovação retroativa. O reenvio devolve o mesmo recibo. O novo turno na versão 1 é recusado. O saldo fica bloqueado até a versão 2 ser liberada (CMD-06) e reconhecida (41.3). As tentativas de contato de 41.3 ficam registradas. | Especificado; não executado |
+| AC-144 | Liberar e mudar a versão ao mesmo tempo (APROV-08) | OS-0450 versão 1 aprovada e pronta | O agrônomo ajusta e aprova a versão 2 (profundidade de 8 para 12 cm) enquanto o PCP libera a versão 1. Repetir 100 vezes, alternando a ordem de commit. | Há um vencedor por disputa (ENG-023). Se a liberação confirma antes, a versão 2 invalida a liberação da versão 1, e a ordem volta a A liberar com as fichas da versão 1 revogadas. Se o ajuste confirma antes, CMD-06 da versão 1 é recusado por conflito de versão. Em nenhuma repetição a ordem fica em Liberadas com versão não aprovada. | Especificado; não executado |
+| AC-145 | Tela desatualizada não libera (APROV-07, APROV-08; PROJ-03) | O Kanban do PCP, aberto antes da mudança e ainda sem o aviso (linha 2 de PROJ-06), mostra OS-0451 "Aprovada · versão 1". No registro, a versão 2 foi criada por ajuste técnico 2 s antes e aguarda o agrônomo. | O PCP toca Liberar para execução na tela, que envia a versão esperada 1 | CMD-06 lê o registro na transação e devolve conflito de versão (73.3.4), sem efeito, com "Aprovação invalidada: versão 2 aguarda agrônomo". A tela relê a ordem por consulta direta e mostra o estado real, sem marca de atualidade (PROJ-12; UIREL-07). | Especificado; não executado |
+| AC-146 | Água sem produto e termos (APROV-14, APROV-15) | Base de AC-72-09: Pivô 2 com 13,5 mm e limite de 12,0 mm por passada; Gotejo T7 sem sonda; OS-0419 com Ureia | Rodar AC-72-09 e abrir IR-01, IR-02, IR-03, MB-08, FO-29, IN-02, IN-04 e o cartão da tarefa | AC-72-09 continua passando. Nenhuma tela mostra "política de água", "enquadramento" ou "autorização" para água sem produto; aparecem "Parâmetros do equipamento · versão N" e "Liberada pela prontidão". A Ureia leva só a versão da OS-0419 ao agrônomo. | Especificado; não executado |
+| AC-147 | Pré-autorização inexistente (APROV-16) | Versão candidata à homologação | Procurar em CF-02 e AG-05 um tipo de regra de pré-autorização ou limiar; chamar CMD-29 com esse tipo; emitir OS-0453, roçada de 5 ha idêntica ao plano | Nenhuma opção existe. A chamada é recusada como tipo desconhecido, sem efeito. OS-0453 vai a Aguardando agrônomo. A revisão de código registrada não encontra caminho de aprovação por limiar. | Especificado; não executado |
+
+### 73.12 Decisões pendentes do proprietário
+
+Estas são propostas, não requisitos aprovados. Nenhuma foi decidida em nome do proprietário. Cada linha diz a proposta, o que ela muda e o que vale até a decisão; o valor em vigor nesse intervalo aparece em CF-02 ou CF-03 marcado como "valor proposto" e não é apresentado em treinamento nem em material comercial como regra aprovada. Decidida uma pendência, o texto da regra citada passa a trazer o valor decidido, e a linha sai desta tabela no registro da versão seguinte. Tempos técnicos iniciais de engenharia (espera progressiva, limites de consulta, tentativas por conector, retenção da outbox) não são pendência: são ajustados pela homologação (IDEM-06, IDEM-15, INTEG-21). As pendências do design system estão em 74.12 (PEND-DS) e as de melhoria contínua em 75.8 (PEND-FB, PEND-OP e PEND-IA).
+
+| ID | Decisão pendente | Proposta | Impacto | Até decidir, vale |
+|---|---|---|---|---|
+| PEND-01 | Pré-autorização por limiares (não aprovada; regra vigente em APROV-16) | Adotar o conteúdo completo de 73.12.1. Um responsável técnico habilitado publica um envelope versionado, válido por no máximo 30 dias, com atividades elegíveis em lista fechada (só operações mecânicas sem insumo que repetem o plano), limites técnicos por talhão, condições verificadas em CMD-06 e CMD-07, revogação e suspensão automática, amostragem mensal de 10 % e envio à revisão individual de tudo o que fica fora. A pré-autorização não libera, não reserva e não inclui valor. | Se aprovada, cria dois comandos (publicar e revogar pré-autorização), um serviço de enquadramento, a tela em AG-05, a amostragem mensal e aceites próprios, e reduz a fila individual do agrônomo só nas atividades elegíveis. Não muda liberação, reserva, prontidão nem autorização econômica. Se recusada, nada muda. | Até decidir, vale: aprovação individual por CMD-42 para toda O.S. agrícola, inclusive operações mecânicas, exceto irrigação somente com água (41.1; DEC-2609-10; APROV-16). Nenhum limiar é configurável, e nada é demonstrado no protótipo como função. |
+| PEND-02 | Validade máxima do pacote offline, atraso máximo tolerado de sincronização e retenção mínima do registro de idempotência (IDEM-19; RSV-09) | Validade máxima configurável do pacote offline: 7 dias (a liberação pode fixar menos por atividade, 8.6.3). Atraso máximo tolerado de sincronização depois do fim da validade: 30 dias. Margem: 30 dias. Retenção mínima do registro de intenção sem efeito durável: 90 dias, acima da soma de 67 dias. O mesmo atraso tolerado vale para a cota delegada (RSV-09). | Fixa quanto tempo um aparelho pode ficar sem sinal e ainda ter os envios reconhecidos pela chave, o volume guardado do registro de idempotência e o limite da cota sem retorno (RSV-09). Prazo curto aumenta chegadas com chave expirada em CF-03; prazo longo aumenta armazenamento e alonga a janela de compatibilidade de API para aparelhos offline (27.5), que precisa cobrir a mesma soma. | Até decidir, vale: esses valores como configuração inicial de HML e piloto em CF-02, identificados como "valor proposto"; toda alteração é recusada se quebrar a relação de IDEM-19; o ensaio de 72 h de NFR-08 e ACE-08 continua como teste mínimo. |
+| PEND-03 | Responsável pelas chegadas com chave expirada (IDEM-19; 73.3.4) | Por tipo de comando: PCP do escopo para O.S. e apontamento; almoxarife do local para reserva e movimento de estoque; integrador/TI para integração de entrada. Reconhecer em 1 dia útil; sem reconhecimento, aviso ao gestor do escopo. | Define quem trata a chegada recusada por chave expirada e em quanto tempo. Sem dono, o fato fica parado em CF-03. | Até decidir, vale: a proposta, configurável em CF-02; o item fica em CF-03 sem efeito, e nada é reaplicado automaticamente. |
+| PEND-04 | Prazos e carências da validade da reserva por finalidade (RN-046; RSV-02; RSV-14) | Cobertura de planejamento: 3 dias depois da data prevista de início; sem data prevista, 14 dias depois da criação. Execução liberada: carência de 2 dias depois do fim ou da revogação da liberação. Manutenção: carência de 7 dias depois do fim da janela de intervenção. Cota delegada: sem prazo além do pacote; devolução só por RSV-09. Aviso "a vencer": 24 h antes, ao PCP e ao almoxarife. | Define quanto tempo a reserva segura material para ordem parada e quando ele volta a ficar disponível para outras ordens. Prazo curto aumenta "Reservar de novo" e Falta insumo na retomada; prazo longo prende estoque. | Até decidir, vale: esses números como configuração inicial de homologação e piloto em CF-02, identificados como "valor proposto"; a implantação pode alterá-los com versão (RSV-02); nenhum treinamento ou material comercial os apresenta como regra aprovada. |
+| PEND-05 | Limites de renovação da reserva e quem renova (RSV-11) | Até 2 renovações por linha; cada uma de até 7 dias (planejamento e manutenção) ou 3 dias (execução). Acima do limite, só nova liberação (CMD-06) ou nova reserva. Renovar e vencer manualmente: almoxarife e PCP (PCM na manutenção). | Define quem prorroga e por quanto tempo. Limite alto prende estoque sem nova liberação; limite baixo pede nova liberação com mais frequência. | Até decidir, vale: a proposta, configurável em CF-02. |
+| PEND-06 | Tolerâncias de divergência entre registros do mesmo fato, por tipo (CONC-10) | Adotar os valores iniciais da tabela de CONC-10 e revê-los depois do piloto, com as divergências medidas em CONC-23 | Define quando dois registros do mesmo fato se vinculam sem conferência e quando abrem caso. Tolerância alta esconde divergência real; baixa aumenta casos para almoxarife e conferente. | Até decidir, vale: os valores iniciais da tabela, configuráveis em CF-02 com versão e vigência |
+| PEND-07 | Nota de leitura em 72.3 sobre excedente relatado no app × "até o saldo" (72.3 item 1; AC-72-11; CONC-14) | Acrescentar a 72.3 uma nota de leitura: o app não aceita quantidade acima do saldo conhecido, o executor relata o excedente por Registrar ocorrência e o caso vai à conferência; fato de outro aparelho não é descartado | Só registra no cap. 72 a leitura que CONC-14 já aplica; não muda comportamento. Sem a nota, a leitura fica só no cap. 73. | Até decidir, vale: CONC-14 (app literal a AC-72-11; servidor preserva o fato tardio e manda o excedente à conferência) |
+| PEND-08 | Escritor designado do abastecimento (CONC-05; CONC-09): a tabela do cap. 2 não tem abastecedor; MA-05 cita "Abastecedor" e MB-09 "Mecânico/abastecedor" | Almoxarife do local ou abastecedor designado por ponto em CF-02; o operador registra como declaração | Define quem prevalece no empate e quem resolve a divergência de abastecimento. Afeta perfis (cap. 2), CF-02, MA-05 e MB-09. | Até decidir, vale: almoxarife do local |
+| PEND-09 | Janelas e prazos da conciliação (CONC-05, CONC-12, CONC-17, CONC-19, CONC-21) | Janela do abastecimento 2 h; leitura do ativo no abastecimento ±0,2 h (horímetro) ou ±2 km (hodômetro); Aguardando original e Aguardando entrega 72 h; prazo do caso 2 dias úteis; incerteza do instante estimado 5 min (monotônico) e 30 min (corrigido) | Define quando correção sem original, confirmação sem entrega e caso parado viram alerta. Prazo curto aumenta alertas; longo retarda o encerramento das O.S. com caso aberto (CONC-19). | Até decidir, vale: esses valores iniciais, configuráveis |
+| PEND-10 | Ciência ao aceitar fato acima do autorizado ou fora da versão (CONC-15; CMD-50) | Ciência registrada (não aprovação) do aprovador da versão na O.S. agrícola com produto; água sem produto sem agrônomo (DEC-2609-10), com ciência do PCP | Define quem fica ciente quando o conferente aceita fato acima do autorizado ou fora da versão. Não cria aprovação retroativa nem fila nova de aprovação. | Até decidir, vale: a proposta, sem autorização retroativa (CMD-43) |
+| PEND-11 | Prazos de reconhecimento e escalonamento das exceções de integração (INTEG-25) | Documento contábil e custo: controladoria reconhece em 1 dia útil; escala ao gestor da controladoria após 3 dias úteis sem solução. Movimento de estoque: almoxarifado do local em 1 dia útil; escala ao gestor do almoxarifado após 3 dias úteis. Técnica: integrador/TI em 4 h úteis; escala ao responsável de TI após 1 dia útil. | Define o prazo de atendimento das exceções de integração e o escalonamento. Afeta a rotina da controladoria, do almoxarifado e de TI e o tempo até o fechamento do período (INTEG-26). | Até decidir, vale: esses valores como configuração inicial em CF-02, identificados como "valor proposto"; a implantação pode alterá-los com versão; nenhum material comercial os apresenta como compromisso de atendimento. |
+| PEND-12 | Uso da marcação "confirmação antes do encerramento" (INTEG-16; RN-047) | Nenhum tipo de efeito marcado no padrão Sankhya e TOTVS. Marcação só com exigência legal, fiscal ou contratual demonstrada, aprovada pela controladoria, com versão e vigência em CF-03, e revista a cada homologação do conector. | Tipo marcado faz as O.S. desse tipo encerrarem só depois da confirmação do ERP e ficarem mais tempo Em conferência. Sem marcação, a O.S. que cumpre os requisitos locais encerra com efeitos Pendente. | Até decidir, vale: nenhum tipo marcado; toda O.S. que cumpre os requisitos locais encerra com os efeitos Pendente. |
+| PEND-13 | Validade por fonte dos dados usados em decisão agronômica e de irrigação (PROJ-13 a PROJ-15) | Tabela de 73.7.8: sonda 24 h; clima observado 24 h; previsão 12 h; telemetria de bomba, pivô e energia 15 min; vistoria MIP/MID 7 dias; satélite ou drone 10 dias; análise de solo 24 meses; análise foliar na safra e no estádio da coleta. Publicação por CMD-29 pela agronomia (fontes agronômicas) e pelo gestor da irrigação (fontes de irrigação), com revisão depois da primeira safra do piloto. | Define quando um dado conta como atual. Validade curta aumenta estimativas e pendências técnicas; longa deixa dado antigo alimentar recomendação automática. Não bloqueia água sem produto (DEC-2609-10). | Até decidir, vale: os valores da tabela de 73.7.8, com a água sem produto nunca bloqueada nem enviada ao agrônomo por dado vencido (DEC-2609-10). |
+| PEND-14 | Atraso tolerado das visões gerenciais (PROJ-06, linhas 4, 7 e 8) | Indicadores operacionais em p95 ≤5 min e p99 ≤15 min; necessidade e reposição em p95 ≤15 min e p99 ≤60 min, com execução completa diária; custos, orçamento e margem da competência aberta em p95 ≤15 min e p99 ≤60 min. Alternativa de menor custo: consolidação gerencial de hora em hora, ou diária até as 06:00, sempre com "dados até" visível. | Define o custo de processamento e a atualidade dos painéis gerenciais. A consolidação horária ou diária custa menos e aumenta o atraso visível em "dados até". | Até decidir, vale: os valores das linhas 4, 7 e 8 de PROJ-06. |
+| PEND-15 | Aparelhos sem sincronizar no fechamento do período (PROJ-16 b; PROJ-17) | Aviso à controladoria com a lista de aparelhos e itens pendentes, sem bloquear CMD-30; fato que chegar depois entra como ajuste de competência anterior (PROJ-17). Alternativa: bloquear CMD-30 até o envio ou até a controladoria declarar o aparelho perdido. | Com aviso, o período fecha com fatos ainda no aparelho, que entram depois como ajuste de competência anterior (PROJ-17). Com bloqueio, um aparelho perdido pode travar o fechamento até decisão da controladoria. | Até decidir, vale: aviso sem bloqueio. |
+| PEND-16 | Prazos das pendências Cota sem retorno e Sem cobertura (RSV-09; RSV-10; RSV-17) | Cota sem retorno: o almoxarife do local resolve em até 2 dias úteis depois do limite de RSV-09, por contagem física do local ou contato registrado com o portador; sem solução, aviso ao gestor do almoxarifado. Sem cobertura: o almoxarife resolve em até 1 dia útil (reposição, transferência, troca por lote apto ou revisão com o PCP); sem solução, aviso ao PCP e ao gestor do almoxarifado. | Define quanto tempo material de cota fica fora do disponível central sem conferência e quanto tempo uma reserva descoberta espera solução. Prazo curto aumenta avisos; longo atrasa a reposição e mantém ordens com Falta insumo. | Até decidir, vale: esses prazos como configuração inicial em CF-02, identificados como "valor proposto". Ao fim do prazo só há aviso: nada é devolvido ao disponível, cancelado ou ajustado automaticamente (RSV-09, RSV-10). |
+| PEND-18 | Exceção de equipe pequena em metas ligadas a remuneração variável (2.1; FO-38; 55.5; IND-15) | Permitir a exceção de 2.1, com revisor posterior designado (direção, sócio ou contador externo com acesso de consulta) e revisão antes do corte do período. Alternativa: proibir a exceção nesses casos e exigir revisor externo antes de publicar. | Com permissão, a organização sem segunda identidade competente publica a mudança com a marca Sem revisão independente; com proibição, precisa de revisor externo antes de publicar. | Até decidir, vale: sem a exceção; nessas metas, a mudança só é publicada por outra identidade (regra geral de 2.1). |
+
+#### 73.12.1 PEND-01 · Conteúdo completo da proposta de pré-autorização por limiares
+
+**Situação: proposta, não aprovada.** Nada desta subseção é requisito, configuração ou comportamento do produto. Até a decisão, vale APROV-16 (73.9.8). Se aprovada, a proposta entra como requisito com IDs próprios, comandos numerados e aceites em 73.11; se recusada, é retirada.
+
+| Elemento | Proposta |
+|---|---|
+| O que é | Decisão técnica antecipada, assinada por um responsável técnico, que aprova de uma vez as O.S. agrícolas futuras que caibam num envelope fechado de atividade, área, parâmetros técnicos e prazo. Cada O.S. que cabe no envelope recebe aprovação registrada por ID e versão, com referência à pré-autorização e à versão dela. A pré-autorização não libera, não reserva e não dispensa prontidão nem autorização econômica. |
+| Responsável técnico | Agrônomo habilitado, titular do escopo (fazenda) em 41.1. O substituto só publica dentro do próprio escopo e do período da substituição. A habilitação precisa estar vigente, e a perda dela suspende a pré-autorização. O responsável técnico responde por todas as O.S. enquadradas e aparece nelas. IA, gerente, PCP e alçada financeira não publicam pré-autorização (RN-041). |
+| Atividades elegíveis | Lista fechada, restrita a operações mecânicas sem insumo que repetem uma atividade do plano agronômico publicado (CMD-02): roçada de entrelinha; cultivo mecânico de entrelinha; transporte interno da produção emitido como ordem própria (APROV-03 b); gradagem niveladora sem mudança de profundidade. |
+| Não elegíveis | O.S. com insumo (defensivo, fertilizante, corretivo, semente tratada ou inoculada); fertirrigação; plantio; colheita; preparo primário (aração, subsolagem, escarificação); operação que exija receita agronômica ou outro documento técnico individual (41.2); área com restrição de RN-016; operação direta sem atividade no plano (cap. 37); revisão de saldo depois de mudança técnica (41.2); O.S. de urgência. |
+| Limites | Fazenda e talhões ou parcelas listados. Cultura e faixa de estádio. Parâmetros técnicos da atividade do plano (classe de implemento, profundidade, altura de corte), sem tolerância além da fixada. Área por O.S. até o saldo da atividade no talhão. Área acumulada por talhão no período até a área do talhão × passadas previstas no plano. Número máximo de O.S. enquadradas por versão. Valor em reais não é limite técnico: continua em CMD-03/CMD-04. |
+| Condições | Verificadas no enquadramento e de novo em CMD-06 e CMD-07: versão da O.S. idêntica à atividade do plano, sem ajuste técnico; pré-autorização vigente, não suspensa e não revogada; responsável técnico com habilitação vigente; nenhuma restrição de RN-016 nem ocorrência técnica aberta no talhão (vistoria, praga, erosão, encharcamento) que peça decisão; dados usados dentro da validade de PROJ-13; nenhuma outra O.S. técnica conflitante no talhão dentro da janela. |
+| Validade | Início e fim explícitos; no máximo 30 dias ou o fim da safra, o que vier antes. Termina sozinha no fim do prazo, e prorrogar é publicar nova versão. |
+| Versão | Cada publicação é uma versão imutável, com autor, instante, envelope completo e motivo. A nova versão vale só para enquadramentos futuros. A O.S. já enquadrada e ainda não iniciada é reavaliada contra a versão vigente em CMD-06 e CMD-07. Publicar e revogar seriam comandos com chave (73.3) e trilha (CF-04). O comando só recebe número se a proposta for aprovada. |
+| Revogação | O responsável técnico, o substituto ou o gestor técnico revogam a qualquer momento, com motivo. Confirmada no servidor, a revogação impede novos enquadramentos. As O.S. enquadradas e ainda não iniciadas voltam a Aguardando agrônomo; as que estavam em Liberadas voltam a A liberar, como na invalidação de 8.4.3. As O.S. em execução mantêm o realizado; se o motivo for técnico, o saldo é pausado com Revisão de saldo pendente (41.2). A suspensão é automática quando a habilitação vence, surge restrição de RN-016 ou abre-se ocorrência técnica no talhão. Aparelho offline segue 41.3 e 12.5, sem promessa de revogação no aparelho desconectado. |
+| Tratamento das exceções | A O.S. que falha em qualquer condição vai à revisão individual (CMD-42), com o motivo (ex.: "fora da pré-autorização: 120 ha > saldo 100 ha"). Não há enquadramento parcial: dividir uma O.S. para caber não escapa do limite acumulado por talhão. Fato executado fora do envelope segue APROV-12. Como controle, o responsável técnico revisa por mês ao menos 10 % das O.S. enquadradas (mínimo 1), com registro. Um achado técnico na revisão suspende a pré-autorização até nova versão. |
+| Relação com CMD-42 | Para a O.S. dentro do envelope, o enquadramento substitui a decisão individual de CMD-42. Um serviço determinístico registra a aprovação da versão com origem "pré-autorização", a identificação e a versão dela e o responsável técnico. A chave deriva de O.S., versão da O.S. e versão da pré-autorização (IDEM-04). O enquadramento não ajusta, não devolve e não rejeita: esses casos são CMD-42 humano. |
+| Relação com CMD-06 | Não libera. CMD-06 continua com o liberador autorizado, a prontidão e a autorização econômica (APROV-01). A liberação automática continua exclusiva da água sem produto. |
+| Autorização técnica × disponibilidade | O envelope não inclui recursos nem valor. Orçamento, janela e prontidão continuam condições separadas (73.9.1). |
+| Interface, se aprovada | O responsável técnico publica e revoga em AG-05. A O.S. enquadrada mostra "Aprovada por pré-autorização PA-n vN · responsável", e IN-02 mostra a amostra do mês. Sem coluna nova. |
+| Aceites, se aprovada | O.S. dentro e fora do envelope; revogação com O.S. em Liberadas e em execução; habilitação vencida; divisão de O.S. para caber no limite; reenvio do enquadramento com um único registro. |
+
+### 73.13 Matriz das mudanças
+
+Uma linha por exigência dos itens 2 a 7 do pedido, com os IDs finais. "Aceites" cita os cenários de 73.11 e, quando for o caso, o aceite de uma regra existente. O item 8 está em 73.11; o item 9, em 73.10 (linha de interface ao fim da tabela), 73.12 e 73.14.
+
+| Exigência do pedido | Regras | Comandos | Cálculos | Telas/formulários | Fluxos | Aceites |
+|---|---|---|---|---|---|---|
+| 2 · Manter a aprovação agronômica das O.S. agrícolas, inclusive das operações mecânicas | RN-007; 41.1; APROV-02, APROV-03, APROV-04, APROV-07, APROV-08, APROV-09, APROV-11 | CMD-41, CMD-42, CMD-06, CMD-07, CMD-16 | Aprovação lida no registro (PROJ-03) | CA-01, CO-02, CO-03, IN-02, PL-04, tela de trabalho da O.S., FO-29, cadastro de operações | FL-OS-01, FL-AG-07, FL-08, FL-13 | AC-82; AC-139, AC-142, AC-144, AC-145; OSA-01; AC-72-04 |
+| 2 · Preservar as exceções expressamente autorizadas | APROV-14, APROV-15; DEC-2609-10; 41.8 | CMD-06 automático (água), CMD-20, CMD-32, CMD-42 (MA-04, CO-05) | CAL-08, CAL-09 | IR-01 a IR-03, MB-08, MA-04, CO-05, FO-43 | FL-14 | AC-72-09; AC-139, AC-146 |
+| 2 · Orçamento e janela operacional não bastam para autorizar | APROV-01, APROV-05, APROV-06 | CMD-03, CMD-04, CMD-06, CMD-29 | — | PL-04, GE-02, CF-02 | FL-03, FL-08 | AC-82; AC-140 |
+| 2 · Pré-autorização por limiares só como proposta pendente, com responsável técnico, atividades elegíveis, limites, condições, validade, versão, revogação e exceções | APROV-16; PEND-01 (73.12.1) | Nenhum até a decisão | — | Nenhuma até a decisão | — | AC-147 |
+| 2 · Não confundir autorização técnica com disponibilidade operacional | RN-009; APROV-01, APROV-10, APROV-11, APROV-12, APROV-13; UIREL-01 | CMD-06, CMD-07, CMD-18 | — | Tela de trabalho (Situação e origem), cartão do Kanban, PL-04, MB-02 | FL-OS-01, FL-08, FL-13 | AC-141, AC-143; DEMO-17 |
+| 3 · Chave única por intenção, gerada pelo iniciador: app, web e processos automáticos | RN-001; IDEM-02, IDEM-04, IDEM-10, IDEM-11 | CMD-01 a CMD-50; `/sync`; CMD-38 | — | MB-01 a MB-10, telas web de comando, CF-03 | FL-25, FL-R10 | Teste de contrato de IDEM-02; AC-85, AC-88 |
+| 3 · App: gerar e persistir a chave e o conteúdo antes do primeiro envio | IDEM-03, IDEM-05; 64.5; RF-OPS-005 | CMD-43, CMD-07, CMD-16, CMD-17 | — | MB-03 (FO-07), MB-05 | FL-25 | AC-73 |
+| 3 · App: a mesma chave em todas as tentativas, inclusive depois de reiniciar | IDEM-06; NFR-08; ENG-028 | CMD-43 | — | MB-03 | FL-25 | AC-73 |
+| 3 · App: outra chave só para nova intenção | IDEM-03, IDEM-07; FORM-09 | CMD-11, CMD-42, CMD-43 | — | FORM-04, FORM-09 | FL-25 | AC-74, AC-86 |
+| 3 · App: cliques repetidos não criam intenção duplicada | IDEM-08, IDEM-09; 68.4; ENG-077; UIREL-06 | CMD-43, CMD-06, CMD-16 | — | MB-03, CA-01, SU-07 | — | AC-83, AC-87 |
+| 3 · Servidor: unicidade por organização, tipo de comando e chave | IDEM-12; 24.1; ENG-024, ENG-025 | Todos os que alteram estado | — | — | — | Teste de integração de IDEM-12; AC-84 |
+| 3 · Mesma chave com conteúdo equivalente devolve o resultado registrado | IDEM-13, IDEM-14; RN-038 | Todos os que alteram estado | Hash do conteúdo canônico (IDEM-13) | Comprovante curto (68.4) | FL-25 | AC-73, AC-84 |
+| 3 · Mesma chave com conteúdo diferente produz conflito explícito | IDEM-14; ENG-021 | Todos os que alteram estado | Hash do conteúdo canônico (IDEM-13) | App: Conflito · Revisar (64.5; 73.10.3) | FL-25 | AC-74, AC-86 |
+| 3 · Gravar atomicamente o efeito, a identidade processada e o recibo | IDEM-15, IDEM-16, IDEM-17; ENG-022; INTEG-01 | Todos os que alteram estado | CAL-02 (efeito sobre a custódia conferido no aceite) | CF-04 | FL-25 | AC-73, AC-84, AC-117 |
+| 3 · Proteção contra duplicação durante as sincronizações offline e a retenção dos fatos | IDEM-19, IDEM-20; 24.1; 30.5; PEND-02, PEND-03 | Todos os que alteram estado | Retenção mínima = validade do pacote + atraso tolerado + margem | CF-02, CF-03 | FL-25 | AC-89; exercício de restauração de IDEM-20 |
+| 3 · UUID sozinho não é garantia de idempotência | IDEM-01, IDEM-18; 12.5 | — | — | — | FL-25 | AC-74, AC-75 |
+| 4 · Política configurável de validade por finalidade, necessidade e situação da O.S. | RN-046; RSV-01, RSV-02, RSV-03, RSV-05; PEND-04, PEND-05 | CMD-49, CMD-06, CMD-44 | — | CF-02, PL-05, SU-07 | FL-12 | AC-91, AC-92, AC-93, AC-99 |
+| 4 · Definir quando a política se aplica e quando a reserva fica protegida; pausa não devolve | RSV-04, RSV-05, RSV-08 | CMD-07, CMD-11, CMD-46, CMD-47, CMD-08 | — | Cartão do Kanban, tela de trabalho, PL-05 | FL-13 | AC-91, AC-92, AC-98, AC-99 |
+| 4 · Devolver ao disponível só a quantidade reservada elegível | RSV-06 | CMD-49 | Fórmula de RSV-06; saldo elegível de 42.1 | SU-07, MB-05 | FL-12 | AC-78; AC-93 |
+| 4 · Nenhum aumento do estoque físico pelo vencimento ("expiração", no pedido) | RSV-07; RN-011 | CMD-49 | CAL-01, CAL-02, CAL-17 | SU-01, SU-03 | FL-12 | AC-77; AC-100 |
+| 4 · Preservar o entregue, consumido, preparado ou sob custódia | RSV-06, RSV-07; RN-013 | CMD-49, CMD-16, CMD-17, CMD-46 | CAL-02 | SU-07, CA-04, MB-05 | FL-12 | AC-78; AC-93, AC-98 |
+| 4 · Tratamento seguro das cotas e autorizações concedidas a aparelhos offline | RSV-08, RSV-09 | CMD-49; CMD-16 sem conexão | Termo `comprometido_offline_vigente` (RSV-06) | MB-02, MB-05, CF-02 | FL-25 | AC-78; AC-92, AC-102 |
+| 4 · Recusar sincronização atrasada não é garantia: a execução física pode ter ocorrido | RSV-10; RN-018, RN-038; CONC-07 | CMD-16, CMD-17 | CAL-02 | MB-05, SU-07 | FL-25 | AC-78; AC-97 |
+| 4 · Registro auditável do vencimento e aviso aos responsáveis | RSV-14, RSV-16, RSV-17; RN-044; UIREL-05 | CMD-49 | — | IN-01, MB-01, SU-07, CF-04 | FL-12 | AC-93, AC-94, AC-103 |
+| 4 · Nova verificação de disponibilidade e reserva antes de retomar | RSV-15 | CMD-07, CMD-48, CMD-06, CMD-44 | Saldo elegível de 42.1; CAL-17 | Tela de trabalho, MB-02, PL-05 | FL-13 | AC-96 |
+| 4 · Resolução atômica da concorrência entre vencimento, renovação e retirada | RSV-11, RSV-12, RSV-13; ENG-023; IDEM-04 | CMD-49, CMD-16, CMD-44, CMD-06 | — | SU-07, MB-05 | FL-12 | AC-77; AC-94, AC-95, AC-101 |
+| 5 · Preservar eventos imutáveis | RN-001, RN-044; ENG-026; CONC-16, CONC-18 | CMD-43, CMD-50 | — | MB-03, CA-02 | FL-25 | AC-108 |
+| 5 · Diferenciar o reenvio do mesmo evento (mesma intenção) | RN-038; CONC-01, CONC-02; IDEM-14 | Todos com chave (73.3) | — | App (64.5) | FL-25 | AC-73, AC-75 |
+| 5 · Diferenciar registros diferentes do mesmo fato físico | CONC-02 a CONC-05, CONC-09, CONC-10 | CMD-50 | CAL-07 | FO-12, MA-05, MB-09 | FL-25 | AC-75; AC-114, AC-115 |
+| 5 · Diferenciar fatos distintos e independentes | CONC-06, CONC-08 | CMD-43, CMD-17 | CAL-02 | CA-02, MB-03 | FL-13, FL-25 | AC-76; AC-111 |
+| 5 · Diferenciar correções e estornos vinculados ao fato original | CONC-16, CONC-17; ENG-026; 42.5 | CMD-50 | — | CA-02, MB-03 | FL-25 | AC-108 |
+| 5 · Somar automaticamente só fatos distintos, aceitos e compatíveis | CONC-06, CONC-07, CONC-08, CONC-12, CONC-13 | CMD-43, CMD-17, CMD-16 | CAL-02 | CA-02, MB-03, MB-05 | FL-12, FL-13 | AC-76; AC-109, AC-110 |
+| 5 · Mesmo abastecimento de 100 L registrado por operador e almoxarife resulta em 100 L | CONC-09, CONC-10, CONC-11; RN-036; PEND-06, PEND-08 | CMD-50 | CAL-07 | FO-12, MA-05, MB-09 | FL-25 | AC-75; AC-105, AC-106 |
+| 5 · Validar estoque, custódia, área executada, consumo, alocação de recursos e versão da autorização | CONC-06, CONC-07, CONC-13, CONC-14, CONC-21; RN-011, RN-013 | CMD-16, CMD-17, CMD-43, CMD-45, CMD-50 | CAL-02; saldo elegível de 42.1 | CA-02, SU-07, MB-03, MB-05 | FL-12, FL-13, FL-25 | AC-107, AC-109, AC-110, AC-111, AC-112, AC-116 |
+| 5 · Preservar relatos conflitantes sem convertê-los em saldo confirmado | CONC-07, CONC-14, CONC-15, CONC-18, CONC-19; RN-018; PEND-07, PEND-10 | CMD-50 | — | CA-02, SU-07, MA-05, IR-03 | FL-25 | AC-107, AC-115, AC-116 |
+| 5 · CRDT só onde a adequação for demonstrada; hora do aparelho não decide conflito | CONC-20, CONC-21, CONC-22; RN-038; 24.1; PEND-09 | — | — | App (64.5) | FL-25 | AC-112; revisão de arquitetura com ADR (CONC-22) |
+| 6 · Transações locais curtas e atômicas para as invariantes | RN-001; INTEG-01, INTEG-02, INTEG-03; ENG-023 | CMD-06, CMD-10, CMD-16, CMD-17, CMD-43, CMD-45 | CAL-02; saldo elegível de 42.1 | — | FL-OS-01, FL-12 | AC-117; ENG-023 |
+| 6 · Alteração de negócio e evento na mesma transação (outbox) | INTEG-01, INTEG-04, INTEG-05, INTEG-06; 12.2 | Todos os que alteram estado | — | CF-03 (diagnóstico) | FL-R09 | AC-117, AC-118 |
+| 6 · Entrega repetida de mensagens e consumidores idempotentes | RN-001; INTEG-07 a INTEG-10 | CMD-40 | — | CF-03 | FL-R09, FL-25 | AC-80; AC-118, AC-119 |
+| 6 · Saga só quando houver transação distribuída que a justifique; sem microsserviços | INTEG-11, INTEG-12, INTEG-24 | — | — | — | FL-21, FL-R09 | AC-129 |
+| 6 · Preservar a conferência da execução, dos consumos, das sobras e da custódia no encerramento | RN-022; INTEG-13; 42.5 | CMD-09, CMD-45, CMD-10 | CAL-02 | Tela de trabalho, CA-02, SU-07 | FL-OS-01 | AC-79; OSFASE-05; AC-72-11 |
+| 6 · Separar a situação operacional da situação de sincronização com o ERP | RN-047; INTEG-14, INTEG-27; UIREL-01 | CMD-10 | — | Tela de trabalho (Situação e origem), CF-03, GE-03 | FL-OS-01, FL-R09 | AC-79; AC-126 |
+| 6 · Não estornar automaticamente consumo físico por falha de integração | RN-047; INTEG-17, INTEG-24 | Nenhum comando disparado pela integração | CAL-02 | — | FL-R09 | AC-79; AC-127 |
+| 6 · Depois de timeout externo, consultar o resultado antes de repetir ou compensar | 24.1; INTEG-19, INTEG-20 | CMD-40 | — | CF-03 (Consultar destino) | FL-R09 | AC-79; AC-120, AC-121 |
+| 6 · Tentativas, prazos, compensações permitidas, tratamento de falhas e responsável pela exceção | INTEG-19 a INTEG-25; PEND-11 | CMD-40 | — | CF-02, CF-03 | FL-R09 | AC-120 a AC-124 |
+| 6 · Encerrar operacionalmente com a sincronização identificada como pendente, quando a integração admite | RN-047; INTEG-13, INTEG-15, INTEG-16, INTEG-26; PEND-12 | CMD-10, CMD-30 | CAL-04 | Tela de trabalho, Kanban, GE-03 | FL-OS-01 | AC-79; AC-123, AC-125, AC-128 |
+| 6 · Nenhuma coluna no Kanban para pendência de integração | INTEG-27; 8.4.3; UIREL-02 | — | — | Kanban, cartão, mapa, app | FL-OS-01 | AC-126 |
+| 7 · Comando é intenção; evento é fato confirmado | RN-001, RN-002; PROJ-01; 73.2 | CMD-01 a CMD-50 | — | CF-04 | FL-25, TEC-28-1 | AC-80; AC-132 |
+| 7 · Separar comandos e consultas quando isso melhora clareza e desempenho | PROJ-02 | — | — | CA-01, SU-03, SU-07, MB-01, MB-05, LO-02 | FL-OS-01, FL-12 | AC-132 |
+| 7 · Projeções assíncronas para indicadores, consolidações mensais, custos e cálculos densos | PROJ-02, PROJ-04, PROJ-16, PROJ-17; INTEG-26 | CMD-02, CMD-29, CMD-30 | CAL-01, CAL-04 a CAL-07, CAL-12, CAL-14, CAL-15, CAL-18 a CAL-20; 44.4, 44.5, 49.2, 51.5 a 51.10, 53.2, 65.3, 65.4 | GE-01, GE-02, GE-03, GE-06, SU-01, VE-01, IN-04 | FL-09, FL-23, FL-24, FL-R04, FL-R05 | AC-131, AC-133, AC-135 |
+| 7 · Validação transacional de saldo, reservas, custódia, aprovação e encerramento; análise de cada CAL; CAL-02 fora de projeção | RN-011; PROJ-03, PROJ-04 | CMD-06, CMD-10, CMD-14, CMD-15, CMD-16, CMD-17, CMD-23, CMD-25, CMD-34, CMD-36, CMD-44, CMD-45, CMD-46, CMD-49, CMD-50 | CAL-01 a CAL-20 classificadas uma a uma; no comando: CAL-02, CAL-03, CAL-07, CAL-11 (por 42.1), CAL-16, CAL-17, CAL-19, 42.1, 44.9/44.11.3 e 49.3 | SU-03, SU-07, MB-05, CA-01 | FL-12, FL-13, FL-OS-01, FL-AG-08 | AC-81; AC-130, AC-136; teste por linha de PROJ-04 |
+| 7 · Versão e instante de referência dos resultados | PROJ-05 | CMD-29 | Todos os de classe projeção | Cartões de 55.5; GE-01 a GE-03, GE-06 | FL-24 | AC-133 |
+| 7 · Atraso máximo aceitável por tipo de consulta | PROJ-06; PERF-03; PEND-14 | — | — | CA-01, IN-01, IN-03, IN-04, GE-06, VE-01, LO-02, quadro de máquinas (44.11) | FL-OS-01, FL-LOG-02, FL-R03 | AC-136, AC-138 |
+| 7 · Comportamento durante processamento ou indisponibilidade | PROJ-07; UIREL-07 | CMD-30, único que depende de projeção | — | GE-06, IN-01 | — | AC-133 |
+| 7 · Eventos duplicados e fora de ordem | PROJ-08, PROJ-09; INTEG-07, INTEG-09 | — | — | — | FL-25, FL-R09 | AC-80 |
+| 7 · Reconstrução de projeções sem repetir efeitos de negócio | PROJ-10, PROJ-11; INTEG-10 | CMD-29, CMD-30 | CAL-04 | GE-03 | FL-24 | AC-131 |
+| 7 · Atualização da interface depois de uma ação confirmada | PROJ-12; UIREL-07 | CMD-16, CMD-43 | — | CA-01, IN-04, MB-03 | FL-13 | AC-132 |
+| 7 · Validade dos dados usados em decisões agronômicas e de irrigação | PROJ-13, PROJ-14, PROJ-15; DEC-2609-10; PEND-13 | CMD-01, CMD-06 automático (água), CMD-21, CMD-29, CMD-42 | CAL-08, CAL-09, CAL-10, CAL-12 | IR-01, IR-04, AG-01, AG-04, FO-43 | FL-04, FL-05, FL-14 | AC-134, AC-137 |
+| 7 · Preservar a arquitetura modular; CQRS sem microsserviços, bancos separados ou event sourcing | Posição arquitetural de 73.7; PROJ-02; INTEG-11 | — | — | — (inventário de projeções nos ADRs, fora da interface) | TEC-28-1 | Revisão de ADR (PROJ-02) |
+| 7 · Trocar promessas de resposta sem prazo por metas mensuráveis de latência e atualização, com volume e carga de teste | PERF-01 a PERF-07; NFR-06; 29.2 a 29.4 | CMD-17, CMD-18, CMD-30, CMD-34, CMD-37, CMD-43, CMD-45 | CAL-02, CAL-04 | Entrada (58.2), LO-02, quadro de máquinas (44.11), PL-05, IN-03 | FL-15, FL-PCM-01, FL-LOG-02, FL-25 | AC-136, AC-138 |
+| 9 · Interface minimalista: só estados, pendências e ações necessários; detalhe técnico fora da tela do usuário | UIREL-01 a UIREL-08; RN-045; DEC-2609-04 | CMD-49, CMD-50 e as demais ações de 73.10.3 | — | Telas de 73.10.1; CF-03 e CF-04 para o detalhe técnico | FL-OS-01, FL-25 | AC-104, AC-126; teste por perfil de UIREL-03 |
+
+### 73.14 Registro das alterações da v3.10
+
+Versão 3.10, de 27/09/2026. A v3.9, de 26/09/2026, fica preservada como versão anterior, sem alteração. Esta revisão muda só a documentação; o software de produção não foi iniciado (72.1).
+
+#### 73.14.1 O que entrou
+
+| Mudança | Onde | IDs |
+|---|---|---|
+| Capítulo 73, contrato normativo dos temas desta revisão | 73.1 a 73.14 | Mapa de seções em 73.1 |
+| Regras novas | Cap. 3, depois de RN-045 | RN-046 (validade da reserva de material); RN-047 (etapa da O.S. separada da integração; nenhum estorno físico por falha de integração) |
+| Comandos novos | 8.2.2, depois de CMD-48 | CMD-49 (Renovar ou vencer reserva de material); CMD-50 (Resolver relato de campo) |
+| Requisitos novos | 73.3 a 73.10 | IDEM-01 a IDEM-20; RSV-01 a RSV-18; CONC-01 a CONC-23; INTEG-01 a INTEG-28; PROJ-01 a PROJ-17; PERF-01 a PERF-07; APROV-01 a APROV-16; UIREL-01 a UIREL-08 (137 requisitos) |
+| Cenários de aceite | 73.11 | AC-73 a AC-147 (75 cenários), todos especificados e não executados |
+| Decisões pendentes do proprietário | 73.12 | PEND-01 a PEND-16 |
+| Capítulo 74, design system | 74.1 a 74.13 | Séries próprias: DS, DS-AC, PEND-DS e CORR-DS |
+| Capítulo 75, melhoria contínua com o proprietário e os usuários | 75.1 a 75.9 | Séries próprias: FB, USO, UXP, INC e IAG; aceites FB-AC, USO-AC, INC-AC e IAG-AC; pendências PEND-FB, PEND-OP e PEND-IA (75.8) |
+| Contagens para a matriz de 20.5 | — | 47 RN (RN-001 a RN-047); 50 CMD (CMD-01 a CMD-50); 147 AC (AC-01 a AC-72 em 17.1 e AC-73 a AC-147 em 73.11), além de AC-72-01 a AC-72-12 (72.4); 137 requisitos do cap. 73 (IDEM, RSV, CONC, INTEG, PROJ, PERF, APROV e UIREL), cada um com evidência individual como os RF |
+
+#### 73.14.2 O que não mudou
+
+Vale "O que não muda" de 73.1. Nenhuma decisão do cap. 72 foi editada. Os registros históricos da v3.7 em 70.3 (A-03, M-18 e M-22) que falam em política de água ficam como estão: DEC-2609-10 os superou, e a leitura vigente é APROV-15.
+
+#### 73.14.3 Consolidação do capítulo
+
+As seções 73.3 a 73.9 foram redigidas em separado e depois consolidadas. Os cenários e aceites de cada seção foram reunidos em 73.11, com a numeração final a partir de AC-73; as pendências, em 73.12, a partir de PEND-01; as matrizes, em 73.13. As instruções de reconciliação de cada seção saíram do capítulo e orientaram as edições registradas em 73.14.4. A correspondência entre os IDs provisórios de redação e os finais fica no registro de trabalho da revisão. Na consolidação também foram feitos estes ajustes de coerência, sem mudar regra de negócio:
+
+| Onde | Ajuste | Motivo |
+|---|---|---|
+| 73.4, 73.5.12 e 73.6 (RN-046, RN-047, CMD-49, CMD-50) | As linhas que as seções mandavam acrescentar no cap. 3 e em 8.2.2 ficam só nesses lugares; o capítulo remete ao ID | Uma regra num lugar só, sem duas definições do mesmo ID |
+| 73.9.8 → 73.12.1 | O conteúdo da proposta de pré-autorização por limiares passou para 73.12.1; em 73.9.8 ficou só a regra vigente (APROV-16) | Separar a decisão pendente dos requisitos aprovados |
+| 73.4.2 e 73.4.4 (RSV-04, RSV-08) | "Pacote offline de execução" (ficha do executor, MB-02) distingue-se do pacote que transporta cota delegada (MB-05), que protege só a cota (RSV-09) | Coerência com AC-78, em que a ficha da ordem venceu e a cota do satélite continua protegida |
+| 73.5.3 (CONC-07) | A chegada depois da retenção de idempotência (IDEM-19) entra entre os casos de recusa, com o item visível em CF-03 e responsável | Coerência com IDEM-19 e 73.3.4 |
+| 73.9.4 (APROV-07) | Fato já ocorrido que chega pela sincronização segue APROV-12: fica Em conferência, sem recusa | Coerência com CONC-07 e RSV-10 |
+| 73.9.5 (APROV-09) | "A reserva de execução nasce em CMD-06" | Coerência com RSV-03, que admite reserva de planejamento anterior por CMD-44 |
+| 73.7.8 (PROJ-14) | "CMD-06 automático pela prontidão", sem "política" | Coerência com APROV-15 e DEC-2609-10 |
+| 73.8.2 (PERF-04) | Linha da rotina de vencimento de reserva (p95 ≤20 min) | RSV-12 citava essa meta em 73.8 sem a linha correspondente |
+| 73.4.4 e 73.12 (RSV-09, RSV-10, PEND-16) | PEND-16 criada, com proposta de prazo para as pendências Cota sem retorno e Sem cobertura | As duas regras exigiam prazo sem propor valor; valor de negócio não é escolhido em silêncio |
+
+#### 73.14.4 Reconciliações nas seções existentes
+
+(a preencher)
+
+#### 73.14.5 Fluxogramas alterados
+
+Regra desta revisão: fluxo alterado mantém as raias e as responsabilidades da v3.9. A lista abaixo é a registrada pela frente de fluxos.
+
+- **FL-OS-01**: separa "Aprovação vigente da versão?" de "Escopo autorizado e prontidão válida?" (as três condições de APROV-01), faz A liberar passar pela aprovação vigente antes da revisão, para a ordem que perdeu a prontidão voltar a ser liberada sem nova revisão (APROV-10), passa a liberação (CMD-06) ao PCP/emitente e mostra a publicação do encerramento, com o ERP seguindo FL-R09 sem mudar a etapa (73.9; 73.6); o retorno de Liberadas a A liberar passa a se chamar "Liberação deixa de vigorar" (8.4.3).
+- **FL-03**: acrescenta a aprovação de cada O.S. pelo agrônomo (CMD-42) na preparação da janela, separa "Cada O.S. com aprovação vigente?" de "Escopo pronto na janela?" e passa a liberação (CMD-06), com resultado por O.S., do Sistema ao PCP (73.9; APROV-01, APROV-09; JANELA-05).
+- **FL-08**: acrescenta a decisão "Aprovação vigente da versão?", lida no registro, separada de "Escopo autorizado e prontidão válida?", com a espera nomeada "Aguardando agrônomo", e passa "Confirme a liberação" (CMD-06) do Sistema ao PCP, sem mudar as raias (73.9; APROV-01, APROV-07, APROV-10).
+- **FL-13**: o teste de início e retomada passa a exigir liberação e aprovação da versão vigentes, reserva ativa que cubra o saldo e condições válidas (APROV-07, APROV-10; RSV-15); pausa não devolve reserva (RSV-04).
+- **FL-AG-07**: a liberação sai da raia Sistema e vai ao PCP/emitente como CMD-06; o Sistema só gera as fichas depois dela, e a aprovação não gera ficha nem reserva; a revisão usa as decisões Aprovar versão, Devolver para ajuste e Rejeitar, que não cancela (APROV-09; DEC-2609-05).
+- **FL-PCM-01**: separa a aprovação da O.S. de manutenção pelo responsável de manutenção (CMD-42) da liberação (CMD-06), que deixam de ser uma ação composta, e a fase 04 passa a "Devolva o ativo e concilie" (APROV-09).
+- **FL-12**: acrescenta a confirmação de recebimento como aceite da mesma entrega, o vencimento da reserva sem renovação com aviso ao almoxarife e ao PCP (CMD-49), a nova reserva pelo PCP quando o material ainda é necessário (RSV-15) e troca "Libere reservas" por "Devolva ao disponível a reserva restante" (73.4; 73.5).
+- **FL-25**: grava chave e conteúdo antes do envio, repete com a mesma chave após falha transitória, responde conflito de chave à mesma chave com outro conteúdo, vincula outro registro do mesmo fato sem novo efeito, aceita a correção vinculada e leva o relato incompatível, possível mesmo fato ou excedente ao CMD-50 (73.3; 73.5).
+- **FL-R09**: a consulta ao destino passa a ter três saídas (encontrado, ausente com a mesma chave, indeterminado após o limite de consultas) (73.6; INTEG-20) e o fato anterior ao corte de gravação gera só prévia conciliada, sem gravar no ERP (comparação externa, item 4).
+- **FL-14**: a decisão da sonda passa a usar a validade da leitura (PROJ-13, PROJ-14); a liberação automática (CMD-06 do sistema) fica só para a água sem produto, e a fertirrigação aprovada (CMD-42) é liberada pelo CMD-06 do liberador do domínio; a ficha deixa de falar em "política" (73.9; APROV-15; DEMO-16).
+- **FL-R10**: o teste passa a cobrir a chave nascida na confirmação da prévia (IDEM-11), e a regra lembra que a IA não aprova O.S. agrícola (APROV-05) e remete a 75.6 (IAG-02, IAG-05) e a DS-87.
+- **FL-02**: causa repetida corrigida uma vez na prévia, com critério explícito e revalidação das linhas afetadas (comparação externa, item 1).
+- **UX-04**: Relatar problema ou sugestão a partir do erro, ao lado de corrigir, sem perder o preenchimento; as regras do relato ficam em 75.2 (comparação externa, item 2).
+- **FL-24**: o resultado medido vira proposta de novo padrão, publicada por CMD-29; a mudança que altera a avaliação de quem propõe só é publicada depois da revisão de outra identidade (comparação externa, item 3).
+
+#### 73.14.6 Refinamentos da comparação externa
+
+(a preencher)
+
+#### 73.14.7 Verificações documentais realizadas
+
+Verificações feitas sobre o texto desta revisão. Não são testes do software (73.11).
+
+(a preencher)
+
+## 74. Design system — v3.10
+
+Este capítulo fixa a aparência do produto: tokens, cor com significado, componentes, padrões de tela, dados e mapa, conteúdo, acessibilidade medida e governança. Serve à engenharia, ao design, ao QA e ao proprietário. O comportamento continua nos capítulos onde já está; aqui ficam só a forma de mostrá-lo e as medidas que tornam essa forma verificável.
+
+### 74.1 Alcance, fonte da verdade e precedência
+
+| Tema | Regra |
+|---|---|
+| Alcance | Web desktop, com verificação em 1440 × 900 e 1366 × 768 (MAPUX-02); app de campo, com referência de 390 × 844; ficha impressa em A4. Vale para as telas do menu vigente (IN-04, CD-01 a CD-07, PA, SAF, OS, CMP, EST), para o app (MB-*) e para toda tela oculta que voltar ao menu. |
+| Fonte da verdade visual | O protótipo validado pelo proprietário (`v37/gen37`): `engine.py` (tokens nas linhas 6–9, botões, chips, `G2_CSS`, `grid`, `section`, `kpis`, `continuity`, `msgbtn`), `ui37.py` (`shell37`, `steps_bar`, `MACRO`), `g2lib.js` (tabela, painel lateral, validação, aviso de não salvo) e `areas/*.py`, com as 145 telas geradas em `_render`. |
+| Contrato | O PRD. O cap. 74 decide token, cor, palavra exibida para cada estado, medida e componente. Regras de comportamento, comandos, permissões e cálculos continuam em 4.2, 4.3, 8.4, 20.2, 64, 67, 68, 72 e 73. |
+| Palavra de estado | Vem do contrato, nesta ordem: cap. 73 nas matérias dele; DEC-2609-01 a 14 (72.2); demais seções do PRD. A 74.4 reúne as palavras e dá a cor de cada uma; não cria estado novo. |
+| Aparência | Nas matérias de 74.3 a 74.9, este capítulo prevalece sobre texto anterior do PRD. Exemplos: largura do menu em 4.3, cores das etapas em 8.4.4, largura da barra do mapa em 67.2. Essas linhas passam a remeter a este capítulo (registro de alterações da v3.10). |
+| Protótipo × capítulo | Onde a 74.13 registra correção, vale o capítulo. Nos demais casos, vale o protótipo; implementação diferente dele e do capítulo é defeito. |
+| Pendência | Tema sem decisão do proprietário é `PEND-DS` (74.12), com proposta. Até a decisão, a implementação usa a proposta, identificada como proposta no espécime, no padrão já usado em INTEG-PEND-1. |
+| Fora do alcance | Estética nova; modo escuro (PEND-DS-03); marca e logotipo (PEND-DS-04). |
+| Artefatos | Arquivo único de tokens, variáveis CSS geradas dele, catálogo de componentes com estados e espécime visual `DesignSystem_Do_Talhao_a_OS_v3_10.html`, gerado dos mesmos tokens (74.10). |
+| Como ler | `DS-nn` é exigência normativa. `DS-AC-nn` é critério de aceite (74.11). Colunas "Absorve" e "Protótipo" são informativas: dizem de onde veio cada valor. As razões de contraste foram medidas com `ds/contraste.py` em 27/09/2026 e estão em 74.9. |
+
+### 74.2 Princípios visuais
+
+Consolidam 4.2, 4.3 e 20.2 sem substituí-los. O comportamento (quem age, o que bloqueia, o que se preserva) continua lá; aqui fica a consequência visual verificável.
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| DS-01 | **Estado com palavra.** Todo estado de registro aparece como a palavra de 74.4.3, com a cor do papel e um sinal não cromático (ponto de 6 px ou símbolo de prazo). Cor nunca é o único sinal (4.2; 20.2; WCAG 1.4.1). | Em captura em escala de cinza de cada estado do espécime e de cada padrão de 74.6, todo estado é lido pelo texto. Nenhum elemento de estado sem texto visível ou nome acessível. |
+| DS-02 | **Uma ação primária por contexto.** Só um botão preenchido em `cor.acao.primaria` por cabeçalho, bloco "Próximo passo", rodapé de painel e faixa inferior do app; até duas secundárias visíveis e o resto em menu (4.2). | Varredura das telas do menu vigente e do app: no máximo um primário visível por contexto. |
+| DS-03 | **Verde tem dois papéis.** Ação (`cor.acao.*`) e condição favorável confirmada (`cor.sucesso.*`). Não indica promessa, posição na fila, meta sem dado nem valor ainda não processado (4.2; 20.2; PROJ-07). | Nenhuma regra de cor por posição ou por ordem de exibição. Valor Desatualizado ou Indisponível não usa verde. |
+| DS-04 | **Classificação × estado.** Classificação (cultura, variedade, tipo, origem, prioridade, grupo) é tag contornada, sem ponto. Estado é chip preenchido, com ponto (74.4; 74.5.8; 74.5.9). | Inventário de chips: nenhuma classificação com preenchimento de estado e nenhum estado sem ponto ou símbolo. |
+| DS-05 | **Número é dado.** Número com algarismos tabulares, alinhado à direita em coluna, unidade junto ao valor e sem quebra no meio (20.2; DEC-2609-08; 10.0). A escrita segue 74.8. | Toda célula numérica, KPI, total, linha de painel, cartão do app e ficha impressa usam `font-variant-numeric: tabular-nums`. |
+| DS-06 | **Bloqueio explica.** Causa, quem resolve e atalho ficam visíveis na própria tela, sem depender de passar o ponteiro nem do aviso temporário (4.3; 20.2; DEC-2609-04). | Com cada selo de papel Erro, a tela do registro mostra causa, dono e link sem interação adicional. |
+| DS-07 | **Contexto visível.** Trilha, Voltar, contexto do topo e faixa de continuidade (ou o equivalente de 74.6) ficam visíveis. Contexto fixo tem cadeado e a palavra "fixo" (4.2; 68.2; DEC-2609-11). | Em cada padrão de 74.6, o usuário identifica fazenda, safra e registro sem rolar a tela. |
+| DS-08 | **Tudo vem do sistema.** Cor, tamanho, espaço, raio, sombra, camada e duração vêm dos tokens de 74.3. Toda peça de interface vem do catálogo 74.5. Valor literal fora do arquivo de tokens é defeito, salvo as exceções nomeadas em 74.3. | Verificação automática (74.10) sem hex, px de espaçamento, sombra ou z-index literal nos componentes. |
+| DS-09 | **Acessibilidade medida.** WCAG 2.2 AA (4.3; NFR-09): texto 4,5:1; texto grande e componente 3:1; foco visível; alvo de 44 × 44 px nas ações de campo. Todo par de tokens em uso tem razão medida em 74.9. | Teste de contraste no CI sobre o arquivo de tokens (74.10); nenhum par em uso abaixo do limite. |
+
+### 74.3 Tokens
+
+Os valores abaixo normalizam o protótipo: em cada dimensão, cada grupo de valores quase iguais vira o valor mais usado do grupo, e nenhum valor novo entra sem motivo medido. A extração do protótipo feita para esta revisão (27/09/2026) contou 92 hex distintos no código, 26 tamanhos de fonte no markup das 145 telas, 12 raios e 9 larguras de painel lateral. A coluna "Nota" marca o que foi corrigido; o motivo e a medição de cada correção estão em 74.13.
+
+#### 74.3.1 Camadas e nomes
+
+| Camada | Contém | Quem usa | Exemplo |
+|---|---|---|---|
+| Referência | A paleta bruta, por família e tom | Só a camada semântica | `ref.verde.700` ↔ `--ref-green-700` = `#1E7A4C` |
+| Semântica | O papel: texto, superfície, borda, ação, foco, sucesso, atenção, erro, neutro, informação, prazo, sobreposição, menu; e as escalas de tipo, espaço, raio, elevação, borda, movimento, layout e camada | Componentes e telas | `cor.texto.principal` ↔ `--color-text-primary` |
+| Componente | Só a exceção que um componente precisa e que nenhum papel cobre | O próprio componente | `progresso.fase.concluida` ↔ `--progress-phase-done` |
+
+O nome do token é um caminho em português com pontos. A variável CSS usa inglês técnico estável e prefixo por tipo (`--color-`, `--type-`, `--space-`, `--radius-`, `--shadow-`, `--border-`, `--motion-`, `--layout-`, `--z-`). A correspondência é 1:1 e sai do mesmo arquivo (74.10).
+
+#### 74.3.2 Cor · referência
+
+Uso exclusivo pela camada semântica. A variável segue o padrão `--ref-{família}-{tom}`, com a família em inglês (green, neutral, amber, red, blue, orange).
+
+| Família | Tons (valor) | Absorve do protótipo |
+|---|---|---|
+| verde | 950 `#0F241A` · 800 `#15603A` · 700 `#1E7A4C` · 500 `#719E85` · 200 `#BFE0CB` · 100 `#E4F3E9` · 50 `#F2F8F4` · 50b `#EEF4EF` | `#1E6B47` → 700; `#9CCBB0` → 500 |
+| neutro | 900 `#15201A` · 600 `#5B6660` · 500 `#859189` · 200 `#E4E9E5` · 150 `#EEF1EE` · 100 `#F4F6F3` · 50 `#FBFCFA` · 0 `#FFFFFF` | `#65736A`, `#4B5A51` → 600; `#8A968E`, `#9AA59E`, `#B7C1BA` → 500 |
+| âmbar | 700 `#8A5A00` · 400 `#D9B25B` · 300 `#F0D9A0` · 100 `#FFF3D6` | `#E9D39B` → 300; `#FFF4D6`, `#FFF7E0` → 100 |
+| vermelho | 700 `#B42318` · 300 `#F4C7C1` · 100 `#FDE8E6` | `#FDECEE` → 100 |
+| azul | 700 `#1E5F8F` · 100 `#E3F0FB` | `#1E88E5`, `#1E6FB8` → 700 |
+| laranja | 700 `#9A3F00` · 100 `#FFE8D6` | — |
+| menu | `#D3E2D8` · `#86A08F` · branco a 6 %, 8 % e 10 % | — |
+
+As paletas de dados do mapa (satélite, camadas operacionais, terreno e hachura) são referência própria, definida em 74.7.
+
+#### 74.3.3 Cor · semântica
+
+| Token | Variável CSS | Valor | Uso | Nota |
+|---|---|---|---|---|
+| `cor.texto.principal` | `--color-text-primary` | `#15201A` | Texto, título, valor; fundo do aviso | — |
+| `cor.texto.secundario` | `--color-text-secondary` | `#5B6660` | Rótulo, apoio, cabeçalho de tabela, opção inativa, texto do chip neutro | Corrigido: era `#65736A` (74.13) |
+| `cor.texto.inverso` | `--color-text-inverse` | `#FFFFFF` | Texto sobre ação, aviso e menu | — |
+| `cor.texto.link` | `--color-text-link` | `#1E7A4C` | Link e ação em texto | — |
+| `cor.texto.link.hover` | `--color-text-link-hover` | `#15603A` | Link com ponteiro | — |
+| `cor.fundo.app` | `--color-bg-app` | `#F4F6F3` | Fundo da aplicação; cabeçalho e total da tabela; campo somente leitura | — |
+| `cor.superficie` | `--color-surface` | `#FFFFFF` | Cartão, bloco, painel, cabeçalho, campo | — |
+| `cor.superficie.sutil` | `--color-surface-subtle` | `#EEF1EE` | Trilho de segmento e de barra; fundo do chip neutro | — |
+| `cor.superficie.aninhada` | `--color-surface-nested` | `#FBFCFA` | Linha filha da árvore | — |
+| `cor.superficie.hover` | `--color-surface-hover` | `#F2F8F4` | Linha e botão secundário com ponteiro | — |
+| `cor.superficie.selecionada` | `--color-surface-selected` | `#E4F3E9` | Etapa atual, faixa de continuidade, ferramenta ligada, linha recém-salva | — |
+| `cor.borda.divisor` | `--color-border-divider` | `#E4E9E5` | Separador e contorno de cartão, bloco, tag e botão secundário. Decorativa (1,23:1): nunca é o único sinal | — |
+| `cor.borda.campo` | `--color-border-field` | `#859189` | Contorno de campo, seletor, busca e caixa de seleção; linha de tabela da ficha impressa | Novo: o campo usava `#E4E9E5` (74.13) |
+| `cor.icone.inativo` | `--color-icon-muted` | `#859189` | Ordenar, filtrar e excluir em repouso. Sobre `cor.superficie.sutil`, usar `cor.texto.secundario` (74.9) | Corrigido: `#8A968E` e `#B7C1BA` (74.13) |
+| `cor.acao.primaria` | `--color-action-primary` | `#1E7A4C` | Botão primário, item ativo do menu, opção escolhida, funcionalidade ativa do mapa | — |
+| `cor.acao.primaria.hover` | `--color-action-primary-hover` | `#15603A` | Primário com ponteiro | Valor existente, novo uso |
+| `cor.acao.destrutiva` | `--color-action-danger` | `#B42318` | Destrutivo contornado e preenchido | — |
+| `cor.foco` | `--color-focus` | `#1E7A4C` | Anel de foco | — |
+| `cor.foco.inverso` | `--color-focus-inverse` | `#FFFFFF` | Anel de foco sobre o menu escuro | Novo (74.13) |
+| `cor.sucesso.texto` · `.fundo` · `.borda` | `--color-success-fg` · `-bg` · `-border` | `#1E7A4C` · `#E4F3E9` · `#BFE0CB` | Papel Sucesso (74.4) | — |
+| `cor.atencao.texto` · `.fundo` · `.borda` | `--color-warning-fg` · `-bg` · `-border` | `#8A5A00` · `#FFF3D6` · `#F0D9A0` | Papel Atenção; aviso de não salvo | Unifica quase-duplicatas (74.13) |
+| `cor.erro.texto` · `.fundo` · `.borda` | `--color-danger-fg` · `-bg` · `-border` | `#B42318` · `#FDE8E6` · `#F4C7C1` | Papel Erro; erro de campo | Unifica `#FDECEE` |
+| `cor.neutro.texto` · `.fundo` | `--color-neutral-fg` · `-bg` | `#5B6660` · `#EEF1EE` | Papel Neutro | — |
+| `cor.informacao.texto` · `.fundo` | `--color-info-fg` · `-bg` | `#1E5F8F` · `#E3F0FB` | Papel Informação | Promovido da tabela G2; absorve `#1E88E5` (74.13) |
+| `cor.prazo-hoje.texto` · `.fundo` | `--color-due-today-fg` · `-bg` | `#9A3F00` · `#FFE8D6` | Só o degrau "Vence hoje" (74.4) | Promovido da tabela G2 |
+| `cor.sobreposicao` | `--color-overlay` | `rgba(21,32,26,.32)` | Véu atrás do painel lateral | Unifica o `.35` legado |
+| `cor.menu.fundo` · `.texto` · `.texto-secundario` | `--color-nav-bg` · `-text` · `-text-muted` | `#0F241A` · `#D3E2D8` · `#86A08F` | Menu lateral | — |
+| `cor.menu.ativo` | `--color-nav-active-bg` | `#1E7A4C` | Item ativo, com `cor.texto.inverso` | — |
+| `cor.menu.grupo-aberto` · `.divisor` · `.selo` | `--color-nav-group-open` · `-divider` · `-badge-bg` | branco a 10 %, 8 % e 6 % | Grupo com item ativo; divisor do perfil; selo DEMONSTRAÇÃO | — |
+
+As bordas de estado (`.borda`) são decorativas: o estado se lê pela palavra e pelo ponto. O antigo texto terciário (`#8A968E`, 3,07:1 sobre branco) deixa de existir; esse texto passa a `cor.texto.secundario` (74.13).
+
+#### 74.3.4 Cor · componente (exceções)
+
+| Token | Variável CSS | Valor | Uso | Nota |
+|---|---|---|---|---|
+| `progresso.fase.concluida` | `--progress-phase-done` | `#719E85` | Segmento de fase concluída na barra de fases da O.S. (74.5.5) | Corrigido: era `#9CCBB0`, 1,81:1 (74.13) |
+| `progresso.fase.futura` | `--progress-phase-next` | `= cor.borda.divisor` | Segmento de fase futura; decorativo, a fase se lê pelo rótulo | — |
+| `tabela.total.hover` | `--table-total-hover` | `#EEF4EF` | Linha de total com ponteiro, sobre `cor.fundo.app` | — |
+| `recursos.condicional.borda` | `--resource-conditional-border` | `#D9B25B`, tracejado de 1 px | Alocação condicional na visão Recursos (DEC-2609-09) | — |
+| `mapa.*` | `--map-*` | 74.7 | Classes, terreno, hachura, rótulo com halo e amostra de legenda | A funcionalidade ativa passa a `cor.acao.primaria`; era `#1E6B47` (74.13) |
+
+#### 74.3.5 Tipografia
+
+| Família | Token ↔ variável | Pesos carregados | Uso |
+|---|---|---|---|
+| Manrope | `tipo.familia.texto` ↔ `--font-text`: `'Manrope', system-ui, sans-serif` | 500, 600, 700, 800 | Todo o texto de interface |
+| Sora | `tipo.familia.titulo` ↔ `--font-display`: `'Sora', 'Manrope', system-ui, sans-serif` | 700 | Título de página e de painel, valor de KPI, ID do talhão, marca |
+
+O protótipo carrega Manrope 400 (usado só na unidade do KPI, absorvido pelo 500) e Sora 600 (sem uso). A confirmação das famílias e a hospedagem das fontes são a PEND-DS-05; a proposta é hospedar os arquivos com o produto, sem serviço pago, com `font-display: swap` e o `system-ui` como reserva.
+
+| Token | Variável | Família · tamanho · peso · altura · espaçamento | Uso | Absorve (px) |
+|---|---|---|---|---|
+| `tipo.rotulo-caixa-alta` | `--type-label-caps` | Manrope 11 · 700 · 1,25 · 0,06em · caixa alta | Rótulo de KPI, cabeçalho da tabela, rótulo da faixa de continuidade, título de coluna do Kanban e de seção da ficha | 10; 10,5; 11 |
+| `tipo.legenda` | `--type-caption` | Manrope 12 · 500 (unidade), 600 (rótulo, ajuda) ou 700 (chip, mini, motivo) · 1,25 | Chip, tag, rótulo de campo, ajuda, unidade do KPI, legenda do mapa, "N de M" | 11,5; 11,8; 12 |
+| `tipo.corpo-compacto` | `--type-body-sm` | Manrope 13 · 500, 600 ou 700 · 1,25 (1,45 em parágrafo) | Célula de tabela, subtítulo, botão compacto, aviso, subitem do menu, unidade do campo | 12,3; 12,5; 12,6; 12,8; 13 |
+| `tipo.corpo` | `--type-body` | Manrope 14 · 500 (campo) ou 700 (botão, item do menu) · 1,25 | Campo, botão padrão, item do menu | 13,5; 14; 14,5 |
+| `tipo.titulo-bloco` | `--type-title-block` | Manrope 15 · 700 · 1,25 · −0,01em | Título de bloco, de cartão e de estado vazio | 15; 16 do vazio |
+| `tipo.app-campo` | `--type-app-field` | Manrope 16 · 500 · 1,25 | Campo do app (16 px evita a ampliação automática do navegador móvel) | 16 |
+| `tipo.app-acao` | `--type-app-action` | Manrope 17 · 800 · 1,25 · −0,01em | Botão grande do app | 16; 17 |
+| `tipo.titulo-painel` | `--type-title-panel` | Sora 19 · 700 · 1,25 · −0,02em | Título de painel lateral, título do app, número do app | 19; 20 |
+| `tipo.titulo-pagina` | `--type-title-page` | Sora 23 · 700 · 1,1 · −0,02em | Título da tela e da ficha | 22; 23; 24; 26 |
+| `tipo.numero-kpi` | `--type-kpi` | Sora 30 · 700 · 1,1 · −0,02em · tabular | Valor de KPI | 30 |
+| `tipo.mapa-id` | `--type-map-id` | Sora 40 · 700 · halo branco (74.7) | ID do talhão no mapa | 32; 34; 40 |
+
+- **Pesos:** Manrope 500, 600, 700 e 800; Sora 700. Nenhum outro.
+- **Altura de linha:** 1,1 em título a partir de 23 px; 1,25 em texto compacto (absorve 1,15, 1,2 e 1,3); 1,45 em parágrafo (absorve 1,35 a 1,55); 1,6 em texto longo (absorve 1,65 a 1,8).
+- **Espaçamento entre letras:** −0,02em (Sora), −0,01em (15 e 17 px), 0 (corpo; absorve −0,005em) e 0,06em (caixa alta; absorve 0,03em a 0,1em).
+- **Caixa alta:** só em `tipo.rotulo-caixa-alta`.
+- **Números:** algarismos tabulares (`tabular-nums`) em toda célula numérica, KPI, total, linha de painel, cartão do app e ficha impressa (DS-05). No protótipo faltam no app e na ficha (74.13).
+- **Texto grande pela WCAG** (≥ 24 px, ou ≥ 18,66 px em negrito): só `tipo.titulo-painel`, `tipo.titulo-pagina`, `tipo.numero-kpi` e `tipo.mapa-id`. O `tipo.app-acao` (17 px/800) conta como texto normal.
+- **Glifos:** a seta de ordenar (9 px) e os glifos × e +/− (18 px) passam a ícones de 12 e 20 px da escala de ícones (74.3.11).
+
+#### 74.3.6 Espaçamento
+
+Escala em passos de 2 px até 20 px, depois 24 e 32 px. Nenhum valor novo: valor ímpar sobe para o par seguinte. Token `espaco.{n}` ↔ `--space-{n}`.
+
+| Token | Valor | Absorve (px) | Token | Valor | Absorve (px) |
+|---|---:|---|---|---:|---|
+| `espaco.0` | 0 | 0 | `espaco.14` | 14 px | 13, 14 |
+| `espaco.2` | 2 px | 1, 2 | `espaco.16` | 16 px | 15, 16 |
+| `espaco.4` | 4 px | 3, 4 | `espaco.18` | 18 px | 17, 18 |
+| `espaco.6` | 6 px | 5, 6 | `espaco.20` | 20 px | 20 |
+| `espaco.8` | 8 px | 7, 8 | `espaco.24` | 24 px | 22, 24, 26 |
+| `espaco.10` | 10 px | 9, 10 | `espaco.32` | 32 px | 28, 32, 34, 36 |
+| `espaco.12` | 12 px | 11, 12 | | | |
+
+**Receitas (vertical × horizontal).** Botão padrão 12 × 20 (era 11 × 20); botão compacto 8 × 14 (era 7 × 14); mini 6 × 10 (era 5 × 10); chip 2 × 10 com borda transparente de 1 px (eram 3 × 10 e 2 × 9); tag 2 × 10 com a sua borda de 1 px (era 2 × 9), de modo que chip e tag têm a mesma altura, como no protótipo; campo 10 × 12 (era 9 × 11); célula da tabela 6 × 8; cabeçalho da tela 14 × 32; conteúdo 18 × 32, com 24 no pé (era 22); espaço entre blocos 18; bloco 14 × 18; KPI 16 × 18; painel lateral 24 × 24 (era 22 × 24); menu 16 × 12; app 16 × 20; cartão do app 14 × 16 (era 13 × 15); aviso 12 × 16 (era 11 × 16). Pelo CSS, os botões ganham 2 px de altura; a medição em tela é do espécime (74.9).
+
+**Exceções nomeadas, fora da escala:** recuo do subitem do menu, 30 px (alinha o texto do subitem ao do item); área do sistema no topo do app, 54 px; alvo de toque, 44 px; margens da ficha A4, 36 × 44 px.
+
+#### 74.3.7 Raio
+
+| Token | Variável | Valor | Uso | Absorve (px) |
+|---|---|---:|---|---|
+| `raio.0` | `--radius-0` | 0 | Tabela da ficha, faixas de borda a borda | 0 |
+| `raio.4` | `--radius-4` | 4 px | Amostra da legenda do mapa | 3, 4 |
+| `raio.8` | `--radius-8` | 8 px | Mini, botão de ícone, menu suspenso, selo que quebra linha, campo inline | 6, 8 |
+| `raio.10` | `--radius-10` | 10 px | Botão, campo, alerta, item do menu, cartão do Kanban, ferramenta do mapa, logotipo | 9, 10 |
+| `raio.12` | `--radius-12` | 12 px | Lista suspensa, aviso, coluna do Kanban, faixa de continuidade, botão da barra do mapa | 12, 13 |
+| `raio.16` | `--radius-16` | 16 px | Cartão, bloco, KPI, moldura da tabela, mapa, cartão e campo do app, botão grande do app | 14, 16 |
+| `raio.pilula` | `--radius-pill` | 999 px | Chip, tag, filtro do topo, busca | 999 |
+
+#### 74.3.8 Elevação e sobreposição
+
+| Token | Variável | Valor | Uso |
+|---|---|---|---|
+| `elevacao.0` | `--shadow-0` | nenhuma | Bloco de seção, tabela, coluna do Kanban |
+| `elevacao.1` | `--shadow-1` | `0 1px 2px rgba(21,32,26,.04), 0 10px 24px -18px rgba(21,32,26,.22)` | Cartão, KPI, cartão do Kanban, cartão do app |
+| `elevacao.2` | `--shadow-2` | `0 1px 4px rgba(21,32,26,.18)` | Controles e etiquetas sobre o mapa |
+| `elevacao.3` | `--shadow-3` | `0 12px 32px -8px rgba(21,32,26,.4)` | Aviso e lista suspensa (a variante `.28` era só legado) |
+| `elevacao.4` | `--shadow-4` | `-12px 0 40px -12px rgba(21,32,26,.35)` | Painel lateral |
+| `botao.primario.sombra` | `--shadow-btn-primary` | `0 1px 2px rgba(30,122,76,.25)` | Botão primário (componente) |
+| `etapas.sombra` | `--shadow-steps` | `0 6px 12px -10px rgba(21,32,26,.25)` | Faixa de etapas fixa (componente) |
+
+O véu atrás do painel lateral é `cor.sobreposicao` (74.3.3).
+
+#### 74.3.9 Bordas e foco
+
+| Token | Variável | Valor | Uso |
+|---|---|---|---|
+| `borda.1` | `--border-1` | 1 px sólida | Divisor, contorno de cartão e de campo |
+| `borda.2` | `--border-2` | 2 px sólida | Seleção (cartão do Kanban, cartão escolhido), linha de total, traço da etapa atual, célula da ficha (absorve 1,5 px) |
+| `borda.3` | `--border-3` | 3 px sólida | Faixa lateral de tom do bloco e de prioridade (absorve 4 px) |
+| `borda.tracejada` | `--border-dashed` | 1 px tracejada | Só para herdado, condicional, proposto e coluna vazia |
+| `foco.anel` | `--focus-ring` | 2 px sólida em `cor.foco`, afastamento de 2 px | Todo controle focável |
+| `foco.anel.linha` | `--focus-ring-row` | 2 px em `cor.foco`, afastamento de −2 px | Linha da tabela (valor do protótipo) |
+| `foco.anel.inverso` | `--focus-ring-inverse` | 2 px em `cor.foco.inverso`, afastamento de 2 px | Controles do menu lateral |
+
+O afastamento de 2 px impede que o anel desapareça sobre o botão primário, que tem a mesma cor. No protótipo, só a linha da tabela tem foco estilizado (74.13).
+
+#### 74.3.10 Movimento e opacidade
+
+| Token | Variável | Valor | Uso |
+|---|---|---|---|
+| `movimento.curto` | `--motion-short` | 200 ms, curva `ease` | Zoom do mapa (a única transição do protótipo) e troca de estado de controle |
+| `movimento.reduzido` | — | 0 ms | Todas as transições quando `prefers-reduced-motion: reduce` |
+| `tempo.aviso` | `--toast-duration` | 4,5 s no mínimo, pausado com foco ou ponteiro | Aviso temporário (74.5.17) |
+| `opacidade.desabilitado` | `--opacity-disabled` | 0,55 | Controle indisponível; o motivo fica em texto com contraste (74.5.0) |
+| `som.salvo` | — | Proposta da PEND-DS-14: um tom senoidal de até 150 ms, volume baixo e fixo | Registro salvo no aparelho ou sincronizado, em resposta a uma ação da pessoa (74.5.29; 64.7) |
+| `som.atencao` | — | Proposta da PEND-DS-14: dois tons descendentes, até 300 ms no total, mesmo volume | Ação impedida ou conflito (74.5.29; 64.7). Som nunca é o único canal (WCAG 1.3.3) |
+
+As opacidades de preenchimento e de rótulo do mapa estão em 74.7.
+
+#### 74.3.11 Layout, alvos, ícones e pontos
+
+| Token | Variável | Valor | Uso | Nota |
+|---|---|---|---|---|
+| `layout.menu` | `--layout-nav` | 232 px | Menu lateral aberto | Medido: 232 px (itens de 208 px + 2 × 12 px). O "aproximada de 248 px" de 4.3 passa a remeter aqui; 224 px e 248 px eram legado |
+| `layout.menu.recolhido` | `--layout-nav-collapsed` | PEND-DS-09 | Menu lateral recolhido (20.2) | O protótipo não recolhe |
+| `layout.conteudo` | — | fluido | Área de conteúdo, sem largura máxima que centralize (68.2) | — |
+| `layout.painel.formulario` | `--layout-panel-form` | 460 px | Formulário curto e decisão em painel lateral | Absorve 440 e 480 px. O roteiro citava 480 px; o uso medido é 460 px em 124 telas e 480 px em 2 (74.13) |
+| `layout.painel.consulta` | `--layout-panel-detail` | 820 px | Tela de trabalho da O.S. e consulta com tabelas | Absorve 840 px |
+| `layout.painel.comparacao` | `--layout-panel-compare` | 1060 px | Só comparação lado a lado de versões (SAF) | — |
+| `layout.painel.talhao` | `--layout-panel-plot` | 356 px | Painel do talhão, dentro do cartão do mapa | Não sobrepõe o mapa |
+| `layout.mapa.barra` | `--layout-map-rail` | 96 px | Barra vertical de funcionalidades | Protótipo validado: 96 px; 67.2 diz 56–72 px (PEND-DS-07) |
+| `layout.app` | `--layout-app` | 390 px | Largura de referência do app (390 × 844) | — |
+| `layout.impressao` | — | A4: 794 × 1123 px a 96 dpi | Ficha impressa | Margens 36 × 44 px (exceção nomeada) |
+| `alvo.campo` | `--target-field` | 44 × 44 px | Ação do app e controle usado no campo (4.3; 64.4) | Vários controles do app medem 17–32 px de altura (74.13) |
+| `alvo.minimo` | `--target-min` | 24 × 24 px | Qualquer controle no desktop (WCAG 2.5.8) | Filtro de coluna 11 × 22 px e expandir linha 22 × 22 px (74.13) |
+| `icone.12` · `.14` · `.16` · `.20` · `.24` | `--icon-12` … `--icon-24` | 12, 14, 16, 20 e 24 px | Ordenar (12); ícone de botão (14; absorve 13 e 15); menu e ferramenta (16); barra do mapa, fechar, zoom (20; absorve 18); app (24; absorve 26) | O ícone de 40 px do estado vazio é exceção do componente |
+| `ponto` | `--dot` | 6 px | Ponto do chip, do contexto e do rodapé | Absorve 7 e 8 px |
+
+Medidas de componente, que ficam no componente e contam como exceções nomeadas (DS-12): as larguras de subtítulo da tela até 900 px, aviso até 560 px, selo no título até 300 px, tag de origem até 150 px, rótulo de coluna da tabela até 104 px, célula da tabela de 340 px por padrão, busca do cabeçalho a partir de 220 px e busca da tabela a partir de 160 px; e as demais medidas escritas nos blocos de 74.5 (por exemplo, círculo da etapa de 22 px, marca de 28 px, zoom de 36 px, amostra da legenda de 11 px e QR de 104 px).
+
+**Pontos de quebra.** O protótipo não tem nenhum: as telas são de largura fixa (1440 ou 390 px). Os números ficam para a PEND-DS-06. A proposta é validar o layout nos quatro tamanhos de MAPUX-02 e quebrar em 3 faixas: celular abaixo de 768 px (lista de cartões no lugar da tabela, 4.3), tablet de 768 a 1279 px (menu recolhido) e desktop a partir de 1280 px.
+
+#### 74.3.12 Camadas (z-index)
+
+| Token | Variável | Valor | Uso |
+|---|---|---:|---|
+| `camada.tabela-fixa` | `--z-table-sticky` | 1 (coluna) e 2 (cabeçalho) | Primeira coluna e cabeçalho fixos da tabela |
+| `camada.faixa` | `--z-steps` | 30 | Faixa de etapas fixa |
+| `camada.suspensa` | `--z-dropdown` | 40 | Lista suspensa e menu de coluna. Sobe de 25 para ficar acima da faixa de etapas (74.13) |
+| `camada.tela-cheia` | `--z-fullscreen` | 55 | Mapa em tela cheia |
+| `camada.painel` | `--z-panel` | 60 | Véu e painel lateral |
+| `camada.aviso` | `--z-toast` | 70 | Aviso temporário |
+
+#### 74.3.13 Exigências dos tokens
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| DS-10 | Tokens em três camadas (74.3.1). Componente usa só token semântico ou de componente; token de referência nunca aparece em componente nem em tela. | Verificação automática (74.10): nenhuma variável `--ref-*` fora do arquivo de tokens. |
+| DS-11 | Cada token tem nome em português e variável CSS em inglês técnico, com correspondência 1:1, gerados do mesmo arquivo. As tabelas de 74.3 são a lista oficial. | A tabela gerada do arquivo de tokens coincide com 74.3, linha a linha. |
+| DS-12 | Cor, espaço, raio, sombra, camada e duração literais só existem no arquivo de tokens. As exceções nomeadas em 74.3.6 e 74.3.11, inclusive as medidas escritas nos blocos de 74.5, são as únicas medidas fixas permitidas no componente. | Verificação automática no CI, com a lista de exceções tirada desses trechos: zero literais fora dela. |
+| DS-13 | Tipografia só da escala de 74.3.5: dois tipos de letra, 11 tamanhos e os pesos listados. Caixa alta só no rótulo de 11 px. Algarismos tabulares conforme DS-05. | Inventário de estilos do catálogo: nenhum tamanho, peso ou família fora da escala. |
+| DS-14 | Com `prefers-reduced-motion: reduce`, toda transição dura 0 ms. Nenhuma informação depende de animação. | Com a preferência ligada, o zoom do mapa muda de escala sem transição e o resultado é o mesmo. |
+| DS-15 | Alvo de 44 × 44 px em toda ação do app e em controle usado no campo; no desktop, 24 × 24 px no mínimo, salvo a exceção de espaçamento de WCAG 2.5.8, que precisa ser medida. | Medição automática no espécime e nas telas do app (74.9): nenhum controle abaixo do limite do seu contexto. |
+
+### 74.4 Cor com significado
+
+Consolida 4.2 (cor sempre com texto), 8.4.3 (etapas e selos), 8.4.4 (cores do mapa do ciclo, que passa a remeter aqui), 64.5 e o cap. 73 (envio, relato, integração, reserva e atualidade). A palavra vem do contrato. A cor vem do protótipo e só muda onde havia conflito entre telas ou falha medida; essas mudanças estão marcadas com ⚑.
+
+#### 74.4.1 Regras
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| DS-16 | Há seis papéis de estado e só seis (74.4.2). As paletas de dados do mapa e dos gráficos (74.7) não servem como cor de estado. | Inventário do catálogo: seis pares de cor de estado, nenhum outro. |
+| DS-17 | **Erro (vermelho)** marca o que impede o próximo passo por uma condição que o responsável não resolve com o seu passo normal: impedimento, bloqueio, conflito, falta de recurso, atraso, rejeição, erro. Nunca marca etapa nem classificação (8.4.4). | Nenhuma etapa e nenhuma tag em vermelho. |
+| DS-18 | **Atenção (âmbar)** marca decisão ou ação pendente que alguém pode tomar agora, ou registro que ainda não tem aceite central. | Todo estado âmbar da tabela 74.4.3 tem dono identificado ou é situação de envio. |
+| DS-19 | **Sucesso (verde)** marca condição favorável confirmada ou efeito concluído (DS-03). | Nenhum registro enviado aparece em verde antes do recibo do servidor; até lá, mostra a situação de envio (64.5). Estados locais do app (Turno aberto; pacote Disponível sem internet) não afirmam aceite central. |
+| DS-20 | **Neutro (cinza)** marca o que não pede nada agora: rascunho, previsto, histórico, inativo, fila do sistema dentro do prazo. | Nenhum estado Neutro da tabela 74.4.3 tem dono e prazo em 73.10.4, e nenhuma pendência com dono e prazo aparece em cinza. |
+| DS-21 | **Informação (azul)** marca o que está em curso agora, pelo sistema ou por terceiro, sem ação do usuário. | Todo estado azul da tabela tem "Quem age" = sistema ou terceiro. |
+| DS-22 | **Prazo-hoje (laranja)** só existe no degrau "Vence hoje" da escala de prazo. | Nenhum outro uso de `cor.prazo-hoje.*`. |
+| DS-23 | **Um chip, um estado.** Etapa, selo, prazo, envio, integração e atualidade são dimensões diferentes e usam chips separados, lidos em sequência. Texto composto colorido pelo pior estado não é usado. O exemplo "Aprovada pelo agrônomo · Falta máquina" (8.4.3) aparece como dois selos lado a lado, na ordem do texto. | Inventário das telas: nenhum chip reúne palavras de duas dimensões. |
+| DS-24 | **Mesma palavra, mesma cor.** A cor sai da tabela 74.4.3 por uma única função (estado → papel), nunca por busca de trecho no texto nem por posição. Palavra nova só entra pela governança (74.10), antes do uso. "Pendente" sozinho só existe na integração ERP; nos demais casos, a palavra nomeia o objeto (74.8). | Teste percorre as telas e a tabela: zero palavra com duas cores. As três regras de cor de selo do protótipo (`ui37.selo`, `processo_os._selos`, `inicio._selo_cor`), que divergem em "Aprovada pelo agrônomo" e "Lote bloqueado", dão lugar a uma só. |
+| DS-25 | **Sinal não cromático.** Estado tem ponto de 6 px na cor do texto do papel (ou o símbolo de prazo ▲ ● ◆ ○ no lugar do ponto) e texto 700. Tag não tem ponto e usa texto secundário 600. A distinção não depende do fundo nem do contorno, que medem de 1,10:1 a 1,23:1 contra a superfície (74.9). | Em escala de cinza, estado e tag se distinguem pelo ponto ou pelo símbolo. |
+
+#### 74.4.2 Papéis
+
+| Papel | Texto · fundo (tokens) | Texto sobre fundo, medido | Quando |
+|---|---|---:|---|
+| Sucesso | `#1E7A4C` · `#E4F3E9` (`cor.sucesso.*`) | 4,64:1 | Favorável confirmado, concluído |
+| Atenção | `#8A5A00` · `#FFF3D6` (`cor.atencao.*`) | 5,37:1 | Decisão ou ação pendente; ainda sem aceite central |
+| Erro | `#B42318` · `#FDE8E6` (`cor.erro.*`) | 5,59:1 | Impede o próximo passo |
+| Neutro | `#5B6660` · `#EEF1EE` (`cor.neutro.*`) | 5,25:1 | Nada pendente agora |
+| Informação | `#1E5F8F` · `#E3F0FB` (`cor.informacao.*`) | 5,87:1 | Em curso, sem ação do usuário |
+| Prazo-hoje | `#9A3F00` · `#FFE8D6` (`cor.prazo-hoje.*`) | 5,76:1 | Só "Vence hoje" |
+
+As seis cores de texto também atendem sobre branco, de 5,33:1 a 6,81:1, quando o estado aparece como texto de estado, sem pílula (74.5.8).
+
+#### 74.4.3 Tabela única: estado → cor → palavra
+
+Esta tabela é a única fonte de cor de estado (DS-24). A causa ou o objeto vêm depois do ponto médio, na mesma cor ("Impedida · ativo bloqueado"). {…} marca valor variável. Palavras separadas por vírgula têm o mesmo papel; quando a linha tem mais de um papel, os grupos separados por ponto e vírgula seguem a ordem da coluna Papel.
+
+| Dimensão · onde aparece | Papel | Palavras exibidas | Fonte da palavra | Mudança em relação ao protótipo |
+|---|---|---|---|---|
+| Etapa da O.S. · coluna do Kanban, chip de fase da lista, mapa, app | Neutro | A liberar, Encerradas, Canceladas (só em filtro e visão própria) | 8.4.3 | Encerradas: 8.4.4 pedia verde; histórico não indica resultado (DS-03). Parte da PEND-DS-01 |
+| Etapa da O.S. | Informação | Liberadas | 8.4.3 | ⚑ Proposta da PEND-DS-01: o protótipo usa verde, e 8.4.4, azul. O azul separa "pronta para iniciar" de "em execução" |
+| Etapa da O.S. | Sucesso | Em execução | 8.4.3 | 8.4.4 pedia ciano, cor que não existe nos tokens. Parte da PEND-DS-01 |
+| Etapa da O.S. | Atenção | Em conferência | 8.4.3 | — |
+| Selo da O.S. · cartão, coluna Condição, tela de trabalho, app | Erro | Impedida · {causa}, Conflito · {objeto}, Falta insumo, Falta máquina, Lote bloqueado, Ativo bloqueado, Aprovação vencida/invalidada, Revogada, Rejeitada | 8.4.3; 8.1; APROV-12; DEC-2609-05 | ⚑ Rejeitada era cinza em uma tela |
+| Selo da O.S. | Atenção | Aguardando agrônomo, Em revisão, Devolvida para ajuste, Janela a definir, Parcial · dia {n} de {m}, Pausada por {motivo}, Aguardando próximo turno, Revisão de saldo pendente, Apontamentos pendentes, Sobras a receber, Entrega sem saldo suficiente, Cancelamento pendente, Reserva vencida | 8.4.3; 8.4.1; 41.2; RSV-16 | "Devolvida para ajuste" substitui "Ajuste solicitado". "Sobras a receber" × "Sobras pendentes" é a PEND-DS-02. Pausada não muda a etapa (Em execução) |
+| Selo da O.S. | Sucesso | Aprovada pelo agrônomo | 8.4.3; APROV-10 | ⚑ Era amarelo pela regra do app |
+| Impedimento de encerramento · tela de trabalho, lista e cartão em Em conferência, só no tipo de efeito marcado por INTEG-16 | Atenção | Aguardando confirmação do ERP · {responsável} · {prazo} | INTEG-16; INTEG-27 | Novo. Não é selo nem coluna: é o impedimento principal do cartão, sem a situação de integração |
+| Prazo · cartão, lista, mapa (símbolo no lugar do ponto) | Erro | ▲ Atrasada | 8.4.3 (atraso é indicador transversal); protótipo | — |
+| Prazo | Prazo-hoje | ● Vence hoje | Protótipo (`inicio.PZ`; legenda de Ordens de serviço) | ⚑ Era vermelho em IN-01, IN-02, CO-06 e PL-05 |
+| Prazo | Atenção | ◆ Até 3 dias | Protótipo (30 usos de "até 3 dias") | Absorve "até 2 dias"; a data vai no texto |
+| Prazo | Sucesso | ○ No prazo | Protótipo | ⚑ "Até 5 dias" e "até 7 dias" em cinza passam a No prazo. Cartão e lista mostram só os três primeiros degraus (8.4.3: só o pertinente) |
+| Aprovação · bloco Situação e origem | Sucesso; Atenção; Erro | Vigente · v{n} · {agrônomo}; Aguardando agrônomo · {prazo}; Vencida/invalidada · v{n} | APROV-13 | Bloco novo (74.6). Na água sem produto, a linha não aparece (APROV-15) |
+| Prontidão · bloco Situação e origem | Sucesso; papel do selo | Pronta; {pendência} · {dono} · {prazo} (por exemplo, "Falta máquina · PCM · até 25/09") | APROV-10; APROV-13 | Bloco novo (74.6) |
+| Envio do aparelho · app; na web, só Verificando envio; suporte em CF-03 (73.10.2) | Atenção | Salvo neste aparelho, Aguardando envio | 64.5; IDEM-05 | ⚑ Eram "No aparelho · aguardando sinal" e "Aguardando sinal" |
+| Envio do aparelho | Informação | Enviando (transitório, no próprio controle), Verificando envio (web, depois de recarregar) | IDEM-08; IDEM-09 | Novos |
+| Envio do aparelho | Sucesso | Sincronizado, com a ação Ver recibo | 64.5 | ⚑ Eram "Enviado com recibo", "Enviado · …", "envios em dia" e "Registrada na O.S." |
+| Envio do aparelho | Erro | Conflito, com a ação Revisar | 64.5; 73.3 | — |
+| Relato de campo · app, tela da O.S., CA-02 | Atenção | Em conferência (chip ao lado de Sincronizado); na tela da O.S., "{n} relatos em conferência", com responsável e prazo | 73.5 | ⚑ CF-03 usava "Reconciliação pendente" e "Em reconciliação" em vermelho |
+| Relato de campo | Texto secundário, sem chip | Já registrado por {papel} · {valor}, Corrigido | 73.5 (CONC-18) | ⚑ CF-03 usava "Deduplicado" e "Confirmado" em verde. "Corrigido" é novo |
+| Relato de campo | Erro | Recusado · {motivo} | 73.5 (CONC-18); 73.10.1 | Novo. Recusa é rejeição (DS-17); o conteúdo do relato continua preservado |
+| Integração ERP · só no bloco Situação e origem para os perfis de INTEG-27, em CF-03 e em GE-03, como "Integração ERP: {situação} · desde {hh:mm}" | Neutro | Pendente | 73.6.5 | Novo |
+| Integração ERP | Informação | Enviando | 73.6.5 | ⚑ "Enviado · aguardando aceite" (âmbar), antes do tempo limite |
+| Integração ERP | Atenção | Em reconciliação, com responsável e prazo depois do limite de consultas | 73.6.5; INTEG-25 | ⚑ A mesma frase mais "A confirmar", depois do tempo limite |
+| Integração ERP | Sucesso | Confirmada | 73.6.5 | Novo |
+| Integração ERP | Erro | Com erro · {causa} | 73.6.5 | ⚑ Era "Rejeitado" |
+| Reserva de material · SU-07, MB-05, tela da O.S. | Neutro | Reservado até dd/mm hh:mm, Devolvido ao disponível: {quantidade} · {motivo} | RSV-16 | Novos. "Liberar reserva" e "expiração" não são usados (74.8) |
+| Reserva de material | Atenção | Reserva vence dd/mm hh:mm (tela da O.S., só na janela de aviso, que é pendência de 73.4), selo Reserva vencida; Cota sem retorno e Sem cobertura (SU-07, pendências do almoxarife com prazo) | RSV-09; RSV-10; RSV-16 | Novos. Sem saldo para reservar de novo, o selo passa a Falta insumo (Erro); com Sem cobertura, as ordens afetadas mostram Falta insumo (RSV-10) |
+| Requisição e entrega · SU-07, tela da O.S., app | Neutro | A entregar, Em custódia · {quantidade} | 8.1; 42 | ⚑ "A entregar" era âmbar em uma tela; "Em uso na O.S." passa a Em custódia |
+| Requisição e entrega | Informação | Em separação | 8.1 | ⚑ "Separada · em conferência" era âmbar |
+| Requisição e entrega | Atenção | Entregue parcial, Aguardando confirmação no app | 8.1; DEC-2609-07 | — |
+| Requisição e entrega | Sucesso | Entregue | 8.1 | ⚑ Era "Entrega completa" |
+| Apontamento · tela da O.S., CA-02 | Neutro; Sucesso; Erro | Previsto; Conferido; Não conforme | 8.1; 4.4 | "Conferido" é resultado da conferência, não situação de envio |
+| Lote · EST, SU | Neutro; Informação; Atenção; Sucesso; Erro | Recebido, Esgotado, Destinado; Em processo; Em inspeção; Liberado; Bloqueado · {causa} | 8.1 | ⚑ "Aguarda laudo" vira detalhe de Em inspeção; "Vencido" vira "Bloqueado · validade vencida" |
+| Atualidade de dado derivado · cartão, linha, camada | — | Atual: nenhuma marca; o cartão gerencial mostra "Dados até dd/mm hh:mm" em texto secundário | PROJ-05; PROJ-07 | Novo |
+| Atualidade | Informação; Atenção; Neutro | Atualizando (texto de estado, só na linha ou no cartão afetado); Desatualizado · Dados até dd/mm hh:mm; Indisponível (sem valor) | PROJ-07; PROJ-12 | Novos. Nunca zero, vazio ou cor de meta no lugar de dado não processado |
+| Validade de dado de decisão · IR-01, IR-04, AG-01, AG-04 | Atenção | vencido, junto de fonte e idade ("{fonte} · {idade} · vencido") | PROJ-13; PROJ-15 | Novo. Não impede a decisão humana (PROJ-15); o valor estimado que substitui o vencido leva a tag "estimado" |
+| App · turno | Sucesso; Atenção; Neutro | Turno aberto; Turno pausado; Sem turno aberto | Protótipo (MB-03) | — |
+| App · pacote offline | Sucesso | Disponível sem internet · v{n} | Protótipo (ficha do app); CAMPO-07 | — |
+| Safra gerencial · SAF, filtro do topo | Neutro; Atenção; Sucesso | Rascunho, Encerrada; Planejamento técnico aprovado, Em fechamento, Período encerrado (filtro do topo); Orçamento autorizado, Em execução | 8.1; 4.3 | ⚑ "Em planejamento" não está em 8.1 (PEND-DS-08) |
+| Compra · CMP, SU | Neutro; Atenção; Informação; Sucesso | Rascunho, Encerrado; Em aprovação, Em decisão, Devolvida para ajuste, Recebido parcial; Enviada, Recebendo propostas, Emitido; Confirmado, Recebido | 8.1 | ⚑ "Devolvida … · ajustar" era vermelho; "Em cotação" era âmbar em PT-05 |
+| Cadastro | Sucesso; Neutro; Atenção | Ativo; Inativo, Suspenso · {motivo}, Revogado; Convite pendente, Acesso solicitado | Protótipo (cadastros); glossário 21.1 a completar | ⚑ Inativo era vermelho na AG-05 |
+| Talhão no Satélite · IN-04 | Neutro; Sucesso; Atenção; Erro | Nuvem (amostra hachurada); Normal; Atenção; Crítico | Protótipo (IN-04); 61.4 | — |
+| Classe de índice e camada operacional do mapa | Cor da classe (74.7), não de estado | Falha, fraco, atenção, médio, bom, vigor alto (NDVI, NDRE, EVI); classes de cada camada operacional (DEC-2609-12) | 61.3; 74.7 | No painel do mapa, a classe aparece como amostra de cor com texto em `cor.texto.principal`, não como chip de estado (74.7) |
+| Classificação · tag | Sem papel: contorno, sem ponto | Cultura, variedade, tipo, origem (App, Web), origem do valor ("estimado"), prioridade, grupo | 4.2; 64.7; PROJ-14 | ⚑ Origem era chip azul e cinza; a prioridade "Alta" era chip vermelho. Urgência se mostra pelo prazo ou pelo selo, não pela tag |
+
+### 74.5 Componentes
+
+Cada bloco é uma exigência normativa, com o ID no título. **Aceite comum:** o componente existe no catálogo (74.10) com cada variante e cada estado do bloco, usa só os tokens citados e passa nos testes de contraste e de regressão visual. Os critérios com precondição, ação e resultado estão em 74.11. As medidas marcadas "Medido" foram tomadas no protótipo renderizado (MB-01, OS-0424-app, IN-04 e OS) durante a extração de 27/09/2026; as demais vêm do CSS e ainda serão medidas no espécime (74.9).
+
+#### 74.5.0 Estados comuns · DS-26
+
+Todo componente implementa, com esta aparência, os estados que se aplicam a ele.
+
+| Estado | Aparência | Regra |
+|---|---|---|
+| Padrão | Tokens do componente | — |
+| Ponteiro | Primário: `cor.acao.primaria.hover`. Secundário, mini e linha: `cor.superficie.hover`. Link: `cor.texto.link.hover` | Não é o único sinal de que algo é clicável |
+| Foco | `foco.anel`; na linha da tabela, `foco.anel.linha`; no menu, `foco.anel.inverso` | Visível em todo controle focável. `outline: none` sem substituto é defeito (WCAG 2.4.7) |
+| Selecionado | Opção escolhida (segmento, aba, chip de filtro, funcionalidade do mapa): fundo `cor.acao.primaria` e `cor.texto.inverso`. Ferramenta ou modo ligado: `cor.superficie.selecionada` com borda de 1 px em `cor.acao.primaria`. Cartão ou item escolhido: `borda.2` em `cor.acao.primaria` | Um padrão por tipo de seleção, com `aria-pressed`, `aria-selected` ou `aria-current` |
+| Desabilitado com motivo | No "Próximo passo", a ação dá lugar ao bloqueio, com causa, quem resolve e atalho (74.6). Nos demais lugares: `aria-disabled="true"`, `opacidade.desabilitado`, continua focável, e o motivo aparece em texto `cor.texto.secundario` junto ao controle e ao ser ativado | Nada de "em breve" (20.2). O motivo não depende de dica de ponteiro |
+| Carregando · Enviando | Comando: o controle troca o rótulo por "Enviando", marca `aria-busy="true"` e ignora novos toques até o resultado (IDEM-08). Consulta: a região mostra "Carregando" no lugar do corpo e mantém cabeçalho, filtros e contexto | Não bloqueia a tela inteira. Sem animação obrigatória |
+| Erro | Campo: borda em `cor.erro.texto` e mensagem `tipo.legenda` 700 com `role="alert"`. Região: caixa de erro com a frase e "Tentar de novo" | O que o usuário preencheu é mantido. Erro não é estado de botão |
+| Somente consulta | Campos `readOnly` sobre `cor.fundo.app`; rodapé só com Fechar; motivo no subtítulo | — |
+
+#### 74.5.1 Shell e cabeçalho da tela · DS-27
+
+| Aspecto | Contrato |
+|---|---|
+| Anatomia | Menu lateral (74.5.2) e coluna de conteúdo. Cabeçalho em `cor.superficie` com borda inferior `cor.borda.divisor` e `espaco.14` × `espaco.32`: (1) filtros do topo, trilha e busca global; (2) Voltar (só em detalhe), título em `tipo.titulo-pagina` sem quebra, selo de estado (até 300 px) e a ação primária à direita; (3) subtítulo de uma frase, `tipo.corpo-compacto` secundário, até 900 px. Depois: faixa de etapas (processo), conteúdo com `espaco.18` × `espaco.32` e `espaco.18` entre blocos |
+| Variantes | Tela do menu; detalhe (Voltar e trilha de 3 níveis); processo com etapas; mapa (sem primário no cabeçalho; selo-resumo no lugar, 74.6) |
+| Estados | Selo de estado atualizado pelo registro. Carregando e erro ficam no conteúdo, nunca no cabeçalho |
+| Regras | Um primário no cabeçalho (DS-02); no detalhe, o primário fica no Próximo passo e o cabeçalho não tem outro (74.6.2). O subtítulo só aparece quando ajuda a decidir. A busca global é exigência de 4.2 e não existe nas telas do menu do protótipo |
+| Acessibilidade | `header`, `nav`, `main`; um único `h1` por tela; o selo tem texto |
+
+#### 74.5.2 Menu lateral · DS-28
+
+| Aspecto | Contrato |
+|---|---|
+| Anatomia | `cor.menu.fundo`, `layout.menu`, `espaco.16` × `espaco.12`. Marca: quadrado de 28 px em `cor.acao.primaria`, `raio.10`, ícone e nome (marca e nome exibido: PEND-DS-04). Grupos do menu vigente (Mapa, Cadastros, Agrícola, Suprimentos) com `icone.16` e rótulo `tipo.corpo` 700; subitem `tipo.corpo-compacto` 500 com recuo de 30 px. No pé: selo DEMONSTRAÇÃO (só no ambiente de demonstração) e perfil |
+| Variantes | Item simples; grupo recolhível (`aria-expanded`); menu recolhido, só com ícones, nome acessível e dica (20.2; largura na PEND-DS-09) |
+| Estados | Ativo: `cor.menu.ativo`, texto inverso 700, `aria-current="page"`. Grupo com item ativo: `cor.menu.grupo-aberto`. Inativo: `cor.menu.texto`; subitem `cor.menu.texto-secundario`. Foco: `foco.anel.inverso`. Medido: item 208 × 34 px, subitem 178 × 28 px |
+| Regras | Só o grupo da tela atual começa aberto. Detalhe acende o item de origem. Ícone sempre com rótulo |
+
+#### 74.5.3 Trilha e Voltar · DS-29
+
+| Aspecto | Contrato |
+|---|---|
+| Anatomia | Linha `tipo.corpo-compacto` 500: Área › Submenu › Registro. Níveis anteriores são links em `cor.texto.secundario`; o último é texto em `cor.texto.principal`. Voltar: chevron `icone.20` à esquerda do título, só em detalhe |
+| Regras | O Voltar leva à origem real, e o retorno preserva filtro, seleção e posição (4.2) |
+| Acessibilidade | `nav aria-label="Trilha"`; `aria-current="page"` no último nível; Voltar com nome "Voltar para {origem}"; alvo de 24 px no desktop e de 44 px no app (medido no app: 20 × 20 e 12 × 27 px; 74.13) |
+
+#### 74.5.4 Filtros do topo · DS-30
+
+| Aspecto | Contrato |
+|---|---|
+| Anatomia | **Filtro:** rótulo `tipo.legenda` 700 secundário, seletor em pílula (`tipo.legenda` 700, borda `cor.borda.campo`) e divisor vertical de 1 × 18 px. **Contexto:** pílula somente leitura em `cor.superficie.sutil` com cadeado `icone.12` e "fixo", mais o link "Trocar safra", que volta à etapa 1 |
+| Variantes | Pela DEC-2609-11: Mapa, Fazenda (filtro); OS, Fazenda e Safra (filtros); EST, Fazenda (filtro); SAF e CMP, fazenda e safra (contexto) |
+| Estados | Trocar o valor muda os dados e mostra o aviso "Fazenda: {nome}". Período encerrado: chip de Atenção "Período encerrado", só leitura (4.3). O que não se aplica não aparece (DEC-2609-11) |
+| Corrige (74.13) | Borda do seletor passa a `cor.borda.campo`; volta o cadeado do contexto fixo; sai a pílula "não se aplica" a 55 % (2,17:1) |
+
+#### 74.5.5 Faixa de etapas · DS-31
+
+| Aspecto | Contrato |
+|---|---|
+| Anatomia | `nav aria-label="Etapas do processo"`, fixa no topo (`camada.faixa`), `cor.superficie`, borda inferior e `etapas.sombra`. Rótulo `tipo.rotulo-caixa-alta`. N colunas iguais, sem rolagem. Cada etapa: número num círculo de 22 px (`tipo.legenda` 700), nome `tipo.corpo-compacto` (até 2 linhas) e motivo opcional `tipo.legenda` 700 em `cor.erro.texto` |
+| Variantes | Horizontal (processos SAF, PA, CMP, EST); vertical (app e trilha de um registro); barra de fases da O.S. (cinco segmentos de 6 px com rótulo, `progresso.fase.*`) |
+| Estados | **Concluída:** ✓ no círculo, `cor.sucesso.texto` sobre `cor.sucesso.fundo`, com data quando houver (68.2). **Atual:** `cor.superficie.selecionada`, traço inferior de 2 px em `cor.acao.primaria`, número inverso sobre `cor.acao.primaria`, nome 800, `aria-current="step"`. **Impedida:** número `cor.erro.texto` sobre `cor.erro.fundo` e motivo. **Futura:** número `cor.texto.principal` sobre `cor.superficie.sutil`. Etapa opcional ou que não se aplica não aparece como erro (68.2) |
+| Regras | Clicar leva à etapa, sem obrigar sequência artificial (68.2). Na barra de fases, a fase atual se distingue pelo rótulo em 800 e por `aria-current`: a cor da atual contra a concluída mede 1,76:1 e não basta sozinha |
+| Corrige (74.13) | Quatro desenhos viram um componente com três variantes; as horizontais ganham o estado concluída; segmento concluído `#9CCBB0` → `#719E85`; texto futuro `#8A968E` → `cor.texto.secundario` |
+
+#### 74.5.6 Faixa de continuidade · DS-32
+
+| Aspecto | Contrato |
+|---|---|
+| Anatomia | Caixa `cor.superficie.selecionada`, borda `cor.borda.divisor`, `raio.12`, `espaco.8` × `espaco.14`. Quatro células separadas por "→" em `cor.texto.secundario`: **Veio de → Está aqui → Falta → Próxima ação** (4.2). Rótulo `tipo.rotulo-caixa-alta` secundário; valor `tipo.corpo-compacto` 600; Próxima ação em `cor.texto.link` 700 |
+| Variantes | Desktop em uma linha que quebra quando falta espaço; app em grade de 2 × 2 |
+| Regras | Célula com registro é link para ele (68.2). Aparece em todo detalhe; na tela de trabalho da O.S. vale a equivalência de 74.6 |
+| Corrige (74.13) | Rótulo de 4,34:1 passa a 5,21:1 (`cor.texto.secundario`); valor cortado com reticências passa a quebrar linha; células passam a abrir o registro |
+
+#### 74.5.7 Botões · DS-33
+
+| Aspecto | Contrato |
+|---|---|
+| Anatomia | Rótulo com verbo que nomeia o efeito (4.2; 20.2; 74.8). Ícone opcional em `icone.14`, sempre com rótulo |
+| Variantes por papel | **Primário:** fundo e borda `cor.acao.primaria`, texto inverso 700, `botao.primario.sombra`. **Secundário:** `cor.superficie`, borda `cor.borda.divisor`, texto principal. **Tonal** (próxima ação no cartão do app): `cor.superficie.selecionada`, borda e texto `cor.acao.primaria`. **Link de ação:** sem fundo, `cor.texto.link` 700, sublinhado. **Destrutivo:** contornado (borda e texto `cor.acao.destrutiva`) para iniciar o efeito; preenchido (`cor.acao.destrutiva` com texto inverso) só para confirmá-lo. **Ícone:** 28 × 28 px (excluir linha) ou 32 × 32 px (fechar painel), com nome acessível |
+| Tamanhos | **Grande** (app): largura total, `espaco.18`, `tipo.app-acao`, `raio.16`, 56 px de altura no mínimo (medido: 350 × 61 e 358 × 56 px). **Padrão:** 12 × 20, `tipo.corpo` 700, `raio.10` (medido: 121 × 42 px antes do ajuste). **Compacto:** 8 × 14, `tipo.corpo-compacto` 700, `raio.10`. **Mini:** 6 × 10, `tipo.legenda` 700, `raio.8`; serve também para a ação da linha da tabela e para as ações do painel do mapa |
+| Estados | Os de 74.5.0; carregando = "Enviando" |
+| Regras | Um primário por contexto (DS-02). No app, toda ação de campo tem 44 px de altura (DS-15), e o compacto e o mini não servem como ação de campo |
+| Corrige (74.13) | 9 tamanhos e 5 raios passam a 4 tamanhos e 3 raios; 4 formas de destrutivo passam a 2; "Confirmar rejeição" deixa o verde e fica vermelho preenchido; botões de 32 px no cartão do app passam a 44 px; foco e ponteiro ganham estilo próprio |
+
+#### 74.5.8 Chips e selos de estado · DS-34
+
+| Aspecto | Contrato |
+|---|---|
+| Anatomia | Pílula preenchida em `cor.{papel}.fundo`, ponto de 6 px e texto `tipo.legenda` 700 em `cor.{papel}.texto`; `espaco.2` × `espaco.10` com `borda.1` transparente (a mesma altura da tag), `raio.pilula`, sem quebra. Na escala de prazo, o símbolo ▲ ● ◆ ○ ocupa o lugar do ponto |
+| Variantes | **Chip.** **Selo que quebra linha** (cartão do Kanban, painel estreito): `raio.8`. **Texto de estado** sem pílula: `tipo.legenda` ou `tipo.corpo-compacto` 700 na cor do papel (por exemplo, "Atualizando"). **Contador** (número dentro do chip, na coluna do Kanban e no chip de fase). **Selo-resumo** do cabeçalho do mapa: o único chip que é botão, com foco e nome acessível |
+| Regras | Palavra e papel só da tabela 74.4.3; causa depois do ponto médio; DS-23, DS-24 e DS-25 |
+| Corrige (74.13) | 5 paddings passam a 1; a pílula de prazo de cor cheia (branco sobre `#1E88E5`, 3,68:1) passa a chip |
+
+#### 74.5.9 Tags de classificação · DS-35
+
+| Aspecto | Contrato |
+|---|---|
+| Anatomia | Pílula contornada em `borda.1` `cor.borda.divisor` (decorativa), sem fundo e sem ponto; texto `tipo.legenda` 600 em `cor.texto.secundario`; `espaco.2` × `espaco.10` |
+| Variantes | Tag; tag de origem, que quebra linha até 150 px |
+| Regras | DS-04. Tag não usa cor de estado. O contorno não é o sinal que a distingue do estado (DS-25) |
+| Corrige (74.13) | A origem com fundo próprio passa a tag; origem (App, Web) e prioridade deixam de ser chip de estado; a tag de grupo preenchida do menu antigo (4,14:1) sai com o legado |
+
+#### 74.5.10 Controles de escolha · DS-36
+
+| Aspecto | Contrato |
+|---|---|
+| Anatomia | Trilho em `cor.superficie.sutil`, `raio.pilula`, `espaco.2` de respiro; opção `tipo.corpo-compacto` 700 com `espaco.6` × `espaco.14` |
+| Variantes | **Segmentado** (`role="group"`, `aria-pressed`). **Abas** (`role="tablist"`, `role="tab"`, `aria-selected`, `aria-controls`; medido: 58–85 × 29 px). **Chips de filtro** com contador (`aria-pressed`; medido: 95–146 × 31 px). **Seletor com lista** (`role="listbox"`; item escolhido em `cor.superficie.selecionada` com texto `cor.acao.primaria`). **Ferramenta ou modo** que liga e desliga (Selecionar área, Medir, Criar vistoria) |
+| Estados | Opção escolhida: `cor.acao.primaria` com texto inverso (4,68:1 contra o trilho; texto a 5,33:1). Inativa: `cor.texto.secundario` (5,25:1 sobre o trilho). Ferramenta ligada: selecionado tonal com borda (74.5.0) |
+| Corrige (74.13) | Opção ativa branca com sombra sobre o trilho (1,14:1) passa a verde; chip de fase ativo em `#15201A` passa a verde; abas ganham os papéis de aba; texto inativo de 4,38:1 passa a 5,25:1 |
+
+#### 74.5.11 Cartão de KPI e número em linha · DS-37
+
+| Aspecto | Contrato |
+|---|---|
+| Anatomia | Cartão em `cor.superficie`, borda `cor.borda.divisor`, `raio.16`, `elevacao.1`, `espaco.16` × `espaco.18`. Rótulo `tipo.rotulo-caixa-alta` secundário; valor `tipo.numero-kpi` em `cor.texto.principal`; unidade `tipo.legenda` 500 secundário, junto ao valor |
+| Variantes | **Cartão.** **Número em linha** (barra do mapa e contador do app): rótulo `tipo.legenda` secundário e valor `tipo.corpo` 700; no app, valor em `tipo.titulo-painel` |
+| Estados | Atual, Atualizando, Desatualizado e Indisponível, conforme 74.4.3 e 74.5.12. O valor só ganha cor de papel quando o indicador tem estado definido pela sua regra |
+| Regras | Até quatro por contexto (4.3). Número tabular. Nunca zero no lugar de dado não processado (PROJ-07) |
+| Corrige (74.13) | O último cartão deixava o valor sempre verde, pela posição (DS-03) |
+
+#### 74.5.12 Indicador de atualidade · DS-38
+
+| Aspecto | Contrato |
+|---|---|
+| Anatomia | Linha `tipo.legenda` 600 em `cor.texto.secundario`: "Dados até dd/mm hh:mm", com fonte quando for mapa ou cartão gerencial (55.5). Quando o estado não é Atual, acrescenta "Atualizando" (texto de estado Informação), o chip "Desatualizado" (Atenção) ou "Indisponível" no lugar do valor |
+| Onde | Cartão gerencial; linha, cartão ou camada que dependa de projeção (73.7) |
+| Regras | A tela de origem de um comando mostra o comprovante (74.5.17) e nunca "Atualizando" para o efeito do próprio comando (PROJ-12). "Atualizando" some sozinho quando a visão alcança a versão do recibo |
+| Acessibilidade | A mudança é anunciada com `aria-live="polite"`, sem mover o foco |
+
+#### 74.5.13 Bloco de seção · DS-39
+
+| Aspecto | Contrato |
+|---|---|
+| Anatomia | `section` em `cor.superficie`, borda `cor.borda.divisor`, `raio.16`, `elevacao.0`. Cabeçalho com título `tipo.titulo-bloco`, descrição opcional de uma linha em `tipo.corpo-compacto` secundário e até duas ações mini à direita; corpo com `espaco.12` nas laterais e no pé |
+| Variantes | **Com tom:** borda esquerda `borda.3` em `cor.atencao.texto` ou `cor.erro.texto`, com o motivo escrito no cabeçalho. **Com estado:** chip no cabeçalho |
+| Estados | Carregando e erro no corpo (74.5.0); vazio conforme 74.5.19 |
+| Corrige (74.13) | `bloco` (12 cópias locais) e `section` (raio 16, sombra, ponto de estado sem palavra) viram um componente; raio 14 → 16; tom de 4 px → 3 px; o ponto de estado sozinho dá lugar ao chip com palavra |
+
+#### 74.5.14 Tabela interativa G2 · DS-40
+
+| Aspecto | Contrato |
+|---|---|
+| Moldura | `cor.superficie`, borda `cor.borda.divisor`, `raio.16`, `role="table"`, rolagem horizontal própria; primeira coluna e cabeçalho fixos (`camada.tabela-fixa`) |
+| Barra | `espaco.8` × `espaco.12`. Busca em pílula (`cor.fundo.app`, borda `cor.borda.campo`, lupa `icone.14`, a partir de 160 px); "N de M" em `tipo.legenda` secundário (4.3); filtros ativos como chips removíveis (texto e borda `cor.acao.primaria` sobre `cor.superficie.selecionada`); "Limpar filtros"; ferramentas da tela. Com seleção: "{n} selecionados", ações em lote e "Limpar seleção". Em árvore: "Expandir tudo" e "Recolher tudo" |
+| Cabeçalho | `cor.fundo.app`. Por coluna: botão de ordenar (`tipo.rotulo-caixa-alta` secundário, até 104 px, quebra linha; seta `icone.12` em `cor.icone.inativo`, ou ▲ ▼ em `cor.acao.primaria`) e botão de filtro (`cor.icone.inativo`; em `cor.acao.primaria` com o número de valores escolhidos). Cada botão com alvo de 24 × 24 px. Ordem: crescente, decrescente, sem ordem |
+| Menu da coluna | Ordenar, filtro textual, valores existentes com contagem, intervalo para número e data e "Agrupar por esta coluna" onde fizer sentido (4.3) |
+| Linha | `tipo.corpo-compacto`, `espaco.6` × `espaco.8`, divisor superior. Número à direita, tabular, sem quebra (DEC-2609-08). Clique, Enter ou Espaço abrem o detalhe; link, botão, campo e caixa de seleção na linha não abrem (4.3) |
+| Estados da linha | Ponteiro `cor.superficie.hover`; foco `foco.anel.linha`; recém-salva com lampejo em `cor.superficie.selecionada`; filha em `cor.superficie.aninhada` com recuo de 20 px por nível e seta de expandir com alvo de 24 × 24 px; exclusão na linha: "Excluir?", [Excluir] (mini destrutivo preenchido) e [Manter]; Atualizando só na linha afetada (74.5.12) |
+| Total | `borda.2` superior em `cor.texto.principal`, `cor.fundo.app`, peso 800, ponteiro `tabela.total.hover`. Só medida aditiva de mesma unidade, do conjunto filtrado (4.3). Abrir o total mostra a composição, só para consulta |
+| Estados da tabela | Carregando e erro (74.5.0); sem resultado e vazio (74.5.19); sem permissão: a linha abre em consulta |
+| Seleção | Caixa com estados marcado, parcial (`aria-checked="mixed"`) e vazio; 16 px de desenho dentro de alvo de 24 px; borda `cor.borda.campo`; marcação em `cor.acao.primaria` |
+| Corrige (74.13) | Filtro de coluna de 11 × 22 px passa a 24 × 24; seta inativa (1,70:1) e "▾" (2,83:1) passam a 3,28:1 sobre a superfície e 3,02:1 sobre o fundo; busca sem foco visível; "selecionar todas" sem estado; total desligado nas tabelas convertidas. Exigidos por 4.3 e ausentes no protótipo: filtro textual, intervalo e "Agrupar por" |
+
+#### 74.5.15 Painel lateral · DS-41
+
+| Aspecto | Contrato |
+|---|---|
+| Estrutura | Véu `cor.sobreposicao`; `aside role="dialog" aria-modal="true"` com `aria-labelledby`; `camada.painel`; `elevacao.4`; altura total, rolagem própria do painel inteiro (DEC-2609-08); `espaco.24` nas bordas e `espaco.12` entre partes |
+| Larguras | `layout.painel.formulario` (460 px), `layout.painel.consulta` (820 px), `layout.painel.comparacao` (1060 px) |
+| Cabeçalho | Título `tipo.titulo-painel` ("{entidade} · {identificação}" ou "Novo {entidade}"), fechar como botão de ícone de 32 × 32 px em `cor.fundo.app` e subtítulo de uma frase quando necessário |
+| Corpo | Resumo de erro no topo (`cor.erro.*`, `role="alert"`); campos (74.5.16); seção Origem com links, na consulta |
+| Rodapé | Divisor superior; [Cancelar] (secundário compacto) e o verbo do efeito (primário compacto) |
+| Fechar | ×, Esc e clique no véu, sempre, com checagem de não salvo: caixa `cor.atencao.*` com `role="alert"`, "Há alterações não salvas.", [Descartar alterações] (mini) e [Continuar editando] (mini primário) |
+| Foco | Ao abrir, vai ao primeiro campo (formulário) ou ao título (consulta); fica preso no painel enquanto ele está aberto; ao fechar, volta ao elemento que o abriu |
+| Corrige (74.13) | 9 larguras passam a 3 tokens, mais o painel do talhão; 5 painéis sem Esc e 1 sem ×; nenhuma gestão de foco; padding de 22 px passa a 24 px |
+
+#### 74.5.16 Campos · DS-42
+
+| Aspecto | Contrato |
+|---|---|
+| Anatomia | Rótulo `tipo.legenda` 600 secundário, ligado ao controle; controle `tipo.corpo` 500, `espaco.10` × `espaco.12`, `raio.10`, `borda.1` em `cor.borda.campo`, fundo `cor.superficie`; unidade como sufixo em `tipo.corpo-compacto` secundário; ajuda em `tipo.legenda` secundário; erro em `tipo.legenda` 700 `cor.erro.texto`, com `role="alert"`, junto ao campo |
+| Tipos | Seleção; múltipla escolha em pílulas; texto; número (`inputMode="decimal"`, vírgula decimal, 74.8); data; e-mail; telefone; área de texto; lista de cadastro com busca e "+ Novo" |
+| Variantes | Desktop; app (`tipo.app-campo`, `espaco.12` × `espaco.14`, `raio.16`, 44 px de altura no mínimo); inline no painel da O.S. (`raio.8`) |
+| Estados | Foco com anel; erro com borda em `cor.erro.texto` em todas as variantes; somente leitura e desabilitado em `cor.fundo.app`, com o motivo no subtítulo |
+| Obrigatório | Marca-se o opcional, com "(opcional)" no rótulo; os obrigatórios levam `aria-required="true"`. A mensagem de erro diz o que fazer e dá exemplo (74.8) |
+| Corrige (74.13) | Borda `#E4E9E5` (1,23:1) passa a `cor.borda.campo` (3,28:1 sobre a superfície; 3,02:1 sobre o fundo); obrigatório sem marca; raios de 8, 10 e 14 px passam a 10 e 16 (8 só inline); a borda de erro, que só existia no formulário da tabela, vale para todos |
+
+#### 74.5.17 Aviso temporário e comprovante · DS-43
+
+| Aspecto | Contrato |
+|---|---|
+| Aviso | Fixo embaixo, no centro, a `espaco.24` da borda, `camada.aviso`; fundo `cor.texto.principal`, texto inverso `tipo.corpo-compacto` 600, `espaco.12` × `espaco.16`, `raio.12`, até 560 px, `elevacao.3`. Sem botão de fechar |
+| Conteúdo | Efeito, objeto e consequência ("Salvo · linha e totais atualizados"), com `role="status"`. Recusa começa pela ação e por "bloqueado", com a causa ("Iniciar · bloqueado · autorização revogada às 07:15"), com `role="alert"` |
+| Tempo | `tempo.aviso` |
+| Comprovante | Sucesso persistente (20.2; 68.4): o registro mostra "{efeito} · {código ou versão} · {hh:mm}" em `tipo.legenda` secundário, com "Ver recibo", no bloco Situação e origem ou no item do app |
+| Regras | O aviso nunca é o único lugar da informação: o bloqueio fica no "Próximo passo" (DS-06) e o resultado fica no comprovante. Há uma camada de aviso só |
+| Corrige (74.13) | Duas camadas de aviso conviviam, a antiga deslocada em 248 px; sucesso, recusa e informação usavam o mesmo papel de acessibilidade |
+
+#### 74.5.18 Confirmação no contexto · DS-44
+
+| Aspecto | Contrato |
+|---|---|
+| Onde | No próprio contexto: linha da tabela, bloco "Próximo passo" ou faixa sobre o bloco. Sem diálogo modal |
+| Anatomia | Caixa `cor.superficie` (ou `cor.atencao.*` quando pede decisão), `borda.1`, `raio.10`, `role="alert"`. Texto com objeto, quantidade, abrangência e consequência (20.2). Motivo obrigatório em área de texto quando o efeito é sensível. [Voltar] (secundário) e [Confirmar {efeito}] (primário, ou destrutivo preenchido) |
+| Regras | Edição simples e reversível salva sem confirmação (20.2; 68.4). Ação em lote mostra selecionados, elegíveis, excluídos e motivos (68.4) |
+
+#### 74.5.19 Estado vazio e sem resultado · DS-45
+
+| Aspecto | Contrato |
+|---|---|
+| Variantes | **Sem resultado por filtro:** frase em `tipo.corpo-compacto` secundário e "Limpar filtros". **Vazio com próximo passo:** ícone de 40 px secundário, título `tipo.titulo-bloco` e a ação que resolve (primário compacto, por exemplo "Cadastrar talhões"). **Sem permissão para criar:** a frase e quem pode agir. **Coluna vazia do Kanban:** frase em `tipo.legenda` secundário, centralizada, `borda.tracejada` |
+| Regras | "Nada encontrado" oferece criar ou revisar o filtro quando permitido (20.2; 4.3). Vazio nunca vira zero num indicador (PROJ-07) |
+| Corrige (74.13) | Só a IN-04 tinha vazio com ação; nas demais telas havia frases soltas |
+
+#### 74.5.20 Kanban: coluna e cartão · DS-46
+
+| Aspecto | Contrato |
+|---|---|
+| Coluna | Uma por etapa, cinco fixas (8.4.3); `cor.fundo.app`, borda `cor.borda.divisor`, `raio.12`, `espaco.10`. Título `tipo.rotulo-caixa-alta` em `cor.texto.principal`, contador (chip com o papel da etapa) e carga em `tipo.legenda` secundário |
+| Cartão | Botão dentro de item de lista; `cor.superficie`, borda `cor.borda.divisor`, `elevacao.1`, `raio.10`, `espaco.10`. Ordem: ID (`tipo.corpo-compacto` 700), atividade, local (secundário), barra de progresso (74.5.21), realizado tabular, selos que quebram linha, dono · prazo (700), responsável · janela (secundário). O conteúdo obrigatório é o de 8.4.3 |
+| Estados | Selecionado (tela de trabalho aberta): `borda.2` em `cor.acao.primaria`; foco com anel; coluna vazia (74.5.19) |
+| Regras | Nenhuma indicação de integração ERP no cartão e nenhuma coluna para ela (INTEG-27). A exceção é o tipo de efeito marcado por INTEG-16: "Aguardando confirmação do ERP" aparece como impedimento principal do cartão em Em conferência, com responsável e prazo (74.4.3). O protótipo não oferece arrastar; se for oferecido, segue 8.4.3 e tem alternativa por botão. No celular, seletor de etapa e lista vertical (8.4.3) |
+| Acessibilidade | Colunas com `role="list"` e cartões em `listitem`; nome do cartão "Abrir {ID} · {atividade}" |
+
+#### 74.5.21 Barra de progresso · DS-47
+
+| Aspecto | Contrato |
+|---|---|
+| Anatomia | Trilho `cor.superficie.sutil` de 6 px, `raio.pilula`; preenchimento `cor.acao.primaria` (4,68:1 contra o trilho), ou `cor.erro.texto` (5,78:1) quando o registro tem selo de Erro; sempre com número e unidade ao lado (20.2) |
+| Variantes | Cartão do Kanban; uso de recurso ("{n} % · {situação}", com o papel da situação); preparo por carga no app ("{n} de {m} cargas preparadas") |
+| Corrige (74.13) | Os medidores sem uso no gerador (`util`, `nc_bar`) saem; o `nc_bar` tinha a marca do nível de controle fixa em 71 % |
+
+#### 74.5.22 Mapa: barra vertical de funcionalidades · DS-48
+
+| Aspecto | Contrato |
+|---|---|
+| Anatomia | `nav role="tablist" aria-orientation="vertical" aria-label="Funcionalidades do mapa"` com nove botões `role="tab"` e `aria-selected`, na ordem de DEC-2609-06 e com os nomes de DEC-2609-12. Cada botão: `icone.20` sobre rótulo `tipo.legenda` 700 centralizado (até 2 linhas), `espaco.10` × `espaco.4`, `raio.12`, largura `layout.mapa.barra` |
+| Estados | Ativa: `cor.acao.primaria` com texto inverso (5,33:1). Inativa: sem fundo, `cor.texto.secundario` (5,98:1 sobre branco). Foco com anel. Medido: 96 × 55 px (uma linha) e 96 × 68 px (duas) |
+| Regras | Trocar a funcionalidade preserva seleção, zoom e filtros e troca legenda, filtros e números (67.2). Dica "Mostrar {nome} no mapa" |
+| Corrige (74.13) | Ativa `#1E6B47` passa a `cor.acao.primaria` (os dois verdes medem 1,21:1 entre si, dois valores para o mesmo papel); inativa `#4B5A51` passa a `cor.texto.secundario`. Largura: PEND-DS-07 |
+
+#### 74.5.23 Mapa: barra horizontal · DS-49
+
+| Aspecto | Contrato |
+|---|---|
+| Anatomia | Faixa no topo do cartão do mapa: nome da funcionalidade (`tipo.corpo` 700); grupos de filtro (rótulo `tipo.legenda` secundário e segmentado, 74.5.10); até quatro números em linha (74.5.11); atalho para o módulo (mini "… ›") ou o modo "Criar vistoria" (Pragas e doenças); linha de fonte e data (74.5.12) |
+| Regras | Fonte, data e qualidade sempre visíveis (67.2; MAPUX-07). A linha de fonte quebra quando falta espaço e, no toque, mostra o texto inteiro |
+| Corrige (74.13) | A fonte era cortada com reticências, e o texto inteiro só existia na dica de ponteiro |
+
+#### 74.5.24 Mapa: ferramentas, zoom e modo · DS-50
+
+| Aspecto | Contrato |
+|---|---|
+| Ferramentas | `role="toolbar"` no canto superior direito: Selecionar área, Medir e Tela cheia (ou Sair da tela cheia), com `icone.14` e rótulo, `espaco.6` × `espaco.10`, `raio.10`, `elevacao.2`. Ligada: selecionado tonal com borda e `aria-pressed`. Medido: 133 × 31, 76 × 31 e 101 × 31 px |
+| Zoom | `role="group" aria-label="Zoom"` com Aproximar e Afastar: 36 × 36 px no desktop e 44 × 44 px em tela de toque; `cor.superficie`, `raio.10`, `elevacao.2`; transição `movimento.curto`, sem transição com movimento reduzido (DS-14) |
+| Modo | Etiqueta `role="status"` no canto superior esquerdo. Com modo ativo: fundo `cor.texto.principal`, texto inverso ("Selecionar área · clique para somar talhões"). Sem modo: `cor.superficie` e "{funcionalidade} · clique no talhão para ver detalhes e ações" |
+| Tela cheia | `role="dialog"` em `camada.tela-cheia`, com a mesma barra, o mapa e as ferramentas; saída evidente e Esc (67.2) |
+| Ausentes no protótipo | Ampliar mapa, Ajustar à fazenda, Voltar à seleção e Ver dados (67.2) entram com o desenho das ferramentas |
+
+#### 74.5.25 Mapa: legenda · DS-51
+
+| Aspecto | Contrato |
+|---|---|
+| Anatomia | Faixa flutuante no pé do mapa, `raio.10`, texto `tipo.legenda` secundário. Cada item: amostra de 11 × 11 px (`raio.4`) com contorno escuro de 3:1 ou mais e rótulo com valor e unidade ("0,72–0,82 bom"). Fundo, paletas, hachura e contornos em 74.7 |
+| Estados | Muda com a funcionalidade e com o filtro. Recolhível, com o estado lembrado por usuário (67.2) |
+| Corrige (74.13) | A legenda não recolhia; as amostras das camadas operacionais tinham contorno branco, invisível sobre a legenda |
+
+#### 74.5.26 Mapa: talhão e painel do talhão · DS-52
+
+| Aspecto | Contrato |
+|---|---|
+| Talhão | Polígono ou pivô com a cor da classe (74.7), contorno `cor.superficie` de 4 px; selecionado com contorno `cor.texto.principal` de 6 px (13,61:1 contra o terreno). Botão focável com nome "{talhão}: {estado}"; Enter abre. Rótulos com halo (74.7) |
+| Contêiner | O mapa é um grupo com nome acessível, e cada talhão é um botão; há alternativa em lista (MAPUX-06) |
+| Painel do talhão | Abre à direita só com seleção (DEC-2609-06), dentro do cartão do mapa, com `layout.painel.talhao` e borda esquerda `cor.borda.divisor`. Título `tipo.titulo-painel`, subtítulo e fechar; chips de estado; pares rótulo-valor (rótulo secundário, valor 700); seções `tipo.rotulo-caixa-alta` com itens em cartão `raio.10`; uma ação primária e as secundárias no pé |
+| Corrige (74.13) | O SVG com `role="img"` contém botões, que o leitor de tela pode não expor; título do painel de 17 px passa a 19 px |
+
+#### 74.5.27 App: cabeçalho, faixa de ação e barra inferior · DS-53
+
+| Aspecto | Contrato |
+|---|---|
+| Cabeçalho | `cor.superficie`, borda inferior `cor.borda.divisor`, área do sistema de 54 px no topo; Voltar com alvo de 44 × 44 px; título `tipo.titulo-painel`; selo de estado; subtítulo `tipo.corpo-compacto` secundário |
+| Faixa de ação | `cor.superficie`, borda superior `cor.borda.divisor`, `espaco.12` × `espaco.20` mais a área segura do aparelho; um botão grande primário, "verbo + objeto", que muda com o estado da ordem |
+| Barra inferior | **Meu dia · Ordens · Registrar · Caixa** (4.4; 64.1; 64.7), com o rótulo explicativo "Mensagens e pendências" na Caixa (68.2). Cada item: `icone.24`, rótulo `tipo.legenda` 700 e alvo de 44 px; o atual no padrão selecionado (74.5.0) com `aria-current="page"`. Não existe no protótipo |
+| Corrige (74.13) | Dois desenhos de cabeçalho e de primário no app passam a um; Voltar de 20 × 20 e 12 × 27 px; títulos de 20 e 19 px passam a 19 px |
+
+#### 74.5.28 App: cartão de tarefa · DS-54
+
+| Aspecto | Contrato |
+|---|---|
+| Anatomia | `cor.superficie`, borda `cor.borda.divisor`, `raio.16`, `elevacao.1`, `espaco.14` × `espaco.16`, `espaco.8` entre linhas. "{ID} · {atividade}" em `tipo.corpo` 700; local em `tipo.corpo-compacto` secundário; chip da etapa e selos; realizado; caixa de insumos (`cor.fundo.app`, `raio.10`: produto · situação, com o papel da situação); ações: próxima ação (tonal) e Abrir ordem (secundário), ambas com 44 px de altura |
+| Variantes | Cartão de atalho (ícone em `cor.acao.primaria` e rótulo; medido: 171 × 59–92 px); número em linha (74.5.11) |
+| Regras | Um destaque de próxima ação por cartão. O bloqueio aparece no rótulo e na caixa de aviso, não em botão cinza. Prioridade e motivo, versão e responsável são obrigatórios (64.1); o protótipo não tem campo próprio para eles |
+| Motivo da posição | Uma linha em `tipo.corpo-compacto` secundário, logo abaixo do título, com o critério de 64.7. Mudança feita pelo gestor acrescenta "· por {nome}", e o motivo abre no toque |
+| Cartão impedido | Selo de Erro "{pendência} · {dono} · {prazo}" (74.4.3, Prontidão) e a ação Abrir ordem, sem botão de execução (64.7) |
+| Corrige (74.13) | Botões de 32 px passam a 44 px; o ponto de estado no título, que repetia o chip da etapa, sai; azul `#1E88E5` passa a `cor.informacao.texto` |
+
+#### 74.5.29 App: barra de envio e situação do registro · DS-55
+
+| Aspecto | Contrato |
+|---|---|
+| Barra de envio | Abaixo do cabeçalho: "{n} aguardando envio" (Atenção) ou "Nada aguardando envio" (secundário), com `aria-live="polite"`; segunda linha com o último comprovante e "Ver envios" (alvo de 44 px); a ação de envio manual, com o verbo de 74.8. O seletor Com sinal · Sem sinal existe só na demonstração |
+| Situação do registro | Chip com a palavra da situação de envio (74.4.3): Conflito com a ação Revisar; Sincronizado com Ver recibo; relato em conferência como segundo chip (DS-23) |
+| Pacote offline | Chip "Disponível sem internet · v{n}". Com a autorização revogada, selo Revogada, e a ação de iniciar dá lugar ao motivo (74.5.0) |
+| Regras | Salvo no aparelho nunca aparece como aceite central (64.5). O controle confirmado fica em "Enviando" até o resultado (IDEM-08) |
+| Retorno no controle | A regra está em 64.7. A forma: o chip da situação de envio (74.4.3), com o ícone, no próprio controle ou no cartão; o aviso temporário segue 74.5.17 |
+| Som de retorno | Quando toca, como se liga e desliga e o modo silencioso estão em 64.7. Os sons são `som.salvo` e `som.atencao` (74.3.10; proposta da PEND-DS-14). No navegador do iPhone, a sessão de áudio é do tipo ambiente, para seguir o modo silencioso |
+| Corrige (74.13) | Palavras de envio do protótipo (74.4.3); duas frases diferentes para a mesma espera; "Ver envios" com 60 × 17 px |
+
+#### 74.5.30 Ficha impressa · DS-56
+
+| Aspecto | Contrato |
+|---|---|
+| Página | `layout.impressao`, fundo branco, margens de 36 × 44 px. Na impressão, os controles de tela (Voltar à ficha do app, Imprimir) ficam ocultos |
+| Cabeçalho | Sobretítulo `tipo.rotulo-caixa-alta`; título `tipo.titulo-pagina` "{O.S.} · {atividade} · {local}"; área, janela e responsável em `tipo.corpo-compacto`; "Versão: {v} · Válida até: {data}"; QR de 104 px com "Confira a vigência pelo QR antes de preparar" |
+| Seções | Títulos `tipo.rotulo-caixa-alta`; pares rótulo e valor (`tipo.titulo-bloco`); tabela com cabeçalho `tipo.rotulo-caixa-alta` e `borda.2` inferior em `cor.texto.principal`, células `tipo.corpo` com linhas em `cor.borda.campo`; caixa "Feito" de 16 px com `borda.2`; linhas de assinatura e de apontamento |
+| Regras | Números tabulares. Nada depende de cor: a ficha é legível em impressão monocromática. Rodapé com data de impressão e aviso de perda de validade quando a versão muda |
+| Corrige (74.13) | Linhas da tabela em `#E4E9E5` (1,23:1 na tela) passam a `cor.borda.campo` (3,28:1); números sem tabular; bordas de 1,5 px passam a 2 px. O resultado em papel não foi medido |
+
+#### 74.5.31 Acesso à IA · DS-87
+
+Acordo Claude + Codex, 27/09/2026 (pedido do proprietário: acesso sempre disponível, fácil de abrir e fechar, sem atrapalhar). Aplica o 59.1 e o cap. 75 (IAG); não antecipa a fase do assistente nem impede a ajuda contextual prevista no 59.2.
+
+| Aspecto | Contrato |
+|---|---|
+| Onde | **Cabeçalho**, no computador e no celular: "Perguntar à IA" (59.1), com posição fixa, alvo de `alvo.campo` e rótulo curto visível "IA" com nome acessível "Perguntar à IA". Nos formulários, "Usar IA nesta tarefa" junto dos campos (59.1). Não existe terceiro acesso. Não existe no protótipo |
+| Variante B | Botão flutuante só no celular e só se o teste em homologação mostrar dificuldade real de alcance com uma mão. Nunca sobre a faixa de ação (74.5.27), o último cartão, o teclado virtual, a legenda ou o zoom do mapa (74.5.24, 74.5.25) |
+| Painel | Um painel lateral por vez (74.5.15, `layout.painel.formulario`): a IA abre no lugar do painel da entidade, e "Voltar à {entidade}" restaura o painel anterior com rascunho, rolagem e foco. No celular, tela cheia temporária com Voltar. Fecha por toque e por Escape; o foco volta ao controle que abriu |
+| Resultado | Proposta aguardando aprovação fica na **Caixa** (app) e em **Aprovações** (IN-02). Comando executado aparece **também no registro de origem** (trilha e situação), porque executar não é aprovar. Fechar o painel não cancela comando já enviado |
+| Estados | Habilitado, mas sem internet ou com o provedor fora: o controle fica no mesmo lugar, indisponível e com o motivo em texto ("Sem internet", "IA indisponível"). O trabalho segue pelo fluxo convencional (59.1). Não habilitado para a organização (PEND-IA-01) ou sem permissão: o controle não aparece |
+| Regras | Não abre sozinho, não pulsa, não toca som e não disputa destaque com a ação primária. Mudar de registro ou fazenda não reaproveita aprovação anterior (IAG-02) |
+| Aceite | Abrir em um toque no recebimento, no apontamento e no mapa; fechar sem perder trabalho; nenhuma sobreposição com o painel recolhido; teclado, foco, zoom de 200 %, tela estreita, teclado virtual e erro de rede verificados. Cabeçalho × flutuante comparados na homologação da fase do assistente, por conclusão, erros, tempo e toques acidentais |
+
+#### 74.5.32 Seleção rápida e busca com sugestões · DS-88
+
+Aplica o UXP-03 (cap. 75) e a R-004 §3: menos toques e digitação sem perder clareza. Usa os campos (74.5.16) e os controles de escolha (74.5.10).
+
+| Aspecto | Contrato |
+|---|---|
+| Qual controle | Lista curta (até cerca de 7 opções que cabem sem rolar): **seleção direta** em segmentado ou pílulas, um toque. Catálogo maior: **busca com sugestões** por nome, código e sinônimo. Número: teclado numérico com a unidade ao lado. Data: atalhos "Hoje" e "Ontem" e calendário. Item com código físico: **leitura do código** (QR ou barras) quando o aparelho permitir, com a busca como alternativa. Não pôr busca onde a lista curta é mais rápida |
+| Sugestão | Cada opção mostra o que distingue homônimos: código, unidade e, quando houver, lote, local ou fazenda. A correspondência é sem acento e sem caixa. Resultado vazio diz "Nenhum {item} encontrado" e oferece "+ Novo" só a quem tem permissão |
+| Valor lembrado | Produto e local podem ser **sugeridos** pelo último uso no mesmo contexto (pessoa, organização, fazenda), visíveis e corrigíveis. **Nunca** preencher sozinho lote, dose, quantidade ou autorização. Opção ambígua nunca é escolhida sozinha. Guardar o identificador estável, não o texto digitado |
+| Consistência | A resposta atrasada de uma busca não substitui a busca atual: resposta fora de ordem é descartada. Sem conexão, a lista vem do catálogo do aparelho com "Catálogo do aparelho · atualizado em dd/mm hh:mm". Na gravação, o servidor revalida disponibilidade, lote, situação e permissão |
+| Acessibilidade | Padrão combobox com lista (`role="combobox"`, `aria-expanded`, `aria-controls`, `aria-activedescendant`; opções em `role="listbox"` e `role="option"`). Setas percorrem, Enter escolhe a opção destacada (não envia o formulário), Esc fecha. Alvo de toque conforme `alvo.campo` no app. Estados vazio, carregando e erro anunciados em `aria-live="polite"` |
+| Aceite | No recebimento (F1), escolher o produto por busca ou leitura e o local sugerido, e digitar lote, validade e quantidade: toques e caracteres medidos no teste ponta a ponta (UXP-02). Dois produtos com o mesmo nome aparecem distintos. Busca lenta seguida de outra mais rápida mostra só o resultado da última |
+
+### 74.6 Padrões de tela
+
+Cada padrão nasce de um nível da hierarquia Menu → Listagem → Detalhe → Sub-detalhe (4.3: a lista serve para localizar e decidir; o detalhe, para compreender e agir). Onde a hierarquia não se aplica (processo em etapas, mapa, app, impressão), o bloco diz o que a substitui. O aceite comum de 74.5 vale aqui, sobre as telas do menu vigente e do app.
+
+#### 74.6.1 Listagem · DS-57
+
+| Aspecto | Contrato |
+|---|---|
+| Estrutura | Cabeçalho com o nome da entidade e o primário de criação ("Nova ordem"); filtros do topo quando mudam os dados; até quatro indicadores acionáveis (4.3); tabela G2 (74.5.14) num bloco de seção. Visões alternativas (Kanban, Recursos) são abas do mesmo bloco |
+| Estado | Etapa e condição em colunas separadas (DS-23); dono e prazo da pendência na linha (DEC-2609-04) |
+| Abertura | Edição curta: painel de 460 px. Detalhe: painel de 820 px ou página. Processo com várias dependências: página (4.3) |
+| Regras | Até sete colunas úteis e "N de M" (4.3). O retorno preserva filtro, ordem, agrupamento e posição (4.3). No celular, lista de cartões com os mesmos filtros (4.3) |
+
+#### 74.6.2 Detalhe · DS-58
+
+| Aspecto | Contrato |
+|---|---|
+| Estrutura | Trilha e Voltar; cabeçalho compacto com **O que é · Onde · Estado · Quem resolve · Prazo** (68.2); faixa de continuidade (74.5.6); bloco "Próximo passo" com uma ação; blocos de conteúdo; origem e histórico no fim |
+| Ação primária | Fica no Próximo passo; o cabeçalho do detalhe não tem outro primário (DS-02) |
+| Estados | Bloqueio no Próximo passo (DS-06); somente consulta quando o perfil não edita; leitura de período encerrado (4.3) |
+| Regras | Detalhes técnicos, históricos e fórmulas ficam acessíveis sem destaque; restrição crítica, unidade, dose, destino, versão e efeito nunca ficam escondidos (68.2) |
+
+#### 74.6.3 Tela de trabalho da O.S. · DS-59
+
+| Aspecto | Contrato |
+|---|---|
+| Abertura | Clique ou Enter na linha ou no cartão abre a tela à direita, em `layout.painel.consulta` (DEC-2609-04); "Abrir ordem completa" abre a mesma tela como página |
+| Ordem das partes | (1) Cabeçalho "{ID} · {atividade}", chip da etapa e selos. (2) Barra de fases (74.5.5). (3) Próximo passo. (4) Atividade. (5) Insumos e doses, com a trilha reservado › entregue › confirmado no app › consumido › em custódia › devolvido, a situação de cada linha e a validade da reserva quando está a vencer ou vencida (RSV-16). (6) Apontamentos. (7) Recursos alocados (DEC-2609-09). (8) Situação e origem |
+| Próximo passo | `role="region"` com uma ação primária compacta e até duas secundárias (por exemplo, "Cancelar sem execução" como destrutivo contornado e "Dispensar saldo" como mini). Fundo pelo estado: com ação, `cor.sucesso.fundo` e `cor.sucesso.borda`; bloqueio que alguém resolve agora, `cor.atencao.*`; bloqueio por condição, `cor.erro.*`; sem ação, `cor.fundo.app`. O bloqueio mostra causa, dono, prazo e atalho (DS-06) |
+| Situação e origem | Linhas rótulo · valor: Origem (plano, versão e quem emitiu); Aprovação e Prontidão em linhas separadas (APROV-13; na água sem produto, sem a linha Aprovação, APROV-15); Reserva, só a vencer ou vencida (RSV-16); relatos em conferência, só quando houver (73.5); Integração ERP, só para os perfis de INTEG-27; último comprovante (74.5.17) |
+| Continuidade | A faixa de 4.2 é cumprida pelas partes da própria tela: Veio de, na linha Origem; Está aqui, na barra de fases; Falta e Próxima ação, no Próximo passo. A faixa não se repete |
+| Regras | A etapa só muda por evento (8.4.3). A integração ERP não vira coluna nem selo no Kanban (INTEG-27) |
+| Corrige (74.13) | O protótipo não tem o bloco Situação e origem: mostra só "Versão · autorização" e o recibo |
+
+#### 74.6.4 Sub-detalhe · DS-60
+
+| Aspecto | Contrato |
+|---|---|
+| Definição | Item dentro de um detalhe: linha de insumo, apontamento, relato, versão, alocação |
+| Estrutura | Painel lateral sobre o detalhe (460 px para editar, 820 px para consultar com tabela, 1060 px para comparar versões lado a lado) ou página com trilha de três níveis quando o item tem processo próprio |
+| Regras | Fechar devolve ao detalhe na mesma posição, com o foco no item de origem (74.5.15). Tabela larga não entra em painel estreito (4.3) |
+
+#### 74.6.5 Processo em etapas · DS-61
+
+| Aspecto | Contrato |
+|---|---|
+| Onde | SAF, PA, CMP e EST. Substitui a lista quando o trabalho é uma sequência de decisões sobre o mesmo objeto |
+| Estrutura | Cabeçalho com o topo de DEC-2609-11 (contexto somente leitura com "Trocar safra" em SAF e CMP; filtro de Fazenda em EST); faixa de etapas fixa (74.5.5); conteúdo da etapa em blocos, rolando sob a faixa; uma ação primária por etapa |
+| Regras | A etapa impedida mostra o motivo na faixa. O usuário vai a qualquer etapa; pendências paralelas aparecem juntas, sem sequência artificial (68.2) |
+
+#### 74.6.6 Mapa · DS-62
+
+| Aspecto | Contrato |
+|---|---|
+| Onde | IN-04 (DEC-2609-06; 67). É uma tela de consulta com entrada por localização |
+| Estrutura | Barra vertical à esquerda (74.5.22). Cartão do mapa com a barra horizontal no topo (74.5.23), ferramentas e zoom à direita (74.5.24), etiqueta de modo à esquerda e legenda no pé (74.5.25). Painel do talhão à direita só com seleção (74.5.26). Dados abaixo do mapa, com "Ver dados" (67.2) |
+| Ação primária | O cabeçalho mostra o selo-resumo ("{n} impedidas · {n} decisões pendentes") no lugar do primário; a ação primária fica no painel do talhão selecionado |
+| Regras | Largura inteira do conteúdo (68.2). A troca de funcionalidade preserva o estado (67.2). Paletas e rótulos em 74.7. No celular, conforme 67.2 |
+
+#### 74.6.7 App de campo · DS-63
+
+| Aspecto | Contrato |
+|---|---|
+| Onde | MB-* e a ficha do app (64; 4.4). O trabalho do dia substitui a listagem |
+| Estrutura | Cabeçalho (74.5.27); barra de envio (74.5.29); uma coluna de cartões (74.5.28) que mostra primeiro trabalho, local, instrução, quantidade, condição e ação (4.4); faixa de ação inferior com um primário; barra inferior de navegação |
+| Regras | Alvos de 44 px (DS-15). Campo em `tipo.app-campo` com teclado numérico. Nenhuma tabela de desktop; dados administrativos recolhidos; depois de registrar, oferece o próximo ponto, carga ou ordem (4.4) |
+| Meu dia | Os blocos Agora, Depois e Impedidas de 64.7, nessa ordem, cada um com título curto; Impedidas traz a contagem no título. Bloco vazio não aparece. O primário da faixa inferior é a ação do cartão de Agora |
+
+#### 74.6.8 Impressão · DS-64
+
+| Aspecto | Contrato |
+|---|---|
+| Onde | Ficha de preparo e aplicação (74.5.30), aberta do app ou da tela da O.S. |
+| Regras | Legível em impressão monocromática. Versão, validade e QR sempre no cabeçalho. Nenhum controle de tela sai no papel |
+
+<!-- Coordenação com a segunda parte do capítulo (74.7 a 74.13). IDs normativos usados nesta parte: DS-01 a DS-64 e DS-87 (74.5.31, acrescentado depois); a segunda parte usa DS-65 a DS-86. PEND-DS citadas nesta parte, para 74.12 manter a numeração: PEND-DS-01 cor das etapas da O.S. (proposta em 74.4.3); PEND-DS-02 "Sobras a receber" × "Sobras pendentes"; PEND-DS-03 modo escuro; PEND-DS-04 marca, logotipo e nome exibido ("Talhão à O.S." × "Do Talhão à O.S."); PEND-DS-05 confirmação de Sora e Manrope e hospedagem das fontes; PEND-DS-06 pontos de quebra (proposta em 74.3.11); PEND-DS-07 largura da barra vertical do mapa (96 px no protótipo × 56–72 px em 67.2); PEND-DS-08 rótulo "Em planejamento" da safra; PEND-DS-09 largura do menu recolhido. A crítica (ds/critica_74.md) acrescentou PEND-DS-14 (sons, citada em 74.3.10 e 74.5.29). Nenhum DS-AC foi numerado nesta parte. -->
+
+### 74.7 Dados e mapa
+
+As paletas de dados mostram o valor ou a classe de uma camada. Não são cor de estado (DS-16) e só aparecem no mapa, na legenda, na amostra de classe e nos gráficos. O comportamento continua em 61.3, 61.4 e 67; aqui ficam cor, contorno, rótulo, legenda e medição. Fonte no protótipo: `ui37.LCOR`, `inicio.LCOR_OP`, `inicio.IDX`, `inicio.legend`, `inicio._mapsvg` e a ordem de gravidade `inicio.SEV`. O protótipo já segue a regra de satélite do proprietário: 6 classes com cores exatas, nuvem hachurada, legenda com valores e ID grande em cada talhão. Esta seção fixa essa regra e estende o mesmo rigor às camadas operacionais.
+
+#### 74.7.1 Paleta por funcionalidade
+
+| Funcionalidade (nomes de DEC-2609-12) | Paleta | Observação |
+|---|---|---|
+| Satélite · NDVI, NDRE e EVI | Rampa de vigor (74.7.2) | Única camada com as cores vivas |
+| Satélite · NDWI | Paleta de água (PEND-DS-10) | Deixa de usar laranja e amarelo da rampa de vigor |
+| Solo | Operacional (PEND-DS-11) | Deixa a rampa de vigor: em pH e nutrientes, "alto" não é "melhor" (61.3) |
+| Integrado, Pragas e doenças, Ordens de serviço, Irrigação, Estádio, Colheita e produtividade, Custos | Operacional (74.7.3) | O Estádio usa a operacional também no mapa do CD-01, que hoje usa a viva (74.13) |
+| Mapas de cadastro e de apoio (CD-01, talhão no cadastro, CA-01, PL-02, AG-01) | Operacional e neutros (74.7.4) | Nenhum mapa local cria cor própria (74.13) |
+
+#### 74.7.2 Rampa de vigor
+
+Token `mapa.vigor.{n}` ↔ `--map-vigor-{n}` (preenchimento) e `mapa.vigor.{n}.traco` ↔ `--map-vigor-{n}-stroke` (contorno da amostra). As seis cores são exatas: não se clareiam, não se dessaturam e não servem a outro índice. O limite inferior pertence à classe (0,30 é "fraco"), como na função `thr` do protótipo.
+
+| Classe | Nome exibido | Preenchimento | Traço | NDVI | NDRE | EVI | Contorno × legenda (74.9) |
+|---|---|---|---|---|---|---|---:|
+| 1 | falha | `#E4002B` | `#9E0A1F` | < 0,30 | < 0,12 | < 0,15 | 8,25:1 |
+| 2 | fraco | `#FF6A00` | `#9A3F00` | 0,30–0,45 | 0,12–0,20 | 0,15–0,25 | 6,73:1 |
+| 3 | atenção | `#FFD500` | `#8A5A00` | 0,45–0,60 | 0,20–0,27 | 0,25–0,35 | 5,86:1 |
+| 4 | médio | `#B5E61D` | `#5F7A0E` | 0,60–0,72 | 0,27–0,33 | 0,35–0,45 | 4,86:1 |
+| 5 | bom | `#3FBF2A` | `#1E7A4C` | 0,72–0,82 | 0,33–0,40 | 0,45–0,55 | 5,27:1 |
+| 6 | vigor alto | `#0B7A1E` | `#0B5A16` | > 0,82 | > 0,40 | > 0,55 | 8,35:1 |
+
+Os limites são dados do índice (61.4), com versão, e não tokens. A escala do protótipo é absoluta para a fazenda, e a linha de fonte diz isso ("escala absoluta da fazenda"). Raster por pixel, escala relativa ao talhão e imagem de fundo real ficam na PEND-DS-12.
+
+#### 74.7.3 Paleta operacional
+
+Token `mapa.op.{cor}` ↔ `--map-op-{color}`. O traço de cada cor é o da classe equivalente da rampa. Com isso, a amostra da legenda operacional ganha contorno escuro, que antes era branco (74.13). O sentido acompanha a 74.4: vermelho impede, amarelo pede decisão e verde está em dia. Mesmo assim, a cor do polígono não substitui o chip de estado: o painel do talhão mostra a palavra de 74.4.3.
+
+| Cor · variável | Preenchimento | Traço | Contorno × legenda | Uso nas legendas do protótipo |
+|---|---|---|---:|---|
+| vermelho · `--map-op-red` | `#C8553D` | `#9E0A1F` | 8,25:1 | Integrado: impedida, conflito ou acima do NC. Pragas e doenças: acima do nível de controle. Ordens de serviço: atrasada. Irrigação: ≥ 12 mm crítico; pendência operacional. Colheita e produtividade: abaixo da meta. Custos: acima de +10 % |
+| laranja · `--map-op-orange` | `#D98A4E` | `#9A3F00` | 6,73:1 | Pragas e doenças: foco em investigação. Ordens de serviço: vence hoje. Estádio: enchimento ou maturação |
+| amarelo · `--map-op-yellow` | `#D4B25A` | `#8A5A00` | 5,86:1 | Integrado: atenção ou decisão pendente. Pragas e doenças: atenção. Ordens de serviço: até 3 dias. Irrigação: déficit de 6–12 mm; aguardando decisão. Estádio: produção contínua. Custos: até +10 % |
+| lima · `--map-op-lime` | `#A9C06A` | `#5F7A0E` | 4,86:1 | Colheita e produtividade: previsão |
+| verde · `--map-op-green` | `#7FAE68` | `#1E7A4C` | 5,27:1 | Integrado: em dia. Pragas e doenças: abaixo do nível. Ordens de serviço: no prazo. Irrigação: < 6 mm, em dia. Estádio: vegetativo. Colheita e produtividade: na meta. Custos: dentro do orçado |
+| verde-escuro · `--map-op-green-dark` | `#5F8F55` | `#0B5A16` | 8,35:1 | Colheita e produtividade: acima da meta |
+| azul · `--map-op-blue` | `#6E9FC6` | `#1E5F8F` | 6,72:1 | Ordens de serviço: irrigando hoje. Irrigação: liberada hoje |
+| roxo · `--map-op-purple` | `#9B8BC4` | `#5B3E94` | 8,11:1 | Estádio: reprodutivo |
+| cinza · `mapa.cinza` ↔ `--map-gray` | `#C9CFCB` | `#5B6660` | 5,91:1 | Integrado e Ordens de serviço: encerrada. Estádio: pré-plantio. Satélite: sem cultura (as duas paletas usam o mesmo cinza) |
+
+Quando o talhão tem mais de um registro, vale a cor do mais grave, na ordem `SEV` do protótipo (vermelho, laranja, amarelo, sem leitura, lima, verde, verde-escuro, azul, roxo, cinza, não se aplica). O rótulo diz qual registro é e quantos há além dele, por exemplo "OS-0423 · atrasada · +1". O azul-escuro operacional (`#44739A`) não aparece em nenhuma legenda e sai da paleta (74.13).
+
+#### 74.7.4 Fundo, neutros e ausência de leitura
+
+| Token ↔ variável | Valor | Uso | Nota |
+|---|---|---|---|
+| `mapa.terreno` ↔ `--map-ground` | `#E3EADB` | Fundo do mapa | Unifica `#DDE5D4`, `#E3EBDD` e `#EEF3EA` (74.13) |
+| `mapa.grade` ↔ `--map-grid` | `#D3DDCB`, linha de 1 px a cada 40 unidades | Grade de referência | — |
+| `mapa.via` ↔ `--map-road` | `#FFFFFF`: 10 px a 0,9 (via principal) e 7 px a 0,8 (via secundária) | Estradas | Substitui a estrada `#B9C6AE` do `farm_map` (74.13) |
+| `mapa.nao-se-aplica` ↔ `--map-not-applicable` | `#E4E9DF` liso, opacidade 1; traço da amostra `#859189` | Sem ordem, sem registro, sem pendência, sequeiro, sem programação, colhido, fora do filtro | Unifica `#E9EEE6`; contorno da amostra de 3,04:1 para 3,24:1 (74.13) |
+| `mapa.sem-leitura` ↔ `--map-no-reading` | Hachura: base `#C9CFCB`, listra `#9E9E9E` de 4 px a 45°, padrão de 10 px. Na amostra: faixas de 45° de 3 px (`#C9CFCB`) e 2 px (`#9E9E9E`). Traço da amostra `#6B6B6B` | Nuvem, sombra, sem imagem, sonda sem dado, sem dado de colheita | O "sem dado" da Colheita e produtividade era liso e passa a hachurado (74.13). A base é a de `mapa.cinza`, e a listra mede 1,69:1 contra ela (I-M-NR): a ausência de leitura se lê pelo rótulo e pela legenda, não só pela listra |
+
+**Regra.** Hachura significa que não há leitura válida: nuvem não vira baixo vigor (61.4), e sem dado é diferente de resultado baixo (61.3). O preenchimento claro liso significa que a camada não se aplica. Nenhum dos dois usa cor de classe ou conta como valor em número da barra horizontal. No Satélite, o % de nuvem da cena aparece na linha de fonte, e o do talhão aparece no painel do talhão (61.4).
+
+#### 74.7.5 Talhão: preenchimento, contorno e rótulos
+
+| Token ↔ variável | Valor | Uso |
+|---|---|---|
+| `mapa.preenchimento.opacidade` ↔ `--map-fill-opacity` | 0,88; 1 em "não se aplica" e "sem leitura" | Classe sobre o terreno. Absorve o 0,8 do `farm_map` (74.13). Sobre imagem de satélite real: PEND-DS-12 |
+| `mapa.contorno` ↔ `--map-plot-stroke` | `#FFFFFF`, 4 px, junção arredondada | Separa talhões vizinhos |
+| `mapa.contorno.selecionado` ↔ `--map-plot-stroke-selected` | `cor.texto.principal`, 6 px | Talhão selecionado (13,61:1 contra o terreno) |
+| `mapa.rotulo.id` ↔ `--map-label-id` | `tipo.mapa-id` com halo `#FFFFFF` de 6 px (`paint-order: stroke`) | ID no centro do talhão |
+| `mapa.rotulo.valor` ↔ `--map-label-value` | Manrope 15 px/800, `cor.texto.principal`, halo branco de 3 px | Classe ou valor ("NDVI 0,74", "OS-0423 · atrasada · +1"), em até 2 linhas dentro do talhão |
+| `mapa.rotulo.apoio` ↔ `--map-label-sub` | Manrope 13 px/700, `cor.texto.principal` a 0,85, halo branco de 3 px | Cultura e área ("Soja · 42,00 ha") |
+| `mapa.mancha` ↔ `--map-patch` | Elipse `#E4002B`, traço `#9E0A1F` de 2 px, área em `#FFFFFF` 12 px/800 (4,85:1) | Mancha detectada no Satélite. A linha de fonte diz "mancha é indício, não diagnóstico" (61.4) |
+
+O halo é obrigatório. Sem ele, o rótulo mede de 3,13:1 a 4,46:1 sobre cinco classes (74.9.3); com ele, 16,75:1. O toque, o clique ou o foco num talhão abrem o painel do talhão (74.5.26), com classe, valor, unidade, data e origem (61.3).
+
+#### 74.7.6 Legenda
+
+A anatomia está em 74.5.25. O conteúdo segue estas regras:
+
+| Aspecto | Regra |
+|---|---|
+| Título | Funcionalidade, índice ou atributo e unidade ("Satélite · NDVI"; "Solo · V% · %") |
+| Item | Amostra de 11 × 11 px com contorno do traço da classe (3,24:1 a 11,74:1) e texto com faixa e nome ("0,72–0,82 bom") ou com a regra da camada ("até 3 dias") |
+| Ordem | A de `SEV`: começa pela classe que pede ação. Cinza, "não se aplica" e "sem leitura", quando presentes, vão ao fim. A rampa de vigor vai de falha a vigor alto, como no protótipo. Integrado, Irrigação, Colheita e produtividade e Custos invertem a ordem atual (74.13) |
+| Complemento | A linha de fonte da barra horizontal (74.5.23) traz fonte, data, resolução, cobertura ou nuvem e a escala. Legenda e linha de fonte, juntas, cumprem 61.3: unidade, intervalos, protocolo, data, resolução e cobertura |
+
+#### 74.7.7 A mesma classe fora do mapa
+
+No painel do talhão, na tabela de "Ver dados", na lista alternativa (MAPUX-06), no gráfico e na exportação, a classe aparece como amostra com contorno e texto em `cor.texto.principal` ("NDVI 0,74 · bom"). O nome da classe é o mesmo da legenda. A cor viva nunca é cor de texto: sobre branco, `#FFD500` mede 1,42:1 e `#3FBF2A`, 2,41:1. O estado do talhão no Satélite (Normal, Atenção, Crítico, Nuvem) é outra dimensão, mostrada em chip conforme 74.4.3 (DS-23).
+
+#### 74.7.8 Gráficos
+
+O protótipo tem gráfico de linha (`engine.linechart`, usado na agronomia) e barras de progresso (74.5.21). O `barchart` do `engine.py` não é chamado por nenhuma tela.
+
+| Elemento | Contrato |
+|---|---|
+| Série única | `cor.acao.primaria`, que é a cor da marca (4.2) e não indica resultado; traço `borda.2` (absorve 2,4 px); último ponto marcado e rotulado com valor e unidade |
+| Projeção | Mesma cor, tracejado 5 × 4 e marcador vazio |
+| Classes de índice ou de camada | Cores da 74.7.2 ou da 74.7.3, iguais às do mapa; nunca cores de estado (DS-16) |
+| Grade | `cor.borda.divisor`, 1 px (decorativa) |
+| Eixos e rótulos | `tipo.legenda` 500 em `cor.texto.secundario` (absorve 10,5 px) |
+| Linha de referência (média, meta) | `cor.texto.principal` tracejada, com o rótulo escrito ("média do período") |
+| Números | Valor e unidade escritos junto ao gráfico: gráfico não substitui número (4.3) |
+| Acessibilidade | `role="img"` com nome que diz a série, a unidade e o período; tabela equivalente em "Ver dados" |
+| Corrige (74.13) | O nome acessível fixo "Série de preços" era usado numa série de nematoides; o `barchart` legado pintava o melhor mês de verde e o pior de vermelho, o que contraria DS-03 e DS-16, e sai com o legado |
+
+#### 74.7.9 Exigências de dados e mapa
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| DS-65 | Cada funcionalidade usa só a paleta de 74.7.1. A rampa de vigor vale só para NDVI, NDRE e EVI, com as seis cores e os seis traços de 74.7.2 | Teste da função de cor: para cada funcionalidade e cada classe, o hex produzido pertence à paleta da funcionalidade; o mesmo hex aparece no mapa, na legenda, na amostra do painel e no gráfico |
+| DS-66 | Ausência de leitura válida é hachurada (`mapa.sem-leitura`); o que não se aplica é liso (`mapa.nao-se-aplica`). Nenhum dos dois usa cor de classe nem entra como valor em média ou total | Cena com nuvem num talhão e talhão sem ordem: um hachurado, outro liso; o índice médio da barra exclui os dois e informa "Sem leitura · {n} talhões" |
+| DS-67 | Todo talhão mostra ID e rótulo de classe ou valor, com halo branco. Toque, clique ou foco abrem classe, valor, unidade, data e origem no painel | Captura das nove funcionalidades: todo talhão com rótulo; pares M-H1, M-H2 e M-ID do teste de contraste (74.9) |
+| DS-68 | Legenda conforme 74.7.6: valores e unidade, ordem de gravidade, amostra com contorno do traço da classe e recolhível (67.2) | Pares M-L-* ≥ 3:1 no teste de contraste; inspeção das nove funcionalidades e das variantes de filtro |
+| DS-69 | Fora do mapa, a classe é amostra com contorno e texto em `cor.texto.principal`. Cor de paleta de dados nunca é cor de texto nem de chip de estado | Varredura do CSS gerado: nenhuma propriedade `color` com valor de `--map-*` |
+| DS-70 | Gráfico conforme 74.7.8, sempre com número e unidade escritos e com tabela equivalente | Teste de acessibilidade: todo `role="img"` com nome; inspeção do valor escrito ao lado de cada gráfico |
+
+### 74.8 Conteúdo
+
+Esta seção remete às regras que já existem e fixa só o que faltava para a interface falar de um jeito só. As regras de origem continuam onde estão: verbos de efeito e lançador × execução (4.2); botão de revisão, efeito nomeado e ação desabilitada (20.2); próxima ação do app (64.1); revisão separada da liberação (DEC-2609-05); precisão e apresentação (10.0); entrada em pt-BR, fuso e previsto × realizado (6.2; FORM-06); termos de envio, reserva, relato e integração (73.3 a 73.6); nomes das funcionalidades do mapa (DEC-2609-12); glossário (21.1). As contagens citadas vêm da extração do protótipo de 27/09/2026 (`ds/extr_estados_mapa.md`), feita sobre 645 rótulos de ação e sobre o texto de `areas/*.py`.
+
+#### 74.8.1 Verbos
+
+| Situação | Use | Não use | Base |
+|---|---|---|---|
+| Enviar à mão a fila do aparelho | Sincronizar agora | Sincronizar, Reenviar registro, Reenviar pendentes | Protótipo (app); 64.5 (o resultado é "Sincronizado") |
+| Abrir um conflito de envio no app | Revisar, no próprio chip ("Conflito · Revisar") | Ver conflito, Tratar conflito, Decidir o conflito offline | 73.3; 4.2 (lançador) |
+| Abrir um conflito na web | Revisar conflito. O botão que confirma nomeia o efeito escolhido | Tratar conflito, Resolver conflito, Ver conflito | 4.2; 20.2 |
+| Decidir relato em conferência | Resolver relato (CMD-50). O botão que confirma nomeia o desfecho de 73.5: vincular ao fato existente, aceitar como fato distinto, recusar como duplicata ou converter em correção vinculada | Deduplicar, Reconciliar | 73.5 |
+| Reserva de material | Renovar reserva; Devolver ao disponível | Liberar reserva, Expirar | 73.4. "Liberar" é o CMD-06 |
+| Integração ERP | Consultar destino; Reprocessar item, só depois de ausência confirmada ou dado corrigido; Abrir em Integrações | Reenviar, Forçar envio | 73.6 |
+| Comprovante | Ver recibo | Ver comprovante, Ver envio | 64.5; 73.3 |
+| Terminar | Concluir execução (CMD-08); Encerrar O.S. (CMD-10); Finalizar apontamento do turno (só o turno) | Finalizar, Fechar ou Concluir para encerrar a O.S. | 8.2; 64.1 |
+| Versão agronômica | Revisar versão → Aprovar versão, Devolver para ajuste ou Rejeitar; depois, Liberar para execução | Aprovar e liberar num botão só | DEC-2609-05 |
+| Ir a um registro × consultar | Abrir {objeto}, para ir ao registro; Ver {objeto}, para consultar sem efeito | Clique aqui, Detalhes, Saiba mais | 4.2 |
+
+#### 74.8.2 Palavras de estado e termos
+
+A palavra de estado vem só da 74.4.3 e nomeia o objeto ("Aguardando agrônomo", "Reserva vencida"). "Pendente" sozinho só existe na integração ERP (73.6.5). "OK", "Erro" e "Em breve" não são palavras de estado (20.2).
+
+| Não use | Use | Base |
+|---|---|---|
+| Ajuste solicitado | Devolvida para ajuste | 8.4.1; DEC-2609-05 |
+| No aparelho · aguardando sinal; Aguardando sinal; Capturado no dispositivo | Salvo neste aparelho; Aguardando envio | 64.5; 73.3 |
+| Enviado com recibo; Enviado · …; envios em dia; Registrada na O.S. | Sincronizado | 64.5 |
+| Reconciliação pendente; Em reconciliação (em relato de campo) | Em conferência. "Em reconciliação" fica só na integração ERP | 73.5; 73.6.5 |
+| Deduplicado; Confirmado (em relato de campo) | Já registrado por {papel} · {valor} | 73.5 (CONC-18) |
+| Rejeitado (integração ERP); Enviado · aguardando aceite | Com erro · {causa}; Enviando | 73.6.5 |
+| Liberar reserva; expiração; Expirada (reserva de material) | Devolver ao disponível; validade da reserva; Reserva vencida | 73.4 |
+| Entrega completa; Em uso na O.S. | Entregue; Em custódia · {quantidade} | 8.1; 42 |
+| Vencido (lote) | Bloqueado · validade vencida | 8.1 |
+| MIP/MID; O.S./prazos; Colheita/produtividade | Pragas e doenças; Ordens de serviço; Colheita e produtividade | DEC-2609-12 |
+
+#### 74.8.3 Números, unidades e datas
+
+Cada grandeza é formatada por uma função única, a mesma que aplica 10.0. A tela nunca monta número e unidade por concatenação. Contagem da extração: vírgula decimal e ponto de milhar em 1.121 e 334 ocorrências, sem nenhum decimal com ponto; "60%" 240 vezes e "60 %" 97; "1h55" 6 vezes.
+
+| Tema | Regra | Exemplo | Base |
+|---|---|---|---|
+| Decimal e milhar | Vírgula decimal e ponto de milhar. A entrada aceita vírgula (`inputMode="decimal"`) | 1.121,50 | 6.2; FORM-06 |
+| Casas | As da tabela de 10.0, por grandeza; este capítulo não as repete. A apresentação compacta (mapa, cartão, KPI) é a PEND-DS-13 | 42,00 ha · 1,25 L/ha | 10.0 |
+| Unidade | Depois do número, com espaço inseparável, inclusive em % e °C, pela convenção do SI; "L" maiúsculo; unidade composta com barra | 60 % · 12 mm · 1,5 L/ha · 150 L/s | 20.2; DS-05 |
+| Moeda | "R$", espaço inseparável e valor com 2 casas em tabela, total e documento. Abreviação ("R$ 158 mil") só conforme a PEND-DS-13 | R$ 5.808,00 | 10.0 |
+| Intervalo | Meia-risca, sem espaços; unidade uma vez, no fim | 0,30–0,45 · 24–26/09 · 6–12 mm | Protótipo (240 ocorrências, nenhuma com hífen) |
+| Sinal | Menos tipográfico (−) em negativo e desvio; "+" explícito em desvio positivo | −5 ha · +10 % | Protótipo (`g2num`) |
+| Data | dd/mm dentro da safra corrente; dd/mm/aaaa em documento, na ficha impressa e quando o ano difere; hora de 24 h, hh:mm; fuso escrito quando difere do da operação | 23/09 06:40 · 15/10/2026 | 6.2 |
+| Duração | Horas trabalhadas em decimal; atraso, prazo e janela em horas e minutos. "1h55" não é usado | 1,80 h · 1 h 55 min | 10.0 |
+| Separadores | " · " entre fatos da mesma linha; "→" só para fluxo e sequência; "×" para dimensão, multiplicação e comparação; "vs." não é usado | OS-0423 · atrasada · +1 | 4.2 (faixa de continuidade) |
+| Contagem | Número e substantivo concordam | Sem leitura · 1 talhão | — |
+| Sem valor | "Indisponível" quando o dado não foi processado (PROJ-07). "—" só quando o campo não se aplica ao registro. Nunca zero no lugar de dado | Indisponível | 74.4.3; PROJ-07 |
+
+#### 74.8.4 Mensagens e títulos
+
+| Tipo | Forma | Exemplo |
+|---|---|---|
+| Aviso de efeito | {efeito} · {consequência} (74.5.17) | "Salvo · linha e totais atualizados" |
+| Recusa | {ação} · bloqueado · {causa} | "Iniciar · bloqueado · autorização revogada às 07:15" |
+| Erro de campo | O que fazer, com exemplo, junto ao campo | "Informe a dose em L/ha, por exemplo 1,5" |
+| Bloqueio no Próximo passo | Causa · quem resolve · prazo · atalho (DS-06) | "Falta máquina · PCM" e o atalho para a alocação |
+| Confirmação | Objeto, quantidade, abrangência e consequência antes do botão (20.2) | "Liberar OS-X (versão v): a requisição reserva …" (protótipo) |
+| Vazio | Frase curta e a ação que resolve (74.5.19) | "Cadastrar talhões" |
+| Título de tela e de painel | Nome da entidade, ou "{ID} · {atividade}" no registro. Só a primeira palavra e os nomes próprios com maiúscula | "Ordens de serviço" · "OS-0424 · Fungicida" |
+
+#### 74.8.5 Exigências de conteúdo
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| DS-71 | Um verbo por efeito, conforme 74.8.1. O lançador usa verbo de abertura, e o botão que confirma nomeia o efeito (4.2; 20.2) | Inventário dos rótulos de ação das telas do menu vigente e do app: nenhum rótulo da coluna "Não use" e nenhum efeito com dois verbos |
+| DS-72 | Palavras de estado só da 74.4.3, e termos conforme 74.8.2 | Varredura do texto das telas, mensagens e ajuda: zero ocorrência da coluna "Não use" |
+| DS-73 | Números, unidades e moeda conforme 74.8.3, formatados por função única por grandeza | Teste unitário da função com os exemplos de 74.8.3. Varredura: nenhum decimal com ponto, nenhum "%" sem espaço, nenhum "1h55" |
+| DS-74 | Datas, horas e durações conforme 74.8.3 | Teste unitário: data na safra corrente → dd/mm; ano diferente → dd/mm/aaaa; hora de 24 h; duração de trabalho em decimal |
+| DS-75 | Mensagens e títulos conforme 74.8.4 | Inspeção de cada aviso, recusa, erro de campo, confirmação e vazio nas jornadas DEMO (25.1) |
+
+### 74.9 Acessibilidade medida
+
+A meta é WCAG 2.2 AA (4.3; NFR-09). Esta seção traz as medições e as regras que as tornam repetíveis: contraste, foco, alvo, teclado, leitor de tela e cor com texto. O teste manual por teclado, leitor de tela e aparelho real continua no ACE-29, e o automático está em 74.10. Contraste de tela não garante a leitura da ficha impressa, que não foi medida (74.5.30).
+
+#### 74.9.1 Método e resultado
+
+| Item | Valor |
+|---|---|
+| Ferramenta | `ds/contraste.py`: luminância relativa e razão da WCAG 2.2. Limites: texto 4,5:1; texto grande (≥ 24 px, ou ≥ 18,66 px em negrito) 3:1; componente de interface e objeto gráfico 3:1 (1.4.3 e 1.4.11) |
+| Entrada | `ds/pares.json`, com os pares em uso depois das correções de 74.13. Foi gerado por `ds/_trab/aplicar_74_13.py` a partir da cópia fiel dos pares do protótipo (`ds/_trab/pares_prototipo_v37.json`), mais os pares T35 a T41 e U43 acrescentados na crítica do capítulo (`ds/critica_74.md`, C11) |
+| Cores translúcidas | Compostas sobre o fundo real, por mistura sRGB, como faz o navegador: `#273A31` (branco a 10 % sobre o menu), `#1D3128` (branco a 6 % sobre o menu), `#FDFEFD` (caixa da legenda, branco a 94 % sobre o terreno `#E3EADB`) e `#38413C` (`cor.texto.principal` a 0,85 sobre o halo) |
+| Execução | 27/09/2026: `python3 ds/contraste.py --json ds/pares.json`. Saída: **111 de 111 pares atendem ao limite**, código 0 (`ds/_trab/contraste_74_9.txt`) |
+| Antes das correções | Mesmo comando sobre os pares do protótipo: 99 de 121 atendem, código 1 (`ds/_trab/contraste_prototipo_v37.txt`). As 22 falhas e o que foi feito com cada uma estão em 74.13 |
+| Pares fora do teste | `ds/pares_informativos.json`: 34 pares medidos só para registro (decorativos, isentos, restrições e motivos de regra), dos quais 2 atendem (`ds/_trab/contraste_informativos_74_9.txt`). Estão em 74.9.3 |
+| Margem mínima | Sete pares passam com menos de 0,1 acima do limite: T35 4,53:1; S06 3,06:1; U02, U18 e U20 3,02:1; U15 3,03:1; U36 3,04:1. Qualquer mudança de fundo ou de tom nesses pares exige nova medição (DS-76) |
+
+#### 74.9.2 Pares em uso
+
+Todos atendem. Nesta tabela, "superfície" é `#FFFFFF`, "fundo" é `#F4F6F3`, "superfície sutil" (trilho) é `#EEF1EE` e "selecionada" é `#E4F3E9`.
+
+**Texto (4,5:1)**
+
+| ID | Par | Frente | Fundo | Mín. | Razão | Resultado |
+|---|---|---|---|---:|---:|---|
+| T01 | texto principal × superfície | `#15201A` | `#FFFFFF` | 4,5:1 | 16,75:1 | atende |
+| T02 | texto principal × fundo da aplicação | `#15201A` | `#F4F6F3` | 4,5:1 | 15,42:1 | atende |
+| T03 | texto principal × superfície sutil (etapa pendente, rótulo de contexto) | `#15201A` | `#EEF1EE` | 4,5:1 | 14,72:1 | atende |
+| T04 | texto principal × selecionada (etapa atual, faixa de continuidade) | `#15201A` | `#E4F3E9` | 4,5:1 | 14,60:1 | atende |
+| T05 | texto principal × linha em foco ou ponteiro | `#15201A` | `#F2F8F4` | 4,5:1 | 15,56:1 | atende |
+| T06 | texto principal × linha filha da árvore | `#15201A` | `#FBFCFA` | 4,5:1 | 16,28:1 | atende |
+| T07 | cor.texto.secundario × superfície (era #65736A) | `#5B6660` | `#FFFFFF` | 4,5:1 | 5,98:1 | atende |
+| T08 | cor.texto.secundario × fundo (cabeçalho da tabela) | `#5B6660` | `#F4F6F3` | 4,5:1 | 5,50:1 | atende |
+| T09 | cor.texto.secundario × superfície sutil (opção inativa) | `#5B6660` | `#EEF1EE` | 4,5:1 | 5,25:1 | atende |
+| T10 | cor.texto.secundario × selecionada (rótulos da faixa de continuidade) | `#5B6660` | `#E4F3E9` | 4,5:1 | 5,21:1 | atende |
+| T11 | cor.texto.secundario × linha com ponteiro | `#5B6660` | `#F2F8F4` | 4,5:1 | 5,55:1 | atende |
+| T12 | cor.texto.secundario × caixa da legenda do mapa | `#5B6660` | `#FDFEFD` | 4,5:1 | 5,91:1 | atende |
+| T13 | texto que era terciário (previsto, manutenção, marcador) → cor.texto.secundario × superfície | `#5B6660` | `#FFFFFF` | 4,5:1 | 5,98:1 | atende |
+| T14 | ação/link × superfície | `#1E7A4C` | `#FFFFFF` | 4,5:1 | 5,33:1 | atende |
+| T15 | ação/link × fundo | `#1E7A4C` | `#F4F6F3` | 4,5:1 | 4,90:1 | atende |
+| T16 | ação × selecionada (chip verde, filtro ativo, próxima ação) | `#1E7A4C` | `#E4F3E9` | 4,5:1 | 4,64:1 | atende |
+| T17 | link com ponteiro × superfície | `#15603A` | `#FFFFFF` | 4,5:1 | 7,59:1 | atende |
+| T18 | texto inverso × ação (botão primário, item ativo, número da etapa) | `#FFFFFF` | `#1E7A4C` | 4,5:1 | 5,33:1 | atende |
+| T19 | texto inverso × cor.texto.principal (aviso temporário, etiqueta de modo do mapa) | `#FFFFFF` | `#15201A` | 4,5:1 | 16,75:1 | atende |
+| T20 | erro × superfície (mensagem de campo, motivo na etapa, excluir) | `#B42318` | `#FFFFFF` | 4,5:1 | 6,57:1 | atende |
+| T21 | chip vermelho / alerta de erro | `#B42318` | `#FDE8E6` | 4,5:1 | 5,59:1 | atende |
+| T22 | chip amarelo / aviso de não salvo | `#8A5A00` | `#FFF3D6` | 4,5:1 | 5,37:1 | atende |
+| T23 | atenção × superfície | `#8A5A00` | `#FFFFFF` | 4,5:1 | 5,93:1 | atende |
+| T24 | chip cinza | `#5B6660` | `#EEF1EE` | 4,5:1 | 5,25:1 | atende |
+| T25 | chip azul | `#1E5F8F` | `#E3F0FB` | 4,5:1 | 5,87:1 | atende |
+| T26 | chip laranja | `#9A3F00` | `#FFE8D6` | 4,5:1 | 5,76:1 | atende |
+| T27 | barra vertical do mapa · ativa: texto inverso × cor.acao.primaria (era #1E6B47) | `#FFFFFF` | `#1E7A4C` | 4,5:1 | 5,33:1 | atende |
+| T28 | barra vertical do mapa · inativa: cor.texto.secundario × superfície (era #4B5A51) | `#5B6660` | `#FFFFFF` | 4,5:1 | 5,98:1 | atende |
+| T29 | cor.atencao.texto × cor.atencao.fundo unificado (era #FFF4D6) | `#8A5A00` | `#FFF3D6` | 4,5:1 | 5,37:1 | atende |
+| T30 | texto inverso × destrutivo preenchido (confirmar efeito) | `#FFFFFF` | `#B42318` | 4,5:1 | 6,57:1 | atende |
+| T31 | texto inverso × primário com ponteiro | `#FFFFFF` | `#15603A` | 4,5:1 | 7,59:1 | atende |
+| T32 | cor.informacao.texto × superfície (texto de estado sem pílula) | `#1E5F8F` | `#FFFFFF` | 4,5:1 | 6,80:1 | atende |
+| T33 | cor.prazo-hoje.texto × superfície (texto de estado sem pílula) | `#9A3F00` | `#FFFFFF` | 4,5:1 | 6,81:1 | atende |
+| T34 | cor.texto.secundario × linha filha da árvore | `#5B6660` | `#FBFCFA` | 4,5:1 | 5,81:1 | atende |
+| T35 | link ou atalho × cor.erro.fundo (Próximo passo com bloqueio por condição) | `#1E7A4C` | `#FDE8E6` | 4,5:1 | 4,53:1 | atende |
+| T36 | link ou atalho × cor.atencao.fundo (Próximo passo com bloqueio que alguém resolve; confirmação) | `#1E7A4C` | `#FFF3D6` | 4,5:1 | 4,83:1 | atende |
+| T37 | cor.texto.secundario × cor.atencao.fundo (dono e prazo do bloqueio) | `#5B6660` | `#FFF3D6` | 4,5:1 | 5,42:1 | atende |
+| T38 | cor.texto.secundario × cor.erro.fundo (dono e prazo do bloqueio) | `#5B6660` | `#FDE8E6` | 4,5:1 | 5,08:1 | atende |
+| T39 | texto principal × cor.atencao.fundo (causa do bloqueio, texto da confirmação) | `#15201A` | `#FFF3D6` | 4,5:1 | 15,19:1 | atende |
+| T40 | texto principal × cor.erro.fundo (causa do bloqueio) | `#15201A` | `#FDE8E6` | 4,5:1 | 14,25:1 | atende |
+| T41 | texto principal × tabela.total.hover (total com ponteiro) | `#15201A` | `#EEF4EF` | 4,5:1 | 15,02:1 | atende |
+
+**Texto grande (3:1)**
+
+| ID | Par | Frente | Fundo | Mín. | Razão | Resultado |
+|---|---|---|---|---:|---:|---|
+| L01 | título da página 23 px/700 × superfície | `#15201A` | `#FFFFFF` | 3:1 | 16,75:1 | atende |
+| L02 | valor de KPI 30 px com papel Sucesso × superfície | `#1E7A4C` | `#FFFFFF` | 3:1 | 5,33:1 | atende |
+
+**Menu lateral escuro**
+
+| ID | Par | Frente | Fundo | Mín. | Razão | Resultado |
+|---|---|---|---|---:|---:|---|
+| S01 | menu · item | `#D3E2D8` | `#0F241A` | 4,5:1 | 12,15:1 | atende |
+| S02 | menu · subitem e texto secundário | `#86A08F` | `#0F241A` | 4,5:1 | 5,78:1 | atende |
+| S03 | menu · marca e nome do perfil | `#FFFFFF` | `#0F241A` | 4,5:1 | 16,31:1 | atende |
+| S04 | menu · grupo aberto (branco 10 %) | `#FFFFFF` | `#273A31` | 4,5:1 | 12,10:1 | atende |
+| S05 | menu · selo DEMONSTRAÇÃO (branco 6 %) | `#86A08F` | `#1D3128` | 4,5:1 | 4,89:1 | atende |
+| S06 | menu · item ativo (indicador) × menu | `#1E7A4C` | `#0F241A` | 3:1 | 3,06:1 | atende |
+| S07 | menu · cor.foco.inverso × menu (era #1E7A4C, 3,06) | `#FFFFFF` | `#0F241A` | 3:1 | 16,31:1 | atende |
+| S08 | menu · seta do grupo × menu | `#86A08F` | `#0F241A` | 3:1 | 5,78:1 | atende |
+
+**Componentes de interface (3:1)**
+
+| ID | Par | Frente | Fundo | Mín. | Razão | Resultado |
+|---|---|---|---|---:|---:|---|
+| U01 | cor.borda.campo × superfície (era #E4E9E5) | `#859189` | `#FFFFFF` | 3:1 | 3,28:1 | atende |
+| U02 | cor.borda.campo × fundo | `#859189` | `#F4F6F3` | 3:1 | 3,02:1 | atende |
+| U03 | contorno de campo com erro × superfície | `#B42318` | `#FFFFFF` | 3:1 | 6,57:1 | atende |
+| U04 | foco × superfície | `#1E7A4C` | `#FFFFFF` | 3:1 | 5,33:1 | atende |
+| U05 | foco × fundo | `#1E7A4C` | `#F4F6F3` | 3:1 | 4,90:1 | atende |
+| U06 | foco × linha com ponteiro | `#1E7A4C` | `#F2F8F4` | 3:1 | 4,95:1 | atende |
+| U07 | foco × selecionada | `#1E7A4C` | `#E4F3E9` | 3:1 | 4,64:1 | atende |
+| U08 | botão primário × superfície | `#1E7A4C` | `#FFFFFF` | 3:1 | 5,33:1 | atende |
+| U09 | botão primário × fundo | `#1E7A4C` | `#F4F6F3` | 3:1 | 4,90:1 | atende |
+| U10 | caixa de seleção · cor.borda.campo × superfície | `#859189` | `#FFFFFF` | 3:1 | 3,28:1 | atende |
+| U11 | opção escolhida (cor.acao.primaria) × trilho (era branco com sombra) | `#1E7A4C` | `#EEF1EE` | 3:1 | 4,68:1 | atende |
+| U12 | filtro do mapa ativo (verde) × trilho | `#1E7A4C` | `#EEF1EE` | 3:1 | 4,68:1 | atende |
+| U13 | chip de filtro ativo × superfície | `#1E7A4C` | `#FFFFFF` | 3:1 | 5,33:1 | atende |
+| U14 | etapa atual · traço inferior × selecionada | `#1E7A4C` | `#E4F3E9` | 3:1 | 4,64:1 | atende |
+| U15 | progresso.fase.concluida × superfície (era #9CCBB0) | `#719E85` | `#FFFFFF` | 3:1 | 3,03:1 | atende |
+| U16 | progresso da O.S. · fase atual × superfície | `#1E7A4C` | `#FFFFFF` | 3:1 | 5,33:1 | atende |
+| U17 | cartão Kanban selecionado · borda × superfície | `#1E7A4C` | `#FFFFFF` | 3:1 | 5,33:1 | atende |
+| U18 | ordenar · seta inativa cor.icone.inativo × cabeçalho (era #B7C1BA) | `#859189` | `#F4F6F3` | 3:1 | 3,02:1 | atende |
+| U19 | ordenar · seta ativa × cabeçalho | `#1E7A4C` | `#F4F6F3` | 3:1 | 4,90:1 | atende |
+| U20 | filtro da coluna · inativo cor.icone.inativo × cabeçalho (era #8A968E) | `#859189` | `#F4F6F3` | 3:1 | 3,02:1 | atende |
+| U21 | excluir linha · cor.icone.inativo × superfície (era #8A968E) | `#859189` | `#FFFFFF` | 3:1 | 3,28:1 | atende |
+| U22 | excluir linha · com ponteiro | `#B42318` | `#FDE8E6` | 3:1 | 5,59:1 | atende |
+| U23 | fechar painel · × cor.texto.secundario × botão (era #65736A) | `#5B6660` | `#F4F6F3` | 3:1 | 5,50:1 | atende |
+| U24 | ponto de estado da seção · verde | `#1E7A4C` | `#FFFFFF` | 3:1 | 5,33:1 | atende |
+| U25 | ponto de estado da seção · amarelo | `#8A5A00` | `#FFFFFF` | 3:1 | 5,93:1 | atende |
+| U26 | ponto de estado da seção · vermelho | `#B42318` | `#FFFFFF` | 3:1 | 6,57:1 | atende |
+| U27 | ponto de estado da seção · cinza | `#5B6660` | `#FFFFFF` | 3:1 | 5,98:1 | atende |
+| U28 | ponto do chip verde × fundo do chip | `#1E7A4C` | `#E4F3E9` | 3:1 | 4,64:1 | atende |
+| U29 | ponto do chip amarelo × fundo do chip | `#8A5A00` | `#FFF3D6` | 3:1 | 5,37:1 | atende |
+| U30 | ponto do chip vermelho × fundo do chip | `#B42318` | `#FDE8E6` | 3:1 | 5,59:1 | atende |
+| U31 | ponto do chip cinza × fundo do chip | `#5B6660` | `#EEF1EE` | 3:1 | 5,25:1 | atende |
+| U32 | ponto do chip azul × fundo do chip | `#1E5F8F` | `#E3F0FB` | 3:1 | 5,87:1 | atende |
+| U33 | ponto do chip laranja × fundo do chip | `#9A3F00` | `#FFE8D6` | 3:1 | 5,76:1 | atende |
+| U34 | app · ponto de Informação cor.informacao.texto × superfície (era #1E88E5) | `#1E5F8F` | `#FFFFFF` | 3:1 | 6,80:1 | atende |
+| U35 | ferramenta do mapa ativa · borda × superfície | `#1E7A4C` | `#FFFFFF` | 3:1 | 5,33:1 | atende |
+| U36 | caixa de seleção · cor.borda.campo × linha com ponteiro | `#859189` | `#F2F8F4` | 3:1 | 3,04:1 | atende |
+| U37 | caixa de seleção · cor.borda.campo × linha filha | `#859189` | `#FBFCFA` | 3:1 | 3,18:1 | atende |
+| U38 | contorno ou ícone sobre superfície sutil = cor.texto.secundario | `#5B6660` | `#EEF1EE` | 3:1 | 5,25:1 | atende |
+| U39 | barra de progresso · cor.acao.primaria × trilho | `#1E7A4C` | `#EEF1EE` | 3:1 | 4,68:1 | atende |
+| U40 | barra de progresso · cor.erro.texto × trilho | `#B42318` | `#EEF1EE` | 3:1 | 5,78:1 | atende |
+| U41 | foco × superfície sutil | `#1E7A4C` | `#EEF1EE` | 3:1 | 4,68:1 | atende |
+| U42 | destrutivo contornado · borda × superfície | `#B42318` | `#FFFFFF` | 3:1 | 6,57:1 | atende |
+| U43 | botão primário × cor.atencao.fundo (confirmação no contexto) | `#1E7A4C` | `#FFF3D6` | 3:1 | 4,83:1 | atende |
+
+**Mapa**
+
+| ID | Par | Frente | Fundo | Mín. | Razão | Resultado |
+|---|---|---|---|---:|---:|---|
+| M-H1 | rótulo com halo branco (efetivo) | `#15201A` | `#FFFFFF` | 4,5:1 | 16,75:1 | atende |
+| M-H2 | sub-rótulo 13 px com opacidade .85 sobre halo | `#38413C` | `#FFFFFF` | 4,5:1 | 10,56:1 | atende |
+| M-ID | ID do talhão 40 px com halo | `#15201A` | `#FFFFFF` | 3:1 | 16,75:1 | atende |
+| M-SEL | contorno do talhão selecionado cor.texto.principal × terreno | `#15201A` | `#E3EADB` | 3:1 | 13,61:1 | atende |
+| M-MA | rótulo da mancha (área) branco 12 px/800 × mapa.mancha | `#FFFFFF` | `#E4002B` | 4,5:1 | 4,85:1 | atende |
+| M-L-red | legenda · contorno da amostra falha (vigor 1) e vermelho operacional × caixa da legenda | `#9E0A1F` | `#FDFEFD` | 3:1 | 8,25:1 | atende |
+| M-L-orange | legenda · contorno da amostra fraco (vigor 2) e laranja operacional × caixa da legenda | `#9A3F00` | `#FDFEFD` | 3:1 | 6,73:1 | atende |
+| M-L-yellow | legenda · contorno da amostra atenção (vigor 3) e amarelo operacional × caixa da legenda | `#8A5A00` | `#FDFEFD` | 3:1 | 5,86:1 | atende |
+| M-L-lime | legenda · contorno da amostra médio (vigor 4) e lima operacional × caixa da legenda | `#5F7A0E` | `#FDFEFD` | 3:1 | 4,86:1 | atende |
+| M-L-ok | legenda · contorno da amostra bom (vigor 5) e verde operacional × caixa da legenda | `#1E7A4C` | `#FDFEFD` | 3:1 | 5,27:1 | atende |
+| M-L-good | legenda · contorno da amostra vigor alto (6) e verde-escuro operacional × caixa da legenda | `#0B5A16` | `#FDFEFD` | 3:1 | 8,35:1 | atende |
+| M-L-gray | legenda · contorno da amostra cinza (sem cultura, encerrada, pré-plantio) × caixa da legenda | `#5B6660` | `#FDFEFD` | 3:1 | 5,91:1 | atende |
+| M-L-blue | legenda · contorno da amostra azul × caixa da legenda | `#1E5F8F` | `#FDFEFD` | 3:1 | 6,72:1 | atende |
+| M-L-navy | legenda · contorno da amostra azul-escuro × caixa da legenda | `#123A57` | `#FDFEFD` | 3:1 | 11,74:1 | atende |
+| M-L-purple | legenda · contorno da amostra roxo × caixa da legenda | `#5B3E94` | `#FDFEFD` | 3:1 | 8,11:1 | atende |
+| M-L-none | legenda · contorno da amostra não se aplica (era #8A968E) × caixa da legenda | `#859189` | `#FDFEFD` | 3:1 | 3,24:1 | atende |
+| M-L-cloud | legenda · contorno da amostra sem leitura (hachura) × caixa da legenda | `#6B6B6B` | `#FDFEFD` | 3:1 | 5,27:1 | atende |
+
+#### 74.9.3 Pares medidos fora do teste
+
+Estes pares não entram no teste porque o elemento é decorativo, é isento ou não é usado daquela forma. Cada um foi medido para registrar por que a regra é a que está no capítulo. A cor desses elementos nunca é o único sinal (DS-01; DS-25).
+
+| ID | Par | Frente | Fundo | Razão | Por que não entra no teste |
+|---|---|---|---|---:|---|
+| I01 | cor.borda.divisor × superfície (decorativa: cartão, bloco, tag, botão secundário) | `#E4E9E5` | `#FFFFFF` | 1,23:1 | Decorativa. Botão, tag e cartão se identificam pelo texto e pela área; a borda não é o único sinal (1.4.11) |
+| I02 | cor.borda.divisor × fundo (decorativa) | `#E4E9E5` | `#F4F6F3` | 1,13:1 | Decorativa, idem I01 |
+| I03 | cor.superficie.selecionada × superfície (etapa atual; o sinal é o traço U14) | `#E4F3E9` | `#FFFFFF` | 1,15:1 | O sinal da etapa atual é o traço inferior (U14, 4,64:1), o nome em 800 e `aria-current` |
+| I04 | botão de zoom branco × terreno (o glifo identifica o controle) | `#FFFFFF` | `#E3EADB` | 1,23:1 | O glifo `#15201A` sobre o botão branco (16,75:1) e `elevacao.2` identificam o controle |
+| I05 | texto inverso × primário desabilitado a 0,55 (isento: componente inativo) | `#FFFFFF` | `#83B69D` | 2,30:1 | Isento: componente inativo (1.4.3). O motivo fica em texto com contraste (74.5.0) |
+| I06 | barra de fases · atual × concluída (a atual se lê pelo rótulo 800 e aria-current) | `#1E7A4C` | `#719E85` | 1,76:1 | A fase atual se lê pelo rótulo em 800 e por `aria-current` (74.5.5) |
+| I07 | restrição · cor.borda.campo × superfície sutil (não usar; ver U38) | `#859189` | `#EEF1EE` | 2,88:1 | Restrição: `cor.borda.campo` não é usada sobre superfície sutil; lá vale U38 |
+| I08 | contorno branco do talhão × terreno (separa talhões; o rótulo identifica) | `#FFFFFF` | `#E3EADB` | 1,23:1 | O talhão se identifica pelo ID e pelo rótulo com halo e pela lista alternativa (MAPUX-06); a seleção usa M-SEL (13,61:1) |
+| I09 | fundo do chip Sucesso × superfície | `#E4F3E9` | `#FFFFFF` | 1,15:1 | O chip se distingue da tag pelo ponto e pelo texto 700, não pelo fundo (DS-25) |
+| I10 | fundo do chip Atenção × superfície | `#FFF3D6` | `#FFFFFF` | 1,10:1 | Idem I09 |
+| I11 | fundo do chip Erro × superfície | `#FDE8E6` | `#FFFFFF` | 1,18:1 | Idem I09 |
+| I12 | fundo do chip Neutro × superfície | `#EEF1EE` | `#FFFFFF` | 1,14:1 | Idem I09 |
+| I13 | fundo do chip Informação × superfície | `#E3F0FB` | `#FFFFFF` | 1,16:1 | Idem I09 |
+| I14 | fundo do chip Prazo-hoje × superfície | `#FFE8D6` | `#FFFFFF` | 1,18:1 | Idem I09 |
+| I15 | borda de papel Sucesso × superfície (caixa do Próximo passo e de aviso) | `#BFE0CB` | `#FFFFFF` | 1,42:1 | Decorativa: o estado se lê pela palavra e pelo ponto (74.3.3) |
+| I16 | borda de papel Atenção × superfície (caixa do Próximo passo e de aviso) | `#F0D9A0` | `#FFFFFF` | 1,39:1 | Idem I15 |
+| I17 | borda de papel Erro × superfície (caixa do Próximo passo e de aviso) | `#F4C7C1` | `#FFFFFF` | 1,52:1 | Idem I15 |
+| I-M-S-good | rótulo sem halo × vigor alto a 0,88 sobre o terreno (motivo do halo obrigatório) | `#15201A` | `#258735` | 3,67:1 | Motivo do halo obrigatório (DS-67). A paleta não muda: é contrato de classe (74.7), e clarear as cores alteraria o que foi validado (CORR-DS-17) |
+| I-M-S-red | rótulo sem halo × falha a 0,88 sobre o terreno (motivo do halo obrigatório) | `#15201A` | `#E41C40` | 3,62:1 | Motivo do halo obrigatório (DS-67). A paleta não muda: é contrato de classe (74.7), e clarear as cores alteraria o que foi validado (CORR-DS-17) |
+| I-M-S-navy | rótulo sem halo × azul-escuro vivo a 0,88 sobre o terreno (motivo do halo obrigatório) | `#15201A` | `#367098` | 3,13:1 | Motivo do halo obrigatório (DS-67). A paleta não muda: é contrato de classe (74.7), e clarear as cores alteraria o que foi validado (CORR-DS-17) |
+| I-M-O-red | rótulo sem halo × vermelho operacional a 0,88 sobre o terreno (motivo do halo obrigatório) | `#15201A` | `#CB6750` | 4,46:1 | Motivo do halo obrigatório (DS-67). A paleta não muda: é contrato de classe (74.7), e clarear as cores alteraria o que foi validado (CORR-DS-17) |
+| I-M-O-navy | rótulo sem halo × azul-escuro operacional, que sai da paleta a 0,88 sobre o terreno (motivo do halo obrigatório) | `#15201A` | `#5781A2` | 4,04:1 | Motivo do halo obrigatório (DS-67). A paleta não muda: é contrato de classe (74.7), e clarear as cores alteraria o que foi validado (CORR-DS-17) |
+| I-V12 | rampa de vigor · falha × fraco (vizinhas) | `#E4002B` | `#FF6A00` | 1,69:1 | Classes vizinhas se separam pelo matiz, pelo contorno branco e pelo rótulo; a classe se lê pelo texto (DS-67) |
+| I-V23 | rampa de vigor · fraco × atenção (vizinhas) | `#FF6A00` | `#FFD500` | 2,02:1 | Classes vizinhas se separam pelo matiz, pelo contorno branco e pelo rótulo; a classe se lê pelo texto (DS-67) |
+| I-V34 | rampa de vigor · atenção × médio (vizinhas) | `#FFD500` | `#B5E61D` | 1,03:1 | Classes vizinhas se separam pelo matiz, pelo contorno branco e pelo rótulo; a classe se lê pelo texto (DS-67) |
+| I-V45 | rampa de vigor · médio × bom (vizinhas) | `#B5E61D` | `#3FBF2A` | 1,64:1 | Classes vizinhas se separam pelo matiz, pelo contorno branco e pelo rótulo; a classe se lê pelo texto (DS-67) |
+| I-V56 | rampa de vigor · bom × vigor alto (vizinhas) | `#3FBF2A` | `#0B7A1E` | 2,28:1 | Classes vizinhas se separam pelo matiz, pelo contorno branco e pelo rótulo; a classe se lê pelo texto (DS-67) |
+| I-T1 | preenchimento falha a 0,88 × terreno | `#E41C40` | `#E3EADB` | 3,76:1 | O preenchimento não é o único meio: classe e valor estão no rótulo e na legenda (1.4.1; 1.4.11) |
+| I-T2 | preenchimento fraco a 0,88 × terreno | `#FC791A` | `#E3EADB` | 2,16:1 | O preenchimento não é o único meio: classe e valor estão no rótulo e na legenda (1.4.1; 1.4.11) |
+| I-T3 | preenchimento atenção a 0,88 × terreno | `#FCD81A` | `#E3EADB` | 1,14:1 | O preenchimento não é o único meio: classe e valor estão no rótulo e na legenda (1.4.1; 1.4.11) |
+| I-T4 | preenchimento médio a 0,88 × terreno | `#BBE634` | `#E3EADB` | 1,18:1 | O preenchimento não é o único meio: classe e valor estão no rótulo e na legenda (1.4.1; 1.4.11) |
+| I-T5 | preenchimento bom a 0,88 × terreno | `#53C43F` | `#E3EADB` | 1,83:1 | O preenchimento não é o único meio: classe e valor estão no rótulo e na legenda (1.4.1; 1.4.11) |
+| I-T6 | preenchimento vigor alto a 0,88 × terreno | `#258735` | `#E3EADB` | 3,71:1 | O preenchimento não é o único meio: classe e valor estão no rótulo e na legenda (1.4.1; 1.4.11) |
+| I-M-NR | hachura de sem leitura · listra × base (o rótulo e a legenda identificam) | `#9E9E9E` | `#C9CFCB` | 1,69:1 | A listra marca a ausência de leitura, mas não é o único sinal: a base é a mesma de `mapa.cinza`, e o talhão se identifica pelo rótulo com halo, pela amostra da legenda com contorno de 5,27:1 (M-L-cloud) e pela causa no painel (DS-66; DS-67) |
+
+#### 74.9.4 Daltonismo simulado na rampa de vigor
+
+Simulação numérica feita com `ds/_extr/cvd.py`: matrizes de Machado, Oliveira e Fernandes (2009), severidade 1,0, e diferença de cor ΔE*ab (CIE76) entre as cores simuladas. Execução em 27/09/2026, saída em `ds/_trab/cvd_74_9.txt`. Não substitui o teste com usuários que o LABMAP-12 pede.
+
+| Classes | ΔE visão típica | ΔE deuteranopia | ΔE protanopia |
+|---|---:|---:|---:|
+| falha × fraco | 37,4 | 23,9 | 37,9 |
+| fraco × atenção | 60,9 | 24,2 | 38,0 |
+| **atenção × médio** | 39,1 | **9,4** | **2,5** |
+| médio × bom | 33,9 | 27,3 | 19,9 |
+| bom × vigor alto | 34,0 | 30,0 | 34,1 |
+| falha × vigor alto | 121,7 | 18,6 | 24,7 |
+| falha × bom | 137,6 | 13,4 | 57,8 |
+
+Na protanopia simulada, "atenção" e "médio" ficam quase iguais (ΔE 2,5). Na deuteranopia, "falha" e "bom" se aproximam (13,4). A paleta não muda, porque é a do proprietário e já foi validada. A leitura fica garantida pelo texto: rótulo com classe ou valor em todo talhão, legenda com valores e painel com o número (DS-67; DS-68). O teste com usuários daltônicos do LABMAP-12 decide se é preciso mais.
+
+#### 74.9.5 Foco, alvo, teclado, leitor de tela e cor
+
+| Tema | Regra | Situação medida no protótipo |
+|---|---|---|
+| Foco visível | `foco.anel`, `foco.anel.linha` ou `foco.anel.inverso` em todo controle focável (74.3.9), com 2 px e razão ≥ 3:1 contra o fundo adjacente (U04–U07, U41, S07) | Só a linha da tabela tem foco estilizado; a busca da tabela remove o contorno (74.13) |
+| Foco não encoberto (2.4.11) | Faixa de etapas fixa, cabeçalho fixo e aviso temporário não cobrem o elemento em foco: a rolagem reserva a altura da faixa (`scroll-padding-top`), e o aviso fica fora da área do foco | Não medido; entra no teste de 74.10 |
+| Alvo | 44 × 44 px em ação do app e controle usado no campo; 24 × 24 px no desktop (DS-15; 2.5.8) | Medido na extração de 27/09/2026, com Chrome sem interface (`ds/_tmp/medida_*.txt`). Voltar do app: 20 × 20 e 12 × 27 px. Ações do cartão do app: 32 px de altura. Com sinal/Sem sinal: 29 px. Ver envios: 60 × 17 px. Abrir ficha para imprimir: 29 px. Filtro de coluna da tabela: 11 × 22 px. Atendem: barra do mapa (96 × 55 e 96 × 68 px), primário do app (350 × 61 e 358 × 56 px), cartões de atalho (171 × 59–92 px) e os controles do desktop, exceto o filtro de coluna. A busca da tabela mede 151 × 19 px no campo; o contêiner não foi medido |
+| Teclado | Toda ação tem caminho por teclado, sem armadilha; ordem de foco igual à ordem visual; Esc fecha painel, lista suspensa e tela cheia; Enter ou Espaço abrem linha e cartão (4.3); arrastar sempre tem alternativa por botão (2.5.7; 8.4.3) | Linha da tabela e talhão focáveis; 5 painéis sem Esc (74.5.15) |
+| Leitor de tela | Papéis e nomes dos blocos de 74.5 (tabela, painel `dialog`, abas `tablist`, barra do mapa `tablist`, faixa de etapas `nav`, aviso `status` ou `alert`); um `h1` por tela; mudança de estado anunciada com `aria-live="polite"` sem mover o foco | Mapa em SVG com `role="img"` contendo botões (74.5.26); sucesso, recusa e informação com o mesmo papel no aviso (74.5.17) |
+| Cor nunca sozinha | Estado com palavra e ponto ou símbolo (DS-01; DS-25); classe do mapa com rótulo (DS-67); gráfico com número (DS-70) | Cumprido nos chips; o último KPI ficava verde pela posição (74.5.11) |
+| Ampliação | Texto ampliado a 200 % sem perda de conteúdo ou de função (1.4.4). O reajuste a 320 px de largura (1.4.10) depende dos pontos de quebra da PEND-DS-06 | Telas de largura fixa, sem ponto de quebra |
+| Movimento | Redução de movimento conforme DS-14 | Nenhuma regra de redução |
+
+#### 74.9.6 Exigências de acessibilidade
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| DS-76 | Todo par em uso (texto × fundo, componente × fundo e mapa) está no arquivo de pares versionado com os tokens e atende ao seu limite. Par novo entra no arquivo antes do uso, e mudança de tom obriga nova medição | O teste de contraste do CI (74.10) falha com qualquer par abaixo do limite; a lista de 74.9.2 coincide com o arquivo |
+| DS-77 | Foco visível e não encoberto em todo controle focável (2.4.7; 2.4.11), com os anéis de 74.3.9 | Teste de jornada percorre cada tela do catálogo e do menu vigente com Tab: todo elemento focado tem anel de 2 px com razão ≥ 3:1 contra o fundo e caixa não coberta por elemento fixo |
+| DS-78 | Operação completa por teclado conforme 74.9.5: sem armadilha, ordem igual à visual, Esc fecha sobreposições, alternativa a arrastar | Teste de jornada das DEMO só com teclado; teste de componente do painel lateral, da lista suspensa, da tela cheia do mapa e da tabela |
+| DS-79 | Papéis, nomes acessíveis e anúncios conforme 74.5 e 74.9.5 | Varredura automática de acessibilidade sem violação de nível A ou AA nas telas do menu vigente, no app e no catálogo; teste com leitor de tela de ACE-29 nos fluxos críticos |
+| DS-80 | Texto ampliado a 200 % sem perda de conteúdo ou de função; reajuste a 320 px de largura depois da PEND-DS-06 | Captura de cada padrão de 74.6 com zoom de 200 % em 1366 × 768: nenhum texto cortado e nenhuma ação inalcançável |
+| DS-81 | Estado e classe legíveis sem distinguir cor, inclusive em daltonismo | Capturas em escala de cinza e com simulação de protanopia e deuteranopia do espécime, do mapa (nove funcionalidades) e do Kanban: cada estado e cada classe identificados pelo texto. Teste com usuários conforme LABMAP-12 |
+
+### 74.10 Governança e entrega à engenharia
+
+O design system é código do monorepo, no pacote `packages/ui` (23.3), e passa pelo mesmo pipeline (27.1) e pelo mesmo quality gate (25.2) do resto do produto. Usa só ferramentas que o 23.1 já adota (TypeScript, Tailwind, Vitest, Testing Library, Playwright) e bibliotecas livres de acessibilidade e de lint. Nenhuma ferramenta paga é obrigatória. Um editor de design pode ser usado por quem quiser, mas a referência é o arquivo de tokens, o catálogo e o espécime.
+
+#### 74.10.1 Artefatos
+
+| Artefato | Onde | Conteúdo | Origem |
+|---|---|---|---|
+| Arquivo de tokens | `packages/ui/tokens/tokens.json` | Cada token de 74.3 e 74.7, com nome, variável CSS, valor, camada, uso e versão. O token semântico aponta para o de referência | Fonte única, editada com revisão (74.10.4) |
+| Variáveis CSS | `packages/ui/tokens/tokens.css` | `:root` com todas as variáveis, `color-scheme: light` enquanto a PEND-DS-03 estiver aberta | Gerado de `tokens.json` por script do repositório |
+| Tipos e tema | `packages/ui/tokens/tokens.ts` e tema do Tailwind | Constantes tipadas; o tema do Tailwind lê as variáveis e não tem valor próprio | Gerado de `tokens.json` |
+| Estado → papel | `packages/ui/tokens/estados.json` | As linhas de 74.4.3 (dimensão, palavras, papel), lidas pela função única de DS-24 | Editado com revisão |
+| Paletas de dados | `packages/ui/tokens/mapa.json` | 74.7.2 a 74.7.5. Os limites dos índices são dados do índice (61.4), não entram aqui | Editado com revisão |
+| Pares de contraste | `packages/ui/tokens/pares.json` | Os pares de 74.9.2, escritos com nomes de token; os valores saem de `tokens.json` | Editado com revisão; hoje, `ds/pares.json` |
+| Ícones | `packages/ui/icons` | Conjunto de traço do protótipo (`engine.ICONS`: grade de 24, traço de 1,8, pontas arredondadas), em SVG, com `aria-hidden` quando há rótulo | Protótipo |
+| Fontes | Servidas com o produto | Manrope 500 a 800 e Sora 700, em woff2 (PEND-DS-05) | — |
+| Catálogo de componentes | Rota interna do `apps/web`, só em desenvolvimento e homologação | Cada bloco de 74.5, com variantes e estados de 74.5.0, sobre dados sintéticos fixos | Componentes reais do `packages/ui` |
+| Espécime | `DesignSystem_Do_Talhao_a_OS_v3_10.html` | Página única para o proprietário ver e a engenharia consultar: tokens, componentes em cada estado, paletas e tabela de contraste, com as propostas das PEND-DS marcadas | Gerado de `tokens.json` |
+| Registro | `docs/design-system/CHANGELOG.md` | Versão, mudança, motivo e medição | Atualizado em cada versão |
+
+#### 74.10.2 Verificações automáticas
+
+Todas rodam no CI (27.1) e bloqueiam a integração pelo quality gate (25.2), como qualquer teste obrigatório.
+
+| Verificação | Ferramenta | Falha quando | Quando roda |
+|---|---|---|---|
+| Contraste | Script do repositório com o cálculo de `ds/contraste.py` sobre `tokens.json` e `pares.json` | Qualquer par abaixo do limite (DS-76) | PR que muda tokens, pares ou componentes |
+| Tokens × PRD | Script que gera a tabela de `tokens.json` e compara com 74.3 e 74.7 | Nome, variável ou valor divergente (DS-11) | PR que muda tokens |
+| Valores literais | Stylelint e varredura do código dos componentes | Hex, `rgb()`, espaço, raio, sombra, camada ou duração fora do arquivo de tokens e das exceções nomeadas (DS-12); `--ref-*` fora dos tokens (DS-10); `--map-*` em `color` (DS-69) | Todo PR |
+| Estado → papel | Vitest | Palavra de 74.4.3 sem papel; palavra na interface fora da tabela; palavra com dois papéis (DS-24) | Todo PR |
+| Formatação de conteúdo | Vitest nas funções de número, unidade, moeda, data e duração | Exemplo de 74.8.3 com resultado diferente (DS-73; DS-74) | Todo PR |
+| Acessibilidade automática | `@axe-core/playwright` (código aberto) | Violação de nível A ou AA no catálogo, nas telas do menu vigente e no app (DS-79) | PR com mudança de interface; completo antes de publicação |
+| Foco e alvo | Playwright: percorre com Tab e mede as caixas | Anel ausente ou encoberto (DS-77); alvo abaixo de 44 × 44 px no app ou de 24 × 24 px no desktop (DS-15) | PR com mudança de interface |
+| Regressão visual | Playwright `toHaveScreenshot` | Diferença acima do limite configurado sem imagem de referência aprovada | PR com mudança de interface |
+
+**Regressão visual.** Captura o catálogo e as telas do menu vigente em 1440 × 900 e 1366 × 768, e o app em 390 × 844 (74.1; MAPUX-02). Usa dados sintéticos fixos, relógio fixo, fontes servidas com o produto e `prefers-reduced-motion: reduce`. As capturas são geradas e comparadas no mesmo contêiner do CI, para que a renderização de fonte do sistema não produza diferença falsa. As imagens de referência ficam versionadas no repositório, e uma imagem nova só entra com a revisão de 74.10.4. O limite de diferença é configurado e versionado. A captura não substitui a inspeção de estados que dependem de interação.
+
+#### 74.10.3 Versão dos tokens
+
+Os tokens seguem versão semântica. A versão 1.0.0 é a deste capítulo (v3.10). Cada versão publica `tokens.json`, variáveis, espécime e registro, e o registro de alterações do PRD cita a versão.
+
+| Tipo | Quando | Exemplo |
+|---|---|---|
+| MAJOR | Remove ou renomeia token ou variável; muda o papel de um token; muda o papel de uma palavra de estado em 74.4.3 | Liberadas deixa Informação e volta a Sucesso (PEND-DS-01) |
+| MINOR | Acrescenta token, variante, componente ou palavra de estado, sem mudar os existentes | `layout.menu.recolhido` (PEND-DS-09) |
+| PATCH | Ajusta um valor sem mudar o papel, com todos os pares ainda dentro do limite | Tom de uma borda decorativa |
+
+#### 74.10.4 Revisão de mudança
+
+| Tema | Regra |
+|---|---|
+| Quem revisa | Toda mudança em `packages/ui/tokens`, no catálogo ou numa imagem de referência passa por PR com revisão de design e revisão de acessibilidade, além do revisor independente de ENG-019. As duas revisões ficam no CODEOWNERS |
+| Revisão de design | Pessoa designada pelo proprietário. Sem designação, o proprietário aprova pelo espécime publicado, sem ler código (23.4) |
+| Revisão de acessibilidade | Pessoa designada pelo proprietário; pode ser a mesma da revisão de design. Confere a medição, o foco, o alvo, o teclado e o leitor de tela do que mudou. Revisão feita por IA não conta como revisão independente (ENG-020) |
+| Conteúdo do PR | Token e versão; motivo; medição antes e depois (saída do teste de contraste); capturas da regressão visual; seções do PRD afetadas, que mudam no mesmo PR (ENG-020) |
+| Palavra ou cor de estado | Primeiro entra a linha em 74.4.3 e em `estados.json`; depois, o uso (DS-24) |
+| Pendência decidida | A decisão de uma PEND-DS vira mudança de token com versão, atualização deste capítulo e linha no registro de alterações |
+| Exceção | Toda exceção a um DS fica registrada com motivo, dono e prazo, como as exceções de lint (ENG-009) |
+
+#### 74.10.5 Ordem de entrega
+
+Acompanha as etapas de 20.3. Cada passo só avança com o catálogo atualizado e as verificações de 74.10.2 aprovadas.
+
+| Passo | Entrega | Etapa de 20.3 |
+|---|---|---|
+| 1 | `tokens.json`, variáveis, tema, fontes, ícones e os testes de contraste, de valores literais e de estado → papel | A — Fundação |
+| 2 | Componentes base: 74.5.0 a 74.5.13 e 74.5.16 a 74.5.19, no catálogo, com todos os estados | A — Fundação |
+| 3 | Tabela G2, painel lateral, Kanban, barra de progresso e padrões de listagem, detalhe e tela de trabalho (74.5.14, 74.5.15, 74.5.20, 74.5.21, 74.6.1 a 74.6.5) | B — Caminho central |
+| 4 | App, barra de envio e ficha impressa (74.5.27 a 74.5.30; 74.6.7; 74.6.8) | B — Caminho central |
+| 5 | Mapa e dados (74.5.22 a 74.5.26; 74.6.6; 74.7) | C e E, conforme as DEMO que usam o mapa |
+
+#### 74.10.6 Exigências de governança
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| DS-82 | Um arquivo de tokens é a fonte única; variáveis CSS, tipos, tema e espécime são gerados dele | Apagar e gerar de novo os derivados não produz diferença no repositório |
+| DS-83 | Catálogo de componentes com cada bloco de 74.5, cada variante e cada estado de 74.5.0 que se aplica, fora do ambiente de produção | Inventário automático: cada componente exportado por `packages/ui` tem entrada no catálogo; a rota do catálogo responde 404 em produção |
+| DS-84 | Verificações de 74.10.2 no CI, bloqueando pelo quality gate (25.2) | PR de teste com um par abaixo do limite, um hex literal num componente e uma palavra de estado fora da tabela: os três checks falham e o PR não integra |
+| DS-85 | Versão semântica conforme 74.10.3, com registro de mudança e medição | Todo PR que muda `tokens.json` altera a versão e o `CHANGELOG.md`; a verificação falha sem os dois |
+| DS-86 | Revisão de mudança conforme 74.10.4 | Proteção de branch exige as aprovações de design e de acessibilidade em `packages/ui/tokens` e nas imagens de referência |
+
+### 74.11 Critérios de aceite
+
+Cada critério tem precondição, ação e resultado. "Automático" significa teste no CI (74.10.2) ou teste de jornada (25.1); "Inspeção" significa conferência humana registrada com captura. Os dados são os do cenário de demonstração do protótipo, com restauração determinística (20.4). Para ACE-29, os critérios que tornam distinguíveis os estados offline, de erro e de sucesso são DS-AC-06, DS-AC-11 e DS-AC-16.
+
+| ID | Precondição | Ação | Resultado esperado | Verificação | Cobre |
+|---|---|---|---|---|---|
+| DS-AC-01 | `tokens.json` e `pares.json` da versão 1.0.0 | Rodar o teste de contraste; depois, num PR de teste, trocar `cor.texto.secundario` por `#65736A` | Primeiro: 111 de 111 pares atendem. Depois: T09 (4,38:1) e T10 (4,34:1) falham, e o PR não integra | Automático | DS-09; DS-76; DS-84 |
+| DS-AC-02 | Painel de formulário com campo de texto, seletor e caixa de seleção, sobre `cor.superficie` e sobre `cor.fundo.app` | Ler o estilo calculado do contorno em repouso e em foco | Contorno `#859189` (3,28:1 e 3,02:1). Em foco, anel de 2 px em `cor.foco` com afastamento de 2 px. Com erro, borda em `cor.erro.texto` e mensagem com `role="alert"` | Automático | DS-42; DS-26 |
+| DS-AC-03 | Catálogo e telas IN-04, OS, SAF e MB-01 | Percorrer cada tela com Tab, do início ao fim | Todo elemento focado mostra anel de 2 px com razão ≥ 3:1 contra o fundo; no menu, anel branco. Nenhum elemento focado fica sob a faixa de etapas, o cabeçalho fixo ou o aviso | Automático | DS-26; DS-77 |
+| DS-AC-04 | MB-01 e OS-0424-app em 390 × 844; OS e IN-04 em 1440 × 900 | Medir a caixa de cada controle interativo | App: todos com 44 × 44 px ou mais, inclusive Voltar, Ver envios, ações do cartão e "Abrir ficha para imprimir". Desktop: todos com 24 × 24 px ou mais, inclusive filtro de coluna e expandir linha | Automático | DS-15 |
+| DS-AC-05 | `estados.json` e as telas do menu vigente e do app, com os dados de demonstração | Coletar todos os chips e selos (texto e papel) | Cada palavra tem um papel só, igual ao da 74.4.3. "Aprovada pelo agrônomo" (OS-0431) é Sucesso no app, na OS e no mapa; "Lote bloqueado" (OB-0104) é Erro em todas as telas | Automático | DS-24 |
+| DS-AC-06 | Espécime e uma captura de cada padrão de 74.6, com estados de Erro, Atenção, Sucesso, Neutro, Informação e Prazo-hoje | Converter para escala de cinza e simular protanopia e deuteranopia | Todo estado se identifica pela palavra e pelo ponto ou símbolo (▲ ● ◆ ○); todo talhão, pela classe ou valor escrito | Inspeção, com simulação automática | DS-01; DS-25; DS-81 |
+| DS-AC-07 | Cartão do Kanban com cultura, origem "App", prioridade "Alta" e selo "Impedida · ativo bloqueado" | Inspecionar o cartão e o DOM | Cultura, origem e prioridade são tags contornadas, sem ponto e sem cor de estado; "Impedida · ativo bloqueado" é chip de Erro com ponto | Automático (componente) | DS-04; DS-34; DS-35 |
+| DS-AC-08 | Telas do menu vigente, tela de trabalho da O.S., painéis e app | Contar botões primários visíveis por contexto | No máximo um por cabeçalho, bloco "Próximo passo", rodapé de painel e faixa inferior do app | Automático | DS-02 |
+| DS-AC-09 | O.S. em A liberar, aprovada, com os selos "Aprovada pelo agrônomo" e "Falta máquina · PCM" (trator T1 bloqueado; 8.4.3; APROV-10) | Abrir a tela de trabalho sem passar o ponteiro sobre nada | O "Próximo passo" usa `cor.erro.*` e mostra causa, "PCM" como quem resolve, prazo e atalho. "Liberar para execução" não aparece como ação disponível | Automático | DS-06; DS-59 |
+| DS-AC-10 | App com o servidor demorando a responder | Tocar três vezes em "Sincronizar agora" | O controle mostra "Enviando", com `aria-busy="true"`, e ignora os toques seguintes; cada item da fila sai uma vez, com a sua chave (IDEM-08); no fim, "Sincronizado" com "Ver recibo" | Automático | DS-26; DS-55 |
+| DS-AC-11 | Quatro registros no app: salvo sem sinal, na fila, sincronizado e em conflito | Abrir "Meu dia" e a ordem | Chips "Salvo neste aparelho" e "Aguardando envio" (Atenção), "Sincronizado" (Sucesso) com "Ver recibo" e "Conflito" (Erro) com "Revisar"; barra "{n} aguardando envio", anunciada; nenhum termo da coluna "Não use" de 74.8.2 | Automático | DS-24; DS-55; DS-72 |
+| DS-AC-12 | O.S. Encerrada com efeito ERP "Com erro" | Abrir Kanban, mapa e app como PCP e operador; abrir a tela da O.S. como controladoria | Kanban, mapa e app sem indicação de integração. A controladoria vê "Integração ERP: Com erro · {causa} · desde {hh:mm}" (Erro) no bloco Situação e origem, com responsável, prazo e "Abrir em Integrações" | Automático | DS-46; DS-59; INTEG-27 |
+| DS-AC-13 | O.S. com uma reserva dentro da janela de aviso e outra vencida | Abrir a tela da O.S. e a SU-07 | "Reserva vence dd/mm hh:mm" (Atenção); selo "Reserva vencida" (Atenção); "Devolvido ao disponível: {quantidade} · {motivo}" (Neutro). Nenhum "Liberar reserva" nem "expiração" | Automático | DS-24; DS-72 |
+| DS-AC-14 | Projeção atrasada em relação ao recibo de um comando | Executar o comando e abrir o cartão gerencial e o mapa que dependem dele | A tela de origem mostra o comprovante, não "Atualizando". A visão dependente mostra "Atualizando" só na linha ou no cartão afetado, anunciado sem mover o foco, e o texto some quando a versão chega. Com a projeção parada: "Desatualizado · Dados até dd/mm hh:mm"; sem dado: "Indisponível", nunca zero | Automático | DS-38; DS-37 |
+| DS-AC-15 | Painel de formulário de 460 px com alteração não salva, aberto a partir de uma linha | Pressionar Esc; depois clicar no véu; depois clicar em × | Nos três casos aparece "Há alterações não salvas." com [Descartar alterações] e [Continuar editando]. Com o painel aberto, o foco não sai dele. Ao fechar, o foco volta à linha de origem | Automático (componente) | DS-41 |
+| DS-AC-16 | Salvar uma linha da tabela; tentar "Iniciar" numa tela aberta antes de a autorização ser revogada no servidor | Executar as duas ações | Sucesso: aviso com `role="status"` e comprovante persistente no registro. Recusa: aviso com `role="alert"` ("Iniciar · bloqueado · autorização revogada às 07:15") e o bloqueio no "Próximo passo". Aviso visível por 4,5 s ou mais, pausado com foco ou ponteiro | Automático | DS-43; DS-06 |
+| DS-AC-17 | Lista da OS com as 13 ordens de demonstração | Ordenar por janela; filtrar fase por valor; filtrar atividade por texto; filtrar janela por intervalo; agrupar por fase; abrir uma linha com Enter | "N de M" acompanha cada filtro; filtros ativos aparecem como chips removíveis; os botões do cabeçalho têm 24 × 24 px e nome acessível; o subtotal do grupo só soma medida aditiva de mesma unidade; Enter abre a tela de trabalho | Automático | DS-40 |
+| DS-AC-18 | IN-04 no Satélite, cena 06/09 (P2 e T7 com nuvem), e em Ordens de serviço com talhão sem ordem | Capturar o mapa e ler o DOM | Nuvem hachurada (`mapa.sem-leitura`); talhão sem ordem liso em `#E4E9DF`; todos os rótulos com halo; a barra mostra o índice médio sem os talhões com nuvem e "Sem leitura · 2 talhões" | Automático | DS-66; DS-67 |
+| DS-AC-19 | IN-04 em cada uma das nove funcionalidades | Ler a legenda; recolher; recarregar a tela | Cada amostra tem o contorno do traço da classe (pares M-L-*); cada item tem faixa ou regra com unidade; a ordem é a de gravidade; a legenda recolhida continua recolhida para o mesmo usuário | Automático | DS-68; DS-51 |
+| DS-AC-20 | Função de cor do mapa | Gerar a cor de cada classe em cada funcionalidade e em CD-01 | NDVI, NDRE e EVI usam os seis hex de 74.7.2; as demais usam a paleta operacional; o Estádio tem a mesma cor em IN-04 e CD-01; nenhuma variável `--map-*` aparece em `color` | Automático | DS-65; DS-69 |
+| DS-AC-21 | Navegador com `prefers-reduced-motion: reduce` | Aproximar o mapa; abrir e fechar um painel | Nenhuma transição (0 ms), com o mesmo estado final | Automático | DS-14 |
+| DS-AC-22 | Catálogo, tela OS, app e ficha impressa | Coletar os estilos calculados de todo texto | Só as famílias, os tamanhos e os pesos de 74.3.5. Células numéricas, KPI, totais, cartão do app e ficha com `tabular-nums`; em coluna, números à direita | Automático | DS-05; DS-13 |
+| DS-AC-23 | Funções de formatação | Rodar os exemplos de 74.8.3; digitar "1,5" num campo de dose | Saídas "1.121,50", "60 %", "R$ 5.808,00", "1 h 55 min", "−5 ha", "0,30–0,45"; a entrada "1,5" vale 1,5 | Automático | DS-73; DS-74 |
+| DS-AC-24 | Repositório na versão 1.0.0 | Gerar de novo os derivados dos tokens; rodar a varredura de valores literais e a comparação com o PRD | Nenhuma diferença nos derivados; zero valor literal fora dos tokens e das exceções nomeadas; a tabela gerada coincide com 74.3 e 74.7 | Automático | DS-10; DS-11; DS-12; DS-82 |
+| DS-AC-25 | Imagens de referência aprovadas da versão 1.0.0 | Num PR de teste, mudar o valor de `cor.acao.primaria` | A regressão visual falha nas capturas afetadas; o PR só integra com nova versão, registro e as aprovações de design e de acessibilidade | Automático | DS-84; DS-85; DS-86 |
+| DS-AC-26 | Ficha da OS-0424 na versão vigente | Imprimir em A4, em escala de cinza | Versão, validade e QR no cabeçalho; nenhum controle de tela no papel; linhas da tabela visíveis; nenhuma informação dada só por cor | Inspeção | DS-56; DS-64 |
+| DS-AC-27 | IN-04 com leitor de tela | Navegar pelo mapa e pela lista alternativa | O mapa é um grupo com nome; cada talhão é um botão "{talhão}: {estado}"; a lista alternativa traz os mesmos dados e ações | Inspeção, com varredura automática | DS-52; DS-79 |
+| DS-AC-28 | Textos de interface, mensagens e ajuda do build | Varredura de termos | Nenhum termo das colunas "Não use" de 74.8.1 e 74.8.2 | Automático | DS-71; DS-72 |
+| DS-AC-29 | Padrões de 74.6 em 1366 × 768 | Ampliar o texto a 200 % | Nenhum texto cortado e nenhuma ação inalcançável | Inspeção | DS-80 |
+
+### 74.12 Pendências do proprietário
+
+São temas sem decisão do proprietário. Cada um tem proposta e o que vale até a decisão. Conforme 74.1, a implementação usa o que está na coluna "Até decidir, vale", e o espécime marca como proposta tudo o que vem daqui. A decisão vira mudança de token com versão (74.10.4). Os números 01 a 09 são os citados em 74.1 a 74.6.
+
+| ID | Pendência | Proposta | Até decidir, vale |
+|---|---|---|---|
+| PEND-DS-01 | Cor das etapas da O.S. O protótipo pinta Liberadas e Em execução de verde; a 8.4.4 pede azul em Liberadas e ciano em Em execução, cor que não existe nos tokens | A liberar Neutro · Liberadas Informação (azul) · Em execução Sucesso · Em conferência Atenção · Encerradas Neutro (74.4.3). O azul separa "pronta para iniciar" de "em execução" com um token que já existe | A proposta |
+| PEND-DS-02 | "Sobras a receber" (protótipo) × "Sobras pendentes" (8.4.3) | "Sobras a receber": diz quem age e evita "pendente" sozinho (DS-24). A 8.4.3 acompanha | "Sobras a receber" |
+| PEND-DS-03 | Modo escuro | Não entregar nesta versão. Os componentes usam só tokens semânticos (DS-10), então o tema escuro pode ser um segundo conjunto de valores dessa camada, medido com os mesmos pares de 74.9. Decidir depois de observar o uso real (turno noturno, cabine, sol direto) | Só o tema claro, com `color-scheme: light` declarado nas variáveis |
+| PEND-DS-04 | Marca, logotipo e nome exibido: o menu mostra "Talhão à O.S."; o PRD se chama "Do Talhão à O.S." | Nome exibido "Do Talhão à O.S.", igual ao título do PRD. Logotipo definitivo fornecido pelo proprietário em SVG, com versão para o menu escuro e área de proteção. Até lá, o quadrado de 28 px em `cor.acao.primaria` com o ícone de folha do protótipo | Nome "Do Talhão à O.S." e a marca provisória do protótipo |
+| PEND-DS-05 | Famílias tipográficas e hospedagem. O protótipo carrega Sora e Manrope do Google Fonts; o PRD não cita famílias | Confirmar Sora 700 (títulos, KPI, ID do talhão) e Manrope 500 a 800 (texto). Servir os arquivos woff2 com o próprio produto, sem serviço pago nem chamada a terceiros durante o uso, com `font-display: swap` e `system-ui` como reserva. Conferir a licença no pacote obtido antes de publicar | A proposta |
+| PEND-DS-06 | Pontos de quebra: o protótipo tem largura fixa (1440 e 390 px) | Três faixas, validadas nos quatro tamanhos de MAPUX-02: celular abaixo de 768 px (lista de cartões no lugar da tabela, 4.3); tablet de 768 a 1279 px (menu recolhido); desktop a partir de 1280 px | A proposta |
+| PEND-DS-07 | Largura da barra vertical do mapa: 96 px no protótipo validado × 56–72 px em 67.2 | 96 px, com rótulo de até duas linhas e alvo de 96 × 55 px ou mais (medido). A 67.2 passa a remeter a `layout.mapa.barra`. A alternativa, 56–72 px, exige rótulos mais curtos ou só ícone com dica | 96 px |
+| PEND-DS-08 | "Em planejamento", usado pelo protótipo na safra, não está em 8.1 | Retirar da interface e usar os estados de 8.1. A alternativa é adotar o rótulo e acrescentá-lo a 8.1 | Os estados de 8.1 |
+| PEND-DS-09 | Largura do menu recolhido (20.2 pede barra recolhível; o protótipo não recolhe) | 64 px: ícone de 20 px centrado num alvo de 44 px, com `espaco.10` de cada lado; nome acessível e dica em cada item; o estado aberto ou recolhido fica lembrado por usuário | A proposta. No desktop, o menu começa aberto |
+| PEND-DS-10 | Paleta do NDWI (água). O protótipo usa laranja e amarelo da rampa de vigor para "muito seco" e "seco" | Muito seco `#D98A4E` e seco `#D4B25A` (laranja e amarelo operacionais); adequado `#4FA3E0` e úmido `#1E5F8F` (os azuis que o NDWI já usa). Traços `#9A3F00`, `#8A5A00`, `#1E5F8F` e `#123A57`, com contorno medido entre 5,86:1 e 11,74:1 (74.9.2). Nenhum hex novo, e a rampa de vigor deixa de aparecer num índice que não é de vigor | A proposta |
+| PEND-DS-11 | Paleta do Solo. O protótipo usa a rampa de vigor e pinta "alto" de verde-escuro, o que contraria 61.3 em pH e nutrientes | Paleta operacional com as classes do protótipo: baixo laranja, médio amarelo, adequado verde e alto azul. "Acima da faixa" não é "melhor", e o julgamento de cada atributo vem da faixa técnica do responsável (61.3). Atributo sem faixa técnica válida não recebe classe | A proposta. O atributo sem faixa mostra o valor escrito, com `mapa.nao-se-aplica` e a legenda "sem faixa técnica" |
+| PEND-DS-12 | Raster por pixel, escala relativa ao talhão e imagem de satélite de fundo. O protótipo pinta o polígono com a classe do valor médio, sobre fundo liso | Adotar a regra de satélite do proprietário: raster na resolução nativa, sem suavização, dentro do polígono, sobre imagem real, com opacidade de 0,85 e o seletor "Contraste: Talhão · Fazenda · Absoluto" recolorindo no próprio navegador. É comportamento de 61.4 e 67 e entra com a decisão | Polígono com a classe do valor médio, escala absoluta da fazenda escrita na linha de fonte, opacidade de 0,88 sobre `mapa.terreno` e manchas como no protótipo |
+| PEND-DS-13 | Apresentação compacta de números: o protótipo usa 0, 1 ou 2 casas em área ("190/350 ha", "0,4 ha") e abrevia moeda ("R$ 158 mil"), e a 10.0 fixa 2 casas | Em rótulo de mapa, cartão e KPI: área sem zeros à direita, até 2 casas; moeda com "mil" e "mi" só em KPI e rótulo de mapa, com o valor completo no detalhe. Em tabela, total, documento e ficha: 10.0 sem mudança | A 10.0 em toda a interface |
+| PEND-DS-14 | Sons de retorno do app. A 64.7 pede "dois sons curtos"; o protótipo não tem som | `som.salvo`: um tom senoidal de até 150 ms. `som.atencao`: dois tons descendentes, até 300 ms no total. Volume baixo, fixo e igual nos dois (74.3.10) | A proposta |
+| PEND-DS-15 | Palavra da reserva comercial que vence. O protótipo usa "Expirada" e "saldo liberado"; a RSV-18 fixa "reserva vencida" e "devolvido ao disponível" só para a reserva de material | "Vencida · devolvida ao disponível", a mesma forma da reserva de material, para que "liberar" e "expirar" tenham um sentido só no produto | A palavra do protótipo, em Neutro |
+
+### 74.13 Correções em relação ao protótipo
+
+Cada linha traz o valor do protótipo, o valor do capítulo, o motivo e a medição. "Antes" é a medição dos pares do protótipo (`ds/_trab/contraste_prototipo_v37.txt`, 99 de 121). "Depois" é a medição de `ds/pares.json` (74.9.2, 111 de 111). As duas foram feitas com `ds/contraste.py` em 27/09/2026. As 22 falhas do protótipo e o destino de cada uma: T09 e T10 → CORR-DS-01; T13 → CORR-DS-02; U01, U02 e U10 → CORR-DS-03; U18 e U20 → CORR-DS-04; U11 → CORR-DS-05; U15 → CORR-DS-06; cinco rótulos do mapa sem halo → CORR-DS-17; sete amostras da legenda operacional → CORR-DS-15. Onde havia mais de um valor possível, o critério foi: preferir um valor que já existe na paleta a um tom novo; entre valores quase iguais, ficar com o mais usado ou com o da tela validada (IN-04).
+
+#### 74.13.1 Cor
+
+| ID | Token ou elemento | Protótipo | Capítulo | Motivo | Medição (antes → depois) |
+|---|---|---|---|---|---|
+| CORR-DS-01 | `cor.texto.secundario` | `#65736A`; `#4B5A51` na barra do mapa | `#5B6660` | T09 e T10 abaixo de 4,5:1. O valor já existia no chip cinza e unifica três quase-duplicatas (ΔE 5,4 e 10,3). O menor ajuste calculado (`#637068`) deixaria só 4,52:1 sobre a selecionada | T07 4,98 → 5,98; T08 4,59 → 5,50; T09 4,38 → 5,25; T10 4,34 → 5,21; T11 4,63 → 5,55; T12 4,93 → 5,91; T28 7,29 → 5,98 |
+| CORR-DS-02 | Texto terciário | `#8A968E` (previsto, manutenção, marcador) | Eliminado; o texto passa a `cor.texto.secundario` | 3,07:1 como texto. O menor ajuste (`#6E7972`) ficaria a ΔE 3,2 do secundário, e "previsto" e "manutenção" já têm palavra própria | T13 3,07 → 5,98 |
+| CORR-DS-03 | `cor.borda.campo` (novo) | `#E4E9E5` em campo, busca, seletor e caixa de seleção | `#859189` | Contorno de campo abaixo de 3:1 (1.4.11). O mesmo valor serve a CORR-DS-04 | U01 1,23 → 3,28; U02 1,13 → 3,02; U10 1,23 → 3,28; novos U36 3,04 e U37 3,18. Sobre superfície sutil mede 2,88 e não é usado (I07; U38) |
+| CORR-DS-04 | `cor.icone.inativo` | `#8A968E` (filtro, excluir), `#B7C1BA` (seta de ordenar), `#9AA59E` (ponto cinza) | `#859189` | Seta e filtro abaixo de 3:1. Os ajustes mínimos ficavam a ΔE ≤ 4,2 entre si: um token só para "controle em repouso" | U18 1,70 → 3,02; U20 2,83 → 3,02; U21 3,07 → 3,28 |
+| CORR-DS-05 | Opção escolhida (segmento, aba em chip, chip de fase) | Branco com sombra sobre o trilho; aba em chip e chip de fase em `#15201A` | `cor.acao.primaria` com `cor.texto.inverso` | Branco sobre o trilho mede 1,14:1. Nenhum ajuste de tom resolve sem derrubar T09. O padrão verde já existia nos filtros do IN-04, e fica um padrão de seleção só | U11 1,14 → 4,68; texto T18 5,33 |
+| CORR-DS-06 | `progresso.fase.concluida` | `#9CCBB0` | `#719E85` | Segmento concluído abaixo de 3:1 | U15 1,81 → 3,03. Efeito medido: atual × concluída cai de 2,94 para 1,76 (I06); a atual se lê pelo rótulo em 800 e por `aria-current` |
+| CORR-DS-07 | Barra vertical do mapa, ativa | `#1E6B47` | `cor.acao.primaria` (`#1E7A4C`) | Dois verdes para o mesmo papel: medem 1,21:1 entre si (ΔE 8,6) | T27 6,46 → 5,33 |
+| CORR-DS-08 | `cor.foco.inverso` (novo) e anel global | Foco estilizado só na linha da tabela; no menu, o verde mede 3,06:1 | `foco.anel` em todo controle; `#FFFFFF` sobre o menu | 2.4.7 exige foco visível; margem de 0,06 no menu | S07 3,06 → 16,31; U04–U07 e U41 de 4,64 a 5,33 |
+| CORR-DS-09 | `cor.atencao.fundo` · `.borda` | `#FFF4D6` e `#FFF7E0`; borda `#E9D39B` | `#FFF3D6`; `#F0D9A0` | Quase-duplicatas (ΔE 0,7 e 3,7; borda 2,3) | T29 5,41 → 5,37 |
+| CORR-DS-10 | `cor.erro.fundo` | `#FDECEE` | `#FDE8E6` | Quase-duplicata (ΔE 2,8) | T21 5,59 (valor mantido) |
+| CORR-DS-11 | `cor.informacao.texto` | `#1E88E5` (ponto do app, pílula de prazo), `#1E6FB8` (divisão proposta no PL-02) | `#1E5F8F` | Três azuis para o mesmo papel; branco sobre `#1E88E5` mede 3,68:1 e falha como texto | U34 3,68 → 6,80 |
+| CORR-DS-12 | `cor.sobreposicao` | Véu a 0,35 no `drawer_button` legado | 0,32 | Quase-duplicata | — |
+| CORR-DS-13 | `mapa.terreno` | `#DDE5D4`, `#E3EBDD`, `#EEF3EA` | `#E3EADB` | Quatro valores (ΔE até 4,7); fica o do IN-04 | M-SEL 13,61 (sobre `#DDE5D4` seria 12,95) |
+| CORR-DS-14 | `mapa.nao-se-aplica` | `#E9EEE6` (`LCOR`) e `#E4E9DF` (`LCOR_OP`) | `#E4E9DF` | Mesmo sentido, ΔE 2,1; fica o do IN-04 | Rótulo com halo 16,75 (M-H1) |
+| CORR-DS-15 | Contorno da amostra da legenda operacional | `#FFFFFF` (a borda visível era o próprio preenchimento) | Traço da classe (74.7.3) | Amostra sem contorno perceptível (1.4.11); a legenda do Satélite já usava o traço escuro | Verde 2,55 → 5,27; lima 1,99 → 4,86; amarelo 2,01 → 5,86; laranja 2,70 → 6,73; cinza 1,57 → 5,91; azul 2,79 → 6,72; não se aplica 1,22 → 3,24 |
+| CORR-DS-16 | Contorno da amostra "não se aplica" | `#8A968E` | `#859189` | O valor `#8A968E` deixa de existir (CORR-DS-02 e 04) | 3,04 → 3,24 |
+| CORR-DS-17 | Rótulo do talhão | Halo presente no IN-04, sem regra | Paleta mantida; halo branco obrigatório (`mapa.rotulo.*`) | Sem halo, cinco classes ficam abaixo de 4,5:1. Clarear as classes (menor ajuste calculado: `#278A2E`, `#F62838`, `#457CAF`, `#C9563D`, `#4D7CA3`) mudaria a paleta contratada e aproximaria vigor alto de bom | Sem halo: 3,67, 3,62, 3,13, 4,46 e 4,04 (74.9.3). Com halo: M-H1 16,75; M-H2 10,56; M-ID 16,75 |
+| CORR-DS-18 | Desenho do mapa no `ui37.farm_map` (CD-01 e cadastro de talhão) | Opacidade 0,8; contorno com o traço escuro da classe, de 2 px (4 px no selecionado); ID de 34 com halo de 5; legenda de 12,5 px com halo de 3,5; estrada `#B9C6AE`; Estádio com a paleta viva | Igual ao IN-04: `mapa.preenchimento.opacidade`, `mapa.contorno`, `mapa.contorno.selecionado`, `mapa.rotulo.*`, `mapa.via` e Estádio na paleta operacional | Dois desenhos para o mesmo mapa | — |
+| CORR-DS-19 | "Sem dado" da Colheita e produtividade | Liso (`none`) | Hachurado (`mapa.sem-leitura`) | Ausência de leitura não é "não se aplica" (61.3) | — |
+| CORR-DS-20 | Mapas locais | CA-01: legenda "Em conferência ou a liberar" em âmbar e cinza `#9AA59E`. Talhão no cadastro: `#8FD67F` (ativo), `#FFD500` (área fora da tolerância), `#C9CFCB` e `#E9EEE6`. AG-01: fundo `#B5E61D` a 0,55. PL-02: `#1E6FB8` a 0,20 | CA-01: papéis de 74.4.3, com A liberar em Neutro e Em conferência em Atenção. Cadastro: `mapa.op.verde`, `mapa.op.amarelo`, `mapa.cinza` e `mapa.nao-se-aplica`. AG-01: `mapa.terreno`. PL-02: `cor.informacao.texto` | A cor da classe 3 servia de alerta de cadastro, a da classe 4 servia de fundo, e havia um verde e um azul fora dos tokens | — |
+| CORR-DS-21 | Azul-escuro operacional | `#44739A` | Sai da paleta | Não aparece em nenhuma legenda | — |
+| CORR-DS-22 | Ordem da legenda | Integrado, Irrigação, Colheita e produtividade e Custos começavam pela classe favorável | Ordem de gravidade (`SEV`) em todas | Uma ordem só | — |
+| CORR-DS-23 | Legado sem uso | `PRAZO` (`#C62828`, `#EF6C00`, `#F9A825`, `#2E7D32`, `#1E88E5`); `LAYERS`, `LEGENDS` e `farm_map2` (`#D9D9D9`, `#1D4ED8`, `#60A5FA`); `ROLE` e `roletag`; `barchart` (`#B7C9BE`) | Removidos do gerador | Nenhuma das 145 telas usa | Branco sobre `#1E88E5` 3,68 (falharia como texto); `roletag` 4,14 |
+
+#### 74.13.2 Escalas, camadas e medidas
+
+As colunas "Absorve" e "Nota" de 74.3 dão o valor de origem de cada token. Aqui ficam só as correções, com a contagem que as motivou (extração de 27/09/2026 sobre as 145 telas geradas).
+
+| ID | Dimensão | Protótipo | Capítulo | Motivo | Medição |
+|---|---|---|---|---|---|
+| CORR-DS-24 | Tamanho de fonte | 26 valores, entre eles 12,3, 12,5, 12,6 e 12,8 px | 11 tokens (74.3.5); eixo de gráfico de 10,5 px passa a `tipo.legenda` | Diferenças que o olho não separa | 26 → 11 |
+| CORR-DS-25 | Família e peso | Manrope 400 (só na unidade do KPI, 150 ocorrências) e Sora 600 (carregado, sem uso) | Manrope 500–800 e Sora 700 | Peso sem uso ou quase sem uso | 2 pesos a menos |
+| CORR-DS-26 | Espaçamento | Valores ímpares e 22 px nas receitas (botão 11 × 20, mini 5 × 10, chip 3 × 10 e 2 × 9, tag 2 × 9, painel 22 × 24) | Escala par (74.3.6) e receitas corrigidas. O chip fica em 2 × 10 com borda transparente de 1 px, e a tag em 2 × 10 com a sua borda de 1 px: os dois mantêm a mesma altura, como no protótipo | Um passo de 2 px | Os botões ganham 2 px de altura; chip e tag, lado a lado, ficam com a mesma altura; a medida em tela será feita no espécime |
+| CORR-DS-27 | Raio | 12 valores, com 14 px na moldura da tabela, no mapa e no campo do app | 7 tokens; 14 → 16 | Quase-duplicatas | 12 → 7 |
+| CORR-DS-28 | Borda | 1,5 px na ficha; tom lateral de 4 px | `borda.2`; `borda.3` | Escala de 1, 2 e 3 px | — |
+| CORR-DS-29 | Camada | Lista suspensa e menu de coluna em 25, abaixo da faixa de etapas (30) | `camada.suspensa` = 40 | A lista abria sob a faixa fixa | — |
+| CORR-DS-30 | Menu lateral | 232 px; 224 px no `shell()` legado; o aviso legado deslocado em 248 px | `layout.menu` = 232 px | O PRD dizia "aproximada de 248 px"; o protótipo validado mede 232 px | Item 208 × 34 px mais 2 × 12 px |
+| CORR-DS-31 | Painel lateral | 9 larguras: 460 (124 telas), 440 (legado, 37), 480 (2), 820, 840 e 1060 px | 460, 820 e 1060 px, mais o painel do talhão (356 px) | O roteiro citava 480 px; o uso medido é 460 px | 9 → 4 |
+| CORR-DS-32 | Alvo | App: Voltar 20 × 20 e 12 × 27 px; ações do cartão com 32 px; Ver envios 60 × 17 px. Desktop: filtro de coluna 11 × 22 px | `alvo.campo` 44 × 44 px; `alvo.minimo` 24 × 24 px | 4.3 e WCAG 2.5.8 | Medidas da extração (74.9.5) |
+| CORR-DS-33 | Ícone e ponto | Ícones de 13, 15, 18 e 26 px; pontos de 7 e 8 px | Ícones de 12, 14, 16, 20 e 24 px; ponto de 6 px | Quase-duplicatas | Ícones: 10 tamanhos → 5, mais o de 40 px do estado vazio |
+| CORR-DS-34 | Movimento | Uma transição, sem redução | `movimento.curto` e redução a 0 ms (DS-14) | Respeitar a preferência de movimento reduzido do sistema | — |
+| CORR-DS-35 | Números tabulares | Presentes na tabela, no KPI e no painel; ausentes no app e na ficha | Em todo número (DS-05) | Alinhamento de coluna | — |
+| CORR-DS-36 | Traço de gráfico | 2,4 px | `borda.2` | Escala de bordas | — |
+
+#### 74.13.3 Componentes
+
+As linhas "Corrige (74.13)" de 74.5 e 74.6 detalham cada caso. Este índice junta as correções de componente e a medição que as motivou.
+
+| ID | Bloco | Protótipo → capítulo | Medição ou contagem |
+|---|---|---|---|
+| CORR-DS-37 | 74.5.4 Filtros do topo | Seletor com borda `#E4E9E5` → `cor.borda.campo`; contexto fixo sem cadeado → cadeado e "fixo"; pílula "não se aplica" a 55 % → sai | Pílula 2,17:1; borda 1,23 → 3,28 |
+| CORR-DS-38 | 74.5.5 Faixa de etapas | Quatro desenhos → um componente com três variantes; horizontais sem "concluída" → com; texto futuro `#8A968E` → `cor.texto.secundario` | 3,07 → 5,98; segmento em CORR-DS-06 |
+| CORR-DS-39 | 74.5.6 Faixa de continuidade | Rótulo `#65736A` → `cor.texto.secundario`; valor com reticências → quebra de linha; célula sem link → abre o registro | 4,34 → 5,21 |
+| CORR-DS-40 | 74.5.7 Botões | 9 tamanhos e 5 raios → 4 e 3; 4 formas de destrutivo → 2; "Confirmar rejeição" verde → destrutivo preenchido; ação do cartão do app de 32 px → 44 px | Medido: 106–175 × 32 px no app |
+| CORR-DS-41 | 74.5.8 Chips | 5 paddings → 1; pílula de prazo branca sobre `#1E88E5` → chip | 3,68:1 → chip de papel (≥ 4,64:1) |
+| CORR-DS-42 | 74.5.9 Tags | Origem com fundo próprio → tag; origem e prioridade em chip de estado → tag; tag de grupo preenchida → sai | `roletag` 4,14:1 |
+| CORR-DS-43 | 74.5.10 Controles de escolha | Abas sem papel → `tablist` e `tab`; opção ativa em CORR-DS-05 | Inativo 4,38 → 5,25 |
+| CORR-DS-44 | 74.5.11 KPI | Último cartão sempre verde, pela posição → cor só com estado definido | DS-03 |
+| CORR-DS-45 | 74.5.13 Bloco de seção | 12 cópias locais de `bloco` e o `section` → um componente; raio 14 → 16; tom de 4 → 3 px; ponto de estado sem palavra → chip | — |
+| CORR-DS-46 | 74.5.14 Tabela G2 | Filtro de coluna de 11 × 22 px → 24 × 24; busca sem foco → com anel; "selecionar todas" sem estado parcial → com; total desligado nas tabelas convertidas → ligado onde aditivo; filtro textual, intervalo e "Agrupar por" ausentes → presentes (4.3) | Seta 1,70 → 3,02; filtro 2,83 → 3,02 |
+| CORR-DS-47 | 74.5.15 Painel lateral | 5 painéis sem Esc e 1 sem × → Esc, × e véu em todos; sem gestão de foco → foco preso e devolvido; padding de 22 → 24 px | 9 larguras → 4 (CORR-DS-31) |
+| CORR-DS-48 | 74.5.16 Campos | Obrigatório sem marca → "(opcional)" no opcional e `aria-required`; raios de 8, 10 e 14 → 10 e 16 (8 só inline); borda de erro só no formulário da tabela → em todos | Borda em CORR-DS-03 |
+| CORR-DS-49 | 74.5.17 Aviso | Duas camadas de aviso, a antiga deslocada em 248 px → uma; um papel para tudo → `status` e `alert` | — |
+| CORR-DS-50 | 74.5.19 Estado vazio | Vazio com ação só na IN-04 → em todas as listas | — |
+| CORR-DS-51 | 74.5.21 Barra de progresso | `util` e `nc_bar`, sem uso no gerador e com a marca do nível de controle fixa em 71 % → saem | — |
+| CORR-DS-52 | 74.5.22 e 74.5.25 Mapa | Barra ativa e inativa em CORR-DS-07 e CORR-DS-01; legenda que não recolhia → recolhível e lembrada | — |
+| CORR-DS-53 | 74.5.23 Barra horizontal | Fonte cortada com reticências, texto inteiro só na dica → quebra de linha e texto inteiro no toque | — |
+| CORR-DS-54 | 74.5.26 Talhão | SVG com `role="img"` contendo botões → grupo com nome e botões; título do painel de 17 → 19 px | — |
+| CORR-DS-55 | 74.5.27 e 74.5.28 App | Dois cabeçalhos e dois primários → um de cada; Voltar de 20 × 20 e 12 × 27 px → 44 × 44; títulos de 20 e 19 → 19 px; ponto no título que repetia o chip → sai | Medidas da extração |
+| CORR-DS-56 | 74.5.29 Barra de envio | Palavras do protótipo → 74.4.3; duas frases para a mesma espera → uma; "Ver envios" de 60 × 17 px → 44 px de altura | — |
+| CORR-DS-57 | 74.5.30 Ficha impressa | Linhas `#E4E9E5` → `cor.borda.campo`; números sem tabular → tabulares; bordas de 1,5 → 2 px | Na tela: 1,23 → 3,28. O papel não foi medido |
+| CORR-DS-58 | 74.6.3 Tela de trabalho da O.S. | Só "Versão · autorização" e o recibo → bloco Situação e origem (APROV-13; RSV-16; 73.5; INTEG-27) | — |
+
+#### 74.13.4 Conteúdo
+
+As trocas de palavra estão em 74.4.3 (coluna "Mudança") e 74.8.2 (coluna "Não use"). Aqui fica a correção de formato que contraria o critério "o mais usado" desta seção.
+
+| ID | Tema | Protótipo | Capítulo | Motivo | Contagem |
+|---|---|---|---|---|---|
+| CORR-DS-59 | Porcentagem e duração (74.8.3) | "60%" (240 usos) e "60 %" (97); "1h55" (6) | "60 %" e "1 h 55 min", com espaço inseparável | Convenção do SI para unidade e porcentagem, e unidade junto ao valor, sem quebra (20.2; DS-05). É a exceção ao critério "o mais usado" | Extração de 27/09/2026 (74.8.3) |
+
+<!-- Coordenação da segunda parte (74.7 a 74.13). IDs usados: DS-65 a DS-86; DS-AC-01 a DS-AC-29; PEND-DS-01 a PEND-DS-15 (01 a 09 com os temas fixados na 74a; 14 e 15 da crítica); CORR-DS-01 a CORR-DS-59. Nenhum deles existe no PRD base (grep em 27/09/2026). As reconciliações pedidas por esta parte (23.1, 25.2, 27.1 ENG-052, 10.0, 61.4 e ACE-29) estão em ds/reconciliacoes_74.md desde a crítica (ds/critica_74.md, C21). Arquivos: ds/pares.json tem os 111 pares em uso (103 depois de 74.13 e 8 da crítica, C11); o original do protótipo está em ds/_trab/pares_prototipo_v37.json; ds/pares_informativos.json tem 34 pares; os dois são gerados por ds/_trab/aplicar_74_13.py. -->
+
+## 75. Melhoria contínua com o proprietário e os usuários — v3.10
+
+### 75.1 Origem, alcance e o que não muda
+
+**Origem:** pedidos do proprietário de 27/09/2026, feitos no canal do Codex e colados por ele no canal do Claude:
+- relato com print e comentário;
+- uso real orientando simplificação;
+- incidentes 24×7 com recuperação;
+- assistente de gestão com validação cruzada entre dois modelos;
+- benchmark e corte de cliques em cada fatia;
+- app de campo com Meu dia por papel, registro rápido e retorno visual e sonoro discreto.
+
+Especificação redigida a partir das metodologias do Codex, revisadas pelo Claude nas rodadas R-003 e R-004 (`docs/parceria/rodadas/`).
+
+**Alcance:** complementa os caps. 15, 26, 30, 58, 59, 64 e 68. Não cria menu, módulo nem papel de acesso novo. O chamado de suporte (68.5, 8.1) e o acompanhamento da adoção (58.5, BO-04) continuam onde estão; este capítulo acrescenta só o que falta e remete a eles.
+
+**O que não muda:**
+- aprovação agronômica e exceções expressas;
+- comandos do domínio (nenhuma função deste capítulo executa comando sem o fluxo e a alçada do PRD);
+- produção só depois de homologação e aceite explícito do proprietário;
+- interface com uma ação primária por tela.
+
+### 75.2 Relato de problema ou sugestão
+
+A mesma entrada serve para problema e sugestão: **Ajuda › Relatar problema ou sugestão**. É o "Abrir chamado" de 68.5, com as regras do proprietário. O usuário não precisa saber se é defeito, melhoria ou falta de conexão.
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| FB-01 | **Print e comentário são obrigatórios**, para problema e para sugestão (regra do proprietário). O servidor recusa relato sem imagem válida ou com comentário vazio; o botão sozinho não garante a regra. | Envio sem imagem ou sem comentário é recusado no cliente e no servidor, com erro junto ao campo e o preenchimento preservado. |
+| FB-02 | **No piloto, o print vem da galeria ou de arquivo** (captura nativa do aparelho ou do sistema), com prévia. O contexto técnico entra automaticamente: tela, etapa, objeto e versão, instante, versão do app, conectividade e correlação do erro (ENG-015). Captura automática da tela pelo navegador fica como melhoria futura, com prova técnica em aparelho do piloto. | O relato chega com a imagem escolhida e o contexto completo, sem o usuário digitar dados técnicos. |
+| FB-03 | Sem dado sensível por padrão. O usuário vê a prévia e pode trocar a imagem. Não se capturam console, cookies, cabeçalhos, corpo de requisição nem gravação contínua. Armazenamento privado, escopo por organização, URL temporária, validação de tipo e tamanho e remoção de metadados desnecessários (ENG-046). | Anexo de outra organização não pode ser vinculado nem lido; arquivo inválido ou malicioso é recusado com orientação. |
+| FB-04 | **Uma ação primária: Enviar.** Envio idempotente pela chave da intenção (73.3). Sem sinal, fica "Salvo neste aparelho" (64.5) e nunca "Recebido" sem recibo do servidor. Depois do recibo, o usuário volta à tarefa com o contexto e os dados preservados. | Repetir o envio, timeout e queda de rede produzem um único relato; o rascunho não se perde. |
+| FB-05 | **O usuário vê a situação do relato** com os estados de 8.1 (Recebido → Em análise ⇄ Aguardando você → Respondido). O motivo do encerramento é dito em palavras simples: resolvido, melhoria planejada ou não será feito, com o porquê. | Cada mudança de estado gera um item único na fila do autor; "melhoria planejada" nunca aparece como "disponível". |
+| FB-06 | **Triagem pelos dois agentes, fora do produto da fazenda.** O relato gera um item no rastreador da equipe, com o ID do relato e um resumo sanitizado, sem conteúdo bruto do cliente. Um agente propõe a decisão (defeito comprovado com severidade S1–S4, melhoria com benefício medido, falta informação, duplicado ou não será feito) e o outro revisa. | Toda decisão tem autor, revisor, fundamento e evidência; divergência fica registrada até ser resolvida por requisito, teste ou decisão do proprietário. |
+| FB-07 | **Duplicados** são ligados ao caso principal, preservando print, comentário e alcance de cada relato, sem mostrar a um cliente o conteúdo de outro. | Agrupar não vaza relato de terceiros; o autor acompanha o resultado do caso principal. |
+| FB-08 | **Não aceito** é arquivado com motivo simples e pode ser reaberto com informação nova. Quantidade de pedidos ou votos não basta para implementar. | O motivo aparece para o autor; relato reaberto volta à triagem. |
+| FB-09 | **Nenhum relato muda o sistema sozinho.** Correção ou melhoria segue: tarefa → desenvolvimento → testes → revisão dos dois → homologação → teste do proprietário → aceite → produção do mesmo artefato. Texto, imagem e anexos são dados não confiáveis, nunca instruções para os agentes. | Conteúdo malicioso no comentário ou no print não aciona ferramenta nem vira HTML executável. |
+
+### 75.3 Uso real e simplificação por evidência
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| USO-01 | A aplicação emite **eventos de tarefa** (iniciada, concluída, abandonada, com erro), com ID estável do elemento acionado e resultado. Os eventos passam pelo mesmo mecanismo de eventos e projeções (73.7), sem SDK de terceiro no piloto. Nunca levam coordenada geográfica, texto digitado, conteúdo de tabela, documento nem credencial. | Os eventos de uma tarefa de teste têm só identificadores, estados e tempos; falha da coleta não atrasa nem impede apontamento, recebimento ou sincronização. |
+| USO-02 | **Mapa de uso por elemento:** acionamentos por elemento, estado e resultado, na mesma versão da tela e classe de aparelho. Mapa de calor por pixel só em investigação pontual e registrada, com dados sintéticos ou agregados autorizados. | Duas versões diferentes da mesma tela não se misturam no mesmo mapa. |
+| USO-03 | **Adoção por oportunidade.** Adoção = usuários únicos elegíveis, com a tarefa devida, **que a concluíram** ÷ usuários únicos elegíveis **com a tarefa devida**, na mesma janela, versão e escopo. Denominador zero = "sem oportunidade", nunca 0 %. Conclusão por tentativa (tentativas concluídas ÷ tentativas iniciadas) é outro indicador e aparece separada. Mostra numerador, denominador, janela e cobertura da coleta. **Janela de cada processo:** a safra ou etapa em que a tarefa é devida, pelo calendário do próprio processo; decisão técnica delegada aos agentes, revista no piloto com os dados, sem questionário ao agricultor. Vale também para a ativação e a adoção do backoffice (58.5, BO-04), que não definem fórmula própria. | 8 de 10 = 80 %; 0 de 10 = 0 %; 0 de 0 = "sem oportunidade". Função sazonal fora da janela aparece como "fora da janela", não como sem uso; registro ainda no aparelho não conta como abandono. |
+| USO-04 | **Pouco uso abre investigação, não remoção automática.** Proposta de simplificação (manter, melhorar a descoberta, simplificar, mover, unir ou retirar) passa pelos dois agentes. Proteções de segurança, integridade, obrigações legais, recuperação e acessibilidade têm análise própria, mesmo com uso zero. | Nenhum algoritmo remove função, muda permissão ou publica versão; toda proposta aprovada liga dados, pareceres e aceite de homologação. |
+| USO-05 | As análises de uso ficam no backoffice da plataforma (BO-04), sem painel novo para o agricultor. | O agricultor não vê painel de uso; o backoffice só vê agregados permitidos. |
+
+### 75.4 Produtividade da interface em cada fatia
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| UXP-01 | **Referências por módulo.** Cinco referências do setor, com fonte oficial e data, reaproveitadas pelas fatias do mesmo módulo. Cada prática recebe uma decisão: adotar, adaptar, adiar ou descartar. Estar no mercado não prova que uma regra de domínio está correta. | A fatia registra as referências usadas e o que foi adotado, adiado ou descartado, com motivo. |
+| UXP-02 | **Menos cliques e menos digitação, sem perder clareza:** herdar o contexto (organização, fazenda, safra, talhão, ordem, local, unidade) visível e corrigível; não pedir o mesmo dado duas vezes; sem tela intermediária que não decide, campo calculável ou confirmação redundante. Aprovações e confirmações de ações graves exigidas pelo PRD continuam. | Os testes ponta a ponta de cada fatia contam cliques e caracteres digitados no mesmo cenário e comparam com a versão anterior; a redução não piora acessibilidade nem rastreabilidade. |
+| UXP-03 | **Seleção rápida por tipo de campo:** lista curta com um toque; catálogo por busca com sugestões (nome, código, sinônimo); número com teclado numérico e unidade; data com atalhos; item com código físico por leitura quando o aparelho permitir. Regras de componente no design system (cap. 74). **Último valor nunca para lote, dose, quantidade ou autorização.** | Campo de catálogo não seleciona sozinho uma opção ambígua; a resposta atrasada de uma busca não substitui a busca atual; sem conexão, o catálogo local mostra que pode estar desatualizado. |
+| UXP-04 | **App de campo: Meu dia, registro rápido e retorno** (pedido do proprietário, 27/09/2026). Fila do dia por papel com prioridade explicável, registro só do realizado, validação antes de confirmar e retorno visual e sonoro discreto. Regras no 64.7; componentes no cap. 74. Não cria painel paralelo nem questionário ao agricultor. | Os aceites CAMPO-11 a CAMPO-16 (64.7) passam nos testes ponta a ponta da fatia, incluindo toque duplo, som desligado e tarefa bloqueada. |
+
+### 75.5 Incidentes e recuperação
+
+As metas continuam as do cap. 30 e do 29.5 (disponibilidade, reconhecimento de S1, RPO e RTO). Este capítulo acrescenta como cumpri-las sem promessa falsa.
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| INC-01 | **Detecção fora da falha principal:** sondas funcionais e alertas por serviço externo à aplicação, mais sinais de latência, tráfego, erros, saturação e invariantes do negócio. Sessão de agente não é monitoramento nem plantão. | Com a aplicação fora do ar, o alerta chega ao responsável pelo canal combinado. |
+| INC-02 | **Plantão humano nomeado antes da produção**, com canal e substituto testados. O perfil operacional (PEND-OP-01) define horário e prazos de reconhecimento. Sem plantão definido, não se anuncia atendimento 24×7. | O ensaio de alarme mostra reconhecimento dentro do prazo do perfil e o acionamento do substituto quando o primeiro não responde. |
+| INC-03 | **Recuperação conhecida e limitada:** só procedimentos homologados, com gatilho, limites, condição de parada e reversão. Retirar instância com defeito, repetir operação idempotente com espera e limite, reduzir trabalho não essencial e voltar para versão anterior já aprovada com esquema compatível. No piloto, recursos nativos da plataforma e procedimentos testados. **Automatizar uma recuperação não depende de incidente real:** entra quando o comportamento e o risco foram demonstrados em ensaio controlado (homologação ou ambiente isolado), com limite, condição de parada, reversão, monitoramento e revisão dos dois agentes. Automação especulativa ou complexa, sem ensaio, fica adiada. Nenhuma automação amplia custo ou privilégio (INC-04). | Uma versão com defeito controlado volta para a anterior aprovada, sem perda de fato confirmado; com esquema incompatível, a volta é impedida. Recuperação automática só é ligada com o relatório do ensaio (gatilho, parada, reversão); sem ensaio, fica manual. |
+| INC-04 | **Proibido automatizar:** restaurar por cima do banco, excluir registros, reverter migração destrutiva, alterar saldo para esconder divergência, desligar isolamento, autenticação ou logs, ampliar credenciais ou custo sem limite, e publicar correção não testada. Correção nova segue desenvolvimento → testes → homologação → aceite. | A revisão do procedimento confere a lista; o ensaio de corrupção restaura em ambiente isolado e reconcilia antes de substituir. |
+| INC-05 | **Comunicação simples:** jornada afetada, impacto, alternativa segura e hora da última atualização, sem previsão inventada e sem detalhe de ataque. Sem sinal, o app mostra o que está salvo no aparelho e não induz reenvio manual. | Durante o incidente, a mensagem mostra a hora da última atualização e a alternativa; nenhum saldo previsto aparece como confirmado. |
+
+### 75.6 Assistente de gestão com validação cruzada entre dois modelos
+
+Estende o cap. 59, o 15, os RF-AI-001..006 e o **CMD-38**. Não cria outro caminho de execução. **Fase:** depois dos processos estáveis da fila (DEC-2609-13 e fatias F1–F5). Até lá, só os contratos abaixo.
+
+| ID | Exigência | Aceite verificável |
+|---|---|---|
+| IAG-01 | **Braço direito de cada função:** no Meu dia e no detalhe do trabalho, mostra situação, o que merece atenção, a decisão que cabe à pessoa, a recomendação com motivo e o próximo passo, só no escopo dela. Não exige conversar com a IA para uma tarefa básica. | O operador não vê margem, salário nem dados de outra fazenda; a direção vê só o que a alçada permite. |
+| IAG-02 | **Analisar sozinho, executar só com aprovação específica:** propostas disparadas por evento de domínio **ou por verificação agendada e limitada** de vencimentos, janelas e pendências (por organização, sobre índices e projeções, sem chamar os modelos quando nada mudou), com orçamento. Alerta deduplicado e silenciado enquanto a situação não muda. Nunca varredura ampla da empresa. Qualquer efeito (gravar, enviar, aprovar, liberar, agendar, comprar, movimentar) passa pelo CMD-38. A aprovação fica ligada a usuário, organização, comando, argumentos, versões, validade e uso único. Nenhuma autorização permanente do tipo "faça tudo por mim". | Aprovação alterada, expirada ou reaproveitada é recusada; clique repetido não duplica efeito; se os fatos mudaram, a proposta volta à revisão. Pendência sem mudança desde ontem aparece quando o prazo ou a janela chega, sem novo evento, e não gera alerta a cada verificação. |
+| IAG-03 | **Todas as fontes do cliente, dentro do escopo:** catálogo semântico das fontes (escritor oficial, unidade, atualidade, chaves) com consulta tipada e leitura limitada. Sem SQL livre e sem credencial irrestrita. Fonte não conectada aparece como indisponível, não como zero. Relatórios e gráficos com dados de origem, tabela interativa e método. | Pergunta, junção ou filtro malicioso não traz dado de outro cliente; totais batem com o detalhe e com uma consulta independente conhecida. |
+| IAG-04 | **Cálculo é determinístico, não do modelo:** saldos, fórmulas, unidades, limites e versões vêm dos serviços de domínio testados. O modelo explica, compara e propõe; não recalcula fórmula crítica em texto livre nem dispensa uma falha determinística. | Uma recomendação cujo número diverge do serviço de domínio é bloqueada. |
+| IAG-05 | **Validação cruzada seletiva entre dois modelos** (pedido do proprietário): primeiro a verificação determinística. O segundo modelo revisa, de forma independente, o que ela não alcança: afirmações em texto, premissas, alternativas e recomendações agronômicas ou financeiras. **Em toda ação substantiva proposta** (gravar, enviar, aprovar, liberar, agendar, comprar, movimentar), revisa também **alvo, argumentos, premissas, efeito previsto e aderência ao pedido do usuário**, e controles determinísticos conferem alvo e argumentos contra o contexto autorizado (registro aberto, ordem citada, versão). Só depois das duas revisões válidas e desses controles vem a prévia para aprovação específica (CMD-38). Registram-se os dois pareceres e as versões. Divergência material, fonte ausente ou falha de um revisor deixa a proposta em "precisa de verificação", sem bloquear a operação manual. **Concordância entre dois modelos não prova verdade.** Receituário, assinatura técnica e aprovação agronômica seguem seus responsáveis. | Duas respostas concordantes mas erradas no conjunto de avaliação são detectadas pelos cálculos ou fontes; quantidade certa para a ordem errada é recusada antes da prévia, mesmo com os dois modelos de acordo; o timeout de um provedor não publica proposta revisada por um só. Relatórios convencionais continuam disponíveis sem IA. |
+| IAG-06 | **Custo, dados e disponibilidade:** limites de chamadas e de gasto por organização; falha do provedor não interrompe a interface convencional; dados enviados aos provedores só no mínimo necessário, sem segredos. Provedores, contrato de tratamento de dados e local de processamento dependem de decisão do proprietário (PEND-IA-01). | Com os provedores fora do ar, relatórios convencionais e operação manual funcionam, e a interface mostra a indisponibilidade. |
+
+### 75.7 Critérios de aceite
+
+Situação de todos: **especificado; não executado** (não há software de produção).
+
+| ID | Cenário | Precondições | Ação | Resultado esperado |
+|---|---|---|---|---|
+| FB-AC-01 | Relato sem imagem | Usuário autenticado na tela de recebimento | Escreve o comentário e toca Enviar sem anexar imagem | Envio recusado junto ao campo; comentário preservado; nenhuma chamada aceita pelo servidor |
+| FB-AC-02 | Relato sem sinal | App sem conexão | Anexa print, comenta e envia; volta o sinal | "Salvo neste aparelho" antes; depois, um único relato Recebido, com protocolo e contexto técnico |
+| FB-AC-03 | Relato repetido | Resposta do servidor perdida depois de gravar | App reenvia com a mesma chave | Um relato só; o recibo original é devolvido |
+| FB-AC-04 | Isolamento | Duas organizações com relatos | Usuário da B tenta abrir o anexo da A pelo identificador | Mesma resposta de "não encontrado"; tentativa registrada |
+| USO-AC-01 | Função sazonal | Função de colheita fora da janela | Consulta de adoção no backoffice | Aparece como "fora da janela", não como sem uso |
+| USO-AC-02 | Coleta fora do ar | Serviço de eventos indisponível | Operador registra apontamento | Apontamento concluído no tempo normal; eventos ficam pendentes ou são descartados sem afetar a operação |
+| USO-AC-03 | Fórmula da adoção | Três funções: 10 elegíveis com oportunidade e 8 concluintes; 10 e 0; 0 e 0 | Consultar a adoção | 80 %; 0 %; "sem oportunidade" (sem divisão por zero) |
+| INC-AC-01 | Versão com defeito | Versão anterior aprovada e esquema compatível | Publicar versão com defeito controlado em homologação e acionar o retorno | Volta à anterior sem perder fato confirmado; registro com horários |
+| INC-AC-02 | Plantão sem resposta | Perfil com substituto configurado | Disparar alarme e não reconhecer | O substituto é acionado no prazo do perfil |
+| IAG-AC-01 | Aprovação adulterada | Proposta de reprogramação preparada | Alterar a quantidade depois de aprovada | Execução recusada; nova prévia exigida |
+| IAG-AC-02 | Dois modelos concordam no erro | Conjunto de avaliação com resposta conhecida | Rodar o caso | A verificação determinística ou a fonte bloqueia; a proposta fica "precisa de verificação" |
+| IAG-AC-03 | Ação certa no alvo errado | Gestor no detalhe da OS-0421 pede para reprogramar o saldo; os dois modelos propõem a quantidade certa na OS-0420 | Validar a proposta | Recusada antes da prévia; fica "precisa de verificação" com o motivo (alvo diverge do contexto); nada executado |
+| IAG-AC-04 | Prazo sem evento novo | Ordem liberada com janela abrindo amanhã às 06:00; nenhum evento depois de ontem | Verificações agendadas às 05:00, 06:00 e 07:00 | Um único aviso na abertura da janela; as verificações seguintes não repetem; nenhuma chamada aos modelos quando nada mudou |
+
+### 75.8 Decisões pendentes do proprietário
+
+Até decidir, vale o comportamento indicado.
+
+| ID | Decisão | Proposta | Até decidir, vale |
+|---|---|---|---|
+| PEND-FB-01 | Alternativa acessível ao print obrigatório | Quem não consegue anexar imagem (leitor de tela, falha de captura) marca "não consigo anexar a imagem" e envia só com o contexto automático; o relato fica marcado | Print obrigatório, com ajuda da equipe caso a pessoa não consiga anexar |
+| PEND-FB-02 | Retenção dos prints | 180 dias depois do encerramento, com exclusão a pedido | Antes de cliente real, nenhum print com dado real |
+| PEND-OP-01 | Perfil operacional do piloto × produção comercial | Piloto: disponibilidade menor declarada, reconhecimento em horário combinado, alerta no celular do responsável, backup e restauração testados. Produção comercial: metas do cap. 30. | Não chamar o piloto de 24×7 |
+| PEND-IA-01 | Provedores, contrato de dados, local de processamento e orçamento do assistente | Decidir com estimativa concreta por organização e mês, antes de ativar | Assistente desligado; operação e relatórios convencionais |
+
+### 75.9 Aplicado, deixado de fora e cortado
+
+- **Aplicado:**
+  - print e comentário obrigatórios;
+  - contexto automático;
+  - uma ação primária;
+  - relato idempotente e sem sinal;
+  - triagem pelos dois agentes;
+  - uso por oportunidade;
+  - incidentes com plantão real;
+  - assistente com aprovação específica e validação determinística antes da cruzada;
+  - produtividade medida nos testes.
+- **Deixado de fora, com motivo:**
+  - captura automática da tela: frágil no celular, fica para depois de prova técnica;
+  - fila da equipe em tempo real: não muda decisão no piloto;
+  - automação de recuperação sem ensaio controlado: fica manual até ser demonstrada (INC-03);
+  - mapa por pixel: só em investigação pontual.
+- **Cortado:**
+  - módulo de gestão de produto dentro do sistema da fazenda;
+  - oito estados visíveis ao agricultor (ficaram os de 8.1);
+  - título, categoria e prioridade digitados pelo usuário;
+  - votação e mural público;
+  - gravação contínua de tela;
+  - SDK de terceiro no piloto;
+  - regra automática de remoção por percentil.
