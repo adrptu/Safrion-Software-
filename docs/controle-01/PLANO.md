@@ -384,6 +384,17 @@ python3 quantidade_test.py && python3 carencia_test.py unit && python3 mip_unit_
 
 **Decisão pendente (Codex e proprietário, não é defeito do CTL-5):** pelo "Usar na O.S." e pelo "Incluir produto" da O.S., a ordem é liberada com agrotóxico e com a CMD-42, mas sem receituário gravado (REC/RA; quem grava é o AG-01). PRD 41.2: "o clique interno não substitui documento legal". A liberação de agrotóxico na O.S. passa a exigir receituário gravado? O `catalogo.json` ainda diz "Preparar receituário → FO-04". O "Incluir produto" da O.S. também aceita agrotóxico em ordem que não pulveriza (anterior ao CTL-5).
 
+**Pedidos do proprietário de 09/10 (executado na mesma branch):**
+- **Praga-alvo no AG-07** (`689c138`, `1440664`). Com a cultura escolhida, a lista tem uma linha por uso na cultura (produto × praga-alvo), lida dos `agrofit_usos_cultura_*.json` e do `agrofit_indice.json`. As colunas novas são Praga-alvo (nome comum), Nome científico e Cultura do uso, com filtro e ordenação; a busca acha a praga-alvo. Sem cultura, a lista continua com uma linha por produto. Na lista por uso, os chips de classe contam usos. A ficha › Usos registrados virou tabela. Testes: `praga_alvo_unit_test.py` (1/19 na 9d4ff31 → 20/20) e `praga_alvo_test.py` (1440 e 390 px).
+- **Ficha do pivô** (`20a868e`). É a capacidade do equipamento, registrada como está na ficha (dados sintéticos), num componente único `ficha_pivo.py`. Abre em CD-03 › Bomba do Pivô 2 › "Ficha do pivô ›" e em IR-01 › setor P2 › "Ficha do pivô" (`IR-01#P2:ficha`).
+  - Fonte: `dados.FICHA_PIVO`, com a chave do equipamento do cadastro. Volta e lâmina a 100 % vêm de `dados.PIVO`. A vazão do setor P2 e da bomba no CD-03 é a da ficha: 166 L/s. O cadastro dizia 340 m³/h e divergia.
+  - A conta lâmina = lâmina100 × 100 ÷ percentímetro só confere a tabela e mostra a divergência (60 %: 11,0 × 11,17 mm).
+  - "21 h" é o regime de operação (h/dia, fora do horário de ponta) e não entra em conta.
+  - A ficha não prescreve lâmina; quem a define são a PA-07 e o responsável técnico.
+  - Ponto de leitura da CAD do talhão: `fpvCad`. Ele lê `irrCadTxt` (frente SOLO, `claude/v44-solo`) quando a função existe.
+  - Testes: `ficha_pivo_unit_test.py` (0/13 na 1440664 → 13/13) e `ficha_pivo_test.py` (0/4 na base → 14/14, 1440 e 390 px).
+- Fica: a Bomba do Pivô 1 diverge da mesma forma. O cadastro diz 300 m³/h e o setor P1 diz 150 L/s (540 m³/h). Sem ficha do P1, não há fonte para escolher; o dono do dado decide.
+
 ---
 
 ## 3. Conflitos entre frentes e como resolver
