@@ -12,11 +12,20 @@ src={f:open(f,encoding='utf-8').read() for f in fontes}
 cham=sorted(f for f,s in src.items() if re.search(r'\bosc_liberar\(',s))
 ok('E1 em todo o código de produto, só a O.S. e o Mapa chamam osc_liberar', cham==['areas/inicio.py','areas/processo_os.py'], cham)
 cl=sorted(f for f,s in src.items() if re.search(r'\bcenLiberar\(c',s) and not f.endswith('cenario.js'))
-ok('E1b só osc_liberar (processo_os) chama cenLiberar: nenhum atalho libera sem gravar CMD-42/CMD-06', cl==['areas/processo_os.py'], cl)
+ok('E1b só osc_liberar (processo_os) e a liberação da ordem de beneficiamento (ben.js, BEN-D05) chamam cenLiberar: nenhum atalho libera sem gravar CMD-42/CMD-06', cl==['areas/processo_os.py','ben.js'], cl)
+# BEN-D05 (integração BEN, 09/10): a OB (fam 'BEN', responsável próprio: Igor) reaproveita cenLiberar. Em ben.js a única função que chama
+# cenLiberar é benAutorizarLiberar, que exige o perfil de produção, recusa ordem que não é de beneficiamento (benO) e grava CMD-42 e CMD-06.
+_bf=[x for x in re.split(r'\nfunction ',src.get('ben.js','')) if re.search(r'\bcenLiberar\(c',x)]
+ok('E1d em ben.js só benAutorizarLiberar chama cenLiberar, com perfil de produção, recusa de ordem que não é OB (benO) e registros CMD-42 e CMD-06',
+   len(_bf)==1 and _bf[0].startswith('benAutorizarLiberar(') and all(t in _bf[0] for t in ("cenExige(ator, 'producao'",'benO(c, id)',"benHist(o, quem, 'Versão ' + o.versao + ' da ordem autorizada (CMD-42)'","benHist(o, quem, 'Liberada (CMD-06)'")),
+   [x[:60] for x in _bf])
 ef=[(f,len(re.findall(r'\bosc_libEfeito\(',s))) for f,s in src.items() if re.search(r'\bosc_libEfeito\(',s)]   # CTL-3: definição + 2 chamadas
 ok('E1c o efeito sem o registro de quem decide (osc_libEfeito) só é chamado por osc_liberar e pela prévia osLibErro (cópia)', ef==[('areas/processo_os.py',3)], ef)
 seed=cenario.seed()['ordens']
-ok('E2 nenhuma ordem de beneficiamento ou manutenção em A liberar no cenário (OB-0104 Encerradas)', not [k for k,o in seed.items() if re.match(r'O[BM]-',k) and o['etapa']=='A liberar'])
+# BEN-D05: a OB em A liberar da semente (OB-0112) é de beneficiamento (fam 'BEN') e fica fora da lista da O.S.: libera pelo Beneficiamento, nunca por osc_liberar
+_os_ids={o['id'] for o in P._ordens()}
+_e2=[k for k,o in seed.items() if o['etapa']=='A liberar' and (k.startswith('OM-') or (k.startswith('OB-') and (o.get('fam')!='BEN' or k in _os_ids)))]
+ok('E2 nenhuma ordem de manutenção em A liberar no cenário; a de beneficiamento em A liberar só com fam BEN e fora da lista da O.S. (OB-0104 Encerradas)', not _e2, _e2)
 ops={a['op'] for p in P._nova_ordem_dados()['planos'].values() for a in p['atv']}
 ok('E3 "Nova ordem" só emite atividade agrícola do plano', not [o for o in ops if re.search('Benef|Manut|Oficina',o)], sorted(ops))
 # (b) elos
