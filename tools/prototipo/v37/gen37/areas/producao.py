@@ -244,7 +244,7 @@ function prLoteRow(c,L,S){ const cu=L.cultura; const U=x=>prEstTxt(cu,x); const 
   const q=S.esgotado?'Esgotado':S.q; const nx=prLoteProx(c,L,S);
   return {id:L.id,ro:true,v:{nome:L.id,prod:L.prod,loc,fis:S.fis,blq:S.blq,proc:S.proc,apto:S.apto,res:S.res,disp:S.disp,q},
     s:{nome:L.id+' '+L.prod,prod:L.prod,loc:loc+' '+(L.validade?prBr(L.validade):''),q:q+' · '+nx.t,fis:U(S.fis),blq:U(S.blq),proc:U(S.proc),apto:U(S.apto),res:U(S.res),disp:U(S.disp)},
-    p:{nome:[{k:'b',t:L.id},{k:'mut',t:' · '+(L.classe?L.classe+' ':'')+(L.saf||'')}],prod:[{k:'txt',t:L.prod}],
+    p:{nome:[{k:'b',t:L.id},{k:'mut',t:' · '+(L.classe?L.classe+' ':'')+(L.saf||'')+(L.dev?' · devolvido na '+L.dev.rm:'')}],prod:[{k:'txt',t:L.prod}],
        loc:[{k:'txt',t:loc},{k:'br'},{k:L.validade&&S.vencido?'chip':'mut',t:L.validade?('vence '+prBr(L.validade)+(S.vencido?' · vencido':'')):'—',c:'yellow'}],
        fis:prTx(U(S.fis)),blq:prTx(U(S.blq)),proc:prTx(U(S.proc)),apto:prTx(U(S.apto)),res:prTx(U(S.res)),disp:[{k:'b',t:U(S.disp)}],
        q:[{k:'chip',t:q,c:PR_QCOR[q]||'gray'},{k:'br'},{k:'mut',t:nx.t}]}}; }
@@ -294,8 +294,9 @@ function prPanLote(self,c,L){ const P=prP(c); const S=prSaldos(c,L); const cu=L.
   const loc=(PRDC.locais[L.local]||{}); const lcs=prLcs(c,L);
   const orig=(L.origem||[]).map(x=>({c:[[x.carga||'abertura','b'],x.tal||'',x.os||'',x.dcol?'colhido '+prBr(x.dcol):'',U(x.kg)+(x.modo==='estimada'?' (estimada)':''),x.est?['estornada','red']:''].filter(Boolean),l:{t:'Ver carga',h:'CARGA.dc.html#'+(x.carga||'')}}));
   if(L.abertura) orig.push({c:[['Saldo de abertura','b'],'safra '+L.saf+' · anterior ao sistema, sem talhão (não entra na produção por talhão)']});
-  const rs=Object.values(P.reservas).filter(r=>r.lote===L.id).map(r=>({c:[[r.id,'b'],r.pedido,U(r.kg),r.st,(r.st==='Ativa'&&S.q!=='Liberado')?['Expedição impedida','red']:'',r.canc?'cancelada: '+r.canc.motivo:''].filter(Boolean)}));
-  const mv=P.movs.filter(m=>m.lote===L.id).slice().reverse().map(m=>({c:[[m.id,'b'],prBr(m.d)+' '+(m.at||''),m.tipo,m.fis===false?['sem efeito no físico','mut']:U(m.kg),m.carga||m.pedido||m.reserva||'',m.quem||'',m.obs||''].filter(Boolean)}));
+  if(L.dev) orig.unshift({c:[['Devolução','b'],'devolvido na '+L.dev.rm+' ('+L.dev.motivo+') · lote de saída '+L.dev.lote,'a produção do talhão não conta de novo'],l:{t:'Abrir carga',h:'EXPED.dc.html#'+L.dev.rm}});   /* Comercial R-C10 */
+  const rs=Object.values(P.reservas).filter(r=>r.lote===L.id).map(r=>({c:[[r.id,'b'],r.pedido,U(r.kg),r.st,(r.st==='Ativa'&&S.q!=='Liberado')?['Expedição impedida','red']:'',r.canc?'cancelada: '+r.canc.motivo:''].filter(Boolean),l:{t:'Abrir venda',h:'VEN.dc.html#'+r.pedido}}));   /* Comercial P5: a venda vive em Contratos e pedidos */
+  const mv=P.movs.filter(m=>m.lote===L.id).slice().reverse().map(m=>({c:[[m.id,'b'],prBr(m.d)+' '+(m.at||''),m.tipo,m.fis===false?['sem efeito no físico','mut']:U(m.kg),m.rm||m.carga||m.pedido||m.reserva||'',m.quem||'',m.obs||''].filter(Boolean),l:m.rm?{t:'Abrir carga',h:'EXPED.dc.html#'+m.rm}:null}));
   const dests=[...new Set(Object.values(P.pedidos).filter(p=>prCompat(p,L)).map(p=>p.dest||'MI-BR'))]; const av=[];
   if(typeof carAvaliar==='function') lcs.forEach(lc=>dests.forEach(d=>{ const a=carAvaliar(c,lc,d); av.push({c:[[lc,'b'],[a.rot,a.st==='nao_conforme'?'red':(a.st==='conforme'?'ok':'')],(a.motivos[0]||a.faltas[0]||{}).t||'',((a.motivos[0]||a.faltas[0]||{}).q?'quem resolve: '+(a.motivos[0]||a.faltas[0]).q:'')].filter(Boolean),l:{t:'Ver carência e destino',h:'CO-06.dc.html'}}); }));
   const PPx={title:L.id+' · '+L.prod,chip:[q,PR_QCOR[q]||'gray'],sub:(loc.nome||'')+(L.validade?' · vence '+prBr(L.validade)+(S.vencido?' (vencido: aviso, não trava)':''):'')+' · recebido '+prBr(L.drec),

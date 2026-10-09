@@ -9,8 +9,8 @@ PERFIS=[('Ana','Gestora · safra, compras e aprovações','SAF.dc.html'),
  ('Beto','Agrônomo(a) · planos agronômicos','PA.dc.html'),
  ('Caio','PCP · ordens de serviço','OS.dc.html'),
  ('Marcos','Operador(a) de campo · app móvel','MB-01.dc.html'),
- ('Rui','Almoxarife · estoque e custódia','EST.dc.html'),
- ('Dora','Comercial e logística','VE-01.dc.html'),
+ ('Rui','Almoxarife · estoque, custódia e expedição','EST.dc.html'),
+ ('Dora','Comercial e logística','VEN.dc.html'),   # Comercial (D-C13): Contratos e pedidos
  ('Fertisul','Parceiro credenciado (portal)','PT-01.dc.html'),
  ('Plataforma','Backoffice (admin)','BO-02.dc.html')]
 CENARIOS=[('Safra','Planejar safra: aplicar plano em lote, ajustar um cultivo e enviar para cotação','SAF.dc.html'),
