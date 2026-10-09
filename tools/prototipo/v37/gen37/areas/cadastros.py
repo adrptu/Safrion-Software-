@@ -102,14 +102,14 @@ CADX_CSS=(
     # o motor envolve cada texto num span.sc-interp, por isso o chip é o span com outro span dentro)
     ".cadx .g2pw span{min-width:0;overflow:hidden;text-overflow:ellipsis}.cadx .g2pw b,.cadx .g2pw span:has(>span:not(.sc-interp)),.cadx .g2pw a,.cadx .g2pw button{flex-shrink:0}"
     ".cadx .g2pw a,.cadx .g2pw button{color:#15201A!important;font-weight:700}@media (hover:hover){.cadx .g2pw a:hover,.cadx .g2pw button:hover{text-decoration:underline!important}}"
-    ".cadx .g2kid{background:#FFFFFF}@media (hover:hover){.cadx .g2ed:hover{background:#F4F6F3}}"
+    ".cadx .g2kid{background:#FFFFFF}@media (hover:hover){.cadx .g2ed:hover{background:#F2F8F4}}"   # DS-HOVER-20261009: verde do sistema, não cinza
     # árvore: a linha do grupo ganha faixa clara (hierarquia sem precisar de caixa)
-    ".cadx-arv .g2r:not(.g2kid) [role=cell]{background:#F7F9F6!important}@media (hover:hover){.cadx-arv .g2r.g2ed:not(.g2kid):hover [role=cell]{background:#EEF3EE!important}}"
+    ".cadx-arv .g2r:not(.g2kid) [role=cell]{background:#F7F9F6!important}@media (hover:hover){.cadx-arv .g2r.g2ed:not(.g2kid):hover [role=cell]{background:#E8F3EC!important}}"
     # faixa "precisa de atenção": cartões brancos com borda esquerda na cor do estado
     ".cadx-faixa{display:flex;gap:12px;flex-wrap:wrap;padding:12px 16px 2px}"
     ".cadx-aviso{flex:0 1 330px;min-width:240px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;background:#FFFFFF;"
     "border:1px solid #E4E9E5;border-radius:12px;padding:10px 14px;cursor:pointer;font-family:inherit;color:#15201A}"
-    "@media (hover:hover){.cadx-aviso:hover{background:#F9FBF8}.cadx-aviso:hover .cadx-verbo{text-decoration:underline}}.cadx-aviso:focus-visible,.cadx-cartao:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px}"
+    "@media (hover:hover){.cadx-aviso:hover{background:#F2F8F4;border-color:#9DBFAA}.cadx-aviso:hover .cadx-verbo{text-decoration:underline}}.cadx-aviso:focus-visible,.cadx-cartao:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px}"
     ".cadx-verbo{font-weight:700;color:#15201A;white-space:nowrap}"
     # cartões de entidade contêiner (fazendas, equipes, conjuntos)
     ".cadx-cartoes{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;padding:16px;align-content:start}"

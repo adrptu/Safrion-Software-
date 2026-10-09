@@ -176,7 +176,7 @@ try:
         MEN="[...document.querySelectorAll('.menu-lat a')].find(a=>a.innerText.trim()==='Planejar safra')"
         mouse_em(MEN); fam['menu hover']=estilo(MEN,['box-shadow'])[0]
         CHP=f"[...document.querySelectorAll('[aria-label=\"Filtrar planos por cultura\"] button')].find(b=>{N}(b.innerText).startsWith('Milho'))"
-        mouse_em(CHP); fam['chip hover']=estilo(CHP,['box-shadow','filter'])
+        mouse_em(CHP); fam['chip hover']=estilo(CHP,['background-image','filter'])   # DS-HOVER-20261009: camada verde por background-image (antes: camada cinza por box-shadow)
         STP="document.querySelectorAll('.etp-itens>*')[1]"
         mouse_em(STP); fam['etapa inerte']=estilo(STP,['filter','cursor','box-shadow'])   # UX-ACAO-UNICA: a faixa só informa
         INE="[...document.querySelectorAll('main div')].find(d=>/^soja\s*·/i.test(d.textContent.trim()))"; mouse_em(INE); fam['texto inerte']=estilo(INE,['cursor','filter','box-shadow'])
@@ -188,11 +188,11 @@ try:
         while k<60 and not c.js("document.activeElement&&document.activeElement.matches('polygon[role=button]')"): c.tab(); k+=1
         fam['talhão foco']=estilo("document.activeElement",['stroke-dasharray','stroke']); shot('IN-04_1440_talhao_foco')
         TB="document.querySelectorAll('nav[aria-label=\"Funcionalidades do mapa\"] button')[1]"
-        mouse_em(TB); fam['trilha hover']=estilo(TB,['box-shadow'])[0]
+        mouse_em(TB); fam['trilha hover']=estilo(TB,['background-image'])[0]   # DS-HOVER-20261009
         print('     (informativo) famílias:',fam)
         fam_ok=(fam['texto inerte'][0]!='pointer' and fam['texto inerte'][1]=='none' and fam['texto inerte'][2]=='none'
-                and 'brightness(0.95)' in fam['botão primário hover'] and '255, 255, 255' in fam['menu hover'] and 'inset' in fam['chip hover'][0] and fam['etapa inerte'][0]=='none' and fam['etapa inerte'][1]!='pointer' and fam['etapa inerte'][2]=='none'
-                and 'rgb(157, 191, 170)' in fam['busca hover'] and fam['busca foco'][0]=='solid' and fam['talhão foco'][0].replace(' ','').replace('px','').startswith('7,4') and 'inset' in fam['trilha hover'])
+                and 'brightness(0.92)' in fam['botão primário hover'] and '255, 255, 255' in fam['menu hover'] and '30, 122, 76' in fam['chip hover'][0] and fam['chip hover'][1]=='none' and fam['etapa inerte'][0]=='none' and fam['etapa inerte'][1]!='pointer' and fam['etapa inerte'][2]=='none'
+                and 'rgb(157, 191, 170)' in fam['busca hover'] and fam['busca foco'][0]=='solid' and fam['talhão foco'][0].replace(' ','').replace('px','').startswith('7,4') and '30, 122, 76' in fam['trilha hover'])
         chk('14 famílias · botão, menu, chip, busca (hover e foco), talhão do mapa (foco tracejado) e trilha do mapa respondem; título de seção e etapa da faixa (inertes) sem cursor de ação nem hover', fam_ok, fam)
         # 15 · indisponível: OK do filtro sem valor marcado fica diferente, cursor de proibido e motivo em texto (role=alert)
         abre('OS',1440,900); c.js("document.querySelector('.g2fb').click()"); time.sleep(.3)
@@ -349,10 +349,10 @@ try:
             s1[0]=='true' and s1[1].startswith('T1') and s1[2]=='Santa Rita' and s1[3] and s1[4]=='solid' and s2[0]=='true' and s2[1].startswith('T1') and s2[2] and s2[3]=='rgb(30, 107, 71)' and s2[4]=='rgb(255, 255, 255)', [s1,s2])
         # 23 · estados da trilha: hover (camada interna) ≠ selecionado (fundo verde) ≠ foco (contorno); celular: rótulos visíveis e nome acessível
         TB=f"{TRI}.find(b=>b.innerText.trim()==='Satélite')"
-        xy=centro(TB); c.mouse(*xy); time.sleep(.15); hv=estilo(TB,['box-shadow','background-color','outline-style']); c.mouse(5,890); time.sleep(.1)
+        xy=centro(TB); c.mouse(*xy); time.sleep(.15); hv=estilo(TB,['background-image','background-color','outline-style']); c.mouse(5,890); time.sleep(.1)   # DS-HOVER-20261009: camada verde
         abre('IN-04',360,800,3,True); tc=trilha(); shot('IN-04_360x800_trilha')
         chk('23 trilha · hover = camada interna sem trocar o fundo; no celular (360 px) Satélite e Pragas e doenças com rótulo visível, título e os novos desenhos',
-            'inset' in hv[0] and hv[1] in ('rgba(0, 0, 0, 0)','transparent') and any(x[0]=='Satélite' and x[2]==SAT and x[1] for x in tc) and any(x[0]=='Pragas e doenças' and x[2]==MON and x[1] for x in tc), [hv,[(x[0],x[1]) for x in tc][:4]])
+            '30, 122, 76' in hv[0] and hv[1] in ('rgba(0, 0, 0, 0)','transparent') and any(x[0]=='Satélite' and x[2]==SAT and x[1] for x in tc) and any(x[0]=='Pragas e doenças' and x[2]==MON and x[1] for x in tc), [hv,[(x[0],x[1]) for x in tc][:4]])
         # 24 · capturas antes/depois da trilha (desktop e celular) e menu recolhido com nome acessível
         AD=os.environ.get('ANTES_DIR') or next((d for d in (os.path.join(HERE,'..','..','base_v42','gen37','_render'),os.path.join(HERE,'..','gen37_antes','_render')) if os.path.isdir(d)),None)
         def recorte(nome):

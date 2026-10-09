@@ -994,19 +994,41 @@ def _reset_screen(f):
 # selos, valores, cartões informativos) não recebe nada: só button, link, aba, opção, linha que abre detalhe e talhão.
 # =====================================================================================
 _ACAO=':is(button,a[href],summary,[role=tab],[role=option]):not(:disabled):not([aria-disabled=true]):not(.g2card)'
+# DS-HOVER-20261009 (proprietário, 05/10: "Padronize o hover verdinho em vez do cinza"): o realce passageiro do hover é o verde-claro do
+# sistema, o mesmo do .g2card (fundo #F2F8F4, borda #9DBFAA), nunca cinza. Três famílias, pela aparência que o próprio controle já tem:
+# - claro (secundário, opção, aba, item de lista, cartão clicável, link com cara de botão): camada verde translúcida por background-image
+#   (o estilo inline não define a imagem de fundo, então o matiz do estado continua: tonal, amarelo, vermelho) e a borda neutra #E4E9E5
+#   vira #9DBFAA; sobre o branco a camada dá #EFF6F2;
+# - cheio (primária verde, escuro, destrutivo cheio): só escurece (filter), sem camada clara por cima do texto branco;
+# - destrutivo claro (texto vermelho): camada vermelha translúcida, para o hover não dizer "seguro" num comando que apaga.
+# O menu lateral escuro mantém a regra própria. Contraste AA do texto sobre o hover medido em ds_unit.js (DS_HOVER).
+DS_HOVER=dict(fundo='#F2F8F4',borda='#9DBFAA',camada='rgba(30,122,76,.07)',camada_ativa='rgba(30,122,76,.14)',camada_destr='rgba(180,35,24,.06)')
+_CLARO=':is(button,a[href][style*="padding"],a.g2cta,summary,[role=tab],[role=option],div[role=button])'
+_CHEIO=(':is(.acoes-prim,[style*="background: rgb(30, 122, 76)"],[style*="background-color: rgb(30, 122, 76)"],[style*="background: rgb(21, 32, 26)"],'
+        '[style*="background-color: rgb(21, 32, 26)"],[style*="background: rgb(180, 35, 24)"],[style*="background-color: rgb(180, 35, 24)"])')
+_DESTR='[style*="color: rgb(180, 35, 24)"]'
+_LIVRE=':not(:disabled):not([aria-disabled=true]):not(.g2card):not(.menu-lat *)'
+_TONAL='main [aria-pressed=true]'   # escolha tonal (ACOES_CSS repinta o desenho cheio antigo): é clara, não cheia
+_NEUTRA=':is([style*="border: 1px solid rgb(228, 233, 229)"],[style*="border-color: rgb(228, 233, 229)"],.acoes-sec)'
+_CLARO_OK=f'{_CLARO}{_LIVRE}:is(:not({_CHEIO}),{_TONAL}):not({_DESTR})'
+_CHEIO_OK=f'{_CHEIO}{_LIVRE}:not({_TONAL})'
+def _camada(c): return f'background-image:linear-gradient({c},{c})!important'
 INTERACAO_CSS=(
-    # hover: escurece de leve e acende uma camada interna (botões e links com cara de botão); menu escuro clareia
+    # hover (DS-HOVER-20261009): claro ganha a camada e a borda verdes; cheio escurece; destrutivo claro ganha camada vermelha; menu escuro clareia
     "@media (hover:hover){"
-    f"{_ACAO}:not(.menu-lat *):hover{{filter:brightness(.95)}}"
-    ":is(button,a[href][style*=\"padding\"],[role=tab],[role=option]):not(:disabled):not([aria-disabled=true]):not(.g2card):not(.menu-lat *):hover{box-shadow:inset 0 0 0 999px rgba(21,32,26,.05)}"
+    f"{_CLARO_OK}:hover{{{_camada(DS_HOVER['camada'])}}}"
+    f"{_CLARO_OK}{_NEUTRA}:hover{{border-color:{DS_HOVER['borda']}!important}}"
+    f"{_CHEIO_OK}:hover{{filter:brightness(.92)}}"
+    f"{_DESTR}{_LIVRE}:not({_CHEIO}):hover{{{_camada(DS_HOVER['camada_destr'])}}}"
     ".menu-lat :is(a,button):hover{box-shadow:inset 0 0 0 999px rgba(255,255,255,.09)}"
-    ".g2ed:hover,.g2tot:hover{background:#F2F8F4}"
-    ":is(input:not([type=checkbox]):not([type=radio]),select,textarea):not(:disabled):not([readonly]):hover{box-shadow:0 0 0 1px #9DBFAA}"
-    "label:has(>input[type=search]):hover{box-shadow:0 0 0 1px #9DBFAA}"
+    f".g2ed:hover,.g2tot:hover{{background:{DS_HOVER['fundo']}}}"
+    f":is(input:not([type=checkbox]):not([type=radio]),select,textarea):not(:disabled):not([readonly]):hover{{box-shadow:0 0 0 1px {DS_HOVER['borda']}}}"
+    f"label:has(>input[type=search]):hover{{box-shadow:0 0 0 1px {DS_HOVER['borda']}}}"
     "svg [role=button]:hover{filter:brightness(.92)}"
     "}"
-    # pressionado: retorno imediato no toque e no clique (o iOS só aplica :active com um ouvinte de toque: g2lib)
-    f"{_ACAO}:active{{filter:brightness(.88)}}"
+    # pressionado: retorno imediato no toque e no clique (o iOS só aplica :active com um ouvinte de toque: g2lib); claro fica mais verde, cheio escurece
+    f"{_CLARO_OK}:active{{{_camada(DS_HOVER['camada_ativa'])}}}"
+    f"{_CHEIO_OK}:active{{filter:brightness(.86)}}"
     ".g2ed:active{background:#E4F3E9}"
     # foco de teclado: contorno nítido de 2 px fora do controle (dentro na linha da grade e no menu escuro em verde-claro)
     ":is(button,a[href],summary,input,select,textarea,[role=tab],[role=option],[tabindex]:not([tabindex=\"-1\"])):focus-visible{outline:2px solid #1E7A4C;outline-offset:2px}"
@@ -1101,7 +1123,7 @@ def area_acoes(pre='aa',rotulo='Ações da etapa'):
             f'</div></div></sc-if>')
 G2_CSS=(".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outline:2px solid #1E7A4C;outline-offset:-2px}"
         # hover dos controles pequenos da grade só onde existe ponteiro com hover (no toque o fundo não fica "grudado")
-        "@media (hover:hover){.g2fi:hover{background:#F2F8F4}.g2fb:hover,.g2car:hover{background:#E4E9E5}.g2del:hover{background:#FDE8E6;color:#B42318}}"
+        "@media (hover:hover){.g2fi:hover{background:#F2F8F4}.g2fb:hover,.g2car:hover{background:#E4F3E9}.g2del:hover{background:#FDE8E6;color:#B42318}}"   # DS-HOVER: verde, não cinza
         ".g2kid{background:#FBFCFA}.g2flash{background:#E4F3E9}.g2tot{cursor:pointer}"
         ".g2sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}"   # texto só para leitor de tela (motivo do chip)
         ".g2hb{display:inline-flex;align-items:center;gap:4px;border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#65736A;padding:7px 2px 7px 0;text-align:left;white-space:normal;max-width:104px;line-height:1.2}"
