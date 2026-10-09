@@ -181,17 +181,16 @@ def build():
                dict(k='rend',l='Rendimento',t='num',a='r'),dict(k='area',l='Área trabalhada',t='num',a='r',ajuda='ha-op = hectares-operação: cada passada conta; 3 passadas em 10 ha = 30 ha-op (PRD 44.1)'),
                dict(k='horas',l='Horas-conjunto (h)',t='num',a='r',d=1,agg='sum'),dict(k='rha',l='Custo R$/ha',t='num',a='r')],
        [],edit=dict(m='pick',leafOnly=False),tree=True,gid='g_op',total=True,qf=dict(k='sit',l='situação',nivel0=True))
-    # g_cap: capacidade por mês (recurso × mês, ocupação), uma por safra para mostrar só os meses do período dela; recolhida por padrão.
+    # g_cap: capacidade por mês (recurso × mês, ocupação), uma por safra; recolhida por padrão.
     # Recurso, Maior uso e Mês abrem o formulário do recurso; as células de mês (nr) só filtram (toque na célula com demanda desta safra)
     def cap_cols(mis):
         return ([dict(k='rec',l='Recurso',w=170),dict(k='maior',l='Maior uso',t='num',a='r'),dict(k='mes',l='Mês',t='num')]+
                 [dict(k=f'm{i}',l=meses[i][1],t='num',a='r',nr=True) for i in mis])
-    # meses do período de cada safra no calendário (sem interseção, o calendário inteiro): a regra é a capMeses de safra.js, que também
-    # recorta a g_cap_NOVA em tempo de execução; aqui só dimensiona a grade de cada safra fixa pelos dados (revisão SAF, S3.1)
-    CAP_MIS={s['id']:([i for i,(m,_) in enumerate(meses) if s['ini'][:7]<=m<=s['fim'][:7]] or list(range(len(meses)))) for s in D2.SAFRAS}
+    # toda g_cap nasce com o calendário inteiro e a capMeses (safra.js) recorta em tempo de execução pelo período gravado: editar o período
+    # pela tela acrescenta ou tira meses (verificação SAF-C02; antes, as safras fixas ficavam com as colunas do período do build)
     cap_html=''
     for k in ['S2627','S27SF','S2526','LG2627','NOVA']:
-        g=grid(cap_cols(CAP_MIS.get(k,list(range(len(meses))))),[],edit=dict(m='pick',leafOnly=False),search=False,gid=f'g_cap_{k}',total=False,headtools=False)
+        g=grid(cap_cols(list(range(len(meses)))),[],edit=dict(m='pick',leafOnly=False),search=False,gid=f'g_cap_{k}',total=False,headtools=False)
         cap_html+=f'<sc-if value="{H("cap_"+k)}" hint-placeholder-val="{F()}">{g}</sc-if>'
     # ---------- etapa 5 · recursos ----------
     # recursos em duas classes, cada uma com a sua grade: máquinas e implementos × pessoas ('oper')

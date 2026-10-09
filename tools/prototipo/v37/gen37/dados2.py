@@ -761,7 +761,13 @@ def cap_saf(oc,outras,recs,meses=None,dias=None):
     """Espelho do capSaf (safra.js · bloco CAPACIDADE): por grupo de recursos e mês, demanda desta safra e das outras safras abertas da mesma
     fazenda (x.nh × rc, inclui o necessário sem alocação), capacidade, ocupação (None = não calculável), necessárias e falta. oc = desta safra,
     com 'cls'; outras = [dict(id, nome, ini, fim, oc)]. A etiqueta de cada ocorrência sai do período da safra de ORIGEM (SAF-C02): com
-    etiqueta (antes, depois, fora) conta no custo e não na capacidade, e a carga vai para g['fora'] (sid None = desta safra)."""
+    etiqueta (antes, depois, fora) conta no custo e não na capacidade, e a carga vai para g['fora'] (sid None = desta safra).
+    Contrato (capContrato): 'cls' em cada ocorrência desta safra e 'ini' e 'fim' em cada outra; a célula soma as parcelas de cada safra em
+    ordem crescente, com laço explícito (o sum() do Python 3.12+ compensa o arredondamento e sairia do JS)."""
+    for o in oc or []:
+        if 'cls' not in o: raise ValueError('cap_saf: ocorrência desta safra sem a etiqueta cls do período dela')
+    for s in outras or []:
+        if 'ini' not in s or 'fim' not in s: raise ValueError('cap_saf: a safra %s chegou sem o período (ini e fim)' % s.get('id'))
     meses=MESES if meses is None else meses; M=len(meses); G={}; n=[0]
     for r in recs: g=cap_rec(r,meses,dias); g.update(dThis=[0.0]*M,dThisAt=[0.0]*M,dOth=[0.0]*M,oth={},sim=[0]*M,semH=[0.0]*M,pendSR=[0]*M,fora=[]); G[r['id']]=g
     def add(o,own,s):
@@ -782,7 +788,7 @@ def cap_saf(oc,outras,recs,meses=None,dias=None):
             else:
                 g['dOth'][o['mi']]+=c['h']; g['oth'].setdefault(sid,[0.0]*M)[o['mi']]+=c['h']
             g['sim'][o['mi']]=max(g['sim'][o['mi']],c['sim'])
-        if own and o['rp']['falta']['semHoras']>1e-9:
+        if o['rp']['falta']['semHoras']>1e-9:   # "≥" com a área sem horas de qualquer safra elegível (a mesma marca nas duas vistas)
             for k in {c['k'] for c in cs}:
                 if k in G: G[k]['semH'][o['mi']]+=o['rp']['falta']['semHoras']
     for o in oc: add(o,True,None)
@@ -791,7 +797,9 @@ def cap_saf(oc,outras,recs,meses=None,dias=None):
     for g in G.values():
         cells=[]
         for mi,(m,lab) in enumerate(meses):
-            d=g['dThis'][mi]+g['dOth'][mi]; cap=g['cap'][mi]; pu=g['porUn'][mi]
+            d=0.0
+            for x in sorted([g['dThis'][mi]]+[v[mi] for v in g['oth'].values()]): d+=x
+            cap=g['cap'][mi]; pu=g['porUn'][mi]
             nc=lambda h: (max(_math.ceil(h/pu-1e-9),g['sim'][mi]) if pu>0 else -1) if h>1e-4 else 0
             nec=nc(d); nt=nc(g['dThis'][mi]); falta=lambda n: n<0 or n>g['un']; red=d>1e-4 and falta(nec)
             cells.append(dict(mi=mi,mes=lab,d=d,dThis=g['dThis'][mi],dOth=g['dOth'][mi],cap=cap,porUn=pu,ocup=(None if cap<=0 else 100*d/cap) if d>1e-4 else 0,

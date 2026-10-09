@@ -16,6 +16,8 @@ observacoes (dados locais coerentes com dados.py / dados2.py / processo_os.py / 
 - DEMO-04: Trator 02 · MF 7719 antes da confirmação do PCP = "Proposto · OS-0420 saldo 70 ha · aguarda PCP" (mesmo rótulo de maquinas.py).
 - T4: dados2 prevê plantio 20/10, mas a 1ª onda (100 ha) já está em plantio pela OS-0420 (dados.py) — mostrado como "1ª onda em curso".
 - PL-03: carga/capacidade e cenários continuam locais (não derivam de dados2.RECURSOS); OM-0234 = preventiva 250 h do MF 7719 em 28/09 (maquinas.py).
+  Sem entrada pelas telas (verificação SAF-C02): "Ver capacidade" no PL-02, no PL-04 e no PL-05 abre a etapa 3 do Planejar safra, a única conta
+  de capacidade (capCalc); os números fixos do PL-03 contradiziam a etapa 3. Derivar o PL-03 da etapa 3 ou removê-lo é tarefa própria.
 """
 import json, re
 from engine import (grid,table,section,kpis,chip,btn,tag,icon,esc,seg,msgbtn,drawer_button,toolrow,prazo,Pt,
@@ -249,7 +251,7 @@ function EXTRAVALS(self,v){
       + section('Regras do gatilho','Leia o gatilho por extenso; a data prevista nunca vira plantio realizado.',
         _acoes(ilnk('Ver grade de cultivo','PL-01.dc.html','grid','Abrir a grade de cultivo da safra'),
                imsg('Simular antecipação do plantio',f'Simulação: antecipar o plantio do T1-A para 10/10 move 7 operações dependentes · a {OS_DES["id"]} (DAP −20) já emitida é ajustada pelo agrônomo ao liberar · nada muda até publicar.','calendar','Simular antecipação sem alterar o plano'),
-               ilnk('Ver capacidade','PL-03.dc.html','trend','Abrir Capacidade e recursos'),
+               ilnk('Ver capacidade','SAF.dc.html#saf=S2627&passo=operacoes','trend','Abrir a capacidade por mês da Safra 2026/27 em Planejar safra'),
                ilnk('Ver compra de insumos','CMP.dc.html','cart','Abrir Compra de insumos (SOL-2026-07)')),
         _nota(f'“20 dias antes do plantio · DAP −20 · previsto para {d_des}” — o produtor não digita sinal negativo. '
               f'“Dias antes da colheita” e “dias após a colheita” são opções distintas, com a colheita escolhida. '
@@ -436,7 +438,7 @@ function EXTRAVALS(self,v){
          msgbtn('Liberar prontas',f'Liberada 1 de 5 A liberar — {OS_DES["id"]} ✓ liberada por Ana (agrônoma) · OS-0418 continua: Ureia 45 % sem saldo apto (0 kg) · {OS_DEMO17["id"]} continua: ativo bloqueado · OS-0422 continua: janela a definir · OS-0423 continua: conflito com a parada da B3. Resultado por item; versão e prontidão revalidadas.',primary=True)],
         g_ord)
       + section('Máquinas na programação','Confira condição, ocupação e elegibilidade separadas antes de programar.',
-        [ilnk('Ver quadro completo','PL-03.dc.html','grid','Abrir Capacidade e recursos')],g_maq,state='gray')
+        [ilnk('Ver capacidade','SAF.dc.html#saf=S2627&passo=operacoes','grid','Abrir a capacidade por mês da Safra 2026/27 em Planejar safra')],g_maq,state='gray')
       + section('Pendências de outros períodos','Resolva as obrigações que continuam abertas; avançar a janela não esconde nada.','',g_pen,state='yellow')
       + _painel_manut('g_mi4')
     )
@@ -472,7 +474,7 @@ function EXTRAVALS(self,v){
                prazo=PZ('até 3 dias'),ab=[LK('Ver na programação','PL-04.dc.html')])),
       R('i4',dict(causa='Pessoas',resp='RH + PCP',prazo='no prazo',alt='2º turno com contratação',apr='—'),
         p=dict(causa=[CH('Pessoas','yellow')],orig=[TX('operador noturno em férias a partir de 28/09')],afet=[TX('plantio T1-B (previsto 25/10)')],imp=[TX('2º turno de outubro sem operador')],
-               prazo=PZ('no prazo'),ab=[LK('Ver cenário','PL-03.dc.html')])),
+               prazo=PZ('no prazo'),ab=[LK('Ver capacidade','SAF.dc.html#saf=S2627&passo=operacoes')])),
       R('i5',dict(causa='Qualidade',resp='Qualidade',prazo='até 3 dias',alt='reprocesso ou desconto',apr='decisão da qualidade'),
         p=dict(causa=[CH('Qualidade','yellow')],orig=[TX(f'INSP-88 · lote {D.LOTE_BLOQ["id"]}')],afet=[TX('expedição do lote')],imp=[TX(f'{_n(D.LOTE_BLOQ["sc"])} sc bloqueados')],
                prazo=PZ('até 3 dias','25/09'),ab=[LK('Resolver origem','CO-06.dc.html')])),

@@ -19,8 +19,9 @@ JS_RUN = r"""
 const fs=require('fs'); eval(fs.readFileSync(process.argv[1],'utf8')+'\n;globalThis.CX={capSaf,capVeredito,fmtOcup,cargaRec,classeOc,capJanelas};');
 const X=globalThis.CX; const jobs=JSON.parse(fs.readFileSync(0,'utf8')); const out=[];
 for(const j of jobs){ if(j.op==='fmt'){ out.push(j.v.map(x=>X.fmtOcup(x))); continue; } if(j.op==='cls'){ out.push(j.v.map(x=>X.classeOc(...x))); continue; }
+  if(j.op==='erro'){ try{ X.capSaf(j.oc,j.outras,j.recursos,j.meses,j.dias); out.push({erro:null}); }catch(e){ out.push({erro:String(e.message)}); } continue; }
   const G=X.capSaf(j.oc,j.outras,j.recursos,j.meses,j.dias); const g={};
-  Object.keys(G).forEach(k=>{ const x=G[k]; g[k]={un:x.un,cells:x.cells.map(c=>({d:c.d,dThis:c.dThis,dOth:c.dOth,cap:c.cap,ocup:c.ocup,nec:c.nec,red:c.red,soma:c.soma,own:c.own})),
+  Object.keys(G).forEach(k=>{ const x=G[k]; g[k]={un:x.un,cells:x.cells.map(c=>({d:c.d,dThis:c.dThis,dOth:c.dOth,cap:c.cap,ocup:c.ocup,nec:c.nec,red:c.red,soma:c.soma,own:c.own,ge:c.ge,txt:X.fmtOcup(c.ocup)})),
     max:x.max?{mes:x.max.mes,ocup:x.max.ocup}:null,reds:x.reds.map(c=>c.mes),horas:x.horasSafra,txt:x.max?X.fmtOcup(x.max.ocup):'—',fo:(x.fora||[]).map(f=>[f.sid,f.cls,f.mi,f.h,f.n])}; });
   const r={G:g,carga:j.oc.map(i=>Object.fromEntries(Object.keys(G).map(k=>[k,X.cargaRec(i,k)])))}; if(j.ver) r.ver=X.capVeredito(G,j.oc,j.ver); out.push(r); }
 process.stdout.write(JSON.stringify(out));
@@ -50,7 +51,7 @@ def ver_in(safra, oc, recursos):
     cls = dict(antes=0, fora=0, depois=0, cal=0)
     for o in oc:
         cls[D2.classe_oc(o['dt'], o['mi'], s['ini'], s['fim'])] += 1
-    return dict(semPlano=[dict(local=c['local'], area=c['area']) for c in sem], aPlano=sum(c['area'] for c in com), cls=cls, ini=br(s['ini']),
+    return dict(semPlano=[dict(local=c['local'], area=c['area']) for c in sem], aPlano=sum(c['area'] for c in com), cls=cls, ini=br(s['ini']), fim=br(s['fim']),
                 outras={x['id']: x['nome'] for x in D2.SAFRAS}, pend=sum(1 for o in oc if o['pend']), semHoras=sum(o['rp']['falta']['semHoras'] for o in oc),
                 incompleto='', periodoCal=D2.MESES[0][1] + ' – ' + D2.MESES[-1][1])
 def job(safra, recursos=None, planos=None, cfg=None, ver=False, outras_off=False):
@@ -212,7 +213,7 @@ if __name__ == '__main__':
         cl = dict(antes=0, fora=0, depois=0, cal=0)
         for o in oc: cl[o['cls']] += 1
         j = dict(op='cap', oc=oc, outras=[dict(id=x, nome=x, ini=per[x][0], fim=per[x][1], oc=ocs[x]) for x in ocs if x != sid], recursos=recs, meses=meses, dias=dias)
-        if ver: j['ver'] = dict(semPlano=[], aPlano=100, cls=cl, ini=br(per[sid][0]), outras={x: x for x in ocs}, pend=0, semHoras=0, incompleto='', periodoCal=meses[0][1])
+        if ver: j['ver'] = dict(semPlano=[], aPlano=100, cls=cl, ini=br(per[sid][0]), fim=br(per[sid][1]), outras={x: x for x in ocs}, pend=0, semHoras=0, incompleto='', periodoCal=meses[0][1])
         return j
     def py_vista(j):
         f = getattr(D2, 'cap_saf', None)
@@ -336,6 +337,64 @@ if __name__ == '__main__':
                     dj = r['G'][kk]['cells'][mi]['d']; dp = pg[kk]['cells'][mi]['d'] if pg else None
                     if abs(dj - orac.get((kk, mi), 0)) > 1e-9 or dp is None or abs(dp - dj) > 1e-9: bad.append((x, kk, mi, dj, dp, orac.get((kk, mi), 0)))
     chk('SAF-C02 propriedade: 150 sorteios (%d vistas) — demanda igual com qualquer safra aberta, = Σ elegíveis pela origem, JS = Python' % nviews, not bad, (len(bad), bad[:4]))
+    # ================= SAF-C02 · correções da verificação independente (09/10/2026) =================
+    # V1-1 (S4): com 3 ou mais safras abertas, a ordem da soma em ponto flutuante mudava o texto da ocupação conforme a safra aberta
+    # (0,1 + 0,1 + 7,0 h em 160 h: "4 %" nas vistas A e B e "5 %" na C; o exato é 4,5 %). A célula soma as parcelas em ordem crescente.
+    OCS_F = dict(A=[ocf('A1', 0.1, '2027-02-10')], B=[ocf('B1', 0.1, '2027-02-10')], C=[ocf('C1', 7.0, '2027-02-10')])
+    PER_F = {x: ('2027-02-01', '2027-02-28') for x in 'ABC'}
+    JFL = [vista(x, OCS_F, PER_F, ver=False) for x in 'ABC']; RFL = js(JFL); PFL = [py_vista(j) for j in JFL]
+    cj = [r['G']['trator']['cells'][0] for r in RFL]; cp = [g['trator']['cells'][0] for g in PFL]
+    chk('SAF-C02 verificação · 3 safras abertas (0,1 + 0,1 + 7,0 h em 160 h): a mesma demanda bit a bit e "5 %" nas 3 vistas, JS e Python (era "4 %" em A e B)',
+        len({c['d'] for c in cj} | {c['d'] for c in cp}) == 1 and [c['txt'] for c in cj] == ['5 %'] * 3 and [D2.fmt_ocup(c['ocup']) for c in cp] == ['5 %'] * 3,
+        ([(c['d'], c['txt']) for c in cj], [(c['d'], D2.fmt_ocup(c['ocup'])) for c in cp]))
+    # V1-2 (S4): o R1 dizia "fora do calendário do protótipo" para ocorrências no calendário mas fora do período da safra
+    _p27 = (SAF['S27SF']['ini'], SAF['S27SF']['fim'])
+    try:
+        SAF['S27SF']['ini'], SAF['S27SF']['fim'] = '2027-08-01', '2027-08-31'
+        jr, ocr = job('S27SF', ver=True); rr = js([jr])[0]
+        na = sum(1 for o in ocr if D2.classe_oc(o['dt'], o['mi'], '2027-08-01', '2027-08-31') == 'antes')
+        chk('SAF-C02 verificação · R1 com a S27SF em ago/27: "nenhuma ocorrência desta safra cai no período dela (01/08/2027 a 31/08/2027)" e a contagem antes do início, sem "fora do calendário"',
+            na == len(ocr) > 1 and rr['ver']['R'] == 'R1' and rr['ver']['txt'] == 'Capacidade não calculada: nenhuma ocorrência desta safra cai no período dela (01/08/2027 a 31/08/2027). Fora da conta: %d ocorrências antes do início da safra (01/08/2027).' % na,
+            (na, len(ocr), rr['ver']))
+    finally:
+        SAF['S27SF']['ini'], SAF['S27SF']['fim'] = _p27
+    OCS_R = dict(A=[ocf('A1', 10, '2027-03-15', mi=-1), ocf('A2', 10, '2027-02-05')], B=[ocf('B1', 40, '2027-02-20')])
+    PER_R = dict(A=('2027-02-10', '2027-03-31'), B=('2027-02-01', '2027-02-28'))
+    OCS_R2 = dict(A=[ocf('A1', 10, '2027-03-15', mi=-1)], B=OCS_R['B'])
+    r1m, r1f = js([vista('A', OCS_R, PER_R), vista('A', OCS_R2, PER_R)])
+    chk('SAF-C02 verificação · R1 misto (antes do início e fora do calendário): "nenhuma … no período dela (10/02/2027 a 31/03/2027) dentro do calendário do protótipo (fev/27)" com as contagens; todas fora do calendário: o texto de sempre',
+        r1m['ver']['txt'] == 'Capacidade não calculada: nenhuma ocorrência desta safra cai no período dela (10/02/2027 a 31/03/2027) dentro do calendário do protótipo (fev/27). Fora da conta: 1 ocorrência antes do início da safra (10/02/2027); 1 ocorrência fora do calendário.'
+        and r1f['ver']['txt'] == 'Capacidade não calculada: a ocorrência desta safra fica fora do calendário do protótipo (fev/27).', (r1m['ver'], r1f['ver']))
+    # V2-3 (S4): o "≥" (área sem horas calculáveis) de uma ocorrência elegível de outra safra só aparecia na vista dessa safra
+    OCS_S = dict(A=[ocf('A1', 100, '2027-02-10')], B=[dict(ocf('B1', 40, '2027-02-10'), rp=dict(itens=[dict(nh=40, h=40, nq=40, Hin=2000)], falta=dict(semHoras=50)))])
+    PER_S = {x: ('2027-02-01', '2027-02-28') for x in 'AB'}
+    JSH = [vista(x, OCS_S, PER_S, ver=False) for x in 'AB']; RSH = js(JSH); PSH = [py_vista(j) for j in JSH]
+    chk('SAF-C02 verificação · "≥" da área sem horas da B na mesma célula nas duas vistas (140 h), JS e Python; antes só na vista da B',
+        [r['G']['trator']['cells'][0]['ge'] for r in RSH] == [True, True] and [g['trator']['cells'][0]['ge'] for g in PSH] == [True, True]
+        and all(near(r['G']['trator']['cells'][0]['d'], 140) for r in RSH), ([r['G']['trator']['cells'][0] for r in RSH], [g['trator']['cells'][0]['ge'] for g in PSH]))
+    # V3-2 (S4): sem o período da outra safra (ou sem a etiqueta desta), a conta voltava, em silêncio, a depender da safra aberta (340 h)
+    j0 = vista('A', OCS, PER, ver=False)
+    sem_per = dict(j0, op='erro', outras=[{k: v for k, v in o.items() if k not in ('ini', 'fim')} for o in j0['outras']])
+    sem_cls = dict(j0, op='erro', oc=[{k: v for k, v in o.items() if k != 'cls'} for o in j0['oc']])
+    e1, e2, e3 = js([sem_per, sem_cls, dict(j0, op='erro')]); pe = []
+    for jj in (sem_per, sem_cls):
+        try: D2.cap_saf(jj['oc'], jj['outras'], jj['recursos'], jj['meses'], jj['dias']); pe.append(None)
+        except ValueError as ex: pe.append(str(ex))
+    chk('SAF-C02 verificação · contrato: outra safra sem ini e fim, ou ocorrência desta sem cls → erro explícito em JS e em Python; com os dois, sem erro',
+        bool(e1['erro']) and 'sem o período' in e1['erro'] and bool(e2['erro']) and 'cls' in e2['erro'] and e3['erro'] is None
+        and bool(pe[0]) and 'sem o período' in pe[0] and bool(pe[1]) and 'cls' in pe[1], (e1, e2, e3, pe))
+    nulo = dict(j0, outras=[dict(o, ini=None, fim=None) for o in j0['outras']]); rn = js([nulo])[0]; pn = py_vista(nulo)
+    chk('SAF-C02 verificação · outra safra sem período (ini e fim nulos): todas as ocorrências dela no calendário contam, como na vista dela (340 h), JS = Python',
+        near(rn['G']['trator']['cells'][0]['d'], 340) and near(pn['trator']['cells'][0]['d'], 340), (rn['G']['trator']['cells'][0], pn['trator']['cells'][0]['d']))
+    # V3-1 (S4, mudança pretendida): carga de outra safra fora da conta numa célula com demanda desta tira o verde (R5 → R4), mesmo cabendo
+    _pp = {s: (SAF[s]['ini'], SAF[s]['fim']) for s in ('S2627', 'S27SF')}
+    try:
+        SAF['S2627']['fim'] = '2027-06-30'
+        jy, _ = job('S27SF', ver=True); ry = js([jy])[0]
+        chk('SAF-C02 verificação · S2627 até 30/06/2027 e S27SF aberta: R4 (era R5) com a poda da S2627 fora da conta (Tratores 25,3 h e Operadores e equipe 25,3 h): sem verde com carga excluída',
+            ry['ver']['R'] == 'R4' and '1 ocorrência da Safra 2026/27 depois do fim dela (Tratores 25,3 h e Operadores e equipe 25,3 h)' in ry['ver']['txt'], ry['ver'])
+    finally:
+        for s_ in _pp: SAF[s_]['ini'], SAF[s_]['fim'] = _pp[s_]
     # C11 · 200 combinações sorteadas de unidades, jornada, turnos, disponibilidade e absenteísmo (e sobrescrita de configuração), JS = Python
     random.seed(20261005); J2 = []; P2 = []
     for k in range(200):
