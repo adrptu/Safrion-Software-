@@ -141,7 +141,7 @@ def _ocorr_py(safra,ajustes,planos_extra):
                 dose=ajustes.get(c['id'],{}).get(f"{a['id']}|{i}",p['dose'])
                 yield c,a,p,dose,dose*c['area']
 def demanda(safra,ajustes=None,planos_extra=None,osd=None):
-    """Demanda por insumo e necessidade líquida por data (CAL-01) — espelho de demFazenda (cal01.js), a conta única do Planejar safra (etapa 4)
+    """Demanda por insumo e necessidade líquida por data (CAL-01) — espelho de demFazenda (cal01.js), a conta única do Planejar safra (passo=demanda)
     e do Mapa › Insumos; a Compra de insumos lê esta (CTL-4, DEM-01..07). estoque = físico apto da fazenda da safra (inclui reservas);
     receb = recebimentos previstos da fazenda; bruta = usos desta safra de hoje em diante (plano sem a parte coberta por O.S. + pendente das O.S.);
     real = uso do plano antes de hoje sem O.S. (fora da demanda, DEM-06); plano = plano sem a parte coberta, todas as datas.
