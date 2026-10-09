@@ -188,6 +188,10 @@ try:
         t.chk('AC-11 preço: soja R$ 131,00/sc contratado; mamão R$ 3,05/kg contratado e R$ 3,00/kg realizado; a receber R$ 91.470,00; referência sintética',
               'R$ 131,00/sc' in mt and 'R$ 3,05/kg' in mt and 'R$ 3,00/kg' in mt and 'R$ 91.470,00' in mt and 'R$ 129,40/sc' in mt, mt[:900])
         t.chk('AC-11 sem seleção, a primária é vender a primeira linha com livre: "Vender Soja em grão · Estoque (2025/26)"', J("PRIM()") == ['Vender Soja em grão · Estoque (2025/26)'], J("PRIM()"))
+        row('S41'); p41 = pan()
+        t.chk('déficit (mamão S41): nenhuma primária, nem "Ver …" (BOT-03/BOT-08 do design system de 09/10); o painel diz o passo e lista o PV-038 com o elo',
+              J("PRIM()") == [] and 'Para cobrir: publicar a previsão de S41' in p41 and 'PV-038' in p41, [J("PRIM()"), p41[:500]])
+        clk('Fechar', 'aside')
         row('Safra 2026/27'); t.chk('selecionada a safra 26/27, a primária é "Vender Soja em grão · Safra 2026/27"', J("PRIM()") == ['Vender Soja em grão · Safra 2026/27'], J("PRIM()"))
         clk('Fechar', 'aside'); clk('Vender Soja em grão · Safra 2026/27'); time.sleep(.9); lib()
         on = J("[...document.querySelectorAll('aside [aria-pressed=true]')].map(b=>N(b.innerText))") or []

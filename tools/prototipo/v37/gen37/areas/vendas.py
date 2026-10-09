@@ -462,8 +462,12 @@ function comPanOf(self, c, r) { const P = prP(c); const U = x => comTxt(r.cu, x)
   const conta = r.livre === null ? 'Livre suspenso: ' + r.amb.join(', ') + ' com a saca do contrato a conferir (' + 'VE-05 oculto diz sc 50 kg; a Colheita contou 60 kg). Registre a massa com a fonte em Contratos e pedidos; nenhuma conversão é feita sem esse registro.'
     : r.tipo === 'est' ? 'Livre = oferta apta ' + U(r.oferta) + ' − compromissos ' + U(r.comp) + (prCmp(r.dispVenc, 0) > 0 ? ' − disponível vencido ' + U(r.dispVenc) : '') + ' = ' + U(r.livre) + '.'
     : 'Livre = ' + (r.tem ? 'previsão publicada ' + U(r.oferta) : 'sem versão publicada (0)') + ' − (vendas futuras ' + U(r.comp) + ' − já cobertas por lote ' + U(r.cob) + ') = ' + U(r.livre) + '.';
+  /* próximo passo com verbo e dono quando falta produto (o déficit é aviso, D-C16: nada trava) */
+  const passo = r.sit !== 'Déficit' ? '' : r.tipo === 'est' ? ' Para cobrir: liberar ou colher lote apto (Estoque de produto · Qualidade) ou encerrar o saldo das vendas abaixo (Contratos e pedidos · Comercial).'
+    : !r.tem ? ' Para cobrir: publicar a previsão de ' + r.perT + ' (Previsão e colheita · Produção) ou renegociar as vendas abaixo (Contratos e pedidos · Comercial).'
+    : ' Para cobrir: rever a previsão publicada (Previsão e colheita · Produção) ou renegociar as vendas abaixo (Contratos e pedidos · Comercial).';
   return { title: r.prod + ' › ' + r.perT, chip: [r.sit, COM_SITC[r.sit]], sub: r.tipo === 'est' ? 'Estoque apto de todas as fazendas; período em curso entra aqui' : 'Período futuro: previsão publicada × vendas futuras',
-    next: conta, nred: r.sit === 'Déficit' || r.sit === 'Suspenso', kv: [{ l: 'Oferta', v: r.tipo === 'est' || r.tem ? U(r.oferta) : 'sem versão publicada' }, { l: 'Compromissos', v: U(r.comp) }, { l: 'Coberto por lote', v: U(r.cob) }, { l: 'Livre para vender', v: r.livre === null ? 'suspenso (' + comSusp(r) + ')' : U(r.livre) }],
+    next: conta + passo, nred: r.sit === 'Déficit' || r.sit === 'Suspenso', kv: [{ l: 'Oferta', v: r.tipo === 'est' || r.tem ? U(r.oferta) : 'sem versão publicada' }, { l: 'Compromissos', v: U(r.comp) }, { l: 'Coberto por lote', v: U(r.cob) }, { l: 'Livre para vender', v: r.livre === null ? 'suspenso (' + comSusp(r) + ')' : U(r.livre) }],
     secs: [{ t: 'Vendas do período', rows: vs, vazio: 'Nenhuma venda.' }].concat(r.tipo === 'est' ? [{ t: 'Lotes', rows: ls, vazio: 'Nenhum lote com saldo.' }] : []),
     prim: r.livre === null && comPode('vender') ? { t: 'Registrar a saca do ' + r.amb[0], h: 'VEN.dc.html#' + r.amb[0] } : comLivreTem(r) && comPode('vender') ? { t: 'Vender ' + r.prod + ' · ' + r.perT, h: 'VEN.dc.html#nova:' + r.prod + ':' + r.per } : null }; }
 function comPanPr(self, c, x) { const U = y => comTxt(x.cu, y); const P = prP(c);
@@ -484,8 +488,9 @@ function EXTRAVALS(self, v) { prRst(self, v); const c = self._c || cenGet(); con
   if (!r && !(sel && sel.g === 'g_pr')) r = rows.find(comLivreTem) || rows.find(x => x.livre === null) || null;
   /* A-17: período suspenso → o passo que destrava é registrar a saca da 1ª venda sem a massa (na venda, com a fonte) */
   if (r && r.livre === null) prim = { t: 'Registrar a saca do ' + r.amb[0], papel: 'vender', h: 'VEN.dc.html#' + r.amb[0] };
-  else if (r) prim = comLivreTem(r) ? { t: 'Vender ' + r.prod + ' · ' + r.perT, papel: 'vender', h: 'VEN.dc.html#nova:' + r.prod + ':' + r.per }
-    : { t: 'Ver vendas de ' + r.perT, go: () => self.setState({ pr_sel: { g: 'g_of', id: r.id }, pr_pan: { g: 'g_of', id: r.id } }) };
+  /* linha em déficit ou sem saldo livre: nenhuma primária (BOT-03/BOT-08 do design system de 09/10: "Ver …" e troca de tela não são
+     primária); o painel da linha, aberto pela seleção, diz o passo que cobre o déficit e lista as vendas com o elo para cada uma */
+  else if (r && comLivreTem(r)) prim = { t: 'Vender ' + r.prod + ' · ' + r.perT, papel: 'vender', h: 'VEN.dc.html#nova:' + r.prod + ':' + r.per };
   comPrim(v, prim);
   const def = rows.filter(x => x.sit === 'Déficit'); const sus = rows.filter(x => x.sit === 'Suspenso'); const ind = comIndicadores(c);
   prStatus(v, [def.length ? def.map(x => x.prod.split(' ')[0] + ' ' + x.perT.replace(/ \(.*\)$/, '')).join(', ') + ' em déficit' : 'sem déficit', sus.length ? sus.length + (sus.length > 1 ? ' períodos suspensos' : ' período suspenso') + ' (saca a conferir)' : '', prCmp(ind.venc, 0) > 0 ? comRS(ind.venc) + ' vencido' : ''].filter(Boolean).join(' · '), def.length || prCmp(ind.venc, 0) > 0 ? 'red' : (sus.length ? 'yellow' : 'green'));
