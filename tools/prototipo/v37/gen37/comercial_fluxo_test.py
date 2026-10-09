@@ -35,6 +35,8 @@ window.ROWTXT=(t)=>{ const r=[...document.querySelectorAll('[role=row]')].find(x
 window.PAN=()=>{ const a=[...document.querySelectorAll('aside[role=dialog]')].find(VIS); return a?N(a.innerText):''; };
 window.TOAST=()=>[...document.querySelectorAll('[role=status]')].map(x=>N(x.innerText)).filter(Boolean).join(' | ');
 window.PRIM=()=>{ const b=[...document.querySelectorAll('header .pr-prim, header button, header a')].filter(e=>VIS(e)&&getComputedStyle(e).backgroundColor==='rgb(30, 122, 76)'); return b.map(e=>N(e.innerText)); };
+/* verde do rodapé do painel aberto (A6 da revisão: com o painel aberto, a ação é a dele e o cabeçalho não repete o verde) */
+window.PRIMP=()=>[...document.querySelectorAll('aside[role=dialog] button, aside[role=dialog] a')].filter(e=>VIS(e)&&getComputedStyle(e).backgroundColor==='rgb(30, 122, 76)').map(e=>N(e.innerText));
 window.DONO=()=>{ const e=[...document.querySelectorAll('header .com-dono')].find(VIS); return e?N(e.innerText):''; };
 window.CEN=()=>JSON.parse(localStorage.getItem('talhao-os-cenario-v1')||'null')||((window.__car&&window.__car.cenGet)?window.__car.cenGet():null);
 'ok'"""
@@ -80,17 +82,17 @@ try:
         ir('VEN.dc.html', limpa=True)
         t.chk('§8.1 sem seleção, a primária é "Registrar venda"', J("PRIM()") == ['Registrar venda'], J("PRIM()"))
         r = row('PV-030'); p = pan()
-        t.chk('(0) A-17 PV-030 "Saca a conferir" (VE-05 oculto sc 50 kg × Colheita 60 kg): o painel pede a massa da saca com a fonte; primária "Registrar a saca do PV-030"',
-              'Saca a conferir' in p and '4.000 sc (saca de 50 ou 60 kg a conferir)' in p and '50 kg' in btns() and '60 kg' in btns() and J("PRIM()") == ['Registrar a saca do PV-030'], [r, J("PRIM()"), p[:500]])
+        t.chk('(0) A-17 PV-030 "Saca a conferir" (VE-05 oculto sc 50 kg × Colheita 60 kg): o painel pede a massa da saca com a fonte; primária "Registrar a saca" no painel, sem verde repetido no cabeçalho (A6)',
+              'Saca a conferir' in p and '4.000 sc (saca de 50 ou 60 kg a conferir)' in p and '50 kg' in btns() and '60 kg' in btns() and J("PRIMP()") == ['Registrar a saca'] and J("PRIM()") == [], [r, J("PRIM()"), J("PRIMP()"), p[:500]])
         clk('60 kg', 'aside'); t.chk('(0) escolhida a massa, o painel mostra a conta antes de gravar: 4.000 sc × 60 kg = 240.000 kg', '4.000 sc × 60 kg = 240.000 kg' in pan(), pan()[:500])
         clk('Registrar a saca', 'aside'); p = toast()
         t.chk('(0) saca de 60 kg registrada por Ana (gestora) com a fonte "Contrato CT-201": 4.000 sc = 240.000 kg; falta 125 sc', 'saca de 60 kg registrada por Ana (gestora) (Contrato CT-201)' in p and 'falta 125 sc' in p, p)
         p = pan()
         sug = J("(()=>{ const i=[...document.querySelectorAll('aside input')].find(x=>x.id.indexOf('pf_q_L10-031_PV-030')===0); return i?i.value:null; })()")
-        t.chk('(1) PV-030 Parcial: o painel abre a reserva com a sugestão L10-031 · 125 sc; a primária é "Reservar lote para o PV-030"', 'Parcial' in p and 'L10-031' in p and sug == '125' and J("PRIM()") == ['Reservar lote para o PV-030'], [r, sug, J("PRIM()"), p[:400]])
+        t.chk('(1) PV-030 Parcial: o painel abre a reserva com a sugestão L10-031 · 125 sc; a primária é "Reservar" no painel (cabeçalho sem verde, A6)', 'Parcial' in p and 'L10-031' in p and sug == '125' and J("PRIMP()") == ['Reservar'] and J("PRIM()") == [], [r, sug, J("PRIM()"), J("PRIMP()"), p[:400]])
         clk('Reservar', 'aside'); p = toast()
         t.chk('(1) Reservar: RS-0002 de 125 sc do L10-031 para o PV-030 (Coberto)', 'RS-0002' in p and '125 sc' in p and 'coberto' in p and 'Coberto' in (J("ROWTXT('PV-030')") or ''), [p, J("ROWTXT('PV-030')")])
-        t.chk('(2) a primária passa a "Programar carga do PV-030"', J("PRIM()") == ['Programar carga do PV-030'], J("PRIM()"))
+        t.chk('(2) a primária passa a "Programar carga do PV-030" (no painel aberto; cabeçalho sem verde repetido, A6)', J("PRIMP()") == ['Programar carga do PV-030'] and J("PRIM()") == [], [J("PRIM()"), J("PRIMP()")])
         clk('Programar carga do PV-030'); time.sleep(.9); lib(); p = pan()
         t.chk('(2) "Programar carga do PV-030" abre a Expedição com a venda herdada (cliente retira)', 'Programar carga' in p and 'PV-030' in p and 'Cliente retira' in p, p[:400])
         clk('Bitrem graneleiro 37 t', 'aside'); setv('#pf_pl', 'QZA1B23')
@@ -98,7 +100,7 @@ try:
         t.chk('(2) previsto pré-preenchido: 37.000 kg (mín da reserva sem carga e da capacidade do bitrem, KC11) e data Hoje', pv == '37000' and 'Hoje 26/09' in pan(), [pv, pan()[:300]])
         clk('Programar carga', 'aside'); p = toast()
         t.chk('(2) RM-0002 programada: 37.000 kg, bitrem QZA1B23, cliente retira', 'RM-0002 programada' in p and 'QZA1B23' in p, p)
-        t.chk('(3) a carga fica selecionada e a primária é "Confirmar saída da RM-0002"', J("PRIM()") == ['Confirmar saída da RM-0002'] and 'Peso bruto' in pan(), [J("PRIM()"), pan()[:300]])
+        t.chk('(3) a carga fica selecionada e a primária é "Confirmar saída da RM-0002" no painel (cabeçalho sem verde repetido, A6)', J("PRIMP()") == ['Confirmar saída da RM-0002'] and J("PRIM()") == [] and 'Peso bruto' in pan(), [J("PRIM()"), J("PRIMP()"), pan()[:300]])
         setv('#pf_br', '51200'); setv('#pf_ta', '14240'); time.sleep(.2)
         t.chk('(3) o painel mostra o líquido antes de gravar: 36.960 kg = 616 sc', '36.960 kg = 616 sc' in pan(), pan()[:600])
         r2 = J("CLK2('Confirmar saída da RM-0002','aside[role=dialog]')"); time.sleep(.8); p = toast()
@@ -190,10 +192,11 @@ try:
         t.chk('AC-11 sem seleção, a primária é vender a primeira linha com livre: "Vender Soja em grão · Estoque (2025/26)"', J("PRIM()") == ['Vender Soja em grão · Estoque (2025/26)'], J("PRIM()"))
         row('S41'); p41 = pan()
         t.chk('déficit (mamão S41): nenhuma primária, nem "Ver …" (BOT-03/BOT-08 do design system de 09/10); o painel diz o passo e lista o PV-038 com o elo',
-              J("PRIM()") == [] and 'Para cobrir: publicar a previsão de S41' in p41 and 'PV-038' in p41, [J("PRIM()"), p41[:500]])
+              J("PRIM()") == [] and J("PRIMP()") == [] and 'Para cobrir: publicar a previsão de S41' in p41 and 'PV-038' in p41, [J("PRIM()"), J("PRIMP()"), p41[:500]])
         clk('Fechar', 'aside')
-        row('Safra 2026/27'); t.chk('selecionada a safra 26/27, a primária é "Vender Soja em grão · Safra 2026/27"', J("PRIM()") == ['Vender Soja em grão · Safra 2026/27'], J("PRIM()"))
-        clk('Fechar', 'aside'); clk('Vender Soja em grão · Safra 2026/27'); time.sleep(.9); lib()
+        row('Safra 2026/27'); t.chk('selecionada a safra 26/27, a primária é "Vender Soja em grão · Safra 2026/27" (no painel aberto; cabeçalho sem verde repetido, A6)', J("PRIMP()") == ['Vender Soja em grão · Safra 2026/27'] and J("PRIM()") == [], [J("PRIM()"), J("PRIMP()")])
+        clk('Fechar', 'aside'); t.chk('fechado o painel, a primária volta ao cabeçalho', J("PRIM()") == ['Vender Soja em grão · Safra 2026/27'], J("PRIM()"))
+        clk('Vender Soja em grão · Safra 2026/27'); time.sleep(.9); lib()
         on = J("[...document.querySelectorAll('aside [aria-pressed=true]')].map(b=>N(b.innerText))") or []
         t.chk('#nova:<produto>:<período> abre "Registrar venda" com Soja em grão, Venda futura e Safra 2026/27 herdados', 'Venda futura' in on and any(x.startswith('Soja em grão') for x in on) and any(x.startswith('Safra 2026/27') for x in on), on)
         t.chk('painel: nenhuma página com erro de JS', not t.errs(), t.errs())

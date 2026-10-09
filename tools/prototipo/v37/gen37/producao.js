@@ -209,6 +209,11 @@ function prFatV(p) { return p.fatConf ? p.fatConf.fat : (p.fat || null); }
 function prUnV(p) { const u = prUn(p.cultura); const un = p.un || prEstUn(p.cultura); const f = prFatV(p);
   return (u.est || !f || prCmp(f, u.massa) === 0) ? un : un + ' ' + prFmtT(f, 3) + ' kg'; }
 function prTxtV(p, kg, d) { const f = prFatV(p); if (!f) return prFmtT(kg, 3) + ' kg'; return prFmtT(prDiv(kg, f), d === undefined ? 2 : d) + ' ' + prUnV(p); }
+/* pedido sem massa gravada (pedido de teste da Colheita): a unidade de estoque da cultura; com massa: a do compromisso (Comercial A7 da revisão) */
+function prTxtP(p, kg) { return prFatV(p) ? prTxtV(p, kg) : prEstTxt(p.cultura, kg); }
+function prUnP(p) { return prFatV(p) ? prUnV(p) : prEstUn(p.cultura); }
+function prQP(p, kg) { const f = prFatV(p); return f ? prDiv(kg, f) : prEstQ(p.cultura, kg); }
+function prBaseP(p, q) { const f = prFatV(p); return f ? prMul(q, f) : prEstBase(p.cultura, q); }
 function prQtdTxt(p) { return prAmb(p) ? prFmtT(p.qc, 3) + ' ' + (p.un || '') + ' (saca de ' + p.fatAmb.join(' ou ') + ' kg a conferir)' : ((prFatV(p) || p.fatAmb) ? prTxtV(p, p.qtd || 0) : prEstTxt(p.cultura, p.qtd)); }
 function prResPed(c, pid) { return Object.values(prP(c).reservas).filter(r => r.pedido === pid && r.st === 'Ativa'); }
 function prFalta(c, ped) { if (prAmb(ped)) return 0; const f = prSub(prSub(ped.qtd, prExpedido(c, ped.id)), prSoma(prResPed(c, ped.id).map(r => r.kg))); return prCmp(f, 0) > 0 ? f : 0; }
@@ -387,13 +392,15 @@ function prDescartarCarga(c, id, motivo, quem) { const P = prP(c, 1); const g = 
   if (c.app && Array.isArray(c.app.fila)) c.app.fila = c.app.fila.filter(x => x !== id);
   return { msg: id + ' descartada (' + mot + '): a carga sai da fila de pesagem; nada entra na produção. O registro e o motivo ficam no histórico.' }; }
 
-/* liberar lote (Qualidade, R-13): reavalia carência e ordem; recusa com a pendência e o dono */
-function prLiberarLote(c, lid, quem) { const P = prP(c, 1); const L = P.lotes[lid]; if (!L) throw new Error('Lote não encontrado.'); const S = prSaldos(c, L);
+/* liberar lote (Qualidade, R-13): reavalia carência e ordem; recusa com a pendência e o dono. Quem age (Comercial A3 da revisão, R-C10):
+   o perfil com o papel qualidade ou agrônomo (a mesma regra do BEN-1 (d) na branch única); grava g2ator, nunca um nome fixo
+   (lote devolvido não volta à venda sem conferência) */
+function prLiberarLote(c, lid, ator) { const quem = cenExigeUm(ator, ['qualidade', 'agronomo'], 'Liberar o lote ' + lid); const P = prP(c, 1); const L = P.lotes[lid]; if (!L) throw new Error('Lote não encontrado.'); const S = prSaldos(c, L);
   if (S.q === 'Liberado') throw new Error(lid + ' já está liberado.');
   if (S.q === 'Em processo') throw new Error(lid + ' está em processo (' + S.mot + '): o beneficiamento libera o lote de saída.');
   if (S.q === 'Bloqueado') throw new Error('Liberar recusado: ' + S.mot + '. Lote bloqueado por carência só sai pela Qualidade com laudo (fora desta etapa). Quem decide: ' + S.dono + '.');
   const Q = prQualidade(c, Object.assign({}, L, { q0: 'Liberado' })); if (Q.q !== 'Liberado') throw new Error('Liberar recusado: ' + Q.mot + '. Quem resolve: ' + Q.dono + '.');
-  L.q0 = 'Liberado'; L.lib = { quem: quem || prQuem('qual'), d: prHoje(), at: cenAgora() }; prMov(c, { tipo: 'liberação', lote: lid, kg: 0, fis: false, quem: L.lib.quem });
+  L.q0 = 'Liberado'; L.lib = { quem, d: prHoje(), at: cenAgora() }; prMov(c, { tipo: 'liberação', lote: lid, kg: 0, fis: false, quem: L.lib.quem });
   return { msg: lid + ' liberado por ' + L.lib.quem + ': ' + prEstTxt(L.cultura, S.fis) + ' aptos para reserva e venda.' }; }
 
 /* reservar lote apto para pedido (R-15): mesma classe, avaliação do destino, ≤ disponível e ≤ falta; dedução única.
@@ -411,17 +418,21 @@ function prReservar(c, k) { const P = prP(c, 1); const kg = prNumOk(k.kg) ? prNu
     if (a.st === 'pendente') pend = pend.concat(a.faltas.map(f => f.t + ' (' + f.q + ')')); }
   if (!(kg > 0)) throw new Error('Informe a quantidade a reservar.');
   if (prCmp(kg, S.disp) > 0) throw new Error('Acima do disponível do ' + L.id + ': ' + prEstTxt(L.cultura, S.disp) + '.');
-  const falta = prFalta(c, ped); if (prCmp(kg, falta) > 0) throw new Error('Acima da falta do ' + ped.id + ': ' + prEstTxt(L.cultura, falta) + '.');
+  const falta = prFalta(c, ped); if (prCmp(kg, falta) > 0) throw new Error('Acima da falta do ' + ped.id + ': ' + prTxtP(ped, falta) + '.');
   const ini = ped.ini || (ped.sem ? prSemIni(ped.sem) : ''); const venceAntes = !!(L.validade && ini && L.validade < ini);   /* aviso, não trava (D-21 da Colheita; Comercial R-C05) */
   P.seq.rs = (P.seq.rs || 0) + 1; const id = 'RS-' + String(P.seq.rs).padStart(4, '0');
   const rs = P.reservas[id] = { id, pedido: ped.id, lote: L.id, kg, kg0: kg, exp: 0, st: 'Ativa', d: prHoje(), at: cenAgora(), quem, chave: k.chave || id, imp };
   prMov(c, { tipo: 'reserva', lote: L.id, kg, fis: false, reserva: id, pedido: ped.id, quem: rs.quem });
   const S2 = prSaldos(c, L); const sit = prSitPed(c, ped);
-  return { msg: id + ': ' + prEstTxt(L.cultura, kg) + ' do ' + L.id + ' reservados para o ' + ped.id + ' (' + ped.cliente + '). ' + L.id + ' disponível ' + prEstTxt(L.cultura, S2.disp) + ' · ' + ped.id + ' ' + sit.t.toLowerCase() + '.'
+  return { msg: id + ': ' + prTxtP(ped, kg) + ' do ' + L.id + ' reservados para o ' + ped.id + ' (' + ped.cliente + '). ' + L.id + ' disponível ' + prEstTxt(L.cultura, S2.disp) + ' · ' + ped.id + ' ' + sit.t.toLowerCase() + '.'
     + (pend.length ? ' Destino ' + (PRDC.dest[dest] || dest) + ' pendente: ' + pend[0] + '; a saída só passa com o destino conforme.' : '')
     + (venceAntes ? ' Aviso: o ' + L.id + ' vence ' + prBr(L.validade) + ', antes do início da janela do ' + ped.id + ' (' + prBr(ini) + ').' : ''), rs }; }
 function prCancelarReserva(c, id, motivo, ator) { const P = prP(c, 1); const r = P.reservas[id]; if (!r || r.st !== 'Ativa') throw new Error('Reserva não está ativa.');
   const quem = cenExigeUm(ator, ['comercial', 'gestor'], 'Cancelar a ' + id);   /* ator obrigatório (Comercial CE-10) */
+  /* Comercial A5 da revisão: a reserva de lote que está numa carga programada da mesma venda não se cancela sozinha (a carga ficaria
+     sem reserva e o caminhão sairia do disponível ou da reserva de outro): cancele a carga antes, como no encerrar saldo (R-C11) */
+  const pg = Object.values(P.expedicoes || {}).filter(x => x.st === 'Programada' && x.pedido === r.pedido && (x.lotes || []).some(l => l.lote === r.lote)).map(x => x.id);
+  if (pg.length) throw new Error('Cancelar a ' + id + ' recusado: ' + pg.join(', ') + ' programada com o ' + r.lote + ' para o ' + r.pedido + '. Cancele a carga antes (Expedição e entregas). Nada foi alterado.');
   const mot = String(motivo || '').trim(); if (!mot) throw new Error('Informe o motivo do cancelamento da reserva.');
   r.st = 'Cancelada'; r.canc = { motivo: mot, quem, d: prHoje(), at: cenAgora() };
   prMov(c, { tipo: 'cancelamento de reserva', lote: r.lote, kg: -r.kg, fis: false, reserva: id, pedido: r.pedido, quem: r.canc.quem, obs: mot });

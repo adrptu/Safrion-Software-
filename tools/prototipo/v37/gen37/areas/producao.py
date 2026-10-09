@@ -151,13 +151,17 @@ function prPainel(self,v,P){ v.pp_open=!!P; P=P||{chip:['','gray']};
   v.pp_secs=(P.secs||[]).map(s=>({t:s.t,rows:(s.rows||[]).map(r=>({c:(r.c||[]).map(q=>Array.isArray(q)?prCel(q[0],q[1]):prCel(q)),hasA:!!r.a,at:r.a?r.a.t:'',go:r.a?r.a.go:(()=>{}),
     hasL:!!r.l,lt:r.l?r.l.t:'',h:r.l?r.l.h:'#'})),vazio:!(s.rows||[]).length,vt:s.vazio||'Nada registrado.'}));
   v.pp_hasForm=!!P.form; v.pp_formT=P.form?P.form.t:''; v.pp_hasFormH=!!(P.form&&P.form.h); v.pp_formH=P.form?(P.form.h||''):''; v.pp_fields=P.form?P.form.fields:[];
-  v.pp_hasErr=!!P.err; v.pp_err=P.err||''; v.pp_sec=P.sec||[];
-  v.pp_hasPB=!!(P.prim&&P.prim.go); v.pp_hasPA=!!(P.prim&&P.prim.h&&!P.prim.go); v.pp_pt=P.prim?P.prim.t:''; v.pp_ph=(P.prim&&P.prim.h)||'#'; v.pp_pgo=(P.prim&&P.prim.go)||(()=>{});
+  v.pp_hasErr=!!P.err; v.pp_err=P.err||''; v.pp_sec=(P.sec||[]).map(b=>Object.assign({},b,{go:prGuarda(self,b.go)}));
+  v.pp_hasPB=!!(P.prim&&P.prim.go); v.pp_hasPA=!!(P.prim&&P.prim.h&&!P.prim.go); v.pp_pt=P.prim?P.prim.t:''; v.pp_ph=(P.prim&&P.prim.h)||'#'; v.pp_pgo=prGuarda(self,(P.prim&&P.prim.go)||(()=>{}));
   v.pp_close=()=>self.setState({pr_pan:null,pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null}); v.pp_closeT=P.form?'Cancelar':'Fechar';
   v.pp_key=(e)=>{ if(e&&e.key==='Escape'){ e.preventDefault(); v.pp_close(); } }; }
 /* executa um comando no estado (atômico) e mostra o resultado; erro fica no painel, junto da ação */
 function prRun(self,fn,ok){ const r=cenMudar(null,fn); if(r.erro){ self.setState({pr_err:r.erro,g2toast:''}); return r; }
-  self.setState(Object.assign({cenrev:Date.now(),g2toast:r.msg||'Registrado.',pr_err:'',pr_ferr:null},ok||{})); return r; }
+  self.__prTrava=Date.now()+PR_TRAVA_MS; self.setState(Object.assign({cenrev:Date.now(),g2toast:r.msg||'Registrado.',pr_err:'',pr_ferr:null},ok||{})); return r; }
+/* duplo clique (Comercial A1 da revisão): depois de um comando gravado, o mesmo lugar do painel vira o próximo passo com padrões preenchidos;
+   o 2º clique de um duplo clique (detail ≥ 2) e qualquer clique logo depois do sucesso (toque duplo) não agem: quem decide clica de novo */
+const PR_TRAVA_MS=400;
+function prGuarda(self,fn){ return (e)=>{ if((e&&e.detail>=2)||Date.now()<(self.__prTrava||0)) return; return fn(e); }; }
 function prPrim(v,p){ v.prim_isB=!!(p&&p.go); v.prim_isA=!!(p&&p.h&&!p.go); v.prim_t=p?p.t:''; v.prim_fn=(p&&p.go)||(()=>{}); v.prim_h=(p&&p.h)||'#'; }
 function prStatus(v,t,c){ v.st_t=t; v.st_st=prChs(c); v.st_dot=prDot(c); }
 /* chave de quem inicia (R-07): nasce quando o formulário abre (estado pr_ch) e morre no sucesso; nunca de contagem do estado,
@@ -196,14 +200,16 @@ function prFormReserva(self,c,L,p,fixo,lotes){ /* fixo: 'lote' (vem do lote: esc
   const P=prP(c); let opcPed=[], opcLot=[];
   if(fixo==='lote'){ opcPed=prPedidosPara(c,L); p=P.pedidos[prFval(self,'ped',(opcPed[0]||{}).id||'')]||opcPed[0]||null; }
   else { opcLot=lotes||Object.values(P.lotes).filter(x=>prCompat(p,x)&&prCmp(prSaldos(c,x).disp,0)>0); L=P.lotes[prFval(self,'lot',(opcLot[0]||{}).id||'')]||opcLot[0]||null; }
-  const S=L?prSaldos(c,L):null; const falta=p?prFalta(c,p):0; const sug=(S&&p)?(prCmp(S.disp,falta)<0?S.disp:falta):0; const cu=(L||p||{}).cultura||'Soja'; const un=prEstUn(cu);
-  const fields=[]; if(fixo==='lote') fields.push(prFld(self,'ped','Pedido',{t:'opts',v:p?p.id:'',opts:opcPed.map(x=>({v:x.id,t:x.id+' · '+x.cliente+' · falta '+prEstTxt(x.cultura,prFalta(c,x))+(x.tipo==='futura'?' · futura':'')}))}));
-  else fields.push(prFld(self,'lot','Lote apto',{t:'opts',v:L?L.id:'',opts:opcLot.map(x=>({v:x.id,t:x.id+' · disponível '+prEstTxt(x.cultura,prSaldos(c,x).disp)}))}));
-  const k='q_'+(L?L.id:'')+'_'+(p?p.id:''); const sugT=prFmtT(prPiso(prEstQ(cu,sug),3),3).replace(/\./g,'');   /* para baixo: redigitada, nunca passa do disponível (revisão A-12) */
-  fields.push(prFld(self,k,'Quantidade a reservar',{t:'txt',v:sugT,u:un,h:'Sugestão: o menor entre o disponível do lote ('+(S?prEstTxt(cu,S.disp):'—')+') e a falta do pedido ('+prEstTxt(cu,falta)+'). Pode reduzir.'}));
+  const S=L?prSaldos(c,L):null; const falta=p?prFalta(c,p):0; const sug=(S&&p)?(prCmp(S.disp,falta)<0?S.disp:falta):0; const cu=(L||p||{}).cultura||'Soja';
+  /* unidade do pedido (Comercial A7 da revisão): a reserva é da venda; com a massa gravada nela (saca de 50 kg), digita e lê nessa massa */
+  const un=p?prUnP(p):prEstUn(cu); const TX=x=>p?prTxtP(p,x):prEstTxt(cu,x); const QB=q=>p?prBaseP(p,q):prEstBase(cu,q); const QQ=x=>p?prQP(p,x):prEstQ(cu,x);
+  const fields=[]; if(fixo==='lote') fields.push(prFld(self,'ped','Pedido',{t:'opts',v:p?p.id:'',opts:opcPed.map(x=>({v:x.id,t:x.id+' · '+x.cliente+' · falta '+prTxtP(x,prFalta(c,x))+(x.tipo==='futura'?' · futura':'')}))}));
+  else fields.push(prFld(self,'lot','Lote apto',{t:'opts',v:L?L.id:'',opts:opcLot.map(x=>({v:x.id,t:x.id+' · disponível '+TX(prSaldos(c,x).disp)}))}));
+  const k='q_'+(L?L.id:'')+'_'+(p?p.id:''); const sugT=prFmtT(prPiso(QQ(sug),3),3).replace(/\./g,'');   /* para baixo: redigitada, nunca passa do disponível (revisão A-12) */
+  fields.push(prFld(self,k,'Quantidade a reservar',{t:'txt',v:sugT,u:un,h:'Sugestão: o menor entre o disponível do lote ('+(S?TX(S.disp):'—')+') e a falta do pedido ('+TX(falta)+'). Pode reduzir.'}));
   const q0=prFval(self,k,sugT); const ch0=self.state.pr_ch||prChave('W-RS');   /* lidos no desenho: o 2º clique repete a mesma chave e o mesmo conteúdo (R-07) */
   const go=()=>{ if(!L||!p){ self.setState({pr_err:'Escolha '+(fixo==='lote'?'o pedido':'o lote')+'.'}); return; } const q=q0;
-    const kg=q===sugT?sug:(prNumOk(q)?prEstBase(cu,prNum(q)):NaN); const ch=ch0;   /* sem edição: a sugestão exata na base */
+    const kg=q===sugT?sug:(prNumOk(q)?QB(prNum(q)):NaN); const ch=ch0;   /* sem edição: a sugestão exata na base */
     prRun(self,x=>prReservar(x,{pedido:p.id,lote:L.id,kg,chave:ch,ator:g2perfil()}),{pr_modo:null,pr_form:null,pr_ch:null}); };   /* quem age: o perfil (Comercial CE-10) */
   return {fields,go,L,p}; }
 function prPanPed(self,c,p){ const P=prP(c); const cu=p.cultura; const U=x=>prEstTxt(cu,x); const st=prSitPed(c,p); const falta=prFalta(c,p); const cx=self.state.pr_cx;
@@ -271,7 +277,7 @@ function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const P=pr
   /* seleção → ação primária (uma, do registro); sem seleção: reservar o primeiro lote com disponível e pedido compatível */
   const sel=st.pr_sel; let alvo=null;
   if(sel&&sel.g==='g_lot'&&P.lotes[sel.id]) alvo={g:'g_lot',id:sel.id};
-  const acaoLote=(L)=>{ const S=prSaldos(c,L); const nx=prLoteProx(c,L,S); if(nx.a==='liberar') return {t:'Liberar '+L.id,go:()=>self.setState({pr_sel:{g:'g_lot',id:L.id},pr_pan:{g:'g_lot',id:L.id},pr_modo:'liberar',pr_form:null,pr_err:''})};
+  const acaoLote=(L)=>{ const S=prSaldos(c,L); const nx=prLoteProx(c,L,S); if(!prPodeLote(nx.a)) return null; if(nx.a==='liberar') return {t:'Liberar '+L.id,go:()=>self.setState({pr_sel:{g:'g_lot',id:L.id},pr_pan:{g:'g_lot',id:L.id},pr_modo:'liberar',pr_form:null,pr_err:''})};
     if(nx.a==='reservar') return {t:'Reservar '+L.id+' para pedido',go:()=>self.setState({pr_sel:{g:'g_lot',id:L.id},pr_pan:{g:'g_lot',id:L.id},pr_modo:'reservar',pr_form:null,pr_err:'',pr_ch:prChave('W-RS')})}; return null; };
   let prim=null; if(alvo) prim=acaoLote(P.lotes[alvo.id]);
   else { const ls=[].concat(...(GR('g_lot').rows||[]).map(r=>r.kids||[])).map(r=>P.lotes[r.id]).filter(Boolean); for(const L of ls){ const a=acaoLote(L); if(a&&/^Reservar/.test(a.t)){ prim=a; break; } } }
@@ -284,6 +290,8 @@ function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const P=pr
   const pan=st.pr_pan; let PP=null;
   if(pan&&pan.g==='g_lot'&&P.lotes[pan.id]) PP=prPanLote(self,c,P.lotes[pan.id]);
   prPainel(self,v,PP); }
+/* papel de quem age no lote (Comercial A3 e A11 da revisão): sem o papel, nenhum verde; o próximo passo diz o dono */
+function prPodeLote(a){ return !!a&&!!g2umPapel(g2perfil(),a==='liberar'?['qualidade','agronomo']:['comercial','gestor']); }
 function prPanLote(self,c,L){ const P=prP(c); const S=prSaldos(c,L); const cu=L.cultura; const U=x=>prEstTxt(cu,x); const q=S.esgotado?'Esgotado':S.q; const nx=prLoteProx(c,L,S); const modo=self.state.pr_modo;
   const loc=(PRDC.locais[L.local]||{}); const lcs=prLcs(c,L);
   /* origem de lote devolvido (Comercial R-C10, CE-11): sem carga e sem kg (a produção do talhão não conta de novo) */
@@ -299,7 +307,8 @@ function prPanLote(self,c,L){ const P=prP(c); const S=prSaldos(c,L); const cu=L.
     kv:[{l:'Físico',v:U(S.fis)},{l:'Bloqueado',v:U(S.blq)},{l:'Apto',v:U(S.apto)},{l:'Reservado',v:U(S.res)},{l:'Disponível',v:U(S.disp)},{l:'Em processo',v:U(S.proc)}],
     secs:[{t:'Origem',rows:orig},{t:'Avaliação do destino dos pedidos',rows:av,vazio:L.abertura?'Saldo de abertura sem lote de campo: o destino é avaliado na expedição.':'Sem lote de campo ainda (o apontamento da data cria o LC-).'},{t:'Reservas',rows:rs,vazio:'Nenhuma reserva.'},{t:'Movimentos',rows:mv}],
     err:self.state.pr_err};
-  if(nx.a==='liberar'){ PPx.prim={t:'Liberar '+L.id,go:()=>prRun(self,x=>prLiberarLote(x,L.id,prQuem('qual')),{pr_modo:null})}; PPx.form={t:'Liberar lote · '+prQuem('qual'),h:'Confira a condição do lote. Liberar reavalia carência e ordem de colheita; com pendência, nada muda e a mensagem diz quem resolve.',fields:[]}; }
+  if(nx.a&&!prPodeLote(nx.a)) PPx.next=PPx.next.replace(/\.$/,'')+'. Decisão de '+g2quemUm(nx.a==='liberar'?['qualidade','agronomo']:['comercial','gestor'])+'.';
+  else if(nx.a==='liberar'){ PPx.prim={t:'Liberar '+L.id,go:()=>prRun(self,x=>prLiberarLote(x,L.id,g2perfil()),{pr_modo:null})}; PPx.form={t:'Liberar lote · '+prQuem('qual'),h:'Confira a condição do lote. Liberar reavalia carência e ordem de colheita; com pendência, nada muda e a mensagem diz quem resolve.',fields:[]}; }
   else if(nx.a==='reservar'){ if(self.state.pr_ch){ const f=prFormReserva(self,c,L,null,'lote'); PPx.form={t:'Reservar para pedido · '+prQuem('com'),h:'Reserva só de lote apto; a quantidade não passa do disponível nem da falta do pedido.',fields:f.fields}; PPx.prim={t:'Reservar',go:f.go}; }
     else PPx.prim={t:'Reservar '+L.id+' para pedido',go:()=>self.setState({pr_ch:prChave('W-RS'),pr_form:null,pr_err:''})}; }   /* depois de reservar, nova reserva abre outro formulário (outra chave) */
   return PPx; }

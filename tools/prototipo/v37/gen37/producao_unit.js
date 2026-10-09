@@ -109,17 +109,17 @@ function OSX(c, id, tal, etapa, ap, tipo, ins) { c.ordens[id] = { id, tipo: tipo
   const b = MUD(c, x => carc_bula(x, P, 'Mamão', 30)); const S1 = prSaldos(c, c.producao.lotes[L.id]); const sit = prSitPed(c, c.producao.pedidos['PV-T1']);
   ok('U07b bula corrigida para 30 dias DEPOIS do recebimento: o lote passa a Bloqueado (carência até 04/10) sem nada regravado', !rs.erro && !b.erro && S1.q === 'Bloqueado' && /carência até 04\/10/.test(S1.mot), [rs.erro, b.erro, S1]);
   ok('U07c a reserva já feita fica com a expedição impedida (pedido Em risco)', sit.t === 'Em risco' && sit.imp.length === 1, sit);
-  const lb = MUD(c, x => prLiberarLote(x, L.id)); ok('U07d Liberar lote bloqueado por carência é recusado (só com laudo, fora)', /bloqueado por carência/.test(lb.erro || ''), lb);
+  const lb = MUD(c, x => prLiberarLote(x, L.id, 'Marta')); ok('U07d Liberar lote bloqueado por carência é recusado (só com laudo, fora)', /bloqueado por carência/.test(lb.erro || ''), lb);
   // dados insuficientes: aplicação em execução com saldo no talhão → Em inspeção, dono nomeado; Liberar recusa com a pendência
   const c2 = NOVO(); OSX(c2, 'OS-0922', 'Pivô 24', 'Em execução', [['20/09', 10]], 'Pulverização · ácaro', ['Abamectina 18 EC']); c2.ordens['OS-0922'].saldo = 24.37; c2.ordens['OS-0922'].resp = 'Wesley';
   OSX(c2, 'OS-0923', 'Pivô 24', 'Em execução', [['10/09', 10]], 'Colheita · semana 37');
   const r2 = MUD(c2, x => prReceber(x, { os: 'OS-0923', ticket: 'TK-C2', bruto: 17200, tara: 7200, cond: 'Íntegra', dcol: '2026-09-10' }));
-  const S2 = prSaldos(c2, r2.L); const lb2 = MUD(c2, x => prLiberarLote(x, r2.L.id));
+  const S2 = prSaldos(c2, r2.L); const lb2 = MUD(c2, x => prLiberarLote(x, r2.L.id, 'Marta'));
   ok('U07e carência sem dados (aplicação em execução sem apontamento completo) → Em inspeção com dono (Wesley)', !r2.erro && S2.q === 'Em inspeção' && /Wesley/.test(S2.dono), [r2.erro, S2]);
   ok('U07f Liberar lote (Qualidade) recusa enquanto a pendência existir, com o dono', /Liberar recusado/.test(lb2.erro || '') && /Wesley/.test(lb2.erro), lb2);
   // avaria: Em inspeção; a Qualidade libera; colheita sem ordem liberada (ordem cancelada depois) volta a Em inspeção
   const c3 = NOVO(); const r3 = MUD(c3, x => prReceber(x, { carga: 'CG-2108', ticket: 'TK-4520', bruto: 19250, tara: 7200, cond: 'Com avaria' }));
-  const S3 = prSaldos(c3, r3.L); const l3 = MUD(c3, x => prLiberarLote(x, r3.L.id, 'Qualidade (Marta)')); const S3b = prSaldos(c3, c3.producao.lotes[r3.L.id]);
+  const S3 = prSaldos(c3, r3.L); const l3 = MUD(c3, x => prLiberarLote(x, r3.L.id, 'Marta')); const S3b = prSaldos(c3, c3.producao.lotes[r3.L.id]);
   ok('U07g Com avaria → Em inspeção (dono Qualidade); Liberar lote pela Qualidade → Liberado', S3.q === 'Em inspeção' && /Qualidade/.test(S3.dono) && !l3.erro && S3b.q === 'Liberado', [S3, l3.erro, S3b.q]);
   c3.ordens['OS-0505'].etapa = 'Canceladas'; ok('U07h colheita sem ordem liberada (O.S. cancelada) → Em inspeção', prSaldos(c3, c3.producao.lotes[r3.L.id]).q === 'Em inspeção', prSaldos(c3, c3.producao.lotes[r3.L.id])); }
 
@@ -251,7 +251,7 @@ const TEB = (c, dap) => { c.ordens['OS-0999'] = { id: 'OS-0999', tipo: 'Pulveriz
 { const c = NOVO(); TEB(c, '19/09');
   const r = MUD(c, x => prReceber(x, { os: 'OS-0505', ticket: 'TK-D1', bruto: 19200, tara: 7200, cond: 'Íntegra', dcol: '2026-09-26' })); const S = r.L && prSaldos(c, r.L);
   ok('R01a carga "colhida" em 26/09 sem apontamento da OS-0505 nesse dia: lote Em inspeção, dono Sérgio (não Liberado)', !r.erro && S.q === 'Em inspeção' && S.dono === 'Sérgio' && /sem apontamento de área da OS-0505/.test(S.mot), [r.erro, S]);
-  const rs = MUD(c, x => prReservar(x, { pedido: 'PV-036', lote: r.L.id, kg: 10000, chave: 'W-R01', ator: 'Ana' })); const lb = MUD(c, x => prLiberarLote(x, r.L.id));
+  const rs = MUD(c, x => prReservar(x, { pedido: 'PV-036', lote: r.L.id, kg: 10000, chave: 'W-R01', ator: 'Ana' })); const lb = MUD(c, x => prLiberarLote(x, r.L.id, 'Marta'));
   ok('R01b esse lote não é reservado e a Qualidade não o libera enquanto o dia não for confirmado (quem resolve: Sérgio)', /não está apto/.test(rs.erro || '') && /Liberar recusado/.test(lb.erro || '') && /Sérgio/.test(lb.erro), [rs.erro, lb.erro]);
   const c2 = NOVO(); TEB(c2, '19/09'); MUD(c2, x => cenApontar(x, { os: 'OS-0505', d: '25/09', ha: 10, h: 4, origem: 'app', quem: 'Marcos', chave: 'APC-R01-25' }));
   const r2 = MUD(c2, x => prReceber(x, { os: 'OS-0505', ticket: 'TK-D2', bruto: 19200, tara: 7200, cond: 'Íntegra', dcol: '2026-09-25' }));
@@ -288,7 +288,7 @@ ok('R02a prNum: "19.250" = 19.250; "1.234.567,8"; "1,20" = 1,2; "1.20" = 1,2; "1
 
 // ---- A-05 (S2) · carga com avaria não entra apta no lote que a Qualidade liberou; condições diferentes não se juntam (M22) ----
 { const c = NOVO(); const a = MUD(c, x => prReceber(x, { os: 'OS-0505', ticket: 'TK-A1', bruto: 12000, tara: 7200, cond: 'Com avaria', dcol: '2026-09-22' }));
-  MUD(c, x => prLiberarLote(x, a.L.id, 'Qualidade (Marta)'));
+  MUD(c, x => prLiberarLote(x, a.L.id, 'Marta'));
   const b = MUD(c, x => prReceber(x, { os: 'OS-0505', ticket: 'TK-A2', bruto: 15000, tara: 7200, cond: 'Com avaria', dcol: '2026-09-22' }));
   ok('R05a 2ª carga com avaria depois da liberação: lote novo Em inspeção; o liberado continua com 4.800 kg aptos', !b.erro && b.L.id !== a.L.id && prSaldos(c, b.L).q === 'Em inspeção' && prSaldos(c, c.producao.lotes[a.L.id]).apto === 4800, [b.erro, b.L && b.L.id, a.L.id]);
   const d = MUD(c, x => prReceber(x, { os: 'OS-0505', ticket: 'TK-A3', bruto: 9000, tara: 7200, cond: 'Fora do padrão', dcol: '2026-09-22' }));

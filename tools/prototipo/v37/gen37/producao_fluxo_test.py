@@ -150,7 +150,7 @@ try:
         setv('#pf_bruto', '19250'); clk('Com avaria', 'aside'); clk('Registrar pesagem', 'aside'); p = toast()
         t.chk('a mesma pesagem por outro formulário (mesmo ticket e conteúdo) = a mesma carga, nada somado', 'mesma carga' in p and cen("c.producao.movs.length") == n, [p, cen("c.producao.movs.length"), n])
         ir('PROD.dc.html'); row('L39-133'); clk('Liberar L39-133', 'aside'); p = toast()
-        t.chk('Liberar lote (Qualidade) passa a Liberado', 'liberado por Qualidade' in p, p)
+        t.chk('Liberar lote passa a Liberado e grava quem agiu (perfil Ana, agrônoma; Comercial A3 da revisão e BEN-1 (d): nunca o nome fixo da Qualidade)', 'liberado por Ana (agrônoma)' in p, p)
         row('L39-133'); setv('[id^=pf_q_L39-133_PV-036]', '10001'); clk('Reservar', 'aside'); p = pan()
         t.chk('reserva acima da falta do pedido é recusada junto ao formulário', 'Acima da falta' in p, p[-300:])
         ir('MB-10.dc.html'); lib(); clk('Sem sinal'); clk('Registrar carga · OS-0505'); setv('#mb_cx', '300'); clk('Carreta 02'); clk('Gravar carga'); p = toast()

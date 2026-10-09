@@ -259,7 +259,7 @@ function g2menuRec(){ if(g2estreito()) return true; try{ return localStorage.get
 // O papel vem sempre desta lista (g2pf), nunca do objeto que o comando recebe. Bloco único, lido também pelos testes sem navegador.
 const G2_PERFIS=[{k:'Ana',t:'Ana · Gestora e RT',papeis:{gestor:'gestora',agronomo:'agrônoma'}},{k:'Caio',t:'Caio · PCP',papeis:{pcp:'PCP'}},
   {k:'Rui',t:'Rui · Almoxarife e expedição',papeis:{almoxarife:'almoxarife',expedicao:'expedição'}},{k:'Paula',t:'Paula · Conferência',papeis:{almoxarife:'almoxarife',conferente:'conferência'}},{k:'Zé',t:'Zé · Mecânico',papeis:{mecanico:'mecânico'}},
-  {k:'Dora',t:'Dora · Comercial',papeis:{comercial:'comercial'}}];   // Comercial (D-C13): Dora vende, reserva e programa carga; Rui confirma a saída física; Ana (gestora) pode tudo e aprova crédito
+  {k:'Dora',t:'Dora · Comercial',papeis:{comercial:'comercial'}},{k:'Marta',t:'Marta · Qualidade',papeis:{qualidade:'qualidade'}}];   // Comercial (D-C13): Dora vende, reserva e programa carga; Rui confirma a saída física; Ana (gestora) pode tudo e aprova crédito. Marta (Qualidade, R-13 da Colheita): libera lote em inspeção, inclusive o devolvido (A3 da revisão do Comercial)
 const G2_PERFIL_KEY='safrion.perfilDemo'; let G2_PERFIL_MEM='';
 function g2pf(p){ const k=(typeof p==='string')?p:(p&&p.k); return G2_PERFIS.find(x=>x.k===k)||null; }   // perfil do cadastro pela chave ("Ana" ou {k:'Ana'})
 function g2perfil(){ let k=G2_PERFIL_MEM; try{ k=localStorage.getItem(G2_PERFIL_KEY)||k; }catch(e){} return g2pf(k)||G2_PERFIS[0]; }

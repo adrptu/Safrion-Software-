@@ -22,6 +22,8 @@ function comUnV(v) { return prUnV(v); }
 function comTxtV(v, kg, d) { return prTxtV(v, kg, d); }
 function comQtdTxt(v) { return (prAmb(v) && !v.enc) ? prQtdTxt(v) : comTxtV(v, v.qtd || 0); }
 function comPrecoTxtV(v, preco) { return 'R$ ' + prFmt(preco === undefined ? v.preco : preco, 2) + '/' + comUnV(v) + (prAmb(v) ? ' (saca a conferir)' : ''); }
+/* quantidade digitada na unidade da venda → base (A7 da revisão: devolução, reserva e carga usam a massa da venda, não a da cultura) */
+function comBaseV(v, q) { const f = comFat(v); return f ? prMul(q, f) : prEstBase(comCultura(v), q); }
 function comValorV(v, base) { const f = comFat(v); return f ? comValorF(f, base, v.preco) : null; }
 /* valor do acordo = quantidade na unidade do contrato × preço (não depende da massa); um arredondamento */
 function comValorQc(v) { if (v.qc === undefined || v.qc === null) return comValorV(v, v.qtd); const cents = prRd(prM(v.qc) * prM(v.preco) * 100n, PR_S * PR_S); return prN(cents * 10000n); }
@@ -48,6 +50,15 @@ function comRmsVenda(c, vid) { return comRms(c, r => r.pedido === vid); }
 function comResKg(c, vid) { return prSoma(prResPed(c, vid).map(r => r.kg)); }
 function comIni(v) { return v.ini || (v.sem ? prSemIni(v.sem) : ''); }
 function comRmDev(rm, lote) { return prSoma((rm.devs || []).filter(d => !lote || d.de === lote).map(d => d.kg)); }
+/* lotes da carga somados por lote (A2 da revisão): uma carga antiga com o mesmo lote em duas linhas nunca baixa duas vezes a reserva */
+function comLotesRm(rm) { const o = []; (rm.lotes || []).forEach(l => { const x = o.find(y => y.lote === l.lote); if (x) x.prev = prSoma([x.prev, l.prev]); else o.push({ lote: l.lote, prev: l.prev }); }); return o; }
+/* carga programada sem reserva que a cubra (A5 da revisão): por lote, a reserva ativa da venda menos o previsto das cargas programadas
+   anteriores (ordem do id); previsto acima disso = impedida (reserva cancelada, consumida por outra carga ou trocada de venda) */
+function comRmDescoberto(c, rm) { if (rm.st !== 'Programada') return []; const ant = comRmsVenda(c, rm.pedido).filter(r => r.st === 'Programada' && r.id < rm.id); const out = [];
+  comLotesRm(rm).forEach(l => { const rv = prSoma(prResPed(c, rm.pedido).filter(r => r.lote === l.lote).map(r => r.kg));
+    const antes = prSoma([].concat(...ant.map(r => r.lotes.filter(x => x.lote === l.lote).map(x => x.prev)))); const cobre = prCmp(rv, antes) > 0 ? prSub(rv, antes) : 0;
+    if (prCmp(l.prev, cobre) > 0) out.push({ lote: l.lote, prev: l.prev, cobre, falta: prSub(l.prev, cobre) }); });
+  return out; }
 function comRmLiq(rm) { return rm.saida ? prSub(rm.saida.liq, comRmDev(rm)) : 0; }
 /* evento do vencimento da carga: Cliente retira = a saída (ponto contratado, PRD 48.2); Agricultor entrega = a entrega confirmada */
 function comRmEvento(rm) { if (!rm.saida) return ''; if (rm.modal === 'retira') return rm.saida.d; return rm.entrega ? rm.entrega.d : ''; }
@@ -115,6 +126,8 @@ function comNaoProg(c, vid, lote) { const res = prSoma(prResPed(c, vid).filter(r
   const z = prSub(res, prog); return prCmp(z, 0) > 0 ? z : 0; }
 function comSitVenda(c, v, hoje) { hoje = hoje || prHoje(); const st = prSitPed(c, v); const P = prP(c); const rs = prResPed(c, v.id); const res = comResKg(c, v.id); const falta = prFalta(c, v);
   const z = { t: st.t, c: st.c, imp: [], res, falta, cred: null };
+  /* A4 da revisão: expedido ≥ vendido com carga ainda em trânsito não é entregue (o vencimento e o realizado contam da entrega) */
+  if (st.t === 'Entregue' && comRmsVenda(c, v.id).some(r => r.st === 'Em trânsito')) return Object.assign(z, { t: 'Em trânsito', c: 'yellow' });
   if (st.t === 'Encerrada' || st.t === 'Entregue' || st.t === 'Saca a conferir') return z;
   z.imp = rs.map(r => ({ r, I: comImpede(c, v, P.lotes[r.lote]) })).filter(x => x.I.imp.length);
   if (z.imp.length) return Object.assign(z, { t: 'Em risco', c: 'red' });
@@ -135,6 +148,16 @@ function comClasse(c, prod) { const L = Object.values(prP(c).lotes).find(x => x.
 function comSafColhida(c, prod, sf, hoje) { hoje = hoje || prHoje();
   if (Object.values(prP(c).lotes).some(L => L.prod === prod && L.saf === sf && (L.origem || []).some(x => x.carga))) return true;
   return Object.values(PRDC.cult).some(k => !k.semanal && prUn(k.cultura).prod === prod && (PRDC.safras[k.saf] || {}).mf === sf && k.colheita && k.colheita <= hoje); }
+/* safra de grão em colheita (A10 da revisão, D-C29; revê a D-C24): começou a ser colhida e algum cultivo dela ainda não fechou a colheita
+   (prResultado.parcial: O.S. de colheita aberta ou carga a pesar). Enquanto isso, a previsão publicada ainda não colhida continua oferta,
+   na linha do estoque da safra; colheita fechada, vale só o realizado (PRD 49.2). Sem versão publicada, nada a somar */
+function comSafCultivos(prod, sf) { return Object.keys(PRDC.cult).filter(cid => { const k = PRDC.cult[cid]; return !k.semanal && prUn(k.cultura).prod === prod && (PRDC.safras[k.saf] || {}).mf === sf; }); }
+function comColhido(c, prod, sf) { const P = prP(c); const ids = Object.values(P.lotes).filter(L => L.prod === prod && L.saf === sf && !L.dev && !L.abertura).map(L => L.id);
+  return prSoma(P.movs.filter(m => ids.indexOf(m.lote) >= 0 && (m.tipo === 'recebimento' || m.tipo === 'estorno')).map(m => m.kg)); }
+function comPrevRestante(c, prod, sf) { if (!sf) return null; const cids = comSafCultivos(prod, sf); if (!cids.length) return null;
+  if (!cids.some(cid => { const R = prResultado(c, cid); return !R || R.parcial; })) return null;
+  const o = prOfertaSafra(c, prod, sf); if (!o.tem) return null; const col = comColhido(c, prod, sf); const r = prSub(o.pub, col);
+  return { pub: o.pub, col, rest: prCmp(r, 0) > 0 ? r : 0 }; }
 function comSafrasFut(c, prod, hoje) { const out = [];
   Object.values(PRDC.cult).forEach(k => { if (k.semanal || prUn(k.cultura).prod !== prod) return; const sf = (PRDC.safras[k.saf] || {}).mf; if (sf && out.indexOf(sf) < 0) out.push(sf); });
   return out.filter(sf => !comSafColhida(c, prod, sf, hoje)).sort(); }
@@ -170,11 +193,12 @@ function comVender(c, k) { const P = comP(c);
   const cond = nat === 'Venda' ? (k.cond || cp.cond || '') : 'Liquidação em produto';
   if (!comCond(cond) || (nat === 'Venda' && comCond(cond).prod)) throw new Error('Informe a condição de pagamento com o evento do vencimento.');
   const modal = k.modal === 'retira' || k.modal === 'entrega' ? k.modal : comModalCp(cp);
+  const local = k.local || (modal === comModalCp(cp) ? (cp.entrega || '') : '');   /* A11 da revisão: "Agricultor entrega" não grava "Retira no armazém" do CD-05 */
   const id = tipo === 'pronta' ? 'PV-' + String(P.seq.pv = P.seq.pv + 1).padStart(3, '0') : 'CT-' + String(P.seq.ct = P.seq.ct + 1);
   const fat = comMassa(cu); const un = comUn(cu);   /* A-17: a massa da unidade fica gravada na venda (não muda se o cadastro da cultura mudar) */
   const v = P.pedidos[id] = { id, cliente: k.cliente, prod: k.prod, cultura: cu, classe: comClasse(c, k.prod), saf, tipo, janela, sem, ini, fim, qtd: prMul(q, fat), qc: q, un, fat,
     fatOrig: 'unidade da cultura no registro: ' + un + (prUn(cu).est ? '' : ' de ' + prFmtT(fat, 3) + ' kg'), dest: 'MI-BR',
-    preco: String(pr), natureza: nat, cond, modal, local: k.local || cp.entrega || '', d: hoje, at: cenAgora(), quem, chave: k.chave || id, imp, obs: k.obs || '' };
+    preco: String(pr), natureza: nat, cond, modal, local, d: hoje, at: cenAgora(), quem, chave: k.chave || id, imp, obs: k.obs || '' };
   if (!sem) delete v.sem;
   const av = []; const ac = nat === 'Venda' ? comAvisoCred(k.cliente) : ''; if (ac) av.push('Aviso: ' + ac + '.');
   if (tipo === 'futura') { const o = sem ? prOfertaSem(c, k.prod, sem) : prOfertaSafra(c, k.prod, saf);
@@ -199,12 +223,16 @@ function comEncerrar(c, k) { const P = comP(c); const v = P.pedidos[k.venda]; if
    aprovação anterior não cobria, k.kg: excesso de peso, KC18); antecipado = pagamento conferido */
 function comAprovarCredito(c, k) { const P = comP(c); const v = P.pedidos[k.venda]; if (!v) throw new Error('Escolha a venda.');
   const ant = !!(comCond(v.cond) || {}).ant; const acao = ant ? 'Conferir o pagamento antecipado do ' + v.id : 'Aprovar crédito do ' + v.id;
-  if (k.chave && v.cred && v.cred.chave === k.chave) return { msg: acao + ': já registrado por ' + v.cred.quem + '; nada foi gravado de novo.', repetido: true };
+  const res = comResKg(c, v.id); const kg = prNumOk(k.kg) && prCmp(prNum(k.kg), res) > 0 ? prNum(k.kg) : res;
+  /* A9 da revisão: a aprovação guarda o que cobre (venda e kg); a mesma chave com outro peso é conflito, nunca "já registrado" que não cobre */
+  const imp = JSON.stringify([v.id, ant ? 'antecipado' : prNum(kg)]);
+  if (k.chave && v.cred && v.cred.chave === k.chave) { if (v.cred.imp !== undefined && v.cred.imp !== imp) throw prConflito(k.chave, v.id);
+    return { msg: acao + ': já registrado por ' + v.cred.quem + '; nada foi gravado de novo.', repetido: true }; }
   const quem = cenExige(k.ator, 'gestor', acao);
   if (comNat(v) !== 'Venda') throw new Error(v.id + ' é ' + comNat(v) + ': liquidação em produto, sem crédito a aprovar.');
-  const res = comResKg(c, v.id); const kg = prNumOk(k.kg) && prCmp(prNum(k.kg), res) > 0 ? prNum(k.kg) : res; const ate = ant ? null : comExpo(c, v.cliente, { [v.id]: kg });
+  const ate = ant ? null : comExpo(c, v.cliente, { [v.id]: kg });
   const rev = cenRevisao(k.ator, v.quem, 'registrou a venda');
-  v.cred = { quem, d: prHoje(), at: cenAgora(), ate, ant, rev, chave: k.chave || '' };
+  v.cred = { quem, d: prHoje(), at: cenAgora(), ate, ant, rev, chave: k.chave || '', imp };
   return { msg: ant ? 'Pagamento antecipado do ' + v.id + ' conferido por ' + quem + ': a saída passa no crédito e a venda fica fora do a receber.' + (rev ? ' ' + rev + '.' : '')
                     : 'Crédito do ' + v.id + ' aprovado por ' + quem + ' até ' + comRS(ate) + ' (a receber de ' + v.cliente + ' + reservado não expedido).' + (rev ? ' ' + rev + '.' : '') }; }
 
@@ -245,8 +273,10 @@ function comProgramar(c, k) { const P = comP(c);
   if (prAmb(v)) throw new Error(v.id + ': saca do contrato a conferir (' + v.fatAmb.join(' ou ') + ' kg): registre a massa com a fonte antes de programar a carga (A-17). Nada foi gravado.');
   const cu = comCultura(v); if (!prResPed(c, v.id).length) throw new Error(v.id + ' sem reserva ativa: reserve lote antes de programar a carga.');
   const ls = ls0.filter(l => !(prCmp(l.prev, 0) === 0)); if (!ls.length) throw new Error('Informe o previsto de ao menos um lote reservado.');
+  /* A2 da revisão: o limite é por lote; o mesmo lote em duas linhas passaria duas vezes pela reserva e baixaria a de outra venda */
+  const dupL = ls.map(l => l.lote).filter((x, i, a) => a.indexOf(x) !== i); if (dupL.length) throw new Error('Lote repetido na carga (' + dupL[0] + '): informe o previsto de cada lote uma vez. Nada foi gravado.');
   ls.forEach(l => { if (!(l.prev > 0)) throw new Error('Previsto do ' + l.lote + ' inválido.'); const np = comNaoProg(c, v.id, l.lote);
-    if (prCmp(l.prev, np) > 0) throw new Error('Previsto do ' + l.lote + ' acima da reserva ainda não programada do ' + v.id + ' nesse lote (' + comTxt(cu, np) + ').'); });
+    if (prCmp(l.prev, np) > 0) throw new Error('Previsto do ' + l.lote + ' acima da reserva ainda não programada do ' + v.id + ' nesse lote (' + comTxtV(v, np) + ').'); });
   const x = comVeic(k.veic); if (!x) throw new Error('Escolha o veículo.');
   if (!comVeicOk(cu, k.veic)) throw new Error(k.veic + ' não serve para ' + v.prod + ': ' + (prUn(cu).vida ? 'fruta vai em baú refrigerado' : 'grão vai em graneleiro') + '.');
   const tot = prSoma(ls.map(l => l.prev)); if (prCmp(tot, x.cap) > 0) throw new Error('Previsto de ' + prFmtT(tot, 2) + ' kg acima da capacidade do ' + k.veic + ' (' + prFmtT(x.cap, 0) + ' kg).');
@@ -256,7 +286,7 @@ function comProgramar(c, k) { const P = comP(c);
   P.seq.rm = P.seq.rm + 1; const id = 'RM-' + String(P.seq.rm).padStart(4, '0');
   const rm = P.expedicoes[id] = { id, pedido: v.id, lotes: ls.map(l => ({ lote: l.lote, prev: l.prev, kg: 0 })), modal, local: v.local || '', transp: modal === 'retira' ? v.cliente : k.transp,
     veic: k.veic, placa, dprev, st: 'Programada', saida: null, entrega: null, devs: [], canc: null, d: prHoje(), at: cenAgora(), quem, chave: k.chave || id, imp };
-  return { msg: id + ' programada por ' + quem + ': ' + v.id + ' (' + v.cliente + ') · ' + rm.lotes.map(l => l.lote + ' ' + prFmtT(l.prev, 2) + ' kg').join(' + ') + ' = ' + comTxt(cu, tot) + ' · ' + k.veic + ' ' + placa
+  return { msg: id + ' programada por ' + quem + ': ' + v.id + ' (' + v.cliente + ') · ' + rm.lotes.map(l => l.lote + ' ' + prFmtT(l.prev, 2) + ' kg').join(' + ') + ' = ' + comTxtV(v, tot) + ' · ' + k.veic + ' ' + placa
     + ' · ' + (modal === 'retira' ? 'cliente retira' : rm.transp) + ' · ' + prBr(dprev) + '. Próximo passo: confirmar a saída com a pesagem.', rm }; }
 function comCancelarCarga(c, k) { const P = comP(c); const rm = P.expedicoes[k.rm]; if (!rm) throw new Error('Carga ' + k.rm + ' não encontrada.');
   if (rm.st === 'Cancelada' && k.chave && (rm.canc || {}).chave === k.chave) return { msg: rm.id + ' já cancelada: nada foi alterado.', repetido: true };
@@ -277,18 +307,19 @@ function comSair(c, k) { const P = comP(c); const rm = P.expedicoes[k.rm]; if (!
   if (!prNumOk(k.bruto) || !(prNum(k.bruto) > 0)) throw new Error('Informe o peso bruto em kg.');
   if (!prNumOk(k.tara) || prNum(k.tara) < 0) throw new Error('Informe a tara em kg (0 ou mais).');
   const liq = prSub(prNum(k.bruto), prNum(k.tara)); if (prCmp(liq, 0) <= 0) throw new Error('Líquido (bruto − tara) tem de ser maior que zero: confira bruto e tara.');
-  let por; if (rm.lotes.length === 1) por = [{ lote: rm.lotes[0].lote, kg: liq }];
-  else { if (!kgs) throw new Error('Informe os kg de cada lote (a soma é o líquido).'); por = rm.lotes.map(l => ({ lote: l.lote, kg: prNumOk(kgs[l.lote]) ? prNum(kgs[l.lote]) : 0 })).filter(x => prCmp(x.kg, 0) > 0);
+  const lsR = comLotesRm(rm);   /* A2 da revisão: um lote, uma linha (carga antiga com lote repetido não baixa a reserva duas vezes) */
+  let por; if (lsR.length === 1) por = [{ lote: lsR[0].lote, kg: liq }];
+  else { if (!kgs) throw new Error('Informe os kg de cada lote (a soma é o líquido).'); por = lsR.map(l => ({ lote: l.lote, kg: prNumOk(kgs[l.lote]) ? prNum(kgs[l.lote]) : 0 })).filter(x => prCmp(x.kg, 0) > 0);
     const s = prSoma(por.map(x => x.kg)); if (prCmp(s, liq) !== 0) throw new Error('A soma dos lotes (' + prFmtT(s, 2) + ' kg) tem de ser o líquido pesado (' + prFmtT(liq, 2) + ' kg).'); }
   const exc = [];
   por.forEach(x => { const L = P.lotes[x.lote]; const I = comImpede(c, v, L);
     if (I.imp.length) throw new Error('Saída recusada: ' + I.imp[0].t + '. Quem resolve: ' + I.imp[0].q + '. Nada foi alterado.');
     const rv = prSoma(prResPed(c, v.id).filter(r => r.lote === x.lote).map(r => r.kg));
     if (prCmp(x.kg, rv) > 0) { const e = prSub(x.kg, rv); const S = prSaldos(c, L);
-      if (prCmp(e, S.disp) > 0) throw new Error('Saída recusada: ' + comTxt(cu, x.kg) + ' do ' + x.lote + ' passam a reserva do ' + v.id + ' (' + comTxt(cu, rv) + ') em ' + comTxt(cu, e) + ' e o disponível do lote é ' + comTxt(cu, S.disp) + ': o excesso nunca sai da reserva de outra venda. Nada foi alterado.');
+      if (prCmp(e, S.disp) > 0) throw new Error('Saída recusada: ' + comTxtV(v, x.kg) + ' do ' + x.lote + ' passam a reserva do ' + v.id + ' (' + comTxtV(v, rv) + ') em ' + comTxtV(v, e) + ' e o disponível do lote é ' + comTxtV(v, S.disp) + ': o excesso nunca sai da reserva de outra venda. Nada foi alterado.');
       exc.push({ lote: x.lote, kg: e }); } });
   let excQuem = '';
-  if (exc.length) { if (!g2papel(k.ator, 'gestor')) throw new Error('Excesso de ' + exc.map(e => comTxt(cu, e.kg) + ' no ' + e.lote).join(', ') + ' sobre a reserva do ' + v.id + ' (ajuste autorizado, PRD 48.4): decisão de ' + g2quem('gestor') + '. Nada foi alterado.');
+  if (exc.length) { if (!g2papel(k.ator, 'gestor')) throw new Error('Excesso de ' + exc.map(e => comTxtV(v, e.kg) + ' no ' + e.lote).join(', ') + ' sobre a reserva do ' + v.id + ' (ajuste autorizado, PRD 48.4): decisão de ' + g2quem('gestor') + '. Nada foi alterado.');
     excQuem = g2ator(k.ator, 'gestor'); }
   const cr = comCredito(c, v, liq); if (!cr.ok) throw new Error('Saída da ' + rm.id + ' recusada no crédito: ' + cr.prob + '. ' + (cr.ant ? 'Conferir o pagamento antecipado' : 'Aprovar crédito do ' + v.id) + ': decisão de ' + g2quem('gestor') + '. Nada foi alterado.');
   const d = prHoje(), at = cenAgora(); const aval = [];
@@ -297,22 +328,27 @@ function comSair(c, k) { const P = comP(c); const rm = P.expedicoes[k.rm]; if (!
     let f = x.kg; prResPed(c, v.id).filter(r => r.lote === x.lote).sort((a, b) => a.id.localeCompare(b.id)).forEach(r => { if (prCmp(f, 0) <= 0) return;
       const t = prCmp(r.kg, f) <= 0 ? r.kg : f; if (r.kg0 === undefined) r.kg0 = r.kg; r.kg = prSub(r.kg, t); r.exp = prSoma([r.exp || 0, t]); f = prSub(f, t);
       if (prCmp(r.kg, 0) <= 0) { r.kg = 0; r.st = 'Expedida'; } });
-    const l = rm.lotes.find(y => y.lote === x.lote); if (l) l.kg = x.kg; });
+    const l = rm.lotes.find(y => y.lote === x.lote); if (l) l.kg = x.kg;
+    /* pós-condição (A2 da revisão): o físico do lote nunca fica abaixo do reservado; se ficar, a saída comeu a reserva de outra venda */
+    const fis = prFis(c, x.lote), res = prResLote(c, x.lote);
+    if (prCmp(fis, res) < 0) throw new Error('Saída recusada: o ' + x.lote + ' ficaria com ' + comTxtV(v, fis) + ' de físico abaixo do reservado (' + comTxtV(v, res) + '): o que passa da reserva do ' + v.id + ' nunca sai da reserva de outra venda. Nada foi alterado.'); });
   rm.saida = { bruto: prNum(k.bruto), tara: prNum(k.tara), liq, d, at, quem, chave: k.chave || ('W-SAI-' + rm.id), imp, aval,
     cred: cr.aprov ? { quem: cr.aprov.quem, ate: cr.aprov.ate, ant: !!cr.aprov.ant } : null, exc: exc.length ? { kg: prSoma(exc.map(e => e.kg)), lotes: exc, quem: excQuem } : null };
   if (rm.modal === 'retira') { rm.st = 'Entregue'; rm.entrega = { d, at, quem, comp: 'retirada na fazenda (ponto contratado)', chave: rm.saida.chave, imp: '' }; } else rm.st = 'Em trânsito';
+  const prevT = prSoma(rm.lotes.map(l => l.prev)); const outras = comRmsVenda(c, v.id).filter(r => r.st === 'Programada' && r.id !== rm.id && comRmDescoberto(c, r).length).map(r => r.id);
+  const avPrev = prCmp(liq, prevT) > 0 ? ' Aviso: líquido ' + comTxtV(v, prSub(liq, prevT)) + ' acima do previsto (' + comTxtV(v, prevT) + ')' + (outras.length ? ': ' + outras.join(', ') + ' fica sem reserva que a cubra (reservar de novo ou cancelar a carga).' : '.') : '';   /* A5 da revisão */
   const val = comValorV(v, liq); const venc = rm.modal === 'retira' ? comVenc(v.cond, d) : ''; const S1 = por.map(x => x.lote + ' disponível ' + comTxt(cu, prSaldos(c, P.lotes[x.lote]).disp));
   const ant = (comCond(v.cond) || {}).ant;
   return { msg: rm.id + ': saída de ' + prFmtT(liq, 2) + ' kg (' + prFmtT(prNum(k.bruto), 2) + ' − ' + prFmtT(prNum(k.tara), 2) + ')' + (u => u.est ? '' : ' = ' + comTxtV(v, liq))(prUn(cu)) + ' para o ' + v.id + ' (' + v.cliente + ')'
-    + (exc.length ? ', com ' + comTxt(cu, rm.saida.exc.kg) + ' de excesso autorizado por ' + excQuem : '') + '. '
+    + (exc.length ? ', com ' + comTxtV(v, rm.saida.exc.kg) + ' de excesso autorizado por ' + excQuem : '') + '. '
     + (rm.modal === 'retira' ? 'Entregue na retirada' : 'Em trânsito: confirmar a entrega') + (comNat(v) !== 'Venda' ? ' · liquidação em produto.' : (ant ? ' · pagamento antecipado conferido.' : ' · ' + comRS(val) + ' a receber' + (venc ? ' até ' + prBr(venc) : ' (' + (comCond(v.cond) || {}).ev + ')') + '.'))
-    + ' ' + S1.join(' · ') + '.', rm }; }
+    + ' ' + S1.join(' · ') + '.' + avPrev, rm }; }
 
 /* devolução (R-C10): lote novo Em inspeção, origem sem carga e sem kg (CE-11), MP de devolução; só a Qualidade libera */
 function comDevolverEf(c, rm, lote, kg, motivo, quem, d, chave, imp) { const P = prP(c); const v = P.pedidos[rm.pedido]; const cu = comCultura(v);
   const l = lote ? rm.lotes.find(x => x.lote === lote) : rm.lotes.find(x => prCmp(x.kg, 0) > 0); if (!l) throw new Error('Escolha o lote da carga.');
   const q = prNumOk(kg) ? prNum(kg) : NaN; if (!(q > 0)) throw new Error('Informe a quantidade devolvida.');
-  const max = prSub(l.kg, comRmDev(rm, l.lote)); if (prCmp(q, max) > 0) throw new Error('Devolução acima do entregue: no máximo ' + comTxt(cu, max) + ' do ' + l.lote + ' na ' + rm.id + '.');
+  const max = prSub(l.kg, comRmDev(rm, l.lote)); if (prCmp(q, max) > 0) throw new Error('Devolução acima do entregue: no máximo ' + comTxtV(v, max) + ' do ' + l.lote + ' na ' + rm.id + '.');
   if ((COMC.motivos || []).indexOf(motivo) < 0) throw new Error('Escolha o motivo da devolução.');
   const L0 = P.lotes[l.lote]; const id = prNovoLote(c, d);
   const L = P.lotes[id] = { id, prod: L0.prod, cultura: L0.cultura, classe: L0.classe, saf: L0.saf, faz: L0.faz, local: L0.local, drec: d, dcol: L0.dcol, validade: L0.validade,
@@ -321,7 +357,7 @@ function comDevolverEf(c, rm, lote, kg, motivo, quem, d, chave, imp) { const P =
   if (L0.abertura) L.abertura = true;
   prMov(c, { tipo: 'devolução', lote: id, kg: q, pedido: v.id, rm: rm.id, quem, obs: motivo, d });
   const dv = { lote: id, de: l.lote, kg: q, motivo, d, at: cenAgora(), quem, chave: chave || ('W-DEV-' + id), imp: imp || '' }; rm.devs = (rm.devs || []).concat([dv]); rm.st = 'Entregue com devolução';
-  if (v.enc) v.qtd = prSub(v.qtd, q);   /* venda encerrada: a quantidade vigente cai junto, sem reabrir falta (R-C10) */
+  if (v.enc) { v.qtd = prSub(v.qtd, q); if (comFat(v)) v.qc = prDiv(v.qtd, comFat(v)); }   /* venda encerrada: a quantidade vigente cai junto, sem reabrir falta (R-C10); a do contrato também (A8 da revisão: o valor do acordo segue o vigente) */
   return dv; }
 function comEntregar(c, k) { const P = comP(c); const rm = P.expedicoes[k.rm]; if (!rm) throw new Error('Carga ' + k.rm + ' não encontrada.');
   const imp = JSON.stringify([k.rm, k.d || '', k.dev ? [prNum(k.dev.kg), k.dev.motivo || ''] : null]);
@@ -335,7 +371,7 @@ function comEntregar(c, k) { const P = comP(c); const rm = P.expedicoes[k.rm]; i
   const v = P.pedidos[rm.pedido]; const cu = comCultura(v); let dv = null;
   if (k.dev) dv = comDevolverEf(c, rm, k.dev.lote, k.dev.kg, k.dev.motivo, quem, d, k.chave ? k.chave + '-DEV' : '', imp);
   const liq = comRmLiq(rm); const venc = comVenc(v.cond, d);
-  return { msg: rm.id + ' entregue em ' + prBr(d) + ' (' + quem + '): ' + comTxt(cu, liq) + ' aceitos' + (dv ? ', ' + comTxt(cu, dv.kg) + ' devolvidos (' + dv.motivo + ') no ' + dv.lote + ' Em inspeção: a Qualidade decide' : '')
+  return { msg: rm.id + ' entregue em ' + prBr(d) + ' (' + quem + '): ' + comTxtV(v, liq) + ' aceitos' + (dv ? ', ' + comTxtV(v, dv.kg) + ' devolvidos (' + dv.motivo + ') no ' + dv.lote + ' Em inspeção: a Qualidade decide' : '')
     + (comNat(v) === 'Venda' && !(comCond(v.cond) || {}).ant ? ' · ' + comRS(comValorV(v, liq)) + ' a receber até ' + prBr(venc) : '') + '.', rm, dev: dv }; }
 function comDevolver(c, k) { const P = comP(c); const rm = P.expedicoes[k.rm]; if (!rm) throw new Error('Carga ' + k.rm + ' não encontrada.');
   const imp = JSON.stringify([k.rm, k.lote || '', prNum(k.kg), k.motivo || '']);
@@ -357,12 +393,14 @@ function comPainel(c, hoje, hz) { hoje = hoje || prHoje(); hz = hz || '4'; const
     const ambV = v => prAmb(v) && !v.enc;   /* A-17: venda sem a massa da saca suspende a conta do período dela */
     const grupos = new Set(lots.filter(x => !x.S.esgotado || prCmp(x.S.res, 0) > 0).map(x => x.g)); vs.filter(v => (v.tipo === 'pronta' || comecou(v)) && (prCmp(prSaldoFut(c, v), 0) > 0 || ambV(v))).forEach(v => grupos.add(gVenda(v)));
     [...grupos].sort().forEach(g => { const ls = lots.filter(x => x.g === g); const ids = ls.map(x => x.L.id);
-      const oferta = prSoma(ls.map(x => x.S.apto)); const vencApto = prSoma(ls.filter(x => x.venc).map(x => x.S.apto)); const dispVenc = prSoma(ls.filter(x => x.venc).map(x => x.S.disp));
+      const pv = sem ? null : comPrevRestante(c, prod, g);   /* A10 da revisão: safra em colheita soma a previsão ainda não colhida */
+      const oferta = prSoma(ls.map(x => x.S.apto).concat([pv ? pv.rest : 0])); const vencApto = prSoma(ls.filter(x => x.venc).map(x => x.S.apto)); const dispVenc = prSoma(ls.filter(x => x.venc).map(x => x.S.disp));
       const est = vs.filter(v => (v.tipo === 'pronta' || comecou(v)) && gVenda(v) === g); const futRes = vs.filter(v => v.tipo === 'futura' && !comecou(v));
       const resEm = (v, apto) => prSoma(prResPed(c, v.id).filter(r => ids.indexOf(r.lote) >= 0 && (!apto || (ls.find(x => x.L.id === r.lote) || {}).S.q === 'Liberado')).map(r => r.kg));
       const comp = prSoma(est.map(v => prSaldoFut(c, v)).concat(futRes.map(v => resEm(v)))); const cob = prSoma(est.concat(futRes).map(v => resEm(v, true)));
       const amb = est.filter(ambV).map(v => v.id); const livre = amb.length ? null : prSub(prSub(oferta, comp), dispVenc);
-      rows.push({ id: 'e:' + prod + ':' + g, prod, cu, per: 'est:' + g, perT: 'Estoque' + (g ? ' (' + g + ')' : ''), tipo: 'est', oferta, tem: true, vencApto, dispVenc, comp, cob, livre, amb,
+      rows.push({ id: 'e:' + prod + ':' + g, prod, cu, per: 'est:' + g, perT: 'Estoque' + (g ? ' (' + g + ')' : '') + (pv ? ' · em colheita' : ''), tipo: 'est', oferta, tem: true, vencApto, dispVenc, comp, cob, livre, amb,
+        colh: pv, apto: prSoma(ls.map(x => x.S.apto)),
         vendas: est.filter(v => prCmp(prSaldoFut(c, v), 0) > 0 || ambV(v)).map(v => v.id).concat(futRes.filter(v => prCmp(resEm(v), 0) > 0).map(v => v.id)) }); });
     if (sem) { let ws = comSemanasFut(hoje, 4);
       if (hz === 's') { const all = new Set(ws); Object.keys(PRDC.cult).forEach(cid => { if (prUn(PRDC.cult[cid].cultura).prod !== prod) return; (P.previsoes[cid] || []).forEach(x => Object.keys(x.sem || {}).forEach(w => all.add(w))); });
@@ -380,7 +418,7 @@ function comPrecos(c, hoje) { hoje = hoje || prHoje(); const P = prP(c); const o
     /* A-17: média só sobre vendas com a massa conhecida, em kg (conversão compatível) e mostrada na unidade atual da cultura; as de saca a conferir ficam à parte */
     const ok = vs.filter(v => !prAmb(v)); const amb = vs.filter(v => prAmb(v) && !v.enc).map(v => v.id);
     const vend = prSoma(ok.map(v => v.qtd)); const valC = prSoma(ok.map(v => comValorV(v, v.qtd)));
-    const rms = comRms(c, rm => !!rm.saida && rm.st !== 'Cancelada' && vs.some(v => v.id === rm.pedido));
+    const rms = comRms(c, rm => !!rm.saida && !!rm.entrega && rm.st !== 'Cancelada' && vs.some(v => v.id === rm.pedido));   /* realizado = entregue (A4 da revisão: em trânsito não conta) */
     const ent = prSoma(rms.map(comRmLiq)); const valR = prSoma(rms.map(rm => comValorV(P.pedidos[rm.pedido], comRmLiq(rm)) || 0));
     const tit = comTitulos(c, t => t.prod === prod); const prodV = Object.values(P.pedidos).filter(v => v.prod === prod && comNat(v) !== 'Venda');
     out.push({ prod, cu, vend, valC, medC: prCmp(vend, 0) > 0 ? prDiv(valC, prEstQ(cu, vend)) : null, ent, valR, medR: prCmp(ent, 0) > 0 ? prDiv(valR, prEstQ(cu, ent)) : null,
@@ -388,7 +426,8 @@ function comPrecos(c, hoje) { hoje = hoje || prHoje(); const P = prP(c); const o
       vendas: vs.map(v => v.id), liq: prodV.map(v => v.id), amb }); });
   return out; }
 function comIndicadores(c, hoje) { hoje = hoje || prHoje(); const tit = comTitulos(c); const d30 = prDiaMais(hoje, -30); const P = prP(c);
-  const ent = comRms(c, rm => !!rm.saida && rm.st !== 'Cancelada' && rm.saida.d >= d30 && rm.saida.d <= hoje).filter(rm => { const v = P.pedidos[rm.pedido]; return v && comNat(v) === 'Venda'; });
+  /* entregue nos últimos 30 dias pela data da entrega (retirada = a saída); carga em trânsito fica de fora (A4 da revisão) */
+  const ent = comRms(c, rm => !!rm.saida && !!rm.entrega && rm.st !== 'Cancelada' && rm.entrega.d >= d30 && rm.entrega.d <= hoje).filter(rm => { const v = P.pedidos[rm.pedido]; return v && comNat(v) === 'Venda'; });
   return { aRec: prSoma(tit.filter(t => !comVencido(t, hoje)).map(t => t.valor)), venc: prSoma(tit.filter(t => comVencido(t, hoje)).map(t => t.valor)),
            ent30: prSoma(ent.map(rm => { const v = P.pedidos[rm.pedido]; return comValorV(v, comRmLiq(rm)) || 0; })), nTit: tit.length }; }
 try { window.__com = { comVender, comConverterSaca, comEncerrar, comAprovarCredito, comProgramar, comCancelarCarga, comSair, comEntregar, comDevolver, comPainel, comPrecos, comCredito, comImpede, comSitVenda, comTitulos, comAReceber }; } catch (e) {}
