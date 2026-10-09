@@ -194,13 +194,17 @@ try:
         t.chk('A-02 bruto "19.250" e tara "7.200": 12.050 kg líquidos (não 12,05)', g == ['Recebida', 12050, 'L39-133'] and '12.050 kg líquidos' in p, [g, p])
         # A-03 · reservar, cancelar e reservar de novo
         ir('PROD.dc.html'); row('L39-133'); clk('Reservar', 'aside'); p1 = toast()
-        ir('PROD.dc.html'); row('PV-036'); clk('Cancelar reserva', 'aside'); setv('#pf_mot', 'cliente adiou'); clk('Cancelar RS-0002', 'aside'); p2 = toast()
+        # Comercial P6 (D-C14): a venda e o "Cancelar reserva" estão em Comercial › Contratos e pedidos; a situação do PV-036 coberto pela reserva é
+        # "Aguardando crédito" (R-C08, KC09: a receber da Frutas Real + esta reserva passa o limite), não "Coberto": a falta é o que prova a cobertura
+        ir('VEN.dc.html'); row('PV-036'); clk('Cancelar reserva', 'aside'); setv('#pf_mot', 'cliente adiou'); clk('Cancelar RS-0002', 'aside'); p2 = toast()
         ir('PROD.dc.html'); row('L39-133'); clk('Reservar', 'aside'); p3 = toast() + ' ' + pan()[-200:]
         a = cen("Object.values(c.producao.reservas).filter(r=>r.pedido==='PV-036'&&r.st==='Ativa').map(r=>r.id)")
-        t.chk('A-03 reservar → cancelar → reservar de novo: uma reserva ativa nova (RS-0003) e PV-036 coberto', a == ['RS-0003'] and 'RS-0002' in p1 and 'cancelada' in p2 and 'RS-0003' in p3 and 'Coberto' in (J("ROWTXT('PV-036')") or ''), [a, p1, p2, p3])
+        ir('VEN.dc.html'); pv = J("ROWTXT('PV-036')") or ''
+        t.chk('A-03 reservar → cancelar → reservar de novo: uma reserva ativa nova (RS-0003) e PV-036 sem falta (Aguardando crédito)', a == ['RS-0003'] and 'RS-0002' in p1 and 'cancelada' in p2 and 'RS-0003' in p3 and 'Aguardando crédito' in pv and '10.000 kg 0 kg' in pv, [a, p1, p2, p3, pv])
         # A-17 · PV-030 diz que é o saldo do CT-201; A-18 · coluna Em processo
-        ir('PROD.dc.html', limpa=True)
+        ir('VEN.dc.html', limpa=True)   # Comercial P6: a linha da venda está em Contratos e pedidos
         t.chk('A-17 a linha do PV-030 diz que a quantidade é o saldo do CT-201', 'saldo 4.000 sc do CT-201' in (J("ROWTXT('PV-030')") or ''), J("ROWTXT('PV-030')"))
+        ir('PROD.dc.html')
         hd = J("[...document.querySelectorAll('[role=columnheader]')].map(x=>N(x.innerText))") or []
         mam = J("ROWTXT('Mamão Formosa · fruta de campo')") or ''
         t.chk('A-18 Estoque de produto com a coluna Em processo (mamão: 66.250 kg em processo)', any(h.lower().startswith('em processo') for h in hd) and '66.250 kg 0 kg 66.250 kg 0 kg' in mam, [hd, mam[:200]])

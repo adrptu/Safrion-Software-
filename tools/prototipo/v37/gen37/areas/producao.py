@@ -3,7 +3,7 @@
 Três telas ligadas ao mesmo estado (cenario.js + producao.js, D-22), sem redigitar:
   COLH.dc.html  Previsão e colheita   planejamento + controle por talhão: previsão por contagem, programar a O.S., resultado
   CARGA.dc.html Cargas e recebimento  execução: ticket, origem, descontos, lote
-  PROD.dc.html  Estoque de produto    controle: físico, bloqueado, apto, reservado, disponível; pedidos e reservas
+  PROD.dc.html  Estoque de produto    controle: físico, bloqueado, apto, reservado, disponível por lote (vendas e cargas: Comercial, P6)
 Padrão das três (spec §3): master-detail (grade G2 com filtro e ordenação → painel do registro), filtros Fazenda e Safra no topo,
 uma ação primária com verbo escolhida pelo registro selecionado (no cabeçalho; no celular fica presa ao rodapé), estado e próximo
 passo em toda linha, unidade junto do número. Abaixo de 480 px a lista vira cartões (sem rolagem horizontal).
@@ -228,15 +228,11 @@ def prod():
                 dict(k='res',l='Reservado',t='num',a='r'),dict(k='disp',l='Disponível',t='num',a='r'),dict(k='q',l='Qualidade · próximo passo',w=260)],
                [],edit=dict(m='pick'),tree=True,gid='g_lot',total=False,qf=dict(k='q',cut=' · ',l='Qualidade',todas='Todos'),
                tools=f'<button type="button" aria-pressed="{H("sl_on")}" onClick="{H("sl_tog")}" style="{H("sl_st")}">Só com saldo</button>')
-    g_ped=grid([dict(k='ped',l='Pedido · cliente',w=210),dict(k='prod',l='Produto',w=190),dict(k='tipo',l='Tipo · janela',w=170),dict(k='qtd',l='Quantidade',t='num',a='r'),
-                dict(k='res',l='Reservado',t='num',a='r'),dict(k='falta',l='Falta',t='num',a='r'),dict(k='sit',l='Situação · próximo passo',w=260)],
-               [],edit=dict(m='pick'),gid='g_ped',total=False,qf=dict(k='sit',cut=' · ',l='Situação',todas='Todos'))
     EXTRAJS[0]=_js(PR_PED_JS+PROD_JS)
-    corpo=(bloco('Lotes de produto','Produto › lote: físico, bloqueado, apto, reservado e disponível pela qualidade efetiva. Clique num lote para ver origem, qualidade, reservas e movimentos.',
-                 g_lot+cartoes('cards_lot'))
-           +bloco('Pedidos','Pronta entrega reserva lote apto; venda futura compromete a previsão, não o físico. Clique num pedido para reservar ou cancelar reserva.',
-                  g_ped+cartoes('cards_ped')))
-    _shell('PROD','Estoque de produto','Quanto tenho de cada produto, quanto está livre para vender e para quem está reservado.',corpo,fname,1250,
+    # Comercial P6 (D-C14): a grade Pedidos saiu para Comercial › Contratos e pedidos (uma lista, uma situação); reservar a partir do lote fica
+    corpo=bloco('Lotes de produto','Produto › lote: físico, bloqueado, apto, reservado e disponível pela qualidade efetiva. Clique num lote para ver origem, qualidade, reservas e movimentos; vendas e cargas ficam em Comercial.',
+                g_lot+cartoes('cards_lot'))
+    _shell('PROD','Estoque de produto','Quanto tenho de cada produto, quanto está livre para vender e para quem está reservado.',corpo,fname,1000,
            'Entrada não é liberação: só lote Liberado vai para reserva. Venda futura não desconta o físico. Saca é derivada da massa (DEC-0510-03).')
 
 PROD_JS=r'''
@@ -248,7 +244,7 @@ function prLoteRow(c,L,S){ const cu=L.cultura; const U=x=>prEstTxt(cu,x); const 
        loc:[{k:'txt',t:loc},{k:'br'},{k:L.validade&&S.vencido?'chip':'mut',t:L.validade?('vence '+prBr(L.validade)+(S.vencido?' · vencido':'')):'—',c:'yellow'}],
        fis:prTx(U(S.fis)),blq:prTx(U(S.blq)),proc:prTx(U(S.proc)),apto:prTx(U(S.apto)),res:prTx(U(S.res)),disp:[{k:'b',t:U(S.disp)}],
        q:[{k:'chip',t:q,c:PR_QCOR[q]||'gray'},{k:'br'},{k:'mut',t:nx.t}]}}; }
-const PR_GRIDS={g_lot:1,g_ped:1};
+const PR_GRIDS={g_lot:1};
 const _g2rows0=g2rows; g2rows=function(self,sp){ return PR_GRIDS[sp.id]?sp.rows:_g2rows0(self,sp); };
 function PREVALS(self,v){ cenOuvir(self); prTopo(self,v); const c=cenGet(); self._c=c; const P=prP(c);
   self.g2pick=(gid,rid)=>{ if(String(rid).indexOf('grp:')===0) return; self.setState({pr_sel:{g:gid,id:rid},pr_pan:{g:gid,id:rid},pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null,pr_cx:null,pr_ch:prChave('W-RS')}); };
@@ -261,34 +257,28 @@ function PREVALS(self,v){ cenOuvir(self); prTopo(self,v); const c=cenGet(); self
       p:{nome:[{k:'b',t:pr}],prod:[{k:'mut',t:ls.length+(ls.length>1?' lotes':' lote')}],loc:[{k:'mut',t:''}],fis:prTx(U(sm('fis'))),blq:prTx(U(sm('blq'))),proc:prTx(U(sm('proc'))),apto:prTx(U(sm('apto'))),res:prTx(U(sm('res'))),disp:[{k:'b',t:U(sm('disp'))}],q:[{k:'mut',t:''}]},
       kids:ls.sort((a,b)=>a.L.id.localeCompare(b.L.id)).map(x=>prLoteRow(c,x.L,x.S))}; });
   GR('g_lot').rows=rows; const x0={}; rows.forEach(r=>{ x0[r.id]=true; }); GR('g_lot').x0=x0;
-  const peds=Object.values(P.pedidos).filter(p=>{ const L=Object.values(P.lotes).find(x=>x.prod===p.prod); return prFazOk(self,L?L.faz:'')&&prSafOk(self,p.saf||(L&&L.saf)); });
-  GR('g_ped').rows=peds.sort((a,b)=>a.id.localeCompare(b.id)).map(p=>prPedRow(c,p));
-  self._lots=lots; self._peds=peds; }
+  self._lots=lots; }
 function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const P=prP(c); const st=self.state;
   /* cartões (celular): mesmos registros, filtro e ordem da grade */
   v.cards_lot=prCards(self,v,'g_lot',id=>{ if(String(id).indexOf('grp:')===0){ const pr=id.slice(4); const ls=(self._lots||[]).filter(L=>L.prod===pr); if(!ls.length) return null; const cu=ls[0].cultura;
       return prCard({grp:true,t1:pr,num:prEstTxt(cu,prSoma(ls.map(L=>prSaldos(c,L).disp)))+' disponível'}); }
     const L=P.lotes[id]; if(!L) return null; const S=prSaldos(c,L); const q=S.esgotado?'Esgotado':S.q; const nx=prLoteProx(c,L,S);
     return prCard({t1:L.id+' · '+L.prod,num:prEstTxt(L.cultura,S.disp),t2:'Físico '+prEstTxt(L.cultura,S.fis)+' · reservado '+prEstTxt(L.cultura,S.res)+' · '+((PRDC.locais[L.local]||{}).nome||''),chip:[q,PR_QCOR[q]||'gray'],nx:nx.t,go:()=>self.g2pick('g_lot',id)}); });
-  v.cards_ped=prCards(self,v,'g_ped',id=>{ const p=P.pedidos[id]; if(!p) return null; const st2=prSitPed(c,p);
-    return prCard({t1:p.id+' · '+p.cliente,num:prEstTxt(p.cultura,prFalta(c,p))+' falta',t2:p.prod+' · '+(p.tipo==='futura'?'futura':'pronta entrega')+' · '+p.janela,chip:[st2.t,st2.c],nx:'',go:()=>self.g2pick('g_ped',id)}); });
   /* seleção → ação primária (uma, do registro); sem seleção: reservar o primeiro lote com disponível e pedido compatível */
   const sel=st.pr_sel; let alvo=null;
-  if(sel&&sel.g==='g_lot'&&P.lotes[sel.id]) alvo={g:'g_lot',id:sel.id}; else if(sel&&sel.g==='g_ped'&&P.pedidos[sel.id]) alvo={g:'g_ped',id:sel.id};
+  if(sel&&sel.g==='g_lot'&&P.lotes[sel.id]) alvo={g:'g_lot',id:sel.id};
   const acaoLote=(L)=>{ const S=prSaldos(c,L); const nx=prLoteProx(c,L,S); if(nx.a==='liberar') return {t:'Liberar '+L.id,go:()=>self.setState({pr_sel:{g:'g_lot',id:L.id},pr_pan:{g:'g_lot',id:L.id},pr_modo:'liberar',pr_form:null,pr_err:''})};
     if(nx.a==='reservar') return {t:'Reservar '+L.id+' para pedido',go:()=>self.setState({pr_sel:{g:'g_lot',id:L.id},pr_pan:{g:'g_lot',id:L.id},pr_modo:'reservar',pr_form:null,pr_err:'',pr_ch:prChave('W-RS')})}; return null; };
-  const acaoPed=(p)=>{ if(prCmp(prFalta(c,p),0)<=0) return null; const ls=Object.values(P.lotes).filter(L=>prCompat(p,L)&&prCmp(prSaldos(c,L).disp,0)>0); if(!ls.length) return null;
-    return {t:'Reservar lote para o '+p.id,go:()=>self.setState({pr_sel:{g:'g_ped',id:p.id},pr_pan:{g:'g_ped',id:p.id},pr_modo:'reservar',pr_form:null,pr_err:'',pr_cx:null,pr_ch:prChave('W-RS')})}; };
-  let prim=null; if(alvo) prim=alvo.g==='g_lot'?acaoLote(P.lotes[alvo.id]):acaoPed(P.pedidos[alvo.id]);
+  let prim=null; if(alvo) prim=acaoLote(P.lotes[alvo.id]);
   else { const ls=[].concat(...(GR('g_lot').rows||[]).map(r=>r.kids||[])).map(r=>P.lotes[r.id]).filter(Boolean); for(const L of ls){ const a=acaoLote(L); if(a&&/^Reservar/.test(a.t)){ prim=a; break; } } }
   prPrim(v,prim);
-  const nPed=(self._peds||[]).filter(p=>{ const s=prSitPed(c,p).t; return s==='Sem reserva'||s==='Parcial'||s==='Em risco'; }).length;
   const nInsp=(self._lots||[]).filter(L=>prSaldos(c,L).q==='Em inspeção').length; const nProc=(self._lots||[]).filter(L=>{ const S=prSaldos(c,L); return S.q==='Em processo'&&!S.esgotado; }).length;
-  const risco=(self._peds||[]).some(p=>prSitPed(c,p).t==='Em risco');
-  prStatus(v,[nPed?nPed+(nPed>1?' pedidos sem cobertura':' pedido sem cobertura'):'pedidos cobertos',nInsp?nInsp+' em inspeção':'',nProc?nProc+' em processo':''].filter(Boolean).join(' · '),risco?'red':(nPed||nInsp?'yellow':'green'));
+  const nBlq=(self._lots||[]).filter(L=>{ const S=prSaldos(c,L); return S.q==='Bloqueado'&&!S.esgotado; }).length;
+  const risco=(self._lots||[]).some(L=>{ const S=prSaldos(c,L); return S.q!=='Liberado'&&prCmp(S.res,0)>0; });   /* reserva em lote que deixou de ser apto */
+  prStatus(v,[nInsp?nInsp+' em inspeção':'',nProc?nProc+' em processo':'',nBlq?nBlq+' bloqueado':'',risco?'reserva em lote impedido':''].filter(Boolean).join(' · ')||'lotes liberados',risco||nBlq?'red':(nInsp?'yellow':'green'));
   /* painel */
   const pan=st.pr_pan; let PP=null;
-  if(pan&&pan.g==='g_lot'&&P.lotes[pan.id]) PP=prPanLote(self,c,P.lotes[pan.id]); else if(pan&&pan.g==='g_ped'&&P.pedidos[pan.id]) PP=prPanPed(self,c,P.pedidos[pan.id]);
+  if(pan&&pan.g==='g_lot'&&P.lotes[pan.id]) PP=prPanLote(self,c,P.lotes[pan.id]);
   prPainel(self,v,PP); }
 function prPanLote(self,c,L){ const P=prP(c); const S=prSaldos(c,L); const cu=L.cultura; const U=x=>prEstTxt(cu,x); const q=S.esgotado?'Esgotado':S.q; const nx=prLoteProx(c,L,S); const modo=self.state.pr_modo;
   const loc=(PRDC.locais[L.local]||{}); const lcs=prLcs(c,L);
@@ -308,9 +298,9 @@ function prPanLote(self,c,L){ const P=prP(c); const S=prSaldos(c,L); const cu=L.
   else if(nx.a==='reservar'){ if(self.state.pr_ch){ const f=prFormReserva(self,c,L,null,'lote'); PPx.form={t:'Reservar para pedido · '+prQuem('com'),h:'Reserva só de lote apto; a quantidade não passa do disponível nem da falta do pedido.',fields:f.fields}; PPx.prim={t:'Reservar',go:f.go}; }
     else PPx.prim={t:'Reservar '+L.id+' para pedido',go:()=>self.setState({pr_ch:prChave('W-RS'),pr_form:null,pr_err:''})}; }   /* depois de reservar, nova reserva abre outro formulário (outra chave) */
   return PPx; }
-/* entrada por link: PROD.dc.html#L39-133 ou #PV-036 abre o registro */
+/* entrada por link: PROD.dc.html#L39-133 abre o lote; #PV-036 (link antigo) abre a venda em Comercial › Contratos e pedidos (P6) */
 function prHash(self){ if(self.__prh) return; self.__prh=1; const ab=()=>{ let h=''; try{ h=decodeURIComponent(location.hash||'').slice(1); }catch(e){} const P=prP(cenGet());
-  if(P.lotes[h]) setTimeout(()=>self.g2pick('g_lot',h),0); else if(P.pedidos[h]) setTimeout(()=>self.g2pick('g_ped',h),0); }; ab(); try{ window.addEventListener('hashchange',ab); }catch(e){} }
+  if(P.lotes[h]) setTimeout(()=>self.g2pick('g_lot',h),0); else if(P.pedidos[h]){ try{ location.replace('VEN.dc.html#'+h); }catch(e){} } }; ab(); try{ window.addEventListener('hashchange',ab); }catch(e){} }
 const _EXV=EXTRAVALS; EXTRAVALS=function(self,v){ prHash(self); _EXV(self,v); };
 '''
 
