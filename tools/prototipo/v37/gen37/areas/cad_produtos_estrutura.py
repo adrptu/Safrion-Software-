@@ -305,10 +305,11 @@ function c7impCalc(self){ const viv=c7vivos(self); const novos=[], alts=[];
     if(t.length) alts.push({id:r.id,set,t:x.cod+' · '+t.join(' · ')}); });
   C7.imp.alterados.forEach(x=>{ const r=viv.find(q=>q.v.dim==='Natureza'&&q.v.cod===x.cod); if(r&&r.v.nome!==x.para) alts.push({id:r.id,set:{nome:x.para},t:x.cod+' · '+r.v.nome+' → '+x.para}); });
   return {novos,alts,n:novos.length+alts.length}; }
-// situação do código: excluído no rascunho, tradução pendente, mapeado ou dimensão própria (com "novo/alterado na vN")
+// situação do código: sai na próxima versão (excluído no rascunho), tradução pendente, mapeado ou dimensão própria
 // (o que muda no rascunho tem coluna própria: No rascunho)
 function c7sit(self,r){ const V=r.v; const m=c7mud(self)[r.id]; const prop=V.trad==='Dimensão própria';
-  if(m==='excluído') return {t:'Excluído',p:[chipc('Excluído','gray')]};
+  // excluído no rascunho: a Situação diz até quando vale (o "Excluído" fica só em No rascunho, sem repetir)
+  if(m==='excluído'){ const t='Sai na v'+(c7ver(self)+1); return {t,p:[chipc(t,'gray')]}; }
   if(!prop&&!V.conta) return {t:'Tradução pendente',p:sitX('Tradução pendente','yellow','Traduzir'),res:true};
   return {t:prop?'Dimensão própria':'Mapeado',p:(prop?sitInfo('Dimensão própria'):sitOk('Mapeado'))}; }
 const C7_ND={'com lançamentos':'tem lançamentos; encerre a vigência em vez de excluir','usada em grupos':'é a natureza de grupos de insumo em Produtos; troque lá antes',

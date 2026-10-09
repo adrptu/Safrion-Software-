@@ -13,8 +13,10 @@ try:
     t.aviso('Publicar estrutura'); time.sleep(.2)
     t.chk('publicada a v6: selo amarelo pela tradução pendente', 'v6 em vigor · 1 tradução pendente' in t.header() and t.chipcor()=='yellow', [t.header(),t.chipcor()])
     ok=t.delrow(0,'PRJ-PIVO3'); r=t.rowtxt(0,'PRJ-PIVO3') or ''
-    t.chk('excluir PRJ-PIVO3 entra no rascunho v7 e o código continua visível até publicar',
-          ok and 'rascunho v7 com 1 alteração' in t.header() and 'Excluído sai na v7' in r and 'rascunho v7' in t.toast(), [ok,t.header(),r,t.toast()])
+    # TABELAS-FOCO (09/10/2026): Situação e No rascunho em colunas próprias; a Situação diz quando o código sai ("Sai na v7") e o
+    # No rascunho diz a mudança ("Excluído"), sem repetir "Excluído" nas duas (antes, numa célula só: "Excluído sai na v7")
+    t.chk('excluir PRJ-PIVO3 entra no rascunho v7 e o código continua visível até publicar (Situação "Sai na v7" | No rascunho "Excluído")',
+          ok and 'rascunho v7 com 1 alteração' in t.header() and r.endswith('Sai na v7 Excluído') and 'Excluído Excluído' not in r and 'rascunho v7' in t.toast(), [ok,t.header(),r,t.toast()])
     t.openrow(0,'PRJ-PIVO3'); de=J("[...document.querySelectorAll('aside[role=dialog] button')].some(b=>/^Excluir /.test(b.innerText.trim()))"); t.cancel()
     t.chk('código marcado para exclusão não oferece "Excluir" de novo (painel em consulta)', not de, de)
     t.openrow(0,'PRJ-PIVO3'); d=t.dlg(); ro=t.fdis('conta')
