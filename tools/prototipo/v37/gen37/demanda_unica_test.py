@@ -38,10 +38,10 @@ caso('A4 compra a menos: Ureia 45% = 1.140 kg a partir de 24/09/2026 (a OS-0418 
      lambda: ('Ureia 45%' in d and L(d,'Ureia 45%')==1140.0 and d['Ureia 45%']['falta']=='2026-09-24',(L(d,'Ureia 45%'),(d.get('Ureia 45%') or {}).get('falta'))))
 caso('A5 compra a menos na Lagoa Grande: Glifosato 480 = 293,34 L a partir de 30/09/2026, estoque apto 0 (o lote G26-14 é da Santa Rita)',
      lambda: (L(lg,'Glifosato 480')==293.34 and lg['Glifosato 480']['falta']=='2026-09-30' and lg['Glifosato 480']['estoque']==0,(L(lg,'Glifosato 480'),lg['Glifosato 480']['falta'],lg['Glifosato 480']['estoque'])))
-caso('A6 estoque da própria fazenda: Óleo mineral LG 630,02 L (nunca 292,81) · Nitrato de cálcio LG 25.756,8 kg e Santa Rita 680 kg',
-     lambda: (L(lg,'Óleo mineral')==630.02 and L(lg,'Nitrato de cálcio')==25756.8 and L(d,'Nitrato de cálcio')==680.0,(L(lg,'Óleo mineral'),L(lg,'Nitrato de cálcio'),L(d,'Nitrato de cálcio'))))
-caso('A7 totais: S2627 14 insumos · R$ 430.255,00; S27SF 8 · R$ 1.094.946,91; LG2627 13 · R$ 1.614.202,52',
-     lambda: (nins(d)==14 and perto(tot(d),430255.00,0.005) and nins(s27)==8 and perto(tot(s27),1094946.91,0.005) and nins(lg)==13 and perto(tot(lg),1614202.52,0.005),
+caso('A6 estoque da própria fazenda: Óleo mineral LG 630,03 L (630,025 L a comprar com 0,01 L, como a Compra; nunca 292,81) · Nitrato de cálcio LG 25.756,8 kg e Santa Rita 680 kg',
+     lambda: (L(lg,'Óleo mineral')==630.03 and L(lg,'Nitrato de cálcio')==25756.8 and L(d,'Nitrato de cálcio')==680.0,(L(lg,'Óleo mineral'),L(lg,'Nitrato de cálcio'),L(d,'Nitrato de cálcio'))))
+caso('A7 totais: S2627 14 insumos · R$ 430.255,00; S27SF 8 · R$ 1.094.947,10; LG2627 13 · R$ 1.614.202,84 (valor = quantidade a comprar com 0,01 da unidade × preço, o mesmo da Compra)',
+     lambda: (nins(d)==14 and perto(tot(d),430255.00,0.005) and nins(s27)==8 and perto(tot(s27),1094947.10,0.005) and nins(lg)==13 and perto(tot(lg),1614202.84,0.005),
               ((nins(d),round(tot(d),2)),(nins(s27),round(tot(s27),2)),(nins(lg),round(tot(lg),2)))))
 # Mapa › Insumos: a página leva as entradas da mesma conta (MDATA.dem) e calcula com demFazenda/demSituacao (cal01.js) sobre o cenário vivo
 import cenario
@@ -104,8 +104,8 @@ caso('B11 escopo por safra: a O.S. da Safra 2026/27 não cobre a mesma atividade
 def b12():
     PX={'c4':'SOJA-AT','c5':'SOJA-AT','c6':'SOJA-AT','c7':'SOJA-AT'}; dp=D2.demanda('S2627',planos_extra=PX)
     t4=sum(e['q'] for e in dp['MAP 11-52']['evs'] if e['tipo']=='dem' and e.get('own') and 'T4' in e['t'])
-    return (t4==43500 and L(dp,'MAP 11-52')==173750.0 and perto(tot(dp),1205541.91,0.01),(t4,L(dp,'MAP 11-52'),round(tot(dp),2)))
-caso('B12 N12 "Aplicar plano em 4 cultivos": MAP do T4 = 26.000 (104 ha sem O.S.) + 17.500 (OS-0420, chave c4|a3) = 43.500, nunca 68.500 · MAP 173.750 kg · R$ 1.205.541,91',b12)
+    return (t4==43500 and L(dp,'MAP 11-52')==173750.0 and perto(tot(dp),1205542.10,0.01),(t4,L(dp,'MAP 11-52'),round(tot(dp),2)))
+caso('B12 N12 "Aplicar plano em 4 cultivos": MAP do T4 = 26.000 (104 ha sem O.S.) + 17.500 (OS-0420, chave c4|a3) = 43.500, nunca 68.500 · MAP 173.750 kg · R$ 1.205.542,10',b12)
 def b13():
     dx=D2.demanda('S2627',planos_extra={'c7':'SOJA-AT'}); ev=[e for e in dx['Fungicida A']['evs'] if e['tipo']=='dem' and e.get('chave')=='OS-0424']
     return (L(dx,'Fungicida A')==55.48 and len(ev)==1 and 'sem vínculo com o plano do talhão' in ev[0]['t'],(L(dx,'Fungicida A'),[e['t'] for e in ev]))

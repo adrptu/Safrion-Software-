@@ -64,7 +64,8 @@ try:
     t=rowtxt('Nitrato de cálcio'); chk('Nitrato de cálcio falta a partir de 01/10/2026', '01/10/2026' in t, t)
     t=rowtxt('KCl 60%'); chk('KCl coberto mostra —', '—' in t and '/20' not in t, t)
     t=rowtxt('Semente de soja 58 W'); chk('58 W coberto (PC-090 chega antes) mostra —', '—' in t and '/20' not in t, t)
-    row('2,4-D 806'); a=aside(); chk('origem com data no início da linha', '25/09/2026 · T1-A · Dessecação' in a and '28/09/2026 · T2 · Dessecação' in a, a[:300]); clk('Fechar','aside[role=dialog]')
+    # CTL-4 (DEM-01/02): a OS-0430 (chave c1|a1, T1-A) cobre a dessecação do T1-A e o uso entra pela ordem; o T2 segue pelo plano
+    row('2,4-D 806'); a=aside(); chk('origem com data no início da linha', '25/09/2026 · T1-A · OS-0430 · Dessecação' in a and '28/09/2026 · T2 · Dessecação' in a, a[:300]); clk('Fechar','aside[role=dialog]')
     # etapa 3
     clk('Solicitar cotações'); chk('etapa 3', cur().startswith('3 '))
     b=body(); chk('Química Centro-Oeste desabilitada com motivo', 'Não homologado' in b and 'documentação fiscal pendente' in b)

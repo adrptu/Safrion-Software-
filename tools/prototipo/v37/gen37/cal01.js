@@ -62,6 +62,8 @@ function cal01Memo(r, o){ o=o||{}; const u=' '+(o.un||'');
 // Uma só conta para o Planejar safra (etapa 4, passo=demanda) e o Mapa › Insumos: demFazenda, com as ordens lidas do cenário compartilhado
 // (cenOsDem, cenario.js). A Compra de insumos lê o espelho Python (dados2.demanda: mesmos eventos na mesma ordem; paridade em demanda_unica_test.py).
 function calNf(x,d){ return Number(x||0).toLocaleString('pt-BR',{minimumFractionDigits:d||0,maximumFractionDigits:d||0}); }
+// quantidade a comprar com 0,01 da unidade: a solicitação leva este número e o valor sai dele (Planejar safra = Compra = Mapa; espelho dados2._r2)
+function calR2(x){ return Math.round((Number(x)||0)*100)/100; }
 function calNfa(x){ return Number(x||0).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:2}); }
 function demTal(t){ return String(t||'').split('-')[0]; }   // talhão de um local da O.S. ('T1-B' → 'T1'; 'Pivô 13' fica)
 // DEM-01 · a O.S. cobre, em cada atividade das chaves dela, as ocorrências do plano da safra dela nos talhões dela (o próprio cultivo ou as
@@ -111,7 +113,7 @@ function demFazenda(x){ const m={}; const ord=(s)=>{ const i=(x.ordem||{})[s]; r
     d.res=(x.reservas||[]).filter(daFaz).reduce((a,r)=>a+r.q,0); d.rec=(x.recebDt||[]).filter(daFaz).reduce((a,r)=>a+r.q,0);
     d.est=Number((x.fisico||{})[d.nome])||0;
     const c=cal01(d.est,d.evs,0,{hoje:x.hoje,viavel:x.viavel}); d.cal=c;
-    d.liq=c.liq; d.falta=c.falta; d.antes=c.antes; d.tarde=c.tarde; d.valor=d.liq*d.preco; d.bruta=c.bruta; d.real=c.real; d.rup=c.rupRec; d.cob=c.cob;
+    d.liq=calR2(c.liq); d.falta=c.falta; d.antes=c.antes; d.tarde=c.tarde; d.valor=d.liq*d.preco; d.bruta=c.bruta; d.real=c.real; d.rup=c.rupRec; d.cob=c.cob;
     d.uso=d.evs.filter(e=>e.tipo==='dem'&&e.own&&e.dt&&e.dt>=(x.hoje||'')).map(e=>e.dt).sort()[0]||''; });   // 1º uso desta safra de hoje em diante
   return m; }
 // DEM-05 · Mapa › Insumos: situação de cada insumo da fazenda no período (eventos até lim; sem lim, a safra toda) pela mesma projeção:

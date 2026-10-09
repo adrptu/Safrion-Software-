@@ -188,6 +188,7 @@ def cfg_in(c):
 # 3) REND-RETORNO-1818 (S5): PLANO (demanda inteira pela partilha, sem janela) → necessidade da sequência e déficit; ATENDIDO (janelas);
 #    SALDO (área sem conjunto + horas que faltam pelas premissas do plano). nec = atendido + saldo em ha e em horas-conjunto.
 import math as _math
+def _r2(x): return _math.floor(float(x or 0)*100+0.5)/100   # espelho de calR2 (cal01.js): Math.round(x*100)/100
 from fractions import Fraction as _Fr
 _RP_DEC=__import__('re').compile(r'[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?')
 def _rp_num(x):   # igual a safra.js rpNum: decimal simples com vírgula ou ponto; vazio (ou só espaço) = sem valor
@@ -1084,7 +1085,8 @@ def dem_fazenda(x):
         d['evs']+=[dict(dt=r['dt'],q=r['q'],tipo='rec',own=False,ord=0,ref=r['ref'],t=r['t']) for r in x['recebDt'] if da(r)]
         d['res']=sum(r['q'] for r in x['reservas'] if da(r)); d['rec']=sum(r['q'] for r in x['recebDt'] if da(r)); d['est']=x['fisico'].get(d['nome'],0)
         r=cal01(d['est'],d['evs'],0.0,x['hoje'],x['viavel'])
-        d.update(liq=r['liq'],falta=r['falta'],antes=r['antes'],tarde=r['tarde'],valor=r['liq']*d['preco'],bruta=r['bruta'],real=r['real'],rup=r['rupRec'],cob=r['cob'],
+        lq=_r2(r['liq'])   # a quantidade a comprar é a que a solicitação leva (0,01 da unidade) e o valor sai dela: Planejar safra = Compra (calR2)
+        d.update(liq=lq,falta=r['falta'],antes=r['antes'],tarde=r['tarde'],valor=lq*d['preco'],bruta=r['bruta'],real=r['real'],rup=r['rupRec'],cob=r['cob'],
                  uso=min([e['dt'] for e in d['evs'] if e['tipo']=='dem' and e.get('own') and e['dt'] and e['dt']>=x['hoje']] or ['']))
     return m
 # chegada viável de uma compra nova (CAL-01 · reposicao_proposta_com_chegada_viavel): hoje + prazo mínimo de reposição (parâmetro de demonstração)
