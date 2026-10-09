@@ -251,7 +251,15 @@ caso('C13', () => { const c = NOVO(); const P = c.producao; const v = P.pedidos[
   try { PRDC.un['Soja'].massa = 50; const w = f.producao.pedidos[nv.id]; const c203 = f.producao.pedidos['CT-203'];
     fx = [w.qtd, comTxtV(w, w.qtd), comValorV(w, w.qtd), prFalta(f, w), c203.qtd, comTxtV(c203, c203.qtd)]; } finally { PRDC.un['Soja'].massa = m0; }
   ok('C13i venda nova grava a massa da unidade no registro (sc de 60 kg) e a origem; se o cadastro da soja mudar para 50 kg, PV-039 continua 60.000 kg, "1.000 sc 60 kg", R$ 130.000,00, falta 60.000 kg; CT-203 continua 720.000 kg',
-     nv.fat === '60' && /sc de 60 kg/.test(nv.fatOrig) && fx[0] === 60000 && fx[1] === '1.000 sc 60 kg' && fx[2] === 130000 && fx[3] === 60000 && fx[4] === 720000 && fx[5] === '12.000 sc 60 kg', [nv.fat, nv.fatOrig, fx]); });
+     nv.fat === '60' && /sc de 60 kg/.test(nv.fatOrig) && fx[0] === 60000 && fx[1] === '1.000 sc 60 kg' && fx[2] === 130000 && fx[3] === 60000 && fx[4] === 720000 && fx[5] === '12.000 sc 60 kg', [nv.fat, nv.fatOrig, fx]);
+  /* encerrar o contrato sem registrar a saca: a quantidade vigente é o entregue (0 kg); a oferta deixa de esperar por ele e registrar depois é recusado */
+  const g = NOVO(); const en = MUD(g, x => comEncerrar(x, { venda: 'CT-203', motivo: 'cliente desistiu', ator: 'Dora', chave: 'T-EN203' }));
+  const og = prOfertaSafra(g, 'Soja em grão', '2026/27'); const rg = MUD(g, x => comConverterSaca(x, { venda: 'CT-203', fat: '60', fonte: 'Contrato CT-203', ator: 'Ana', chave: 'T-S203' }));
+  ['CRE-0095', 'BT-090'].forEach(id => MUD(g, x => comConverterSaca(x, { venda: id, fat: '60', fonte: 'Contrato ' + id, ator: 'Ana', chave: 'T-60-' + id })));
+  const og2 = prOfertaSafra(g, 'Soja em grão', '2026/27');
+  ok('C13j CT-203 encerrado sem a saca: "Encerrada", 0 kg vigentes; a oferta 26/27 segue suspensa só por CRE-0095 e BT-090; registrar a saca depois é recusado; com as outras duas em 60 kg, livre 60.280 sc (68.180 − 7.900)',
+     !en.erro && prSitPed(g, g.producao.pedidos['CT-203']).t === 'Encerrada' && g.producao.pedidos['CT-203'].qtd === 0 && og.amb.join() === 'CRE-0095,BT-090' && /está encerrada/.test(rg.erro || '') && !g.producao.pedidos['CT-203'].fatConf
+     && og2.livre !== null && SC(og2.livre) === '60.280 sc' && comQtdTxt(g.producao.pedidos['CT-203']) === '0 kg', [en.erro, og.amb, rg.erro, og2.livre]); });
 }
 /* CE-01 · página montada sem o núcleo da carência */
 if (TEM_COM && !NUCLEO) {

@@ -202,14 +202,14 @@ function prExpedido(c, pid) { return prSoma(prP(c).movs.filter(m => (m.tipo === 
 /* fator do compromisso (Comercial A-17; DEC-0510-03 dimensional): a venda guarda a quantidade na unidade do contrato (qc), a massa dessa
    unidade (fat, kg) e a origem; legado com a massa ambígua (sc 50 × 60 kg, fatAmb) fica sem kg (qtd null) até a conversão registrada
    (fatConf): falta, saldo, oferta e saída que dependem dela ficam suspensos; nada é convertido em silêncio pela unidade atual da cultura */
-function prAmb(p) { return !!(p && p.fatAmb && !p.fatConf); }
+function prAmb(p) { return !!(p && p.fatAmb && !p.fatConf && !p.enc); }   /* encerrada: a quantidade vigente é o expedido em kg, nada a conferir */
 /* texto na unidade do compromisso (fonte única; o Comercial usa as mesmas): massa gravada na venda, nunca a do cadastro atual; com a massa
    igual à da cultura, o rótulo é o de sempre ("616 sc"); diferente, vai junto ("12.000 sc 50 kg"); sem massa conhecida, só kg */
 function prFatV(p) { return p.fatConf ? p.fatConf.fat : (p.fat || null); }
 function prUnV(p) { const u = prUn(p.cultura); const un = p.un || prEstUn(p.cultura); const f = prFatV(p);
   return (u.est || !f || prCmp(f, u.massa) === 0) ? un : un + ' ' + prFmtT(f, 3) + ' kg'; }
 function prTxtV(p, kg, d) { const f = prFatV(p); if (!f) return prFmtT(kg, 3) + ' kg'; return prFmtT(prDiv(kg, f), d === undefined ? 2 : d) + ' ' + prUnV(p); }
-function prQtdTxt(p) { return prAmb(p) ? prFmtT(p.qc, 3) + ' ' + (p.un || '') + ' (saca de ' + p.fatAmb.join(' ou ') + ' kg a conferir)' : (prFatV(p) ? prTxtV(p, p.qtd || 0) : prEstTxt(p.cultura, p.qtd)); }
+function prQtdTxt(p) { return prAmb(p) ? prFmtT(p.qc, 3) + ' ' + (p.un || '') + ' (saca de ' + p.fatAmb.join(' ou ') + ' kg a conferir)' : ((prFatV(p) || p.fatAmb) ? prTxtV(p, p.qtd || 0) : prEstTxt(p.cultura, p.qtd)); }
 function prResPed(c, pid) { return Object.values(prP(c).reservas).filter(r => r.pedido === pid && r.st === 'Ativa'); }
 function prFalta(c, ped) { if (prAmb(ped)) return 0; const f = prSub(prSub(ped.qtd, prExpedido(c, ped.id)), prSoma(prResPed(c, ped.id).map(r => r.kg))); return prCmp(f, 0) > 0 ? f : 0; }
 function prCompat(ped, L) { return ped.prod === L.prod && (!ped.classe || !L.classe || ped.classe === L.classe) && (!ped.saf || !L.saf || ped.saf === L.saf); }

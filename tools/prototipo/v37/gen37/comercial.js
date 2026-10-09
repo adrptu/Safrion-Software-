@@ -216,6 +216,7 @@ function comConverterSaca(c, k) { const P = comP(c); const v = P.pedidos[k.venda
   if (v.fatConf) { if (k.chave && v.fatConf.chave === k.chave) { if (v.fatConf.imp !== imp) throw prConflito(k.chave, v.id); return { msg: 'Saca do ' + v.id + ' já registrada: nada foi alterado.', repetido: true }; }
     throw new Error('Saca do ' + v.id + ' já registrada: ' + v.fatConf.fat + ' kg, por ' + v.fatConf.quem + ' em ' + prBr(v.fatConf.d) + ' (' + v.fatConf.fonte + '). Nada foi alterado.'); }
   if (!v.fatAmb) throw new Error(v.id + ' já tem a massa da unidade gravada no registro (' + comUnV(v) + '): nada a converter.');
+  if (v.enc) throw new Error(v.id + ' está encerrada: a quantidade vigente é o entregue (' + comTxtV(v, v.qtd || 0) + '). Nada foi alterado.');
   const quem = cenExigeUm(k.ator, ['comercial', 'gestor'], 'Registrar a saca do ' + v.id);
   if (v.fatAmb.indexOf(fat) < 0) throw new Error('Escolha a massa da saca escrita no contrato: ' + v.fatAmb.map(x => x + ' kg').join(' ou ') + '.');
   if (!fonte) throw new Error('Informe onde está a massa da saca (ex.: contrato ' + (v.ref || v.id) + ', cláusula da quantidade).');
