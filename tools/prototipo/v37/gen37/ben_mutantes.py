@@ -66,6 +66,10 @@ M = [
  ('M57 S4 recusa do Liberar lote chama fruta de campo de lote do beneficiamento', "if (L.insp) throw new Error(lid + (L.benef ? ' é lote do beneficiamento (' + L.benef + ')' : ' tem a inspeção ' + L.insp)", "if (L.insp) throw new Error(lid + (true ? ' é lote do beneficiamento (' + L.benef + ')' : ' tem a inspeção ' + L.insp)"),
  # integração BEN na branch única (09/10): achados dos revisores
  ('M58 caixas da ordem nova pela sugestão, sem olhar o livre no Estoque', "return { sug, livre, cx: livre >= 1 && sug > livre ? livre : sug }; }", "return { sug, livre, cx: sug }; }"),
+ ('M59 cancelar fora de A liberar (reserva e entrega soltas)', "if (o.etapa !== 'A liberar') throw new Error('Cancele só em A liberar", "if (false) throw new Error('Cancele só em A liberar"),
+ ('M60 cancelar sem motivo', "if (!mot) throw new Error('Informe o motivo do cancelamento.');", ""),
+ ('M61 ordem cancelada continua prendendo o lote', "o.id !== fora && o.etapa !== 'Encerradas' && o.etapa !== 'Canceladas' &&", "o.id !== fora && o.etapa !== 'Encerradas' &&"),
+ ('M62 cancelar sem perfil', "const quem = cenExigeUm(ator, ['producao', 'gestor'], 'Cancelar a ' + id);", "const quem = 'Igor (responsável de produção)';"),
 ]
 U = open(os.path.join(HERE, 'ben_unit.js'), encoding='utf-8').read()
 base = motor(); OK = []

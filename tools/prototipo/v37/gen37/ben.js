@@ -149,7 +149,7 @@ function benPendRec(c, ok) { ok = ok || (() => true); const P = prP(c);
 function benEtapas(c, o) { const r = benRota(o.ben.rota); const v = benValidos(o); const pr = v.filter(s => s.fluxo === 'Produto');
   return ((r && r.etapas) || []).map(e => { if (e.pert !== 'Exigida') return { nome: e.nome, pert: e.pert, sit: 'Não se aplica', ev: e.mot || '' };
     let ok = false, ev = '';
-    if (e.nome === 'Recepção') { ok = o.etapa !== 'A liberar'; ev = ok ? 'entradas ' + o.ben.ent.map(x => x.lote).join(', ') + ' liberadas para a ordem' : 'conferida na liberação'; }
+    if (e.nome === 'Recepção') { ok = ['A liberar', 'Canceladas'].indexOf(o.etapa) < 0; ev = ok ? 'entradas ' + o.ben.ent.map(x => x.lote).join(', ') + ' liberadas para a ordem' : 'conferida na liberação'; }
     else if (e.nome === 'Triagem e classificação') { ok = pr.some(s => !!s.classe); ev = ok ? pr.map(s => s.id + ' classe ' + s.classe).join(', ') : 'nenhuma saída de Produto com classe'; }
     else if (e.nome === 'Embalagem') { ok = pr.length > 0 && pr.every(s => s.cx > 0 && prCmp(s.bruto || 0, 0) > 0); ev = ok ? pr.map(s => s.id + ' ' + s.cx + ' cx').join(', ') : 'saída de Produto sem caixas e bruto'; }
     else ev = 'sem evidência registrada';
@@ -162,12 +162,14 @@ function benSelos(c, o) { const out = []; const b = benBal(o); const it = benReq
   if (o.ben.corr && o.ben.corr.pend) out.push({ t: 'Correção aguarda a gestão', c: 'yellow' });
   if (o.ben.corrigido) out.push({ t: 'Corrigido na conferência', c: 'yellow' });
   if (o.etapa === 'Em conferência' && it && it.custodia > 1e-9) out.push({ t: 'Sobra em custódia', c: 'yellow' });
-  if (o.etapa !== 'Encerradas' && o.ben.fim && o.ben.fim < prHoje()) out.push({ t: 'Atrasada', c: 'red' });
+  if (['Encerradas', 'Canceladas'].indexOf(o.etapa) < 0 && o.ben.fim && o.ben.fim < prHoje()) out.push({ t: 'Atrasada', c: 'red' });
   return out; }
 function benProx(c, o) { const b = benBal(o); const it = benReqItem(c, o);
   if (o.etapa === 'A liberar') { const im = benImpedimentos(c, o);
-    return im.length ? { t: 'Resolver ' + (im.length > 1 ? im.length + ' impedimentos' : '1 impedimento') + ' e autorizar a rota', quem: im.map(x => x.dono).filter(Boolean).filter((x, i, a) => a.indexOf(x) === i).join('; '), acao: 'liberar', imp: im, red: true }
+    return im.length ? { t: 'Resolver ' + (im.length > 1 ? im.length + ' impedimentos' : '1 impedimento') + ' e autorizar a rota', quem: im.map(x => x.dono).filter(Boolean).filter((x, i, a) => a.indexOf(x) === i).join('; '), acao: 'liberar', imp: im, red: true,
+        nota: 'Sem como resolver: Cancelar a ordem (nada foi reservado) e abrir outra · ' + benProdQ() }
       : { t: 'Autorizar rota e liberar', quem: benProdQ(), acao: 'liberar' }; }
+  if (o.etapa === 'Canceladas') { const k = o.ben.canc || {}; return { t: 'Cancelada: ' + (k.motivo || '—'), quem: k.quem || '', acao: null, nota: 'Nada estava reservado; as entradas abrem outra ordem' }; }
   if (o.etapa === 'Liberadas') { const falta = it && cenSaldoEntregar(it) > 1e-9 && !(it.custodia > 1e-9);
     return { t: 'Iniciar processo', quem: benProdQ(), acao: 'iniciar', nota: falta ? 'Caixas da ' + o.req + ' ainda no Estoque: ' + benQuem('almoxarife') + ' entrega no balcão (' + benUn(cenSaldoEntregar(it)) + ').' : '' }; }
   if (o.etapa === 'Em execução') { const pr = benValidos(o).some(s => s.fluxo === 'Produto');
@@ -251,6 +253,18 @@ function benRetirar(c, id, lote, ator, k) { const quem = cenExige(ator, 'produca
   if (it && it.tot === o.ben.cxSug) it.tot = sug; o.ben.cxSug = sug; o.versao = 'v' + (Number(String(o.versao).replace(/\D/g, '') || 1) + 1); benToca(o);
   const det = lote + ' sai da ordem: ' + benKg(benEntrada(o)) + ' · ' + benUn(it ? it.tot : 0) + ' de caixa (sugestão ' + sug + ')';
   benHist(o, quem, 'Entrada retirada · ' + o.versao, det); const msg = id + ' ' + o.versao + ': ' + det + '.'; benGravaRecibo(c, k, 'benRetirar', imp, msg); return { msg }; }
+/* cancelar a ordem em A liberar (BEN-D22): rascunho, nada autorizado nem reservado (DEC-2609-13); sai do quadro para Canceladas com motivo,
+   quem e quando, e as entradas voltam a abrir ordem. Dano evitado (integração BEN): ordem que não libera (caixas acima do livre; entrada que
+   mudou com o estorno da carga, BEN-D19) prendia o lote perecível sem saída. Liberada em diante, cancelar mexe em reserva e entrega (BEN-6) */
+function benCancelar(c, id, motivo, ator, k) { const quem = cenExigeUm(ator, ['producao', 'gestor'], 'Cancelar a ' + id); const o = benO(c, id);
+  const mot = String(motivo || '').trim(); const imp = JSON.stringify([id, mot]); const ja = benRecibo(c, k, 'benCancelar', imp); if (ja) return ja;
+  if (o.etapa === 'Canceladas') throw new Error('Já feito: ' + id + ' cancelada.'); benVer(o, k);
+  if (o.etapa !== 'A liberar') throw new Error('Cancele só em A liberar (' + id + ' está em ' + o.etapa + '): depois da liberação há reserva e entrega, e o cancelamento entra no BEN-6.');
+  if (!mot) throw new Error('Informe o motivo do cancelamento.');
+  o.etapa = 'Canceladas'; o.ben.canc = { quem, em: benEm(), motivo: mot }; const ls = o.ben.ent.map(e => e.lote).join(', ');
+  benHist(o, quem, 'Ordem cancelada · ' + o.versao, mot + ' · nada estava reservado; ' + ls + (o.ben.ent.length > 1 ? ' voltam' : ' volta') + ' a abrir ordem'); benToca(o);
+  const msg = id + ' cancelada por ' + quem + ' (' + mot + '): nada estava reservado; ' + ls + (o.ben.ent.length > 1 ? ' podem' : ' pode') + ' abrir outra ordem.';
+  benGravaRecibo(c, k, 'benCancelar', imp, msg); return { msg }; }
 /* autorizar rota e liberar (R-A05): todas as causas de uma vez; sem causa, CMD-42 e CMD-06 em eventos separados no mesmo cenMudar */
 function benAutorizarLiberar(c, id, ator, k) { const quem = cenExige(ator, 'producao', 'Autorizar rota e liberar a ' + id); const o = benO(c, id);
   if (o.etapa !== 'A liberar') throw new Error('Já feito: ' + id + ' está em ' + o.etapa + '.'); benVer(o, k);
