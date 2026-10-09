@@ -32,6 +32,7 @@ M = [
  ('M24 fechar libera o lote (R-E01)', "q0: 'Em inspeção', cond: '', origem: ents.map", "q0: 'Liberado', cond: '', origem: ents.map"),
  ('M25 carência não herdada pela genealogia', "if (x.lote) out.push.apply(out, prOrigCampo(c, P.lotes[x.lote], vis)); else if (x.os) out.push(x);", "if (x.os) out.push(x);"),
  ('M26 liberar lote sem perfil (prLiberarLote)', "const quem = cenExigeUm(ator, ['qualidade', 'agronomo'], 'Liberar o lote ' + lid);", "const quem = 'Qualidade (Marta)';"),
+ ('M27 em processo antes do Iniciar (BEN-D15)', "function benEmProc(o) { if (o.etapa !== 'Em execução' || o.ben.conc) return 0;", "function benEmProc(o) { if (o.etapa === 'Encerradas' || o.ben.conc) return 0;"),
 ]
 U = open(os.path.join(HERE, 'ben_unit.js'), encoding='utf-8').read()
 base = motor(); OK = []
