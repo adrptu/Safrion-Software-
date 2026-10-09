@@ -223,7 +223,7 @@ try:
     temF=bool(J(f"(()=>{{try{{const A=window.__agx.AGX; return !!A.FK[A.P[A.reg['{X['reg']}']].key];}}catch(e){{return null;}}}})()")); pa=PASSO(); fx=ficha()
     chk('12 só consulta: sem "Preparar receituário" nem "Receituário emitido"; Soja × alvo → "Usar na O.S." com as ordens A liberar de soja, ou desligado dizendo o motivo',
         not J(f"!!document.querySelector('{RX}')") and 'Preparar receituário' not in fx and 'Receituário emitido' not in fx
-        and ((ORDS()==['OS-0430','OS-0431'] and 'Esta consulta não emite receituário' in pa) if temF else (USAR() is True and 'Sem produto da fazenda com este ingrediente ativo' in pa)), [temF,ORDS(),pa])
+        and ((ORDS()==['OS-0430'] and ('Esta consulta não emite receituário' in pa or 'não está na referência conferida' in pa)) if temF else (USAR() is True and 'Sem produto da fazenda com este ingrediente ativo' in pa)), [temF,ORDS(),pa])   # revisão do CTL-5: só a ordem de pulverização (S3-1); alvo da referência (S3-3)
     junta('AG-07 ficha')
 
     # ---------- 13 · links antigos: filtro pelo ingrediente, registro único abre a ficha, proibido explica ----------
@@ -247,13 +247,14 @@ try:
     lin=[f"{l['prod']} {l['lote']} {l['local']} {nf(l['fisico'])} {l['un']} {nf(l['reservado'])} {l['un']} {nf(disp(l))} {l['un']}" for l in LA]
     MA=cid('Mamão'); alm=sorted(a for c_,a in ((c_,a) for c_,L in U.items() if int(c_)==MA for a,ps in L if XA['i'] in ps))
     setv(f'{FX} select[aria-label="Cultura do uso"]',str(MA)); setv(f'{FX} select[aria-label="Alvo do uso"]',str(alm[0]))
-    pfs=J(f"!!document.querySelector('{FX} select[aria-label=\"Produto da fazenda\"]')"); d14=USAR(); d14b=d14
+    pfs=J(f"!!document.querySelector('{FX} select[aria-label=\"Produto da fazenda\"]')"); d14=USAR()
     # dos 3 nomes da fazenda com abamectina, só a Abamectina 18 EC está no catálogo da O.S. (lote ou plano): é ela que vai, sem perguntar
-    chk(f'14 Na fazenda ({XA["nome"]}): lotes de {", ".join(nfz)} iguais ao cenário; referência "Abamectina 18 EC"; Mamão: a ordem A liberar de mamão (o produto é o do catálogo da O.S.)',
+    # revisão do CTL-5 (S3-1): só a ordem de pulverização do mamão (OS-0501) é candidata, e vem escolhida (lista de um item: um toque a menos)
+    chk(f'14 Na fazenda ({XA["nome"]}): lotes de {", ".join(nfz)} iguais ao cenário; referência "Abamectina 18 EC"; Mamão: só a ordem de pulverização A liberar de mamão (OS-0501, já escolhida; o produto é o do catálogo da O.S.)',
         lot==lin and len(lin)>0 and 'REFERÊNCIA CONFERIDA EM BULA' in f.upper() and 'Abamectina 18 EC' in f
-        and pfs is False and d14 is True and ORDS()==['OS-0501','OS-0502','OS-0511'], [lin,lot,pfs,d14,ORDS()])
-    setv(f'{FX} select[aria-label="Ordem A liberar"]','OS-0501')
-    chk('14b com a ordem escolhida, "Usar na O.S." liga e diz o próximo passo na OS-0501 com a Abamectina 18 EC', d14b is True and USAR() is False and 'Abre a OS-0501 em Ajustar antes de liberar com Abamectina 18 EC incluído' in PASSO(), [d14b,USAR(),PASSO()])
+        and pfs is False and ORDS()==['OS-0501'], [lin,lot,pfs,d14,ORDS()])
+    chk('14b com a ordem já escolhida, "Usar na O.S." liga e diz o próximo passo na OS-0501 com a Abamectina 18 EC para o ácaro da referência', d14 is False and USAR() is False
+        and _re.search(r'Abre a OS-0501 em Ajustar antes de liberar com Abamectina 18 EC incluído para ácaro-(branco|rajado)\.', PASSO()), [d14,USAR(),PASSO()])
     J(f"(()=>{{const s=document.querySelector('{FX} section[aria-label=\"Na fazenda\"]'); if(s) s.scrollIntoView({{block:'start'}});}})()"); time.sleep(.3)
     shot('ficha_na_fazenda'); junta('AG-07 abamectina')
 
@@ -269,7 +270,7 @@ try:
     chk(f'15 {XT["nome"]} (só "Todas as culturas"): Cultura oferece Soja; com "Todas as culturas" "Usar na O.S." fica desligado com orientação e sem ordens; com Soja vale a cultura real',
         'Soja · pelo uso em “Todas as culturas”' in op and disTD is True and 'escolha no campo Cultura a cultura do talhão' in dica and not ordTD
         and 'escolha no campo Cultura' not in pS and 'Receituário emitido' not in pS
-        and ((ORDS()==['OS-0430','OS-0431']) if temT else ('Sem produto da fazenda com este ingrediente ativo' in pS)), [op[:4],disTD,dica[-160:],temT,ORDS(),pS[-160:]])
+        and ((ORDS()==['OS-0430']) if temT else ('Sem produto da fazenda com este ingrediente ativo' in pS)), [op[:4],disTD,dica[-160:],temT,ORDS(),pS[-160:]])   # revisão do CTL-5 (S3-1): só a ordem de pulverização
     # ---------- 16 · 1280×800: a grade inteira cabe (sem rolagem lateral) · LMR ausente é texto neutro, não vermelho ----------
     c.size(1280,800); c.goto(U_('AG-07.dc.html'),wait=.8); pronto()
     lay=J("(()=>{const r=document.querySelector('.g2rola'); const h=[...document.querySelectorAll('main [role=columnheader]')].pop().getBoundingClientRect(); return [r.scrollWidth,r.clientWidth,Math.round(h.right),innerWidth];})()") or [1,0,1,0]

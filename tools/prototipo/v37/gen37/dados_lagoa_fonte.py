@@ -66,7 +66,9 @@ def _irrig_sup(a, fin):
 def captacao(agua, hoje, curso=None, fin='Irrigação'):
     """captação dos pivôs = soma das outorgas de captação superficial para a finalidade, do mesmo curso d'água, no cadastro.
     Premissa declarada (o cadastro não liga pivô a ponto de captação): sem curso, vale o de maior vazão vigente somada (rede comum
-    aos pontos do curso). Outorga vencida sai da soma e fica na observação; nenhuma vigente → situação 'Vencida' (trava com o gestor)."""
+    aos pontos do curso). Outorga vencida sai da soma e fica na observação; nenhuma vigente → situação 'Vencida' (trava com o gestor);
+    nenhuma outorga do curso no cadastro → 'Sem outorga'. outs = as outorgas do curso (número, L/s, h/dia, vencimento, renovação): a trava
+    avalia a vigência na DATA DE CADA DIA DA JANELA (irrOutDia, irrigacao_estado.js), não só hoje (revisão do CTL-5, S3-2)."""
     br = lambda d: '/'.join(reversed(str(d).split('-'))) if d else '—'
     sup = [a for a in agua if _irrig_sup(a, fin)]
     vale = lambda a: agua_sit(a, hoje) != 'Vencida' and agua_ls(a['vazao']) and agua_h(a['regime'])
@@ -77,18 +79,20 @@ def captacao(agua, hoje, curso=None, fin='Irrigação'):
         cursos = [a['curso'] for a in sup]
         curso = max(soma, key=soma.get) if soma else (max(cursos, key=cursos.count) if cursos else '')
     todas = [a for a in sup if a['curso'] == curso]
+    outs = [dict(num=a['num'], ls=agua_ls(a['vazao']), h=agua_h(a['regime']), venc=a['venc'] or '', renov=bool(a.get('renov')))
+            for a in todas if agua_ls(a['vazao']) and agua_h(a['regime'])]
+    if not todas:
+        return dict(nome='Sem outorga de irrigação no cadastro', outorga='—', ls=0.0, h=0.0, venc='', st='Sem outorga', outs=[],
+                    obs='nenhuma outorga de captação superficial para ' + fin.lower() + ' no cadastro (aba Água)')
     ok = [a for a in todas if vale(a)]
     fora = [a['num'] + ' vencida em ' + br(a['venc']) for a in todas if a not in ok and agua_sit(a, hoje) == 'Vencida']
     if not ok:
-        return dict(nome=curso or 'sem captação no cadastro', outorga=' + '.join(a['num'] for a in todas) or 'sem outorga no cadastro',
-                    ls=0.0, h=0.0, venc=max([a['venc'] for a in todas if a['venc']] or ['']), st='Vencida', aviso='',
-                    obs='nenhuma outorga vigente de ' + fin.lower() + ' no cadastro' + (' · ' + ', '.join(fora) if fora else ''))
+        return dict(nome=curso, outorga=' + '.join(a['num'] for a in todas), ls=0.0, h=0.0, venc=max([a['venc'] for a in todas if a['venc']] or ['']),
+                    st='Vencida', outs=outs, obs='nenhuma outorga vigente de ' + fin.lower() + ' no cadastro' + (' · ' + ', '.join(fora) if fora else ''))
     ls = sum(agua_ls(a['vazao']) for a in ok); vol = sum(agua_ls(a['vazao']) * agua_h(a['regime']) for a in ok)   # m³/dia = L/s × h × 3,6
     sits = [agua_sit(a, hoje) for a in ok]
     st = 'Em renovação' if 'Em renovação' in sits else ('Vence em 90 dias' if 'Vence em 90 dias' in sits else 'Vigente')
     pri = min(ok, key=lambda a: a['venc'] or '9999')
-    al = next((a for a in ok if agua_sit(a, hoje) == st), pri)   # a outorga que motiva o aviso
-    aviso = '' if st == 'Vigente' else ('Outorga ' + al['num'] + (' em renovação' if st == 'Em renovação' else ' vence em ' + br(al['venc'])))
-    return dict(nome=curso, outorga=' + '.join(a['num'] for a in ok), ls=ls, h=vol / ls, venc=pri['venc'], st=st, aviso=aviso,
+    return dict(nome=curso, outorga=' + '.join(a['num'] for a in ok), ls=ls, h=vol / ls, venc=pri['venc'], st=st, outs=outs,
                 obs=str(len(ok)) + ' outorgas de ' + fin.lower() + ' do ' + curso + ' no cadastro (aba Água)'
                 + (' · fora da soma: ' + ', '.join(fora) if fora else ''))

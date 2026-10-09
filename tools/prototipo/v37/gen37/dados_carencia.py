@@ -100,19 +100,20 @@ def _usos(p):
         sem = [u for u in us if str(u['carencia']).startswith('sem restri') and u['conferido']]
         na = [u for u in us if u['carencia'] in (A._PRE, A._TS)]
         alvos = ', '.join(u['alvo'] for u in us)
+        al = [u['alvo'] for u in us]   # lista (o texto da referência tem vírgula entre parênteses): a trava do alvo usa esta (carAlvoRef, CTL-5)
         if conf:
             d = max(x[0] for x in conf); maior = max(x[0] for x in num)
-            out[c] = dict(dias=d, conf=True, na=False, alvos=alvos,
+            out[c] = dict(dias=d, conf=True, na=False, alvos=alvos, al=al,
                           txt=f'{d} dias (bula conferida)' + (f'; uso não conferido indica {maior} dias' if maior > d else ''))
         elif num:
             d = max(x[0] for x in num)
-            out[c] = dict(dias=d, conf=False, na=False, alvos=alvos, txt=f'{d} dias · uso não conferido na bula (prazo provisório)')
+            out[c] = dict(dias=d, conf=False, na=False, alvos=alvos, al=al, txt=f'{d} dias · uso não conferido na bula (prazo provisório)')
         elif sem:
-            out[c] = dict(dias=0, conf=True, na=False, alvos=alvos, txt='sem restrições na bula (conferida)')
+            out[c] = dict(dias=0, conf=True, na=False, alvos=alvos, al=al, txt='sem restrições na bula (conferida)')
         elif na:
-            out[c] = dict(dias=None, conf=True, na=True, alvos=alvos, txt=na[0]['carencia'])
+            out[c] = dict(dias=None, conf=True, na=True, alvos=alvos, al=al, txt=na[0]['carencia'])
         else:
-            out[c] = dict(dias=None, conf=False, na=False, alvos=alvos, txt=str(us[0]['carencia']))
+            out[c] = dict(dias=None, conf=False, na=False, alvos=alvos, al=al, txt=str(us[0]['carencia']))
     import dados_mip as DM   # Frente E: usos por ha (dose, unidade, nº máximo, conferido) pela mesma derivação do AG-01 (dados_mip.uso)
     for c, r in out.items():
         r['fx'] = [dict(dmin=x['dmin'], dmax=x['dmax'], un=x['un'], mx=x['mx'], conf=x['conf'], calda=x['calda'])
@@ -229,13 +230,28 @@ function carTals(nome){ const s=String(nome||''); const out=[]; const add=(tid,p
   return out; }
 // cultura de um talhão da ordem: a do cultivo da ordem nova (outra safra); senão a do talhão (trava legal da O.S. e "Usar na O.S." do AG-07)
 function carCult(o,tid){ const cv=String((o&&o.osc&&o.osc.novo&&o.osc.novo.cultura)||'').split(' ')[0]; return cv||((CARD.tal[tid]||{}).cult||''); }
+// operação que aplica defensivo: só nela entra produto vindo da Consulta Agrofit (CTL-5, revisão S3-1; dano evitado: reservar e consumir
+// agrotóxico em calagem, sexagem, fertirrigação ou colheita, com estoque e custo errados e aplicação registrada que não aconteceu)
+const CAR_OPS_DEF=['Pulverização','Tratamento de sementes'];
+function carOpDef(op){ return CAR_OPS_DEF.indexOf(String(op||''))>=0; }
+// alvo × referência conferida da fazenda (P = CARD.prod[produto], cu = cultura): devolve o alvo como a referência o escreve, ou '' se ela não o
+// cobre. Casa o nome inteiro, o nome antes de " · " ou " (" e cada item entre parênteses, sem acento e sem caixa. Herbicida: a referência
+// lista grupos de plantas daninhas (não espécies), e a espécie registrada vale. Regra única: AG-07 ("Usar na O.S.") e trava da O.S. (CTL-5, S3-3).
+function carAlvoRef(P,cu,alvo){ const u=P&&P.usos?P.usos[cu]:null; const a=String(alvo||'').trim(); if(!u||!a) return '';
+  const n=t=>String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim(); const na=n(a);
+  for(const r of (u.al||[])){ const cab=r.split(' · ')[0], base=cab.split(' (')[0].trim(); if(na===n(r)||na===n(cab)||na===n(base)) return base;
+    const par=/\(([^)]*)\)/.exec(cab); if(par){ const it=par[1].split(',').map(x=>x.trim()).find(x=>n(x)===na); if(it) return it; } }
+  if(/^Herbicida/.test(P.classe||'')&&(u.al||[]).length) return a.charAt(0).toLowerCase()+a.slice(1);
+  return ''; }
 '''
 
 
 def js_local():
-    """só o local e a cultura das ordens (AG-07 · Usar na O.S.): talhões com nome e cultura + JS_LOCAL, sem o motor de carência."""
+    """só o local, a cultura e a operação das ordens e o alvo da referência (AG-07 · Usar na O.S.): talhões com nome e cultura, alvos da
+    referência por produto e JS_LOCAL, sem o motor de carência."""
     tal = _talhoes()
-    c = dict(tal={k: dict(nome=v['nome'], cult=v['cult']) for k, v in tal.items()}, nomes=_nomes(tal))
+    prod = {k: dict(classe=v['classe'], usos={cu: dict(al=u['al']) for cu, u in v['usos'].items()}) for k, v in _produtos().items() if v['usos']}   # alvo × referência (carAlvoRef)
+    c = dict(tal={k: dict(nome=v['nome'], cult=v['cult']) for k, v in tal.items()}, nomes=_nomes(tal), prod=prod)
     return 'const CARD = ' + json.dumps(c, ensure_ascii=False).replace('</', '<\\/') + ';\n' + JS_LOCAL
 
 

@@ -992,9 +992,10 @@ def agf_dados():
     lac=A.lacunas_resist(ind)
     if lac: print(f'AVISO AG-07: {len(lac)} ingrediente(s) químico(s) sem código IRAC/FRAC/HRAC (rotação cai no grupo químico): {lac[:12]}')
     # produtos que a O.S. aceita no "Incluir produto" (o mesmo catálogo da tela O.S.: plano + lotes): "Usar na O.S." só oferece estes (CTL-5)
-    from areas.processo_os import _nova_ordem_dados
+    from areas.processo_os import _nova_ordem_dados, _ordens
     osp=sorted({x['p'] for x in _nova_ordem_dados()['prods']})
-    return dict(ref=ref,osp=osp,grupos={k:list(v) for k,v in A.GRUPOS_RESIST.items()},grupo_ref=gref,gq_gen=[_agf_norm(g) for g in A.GQ_GENERICOS],
+    osop={o['id']:o['atv']['op'] for o in _ordens()}   # operação de cada ordem do registro (ordem nova: osc.novo.atv.op): "Usar na O.S." só em pulverização (CTL-5, S3-1)
+    return dict(ref=ref,osp=osp,osop=osop,grupos={k:list(v) for k,v in A.GRUPOS_RESIST.items()},grupo_ref=gref,gq_gen=[_agf_norm(g) for g in A.GQ_GENERICOS],
                 planos=planos,culturas=AGF_CULTURAS,consulta=A.CONSULTA['data'],oficial=A.CONSULTA['link'])
 
 def _agf_norm(s):
@@ -1432,7 +1433,9 @@ function agCref(r,p,cn){ const mc=!!p&&r.conc.length===r.ids.length&&r.ids.every
 // ---------- uso na O.S. (CTL-5 · RL-E3) ----------
 // ordens A liberar da cultura: a cultura de cada talhão da ordem pela mesma regra da trava legal (carCult, dados_carencia)
 try{ window.__agx={AGX,AG_REF,agAlvoT,agOsCand}; }catch(e){}   // inspeção nos testes (ctl5_test, agrofit_test), como window.__cen
-function agOsCand(c,cn){ return Object.values((c&&c.ordens)||{}).filter(o=>o.etapa==='A liberar'&&/^OS-/.test(o.id)&&carTals(o.talhao).some(t=>carCult(o,t.tid)===cn))
+// e de operação que aplica defensivo (carOpDef, dados_carencia: pulverização ou tratamento de sementes; revisão do CTL-5, S3-1)
+function agOsOp(o){ const n=o&&o.osc&&o.osc.novo; return (n&&n.atv&&n.atv.op)||((AGF.osop||{})[o.id])||''; }
+function agOsCand(c,cn){ return Object.values((c&&c.ordens)||{}).filter(o=>o.etapa==='A liberar'&&/^OS-/.test(o.id)&&carOpDef(agOsOp(o))&&carTals(o.talhao).some(t=>carCult(o,t.tid)===cn))
   .sort((a,b)=>AGC.compare(a.id,b.id)); }
 // ---------- render ----------
 function PREVALS(self,v){
@@ -1557,25 +1560,35 @@ function agFichaVals(self,v){ const st=self.state; const pi=(st.agf&&AGX.st==='o
   const PU=uOk?AGX.PU[pi]:[]; const meus=cul!==''?agUni(PU.filter(x=>x[0]===Number(cul)||(p.todas&&!isTD&&x[0]===TD)).map(x=>x[1])):[];
   const alSort=(a,b)=>AGC.compare(agAlvoT(a,true),agAlvoT(b,true)); meus.sort(alSort);
   v.af_alvo=al; v.af_alvoDis=cul===''||!uOk; v.af_setalvo=(e)=>self.setState({af_alvo:e.target.value});
-  v.af_alvos=[{v:'',t:!uOk?'Carregando alvos…':(cul===''?'Escolha a cultura primeiro':('Escolha o alvo ('+agNf(meus.length)+')'))}]
-    .concat(meus.map(a=>({v:String(a),t:agAlvoT(a,true)+' · '+((I.alvos[a]||[''])[0]||'—')})));
   // uso na O.S. (CTL-5 · RL-E3): leva produto da fazenda, cultura e alvo ao "Ajustar antes de liberar" da ordem; a consulta não emite receituário
   const F=agFaz(p,c), nf=F?F.nf.filter(n=>(AGF.osp||[]).indexOf(n)>=0):[], pf=nf.length===1?nf[0]:(nf.indexOf(st.af_pf)>=0?st.af_pf:'');
+  // alvo × referência conferida da fazenda (carAlvoRef, a mesma regra da trava da O.S.; revisão do CTL-5, S3-3): a O.S. grava o alvo como a
+  // referência o escreve, e só alvo coberto por ela liga "Usar na O.S." (a lista continua com todos os alvos do registro, para a consulta)
+  const refDe=(n,a)=>{ const x=I.alvos[a]||['',[]]; for(const t of (x[1]||[]).concat(x[0]?[x[0]]:[])){ const r=carAlvoRef(CARD.prod[n],cn,t); if(r) return r; } return ''; };
+  const cob=nf.length&&cul!==''&&!isTD?meus.filter(a=>nf.some(n=>!!refDe(n,a))):[], marca=cob.length>0&&cob.length<meus.length;
+  v.af_alvos=[{v:'',t:!uOk?'Carregando alvos…':(cul===''?'Escolha a cultura primeiro':('Escolha o alvo ('+agNf(meus.length)+')'))}]
+    .concat(meus.map(a=>({v:String(a),t:agAlvoT(a,true)+' · '+((I.alvos[a]||[''])[0]||'—')+(marca&&cob.indexOf(a)>=0?' · na referência da fazenda':'')})));
+  const ar=(al!==''&&pf)?refDe(pf,Number(al)):'', refAl=((((CARD.prod[pf]||{}).usos||{})[cn]||{}).al)||[];
   v.af_hasPf=nf.length>1; v.af_pf=pf; v.af_pfs=[{v:'',t:'Escolha o produto ('+agNf(nf.length)+')'}].concat(nf.map(n=>({v:n,t:n}))); v.af_setpf=(e)=>self.setState({af_pf:e.target.value});
   const cand=(cul!==''&&!isTD)?agOsCand(c,cn):[], ord=cand.some(o=>o.id===st.af_ord)?st.af_ord:(cand.length===1?cand[0].id:'');
   v.af_ord=ord; v.af_ordDis=!cand.length; v.af_setord=(e)=>self.setState({af_ord:e.target.value});
-  v.af_ords=[{v:'',t:cul===''||isTD?'Escolha a cultura primeiro':(cand.length?'Escolha a ordem ('+agNf(cand.length)+')':'Nenhuma ordem A liberar em '+cn)}]
+  v.af_ords=[{v:'',t:cul===''||isTD?'Escolha a cultura primeiro':(cand.length?'Escolha a ordem ('+agNf(cand.length)+')':'Nenhuma ordem de pulverização A liberar em '+cn)}]
     .concat(cand.map(o=>({v:o.id,t:o.id+' · '+o.tipo+' · '+o.talhao})));
-  const pode=cul!==''&&!isTD&&al!==''&&uOk&&!!pf&&!!ord; v.af_usarDis=!pode; v.af_usarSt=pode?'':'opacity:.45;cursor:not-allowed;';
-  v.af_usar=()=>{ if(!pode) return; try{ location.href='OS.dc.html#'+ord+':usar='+[pf,cn,an].map(encodeURIComponent).join('|'); }catch(e){} };
+  // quem age (perfil de demonstração; CTL-3): incluir produto na O.S. é decisão do agrônomo; sem o papel, o botão fica desligado e diz quem decide
+  const PF=g2perfil(), agr=g2papel(PF,'agronomo');
+  const pode=cul!==''&&!isTD&&al!==''&&uOk&&!!pf&&!!ar&&!!ord&&agr; v.af_usarDis=!pode; v.af_usarSt=pode?'':'opacity:.45;cursor:not-allowed;';
+  v.af_usar=()=>{ if(!pode) return; try{ location.href='OS.dc.html#'+ord+':usar='+[pf,cn,ar].map(encodeURIComponent).join('|'); }catch(e){} };
   v.af_dica=!uOk?'Carregando os usos registrados…':(cul===''?'Escolha a cultura e o alvo do uso registrado para usar o produto numa O.S.'
     :(isTD?'Uso registrado em “Todas as culturas”: escolha no campo Cultura a cultura do talhão (ex.: '+(extra.slice(0,2).map(x=>I.culturas[x][0]).join(', ')||'Soja')+').'
-    :(al===''?((viaTD?'Registro sem uso específico em '+cn+': vale o uso em “Todas as culturas”. ':'')+'Escolha o alvo.')
+    :(al===''?((viaTD?'Registro sem uso específico em '+cn+': vale o uso em “Todas as culturas”. ':'')+'Escolha o alvo.'+(marca?' Os marcados “na referência da fazenda” podem ir para a O.S.':''))
     :(!nf.length?(F?('A fazenda tem '+F.nf.join(', ')+' só como referência de bula (sem lote nem plano): cadastre o produto para usá-lo numa O.S.')
       :'Sem produto da fazenda com este ingrediente ativo: cadastre o produto para usá-lo numa O.S.')
-    :(!cand.length?'Nenhuma ordem A liberar em '+cn.toLowerCase()+'. A ordem nasce do plano (Nova ordem, na O.S.) ou da vistoria (Pragas e doenças).'
-    :(!pf?'Escolha o produto da fazenda.':(!ord?'Escolha a ordem A liberar.'
-    :'Abre a '+ord+' em Ajustar antes de liberar com '+pf+' incluído para '+an+'. A agrônoma informa a dose; ao liberar, a O.S. confere registro, dose e nº de aplicações e grava a aprovação. Esta consulta não emite receituário.')))))));
+    :(!pf?'Escolha o produto da fazenda.'
+    :(!ar?(an+' não está na referência conferida de '+pf+' em '+cn.toLowerCase()+(refAl.length?' ('+refAl.join('; ')+')':' (sem uso nesta cultura)')+': a O.S. só grava alvo da referência.'+(cob.length?' Escolha um alvo marcado “na referência da fazenda”.':''))
+    :(!cand.length?'Nenhuma ordem de pulverização A liberar em '+cn.toLowerCase()+'. A ordem nasce do plano (Nova ordem, na O.S.) ou da vistoria (Pragas e doenças).'
+    :(!ord?'Escolha a ordem A liberar.'
+    :(!agr?'Incluir '+pf+' na '+ord+' é decisão de '+g2quem('agronomo')+'; o perfil '+PF.t+' só consulta.'
+    :'Abre a '+ord+' em Ajustar antes de liberar com '+pf+' incluído para '+ar+'. A agrônoma informa a dose; ao liberar, a O.S. confere registro, dose e nº de aplicações e grava a aprovação. Esta consulta não emite receituário.')))))))));
   // usos registrados
   const fq=g2norm(st.af_q||'').split(/\s+/).filter(Boolean), casa=(t)=>fq.every(w=>t.indexOf(w)>=0);
   v.af_q=st.af_q||''; v.af_setq=(e)=>self.setState({af_q:e.target.value,af_all:false}); v.af_usosLoad=!uOk;

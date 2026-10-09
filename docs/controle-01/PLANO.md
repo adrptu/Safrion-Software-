@@ -204,6 +204,12 @@ python3 quantidade_test.py && python3 carencia_test.py unit && python3 mip_unit_
 - o CD-01 nomeia o ponto como a IR-04 ("Outorga SINT-002/0000"; antes "Certidão");
 - testes: `outorga_unit_test.py` (base 2/18 → 18/18) e `ctl5_test.py` E3.1–E3.7 (1440 e 390 px).
 
+**Correções da revisão (09/10, executado):**
+- vigência na data de cada dia da janela, não só hoje (S3-2): `captacao()` leva `outs` (número, L/s, h/dia, vencimento, renovação); `irrOutDia` dá a vazão e o volume do dia; sem outorga vigente no dia → "Outorga vencida em dd/mm/aaaa · captação" com o gestor; o aviso só aparece se a janela passa do vencimento ("Outorga SINT-002/0000 vence em 20/11/2026 · depois, 144 L/s");
+- cadastro sem outorga de irrigação: "Sem outorga de irrigação no cadastro" (antes "Outorga vencida · sem captação no cadastro");
+- IR-02 e IR-04 usam a mesma conta do uso do dia (`irrUsoDia`, 0 % sem outorga); a IR-04 diz qual outorga vence e quanto sai ("SINT-002/0000 vence em 20/11/2026 (42 de 186 L/s)") e leva a "Renovar no cadastro ›" (CD-01 › Água);
+- testes: `outorga_unit_test.py` P5–P7 e J15–J20 (na a396c51: 16/27 → 27/27, executado em 09/10; P5 já passava: cobre os mutantes vivos E3-o/p/q/r); `ctl5_test.py` E3.2b e E3.8; `irtest.py` IR-02 (a janela de hoje não tem mais aviso de outorga).
+
 ### CTL-4 · B (início com entrega parcial)
 
 **Arquivos:**
@@ -368,7 +374,15 @@ python3 quantidade_test.py && python3 carencia_test.py unit && python3 mip_unit_
 - no lugar do link "Preparar receituário em Pragas e doenças", o AG-07 oferece "Usar na O.S." (pedido do integrador): produto da fazenda, cultura e alvo vão ao "Ajustar antes de liberar" da ordem A liberar escolhida, só as da cultura (`carCult`, a mesma regra da trava legal; `dados_carencia.JS_LOCAL`);
 - dose em branco; a trava legal do CTL-1 decide; a aprovação (CMD-42) grava produto, dose e alvo; a gaveta de receituário saiu;
 - fica: `catalogo.json` (AG-07, do PRD) ainda diz "Preparar receituário → FO-04" (mudança de contrato: Codex e proprietário);
-- testes: `usar_os_unit_test.py` (base 6/16 → 16/16), `agrofit_test.py` 9, 12, 14, 14b e 15, `ctl5_test.py` E2.1–E2.13.
+- testes: `usar_os_unit_test.py` (base 6/17 → 17/17), `agrofit_test.py` 9, 12, 14, 14b e 15, `ctl5_test.py` E2.1–E2.13.
+
+**Correções da revisão (09/10, executado):**
+- só ordem de operação que aplica defensivo (pulverização ou tratamento de sementes; `carOpDef`, `dados_carencia.JS_LOCAL`) é candidata no AG-07, e o link da O.S. confere a operação antes de incluir (S3-1; dano evitado: reserva e consumo de agrotóxico em calagem, sexagem, fertirrigação ou colheita);
+- alvo × referência conferida da fazenda (S3-3): `carAlvoRef` é a regra única do AG-07 e da trava da O.S. (`osUsoItem`); o AG-07 marca "na referência da fazenda" e só liga "Usar na O.S." para alvo coberto; a O.S. grava o alvo como a referência o escreve ("antracnose") e recusa alvo fora dela;
+- perfil sem o papel de agrônomo: o AG-07 desliga o botão e diz quem decide (S4-1); chegada à O.S. com mensagem "Vindo da Consulta Agrofit: …" e a linha incluída destacada por 1,5 s (`.g2flash` existente; S4-2);
+- testes: `usar_os_unit_test.py` U4, U5, U14–U18, F5 e F6 (na a396c51: 15/24 → 24/24, executado em 09/10); `ctl5_test.py` E2.2, E2.3b, E2.4b, E2.9, E2.10b, E2.11c, E2.11d e E2.13 (OS-0501); `agrofit_test.py` 12, 14, 14b e 15 (só a ordem de pulverização).
+
+**Decisão pendente (Codex e proprietário, não é defeito do CTL-5):** pelo "Usar na O.S." e pelo "Incluir produto" da O.S., a ordem é liberada com agrotóxico e com a CMD-42, mas sem receituário gravado (REC/RA; quem grava é o AG-01). PRD 41.2: "o clique interno não substitui documento legal". A liberação de agrotóxico na O.S. passa a exigir receituário gravado? O `catalogo.json` ainda diz "Preparar receituário → FO-04". O "Incluir produto" da O.S. também aceita agrotóxico em ordem que não pulveriza (anterior ao CTL-5).
 
 ---
 

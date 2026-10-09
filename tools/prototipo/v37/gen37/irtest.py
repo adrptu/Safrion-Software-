@@ -56,7 +56,7 @@ try:
     J(f"({SETV})('select[aria-label=\"Filtrar por fazenda\"]','Lagoa Grande')"); time.sleep(.5)
     clk('Programar irrigação'); sv('#pg_sel', 'PV01'); d = J("[...document.querySelectorAll('aside[role=dialog] > div, aside[role=dialog] [role=list]')].map(e=>e.innerText).join(' ')").replace('\n', ' ')
     dl = d.lower()   # innerText traz o text-transform dos rótulos: comparar sem caixa
-    chk('IR-02: painel Programar irrigação com necessidade, passadas e janela sugerida (PV01, Lagoa Grande)', 'pivô 1' in dl and 'janela sugerida' in dl and 'pronta' in dl and 'outorga sint-002/0000 vence em 20/11/2026' in dl and 'em renovação' not in dl, d[-500:])   # CTL-5: aviso da outorga vem do cadastro
+    chk('IR-02: painel Programar irrigação com necessidade, passadas e janela sugerida (PV01, Lagoa Grande)', 'pivô 1' in dl and 'janela sugerida' in dl and 'pronta' in dl and 'vence em 20/11/2026' not in dl and 'em renovação' not in dl, d[-500:])   # CTL-5 (revisão S3-2): a janela de hoje não passa do vencimento da SINT-002/0000 (20/11/2026): sem aviso de outorga
     clk('Programar', 'aside[role=dialog]'); t = T()
     chk('IR-02: nova tarefa OS-0607 liberada automaticamente (água sem produto)', 'OS-0607' in t and 'Liberadas' in t and 'Liberadas' in ROW('OS-0607'), t)
     clk('Programar irrigação'); sv('#pg_sel', 'PV01'); d = J("[...document.querySelectorAll('aside[role=dialog] [role=status]')].map(e=>e.innerText).join(' ')") or ''

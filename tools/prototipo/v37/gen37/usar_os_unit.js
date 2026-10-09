@@ -11,15 +11,23 @@ const ids=(L)=>L.map(o=>o.id).join(',');
 // ---- U1 · cultura da ordem: uma regra só (carCult) para a trava legal da O.S. e para os candidatos do AG-07
 { const c=C(); const lin=[]; Object.values(c.ordens).forEach(o=>carTals(o.talhao).forEach(t=>lin.push([o.id,t.tid,carCult(o,t.tid),CARD.tal[t.tid].cult])));
   ok('U1 semente: cultura de cada talhão das '+Object.keys(c.ordens).length+' ordens = a do talhão no cadastro ('+lin.length+' pares)', lin.length>20&&lin.every(x=>x[2]===x[3]), lin.filter(x=>x[2]!==x[3]).slice(0,4)); }
-{ const c=C(); osc_nova(c,{id:'OS-0440',tipo:'Herbicida pós-emergente',talhao:'T1-A',area:160,versao:'v1',resp:'Marcos',ins:[],selos:[]}); const o=c.ordens['OS-0440']; o.osc.novo.cultura='Milho safrinha';
+{ const c=C(); osc_nova(c,{id:'OS-0440',tipo:'Herbicida pós-emergente',talhao:'T1-A',area:160,versao:'v1',resp:'Marcos',ins:[],selos:[],atv:{op:'Pulverização'}}); const o=c.ordens['OS-0440']; o.osc.novo.cultura='Milho safrinha';
   ok('U2 ordem nova da safrinha no T1-A: cultura do cultivo (Milho), não a do talhão (Soja)', carCult(o,'T1')==='Milho', carCult(o,'T1'));
   ok('U3 AG-07: a ordem nova de milho é candidata em Milho e não em Soja', ids(agOsCand(c,'Milho'))==='OS-0440'&&ids(agOsCand(c,'Soja')).indexOf('OS-0440')<0, [ids(agOsCand(c,'Milho')),ids(agOsCand(c,'Soja'))]); }
 
-// ---- U4 · candidatos do AG-07: só O.S. A liberar (não OB, não liberada) da cultura escolhida
+// ---- U4 · candidatos do AG-07: só O.S. A liberar (não OB, não liberada) da cultura escolhida e de operação que aplica defensivo
+// (revisão do CTL-5, S3-1: antes entravam Calagem, Sexagem e Fertirrigação, e a reserva de agrotóxico ia para operação que não pulveriza)
 { const c=C(); const s=ids(agOsCand(c,'Soja')), m=ids(agOsCand(c,'Mamão')), f=ids(agOsCand(c,'Feijão')), mi=ids(agOsCand(c,'Milho')), ca=ids(agOsCand(c,'Café'));
-  ok('U4 semente: Soja = OS-0430, OS-0431 · Mamão = OS-0501, OS-0502, OS-0511 · Feijão = OS-0418 · Milho e Café = nenhuma', s==='OS-0430,OS-0431'&&m==='OS-0501,OS-0502,OS-0511'&&f==='OS-0418'&&mi===''&&ca==='', [s,m,f,mi,ca]); }
+  ok('U4 semente: Soja = OS-0430 (dessecação) · Mamão = OS-0501 (dessecação) · Feijão, Milho e Café = nenhuma', s==='OS-0430'&&m==='OS-0501'&&f===''&&mi===''&&ca==='', [s,m,f,mi,ca]); }
 { const c=C(); const r=T(()=>osc_liberar(c,'OS-0430',false,'','Ana'));
-  ok('U5 liberada sai da lista: depois de liberar a OS-0430, Soja = OS-0431', r.ok&&ids(agOsCand(c,'Soja'))==='OS-0431', [r,ids(agOsCand(c,'Soja'))]); }
+  ok('U5 liberada sai da lista: depois de liberar a OS-0430, Soja = nenhuma', r.ok&&ids(agOsCand(c,'Soja'))==='', [r,ids(agOsCand(c,'Soja'))]); }
+{ const c=C(); const no=(id,tipo,op,cult,tal)=>osc_nova(c,{id,tipo,talhao:tal||'Pivô 15',area:36.17,versao:'v1',resp:'—',ins:[],selos:[],atv:{op},cultura:cult||'Mamão Formosa'});
+  no('OS-0440','Colheita · semana 40','Colheita de frutas'); no('OS-0441','Pulverização · Controle de ácaro-rajado','Pulverização'); no('OS-0442','Fertirrigação · Ureia 45%','Fertirrigação');
+  const m=ids(agOsCand(c,'Mamão'));
+  ok('U14 NEGATIVO Calagem (OS-0502), Sexagem e desbaste (OS-0511), Fertirrigação (OS-0418, OS-0442) e Colheita (OS-0440) não são candidatas; pulverização nova (OS-0441) é',
+     m==='OS-0441,OS-0501'&&ids(agOsCand(c,'Feijão'))==='', [m,ids(agOsCand(c,'Feijão'))]); }
+{ const c=C(); c.ordens['OB-0199']={id:'OB-0199',tipo:'Pulverização · teste',talhao:'Pivô 13',area:10,etapa:'A liberar',versao:'v1',realizado:0,saldo:10,resp:'—',ins:[],req:null,selos:[],ap:[],reservado:false,osc:{novo:{atv:{op:'Pulverização'},cultura:'Mamão'}}};
+  ok('U15 NEGATIVO ordem OB (beneficiamento) nunca é candidata, nem com operação de pulverização', ids(agOsCand(c,'Mamão'))==='OS-0501', ids(agOsCand(c,'Mamão'))); }
 
 // ---- U6 · caminho normal: Tebuconazol 200 EC (Consulta Agrofit: mamão × antracnose) incluído na OS-0501 com 0,8 L/ha
 { const c=C(); const o0=c.ordens['OS-0501'], a0=o0.area, v0=o0.versao;
@@ -47,6 +55,20 @@ const M=(fn)=>cenMudar(null,fn);
   const r1=M(c=>osc_ajustar(c,'OS-0501',a,{},'',[],add,false,'Ana')); const n1=cenGet().ordens['OS-0501'].ins.length, v1=cenGet().ordens['OS-0501'].versao;
   const r=M(c=>osc_ajustar(c,'OS-0501',a,{},'',[],add,false,'Ana')); const o=cenGet().ordens['OS-0501'];
   ok('U12 REPETIÇÃO: usar o mesmo produto de novo na mesma ordem é recusado ("já está na ordem"); não duplica nem muda a versão', !r1.erro&&/já está na ordem/.test(r.erro||'')&&o.ins.length===n1&&o.versao===v1, [r1,r,n1,v1]); }
+// ---- U16..U18 · alvo × referência conferida da fazenda (revisão do CTL-5, S3-3): a trava legal única confere o alvo como confere a dose
+{ cenReset(); const o0=JSON.parse(JSON.stringify(cenGet().ordens['OS-0501']));
+  const r=M(c=>osc_ajustar(c,'OS-0501',o0.area,{},'',[],[{p:'Acetamiprido 200 SP',dose:0.3,un:'kg',g:'Inseticida',alvo:'Cochonilha'}],true,'Ana'));
+  ok('U16 RECUSA alvo fora da referência: Acetamiprido 200 SP para Cochonilha no mamão (referência: mosca-branca) → "Cochonilha não está na referência conferida em mamão (mosca-branca)"; nada gravado',
+     /Cochonilha não está na referência conferida em mamão \(mosca-branca\)/.test(r.erro||'')&&nada('OS-0501',o0), r); }
+{ cenReset(); const o0=cenGet().ordens['OS-0501'];
+  const r=M(c=>osc_ajustar(c,'OS-0501',o0.area,{},'',[],[{p:'Acetamiprido 200 SP',dose:0.3,un:'kg',g:'Inseticida',alvo:'mosca-branca'}],true,'Ana'));
+  const ev=((cenGet().ordens['OS-0501'].osc||{}).ev||[]).find(e=>e.cmd==='CMD-42')||{};
+  ok('U17 alvo da referência (mosca-branca) passa: CMD-42 "Acetamiprido 200 SP 0,3 kg/ha para mosca-branca"', !r.erro&&/Acetamiprido 200 SP 0,3 kg\/ha para mosca-branca \(CMD-42\)/.test(ev.t||''), [r,ev.t]); }
+{ const P=(n)=>CARD.prod[n]; const casos=[['Tebuconazol 200 EC','Mamão','Antracnose','antracnose'],['Abamectina 18 EC','Mamão','Ácaro-branco','ácaro-branco'],['Acetamiprido 200 SP','Mamão','Cochonilha',''],
+    ['Cletodim 240','Soja','Capim-amargoso','capim-amargoso'],['Glifosato 480','Mamão','capim-colchão','capim-colchão'],['Tebuconazol 200 EC','Soja','Antracnose','']];
+  const got=casos.map(x=>typeof carAlvoRef==='function'?carAlvoRef(P(x[0]),x[1],x[2]):'?');
+  ok('U18 regra única do alvo (carAlvoRef: AG-07 e trava da O.S.): nome igual, nome antes de "·" ou "(", ou item entre parênteses; herbicida: referência por grupo de plantas daninhas cobre a espécie; sem uso na cultura: nada',
+     got.every((g,i)=>g===casos[i][3]), got); }
 cenReset();
 // ---- U13 · ordens da semente sem alvo: o texto da aprovação não muda
 { const c=C(); T(()=>osc_liberar(c,'OS-0430',false,'','Ana')); const t=((c.ordens['OS-0430'].osc||{}).ev||[]).find(e=>e.cmd==='CMD-42')||{};

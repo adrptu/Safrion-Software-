@@ -221,10 +221,6 @@ def ir02():
             f'<sc-if value="{H("pg_nova")}" hint-placeholder-val="{T()}"><button type="button" onClick="{H("pg_ok")}" style="{BTN_ST(True,True)}">{H("pg_okT")}</button></sc-if>')
     EXTRA.append(painel('pg',pg_corpo,pg_rod))
     EXTRAJS[0]=prefixo()+JS_COMUM+r"""
-function irrUsoDia(s,cid,k){ const cp=s.capt[cid]; const ws=irrComprometidas(s,null).filter(w=>w.capt===cid); const d0=k*1440,d1=d0+1440; let vol=0,pico=0;
-  ws.forEach(w=>{ const a=Math.max(d0,w.ini),b=Math.min(d1,w.fim); if(b>a) vol+=w.ls*(b-a)*0.06; });
-  ws.filter(w=>w.fim>d0&&w.ini<d1).forEach(w=>{ const t=Math.max(w.ini,d0); const q=ws.filter(z=>z.ini<=t&&z.fim>t).reduce((a,z)=>a+z.ls,0); if(q>pico) pico=q; });
-  const cap=irrCapDia(cp); return {vol,pico,pct:cap>0?vol/cap*100:0}; }
 function irrBr(iso){ const a=String(iso||'').split('-'); return a.length===3?a[2]+'/'+a[1]+'/'+a[0]:'—'; }
 function PREVALS(self,v){ irrOuvir(self); const s=irrGet(); const fz=irrFazK(self); irrFazVals(self,v); const c=irrFaixa(v,s,fz);
   irrHashOuvir(self,(h)=>{ if(h.indexOf('programar')!==0) return; const sid=h.split('=')[1]||''; const x=irrGet().setores[sid]; if(x) irrFazDe(self,x.faz); self.setState({pg:{sid:x?sid:''}}); });
@@ -247,7 +243,7 @@ function PREVALS(self,v){ irrOuvir(self); const s=irrGet(); const fz=irrFazK(sel
     const u=irrUsoDia(s,cid,0);
     return {id:'c-'+cid,v:{},s:{item:cp.nome,pend:cp.st},kids,
       p:{item:[{k:'b',t:cp.nome},{k:'br',t:''},{k:'mut',t:'outorga '+cp.outorga}],setor:[{k:'mut',t:kids.length+(kids.length===1?' ordem':' ordens')}],
-         jan:[{k:'txt',t:'hoje: pico '+irrN(u.pico)+' de '+irrN(cp.ls)+' L/s'},{k:'br',t:''},{k:'mut',t:'volume do dia '+irrN(u.pct,0)+' % de '+irrN(irrCapDia(cp))+' m³'}],
+         jan:[{k:'txt',t:'hoje: pico '+irrN(u.pico)+' de '+irrN(cp.ls)+' L/s'},{k:'br',t:''},{k:'mut',t:'volume do dia '+irrN(u.pct,0)+' % de '+irrN(u.cap)+' m³'}],
          lam:[{k:'mut',t:''}],pend:[{k:'chip',t:cp.st,c:irrOutC(cp.st)},{k:'br',t:''},{k:'mut',t:irrOutVenc(s,cp)}]}}; });
   IRG('g_ag').rows=rows;
   const t=[]; if(c.conf) t.push(c.conf+(c.conf>1?' conflitos':' conflito')); if(c.jan) t.push(c.jan+(c.jan>1?' janelas a definir':' janela a definir'));
@@ -567,10 +563,11 @@ function PREVALS(self,v){ irrOuvir(self); const s=irrGet(); const fz=irrFazK(sel
       p:{nome:[{k:'b',t:f.nome},{k:'br',t:''},{k:'mut',t:f.gr+' · '+f.un}],at:[{k:'txt',t:f.at===null||f.at===undefined?'—':irrQuando(f.at)}],cal,estado:[{k:'chip',t:stT,c:ESTC[f.st]||'gray'}],efe:[{k:f.st==='Ativa'?'mut':'txt',t:efe}]}}; });
   const cs=Object.keys(s.capt).filter(k=>!fz||s.capt[k].faz===fz);
   IRG('g_cap').rows=cs.map(k=>{ const cp=s.capt[k]; const ss=Object.keys(s.setores).filter(z=>s.setores[z].capt===k&&s.setores[z].bal);
-    const ws=irrComprometidas(s,null).filter(w=>w.capt===k); let vol=0; ws.forEach(w=>{ const a=Math.max(0,w.ini),b=Math.min(1440,w.fim); if(b>a) vol+=w.ls*(b-a)*0.06; }); const cap=irrCapDia(cp); const pct=cap>0?vol/cap*100:0;
+    const u=irrUsoDia(s,k,0), vol=u.vol, cap=u.cap, pct=u.pct;   /* a mesma conta da IR-02 (irrigacao_estado.js) */
+    const ren=cp.st!=='Vigente'?[{k:'br',t:''},{k:'link',t:'Renovar no cadastro ›',h:'CD-01.dc.html#aba=agua'}]:[];   /* quem renova: o gestor, na aba Água do CD-01 (a fonte) */
     return {id:k,v:{ls:cp.ls,venc:cp.venc,nome:cp.nome,outorga:cp.outorga+' · '+irrN(cp.ls)+' L/s × '+irrN(cp.h,1,0)+' h/dia · '+irrN(cap)+' m³/dia',obs:cp.obs||'—'},s:{nome:cp.nome,st:cp.st,uso:irrN(pct,0)+' %',set:ss.length+''},
       p:{nome:[{k:'b',t:cp.nome},{k:'br',t:''},{k:'mut',t:'outorga '+cp.outorga+(fz?'':' · '+s.faz[cp.faz].nome)}],ls:[{k:'txt',t:irrN(cp.ls)+' L/s'},{k:'br',t:''},{k:'mut',t:irrN(cp.h,1,0)+' h/dia'}],
-         st:[{k:'chip',t:cp.st,c:irrOutC(cp.st)},{k:'br',t:''},{k:'mut',t:irrOutVenc(s,cp)}],uso:[{k:'txt',t:irrN(vol)+' m³ · '+irrN(pct,0)+' % do dia'}],
+         st:[{k:'chip',t:cp.st,c:irrOutC(cp.st)},{k:'br',t:''},{k:'mut',t:irrOutVenc(s,cp)}].concat(ren),uso:[{k:'txt',t:irrN(vol)+' m³ · '+irrN(pct,0)+' % do dia'}],
          set:[{k:ss.length?'txt':'mut',t:ss.length?ss.length+(ss.length>1?' setores':' setor'):'nenhum'}].concat(ss.length&&ss.length<=3?[{k:'br',t:''},{k:'mut',t:ss.map(z=>s.setores[z].nome).join(', ')}]:[])}}; });
   v.hs_t=c.sensT||'Fontes em dia'; v.hs_st=chipSt(c.sens?'yellow':'green');
   v.des=fz!=='LG'&&fz!=='BV'; v.tem=fz!=='BV'; v.vazio=fz==='BV'; v.vazioT='Boa Vista não tem fonte de clima ou sensor cadastrado.'; }
