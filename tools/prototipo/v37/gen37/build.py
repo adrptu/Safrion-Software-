@@ -20,8 +20,9 @@ for a in AREAS:
         FALHAS.append((a,repr(ex))); traceback.print_exc()
 if FALHAS: print('MÓDULOS COM FALHA:',FALHAS)
 # telas que deixaram de ser geradas (01/10: O.S. sem revisão; o agrônomo libera na tela O.S.): o arquivo de um build anterior sai do project/ e do canvas
+# 06/10 (colheita, D-16): MB-10det sai; pesar e receber ficam em Produção › Cargas e recebimento (CARGA)
 # 06/10 (PLAT-01, PLAT-D02): CF-05det, BO-01det, BO-02det, BO-03 e BO-03det viram o detalhe da linha; BO-04 sai. A tela antiga sai também do _render/ (o montar_render só copia)
-for _f in ('IN-02det.dc.html','IN-02x-os0420.dc.html','CF-05det.dc.html','BO-01det.dc.html','BO-02det.dc.html','BO-03.dc.html','BO-03det.dc.html','BO-04.dc.html'):
+for _f in ('IN-02det.dc.html','IN-02x-os0420.dc.html','CF-05det.dc.html','BO-01det.dc.html','BO-02det.dc.html','BO-03.dc.html','BO-03det.dc.html','BO-04.dc.html','MB-10det.dc.html'):
     for _d in (E.P,os.path.join(os.path.dirname(E.P),'_render')):
         if os.path.exists(os.path.join(_d,_f)): os.remove(os.path.join(_d,_f))
 # tudo que foi escrito no project/ com meta conhecida entra no canvas
@@ -42,7 +43,8 @@ boards={}; order=[]; notes={}
 VIS_ROWS=[('Índice',['Main.dc.html']),('Mapa',['IN-04.dc.html'])]+[(nome,[h for _,h in items]) for nome,ic,items in MENU2 if nome!='Mapa']
 # App de campo (prioridade de teste com os primeiros clientes, DEC-2609-13): mesmo cenário da O.S. e do Estoque
 # PCM S4 (§1, §3.7): MB-09 "Máquina" e MB-09det "Ordem de manutenção" deixam de ser ocultos: ligados ao MB-01, gravam no cenário e funcionam sem sinal
-VIS_ROWS.append(('App de campo',['MB-01.dc.html','MB-02.dc.html','MB-03.dc.html','MB-04.dc.html','MB-05.dc.html','MB-09.dc.html','MB-09det.dc.html']))
+VIS_ROWS.append(('App de campo',['MB-01.dc.html','MB-02.dc.html','MB-03.dc.html','MB-04.dc.html','MB-05.dc.html','MB-07.dc.html','MB-10.dc.html',
+                                 'MB-09.dc.html','MB-09det.dc.html']))   # MB-07 e MB-10 no estado (colheita, 06/10)
 detalhes={'Agrícola':['CA-01det.dc.html','CA-01x-os0420.dc.html','OS-0424-app.dc.html','OS-0424-ficha.dc.html','AG-01det.dc.html','IR-02.dc.html','IR-03.dc.html','IR-03det.dc.html','IR-04.dc.html'],
           'Cadastros':[f for f in files if f.startswith('CD-') and 'det' in f]}
 y=0; placed=set()

@@ -124,7 +124,7 @@ try:
     chk('A7d 16/10: Inadimplente · 15 dias', selo() == 'Inadimplente · 15 dias', selo())
     go('OS.dc.html'); f = faixa()
     chk('A8d faixa vermelha na O.S.: suspenso ampliar a área, nada apagado, trabalho de campo segue', f and f['bg'] == 'rgb(253, 232, 230)' and 'suspenso' in f['t'] and 'nada foi apagado' in f['t'], f)
-    lib = J("(()=>{ const C=window.__cen; if(!C) return 'sem window.__cen'; const r=C.cenMudar(null,k=>C.osc_liberar(k,'OS-0430',false,'')); return r.erro||r.msg||''; })()")
+    lib = J("(()=>{ const C=window.__cen; if(!C) return 'sem window.__cen'; const r=C.cenMudar(null,k=>C.osc_liberar(k,'OS-0430',false,'',{k:'Ana'})); return r.erro||r.msg||''; })()")
     chk('A9a inadimplente: liberar a OS-0430 (mesmo comando da tela, osc_liberar) segue', 'liberada' in (lib or ''), lib)
     go('CD-01.dc.html'); clk('Cadastrar talhão'); t = toast()
     chk('A9b Cadastrar talhão recusa antes de abrir, com motivo e caminho', 'suspenso até o pagamento' in t and 'Configurações › Assinatura e cobrança' in t and dlg() == '', [t, dlg()[:200]])

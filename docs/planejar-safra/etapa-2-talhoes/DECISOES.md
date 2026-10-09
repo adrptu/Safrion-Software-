@@ -91,3 +91,19 @@ Fonte: os 30 achados confirmados da revisão de `../especificacao.md` (v1, 16:53
 | REG-12 | §8 reescrito: contrato → PR-A sem `dados2.py` → etapa única → PR-G → B1-B4 → PR-C; links `passo=cultivos`. |
 
 **Números que mudaram da v1 para a v2 (exec.):** P2 na S27SF de 18/03 para 24/03/2027; T3 de 12/02 para 18/02/2027; c7 de 17/03 para 23/03/2027; faixa S27SF "Ocupado 80" virou "Perene 80"; chips S27SF de 10 para 8 (A conferir 4 · Perene 2 · Livre 1 · Planejado 1); linhas S27SF 15 e S2627 18; lote S2627 de 3 para 4 cultivos.
+
+## 6. Revisão adversarial de 06/10/2026 (código da branch `claude/v44-saf`)
+
+Achados do revisor (papel do Codex) corrigidos no código; proteção em `saf_revisao_test.py` (navegador) e `capacidade_unit.py` (unidade).
+
+| Achado | Regra adotada |
+|---|---|
+| S1, S2.1 (R-22) | Toda leitura e gravação da etapa 2 usa só os cultivos da safra aberta (`cultsDe`): checagem de nome, área livre, Dividir (abrir e salvar) e grupo gravado. Na `g_cult_NOVA`, um grupo por safra e talhão (`grpId`), sem id repetido. |
+| S2.2 (R-14, R-19) | Uma função dá o nome final da parcela (`parcelaFinal`) para a trava, o plantio mínimo, a prévia e o que se grava. Nome digitado vale; vazio ou igual ao do talhão com área parcial vira a parcela sugerida. |
+| S3.2 (R-24) | Cultivo vinculado a ciclo perene grava `modo='vinc'`: cultura, cultivar, plantio, área e parcela ficam só leitura ao editar, e a linha não oferece Dividir. Meta e plano continuam editáveis. |
+| S3.3 | O atalho da nota só diz "Informar colheita" quando o painel do cultivo tem o campo (sem plano, safra aberta, fora de ciclo vinculado); senão, "Ver …". |
+| S3.4, S4 | "Corrigir" abre o cultivo desta safra que está na trava mostrada; a nota descreve essa trava sem repetir o rótulo. |
+| S3.5 | Atalho para outra safra com o mesmo endereço abre direto (o `hashchange` não dispara). |
+| S3.6 | Sem cultura no rascunho, o seletor mostra "Escolha a cultura"; a ocupação prevista fica "—". |
+| S3.7 (DEC-0510-03) | No Dividir, a unidade da meta é a de mercado da cultura (`unMetaDe`), sem seletor. |
+| S3.8 (R-23) | "Selecionar as N linhas visíveis" conta e marca só linhas com caixa (nunca talhão, ocupação de fora ou área livre). |

@@ -77,16 +77,24 @@ def seed():
         reqs[rid] = dict(id=rid, os=oid, estado=('Reservada' if fe == 0 else 'Entregue'), itens=itens)
     # v=2 (01/10, O.S. sem revisão): descarta o cenário salvo no navegador que ainda tinha aprov, selos de aprovação e recibo APV-
     # v=3 (04/10, SINT-C03 + PRE-REV-20261004): quantidades da semente pela regra única; o salvo com a regra antiga travaria o apontamento
-    # v=4 (1a · PCMS-M01, PCM simplificado §7.2): a manutenção entra no cenário único (c.man, com achados, leituras e recibos); a chave própria
-    # chave própria da manutenção sai. O.S., Estoque, App, CD-03 e a tela MA leem e gravam o mesmo estado; o salvo v=3 volta ao seed (cenGet).
+    # v=4 (1a · PCMS-M01, PCM simplificado §7.2): a manutenção entra no cenário único (c.man, com achados, leituras e recibos); a
+    # chave própria da manutenção sai. O.S., Estoque, App, CD-03 e a tela MA leem e gravam o mesmo estado.
+    # v=4 (06/10, colheita de ponta a ponta · docs/colheita): o estado ganha c.producao (contagens, previsões, cargas, lotes de produto,
+    # pedidos, reservas e movimentos MP-); o salvo sem ele é descartado (D-18)
+    # v=5 (09/10, junção PCM × Colheita): as duas frentes subiram para v=4 com conteúdos diferentes; o salvo v=4 de qualquer uma das
+    # duas volta ao seed (cenGet), que traz c.man e c.producao juntos.
     import dados_manutencao as DM
-    return dict(v=4, rev=0, ordens=ordens, reqs=reqs, lotes=lotes, movs=[], ocorr=[],
+    import dados_producao
+    return dict(v=5, rev=0, ordens=ordens, reqs=reqs, lotes=lotes, movs=[], ocorr=[],
                 # S4 (PCM §3.7): usuario = Ver como do app (Marcos · Zé, simulação); manFila = comandos da manutenção feitos sem sinal
-                app=dict(online=True, fila=[], turno=None, operador='Marcos', usuario='Marcos', manFila=[]), man=DM.seed())
+                app=dict(online=True, fila=[], turno=None, operador='Marcos', usuario='Marcos', manFila=[]),
+                man=DM.seed(), producao=dados_producao.seed())
 
 
 def js_prefixo():
-    return 'const CEN0 = ' + json.dumps(seed(), ensure_ascii=False).replace('</', '<\\/') + ';\n' + open(os.path.join(HERE, 'cenario.js'), encoding='utf-8').read() + '\n'
+    import dados_producao   # regras da produção (producao.js) em toda página do estado (D-22): O.S., Mapa, Estoque e app têm prPodeEncerrar
+    return ('const CEN0 = ' + json.dumps(seed(), ensure_ascii=False).replace('</', '<\\/') + ';\n' + open(os.path.join(HERE, 'cenario.js'), encoding='utf-8').read() + '\n'
+            + dados_producao.js_regras())
 
 
 def perfis_js():

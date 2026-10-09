@@ -11,7 +11,7 @@ Fonte única dos dados de demonstração e das regras da manutenção (tela MA, 
 - matriz papel × comando (D-33): Otávio (PCM), Zé (mecânico), Ana (gestora), pelo perfil de demonstração (g2lib G2_PERFIS).
 Hoje da demonstração: 23/09/2026. "Em breve" = a janela (vencimento − tolerância) começa em até 10 dias.
 vencimento() é a mesma fórmula do manVenc() do JS (paridade conferida em ma_regras_test.py e ma_planos_test.py).
-Estado v=4 (S2): estado salvo de versão antiga volta ao seed (D-47). Desde o 1a, o estado vive em c.man do cenário único (cenario.py v=4)."""
+Estado v=4 (S2): estado salvo de versão antiga volta ao seed (D-47). Desde o 1a, o estado vive em c.man do cenário único (cenario.py v=5 desde a junção com a Colheita)."""
 import json, math, datetime
 import dados_cad as DC
 import alocacao as AL
@@ -414,7 +414,7 @@ JS_ACESSO_CEN = r'''
 /* ===== Estado da manutenção dentro do cenário único (1a, PCMS-M01): c.man de 'talhao-os-cenario-v1'; O.S., Estoque, App e CD-03 leem o mesmo ===== */
 function manClone(o){ return JSON.parse(JSON.stringify(o)); }
 function manGet(){ return cenGet().man; }
-function manReset(self){ cenReset(); try{ cenSave(cenClone(CEN0)); }catch(e){} if(self) self.setState({manrev:Date.now(),cenrev:Date.now(),g2toast:'Demonstração restaurada: manutenção, ordens, estoque e app voltam ao início.'}); }
+function manReset(self){ cenReset(); try{ cenSave(cenClone(CEN0)); }catch(e){} if(self) self.setState({manrev:Date.now(),cenrev:Date.now(),g2toast:'Demonstração restaurada: manutenção, ordens, estoque, colheita e app voltam ao início.'}); }
 function manMudar(self,fn){ const c=cenClone(cenGet()); let r;
   try{ r=fn(c.man,c)||{}; }catch(e){ r={erro:String(e.message||e)}; }
   if(r.erro){ if(self) self.setState({g2toast:r.erro}); return r; }

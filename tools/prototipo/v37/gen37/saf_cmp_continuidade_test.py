@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """Teste CDP · QUALIDADE-ARTEFATO-20261003-FLUXO item 1 (continuidade SAF → CMP) e item 2 (CAL-01 na tela).
-Safrinha 2027 → etapa 6 → Enviar para cotação gera SOL-2027-02 com o registro único (talhao-os-compras-v1: ID, fazenda, safra, itens,
+Safrinha 2027 → etapa 4 (demanda de insumos; era a 6 até 05/10/2026) → Enviar para cotação gera SOL-2027-02 com o registro único (talhao-os-compras-v1: ID, fazenda, safra, itens,
 estado e origem) → Abrir Compra de insumos abre a MESMA solicitação (CMP.dc.html#sol=…&saf=…) na etapa 2 com os mesmos itens, valor e
-memória CAL-01 → recarregar mantém → Ver origem volta ao Planejar safra na etapa 6. Cada safra guarda o próprio andamento da compra, que
+memória CAL-01 → recarregar mantém → Ver origem volta ao Planejar safra na demanda de insumos (passo=demanda). Cada safra guarda o próprio andamento da compra, que
 sobrevive à ida e volta (registro proc) e aparece no Planejar safra. Lagoa Grande: realizado fora da demanda, fazenda certa, grupos sem
 homologado não travam os convites. Paridade da tela (safra.js) com dados2.demanda e bordas de endereço. Erros JS por ouvinte próprio.
 Uso: python3 saf_cmp_continuidade_test.py [pasta_png]   (≈ 100 s; capturas q_saf-cmp_*.png em _probe/)"""
@@ -54,11 +54,11 @@ try:
     def foto(nome): c.shot(os.path.join(OUT,f'q_saf-cmp_{nome}.png'))
     def ls(): return json.loads(J("localStorage.getItem('talhao-os-compras-v1')||'null'") or 'null')
     c.size(1440,1000); ir('SAF.dc.html'); J("localStorage.clear()"); ir('SAF.dc.html')
-    # ---------------- Planejar safra · Safrinha 2027 · etapa 6 ----------------
+    # ---------------- Planejar safra · Safrinha 2027 · etapa 4 (demanda de insumos) ----------------
     r=J("""(()=>{const r=[...document.querySelectorAll('[role=row]')].find(x=>x.innerText.indexOf('Safrinha 2027')>=0); const b=r&&[...r.querySelectorAll('button')].find(b=>/^Continuar/.test(b.innerText.trim())); if(!b) return 'sem botão'; b.click(); return b.innerText.trim();})()"""); time.sleep(.6)
-    chk('1 SAF: Safrinha 2027 abre direto na etapa 6 ("Continuar: enviar demanda para cotação")',r=='Continuar: enviar demanda para cotação' and cur().startswith('6 '),(r,cur()))
+    chk('1 SAF: Safrinha 2027 abre direto na etapa 4, demanda de insumos ("Continuar: enviar demanda para cotação")',r=='Continuar: enviar demanda para cotação' and cur().startswith('4 '),(r,cur()))
     k6=J("(document.body.innerText.match(/Valor da necessidade[^\\n]+/)||[''])[0]")
-    chk('2 SAF etapa 6 (CAL-01): R$ 1.098.502,50 · 8 insumos a comprar · ainda não enviada',k6=='Valor da necessidade líquida R$ 1.098.502,50 · 8 insumos a comprar · ainda não enviada',k6)
+    chk('2 SAF demanda de insumos (CAL-01): R$ 1.098.502,50 · 8 insumos a comprar · ainda não enviada',k6=='Valor da necessidade líquida R$ 1.098.502,50 · 8 insumos a comprar · ainda não enviada',k6)
     clk('Expandir tudo'); mp=rowtxt('MAP 11-52')
     # TABELAS-FOCO (5983172395): necessidade, unidade, data da falta e "usado antes" em colunas próprias
     # a unidade fica junto do valor (decisão do proprietário, 05/10/2026); data da falta e "usado antes" em colunas próprias
@@ -69,10 +69,10 @@ try:
         and m_saf[-1]=='Necessidade líquida = soma das faltas desta safra = 101.440 kg · falta a partir de 20/02/2027',m_saf)
     foto('1_saf_etapa6')
     clk('Enviar para cotação'); t=T()
-    chk('5 SAF envia SOL-2027-02: 8 insumos, R$ 1.098.502,50, origem Safrinha 2027 · etapa 6',t.startswith('Solicitação SOL-2027-02 enviada a Compras: 8 insumos, R$ 1.098.502,50. Origem: Safrinha 2027 · Planejar safra, etapa 6.'),t)
+    chk('5 SAF envia SOL-2027-02: 8 insumos, R$ 1.098.502,50, origem Safrinha 2027 · demanda de insumos',t.startswith('Solicitação SOL-2027-02 enviada a Compras: 8 insumos, R$ 1.098.502,50. Origem: Safrinha 2027 · Planejar safra, demanda de insumos.'),t)
     g=ls(); s=((g or {}).get('sols') or {}).get('S27SF') or {}
     chk('6 registro único talhao-os-compras-v1: ID, fazenda, safra, 8 itens, estado e origem',s.get('id')=='SOL-2027-02' and s.get('safra')=='S27SF' and s.get('nome')=='Safrinha 2027' and s.get('faz')=='Santa Rita'
-        and len(s.get('itens') or {})==8 and s.get('estado')=='Enviada · a cotar' and (s.get('origem') or {}).get('h')=='SAF.dc.html#saf=S27SF&etapa=6' and abs((s.get('total') or 0)-1098502.5)<0.01,
+        and len(s.get('itens') or {})==8 and s.get('estado')=='Enviada · a cotar' and (s.get('origem') or {}).get('h')=='SAF.dc.html#saf=S27SF&passo=demanda' and abs((s.get('total') or 0)-1098502.5)<0.01,
         {k:s.get(k) for k in ['id','safra','nome','faz','estado','origem','total']})
     clk('Enviar para cotação') if J("[...document.querySelectorAll('button')].some(b=>b.offsetParent&&b.innerText.trim()==='Enviar para cotação')") else None
     chk('7 SAF: tudo enviado, a ação principal vira "Abrir Compra de insumos ›" (sem duplicar)',J("[...document.querySelectorAll('button,a')].filter(b=>b.offsetParent).some(b=>b.innerText.trim()==='Abrir Compra de insumos ›')") and len((ls() or {}).get('sols',{}))==1)
@@ -86,7 +86,7 @@ try:
     chk('10 CMP MAP 11-52: 101.440 · falta a partir de 20/02/2027 · estoque usado antes: 90.000',all(x in mp2 for x in ['101.440','20/02/2027','usado antes: 90.000']),mp2)
     rowclick('MAP 11-52'); m_cmp=memo(); lk=J("[...document.querySelectorAll('aside[role=dialog] a')].map(a=>[a.innerText.trim(),a.getAttribute('href')])") or []; foto('3b_cmp_memoria_cal01'); fechar()
     chk('11 mesma memória CAL-01 nas duas telas (MAP 11-52, linha a linha)',m_cmp==m_saf and len(m_saf)>=6,{'saf':m_saf,'cmp':m_cmp})
-    chk('12 origem do insumo volta ao Planejar safra na etapa 6 da Safrinha',any(t.startswith('Ver no Planejar safra · etapa 6') and h=='SAF.dc.html#saf=S27SF&etapa=6' for t,h in lk),lk)
+    chk('12 origem do insumo volta ao Planejar safra na demanda de insumos da Safrinha (passo=demanda)',any(t.startswith('Ver no Planejar safra · demanda de insumos') and h=='SAF.dc.html#saf=S27SF&passo=demanda' for t,h in lk),lk)
     foto('3_cmp_etapa2')
     ir('CMP.dc.html#sol=SOL-2027-02&saf=S27SF',w=1.4)
     chk('13 recarregar a Compra mantém SOL-2027-02 na etapa 2',cur().startswith('2 Confira a demanda') and 'Safrinha 2027 · SOL-2027-02' in body() and '1.098.502,50' in body(),(cur(),url()))
@@ -108,11 +108,11 @@ try:
     chk('17 de volta à 2026/27: os convites dela continuam enviados',bool(k3c) and 'SOL-2026-07' in body(),k3c)
     # ---------------- volta à origem ----------------
     etapa(1); J("""(()=>{const r=[...document.querySelectorAll('[role=row]')].find(x=>x.innerText.indexOf('Safrinha 2027')>=0); [...r.querySelectorAll('button')].find(b=>b.innerText.trim()==='Abrir compra').click();})()"""); time.sleep(.5)
-    h=J("(()=>{const a=[...document.querySelectorAll('a')].find(a=>a.offsetParent&&a.innerText.trim()==='Ver origem · etapa 6 ›'); return a?a.getAttribute('href'):'';})()")
-    chk('18 trilha da compra oferece "Ver origem · etapa 6 ›" para a Safrinha',h=='SAF.dc.html#saf=S27SF&etapa=6',h)
-    tr0=trail(); nav('Ver origem · etapa 6 ›','SAF.dc.html')
+    h=J("(()=>{const a=[...document.querySelectorAll('a')].find(a=>a.offsetParent&&a.innerText.trim()==='Ver origem · demanda de insumos ›'); return a?a.getAttribute('href'):'';})()")
+    chk('18 trilha da compra oferece "Ver origem · demanda de insumos ›" para a Safrinha',h=='SAF.dc.html#saf=S27SF&passo=demanda',h)
+    tr0=trail(); nav('Ver origem · demanda de insumos ›','SAF.dc.html')
     k6b=J("(document.body.innerText.match(/Valor da necessidade[^\\n]+/)||[''])[0]")
-    chk('19 SAF volta na etapa 6 da Safrinha e mostra o andamento da compra (registro proc): SOL-2027-02 · Em cotação · N de 13 respostas',cur().startswith('6 ') and 'Safrinha 2027' in J("document.body.innerText.slice(0,600)") and 'solicitação SOL-2027-02 · Em cotação · ' in k6b and 'de 13 respostas' in k6b,(cur(),k6b))
+    chk('19 SAF volta na demanda de insumos (etapa 4) da Safrinha e mostra o andamento da compra (registro proc): SOL-2027-02 · Em cotação · N de 13 respostas',cur().startswith('4 ') and 'Safrinha 2027' in J("document.body.innerText.slice(0,600)") and 'solicitação SOL-2027-02 · Em cotação · ' in k6b and 'de 13 respostas' in k6b,(cur(),k6b))
     foto('5_saf_volta')
     nav('Abrir Compra de insumos ›','CMP.dc.html'); tr1=trail(); g=ls() or {}
     chk('26 Compra → origem → Compra: convites e propostas da SOL-2027-02 continuam (trilha igual) e o registro guarda o estado',
@@ -122,7 +122,7 @@ try:
     chk('20 SAF recarregada sem endereço: a Safrinha não volta a "enviar demanda" (registro mantido)','enviar demanda' not in px and 'Continuar' in px,px)
     # ---------------- mesma memória na Safra 2026/27 (reserva de outro destino) ----------------
     J("""(()=>{const r=[...document.querySelectorAll('[role=row]')].find(x=>x.innerText.indexOf('Safra 2026/27')>=0); [...r.querySelectorAll('button')].find(b=>/^Continuar/.test(b.innerText.trim())).click();})()"""); time.sleep(.5)
-    etapa(6); w=J("(()=>{const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent); const box=t.parentElement; return {box:box.clientWidth, scroll:box.scrollWidth, tab:Math.round(t.getBoundingClientRect().width)};})()")
+    etapa(4); w=J("(()=>{const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent); const box=t.parentElement; return {box:box.clientWidth, scroll:box.scrollWidth, tab:Math.round(t.getBoundingClientRect().width)};})()")
     hs=J("[...[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent).querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/\\s+/g,' ').replace(/ ⇅.*$/,'').trim())") or []
     # TABELAS-FOCO item 6: com uma variável por coluna a tabela pode rolar dentro da caixa; a página não rola e "1º uso" segue logo depois do insumo (v3.8)
     pg=J("[document.documentElement.scrollWidth, innerWidth]")
@@ -130,7 +130,7 @@ try:
     vis=J("""(()=>{const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent); const box=t.parentElement; box.scrollLeft=0; const R=box.getBoundingClientRect();
       return [...t.querySelectorAll('[role=columnheader]')].filter(h=>R.right+0.5>=h.getBoundingClientRect().right).map(h=>h.innerText.replace(/[⇅▾▴]/g,'').replace(/\\s+/g,' ').trim().toUpperCase());})()""") or []
     ess=['GRUPO','INSUMO','1º USO','NECESSIDADE LÍQUIDA','FALTA EM']
-    chk('23 SAF etapa 6 (2026/27, grupos recolhidos): a página não rola; "1º uso" logo depois de Grupo | Insumo (v3.8); Necessidade líquida e Falta em à vista sem rolar a tabela',
+    chk('23 SAF demanda de insumos, etapa 4 (2026/27, grupos recolhidos): a página não rola; "1º uso" logo depois de Grupo | Insumo (v3.8); Necessidade líquida e Falta em à vista sem rolar a tabela',
         pg[0]<=pg[1]+1 and len(hs)>3 and [h.upper() for h in hs[:3]]==['GRUPO','INSUMO','1º USO'] and all(x in vis for x in ess),(w,pg,hs[:4],vis))
     clk('Expandir tudo'); fa=rowtxt('Fungicida A'); gl=rowtxt('Glifosato 480'); rowclick('Glifosato 480'); gm=memo(); fechar()
     chk('24 memória como extrato por data, com a origem de sempre: "25/09/2026 · T1-A · Dessecação pré-plantio · 2,00 L/ha × 160 ha = 320,0 L"; 1º uso intacto',
@@ -150,7 +150,7 @@ try:
         ir(f'SAF.dc.html#saf={saf}&etapa=6',w=1.4); k6=J("(document.body.innerText.match(/Valor da necessidade[^\\n]+/)||[''])[0]") or ''
         dm=D2.demanda(saf); n=sum(1 for o in dm.values() if o['liq']>0.001); tot=sum(o['valor'] for o in dm.values())
         esp='R$ '+f"{tot:,.2f}".replace(',','X').replace('.',',').replace('X','.')+f' · {n} insumos a comprar'; par.append((saf,esp in k6,esp,k6))
-    chk('27 paridade na tela: etapa 6 de S2627, S27SF e LG2627 = dados2.demanda (valor e nº de insumos)',all(x[1] for x in par),par)
+    chk('27 paridade na tela: demanda de insumos (endereço antigo etapa=6) de S2627, S27SF e LG2627 = dados2.demanda (valor e nº de insumos)',all(x[1] for x in par),par)
     # ---------------- Lagoa Grande: realizado fora da demanda, fazenda certa, convites sem trava ----------------
     ir('SAF.dc.html#saf=LG2627&etapa=6',w=1.6); clk('Expandir tudo'); cal=rowtxt('Calcário dolomítico filler'); fz=J("[...document.querySelectorAll('span')].filter(s=>s.children.length===0&&/^Fazenda /.test(s.innerText.trim())).map(s=>s.innerText.trim())")
     # falta com necessidade líquida (a ruptura coberta pelo recebimento não conta): data da coluna "Falta em" antes de hoje

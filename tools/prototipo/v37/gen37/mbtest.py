@@ -9,15 +9,17 @@ sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
 from cdp import Chrome
 from journeys import free
 HERE=os.path.dirname(os.path.abspath(__file__)); R=os.path.join(HERE,'_render'); OUT=os.path.join(HERE,'_shots'); p=free()
-TELAS=['MB-01','MB-02','MB-02det','MB-03','MB-03x-recibo','MB-04','MB-05','MB-05det','MB-06','MB-07','MB-08','MB-08x-recibo','MB-09','MB-09det','MB-10','MB-10det']
+# colheita (06/10, D-16): MB-10det saiu (pesar e receber ficam em Produção › Cargas e recebimento); MB-07 e MB-10 passaram ao estado
+TELAS=['MB-01','MB-02','MB-02det','MB-03','MB-03x-recibo','MB-04','MB-05','MB-05det','MB-06','MB-07','MB-08','MB-08x-recibo','MB-09','MB-09det','MB-10']
 for t in TELAS:
     open(os.path.join(R,t+'.dc.html'),'w').write(open(os.path.join(HERE,'project',t+'.dc.html')).read())
 srv=subprocess.Popen(['python3','-m','http.server',str(p),'--bind','127.0.0.1','--directory',R],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL); time.sleep(0.8)
 c=Chrome(port=free()); J=c.js; FAIL=[]
 PARTES=[x for x in sys.argv[1:] if x in ('a','b','c','d')] or ['a','b','c','d']
 def parte(x): return x in PARTES
-# PCM S4 (§3.7): o MB-01 passa a levar ao MB-09 "Máquina" (ligado ao cenário, grava e funciona sem sinal); MB-07, MB-08 e MB-10 seguem fora
-OCULTAS={'MB-01':{f'MB-{n:02d}.dc.html' for n in (7,8,10)},'MB-02':{'MB-08.dc.html'},'MB-05':{'MB-05det.dc.html','SU-03det.dc.html'}}
+# PCM S4 (§3.7): o MB-01 passa a levar ao MB-09 "Máquina" (ligado ao cenário, grava e funciona sem sinal); colheita (06/10): MB-07 e MB-10
+# no estado, o MB-01 leva a eles; só o MB-08 segue fora
+OCULTAS={'MB-01':{'MB-08.dc.html'},'MB-02':{'MB-08.dc.html'},'MB-05':{'MB-05det.dc.html','SU-03det.dc.html'}}
 SETV="""((sel,val)=>{const i=document.querySelector(sel); const P=i.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(P,'value').set.call(i,val); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})"""
 CLK="""((t)=>{const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...document.querySelectorAll('button,a')].filter(e=>e.offsetParent!==null); const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok';})"""
 T=lambda: J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')")
@@ -78,23 +80,24 @@ try:
       ok('LIB-2287' in b and 'LB-2205' not in b,'liberação LIB-2287')
       ok('10,81 mm nos 80 ha (volta completa' in b and '20:02–24/09 10:33' in b,'execução da volta completa')
       ok('nada nesta ordem' not in b and 'próximo ciclo: OS-0422' in b,'falta mostra o próximo ciclo')
-      print('DEMO-06 · MB-07')
-      open_('MB-07'); b=BODY()
-      ok('Previsão T7 · S39 (v S39-02)' in b and 'Previsão PV-031' not in b and 'previsão S39, que abastece o PV-031' in b,'previsão x pedido')
-      clk('Registrar e ir à planta 19'); ok('planta 19 de 40' in BODY(),'avança planta')
-      print('DEMO-20 · MB-10 papéis')
+      # colheita (06/10): MB-07 conta no estado (talhão por toque, planta a planta, Concluir talhão grava a CNT- e não publica);
+      # MB-10 tem a aba Colheita no estado e a aba Motorista igual; Balança e Recebedor saíram (pesar e receber na web, CARGA)
+      print('Colheita · MB-07 contagem no estado')
+      J("localStorage.clear()"); open_('MB-07'); b=BODY()
+      ok('Pivô 19' in b and 'Pivô 6' in b and 'T7' in b and 'escolha o talhão' in HDR(),'MB-07: talhões de fruta em produção por um toque')
+      clk('Pivô 6'); J("document.querySelector('[aria-label=\"Mais um fruto Pintado\"]').click()"); time.sleep(.3)
+      clk('Registrar e ir à planta 2'); ok('planta 2 de 20' in BODY() and 'Pintado 1' in BODY(),'avança planta e soma a amostra')
+      clk('Corrigir a última planta'); ok('planta 1 de 20' in BODY(),'Corrigir a última planta devolve a planta aos contadores')
+      print('Colheita · MB-10 aba Colheita e aba Motorista')
       open_('MB-10'); b=BODY()
-      ok('CG-1207' in b and 'T2' not in b and 'Carga 05' not in b,'balança sem T2/Carga 05')
-      ok('Sandra (fiscal) · prazo hoje 10:00' in b,'Carga 07 · Sandra 10:00')
+      ok('OS-0505 · Pivô 19' in b and 'CG-2108' in b and 'Balança' not in b and 'Recebedor' not in b,'aba Colheita: OS-0505 com a CG-2108 a pesar; sem Balança e Recebedor')
+      ok(FOOT()=='Registrar carga · OS-0505','primário da aba Colheita: '+FOOT())
       J("document.querySelectorAll('[role=tab]')[1].click()"); time.sleep(.4); b=BODY()
-      ok('Minha viagem' in b and 'Abrir pesagem' not in b and 'Carga 07' not in b and 'Confirmar chegada' not in b,'motorista vê só a viagem')
+      ok('Minha viagem' in b and 'OS-0505' not in b,'motorista vê só a viagem')
       ok('Informar nova previsão' in FOOT(),'primário do motorista')
       clk('Informar nova previsão'); ok('10:20' in BODY(),'nova previsão exibida')
-      J("document.querySelectorAll('[role=tab]')[2].click()"); time.sleep(.4)
-      ok('Minha viagem' not in BODY() and 'Chegada a confirmar' in BODY(),'recebedor vê a chegada')
-      clk('Confirmar chegada'); ok('Chegada confirmada' in BODY() and 'chegada confirmada' in HDR(),'confirmar chegada muda selo e cabeçalho')
       print('Confirmações de detalhe')
-      for tela,bt,exp in [('MB-05det','Confirmar recebimento','DV-0912'),('MB-09det','Concluir serviço','Em conferência'),('MB-10det','Confirmar pesagem','ROM-0791 emitido'),('MB-04','Registrar ocorrência','registrada')]:
+      for tela,bt,exp in [('MB-05det','Confirmar recebimento','DV-0912'),('MB-09det','Concluir serviço','Em conferência'),('MB-04','Registrar ocorrência','registrada')]:
           open_(tela)
           # PCM S4: Equipamento (o tipo de entrada) pede a máquina e vira achado; o texto do vento é do tipo Clima, que segue como ocorrência da O.S.
           if tela=='MB-04': clk('Clima'); J(f"({SETV})('#oc_txt','Vento acima de 10 km/h; parei a barra.')"); time.sleep(.2)
