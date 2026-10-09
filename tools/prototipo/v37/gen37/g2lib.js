@@ -82,9 +82,28 @@ function g2flat(sp,st,rows,mask,added){
       out.push({r,lvl,has:kids.length>0});
       if(kids.length && (exp[r.id] || (filt && anyKid && !selfOk))) walk(kids,lvl+1,selfOk&&!filt); }); };
   walk(rows,0,false); return out; }
+// Selos e chips de estado com significado e próximo passo (DS-DICA-20261009): fonte única das dicas de estado; o texto segue as regras do
+// motor (fases da O.S. do AGENTS §4, PEND-OS-01 e as exceções da aprovação; bloqueios nas mensagens de osEncBloq/osLibErro). Chave = texto
+// do selo antes de " · ". Só vale onde a tela pede (data-dica-de ou parte {de:1}): o mesmo texto noutro contexto pode significar outra coisa.
+const G2_DICAS={
+  'A liberar':'Criada e ainda fora do campo. Próximo passo: liberar. O.S. agrícola: Aprovar e liberar (o agrônomo aprova a versão e o gestor libera, em dois registros); irrigação só com água, manutenção e beneficiamento: libera o responsável próprio.',
+  'Liberadas':'Liberada para o campo; os insumos da ordem ficam reservados no Estoque. Próximo passo: entregar os insumos a quem executa e iniciar.',
+  'Em execução':'Em execução: cada turno aponta o que foi feito (área ou quantidade, horas e consumo). Próximo passo: terminar e levar à conferência.',
+  'Em conferência':'Execução terminada: apontamentos, consumo e sobras em conferência. Próximo passo: conferir (sobra em custódia volta ao Estoque) e encerrar.',
+  'Encerradas':'Fechada: realizado, consumo e custo gravados. Sem próximo passo.',
+  'Canceladas':'Cancelada sem execução, com o motivo registrado. Sem próximo passo.',
+  'Aguardando sinal do app':'Turno apontado no aparelho que ainda não chegou. Próximo passo: quem executou reconecta o app; o envio é automático e não duplica.',
+  'Sobras a receber':'Sobra de insumo em custódia com quem executou. Próximo passo: o almoxarife recebe a devolução no Estoque; só então a ordem encerra.',
+  'Apontamento em conferência':'Apontamento em possível duplicidade. Próximo passo: a conferência decide na linha do apontamento (mesmo turno conta uma vez; outro turno soma).',
+  'Falta insumo':'O saldo do lote no Estoque não cobre dose × área. Próximo passo: o Estoque recebe o insumo ou o agrônomo ajusta dose, área ou produto antes de liberar.',
+  'Fora do registro':'Produto, dose ou cultura fora do registro (bula e AGROFIT). Próximo passo: o agrônomo ajusta produto ou dose antes de liberar.',
+  'Total 0':'Dose × área dá 0 na precisão do Estoque. Próximo passo: o agrônomo ajusta a dose ou a área.',
+  'Insumo esgotado':'Um insumo acabou com área ainda a fazer. Próximo passo: o agrônomo decide a área restante.',
+  'Carga a pesar':'Carga de colheita ainda não pesada. Próximo passo: o Recebimento pesa e recebe a carga em Produção › Cargas e recebimento.'};
+function g2dicaDe(t){ const s=String(t||'').trim(); return G2_DICAS[s]||G2_DICAS[s.split(' · ')[0].trim()]||''; }
 function g2part(p,v){ const o={isCn:false,isTxt:false,isB:false,isMut:false,isChip:false,isTag:false,isLink:false,isCta:false,isAct:false,isBr:false,t:p.t||'',st:'',cls:'',dot:'',href:p.h||'#',fn:null,title:p.t||'',dica:'',hasDica:false};
   switch(p.k){ case 'b': o.isB=true; break; case 'mut': o.isMut=true; break;
-    case 'chip': { const cc=G2C[p.c]||G2C.gray; o.isChip=true; o.dica=p.dica||''; o.hasDica=!!p.dica; o.st='display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;color:'+cc[0]+';background:'+cc[1]+';'; o.dot='width:6px;height:6px;border-radius:999px;flex-shrink:0;background:'+cc[0]+';'; break; }
+    case 'chip': { const cc=G2C[p.c]||G2C.gray; o.isChip=true; o.dica=p.dica||(p.de?g2dicaDe(p.t):''); o.hasDica=!!p.dica;   /* p.de: dica de estado do dicionário, só visual (o leitor de tela lê o motivo explícito) */ o.st='display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;color:'+cc[0]+';background:'+cc[1]+';'; o.dot='width:6px;height:6px;border-radius:999px;flex-shrink:0;background:'+cc[0]+';'; break; }
     case 'cn': { const cc=G2C[p.c]||G2C.gray; o.isCn=true; o.st='font-weight:800;white-space:nowrap;color:'+cc[0]+';'; break; }
     case 'tag': o.isTag=true; break; case 'link': o.isLink=true; break;
     case 'cta': o.isCta=true; o.cls='g2cta'; o.st=p.u?G2CTAU:G2CTA; break;
@@ -483,4 +502,88 @@ function g2mudou(self){ if(typeof document==='undefined'||!self.__g2foto) return
     let u=null; try{ u=new URL(a.getAttribute('href'),location.href); }catch(er){ return; }
     if(u.origin!==location.origin||u.pathname===location.pathname) return;   // âncora na mesma tela não carrega outra
     g2carga('ini'); try{ sessionStorage.setItem('g2nav',String(Date.now())); }catch(er){} });
+})();
+// ===== DS-DICA-20261009 · dica acessível (g2dica) =====
+// Proprietário (09/10/2026): "coloque tooltip onde for necessária para melhorar feedback ao usuário". Componente único: abre no hover (ponteiro
+// fino, 300 ms) e no foco de teclado; no toque, com toque longo (500 ms) ou no ícone ⓘ (.g2dica-i); fecha com Esc, ao sair e ao perder o foco.
+// role=tooltip e o gatilho passa a ser descrito por ela (aria-describedby) enquanto aberta. Texto: data-dica (explícito; vazio = sem dica),
+// data-dica-de (selo: o texto do selo busca o significado e o próximo passo em G2_DICAS) ou
+// o title que acrescenta algo ao rótulo visível; ícone sem texto mostra o nome do comando. Nunca repete o rótulo visível. Botão indisponível
+// com motivo usa aria-disabled="true" (continua focável): o clique é recusado aqui e a dica diz o porquê.
+const G2_DICA_ID='g2-dica';
+const G2D={el:null,desc:null,modo:'',sai:0,entra:0,lp:0,lpXY:null,toque:0};
+function g2visTxt(el){ return String((el&&el.innerText)||'').replace(/\s+/g,' ').trim(); }
+function g2contem(vis,t){ const n=(s)=>g2norm(s).replace(/[^a-z0-9]+/g,' ').trim(); const b=n(t); return !!b&&n(vis).indexOf(b)>=0; }
+// regra do texto (pura, testada em ds_unit.js): explícito > title que acrescenta > nome do ícone sem texto > nada
+function g2dicaRegra(o){ if(o.dica!==null&&o.dica!==undefined) return String(o.dica).trim();
+  if(o.de!==null&&o.de!==undefined) return g2dicaDe(o.de);   // data-dica-de="texto do selo": dica de estado do dicionário (G2_DICAS)
+  const t=String(o.title||'').trim(), vis=String(o.vis||'').trim(), al=String(o.aria||'').trim();
+  if(t&&!g2contem(vis,t)) return t;
+  if(al&&o.comando&&!/[\p{L}\p{N}]/u.test(vis)) return al;   // sem letra nem número visível (×, ‹, ▾, só ícone)
+  return ''; }
+function g2dicaTexto(el){ if(!el||el.nodeType!==1||!el.getAttribute) return '';
+  const d=el.getAttribute('data-dica'), de=el.getAttribute('data-dica-de'), t=el.getAttribute('title')||el.__g2tt||'', al=el.getAttribute('aria-label')||'';
+  if(d===null&&de===null&&!t&&!al) return '';   // sem fonte de dica: nem mede o texto visível (innerText custa layout)
+  return g2dicaRegra({dica:d,de,title:t,vis:(d===null&&de===null)?g2visTxt(el):'',aria:al,
+    comando:el.matches('button,a[href],[role=button]')&&!(typeof SVGElement!=='undefined'&&el instanceof SVGElement)}); }   // polígono do mapa não vira dica
+function g2dicaAlvo(n){ for(let e=n,i=0;e&&e.nodeType===1&&i<6;e=e.parentElement,i++){
+    if(e.id===G2_DICA_ID) return null; if(e.closest&&e.closest('svg')&&e.tagName!=='svg'&&!(e.matches&&e.matches('svg [role=button]'))) continue;
+    const t=g2dicaTexto(e); if(t) return {el:e,t};
+    if(e.matches&&e.matches('main,header,nav,aside,section,[role=table],[role=row],[role=list],body')) break; }
+  return null; }
+function g2dicaEl(){ let d=document.getElementById(G2_DICA_ID);
+  if(!d){ d=document.createElement('div'); d.id=G2_DICA_ID; d.setAttribute('role','tooltip'); d.className='g2dica'; d.hidden=true; document.body.appendChild(d);
+    d.addEventListener('pointerenter',()=>clearTimeout(G2D.sai)); d.addEventListener('pointerleave',()=>g2dicaSai(120)); }
+  return d; }
+function g2dicaPos(){ const d=document.getElementById(G2_DICA_ID), el=G2D.el; if(!d||d.hidden||!el) return;
+  if(!g2vis(el)){ g2dicaFecha(); return; }
+  const r=el.getBoundingClientRect(), W=window.innerWidth, H=window.innerHeight; d.style.maxWidth=Math.min(320,W-16)+'px'; d.style.left='0px'; d.style.top='0px';
+  const w=d.offsetWidth, h=d.offsetHeight; let x=Math.round(r.left+r.width/2-w/2); x=Math.max(8,Math.min(x,W-w-8));
+  let y=Math.round(r.top-h-8), lado='cima'; if(y<8){ y=Math.round(r.bottom+8); lado='baixo'; } if(y+h>H-8) y=Math.max(8,H-h-8);
+  d.style.left=x+'px'; d.style.top=y+'px'; d.dataset.lado=lado; }
+// desc: quem o leitor de tela descreve (o elemento focado; no hover, o próprio gatilho)
+function g2dicaMostra(el,t,modo,desc){ if(typeof document==='undefined') return; const d=g2dicaEl(); clearTimeout(G2D.sai); clearTimeout(G2D.entra);
+  if(G2D.el&&(G2D.el!==el||G2D.desc!==(desc||el))) g2dicaLimpa();
+  d.textContent=t; d.hidden=false; d.dataset.modo=modo; G2D.el=el; G2D.desc=desc||el; G2D.modo=modo;
+  const ds=G2D.desc, nome=String(ds.getAttribute('aria-label')||g2visTxt(ds)).trim();
+  if(g2norm(nome)!==g2norm(t)){ const db=String(ds.getAttribute('aria-describedby')||'').split(/\s+/).filter(Boolean); if(db.indexOf(G2_DICA_ID)<0){ db.push(G2_DICA_ID); ds.setAttribute('aria-describedby',db.join(' ')); } }
+  if(modo==='ponteiro'&&el.hasAttribute('title')){ el.__g2tt=el.getAttribute('title'); el.removeAttribute('title'); }   // sem a dica nativa por cima; volta ao fechar
+  g2dicaPos(); }
+function g2dicaLimpa(){ const el=G2D.el, ds=G2D.desc; if(ds){ const db=String(ds.getAttribute('aria-describedby')||'').split(/\s+/).filter(x=>x&&x!==G2_DICA_ID);
+    if(db.length) ds.setAttribute('aria-describedby',db.join(' ')); else ds.removeAttribute('aria-describedby'); }
+  if(el&&el.__g2tt!==undefined){ if(!el.hasAttribute('title')) el.setAttribute('title',el.__g2tt); delete el.__g2tt; }
+  G2D.el=null; G2D.desc=null; G2D.modo=''; }
+function g2dicaFecha(){ clearTimeout(G2D.sai); clearTimeout(G2D.entra); const d=document.getElementById(G2_DICA_ID); if(d) d.hidden=true; g2dicaLimpa(); }
+function g2dicaSai(ms){ clearTimeout(G2D.sai); G2D.sai=setTimeout(g2dicaFecha,ms); }
+(function g2dicaGlob(){ if(typeof document==='undefined'||window.__g2dica) return; window.__g2dica=1;
+  const dentro=(n)=>!!(n&&n.closest&&n.closest('#'+G2_DICA_ID));
+  // hover: abre depois de 300 ms parado no gatilho (sem espera se outra dica já está aberta); sair do gatilho e da dica fecha em 120 ms
+  document.addEventListener('pointerover',(e)=>{ if(e.pointerType==='touch'||dentro(e.target)) return; const a=g2dicaAlvo(e.target);
+    if(!a){ clearTimeout(G2D.entra); if(G2D.el&&G2D.modo==='ponteiro') g2dicaSai(120); return; }
+    if(a.el===G2D.el){ clearTimeout(G2D.sai); return; }
+    clearTimeout(G2D.entra); G2D.entra=setTimeout(()=>g2dicaMostra(a.el,a.t,'ponteiro'),(G2D.el&&G2D.modo==='ponteiro')?0:300); },true);
+  document.addEventListener('pointerout',(e)=>{ if(e.pointerType==='touch'||e.relatedTarget) return; clearTimeout(G2D.entra); if(G2D.el&&G2D.modo==='ponteiro') g2dicaSai(120); },true);
+  // foco de teclado: abre já; descreve o elemento focado (a dica pode vir do cabeçalho da coluna do botão de ordenar)
+  document.addEventListener('focusin',(e)=>{ const a=g2dicaAlvo(e.target); if(a) g2dicaMostra(a.el,a.t,'foco',e.target); else if(G2D.el&&G2D.modo!=='ponteiro') g2dicaFecha(); },true);
+  document.addEventListener('focusout',(e)=>{ if(G2D.el&&G2D.modo!=='ponteiro'&&G2D.modo!=='recusa'&&(!e.relatedTarget||!G2D.el.contains(e.relatedTarget))) g2dicaFecha(); },true);
+  // Esc fecha a dica; a dica explícita (data-dica) consome a tecla, para não fechar também o painel em que o foco está (WCAG 1.4.13)
+  document.addEventListener('keydown',(e)=>{ if(e.key!=='Escape') return; const d=document.getElementById(G2_DICA_ID); if(!d||d.hidden||!G2D.el) return;
+    const exp=G2D.el.hasAttribute('data-dica'); g2dicaFecha(); if(exp){ e.preventDefault(); e.stopPropagation(); } },true);
+  // toque longo (500 ms parado) mostra a dica e não aciona o comando; tocar fora fecha
+  document.addEventListener('pointerdown',(e)=>{ if(e.pointerType!=='touch') return; const a=g2dicaAlvo(e.target);
+    if(!a){ if(G2D.el&&!dentro(e.target)) g2dicaFecha(); return; }
+    clearTimeout(G2D.lp); G2D.lpXY=[e.clientX,e.clientY]; G2D.lp=setTimeout(()=>{ G2D.lp=0; G2D.toque=Date.now(); g2dicaMostra(a.el,a.t,'toque'); g2dicaSai(4000); },500); },true);
+  document.addEventListener('pointermove',(e)=>{ if(e.pointerType==='touch'&&G2D.lp&&G2D.lpXY&&Math.hypot(e.clientX-G2D.lpXY[0],e.clientY-G2D.lpXY[1])>10){ clearTimeout(G2D.lp); G2D.lp=0; } },true);
+  const solta=()=>{ clearTimeout(G2D.lp); G2D.lp=0; }; document.addEventListener('pointerup',solta,true); document.addEventListener('pointercancel',solta,true);
+  document.addEventListener('contextmenu',(e)=>{ if(G2D.toque&&Date.now()-G2D.toque<900) e.preventDefault(); },true);
+  document.addEventListener('click',(e)=>{
+    if(G2D.toque&&Date.now()-G2D.toque<900){ G2D.toque=0; e.preventDefault(); e.stopPropagation(); return; }   // o toque longo foi para ler a dica
+    const t=e.target;
+    // ícone ⓘ: tocar (ou Enter) abre e fecha a dica; não é comando
+    const i=t&&t.closest&&t.closest('.g2dica-i'); if(i){ e.preventDefault(); e.stopPropagation(); if(G2D.el===i) g2dicaFecha(); else { g2dicaMostra(i,g2dicaTexto(i),'toque'); g2dicaSai(6000); } return; }
+    // indisponível com motivo (aria-disabled="true"): o comando não roda; a dica diz o porquê e o leitor de tela ouve a recusa
+    const b=t&&t.closest&&t.closest('[aria-disabled="true"]'); if(b&&b.matches('button,a,[role=button]')){ e.preventDefault(); e.stopPropagation();
+      const m=g2dicaTexto(b)||'Indisponível agora.'; g2dicaMostra(b,m,'recusa'); g2dicaSai(4000); g2vivo('Indisponível: '+m); } },true);
+  const repos=()=>{ if(G2D.el) g2dicaPos(); }; window.addEventListener('resize',()=>{ if(G2D.el) g2dicaFecha(); }); document.addEventListener('scroll',repos,true);
+  try{ new MutationObserver(()=>{ if(G2D.el&&!g2vis(G2D.el)) g2dicaFecha(); }).observe(document.documentElement,{childList:true,subtree:true}); }catch(e){}
 })();

@@ -1159,6 +1159,26 @@ RETORNO_CSS=(
     "#g2-carga.fim{opacity:0;width:100%;transition:width .22s ease-out,opacity .28s ease .22s}"
     "@media (prefers-reduced-motion:reduce){#g2-carga.ini,#g2-carga.chega{width:100%;transition:none}#g2-carga.fim{transition:none}}"
 )
+# =====================================================================================
+# DS-DICA-20261009 (g2lib: g2dica, G2_DICAS): dica acessível (role=tooltip), ícone ⓘ, termo com dica e indisponível com motivo.
+# =====================================================================================
+DS_DICA=dict(fundo='#15201A',texto='#FFFFFF',raio='9px',largura='320px',atraso_ms=300,toque_ms=500,borda_i='#9DBFAA')
+DICA_CSS=(
+    # dica (role=tooltip): fundo escuro, texto branco (contraste 16,7:1), até 320 px, fora do fluxo (não empurra nada)
+    f".g2dica{{position:fixed;z-index:2147483001;max-width:{DS_DICA['largura']};box-sizing:border-box;padding:8px 11px;border-radius:{DS_DICA['raio']};background:{DS_DICA['fundo']};color:{DS_DICA['texto']};"
+    "font-family:'Manrope',system-ui,sans-serif;font-size:12.5px;font-weight:600;line-height:1.4;letter-spacing:0;text-transform:none;text-align:left;white-space:normal;overflow-wrap:anywhere;"
+    "box-shadow:0 10px 26px -10px rgba(21,32,26,.55);pointer-events:auto}.g2dica[hidden]{display:none}"
+    "@media (prefers-reduced-motion:no-preference){.g2dica:not([hidden]){animation:g2dicaEntra .12s ease-out}}@keyframes g2dicaEntra{from{opacity:0;transform:translateY(2px)}to{opacity:1;transform:none}}"
+    # ícone ⓘ (caminho da dica no toque): 18 px no desenho, 44 px de alvo com ponteiro grosso
+    f".g2dica-i{{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;padding:0;margin:0 0 0 4px;border:1px solid {DS_DICA['borda_i']};border-radius:999px;"
+    "background:#FFFFFF;color:#1E7A4C;font-family:inherit;font-size:11px;font-weight:800;font-style:normal;line-height:1;cursor:help;vertical-align:middle;position:relative;flex-shrink:0}"
+    "@media (pointer:coarse){.g2dica-i::after{content:'';position:absolute;inset:-13px}}"
+    # termo com dica (sigla, unidade, valor calculado): sublinhado pontilhado, como abbr; selo com dica: cursor de ajuda
+    "span[data-dica]:not([data-dica=\"\"]):not(.g2dica-i):not([style*=\"border-radius: 999px\"]){text-decoration:underline dotted #8A968E;text-decoration-thickness:1px;text-underline-offset:3px;cursor:help}"
+    "[data-dica]:not([data-dica=\"\"])[style*=\"border-radius: 999px\"]{cursor:help}"
+    # indisponível com motivo: continua focável (aria-disabled), com a mesma aparência do desabilitado; o g2lib recusa o clique e mostra o porquê
+    ":is(button,a)[aria-disabled=true]{opacity:.55;cursor:not-allowed;filter:none;box-shadow:none}"
+)
 G2_CSS=(".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outline:2px solid #1E7A4C;outline-offset:-2px}"
         # hover dos controles pequenos da grade só onde existe ponteiro com hover (no toque o fundo não fica "grudado")
         "@media (hover:hover){.g2fi:hover{background:#F2F8F4}.g2fb:hover,.g2car:hover{background:#E4F3E9}.g2del:hover{background:#FDE8E6;color:#B42318}}"   # DS-HOVER: verde, não cinza
@@ -1194,7 +1214,7 @@ G2_CSS=(".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outlin
         "main section:only-of-type>div:last-child>div>.g2caixa:last-of-type{flex:1 1 0}main section:only-of-type>div:last-child>div>.g2caixa:last-of-type>.g2rola{flex:1 1 0}"
         "main section:only-of-type>div:last-child>div>.rola{flex:1 1 0;min-height:0;overflow:auto}"
         ".g2rola [role=table]>[role=row]:first-child{position:sticky;top:0;z-index:3}"
-        + INTERACAO_CSS + ACOES_CSS + SEP_CSS + RETORNO_CSS)
+        + INTERACAO_CSS + ACOES_CSS + SEP_CSS + RETORNO_CSS + DICA_CSS)
 _TRASH='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>'
 _MINI=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer; white-space: nowrap;'
 _MINIP=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {ACC}; background: {ACC}; color: #fff; cursor: pointer; white-space: nowrap;'
@@ -1202,7 +1222,7 @@ _PARTS=(f'<sc-if value="{{{{p.isTxt}}}}" hint-placeholder-val="{{{{false}}}}"><s
         f'<sc-if value="{{{{p.isCn}}}}" hint-placeholder-val="{{{{false}}}}"><span style="{{{{p.st}}}}">{{{{p.t}}}}</span></sc-if>'
         f'<sc-if value="{{{{p.isB}}}}" hint-placeholder-val="{{{{false}}}}"><b>{{{{p.t}}}}</b></sc-if>'
         f'<sc-if value="{{{{p.isMut}}}}" hint-placeholder-val="{{{{false}}}}"><span style="color: {MUTED}; font-size: 12px;">{{{{p.t}}}}</span></sc-if>'
-        f'<sc-if value="{{{{p.isChip}}}}" hint-placeholder-val="{{{{false}}}}"><span title="{{{{p.dica}}}}" style="{{{{p.st}}}}"><span style="{{{{p.dot}}}}"></span>{{{{p.t}}}}<sc-if value="{{{{p.hasDica}}}}" hint-placeholder-val="{{{{false}}}}"><span class="g2sr">: {{{{p.dica}}}}</span></sc-if></span></sc-if>'
+        f'<sc-if value="{{{{p.isChip}}}}" hint-placeholder-val="{{{{false}}}}"><span data-dica="{{{{p.dica}}}}" style="{{{{p.st}}}}"><span style="{{{{p.dot}}}}"></span>{{{{p.t}}}}<sc-if value="{{{{p.hasDica}}}}" hint-placeholder-val="{{{{false}}}}"><span class="g2sr">: {{{{p.dica}}}}</span></sc-if></span></sc-if>'
         f'<sc-if value="{{{{p.isTag}}}}" hint-placeholder-val="{{{{false}}}}"><span style="display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; color: {MUTED}; border: 1px solid {LINE}; white-space: nowrap;">{{{{p.t}}}}</span></sc-if>'
         f'<sc-if value="{{{{p.isLink}}}}" hint-placeholder-val="{{{{false}}}}"><a href="{{{{p.href}}}}" style="color: {ACC}; font-weight: 700; text-decoration: none;">{{{{p.t}}}}</a></sc-if>'
         f'<sc-if value="{{{{p.isCta}}}}" hint-placeholder-val="{{{{false}}}}"><a class="{{{{p.cls}}}}" href="{{{{p.href}}}}" style="{{{{p.st}}}}">{{{{p.t}}}}</a></sc-if>'
@@ -1228,12 +1248,65 @@ def _col_un(c):
 import re as _re_mod
 _re_un=_re_mod.compile(r'^(.*?)\s*\(([^()]+)\)\s*$'); _re_un2=_re_mod.compile(r'^(\S+) por (.+)$')
 
+# DS-DICA-20261009 · siglas, unidades e valores calculados no cabeçalho da coluna: a dica nasce aqui (fonte única) quando a coluna não traz
+# ajuda própria. Só o que o rótulo não diz: o significado da sigla ou da unidade e a fórmula curta da coluna calculada (edit.calc).
+GLOSSARIO=[
+    (r'\bDAP\b','DAP: dias após o plantio, contados da data de plantio do talhão.'),
+    (r'\bDAE\b','DAE: dias após a emergência.'),
+    (r'\bCAD\b','CAD: capacidade de água disponível do solo (mm) na zona das raízes.'),
+    (r'\bNC\b','NC: nível de controle; acima dele o controle compensa o dano.'),
+    (r'\bETc\b','ETc: evapotranspiração da cultura (mm/dia) = ETo × Kc.'),
+    (r'\bETo\b','ETo: evapotranspiração de referência (mm/dia), da estação meteorológica.'),
+    (r'\bKc\b','Kc: coeficiente da cultura no estádio atual.'),
+    (r'\bha-op\b','ha-op: hectares-operação; cada passada conta (3 passadas em 10 ha = 30 ha-op).'),
+    (r'sc/ha','sc/ha: sacas por hectare; saca de 60 kg (soja, milho, feijão, trigo, café beneficiado); arroz em casca no RS e em SC, 50 kg (DEC-0510-03).'),
+    (r'\bt/ha\b','t/ha: toneladas por hectare (frutas e cana; cana em t de colmos por corte).'),
+    (r'ha/h','ha/h: rendimento, hectares trabalhados por hora de máquina.'),
+    (r'R\$/ha','R$/ha: reais por hectare (valor ÷ área em ha).'),
+    (r'R\$/h\b','R$/h: reais por hora (valor ÷ horas).'),
+    (r'^Lâmina','Lâmina de água em mm: 1 mm = 10 m³ por hectare.'),
+    (r'\bATR\b','ATR: açúcar total recuperável, kg por tonelada de cana.'),
+    (r'\bTCH\b','TCH: toneladas de colmos por hectare.'),
+    (r'\bCOE\b','COE: custo operacional efetivo (desembolso da safra).'),
+    (r'\bCOT\b','COT: custo operacional total (COE + depreciação e pró-labore).'),
+    (r'^Carência','Carência: dias mínimos entre a última aplicação e a colheita (bula e AGROFIT).'),
+    (r'^Reentrada','Reentrada: tempo mínimo para entrar na área depois da aplicação (bula).'),
+]
+_OPS={'mul':' × ','sum':' + ','sub':' − '}
+def _formula(k,calc,cols,campos=()):
+    """Fórmula curta da coluna calculada: "Calculado: Quantidade × Preço" (g2calc no g2lib faz a conta; aqui só o texto). Termo sem rótulo
+    (nem coluna nem campo do formulário) não vira dica: a fórmula diria a chave interna."""
+    cx=next((x for x in (calc or []) if x.get('k')==k),None)
+    if not cx: return ''
+    L={f['k']:f.get('l') for f in campos if f.get('k') and f.get('l')}; L.update({c['k']:c.get('l') for c in cols if c.get('l')})
+    if any(x not in L for x in cx.get('a',[])): return ''
+    a=[L[x] for x in cx.get('a',[])]
+    op=cx.get('op')
+    if op in _OPS: f=_OPS[op].join(a)
+    elif op=='div' and len(a)>=2: f=a[0]+' ÷ '+a[1]
+    elif op=='max0sub': f='o maior entre 0 e '+' − '.join(a)
+    else: return ''
+    return 'Calculado: '+f+'.'
+def _ajuda_auto(cols,calc,campos=()):
+    """Ajuda da coluna (dica do cabeçalho) quando a tela não deu uma: sigla/unidade do GLOSSARIO e fórmula da coluna calculada."""
+    import re as _r
+    out=[]
+    for c in cols:
+        if c.get('ajuda'): out.append(c); continue
+        rot=(c.get('l') or '')+' '+(c.get('un') or c.get('u') or '')
+        partes=[t for rx,t in GLOSSARIO if _r.search(rx,rot)][:2]
+        f=_formula(c['k'],calc,cols,campos)
+        if f: partes.append(f)
+        out.append(dict(c,ajuda=' '.join(partes)) if partes else c)
+    return out
 def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=True,so=None,add=None,bulk='',gid=None,x0=None,frame=True,tools='',headtools=True,qf=None):
     cols=[_col_un(c) for c in cols]
     # rótulos que ficariam iguais sem a unidade ("Custo (R$/h)" e "Custo (R$/ha)") mantêm a unidade, sem parênteses: "Custo R$/h", "Custo R$/ha"
     # (proprietário, 05/10/2026: "Custo R$/h e R$/ha é melhor e mais intuitivo")
     _ls=[c.get('l') for c in cols]
     cols=[(dict(c,l=c['l']+' '+c['un']) if (c.get('un') and _ls.count(c.get('l'))>1) else c) for c in cols]
+    _ed=edit if isinstance(edit,dict) else {}
+    cols=_ajuda_auto(cols,_ed.get('calc'),_ed.get('fields') or ())   # DS-DICA: sigla, unidade e fórmula no cabeçalho
     """Grade interativa. cols: [dict(k,l,t='txt'|'num',a='r',u,d,agg='sum'|'avg',chips={valor:cor},w,pre)];
     rows: [dict(id,v={},s={},p={k:[partes]},ro=False,kids=[...],o=[dict(t,h)],dr='d3_open',sh='d2')];
     edit: dict(m='form'|'ro'|'origin'|'none', title, sub, fields=[dict(k,l,t='txt'|'num'|'sel'|'date'|'area',opts,req,min,max,u,cond=dict(k,eq),help,def,ro)], calc, newTitle, leafOnly)."""
@@ -1283,7 +1356,7 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     hsel=f'<div role="columnheader" style="padding: 6px 4px 6px 12px; display: flex; align-items: center;"><button type="button" aria-label="{H("_selallLab")}" title="{H("_selallLab")}" onClick="{H("_selall")}" style="border: 1px solid {LINE}; background: {SURF}; width: 16px; height: 16px; border-radius: 4px; cursor: pointer; padding: 0;"></button></div>' if sel else ''
     hdel=f'<div role="columnheader"></div>' if dele else ''
     head=(f'<div role="row" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; background: {BG}; border-radius: 0;">{hsel}'
-          f'<sc-for list="{H("_head")}" as="h" hint-placeholder-count="{len(cols)}"><div role="columnheader" class="{_h("h.cls")}" data-un="{_h("h.un")}" title="{_h("h.tt")}" style="{_h("h.st")} padding: 0 4px 0 8px;">'
+          f'<sc-for list="{H("_head")}" as="h" hint-placeholder-count="{len(cols)}"><div role="columnheader" class="{_h("h.cls")}" data-un="{_h("h.un")}" data-dica="{_h("h.tt")}" style="{_h("h.st")} padding: 0 4px 0 8px;">'
           + (f'<button type="button" class="g2hb" onClick="{_h("h.sort")}" aria-label="{_h("h.sortLabel")}">{_h("h.l")} <span aria-hidden="true" style="{_h("h.astyle")} font-size: 9px;">{_h("h.arrow")}</span></button>'
              f'<button type="button" class="g2fb" onClick="{_h("h.fmenu")}" aria-label="{_h("h.flabel")}" title="{_h("h.flabel")}" style="color: {_h("h.fcolor")};">▾{_h("h.fil")}</button>' if headtools else
              f'<span class="g2hb" style="cursor: default;">{_h("h.l")}</span>')

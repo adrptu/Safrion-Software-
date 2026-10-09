@@ -553,7 +553,7 @@ function PREVALS(self,v){
        real:(o.area?o.realizado:null),saldo:(o.area?o.saldo:null),disp:(o.disp||null),prog:(o.area?Math.round(1000*(o.realizado||0)/o.area)/10:null),resp:o.resp},
     s:{id:o.id,tal:tl.map(t=>t.l).join(', '),sit:sel.map(x=>x.l).join(' · ')},
     p:{id:[{k:'b',t:o.id}],tal:(tl.length?tl.map(t=>({k:'txt',t:t.l})).reduce((a,x,i)=>a.concat(i?[{k:'br'},x]:[x]),[]):[{k:'mut',t:'—'}]),
-       fase:[{k:'chip',t:o.etapa,c:FCOR[o.etapa]}],sit:(o.selos.length?o.selos.map(x=>({k:'chip',t:x.t,c:x.c})):[{k:'mut',t:'—'}])}}; });
+       fase:[{k:'chip',t:o.etapa,c:FCOR[o.etapa],de:1}],sit:(o.selos.length?o.selos.map(x=>({k:'chip',t:x.t,c:x.c,de:1})):[{k:'mut',t:'—'}])}}; });   /* de: dica de estado (g2lib G2_DICAS) */
   // Agrupar por talhão (TABELAS-FOCO item 7, TF06): a mesma O.S. aparece em cada talhão vinculado, com a mesma identidade; o grupo conta
   // O.S. distintas e soma a área das O.S. vinculadas (não é área física do talhão); o total geral conta cada O.S. uma vez (abaixo, os_gtot)
   if(self.state.os_agr){ const ft=((g2st(self,'g_os').f||{}).tal)||[]; const gs={}, ord=[];
@@ -936,8 +936,8 @@ def bloco(titulo,desc,corpo,acao=''):
             f'<h3 style="margin: 0; font-size: 15px; font-weight: 800; letter-spacing: -.01em;">{esc(titulo)}</h3><div style="font-size: 12.8px; color: {MUTED};">{esc(desc)}</div></div>{acao}</div>'
             f'<div style="padding: 0 12px 12px; display: flex; flex-direction: column; gap: 10px;">{corpo}</div></section>')
 
-def _chip_hole(t,st,dot):
-    return f'<span style="{H(st)}"><span style="{H(dot)}"></span>{H(t)}</span>'
+def _chip_hole(t,st,dot):   # selo de estado: a dica (significado e próximo passo) vem do dicionário único do g2lib (DS-DICA-20261009)
+    return f'<span data-dica-de="{H(t)}" style="{H(st)}"><span style="{H(dot)}"></span>{H(t)}</span>'
 
 def _kanban():
     card=(f'<div role="button" tabIndex="0" aria-label="{H("k.lab")}" onClick="{H("k.open")}" onKeyDown="{H("k.key")}" style="{H("k.st")}">'
@@ -951,7 +951,7 @@ def _kanban():
           f'<sc-if value="{H("k.hasDp")}" hint-placeholder-val="{F()}"><div style="font-size: 11.5px; font-weight: 700; color: {INK};">{H("k.dp")}</div></sc-if>'
           f'<div style="font-size: 11.5px; color: {MUTED};">{H("k.meta")}</div></div>')
     col=(f'<div style="flex: 1 1 0; min-width: 0; background: {BG}; border: 1px solid {LINE}; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">'
-         f'<div style="display: flex; align-items: center; gap: 6px;"><span style="font-size: 11px; font-weight: 800; letter-spacing: .05em; color: {INK}; text-transform: uppercase;">{H("c.t")}</span>'
+         f'<div style="display: flex; align-items: center; gap: 6px;"><span data-dica-de="{H("c.t")}" style="font-size: 11px; font-weight: 800; letter-spacing: .05em; color: {INK}; text-transform: uppercase;">{H("c.t")}</span>'
          f'<span style="{H("c.nst")} padding: 1px 8px; font-size: 11.5px;">{H("c.n")}</span></div>'
          f'<div style="font-size: 11.5px; color: {MUTED}; margin-top: -4px; min-height: 14px;">{H("c.carga")}</div>'
          f'<sc-for list="{H("c.cards")}" as="k" hint-placeholder-count="2">{card}</sc-for>'

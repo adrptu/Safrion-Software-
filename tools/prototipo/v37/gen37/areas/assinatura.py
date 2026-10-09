@@ -30,7 +30,7 @@ CSS = ('<style>'
        '.assin-ks{font-size:12.5px;color:#65736A;line-height:1.35}'
        '.assin-esc{font-family:inherit;font-size:13px;font-weight:700;padding:8px 14px;border-radius:999px;border:1px solid #E4E9E5;background:#FFFFFF;color:#15201A;cursor:pointer}'
        '.assin-esc[aria-checked=true]{border-color:#1E7A4C;background:#E4F3E9;color:#1E7A4C}'
-       '.assin-esc:disabled{opacity:.45;cursor:not-allowed}.assin-prim:disabled{opacity:.5;cursor:not-allowed}'
+       '.assin-esc:disabled{opacity:.45;cursor:not-allowed}.assin-prim:is(:disabled,[aria-disabled=true]){opacity:.5;cursor:not-allowed}'
        '.assin [role=group] button[aria-pressed=true]{background:#E4F3E9!important;color:#1E7A4C!important;border-color:#1E7A4C!important}'
        '.assin-lin{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #E4E9E5;font-size:13px;line-height:1.4}'
        '.assin-lin>span:first-child{color:#65736A;flex-shrink:0;max-width:46%}.assin-lin>span:last-child{text-align:right;min-width:0;overflow-wrap:anywhere}'
@@ -291,6 +291,6 @@ def build():
     HEIGHTS37[fname] = 1700
     shell37('CF-05', 'Assinatura e cobrança', corpo, fname=fname, search=False, perfil=PERFIL_CF,
             subtitle='Cobrança simulada · nenhum valor é cobrado. Plano, uso medido no cadastro, faturas e mudança de plano ou área com prévia.',
-            primary_html=f'<button type="button" class="assin-prim" disabled="{H("cf_prim_dis")}" title="{H("cf_prim_tit")}" onClick="{H("cf_prim_fn")}" style="{BTN_ST(True)}">{H("cf_prim_t")}</button>',
+            primary_html=f'<button type="button" class="assin-prim" aria-disabled="{H("cf_prim_dis")}" data-dica="{H("cf_prim_tit")}" title="{H("cf_prim_tit")}" onClick="{H("cf_prim_fn")}" style="{BTN_ST(True)}">{H("cf_prim_t")}</button>',
             footer='Preços, trial e régua são exemplos a decidir pelo proprietário (DEC-01/05/09). Inadimplência nunca apaga dado.')
     injeta(fname, 'Assinatura e cobrança', chip_dyn('cf_st'))

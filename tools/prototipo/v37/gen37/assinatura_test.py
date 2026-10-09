@@ -196,7 +196,7 @@ try:
     go('CF-05.dc.html', limpa=True)
     J('localStorage.setItem("talhao-os-cd01-v1", ' + json.dumps(json.dumps(cad_mais({'id':'TNX','v':{'t':'Grande','faz':'Santa Rita','decl':2600,'sit':'Ativo'}}))) + '); 1')
     go('CF-05.dc.html'); p0 = J(PRIMS)
-    clk('Pedir proposta empresarial', vez=2); t = toast(); p1 = J(PRIMS); dis = J("(()=>{const b=[...document.querySelectorAll('header button')].find(x=>/Proposta empresarial pedida/.test(x.innerText)); return b?b.disabled:null;})()")
+    clk('Pedir proposta empresarial', vez=2); t = toast(); p1 = J(PRIMS); dis = J("(()=>{const b=[...document.querySelectorAll('header button')].find(x=>/Proposta empresarial pedida/.test(x.innerText)); return b?b.getAttribute('aria-disabled')==='true':null;})()")   # DS-DICA-20261009: indisponível com motivo fica focável (aria-disabled)
     npro = J("Object.values(JSON.parse(localStorage.getItem('talhao-os-cenario-v1')).assin.recibos).filter(r=>/^PRO-/.test(r.id)).length")
     go('BO-02.dc.html'); lsr = linha(0, 'Grupo Santa Rita')
     chk('A20 medida 5.170,23 ha: primária Pedir proposta empresarial (não Ampliar, que seria sempre recusado); clique duplo registra um pedido (PRO-0001); a primária fica desabilitada e o BO-02 mostra o pedido',

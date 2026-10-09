@@ -141,7 +141,7 @@ def bo02():
     HEIGHTS37[fname] = 1150
     shell37('BO-02', 'Assinaturas e cobrança', corpo, fname=fname, ctx=CTX_BO, perfil=PERFIL_BO, steps=telas(1), search=False,
             subtitle='Plataforma · cobrança simulada, nenhum provedor real. Todas as organizações no mesmo estado; a da demonstração é medida ao vivo no cadastro.',
-            primary_html=f'<button type="button" class="assin-prim" disabled="{H("bo_prim_dis")}" title="{H("bo_prim_tit")}" onClick="{H("bo_prim_fn")}" style="{BTN_ST(True)}">{H("bo_prim_t")}</button>',
+            primary_html=f'<button type="button" class="assin-prim" aria-disabled="{H("bo_prim_dis")}" data-dica="{H("bo_prim_tit")}" title="{H("bo_prim_tit")}" onClick="{H("bo_prim_fn")}" style="{BTN_ST(True)}">{H("bo_prim_t")}</button>',
             footer='Fatura só fica Paga por evento do provedor (simulado), aplicado uma vez. Nada é apagado.')
     injeta(fname, 'Assinaturas e cobrança', chip_dyn('bo_st'))
 
