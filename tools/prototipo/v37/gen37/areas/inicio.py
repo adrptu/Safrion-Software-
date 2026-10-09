@@ -639,7 +639,8 @@ function mapOrdsCen(){ let c=null; try{ c=cenGet(); }catch(e){ c=null; } MAPC=c;
     if(co&&co.etapa==='Em conferência'){ try{ bq=cenPodeEncerrar(c,o.id)||''; }catch(e){ bq=''; } x.selos=x.selos.filter(s=>!/^Aguardando sinal do app/.test(s[0]));
       if(/^Carga a pesar/.test(bq)){ if(!x.selos.some(s=>s[0]==='Carga a pesar')) x.selos=x.selos.concat([['Carga a pesar','yellow']]); }   /* colheita (R-18): não é sobra em custódia */
       else if(/sinal/.test(bq)) x.selos=x.selos.filter(s=>!/^Sobras a receber/i.test(s[0])).concat([['Aguardando sinal do app','yellow']]);
-      else if(bq&&!x.selos.some(s=>/^Sobras a receber/i.test(s[0]))) x.selos=x.selos.concat([['Sobras a receber','yellow']]); }
+      else if(bq){ const t=/^Sobra em custódia/.test(bq)?'Sobras a receber':(/^Consumo em conferência/.test(bq)?'Consumo em conferência':(/duplicidade/.test(bq)?'Apontamento em conferência':''));   /* o selo do bloqueio que existe; a divergência de dose já vem do cenário (revisão DOM achado 3) */
+        if(t&&!x.selos.some(s=>s[0]===t)) x.selos=x.selos.concat([[t,'yellow']]); } }
     if(x.fase!=='A liberar') x.selos=x.selos.filter(s=>!/^Aguardando(?! sinal do app)/.test(s[0]));
     if(x.fase==='Encerradas'||x.fase==='Canceladas') x.pz='encerrada';
     const a=o.act; x.act=(!a||(a.c==='ag'&&!inPendLib(c,o.id))||(a.c==='cust'&&co&&!cust.length))?null:a;

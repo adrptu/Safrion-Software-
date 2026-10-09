@@ -62,6 +62,17 @@ const ORIG = (c, ben) => Object.values(c.producao.cargas).filter(g => g.st === '
   ok('C01k 3.000 kg medidos + 8.000 L pendentes: "50 sc + 8.000 L · sc a apurar", produtividade a apurar',
      !r2.erro && X.R.apurar === true && row.s.colh === '50 sc + 8.000 L · sc a apurar' && row.s.prtv === 'sc/ha a apurar', [r2.erro, row.s]); }
 
+// ---- C01o · revisão DOM achado 7: cartão do grupo a 390 px (mesma regra da linha do grupo no desktop) ----
+{ const G = (rs) => typeof prGrpNum === 'function' ? prGrpNum('Café', rs) : 'sem prGrpNum (cartão do grupo calculado dentro da tela)';
+  const A = base(5); const X0 = prTal(A.c, CID); const t0 = G([X0.R]); ORIG(A.c, 3000); const X1 = prTal(A.c, CID); const t1 = G([X1.R]); const t2 = G([X0.R, X1.R]);
+  ok('C01o cartão do grupo: café todo a apurar "sc/ha a apurar · 1 talhão" (nunca "1 talhões" sem estado); medido, a ponderada; misto, a ponderada e "1 talhão a apurar fora da conta"',
+     t0 === 'sc/ha a apurar · 1 talhão' && t1 === '10,00 sc/ha ponderada sobre 5 ha' && t2 === '10,00 sc/ha ponderada sobre 5 ha · 1 talhão a apurar fora da conta' && !FALSO.test(t0), [t0, t1, t2]); }
+
+// ---- C01p · revisão DOM achado 7: ordenação do talhão misto (50 sc medidos + 8.000 L a apurar) pelo medido, não como vazio ----
+{ const A = base(5); ORIG(A.c, 3000); MUD(A.c, x => prReceber(x, { os: 'OS-0930', ticket: 'TK-CF2', bruto: 7200, tara: 3200, litros: 8000, cond: 'Íntegra', dcol: '2026-09-25' }));
+  const { X, row } = linha(A.c);
+  ok('C01p talhão misto ordena pelo medido (3.000 kg), não como vazio; só a apurar continua vazio (C01c)', X.R.apurar === true && row.v.colh === 3000, [X.R.apurar, row.v.colh]); }
+
 // ---- C01l · ligação com o Comercial: a oferta de café beneficiado vem da previsão publicada; o café a apurar não entra como zero ----
 { const c0 = cenClone(CEN0); const o0 = prOfertaSafra(c0, 'Café beneficiado', '2026/27'); const A = base(5); const o1 = prOfertaSafra(A.c, 'Café beneficiado', '2026/27');
   ok('C01l oferta de Café beneficiado igual antes e depois dos 12.000 L (o físico em litros não vira oferta nem zero)', JSON.stringify(o0) === JSON.stringify(o1), [o0, o1]); }

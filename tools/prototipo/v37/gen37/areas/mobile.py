@@ -499,8 +499,9 @@ if(L){ const oo=c.ordens[L.os]; const ap=oo&&(oo.ap||[]).find(a=>a.dia===L.dia);
   DCH(v,'lcf',ab?'Consumo em conferência':'Conferência resolvida',ab?'yellow':'green'); if(!L.cons&&cf.length&&!dup&&!desc) v.last_cons='nada baixado neste turno';
   /* B-R8: dose diferente da planejada fica como informada e vai para revisão técnica do agrônomo (o operador vê no recibo) */
   const dva=(ap&&(ap.div||[]).length&&!desc)?ap:null; v.last_hasDiv=!!dva;
-  v.last_div=dva?(dva.div.map(cenDivTxt).join('; ')+(dva.rev?' · '+dva.rev.dec.toLowerCase()+' por '+dva.rev.quem:' · revisão técnica de '+g2quem('agronomo'))):'';
-  DCH(v,'ldv',dva&&dva.rev?'Dose revisada':CEN_DIV,dva&&dva.rev?'green':'red'); }
+  /* retido como duplicidade: a revisão só abre se o turno somar (revisão DOM achado 6) */
+  v.last_div=dva?(dva.div.map(cenDivTxt).join('; ')+(dva.rev?' · '+dva.rev.dec.toLowerCase()+' por '+dva.rev.quem:(dup?' · a revisão técnica abre se '+CEN_CONF_AP+' somar o turno':' · revisão técnica de '+g2quem('agronomo')))):'';
+  DCH(v,'ldv',dva&&dva.rev?'Dose revisada':CEN_DIV,dva&&dva.rev?'green':(dup?'yellow':'red')); }
 DCH(v,'hdr',t?(mbPausado(t)?'turno pausado':'turno aberto'):'sem turno aberto',t?(mbPausado(t)?'yellow':'green'):'gray');
 v.t_fe=false; v.t_zero=false;
 if(t){ const pz=mbPausado(t);

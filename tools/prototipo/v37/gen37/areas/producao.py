@@ -497,11 +497,15 @@ function prTalRow(c,X){ const k=X.k, R=X.R; const pv=prPrevTxt(c,X); const colhT
   const prtvT=R.apurar?prPrtvResTxt(k.cultura,R):(R.prtv!==null&&R.area>0?prPrtvTxt(k.cultura,R.kg,R.area)+(k.semanal?' · ciclo':' · safra')+(R.parcial?' parcial':' final'):'—');
   const refT=k.meta?('meta '+prFmtT(k.meta,1)+' '+(k.un_meta||PRDC.un[prCult(k.cultura)].prtv)):'sem meta'; const dsT=R.desv!==null?prFmt(R.desv,1)+' %':(R.apurar?'a apurar':(R.comecou?(k.semanal?'ciclo aberto':(R.parcial?'safra parcial':'—')):'—'));
   const pes=R.aPesar.length; const nx=X.nx+(pes?' · '+pes+(pes>1?' cargas a receber':' carga a receber'):'');
-  return {id:k.id,ro:true,v:{tal:k.local,cult:k.cultura,area:k.area,colh:R.apurar?null:R.kg,sit:X.sit},
+  return {id:k.id,ro:true,v:{tal:k.local,cult:k.cultura,area:k.area,colh:R.apurar&&!(prCmp(R.kg,0)>0)?null:R.kg,sit:X.sit},   /* parte medida ordena pelo medido; só a apurar fica vazio (COLH-C01, revisão DOM achado 7) */
     s:{tal:k.local+' '+k.cultura,cult:k.cultura,prev:pv.t,colh:colhT,prtv:prtvT,ref:refT+' '+dsT,sit:X.sit+' · '+nx},
     p:{tal:[{k:'b',t:k.local}].concat(k.var?[{k:'br'},{k:'mut',t:k.var}]:[]),cult:[{k:'txt',t:k.cultura}],prev:[{k:pv.v===null?'mut':'txt',t:pv.t}],colh:[{k:R.comecou?'b':'mut',t:colhT}],
        prtv:[{k:R.prtv!==null?'txt':'mut',t:prtvT}],ref:[{k:'txt',t:refT},{k:'br'},{k:R.desv!==null&&R.desv<0?'cn':'mut',c:'red',t:dsT}],
        sit:[{k:'chip',t:X.sit+(X.ult&&X.sit==='Prevista'?' (v'+X.ult.v+')':''),c:PR_SITCOR[X.sit]},{k:'br'},{k:'mut',t:nx}]}}; }
+/* cartão do grupo (cultura) a 390 px: o mesmo texto da linha do grupo no desktop, ponderada só sobre o medido e o que ficou a apurar (COLH-C01) */
+function prGrpNum(cu,rs){ const pd=prPonderada(rs); const nap=rs.filter(r=>r&&r.apurar).length; const n=rs.length+(rs.length>1?' talhões':' talhão');
+  if(pd) return prPrtvTxt(cu,pd.kg,pd.area)+' ponderada sobre '+prFmtT(pd.area,2)+' ha'+(nap?' · '+nap+(nap>1?' talhões':' talhão')+' a apurar fora da conta':'');
+  return nap?prPrtvResTxt(cu,{apurar:true})+' · '+n:n; }
 function PREVALS(self,v){ cenOuvir(self); prTopo(self,v); const c=cenGet(); self._c=c;
   self.g2pick=(gid,rid)=>{ if(String(rid).indexOf('grp:')===0) return; self.setState({pr_sel:{g:gid,id:rid},pr_pan:{g:gid,id:rid},pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null}); };
   const cids=Object.keys(PRDC.cult).filter(id=>{ const k=PRDC.cult[id]; return k.prod&&prFazOk(self,k.faz)&&prSafOk(self,(PRDC.safras[k.saf]||{}).mf); });
@@ -580,8 +584,8 @@ function prPanTal(self,c,X){ const k=X.k, R=X.R; const P=prP(c); const U=x=>prUn
 function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const st=self.state; const vis=st.pr_vis||'t';
   v.vt=vis==='t'; v.vs=vis==='s'; v.vt_on=String(vis==='t'); v.vs_on=String(vis==='s'); v.vt_go=()=>self.setState({pr_vis:'t'}); v.vs_go=()=>self.setState({pr_vis:'s'});
   const XS=self._X||[]; const byId={}; XS.forEach(x=>{ byId[x.k.id]=x; });
-  v.cards_tal=prCards(self,v,'g_tal',id=>{ if(String(id).indexOf('grp:')===0){ const cu=id.slice(4); const xs=XS.filter(x=>x.k.cultura===cu); const pd=prPonderada(xs.map(x=>x.R));
-      return prCard({grp:true,t1:cu,num:pd?prPrtvTxt(cu,pd.kg,pd.area)+' ponderada sobre '+prFmtT(pd.area,2)+' ha':xs.length+' talhões'}); }
+  v.cards_tal=prCards(self,v,'g_tal',id=>{ if(String(id).indexOf('grp:')===0){ const cu=id.slice(4); const xs=XS.filter(x=>x.k.cultura===cu);
+      return prCard({grp:true,t1:cu,num:prGrpNum(cu,xs.map(x=>x.R))}); }
     const X=byId[id]; if(!X) return null; const R=X.R;
     return prCard({t1:X.k.local+' · '+X.k.cultura,num:R.apurar?prProdTxt(X.k.cultura,R):(R.prtv!==null&&R.area>0?prPrtvTxt(X.k.cultura,R.kg,R.area):prProdTxt(X.k.cultura,R)),t2:'Previsão '+prPrevTxt(c,X).t+' · colhido '+prProdTxt(X.k.cultura,R),chip:[X.sit,PR_SITCOR[X.sit]],nx:X.nx,go:()=>self.g2pick('g_tal',id)}); });
   v.cards_sem=prCards(self,v,'g_sem',id=>{ const r=(self._wrows||[]).find(x=>x.id===id); if(!r) return null; const neg=prCmp(r.v.livre,0)<0;

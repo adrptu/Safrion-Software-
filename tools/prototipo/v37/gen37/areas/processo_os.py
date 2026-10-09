@@ -237,7 +237,8 @@ function osMerge(b,co,c){ if(!co) return b;
   if(x.aj&&x.aj.length){ o.area=co.area; o.ajv=x.aj[x.aj.length-1].v; o.orig=(b.orig||[]).concat(x.aj.map(a=>a.t));
     o.ins=(co.ins||[]).map(y=>{ const i=(b.ins||[]).find(z=>z.p===y.p); return Object.assign({g:y.g||''},i||{},{p:y.p,dose:y.dose,un:y.un,tot:y.tot}); }); }
   if(x.ev&&x.ev.length) o.orig=(o.orig||[]).concat(x.ev.map(e=>e.t));   // aprovação (CMD-42) e liberação (CMD-06) na Origem
-  (co.ap||[]).filter(a=>a.rev).forEach(a=>{ o.orig=(o.orig||[]).concat(['Dia '+a.dia+' · '+CEN_DIV+' '+a.rev.dec.toLowerCase()+' por '+a.rev.quem+' às '+a.rev.at+': '+a.rev.txt]); });   // B-R8
+  (co.ap||[]).forEach(a=>{ (a.revAnt||[]).forEach(r=>{ o.orig=(o.orig||[]).concat(['Dia '+a.dia+' · '+CEN_DIV+' '+r.dec.toLowerCase()+' por '+r.quem+' às '+r.at+': '+r.txt+' · reaberta: '+r.reaberta]); });
+    if(a.rev) o.orig=(o.orig||[]).concat(['Dia '+a.dia+' · '+CEN_DIV+' '+a.rev.dec.toLowerCase()+' por '+a.rev.quem+' às '+a.rev.at+': '+a.rev.txt]); });   // B-R8 (revisão reaberta fica no histórico)
   if(b.area){ o.realizado=co.realizado||0; o.saldo=co.saldo||0; }
   if(co.etapa!==b.etapa){ o.cond=osCondGen(o); o.dono=co.etapa==='Em conferência'?o.resp:''; o.prazo=co.etapa==='Em conferência'?'conferir':''; }
   if(mine){ o.cond=x.cond; o.dono=x.dono||''; o.prazo=x.prazo||''; }
@@ -870,7 +871,7 @@ function EXTRAVALS(self,v){
       const fal=dup?cenApDecCons(cgo,x,cenApDecBase(cg,cgo,null),null).falta:[];
       const usx=fal.map(f=>({lab:'Usado de '+f.p+' ('+f.un+')',v:(apus[x.dia]||{})[f.p]||'',hint:'Estimativa '+nd(f.q)+' '+f.un+' passa da custódia ('+nd(f.cust)+' '+f.un+'): informe o usado'+(x.quem?' com '+x.quem:''),
         set:(e)=>{ const cur=self.state.apus&&self.state.apus.id===o.id?self.state.apus:{id:o.id}; self.setState({apus:Object.assign({},cur,{[x.dia]:Object.assign({},cur[x.dia]||{},{[f.p]:e.target.value})})}); }}));
-      const dv=!prev&&(x.div||[]).length>0, dvAb=dv&&som&&!x.rev, dvS=dvr[x.dia]||{};
+      const dv=!prev&&x.st!==CEN_AP_DESC&&(x.div||[]).length>0, dvAb=dv&&som&&!x.rev, dvS=dvr[x.dia]||{};   /* guardado como duplicidade nunca soma: sem divergência (revisão DOM achado 6) */
       const dvQ=(dvAb&&!AGRd)?'Revisão técnica pendente: decisão de '+g2quem('agronomo')+' (aceitar com motivo ou registrar a correção).':((dv&&!som&&!x.rev)?'A revisão técnica abre quando o apontamento somar.':'');
       return {div:dv,divT:dv?CEN_DIV+' · '+x.div.map(cenDivTxt).join('; '):'',hasRev:dv&&!!x.rev,revT:x.rev?'Revisão técnica: '+x.rev.dec.toLowerCase()+' por '+x.rev.quem+' às '+x.rev.at+' · '+x.rev.txt+(x.rev.rp?' · '+x.rev.rp:''):'',
         divQ:dvQ,hasDivQ:!!dvQ,dvPode:dvAb&&AGRd,dvfid:'dv_'+x.dia,dvlab:'Motivo ou correção decidida · dia '+x.dia,dvv:dvS.t||'',dverr:dvS.err||'',hasDverr:!!dvS.err,

@@ -112,6 +112,22 @@ def rodar():
         a.ok(ok_enc and et == 'Encerradas', f'revisões feitas: Conferir e encerrar → Encerradas ({et})')
         guard()
         a.ok(not erros and ncol == 'a liberar|liberadas|em execução|em conferência|encerradas', f'sem erros JS (O.S., app) e Kanban com as 5 fases, sem coluna nova: {erros} · {ncol}')
+        # 9 · revisão DOM achado 6: turno retido como duplicidade (mesma data do apontamento da web) → o recibo do app diz que a revisão só abre
+        #     se o turno somar; guardado como duplicidade por Paula, a linha do dia não mostra divergência nem promete revisão
+        a.c.size(390, 1800); a.abrir('MB-01'); a.clk('Restaurar demonstração'); time.sleep(.3); web()
+        p0 = cmd(f"(W.osc_liberar(c,'{OS}',false,'','Ana'), c.reqs[c.ordens['{OS}'].req].itens.forEach(i=>W.cenEntregar(c,c.ordens['{OS}'].req,i.prod,i.solicitado,'Marcos','Rui')), W.cenConfirmarRecebimento(c,c.ordens['{OS}'].req), W.cenIniciarTurno(c,'{OS}'), c.app.turno=null, W.osc_apontar(c,'{OS}','26/09',10,{{'Glifosato 480':20,'2,4-D 806':10,'Óleo mineral':5}},[],'W-DUP'))")
+        a.c.size(390, 1800); a.abrir('MB-03'); r = a.clk_sel(f'main button[title="Iniciar turno na {OS}"]'); time.sleep(.2)
+        a.setv('#ft_ha', '10'); a.setv('#ft_h', '1'); a.setv('#ft_c0', '20'); a.setv('#ft_c1', '0'); a.setv('#ft_c2', '5'); a.clk('Fechar turno'); t = a.toast() or ''; b = a.body()
+        i = b.find('Turno fechado ·'); rb = b[i:i + 600]
+        a.ok(p0.startswith('Apontamento do dia 1') and r == 'ok' and 'em conferência' in t and 'Em conferência · duplicidade' in rb
+             and '2,4-D 806 planejado 10 L × informado 0 L · a revisão técnica abre se Paula (conferência) somar o turno' in rb and 'revisão técnica de Ana' not in rb,
+             'recibo do turno retido como duplicidade: a divergência fica registrada e a revisão só abre se Paula somar: ' + rb.replace('\n', ' / ')[:320])
+        shot('dose_div_7_app_dup.png')
+        web(); dd = cmd(f"W.osc_apDecidir(c,'{OS}',2,'anterior',null,'Paula')")   # o comando da O.S. (Paula, conferência)
+        web(); ordem(OS); p = pan(); i = p.find('Dia 2'); l2 = p[i:p.find('Acumulado', i)] if i >= 0 else ''
+        a.ok(dd.startswith('Dia 2 guardado como duplicidade') and 'Duplicidade · não somado' in l2 and SELO not in l2 and 'A revisão técnica abre quando o apontamento somar' not in l2 and SELO not in linha(OS),
+             f'guardado como duplicidade ({dd[:60]}): a linha do dia 2 sem divergência nem promessa de revisão; lista sem selo: ' + l2[:240])
+        shot('dose_div_8_dup_guardado.png'); guard()
         a.c.size(390, 1800); a.abrir('MB-01'); a.clk('Restaurar demonstração')
     finally:
         a.fim()
