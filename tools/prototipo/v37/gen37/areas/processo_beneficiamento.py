@@ -95,7 +95,9 @@ function bnNovaForm(self,c,pre){ const aptos=benLotesAptos(c).filter(L=>prFazOk(
   const rotaTxt=r?('Rota: '+benRotaTxt(r)+' (única versão aprovada para '+r.ent+': '+r.aprov.quem+', '+prBr(r.aprov.em)+'). '):'';
   const go=()=>{ if(!(self.state.pr_pan&&self.state.pr_pan.g==='nova')) return;   /* toque num formulário já fechado (duplo toque): nada a fazer, o aviso do 1º fica */
     if(!sel.length){ self.setState({pr_err:'Escolha ao menos um lote de entrada.'}); return; } const cx=prFval(self,'cx_'+sug,String(pad.cx));
-    bnRun(self,x=>benNova(x,{lotes:ents,rota:rk,cx:prNumOk(cx)?prNum(cx):cx,ini:prFval(self,'ini',hj),chave:self.state.pr_ch||prChave('W-BNN')},g2perfil()),{pr_form:null,pr_ch:null,pr_pan:null}); };
+    const rr=bnRun(self,x=>benNova(x,{lotes:ents,rota:rk,cx:prNumOk(cx)?prNum(cx):cx,ini:prFval(self,'ini',hj),chave:self.state.pr_ch||prChave('W-BNN')},g2perfil()),{pr_form:null,pr_ch:null,pr_pan:null});
+    /* a ordem criada fica selecionada e aberta, com o próximo passo dela (rodada 1, S3): antes o painel fechava e o cabeçalho apontava outra ordem */
+    if(!rr.erro&&rr.id) self.setState({pr_sel:{g:'g_ob',id:rr.id},pr_pan:{g:'g_ob',id:rr.id},pr_modo:null,bn_sub:null}); };
   return {title:'Nova ordem de beneficiamento',chip:['Rascunho','gray'],sub:'Entradas recebidas na Colheita (fruta de campo em processo); a rota vem do produto e do estágio.',
     form:{t:'Nova ordem · '+benProdQ(),h:rotaTxt+'Criar não reserva nada: as entradas e as caixas são reservadas na liberação.',fields:fs},err:self.state.pr_err,prim:{t:'Criar ordem',go}}; }
 function bnSaidaForm(self,c,o){ const r=benRota(o.ben.rota); const conf=o.etapa==='Em conferência'; const sub=self.state.bn_sub||null;   /* sub: relançar o registro estornado (fluxo, classe e destino herdados) */

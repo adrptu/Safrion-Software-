@@ -24,6 +24,8 @@ Modos (um por vez, cada um abre o Chrome headless do cadc_lib.T; o cenário come
            mesma REQ (toque duplo grava uma vez), o Rui entrega no balcão e o balanço fecha com diferença 0.
   duplo    rodada 1 (S3): toque duplo real (mouse a 1440, toque a 390) em "Autorizar rota e liberar" e "Iniciar processo": a repetição é
            absorvida (o aviso repete o recibo) e não dispara a operação seguinte.
+  criada   rodada 1 (S3): depois de "Criar ordem" (toque duplo) a ordem criada fica selecionada e aberta com o próximo passo dela; o 2º
+           toque não a libera e o cabeçalho não aponta outra ordem.
   cancelar integração BEN (09/10): ordem em A liberar que não libera (caixas acima do livre; entrada que mudou com o estorno da carga)
            tem saída: "Cancelar a ordem" com motivo (nada reservado) e o lote abre outra ordem.
   faixa390 integração BEN (09/10): a 390 px, Cargas › faixa de telas › Beneficiamento por toque real (a lista aberta fica acima da
@@ -34,7 +36,7 @@ import sys, os, time, json
 os.environ.setdefault('SAFRION_DADOS', 'sintetico')
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from cadc_lib import T
-TODOS = ('fluxo', 'erros', 'celular', 'revisao', 'roteiro', 'roteiro390', 'complemento', 'duplo', 'cancelar', 'faixa390')
+TODOS = ('fluxo', 'erros', 'celular', 'revisao', 'roteiro', 'roteiro390', 'complemento', 'duplo', 'criada', 'cancelar', 'faixa390')
 MODOS = [a for a in sys.argv[1:] if a in TODOS] or list(TODOS)
 PR = os.path.join(HERE, '_probe'); os.makedirs(PR, exist_ok=True)
 t = T(); J = t.J
@@ -448,6 +450,25 @@ try:
             t.chk(T_ + ' D2 · toque duplo em "Iniciar processo": só inicia (Em execução; o formulário de saída não abre sozinho)',
                   r == 'ok' and st == 'Em execução' and rev() == r0 + 1 and fm is False, [r, st, fm, rev(), r0, p[:300]])
             t.chk(T_ + ' duplo sem erro de JS', not t.errs(), t.errs())
+        tamanho(1440, 1000)
+    if 'criada' in MODOS:
+        # rodada 1 (S3): depois de "Criar ordem" a ordem criada sumia da vista (o painel fechava) e a primária do cabeçalho apontava outra
+        # ordem com o mesmo verbo. A ordem criada fica selecionada e aberta, com o próximo passo dela; o toque duplo no Criar não a libera
+        from ben_unit_test import motor, node
+        fx = node(motor() + """ const c = cenClone(CEN0); const RU = 'Rui', CX = BENC.cx.item;
+          const n0 = c.movs.length; cenReceber(c, CX, 'CX26-02', 1200, 'un', 'Packing', '—', 'NF 7731', true, RU); c.movs[n0].estRec = { id: 'r7731', nf: 'NF 7731', ped: 'PC-096', conf: 1200, apto: 1200, quar: 0, lote: 'CX26-02' };
+          c.rev = (c.rev || 0) + 1; print(JSON.stringify(c));""", 'ben_criada.js')
+        FX = fx.stdout.strip().splitlines()[-1]
+        for W in (1440, 390):
+            T_ = str(W); H = 844 if W < 500 else 1000; tamanho(W, H); print(f'== criada {T_} · a ordem criada fica aberta com o próximo passo dela')
+            ir('BEN.dc.html', limpa=True, w=W, h=H); J(f"localStorage.setItem('talhao-os-cenario-v1', {json.dumps(FX)})"); perfil('Igor'); ir('BEN.dc.html', w=W, h=H)
+            tocar('+ Nova ordem'); tocar('L39-132', 'aside'); r = duplo('Criar ordem'); p = pan(); tc = toast(); h2 = J("(()=>{ const a=[...document.querySelectorAll('aside[role=dialog]')].find(VIS); const h=a&&a.querySelector('h2'); return h?N(h.innerText):''; })()")
+            st = cen("[c.ordens['OB-0113']&&c.ordens['OB-0113'].etapa, !!c.ordens['OB-0114']]"); hp = J("PRIM()") or []
+            t.chk(T_ + ' C1 · Criar ordem (toque duplo): uma OB-0113 só, em A liberar (o 2º toque não a libera); o aviso diz a criação',
+                  r == 'ok' and st == ['A liberar', False] and 'OB-0113 criada (A liberar)' in tc, [r, st, tc])
+            t.chk(T_ + ' C2 · a OB-0113 fica aberta no painel com o próximo passo dela (Autorizar rota e liberar · Igor), e nada no cabeçalho aponta outra ordem',
+                  h2.startswith('OB-0113') and 'PRÓXIMO PASSO Autorizar rota e liberar · Igor' in p and not any('OB-0112' in x for x in hp), [h2, p[:300], hp])
+            t.chk(T_ + ' criada sem erro de JS', not t.errs(), t.errs())
         tamanho(1440, 1000)
     if 'cancelar' in MODOS:
         # integração BEN (09/10), achado 2: ordem em A liberar que não libera (caixas acima do livre; entrada que mudou com o estorno da carga)

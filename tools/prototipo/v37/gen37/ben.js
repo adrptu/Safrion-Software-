@@ -199,8 +199,8 @@ function benProx(c, o) { const b = benBal(o); const it = benReqItem(c, o);
 /* ---------- idempotência e versão esperada (R-A11, PCMS-G04) ---------- */
 function benRecibo(c, k, nome, imp) { if (!k || !k.chave) return null; const ja = (benB(c).recibos || {})[k.chave]; if (!ja) return null;
   if (ja.nome !== nome || ja.imp !== imp) throw new Error('Este registro (' + k.chave + ') já foi gravado com outro conteúdo: conflito, nada gravado.');
-  return { msg: 'Já feito: ' + ja.msg, nada: true, repetido: true }; }
-function benGravaRecibo(c, k, nome, imp, msg) { if (!k || !k.chave) return; benB(c, 1).recibos[k.chave] = { nome, imp, msg, at: cenAgora() }; }
+  return { msg: 'Já feito: ' + ja.msg, nada: true, repetido: true, id: ja.id || '' }; }
+function benGravaRecibo(c, k, nome, imp, msg, id) { if (!k || !k.chave) return; benB(c, 1).recibos[k.chave] = Object.assign({ nome, imp, msg, at: cenAgora() }, id ? { id } : {}); }
 function benEstadoTxt(o) { const b = benBal(o); return o.etapa + ' · ' + benValidos(o).length + ' registros válidos · diferença ' + benKg(b.dif); }
 function benVer(o, k) { if (k && k.ver !== undefined && k.ver !== null && Number(k.ver) !== Number(o.ver || 1))
   throw new Error('A ' + o.id + ' mudou depois que você abriu: ' + benEstadoTxt(o) + '. Confira e registre de novo.'); }
@@ -255,7 +255,7 @@ function benNova(c, k, ator) { const quem = cenExige(ator, 'producao', 'Criar or
   benHist(o, quem, 'Ordem criada · v1', det);
   /* acima do livre a ordem nasce, mas a liberação fica impedida até o Estoque ter as caixas: o aviso diz isso agora, não na liberação */
   const av = cx > pad.livre ? ' Atenção: ' + benUn(pad.livre) + ' livres no Estoque para ' + benUn(cx) + ': a liberação fica impedida até o Estoque receber as caixas (' + benCaixasVem(c) + ').' : '';
-  const msg = id + ' criada (A liberar): ' + det + '. Próximo passo: Autorizar rota e liberar.' + av; benGravaRecibo(c, k, 'benNova', imp, msg); return { msg, id }; }
+  const msg = id + ' criada (A liberar): ' + det + '. Próximo passo: Autorizar rota e liberar.' + av; benGravaRecibo(c, k, 'benNova', imp, msg, id); return { msg, id }; }
 /* retirar entrada antes de liberar (I3): grava a versão seguinte; a sugestão de caixas acompanha a entrada quando estava confirmada */
 function benRetirar(c, id, lote, ator, k) { const quem = cenExige(ator, 'producao', 'Retirar ' + lote + ' da ' + id); const o = benO(c, id);
   const imp = JSON.stringify([id, lote]); const ja = benRecibo(c, k, 'benRetirar', imp); if (ja) return ja; benVer(o, k);

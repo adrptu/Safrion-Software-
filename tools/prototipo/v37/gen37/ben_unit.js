@@ -545,4 +545,8 @@ function OB113(c) { const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132'
   const c2 = NOVO(); const n2 = MUD(c2, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }] }, IG)); const a2 = MUD(c2, x => benComplementar(x, n2.id, 10, IG, { chave: 'W-BNX-T7' }));
   ok('U41h ordem em A liberar: pedir caixas é recusado (as caixas da ordem se ajustam antes de liberar; a reserva nasce na liberação)', /^Peça caixas com a ordem liberada ou em execução \(OB-0113 está em A liberar\)/.test(a2.erro || ''), a2); }
 
+// ---- U42 · rodada 1 (S3): o recibo da ordem nova guarda o número; o toque repetido devolve a mesma ordem (a tela abre a criada) ----
+{ const c = NOVO(); const k = { lotes: [{ lote: 'L39-132', kg: 12300 }], chave: 'W-BNN-T42' }; const a = MUD(c, x => benNova(x, k, IG)); const b = MUD(c, x => benNova(x, k, IG));
+  ok('U42a criar com a mesma chave: a 2ª vez é "Já feito" sem gravar e devolve o mesmo número (OB-0113), sem OB-0114', a.id === 'OB-0113' && b.nada && b.id === 'OB-0113' && /^Já feito: OB-0113 criada/.test(b.msg) && !c.ordens['OB-0114'], [a, b]); }
+
 print(JSON.stringify(R));
