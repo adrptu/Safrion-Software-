@@ -81,7 +81,7 @@ try:
         m.ir('vis=' + v); cartoes[v] = J("[...document.querySelectorAll('main .ma-card,main button.ma-card')].filter(e=>e.getClientRects().length).length")
     m.ir('vis=ativos'); apt = J("(()=>{const b=[...document.querySelectorAll('main button')].find(b=>/APTOS AGORA/i.test(b.innerText)); return b?b.innerText.replace(/\\s+/g,' '):'';})()")
     n0 = len(m.linhas(0)); m.clk('APTOS AGORA'); n1 = len(m.linhas(0))
-    m.ok(all(0 < x <= 4 for x in cartoes.values()) and 'Aptos agora' in apt.title() or ('APTOS AGORA' in apt and n1 < n0), 'AC-PCM-17 · até 4 cartões por visão; "Aptos agora" (não disponibilidade) e tocar filtra', [cartoes, apt, n0, n1])
+    m.ok(all(0 < x <= 4 for x in cartoes.values()) and 'APTOS AGORA' in apt.upper() and 0 < n1 < n0, 'AC-PCM-17 · até 4 cartões por visão; "Aptos agora" (não disponibilidade) e tocar filtra', [cartoes, apt, n0, n1])
     # ---------- AC-PCM-19 · Ver como: abertura, matriz, pontes do Otávio, estado não muda ----------
     ab = {}
     for k in ('Otávio', 'Zé', 'Ana'):
@@ -103,12 +103,14 @@ try:
          'AC-PCM-12/13 · a OM-0233 traz a 1ª tentativa Reprovada; quem não executa vê o Teste sem comando e o motivo; MA-04det é só redirecionamento', p[-160:])
     # ---------- AC-PCM-14 · a mesma condição do T1 na MA, no CD-03 e na O.S. (bloqueado e depois apto) ----------
     def tres():
-        m.ir('ativo=a01'); x1 = 'Bloqueado' if 'Bloqueado' in J("document.querySelector('main').innerText.split('\\n').slice(0,40).join(' ')") else 'Apto'
+        m.ir('ativo=a01'); t1 = J("document.querySelector('main').innerText.split('\\n').slice(0,40).join(' ')") or ''
+        x1 = 'Bloqueado' if 'Bloqueado' in t1 else ('Apto' if re.search(r'\bApto\b', t1) else '?')   # revisão 09/10 (S4): sem o texto da condição não vale "Apto"
         m.ir('', pagina='CD-03.dc.html'); J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.indexOf('Trator T1')>=0); if(r) (r.querySelector('.g2pw')||r).click();})()"); time.sleep(.5)
         ct = J("(()=>{const i=document.querySelector('aside[role=dialog] [id$=\"_cond_t\"]'); return i?i.value:'';})()") or ''
         x2 = 'Bloqueado' if ct.startswith('Bloqueado') else ('Apto' if ct.startswith('Apto') else '?' + ct)
         m.ir('', pagina='OS.dc.html'); o = J("document.body.innerText") or ''
-        x3 = 'Bloqueado' if 'Trator T1 bloqueado' in o else 'Apto'
+        oc = J("(()=>{ try{ const c=window.__cen.cenGet(); const a=c.man.ativos.a01; return a?a.cond:''; }catch(e){ return ''; } })()") or ''
+        x3 = 'Bloqueado' if ('Trator T1 bloqueado' in o and oc == 'Bloqueado') else ('Apto' if ('Trator T1 bloqueado' not in o and oc == 'Apto' and 'OS-0431' in o) else '?')
         return [x1, x2, x3]
     antes = tres()
     m.ir('om=OM-0233', perfil='Zé'); m.clk('Aprovado', '#ma-painel'); m.clk('Anexar foto e registrar Aprovado', '#ma-painel'); m.setv('#om-leitura', '4320'); m.clk('Previsto (6,5 h)', '#ma-painel')

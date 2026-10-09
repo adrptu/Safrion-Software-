@@ -373,7 +373,7 @@ def build():
       + f'<div style="display: flex; justify-content: flex-end;"><button type="button" onClick="{H("restaurar")}" title="Voltar ordens, estoque, manutenção, colheita e app ao início da demonstração" '
         f'style="font-family: inherit; font-size: 12px; font-weight: 600; color: {MUTED}; background: transparent; border: 0; padding: 4px 0; cursor: pointer; text-decoration: underline;">Restaurar demonstração</button></div>')
     js='''const fila=mbFila(c); v.fila=fila.map(o=>mbCard(self,c,o)); v.fila_vazia=!fila.length;
-const pend=(c.app.fila||[]).length; const us=mbUsuario(c); mbVerComo(self,v,c); const ze=us==='Zé'; v.us_mar=!ze; v.us_ze=ze;
+const pend=(c.app.fila||[]).length; const us=mbUsuario(c); mbVerComo(self,v,c); const ze=mbPapelUs(us)!=='operador'; v.us_mar=!ze; v.us_ze=ze;   /* técnico de manutenção (Zé, mecânico; João, eletricista; revisão 09/10, A8): Minha fila com as OMs dele */
 v.hdr_ttl='Hoje no campo'; v.hdr_sub=us+' · '+mbPapelUs(us)+' · Santa Rita';
 const mv=mbManView(c); const oms=ze?mbOmsDe(mv,us):[]; v.omf=oms.map(o=>mbOmCard(self,c,mv,o)); v.omf_vazia=ze&&!oms.length;
 const nq=ze?oms.length:fila.length; DCH(v,'hdr',ze?(nq+(nq===1?' ordem':' ordens')+' · '+(pend?pend+' aguardando sinal':'envios em dia')):(fila.length+(fila.length===1?' ordem':' ordens')+' · '+(pend?pend+' aguardando sinal':'envios em dia')),pend?'yellow':'green');
@@ -991,10 +991,11 @@ DCH(v,'hdr',k?(k.local+' · planta '+(n+1)):(s.m7ok?'contagem gravada':'escolha 
            + f'<div style="display: flex; flex-direction: column; gap: 6px;">{lab("Tanque · lote")}' + pills('mq_tqs','Tanque e lote',2) + '</div>'
            + ffield('Volume · L','mq-vol','mq_vol','mq_setvol','',big=True,ph='0')
            + IF('mq_hasCont',ffield(H('mq_unl'),'mq-leit','mq_leitv','mq_setleit','',hint=H('mq_ult'),ph='leitura no painel'))
-           + btns(f'<button type="button" aria-pressed="{H("mq_cheio")}" onClick="{H("mq_tcheio")}" title="Marque quando completou o tanque: calcula L/h" style="{H("mq_cheiost")}">Tanque cheio · calcula L/h</button>',
+           + btns(f'<button type="button" aria-pressed="{H("mq_cheio")}" onClick="{H("mq_tcheio")}" title="Marque quando completou o tanque: calcula o consumo" style="{H("mq_cheiost")}">{H("mq_cheiot")}</button>',
                   f'<button type="button" onClick="{H("mq_foto")}" title="Anexar a foto do tíquete (simulado)" style="{_BST}">{icon("doc",14)}{H("mq_fotol")}</button>')
            + note(H('mq_fotot'))
-           + f'<div style="font-size: 13px; color: {MUTED};">{kv("Operador",H("mq_op"))} · {kv("Data",H("mq_data"))}</div>'
+           + f'<div style="display: flex; flex-direction: column; gap: 6px;">{lab("Operador da máquina")}' + pills('mq_ops','Operador da máquina',3) + note(H('mq_opsug')) + '</div>'
+           + f'<div style="font-size: 13px; color: {MUTED};">{kv("Data",H("mq_data"))}</div>'
            + btns(fnb('Salvar e registrar outro','mq_outro','fuel','Gravar este lançamento e limpar para o próximo tíquete (fica só a data)')))
       + IF('mq_lt',h2('Registrar leitura','Leitura avulsa do contador, com a data em que foi lida.')
            + ffield(H('mq_unl'),'mq-lt','mq_ltv','mq_setlt','',big=True,hint=H('mq_ult'),ph='leitura no painel')
@@ -1009,10 +1010,10 @@ DCH(v,'hdr',k?(k.local+' · planta '+(n+1)):(s.m7ok?'contagem gravada':'escolha 
     js='''const mv=mbManView(c); const us=mbUsuario(c); mbVerComo(self,v,c); const cur=mbAtvCurtos(c,mv,us);
 const hm=(String(location.hash||'').match(/ativo=([\\w-]+)/)||[])[1];
 let aid=s.mq_aid; if(!aid) aid=(hm&&mv.ativos[hm])?hm:(cur.ids[0]||''); if(aid==='-') aid=''; const a=aid?mv.ativos[aid]:null;
-v.mq_curtos=cur.ids.map(id=>({t:mv.ativos[id].nome,on:String(id===aid),st:mbPill(id===aid),fn:()=>self.setState({mq_aid:id,mq_rec:null,mq_tq:undefined}),tt:'Escolher '+mv.ativos[id].nome}));
+v.mq_curtos=cur.ids.map(id=>({t:mv.ativos[id].nome,on:String(id===aid),st:mbPill(id===aid),fn:()=>self.setState({mq_aid:id,mq_rec:null,mq_tq:undefined,mq_opk:undefined}),tt:'Escolher '+mv.ativos[id].nome}));
 const q=String(s.mq_q||'').trim().toLowerCase(); v.mq_q=s.mq_q||''; v.mq_setq=(e)=>self.setState({mq_q:e.target.value});
 const sug=q?Object.values(mv.ativos).filter(x=>x.nome.toLowerCase().indexOf(q)>=0||String(x.modelo||'').toLowerCase().indexOf(q)>=0).slice(0,5):[];
-v.mq_sug=sug.map(x=>({t:x.nome,on:String(x.id===aid),st:mbPill(x.id===aid),fn:()=>self.setState({mq_aid:x.id,mq_q:'',mq_rec:null,mq_tq:undefined}),tt:'Escolher '+x.nome})); v.mq_hasSug=sug.length>0;
+v.mq_sug=sug.map(x=>({t:x.nome,on:String(x.id===aid),st:mbPill(x.id===aid),fn:()=>self.setState({mq_aid:x.id,mq_q:'',mq_rec:null,mq_tq:undefined,mq_opk:undefined}),tt:'Escolher '+x.nome})); v.mq_hasSug=sug.length>0;
 v.mq_tem=!!a; v.mq_sem=!a; v.mq_hasCont=!!(a&&a.un);
 const cd=mbCond(a); v.mq_nome=a?manNome(a):''; v.mq_cond=cd.t; v.mq_cst=mbCondSt(cd.c); v.mq_dot='width: 10px; height: 10px; border-radius: 999px; flex-shrink: 0; background: '+(MBC[cd.c]||MBC.gray)[0]+';';
 v.mq_leit=a?(a.un?('Leitura '+manLeitTxt(a)+(a.suspeita?' · leitura a confirmar (Otávio)':'')):'Sem contador'):'';
@@ -1029,12 +1030,18 @@ v.mq_vol=s.mq_vol||''; v.mq_setvol=(e)=>self.setState({mq_vol:e.target.value});
 v.mq_unl=a&&a.un==='km'?'Odômetro · km':'Horímetro · h'; v.mq_leitv=s.mq_leit||''; v.mq_setleit=(e)=>self.setState({mq_leit:e.target.value}); v.mq_ult=a&&a.leit?('Última: '+manLeitTxt(a)):'';
 v.mq_cheio=String(!!s.mq_cheio); v.mq_cheiost=mbPill(!!s.mq_cheio); v.mq_tcheio=()=>self.setState({mq_cheio:!self.state.mq_cheio});
 v.mq_fotol=s.mq_foto?'Remover foto':'Anexar foto (simulado)'; v.mq_fotot=s.mq_foto?'1 foto do tíquete (simulada)':'Sem foto · a foto é simulada neste protótipo.'; v.mq_foto=()=>self.setState({mq_foto:!self.state.mq_foto});
-v.mq_op=us+' (você)'; v.mq_data=manBr(mv.hoje)+' (hoje)';
+/* S4 da revisão (09/10): o operador do abastecimento é quem opera a máquina, não quem lança. Operador do app: ele mesmo; mecânico ou eletricista: o operador
+   da alocação de hoje (O.S. › Recursos), corrigível; sem alocação, escolher (nunca o próprio mecânico por padrão) */
+const opDef=mbPapelUs(us)==='operador'?us:(a?manOperadorDia(mv,a.id,mv.hoje):''); const op=s.mq_opk!==undefined?s.mq_opk:opDef;
+v.mq_ops=MAN_OPS.map(x=>({t:x+(x===us?' (você)':''),on:String(x===op),st:mbPill(x===op),fn:()=>self.setState({mq_opk:x===op?'':x}),tt:'Operador da máquina: '+x}));
+v.mq_opsug=op?(op===us?'Você opera esta máquina · corrigível':('Operador '+(op===opDef&&opDef?'da alocação de hoje':'escolhido')+': '+op+' · corrigível')):'Sem alocação hoje: escolha quem opera a máquina.';
+v.mq_cheiot='Tanque cheio · calcula '+(a&&a.un==='km'?'km/L':'L/h');
+v.mq_op=op; v.mq_data=manBr(mv.hoje)+' (hoje)';
 const chave=()=>self.state.mq_k||self.__mqk0||(self.__mqk0=manChave());   /* duplo toque no mesmo instante lê a mesma chave: um lançamento só (AC-PCM-16) */
 const salvar=(outro)=>{ if(!a) return TOAST(self,'Escolha a máquina.'); const st=self.state;
-  const d={aid:a.id,tq,vol:st.mq_vol,leit:st.mq_leit,op:us,evid:st.mq_foto?'foto do tíquete (simulada)':'',cheio:!!st.mq_cheio,data:mv.hoje,os:cur.os||''};
+  const d={aid:a.id,tq,vol:st.mq_vol,leit:st.mq_leit,op,evid:st.mq_foto?'foto do tíquete (simulada)':'',cheio:!!st.mq_cheio,data:mv.hoje,os:cur.os||''};
   const r=mbManCmd(self,'abastecer',{d},null,chave());
-  if(!r.erro&&!r.nada){ const base={mq_vol:'',mq_leit:'',mq_foto:false,mq_cheio:false,mq_k:manChave(),mq_rec:{t:r.msg,fila:!!r.fila}}; self.setState(outro?Object.assign(base,{mq_aid:'-',mq_tq:undefined}):base); } };
+  if(!r.erro&&!r.nada){ const base={mq_vol:'',mq_leit:'',mq_foto:false,mq_cheio:false,mq_k:manChave(),mq_rec:{t:r.msg,fila:!!r.fila}}; self.setState(outro?Object.assign(base,{mq_aid:'-',mq_tq:undefined,mq_opk:undefined}):base); } };
 v.mq_reg=()=>salvar(false); v.mq_outro=()=>salvar(true);
 v.mq_ltv=s.mq_lt||''; v.mq_setlt=(e)=>self.setState({mq_lt:e.target.value}); const dl=s.mq_ltd||mv.hoje;
 v.mq_ltdias=[['Hoje',mv.hoje],['Ontem',manAdd(mv.hoje,-1)]].map(([t,d])=>({t:t+' · '+manBr(d),on:String(d===dl),st:mbPill(d===dl),fn:()=>self.setState({mq_ltd:d}),tt:'Data da leitura: '+manBr(d)}));
@@ -1175,7 +1182,7 @@ v.dp_apt=decide; v.dp_aptSub=(a?a.nome:'Ativo')+' '+(a?a.cond.toLowerCase():'')+
 v.dp_aptMot=decide&&(!!podeC||!!aptM); v.dp_aptMotT=podeC?podeC+'.':(aptM||'');
 v.dp_manEd=decide&&!podeC; v.dp_mant=ff.mant||''; v.dp_setmant=(e)=>setF('mant',e.target.value); v.dp_manl='Manter '+(a?a.cond.toLowerCase():'')+' · com motivo';
 v.dp_man=()=>{ const f2=self.state.dp||{}; run('manter',{motivo:f2.mant},['mant']); };
-v.dp_aptl='Declarar '+(a?a.nome:'ativo')+' apto'; v.dp_apto=()=>run('apto',{});
+v.dp_aptl=manAptoRot(mv,o); v.dp_apto=()=>run('apto',{});   /* A1: com outro motivo aberto, encerra só o desta OM e o ativo segue na condição */
 /* primária: o próximo passo com verbo, pela fase; sem permissão, volta à fila (o motivo fica no corpo) */
 v.dp_pIni=o.etapa==='Liberadas'&&!pE; v.dp_pCon=exe&&!pE; v.dp_pApt=decide&&!podeC&&!aptM; v.dp_pVolta=!v.dp_pIni&&!v.dp_pCon&&!v.dp_pApt;
 v.dp_ini=()=>run('iniciar',{}); v.dp_con=()=>conc(false);'''
@@ -1302,14 +1309,14 @@ try { window.__mb = { mbIniciar, mbDescartar, mbResta }; } catch (e) {}
 # Sem sinal: o comando leva a chave do aparelho e vai para c.app.manFila (manAppCmd); a fila vai uma vez só (manAppSinal, no mbSinal);
 # OM mudada no escritório vira "Conflito a resolver · Otávio" e nunca é aplicada em silêncio.
 MBAPP_JS += r'''
-const MB_US = [{ k: 'Marcos', p: 'operador' }, { k: 'Zé', p: 'mecânico' }];
+const MB_US = [{ k: 'Marcos', p: 'operador' }, { k: 'Zé', p: 'mecânico' }, { k: 'João', p: 'eletricista' }];   // João: OMs de eletricista (NR-10), revisão 09/10 (A8)
 function mbUsuario(c){ const u = c && c.app && c.app.usuario; return MB_US.some(x => x.k === u) ? u : 'Marcos'; }
 function mbPapelUs(u){ return (MB_US.find(x => x.k === u) || MB_US[0]).p; }
 // Ver como (simulação, não é login): troca quem usa o app; o estado da demonstração não muda além de c.app.usuario.
 function mbVerComo(self, v, c){ const u = mbUsuario(c);
   v.vc_us = MB_US.map(x => ({ t: x.k + ' · ' + x.p, on: String(x.k === u), st: mbSeg(x.k === u, false), tt: 'Ver o app como ' + x.k + ' (' + x.p + ') · simulação, não é login',
     fn: () => { if (mbUsuario(cenGet()) === x.k) return; cenMudar(self, c2 => { c2.app.usuario = x.k; return { msg: 'Ver como ' + x.k + ' (' + x.p + ') · simulação, não é login.' }; });
-      self.setState({ mq_aid: '', mq_rec: null, dp: {}, dp_rec: null, dp_aviso: null, oc_aid: undefined }); } })); }
+      self.setState({ mq_aid: '', mq_rec: null, mq_opk: undefined, dp: {}, dp_rec: null, dp_aviso: null, oc_aid: undefined }); } })); }
 // O que o aparelho mostra: o estado do servidor com a fila feita sem sinal aplicada por cima (mesmas funções).
 function mbManView(c){ return manAppProj(c); }
 const MB_CRIT = { 'Alta': 0, 'Média': 1, 'Baixa': 2 };
@@ -1339,7 +1346,8 @@ function mbOmCard(self, c, m, o){ const a = m.ativos[o.aid]; const p = mbOmPasso
     href: 'MB-09det.dc.html#' + o.id, sel: () => mbOmSet(o.id), isIni: p.k === 'ini', isLnk: p.k === 'cont' || p.k === 'apt', nx_t: p.t,
     ini: () => { mbOmSet(o.id); mbManCmd(self, 'iniciar', { om: o.id }); }, tt: 'Abrir ' + o.id + ' · tarefas, peças e conclusão', nx_tt: p.t + ' · ' + o.id }; }
 function mbCond(a){ if (!a) return { t: '—', c: 'gray' }; const ci = a.condInfo || {};
-  if (a.cond === 'Bloqueado') return { t: 'Não opere · bloqueado' + (ci.motivo ? ' · ' + ci.motivo : '') + (ci.om ? ' · ' + ci.om : ''), c: 'red' };
+  const nm = (ci.mais || []).length;   // A1: outros motivos de bloqueio
+  if (a.cond === 'Bloqueado') return { t: 'Não opere · bloqueado' + (ci.motivo ? ' · ' + ci.motivo : '') + (ci.om ? ' · ' + ci.om : '') + (nm ? ' · +' + nm + (nm > 1 ? ' motivos' : ' motivo') : ''), c: 'red' };
   if (a.cond === 'Restrito') return { t: 'Opere com restrição' + (ci.lim ? ' · ' + ci.lim : (ci.motivo ? ' · ' + ci.motivo : '')) + (ci.ate ? ' · até ' + manBr(ci.ate) : ''), c: 'yellow' };
   return { t: 'Apto para operar', c: 'green' }; }
 function mbCondSt(k){ const x = MBC[k] || MBC.gray; return 'font-size: 15px; font-weight: 800; line-height: 1.35; padding: 8px 12px; border-radius: 12px; color: ' + x[0] + '; background: ' + x[1] + ';'; }

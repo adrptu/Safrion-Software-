@@ -8,7 +8,7 @@ Fonte única dos dados de demonstração e das regras da manutenção (tela MA, 
 - histórico encerrado sintético a partir de VINCULOS.ult (D-43), custo pela função única manCusto;
 - achados (c.achados, D-09/D-45/D-48), leituras com histórico (c.leituras, D-40), abastecimentos (c.abast, D-15/D-19) e recibos (c.recibos, D-30);
 - conflito com a produção calculado sobre a alocação da semana (alocacao.py, a mesma de O.S. › Recursos; D-38);
-- matriz papel × comando (D-33): Otávio (PCM), Zé (mecânico), Ana (gestora), pelo perfil de demonstração (g2lib G2_PERFIS).
+- matriz papel × comando (D-33): Otávio (PCM), Zé (mecânico), João (irrigante, eletricista NR-10; revisão 09/10), Ana (gestora), pelo perfil de demonstração (g2lib G2_PERFIS).
 Hoje da demonstração: 23/09/2026. "Em breve" = a janela (vencimento − tolerância) começa em até 10 dias.
 vencimento() é a mesma fórmula do manVenc() do JS (paridade conferida em ma_regras_test.py e ma_planos_test.py).
 Estado v=4 (S2): estado salvo de versão antiga volta ao seed (D-47). Desde o 1a, o estado vive em c.man do cenário único (cenario.py v=5 desde a junção com a Colheita)."""
@@ -46,8 +46,9 @@ EXTRA = {
 GRUPO = {'Trator': 'Tratores', 'Pulverizador': 'Pulverizadores', 'Plantadeira': 'Plantadeiras', 'Distribuidor': 'Implementos',
          'Colhedora': 'Colhedoras', 'Tratamento de sementes': 'Beneficiamento', 'Implemento': 'Implementos', 'Irrigação': 'Irrigação',
          'Beneficiamento': 'Beneficiamento', 'Armazenagem': 'Armazenagem', 'Veículo': 'Veículos'}
-# responsável técnico do ativo (D-49; antes um mapa local do MA-01): a01, a02, a05 → Zé; a11, a15, a12 → Equipe elétrica; demais → Otávio
-RT = {'a01': 'Zé', 'a02': 'Zé', 'a05': 'Zé', 'a11': 'Equipe elétrica', 'a15': 'Equipe elétrica', 'a12': 'Equipe elétrica'}
+# responsável técnico do ativo (D-49; antes um mapa local do MA-01): a01, a02, a05 → Zé; a11, a15, a12 → João (irrigante, NR-10); demais → Otávio.
+# Revisão de 09/10 (S4): "Equipe elétrica" não é pessoa do CD-04; o responsável técnico é sempre uma pessoa (a lista do painel vem de pessoas()).
+RT = {'a01': 'Zé', 'a02': 'Zé', 'a05': 'Zé', 'a11': 'João', 'a15': 'João', 'a12': 'João'}
 # condição semeada (CMD-18 da OM-0233; restrição da Bomba do Pivô 2 com prazo, PRD l.7720)
 COND = {
  'a01': dict(motivo='Pressão hidráulica baixa · SM-0147 e INSP-105', desde='2026-09-22', por='Zé (mecânico)', evid='checklist + manômetro',
@@ -63,7 +64,7 @@ def _ativos():
         x = EXTRA[a['id']]; ci = COND.get(a['id'])
         out[a['id']] = dict(id=a['id'], nome=a['nome'], modelo=a['modelo'], classe=a['classe'], grupo=GRUPO.get(a['classe'], a['classe']),
                             local=a['local'], un=x['un'], ritmo=x['ritmo'], cond=x['cond'], lh=x.get('lh'),
-                            condInfo=(dict(ci) if ci else None), rt=RT.get(a['id'], 'Otávio'),
+                            condInfo=(dict(ci, cond=x['cond']) if ci else None), rt=RT.get(a['id'], 'Otávio'),
                             condHist=([dict(cond=x['cond'], motivo=ci['motivo'], por=ci['por'], em=ci['desde'], achado=ci['achado'], om=ci['om'], ate=ci['ate'])] if ci else []),
                             leit=(dict(val=x['leit'][0], data=x['leit'][1], origem=x['leit'][2]) if x['leit'] else None))
     out['cb01'] = dict(id='cb01', nome='Comboio CB-01', modelo='caminhão comboio 6 m³', classe='Veículo', grupo='Veículos', local='Sede',
@@ -451,7 +452,7 @@ function manHab(k,h){ const p=manPessoa(k); return !!p&&p.hab.indexOf(h)>=0; }
 function manExecCands(esp){ const nr=MAN_ESP_NR[esp]; if(!nr) return []; return MAN_PES.filter(p=>p.nr.indexOf(nr)>=0).map(p=>p.k); }
 function manExecSug(o){ if(o.executante) return o.executante; const cs=manExecCands(o.esp); return cs.length===1?cs[0]:''; }
 function manPf(pf){ const q=(typeof g2pf==='function')?g2pf(pf):null; if(q) return q; if(pf&&typeof pf==='object') return {k:pf.k||'',papeis:pf.papeis||{}}; return {k:String(pf||''),papeis:{}}; }
-function manPapelDe(pf){ const p=(manPf(pf).papeis)||{}; return p.pcm?'pcm':(p.mecanico?'mecanico':(p.gestor?'gestor':'')); }
+function manPapelDe(pf){ const p=(manPf(pf).papeis)||{}; return p.pcm?'pcm':((p.mecanico||p.eletricista)?'mecanico':(p.gestor?'gestor':'')); }   /* eletricista (João, NR-10) age como técnico de manutenção: executa e, se responsável técnico, decide a aptidão */
 function manPor(pf){ const q=manPf(pf); const pa=manPapelDe(q); if(!q.k) return ''; if(typeof g2ator==='function'&&pa){ const t=g2ator(q,pa); if(t) return t; } return q.k; }
 function manRtTxt(a){ return a?(a.rt||'Otávio'):'—'; }
 function manPode(c,pf,cmd,x){ x=x||{}; const q=manPf(pf); const pa=manPapelDe(q); const k=q.k;
@@ -602,7 +603,7 @@ function manMover(c,id,iso,motivo,pf,forcar){ const o=c.oms[id]; if(!o) throw ne
   if(fora&&manVazio(motivo)) return {nada:true,avisoTol:true,msg:'Fica fora da tolerância · '+(tl.venc?'venceu':'vence')+' em '+manBr(tl.dl)+'. Informe o motivo para mover mesmo assim.'};
   const cf=manConflito(c,o,iso);
   if(o.etapa==='Liberadas'&&cf&&!forcar) return {nada:true,avisoConf:true,msg:cf.t+' ('+cf.det+'). Mova para outro dia ou confirme mesmo assim.'};
-  if(!o.vencOrig) o.vencOrig=o.janIso; const de=o.janIso; o.janAnt=o.jan; o.janIso=iso; o.jan=manBr(iso); o.ret=manBr(iso)+' 17:00'; o.conflitoAceito=false;
+  if(!o.vencOrig) o.vencOrig=o.janIso; const de=o.janIso; o.janAnt=o.jan; o.janIso=iso; o.jan=manBr(iso); o.ret=manBr(iso)+' 17:00'; o.conflitoAceito=!!(cf&&forcar&&o.etapa==='Liberadas');   /* S4: "Mover mesmo assim" é aceite do conflito do dia novo */
   o.movs=(o.movs||[]).concat([{de,para:iso,motivo:String(motivo||'').trim(),por:manPor(pf),em:c.hoje}]); manToca(o);
   return {msg:id+' movida para '+manBr(iso)+(fora?' · fora da tolerância ('+String(motivo).trim()+')':(tl?' · dentro da tolerância (até '+manBr(tl.dl)+')':''))+(cf?' · '+cf.t:' · sem conflito')+'.'}; }
 /* liberar: executante e tempo; falta de peça trava (estoque); conflito com a produção é aviso confirmado até o 1b ("Liberar mesmo assim") */
@@ -621,13 +622,13 @@ function manLiberar(c,id,forcar,pf,d){ const o=c.oms[id]; if(!o) throw new Error
 function manSolicitar(c,id,pf){ const o=c.oms[id]; if(!o) throw new Error('Ordem não encontrada.'); if(pf!==undefined) manExige(c,pf,'ponte'); if(o.sc) return {nada:true,msg:'A '+o.sc.id+' já foi enviada a Compras (simulado).'};
   const f=manFalta(c,o); if(!f.length) return {nada:true,msg:'Nenhuma peça em falta nesta ordem.'};
   const sc='SC-'+String(c.seqsc||41).padStart(3,'0'); c.seqsc=(c.seqsc||41)+1;
-  o.sc={id:sc,data:c.hoje,itens:f.map(p=>{ const it=c.itens[p.item]; return {item:p.item,nome:p.nome,un:p.un,qtd:Math.max(0,p.qtd-Math.max(0,it.saldo-it.reservado))}; })}; manToca(o);
+  o.sc={id:sc,data:c.hoje,por:manPor(pf),itens:f.map(p=>{ const it=c.itens[p.item]; return {item:p.item,nome:p.nome,un:p.un,qtd:Math.max(0,p.qtd-Math.max(0,it.saldo-it.reservado))}; })}; manToca(o);
   return {msg:sc+' enviada a Compras (simulado · Compras recebe no 1c): '+o.sc.itens.map(x=>x.nome+' '+manN(x.qtd,1)+' '+x.un).join(', ')+' · a '+id+' libera quando a peça chegar.'}; }
 function manReceber(c,id,pf){ const o=c.oms[id]; if(!o||!o.sc) throw new Error('Esta ordem não tem compra solicitada.'); if(pf!==undefined) manExige(c,pf,'ponte'); if(o.sc.rec) return {nada:true,msg:'Recebimento da '+o.sc.id+' já registrado.'};
-  o.sc.itens.forEach(x=>{ c.itens[x.item].saldo+=x.qtd; }); o.sc.rec=c.hoje; manToca(o);
+  o.sc.itens.forEach(x=>{ c.itens[x.item].saldo+=x.qtd; }); o.sc.rec=c.hoje; o.sc.recPor=manPor(pf); manToca(o);
   return {msg:'Recebimento da '+o.sc.id+' (simulado · papel do Almoxarifado): '+o.sc.itens.map(x=>x.nome+' '+manN(x.qtd,1)+' '+x.un).join(', ')+' · '+id+' pronta para liberar.'}; }
 function manIniciar(c,id,pf){ const o=c.oms[id]; if(!o||o.etapa!=='Liberadas') throw new Error(id+' não está em Liberadas.'); if(pf!==undefined) manExige(c,pf,'executar',{o});
-  o.etapa='Em execução'; o.ini=c.hoje; manToca(o);
+  o.etapa='Em execução'; o.ini=c.hoje; o.iniPor=manPor(pf); manToca(o);
   return {msg:id+' Em execução · responda as tarefas e informe a leitura do contador para concluir.'}; }
 /* resposta tarefa a tarefa (PRD 54.2: nunca pré-marcar; guarda quem e quando); editar só o motivo não troca o autor da resposta (CTL-3, achado 2) */
 function manResp(c,id,i,r,mot,pf,val){ const o=c.oms[id]; if(!o||o.etapa!=='Em execução') throw new Error('Responda as tarefas com a ordem Em execução.'); const t=o.chk[i]; if(!t) throw new Error('Tarefa não encontrada.');
@@ -652,13 +653,27 @@ function manIncluir(c,id,tipo,txt,pf){ const o=c.oms[id]; if(!o) throw new Error
   if(o.chk.some(t=>t.t.toLowerCase()===String(txt).trim().toLowerCase())) throw new Error('Esta tarefa já está na ordem.');
   o.chk.push(Object.assign({t:String(txt).trim(),tipo,r:'',mot:'',nova:o.etapa==='Em execução'},tipo==='Medição'?{val:'',un:''}:{})); manToca(o);
   return {msg:'Tarefa incluída na '+id+': '+String(txt).trim()+' ('+tipo+')'+(o.etapa==='Em execução'?' · o executante vê o selo “Tarefa nova”':'')+'.'}; }
-/* a OM que trata a condição (D-34): Teste do reparo entra sozinho se o ativo Bloqueado ainda não tem Teste (no Restrito, Medição também vale) */
-function manTratar(c,o,ach){ const a=c.ativos[o.aid]; if(!a||a.cond==='Apto') return false; o.trata=true; a.condInfo=a.condInfo||{}; a.condInfo.om=o.id;
+/* motivos da condição (revisão 09/10, A1): cada motivo tem achado e OM; o principal é a.condInfo e os demais ficam em a.condInfo.mais.
+   O ativo só volta a Apto quando não sobra motivo: "Declarar apto" encerra só o motivo da ordem (dano evitado: máquina a campo com outro defeito bloqueante aberto). */
+function manMots(a){ const i=a&&a.condInfo; return i?[i].concat(i.mais||[]):[]; }
+function manMotOm(c,m){ const o=m&&m.om&&c.oms[m.om]; return o&&manAberta(o)?o:null; }
+function manMotTxt(c,m){ const o=manMotOm(c,m); return (m.achado||m.motivo||'motivo')+' · '+(o?o.id:'sem ordem'); }
+function manMotSet(a,ms){ ms=ms.slice(); if(!ms.length){ a.condInfo=null; return; } ms.forEach(m=>{ delete m.mais; }); if(ms.length>1) ms[0].mais=ms.slice(1); a.condInfo=ms[0]; }
+function manMotCond(a){ const ms=manMots(a); if(!ms.length) return 'Apto'; return ms.some(m=>(m.cond||a.cond)==='Bloqueado')?'Bloqueado':'Restrito'; }
+/* novo motivo: o bloqueio passa à frente de uma restrição; num ativo já bloqueado, acrescenta (o principal segue o primeiro) */
+function manMotAdd(a,m){ const ms=manMots(a); if(!ms.length||a.cond==='Apto'){ manMotSet(a,[m]); return; } if(a.cond==='Restrito'&&m.cond==='Bloqueado') manMotSet(a,[m].concat(ms)); else manMotSet(a,ms.concat([m])); }
+/* O.S. com o recurso do ativo alocado de hoje em diante (alocação do PCP, O.S. › Recursos): aviso, nunca promessa de impedimento (A9) */
+function manOsAloc(c,aid){ const r=MAN_AL.rec[aid]; if(!r) return []; return [...new Set(MAN_AL.aloc.filter(x=>x.r===r&&x.sit!=='manutenção'&&x.dia>=c.hoje).map(x=>x.os))]; }
+/* a OM que trata a condição (D-34): trata um motivo (o do achado; senão um sem achado e sem ordem); Teste do reparo entra sozinho se ainda não há Teste (no Restrito, Medição também vale) */
+function manTratar(c,o,ach,mot){ const a=c.ativos[o.aid]; if(!a||a.cond==='Apto') return false; const ms=manMots(a);
+  const m=mot||ms.find(x=>ach&&x.achado===ach&&!manMotOm(c,x))||ms.find(x=>!x.achado&&!manMotOm(c,x)); if(!m) return false;
+  o.trata=true; m.om=o.id; const mc=m.cond||a.cond;
   const temT=o.chk.some(t=>t.tipo==='Teste'); const temM=o.chk.some(t=>t.tipo==='Medição');
-  if(!temT&&!(a.cond==='Restrito'&&temM)){ const s=(ach&&c.achados[ach])?c.achados[ach].sint:((a.condInfo&&a.condInfo.motivo)||'condição do ativo'); o.chk.push({t:'Teste do reparo · '+s,tipo:'Teste',r:'',mot:'',fixo:true,tent:[]}); }
+  if(!temT&&!(mc==='Restrito'&&temM)){ const s=(ach&&c.achados[ach])?c.achados[ach].sint:(m.motivo||'condição do ativo'); o.chk.push({t:'Teste do reparo · '+s,tipo:'Teste',r:'',mot:'',fixo:true,tent:[]}); }
   return true; }
 function manTesteValido(c,o){ const a=c.ativos[o.aid]; const tt=o.chk.filter(t=>t.tipo==='Teste'); if(tt.length&&tt.every(t=>(t.tent||[]).length&&t.tent[t.tent.length-1].r==='Aprovado')) return true;
-  const cond=a?(a.cond!=='Apto'?a.cond:((a.condHist||[]).slice(-2)[0]||{}).cond):''; if(!tt.length&&(cond==='Restrito'||(a&&a.cond==='Restrito'))&&o.chk.some(t=>t.tipo==='Medição'&&t.r==='Conforme')) return true; return false; }
+  const mm=manMots(a).find(m=>m.om===o.id);
+  const cond=mm?(mm.cond||a.cond):(a?(a.cond!=='Apto'?a.cond:((a.condHist||[]).slice(-2)[0]||{}).cond):''); if(!tt.length&&(cond==='Restrito'||(a&&a.cond==='Restrito'))&&o.chk.some(t=>t.tipo==='Medição'&&t.r==='Conforme')) return true; return false; }
 /* o que falta para concluir (a mesma regra na web e no app): tarefas, teste, leitura, horas */
 function manFaltaConcluir(c,o,leit,horas){ const f=[]; const a=c.ativos[o.aid];
   o.chk.forEach(t=>{ const tp=t.tipo||'Serviço';
@@ -722,14 +737,23 @@ function manConcluir(c,id,leit,horas,forcar,apl,pf){ const o=c.oms[id]; if(!o||o
 /* aptidão (CMD-19; D-10): "Declarar apto" só em Em conferência, na OM que trata a condição, com teste válido para o risco */
 function manAptoMotivo(c,o){ if(!o) return 'Ordem não encontrada.'; if(!o.trata) return 'Esta ordem não trata a condição do ativo.'; if(o.aptidao) return 'Aptidão já decidida.';
   if(o.etapa!=='Em conferência') return 'Declarar apto só em Em conferência.'; if(!manTesteValido(c,o)) return 'Falta: teste válido (Teste aprovado ou, no Restrito, Medição conforme).'; return ''; }
+/* outros motivos da condição que seguem abertos além dos que esta OM trata (A1): o rótulo do comando diz se o ativo fica apto ou segue na condição */
+function manAptoFica(c,o){ const a=c.ativos[o.aid]; return manMots(a).filter(m=>m.om!==o.id); }
+function manAptoRot(c,o){ const a=c.ativos[o.aid]; const fica=manAptoFica(c,o); if(!fica.length) return 'Declarar '+(a?a.nome:'ativo')+' apto';
+  return 'Encerrar o motivo da '+o.id+' · '+(a?a.nome:'ativo')+' segue '+(fica.some(m=>(m.cond||a.cond)==='Bloqueado')?'bloqueado':'restrito'); }
 function manDeclararApto(c,id,pf){ const o=c.oms[id]; const m=manAptoMotivo(c,o); if(m) throw new Error(m); const a=c.ativos[o.aid]; if(pf!==undefined) manExige(c,pf,'condicao',{aid:o.aid});
-  const ant=a.cond, por=manPor(pf); a.cond='Apto'; a.condInfo=null; a.condHist=(a.condHist||[]).concat([{cond:'Apto',de:ant,motivo:'Declarado apto pela '+id+' (teste válido)',por,em:c.hoje,om:id}]);
+  const ant=a.cond, por=manPor(pf); const fica=manAptoFica(c,o);
+  if(fica.length){ const falta=fica.map(x=>manMotTxt(c,x)); manMotSet(a,fica); a.cond=manMotCond(a);
+    a.condHist=(a.condHist||[]).concat([{cond:a.cond,de:ant,motivo:'Motivo da '+id+' encerrado (teste válido) · segue '+a.cond.toLowerCase()+' por '+falta.join('; '),por,em:c.hoje,om:id}]);
+    o.aptidao={dec:'motivo',por,em:c.hoje,falta}; manToca(o);
+    return {msg:'Motivo da '+id+' encerrado (CMD-19 por '+por+') · '+manNome(a)+' segue '+a.cond.toLowerCase()+' · Falta: '+falta.join(' · ')+'.'}; }
+  a.cond='Apto'; a.condInfo=null; a.condHist=(a.condHist||[]).concat([{cond:'Apto',de:ant,motivo:'Declarado apto pela '+id+' (teste válido)',por,em:c.hoje,om:id}]);
   o.aptidao={dec:'apto',por,em:c.hoje}; manToca(o);
   return {msg:manNome(a)+' apto · CMD-19 por '+por+' na '+id+' · a agenda antiga não é reassumida; volta pela reprogramação do PCP.'}; }
 function manManter(c,id,motivo,pf){ const o=c.oms[id]; if(!o||!o.trata) throw new Error('Esta ordem não trata a condição do ativo.'); if(o.aptidao) throw new Error('Aptidão já decidida.');
   if(o.etapa!=='Em conferência') throw new Error('Decida a aptidão em Em conferência.'); if(pf!==undefined) manExige(c,pf,'condicao',{aid:o.aid}); if(manVazio(motivo)) throw new Error('Informe o motivo para manter.');
   const a=c.ativos[o.aid]; const por=manPor(pf); o.aptidao={dec:'manter',motivo:String(motivo).trim(),por,em:c.hoje};
-  if(a.condInfo&&a.condInfo.om===id) a.condInfo.om=''; a.condHist=(a.condHist||[]).concat([{cond:a.cond,motivo:'Mantido '+a.cond.toLowerCase()+' na '+id+': '+String(motivo).trim(),por,em:c.hoje,om:id}]); manToca(o);
+  manMots(a).forEach(x=>{ if(x.om===id) x.om=''; }); a.condHist=(a.condHist||[]).concat([{cond:a.cond,motivo:'Mantido '+a.cond.toLowerCase()+' na '+id+': '+String(motivo).trim(),por,em:c.hoje,om:id}]); manToca(o);
   return {msg:manNome(a)+' segue '+a.cond.toLowerCase()+' ('+String(motivo).trim()+') · o vínculo com a '+id+' foi desfeito; crie uma ordem corretiva no ativo.'}; }
 /* peças retiradas (D-13): destino Recondicionar · Garantia · Sucata, com responsável; nunca volta ao livre */
 function manRetirada(c,id,i,dest,resp,pf){ const o=c.oms[id]; if(!o) throw new Error('Ordem não encontrada.'); const r=(o.retiradas||[])[i]; if(!r) throw new Error('Peça retirada não encontrada.');
@@ -738,13 +762,14 @@ function manRetirada(c,id,i,dest,resp,pf){ const o=c.oms[id]; if(!o) throw new E
   r.dest=dest; r.resp=String(resp).trim(); r.por=manPor(pf); r.em=c.hoje; manToca(o);
   return {msg:r.nome+' → '+dest.toLowerCase()+' com '+r.resp+' · não volta ao estoque livre.'}; }
 function manSobras(c,id,pf){ const o=c.oms[id]; if(!o) throw new Error('Ordem não encontrada.'); if(pf!==undefined) manExige(c,pf,'ponte'); const sb=(o.pecas||[]).filter(p=>p.sob>0); if(!sb.length) return {nada:true,msg:'Sem sobras nesta ordem.'};
-  const rc='AL-'+(412+Object.values(c.oms).filter(x=>x.recibo).length); sb.forEach(p=>{ if(p.item) c.itens[p.item].saldo+=p.sob; p.dev=(p.dev||0)+p.sob; p.sob=0; }); o.recibo=rc; manToca(o);
+  const rc='AL-'+(412+Object.values(c.oms).filter(x=>x.recibo).length); sb.forEach(p=>{ if(p.item) c.itens[p.item].saldo+=p.sob; p.dev=(p.dev||0)+p.sob; p.sob=0; }); o.recibo=rc; o.devPor={por:manPor(pf),em:c.hoje}; manToca(o);
   return {msg:'Sobras da '+id+' devolvidas (simulado · papel do Almoxarifado) com recibo '+rc+' · '+sb.map(p=>manN(p.dev)+' '+p.un+' '+p.nome).join(', ')+'.'}; }
 /* encerrar: uma regra (F79 + F92; D-34): sobras, peças retiradas com destino, decisão de aptidão na OM que trata a condição */
 function manFaltaEncerrar(c,o){ const f=[]; const a=c.ativos[o.aid];
   if((o.pecas||[]).some(p=>p.sob>0)) f.push('resolver sobras · Otávio (simulado · papel do Almoxarifado)');
   (o.retiradas||[]).forEach(r=>{ if(!r.dest||r.dest==='A definir'||!r.resp) f.push('destino e responsável de '+r.nome+' · '+(o.executante||'Otávio')); });
   if(o.trata&&!o.aptidao) f.push('Declarar '+(a?a.nome:'o ativo')+' apto ou Manter '+(a&&a.cond!=='Apto'?a.cond.toLowerCase():'a condição')+' · Otávio ou '+manRtTxt(a));
+  const ca=manAppConfAbertos(c,o.id).length; if(ca) f.push('resolver '+ca+(ca>1?' registros do app':' registro do app')+' (aplicar ou descartar) · Otávio');   /* S4: o fato do campo não fica para trás do encerramento */
   return f; }
 function manEncerrar(c,id,pf){ const o=c.oms[id]; if(!o||o.etapa!=='Em conferência') throw new Error(id+' não está Em conferência.'); if(pf!==undefined) manExige(c,pf,'encerrar');
   const f=manFaltaEncerrar(c,o); if(f.length) throw new Error('Falta: '+f.join(' · ')+'.');
@@ -759,14 +784,24 @@ function manAchRegistrar(c,d,pf,chave){ return manCmd(c,chave,'achado',()=>{ if(
     if(['Alta','Média','Baixa'].indexOf(d.crit)<0) er.push('criticidade'); if(['Apto','Restrito','Bloqueado'].indexOf(d.sug)<0) er.push('condição sugerida');
     if(er.length) throw new Error('Informe: '+er.join(', ')+'.');
     const ab=manAchAberto(c,d.aid,d.comp); const por=manPor(pf);
-    if(ab&&!d.rep) return {nada:true,rep:ab.id,msg:'Possível repetição de '+ab.id+' ('+ab.sint+') · Somar ou Registrar novo.'};
-    if(ab&&d.rep==='somar'){ ab.oc=(ab.oc||[]).concat([c.hoje]); if(!manVazio(d.evid)) ab.evid=(ab.evid?ab.evid+' + ':'')+String(d.evid).trim(); ab.rv=(ab.rv||0)+1;
-      if(!manVazio(d.leit)) manLeitura(c,d.aid,manNum(d.leit),'Achado '+ab.id,pf,c.hoje); return {id:ab.id,msg:'Somado ao '+ab.id+' · '+ab.oc.length+' ocorrências.'}; }
+    if(ab&&!d.rep){ const sobe=manAchSobe(ab,d); return {nada:true,rep:ab.id,mais:sobe.length>0,msg:'Possível repetição de '+ab.id+' ('+ab.sint+') · Somar ou Registrar novo'+(sobe.length?' · a nova é mais grave: somar eleva '+sobe.join(' e '):'')+'.'}; }
+    if(ab&&d.rep==='somar'){ const sobe=manAchSobe(ab,d);
+      if(!ab.ocd) ab.ocd=[{em:ab.em,crit:ab.crit,sug:ab.sug,por:ab.por,sint:ab.sint}];
+      ab.ocd.push({em:c.hoje,crit:d.crit,sug:d.sug,por,sint:String(d.sint).trim(),evid:String(d.evid||'').trim()});
+      ab.oc=(ab.oc||[]).concat([c.hoje]); if(!manVazio(d.evid)) ab.evid=(ab.evid?ab.evid+' + ':'')+String(d.evid).trim(); ab.rv=(ab.rv||0)+1;
+      if(MAN_CRITN[d.crit]>MAN_CRITN[ab.crit]) ab.crit=d.crit; if(MAN_SUGN[d.sug]>MAN_SUGN[ab.sug]) ab.sug=d.sug; if(sobe.length) ab.nova=true;
+      if(!manVazio(d.leit)) manLeitura(c,d.aid,manNum(d.leit),'Achado '+ab.id,pf,c.hoje);
+      let bm=''; if(d.bloquear&&ab.sug==='Bloqueado'){ const rb=manCondicao(c,d.aid,'bloquear',{motivo:ab.sint,evid:d.evid,achado:ab.id},pf); bm=' · '+(rb.nada?a.nome+' já estava bloqueado por '+ab.id:manBloqTxt(a,rb)); }
+      return {id:ab.id,msg:'Somado ao '+ab.id+' · '+ab.oc.length+' ocorrências'+(sobe.length?' · '+sobe.join(' e '):'')+bm+'.'}; }
     const id=manAchProx(c,MAN_PREF[d.origem]);
     c.achados[id]={id,origem:d.origem,comp:d.comp,aid:d.aid,sint:String(d.sint).trim(),crit:d.crit,sug:d.sug,evid:String(d.evid||'').trim(),leit:manVazio(d.leit)?'':manNum(d.leit),por,em:c.hoje,oc:[c.hoje],estado:'Sem ordem',om:'',nova:true,voltou:'',mot:'',rv:0,os:d.os||''};
     let lm=''; if(!manVazio(d.leit)&&a.un){ const r=manLeitura(c,d.aid,manNum(d.leit),'Achado '+id,pf,c.hoje); lm=r.msg?' · '+r.msg:''; }
-    let bm=''; if(d.bloquear&&d.sug==='Bloqueado'){ manCondicao(c,d.aid,'bloquear',{motivo:String(d.sint).trim(),evid:d.evid,achado:id},pf); bm=' · '+a.nome+' bloqueado'; }
+    let bm=''; if(d.bloquear&&d.sug==='Bloqueado'){ const rb=manCondicao(c,d.aid,'bloquear',{motivo:String(d.sint).trim(),evid:d.evid,achado:id},pf); bm=' · '+manBloqTxt(a,rb); }
     return {id,msg:'Achado '+id+' registrado · '+manNome(a)+' · '+d.comp+bm+lm+(d.os?' · ligado à '+d.os:'')}; }); }
+/* repetição mais grave (revisão 09/10, A2): somar nunca perde a criticidade nem a sugestão de condição da ocorrência nova */
+const MAN_CRITN={'Baixa':1,'Média':2,'Alta':3}, MAN_SUGN={'Apto':1,'Restrito':2,'Bloqueado':3};
+function manAchSobe(ab,d){ const s=[]; if(MAN_CRITN[d.crit]>MAN_CRITN[ab.crit]) s.push('criticidade '+ab.crit+' → '+d.crit); if(MAN_SUGN[d.sug]>MAN_SUGN[ab.sug]) s.push('sugestão '+ab.sug+' → '+d.sug); return s; }
+function manBloqTxt(a,rb){ return rb&&rb.ant==='Bloqueado'?(a.nome+' segue bloqueado · motivo acrescentado ('+rb.n+' motivos)'):(a.nome+' bloqueado'); }
 /* OM aberta do ativo que aceita vínculo: A liberar, Liberadas ou Em execução (M:281); nunca Em conferência (D-35) */
 function manOmVinc(c,aid){ return Object.values(c.oms).filter(o=>o.aid===aid&&MAN_ABERTAS.indexOf(o.etapa)>=0).sort((a,b)=>(a.janIso||'').localeCompare(b.janIso||''))[0]||null; }
 function manAchVenc(c,aid){ return manSemOm(c).filter(l=>l.aid===aid).sort((a,b)=>manIniJanela(a.x)-manIniJanela(b.x))[0]||null; }
@@ -798,7 +833,8 @@ function manAchCorretiva(c,id,pf,chave){ return manCmd(c,chave,'achCorretiva',()
     const o={id:oid,tipo:'Corretiva',aid:a.id,serv:'Corretiva · '+q.comp.toLowerCase()+' · '+q.sint,comp:q.comp,crit:q.crit,etapa:'A liberar',origem:id+' · '+q.origem.toLowerCase()+(q.os?' · '+q.os:''),
       jan:'',janIso:'',ret:'',esp,tempo:null,executante:'',chk:[],pecas:[],exec:null,selos:[],achados:[id],origAch:id,rv:0};
     c.oms[oid]=o; const pj=manProxLivre(c,o)||manAdd(c.hoje,1); o.janIso=pj; o.jan=manBr(pj); o.ret=manBr(pj)+' 17:00';
-    const trata=(a.cond!=='Apto'&&!(a.condInfo&&a.condInfo.om&&c.oms[a.condInfo.om]&&manAberta(c.oms[a.condInfo.om])))?manTratar(c,o,id):false;
+    const ms=manMots(a); const mot=ms.find(m=>m.achado===id&&!manMotOm(c,m))||ms.find(m=>!m.achado&&!manMotOm(c,m));   /* A1: o motivo do achado (ou um sem achado), nunca o de outra OM aberta */
+    const trata=(a.cond!=='Apto'&&mot)?manTratar(c,o,id,mot):false;
     if(!trata) manVerifAch(o,q);
     q.estado='Na OM'; q.om=oid; q.nova=false; q.voltou=''; q.dec={k:'corretiva',por:manPor(pf),em:c.hoje}; q.rv=(q.rv||0)+1;
     return {id:oid,msg:oid+' criada em A liberar · '+manNome(a)+' · '+q.comp+' · '+q.crit+' · janela '+manBr(pj)+(trata?' · trata a condição ('+a.cond+'): Teste do reparo incluído':'')+' · informe o tempo previsto para liberar.'}; }); }
@@ -807,14 +843,15 @@ function manAchFechar(c,id,mot,pf){ const q=c.achados[id]; if(!q) throw new Erro
   q.estado='Fechado sem serviço'; q.mot=String(mot).trim(); q.nova=false; q.dec={k:'fechar',por:manPor(pf),em:c.hoje}; q.rv=(q.rv||0)+1;
   return {msg:id+' fechado sem serviço · '+q.mot+'.'}; }
 function manAchCrit(c,id,crit,pf){ const q=c.achados[id]; if(!q) throw new Error('Achado não encontrado.'); if(pf!==undefined) manExige(c,pf,'decidir'); if(['Alta','Média','Baixa'].indexOf(crit)<0) throw new Error('Criticidade inválida.');
-  if(q.crit===crit) return {nada:true}; q.crit=crit; q.nova=false; q.rv=(q.rv||0)+1; return {msg:id+' · criticidade '+crit+'.'}; }
+  if(q.crit===crit) return {nada:true}; q.critHist=(q.critHist||[]).concat([{de:q.crit,para:crit,por:manPor(pf),em:c.hoje}]); q.crit=crit; q.nova=false; q.rv=(q.rv||0)+1; return {msg:id+' · criticidade '+crit+'.'}; }
 /* corretiva pela condição (detalhe do ativo Bloqueado sem OM que trate, ex.: depois de "Manter"): herda o motivo e ganha o Teste do reparo */
 function manCorretivaAtivo(c,aid,pf,chave){ return manCmd(c,chave,'corretivaAtivo',()=>{ const a=c.ativos[aid]; if(!a) throw new Error('Ativo não encontrado.'); if(pf!==undefined) manExige(c,pf,'decidir');
-    const i=a.condInfo||{}; if(i.om&&c.oms[i.om]&&manAberta(c.oms[i.om])) return {nada:true,id:i.om,msg:'A '+i.om+' já trata a condição do '+a.nome+'.'};
+    const ms=manMots(a); if(!ms.length) throw new Error(a.nome+' está apto: nenhuma condição a tratar.');
+    const i=ms.find(m=>!manMotOm(c,m)); if(!i){ const t=manMotOm(c,ms[0]); return {nada:true,id:t?t.id:'',msg:'A condição do '+a.nome+' já é tratada: '+ms.map(m=>manMotTxt(c,m)).join(' · ')+'.'}; }
     if(i.achado&&c.achados[i.achado]&&c.achados[i.achado].estado==='Sem ordem') return manAchCorretiva(c,i.achado);
     const oid='OM-'+String(c.seq).padStart(4,'0'); c.seq++; const esp=a.classe==='Irrigação'?'Eletricista':'Mecânico';
     const o={id:oid,tipo:'Corretiva',aid,serv:'Corretiva · '+(i.motivo||a.cond),crit:'Alta',etapa:'A liberar',origem:'Condição '+a.cond+' · '+(i.motivo||''),jan:'',janIso:'',ret:'',esp,tempo:null,executante:'',chk:[],pecas:[],exec:null,selos:[],achados:[],rv:0};
-    c.oms[oid]=o; const pj=manProxLivre(c,o)||manAdd(c.hoje,1); o.janIso=pj; o.jan=manBr(pj); o.ret=manBr(pj)+' 17:00'; manTratar(c,o,'');
+    c.oms[oid]=o; const pj=manProxLivre(c,o)||manAdd(c.hoje,1); o.janIso=pj; o.jan=manBr(pj); o.ret=manBr(pj)+' 17:00'; manTratar(c,o,'',i);
     return {id:oid,msg:oid+' criada em A liberar · trata a condição do '+a.nome+' (Teste do reparo incluído) · informe o tempo previsto para liberar.'}; }); }
 /* marco sugerido do vínculo (D-41): última OM encerrada do mesmo serviço, ou de um que o "cumpre também"; corretiva nunca serve */
 function manMarcoSug(c,p,aid){ const nomes=manWork(p).concat(manPub(p)).map(s=>String(s.nome).toLowerCase()); let best=null;
@@ -827,19 +864,22 @@ function manCondicao(c,aid,acao,d,pf){ const a=c.ativos[aid]; if(!a) throw new E
   const hist=(x)=>{ a.condHist=(a.condHist||[]).concat([Object.assign({por,em:c.hoje},x)]); };
   if(acao==='rt'){ if(manVazio(d.rt)) throw new Error('Escolha o responsável técnico.'); if(manVazio(d.motivo)) throw new Error('Informe o motivo da troca.'); const de=a.rt; a.rt=String(d.rt).trim();
     hist({cond:a.cond,motivo:'Responsável técnico: '+de+' → '+a.rt+' ('+String(d.motivo).trim()+')'}); return {msg:'Responsável técnico do '+a.nome+': '+a.rt+'.'}; }
-  if(acao==='bloquear'){ if(a.cond==='Bloqueado') return {nada:true,msg:a.nome+' já está bloqueado.'}; if(manVazio(d.motivo)) throw new Error('Informe o motivo do bloqueio.');
-    a.cond='Bloqueado'; a.condInfo={motivo:String(d.motivo).trim(),desde:c.hoje,por,evid:String(d.evid||'').trim(),achado:d.achado||'',om:'',ate:'',lim:''};
-    let t=''; if(d.om){ const o=c.oms[d.om]; if(!o||o.aid!==aid||MAN_ABERTAS.indexOf(o.etapa)<0) throw new Error('Escolha uma ordem aberta do mesmo ativo.'); manTratar(c,o,d.achado); manToca(o); t=' · tratado na '+o.id; }
-    hist({cond:'Bloqueado',motivo:a.condInfo.motivo,achado:a.condInfo.achado,om:a.condInfo.om||''});
-    return {msg:a.nome+' bloqueado (CMD-18) · '+a.condInfo.motivo+t+' · as O.S. que usam o ativo ficam impedidas.'}; }
+  if(acao==='bloquear'){ if(a.cond==='Bloqueado'&&(!d.achado||manMots(a).some(m=>m.achado===d.achado))) return {nada:true,msg:a.nome+' já está bloqueado'+(d.achado?' por '+d.achado:'')+'.'};
+    if(manVazio(d.motivo)) throw new Error('Informe o motivo do bloqueio.');
+    const ant=a.cond; const m={cond:'Bloqueado',motivo:String(d.motivo).trim(),desde:c.hoje,por,evid:String(d.evid||'').trim(),achado:d.achado||'',om:'',ate:'',lim:''};
+    manMotAdd(a,m); a.cond='Bloqueado';   /* A1: num ativo já bloqueado (ou restrito) o motivo novo se soma; nenhum se perde */
+    let t=''; if(d.om){ const o=c.oms[d.om]; if(!o||o.aid!==aid||MAN_ABERTAS.indexOf(o.etapa)<0) throw new Error('Escolha uma ordem aberta do mesmo ativo.'); manTratar(c,o,d.achado,m); manToca(o); t=' · tratado na '+o.id; }
+    hist({cond:'Bloqueado',motivo:m.motivo+(ant!=='Apto'?' (motivo acrescentado)':''),achado:m.achado,om:m.om||''});
+    const os=manOsAloc(c,aid); const n=manMots(a).length;   /* A9: as O.S. alocadas são aviso ao PCP; o impedimento derivado na O.S. é o Bloco 2 (PCMS-A05) */
+    return {ant,n,msg:a.nome+(ant==='Bloqueado'?' segue bloqueado · motivo acrescentado ('+n+' motivos)':' bloqueado (CMD-18)')+' · '+m.motivo+t+(os.length?' · alocado em '+os.join(', ')+': avise o PCP (O.S. › Recursos)':'')+'.'}; }
   if(acao==='restringir'){ if(manVazio(d.motivo)) throw new Error('Informe o motivo da restrição.'); if(manVazio(d.lim)) throw new Error('Informe os limites de operação.');
     if(manVazio(d.ate)) throw new Error('Informe o prazo da restrição.'); if(d.ate<c.hoje) throw new Error('O prazo não pode ser anterior a hoje.');
     if(a.cond==='Bloqueado') throw new Error(a.nome+' está bloqueado: a saída é Declarar apto na ordem que trata a condição.');
-    a.cond='Restrito'; a.condInfo={motivo:String(d.motivo).trim(),desde:c.hoje,por,evid:String(d.evid||'').trim(),achado:d.achado||'',om:'',ate:d.ate,lim:String(d.lim).trim()};
-    if(d.om){ const o=c.oms[d.om]; if(o&&o.aid===aid&&MAN_ABERTAS.indexOf(o.etapa)>=0){ manTratar(c,o,d.achado); manToca(o); } }
+    a.cond='Restrito'; a.condInfo={cond:'Restrito',motivo:String(d.motivo).trim(),desde:c.hoje,por,evid:String(d.evid||'').trim(),achado:d.achado||'',om:'',ate:d.ate,lim:String(d.lim).trim()};
+    if(d.om){ const o=c.oms[d.om]; if(o&&o.aid===aid&&MAN_ABERTAS.indexOf(o.etapa)>=0){ manTratar(c,o,d.achado,a.condInfo); manToca(o); } }
     hist({cond:'Restrito',motivo:a.condInfo.motivo,ate:d.ate,om:a.condInfo.om||''}); return {msg:a.nome+' restrito até '+manBr(d.ate)+' · '+a.condInfo.lim+'.'}; }
   if(acao==='encerrar'){ if(a.cond!=='Restrito') throw new Error('Encerrar restrição só com o ativo Restrito.');
-    const om=a.condInfo&&a.condInfo.om&&c.oms[a.condInfo.om]; if(om&&manAberta(om)) throw new Error('A '+om.id+' trata a restrição: a saída é Declarar apto nela.');
+    const om=manMots(a).map(m=>manMotOm(c,m)).find(Boolean); if(om) throw new Error('A '+om.id+' trata a restrição: a saída é Declarar apto nela.');
     if(manVazio(d.motivo)) throw new Error('Informe o motivo.'); if(manVazio(d.evid)) throw new Error('Informe a evidência (medição).');
     a.cond='Apto'; a.condInfo=null; hist({cond:'Apto',de:'Restrito',motivo:'Restrição encerrada: '+String(d.motivo).trim()+' · '+String(d.evid).trim()}); return {msg:'Restrição do '+a.nome+' encerrada · Apto.'}; }
   throw new Error('Ação de condição desconhecida.'); }
@@ -886,9 +926,15 @@ function manLeituraDescartar(c,aid,pf){ if(pf!==undefined) manExige(c,pf,'leitur
   return {msg:'Leitura de '+manQ(s.val,a.un)+' descartada'+(s.ab?' ('+s.ab+')':'')+' · '+manNome(a)+' segue em '+manLeitTxt(a)+'.'}; }
 /* ---------- abastecimento (RF-AST-006; D-15, D-19): um lançamento, L/h só com método (tanque cheio), estorno com lançamento novo ---------- */
 function manAbProx(c,pre){ const ns=(c.abast||[]).filter(x=>String(x.id).indexOf(pre+'-')===0).map(x=>Number(String(x.id).slice(pre.length+1))||0); return pre+'-'+String((ns.length?Math.max.apply(null,ns):(pre==='ES'?87:1042))+1).padStart(4,'0'); }
+/* consumo pelo método tanque cheio (PRD CAL-07): volume de todos os lançamentos não estornados com leitura em (cheio anterior, este cheio] ÷ a distância do contador
+   (revisão 09/10, A4: o parcial no meio conta). Unidade pelo contador do ativo (A10): horímetro → L/h; odômetro → km/L. lh = o valor na unidade un. */
 function manLh(c,b){ if(!b||b.tipo||b.qual==='Estornado'||!b.cheio||b.leit===null||b.leit===undefined) return null;
-  const ant=(c.abast||[]).filter(x=>x.aid===b.aid&&!x.tipo&&x.qual!=='Estornado'&&x.cheio&&x.leit!==null&&x.leit!==undefined&&x.leit<b.leit&&(x.data+(x.hora||''))<=(b.data+(b.hora||''))&&x.id!==b.id)
-    .sort((x,y)=>y.leit-x.leit)[0]; if(!ant) return null; const dh=b.leit-ant.leit; if(dh<=0) return null; return {lh:b.vol/dh,de:ant.id,h:dh}; }
+  const ok=(x)=>x.aid===b.aid&&!x.tipo&&x.qual!=='Estornado'&&x.leit!==null&&x.leit!==undefined;
+  const ant=(c.abast||[]).filter(x=>ok(x)&&x.cheio&&x.leit<b.leit&&(x.data+(x.hora||''))<=(b.data+(b.hora||''))&&x.id!==b.id)
+    .sort((x,y)=>y.leit-x.leit)[0]; if(!ant) return null; const dh=b.leit-ant.leit; if(dh<=0) return null;
+  const its=(c.abast||[]).filter(x=>ok(x)&&x.leit>ant.leit&&x.leit<=b.leit&&(x.data+(x.hora||''))<=(b.data+(b.hora||''))); const vol=its.reduce((s2,x)=>s2+(Number(x.vol)||0),0);
+  const km=b.un==='km'; return {lh:km?(vol>0?dh/vol:null):vol/dh,un:km?'km/L':'L/h',de:ant.id,h:dh,vol,n:its.length}; }
+function manConsTxt(x){ return x&&x.lh!==null&&x.lh!==undefined?(manN(x.lh,1)+' '+x.un):'—'; }
 function manAbastecer(c,d,pf,chave){ return manCmd(c,chave,'abast',()=>{ if(pf!==undefined) manExige(c,pf,'registrar'); d=d||{}; const a=c.ativos[d.aid]; const er=[];
     if(!a) er.push('ativo'); if(manVazio(d.tq)) er.push('tanque/lote'); const vol=manNum(d.vol); if(isNaN(vol)||vol<=0) er.push('volume em L');
     if(a&&a.un&&manVazio(d.leit)) er.push('leitura ('+a.un+')'); if(manVazio(d.op)) er.push('operador');
@@ -898,12 +944,18 @@ function manAbastecer(c,d,pf,chave){ return manCmd(c,chave,'abast',()=>{ if(pf!=
     const b={id,aid:a.id,tq:d.tq,vol,data,hora:d.hora||manHr(),leit:L,un:a.un,op:d.op,evid:String(d.evid||'').trim(),cheio:!!d.cheio,qual:'Confirmada',por:manPor(pf),os:d.os||''};
     c.abast=(c.abast||[]).concat([b]); let m={msg:''}; if(a.un){ m=manLeitura(c,a.id,L,'Abastecimento '+id,pf,data,id); b.qual=m.qual||'Confirmada'; b.lt=m.lt; }
     const lh=manLh(c,b);
-    return {id,msg:'Lançamento '+id+' registrado · '+manNome(a)+' · '+manN(vol)+' L'+(lh?' · '+manN(lh.lh,1)+' L/h (tanque cheio)':'')+(m.msg?' · '+m.msg:'')}; }); }
+    return {id,msg:'Lançamento '+id+' registrado · '+manNome(a)+' · '+manN(vol)+' L'+(lh?' · '+manConsTxt(lh)+' (tanque cheio'+(lh.n>1?', '+lh.n+' lançamentos':'')+')':'')+(m.msg?' · '+m.msg:'')}; }); }
 function manEstornar(c,id,motivo,pf,chave){ return manCmd(c,chave,'estorno',()=>{ if(pf!==undefined) manExige(c,pf,'estorno'); const b=(c.abast||[]).find(x=>x.id===id); if(!b||b.tipo) throw new Error('Lançamento não encontrado.');
     if(b.qual==='Estornado') return {nada:true,msg:id+' já foi estornado ('+b.estorno+').'}; if(manVazio(motivo)) throw new Error('Informe o motivo do estorno.');
     const es=manAbProx(c,'ES'); c.abast.push({id:es,tipo:'Estorno',ref:id,aid:b.aid,tq:b.tq,vol:-b.vol,data:c.hoje,hora:manHr(),leit:null,un:b.un,op:b.op,evid:'',cheio:false,qual:'Estorno',motivo:String(motivo).trim(),por:manPor(pf)});
-    b.qual='Estornado'; b.estorno=es; const lt=(c.leituras||[]).find(x=>x.id===b.lt); if(lt&&lt.qual==='A confirmar'){ const a=c.ativos[b.aid]; if(a&&a.suspeita&&a.suspeita.lt===lt.id) delete a.suspeita; lt.qual='Descartada'; }
-    return {id:es,msg:'Estorno '+es+' lançado para '+id+' ('+String(motivo).trim()+') · o original fica no histórico; registre o lançamento correto.'}; }); }
+    b.qual='Estornado'; b.estorno=es; const lt=(c.leituras||[]).find(x=>x.id===b.lt); const a=c.ativos[b.aid]; let lm='';
+    if(lt&&lt.qual==='A confirmar'){ if(a&&a.suspeita&&a.suspeita.lt===lt.id) delete a.suspeita; lt.qual='Descartada'; }
+    else if(lt&&lt.qual==='Confirmada'){ lt.qual='Estornada';   /* A3: a leitura do lançamento estornado sai; se era a atual, volta a última confirmada antes dela e os vencimentos recalculam */
+      if(a&&a.leit&&a.leit.val===lt.val&&a.leit.data===lt.data&&a.leit.origem===lt.origem){
+        const ls=(c.leituras||[]).map((x,i)=>[x,i]).filter(([x])=>x.aid===a.id&&x.id!==lt.id&&['Confirmada','Troca de contador'].indexOf(x.qual)>=0)
+          .sort((p1,p2)=>String(p1[0].data).localeCompare(String(p2[0].data))||(p1[1]-p2[1])); const pv=(ls.slice(-1)[0]||[])[0];
+        if(pv){ a.leit={val:pv.val,data:pv.data,origem:pv.origem}; lm=' · leitura de '+manQ(lt.val,a.un)+' estornada: '+manNome(a)+' volta a '+manLeitTxt(a); } } }
+    return {id:es,msg:'Estorno '+es+' lançado para '+id+' ('+String(motivo).trim()+')'+lm+' · o original fica no histórico; registre o lançamento correto.'}; }); }
 /* ---------- indicadores (PRD 55.2: até 4 cartões; "não calculável" sem dado) ---------- */
 function manPeriodo(c,k){ const h=c.hoje; if(k==='30d') return {de:manAdd(h,-30),ate:h,t:'30 d'}; if(k==='12m') return {de:manAdd(h,-365),ate:h,t:'12 m'};
   const M=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']; return {de:h.slice(0,8)+'01',ate:h,t:M[Number(h.slice(5,7))-1]+'/'+h.slice(0,4)}; }
@@ -951,20 +1003,25 @@ function manAppCmd(cc,q){ if(!q||!q.chave) throw new Error('Comando sem chave do
   if(cc.app.online!==false) return manAppAplicar(cc.man,q);
   cc.app.manFila=cc.app.manFila||[]; if(cc.app.manFila.some(x=>x.chave===q.chave)) return {nada:true,repetido:true,msg:'Já está no aparelho · aguardando sinal.'};
   const m=manClone(manAppProj(cc)); const o=a.om?m.oms[a.om]:null;   /* cópia: validar no aparelho nunca grava no servidor */ const rv=o?(o.rv||0):null, fase=o?o.etapa:null; const desc=manAppDesc(m,q);
+  /* A7: a versão de referência é a do servidor quando a OM entrou na fila (o 1º registro dela); a projeção do aparelho pode coincidir com uma mudança do escritório */
+  const ant=a.om?cc.app.manFila.find(x=>x.om===a.om):null; const srv=a.om?cc.man.oms[a.om]:null; const rvBase=ant?(ant.rvBase!==undefined?ant.rvBase:ant.rv):(srv?(srv.rv||0):null);
   const r=manAppAplicar(m,q); if(r.nada) return r;
-  cc.app.manFila.push({chave:q.chave,cmd:q.cmd,args:a,por:q.por,om:a.om||'',rv,fase,at:cenAgora(),desc}); cc.app.fila=(cc.app.fila||[]).concat(['MAN|'+q.chave]);
+  cc.app.manFila.push({chave:q.chave,cmd:q.cmd,args:a,por:q.por,om:a.om||'',rv,rvBase,fase,at:cenAgora(),desc}); cc.app.fila=(cc.app.fila||[]).concat(['MAN|'+q.chave]);
   return {fila:true,id:r.id||'',msg:desc+' · no aparelho, aguardando sinal (vai uma vez só ao voltar).'}; }
 function manAppConflito(m,q,mot){ m.appConf=m.appConf||[]; const id='CA-'+String(m.appConf.length+1).padStart(3,'0');
   m.appConf.push({id,chave:q.chave,cmd:q.cmd,args:q.args,por:q.por,om:q.om||'',aid:manAppAid(m,q),at:q.at,desc:q.desc,mot,estado:'A resolver'});
   const o=q.om&&m.oms[q.om]; if(o) o.conflitoApp=(o.conflitoApp||0)+1; return id; }
 /* volta do sinal: cada registro entra uma vez (recibo pela chave); OM mudada desde o registro vira conflito */
-function manAppSinal(cc){ const F=manAppFila(cc).slice(); const m=cc.man; let n=0; const conf=[];
+function manAppSinal(cc){ const F=manAppFila(cc).slice(); const m=cc.man; let n=0; const conf=[]; const esp={}, ruim={};
   F.forEach(q=>{ m.recibos=m.recibos||{}; if(m.recibos[q.chave]){ return; }
     const o=q.om?m.oms[q.om]:null; let mot='';
+    /* A7: versão esperada = a do servidor no 1º registro da OM, depois a que os registros desta fila deixaram; o seguinte de uma OM em conflito também vira conflito */
+    const e=o?((q.om in esp)?esp[q.om]:(q.rvBase!==undefined&&q.rvBase!==null?q.rvBase:q.rv)):null;
     if(q.om&&!o) mot=q.om+' não existe mais';
-    else if(o&&((o.rv||0)!==q.rv||o.etapa!==q.fase)) mot=q.om+' mudou no escritório depois do registro'+(o.etapa!==q.fase?' (era '+q.fase+', agora '+o.etapa+')':' (outra alteração na mesma fase)');
-    if(!mot){ try{ const r=manAppAplicar(m,q); if(r.nada&&!r.repetido) mot=r.msg||'não aplicado'; else { n++; return; } }catch(e){ mot=String(e.message||e); } }
-    conf.push(manAppConflito(m,q,mot)); });
+    else if(o&&ruim[q.om]) mot=q.om+' tem registro anterior desta fila em conflito';
+    else if(o&&((o.rv||0)!==e||o.etapa!==q.fase)) mot=q.om+' mudou no escritório depois do registro'+(o.etapa!==q.fase?' (era '+q.fase+', agora '+o.etapa+')':' (outra alteração na mesma fase)');
+    if(!mot){ try{ const r=manAppAplicar(m,q); if(r.nada&&!r.repetido) mot=r.msg||'não aplicado'; else { n++; if(o) esp[q.om]=(m.oms[q.om].rv||0); return; } }catch(x){ mot=String(x.message||x); } }
+    if(q.om) ruim[q.om]=1; conf.push(manAppConflito(m,q,mot)); });
   cc.app.manFila=[]; cc.app.fila=(cc.app.fila||[]).filter(k=>String(k).indexOf('MAN|')!==0);
   return {n,conf}; }
 function manAppConfAbertos(c,om,aid){ return (c.appConf||[]).filter(x=>x.estado==='A resolver'&&(om===undefined||x.om===om)&&(aid===undefined||(!x.om&&x.aid===aid))); }
@@ -980,7 +1037,8 @@ function manAppConfDescartar(c,id,motivo,pf){ manExige(c,pf,'decidir'); const x=
   return {msg:'Registro do app descartado: '+x.desc+' ('+String(motivo).trim()+') · fica no histórico da ordem.'}; }
 /* acesso para os testes de navegador (mesmo padrão do window.__cen da O.S.) */
 try { window.__man = { manPropor, manAppCmd, manAppSinal, manAppProj, manAppConfAplicar, manAppConfDescartar, manMudar, manRetirada, manIncluir, manGet, manClone, manLinhas, manVenc, manGerar, manGerarTodas, manLiberar, manConcluir, manReset, manLeitura, manLeituraOk, manLeituraDescartar, manSolicitar, manReceber, manPlaus, manNum,
-  manConflito, manProxLivre, manMover, manPode, manAchOpcoes, manCusto, manCustoFinal, manTesteValido, manFaltaEncerrar, manFaltaConcluir, manMarcoSug }; } catch (e) {}
+  manConflito, manProxLivre, manMover, manPode, manAchOpcoes, manCusto, manCustoFinal, manTesteValido, manFaltaEncerrar, manFaltaConcluir, manMarcoSug,
+  manTentativa, manDeclararApto, manAchRegistrar, manAchCorretiva, manAbastecer, manCondicao, manMots, manAptoRot }; } catch (e) {}
 '''
 
 

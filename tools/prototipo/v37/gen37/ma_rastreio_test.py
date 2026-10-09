@@ -104,7 +104,8 @@ try:
     F('F88, F89', 'Teste com tentativas; Declarar apto / Manter', tem('om33', '1ª tentativa · Reprovado') and "'Declarar '" in MAS and "'Manter '" in MAS)
     F('F91', 'peças retiradas exigidas no Encerrar', tem('om33', 'Peças retiradas', 'Bomba hidráulica usada') and 'destino e responsável de ' in MAS)
     F('F94', 'Sai: tanque fixo', 'Tanque Sede 38' not in MAS)
-    F('F95, F96', 'modo Abastecimentos; painel da leitura; app MB-09', tem('ab', 'AB-1042', 'CONSUMO L/H') and emsrc('Registrar abastecimento', 'Salvar e registrar outro', f='MB-09.dc.html'))
+    # revisão 09/10 (A10): a coluna passou de "Consumo L/h" a "Consumo" e a unidade (L/h ou km/L, pelo contador) vai na célula
+    F('F95, F96', 'modo Abastecimentos; painel da leitura; app MB-09', tem('ab', 'AB-1042', 'CONSUMO', '16,4 L/h') and emsrc('Registrar abastecimento', 'Salvar e registrar outro', f='MB-09.dc.html'))
     F('F98, F99', 'Sai: conferir/desvio fixos (desvio é filtro e achado)', 'Investigar desvio' not in MAS and tem('at', 'Desvio de consumo'))
     F('F100, F101', '"Corrigir com estorno"; coluna Consumo', 'Corrigir com estorno' in MAS and tem('at', 'CONSUMO'))
     F('F103, F104', 'MB-01, MB-09 "Máquina", MB-09det = painel da OM, MB-04 → achado; sem sinal',

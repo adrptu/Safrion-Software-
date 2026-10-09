@@ -65,7 +65,7 @@ CSS=('.ma-vis-m{display:none}'
 # =====================================================================================
 # JS da tela: endereço, Ver como, visões, grades, detalhes e painéis. Regras e cálculos vêm de dados_manutencao.JS (fonte única).
 MA_JS=r'''
-const MA_PERFIS=['Otávio','Zé','Ana'];
+const MA_PERFIS=['Otávio','Zé','João','Ana'];   /* João (eletricista NR-10) executa as OMs de eletricista (revisão 09/10, A8) */
 const MA_CH={green:['#1E7A4C','#E4F3E9'],yellow:['#8A5A00','#FFF3D6'],red:['#B42318','#FDE8E6'],gray:['#5B6660','#EEF1EE']};
 const MA_PRIM=__PRIM__, MA_SEC=__SEC__;
 const MA_ETC={'A liberar':'gray','Liberadas':'green','Em execução':'green','Em conferência':'yellow','Encerradas':'gray'};
@@ -115,7 +115,12 @@ function ma_pg(self,k,id){ self.setState({pg:{k,id},pan:null,rec:null,blk:{},anu
 function ma_volta(self){ const k=self.state.pg&&self.state.pg.k; self.setState({pg:null,pan:null,rec:null,vis:k==='plano'?'planos':'ativos'});
   setTimeout(()=>{ try{ const g=self.__lastRow; if(g){ const r=document.querySelector('[data-rid="'+g+'"]'); if(r){ r.scrollIntoView({block:'center'}); r.focus(); } } }catch(e){} },60); }
 /* comando: aplica, guarda o comprovante no painel e a "Próxima" (só navega); a chave do registro é renovada depois de cada comando gravado */
-function ma_cmd(self,fn,depois){ const r=manMudar(self,fn); if(!r.erro&&!r.nada) self.setState({pchave:manChave()}); if(!r.erro&&!r.aviso&&!r.avisoTol&&!r.avisoConf&&!r.avisoLeit&&!r.rep&&depois) depois(r); return r; }
+/* A11 (revisão 09/10): o painel da OM guarda o o.rv lido ao abrir; todo comando dele confere a versão (manRv) antes de gravar. Mudou em outra aba ou
+   no app → "Mudou desde que você abriu…" e nada grava; o painel já mostra o estado novo e a referência é renovada (o próximo toque confirma). */
+function ma_mud(self,fn){ const pan=self.state.pan; const ref=(pan&&pan.k==='om'&&self.__rv&&self.__rv.id===pan.id)?self.__rv:null;
+  const r=manMudar(self,ref?((m,cc)=>{ const o=m.oms[ref.id]; if(o) manRv(o,ref.rv); return fn(m,cc); }):fn);
+  if(ref){ const o=manGet().oms[ref.id]; if(o) self.__rv={id:ref.id,rv:o.rv||0}; } return r; }
+function ma_cmd(self,fn,depois){ const r=ma_mud(self,fn); if(!r.erro&&!r.nada) self.setState({pchave:manChave()}); if(!r.erro&&!r.aviso&&!r.avisoTol&&!r.avisoConf&&!r.avisoLeit&&!r.rep&&depois) depois(r); return r; }
 function ma_rec(self,r,prox){ if(r&&!r.erro&&r.msg) self.setState({rec:{msg:r.msg,prox:prox||null},paviso:null}); }
 /* "Próxima": no lote recém-gerado, a próxima dele ainda a liberar (Abrir as 3 › …); fora do lote, a próxima ordem que espera o papel */
 function ma_proxOm(c,pf,id,lote){ if(lote&&lote.indexOf(id)>=0){ const n=lote.find(x=>x!==id&&c.oms[x]&&c.oms[x].etapa==='A liberar'); if(n) return {t:'Próxima: '+n+' ›',k:'om',id:n}; }
@@ -172,12 +177,12 @@ function ma_linhaAtv(c,a,per){ const px=ma_prox(c,a); const abertas=Object.value
        ab:abp.length?abp:[{k:'mut',t:'—'}],cons:cons?[{k:'txt',t:cons.t}].concat(cons.desvio!==null&&Math.abs(cons.desvio)>=15?[ma_ch((cons.desvio>0?'+':'')+manN(cons.desvio)+' %','yellow')]:[]):[{k:'mut',t:'— sem método'}]}}; }
 /* consumo pelo último lançamento com método (tanque cheio a tanque cheio; PRD CAL-07); sem método, "—" */
 function ma_consumo(c,a){ const bs=(c.abast||[]).filter(b=>b.aid===a.id&&!b.tipo&&b.qual!=='Estornado').sort((x,y)=>(y.data+(y.hora||'')).localeCompare(x.data+(x.hora||'')));
-  for(const b of bs){ const lh=manLh(c,b); if(lh){ const dv=a.lh?Math.round((lh.lh/a.lh-1)*100):null; return {t:manN(lh.lh,1)+' L/h · tanque cheio',lh:lh.lh,desvio:dv,b:b.id}; } } return null; }
+  for(const b of bs){ const lh=manLh(c,b); if(lh&&lh.lh!==null){ const dv=(a.lh&&lh.un==='L/h')?Math.round((lh.lh/a.lh-1)*100):null; return {t:manConsTxt(lh)+' · tanque cheio',lh:lh.lh,un:lh.un,desvio:dv,b:b.id}; } } return null; }
 function ma_linhaAb(c,b){ const a=c.ativos[b.aid]||{nome:b.aid}; const lh=manLh(c,b); const qc={'Confirmada':'green','A confirmar':'yellow','Troca de contador':'green','Descartada':'gray','Estornado':'gray','Estorno':'gray','Substituída':'gray'}[b.qual]||'gray';
   return {id:b.id,v:{vol:b.vol,data:b.data+' '+(b.hora||''),lh:lh?Math.round(lh.lh*10)/10:null},s:{id:b.id+' '+b.op+' '+(b.evid||''),ativo:a.nome,tq:b.tq,data:manBr(b.data)+' '+(b.hora||''),met:b.tipo?'Estorno':(lh?'Tanque cheio':(b.cheio?'Tanque cheio (sem anterior)':'Estimada')),qual:b.qual},
     p:{id:[{k:'link',t:b.id,h:'#leitura='+b.id},{k:'br',t:''},{k:'mut',t:b.op+(b.evid?' · '+b.evid:' · sem evidência')}],ativo:[{k:'txt',t:a.nome}],tq:[{k:'txt',t:b.tq}],
        data:[{k:'txt',t:manBr(b.data)+' '+(b.hora||'')}].concat(b.leit!==null&&b.leit!==undefined?[{k:'br',t:''},{k:'mut',t:manQ(b.leit,b.un)}]:[]),met:[{k:'txt',t:b.tipo?('Estorno de '+b.ref):(lh?'Tanque cheio':(b.cheio?'Tanque cheio · sem anterior':'Estimada'))}],
-       lh:lh?[{k:'txt',t:manN(lh.lh,1)+' L/h'}]:[{k:'mut',t:'—'}],qual:[ma_ch(b.qual,qc)].concat(b.estorno?[{k:'mut',t:'· '+b.estorno}]:[])}}; }
+       lh:lh?[{k:'txt',t:manConsTxt(lh)}]:[{k:'mut',t:'—'}],qual:[ma_ch(b.qual,qc)].concat(b.estorno?[{k:'mut',t:'· '+b.estorno}]:[])}}; }
 function ma_linhaPl(c,p){ const e=pmEst(p); const nv=pmVincs(c,p.id).length; const cand=pmCands(c,p).length; const si=pmSit(c,p); const sem=manLinhas(c,p.id).filter(l=>l.s&&manDevida(l)&&!l.om&&!l.dup).length;
   return {id:p.id,v:{},s:{nome:p.id+' '+p.nome,est:e[0],apl:manAplTxt(c,p),svs:manWork(p).map(s=>s.nome).join(', '),atv:nv+' vinculados de '+(nv+cand),sit:si.t+(sem?' · '+sem+' sem ordem':''),grupo:p.grupo},
     p:{nome:[{k:'link',t:p.id,h:'#plano='+p.id},{k:'mut',t:'· '+p.nome}],est:[ma_ch(e[0],e[1])],apl:[{k:'txt',t:manAplTxt(c,p)}],svs:[{k:'txt',t:manWork(p).map(s=>s.nome).join(' · ')||'—'}],
@@ -317,7 +322,7 @@ function EXTRAVALS(self,v){ const c=manGet(); const st=self.state; const pf=g2pe
   if(v.pg_plano) pmPlanoV(self,v,c,c.planos[st.pg.id],pf); else pmPlanoV0(v);
   ma_panV(self,v,c,pf); pmSvP(self,v,c); pmNpP(self,v,c); pmVkP(self,v,c); }
 function ma_hprim(self,v,c,pf,vis,lista,panAberto){ let t='',fn=null,dis='',sec=null;
-  if(lista&&vis==='semordem'){ const ks=(self.__so||[]).filter(r=>r.k==='venc'&&r.devida).map(r=>r.key); const n=ks.length;
+  if(lista&&vis==='semordem'){ const spS=ma_G('g_so'), stS=g2st(self,'g_so'); const ks=(self.__so||[]).filter(r=>r.k==='venc'&&r.devida&&g2match(r,spS,stS)).map(r=>r.key); const n=ks.length;   /* A6: o que a grade mostra */
     t=n?('Gerar '+n+(n>1?' ordens preventivas':' ordem preventiva')):'Gerar ordens preventivas'; dis=n?manPode(c,pf,'gerar'):'Nada a gerar neste filtro';
     fn=()=>{ const r=ma_cmd(self,c2=>manGerarTodas(c2,ks,g2perfil())); if(r&&r.ids&&r.ids.length){ self.setState({gerados:r.ids,vis:'ordens',fase:'A liberar',rot:''}); ma_abrir(self,'om',r.ids[0]); ma_rec(self,r,r.ids.length>1?{t:'Abrir as '+r.ids.length+' › próxima: '+r.ids[1],k:'om',id:r.ids[1]}:null); } };
     sec={t:'Registrar achado',fn:()=>ma_novoAch(self,'')}; }
@@ -336,7 +341,7 @@ function ma_custoNat(c,aid,per){ const P=manPeriodo(c,per); const n={pecas:0,lub
   Object.values(c.oms).filter(o=>o.aid===aid&&o.etapa==='Encerradas'&&o.exec&&o.exec.data>=P.de&&o.exec.data<=P.ate).forEach(o=>{ (o.pecas||[]).forEach(p=>{ const v=(p.apl||0)*(p.preco||0); if(/^(OL|GR)-/.test(p.item||'')) n.lub+=v; else n.pecas+=v; });
     n.ofi+=((o.exec&&o.exec.horas)||0)*c.custoh; n.terc+=Number(o.terc)||0; }); return n; }
 function ma_ativoV0(v){ v.at_kv=[]; v.at_blk=[]; v.at_agenda=[]; v.at_hist=[]; v.at_cn=[]; v.at_prim=false; v.at_secs=[]; }
-function ma_ativoV(self,v,c,a,pf){ const st=self.state; const i=a.condInfo||{}; const tr=i.om&&c.oms[i.om];
+function ma_ativoV(self,v,c,a,pf){ const st=self.state; const i=a.condInfo||{}; const ms=manMots(a); const trs=ms.map(m=>manMotOm(c,m)).filter(Boolean); const tr=trs[0]||(i.om&&c.oms[i.om]);
   v.at_cas=ma_cas(self,c,manAppConfAbertos(c,undefined,a.id),pf); v.at_hasCa=v.at_cas.length>0;
   v.at_t=a.nome; v.at_sub=a.modelo+' · '+a.local+' · '+a.grupo+' · responsável técnico: '+manRtTxt(a); v.at_cond=ma_condTxt(c,a); v.at_cst=ma_chipSt(ma_cond(a)); v.at_cdot=ma_dotSt(ma_cond(a));
   v.at_leit=a.leit?('Leitura '+manLeitTxt(a)+(a.suspeita?' · '+manQ(a.suspeita.val,a.un)+' a confirmar':'')):'Sem contador'; v.voltar=()=>ma_volta(self);
@@ -345,13 +350,14 @@ function ma_ativoV(self,v,c,a,pf){ const st=self.state; const i=a.condInfo||{}; 
   const B=(k,t,sum)=>{ const open=bo[k]===undefined?(k===dflt):!!bo[k]; const tog=()=>self.setState({blk:Object.assign({},self.state.blk||{},{[k]:!open})});
     v['ab_'+k]=open; v['abk_'+k+'_t']=t; v['abk_'+k+'_s']=sum; v['abk_'+k+'_y']=open?'▾':'▸'; v['abk_'+k+'_o']=String(open); v['abk_'+k+'_g']=tog; return {k,t,sum,open:String(open),sym:open?'▾':'▸',tog}; };
   const ls=manLinhas(c).filter(l=>l.aid===a.id&&l.s); const oms=Object.values(c.oms).filter(o=>o.aid===a.id);
-  v.at_blk=[B('sit','Situação',ma_condTxt(c,a)+(tr?' · tratada pela '+tr.id:'')),B('venc','O que vence',ls.length?(ls.filter(manDevida).length+' devido(s) de '+ls.length):'Sem plano'),
+  v.at_blk=[B('sit','Situação',ma_condTxt(c,a)+(ms.length>1?' · '+ms.length+' motivos':'')+(trs.length?' · tratada pela '+[...new Set(trs.map(o=>o.id))].join(' e '):'')),B('venc','O que vence',ls.length?(ls.filter(manDevida).length+' devido(s) de '+ls.length):'Sem plano'),
     B('ach','Achados',achs.length?(achs.length+' sem ordem'):'nenhum sem ordem'),B('om','Ordens',oms.filter(manAberta).length+' abertas · '+oms.filter(o=>!manAberta(o)).length+' encerradas'),
     B('lei','Leituras e abastecimentos',a.suspeita?'1 leitura a confirmar':(a.leit?manLeitTxt(a):'sem contador')),B('cus','Custo e desempenho',manRS(manCustoPeriodo(c,st.per||'mes',a.id).enc)+' · '+manPeriodo(c,st.per||'mes').t)];
-  v.at_kv=[{l:'Condição',v:ma_condTxt(c,a)+(i.motivo?' · '+i.motivo:'')},{l:'Desde · quem',v:i.desde?(manBr(i.desde)+' · '+(i.por||'—')):'—'},{l:'Evidência',v:i.evid||'—'},
+  v.at_kv=[{l:'Condição',v:ma_condTxt(c,a)+(i.motivo&&ms.length<2?' · '+i.motivo:'')}].concat(ms.length>1?ms.map((m,j)=>({l:'Motivo '+(j+1),v:m.motivo+' · '+manMotTxt(c,m)+(manMotOm(c,m)?' '+manMotOm(c,m).etapa:'')})):[])
+    .concat([{l:'Desde · quem',v:i.desde?(manBr(i.desde)+' · '+(i.por||'—')):'—'},{l:'Evidência',v:i.evid||'—'},
     {l:'Prazo · limites',v:a.cond==='Restrito'?((i.ate?'até '+manBr(i.ate):'sem prazo')+(i.lim?' · '+i.lim:'')+(manRestricaoVencida(c,a)?' · Restrição vencida':'')):'—'},
-    {l:'Tratada pela',v:tr?(tr.id+' · '+tr.etapa):'—'},{l:'Responsável técnico',v:manRtTxt(a)},
-    {l:'Leitura',v:a.leit?(manLeitTxt(a)+' · '+a.leit.origem):'sem contador'},{l:'Retorno previsto',v:tr&&manAberta(tr)?(tr.ret||'—')+(manFalta(c,tr).length?' (condicional: falta peça)':''):'—'}];
+    {l:'Tratada pela',v:trs.length?[...new Set(trs.map(o=>o.id+' · '+o.etapa))].join(' e '):'—'},{l:'Responsável técnico',v:manRtTxt(a)},
+    {l:'Leitura',v:a.leit?(manLeitTxt(a)+' · '+a.leit.origem):'sem contador'},{l:'Retorno previsto',v:tr&&manAberta(tr)?(tr.ret||'—')+(manFalta(c,tr).length?' (condicional: falta peça)':'')+(ms.length>1?' · apto só com todos os motivos resolvidos':''):'—'}]);
   v.at_agenda=ma_agenda(c,a.id).map(t=>({t})); v.at_semAgenda=!v.at_agenda.length;
   v.at_hist=(a.condHist||[]).slice(-4).reverse().map(h=>({t:manBr(h.em)+' · '+h.cond+' · '+h.motivo+(h.por?' · '+h.por:'')}));
   v.at_mudar=()=>ma_abrir(self,'cond',a.id); v.at_mudar_dis=!!manPode(c,pf,'condicao',{aid:a.id}); v.at_mudar_why=manPode(c,pf,'condicao',{aid:a.id});
@@ -360,7 +366,7 @@ function ma_ativoV(self,v,c,a,pf){ const st=self.state; const i=a.condInfo||{}; 
     {l:'Custo por hora operada',v:'não calculável (KPI-PCM-10)'},{l:'Consumo',v:cons?(cons.t+(cons.desvio!==null?' · desvio '+(cons.desvio>0?'+':'')+cons.desvio+' %':'')):'— sem método'},
     {l:'Disponibilidade 30 d',v:'não calculável'},{l:'MTBF · MTTR',v:'não estimável'},{l:'Cumprimento de preventiva',v:cu}];
   /* primária do detalhe: a primeira que se aplica (§3.4) */
-  const semTrata=a.cond==='Bloqueado'&&!(tr&&manAberta(tr)); let P=null;
+  const semTrata=a.cond==='Bloqueado'&&ms.some(m=>!manMotOm(c,m)); let P=null;   /* A1: algum motivo sem ordem que o trate */
   if(a.suspeita) P={t:'Confirmar leitura '+manQ(a.suspeita.val,a.un),fn:()=>ma_abrir(self,'leitura',a.suspeita.lt||a.suspeita.ab),dis:manPode(c,pf,'leituraDecidir')};
   else if(semTrata) P={t:'Criar ordem corretiva',fn:()=>ma_cmd(self,c2=>manCorretivaAtivo(c2,a.id,g2perfil(),self.state.pchave),(r)=>{ if(r.id) ma_abrir(self,'om',r.id); ma_rec(self,r); }),dis:manPode(c,pf,'decidir')};
   else if(ma_motor(a)&&a.un) P={t:'Registrar abastecimento',fn:()=>ma_novoAb(self,a.id),dis:manPode(c,pf,'registrar')};
@@ -385,7 +391,7 @@ function ma_btn(t,fn,dis,prim){ return {t,fn:dis?(()=>{}):fn,dis:!!dis,why:dis||
 function ma_panV(self,v,c,pf){ const st=self.state; const pan=st.pan;
   const L=['pk_om','pk_achado','pk_venc','pk_cond','pk_leitura','pk_novoAch','pk_abast','pk_novaLeit','pk_pub']; L.forEach(k=>{ v[k]=false; });
   ['om_fases','om_blk','om_tks','om_pcs','om_rets','om_kv','om_achs','om_cands','om_atalhos','ac_kv','ac_crit','ac_secs','vc_kv','vc_pecas','cd_acoes','cd_hist','cd_achs','cd_oms','cd_rts','lt_kv','na_ativos','na_orig','na_comp','na_crit','na_sug','ab_ativos','ab_tqs','ab_ops','ab_datas','nl_ativos','pb_dif','pb_oab','pan_secs','om_inc_tipos'].forEach(k=>{ v[k]=[]; });
-  v.pan_open=!!pan; v.anun=st.anun||''; if(!pan){ v.pan_t=''; v.pan_sub=''; return; }
+  v.pan_open=!!pan; v.anun=st.anun||''; if(!pan||pan.k!=='om') self.__rv=null; if(!pan){ v.pan_t=''; v.pan_sub=''; return; }
   v.pan_modal=!!pan.modal; v.pan_role=pan.modal?'dialog':'complementary'; v.pan_am=pan.modal?'true':'false'; v.pan_cls='ma-pan'+(pan.modal?'':' ma-nm');
   v.pan_close=()=>ma_fechar(self);
   v.pan_key=(e)=>{ if(!e) return; if(e.key==='Escape'){ e.preventDefault(); ma_fechar(self); return; } let est=false; try{ est=window.matchMedia('(max-width: 640px)').matches; }catch(x){}
@@ -429,7 +435,7 @@ function ma_omPrim(self,c,o,pf,f){ const a=c.ativos[o.aid]; const P={}; const S=
     if(o.trata&&!o.aptidao){ const pod=manPode(c,pf,'condicao',{aid:o.aid}); const m=manAptoMotivo(c,o);
       const manter=()=>self.setState({paviso:{t:'Manter '+(a?a.nome:'o ativo')+' '+(a?a.cond.toLowerCase():'')+': informe o motivo (o vínculo com a '+o.id+' é desfeito).',campo:'mant',lab:'Motivo para manter',
         ok:{t:'Manter '+(a?a.cond.toLowerCase():''),fn:()=>{ const mt=(self.state.pf||{}).mant; ma_cmd(self,c2=>manManter(c2,o.id,mt,g2perfil()),(r)=>ma_rec(self,r)); }},no:'Voltar'}});
-      if(!m){ S.push(ma_btn('Manter '+(a?a.cond.toLowerCase():'')+' · motivo',manter,pod,false)); return {P:ma_btn('Declarar '+(a?a.nome:'ativo')+' apto',()=>run(c2=>manDeclararApto(c2,o.id,g2perfil())),pod,true),S}; }
+      if(!m){ S.push(ma_btn('Manter '+(a?a.cond.toLowerCase():'')+' · motivo',manter,pod,false)); return {P:ma_btn(manAptoRot(c,o),()=>run(c2=>manDeclararApto(c2,o.id,g2perfil())),pod,true),S}; }
       return {P:ma_btn('Manter '+(a?a.cond.toLowerCase():'')+' · motivo',manter,pod,true),S:[ma_btn('Declarar apto',()=>{},m,false)]}; }
     if((o.pecas||[]).some(p=>p.sob>0)) return {P:ma_btn('Resolver sobras (simulado · papel do Almoxarifado)',()=>run(c2=>manSobras(c2,o.id,g2perfil()),null),manPode(c,pf,'ponte'),true),S};
     return {P:ma_btn('Encerrar ordem · '+manRS(custo),()=>run(c2=>manEncerrar(c2,o.id,g2perfil())),manPode(c,pf,'encerrar')||(fe.length?'Falta: '+fe.join(' · '):''),true),S}; }
@@ -441,6 +447,7 @@ function ma_cas(self,c,lst,pf){ const pd=manPode(c,pf,'decidir');
     dmv:(self.state.pf||{})['cad_'+x.id]||'',dset:(e)=>maF(self,'cad_'+x.id,e.target.value),dlab:'Motivo para descartar · '+x.desc,
     ds:()=>ma_cmd(self,c2=>manAppConfDescartar(c2,x.id,(self.state.pf||{})['cad_'+x.id],g2perfil()),(r)=>ma_rec(self,r))})); }
 function ma_panOm(self,v,c,o,pf){ const st=self.state; const f=st.pf||{}; const a=c.ativos[o.aid]; const cur=MAN_FASES.indexOf(o.etapa);
+  if(!self.__rv||self.__rv.id!==o.id) self.__rv={id:o.id,rv:o.rv||0};   /* A11: versão lida ao abrir o painel */
   v.om_cas=ma_cas(self,c,manAppConfAbertos(c,o.id),pf); v.om_hasCa=v.om_cas.length>0;
   v.pan_t=o.id+' · '+(a?a.nome:''); v.pan_sub=(String(o.serv||'').indexOf(o.tipo)===0?o.serv:o.tipo+(o.pid?' · '+o.pid+' v'+o.ver:'')+' · '+o.serv); v.om_ah='#ativo='+o.aid; v.om_at='Abrir '+(a?a.nome:'ativo')+' ›'; v.om_goAt=()=>ma_pg(self,'ativo',o.aid);
   v.om_fases=MAN_FASES.map((x,i)=>({t:x,cur:i===cur?'step':'false',st:'display:flex;flex-direction:column;gap:5px;font-size:11.5px;font-weight:'+(i===cur?'800':'600')+';color:'+(i<=cur?'#15201A':'#8A968E')+';',
@@ -458,7 +465,8 @@ function ma_panOm(self,v,c,o,pf){ const st=self.state; const f=st.pf||{}; const 
     B('con','Conclusão',o.exec?('concluída '+manBr(o.exec.data)+(o.exec.leit!==null&&o.exec.leit!==undefined&&a?' · '+manQ(o.exec.leit,a.un):'')+' · '+manN(o.exec.horas,1)+' h'):'leitura e horas na conclusão'),
     B('cus','Custo e tempos',custoF!==null?manRS(custoF):(manRS(custoE)+' est.')),B('ori','Origem',(o.achados||[]).length?(o.achados.join(', ')):String(o.origem||'').split(' · ')[0])];
   /* ativo, só leitura */
-  v.om_cond=a?(ma_condTxt(c,a)+(o.trata&&a.cond!=='Apto'?' · tratada por esta OM':'')):'—'; v.om_cst=ma_chipSt(a?ma_cond(a):'gray'); v.om_cdot=ma_dotSt(a?ma_cond(a):'gray'); v.om_leit=a&&a.leit?('Leitura '+manLeitTxt(a)):'sem contador';
+  const fica=o.trata&&a&&a.cond!=='Apto'?manAptoFica(c,o):[];
+  v.om_cond=a?(ma_condTxt(c,a)+(o.trata&&a.cond!=='Apto'?' · tratada por esta OM':'')+(fica.length?' · outros motivos: '+fica.map(m=>manMotTxt(c,m)).join(' · '):'')):'—'; v.om_cst=ma_chipSt(a?ma_cond(a):'gray'); v.om_cdot=ma_dotSt(a?ma_cond(a):'gray'); v.om_leit=a&&a.leit?('Leitura '+manLeitTxt(a)):'sem contador';
   /* janela e equipe */
   const podeJ=(o.etapa==='A liberar'||o.etapa==='Liberadas'); const pm=manPode(c,pf,'mover'); v.om_janEd=podeJ&&!pm; v.om_janRo=!v.om_janEd;
   v.om_jan=(o.jan||'—')+(o.vencOrig&&o.vencOrig!==o.janIso?' · vencimento original '+manBr(o.vencOrig):''); v.om_conf=!!cf; v.om_conft=cf?(cf.t+' · '+cf.det):'';
@@ -489,13 +497,13 @@ function ma_panOm(self,v,c,o,pf){ const st=self.state; const f=st.pf||{}; const 
     const R=MAN_RESP[tp]||MAN_RESP['Serviço']; const ul=(t.tent||[]).slice(-1)[0]; const rr=isT?(ul?ul.r:''):(t.r||'');
     const pend=f['tr'+i]||'';
     return {n:String(i+1),t:t.t,tipo:tp,isT,notT:!isT,isM,ed,edR:ed&&!isT,ro:!ed,why:exe&&isT&&!pE&&pT?'Teste: '+pT:'',hasWhy:exe&&isT&&!pE&&!!pT,nova:!!(t.nova&&!t.r),
-      opts:R.map(x=>({t:x,on:String(isT?pend===x:t.r===x),lab:x+' · '+t.t,go:()=>{ if(isT){ maF(self,'tr'+i,pend===x?'':x); return; } manMudar(self,c2=>manResp(c2,o.id,i,t.r===x?'':x,undefined,g2perfil())); },
+      opts:R.map(x=>({t:x,on:String(isT?pend===x:t.r===x),lab:x+' · '+t.t,go:()=>{ if(isT){ maF(self,'tr'+i,pend===x?'':x); return; } ma_mud(self,c2=>manResp(c2,o.id,i,t.r===x?'':x,undefined,g2perfil())); },
         st:'font-family:inherit;font-size:12px;font-weight:700;padding:4px 9px;border-radius:8px;cursor:pointer;white-space:nowrap;'+((isT?pend===x:t.r===x)?(MAN_OK.indexOf(x)>=0?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #8A5A00;background:#FFF3D6;color:#8A5A00;'):'border:1px solid #E4E9E5;background:#fff;color:#15201A;')})),
       r:rr||'Sem resposta',rst:ma_chipSt(MAN_OK.indexOf(rr)>=0?'green':(rr?(rr==='Reprovado'?'red':'yellow'):'gray')),rdot:ma_dotSt(MAN_OK.indexOf(rr)>=0?'green':(rr?(rr==='Reprovado'?'red':'yellow'):'gray')),
       por:t.por?('por '+t.por+(t.em?' às '+t.em:'')+((t.motPor&&t.motPor!==t.por)?' · motivo editado por '+t.motPor+(t.motEm?' às '+t.motEm:''):'')):'',hasPor:!!t.por&&!isT,
-      mot:t.mot||'',hasMotIn:ed&&!isT&&!!t.r&&MAN_OK.indexOf(t.r)<0,hasMotTx:!ed&&!!t.mot,motlab:'Motivo · '+t.t,setmot:(e)=>{ const val=e.target.value; manMudar(self,c2=>manResp(c2,o.id,i,t.r,val,g2perfil())); },
+      mot:t.mot||'',hasMotIn:ed&&!isT&&!!t.r&&MAN_OK.indexOf(t.r)<0,hasMotTx:!ed&&!!t.mot,motlab:'Motivo · '+t.t,setmot:(e)=>{ const val=e.target.value; ma_mud(self,c2=>manResp(c2,o.id,i,t.r,val,g2perfil())); },
       val:t.val===undefined||t.val===''?'':String(t.val).replace('.',','),un:t.un||'',vlab:'Valor · '+t.t+(t.un?' ('+t.un+')':''),hasValIn:ed&&isM,hasValTx:!ed&&isM&&t.val!==''&&t.val!==undefined,valTx:t.val!==''&&t.val!==undefined?manN(t.val,2)+' '+(t.un||''):'',
-      setval:(e)=>{ const val=e.target.value; manMudar(self,c2=>manResp(c2,o.id,i,undefined,undefined,g2perfil(),val)); },
+      setval:(e)=>{ const val=e.target.value; ma_mud(self,c2=>manResp(c2,o.id,i,undefined,undefined,g2perfil(),val)); },
       tents:(t.tent||[]).map((x,j)=>({t:(j+1)+'ª tentativa · '+x.r+' · '+x.evid+' · '+x.por+' · '+x.em,st:ma_chipSt(x.r==='Aprovado'?'green':'red'),dot:ma_dotSt(x.r==='Aprovado'?'green':'red'),r:x.r})),hasTents:isT&&(t.tent||[]).length>0,
       tentEd:ed&&isT,tevid:f['te'+i]||'',tlab:'Evidência do teste · '+t.t,settevid:(e)=>maF(self,'te'+i,e.target.value),treg:!!pend,
       tgo:()=>{ const ff=self.state.pf||{}; const ev='foto (simulada)'+(String(ff['te'+i]||'').trim()?' · '+String(ff['te'+i]).trim():''); ma_cmd(self,c2=>manTentativa(c2,o.id,i,pend,ev,g2perfil()),(r)=>{ const f2=Object.assign({},self.state.pf||{}); delete f2['tr'+i]; delete f2['te'+i]; self.setState({pf:f2}); ma_rec(self,r); }); },
@@ -572,12 +580,12 @@ function ma_panCond(self,v,c,a,pf){ const st=self.state; const f=st.pf||{}; cons
   if(a.cond==='Restrito') acs.push(['encerrar','Encerrar restrição']); acs.push(['rt','Trocar responsável técnico']);
   const ac=acs.find(x=>x[0]===f.acao)?f.acao:acs[0][0];
   v.cd_acoes=acs.map(([k,t])=>({t,on:String(ac===k),st:ma_pill(ac===k),go:()=>maF(self,'acao',k)}));
-  v.cd_bloqTxt=a.cond==='Bloqueado'?'Bloqueado → Apto só por “Declarar apto” na ordem que trata a condição'+(i.om?' ('+i.om+')':'')+', com teste aprovado (CMD-19).':'';
+  const ms=manMots(a); v.cd_bloqTxt=a.cond==='Bloqueado'?('Bloqueado → Apto só por “Declarar apto” na ordem que trata cada motivo, com teste aprovado (CMD-19)'+(ms.length?': '+ms.map(m=>m.motivo+' · '+manMotTxt(c,m)).join(' | '):'')+'. Um defeito novo entra por Registrar achado → “Registrar e bloquear” e soma um motivo.'):'';
   v.cd_isB=ac==='bloquear'; v.cd_isR=ac==='restringir'; v.cd_isE=ac==='encerrar'; v.cd_isT=ac==='rt';
   ['motivo','evid','lim','ate','achado','om','rt'].forEach(k=>{ v['cd_'+k]=f[k]||''; v['cd_set'+k]=(e)=>maF(self,k,e.target.value); });
   v.cd_achs=[{v:'',t:'Sem achado de origem'}].concat(Object.values(c.achados).filter(q=>q.aid===a.id&&(q.estado==='Sem ordem'||q.estado==='Na OM')).map(q=>({v:q.id,t:q.id+' · '+q.sint})));
   const oms=Object.values(c.oms).filter(o=>o.aid===a.id&&MAN_ABERTAS.indexOf(o.etapa)>=0); v.cd_oms=[{v:'',t:'Sem ordem que trate (o detalhe pedirá Criar ordem corretiva)'}].concat(oms.map(o=>({v:o.id,t:'Tratar na '+o.id+' · '+o.serv+' · '+o.etapa})));
-  v.cd_temOms=oms.length>0; v.cd_rts=['Otávio','Zé','João','Equipe elétrica'].map(x=>({v:x,t:x}));
+  v.cd_temOms=oms.length>0; v.cd_rts=MAN_PES.map(p=>({v:p.k,t:p.k+' · '+p.f+(p.nr.length?' · '+p.nr.join(', '):'')}));   /* S4: pessoas do CD-04 (habilitação), não uma lista paralela */
   v.cd_hist=(a.condHist||[]).slice(-5).reverse().map(h=>({t:manBr(h.em)+' · '+h.cond+' · '+h.motivo+(h.por?' · '+h.por:'')+(h.om?' · '+h.om:'')}));
   const pod=manPode(c,pf,'condicao',{aid:a.id});
   const go=(acao,d)=>ma_cmd(self,c2=>manCondicao(c2,a.id,acao,d,g2perfil()),(r)=>{ self.setState({pf:{}}); ma_rec(self,r); });
@@ -591,7 +599,7 @@ function ma_panLeit(self,v,c,id,pf){ const lt=(c.leituras||[]).find(x=>x.id===id
   const L=lt||(b&&b.lt?(c.leituras||[]).find(x=>x.id===b.lt):null); const aid=(L&&L.aid)||(b&&b.aid); const a=c.ativos[aid];
   if(!a){ v.pan_t='Leitura'; v.pan_sub='Não encontrada'; return {P:null,S:[]}; }
   v.pan_t=(b?b.id:(L?L.id:''))+' · '+a.nome; v.pan_sub=b?(b.tipo?('Estorno de '+b.ref):('Abastecimento · '+manN(b.vol)+' L · '+b.tq)):('Leitura · '+(L?L.origem:''));
-  v.lt_kv=(b?[{l:'Volume',v:manN(b.vol)+' L'},{l:'Tanque/lote',v:b.tq},{l:'Operador',v:b.op},{l:'Evidência',v:b.evid||'sem evidência'},{l:'Método',v:manLh(c,b)?('Tanque cheio · '+manN(manLh(c,b).lh,1)+' L/h'):(b.cheio?'Tanque cheio (sem anterior)':'Estimada')},{l:'Registrado por',v:b.por||'—'}].concat(b.motivo?[{l:'Motivo',v:b.motivo}]:[]):[])
+  v.lt_kv=(b?[{l:'Volume',v:manN(b.vol)+' L'},{l:'Tanque/lote',v:b.tq},{l:'Operador',v:b.op},{l:'Evidência',v:b.evid||'sem evidência'},{l:'Método',v:manLh(c,b)?('Tanque cheio · '+manConsTxt(manLh(c,b))+(manLh(c,b).n>1?' ('+manLh(c,b).n+' lançamentos desde o cheio anterior)':'')):(b.cheio?'Tanque cheio (sem anterior)':'Estimada')},{l:'Registrado por',v:b.por||'—'}].concat(b.motivo?[{l:'Motivo',v:b.motivo}]:[]):[])
     .concat(L?[{l:'Leitura',v:manQ(L.val,L.un)+' · '+manBr(L.data)},{l:'Origem',v:L.origem},{l:'Qualidade',v:L.qual}]:[]).concat([{l:'Leitura atual do ativo',v:manLeitTxt(a)}]);
   const pend=a.suspeita&&((L&&a.suspeita.lt===L.id)||(b&&a.suspeita.ab===b.id)); const pd=manPode(c,pf,'leituraDecidir');
   const S=[]; let P=null;
@@ -611,6 +619,8 @@ function ma_panNovoAch(self,v,c,pf){ const st=self.state; const f=st.pf||{}; v.p
   const ab=a&&f.comp?manAchAberto(c,a.id,f.comp):null; v.na_rep=!!ab; v.na_rept=ab?('Possível repetição de '+ab.id+' · '+ab.sint+' ('+ab.oc.length+(ab.oc.length>1?' ocorrências':' ocorrência')+')'):'';
   const pd=manPode(c,pf,'registrar'); const pb=a?manPode(c,pf,'condicao',{aid:a.id}):'x';
   const go=(rep,bloq)=>ma_cmd(self,c2=>manAchRegistrar(c2,Object.assign({},self.state.pf||{},{rep,bloquear:bloq}),g2perfil(),self.state.pchave),(r)=>{ if(r.id){ self.setState({pf:{}}); ma_abrir(self,'achado',r.id); ma_rec(self,r); } });
+  const sobe=ab?manAchSobe(ab,f):[]; v.na_rept=ab?(v.na_rept+(sobe.length?' · a nova é mais grave: somar eleva '+sobe.join(' e '):'')):'';   /* A2: somar nunca perde a gravidade */
+  if(ab&&f.sug==='Bloqueado'&&!pb&&a&&!manMots(a).some(m=>m.achado===ab.id)) return {P:ma_btn('Somar ao '+ab.id+' e bloquear',()=>go('somar',true),pd,true),S:[ma_btn('Só somar',()=>go('somar',false),pd,false),ma_btn('Registrar novo',()=>go('novo',true),pd,false)]};
   if(ab) return {P:ma_btn('Somar ao '+ab.id,()=>go('somar',false),pd,true),S:[ma_btn('Registrar novo',()=>go('novo',f.sug==='Bloqueado'&&!pb),pd,false)]};
   if(f.sug==='Bloqueado'&&!pb) return {P:ma_btn('Registrar e bloquear',()=>go('',true),pd,true),S:[ma_btn('Só registrar',()=>go('',false),pd,false)]};
   return {P:ma_btn('Registrar achado',()=>go('',false),pd,true),S:[]}; }
@@ -933,7 +943,7 @@ def _visoes():
             dict(k='ab',l='Em aberto',w=120),dict(k='custo',l='Custo no período',t='num',a='r',d=2,pre='R$ ',agg='sum',w=110),dict(k='cons',l='Consumo',w=95)],'g_at',total=True,
            qf=dict(k='cond',l='condição'))
     g_ab=G([dict(k='id',l='Lançamento · operador',w=130),dict(k='ativo',l='Ativo',w=120),dict(k='tq',l='Tanque/lote',w=105),dict(k='vol',l='Volume (L)',t='num',a='r',w=75),
-            dict(k='data',l='Data · leitura',w=100),dict(k='met',l='Método',w=110),dict(k='lh',l='Consumo L/h',t='num',a='r',w=80),dict(k='qual',l='Qualidade',w=105)],'g_ab',qf=dict(k='qual',l='qualidade'))
+            dict(k='data',l='Data · leitura',w=100),dict(k='met',l='Método',w=110),dict(k='lh',l='Consumo',t='num',a='r',w=80),dict(k='qual',l='Qualidade',w=105)],'g_ab',qf=dict(k='qual',l='qualidade'))
     g_pl=G([dict(k='nome',l='Plano',w=150),dict(k='est',l='Estado',w=140),dict(k='apl',l='Aplica-se a',w=140),dict(k='svs',l='Serviços',w=140),dict(k='atv',l='Ativos',w=110),dict(k='sit',l='Situação',w=165)],'g_pl')
     flt=lambda *xs: '<div class="ma-flt" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">'+''.join(xs)+'</div>'
     semordem=(_card_html('c_so') + flt(_chips('so_tipo','Tipo'),_chips('so_prazo','Prazo pelo início da janela'),_sel('f_crit','f_setcrit','f_crits','Criticidade'),_sel('f_grupo','f_setgrupo','f_grupos','Grupo'),_sel('f_plano','f_setplano','f_planos','Plano'))

@@ -148,7 +148,7 @@ caso('AC-PCM-13/26 condição e encerrar', () => {
   const e3 = run(c, x => manEncerrar(x, 'OM-0233', OT));
   ok('AC-PCM-26 · destino com responsável e nenhum movimento de lote; depois disso encerra com o custo (R$ 4.100 de peças + 6,5 h)', !d1.erro && !e3.erro && c.oms['OM-0233'].etapa === 'Encerradas' && c.oms['OM-0233'].custo === 3600 + 500 + 6.5 * 320 && JSON.stringify(c.itens) === JSON.stringify(MAN0.itens), [d1, e3, c.oms['OM-0233'].custo]);
   // Encerrar restrição: OM-0228 trata a restrição → "Encerrar restrição" recusado; Medição Conforme devolve a Bomba do Pivô 2 a Apto
-  const b = S(); const JO = { k: 'João', papeis: { mecanico: 'irrigante' } };
+  const b = S(); const JO = g2pf('João');   // A8 (revisão 09/10): o João do cadastro de perfis (G2_PERFIS), não um perfil inventado no teste
   const er = run(b, x => manCondicao(x, 'a11', 'encerrar', { motivo: 'x', evid: 'y' }, OT));
   ok('AC-PCM-13 · "Encerrar restrição" recusado enquanto a OM-0228 trata a restrição', /OM-0228 trata a restrição/.test(er.erro || ''), er);
   run(b, x => manIniciar(x, 'OM-0228', JO)); run(b, x => manResp(x, 'OM-0228', 0, 'Conforme', undefined, JO, '3,4')); run(b, x => manResp(x, 'OM-0228', 1, 'Conforme', undefined, JO)); run(b, x => manResp(x, 'OM-0228', 2, 'Conforme', undefined, JO));
@@ -285,6 +285,108 @@ caso('CTL-01 (d) horímetro único e Gerar ordem', () => {
   ok('Horímetro único · abastecimento, achado, leitura avulsa e conclusão gravam pela mesma função no histórico c.leituras (4 origens)', ['Abastecimento', 'Achado', 'Leitura', 'Conclusão'].every(o => org.indexOf(o) >= 0) && c.ativos.a04.leit.val === 3430 && c.ativos.a02.leit.val === 2995, org);
   const g = S(); const r = manGerarTodas(g, null, OT); const l = manLinhas(g, null).find(x => x.om && x.om.id === 'OM-0235'); const r2 = l ? run(g, x => manGerar(x, l.pid + '|' + l.aid, l.sid, OT)) : { erro: 'sem linha' };
   ok('Gerar ordem · lote (Sem ordem) e painel do vencimento usam a mesma regra: gerar de novo o ciclo do Trator 03 devolve a OM-0235, sem OM nova', r.ids.length === 3 && r2.nada && r2.id === 'OM-0235' && /Já existe a OM-0235/.test(r2.msg) && Object.keys(g.oms).length === Object.keys(MAN0.oms).length + 3, [r, r2]);
+});
+
+// ===== Revisão adversarial de 09/10 (A1–A11 e S4): cada achado corrigido ganha proteção de regressão =====
+const JOAO = g2pf('João');
+caso('REV-A1 motivos da condição', () => {
+  const c = S();
+  const r = run(c, x => manAchRegistrar(x, { aid: 'a01', origem: 'Inspeção', comp: 'Rodado e freios', sint: 'Freio de serviço sem ação no pedal', crit: 'Alta', sug: 'Bloqueado', bloquear: true }, ZE, 'ra1'));
+  ok('REV-A1 · "Registrar e bloquear" no Trator T1 já bloqueado acrescenta o motivo (2) e diz "segue bloqueado"', !r.erro && c.ativos.a01.cond === 'Bloqueado' && manMots(c.ativos.a01).length === 2 && manMots(c.ativos.a01)[1].achado === r.id && /segue bloqueado · motivo acrescentado \(2 motivos\)/.test(r.msg), [r, c.ativos.a01.condInfo]);
+  const co = run(c, x => manAchCorretiva(x, r.id, OT, 'ra2')); const o2 = c.oms[co.id];
+  ok('REV-A1 · a corretiva do achado novo trata o motivo dele e ganha "Teste do reparo · Freio…"', !!o2 && o2.trata && manMots(c.ativos.a01)[1].om === co.id && o2.chk.some(t => t.tipo === 'Teste' && /Teste do reparo · Freio de serviço/.test(t.t)), [co, o2 && o2.chk]);
+  const t = c.oms['OM-0233'].chk.findIndex(x => x.tipo === 'Teste');
+  run(c, x => manTentativa(x, 'OM-0233', t, 'Aprovado', 'manômetro 190 bar', ZE)); run(c, x => manConcluir(x, 'OM-0233', '4320', '6,5', false, {}, ZE));
+  ok('REV-A1 · o comando de aptidão da OM-0233 diz que o T1 segue bloqueado', /^Encerrar o motivo da OM-0233 · Trator T1 segue bloqueado$/.test(manAptoRot(c, c.oms['OM-0233'])), manAptoRot(c, c.oms['OM-0233']));
+  const ap = run(c, x => manDeclararApto(x, 'OM-0233', ZE));
+  ok('REV-A1 (S1) · "Declarar apto" na OM-0233 encerra só o motivo dela: o T1 segue Bloqueado · Falta: ' + r.id + ' · ' + co.id, !ap.erro && c.ativos.a01.cond === 'Bloqueado' && manMots(c.ativos.a01).length === 1 && c.ativos.a01.condInfo.achado === r.id && ap.msg.indexOf('Falta: ' + r.id + ' · ' + co.id) >= 0 && !!c.oms['OM-0233'].aptidao && !manSelos(c, c.oms['OM-0233']).some(x => /Decidir aptidão/.test(x.t)), [ap, c.ativos.a01]);
+  run(c, x => manLiberar(x, co.id, true, OT, { tempo: '2' })); run(c, x => manIniciar(x, co.id, ZE));
+  const t2 = c.oms[co.id].chk.findIndex(x => x.tipo === 'Teste'); run(c, x => manTentativa(x, co.id, t2, 'Aprovado', 'freio ok na rampa', ZE));
+  run(c, x => manConcluir(x, co.id, '4322', '2', false, {}, ZE)); ok('REV-A1 · o último motivo pede "Declarar Trator T1 apto"', manAptoRot(c, c.oms[co.id]) === 'Declarar Trator T1 apto', manAptoRot(c, c.oms[co.id]));
+  const ap2 = run(c, x => manDeclararApto(x, co.id, ZE));
+  ok('REV-A1 · resolvido o último motivo, o T1 fica Apto (sem motivo)', !ap2.erro && c.ativos.a01.cond === 'Apto' && !c.ativos.a01.condInfo, [ap2, c.ativos.a01]);
+  const p = S(); const r2 = run(p, x => manAchRegistrar(x, { aid: 'a01', origem: 'Relato', comp: 'Elétrico', sint: 'Curto no painel', crit: 'Alta', sug: 'Bloqueado', bloquear: true }, OT, 'ra3'));
+  ok('REV-A1 · o achado novo vira motivo da condição (antes só a mensagem dizia "bloqueado")', manMots(p.ativos.a01).some(m => m.achado === r2.id) && p.ativos.a01.condHist.length === 2, [r2, p.ativos.a01]);
+  const b = S(); const rb = run(b, x => manAchRegistrar(x, { aid: 'a11', origem: 'Inspeção', comp: 'Elétrico', sint: 'Cabo do motor com isolamento rompido', crit: 'Alta', sug: 'Bloqueado', bloquear: true }, OT, 'rb1'));
+  ok('REV-A1 · bloquear a Bomba do Pivô 2 restrita põe o bloqueio à frente e guarda a restrição tratada pela OM-0228', !rb.erro && b.ativos.a11.cond === 'Bloqueado' && manMots(b.ativos.a11).length === 2 && manMots(b.ativos.a11)[0].achado === rb.id && manMots(b.ativos.a11)[1].om === 'OM-0228', [rb, b.ativos.a11.condInfo]);
+  run(b, x => manIniciar(x, 'OM-0228', JOAO)); run(b, x => manResp(x, 'OM-0228', 0, 'Conforme', undefined, JOAO, '3,4')); run(b, x => manResp(x, 'OM-0228', 1, 'Conforme', undefined, JOAO)); run(b, x => manResp(x, 'OM-0228', 2, 'Conforme', undefined, JOAO));
+  run(b, x => manConcluir(x, 'OM-0228', '8930', '3', false, {}, JOAO)); const ab = run(b, x => manDeclararApto(x, 'OM-0228', JOAO));
+  ok('REV-A1 · João (responsável técnico) encerra a restrição na OM-0228; a bomba segue Bloqueada pelo motivo novo', !ab.erro && b.ativos.a11.cond === 'Bloqueado' && manMots(b.ativos.a11).length === 1 && b.ativos.a11.condInfo.achado === rb.id, [ab, b.ativos.a11]);
+  const m = S(); const nb = run(m, x => manCorretivaAtivo(x, 'a03', OT, 'rc1'));
+  ok('REV-A1 · "Criar ordem corretiva" pela condição num ativo apto é recusada (nada a tratar)', /apto: nenhuma condição/.test(nb.erro || ''), nb);
+});
+caso('REV-A2 somar mais grave', () => {
+  const c = S(); const d = { aid: 'a02', origem: 'Relato', comp: 'Hidráulico', sint: 'Mangueira estourou, óleo no motor', crit: 'Alta', sug: 'Bloqueado' };
+  const r0 = run(c, x => manAchRegistrar(x, Object.assign({}, d), OT, 's0'));
+  ok('REV-A2 · a repetição avisa que a ocorrência nova é mais grave', r0.nada && r0.rep === 'INSP-104' && /mais grave: somar eleva criticidade Média → Alta e sugestão Apto → Bloqueado/.test(r0.msg), r0);
+  const r1 = run(c, x => manAchRegistrar(x, Object.assign({ rep: 'somar' }, d), OT, 's1')); const q = c.achados['INSP-104'];
+  ok('REV-A2 (S2) · somar eleva criticidade e sugestão para a mais grave e guarda cada ocorrência (criticidade, sugestão e autor)', !r1.erro && q.crit === 'Alta' && q.sug === 'Bloqueado' && q.ocd.length === 2 && q.ocd[0].crit === 'Média' && q.ocd[1].crit === 'Alta' && q.ocd[1].sug === 'Bloqueado' && /Otávio/.test(q.ocd[1].por), [r1, q]);
+  ok('REV-A2 · com a gravidade somada, a primária do achado é "Criar ordem corretiva" (não vincula à preventiva de 28/09)', manAchOpcoes(c, 'INSP-104').prim.k === 'corretiva', manAchOpcoes(c, 'INSP-104'));
+  const c2 = S(); const r2 = run(c2, x => manAchRegistrar(x, Object.assign({ rep: 'somar', bloquear: true }, d), ZE, 's2'));
+  ok('REV-A2 · "Somar e bloquear" (Zé, responsável técnico do Trator 02) bloqueia com o INSP-104 como motivo', !r2.erro && c2.ativos.a02.cond === 'Bloqueado' && c2.ativos.a02.condInfo.achado === 'INSP-104' && /Trator 02 bloqueado/.test(r2.msg), [r2, c2.ativos.a02]);
+  const c3 = S(); const r3 = run(c3, x => manAchRegistrar(x, Object.assign({ rep: 'somar', bloquear: true }, d), ANA, 's3'));
+  ok('REV-A2 · sem a competência (Ana) "Somar e bloquear" é recusado e nada grava', /responsável técnico/.test(r3.erro || '') && c3.achados['INSP-104'].oc.length === 1, r3);
+});
+caso('REV-A3 estorno da leitura', () => {
+  const c = S(); const r1 = run(c, x => manAbastecer(x, { aid: 'a02', tq: 'Sede · D-118', vol: '150', leit: '3.010', op: 'Beto', cheio: false }, OT, 'e1'));
+  const r2 = run(c, x => manEstornar(x, r1.id, 'leitura digitada errada (era 2.995)', OT, 'e2')); const lt = c.leituras.find(x => x.ab === r1.id);
+  ok('REV-A3 (S2) · o estorno marca a leitura do lançamento como Estornada e o Trator 02 volta a 2.988 h', !r2.erro && c.ativos.a02.leit.val === 2988 && lt && lt.qual === 'Estornada' && /volta a 2\.988 h/.test(r2.msg), [r2, c.ativos.a02.leit, lt]);
+  const r3 = run(c, x => manAbastecer(x, { aid: 'a02', tq: 'Sede · D-118', vol: '150', leit: '2.995', op: 'Beto', cheio: false }, OT, 'e3'));
+  ok('REV-A3 · o lançamento certo (2.995 h) entra Confirmado, sem troca de contador nem deslocar marco e últimas execuções', !r3.erro && c.ativos.a02.leit.val === 2995 && !c.ativos.a02.suspeita && c.vinc['PM-01|a02'].ult.s1.leit === 2793 && c.leituras.slice(-1)[0].qual === 'Confirmada', [r3, c.ativos.a02, c.vinc['PM-01|a02'].ult]);
+});
+caso('REV-A4/A10 consumo', () => {
+  const c = S(); run(c, x => manAbastecer(x, { aid: 'a02', tq: 'Comboio CB-01 · D-118', vol: '100', leit: '2.994', op: 'Beto', cheio: false }, OT, 'p1'));
+  const f = run(c, x => manAbastecer(x, { aid: 'a02', tq: 'Comboio CB-01 · D-118', vol: '90', leit: '3.000', op: 'Beto', cheio: true }, OT, 'p2'));
+  const lh = manLh(c, c.abast.find(x => x.id === f.id));
+  ok('REV-A4 (S2) · tanque cheio a tanque cheio soma o parcial do meio: (100 + 90) L ÷ 12 h = 15,8 L/h', !!lh && Math.abs(lh.lh - 190 / 12) < 1e-9 && lh.un === 'L/h' && /15,8 L\/h/.test(f.msg), [lh, f.msg]);
+  const k = S(); run(k, x => manAbastecer(x, { aid: 'cb01', tq: 'Sede · D-118', vol: '200', leit: '48.300', op: 'Beto', cheio: true }, OT, 'c1'));
+  const g = run(k, x => manAbastecer(x, { aid: 'cb01', tq: 'Sede · D-118', vol: '60', leit: '48.500', op: 'Beto', cheio: true }, OT, 'c2'));
+  const lk = manLh(k, k.abast.find(x => x.id === g.id));
+  ok('REV-A10 · o comboio (odômetro) mostra km/L: 200 km ÷ 60 L = 3,3 km/L, nunca "L/h"', !!lk && lk.un === 'km/L' && Math.abs(lk.lh - 200 / 60) < 1e-9 && /3,3 km\/L/.test(g.msg) && !/L\/h/.test(g.msg) && manConsTxt(lk) === '3,3 km/L', [lk, g.msg]);
+});
+caso('REV-A9 mensagem do bloqueio', () => {
+  const r = run(S(), x => manCondicao(x, 'a02', 'bloquear', { motivo: 'freio' }, OT));
+  ok('REV-A9 · bloquear o Trator 02 não promete impedir as O.S.: avisa a alocada (OS-0420) para o PCP', !r.erro && !/ficam impedidas/.test(r.msg) && /alocado em OS-0420: avise o PCP/.test(r.msg), r);
+});
+caso('REV-A11 versão do registro', () => {
+  const c = S(); const rv = c.oms['OM-0234'].rv; run(c, x => manAchVincular(x, 'INSP-104', 'OM-0234', OT)); let e = '';
+  try { manRv(c.oms['OM-0234'], rv); } catch (x) { e = x.message; }
+  ok('REV-A11 · a OM mudou depois de aberta: o comando com a versão lida é recusado "Mudou desde que você abriu"', /Mudou desde que você abriu: OM-0234/.test(e) && c.oms['OM-0234'].rv === rv + 1, e);
+});
+caso('REV-S4 encerrar, autor e conflito aceito', () => {
+  const c = S(); c.appConf = [{ id: 'CA-001', chave: 'z', cmd: 'retirada', args: { om: 'OM-0230' }, por: 'Zé', om: 'OM-0230', estado: 'A resolver', desc: 'x', mot: 'y' }]; c.oms['OM-0230'].conflitoApp = 1;
+  run(c, x => manSobras(x, 'OM-0230', OT)); const e = run(c, x => manEncerrar(x, 'OM-0230', OT));
+  ok('REV-S4 · Encerrar é recusado com registro do app "A resolver" (o fato do campo não fica para trás)', /resolver 1 registro do app/.test(e.erro || '') && c.oms['OM-0230'].etapa === 'Em conferência', e);
+  const d = S(); run(d, x => manLiberar(x, 'OM-0234', true, OT, { executante: 'Zé', tempo: '5' })); run(d, x => manIniciar(x, 'OM-0234', ZE));
+  ok('REV-S4 · Iniciar grava quem iniciou (Zé) além da data', /Zé/.test(d.oms['OM-0234'].iniPor || '') && d.oms['OM-0234'].ini === d.hoje, d.oms['OM-0234']);
+  const g = S(); manGerarTodas(g, null, OT); run(g, x => manSolicitar(x, 'OM-0235', OT)); run(g, x => manReceber(x, 'OM-0235', OT)); run(g, x => manAchCrit(x, 'SM-0150', 'Média', OT));
+  const f = S(); run(f, x => manSobras(x, 'OM-0230', OT));
+  ok('REV-S4 · solicitar compra, registrar recebimento, resolver sobras e mudar criticidade gravam o autor', /Otávio/.test((g.oms['OM-0235'].sc || {}).por || '') && /Otávio/.test((g.oms['OM-0235'].sc || {}).recPor || '') && /Otávio/.test(((f.oms['OM-0230'].devPor) || {}).por || '') && /Otávio/.test(((g.achados['SM-0150'].critHist || [])[0] || {}).por || ''), [g.oms['OM-0235'].sc, f.oms['OM-0230'].devPor, g.achados['SM-0150'].critHist]);
+  const m = S(); run(m, x => manLiberar(x, 'OM-0234', true, OT, { executante: 'Zé', tempo: '5' })); run(m, x => manMover(x, 'OM-0234', '2026-09-29', '', OT)); const mv = run(m, x => manMover(x, 'OM-0234', '2026-09-25', '', OT, true));
+  ok('REV-S4 · "Mover mesmo assim" para dia com conflito guarda o conflito aceito (selo amarelo, não volta a vermelho)', !mv.erro && m.oms['OM-0234'].conflitoAceito === true && manSelos(m, m.oms['OM-0234']).some(x => /^Conflito aceito/.test(x.t)), [mv, manSelos(m, m.oms['OM-0234'])]);
+});
+caso('REV-S4 travas sem proteção (mutantes vivos M18 M21 M24 M30 M31 M36 M37 M39 M40)', () => {
+  const a = S(); const t = a.oms['OM-0233'].chk.findIndex(x => x.tipo === 'Teste'); run(a, x => manTentativa(x, 'OM-0233', t, 'Aprovado', 'foto', ZE)); const m18 = run(a, x => manDeclararApto(x, 'OM-0233', ZE));
+  ok('M18 · "Declarar apto" fora de Em conferência é recusado (o T1 segue bloqueado)', /só em Em conferência/.test(m18.erro || '') && a.ativos.a01.cond === 'Bloqueado', m18);
+  const m21 = run(S(), x => manIncluir(x, 'OM-0234', 'Serviço', 'Trocar correia', OT));
+  ok('M21 · incluir tarefa em preventiva é recusado (segue a versão do plano)', /preventiva segue a versão do plano/.test(m21.erro || ''), m21);
+  const m24 = run(S(), x => manCondicao(x, 'a04', 'restringir', { motivo: 'folga', lim: 'sem implemento', ate: '' }, OT));
+  ok('M24 · restringir sem prazo é recusado', /prazo da restrição/.test(m24.erro || ''), m24);
+  const b = S(); run(b, x => manLiberar(x, 'OM-0234', true, OT, { executante: 'Zé', tempo: '5' })); run(b, x => manIniciar(x, 'OM-0234', ZE)); run(b, x => manResp(x, 'OM-0234', 0, 'Não feito', 'faltou filtro', ZE));
+  const t0 = Object.assign({}, b.oms['OM-0234'].chk[0]); run(b, x => manResp(x, 'OM-0234', 0, 'Não feito', 'faltou o filtro no almoxarifado', undefined));
+  const t1 = b.oms['OM-0234'].chk[0];
+  ok('M30 · editar só o motivo não troca o autor nem a hora da resposta', t1.por === t0.por && t1.em === t0.em && /Zé/.test(t1.por) && t1.mot === 'faltou o filtro no almoxarifado', [t0, t1]);
+  const m31 = run(S(), x => manResp(x, 'OM-0233', 0, 'Não feito', 'x', ANA));
+  ok('M31 · quem não é o executante não responde tarefa (Ana na OM-0233 do Zé)', /Ação de Zé, executante/.test(m31.erro || ''), m31);
+  const c = S(); run(c, x => manLiberar(x, 'OM-0234', true, OT, { executante: 'Zé', tempo: '5' })); run(c, x => manIniciar(x, 'OM-0234', ZE)); c.oms['OM-0234'].chk.forEach((tk, i) => run(c, x => manResp(x, 'OM-0234', i, 'Feito', undefined, ZE)));
+  const m36 = run(c, x => manConcluir(x, 'OM-0234', '2995', '5', false, { 0: '5' }, ZE));
+  ok('M36 · aplicar acima do planejado sem saldo livre é recusado e nada baixa', /Saldo insuficiente de Kit filtros MF 7719/.test(m36.erro || '') && c.itens['KIT-MF7719'].saldo === 2, [m36, c.itens['KIT-MF7719']]);
+  const m37 = run(S(), x => manGerar(x, 'PM-03|a01', 's1', OT));
+  ok('M37 · gerar ordem de vencimento em dia é recusado', /está em dia/.test(m37.erro || ''), m37);
+  const d = S(); const ra = run(d, x => manAchRegistrar(x, { aid: 'a05', origem: 'Inspeção', comp: 'Motor', sint: 'Ruído', crit: 'Média', sug: 'Apto' }, OT, 'v1')); const m39 = run(d, x => manAchVincular(x, ra.id, 'OM-0230', OT));
+  ok('M39 · vincular achado a OM Em conferência é recusado', /Em conferência: vincule só/.test(m39.erro || '') && d.achados[ra.id].estado === 'Sem ordem', m39);
+  const m40 = run(S(), x => manEncerrar(x, 'OM-0230', OT));
+  ok('M40 · encerrar com sobra a resolver é recusado', /resolver sobras/.test(m40.erro || ''), m40);
 });
 
 print(JSON.stringify(R));

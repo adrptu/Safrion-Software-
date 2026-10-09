@@ -279,7 +279,11 @@ function osManCond(o,b,c){ if(!b||!b.bloq||!b.bloq.aid) return; const a=((c&&c.m
   if(a.cond==='Bloqueado'){ const om=a.condInfo&&a.condInfo.om; o.bloq=Object.assign({},b.bloq,{t:String(b.bloq.t).replace(/\(OM-\d+\)/,'('+(om||'sem ordem que trate')+')')},
       b.bloq.h?{}:{h:'MA.dc.html#'+(om?'om='+om:'ativo='+a.id),hl:om?('Acompanhar '+om):('Abrir '+a.nome+' na Manutenção')}); return; }   /* o link próprio do bloqueio (ex.: ordem completa) fica */
   o.bloq=null; o.selos=(o.selos||[]).filter(s=>!/bloquead|Falta máquina/i.test(s.t));
-  const h=(a.condHist||[]).slice(-1)[0]||{}; o.cond=a.nome+' '+a.cond.toLowerCase()+' desde '+String(h.em||'').split('-').reverse().slice(0,2).join('/')+(h.om?' ('+h.om+')':'')+' · o PCP reprograma a ordem com o ativo.'; o.dono='PCP'; o.prazo='reprogramar'; }
+  /* revisão 09/10 (A5): com a máquina apta sai só o impedimento; o dono volta ao normal da fase. A reprogramação pelo PCP vale uma vez, antes de liberar
+     (A liberar); em execução, conferência ou encerrada a ordem segue com o dono da fase (dano evitado: ordem em andamento "com o PCP" para sempre) */
+  const h=(a.condHist||[]).slice(-1)[0]||{}; const desde=a.nome+' '+a.cond.toLowerCase()+' desde '+String(h.em||'').split('-').reverse().slice(0,2).join('/')+(h.om?' ('+h.om+')':'');
+  if(o.etapa==='A liberar'){ o.cond=desde+' · o PCP reprograma a máquina da ordem (O.S. › Recursos); depois '+OS_AGRO+' confere e libera. Próximo passo: liberar para execução.'; o.dono='PCP'; o.prazo='reprogramar antes de liberar'; return; }
+  o.cond=osCondGen(Object.assign({},o,{cond:desde+'.'})); o.dono=o.etapa==='Em conferência'?o.resp:''; o.prazo=o.etapa==='Em conferência'?'conferir':''; }
 function osCondGen(o){ const pend=(o.ap||[]).filter(a=>a.sinc===false).length;
   if(o.etapa==='Liberadas') return 'Liberada'+(o.req?' · '+o.req+' reservou os insumos no Estoque':'')+'. Próximo passo: iniciar na janela '+o.janela+'.';
   if(o.etapa==='Em execução') return 'Em execução · '+nf(o.realizado)+' de '+nf(o.area)+' ha'+(pend?' · '+pend+(pend>1?' apontamentos':' apontamento')+' no aparelho aguardando sinal':'')+'. Registre o apontamento de cada turno.';

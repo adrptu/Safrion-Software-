@@ -71,11 +71,15 @@ try:
     c = inicio('Ana'); c.menu(); c.abre('a02'); m.bloco('Ordens'); b = m.body()
     tarefa('(d) custo de uma OM (Manutenção · ativo › Ordens)', c, (2, 0, 0), 'OM-0219' in b and 'R$ 4.658,00' in b)
     # (e) abastecimento, web (operador herdado da alocação: 8)
-    c = inicio('Otávio'); c.menu(); c.clk('Ativos', 'main'); c.abre('a02'); c.clk('Registrar abastecimento'); c.clk('Sede · D-118', '#ma-painel'); c.dig('#ab-vol', '180'); c.dig('#ab-leit', '3001')
+    c = inicio('Otávio'); c.menu(); c.clk('Ativos', 'main'); c.abre('a02'); c.clk('Registrar abastecimento')
+    # revisão 09/10 (S4): o toque no tanque só conta quando há escolha; no campo o Trator 02 só tem o comboio, já escolhido (antes contava um toque em "Sede · D-118" que não existe)
+    tq = J("[...document.querySelectorAll('#ma-painel [role=group] button')].filter(b=>/D-11[78]/.test(b.innerText)).map(b=>[b.innerText.trim(),b.getAttribute('aria-pressed')])") or []
+    if not any(x[1] == 'true' for x in tq): c.clk('Sede · D-118', '#ma-painel')
+    c.dig('#ab-vol', '180'); c.dig('#ab-leit', '3001')
     op = J("[...document.querySelectorAll('#ma-painel [aria-pressed=true]')].map(b=>b.innerText.trim())") or []
     if not any(x in op for x in ('Beto', 'Carlos', 'Marcos', 'Lucas', 'João')): c.clk('Beto', '#ma-painel')
     c.clk('Registrar abastecimento', '#ma-painel')
-    tarefa('(e) abastecimento, web', c, (9, 7, 0), m.man("m.abast.some(b=>b.aid==='a02'&&b.vol===180)"), op)
+    tarefa('(e) abastecimento, web', c, (9, 7, 0), m.man("m.abast.some(b=>b.aid==='a02'&&b.vol===180)"), [op, tq])
     print('\nTABELA (executado no candidato · convenção do §8):')
     for nome, tot, esp in RES: print(f'  {nome:60s} {tot[0]:>3} · {tot[1]:>2} · {tot[2]}   (§8 depois: {esp[0]} · {esp[1]} · {esp[2]})')
     print('  (a) no app e (e) no app: ma_app_fluxo_test.py mede 7 e 6 toques.')

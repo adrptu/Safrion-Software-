@@ -100,6 +100,17 @@ try:
     a.J("localStorage.setItem('safrion.perfilDemo','Otávio')"); a.c.size(1280, 900); go('MA.dc.html#vis=semordem', 1.6)
     a.ok('SM-0153' in a.body() and 'Vazamento no comando da barra' in a.body(), 'tela MA · Sem ordem: o SM-0153 vindo do app aparece para o Otávio decidir')
     errs('MA Sem ordem')
+    # ---------- revisão 09/10 · João (A8) e operador do abastecimento (S4) ----------
+    a.c.size(390, 1800); go('MB-01.dc.html'); a.clk('Restaurar demonstração'); a.clk('João · eletricista'); b = a.body(); fila = b[b.find('Minha fila'):b.find('Abrir por tipo de trabalho')]
+    a.ok(cen('c.app.usuario') == 'João' and 'OM-0228' in fila, 'A8 · Ver como João no app: a OM-0228 (eletricista, NR-10) na Minha fila · ' + fila[:120].replace('\n', ' '))
+    a.clk('Zé · mecânico'); go('MB-09.dc.html'); n0 = cen('c.man.abast.length')
+    on = a.J("[...document.querySelectorAll('[role=group][aria-label=\"Operador da máquina\"] button')].filter(x=>x.getAttribute('aria-pressed')==='true').map(x=>x.innerText.trim())") or []
+    a.clk('Sede · D-118'); a.setv('#mq-vol', '90'); a.setv('#mq-leit', '4313')   # Trator T1 na Oficina Sede: tanque e comboio elegíveis
+    if on: a.clk(on[0])   # tira o operador herdado para conferir a recusa
+    a.clk('Registrar abastecimento'); t = toast(); a.clk('Carlos'); a.clk('Registrar abastecimento')
+    a.ok(not [x for x in on if 'Zé' in x] and 'operador' in t and cen('c.man.abast.length') == n0 + 1 and cen('c.man.abast[c.man.abast.length-1].op') == 'Carlos',
+         'S4 · Zé (mecânico) lança o abastecimento: o operador nunca é ele por padrão; sem operador o app pede, e grava o escolhido (Carlos) · ' + json.dumps([on, t[:120], cen('c.man.abast[c.man.abast.length-1].op')], ensure_ascii=False))
+    errs('MB-09 operador')
     a.ok(not ERR, 'sem erros JS nas telas ' + json.dumps(ERR, ensure_ascii=False)[:400])
     a.c.size(390, 1800); go('MB-01.dc.html'); a.clk('Restaurar demonstração')
 finally:

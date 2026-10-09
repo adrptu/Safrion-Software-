@@ -101,4 +101,32 @@ caso('MB-04 → achado', () => {
   ok('AC-PCM-27 · sem sinal o achado fica no aparelho e entra uma vez na volta (SM-0153 em Sem ordem)', f.fila && !s.erro && y.man.achados['SM-0153'] && y.man.achados['SM-0153'].estado === 'Sem ordem' && !y.app.manFila.length, [f, s]);
 });
 
+// ===== Revisão adversarial de 09/10: A7 (versão do servidor na fila sem sinal), A8 (João executa as OMs de eletricista), A2 (somar mais grave pelo app) =====
+caso('REV-A7 fila sem sinal', () => {
+  const c = C(); const Z = 'Zé'; muda(c, (m) => manLiberar(m, 'OM-0234', true, OT, { executante: 'Zé', tempo: '5' })); app(c, 'iniciar', { om: 'OM-0234' }, Z, 'i0');
+  muda(c, (m, cc) => mbSinal(cc, false));
+  const f1 = app(c, 'resp', { om: 'OM-0234', i: 0, r: 'Feito' }, Z, 'd1'); const f2 = app(c, 'resp', { om: 'OM-0234', i: 1, r: 'Não feito', mot: 'faltou filtro' }, Z, 'd2');
+  ok('REV-A7 · os dois registros da OM-0234 guardam a versão do servidor do 1º (não a projeção do aparelho)', f1.fila && f2.fila && c.app.manFila.every(q => q.rvBase === c.man.oms['OM-0234'].rv), c.app.manFila.map(q => [q.chave, q.rv, q.rvBase]));
+  muda(c, (m) => manAchVincular(m, 'INSP-104', 'OM-0234', OT));   // escritório: OM-0234 vai de rv n para n+1 (o mesmo número que a projeção do aparelho deu ao 2º)
+  const s2 = muda(c, (m, cc) => mbSinal(cc, true)); const o = c.man.oms['OM-0234'];
+  ok('REV-A7 (S3) · na volta do sinal os dois viram "Conflito a resolver" e nenhum entra em silêncio na OM mudada', !s2.erro && !o.chk[0].r && !o.chk[1].r && (c.man.appConf || []).length === 2 && c.man.appConf.every(x => x.estado === 'A resolver') && /registro anterior desta fila em conflito/.test(c.man.appConf[1].mot), [s2, o.chk.slice(0, 2), c.man.appConf]);
+  const d = C(); muda(d, (m) => manLiberar(m, 'OM-0234', true, OT, { executante: 'Zé', tempo: '5' })); muda(d, (m, cc) => mbSinal(cc, false));
+  app(d, 'iniciar', { om: 'OM-0234' }, Z, 'j0'); app(d, 'resp', { om: 'OM-0234', i: 0, r: 'Feito' }, Z, 'j1'); const s3 = muda(d, (m, cc) => mbSinal(cc, true));
+  ok('REV-A7 · sem mudança no escritório, iniciar + resposta feitos sem sinal entram em ordem (nenhum conflito)', !s3.erro && d.man.oms['OM-0234'].etapa === 'Em execução' && d.man.oms['OM-0234'].chk[0].r === 'Feito' && !(d.man.appConf || []).length, [s3, d.man.appConf]);
+});
+caso('REV-A8 João', () => {
+  const c = C(); const J = 'João';
+  ok('REV-A8 · João está no Ver como do app e vê a OM-0228 (eletricista) na Minha fila', MB_US.some(x => x.k === J) && mbOmsDe(c.man, J).map(o => o.id).join() === 'OM-0228' && !!g2pf(J), mbOmsDe(c.man, J).map(o => o.id));
+  app(c, 'iniciar', { om: 'OM-0228' }, J, 'jo0'); app(c, 'resp', { om: 'OM-0228', i: 0, r: 'Conforme', val: '3,4' }, J, 'jo1'); app(c, 'resp', { om: 'OM-0228', i: 1, r: 'Conforme' }, J, 'jo2'); app(c, 'resp', { om: 'OM-0228', i: 2, r: 'Conforme' }, J, 'jo3');
+  const cc = app(c, 'concluir', { om: 'OM-0228', leit: '8930', horas: '3' }, J, 'jo4'); const ap = app(c, 'apto', { om: 'OM-0228' }, J, 'jo5');
+  ok('REV-A8 (S3) · João executa a OM-0228 pelo app e, responsável técnico da Bomba do Pivô 2, a declara apta (medição conforme)', !cc.erro && !ap.erro && c.man.oms['OM-0228'].etapa === 'Em conferência' && c.man.ativos.a11.cond === 'Apto' && /João/.test(c.man.oms['OM-0228'].aptidao.por), [cc, ap, c.man.ativos.a11.cond]);
+});
+caso('REV-A2 app somar mais grave', () => {
+  const c = C(); const d = { aid: 'a02', origem: 'Relato', comp: 'Hidráulico', sint: 'Mangueira estourou', crit: 'Alta', sug: 'Bloqueado', os: '' };
+  const r = app(c, 'achado', { d }, 'Marcos', 'am1');
+  ok('REV-A2 · no app, a repetição mais grave avisa antes de somar', r.nada && r.rep === 'INSP-104' && /mais grave/.test(r.msg), r);
+  const r2 = app(c, 'achado', { d: Object.assign({}, d, { rep: 'somar' }) }, 'Marcos', 'am2');
+  ok('REV-A2 · somar pelo app leva a gravidade (Alta · Bloqueado) ao INSP-104 e mostra a mudança', !r2.erro && c.man.achados['INSP-104'].crit === 'Alta' && c.man.achados['INSP-104'].sug === 'Bloqueado' && /criticidade Média → Alta/.test(r2.msg), [r2, c.man.achados['INSP-104']]);
+});
+
 print(JSON.stringify(R));

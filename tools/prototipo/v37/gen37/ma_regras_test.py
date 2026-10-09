@@ -19,7 +19,19 @@ def unit():
     out = r.stdout.strip().splitlines()
     ok(r.returncode == 0 and out, 'motor JS (jsc/node) executou sem erro', r.stderr[:600])
     for x in (json.loads(out[-1]) if out else []): ok(x['ok'], x['n'], x['info'])
+def os_unit():
+    """S3 × O.S. (revisão 09/10, A5): perfis + cenário + núcleo da O.S. (JS_NUCLEO, OSD) + regras da manutenção + ma_os_unit.js"""
+    import cenario, dados_manutencao as DM
+    import areas.processo_os as P
+    osd = dict(ords=P._ordens(), nova=P._nova_ordem_dados())
+    src = (PRELUDIO + cenario.perfis_js() + cenario.js_prefixo() + 'const OSD = ' + json.dumps(osd, ensure_ascii=False) + ';\n' + P.JS_NUCLEO + '\n'
+           + DM.js_regras() + open(os.path.join(HERE, 'ma_os_unit.js'), encoding='utf-8').read())
+    p = os.path.join(HERE, '_probe', 'ma_os_unit_all.js'); open(p, 'w', encoding='utf-8').write(src)
+    r = subprocess.run(MOTOR + [p], capture_output=True, text=True, timeout=120)
+    out = r.stdout.strip().splitlines()
+    ok(r.returncode == 0 and out, 'motor JS da O.S. (S3) executou sem erro', r.stderr[:600])
+    for x in (json.loads(out[-1]) if out else []): ok(x['ok'], x['n'], x['info'])
 if __name__ == '__main__':
-    unit()
+    os.chdir(HERE); unit(); os_unit()
     print(f'RESULTADO: {N[0] - len(FAIL)}/{N[0]} ok' + (' · FALHAS: ' + '; '.join(FAIL) if FAIL else ''))
     sys.exit(1 if FAIL else 0)

@@ -176,7 +176,8 @@ function c3cap(V){ const n=k=>c3n(V,k), f=(x,u)=>x===null?'—':nfa(x)+' '+u;
 function c3man(id){ try{ return ((cenGet().man||{}).ativos||{})[id]||null; }catch(e){ return null; } }
 function c3cond(r){ const V=r.v; if(V.sit==='Inativo') return {t:'Inativo',c:'gray',ok:false,curto:'inativo'}; const a=c3man(r.id); const x=C3.cond[r.id];
   if(a&&a.cond==='Bloqueado'){ const i=a.condInfo||{}; const om=i.om||''; const o=om?(cenGet().man.oms||{})[om]:null;
-    const xx={t:'Bloqueado',om,ordens:(x&&x.ordens)||[],m:(om?om+' · ':'')+(i.motivo||'')+(o&&o.ret?' · retorno previsto '+o.ret:'')};
+    const nm=(i.mais||[]).length;   /* revisão 09/10 (A1): outros motivos de bloqueio, cada um com a sua OM, na Manutenção */
+    const xx={t:'Bloqueado',om,ordens:(x&&x.ordens)||[],m:(om?om+' · ':'')+(i.motivo||'')+(o&&o.ret?' · retorno previsto '+o.ret:'')+(nm?' · +'+nm+(nm>1?' motivos':' motivo')+' na Manutenção':'')};
     return {t:'Bloqueado',c:'red',ok:false,m:xx.m,x:xx,curto:'bloqueado',aid:a.id}; }
   if(a&&a.cond==='Restrito'){ const i=a.condInfo||{}; return {t:'Restrito',c:'yellow',ok:true,m:(i.lim||i.motivo||'')+(i.ate?' · até '+i.ate.split('-').reverse().slice(0,2).join('/'):''),curto:'restrito',aid:a.id}; }
   return {t:'Apto',c:'green',ok:true}; }

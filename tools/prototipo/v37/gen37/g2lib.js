@@ -259,7 +259,8 @@ function g2menuRec(){ if(g2estreito()) return true; try{ return localStorage.get
 // O papel vem sempre desta lista (g2pf), nunca do objeto que o comando recebe. Bloco único, lido também pelos testes sem navegador.
 const G2_PERFIS=[{k:'Ana',t:'Ana · Gestora e RT',papeis:{gestor:'gestora',agronomo:'agrônoma'}},{k:'Caio',t:'Caio · PCP',papeis:{pcp:'PCP'}},
   {k:'Rui',t:'Rui · Almoxarife',papeis:{almoxarife:'almoxarife'}},{k:'Paula',t:'Paula · Conferência',papeis:{almoxarife:'almoxarife',conferente:'conferência'}},{k:'Zé',t:'Zé · Mecânico',papeis:{mecanico:'mecânico'}},
-  {k:'Otávio',t:'Otávio · Manutenção (PCM)',papeis:{pcm:'responsável de manutenção'}}];   /* PCM simplificado (05/10, D-20): Ver como da Manutenção = Otávio · Zé · Ana */
+  {k:'Otávio',t:'Otávio · Manutenção (PCM)',papeis:{pcm:'responsável de manutenção'}},
+  {k:'João',t:'João · Irrigante (eletricista NR-10)',papeis:{eletricista:'irrigante'}}];   /* PCM simplificado (05/10, D-20): Ver como da Manutenção = Otávio · Zé · João · Ana; João executa as OMs de eletricista (revisão 09/10, A8) */
 const G2_PERFIL_KEY='safrion.perfilDemo'; let G2_PERFIL_MEM='';
 function g2pf(p){ const k=(typeof p==='string')?p:(p&&p.k); return G2_PERFIS.find(x=>x.k===k)||null; }   // perfil do cadastro pela chave ("Ana" ou {k:'Ana'})
 function g2perfil(){ let k=G2_PERFIL_MEM; try{ k=localStorage.getItem(G2_PERFIL_KEY)||k; }catch(e){} return g2pf(k)||G2_PERFIS[0]; }

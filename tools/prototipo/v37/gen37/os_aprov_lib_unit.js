@@ -107,7 +107,7 @@ caso('A6 prévia',()=>{ cenReset(); ok('A6 a prévia do impedimento (osLibErro) 
 caso('A7 cadastro',()=>{ ok('A7 papéis do cadastro: OS_LIB = gestor; g2quem(agrônomo) = OS_AGRO; g2quem(gestor) = Ana (gestora)', typeof OS_LIB!=='undefined'&&OS_LIB==='gestor'&&g2quem('agronomo')===OS_AGRO&&g2quem('gestor')==='Ana (gestora)'); });
 // A8 · revisão do CTL-3, achado 6: papéis em pessoas diferentes (cadastro injetado e retirado). Prova que o CMD-06 exige o liberador (gestor) e o
 // CMD-42 o agrônomo, cada um no seu registro (antes, sem perfil com um só dos papéis, os mutantes "CMD-06 sem papel" e "g2papel com some" passavam)
-caso('A8 papéis separados',()=>{ G2_PERFIS.push({k:'Beto',t:'Beto · Agrônomo',papeis:{agronomo:'agrônomo'}},{k:'Gil',t:'Gil · Gestor',papeis:{gestor:'gestor'}});
+caso('A8 papéis separados',()=>{ const n0=G2_PERFIS.length; G2_PERFIS.push({k:'Beto',t:'Beto · Agrônomo',papeis:{agronomo:'agrônomo'}},{k:'Gil',t:'Gil · Gestor',papeis:{gestor:'gestor'}});
   try{ cenReset(); const rev=cenGet().rev, nreq=Object.keys(cenGet().reqs).length; const o=ords().find(x=>x.id==='OS-0430');
     const rb=L(null,'OS-0430',P_('Beto'));
     ok('A8 NEGATIVO Beto (só agrônomo) libera a OS-0430: recusado no CMD-06 ("decisão de Ana (gestora) ou Gil (gestor)"), sem CMD-42/CMD-06 e sem reserva',
@@ -118,6 +118,6 @@ caso('A8 papéis separados',()=>{ G2_PERFIS.push({k:'Beto',t:'Beto · Agrônomo'
     const bb=osProx(o,P_('Beto')).b||{}, bo=osProx(o,P_('Gil')).b||{};
     ok('A8c a tela (osProx) não oferece "Liberar para execução" a quem tem só um dos papéis (pendência de papel)', !!bb.papel&&!!bo.papel, [bb,bo]);
     ok('A8d confirmação com Beto: "Beto (agrônomo) aprova esta versão e Ana (gestora) ou Gil (gestor) libera"', osLibTxt(P_('Beto'))==='Beto (agrônomo) aprova esta versão e Ana (gestora) ou Gil (gestor) libera', osLibTxt(P_('Beto')));
-  } finally { G2_PERFIS.splice(6); }
-  ok('A8e cadastro restaurado (6 perfis)', G2_PERFIS.length===6); });
+  } finally { G2_PERFIS.splice(n0); }
+  ok('A8e cadastro restaurado (7 perfis: João entrou na revisão do PCM de 09/10)', G2_PERFIS.length===7&&n0===7); });
 print('TOTAL '+R.length+' · falhas '+(ok.f||0));
