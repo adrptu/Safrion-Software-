@@ -65,10 +65,16 @@ M = [
  ('M56 S4 versão antes do "já feito" (toque repetido vira conflito)', "const quem = cenExige(ator, 'conferente', 'Conferir o balanço da ' + id); const o = benO(c, id);", "const quem = cenExige(ator, 'conferente', 'Conferir o balanço da ' + id); const o = benO(c, id); benVer(o, k);"),
  ('M57 S4 recusa do Liberar lote chama fruta de campo de lote do beneficiamento', "if (L.insp) throw new Error(lid + (L.benef ? ' é lote do beneficiamento (' + L.benef + ')' : ' tem a inspeção ' + L.insp)", "if (L.insp) throw new Error(lid + (true ? ' é lote do beneficiamento (' + L.benef + ')' : ' tem a inspeção ' + L.insp)"),
  # integração BEN na branch única (09/10): achados dos revisores
- ('M58 caixas da ordem nova pela sugestão, sem olhar o livre no Estoque', "return { sug, livre, cx: livre >= 1 && sug > livre ? livre : sug }; }", "return { sug, livre, cx: sug }; }"),
+ ('M58 caixas da ordem nova reduzidas ao livre (a falta some do planejamento; rodada 1, BEN-D23)', "return { sug, livre, cx: sug }; }", "return { sug, livre, cx: livre >= 1 && sug > livre ? livre : sug }; }"),
  ('M59 cancelar fora de A liberar (reserva e entrega soltas)', "if (o.etapa !== 'A liberar') throw new Error('Cancele só em A liberar", "if (false) throw new Error('Cancele só em A liberar"),
  ('M60 cancelar sem motivo', "if (!mot) throw new Error('Informe o motivo do cancelamento.');", ""),
  ('M61 ordem cancelada continua prendendo o lote', "o.id !== fora && o.etapa !== 'Encerradas' && o.etapa !== 'Canceladas' &&", "o.id !== fora && o.etapa !== 'Encerradas' &&"),
+ ('M63 falta de caixa sem a nota a conferir como saída (BEN-D23)', "const nf = benNfCx(c)[0] || null;", "const nf = null;"),
+ ('M64 nota de caixa já conferida continua oferecida como saída', "return (BENC.nfcx || []).filter(n => !feitas[n.rid]); }", "return (BENC.nfcx || []); }"),
+ ('M65 complemento de caixas sem reserva no Estoque (rodada 1, S3)', "  l.reservado += n; it.solicitado += n; const ins", "  it.solicitado += n; const ins"),
+ ('M66 complemento troca de lote com caixa em custódia', "    if (it.custodia > 1e-9 || pend > 1e-9) throw new Error('Pedir '", "    if (false) throw new Error('Pedir '"),
+ ('M67 recusa por custódia sem a saída (complemento da ordem)', "' já foi toda entregue. Peça mais caixas na ordem (\"Pedir mais caixas\"); '", "' já foi toda entregue. Peça a entrega no Estoque; '"),
+ ('M68 comando sobre ordem Cancelada vira "Já feito" (rodada 1, S4)', "function benViva(o, verbo) { if (o.etapa !== 'Canceladas') return;", "function benViva(o, verbo) { return;"),
  ('M62 cancelar sem perfil', "const quem = cenExigeUm(ator, ['producao', 'gestor'], 'Cancelar a ' + id);", "const quem = 'Igor (responsável de produção)';"),
 ]
 U = open(os.path.join(HERE, 'ben_unit.js'), encoding='utf-8').read()

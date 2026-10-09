@@ -163,7 +163,7 @@ function prPainel(self,v,P){ v.pp_open=!!P; P=P||{chip:['','gray']};
   v.pp_hasForm=!!P.form; v.pp_formT=P.form?P.form.t:''; v.pp_hasFormH=!!(P.form&&P.form.h); v.pp_formH=P.form?(P.form.h||''):''; v.pp_fields=P.form?P.form.fields:[];
   v.pp_hasErr=!!P.err; v.pp_err=P.err||''; v.pp_sec=P.sec||[];
   v.pp_hasPB=!!(P.prim&&P.prim.go); v.pp_hasPA=!!(P.prim&&P.prim.h&&!P.prim.go); v.pp_pt=P.prim?P.prim.t:''; v.pp_ph=(P.prim&&P.prim.h)||'#'; v.pp_pgo=(P.prim&&P.prim.go)||(()=>{});
-  v.pp_close=()=>self.setState({pr_pan:null,pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null}); v.pp_closeT=P.form?'Cancelar':'Fechar';
+  v.pp_close=()=>self.setState({pr_pan:null,pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null}); v.pp_closeT=P.form&&!P.form.aviso?'Cancelar':'Fechar';   /* form.aviso: recusa mostrada no lugar do formulário (nada a cancelar) */
   v.pp_key=(e)=>{ if(e&&e.key==='Escape'){ e.preventDefault(); v.pp_close(); } }; }
 /* executa um comando no estado (atômico) e mostra o resultado; erro fica no painel, junto da ação */
 function prRun(self,fn,ok){ const r=cenMudar(null,fn); if(r.erro){ self.setState({pr_err:r.erro,g2toast:''}); return r; }

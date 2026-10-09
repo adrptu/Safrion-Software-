@@ -16,21 +16,29 @@ F=lambda: H('false')
 NOMES=['Confira recebimentos','Entregue por O.S.','Receba devoluções','Confira saldos','Faça contagens','Acompanhe movimentos']
 
 # ---------------- constantes locais (coerentes com dados2/cenário) ----------------
-LOCAIS=['Galpão 1','Galpão 2','Câmara fria','Almox. defensivos']
+LOCAIS=['Galpão 1','Galpão 2','Câmara fria','Almox. defensivos','Packing']   # Packing: caixas do beneficiamento (CX26-01, NF 7731 · BEN-D23)
 LOCAL_REC={'KCl 60%':'Galpão 2','Semente de soja 58 W':'Câmara fria','Semente de soja 62 X':'Câmara fria'}
-PESSOAS=['Paula','Marcos','Carlos','João']
+PESSOAS=['Paula','Marcos','Carlos','João','Igor']   # Igor: quem executa a ordem de beneficiamento recebe as caixas no balcão (BEN-D13 → BEN-D23)
 # mesma palavra para a mesma pessoa em toda a tela: Rui é o almoxarife que entrega e recebe (cenario.js) e também conta
 CONTADORES=['Paula (almoxarife)','Rui (almoxarife)']
 CONDS=['Apta · volta ao disponível','Bloqueada para inspeção · vai para quarentena']
 DIVS=['Sem divergência','Falta','Sobra','Avaria','Item diferente do pedido']
 CAUSA_BASE={'INV-2609':'Sacaria rasgada na pilha 3'}
-SEM_VALIDADE=['Fertilizantes','Corretivos']    # grupos recebidos sem validade de lote
+SEM_VALIDADE=['Fertilizantes','Corretivos','Embalagens']    # grupos recebidos sem validade de lote (caixa do packing: BEN-D23)
 CONTADOR_BASE={'INV-2609':'Rui (almoxarife)','INV-2610':'Paula (almoxarife)'}
 # O.S. impedida (selo "Impedida" no cenário): a ordem de manutenção que impede vem do registro da manutenção
 IMPED={'OS-0420':dict(selo='O.S. impedida · OM-0233',
                       txt='OS-0420 impedida pela OM-0233 (Trator T1 bloqueado): entregue quando o ativo for liberado ou substituído na O.S.')}
 
 def _forn(fid): return next((f['nome'] for f in D2.FORNECEDORES if f['id']==fid),fid)
+# pedidos e notas que o Estoque recebe: os de Compras (dados2) e os de caixa do packing (dados_ben, BEN-D23: a compra de caixa é do BEN-2,
+# por isso o pedido não vem de Compras e a linha não leva o atalho "Ver pedido")
+def _pedidos():
+    import dados_ben as DB
+    return [dict(p,cmp=True) for p in D2.PEDIDOS]+[dict(p,cmp=False) for p in DB.PEDIDOS_CX]
+def _notas():
+    import dados_ben as DB
+    return list(D2.RECEBIMENTOS)+list(DB.NFS_CX)
 def _ped_label(p): return f"{p['id']} · {p['item']} · {_forn(p['f'])}"
 
 def bloco(titulo,desc,corpo,acao=''):
@@ -50,12 +58,13 @@ def navpe():
             + '</div>')
 
 def _dados_js():
-    peds=[dict(id=p['id'],item=p['item'],un=p['un'],grupo=p.get('grupo',''),forn=_forn(p['f']),a_entregar=p['a_entregar'],label=_ped_label(p)) for p in D2.PEDIDOS]
+    PS=_pedidos()
+    peds=[dict(id=p['id'],item=p['item'],un=p['un'],grupo=p.get('grupo',''),forn=_forn(p['f']),a_entregar=p['a_entregar'],label=_ped_label(p),cmp=p['cmp']) for p in PS]
     recs=[]
-    for r in D2.RECEBIMENTOS:
-        p=next(x for x in D2.PEDIDOS if x['id']==r['pedido']); prev='previsto' in r['data']
+    for r in _notas():
+        p=next(x for x in PS if x['id']==r['pedido']); prev='previsto' in r['data']
         recs.append(dict(id='r'+r['id'].split()[-1],nf=r['id'],data=('previsto '+r['data'].split()[0]) if prev else r['data'],ped=_ped_label(p),item=r['item'],un=r['un'],
-                         qtd_nf=r['qtd_nf'],conf=r['qtd_conf'],apto=r['apto'],quar=r['quarentena'],lote=r['lote'],val='',local=LOCAL_REC.get(r['item'],'Galpão 2'),
+                         qtd_nf=r['qtd_nf'],conf=r['qtd_conf'],apto=r['apto'],quar=r['quarentena'],lote=r['lote'],val='',local=r.get('local') or LOCAL_REC.get(r['item'],'Galpão 2'),
                          div='Sem divergência',obs=('Laudo de umidade pendente' if r['quarentena'] else ''),ok=r['qtd_conf'] is not None))
     chave={l['lote']:l['item']+'|'+l['lote'] for l in D2.LOTES}
     conts=[dict(id=c['id'],key=chave[c['lote']],sis=(c['sistema'] if c['contado'] is not None else None),cont=c['contado'],
@@ -65,7 +74,7 @@ def _dados_js():
 def build():
     fname='EST.dc.html'; E._reset_screen(fname)
     # ---------- etapa 1 · recebimentos (linhas: notas de base + recebimentos gravados no cenário) ----------
-    ped_opts=[_ped_label(p) for p in D2.PEDIDOS]
+    ped_opts=[_ped_label(p) for p in _pedidos()]
     # larguras (w) contidas: pedido, item e situação quebram em linhas e a grade cabe em 1440 px sem rolagem horizontal
     # TABELAS-FOCO (5983172395): uma variável por coluna em todas as etapas; a unidade fica junto da quantidade ("60.000 kg"):
     # decisão do proprietário de 05/10/2026 (mais intuitivo; filtrar unidade não gera valor). O valor tipado (v) continua número para ordenar
@@ -314,10 +323,10 @@ function estAprovar(c,inv,ator){ const rec=einvRec(c,inv); const l=rec&&c.lotes[
 // ---------- validação dos formulários (erro junto ao campo; o preenchido é mantido) ----------
 const ESTV={};
 ESTV.g_rec=(self,fm)=>{ const C=cenGet(); const e={}, d=fm.draft; const n=(k)=>g2num(d[k]); const conf=n('conf'), apto=n('apto'), quar=eblank(d.quar)?0:n('quar'), qnf=n('qtd_nf');
-  const p=epeds(C).find(x=>x.id===elotId(d.ped));
-  if(!isNaN(conf)&&!isNaN(apto)&&!isNaN(quar)&&Math.abs(apto+quar-conf)>1e-6) e.apto='Apta + quarentena deve somar a conferida ('+eq(conf,'kg')+').';
-  if(!isNaN(conf)&&!isNaN(qnf)&&Math.abs(conf-qnf)>1e-6&&d.div==='Sem divergência') e.div='A conferida difere da nota em '+eq(Math.abs(conf-qnf),'kg')+': indique a divergência.';
-  if(p&&!isNaN(conf)&&conf>p.a_entregar+1e-6&&d.div!=='Sobra') e.conf='Acima do saldo do pedido '+p.id+' ('+eq(p.a_entregar,'kg')+' a entregar): registre como sobra.';
+  const p=epeds(C).find(x=>x.id===elotId(d.ped)); const u=(p&&p.un)||'kg';
+  if(!isNaN(conf)&&!isNaN(apto)&&!isNaN(quar)&&Math.abs(apto+quar-conf)>1e-6) e.apto='Apta + quarentena deve somar a conferida ('+eq(conf,u)+').';
+  if(!isNaN(conf)&&!isNaN(qnf)&&Math.abs(conf-qnf)>1e-6&&d.div==='Sem divergência') e.div='A conferida difere da nota em '+eq(Math.abs(conf-qnf),u)+': indique a divergência.';
+  if(p&&!isNaN(conf)&&conf>p.a_entregar+1e-6&&d.div!=='Sobra') e.conf='Acima do saldo do pedido '+p.id+' ('+eq(p.a_entregar,u)+' a entregar): registre como sobra.';
   if(((!isNaN(quar)&&quar>0)||(d.div&&d.div!=='Sem divergência'))&&!String(d.obs||'').trim()) e.obs='Informe o motivo da quarentena ou da divergência.';
   const nfn=String(d.nf||'').replace(/\D/g,''); if(nfn){ const dup=erecs(C).find(r=>r.id!==fm.rid&&String(r.nf||'').replace(/\D/g,'')===nfn); if(dup) e.nf=dup.nf+' já foi lançada: documento duplicado não cria segunda entrada.'; }
   const lt=String(d.lote||'').trim(); const outro=Object.values(C.lotes).find(l=>l.lote===lt&&p&&l.prod!==p.item); if(outro) e.lote='O lote '+lt+' é de '+outro.prod+'. Use outro código de lote.';
@@ -394,7 +403,7 @@ function PREVALS(self,v){
     const r={id:x.id,ro:ok,v:{nf:x.nf,data:dt,cfd:cf,vali:eym(vl),ped:x.ped,forn:p?p.forn:'',item:x.item,un:x.un||'kg',qtd_nf:x.qtd_nf,conf:ok?x.conf:'',apto:ok?x.apto:'',quar:ok?x.quar:'',lote:x.lote,val:vl,local:x.local,div:x.div||'Sem divergência',obs:x.obs||''},s:{},p:{}};
     r.p.nf=[{k:'b',t:x.nf}]; r.s.nf=x.nf; r.s.data=dt?edmy(dt):''; r.p.data=[{k:dt?'txt':'mut',t:dt?edmy(dt):'—'}];
     r.s.cfd=cf?edmy(cf):''; r.p.cfd=[{k:cf?'txt':'mut',t:cf?edmy(cf):'—'}];
-    r.p.ped=p?[{k:'b',t:p.id},{k:'link',t:'Ver pedido',h:'CMP.dc.html'}]:[{k:'mut',t:'—'}]; r.s.ped=p?p.id:''; r.s.forn=p?p.forn:''; r.p.forn=[{k:'txt',t:p?p.forn:'—'}];
+    r.p.ped=p?[{k:'b',t:p.id}].concat(p.cmp?[{k:'link',t:'Ver pedido',h:'CMP.dc.html'}]:[]):[{k:'mut',t:'—'}]; r.s.ped=p?p.id:''; r.s.forn=p?p.forn:''; r.p.forn=[{k:'txt',t:p?p.forn:'—'}];
     r.p.item=[{k:'txt',t:x.item}]; r.s.item=x.item; r.s.lote=x.lote; r.s.vali=vl; r.p.vali=[{k:vl?'txt':'mut',t:vl||'—'}];
     ['qtd_nf','conf','apto','quar'].forEach(f=>{ const q=r.v[f]; r.p[f]=(q===''||q===null||q===undefined)?[{k:'mut',t:'—'}]:[{k:'txt',t:eq(q,r.v.un)}]; });
     // nota que ainda não chegou fica "Prevista"; conferida com lote vencido fica "Vencido" (não volta ao disponível)
@@ -404,7 +413,8 @@ function PREVALS(self,v){
     else if(quar>0) sit={k:'chip',t:'Quarentena liberada',c:'green'}; else sit={k:'chip',t:'Conferido',c:'green'};
     const dv=ok&&x.div&&x.div!=='Sem divergência'; r.p.sit=[sit]; r.s.sit=sit.t; r.v.divg=dv?x.div:''; r.p.divg=dv?[{k:'chip',t:x.div,c:'red'}]:[{k:'mut',t:'—'}]; r.s.divg=dv?x.div:''; return r; });
   const fmR=g2st(self,'g_rec').fm; const fV=GR('g_rec').edit.fields.find(f=>f.k==='val');
-  if(fmR){ const fe=efert(fmR.draft.ped); fV.ro=fe; fV.help=fe?'Fertilizantes e corretivos: sem validade de lote.':'Mês/ano (ex.: 06/2027). Lote vencido entra todo em quarentena.'; }
+  if(fmR){ const fe=efert(fmR.draft.ped); fV.ro=fe; fV.help=fe?'Fertilizantes, corretivos e embalagens: sem validade de lote.':'Mês/ano (ex.: 06/2027). Lote vencido entra todo em quarentena.';
+    const pu=(epedBase(fmR.draft.ped)||{}).un||'kg'; GR('g_rec').edit.fields.forEach(f=>{ if(['qtd_nf','conf','apto','quar'].indexOf(f.k)>=0) f.u=pu; }); }   /* a unidade é a do pedido (caixa em un) */
   // ---- etapa 2: entregas por O.S. ----
   let nent=0,nag=0,ncons=0,nimp=0;
   const eord=x=>(x.pode&&x.l&&x.pend>1e-9)?0:(x.pode?1:2);

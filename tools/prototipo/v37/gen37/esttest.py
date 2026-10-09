@@ -34,6 +34,12 @@ def parte1(E):
     print('toast:', E.toast()); E.ok(not E.aberto(), 'recebimento salvo com validade')
     t = E.rowtxt('NF 4533'); print('linha:', t); E.ok('Aguarda laudo' in t and '2.000 kg' in t and 'validade 03/2027' in t, 'linha mostra quarentena aguardando laudo e a validade')
     E.ok(E.cen("[c.lotes['Semente de soja 58 W|S58-0926'].fisico, c.lotes['Semente de soja 58 W|S58-0926'].quarentena]") == [20000, 2000], 'recebimento gravado no lote do cenário (20 t, 2 t em quarentena)')
+    # integração BEN, rodada 1 (BEN-D23): a NF 7731 das caixas do packing chegou e espera a conferência; com ela pendente o primário do bloco
+    # é "Conferir NF 7731" (o "Registrar recebimento" aparece com todas as notas conferidas). Embalagem: unidade un, sem validade, local Packing
+    print('abrir NF 7731:', E.row('NF 7731'))
+    E.ok(E.J("document.querySelector('#fx_g_rec_val').readOnly && document.querySelector('#fx_g_rec_val').value==='Sem validade' && document.querySelector('#fx_g_rec_local').value==='Packing'"), 'caixa (PC-096): validade travada em Sem validade, local Packing')
+    E.setv('fx_g_rec_conf', '1200'); E.setv('fx_g_rec_apto', '1200'); E.setv('fx_g_rec_quar', '0'); E.salvar(); tc = E.toast(); print('toast:', tc)
+    E.ok('Recebimento NF 7731 conferido: 1.200 un de Caixa de mamão Formosa 10 kg no lote CX26-02' in tc, 'NF 7731 conferida em un no lote CX26-02', tc)
     # documento duplicado · fertilizante sem validade
     E.clk('Registrar recebimento')
     E.ok(E.J("document.querySelector('#fx_g_rec_val').readOnly && document.querySelector('#fx_g_rec_val').value==='Sem validade'"), 'fertilizante (PC-088): validade travada em Sem validade')

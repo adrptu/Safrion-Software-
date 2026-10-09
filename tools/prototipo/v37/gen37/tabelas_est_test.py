@@ -83,7 +83,8 @@ try:
             filtra('Na nota', ['60.000 kg']); r1 = [r.get('NOTA FISCAL') for r in dicts()]
             chk('seção 1: filtro Na nota = "60.000 kg" (o menu oferece o texto da célula, com a unidade): só a NF 4501', r1 == ['NF 4501'], r1)
             limpa(); ordena('Data da nota'); o1 = [r.get('NOTA FISCAL') for r in dicts()]
-            chk('seção 1: ordenar Data da nota (data): NF 4501 (19/09) antes da NF 4533 (24/09)', o1 == ['NF 4501', 'NF 4533'], o1)
+            # integração BEN, rodada 1 (BEN-D23): a NF 7731 das caixas do packing (25/09, a conferir) entra na lista do Estoque
+            chk('seção 1: ordenar Data da nota (data): NF 4501 (19/09) antes da NF 4533 (24/09) e da NF 7731 das caixas (25/09)', o1 == ['NF 4501', 'NF 4533', 'NF 7731'], o1)
         if i == 2:
             its = sorted({r.get('ITEM') for r in d if r.get('ITEM')}); it0 = its[0] if its else ''
             filtra('Item', [it0]); r2 = [r for r in dicts() if r.get('ITEM')]
