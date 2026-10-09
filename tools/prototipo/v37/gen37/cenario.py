@@ -86,8 +86,9 @@ def seed():
 
 def js_prefixo():
     import dados_producao   # regras da produção (producao.js) em toda página do estado (D-22): O.S., Mapa, Estoque e app têm prPodeEncerrar
+    # análise de solo (SOLO-01): só as funções de solo.js (regras e comandos sobre c.solo); os dados (SOLO0) entram só no AG-02 e no Planejar safra
     return ('const CEN0 = ' + json.dumps(seed(), ensure_ascii=False).replace('</', '<\\/') + ';\n' + open(os.path.join(HERE, 'cenario.js'), encoding='utf-8').read() + '\n'
-            + dados_producao.js_regras())
+            + dados_producao.js_regras() + open(os.path.join(HERE, 'solo.js'), encoding='utf-8').read() + '\n')
 
 
 def perfis_js():

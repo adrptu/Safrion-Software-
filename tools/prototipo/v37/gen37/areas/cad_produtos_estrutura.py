@@ -33,15 +33,8 @@ def cd06():
     fname='CD-06.dc.html'; E._reset_screen(fname)
     it=_itens(); it.update(DC.ITENS_NOVOS)
     lotes={l['item']:l for l in D2.LOTES}
-    # preço de referência: o dos planos (última cotação homologada) e os extras; semente de cultivar usa o preço da semente da cultura no plano
-    preco={}
-    for p in D2.PLANOS:
-        for a in p['atividades']:
-            for x in a['prods']:
-                if 'do cultivo' in x['prod']: preco.setdefault('Semente de '+p['cultura'].lower(),x['preco'])
-                else: preco.setdefault(x['prod'],x['preco'])
-    preco.update(DC.PRECO_EXTRA)
-    def preco_de(n): return preco.get(n, next((v for k,v in preco.items() if k.startswith('Semente de ') and n.startswith(k+' ')),''))
+    # preço de referência: fonte única em dados_cad.preco_ref (planos + extras; semente de cultivar pelo preço da semente da cultura)
+    preco_de=DC.preco_ref
     # onde o item é usado nos planos (trava a unidade-base: a dose do plano é digitada nela)
     uso={}
     for p in D2.PLANOS:
@@ -65,9 +58,7 @@ def cd06():
         if n=='Café beneficiado': return D.LOTE_BLOQ['sc']
         if n=='Diesel S10': return 9800
         return D2.ESTOQUE.get(n,0)
-    gar={'MAP 11-52':'11% N · 52% P₂O₅','KCl 60%':'60% K₂O','Ureia 45%':'45% N','NPK 20-05-20':'20-05-20','Nitrato de cálcio':'15,5% N · 19% Ca','Nitrato de potássio':'13% N · 44% K₂O',
-         'Diesel S10':'densidade 0,85 kg/L a 20 °C','Soja em grão':'umidade-base 14%','Café beneficiado':'umidade-base 12%','Caixa de mamão 20 kg':'tara 1,2 kg',
-         'Calcário dolomítico':'PRNT 85%'}
+    gar={n:g['txt'] for n,g in DC.GARANTIA.items()}   # texto da garantia: fonte estruturada em dados_cad (SOLO-01, D-11)
     fmt=lambda x: f'{x:,.0f}'.replace(',','.')
     grupos={}; k=0
     for n,d in sorted(it.items(),key=lambda x:(x[1]['grupo'],x[0])):

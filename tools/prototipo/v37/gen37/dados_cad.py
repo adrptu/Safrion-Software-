@@ -151,8 +151,28 @@ EMB_ITEM={'Glifosato 480':('Galão',20),'2,4-D 806':('Galão',20),'Óleo mineral
           'Semente de feijão Pérola':('Saco',40),'Diesel S10':('Granel',''),'Soja em grão':('Granel',''),'Café beneficiado':('Saco',1),'Caixa de mamão 20 kg':('Pallet',60),
           'Calcário dolomítico':('Granel','')}
 PRECO_DATA='2026-09-15'   # preço de referência dos itens de plano (última cotação homologada)
-PRECO_EXTRA={'Diesel S10':6.19,'Caixa de mamão 20 kg':4.80}
+# Calcário dolomítico: R$ 180,00/t sintético (SOLO-01, D-10): sem preço, a calagem incluída pela análise daria custo 0 na safra e proposta de R$ 0 na Compra
+PRECO_EXTRA={'Diesel S10':6.19,'Caixa de mamão 20 kg':4.80,'Calcário dolomítico':180.0}
 ITENS_NOVOS={'Calcário dolomítico':dict(grupo='Corretivos',un='t')}   # corretivo: cadastrável, homologável e cotável
+def preco_ref(n):
+    """preço de referência (fonte única do CD-06 e da análise de solo): o dos planos (última cotação homologada) e os extras; a semente de
+    cultivar usa o preço da semente da cultura no plano. Sem preço: ''."""
+    if not hasattr(preco_ref,'_m'):
+        m={}
+        for p in D2.PLANOS:
+            for a in p['atividades']:
+                for x in a['prods']:
+                    if 'do cultivo' in x['prod']: m.setdefault('Semente de '+p['cultura'].lower(),x['preco'])
+                    else: m.setdefault(x['prod'],x['preco'])
+        m.update(PRECO_EXTRA); preco_ref._m=m
+    m=preco_ref._m
+    return m.get(n, next((v for k,v in m.items() if k.startswith('Semente de ') and n.startswith(k+' ')),''))
+# Garantia estruturada (SOLO-01, D-11): uma fonte para o texto do CD-06 (txt) e para a regra da análise de solo (PRNT do corretivo e
+# % de K₂O da fonte simples de potássio). Números em texto decimal (a regra usa a aritmética decimal pr*). Filler: PRNT 90 % sintético.
+GARANTIA={'MAP 11-52':dict(txt='11% N · 52% P₂O₅'),'KCl 60%':dict(txt='60% K₂O',k2o='60'),'Ureia 45%':dict(txt='45% N'),'NPK 20-05-20':dict(txt='20-05-20'),
+          'Nitrato de cálcio':dict(txt='15,5% N · 19% Ca'),'Nitrato de potássio':dict(txt='13% N · 44% K₂O'),'Diesel S10':dict(txt='densidade 0,85 kg/L a 20 °C'),
+          'Soja em grão':dict(txt='umidade-base 14%'),'Café beneficiado':dict(txt='umidade-base 12%'),'Caixa de mamão 20 kg':dict(txt='tara 1,2 kg'),
+          'Calcário dolomítico':dict(txt='PRNT 85%',prnt='85'),'Calcário dolomítico filler':dict(txt='PRNT 90%',prnt='90')}
 LOCAIS=[('l1','Galpão 1','Santa Rita','Galpão','',''),('l2','Galpão 2','Santa Rita','Galpão','',''),('l3','Almox. defensivos','Santa Rita','Almoxarifado','',''),
         ('l4','Câmara fria','Santa Rita','Câmara fria','',''),('l5','Tanque Sede','Santa Rita','Tanque',15000,'L'),('l6','Silo 01','Santa Rita','Silo',60000,'sc 60 kg'),
         ('l7','Armazém Sede','Santa Rita','Armazém','',''),('l8','Packing','Santa Rita','Packing','',''),('l9','Galpão Boa Vista','Boa Vista','Galpão','',''),

@@ -7,8 +7,9 @@ import time
 t=T(); J=t.J
 try:
     t.goto('CD-06.dc.html'); body=J("document.body.innerText")
-    t.chk('abre com a pendência do cadastro no cabeçalho e sem fatos do Estoque (quarentena, pedido)',
-          '1 item sem preço' in t.header() and 'Cadastrar item' in t.bloco() and 'quarentena' not in body and 'PC-088' not in body and not t.errs(), t.header())
+    # SOLO-01 (D-10): o Calcário dolomítico ganhou preço de referência (R$ 180,00/t) e data; o selo abre sem pendência de preço
+    t.chk('abre sem pendência de preço no cabeçalho e sem fatos do Estoque (quarentena, pedido)',
+          'sem preço' not in t.header() and 'Cadastrar item' in t.bloco() and 'quarentena' not in body and 'PC-088' not in body and not t.errs(), t.header())
     r=t.rowtxt(0,'KCl 60%'); t.openrow(0,'KCl 60%'); dk=t.dlg(); t.cancel()
     t.chk('item mostra unidade + embalagem, controle e preço com data; o saldo fica no painel com "Ver saldo no Estoque"',
           all(x in r for x in ['kg big bag de 1.000 kg','Só lote','R$ 2,40/kg','15/09/2026']) and 'Ver saldo no Estoque' in dk and 'Saldo: 50.000 kg' in dk, [r,dk[-200:]])
@@ -23,7 +24,7 @@ try:
     t.openrow(0,'Ureia 45%'); d=t.dlg()
     t.chk('Ureia sem saldo mas em plano: unidade travada pelo plano', t.fdis('un') and 'Travada: usado no plano Milho safrinha' in d, d[:300])
     t.cancel()
-    t.openrow(0,'Calcário dolomítico'); L=t.labels(); t.fset('preco','480'); t.btn('Salvar'); a=t.alerts()
+    t.openrow(0,'Calcário dolomítico'); L=t.labels(); t.fset('preco','480'); t.fset('pdata',''); t.btn('Salvar'); a=t.alerts()   # SOLO-01: o calcário já tem data; limpa para testar a trava
     t.chk('Calcário (granel): sem campo de conteúdo; preço sem data é barrado junto ao campo', 'Conteúdo da embalagem' not in L and 'Informe a data do preço.' in a, [L,a])
     t.fset('pdata','2026-09-20'); t.btn('Salvar'); time.sleep(.2)
     t.chk('preço salvo com data e a pendência some do cabeçalho', 'R$ 480,00/t' in (t.rowtxt(0,'Calcário') or '') and '20/09/2026' in (t.rowtxt(0,'Calcário') or '') and 'Cadastro completo' in t.header(), [t.rowtxt(0,'Calcário'),t.header()])

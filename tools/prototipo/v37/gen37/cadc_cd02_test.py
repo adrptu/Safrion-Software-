@@ -64,7 +64,7 @@ try:
     t.goto('CD-06.dc.html'); r=t.rowtxt(0,'Semente de soja 64 Z') or ''
     t.chk('os itens criados pelas cultivares (64 Z e BRS 373) aparecem em Produtos › Sementes, pendentes de preço e embalagem',
           'sem embalagem' in r.lower() and 'sem preço' in r.lower() and t.rowtxt(0,'Semente de sorgo BRS 373') and 'Sementes 6 itens' in (t.anyrow(0,'Sementes 6') or '')
-          and '3 itens sem preço · 2 itens sem embalagem' in t.header(), [r,t.anyrow(0,'Sementes'),t.header()])
+          and '2 itens sem preço · 2 itens sem embalagem' in t.header()   # SOLO-01 (D-10): o Calcário dolomítico tem preço, [r,t.anyrow(0,'Sementes'),t.header()])
     t.chk('nenhum erro de JS na jornada', not t.errs(), t.errs())
 finally:
     t.fim()

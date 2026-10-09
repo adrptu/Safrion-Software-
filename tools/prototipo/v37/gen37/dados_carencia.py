@@ -141,6 +141,12 @@ def _produtos():
         if x['item'] not in out:
             out[x['item']] = dict(ingr='', classe=x['grupo'], defn=any(x['grupo'].startswith(g) for g in DEF + ('Herbicidas', 'Fungicidas', 'Inseticidas')),
                                   adj=False, ficha='', usos={})
+    # itens cadastrados fora dos planos, com o grupo declarado no CD-06 (SOLO-01, A4): o Calcário dolomítico da calagem incluída pela análise
+    # de solo é corretivo, fora do registro de agrotóxico (sem isto, a O.S. dele contava como agrotóxico sem registro e nunca liberava)
+    import dados_cad as DC
+    for n, x in DC.ITENS_NOVOS.items():
+        if n not in out:
+            out[n] = dict(ingr='', classe=x['grupo'], defn=any(x['grupo'].startswith(g) for g in DEF), adj=False, ficha='', usos={})
     return out
 
 
