@@ -1,0 +1,36 @@
+{
+ "arquivo": "tools/prototipo/v37/gen37/safra.js",
+ "N": 10000,
+ "semente": 777,
+ "python": true,
+ "estatistica": {
+  "vistas": 29996,
+  "pares": 0,
+  "celulas": 299009,
+  "fora_outras": 3196,
+  "oc_fora": 23065,
+  "cen_mesmo_periodo": 4721,
+  "cen_fechada": 4357,
+  "cen_outra_faz": 2947,
+  "Rs": {
+   "R2": 13095,
+   "R4": 4697,
+   "R5": 1454,
+   "R1": 8501,
+   "R3": 716,
+   "R0": 1533
+  }
+ },
+ "cobertura": {
+  "a_oraculo": 299009,
+  "a_pares_celulas": 167082,
+  "a_pares_mesmo_periodo_celulas_com_fora": 3345,
+  "b_fontes": 158452,
+  "c_grupos": 2018,
+  "c_vistas_com_grupo": 1861,
+  "d_vistas_fechadas": 5396,
+  "d_vistas_com_outra_faz": 10679,
+  "e_celulas": 299009
+ },
+ "falhas": {}
+}

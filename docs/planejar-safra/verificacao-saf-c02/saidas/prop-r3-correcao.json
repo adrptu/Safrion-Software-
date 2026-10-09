@@ -1,0 +1,16 @@
+{
+ "views": 998,
+ "viewsComCargaPertinenteFora": 204,
+ "falhas": {
+  "cons": 0,
+  "verde": 0,
+  "cita": 0,
+  "sim": 0
+ },
+ "ex": {
+  "cons": [],
+  "verde": [],
+  "cita": [],
+  "sim": []
+ }
+}
