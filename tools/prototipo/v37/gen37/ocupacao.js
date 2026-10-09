@@ -65,6 +65,10 @@ function ocOcupacoes(ctx,safras,cults){ const recs=[], vistos={};
 function ocIntersec(a0,a1,b0,b1){ const x0=Math.max(a0,b0), x1=Math.min(a1,b1); return x0<x1?[x0,x1]:null; }
 function ocCmp(a,b){ return (a.plantio-b.plantio)||(a.id<b.id?-1:(a.id>b.id?1:0)); }
 // R-14 trava e R-15 pendência entre as ocupações de um talhão de área T. A pendência fica na de plantio mais tardio.
+// Soma no tempo por eventos (SAF-C01): os núcleos ativos só mudam em plantio, plantio + 1 e fim do núcleo (com folga), e os períodos previstos
+// em início e liberação (est). Entre dois pontos seguidos nada muda: cada trecho é avaliado uma vez, sem horizonte (o teto antigo, d0 + 900
+// dias, deixava uma perene ou ocupação antiga esconder a soma de anos depois). Depois do último ponto só ficam perenes, com núcleo igual ao
+// previsto: dá trava ou nada, nunca pendência; por isso o último trecho conta 1 dia.
 function ocAvalia(ctx,occs,T,alvo){ const trav=[], pend={}; const oc=occs.slice().sort(ocCmp); const add=(k,x)=>{ (pend[k]||(pend[k]=[])).push(x); };
   for(let i=0;i<oc.length;i++){ const A=oc[i]; for(let j=i+1;j<oc.length;j++){ const B=oc[j];
     if(A.ciclo===B.ciclo) continue; if(alvo&&alvo!==A.id&&alvo!==B.id) continue; if(!ocMesmaArea(A,B)) continue;
@@ -72,17 +76,20 @@ function ocAvalia(ctx,occs,T,alvo){ const trav=[], pend={}; const oc=occs.slice(
     if((ocComPlano(A)||ocComPlano(B))&&ocIntersec(A.plantio,ocNucLib(A),B.plantio,ocNucLib(B))){ trav.push(['faixa',A.id,B.id,B.plantio]); continue; }
     const kind={plano:'prevista',informada:'prevista',observado:'prevista',estimado:'provavel',semdata:'naoconf'}[A.classe];
     if(kind){ const fimA=ocLib(ctx,A,kind==='naoconf'?'pior':'est'); const r=ocIntersec(A.ini,fimA,B.ini,ocLib(ctx,B,'est')); if(r) add(B.id,[kind,A.id,r[0],r[1]-1,r[1]-r[0]]); } } }
-  if(occs.length){ const d0=ocMin(occs.map(o=>o.ini)); const d1=ocMax(occs.map(o=>Math.min(ocLib(ctx,o,'est'),d0+900)));
+  if(occs.length){ const pts=new Set();
+    occs.forEach(o=>{ [o.plantio,o.plantio+1,ocNucLib(o),o.ini,ocLib(ctx,o,'est')].forEach(x=>{ if(x<OC_INF) pts.add(x); }); });
+    const xs=Array.from(pts).sort((p,q)=>p-q);
     const visT={}, visP={}, ordP=[]; const sum=(l)=>l.reduce((s,o)=>s+o.area,0);
     const cruz=(l)=>l.some((a,k)=>l.slice(k+1).some(b=>ocMesmaArea(a,b)&&a.ciclo!==b.ciclo));
     const ult=(l)=>l.reduce((m,o)=>(!m||ocCmp(o,m)>0)?o:m,null);
-    for(let x=d0;x<=d1;x++){ const nu=occs.filter(o=>ocNucAtivo(o,x));
+    for(let i=0;i<xs.length;i++){ const x=xs[i], n=(i+1<xs.length?xs[i+1]:x+1)-x; const nu=occs.filter(o=>ocNucAtivo(o,x));
       if(sum(nu)>T+0.005&&nu.some(ocComPlano)&&!cruz(nu)){ const last=ult(nu);
         if(!alvo||nu.some(o=>o.id===alvo)){ const k=nu.filter(o=>o!==last).map(o=>o.id).sort().join('+'); const kk=k+'>'+last.id; if(!visT[kk]){ visT[kk]=1; trav.push(['soma',k,last.id,x,ocR2(sum(nu))]); } } }
       else { const pv=occs.filter(o=>o.ini<=x&&x<ocLib(ctx,o,'est'));
-        if(sum(pv)>T+0.005&&!cruz(pv)){ const last=ult(pv); const key=last.id+'>'+pv.filter(o=>o!==last).map(o=>o.id).sort().join('+'); if(!visP[key]){ visP[key]=[]; ordP.push(key); } visP[key].push(x); } } }
-    ordP.forEach(key=>{ const i=key.indexOf('>'); const lid=key.slice(0,i), causa=key.slice(i+1); const dias=visP[key];
-      if(alvo&&alvo!==lid&&causa.split('+').indexOf(alvo)<0) return; add(lid,['soma',causa,dias[0],dias[dias.length-1],dias.length]); }); }
+        if(sum(pv)>T+0.005&&!cruz(pv)){ const last=ult(pv); const key=last.id+'>'+pv.filter(o=>o!==last).map(o=>o.id).sort().join('+');
+          if(!visP[key]){ visP[key]=[x,x,0]; ordP.push(key); } const v=visP[key]; v[1]=x+n-1; v[2]+=n; } } }
+    ordP.forEach(key=>{ const i=key.indexOf('>'); const lid=key.slice(0,i), causa=key.slice(i+1); const v=visP[key];
+      if(alvo&&alvo!==lid&&causa.split('+').indexOf(alvo)<0) return; add(lid,['soma',causa,v[0],v[1],v[2]]); }); }
   return [trav,pend]; }
 // ---------- tabela da etapa 2 ----------
 // safra {id, ini, fim, faz, ro}; talhoes [[nome, área]] na ordem do CD-01; occ = ocOcupacoes de todas as safras; safras {id: safra}
@@ -114,16 +121,20 @@ function ocTabela(ctx,safra,occ0,talhoes,safras){ const sid=safra.id, a=ocDia(sa
     const vis=fora.filter(o=>!(nomes[o.faixa]||inteiro)||adj.indexOf(o.id)>=0).sort((x,y)=>(x.ini-y.ini)||(x.id<y.id?-1:(x.id>y.id?1:0)));
     let nl; if(!own.length) nl=vis.length<=1?1:1+vis.length; else if(own.length===1&&own[0].tipo!=='Parcela'&&!vis.length) nl=1; else nl=1+own.length+vis.length;
     const resid=T-A-livre-conf; const per=resid>0.005?Math.min(resid,fora.filter(o=>o.classe==='perene').reduce((s,o)=>s+o.area,0)):0;
+    // excesso (SAF-C01): a maior soma certa acima da área nas travas de soma. Fica fora da partição da faixa (que soma T, R-09: a Perene vai
+    // só até o resíduo) e aparece no texto da faixa, para a sobreposição não sumir no resumo
+    const exc=ocR2(Math.max(0,tr.reduce((m,x)=>x[0]==='soma'?Math.max(m,x[4]):m,T)-T));
     const editavel=!safra.ro;
     const vinc=fora.filter(o=>o.classe==='perene'&&editavel&&!o.safs.some(s2=>safras[s2]&&ocDia(safras[s2].ini)<=b&&ocDia(safras[s2].fim)>=a)).map(o=>o.id);
-    linhas.push({t,T,A:ocR2(A),sit,livre:ocR2(livre),conf:ocR2(conf),area_livre:ocR2(livre+conf),desde,est,own,fora,vis,seq,pend:pe,pend_own:pendOwn,trav:tr,fix,linhas:nl,vinc,planejar:(livre+conf>0.005&&editavel)});
+    linhas.push({t,T,A:ocR2(A),sit,livre:ocR2(livre),conf:ocR2(conf),area_livre:ocR2(livre+conf),desde,est,own,fora,vis,seq,pend:pe,pend_own:pendOwn,trav:tr,exc,fix,linhas:nl,vinc,planejar:(livre+conf>0.005&&editavel)});
     band.nesta+=A; band.livre+=livre; band.conf+=conf; band.perene+=Math.max(per,0); band.ocup+=Math.max(resid-per,0); });
   Object.keys(band).forEach(k=>{ band[k]=ocR2(band[k]); });
   return [linhas,band]; }
 function ocChips(linhas){ const c={}; linhas.forEach(v=>{ c[v.sit]=(c[v.sit]||0)+1; }); return c; }
 function ocSucessoes(linhas){ return linhas.filter(v=>v.sit==='A conferir'&&v.conf<=0.005).length; }
 function ocFaixaTxt(band,linhas,tot){ const p=['Nesta safra '+ocHa(band.nesta)].concat([['Livre','livre'],['A conferir','conf'],['Perene','perene'],['Ocupado','ocup']].filter(([r,k])=>band[k]>0.005).map(([r,k])=>r+' '+ocHa(band[k])));
-  const s=ocSucessoes(linhas); return p.join(' · ')+' · de '+ocHa(tot)+' ha'+(s===1?' · 1 sucessão a conferir':(s?' · '+s+' sucessões a conferir':'')); }
+  const s=ocSucessoes(linhas); const ex=ocR2(linhas.reduce((q,v)=>q+(v.exc||0),0));
+  return p.join(' · ')+' · de '+ocHa(tot)+' ha'+(ex>0.005?' · '+ocHa(ex)+' ha em sobreposição':'')+(s===1?' · 1 sucessão a conferir':(s?' · '+s+' sucessões a conferir':'')); }
 // ---------- salvar: trava, pendência nova e aviso (R-14, R-15) ----------
 function ocPendNovas(antes,depois){ const out={}; const eq=(p,q)=>p.length===q.length&&p.every((x,i)=>x===q[i]);
   Object.keys(depois).forEach(k=>{ const n=depois[k].filter(p=>!(antes[k]||[]).some(q=>eq(p,q))); if(n.length) out[k]=n; }); return out; }
@@ -158,9 +169,11 @@ function ocMsgTrava(ctx,chk,sid,T,pmin){ const o=chk.o, tr=chk.trav; const by={}
   if(tipos.indexOf('safra')>=0||tipos.indexOf('soma')>=0){
     const outros=chk.mesmo.filter(x=>x!==o&&ocIntersec(o.ini,ocLib(ctx,o,'est'),x.ini,ocLib(ctx,x,'est')));
     if(outros.length){ const ini=ocMax([o.ini].concat(outros.map(x=>x.ini))); const fim=ocMin([o.fim!==null?o.fim:o.plantio].concat(outros.filter(x=>x.fim!==null).map(x=>x.fim)));
-      let pior=-Infinity; for(let k=0;k<Math.max(1,fim-ini+1);k++){ const s=outros.filter(x=>x.ini<=ini+k&&ini+k<ocLib(ctx,x,'est')).reduce((q,x)=>q+x.area,0); if(s>pior) pior=s; }
+      // maior soma dos outros nos dias ini..ate: só muda no início e na liberação de cada um (SAF-C01; o laço dia a dia ia até 10^8 com perenes)
+      const ate=ini+Math.max(1,fim-ini+1)-1; const pts=[ini].concat(outros.map(x=>x.ini),outros.map(x=>ocLib(ctx,x,'est'))).filter(d=>ini<=d&&d<=ate);
+      const pior=ocMax(pts.map(d=>outros.filter(x=>x.ini<=d&&d<ocLib(ctx,x,'est')).reduce((q,x)=>q+x.area,0)));
       const quem=outros.map(x=>x.cult+' ('+x.faixa+', '+x.safnome+')').join(' e ');
-      return 'De '+ocBr(ini)+' a '+ocBr(fim)+', '+ocHa(pior)+' ha de '+o.t+' estão com '+quem+'. Máximo '+ocHa(Math.max(0,T-pior))+' ha nesse período.'; }
+      return (fim>=OC_INF?'A partir de '+ocBr(ini):'De '+ocBr(ini)+' a '+ocBr(fim))+', '+ocHa(pior)+' ha de '+o.t+' estão com '+quem+'. Máximo '+ocHa(Math.max(0,T-pior))+' ha nesse período.'; }
     const s=(tr.find(x=>x[0]==='safra')||[0,0,0,0,0])[4];
     return 'As áreas de '+o.t+' nesta safra somariam '+ocHa(s)+' ha; o talhão tem '+ocHa(T)+' ha (livre: '+ocHa(Math.max(0,T-(s-o.area)))+' ha).'; }
   const ob=tr.find(x=>x[0]==='observado');

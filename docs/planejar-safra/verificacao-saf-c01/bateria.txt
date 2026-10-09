@@ -1,0 +1,15 @@
+# SAF-C01 · bateria executada em 2026-10-09 na worktree claude/v44-saf-c01 (base ecc8b00), ocupacao.js sha256 e5c3759e16e7d21a96b7dad6cbf63ba5a77059e15708958c4ff9155597d1ed37
+python3 build.py > /tmp/SAFC01-build.log → rc=0 · grep -c FALHA = 0 · 140 artboards → /home/user/sp-safc01/tools/prototipo/v37/gen37/project · menu vigente: 45 · ocultos: 95
+python3 montar_render.py → rc=0 · _render montado: 140 páginas + 20 arquivos do site · dados reais locais: 5/5
+python3 ocupacao_unit.py → rc=0 · RESULTADO: 117 OK · 0 FALHA
+saf_c01_test.py (navegador) → rc=0 · RESULTADO: 38 ok · 0 falhas (tudo)
+# demais (navegador com: env CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdpF.lock env CDP_GL=1 SAFRION_DADOS=sintetico timeout 900 python3 <teste>)
+capacidade_unit.py rc=0 9s RESULTADO: 76 OK · 0 FALHA
+rend_multiconjuntos_unit.py rc=0 2s RESULTADO: 106/106 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+varredura.py rc=0 362s RESULTADO: 140/140 páginas sem erro
+ocupacao_test.py rc=0 111s RESULTADO: 65 ok · 0 falhas (tudo)
+saf_revisao_test.py rc=0 156s RESULTADO: 42 ok · 0 falhas
+saf_operacoes_test.py rc=0 169s RESULTADO: 87 ok · 0 falhas (tudo)
+tabelas_saf_test.py rc=0 47s RESULTADO: 24/24 ok
+partest.py rc=0 85s RESULTADO: 46 ok · 1 falhas
+partest.py: a falha é o vermelho conhecido da base "T1-C copia ajuste do T1-B" (o partest sai com rc=0 mesmo com falha)
