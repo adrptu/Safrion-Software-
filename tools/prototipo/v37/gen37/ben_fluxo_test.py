@@ -9,7 +9,9 @@ Modos (um por vez, cada um abre o Chrome headless do cadc_lib.T; o cenário come
   erros    recusas e repetição pela tela: perfil sem papel recusado sem gravar; massa pesada acima da entrada; caixas acima da custódia;
            estorno com motivo e relançamento herdado; justificativa acima da alçada decide a gestão; toque duplo no Registrar grava uma vez;
            formulário aberto em versão antiga recebe conflito; navegar (atalhos) nunca grava.
-  celular  390 × 844: cartões, sem rolagem lateral, ação primária visível e painel inteiro (BEN e Estoque de produto).
+  celular  390 × 844: cartões, sem rolagem lateral, ação primária visível e painel inteiro (BEN e Estoque de produto); fluxo a 390 px:
+           Concluir e Conferir com o aviso da mudança de fase visível, Fechar recusado com a causa no painel, toque duplo no Retirar
+           grava uma vez e Autorizar e liberar recusado sem gravar.
 Uso: env CHROME_BIN=… flock /tmp/cdpB.lock env CDP_GL=1 timeout 900 python3 ben_fluxo_test.py [fluxo|erros|celular]
 Capturas em _probe/ben_*.png. Dados sintéticos (SAFRION_DADOS=sintetico)."""
 import sys, os, time, json
@@ -52,6 +54,7 @@ def shot(n): t.c.shot(os.path.join(PR, 'ben_' + n + '.png'))
 def cen(expr): return J(f"(()=>{{ const c=CEN()||(window.__cen?window.__cen.cenGet():{{}}); return ({expr}); }})()")   # nada gravado ainda: lê o cenário inicial pelo cenGet
 def perfil(k): J(f"PERFIL({json.dumps(k)})"); time.sleep(.1)
 def rev(): return cen("c.rev||0")
+CHIP = "(()=>{ const a=[...document.querySelectorAll('aside[role=dialog]')].find(VIS); const h=a&&a.querySelector('h2'); const b=h&&h.parentElement.querySelector('span[style*=\"border-radius\"]'); return b?N(b.innerText):''; })()"
 FAIXA = "[...document.querySelectorAll('nav[aria-label=\"Telas de recebimento e beneficiamento\"] a')].map(a=>[N(a.innerText),a.getAttribute('href'),a.getAttribute('aria-current')])"
 def nav_clk(x, root):   # toque que navega (link): conta o toque e recarrega o apoio na página nova
     cl, tx = J("[window.__cl||0, window.__tx||0]") or [0, 0]; r = J(f"CLK({json.dumps(x)},{json.dumps(root)})"); time.sleep(1.4); lib(); J(f"window.__cl={cl + 1}; window.__tx={tx};"); return r
@@ -86,13 +89,17 @@ try:
         perfil('Igor'); r0 = rev(); clk('Autorizar rota e liberar · OB-0112'); p = pan()
         t.chk('(2) painel da OB-0112 lista as duas causas antes do toque, cada uma com dono e atalho', 'L39-119 em inspeção (INSP-94) · Marta (qualidade)' in p and 'Caixa de mamão Formosa 10 kg: 540 un disponíveis para 881 un · Estoque' in p
               and 'Receber a devolução da OB-0110 no Estoque' in p and 'Retirar L39-119 da ordem' in p, p[:900])
+        t.chk('(2) OB-0112 A liberar: balanço sem diferença nem recuperação antes de começar ("Entrada a processar"; nada "acima da faixa" nem 100,00 %)',
+              'Entrada a processar' in p and 'acima da faixa' not in p and '100,00 %' not in p and 'Em processo 0 kg' not in p, p[p.find('BALANÇO'):][:300] if 'BALANÇO' in p else p[:600])
         clk('Autorizar rota e liberar', 'aside'); p = pan()
         t.chk('(2) "Autorizar rota e liberar" recusa com as 2 causas; nada gravado (fase e revisão iguais)', 'Liberação recusada · 2 causas' in p and cen("c.ordens['OB-0112'].etapa") == 'A liberar' and rev() == r0, [p[-400:], rev(), r0])
         clk('Fechar', 'aside')
         # (3) OB-0110: concluir, conferir (Paula), fechar recusado pela custódia
         row('OB-0110'); p = pan()
         t.chk('(3) OB-0110 Em execução: balanço com as razões de K01 (A 80,00 %, B 15,00 %, descarte 5,00 %, recuperação 95,00 %) e primária "Concluir execução"', all(x in p for x in ('80,00 %', '15,00 %', '5,00 %', '95,00 %')) and J("PPRIM()") == ['Concluir execução'] and 'Fechar processo' not in p, [J("PPRIM()"), p[:600]])
-        clk('Concluir execução', 'aside'); et = cen("c.ordens['OB-0110'].etapa")
+        clk('Concluir execução', 'aside'); et = cen("c.ordens['OB-0110'].etapa"); tc = toast(); ch = J(CHIP)
+        t.chk('(3) retorno da mudança de fase: o aviso diz "OB-0110 em conferência" com a diferença e quem confere; o selo do painel passa a "Em conferência"',
+              'OB-0110 em conferência' in tc and 'Paula (conferência) confere o balanço' in tc and ch == 'Em conferência', [tc, ch])
         perfil('Paula'); clk('Conferir balanço', 'aside'); cf = cen("(c.ordens['OB-0110'].ben.conf||{}).quem")
         t.chk('(3) Concluir (Igor) → Em conferência; Conferir balanço gravado em nome da Paula (conferência), diferença 0', et == 'Em conferência' and cf == 'Paula (conferência)', [et, cf, toast()])
         perfil('Igor'); clk('Fechar processo', 'aside'); p = pan()
@@ -156,6 +163,9 @@ try:
         clk('Pesagem refeita', 'aside'); clk('Confirmar estorno de S-02', 'aside'); p = pan(); st = cen("[c.ordens['OB-0110'].ben.sai[1].estorno&&c.ordens['OB-0110'].ben.sai[1].estorno.motivo, c.reqs['REQ-030'].itens[0].custodia, c.movs.slice(-1)[0].tipo]")
         t.chk('estorno com motivo: S-02 riscada, 180 cx voltam à custódia (240), MV estorno-consumo; o relançamento abre herdando fluxo e classe', st == ['Pesagem refeita', 240, 'estorno-consumo'] and 'relançar s-02' in p.lower()
               and J("[...document.querySelectorAll('aside button[aria-pressed=true]')].map(b=>N(b.innerText)).join('|')") == 'Produto|B', [st, J("[...document.querySelectorAll('aside button[aria-pressed=true]')].map(b=>N(b.innerText)).join('|')"), p[p.lower().find('relançar'):][:120]])
+        bl = J("(()=>{ const a=[...document.querySelectorAll('aside[role=dialog]')].find(VIS); const s=a&&[...a.querySelectorAll('section')].find(x=>/balanço de massa/i.test(x.getAttribute('aria-label')||'')); return s?N(s.innerText):''; })()") or ''
+        t.chk('em execução com 1.800 kg ainda não registrados: o balanço mostra "Em processo" e a diferença "apurada no Concluir" (não "acima da faixa")',
+              'Em processo 1.800 kg' in bl and 'apurada no Concluir' in bl and 'acima da faixa' not in bl, bl)
         setv('#pf_cx', '180'); setv('#pf_br', '1808'); J("(()=>{ const b=[...document.querySelectorAll('aside button')].find(x=>N(x.innerText)==='Registrar'); b.click(); b.click(); })()"); time.sleep(.6)
         n = cen("c.ordens['OB-0110'].ben.sai.filter(s=>!s.estorno).length"); nm = cen("c.movs.filter(m=>m.tipo==='consumo').length")
         t.chk('toque duplo no Registrar (mesma chave): 1 registro novo e 1 MV de consumo', n == 3 and nm == 1, [n, nm, toast()])
@@ -185,6 +195,23 @@ try:
               "a.scrollTop=a.scrollHeight; const br=b&&b.getBoundingClientRect(); return {w:Math.round(r.width), fora:r.left<-1||r.right>innerWidth+1, prim:!!b&&br.bottom<=innerHeight+1&&br.top>=0}; })()")
         t.chk('painel da OB-0110 a 390 px: largura toda, sem corte, primária "Concluir execução" alcançável', d and d['w'] >= 380 and not d['fora'] and d['prim'], d)
         shot('celular_painel')
+        # fluxo a 390 px: avançar (Concluir, Conferir), recusa (Fechar com caixas em custódia) e repetição (toque duplo no Retirar)
+        TV = "(()=>{ const e=[...document.querySelectorAll('[role=status]')].find(x=>N(x.innerText)); if(!e) return null; const r=e.getBoundingClientRect(); return r.top>=0&&r.bottom<=innerHeight&&r.left>=0&&r.right<=innerWidth; })()"
+        perfil('Igor'); r0 = rev(); clk('Concluir execução', 'aside'); tc = toast(); ch = J(CHIP); tv = J(TV)
+        t.chk('390 px · Concluir: o aviso "OB-0110 em conferência" aparece inteiro na tela e o selo do painel muda para "Em conferência"', 'OB-0110 em conferência' in tc and ch == 'Em conferência' and tv and rev() == r0 + 1, [tc, ch, tv])
+        perfil('Paula'); clk('Conferir balanço', 'aside'); tc = toast()
+        t.chk('390 px · Conferir balanço gravado pela Paula; o aviso diz o próximo passo', 'conferido por Paula (conferência)' in tc and 'Próximo passo: Fechar processo' in tc, tc)
+        perfil('Igor'); r1 = rev(); clk('Fechar processo', 'aside'); p = pan()
+        vis = J("(()=>{ const a=[...document.querySelectorAll('aside[role=dialog]')].find(VIS); const e=a&&[...a.querySelectorAll('[role=alert]')].find(VIS); if(!e) return null; e.scrollIntoView({block:'nearest'}); const r=e.getBoundingClientRect(); return r.left>=0&&r.right<=innerWidth+1; })()")
+        t.chk('390 px · Fechar recusado: "Não gravado" com a causa (caixas em custódia) no painel, sem corte; nada gravado', 'não gravado' in p.lower() and 'Sobra em custódia: Caixa de mamão Formosa 10 kg 60 un' in p and vis and rev() == r1 and cen("c.ordens['OB-0110'].etapa") == 'Em conferência', [vis, rev(), r1, p[:900]])
+        clk('Fechar', 'aside')
+        J("(()=>{ const k=[...document.querySelectorAll('.pr-card')].find(x=>N(x.innerText).indexOf('OB-0112')>=0); k&&k.click(); })()"); time.sleep(.6)
+        r2 = rev(); J("(()=>{ const a=[...document.querySelectorAll('aside[role=dialog]')].find(VIS); const b=a&&[...a.querySelectorAll('button')].find(x=>N(x.innerText)==='Retirar L39-119 da ordem'); if(b){ b.click(); b.click(); } })()"); time.sleep(.6)
+        st = cen("[c.ordens['OB-0112'].versao, c.ordens['OB-0112'].ben.ent.map(e=>e.lote).join(','), c.ordens['OB-0112'].ben.hist.filter(h=>/Entrada retirada/.test(h.ev)).length]")
+        t.chk('390 px · toque duplo em "Retirar L39-119 da ordem": uma retirada só (v2, uma linha no histórico, revisão +1)', st == ['v2', 'L39-117,L39-118', 1] and rev() == r2 + 1, [st, rev(), r2, toast()])
+        r3 = rev(); clk('Autorizar rota e liberar', 'aside'); p = pan()
+        t.chk('390 px · Autorizar e liberar recusado por 1 causa (540 un livres para 584 un) com atalho de devolução; nada gravado', 'Liberação recusada · 1 causa' in p and '540 un disponíveis para 584 un' in p and rev() == r3, p[-400:])
+        shot('celular_fluxo')
         ir('PROD.dc.html', w=390, h=844); m = J("({lado:document.documentElement.scrollWidth>innerWidth+1, cards:[...document.querySelectorAll('.pr-card')].filter(VIS).length})")
         t.chk('Estoque de produto a 390 px com os lotes do packing: sem rolagem lateral, cartões', m and not m['lado'] and m['cards'] > 0, m)
         t.chk('celular sem erro de JS', not t.errs(), t.errs())

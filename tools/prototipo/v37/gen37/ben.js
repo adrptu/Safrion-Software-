@@ -63,8 +63,9 @@ function benBal(o) { const r = benRota(o.ben.rota); const v = benValidos(o); con
   const pp = x => prCmp(proc, 0) > 0 ? prDiv(prMul(x, 100), proc) : 0;
   const cls = {}; v.filter(s => s.fluxo === 'Produto').forEach(s => { cls[s.classe] = prSoma([cls[s.classe] || 0, s.kg]); });
   return { proc, prod, outro, desc, perda, sai, dif, ad, pct: pp(dif), faixa, dentro: prCmp(ad, faixa) <= 0, ganho: prCmp(dif, 0) < 0, cls, rec: pp(prod), pp, r }; }
-/* em processo (avanço no Concluir, R-A08): o que ainda não foi registrado; depois do Concluir a ordem declara tudo processado */
-function benEmProc(o) { if (o.etapa === 'Encerradas' || o.ben.conc) return 0; const x = prSub(benEntrada(o), benSoma(benValidos(o))); return prCmp(x, 0) > 0 ? x : 0; }
+/* em processo (avanço no Concluir, R-A08): o que ainda não foi registrado entre o Iniciar e o Concluir; antes de iniciar nada está
+   em processo na ordem, e depois do Concluir a ordem declara tudo processado */
+function benEmProc(o) { if (o.etapa !== 'Em execução' || o.ben.conc) return 0; const x = prSub(benEntrada(o), benSoma(benValidos(o))); return prCmp(x, 0) > 0 ? x : 0; }
 /* alçada de diferença (R-G06): % do processado e teto em kg da versão; vale o mais restritivo; a mensagem diz qual disparou */
 function benAlcada(o, dif) { const r = benRota(o.ben.rota); const proc = benEntrada(o); const ad = benAbs(dif);
   const lp = prDiv(prMul(proc, r.par.alcada_pct), 100); const porPct = prCmp(lp, r.par.alcada_kg) <= 0; const lim = porPct ? lp : prN(prM(r.par.alcada_kg));

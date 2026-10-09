@@ -41,6 +41,7 @@ function bnRun(self,fn,ok){ const r=benMudar(fn); if(r.erro){ self.setState({pr_
   self.setState(Object.assign({cenrev:Date.now(),g2toast:r.msg||'Registrado.',pr_err:'',pr_ferr:null},ok||{})); return r; }
 function bnMan(){ try{ const t=localStorage.getItem(BENC.manKey); return t?JSON.parse(t):null; }catch(e){ return null; } }
 function bnProdTxt(o){ const r=benRota(o.ben.rota); return r?r.ent.split(' · ')[0]:''; }
+function bnQtdTxt(o){ const e=benKg(benEntrada(o)); return o.etapa==='A liberar'||o.etapa==='Liberadas'?'entrada '+e:(o.etapa==='Em execução'?'em processo '+benKg(benEmProc(o))+' de '+e:'processado '+e); }
 function bnRow(c,o){ const r=benRota(o.ben.rota); const nx=benProx(c,o); const ss=benSelos(c,o); const ep=benEmProc(o); const pr=bnProdTxt(o);
   return {id:o.id,ro:true,m:{cond:ss.map(s=>({id:s.t,l:s.t}))},v:{id:o.id,prod:pr,fase:o.etapa,cond:ss.map(s=>s.t).join(' | '),ep,nx:nx.t,quem:nx.quem||''},
     s:{id:o.id,prod:pr,fase:o.etapa,cond:ss.map(s=>s.t).join(' | '),ep:benKg(ep),nx:nx.t,quem:nx.quem||''},
@@ -50,11 +51,11 @@ function bnRow(c,o){ const r=benRota(o.ben.rota); const nx=benProx(c,o); const s
 /* Kanban: o mesmo componente da O.S. (5 fases; condição é selo, nunca coluna) */
 function bnKanban(self,c,ords){ return BEN_FASES.map(f=>{ const os=ords.filter(o=>o.etapa===f); const kg=prSoma(os.map(o=>benEntrada(o)));
   return {t:f,n:String(os.length),nst:prChs(os.length?'gray':'gray'),carga:os.length?benKg(kg)+' de entrada':'',vazio:!os.length,
-    cards:os.map(o=>{ const nx=benProx(c,o); const ep=benEmProc(o); const cur=(self.state.pr_sel||{}).id===o.id;
+    cards:os.map(o=>{ const nx=benProx(c,o); const cur=(self.state.pr_sel||{}).id===o.id;
       return {lab:o.id+' · '+o.etapa,open:()=>self.g2pick('g_ob',o.id),key:(e)=>{ if(e&&(e.key==='Enter'||e.key===' ')){ e.preventDefault(); self.g2pick('g_ob',o.id); } },
         st:'display:flex;flex-direction:column;gap:5px;padding:10px;border-radius:10px;background:#FFFFFF;cursor:pointer;border:1px solid '+(cur?'#1E7A4C':'#E4E9E5')+';',
         id:o.id,tipo:bnProdTxt(o)+' · '+benRotaTxt(benRota(o.ben.rota)),local:o.talhao+' · '+prBr(o.ben.ini)+'–'+prBr(o.ben.fim),hasBar:false,bar:'',
-        hasReal:true,real:'Em processo '+benKg(ep)+' de '+benKg(benEntrada(o)),selos:benSelos(c,o).map(s=>({t:s.t,st:prChs(s.c),dot:prDot(s.c)})),
+        hasReal:true,real:bnQtdTxt(o).replace(/^./,x=>x.toUpperCase()),selos:benSelos(c,o).map(s=>({t:s.t,st:prChs(s.c),dot:prDot(s.c)})),
         hasObs:false,obs:'',hasDp:true,dp:nx.t,meta:nx.quem||''}; })}; }); }
 function PREVALS(self,v){ cenOuvir(self); prTopo(self,v); const c=cenGet(); self._c=c;
   self.g2pick=(gid,rid)=>self.setState({pr_sel:{g:gid,id:rid},pr_pan:{g:gid,id:rid},pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null,pr_ch:null,bn_sub:null});
@@ -108,17 +109,21 @@ function bnPainel(self,c,o){ const r=benRota(o.ben.rota); const b=benBal(o); con
   if(at==='A liberar'){ const im=benImpedimentos(c,o);
     secs.push({t:'Impedimentos da liberação',rows:im.map(x=>({c:[[x.t,'red'],x.dono?'resolve: '+x.dono:'',x.link?x.link.why:''].filter(Boolean),
       a:x.ret?{t:'Retirar '+x.lote+' da ordem',go:()=>bnRun(self,y=>benRetirar(y,o.id,x.lote,g2perfil(),{ver:o.ver}),{})}:null,l:x.link?{t:x.link.t,h:x.link.h}:null})),vazio:'Nenhum: a ordem pode ser autorizada e liberada.'}); }
-  /* balanço (R-F01, R-F02; §7): nunca editável; razão sempre sobre o processado */
-  const bal=[{c:[['Entrada processada','b'],benKg(b.proc),o.ben.ent.length+(o.ben.ent.length>1?' lotes':' lote')]}];
+  /* balanço (R-F01, R-F02; §7): nunca editável; razão sempre sobre o processado. Antes do Iniciar não há diferença nem recuperação;
+     em execução, o que falta registrar é "em processo" e a diferença só é apurada no Concluir (um alarme antes disso seria falso) */
+  const nIni=at==='A liberar'||at==='Liberadas'; const ep=benEmProc(o); const aberto=prCmp(ep,0)>0;
+  const bal=[{c:[[nIni?'Entrada a processar':(aberto?'Entrada':'Entrada processada'),'b'],benKg(b.proc),o.ben.ent.length+(o.ben.ent.length>1?' lotes':' lote')]}];
+  if(nIni) bal.push({c:[['Diferença e recuperação','b'],['apuradas com as saídas pesadas, depois do Iniciar','mut']]});
+  else {
   Object.keys(b.cls).sort().forEach(k=>bal.push({c:[['Produto '+k,'b'],benKg(b.cls[k]),benPct(b.pp(b.cls[k]))]}));
   if(prCmp(b.outro,0)>0) bal.push({c:[['Outro destino','b'],benKg(b.outro),benPct(b.pp(b.outro))]});
   if(prCmp(b.desc,0)>0) bal.push({c:[['Descarte','b'],benKg(b.desc),benPct(b.pp(b.desc))]});
   if(prCmp(b.perda,0)>0) bal.push({c:[['Perdas identificadas','b'],benKg(b.perda),benPct(b.pp(b.perda))]});
-  const ep=benEmProc(o); if(!o.ben.conc&&at!=='Encerradas'&&at!=='A liberar'&&prCmp(ep,0)>0) bal.push({c:[['Em processo','b'],benKg(ep),'ainda não registrado: no Concluir vira diferença']});
   const dentro=b.dentro, jok=benJustOk(o,b);
-  bal.push({c:[['Diferença','b'],[benKg(b.dif)+' ('+benPct(b.pct)+')',dentro||jok?'ok':'red'],'faixa ± '+benKg(b.faixa)+' ('+prFmtT(prMul(r.par.tol_pesado,100),2)+' % · '+benRotaTxt(r)+', sintético)',
+  if(aberto){ bal.push({c:[['Em processo','b'],benKg(ep),'ainda não registrado: no Concluir vira diferença']}); bal.push({c:[['Diferença','b'],['apurada no Concluir','mut']]}); }
+  else bal.push({c:[['Diferença','b'],[benKg(b.dif)+' ('+benPct(b.pct)+')',dentro||jok?'ok':'red'],'faixa ± '+benKg(b.faixa)+' ('+prFmtT(prMul(r.par.tol_pesado,100),2)+' % · '+benRotaTxt(r)+', sintético)',
     dentro?(b.ganho?'ganho aparente dentro da faixa':'dentro da faixa'):(jok?'justificada':(b.ganho?'ganho aparente acima da faixa':'acima da faixa'))]});
-  bal.push({c:[['Recuperação comercial','b'],benPct(b.rec),'prevista '+prFmtT(prMul(r.par.frac_vend,100),2)+' % (sintético)'+(o.ben.conc&&prCmp(b.rec,prMul(r.par.frac_vend,100))<0?' · abaixo da prevista (aviso)':'')]});
+  bal.push({c:[['Recuperação comercial','b'],benPct(b.rec)+(aberto?' até agora':''),'prevista '+prFmtT(prMul(r.par.frac_vend,100),2)+' % (sintético)'+(o.ben.conc&&prCmp(b.rec,prMul(r.par.frac_vend,100))<0?' · abaixo da prevista (aviso)':'')]}); }
   (o.ben.just||[]).filter(j=>!j.caida).forEach(j=>bal.push({c:[['Diferença justificada','b'],benKg(j.dif),j.motivo+': '+j.texto,j.quem]}));
   if(o.ben.corr) bal.push({c:[['Corrigido na conferência','b'],benKg(o.ben.corr.antes)+' → '+benKg(o.ben.corr.depois),o.ben.corr.motivo,o.ben.corr.pend?['aguarda '+benQuem('gestor'),'red']:('confirmado por '+((o.ben.corr.conf||{}).quem||''))]});
   if(o.ben.conf) bal.push({c:[['Conferido','b'],o.ben.conf.quem,prBr(o.ben.conf.em.slice(0,10))+' '+o.ben.conf.em.slice(11)]});
@@ -136,7 +141,8 @@ function bnPainel(self,c,o){ const r=benRota(o.ben.rota); const b=benBal(o); con
   if(it) secs.push({t:'Caixas · '+o.req,rows:[{c:[[it.prod,'b'],'solicitado '+benUn(it.solicitado),'entregue '+benUn(it.entregue),'usado '+benUn(it.consumido),['em custódia '+benUn(it.custodia),it.custodia>1e-9&&at==='Em conferência'?'red':''],'devolvido '+benUn(it.devolvido)],l:{t:'Abrir no Estoque',h:'EST.dc.html'}}]});
   else if((o.ins||[]).length) secs.push({t:'Caixas',rows:[{c:[[o.ins[0].p,'b'],benUn(o.ins[0].tot)+' a reservar na liberação','sugestão '+o.ben.cxSug+' un']}]});
   /* etapas da rota (a mesma função da trava do Fechar) */
-  secs.push({t:'Etapas · '+benRotaTxt(r),rows:benEtapas(c,o).map(e=>({c:[[e.nome,'b'],e.pert,[e.sit,e.sit==='Cumprida'?'ok':(e.sit==='Pendente'?'red':'mut')],e.ev]}))});
+  /* etapa pendente só é alerta (vermelho) quando já impede o Fechar, na conferência; antes disso é o que falta fazer */
+  secs.push({t:'Etapas · '+benRotaTxt(r),rows:benEtapas(c,o).map(e=>({c:[[e.nome,'b'],e.pert,[e.sit,e.sit==='Cumprida'?'ok':(e.sit==='Pendente'&&at==='Em conferência'?'red':'mut')],e.ev]}))});
   /* recursos: condição do ativo lida da Manutenção (só exibição no BEN-1) e horas pela capacidade */
   const hr=benHoras(o); const ca=benCondAtivo(bnMan(),(r.ativos||[])[0]);
   if(hr) secs.push({t:'Recursos',rows:[{c:[[hr.ativo.nome,'b'],[ca.t+' na Manutenção',ca.k==='ok'?'ok':'red'],prFmtT(hr.ativo.kgh,0)+' kg/h',prFmt(hr.h,2)+' h de linha','equipe '+hr.equipe+' · '+prFmt(hr.hh,2)+' HH','estimado pela capacidade'].concat(ca.msg?[ca.msg]:[]),l:ca.k==='ok'?null:{t:'Ver na Manutenção',h:'MA-01.dc.html'}}]});
@@ -144,7 +150,7 @@ function bnPainel(self,c,o){ const r=benRota(o.ben.rota); const b=benBal(o); con
   if(at==='Encerradas'){ const I=o.ben.insp&&benB(c).insp[o.ben.insp]; const ls=Object.values(prP(c).lotes).filter(L=>L.benef===o.id);
     secs.unshift({t:'Lotes gerados',rows:ls.map(L=>{ const S=prSaldos(c,L); return {c:[[L.id,'b'],L.prod.split(' · ')[1]+' '+L.classe,benKg(S.fis)+' · '+(L.cx||0)+' cx',[S.esgotado?'esgotado':S.q,S.q==='Liberado'?'ok':''],I?I.id+' · prazo '+prBr(I.prazo)+' · '+I.resp:''],l:{t:'Abrir no Estoque de produto',h:'PROD.dc.html#'+L.id}}; })}); }
   secs.push({t:'Histórico',rows:(o.ben.hist||[]).slice().reverse().map(h=>({c:[[prBr(h.d)+' '+h.at,'b'],h.quem,h.ev,h.det,h.mov||''].filter(Boolean)}))});
-  const kv=[{l:'Rota',v:benRotaTxt(r)+' · aprovada por '+r.aprov.quem+' em '+prBr(r.aprov.em)},{l:'Versão da ordem',v:o.versao},{l:'Entrada',v:benKg(b.proc)},{l:'Diferença',v:benKg(b.dif)+' · faixa ± '+benKg(b.faixa)},
+  const kv=[{l:'Rota',v:benRotaTxt(r)+' · aprovada por '+r.aprov.quem+' em '+prBr(r.aprov.em)},{l:'Versão da ordem',v:o.versao},{l:'Entrada',v:benKg(b.proc)},{l:'Diferença',v:(nIni||aberto?'apurada no Concluir':benKg(b.dif))+' · faixa ± '+benKg(b.faixa)},
     {l:'Caixas em custódia',v:it?benUn(it.custodia):'—'},{l:'Responsável',v:benProdQ()}];
   /* quem age é o perfil (CTL-3): se o perfil escolhido não registra o passo, o painel diz quem registra antes do toque */
   const PAP={liberar:'producao',iniciar:'producao',saida:'producao',concluir:'producao',confirmar:'gestor',conferir:'conferente',fechar:'producao',
@@ -187,7 +193,7 @@ function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const st=s
   v.kb=bnKanban(self,c,ords);
   v.nova_go=()=>self.setState({pr_pan:{g:'nova'},pr_sel:null,pr_form:null,pr_err:'',pr_modo:null,pr_ch:prChave('W-BNN')});
   v.cards_ob=prCards(self,v,'g_ob',id=>{ const o=c.ordens[id]; if(!benEh(o)) return null; const nx=benProx(c,o);
-    return prCard({t1:o.id+' · '+bnProdTxt(o),num:benKg(benEntrada(o)),t2:benRotaTxt(benRota(o.ben.rota))+' · '+o.talhao+' · em processo '+benKg(benEmProc(o)),chip:[o.etapa,BN_FCOR[o.etapa]||'gray'],nx:nx.t+(nx.quem?' · '+nx.quem:''),go:()=>self.g2pick('g_ob',id)}); });
+    return prCard({t1:o.id+' · '+bnProdTxt(o),num:benKg(benEntrada(o)),t2:benRotaTxt(benRota(o.ben.rota))+' · '+o.talhao+' · '+bnQtdTxt(o),chip:[o.etapa,BN_FCOR[o.etapa]||'gray'],nx:nx.t+(nx.quem?' · '+nx.quem:''),go:()=>self.g2pick('g_ob',id)}); });
   /* ação primária do cabeçalho: a da ordem selecionada; sem seleção, a da 1ª ordem da lista (fase) que tem passo */
   const sel=st.pr_sel; let o=sel&&c.ordens[sel.id]&&benEh(c.ordens[sel.id])?c.ordens[sel.id]:null; let suf='';
   if(!o){ o=ords.slice().sort((a,b)=>BEN_FASES.indexOf(a.etapa)-BEN_FASES.indexOf(b.etapa)).find(x=>benProx(c,x).acao)||null; if(o) suf=' · '+o.id; }
