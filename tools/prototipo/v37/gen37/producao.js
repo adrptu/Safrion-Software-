@@ -222,10 +222,10 @@ function prOfertaSem(c, prod, sem) { let pub = 0, tem = false; Object.keys(PRDC.
 function prOfertaSafra(c, prod, saf) { let pub = 0, tem = false; Object.keys(PRDC.cult).forEach(cid => { const k = PRDC.cult[cid]; if (prUn(k.cultura).prod !== prod || (PRDC.safras[k.saf] || {}).mf !== saf) return;
     const vs = (prP(c).previsoes[cid] || []).filter(v => v.safra !== undefined); const v = vs[vs.length - 1]; if (v) { pub = prSoma([pub, v.safra]); tem = true; } });
   const cultura = (Object.values(PRDC.cult).find(k => prUn(k.cultura).prod === prod) || {}).cultura || 'Soja';
-  const ob = (PRDC.obrig || []).filter(x => x.prod === prod && x.saf === saf).map(x => ({ id: x.id, tipo: x.tipo, kg: prMul(x.sc, prUn(cultura).massa), cont: x.cont }));
+  /* CT-203, CRE-0095 e BT-090 são vendas futuras do estado (Comercial D-C04): o catálogo não tem mais obrigações (P7) */
   const fut = Object.values(prP(c).pedidos).filter(p => p.tipo === 'futura' && p.prod === prod && p.saf === saf);
-  const futKg = prSoma(ob.map(x => x.kg).concat(fut.map(p => prSaldoFut(c, p)))); const resKg = prSoma([].concat(...fut.map(p => prResPed(c, p.id))).map(r => r.kg));
-  return { pub, tem, ob, fut, futKg, resKg, livre: prSub(pub, prSub(futKg, resKg)), cultura }; }
+  const futKg = prSoma(fut.map(p => prSaldoFut(c, p))); const resKg = prSoma([].concat(...fut.map(p => prResPed(c, p.id))).map(r => r.kg));
+  return { pub, tem, fut, futKg, resKg, livre: prSub(pub, prSub(futKg, resKg)), cultura }; }
 
 /* ---------- encerrar a O.S. de colheita (R-18): presente em toda página do estado (cenPodeEncerrar chama) ---------- */
 function prPodeEncerrar(c, id) { const o = (c.ordens || {})[id]; if (!o || !prEhColheita(o)) return '';

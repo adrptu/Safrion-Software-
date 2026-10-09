@@ -441,8 +441,9 @@ def colh():
                 dict(k='colh',l='Colhido',t='num',a='r',w=90),dict(k='prtv',l='Produtividade',w=150),dict(k='ref',l='Referência · desvio',w=140),
                 dict(k='sit',l='Situação · próximo passo',w=230)],
                [],edit=dict(m='pick'),tree=True,gid='g_tal',total=False,qf=dict(k='sit',cut=' · ',l='Situação',todas='Todas'))
+    # Comercial P7 (D-C14, CE-05): "Vendas futuras" e "Oferta livre" saíram para o Painel comercial (a semana em curso entra lá pelo estoque, PRD 49.2)
     g_sem=grid([dict(k='sem',l='Semana',w=150),dict(k='prod',l='Produto',w=200),dict(k='pub',l='Previsão publicada',t='num',a='r',w=150),dict(k='colh',l='Colhido',t='num',a='r'),
-                dict(k='fut',l='Vendas futuras',t='num',a='r',w=170),dict(k='livre',l='Oferta livre',t='num',a='r',w=150),dict(k='desv',l='Desvio',w=150)],
+                dict(k='desv',l='Desvio',w=150)],
                [],edit=dict(m='pick'),gid='g_sem',total=False,qf=dict(k='prod',l='Produto',todas='Todos'),
                tools=f'<span role="group" aria-label="Horizonte" style="display: inline-flex; gap: 6px;"><button type="button" aria-pressed="{H("hz4_on")}" onClick="{H("hz4")}" style="{H("hz4_st")}">4 semanas</button><button type="button" aria-pressed="{H("hzs_on")}" onClick="{H("hzs")}" style="{H("hzs_st")}">Safra</button></span>')
     EXTRAJS[0]=_js(COLH_JS)
@@ -450,8 +451,8 @@ def colh():
          f'<button type="button" aria-pressed="{H("vs_on")}" onClick="{H("vs_go")}">Por semana</button></div>')
     corpo=(IF('vt',bloco('Previsão e resultado por talhão','Cultura › talhão: previsão publicada, colhido, produtividade contra a meta e a previsão. Clique num talhão para contagens, versões, passes, cargas e resultado.',
                          g_tal+cartoes('cards_tal'),acao=vis),d=True)
-           +IF('vs',bloco('Oferta por semana','Previsão publicada × colhido × vendas futuras: a oferta livre é o que ainda pode ser vendido; negativa é déficit. Grão por safra.',
-                          g_sem+cartoes('cards_sem'),acao=vis)))
+           +IF('vs',bloco('Previsão por semana','Previsão publicada × colhido × desvio. Grão por safra. Oferta livre e vendas futuras: Painel comercial.',
+                          g_sem+cartoes('cards_sem')+f'<a href="PCOM.dc.html" style="align-self: flex-start; color: {ACC}; font-weight: 700; text-decoration: none; font-size: 12.5px;">Oferta livre e vendas futuras: Painel comercial ›</a>',acao=vis)))
     _shell('COLH','Previsão e colheita','Quanto vou colher, em que semana, de cada talhão, e quanto já colhi contra o previsto e a meta.',corpo,fname,1150,
            'Produção vem só da carga recebida; área vem só do apontamento da O.S.; produtividade é calculada, nunca digitada (R-02 a R-04).')
 
@@ -512,24 +513,21 @@ function PREVALS(self,v){ cenOuvir(self); prTopo(self,v); const c=cenGet(); self
   const prods=[...new Set(X.filter(x=>x.k.semanal).map(x=>prUn(x.k.cultura).prod))];
   prods.forEach(pr=>{ const cu=X.find(x=>prUn(x.k.cultura).prod===pr).k.cultura; let ws=[0,1,2,3].map(i=>prSemMais(s0,i));
     if(hz==='s'){ const all=new Set(ws); X.filter(x=>prUn(x.k.cultura).prod===pr).forEach(x=>{ (prP(c).previsoes[x.k.id]||[]).forEach(v=>Object.keys(v.sem||{}).forEach(w=>all.add(w))); x.R.passes.forEach(p=>all.add(p.sem)); });
-      Object.values(prP(c).pedidos).filter(p=>p.prod===pr&&p.sem).forEach(p=>all.add(p.sem)); ws=[...all].sort(); }
+      ws=[...all].sort(); }
     ws.forEach(w=>{ const of=prOfertaSem(c,pr,w); const ps=[].concat(...X.filter(x=>prUn(x.k.cultura).prod===pr).map(x=>x.R.passes)).filter(p=>p.sem===w);
       const colh=prSoma(ps.map(p=>p.kg)); const fim=ps.length&&ps.every(p=>p.final)&&w<s0; const desv=(fim&&of.tem&&prCmp(of.pub,0)>0)?prDiv(prMul(prSub(colh,of.pub),100),of.pub):null;
       const U=x=>prUnTxt(cu,x); const ini=prSemIni(w);
-      rows.push({id:'w:'+pr+':'+w,ro:true,v:{sem:w,prod:pr,pub:of.pub,colh,fut:of.futKg,livre:of.livre},
-        s:{sem:prSemTxt(w),prod:pr,pub:of.tem?U(of.pub):'sem versão publicada',colh:U(colh),fut:U(of.futKg),livre:U(of.livre),desv:desv===null?'':prFmt(desv,1)+' %'},
+      rows.push({id:'w:'+pr+':'+w,ro:true,v:{sem:w,prod:pr,pub:of.pub,colh},
+        s:{sem:prSemTxt(w),prod:pr,pub:of.tem?U(of.pub):'sem versão publicada',colh:U(colh),desv:desv===null?'':prFmt(desv,1)+' %'},
         p:{sem:[{k:'b',t:prSemTxt(w)},{k:'mut',t:' · '+prBr(ini)+'–'+prBr(prDiaMais(ini,6))+(w===s0?' (em curso)':'')}],prod:[{k:'txt',t:pr}],
            pub:[{k:of.tem?'txt':'mut',t:of.tem?U(of.pub):'sem versão publicada'}],colh:[{k:ps.length?'txt':'mut',t:ps.length?U(colh)+(fim?'':' · parcial'):'—'}],
-           fut:[{k:'txt',t:U(of.futKg)}].concat(of.fut.length?[{k:'br'},{k:'mut',t:of.fut.map(p=>p.id).join(', ')}]:[]),
-           livre:w<s0?[{k:'mut',t:'semana encerrada'}]:(prCmp(of.livre,0)<0?[{k:'chip',t:'déficit '+U(prSub(0,of.livre)),c:'red'}]:[{k:'b',t:U(of.livre)}]),
            desv:[{k:desv===null?'mut':'txt',t:desv===null?(w>=s0?'semana aberta':'—'):prFmt(desv,1)+' %'}]}}); }); });
   const safs=[...new Set(X.filter(x=>!x.k.semanal&&prUn(x.k.cultura).base==='comercial').map(x=>prUn(x.k.cultura).prod+'|'+(PRDC.safras[x.k.saf]||{}).mf))];
   safs.forEach(ks=>{ const [pr,sf]=ks.split('|'); const of=prOfertaSafra(c,pr,sf); const cu=of.cultura; const U=x=>prUnTxt(cu,x,0);
     const colh=prSoma(X.filter(x=>prUn(x.k.cultura).prod===pr&&(PRDC.safras[x.k.saf]||{}).mf===sf).map(x=>x.R.kg));
-    rows.push({id:'s:'+ks,ro:true,v:{sem:'9999-'+sf,prod:pr,pub:of.pub,colh,fut:of.futKg,livre:of.livre},
-      s:{sem:'Safra '+sf,prod:pr,pub:U(of.pub),colh:U(colh),fut:U(of.futKg),livre:U(of.livre),desv:''},
+    rows.push({id:'s:'+ks,ro:true,v:{sem:'9999-'+sf,prod:pr,pub:of.pub,colh},
+      s:{sem:'Safra '+sf,prod:pr,pub:U(of.pub),colh:U(colh),desv:''},
       p:{sem:[{k:'b',t:'Safra '+sf}],prod:[{k:'txt',t:pr}],pub:[{k:of.tem?'txt':'mut',t:of.tem?U(of.pub):'sem versão publicada'}],colh:[{k:'txt',t:U(colh)}],
-         fut:[{k:'txt',t:U(of.futKg)},{k:'br'},{k:'mut',t:of.ob.map(x=>x.id).concat(of.fut.map(p=>p.id)).join(', ')}],livre:prCmp(of.livre,0)<0?[{k:'chip',t:'déficit '+U(prSub(0,of.livre)),c:'red'}]:[{k:'b',t:U(of.livre)}],
          desv:[{k:'mut',t:'safra aberta'}]}}); });
   GR('g_sem').rows=rows; self._wrows=rows;
   v.hz4_on=String(hz==='4'); v.hzs_on=String(hz==='s'); v.hz4_st=prPill(hz==='4'); v.hzs_st=prPill(hz==='s'); v.hz4=()=>self.setState({pr_hz:'4'}); v.hzs=()=>self.setState({pr_hz:'s'}); }
@@ -574,14 +572,14 @@ function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const st=s
       return prCard({grp:true,t1:cu,num:pd?prPrtvTxt(cu,pd.kg,pd.area)+' ponderada sobre '+prFmtT(pd.area,2)+' ha':xs.length+' talhões'}); }
     const X=byId[id]; if(!X) return null; const R=X.R;
     return prCard({t1:X.k.local+' · '+X.k.cultura,num:R.prtv!==null&&R.area>0?prPrtvTxt(X.k.cultura,R.kg,R.area):(R.comecou?prUnTxt(X.k.cultura,R.kg):'—'),t2:'Previsão '+prPrevTxt(c,X).t+' · colhido '+(R.comecou?prUnTxt(X.k.cultura,R.kg):'—'),chip:[X.sit,PR_SITCOR[X.sit]],nx:X.nx,go:()=>self.g2pick('g_tal',id)}); });
-  v.cards_sem=prCards(self,v,'g_sem',id=>{ const r=(self._wrows||[]).find(x=>x.id===id); if(!r) return null; const neg=prCmp(r.v.livre,0)<0;
-    return prCard({t1:r.s.sem+' · '+r.s.prod,num:r.s.livre+(neg?' (déficit)':' livre'),t2:'Publicada '+r.s.pub+' · colhido '+r.s.colh+' · vendas futuras '+r.s.fut,chip:[neg?'Déficit':'Oferta',neg?'red':'gray'],nx:'',go:()=>{}}); });
+  v.cards_sem=prCards(self,v,'g_sem',id=>{ const r=(self._wrows||[]).find(x=>x.id===id); if(!r) return null;
+    return prCard({t1:r.s.sem+' · '+r.s.prod,num:r.s.pub,t2:'Colhido '+r.s.colh+(r.s.desv?' · desvio '+r.s.desv:''),chip:['Previsão','gray'],nx:'',go:()=>{}}); });
   /* ação primária: do talhão selecionado; sem seleção, a do 1º talhão da lista em que a regra dá passo */
   const sel=st.pr_sel; let X=sel&&sel.g==='g_tal'?byId[sel.id]:null; let suf='';
   if(!X){ const ord=[].concat(...(GR('g_tal').rows||[]).map(r=>r.kids||[])).map(r=>byId[r.id]).filter(Boolean); X=ord.find(x=>x.ac)||null; if(X) suf=' do '+X.k.local; }
   const ac=X&&X.ac; prPrim(v,ac?(ac.h?{t:ac.t+suf,h:ac.h}:{t:ac.t+suf,go:()=>self.setState({pr_sel:{g:'g_tal',id:X.k.id},pr_pan:{g:'g_tal',id:X.k.id},pr_form:null,pr_err:''})}):null);
-  const nc=XS.filter(x=>x.sit==='Em colheita'), ap=[].concat(...XS.map(x=>x.R.aPesar)).length; const def=(self._wrows||[]).filter(r=>prCmp(r.v.livre,0)<0);
-  prStatus(v,[nc.length?nc.map(x=>x.k.local).join(', ')+' em colheita':'nenhum talhão em colheita',ap?ap+(ap>1?' cargas a receber':' carga a receber'):'',def.length?def.map(r=>r.s.sem).join(', ')+' em déficit':''].filter(Boolean).join(' · '),def.length?'red':(ap?'yellow':'green'));
+  const nc=XS.filter(x=>x.sit==='Em colheita'), ap=[].concat(...XS.map(x=>x.R.aPesar)).length;   /* déficit de oferta: Painel comercial (P7) */
+  prStatus(v,[nc.length?nc.map(x=>x.k.local).join(', ')+' em colheita':'nenhum talhão em colheita',ap?ap+(ap>1?' cargas a receber':' carga a receber'):''].filter(Boolean).join(' · '),ap?'yellow':'green');
   const pan=st.pr_pan; prPainel(self,v,pan&&pan.g==='g_tal'&&byId[pan.id]?prPanTal(self,c,byId[pan.id]):null); }
 function prHash(self){ if(self.__prh) return; self.__prh=1; const ab=()=>{ let h=''; try{ h=decodeURIComponent(location.hash||'').slice(1); }catch(e){} if(PRDC.cult[h]) setTimeout(()=>self.g2pick('g_tal',h),0); }; ab(); try{ window.addEventListener('hashchange',ab); }catch(e){} }
 const _EXV=EXTRAVALS; EXTRAVALS=function(self,v){ prHash(self); _EXV(self,v); };
