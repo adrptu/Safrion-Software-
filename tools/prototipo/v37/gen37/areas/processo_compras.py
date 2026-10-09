@@ -163,7 +163,7 @@ function solLer(){ try{ const o=JSON.parse(localStorage.getItem(SOL_KEY)||'null'
 // safras da compra: as do cadastro e as que só existem numa solicitação gravada pelo Planejar safra (safra nova)
 function safras(){ const ls=solLer(); return CD.safras.concat(Object.values(ls).filter(r=>r&&r.safra&&!CD.safras.some(s=>s.id===r.safra)).map(r=>({id:r.safra,nome:r.nome||r.safra,periodo:'',estado:'',faz:r.faz||''}))); }
 function safNome(id){ const s=safras().find(x=>x.id===id); return s?s.nome:String(id||''); }
-function safHref(saf){ return 'SAF.dc.html#saf='+encodeURIComponent(saf)+'&etapa=6'; }
+function safHref(saf){ return 'SAF.dc.html#saf='+encodeURIComponent(saf)+'&passo=demanda'; }
 const SOLC={}; let SX=null;
 function solDe(saf){ if(!saf) return null; const rec=solLer()[saf]; if(!rec&&saf!=='S2627') return null;
   const key=rec?JSON.stringify([rec.id,rec.itens,rec.comp||0]):'ini'; if(SOLC[saf]&&SOLC[saf].key===key) return SOLC[saf]; let x;
@@ -172,7 +172,7 @@ function solDe(saf){ if(!saf) return null; const rec=solLer()[saf]; if(!rec&&saf
     const itens=Object.keys(rec.itens||{}).map(n=>{ const d=det[n]||{}; return {nome:n,grupo:d.grupo||'—',un:d.un||'',preco:Number(d.preco)||0,nec:Math.round(Number(rec.itens[n])*100)/100}; })
       .sort((a,b)=>pt(a.grupo,b.grupo)||pt(a.nome,b.nome)); itens.forEach((it,i)=>{ it.i=i; });
     x={safra:saf,nome:rec.nome||safNome(saf),sol:{id:rec.id,enviada:rec.em||rec.at||'',por:rec.por||''},itens,dem:Object.values(det),ref:itens.reduce((a,it)=>a+it.nec*it.preco,0),comp:rec.comp||0}; }
-  x.key=key; x.pcIni=CD.pcIni+10*Math.max(0,safras().findIndex(s=>s.id===saf)); x.origem={t:'Planejar safra · '+x.nome+' · etapa 6',h:safHref(saf)};
+  x.key=key; x.pcIni=CD.pcIni+10*Math.max(0,safras().findIndex(s=>s.id===saf)); x.origem={t:'Planejar safra · '+x.nome+' · demanda de insumos',h:safHref(saf)};
   SOLC[saf]=x; return x; }
 function sx(self){ SX=solDe(self.state.saf||null); return SX; }
 // memória CAL-01 do insumo (a mesma função do Planejar safra)
@@ -275,7 +275,7 @@ function PREVALS(self,v){
     r.p.nome=[B(s.nome),MU(s.periodo)].concat(on?[CH('Selecionada','blue')]:[]);
     const x=solDe(s.id);
     if(x){ r.p.sol=[B(x.sol.id),MU(x.itens.length+' insumos · '+rs(x.ref)+(x.comp?' · '+x.comp+(x.comp>1?' complementos':' complemento'):'')),BR(),MU('enviada '+x.sol.enviada+' por '+x.sol.por)]; r.s.sol=x.sol.id;
-      r.p.orig=[T('Planejar safra · etapa 6'),LK('Ver origem',x.origem.h)]; r.s.orig='Planejar safra';
+      r.p.orig=[T('Planejar safra · demanda de insumos'),LK('Ver origem',x.origem.h)]; r.s.orig='Planejar safra';
       const e=estadoCompra(self,m,s.id); r.p.comp=[e]; r.s.comp=e.t; r.p.acao=[{k:'act',t:'Abrir compra',fn:'pick:'+s.id}]; }
     else if(s.id==='S2526'){ r.p.sol=[B(CD.sol2526),MU('concluída')]; r.s.sol=CD.sol2526; r.p.orig=[T('Planejar safra · 2025/26')]; r.s.orig='Planejar safra';
       r.p.comp=[CH('Encerrada · '+CD.ped2526.length+' pedidos entregues','gray')]; r.s.comp='Encerrada'; r.p.acao=[{k:'act',t:'Consultar pedidos',fn:'pick:'+s.id}]; }
@@ -319,7 +319,7 @@ function PREVALS(self,v){
           p:{bruta:[T(nf(d.bruta,dc))].concat(c.real>0.001?[BR(),MU('realizado: '+nf(c.real,dc))]:[]),est:[T(nf(d.est,dc))].concat((d.liq>0.001&&c.antes>0.001)?[BR(),MU('usado antes: '+nf(c.antes,dc))]:(d.res?[BR(),MU('res. '+nf(d.res,dc))]:[])),
              rec:[T(nf(d.rec,dc))].concat(d.liq>0.001&&c.tarde>0.001?[BR(),MU(nf(c.tarde,dc)+' após a falta')]:[]),
              liq:[B(nf(d.liq,dc))],falta:fa?[(d.liq>0.001?B(brd(fa)):CH(brd(fa),'red'))]:[MU('—')],sit},
-          o:cal01Memo(c,{un:d.un,res:d.res,quar:d.quar}).map(t=>({t})).concat([{t:'Ver no Planejar safra · etapa 6',h:SX.origem.h}])}; })}; });
+          o:cal01Memo(c,{un:d.un,res:d.res,quar:d.quar}).map(t=>({t})).concat([{t:'Ver no Planejar safra · demanda de insumos',h:SX.origem.h}])}; })}; });
   GR('g_dem').x0=Object.fromEntries(GR('g_dem').rows.map(r=>[r.id,true]));
   // ---- etapa 3 · convites ----
   GR('g_conv').rows=m.G.map((g,gi)=>{ const cs=Object.values(m.conv).filter(c=>c.gi===gi); const its=m.items.filter(x=>x.gi===gi);
@@ -473,7 +473,7 @@ function hooks(self){ if(self._hk) return; self._hk=true;
       const falt=np?(np.itens.map(it=>faltaDe(st,it.nome,null)).filter(Boolean).sort()[0]||null):(op?faltaDe(st,op.item,op.id):null);
       x[r.id]=Object.assign({},cur,{prev:r.v.prev,obs:r.v.obs}); keep(self,gid,r.id,{pcx:x,g2toast:'Previsão de '+r.id+' reprogramada para '+brd(r.v.prev)+'. O Estoque passa a esperar esta data.'
         +(falt&&r.v.prev>falt?' Atenção: nova data depois da falta de '+brd(falt)+'.':'')}); } }; }
-const WHYMSG={'Escolha a safra':'Escolha a safra na etapa 1 para abrir esta etapa.','Sem solicitação':'Esta safra ainda não tem solicitação: envie a demanda em Planejar safra › etapa 6.',
+const WHYMSG={'Escolha a safra':'Escolha a safra na etapa 1 para abrir esta etapa.','Sem solicitação':'Esta safra ainda não tem solicitação: envie a demanda em Planejar safra › demanda de insumos.',
   'Safra encerrada':'Safra 2025/26 encerrada: só os pedidos (etapa 6) ficam em consulta.','Envie os convites':'Envie os convites na etapa 3 para receber propostas.','Aguarde propostas':'Aguarde as primeiras propostas (simuladas) chegarem.'};
 function EXTRAVALS(self,v){ hooks(self);
   const st=self.state; const step=st.step||1; const saf=st.saf||null; sx(self); const m=self._m||M(self); const apr=aprOf(st); const a=st.aprov||null;
@@ -484,16 +484,16 @@ function EXTRAVALS(self,v){ hooks(self);
     let sid=ms?ms[1]:null; if(!sid&&mi){ const f=safras().find(z=>{ const y=solDe(z.id); return y&&y.sol.id===mi[1]; }); if(f) sid=f.id; }
     const s=sid?safras().find(z=>z.id===sid):null; const x=s?solDe(s.id):null;
     if(x){ const outra=!!(mi&&mi[1]!==x.sol.id);
-      const msg=outra?(mi[1]+' não é a solicitação da '+x.nome+': aberta a '+x.sol.id+'.'):('Solicitação '+x.sol.id+' aberta · origem: '+x.nome+' · Planejar safra, etapa 6.');
+      const msg=outra?(mi[1]+' não é a solicitação da '+x.nome+': aberta a '+x.sol.id+'.'):('Solicitação '+x.sol.id+' aberta · origem: '+x.nome+' · Planejar safra, demanda de insumos.');
       setTimeout(()=>{ if(self.state.saf!==x.safra) trocaSafra(self,x.safra,{step:2,g2toast:msg}); else if(outra) toast(self,msg); hashSync(x.safra,x); },0); return; }
     if(s&&s.id==='S2526'){ setTimeout(()=>{ if(self.state.saf!==s.id) trocaSafra(self,s.id,{step:6,g2toast:s.nome+' encerrada: '+CD.sol2526+' concluída, pedidos em consulta.'}); },0); return; }
-    if(s){ setTimeout(()=>{ trocaSafra(self,s.id,{step:1,g2toast:(mi?mi[1]+' não está gravada neste navegador':s.nome+' ainda não tem solicitação')+': envie a demanda em Planejar safra › etapa 6.'}); },0); return; }
+    if(s){ setTimeout(()=>{ trocaSafra(self,s.id,{step:1,g2toast:(mi?mi[1]+' não está gravada neste navegador':s.nome+' ainda não tem solicitação')+': envie a demanda em Planejar safra › demanda de insumos.'}); },0); return; }
     setTimeout(()=>self.setState({g2toast:(mi?mi[1]:'A safra do endereço')+' não foi encontrada: escolha a safra na etapa 1.'}),0); };
   if(!self.__hashIni){ self.__hashIni=1; abrirHash(); try{ window.addEventListener('hashchange',abrirHash); }catch(e){} }
   for(let i=1;i<=6;i++) v['s'+i]=(step===i);
   const whys={}; for(let i=2;i<=6;i++){ if(!saf) whys[i]='Escolha a safra'; else if(saf==='S2526'){ if(i<6) whys[i]='Safra encerrada'; } else if(!SX) whys[i]='Sem solicitação'; }
   if(SX){ if(!m.env){ whys[4]='Envie os convites'; whys[5]='Envie os convites'; } else if(!m.nresp){ whys[4]='Aguarde propostas'; whys[5]='Aguarde propostas'; } }
-  const go=(i)=>{ const w=whys[i]; if(w){ toast(self,w==='Sem solicitação'?(safNome(saf)+' ainda não tem solicitação: envie a demanda em Planejar safra › etapa 6.'):WHYMSG[w]); return; } g2etapa(self,{step:i,conf5:false}); };
+  const go=(i)=>{ const w=whys[i]; if(w){ toast(self,w==='Sem solicitação'?(safNome(saf)+' ainda não tem solicitação: envie a demanda em Planejar safra › demanda de insumos.'):WHYMSG[w]); return; } g2etapa(self,{step:i,conf5:false}); };
   g2steps(self,v,'stp',6,step,whys);   // só informa (UX-ACAO-UNICA-20261003): avanço e retorno na área de ações
   v.pick=(id)=>pick(self,id);
   const safObj=safras().find(s=>s.id===saf);
@@ -502,7 +502,7 @@ function EXTRAVALS(self,v){ hooks(self);
   // trilha de documentos
   const pendOk=!!(a&&a.estado==='pendente'&&a.sig===m.sig); const stale=!!(a&&a.estado==='pendente'&&a.sig!==m.sig);
   const devA=!!(a&&a.estado==='devolvida'), recA=!!(a&&a.estado==='recusada'); const mud=!!(a&&a.sig!==m.sig);   // mud: compra alterada depois da decisão
-  v.tr_on=!!SX; v.orig_h=SX?SX.origem.h:'SAF.dc.html'; v.orig_t='Ver origem · etapa 6 ›';
+  v.tr_on=!!SX; v.orig_h=SX?SX.origem.h:'SAF.dc.html'; v.orig_t='Ver origem · demanda de insumos ›';
   const pill=(t,ok,sep,bad)=>({t,sep,st:'display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;font-weight:700;'+(ok?'background:#E4F3E9;color:#1E7A4C;':(bad?'background:#FDE8E6;color:#B42318;':'background:#EEF1EE;color:#5B6660;'))});
   v.trail=!SX?[]:[pill(SX.sol.id+' · '+SX.itens.length+' insumos',true,false),pill(m.env?(m.env.n+' convites enviados'):(m.nconv+' convites a enviar'),!!m.env,true),
     pill(m.nresp+(m.nresp===1?' proposta':' propostas'),m.nresp>0,true),
@@ -573,7 +573,7 @@ function EXTRAVALS(self,v){ hooks(self);
   const CUR=['Escolha da safra','Demanda','Cotações','Propostas','Aprovação','Entregas'];
   const ir=(i)=>({t:'‹ '+CUR[i-1],fn:()=>go(i),to:i,a:'voltar'}), av=(i,t)=>({t:t+' ›',fn:()=>go(i),to:i,a:'avancar'}), cmd=(t,fn)=>({t,fn,a:'comando'});
   let A={};
-  if(step===1){ if(saf&&!SX&&saf!=='S2526') A={nota:safNome(saf)+' ainda não tem solicitação de compra: a demanda é enviada no Planejar safra (etapa 6).',prim:{t:'Abrir Planejar safra ›',h:safHref(saf),a:'abrir'}}; }
+  if(step===1){ if(saf&&!SX&&saf!=='S2526') A={nota:safNome(saf)+' ainda não tem solicitação de compra: a demanda é enviada no Planejar safra (demanda de insumos).',prim:{t:'Abrir Planejar safra ›',h:safHref(saf),a:'abrir'}}; }
   else if(SX){
     if(step===2) A={prim:av(3,'Solicitar cotações')};
     if(step===3) A=!m.env?{volta:ir(2),nota:'Comparar propostas fica disponível depois do envio dos convites.',prim:cmd('Enviar convites (simulado)',()=>enviar(self))}
