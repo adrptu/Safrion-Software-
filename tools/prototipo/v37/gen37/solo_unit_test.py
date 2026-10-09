@@ -38,6 +38,11 @@ def main():
     so = defs(open(os.path.join(HERE, 'solo.js'), encoding='utf-8').read())
     for f in ('safra.js', 'cal01.js', 'ocupacao.js', 'cenario.js', 'producao.js', 'ben.js', 'g2lib.js', 'irrigacao_estado.js', 'mip.js'):
         dup = sorted(so & defs(open(os.path.join(HERE, f), encoding='utf-8').read())); ok(f'nomes de solo.js não colidem com {f}', not dup, dup)
+    # regressão (rodada 3): solo.js entra no prefixo do cenário de todas as telas, inclusive a O.S.; o os_irrig_filtro_test (verificação 6)
+    # proíbe "política de água"/"PA-07"/"exceção"/"revisão individual" no texto e nos scripts da OS.dc.html. Esse texto fica nas telas do solo e da Irrigação
+    import cenario
+    proib = sorted(set(re.findall(r'política de água|PA-07|exceção|revisão individual', cenario.js_prefixo(), re.I)))
+    ok('prefixo do cenário (com solo.js) sem "política de água", "PA-07", "exceção" e "revisão individual" (a O.S. carrega o prefixo)', not proib, proib)
     print('RESULTADO:', 'OK' if all(OK) else 'FALHOU', f'{sum(OK)}/{len(OK)}')
     return all(OK)
 

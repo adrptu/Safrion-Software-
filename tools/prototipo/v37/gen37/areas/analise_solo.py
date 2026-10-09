@@ -306,7 +306,7 @@ function EXTRAVALS(self,v){ try{ window.__soloSelf=self; window.__solo={get:()=>
       const res=cenMudar(null,cc=>soloCorrigir(cc,l.id,a,r.v.val,r.v.un,'COR-'+l.id+'-'+Date.now(),soAtor()));
       self.setState({cenrev:Date.now(),g2toast:res.erro||res.msg}); }
     if(gid==='g_agua'&&r){ g2set(self,'g_agua',{rows:null}); const d=soAgDados(r.v); const ch=self.__agK||('AGS-'+Date.now()); self.__agK=null;
-      const res=cenMudar(null,cc=>soloMedir(cc,d,ch,soAtor())); self.setState({cenrev:Date.now(),g2toast:res.erro||res.msg}); } };
+      const res=cenMudar(null,cc=>soloMedir(cc,d,ch,soAtor())); self.setState({cenrev:Date.now(),g2toast:res.erro||(res.repetido?res.msg:res.msg+' A lâmina segue a política de água e o responsável técnico.')}); } };
   self.g2check=(gid,rows,r,d,isNew)=>{ if(gid==='g_ext'){ if(d.orig==='medido'&&!d.un) return {un:'Escolha a unidade: sem unidade o laudo fica inconsistente.'}; return {}; }
     if(gid!=='g_agua') return {}; if(!self.__agK) self.__agK='AGS-'+Date.now(); const k=cenClone(cenGet()); try{ soloMedir(k,soAgDados(d),'PREVIA-'+Date.now(),soAtor()); return {}; }
     catch(e){ const m=String(e.message||e); const f=/capacidade de campo/.test(m)?'ccv':(/ponto de murcha|Ponto de murcha/.test(m)?'pmpv':(/profundidade efetiva/.test(m)?'z':(/data|depois de hoje/i.test(m)?'datav':(/já está registrada/.test(m)?'datav':'talv')))); const o={}; o[f]=m.replace(' Nada foi gravado.',''); return o; } };

@@ -76,7 +76,8 @@ function soloGesso(ca, m, argila, classe, R) {   /* R08 (D-03, demonstração): 
   if (!gat) return { gat: false }; const k = G.k[classe]; if (!k) return { gat: true, nc: 'sem fator para a classe ' + (classe || '—') };
   if (argila === null) return { gat: true, nc: 'argila não analisada' }; return { gat: true, k, ng: prMul(k, argila) }; }
 /* água disponível (pedido do proprietário 05–09/10): CAD = (CC − PMP) × profundidade efetiva, em mm. Propriedade do solo: não é a capacidade
-   do equipamento nem a lâmina recomendada (a lâmina vem da política de água, PA-07, e do responsável técnico). */
+   do equipamento nem a lâmina recomendada (R24, ESPECIFICACAO §3.6). Este arquivo entra no prefixo do cenário de todas as telas, inclusive a
+   O.S., que não fala de irrigação por política: o texto sobre de onde vem a lâmina fica só nas telas de Análises de solo e Irrigação. */
 function soloCAD(m) {
   const cc = soloNum(m.cc), pmp = soloNum(m.pmp), z = soloNum(m.z);
   if (cc === null || (typeof cc !== 'string')) return { v: null, nc: 'sem capacidade de campo' };
@@ -331,7 +332,7 @@ function soloMedir(c, d, chave, ator) {
     const id = 'AGS-' + String(todos.reduce((mx, m) => Math.max(mx, Number(String(m.id).replace(/\D/g, '')) || 0), 0) + 1).padStart(3, '0');
     S.agua[id] = { id, faz: d.faz, tal: d.tal, zona: d.zona || '', data: d.data, prof: d.prof, z: soloNum(d.z), met: d.met, un: d.un, cc: soloNum(d.cc), pmp: soloNum(d.pmp) || '', fonte: d.fonte, resp: d.resp, reg: { por: quem, em: soloAgora() } };
     const cad = soloCAD(S.agua[id]);
-    return { msg: id + ' registrada: ' + (cad.v !== null ? 'CAD ' + prFmtT(cad.v, 1) + ' mm' : 'CAD não calculável (' + cad.nc + ')') + '. Referência para a Irrigação; a lâmina segue a política de água e o responsável técnico.', id }; }); }
+    return { msg: id + ' registrada: ' + (cad.v !== null ? 'CAD ' + prFmtT(cad.v, 1) + ' mm' : 'CAD não calculável (' + cad.nc + ')') + '. Referência para a Irrigação, não a lâmina.', id }; }); }
 
 /* ---------- leitura para a O.S. e o Mapa (sem SOLO0): origem da dose e selo "Plano mudou" (R20, R21, A21) ---------- */
 function soloAcDaChave(c, ck, prod) { const A = ((c && c.solo) || {}).aceites || {}; return Object.values(A).find(a => a.st === 'ativo' && a.cid + '|' + a.atv.id === ck && a.prod === prod) || null; }
