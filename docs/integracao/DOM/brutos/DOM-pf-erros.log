@@ -1,0 +1,14 @@
+== erros · recusa e repetição
+OK  pesagem sem condição é recusada no painel, nada gravado · e são calculados. Ticket da balança Peso bruto kg Tara kg Condição da carga Íntegra Com avaria Fora do padrão Só Íntegra entra liberada; com avaria ou fora do padrão vai para inspeção da Qualidade. Informe a condição da carga: Íntegra, Com avaria ou Fora do padrão. Descartar Cancelar Pesar a CG-2108
+OK  Com avaria: L39-133 nasce Em inspeção (entrada não é liberação) · Em inspeção
+OK  ticket TK-4520 repetido com outro conteúdo = conflito, nada gravado · o kg Tara kg Condição da carga Íntegra Com avaria Fora do padrão Só Íntegra entra liberada; com avaria ou fora do padrão vai para inspeção da Qualidade. Ticket TK-4520 já recebido na CG-2108 (12.050 kg líquidos) com outro conteúdo: conflito, nada gravado. Confira o ticket. Cancelar Registrar pesagem
+OK  a mesma pesagem por outro formulário (mesmo ticket e conteúdo) = a mesma carga, nada somado · ['Ticket TK-4520 já recebido na CG-2108 com o mesmo conteúdo: é a mesma carga, nada foi somado de novo.', 11, 11]
+OK  Liberar lote (Qualidade) passa a Liberado · L39-133 liberado por Qualidade (Marta): 12.050 kg aptos para reserva e venda.
+OK  reserva acima da falta do pedido é recusada junto ao formulário · arga › AVALIAÇÃO DO DESTINO DOS PEDIDOS LC-0505-2 Conforme no escopo · Mercado interno · Brasil Ver carência e destino › RESERVAS Nenhuma reserva. MOVIMENTOS MP-1012 26/09 12:47 liberação sem efeito no físico Qualidade (Marta) MP-1011 26/09 12:47 recebimento 12.050 kg CG-2108 Lúcia Cancelar Reservar
+OK  AC-16 sem sinal: a carga fica no aparelho · ['CG-2109', 'Carga CG-2109 registrada (Pivô 19, ~300 caixas): a pesar na balança. A estimativa não soma na produção. Salvo no aparelho; envia quando houver sinal.']
+OK  AC-16 a carga do aparelho não aparece na web · CG-2109
+OK  AC-16 ao voltar o sinal a carga entra uma vez (repetir o envio não duplica) · 1
+OK  AC-12 MB-07: Concluir talhão grava a CNT-0002 do Pivô 6 sem publicar (versão vigente continua a v1) · ['Contagem CNT-0002 do Pivô 6 gravada: 1 planta, peso médio 1,1 kg. Rascunho: S40 111,55 t · S41 0 t. A previsão só muda quando Ana (agrônoma) publicar.', 1]
+OK  AC-12 depois da contagem, a ação do Pivô 6 é "Publicar previsão" · ['Publicar previsão']
+OK  AC-15 no OS.dc.html, encerrar a OS-0505 com a CG-2108 a pesar fica impedido no comando, com dono Lúcia e o caminho para pesar · ['NÃO ACHEI: Conferir e encerrar', 'Em conferência', 'CARGA.dc.html#CG-2108', 'OS-0505 · Colheita · semana 39 × Em conferência Parcial · dia 2 de 3 Carga a pesar Pivô 19 · 75,11 ha · janela 21–24/09 · Sérgio 50 / 75,11 ha · 67 % A liberar Liberadas Em execução Em conferência Encerradas PRÓXIMO PASSO
+RESULTADO: OK 12/12

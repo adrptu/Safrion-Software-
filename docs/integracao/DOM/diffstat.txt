@@ -1,0 +1,19 @@
+ docs/colheita/DECISOES.md                          |   1 +
+ docs/controle-01/PLANO.md                          |   3 +
+ tools/prototipo/v37/gen37/areas/inicio.py          |   3 +-
+ tools/prototipo/v37/gen37/areas/mobile.py          |  10 +-
+ tools/prototipo/v37/gen37/areas/processo_os.py     |  40 +++-
+ tools/prototipo/v37/gen37/areas/producao.py        |  55 ++---
+ tools/prototipo/v37/gen37/cafe_apurar_nav.py       |  84 ++++++++
+ tools/prototipo/v37/gen37/cafe_apurar_test.py      |  47 +++++
+ tools/prototipo/v37/gen37/cafe_apurar_unit.js      |  83 ++++++++
+ tools/prototipo/v37/gen37/cenario.js               |  85 +++++++-
+ .../prototipo/v37/gen37/consumo_divergente_test.py |   3 +-
+ tools/prototipo/v37/gen37/dose_divergente_nav.py   | 134 ++++++++++++
+ tools/prototipo/v37/gen37/dose_divergente_test.py  |  86 ++++++++
+ tools/prototipo/v37/gen37/dose_divergente_unit.js  | 230 +++++++++++++++++++++
+ tools/prototipo/v37/gen37/inicio_entrega_unit.js   |   3 +-
+ tools/prototipo/v37/gen37/os_cenario_test.py       |  16 +-
+ tools/prototipo/v37/gen37/os_v39_bloq_test.py      |   7 +-
+ tools/prototipo/v37/gen37/producao.js              |  73 ++++---
+ 18 files changed, 886 insertions(+), 77 deletions(-)

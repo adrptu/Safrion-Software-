@@ -1,0 +1,447 @@
+From e2d1040d7519cf582655ab981a79b22e96128cc1 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Fri, 9 Oct 2026 11:31:19 +0000
+Subject: [PATCH 1/6] =?UTF-8?q?B-R8:=20diverg=C3=AAncia=20de=20consumo/dos?=
+ =?UTF-8?q?e=20no=20fecho=20do=20turno=20abre=20revis=C3=A3o=20do=20agr?=
+ =?UTF-8?q?=C3=B4nomo?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Revisão Codex 6064114787 §2 (B-R8). O consumo informado diferente do
+planejado para a área apontada (dose × área pela regra única, cenQtdTrecho)
+agora fica registrado como informado, marca o apontamento (ap.div, por
+produto, planejado × informado com unidade) e a O.S. (selo vermelho
+"Divergência de consumo/dose · produtos") e abre revisão técnica do
+agrônomo. Encerrar exige a revisão feita (cenPodeEncerrar): aceitar com
+motivo ou registrar a correção/reaplicação decidida (cenDivRever, papel
+agronomo; mesma decisão repetida não grava de novo; outra é conflito).
+
+Precisão: centésimo da unidade (a de cenQtd); nenhuma tolerância. LIM_DISP
+(20 %) é alçada de área dispensada e o ×1,5/×0,5 do ajuste é aviso de
+digitação: nenhum dos dois é tolerância de consumo. A sugestão não editada
+(estimativa) não abre divergência. Retido como duplicidade ou no aparelho,
+a revisão abre quando o apontamento soma.
+
+O.S.: osMerge põe dono e prazo da revisão (Em execução e Em conferência,
+sem o selo falso "Sobras a receber"), osEncBloq diz o bloqueio e quem
+resolve, osc_conferencia mantém o selo e a Origem guarda a revisão.
+
+Dano evitado: subdose ou superdose aplicada sem decisão do agrônomo
+passar como execução conforme (resultado técnico da lavoura e receituário).
+
+Teste: dose_divergente_test.py unit (harness Codex virou D01/D02).
+Base ecc8b00: 4/22 (vermelho; D07b mostra a O.S. encerrada com a
+divergência). Depois: 22/22.
+
+Expectativa mudada com motivo: inicio_entrega_unit.js N5 — 80 L de
+Fungicida A e 0 L de Adjuvante em 100 ha (planejado 50 L e 25 L) agora
+também mostram o selo da divergência (regra nova). Mensagem do turno:
+a divergência vem antes do "Consumo em conferência" (as frases de
+aprova_quem_decide e ap_unico W2 continuam valendo sem mudança).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01Div8EjesSwVnpSUvYjZ7kh
+---
+ .../prototipo/v37/gen37/areas/processo_os.py  |  13 +-
+ tools/prototipo/v37/gen37/cenario.js          |  48 +++++-
+ .../v37/gen37/dose_divergente_test.py         |  41 +++++
+ .../v37/gen37/dose_divergente_unit.js         | 146 ++++++++++++++++++
+ .../v37/gen37/inicio_entrega_unit.js          |   3 +-
+ 5 files changed, 241 insertions(+), 10 deletions(-)
+ create mode 100644 tools/prototipo/v37/gen37/dose_divergente_test.py
+ create mode 100644 tools/prototipo/v37/gen37/dose_divergente_unit.js
+
+diff --git a/tools/prototipo/v37/gen37/areas/processo_os.py b/tools/prototipo/v37/gen37/areas/processo_os.py
+index fa9fc0f..cab44f5 100644
+--- a/tools/prototipo/v37/gen37/areas/processo_os.py
++++ b/tools/prototipo/v37/gen37/areas/processo_os.py
+@@ -237,6 +237,7 @@ function osMerge(b,co,c){ if(!co) return b;
+   if(x.aj&&x.aj.length){ o.area=co.area; o.ajv=x.aj[x.aj.length-1].v; o.orig=(b.orig||[]).concat(x.aj.map(a=>a.t));
+     o.ins=(co.ins||[]).map(y=>{ const i=(b.ins||[]).find(z=>z.p===y.p); return Object.assign({g:y.g||''},i||{},{p:y.p,dose:y.dose,un:y.un,tot:y.tot}); }); }
+   if(x.ev&&x.ev.length) o.orig=(o.orig||[]).concat(x.ev.map(e=>e.t));   // aprovação (CMD-42) e liberação (CMD-06) na Origem
++  (co.ap||[]).filter(a=>a.rev).forEach(a=>{ o.orig=(o.orig||[]).concat(['Dia '+a.dia+' · '+CEN_DIV+' '+a.rev.dec.toLowerCase()+' por '+a.rev.quem+' às '+a.rev.at+': '+a.rev.txt]); });   // B-R8
+   if(b.area){ o.realizado=co.realizado||0; o.saldo=co.saldo||0; }
+   if(co.etapa!==b.etapa){ o.cond=osCondGen(o); o.dono=co.etapa==='Em conferência'?o.resp:''; o.prazo=co.etapa==='Em conferência'?'conferir':''; }
+   if(mine){ o.cond=x.cond; o.dono=x.dono||''; o.prazo=x.prazo||''; }
+@@ -248,12 +249,14 @@ function osMerge(b,co,c){ if(!co) return b;
+     const fz=((co.saldo||0)-osApPend(co)>0.001)&&cenIniFalta(co,r);   // componente esgotado com área a fazer (regra única de início)
+     if(fz&&fz.k==='rever'){ o.selos=o.selos.concat([{t:'Insumo esgotado · '+fz.its.map(i=>i.prod).join(', '),c:'red'}]); o.dono=OS_AGRO; o.prazo='decidir a área restante';
+       o.esg={acao:'apontar',t:'Apontar bloqueado: '+fz.t,q:fz.q}; }
+-    const dpx=(co.ap||[]).filter(a=>a.st===CEN_AP_DUP); if(dpx.length){ o.dono=CEN_CONF_AP; o.prazo='decidir se o dia '+dpx.map(a=>a.dia).join(', ')+' é outro turno'; } }   // duplicidade retida: decide a conferência (CMD-09)
++    const dpx=(co.ap||[]).filter(a=>a.st===CEN_AP_DUP); if(dpx.length){ o.dono=CEN_CONF_AP; o.prazo='decidir se o dia '+dpx.map(a=>a.dia).join(', ')+' é outro turno'; }   // duplicidade retida: decide a conferência (CMD-09)
++    else if(!o.esg&&cenDivAbertas(co).length){ o.dono=OS_AGRO; o.prazo='revisar a divergência de dose do dia '+cenDivAbertas(co).map(a=>a.dia).join(', '); } }   // B-R8: revisão técnica pendente
+   // conferência: o encerramento depende do cenário (apontamento aguardando sinal ou sobra em custódia)
+   if(co.etapa==='Em conferência'){ o.encM=cenPodeEncerrar(c,co.id);
+     if(!o.encM){ o.selos=o.selos.filter(s=>!/Sobras a receber|Aguardando sinal/i.test(s.t)); if(!mine){ o.cond='Apontamentos enviados e nada em custódia. Próximo passo: conferir e encerrar.'; o.dono=o.resp; o.prazo='conferir e encerrar'; } }
+     else if(/^Carga a pesar/.test(o.encM)){ const t='Carga a pesar';   /* colheita (R-18): carga a pesar ou no aparelho; quem recebe pesa em Produção › Cargas e recebimento */
+       if(!o.selos.some(s=>s.t===t)) o.selos=o.selos.concat([{t,c:'yellow'}]); o.dono=(typeof prRec==='function'?prRec(prFazDaOS(c,co)):'Recebimento'); o.prazo='pesar e receber a carga'; }
++    else if(o.encM.indexOf(CEN_DIV)===0){ o.dono=OS_AGRO; o.prazo='revisar a divergência de dose'; }   /* B-R8: o selo vem do cenário (cenSeloDiv) */
+     else { const sin=/sinal/.test(o.encM); const t=sin?'Aguardando sinal do app':(/duplicidade/.test(o.encM)?'Apontamento em conferência':'Sobras a receber');  // o bloqueio também na lista e no Kanban
+       if(!o.selos.some(s=>s.t===t)) o.selos=o.selos.concat([{t,c:'yellow'}]);
+       if(sin){ o.dono=o.resp; o.prazo='reconectar o app'; } else if(/duplicidade/.test(o.encM)){ o.dono=CEN_CONF_AP; o.prazo='decidir a duplicidade'; } else if(!/almoxarife/.test(o.dono||'')){ o.dono='Rui (almoxarife)'; o.prazo='receber a devolução'; } } }
+@@ -304,6 +307,8 @@ function osTrilha(o,it){ if(!it||o.etapa==='Canceladas'||(!o.reservado&&!(it.ent
+ function osLibErro(o,c0){ const c=c0||cenGet(); if(!c.ordens[o.id]) return ''; const k=cenClone(c);
+   try { osc_libEfeito(k,o.id,false,o.janela); return ''; } catch (e) { return String(e.message||e); } }   /* o motivo do Estoque, da lei ou da carência; não o perfil */
+ function osEncBloq(o){ const m=o.encM;
++  if(String(m).indexOf(CEN_DIV)===0) return {acao:'encerrar',t:'Encerrar bloqueado: divergência de consumo/dose em revisão técnica · '+cenDivAbertas(o).map(a=>'dia '+a.dia+' · '+a.div.map(cenDivTxt).join('; ')).join(' | ')+'.',
++    q:OS_AGRO+', na linha do apontamento: aceita com motivo ou registra a correção ou reaplicação.'};   /* B-R8 */
+   if(/^Carga a pesar/.test(m)){ const g=(/CG-\d+/.exec(m)||[''])[0]; return {acao:'encerrar',t:'Encerrar bloqueado: '+m.replace(/\.$/,'')+'.',q:(o.dono||'Recebimento')+' pesa e recebe a carga (registrada por engano: descarta com motivo na mesma tela); a produção do talhão só fecha com ela.',h:'CARGA.dc.html'+(g?'#'+g:''),hl:'Pesar a carga'}; }   /* colheita (R-18) */
+   if(/^Carga no aparelho/.test(m)) return {acao:'encerrar',t:'Encerrar bloqueado: '+m.replace(/\.$/,'')+'.',q:(typeof prResp==='function'?prResp(o):o.resp)+' reconecta o app; a carga entra uma vez e vai para a pesagem.'};   /* colheita sem sinal (revisão A-11): não é o recebimento que resolve */
+   if(/sinal/.test(m)) return {acao:'encerrar',t:'Encerrar bloqueado: há apontamentos no aparelho aguardando sinal.',q:o.resp+' reconecta o app; o envio é automático e não duplica.'};
+@@ -422,7 +427,7 @@ function osc_apontar(c,id,d,ha,cons,est,chave){ const R=cenApontar(c,{os:id,d,ha
+   if(R.repetido) return {msg:'Apontamento do dia '+ap.dia+' já registrado ('+nd(ap.ha)+' ha): nada foi somado de novo.'};
+   if(R.dup.length) return {msg:'Apontamento do dia '+ap.dia+' ('+nd(ha)+' ha em '+d+') em conferência: já há '+cenApDupTxt(R.dup)+' nesta data. Nada foi somado nem baixado; '+CEN_CONF_AP+' decide se é outro turno.'};
+   const un=p=>((o.ins||[]).find(x=>x.p===p)||{}).un||''; const ins=Object.keys(ap.cons||{}).map(p=>p+' '+nd(ap.cons[p])+' '+un(p)).join(', ');
+-  return {msg:'Apontamento do dia '+ap.dia+': '+nd(ha)+' ha (provisório)'+(ins?' · usado: '+ins:'')+'. Saldo '+nf(o.saldo)+' ha; a ordem continua em execução.'
++  return {msg:'Apontamento do dia '+ap.dia+': '+nd(ha)+' ha (provisório)'+(ins?' · usado: '+ins:'')+'. Saldo '+nf(o.saldo)+' ha; a ordem continua em execução.'+cenDivMsg(ap)
+     +(R.ks.length?' Consumo em conferência: '+R.ks.map(k=>cenConfTxt(k,c)).join('; ')+' · '+cenConcQuem(c,R.ks)+'.':'')}; }
+ function osc_apDecidir(c,id,dia,modo,us,ator){ return cenApDecidir(c,id,dia,modo,ator,us); }   /* CMD-09 (quem confere): 'anterior' | 'este' | 'somar'; us = usado informado na conferência */
+ // linhas de consumo do formulário (O.S. e Mapa), a mesma regra do MB-03: com o operador, sugere dose × área do trecho (editável, estimativa);
+@@ -441,7 +446,7 @@ function osApColeta(L){ const cons={},est=[]; let erro='';
+ function osApDupAviso(c,o,d){ const co=c.ordens[o.id]; if(!co||!/^\d\d\/\d\d$/.test(d||'')) return '';
+   const l=cenApDup(co,{d,parc:null,chave:'?',origem:'web'}); return l.length?'Já há '+cenApDupTxt(l)+' em '+d+'. Se for outro turno, salve: ele fica em conferência com '+CEN_CONF_AP+' e só soma depois da decisão.':''; }
+ function osc_conferencia(c,id){ const o=osc_o(c,id); if(o.etapa!=='Em execução') throw new Error(id+' não está em execução.');
+-  if(o.area&&o.saldo>0.001) throw new Error('Ainda há '+cenNum(o.saldo)+' ha de saldo.'); o.etapa='Em conferência'; o.selos=[];
++  if(o.area&&o.saldo>0.001) throw new Error('Ainda há '+cenNum(o.saldo)+' ha de saldo.'); o.etapa='Em conferência'; o.selos=[]; cenSeloDiv(c,id);   /* B-R8: a revisão pendente segue visível */
+   return {msg:id+' enviada para conferência.'}; }
+ // encerrar: só com apontamentos enviados e nada em custódia (cenPodeEncerrar); os apontamentos passam a conferidos
+ function osc_encerrar(c,id){ const o=osc_o(c,id); if(o.etapa!=='Em conferência') throw new Error(id+' não está em conferência.');
+@@ -515,7 +520,7 @@ function dotSt(c){ const cc=G2C[c]||G2C.gray; return 'width:6px;height:6px;borde
+ // ===== O.S. × cenário compartilhado (cenario.js, o mesmo estado do Estoque e do App) =====
+ // Fase, realizado/saldo, apontamentos, requisição e insumos vêm de cenGet(); o que o cenário não tem vem de OSD (registro).
+ // Gancho de teste/inspeção (o script da tela roda isolado): os testes os_* leem e mudam o cenário na própria página.
+-try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenDevolver, cenConfirmarRecebimento, cenIniciarTurno, cenPausar, cenFecharTurno, cenOcorrencia, cenSinal, cenPodeEncerrar, osc_liberar, osc_ajustar, osc_encerrar, osc_apontar, osc_dispensar, osc_cancelar, osc_apDecidir }; } catch (e) {}
++try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenDevolver, cenConfirmarRecebimento, cenIniciarTurno, cenPausar, cenFecharTurno, cenOcorrencia, cenSinal, cenPodeEncerrar, osc_liberar, osc_ajustar, osc_encerrar, osc_apontar, osc_dispensar, osc_cancelar, osc_apDecidir, osc_conferencia, cenDivRever }; } catch (e) {}
+ // filtros do topo (Fazenda e Safra): lista, Kanban, chips de fase e selo do cabeçalho mostram só as ordens do recorte
+ function mfFaz(self){ return self.state.mf_faz||'Santa Rita'; }
+ function mfSaf(self){ return self.state.mf_saf||'Todas'; }
+diff --git a/tools/prototipo/v37/gen37/cenario.js b/tools/prototipo/v37/gen37/cenario.js
+index d0161d8..b0937b4 100644
+--- a/tools/prototipo/v37/gen37/cenario.js
++++ b/tools/prototipo/v37/gen37/cenario.js
+@@ -254,6 +254,41 @@ function cenApImp(k) { const n = x => (x === undefined || x === null || x === ''
+ function cenApDupTxt(l) { return l.map(a => 'dia ' + a.dia + ', ' + cenNum(a.ha) + ' ha ' + (a.origem === 'app' ? 'pelo app' + (a.quem ? ' (' + a.quem + ')' : '') : 'pela web')).join('; '); }
+ function cenSeloAp(c, id) { const o = c.ordens[id]; if (!o) return; const t = 'Apontamento em conferência';
+   o.selos = (o.selos || []).filter(s => s.t !== t); if ((o.ap || []).some(a => a.st === CEN_AP_DUP)) o.selos.push({ t, c: 'yellow' }); }
++// ---------- Divergência de consumo/dose no apontamento (B-R8; PRD 41: dose é decisão agronômica; aprovar ≠ executar conforme) ----------
++// Planejado do trecho = dose × área pela regra única (cenQtdTrecho); informado = o fato do apontamento (o que veio editado, não a sugestão).
++// Precisão: a da regra de quantidade, centésimo da unidade (cenQtd); nenhuma tolerância. LIM_DISP (20 %) é alçada de área dispensada e o
++// ×1,5/×0,5 do ajuste é aviso de digitação de dose: nenhum dos dois é tolerância de consumo, por isso não são usados aqui.
++// Divergente: o consumo fica como informado (nada é forçado à dose), o apontamento guarda planejado × informado por produto (ap.div), a O.S.
++// ganha o selo e o agrônomo revisa: aceita com motivo ou registra a correção/reaplicação; encerrar exige a revisão feita (cenPodeEncerrar).
++// Dano evitado: subdose ou superdose aplicada sem decisão do agrônomo passar como execução conforme (resultado técnico e receituário).
++const CEN_DIV = 'Divergência de consumo/dose';
++function cenApDiv(o, ap, antes) {
++  const inf = ap.inf || {}, cons = ap.cons || {}, out = []; const c2 = x => Math.round(Number(x) * 100);
++  (o.ins || []).forEach(x => { if (!inf[x.p] || cons[x.p] === undefined) return; const plan = cenQtdTrecho(x.dose, antes, ap.ha), q = Number(cons[x.p]);
++    if (c2(q) !== c2(plan)) out.push({ p: x.p, un: x.un, plan, inf: q }); });
++  Object.keys(inf).forEach(p => { if (!(o.ins || []).some(x => x.p === p) && Number(cons[p]) > 0) out.push({ p, un: '', plan: 0, inf: Number(cons[p]) }); });   // fora da ordem: planejado 0
++  return out; }
++function cenDivTxt(d) { return d.p + ' planejado ' + cenNum(d.plan) + (d.un ? ' ' + d.un : '') + ' × informado ' + cenNum(d.inf) + (d.un ? ' ' + d.un : ''); }
++function cenDivAbertas(o) { return (o.ap || []).filter(a => cenApSomado(a) && (a.div || []).length && !a.rev); }   // só o que somou: retido ou no aparelho ainda não conta
++function cenSeloDiv(c, id) { const o = c.ordens[id]; if (!o) return; o.selos = (o.selos || []).filter(s => String(s.t).indexOf(CEN_DIV) !== 0);
++  const ab = cenDivAbertas(o); if (!ab.length) return; const ps = [];
++  ab.forEach(a => a.div.forEach(d => { if (ps.indexOf(d.p) < 0) ps.push(d.p); })); o.selos.push({ t: CEN_DIV + ' · ' + ps.join(', '), c: 'red' }); }
++function cenDivMsg(ap) { return (ap && (ap.div || []).length) ? ' ' + CEN_DIV + ': ' + ap.div.map(cenDivTxt).join('; ') + ' · revisão técnica de ' + g2quem('agronomo') + '.' : ''; }
++// revisão técnica (agrônomo): dec 'aceitar' (com motivo) ou 'corrigir' (correção/reaplicação decidida, descrita). O consumo informado fica.
++// Mesma decisão de novo = já registrada (nada muda); outra decisão no mesmo dia = conflito (ENG-021).
++function cenDivRever(c, id, dia, dec, texto, ator) {
++  const quem = cenExige(ator, 'agronomo', 'Revisar a divergência de consumo/dose do dia ' + dia + ' da ' + id);
++  const o = c.ordens[id]; const ap = o && (o.ap || []).find(a => a.dia === dia && (a.div || []).length && cenApSomado(a));
++  if (!ap) throw new Error('O dia ' + dia + ' da ' + id + ' não tem divergência de consumo/dose em revisão.');
++  if (['aceitar', 'corrigir'].indexOf(dec) < 0) throw new Error('Decisão desconhecida: ' + dec + '.');
++  const txt = String(texto || '').trim(); const D = dec === 'aceitar' ? 'Aceita' : 'Correção decidida';
++  if (ap.rev) { if (ap.rev.dec === D && ap.rev.txt === txt) return { msg: 'Divergência do dia ' + dia + ' da ' + id + ' já revisada (' + ap.rev.dec.toLowerCase() + ' por ' + ap.rev.quem + ' às ' + ap.rev.at + '): nada foi gravado de novo.', repetido: true };
++    throw new Error('A divergência do dia ' + dia + ' da ' + id + ' já foi revisada (' + ap.rev.dec.toLowerCase() + ' por ' + ap.rev.quem + ' às ' + ap.rev.at + '): outra decisão é conflito, nada gravado.'); }
++  if (!txt) throw new Error((dec === 'aceitar' ? 'Informe o motivo para aceitar a divergência do dia ' : 'Descreva a correção ou reaplicação decidida para o dia ') + dia + ' da ' + id + '. Nada foi alterado.');
++  ap.rev = { dec: D, txt, quem, at: cenAgora() }; const rp = cenRevisao(ator, ap.quem, 'apontou'); if (rp) ap.rev.rp = rp;
++  cenSeloDiv(c, id); const t1 = txt.replace(/[.\s]+$/, '');
++  return { msg: (dec === 'aceitar' ? 'Divergência de consumo/dose do dia ' + dia + ' da ' + id + ' aceita por ' + quem + ': ' + t1 + '. O consumo informado fica como está.'
++    : 'Correção registrada por ' + quem + ' para o dia ' + dia + ' da ' + id + ': ' + t1 + '. O consumo informado fica como está; a reaplicação sai em nova ordem.') + (rp ? ' Fica ' + rp + '.' : '') }; }
+ // baixa do consumo do apontamento, uma vez: até a custódia baixa; acima vira conferência com o almoxarife (CONC-07; CMD-50)
+ function cenApBaixa(c, o, ap) {
+   const r = o.req && c.reqs[o.req]; const cons = ap.cons = ap.cons || {}; const inf = ap.inf || {}; const conf = {};
+@@ -282,7 +317,7 @@ function cenApEntra(c, o, ap, baixado) {
+       cenSeloConf(c, o.id); }
+     cenSeloAp(c, o.id); return { ap, ks: [], dup }; }
+   const ks = baixado ? [] : cenApBaixa(c, o, ap);
+-  o.realizado += ap.ha; o.saldo = Math.max(0, o.saldo - ap.ha);
++  o.realizado += ap.ha; o.saldo = Math.max(0, o.saldo - ap.ha); cenSeloDiv(c, o.id);   // divergência de dose: revisão abre quando o apontamento soma (B-R8)
+   return { ap, ks, dup: [] }; }
+ function cenApontar(c, k) {
+   const o = c.ordens[k.os]; if (!o) throw new Error('Ordem não encontrada.');
+@@ -306,6 +341,7 @@ function cenApontar(c, k) {
+   // previstos são plano, não fato: a web mantém os próximos dias (renumerados) e o app não os guarda — o que cada tela já fazia
+   const ap = { d: k.d, dia, ha, h: k.h || null, parc: k.parc || null, st: 'Provisório', cons, inf, obs: k.obs || '', origem: k.origem || 'web', quem,
+     chave: k.chave || ((k.origem === 'app' ? 'TU-' : 'W-') + k.os + '-dia' + dia), imp: cenApImp(k), at: cenAgora(), sinc: k.origem === 'app' ? cenOnline(c) : true };
++  { const dv = cenApDiv(o, ap, (o.realizado || 0) + pend); if (dv.length) ap.div = dv; }   // B-R8: antes da baixa (que tira a linha 0 de ap.cons)
+   const reter = ap.sinc && cenApDup(o, ap).length > 0;   // previsto só sai quando o apontamento soma
+   const prev = k.origem === 'app' ? [] : (o.ap || []).filter(a => a.st === 'Previsto').slice(reter ? 0 : 1).map((x, i) => Object.assign({}, x, { dia: dia + 1 + i }));
+   o.ap = feitos.concat([ap]).concat(prev);
+@@ -331,7 +367,7 @@ function cenApDecidir(c, id, dia, modo, ator, us) {
+   if (modo !== 'somar' && !viv.length) throw new Error('O dia ' + de0 + ' já não vale (estornado ou guardado): o dia ' + dia + ' só pode ser somado como outro turno.');
+   if (modo === 'anterior') {
+     ap.dec = { modo, quem, at: cenAgora() }; guarda(ap, 'Mesmo turno do dia ' + de + ': guardado como duplicidade, nada baixado.');
+-    ag.forEach(k => { k.estado = 'Recusado'; k.decisao = 'mesmo turno do dia ' + de; k.por = quem; }); cenSeloAp(c, id); cenSeloConf(c, id);
++    ag.forEach(k => { k.estado = 'Recusado'; k.decisao = 'mesmo turno do dia ' + de; k.por = quem; }); cenSeloAp(c, id); cenSeloConf(c, id); cenSeloDiv(c, id);
+     return { msg: 'Dia ' + dia + ' guardado como duplicidade do dia ' + de + ': nada foi somado nem baixado; o relato fica no histórico.' }; }
+   const K = modo === 'este' ? (viv.length === 1 && cenApSomado(viv[0]) ? viv[0] : null) : null;
+   if (modo === 'este') { if (!K) throw new Error('"Vale este" só contra um apontamento já somado: decida antes o dia ' + (de || de0) + '.');
+@@ -348,8 +384,9 @@ function cenApDecidir(c, id, dia, modo, ator, us) {
+     o.realizado -= K.ha; o.saldo += K.ha; K.dec = { modo: 'estornado', quem, at: ap.dec.at, vale: dia };
+     guarda(K, 'Estornado: mesmo turno do dia ' + dia + ', que ficou valendo.'); est = ' O dia ' + K.dia + ' foi estornado e fica guardado como duplicidade.'; }
+   ap.st = 'Provisório'; ag.forEach(k => { k.estado = 'Em conferência'; }); ap.cons = dc.cons; ap.inf = dc.inf;
++  { const dv = cenApDiv(o, ap, b.real + b.pend); if (dv.length) ap.div = dv; else delete ap.div; }   // B-R8: o usado informado na conferência também é fato
+   const ks = cenApBaixa(c, o, ap); const m0 = mvOf(ap); if (m0) m0.obs = (K ? 'Mesmo turno: vale este dia' : 'Somado como outro turno') + ' · ' + quem + '.';
+-  o.realizado += ap.ha; o.saldo = Math.max(0, o.saldo - ap.ha); cenSeloAp(c, id); cenSeloConf(c, id);
++  o.realizado += ap.ha; o.saldo = Math.max(0, o.saldo - ap.ha); cenSeloAp(c, id); cenSeloConf(c, id); cenSeloDiv(c, id);
+   if (!(o.saldo > 1e-9)) o.ap = o.ap.filter(a => a.st !== 'Previsto');
+   return { msg: 'Dia ' + dia + (K ? ' vale como o turno de ' + ap.d + ': ' : ' somado como outro turno: ') + cenNum(ap.ha) + ' ha · saldo ' + cenNum(o.saldo) + ' ha.' + est
+     + (ks.length || ag.length ? ' Consumo em conferência: ' + cenConcQuem(c, ks.concat(ag)) + '.' : '') }; }
+@@ -363,7 +400,7 @@ function cenFecharTurno(c, ha, horas, consumo, obs, est) {
+   if (R.repetido) return { msg: 'Turno já registrado como dia ' + ap.dia + ' (' + cenNum(ap.ha, 1) + ' ha): nada foi somado de novo.' };
+   if (R.dup.length) return { msg: 'Turno fechado: ' + cenNum(ha, 1) + ' ha em ' + cenNum(horas, 1) + ' h, em conferência: já há ' + cenApDupTxt(R.dup) + ' em ' + ap.d
+     + '. Nada foi somado nem baixado; ' + CEN_CONF_AP + ' decide se é outro turno.' };
+-  return { msg: 'Turno fechado: ' + cenNum(ha, 1) + ' ha em ' + cenNum(horas, 1) + ' h' + (ap.sinc ? '.' : ' · salvo no aparelho, envia quando houver sinal.') + ' A ordem continua em execução.'
++  return { msg: 'Turno fechado: ' + cenNum(ha, 1) + ' ha em ' + cenNum(horas, 1) + ' h' + (ap.sinc ? '.' : ' · salvo no aparelho, envia quando houver sinal.') + ' A ordem continua em execução.' + cenDivMsg(ap)
+     + (R.ks.length ? ' Consumo em conferência: ' + R.ks.map(k => cenConfTxt(k, c)).join('; ') + ' · ' + cenConcQuem(c, R.ks) + '.' : '') };
+ }
+ // Conciliar o consumo em conferência (CMD-50, almoxarife). Prévia = efeito: aceitar baixa o relatado uma vez; o que passa da custódia
+@@ -426,11 +463,12 @@ function cenSinal(c, online) {
+   c.app.fila = []; return { msg: (n ? (n + (n > 1 ? ' registros enviados' : ' registro enviado') + ' ao voltar o sinal.') : 'Sinal de volta. Nada pendente.')
+     + (ret.length ? ' Em conferência de duplicidade: ' + ret.join('; ') + '. Nada foi somado; ' + CEN_CONF_AP + ' decide.' : '') };
+ }
+-// Encerrar exige apontamentos enviados e nada em custódia (sobra devolvida).
++// Encerrar exige apontamentos enviados, nada em custódia (sobra devolvida) e a divergência de dose revisada pelo agrônomo (B-R8).
+ function cenPodeEncerrar(c, id) { const o = c.ordens[id]; const r = o.req && c.reqs[o.req];
+   if ((o.ap || []).some(a => a.sinc === false)) return 'Há apontamentos no aparelho aguardando sinal.';
+   const dp = (o.ap || []).filter(a => a.st === CEN_AP_DUP); if (dp.length) return 'Apontamento em conferência de duplicidade: ' + dp.map(a => 'dia ' + a.dia + ' (' + a.d + ', ' + cenNum(a.ha) + ' ha)').join(', ') + '. ' + CEN_CONF_AP + ' decide se é outro turno.';
+   const cf = cenConfAbertas(c, id); if (cf.length) return 'Consumo em conferência: ' + cf.map(k => cenConfTxt(k, c)).join('; ') + '. No Estoque: ' + cenConcQuem(c, cf) + '.';
+   const cust = r ? r.itens.filter(i => i.custodia > 0.001) : []; if (cust.length) return 'Sobra em custódia: ' + cust.map(i => i.prod + ' ' + cenNum(i.custodia) + ' ' + i.un).join(', ') + '. Receba a devolução no Estoque.';
++  const dv = cenDivAbertas(o); if (dv.length) return CEN_DIV + ' em revisão técnica: ' + dv.map(a => 'dia ' + a.dia + ' · ' + a.div.map(cenDivTxt).join('; ')).join(' | ') + '. ' + g2quem('agronomo') + ' aceita com motivo ou registra a correção na linha do apontamento.';   // B-R8
+   if (typeof prPodeEncerrar === 'function') { const pm = prPodeEncerrar(c, id); if (pm) return pm; }   // colheita: nenhuma carga a pesar ou sem sinal (R-18)
+   return ''; }
+diff --git a/tools/prototipo/v37/gen37/dose_divergente_test.py b/tools/prototipo/v37/gen37/dose_divergente_test.py
+new file mode 100644
+index 0000000..982841d
+--- /dev/null
++++ b/tools/prototipo/v37/gen37/dose_divergente_test.py
+@@ -0,0 +1,41 @@
++# -*- coding: utf-8 -*-
++"""B-R8 · divergência de consumo/dose no fecho do turno (revisão Codex 6064114787 §2; harness "Prova focal recuperável B-R8" virou teste).
++unit: monta o JS real (perfis + cenario.js + OSD do gerador + núcleo da O.S. com carência) e roda dose_divergente_unit.js no node.
++nav:  Chrome real sobre o mesmo cenário (localStorage): app MB-03 a 390 px fecha o turno com dose divergente e mostra o recibo;
++      O.S. (1440 px e 390 px) mostra o selo na lista, no Kanban e no painel, a linha do apontamento com planejado × informado,
++      recusa de quem não é agrônomo, motivo obrigatório, aceite de Ana, repetição sem efeito e o encerramento só depois da revisão.
++Uso (de gen37/, depois do build e do montar_render): python3 dose_divergente_test.py [unit|nav]   (sem argumento: unit; sai 1 se alguma falhar)"""
++import os, sys, json, subprocess, tempfile, time
++os.environ.setdefault('SAFRION_DADOS', 'sintetico')
++HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE); os.chdir(HERE)
++MODOS = sys.argv[1:] or ['unit']
++FALHAS = 0
++
++
++def unit():
++    import cenario
++    import areas.processo_os as P
++    g2 = [l for l in open(os.path.join(HERE, 'g2lib.js'), encoding='utf-8') if l.startswith('function g2num')][0]
++    pre = "var window={addEventListener(){}}; var localStorage=undefined; var location={hash:''};\n" + g2 + cenario.perfis_js()
++    osd = dict(ords=P._ordens(), nova=P._nova_ordem_dados(), aloc={}, agf={})
++    src = (pre + cenario.js_prefixo() + 'const OSD = ' + json.dumps(osd, ensure_ascii=False) + ';\nconst RC_OS=[];\n' + P.JS_NUCLEO + '\n'
++           + open(os.path.join(HERE, 'dose_divergente_unit.js'), encoding='utf-8').read())
++    fd, p = tempfile.mkstemp(prefix='dose_div_', suffix='.js')
++    with os.fdopen(fd, 'w', encoding='utf-8') as f: f.write(src)
++    try: r = subprocess.run(['node', p], capture_output=True, text=True, timeout=120)
++    finally: os.unlink(p)
++    for l in r.stdout.splitlines():
++        if l.startswith('REPRO'): print(l[:900])
++    L = [l for l in r.stdout.splitlines() if l.startswith('[{')]
++    if r.returncode or not L: print('FALHA motor JS:', r.stderr[-1500:]); return 1
++    res = json.loads(L[-1]); f = 0
++    for x in res:
++        print(('OK    ' if x['ok'] else 'FALHA ') + x['n'] + ('' if x['ok'] else ' · ' + x['info'][:500])); f += not x['ok']
++    print(f'RESULTADO unit: {len(res) - f}/{len(res)}'); return 1 if f else 0
++
++
++if 'unit' in MODOS: FALHAS += unit()
++if 'nav' in MODOS:
++    import dose_divergente_nav
++    FALHAS += dose_divergente_nav.rodar()
++sys.exit(1 if FALHAS else 0)
+diff --git a/tools/prototipo/v37/gen37/dose_divergente_unit.js b/tools/prototipo/v37/gen37/dose_divergente_unit.js
+new file mode 100644
+index 0000000..a6e9f95
+--- /dev/null
++++ b/tools/prototipo/v37/gen37/dose_divergente_unit.js
+@@ -0,0 +1,146 @@
++// B-R8 · divergência de consumo/dose no fecho do turno (revisão Codex 6064114787 §2 e "Prova focal recuperável B-R8") · node, sem navegador.
++// Carregado depois de: g2num + perfis + CEN0 + cenario.js + OSD + núcleo da O.S. (dose_divergente_test.py). Dados sintéticos.
++// Regra: o consumo informado diferente do planejado para a área apontada (dose × área pela regra única, centésimo da unidade) é gravado
++// como informado, marca o apontamento e a O.S. ("Divergência de consumo/dose", por produto, planejado × informado com unidade) e abre
++// revisão técnica do agrônomo, resolvida (aceitar com motivo ou registrar a correção) antes do encerramento final. Dano evitado: subdose
++// ou superdose aplicada sem decisão do agrônomo passar por execução conforme (resultado técnico da lavoura e receituário).
++const R = []; function ok(n, c, info) { R.push({ n, ok: !!c, info: c ? '' : JSON.stringify(info === undefined ? '' : info).slice(0, 900) }); }
++const TRY = (f) => { try { return { r: f() }; } catch (e) { return { erro: String(e.message || e) }; } };
++const SELO = 'Divergência de consumo/dose';
++const temSelo = (o) => (o.selos || []).filter(s => String(s.t).indexOf(SELO) === 0);
++const MUD = (c, fn) => { const x = cenClone(c); try { const r = fn(x) || {}; Object.keys(c).forEach(k => delete c[k]); Object.assign(c, x); return r; } catch (e) { return { erro: String(e.message || e) }; } };
++const ABERTAS = (o) => (typeof cenDivAbertas === 'function') ? cenDivAbertas(o) : [];
++const REVER = (c, id, dia, dec, txt, ator) => MUD(c, x => cenDivRever(x, id, dia, dec, txt, ator));
++// a mesma preparação do harness Codex: OS-0430 aprovada e liberada por Ana, três insumos entregues a Marcos e confirmados, turno iniciado
++function prep() { const c = cenClone(CEN0), id = 'OS-0430';
++  const lib = osc_liberar(c, id, false, '', 'Ana'); const o = c.ordens[id], rid = o.req;
++  c.reqs[rid].itens.forEach(i => cenEntregar(c, rid, i.prod, i.solicitado, 'Marcos', 'Rui'));
++  cenConfirmarRecebimento(c, rid); cenIniciarTurno(c, id); return { c, id, o, rid, lib }; }
++const IT = (c, rid, p) => c.reqs[rid].itens.find(i => i.prod === p);
++
++// ---- D01 · reprodução Codex (B-R8): 10 ha, informado 20 / 0 / 0 contra 20 / 10 / 5 planejado ----
++{ const { c, id, o, rid } = prep();
++  const esperado = Object.fromEntries(o.ins.map(i => [i.p, cenQtdTrecho(i.dose, o.realizado, 10)]));
++  const ret = TRY(() => cenFecharTurno(c, 10, 1, { 'Glifosato 480': 20, '2,4-D 806': 0, 'Óleo mineral': 0 }, 'Contraprova sintética Codex B-R8', []));
++  const ap = o.ap.filter(a => a.st !== 'Previsto').slice(-1)[0] || {};
++  console.log('REPRO B-R8 ' + JSON.stringify({ esperado, retorno: ret, realizado: o.realizado, saldo: o.saldo, st: ap.st, div: ap.div || null, selos: o.selos }));
++  ok('D01a planejado do trecho pela regra única: 20 / 10 / 5 L para 10 ha', esperado['Glifosato 480'] === 20 && esperado['2,4-D 806'] === 10 && esperado['Óleo mineral'] === 5, esperado);
++  ok('D01b o fato fica como informado: 10 ha realizados, apontamento Provisório, Glifosato 20 L baixado e 2,4-D e Óleo sem baixa (nada forçado à dose)',
++     !ret.erro && o.realizado === 10 && ap.st === 'Provisório' && IT(c, rid, 'Glifosato 480').consumido === 20 && IT(c, rid, '2,4-D 806').consumido === 0 && IT(c, rid, 'Óleo mineral').consumido === 0,
++     [ret, o.realizado, ap.st, c.reqs[rid].itens.map(i => [i.prod, i.consumido, i.custodia])]);
++  const dv = (ap.div || []).map(d => d.p + ':' + d.plan + '>' + d.inf + ' ' + d.un).join(' | ');
++  ok('D01c o apontamento guarda a divergência por produto, planejado × informado com unidade (2,4-D 806 10 → 0 L; Óleo mineral 5 → 0 L)',
++     dv === '2,4-D 806:10>0 L | Óleo mineral:5>0 L', ap.div);
++  const s = temSelo(o);
++  ok('D01d a O.S. ganha o selo vermelho "Divergência de consumo/dose · 2,4-D 806, Óleo mineral"',
++     s.length === 1 && s[0].t === SELO + ' · 2,4-D 806, Óleo mineral' && s[0].c === 'red', o.selos);
++  ok('D01e revisão técnica pendente do agrônomo (uma, do dia 1)', ABERTAS(o).length === 1 && ABERTAS(o)[0].dia === 1, ABERTAS(o).map(a => a.dia));
++  ok('D01f o fecho do turno diz o que divergiu e quem revisa, sem "S2"',
++     !ret.erro && ret.r.msg === 'Turno fechado: 10 ha em 1 h. A ordem continua em execução. Divergência de consumo/dose: 2,4-D 806 planejado 10 L × informado 0 L; Óleo mineral planejado 5 L × informado 0 L · revisão técnica de Ana (agrônoma).'
++     && !/S2/.test(ret.r.msg), ret); }
++
++// ---- D02 · controle Codex: informado = planejado (20 / 10 / 5) não abre nada; mensagem de sempre ----
++{ const { c, o } = prep();
++  const ret = TRY(() => cenFecharTurno(c, 10, 1, { 'Glifosato 480': 20, '2,4-D 806': 10, 'Óleo mineral': 5 }, '', []));
++  const ap = o.ap.filter(a => a.st !== 'Previsto').slice(-1)[0] || {};
++  ok('D02 controle 20 / 10 / 5: sem divergência, sem selo, sem revisão; mesma mensagem de fecho',
++     !ret.erro && ret.r.msg === 'Turno fechado: 10 ha em 1 h. A ordem continua em execução.' && !(ap.div || []).length && !temSelo(o).length && !ABERTAS(o).length
++     && JSON.stringify(ap.cons) === JSON.stringify({ 'Glifosato 480': 20, '2,4-D 806': 10, 'Óleo mineral': 5 }), [ret, ap.div, o.selos, ap.cons]); }
++
++// ---- D03 · sugestão não editada (est) é estimativa, não fato informado: não abre divergência ----
++{ const { c, o } = prep();
++  const ret = TRY(() => cenFecharTurno(c, 10, 1, { 'Glifosato 480': 20, '2,4-D 806': 10, 'Óleo mineral': 5 }, '', ['Glifosato 480', '2,4-D 806', 'Óleo mineral']));
++  ok('D03 sugestão dose × área não editada: sem divergência nem selo', !ret.erro && !temSelo(o).length && !ABERTAS(o).length, [ret, o.selos]); }
++
++// ---- D04 · precisão: centésimo da unidade (a da regra de quantidade, cenQtd); nenhuma tolerância inventada ----
++{ const a = prep(); TRY(() => cenFecharTurno(a.c, 10, 1, { 'Glifosato 480': 20.004, '2,4-D 806': 10, 'Óleo mineral': 5 }, '', []));
++  const b = prep(); TRY(() => cenFecharTurno(b.c, 10, 1, { 'Glifosato 480': 20.01, '2,4-D 806': 10, 'Óleo mineral': 5 }, '', []));
++  const db = (b.o.ap.slice(-1)[0] || {}).div || [];
++  ok('D04 20,004 L arredonda para 20,00 (igual ao planejado); 20,01 L diverge (centésimo, sem tolerância)',
++     !temSelo(a.o).length && db.length === 1 && db[0].p === 'Glifosato 480' && db[0].plan === 20 && db[0].inf === 20.01, [a.o.selos, db]); }
++
++// ---- D05 · revisão: só o agrônomo; motivo obrigatório; recusa não muda nada ----
++{ const { c, id, o } = prep(); TRY(() => cenFecharTurno(c, 10, 1, { 'Glifosato 480': 20, '2,4-D 806': 0, 'Óleo mineral': 0 }, '', []));
++  const antes = JSON.stringify(c);
++  const r1 = REVER(c, id, 1, 'aceitar', 'chuva lavou a calda', 'Rui');
++  ok('D05a Rui (almoxarife) não revisa: recusado com quem decide, nada muda',
++     r1.erro === 'Revisar a divergência de consumo/dose do dia 1 da OS-0430: decisão de Ana (agrônoma). Nada foi alterado.' && JSON.stringify(c) === antes, r1);
++  const r2 = REVER(c, id, 1, 'aceitar', '   ', 'Ana');
++  ok('D05b aceitar sem motivo é recusado, nada muda', r2.erro === 'Informe o motivo para aceitar a divergência do dia 1 da OS-0430. Nada foi alterado.' && JSON.stringify(c) === antes, r2);
++  const r3 = REVER(c, id, 2, 'aceitar', 'x', 'Ana');
++  ok('D05c dia sem divergência em revisão é recusado', /não tem divergência de consumo\/dose em revisão/.test(r3.erro || '') && JSON.stringify(c) === antes, r3);
++  const r4 = REVER(c, id, 1, 'aceitar', 'Mistura sem 2,4-D por deriva no vizinho; controle conferido em campo', 'Ana');
++  const ap = o.ap.find(a => a.dia === 1) || {}; const ap2 = c.ordens[id].ap.find(a => a.dia === 1) || {};
++  ok('D05d Ana (agrônoma) aceita com motivo: revisão gravada com autor, selo sai, consumo informado continua como está',
++     !r4.erro && ap2.rev && ap2.rev.dec === 'Aceita' && ap2.rev.quem === 'Ana (agrônoma)' && /deriva/.test(ap2.rev.txt) && !temSelo(c.ordens[id]).length && !ABERTAS(c.ordens[id]).length
++     && IT(c, c.ordens[id].req, '2,4-D 806').consumido === 0 && r4.msg === 'Divergência de consumo/dose do dia 1 da OS-0430 aceita por Ana (agrônoma): Mistura sem 2,4-D por deriva no vizinho; controle conferido em campo. O consumo informado fica como está.',
++     [r4, ap2.rev, c.ordens[id].selos]);
++  // repetição (mesmo conteúdo) não grava de novo; outro conteúdo é conflito
++  const depois = JSON.stringify(c);
++  const r5 = REVER(c, id, 1, 'aceitar', 'Mistura sem 2,4-D por deriva no vizinho; controle conferido em campo', 'Ana');
++  const r6 = REVER(c, id, 1, 'corrigir', 'Reaplicar', 'Ana');
++  ok('D05e repetir a mesma revisão não grava de novo; outra decisão no mesmo dia é conflito, nada muda',
++     !r5.erro && r5.repetido && /já revisada/.test(r5.msg) && /conflito/.test(r6.erro || '') && JSON.stringify(c) === depois, [r5, r6]); }
++
++// ---- D06 · registrar correção/reaplicação decidida pelo agrônomo ----
++{ const { c, id } = prep(); TRY(() => cenFecharTurno(c, 10, 1, { 'Glifosato 480': 20, '2,4-D 806': 0, 'Óleo mineral': 0 }, '', []));
++  const r0 = REVER(c, id, 1, 'corrigir', '', 'Ana');
++  const r = REVER(c, id, 1, 'corrigir', 'Reaplicar 2,4-D 806 1 L/ha e Óleo mineral 0,5 L/ha nos 10 ha em nova O.S.', 'Ana'); const ap = c.ordens[id].ap.find(a => a.dia === 1) || {};
++  ok('D06 correção sem texto é recusada; com o texto, gravada como "Correção decidida" por Ana e o selo sai',
++     r0.erro === 'Descreva a correção ou reaplicação decidida para o dia 1 da OS-0430. Nada foi alterado.' && !r.erro && ap.rev && ap.rev.dec === 'Correção decidida' && !temSelo(c.ordens[id]).length
++     && r.msg === 'Correção registrada por Ana (agrônoma) para o dia 1 da OS-0430: Reaplicar 2,4-D 806 1 L/ha e Óleo mineral 0,5 L/ha nos 10 ha em nova O.S. O consumo informado fica como está; a reaplicação sai em nova ordem.',
++     [r0, r, ap.rev]); }
++
++// ---- D07 · encerramento final exige a revisão resolvida (conferência, painel e Kanban leem o mesmo estado) ----
++{ const { c, id, rid } = prep();
++  // 160 ha num turno com 2,4-D abaixo do planejado (100 L × 160 L); o resto conforme; sobra devolvida
++  TRY(() => cenFecharTurno(c, 160, 8, { 'Glifosato 480': 320, '2,4-D 806': 100, 'Óleo mineral': 80 }, '', []));
++  const dv = IT(c, rid, '2,4-D 806').custodia; MUD(c, x => cenDevolver(x, rid, '2,4-D 806', dv, true, 'Rui'));
++  const cf = MUD(c, x => osc_conferencia(x, id));
++  const o = c.ordens[id]; const pe = cenPodeEncerrar(c, id);
++  ok('D07a enviada para conferência, o selo continua e o encerramento diz a divergência e quem revisa',
++     !cf.erro && o.etapa === 'Em conferência' && temSelo(o).length === 1 && temSelo(o)[0].t === SELO + ' · 2,4-D 806'
++     && pe === 'Divergência de consumo/dose em revisão técnica: dia 1 · 2,4-D 806 planejado 160 L × informado 100 L. Ana (agrônoma) aceita com motivo ou registra a correção na linha do apontamento.',
++     [cf, o.etapa, o.selos, pe]);
++  const en = MUD(c, x => osc_encerrar(x, id));
++  ok('D07b encerrar é recusado e nada muda', /^Encerrar bloqueado: Divergência de consumo\/dose em revisão técnica/.test(en.erro || '') && c.ordens[id].etapa === 'Em conferência', en);
++  const OS0 = (OSD.ords || []).find(b => b.id === id); const m = osMerge(Object.assign(cenClone(OS0), { selos: [] }), c.ordens[id], c); const pb = osProx(m, g2pf('Ana'));
++  ok('D07c O.S./Kanban (osMerge): selo, dono Ana (agrônoma) e próximo passo bloqueado com quem resolve; sem "Sobras a receber"',
++     m.selos.some(s => s.t === SELO + ' · 2,4-D 806' && s.c === 'red') && !m.selos.some(s => s.t === 'Sobras a receber') && m.dono === 'Ana (agrônoma)' && m.prazo === 'revisar a divergência de dose'
++     && pb.b && pb.b.t === 'Encerrar bloqueado: divergência de consumo/dose em revisão técnica · dia 1 · 2,4-D 806 planejado 160 L × informado 100 L.'
++     && pb.b.q === 'Ana (agrônoma), na linha do apontamento: aceita com motivo ou registra a correção ou reaplicação.', [m.selos, m.dono, m.prazo, pb.b]);
++  const rv = REVER(c, id, 1, 'aceitar', 'Subdose de 2,4-D compensada pelo glifosato; sem rebrote na vistoria', 'Ana');
++  const en2 = MUD(c, x => osc_encerrar(x, id));
++  ok('D07d revisada, o encerramento passa e o apontamento fica Conferido com a revisão', !rv.erro && !en2.erro && c.ordens[id].etapa === 'Encerradas'
++     && c.ordens[id].ap.find(a => a.dia === 1).st === 'Conferido' && c.ordens[id].ap.find(a => a.dia === 1).rev.dec === 'Aceita', [rv, en2, c.ordens[id].etapa]); }
++
++// ---- D08 · sem sinal: a divergência fica no apontamento do aparelho; selo e revisão só quando chega ao servidor, uma vez ----
++{ const { c, id, o } = prep(); cenSinal(c, false);
++  TRY(() => cenFecharTurno(c, 10, 1, { 'Glifosato 480': 20, '2,4-D 806': 0, 'Óleo mineral': 5 }, '', []));
++  const s0 = [temSelo(o).length, ABERTAS(o).length, ((o.ap.slice(-1)[0] || {}).div || []).length];
++  cenSinal(c, true); cenSinal(c, true);
++  const s1 = [temSelo(o).length, ABERTAS(o).length, (temSelo(o)[0] || {}).t];
++  ok('D08 sem sinal: divergência gravada no apontamento, sem selo; ao voltar o sinal (dois envios) o selo e a revisão aparecem uma vez',
++     s0.join() === '0,0,1' && s1[0] === 1 && s1[1] === 1 && s1[2] === SELO + ' · 2,4-D 806', [s0, s1]); }
++
++// ---- D09 · apontamento pela web (O.S. e Mapa): o mesmo comando, a mesma regra ----
++{ const { c, id, o } = prep(); c.app.turno = null;
++  const r = TRY(() => osc_apontar(c, id, '26/09', 10, { 'Glifosato 480': 20, '2,4-D 806': 12, 'Óleo mineral': 5 }, [], 'W-OS-0430-teste'));
++  const ap = o.ap.filter(a => a.st !== 'Previsto').slice(-1)[0] || {};
++  ok('D09 web: 2,4-D 12 L contra 10 L planejado abre a divergência (superdose) e a mensagem diz quem revisa',
++     !r.erro && (ap.div || []).length === 1 && ap.div[0].p === '2,4-D 806' && ap.div[0].plan === 10 && ap.div[0].inf === 12 && temSelo(o).length === 1
++     && /Divergência de consumo\/dose: 2,4-D 806 planejado 10 L × informado 12 L · revisão técnica de Ana \(agrônoma\)\.$/.test(r.r.msg), [r, ap.div]); }
++
++// ---- D10 · duplicidade retida não abre revisão até a decisão de quem confere; somada, abre ----
++{ const { c, id, o } = prep(); c.app.turno = null;
++  TRY(() => osc_apontar(c, id, '26/09', 10, { 'Glifosato 480': 20, '2,4-D 806': 10, 'Óleo mineral': 5 }, [], 'W-A'));
++  TRY(() => cenIniciarTurno(c, id)); c.app.operador = 'Marcos';
++  const f = TRY(() => cenFecharTurno(c, 10, 1, { 'Glifosato 480': 20, '2,4-D 806': 0, 'Óleo mineral': 5 }, '', []));
++  const dup = o.ap.find(a => a.st === CEN_AP_DUP);
++  const s0 = [!!dup, temSelo(o).length];
++  const d = MUD(c, x => cenApDecidir(x, id, dup ? dup.dia : 0, 'somar', 'Paula'));
++  const o2 = c.ordens[id];
++  ok('D10 duplicidade retida: sem selo; somada como outro turno por Paula, a divergência do turno abre a revisão',
++     s0.join() === 'true,0' && !d.erro && temSelo(o2).length === 1 && ABERTAS(o2).length === 1, [f, s0, d, o2.selos]); }
++
++console.log(JSON.stringify(R));
+diff --git a/tools/prototipo/v37/gen37/inicio_entrega_unit.js b/tools/prototipo/v37/gen37/inicio_entrega_unit.js
+index 68ec8b2..f654cc3 100644
+--- a/tools/prototipo/v37/gen37/inicio_entrega_unit.js
++++ b/tools/prototipo/v37/gen37/inicio_entrega_unit.js
+@@ -64,6 +64,7 @@ ok('N4b app: inicia com os três; fecha 20 ha e o Óleo zera', iniApp('OS-0430')
+ ok('N4b app: só o Óleo falta: "Óleo mineral 60 L a entregar"', iniApp('OS-0430') === 'Iniciar bloqueado: REQ-041 sem entrega · Óleo mineral 60 L a entregar. ' + Q1, iniApp('OS-0430'));
+ 
+ // N5 · componente esgotado: consumo acima da custódia aceito pela gestora (CTL-3, padrão 2) zera o saldo a entregar; a área continua → dono é a agrônoma
++// B-R8 (09/10): 80 L de Fungicida A e 0 L de Adjuvante informados em 100 ha (planejado 50 L e 25 L) também abrem a divergência de dose (selo vermelho)
+ reset(); iniApp('OS-0421'); fechar(100, { 'Fungicida A': 80, 'Adjuvante espalhante': 0 }); mud(W, "return cenConciliar(c,'CC-301',true,undefined,'Ana')");
+ const it5 = st("(()=>{const i=c.reqs['REQ-035'].itens[0];return [i.solicitado,i.consumido,i.custodia,cenSaldoEntregar(i),c.ordens['OS-0421'].saldo]})()");
+ const T5 = 'Iniciar bloqueado: Fungicida A: todo o solicitado na REQ-035 já foi consumido e nada está com Marcos. Ana (agrônoma) decide a área restante: Dispensar saldo na O.S. e, se ainda precisar aplicar, emitir nova ordem.';
+@@ -71,7 +72,7 @@ ok('N5 estado: 175 solicitados, 175 consumidos, custódia 0, nada a entregar, 60
+ ok('N5 app: recusa com dono Ana (agrônoma); cartão "Insumo esgotado", não "Retirar"', iniApp('OS-0421') === T5 && JSON.stringify(passo('OS-0421')) === JSON.stringify(['rever', 'Insumo esgotado · Ana (agrônoma)']), [iniApp('OS-0421'), passo('OS-0421')]);
+ const MG = id => w(`(()=>{const c=cenGet(),co=c.ordens['${id}'];const o=osMerge(Object.assign(cenClone(co),{selos:[]}),co,c);const pb=osProx(o);return [o.selos.map(s=>s.t+'/'+s.c).join(', '),o.dono,o.prazo,pb.P.btn,pb.b?pb.b.t+' | '+pb.b.q:null]})()`);
+ const mg5 = MG('OS-0421');
+-ok('N5 web: a dona vê a pendência na lista/Kanban/Mapa (selo vermelho "Insumo esgotado · Fungicida A", Ana, decidir a área restante; painel com o impedimento no lugar do primário)', JSON.stringify(mg5) === JSON.stringify(['Parcial · dia 4 de 7/yellow, Insumo esgotado · Fungicida A/red', 'Ana (agrônoma)', 'decidir a área restante', 'Registrar apontamento', 'Apontar bloqueado: Fungicida A: todo o solicitado na REQ-035 já foi consumido e nada está com Marcos. | Ana (agrônoma) decide a área restante: Dispensar saldo na O.S. e, se ainda precisar aplicar, emitir nova ordem.']), mg5);
++ok('N5 web: a dona vê a pendência na lista/Kanban/Mapa (selo vermelho "Insumo esgotado · Fungicida A", Ana, decidir a área restante; painel com o impedimento no lugar do primário)', JSON.stringify(mg5) === JSON.stringify(['Parcial · dia 4 de 7/yellow, Divergência de consumo/dose · Fungicida A, Adjuvante espalhante/red, Insumo esgotado · Fungicida A/red', 'Ana (agrônoma)', 'decidir a área restante', 'Registrar apontamento', 'Apontar bloqueado: Fungicida A: todo o solicitado na REQ-035 já foi consumido e nada está com Marcos. | Ana (agrônoma) decide a área restante: Dispensar saldo na O.S. e, se ainda precisar aplicar, emitir nova ordem.']), mg5);
+ ok('N5 Rui não resolve: entregar mais é recusado (saldo a entregar 0 L)', ent('REQ-035', 'Fungicida A', 1) === 'Acima do saldo a entregar: 0 L.', ent('REQ-035', 'Fungicida A', 1));
+ 
+ // P5 · caminho feliz: entrega completa, 160 ha num turno, custódia 0/0/0 → próximo passo é Enviar para conferência, sem selo vermelho
+-- 
+2.43.0
+

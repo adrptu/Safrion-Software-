@@ -1,0 +1,5 @@
+dose_divergente_test.py nav exit=0 717s :: 17/17 ok · FALHAS: 0 
+cafe_apurar_test.py nav exit=0 1120s :: RESULTADO: OK 10/10 
+varredura.py exit=0 1279s :: RESULTADO: 140/140 páginas sem erro 
+../ferramentas/acoes_duplicadas.py . /tmp/DOM-dup.json exit=0 519s :: RESULTADO: 140 páginas · 0 com ação repetida · erros 0 
+FIM

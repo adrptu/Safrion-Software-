@@ -1,0 +1,5 @@
+  OK  turno iniciado no quadro do MB-03 chega ao MB-01 (Fechar turno · OS-0421)
+  OK  Restaurar no MB-01: o quadro do MB-03 também volta ao início
+  OK  mudança feita no outro quadro depois do Restaurar não ressuscita o turno antigo
+  OK  sem erros JS []
+4/4 ok · FALHAS: 0

@@ -1,0 +1,9 @@
+== celular · AC-19 em 390 × 844
+OK  AC-19 COLH: cartões no lugar da tabela, sem rolagem horizontal · [390, 0, 23, 0]
+OK  AC-19 COLH: ação primária visível e presa ao rodapé · ['Publicar previsão do Pivô 19', 788, 832, 844, 'fixed']
+OK  AC-19 CARGA: cartões no lugar da tabela, sem rolagem horizontal · [390, 0, 8, 0]
+OK  AC-19 CARGA: ação primária visível e presa ao rodapé · ['Registrar pesagem', 788, 832, 844, 'fixed']
+OK  AC-19 PROD: cartões no lugar da tabela, sem rolagem horizontal · [390, 0, 8, 0]
+OK  AC-19 PROD: ação primária visível e presa ao rodapé · ['Reservar L10-031 para pedido', 788, 832, 844, 'fixed']
+OK  AC-19 tocar no cartão abre o painel do lote (master-detail no celular) · L10-031 · Soja em grão Liberado Silo 01 · recebido 05/03 × PRÓXIMO PASSO Reservar para pedido · Comercial. Qualidade: Íntegro no recebimento. FÍSICO 38.420 sc BLOQUEADO 0 sc APTO 38.420 sc RESERVADO 3
+RESULTADO: OK 7/7

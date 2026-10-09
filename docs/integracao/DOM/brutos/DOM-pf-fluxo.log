@@ -1,0 +1,24 @@
+== fluxo · AC-01 menu e AC-17 tarefa do proprietário (§8.1), cliques e campos medidos
+OK  AC-01 grupo Produção logo depois de Agrícola (antes de Manutenção) · Talhão à O.S. Mapa Cadastros ▸ Agrícola ▸ Produção ▾ Previsão e colheita Cargas e recebimento Estoque de produto Manutenção ▸ Suprimentos ▸ Configurações ▸ DEMONSTRAÇÃO · dados fictícios A Ana · Gestora e RT Caio · PCP Rui · Almoxarife Paula · Conferência Zé · Mecânico Perfil de demonstração
+OK  AC-01 Produção com 3 itens: Previsão e colheita, Cargas e recebimento, Estoque de produto · [['Previsão e colheita', 'COLH.dc.html'], ['Cargas e recebimento', 'CARGA.dc.html'], ['Estoque de produto', 'PROD.dc.html']]
+OK  AC-01 COLH abre sem erro de JS
+OK  AC-01 CARGA abre sem erro de JS
+OK  AC-01 PROD abre sem erro de JS
+OK  §8.1 sem seleção, a ação primária é "Publicar previsão" do Pivô 19 · ['Publicar previsão do Pivô 19']
+OK  painel do Pivô 19: passe S39 parcial 0,73 t/ha, ciclo 0,48 t/ha, 1 carga a receber, rascunho S40 e S41 · Pivô 19 · Mamão Formosa Tainung 1 Em colheita Lagoa Grande · Safra Mamão 2026/27 · 75,11 ha · meta 50 t/ha/ano × PRÓXIMO PASSO Publicar S40 e S41 · Ana (agrônoma). PREVISÃO VIGENTE 72,9 t · S39 (v1) COLHIDO NO CICLO 36,42 t PRODUTIVIDADE 0,48 t/ha parcial CARGAS A RECEBER 1 CUSTO R$/T sem custo real
+OK  (1) Publicar previsão: v2 do Pivô 19 com S40 72,78 t e S41 87,34 t · Pivô 19 · previsão v2 publicada por Ana (agrônoma): S40 72,78 t · S41 87,34 t. A semana em curso (S39) não muda: orienta a OS-0505.
+OK  (1) a ação primária passa a "Programar colheita S40" · ['Programar colheita S40']
+OK  (1) "Programar colheita S40" abre a ordem nova pré-preenchida (Pivô 19, janela 28/09) · ['lg19', '2026-09-28']
+OK  (1) Emitir: ordem "Colheita · semana 40" do Pivô 19 em A liberar · OS-0440
+OK  (2) Aprovar e liberar a ordem nova (carência do Pivô 19 em dia): Liberadas · ['Liberadas', 'OS-0440 · Colheita · semana 40 × Liberadas Pivô 19 · 75,11 ha · janela a partir de 28/09/2026 · — A liberar Liberadas Em execução Em conferência Encerradas PRÓXIMO PASSO Confira máquina, equipe e insumos e inicie a execução na janela a partir de 28/09/2026. Iniciar execução Cancelar s
+OK  (3) MB-10 › Colheita › OS-0505: Apontar área 25 ha em 8 h (regra única do apontamento, origem app) · Área apontada: 25 ha em 8 h na OS-0505. A produção só muda com a carga pesada.
+OK  (3) o apontamento do app entrou uma vez na OS-0505 (26/09, Provisório) · [[25, 'Provisório', '26/09']]
+OK  AC-04 apontar 25 ha sem carga não muda a produção (36,42 t) e o passe S39 cai para 0,49 t/ha · Pivô 19 · Mamão Formosa Tainung 1 Em colheita Lagoa Grande · Safra Mamão 2026/27 · 75,11 ha · meta 50 t/ha/ano × PRÓXIMO PASSO Emitir a O.S. da S41 · Ana (agrônoma). PREVISÃO VIGENTE 72,9 t · S39 (v1) COLHIDO NO CICLO 36,42 t PRODUTIVIDADE 0,48 t/ha parcial CARGAS A RECEBER 1 CUSTO R$/T sem custo re
+OK  (4) sem seleção, a primária é "Registrar pesagem" · ['Registrar pesagem']
+OK  (4) com a CG-2108 selecionada, a primária vira "Pesar a CG-2108" · ['Pesar a CG-2108']
+OK  (4) Pesar a CG-2108 (19.250 − 7.200): nasce o L39-133 com 12.050 kg, Liberado; passe 0,65 t/ha · CG-2108 recebida: 12.050 kg líquidos (19.250 − 7.200) no L39-133 (novo) · Galpão de frutas Lagoa Grande · Liberado. Pivô 19: passe S39 0,65 t/ha (parcial).
+OK  (5) L39-133 no estoque: 12.050 kg apto, vence 29/09; ação "Reservar para pedido" com PV-036 e sugestão 10.000 kg · L39-133 · Mamão Formosa · fruta de campo Liberado Galpão de frutas Lagoa Grande · vence 29/09 · recebido 26/09 × PRÓXIMO PASSO Reservar para pedido · Comercial. Qualidade: Íntegro no recebimento. FÍSICO 12.050 kg BLOQUEADO 0 kg APTO 12.050 kg RESERVADO 0 kg DISPONÍVEL 12.050 kg EM PROCESSO 0 kg RESE
+OK  (5) reserva RS-0002: 10.000 kg para o PV-036; L39-133 disponível 2.050 kg; PV-036 coberto · RS-0002: 10.000 kg do L39-133 reservados para o PV-036 (Frutas Real). L39-133 disponível 2.050 kg · PV-036 coberto.
+     medida AC-17: 12 cliques · 5 campos digitados (25 ha, horas, ticket, bruto, tara)
+OK  AC-17 tarefa de ponta a ponta dentro de 30 cliques e 5 campos digitados (12 cliques · 5 campos) · [12, 5]
+RESULTADO: OK 21/21

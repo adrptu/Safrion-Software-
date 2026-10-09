@@ -1,0 +1,13 @@
+../ferramentas/acoes_duplicadas.py . /tmp/DOM-dup.json -> exit 0 :: RESULTADO: 140 páginas · 0 com ação repetida · erros 0
+os_cenario_test.py -> exit 1 :: RESULTADO: 20/21 ok · FALHAS: A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cená
+os_v39_bloq_test.py -> exit 0 :: RESULTADO: 12/12 ok
+consumo_divergente_test.py -> exit 1 :: 20/21 ok · FALHAS: 1
+ap_unico_test.py nav -> exit 0 :: RESULTADO nav: 23/23
+app_mb03_turno_test.py -> exit 0 :: 11/11 ok · FALHAS: 0
+app_cenario_test.py -> exit 0 :: 15/15 ok · FALHAS: 0
+app_mb03x_test.py -> exit 0 :: 7/7 ok · FALHAS: 0
+app_restaurar_test.py -> exit 0 :: 4/4 ok · FALHAS: 0
+app_saldo_zero_test.py -> exit 0 :: 12/12 ok · FALHAS: 0
+app_entrega_parcial_test.py -> exit 0 :: 7/7 ok · FALHAS: 0
+app_mb02det_test.py -> exit 0 :: 8/8 ok · FALHAS: 0
+mbtest.py -> exit 0 :: FALHAS: 0

@@ -1,0 +1,10 @@
+== os · A-05 / AC-22: ordem nova de colheita na fazenda e safra do cultivo; uma por semana; carência no liberar
+OK  A-05 ordem nova do Pivô 19 (Safra Mamão 2026/27) nasce na Lagoa Grande e na safra 2026/27, A liberar · [['ok', 'ok', 'ok', 'ok'], ['OS-0440', 'Colheita · semana 40', 'Lagoa Grande', '2026/27', 'A liberar']]
+OK  A-05 com o filtro Lagoa Grande · 2026/27 a ordem nova aparece na lista · OS-0440
+OK  AC-22 perene: a ordem se chama "Colheita · semana 40" · ['OS-0440', 'Colheita · semana 40', 'Lagoa Grande', '2026/27', 'A liberar']
+OK  AC-22 segunda ordem de colheita da mesma semana (S40) no Pivô 19 é recusada e aponta a existente · Nova ordem × Escolha safra, cultivo e atividade do plano. A ordem nasce em A liberar; o agrônomo libera e pode ajustar antes. Corrija os campos destacados; o que você preencheu foi mantido. Safra Selecione a safra Safra 2026/27 Safrinha 2027 Safra Mamão 2026/27 Cultivo Selecione o cultivo Pivô 1 · M
+OK  AC-22 colheita na semana 39 do Pivô 19 é recusada: a OS-0505 (Colheita · semana 39) já existe · Nova ordem × Escolha safra, cultivo e atividade do plano. A ordem nasce em A liberar; o agrônomo libera e pode ajustar antes. Corrija os campos destacados; o que você preencheu foi mantido. Safra Selecione a safra Safra 2026/27 Safrinha 2027 Safra Mamão 2026/27 Cultivo Selecione o cultivo Pivô 1 · M
+OK  #nova:lg06:q3:2026-09-28 abre a ordem nova já preenchida (safra, cultivo, atividade, janela) · ['LG2627', 'lg06', 'q3', '2026-09-28']
+OK  a ordem da S40 do Pivô 6 é emitida (A liberar) · OS-0441
+OK  AC-22 liberar (Aprovar e liberar) a S40 do Pivô 6 fica impedido no comando por carência sem dados, com dono Wesley; a ordem continua A liberar · ['NÃO ACHEI: Liberar para execução', 'A liberar', 'OS-0441 · Colheita · semana 40 × A liberar Carência sem dados Pivô 6 · 62,79 ha · janela a partir de 28/09/2026 · — A liberar Liberadas Em execução Em conferência Encerradas PRÓXIMO PASSO O agrônomo confere atividade e área abaixo e libera; se preci
+RESULTADO: OK 8/8

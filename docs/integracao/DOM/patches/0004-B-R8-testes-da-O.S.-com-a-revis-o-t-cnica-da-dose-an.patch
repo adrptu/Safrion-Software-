@@ -1,0 +1,89 @@
+From dbc1acc9f625b8123954e52c60e35edbe20817f1 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Fri, 9 Oct 2026 13:32:08 +0000
+Subject: [PATCH 4/6] =?UTF-8?q?B-R8:=20testes=20da=20O.S.=20com=20a=20revi?=
+ =?UTF-8?q?s=C3=A3o=20t=C3=A9cnica=20da=20dose=20antes=20do=20encerramento?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Expectativas mudadas com motivo (regra nova B-R8, e2d1040):
+
+- os_cenario_test.py, passo 8: o turno 2 da OS-0430 informa 180 L de
+  Glifosato 480 em 100 ha, onde o planejado do trecho é 200 L (2 L/ha).
+  Recebida a devolução, o bloqueio da sobra sai e fica o da divergência
+  de dose ("Encerrar bloqueado: divergência de consumo/dose em revisão
+  técnica · dia 2 · Glifosato 480 planejado 200 L × informado 180 L"),
+  sem "Conferir e encerrar". Passo 8b (novo): Ana (agrônoma) aceita com
+  motivo na linha do apontamento e o "Conferir e encerrar" aparece; o
+  passo 9 (encerrar) segue igual.
+- os_v39_bloq_test.py: 300 L de Glifosato informados para 160 ha
+  (planejado 320 L). Depois da devolução, a lista mostra o selo
+  "Divergência de consumo/dose · Glifosato 480", quem resolve Ana
+  (agrônoma) e próxima ação "revisar a divergência de dose"; aceita a
+  revisão (cenDivRever), o dono volta a ser Marcos e "conferir e
+  encerrar", como antes.
+
+Executado (Chrome real, trava /tmp/cdpB.lock):
+- os_cenario_test.py → 20/21; a única falha é o vermelho conhecido da
+  base "A liberar sem revisão" (PEND-OS-01), sem relação com a B-R8.
+  Antes desta mudança, na mesma HEAD: 17/20 (passos 8 e 9 vermelhos
+  pela regra nova).
+- os_v39_bloq_test.py → 12/12.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01Div8EjesSwVnpSUvYjZ7kh
+---
+ tools/prototipo/v37/gen37/os_cenario_test.py  | 16 +++++++++++++---
+ tools/prototipo/v37/gen37/os_v39_bloq_test.py |  7 ++++++-
+ 2 files changed, 19 insertions(+), 4 deletions(-)
+
+diff --git a/tools/prototipo/v37/gen37/os_cenario_test.py b/tools/prototipo/v37/gen37/os_cenario_test.py
+index 90192f4..536e299 100644
+--- a/tools/prototipo/v37/gen37/os_cenario_test.py
++++ b/tools/prototipo/v37/gen37/os_cenario_test.py
+@@ -59,10 +59,20 @@ try:
+     T.ok('Em conferência' in T.linha(OS) and 'Encerrar bloqueado: sobra em custódia · Glifosato 480 20 L (1 × galão 20 L) com Marcos.' in p
+          and T.link('Receber devolução no Estoque') == 'EST.dc.html' and not T.temb('Conferir e encerrar'),
+          'Em conferência: encerrar bloqueado pela sobra de 20 L com Marcos e link "Receber devolução no Estoque" → EST.dc.html', p[:500])
+-    # 8 · Estoque recebe a devolução (apta): o bloqueio sai sem recarregar e o botão de encerrar aparece
++    # 8 · Estoque recebe a devolução (apta): o bloqueio da sobra sai sem recarregar
++    # B-R8 (09/10): o turno 2 informou 180 L de Glifosato onde o planejado do trecho era 200 L (2 L/ha × 100 ha); a divergência de dose
++    # passa a ser o bloqueio do encerramento até a revisão técnica de Ana (agrônoma) — regra nova, expectativa mudada com motivo
+     T.mudar(f"return cenDevolver(c,'{RQ}','Glifosato 480',20,true,'Rui');"); p = T.pan(); i = T.ins()
+-    T.ok('Encerrar bloqueado' not in p and T.temb('Conferir e encerrar') and 'Devolvido 20 L' in i and 'Consumido · sobra devolvida' in i and 'nada em custódia' in p,
+-         'devolução recebida no Estoque: bloqueio some, trilha mostra Devolvido 20 L e surge Conferir e encerrar', p[:500])
++    T.ok('sobra em custódia' not in p and 'Encerrar bloqueado: divergência de consumo/dose em revisão técnica · dia 2 · Glifosato 480 planejado 200 L × informado 180 L.' in p
++         and not T.temb('Conferir e encerrar') and 'Devolvido 20 L' in i and 'Consumido · sobra devolvida' in i,
++         'devolução recebida no Estoque: o bloqueio da sobra some e fica o da divergência de dose (Glifosato 200 L planejado × 180 L informado), trilha com Devolvido 20 L', p[:500])
++    # 8b · Ana (agrônoma) aceita a divergência com motivo na linha do apontamento: o bloqueio some e surge Conferir e encerrar
++    T.J("""(()=>{const i=[...document.querySelectorAll('aside[role=dialog] textarea')].find(x=>x.getAttribute('aria-label')==='Motivo ou correção decidida · dia 2');
++      Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set.call(i,'Bordadura sem aplicação por vento; vistoria sem rebrote');
++      i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})()"""); time.sleep(.3)
++    T.btn('Aceitar com motivo'); p = T.pan()
++    T.ok('Encerrar bloqueado' not in p and T.temb('Conferir e encerrar') and 'nada em custódia' in p and 'Revisão técnica: aceita por Ana (agrônoma)' in p,
++         'revisão técnica aceita por Ana (agrônoma) com motivo: bloqueio some e surge Conferir e encerrar', p[:500])
+     # 9 · conferir e encerrar grava no cenário (regra atual: Em conferência → Encerradas)
+     T.btn('Conferir e encerrar'); T.btn('Confirmar encerramento'); st = T.cen(f"[c.ordens['{OS}'].etapa, c.ordens['{OS}'].ap.map(a=>a.st).join(',')]"); print('  ', st, T.toast())
+     T.ok(st == ['Encerradas', 'Conferido,Conferido'] and 'Encerradas' in T.linha(OS) and 'somente consulta' in T.pan() and f'{OS} encerrada' in T.toast(),
+diff --git a/tools/prototipo/v37/gen37/os_v39_bloq_test.py b/tools/prototipo/v37/gen37/os_v39_bloq_test.py
+index b43c937..e0bbd41 100644
+--- a/tools/prototipo/v37/gen37/os_v39_bloq_test.py
++++ b/tools/prototipo/v37/gen37/os_v39_bloq_test.py
+@@ -34,7 +34,12 @@ try:
+     tab('Kanban'); k = card(OS); tab('Lista')
+     T.ok('Sobras a receber' in k and 'Rui (almoxarife) · receber a devolução' in k, 'Kanban da OS-0430 com o mesmo selo e dono', k)
+     T.mudar(f"return cenDevolver(c,'{RQ}','Glifosato 480',20,true,'Rui');"); l = T.linha(OS)
+-    T.ok('Sobras a receber' not in l and T.cel(OS, 'Quem resolve') == 'Marcos' and T.cel(OS, 'Próxima ação') == 'conferir e encerrar', 'devolução recebida: selo sai e o dono volta a ser Marcos', l)
++    # B-R8 (09/10): 300 L de Glifosato informados para 160 ha (planejado 320 L) abrem a divergência de dose; depois da sobra, a pendência é
++    # a revisão técnica de Ana (agrônoma). Expectativa mudada com motivo: regra nova; aceita a revisão, o dono volta a ser Marcos
++    T.ok('Sobras a receber' not in l and 'Divergência de consumo/dose · Glifosato 480' in l and T.cel(OS, 'Quem resolve') == 'Ana (agrônoma)' and T.cel(OS, 'Próxima ação') == 'revisar a divergência de dose',
++         'devolução recebida: selo de sobra sai; fica a divergência de dose com Ana (agrônoma)', l)
++    T.mudar(f"return cenDivRever(c,'{OS}',1,'aceitar','Bordadura sem aplicação; vistoria sem rebrote','Ana');"); l = T.linha(OS)
++    T.ok('Divergência de consumo/dose' not in l and T.cel(OS, 'Quem resolve') == 'Marcos' and T.cel(OS, 'Próxima ação') == 'conferir e encerrar', 'revisão aceita por Ana: selo sai e o dono volta a ser Marcos', l)
+     T.ordem(OS); T.btn('Conferir e encerrar'); T.btn('Confirmar encerramento'); T.fechar()
+     # CTL-2 · A (AP-02): o turno do app grava a data operacional (CEN_DIA_OP = 26/09), não o relógio do aparelho → o período fecha em 26/09
+     esp = 'período 10–26/09'
+-- 
+2.43.0
+

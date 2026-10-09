@@ -1,0 +1,6 @@
+1fd8cfa9517a3ae06a262121bbb49e95967bbf47 DOM: correções da revisão
+7f26b3b863f0eb24552e51bb9e6e192518f08583 CONTROLE-01 G3: registro da B-R8 feita no protótipo e da precisão escolhida
+dbc1acc9f625b8123954e52c60e35edbe20817f1 B-R8: testes da O.S. com a revisão técnica da dose antes do encerramento
+f614da7a8a21bfce6d1c2a1418957a17b98b84de COLH-C01: café em litros fica "sc a apurar" com ou sem área apontada
+f0a0cd856715bddf381cd8d21b4e6fff9ae3839b B-R8: revisão técnica na linha do apontamento (O.S.) e divergência no recibo do app
+e2d1040d7519cf582655ab981a79b22e96128cc1 B-R8: divergência de consumo/dose no fecho do turno abre revisão do agrônomo
