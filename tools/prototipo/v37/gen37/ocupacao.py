@@ -186,7 +186,11 @@ def intersec(a0, a1, b0, b1):
 
 def avalia(ctx, occs, T, alvo=None):
     """R-14 trava (só o certo) e R-15 pendência (previsões) entre as ocupações de um talhão de área T.
-    trava: (tipo, id_a, id_b, dia[, soma]); pendência[id]: [(tipo, causa, dia_ini, dia_fim, ndias)]. A pendência fica na de plantio mais tardio."""
+    trava: (tipo, id_a, id_b, dia[, soma]); pendência[id]: [(tipo, causa, dia_ini, dia_fim, ndias)]. A pendência fica na de plantio mais tardio.
+    Soma no tempo por eventos (SAF-C01): os núcleos ativos só mudam em plantio, plantio + 1 e fim do núcleo (com folga), e os períodos
+    previstos em início e liberação (est). Entre dois pontos seguidos nada muda: cada trecho é avaliado uma vez, sem horizonte (o teto
+    antigo, d0 + 900 dias, deixava uma perene ou ocupação antiga esconder a soma de anos depois). Depois do último ponto só ficam perenes,
+    com núcleo igual ao previsto: dá trava ou nada, nunca pendência; por isso o último trecho conta 1 dia."""
     trav, pend = [], {}
     oc = sorted(occs, key=lambda o: (o['plantio'], o['id']))
     for i, A in enumerate(oc):
@@ -205,11 +209,11 @@ def avalia(ctx, occs, T, alvo=None):
                 r = intersec(A['ini'], fimA, B['ini'], liberacao(ctx, B, 'est'))
                 if r: pend.setdefault(B['id'], []).append((kind, A['id'], r[0], r[1] - 1, r[1] - r[0]))
     if occs:
-        d0 = min(o['ini'] for o in occs); d1 = max(min(liberacao(ctx, o, 'est'), d0 + 900) for o in occs)
+        pts = sorted({x for o in occs for x in (o['plantio'], o['plantio'] + 1, nuc_lib(o), o['ini'], liberacao(ctx, o, 'est')) if x < INF})
         vis_t, vis_p, ordp = set(), {}, []
         cruz = lambda lst: any(mesma_area(a, b) and a['ciclo'] != b['ciclo'] for k2, a in enumerate(lst) for b in lst[k2 + 1:])
-        x = d0
-        while x <= d1:
+        for i, x in enumerate(pts):
+            n = (pts[i + 1] if i + 1 < len(pts) else x + 1) - x
             nu = [o for o in occs if nuc_ativo(o, x)]
             if sum(o['area'] for o in nu) > T + 0.005 and any(com_plano(o) for o in nu) and not cruz(nu):
                 last = max(nu, key=lambda o: (o['plantio'], o['id']))
@@ -221,13 +225,12 @@ def avalia(ctx, occs, T, alvo=None):
                 if sum(o['area'] for o in pv) > T + 0.005 and not cruz(pv):
                     last = max(pv, key=lambda o: (o['plantio'], o['id']))
                     key = (last['id'], '+'.join(sorted(o['id'] for o in pv if o is not last)))
-                    if key not in vis_p: vis_p[key] = []; ordp.append(key)
-                    vis_p[key].append(x)
-            x += 1
+                    if key not in vis_p: vis_p[key] = [x, x, 0]; ordp.append(key)
+                    v = vis_p[key]; v[1] = x + n - 1; v[2] += n
         for key in ordp:
-            lid, causa = key; dias = vis_p[key]
+            lid, causa = key; d_ini, d_fim, nd = vis_p[key]
             if alvo and alvo != lid and alvo not in causa.split('+'): continue
-            pend.setdefault(lid, []).append(('soma', causa, dias[0], dias[-1], len(dias)))
+            pend.setdefault(lid, []).append(('soma', causa, d_ini, d_fim, nd))
     return trav, pend
 
 
@@ -286,11 +289,13 @@ def tabela(ctx, safra, occ, talhoes, safras):
         else: nl = 1 + len(own) + len(vis)
         resid = T - A - livre - conf
         per = min(resid, sum(o['area'] for o in fora if o['classe'] == 'perene')) if resid > 0.005 else 0.0
+        # excesso (SAF-C01): a maior soma certa acima da área nas travas de soma; fora da partição da faixa (soma T, R-09), no texto da faixa
+        exc = r2(max(0.0, max([T] + [x[4] for x in tr if x[0] == 'soma']) - T))
         editavel = not safra.get('ro')
         vinc = [o['id'] for o in fora if o['classe'] == 'perene' and editavel and
                 not any(dia(safras[s2]['ini']) <= b and dia(safras[s2]['fim']) >= a for s2 in o['safs'] if s2 in safras)]
         linhas[t] = dict(t=t, T=T, A=r2(A), sit=sit, livre=r2(livre), conf=r2(conf), area_livre=r2(livre + conf), desde=desde, est=est,
-                         own=own, fora=fora, vis=vis, seq=seq, pend=pe, pend_own=pend_own, trav=tr, fix=fix, linhas=nl, vinc=vinc,
+                         own=own, fora=fora, vis=vis, seq=seq, pend=pe, pend_own=pend_own, trav=tr, exc=exc, fix=fix, linhas=nl, vinc=vinc,
                          planejar=(livre + conf > 0.005 and editavel))
         ordem.append(t)
         band['nesta'] += A; band['livre'] += livre; band['conf'] += conf; band['perene'] += max(per, 0.0); band['ocup'] += max(resid - per, 0.0)
@@ -309,8 +314,9 @@ def sucessoes(linhas): return sum(1 for v in linhas if v['sit'] == 'A conferir' 
 
 def faixa_txt(band, linhas, tot):
     p = ['Nesta safra %s' % ha(band['nesta'])] + ['%s %s' % (r, ha(band[k])) for r, k in (('Livre', 'livre'), ('A conferir', 'conf'), ('Perene', 'perene'), ('Ocupado', 'ocup')) if band[k] > 0.005]
-    s = sucessoes(linhas)
-    return ' · '.join(p) + ' · de %s ha' % ha(tot) + (' · %d sucessão a conferir' % s if s == 1 else (' · %d sucessões a conferir' % s if s else ''))
+    s = sucessoes(linhas); ex = r2(sum(v.get('exc', 0) for v in linhas))
+    return (' · '.join(p) + ' · de %s ha' % ha(tot) + (' · %s ha em sobreposição' % ha(ex) if ex > 0.005 else '') +
+            (' · %d sucessão a conferir' % s if s == 1 else (' · %d sucessões a conferir' % s if s else '')))
 
 
 
@@ -398,9 +404,13 @@ def msg_trava(ctx, chk, sid, T, safnomes, pmin=None):
         outros = [x for x in chk['mesmo'] if x is not o and intersec(o['ini'], liberacao(ctx, o, 'est'), x['ini'], liberacao(ctx, x, 'est'))]
         if outros:
             ini = max([o['ini']] + [x['ini'] for x in outros]); fim = min([o['fim'] if o['fim'] is not None else o['plantio']] + [x['fim'] for x in outros if x['fim'] is not None])
-            pior = max(sum(x['area'] for x in outros if x['ini'] <= ini + k < liberacao(ctx, x, 'est')) for k in range(max(1, fim - ini + 1)))
+            # maior soma dos outros nos dias ini..ate: só muda no início e na liberação de cada um (SAF-C01; o laço dia a dia ia até 10^8 com perenes)
+            ate = ini + max(1, fim - ini + 1) - 1
+            pts = [d for d in [ini] + [x['ini'] for x in outros] + [liberacao(ctx, x, 'est') for x in outros] if ini <= d <= ate]
+            pior = max(sum(x['area'] for x in outros if x['ini'] <= d < liberacao(ctx, x, 'est')) for d in pts)
             quem = ' e '.join('%s (%s, %s)' % (x['cult'], x['faixa'], x['safnome']) for x in outros)
-            return 'De %s a %s, %s ha de %s estão com %s. Máximo %s ha nesse período.' % (br(ini), br(fim), ha(pior), o['t'], quem, ha(max(0.0, T - pior)))
+            quando = ('A partir de %s' % br(ini)) if fim >= INF else ('De %s a %s' % (br(ini), br(fim)))
+            return '%s, %s ha de %s estão com %s. Máximo %s ha nesse período.' % (quando, ha(pior), o['t'], quem, ha(max(0.0, T - pior)))
         soma = next((x[4] for x in tr if x[0] == 'safra'), 0)
         return 'As áreas de %s nesta safra somariam %s ha; o talhão tem %s ha (livre: %s ha).' % (o['t'], ha(soma), ha(T), ha(max(0.0, T - (soma - o['area']))))
     ob = next((x for x in tr if x[0] == 'observado'), None)

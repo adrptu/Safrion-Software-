@@ -216,6 +216,7 @@ As cinco primeiras respondem "onde, quanto e quando". Cultura, Ocupa até, Fim p
 - As cinco parcelas somam T (R-09). Parcela de 0 ha é omitida, para caber a 390 px; "Nesta safra" sempre aparece.
 - "Nesta safra" corresponde ao chip Planejado; a faixa soma **hectares por classe**, os chips contam **talhões pela Situação**. Um talhão Livre pode ter hectares de outra safra (T1 no caso 5).
 - "N sucessão a conferir" = talhões em A conferir sem área a conferir (R-10, item 2b). Chip A conferir = talhões com área a conferir + talhões com sucessão a conferir.
+- Com dado antigo em Sobreposição por soma (R-10, item 1), a faixa ganha "· N ha em sobreposição" logo depois de "de T ha": N = Σ por talhão da maior soma certa acima da área. As cinco parcelas continuam somando T (a Perene vai só até o resíduo), então sem esse trecho o excesso sumiria do resumo (SAF-C01).
 
 **Fonte única dos números de faixa (exec., `saida_ocupacao_f1.txt`; iguais com e sem e4/e5):**
 
@@ -302,10 +303,10 @@ Todas as funções abaixo existem uma vez, em `ocupacao.js`/`ocupacao.py` (ENG-0
 - **Núcleo** = [plantio, fim certo]. Fim certo: perene, sem fim; Observado, a colheita real; senão, o menor entre Ocupa até e plantio + **ciclo mínimo da cultura** − 1 (menor ciclo das cultivares no CD-02: soja 112, milho 140, feijão 90). Cultura sem ciclo: só o dia do plantio. O ciclo mínimo é decisão técnica que o Codex revisa e não substitui a colheita informada.
 - **T-área (regra de hoje, `safra.js:527-537`):** Σ das áreas desta safra no talhão > área + 0,005 ha.
 - **T-faixa:** mesma faixa ou talhão inteiro, núcleos cruzados contando a folga (`[plantio, núcleo + folga)`), e pelo menos uma das duas com plano aplicado ou perene.
-- **T-soma:** faixas diferentes, num mesmo dia, Σ das áreas em núcleo > área + 0,005 ha, com plano em alguma.
+- **T-soma:** faixas diferentes, num mesmo dia, Σ das áreas em núcleo > área + 0,005 ha, com plano em alguma. Conferida em todos os dias, sem horizonte: a varredura vai de evento em evento (plantio, fim do núcleo, início e liberação), e uma perene ou ocupação antiga no talhão não a encurta (SAF-C01; a pendência de soma da R-15 usa a mesma varredura).
 - **T-observado:** atividade da nova antes da colheita real registrada da outra, na mesma faixa.
 - Onde roda: salvar Planejar e Vincular; editar área, plantio, plano ou colheita; Dividir; Aplicar plano (linha e lote). Excluir não trava.
-- Mensagem: fato, dano e saída (§7.3). Período citado = interseção dos dois períodos (máx dos inícios a mín dos Ocupa até); "Máximo X ha" = área − ocupação de fora no pior dia dessa interseção.
+- Mensagem: fato, dano e saída (§7.3). Período citado = interseção dos dois períodos (máx dos inícios a mín dos Ocupa até); "Máximo X ha" = área − ocupação de fora no pior dia dessa interseção. Sem fim (só perenes na interseção): "A partir de dd/mm/aaaa, …" (SAF-C01).
 
 **R-15 · Pendência e aviso (salva).** Previsões que se cruzam não travam (PRD 39.4, PRD.md:6683-6685; SAFRA-08, PRD.md:6731).
 - **Sobreposição prevista:** os períodos `[início, liberacao(est))` se cruzam na mesma faixa (ou a soma diária prevista passa da área) e os núcleos não. O plano é aplicado, o cultivo entra na demanda e a linha fica A conferir com "Sobreposição prevista: N dias (<atividade> dd/mm × <cultura> até dd/mm)".

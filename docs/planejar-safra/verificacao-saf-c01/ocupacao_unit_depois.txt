@@ -1,0 +1,122 @@
+# python3 ocupacao_unit.py  (ocupacao.js sha256 e5c3759e16e7d21a96b7dad6cbf63ba5a77059e15708958c4ff9155597d1ed37)
+OK    · OC-U6 paridade JS = Python · períodos (1 casos)
+OK    · OC-U1 períodos dos cultivos da Santa Rita (§6.1)
+OK    · OC-U1 R-05: T7 e C1 "sem fim" (colheitaDe não serve como fim)
+OK    · OC-U6 paridade JS = Python · tabelas folga 1 (8 casos)
+OK    · OC-U2 faixa S2627 (§3.4)
+OK    · OC-U3 chips S2627 pelo nível 0 (soma = Todas)
+OK    · §3.2 linhas com grupos abertos S2627 = 18
+OK    · OC-U2 faixa soma T (S2627, folga 1)
+OK    · OC-U2 faixa S27SF (§3.4)
+OK    · OC-U3 chips S27SF pelo nível 0 (soma = Todas)
+OK    · §3.2 linhas com grupos abertos S27SF = 15
+OK    · OC-U2 faixa soma T (S27SF, folga 1)
+OK    · OC-U2 faixa caso 5 (§3.4)
+OK    · OC-U3 chips caso 5 pelo nível 0 (soma = Todas)
+OK    · §3.2 linhas com grupos abertos caso 5 = 15
+OK    · OC-U2 faixa soma T (caso 5, folga 1)
+OK    · OC-U2 faixa 2027/28 (§3.4)
+OK    · OC-U3 chips 2027/28 pelo nível 0 (soma = Todas)
+OK    · §3.2 linhas com grupos abertos 2027/28 = 8
+OK    · OC-U2 faixa soma T (2027/28, folga 1)
+OK    · OC-U2 faixa LG2627 (§3.4)
+OK    · OC-U3 chips LG2627 pelo nível 0 (soma = Todas)
+OK    · OC-U2 faixa soma T (LG2627, folga 1)
+OK    · OC-U2 faixa Boa Vista nova (§3.4)
+OK    · OC-U3 chips Boa Vista nova pelo nível 0 (soma = Todas)
+OK    · OC-U2 faixa soma T (Boa Vista nova, folga 1)
+OK    · OC-U2 faixa Lagoa nova 2027/28 (§3.4)
+OK    · OC-U3 chips Lagoa nova 2027/28 pelo nível 0 (soma = Todas)
+OK    · OC-U2 faixa soma T (Lagoa nova 2027/28, folga 1)
+OK    · OC-U2 faixa Lagoa nova 2026/27 (§3.4)
+OK    · OC-U3 chips Lagoa nova 2026/27 pelo nível 0 (soma = Todas)
+OK    · OC-U2 faixa soma T (Lagoa nova 2026/27, folga 1)
+OK    · §6.1 S27SF Situação e Livre a partir de
+OK    · §6.1 S27SF "est." em T3, T4 e P2
+OK    · R-12 S27SF filhas de fora visíveis
+OK    · R-12 S2627 filhas de fora visíveis (d1, d2, d3+e4, e5)
+OK    · R-24 2027/28: Vincular ciclo em T7 e C1, sem Planejar
+OK    · R-24 caso 5 (a S2627 cruza): T7 e C1 sem Vincular nem Planejar
+OK    · R-25 Lagoa nova 2026/27: 23 pivôs Perene sem ação
+OK    · R-24 Lagoa nova 2027/28: 23 Vincular, 0 Planejar
+OK    · R-01 Boa Vista nova: só o B1, Livre 120 ha desde 01/09/2026
+OK    · R-01 LG2627 nunca oferece o T1
+OK    · §6.1 caso 5 e 2027/28
+OK    · OC-U6 paridade JS = Python · tabelas folga 0 (8 casos)
+OK    · OC-U2 faixa soma T (S2627, folga 0)
+OK    · OC-U2 faixa soma T (S27SF, folga 0)
+OK    · OC-U2 faixa soma T (caso 5, folga 0)
+OK    · OC-U2 faixa soma T (2027/28, folga 0)
+OK    · OC-U2 faixa soma T (LG2627, folga 0)
+OK    · OC-U2 faixa soma T (Boa Vista nova, folga 0)
+OK    · OC-U2 faixa soma T (Lagoa nova 2027/28, folga 0)
+OK    · OC-U2 faixa soma T (Lagoa nova 2026/27, folga 0)
+OK    · A10 folga 0: S27SF T1 a partir de 20/02/2027, P2 23/03/2027
+OK    · OC-U6 paridade JS = Python · sem e4/e5 (2 casos)
+OK    · OC-U9 faixas da S27SF e da S2627 iguais com e sem e4/e5
+OK    · OC-U6 paridade JS = Python · OC-U7 (4 casos)
+OK    · OC-U7 mesma liberação do e5 (16/11/2026) e mesma pendência do c7
+OK    · OC-U6 paridade JS = Python · bordas §7.3 + mensagens (38 casos)
+OK    · OC-U8 T1-B 152 ha 21/02/2027 salva
+OK    · OC-U8 T1-B 152 ha 20/02/2027 pendência 1 dia com c2
+OK    · OC-U8 folga 0: T1-B 20/02/2027 sem pendência
+OK    · OC-U8 T1-B 15/02/2027 pendência 6 dias com c2
+OK    · OC-U8 T1-C 15/02/2027 pendência de soma no d1
+OK    · OC-U8 T1 312 ha 21/02/2027 recusado (M1)
+OK    · OC-U8 T1 312 ha 11/07/2027 recusado pela área desta safra (regra de hoje)
+OK    · OC-U8 T3 milho 23/10/2026 recusado (M2)
+OK    · OC-U8 T3 milho 10/01/2027 recusado (M2)
+OK    · OC-U8 T3 milho 10/02/2027 recusado (M2)
+OK    · OC-U8 T3 milho 11/02/2027 salva com provável sobreposição (7 dias)
+OK    · OC-U8 T3 milho 18/02/2027 salva com aviso de saída estimada
+OK    · OC-U8 T3 milho sem plano 23/10/2026 salva com aviso
+OK    · OC-U8 c5 colheita 20/01/2027 → milho 21/01/2027 salva
+OK    · OC-U8 c5 colheita 20/01/2027 → milho 20/01/2027 recusado
+OK    · OC-U8 c4 SOJA-AT salva
+OK    · OC-U8 c5 SOJA-AT salva
+OK    · OC-U8 c6 SOJA-AT salva
+OK    · OC-U8 c4 SOJA-PD salva
+OK    · OC-U8 c5 SOJA-PD salva
+OK    · OC-U8 c6 SOJA-PD salva
+OK    · OC-U8 c7 SOJA-AT pendência 11 dias com e5 (P1)
+OK    · OC-U8 c7 SOJA-PD pendência 6 dias
+OK    · OC-U8 e5 colhido 20/11/2026 → c7 SOJA-AT recusado (M4)
+OK    · OC-U8 e5 sem colheita informada → c7 SOJA-AT recusado (M2)
+OK    · OC-U8 plantio do c1 em 30/10/2026: pendência 6 dias no d1 (P2)
+OK    · OC-U8 OC-11 depois SOJA-AT no c5: pendência passa ao milho (7 dias)
+OK    · OC-U8 OC-11 depois SOJA-PD no c5: 4 dias
+OK    · OC-U8 OC-23(a) T3 no padrão, depois SOJA-AT no c5: sem pendência
+OK    · OC-U8 OC-23(a) T3 no padrão, depois SOJA-PD no c5: sem pendência
+OK    · OC-U8 OC-23(b) P2 milho 24/03, c7 SOJA-AT 25/11: só a pendência com e5
+OK    · OC-U8 OC-23(b) c7 SOJA-AT 06/12/2026 recusado (M2 com as duas ocupações)
+OK    · OC-U8 OC-23(b) c7 SOJA-PD 01/12/2026: pendência 3 dias no milho
+OK    · OC-U8 SOJA-AT T1-B 12/03/2027 pendência 1 dia
+OK    · OC-U8 SOJA-AT T1-B 13/03/2027 salva
+OK    · OC-U8 2027/28 Milho T7 01/10/2027 recusado (M3)
+OK    · OC-U8 2027/28 Café CAFE-AR T3 01/11/2027 salva com início 01/11/2027
+OK    · OC-U8 2027/28 Vincular c9: uma ocupação, sem trava
+OK    · OC-U6 paridade JS = Python · PlantioMin (8 casos)
+OK    · OC-21 PlantioMin c7 SOJA-AT 06/12/2026 · SOJA-PD 01/12/2026
+OK    · OC-21 PlantioMin T1-B: SOJA-AT 13/03, SOJA-PD 08/03, MILHO-SF e FEIJ-PV 21/02/2027
+OK    · R-17 depois da colheita real do e5: PlantioMin 11/12/2026
+OK    · R-17 sem janela com o milho do P2 em 24/03/2027 (P3)
+OK    · OC-U4 P3 (sem janela)
+OK    · OC-U6 paridade JS = Python · SAF-C01 (3 casos do Codex + 4 do autor) (14 casos)
+OK    · SAF-C01 PERENE-ANTIGO-EXCESSO (café 2020 40 ha + soja 2027 70 ha): trava, pendência R-15, Situação, faixa e excesso
+OK    · SAF-C01 PERENE-ANTIGO-EXCESSO (café 2020 40 ha + soja 2027 70 ha): mensagem da trava
+OK    · SAF-C01 PERENE-RECENTE-EXCESSO (café 2026 40 ha + soja 2027 70 ha): trava, pendência R-15, Situação, faixa e excesso
+OK    · SAF-C01 PERENE-RECENTE-EXCESSO (café 2026 40 ha + soja 2027 70 ha): mensagem da trava
+OK    · SAF-C01 PERENE-ANTIGO-LIMITE (café 2020 40 ha + soja 2027 60 ha): trava, pendência R-15, Situação, faixa e excesso
+OK    · SAF-C01 PERENE-ANTIGO-LIMITE (café 2020 40 ha + soja 2027 60 ha): mensagem da trava
+OK    · SAF-C01 PERENE-PERENE ANTIGO (café 2020 40 ha + café 2027 70 ha): trava de soma, Situação Sobreposição e mensagem "A partir de" (o período não tem fim; o laço antigo da mensagem ia até 10^8 dias)
+OK    · SAF-C01 PERENE-PERENE RECENTE (café 2026 40 ha + café 2027 70 ha): trava de soma, Situação Sobreposição e mensagem "A partir de" (o período não tem fim; o laço antigo da mensagem ia até 10^8 dias)
+OK    · SAF-C01 controle PERENE-ANTIGO-MESMA-FAIXA (café 2020 40 ha em T1-A + soja 2027 30 ha em T1-A): trava de faixa (M3), sem soma (70 ha cabem), como antes
+OK    · SAF-C01 ANUAL-ANTIGA-EXCESSO (soja 2020 em T1-C + soja 40 ha da safrinha + soja 70 ha): a soja de 2020 não esconde a soma de 110 ha em 2027 (ocChecar e tabela)
+     (SAF-C01) conjuntos aleatórios 300 · com trava de soma 59 · com pendência de soma 35 · mensagens M1 com período finito 37 · grupos fazenda × talhão da base 31
+OK    · SAF-C01 varredura por eventos = laço dia a dia sem teto, e mensagem M1 = laço dia a dia (base + 300 conjuntos aleatórios, plantios de 2012 a 2027, com e sem alvo)
+OK    · OC-U6 paridade JS = Python · SAF-C01 conjuntos aleatórios (ocChecar e mensagens) (120 casos)
+     (OC-U5) salvamentos tentados 1200 · aceitos 398 · recusados 802
+OK    · OC-U5 propriedades (400 sequências × 3 salvamentos, folga 0/1/3): 0 falhas
+OK    · OC-U6 paridade JS = Python · amostra das propriedades (150 casos)
+
+RESULTADO: 117 OK · 0 FALHA

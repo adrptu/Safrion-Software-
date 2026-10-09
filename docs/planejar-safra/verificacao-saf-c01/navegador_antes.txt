@@ -1,0 +1,65 @@
+# env CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdpF.lock env CDP_GL=1 SAFRION_DADOS=sintetico timeout 900 python3 saf_c01_test.py  (_render gerado com ocupacao.js sha256 ca3061319ae0e98223128eb724eaaf6a53e25a2c6196b4e44ed37f22095ea154)
+OK    · 1440×900 gravar/editar preparo: café 40 ha plantado em 01/01/2020 na parcela B1-A do B1 (Café antigo BV)
+OK    · 1440×900 gravar/editar Safra BV 2027: B1 Livre 80 ha (o café de 2020 ocupa 40)
+FALHA · 1440×900 gravar/editar: gravar soja 90 ha (café 40 + 90 = 130 > 120 ha) é recusado com a mensagem da trava; painel aberto; nada gravado · ('(painel fechado)', 'De 12/05/2027 a 27/09/2027, 40 ha de B1 estão com Café (B1-A, Café antigo BV). Máximo 80 ha nesse período.', [{'id': 'n2_61987', 'v': {'cult': 'Soja', 'var': '58 W', 'plano': 'SOJA-AT', 'plantio': '2027-06-01', 'local': 'B1-B', 'area': 90, 'meta': 60, 'talhao': 'B1', 'faz': 'Boa Vista', 'saf': 'n6_56952', 'colheita': '', 'unm': 'sc/ha', 'tipo': 'Parcela'}, 's': {'cult': 'Soja', 'var': '58 W', 'plano': 'SOJA-AT', 'plantio': '2027-06-01', 'local': 'B1-B'}, 'p': {}, 'decl': True}])
+FALHA · 1440×900 gravar/editar: limite, soja 80 ha (soma = 120 ha) grava · ('(painel fechado)', 'Cultivo incluído como parcela B1-B · 30 ha livres em B1 · plano Soja alta tecnologia.', [{'id': 'n2_61987', 'v': {'cult': 'Soja', 'var': '58 W', 'plano': 'SOJA-AT', 'plantio': '2027-06-01', 'local': 'B1-B', 'area': 90, 'meta': 60, 'talhao': 'B1', 'faz': 'Boa Vista', 'saf': 'n6_56952', 'colheita': '', 'unm': 'sc/ha', 'tipo': 'Parcela'}, 's': {'cult': 'Soja', 'var': '58 W', 'plano': 'SOJA-AT', 'plantio': '2027-06-01', 'local': 'B1-B'}, 'p': {}, 'decl': True}])
+FALHA · 1440×900 gravar/editar: editar a soja para 90 ha é recusado com a mensagem da trava; continua 80 ha · ('(painel fechado)', [{'id': 'n2_61987', 'v': {'cult': 'Soja', 'var': '58 W', 'plano': 'SOJA-AT', 'plantio': '2027-06-01', 'local': 'B1-B', 'area': 90, 'meta': 60, 'talhao': 'B1', 'faz': 'Boa Vista', 'saf': 'n6_56952', 'colheita': '', 'unm': 'sc/ha', 'tipo': 'Parcela'}, 's': {'cult': 'Soja', 'var': '58 W', 'plano': 'SOJA-AT', 'plantio': '2027-06-01', 'local': 'B1-B'}, 'p': {}, 'decl': True}])
+FALHA · 1440×900 gravar/editar: editar só a meta (80 ha, no limite) grava · ('(painel fechado)', 'Salvo · linha e totais atualizados', [{'id': 'n2_61987', 'v': {'cult': 'Soja', 'var': '58 W', 'plano': 'SOJA-AT', 'plantio': '2027-06-01', 'local': 'B1-B', 'area': 90, 'meta': 60, 'talhao': 'B1', 'faz': 'Boa Vista', 'saf': 'n6_56952', 'colheita': '', 'unm': 'sc/ha', 'tipo': 'Parcela'}, 's': {'cult': 'Soja', 'var': '58 W', 'plano': 'SOJA-AT', 'plantio': '2027-06-01', 'local': 'B1-B'}, 'p': {}, 'decl': True}])
+OK    · 1440×900 gravar/editar: sem rolagem lateral da página
+OK    · 1440×900 gravar/editar: sem erro de JS
+OK    · 1440×900 dividir preparo: café 40 ha plantado em 01/01/2020 na parcela B1-A do B1 (Café BV 2026/27)
+OK    · 1440×900 dividir Safra BV 2027: B1 Livre 80 ha (o café de 2020 ocupa 40)
+FALHA · 1440×900 dividir: gravar soja 90 ha também é recusado (café de 2020 numa safra que cruza) · (painel fechado)
+FALHA · 1440×900 dividir: Dividir B1 abre só a soja desta safra (B1-B, 80 ha) · [{'id': 'n2_84694', 'local': 'B1-B', 'area': '90', 'cult': 'Soja', 'var': '58 W', 'plantio': '2027-06-01', 'meta': '60', 'unm': 'sc/ha', 'plano': 'SOJA-AT', 'colheita': '', 'adj': None, 'from': '', 'decl': True, 'ask': False}]
+     (medido) 1440×900 dividir: nome sugerido para a parcela nova (a do café é B1-A): B1-A
+FALHA · 1440×900 dividir: dividir em 50 + 40 ha (café 40 + 90 = 130 > 120): "A divisão travaria a área… Nada foi gravado", com a mensagem da trava na parcela · ('(painel fechado)', [{'id': 'n2_84694', 'v': {'cult': 'Soja', 'var': '58 W', 'plano': 'SOJA-AT', 'plantio': '2027-06-01', 'local': 'B1-B', 'area': 50, 'meta': 60, 'talhao': 'B1', 'faz': 'Boa Vista', 'saf': 'n6_79722', 'colheita': '', 'unm': 'sc/ha', 'tipo': 'Parcela'}, 's': {}, 'p': {}, 'decl': True}, {'id': 'pB1_288494_1', 'v': {'talhao': 'B1', 'faz': 'Boa Vista', 'local': 'B1-C', 'cult': 'Soja', 'var': '58 W', 'area': 40, 'plantio': '2027-06-01', 'meta': 60, 'unm': 'sc/ha', 'plano': 'SOJA-AT', 'colheita': '', 'saf': 'n6_79722', 'tipo': 'Parcela'}, 's': {}, 'p': {}, 'decl': True}])
+FALHA · 1440×900 dividir: dividir em 50 + 30 ha (soma = 120 ha) grava · ('(painel fechado)', 'B1 dividido em 2 parcelas · 30 ha livres. Plano operacional, recursos e demanda recalculados.', [40, 50])
+FALHA · 1440×900 dividir: dado antigo (soja 60 + 30 ha + café 40 = 130 ha): B1 em Sobreposição, motivo "somam 130 ha" · {'_id': 'grp_B1', '_kid': False, 'C0': '', 'TALHÃO OU PARCELA': 'B1 Dividir', 'SITUAÇÃO': 'Planejado', '_dica': '', 'ÁREA LIVRE': '—', 'LIVRE A PARTIR DE': '—', 'ÁREA': '100 ha', 'CULTURA': 'Soja', 'OCUPA ATÉ': '', 'FIM POR': '', 'SAFRA': '', 'VARIEDADE': '58 W', 'PLANO AGRONÔMICO': 'Soja alta tecnologia', 'VERSÃO': 'v6', 'PLANTIO': '01/06/2027', 'META': 'por parcela', 'AJUSTES LOCAIS': '—', 'TIPO': '2 parcelas', 'C17': ''}
+FALHA · 1440×900 dividir: faixa mostra o excesso: "· de 120 ha · 10 ha em sobreposição" · Nesta safra 100 · Perene 20 · de 120 ha
+FALHA · 1440×900 dividir: nota "Sobreposição em B1: … somam 130 ha …" com "Corrigir B1" · Dimensionar operações ›
+OK    · 1440×900 dividir: sem rolagem lateral da página
+OK    · 1440×900 dividir: sem erro de JS
+OK    · 390×844 gravar/editar preparo: café 40 ha plantado em 01/01/2020 na parcela B1-A do B1 (Café antigo BV)
+OK    · 390×844 gravar/editar Safra BV 2027: B1 Livre 80 ha (o café de 2020 ocupa 40)
+FALHA · 390×844 gravar/editar: gravar soja 90 ha (café 40 + 90 = 130 > 120 ha) é recusado com a mensagem da trava; painel aberto; nada gravado · ('(painel fechado)', 'De 12/05/2027 a 27/09/2027, 40 ha de B1 estão com Café (B1-A, Café antigo BV). Máximo 80 ha nesse período.', [{'id': 'n2_10989', 'v': {'cult': 'Soja', 'var': '58 W', 'plano': 'SOJA-AT', 'plantio': '2027-06-01', 'local': 'B1-B', 'area': 90, 'meta': 60, 'talhao': 'B1', 'faz': 'Boa Vista', 'saf': 'n6_05871', 'colheita': '', 'unm': 'sc/ha', 'tipo': 'Parcela'}, 's': {'cult': 'Soja', 'var': '58 W', 'plano': 'SOJA-AT', 'plantio': '2027-06-01', 'local': 'B1-B'}, 'p': {}, 'decl': True}])
+FALHA · 390×844 gravar/editar: limite, soja 80 ha (soma = 120 ha) grava · ('(painel fechado)', 'Cultivo incluído como parcela B1-B · 30 ha livres em B1 · plano Soja alta tecnologia.', [{'id': 'n2_10989', 'v': {'cult': 'Soja', 'var': '58 W', 'plano': 'SOJA-AT', 'plantio': '2027-06-01', 'local': 'B1-B', 'area': 90, 'meta': 60, 'talhao': 'B1', 'faz': 'Boa Vista', 'saf': 'n6_05871', 'colheita': '', 'unm': 'sc/ha', 'tipo': 'Parcela'}, 's': {'cult': 'Soja', 'var': '58 W', 'plano': 'SOJA-AT', 'plantio': '2027-06-01', 'local': 'B1-B'}, 'p': {}, 'decl': True}])
+FALHA · 390×844 gravar/editar: editar a soja para 90 ha é recusado com a mensagem da trava; continua 80 ha · ('(painel fechado)', [{'id': 'n2_10989', 'v': {'cult': 'Soja', 'var': '58 W', 'plano': 'SOJA-AT', 'plantio': '2027-06-01', 'local': 'B1-B', 'area': 90, 'meta': 60, 'talhao': 'B1', 'faz': 'Boa Vista', 'saf': 'n6_05871', 'colheita': '', 'unm': 'sc/ha', 'tipo': 'Parcela'}, 's': {'cult': 'Soja', 'var': '58 W', 'plano': 'SOJA-AT', 'plantio': '2027-06-01', 'local': 'B1-B'}, 'p': {}, 'decl': True}])
+FALHA · 390×844 gravar/editar: editar só a meta (80 ha, no limite) grava · ('(painel fechado)', 'Salvo · linha e totais atualizados', [{'id': 'n2_10989', 'v': {'cult': 'Soja', 'var': '58 W', 'plano': 'SOJA-AT', 'plantio': '2027-06-01', 'local': 'B1-B', 'area': 90, 'meta': 60, 'talhao': 'B1', 'faz': 'Boa Vista', 'saf': 'n6_05871', 'colheita': '', 'unm': 'sc/ha', 'tipo': 'Parcela'}, 's': {'cult': 'Soja', 'var': '58 W', 'plano': 'SOJA-AT', 'plantio': '2027-06-01', 'local': 'B1-B'}, 'p': {}, 'decl': True}])
+OK    · 390×844 gravar/editar: sem rolagem lateral da página
+OK    · 390×844 gravar/editar: sem erro de JS
+OK    · 390×844 dividir preparo: café 40 ha plantado em 01/01/2020 na parcela B1-A do B1 (Café BV 2026/27)
+OK    · 390×844 dividir Safra BV 2027: B1 Livre 80 ha (o café de 2020 ocupa 40)
+FALHA · 390×844 dividir: gravar soja 90 ha também é recusado (café de 2020 numa safra que cruza) · (painel fechado)
+FALHA · 390×844 dividir: Dividir B1 abre só a soja desta safra (B1-B, 80 ha) · [{'id': 'n2_34541', 'local': 'B1-B', 'area': '90', 'cult': 'Soja', 'var': '58 W', 'plantio': '2027-06-01', 'meta': '60', 'unm': 'sc/ha', 'plano': 'SOJA-AT', 'colheita': '', 'adj': None, 'from': '', 'decl': True, 'ask': False}]
+     (medido) 390×844 dividir: nome sugerido para a parcela nova (a do café é B1-A): B1-A
+FALHA · 390×844 dividir: dividir em 50 + 40 ha (café 40 + 90 = 130 > 120): "A divisão travaria a área… Nada foi gravado", com a mensagem da trava na parcela · ('(painel fechado)', [{'id': 'n2_34541', 'v': {'cult': 'Soja', 'var': '58 W', 'plano': 'SOJA-AT', 'plantio': '2027-06-01', 'local': 'B1-B', 'area': 50, 'meta': 60, 'talhao': 'B1', 'faz': 'Boa Vista', 'saf': 'n6_29101', 'colheita': '', 'unm': 'sc/ha', 'tipo': 'Parcela'}, 's': {}, 'p': {}, 'decl': True}, {'id': 'pB1_338291_1', 'v': {'talhao': 'B1', 'faz': 'Boa Vista', 'local': 'B1-C', 'cult': 'Soja', 'var': '58 W', 'area': 40, 'plantio': '2027-06-01', 'meta': 60, 'unm': 'sc/ha', 'plano': 'SOJA-AT', 'colheita': '', 'saf': 'n6_29101', 'tipo': 'Parcela'}, 's': {}, 'p': {}, 'decl': True}])
+FALHA · 390×844 dividir: dividir em 50 + 30 ha (soma = 120 ha) grava · ('(painel fechado)', 'B1 dividido em 2 parcelas · 30 ha livres. Plano operacional, recursos e demanda recalculados.', [40, 50])
+FALHA · 390×844 dividir: dado antigo (soja 60 + 30 ha + café 40 = 130 ha): B1 em Sobreposição, motivo "somam 130 ha" · {'_id': 'grp_B1', '_kid': False, 'C0': '', 'TALHÃO OU PARCELA': 'B1 Dividir', 'SITUAÇÃO': 'Planej.', '_dica': 'Planejado', 'ÁREA LIVRE': '—', 'LIVRE A PARTIR DE': '—', 'ÁREA': '100 ha', 'CULTURA': 'Soja', 'OCUPA ATÉ': '', 'FIM POR': '', 'SAFRA': '', 'VARIEDADE': '58 W', 'PLANO AGRONÔMICO': 'Soja alta tecnologia', 'VERSÃO': 'v6', 'PLANTIO': '01/06/2027', 'META': 'por parcela', 'AJUSTES LOCAIS': '—', 'TIPO': '2 parcelas', 'C17': ''}
+FALHA · 390×844 dividir: faixa mostra o excesso: "· de 120 ha · 10 ha em sobreposição" · Nesta safra 100 · Perene 20 · de 120 ha
+FALHA · 390×844 dividir: nota "Sobreposição em B1: … somam 130 ha …" com "Corrigir B1" · Dimensionar operações ›
+OK    · 390×844 dividir: sem rolagem lateral da página
+OK    · 390×844 dividir: sem erro de JS
+
+RESULTADO: 16 ok · 22 falhas (tudo)
+  - 1440×900 gravar/editar: gravar soja 90 ha (café 40 + 90 = 130 > 120 ha) é recusado com a mensagem da trava; painel aberto; nada gravado
+  - 1440×900 gravar/editar: limite, soja 80 ha (soma = 120 ha) grava
+  - 1440×900 gravar/editar: editar a soja para 90 ha é recusado com a mensagem da trava; continua 80 ha
+  - 1440×900 gravar/editar: editar só a meta (80 ha, no limite) grava
+  - 1440×900 dividir: gravar soja 90 ha também é recusado (café de 2020 numa safra que cruza)
+  - 1440×900 dividir: Dividir B1 abre só a soja desta safra (B1-B, 80 ha)
+  - 1440×900 dividir: dividir em 50 + 40 ha (café 40 + 90 = 130 > 120): "A divisão travaria a área… Nada foi gravado", com a mensagem da trava na parcela
+  - 1440×900 dividir: dividir em 50 + 30 ha (soma = 120 ha) grava
+  - 1440×900 dividir: dado antigo (soja 60 + 30 ha + café 40 = 130 ha): B1 em Sobreposição, motivo "somam 130 ha"
+  - 1440×900 dividir: faixa mostra o excesso: "· de 120 ha · 10 ha em sobreposição"
+  - 1440×900 dividir: nota "Sobreposição em B1: … somam 130 ha …" com "Corrigir B1"
+  - 390×844 gravar/editar: gravar soja 90 ha (café 40 + 90 = 130 > 120 ha) é recusado com a mensagem da trava; painel aberto; nada gravado
+  - 390×844 gravar/editar: limite, soja 80 ha (soma = 120 ha) grava
+  - 390×844 gravar/editar: editar a soja para 90 ha é recusado com a mensagem da trava; continua 80 ha
+  - 390×844 gravar/editar: editar só a meta (80 ha, no limite) grava
+  - 390×844 dividir: gravar soja 90 ha também é recusado (café de 2020 numa safra que cruza)
+  - 390×844 dividir: Dividir B1 abre só a soja desta safra (B1-B, 80 ha)
+  - 390×844 dividir: dividir em 50 + 40 ha (café 40 + 90 = 130 > 120): "A divisão travaria a área… Nada foi gravado", com a mensagem da trava na parcela
+  - 390×844 dividir: dividir em 50 + 30 ha (soma = 120 ha) grava
+  - 390×844 dividir: dado antigo (soja 60 + 30 ha + café 40 = 130 ha): B1 em Sobreposição, motivo "somam 130 ha"
+  - 390×844 dividir: faixa mostra o excesso: "· de 120 ha · 10 ha em sobreposição"
+  - 390×844 dividir: nota "Sobreposição em B1: … somam 130 ha …" com "Corrigir B1"
