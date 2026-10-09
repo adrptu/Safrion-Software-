@@ -1141,6 +1141,24 @@ SEP_CSS=(
     f"aside[role=dialog]>div:first-child:has(>h2),aside[role=dialog]>h2:first-child{{border-bottom:1px solid {DS_SEP['cor']};padding-bottom:12px}}"
     f".g2-cab{{border-bottom:1px solid {DS_SEP['cor']};padding-bottom:14px}}"
 )
+# =====================================================================================
+# DS-RETORNO-20261009 (g2lib: g2flash, g2vivo, g2carga; chamados só pelo motor, ENGINE_JS2: montagem e cada desenho): realce passageiro do
+# que mudou, barra de carga entre telas e título focado por código. docs/design-system/separador-hover-retorno-dica.md (padrões e amostras).
+# =====================================================================================
+DS_RETORNO=dict(realce='#EDF7F0',realce_meio='#F2F8F4',anel='rgba(30,122,76,.38)',realce_ms=520,estatico='#EDF7F0',carga='#1E7A4C',carga_h='3px')   # realce claro o bastante para o texto apagado (#65736A) ficar em 4,55:1; o anel verde é o que chama o olho
+RETORNO_CSS=(
+    # realce passageiro do que mudou: verde suave que esmaece em 520 ms; com "menos movimento", realce estático curto (o g2lib tira em 600 ms)
+    f"@keyframes g2realce{{0%{{background-color:{DS_RETORNO['realce']};box-shadow:0 0 0 3px {DS_RETORNO['anel']}}}55%{{background-color:{DS_RETORNO['realce_meio']};box-shadow:0 0 0 2px rgba(30,122,76,.14)}}100%{{}}}}"
+    f".g2-realce{{animation:g2realce {DS_RETORNO['realce_ms']/1000:.2f}s ease-out}}"
+    f"@media (prefers-reduced-motion:reduce){{.g2-realce{{animation:none!important;background-color:{DS_RETORNO['estatico']}!important;box-shadow:0 0 0 2px #1E7A4C!important}}}}"
+    # título que recebe o foco por código (tela nova, etapa nova): sem anel de foco; o realce mostra o novo contexto
+    ":is(h1,h2,h3)[tabindex=\"-1\"]:focus{outline:none}"
+    # barra fina de carga entre telas (do clique no link até a tela nova montar)
+    f"#g2-carga{{position:fixed;top:0;left:0;height:{DS_RETORNO['carga_h']};width:0;background:{DS_RETORNO['carga']};box-shadow:0 0 8px rgba(30,122,76,.5);z-index:2147483000;pointer-events:none;opacity:0}}"
+    "#g2-carga.ini{opacity:1;width:82%;transition:width 1.4s cubic-bezier(.08,.6,.2,1)}#g2-carga.chega{opacity:1;width:82%}"
+    "#g2-carga.fim{opacity:0;width:100%;transition:width .22s ease-out,opacity .28s ease .22s}"
+    "@media (prefers-reduced-motion:reduce){#g2-carga.ini,#g2-carga.chega{width:100%;transition:none}#g2-carga.fim{transition:none}}"
+)
 G2_CSS=(".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outline:2px solid #1E7A4C;outline-offset:-2px}"
         # hover dos controles pequenos da grade só onde existe ponteiro com hover (no toque o fundo não fica "grudado")
         "@media (hover:hover){.g2fi:hover{background:#F2F8F4}.g2fb:hover,.g2car:hover{background:#E4F3E9}.g2del:hover{background:#FDE8E6;color:#B42318}}"   # DS-HOVER: verde, não cinza
@@ -1176,7 +1194,7 @@ G2_CSS=(".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outlin
         "main section:only-of-type>div:last-child>div>.g2caixa:last-of-type{flex:1 1 0}main section:only-of-type>div:last-child>div>.g2caixa:last-of-type>.g2rola{flex:1 1 0}"
         "main section:only-of-type>div:last-child>div>.rola{flex:1 1 0;min-height:0;overflow:auto}"
         ".g2rola [role=table]>[role=row]:first-child{position:sticky;top:0;z-index:3}"
-        + INTERACAO_CSS + ACOES_CSS + SEP_CSS)
+        + INTERACAO_CSS + ACOES_CSS + SEP_CSS + RETORNO_CSS)
 _TRASH='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>'
 _MINI=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer; white-space: nowrap;'
 _MINIP=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {ACC}; background: {ACC}; color: #fff; cursor: pointer; white-space: nowrap;'
@@ -1283,7 +1301,7 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
         tot=(f'<div role="row" class="g2tot" tabIndex="0" onClick="{H("_totopen")}" title="Ver a composição do total" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; border-top: 2px solid {INK}; background: {BG}; font-size: 13px;">'
              + ('<div role="cell"></div>' if sel else '') + f'<sc-for list="{H("_tot")}" as="t" hint-placeholder-count="{len(cols)}"><div role="cell" class="{_h("t.cls")}" style="{_h("t.st")}">{_h("t.t")}</div></sc-for>' + ('<div role="cell"></div>' if dele else '') + '</div>')
     empty=f'<sc-if value="{H("_empty")}" hint-placeholder-val="{{{{false}}}}"><div style="padding: 16px; font-size: 13px; color: {MUTED};">Nenhuma linha corresponde aos filtros · <button type="button" onClick="{H("_clear")}" style="border: 0; background: transparent; color: {ACC}; font-family: inherit; font-weight: 700; cursor: pointer;">Limpar filtros</button></div></sc-if>'
-    tbl=(f'<div class="g2rola"><div role="table" style="display: grid; grid-template-columns: var(--g2cols, repeat({n}, auto)); min-width: 100%; width: max-content;">{head}{body}{tot}</div></div>{empty}')
+    tbl=(f'<div class="g2rola"><div role="table" data-g2g="{gid}" style="display: grid; grid-template-columns: var(--g2cols, repeat({n}, auto)); min-width: 100%; width: max-content;">{head}{body}{tot}</div></div>{empty}')
     EXTRA.append(_g2form(gid))
     box=f'background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; min-width: 0; overflow: hidden;' if frame else 'min-width: 0;'
     return f'<div class="g2caixa" style="{box}">{tb}{fpanel}{tbl}</div>'
@@ -1483,7 +1501,9 @@ ENGINE_JS2=ENGINE_JS2.replace("    return v;\n  }\n}","""    v.g2toast = this.st
     if (typeof assinAvisoVals === 'function') assinAvisoVals(this, v);   // faixa de cobrança (PLAT-01, R11): só as telas da organização têm o buraco
     return v;
   }
-  componentDidUpdate(pp, ps) { if (this.state.g2toast && this.state.g2toast !== (ps || {}).g2toast) { clearTimeout(this._g2t); this._g2t = setTimeout(() => this.setState({ g2toast: '' }), 4500); } }
+  componentDidMount() { g2montou(this); }   /* DS-RETORNO-20261009: tela nova (realce do título, fim da barra de carga, anúncio) */
+  componentDidUpdate(pp, ps) { if (this.state.g2toast && this.state.g2toast !== (ps || {}).g2toast) { clearTimeout(this._g2t); this._g2t = setTimeout(() => this.setState({ g2toast: '' }), 4500); }
+    g2mudou(this); }   /* DS-RETORNO-20261009: etapa/seção nova ou aviso novo realça o que mudou e anuncia (ponto central, não por tela) */
 }""")
 assert 'g2vals' in ENGINE_JS2, 'patch do motor falhou'
 EXTRAJS=['']  # JS específico da tela (function EXTRAVALS(self,v){...}) — processos usam
@@ -1500,4 +1520,5 @@ def engine():
     grids=json.dumps(GRIDS,ensure_ascii=False).replace('</','<\\/')
     nav=json.dumps(NAVSPEC,ensure_ascii=False)
     return 'const SPEC = '+spec+';\nconst GRIDS = '+grids+';\nconst NAV = '+nav+';\n'+G2LIB+'\n'+_assin_prefixo()+(EXTRAJS[0] or '')+'\n'+ENGINE_JS2
-G2_TOAST=f'<div role="status" style="position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(22px + var(--acoes-h, 0px) + env(safe-area-inset-bottom, 0px)); z-index: 70; background: {INK}; color: #fff; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 12px 32px -8px rgba(21,32,26,.4); max-width: min(560px, calc(100vw - 32px)); box-sizing: border-box; {{{{g2toastst}}}}">{{{{g2toast}}}}</div>'
+# o aviso é visto aqui e anunciado uma vez pela região viva do g2lib (g2vivo, DS-RETORNO-20261009): aria-live=off evita a leitura em dobro
+G2_TOAST=f'<div role="status" aria-live="off" style="position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(22px + var(--acoes-h, 0px) + env(safe-area-inset-bottom, 0px)); z-index: 70; background: {INK}; color: #fff; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 12px 32px -8px rgba(21,32,26,.4); max-width: min(560px, calc(100vw - 32px)); box-sizing: border-box; {{{{g2toastst}}}}">{{{{g2toast}}}}</div>'

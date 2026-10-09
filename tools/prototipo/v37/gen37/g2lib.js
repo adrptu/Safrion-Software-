@@ -399,3 +399,88 @@ function g2acoes(v,pre,c){ c=c||{}; const nada=()=>{};
   const lk=!!(prim&&prim.h); v[pre+'_hasPrim']=!!prim&&!lk; v[pre+'_hasLink']=lk; v[pre+'_primT']=prim?prim.t:''; v[pre+'_primFn']=(prim&&prim.fn)||nada; v[pre+'_href']=lk?prim.h:'#';
   v[pre+'_primA']=(prim&&prim.a)||'avancar'; v[pre+'_desc']=c.nota?(pre+'-nota'):'';
   v[pre+'_has']=!!(c.nota||lnks.length||volta||sec||prim); }
+// ===== DS-RETORNO-20261009 · retorno visual de mudança (g2flash) =====
+// Proprietário (09/10/2026): "quando muda de tela e avança no processo não está dando aquele feedback ao usuário em tempo real como se fosse um
+// flash de atualização e mudança de contexto". Uma só função de realce (g2flash), chamada só pelos pontos centrais do motor (engine.ENGINE_JS2):
+// carga da tela (componentDidMount → g2montou), troca de etapa ou seção (faixa de progresso lida depois de cada desenho → g2mudou) e mudança de
+// estado com aviso (g2toast novo: gravar, aprovar, liberar, mover cartão → g2mudou). Realce = camada verde que esmaece em 520 ms no bloco que
+// mudou; com "menos movimento" fica um realce estático curto (CSS). Não atrasa a ação nem esconde o resultado: o desenho novo já está na tela.
+// Anúncio: região viva única (aria-live polite) com o novo estado. Navegação entre telas: barra fina no topo (g2carga) do clique até a tela nova.
+const G2_REALCE_MS=520;
+function g2menos(){ try{ return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return false; } }
+function g2txt(el){ return String((el&&el.textContent)||'').replace(/\s+/g,' ').trim(); }
+function g2vis(el){ return !!el&&el.isConnected&&el.getClientRects().length>0; }
+// região viva única: repetir a mesma frase anuncia de novo (esvazia e preenche)
+function g2vivo(msg){ if(typeof document==='undefined'||!document.body) return null; let r=document.getElementById('g2-vivo');
+  if(!r){ r=document.createElement('div'); r.id='g2-vivo'; r.setAttribute('aria-live','polite'); r.setAttribute('aria-atomic','true'); r.className='g2sr';
+    r.style.cssText='position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap'; document.body.appendChild(r); }
+  // duas frases no mesmo instante (ex.: o resultado e a recusa do 2º clique) saem juntas, sem uma apagar a outra
+  const t=(r.__pend?r.__pend+' ':'')+String(msg||''); clearTimeout(r.__t); r.textContent=''; r.__pend=t;
+  r.__t=setTimeout(()=>{ r.textContent=t; r.__pend=''; },60); r.dataset.ultimo=t; return r; }
+// realce passageiro de um elemento (ou seletor) + anúncio opcional; window.__g2realces guarda os últimos 20 (o teste de navegador lê)
+function g2flash(alvo,msg){ let el=null; try{ if(typeof document==='undefined') return null;
+    el=(typeof alvo==='string')?document.querySelector(alvo):alvo; if(!g2vis(el)) el=null;
+    if(el){ el.classList.remove('g2-realce'); void el.offsetWidth; el.classList.add('g2-realce'); clearTimeout(el.__g2r);
+      el.__g2r=setTimeout(()=>el.classList.remove('g2-realce'),G2_REALCE_MS+80);
+      const L=(window.__g2realces=window.__g2realces||[]); L.push({t:Date.now(),tag:el.tagName,txt:g2txt(el).slice(0,80),msg:String(msg||'')}); if(L.length>20) L.shift(); }
+    if(msg) g2vivo(msg); }catch(e){} return el; }
+// barra fina de carga no topo: 'ini' (clique num link de outra tela), 'chega' + 'fim' (tela nova montada)
+function g2carga(fase){ if(typeof document==='undefined'||!document.body) return; let b=document.getElementById('g2-carga');
+  if(!b){ b=document.createElement('div'); b.id='g2-carga'; b.setAttribute('aria-hidden','true'); document.body.appendChild(b); }
+  clearTimeout(b.__t); b.className=''; void b.offsetWidth; b.className=fase||''; if(fase==='fim') b.__t=setTimeout(()=>{ b.className=''; },700); }
+// etapa ou seção atual (faixa de progresso SAF/CMP/PA/PM ou seções do Estoque): '' se a tela não tem faixa
+function g2passo(){ if(typeof document==='undefined') return '';
+  const e=document.querySelector('.etp-ind li[aria-current="step"],.etp-sec .etp-itens>[aria-current="true"]'); if(!e) return '';
+  const nm=e.querySelector(':scope>span:not([aria-hidden="true"])>span')||e.querySelector('span'); const c=nm?nm.cloneNode(true):null;
+  if(c) c.querySelectorAll('.etp-sr').forEach(x=>x.remove()); const nome=c?g2txt(c):g2txt(e);
+  if(e.tagName==='LI'){ const ls=[...e.parentElement.children].filter(x=>x.tagName==='LI'); return 'Etapa '+(ls.indexOf(e)+1)+' de '+ls.length+': '+nome; }
+  return 'Seção: '+nome; }
+// bloco do contexto atual: o cartão do 1º título visível do conteúdo (o mesmo que g2etapa foca)
+function g2blocoAtual(){ const m=document.querySelector('main'); if(!m) return null; const h=[...m.querySelectorAll('h2,h3')].find(g2vis);
+  if(h) return h.closest('section')||h.parentElement; return [...m.children].find(g2vis)||m; }
+// filhos com caixa (sc-if e sc-for são display:contents)
+function g2blocos(p){ const out=[]; for(const c of p.children){ if(/^SC-/.test(c.tagName)) out.push(...g2blocos(c)); else out.push(c); } return out; }
+// foto do que está na tela, por chave estável e nível (1 = linha/cartão, 2 = região rotulada/estado do cabeçalho, 3 = bloco do conteúdo)
+function g2foto(){ const f={}; if(typeof document==='undefined') return f;
+  const add=(k,el,nv,s)=>{ if(el&&!f[k]) f[k]={el,nv,s:(s===undefined?g2txt(el):s)}; };
+  document.querySelectorAll('[role=table][data-g2g] [role=row][data-rid]').forEach(r=>add('r:'+r.closest('[role=table]').getAttribute('data-g2g')+':'+r.getAttribute('data-rid'),r,1));
+  document.querySelectorAll('[role=list]').forEach(l=>g2blocos(l).forEach((col,ci)=>col.querySelectorAll('[role=button],[role=listitem]').forEach(k=>{
+    const b=k.querySelector('b'); add('k:'+(b?g2txt(b):(k.getAttribute('aria-label')||g2txt(k).slice(0,40))),k,1,ci+'|'+g2txt(k)); })));
+  document.querySelectorAll('[data-g2k]').forEach(e=>add('x:'+e.getAttribute('data-g2k'),e,1));
+  const h=document.querySelector('header h1'); if(h&&h.nextElementSibling) add('h:estado',h.nextElementSibling,2);
+  document.querySelectorAll('[role=region][aria-label],section[aria-label]').forEach(e=>add('g:'+e.getAttribute('aria-label'),e,2));
+  document.querySelectorAll('aside[role=dialog] h2').forEach(t=>add('d:'+g2txt(t).slice(0,60),t.parentElement,2));
+  document.querySelectorAll('main section').forEach((s,i)=>{ const t=s.querySelector('h2,h3'); add('s:'+(t?g2txt(t).slice(0,60):i),s,3); });
+  return f; }
+// tela montada: barra de carga termina, título realçado e anunciado; vindo de um link do protótipo, o foco vai ao título da tela nova
+function g2montou(self){ if(typeof document==='undefined') return; setTimeout(()=>{ try{
+    const h=document.querySelector('header h1')||document.querySelector('h1');
+    let veio=false; try{ const t=Number(sessionStorage.getItem('g2nav')||0); sessionStorage.removeItem('g2nav'); veio=t>0&&Date.now()-t<15000; }catch(e){}
+    g2carga('chega'); setTimeout(()=>g2carga('fim'),g2menos()?300:40);
+    const st=h&&h.nextElementSibling; const stT=st?g2txt(st):''; const tit=h?g2txt(h):document.title;
+    g2flash(h,'Tela: '+tit+(stT?' · '+stT:''));
+    const ae=document.activeElement;
+    if(veio&&h&&!location.hash&&(!ae||ae===document.body)){ if(!h.hasAttribute('tabindex')) h.setAttribute('tabindex','-1'); h.focus({preventScroll:true}); }
+    self.__g2foto=g2foto(); self.__g2passo=g2passo(); self.__g2toastVisto=(self.state&&self.state.g2toast)||''; }catch(e){} },60); }
+// depois de cada desenho: troca de etapa/seção realça o bloco do novo contexto; aviso novo (g2toast) realça o que mudou e anuncia
+function g2mudou(self){ if(typeof document==='undefined'||!self.__g2foto) return;   // antes da 1ª foto (montagem) não compara
+  const f=g2foto(), ant=self.__g2foto, agora=Date.now(); self.__g2foto=f;
+  const mud=self.__g2mud=(self.__g2mud||[]).filter(x=>agora-x.t<1200);   // mudanças recentes (o aviso pode vir num desenho seguinte ao do dado)
+  for(const k in f){ if(ant[k]&&ant[k].s!==f[k].s) mud.push({k,t:agora}); }
+  const t=(self.state&&self.state.g2toast)||''; const tNovo=!!t&&t!==self.__g2toastVisto; if(!t) self.__g2toastVisto='';
+  const p=g2passo();
+  if(p&&self.__g2passo&&p!==self.__g2passo){ self.__g2passo=p; if(tNovo) self.__g2toastVisto=t; self.__g2mud=[]; g2flash(g2blocoAtual(),p+(tNovo?'. '+t:'')); return; }
+  if(p) self.__g2passo=p;
+  if(!tNovo) return; self.__g2toastVisto=t;
+  const ks=[...new Set(mud.map(x=>x.k).concat(Object.keys(f).filter(k=>!ant[k]&&f[k].nv===1&&f[k].el.classList.contains('g2flash'))))]; self.__g2mud=[];
+  const nivel=(n)=>ks.filter(k=>f[k]&&f[k].nv===n).map(k=>f[k].el).filter(g2vis);
+  let alvos=nivel(1).slice(0,3).concat(nivel(2).slice(0,2)); if(!alvos.length) alvos=nivel(3).slice(0,1);
+  alvos.forEach(e=>g2flash(e)); g2vivo(t); }
+(function g2retGlob(){ if(typeof document==='undefined'||window.__g2ret) return; window.__g2ret=1;
+  // clique num link para outra tela do protótipo: a barra começa já (a navegação segue sem espera); a tela nova termina a barra e foca o título
+  document.addEventListener('click',(e)=>{ if(e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey) return;
+    const a=e.target&&e.target.closest&&e.target.closest('a[href]'); if(!a||(a.target&&a.target!=='_self')||a.hasAttribute('download')) return;
+    let u=null; try{ u=new URL(a.getAttribute('href'),location.href); }catch(er){ return; }
+    if(u.origin!==location.origin||u.pathname===location.pathname) return;   // âncora na mesma tela não carrega outra
+    g2carga('ini'); try{ sessionStorage.setItem('g2nav',String(Date.now())); }catch(er){} });
+})();
