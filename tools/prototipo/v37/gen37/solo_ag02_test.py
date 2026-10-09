@@ -4,7 +4,7 @@ Modos (um por vez, cada um abre o Chrome headless do cadc_lib.T):
   desktop  1440 × 1000: menu (D-01); AC-SOLO-06 registrar o laudo de exemplo (LAU-2073), repetir (recusa), chave repetida (já registrado),
            Caio não valida, Ana valida e só então o T7 tem sugestão; AC-SOLO-07 LAU-2048 inconsistente sem "Validar" e correção do K;
            AC-SOLO-15 OS-0502 liberada → "não aplicável"; Por quê com a regra rotulada; água no solo (CAD, repetida recusada, sem CC
-           recusada) e a CAD como referência no IR-01; AC-SOLO-18 tabelas com busca, filtro e ordenação; uma ação primária.
+           recusada) e a CAD como referência no IR-01 (outra CAD não muda lâmina nem necessidade, R24); AC-SOLO-18 tabelas com busca, filtro e ordenação; uma ação primária.
   celular  390 × 844: sem rolagem horizontal da página, primária visível, painel do laudo em tela cheia com o original recolhido e a
            primária presa no rodapé; formulário de registro sem estouro.
 Uso: env CHROME_BIN=… flock /tmp/cdpC.lock env CDP_GL=1 timeout 900 python3 solo_ag02_test.py [desktop|celular]
@@ -126,8 +126,16 @@ try:
         t.cancel()
         shot('desktop')
         ir('IR-01.dc.html'); J("SETV('select[aria-label=\"Filtrar por fazenda\"]','Santa Rita')"); time.sleep(.5); lib()
-        row('Gotejo T7'); d = t.dlg()
+        row('Gotejo T7'); d = t.dlg(); IRK = ('lmax', 'imin', 'efic', 'necT', 'eqT', 'defT'); v0 = [t.fv(k) for k in IRK]
         t.chk('IR-01: a CAD do talhão aparece como referência no setor (T7: 56 mm), dizendo que não é a lâmina', 'Água disponível no solo (referência)' in d and t.fv('cadT') and 'CAD 56 mm' in t.fv('cadT') and 'não é' in d.lower(), [t.fv('cadT'), d[-300:]])
+        t.cancel()
+        # R24 (AC-SOLO-24): uma medição nova do T7 com outra CAD (120 mm) muda só a referência; lâmina, intervalo, eficiência, necessidade e equipamento ficam iguais
+        J("(()=>{ const c=JSON.parse(localStorage.getItem('talhao-os-cenario-v1')||'{}'); c.solo=c.solo||{}; c.solo.agua=c.solo.agua||{};"
+          " c.solo.agua['AGS-099']={id:'AGS-099',faz:'Santa Rita',tal:'T7',zona:'',data:'2026-09-22',prof:'0–40',z:'40',met:'Curva de retenção (laboratório)',un:'% volume',cc:'40',pmp:'10',fonte:'Lab Solo Vale',resp:'Ana (agrônoma)'};"
+          " localStorage.setItem('talhao-os-cenario-v1',JSON.stringify(c)); })()")
+        ir('IR-01.dc.html'); J("SETV('select[aria-label=\"Filtrar por fazenda\"]','Santa Rita')"); time.sleep(.5); lib()
+        row('Gotejo T7'); t.dlg(); v1 = [t.fv(k) for k in IRK]; cad1 = t.fv('cadT') or ''
+        t.chk('R24 outra CAD no T7 (120 mm) muda só a referência: lâmina máxima, intervalo, eficiência, déficit, necessidade e equipamento iguais', 'CAD 120 mm' in cad1 and v1 == v0 and all(x is not None for x in v0), [cad1, v0, v1])
         t.cancel()
         t.chk('nenhum erro de JS (desktop)', not t.errs(), t.errs())
     if 'celular' in MODOS:
