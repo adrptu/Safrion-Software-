@@ -953,6 +953,16 @@ def ag01det():
 import os as _os, shutil as _sh
 AGF_ID='g_agf'
 AGF_CULTURAS=['Soja','Milho','Feijão','Café','Mamão']
+# Praga-alvo (pedido do proprietário, 09/10/2026: "na consulta agrofit tem que aparecer colunas das pragas alvo"): com a cultura escolhida a
+# lista tem uma linha por USO na cultura (produto × praga-alvo, como no AGROFIT), lida dos usos registrados (agrofit_usos_cultura_*.json) e dos
+# alvos do agrofit_indice.json (nada inventado): Praga-alvo (nomes comuns; coluna multivalorada, o filtro marca o nome) e Nome científico, uma
+# variável por coluna, com filtro e ordenação no cabeçalho; "Cultura do uso" separa o uso registrado na cultura do uso em "Todas as culturas".
+# Sem cultura, a lista continua com uma linha por produto (AGF_COLS_P, as 6 colunas do desenho).
+AGF_COLS_P=[dict(k='prod',l='Produto · registro',w=180),dict(k='ing',l='Ingrediente ativo · grupo químico',w=190),dict(k='cls',l='Classe · modo de ação',w=130),
+            dict(k='cult',l='Culturas',t='num',w=115),dict(k='tox',l='Tox · amb',w=120),dict(k='faz',l='Na fazenda',t='num',w=125)]
+AGF_COLS_U=[dict(k='prod',l='Produto · registro',w=170),dict(k='alvo',l='Praga-alvo',w=170,multi=True),dict(k='cien',l='Nome científico',w=160),
+            dict(k='ucul',l='Cultura do uso',w=110),dict(k='ing',l='Ingrediente ativo · grupo químico',w=180),dict(k='cls',l='Classe · modo de ação',w=130),
+            dict(k='tox',l='Tox · amb',w=120),dict(k='faz',l='Na fazenda',t='num',w=125)]
 AGF_DIR=_os.path.join(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))),'dados_agrofit','site')
 # arquivos que a página busca (publicar ao lado de AG-07.dc.html); os de produto e de técnicos ficam só no servidor
 def agf_arquivos():
@@ -1124,10 +1134,14 @@ def _agf_painel(link):
     usos=(f'<input type="search" aria-label="Filtrar usos por cultura ou alvo" placeholder="Filtrar cultura ou alvo…" value="{H("af_q")}" onChange="{H("af_setq")}" '
           f'style="font-family: inherit; font-size: 13px; padding: 7px 10px; border: 1px solid {LINE}; border-radius: 9px; max-width: 340px;">'
           + se('af_usosLoad',f'<div role="status" style="{MUT}">Carregando os usos registrados…</div>')
-          + f'<div role="list" aria-label="{H("af_usosL")}" style="display: flex; flex-direction: column;">'
-          f'<sc-for list="{H("af_usos")}" as="u" hint-placeholder-count="3"><div role="listitem" style="display: grid; grid-template-columns: minmax(0,1.1fr) minmax(0,2fr) auto; gap: 10px; align-items: baseline; padding: 7px 8px; border-top: 1px solid {LINE}; font-size: 12.8px; line-height: 1.4; {H("u.st")}">'
-          f'<b style="min-width: 0;">{H("u.t")}</b><span style="min-width: 0; color: {MUTED};">{H("u.sub")}</span>'
-          f'<button type="button" onClick="{H("u.go")}" aria-label="{H("u.lab")}" style="{BL} font-size: 12.5px;">{H("u.bt")} ›</button></div></sc-for></div>'
+          + f'<div role="table" aria-label="{H("af_usosL")}" style="display: flex; flex-direction: column;">'
+          f'<div role="row" style="display: grid; grid-template-columns: {H("af_usosTpl")}; gap: 10px; padding: 4px 8px; {TH}">'
+          f'<sc-for list="{H("af_usosCab")}" as="h" hint-placeholder-count="3"><span role="columnheader" aria-sort="{H("h.sort")}" style="min-width: 0;">'
+          f'<button type="button" onClick="{H("h.go")}" title="{H("h.tt")}" style="border: 0; background: transparent; padding: 0; font: inherit; color: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; text-align: left;">{H("h.l")} <span aria-hidden="true" style="{H("h.ast")}">{H("h.seta")}</span></button></span></sc-for>'
+          f'<span role="columnheader" aria-label="Ação"></span></div>'
+          f'<sc-for list="{H("af_usos")}" as="u" hint-placeholder-count="3"><div role="row" style="display: grid; grid-template-columns: {H("af_usosTpl")}; gap: 10px; align-items: baseline; padding: 7px 8px; border-top: 1px solid {LINE}; font-size: 12.8px; line-height: 1.4; {H("u.st")}">'
+          f'<sc-for list="{H("u.cs")}" as="x" hint-placeholder-count="3"><span role="cell" style="min-width: 0; overflow-wrap: anywhere; {H("x.st")}">{H("x.t")}</span></sc-for>'
+          f'<span role="cell"><button type="button" onClick="{H("u.go")}" aria-label="{H("u.lab")}" style="{BL} font-size: 12.5px; white-space: nowrap;">{H("u.bt")} ›</button></span></div></sc-for></div>'
           + se('af_usosVazio',f'<div style="{MUT}">Nenhum uso com “{H("af_q")}”.</div>')
           + se('af_usosMais',f'<button type="button" onClick="{H("af_usosTodos")}" style="{BL}">Mostrar todos ({H("af_usosN")}) ›</button>'))
     # rotação: mesma cultura × alvo, outro grupo químico (e outro grupo de resistência quando conhecido)
@@ -1199,7 +1213,7 @@ AGF_JS=r'''
 function GR(id){ return GRIDS.find(g=>g.id===id); }
 const AGC=new Intl.Collator('pt-BR',{numeric:true,sensitivity:'base'});
 const AGX={st:'',err:'',tries:0,meta:null,I:null,P:[],reg:{},ord:[],uSt:'',uErr:'',U:null,PU:null,pairs:null,UA:{},lSt:'',lErr:'',L:null,rev:0,
-  vk:null,vis:null,gk:null,grows:null,leaf:{},FK:{},fazCul:[],culItems:[]};
+  vk:null,vis:null,gk:null,grows:null,leaf:{},FK:{},fazCul:[],culItems:[],uleaf:{},UH:{},AT:{},uvk:null,uvis:null,retRid:''};
 const AG_REF={}; AGF.ref.forEach(r=>{ AG_REF[r.id]=r; });
 const AG_FAZ=['Com saldo disponível','Sem saldo disponível','Fora da fazenda'];
 const AG_FASE={'A liberar':'gray','Liberadas':'green','Em execução':'green','Em conferência':'yellow'};
@@ -1277,7 +1291,7 @@ function agPrep(I){ AGX.I=I; const F={}; I.campos.forEach((c,i)=>{ F[c]=i; });
   const inm={}; IG.forEach((x,id)=>{ inm[g2norm(x[0]).trim()]=id; }); AGX.FK={};
   AGF.ref.forEach(r=>{ const ids=r.agrofit.map(n=>inm[g2norm(n).trim()]); r.ids=ids.filter(x=>x!==undefined);
     r.key=(r.ids.length&&r.ids.length===r.agrofit.length)?r.ids.slice().sort((a,b)=>a-b).join(','):''; if(r.key) (AGX.FK[r.key]=AGX.FK[r.key]||[]).push(r); });
-  AGX.leaf={}; AGX.vk=null; AGX.gk=null; }
+  AGX.leaf={}; AGX.uleaf={}; AGX.UH={}; AGX.AT={}; AGX.vk=null; AGX.uvk=null; AGX.gk=null; }
 // rotação por MODO DE AÇÃO: código IRAC/FRAC/HRAC de referência de cada ingrediente (AGF.grupo_ref cobre todos os químicos do arquivo).
 // Sem código, vale o grupo químico do AGROFIT; rótulo que não indica modo de ação (biológico, extrato, inorgânico) → o próprio ingrediente.
 // Código "UN" (modo de ação desconhecido) não une produtos. s = chaves de sítio específico; m = multissítio (FRAC M).
@@ -1294,7 +1308,7 @@ function agMesmo(p,q){ const P=p.rot, Q=q.rot; for(const k of Q.s) if(P.s.has(k)
 function agPrepUsos(arr){ const U={}; arr.forEach(s=>{ Object.keys(s.culturas).forEach(k=>{ U[k]=s.culturas[k]; }); });
   const PU=AGX.P.map(()=>[]), pairs=[];
   Object.keys(U).forEach(k=>{ const c=Number(k); U[k].forEach(x=>{ pairs.push({c:c,a:x[0],ps:x[1],h:null}); x[1].forEach(pi=>{ if(PU[pi]) PU[pi].push([c,x[0]]); }); }); });
-  AGX.U=U; AGX.PU=PU; AGX.pairs=pairs; AGX.UA={}; AGX.vk=null; AGX.gk=null; agPrepH(pairs); }
+  AGX.U=U; AGX.PU=PU; AGX.pairs=pairs; AGX.UA={}; AGX.uleaf={}; AGX.vk=null; AGX.uvk=null; AGX.gk=null; agPrepH(pairs); }
 // texto pesquisável dos ~280 mil usos montado em fatias de ~12 ms logo após a carga (a 1ª busca não paga a montagem)
 function agPrepH(pairs){ let i=0; const passo=()=>{ if(AGX.pairs!==pairs) return; const t0=Date.now();
     while(i<pairs.length){ agPairH(pairs[i++]); if((i&511)===0&&Date.now()-t0>12) break; } if(i<pairs.length) setTimeout(passo,0); };
@@ -1356,6 +1370,36 @@ function agLeafFaz(L,F){ if(!F){ L.v.faz=null; L.s.faz=AG_FAZ[2]; L.p.faz=[{k:'m
   const com=F.por.filter(x=>x.L.length), x0=com[0]||F.por[0]; L.v.faz=F.disp; L.s.faz=F.cat;
   const fz=[{k:'txt',t:x0.n+(F.por.length>1?' +'+(F.por.length-1):'')},{k:'br'}];
   fz.push(x0.L.length?{k:'mut',t:agNf(x0.disp)+' '+x0.un+' disponíveis'}:{k:'mut',t:'sem lote'}); L.p.faz=fz; }
+// ---------- Praga-alvo (09/10): com a cultura escolhida, uma linha por USO na cultura (produto × praga-alvo), como no AGROFIT ----------
+// Praga-alvo = nomes comuns do AGROFIT (r.m.alvo: o filtro da coluna marca o nome, não um pedaço de texto); Nome científico na sua coluna;
+// Cultura do uso = a cultura escolhida ou "Todas as culturas". Sem cultura (ou com os usos ainda carregando), uma linha por produto.
+let AG_COLS_P=null;
+function agModoUso(st){ return (st.agf_cul||'')!==''&&AGX.uSt==='ok'; }
+function agUH(c,a){ const k=c+'|'+a; let h=AGX.UH[k]; if(h===undefined){ const I=AGX.I, al=I.alvos[a]||['',[]]; h=AGX.UH[k]=g2norm(I.culturas[c][0]+' '+al[0]+' '+(al[1]||[]).join(' ')); } return h; }
+function agAT(a){ let t=AGX.AT[a]; if(t===undefined) t=AGX.AT[a]=agAlvoT(a,true); return t; }
+function agUsoLeaf(p,c,a){ const k=p.i+'|'+c+'|'+a; let L=AGX.uleaf[k]; if(L) return L;
+  const I=AGX.I, P0=agLeaf(p), al=I.alvos[a]||['',[],'',0], cs=al[1]||[], com=cs.join(', '), ci=al[0]||'', cn=I.culturas[c][0], id=p.reg+'@'+c+'@'+a;
+  L={id:id, dr:'agf_op_'+id, pi:p.i, uc:c, ua:a, v:{faz:P0.v.faz}, m:{alvo:cs.map(n=>({id:n,l:n}))},
+    s:Object.assign({},P0.s,{alvo:com,cien:ci,ucul:cn}),
+    p:Object.assign({},P0.p,{alvo:[{k:com?'txt':'mut',t:com||(ci?'—':'não informado')}],cien:[{k:ci?'txt':'mut',t:ci||'—'}],ucul:[{k:'txt',t:cn}]})};
+  return (AGX.uleaf[k]=L); }
+// usos visíveis: os produtos que passam nos filtros da lista (agVis) × os alvos deles na cultura (e em "Todas as culturas", salvo "só os de");
+// a busca vale palavra a palavra no produto OU na praga-alvo do MESMO uso (cultura, nome científico e nomes comuns)
+function agVisUso(st){ const V=agVis(st), k=AGX.vk; if(AGX.uvk===k&&AGX.uvis) return AGX.uvis;
+  const I=AGX.I, TD=I.todasCulturas, cul=Number(st.agf_cul), al=st.agf_alvo||'', semTD=!!st.agf_semTD;
+  const ws=g2norm(st.agf_q||'').split(/\s+/).filter(Boolean).slice(0,30), ok=new Set(V.ids), por={};
+  [cul].concat(cul!==TD&&!semTD?[TD]:[]).forEach(c=>agUA(c).forEach((ps,a)=>{ if(al!==''&&a!==Number(al)) return; ps.forEach(i=>{ if(ok.has(i)) (por[i]=por[i]||[]).push([c,a]); }); }));
+  const rows=[]; V.ids.forEach(i=>{ const L=por[i]; if(!L) return; const p=AGX.P[i];
+    L.sort((x,y)=>((x[0]===cul?0:1)-(y[0]===cul?0:1))||AGC.compare(agAT(x[1]),agAT(y[1])));
+    L.forEach(x=>{ if(ws.length&&!ws.every(w=>p.hay.indexOf(w)>=0||agUH(x[0],x[1]).indexOf(w)>=0)) return; rows.push(agUsoLeaf(p,x[0],x[1])); }); });
+  AGX.uvis={rows:rows,nCul:rows.filter(r=>r.uc===cul).length}; AGX.uvk=k; return AGX.uvis; }
+// total de usos da cultura (com "Todas as culturas", salvo "só os de"): o "de N usos em <cultura>" da contagem
+function agUsoTot(st){ const TD=AGX.I.todasCulturas, cul=Number(st.agf_cul); let n=0;
+  [cul].concat(cul!==TD&&!st.agf_semTD?[TD]:[]).forEach(c=>agUA(c).forEach(ps=>{ n+=ps.length; })); return n; }
+// trocar de modo (cultura sim/não) tira filtro e ordenação das colunas que só existem no outro modo
+function agColsLimpa(self,mu){ const ks=(mu?AGF_COLS_U:(AG_COLS_P||[])).map(c=>c.k); const gs=g2st(self,AGF_G), f=Object.assign({},gs.f||{}); let mud=false;
+  Object.keys(f).forEach(k=>{ if(ks.indexOf(k)<0){ delete f[k]; mud=true; } }); const so=gs.so&&gs.so.k&&ks.indexOf(gs.so.k)<0?{}:gs.so;
+  if(mud||so!==gs.so) g2set(self,AGF_G,{f:f,so:so}); }
 function agGKeys(p,gb,F){ const I=AGX.I; switch(gb){
   case 'cls': return p.comp.length?p.comp:['(classe não informada)'];
   case 'gq': return p.gq.length?p.gq.map(g=>I.gruposQuimicos[g]):['(grupo químico não informado)'];
@@ -1395,18 +1439,20 @@ function agHash(){ try{ return decodeURIComponent((location.hash||'').slice(1));
 function agSetHash(h){ try{ if(h){ if(location.hash!=='#'+h) history.replaceState(null,'','#'+h); } else if(location.hash) history.replaceState(null,'',location.pathname+location.search); }catch(e){} }
 function agFoc(el){ return Array.prototype.slice.call(el.querySelectorAll('a[href],button,input,select,textarea,[tabindex]'))
   .filter(x=>!x.disabled&&x.tabIndex>=0&&x.getClientRects().length>0); }
-function agOpen(self,reg){ const pi=AGX.reg[reg]; if(pi===undefined) return; const st=self.state, p=AGX.P[pi];
+function agOpen(self,reg,o){ const pi=AGX.reg[reg]; if(pi===undefined) return; const st=self.state, p=AGX.P[pi]; AGX.retRid=(o&&o.rid)||'';
   if(!st.agf){ try{ AG_RET=document.activeElement; }catch(e){ AG_RET=null; } }
   // cultura e alvo da ficha: os da lista quando o registro os tem. Uso em "Todas as culturas" vale para a cultura da lista (ex.: Mamão),
   // que fica escolhida: a O.S. precisa da cultura real do talhão.
   let cul='', al=''; const lc=st.agf_cul||'', TD=AGX.I.todasCulturas;
   if(lc!==''){ if(p.culSet.has(Number(lc))||p.todas) cul=lc; }
   else if(p.cul.length===1) cul=String(p.cul[0]);
-  const la=st.agf_alvo||''; if(cul!==''&&la!==''&&AGX.PU&&AGX.PU[pi].some(x=>(String(x[0])===cul||(p.todas&&x[0]===TD))&&String(x[1])===la)) al=la;
-  self.setState({agf:reg,af_cul:cul,af_alvo:al,af_q:'',af_all:false,af_pf:'',af_ord:'',agf_miss:''}); agSetHash('reg-'+reg);
+  const la=(o&&o.a!==undefined)?String(o.a):(st.agf_alvo||''); if(cul!==''&&la!==''&&AGX.PU&&AGX.PU[pi].some(x=>(String(x[0])===cul||(p.todas&&x[0]===TD))&&String(x[1])===la)) al=la;
+  self.setState({agf:reg,af_cul:cul,af_alvo:al,af_q:'',af_all:false,af_uso_so:{},af_pf:'',af_ord:'',agf_miss:''}); agSetHash('reg-'+reg);
   setTimeout(()=>{ try{ const a=document.querySelector('aside[aria-label^="Ficha"]'); if(a){ a.scrollTop=0; const b=a.querySelector('button[aria-label="Fechar"]'); if(b&&!a.contains(document.activeElement)) b.focus(); } }catch(e){} },30); }
 function agClose(self){ const reg=self.state.agf; self.setState({agf:null}); agSetHash(self.state.agf_ref||'');
-  setTimeout(()=>{ try{ const p=AGX.P[AGX.reg[reg]]; const lin=p&&Array.prototype.slice.call(document.querySelectorAll('main [role=row].g2ed')).find(r=>{ const c=r.querySelector('[role=cell]'); return c&&c.innerText.split('\n')[0].trim()===p.nome; });
+  const rid=AGX.retRid; AGX.retRid='';
+  setTimeout(()=>{ try{ const p=AGX.P[AGX.reg[reg]]; const lin=(rid&&Array.prototype.slice.call(document.querySelectorAll('main [role=row].g2ed')).find(r=>r.getAttribute('data-rid')===rid))
+      ||(p&&Array.prototype.slice.call(document.querySelectorAll('main [role=row].g2ed')).find(r=>{ const c=r.querySelector('[role=cell]'); return c&&c.innerText.split('\n')[0].trim()===p.nome; }));
     const alvo=lin||((AG_RET&&AG_RET.isConnected&&AG_RET!==document.body)?AG_RET:document.querySelector('main input[type=search]')); AG_RET=null; if(alvo) alvo.focus(); }catch(e){} },30); }
 function agTeclas(self,e){ const st=self.state; if(!st.agf) return;
   if(e.key==='Escape'){ if(e.defaultPrevented) return; e.preventDefault(); agClose(self); return; }
@@ -1457,15 +1503,19 @@ function PREVALS(self,v){
   v.agf_uLoad=ok&&AGX.uSt==='carregando'; v.agf_uErro=ok&&AGX.uSt==='erro'; v.agf_uErrT=AGX.uErr||''; v.agf_uRetry=()=>{ AGX.uSt=''; agUsosCarregar(self); };
   v.agf_setgb=(e)=>{ self.setState({agf_gb:e.target.value,agf_lim:AG_LIM}); g2set(self,AGF_G,{x:null}); };
   sp.lim=st.agf_lim||AG_LIM;
+  if(!AG_COLS_P) AG_COLS_P=sp.cols.slice();
+  const mu=ok&&agModoUso(st); sp.cols=mu?AGF_COLS_U:AG_COLS_P; v.agf_ncol=sp.cols.length;
   if(!ok){ sp.rows=[]; sp.tree=false; v.agc=agAc(self,'agf_cul',[],'',()=>{}); v.aga=agAc(self,'agf_alvo',[],'',()=>{}); v.agf_orgOn='false'; v.agf_orgN=''; v.agf_orgSt=''; return; }
   const I=AGX.I, TD=I.todasCulturas, cul=st.agf_cul||'', al=st.agf_alvo||'', cls=st.agf_cls||'', gb=st.agf_gb||'';
   const V=agVis(st);
   // filtros: cultura (combobox), praga ou alvo (com a cultura), classe por componente (+ Biológico), orgânicos
-  v.agc=agAc(self,'agf_cul',AGX.culItems,cul,(x)=>{ agSetF(self,{agf_cul:x,agf_alvo:''}); },{ph:'Todas as culturas · digite para buscar'});
+  v.agc=agAc(self,'agf_cul',AGX.culItems,cul,(x)=>{ agColsLimpa(self,x!==''); agSetF(self,{agf_cul:x,agf_alvo:''}); },{ph:'Todas as culturas · digite para buscar'});
   v.agf_temCul=cul!=='';
   const semTD=!!st.agf_semTD, cn0=cul!==''?I.culturas[Number(cul)][0]:''; v.agf_hasTD=cul!==''&&Number(cul)!==TD&&(V.nTD>0||semTD);
+  const VU=mu?agVisUso(st):null; if(mu&&Number(cul)!==TD) v.agf_hasTD=semTD||VU.rows.length>VU.nCul;
   v.agf_tdT=semTD?('Só registros específicos de '+cn0+'; os com uso em "Todas as culturas" (em geral biológicos, registrados por alvo) estão fora.')
-    :(agNf(V.ids.length-V.nTD)+' com registro em '+cn0+' + '+agNf(V.nTD)+' com uso em "Todas as culturas" (em geral biológicos, registrados por alvo; valem para qualquer cultura).');
+    :(mu?(agNf(VU.nCul)+(VU.nCul===1?' uso registrado em ':' usos registrados em ')+cn0+' + '+agNf(VU.rows.length-VU.nCul)+' em "Todas as culturas" (em geral biológicos, registrados por alvo; valem para qualquer cultura).')
+    :(agNf(V.ids.length-V.nTD)+' com registro em '+cn0+' + '+agNf(V.nTD)+' com uso em "Todas as culturas" (em geral biológicos, registrados por alvo; valem para qualquer cultura).'));
   v.agf_tdBt=semTD?'Incluir "Todas as culturas"':('Ver só os de '+cn0); v.agf_tdTog=()=>agSetF(self,{agf_semTD:!semTD});
   let alItems=[]; if(cul!==''&&AGX.uSt==='ok'){ const mm=new Map(); agUA(cul).forEach((ps,a)=>{ mm.set(a,{n:ps.length,todas:false}); });
       if(Number(cul)!==TD&&!st.agf_semTD) agUA(TD).forEach((ps,a)=>{ const x=mm.get(a); if(x) x.n+=ps.length; else mm.set(a,{n:ps.length,todas:true}); });
@@ -1497,12 +1547,15 @@ function PREVALS(self,v){
     v.agf_missSt='background:#FFF3D6;color:#8A5A00;'; v.agf_missX=()=>{ self.setState({agf_miss:''}); agSetHash(''); }; }
   // linhas da grade: folhas em cache; "Na fazenda" ao vivo só nos registros com ingrediente de produto da fazenda
   const P=AGX.P, Fz={}; V.ids.forEach(i=>{ const p=P[i]; if(AGX.FK[p.key]){ Fz[i]=agFaz(p,c); agLeafFaz(agLeaf(p),Fz[i]); } });
-  if(!gb){ sp.tree=false; sp.x0={}; sp.rows=V.ids.map(i=>agLeaf(P[i])); }
-  else { const gk=AGX.vk+'#'+gb+'#'+(gb==='faz'?(c.rev||0):''); if(AGX.gk!==gk){ const G={};
-      V.ids.forEach(i=>{ const p=P[i]; agGKeys(p,gb,Fz[i]).forEach(k=>{ (G[k]=G[k]||[]).push(i); }); });
+  // por uso: a coluna "Na fazenda" da linha segue a do produto (ao vivo, pelo cenário)
+  const base=mu?VU.rows:V.ids.map(i=>agLeaf(P[i]));
+  if(mu) base.forEach(r=>{ if(Fz[r.pi]!==undefined){ const L=agLeaf(P[r.pi]); r.v.faz=L.v.faz; r.s.faz=L.s.faz; r.p.faz=L.p.faz; } });
+  if(!gb){ sp.tree=false; sp.x0={}; sp.rows=base; }
+  else { const gk=AGX.vk+'#'+gb+'#'+(mu?'u':'p')+'#'+(gb==='faz'?(c.rev||0):''); if(AGX.gk!==gk){ const G={};
+      base.forEach(r=>{ const i=mu?r.pi:AGX.reg[r.id]; agGKeys(P[i],gb,Fz[i]).forEach(k=>{ (G[k]=G[k]||[]).push(r); }); });
       const ks2=Object.keys(G).sort(agGOrd(gb));
-      AGX.grows=ks2.map((k,j)=>{ const its=G[k], n=its.length; return {id:'G~'+j, dr:'agf_gx_'+j, v:{}, s:{prod:k}, p:{prod:[{k:'b',t:k},{k:'mut',t:agNf(n)+(n>1?' produtos':' produto')}]},
-          kids:its.map(i=>Object.assign({},agLeaf(P[i]),{id:P[i].reg+'~'+j}))}; }); AGX.gk=gk; }
+      AGX.grows=ks2.map((k,j)=>{ const its=G[k], n=its.length; return {id:'G~'+j, dr:'agf_gx_'+j, v:{}, s:{prod:k}, p:{prod:[{k:'b',t:k},{k:'mut',t:agNf(n)+(mu?(n>1?' usos':' uso'):(n>1?' produtos':' produto'))}]},
+          kids:its.map(r=>Object.assign({},r,{id:r.id+'~'+j}))}; }); AGX.gk=gk; }
     sp.tree=true; sp.x0={}; sp.rows=AGX.grows; }
 }
 // render incremental: a grade ordena e filtra o conjunto inteiro; só as primeiras linhas viram DOM ("Mostrar mais" amplia)
@@ -1518,25 +1571,26 @@ function EXTRAVALS(self,v){
   const st=self.state, sp=GR(AGF_G), gs=g2st(self,AGF_G), G=AGF_G, ok=AGX.st==='ok';
   // busca própria (sem acento; cultura e alvo no mesmo uso) no lugar da busca da grade
   v[G+'_q']=st.agf_q||''; v[G+'_setq']=(e)=>agSetF(self,{agf_q:e.target.value});
-  v[G+'_all']=agNf(ok?AGX.P.length:0)+' produtos';
+  const mu=ok&&agModoUso(st);
+  v[G+'_all']=mu?(agNf(agUsoTot(st))+' usos em '+AGX.I.culturas[Number(st.agf_cul)][0]):(agNf(ok?AGX.P.length:0)+' produtos');
   const fil=Object.keys(gs.f||{}).some(k=>(gs.f[k]||[]).length);
-  if(ok){ const V=agVis(st); if(!fil) v[G+'_count']=agNf(V.ids.length);
+  if(ok){ const V=agVis(st); if(!fil) v[G+'_count']=agNf(mu?agVisUso(st).rows.length:V.ids.length);
     else { const added=st.added||{}, ids=new Set(); const walk=(l)=>l.forEach(r=>{ if(r.kids) walk(r.kids); else if(g2match(r,sp,gs,null,added)) ids.add(String(r.id).split('~')[0]); }); walk(sp.rows||[]); v[G+'_count']=agNf(ids.size); } }
   else v[G+'_count']='0';
   v[G+'_filtered']=fil||!!(st.agf_q||st.agf_cul||st.agf_alvo||st.agf_cls||st.agf_org||st.agf_ref||st.agf_semTD);
   v[G+'_clear']=()=>{ g2set(self,G,{q:'',f:{},qv:'',aq:''}); agSetF(self,{agf_q:'',agf_cul:'',agf_alvo:'',agf_cls:'',agf_org:false,agf_ref:'',agf_semTD:false}); if(st.agf_ref) agSetHash(''); };
   // mais linhas
   const lim=sp.lim||AG_LIM, nf=sp.nflat||0; v.agf_temMais=ok&&nf>lim; v.agf_maisN=agNf(Math.min(AG_PASSO,nf-lim));
-  v.agf_maisT='Mostrando '+agNf(Math.min(lim,nf))+' de '+agNf(nf)+(st.agf_gb?' linhas':' produtos'); v.agf_mais=()=>self.setState({agf_lim:lim+AG_PASSO});
+  v.agf_maisT='Mostrando '+agNf(Math.min(lim,nf))+' de '+agNf(nf)+(st.agf_gb?' linhas':(mu?' usos':' produtos')); v.agf_mais=()=>self.setState({agf_lim:lim+AG_PASSO});
   // abrir ficha e abrir/fechar grupo só nas linhas desenhadas
   (v[G+'_rows']||[]).forEach(rw=>{ const s=String(rw.id); if(s.indexOf('G~')===0){ const j=s.slice(2); v['agf_gx_'+j]=()=>{ const x=Object.assign({},g2st(self,G).x||sp.x0||{}); x[s]=!x[s]; g2set(self,G,{x:x}); }; }
-    else { const reg=s.split('~')[0]; v['agf_op_'+reg]=()=>agOpen(self,reg); } });
+    else { const id0=s.split('~')[0], q=id0.split('@'); v['agf_op_'+id0]=q.length===3?(()=>agOpen(self,q[0],{a:q[2],rid:s})):(()=>agOpen(self,q[0])); } });
   // menu ▾ da coluna: no máximo 300 valores (a busca do menu acha os demais)
   const fm=v[G+'_fm']; if(fm&&fm.open&&fm.vals&&fm.vals.length>300) fm.vals=fm.vals.slice(0,300);
   agFichaVals(self,v);
 }
 function agFichaVals(self,v){ const st=self.state; const pi=(st.agf&&AGX.st==='ok')?AGX.reg[st.agf]:undefined; const p=pi!==undefined?AGX.P[pi]:null;
-  ['af_chips','af_culs','af_alvos','af_usos','af_rotG','af_lmr','af_lotes','af_planos','af_os','af_refsF','af_cref','af_kv','af_ings'].forEach(k=>{ v[k]=[]; });
+  ['af_chips','af_culs','af_alvos','af_usos','af_usosCab','af_rotG','af_lmr','af_lotes','af_planos','af_os','af_refsF','af_cref','af_kv','af_ings'].forEach(k=>{ v[k]=[]; });
   v.af_open=!!p; v.af_close=()=>agClose(self); if(!p) return;
   if(!AGX.lSt) setTimeout(()=>agLmrCarregar(self),0);
   const I=AGX.I, TD=I.todasCulturas, c=cenGet(), uOk=AGX.uSt==='ok', cul=st.af_cul||'', al=st.af_alvo||'', dt=agDataArq();
@@ -1556,7 +1610,7 @@ function agFichaVals(self,v){ const st=self.state; const pi=(st.agf&&AGX.st==='o
   const opC=[]; cs.forEach(id=>{ opC.push({v:String(id),t:I.culturas[id][0]+(id===TD?' (escolha abaixo a cultura do talhão)':'')});
     if(id===TD) extra.forEach(x=>opC.push({v:String(x),t:I.culturas[x][0]+' · pelo uso em “Todas as culturas”'})); });
   v.af_cul=cul; v.af_culs=[{v:'',t:'Escolha a cultura ('+agNf(cs.length)+')'}].concat(opC);
-  v.af_setcul=(e)=>self.setState({af_cul:e.target.value,af_alvo:'',af_all:false});
+  v.af_setcul=(e)=>self.setState({af_cul:e.target.value,af_alvo:'',af_all:false,af_uso_so:{}});
   const PU=uOk?AGX.PU[pi]:[]; const meus=cul!==''?agUni(PU.filter(x=>x[0]===Number(cul)||(p.todas&&!isTD&&x[0]===TD)).map(x=>x[1])):[];
   const alSort=(a,b)=>AGC.compare(agAlvoT(a,true),agAlvoT(b,true)); meus.sort(alSort);
   v.af_alvo=al; v.af_alvoDis=cul===''||!uOk; v.af_setalvo=(e)=>self.setState({af_alvo:e.target.value});
@@ -1593,16 +1647,28 @@ function agFichaVals(self,v){ const st=self.state; const pi=(st.agf&&AGX.st==='o
   const fq=g2norm(st.af_q||'').split(/\s+/).filter(Boolean), casa=(t)=>fq.every(w=>t.indexOf(w)>=0);
   v.af_q=st.af_q||''; v.af_setq=(e)=>self.setState({af_q:e.target.value,af_all:false}); v.af_usosLoad=!uOk;
   v.af_usosT='Usos registrados · '+agNf(cs.length)+(cs.length===1?' cultura':' culturas')+' · '+agNf(p.nUsos)+(p.nUsos===1?' uso':' usos');
-  let rows=[];
-  if(uOk&&cul!==''){ v.af_usosL='Alvos em '+cn;
-    rows=meus.filter(a=>!fq.length||casa(g2norm(cn+' '+agAlvoT(a)))).map(a=>{ const ali=I.alvos[a]||['',[],'',0], on=String(a)===al;
-      return {t:agAlvoT(a,true),sub:(ali[0]||'—')+' · '+(AG_TIPO[ali[2]]||'alvo')+((ali[1]||[]).length>1?' · também '+ali[1].slice(1,4).join(', '):''),bt:on?'Escolhido':'Escolher',lab:'Escolher o alvo '+agAlvoT(a,true),
-        st:on?'background:#E4F3E9;border-radius:8px;':'',go:()=>self.setState({af_alvo:String(a)})}; }); }
-  else if(uOk){ v.af_usosL='Culturas do registro'; const por={}; PU.forEach(x=>{ (por[x[0]]=por[x[0]]||[]).push(x[1]); });
-    rows=cs.map(cid=>{ const as=(por[cid]||[]).slice().sort(alSort), nm=I.culturas[cid][0]; let mt=as;
+  // tabela de usos, uma variável por coluna (09/10): com a cultura, os alvos dela (Praga-alvo = nomes comuns · Nome científico · Tipo);
+  // sem cultura, as culturas do registro (Cultura · Nº de alvos · Alvos). Ordenação no cabeçalho (af_uso_so); filtro no campo acima.
+  let rows=[]; const MU='color:#5B6660;';
+  const so=st.af_uso_so||{}, cab=(ks)=>ks.map(([k,l])=>{ const on=so.k===k; return {l:l,sort:on?(so.d?'descending':'ascending'):'none',seta:on?(so.d?'▼':'▲'):'⇅',ast:on?'color:#1E7A4C;font-size:9px;':'color:#B7C1BA;font-size:9px;',
+      tt:'Ordenar por '+l.toLowerCase(),go:()=>self.setState({af_uso_so:!on?{k:k,d:false}:(!so.d?{k:k,d:true}:{})})}; });
+  const ordena=(L,key)=>{ if(!so.k) return L; const d=so.d?-1:1; return L.slice().sort((x,y)=>{ const a=key(x,so.k), b=key(y,so.k); if(a===''&&b==='') return 0; if(a==='') return 1; if(b==='') return -1;
+      return (typeof a==='number'&&typeof b==='number'?(a-b):AGC.compare(String(a),String(b)))*d; }); };
+  if(uOk&&cul!==''){ v.af_usosL='Alvos em '+cn; v.af_usosTpl='minmax(0,1.2fr) minmax(0,1.1fr) minmax(0,.7fr) auto';
+    v.af_usosCab=cab([['com','Praga-alvo'],['ci','Nome científico'],['tipo','Tipo']]);
+    const ali=(a)=>I.alvos[a]||['',[],'',0], kA=(a,k)=>k==='com'?(ali(a)[1]||[]).join(', '):(k==='ci'?(ali(a)[0]||''):(AG_TIPO[ali(a)[2]]||''));
+    rows=ordena(meus.filter(a=>!fq.length||casa(g2norm(cn+' '+agAlvoT(a)))),kA).map(a=>{ const x=ali(a), on=String(a)===al, com=(x[1]||[]).join(', ');
+      return {cs:[{t:com||(x[0]?'—':'não informado'),st:com?'font-weight:700;':MU},{t:x[0]||'—',st:x[0]?'font-style:italic;':MU},{t:AG_TIPO[x[2]]||'—',st:MU}],
+        bt:on?'Escolhido':'Escolher',lab:'Escolher o alvo '+agAlvoT(a,true),st:on?'background:#E4F3E9;border-radius:8px;':'',go:()=>self.setState({af_alvo:String(a)})}; }); }
+  else if(uOk){ v.af_usosL='Culturas do registro'; v.af_usosTpl='minmax(0,1fr) minmax(0,.6fr) minmax(0,1.6fr) auto';
+    v.af_usosCab=cab([['cul','Cultura'],['n','Nº de alvos'],['alvos','Alvos']]); const por={}; PU.forEach(x=>{ (por[x[0]]=por[x[0]]||[]).push(x[1]); });
+    const L=cs.map(cid=>{ const as=(por[cid]||[]).slice().sort(alSort), nm=I.culturas[cid][0]; let mt=as;
         if(fq.length){ if(casa(g2norm(nm))) mt=as; else { mt=as.filter(a=>casa(g2norm(nm+' '+agAlvoT(a)))); if(!mt.length) return null; } }
-        return {t:nm,sub:agNf(as.length)+(as.length===1?' alvo: ':' alvos: ')+mt.slice(0,4).map(a=>agAlvoT(a,true)).join(', ')+(mt.length>4?' +'+(mt.length-4):''),bt:'Escolher',lab:'Escolher a cultura '+nm,st:'',
-          go:()=>self.setState({af_cul:String(cid),af_alvo:(fq.length&&mt.length===1)?String(mt[0]):'',af_q:'',af_all:false})}; }).filter(Boolean); }
+        return {cid:cid,nm:nm,as:as,mt:mt}; }).filter(Boolean);
+    rows=ordena(L,(x,k)=>k==='cul'?x.nm:(k==='n'?x.as.length:x.mt.map(a=>agAlvoT(a,true)).join(', '))).map(x=>({
+        cs:[{t:x.nm,st:'font-weight:700;'},{t:agNf(x.as.length),st:'font-variant-numeric:tabular-nums;'},{t:x.mt.slice(0,4).map(a=>agAlvoT(a,true)).join(', ')+(x.mt.length>4?' +'+agNf(x.mt.length-4):''),st:MU}],
+        bt:'Escolher',lab:'Escolher a cultura '+x.nm,st:'',go:()=>self.setState({af_cul:String(x.cid),af_alvo:(fq.length&&x.mt.length===1)?String(x.mt[0]):'',af_q:'',af_all:false,af_uso_so:{}})})); }
+  else { v.af_usosL='Usos registrados'; v.af_usosTpl='minmax(0,1fr) auto'; v.af_usosCab=[]; }
   v.af_usosN=agNf(rows.length); v.af_usosMais=!st.af_all&&rows.length>40; v.af_usosTodos=()=>self.setState({af_all:true});
   v.af_usos=st.af_all?rows:rows.slice(0,40); v.af_usosVazio=uOk&&fq.length>0&&!rows.length;
   // rotação: mesma cultura × alvo, OUTRO MODO DE AÇÃO (código IRAC/FRAC/HRAC de referência por ingrediente; ver agRotKeys)
@@ -1671,13 +1737,14 @@ def ag07():
     fname='AG-07.dc.html'; E._reset_screen(fname)
     dados=agf_dados(); link=A.CONSULTA['link']
     # 6 colunas; larguras máximas (texto quebra) para a grade inteira caber em 1280 px com o menu aberto (contêiner de ~956 px)
-    cols=[dict(k='prod',l='Produto · registro',w=180),dict(k='ing',l='Ingrediente ativo · grupo químico',w=190),dict(k='cls',l='Classe · modo de ação',w=130),
-          dict(k='cult',l='Culturas',t='num',w=115),dict(k='tox',l='Tox · amb',w=120),dict(k='faz',l='Na fazenda',t='num',w=125)]
+    # com a cultura escolhida, as 8 colunas por uso (AGF_COLS_U): a página troca sp.cols e o número de trilhas da grade (agf_ncol, _agf_pos)
+    cols=[dict(c) for c in AGF_COLS_P]
     g=grid(cols,[],edit=dict(m='ro',title='',fields=[]),gid=AGF_ID,total=False,tools=_agf_tools())
     corpo=_agf_estados()+f'<sc-if value="{H("agf_ok")}" hint-placeholder-val="{F_()}">'+bloco('Produtos fitossanitários com registro','',_agf_filtros()+g+_agf_mais())+'</sc-if>'
     EXTRA.append(_agf_painel(link))
     import dados_carencia as DCAR   # local e cultura das ordens (Usar na O.S.): a mesma regra da trava legal da O.S.
-    EXTRAJS[0]=(cenario.js_prefixo()+DCAR.js_local()+'const AGF = '+json.dumps(dados,ensure_ascii=False).replace('</','<\\/')+';\nconst AGF_G = '+json.dumps(AGF_ID)+';\n'+AGF_JS)
+    EXTRAJS[0]=(cenario.js_prefixo()+DCAR.js_local()+'const AGF = '+json.dumps(dados,ensure_ascii=False).replace('</','<\\/')+';\nconst AGF_G = '+json.dumps(AGF_ID)+';\n'
+                +'const AGF_COLS_U = '+json.dumps([E._col_un(dict(c)) for c in AGF_COLS_U],ensure_ascii=False)+';\n'+AGF_JS)
     HEIGHTS37[fname]=900
     shell37('AG-07','Consulta Agrofit',corpo,fname=fname,status=(H('agf_stT'),'gray'),cont=_agf_fonte(link),search=False)
     _agf_pos(fname)
@@ -1703,4 +1770,8 @@ def _agf_pos(fname):
     assert s.count('</style>')>=1; s=s.replace('</style>','.agf-busca:focus-within{outline:2px solid #1E7A4C;outline-offset:1px}</style>',1)
     old=_chip(H('agf_stT'),'gray'); assert s.count(old)==1, 'selo do cabeçalho não encontrado em '+fname
     s=s.replace(old,f'<span role="status" style="{H("agf_stSt")}"><span style="{H("agf_stDot")}"></span>{H("agf_stT")}</span>')
+    # uma linha por uso (cultura escolhida) tem 8 colunas; por produto, 6: o número de trilhas da grade vem da página (agf_ncol)
+    tpl=f'grid-template-columns: var(--g2cols, repeat({len(AGF_COLS_P)}, auto));'
+    assert s.count(tpl)==1, 'trilhas da grade não encontradas em '+fname
+    s=s.replace(tpl,'grid-template-columns: var(--g2cols, repeat('+H('agf_ncol')+', auto));')
     open(p,'w',encoding='utf-8').write(s)

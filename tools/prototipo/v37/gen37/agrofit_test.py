@@ -4,7 +4,8 @@ Os esperados saem dos próprios arquivos servidos (agrofit_meta.json, agrofit_in
 agrofit_lmr.json), da base da fazenda embutida na página (AGF) e do cenário compartilhado (window.__cen na O.S.), recalculados
 aqui em Python com a mesma regra da página — nenhum número escrito à mão. Capturas em _probe/agrofit_real_*.png (1440×900).
 CTL-5 (06/10/2026, RL-E3): a AG-07 só consulta; os itens 9, 12, 14 e 15 trocaram o receituário paralelo pelo "Usar na O.S."
-(o registro nasce na O.S.; o fluxo inteiro está em ctl5_test.py). Uso: python3 agrofit_test.py (≈ 40 s)."""
+(o registro nasce na O.S.; o fluxo inteiro está em ctl5_test.py). Praga-alvo (09/10/2026): com a cultura escolhida a lista é por uso
+(produto × praga-alvo), e os itens 6 e 7 contam usos (o fluxo está em praga_alvo_test.py). Uso: python3 agrofit_test.py (≈ 40 s)."""
 import sys, os, time, subprocess, json, unicodedata
 HERE=os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0,HERE)
 from cdp import Chrome
@@ -92,7 +93,7 @@ try:
     U_=lambda f: f'http://127.0.0.1:{p}/{f}'
     J0="window.__setv=(sel,val)=>{const el=document.querySelector(sel); if(!el) return 'SEM '+sel; const pr=el.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(pr,'value').set.call(el,val); el.dispatchEvent(new Event(el.tagName==='SELECT'?'change':'input',{bubbles:true})); return 'ok';}; 1"
     setv=lambda sel,val: (J(f"__setv({json.dumps(sel)},{json.dumps(val)})"),time.sleep(.35))[0]
-    cnt=lambda: J("(()=>{const s=[...document.querySelectorAll('main span')].find(x=>/ de [\\d.]+ produtos$/.test(x.innerText.trim())); return s?s.innerText.trim():'';})()") or ''
+    cnt=lambda: J("(()=>{const s=[...document.querySelectorAll('main span')].find(x=>/ de [\\d.]+ (produtos|usos em .+)$/.test(x.innerText.trim())); return s?s.innerText.trim():'';})()") or ''
     rows=lambda: J("[...document.querySelectorAll('main [role=table] [role=row].g2ed')].map(r=>[...r.querySelectorAll('[role=cell]')].map(x=>x.innerText.trim()))") or []
     status=lambda: J("[...document.querySelectorAll('main [role=status]')].map(x=>x.innerText.replace(/\\s+/g,' ').trim())") or []
     FX='aside[aria-label^="Ficha"]'; RX='aside[aria-label="Preparar receituário agronômico"]'   # RX: a gaveta que saiu (CTL-5); só para conferir que não existe
@@ -160,17 +161,19 @@ try:
         len(E5)>0 and a1==a2==f'{nf(len(E5),0)} de {nf(NP,0)} produtos' and not (nomes & {P[i]['nome'] for i in sem} - {P[i]['nome'] for i in E5}), [a1,a2,len(E5)])
     setv('main input[type=search]','')
     # ---------- 6 · Cultura = Soja (combobox) e "só os de Soja" ----------
-    SJ=cid('Soja'); eS=[x for x in P if SJ in x['cul'] or TD in x['cul']]; eSo=[x for x in P if SJ in x['cul']]
+    # Praga-alvo (09/10/2026): com a cultura escolhida a lista tem uma linha por USO na cultura (produto × praga-alvo); a contagem passou de
+    # produtos a usos ("N de M usos em Soja") e "Ver só os de Soja" bate com nUsos da cultura no índice (antes: produtos, nProdutos)
+    SJ=cid('Soja'); uS=sum(len(ps) for c_ in (SJ,TD) for a_,ps in U[str(c_)]); uSo=sum(len(ps) for a_,ps in U[str(SJ)])
     combo('Cultura','soja'); b1=cnt(); st=status(); clica('main','Ver só os de Soja'); b2=cnt()
-    chk(f'6 Cultura Soja: {len(eS)} (com "Todas as culturas") e "Ver só os de Soja" → {len(eSo)} (= contagem da cultura no índice)',
-        b1==f'{nf(len(eS),0)} de {nf(NP,0)} produtos' and b2==f'{nf(len(eSo),0)} de {nf(NP,0)} produtos' and len(eSo)==CU[SJ][3]
+    chk(f'6 Cultura Soja: {uS} usos (com "Todas as culturas") e "Ver só os de Soja" → {uSo} usos (= nUsos da cultura no índice)',
+        b1==f'{nf(uS,0)} de {nf(uS,0)} usos em Soja' and b2==f'{nf(uSo,0)} de {nf(uSo,0)} usos em Soja' and uSo==CU[SJ][4]
         and any('Todas as culturas' in s for s in st), [b1,b2,st])
     clica('main','Incluir "Todas as culturas"')
     # ---------- 7 · Praga ou alvo (aparece com a cultura) ----------
     PH=aid('Phakopsora pachyrhizi'); eA=usos(SJ,PH)|usos(TD,PH)
-    combo('Praga ou alvo','phakopsora'); c7=cnt(); vis7=set(r[0].split('\n')[0] for r in rows())
-    chk(f'7 Praga ou alvo = Phakopsora pachyrhizi em Soja: {len(eA)} registros (Soja + "Todas as culturas"), linhas só deles',
-        c7==f'{nf(len(eA),0)} de {nf(NP,0)} produtos' and vis7 and vis7<= {P[i]['nome'] for i in eA}, [c7,len(eA)])
+    combo('Praga ou alvo','phakopsora'); c7=cnt(); L7=rows(); vis7=set(r[0].split('\n')[0] for r in L7)
+    chk(f'7 Praga ou alvo = Phakopsora pachyrhizi em Soja: {len(eA)} usos (Soja + "Todas as culturas"), linhas só deles, com o nome científico na coluna própria',
+        c7==f'{nf(len(eA),0)} de {nf(uS,0)} usos em Soja' and vis7 and vis7<= {P[i]['nome'] for i in eA} and all(r[2]=='Phakopsora pachyrhizi' for r in L7), [c7,len(eA),L7[:2]])
     shot('soja_ferrugem')
     # ---------- 8 · Classe + agrupar por grupo químico ----------
     J("[...document.querySelectorAll('main button')].find(b=>/^Limpar filtros/.test(b.innerText.trim())).click()"); time.sleep(.4)

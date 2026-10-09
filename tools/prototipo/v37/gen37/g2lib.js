@@ -311,12 +311,13 @@ function g2navvals(self,v,nav){ const rec=(self.state.menuRec===undefined)?g2men
   // coluna presa e o cabeçalho preso (--g2c0w, --g2hh): nada focado fica por baixo deles.
   const presa=(r)=>{ const cw=r.clientWidth; if(!cw) return; const hr=r.querySelector('[role=table]>[role=row]'); if(!hr) return;
     const hs=[...hr.querySelectorAll('[role=columnheader]')]; const h=hs.find(x=>x.classList.contains('g2c0')); if(!h) return;
-    if(r.hasAttribute('data-c0')&&r.__c0w!==cw){ r.removeAttribute('data-c0'); r.style.removeProperty('--g2cols'); }
+    // refaz também quando o número de colunas muda (AG-07: 6 por produto, 8 por uso na cultura): --g2cols tem uma trilha por coluna
+    if(r.hasAttribute('data-c0')&&(r.__c0w!==cw||r.__c0n!==hs.length)){ r.removeAttribute('data-c0'); r.style.removeProperty('--g2cols'); }
     const cap=Math.max(96,Math.round(cw*.45));
     if(!r.hasAttribute('data-c0')&&r.scrollWidth-cw>2&&h.getBoundingClientRect().width>cap+1){
       const c0='minmax(min-content, '+cap+'px)'; r.setAttribute('data-c0',''); r.style.setProperty('--g2cols',hs.map(x=>x===h?c0:'auto').join(' '));
       const vis=Math.max(96,Math.floor(cw-h.getBoundingClientRect().width-4)); r.style.setProperty('--g2cols',hs.map(x=>x===h?c0:'fit-content('+vis+'px)').join(' ')); }
-    r.__c0w=cw; r.style.setProperty('--g2c0w',Math.round(h.getBoundingClientRect().width)+'px'); r.style.setProperty('--g2hh',Math.round(hr.getBoundingClientRect().height)+'px'); };
+    r.__c0w=cw; r.__c0n=hs.length; r.style.setProperty('--g2c0w',Math.round(h.getBoundingClientRect().width)+'px'); r.style.setProperty('--g2hh',Math.round(hr.getBoundingClientRect().height)+'px'); };
   const faixa=()=>{ const col=document.querySelector('.ml-tog+div'); if(!col) return; const nv=col.querySelector(':scope>.etp'); col.style.setProperty('--etp-h',(nv&&nv.getClientRects().length?nv.offsetHeight:0)+'px'); };
   const acoes=()=>{ const a=[...document.querySelectorAll('main .acoes')].find(vis); const h=(a&&getComputedStyle(a).position==='sticky')?Math.round(a.getBoundingClientRect().height):0; document.documentElement.style.setProperty('--acoes-h',h+'px'); };
   const mais=()=>{ faixa(); acoes(); document.querySelectorAll('.g2rola,.rola').forEach(r=>{ if(r.classList.contains('g2rola')) presa(r); if(r.scrollWidth-r.clientWidth-r.scrollLeft>2) r.setAttribute('data-mais',''); else r.removeAttribute('data-mais'); }); };
