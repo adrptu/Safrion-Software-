@@ -22,6 +22,8 @@ Modos (um por vez, cada um abre o Chrome headless do cadc_lib.T; o cenário come
            sem "Estornar" com o porquê; a Marta sem "Registrar decisão" no L39-132.
   complemento rodada 1 (S3): falta de caixa durante a execução: a recusa diz a saída, "Pedir mais caixas" faz o complemento da
            mesma REQ (toque duplo grava uma vez), o Rui entrega no balcão e o balanço fecha com diferença 0.
+  duplo    rodada 1 (S3): toque duplo real (mouse a 1440, toque a 390) em "Autorizar rota e liberar" e "Iniciar processo": a repetição é
+           absorvida (o aviso repete o recibo) e não dispara a operação seguinte.
   cancelar integração BEN (09/10): ordem em A liberar que não libera (caixas acima do livre; entrada que mudou com o estorno da carga)
            tem saída: "Cancelar a ordem" com motivo (nada reservado) e o lote abre outra ordem.
   faixa390 integração BEN (09/10): a 390 px, Cargas › faixa de telas › Beneficiamento por toque real (a lista aberta fica acima da
@@ -32,7 +34,7 @@ import sys, os, time, json
 os.environ.setdefault('SAFRION_DADOS', 'sintetico')
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from cadc_lib import T
-TODOS = ('fluxo', 'erros', 'celular', 'revisao', 'roteiro', 'roteiro390', 'complemento', 'cancelar', 'faixa390')
+TODOS = ('fluxo', 'erros', 'celular', 'revisao', 'roteiro', 'roteiro390', 'complemento', 'duplo', 'cancelar', 'faixa390')
 MODOS = [a for a in sys.argv[1:] if a in TODOS] or list(TODOS)
 PR = os.path.join(HERE, '_probe'); os.makedirs(PR, exist_ok=True)
 t = T(); J = t.J
@@ -98,6 +100,18 @@ def tocar(x, root=None, w=.6, nav=False):
     else:
         for tp in ('mouseMoved', 'mousePressed', 'mouseReleased'): t.c.call('Input.dispatchMouseEvent', {'type': tp, 'x': p['x'], 'y': p['y'], 'button': 'left', 'clickCount': 1})
     time.sleep(1.4 if nav else w); lib(); J(f"window.__cl={cl + 1}; window.__tx={tx};"); return 'ok'
+def duplo(x, root='aside', gap=.12):
+    """toque/clique duplo real no mesmo ponto (gap entre os dois): o 2º cai no que o 1º fez aparecer, como na mão da pessoa"""
+    p = J(f"PTO({json.dumps(x)},{json.dumps(root)})"); n = 0
+    while p and p['cob'] and p.get('aviso') and n < 10: time.sleep(1); n += 1; p = J(f"PTO({json.dumps(x)},{json.dumps(root)})")   # espera o aviso sair de cima
+    if not p or p['cob']: return 'NÃO ACHEI/COBERTO: ' + x + ('' if not p else ' por ' + p['top'])
+    for i in range(2):
+        if MOBILE[0]:
+            t.c.call('Input.dispatchTouchEvent', {'type': 'touchStart', 'touchPoints': [{'x': p['x'], 'y': p['y']}]}); t.c.call('Input.dispatchTouchEvent', {'type': 'touchEnd', 'touchPoints': []})
+        else:
+            for tp in ('mousePressed', 'mouseReleased'): t.c.call('Input.dispatchMouseEvent', {'type': tp, 'x': p['x'], 'y': p['y'], 'button': 'left', 'clickCount': i + 1})
+        if i == 0: time.sleep(gap)
+    time.sleep(1); lib(); return 'ok'
 def est_secao(i): J(f"document.querySelectorAll('nav[aria-label=\"Seções do estoque\"] button')[{i - 1}].click()"); time.sleep(.5)
 
 try:
@@ -413,6 +427,28 @@ try:
               'S-03 registrada' in a and 'S-04 registrada' in b and st == ['Em conferência', 0, 0] and 'diferença 0 kg (0,00 %)' in tc, [a, b, st, tc])
         shot('complemento')
         t.chk('complemento sem erro de JS', not t.errs(), t.errs())
+    if 'duplo' in MODOS:
+        # rodada 1 (S3): o 2º clique de um clique duplo em "Autorizar rota e liberar" caía na primária seguinte ("Iniciar processo") e iniciava
+        # o processo. A repetição tem de ser absorvida (o aviso repete o recibo) sem disparar a operação seguinte, a 1440 (mouse) e a 390 (toque)
+        from ben_unit_test import motor, node
+        fx = node(motor() + """ const c = cenClone(CEN0); const IG = 'Igor', RU = 'Rui', CX = BENC.cx.item;
+          function M(fn) { const x = cenClone(c); const r = fn(x) || {}; Object.keys(c).forEach(k => delete c[k]); Object.assign(c, x); return r; }
+          M(x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }] }, IG));
+          M(x => { const n0 = x.movs.length; cenReceber(x, CX, 'CX26-02', 1200, 'un', 'Packing', '—', 'NF 7731', true, RU); x.movs[n0].estRec = { id: 'r7731', nf: 'NF 7731', ped: 'PC-096', conf: 1200, apto: 1200, quar: 0, lote: 'CX26-02' }; });
+          c.rev = (c.rev || 0) + 1; print(JSON.stringify(c));""", 'ben_duplo.js')
+        FX = fx.stdout.strip().splitlines()[-1]
+        for W in (1440, 390):
+            T_ = str(W); H = 844 if W < 500 else 1000; tamanho(W, H); print(f'== duplo {T_} · toque duplo nas primárias que mudam de fase')
+            ir('BEN.dc.html', limpa=True, w=W, h=H); J(f"localStorage.setItem('talhao-os-cenario-v1', {json.dumps(FX)})"); perfil('Igor'); ir('BEN.dc.html#OB-0113', w=W, h=H)
+            r0 = rev(); r = duplo('Autorizar rota e liberar'); tc = toast(); p = pan()
+            st = cen("[c.ordens['OB-0113'].etapa, c.ordens['OB-0113'].ben.hist.filter(h=>/Iniciada/.test(h.ev)).length, c.ordens['OB-0113'].ben.hist.filter(h=>/Liberada/.test(h.ev)).length]")
+            t.chk(T_ + ' D1 · toque duplo em "Autorizar rota e liberar": só libera (Liberadas, uma liberação, nada iniciado; revisão +1); o 2º toque repete o recibo',
+                  r == 'ok' and st == ['Liberadas', 0, 1] and rev() == r0 + 1 and 'autorizada (CMD-42) e liberada (CMD-06)' in tc and 'não gravado' not in p.lower(), [r, st, rev(), r0, tc])
+            r0 = rev(); r = duplo('Iniciar processo'); p = pan(); st = cen("c.ordens['OB-0113'].etapa"); fm = J("!!document.querySelector('aside [role=group][aria-label^=\"Registrar saída\"]')")
+            t.chk(T_ + ' D2 · toque duplo em "Iniciar processo": só inicia (Em execução; o formulário de saída não abre sozinho)',
+                  r == 'ok' and st == 'Em execução' and rev() == r0 + 1 and fm is False, [r, st, fm, rev(), r0, p[:300]])
+            t.chk(T_ + ' duplo sem erro de JS', not t.errs(), t.errs())
+        tamanho(1440, 1000)
     if 'cancelar' in MODOS:
         # integração BEN (09/10), achado 2: ordem em A liberar que não libera (caixas acima do livre; entrada que mudou com o estorno da carga)
         # prendia o lote sem saída (sem Cancelar, sem editar, sem incluir entrada). Agora "Cancelar a ordem" (rascunho: nada reservado)

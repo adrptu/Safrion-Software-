@@ -37,7 +37,15 @@ BEN_JS = r'''
 const PR_GRIDS={g_ob:1};
 const _g2rows0=g2rows; g2rows=function(self,sp){ return PR_GRIDS[sp.id]?sp.rows:_g2rows0(self,sp); };
 const BN_FCOR={'A liberar':'gray','Liberadas':'blue','Em execução':'green','Em conferência':'yellow','Encerradas':'gray','Canceladas':'gray'};
-function bnRun(self,fn,ok){ const r=benMudar(fn);
+/* repetição do toque (rodada 1 da integração, S3): o 2º toque de um toque duplo cai no botão que o 1º fez aparecer (Autorizar → Iniciar;
+   Criar ordem → Autorizar). Até BN_REP_MS depois de uma ação do painel, ou com o contador de cliques do navegador em 2 ou mais, o toque é
+   absorvido: o aviso repete o recibo do 1º toque e nada roda. Dano evitado: iniciar o processo (ou liberar a ordem) sem a pessoa decidir */
+const BN_REP_MS=400;
+function bnAgora(){ return typeof performance!=='undefined'&&performance.now?performance.now():Date.now(); }
+function bnGuarda(self,fn){ return (e)=>{ const u=self._bnUlt||null; const t=bnAgora();
+  if((e&&e.detail>=2)||(u&&t-u.t<BN_REP_MS)){ if(u&&u.msg) self.setState({g2toast:/^Já feito/.test(u.msg)?u.msg:'Já feito: '+u.msg,pr_err:''}); return; }
+  self._bnUlt={t,msg:''}; return fn(e); }; }
+function bnRun(self,fn,ok){ const r=benMudar(fn); self._bnUlt={t:bnAgora(),msg:r.erro?(/^Já feito/.test(r.erro)?r.erro:''):(r.msg||'')};
   /* toque repetido (duplo toque, outra aba): o efeito já existe; o retorno é aviso, não erro, e não apaga o aviso do primeiro toque */
   if(r.erro&&/^Já feito/.test(r.erro)){ self.setState({g2toast:r.erro,pr_err:''}); return r; }
   if(r.erro){ self.setState({pr_err:r.erro,g2toast:''}); return r; }
@@ -61,7 +69,7 @@ function bnKanban(self,c,ords){ return BEN_FASES.map(f=>{ const os=ords.filter(o
         hasReal:true,real:bnQtdTxt(o).replace(/^./,x=>x.toUpperCase()),selos:benSelos(c,o).map(s=>({t:s.t,st:prChs(s.c),dot:prDot(s.c)})),
         hasObs:false,obs:'',hasDp:true,dp:nx.t,meta:nx.quem||''}; })}; }); }
 function PREVALS(self,v){ cenOuvir(self); prTopo(self,v); const c=cenGet(); self._c=c;
-  self.g2pick=(gid,rid)=>self.setState({pr_sel:{g:gid,id:rid},pr_pan:{g:gid,id:rid},pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null,pr_ch:null,bn_sub:null});
+  self.g2pick=(gid,rid)=>(self._bnUlt={t:bnAgora(),msg:''},self.setState({pr_sel:{g:gid,id:rid},pr_pan:{g:gid,id:rid},pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null,pr_ch:null,bn_sub:null}));
   const ords=benOrdens(c).filter(o=>prFazOk(self,o.ben.faz)); self._ords=ords;
   const ord=o=>(BEN_FASES.indexOf(o.etapa)+1||BEN_FASES.length+1)*1000+Number(o.id.replace(/\D/g,''));   /* Canceladas (fora do quadro, BEN-D22) por último */
   GR('g_ob').rows=ords.slice().sort((a,b)=>ord(a)-ord(b)).map(o=>bnRow(c,o)); }
@@ -232,7 +240,10 @@ function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const st=s
   const pan=st.pr_pan; let PP=null;
   if(pan&&pan.g==='nova') PP=bnNovaForm(self,c,pan.lote||'');
   else if(pan&&c.ordens[pan.id]&&benEh(c.ordens[pan.id])) PP=bnPainel(self,c,c.ordens[pan.id]);
-  prPainel(self,v,PP); }
+  /* toda ação do painel (primária, secundárias, ações das linhas e o fechar) passa pela guarda da repetição */
+  if(PP){ if(PP.prim&&PP.prim.go) PP.prim.go=bnGuarda(self,PP.prim.go); (PP.sec||[]).forEach(b=>{ b.go=bnGuarda(self,b.go); });
+    (PP.secs||[]).forEach(s=>(s.rows||[]).forEach(r=>{ if(r.a&&r.a.go) r.a.go=bnGuarda(self,r.a.go); })); }
+  prPainel(self,v,PP); if(PP) v.pp_close=bnGuarda(self,v.pp_close); }
 /* entrada por link: BEN.dc.html#OB-0110 abre a ordem; #nova=L39-131 abre a ordem nova com o lote (vindo do Estoque de produto) */
 function bnHash(self){ if(self.__bnh) return; self.__bnh=1; const ab=()=>{ let h=''; try{ h=decodeURIComponent(location.hash||'').slice(1); }catch(e){} const c=cenGet();
   if(/^nova=/.test(h)){ const id=h.slice(5); setTimeout(()=>self.setState({pr_pan:{g:'nova',lote:id},pr_sel:null,pr_form:{lt:id},pr_err:'',pr_modo:null,pr_ch:prChave('W-BNN')}),0); }
