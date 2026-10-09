@@ -12,7 +12,7 @@
     "@safrion/contracts": "workspace:*",
     "@safrion/db": "workspace:*",
     "@safrion/domain": "workspace:*",
-    "next": "16.3.6",
+    "next": "16.3.8",
     "openid-client": "6.8.8",
     "pg": "8.23.0",
     "react": "19.3.0",
