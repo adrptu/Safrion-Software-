@@ -50,6 +50,15 @@ PC=dict(id='PC-088', item='KCl 60 %', pedido=100, recebido=60, apto=50, quarente
 # ---- Irrigação (DEMO-05/15) ----
 # volta_62_h: uma volta a 62 % = 9,0 h ÷ 0,62 ≈ 14,52 h (= 10,81 mm × 80 ha ÷ 166 L/s); exec_h = andamento de 2,1 h (≈14,47 % da volta)
 PIVO=dict(id='Pivô 2', volta_h=9.0, lamina_100=6.7, percent=62, exec_h=2.1, lamina_aplicada=10.81, cobertura_pct=14.47, volta_62_h=14.52)
+# Ficha do pivô (pedido de 09/10/2026): capacidade do equipamento como está na ficha técnica do fabricante · DADOS SINTÉTICOS.
+# Chave = o equipamento de irrigação do cadastro (dados_cad.ATIVOS a11, Bomba do Pivô 2). Tempo de volta e lâmina a 100 % são os de PIVO
+# (fonte atual, sem cópia); a vazão daqui é a fonte da Irrigação (setor P2) e do cadastro da bomba. Tabela percentímetro × tempo de volta
+# × lâmina registrada como está (texto da ficha, Decimal na conta; a linha 100 % vem de PIVO); a conferência fica em ficha_pivo.py.
+# regime_h: "21 h" é o regime de operação (h/dia, fora do horário de ponta), guardado como referência, sem outro uso.
+FICHA_PIVO={'a11':dict(pivo=PIVO['id'], fabricante='Fabricante demonstrativo (sintético)', modelo='pivô central fixo · 8 torres', raio_m=505, area_ha=80,
+                       vazao_ls=166, pressao_mca=32, volta_100_h=PIVO['volta_h'], lamina_100_mm=PIVO['lamina_100'], regime_h=21, regime_obs='fora do horário de ponta',
+                       tabela=[('100',str(PIVO['volta_h']),str(PIVO['lamina_100'])),('90','10.0','7.4'),('80','11.3','8.4'),('70','12.9','9.6'),('60','15.0','11.0'),
+                               ('50','18.0','13.4'),('40','22.5','16.8'),('30','30.0','22.3'),('20','45.0','33.5'),('10','90.0','67.0')])}
 POLITICA_AGUA=dict(id='PA-07 v3', lamina_max=12.0, intervalo_min='18 h', validade='30/11/2026', autor='Ana (agrônoma)')
 
 # ---- Máquinas (DEMO-04/17) ----

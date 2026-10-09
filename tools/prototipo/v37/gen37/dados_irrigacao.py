@@ -17,6 +17,7 @@ As tarefas do dia da Lagoa Grande (tarefa única por setor) são geradas pelo ir
 import json, os, math, datetime as dt
 import dados_lagoa_safra as DLS
 import dados_lagoa_fonte as LF   # outorga: fonte única = o cadastro (CTL-5)
+import dados as D                # vazão do Pivô 2: fonte única = a ficha do pivô (dados.FICHA_PIVO, 09/10/2026)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOJE = dt.date(2026, 9, 23)
@@ -84,7 +85,7 @@ def _sr():
     """Santa Rita: P2, P1 e T7 com o balanço de 7 dias (16/09..22/09) que fecha nos déficits das outras telas."""
     S = {}
     base = [
-        ('P2', 'Pivô 2', 'Milho V10', 80, 'pivô', 166, 'B2', 'Bomba B2', 'SR-RIO', 12.0, 18, 90, 8.0, 'SO-P2', 5.0, 12.0, 11.2,
+        ('P2', 'Pivô 2', 'Milho V10', 80, 'pivô', D.FICHA_PIVO['a11']['vazao_ls'], 'B2', 'Bomba B2', 'SR-RIO', 12.0, 18, 90, 8.0, 'SO-P2', 5.0, 12.0, 11.2,
          [_ap(m(-6, '20:00'), 'OS-0388', 8640, 80, 90, 80, 'volta completa'), _ap(m(-4, '20:00'), 'OS-0391', 6400, 80, 90, 80, 'volta completa'),
           _ap(m(-1, '22:06'), 'OS-0394', 1206, 80, 90, 11.6, 'passagem parcial', prov=True)]),
         ('P1', 'Pivô 1', 'Feijão R5', 95, 'pivô', 150, 'B1', 'Bomba B1', 'SR-RIO', 12.0, 18, 90, 8.0, 'SO-P1', 5.0, 12.0, 8.4,

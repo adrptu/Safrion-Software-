@@ -26,6 +26,7 @@ import engine as E
 from ui37 import shell37, HEIGHTS37, PARENT37, MACRO, secoes_nav, secao_item
 import cenario
 import dados_irrigacao as DI
+import ficha_pivo as FP   # ficha do pivô: o mesmo componente do CD-03 (capacidade do equipamento), aberto pelo setor (09/10/2026)
 
 H=lambda s: '{{'+s+'}}'
 F=lambda: H('false')
@@ -155,13 +156,15 @@ def ir01():
                            dict(k='lmax',l='Lâmina máxima por passada',t='num',req=True,min=1,max=40,u='mm'),dict(k='imin',l='Intervalo mínimo entre inícios',t='num',req=True,min=6,max=96,u='h'),
                            dict(k='efic',l='Eficiência do sistema',t='num',req=True,min=50,max=100,u='%')]),
                gid='g_set',total=False,qf=dict(k='sit',l='Situação',todas='Todos'))
-    EXTRAJS[0]=prefixo()+JS_COMUM+r"""
+    EXTRAJS[0]=prefixo()+FP.js('IR')+JS_COMUM+r"""
 const RK={'Impedida':1,'A conferir':2,'A programar':3,'A liberar':3,'Irrigando':4,'Programada':5,'Sem necessidade':6,'Sem irrigação':7};
-function PREVALS(self,v){ irrOuvir(self); const s=irrGet(); const fz=irrFazK(self); irrFazVals(self,v); irrFaixa(v,s,fz);
+function PREVALS(self,v){ irrOuvir(self); fpvVals(self,v); const s=irrGet(); const fz=irrFazK(self); irrFazVals(self,v); irrFaixa(v,s,fz);
   irrHashOuvir(self,(h)=>{ if(h.indexOf('faz=')===0){ const f=h.slice(4); if(['Santa Rita','Lagoa Grande','Boa Vista','Todas'].indexOf(f)>=0) irrFazSet(self,f,''); try{ history.replaceState(null,'',location.pathname); }catch(e){} return; }
     const sid=h.split(':')[0]; const x=irrGet().setores[sid]; if(!x) return; irrFazDe(self,x.faz);
+    // #P2:ficha abre a ficha do pivô do setor (sub-detalhe; fechar volta ao setor); setor sem ficha abre só o setor
+    const fid=h.split(':')[1]==='ficha'?fpvDe(sid):'';
     // abre o painel do setor quando a linha já estiver na grade (a troca de fazenda redesenha antes)
-    let n=0; const abre=()=>{ const sp=IRG('g_set'); if(g2find(g2rows(self,sp),sid)) g2open(self,sp,sid,null); else if(n++<8) setTimeout(abre,120); }; setTimeout(abre,0); });
+    let n=0; const abre=()=>{ const sp=IRG('g_set'); if(g2find(g2rows(self,sp),sid)){ if(fid) fpvAbrir(self,fid,{gid:'g_set',rid:sid}); else g2open(self,sp,sid,null); } else if(n++<8) setTimeout(abre,120); }; setTimeout(abre,0); });
   const sids=Object.keys(s.setores).filter(k=>!fz||s.setores[k].faz===fz);
   const rows=sids.map(k=>{ const x=s.setores[k]; const si=irrSituacao(s,k); const n=si.n; const top=si.top; const o=top&&top.o; const F=s.faz[x.faz];
     const def=si.d===null?[{k:'mut',t:'—'}]:[{k:'b',t:(si.est?'≈':'')+irrN(si.d,1)+' mm'},{k:'br',t:''}].concat(si.est?[{k:'chip',t:'Estimativa por ET',c:'yellow'}]:[{k:'mut',t:F.demo?'demonstrativo':'medido'}]);
@@ -198,8 +201,12 @@ function EXTRAVALS(self,v){ irrVista(self,'g_set');
   self.g2formActs=(gid,r)=>{ if(gid!=='g_set') return []; const s=irrGet(); const si=irrSituacao(s,r.id); const out=[];
     if(si.acao) out.push({t:si.acao[0],h:si.hoje,go:()=>irrGo(si.acao[1])});
     if(s.setores[r.id].bal&&(!si.acao||si.acao[0]!=='Programar irrigação')&&!(si.ords||[]).length) out.push({t:'Programar irrigação',h:'Abre a programação com a necessidade e a janela sugerida.',go:()=>irrGo('IR-02.dc.html#programar='+r.id)});
+    // ficha do pivô (capacidade do equipamento, a mesma do cadastro CD-03): só o setor que tem ficha registrada
+    const fid=fpvDe(r.id); if(fid) out.push({t:'Ficha do pivô',h:'Capacidade do equipamento: vazão, pressão, tempo de volta e lâmina pelo percentímetro (ficha do fabricante).',
+      go:()=>{ const fm=g2st(self,'g_set').fm; if(g2dirty(fm)){ g2set(self,'g_set',{fm:Object.assign({},fm,{warn:true})}); return; } g2set(self,'g_set',{fm:null}); fpvAbrir(self,fid,{gid:'g_set',rid:r.id}); }});
     return out; }; }
 """
+    EXTRA.append(FP.painel())   # gaveta "Ficha do pivô" (o mesmo componente do CD-03)
     corpo=(vazio('vazio','vazioT','Cadastrar setores','CD-03.dc.html')
            + f'<sc-if value="{H("tem")}" hint-placeholder-val="{T()}">'+section('Setores','','',g_set)+'</sc-if>')
     prim=(f'<span style="{H("hs_st")}">{H("hs_t")}</span><span style="width: 8px;"></span>'
