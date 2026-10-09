@@ -6,7 +6,7 @@
 3. motor: a montagem e cada desenho chamam g2montou/g2mudou (ponto central, nenhuma tela chama g2flash); o aviso visível não é lido em dobro;
 4. glossário e fórmula da coluna (GLOSSARIO, _formula, _ajuda_auto);
 5. os tokens medidos no teste de contraste são os do engine;
-6. com o build feito: toda página do project/ carrega o CSS comum do módulo."""
+6. com o build feito: toda página do project/ carrega o CSS comum do módulo; BO-02 e CF-05 mostram o motivo do indisponível em texto (DS-06)."""
 import os, re, sys, glob, subprocess
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import engine as E
@@ -34,6 +34,11 @@ chk('2.4 separador: linha abaixo do título do bloco (sem linha dupla sobre a mo
 chk('2.5 realce: animação de 0,52 s e, com menos movimento, realce estático sem animação', '@keyframes g2realce' in css and '.g2-realce{animation:g2realce 0.52s' in css and re.search(r'prefers-reduced-motion:reduce\)\{\.g2-realce\{animation:none!important', css))
 chk('2.6 barra de carga no topo e dica (role=tooltip criada pelo g2lib) com estilo comum', '#g2-carga{' in css and '.g2dica{' in css and '.g2dica-i{' in css)
 chk('2.7 indisponível com motivo (aria-disabled) com a aparência do desabilitado', ':is(button,a)[aria-disabled=true]{opacity:.55' in css)
+# PRD DS-06 e 74.5.0 (VIS-04): o motivo do indisponível fica em texto visível junto do controle, na cor do texto secundário; a dica só complementa
+am = getattr(E, 'acao_motivo', None)
+chk('2.8 motivo visível do indisponível: estilo comum .g2motivo (texto secundário #65736A, sem depender de ponteiro)', '.g2motivo{' in css and 'color:#65736A' in css.split('.g2motivo{', 1)[-1].split('}', 1)[0])
+amh = am('<button aria-disabled="{{d}}" data-dica="{{m}}">Conciliar</button>', '{{d}}', '{{m}}') if am else ''
+chk('2.9 componente comum acao_motivo: o botão e, só quando indisponível, o motivo em texto ao lado (sc-if no mesmo estado)', bool(am) and 'class="g2ind"' in amh and '<sc-if value="{{d}}"' in amh and 'class="g2motivo"' in amh and '{{m}}</span>' in amh, amh)
 
 # 3 · motor
 chk('3.1 montagem chama g2montou e cada desenho chama g2mudou (pontos centrais)', 'componentDidMount() { g2montou(this); }' in E.ENGINE_JS2 and 'g2mudou(this); }' in E.ENGINE_JS2)
@@ -43,7 +48,8 @@ for f in glob.glob(os.path.join(HERE, 'areas', '*.py')) + [p for p in glob.glob(
     if re.search(r'\bg2flash\(', open(f, encoding='utf-8').read()): chamadas.append(os.path.basename(f))
 chk('3.2 nenhuma tela chama g2flash direto (a função é chamada só pelo motor)', not chamadas, chamadas)
 chk('3.3 aviso visível com aria-live=off; o anúncio sai uma vez pela região viva (aria-live polite)', 'role="status" aria-live="off"' in E.G2_TOAST and "setAttribute('aria-live','polite')" in lib)
-chk('3.4 clique em aria-disabled="true" é recusado no g2lib (o comando não roda) e a recusa é anunciada', "closest('[aria-disabled=\"true\"]')" in lib and "g2vivo('Indisponível: '+m)" in lib)
+chk('3.4 clique em aria-disabled="true" é recusado no g2lib (o comando não roda) e a recusa é anunciada', "closest('[aria-disabled=\"true\"]')" in lib and "'Indisponível: '+m" in lib)
+chk('3.5 a recusa realça o motivo visível junto do controle (g2flash no .g2motivo do mesmo .g2ind)', "closest('.g2ind')" in lib and "querySelector('.g2motivo')" in lib)
 
 # 4 · glossário e fórmula
 cols = [dict(k='q', l='Quantidade'), dict(k='p', l='Preço'), dict(k='tot', l='Total')]
@@ -63,6 +69,8 @@ pags = sorted(glob.glob(os.path.join(E.P, '*.dc.html')))
 if pags:
     sem = [os.path.basename(p) for p in pags if '@keyframes g2realce' not in open(p, encoding='utf-8').read() or '.g2-cab{' not in open(p, encoding='utf-8').read()]
     chk(f'6 as {len(pags)} páginas do project/ carregam o CSS comum (realce, separador, dica)', not sem, sem)
+    ind = [f for f in ('BO-02.dc.html', 'CF-05.dc.html') if 'class="g2ind"' not in open(os.path.join(E.P, f), encoding='utf-8').read() or 'class="g2motivo"' not in open(os.path.join(E.P, f), encoding='utf-8').read()]
+    chk('6.1 BO-02 (Conciliar pagamentos) e CF-05 (Pedir proposta empresarial): primária indisponível com o motivo visível (acao_motivo)', not ind, ind)
 else:
     print('(6 pulado: rode python3 build.py antes)')
 print('RESULTADO:', 'OK' if all(ok) else 'FALHOU', f'{sum(ok)}/{len(ok)}')

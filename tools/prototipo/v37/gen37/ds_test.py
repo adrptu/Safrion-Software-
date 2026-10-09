@@ -10,15 +10,17 @@ Chrome headless por CDP (comp_lib.Chrome), servindo o _render:
      redundante sem dica;
  E · 390 px com toque: etapa do SAF, liberar pela lista da O.S., conciliar e toque longo no BO-02;
  F · capturas antes/depois de 6 telas a 1440 e 390 px em _probe/ds/ (antes = DS_ANTES, o _render da base); DS_AMOSTRAS=1 grava as
-     amostras do design system. Ordem de execução: A, B, C, D, F, E (ligar o toque tira o hover da janela do teste).
-Uso: python3 ds_test.py · DS_RENDER=<dir> serve outro _render (ex.: o da base ecc8b00, para ver o defeito) · DS_PARTES=A,B,C,D,E,F
+     amostras do design system;
+ G · motivo do botão indisponível visível em texto junto do controle (PRD DS-06 e 74.5.0, VIS-04), a 1440 e 390 px: normal, bloqueio e recusa.
+     Ordem de execução: A, B, C, D, F, E, G (ligar o toque tira o hover da janela do teste).
+Uso: python3 ds_test.py · DS_RENDER=<dir> serve outro _render (ex.: o da base ecc8b00, para ver o defeito) · DS_PARTES=A,B,C,D,E,F,G
 · DS_ANTES=<dir> liga as capturas "antes"."""
 import os, sys, time, json, glob
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from comp_lib import Chrome, servir
 R = os.environ.get('DS_RENDER') or os.path.join(HERE, '_render')
 ANTES = os.environ.get('DS_ANTES') or ''
-PARTES = set((os.environ.get('DS_PARTES') or 'A,B,C,D,E,F').split(','))
+PARTES = set((os.environ.get('DS_PARTES') or 'A,B,C,D,E,F,G').split(','))
 PROBE = os.path.join(HERE, '_probe', 'ds'); os.makedirs(PROBE, exist_ok=True)
 ok = []
 def chk(nome, cond, extra=''):
@@ -330,6 +332,32 @@ try:
         chk('E4 390 px · tocar fora fecha a dica', not d['vis'], d)
         dd = J("(()=>{const d=document.getElementById('g2-dica'); return d?d.getBoundingClientRect().right<=innerWidth:true;})()")
         chk('E5 390 px · sem erro de execução e a dica cabe na tela', not errs() and dd, [errs(), dd])
+
+    # ======================= G · motivo do indisponível visível em texto (PRD DS-06 e 74.5.0; VIS-04) =======================
+    # "Causa, quem resolve e atalho ficam visíveis na própria tela, sem depender de passar o ponteiro": a dica complementa, não substitui.
+    if 'G' in PARTES:
+        MOT = r"""(()=>{const b=[...document.querySelectorAll('header button')].find(x=>x.innerText.trim()==='Conciliar pagamentos'); if(!b) return null;
+          const d=document.getElementById('g2-dica'); const dv=!!d&&!d.hidden&&d.getClientRects().length>0; const rb=b.getBoundingClientRect();
+          const m=[...document.querySelectorAll('header *')].filter(e=>e.getClientRects().length>0&&!b.contains(e)&&e.children.length===0&&/Nenhum evento do provedor a conciliar/.test(e.textContent))
+            .map(e=>{const r=e.getBoundingClientRect(), s=getComputedStyle(e); return {t:e.textContent.trim(), cor:s.color, fs:parseFloat(s.fontSize),
+              perto:Math.max(0,r.top-rb.bottom,rb.top-r.bottom)<=24&&Math.max(0,r.left-rb.right,rb.left-r.right)<=24, cabe:r.left>=0&&r.right<=innerWidth+0.5};});
+          return {dis:b.getAttribute('aria-disabled'), dica:dv, m};})()"""
+        for w, h, toque in ((1440, 900, False), (390, 844, True)):
+            abre('BO-02.dc.html', w, h, toque=toque); m0 = J(MOT)
+            chk(f'G1 {w} px · normal: com evento a conciliar, a primária está disponível e não há motivo de bloqueio', bool(m0) and m0['dis'] != 'true' and not m0['m'], m0)
+            J("[...document.querySelectorAll('header button')].find(x=>x.innerText.trim()==='Conciliar pagamentos').click()"); time.sleep(.7)
+            if not toque: fora()
+            J("document.activeElement&&document.activeElement.blur&&document.activeElement.blur()"); time.sleep(.3); m1 = J(MOT)
+            chk(f'G2 {w} px · tudo conciliado: o motivo fica visível em texto junto do botão (sem ponteiro, sem foco, sem dica aberta), na cor do texto secundário e dentro da tela',
+                bool(m1) and m1['dis'] == 'true' and not m1['dica'] and len(m1['m']) == 1 and m1['m'][0]['cor'] == 'rgb(101, 115, 106)' and m1['m'][0]['fs'] >= 12
+                and m1['m'][0]['perto'] and m1['m'][0]['cabe'], m1)
+            n5 = nreal()
+            if toque:
+                p = centro("[...document.querySelectorAll('header button')].find(x=>x.innerText.trim()==='Conciliar pagamentos')"); c.toque(p[0], p[1])
+            else: J("[...document.querySelectorAll('header button')].find(x=>x.innerText.trim()==='Conciliar pagamentos').click()")
+            time.sleep(.5); v = vivo(); rs = realces(n5)
+            chk(f'G3 {w} px · recusa: ativar o botão indisponível realça o motivo visível e anuncia "Indisponível: …"', any('Nenhum evento do provedor a conciliar' in x['txt'] for x in rs) and v.startswith('Indisponível: Nenhum evento'), [rs, v])
+        chk('G4 sem erro de execução', not errs(), errs())
 
 finally:
     try: c.close()
