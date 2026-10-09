@@ -1178,7 +1178,17 @@ DICA_CSS=(
     "[data-dica]:not([data-dica=\"\"])[style*=\"border-radius: 999px\"]{cursor:help}"
     # indisponível com motivo: continua focável (aria-disabled), com a mesma aparência do desabilitado; o g2lib recusa o clique e mostra o porquê
     ":is(button,a)[aria-disabled=true]{opacity:.55;cursor:not-allowed;filter:none;box-shadow:none}"
+    # motivo do indisponível em texto junto do controle (PRD DS-06 e 74.5.0, VIS-04): visível sem ponteiro nem foco, texto secundário (4,97:1
+    # no branco); acao_motivo monta o par botão + motivo; no estreito o par ocupa a linha e o motivo alinha à esquerda, sob o botão
+    ".g2ind{display:inline-flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:0;max-width:360px}"
+    ".g2motivo{display:block;font-size:12.5px;font-weight:600;line-height:1.35;color:#65736A;text-align:right;white-space:normal;overflow-wrap:anywhere;border-radius:6px}"
+    "@media (max-width:640px){.g2ind{align-items:flex-start;max-width:100%}.g2motivo{text-align:left}}"
 )
+def acao_motivo(botao, dis, motivo):
+    """Botão que pode ficar indisponível com motivo (PRD DS-06 e 74.5.0, VIS-04): o botão (com aria-disabled="{dis}" e data-dica="{motivo}") e,
+    só enquanto indisponível, o motivo em texto visível logo abaixo, na cor do texto secundário. A dica no ponteiro, no foco e no toque longo
+    complementa; não substitui o texto. Ativar o botão indisponível realça este motivo e anuncia a recusa (g2lib)."""
+    return f'<span class="g2ind">{botao}<sc-if value="{dis}" hint-placeholder-val="{{{{false}}}}"><span class="g2motivo">{motivo}</span></sc-if></span>'
 G2_CSS=(".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outline:2px solid #1E7A4C;outline-offset:-2px}"
         # hover dos controles pequenos da grade só onde existe ponteiro com hover (no toque o fundo não fica "grudado")
         "@media (hover:hover){.g2fi:hover{background:#F2F8F4}.g2fb:hover,.g2car:hover{background:#E4F3E9}.g2del:hover{background:#FDE8E6;color:#B42318}}"   # DS-HOVER: verde, não cinza

@@ -509,7 +509,8 @@ function g2mudou(self){ if(typeof document==='undefined'||!self.__g2foto) return
 // role=tooltip e o gatilho passa a ser descrito por ela (aria-describedby) enquanto aberta. Texto: data-dica (explícito; vazio = sem dica),
 // data-dica-de (selo: o texto do selo busca o significado e o próximo passo em G2_DICAS) ou
 // o title que acrescenta algo ao rótulo visível; ícone sem texto mostra o nome do comando. Nunca repete o rótulo visível. Botão indisponível
-// com motivo usa aria-disabled="true" (continua focável): o clique é recusado aqui e a dica diz o porquê.
+// com motivo usa aria-disabled="true" (continua focável): o clique é recusado aqui e a dica diz o porquê; o motivo também fica em texto junto do
+// botão (engine.acao_motivo, PRD DS-06 e 74.5.0, VIS-04), realçado na recusa: a dica complementa, não substitui.
 const G2_DICA_ID='g2-dica';
 const G2D={el:null,desc:null,modo:'',sai:0,entra:0,lp:0,lpXY:null,toque:0};
 function g2visTxt(el){ return String((el&&el.innerText)||'').replace(/\s+/g,' ').trim(); }
@@ -583,7 +584,8 @@ function g2dicaSai(ms){ clearTimeout(G2D.sai); G2D.sai=setTimeout(g2dicaFecha,ms
     const i=t&&t.closest&&t.closest('.g2dica-i'); if(i){ e.preventDefault(); e.stopPropagation(); if(G2D.el===i) g2dicaFecha(); else { g2dicaMostra(i,g2dicaTexto(i),'toque'); g2dicaSai(6000); } return; }
     // indisponível com motivo (aria-disabled="true"): o comando não roda; a dica diz o porquê e o leitor de tela ouve a recusa
     const b=t&&t.closest&&t.closest('[aria-disabled="true"]'); if(b&&b.matches('button,a,[role=button]')){ e.preventDefault(); e.stopPropagation();
-      const m=g2dicaTexto(b)||'Indisponível agora.'; g2dicaMostra(b,m,'recusa'); g2dicaSai(4000); g2vivo('Indisponível: '+m); } },true);
+      const m=g2dicaTexto(b)||'Indisponível agora.'; g2dicaMostra(b,m,'recusa'); g2dicaSai(4000);
+      const mv=b.closest('.g2ind'); g2flash(mv&&mv.querySelector('.g2motivo'),'Indisponível: '+m); } },true);   /* o motivo visível junto do botão (acao_motivo) é realçado */
   const repos=()=>{ if(G2D.el) g2dicaPos(); }; window.addEventListener('resize',()=>{ if(G2D.el) g2dicaFecha(); }); document.addEventListener('scroll',repos,true);
   try{ new MutationObserver(()=>{ if(G2D.el&&!g2vis(G2D.el)) g2dicaFecha(); }).observe(document.documentElement,{childList:true,subtree:true}); }catch(e){}
 })();

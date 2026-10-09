@@ -291,6 +291,6 @@ def build():
     HEIGHTS37[fname] = 1700
     shell37('CF-05', 'Assinatura e cobrança', corpo, fname=fname, search=False, perfil=PERFIL_CF,
             subtitle='Cobrança simulada · nenhum valor é cobrado. Plano, uso medido no cadastro, faturas e mudança de plano ou área com prévia.',
-            primary_html=f'<button type="button" class="assin-prim" aria-disabled="{H("cf_prim_dis")}" data-dica="{H("cf_prim_tit")}" title="{H("cf_prim_tit")}" onClick="{H("cf_prim_fn")}" style="{BTN_ST(True)}">{H("cf_prim_t")}</button>',
+            primary_html=E.acao_motivo(f'<button type="button" class="assin-prim" aria-disabled="{H("cf_prim_dis")}" data-dica="{H("cf_prim_tit")}" title="{H("cf_prim_tit")}" onClick="{H("cf_prim_fn")}" style="{BTN_ST(True)}">{H("cf_prim_t")}</button>', H("cf_prim_dis"), H("cf_prim_tit")),   # DS-06/VIS-04: motivo visível junto do botão
             footer='Preços, trial e régua são exemplos a decidir pelo proprietário (DEC-01/05/09). Inadimplência nunca apaga dado.')
     injeta(fname, 'Assinatura e cobrança', chip_dyn('cf_st'))

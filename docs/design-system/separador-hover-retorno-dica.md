@@ -2,14 +2,14 @@
 
 Quatro padrões do design system do protótipo, pedidos pelo proprietário (Adrianus) e entregues pelo estilo e pelos componentes comuns do gerador (`engine.py`, `ui37.py`, `g2lib.js`). Nenhum deles é desenhado tela a tela.
 
-Proposta para o capítulo 74 do PRD, que está em revisão. Os tokens abaixo são a fonte em uso no protótipo (`engine.DS_SEP`, `engine.DS_HOVER`, `engine.DS_RETORNO`, `engine.DS_DICA`).
+Proposta para o capítulo 74 do PRD, que está em revisão. Os tokens abaixo são a fonte em uso no protótipo (`engine.DS_SEP`, `engine.DS_HOVER`, `engine.DS_RETORNO`, `engine.DS_DICA`). Os quatro padrões são os VIS-01 a VIS-04 dos padrões do proprietário de 09/10/2026 (`docs/design-system/README.md` do PR #50, ainda fora desta branch).
 
-| Padrão | Pedido | Onde vive | Teste |
-|---|---|---|---|
-| Separador | 05/10/2026 | `engine.SEP_CSS` (dentro de `G2_CSS`), header da casca (`ui37.shell37`, `engine.mobile`), `.g2-cab` | `ds_test.py` A |
-| Hover verde | 05/10/2026 | `engine.INTERACAO_CSS` (`DS_HOVER`) | `ds_test.py` B, `ds_unit.js` 3 |
-| Retorno visual | 09/10/2026 | `g2lib.js` (`g2flash`, `g2vivo`, `g2carga`, `g2montou`, `g2mudou`) chamado pelo motor (`engine.ENGINE_JS2`) | `ds_test.py` C e E |
-| Dica | 09/10/2026 | `g2lib.js` (`g2dica`, `G2_DICAS`), `engine.GLOSSARIO` | `ds_test.py` D e E, `ds_unit.js` 1 e 2 |
+| Padrão | ID | Pedido | Onde vive | Teste |
+|---|---|---|---|---|
+| Separador | VIS-01 | 05/10/2026 | `engine.SEP_CSS` (dentro de `G2_CSS`), header da casca (`ui37.shell37`, `engine.mobile`), `.g2-cab` | `ds_test.py` A |
+| Hover verde | VIS-02 | 05/10/2026 | `engine.INTERACAO_CSS` (`DS_HOVER`) | `ds_test.py` B, `ds_unit.js` 3 |
+| Retorno visual | VIS-03 | 09/10/2026 | `g2lib.js` (`g2flash`, `g2vivo`, `g2carga`, `g2montou`, `g2mudou`) chamado pelo motor (`engine.ENGINE_JS2`) | `ds_test.py` C e E |
+| Dica | VIS-04 | 09/10/2026 | `g2lib.js` (`g2dica`, `G2_DICAS`), `engine.GLOSSARIO`, `engine.acao_motivo` | `ds_test.py` D, E e G, `ds_unit.js` 1 e 2 |
 
 ## 1. Separador
 
@@ -75,7 +75,7 @@ A camada é `background-image`, porque o estilo inline dos componentes não defi
 | Clicar num link de outra tela | ouvinte de clique do `g2lib` | barra fina no topo (`#g2-carga`) do clique até a tela nova | — |
 | Avançar ou voltar etapa, trocar seção (SAF, Compras, Planos, Manutenção, Estoque) | `componentDidUpdate` → `g2mudou`, lendo a faixa de progresso | bloco do novo contexto (o mesmo cujo título o `g2etapa` foca) | `Etapa i de n: <nome>` ou `Seção: <nome>` |
 | Gravar, aprovar, liberar, mover cartão (todo comando que mostra aviso) | `componentDidUpdate` → `g2mudou`, quando o aviso (`g2toast`) é novo | o que mudou: linha da tabela, cartão do Kanban, região rotulada, estado do cabeçalho; sem nada mais fino, o bloco | o próprio aviso |
-| Clicar num botão indisponível | ouvinte do `g2lib` | a dica do botão abre com o porquê | `Indisponível: <motivo>` |
+| Clicar num botão indisponível | ouvinte do `g2lib` | o motivo em texto junto do botão (`acao_motivo`); a dica do botão abre com o porquê | `Indisponível: <motivo>` |
 
 Para achar o que mudou, o motor compara uma foto da tela antes e depois, por chaves estáveis: `data-g2g` + `data-rid` nas linhas, o código do cartão e a coluna do Kanban, regiões rotuladas, o estado do cabeçalho e os blocos. Uma tela nova não precisa fazer nada. Uma tela pode marcar um elemento com `data-g2k="chave"` para ele entrar na comparação.
 
@@ -114,7 +114,7 @@ Nada de dica que repita o rótulo visível.
 
 | Caso | Como | Onde está hoje |
 |---|---|---|
-| Botão indisponível ou ação recusada | `aria-disabled="true"` + `data-dica` com o porquê e o que falta. O botão continua focável e o `g2lib` recusa o clique e anuncia `Indisponível: …`. O comando também confere de novo. | CF-05 (Pedir proposta empresarial), BO-02 (Conciliar pagamentos) |
+| Botão indisponível ou ação recusada | `engine.acao_motivo(botão, dis, motivo)`: o botão com `aria-disabled="true"` + `data-dica` e, só enquanto indisponível, o **motivo em texto visível** logo abaixo (`.g2motivo`, texto secundário `#65736A`, 12,5 px). O motivo não depende de ponteiro, foco ou dica (PRD DS-06 e 74.5.0; VIS-04): a dica complementa junto do ponteiro, do foco e do toque longo. O botão continua focável; o `g2lib` recusa o clique, realça o motivo e anuncia `Indisponível: …`. O comando também confere de novo. | CF-05 (Pedir proposta empresarial), BO-02 (Conciliar pagamentos) |
 | Selo e chip de estado | `data-dica-de` no selo ou `{k:'chip', …, de:1}` na célula da tabela. O dicionário só vale onde a tela pede, porque o mesmo texto noutro contexto pode significar outra coisa. | O.S.: 5 fases do Kanban (título da coluna, cartão, painel e lista) e selos de bloqueio (Falta insumo, Fora do registro, Total 0, Sobras a receber, Aguardando sinal do app, Apontamento em conferência, Insumo esgotado, Carga a pesar). A dica de «A liberar» já diz as exceções da aprovação: irrigação só com água, manutenção e beneficiamento liberam pelo responsável próprio. |
 | Sigla e unidade | `engine.GLOSSARIO` vira a dica do cabeçalho da coluna, quando a coluna não traz ajuda própria | NC (AG-01, AG-01det), R$/ha (CF-05, BO-01), ha/h (CD-02), lâmina (IR-02, IR-03, IR-03det, IR-04), R$/h (SAF); sc/ha, t/ha, DAP, DAE, CAD, ETc, ETo, Kc, ha-op, ATR, TCH, COE, COT, carência e reentrada onde a coluna aparecer |
 | Valor calculado | fórmula curta da coluna calculada (`edit.calc`), com os rótulos | colunas calculadas da grade (ex.: PT-02det: Quantidade × Preço; CO-03: Peso bruto − Tara) |
@@ -133,8 +133,11 @@ Nada de dica que repita o rótulo visível.
 **Amostras:**
 
 ```html
-<!-- botão indisponível com motivo (continua focável) -->
-<button aria-disabled="{{dis}}" data-dica="{{motivo}}">Conciliar pagamentos</button>
+<!-- botão indisponível com motivo (continua focável): engine.acao_motivo(botão, '{{dis}}', '{{motivo}}') -->
+<span class="g2ind">
+  <button aria-disabled="{{dis}}" data-dica="{{motivo}}">Conciliar pagamentos</button>
+  <sc-if value="{{dis}}"><span class="g2motivo">{{motivo}}</span></sc-if>   <!-- motivo visível, sem depender da dica -->
+</span>
 <!-- selo de estado: o significado vem do dicionário único -->
 <span data-dica-de="{{fase}}">{{fase}}</span>
 <!-- sigla ou unidade no texto -->
@@ -143,7 +146,7 @@ Nada de dica que repita o rótulo visível.
 <button type="button" class="g2dica-i" aria-label="Mais informação" data-dica="…">i</button>
 ```
 
-![Dica no botão indisponível](amostras/dica-indisponivel.png)
+![Motivo visível e dica no botão indisponível](amostras/dica-indisponivel.png)
 
 ## Verificação
 
@@ -151,4 +154,4 @@ Nada de dica que repita o rótulo visível.
 |---|---|
 | `node ds_unit.js` | regra do texto da dica, dicionário de estados e contraste AA |
 | `python3 ds_unit_test.py` | CSS comum, ausência de hover cinza, pontos centrais do motor, glossário e fórmula, tokens e páginas geradas |
-| `python3 ds_test.py` | navegador: separador nas 140 páginas e a 390 px, hover computado, realce e anúncio (tela, etapa, O.S. no Kanban, BO-02), menos movimento, dica (hover, foco, Esc, aria-describedby, toque longo) e, com `DS_ANTES=<_render da base>`, capturas antes/depois a 1440 e 390 px de OS, PA, PM, AG-01, AG-01det e AG-07 em `_probe/ds/` (telas onde faltava a linha; o teste confere que antes ≠ depois) |
+| `python3 ds_test.py` | navegador: separador nas 140 páginas e a 390 px, hover computado, realce e anúncio (tela, etapa, O.S. no Kanban, BO-02), menos movimento, dica (hover, foco, Esc, aria-describedby, toque longo), motivo do indisponível visível em texto a 1440 e 390 px (G) e, com `DS_ANTES=<_render da base>`, capturas antes/depois a 1440 e 390 px de OS, PA, PM, AG-01, AG-01det e AG-07 em `_probe/ds/` (telas onde faltava a linha; o teste confere que antes ≠ depois) |
