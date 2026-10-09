@@ -39,7 +39,7 @@ ok('E1d em ben.js o nome cenLiberar aparece uma vez só, como cenLiberar(c, id) 
    _ok and not _outros, [_usos, _outros])
 _b = src.get('ben.js', ''); _m = _b.find('\nfunction benIniciar(')
 _mut = [('atalho logo depois de benAutorizarLiberar', _b[:_m] + '\nconst benLibDireto = (c, id) => cenLiberar(c, id);' + _b[_m:]),
-        ('chamada com outra variável', _b.replace("o.etapa = 'Em execução'; const it = benReqItem(c, o);", "o.etapa = 'Em execução'; cenLiberar(x, id); const it = benReqItem(c, o);", 1)),
+        ('chamada com outra variável', _b.replace("o.etapa = 'Em execução'; const T = benCxTot(c, o);", "o.etapa = 'Em execução'; cenLiberar(x, id); const T = benCxTot(c, o);", 1)),
         ('apelido do nome', _b[:_m] + '\nconst benL = cenLiberar;' + _b[_m:])]
 ok('E1e o E1d derruba os atalhos de cenLiberar entre funções do ben.js (3 mutantes: atalho colado, outra variável, apelido)',
    _m > 0 and all(not e1d(t)[0] for _, t in _mut) and all(t != _b for _, t in _mut), [(n, e1d(t)[1]) for n, t in _mut])

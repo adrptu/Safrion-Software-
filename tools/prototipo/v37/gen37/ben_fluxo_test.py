@@ -22,6 +22,9 @@ Modos (um por vez, cada um abre o Chrome headless do cadc_lib.T; o cenário come
            sem "Estornar" com o porquê; a Marta sem "Registrar decisão" no L39-132.
   complemento rodada 1 (S3): falta de caixa durante a execução: a recusa diz a saída, "Pedir mais caixas" faz o complemento da
            mesma REQ (toque duplo grava uma vez), o Rui entrega no balcão e o balanço fecha com diferença 0.
+  lotes    BEN-REV-20261009-03 (S2): complemento em outro lote pela tela: "Pedir mais caixas" sem caixa livre no lote da REQ-041 abre a
+           REQ-042 no lote que tem (linha por lote, as duas no painel); o estorno da S-01 volta ao CX26-01; o Rui recebe a devolução da
+           REQ-041 no CX26-01 e entrega a REQ-042 do QA-CX-02 (a reprodução do Codex, com os saldos por lote).
   duplo    rodada 1 (S3): toque duplo real (mouse a 1440, toque a 390) em "Autorizar rota e liberar" e "Iniciar processo": a repetição é
            absorvida (o aviso repete o recibo) e não dispara a operação seguinte.
   criada   rodada 1 (S3): depois de "Criar ordem" (toque duplo) a ordem criada fica selecionada e aberta com o próximo passo dela; o 2º
@@ -32,13 +35,13 @@ Modos (um por vez, cada um abre o Chrome headless do cadc_lib.T; o cenário come
            tem saída: "Cancelar a ordem" com motivo (nada reservado) e o lote abre outra ordem.
   faixa390 integração BEN (09/10): a 390 px, Cargas › faixa de telas › Beneficiamento por toque real (a lista aberta fica acima da
            primária presa ao rodapé); a ordem nasce com a necessidade de caixas e a falta aparece com a saída.
-Uso: env CHROME_BIN=… flock /tmp/cdpB.lock env CDP_GL=1 timeout 900 python3 ben_fluxo_test.py [fluxo|erros|celular|revisao|roteiro|roteiro390|complemento|duplo|criada|teclado|cancelar|faixa390]
+Uso: env CHROME_BIN=… flock /tmp/cdpB.lock env CDP_GL=1 timeout 900 python3 ben_fluxo_test.py [fluxo|erros|celular|revisao|roteiro|roteiro390|complemento|lotes|duplo|criada|teclado|cancelar|faixa390]
 Capturas em _probe/ben_*.png. Dados sintéticos (SAFRION_DADOS=sintetico)."""
 import sys, os, time, json
 os.environ.setdefault('SAFRION_DADOS', 'sintetico')
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from cadc_lib import T
-TODOS = ('fluxo', 'erros', 'celular', 'revisao', 'roteiro', 'roteiro390', 'complemento', 'duplo', 'criada', 'teclado', 'cancelar', 'faixa390')
+TODOS = ('fluxo', 'erros', 'celular', 'revisao', 'roteiro', 'roteiro390', 'complemento', 'lotes', 'duplo', 'criada', 'teclado', 'cancelar', 'faixa390')
 MODOS = [a for a in sys.argv[1:] if a in TODOS] or list(TODOS)
 PR = os.path.join(HERE, '_probe'); os.makedirs(PR, exist_ok=True)
 t = T(); J = t.J
@@ -452,6 +455,44 @@ try:
               'S-03 registrada' in a and 'S-04 registrada' in b and st == ['Em conferência', 0, 0] and 'diferença 0 kg (0,00 %)' in tc, [a, b, st, tc])
         shot('complemento')
         t.chk('complemento sem erro de JS', not t.errs(), t.errs())
+    if 'lotes' in MODOS:
+        # BEN-REV-20261009-03 (S2): o complemento trocava o lote do item da REQ-041; o estorno e a devolução das caixas antigas iam para o lote
+        # novo (CX26-01 ficava 0 e o QA-CX-02 subia a 1.540). Agora o complemento em outro lote é uma requisição própria (linha por lote)
+        print('== lotes · complemento em outro lote: linha própria por lote; estorno e devolução no lote de origem')
+        from ben_unit_test import motor, node
+        fx = node(motor() + """ const c = cenClone(CEN0); const IG = 'Igor', RU = 'Rui', CX = BENC.cx.item;
+          function M(fn) { const x = cenClone(c); const r = fn(x) || {}; if (r.erro) throw new Error(r.erro); Object.keys(c).forEach(k => delete c[k]); Object.assign(c, x); return r; }
+          M(x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }], cx: 540 }, IG)); M(x => benAutorizarLiberar(x, 'OB-0113', IG));
+          M(x => cenEntregar(x, 'REQ-041', CX, 540, 'Igor', RU)); M(x => benIniciar(x, 'OB-0113', IG)); M(x => benSaida(x, 'OB-0113', { fluxo: 'Produto', classe: 'A', cx: 540, bruto: 5724 }, IG));
+          M(x => cenReceber(x, CX, 'QA-CX-02', 1000, 'un', 'Packing', '', 'NF-QA-02', true, RU));
+          c.rev = (c.rev || 0) + 1; print(JSON.stringify(c));""", 'ben_lotes.js')
+        ir('BEN.dc.html', limpa=True); J(f"localStorage.setItem('talhao-os-cenario-v1', {json.dumps(fx.stdout.strip().splitlines()[-1])})"); perfil('Igor'); ir('BEN.dc.html#OB-0113')
+        LT = "[c.lotes['Caixa de mamão Formosa 10 kg|CX26-01'].fisico, c.lotes['Caixa de mamão Formosa 10 kg|QA-CX-02'].fisico, c.lotes['Caixa de mamão Formosa 10 kg|QA-CX-02'].reservado]"
+        st = cen("[c.ordens['OB-0113'].etapa, c.reqs['REQ-041'].itens[0].lote, c.reqs['REQ-041'].itens[0].consumido, " + LT + "]")
+        t.chk('L0 · fixture pelo motor das telas (a reprodução do Codex): OB-0113 com 540 caixas do CX26-01 usadas na S-01; 1.000 caixas novas no QA-CX-02', st == ['Em execução', 'CX26-01', 540, [0, 1000, 0]], st)
+        clk('Pedir mais caixas', 'aside'); setv('#pf_qx', '100'); clk('Pedir caixas', 'aside'); tc = toast(); ir('BEN.dc.html#OB-0113'); p = pan()
+        st = cen("[c.reqs['REQ-041'].itens[0].lote, c.reqs['REQ-042']&&c.reqs['REQ-042'].itens[0].lote, c.reqs['REQ-042']&&c.reqs['REQ-042'].itens[0].solicitado, c.ordens['OB-0113'].ben.reqc]")
+        t.chk('L1 · Pedir mais caixas (100) sem caixa livre no CX26-01: a REQ-042 nasce no QA-CX-02 e a REQ-041 segue no CX26-01; o aviso diz o porquê e o painel mostra as duas linhas com o lote',
+              st == ['CX26-01', 'QA-CX-02', 100, ['REQ-042']] and 'no QA-CX-02 (o CX26-01 da REQ-041 tinha 0 un livres: requisição própria, a devolução volta a cada lote): REQ-042 com 100 un' in tc
+              and 'caixas · req-041 e req-042' in p.lower() and 'REQ-041 · CX26-01 solicitado 540 un' in p and 'REQ-042 · QA-CX-02 solicitado 100 un' in p, [st, tc, p[p.lower().find('caixas · req'):][:300]])
+        clk('Estornar S-01', 'aside'); clk('Pesagem refeita', 'aside'); clk('Confirmar estorno de S-01', 'aside'); tc = toast()
+        st = cen("(()=>{ const m=c.movs.filter(x=>x.tipo==='estorno-consumo').slice(-1)[0]||{}; const o=c.movs.find(x=>x.id===m.ref)||{}; return [m.lote, m.req, o.lote, c.reqs['REQ-041'].itens[0].custodia, c.reqs['REQ-042'].itens[0].custodia]; })()")
+        t.chk('L2 · estorno da S-01 pela tela (Pesagem refeita): o estorno-consumo volta ao CX26-01 e à REQ-041, o mesmo lote do consumo; a REQ-042 fica intacta', st == ['CX26-01', 'REQ-041', 'CX26-01', 540, 0], [st, tc])
+        perfil('Rui'); ir('EST.dc.html'); est_secao(3); rw = J("ROWTXT('REQ-041')") or ''
+        r = J("(()=>{ const rw=[...document.querySelectorAll('[role=row]')].find(x=>N(x.innerText).indexOf('REQ-041')>=0); if(!rw) return 'sem linha'; window.__cl++; (rw.querySelector('[role=cell] span')||rw).click(); return 'ok'; })()"); time.sleep(.5)
+        q = J("(document.querySelector('#fx_g_dev_qtd')||{}).value"); clk('Salvar', 'aside[role=dialog]'); tc = toast(); st = cen(LT)
+        t.chk('L3 · Estoque › Receba devoluções: a REQ-041 (CX26-01) sugere 540 un; recebida, o CX26-01 volta a 540 e o QA-CX-02 continua com 1.000 e a reserva 100 da REQ-042',
+              r == 'ok' and 'CX26-01' in rw and q == '540' and st == [540, 1000, 100], [rw, q, st, tc])
+        est_secao(2); rw = J("ROWTXT('REQ-042')") or ''
+        r = J("(()=>{ const rw=[...document.querySelectorAll('[role=row]')].find(x=>N(x.innerText).indexOf('REQ-042')>=0); if(!rw) return 'sem linha'; window.__cl++; (rw.querySelector('[role=cell] span')||rw).click(); return 'ok'; })()"); time.sleep(.5)
+        q = J("[(document.querySelector('#fx_g_ent_qtd')||{}).value,(document.querySelector('#fx_g_ent_quem')||{}).value]"); clk('Salvar', 'aside[role=dialog]'); tc = toast()
+        st = cen(LT + ".concat([c.reqs['REQ-042'].itens[0].custodia])")
+        t.chk('L4 · Estoque › Entregue por O.S.: a REQ-042 (OB-0113, lote QA-CX-02) entrega 100 un ao Igor: sai do QA-CX-02 (físico 900, reserva 0) e o CX26-01 não muda (540)',
+              r == 'ok' and 'QA-CX-02' in rw and 'OB-0113' in rw and q == ['100', 'Igor'] and st == [540, 900, 0, 100], [rw, q, st, tc])
+        perfil('Igor'); ir('BEN.dc.html#OB-0113'); p = pan()
+        t.chk('L5 · no painel a custódia está na REQ-042 (100 un do QA-CX-02) e a REQ-041 mostra o devolvido (540)', 'caixas em custódia 100 un (req-041 · cx26-01 0 un; req-042 · qa-cx-02 100 un)' in p.lower() and 'REQ-041 · CX26-01 solicitado 540 un entregue 540 un usado 0 un em custódia 0 un devolvido 540 un' in p, p[p.lower().find('caixas em cust'):][:200] + ' … ' + p[p.lower().find('caixas · req'):][:300])
+        shot('lotes')
+        t.chk('lotes sem erro de JS', not t.errs(), t.errs())
     if 'duplo' in MODOS:
         # rodada 1 (S3): o 2º clique de um clique duplo em "Autorizar rota e liberar" caía na primária seguinte ("Iniciar processo") e iniciava
         # o processo. A repetição tem de ser absorvida (o aviso repete o recibo) sem disparar a operação seguinte, a 1440 (mouse) e a 390 (toque)

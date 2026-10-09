@@ -431,6 +431,9 @@ function cenPodeEncerrar(c, id) { const o = c.ordens[id]; const r = o.req && c.r
   if ((o.ap || []).some(a => a.sinc === false)) return 'Há apontamentos no aparelho aguardando sinal.';
   const dp = (o.ap || []).filter(a => a.st === CEN_AP_DUP); if (dp.length) return 'Apontamento em conferência de duplicidade: ' + dp.map(a => 'dia ' + a.dia + ' (' + a.d + ', ' + cenNum(a.ha) + ' ha)').join(', ') + '. ' + CEN_CONF_AP + ' decide se é outro turno.';
   const cf = cenConfAbertas(c, id); if (cf.length) return 'Consumo em conferência: ' + cf.map(k => cenConfTxt(k, c)).join('; ') + '. No Estoque: ' + cenConcQuem(c, cf) + '.';
-  const cust = r ? r.itens.filter(i => i.custodia > 0.001) : []; if (cust.length) return 'Sobra em custódia: ' + cust.map(i => i.prod + ' ' + cenNum(i.custodia) + ' ' + i.un).join(', ') + '. Receba a devolução no Estoque.';
+  // todas as requisições da ordem (a do beneficiamento tem uma por lote de caixa, BEN-REV-20261009-03); com mais de uma, diz a REQ e o lote
+  const rs = Object.values(c.reqs || {}).filter(x => x.os === id && x !== r); if (r) rs.unshift(r);
+  const cust = []; rs.forEach(x => x.itens.forEach(i => { if (i.custodia > 0.001) cust.push(i.prod + ' ' + cenNum(i.custodia) + ' ' + i.un + (rs.length > 1 ? ' (' + x.id + ' · ' + i.lote + ')' : '')); }));
+  if (cust.length) return 'Sobra em custódia: ' + cust.join(', ') + '. Receba a devolução no Estoque.';
   if (typeof prPodeEncerrar === 'function') { const pm = prPodeEncerrar(c, id); if (pm) return pm; }   // colheita: nenhuma carga a pesar ou sem sinal (R-18)
   return ''; }

@@ -112,13 +112,13 @@ function bnSaidaForm(self,c,o){ const r=benRota(o.ben.rota); const conf=o.etapa=
     fs.push(prFld(self,'tk','Ticket da balança',{t:'txt',im:'text',ph:'ex.: TK-5560',h:'Balança e hora: '+r.par.balanca+', agora. Sem pesagem não é perda identificada.'})); }
   else if(def){ fs.push(bnFldOpts(self,'de','Destino',def.destinos.map(x=>({v:x,t:x})),'')); fs.push(prFld(self,'kg','Peso',{t:'txt',u:'kg'})); }
   if(conf) fs.push(prFld(self,'mo','Motivo da correção',{t:'txt',im:'text',ph:'ex.: perda pesada na esteira'}));
-  const it=benReqItem(c,o);
+  const T=benCxTot(c,o);
   const go=()=>{ if(self.state.pr_modo!=='saida') return;   /* formulário já fechado pelo 1º toque */
     const k={fluxo:fl,classe:prFval(self,'cl',''),destino:prFval(self,'de',''),causa:prFval(self,'ca',''),cx:prFval(self,'cx',''),bruto:prFval(self,'br',''),kg:prFval(self,'kg',''),
       ticket:prFval(self,'tk',''),motivo:prFval(self,'mo',''),subst:sub?sub.id:'',chave:self.state.pr_ch||prChave('W-BNS'),ver:self.state.bn_ver};
     ['cx','bruto','kg'].forEach(x=>{ if(prNumOk(k[x])) k[x]=prNum(k[x]); });
     bnRun(self,x=>benSaida(x,o.id,k,g2perfil()),{pr_form:null,pr_ch:null,pr_modo:null,bn_sub:null,bn_ver:null}); };
-  return {fields:fs,go,h:(prev?prev+' ':'')+(it?'Caixas em custódia: '+benUn(it.custodia)+' ('+o.req+').':'')}; }
+  return {fields:fs,go,h:(prev?prev+' ':'')+(T.n?'Caixas em custódia: '+benCustTxt(c,o)+'.':'')}; }
 /* ---------- painel da ordem ---------- */
 function bnPainel(self,c,o){ const r=benRota(o.ben.rota); const b=benBal(o); const nx=benProx(c,o); const modo=self.state.pr_modo||''; const it=benReqItem(c,o); const at=o.etapa;
   const verAgora=()=>self.setState({bn_ver:o.ver});
@@ -156,7 +156,9 @@ function bnPainel(self,c,o){ const r=benRota(o.ben.rota); const b=benBal(o); con
   secs.push({t:'Entradas',rows:o.ben.ent.map(e=>{ const L=prP(c).lotes[e.lote]; const S=L?prSaldos(c,L):null;
     return {c:[[e.lote,'b'],benKg(e.kg),L?L.prod.split(' · ')[1]||'':'',S?(S.esgotado?'esgotado':S.q):'',L&&L.faz!=='Santa Rita'?L.faz:''].filter(Boolean),l:{t:'Ver no Estoque de produto',h:'PROD.dc.html#'+e.lote}}; })});
   /* caixas (requisição): lida da REQ */
-  if(it) secs.push({t:'Caixas · '+o.req,rows:[{c:[[it.prod,'b'],'solicitado '+benUn(it.solicitado),'entregue '+benUn(it.entregue),'usado '+benUn(it.consumido),['em custódia '+benUn(it.custodia),it.custodia>1e-9&&at==='Em conferência'?'red':''],'devolvido '+benUn(it.devolvido)],l:{t:'Abrir no Estoque',h:'EST.dc.html'}}]});
+  /* uma linha por requisição e lote (BEN-REV-20261009-03): o complemento em outro lote aparece com a REQ e o lote dele */
+  const LC=benLinhas(c,o);
+  if(LC.length) secs.push({t:'Caixas · '+LC.map(x=>x.rid).join(' e '),rows:LC.map(x=>({c:[[LC.length>1?x.rid+' · '+x.it.lote:x.it.prod,'b'],'solicitado '+benUn(x.it.solicitado),'entregue '+benUn(x.it.entregue),'usado '+benUn(x.it.consumido),['em custódia '+benUn(x.it.custodia),x.it.custodia>1e-9&&at==='Em conferência'?'red':''],'devolvido '+benUn(x.it.devolvido)],l:{t:'Abrir no Estoque',h:'EST.dc.html'}}))});
   else if((o.ins||[]).length) secs.push({t:'Caixas',rows:[{c:[[o.ins[0].p,'b'],benUn(o.ins[0].tot)+' a reservar na liberação','sugestão '+o.ben.cxSug+' un']}]});
   /* etapas da rota (a mesma função da trava do Fechar) */
   /* etapa pendente só é alerta (vermelho) quando já impede o Fechar, na conferência; antes disso é o que falta fazer */
@@ -169,7 +171,7 @@ function bnPainel(self,c,o){ const r=benRota(o.ben.rota); const b=benBal(o); con
     secs.unshift({t:'Lotes gerados',rows:ls.map(L=>{ const S=prSaldos(c,L); return {c:[[L.id,'b'],L.prod.split(' · ')[1]+' '+L.classe,benKg(S.fis)+' · '+(L.cx||0)+' cx',[S.esgotado?'esgotado':S.q,S.q==='Liberado'?'ok':''],I?I.id+' · prazo '+prBr(I.prazo)+' · '+I.resp:''],l:{t:'Abrir no Estoque de produto',h:'PROD.dc.html#'+L.id}}; })}); }
   secs.push({t:'Histórico',rows:(o.ben.hist||[]).slice().reverse().map(h=>({c:[[prBr(h.d)+' '+h.at,'b'],h.quem,h.ev,h.det,h.mov||''].filter(Boolean)}))});
   const kv=[{l:'Rota',v:benRotaTxt(r)+' · aprovada por '+r.aprov.quem+' em '+prBr(r.aprov.em)},{l:'Versão da ordem',v:o.versao},{l:'Entrada',v:benKg(b.proc)},{l:'Diferença',v:(nIni||aberto?'apurada no envio para conferência':benKg(b.dif))+' · faixa ± '+benKg(b.faixa)},
-    {l:'Caixas em custódia',v:it?benUn(it.custodia):'—'},{l:'Responsável',v:benProdQ()}];
+    {l:'Caixas em custódia',v:it?benCustTxt(c,o):'—'},{l:'Responsável',v:benProdQ()}];
   /* quem age é o perfil (CTL-3): se o perfil escolhido não registra o passo, o painel diz quem registra antes do toque */
   const PAP={liberar:'producao',iniciar:'producao',saida:'producao',concluir:'producao',confirmar:'gestor',conferir:'conferente',fechar:'producao',
     justificar:benAlcada(o,b.dif).passa?'gestor':['producao','gestor']}[nx.acao]; const pf=g2perfil();
@@ -201,8 +203,8 @@ function bnPainel(self,c,o){ const r=benRota(o.ben.rota); const b=benBal(o); con
     PPx.prim={t:'Confirmar cancelamento da '+o.id,go:()=>self.state.pr_modo==='cancelar'&&bnRun(self,x=>benCancelar(x,o.id,prFval(self,'mc',''),g2perfil(),{chave:self.state.pr_ch,ver:self.state.bn_ver}),{pr_form:null,pr_ch:null,pr_modo:null})};
     PPx.sec=[{t:'Voltar',go:()=>self.setState({pr_modo:null,pr_err:''})}]; return PPx; }
   /* pedir mais caixas (rodada 1, S3): complemento da mesma REQ; sugestão pelo que falta processar menos o que já está em custódia ou a entregar */
-  if(modo==='caixas'){ const cu=it?it.custodia:0, pe=it?cenSaldoEntregar(it):0; const ne=benCaixas(ep,r); const sx=Math.max(1,ne-Math.ceil(cu+pe-1e-9));
-    PPx.form={t:'Pedir mais caixas · '+benProdQ(),h:'Complemento da '+o.req+': o Estoque reserva'+(it?' no '+it.lote:'')+' e entrega no balcão; as caixas viram custódia da ordem. Em custódia '+benUn(cu)+' · a entregar '+benUn(pe)+' · em processo '+benKg(ep)+' (⌈'+benKg(ep)+' × '+prFmtT(prMul(r.par.frac_vend,100),2)+' % ÷ '+prFmtT(BENC.cx.massa,3)+' kg⌉ = '+ne+' un). Confirme ou ajuste.',
+  if(modo==='caixas'){ const TC=benCxTot(c,o); const cu=TC.cust, pe=TC.pend; const ne=benCaixas(ep,r); const sx=Math.max(1,ne-Math.ceil(cu+pe-1e-9));
+    PPx.form={t:'Pedir mais caixas · '+benProdQ(),h:'Complemento da '+o.req+': o Estoque reserva'+(it?' no '+it.lote:'')+' e entrega no balcão; as caixas viram custódia da ordem. Sem caixa livre nesse lote, o pedido abre uma requisição própria no lote que tem (a devolução volta a cada lote). Em custódia '+benUn(cu)+' · a entregar '+benUn(pe)+' · em processo '+benKg(ep)+' (⌈'+benKg(ep)+' × '+prFmtT(prMul(r.par.frac_vend,100),2)+' % ÷ '+prFmtT(BENC.cx.massa,3)+' kg⌉ = '+ne+' un). Confirme ou ajuste.',
       fields:[prFld(self,'qx','Caixas',{t:'txt',im:'numeric',v:String(sx),u:'un'})]};
     PPx.prim={t:'Pedir caixas',go:()=>self.state.pr_modo==='caixas'&&bnRun(self,x=>benComplementar(x,o.id,prNum(prFval(self,'qx',String(sx))),g2perfil(),{chave:self.state.pr_ch,ver:self.state.bn_ver}),{pr_form:null,pr_ch:null,pr_modo:null})};
     PPx.sec=[{t:'Voltar',go:()=>self.setState({pr_modo:null,pr_err:''})}]; return PPx; }

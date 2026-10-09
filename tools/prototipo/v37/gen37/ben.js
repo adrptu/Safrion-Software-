@@ -56,6 +56,15 @@ function benPrende(c, L) { if (!L) return null; const ob = L.ordem && (c.ordens 
 function benOndeTxt(o) { const r = benRota(o.ben.rota); const lc = PRDC.locais[o.ben.local] || {}; if (!lc.faz || lc.faz === o.ben.faz) return '';
   const a = (BENC.ativos || {})[(r && r.ativos || [])[0]]; return ' · fruta da ' + o.ben.faz + ' processada na ' + (a ? a.nome + ' · ' : '') + (lc.nome || o.ben.local) + ' (' + lc.faz + ')'; }
 function benReqItem(c, o) { const r = o.req && c.reqs[o.req]; return r ? r.itens.find(i => i.prod === BENC.cx.item) || null : null; }
+/* linhas de caixas da ordem, uma por lote (BEN-REV-20261009-03): a REQ da liberação e as do complemento em outro lote (o.ben.reqc), na
+   ordem em que nasceram. Cada linha guarda o lote de onde as caixas saíram; o lote de uma linha nunca muda. Dano evitado: com um item só,
+   o complemento trocava o lote do item e o estorno e a devolução das caixas antigas iam para o lote novo (saldo por lote corrompido) */
+function benLinhas(c, o) { return [o.req].concat((o.ben && o.ben.reqc) || []).filter((k, i, a) => k && c.reqs[k] && a.indexOf(k) === i)
+  .map(k => ({ rid: k, it: c.reqs[k].itens.find(i => i.prod === BENC.cx.item) })).filter(x => x.it); }
+function benCxTot(c, o) { const L = benLinhas(c, o); const s = f => L.reduce((a, x) => a + (x.it[f] || 0), 0);
+  return { n: L.length, L, sol: s('solicitado'), cust: s('custodia'), pend: L.reduce((a, x) => a + cenSaldoEntregar(x.it), 0), reqs: L.map(x => x.rid).join(' e ') }; }
+/* custódia por linha, para a pessoa ver de que requisição e lote: "540 un (REQ-041)" ou "640 un (REQ-041 · CX26-01 540 un; REQ-042 · QA-CX-02 100 un)" */
+function benCustTxt(c, o) { const T = benCxTot(c, o); return benUn(T.cust) + ' (' + (T.n > 1 ? T.L.map(x => x.rid + ' · ' + x.it.lote + ' ' + benUn(x.it.custodia)).join('; ') : T.reqs) + ')'; }
 
 /* ---------- massa e embalagem (R-C01, R-C03): embalagem não é fruta ---------- */
 function benTara(cx, pallets, r) { return prSoma([prMul(cx || 0, BENC.cx.tara), prMul(pallets || 0, r.par.tara_pallet)]); }
@@ -73,8 +82,8 @@ function benNfCx(c) { const feitas = {}; (c.movs || []).forEach(m => { if (m.tip
 /* de onde vêm as caixas que faltam (impedimento da liberação): a sobra em custódia de outra ordem (Receba devoluções) e a nota de caixa a
    conferir (Confira recebimentos), o que cobrir a falta primeiro; sem nenhuma, a compra é do BEN-2 e a ordem pode ser cancelada (BEN-D22) */
 function benCaixasRec(c, o, d, tot) { const falta = Math.ceil(tot - d - 1e-9); const al = benQuem('almoxarife'); const it = BENC.cx.item;
-  const sob = benOrdens(c).filter(b => b.id !== (o && o.id) && b.req && c.reqs[b.req] && c.reqs[b.req].itens.some(i => i.prod === it && i.custodia > 1e-9));
-  const cu = sob.length ? c.reqs[sob[0].req].itens.find(i => i.prod === it).custodia : 0; const nf = benNfCx(c)[0] || null;
+  const sob = benOrdens(c).filter(b => b.id !== (o && o.id) && benCxTot(c, b).cust > 1e-9);
+  const cu = sob.length ? benCxTot(c, sob[0]).cust : 0; const nf = benNfCx(c)[0] || null;
   const tDev = sob.length ? 'A ' + sob[0].id + ' tem ' + prFmtT(cu, 0) + ' un em custódia (Receba devoluções).' : '';
   const tNf = nf ? 'A ' + nf.id + ' (' + nf.ped + ' · ' + nf.forn + ') traz ' + prFmtT(nf.qtd, 0) + ' un: ' + al + ' confere em Estoque › Confira recebimentos.' : '';
   const base = 'Faltam ' + prFmtT(falta, 0) + ' un. ';
@@ -169,22 +178,22 @@ function benEtapas(c, o) { const r = benRota(o.ben.rota); const v = benValidos(o
     return { nome: e.nome, pert: 'Exigida', sit: ok ? 'Cumprida' : 'Pendente', ev }; }); }
 
 /* ---------- próximo passo, selos e textos ---------- */
-function benSelos(c, o) { const out = []; const b = benBal(o); const it = benReqItem(c, o);
+function benSelos(c, o) { const out = []; const b = benBal(o); const T = benCxTot(c, o);
   if (o.etapa === 'A liberar' && benImpedimentos(c, o).length) out.push({ t: 'Impedida', c: 'red' });
   if (o.ben.conc && o.etapa === 'Em conferência' && !b.dentro && !benJustOk(o, b)) out.push({ t: b.ganho ? 'Ganho aparente acima da faixa' : 'Diferença acima da faixa', c: 'red' });
   if (o.ben.corr && o.ben.corr.pend) out.push({ t: 'Correção aguarda a gestão', c: 'yellow' });
   if (o.ben.corrigido) out.push({ t: 'Corrigido na conferência', c: 'yellow' });
-  if (o.etapa === 'Em conferência' && it && it.custodia > 1e-9) out.push({ t: 'Sobra em custódia', c: 'yellow' });
+  if (o.etapa === 'Em conferência' && T.cust > 1e-9) out.push({ t: 'Sobra em custódia', c: 'yellow' });
   if (['Encerradas', 'Canceladas'].indexOf(o.etapa) < 0 && o.ben.fim && o.ben.fim < prHoje()) out.push({ t: 'Atrasada', c: 'red' });
   return out; }
-function benProx(c, o) { const b = benBal(o); const it = benReqItem(c, o);
+function benProx(c, o) { const b = benBal(o); const T = benCxTot(c, o);
   if (o.etapa === 'A liberar') { const im = benImpedimentos(c, o);
     return im.length ? { t: 'Resolver ' + (im.length > 1 ? im.length + ' impedimentos' : '1 impedimento') + ' e autorizar a rota', quem: im.map(x => x.dono).filter(Boolean).filter((x, i, a) => a.indexOf(x) === i).join('; '), acao: 'liberar', imp: im, red: true,
         nota: 'Sem como resolver: Cancelar a ordem (nada foi reservado) e abrir outra · ' + benProdQ() }
       : { t: 'Autorizar rota e liberar', quem: benProdQ(), acao: 'liberar' }; }
   if (o.etapa === 'Canceladas') { const k = o.ben.canc || {}; return { t: 'Cancelada: ' + (k.motivo || '—'), quem: k.quem || '', acao: null, nota: 'Nada estava reservado; as entradas abrem outra ordem' }; }
-  if (o.etapa === 'Liberadas') { const falta = it && cenSaldoEntregar(it) > 1e-9 && !(it.custodia > 1e-9);
-    return { t: 'Iniciar processo', quem: benProdQ(), acao: 'iniciar', nota: falta ? 'Caixas da ' + o.req + ' ainda no Estoque: ' + benQuem('almoxarife') + ' entrega no balcão (' + benUn(cenSaldoEntregar(it)) + ').' : '' }; }
+  if (o.etapa === 'Liberadas') { const falta = T.n && T.pend > 1e-9 && !(T.cust > 1e-9);
+    return { t: 'Iniciar processo', quem: benProdQ(), acao: 'iniciar', nota: falta ? 'Caixas da ' + T.reqs + ' ainda no Estoque: ' + benQuem('almoxarife') + ' entrega no balcão (' + benUn(T.pend) + ').' : '' }; }
   if (o.etapa === 'Em execução') { const pr = benValidos(o).some(s => s.fluxo === 'Produto');
     const ep = benEmProc(o); return pr ? { t: 'Enviar para conferência', quem: benProdQ(), acao: 'concluir', nota: prCmp(ep, 0) > 0 ? 'O que não foi registrado (' + benKg(ep) + ') vira diferença na conferência.' : '' } : { t: 'Registrar saída', quem: benProdQ(), acao: 'saida' }; }
   if (o.etapa === 'Em conferência') {
@@ -296,9 +305,9 @@ function benAutorizarLiberar(c, id, ator, k) { const quem = cenExige(ator, 'prod
   return { msg: id + ' ' + o.versao + ' autorizada (CMD-42) e liberada (CMD-06) por ' + quem + ': ' + det + '.' + (o.req ? ' O Estoque entrega as caixas no balcão.' : '') }; }
 function benIniciar(c, id, ator, k) { const quem = cenExige(ator, 'producao', 'Iniciar a ' + id); const o = benO(c, id);
   benViva(o, 'iniciar'); if (o.etapa !== 'Liberadas') throw new Error(o.etapa === 'A liberar' ? id + ' ainda não foi liberada: Autorizar rota e liberar.' : 'Já feito: ' + id + ' está em ' + o.etapa + '.'); benVer(o, k);
-  o.etapa = 'Em execução'; const it = benReqItem(c, o); if (it && it.custodia > 1e-9) it.confirmado = 'balcao';   /* recebida no balcão por quem executa (PCMS-M14) */
+  o.etapa = 'Em execução'; const T = benCxTot(c, o); T.L.forEach(x => { if (x.it.custodia > 1e-9) x.it.confirmado = 'balcao'; });   /* recebida no balcão por quem executa (PCMS-M14) */
   benHist(o, quem, 'Iniciada', 'Entradas ' + o.ben.ent.map(e => e.lote).join(', ') + ' em processo'); benToca(o);
-  return { msg: id + ' em execução: registre as saídas pesadas (produto com caixas e bruto, descarte, outro destino e perda identificada).' + (it && !(it.custodia > 1e-9) ? ' Caixas da ' + o.req + ' ainda no Estoque.' : '') }; }
+  return { msg: id + ' em execução: registre as saídas pesadas (produto com caixas e bruto, descarte, outro destino e perda identificada).' + (T.n && !(T.cust > 1e-9) ? ' Caixas da ' + T.reqs + ' ainda no Estoque.' : '') }; }
 /* registrar saída, descarte, outro destino ou perda identificada (R-A07, R-C01, R-C02, R-F07, R-A12) */
 const BEN_FLUXOS = ['Produto', 'Outro destino', 'Descarte', 'Perda identificada'];
 function benSaida(c, id, k, ator) { const quem = cenExige(ator, 'producao', 'Registrar saída na ' + id); const o = benO(c, id); const r = benRota(o.ben.rota);
@@ -314,17 +323,17 @@ function benSaida(c, id, k, ator) { const quem = cenExige(ator, 'producao', 'Reg
     if (!String(k.motivo || '').trim()) throw new Error('Correção na conferência: informe o motivo.'); }
   const s = { id: 'S-' + String(o.ben.nsai + 1).padStart(2, '0'), fluxo: k.fluxo, classe: '', destino: '', causa: '', prod: '', lote: '', cx: 0, pallets: 0, bruto: null, tara: null, kg: 0,
     orig: 'Pesado', ev: { ticket: '', balanca: r.par.balanca, em: benEm() }, d: prHoje(), at: cenAgora(), quem, chave: k.chave || '', estorno: null, subst: sub ? sub.id : '', motivo: String(k.motivo || '').trim() };
-  let it = null, aviso = '';
+  let T = null, aviso = '';
   if (k.fluxo === 'Produto') {
     if ((def.classes || []).indexOf(k.classe) < 0) throw new Error('Escolha a classe: ' + def.classes.join(' ou ') + '.');
     const cx = benNum(k.cx), bruto = benNum(k.bruto);
     if (!(Number.isInteger(cx) && cx > 0) || !(isFinite(bruto) && bruto > 0)) throw new Error('Informe caixas e bruto.');
     let pal = 0; if (r.par.pesagem === 'pallet') { pal = benNum(k.pallets); if (!(Number.isInteger(pal) && pal >= 0)) throw new Error('Informe os pallets pesados (0 ou mais).'); }
     const tara = benTara(cx, pal, r); const liq = prSub(bruto, tara); if (prCmp(liq, 0) <= 0) throw new Error('Bruto ' + benKg(bruto) + ' não passa da tara ' + benKg(tara) + ': confira a pesagem.');
-    it = benReqItem(c, o); const cust = it ? it.custodia : 0; const pend = it ? cenSaldoEntregar(it) : 0;
+    T = benCxTot(c, o); const cust = T.cust, pend = T.pend; const mais = T.n > 1;
     /* a recusa diz a saída (rodada 1, S3): a entrega pendente no balcão, ou o complemento da mesma ordem quando a REQ já foi toda entregue */
-    if (cx > cust + 1e-9) throw new Error('Caixas acima da custódia: ' + benUn(cust) + (pend > 1e-9 ? '. A ' + o.req + ' tem ' + benUn(pend) + ' a entregar: ' + benQuem('almoxarife') + ' entrega no balcão (Estoque › Entregue por O.S.).'
-      : ', e a ' + (o.req || 'requisição') + ' já foi toda entregue. Peça mais caixas na ordem ("Pedir mais caixas"); ' + benQuem('almoxarife') + ' entrega no balcão.'));
+    if (cx > cust + 1e-9) throw new Error('Caixas acima da custódia: ' + benUn(cust) + (pend > 1e-9 ? '. A ' + T.reqs + (mais ? ' têm ' : ' tem ') + benUn(pend) + ' a entregar: ' + benQuem('almoxarife') + ' entrega no balcão (Estoque › Entregue por O.S.).'
+      : ', e a ' + (T.reqs || 'requisição') + (mais ? ' já foram todas entregues' : ' já foi toda entregue') + '. Peça mais caixas na ordem ("Pedir mais caixas"); ' + benQuem('almoxarife') + ' entrega no balcão.'));
     Object.assign(s, { classe: k.classe, prod: def.prod, cx, pallets: pal, bruto: prN(prM(bruto)), tara, kg: liq });
     const pc = prDiv(liq, cx); const nom = BENC.cx.massa; const desv = prDiv(prMul(prSub(pc, nom), 100), nom);
     if (prCmp(benAbs(prSub(pc, nom)), prMul(nom, r.par.aviso_cx)) > 0) aviso = ' Atenção: ' + prFmtT(pc, 3) + ' kg por caixa contra ' + prFmtT(nom, 3) + ' kg (' + (prCmp(desv, 0) > 0 ? '+' : '') + prFmt(desv, 2) + ' %): confira a contagem ou a pesagem.'; }
@@ -338,41 +347,51 @@ function benSaida(c, id, k, ator) { const quem = cenExige(ator, 'producao', 'Reg
   const proc = benEntrada(o), tol = benFaixa(proc, r); const tot = prSoma([benSoma(benValidos(o)), s.kg]);
   if (prCmp(tot, prSoma([proc, tol])) > 0) throw new Error('Saídas pesadas ' + benKg(tot) + ' > entrada ' + benKg(proc) + ' + tolerância ' + benKg(tol) + '. Confira a pesagem.');
   if (s.fluxo === 'Produto') { s.lote = (o.ben.sai.find(x => x.fluxo === 'Produto' && x.classe === s.classe && x.lote) || {}).lote || prProxLote(c, prHoje());   /* um lote por classe da ordem (R-A16) */
-    it.consumido += s.cx; it.custodia -= s.cx; it.confirmado = 'balcao';   /* quem embala tem as caixas: recebidas no balcão (PCMS-M14) */
-    s.mv = cenMov(c, { tipo: 'consumo', os: id, req: o.req, prod: BENC.cx.item, lote: it.lote, qtd: s.cx, un: 'un', quem, origem: 'web', sinc: true, det: BENC.cx.item + ' ' + s.cx }).id; }
+    /* consumo por linha (BEN-REV-20261009-03): sai da custódia da requisição mais antiga primeiro; cada parte grava a requisição, o lote e o
+       movimento, para o estorno voltar ao mesmo lote. Quem embala tem as caixas: recebidas no balcão (PCMS-M14) */
+    let rest = s.cx; s.cons = [];
+    T.L.forEach(x => { const q = Math.min(rest, x.it.custodia); if (!(q > 1e-9)) return; x.it.consumido += q; x.it.custodia -= q; x.it.confirmado = 'balcao'; rest -= q;
+      s.cons.push({ req: x.rid, lote: x.it.lote, qtd: q, mv: cenMov(c, { tipo: 'consumo', os: id, req: x.rid, prod: BENC.cx.item, lote: x.it.lote, qtd: q, un: 'un', quem, origem: 'web', sinc: true, det: BENC.cx.item + ' ' + q }).id }); });
+    s.mv = s.cons[0].mv; }
   const b0 = benBal(o); o.ben.nsai += 1; o.ben.sai.push(s); const b1 = benBal(o);
   if (conf) { benBalMudou(o, quem); benCorrecao(o, quem, ator, b0, b1, s.motivo); }
   const det = s.fluxo + (s.classe ? ' ' + s.classe : '') + (s.destino ? ' · ' + s.destino : '') + (s.causa ? ' · ' + s.causa + ' · ticket ' + s.ev.ticket : '')
     + (s.cx ? ' · ' + s.cx + ' cx · bruto ' + benKg(s.bruto) + ' − tara ' + benKg(s.tara) + ' = ' + benKg(s.kg) + ' → ' + s.lote : ' · ' + benKg(s.kg)) + (s.subst ? ' · substitui ' + s.subst : '')
-    + (conf ? ' · correção na conferência (' + s.motivo + '): diferença ' + benKg(b0.dif) + ' → ' + benKg(b1.dif) : '');
-  benHist(o, quem, 'Saída ' + s.id + ' registrada', det, s.mv || ''); benToca(o);
+    + (conf ? ' · correção na conferência (' + s.motivo + '): diferença ' + benKg(b0.dif) + ' → ' + benKg(b1.dif) : '')
+    + ((s.cons || []).length > 1 ? ' · caixas ' + s.cons.map(p => benUn(p.qtd) + ' do ' + p.lote + ' (' + p.req + ')').join(' + ') : '');
+  benHist(o, quem, 'Saída ' + s.id + ' registrada', det, (s.cons || []).map(p => p.mv).join(', ')); benToca(o);
   const msg = s.id + ' registrada na ' + id + ': ' + det + '.' + (o.ben.corr && o.ben.corr.pend ? ' Correção ' + o.ben.corr.msg + ': decide ' + benQuem('gestor') + '.' : '') + aviso;
   benGravaRecibo(c, k, 'benSaida', imp, msg); return { msg, s }; }
 /* pedir mais caixas (rodada 1 da integração, S3): falta de caixa na execução se resolve pelo mecanismo de requisição existente, o
-   complemento da mesma ordem. Reserva no Estoque (movimento de reserva), soma à REQ e às caixas da ordem; o Estoque entrega no balcão e as
-   caixas viram custódia de quem executa; recibo pela chave de quem pede e versão esperada. Sai do lote da REQ; se ele não tem, e a ordem não
-   tem caixa em custódia nem a entregar, o item passa ao lote com caixas livres (a devolução volta a ele). Dano evitado: a ordem embalava só
-   parte da fruta e o resto virava diferença no Fechar (perda fictícia) */
+   complemento da mesma ordem. Reserva no Estoque (movimento de reserva), soma às caixas da ordem; o Estoque entrega no balcão e as caixas
+   viram custódia de quem executa; recibo pela chave de quem pede e versão esperada. Sai do lote de uma linha da ordem que tenha as caixas
+   livres (a REQ da liberação primeiro); senão, do lote com caixas livres numa requisição própria da ordem (linha por lote,
+   BEN-REV-20261009-03): o lote de uma linha nunca muda, e o estorno e a devolução voltam ao lote de onde as caixas saíram. Dano evitado:
+   a ordem embalava só parte da fruta e o resto virava diferença no Fechar (perda fictícia) */
 function benComplementar(c, id, qtd, ator, k) { const quem = cenExige(ator, 'producao', 'Pedir caixas para a ' + id); const o = benO(c, id); k = k || {};
   const n = benNum(qtd); const imp = JSON.stringify([id, String(qtd)]); const ja = benRecibo(c, k, 'benComplementar', imp); if (ja) return ja;
   benViva(o, 'pedir'); benVer(o, k);
   if (['Liberadas', 'Em execução'].indexOf(o.etapa) < 0 || o.ben.conc) throw new Error('Peça caixas com a ordem liberada ou em execução (' + id + ' está em ' + o.etapa + '): ' + (o.etapa === 'A liberar' ? 'antes de liberar, ajuste as caixas da ordem; a reserva nasce na liberação.' : 'na conferência não entra embalagem nova; reabra a execução se faltou registrar Produto.'));
   if (!(Number.isInteger(n) && n >= 1)) throw new Error('Caixas: número inteiro de unidades (ao menos 1).');
-  const r = c.reqs[o.req]; const it = benReqItem(c, o); if (!r || !it) throw new Error(id + ' sem requisição de caixas.');
-  let l = c.lotes[it.prod + '|' + it.lote]; const livreReq = l ? Math.floor(cenDisp(l) + 1e-9) : 0; let troca = '';
-  if (livreReq < n) { const pend = cenSaldoEntregar(it);
-    if (it.custodia > 1e-9 || pend > 1e-9) throw new Error('Pedir ' + benUn(n) + ': o ' + it.lote + ' (lote da ' + o.req + ') tem ' + benUn(livreReq) + ' livres e há ' + benUn(it.custodia + pend) + ' ' + (it.custodia > 1e-9 ? 'em custódia com a ordem' : 'a entregar') + '. Use as caixas ' + (it.custodia > 1e-9 ? 'em custódia' : 'a entregar') + ' e peça de novo; o complemento muda de lote só sem caixa em custódia nem a entregar. Nada foi gravado.');
-    const b = cenLote(c, it.prod); const lb = b ? Math.floor(cenDisp(b) + 1e-9) : 0;
-    if (!b || lb < n) throw new Error('Pedir ' + benUn(n) + ': ' + benUn(Math.max(livreReq, lb)) + ' livres no Estoque. ' + benCaixasRec(c, o, Math.max(livreReq, lb), n).why + ' Nada foi gravado.');
-    troca = ' do ' + b.lote + ' (o ' + it.lote + ' tinha ' + benUn(livreReq) + ' livres)'; it.lote = b.lote; l = b; }
-  l.reservado += n; it.solicitado += n; const ins = (o.ins || []).find(x => x.p === it.prod); if (ins) ins.tot += n;
-  const mv = cenMov(c, { tipo: 'reserva', req: o.req, os: id, prod: it.prod, lote: it.lote, qtd: n, un: it.un, quem, origem: 'web', det: 'complemento da ' + id });
-  const det = o.req + ' ' + prFmtT(it.solicitado - n, 0) + ' → ' + benUn(it.solicitado) + ' · reserva' + (troca || ' no ' + it.lote) + ' · ' + benQuem('almoxarife') + ' entrega no balcão';
-  benHist(o, quem, 'Caixas pedidas · ' + o.req + ' +' + benUn(n), det, mv.id); benToca(o);
-  const msg = benUn(n) + ' de ' + it.prod + ' pedidas para a ' + id + troca + ': ' + o.req + ' com ' + benUn(it.solicitado) + '. ' + benQuem('almoxarife') + ' entrega no balcão (Estoque › Entregue por O.S.).';
+  const L = benLinhas(c, o); if (!L.length) throw new Error(id + ' sem requisição de caixas.');
+  const livre = x => { const l = c.lotes[x.it.prod + '|' + x.it.lote]; return l ? Math.floor(cenDisp(l) + 1e-9) : 0; };
+  let x = L.find(y => livre(y) >= n) || null; let troca = '';
+  if (!x) { const b = cenLote(c, L[0].it.prod); const lb = b ? Math.floor(cenDisp(b) + 1e-9) : 0; const mx = Math.max(lb, ...L.map(livre));
+    if (!b || lb < n) throw new Error('Pedir ' + benUn(n) + ': ' + benUn(mx) + ' livres no Estoque. ' + benCaixasRec(c, o, mx, n).why + ' Nada foi gravado.');
+    const i0 = L[0].it; const rid = cenProxId(c, 'reqs', 'REQ', 41);
+    c.reqs[rid] = { id: rid, os: id, itens: [{ prod: i0.prod, lote: b.lote, un: i0.un, emb: i0.emb || '', solicitado: 0, entregue: 0, consumido: 0, devolvido: 0, custodia: 0 }], estado: 'Reservada', comp: o.req };
+    (o.ben.reqc = o.ben.reqc || []).push(rid); x = { rid, it: c.reqs[rid].itens[0] };
+    troca = ' no ' + b.lote + ' (o ' + L.map(y => y.it.lote + ' da ' + y.rid).join(' e o ') + ' tinha' + (L.length > 1 ? 'm ' : ' ') + L.map(y => benUn(livre(y))).join(' e ') + ' livres: requisição própria, a devolução volta a cada lote)'; }
+  const it = x.it; c.lotes[it.prod + '|' + it.lote].reservado += n; it.solicitado += n; const ins = (o.ins || []).find(y => y.p === it.prod); if (ins) ins.tot += n;
+  const mv = cenMov(c, { tipo: 'reserva', req: x.rid, os: id, prod: it.prod, lote: it.lote, qtd: n, un: it.un, quem, origem: 'web', det: 'complemento da ' + id });
+  const det = x.rid + ' ' + prFmtT(it.solicitado - n, 0) + ' → ' + benUn(it.solicitado) + ' · reserva' + (troca || ' no ' + it.lote) + ' · ' + benQuem('almoxarife') + ' entrega no balcão';
+  benHist(o, quem, 'Caixas pedidas · ' + x.rid + ' +' + benUn(n), det, mv.id); benToca(o);
+  const msg = benUn(n) + ' de ' + it.prod + ' pedidas para a ' + id + troca + ': ' + x.rid + ' com ' + benUn(it.solicitado) + '. ' + benQuem('almoxarife') + ' entrega no balcão (Estoque › Entregue por O.S.).';
   benGravaRecibo(c, k, 'benComplementar', imp, msg); return { msg }; }
 /* estornar registro (R-A15): não apaga; o original fica riscado com quem, quando e motivo; caixas voltam à custódia (MV estorno-consumo) */
 const BEN_MOT_EST = ['Erro de digitação', 'Pesagem refeita', 'Outro'];
+function benPartes(c, o, s) { if ((s.cons || []).length) return s.cons; const m = s.mv && (c.movs || []).find(x => x.id === s.mv);
+  if (m && m.req && m.lote) return [{ req: m.req, lote: m.lote, qtd: s.cx, mv: m.id }]; const it = benReqItem(c, o); return it ? [{ req: o.req, lote: it.lote, qtd: s.cx, mv: s.mv || '' }] : []; }
 function benEstornar(c, id, sid, motivo, texto, ator, k) { const quem = cenExige(ator, 'producao', 'Estornar ' + sid + ' da ' + id); const o = benO(c, id);
   const imp = JSON.stringify([id, sid, motivo || '', String(texto || '').trim()]); const ja = benRecibo(c, k, 'benEstornar', imp); if (ja) return ja; benVer(o, k);
   if (o.etapa === 'Encerradas') throw new Error('Correção de ordem encerrada é ajuste vinculado com alçada (BEN-7).');
@@ -381,10 +400,14 @@ function benEstornar(c, id, sid, motivo, texto, ator, k) { const quem = cenExige
   if (BEN_MOT_EST.indexOf(motivo) < 0) throw new Error('Escolha o motivo do estorno: ' + BEN_MOT_EST.join(', ') + '.');
   const mot = motivo === 'Outro' ? String(texto || '').trim() : motivo; if (!mot) throw new Error('Descreva o motivo do estorno.');
   const b0 = benBal(o); s.estorno = { quem, em: benEm(), motivo: mot }; let mv = '';
-  if (s.cx > 0) { const it = benReqItem(c, o); it.consumido -= s.cx; it.custodia += s.cx;
-    mv = cenMov(c, { tipo: 'estorno-consumo', os: id, req: o.req, prod: BENC.cx.item, lote: it.lote, qtd: s.cx, un: 'un', quem, origem: 'web', sinc: true, det: BENC.cx.item + ' ' + s.cx, ref: s.mv || '' }).id; s.estorno.mv = mv; }
+  /* as caixas voltam à custódia da linha e do lote de cada parte do consumo (BEN-REV-20261009-03), com ref ao movimento original */
+  if (s.cx > 0) { const P = benPartes(c, o, s).map(p => ({ p, it: (c.reqs[p.req] ? c.reqs[p.req].itens : []).find(i => i.prod === BENC.cx.item && i.lote === p.lote) }));
+    const sem = P.find(x => !x.it); if (!P.length || sem) throw new Error('Estorno de ' + sid + ': a linha de caixas ' + (sem ? sem.p.req + ' · ' + sem.p.lote : '') + ' não está na ' + id + '. Nada foi gravado.');
+    const ids = P.map(x => { x.it.consumido -= x.p.qtd; x.it.custodia += x.p.qtd;
+      return cenMov(c, { tipo: 'estorno-consumo', os: id, req: x.p.req, prod: BENC.cx.item, lote: x.p.lote, qtd: x.p.qtd, un: 'un', quem, origem: 'web', sinc: true, det: BENC.cx.item + ' ' + x.p.qtd, ref: x.p.mv || '' }).id; });
+    mv = ids.join(', '); s.estorno.mv = ids[0]; if (ids.length > 1) s.estorno.mvs = ids; }
   const b1 = benBal(o); benBalMudou(o, quem); if (o.etapa === 'Em conferência') benCorrecao(o, quem, ator, b0, b1, mot);
-  const det = mot + ' · diferença ' + benKg(b0.dif) + ' (' + benPct(b0.pct) + ') → ' + benKg(b1.dif) + ' (' + benPct(b1.pct) + ')' + (s.cx ? ' · ' + benUn(s.cx) + ' de caixa voltam à custódia' : '');
+  const det = mot + ' · diferença ' + benKg(b0.dif) + ' (' + benPct(b0.pct) + ') → ' + benKg(b1.dif) + ' (' + benPct(b1.pct) + ')' + (s.cx ? ' · ' + benUn(s.cx) + ' de caixa voltam à custódia' + (benPartes(c, o, s).length > 1 ? ' (' + benPartes(c, o, s).map(p => benUn(p.qtd) + ' ao ' + p.lote + ' · ' + p.req).join(', ') + ')' : '') : '');
   benHist(o, quem, 'Estorno de ' + sid, det, mv); benToca(o); const msg = sid + ' estornado: ' + det + '.'; benGravaRecibo(c, k, 'benEstornar', imp, msg); return { msg }; }
 /* enviar para conferência (R-A08; o comando era "Concluir execução": verbo do efeito na rodada 1, como a O.S.): ≥ 1 saída de Produto com classe;
    no avanço "no Concluir" da rota o não registrado vira diferença; grava dif₀ */
