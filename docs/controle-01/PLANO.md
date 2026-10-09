@@ -55,6 +55,7 @@ Os números de teste de cada frente vêm das execuções dos desenhos em `ctl/`.
   - O CTL-3 tira o texto do HEAD, mas o histórico continua.
   - O Codex confere com o proprietário antes de qualquer publicação.
 - **G3 · B-R8.** Fechamento com dose efetiva abaixo da aprovada. Carrega o resto do dano da B e está "severidade a classificar". Se o Codex classificar como S2, vira o CTL-11, antes da homologação.
+  - Classificada S2 pelo Codex (6064114787 §2). Feita no protótipo em 09/10 (`e2d1040`, `f0a0cd8`, `dbc1acc`, branch `claude/v44-dom`): o consumo fica como informado; o apontamento e a O.S. ganham o selo "Divergência de consumo/dose" (planejado × informado por produto, com unidade); a revisão técnica do agrônomo (aceitar com motivo ou registrar a correção) é exigida antes do encerramento. Precisão: centésimo da unidade (`cenQtd`), sem tolerância; `LIM_DISP` (20 %) é alçada de área dispensada, não tolerância de consumo.
 - **G4 · CTL-7.** Precisa estar integrado antes da homologação (motivo no §2, CTL-7).
 
 **Regra de pilha:**
