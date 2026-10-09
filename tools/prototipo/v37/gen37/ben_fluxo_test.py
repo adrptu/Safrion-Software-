@@ -20,13 +20,15 @@ Modos (um por vez, cada um abre o Chrome headless do cadc_lib.T; o cenário come
            a CG-2107 sem "Estornar"; a Marta sem "Registrar decisão"): o valor inicial fica dentro das caixas livres no Estoque.
   cancelar integração BEN (09/10): ordem em A liberar que não libera (caixas acima do livre; entrada que mudou com o estorno da carga)
            tem saída: "Cancelar a ordem" com motivo (nada reservado) e o lote abre outra ordem.
-Uso: env CHROME_BIN=… flock /tmp/cdpB.lock env CDP_GL=1 timeout 900 python3 ben_fluxo_test.py [fluxo|erros|celular|revisao|roteiro|cancelar]
+  faixa390 integração BEN (09/10): a 390 px, Cargas › faixa de telas › Beneficiamento por toque real (a lista aberta fica acima da
+           primária presa ao rodapé) e o roteiro com o valor inicial das caixas.
+Uso: env CHROME_BIN=… flock /tmp/cdpB.lock env CDP_GL=1 timeout 900 python3 ben_fluxo_test.py [fluxo|erros|celular|revisao|roteiro|cancelar|faixa390]
 Capturas em _probe/ben_*.png. Dados sintéticos (SAFRION_DADOS=sintetico)."""
 import sys, os, time, json
 os.environ.setdefault('SAFRION_DADOS', 'sintetico')
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from cadc_lib import T
-MODOS = [a for a in sys.argv[1:] if a in ('fluxo', 'erros', 'celular', 'revisao', 'roteiro', 'cancelar')] or ['fluxo', 'erros', 'celular', 'revisao', 'roteiro', 'cancelar']
+MODOS = [a for a in sys.argv[1:] if a in ('fluxo', 'erros', 'celular', 'revisao', 'roteiro', 'cancelar', 'faixa390')] or ['fluxo', 'erros', 'celular', 'revisao', 'roteiro', 'cancelar', 'faixa390']
 PR = os.path.join(HERE, '_probe'); os.makedirs(PR, exist_ok=True)
 t = T(); J = t.J
 LIB = r"""
@@ -328,6 +330,30 @@ try:
         t.chk('C2 · cancelada a OB-0113, o L39-131 volta à ordem nova com o saldo de agora (12.180 kg)', cen("c.ordens['OB-0113'].etapa") == 'Canceladas' and 'L39-131 · 12.180 kg' in p, p[:600])
         shot('cancelar')
         t.chk('cancelar sem erro de JS', not t.errs(), t.errs())
+    if 'faixa390' in MODOS:
+        # integração BEN (09/10), achado 3: a 390 px a lista aberta da faixa de telas (z-index 31) ficava sob a primária presa ao rodapé
+        # (z-index 40) e o toque em "Beneficiamento" abria a pesagem; é o único caminho do menu até o Beneficiamento. Toque real (CDP), não .click()
+        print('== faixa390 · 390 × 844: Cargas › faixa › Beneficiamento por toque real e o roteiro do proprietário com o valor inicial')
+        ir('CARGA.dc.html', limpa=True, w=390, h=844); perfil('Igor'); ir('CARGA.dc.html', w=390, h=844); time.sleep(1.5)
+        J("(()=>{ const l=document.querySelector('nav[aria-label=\"Telas de recebimento e beneficiamento\"] label.etp-atual'); l&&l.click(); })()"); time.sleep(.6)
+        m = J("(()=>{ const a=[...document.querySelectorAll('nav[aria-label=\"Telas de recebimento e beneficiamento\"] a')].find(x=>x.getAttribute('href')==='BEN.dc.html'); if(!a||!VIS(a)) return null; const r=a.getBoundingClientRect();"
+              " const pts=[[.15,.5],[.5,.5],[.85,.5],[.5,.2],[.5,.8]].map(([fx,fy])=>{ const e=document.elementFromPoint(r.left+r.width*fx,r.top+r.height*fy); return e&&(e===a||a.contains(e))?'livre':'coberto por '+N(e&&e.innerText).slice(0,30); });"
+              " return {x:Math.round(r.left+r.width/2), y:Math.round(r.top+r.height/2), pts}; })()")
+        t.chk('F1 · 390 px: lista da faixa aberta e o item "Beneficiamento" livre nos 5 pontos (nada por cima, nem a primária presa ao rodapé)', m and all(x == 'livre' for x in m['pts']), m)
+        if m:
+            for tp in ('mousePressed', 'mouseReleased'): t.c.call('Input.dispatchMouseEvent', {'type': tp, 'x': m['x'], 'y': m['y'], 'button': 'left', 'clickCount': 1})
+        time.sleep(1.6); lib(); loc = J("location.pathname.split('/').pop()"); p = pan()
+        t.chk('F1 · o toque no item leva ao Beneficiamento (não abre a pesagem)', loc == 'BEN.dc.html' and 'Registrar pesagem' not in p, [loc, p[:200]])
+        clk('+ Nova ordem'); clk('L39-132', 'aside'); cxv = J("(document.querySelector('aside [id^=pf_cx_]')||{}).value"); clk('Criar ordem', 'aside')
+        ir('BEN.dc.html#OB-0113', w=390, h=844); clk('Autorizar rota e liberar', 'aside'); st = cen("[c.ordens['OB-0113']&&c.ordens['OB-0113'].etapa, c.producao.lotes['L39-132'].ordem]")
+        t.chk('F2 · 390 px: o roteiro com o valor inicial (540 caixas) cria e libera a OB-0113', cxv == '540' and st == ['Liberadas', 'OB-0113'], [cxv, st, toast()])
+        clk('Fechar', 'aside'); J("(()=>{ const l=document.querySelector('nav[aria-label=\"Telas de recebimento e beneficiamento\"] label.etp-atual'); l&&l.click(); })()"); time.sleep(.6)
+        pv = J("(()=>{ const b=document.querySelector('.pr-prim'); return b?getComputedStyle(b).visibility:'sem'; })()")
+        J("(()=>{ const l=document.querySelector('nav[aria-label=\"Telas de recebimento e beneficiamento\"] label.etp-atual'); l&&l.click(); })()"); time.sleep(.6)
+        pv2 = J("(()=>{ const b=document.querySelector('.pr-prim'); return b&&VIS(b)?getComputedStyle(b).visibility:'sem'; })()")
+        t.chk('F3 · no Beneficiamento a 390 px a primária presa ao rodapé some só com a lista aberta e volta ao fechar', pv == 'hidden' and pv2 == 'visible', [pv, pv2])
+        shot('faixa390')
+        t.chk('faixa390 sem erro de JS', not t.errs(), t.errs())
 finally:
     t.fim()
 sys.exit(0 if all(t.ok) else 1)   # juízo pela linha RESULTADO e pelo código de saída
