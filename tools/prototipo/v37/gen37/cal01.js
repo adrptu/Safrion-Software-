@@ -133,6 +133,24 @@ function demPorLocal(m, tid, areaT, hoje){ const out={};
     const ar=ls.map(t=>Number((areaT||{})[tid(t)])||1); const s=ar.reduce((a,b)=>a+b,0);
     ls.forEach((t,i)=>{ const k=tid(t); (out[k]||(out[k]=[])).push({p:d.nome,q:e.q*ar[i]/s,un:d.un,dt:e.dt,orig:e.t}); }); }));
   return out; }
+// DEM-09 · a solicitação já enviada × a demanda de agora (Planejar safra, etapa 4). Depois do envio a demanda pode baixar (O.S. cancelada,
+// plano mudado): o insumo que a solicitação pede acima da necessidade líquida fica "Acima da demanda" e a atualização tira só a diferença
+// (dano evitado: comprar o que a demanda já não pede). Com pedido já emitido a solicitação não muda: o excedente entra no estoque e a linha
+// só avisa (cancelar pedido é decisão da Compra). Quantidades na unidade do insumo; tolerância de 0,01 (a mesma do complemento).
+// d: {liq, rup} da demanda (ou nada, se ela não pede o insumo); sent: o que a solicitação pede. Devolve {t, c, dif, pend, sol}.
+function demSolSit(d, sent, temSol, pedEmit){ const liq=Number(d&&d.liq)||0, rup=Number(d&&d.rup)||0; sent=Number(sent)||0;
+  if(temSol&&sent>liq+0.01) return {t:'Acima da demanda',c:'red',dif:sent-liq,pend:!pedEmit,sol:true};
+  if(liq<=0.001&&rup>0.001) return {t:'Coberto pelo recebimento',c:'yellow',dif:0,pend:false,sol:false};
+  if(liq<=0.001) return {t:'Coberto pelo estoque',c:'green',dif:0,pend:false,sol:false};
+  if(temSol&&sent>=liq-0.01) return {t:'Em cotação',c:'blue',dif:0,pend:false,sol:true};
+  if(temSol) return {t:'Complemento',c:'yellow',dif:liq-sent,pend:true,sol:true};
+  return {t:'A enviar',c:'gray',dif:liq,pend:true,sol:false}; }
+// itens da versão nova da solicitação: sobe o que a demanda pede a mais (complemento) e baixa o que ela pede a menos (sai com 0); com pedido
+// emitido nada baixa. itens {insumo: quantidade}; dm {insumo: {liq}}. Devolve {it, novos, menos} (novos e menos: nomes dos insumos).
+function demSolRevisar(itens, dm, pedEmit){ const it=Object.assign({},itens||{}); const novos=[], menos=[]; const L=(n)=>Number(((dm||{})[n]||{}).liq)||0;
+  Object.keys(dm||{}).forEach(n=>{ if(L(n)>0.001&&L(n)>(Number(it[n])||0)+0.01){ novos.push(n); it[n]=L(n); } });
+  if(!pedEmit) Object.keys(itens||{}).forEach(n=>{ if((Number(itens[n])||0)>L(n)+0.01){ menos.push(n); if(L(n)>0.001) it[n]=L(n); else delete it[n]; } });
+  return {it,novos,menos}; }
 // DEM-08 · Compra, etapa 4: escolha padrão = a de menor custo que chega antes da falta; sem nenhuma a tempo, a que chega primeiro (empate: menor
 // custo), sem justificativa obrigatória — não existe alternativa a tempo a justificar (AGENTS §4); o aviso "chega depois da falta" continua.
 // props em ordem de custo (unit crescente), com {f, unit, chega, late}.

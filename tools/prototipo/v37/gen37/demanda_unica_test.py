@@ -209,5 +209,27 @@ def e3():
     return (st['MAP 11-52'][2]=='precisa de 170.000 kg · estoque apto 90.000 kg · falta a partir de 18/10/2026 · Suprimentos compra na Compra de insumos'
             and st['KCl 60%'][0]=='Pedido a receber · PC-088 · 02/10',(st.get('MAP 11-52'),st.get('KCl 60%')))
 caso('E3 detalhe do MAP: "precisa de 170.000 kg · estoque apto 90.000 kg · falta a partir de 18/10/2026 …"; KCl "Pedido a receber · PC-088 · 02/10"',e3)
+# ---------------- F · solicitação já enviada × demanda de agora (DEM-09) ----------------
+print('== F · SOL enviada × demanda de agora (DEM-09)')
+def f1():
+    r=runjs(CAL+"\nconsole.log(JSON.stringify([demSolSit(null,1140,true,false),demSolSit(null,1140,true,true),demSolSit({liq:80000},80000,true,false).t,"
+               "demSolSit({liq:80000},62500,true,false),demSolSit({liq:80000},0,false,false).t,demSolSit({liq:0},0,true,false).t,demSolSit({liq:0,rup:5},0,true,false).t,demSolSit({liq:30},30.005,true,false).t]));")
+    return (r[0]['t']=='Acima da demanda' and r[0]['dif']==1140 and r[0]['pend'] is True and r[1]['t']=='Acima da demanda' and r[1]['pend'] is False
+            and r[2]=='Em cotação' and r[3]['t']=='Complemento' and r[3]['dif']==17500 and r[4]=='A enviar' and r[5]=='Coberto pelo estoque' and r[6]=='Coberto pelo recebimento' and r[7]=='Em cotação',r)
+caso('F1 situação do insumo: a SOL pede 1.140 kg e a demanda 0 → "Acima da demanda" (1.140 kg, pendente; com pedido emitido só avisa); igual → Em cotação; a menos → Complemento 17.500 kg; sem SOL → A enviar; dentro da tolerância 0,01 → Em cotação',f1)
+def f2():
+    dx=D2.demanda('S2627',osd=D2.os_dem((lambda c:(c['ordens']['OS-0418'].__setitem__('etapa','Canceladas'),c)[1])(copy.deepcopy(cenario.seed()))))
+    sol0={n:round(o['liq'],3) for n,o in d.items() if o['liq']>0.001}; dm={n:dict(liq=o['liq']) for n,o in dx.items()}
+    r=runjs(CAL+f"\nconst S={json.dumps(sol0,ensure_ascii=False)}, M={json.dumps(dm,ensure_ascii=False)}; console.log(JSON.stringify([demSolRevisar(S,M,false),demSolRevisar(S,M,true)]));")
+    a,b=r; preco=d['Ureia 45%']['preco']
+    return (a['menos']==['Ureia 45%'] and a['novos']==[] and 'Ureia 45%' not in a['it'] and len(a['it'])==len(sol0)-1 and all(a['it'][n]==sol0[n] for n in a['it'])
+            and round(sol0['Ureia 45%']*preco,2)==3534.0 and b['menos']==[] and b['it']==sol0,(a['menos'],a['novos'],len(a['it']),len(sol0),b['menos']))
+caso('F2 OS-0418 cancelada depois do envio da SOL-2026-07: a atualização tira só a Ureia 45% (1.140 kg · R$ 3.534,00) e mantém as outras 13 quantidades; com pedido emitido nada baixa',f2)
+def f3():
+    r=runjs(CAL+"\nconsole.log(JSON.stringify([demSolRevisar({'MAP 11-52':62500,'Óleo mineral':210},{'MAP 11-52':{liq:80000},'Óleo mineral':{liq:150},'Ureia 45%':{liq:1140}},false),"
+               "demSolRevisar({'MAP 11-52':80000},{'MAP 11-52':{liq:80000}},false)]));")
+    a,b=r
+    return (sorted(a['novos'])==['MAP 11-52','Ureia 45%'] and a['menos']==['Óleo mineral'] and a['it']=={'MAP 11-52':80000,'Óleo mineral':150,'Ureia 45%':1140} and b['novos']==[] and b['menos']==[],r)
+caso('F3 complemento e redução na mesma atualização: MAP sobe para 80.000 kg e a Ureia entra (novos), o Óleo baixa para 150 L (menos); repetir com a SOL igual à demanda não muda nada',f3)
 print(f'\nRESULTADO: {len(OK)} ok · {len(FAIL)} falhas'); [print('  -',f) for f in FAIL]
 sys.exit(1 if FAIL else 0)

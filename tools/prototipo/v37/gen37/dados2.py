@@ -943,7 +943,8 @@ def _saf_id(faz,lab):   # rótulo de safra da ordem ('2026/27', 'Safrinha 2027')
 _OSB=[None]
 def os_base():
     """Parte fixa das ordens para a demanda (vai às telas como D2.osb / MDATA.dem.osb): fazenda, safra (id), chaves do plano, talhões, início
-    da janela e texto; as safras abertas (para a ordem nova emitida no cenário) e grupo e preço de referência de cada insumo."""
+    da janela e texto; as safras abertas (para a ordem nova emitida no cenário) e grupo, preço de referência e unidade de cada insumo
+    (a unidade serve à linha "Acima da demanda" do insumo que saiu da demanda, DEM-09)."""
     if _OSB[0] is None:
         import areas.processo_os as P
         ords=[]
@@ -956,10 +957,10 @@ def os_base():
         for s_ in SAFRAS:
             for c in CULTIVOS.get(s_['id'],[]):
                 for a in (PLANO[c['plano']]['atividades'] if c['plano'] else []):
-                    for x in a['prods']: cat.setdefault(prod_nome(x['prod'],c),dict(g=x['grupo'],preco=x['preco']))
+                    for x in a['prods']: cat.setdefault(prod_nome(x['prod'],c),dict(g=x['grupo'],preco=x['preco'],un=x['un']))
         for pl in PLANOS:
             for a in pl['atividades']:
-                for x in a['prods']: cat.setdefault(x['prod'],dict(g=x['grupo'],preco=x['preco']))
+                for x in a['prods']: cat.setdefault(x['prod'],dict(g=x['grupo'],preco=x['preco'],un=x['un']))
         _OSB[0]=dict(ords=ords,safs=[dict(id=s_['id'],faz=s_['fazenda'],nome=s_['nome']) for s_ in SAFRAS if not s_['ro']],cat=cat,hoje=HOJE_ISO)
     return _OSB[0]
 _OSD=[None]

@@ -68,6 +68,7 @@ Baseline executado: `python3 cal01_test.py` dá **43 ok · 2 falhas já no HEAD*
 | **DEM-06** | O uso do plano com data passada e sem O.S. continua fora da demanda, mas deixa de se chamar "realizado". | Afirmar execução sem registro. | RN-003 |
 | **DEM-07** | O físico apto e os recebimentos são os da fazenda da safra. Estoque de outra fazenda não cobre a demanda. | Compra a menos na Lagoa Grande (Glifosato 293 L a partir de 30/09). | RN-011, l.5127, l.9184 |
 | **DEM-08** | Na Compra (etapa 4), quando nenhuma proposta chega antes da falta, a escolha padrão é a que chega primeiro (empate: menor custo), **sem justificativa obrigatória**. O aviso "chega depois da falta" continua. Quando existe proposta a tempo, a trava atual fica. | A trava sem dano que a Ureia passaria a disparar: "Enviar à Direção" e "Aprovar compra" ficariam bloqueados sem alternativa possível. | AGENTS §4, CAL-01 (l.9182: pedir antecipação ou alternativa) |
+| **DEM-09** (acrescentada na implementação, 09/10) | Com a demanda viva (SAF e Mapa leem as O.S. do cenário), ela pode baixar depois do envio da solicitação (O.S. cancelada, plano mudado). No Planejar safra (etapa 4), o insumo que a SOL pede acima da líquida de agora fica "Acima da demanda · <diferença>", inclusive o que saiu da demanda; a primária vira "Atualizar <SOL>" e a versão nova tira só a diferença (o complemento continua subindo o que falta). Com pedido já emitido a SOL não muda: a linha só avisa e o excedente entra no estoque. Regra em `cal01.js` (`demSolSit`, `demSolRevisar`); a Compra lê o registro da versão inteiro. | Compra a mais em silêncio: OS-0418 cancelada depois do envio e a SOL-2026-07 seguia cotando 1.140 kg de Ureia (R$ 3.534,00), sem sinal no Planejar safra e com R$ 430.255,00 na Compra. | RN-006, AC-08, CAL-01, AGENTS §4 |
 
 A OS-0420 recebe a chave da própria origem, `c4|a3`. As fontes:
 - `processo_os.py:120`: "Soja alta tecnologia v6 · REC-014 v2 · Plantio e adubação de base";
@@ -80,6 +81,7 @@ Sem plano no T4, a ordem conta inteira (N7). Com o plano aplicado, ela cobre 100
 - **PA-C2:** a O.S. de várias chaves sem área por chave usa rateio pela área. No software real, a O.S. traz a área de cada chave.
 - **PA-C3:** a O.S. sem vínculo conta a mais, com aviso, em vez de sumir.
 - **PA-C4 (DEM-08):** sem proposta a tempo, o padrão é a que chega primeiro, sem justificativa.
+- **PA-C5 (DEM-09):** a redução da SOL não pede confirmação extra: é a primária da etapa 4 e nomeia o insumo e a diferença. A Compra recomeça a cotação na versão nova, como já faz no complemento.
 
 A entrada de Controle transversal fica para depois (padrão 3 do pedido).
 
