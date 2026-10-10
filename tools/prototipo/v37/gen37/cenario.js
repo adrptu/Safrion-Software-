@@ -6,11 +6,14 @@
 const CEN_KEY = 'talhao-os-cenario-v1';
 let CEN_MEM = null;
 function cenClone(o) { return JSON.parse(JSON.stringify(o)); }
-function cenLoad() { try { const t = localStorage.getItem(CEN_KEY); return t ? JSON.parse(t) : null; } catch (e) { return null; } }
+let CEN_ILEG = false;   // VISOES-1: a última leitura achou o cenário gravado ilegível (cenIlegivel lê isto, sem ler de novo a cada desenho)
+function cenLoad() { let t = null; try { t = localStorage.getItem(CEN_KEY); } catch (e) { return null; } if (!t) { CEN_ILEG = false; return null; }
+  try { const c = JSON.parse(t); CEN_ILEG = false; return c; } catch (e) { CEN_ILEG = true; return null; } }
 // VISOES-1 §2.8 (revisão Codex 6093255041, item 4): o cenário gravado que não se lê não é apagado: antes de gravar por cima ou recomeçar,
 // a cópia ilegível vai para CEN_KEY + ':ilegivel' (só a primeira; nada é sobrescrito); a tela diz o que houve (cenIlegivel)
-function cenIlegivel() { let t = null; try { t = localStorage.getItem(CEN_KEY); } catch (e) { return false; } if (!t) return false; try { JSON.parse(t); return false; } catch (e) { return true; } }
-function cenGuardaIlegivel() { try { if (cenIlegivel() && localStorage.getItem(CEN_KEY + ':ilegivel') === null) localStorage.setItem(CEN_KEY + ':ilegivel', localStorage.getItem(CEN_KEY)); } catch (e) {} }
+function cenIlegivel() { return CEN_ILEG; }
+function cenIlegivelAgora() { let t = null; try { t = localStorage.getItem(CEN_KEY); } catch (e) { return false; } if (!t) return false; try { JSON.parse(t); return false; } catch (e) { return true; } }
+function cenGuardaIlegivel() { try { if (cenIlegivelAgora() && localStorage.getItem(CEN_KEY + ':ilegivel') === null) localStorage.setItem(CEN_KEY + ':ilegivel', localStorage.getItem(CEN_KEY)); } catch (e) {} }
 // Gravação (Codex 6150155986): devolve true se o navegador gravou. Sem gravar (cota cheia, armazenamento bloqueado):
 // - modo estrito (comando que precisa ser durável): a memória volta ao estado anterior e o comando recebe o erro, sem efeito;
 // - modo padrão (prévias e demonstração só em memória): a cópia antiga gravada sai, para não esconder a mudança desta aba, e o
