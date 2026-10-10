@@ -491,7 +491,7 @@ Autor: Claude, na branch `claude/v44-solo`. Rótulo: tudo o que está nesta seç
 
 **Como rodar.** Build `SAFRION_DADOS=sintetico python3 build.py > /tmp/SOLO-build.log; grep -c FALHA /tmp/SOLO-build.log`, depois `python3 montar_render.py`. Navegador um por vez: `env CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdpC.lock env CDP_GL=1 SAFRION_DADOS=sintetico timeout 900 python3 <teste>`. Sem navegador: `SAFRION_DADOS=sintetico python3 <teste>`.
 
-**Rodada 3 (09–10/10), do merge `edea9e6` até `4db6151` (HEAD desta entrega).** A máquina reiniciou às ~22:53 no meio da rodada 2; a rodada 3 retoma o que faltava e repete os testes do módulo. Ela achou dois defeitos do próprio SOLO, corrigidos com regressão (abaixo). Cada build teve 0 FALHA, 141 artboards, menu vigente 47 e ocultos 94, e `montar_render.py` montou 141 páginas. Build A = `edea9e6`; B = `bcfd842` (23:20); C = `4db6151` (23:59). Cada teste rodou no build vigente na hora.
+**Rodada 3 (09–10/10), do merge `edea9e6` até `4db6151`.** A máquina reiniciou às ~22:53 no meio da rodada 2; a rodada 3 retoma o que faltava e repete os testes do módulo. Ela achou dois defeitos do próprio SOLO, corrigidos com regressão (abaixo). Cada build teve 0 FALHA, 141 artboards, menu vigente 47 e ocultos 94, e `montar_render.py` montou 141 páginas. Build A = `edea9e6`; B = `bcfd842` (23:20); C = `4db6151` (23:59). Cada teste rodou no build vigente na hora.
 
 **Defeitos do SOLO achados pela bateria e corrigidos (executado):**
 
@@ -525,7 +525,14 @@ Autor: Claude, na branch `claude/v44-solo`. Rótulo: tudo o que está nesta seç
 - `cadp_fix_test` 11/15. Falham as verificações 9, 10, 12 e 13 (Papéis dos parceiros). Executado aqui também na base `3b1e7e2`, extraída por `git archive` e construída à parte: as mesmas quatro falham, 11/15.
 - `intest`, `saf38test` e `psfix38test` (conhecidos): executados aqui também na base `3b1e7e2`, com o mesmo erro (`intest` com 6 FALHA e "RuntimeError: Uncaught"; `saf38test` com "RuntimeError: Uncaught"; `psfix38test` com "IndexError").
 
-**Rodada 4, sobre o build C (`4db6151`).** `irr_estado_test` (cortado pelo limite de tempo da rodada 3), os testes do módulo de novo no build final, `cmptest` (a memória da Compra mudou em C) e `links_ocultos_test`: em execução neste commit; o resultado entra no commit seguinte.
+**Rodada 4, sobre o build C (`4db6151`, código final desta entrega; 10/10, 01:02–01:29).** Vai para o build final o que faltava da rodada 3: o `irr_estado_test`, cortado pelo limite de tempo, os testes do módulo, o `cmptest` (a memória da Compra mudou em C) e o `links_ocultos_test`.
+
+| Teste | Resultado |
+|---|---|
+| `solo_ag02_test.py` desktop · celular | OK 27/27 · OK 5/5 |
+| `solo_saf_test.py` desktop · celular | OK 33/33 · OK 3/3 |
+| `solo_os_test.py` desktop · celular | OK 16/16 · OK 2/2 |
+| `irr_estado_test.py` · `cmptest.py` · `links_ocultos_test.py` | 38 ok · 0 falhas · "FALHAS: nenhuma" · TOTAL 11, falhas 0 |
 
 **Rodada 2, sobre o merge `d1506fb`.** Build: 0 FALHA, 141 artboards, menu vigente 47, ocultos 94. `montar_render.py`: 141 páginas.
 
