@@ -896,15 +896,21 @@ function divVals(self,v){ const dv=self.state.dv; v.dv_open=!!dv; if(!dv){ v.dv_
   const lst=dv.rows; const A=lst.reduce((a,x)=>{ const n=g2num(x.area); return a+(isNaN(n)?0:n); },0); const D=dv.ro?{cap:T,pior:0}:dvCap(self,t,lst); const L=D.cap-A; const exc=L< -0.005, ok=Math.abs(L)<=0.005;
   v.dv_titulo=dv.ro?('Parcelas de '+t):('Dividir '+t+' em parcelas'); v.dv_n=lst.length+(lst.length>1?' parcelas':' parcela');
   v.dv_resumo='Talhão '+nfa(T)+' ha'+(D.pior>0.005?' · outras safras '+nfa(D.pior)+' ha':'')+' · alocado '+nfa(A)+' ha · livre '+nfa(Math.max(0,L))+' ha';
-  v.dv_selo=exc?('Excede em '+nfa(-L)+' ha'):(ok?'Área conferida':(nfa(L)+' ha livres'));
-  const cc=exc?['#B42318','#FDE8E6']:(ok?['#1E7A4C','#E4F3E9']:['#8A5A00','#FFF4D6']);
+  // o verde só sem recusa à vista: com erro pendente no painel, a área que fecha aparece como "0 ha livres" (amarelo), não como conferida
+  const pend=!!dv.gerr||Object.keys(dv.err||{}).length>0, conf=ok&&!pend;
+  v.dv_selo=exc?('Excede em '+nfa(-L)+' ha'):(conf?'Área conferida':(nfa(Math.max(0,L))+' ha livres'));
+  const cc=exc?['#B42318','#FDE8E6']:(conf?['#1E7A4C','#E4F3E9']:['#8A5A00','#FFF4D6']);
   v.dv_selost='display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;color:'+cc[0]+';background:'+cc[1]+';';
   v.dv_ro=!!dv.ro; v.dv_edit=!dv.ro; const adj=adjOf(self);
   const CULT=Object.keys(D2.culturas||{}).length?Object.keys(D2.culturas):['Soja','Milho','Feijão','Café','Mamão Formosa'];
   const upd=(i,patch)=>{ const cur=self.state.dv; const rs=cur.rows.slice(); rs[i]=Object.assign({},rs[i],patch); return Object.assign({},cur,{rows:rs}); };
   v.dv_rows=lst.map((x,i)=>{ const pl=planById(x.plano); const na=x.id?Object.keys(adj[x.id]||{}).length:Object.keys(x.adj||{}).length; const e=(dv.err||{})[i]||{};
-    const set=(f)=>(ev)=>{ const cur=self.state.dv; const rs=cur.rows.slice(); rs[i]=Object.assign({},rs[i],{[f]:ev.target.value}); const er=Object.assign({},cur.err||{}); if(er[i]){ er[i]=Object.assign({},er[i]); delete er[i][f]; if(!Object.keys(er[i]).length) delete er[i]; }
-      self.setState({dv:Object.assign({},cur,{rows:rs,err:er,warn:false,gerr:(Object.keys(er).length?cur.gerr:'')})}); };
+    // mudar uma área muda a soma: a recusa agregada (em todas as parcelas e no aviso do painel) fica vencida e sai; o Salvar recalcula (revisão do lote SAF, S3)
+    const AGR=/^(Reduza a área: as parcelas somam|A divisão travaria a área|As parcelas somam)/;
+    const set=(f)=>(ev)=>{ const cur=self.state.dv; const rs=cur.rows.slice(); rs[i]=Object.assign({},rs[i],{[f]:ev.target.value}); const er={};
+      Object.keys(cur.err||{}).forEach(k=>{ const o=Object.assign({},cur.err[k]); if(Number(k)===i) delete o[f]; if(f==='area'&&AGR.test(o.area||'')) delete o.area; if(Object.keys(o).length) er[k]=o; });
+      const venc=f==='area'&&AGR.test(cur.gerr||'');
+      self.setState({dv:Object.assign({},cur,{rows:rs,err:er,warn:false,gerr:(!Object.keys(er).length?'':(venc?'Corrija os campos destacados; o que você digitou foi mantido.':cur.gerr))})}); };
     const ist=(f,x2)=>'font-family:inherit;font-size:13px;padding:6px 8px;border-radius:8px;box-sizing:border-box;width:100%;min-width:0;color:#15201A;border:1px solid '+(e[f]?'#B42318':'#E4E9E5')+';background:'+(dv.ro?'#F4F6F3':'#FFFFFF')+';'+(x2||'');
     let pt; if(!pl) pt=''; else if(pl.cultura!==x.cult) pt='Plano de '+pl.cultura+': escolha um plano de '+x.cult; else pt=(na?na+(na>1?' ajustes deste talhão':' ajuste deste talhão'):'')+(x.from?((na?' · ':'')+'copiado de '+x.from):'');
     const lab=x.local||('parcela '+(i+1)); const errs=Object.keys(e).map(k=>e[k]);

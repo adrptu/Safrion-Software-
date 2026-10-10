@@ -100,6 +100,12 @@ def fluxo_dividir(w, h, toque):
         and [x['v'].get('area') for x in soja(n1)] == [80], (al, soja(n1)))
     chk(f'{tag}: na parcela, "Reduza a área… máximo 80 ha", sem o "Máximo 0 ha" de cada parcela contra a irmã',
         'Máximo 0 ha' not in al and any('Reduza a área: as parcelas somam 90 ha e o máximo é 80 ha.' == (v or {}).get('area') for v in e.values()), (al, e))
+    # revisão do lote SAF (S3): depois da recusa, corrigir só uma parcela tira a recusa vencida; o verde nunca fica ao lado de "travaria"/"Reduza a área"
+    dv_area(ps, '40'); time.sleep(.2); pa = painel(); al2 = alerta(); e2 = erros_dv()
+    venc = 'travaria' in al2 or 'Reduza a área' in pa or any('Reduza a área' in ((v or {}).get('area') or '') for v in e2.values())
+    chk(f'{tag}: depois da recusa, mudar só {ps} para 40 (40 + 40 = 80) tira a recusa vencida e só então mostra "Área conferida"',
+        not venc and 'Área conferida' in pa, (pa[:300], al2, e2))
+    dv_area(ps, '50'); time.sleep(.2)
     botao('Distribuir área igualmente', PAINEL); time.sleep(.3); d = dv() or {'rows': []}; pa = painel()
     chk(f'{tag}: "Distribuir área igualmente" reparte os 80 ha que cabem (40 + 40), com "Área conferida" (antes 60 + 60)',
         sorted(r.get('area') for r in d['rows']) == ['40', '40'] and 'Área conferida' in pa, (d['rows'], pa[:300]))
