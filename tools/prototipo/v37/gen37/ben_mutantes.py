@@ -82,6 +82,10 @@ M = [
  ('M71 Fechar olha só a REQ da liberação (custódia do complemento esquecida)', "const rs = Object.values(c.reqs || {}).filter(x => x.os === id && x !== r);", "const rs = [];"),
  ('M72 complemento abre REQ nova mesmo com caixa livre no lote de outra linha', "let x = L.find(y => livre(y) >= n) || null;", "let x = livre(L[0]) >= n ? L[0] : null;"),
  ('M62 cancelar sem perfil', "const quem = cenExigeUm(ator, ['producao', 'gestor'], 'Cancelar a ' + id);", "const quem = 'Igor (responsável de produção)';"),
+ ('M73 recuperação conta a custódia inteira de qualquer ordem como sobra (rodada 2, S2)', ".map(b => ({ b, n: benCxSobra(c, b) }))", ".map(b => ({ b, n: Math.floor(benCxTot(c, b).cust + 1e-9) }))"),
+ ('M74 sobra de ordem em execução ignora o que falta registrar', "(o.etapa === 'Em execução' ? benEmProc(o) : 0)", "0"),
+ ('M75 sobra com a fração vendável (subestima as caixas que a ordem usa)', "const usa = prCmp(kg, 0) > 0 ? Number((prM(kg) + m - 1n) / m) : 0;", "const usa = prCmp(kg, 0) > 0 ? benCaixas(kg, benRota(o.ben.rota)) : 0;"),
+ ('M76 falta de caixa em ordem liberada manda Cancelar a ordem', "const aLib = !o || o.etapa === 'A liberar';", "const aLib = true;"),
 ]
 U = open(os.path.join(HERE, 'ben_unit.js'), encoding='utf-8').read()
 base = motor(); OK = []

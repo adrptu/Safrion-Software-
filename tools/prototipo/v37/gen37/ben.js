@@ -79,17 +79,28 @@ function benCaixasPadrao(c, kg, r) { const sug = benCaixas(kg, r), livre = benCa
 /* notas de caixa a conferir no Estoque (BENC.nfcx): a conferida (movimento recebimento-nf com a conferência da nota) sai da lista */
 function benNfCx(c) { const feitas = {}; (c.movs || []).forEach(m => { if (m.tipo === 'recebimento-nf' && m.estRec && m.estRec.id) feitas[m.estRec.id] = true; });
   return (BENC.nfcx || []).filter(n => !feitas[n.rid]); }
-/* de onde vêm as caixas que faltam (impedimento da liberação): a sobra em custódia de outra ordem (Receba devoluções) e a nota de caixa a
-   conferir (Confira recebimentos), o que cobrir a falta primeiro; sem nenhuma, a compra é do BEN-2 e a ordem pode ser cancelada (BEN-D22) */
-function benCaixasRec(c, o, d, tot) { const falta = Math.ceil(tot - d - 1e-9); const al = benQuem('almoxarife'); const it = BENC.cx.item;
-  const sob = benOrdens(c).filter(b => b.id !== (o && o.id) && benCxTot(c, b).cust > 1e-9);
-  const cu = sob.length ? benCxTot(c, sob[0]).cust : 0; const nf = benNfCx(c)[0] || null;
-  const tDev = sob.length ? 'A ' + sob[0].id + ' tem ' + prFmtT(cu, 0) + ' un em custódia (Receba devoluções).' : '';
+/* sobra de caixas de uma ordem, a única custódia que a falta de outra ordem pode pedir de volta (integração BEN, rodada 2): o que passa do
+   máximo que ela ainda pode embalar, ⌈kg a embalar ÷ massa da caixa⌉ com toda a fruta em caixa (sem a fração vendável, para não subestimar
+   o que ela usa). Liberada: a entrada inteira; em execução: o que falta registrar (benEmProc); enviada para conferência: nada, a custódia
+   inteira é sobra (o selo "Sobra em custódia"). Dano evitado: o atalho "Receber a devolução" apontava as 1.169 caixas de uma ordem liberada;
+   seguido, ela ficava sem caixa, sem cancelar (BEN-6) e com a fruta presa, e a falta só mudava de ordem (perda fictícia) */
+function benCxSobra(c, o) { const cu = Math.floor(benCxTot(c, o).cust + 1e-9); if (!(cu > 0)) return 0;
+  const kg = o.etapa === 'Liberadas' ? benEntrada(o) : (o.etapa === 'Em execução' ? benEmProc(o) : 0); const m = prM(BENC.cx.massa);
+  const usa = prCmp(kg, 0) > 0 ? Number((prM(kg) + m - 1n) / m) : 0; return Math.max(0, cu - usa); }
+/* de onde vêm as caixas que faltam (impedimento da liberação e recusa do "Pedir mais caixas"): a sobra de outra ordem (benCxSobra; Receba
+   devoluções) e a nota de caixa a conferir (Confira recebimentos), o que cobrir a falta primeiro; sem nenhuma, a compra é do BEN-2: em A
+   liberar a ordem pode ser cancelada (BEN-D22); liberada ou em execução não se cancela (BEN-6), e a nota que chegar é o caminho */
+function benCaixasRec(c, o, d, tot) { const falta = Math.ceil(tot - d - 1e-9); const al = benQuem('almoxarife');
+  const sob = benOrdens(c).filter(b => b.id !== (o && o.id)).map(b => ({ b, n: benCxSobra(c, b) })).filter(x => x.n > 0).sort((x, y) => y.n - x.n);
+  const s0 = sob.find(x => x.n >= falta) || sob[0] || null; const cu = s0 ? s0.n : 0; const nf = benNfCx(c)[0] || null;
+  const tDev = s0 ? 'A ' + s0.b.id + ' tem sobra de ' + prFmtT(cu, 0) + ' un em custódia (Receba devoluções).' : '';
   const tNf = nf ? 'A ' + nf.id + ' (' + nf.ped + ' · ' + nf.forn + ') traz ' + prFmtT(nf.qtd, 0) + ' un: ' + al + ' confere em Estoque › Confira recebimentos.' : '';
   const base = 'Faltam ' + prFmtT(falta, 0) + ' un. ';
-  if (sob.length && (cu + 1e-9 >= falta || !nf)) return { t: 'Receber a devolução da ' + sob[0].id + ' no Estoque', h: 'EST.dc.html', why: base + tDev + (tNf ? ' ' + tNf : '') };
+  if (s0 && (cu >= falta || !nf)) return { t: 'Receber a devolução da ' + s0.b.id + ' no Estoque', h: 'EST.dc.html', why: base + tDev + (tNf ? ' ' + tNf : '') };
   if (nf) return { t: 'Conferir a ' + nf.id + ' das caixas no Estoque', h: 'EST.dc.html', why: base + tNf + (tDev ? ' ' + tDev : '') };
-  return { t: 'Ver saldo de caixas no Estoque', h: 'EST.dc.html', why: 'Faltam ' + prFmtT(falta, 0) + ' un e não há nota de caixas a conferir nem sobra em custódia: a compra de caixas entra no BEN-2. Sem caixa, Cancelar a ordem (nada foi reservado).' }; }
+  const aLib = !o || o.etapa === 'A liberar';
+  return { t: 'Ver saldo de caixas no Estoque', h: 'EST.dc.html', why: 'Faltam ' + prFmtT(falta, 0) + ' un e não há nota de caixas a conferir nem sobra em custódia: a compra de caixas entra no BEN-2.'
+    + (aLib ? ' Sem caixa, Cancelar a ordem (nada foi reservado).' : ' Quando a nota das caixas chegar, ' + al + ' confere em Estoque › Confira recebimentos e você pede de novo (Pedir mais caixas).') }; }
 /* texto curto do que traz as caixas (aviso da ordem nova): a nota a conferir e quem confere */
 function benCaixasVem(c) { const nf = benNfCx(c)[0]; return nf ? nf.id + ' do ' + nf.ped + ', ' + benUn(nf.qtd) + ' a conferir · ' + benQuem('almoxarife') : benQuem('almoxarife') + ' · a compra de caixas entra no BEN-2'; }
 /* faixa de conferência da parte pesada (R-F02): tol_pesado × processado, 6 casas */

@@ -35,13 +35,17 @@ Modos (um por vez, cada um abre o Chrome headless do cadc_lib.T; o cenário come
            tem saída: "Cancelar a ordem" com motivo (nada reservado) e o lote abre outra ordem.
   faixa390 integração BEN (09/10): a 390 px, Cargas › faixa de telas › Beneficiamento por toque real (a lista aberta fica acima da
            primária presa ao rodapé); a ordem nasce com a necessidade de caixas e a falta aparece com a saída.
-Uso: env CHROME_BIN=… flock /tmp/cdpB.lock env CDP_GL=1 timeout 900 python3 ben_fluxo_test.py [fluxo|erros|celular|revisao|roteiro|roteiro390|complemento|lotes|duplo|criada|teclado|cancelar|faixa390]
+  cadeia   integração BEN, rodada 2 (S2 da reverificação; cadeia390 = o mesmo a 390 com toque real): com a OB-0113 liberada e as 1.169
+           caixas entregues, a falta da OB-0112 não manda receber a "devolução" da OB-0113; em execução ela guarda as caixas que ainda
+           pode usar e "Pedir mais caixas" sem nota nem sobra não manda cancelar; com tudo registrado a sobra (69 un) vira a saída da
+           OB-0112, o Rui a recebe pelo atalho e a OB-0113 fecha os 12.300 kg com diferença 0.
+Uso: env CHROME_BIN=… flock /tmp/cdpB.lock env CDP_GL=1 timeout 900 python3 ben_fluxo_test.py [fluxo|erros|celular|revisao|roteiro|roteiro390|complemento|lotes|duplo|criada|teclado|cancelar|faixa390|cadeia|cadeia390]
 Capturas em _probe/ben_*.png. Dados sintéticos (SAFRION_DADOS=sintetico)."""
 import sys, os, time, json
 os.environ.setdefault('SAFRION_DADOS', 'sintetico')
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from cadc_lib import T
-TODOS = ('fluxo', 'erros', 'celular', 'revisao', 'roteiro', 'roteiro390', 'complemento', 'lotes', 'duplo', 'criada', 'teclado', 'cancelar', 'faixa390')
+TODOS = ('fluxo', 'erros', 'celular', 'revisao', 'roteiro', 'roteiro390', 'complemento', 'lotes', 'duplo', 'criada', 'teclado', 'cancelar', 'faixa390', 'cadeia', 'cadeia390')
 MODOS = [a for a in sys.argv[1:] if a in TODOS] or list(TODOS)
 PR = os.path.join(HERE, '_probe'); os.makedirs(PR, exist_ok=True)
 t = T(); J = t.J
@@ -167,7 +171,7 @@ try:
         t.chk('(2) com a OB-0112 aberta há um verde só na página, o do painel ("Autorizar rota e liberar"; BOT-01)', gr == ['Autorizar rota e liberar'], gr)
         # rodada 1 (BEN-D23): a falta de 341 caixas tem saída real: a NF 7731 a conferir no Estoque (a sobra de 60 da OB-0110 não cobre)
         t.chk('(2) painel da OB-0112 lista as duas causas antes do toque, cada uma com dono e atalho (caixas: conferir a NF 7731; a sobra da OB-0110 citada)', 'L39-119 em inspeção (INSP-94) · Marta (qualidade)' in p and 'Caixa de mamão Formosa 10 kg: 540 un disponíveis para 881 un · Estoque' in p
-              and 'Conferir a NF 7731 das caixas no Estoque' in p and 'A OB-0110 tem 60 un em custódia' in p and 'Retirar L39-119 da ordem' in p, p[:900])
+              and 'Conferir a NF 7731 das caixas no Estoque' in p and 'A OB-0110 tem sobra de 60 un em custódia' in p and 'Retirar L39-119 da ordem' in p, p[:900])
         t.chk('(2) OB-0112 A liberar: balanço sem diferença nem recuperação antes de começar ("Entrada a processar"; nada "acima da faixa" nem 100,00 %)',
               'Entrada a processar' in p and 'acima da faixa' not in p and '100,00 %' not in p and 'Em processo 0 kg' not in p, p[p.find('BALANÇO'):][:300] if 'BALANÇO' in p else p[:600])
         clk('Autorizar rota e liberar', 'aside'); p = pan()
@@ -627,6 +631,57 @@ try:
         t.chk('F3 · em Cargas a 390 px a primária presa ao rodapé some só com a lista da faixa aberta e volta ao fechar', pv == 'hidden' and pv2 == 'visible', [pv, pv2])
         shot('faixa390')
         t.chk('faixa390 sem erro de JS', not t.errs(), t.errs())
+    def cadeia(W):
+        # integração BEN, rodada 2 (S2 da reverificação, p10_cadeia): a falta de caixas da OB-0112 mandava receber a "devolução" das 1.169 caixas
+        # da OB-0113 liberada; seguido à risca, a OB-0113 ficava com 919 de 1.169 caixas, sem cancelar e com ~2.500 kg sem caixa. Agora só a
+        # sobra (custódia acima do que a ordem ainda pode embalar) é saída; a 1440 com clique real e a 390 com toque real
+        T_ = 'K' + str(W); H = 844 if W < 500 else 1000; tamanho(W, H)
+        print(f'== cadeia {W} · a falta de uma ordem não tira as caixas de outra ordem liberada ou em execução')
+        from ben_unit_test import motor, node
+        fx = node(motor() + """ const c = cenClone(CEN0); const IG = 'Igor', RU = 'Rui', MA = 'Marta', CX = BENC.cx.item;
+          function M(fn) { const x = cenClone(c); const r = fn(x) || {}; if (r.erro) throw new Error(r.erro); Object.keys(c).forEach(k => delete c[k]); Object.assign(c, x); return r; }
+          M(x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }] }, IG));
+          M(x => { const n0 = x.movs.length; cenReceber(x, CX, 'CX26-02', 1200, 'un', 'Packing', '—', 'NF 7731', true, RU); x.movs[n0].estRec = { id: 'r7731', nf: 'NF 7731', ped: 'PC-096', conf: 1200, apto: 1200, quar: 0, lote: 'CX26-02' }; });
+          M(x => benAutorizarLiberar(x, 'OB-0113', IG)); M(x => cenEntregar(x, 'REQ-041', CX, 1169, null, RU)); M(x => cenDevolver(x, 'REQ-030', CX, 60, true, RU));
+          M(x => benResultado(x, 'L39-119', 'Conforme', '', MA)); M(x => benDecidir(x, 'L39-119', 'Liberar', {}, MA));
+          c.rev = (c.rev || 0) + 1; print(JSON.stringify(c));""", 'ben_cadeia.js')
+        ir('BEN.dc.html', limpa=True, w=W, h=H); J(f"localStorage.setItem('talhao-os-cenario-v1', {json.dumps(fx.stdout.strip().splitlines()[-1])})"); perfil('Igor')
+        def abre(id): ir('Main.dc.html', w=W, h=H); ir('BEN.dc.html#' + id, w=W, h=H); time.sleep(.3); return pan()
+        CXS = "[c.ordens['OB-0113'].etapa, c.reqs['REQ-041'].itens[0].custodia, (c.lotes['Caixa de mamão Formosa 10 kg|CX26-01']||{}).fisico, (c.lotes['Caixa de mamão Formosa 10 kg|CX26-02']||{}).fisico]"
+        st = cen(CXS); p = abre('OB-0112'); i = p.find('IMPEDIMENTOS'); imp = p[i:i + 520]
+        t.chk(T_ + ' 0 · fixture pelo motor das telas: OB-0113 liberada com as 1.169 caixas do CX26-02 em custódia; OB-0110 devolveu 60 ao CX26-01 (600)', st == ['Liberadas', 1169, 600, 31], st)
+        t.chk(T_ + ' 1 · OB-0112 (600 para 881): a falta não aponta as caixas da OB-0113 liberada; sem nota nem sobra, a saída é a compra (BEN-2) ou Cancelar a ordem',
+              '600 un disponíveis para 881 un' in imp and 'Receber a devolução' not in p and 'OB-0113' not in imp and 'Ver saldo de caixas no Estoque' in imp
+              and 'Faltam 281 un e não há nota de caixas a conferir nem sobra em custódia: a compra de caixas entra no BEN-2. Sem caixa, Cancelar a ordem' in p, imp)
+        r = tocar('Iniciar processo', 'aside') if 'Iniciar processo' in abre('OB-0113') else 'sem Iniciar'
+        a = tocar('+ Registrar saída', 'aside') if '+ Registrar saída' in pan() else tocar('Registrar saída', 'aside')
+        tocar('Produto', 'aside'); tocar('A', 'aside'); setv('#pf_cx', '1100'); setv('#pf_br', '11660'); b = tocar('Registrar', 'aside'); tc = toast()
+        p = abre('OB-0112'); i = p.find('IMPEDIMENTOS'); imp = p[i:i + 400]
+        t.chk(T_ + ' 2 · OB-0113 em execução com 1.300 kg a registrar e 69 caixas (pode usar até 130): a OB-0112 continua sem apontar as caixas dela',
+              r == 'ok' and b == 'ok' and 'S-01 registrada' in tc and cen("c.reqs['REQ-041'].itens[0].custodia") == 69 and 'Receber a devolução' not in p and 'OB-0113' not in imp, [r, a, b, tc, imp])
+        abre('OB-0113'); tocar('Pedir mais caixas', 'aside'); setv('#pf_qx', '1000'); r0 = rev(); tocar('Pedir caixas', 'aside'); p = pan(); k = p.find('Pedir 1.000 un')
+        t.chk(T_ + ' 3 · OB-0113 em execução pede 1.000 com 600 livres, sem nota nem sobra: a recusa diz a compra (BEN-2) e o caminho da nota, sem "Cancelar a ordem"; nada gravado',
+              'Pedir 1.000 un: 600 un livres no Estoque. Faltam 400 un e não há nota de caixas a conferir nem sobra em custódia: a compra de caixas entra no BEN-2. Quando a nota das caixas chegar, Rui (almoxarife) ou Paula (almoxarife) confere em Estoque › Confira recebimentos e você pede de novo (Pedir mais caixas).' in p
+              and 'Cancelar a ordem' not in p[k:k + 400] and rev() == r0, p[k:k + 400] if k >= 0 else p[-500:])
+        tocar('Voltar', 'aside'); abre('OB-0113'); a = tocar('+ Registrar saída', 'aside'); tocar('Descarte', 'aside'); tocar('Compostagem', 'aside'); setv('#pf_kg', '1300'); b = tocar('Registrar', 'aside'); tc = toast()
+        p = abre('OB-0112'); i = p.find('IMPEDIMENTOS'); imp = p[i:i + 400]
+        t.chk(T_ + ' 4 · com tudo registrado (nada a embalar) as 69 un são sobra: a OB-0112 aponta "Receber a devolução da OB-0113" com a sobra',
+              a == 'ok' and b == 'ok' and 'S-02 registrada' in tc and 'Receber a devolução da OB-0113 no Estoque' in imp and 'Faltam 281 un. A OB-0113 tem sobra de 69 un em custódia (Receba devoluções).' in imp, [a, b, tc, imp])
+        perfil('Rui'); r0 = rev(); r = tocar('Receber a devolução da OB-0113 no Estoque', 'aside', nav=True); loc = J("location.pathname.split('/').pop()")
+        if W < 500: tocar('Confira recebimentos', 'nav[aria-label="Seções do estoque"]')
+        tocar('Receba devoluções', 'nav[aria-label="Seções do estoque"]'); rw = J("ROWTXT('REQ-041')") or ''; r2 = tocar('REQ-041'); q = J("(document.querySelector('#fx_g_dev_qtd')||{}).value")
+        r3 = tocar('Salvar', 'aside[role=dialog]'); tc = toast(); st = cen(CXS)
+        t.chk(T_ + ' 5 · Rui segue o atalho (navega sem gravar) e recebe em Receba devoluções a sobra da REQ-041 (69 un) no CX26-02',
+              r == 'ok' and loc == 'EST.dc.html' and r2 == 'ok' and q == '69' and r3 == 'ok' and '69 un de Caixa de mamão Formosa 10 kg devolvidos ao disponível' in tc and st == ['Em execução', 0, 600, 100], [r, loc, rw, r2, q, r3, tc, st])
+        perfil('Igor'); abre('OB-0113'); r = tocar(CONC, 'aside'); tc = toast(); perfil('Paula'); r2 = tocar('Conferir balanço', 'aside'); perfil('Igor'); r3 = tocar('Fechar processo', 'aside'); tc2 = toast()
+        st = cen("(()=>{ const o=c.ordens['OB-0113']; return [o.etapa, (o.ben.just||[]).length, o.ben.sai.filter(s=>s.fluxo==='Perda identificada').length, c.reqs['REQ-041'].itens[0].custodia, c.reqs['REQ-041'].itens[0].consumido]; })()")
+        t.chk(T_ + ' 6 · a OB-0113 fecha os 12.300 kg (A 11.000 + descarte 1.300) com diferença 0, sem justificativa nem perda; as 1.100 caixas usadas, custódia 0',
+              r == 'ok' and r2 == 'ok' and r3 == 'ok' and 'diferença 0 kg (0,00 %)' in tc and st == ['Encerradas', 0, 0, 0, 1100], [r, r2, r3, tc, tc2, st])
+        shot('cadeia_' + str(W))
+        t.chk(T_ + ' cadeia sem erro de JS', not t.errs(), t.errs())
+        tamanho(1440, 1000)
+    if 'cadeia' in MODOS: cadeia(1440)
+    if 'cadeia390' in MODOS: cadeia(390)
 finally:
     t.fim()
 sys.exit(0 if all(t.ok) else 1)   # juízo pela linha RESULTADO e pelo código de saída

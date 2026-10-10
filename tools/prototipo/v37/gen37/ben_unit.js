@@ -278,7 +278,7 @@ ok('U18 K29 condição do a13: "Apto" da semente; "Restrito · monitorado" → a
 // ---- U25 · R-A03, R-A05 · K06, K07, K08 impedimentos, retirar entrada e liberar ----
 { const c = NOVO(); const im = benImpedimentos(c, O(c, 'OB-0112'));
   ok('U25a K06 duas causas juntas, cada uma com dono e atalho: "L39-119 em inspeção (INSP-94) · Marta (qualidade)" e "…: 540 un disponíveis para 881 un · Estoque" (I4: devolução da OB-0110)',
-     im.length === 2 && im[0].t === 'L39-119 em inspeção (INSP-94) · Marta (qualidade)' && im[1].t === CX + ': 540 un disponíveis para 881 un · Estoque' && /OB-0110 tem 60 un em custódia/.test(im[1].link.why), im);
+     im.length === 2 && im[0].t === 'L39-119 em inspeção (INSP-94) · Marta (qualidade)' && im[1].t === CX + ': 540 un disponíveis para 881 un · Estoque' && /OB-0110 tem sobra de 60 un em custódia/.test(im[1].link.why), im);
   const r0 = MUD(c, x => benAutorizarLiberar(x, 'OB-0112', IG)); const an = MUD(c, x => benAutorizarLiberar(x, 'OB-0112', AN));
   ok('U25b liberar com causas: recusa com as duas e nada gravado; Ana não autoriza (decisão do responsável de produção)', /^Liberação recusada · 2 causas/.test(r0.erro || '') && O(c, 'OB-0112').etapa === 'A liberar' && /decisão de Igor \(responsável de produção\)/.test(an.erro || ''), [r0, an]);
   const rt = MUD(c, x => benRetirar(x, 'OB-0112', 'L39-119', IG)); const im2 = benImpedimentos(c, O(c, 'OB-0112'));
@@ -628,5 +628,43 @@ function OB540(c) { const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132'
   ok('U45h complemento em outro lote: o toque repetido devolve o mesmo recibo (sem REQ-043), conteúdo diferente com a mesma chave é conflito; versão vencida e perfil sem papel recusados; nada gravado',
      !a.erro && !!c.reqs['REQ-042'] && b.nada && b.msg === 'Já feito: ' + a.msg && /conflito, nada gravado/.test(d.erro || '') && /mudou depois que você abriu/.test(v.erro || '') && /decisão de Igor/.test(pr.erro || '')
      && JSON.stringify(c) === j0 && !c.reqs['REQ-043'], [a, b, d, v, pr]); }
+
+// ---- U46 · integração BEN, rodada 2 (S2 da reverificação): a recuperação da falta de caixas nunca tira as caixas que outra ordem liberada
+//      ou em execução ainda vai usar. Sobra = custódia acima do máximo que ela ainda pode embalar (⌈kg a embalar ÷ 10 kg⌉); em conferência,
+//      a custódia inteira. Antes: a OB-0112 mandava receber a "devolução" das 1.169 caixas da OB-0113 liberada; seguida, a OB-0113 ficava
+//      com 919 de 1.169 caixas, sem cancelar e com ~2.500 kg sem caixa (perda fictícia ou destinação forçada) ----
+const SOB = (c, id) => typeof benCxSobra === 'function' ? benCxSobra(c, O(c, id)) : 'sem benCxSobra';
+function CADEIA(c) { const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }] }, IG)); RECEBE_NF(c, 1200);
+  const st = [MUD(c, x => benAutorizarLiberar(x, n.id, IG)), MUD(c, x => cenEntregar(x, 'REQ-041', CX, 1169, null, RU)), MUD(c, x => cenDevolver(x, 'REQ-030', CX, 60, true, RU)),
+    MUD(c, x => benResultado(x, 'L39-119', 'Conforme', '', MA)), MUD(c, x => benDecidir(x, 'L39-119', 'Liberar', {}, MA))]; return { id: n.id, st }; }
+const CXIMP = (c, id) => benImpedimentos(c, O(c, id)).find(y => y.cx) || {};
+{ const c = NOVO(); const z = CADEIA(c); const im = CXIMP(c, 'OB-0112'); const l = im.link || {};
+  ok('U46a OB-0113 liberada com as 1.169 caixas do L39-132: a falta da OB-0112 (600 para 881) não aponta a custódia dela; sem nota nem sobra, a saída é a compra (BEN-2) ou Cancelar a ordem em A liberar',
+     z.id === 'OB-0113' && z.st.every(y => !y.erro) && O(c, 'OB-0113').etapa === 'Liberadas' && REQ(c, 'REQ-041').custodia === 1169 && SOB(c, 'OB-0113') === 0
+     && /600 un disponíveis para 881 un/.test(im.t || '') && l.t === 'Ver saldo de caixas no Estoque' && !/OB-0113/.test(l.why || '') && /^Faltam 281 un e não há nota/.test(l.why || '') && /Cancelar a ordem/.test(l.why || ''), [z.st.map(y => y.erro || ''), SOB(c, 'OB-0113'), im]);
+  const i0 = MUD(c, x => benIniciar(x, 'OB-0113', IG)); const imx = CXIMP(c, 'OB-0112'); const s0 = SOB(c, 'OB-0113');
+  const a = MUD(c, x => benSaida(x, 'OB-0113', { fluxo: 'Produto', classe: 'A', cx: 1100, bruto: 11660 }, IG)); const s1 = SOB(c, 'OB-0113'); const ima = CXIMP(c, 'OB-0112');
+  ok('U46b em execução a OB-0113 guarda as caixas que ainda pode usar: antes das saídas (1.169 un para 12.300 kg) e com 1.300 kg a registrar e 69 un em custódia (até 130 cx), sobra 0 e nenhuma recomendação de devolução',
+     !i0.erro && !a.erro && s0 === 0 && s1 === 0 && REQ(c, 'REQ-041').custodia === 69 && (imx.link || {}).t === 'Ver saldo de caixas no Estoque' && (ima.link || {}).t === 'Ver saldo de caixas no Estoque'
+     && !/OB-0113/.test((imx.link || {}).why || '') && !/OB-0113/.test((ima.link || {}).why || ''), [i0, a, s0, s1, imx, ima]);
+  const d = MUD(c, x => benSaida(x, 'OB-0113', { fluxo: 'Descarte', destino: 'Compostagem', kg: 1300 }, IG)); const imd = CXIMP(c, 'OB-0112');
+  const e = MUD(c, x => benConcluir(x, 'OB-0113', IG)); const ime = CXIMP(c, 'OB-0112');
+  ok('U46c com tudo registrado (nada a embalar) as 69 un são sobra, e em conferência também: a OB-0112 recebe o atalho "Receber a devolução da OB-0113" com a sobra (69 un)',
+     !d.erro && !e.erro && (imd.link || {}).t === 'Receber a devolução da OB-0113 no Estoque' && /^Faltam 281 un\. A OB-0113 tem sobra de 69 un em custódia \(Receba devoluções\)\./.test((imd.link || {}).why || '')
+     && O(c, 'OB-0113').etapa === 'Em conferência' && SOB(c, 'OB-0113') === 69 && (ime.link || {}).t === 'Receber a devolução da OB-0113 no Estoque', [d, e, imd, ime]); }
+{ /* a OB-0113 liberada com caixas acima do que pode usar (1.300 un para 12.300 kg, até 1.230 cx): só as 70 un acima contam como sobra */
+  const c = NOVO(); RECEBE_NF(c, 1400); MUD(c, x => cenDevolver(x, 'REQ-030', CX, 60, true, RU)); const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }], cx: 1300 }, IG));
+  const l = MUD(c, x => benAutorizarLiberar(x, n.id, IG)); const rid = O(c, n.id).req; const en = MUD(c, x => cenEntregar(x, rid, CX, 1300, null, RU));
+  const n2 = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-131', kg: 24120 }] }, IG)); const im = CXIMP(c, n2.id);
+  ok('U46d ordem liberada com 1.300 caixas para 12.300 kg (no máximo 1.230 cx): sobra 70 un, e a OB-0114 do L39-131 vê só essa sobra (nunca as 1.300)',
+     !l.erro && !en.erro && SOB(c, n.id) === 70 && /A OB-0113 tem sobra de 70 un em custódia/.test((im.link || {}).why || ''), [l, en, SOB(c, n.id), im]); }
+{ /* falta de caixa na execução sem nota nem sobra: a recusa do "Pedir mais caixas" não manda cancelar (a ordem liberada não se cancela, BEN-6) */
+  const c = NOVO(); RECEBE_NF(c, 1200); MUD(c, x => cenDevolver(x, 'REQ-030', CX, 60, true, RU)); const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }] }, IG));
+  const st = [MUD(c, x => benAutorizarLiberar(x, n.id, IG)), MUD(c, x => cenEntregar(x, 'REQ-041', CX, 1169, null, RU)), MUD(c, x => benIniciar(x, n.id, IG)),
+    MUD(c, x => benSaida(x, n.id, { fluxo: 'Produto', classe: 'A', cx: 1169, bruto: 12391.4 }, IG))]; const j0 = JSON.stringify(c);
+  const p = MUD(c, x => benComplementar(x, n.id, 700, IG, { chave: 'W-BNX-46E', ver: O(c, n.id).ver }));
+  ok('U46e em execução, pedir 700 com 600 livres e sem nota nem sobra: recusa sem gravar que diz a compra (BEN-2) e o caminho da nota no Estoque, sem "Cancelar a ordem"',
+     st.every(y => !y.erro) && /^Pedir 700 un: 600 un livres no Estoque\. Faltam 100 un e não há nota de caixas a conferir nem sobra em custódia: a compra de caixas entra no BEN-2\./.test(p.erro || '')
+     && /Confira recebimentos/.test(p.erro || '') && /Pedir mais caixas/.test(p.erro || '') && !/Cancelar a ordem/.test(p.erro || '') && JSON.stringify(c) === j0, [st.map(y => y.erro || ''), p]); }
 
 print(JSON.stringify(R));
