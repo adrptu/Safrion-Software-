@@ -480,6 +480,9 @@ Autor: Claude, na branch `claude/v44-solo`. Rótulo: tudo o que está nesta seç
 | `d1506fb` | Merge da `claude/prototipo-v44` (`2678481`: correções da integração do BEN), sem conflito: nenhum arquivo em comum com o SOLO |
 | `eafb888` | Esta seção, §3.6 (água no solo), R23-R24, AC-SOLO-22..24 e D-32..D-36 |
 | `edea9e6` | Merge da `claude/prototipo-v44` (`3b1e7e2`: integração BEN rodada 1, S2-S4), sem conflito. Toca dois arquivos que o SOLO também mexe: `areas/processo_os.py` (dois textos de caminho do menu) e `links_ocultos_test.py` (E1d/E1e/E4 novos) |
+| `1a9e1ff` | Checkpoint desta seção (rodada 2 até o reinício, começo da rodada 3) |
+| `bcfd842` | Correção: o texto da política de água sai do prefixo do cenário (a O.S. volta a não citar PA-07), com regressão no `solo_unit_test` |
+| `4db6151` | Correção: memória da demanda igual no Planejar safra e na Compra (rótulo do ajuste do talhão também no `dados2.demanda`), com regressão no `solo_unit_test` |
 
 **Defeitos da base corrigidos, com regressão** (`SAFRION_DADOS=sintetico python3 solo_regressao_test.py [pasta gen37]`):
 - D1 (FX-002, D-22): a OS-0502 dizia "Calagem pela análise de solo" com a dose fixa do plano.
@@ -488,17 +491,41 @@ Autor: Claude, na branch `claude/v44-solo`. Rótulo: tudo o que está nesta seç
 
 **Como rodar.** Build `SAFRION_DADOS=sintetico python3 build.py > /tmp/SOLO-build.log; grep -c FALHA /tmp/SOLO-build.log`, depois `python3 montar_render.py`. Navegador um por vez: `env CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdpC.lock env CDP_GL=1 SAFRION_DADOS=sintetico timeout 900 python3 <teste>`. Sem navegador: `SAFRION_DADOS=sintetico python3 <teste>`.
 
-**Rodada 3, sobre o merge `edea9e6` (HEAD desta entrega).** Build: 0 FALHA, 141 artboards, menu vigente 47, ocultos 94. `montar_render.py`: 141 páginas. A máquina reiniciou às ~22:53 no meio da rodada 2; a rodada 3 retoma dela o que faltava e repete os testes do módulo sobre o merge novo.
+**Rodada 3 (09–10/10), do merge `edea9e6` até `4db6151` (HEAD desta entrega).** A máquina reiniciou às ~22:53 no meio da rodada 2; a rodada 3 retoma o que faltava e repete os testes do módulo. Ela achou dois defeitos do próprio SOLO, corrigidos com regressão (abaixo). Cada build teve 0 FALHA, 141 artboards, menu vigente 47 e ocultos 94, e `montar_render.py` montou 141 páginas. Build A = `edea9e6`; B = `bcfd842` (23:20); C = `4db6151` (23:59). Cada teste rodou no build vigente na hora.
 
-| Teste | Resultado |
-|---|---|
-| `solo_unit_test.py` · `solo_regressao_test.py` (sem navegador) | OK 89/89 · OK 2/2 |
-| Sem navegador: `legal_unit_test` 35/35, `mip_unit_test` 34/34, `producao_unit_test` 121/121, `assinatura_unit_test` 76/76, `capacidade_unit` 76/76, `rend_multiconjuntos_unit` 106/106, `ocupacao_unit` 117/117, `ben_unit_test` 156/156, `quantidade_test` 14/14, `aprova_quem_decide_test` 102/102, `inicio_entrega_test` 26/26, `os_aprov_lib_test` 45/45 | todos verdes |
-| `links_ocultos_test.py` | TOTAL 11 · falhas 0 (E1e e E4 novos do BEN incluídos) |
-| `solo_os_test.py` desktop · celular | OK 16/16 · OK 2/2 |
-| `solo_ag02_test.py` desktop · celular | OK 27/27 · OK 5/5 |
-| `solo_saf_test.py` desktop | OK 33/33 |
-| Demais (celular do SAF, varredura, `acoes_duplicadas` e os existentes que tocam os arquivos mexidos) | em execução neste commit; o resultado entra no commit seguinte |
+**Defeitos do SOLO achados pela bateria e corrigidos (executado):**
+
+| Commit | Defeito | Prova |
+|---|---|---|
+| `bcfd842` | O `solo.js` entra no prefixo do cenário de todas as telas, inclusive a O.S., e levava "política de água" e "PA-07" (comentário do `soloCAD` e aviso do `soloMedir`). A O.S. não fala de irrigação por política. Agora o aviso diz "Referência para a Irrigação, não a lâmina."; a tela Análises de solo acrescenta a frase da política, e o aviso que a pessoa lê é o mesmo | `os_irrig_filtro_test` 14/15 (A) → 15/15 (B). `solo_unit_test` com a verificação nova: 89/90 sem a correção → 90/90 |
+| `4db6151` | O P4 pôs a origem da dose na memória da etapa 4 (`safra.js`, R21), mas a Compra lê a memória do `dados2.demanda`. O ajuste do T1-B (Fungicida A 0,60 L/ha) saía "(ajustado pelo usuário)" numa tela e sem rótulo na outra. Agora o `dados2.demanda` usa o mesmo rótulo; quantidade e valor não mudam | `saf_cmp_continuidade_test` 30/31 (A e B) → 31/31 (C); a mesma verificação passa 31/31 nas bases das outras frentes. `solo_unit_test`: 90/91 sem a correção → 91/91 |
+
+| Teste | Build | Resultado |
+|---|---|---|
+| `solo_unit_test.py` · `solo_regressao_test.py` (sem navegador) | C | OK 91/91 · OK 2/2 |
+| Sem navegador: `legal_unit_test` 35/35, `mip_unit_test` 34/34, `producao_unit_test` 121/121, `assinatura_unit_test` 76/76, `ben_unit_test` 156/156, `aprova_quem_decide_test` 102/102, `inicio_entrega_test` 26/26 e `os_aprov_lib_test` 45/45 | A | todos verdes |
+| Sem navegador: `quantidade_test` 14/14, `rend_multiconjuntos_unit` 106/106, `capacidade_unit` 76/76 e `ocupacao_unit` 117/117 | C | todos verdes |
+| `links_ocultos_test.py` | A | TOTAL 11 · falhas 0 (com o E1e e o E4 novos do BEN) |
+| `solo_os_test.py` desktop · celular | A | OK 16/16 · OK 2/2 |
+| `solo_ag02_test.py` desktop · celular | A (desktop de novo em B) | OK 27/27 (B: 27/27) · OK 5/5 |
+| `solo_saf_test.py` desktop · celular | A | OK 33/33 · OK 3/3 |
+| `os_irrig_filtro_test.py` | A · B | 14/15 (defeito acima) · 15/15 |
+| `os_v39_selo_agua_test` 12/12, `os_v39_bloq_test` 11/11 | A | verdes |
+| `tabelas_os_test` 38/38, `os_ator_test` 15/15, `ap_unico_test` (unit 80/80, nav 23/23), `map_aprov_test` 5/5, `agrofit_test` 17/17, `saf_revisao_test` 42/42, `saf_c01_test` 38/38, `ocupacao_test` 65/65, `rend_multiconjuntos_test` fluxo 18/18 e telas 5/5, `saftest` (sem erro de script; 18 insumos e R$ 1.273.146,10, como nas bases), `cmptest` (FALHAS: nenhuma) | B | verdes |
+| `saf_cmp_continuidade_test.py` | A · B · C | 30/31 · 30/31 (defeito acima) · 31/31 |
+| `etapas_celular_test` 14/14, `acao_unica_test` v3 10/10 e saf 10/10, `cadp_test` 15/15, `cadp_vtest` 12/12, `esttest` OK, `agtest` 16/16, `cadc_cd02_test` 15/15, `cadc_cd06_test` 14/14, `cadc_fix_cd06` 13/13, `os_v39_liberar_test` 20/20, `saf_operacoes_test` 87/87, `tabelas_saf_test` 24/24, `irtest` (26 ✓, nenhuma falha), `carencia_test` 91/91, `mip_correcoes_test` 14/14, `mip_fluxo_test` 15/15, `irr_fluxo_test` 33/33, `map_irrig_filtro_test` 15/15 | C | verdes |
+| `varredura.py` · `../ferramentas/acoes_duplicadas.py . /tmp/SOLO-dup.json` | C | 141/141 páginas sem erro · 141 páginas, 0 com ação repetida, erros 0 |
+| `cadc_test.py` (sem argumento) | C | só imprime a lista de suítes; as suítes que o SOLO toca (CD-02, CD-06, fix CD-06) rodaram à parte |
+
+**Vermelhos que não são do SOLO** (mesma falha na base, sem esconder):
+- `ostest` 32/33. Falha o "painel da nova ordem A liberar: Liberar para execução e Ajustar antes de liberar" (PEND-OS-01, o rótulo virou "Aprovar e liberar"). A mesma falha aparece no log da base da frente BEN (`/tmp/BEN-base-ostest.log`).
+- `os_cenario_test` 19/20 (PEND-OS-01, conhecido).
+- `partest` 46/47 ("T1-C copia ajuste do T1-B"; conhecido, com a mesma falha nos logs das frentes CTL-4 e CTL-1).
+- `cotest` 41/53 (o mesmo 41/53 nas bases das frentes BEN, SUP e CTL-1).
+- `cadp_fix_test` 11/15. Falham as verificações 9, 10, 12 e 13 (Papéis dos parceiros). Executado aqui também na base `3b1e7e2`, extraída por `git archive` e construída à parte: as mesmas quatro falham, 11/15.
+- `intest`, `saf38test` e `psfix38test` (conhecidos): executados aqui também na base `3b1e7e2`, com o mesmo erro (`intest` com 6 FALHA e "RuntimeError: Uncaught"; `saf38test` com "RuntimeError: Uncaught"; `psfix38test` com "IndexError").
+
+**Rodada 4, sobre o build C (`4db6151`).** `irr_estado_test` (cortado pelo limite de tempo da rodada 3), os testes do módulo de novo no build final, `cmptest` (a memória da Compra mudou em C) e `links_ocultos_test`: em execução neste commit; o resultado entra no commit seguinte.
 
 **Rodada 2, sobre o merge `d1506fb`.** Build: 0 FALHA, 141 artboards, menu vigente 47, ocultos 94. `montar_render.py`: 141 páginas.
 
@@ -551,5 +578,7 @@ Autor: Claude, na branch `claude/v44-solo`. Rótulo: tudo o que está nesta seç
 **Riscos para o integrador.**
 - `safra.js` (`ocorr`, `adjOf`/`doseEf`, painel de insumos, `doApply`, `abrirHash`) e `areas/processo_safra.py` também são editados pelas frentes do Planejar safra: juntar por função e rodar de novo `solo_saf_test.py` e `saf_operacoes_test.py`.
 - `areas/processo_os.py` (`osProx`, `osc_nova`, selo) é editado pelas frentes de O.S. e CONTROLE: rodar de novo `solo_os_test.py`, `os_cenario_test.py` e `os_v39_liberar_test.py`.
+- `dados2.demanda` (a memória que a Compra lê) repete o rótulo de origem da etapa 4 do `safra.js` ("(ajustado pelo usuário)"). A frente CTL-4, que mexe na demanda, precisa manter os dois textos iguais e rodar de novo o `saf_cmp_continuidade_test.py` (verificação 21) e o `solo_unit_test.py`.
+- O `solo.js` vai para o prefixo de todas as telas, inclusive a O.S.: texto de política de água, PA-07 ou exceção fica fora dele (o `solo_unit_test.py` confere; o `os_irrig_filtro_test.py` derruba).
 - `cenario.py js_prefixo` concatena `producao.js`, `ben.js` e `solo.js`: outra frente que acrescentar regras ali precisa manter o `solo.js` (só funções) e a checagem de colisão de nomes do `solo_unit_test.py`.
 - Menu Agrícola com 7 itens (D-01). Se a frente NAV enxugar o menu, a "Análises de solo" pode virar acesso pelo plano sem mudar a tela.
