@@ -5,10 +5,11 @@ import sys, os, time, json, datetime
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from os_lib import Os
 from conferencia_diaria_nav_helpers import conferir_dias
+from comp_lib import troca_visao   # VISOES-1: troca de visão pelo seletor (data-visao), não pelo texto
 T = Os(); J = T.J; OS = 'OS-0430'
 VERM = 'rgb(180, 35, 24)'; AMAR = 'rgb(138, 90, 0)'
 def card(id_): return J(f"(()=>{{const k=[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] [role=button]')].find(k=>k.innerText.trim().startsWith('{id_}')); return k?k.innerText.replace(/\\s+/g,' '):'';}})()") or ''
-def tab(t): J(f"(()=>{{const b=[...document.querySelectorAll('[role=tab],button')].find(b=>b.innerText.trim()==='{t}'); b&&b.click();}})()"); time.sleep(.4)
+def tab(t): troca_visao(J, {'Lista': 'lista', 'Kanban': 'kanban'}[t])   # VISOES-1: pelo seletor (data-visao)
 def cor(id_, t): return J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith('{id_}')); if(!r) return ''; const s=[...r.querySelectorAll('span')].filter(s=>s.innerText.trim().startsWith({json.dumps(t)})).reverse().sort((a,b)=>a.innerText.length-b.innerText.length)[0]; return s?getComputedStyle(s).color:'';}})()") or ''
 def hdr(): return J("(()=>{const s=document.querySelector('header h1').nextElementSibling; return s?s.innerText.trim():'';})()") or ''
 try:

@@ -10,6 +10,7 @@ import sys, os, time, json, re
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from os_lib import Os
 from conferencia_diaria_nav_helpers import conferir_dias
+from comp_lib import troca_visao   # VISOES-1: troca de visão pelo seletor (data-visao), não pelo texto
 
 T = Os(); OS = 'OS-0430'
 def setin(lab, val):  # campo do painel pelo rótulo acessível (input + change, como a digitação)
@@ -137,7 +138,7 @@ try:
          (pa[-500:], st, pb[-400:], st2, st3, tt))
     T.fechar(); reset()
     T.mudar(f"c.ordens['{OS}'].ins[0].dose=7.5; c.ordens['{OS}'].ins[0].tot=1200; return {{msg:''}};"); T.ordem(OS); p = T.pan()
-    T.fechar(); aba = lambda n: (T.J(f"(()=>{{const b=[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==={json.dumps(n)}); b&&b.click();}})()"), time.sleep(.4))
+    T.fechar(); aba = lambda n: troca_visao(T.J, {'Lista': 'lista', 'Kanban': 'kanban'}[n])   # VISOES-1: pelo seletor (data-visao)
     aba('Kanban'); kb = T.J("(()=>{const k=[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] [role=button]')].find(x=>x.innerText.indexOf('OS-0430')===0); return k?k.innerText:'';})()") or ''
     aba('Lista'); T.ordem(OS)
     T.ok('Fora do registro · Glifosato 480' in T.linha(OS) and 'Fora do registro · Glifosato 480' in kb and 'Liberar bloqueado: Glifosato 480 7,5 L/ha em T1 (T1-A): dose fora da bula: 1,5–3 L/ha.' in p

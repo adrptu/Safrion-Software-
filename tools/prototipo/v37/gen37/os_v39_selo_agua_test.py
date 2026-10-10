@@ -7,6 +7,7 @@ linha, e a OS-0419 abre na IR-03det. Lê a _render/ como está (não copia proje
 import sys, os, time, json, re
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from os_lib import Os
+from comp_lib import troca_visao   # VISOES-1: troca de visão pelo seletor (data-visao), não pelo texto
 T = Os(copiar=False); J = T.J
 VERM, AMAR = 'rgb(180, 35, 24)', 'rgb(138, 90, 0)'
 AGUA = ('OS-0419', 'OS-0422', 'OS-0423')
@@ -47,7 +48,7 @@ try:
     filtro('Filtrar por fazenda', 'Santa Rita'); L = ids(); ch = chips()
     T.ok(len(L) == 10 and ch[:1] == [f'Todas {len(L)}'] and not set(AGUA) & set(L) and not agua_txt(),
          'Santa Rita · todas as safras: 10 ordens agrícolas, chip Todas = linhas, sem OS-0419/0422/0423 na lista nem no texto da tela', (L, ch[:1], agua_txt()))
-    clica('Kanban'); K = kanban(); a_kb = agua_txt(); clica('Lista')
+    troca_visao(J,'kanban'); K = kanban(); a_kb = agua_txt(); troca_visao(J,'lista')
     T.ok(sorted(K) == sorted(L) and not set(AGUA) & set(K) and not a_kb, 'Kanban de Santa Rita: os mesmos 10 cartões da lista, nenhum de água', (K, a_kb))
     # ---- fertirrigação OS-0418 fica na O.S. ----
     l = T.linha('OS-0418'); T.ordem('OS-0418'); p = T.pan(); ins = p[p.find('INSUMOS'):p.find('RECURSOS')]

@@ -31,7 +31,7 @@ def row_click(t,texto,sel="[role=row].g2ed"):
     return t.js(f"""(()=>{{const r=[...document.querySelectorAll('{sel}')].find(r=>r.innerText.indexOf({json.dumps(texto)})>=0); if(!r) return 'sem linha'; const c=r.querySelector('[role=cell] span')||r.querySelector('[role=cell]'); c.click(); return 'ok';}})()""")
 def abrir_safra(t):
     t.abrir('SAF.dc.html'); t.js("(()=>{const b=[...document.querySelectorAll('button')].find(b=>/^Continuar/.test(b.innerText.trim())); if(b) b.click();})()"); time.sleep(.5)
-from comp_lib import IR_ETAPA
+from comp_lib import IR_ETAPA, troca_visao   # VISOES-1: troca de visão pelo seletor (data-visao)
 def etapa(t,i): r=t.js(f"({IR_ETAPA})({i})"); time.sleep(.5); return r   # a faixa só informa (UX-ACAO-UNICA-20261003): anda pela área de ações
 # ---------------------------------------------------------------- testes
 def t01(t):
@@ -157,7 +157,7 @@ def t12(t):
         return out
     vistas={}
     t.abrir('OS.dc.html'); vistas['Lista (OS)']=blocos(t.js("document.body.innerText"))
-    t.clk('Kanban'); time.sleep(.4)
+    troca_visao(t.js,'kanban'); time.sleep(.4)
     kb=t.js("""(()=>{const o={}; const F=['A liberar','Liberadas','Em execução','Em conferência','Encerradas']; const t=document.body.innerText; let cur=null; t.split('\\n').forEach(l=>{ const s=l.trim(); const f=F.find(x=>s.toUpperCase().startsWith(x.toUpperCase())); if(f && s.length<40) cur=f; const m=s.match(/^OS-04\\d\\d/); if(m && cur && !o[m[0]]) o[m[0]]=cur; }); return o;})()""")
     vistas['Kanban (OS)']=kb
     t.abrir('MB-02.dc.html'); vistas['App (MB-02)']=blocos(t.js("document.body.innerText"))

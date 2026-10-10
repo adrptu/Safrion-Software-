@@ -7,18 +7,22 @@ const CEN_KEY = 'talhao-os-cenario-v1';
 let CEN_MEM = null;
 function cenClone(o) { return JSON.parse(JSON.stringify(o)); }
 function cenLoad() { try { const t = localStorage.getItem(CEN_KEY); return t ? JSON.parse(t) : null; } catch (e) { return null; } }
+// VISOES-1 §2.8 (revisão Codex 6093255041, item 4): o cenário gravado que não se lê não é apagado: antes de gravar por cima ou recomeçar,
+// a cópia ilegível vai para CEN_KEY + ':ilegivel' (só a primeira; nada é sobrescrito); a tela diz o que houve (cenIlegivel)
+function cenIlegivel() { let t = null; try { t = localStorage.getItem(CEN_KEY); } catch (e) { return false; } if (!t) return false; try { JSON.parse(t); return false; } catch (e) { return true; } }
+function cenGuardaIlegivel() { try { if (cenIlegivel() && localStorage.getItem(CEN_KEY + ':ilegivel') === null) localStorage.setItem(CEN_KEY + ':ilegivel', localStorage.getItem(CEN_KEY)); } catch (e) {} }
 // Gravação (Codex 6150155986): devolve true se o navegador gravou. Sem gravar (cota cheia, armazenamento bloqueado):
 // - modo estrito (comando que precisa ser durável): a memória volta ao estado anterior e o comando recebe o erro, sem efeito;
 // - modo padrão (prévias e demonstração só em memória): a cópia antiga gravada sai, para não esconder a mudança desta aba, e o
 //   comando avisa que ela vale só nesta aba. Sem armazenamento algum (sandbox), segue só em memória, como antes.
 const CEN_GRAVA_ERRO = 'Não foi possível gravar no navegador (armazenamento cheio ou bloqueado). Nada foi alterado: libere espaço e repita.';
 const CEN_GRAVA_AVISO = ' · Atenção: o navegador não gravou; a mudança vale só nesta aba até liberar espaço.';
-function cenSave(c, estrito) { const ant = CEN_MEM; CEN_MEM = c;
+function cenSave(c, estrito) { const ant = CEN_MEM; CEN_MEM = c; cenGuardaIlegivel();   /* VISOES-1 §2.8: a cópia ilegível vai antes para :ilegivel */
   try { localStorage.setItem(CEN_KEY, JSON.stringify(c)); return true; }
   catch (e) { if (estrito) { CEN_MEM = ant; throw new Error(CEN_GRAVA_ERRO); }
     try { localStorage.removeItem(CEN_KEY); } catch (e2) {} return false; } }
 function cenGet() { const c = cenLoad() || CEN_MEM; if (c && c.v === CEN0.v) return c; CEN_MEM = cenClone(CEN0); return CEN_MEM; }
-function cenReset() { CEN_MEM = cenClone(CEN0); try { localStorage.removeItem(CEN_KEY); } catch (e) {} }
+function cenReset() { CEN_MEM = cenClone(CEN0); cenGuardaIlegivel(); try { localStorage.removeItem(CEN_KEY); } catch (e) {} }
 function cenAgora() { const d = new Date(); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
 // Mudança atômica: aplica fn numa cópia, grava e devolve a mensagem (ou o erro, sem gravar nada).
 // Ordem de gravação (CONF-01 R14, revisão F1): o que já existia antes do comando fica com sq 0 (seed) e o que o comando gravou ganha sq = c.rev,

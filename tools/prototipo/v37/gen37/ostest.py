@@ -8,6 +8,7 @@ import sys, os, time, subprocess, json, re, shutil
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
 from cdp import Chrome
 from journeys import free
+from comp_lib import troca_visao   # VISOES-1: troca de visão pelo seletor (data-visao), não pelo texto
 HERE=os.path.dirname(os.path.abspath(__file__)); R=os.path.join(HERE,'_render')
 for n in ('OS.dc.html',): shutil.copy(os.path.join(HERE,'project',n),os.path.join(R,n))  # IN-04 e MB-02 são de outras frentes: usa a cópia já em _render
 p=free(); srv=subprocess.Popen(['python3','-m','http.server',str(p),'--bind','127.0.0.1','--directory',R],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL); time.sleep(0.8)
@@ -62,7 +63,7 @@ try:
     J("document.querySelector('aside[role=dialog]').dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}))"); time.sleep(.3)
     check('Esc fecha painel', pan()=='')
     # Kanban
-    clk('Kanban'); time.sleep(.3)
+    troca_visao(J,'kanban'); time.sleep(.3)
     cols=J("[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] > div')].map(d=>d.innerText.split('\\n').slice(0,2).join(' '))")
     check('Kanban 5 colunas fixas', len(cols)==5 and all(cols[i].upper().startswith(FASES[i].upper()) for i in range(5)), cols)
     kb={}
@@ -75,7 +76,7 @@ try:
     t=pan(); check('cartão abre painel OS-0420 com link da ordem completa', 'OS-0420' in t and J("(document.querySelector('aside[role=dialog] a')||{}).getAttribute('href')")=='CA-01x-os0420.dc.html' and 'v3 no saldo de 70 ha' in t and 'em revisão' not in t, t[:60])
     clk('Fechar','aside[role=dialog]')
     # lista × Kanban
-    clk('Lista'); lista={}
+    troca_visao(J,'lista'); lista={}
     for r_ in J("[...document.querySelectorAll('[role=row].g2ed')].map(r=>r.innerText.replace(/\\n/g,' | '))"):
         lista[r_.split(' | ')[0].strip()]=fase_de(r_)
     check('Lista = Kanban', lista==kb, {k:(lista.get(k),kb.get(k)) for k in kb if lista.get(k)!=kb.get(k)})

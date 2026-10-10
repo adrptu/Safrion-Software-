@@ -7,7 +7,7 @@ talhão com contagem distinta e total sem somar grupos sobrepostos.
 Uso: python3 tabelas_os_test.py [pasta de capturas]   (< 90 s)"""
 import sys, os, re, time, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from comp_lib import Chrome, servir
+from comp_lib import Chrome, servir, troca_visao
 OUT = sys.argv[1] if len(sys.argv) > 1 else None
 if OUT: os.makedirs(OUT, exist_ok=True)
 OK, FAIL = [], []
@@ -25,7 +25,7 @@ def marca(nome):   # marca/desmarca uma opção pelo nome exato (o número ao la
     abre_tal(); r = J(f"(()=>{{const l=[...document.querySelectorAll('[aria-label=\"Filtrar por talhão\"] label')].find(l=>l.innerText.replace(/\\s+\\d+$/,'').trim()==={json.dumps(nome)}); if(!l) return false; l.querySelector('input').click(); return true;}})()"); time.sleep(.4); return r
 def fecha_tal(): J("(()=>{const d=document.querySelector('[aria-label=\"Filtrar por talhão\"]'); if(d) [...d.querySelectorAll('button')].find(b=>b.innerText.trim()==='Fechar').click();})()"); time.sleep(.3)
 def todos(): J("[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Todos os talhões').click()"); time.sleep(.4)
-def aba(t): J(f"[...document.querySelectorAll('button,[role=tab]')].find(b=>b.innerText.trim()==={json.dumps(t)}).click()"); time.sleep(.4)
+def aba(t): troca_visao(J, {'Lista': 'lista', 'Kanban': 'kanban', 'Recursos': 'carga', 'Agrupada': 'agrupada'}[t])   # VISOES-1: pelo seletor (data-visao)
 def fase(t): J(f"(()=>{{const b=[...document.querySelectorAll('[aria-label=\"Filtrar por fase\"] button')].find(b=>b.innerText.trim().startsWith({json.dumps(t)})); b&&b.click();}})()"); time.sleep(.4)
 def busca(q):
     J(f"""(()=>{{const i=document.querySelector('input[aria-label="Buscar nesta tabela"]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,{json.dumps(q)});
@@ -41,7 +41,7 @@ def cel_col(col): return J(f"""(()=>{{const hs=[...document.querySelectorAll('[r
 def ordena(col):
     J(f"""(()=>{{const h=[...document.querySelectorAll('[role=columnheader]')].filter(h=>h.offsetParent).find(h=>h.innerText.replace(/[⇅▾▴▲▼]/g,'').trim().toUpperCase()==={json.dumps(col.upper())});
       const b=[...h.querySelectorAll('button')].find(b=>/Ordenar|⇅/.test((b.getAttribute('aria-label')||'')+b.innerText))||h.querySelector('button'); b.click();}})()"""); time.sleep(.4)
-def negocio(): return J("JSON.stringify(Object.keys(localStorage).sort().map(k=>[k,localStorage.getItem(k)]))")
+def negocio(): return J("JSON.stringify(Object.keys(localStorage).filter(k=>k.indexOf('safrion.pref.')!==0).sort().map(k=>[k,localStorage.getItem(k)]))")   # a preferência de visão (safrion.pref.) não é negócio (VISOES-1)
 def shot(n):
     if OUT: c.shot(os.path.join(OUT, n + '.png'))
 
@@ -117,7 +117,7 @@ try:
     pr = dict(zip(ids(), cel_col('Prazo'))); ac = dict(zip(ids(), cel_col('Próxima ação')))
     chk('TF03 Próxima ação separada do prazo ("entrega" | "até 15/10")', ac.get('OS-0425') == 'entrega' and pr.get('OS-0425') == 'até 15/10', (ac.get('OS-0425'), pr.get('OS-0425')))
     # ---------------- TF06 ----------------
-    J("[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Agrupar por talhão').click()"); time.sleep(.6)
+    aba('Agrupada'); time.sleep(.2)   # VISOES-1: agrupar por talhão é a visão Tabela agrupada
     g = J("""(()=>{ const out={}; let cur=null; [...document.querySelectorAll('[role=row].g2r')].filter(r=>r.offsetParent).forEach(r=>{ const t=r.querySelector('[role=cell]').innerText.replace('▾','').replace('▸','').trim();
       if(/^O[SB]-/.test(t)) out[cur].push(t); else { cur=t; out[cur]=[]; } }); return out; })()""") or {}
     tot = next((x for x in notas() if x.startswith('Total')), '')
@@ -132,7 +132,7 @@ try:
     J("[...document.querySelectorAll('[role=row].g2r')].filter(r=>r.offsetParent).find(r=>/^OS-0421/.test(r.innerText.trim())).querySelector('[role=cell]').click()"); time.sleep(.5)
     chk('TF06 clicar na O.S. dentro do grupo abre o detalhe da própria O.S.', (J("(document.querySelector('aside[role=dialog]')||{}).innerText||''") or '').startswith('OS-0421'))
     J("(()=>{const b=document.querySelector('aside[role=dialog] button[aria-label=Fechar]'); b&&b.click();})()"); time.sleep(.3)
-    J("[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Desagrupar').click()"); time.sleep(.4); todos()
+    aba('Lista'); todos()   # VISOES-1: desagrupar = voltar à Lista
     chk('TF06 desagrupar volta às linhas canônicas', sorted(ids()) == sorted(todas), len(ids()))
     chk('sem botão Expandir/Recolher na lista sem grupos', not J("[...document.querySelectorAll('.g2xtog')].some(b=>b.offsetParent)"))
     chk('sem erro de script (1440)', not J("window.__e"), J("window.__e"))

@@ -17,7 +17,7 @@ Modos (cada um < 90 s; capturas em _probe/acao_*.png):
 Emulação no Chrome headless (largura × altura em px CSS, escala, toque, sem hover): não é aparelho físico."""
 import sys, os, time, json
 HERE=os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0,HERE)
-from comp_lib import Chrome, servir, IR_ETAPA
+from comp_lib import Chrome, servir, IR_ETAPA, troca_visao
 MODO=sys.argv[1] if len(sys.argv)>1 else 'saf'
 PROBE=os.path.join(HERE,'_probe'); os.makedirs(PROBE,exist_ok=True)
 OK=[]; FAIL=[]
@@ -186,11 +186,11 @@ try:
             and tel['MA'][0]==0, tel)
         # 15 · O.S.: Lista e Kanban com o mesmo filtro (reproduzido antes: 2 × 10); Recursos explica a granularidade; fase não muda por clique
         abre('OS'); o0=est(); clk('Liberadas','[aria-label="Filtrar por fase"]'); lis=J("[...document.querySelectorAll('main [role=row].g2ed')].filter(e=>e.getClientRects().length).map(r=>r.innerText.split('\\n')[0].trim())")
-        clk('Kanban','[aria-label="Visão das ordens"]'); kb=J("[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] [role=button]')].filter(e=>e.getClientRects().length).map(b=>b.getAttribute('aria-label').split(' ')[1])")
+        troca_visao(J,'kanban','[aria-label="Visão das ordens"]'); kb=J("[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] [role=button]')].filter(e=>e.getClientRects().length).map(b=>b.getAttribute('aria-label').split(' ')[1])")
         nota=J("(()=>{const n=[...document.querySelectorAll('main [role=note]')].find(e=>e.getClientRects().length); return n?n.innerText.replace(/\\s+/g,' ').trim():'';})()"); shot('os_kanban_filtro')
-        clk('Recursos','[aria-label="Visão das ordens"]'); rc=J("(()=>{const n=[...document.querySelectorAll('main [role=note]')].find(e=>e.getClientRects().length); return n?n.innerText.replace(/\\s+/g,' ').trim():'';})()")
-        clk('Kanban','[aria-label="Visão das ordens"]'); clk('Limpar filtros'); kb2=J("[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] [role=button]')].filter(e=>e.getClientRects().length).length")
-        clk('Lista','[aria-label="Visão das ordens"]'); J("(()=>{const r=document.querySelector('[role=row].g2ed'); (r.querySelector('[role=cell] b')||r).click();})()"); time.sleep(.5)
+        troca_visao(J,'carga','[aria-label="Visão das ordens"]'); rc=J("(()=>{const n=[...document.querySelectorAll('main [role=note]')].find(e=>e.getClientRects().length); return n?n.innerText.replace(/\\s+/g,' ').trim():'';})()")
+        troca_visao(J,'kanban','[aria-label="Visão das ordens"]'); clk('Limpar filtros'); kb2=J("[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] [role=button]')].filter(e=>e.getClientRects().length).length")
+        troca_visao(J,'lista','[aria-label="Visão das ordens"]'); J("(()=>{const r=document.querySelector('[role=row].g2ed'); (r.querySelector('[role=cell] b')||r).click();})()"); time.sleep(.5)
         fase0=J("(()=>{const d=document.querySelector('aside[role=dialog]'); return d?(d.innerText.match(/A liberar|Liberadas|Em execução|Em conferência|Encerradas/)||[''])[0]:'';})()")
         ctl=J("(()=>{const d=document.querySelector('aside[role=dialog]'); if(!d) return -1; return [...d.querySelectorAll('button,a,[role=button]')].filter(b=>/^(A liberar|Liberadas|Em execução|Em conferência|Encerradas)$/.test(b.innerText.trim())).length;})()")
         o1=est()
@@ -445,7 +445,7 @@ try:
         abre('SAF',hash='#saf=S2627&etapa=2'); time.sleep(.3)
         xt=J("(()=>{const b=[...document.querySelectorAll('main button')].find(b=>b.getClientRects().length&&/^(Expandir|Recolher) tudo$/.test(b.innerText.trim())); if(!b) return null; const cs=getComputedStyle(b); return [b.innerText.trim(), cs.backgroundColor, cs.borderTopWidth];})()")
         qf=J("(()=>{const b=[...document.querySelectorAll('main [aria-pressed=true]')].find(b=>b.getClientRects().length); return b?[b.innerText.replace(/\\s+/g,' ').trim(), getComputedStyle(b).backgroundColor]:null;})()")
-        abre('OS',limpa=False); vs=J("(()=>{const b=[...document.querySelectorAll('main [aria-label=\"Visão das ordens\"] [aria-pressed=true]')].find(b=>b.getClientRects().length); return b?[b.innerText.trim(), getComputedStyle(b).backgroundColor]:null;})()")
+        abre('OS',limpa=False); vs=J("(()=>{const b=[...document.querySelectorAll('main [aria-label=\"Visão das ordens\"] [aria-pressed=true]')].find(b=>b.getClientRects().length); return b?[b.innerText.trim()||b.getAttribute('aria-label'), getComputedStyle(b).backgroundColor]:null;})()")
         och=J("(()=>{const b=[...document.querySelectorAll('main [aria-label=\"Filtrar por fase\"] [aria-pressed=true]')].find(b=>b.getClientRects().length); return b?[b.innerText.replace(/\\s+/g,' ').trim(), getComputedStyle(b).backgroundColor]:null;})()")
         G='rgb(30, 122, 76)'
         chk('29 tipo por função: "Expandir/Recolher tudo" sem fundo e sem borda; filtro rápido escolhido (SAF), visão atual (O.S. Lista) e chip de fase escolhido sem o verde cheio da primária',

@@ -9,6 +9,7 @@ import sys, os, time, subprocess, json, re
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
 from cdp import Chrome
 from journeys import free
+from comp_lib import troca_visao   # VISOES-1: troca de visão pelo seletor (data-visao), não pelo texto
 HERE=os.path.dirname(os.path.abspath(__file__)); R=sys.argv[1] if len(sys.argv)>1 else os.path.join(HERE,'_render')
 p=free(); srv=subprocess.Popen(['python3','-m','http.server',str(p),'--bind','127.0.0.1','--directory',R],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL); time.sleep(.8)
 c=Chrome(port=free()); J=c.js; OK=[]; FAIL=[]
@@ -67,13 +68,13 @@ try:
             if e['ids'] and not e['hd'].startswith(f"{num(e['ch'],'Em execução')} em execução"): ruim.append((f,s,'cabeçalho',e['hd'],e['ch']))
     chk(f'2 lista, chips e cabeçalho sem OS-0419/0422/0423 nas {len(FAZ)}×{len(SAF)} combinações de Fazenda e Safra; chip Todas = linhas; em execução do selo = chip',
         len(FAZ)>=4 and len(SAF)>=4 and not ruim and NS[('Santa Rita','Todas')]==n0, (ruim[:4],FAZ,SAF))
-    filtro('Filtrar por fazenda','Santa Rita'); filtro('Filtrar por safra','Todas'); clica('Kanban'); ruim=[]
+    filtro('Filtrar por fazenda','Santa Rita'); filtro('Filtrar por safra','Todas'); troca_visao(J,'kanban'); ruim=[]
     for f in FAZ:
         for s in SAF:
             filtro('Filtrar por fazenda',f,.25); filtro('Filtrar por safra',s,.25); e=J(EST)
             if set(AGUA)&set(e['kb']) or e['agua']: ruim.append((f,s,'água',e['kb']))
             if len(e['kb'])!=NS[(f,s)]: ruim.append((f,s,'cartões',len(e['kb']),NS[(f,s)]))
-    filtro('Filtrar por fazenda','Santa Rita'); filtro('Filtrar por safra','Todas'); kb_sr=J(EST)['kb']; clica('Lista')
+    filtro('Filtrar por fazenda','Santa Rita'); filtro('Filtrar por safra','Todas'); kb_sr=J(EST)['kb']; troca_visao(J,'lista')
     chk('3 Kanban sem ordens de água em todas as combinações; cartões = linhas da lista em cada uma (Santa Rita/Todas: as mesmas 10)',
         not ruim and sorted(kb_sr)==sorted(ids0), (ruim[:4],kb_sr))
     # ---------- fertirrigação OS-0418 continua na O.S. ----------
@@ -92,9 +93,9 @@ try:
     # ---------- filtros do topo ----------
     filtro('Filtrar por safra','2025/26')
     chk('7 Safra 2025/26: lista, chips e cabeçalho só com OS-0415 e OB-0104', sorted(ids())==['OB-0104','OS-0415'] and chips()[0]=='Todas 2' and 'Encerradas 2' in chips() and 'A liberar 0' in chips() and hdr()=='0 em execução · nenhuma impedida', (ids(),chips(),hdr()))
-    clica('Kanban'); kb=J("[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] > div')].map(d=>d.querySelectorAll('[role=button]').length)")
+    troca_visao(J,'kanban'); kb=J("[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] > div')].map(d=>d.querySelectorAll('[role=button]').length)")
     chk('8 Kanban 2025/26: 2 cartões, ambos em Encerradas', kb==[0,0,0,0,2], kb)
-    clica('Lista'); filtro('Filtrar por safra','Safrinha 2027')
+    troca_visao(J,'lista'); filtro('Filtrar por safra','Safrinha 2027')
     chk('9 Safrinha 2027 sem ordens: uma frase e uma ação, sem lista nem abas', vazio()=='Nenhuma ordem na safra Safrinha 2027 Ver todas as safras' and J("document.querySelectorAll('[role=table]').length")==0 and not J("!!document.querySelector('[aria-label=\"Visão das ordens\"]')"), vazio())
     clica('Ver todas as safras')
     chk(f'10 Ver todas as safras volta às {n0} ordens e o seletor mostra Todas', len(ids())==n0 and sel('Filtrar por safra')=='Todas' and vazio()=='', (len(ids()),sel('Filtrar por safra')))

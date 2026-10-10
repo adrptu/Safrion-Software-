@@ -17,7 +17,7 @@ Uso: python3 ds_test.py · DS_RENDER=<dir> serve outro _render (ex.: o da base e
 · DS_ANTES=<dir> liga as capturas "antes"."""
 import os, sys, time, json, glob
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from comp_lib import Chrome, servir
+from comp_lib import Chrome, servir, troca_visao
 R = os.environ.get('DS_RENDER') or os.path.join(HERE, '_render')
 ANTES = os.environ.get('DS_ANTES') or ''
 PARTES = set((os.environ.get('DS_PARTES') or 'A,B,C,D,E,F,G').split(','))
@@ -160,10 +160,10 @@ try:
         row = "document.querySelector('[role=table] [role=row].g2ed')"
         hover(row); bg = J(f"getComputedStyle({row}).backgroundColor")
         chk('B1 linha da grade da O.S.: hover verde #F2F8F4', bg == 'rgb(242, 248, 244)', bg)
-        sec = "[...document.querySelectorAll('main button')].find(b=>b.innerText.trim()==='Agrupar por talhão')"
+        sec = "document.getElementById('ost_btn')"   # VISOES-1: o secundário claro da barra é o seletor Talhão ("Agrupar por talhão" virou a visão Tabela agrupada)
         hover(sec); st = J(f"(()=>{{const s=getComputedStyle({sec}); return [s.backgroundImage,s.borderTopColor,s.boxShadow,s.filter];}})()") or ['', '', '', '']
         chk('B2 botão secundário: camada verde (rgba(30,122,76,.07)) e borda #9DBFAA; sem a camada cinza nem escurecer', '30, 122, 76, 0.07' in st[0] and st[1] == 'rgb(157, 191, 170)' and '21, 32, 26, 0.05' not in st[2] and st[3] == 'none', st)
-        seg = "[...document.querySelectorAll('[role=group] button')].find(b=>b.innerText.trim()==='Kanban')"
+        seg = "document.querySelector('[role=toolbar] [data-visao=kanban]')"   # VISOES-1: opção de visão só com ícone
         hover(seg); st = J(f"(()=>{{const s=getComputedStyle({seg}); return [s.backgroundImage,s.boxShadow,s.filter];}})()") or ['', '', '']
         chk('B3 opção de visão (Kanban): camada verde, sem cinza', '30, 122, 76' in st[0] and '21, 32, 26, 0.05' not in st[1] and st[2] == 'none', st)
         prim = "[...document.querySelectorAll('main button,header button')].find(b=>b.innerText.trim()==='Nova ordem')"
@@ -224,7 +224,7 @@ try:
         n2 = nreal(); J("document.querySelector('[data-acoes] [data-acao=voltar]').click()"); time.sleep(.6); v = vivo(); rs = realces(n2)
         chk('C6 voltar para a etapa 2: realce e anúncio "Etapa 2 de 4"', v.startswith('Etapa 2 de 4') and len(rs) >= 1, [v, rs])
         # O.S. no Kanban: liberar move o cartão de "A liberar" para "Liberadas"
-        abre('OS.dc.html'); clk('Kanban'); time.sleep(.4)
+        abre('OS.dc.html'); troca_visao(J, 'kanban')
         COL = "(()=>{const l=document.querySelector('[role=list][aria-label=\"Kanban das ordens\"]'); if(!l) return null; const cols=[...l.querySelectorAll(':scope>sc-for>div,:scope>div')]; return cols.map(c=>[...c.querySelectorAll('[role=button] b')].map(b=>b.innerText.trim()));})()"
         k0 = J(COL) or []
         J("(()=>{const k=[...document.querySelectorAll('[role=list] [role=button]')].find(k=>(k.querySelector('b')||{}).innerText==='OS-0430'); if(k) k.click(); return !!k;})()"); time.sleep(.5)
@@ -296,11 +296,11 @@ try:
         # revisão DS (achado 9): o title igual ao rótulo faria o navegador mostrar a dica nativa repetida: ele sai enquanto o ponteiro está em cima
         fora(); t2 = J(f"({MAPA}).getAttribute('title')")
         chk('D8b ponteiro no item "Mapa" do menu aberto: o title igual ao rótulo sai (sem a dica nativa repetida) e volta quando o ponteiro sai', t0 == 'Mapa' and t1 is None and t2 == 'Mapa', [t0, t1, t2])
-        fora(); clk('Kanban'); time.sleep(.4)
+        fora(); troca_visao(J, 'kanban')
         COLT = "[...document.querySelectorAll('[role=list] [data-dica-de]')].find(s=>s.textContent.trim()==='A liberar')"   # textContent: o título da coluna é maiúsculo só no CSS
         hover(COLT, .7); d = J(DICA)
         chk('D9 selo de estado (coluna A liberar do Kanban): significado e próximo passo (Aprovar e liberar)', d['vis'] and 'Aprovar e liberar' in d['t'] and 'gestor libera' in d['t'], [d, J(f"!!{COLT}")])
-        fora(); clk('Lista'); time.sleep(.3)
+        fora(); troca_visao(J, 'lista')
         hover("[...document.querySelectorAll('[role=table] [data-dica]')].find(s=>/Falta insumo/.test(s.innerText))", .7); d = J(DICA)
         chk('D10 selo da lista (Falta insumo · …): o que falta e quem resolve', d['vis'] and 'Estoque' in d['t'] and 'agrônomo' in d['t'], d)
         fora(); abre('BO-01.dc.html')
@@ -333,10 +333,10 @@ try:
         c.mouse(p[0], p[1]); c.mouse(p[0], p[1], 'mousePressed', 'left'); c.mouse(p[0], p[1], 'mouseReleased', 'left'); time.sleep(.45); d = J(DICA)
         chk('D13b o clique do ponteiro na linha não abre a dica do selo (só o foco de teclado)', not d['vis'] or not d['t'].startswith('Falta insumo:'), d)
         J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>/Fechar|×/.test(b.getAttribute('aria-label')||b.innerText)); if(b) b.click(); return 1;})()"); fora()
-        clk('Kanban'); time.sleep(.4)
+        troca_visao(J, 'kanban')
         kb = tab_ate('[role=list] [role=button]', '/OS-0418/')
         chk('D13c Tab até o cartão da OS-0418 no Kanban: a mesma dica do selo, descrevendo o cartão', bool(kb) and 'OS-0418' in kb['foco'] and kb['vis'] and kb['t'].startswith('Falta insumo:') and 'g2-dica' in kb['db'], kb)
-        c.tecla('Escape', 'Escape', 27); time.sleep(.2); clk('Lista'); time.sleep(.3)
+        c.tecla('Escape', 'Escape', 27); time.sleep(.2); troca_visao(J, 'lista')
         # revisão DS (achado 6): o selo do bloqueio do encerramento leva o mesmo texto do painel e do comando (osEncBloq), com quem resolve
         SEL = "[...document.querySelectorAll('[role=row].g2ed')].find(r=>/OS-0417/.test(r.innerText)).querySelector('[data-dica^=\"Encerrar bloqueado\"]')"
         hover(SEL, .7); d = J(DICA); fora()
