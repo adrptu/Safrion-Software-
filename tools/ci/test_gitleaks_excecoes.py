@@ -1,5 +1,6 @@
 """As exceções do .gitleaks.toml continuam estreitas: HML-SECRET-03 (um literal exato em 25 arquivos exatos do protótipo)
-e HML-SECRET-04 (cinco nomes exatos de chave de localStorage, só no protótipo e em dois arquivos de especificação)."""
+e HML-SECRET-04 (cinco nomes exatos de chave de localStorage, só no protótipo e em dois arquivos de especificação).
+O .gitleaksignore tem só o achado exato da HML-SECRET-05 (commit, arquivo, regra e linha), sem curinga."""
 from pathlib import Path
 import re
 import tomllib
@@ -78,6 +79,21 @@ class ExcecaoDasChavesDoPrototipo(unittest.TestCase):
                      'docs/pcm-suprimentos/verificacao/outro.js', 'docs/beneficiamento/verificacao/revisao.json.bak',
                      'x/tools/prototipo/v37/gen37/mip.js'):
             self.assertFalse(any(c.search(fora) for c in caminhos), fora)
+
+
+HML_SECRET_05 = ['7d38e5d50083a96b03d5a1247c31cd7518803b09:docs/integracao/PCM/diff-cdc185f-ba03515.patch:generic-api-key:3922']
+
+
+class IgnoreSoComAchadoExato(unittest.TestCase):
+    def test_gitleaksignore_so_com_o_fingerprint_da_hml_secret_05(self):
+        linhas = [l.strip() for l in (RAIZ / '.gitleaksignore').read_text(encoding='utf-8').splitlines()]
+        efetivas = [l for l in linhas if l and not l.startswith('#')]
+        self.assertEqual(efetivas, HML_SECRET_05)
+        for l in efetivas:
+            with self.subTest(l=l):
+                # commit de 40 hex, caminho exato, regra e linha: sem curinga nem fingerprint de arquivo inteiro
+                self.assertRegex(l, r'^[0-9a-f]{40}:[A-Za-z0-9_./-]+:generic-api-key:[0-9]+$')
+                self.assertNotIn('*', l)
 
 
 if __name__ == '__main__':
