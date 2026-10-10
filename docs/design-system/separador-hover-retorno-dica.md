@@ -18,7 +18,7 @@ Proposta para o capítulo 74 do PRD, que está em revisão. Os tokens abaixo sã
 **Regra.** Uma linha de 1 px separa o cabeçalho do conteúdo, em três lugares:
 
 1. **Cabeçalho da página** (título e ação do topo à direita). É a borda inferior do `header` da casca, em todas as telas. O índice e a ficha impressa, que não usam a casca, usam `.g2-cab`.
-2. **Linha de título do bloco** (`section` com título, descrição e ação à direita). A linha fica recuada 12 px dos lados, como a moldura da tabela da tela Planejar safra. Quando o bloco já começa por uma tabela emoldurada (`.g2caixa` com borda), a borda da tabela é a linha. Assim não há linha dupla.
+2. **Linha de título do bloco** (`section` com título, descrição e ação à direita). A linha fica recuada 12 px dos lados, como a moldura da tabela da tela Planejar safra. Quando o conteúdo do bloco já começa por uma borda no topo (tabela emoldurada `.g2caixa`, caixa com borda como a «Memória de cálculo», ficha de rótulo × valor cuja 1ª célula tem `border-top`), essa borda é a linha. Assim não há linha dupla (revisão DS de 09/10: AG-04det, GE-05 e GE-06det tinham duas).
 3. **Painel lateral** (`aside[role=dialog]`): abaixo do título e do × do topo à direita. É o caso do formulário «Nova safra».
 
 | Token | Valor |
@@ -71,9 +71,10 @@ A camada é `background-image`, porque o estilo inline dos componentes não defi
 
 | Quando | Ponto central | Realce | Anúncio (aria-live polite) |
 |---|---|---|---|
-| Abrir uma tela | `componentDidMount` → `g2montou` | título da tela (`h1`); a barra de carga termina; vindo de um link do protótipo, o foco vai ao título | `Tela: <título> · <estado>` |
+| Abrir uma tela | `componentDidMount` → `g2montou` | título da tela (`h1`); a barra de carga termina; vindo de um link do protótipo, o foco vai ao título | `Tela: <título> · <estado>`; com o foco no título, só `<estado>` (o leitor de tela já lê o título) |
+| Voltar ou avançar pelo navegador (a tela volta da memória, sem montar de novo) | `pageshow` com `persisted` no `g2lib` | a barra ligada no clique termina | — |
 | Clicar num link de outra tela | ouvinte de clique do `g2lib` | barra fina no topo (`#g2-carga`) do clique até a tela nova | — |
-| Avançar ou voltar etapa, trocar seção (SAF, Compras, Planos, Manutenção, Estoque) | `componentDidUpdate` → `g2mudou`, lendo a faixa de progresso | bloco do novo contexto (o mesmo cujo título o `g2etapa` foca) | `Etapa i de n: <nome>` ou `Seção: <nome>` |
+| Avançar ou voltar etapa, trocar seção (SAF, Compras, Planos, Manutenção, Estoque) | `componentDidUpdate` → `g2mudou`, lendo a faixa de progresso | bloco do novo contexto (o mesmo cujo título o `g2etapa` foca); se o botão que trocou a etapa saiu da tela, o foco vai ao título desse bloco | `Etapa i de n: <nome>` ou `Seção: <nome>` |
 | Gravar, aprovar, liberar, mover cartão (todo comando que mostra aviso) | `componentDidUpdate` → `g2mudou`, quando o aviso (`g2toast`) é novo | o que mudou: linha da tabela, cartão do Kanban, região rotulada, estado do cabeçalho; sem nada mais fino, o bloco | o próprio aviso |
 | Clicar num botão indisponível | ouvinte do `g2lib` | o motivo em texto junto do botão (`acao_motivo`); a dica do botão abre com o porquê | `Indisponível: <motivo>` |
 
@@ -99,7 +100,8 @@ O realce nunca atrasa a ação nem esconde o resultado: o desenho novo já está
 - **Abre** com o ponteiro parado sobre o gatilho (300 ms), no foco de teclado (na hora), com toque longo (500 ms) ou ao tocar no ícone ⓘ (`.g2dica-i`).
 - **Fecha** com Esc, ao tirar o ponteiro do gatilho e da dica, ao perder o foco ou ao tocar fora.
 - **Leitor de tela:** enquanto a dica está aberta, o gatilho ganha `aria-describedby="g2-dica"`. A dica não repete o nome acessível.
-- **Não depende do `title`**, que não aparece no teclado nem no toque. Se a tela já tinha `title`, ele sai de cima durante o hover e volta depois.
+- **Não depende do `title`**, que não aparece no teclado nem no toque. Se a tela já tinha `title`, ele sai de cima durante o hover e volta depois. O `title` igual ao rótulo visível (item do menu aberto) também sai enquanto o ponteiro está em cima, para o navegador não mostrar a dica nativa repetida; com o menu recolhido ele é a dica do item.
+- **Selo dentro de linha ou cartão:** o selo não recebe foco. Com foco de teclado na linha da tabela ou no cartão do Kanban, a dica é a do selo mais grave de dentro dele (vermelho, depois amarelo), com o nome do selo à frente, e descreve a linha ou o cartão (`aria-describedby`). O clique do ponteiro na linha não abre a dica.
 
 **Texto, nesta ordem:**
 
@@ -115,8 +117,8 @@ Nada de dica que repita o rótulo visível.
 | Caso | Como | Onde está hoje |
 |---|---|---|
 | Botão indisponível ou ação recusada | `engine.acao_motivo(botão, dis, motivo)`: o botão com `aria-disabled="true"` + `data-dica` e, só enquanto indisponível, o **motivo em texto visível** logo abaixo (`.g2motivo`, texto secundário `#65736A`, 12,5 px). O motivo não depende de ponteiro, foco ou dica (PRD DS-06 e 74.5.0; VIS-04): a dica complementa junto do ponteiro, do foco e do toque longo. O botão continua focável; o `g2lib` recusa o clique, realça o motivo e anuncia `Indisponível: …`. O comando também confere de novo. | CF-05 (Pedir proposta empresarial), BO-02 (Conciliar pagamentos) |
-| Selo e chip de estado | `data-dica-de` no selo ou `{k:'chip', …, de:1}` na célula da tabela. O dicionário só vale onde a tela pede, porque o mesmo texto noutro contexto pode significar outra coisa. | O.S.: 5 fases do Kanban (título da coluna, cartão, painel e lista) e selos de bloqueio (Falta insumo, Fora do registro, Total 0, Sobras a receber, Aguardando sinal do app, Apontamento em conferência, Insumo esgotado, Carga a pesar). A dica de «A liberar» já diz as exceções da aprovação: irrigação só com água, manutenção e beneficiamento liberam pelo responsável próprio. |
-| Sigla e unidade | `engine.GLOSSARIO` vira a dica do cabeçalho da coluna, quando a coluna não traz ajuda própria | NC (AG-01, AG-01det), R$/ha (CF-05, BO-01), ha/h (CD-02), lâmina (IR-02, IR-03, IR-03det, IR-04), R$/h (SAF); sc/ha, t/ha, DAP, DAE, CAD, ETc, ETo, Kc, ha-op, ATR, TCH, COE, COT, carência e reentrada onde a coluna aparecer |
+| Selo e chip de estado | `data-dica-de` no selo ou `{k:'chip', …, de:1}` na célula da tabela. O dicionário só vale onde a tela pede, porque o mesmo texto noutro contexto pode significar outra coisa. | O.S.: 5 fases do Kanban (título da coluna, cartão, painel e lista) e selos de bloqueio (Falta insumo, Fora do registro, Total 0, Sobras a receber, Aguardando sinal do app, Apontamento em conferência, Insumo esgotado). A dica de «A liberar» já diz as exceções da aprovação: irrigação só com água, manutenção e beneficiamento liberam pelo responsável próprio. O selo do bloqueio do encerramento em conferência (Carga a pesar, Sobras a receber, Aguardando sinal do app, Apontamento em conferência) leva o texto do próprio bloqueio, o mesmo do painel e do comando (`osSeloDica` ← `osEncBloq`), com quem resolve. O dicionário não cita caminho de menu. |
+| Sigla e unidade | `engine.GLOSSARIO` vira a dica do cabeçalho da coluna, quando a coluna não traz ajuda própria: pelo rótulo (`_ajuda_auto`) ou, quando a sigla ou a unidade está na célula junto do valor («62,4 sc/ha», «DAP +20»), pelas células (`g2glossCol`, em ao menos 30 % das células com texto; código como COT-0031 não conta). R$/ha·mês e R$/ha·ano têm entrada própria | rótulo: NC (AG-01, AG-01det), R$/ha·mês (CF-05, BO-01), R$/ha·ano (BO-01), lâmina (IR-02, IR-03, IR-03det), ha/h e R$/h onde a coluna aparecer; célula: sc/ha (GE-02, GE-08, PL-01, COLH), DAP (AG-05, PL-02, PL-02det, PL-05), NC (AG-03, AG-03det, AG-06), ETo/ETc (IR-04, conforme o estado) |
 | Valor calculado | fórmula curta da coluna calculada (`edit.calc`), com os rótulos | colunas calculadas da grade (ex.: PT-02det: Quantidade × Preço; CO-03: Peso bruto − Tara) |
 | Ícone sem texto | nome do comando (só visual: o leitor de tela já lê o nome) | botão do menu, ×, setas, filtro da coluna, menu recolhido |
 | Texto de ajuda que já existia | `title` que acrescenta ao rótulo vira dica acessível | em todas as telas, sem marcação nova |
@@ -154,4 +156,4 @@ Nada de dica que repita o rótulo visível.
 |---|---|
 | `node ds_unit.js` | regra do texto da dica, dicionário de estados e contraste AA |
 | `python3 ds_unit_test.py` | CSS comum, ausência de hover cinza, pontos centrais do motor, glossário e fórmula, tokens e páginas geradas |
-| `python3 ds_test.py` | navegador: separador nas 140 páginas e a 390 px, hover computado, realce e anúncio (tela, etapa, O.S. no Kanban, BO-02), menos movimento, dica (hover, foco, Esc, aria-describedby, toque longo), motivo do indisponível visível em texto a 1440 e 390 px (G) e, com `DS_ANTES=<_render da base>`, capturas antes/depois a 1440 e 390 px de OS, PA, PM, AG-01, AG-01det e AG-07 em `_probe/ds/` (telas onde faltava a linha; o teste confere que antes ≠ depois) |
+| `python3 ds_test.py` | navegador: separador nas 140 páginas e a 390 px (sem linha dupla), hover computado, realce e anúncio (tela, etapa, O.S. no Kanban, BO-02), barra de carga que termina (também ao voltar pelo navegador), foco no título da etapa nova, menos movimento, dica (hover, foco, Esc, aria-describedby, toque longo, linha e cartão focados, selo do bloqueio, sigla na célula, title redundante), motivo do indisponível visível em texto a 1440 e 390 px (G) e, com `DS_ANTES=<_render da base>`, capturas antes/depois a 1440 e 390 px de OS, PA, PM, AG-01, AG-01det e AG-07 em `_probe/ds/` (telas onde faltava a linha; o teste confere que antes ≠ depois) |

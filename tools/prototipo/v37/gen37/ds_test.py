@@ -7,7 +7,7 @@ Chrome headless por CDP (comp_lib.Chrome), servindo o _render:
  C · retorno visual: tela nova (título realçado, anúncio, barra de carga, foco no título vindo de link); etapa do Planejar safra (avançar
      e voltar); liberar uma O.S. no Kanban (o cartão muda de coluna); normal, repetição e recusa no BO-02; menos movimento;
  D · dica: hover, foco, Esc e aria-describedby no botão indisponível; ícone sem texto; selo do Kanban; cabeçalho de coluna; título
-     redundante sem dica;
+     redundante sem dica (e sem a dica nativa); sigla na célula; foco de teclado na linha e no cartão (dica do selo); selo do bloqueio;
  E · 390 px com toque: etapa do SAF, liberar pela lista da O.S., conciliar e toque longo no BO-02;
  F · capturas antes/depois de 6 telas a 1440 e 390 px em _probe/ds/ (antes = DS_ANTES, o _render da base); DS_AMOSTRAS=1 grava as
      amostras do design system;
@@ -110,33 +110,43 @@ SEP = r"""(()=>{ const vis=e=>!!e&&e.getClientRects().length>0;
   const hd=document.querySelector('[data-root]>div>header,[data-mroot]>header,header.g2-cab');
   const hs=hd?getComputedStyle(hd):null; const cab=!!hs&&parseFloat(hs.borderBottomWidth)>=1&&hs.borderBottomStyle!=='none'&&hs.borderBottomColor!=='rgba(0, 0, 0, 0)';
   const linha=(e)=>{ const s=getComputedStyle(e); return /linear-gradient\(rgb\(228, 233, 229\)/.test(s.backgroundImage)||(parseFloat(s.borderBottomWidth)>=1&&s.borderBottomStyle!=='none'); };
-  const moldura=(nx)=>{ const g=nx.querySelector(':scope>.g2caixa:first-child,:scope>sc-if:first-child>.g2caixa:first-child'); return !!g&&parseFloat(getComputedStyle(g).borderTopWidth)>=1; };
-  const fora=[]; let n=0;
+  const borda=(e)=>{ const s=getComputedStyle(e); return parseFloat(s.borderTopWidth)>=1&&s.borderTopStyle!=='none'; };
+  const prim=(e)=>{ let f=e&&e.firstElementChild; while(f&&getComputedStyle(f).display==='contents') f=f.firstElementChild; return f; };
+  /* o conteúdo começa por uma borda no topo (tabela emoldurada, caixa com borda, ficha cuja 1ª célula tem border-top): ela é a linha */
+  const moldura=(nx)=>{ const f=prim(nx); if(!f) return false; if(borda(f)) return true; const g=prim(f); return !!g&&borda(g); };
+  /* linha dupla (revisão DS, achado 5): a linha do título e, até 14 px abaixo dela, outra borda larga no topo do conteúdo */
+  const dupla=(row)=>{ const r=row.getBoundingClientRect(), nx=row.nextElementSibling; if(!nx) return false;
+    return [nx,...nx.querySelectorAll('*')].filter(vis).slice(0,40).some(k=>{ const q=k.getBoundingClientRect(); return q.top-r.bottom<=14&&q.top>=r.bottom-1&&borda(k)&&q.width>r.width*0.5; }); };
+  const fora=[], duplas=[]; let n=0;
   for(const s of document.querySelectorAll('main section')){ const row=s.firstElementChild; if(!vis(row)||!row.nextElementSibling) continue;
     if(!row.querySelector(':scope>h2,:scope>h3,:scope>div>h2,:scope>div>h3')) continue; n++;
-    if(!(linha(row)||moldura(row.nextElementSibling))) fora.push((row.querySelector('h2,h3').innerText||'').slice(0,40)); }
-  return {cab, n, fora, h1:!!document.querySelector('h1')}; })()"""
+    const ln=linha(row), t=(row.querySelector('h2,h3').innerText||'').slice(0,40);
+    if(!(ln||moldura(row.nextElementSibling))) fora.push(t);
+    if(ln&&dupla(row)) duplas.push(t); }
+  return {cab, n, fora, duplas, h1:!!document.querySelector('h1')}; })()"""
 PAINEL = "(()=>{const d=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.getClientRects().length); if(!d) return null; const r=d.firstElementChild; const s=getComputedStyle(r); return {t:(d.querySelector('h2')||{}).innerText||'',b:parseFloat(s.borderBottomWidth)>=1&&s.borderBottomColor==='rgb(228, 233, 229)'};})()"
 try:
     # ======================= A · separador =======================
     if 'A' in PARTES:
         pags = sorted(os.path.basename(p) for p in glob.glob(os.path.join(R, '*.dc.html')))
         janela(1440, 900); media()
-        semcab, semlin, nblocos = [], [], 0
+        semcab, semlin, nblocos, duplas = [], [], 0, []
         for p in pags:
             c.goto(U(p), .3); time.sleep(.25)
             r = J(SEP) or {}
             nblocos += r.get('n', 0)
             if not r.get('cab'): semcab.append(p)
             if r.get('fora'): semlin.append((p, r['fora']))
+            if r.get('duplas'): duplas.append((p, r['duplas']))
         chk(f'A1 separador abaixo do cabeçalho da página (título + ação do topo à direita) nas {len(pags)} páginas a 1440 px', not semcab and len(pags) >= 100, semcab)
-        chk(f'A2 linha abaixo do título de cada bloco ({nblocos} blocos com título): própria ou a moldura da tabela que começa o bloco', not semlin and nblocos > 50, semlin[:12])
+        chk(f'A2 linha abaixo do título de cada bloco ({nblocos} blocos com título): própria ou a borda no topo do conteúdo (tabela emoldurada, caixa, ficha)', not semlin and nblocos > 50, semlin[:12])
+        chk('A2b sem linha dupla: a linha do título não fica sobre outra borda larga até 14 px abaixo (revisão DS, achado 5: AG-04det, GE-05, GE-06det)', not duplas, duplas[:12])
         janela(390, 844); media()   # largura do celular sem a emulação de toque (o separador não depende dela; o hover das partes B a D, sim)
         cel = ['SAF.dc.html', 'OS.dc.html', 'EST.dc.html', 'CD-01.dc.html', 'CF-05.dc.html', 'PA.dc.html', 'AG-01.dc.html', 'MB-01.dc.html']
         r390 = {}
         for p in cel:
             c.goto(U(p), .3); time.sleep(.25); r390[p] = J(SEP) or {}
-        chk('A3 a 390 px (8 telas): separador do cabeçalho e dos blocos', all(x.get('cab') and not x.get('fora') for x in r390.values()), {k: v for k, v in r390.items() if not (v.get('cab') and not v.get('fora'))})
+        chk('A3 a 390 px (8 telas): separador do cabeçalho e dos blocos, sem linha dupla', all(x.get('cab') and not x.get('fora') and not x.get('duplas') for x in r390.values()), {k: v for k, v in r390.items() if not (v.get('cab') and not v.get('fora') and not v.get('duplas'))})
         abre('SAF.dc.html'); clk('Nova safra'); time.sleep(.4); pn = J(PAINEL)
         chk('A4 painel "Nova safra": linha abaixo do título e do × do topo à direita', bool(pn) and pn['t'] == 'Nova safra' and pn['b'], pn)
         abre('CD-03.dc.html'); J("(()=>{const r=document.querySelector('[role=row].g2ed'); (r.querySelector('.g2pw')||r).click(); return 1;})()"); time.sleep(.4); pn = J(PAINEL)
@@ -179,6 +189,7 @@ try:
         abre('OS.dc.html'); time.sleep(.3); rs = realces(0); v = vivo()
         chk('C1 tela nova: o título da tela é realçado e o novo contexto é anunciado (aria-live polite)', any(x['tag'] == 'H1' and 'Ordem de Serviço' in x['txt'] for x in rs) and v.startswith('Tela: Ordem de Serviço')
             and J("document.getElementById('g2-vivo').getAttribute('aria-live')") == 'polite', [rs, v])
+        J("window.__pp=null; window.addEventListener('pageshow',e=>{window.__pp=e.persisted;}); 1")   # o C2c lê se a O.S. voltou da memória
         cl = J("(()=>{const a=document.querySelector('.menu-lat a[href=\"SAF.dc.html\"]'); if(!a) return 'sem link'; a.click(); const g=document.getElementById('g2-carga'); return g?g.className:'sem barra';})()")
         chk('C2 clicar num link de outra tela liga a barra fina de carga no topo já no clique', cl == 'ini', cl)
         for _ in range(40):
@@ -186,8 +197,22 @@ try:
             if (J("location.pathname") or '').endswith('SAF.dc.html') and J("document.readyState") == 'complete': break
         time.sleep(.8)
         fo = J("(()=>{const a=document.activeElement; return a?[a.tagName,(a.innerText||'').trim()]:null;})()"); v = vivo(); rs = realces(0)
-        chk('C3 tela aberta pelo link: foco no título da tela nova, título realçado e anúncio "Tela: Planejar safra"', fo and fo[0] == 'H1' and fo[1] == 'Planejar safra'
-            and any(x['tag'] == 'H1' for x in rs) and v.startswith('Tela: Planejar safra'), [fo, v, rs])
+        stT = J("(()=>{const h=document.querySelector('header h1'); return h&&h.nextElementSibling?h.nextElementSibling.textContent.replace(/\\s+/g,' ').trim():'';})()") or ''
+        # revisão DS (achado 10): com o foco no título o leitor de tela já lê "Planejar safra"; o anúncio leva só o estado (antes: "Tela: Planejar safra · …", o título duas vezes)
+        chk('C3 tela aberta pelo link: foco no título da tela nova, título realçado e anúncio só do estado (sem repetir o título que o foco já lê)', fo and fo[0] == 'H1' and fo[1] == 'Planejar safra'
+            and any(x['tag'] == 'H1' for x in rs) and v == stT and 'Planejar safra' not in v and not v.startswith('Tela:'), [fo, v, stT, rs])
+        # revisão DS (achado 4, mutante M2): a barra termina depois da carga (o C2 só via o começo)
+        time.sleep(.4); bar = J("(()=>{const b=document.getElementById('g2-carga'); return b?[b.className,getComputedStyle(b).opacity]:null;})()")
+        chk('C2b a barra de carga termina depois que a tela nova monta (sem ini/chega, opacidade 0)', bool(bar) and bar[0] not in ('ini', 'chega') and bar[1] == '0', bar)
+        # revisão DS (achado 1): voltar pelo navegador traz a tela anterior da memória (bfcache) sem montar de novo; a barra ligada no clique termina
+        h = c.call('Page.getNavigationHistory'); c.call('Page.navigateToHistoryEntry', {'entryId': h['entries'][h['currentIndex'] - 1]['id']})
+        for _ in range(30):
+            time.sleep(.2)
+            if (J("location.pathname") or '').endswith('OS.dc.html') and J("document.readyState") == 'complete': break
+        time.sleep(1.0)
+        bf = J("(()=>{const b=document.getElementById('g2-carga'); return {url:location.pathname, pp:window.__pp===true, cls:b?b.className:null, op:b?getComputedStyle(b).opacity:null, nav:sessionStorage.getItem('g2nav')};})()") or {}
+        chk('C2c voltar pelo navegador (a O.S. volta da memória, pageshow persisted): a barra não fica presa (sem ini, opacidade 0) e a marca de navegação sai', bf.get('pp') and bf.get('url', '').endswith('OS.dc.html')
+            and bf.get('cls') not in ('ini', 'chega') and bf.get('op') == '0' and not bf.get('nav'), bf)
         # etapa (SAF): avançar pela linha, pela área de ações, e voltar
         abre('SAF.dc.html'); n0 = nreal()
         J("(()=>{const r=[...document.querySelectorAll('main [role=row]')].find(r=>/Safra 2026\\/27/.test(r.innerText)); const b=r&&[...r.querySelectorAll('button')].find(b=>/^Continuar/.test(b.innerText.trim())); if(b) b.click(); return !!b;})()")
@@ -217,9 +242,11 @@ try:
         ncon = J(NCON)
         chk('C10 normal: conciliar realça o que mudou e anuncia o resultado', 'CON-0001' in t and len(rs) >= 1 and 'CON-0001' in v, [t, v, rs])
         chk('C11 repetição: o clique duplo grava um só recibo (CON-0001)', ncon == 1, ncon)
+        J("(()=>{window.__chegou=[]; [...document.querySelectorAll('header button')].find(x=>x.innerText.trim()==='Conciliar pagamentos').addEventListener('click',()=>window.__chegou.push(1)); return 1;})()")   # revisão DS (achado 4, M6)
         J("[...document.querySelectorAll('header button')].find(x=>x.innerText.trim()==='Conciliar pagamentos').click()"); time.sleep(.4); v = vivo(); d = J(DICA)
         chk('C12 recusa: clicar de novo no botão indisponível não roda o comando; a dica no próprio botão (role=tooltip) diz o porquê e a recusa é anunciada',
             J(NCON) == 1 and d['vis'] and d['role'] == 'tooltip' and 'Nenhum evento do provedor a conciliar' in d['t'] and v.startswith('Indisponível: Nenhum evento'), [J(NCON), d, v])
+        chk('C12b a recusa para o clique antes do botão: o ouvinte do próprio botão (onde o comando de uma tela nova estaria) não recebe o clique', J("(window.__chegou||[1]).length") == 0, J("window.__chegou"))
         # menos movimento: realce estático, sem animação
         abre('SAF.dc.html', rm=True)
         rm = J("""(async()=>{const r=[...document.querySelectorAll('main [role=row]')].find(r=>/Safra 2026\\/27/.test(r.innerText)); [...r.querySelectorAll('button')].find(b=>/^Continuar/.test(b.innerText.trim())).click();
@@ -232,6 +259,13 @@ try:
         an = J("""(async()=>{const r=[...document.querySelectorAll('main [role=row]')].find(r=>/Safra 2026\\/27/.test(r.innerText)); [...r.querySelectorAll('button')].find(b=>/^Continuar/.test(b.innerText.trim())).click();
           await new Promise(x=>setTimeout(x,60)); const e=document.querySelector('.g2-realce'); return e?[getComputedStyle(e).animationName,getComputedStyle(e).animationDuration]:null;})()""")
         chk('C15 sem a preferência: o realce é a animação g2realce de 0,52 s', bool(an) and an[0] == 'g2realce' and an[1] == '0.52s', an)
+        # revisão DS (achado 3): trocar de etapa pelo botão da linha (Enter) tira o botão da tela; o foco vai ao título do novo contexto, não ao BODY
+        for pg, rot in (('CMP.dc.html', 'Abrir compra'), ('SAF.dc.html', 'Continuar')):
+            abre(pg)
+            okb = J(f"(()=>{{const b=[...document.querySelectorAll('main [role=row] button')].find(b=>b.getClientRects().length&&b.innerText.trim().startsWith({json.dumps(rot)})); if(!b) return false; b.focus(); return document.activeElement===b;}})()")
+            n7 = nreal(); c.tecla('Enter', 'Enter', 13, text='\r'); time.sleep(.9); v = vivo(); rs = realces(n7)
+            fo = J("(()=>{const a=document.activeElement; return a?[a.tagName,(a.innerText||'').trim().slice(0,60),!!(document.querySelector('main')||document.body).contains(a)]:null;})()")
+            chk(f'C17 {pg[:-8]} · Enter em "{rot}" na linha: a etapa 2 é anunciada e realçada, e o foco vai ao título do novo contexto (h2/h3), não ao BODY', okb and v.startswith('Etapa 2 de') and len(rs) >= 1 and fo and fo[0] in ('H2', 'H3') and fo[2], [okb, v, fo, rs])
         chk('C16 sem erro de execução', not errs(), errs())
 
     # ======================= D · dica =======================
@@ -256,8 +290,12 @@ try:
         # ícone sem texto: o nome do comando, sem repetir para o leitor de tela
         abre('OS.dc.html'); hover("document.querySelector('.ml-tog')", .7); d = J(DICA); db = J("document.querySelector('.ml-tog').getAttribute('aria-describedby')||''")
         chk('D7 ícone sem texto (botão do menu): a dica mostra o nome do comando e não vira descrição repetida', d['vis'] and d['t'] in ('Recolher menu', 'Expandir menu') and 'g2-dica' not in db, [d, db])
-        fora(); hover("document.querySelector('.menu-lat a[href=\"IN-04.dc.html\"]')", .7); d = J(DICA)
+        fora(); MAPA = "document.querySelector('.menu-lat a[href=\"IN-04.dc.html\"]')"; t0 = J(f"({MAPA}).getAttribute('title')")
+        hover(MAPA, .7); d = J(DICA); t1 = J(f"({MAPA}).getAttribute('title')")
         chk('D8 título igual ao rótulo visível (Mapa no menu aberto): sem dica', not d['vis'], d)
+        # revisão DS (achado 9): o title igual ao rótulo faria o navegador mostrar a dica nativa repetida: ele sai enquanto o ponteiro está em cima
+        fora(); t2 = J(f"({MAPA}).getAttribute('title')")
+        chk('D8b ponteiro no item "Mapa" do menu aberto: o title igual ao rótulo sai (sem a dica nativa repetida) e volta quando o ponteiro sai', t0 == 'Mapa' and t1 is None and t2 == 'Mapa', [t0, t1, t2])
         fora(); clk('Kanban'); time.sleep(.4)
         COLT = "[...document.querySelectorAll('[role=list] [data-dica-de]')].find(s=>s.textContent.trim()==='A liberar')"   # textContent: o título da coluna é maiúsculo só no CSS
         hover(COLT, .7); d = J(DICA)
@@ -271,6 +309,42 @@ try:
         db = J("document.activeElement&&document.activeElement.getAttribute('aria-describedby')||''")
         chk('D11 unidade no cabeçalho da coluna (R$/ha): a dica explica a conta no foco do botão de ordenar', d['vis'] and 'reais por hectare' in d['t'] and 'g2-dica' in db, [d, db, foc])
         c.tecla('Escape', 'Escape', 27); time.sleep(.2)
+        # revisão DS (achado 8): a sigla ou a unidade que está na célula (unidade junto do valor) dá a dica do cabeçalho da coluna
+        hs = {}
+        for pg, rx in (('PL-02.dc.html', 'Gatilho por extenso'), ('GE-02.dc.html', 'Premissas')):
+            abre(pg); hs[pg] = J(f"(()=>{{const h=[...document.querySelectorAll('[role=columnheader]')].find(h=>h.innerText.trim().toLowerCase().startsWith({json.dumps(rx.lower())})); return h?(h.getAttribute('data-dica')||''):null;}})()")
+        foc = J("(()=>{const h=[...document.querySelectorAll('[role=columnheader]')].find(h=>/^premissas/i.test(h.innerText.trim())); const b=h&&h.querySelector('button.g2hb'); if(b) b.focus(); return !!b;})()"); time.sleep(.3); d = J(DICA)
+        chk('D14 sigla ou unidade na célula vira dica do cabeçalho: DAP (PL-02 Gatilho por extenso) e sc/ha (GE-02 Premissas, "rendimento 62 sc/ha"), aberta no foco do botão de ordenar',
+            (hs.get('GE-02.dc.html') or '').startswith('sc/ha:') and (hs.get('PL-02.dc.html') or '').startswith('DAP:') and foc and d['vis'] and 'sacas por hectare' in d['t'], [hs, foc, d])
+        c.tecla('Escape', 'Escape', 27); time.sleep(.2)
+        # revisão DS (achado 2): o selo não recebe foco; com foco de teclado (Tab) na linha ou no cartão, a dica é a do selo e descreve a linha
+        abre('OS.dc.html')
+        def tab_ate(sel, rx):
+            pos = J(f"""(()=>{{const q=[...document.querySelectorAll({json.dumps(sel)})].filter(e=>e.getClientRects().length); const i=q.findIndex(e=>{rx}.test(e.innerText)); if(i<0) return null;
+              q[i].scrollIntoView({{block:'center'}}); const o=q[i>0?i-1:i+1]; o.focus(); return i>0?1:-1;}})()""")
+            if pos is None: return None
+            c.tab(shift=(pos < 0)); time.sleep(.4)
+            return J("(()=>{const a=document.activeElement, d=document.getElementById('g2-dica'); return {foco:(a.innerText||'').replace(/\\s+/g,' ').slice(0,40), fv:a.matches(':focus-visible'), db:a.getAttribute('aria-describedby')||'', vis:!!d&&!d.hidden, t:d?d.textContent:''};})()")
+        rl = tab_ate('[role=row].g2ed', '/OS-0418/')
+        chk('D13 Tab até a linha da OS-0418: a dica do selo "Falta insumo" (o que falta e quem resolve) abre e descreve a linha (aria-describedby)', bool(rl) and 'OS-0418' in rl['foco'] and rl['fv'] and rl['vis']
+            and rl['t'].startswith('Falta insumo:') and 'Estoque' in rl['t'] and 'agrônomo' in rl['t'] and 'g2-dica' in rl['db'], rl)
+        c.tecla('Escape', 'Escape', 27); time.sleep(.2)
+        p = centro("[...document.querySelectorAll('[role=row].g2ed')].find(r=>/OS-0418/.test(r.innerText)).firstElementChild")
+        c.mouse(p[0], p[1]); c.mouse(p[0], p[1], 'mousePressed', 'left'); c.mouse(p[0], p[1], 'mouseReleased', 'left'); time.sleep(.45); d = J(DICA)
+        chk('D13b o clique do ponteiro na linha não abre a dica do selo (só o foco de teclado)', not d['vis'] or not d['t'].startswith('Falta insumo:'), d)
+        J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>/Fechar|×/.test(b.getAttribute('aria-label')||b.innerText)); if(b) b.click(); return 1;})()"); fora()
+        clk('Kanban'); time.sleep(.4)
+        kb = tab_ate('[role=list] [role=button]', '/OS-0418/')
+        chk('D13c Tab até o cartão da OS-0418 no Kanban: a mesma dica do selo, descrevendo o cartão', bool(kb) and 'OS-0418' in kb['foco'] and kb['vis'] and kb['t'].startswith('Falta insumo:') and 'g2-dica' in kb['db'], kb)
+        c.tecla('Escape', 'Escape', 27); time.sleep(.2); clk('Lista'); time.sleep(.3)
+        # revisão DS (achado 6): o selo do bloqueio do encerramento leva o mesmo texto do painel e do comando (osEncBloq), com quem resolve
+        SEL = "[...document.querySelectorAll('[role=row].g2ed')].find(r=>/OS-0417/.test(r.innerText)).querySelector('[data-dica^=\"Encerrar bloqueado\"]')"
+        hover(SEL, .7); d = J(DICA); fora()
+        J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>/OS-0417/.test(r.innerText)); (r.querySelector('.g2pw')||r).click(); return 1;})()"); time.sleep(.5)
+        pn = J("(()=>{const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.getClientRects().length); return a?a.innerText.replace(/\\s+/g,' '):'';})()") or ''
+        bt, _, bq = (d.get('t') or '').partition(' Próximo passo: ')
+        chk('D15 selo "Sobras a receber" da OS-0417: a dica é o bloqueio do encerramento (o mesmo texto do painel) e quem resolve (Rui, almoxarife)', d['vis'] and bt.startswith('Encerrar bloqueado: sobra em custódia')
+            and 'Rui (almoxarife) recebe a devolução no Estoque' in bq and bt in pn and bq.rstrip('.') in pn, [d, pn[:400]])
         chk('D12 sem erro de execução', not errs(), errs())
 
     # ======================= F · capturas antes/depois =======================

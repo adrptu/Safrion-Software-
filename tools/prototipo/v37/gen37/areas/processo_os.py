@@ -252,9 +252,9 @@ function osMerge(b,co,c){ if(!co) return b;
   // conferência: o encerramento depende do cenário (apontamento aguardando sinal ou sobra em custódia)
   if(co.etapa==='Em conferência'){ o.encM=cenPodeEncerrar(c,co.id);
     if(!o.encM){ o.selos=o.selos.filter(s=>!/Sobras a receber|Aguardando sinal/i.test(s.t)); if(!mine){ o.cond='Apontamentos enviados e nada em custódia. Próximo passo: conferir e encerrar.'; o.dono=o.resp; o.prazo='conferir e encerrar'; } }
-    else if(/^Carga a pesar/.test(o.encM)){ const t='Carga a pesar';   /* colheita (R-18): carga a pesar ou no aparelho; quem recebe pesa em Produção › Cargas e recebimento */
+    else if(/^Carga a pesar/.test(o.encM)){ const t=osEncSelo(o.encM);   /* colheita (R-18): carga a pesar ou no aparelho; quem recebe pesa em Produção › Cargas e recebimento */
       if(!o.selos.some(s=>s.t===t)) o.selos=o.selos.concat([{t,c:'yellow'}]); o.dono=(typeof prRec==='function'?prRec(prFazDaOS(c,co)):'Recebimento'); o.prazo='pesar e receber a carga'; }
-    else { const sin=/sinal/.test(o.encM); const t=sin?'Aguardando sinal do app':(/duplicidade/.test(o.encM)?'Apontamento em conferência':'Sobras a receber');  // o bloqueio também na lista e no Kanban
+    else { const sin=/sinal/.test(o.encM); const t=osEncSelo(o.encM);  // o bloqueio também na lista e no Kanban
       if(!o.selos.some(s=>s.t===t)) o.selos=o.selos.concat([{t,c:'yellow'}]);
       if(sin){ o.dono=o.resp; o.prazo='reconectar o app'; } else if(/duplicidade/.test(o.encM)){ o.dono=CEN_CONF_AP; o.prazo='decidir a duplicidade'; } else if(!/almoxarife/.test(o.dono||'')){ o.dono='Rui (almoxarife)'; o.prazo='receber a devolução'; } } }
   // A liberar: o Estoque (reserva por lote) pode segurar a liberação desde a abertura → selo vermelho e dono na lista, no Kanban e no painel
@@ -311,6 +311,11 @@ function osEncBloq(o){ const m=o.encM;
   const its=(o.r?o.r.itens:[]).filter(i=>i.custodia>0.001); const quem=its.map(i=>i.quem||o.resp).filter((v,i,a)=>a.indexOf(v)===i).join(', ')||o.resp;
   return {acao:'encerrar',t:'Encerrar bloqueado: sobra em custódia · '+its.map(i=>{ const pk=osPk(i.custodia,i.emb); return i.prod+' '+nd(i.custodia)+' '+i.un+(pk?' ('+pk+')':''); }).join(', ')+' com '+quem+'.',
     q:'Rui (almoxarife) recebe a devolução no Estoque.',h:'EST.dc.html',hl:'Receber devolução no Estoque'}; }
+// selo do bloqueio do encerramento: o nome (osEncSelo, o mesmo em osMerge) e a dica com quem resolve (osSeloDica) saem do mesmo bloqueio que o
+// painel e o comando mostram (osEncBloq, fonte única; revisão DS, achado 6). Outro selo, ou o mesmo antes da conferência: '' (vale o dicionário
+// do g2lib). Como a do dicionário, é visual no selo; o teclado e o leitor de tela a recebem na linha ou no cartão focado (g2dicaSelo).
+function osEncSelo(m){ return /^Carga a pesar/.test(m)?'Carga a pesar':(/sinal/.test(m)?'Aguardando sinal do app':(/duplicidade/.test(m)?'Apontamento em conferência':'Sobras a receber')); }
+function osSeloDica(o,t){ if(!o.encM||osEncSelo(o.encM)!==t) return ''; const b=osEncBloq(o); return b.t+' Próximo passo: '+b.q; }
 // mudança pela tela: grava no cenário (cenMudar) e redesenha; o erro fica junto ao botão (pa.err) ou vai para onErr
 function osRun(self,fn,ok,onErr){ const r=cenMudar(null,fn);
   if(r.erro){ if(onErr) onErr(r.erro); else self.setState({pa:Object.assign({},self.state.pa||{},{err:r.erro})}); return r; }
@@ -553,7 +558,7 @@ function PREVALS(self,v){
        real:(o.area?o.realizado:null),saldo:(o.area?o.saldo:null),disp:(o.disp||null),prog:(o.area?Math.round(1000*(o.realizado||0)/o.area)/10:null),resp:o.resp},
     s:{id:o.id,tal:tl.map(t=>t.l).join(', '),sit:sel.map(x=>x.l).join(' · ')},
     p:{id:[{k:'b',t:o.id}],tal:(tl.length?tl.map(t=>({k:'txt',t:t.l})).reduce((a,x,i)=>a.concat(i?[{k:'br'},x]:[x]),[]):[{k:'mut',t:'—'}]),
-       fase:[{k:'chip',t:o.etapa,c:FCOR[o.etapa],de:1}],sit:(o.selos.length?o.selos.map(x=>({k:'chip',t:x.t,c:x.c,de:1})):[{k:'mut',t:'—'}])}}; });   /* de: dica de estado (g2lib G2_DICAS) */
+       fase:[{k:'chip',t:o.etapa,c:FCOR[o.etapa],de:1}],sit:(o.selos.length?o.selos.map(x=>({k:'chip',t:x.t,c:x.c,de:1,dv:osSeloDica(o,x.t)})):[{k:'mut',t:'—'}])}}; });   /* de: dica de estado (g2lib G2_DICAS); dv: a do bloqueio do encerramento (osSeloDica) */
   // Agrupar por talhão (TABELAS-FOCO item 7, TF06): a mesma O.S. aparece em cada talhão vinculado, com a mesma identidade; o grupo conta
   // O.S. distintas e soma a área das O.S. vinculadas (não é área física do talhão); o total geral conta cada O.S. uma vez (abaixo, os_gtot)
   if(self.state.os_agr){ const ft=((g2st(self,'g_os').f||{}).tal)||[]; const gs={}, ord=[];
@@ -833,7 +838,7 @@ function EXTRAVALS(self,v){
         const ini=!!o.area&&(o.realizado||0)>0;
         return {id:o.id,tipo:o.tipo,local:localTxt(o),obs:o.obs||'',hasObs:!!o.obs,real:(ini?nf(o.realizado)+'/'+nf(o.area)+' ha · '+pct+' % · '+salTxt(o):(o.area?'':'sem área · ordem de processo')),
           hasReal:!(o.area&&!ini),hasBar:ini,bar:'display:block;height:100%;border-radius:999px;background:'+(o.selos.some(s=>s.c==='red')?'#B42318':'#1E7A4C')+';width:'+pct+'%;',
-          selos:o.selos.map(s=>({t:s.t,st:chipSt(s.c).replace('white-space:nowrap;','white-space:normal;line-height:1.3;align-items:baseline;').replace('border-radius:999px;','border-radius:8px;'),dot:dotSt(s.c)+'transform:translateY(-1px);'})),meta:o.resp+' · '+o.janela,dp:(o.dono?o.dono+' · '+o.prazo:''),hasDp:!!o.dono,lab:'Abrir '+o.id+' · '+o.tipo,
+          selos:o.selos.map(s=>({t:s.t,dica:osSeloDica(o,s.t)||g2dicaDe(s.t),st:chipSt(s.c).replace('white-space:nowrap;','white-space:normal;line-height:1.3;align-items:baseline;').replace('border-radius:999px;','border-radius:8px;'),dot:dotSt(s.c)+'transform:translateY(-1px);'})),meta:o.resp+' · '+o.janela,dp:(o.dono?o.dono+' · '+o.prazo:''),hasDp:!!o.dono,lab:'Abrir '+o.id+' · '+o.tipo,
           st:'display:flex;flex-direction:column;gap:6px;text-align:left;width:100%;box-sizing:border-box;background:#FFFFFF;border-radius:10px;padding:9px 10px;cursor:pointer;font-family:inherit;color:#15201A;'+(st.pan===o.id?'border:2px solid #1E7A4C;':'border:1px solid #E4E9E5;box-shadow:0 1px 2px rgba(21,32,26,.05);'),
           open:()=>openPan(o.id), key:(e)=>{ if(e&&(e.key==='Enter'||e.key===' ')){ e.preventDefault(); openPan(o.id); } }}; })}; });
   // ---- painel lateral de consulta ----
@@ -842,7 +847,7 @@ function EXTRAVALS(self,v){
   v.pan_close=close; v.pan_key=(e)=>{ if(e&&e.key==='Escape'){ e.preventDefault(); close(); } };
   if(o){ const a=acum(o);
     v.pan_t=o.id+' · '+o.tipo; v.pan_fase=o.etapa; v.pan_fst=chipSt(FCOR[o.etapa]); v.pan_fdot=dotSt(FCOR[o.etapa]);
-    v.pan_selos=o.selos.map(s=>({t:s.t,st:chipSt(s.c),dot:dotSt(s.c)}));
+    v.pan_selos=o.selos.map(s=>({t:s.t,dica:osSeloDica(o,s.t)||g2dicaDe(s.t),st:chipSt(s.c),dot:dotSt(s.c)}));
     const cur=FASES.indexOf(o.etapa);
     v.pan_steps=FASES.map((f,i)=>({t:f,cur:i===cur?'step':'false',st:'display:flex;flex-direction:column;gap:5px;font-size:11.5px;font-weight:'+(i===cur?'800':'600')+';color:'+(i<=cur?'#15201A':'#8A968E')+';',
       bst:'height:5px;border-radius:999px;background:'+(i<cur?'#9CCBB0':(i===cur?'#1E7A4C':'#E4E9E5'))+';'}));
@@ -936,8 +941,10 @@ def bloco(titulo,desc,corpo,acao=''):
             f'<h3 style="margin: 0; font-size: 15px; font-weight: 800; letter-spacing: -.01em;">{esc(titulo)}</h3><div style="font-size: 12.8px; color: {MUTED};">{esc(desc)}</div></div>{acao}</div>'
             f'<div style="padding: 0 12px 12px; display: flex; flex-direction: column; gap: 10px;">{corpo}</div></section>')
 
-def _chip_hole(t,st,dot):   # selo de estado: a dica (significado e próximo passo) vem do dicionário único do g2lib (DS-DICA-20261009)
-    return f'<span data-dica-de="{H(t)}" style="{H(st)}"><span style="{H(dot)}"></span>{H(t)}</span>'
+def _chip_hole(t,st,dot,dica=None):   # selo de estado: a dica (significado e próximo passo) vem do dicionário único do g2lib (DS-DICA-20261009)
+    # ou, com dica, do texto que a tela montou (selo do bloqueio do encerramento: osSeloDica, revisão DS, achado 6)
+    at=f'data-dica="{H(dica)}"' if dica else f'data-dica-de="{H(t)}"'
+    return f'<span {at} style="{H(st)}"><span style="{H(dot)}"></span>{H(t)}</span>'
 
 def _kanban():
     card=(f'<div role="button" tabIndex="0" aria-label="{H("k.lab")}" onClick="{H("k.open")}" onKeyDown="{H("k.key")}" style="{H("k.st")}">'
@@ -946,7 +953,7 @@ def _kanban():
           f'<div style="font-size: 12px; color: {MUTED};">{H("k.local")}</div>'
           f'<sc-if value="{H("k.hasBar")}" hint-placeholder-val="{T()}"><span style="display: block; height: 6px; border-radius: 999px; background: {GRAYS}; overflow: hidden;"><span style="{H("k.bar")}"></span></span></sc-if>'
           f'<sc-if value="{H("k.hasReal")}" hint-placeholder-val="{T()}"><div style="font-size: 11.5px; color: {MUTED}; font-variant-numeric: tabular-nums;">{H("k.real")}</div></sc-if>'
-          f'<div style="display: flex; flex-wrap: wrap; gap: 4px;"><sc-for list="{H("k.selos")}" as="s" hint-placeholder-count="1">{_chip_hole("s.t","s.st","s.dot")}</sc-for></div>'
+          f'<div style="display: flex; flex-wrap: wrap; gap: 4px;"><sc-for list="{H("k.selos")}" as="s" hint-placeholder-count="1">{_chip_hole("s.t","s.st","s.dot","s.dica")}</sc-for></div>'
           f'<sc-if value="{H("k.hasObs")}" hint-placeholder-val="{F()}"><div style="font-size: 11.5px; color: {MUTED};">{H("k.obs")}</div></sc-if>'
           f'<sc-if value="{H("k.hasDp")}" hint-placeholder-val="{F()}"><div style="font-size: 11.5px; font-weight: 700; color: {INK};">{H("k.dp")}</div></sc-if>'
           f'<div style="font-size: 11.5px; color: {MUTED};">{H("k.meta")}</div></div>')
@@ -1101,7 +1108,7 @@ def _painel():
       f'<div style="display: flex; align-items: flex-start; gap: 10px;"><h2 style="margin: 0; font-family: {DISP}; font-size: 19px; font-weight: 700; letter-spacing: -.02em; flex-grow: 1; line-height: 1.3;">{H("pan_t")}</h2>'
       f'<sc-if value="{H("pan_hasLink")}" hint-placeholder-val="{F()}"><a href="{H("pan_link")}" style="{_MINI} text-decoration: none; display: inline-flex; align-items: center; white-space: nowrap;">Abrir ordem completa ›</a></sc-if>'
       f'<button type="button" aria-label="Fechar" title="Fechar" onClick="{H("pan_close")}" style="border: 0; background: {BG}; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 18px; color: {MUTED}; flex-shrink: 0;">×</button></div>'
-      f'<div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">{_chip_hole("pan_fase","pan_fst","pan_fdot")}<sc-for list="{H("pan_selos")}" as="s" hint-placeholder-count="1">{_chip_hole("s.t","s.st","s.dot")}</sc-for></div>'
+      f'<div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">{_chip_hole("pan_fase","pan_fst","pan_fdot")}<sc-for list="{H("pan_selos")}" as="s" hint-placeholder-count="1">{_chip_hole("s.t","s.st","s.dot","s.dica")}</sc-for></div>'
       f'<div style="display: flex; flex-direction: column; gap: 5px;"><div style="font-size: 13px; font-weight: 600;">{H("pan_res")}</div>'
       f'<sc-if value="{H("pan_hasProg")}" hint-placeholder-val="{F()}"><div style="display: flex; align-items: center; gap: 10px;"><div style="flex-grow: 1; height: 6px; border-radius: 999px; background: #E4E9E5; overflow: hidden;"><div style="{H("pan_progst")}"></div></div>'
       f'<span style="font-size: 12px; color: {MUTED}; white-space: nowrap; font-variant-numeric: tabular-nums;">{H("pan_prog")}</span></div></sc-if></div>'

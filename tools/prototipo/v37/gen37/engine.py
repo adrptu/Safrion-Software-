@@ -1132,8 +1132,13 @@ def area_acoes(pre='aa',rotulo='Ações da etapa'):
 # 3. painel lateral (aside[role=dialog]): abaixo do título e do × do topo à direita.
 DS_SEP=dict(cor='#E4E9E5',recuo='12px',espaco='10px')
 _CAB_BLOCO='main section>div:first-child:not(:last-child):has(>h2,>h3,>div>h2,>div>h3)'
-_SEM_MOLDURA=(':not(:has(+*>.g2caixa[style*="border: 1px"]:first-child))'
-              ':not(:has(+*>sc-if:first-child>.g2caixa[style*="border: 1px"]:first-child))')
+# o conteúdo que já começa por uma borda no topo faz o papel da linha (sem linha dupla): tabela emoldurada (.g2caixa), caixa com borda (aviso,
+# memória de cálculo) e ficha de pares rótulo × valor cuja 1ª célula traz border-top (revisão DS, achado 5: AG-04det, GE-05, GE-06det)
+_BORDA_TOPO=':is([style*="border: 1px"],[style*="border-top: 1px"])'
+_SEM_MOLDURA=(f':not(:has(+*>{_BORDA_TOPO}:first-child))'
+              f':not(:has(+*>sc-if:first-child>{_BORDA_TOPO}:first-child))'
+              f':not(:has(+*>:first-child>[style*="border-top: 1px"]:first-child))'
+              f':not(:has(+*>sc-if:first-child>:first-child>[style*="border-top: 1px"]:first-child))')
 SEP_CSS=(
     f"{_CAB_BLOCO}{_SEM_MOLDURA}{{background-image:linear-gradient({DS_SEP['cor']},{DS_SEP['cor']})!important;background-size:calc(100% - 2 * {DS_SEP['recuo']}) 1px!important;"
     "background-position:50% 100%!important;background-repeat:no-repeat!important}"
@@ -1272,7 +1277,9 @@ GLOSSARIO=[
     (r'sc/ha','sc/ha: sacas por hectare; saca de 60 kg (soja, milho, feijão, trigo, café beneficiado); arroz em casca no RS e em SC, 50 kg (DEC-0510-03).'),
     (r'\bt/ha\b','t/ha: toneladas por hectare (frutas e cana; cana em t de colmos por corte).'),
     (r'ha/h','ha/h: rendimento, hectares trabalhados por hora de máquina.'),
-    (r'R\$/ha','R$/ha: reais por hectare (valor ÷ área em ha).'),
+    (r'R\$/ha·mês','R$/ha·mês: reais por hectare por mês (valor mensal ÷ área em ha).'),
+    (r'R\$/ha·ano','R$/ha·ano: reais por hectare por ano (preço por ha·mês × 12).'),
+    (r'R\$/ha(?![·/])','R$/ha: reais por hectare (valor ÷ área em ha).'),   # revisão DS (achado 7): R$/ha·mês e R$/ha·ano têm entrada própria
     (r'R\$/h\b','R$/h: reais por hora (valor ÷ horas).'),
     (r'^Lâmina','Lâmina de água em mm: 1 mm = 10 m³ por hectare.'),
     (r'\bATR\b','ATR: açúcar total recuperável, kg por tonelada de cana.'),
@@ -1309,6 +1316,10 @@ def _ajuda_auto(cols,calc,campos=()):
         if f: partes.append(f)
         out.append(dict(c,ajuda=' '.join(partes)) if partes else c)
     return out
+# revisão DS (achado 8): a sigla ou a unidade que está na célula (unidade junto do valor: "62,4 sc/ha", "35 DAP") e não no rótulo também dá a dica
+# do cabeçalho da coluna. A regra roda no navegador (g2lib.g2glossCol), sobre as linhas que a grade mostra (as do build e as montadas na tela), com
+# estas entradas do GLOSSARIO (as de "^" valem só para o rótulo): fonte única do texto, aqui.
+_GLOSS_CEL=[(rx,t) for rx,t in GLOSSARIO if not rx.startswith('^')]
 def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=True,so=None,add=None,bulk='',gid=None,x0=None,frame=True,tools='',headtools=True,qf=None):
     cols=[_col_un(c) for c in cols]
     # rótulos que ficariam iguais sem a unidade ("Custo (R$/h)" e "Custo (R$/ha)") mantêm a unidade, sem parênteses: "Custo R$/h", "Custo R$/ha"
@@ -1602,6 +1613,7 @@ def engine():
     spec=json.dumps(WIDGETS,ensure_ascii=False).replace('</','<\\/')
     grids=json.dumps(GRIDS,ensure_ascii=False).replace('</','<\\/')
     nav=json.dumps(NAVSPEC,ensure_ascii=False)
-    return 'const SPEC = '+spec+';\nconst GRIDS = '+grids+';\nconst NAV = '+nav+';\n'+G2LIB+'\n'+_assin_prefixo()+(EXTRAJS[0] or '')+'\n'+ENGINE_JS2
+    gloss=json.dumps(_GLOSS_CEL,ensure_ascii=False)   # glossário da célula (revisão DS, achado 8): g2glossCol no g2lib
+    return 'const SPEC = '+spec+';\nconst GRIDS = '+grids+';\nconst NAV = '+nav+';\nconst G2_GLOSS = '+gloss+';\n'+G2LIB+'\n'+_assin_prefixo()+(EXTRAJS[0] or '')+'\n'+ENGINE_JS2
 # o aviso é visto aqui e anunciado uma vez pela região viva do g2lib (g2vivo, DS-RETORNO-20261009): aria-live=off evita a leitura em dobro
 G2_TOAST=f'<div role="status" aria-live="off" style="position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(22px + var(--acoes-h, 0px) + env(safe-area-inset-bottom, 0px)); z-index: 70; background: {INK}; color: #fff; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 12px 32px -8px rgba(21,32,26,.4); max-width: min(560px, calc(100vw - 32px)); box-sizing: border-box; {{{{g2toastst}}}}">{{{{g2toast}}}}</div>'

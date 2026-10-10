@@ -98,12 +98,14 @@ const G2_DICAS={
   'Falta insumo':'O saldo do lote no Estoque não cobre dose × área. Próximo passo: o Estoque recebe o insumo ou o agrônomo ajusta dose, área ou produto antes de liberar.',
   'Fora do registro':'Produto, dose ou cultura fora do registro (bula e AGROFIT). Próximo passo: o agrônomo ajusta produto ou dose antes de liberar.',
   'Total 0':'Dose × área dá 0 na precisão do Estoque. Próximo passo: o agrônomo ajusta a dose ou a área.',
-  'Insumo esgotado':'Um insumo acabou com área ainda a fazer. Próximo passo: o agrônomo decide a área restante.',
-  'Carga a pesar':'Carga de colheita ainda não pesada. Próximo passo: o Recebimento pesa e recebe a carga em Produção › Cargas e recebimento.'};
+  'Insumo esgotado':'Um insumo acabou com área ainda a fazer. Próximo passo: o agrônomo decide a área restante.'};
+// revisão DS (achado 6): sem caminho de menu no texto (o nome do item muda). O selo do bloqueio do encerramento em conferência (Carga a pesar,
+// Sobras a receber, Aguardando sinal do app, Apontamento em conferência) leva a dica do próprio bloqueio (processo_os.osSeloDica ← osEncBloq,
+// o mesmo texto do painel e do comando); "Carga a pesar" só existe aí e saiu daqui. As três outras ficam para o selo antes da conferência.
 function g2dicaDe(t){ const s=String(t||'').trim(); return G2_DICAS[s]||G2_DICAS[s.split(' · ')[0].trim()]||''; }
 function g2part(p,v){ const o={isCn:false,isTxt:false,isB:false,isMut:false,isChip:false,isTag:false,isLink:false,isCta:false,isAct:false,isBr:false,t:p.t||'',st:'',cls:'',dot:'',href:p.h||'#',fn:null,title:p.t||'',dica:'',hasDica:false};
   switch(p.k){ case 'b': o.isB=true; break; case 'mut': o.isMut=true; break;
-    case 'chip': { const cc=G2C[p.c]||G2C.gray; o.isChip=true; o.dica=p.dica||(p.de?g2dicaDe(p.t):''); o.hasDica=!!p.dica;   /* p.de: dica de estado do dicionário, só visual (o leitor de tela lê o motivo explícito) */ o.st='display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;color:'+cc[0]+';background:'+cc[1]+';'; o.dot='width:6px;height:6px;border-radius:999px;flex-shrink:0;background:'+cc[0]+';'; break; }
+    case 'chip': { const cc=G2C[p.c]||G2C.gray; o.isChip=true; o.dica=p.dica||p.dv||(p.de?g2dicaDe(p.t):''); o.hasDica=!!p.dica;   /* p.de: dica de estado do dicionário; p.dv: texto pronto da tela (selo do bloqueio, osSeloDica); os dois só visuais (o leitor de tela lê o motivo explícito p.dica; a linha focada recebe a dica do selo, g2dicaSelo) */ o.st='display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;color:'+cc[0]+';background:'+cc[1]+';'; o.dot='width:6px;height:6px;border-radius:999px;flex-shrink:0;background:'+cc[0]+';'; break; }
     case 'cn': { const cc=G2C[p.c]||G2C.gray; o.isCn=true; o.st='font-weight:800;white-space:nowrap;color:'+cc[0]+';'; break; }
     case 'tag': o.isTag=true; break; case 'link': o.isLink=true; break;
     case 'cta': o.isCta=true; o.cls='g2cta'; o.st=p.u?G2CTAU:G2CTA; break;
@@ -112,6 +114,18 @@ function g2part(p,v){ const o={isCn:false,isTxt:false,isB:false,isMut:false,isCh
       if(p.full){ o.cls='g2full'; o.st='width:100%;min-height:44px;border:0;background:'+(p.on?'#E4F3E9':'transparent')+';padding:0 6px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:'+(p.on?'700':'400')+';text-align:right;font-variant-numeric:tabular-nums;color:'+((G2C[p.c]||[])[0]||'#15201A')+';'+(p.on?'outline:2px solid #1E7A4C;outline-offset:-2px;border-radius:6px;':''); } break;
     case 'br': o.isBr=true; break; default: o.isTxt=true; }
   return o; }
+// revisão DS (achado 8): sigla ou unidade que está na célula ("62,4 sc/ha", "35 DAP") e não no rótulo dá a dica do cabeçalho da coluna, só onde é da
+// coluna (em ao menos 30 % das células com texto; termo solto numa observação não conta); código de registro (COT-0031) não é sigla. Texto: G2_GLOSS
+// (engine._GLOSS_CEL, fonte única). Guardado por grade enquanto as linhas são as mesmas (o desenho não refaz a varredura); com linhas novas, lê até
+// 200 linhas e só conta célula a célula o termo que aparece no texto junto (pior caso medido em node: ds_unit.js 2b.8).
+const G2GC={};
+function g2glossCol(sp,c,rows){ if(typeof G2_GLOSS==='undefined'||!rows||!rows.length) return '';
+  let m=G2GC[sp.id]; if(!m||m.rows!==rows){ m=G2GC[sp.id]={rows,k:{}}; } if(m.k[c.k]!==undefined) return m.k[c.k];
+  if(!G2GC.__re) G2GC.__re=G2_GLOSS.map(x=>[new RegExp(x[0]),x[1]]);
+  const cel=[]; let n=0; const walk=(l)=>{ for(const r of l){ if(++n>200) return; const t=(g2text(r,c)+' '+(((r.p&&r.p[c.k])||[]).map(p=>(p&&p.t)||'').join(' '))).replace(/\b[A-Z]{2,5}-\d[\w-]*/g,'').trim();
+      if(t&&t!=='—') cel.push(t); if(r.kids) walk(r.kids); } }; walk(rows);
+  const all=cel.join('\n'); const out=cel.length?G2GC.__re.filter(([re])=>re.test(all)&&cel.filter(x=>re.test(x)).length>=Math.max(1,0.3*cel.length)).slice(0,2).map(x=>x[1]).join(' '):'';
+  return (m.k[c.k]=out); }
 function g2sum(sp,flat,c){ let s=0,n=0; flat.forEach(x=>{ if(x.lvl!==0) return; const k=g2key(x.r,c); if(typeof k==='number'){ s+=k; n++; } }); return n? (c.agg==='avg'? s/n : s) : null; }
 // condição de campo do formulário: {k, eq} (igual) ou {k, ne} (diferente)
 function g2cond(f,d){ if(!f.cond) return true; const um=(c)=>{ const v=String((d||{})[c.k]===undefined?'':d[c.k]); return (c.ne!==undefined)?v!==String(c.ne):v===String(c.eq); };
@@ -161,7 +175,7 @@ function g2vals(self,sp,v,mask){
   const flat=g2flat(sp,st,g2qrows(sp,st,rows),mask,added); const ed=sp.edit||{m:'none'}; const editable=ed.m&&ed.m!=='none';
   g2qvals(self,sp,v,st,rows,added);
   const so=st.so||sp.so||{};
-  v[id+'_head']=sp.cols.map((c,ci)=>({l:c.l, tt:c.ajuda||'', un:c.un||'', cls:(ci===0?'g2c0':''), st:'display:flex;align-items:center;gap:2px;justify-content:'+(c.a==='r'?'flex-end':'flex-start')+';'+(ci===0?'position:sticky;left:0;z-index:2;background:#F4F6F3;box-shadow:1px 0 0 #E4E9E5;':''),
+  v[id+'_head']=sp.cols.map((c,ci)=>({l:c.l, tt:c.ajuda||g2glossCol(sp,c,rows), un:c.un||'', cls:(ci===0?'g2c0':''), st:'display:flex;align-items:center;gap:2px;justify-content:'+(c.a==='r'?'flex-end':'flex-start')+';'+(ci===0?'position:sticky;left:0;z-index:2;background:#F4F6F3;box-shadow:1px 0 0 #E4E9E5;':''),
      arrow:(so.k===c.k?(so.d?'▼':'▲'):'⇅'), astyle:(so.k===c.k?'color:#1E7A4C;':'color:#B7C1BA;'), sortLabel:'Ordenar por '+c.l,
      sort:()=>{ const cur=g2st(self,id).so||sp.so||{}; let nx; if(cur.k!==c.k) nx={k:c.k,d:false}; else if(!cur.d) nx={k:c.k,d:true}; else nx={}; g2set(self,id,{so:nx}); },
      fil:(((st.f||{})[c.k]||[]).length?' · '+((st.f||{})[c.k]||[]).length:''), fcolor:(((st.f||{})[c.k]||[]).length?'#1E7A4C':'#8A968E'),
@@ -477,9 +491,10 @@ function g2montou(self){ if(typeof document==='undefined') return; setTimeout(()
     let veio=false; try{ const t=Number(sessionStorage.getItem('g2nav')||0); sessionStorage.removeItem('g2nav'); veio=t>0&&Date.now()-t<15000; }catch(e){}
     g2carga('chega'); setTimeout(()=>g2carga('fim'),g2menos()?300:40);
     const st=h&&h.nextElementSibling; const stT=st?g2txt(st):''; const tit=h?g2txt(h):document.title;
-    g2flash(h,'Tela: '+tit+(stT?' · '+stT:''));
-    const ae=document.activeElement;
-    if(veio&&h&&!location.hash&&(!ae||ae===document.body)){ if(!h.hasAttribute('tabindex')) h.setAttribute('tabindex','-1'); h.focus({preventScroll:true}); }
+    const ae=document.activeElement; const foca=veio&&h&&!location.hash&&(!ae||ae===document.body);
+    /* revisão DS (achado 10): com o foco no título o leitor de tela já lê o título; o anúncio leva só o estado (sem ler o título duas vezes) */
+    g2flash(h,foca?stT:('Tela: '+tit+(stT?' · '+stT:'')));
+    if(foca){ if(!h.hasAttribute('tabindex')) h.setAttribute('tabindex','-1'); h.focus({preventScroll:true}); }
     self.__g2foto=g2foto(); self.__g2passo=g2passo(); self.__g2toastVisto=(self.state&&self.state.g2toast)||''; }catch(e){} },60); }
 // depois de cada desenho: troca de etapa/seção realça o bloco do novo contexto; aviso novo (g2toast) realça o que mudou e anuncia
 function g2mudou(self){ if(typeof document==='undefined'||!self.__g2foto) return;   // antes da 1ª foto (montagem) não compara
@@ -488,7 +503,10 @@ function g2mudou(self){ if(typeof document==='undefined'||!self.__g2foto) return
   for(const k in f){ if(ant[k]&&ant[k].s!==f[k].s) mud.push({k,t:agora}); }
   const t=(self.state&&self.state.g2toast)||''; const tNovo=!!t&&t!==self.__g2toastVisto; if(!t) self.__g2toastVisto='';
   const p=g2passo();
-  if(p&&self.__g2passo&&p!==self.__g2passo){ self.__g2passo=p; if(tNovo) self.__g2toastVisto=t; self.__g2mud=[]; g2flash(g2blocoAtual(),p+(tNovo?'. '+t:'')); return; }
+  if(p&&self.__g2passo&&p!==self.__g2passo){ self.__g2passo=p; if(tNovo) self.__g2toastVisto=t; self.__g2mud=[]; const b=g2blocoAtual(); g2flash(b,p+(tNovo?'. '+t:''));
+    /* revisão DS (achado 3): o botão que trocou a etapa sumiu (foco no BODY ou fora da página): o foco vai ao título do novo contexto (rola só se ele estiver fora da vista) */
+    const ae=document.activeElement; if(!ae||ae===document.body||!ae.isConnected){ const hh=b&&b.querySelector('h2,h3'); if(hh){ if(!hh.hasAttribute('tabindex')) hh.setAttribute('tabindex','-1'); hh.focus({preventScroll:false}); } }
+    return; }
   if(p) self.__g2passo=p;
   if(!tNovo) return; self.__g2toastVisto=t;
   const ks=[...new Set(mud.map(x=>x.k).concat(Object.keys(f).filter(k=>!ant[k]&&f[k].nv===1&&f[k].el.classList.contains('g2flash'))))]; self.__g2mud=[];
@@ -496,6 +514,8 @@ function g2mudou(self){ if(typeof document==='undefined'||!self.__g2foto) return
   let alvos=nivel(1).slice(0,3).concat(nivel(2).slice(0,2)); if(!alvos.length) alvos=nivel(3).slice(0,1);
   alvos.forEach(e=>g2flash(e)); g2vivo(t); }
 (function g2retGlob(){ if(typeof document==='undefined'||window.__g2ret) return; window.__g2ret=1;
+  // revisão DS (achado 1): a tela que volta da memória do navegador (voltar/avançar, bfcache) não monta de novo: a barra ligada no clique termina aqui
+  window.addEventListener('pageshow',(e)=>{ if(!e.persisted) return; g2carga('fim'); try{ sessionStorage.removeItem('g2nav'); }catch(er){} });
   // clique num link para outra tela do protótipo: a barra começa já (a navegação segue sem espera); a tela nova termina a barra e foca o título
   document.addEventListener('click',(e)=>{ if(e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey) return;
     const a=e.target&&e.target.closest&&e.target.closest('a[href]'); if(!a||(a.target&&a.target!=='_self')||a.hasAttribute('download')) return;
@@ -512,7 +532,7 @@ function g2mudou(self){ if(typeof document==='undefined'||!self.__g2foto) return
 // com motivo usa aria-disabled="true" (continua focável): o clique é recusado aqui e a dica diz o porquê; o motivo também fica em texto junto do
 // botão (engine.acao_motivo, PRD DS-06 e 74.5.0, VIS-04), realçado na recusa: a dica complementa, não substitui.
 const G2_DICA_ID='g2-dica';
-const G2D={el:null,desc:null,modo:'',sai:0,entra:0,lp:0,lpXY:null,toque:0};
+const G2D={el:null,desc:null,modo:'',sai:0,entra:0,lp:0,lpXY:null,toque:0,tt:null};
 function g2visTxt(el){ return String((el&&el.innerText)||'').replace(/\s+/g,' ').trim(); }
 function g2contem(vis,t){ const n=(s)=>g2norm(s).replace(/[^a-z0-9]+/g,' ').trim(); const b=n(t); return !!b&&n(vis).indexOf(b)>=0; }
 // regra do texto (pura, testada em ds_unit.js): explícito > title que acrescenta > nome do ícone sem texto > nada
@@ -532,6 +552,17 @@ function g2dicaAlvo(n){ for(let e=n,i=0;e&&e.nodeType===1&&i<6;e=e.parentElement
     const t=g2dicaTexto(e); if(t) return {el:e,t};
     if(e.matches&&e.matches('main,header,nav,aside,section,[role=table],[role=row],[role=list],body')) break; }
   return null; }
+// revisão DS (achado 2): o selo de estado não recebe foco; a linha da grade e o cartão do Kanban, sim. Com foco de teclado (:focus-visible) numa
+// linha ou cartão sem dica própria, a dica é a do selo mais grave de dentro dele (vermelho > amarelo/laranja > os demais; empate: o primeiro),
+// com o nome do selo à frente; ela descreve a linha ou o cartão (aria-describedby). O clique do ponteiro na linha não abre dica.
+function g2dicaSelo(n){ if(!n||n.nodeType!==1||!n.matches('[role=row],[role=list] [role=button],[role=list] [role=listitem]')) return null;
+  try{ if(!n.matches(':focus-visible')) return null; }catch(e){}
+  const ss=[...n.querySelectorAll('[data-dica-de],span[data-dica][style*="border-radius"]')].filter(s=>g2vis(s)&&!s.closest('[role=columnheader]')).map(s=>({s,t:g2dicaTexto(s)})).filter(x=>x.t);
+  if(!ss.length) return null;
+  const grav=(s)=>{ const c=getComputedStyle(s).color; return c==='rgb(180, 35, 24)'?3:((c==='rgb(138, 90, 0)'||c==='rgb(154, 63, 0)')?2:1); };
+  let m=ss[0], g=grav(m.s); ss.slice(1).forEach(x=>{ const k=grav(x.s); if(k>g){ m=x; g=k; } });
+  const nome=g2txt(m.s).split(' · ')[0].trim();
+  return {el:m.s,t:(nome&&!g2contem(m.t,nome)?nome+': ':'')+m.t}; }
 function g2dicaEl(){ let d=document.getElementById(G2_DICA_ID);
   if(!d){ d=document.createElement('div'); d.id=G2_DICA_ID; d.setAttribute('role','tooltip'); d.className='g2dica'; d.hidden=true; document.body.appendChild(d);
     d.addEventListener('pointerenter',()=>clearTimeout(G2D.sai)); d.addEventListener('pointerleave',()=>g2dicaSai(120)); }
@@ -556,16 +587,24 @@ function g2dicaLimpa(){ const el=G2D.el, ds=G2D.desc; if(ds){ const db=String(ds
   G2D.el=null; G2D.desc=null; G2D.modo=''; }
 function g2dicaFecha(){ clearTimeout(G2D.sai); clearTimeout(G2D.entra); const d=document.getElementById(G2_DICA_ID); if(d) d.hidden=true; g2dicaLimpa(); }
 function g2dicaSai(ms){ clearTimeout(G2D.sai); G2D.sai=setTimeout(g2dicaFecha,ms); }
+// revisão DS (achado 9): title igual ao rótulo visível (ex.: item do menu aberto) faria o navegador mostrar a dica nativa repetida: ele sai enquanto
+// o ponteiro está em cima e volta ao sair (com o menu recolhido o texto fica oculto e o title vira a dica do sistema, como antes)
+function g2ttVolta(){ const el=G2D.tt; G2D.tt=null; if(el&&el.__g2ttR!==undefined){ if(!el.hasAttribute('title')) el.setAttribute('title',el.__g2ttR); delete el.__g2ttR; } }
+function g2ttTira(n){ if(G2D.tt&&n&&G2D.tt.contains(n)) return; g2ttVolta();
+  let el=null; for(let e=n,i=0;e&&e.nodeType===1&&i<6;e=e.parentElement,i++){ if(e.hasAttribute('title')){ el=e; break; } } if(!el) return;
+  const t=String(el.getAttribute('title')||'').trim(); if(!t||!g2contem(g2visTxt(el),t)) return;
+  el.__g2ttR=el.getAttribute('title'); el.removeAttribute('title'); G2D.tt=el; }
 (function g2dicaGlob(){ if(typeof document==='undefined'||window.__g2dica) return; window.__g2dica=1;
   const dentro=(n)=>!!(n&&n.closest&&n.closest('#'+G2_DICA_ID));
   // hover: abre depois de 300 ms parado no gatilho (sem espera se outra dica já está aberta); sair do gatilho e da dica fecha em 120 ms
-  document.addEventListener('pointerover',(e)=>{ if(e.pointerType==='touch'||dentro(e.target)) return; const a=g2dicaAlvo(e.target);
+  document.addEventListener('pointerover',(e)=>{ if(e.pointerType==='touch'||dentro(e.target)) return; g2ttTira(e.target); const a=g2dicaAlvo(e.target);
     if(!a){ clearTimeout(G2D.entra); if(G2D.el&&G2D.modo==='ponteiro') g2dicaSai(120); return; }
     if(a.el===G2D.el){ clearTimeout(G2D.sai); return; }
     clearTimeout(G2D.entra); G2D.entra=setTimeout(()=>g2dicaMostra(a.el,a.t,'ponteiro'),(G2D.el&&G2D.modo==='ponteiro')?0:300); },true);
-  document.addEventListener('pointerout',(e)=>{ if(e.pointerType==='touch'||e.relatedTarget) return; clearTimeout(G2D.entra); if(G2D.el&&G2D.modo==='ponteiro') g2dicaSai(120); },true);
-  // foco de teclado: abre já; descreve o elemento focado (a dica pode vir do cabeçalho da coluna do botão de ordenar)
-  document.addEventListener('focusin',(e)=>{ const a=g2dicaAlvo(e.target); if(a) g2dicaMostra(a.el,a.t,'foco',e.target); else if(G2D.el&&G2D.modo!=='ponteiro') g2dicaFecha(); },true);
+  document.addEventListener('pointerout',(e)=>{ if(e.pointerType==='touch'||e.relatedTarget) return; g2ttVolta(); clearTimeout(G2D.entra); if(G2D.el&&G2D.modo==='ponteiro') g2dicaSai(120); },true);
+  // foco de teclado: abre já; descreve o elemento focado (a dica pode vir do cabeçalho da coluna do botão de ordenar). Linha de grade ou cartão
+  // (Kanban) sem dica própria, com foco de teclado: a dica do selo de estado de dentro dela (revisão DS, achado 2: o selo não é focável)
+  document.addEventListener('focusin',(e)=>{ const a=g2dicaAlvo(e.target)||g2dicaSelo(e.target); if(a) g2dicaMostra(a.el,a.t,'foco',e.target); else if(G2D.el&&G2D.modo!=='ponteiro') g2dicaFecha(); },true);
   document.addEventListener('focusout',(e)=>{ if(G2D.el&&G2D.modo!=='ponteiro'&&G2D.modo!=='recusa'&&(!e.relatedTarget||!G2D.el.contains(e.relatedTarget))) g2dicaFecha(); },true);
   // Esc fecha a dica; a dica explícita (data-dica) consome a tecla, para não fechar também o painel em que o foco está (WCAG 1.4.13)
   document.addEventListener('keydown',(e)=>{ if(e.key!=='Escape') return; const d=document.getElementById(G2_DICA_ID); if(!d||d.hidden||!G2D.el) return;

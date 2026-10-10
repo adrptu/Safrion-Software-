@@ -6,7 +6,8 @@
 3. motor: a montagem e cada desenho chamam g2montou/g2mudou (ponto central, nenhuma tela chama g2flash); o aviso visível não é lido em dobro;
 4. glossário e fórmula da coluna (GLOSSARIO, _formula, _ajuda_auto);
 5. os tokens medidos no teste de contraste são os do engine;
-6. com o build feito: toda página do project/ carrega o CSS comum do módulo; BO-02 e CF-05 mostram o motivo do indisponível em texto (DS-06)."""
+6. com o build feito: toda página do project/ carrega o CSS comum do módulo; BO-02 e CF-05 mostram o motivo do indisponível em texto (DS-06).
+Revisão DS (09/10): 2.4 (linha dupla, achado 5), 3.6 (selo do bloqueio, achado 6), 3.7 e 3.8 (achados 1, 3, 9, 10), 4.6 (achado 7) e 4.7 (achado 8)."""
 import os, re, sys, glob, subprocess
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import engine as E
@@ -30,7 +31,10 @@ for f in fontes:
     for m in re.finditer(r':hover[^{}"]*\{[^}]*background(?:-color)?:\s*(#(?:F4F6F3|E4E9E5|EEF1EE|EEF3EE|F9FBF8|F7F9F6))', open(f, encoding='utf-8').read(), re.I):
         cinza.append((os.path.basename(f), m.group(1)))
 chk('2.3 nenhuma regra de hover com fundo cinza no gerador (engine, ui37, areas)', not cinza, cinza)
-chk('2.4 separador: linha abaixo do título do bloco (sem linha dupla sobre a moldura da tabela), do painel lateral e .g2-cab', bool(SEP) and SEP in css and 'aside[role=dialog]>div:first-child:has(>h2)' in SEP and '.g2caixa[style*="border: 1px"]' in SEP)
+# revisão DS (achado 5): a exceção da linha dupla deixou de ser só a tabela emoldurada (.g2caixa): vale para todo conteúdo que começa com borda
+# no topo (caixa com borda, ficha cuja 1ª célula tem border-top), que já faz o papel da linha (AG-04det, GE-05, GE-06det tinham duas linhas)
+chk('2.4 separador: linha abaixo do título do bloco (sem linha dupla sobre conteúdo que começa com borda no topo), do painel lateral e .g2-cab', bool(SEP) and SEP in css
+    and 'aside[role=dialog]>div:first-child:has(>h2)' in SEP and ':is([style*="border: 1px"],[style*="border-top: 1px"])' in SEP and '>:first-child>[style*="border-top: 1px"]:first-child' in SEP)
 chk('2.5 realce: animação de 0,52 s e, com menos movimento, realce estático sem animação', '@keyframes g2realce' in css and '.g2-realce{animation:g2realce 0.52s' in css and re.search(r'prefers-reduced-motion:reduce\)\{\.g2-realce\{animation:none!important', css))
 chk('2.6 barra de carga no topo e dica (role=tooltip criada pelo g2lib) com estilo comum', '#g2-carga{' in css and '.g2dica{' in css and '.g2dica-i{' in css)
 chk('2.7 indisponível com motivo (aria-disabled) com a aparência do desabilitado', ':is(button,a)[aria-disabled=true]{opacity:.55' in css)
@@ -50,6 +54,15 @@ chk('3.2 nenhuma tela chama g2flash direto (a função é chamada só pelo motor
 chk('3.3 aviso visível com aria-live=off; o anúncio sai uma vez pela região viva (aria-live polite)', 'role="status" aria-live="off"' in E.G2_TOAST and "setAttribute('aria-live','polite')" in lib)
 chk('3.4 clique em aria-disabled="true" é recusado no g2lib (o comando não roda) e a recusa é anunciada', "closest('[aria-disabled=\"true\"]')" in lib and "'Indisponível: '+m" in lib)
 chk('3.5 a recusa realça o motivo visível junto do controle (g2flash no .g2motivo do mesmo .g2ind)', "closest('.g2ind')" in lib and "querySelector('.g2motivo')" in lib)
+# revisão DS (achado 6): o selo do bloqueio do encerramento usa o mesmo bloqueio do painel e do comando (osEncBloq), na lista, no Kanban e no painel
+po = open(os.path.join(HERE, 'areas', 'processo_os.py'), encoding='utf-8').read()
+chk('3.6 selo do bloqueio do encerramento: nome por osEncSelo (osMerge) e dica por osSeloDica ← osEncBloq na lista, no Kanban e no painel', 'function osSeloDica(o,t)' in po and 'const b=osEncBloq(o)' in po.split('function osSeloDica(o,t)', 1)[-1][:200]
+    and po.count('osSeloDica(o,') >= 3 and 'dica:osSeloDica(o,s.t)||g2dicaDe(s.t)' in po and "dv:osSeloDica(o,x.t)" in po and po.count('const t=osEncSelo(o.encM)') == 2
+    and '_chip_hole("s.t","s.st","s.dot","s.dica")' in po)
+# revisão DS (achados 1, 3, 9, 10): pontos centrais do g2lib
+chk('3.7 voltar pelo navegador (bfcache) termina a barra de carga; troca de etapa com o foco perdido foca o título do novo contexto', "addEventListener('pageshow'" in lib and 'e.persisted' in lib and "g2carga('fim')" in lib.split("addEventListener('pageshow'", 1)[-1][:120]
+    and "hh.focus(" in lib.split('function g2mudou', 1)[-1][:1400])
+chk('3.8 title igual ao rótulo visível sai enquanto o ponteiro está em cima (g2ttTira/g2ttVolta); o foco no título anuncia só o estado', 'function g2ttTira' in lib and 'g2ttTira(e.target)' in lib and 'g2ttVolta();' in lib and "g2flash(h,foca?stT:" in lib)
 
 # 4 · glossário e fórmula
 cols = [dict(k='q', l='Quantidade'), dict(k='p', l='Preço'), dict(k='tot', l='Total')]
@@ -59,6 +72,16 @@ chk('4.3 rótulo do campo do formulário completa a fórmula', hasattr(E, '_form
 a = (E._ajuda_auto if hasattr(E, '_ajuda_auto') else (lambda cols, calc: cols))([dict(k='c', l='Custo R$/ha'), dict(k='l', l='Lâmina aplicada'), dict(k='x', l='Contagem × NC'), dict(k='z', l='Área', ajuda='própria'), dict(k='n', l='Nome')], None)
 chk('4.4 glossário: R$/ha, lâmina e NC ganham dica; ajuda própria fica; coluna comum fica sem dica', 'reais por hectare' in a[0].get('ajuda', '') and '10 m³' in a[1].get('ajuda', '') and 'nível de controle' in a[2].get('ajuda', '') and a[3]['ajuda'] == 'própria' and 'ajuda' not in a[4], a)
 chk('4.5 sc/ha diz a saca da cultura (DEC-0510-03)', any('60 kg' in t and '50 kg' in t for rx, t in getattr(E, 'GLOSSARIO', []) if rx == 'sc/ha'))
+# revisão DS (achado 7): a unidade com período tem dica própria; a genérica de R$/ha não se aplica a ela
+a = E._ajuda_auto([dict(k='p', l='Preço R$/ha·mês'), dict(k='e', l='Equivalente R$/ha·ano'), dict(k='c', l='Custo R$/ha'), dict(k='m', l='Mínimo R$/mês')], None)
+chk('4.6 R$/ha·mês e R$/ha·ano: dica com o período (a de R$/ha fica para R$/ha sem período); R$/mês sem dica', 'por mês' in a[0].get('ajuda', '') and 'valor ÷ área em ha)' not in a[0].get('ajuda', '')
+    and 'por ano' in a[1].get('ajuda', '') and '× 12' in a[1].get('ajuda', '') and 'valor ÷ área em ha)' not in a[1].get('ajuda', '') and a[2].get('ajuda', '').startswith('R$/ha: reais por hectare')
+    and 'ajuda' not in a[3], [x.get('ajuda') for x in a])
+# revisão DS (achado 8): a sigla ou a unidade que está na célula também dá a dica do cabeçalho (g2glossCol no navegador), com o mesmo texto
+GC = getattr(E, '_GLOSS_CEL', None)
+chk('4.7 glossário da célula = GLOSSARIO sem as entradas só de rótulo ("^"), e o motor entrega G2_GLOSS ao g2lib', bool(GC) and all(not rx.startswith('^') for rx, t in GC)
+    and len(GC) == len([1 for rx, t in E.GLOSSARIO if not rx.startswith('^')]) and any(rx == 'sc/ha' for rx, t in GC) and "const G2_GLOSS = '+gloss" in open(os.path.join(HERE, 'engine.py'), encoding='utf-8').read()
+    and 'tt:c.ajuda||g2glossCol(sp,c,rows)' in open(os.path.join(HERE, 'g2lib.js'), encoding='utf-8').read())
 
 # 5 · tokens
 du = open(os.path.join(HERE, 'ds_unit.js'), encoding='utf-8').read()
