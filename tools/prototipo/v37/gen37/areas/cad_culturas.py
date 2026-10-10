@@ -74,7 +74,7 @@ def cd02():
                     txt('ncult','Nome da nova cultura',cond=cond('cult',OUTRA_C)),
                     sel('tipo','Tipo de ciclo',['Anual','Perene'],cond=cond('cult',OUTRA_C),**{'def':'Anual'}),
                     sel('unid','Unidade de produtividade',DC.UNID_PROD,cond=cond('cult',OUTRA_C),**{'def':DC.UNID_PROD[0]},
-                        help='Meta e custo por unidade do Planejar safra usam esta unidade.'),
+                        help='Padrão da cultura na meta e no custo por unidade do Planejar safra; o seletor "Unidade de produtividade" das tabelas também mostra kg/ha, t/ha e sc 60 kg/ha.'),
                     num('dias','Ciclo até a colheita','dias',min=30,max=250,cond=cond('tipo','Anual')),
                     sel('sem','Item de semente',SEMENTES_BASE+[CRIAR],cond=cond('tipo','Anual'),**{'def':CRIAR},
                         help='Grupo Sementes, em kg: Compras cota e o Estoque recebe por este item.'),
@@ -85,7 +85,7 @@ def cd02():
          edit=dict(m='form',title='Cultura',sub='Altere nome e unidade de produtividade; o tipo de ciclo fica fixo depois do cadastro.',
              fields=[txt('nome','Nome da cultura'),
                      sel('tipo','Tipo de ciclo',['Anual','Perene'],ro=True,help='Anual pede ciclo e semente na cultivar; perene carrega a data real do ciclo.'),
-                     sel('unid','Unidade de produtividade',DC.UNID_PROD,help='Meta e custo por unidade do Planejar safra usam esta unidade.')]))
+                     sel('unid','Unidade de produtividade',DC.UNID_PROD,help='Padrão da cultura na meta e no custo por unidade do Planejar safra; o seletor "Unidade de produtividade" das tabelas também mostra kg/ha, t/ha e sc 60 kg/ha.')]))
     # ---- operações (fonte) e árvore Operação → conjunto ----
     ops=[]
     for c in D2.CONJ:
@@ -236,7 +236,7 @@ function EXTRAVALS(self,v){ simv(self,v);
       soPai('g_cv',rows,r,c.id); self.setState({g2toast:'Salvo: '+r.v.nome+' em '+c.v.nome+' · '+msg.join(' · ')+'.'}); return; }
     if(gid==='g_cult'){ const o=self.__c2old; let n=0;
       if(o&&o.id===r.id&&o.nome!==r.v.nome){ const rr=g2clone(RW(self,'g_rend')); leaves(rr).forEach(x=>{ if(x.v.cult===o.nome){ x.v.cult=r.v.nome; n++; } }); if(n) g2set(self,'g_rend',{rows:rr}); }
-      self.setState({g2toast:'Salvo: cultura '+r.v.nome+' · produtividade em '+r.v.unid+(n?' · '+n+(n>1?' rendimentos passam':' rendimento passa')+' a '+r.v.nome:'')+'. Planejar safra usa esta unidade na meta.'}); return; }
+      self.setState({g2toast:'Salvo: cultura '+r.v.nome+' · produtividade em '+r.v.unid+(n?' · '+n+(n>1?' rendimentos passam':' rendimento passa')+' a '+r.v.nome:'')+'. É o Padrão da cultura na meta do Planejar safra.'}); return; }
     if(gid==='g_op'){ const n=ml(r.v.atvs).length; self.setState({g2toast:'Salvo: '+r.v.nome+' · processo '+r.v.proc+' · '+n+(n===1?' atividade usual':' atividades usuais')+' nos Planos agronômicos.'}); return; }
     if(gid==='g_rend'){ const ops=g2clone(RW(self,'g_op')); let o; let pre='';
       if(r.v.op===OUTRA_O){ const nm=String(r.v.nop).trim(); o={id:'OP'+(ops.length+1)+'_'+String(Date.now()).slice(-4),v:{nome:nm,proc:r.v.nproc||'Tratos culturais',atvs:''},s:{},p:{}};

@@ -8,6 +8,8 @@ from ui37 import shell37, steps_state, HEIGHTS37
 import dados2 as D2
 import dados as D
 import ocupacao_cen as OCEN
+import cenario
+import unidprod_ui as UNP
 HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE)
 H=lambda s: '{{'+s+'}}'
 F=lambda: H('false')
@@ -46,7 +48,8 @@ def build():
                dict(k='meta',l='Meta',t='num',a='r'),dict(k='aj',l='Ajustes locais',t='num',a='r'),dict(k='tipo',l='Tipo',w=120)]
     NUNCA_C=dict(k='modo',eq='__nunca'); PLAN=dict(k='modo',ne='vinc'); VINC=dict(k='modo',eq='vinc')
     # painel "Planejar T1" (§2): contexto herdado no subtítulo; Plano antes do Plantio; Plantio = PlantioMin; Colheita prevista editável só sem
-    # plano; meta na unidade de mercado da cultura (DEC-0510-03). "Vincular ciclo C1" (R-24) mostra o ciclo travado e pede plano e meta.
+    # plano; meta na unidade escolhida no seletor da tabela (UNID-PROD), Padrão = unidade de mercado da cultura (DEC-0510-03).
+    # "Vincular ciclo C1" (R-24) mostra o ciclo travado e pede plano e meta.
     CULT_FIELDS=[dict(k='modo',l='',t='txt',cond=NUNCA_C),dict(k='talhao',l='',t='txt',cond=NUNCA_C),
                  dict(k='cult',l='Cultura',t='sel',dyn=True,opts=[],req=True,cond=PLAN),dict(k='cult',l='Cultura',ro=True,cond=VINC),
                  dict(k='var',l='Variedade',t='txt',req=True,cond=PLAN),dict(k='var',l='Variedade',ro=True,cond=VINC),
@@ -58,7 +61,7 @@ def build():
                  dict(k='area',l='Área',t='num',req=True,min=0.01,max=5000,u='ha',cond=PLAN),dict(k='area',l='Área do ciclo',ro=True,u='ha',cond=VINC),
                  dict(k='colheita',l='Colheita prevista',t='date',cond=[dict(k='plano',eq=''),PLAN],help='Sem plano: a data que a fazenda prevê. Vazia, o sistema estima pelo ciclo da cultivar (CD-02).'),
                  dict(k='colh_txt',l='Colheita prevista',ro=True,live=True,cond=dict(k='plano',ne='')),
-                 dict(k='meta',l='Meta de produtividade',t='num',req=True,min=0),dict(k='unm_txt',l='Unidade da meta',ro=True,live=True,help='Unidade de mercado da cultura (CD-02, DEC-0510-03).'),
+                 dict(k='meta',l='Meta de produtividade',t='num',req=True,min=0),dict(k='unm_txt',l='Unidade da meta',ro=True,live=True,help='A do seletor "Unidade de produtividade" da tabela ao abrir este painel; o Padrão da cultura vem do CD-02 (DEC-0510-03).'),
                  dict(k='ocup_txt',l='Ocupação prevista',ro=True,live=True,cond=PLAN)]
     def talhao_de(c):
         return c['local'] if c['tipo']!='Parcela' else c['local'].rsplit('-',1)[0]
@@ -82,7 +85,8 @@ def build():
         # sem caixas de seleção (proprietário, 13/10/2026): o plano entra pela primária "Aplicar plano em N cultivos" (os sem plano) ou pelo
         # "Aplicar plano" / "Reaplicar" da linha; trocar o plano de um cultivo é pelo formulário da linha
         g=grid(CULT_COLS,rows,edit=dict(m='form',title='Cultivo',newTitle='Novo cultivo',sub='Altere o cultivo e o plano agronômico e salve.',fields=CULT_FIELDS),
-               sel=False,dele=not ro,add=None,gid=f'g_cult_{k}',qf=dict(k='sit',l='situação',nivel0=True),total=True,tree=True,x0={})
+               sel=False,dele=not ro,add=None,gid=f'g_cult_{k}',qf=dict(k='sit',l='situação',nivel0=True),total=True,tree=True,x0={},
+               tools=UNP.sel_html('us_'+k))   # UNID-PROD: um seletor por tabela, na barra (D-U01)
         cult_html+=f'<sc-if value="{H("cult_"+k)}" hint-placeholder-val="{F()}">{g}</sc-if>'
     # ---------- etapa 3 · rendimentos (uma grade por safra: a edição vale só para a safra aberta; safra encerrada abre só em consulta) ----------
     ops={}
@@ -232,20 +236,23 @@ def build():
     from areas.analise_solo import SOLO_UI_JS, porque_html
     # análise de solo (SOLO-01): o estado compartilhado (cenario.js + solo.js) e os laudos (SOLO0) entram no Planejar safra; 0 colisões de nome (solo_unit_test)
     # CTL-4: o mesmo cenário compartilhado (O.S., requisições, lotes) entra na demanda (cenDemEntradas/cenOsDem): emitir, liberar, apontar, cancelar ou devolver muda a conta
-    EXTRAJS[0]=cenario.js_prefixo()+DSO.js_prefixo()+SOLO_UI_JS+'\nconst D2 = '+json.dumps(d2,ensure_ascii=False)+';\n'+open(os.path.join(ROOT,'cal01.js')).read()+'\n'+open(os.path.join(ROOT,'ocupacao.js')).read()+'\n'+open(os.path.join(ROOT,'safra.js')).read()+'''
+    # UNID-PROD (D-U14): o conversor único (producao.js) com o prefixo do estado, o mesmo das telas do estado; a tela não chama cenGet nem cenSave
+    EXTRA.append('<style>'+UNP.CSS+'</style>')
+    EXTRAJS[0]=cenario.js_prefixo()+DSO.js_prefixo()+SOLO_UI_JS+UNP.JS+'\nconst D2 = '+json.dumps(d2,ensure_ascii=False)+';\n'+open(os.path.join(ROOT,'cal01.js')).read()+'\n'+open(os.path.join(ROOT,'ocupacao.js')).read()+'\n'+open(os.path.join(ROOT,'safra.js')).read()+'''
 function _safhooks(self){ self.g2after=(gid,rows,r,isNew)=>{ if(gid==='g_saf' && r && String(r.id).indexOf('n')===0 && !self.state.saf){ if(!r.v.estado) r.v.estado='Rascunho'; self.setState({saf:r.id,step:2,g2toast:'Safra criada: '+r.v.nome+'. Planeje os talhões livres na tabela.'}); }
     if(String(gid).indexOf('g_cult_')===0) cultAfter(self,gid,rows,r,isNew);
     if(String(gid).indexOf('g_rend_')===0&&r) rendAfter(self,gid,rows,r,isNew);
     if(String(gid).indexOf('g_recp_')===0&&r) recAfter(self,gid,rows,r); };
   self.g2live=(gid,k,d)=>(String(gid).indexOf('g_rend_')===0?rendLive(k,d,self):(String(gid).indexOf('g_cult_')===0?cultLive(self,gid,k,d):(String(gid).indexOf('g_recp_')===0?recLive(self,gid,k,d):null)));
   self.g2draft=(gid,k,d,fm)=>(String(gid).indexOf('g_cult_')===0?cultDraft(self,gid,k,d,fm):null);
+  self.g2openDraft=(gid,r,d)=>safOpenDraft(self,gid,r,d);
   self.g2formSub=(gid,r,fm)=>(String(gid).indexOf('g_cult_')===0?cultSub(self,gid,r,fm):(String(gid).indexOf('g_recp_')===0?recSub(self):null));
   self.g2opts=(gid,k,d,rid)=>(String(gid).indexOf('g_cult_')===0&&k==='plano'?planOpts(d):(String(gid).indexOf('g_cult_')===0&&k==='cult'?cultOpts(d):(String(gid).indexOf('g_rend_')===0&&k==='conj_id'?conjOpts(rid||d.base):null)));
   self.g2formActs=(gid,r,fm)=>(String(gid).indexOf('g_cult_')===0?cultActs(self,gid,r):(String(gid).indexOf('g_rend_')===0?rendActs(self,gid,r):null));
   self.g2check=(gid,rows,r,d,isNew)=>(String(gid).indexOf('g_cult_')===0?cultCheck(self,gid,rows,r,d,isNew):(String(gid).indexOf('g_rend_')===0?(self._conjAntes=(r?String(r.v.conj_id||''):null),opAntes(self,r),rendCheck(self,rows,r,d,isNew)):(String(gid).indexOf('g_recp_')===0?(opAntes(self,r),null):(gid==='g_saf'?safCheck(d):null))));
   self.g2pick=(gid,rid,r)=>{ if(gid==='g_op') abrirRend(self,rid); if(String(gid).indexOf('g_cap_')===0) abrirRec(self,rid); }; }
 const _EV=EXTRAVALS; EXTRAVALS=function(self,v){ _safhooks(self); cenOuvir(self); _EV(self,v); };
-const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)=>rendNova(self,rid); resumoVals(self,v); };   // + Outra configuração e Resumo da safra (etapa 3)'''
+const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)=>rendNova(self,rid); resumoVals(self,v); safUnidVals(self,v); };   // + Outra configuração e Resumo da safra (etapa 3)'''
     import plano_referencia as PR
     EXTRAJS[0] += PR.js()
     EXTRA.append(PR.painel())

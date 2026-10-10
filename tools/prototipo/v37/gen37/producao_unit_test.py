@@ -65,6 +65,35 @@ def main():
     u = json.loads((r.stdout or 'null').strip().splitlines()[-1]) if r.stdout.strip() else None
     ok('U22a R-U11 ordenação pela chave em kg/ha: "484,89 kg/ha" antes de "1.200,00 kg/ha"; "a apurar" no fim (o texto punha 1.200 antes)', u and u['ord'] == 'BAC', [u, r.stderr[-300:]])
     ok('U22b R-U11 filtro por valor aplicado em t/ha continua achando a mesma linha em kg/ha (chave igual nas duas unidades)', u and u['mesma'] and u['kgB'] == ['B'] and u['tB'] == ['B'], u)
+    # U23 · UNID-PROD R-U06 no Planejar safra (safra.js, regras sem tela): a meta guarda valor e unidade informados; o rascunho fixa a unidade
+    # ao abrir (D-U20, RC-01); salvar com o texto mostrado não regrava (RC-02); trocas repetidas não derivam
+    import ocupacao_cen as OCEN, cenario
+    js23 = ('globalThis.localStorage=undefined;\n' + open(os.path.join(HERE, 'g2lib.js'), encoding='utf-8').read() + '\n' + cenario.js_prefixo()
+            + 'const GRIDS=[];const D2={unMeta:' + json.dumps(OCEN.UN_META, ensure_ascii=False) + '};\n' + open(os.path.join(HERE, 'safra.js'), encoding='utf-8').read() + r'''
+const o={}; const G=(r,x)=>metaGravar(Object.assign({cult:'Soja'},r,x||{}));
+o.p=metaRascunho('Soja',64,'sc/ha'); g2unidSet('Soja','t'); o.t=metaRascunho('Soja',64,'sc/ha'); o.tg=G(o.t);
+g2unidSet('Soja','kg'); o.fixo=[metaUnTxt(Object.assign({cult:'Soja'},o.t)), G(o.t,{meta:'3,9'})];
+g2unidSet('Soja','padrao'); o.r385=metaRascunho('Soja',3.85,'t/ha'); o.g385=G(o.r385);
+let m={meta:3.85,unm:'t/ha'}; const ks=['t','kg','padrao']; for(let i=0;i<20;i++){ g2unidSet('Soja',ks[i%3]); const r=metaRascunho('Soja',m.meta,m.unm); m=G(r); }
+o.deriva=m; g2unidSet('Soja','padrao'); o.tela=metaTela({v:{cult:'Soja',meta:3.85,unm:'t/ha'}});
+o.un=[metaUnTxt({cult:'Soja',_un:'kg/ha'}),metaUnTxt({cult:'Soja',_un:'sc/ha'}),metaUnTxt({cult:'Mamão Formosa',_un:'kg/ha/ano'})];
+console.log(JSON.stringify(o));''')
+    p23 = os.path.join(HERE, '_probe', 'unidprod_saf_unit.js'); open(p23, 'w', encoding='utf-8').write(js23)
+    r = subprocess.run(['node', p23], capture_output=True, text=True, timeout=60)
+    o = json.loads(r.stdout.strip().splitlines()[-1]) if r.stdout.strip() else {}
+    ok('U23a R-U06 meta do T1-A (64 sc/ha): no Padrão o painel abre "64"; com t/ha abre "3,84" em t/ha; salvar sem mexer mantém {64, sc/ha} (RC-02)',
+       o.get('p', {}).get('meta') == '64' and o.get('t', {}).get('meta') == '3,84' and o.get('t', {}).get('_un') == 't/ha' and o.get('tg') == {'meta': 64, 'unm': 'sc/ha'}, [o.get('t'), o.get('tg'), r.stderr[-300:]])
+    ok('U23b D-U20 rascunho aberto em t/ha: trocar a preferência para kg/ha não muda a unidade do campo; 3,9 grava {3,9, t/ha} (não 3.900 vezes, RC-01)',
+       o.get('fixo') == ['t/ha · Padrão da cultura: sc/ha (60 kg)', {'meta': 3.9, 'unm': 't/ha'}], o.get('fixo'))
+    ok('U23c 3,85 t/ha no Padrão abre "64,17" e salvar sem mexer mantém {3,85, t/ha}; 20 aberturas e salvamentos em t → kg → Padrão sem deriva; a tabela mostra "64,17 sc/ha"',
+       o.get('r385', {}).get('meta') == '64,17' and o.get('g385') == {'meta': 3.85, 'unm': 't/ha'} and o.get('deriva') == {'meta': 3.85, 'unm': 't/ha'} and o.get('tela') == {'t': '64,17 sc/ha', 'k': 3850},
+       [o.get('r385'), o.get('g385'), o.get('deriva'), o.get('tela')])
+    ok('U23d campo "Unidade da meta": "kg/ha · Padrão da cultura: sc/ha (60 kg)"; no Padrão "sc/ha · Padrão da cultura"; mamão "kg/ha/ano · Padrão da cultura: t/ha/ano"',
+       o.get('un') == ['kg/ha · Padrão da cultura: sc/ha (60 kg)', 'sc/ha · Padrão da cultura', 'kg/ha/ano · Padrão da cultura: t/ha/ano'], o.get('un'))
+    # AC-j · fonte única do fator (ENG-011, R-U01): a segunda tabela (KG_UN do Planejar safra) e o × 1000 fixo do rascunho pela meta saíram
+    saf = open(os.path.join(HERE, 'safra.js'), encoding='utf-8').read(); prj = open(os.path.join(HERE, 'producao.js'), encoding='utf-8').read()
+    ok('AC-j fonte única: sem KG_UN no safra.js e sem o × 1000 fixo no rascunho; o Planejar safra converte pelo prUnpKgHa',
+       'KG_UN' not in saf and 'prMul(prMul(k.area, k.meta), 1000)' not in prj and 'prUnpKgHa(' in saf, ['KG_UN' in saf, 'prUnpKgHa(' in saf])
     print('RESULTADO:', 'OK' if all(OK) else 'FALHOU', f'{sum(OK)}/{len(OK)}')
     return all(OK)
 

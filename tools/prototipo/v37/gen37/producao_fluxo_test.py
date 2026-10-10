@@ -303,8 +303,8 @@ window.TBL=()=>[...document.querySelectorAll('[role=table]')].find(VIS)||null;
 window.HIDX=(col)=>{ const hs=[...TBL().querySelectorAll('[role=columnheader]')]; return hs.findIndex(h=>N(h.innerText).toUpperCase().startsWith(col.toUpperCase())); };
 window.ROWEL=(tal)=>[...TBL().querySelectorAll('[role=row]')].find(x=>[...x.querySelectorAll('[role=cell]')].slice(0,2).some(c=>{ const t=N(c.innerText).replace(/^[▾▸▴▶▼►]\s*/,''); return t===tal||t.startsWith(tal+' '); }))||null;
 window.ROWCLK=(tal)=>{ const r=ROWEL(tal); if(!r) return 'sem linha '+tal; const c=[...r.querySelectorAll('[role=cell]')].find(z=>N(z.innerText)&&!z.querySelector('input[type=checkbox]')); (c||r).click(); return 'ok'; };
-window.SAFM=(k)=>{ const S=window.__safSelf; if(!S) return null; return JSON.stringify(leaves(g2rows(S,GR('g_cult_'+k))).map(c=>[c.id,c.v.local,c.v.meta,c.v.unm])); };
-window.SAFR=(k,loc)=>{ const S=window.__safSelf; const c=leaves(g2rows(S,GR('g_cult_'+k))).find(c=>c.v.local===loc); return c?[c.v.meta,c.v.unm]:null; };
+window.SAFM=(k)=>{ const S=window.__safSelf; return (S&&S.__cultivos)?JSON.stringify(S.__cultivos(k)):null; };
+window.SAFR=(k,loc)=>{ const S=window.__safSelf; const c=(S&&S.__cultivos)?S.__cultivos(k).find(c=>c[1]===loc):null; return c?[c[2],c[3]]:null; };
 window.CEL=(tal,col)=>{ const r=ROWEL(tal); const i=HIDX(col); if(!r||i<0) return null; const cs=r.querySelectorAll('[role=cell]'); return cs[i]?N(cs[i].innerText):null; };
 window.UST=()=>{ const tb=TBL(); return {rows:[...tb.querySelectorAll('[role=row]')].map(r=>r.querySelector('[role=cell]')).filter(Boolean).map(c=>N(c.innerText)),
   q:[...document.querySelectorAll('button[aria-pressed=true]')].filter(VIS).map(b=>N(b.innerText)), fch:[...document.querySelectorAll('button[aria-label="Remover filtro"]')].filter(VIS).length,
@@ -383,6 +383,39 @@ window.CARDS=()=>[...document.querySelectorAll('.pr-card, .pr-grp')].filter(VIS)
         ir('COLH.dc.html'); ul(); row('T1-A'); us = ui(); usel('kg'); rs = cel('T1-A', 'Referência'); us2 = ui(); mamao = cel('Pivô 19')
         t.chk('AC-h contexto = cultura do painel aberto: "Unidade de produtividade · Soja"; com kg/ha, a Referência do T1-A mostra "meta 3.840 kg/ha"; o Mamão fica na escolha dele',
               us.get('lab') == 'Unidade de produtividade · Soja' and us.get('opts') == ['padrao', 'kg', 't'] and us2.get('v') == 'kg' and rs.startswith('meta 3.840 kg/ha') and ' kg/ha · ciclo parcial' in mamao, [us, rs, us2.get('v'), mamao])
+        # 7b/8 · SAF (P3): a mesma escolha da Soja aparece na Meta; trocar a unidade não muda meta nem unidade gravadas; salvar sem mexer não regrava
+        def rowc(tal): r = J(f"ROWCLK({json.dumps(tal)})"); time.sleep(.5); return r
+        def fv(k): return J(f"(()=>{{ const i=document.querySelector('aside[role=dialog] [id$=\"_{k}\"]'); return i?i.value:null; }})()")
+        def fset(k, val): r = J(f"SETV('aside[role=dialog] [id$=\"_{k}\"]',{json.dumps(val)})"); time.sleep(.3); return r
+        ir('SAF.dc.html'); clk('Continuar'); time.sleep(.6); ul(); u7 = ui(); m7 = cel('T1-A', 'Meta'); L0 = J("LS()")
+        t.chk('AC-h entre telas: a Soja em kg/ha escolhida no COLH aparece em kg/ha no Planejar safra ("3.840 kg/ha" na Meta do T1-A; seletor "Unidade de produtividade · Soja")',
+              u7.get('lab') == 'Unidade de produtividade · Soja' and u7.get('v') == 'kg' and m7 == '3.840 kg/ha', [u7, m7])
+        M0 = J("SAFM('S2627')"); J("USEL().focus()")
+        for i in range(10): tecla('ArrowDown'); tecla('ArrowUp')
+        time.sleep(.3); M1 = J("SAFM('S2627')"); L1 = J("LS()"); u8 = ui()
+        t.chk('AC-c SAF: 20 trocas pelo teclado não mudam meta nem unidade gravadas de nenhum cultivo, nem o localStorage (menos a preferência); foco no seletor',
+              M0 and M0 == M1 and L0 == L1 and u8.get('foco') and '"T1-A",64,"sc/ha"]' in M0, [M0[:200] if M0 else M0, u8])
+        usel('t'); rowc('T1-A'); f1 = [fv('meta'), fv('unm_txt')]; clk('Salvar', 'aside[role=dialog]'); a1 = J("SAFR('S2627','T1-A')")
+        t.chk('R-U06 com t/ha escolhido, o painel do T1-A abre "3,84" e "t/ha · Padrão da cultura: sc/ha (60 kg)"; salvar sem mexer mantém {64, sc/ha}',
+              f1 == ['3,84', 't/ha · Padrão da cultura: sc/ha (60 kg)'] and a1 == [64, 'sc/ha'], [f1, a1])
+        J("(()=>{ const r=ROWEL('T1'); const b=r&&[...r.querySelectorAll('button')].find(x=>N(x.innerText)==='Dividir'); if(b) b.click(); })()"); time.sleep(.6); dm = J("[...document.querySelectorAll('input[aria-label^=\"Meta de \"]')].filter(VIS).map(i=>i.value)") or []
+        du = J("[...document.querySelectorAll('[data-un=meta]')].filter(VIS).map(x=>N(x.innerText))") or []
+        clk('Salvar divisão'); time.sleep(.4); d1 = [J("SAFR('S2627','T1-A')"), J("SAFR('S2627','T1-B')")]
+        t.chk('R-U06 Dividir do T1 em t/ha: cada parcela abre na unidade da preferência (3,84 e 3,72 t/ha); salvar sem mexer mantém {64, sc/ha} e {62, sc/ha}, linha a linha',
+              dm[:2] == ['3,84', '3,72'] and du[:2] == ['t/ha', 't/ha'] and d1 == [[64, 'sc/ha'], [62, 'sc/ha']], [dm, du, d1])
+        rowc('T1-A'); fset('meta', 'abc'); clk('Salvar', 'aside[role=dialog]'); e8 = J("[...document.querySelectorAll('aside [role=alert]')].filter(VIS).map(x=>N(x.innerText)).join(' | ')") or ''; a8 = J("SAFR('S2627','T1-A')")
+        t.chk('recusa: meta "abc" não é número; nada gravado ({64, sc/ha})', 'número' in e8 and a8 == [64, 'sc/ha'], [e8, a8])
+        fset('meta', '3,9'); usel('kg'); f2 = [fv('meta'), fv('unm_txt')]; clk('Salvar', 'aside[role=dialog]'); a2 = J("SAFR('S2627','T1-A')"); m2 = cel('T1-A', 'Meta')
+        t.chk('D-U20 com o painel aberto e 3,9 digitado em t/ha, trocar o seletor para kg/ha não muda o campo (3,9 · t/ha); salvar grava {3,9, t/ha}; a tabela mostra "3.900 kg/ha"',
+              f2 == ['3,9', 't/ha · Padrão da cultura: sc/ha (60 kg)'] and a2 == [3.9, 't/ha'] and m2 == '3.900 kg/ha', [f2, a2, m2])
+        usel('t'); rowc('T1-A'); fset('meta', '3,85'); clk('Salvar', 'aside[role=dialog]'); a3 = J("SAFR('S2627','T1-A')"); usel('padrao'); m3 = cel('T1-A', 'Meta')
+        for i in range(20): usel(['t', 'kg', 'padrao'][i % 3])
+        usel('padrao'); a4 = J("SAFR('S2627','T1-A')"); m4b = cel('T1-A', 'Meta')
+        t.chk('R-U06 digitar 3,85 com t/ha grava {3,85, t/ha}; no Padrão a tabela mostra "64,17 sc/ha"; 20 trocas depois, o mesmo texto e o mesmo {3,85, t/ha} (sem deriva)',
+              a3 == [3.85, 't/ha'] and m3 == '64,17 sc/ha' and a4 == [3.85, 't/ha'] and m4b == '64,17 sc/ha', [a3, m3, a4, m4b])
+        ir('SAF.dc.html', w=390, h=844); clk('Continuar'); time.sleep(.6); ul(); u9 = ui(); sw9 = J("[document.documentElement.scrollWidth, innerWidth]")
+        t.chk('AC-g SAF a 390 px: seletor com alvo ≥ 44 px e sem rolagem horizontal', u9.get('h', 0) >= 44 and sw9 and sw9[0] <= sw9[1], [u9, sw9])
+        shot('unid_saf')
         # recusa (R-U05): café da roça só em L não vira massa; com o peso do fruto, kg/ha de Café da roça (nunca café beneficiado)
         ir('CARGA.dc.html')
         J("window.__car.cenMudar(null,c=>{ c.ordens['OS-0930']={id:'OS-0930',tipo:'Colheita de café',talhao:'C1',area:0,etapa:'Em execução',versao:'v1',realizado:5,saldo:0,resp:'Sérgio',ins:[],req:null,selos:[],"
