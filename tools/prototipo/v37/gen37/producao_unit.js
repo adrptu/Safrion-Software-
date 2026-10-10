@@ -375,3 +375,131 @@ ok('R19 "semana 2" lida em 26/09/2026 = 2027-W02; "semana 39" = 2026-W39; janela
   const so = Object.keys(PRDC.cult).find(k => PRDC.cult[k].cultura === 'Soja' && !PRDC.cult[k].semanal); const kk = PRDC.cult[so];
   OSX(c, 'OS-0962', kk.local, 'Em execução', [['20/09', prSoma([kk.area, 10])]], 'Colheita de grãos'); PRDC.osCult['OS-0962'] = so;
   ok('M12 anual: área colhida limitada à área do cultivo (' + kk.area + ' ha), mesmo com apontamento maior', prResultado(c, so).area === kk.area, prResultado(c, so).area); delete PRDC.osCult['OS-0962']; }
+
+// =====================================================================================================================
+// U21 · UNID-PROD · defeitos reproduzidos (falham na base 47ff754; só usam funções que já existiam lá, cada conta isolada em try)
+// =====================================================================================================================
+{ const T = (f) => { try { return f(); } catch (e) { return 'ERRO ' + String(e.message || e); } }; const c0 = cenClone(CEN0);
+  // RC-09 (S3): o rascunho "pela meta" multiplicava por 1000 fixo, supondo a meta em t/ha: 50.000 kg/ha/ano viravam 36,3 milhões de kg na semana
+  const lg = PRDC.cult.lg02; const m0 = [lg.meta, lg.un_meta]; const a = T(() => prRascunho(c0, 'lg02').sem); lg.meta = 50000; lg.un_meta = 'kg/ha/ano';
+  const b = T(() => prRascunho(c0, 'lg02').sem); lg.meta = m0[0]; lg.un_meta = m0[1];
+  ok('U21a RC-09 (K-U12) rascunho pela meta pelo conversor: Pivô 2 = 36.298,076923 kg/semana com 50 t/ha/ano e com 50.000 kg/ha/ano (sem × 1000 fixo)',
+     a && Object.values(a)[0] === 36298.076923 && JSON.stringify(a) === JSON.stringify(b), [a, b]);
+  // R-U09 (S2 latente): o desvio comparava a produtividade no Padrão com o número da meta sem ler a unidade gravada (k.un_meta)
+  const so = Object.keys(PRDC.cult).find(k => PRDC.cult[k].cultura === 'Soja' && !PRDC.cult[k].semanal); const ks = PRDC.cult[so];
+  PRDC.cult.tu2 = Object.assign({}, ks, { id: 'tu2', area: 10, meta: 25, un_meta: 'sc/ha', prod: true }); PRDC.osCult['OS-0973'] = 'tu2';
+  const c = cenClone(CEN0); OSX(c, 'OS-0973', ks.local, 'Em execução', [['25/09', 10]], 'Colheita de grãos');
+  const g = MUD(c, x => prReceber(x, { os: 'OS-0973', ticket: 'TK-U73', bruto: 30000, tara: 15000, u: '14', imp: '1', cond: 'Íntegra', dcol: '2026-09-25' }));
+  const D = (m, u) => { PRDC.cult.tu2.meta = m; PRDC.cult.tu2.un_meta = u; return T(() => prResultado(c, 'tu2').desv); };
+  const d1 = D(25, 'sc/ha'), d2 = D(1.5, 't/ha'), d3 = D(1200, 'kg/ha'); delete PRDC.cult.tu2; delete PRDC.osCult['OS-0973'];
+  ok('U21b R-U09 desvio com a unidade gravada na meta: 1.500 kg/ha contra 25 sc/ha, 1,5 t/ha e 1.200 kg/ha = 0 %, 0 % e +25 % (a base dava +1.566,7 % com 1,5 t/ha)',
+     !g.erro && d1 === 0 && d2 === 0 && d3 === 25, [g.erro, d1, d2, d3]);
+  // R-U08 (S2): a ponderada somava produtos e estágios diferentes (café da roça com café beneficiado) sem recusar
+  const e1 = T(() => prPonderada([{ k: { cultura: 'Café' }, kg: 3000, area: 5 }, { k: { cultura: 'Café' }, kg: 6000, area: 5, estagio: 'campo' }]));
+  ok('U21c R-U08 café beneficiado × café da roça na mesma ponderada é recusado (a base somava 9.000 kg em 10 ha)',
+     e1 === 'ERRO Produtos ou estágios diferentes não se agregam: Café beneficiado × Café da roça.', e1);
+  ok('U21d o catálogo volta ao original (lg02, tu2, OS-0973)', PRDC.cult.lg02.meta === m0[0] && PRDC.cult.lg02.un_meta === m0[1] && !PRDC.cult.tu2 && !PRDC.osCult['OS-0973']); }
+
+// =====================================================================================================================
+// U20 · UNID-PROD: unidade de produtividade selecionável (docs/unidades-produtividade/ESPECIFICACAO.md v1.1 §6 e §8; contas K-U01..K-U14
+// em docs/unidades-produtividade/verificacao/contas.py). Conversor único (prUnp*); a troca é exibição: nada muda no cenário.
+// =====================================================================================================================
+{ const TX = (cu, X, k) => prUnpTxt(prUnpInd(cu, X, k)); const KS = (cu, est, X) => prUnpOpcoes(cu, est || 'base', X).map(o => o.k);
+  const ERR = (f) => { try { f(); return ''; } catch (e) { return String(e.message || e); } };
+  // AC-a · K-U01: 6.000 kg/ha = 6 t/ha = 100 sc60 eq./ha, nos dois sentidos (soja tem sc 60 kg como Padrão; o mamão mostra a equivalência)
+  const S6 = { kg: 60000, area: 10 };
+  ok('U20a K-U01 6.000 kg/ha ↔ 6 t/ha ↔ 100 sc/ha (soja) ↔ 100 sc60 eq./ha (mamão): a volta é multiplicação exata',
+     TX('Soja', S6, 'kg') === '6.000,00 kg/ha' && TX('Soja', S6, 't') === '6,00 t/ha' && TX('Soja', S6, 'padrao') === '100,00 sc/ha'
+     && TX('Mamão Formosa', S6, 'sc60') === '100,00 sc60 eq./ha de Mamão Formosa · fruta de campo' && TX('Mamão Formosa', S6, 'kg') === '6.000,00 kg/ha'
+     && prUnpKgHa('Soja', 100, 'sc/ha') === 6000 && prUnpKgHa('Soja', 6, 't/ha') === 6000 && prUnpKgHa('Mamão Formosa', 100, 'sc60 eq./ha') === 6000 && prUnpInd('Soja', S6, 't').kgHa === 6000,
+     [TX('Soja', S6, 'kg'), TX('Soja', S6, 't'), TX('Soja', S6, 'padrao'), TX('Mamão Formosa', S6, 'sc60')]);
+  // AC-b · K-U02: massa declarada (algodão @ 15 kg; arroz RS sc 50 kg com a sc 60 separada; cx 10 kg do mamão vinda do EMB_PACK)
+  const al = prUnpOpcoes('Algodão em caroço', 'base'); const ar = prUnpOpcoes('Arroz RS', 'base');
+  ok('U20b K-U02 algodão em caroço 4.526 kg/ha = 301,73 @/ha (Padrão "@/ha (15 kg)"); arroz RS 9.044 kg/ha = 180,88 sc/ha (50 kg) e 150,73 sc60 eq./ha, separadas',
+     TX('Algodão em caroço', { kg: 4526, area: 1 }, 'padrao') === '301,73 @/ha' && al[0].rot === 'Padrão da cultura · @/ha (15 kg)'
+     && TX('Arroz RS', { kg: 9044, area: 1 }, 'padrao') === '180,88 sc/ha' && TX('Arroz RS', { kg: 9044, area: 1 }, 'sc60') === '150,73 sc60 eq./ha de Arroz em casca RS'
+     && ar[0].rot === 'Padrão da cultura · sc/ha (50 kg)' && ar.some(o => o.k === 'sc60' && o.rot === 'sc 60 kg/ha (equivalência)'),
+     [TX('Algodão em caroço', { kg: 4526, area: 1 }, 'padrao'), al[0].rot, TX('Arroz RS', { kg: 9044, area: 1 }, 'sc60'), ar.map(o => o.rot)]);
+  const mo = prUnpOpcoes('Mamão Formosa', 'base'); const cx = mo.find(o => o.k === 'cx10'); const c0 = cenClone(CEN0); const r6 = prResultado(c0, 'lg06');
+  ok('U20b2 opções do mamão: Padrão t/ha, kg/ha, sc 60 e cx 10 kg (EMB_PACK), sem t/ha repetido; Pivô 6 = 96,07 cx10 eq./ha de Mamão Formosa · fruta de campo; soja sem sc 60 repetida; café com sc 60 (fruto)',
+     KS('Mamão Formosa').join() === 'padrao,kg,sc60,cx10' && cx && cx.rot === 'cx 10 kg/ha (equivalência)' && cx.massa === '10' && mo[0].rot === 'Padrão da cultura · t/ha'
+     && TX('Mamão Formosa', r6, 'cx10') === '96,07 cx10 eq./ha de Mamão Formosa · fruta de campo' && KS('Soja').join() === 'padrao,kg,t' && KS('Café').join() === 'padrao,kg,t,sc60',
+     [KS('Mamão Formosa'), cx, mo[0].rot, TX('Mamão Formosa', r6, 'cx10'), KS('Soja'), KS('Café')]);
+  // K-U03..K-U05 · semente: Pivô 6, Pivô 19 e a ponderada do mamão em todas as unidades, com um arredondamento (K-U14)
+  const r19 = prResultado(c0, 'lg19'); const pm = prPonderada([r6, r19]);
+  ok('U20s K-U03..05 semente: Pivô 6 960,66 kg/ha · 0,96 t/ha · 16,01 sc60 eq.; Pivô 19 484,89 · 8,08; mamão ponderado 701,52 kg/ha · 0,70 t/ha · 11,69 sc60 eq. (a média simples daria 722,78)',
+     TX('Mamão Formosa', r6, 'kg') === '960,66 kg/ha' && TX('Mamão Formosa', r6, 'padrao') === '0,96 t/ha' && TX('Mamão Formosa', r6, 'sc60') === '16,01 sc60 eq./ha de Mamão Formosa · fruta de campo'
+     && TX('Mamão Formosa', r19, 'kg') === '484,89 kg/ha' && TX('Mamão Formosa', r19, 'sc60') === '8,08 sc60 eq./ha de Mamão Formosa · fruta de campo' && TX('Mamão Formosa', r19, 'cx10') === '48,49 cx10 eq./ha de Mamão Formosa · fruta de campo'
+     && TX('Mamão Formosa', pm, 'kg') === '701,52 kg/ha' && TX('Mamão Formosa', pm, 'padrao') === '0,70 t/ha' && TX('Mamão Formosa', pm, 'sc60') === '11,69 sc60 eq./ha de Mamão Formosa · fruta de campo'
+     && prFmt(prDiv(prSoma([prUnpInd('Mamão Formosa', r6, 'kg').kgHa, prUnpInd('Mamão Formosa', r19, 'kg').kgHa]), 2), 2) === '722,78',
+     [TX('Mamão Formosa', r6, 'kg'), TX('Mamão Formosa', r19, 'kg'), TX('Mamão Formosa', pm, 'kg'), TX('Mamão Formosa', pm, 'sc60')]);
+  // AC-c · K-U11: 20 trocas sem deriva e sem mudar o cenário; a meta também parte sempre do valor gravado
+  const cj = JSON.stringify(c0); const prim = {}; let deriva = []; const mt = {};
+  for (let i = 0; i < 20; i++) KS('Mamão Formosa').forEach(k => { const t = TX('Mamão Formosa', prResultado(c0, 'lg06'), k) + ' | ' + prUnpMeta('Mamão Formosa', 50, 't/ha/ano', k).txt;
+    if (prim[k] === undefined) prim[k] = t; else if (prim[k] !== t) deriva.push([i, k, t]); });
+  ok('U20c K-U11 20 trocas Padrão → kg → sc60 → cx10: textos idênticos a cada volta e o cenário (JSON) igual byte a byte',
+     !deriva.length && JSON.stringify(c0) === cj && prim.kg === '960,66 kg/ha | 50.000 kg/ha/ano' && prim.sc60.indexOf('833,33 sc60 eq./ha/ano') > 0, [deriva.slice(0, 3), prim]);
+  // AC-d · culturas diferentes sem trava arbitrária; frutos sem massa (coco) indisponível com o motivo
+  const cult = ['Soja', 'Milho', 'Mamão Formosa', 'Algodão em caroço', 'Algodão em pluma', 'Café']; const trava = cult.filter(cu => prUnpOpcoes(cu, 'base').some(o => !o.ok));
+  const co = prUnpOpcoes('Coco', 'base'); const ci = prUnpInd('Coco', { kg: 12500, area: 1.25 }, 'kg');
+  ok('U20d soja, milho, mamão, algodão (caroço e pluma) e café: todas as opções de massa valem no estágio de massa; coco em frutos: massa indisponível ("Falta peso ou conversão medida") e mostra o Padrão',
+     !trava.length && co.filter(o => o.k !== 'padrao').every(o => !o.ok && o.motivo === 'Falta peso ou conversão medida') && prUnpTxt(ci) === '10,00 mil frutos/ha' && /kg\/ha indisponível para Coco verde: falta peso/.test(ci.motivo),
+     [trava, co, prUnpTxt(ci), ci.motivo]);
+  // AC-e · K-U10: zero medido ≠ não apurado; área 0 é pendência, sem divisão
+  ok('U20e K-U10 0 kg em 10 ha = "0,00 kg/ha" (zero medido); 5.000 kg sem área = "sem área colhida apontada"; sem área e sem produção = "—"',
+     TX('Soja', { kg: 0, area: 10 }, 'kg') === '0,00 kg/ha' && TX('Soja', { kg: 5000, area: 0 }, 'kg') === 'sem área colhida apontada' && TX('Soja', { kg: 0, area: 0 }, 't') === '—'
+     && prUnpInd('Soja', { kg: 5000, area: 0 }, 'kg').st === 'pend' && prUnpInd('Soja', { kg: 5000, area: 0 }, 'kg').num === null,
+     [TX('Soja', { kg: 0, area: 10 }, 'kg'), TX('Soja', { kg: 5000, area: 0 }, 'kg'), TX('Soja', { kg: 0, area: 0 }, 't')]);
+  ok('U20e2 estimativa: origem com participação estimada leva " · estimativa" junto do número (D-U15)', TX('Soja', { kg: 60000, area: 10, estim: true }, 'kg') === '6.000,00 kg/ha · estimativa', TX('Soja', { kg: 60000, area: 10, estim: true }, 'kg'));
+  // AC-f · K-U09: café da roça em L; com o fruto pesado, kg/t/sc60 eq. do fruto (nunca como beneficiado); sem peso, só L/ha; não há fator L→kg
+  const CF = (area, semPeso) => { const c = cenClone(CEN0); OSX(c, 'OS-0930', 'C1', 'Em execução', area ? [['25/09', area]] : [], 'Colheita de café');
+    MUD(c, x => prReceber(x, { os: 'OS-0930', ticket: 'TK-CF1', bruto: 9200, tara: 3200, litros: 12000, cond: 'Íntegra', dcol: '2026-09-25' }));
+    if (semPeso) Object.values(c.producao.cargas).filter(g => g.cultura === 'Café').forEach(g => g.origem.forEach(x => { x.kg = 0; }));
+    return prResultado(c, 'c9'); };
+  const F = CF(5), FS = CF(5, true), F0 = CF(0); const iS = prUnpInd('Café', FS, 'kg');
+  ok('U20f K-U09 café da roça (12.000 L, 6.000 kg pesados, 5 ha): Padrão "sc/ha a apurar · 2.400 L/ha de Café da roça"; kg "1.200,00 kg/ha de Café da roça"; sc60 "20,00 sc60 eq./ha de Café da roça"; sem área "sem área colhida apontada"',
+     TX('Café', F, 'padrao') === 'sc/ha a apurar · 2.400 L/ha de Café da roça' && TX('Café', F, 'kg') === 'kg/ha a apurar · 1.200,00 kg/ha de Café da roça'
+     && TX('Café', F, 't') === 't/ha a apurar · 1,20 t/ha de Café da roça' && TX('Café', F, 'sc60') === 'sc60 eq./ha a apurar · 20,00 sc60 eq./ha de Café da roça'
+     && TX('Café', F0, 'padrao') === 'sc/ha a apurar · sem área colhida apontada' && F.litros === 12000 && F.liq === 6000 && F.kgOk === true,
+     [TX('Café', F, 'padrao'), TX('Café', F, 'kg'), TX('Café', F, 'sc60'), TX('Café', F0, 'padrao'), F.litros, F.liq, F.kgOk]);
+  ok('U20f2 sem peso do fruto: só L/ha e a massa indisponível com o motivo; não existe caminho de L para kg (L/ha não é massa)',
+     prUnpTxt(iS) === 'kg/ha a apurar · 2.400 L/ha de Café da roça' && iS.motivo === 'kg/ha indisponível para Café da roça: falta peso ou conversão medida' && FS.kgOk === false
+     && prUnpOpcoes('Café', 'campo', FS).filter(o => o.k !== 'padrao').every(o => !o.ok) && prUnpMassa('Café', 'L/ha') === null && /sem massa/.test(ERR(() => prUnpKgHa('Café', 1, 'L/ha')))
+     && /sem massa/.test(ERR(() => prUnpKgHa('Coco', 10, 'mil frutos/ha'))),
+     [prUnpTxt(iS), iS.motivo, FS.kgOk, prUnpMassa('Café', 'L/ha')]);
+  // AC-i · contraprovas de agregação (contrato, item 6)
+  const so = Object.keys(PRDC.cult).find(k => PRDC.cult[k].cultura === 'Soja' && !PRDC.cult[k].semanal); const ks = PRDC.cult[so];
+  PRDC.cult.tu1 = Object.assign({}, ks, { id: 'tu1', area: 10, meta: 25, un_meta: 'sc/ha', prod: true });
+  const c = cenClone(CEN0); OSX(c, 'OS-0971', ks.local, 'Em execução', [['25/09', 10]], 'Colheita de grãos'); OSX(c, 'OS-0972', ks.local, 'Em execução', [['26/09', 10]], 'Colheita de grãos');
+  PRDC.osCult['OS-0971'] = 'tu1'; PRDC.osCult['OS-0972'] = 'tu1';
+  const g1 = MUD(c, x => prReceber(x, { os: 'OS-0971', ticket: 'TK-U71', bruto: 25000, tara: 15000, u: '14', imp: '1', cond: 'Íntegra', dcol: '2026-09-25' }));
+  const g2 = MUD(c, x => prReceber(x, { os: 'OS-0972', ticket: 'TK-U72', bruto: 20000, tara: 15000, u: '14', imp: '1', cond: 'Íntegra', dcol: '2026-09-26' }));
+  const RT = prResultado(c, 'tu1'); const errado = prUnpDiv(RT.kg, prSoma(RT.passes.map(p => p.area)), 1);
+  delete PRDC.cult.tu1; delete PRDC.osCult['OS-0971']; delete PRDC.osCult['OS-0972'];
+  ok('U20i1 K-U07 mesmo cultivo de 10 ha, duas passagens nos mesmos 10 ha (10.000 + 5.000 kg): 1.500 kg/ha = 1,5 t/ha = 25 sc/ha (não 750 kg/ha somando 20 ha)',
+     !g1.erro && !g2.erro && RT.kg === 15000 && RT.area === 10 && TX('Soja', RT, 'kg') === '1.500,00 kg/ha' && TX('Soja', RT, 't') === '1,50 t/ha' && TX('Soja', RT, 'padrao') === '25,00 sc/ha' && errado === 750,
+     [g1.erro, g2.erro, RT.kg, RT.area, TX('Soja', RT, 'kg'), errado]);
+  const P2 = prPonderada([{ k: { cultura: 'Soja' }, kg: 10000, area: 10 }, { k: { cultura: 'Soja' }, kg: 15000, area: 5 }]);
+  ok('U20i2 K-U08 parcelas distintas 10 ha/10.000 kg e 5 ha/15.000 kg: 25.000 ÷ 15 = 1.666,67 kg/ha = 1,67 t/ha = 27,78 sc/ha (a média simples das taxas daria 2.000)',
+     TX('Soja', P2, 'kg') === '1.666,67 kg/ha' && TX('Soja', P2, 't') === '1,67 t/ha' && TX('Soja', P2, 'padrao') === '27,78 sc/ha' && prDiv(prSoma([1000, 3000]), 2) === 2000,
+     [TX('Soja', P2, 'kg'), TX('Soja', P2, 't'), TX('Soja', P2, 'padrao')]);
+  const e1 = ERR(() => prPonderada([{ k: { cultura: 'Café' }, kg: 3000, area: 5 }, { k: { cultura: 'Café' }, kg: 6000, area: 5, estagio: 'campo' }]));
+  const e2 = ERR(() => prPonderada([{ k: { cultura: 'Algodão em caroço' }, kg: 4526, area: 1 }, { k: { cultura: 'Algodão em pluma' }, kg: 2053, area: 1 }]));
+  ok('U20i3 nunca agrega produtos ou estágios diferentes: café beneficiado × café da roça e algodão em caroço × pluma lançam o erro da R-U08',
+     e1 === 'Produtos ou estágios diferentes não se agregam: Café beneficiado × Café da roça.' && e2 === 'Produtos ou estágios diferentes não se agregam: Algodão em caroço × Algodão em pluma.', [e1, e2]);
+  // meta na unidade escolhida (R-U02, R-U06; K-U06, K-U13): a mesma unidade mostra o valor gravado; outra converte uma vez; até 2 casas
+  const M = (cu, v, u, k) => prUnpMeta(cu, v, u, k).txt;
+  ok('U20m K-U06/K-U13 meta: mamão 50 t/ha/ano = 50.000 kg/ha/ano = 833,33 sc60 eq./ha/ano = 5.000 cx10 eq./ha/ano; soja 64 sc/ha = 3.840 kg/ha = 3,84 t/ha; 3,85 t/ha gravado = 64,17 sc/ha no Padrão e 3,85 t/ha em t/ha',
+     M('Mamão Formosa', 50, 't/ha/ano', 'padrao') === '50 t/ha/ano' && M('Mamão Formosa', 50, 't/ha/ano', 'kg') === '50.000 kg/ha/ano' && M('Mamão Formosa', 50, 't/ha/ano', 'sc60') === '833,33 sc60 eq./ha/ano'
+     && M('Mamão Formosa', 50, 't/ha/ano', 'cx10') === '5.000 cx10 eq./ha/ano' && M('Soja', 64, 'sc/ha', 'kg') === '3.840 kg/ha' && M('Soja', 64, 'sc/ha', 't') === '3,84 t/ha' && M('Soja', 64, 'sc/ha', 'padrao') === '64 sc/ha'
+     && M('Soja', 3.85, 't/ha', 'padrao') === '64,17 sc/ha' && M('Soja', 3.85, 't/ha', 't') === '3,85 t/ha' && prUnpMeta('Soja', 64, 'sc/ha', 't').kgHa === 3840,
+     [M('Mamão Formosa', 50, 't/ha/ano', 'sc60'), M('Soja', 64, 'sc/ha', 't'), M('Soja', 3.85, 't/ha', 'padrao')]);
+  // R-U12 · sem op, os textos de hoje (mensagens de comando); com op, o conversor (laranja: o "lado" t/ha só no Padrão)
+  ok('U20n R-U12 sem op o texto de hoje; com op o conversor: laranja Padrão "300,00 cx/ha · 12,24 t/ha" e kg/ha "12.240,00 kg/ha" (o lado só no Padrão)',
+     prPrtvTxt('Laranja', 24480, 2) === '300,00 cx/ha · 12,24 t/ha' && prPrtvTxt('Laranja', 24480, 2, 'padrao') === '300,00 cx/ha · 12,24 t/ha' && prPrtvTxt('Laranja', 24480, 2, 'kg') === '12.240,00 kg/ha'
+     && prPrtvResTxt('Café', { apurar: true }) === 'sc/ha a apurar' && prPrtvResTxt('Café', { apurar: true }, 'kg') === 'kg/ha a apurar',
+     [prPrtvTxt('Laranja', 24480, 2, 'padrao'), prPrtvTxt('Laranja', 24480, 2, 'kg')]);
+  // a ponderada traz "apurar" como contagem dos talhões fora da conta: o indicador dela continua medido (revisão de 10/10, C01o)
+  const pf = prPonderada([{ k: { cultura: 'Café' }, kg: 3000, area: 5 }, { k: { cultura: 'Café' }, kg: 0, area: 5, apurar: true }]);
+  ok('U20p ponderada com 1 talhão a apurar fora da conta: indicador medido "10,00 sc/ha" (a contagem não vira estado a apurar)', pf.apurar === 1 && TX('Café', pf, 'padrao') === '10,00 sc/ha' && TX('Café', pf, 'kg') === '600,00 kg/ha', [pf, TX('Café', pf, 'padrao')]);
+  ok('U20o o catálogo volta ao original depois dos casos injetados (tu1, OS-0971/0972)', !PRDC.cult.tu1 && !PRDC.osCult['OS-0971'] && !PRDC.osCult['OS-0972']); }

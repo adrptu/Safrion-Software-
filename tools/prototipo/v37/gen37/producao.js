@@ -44,9 +44,12 @@ function prEstQ(cultura, base, prod) { const u = prUn(cultura); return (u.est ||
 function prEstTxt(cultura, base, d, prod) { return prFmtT(prEstQ(cultura, base, prod), d === undefined ? 2 : d) + ' ' + prEstUn(cultura, prod); }
 function prLoteTxt(L, base, d) { return prEstTxt(L.cultura, base, d, L.prod); }   /* quantidade de um lote, na unidade do estágio dele */
 function prEstBase(cultura, q) { const u = prUn(cultura); return u.est ? prN(prM(q)) : prMul(q, u.massa); }   /* quantidade digitada na unidade de estoque → base */
-/* produtividade = produção na base física ÷ área colhida, na unidade da cultura (R-04); laranja mostra t/ha ao lado */
+/* produtividade = produção na base física ÷ área colhida, na unidade da cultura (R-04); laranja mostra t/ha ao lado.
+   op (UNID-PROD, opcional): a unidade escolhida na tela (prUnpOpcoes); com op o texto sai do conversor único (prUnpTxt). Sem op, o texto
+   de hoje: as mensagens de comando não leem preferência de tela (R-U12) */
 function prPrtv(cultura, base, ha) { if (!(Number(ha) > 0)) return null; return prDiv(prQ(cultura, base), ha); }
-function prPrtvTxt(cultura, base, ha) { const u = prUn(cultura); const p = prPrtv(cultura, base, ha); if (p === null) return '—';
+function prPrtvTxt(cultura, base, ha, op) { if (op !== undefined) return prUnpTxt(prUnpInd(cultura, { kg: base, area: ha }, op));
+  const u = prUn(cultura); const p = prPrtv(cultura, base, ha); if (p === null) return '—';
   return prFmt(p, 2) + ' ' + u.prtv + (u.lado ? ' · ' + prFmt(prDiv(prDiv(base, 1000), ha), 2) + ' ' + u.lado : ''); }
 
 /* ---------- grão: descontos (R-08) e matéria seca (função única, a mesma da BEN-3 como benEst) ---------- */
@@ -135,12 +138,15 @@ function prAPesar(c, osId) { return prCargas(c, g => g.st === 'A pesar' && (g.or
    produção, na produtividade nem no desvio; x.ben = 0 é zero medido (real). Função única do estado de apuração: prApurado. */
 function prApurado(x, cultura) { return prUn(cultura).base !== 'beneficiado' || (x.ben !== undefined && x.ben !== null && x.ben !== '' && isFinite(Number(x.ben))); }
 function prProdOrig(x, cultura) { const u = prUn(cultura); if (u.base === 'beneficiado') return prApurado(x, cultura) ? Number(x.ben) : 0; return u.base === 'comercial' ? (x.com || 0) : (x.kg || 0); }
-function prProdOS(c, osId) { const out = { kg: 0, liq: 0, com: 0, cafe: 0, apurar: false };
+/* UNID-PROD: litros = todos os L de café da roça (medidos ou a apurar); kgOk = toda origem com peso líquido > 0 (o kg do fruto vale);
+   estim = alguma origem com participação estimada (COLH R-06). cafe (só os L a apurar) e liq não mudam */
+function prProdOS(c, osId) { const out = { kg: 0, liq: 0, com: 0, cafe: 0, apurar: false, litros: 0, kgOk: false, estim: false, n: 0 }; let semPeso = false;
   prCargas(c, g => g.st === 'Recebida').forEach(g => (g.origem || []).filter(x => x.os === osId).forEach(x => {
+    out.n++; out.litros = prSoma([out.litros, x.litros || 0]); if (!(Number(x.kg) > 0)) semPeso = true; if (x.modo === 'estimada') out.estim = true;
     out.liq = prSoma([out.liq, x.kg || 0]); out.com = prSoma([out.com, x.com || 0]);
     if (prApurado(x, g.cultura)) out.kg = prSoma([out.kg, prProdOrig(x, g.cultura)]);
     else { out.apurar = true; out.cafe = prSoma([out.cafe, x.litros || 0]); } }));
-  return out; }
+  out.kgOk = out.n > 0 && !semPeso; return out; }
 function prAreaOS(o) { return prSoma((o.ap || []).filter(a => cenApSomado(a)).map(a => a.ha)); }
 /* versão publicada que vale como referência do passe: a última publicada ANTES do início da semana (R-05, R-17) */
 function prVersaoRef(c, cid, sem) { const ini = prSemIni(sem); const vs = (prP(c).previsoes[cid] || []).filter(v => v.d < ini && v.sem && v.sem[sem] !== undefined); return vs[vs.length - 1] || null; }
@@ -151,6 +157,7 @@ function prPasse(c, o) { const cid = prCultDaOS(c, o); const k = PRDC.cult[cid] 
   const ref = prVersaoRef(c, cid, sem); const refKg = ref ? ref.sem[sem] : null;
   const desv = (final && refKg && !p.apurar) ? prDiv(prMul(prSub(p.kg, refKg), 100), refKg) : null;
   return { os: o.id, o, cid, cultura: k.cultura, sem, fase: o.etapa, area, kg: p.kg, liq: p.liq, com: p.com, cafe: p.cafe, apurar: p.apurar, aPesar: ap, final, ref, refKg, desv,
+           litros: p.litros, kgOk: p.kgOk, estim: p.estim, n: p.n,
            prtv: p.apurar ? null : prPrtv(k.cultura || 'Mamão Formosa', p.kg, area) }; }
 /* resultado do cultivo: passes (perene semanal), ciclo (área do cultivo, R-02 e D-11) ou safra (anual: mín(área, Σ ha)) */
 function prResultado(c, cid) { const k = PRDC.cult[cid]; if (!k) return null; const u = prUn(k.cultura); const oss = prOsCult(c, cid);
@@ -158,12 +165,16 @@ function prResultado(c, cid) { const k = PRDC.cult[cid]; if (!k) return null; co
   const kg = prSoma(passes.map(p => p.kg)); const haSom = prSoma(passes.map(p => p.area)); const aPesar = [].concat(...passes.map(p => p.aPesar));
   const apurar = passes.some(p => p.apurar); const cafe = prSoma(passes.map(p => p.cafe || 0));   /* café: litros ainda sem rendimento medido */
   const comecou = apurar || passes.some(p => prCmp(p.area, 0) > 0 || prCmp(p.kg, 0) > 0);
+  /* UNID-PROD (R-U05): todos os L e o peso líquido do fruto; o kg do fruto só vale com peso em todas as origens */
+  const litros = prSoma(passes.map(p => p.litros || 0)), liq = prSoma(passes.map(p => p.liq || 0)); const comOrig = passes.filter(p => p.n > 0);
+  const kgOk = comOrig.length > 0 && comOrig.every(p => p.kgOk), estim = passes.some(p => p.estim);
+  /* desvio contra a meta na base por ha, os dois pelo conversor e com a unidade gravada na meta (R-U09) */
   let area, parcial, ref = null, desv = null;
   if (k.semanal) { area = comecou ? k.area : 0; const fim = (PRDC.safras[k.saf] || {}).fim || ''; parcial = !(fim && prHoje() > fim);
-    if (!parcial && k.meta && !apurar) { ref = k.meta; desv = prDiv(prMul(prSub(prPrtv(k.cultura, kg, area), k.meta), 100), k.meta); } }
+    if (!parcial && k.meta && !apurar) { ref = k.meta; desv = prUnpDesv(k.cultura, kg, area, k.meta, k.un_meta); } }
   else { area = prCmp(haSom, k.area) > 0 ? k.area : haSom; parcial = !oss.length || oss.some(o => o.etapa !== 'Encerradas') || aPesar.length > 0;
-    ref = k.meta || null; if (ref && area > 0 && !apurar) desv = prDiv(prMul(prSub(prPrtv(k.cultura, kg, area), ref), 100), ref); }
-  return { cid, k, u, passes, kg, area, parcial, ref, desv, aPesar, cafe, apurar, prtv: (area > 0 && !apurar) ? prPrtv(k.cultura, kg, area) : null, comecou }; }
+    ref = k.meta || null; if (ref && area > 0 && !apurar) desv = prUnpDesv(k.cultura, kg, area, ref, k.un_meta); }
+  return { cid, k, u, passes, kg, area, parcial, ref, desv, aPesar, cafe, apurar, prtv: (area > 0 && !apurar) ? prPrtv(k.cultura, kg, area) : null, comecou, litros, liq, kgOk, estim }; }
 /* textos do resultado (linha, grupo, painel, passe, cartão e recebimento): com parte a apurar nunca "0 sc", "0,00 sc/ha" nem desvio (COLH-C01).
    X = resultado do talhão (prResultado) ou passe (prPasse): kg medido, cafe (L a apurar), apurar, area, comecou */
 function prProdTxt(cultura, X) { if (X.apurar) return (prCmp(X.kg, 0) > 0 ? prUnTxt(cultura, X.kg) + ' + ' : '') + prFmtT(X.cafe, 0) + ' L · ' + prUn(cultura).un + ' a apurar';
@@ -171,11 +182,84 @@ function prProdTxt(cultura, X) { if (X.apurar) return (prCmp(X.kg, 0) > 0 ? prUn
 /* carga de café: os litros e, medido o rendimento de todas as origens, as sacas medidas; senão "sc a apurar" */
 function prCargaCafeTxt(g) { const os = g.origem || []; const ok = os.length > 0 && os.every(x => prApurado(x, g.cultura));
   return prFmtT(g.litros, 0) + ' L · ' + (ok ? prUnTxt(g.cultura, prSoma(os.map(x => Number(x.ben)))) : prUn(g.cultura).un + ' a apurar'); }
-function prPrtvResTxt(cultura, X) { if (X.apurar) return prUn(cultura).prtv + ' a apurar'; return (X.prtv !== null && X.prtv !== undefined && X.area > 0) ? prPrtvTxt(cultura, X.kg, X.area) : '—'; }
+function prPrtvResTxt(cultura, X, op) { if (op !== undefined) return prUnpTxt(prUnpInd(cultura, X, op));
+  if (X.apurar) return prUn(cultura).prtv + ' a apurar'; return (X.prtv !== null && X.prtv !== undefined && X.area > 0) ? prPrtvTxt(cultura, X.kg, X.area) : '—'; }
 /* cultura (ou fazenda): Σ produção ÷ Σ área, ponderada; nunca média de médias (R-04, K07). Talhão a apurar fica fora da conta
-   (a área sem produção medida não entra como zero, COLH-C01); apurar conta os que ficaram fora */
+   (a área sem produção medida não entra como zero, COLH-C01); apurar conta os que ficaram fora.
+   UNID-PROD R-U08: só soma o mesmo produto do mesmo estágio (chave = u.prod no estágio-base, u.proc no campo, r.estagio === 'campo');
+   produtos ou estágios diferentes (café da roça × beneficiado, algodão em caroço × pluma) lançam erro, nunca somam */
+function prAgrChave(r) { const u = prUn(r.k.cultura); return r.estagio === 'campo' ? (u.proc || u.prod) : u.prod; }
 function prPonderada(rs) { const v = rs.filter(r => r && r.area > 0 && !r.apurar); const fora = rs.filter(r => r && r.apurar).length; if (!v.length) return null; const cultura = v[0].k.cultura;
-  const kg = prSoma(v.map(r => r.kg)), ha = prSoma(v.map(r => r.area)); return { kg, area: ha, prtv: prPrtv(cultura, kg, ha), parcial: v.some(r => r.parcial) || fora > 0, apurar: fora }; }
+  const k0 = prAgrChave(v[0]); const dif = v.find(r => prAgrChave(r) !== k0); if (dif) throw new Error('Produtos ou estágios diferentes não se agregam: ' + k0 + ' × ' + prAgrChave(dif) + '.');
+  const kg = prSoma(v.map(r => r.kg)), ha = prSoma(v.map(r => r.area));
+  return { kg, area: ha, prtv: prPrtv(cultura, kg, ha), parcial: v.some(r => r.parcial) || fora > 0, apurar: fora, cultura, estim: v.some(r => r.estim) }; }
+
+/* ---------- unidade de produtividade selecionável (UNID-PROD · docs/unidades-produtividade/ESPECIFICACAO.md v1.1, D-U01..D-U21) ----------
+   Conversor único (ENG-011, R-U01): toda tela que mostra produtividade ou meta em outra unidade passa por aqui; nenhuma multiplica por conta própria.
+   A base do indicador em massa é kg/ha (6 casas); o número na unidade escolhida sai de produção ÷ (área × massa da unidade), um arredondamento (R-U02).
+   Massa só converte massa (R-U05): L do café da roça e frutos (coco, abacaxi) nunca viram kg; o kg do fruto só vale com peso líquido em todas as origens.
+   A escolha é exibição: nada aqui lê ou grava o cenário nem a preferência (a preferência fica na tela, g2unidPref no bloco <perfis>). */
+const PR_UNP_FIX = [{ k: 'kg', un: 'kg/ha', rot: 'kg/ha', massa: '1' }, { k: 't', un: 't/ha', rot: 't/ha', massa: '1000' },
+  { k: 'sc60', un: 'sc60 eq./ha', rot: 'sc 60 kg/ha (equivalência)', massa: '60', eq: true }];
+const PR_UNP_SEMPESO = 'Falta peso ou conversão medida';
+function prUnpPesa(u) { return u.base !== 'frutos'; }   /* estágio-base pesado na balança (grão, café beneficiado, fruta, cana) */
+function prUnpAlt(cultura) { return (PRDC.unAlt || {})[prCult(cultura)] || []; }   /* massa declarada do produto (caixa do packing, D-U08) */
+function prUnpPadrao(cultura, estagio) { const u = prUn(cultura);
+  if (estagio === 'campo') return { k: 'padrao', un: u.campo + '/ha', rot: 'Padrão do estágio · ' + u.campo + '/ha', massa: null, div: '1', ok: true, motivo: '', L: true };
+  const m = prUnpPesa(u); const kg = (m && u.un !== 't' && u.un !== 'kg') ? ' (' + prFmtT(u.massa, 3) + ' kg)' : '';
+  return { k: 'padrao', un: u.prtv, rot: 'Padrão da cultura · ' + u.prtv + kg, massa: m ? u.massa : null, div: u.massa, ok: true, motivo: '', lado: u.lado || '' }; }
+/* opções do estágio ('base' ou 'campo'): Padrão, kg/ha, t/ha, sc 60 kg/ha (equivalência) e as de massa declarada; sai a opção igual ao Padrão em
+   todos os estágios (D-U03). X (opcional) é o resultado lido: no campo do café, sem peso em todas as origens as de massa ficam indisponíveis */
+function prUnpOpcoes(cultura, estagio, X) { const u = prUn(cultura); const est = (estagio === 'campo' && u.campo) ? 'campo' : 'base';
+  const P = prUnpPadrao(cultura, est); const pesa = est === 'campo' ? !(X && X.kgOk === false) : prUnpPesa(u);
+  const igual = (o) => !u.campo && prUnpPesa(u) && prCmp(o.massa, u.massa) === 0;
+  return [P].concat(PR_UNP_FIX.concat(prUnpAlt(cultura)).filter(o => !igual(o))
+    .map(o => ({ k: o.k, un: o.un, rot: o.rot, massa: o.massa, div: o.massa, eq: !!o.eq, ok: pesa, motivo: pesa ? '' : PR_UNP_SEMPESO }))); }
+/* unidade em texto (meta gravada ou opção) → massa da unidade em kg e o período; null se não é massa. Reconhece o un das opções e o texto do Padrão */
+function prUnpMassa(cultura, unTxt) { const u = prUn(cultura); const t = String(unTxt || '').trim(); const per = /\/ano$/.test(t) ? '/ano' : ''; const s = per ? t.slice(0, -4) : t;
+  if (!s || s === u.prtv) return prUnpPesa(u) ? { massa: u.massa, per, k: 'padrao' } : null;
+  const o = PR_UNP_FIX.concat(prUnpAlt(cultura)).find(x => x.un === s); return (o && prUnpPesa(u)) ? { massa: o.massa, per, k: o.k } : null; }
+/* valor por ha na unidade informada → base física por ha (kg; frutos no coco), multiplicação exata; unidade desconhecida é recusada */
+function prUnpQHa(cultura, valor, unTxt) { const u = prUn(cultura); const s = String(unTxt || '').trim().replace(/\/ano$/, '');
+  if (!s || s === u.prtv) return prMul(valor, u.massa); const m = prUnpMassa(cultura, unTxt);
+  if (!m) throw new Error('Unidade sem massa para ' + cultura + ': ' + unTxt + '.'); return prMul(valor, m.massa); }
+function prUnpKgHa(cultura, valor, unTxt) { if (!prUnpPesa(prUn(cultura))) throw new Error('Unidade sem massa para ' + cultura + ': ' + unTxt + '.'); return prUnpQHa(cultura, valor, unTxt); }
+/* q ÷ (área × div), um arredondamento (prM em milionésimos: q·10^12 ÷ (área·div·10^12)) */
+function prUnpDiv(q, area, div) { return prN(prRd(prM(q) * PR_S * PR_S, prM(area) * prM(div))); }
+/* desvio % contra a meta na base por ha: (q ÷ área − meta) ÷ meta × 100, um arredondamento; meta com a unidade gravada (R-U09) */
+function prUnpDesv(cultura, q, area, meta, unMeta) { const Q = prM(prUnpQHa(cultura, meta, unMeta)), A = prM(area); const den = Q * A; if (den === 0n) return null;
+  return prN(prRd((prM(q) * PR_S - den) * 100n * PR_S, den)); }
+/* indicador (R-U07): X de prResultado, prPasse ou prPonderada; k = chave da opção escolhida. st: medido | apurar | pend | vazio.
+   kgHa = base por ha com 6 casas (a chave de ordenação e de filtro, igual em qualquer unidade); num = o número na unidade escolhida */
+function prUnpInd(cultura, X, k) { const u = prUn(cultura); const ops = prUnpOpcoes(cultura, 'base'); const ped = ops.find(o => o.k === k);
+  const o = (ped && ped.ok) ? ped : ops[0]; const temArea = prCmp(X.area || 0, 0) > 0;
+  const ind = { st: '', kgHa: null, num: null, un: o.un, prod: '', estagio: 'base', estim: !!X.estim, op: o.k, campo: null, lado: '',
+                motivo: (ped && !ped.ok) ? ped.rot + ' indisponível para ' + u.prod + ': ' + ped.motivo.toLowerCase() : '' };
+  if (X.apurar === true) { ind.st = 'apurar';   /* café beneficiado sem rendimento medido: nunca "0"; ao lado, o indicador medido do fruto (D-U11).
+    Na ponderada, apurar é a contagem dos talhões fora da conta (não o estado): ela é sempre medida */
+    if (u.campo && prCmp(X.litros || 0, 0) > 0) {
+      if (!temArea) ind.campo = { st: 'pend' };
+      else { const oc = prUnpOpcoes(cultura, 'campo', X); const pc = oc.find(x => x.k === o.k); const c = (pc && pc.ok) ? pc : oc[0];
+        if (pc && !pc.ok) ind.motivo = pc.rot + ' indisponível para ' + u.proc + ': ' + pc.motivo.toLowerCase();
+        ind.campo = { st: 'medido', estagio: 'campo', prod: u.proc, un: c.un, L: !!c.L, kgHa: c.massa ? prUnpDiv(X.liq, X.area, 1) : null, lHa: prUnpDiv(X.litros, X.area, 1),
+                      num: prUnpDiv(c.massa ? X.liq : X.litros, X.area, c.div) }; } }
+    return ind; }
+  if (!temArea) { ind.st = prCmp(X.kg || 0, 0) > 0 ? 'pend' : 'vazio'; return ind; }
+  ind.st = 'medido'; ind.kgHa = prUnpDiv(X.kg, X.area, 1); ind.num = prUnpDiv(X.kg, X.area, o.div);
+  if (o.eq) ind.prod = u.prod; if (o.k === 'padrao' && u.lado) ind.lado = prFmt(prUnpDiv(X.kg, X.area, 1000), 2) + ' ' + u.lado;
+  return ind; }
+function prUnpNum(x) { return (x.L ? prFmtT(x.num, 2) : prFmt(x.num, 2)) + ' ' + x.un; }
+/* texto da célula (R-U03): "‹número› ‹un›" [· lado] [de ‹produto› quando é equivalência ou outro estágio] [· estimativa] */
+function prUnpTxt(ind) { if (!ind || ind.st === 'vazio') return '—'; if (ind.st === 'pend') return 'sem área colhida apontada'; const est = ind.estim ? ' · estimativa' : '';
+  if (ind.st === 'apurar') { const c = ind.campo; return ind.un + ' a apurar' + (c ? ' · ' + (c.st === 'pend' ? 'sem área colhida apontada' : prUnpNum(c) + ' de ' + c.prod) : '') + est; }
+  return prUnpNum(ind) + (ind.lado ? ' · ' + ind.lado : '') + (ind.prod ? ' de ' + ind.prod : '') + est; }
+/* meta (valor e unidade gravados) na unidade escolhida: a mesma unidade mostra o valor gravado; outra converte uma vez; até 2 casas (R-U02).
+   Unidade gravada sem conversão: mostra como foi gravada (ok: false) */
+function prUnpMeta(cultura, valor, unTxt, k) { const ops = prUnpOpcoes(cultura, 'base'); const o = ops.find(x => x.k === k && x.ok) || ops[0];
+  const per = /\/ano$/.test(String(unTxt || '').trim()) ? '/ano' : ''; let q;
+  try { q = prUnpQHa(cultura, valor, unTxt); } catch (e) { return { txt: prFmtT(valor, 2) + ' ' + (unTxt || ''), kgHa: null, ok: false, un: unTxt || '' }; }
+  const m = prUnpMassa(cultura, unTxt); const mesma = m ? m.k === o.k : o.k === 'padrao';
+  const num = mesma ? prN(prM(valor)) : prUnpDiv(q, 1, o.div); return { txt: prFmtT(num, 2) + ' ' + o.un + per, num, kgHa: q, ok: true, un: o.un + per }; }
 
 /* ---------- previsão (R-17) ---------- */
 function prContagem(c, cid) { const l = (prP(c).contagens || []).filter(x => x.cult === cid && x.sinc !== false); return l[l.length - 1] || null; }
@@ -187,9 +271,9 @@ function prRascunho(c, cid, par) { const k = PRDC.cult[cid]; if (!k) return null
   if (k.semanal) { const n = prContagem(c, cid);
     if (n) { const S = prSem(n.d); const sem = {}; [['pintado', 0], ['devez', 1], ['verde', 2]].forEach(([e, i]) => { sem[prSemMais(S, i)] = prKgEstadio(k.area, P.plantas_ha, n[e], n.plantas, n.peso, P.perda); });
       return { base: 'contagem', cnt: n, sem, par: P }; }
-    if (!k.meta) return null; const S = prSem(prHoje()); const kg = prDiv(prMul(prMul(k.area, k.meta), 1000), 52); const sem = {};
+    if (!k.meta) return null; const S = prSem(prHoje()); const kg = prMulDiv(k.area, prUnpQHa(k.cultura, k.meta, k.un_meta), 52); const sem = {};   /* meta pelo conversor (RC-09) */
     [1, 2, 3].forEach(i => { sem[prSemMais(S, i)] = kg; }); return { base: 'meta', sem, par: P }; }
-  if (!k.meta) return null; return { base: 'meta', safra: prMul(prMul(k.area, k.meta), prUn(k.cultura).massa) }; }
+  if (!k.meta) return null; return { base: 'meta', safra: prMul(k.area, prUnpQHa(k.cultura, k.meta, k.un_meta)) }; }
 function prSemComecou(sem) { return prSemIni(sem) <= prHoje(); }
 /* semanas publicáveis do rascunho: só as que ainda não começaram e mudam o que está publicado */
 function prPublicavel(c, cid, par) { const r = prRascunho(c, cid, par); if (!r) return null; const vs = prP(c).previsoes[cid] || []; const ult = vs[vs.length - 1] || null;
