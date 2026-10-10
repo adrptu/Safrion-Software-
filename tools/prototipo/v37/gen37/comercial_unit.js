@@ -303,7 +303,13 @@ caso('RV-IDEM', () => { const c = NOVO60(); EMTRANSITO(c); const rm0 = c.produca
   /* sem a devolução gravada com a chave do recibo não há como provar a origem: conflito explícito, nunca sucesso */
   c2.producao.expedicoes['RM-0002'].devs[0].chave = 'OUTRA'; const S3 = JSON.stringify(c2);
   const r6 = MUD(c2, x => comEntregar(x, Object.assign({}, E2, { dev: Object.assign({}, E2.dev, { lote: de }) })));
-  ok('RV-IDEMe sem a devolução do recibo, pedir o lote é conflito (não dá para provar a igualdade); nada gravado', /conflito/.test(r6.erro || '') && JSON.stringify(c2) === S3, r6); });
+  ok('RV-IDEMe sem a devolução do recibo, pedir o lote é conflito (não dá para provar a igualdade); nada gravado', /conflito/.test(r6.erro || '') && JSON.stringify(c2) === S3, r6);
+  /* COM-REV-20261010-03: sem a devolução do recibo, repetir SEM lote (seleção automática) também é conflito; entrega sem devolução repete como antes */
+  const r7 = MUD(c2, x => comEntregar(x, E2));
+  ok('RV-IDEMf sem a devolução do recibo, repetir sem lote é conflito (origem não comprovada); nada gravado', /conflito/.test(r7.erro || '') && !r7.repetido && JSON.stringify(c2) === S3, r7);
+  const c3 = NOVO60(); EMTRANSITO(c3); const E3 = { rm: 'RM-0002', d: '2026-09-26', ator: 'Rui', chave: 'I-S' }; MUD(c3, x => comEntregar(x, E3)); const S4 = JSON.stringify(c3);
+  const r8 = MUD(c3, x => comEntregar(x, E3));
+  ok('RV-IDEMg entrega sem devolução repete com a mesma chave, sem conferir devolução; nada gravado', r8.repetido && JSON.stringify(c3) === S4, r8); });
 caso('RV-A3', () => { const c = NOVO60(); EMTRANSITO(c); const PP = () => c.producao;
   MUD(c, x => comEntregar(x, { rm: 'RM-0002', d: '2026-09-26', dev: { kg: 400, motivo: 'Maturação avançada' }, ator: 'Rui', chave: 'T-E' })); const lid = PP().expedicoes['RM-0002'].devs[0].lote;
   const er = ['Dora', 'Rui', 'Caio', 'Paula', ''].map(a => MUD(c, x => prLiberarLote(x, lid, a)).erro || '');

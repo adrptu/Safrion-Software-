@@ -362,9 +362,11 @@ function comDevolverEf(c, rm, lote, kg, motivo, quem, d, chave, imp) { const P =
 function comEntregar(c, k) { const P = comP(c); const rm = P.expedicoes[k.rm]; if (!rm) throw new Error('Carga ' + k.rm + ' não encontrada.');
   const imp = JSON.stringify([k.rm, k.d || '', k.dev ? [prNum(k.dev.kg), k.dev.motivo || ''] : null]);
   /* COM-IDEM-01: a origem da devolução confere pela origem efetiva gravada (vale também para recibos antigos, cuja impressão não tem o lote):
-     outro lote pedido com a mesma chave é conflito; sem lote (seleção automática) vale a origem gravada; sem a devolução gravada não há como provar: conflito */
+     outro lote pedido com a mesma chave é conflito; sem lote (seleção automática) vale a origem gravada; com devolução pedida, sem a devolução do recibo
+     (ou sem origem gravada) não há como provar a igualdade: conflito, com ou sem lote (COM-REV-20261010-03). Entrega sem devolução continua como estava */
   if (rm.entrega) { if (k.chave && rm.entrega.chave === k.chave) { if (rm.entrega.imp !== imp) throw prConflito(k.chave, rm.id);
-      if (k.dev && k.dev.lote) { const dv0 = (rm.devs || []).find(x => x.chave === k.chave + '-DEV'); if (!dv0 || dv0.de !== k.dev.lote) throw prConflito(k.chave, rm.id + (dv0 ? ' com a devolução do ' + dv0.de : '')); }
+      if (k.dev) { const dv0 = (rm.devs || []).find(x => x.chave === k.chave + '-DEV');
+        if (!dv0 || !dv0.de || (k.dev.lote && dv0.de !== k.dev.lote)) throw prConflito(k.chave, rm.id + (dv0 && dv0.de ? ' com a devolução do ' + dv0.de : '')); }
       return { msg: 'Entrega da ' + rm.id + ' já confirmada: nada foi gravado de novo.', rm, repetido: true }; }
     throw new Error('Entrega da ' + rm.id + ' já confirmada em ' + prBr(rm.entrega.d) + ': nada foi gravado de novo.'); }
   if (rm.st !== 'Em trânsito') throw new Error(rm.id + ' está ' + rm.st.toLowerCase() + ': só carga em trânsito tem entrega a confirmar.');
