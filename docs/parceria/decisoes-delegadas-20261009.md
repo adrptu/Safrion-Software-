@@ -26,7 +26,7 @@ Leitura do Codex (6091443216, item 5): os passos 1 a 3 das decisões delegadas s
 
 ## Confronto: conjunto vigente × passos 1 a 3
 
-Passos 1 a 3: seção 5 do [texto ao proprietário em `64040f8`](https://github.com/adrptu/Safrion-Software-/blob/64040f8194eacf6383c49886d82471c6a8606ed6/docs/decisoes-delegadas/DECISOES-DELEGADAS.md). Estado: checkpoint lido em 10/10/2026 (cabeçalho das 00:00 UTC, conferido de novo na versão das 00:29 UTC). O checkpoint muda; vale sempre o vigente.
+Passos 1 a 3: seção 5 do [texto ao proprietário em `58fb55b`](https://github.com/adrptu/Safrion-Software-/blob/58fb55bdd3d758d20b26f2dad84b371b626344d3/docs/decisoes-delegadas/DECISOES-DELEGADAS.md). Estado: checkpoint lido em 10/10/2026 (cabeçalho das 00:00 UTC, conferido de novo na versão das 00:29 UTC). O checkpoint muda; vale sempre o vigente.
 
 | ID | No checkpoint | Nos passos 1 a 3 |
 |---|---|---|
