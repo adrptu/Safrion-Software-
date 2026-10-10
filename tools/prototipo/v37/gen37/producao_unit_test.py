@@ -69,7 +69,9 @@ def main():
     # ao abrir (D-U20, RC-01); salvar com o texto mostrado não regrava (RC-02); trocas repetidas não derivam
     import ocupacao_cen as OCEN, cenario
     js23 = ('globalThis.localStorage=undefined;\n' + open(os.path.join(HERE, 'g2lib.js'), encoding='utf-8').read() + '\n' + cenario.js_prefixo()
-            + 'const GRIDS=[];const D2={unMeta:' + json.dumps(OCEN.UN_META, ensure_ascii=False) + '};\n' + open(os.path.join(HERE, 'safra.js'), encoding='utf-8').read() + r'''
+            + 'const GRIDS=[];const D2={unMeta:' + json.dumps(OCEN.UN_META, ensure_ascii=False) + '};\n'
+            + 'const CULT_SEM=' + json.dumps([[c['cultura'], c['meta'], c['un_meta']] for l in __import__('dados2').CULTIVOS.values() for c in l], ensure_ascii=False) + ';\n'
+            + open(os.path.join(HERE, 'safra.js'), encoding='utf-8').read() + r'''
 const o={}; const G=(r,x)=>metaGravar(Object.assign({cult:'Soja'},r,x||{}));
 o.p=metaRascunho('Soja',64,'sc/ha'); g2unidSet('Soja','t'); o.t=metaRascunho('Soja',64,'sc/ha'); o.tg=G(o.t);
 g2unidSet('Soja','kg'); o.fixo=[metaUnTxt(Object.assign({cult:'Soja'},o.t)), G(o.t,{meta:'3,9'})];
@@ -77,6 +79,7 @@ g2unidSet('Soja','padrao'); o.r385=metaRascunho('Soja',3.85,'t/ha'); o.g385=G(o.
 let m={meta:3.85,unm:'t/ha'}; const ks=['t','kg','padrao']; for(let i=0;i<20;i++){ g2unidSet('Soja',ks[i%3]); const r=metaRascunho('Soja',m.meta,m.unm); m=G(r); }
 o.deriva=m; g2unidSet('Soja','padrao'); o.tela=metaTela({v:{cult:'Soja',meta:3.85,unm:'t/ha'}});
 o.un=[metaUnTxt({cult:'Soja',_un:'kg/ha'}),metaUnTxt({cult:'Soja',_un:'sc/ha'}),metaUnTxt({cult:'Mamão Formosa',_un:'kg/ha/ano'})];
+const KG_ANTES={'sc/ha':60,'t/ha/ano':1000,'kg/ha':1}; o.custo=CULT_SEM.filter(([cu,m,u])=>prUnpKgHa(cu,m,u)!==m*KG_ANTES[u]);
 console.log(JSON.stringify(o));''')
     p23 = os.path.join(HERE, '_probe', 'unidprod_saf_unit.js'); open(p23, 'w', encoding='utf-8').write(js23)
     r = subprocess.run(['node', p23], capture_output=True, text=True, timeout=60)
@@ -90,6 +93,8 @@ console.log(JSON.stringify(o));''')
        [o.get('r385'), o.get('g385'), o.get('deriva'), o.get('tela')])
     ok('U23d campo "Unidade da meta": "kg/ha · Padrão da cultura: sc/ha (60 kg)"; no Padrão "sc/ha · Padrão da cultura"; mamão "kg/ha/ano · Padrão da cultura: t/ha/ano"',
        o.get('un') == ['kg/ha · Padrão da cultura: sc/ha (60 kg)', 'sc/ha · Padrão da cultura', 'kg/ha/ano · Padrão da cultura: t/ha/ano'], o.get('un'))
+    ok('U23e Custo R$/kg do Planejar safra: a meta em kg/ha pelo conversor é igual à da tabela antiga (KG_UN) nas 40 metas da semente',
+       o.get('custo') == [], o.get('custo'))
     # AC-j · fonte única do fator (ENG-011, R-U01): a segunda tabela (KG_UN do Planejar safra) e o × 1000 fixo do rascunho pela meta saíram
     saf = open(os.path.join(HERE, 'safra.js'), encoding='utf-8').read(); prj = open(os.path.join(HERE, 'producao.js'), encoding='utf-8').read()
     ok('AC-j fonte única: sem KG_UN no safra.js e sem o × 1000 fixo no rascunho; o Planejar safra converte pelo prUnpKgHa',

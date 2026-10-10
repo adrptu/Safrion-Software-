@@ -2,7 +2,7 @@
 
 **Pedido do proprietário (Adrianus, 10/10/2026, literal, trazido pelo Codex em UNIDADES-PROD-20261010-01, PR #47, comentário 6093638004):** «Coloque opções para todas culturas em kg/ha, ton/ha, sc 60 kg/ha, etc.» O Codex aceitou a direção em 6093701812 com duas precisões: a base kg/ha vale só para o indicador em massa (item 4 do contrato) e a agregação não conta duas vezes a mesma área (item 6).
 
-- **Rótulo:** especificado. Nenhum código foi alterado. "(executado)" marca o que saiu de comando rodado em 10/10/2026 nesta worktree: `python3 docs/unidades-produtividade/verificacao/contas.py` (FALHAS: 0), as buscas do §0 (`grep` de sc/ha, t/ha, kg/ha, produtividade, `prPrtv`, `un_meta`, `KG_UN`), a checagem de nomes globais (safra.js, ocupacao.js, cal01.js, g2lib.js, support.js e o JS do processo_safra.py contra producao.js e cenario.js: nenhuma colisão) e a sonda da semente no node (ponderada do mamão 96.740 kg ÷ 137,9 ha = 0,70 t/ha; nenhuma soja, milho ou café com produção na semente).
+- **Rótulo:** §0 a §10 especificados (a implementação e os testes executados estão no §11). "(executado)" marca o que saiu de comando rodado em 10/10/2026 nesta worktree: `python3 docs/unidades-produtividade/verificacao/contas.py` (FALHAS: 0), as buscas do §0 (`grep` de sc/ha, t/ha, kg/ha, produtividade, `prPrtv`, `un_meta`, `KG_UN`), a checagem de nomes globais (safra.js, ocupacao.js, cal01.js, g2lib.js, support.js e o JS do processo_safra.py contra producao.js e cenario.js: nenhuma colisão) e a sonda da semente no node (ponderada do mamão 96.740 kg ÷ 137,9 ha = 0,70 t/ha; nenhuma soja, milho ou café com produção na semente).
 - **v1.1 (10/10/2026):** revisão por contraexemplo contra o código e o PRD. Os achados RC-01 a RC-17 e o que mudou estão no §10.
 - **Base:** `47ff754` (branch `claude/v44-unidades`). `gen37/` = `tools/prototipo/v37/gen37/`. PRD = `Safrion-Software-/docs/PRD.md` v3.11, "l.N" = linha. Decisões tomadas sem o proprietário: `DECISOES.md` (D-Unn). O PRD não é reaberto: o requisito fica registrado em `DECISOES.md`, fica fora da v55 e entra na versão seguinte (contrato, item 8).
 - **Fontes reaproveitadas, não repetidas:** a unidade de mercado e a massa de cada cultura vêm de `docs/culturas/UNIDADES-DE-MERCADO.md` (DEC-0510-03). Área colhida, produtividade, referência, café e "a apurar" vêm de `docs/colheita/ESPECIFICACAO.md` (R-02, R-04, R-05, R-09 e COLH-C01). Do PRD valem 10.0 (decimal sem arredondar a cada etapa, l.4237), 45.4 (no café, a quantidade tem base declarada e não há fator universal, l.7648) e 62.2/62.3 (a saca exige massa explícita, as passagens legítimas somam e produtos e estados não se misturam, l.9188 e l.9194-9196).
@@ -13,7 +13,7 @@ Requisitos do PRD e fora do escopo: DEC-0510-03; PRD 10.0, 45.4, 62.2, ENG-011, 
 Autor / revisor / integrador: Claude / Codex / integrador da branch única
 Base / arquivos sob responsabilidade: 47ff754 / producao.js (bloco novo e os pontos do §0), g2lib.js (preferência, chave de ordenação e filtro, gancho de abertura), areas/producao.py (COLH), safra.js e areas/processo_safra.py (meta), dados_cad.py e dados_producao.py (catálogo), cad_culturas.py (texto de ajuda), testes do §7
 Aceite e comando de verificação: §8; bateria do §7
-Estado / impedimento / próximo passo: especificado (v1.1, revisada) / nenhum (D-U01 a D-U21 valem até o proprietário mudar) / P1
+Estado / impedimento / próximo passo: implementado P1–P3 e bateria P4 executada (§11) / Mapa pendente da DEC-0910-36 (D-U02) / revisão do Codex
 ```
 
 ## 0. Mapa do existente (busca executada)
@@ -286,3 +286,23 @@ Feita contra o código da base `47ff754` e o PRD v3.11. Severidade pelo PRD 22.1
 | RC-15 | S4 | "`prPonderada` recusa" sem dizer como (número, nulo ou erro) nem a chave de agregação; nada impedia mudar `prtv` para kg/ha, o que quebraria U03 e U06 | Erro com motivo e chave = produto do estágio (R-U08); `prtv` no Padrão (§0, §5) |
 | RC-16 | S4 | Testes: `tu1` injetado no `PRDC` sem voltar ao original; modo `unid` fora da lista `MODOS`; "20 trocas" sem sequência (ArrowDown parado na última opção); "o mesmo número na linha e nos passes" mistura passe e ciclo | Restaurar o `PRDC`; `MODOS`; 10 × (ArrowDown, ArrowUp); passo 6 |
 | RC-17 | S3 | Pré-existente, fora deste módulo: a meta editada no SAF não chega à COLH (o `PRDC.cult` vem da semente; o SAF não grava no estado único). Dado que não se integra | Registrado no §9, com a condição de retorno |
+
+## 11. Implementação (10/10/2026, branch `claude/v44-unidades`)
+Rótulo: executado, salvo o que diz "especificado". Comandos dentro de `gen37/`, com `SAFRION_DADOS=sintetico`; navegador com `env CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdpU.lock env CDP_GL=1 timeout 900 python3 <teste>`.
+
+| Passo | Commit | O que entrou |
+|---|---|---|
+| P1 | `bc100fe` | Conversor `prUnp*`, `litros`/`kgOk`/`estim`, desvio pela unidade da meta, rascunho pela meta pelo conversor, guarda da R-U08, algodão (D-U07), `unAlt` do `EMB_PACK` (D-U08), U20 e U21 |
+| P2 | `96aed0c` | Seletor na COLH (`unidprod_ui.py`), preferência e `r.ordk` no `g2lib.js`, linha/grupo/painel/cartões, café da roça, U22, modo `unid` (COLH) |
+| P3 | `e88c9d0` | SAF: sai o `KG_UN`, meta `{meta, unm}` com rascunho fixo e sem regravar, gancho `g2openDraft` (D-U22), D-U23, prefixo do estado (D-U14 ajustada), CD-02, U23, AC-j, modo `unid` (SAF) |
+
+**Defeitos reproduzidos na base `47ff754` (falham lá, passam aqui):** U21a (rascunho pela meta com × 1000 fixo), U21b (desvio sem a unidade gravada na meta), U21c (ponderada somava café da roça com beneficiado), U22a/U22b (ordem e filtro por valor pelo texto).
+
+**Testes (executado):**
+- `producao_unit_test.py`: OK 154/154; `cafe_apurar_test.py unit`: 17/17; `verificacao/contas.py`: FALHAS 0.
+- Build: 0 FALHA; `montar_render.py`: 142 páginas; `varredura.py`: 142/142 sem erro; `acoes_duplicadas.py`: 0 com ação repetida (iguais à base).
+- `producao_fluxo_test.py unid`: OK 23/23, com a linha "PENDENTE (DEC-0910-36)" do Mapa, que não conta como OK.
+- Vizinhos, iguais à base onde havia log: `producao_fluxo_test.py` os 8/8, fluxo 21/21, erros 12/12, celular 7/7, revisao 18/18 (modos separados); `cafe_apurar_test.py nav` 10/10; `tabelas_saf_test.py` 24/24; `saf_c01_test.py` 68/0; `saf_capacidade_simetrica_test.py` 38/0; `saf_cmp_continuidade_test.py` 31/0; `saf_operacoes_test.py` 87/0; `saf_revisao_test.py` 42/0; `cadc_cd02_test.py` 15/15; `cadf_det_test.py` 13/13; `tabelas_os_test.py` 38/38; `saftest.py` sem erro de JS.
+- `producao_fluxo_test.py` com todos os modos numa só execução: 88/89 na primeira vez (A-04 da revisão não emitiu a ordem; o mesmo modo sozinho deu 18/18) e OK 89/89 na segunda. A-04 fica como instabilidade observada, não escondida: não toca a unidade de produtividade.
+
+**Fora (especificado, não executado):** camada do Mapa (D-U02, DEC-0910-36); artefato publicado pelo integrador da branch única.
