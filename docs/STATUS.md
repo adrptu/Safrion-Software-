@@ -11,9 +11,10 @@ Atualizado em 09/10/2026 por Claude, sobre a `main` `266a682`. PR aberto não si
 | Protótipo | Navegável, com dados sintéticos e sem banco ou login reais. Regime leve (AGENTS 3.5): branch única `claude/prototipo-v44`, PR #47 em rascunho; artefato v53 (09/10, Planejar safra integrado); frentes em andamento listadas no PR #47 | https://claude.ai/artifact/HqspGRcrX1wcayCVMe9emm |
 | Design system | PRD cap. 74 e os padrões do proprietário de 09/10 (DEC-0910-01): botões BOT-01 a BOT-09, seleção que abre detalhe (SEL), etapa futura neutra (ETP) e separador, hover verde, retorno visual e dica (VIS). SEL-02, BOT-03 e BOT-07 precisados pela revisão do Codex no PR #50 (DS-NAV-20261009-02): registro indisponível com aviso e recuperação, Programar só para agendar execução e alvo único semântico na linha. No protótipo: componente comum e teste de conformidade em andamento; correção das telas depois da integração das frentes. No software real (`packages/ui`): pendente | `docs/design-system/README.md` |
 | Merge na `main` | Feito pelos agentes: o revisor integra o PR do outro com CI verde e parecer escrito; ninguém integra o próprio (DEC-0910-02, 09/10) | `AGENTS.md` 2 e 3 |
+| Decisões delegadas (09/10) | Delegação do proprietário aos dois agentes (DEC-0910-03) e 30 linhas com acordo escrito do Codex (recibos 6091153950 e 6091443216), cada uma com o seu limite; 24 entradas aguardam a revisão do Codex. Nada é aprovação do proprietário; o PRD fica inalterado até a comparação final; implementação pendente | `docs/DECISIONS.md`; `docs/parceria/decisoes-delegadas-20261009.md` |
 | Repositório | Privado; PRs #2 a #31, #46 e #48 integrados | https://github.com/adrptu/Safrion-Software- |
 | Fundação | Domínio (decimal, unidades e saldo por lote); PostgreSQL/PostGIS com RLS e isolamento entre organizações; login OIDC com sessões; concessão e revogação de acesso; primeira interface de estoque e cadastros; imagens de homologação verificadas na CI | PRs #5, #7, #8, #9, #10 e #11 |
-| Homologação | Terraform, conexão ao banco por IP privado e fila de vínculo integrados e validados na CI, sem plan nem apply. **Nenhum ambiente hospedado**: provisionar depende de autorização concreta de custo e destino | PR #14; `infra/terraform/`; `docs/OPERACAO.md` |
+| Homologação | Terraform, conexão ao banco por IP privado e fila de vínculo integrados e validados na CI, sem plan nem apply. **Nenhum ambiente hospedado ainda**: desenvolvimento, QA e HML já estão autorizados com referência de custo (EXT-01, R-006); falta provisionar e comprovar o ambiente, dentro dessas autorizações concretas (plano revisado antes de cada apply; alerta de orçamento não é teto) | PR #14; `infra/terraform/`; `docs/OPERACAO.md`; EXT-01 em `docs/DECISIONS.md` |
 | Proteção da `main` | Ruleset `24154464` ativo, conferido na leitura do servidor (alterado em 29/09, 10:13 de Brasília): exclusão e force push bloqueados, pull request obrigatório e os 10 checks obrigatórios do app GitHub Actions, com branch atualizada antes do merge. Sem exceção de bypass | PR #15; `tools/github/` |
 | Produção | Não existe | — |
 
@@ -28,7 +29,7 @@ Atualizado em 09/10/2026 por Claude, sobre a `main` `266a682`. PR aberto não si
 ### Sequência
 
 1. Feito em 29/09: os 10 checks obrigatórios estão no ruleset existente, conferidos na leitura do servidor.
-2. Ensaio remoto da homologação, com autorização de custo e destino do proprietário: restauração do backup em instância isolada, logs sem dados pessoais, acesso e revogação.
+2. Ensaio remoto da homologação, dentro das autorizações concretas já recebidas (EXT-01, R-006): restauração do backup em instância isolada, logs sem dados pessoais, acesso e revogação.
 3. Antes do primeiro usuário externo: teste de todas as rotas com usuário de outra organização e inventário dos dados pessoais tratados.
 4. Feito em 09/10: PRD v3.11 vigente (#48). As decisões pendentes (73.12, 74.12, 75.8) continuam com o proprietário.
 5. Design system de 09/10: aplicar BOT, SEL, ETP e VIS no protótipo (componente comum, teste de conformidade e correção das telas depois da integração) e, ao passar para o software real, em `packages/ui`.
