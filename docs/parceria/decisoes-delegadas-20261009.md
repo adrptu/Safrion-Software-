@@ -58,10 +58,10 @@ Passos 1 a 3: seção 5 do [texto ao proprietário em `58fb55b`](https://github.
 | CADUX | Preservado | Passo 1, item 8, por último |
 | Ficha do pivô e capacidade | Preservado | Parcial no passo 2 (IRR-03, IRR-04); ficha no detalhe do equipamento **fora dos passos** |
 | Agrofit: praga-alvo | Preservado | Parcial no passo 2 (AGR-07); colunas de praga-alvo **fora dos passos** |
-| Hiperclareza | Não aparece no checkpoint nem no repositório | **Fora dos passos**; o Codex indica a origem |
+| Hiperclareza | Pedido direto do proprietário ao Codex, preservado no recibo 6091898499 (PR #51), sem horário: "Se alguma tela não tiver hiper foco e hiper clareza ao usuário melhore com claude." e "sempre tem que estar hiper claro o que fazer, de onde veio, para onde vai no fluxo de processos. com ações únicas e não redundantes para cada coisa no sistema." | **Fora dos passos**; encaixa em NAV, DS e UX existentes, sem fase nem portão novos. Verificável por tela: origem e contexto, estado, ação primária, consequência e destino, recuperação, com rascunho, filtros e foco preservados |
 | Software real: C2 e PRs #32 a #35 | Preservados para a transição | Fora dos passos por definição (DEC-0910-05) |
 
-**Divergência de ordem.** O cabeçalho das 00:00 UTC coordenava BEN → DOM → COM → PCM; o das 00:29 UTC compõe SAF → DOM → PCM sobre o BEN corrigido. O passo 1 põe CTL-4 e SUP entre essas frentes e a COM depois da PCM. Vale o checkpoint.
+**Ordem.** "BEN → DOM → COM → PCM" (cabeçalho das 00:00 UTC) é estado antigo. A ordem operacional vigente, pelos recibos do Codex de 10/10 (6091515434, 6091532182, 6091571327 e 6091898499): composição SAF → DOM → PCM sobre o BEN corrigido, depois a NAV-1, e a COM depois da composição. O passo 1 punha CTL-4 e SUP entre essas frentes; vale o checkpoint vigente.
 
 **Resultado.** Nenhum ID sai do conjunto vigente: todos continuam como requisito, com o estado do checkpoint, até a conclusão e a auditoria do conjunto (DEC-0910-05).
 
