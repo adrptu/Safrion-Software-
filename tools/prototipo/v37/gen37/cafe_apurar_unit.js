@@ -19,10 +19,12 @@ const ORIG = (c, ben) => Object.values(c.producao.cargas).filter(g => g.st === '
 // ---- C01a/b · a mesma carga, com e sem área apontada: "12.000 L · sc a apurar", nunca 0 sc / 0,00 sc/ha / −100,0 % ----
 { const A = base(5), B = base(0); const la = linha(A.c), lb = linha(B.c);
   console.log('REPRO COLH-C01 ' + JSON.stringify({ comArea: { colh: la.row.s.colh, prtv: la.row.s.prtv, ref: la.row.s.ref }, semArea: { colh: lb.row.s.colh, prtv: lb.row.s.prtv, ref: lb.row.s.ref } }));
-  ok('C01a com 5 ha apontados: colhido "12.000 L · sc a apurar"; produtividade e desvio a apurar (nada de 0 sc, 0,00 sc/ha ou −100,0 %)',
-     !A.r.erro && la.row.s.colh === '12.000 L · sc a apurar' && la.row.s.prtv === 'sc/ha a apurar' && /a apurar$/.test(la.row.s.ref) && !FALSO.test(la.row.s.colh + ' ' + la.row.s.prtv + ' ' + la.row.s.ref),
+  // UNID-PROD (R-U05, D-U11): a parte do fruto aparece em L/ha com o produto; o café beneficiado continua "a apurar" (expectativa mudada)
+  ok('C01a com 5 ha apontados: colhido "12.000 L · sc a apurar"; produtividade "sc/ha a apurar · 2.400 L/ha de Café da roça" e desvio a apurar (nada de 0 sc, 0,00 sc/ha ou −100,0 %)',
+     !A.r.erro && la.row.s.colh === '12.000 L · sc a apurar' && la.row.s.prtv === 'sc/ha a apurar · 2.400 L/ha de Café da roça' && /a apurar$/.test(la.row.s.ref) && !FALSO.test(la.row.s.colh + ' ' + la.row.s.prtv + ' ' + la.row.s.ref),
      [A.r.erro, la.row.s]);
-  ok('C01b sem área apontada: o mesmo texto (o apontamento não muda o estado de apuração)', !B.r.erro && lb.row.s.colh === la.row.s.colh && lb.row.s.prtv === la.row.s.prtv && lb.row.s.ref === la.row.s.ref, [lb.row.s, la.row.s]);
+  ok('C01b sem área apontada: colhido e desvio iguais (o apontamento não muda o estado de apuração); produtividade "sc/ha a apurar · sem área colhida apontada", sem divisão',
+     !B.r.erro && lb.row.s.colh === la.row.s.colh && lb.row.s.prtv === 'sc/ha a apurar · sem área colhida apontada' && lb.row.s.ref === la.row.s.ref, [lb.row.s, la.row.s]);
   ok('C01c a linha não ordena o café a apurar como zero colhido (valor vazio, não 0)', la.row.v.colh === null && lb.row.v.colh === null, [la.row.v.colh, lb.row.v.colh]);
   const R5 = la.X.R; ok('C01d estado único (prResultado): a apurar, 12.000 L pendentes, 0 kg medidos, produtividade e desvio nulos', R5.apurar === true && R5.cafe === 12000 && R5.kg === 0 && R5.prtv === null && R5.desv === null, R5); }
 
@@ -30,8 +32,8 @@ const ORIG = (c, ben) => Object.values(c.producao.cargas).filter(g => g.st === '
 { const A = base(5); const X = prTal(A.c, CID); const pd = prPonderada([X.R]);
   ok('C01e total da cultura: a produtividade ponderada não soma o café a apurar como zero', pd === null || pd.area === 0, pd);
   const P = prPanTal(SELF, A.c, X); const kv = Object.fromEntries(P.kv.map(x => [x.l, x.v])); const txt = JSON.stringify(P.secs);
-  ok('C01f painel do talhão: colhido "12.000 L · sc a apurar", produtividade e meta a apurar; passe e resultado sem 0 sc',
-     kv['Colhido na safra'] === '12.000 L · sc a apurar' && kv['Produtividade'] === 'sc/ha a apurar' && /12\.000 L · sc a apurar/.test(txt) && !FALSO.test(JSON.stringify(P.kv) + txt), [P.kv, txt.slice(0, 600)]);
+  ok('C01f painel do talhão: colhido "12.000 L · sc a apurar", produtividade "sc/ha a apurar · 2.400 L/ha de Café da roça" e meta a apurar; passe e resultado sem 0 sc',
+     kv['Colhido na safra'] === '12.000 L · sc a apurar' && kv['Produtividade'] === 'sc/ha a apurar · 2.400 L/ha de Café da roça' && /12\.000 L · sc a apurar/.test(txt) && !FALSO.test(JSON.stringify(P.kv) + txt), [P.kv, txt.slice(0, 600)]);
   ok('C01g mensagem do recebimento com área apontada: passe "sc/ha a apurar", não "0,00 sc/ha"', /passe S\d\d sc\/ha a apurar/.test(A.r.msg) && !FALSO.test(A.r.msg), A.r.msg); }
 
 // ---- C01h · estoque de produto: lote "Café da roça" em L, sem saca derivada de litros ----
@@ -59,8 +61,8 @@ const ORIG = (c, ben) => Object.values(c.producao.cargas).filter(g => g.st === '
 { const A = base(5); ORIG(A.c, 3000);
   const r2 = MUD(A.c, x => prReceber(x, { os: 'OS-0930', ticket: 'TK-CF2', bruto: 7200, tara: 3200, litros: 8000, cond: 'Íntegra', dcol: '2026-09-25' }));
   const { X, row } = linha(A.c);
-  ok('C01k 3.000 kg medidos + 8.000 L pendentes: "50 sc + 8.000 L · sc a apurar", produtividade a apurar',
-     !r2.erro && X.R.apurar === true && row.s.colh === '50 sc + 8.000 L · sc a apurar' && row.s.prtv === 'sc/ha a apurar', [r2.erro, row.s]); }
+  ok('C01k 3.000 kg medidos + 8.000 L pendentes: "50 sc + 8.000 L · sc a apurar", produtividade a apurar com o fruto de todas as cargas (20.000 L em 5 ha = 4.000 L/ha de Café da roça)',
+     !r2.erro && X.R.apurar === true && row.s.colh === '50 sc + 8.000 L · sc a apurar' && row.s.prtv === 'sc/ha a apurar · 4.000 L/ha de Café da roça', [r2.erro, row.s]); }
 
 // ---- C01o · revisão DOM achado 7: cartão do grupo a 390 px (mesma regra da linha do grupo no desktop) ----
 { const G = (rs) => typeof prGrpNum === 'function' ? prGrpNum('Café', rs) : 'sem prGrpNum (cartão do grupo calculado dentro da tela)';
@@ -79,5 +81,17 @@ const ORIG = (c, ben) => Object.values(c.producao.cargas).filter(g => g.st === '
 
 // ---- C01m · outras culturas não mudam: grão com carga continua "sc" medido ----
 { const c = cenClone(CEN0); const s = prResultado(c, 'lg19'); ok('C01m mamão (Pivô 19) segue medido: não fica a apurar', s && s.apurar === false && s.kg > 0, s && [s.apurar, s.kg]); }
+
+// ---- C01q · UNID-PROD (AC-h, R-U10): a mesma unidade na linha, no grupo, no painel e no cartão do mesmo contexto (perfil × cultura) ----
+// A preferência fica na memória da página (sem localStorage no node) e por perfil: Ana escolhe kg/ha para o Café; Caio continua no Padrão.
+{ const A = base(5); const c0 = JSON.stringify(A.c); g2unidSet('Café', 'kg'); const { X, row } = linha(A.c); const P = prPanTal(SELF, A.c, X); const kv = Object.fromEntries(P.kv.map(x => [x.l, x.v]));
+  const ok1 = row.s.prtv === 'kg/ha a apurar · 1.200,00 kg/ha de Café da roça' && kv['Produtividade'] === row.s.prtv && row.s.ref === 'meta 2.280 kg/ha a apurar'
+    && kv['Unidade de produtividade'] === 'kg/ha · Padrão da cultura: sc/ha (60 kg)' && /meta 2\.280 kg\/ha/.test(P.sub) && prGrpNum('Café', [X.R]) === 'kg/ha a apurar · 1 talhão';
+  const j1 = JSON.stringify(A.c); ORIG(A.c, 3000); const L2 = linha(A.c); const P2 = prPanTal(SELF, A.c, L2.X); const kv2 = Object.fromEntries(P2.kv.map(x => [x.l, x.v]));
+  const ok2 = L2.row.s.prtv === '600,00 kg/ha · safra parcial' && kv2['Produtividade'] === '600,00 kg/ha parcial' && prGrpNum('Café', [L2.X.R]) === '600,00 kg/ha ponderada sobre 5 ha' && L2.row.ordk.prtv === 600;
+  const perf0 = G2_PERFIL_MEM; G2_PERFIL_MEM = 'Caio'; const caio = linha(A.c).row.s.prtv; G2_PERFIL_MEM = perf0; const ana = linha(A.c).row.s.prtv; g2unidSet('Café', 'padrao');
+  ok('C01q UNID-PROD: com kg/ha escolhido (Ana), linha, painel, grupo e meta em kg/ha ("kg/ha a apurar · 1.200,00 kg/ha de Café da roça"; medido "600,00 kg/ha"); Caio continua no Padrão; o cenário não muda',
+     ok1 && ok2 && caio === '10,00 sc/ha · safra parcial' && ana === '600,00 kg/ha · safra parcial' && j1 === c0,
+     [row.s.prtv, row.s.ref, kv['Unidade de produtividade'], P.sub, L2.row.s.prtv, kv2['Produtividade'], caio, ana]); }
 
 console.log(JSON.stringify(R));

@@ -42,10 +42,29 @@ def main():
     from areas import producao as AP
     defs = lambda t: set(re.findall(r'^(?:function|const|let|var)\s+([A-Za-z_$][\w$]*)', t, re.M)) | set(re.findall(r'(?<![\w.])function\s+([A-Za-z_$][\w$]*)\s*\(', t))
     pr = defs(open(os.path.join(HERE, 'producao.js'), encoding='utf-8').read())
-    outros = {'cenario.js': open(os.path.join(HERE, 'cenario.js'), encoding='utf-8').read(), 'dados_carencia.JS': __import__('dados_carencia').JS}
+    outros = {'cenario.js': open(os.path.join(HERE, 'cenario.js'), encoding='utf-8').read(), 'dados_carencia.JS': __import__('dados_carencia').JS,
+              'safra.js': open(os.path.join(HERE, 'safra.js'), encoding='utf-8').read(),   # UNID-PROD (D-U14): o Planejar safra carrega o conversor
+              'ocupacao.js': open(os.path.join(HERE, 'ocupacao.js'), encoding='utf-8').read(), 'cal01.js': open(os.path.join(HERE, 'cal01.js'), encoding='utf-8').read(),
+              'unidprod_ui.JS': __import__('unidprod_ui').JS}
     outros.update({'areas/producao.py:' + k: getattr(AP, k) for k in dir(AP) if k.endswith('_JS') and isinstance(getattr(AP, k), str)})
     for nome, t in outros.items():
         dup = sorted(pr & defs(t)); ok(f'nomes de producao.js não são redefinidos em {nome}', not dup, dup)
+    # U22 · UNID-PROD (R-U11, revisão RC-03/RC-04): a coluna Produtividade/Meta mostra um texto que muda com a unidade escolhida; a ordem e o
+    # filtro por valores usam a chave estável r.ordk (kg/ha), não o texto. Falha na base 47ff754 (o g2lib ordenava e filtrava pelo texto).
+    js = r'''const vm=require('vm'),fs=require('fs'); const ctx={}; vm.createContext(ctx);
+      vm.runInContext(fs.readFileSync(process.argv[1],'utf8')+';this.g2sort=g2sort;this.g2match=g2match;this.g2fkeys=g2fkeys;',ctx);
+      const sp={cols:[{k:'tal'},{k:'prtv'}]}; const c=sp.cols[1];
+      const R=(id,kg,t)=>({id,v:{tal:id},s:{tal:id,prtv:t},ordk:{prtv:kg}});
+      const kg=[R('A',1200,'1.200,00 kg/ha'),R('B',484.89,'484,89 kg/ha'),R('C','apurar','sc/ha a apurar')];
+      const t=[R('A',1200,'1,20 t/ha'),R('B',484.89,'0,48 t/ha'),R('C','apurar','sc/ha a apurar')];
+      const ord=ctx.g2sort(kg,sp,{so:{k:'prtv'}}).map(r=>r.id).join('');
+      const chave=ctx.g2fkeys(t[1],c)[0]; const f={f:{prtv:[chave]}};
+      console.log(JSON.stringify({ord, chave, kgB:kg.filter(r=>ctx.g2match(r,sp,f)).map(r=>r.id), tB:t.filter(r=>ctx.g2match(r,sp,f)).map(r=>r.id),
+        mesma:ctx.g2fkeys(kg[1],c)[0]===ctx.g2fkeys(t[1],c)[0]}));'''
+    r = subprocess.run(['node', '-e', js, os.path.join(HERE, 'g2lib.js')], capture_output=True, text=True, timeout=60)
+    u = json.loads((r.stdout or 'null').strip().splitlines()[-1]) if r.stdout.strip() else None
+    ok('U22a R-U11 ordenação pela chave em kg/ha: "484,89 kg/ha" antes de "1.200,00 kg/ha"; "a apurar" no fim (o texto punha 1.200 antes)', u and u['ord'] == 'BAC', [u, r.stderr[-300:]])
+    ok('U22b R-U11 filtro por valor aplicado em t/ha continua achando a mesma linha em kg/ha (chave igual nas duas unidades)', u and u['mesma'] and u['kgB'] == ['B'] and u['tB'] == ['B'], u)
     print('RESULTADO:', 'OK' if all(OK) else 'FALHOU', f'{sum(OK)}/{len(OK)}')
     return all(OK)
 

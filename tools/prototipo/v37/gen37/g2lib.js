@@ -23,8 +23,15 @@ function g2text(r,c){ if(r.s&&r.s[c.k]!==undefined&&r.s[c.k]!==null) return (c&&
 // coluna multivalorada (c.multi, TABELAS-FOCO): a linha traz r.m[k]=[{id,l}] (vínculos estruturados, ex.: talhões); filtro por pertinência
 // do ID, nunca por texto (T1 não pega T10 nem T1-A); vazio é um valor próprio do filtro, nos dois sentidos
 function g2mem(r,c){ return (c.multi&&r.m&&r.m[c.k])||null; }
-function g2fkeys(r,c){ const m=g2mem(r,c); if(m) return m.length?m.map(x=>x.id):['(vazio)']; const t=g2text(r,c); return [(t===''||t==='—')?'(vazio)':t]; }
-function g2key(r,c){ if(c.t==='date'){ const d=r.v&&r.v[c.k]; return (d===undefined||d===null||d==='')?null:String(d); }   // ISO: ordena por data
+// chave estável (r.ordk[k], UNID-PROD R-U11): a coluna mostra um texto que muda com a unidade escolhida; a ordem e o filtro por valores
+// usam a chave (número em kg/ha; texto para os estados), não o texto. O menu do filtro continua mostrando o texto da célula
+function g2ordk(r,c){ return (r&&r.ordk&&r.ordk[c.k]!==undefined)?r.ordk[c.k]:undefined; }
+function g2fkeys(r,c){ const o=g2ordk(r,c); if(o!==undefined) return [(o===null||o===''||o==='vazio')?'(vazio)':String(o)];
+  const m=g2mem(r,c); if(m) return m.length?m.map(x=>x.id):['(vazio)']; const t=g2text(r,c); return [(t===''||t==='—')?'(vazio)':t]; }
+// rótulo de um valor do filtro: com chave estável, o texto da célula de hoje (na unidade escolhida); senão a própria chave
+function g2flab(rows,c,k){ if(k==='(vazio)') return k; const ach=(list)=>{ for(const r of list||[]){ const o=g2ordk(r,c); if(o!==undefined&&String(o)===k) return g2text(r,c)||k; const x=ach(r.kids); if(x) return x; } return ''; }; return ach(rows)||k; }
+function g2key(r,c){ const o=g2ordk(r,c); if(o!==undefined) return typeof o==='number'?o:null;
+  if(c.t==='date'){ const d=r.v&&r.v[c.k]; return (d===undefined||d===null||d==='')?null:String(d); }   // ISO: ordena por data
   if(c.t==='num'){ let n=(r.v&&r.v[c.k]!==undefined&&r.v[c.k]!==null&&r.v[c.k]!=='')?Number(r.v[c.k]):g2num(r.s&&r.s[c.k]); return isNaN(n)?null:n; } const t=g2text(r,c); return (t===''||t==='—')?null:t; }
 function g2match(r,sp,st,mask,added){
   if(r.sh && !(added||{})[r.sh]) return false;
@@ -186,7 +193,7 @@ function g2vals(self,sp,v,mask){
   // valores do filtro aberto
   const fmc=st.fmc; const fcol=sp.cols.find(c=>c.k===fmc);
   if(fcol){ const cnt={}, lab={}; const leaf=(list)=>list.forEach(r=>{ if(r.livre||r.fora) return; if(r.kids&&r.kids.length) leaf(r.kids); if(!(r.kids&&r.kids.length)||sp.tree===false||!sp.tree||(fcol.niv0&&r.tal)){
-      const m=g2mem(r,fcol); g2fkeys(r,fcol).forEach(k=>{ cnt[k]=(cnt[k]||0)+1; if(!lab[k]){ const x=m&&m.find(y=>y.id===k); lab[k]=x?x.l:k; } }); } }); leaf(rows);
+      const m=g2mem(r,fcol); const ok=g2ordk(r,fcol)!==undefined; g2fkeys(r,fcol).forEach(k=>{ cnt[k]=(cnt[k]||0)+1; if(!lab[k]){ const x=m&&m.find(y=>y.id===k); lab[k]=x?x.l:((ok&&k!=='(vazio)')?(g2text(r,fcol)||k):k); } }); } }); leaf(rows);
     const L=(k)=>lab[k]||k; const todos=Object.keys(cnt).sort((a,b)=>L(a).localeCompare(L(b),'pt-BR',{numeric:true})); const apl=(st.f||{})[fmc];
     // rascunho da seleção: abre com o filtro aplicado (ou tudo marcado); só vale no OK, como no Excel e no Google Sheets
     const sel=st.fmd?st.fmd.slice():(apl&&apl.length?apl.filter(k=>cnt[k]):todos.slice()); const q=st.fmq||''; const qn=g2norm(q);
@@ -235,7 +242,7 @@ function g2vals(self,sp,v,mask){
   v[id+'_empty']=flat.length===0; v[id+'_some']=flat.length>0;
   v[id+'_q']=st.q||''; v[id+'_setq']=(e)=>g2set(self,id,{q:e.target.value});
   v[id+'_filtered']=g2filtering(st)||!!(sp.qf&&st.qv); v[id+'_clear']=()=>g2set(self,id,{q:'',f:{},qv:''});
-  v[id+'_fchips']=Object.keys(st.f||{}).filter(k=>(st.f[k]||[]).length).map(k=>{ const c=sp.cols.find(x=>x.k===k)||{l:k}; return {t:c.l+': '+st.f[k].join(', '), rm:()=>{ const f=Object.assign({},g2st(self,id).f||{}); delete f[k]; g2set(self,id,{f}); }}; });
+  v[id+'_fchips']=Object.keys(st.f||{}).filter(k=>(st.f[k]||[]).length).map(k=>{ const c=sp.cols.find(x=>x.k===k)||{l:k}; return {t:c.l+': '+st.f[k].map(x=>g2flab(rows,c,x)).join(', '), rm:()=>{ const f=Object.assign({},g2st(self,id).f||{}); delete f[k]; g2set(self,id,{f}); }}; });
   v[id+'_selcount']=Object.values(st.sel||{}).filter(Boolean).length; v[id+'_hassel']=v[id+'_selcount']>0;
   // barra de seleção (DS-40 · UX-ACAO-UNICA-20261003): seleção por IDs; diz quantos estão fora da vista (filtro ou grupo recolhido),
   // sem perder nem ampliar a seleção; a prévia do comando de lote lista todos os incluídos
@@ -359,6 +366,12 @@ function g2papT(papeis){ return [].concat(papeis).map(x=>((G2_PAPEIS.find(y=>y.k
 // quem decide a alçada (texto das telas, nunca nome fixo): sem titular ativo, diz onde conceder
 function g2alcQuem(id,nivel){ const n=g2alcN(g2alc(id),nivel); if(!n) return ''; const q=n.modo==='um'?g2quemUm(n.papeis):g2quem(n.papeis);
   return q||(g2papT(n.papeis)+' sem titular: conceda em Configurações › Usuários e alçadas'); }
+// UNID-PROD (R-U10, D-U13): unidade de produtividade por perfil × cultura, no navegador de quem usa (exibição; nunca vai para o cenário).
+// Leitura e gravação em try/catch, com a memória da página como reserva (janela privada, testes sem navegador); o valor inicial é o Padrão.
+const G2_UNID_KEY='safrion.pref.unidprod:'; const G2_UNID_MEM={};
+function g2unidChave(cultura){ return G2_UNID_KEY+g2perfil().k+':'+cultura; }
+function g2unidPref(cultura){ const k=g2unidChave(cultura); let v=G2_UNID_MEM[k]; try{ const x=localStorage.getItem(k); if(x) v=x; }catch(e){} return v||'padrao'; }
+function g2unidSet(cultura,op){ const k=g2unidChave(cultura); G2_UNID_MEM[k]=String(op||'padrao'); try{ localStorage.setItem(k,G2_UNID_MEM[k]); }catch(e){} }
 // </perfis>
 // trocar o perfil (aqui ou em outra aba) fecha a confirmação ou o formulário de decisão aberto, montado para o perfil anterior (revisão do CTL-3,
 // achado 1; dano evitado: a tela afirmar que decide quem não tem o papel). Cada tela diz o que fecha em self.g2perfilFecha (O.S., Mapa, Estoque)
