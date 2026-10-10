@@ -869,8 +869,10 @@ function g2voltaChegada(self,gid,sp){ if(self.__g2chegou) return; self.__g2chego
   let nt=null; try{ nt=new URLSearchParams(location.search).get('volta'); }catch(e){} if(nt===null) return;
   const c=g2voltaLer(), es=g2escopo(self);
   const mot=g2voltaValida(c,{nt,origem:String(location.origin),arq:g2arq(),ent:sp.ent,perfil:g2perfil().k,faz:es.faz,saf:es.saf,agora:Date.now()});
-  const ps=String(location.search||'').replace(/^\?/,'').split('&').filter(p=>p&&!/^volta(=|$)/.test(p)&&!(mot&&/^view(=|$)/.test(p)));
-  try{ history.replaceState(history.state,'',location.pathname+(ps.length?'?'+ps.join('&'):'')+location.hash); }catch(e){}
+  // a ficha sai do endereço; recusada, sai também a visão (g2visaoUrl troca só o view= e mantém o resto da query cru)
+  const q=String(location.search||'').replace(/^\?/,'').split('&').filter(p=>p&&!/^volta(=|$)/.test(p)).join('&');
+  let vw=''; try{ vw=mot?'':(new URLSearchParams(location.search).get('view')||''); }catch(e){}
+  try{ history.replaceState(history.state,'',g2visaoUrl(location.pathname,q,location.hash,vw)); }catch(e){}
   self.__g2voltaMotivo=mot; const all=Object.assign({},self.state.g2||{});
   if(mot){ all[gid]=Object.assign({},all[gid]||{},{f:{},q:'',so:null,qv:'',sel:{}}); self.state.g2=all; g2keepGrava(self,gid,all[gid]); return; }
   c.usado=Date.now(); try{ sessionStorage.setItem(G2_VOLTA,JSON.stringify(c)); }catch(e){}

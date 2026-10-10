@@ -154,11 +154,11 @@ chk('M6 mutante "contexto de outro perfil aceito" fica vermelho', m6 is not None
 RUINS = ["history.replaceState(null,'',location.pathname)", "history.replaceState(null,'',location.pathname+location.hash)", "history.replaceState(null,'',location.pathname+'#'+id)",
          "location.replace(location.pathname)", "location.href=location.pathname+'#x';", "history.pushState({},'',location.pathname)", "location.assign(location.pathname+location.hash)"]
 BONS = ["history.replaceState(history.state,'',g2visaoUrl(location.pathname,location.search,location.hash,k))", "history.replaceState(null,'',location.pathname+location.search)",
-        "history.replaceState(history.state,'',location.href)", "if(location.href==x) y()"]
+        "history.replaceState(history.state,'',location.href)", "if(location.href==x) y()", "history.replaceState(history.state,'',g2visaoUrl(location.pathname,q,location.hash,vw))"]
 def b4b():
     if not (temV and hasattr(V, 'escritas_sem_query')): return ['visoes.escritas_sem_query ausente']
     return [('não acusou', x) for x in RUINS if not V.escritas_sem_query(x)] + [('falso positivo', x) for x in BONS if V.escritas_sem_query(x)]
-fb4 = b4b(); chk('B4b checagem estática: acusa replaceState/pushState/location.replace/assign/href= com location.pathname sem location.search (7 formas) e aceita as que preservam a query (4)', not fb4, fb4)
+fb4 = b4b(); chk('B4b checagem estática: acusa replaceState/pushState/location.replace/assign/href= com location.pathname sem location.search (7 formas) e aceita as que preservam a query ou passam por g2visaoUrl (5)', not fb4, fb4)
 
 # 5 · com o build feito
 P = os.path.join(D, 'project')

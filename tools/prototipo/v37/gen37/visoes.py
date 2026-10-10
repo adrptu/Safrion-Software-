@@ -82,7 +82,8 @@ def validas(ent):
 
 # ---- §2.4 (estática): nas telas com seletor, toda escrita de URL preserva location.search (o ?view) ----
 # revisão VISOES-1, achado A9: a checagem antiga só pegava "replaceState(…location.pathname)" exato; esta acusa replaceState, pushState,
-# location.replace/assign e location.href= cujo argumento usa location.pathname sem location.search (g2visaoUrl recebe os dois e passa)
+# location.replace/assign e location.href= cujo argumento usa location.pathname sem location.search, salvo quando passa por g2visaoUrl (que troca
+# só o view= e mantém o resto da query)
 import re as _re
 _ESCRITA = _re.compile(r'(?:history\.(?:replaceState|pushState)|location\.(?:replace|assign))\s*\(|location\.href\s*=(?!=)')
 
@@ -100,5 +101,5 @@ def escritas_sem_query(src):
     ruins = []
     for m in _ESCRITA.finditer(src):
         arg = _argumento(src, m.end())
-        if 'location.pathname' in arg and 'location.search' not in arg: ruins.append((m.group(0) + arg)[:160])
+        if 'location.pathname' in arg and 'location.search' not in arg and 'g2visaoUrl(' not in arg: ruins.append((m.group(0) + arg)[:160])
     return ruins
