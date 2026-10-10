@@ -1,11 +1,11 @@
 // VISOES-1 (10/10/2026) · regras puras do seletor de visões no g2lib, sem navegador: node visoes_unit.js
-// U1–U9 do desenho (precedência, endereço, teclado, chave da preferência, celular) e a volta do detalhe (revisão Codex 6093255041, item 2).
+// U1–U9 do desenho (precedência, endereço, teclado, chave da preferência, celular) e a volta do detalhe (U10, rev. Codex 01 e 02).
 // VISOES_G2LIB=<arquivo> roda contra outro g2lib (o anterior à F1, para ver o vermelho; ou um mutante).
 const fs = require('fs'), path = require('path');
 const arq = process.env.VISOES_G2LIB || path.join(__dirname, 'g2lib.js');
 const src = fs.readFileSync(arq, 'utf8');
 const NOMES = ['g2visaoValida', 'g2visaoInicial', 'g2visaoAviso', 'g2visaoUrl', 'g2visaoTecla', 'g2visaoChave', 'g2visaoPrefLer', 'g2visaoPrefGrava',
-  'g2visoesCelular', 'g2voltaValido', 'g2voltaDecide', 'g2voltaUrl'];
+  'g2visoesCelular', 'g2voltaForma', 'g2voltaValida', 'g2voltaUrl'];
 const G = new Function('const G2_GLOSS=[];\n' + src + '\nreturn {' + NOMES.map(n => n + ': (typeof ' + n + "==='function'?" + n + ':null)').join(',') + '};')();
 let ok = 0, falhas = 0;
 const chk = (nome, f, extra) => { let c = false, x; try { c = !!f(); } catch (e) { x = String(e && e.message || e); }
@@ -39,6 +39,9 @@ chk('U6d sem visão (k vazio) tira só o view; os outros parâmetros ficam', () 
 chk('U6e ida e volta: o endereço gravado reabre na mesma visão e preserva theme', () => OS.every(k => { const u = U('/OS.dc.html', '?theme=dark', '#x', k); const q = u.slice(u.indexOf('?'), u.indexOf('#'));
   return ini(q, 'kanban').k === k && new URLSearchParams(q).get('theme') === 'dark' && u.endsWith('#x'); }));
 chk('U6f (Codex, item 1) preferência kanban → escolher Lista → F5: abre a Lista', () => { const u = U('/OS.dc.html', '', '', 'lista'); return ini(u.slice(u.indexOf('?')), 'kanban').k === 'lista'; });
+// revisão VISOES-1, achado A8: os outros parâmetros ficam em texto cru (URLSearchParams.toString() fazia "%20" virar "+" e "flag" virar "flag=")
+chk('U6g os outros parâmetros ficam como estavam: x=a+b, y=%20, flag sem "=", z=%2Fw; só o view muda', () => U('/OS.dc.html', '?x=a+b&y=%20&flag&view=lista&z=%2Fw', '#OS-0420', 'kanban') === '/OS.dc.html?x=a+b&y=%20&flag&z=%2Fw&view=kanban#OS-0420'
+  && U('/OS.dc.html', '?theme=dark&x=a%20b&flag&y=%2Fz', '#OS-0420', 'agrupada') === '/OS.dc.html?theme=dark&x=a%20b&flag&y=%2Fz&view=agrupada#OS-0420');
 // U7 · teclado: seta move o foco e nunca ativa
 const T = (i, k, n, m) => F('g2visaoTecla')(i, k, n || 4, m);
 chk('U7 → com volta (3 → 0), ← com volta (0 → 3), Home 0 e End 3', () => T(3, 'ArrowRight').foco === 0 && T(1, 'ArrowRight').foco === 2 && T(0, 'ArrowLeft').foco === 3 && T(2, 'Home').foco === 0 && T(1, 'End').foco === 3);
@@ -56,14 +59,22 @@ chk('U9 até 3 visões: todas na barra, sem "mais"', () => { const r = C(['lista
 chk('U9b 4 visões: 3 na barra + "mais" com a Carga', () => { const r = C(OS, 'lista'); return r.barra.join() === 'lista,agrupada,kanban' && r.mais.join() === 'carga' && !r.maisAtivo; });
 chk('U9c ativa dentro do "mais" (carga) marca o "mais"', () => C(OS, 'carga').maisAtivo === true);
 chk('U9d uma visão só: nada (sem barra)', () => { const r = C(['lista'], 'lista'); return r.barra.length === 0 && r.mais.length === 0; });
-// V · volta do detalhe (revisão Codex 6093255041, item 2): back só com histórico comprovado; senão destino canônico; contexto validado
-const ctx = { arq: 'OS.dc.html', ent: 'os', gid: 'g_os', view: 'agrupada', q: 'theme=dark', foco: 'OS-0421', nt: 'ab12cd34', t: 1, dest: 'CA-01det.dc.html' };
-const D = (c, a, h) => F('g2voltaDecide')(c, a, h);
-chk('V1 mesma aba (marca do detalhe = contexto e história > 1): history.back()', () => D(ctx, 'OS.dc.html', { len: 3, marca: 'ab12cd34' }) === 'back');
-chk('V2 nova aba (history.length = 1, sem marca): destino canônico com ?view', () => D(ctx, 'OS.dc.html', { len: 1, marca: undefined }) === 'canonico' && F('g2voltaUrl')(ctx) === 'OS.dc.html?theme=dark&view=agrupada');
-chk('V3 referrer sem histórico comprovado (marca de outro contexto): canônico, nunca back', () => D(ctx, 'OS.dc.html', { len: 4, marca: 'zz99' }) === 'canonico');
-chk('V4 link para outra lista ou contexto inválido (arquivo, entidade, visão): o link segue como está', () => D(ctx, 'EST.dc.html', { len: 3, marca: 'ab12cd34' }) === 'link'
-  && D(Object.assign({}, ctx, { arq: 'javascript:alert(1)' }), 'javascript:alert(1)', { len: 3 }) === 'link' && D(Object.assign({}, ctx, { view: 'KANBAN' }), 'OS.dc.html', { len: 3 }) === 'link'
-  && D(Object.assign({}, ctx, { arq: '../x/OS.dc.html' }), '../x/OS.dc.html', { len: 3 }) === 'link' && D(null, 'OS.dc.html', { len: 3 }) === 'link');
+// U10 · volta do detalhe (DESENHO §2.11, rev. Codex 01 e 02): o "Voltar" sempre vai ao destino canônico; o contexto só vale se for válido
+const AGORA = 1791600000000;
+const ctx = { arq: 'OS.dc.html', ent: 'os', gid: 'g_os', view: 'agrupada', q: 'theme=dark', foco: 'OS-0421', nt: 'ab12cd34', t: AGORA - 60000, dest: 'CA-01det.dc.html',
+  origem: 'http://x', perfil: 'Ana', faz: 'Todas', saf: '2026/27', keep: { f: { fase: ['Em execução'] }, q: '', so: null, qv: '' } };
+const chega = { nt: 'ab12cd34', origem: 'http://x', arq: 'OS.dc.html', ent: 'os', perfil: 'Ana', faz: 'Todas', saf: '2026/27', agora: AGORA };
+const VAL = (c, a) => F('g2voltaValida')(c, a);
+const com = (o) => Object.assign({}, ctx, o), em = (o) => Object.assign({}, chega, o);
+chk('U10 contexto válido (mesma ficha, origem, arquivo, entidade, perfil e escopo, 1 min, não usado): aceito ("")', () => VAL(ctx, chega) === '');
+chk('U10b destino canônico do "Voltar": a lista na visão do contexto, com os outros parâmetros e a ficha (?view e ?volta), nunca o histórico',
+  () => F('g2voltaUrl')(ctx) === 'OS.dc.html?theme=dark&view=agrupada&volta=ab12cd34' && F('g2voltaUrl')(com({ q: '' })) === 'OS.dc.html?view=agrupada&volta=ab12cd34');
+const MOTIVOS = [['ausente', null, chega], ['forma', com({ arq: '../x/OS.dc.html' }), chega], ['forma', com({ view: 'KANBAN' }), chega], ['outra ficha', ctx, em({ nt: 'zz99' })],
+  ['usado', com({ usado: AGORA - 1000 }), chega], ['outra origem', ctx, em({ origem: 'http://y' })], ['outro arquivo', ctx, em({ arq: 'EST.dc.html' })],
+  ['outra entidade', ctx, em({ ent: 'ob' })], ['outro perfil', ctx, em({ perfil: 'Caio' })], ['outro escopo', ctx, em({ saf: '2025/26' })], ['outro escopo', ctx, em({ faz: 'Santa Rita' })],
+  ['antigo', com({ t: AGORA - 2 * 3600000 }), chega], ['antigo', com({ t: AGORA - 3600000 }), chega], ['antigo', com({ t: AGORA + 60000 }), chega]];
+chk('U10c cada recusa devolve o motivo: ausente, forma, outra ficha, usado, outra origem, outro arquivo, outra entidade, outro perfil, outro escopo (Safra e Fazenda), antigo (2 h, 1 h exata, no futuro)',
+  () => MOTIVOS.every(([m, c, a]) => VAL(c, a) === m), (() => { try { return MOTIVOS.map(([m, c, a]) => [m, VAL(c, a)]).filter(x => x[0] !== x[1]); } catch (e) { return String(e.message); } })());
+chk('U10d o "voltar" do histórico não existe no g2lib (nem history.back nem history.go negativo)', () => !/history\.back\s*\(|history\.go\s*\(\s*-/.test(src));
 console.log(`TOTAL ${ok + falhas} · OK ${ok} · FALHAS ${falhas}`);
 process.exit(falhas ? 1 : 0);

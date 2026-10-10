@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 """VISOES-1 (10/10/2026) · regras do seletor de visões sem navegador: python3 visoes_unit_test.py
-1. node visoes_unit.js (U1–U9 e a volta do detalhe V1–V4): precedência, endereço, teclado, preferência, celular;
+1. node visoes_unit.js (U1–U9 e a volta do detalhe U10): precedência, endereço, teclado, preferência, celular, contexto de retorno;
 2. P1–P3: a visão nasce do atributo dominante (visoes.py, fonte única do build e dos testes); negativos; painel de visão não sustentada
    falha o build; uma visão só, sem barra;
 3. componente (engine.visoes): toolbar com rótulo, um botão por visão com aria-label "Ver em …", aria-pressed, foco itinerante, ícone
    aria-hidden e nenhum texto visível; "mais" com 4 ou mais; nunca o verde cheio; CSS 32/44 px, ativo tonal com barra de 2 px, contraste;
    licença do Lucide (ISC, com o MIT do Feather);
-4. mutantes que têm de ficar vermelhos: precedência invertida, seta que ativa, aria-pressed ausente, Calendário aceito sem data;
+4. mutantes que têm de ficar vermelhos: precedência invertida, seta que ativa, aria-pressed ausente, Calendário aceito sem data, Voltar
+   pelo histórico e contexto sem checar o perfil; checagem estática de escrita de URL (B4b);
 5. com o build feito: só a O.S. tem seletor; o botão "Agrupar por talhão" saiu (um caminho só); nenhum arrastar.
 VISOES_DIR=<gen37> roda contra outra árvore (ex.: a anterior à F1, para ver o vermelho)."""
 import os, re, sys, subprocess, tempfile, importlib
@@ -29,7 +30,7 @@ r = node(os.path.join(D, 'g2lib.js'))
 for l in r.stdout.strip().splitlines():
     if l.startswith('FALHOU'): print('   ' + l)
 print('   ' + (r.stdout.strip().splitlines()[-1] if r.stdout.strip() else r.stderr[-300:]))
-chk('1 node visoes_unit.js (U1–U9, V1–V4)', r.returncode == 0, r.stdout[-400:] + r.stderr[-300:])
+chk('1 node visoes_unit.js (U1–U10)', r.returncode == 0, r.stdout[-400:] + r.stderr[-300:])
 
 V = tenta(lambda: importlib.import_module('visoes'))
 E = tenta(lambda: importlib.import_module('engine'))
@@ -144,6 +145,20 @@ if temV and temE:
     chk('M4 mutante "Calendário aceito sem data" fica vermelho em P2', 'sem data, sem Calendário' in fm and not p2(), fm)
 else:
     chk('M3 mutante "aria-pressed ausente"', False, 'componente ausente'); chk('M4 mutante "Calendário aceito sem data"', False, 'visoes.py ausente')
+# revisão VISOES-1 (achados A3/C2: rev. Codex 02): o Voltar pelo histórico e o contexto aceito de outro perfil têm de ficar vermelhos
+m5 = mut_js('voltar pelo histórico', "a.setAttribute('href',g2voltaUrl(c)); },true);", "e.preventDefault(); history.back(); },true);")
+chk('M5 mutante "Voltar pelo histórico" (history.back no clique) fica vermelho', m5 is not None and m5.returncode != 0 and 'FALHOU U10d' in m5.stdout, (m5.stdout[-300:] if m5 else 'sem a regra'))
+m6 = mut_js('perfil', "if(c.perfil!==a.perfil) return 'outro perfil';", "")
+chk('M6 mutante "contexto de outro perfil aceito" fica vermelho', m6 is not None and m6.returncode != 0 and 'FALHOU U10c' in m6.stdout, (m6.stdout[-300:] if m6 else 'sem a regra'))
+# revisão VISOES-1, achado A9: a checagem estática pega toda escrita de URL que apague a query, não só a forma exata antiga
+RUINS = ["history.replaceState(null,'',location.pathname)", "history.replaceState(null,'',location.pathname+location.hash)", "history.replaceState(null,'',location.pathname+'#'+id)",
+         "location.replace(location.pathname)", "location.href=location.pathname+'#x';", "history.pushState({},'',location.pathname)", "location.assign(location.pathname+location.hash)"]
+BONS = ["history.replaceState(history.state,'',g2visaoUrl(location.pathname,location.search,location.hash,k))", "history.replaceState(null,'',location.pathname+location.search)",
+        "history.replaceState(history.state,'',location.href)", "if(location.href==x) y()"]
+def b4b():
+    if not (temV and hasattr(V, 'escritas_sem_query')): return ['visoes.escritas_sem_query ausente']
+    return [('não acusou', x) for x in RUINS if not V.escritas_sem_query(x)] + [('falso positivo', x) for x in BONS if V.escritas_sem_query(x)]
+fb4 = b4b(); chk('B4b checagem estática: acusa replaceState/pushState/location.replace/assign/href= com location.pathname sem location.search (7 formas) e aceita as que preservam a query (4)', not fb4, fb4)
 
 # 5 · com o build feito
 P = os.path.join(D, 'project')
@@ -154,9 +169,9 @@ if os.path.isdir(P):
     chk('B1 só a O.S. tem o seletor nesta fatia, com as 4 visões; G2_VISOES vai na página', com == ['OS.dc.html'] and 'data-visoes="lista agrupada kanban carga"' in s and 'const G2_VISOES = {"g_os"' in s, com)
     chk('B2 um caminho só: o botão "Agrupar por talhão" (os_agrgo) e as abas de texto Lista | Kanban | Recursos saíram', 'os_agrgo' not in s and '>Recursos</button>' not in s and '>Kanban</button>' not in s, '')
     chk('B3 nenhum arrastar (Kanban e Carga sem draggable)', 'draggable' not in s)
-    # §2.4: toda escrita de URL nas telas com seletor preserva location.search (replaceState só com o pathname apagaria o ?view)
-    ruins = [f for f in com if re.search(r"replaceState\([^)]*location\.pathname\s*\)", pags[f])]
-    chk('B4 telas com seletor: nenhuma escrita de URL que apague a query (?view)', not ruins, ruins)
+    # §2.4: toda escrita de URL nas telas com seletor preserva location.search (a regra de visoes.escritas_sem_query)
+    ruins = [f for f in com if temV and hasattr(V, 'escritas_sem_query') and V.escritas_sem_query(pags[f])]
+    chk('B4 telas com seletor: nenhuma escrita de URL que apague a query (?view)', temV and hasattr(V, 'escritas_sem_query') and not ruins, ruins)
 else:
     chk('B1–B4 build feito (project/)', False, 'sem project/')
 print(f'RESULTADO: {"OK" if all(ok) else "FALHOU"} {sum(ok)}/{len(ok)}')

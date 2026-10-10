@@ -79,3 +79,26 @@ def validas(ent):
     checar(ent)
     at = REGISTRO[ent]['ativas']
     return [k for k in ORDEM if k in at]
+
+# ---- §2.4 (estática): nas telas com seletor, toda escrita de URL preserva location.search (o ?view) ----
+# revisão VISOES-1, achado A9: a checagem antiga só pegava "replaceState(…location.pathname)" exato; esta acusa replaceState, pushState,
+# location.replace/assign e location.href= cujo argumento usa location.pathname sem location.search (g2visaoUrl recebe os dois e passa)
+import re as _re
+_ESCRITA = _re.compile(r'(?:history\.(?:replaceState|pushState)|location\.(?:replace|assign))\s*\(|location\.href\s*=(?!=)')
+
+def _argumento(src, i):
+    """Texto do argumento a partir de src[i]: até o ")" que fecha a chamada, ou até ";", "}" ou fim de linha na atribuição."""
+    if src[i - 1] == '(':
+        n, j = 1, i
+        while j < len(src) and n:
+            n += {'(': 1, ')': -1}.get(src[j], 0); j += 1
+        return src[i:j - 1]
+    m = _re.match(r'[^;}\n]*', src[i:]); return m.group(0)
+
+def escritas_sem_query(src):
+    """Trechos de escrita de URL que apagariam a query (usam location.pathname sem location.search)."""
+    ruins = []
+    for m in _ESCRITA.finditer(src):
+        arg = _argumento(src, m.end())
+        if 'location.pathname' in arg and 'location.search' not in arg: ruins.append((m.group(0) + arg)[:160])
+    return ruins
