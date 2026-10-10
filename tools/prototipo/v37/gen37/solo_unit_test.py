@@ -43,6 +43,13 @@ def main():
     import cenario
     proib = sorted(set(re.findall(r'política de água|PA-07|exceção|revisão individual', cenario.js_prefixo(), re.I)))
     ok('prefixo do cenário (com solo.js) sem "política de água", "PA-07", "exceção" e "revisão individual" (a O.S. carrega o prefixo)', not proib, proib)
+    # regressão (rodada 3): a etapa 4 do Planejar safra (safra.js demanda) passou a dizer a origem da dose (R21); a Compra lê a memória do
+    # dados2.demanda. Sem o mesmo rótulo no Python, a memória do Fungicida A diferia entre as duas telas (saf_cmp_continuidade_test, verificação 21)
+    import dados2 as D2
+    fa = [e['calc'] for e in D2.demanda('S2627')['Fungicida A']['evs'] if e.get('own')]
+    sj = open(os.path.join(HERE, 'safra.js'), encoding='utf-8').read()
+    ok('memória da demanda no Python com a origem do ajuste do talhão, como a etapa 4 (T1-B 0,60 L/ha "(ajustado pelo usuário)"; os demais sem rótulo)',
+       '0,60 L/ha (ajustado pelo usuário) × 152 ha' in fa and sum('ajustado' in x for x in fa) == 1 and "' (ajustado pelo usuário)'" in sj, fa)
     print('RESULTADO:', 'OK' if all(OK) else 'FALHOU', f'{sum(OK)}/{len(OK)}')
     return all(OK)
 

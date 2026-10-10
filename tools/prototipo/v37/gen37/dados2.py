@@ -150,8 +150,11 @@ def demanda(safra,ajustes=None,planos_extra=None):
         nm=prod_nome(p['prod'],c)
         o=out.setdefault(nm,dict(grupo=p['grupo'],un=p['un'],preco=p['preco'],bruta=0.0,orig=[],evs=[]))
         o['bruta']+=q; o['orig'].append((c['local'],a['nome'],dose,c['area'],q))
+        # origem da dose na memória (R21 da análise de solo): o ajuste do talhão diz "(ajustado pelo usuário)", como a etapa 4 do Planejar safra
+        # (safra.js demanda), para a memória ficar igual nas duas telas (Planejar safra e Compra). A semente não tem aceite da análise
+        aj=any(pp is p and f"{a['id']}|{i}" in ajustes.get(c['id'],{}) for i,pp in enumerate(a['prods']))
         o['evs'].append(dict(dt=data_atividade(c,a).isoformat(),q=q,tipo='dem',own=True,ord=ordem.get(safra,99),chave=f"{c['id']}|{a['id']}",
-                             t=f"{c['local']} · {a['nome']}",calc=f"{_nf(dose,2)} {p['un']}/ha × {_nfa(c['area'])} ha"))   # área com até 2 casas (PRE-REV R5)
+                             t=f"{c['local']} · {a['nome']}",calc=f"{_nf(dose,2)} {p['un']}/ha{' (ajustado pelo usuário)' if aj else ''} × {_nfa(c['area'])} ha"))   # área com até 2 casas (PRE-REV R5)
     for nm,o in out.items():
         o['evs']+=_outras_origens(safra,nm)
         o['estoque']=fisico_apto(nm); o['reservado']=sum(r['q'] for r in RESERVAS if r['item']==nm); o['receb']=RECEB.get(nm,0)
