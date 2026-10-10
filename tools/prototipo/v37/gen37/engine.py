@@ -1228,6 +1228,11 @@ VISOES_CSS=(
     ".g2vmenu>button{display:flex;align-items:center;gap:10px;min-height:44px;padding:8px 12px;border:0;border-radius:8px;background:transparent;color:#15201A;"
     "font-family:inherit;font-size:14px;font-weight:600;text-align:left;cursor:pointer;white-space:nowrap}"
     f".g2vmenu>button[aria-checked=true]{{background:{DS_VISOES['ativo_fundo']};color:{DS_VISOES['ativo_icone']};box-shadow:inset 0 -2px 0 {DS_VISOES['ativo_barra']}}}"
+    # revisão VISOES-1, achado B5: o menu do "mais" só existe no estreito; aberto a 390 px e alargada a janela, ele não fica solto sem o botão
+    "@media (min-width:641px){.g2vmenu{display:none}}"
+    # revisão VISOES-1, achado B3: em cores forçadas (alto contraste) o fundo tonal e a barra (box-shadow) somem; o ativo usa as cores do sistema
+    "@media (forced-colors:active){.g2visoes>button[aria-pressed=true],.g2visoes>button[data-ativo=true],.g2vmenu>button[aria-checked=true]"
+    "{forced-color-adjust:none;background:Highlight;color:HighlightText;border-color:Highlight}}"
     # estado em toda visão (§2.8): uma frase e a ação nomeada, no topo do painel
     ".g2vest{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;padding:10px 12px;border:1px dashed #E4E9E5;border-radius:10px;background:#FFFFFF;"
     "font-size:13px;font-weight:600;line-height:1.4;color:#15201A}"

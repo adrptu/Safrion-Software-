@@ -695,7 +695,10 @@ function g2ttTira(n){ if(G2D.tt&&n&&G2D.tt.contains(n)) return; g2ttVolta();
   document.addEventListener('pointerout',(e)=>{ if(e.pointerType==='touch'||e.relatedTarget) return; g2ttVolta(); clearTimeout(G2D.entra); if(G2D.el&&G2D.modo==='ponteiro') g2dicaSai(120); },true);
   // foco de teclado: abre já; descreve o elemento focado (a dica pode vir do cabeçalho da coluna do botão de ordenar). Linha de grade ou cartão
   // (Kanban) sem dica própria, com foco de teclado: a dica do selo de estado de dentro dela (revisão DS, achado 2: o selo não é focável)
-  document.addEventListener('focusin',(e)=>{ const a=g2dicaAlvo(e.target)||g2dicaSelo(e.target); if(a) g2dicaMostra(a.el,a.t,'foco',e.target); else if(G2D.el&&G2D.modo!=='ponteiro') g2dicaFecha(); },true);
+  // Só o foco de teclado (:focus-visible) abre a dica: o clique do mouse e o toque curto também focam o botão, e a dica aberta ficava presa por
+  // cima da ação vizinha (revisão VISOES-1, achado B1: cobria "Nova ordem" e os chips de fase e engolia o 1º clique). Hover e toque longo seguem
+  document.addEventListener('focusin',(e)=>{ let fv=true; try{ fv=e.target.matches(':focus-visible'); }catch(er){}
+    const a=fv?(g2dicaAlvo(e.target)||g2dicaSelo(e.target)):null; if(a) g2dicaMostra(a.el,a.t,'foco',e.target); else if(G2D.el&&G2D.modo!=='ponteiro') g2dicaFecha(); },true);
   document.addEventListener('focusout',(e)=>{ if(G2D.el&&G2D.modo!=='ponteiro'&&G2D.modo!=='recusa'&&(!e.relatedTarget||!G2D.el.contains(e.relatedTarget))) g2dicaFecha(); },true);
   // Esc fecha a dica; a dica explícita (data-dica) consome a tecla, para não fechar também o painel em que o foco está (WCAG 1.4.13)
   document.addEventListener('keydown',(e)=>{ if(e.key!=='Escape') return; const d=document.getElementById(G2_DICA_ID); if(!d||d.hidden||!G2D.el) return;
@@ -735,9 +738,11 @@ function g2visaoInicial(search,pref,validas){ let q=null; try{ q=new URLSearchPa
 // aviso do valor inválido no endereço: nunca repete o valor cru (só o nome da visão aberta)
 function g2visaoAviso(ini,nome){ if(!ini||!ini.aviso) return '';
   return 'A visão pedida no endereço não existe nesta lista: aberta em '+(ini.fonte==='pref'?(nome||ini.k)+' (sua última escolha)':(nome||'Lista'))+'.'; }
-// endereço com a visão (puro): k grava ?view=<k>; k vazio tira o parâmetro; o hash e os outros parâmetros ficam
-function g2visaoUrl(pathname,search,hash,k){ let p; try{ p=new URLSearchParams(String(search||'')); }catch(e){ p=new URLSearchParams(''); }
-  if(k) p.set('view',k); else p.delete('view'); const q=p.toString(); return String(pathname||'')+(q?'?'+q:'')+String(hash||''); }
+// endereço com a visão (puro): k grava ?view=<k>; k vazio tira o parâmetro; o hash e os outros parâmetros ficam como estavam, em texto cru
+// (revisão VISOES-1, achado A8: URLSearchParams.toString() recodificava a query inteira, "%20" virava "+" e "flag" virava "flag=")
+function g2visaoUrl(pathname,search,hash,k){ const s=String(search||'').replace(/^\?/,'');
+  const ps=s?s.split('&').filter(p=>p&&(p.indexOf('=')<0?p:p.slice(0,p.indexOf('=')))!=='view'):[];
+  if(k) ps.push('view='+encodeURIComponent(k)); return String(pathname||'')+(ps.length?'?'+ps.join('&'):'')+String(hash||''); }
 // teclado da barra horizontal (pura): ← → movem o foco com volta, Home e End vão às pontas; ↑ ↓ não movem (no "mais", ↓ abre o menu).
 // Nenhuma seta ativa: ativar é Enter ou Espaço, nativos do botão (devolve nulo para elas e para as outras teclas)
 function g2visaoTecla(i,tecla,n,noMais){ if(!(n>0)||!(i>=0)||i>=n) return null;
@@ -753,20 +758,27 @@ function g2visaoPrefGrava(chave,k,st){ G2_VISAO_MEM[chave]=k; try{ const s=st||(
 // celular (pura): até 3 visões, todas na barra; 4 ou mais, as 3 primeiras e "mais" com as demais; a ativa dentro do "mais" marca o "mais"
 function g2visoesCelular(validas,ativa){ const v=(validas||[]).slice(); if(v.length<2) return {barra:[],mais:[],maisAtivo:false};
   if(v.length<=3) return {barra:v,mais:[],maisAtivo:false}; const mais=v.slice(3); return {barra:v.slice(0,3),mais,maisAtivo:mais.indexOf(ativa)>=0}; }
-// volta do detalhe (pura; revisão Codex 6093255041, item 2): "back" só com entrada de histórico comprovada (a marca que a página de detalhe
-// gravou ao chegar da lista na mesma aba e history.length > 1); senão o destino canônico (a lista na visão em que estava, ?view); sem contexto
-// válido para o mesmo arquivo, o link segue como está
-function g2voltaValido(c){ return !!c&&typeof c==='object'&&/^[A-Za-z0-9][A-Za-z0-9_-]*(\.[A-Za-z0-9_-]+)*\.html$/.test(String(c.arq||''))&&/^[a-z]+$/.test(String(c.ent||''))
+// volta do detalhe (puras; DESENHO §2.11, rev. Codex 01 e 02, VISOES-REV-20261010-02/03). O "Voltar" e a trilha da página de detalhe SEMPRE
+// navegam ao destino canônico da lista (o arquivo com ?view e a ficha ?volta=<nt> do contexto de retorno): nunca o "voltar" do histórico, nunca
+// adivinhar a entrada anterior. A lista só aplica o contexto se ele for válido (g2voltaValida); senão abre canônica, sem estado antigo.
+const G2_VOLTA_MS=3600000;   // contexto de retorno vale até 1 h
+function g2voltaForma(c){ return !!c&&typeof c==='object'&&/^[A-Za-z0-9][A-Za-z0-9_-]*(\.[A-Za-z0-9_-]+)*\.html$/.test(String(c.arq||''))&&/^[a-z]+$/.test(String(c.ent||''))
   &&/^[a-z]+$/.test(String(c.view||''))&&/^[A-Za-z0-9_]+$/.test(String(c.gid||''))&&/^[a-z0-9]+$/.test(String(c.nt||'')); }
-function g2voltaDecide(c,arqLink,hist){ if(!g2voltaValido(c)||arqLink!==c.arq) return 'link';
-  return (hist&&hist.len>1&&hist.marca===c.nt)?'back':'canonico'; }
-function g2voltaUrl(c){ return g2visaoUrl(c.arq,c.q||'','',c.view); }
+// '' quando o contexto vale para esta chegada (a: nt da ficha no endereço, origem, arquivo e entidade da lista, perfil e escopo Fazenda/Safra
+// atuais, agora); senão o motivo da recusa. Usado uma vez, não vale de novo
+function g2voltaValida(c,a){ if(!c) return 'ausente'; if(!g2voltaForma(c)) return 'forma'; if(!a||String(a.nt||'')!==c.nt) return 'outra ficha';
+  if(c.usado) return 'usado'; if(c.origem!==a.origem) return 'outra origem'; if(c.arq!==a.arq) return 'outro arquivo'; if(c.ent!==a.ent) return 'outra entidade';
+  if(c.perfil!==a.perfil) return 'outro perfil'; if(c.faz!==a.faz||c.saf!==a.saf) return 'outro escopo';
+  const t=Number(c.t)||0; if(!(a.agora>=t&&a.agora-t<G2_VOLTA_MS)) return 'antigo'; return ''; }
+// destino canônico do "Voltar": a lista na visão em que estava, com os outros parâmetros dela e a ficha do contexto
+function g2voltaUrl(c){ const u=g2visaoUrl(c.arq,c.q||'','',c.view); return u+(u.indexOf('?')<0?'?':'&')+'volta='+c.nt; }
 
 function g2visaoSpec(gid){ return (typeof G2_VISOES!=='undefined'&&G2_VISOES&&G2_VISOES[gid])||null; }
 function g2arq(){ try{ return String(location.pathname).split('/').pop(); }catch(e){ return ''; } }
 // visão aberta da grade; na primeira leitura da tela aplica a precedência; o aviso do valor inválido sai uma vez e o endereço perde o valor
 // inválido (o F5 não repete o aviso)
 function g2visao(self,gid){ const sp=g2visaoSpec(gid); if(!sp) return 'lista'; const st=g2st(self,gid); if(st.visao&&sp.validas.indexOf(st.visao)>=0) return st.visao;
+  g2voltaChegada(self,gid,sp);   // antes da visão inicial: a ficha de retorno recusada tira do endereço a visão que veio com ela
   let search=''; try{ search=location.search; }catch(e){}
   const ini=g2visaoInicial(search,g2visaoPrefLer(g2visaoChave(g2perfil().k,sp.ent)),sp.validas);
   const all=Object.assign({},self.state.g2||{}); all[gid]=Object.assign({},all[gid]||{},{visao:ini.k}); self.state.g2=all;
@@ -787,9 +799,10 @@ function g2visaoIr(self,gid,k,origem){ const sp=g2visaoSpec(gid); if(!sp||sp.val
   try{ history.replaceState(history.state,'',g2visaoUrl(location.pathname,location.search,location.hash,k)); }catch(e){}
   g2set(self,gid,{visao:k,vf:null,vm:false});
   setTimeout(()=>{ try{ if(k!==ant){ const r=(self.__g2rol||{})[gid+':'+k]; if(r) g2rolPoe(r,gid); }
-    if(origem==='seletor'){ const bar=document.querySelector('[data-visoes-gid="'+gid+'"]'); if(!bar) return;
-      const b=[...bar.querySelectorAll('[data-visao="'+k+'"]')].find(g2vis)||bar.querySelector('[data-visao-mais]');
-      if(b&&g2vis(b)&&document.activeElement!==b) b.focus({preventScroll:true}); } }catch(e){} },0); }
+    if(origem==='seletor'){ const b=g2visaoBotao(gid,k); if(b&&document.activeElement!==b) b.focus({preventScroll:true}); } }catch(e){} },0); }
+// o botão visível da visão k na barra (no estreito, a visão do "mais" é o próprio "mais")
+function g2visaoBotao(gid,k){ if(typeof document==='undefined') return null; const bar=document.querySelector('[data-visoes-gid="'+gid+'"]'); if(!bar) return null;
+  const b=[...bar.querySelectorAll('[data-visao="'+k+'"]')].find(g2vis)||bar.querySelector('[data-visao-mais]'); return b&&g2vis(b)?b:null; }
 // a visão não montou: o erro fica no estado da visão (§2.8) e o painel some; "Ver em lista" leva à Lista, que não depende dela.
 // window.__g2visaoFalha = '<k>' simula a falha (teste), como o ?falha=1 do AGROFIT
 function g2visaoTenta(self,gid,k,fn){ const e=(self.__g2vErr=self.__g2vErr||{}); const m=(e[gid]=e[gid]||{}); delete m[k];
@@ -812,10 +825,14 @@ function g2visaoTeclaMenu(self,gid,e){ const m=e.currentTarget; const its=[...m.
 function g2visoesFim(self,v){ if(typeof G2_VISOES==='undefined'||!G2_VISOES) return;
   for(const gid in G2_VISOES){ const sp=G2_VISOES[gid]; const k=g2visao(self,gid), st=g2st(self,gid), err=((self.__g2vErr||{})[gid])||{};
     const cel=g2visoesCelular(sp.validas,k), ir=(x)=>()=>g2visaoIr(self,gid,x,'seletor');
-    sp.validas.forEach(x=>{ v[gid+'_vb_'+x+'_p']=x===k?'true':'false'; v[gid+'_vb_'+x+'_t']=((st.vf?st.vf===x:x===k))?'0':'-1'; v[gid+'_vb_'+x+'_go']=ir(x);
+    // a parada de Tab lembrada pelas setas (vf) só vale se o botão dela aparece nesta largura (revisão VISOES-1, achados A6/B2: depois de
+    // estreitar, alargar ou girar, ela ficava num botão oculto e o Tab pulava o seletor); senão volta à ativa (ou ao "mais" com a ativa nele)
+    let vf=st.vf||null; if(vf){ let est=false; try{ est=matchMedia('(max-width:640px)').matches; }catch(e){} const i=sp.validas.indexOf(vf);
+      if((vf==='__mais'&&(!est||sp.validas.length<=3))||(i>=3&&est)||(vf!=='__mais'&&i<0)) vf=null; }
+    sp.validas.forEach(x=>{ v[gid+'_vb_'+x+'_p']=x===k?'true':'false'; v[gid+'_vb_'+x+'_t']=((vf?vf===x:x===k))?'0':'-1'; v[gid+'_vb_'+x+'_go']=ir(x);
       v[gid+'_vmi_'+x+'_c']=x===k?'true':'false'; v[gid+'_vmi_'+x+'_go']=ir(x); });
     (sp.paineis||[]).forEach(pn=>{ v[gid+'_vp_'+pn[0]]=pn.indexOf(k)>=0&&!err[k]; });
-    const maisFoc=st.vf?st.vf==='__mais':cel.maisAtivo;
+    const maisFoc=vf?vf==='__mais':cel.maisAtivo;
     v[gid+'_vm_t']=maisFoc?'0':'-1'; v[gid+'_vm_on']=cel.maisAtivo?'true':'false'; v[gid+'_vm_x']=st.vm?'true':'false'; v[gid+'_vm_open']=!!st.vm;
     v[gid+'_vm_lab']='Mais visões'+(cel.maisAtivo?' (atual: '+String((sp.nomes||{})[k]||k).toLowerCase()+')':'');
     v[gid+'_vm_go']=()=>{ const ab=!g2st(self,gid).vm; g2set(self,gid,{vm:ab}); if(ab) setTimeout(()=>g2visaoMenuFoco(gid),0); };
@@ -825,52 +842,75 @@ function g2visoesFim(self,v){ if(typeof G2_VISOES==='undefined'||!G2_VISOES) ret
     if(err[k]) es={tipo:'erro',texto:'Não foi possível mostrar a visão '+((sp.nomes||{})[k]||k)+': '+err[k]+'.',acao:'Ver em lista',fn:()=>g2visaoIr(self,gid,sp.validas[0],'fallback')};
     else if(self.g2visaoEstado) es=self.g2visaoEstado(gid,k)||null;
     v[gid+'_vest_on']=!!es; v[gid+'_vest_t']=es?es.texto:''; v[gid+'_vest_tipo']=es?es.tipo:''; v[gid+'_vest_a']=(es&&es.acao)||'';
-    v[gid+'_vest_tema']=!!(es&&es.acao&&es.fn); v[gid+'_vest_go']=(es&&es.fn)||(()=>{}); } }
-// ---- volta do detalhe (§2.11 e revisão Codex 6093255041, item 2): contexto de retorno canônico na sessão, validado antes de usar ----
-const G2_VOLTA='g2volta', G2_VOLTA_REST='g2volta:restaura';
-function g2voltaLer(){ try{ const c=JSON.parse(sessionStorage.getItem(G2_VOLTA)||'null'); return g2voltaValido(c)?c:null; }catch(e){ return null; } }
+    // a ação do estado some no redesenho e levava o foco ao <body> (revisão VISOES-1, achados B4/C4): o foco vai ao botão da visão aberta
+    v[gid+'_vest_tema']=!!(es&&es.acao&&es.fn); v[gid+'_vest_go']=(es&&es.fn)?(()=>{ es.fn(); setTimeout(()=>{ try{ const a=document.activeElement;
+      if(a&&a!==document.body&&g2vis(a)) return; const b=g2visaoBotao(gid,g2visao(self,gid)); if(b) b.focus({preventScroll:true}); }catch(e){} },0); }):(()=>{});
+    // foco restaurado na volta: reafirmado depois de cada desenho até a 1ª interação da pessoa (revisão VISOES-1, achado A4)
+    const fg=self.__g2focoGuarda; if(fg){ if(Date.now()>fg.ate) self.__g2focoGuarda=null; else setTimeout(fg.fn,0); } } }
+// ---- volta do detalhe (§2.11, rev. Codex 01 e 02; VISOES-REV-20261010-02/03): contexto de retorno na sessão da aba, validado na lista ----
+// Ao sair da lista por um link (clique, Ctrl ou meio para nova aba), ela grava o contexto: arquivo, entidade, perfil, Fazenda e Safra, visão,
+// filtros da grade (g2keep), rolagem e o registro aberto (foco). O "Voltar"/trilha do detalhe leva ao destino canônico com a ficha (?volta=<nt>);
+// a lista aplica o contexto só se for válido (g2voltaValida) e o marca como usado. Recusado (antigo, de outro perfil ou escopo, já usado, de
+// outra ficha): a lista abre canônica, no escopo atual, sem a visão, os filtros nem a posição antigos. O Voltar nativo do navegador
+// (back_forward) continua restaurando a rolagem e o foco da entrada que a lista marcou ao sair.
+const G2_VOLTA='g2volta';
+function g2voltaLer(){ try{ const c=JSON.parse(sessionStorage.getItem(G2_VOLTA)||'null'); return g2voltaForma(c)?c:null; }catch(e){ return null; } }
 function g2voltaNt(){ return (Math.random().toString(36).slice(2,10)+Date.now().toString(36)).replace(/[^a-z0-9]/g,''); }
-// ao sair da lista (qualquer link para outra tela, também em nova aba): visão, parâmetros, rolagem da visão e o registro aberto (foco);
-// a entrada da lista no histórico ganha a marca própria (g2volta)
-function g2voltaGuarda(self,gid,dest){ const sp=g2visaoSpec(gid); if(!sp) return; const k=g2visao(self,gid), arq=g2arq(), nt=g2voltaNt();
-  let q=''; try{ const p=new URLSearchParams(location.search); p.delete('view'); q=p.toString(); }catch(e){}
-  const c={arq,ent:sp.ent,gid,view:k,q,foco:String((self.g2visaoFoco&&self.g2visaoFoco(gid))||''),nt,t:Date.now(),dest:String(dest||'')};
-  try{ sessionStorage.setItem('g2rol:'+arq+':'+gid+':'+k,JSON.stringify(g2rolLe(gid))); sessionStorage.setItem(G2_VOLTA,JSON.stringify(c)); }catch(e){}
+function g2escopo(self){ const s=(self&&self.state)||{}; return {faz:s.mf_faz||'Santa Rita',saf:s.mf_saf||'Todas'}; }   // padrões do motor (ENGINE_JS2: mf_faz, mf_saf)
+function g2voltaGuarda(self,gid,dest){ const sp=g2visaoSpec(gid); if(!sp) return; const k=g2visao(self,gid), arq=g2arq(), nt=g2voltaNt(), st=g2st(self,gid), es=g2escopo(self);
+  let q=''; try{ q=String(location.search||'').replace(/^\?/,'').split('&').filter(p=>p&&!/^(view|volta)(=|$)/.test(p)).join('&'); }catch(e){}
+  const c={arq,ent:sp.ent,gid,view:k,q,foco:String((self.g2visaoFoco&&self.g2visaoFoco(gid))||''),nt,t:Date.now(),dest:String(dest||''),
+    origem:String(location.origin),perfil:g2perfil().k,faz:es.faz,saf:es.saf,keep:{f:st.f||{},q:st.q||'',so:st.so||null,qv:st.qv||''},rol:g2rolLe(gid)};
+  try{ sessionStorage.setItem('g2rol:'+arq+':'+gid+':'+k,JSON.stringify(c.rol)); sessionStorage.setItem(G2_VOLTA,JSON.stringify(c)); }catch(e){}
   try{ history.replaceState(Object.assign({},history.state||{},{g2volta:nt}),'',location.href); }catch(e){} }
-// na lista: volta comprovada (marca da sessão gravada pelo "Voltar" ou navegação de volta com a marca desta entrada) restaura rolagem e foco
+// chegada na lista (1º desenho, antes da visão inicial): a ficha ?volta=<nt> sai do endereço; válida → filtros do contexto, foco e rolagem;
+// recusada → sem ?view, filtros limpos (o g2keep também), sem posição. Escopo Fazenda/Safra: o da sessão (g2keep), que já está no estado
+function g2voltaChegada(self,gid,sp){ if(self.__g2chegou) return; self.__g2chegou=1; if(typeof location==='undefined') return;
+  let nt=null; try{ nt=new URLSearchParams(location.search).get('volta'); }catch(e){} if(nt===null) return;
+  const c=g2voltaLer(), es=g2escopo(self);
+  const mot=g2voltaValida(c,{nt,origem:String(location.origin),arq:g2arq(),ent:sp.ent,perfil:g2perfil().k,faz:es.faz,saf:es.saf,agora:Date.now()});
+  const ps=String(location.search||'').replace(/^\?/,'').split('&').filter(p=>p&&!/^volta(=|$)/.test(p)&&!(mot&&/^view(=|$)/.test(p)));
+  try{ history.replaceState(history.state,'',location.pathname+(ps.length?'?'+ps.join('&'):'')+location.hash); }catch(e){}
+  self.__g2voltaMotivo=mot; const all=Object.assign({},self.state.g2||{});
+  if(mot){ all[gid]=Object.assign({},all[gid]||{},{f:{},q:'',so:null,qv:'',sel:{}}); self.state.g2=all; g2keepGrava(self,gid,all[gid]); return; }
+  c.usado=Date.now(); try{ sessionStorage.setItem(G2_VOLTA,JSON.stringify(c)); }catch(e){}
+  const kp=(c.keep&&typeof c.keep==='object')?c.keep:{}; all[gid]=Object.assign({},all[gid]||{},{f:kp.f||{},q:kp.q||'',so:kp.so||null,qv:kp.qv||''}); self.state.g2=all; g2keepGrava(self,gid,all[gid]);
+  self.__g2voltaAlvo={foco:c.foco||'',rol:c.rol||null}; }
+// na lista: volta válida (g2voltaChegada) ou Voltar nativo com a marca desta entrada → rolagem e foco no registro aberto; o foco é reafirmado a
+// cada desenho até a 1ª interação da pessoa (um redesenho do runtime reaproveitava a linha focada para outra ordem)
 function g2visaoLiga(self,gid){ if(typeof window==='undefined'||window.__g2visaoTela) return; window.__g2visaoTela={self,gid};
   let nav=''; try{ nav=((performance.getEntriesByType('navigation')||[])[0]||{}).type||''; }catch(e){}
-  const c=g2voltaLer(); let r=null; try{ r=JSON.parse(sessionStorage.getItem(G2_VOLTA_REST)||'null'); }catch(e){}
-  const arq=g2arq(), marca=(history.state||{}).g2volta;
-  const volta=!!c&&c.arq===arq&&c.gid===gid&&((!!r&&r.nt===c.nt&&Date.now()-(r.t||0)<60000)||(nav==='back_forward'&&marca===c.nt));
-  try{ sessionStorage.removeItem(G2_VOLTA_REST); }catch(e){}
-  if(!volta) return;
-  const poe=()=>{ try{ const k=g2visao(self,gid); let ro=null; try{ ro=JSON.parse(sessionStorage.getItem('g2rol:'+arq+':'+gid+':'+k)||'null'); }catch(e){} if(ro) g2rolPoe(ro,gid);
-    if(c.foco){ const el=[...document.querySelectorAll('[data-g2g="'+gid+'"] [role=row][data-rid]')].find(x=>g2vis(x)&&String(x.getAttribute('data-rid')).split('@')[0]===c.foco)
-        ||[...document.querySelectorAll('[role=list] [role=button][aria-label]')].find(x=>g2vis(x)&&String(x.getAttribute('aria-label')).indexOf('Abrir '+c.foco+' ')===0);
-      if(el) el.focus({preventScroll:true}); } }catch(e){} };
+  const arq=g2arq(); let alvo=self.__g2voltaAlvo||null;
+  if(!alvo&&nav==='back_forward'){ const c=g2voltaLer(), marca=(history.state||{}).g2volta; if(c&&c.arq===arq&&c.gid===gid&&marca===c.nt) alvo={foco:c.foco||'',rol:null}; }
+  if(!alvo) return;
+  const linha=()=>alvo.foco?([...document.querySelectorAll('[data-g2g="'+gid+'"] [role=row][data-rid]')].find(x=>g2vis(x)&&String(x.getAttribute('data-rid')).split('@')[0]===alvo.foco)
+      ||[...document.querySelectorAll('[role=list] [role=button][aria-label]')].find(x=>g2vis(x)&&String(x.getAttribute('aria-label')).indexOf('Abrir '+alvo.foco+' ')===0)):null;
+  const foca=()=>{ try{ const el=linha(); if(el&&document.activeElement!==el) el.focus({preventScroll:true}); }catch(e){} };
+  const poe=()=>{ try{ const k=g2visao(self,gid); let ro=alvo.rol; if(!ro){ try{ ro=JSON.parse(sessionStorage.getItem('g2rol:'+arq+':'+gid+':'+k)||'null'); }catch(e){} }
+    if(ro) g2rolPoe(ro,gid); foca(); }catch(e){} };
+  if(alvo.foco){ self.__g2focoGuarda={fn:foca,ate:Date.now()+10000};
+    const ev=['pointerdown','keydown','wheel','touchstart'], solta=()=>{ self.__g2focoGuarda=null; ev.forEach(t=>document.removeEventListener(t,solta,true)); };
+    ev.forEach(t=>document.addEventListener(t,solta,true)); }
   setTimeout(poe,80); setTimeout(poe,450); }
 (function g2visaoGlob(){ if(typeof document==='undefined'||window.__g2visaoGlob) return; window.__g2visaoGlob=1;
   // menu "mais" aberto: tocar fora fecha
   document.addEventListener('pointerdown',(e)=>{ const t=window.__g2visaoTela; if(!t||!g2st(t.self,t.gid).vm) return;
     if(!(e.target&&e.target.closest&&e.target.closest('.g2visoes-w'))) g2set(t.self,t.gid,{vm:false}); },true);
-  // página de detalhe que chegou da lista na mesma aba (link, referrer da lista, histórico com entrada anterior, contexto recém-gravado):
-  // a entrada do detalhe ganha a marca que comprova o histórico (nova aba: history.length = 1, sem marca)
-  try{ const c=g2voltaLer(), arq=g2arq(); if(c&&c.dest===arq&&c.arq!==arq){ let nav=''; try{ nav=((performance.getEntriesByType('navigation')||[])[0]||{}).type||''; }catch(e){}
-      let ref=''; try{ const u=new URL(document.referrer); ref=u.origin===location.origin?u.pathname.split('/').pop():''; }catch(e){}
-      if(nav==='navigate'&&ref===c.arq&&history.length>1&&Date.now()-(c.t||0)<20000&&!((history.state||{}).g2voltaDe))
-        history.replaceState(Object.assign({},history.state||{},{g2voltaDe:c.nt}),'',location.href); } }catch(e){}
-  window.addEventListener('pageshow',(e)=>{ if(e.persisted){ try{ sessionStorage.removeItem(G2_VOLTA_REST); }catch(er){} } });
+  // a parada de Tab lembrada pelas setas (vf) só vale com o foco na barra: ao sair, volta à ativa (revisão VISOES-1, achados A6/B2); mudar a
+  // largura em torno de 640 px (giro, janela, zoom) também a esquece e fecha o "mais", que some no largo (achado B5)
+  document.addEventListener('focusout',(e)=>{ const w=e.target&&e.target.closest&&e.target.closest('.g2visoes-w'); if(!w) return; const rt=e.relatedTarget;
+    if(rt&&w.contains(rt)) return; const t=window.__g2visaoTela; if(t&&g2st(t.self,t.gid).vf) g2set(t.self,t.gid,{vf:null}); },true);
+  try{ const mq=matchMedia('(max-width:640px)'), muda=()=>{ const t=window.__g2visaoTela; if(!t) return; const st=g2st(t.self,t.gid); if(st.vf||st.vm) g2set(t.self,t.gid,{vf:null,vm:false}); };
+    if(mq.addEventListener) mq.addEventListener('change',muda); else if(mq.addListener) mq.addListener(muda); }catch(e){}
   const lnk=(e)=>{ const a=e.target&&e.target.closest&&e.target.closest('a[href]'); if(!a) return null; let u=null; try{ u=new URL(a.getAttribute('href'),location.href); }catch(er){ return null; }
     return u.origin===location.origin?{a,u,dest:u.pathname.split('/').pop()}:null; };
   // sair da lista por um link (clique, Ctrl/meio para nova aba): guarda o contexto de retorno
   const sai=(e)=>{ const t=window.__g2visaoTela; if(!t) return; const l=lnk(e); if(!l||l.dest===g2arq()) return; g2voltaGuarda(t.self,t.gid,l.dest); };
   document.addEventListener('click',sai,true); document.addEventListener('auxclick',sai,true);
-  // "Voltar" (seta da página de detalhe) e a trilha do cabeçalho: história comprovada → history.back(); senão a lista na visão em que estava
+  // "Voltar" (seta da página de detalhe) e a trilha do cabeçalho: sempre o destino canônico com a ficha do contexto desta aba; sem contexto desta
+  // aba para esta lista (link direto, aba sem opener, contexto já usado), o link segue como está. Nunca o "voltar" do histórico
   document.addEventListener('click',(e)=>{ if(e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||window.__g2visaoTela) return;
     const l=lnk(e); if(!l) return; const a=l.a; if(!(a.getAttribute('aria-label')==='Voltar'||(a.closest('header')&&!a.closest('.menu-lat')))) return;
-    const c=g2voltaLer(); const d=g2voltaDecide(c,l.dest,{len:history.length,marca:(history.state||{}).g2voltaDe}); if(d==='link') return;
-    try{ sessionStorage.setItem(G2_VOLTA_REST,JSON.stringify({nt:c.nt,t:Date.now()})); }catch(er){}
-    if(d==='back'){ e.preventDefault(); history.back(); return; }
+    const c=g2voltaLer(); if(!c||c.usado||c.arq!==l.dest||c.dest!==g2arq()) return;
     a.setAttribute('href',g2voltaUrl(c)); },true);
 })();
