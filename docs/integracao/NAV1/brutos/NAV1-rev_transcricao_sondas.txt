@@ -1,0 +1,120 @@
+# Revisão adversarial da NAV-1 (agente NAV1:revisar, sobre 0e1c368): sondas adv.py, base_A.py e mutantes do pa_regras_test
+# Saidas registradas no transcript do agente (nao havia arquivo de log). Extraidas sem reexecutar nada.
+# Horario UTC de cada comando; corpo de heredoc omitido; caminhos da maquina trocados por marcadores.
+
+### 2026-10-09T17:20:58.400Z
+$ W=$(cat <scratchpad>/.nav1_codex_rev_dir_path); cat > $W/probes/adv.py <<'EOF'
+  [corpo do heredoc omitido]
+  File "<scratchpad>/nav1-codex-rev-1791565515/probes/adv.py", line 11
+    return J(f"(()=>{{const e={sel}; if(!e) return null; {'e.scrollIntoView({block:\"center\"});' if scroll else ''} const r=e.getBoundingClientRect(); return [r.left+r.width/2,r.top+r.height/2];}})()")
+                                                                                                                                                                                                         ^
+SyntaxError: f-string expression part cannot include a backslash
+
+### 2026-10-09T17:21:38.037Z
+$ W=$(cat <scratchpad>/.nav1_codex_rev_dir_path); cd $W/probes && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+ok
+
+### 2026-10-09T17:21:42.513Z
+$ W=$(cat <scratchpad>/.nav1_codex_rev_dir_path); cd $W/probes && env CHROME_BIN=<chrome> flock /tmp/cdpE.lock env CDP_GL=1 timeout 600 python3 adv.py $W/head/tools/prototipo/v37/gen37 2>&1 | cut -c1-900
+== A: rascunho com 0,6 no Fungicida A; digita 6 na dose do Herbicida (sem Enter) e clica Publicar
+   atividades: ['Dessecação pré-plantio', 'Tratamento de sementes', 'Plantio e adubação de base', 'Adubação de cobertura', 'Herbicida pós-emergente', 'Fungicida 2ª aplicação + inseticida', 'Colheita']
+   doses visíveis: ['Alterar a dose de Glifosato 480, hoje 2 L/ha', 'Alterar a dose de 2,4-D 806, hoje 1 L/ha', 'Alterar a dose de Óleo mineral, hoje 0,5 L/ha', 'Alterar a dose de Fungicida A, hoje 0,6 L/ha', 'Alterar a dose de Adjuvante espalhante, hoje 0,25 L/ha']
+   bloco de alterações ANTES do clique (digitando 6): {'top': 1745, 'bot': 1939, 'vh': 900, 'txt': 'Alterações do rascunho v7 em relação à v6 Confira cada alteração antes de publicar; publicar cria a nova versão sem mudar os cultivos. Alterada Fungicida 1ª aplicação · Fungicida A: 0,5 → 0,6 L/ha Custo de insumos: R$ 2.099,90/ha na v6 → R$ 2.114,40/ha na v7 ('}
+   toast: Versão v7 publicada. Os cultivos continuam como estavam (3 cultivos na v6 e 2 na v5 (safra encerrada)); decida a adoção em Planejar safra.
+   estado: {'h2': 'Soja alta tecnologia', 'est': 'Publicado · v7', 'hash': '#plano=SOJA-AT', 'area': ['voltar:‹ Biblioteca de planos'], 'cards': 0, 'alerts': []}
+   versões: v7 publicada em 23/09/2026 Em vigor nenhum cultivo v6 publicada em 12/08/2026 Substituída 3 cultivos v5 publicada em 18/08/2025 Substituída 2 cultivos
+   dose publicada de Glifosato 480 = 6 L/ha | Fungicida A = 0,6 L/ha
+== B: rascunho com 0,6; muda a dose do Fungicida A para 0 (inválido, sem Enter) e clica Publicar
+   toast: Versão v7 publicada. Os cultivos continuam como estavam (3 cultivos na v6 e 2 na v5 (safra encerrada)); decida a adoção em Planejar safra.
+   estado: {'h2': 'Soja alta tecnologia', 'est': 'Publicado · v7', 'hash': '#plano=SOJA-AT', 'area': ['voltar:‹ Biblioteca de planos'], 'cards': 0, 'alerts': ['Informe a dose por hectare, maior que zero.']}
+   campo em edição ainda aberto? True 0
+== C: duplo clique em Publicar versão v7
+   toast: Versão v7 publicada. Os cultivos continuam como estavam (3 cultivos na v6 e 2 na v5 (safra encerrada)); decida a adoção em Planejar safra.
+   estado: {'h2': 'Soja alta tecnologia', 'est': 'Publicado · v7', 'hash': '#plano=SOJA-AT', 'area': ['voltar:‹ Biblioteca de planos'], 'cards': 0, 'alerts': []}
+   versões: v7 publicada em 23/09/2026 Em vigor nenhum cultivo v6 publicada em 12/08/2026 Substituída 3 cultivos v5 publicada em 18/08/2025 Substituída 2 cultivos
+   o que ficou no lugar do Publicar: ‹ Biblioteca de planos
+== D: muda 0,5 → 0,6 e volta a 0,5; publica
+   estado: {'h2': 'Soja alta tecnologia', 'est': 'Rascunho v7 em edição', 'hash': '#plano=SOJA-AT', 'area': ['voltar:‹ Biblioteca de planos', 'comando:Publicar versão v7'], 'cards': 0, 'alerts': []}
+   bloco: Alterações do rascunho v7 em relação à v6 Confira cada alteração antes de publicar; publicar cria a nova versão sem mudar os cultivos. O rascunho está igual à versão publicada. Custo de insumos: R$ 2.099,90/ha na v6 → R$ 2.099,90/ha na v7 (sem mudança) Aplicado em 3 cultivos na v6 e 2 na v5 (safra e
+   toast: Versão v7 publicada. Os cultivos continuam como estavam (3 cultivos na v6 e 2 na v5 (safra encerrada)); decida a adoção em Planejar safra.
+   cultivos: ['Na v6 · v7 publicada', 'Na v6 · v7 publicada', 'Na v6 · v7 publicada']
+   links: 3
+== E: abre o filtro de uma coluna da tabela de cultivos, foca um botão do filtro e tecla Esc
+   botões de filtro: ['Filtrar Safra', 'Filtrar Talhão ou parcela', 'Filtrar Cultura e variedade', 'Filtrar Área', 'Filtrar Versão aplicada', 'Filtrar Situação']
+   popover: {'foco': '↑ Classificar de A a Z'}
+   depois do Esc: {'h2': '', 'est': '', 'hash': '', 'area': [], 'cards': 8, 'alerts': []} | popover aberto? False
+== F: 390 px, detalhe aberto, menu aberto pelo botão; Esc
+   antes: {'aberto': True, 'pos': 'absolute'} | depois: menu aberto? False | {'h2': '', 'est': '', 'hash': '', 'area': [], 'cards': 8, 'alerts': []}
+== G: painel "Atividade" aberto na Soja; o endereço muda para #plano=MILHO-SF; Salvar
+   painel antes: Atividade · Dessecação pré-plantio | depois da troca: Nova atividade | tela: Milho safrinha #plano=MILHO-SF | toast: Plano aberto: Milho safrinha
+   estado: {'h2': 'Milho safrinha', 'est': 'Publicado · v4', 'hash': '#plano=MILHO-SF', 'area': ['voltar:‹ Biblioteca de planos'], 'cards': 0, 'alerts': []}
+== H: cria plano "Soja teste", F5
+   hash: #plano=NPmv18mng3 | depois do F5: {'h2': '', 'est': '', 'hash': '', 'area': [], 'cards': 8, 'alerts': []} | aviso: Plano “NPmv18mng3” não encontrado neste navegador: escolha um plano da biblioteca.
+== I 1440px: depois de mudar a dose: {'vh': 900, 'dif_top': 1160, 'dif_bot': 1354, 'dif_visivel_px': 0, 'pub_top': 414, 'pub_na_tela': True}
+== I 390px: depois de mudar a dose: {'vh': 844, 'dif_top': 1510, 'dif_bot': 1868, 'dif_visivel_px': 0, 'pub_top': 770, 'pub_na_tela': True}
+== J: abre "Incluir insumo", escolhe produto e digita dose; volta à biblioteca
+   dose digitada: 0,3 | depois do voltar: 8 cartões | aviso: Plano aberto: Soja alta tecnologia
+   reabrindo: inclusão ainda aberta? False | rascunho? Publicado · v6
+
+### 2026-10-09T17:28:36.069Z
+$ W=$(cat <scratchpad>/.nav1_codex_rev_dir_path); cat > $W/probes/saf_links_all.py <<'EOF'
+  [corpo do heredoc omitido]
+Command did not complete within its 320s timeout and was moved to the background (ID: bxkebrqs9). Output is being written to: <sessao-tmp>/tasks/bxkebrqs9.output. If it exits while you are still working you will be notified, but it is terminated when you give your final response and no notification can follow that — so do not end your turn to wait for it; if you need its result, wait for it before giving your final response. To check interim output, use Read on that file path.
+Session cwd remains <repo>; directory changes made by the backgrounded command do not apply to subsequent commands.
+
+### 2026-10-09T17:35:26.065Z
+$ W=$(cat <scratchpad>/.nav1_codex_rev_dir_path); mkdir -p $W/mut && cd $W && rm -rf mut/g && cp -r head/tools/prototipo/v37/gen37 mut/g && rm -rf mut/g/_render mut/g/project mut/g/_probe && cat > $W/mut/run_mut_regras.py <<'EOF'
+  [corpo do heredoc omitido]
+MORTO   M1 link do cultivo com a safra fixa S2627 | []
+MORTO   M2 link também para safra encerrada | []
+MORTO   M3 Publicar sem a trava da inclusão aberta | []
+MORTO   M4 publicar não grava o histórico | []
+MORTO   M5 nome repetido diferenciando maiúsculas | []
+MORTO   M6 copiar da base usa o rascunho da base (não a versão publicada) | []
+MORTO   M7 endereço sem decodificar | []
+MORTO   M8 diferenças sem "retira" | []
+MORTO   M9 rascunho sem clonar (muda a versão publicada) | []
+MORTO   M11 chip sem a versão publicada | []
+MORTO   M12 Publicar com prim mesmo sem rascunho | []
+
+### 2026-10-09T17:35:43.045Z
+$ W=$(cat <scratchpad>/.nav1_codex_rev_dir_path); cd $W && rm -rf mut/g mut/v37 && mkdir -p mut/v37 && (cd head/tools/prototipo/v37 && tar --exclude=gen37/_render --exclude=gen37/project --exclude=gen37/_probe -cf - .) | tar -xf - -C mut/v37 && sed -i "s#G=os.path.join(W,'mut','g')#G=os.path.join(W,'mut','v37','gen37')#" mut/run_mut_regras.py && cd mut/v37/gen37 && GEN=$PWD python3 pa_regras_test.py > /dev/null; echo control_rc=$?; python3 $W/mut/run_mut_regras.py $W
+control_rc=0
+VIVO    M1 link do cultivo com a safra fixa S2627 | []
+VIVO    M2 link também para safra encerrada | []
+MORTO   M3 Publicar sem a trava da inclusão aberta | ['FALHA U5 Próximo passo: sem rascunho nenhuma primária; com rascunho "P']
+MORTO   M4 publicar não grava o histórico | ['FALHA U6 publicar cria a v7 (em vigor, no histórico com a data de hoje']
+MORTO   M5 nome repetido diferenciando maiúsculas | ['FALHA U9 novo plano: nome obrigatório; repetido na mesma cultura recus']
+VIVO    M6 copiar da base usa o rascunho da base (não a versão publicada) | []
+MORTO   M7 endereço sem decodificar | ['FALHA U1 endereço: #plano=SOJA-AT → SOJA-AT; com outro parâmetro antes']
+VIVO    M8 diferenças sem "retira" | []
+MORTO   M9 rascunho sem clonar (muda a versão publicada) | ['FALHA U2 1ª mudança de dose na v6 cria o rascunho v7; a v6 publicada e', 'FALHA U4 diferenças v7 × v6: dose alterada, insumo incluído, atividade']
+MORTO   M11 chip sem a versão publicada | ['FALHA U8 situação do cultivo (X-AGR-6): em vigor; com rascunho "Contin']
+MORTO   M12 Publicar com prim mesmo sem rascunho | ['FALHA U5 Próximo passo: sem rascunho nenhuma primária; com rascunho "P']
+
+### 2026-10-09T17:37:02.870Z
+$ W=$(cat <scratchpad>/.nav1_codex_rev_dir_path); cd $W/probes && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+ok
+
+### 2026-10-09T17:37:07.190Z
+$ W=$(cat <scratchpad>/.nav1_codex_rev_dir_path); cd $W/probes && env CHROME_BIN=<chrome> flock /tmp/cdpE.lock env CDP_GL=1 timeout 600 python3 adv.py $W/head/tools/prototipo/v37/gen37 K,G2 > $W/adv_KG2.txt 2>&1; echo rc=$? >> $W/adv_KG2.txt
+Command running in background with ID: b0p9p0gfr. Output is being written to: <sessao-tmp>/tasks/b0p9p0gfr.output. If it exits while you are still working you will be notified, but it is terminated when you give your final response and no notification can follow that — so do not end your turn to wait for it; if you need its result, wait for it before giving your final response. To check interim output, use Read on that file path.
+Session cwd remains <repo>; directory changes made by the backgrounded command do not apply to subsequent commands.
+
+### 2026-10-09T17:43:47.346Z
+$ W=$(cat <scratchpad>/.nav1_codex_rev_dir_path); cd $W/probes && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+ok
+
+### 2026-10-09T17:43:51.930Z
+$ W=$(cat <scratchpad>/.nav1_codex_rev_dir_path); cd $W/probes && env CHROME_BIN=<chrome> flock /tmp/cdpE.lock env CDP_GL=1 timeout 600 python3 adv.py $W/head/tools/prototipo/v37/gen37 L > $W/adv_L.txt 2>&1; echo rc=$? >> $W/adv_L.txt
+Command running in background with ID: bz2xk6ckb. Output is being written to: <sessao-tmp>/tasks/bz2xk6ckb.output. If it exits while you are still working you will be notified, but it is terminated when you give your final response and no notification can follow that — so do not end your turn to wait for it; if you need its result, wait for it before giving your final response. To check interim output, use Read on that file path.
+Session cwd remains <repo>; directory changes made by the backgrounded command do not apply to subsequent commands.
+
+### 2026-10-09T18:16:48.370Z
+$ W=$(cat <scratchpad>/.nav1_codex_rev_dir_path); cat > $W/probes/base_A.py <<'EOF'
+  [corpo do heredoc omitido]
+Command running in background with ID: by049klvi. Output is being written to: <sessao-tmp>/tasks/by049klvi.output. If it exits while you are still working you will be notified, but it is terminated when you give your final response and no notification can follow that — so do not end your turn to wait for it; if you need its result, wait for it before giving your final response. To check interim output, use Read on that file path.
+Session cwd remains <repo>; directory changes made by the backgrounded command do not apply to subsequent commands.

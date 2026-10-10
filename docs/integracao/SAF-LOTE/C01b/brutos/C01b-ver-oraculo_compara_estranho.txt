@@ -1,0 +1,38 @@
+CONTAGENS
+  fisico_sem_trava:mesma faixa no dia (cruz)    40
+  fisico_sem_trava:sem plano/perene no dia      5
+  fixtures                                      1204
+  js_base:nao_trava_e_devia                     106
+  js_novo:m1_conferidas                         333
+  novo_trava_soma_ok                            164
+  oraculo_pend_soma                             154
+  oraculo_trava_soma                            164
+  py_base:nao_trava_e_devia                     106
+  py_novo:m1_conferidas                         333
+DIVERGÊNCIAS (classe: n)
+  js_base:pend_soma                             103
+  js_base:trav_soma                             106
+  py_base:pend_soma                             103
+  py_base:trav_soma                             106
+
+== js_base:pend_soma (até 3) ==
+   ["CODEX-2020-70", {}, {"soja": [["soma", "cafe", 21082, 21090, 9]]}]
+   ["F0019.0", {}, {"alvo": [["soma", "o0", 21051, 21123, 73]]}]
+   ["F0025.0", {}, {"alvo": [["soma", "o1", 36305, 36334, 30]]}]
+
+== js_base:trav_soma (até 3) ==
+   ["CODEX-2020-70", [], [["soma", "cafe", "soja", 20970, 110]]]
+   ["F0019.0", [], [["soma", "o0", "alvo", 21012, 127.85]]]
+   ["F0025.0", [], [["soma", "o1", "alvo", 36165, 0.38]]]
+
+== py_base:pend_soma (até 3) ==
+   ["CODEX-2020-70", {}, {"soja": [["soma", "cafe", 21082, 21090, 9]]}]
+   ["F0019.0", {}, {"alvo": [["soma", "o0", 21051, 21123, 73]]}]
+   ["F0025.0", {}, {"alvo": [["soma", "o1", 36305, 36334, 30]]}]
+
+== py_base:trav_soma (até 3) ==
+   ["CODEX-2020-70", [], [["soma", "cafe", "soja", 20970, 110]]]
+   ["F0019.0", [], [["soma", "o0", "alvo", 21012, 127.85]]]
+   ["F0025.0", [], [["soma", "o1", "alvo", 36165, 0.38]]]
+
+tempo: oraculo 21068 ms · js_novo 2696.6 ms · py_novo 1708.8 ms · js_base 8566.1 ms · py_base 8547.4 ms

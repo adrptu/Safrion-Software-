@@ -1,0 +1,20 @@
+MA-01
+  ok  MA-01.dc.html: sem erro JS
+  FALHA MA-01.dc.html: faixa com 5 links e etapa 1 atual
+  FALHA MA-01.dc.html: grades sem rolagem horizontal a 1440 px [183]
+  ok  MA-01.dc.html: sem botões Editar
+  FALHA MA-01: substituto com rótulo único antes do PCP · Trator 02 · MF 7719 · Santa Rita · T4 Apto 2.988 h · 23/09 Vence em breve Revisão 250 h · 3.043 h ≈ 28/09 +1 OM-0234 · A
+  ok  MA-01: 16 ativos com a identidade do CD-03 + comboio
+  FALHA MA-01: próxima manutenção vem dos planos (Vencida · Vence em breve · Sem plano)
+  FALHA MA-01: clique na linha abre formulário do ativo
+Traceback (most recent call last):
+  File "<sp-pcm>/tools/prototipo/v37/gen37/matest.py", line 44, in <module>
+    setv('aside[role=dialog] select[id$=_cond]','Restrito · monitorado'); clk('Salvar','aside[role=dialog]')
+                                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<sp-pcm>/tools/prototipo/v37/gen37/matest.py", line 13, in clk
+    def clk(t,root=None): r=J(f"({CLK})({json.dumps(t)},{json.dumps(root)})"); time.sleep(.45); return r
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<sp-pcm>/tools/prototipo/v37/gen37/cdp.py", line 95, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught

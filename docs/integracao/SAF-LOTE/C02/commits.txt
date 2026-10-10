@@ -1,0 +1,3 @@
+16716710a62879ddd44a52473d899bdf16282566 SAF-C02: saídas brutas da verificação
+f52fa090c8643d99a9cce6d6aebb359ad10de206 SAF-C02: correções da verificação
+62b0904027747d646658651bd054c08481478b6e SAF-C02: capacidade simétrica entre safras abertas (elegibilidade pela safra de origem)

@@ -1,0 +1,70 @@
+OK    · OC-14 sem "Adicionar cultivo" #saf=S2627&passo=cultivos
+OK    · OC-14 sem "Adicionar cultivo" #saf=S27SF&passo=cultivos
+OK    · OC-14 sem "Adicionar cultivo" #saf=S2526&passo=cultivos
+OK    · OC-14 sem "Adicionar cultivo" #saf=LG2627&passo=cultivos
+OK    · OC-01 S27SF: 8 talhões da Santa Rita, nenhum pivô
+OK    · OC-03 faixa S27SF (§3.4)
+OK    · OC-04 chips S27SF pelo nível 0 (soma = Todas)
+OK    · §6.1 Situação, Área livre e Livre a partir de (S27SF)
+OK    · OC-02 T3 é folha com a ocupação de fora esmaecida (Soja 62 X, 17/02/2027, Estimado, Safra 2026/27 ›)
+OK    · OC-18 Situação com texto e motivo do A conferir na dica
+OK    · OC-18 motivo também no texto para leitor de tela
+OK    · OC-05 negativo: T7 e C1 Perene sem Planejar nem Vincular (a S2627 cruza)
+OK    · OC-02 grupo T1: c1 e c2 (Safra 2026/27) e d1 desta safra, por data de início
+OK    · R-13 total da Área só desta safra (553 ha)
+OK    · R-23 seleção só nas linhas desta safra
+OK    · OC-04 chip Livre mostra só o T1 (com as filhas ao abrir)
+OK    · OC-03 faixa S2627 com "1 sucessão a conferir"
+OK    · OC-04 chips S2627
+OK    · §3.2 S2627 com 18 linhas de grupos abertos
+OK    · §5.1 nota da S2627 cita a sucessão do P1 com a saída
+OK    · OC-16 S2526 encerrada: 5 cultivos, sem Planejar nem Dividir, Situação "—"
+OK    · OC-20 lavouras em campo e4/e5 na S2526 com colheita informada
+OK    · OC-01 LG2627: 23 pivôs, nunca o T1
+OK    · OC-06 painel "Planejar T1" com contexto herdado
+OK    · OC-06 padrões: 152 ha, 21/02/2027 (PlantioMin), T1-B; prévia 21/02/2027 a 11/07/2027
+OK    · OC-06 Plano antes de Plantio; Colheita prevista do plano só leitura; unidade da meta da cultura (DEC-0510-03)
+OK    · §0 campo numérico com teclado decimal
+OK    · OC-06 salva: "Cultivo incluído como parcela T1-B"
+OK    · OC-06 faixa "Nesta safra 705 · A conferir 380 · Perene 80"
+OK    · OC-06 T1 passa a Planejado e perde o Planejar ›
+     (medido) OC-19 toques no Planejar do T1 (1440): Planejar ›, Meta, Salvar: 3
+OK    · Repetição: Salvar com o painel fechado não cria outro cultivo
+OK    · OC-13 estado sem linha de exibição (fora, livre, talhão)
+OK    · OC-07 recusa M1 com fato e saída; painel continua aberto
+OK    · OC-07 nada gravado (faixa igual)
+OK    · OC-18 Esc/Cancelar com alteração pede confirmação
+OK    · OC-08 T1-B em 20/02/2027 salva com pendência de 1 dia (folga 1)
+OK    · OC-08 T1 fica A conferir pela pendência
+OK    · OC-11 milho no T3 em 10/02/2027 recusado (M2)
+OK    · OC-11 em 11/02/2027 salva com o aviso "provável sobreposição (7 dias)"
+OK    · OC-09 R-16 o painel mostra antes quem recebe com pendência e o botão conta 4
+OK    · OC-09 aplica nos 4, P2 com pendência
+OK    · OC-09 P2 A conferir com o ocupante (e5) visível na linha
+OK    · OC-09 nota sem "sem plano" e com a pendência e as saídas
+OK    · OC-12 com plano no c6, P1 sai de A conferir na S2627
+OK    · R-17 "Mudar plantio ›" abre o P2 com o plantio mínimo 06/12/2026
+OK    · §9.3 com 06/12/2026 a pendência some
+OK    · OC-10 c1 em 30/10/2026 salva com a pendência P2 no d1
+OK    · OC-10 d1 visível no grupo T1
+OK    · OC-22 S27SF: T4 Livre 204 ha desde 11/02/2027
+OK    · OC-22 chips "A conferir 3 · Livre 2 · Perene 2 · Planejado 1"
+OK    · §5.1 endereço com &cult= abre a S2627 no passo cultivos com o painel do c5
+OK    · OC-05 2027/28: T7 e C1 com Vincular ciclo, sem Planejar; faixa "Livre 1.085 · Perene 80"
+OK    · OC-05 painel "Vincular ciclo C1" com o plantio real travado e sem plano
+OK    · OC-05 vincular C1: faixa "Nesta safra 38 · Livre 1.085 · Perene 42"
+OK    · OC-05 o cultivo vinculado nasce sem plano e C1 não oferece Vincular de novo
+OK    · OC-15/R-01 Boa Vista nova: só o B1, Livre 120 ha desde 01/09/2026
+OK    · R-22 a safra nova não herda o cultivo vinculado da outra safra nova
+OK    · OC-15/R-21 cultivo da Boa Vista grava Boa Vista e a safra dele
+OK    · sem erro de JS (desktop)
+OK    · OC-17 390×844: sem rolagem lateral da página; seleção ≤ 40 px; Situação inteira sem rolar a caixa; Planejar › na coluna presa; grupos recolhidos
+OK    · OC-17 360×800: sem rolagem lateral da página; seleção ≤ 40 px; Situação inteira sem rolar a caixa; Planejar › na coluna presa; grupos recolhidos
+OK    · OC-17 painel em tela cheia a 390
+OK    · 390: Planejar T1 com os padrões salva (fluxo principal no celular)
+     (medido) OC-19 toques no Planejar do T1 (390): Planejar ›, Meta, Salvar: 3
+OK    · 390: recusa M2 visível no painel
+OK    · sem erro de JS (celular)
+
+RESULTADO: 65 ok · 0 falhas (tudo)
+rc=0 tempo=148 s (inclui espera do lock)

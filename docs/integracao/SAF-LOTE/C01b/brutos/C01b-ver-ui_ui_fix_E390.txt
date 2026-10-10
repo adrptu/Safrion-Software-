@@ -1,0 +1,13 @@
+     (medido) fix 390x844 E(dividir sugestões) depois de "+ Adicionar parcela": ([('C1-B', '18'), ('C1-A', '20')], 'Talhão 38 ha · alocado 38 ha · livre 0 ha Área conferida')
+FALHA · fix 390x844 E(dividir sugestões) · "+ Adicionar parcela" não propõe área nem nome que o café (C1-A, 20 ha) ocupa · ([('C1-B', '18'), ('C1-A', '20')], 'Talhão 38 ha · alocado 38 ha · livre 0 ha Área conferida')
+     (medido) fix 390x844 E(dividir sugestões) Salvar a proposta do próprio painel: A divisão travaria a área: 1 parcela com ocupação certa no período. Nada foi gravado. | C1-A tem Café perene, sem fim registrado. O plano geraria insumo e O.S. sobre o cafezal. O encerramento do ciclo ainda não existe no sistema.
+OK    · fix 390x844 E(dividir sugestões) · salvar a proposta do painel é recusado (nada gravado)
+     (medido) fix 390x844 E(dividir sugestões) depois de "Distribuir área igualmente": ([('C1-B', '19'), ('C1-C', '19')], 'Talhão 38 ha · alocado 38 ha · livre 0 ha Área conferida')
+FALHA · fix 390x844 E(dividir sugestões) · "Distribuir área igualmente" reparte só a área que o café deixa (18 ha), não os 38 ha do talhão · ([('C1-B', '19'), ('C1-C', '19')], 'Talhão 38 ha · alocado 38 ha · livre 0 ha Área conferida')
+     (medido) fix 390x844 E(dividir sugestões) Salvar depois de distribuir: A divisão travaria a área: 2 parcelas com ocupação certa no período. Nada foi gravado. | De 11/09/2027 a 27/01/2028, 39 ha de C1 estão com Café (C1-A, Safra 2026/27) e Soja (C1-C, SR 2027 cruza). Máximo 0 ha nesse período. | De 11/09/2027 a 27/01/2028, 39 ha de C1 estão com Café (C1-A, Safra 2026/27) e Soja (C1-B, SR 2027 cruza). Máximo 0 ha nesse período.
+OK    · fix 390x844 E(dividir sugestões) · salvar a distribuição do painel é recusado (nada gravado)
+OK    · fix 390x844 E(dividir sugestões) · sem erro de JS
+
+RESULTADO fix: 3 ok · 2 falhas (E celular)
+  - fix 390x844 E(dividir sugestões) · "+ Adicionar parcela" não propõe área nem nome que o café (C1-A, 20 ha) ocupa
+  - fix 390x844 E(dividir sugestões) · "Distribuir área igualmente" reparte só a área que o café deixa (18 ha), não os 38 ha do talhão

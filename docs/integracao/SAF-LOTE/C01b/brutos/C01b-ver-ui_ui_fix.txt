@@ -1,0 +1,108 @@
+OK    · fix 1440x900 A(adendo C1) · preparo: café 2019 reduzido a 20 ha (C1-A)
+OK    · fix 1440x900 A(adendo C1) · safra 2028: C1 Livre 18 ha (38 − 20 do café sem fim)
+OK    · fix 1440x900 A(adendo C1) · 30 ha (20 + 30 = 50 > 38): duplo clique/toque real em Salvar recusa com o motivo; nada gravado
+OK    · fix 1440x900 A(adendo C1) · 30 ha: dois .click() no mesmo tique também recusam; nada gravado
+OK    · fix 1440x900 A(adendo C1) · rascunho preservado depois das recusas (cultura, plano, plantio, parcela, área, meta)
+OK    · fix 1440x900 A(adendo C1) · Escape com rascunho: "Há alterações não salvas" (não fecha)
+OK    · fix 1440x900 A(adendo C1) · "Continuar editando" volta ao rascunho intacto (30 ha, C1-B)
+OK    · fix 1440x900 A(adendo C1) · limite 18 ha (20 + 18 = 38) grava, e o duplo .click() síncrono grava uma linha só
+     (medido) fix 1440x900 A(adendo C1) toast depois de gravar 18 ha: Cultivo incluído como parcela C1-B · 20 ha livres em C1 · plano Soja alta tecnologia.
+FALHA · fix 1440x900 A(adendo C1) · toast não anuncia área livre que o café ocupa (C1 fica 0 ha livre: 38 − 20 − 18) · Cultivo incluído como parcela C1-B · 20 ha livres em C1 · plano Soja alta tecnologia.
+     (medido) fix 1440x900 A(adendo C1) linha C1 depois de gravar: {'SITUAÇÃO': 'Planejado', 'ÁREA LIVRE': '—', 'ÁREA': '18 ha', '_dica': ''}
+OK    · fix 1440x900 A(adendo C1) · tabela: C1 sem área livre e sem Sobreposição
+OK    · fix 1440x900 A(adendo C1) · editar a soja 18 → 19 ha recusa com o motivo; continua 18
+OK    · fix 1440x900 A(adendo C1) · sem rolagem lateral
+OK    · fix 1440x900 A(adendo C1) · sem erro de JS
+OK    · fix 1440x900 B(ordem inversa) · preparo: soja 90 ha no B1 em 2027 grava (sem café ainda)
+     (medido) fix 1440x900 B(ordem inversa) B1 na safra 2020 (soja de 2027 fora da janela): {'SITUAÇÃO': 'Livre', 'ÁREA LIVRE': '120 ha', '_dica': '120 ha livres a partir de 01/01/2020 (folga 1 dia)'}
+FALHA · fix 1440x900 B(ordem inversa) · café 2020 de 40 ha depois da soja 2027 (40 + 90 = 130 > 120) recusa com motivo; nada gravado · ('Corrija os campos destacados; o que você preencheu foi mantido. | B1-A tem Soja da BV 2027 primeiro desde 01/06/2027. O plano geraria insumo e O.S. sobre lavoura em campo. B1-A tem Soja da BV 2027 primeiro a partir de 01/06/2027. Para o café com o plano começar depois do cultivo anterior (01/01/2020), replaneje esse soja para 05/07/2027 ou depois.', [('n5_92350', 'B1-A', 'Soja', 90, 'SOJA-AT')])
+     (medido) fix 1440x900 B(ordem inversa) mensagem da recusa do café: Corrija os campos destacados; o que você preencheu foi mantido. | B1-A tem Soja da BV 2027 primeiro desde 01/06/2027. O plano geraria insumo e O.S. sobre lavoura em campo. B1-A tem Soja da BV 2027 primeiro a partir de 01/06/2027. Para o café com o plano começar depois do cultivo anterior (01/01/2020), replaneje esse soja para 05/07/2027 ou depois.
+FALHA · fix 1440x900 B(ordem inversa) · café 30 ha (limite 120) grava · ('Corrija os campos destacados; o que você preencheu foi mantido. | B1-A tem Soja da BV 2027 primeiro desde 01/06/2027. O plano geraria insumo e O.S. sobre lavoura em campo. B1-A tem Soja da BV 2027 primeiro a partir de 01/06/2027. Para o café com o plano começar depois do cultivo anterior (01/01/2020), replaneje esse soja para 05/07/2027 ou depois.', 'Safra aberta: Café 2020 depois · Cultivos e planos', [('n5_92350', 'B1-A', 'Soja', 90, 'SOJA-AT')])
+FALHA · fix 1440x900 B(ordem inversa) · editar o café 30 → 31 ha recusa; continua 30 · ('Corrija os campos destacados; o que você preencheu foi mantido. | B1-A tem Soja da BV 2027 primeiro desde 01/06/2027. O plano geraria insumo e O.S. sobre lavoura em campo. B1-A tem Soja da BV 2027 primeiro a partir de 01/06/2027. Para o café com o plano começar depois do cultivo anterior (01/01/2020), replaneje esse soja para 05/07/2027 ou depois.', [('n5_92350', 'B1-A', 'Soja', 90, 'SOJA-AT')])
+     (medido) fix 1440x900 B(ordem inversa) B1 na safra 2020 depois do café 30: {'sit': 'Livre', 'livre': '120 ha', 'dica': '120 ha livres a partir de 01/01/2020 (folga 1 dia)', 'ações': ['Planejar ›']}
+FALHA · fix 1440x900 B(ordem inversa) · mais um café de 10 ha em 2020 (30 + 10 + 90 = 130) recusa; nada gravado · ('Corrija os campos destacados; o que você preencheu foi mantido. | B1-A tem Soja da BV 2027 primeiro desde 01/06/2027. O plano geraria insumo e O.S. sobre lavoura em campo. B1-A tem Soja da BV 2027 primeiro a partir de 01/06/2027. Para o café com o plano começar depois do cultivo anterior (01/01/2020), replaneje esse soja para 05/07/2027 ou depois.', [('n5_92350', 'B1-A', 'Soja', 90, 'SOJA-AT')])
+     (medido) fix 1440x900 B(ordem inversa) mensagem da 2ª parcela de café: Corrija os campos destacados; o que você preencheu foi mantido. | B1-A tem Soja da BV 2027 primeiro desde 01/06/2027. O plano geraria insumo e O.S. sobre lavoura em campo. B1-A tem Soja da BV 2027 primeiro a partir de 01/06/2027. Para o café com o plano começar depois do cultivo anterior (01/01/2020), replaneje esse soja para 05/07/2027 ou depois.
+OK    · fix 1440x900 B(ordem inversa) · sem rolagem lateral
+OK    · fix 1440x900 B(ordem inversa) · sem erro de JS
+OK    · fix 1440x900 C(aplicar plano) · preparo: soja antiga 50 ha com plano no B1 (2020)
+OK    · fix 1440x900 C(aplicar plano) · preparo: soja A 70 ha sem plano (2027-06-01)
+     (medido) fix 1440x900 C(aplicar plano) B1 na BV 2027 B: {'SITUAÇÃO': 'Livre', 'ÁREA LIVRE': '50 ha', '_dica': '50 ha livres a partir de 01/03/2027 (folga 1 dia)'}
+     (medido) fix 1440x900 C(aplicar plano) soja B 70 ha sem plano (2027-07-01): toast/alerta: ('Cultivo incluído como parcela B1-B · 50 ha livres em B1. Escolha o plano agronômico na linha. Atenção: B1: a soma prevista das áreas passa da área do talhão de 01/07/2027 a 27/09/2027 (89 dias)..', '(painel fechado)')
+     (medido) fix 1440x900 C(aplicar plano) painel Aplicar plano: Aplicar plano a 1 cultivo Escolha um plano da mesma cultura. Cada cultivo recebe o plano padrão; ajustes locais podem ser feitos depois. B1-B · Soja 58 W · 70 ha · não recebe: De 11/06/2027 a 27/09/2027, 70 ha de B1 estão com Soja (B1-A, BV 2027 A). Máximo 50 ha nesse período. Plano agronômico Escolha o plano Soja alta tecnologia v6 · 8 atividades Soja padrão v3 · 4 atividades Cancelar Aplicar plano em 0 cultivos
+OK    · fix 1440x900 C(aplicar plano) · aplicar SOJA-AT na soja B (70 + 70 > 120, ocupação antiga de 2020 no talhão) recusa com motivo; plano não aplicado
+OK    · fix 1440x900 C(aplicar plano) · sem erro de JS
+     (medido) fix 1440x900 D(dividir C1) C1 na safra 2027: {'SITUAÇÃO': 'Livre', 'ÁREA LIVRE': '18 ha', 'LIVRE A PARTIR DE': '01/01/2027', '_dica': '18 ha livres a partir de 01/01/2027 (folga 1 dia)'}
+OK    · fix 1440x900 D(dividir C1) · soja 19 ha (20 + 19 > 38) recusa
+OK    · fix 1440x900 D(dividir C1) · soja 18 ha (limite) grava
+     (medido) fix 1440x900 D(dividir C1) toast: Cultivo incluído como parcela C1-B · 20 ha livres em C1 · plano Soja alta tecnologia.
+OK    · fix 1440x900 D(dividir C1) · Dividir C1 abre só a soja desta safra
+     (medido) fix 1440x900 D(dividir C1) nome sugerido da parcela nova: C1-A
+     (medido) fix 1440x900 D(dividir C1) resumo do painel Dividir: Dividir C1 em parcelas × Defina quantas parcelas precisar e os dados de cada uma; a soma não pode passar da área do talhão. 2 parcelas Talhão 38 ha · alocado 38 ha · livre 0 ha Área conferida PARCELA ÁREA (HA) CULTURA VARIEDADE PLANTIO META UNIDADE PLANO AGRON
+FALHA · fix 1440x900 D(dividir C1) · dividir em 10 + 9 (20 + 19 > 38) recusa "Nada foi gravado" com o motivo; continua 18 · ('', [('n5_60653', 'C1-B', 'Soja', 18, 'SOJA-AT')])
+OK    · fix 1440x900 D(dividir C1) · dividir em 10 + 8 (limite) grava
+     (medido) fix 1440x900 D(dividir C1) toast do dividir: C1 dividido em 2 parcelas · 20 ha livres. Plano operacional, recursos e demanda recalculados.
+FALHA · fix 1440x900 D(dividir C1) · toast do dividir não anuncia área livre que o café ocupa · C1 dividido em 2 parcelas · 20 ha livres. Plano operacional, recursos e demanda recalculados.
+OK    · fix 1440x900 D(dividir C1) · sem rolagem lateral
+OK    · fix 1440x900 D(dividir C1) · sem erro de JS
+OK    · fix 390x844 A(adendo C1) · preparo: café 2019 reduzido a 20 ha (C1-A)
+OK    · fix 390x844 A(adendo C1) · safra 2028: C1 Livre 18 ha (38 − 20 do café sem fim)
+OK    · fix 390x844 A(adendo C1) · 30 ha (20 + 30 = 50 > 38): duplo clique/toque real em Salvar recusa com o motivo; nada gravado
+OK    · fix 390x844 A(adendo C1) · 30 ha: dois .click() no mesmo tique também recusam; nada gravado
+OK    · fix 390x844 A(adendo C1) · rascunho preservado depois das recusas (cultura, plano, plantio, parcela, área, meta)
+OK    · fix 390x844 A(adendo C1) · Escape com rascunho: "Há alterações não salvas" (não fecha)
+OK    · fix 390x844 A(adendo C1) · "Continuar editando" volta ao rascunho intacto (30 ha, C1-B)
+OK    · fix 390x844 A(adendo C1) · limite 18 ha (20 + 18 = 38) grava, e o duplo .click() síncrono grava uma linha só
+     (medido) fix 390x844 A(adendo C1) toast depois de gravar 18 ha: Cultivo incluído como parcela C1-B · 20 ha livres em C1 · plano Soja alta tecnologia.
+FALHA · fix 390x844 A(adendo C1) · toast não anuncia área livre que o café ocupa (C1 fica 0 ha livre: 38 − 20 − 18) · Cultivo incluído como parcela C1-B · 20 ha livres em C1 · plano Soja alta tecnologia.
+     (medido) fix 390x844 A(adendo C1) linha C1 depois de gravar: {'SITUAÇÃO': 'Planej.', 'ÁREA LIVRE': '—', 'ÁREA': '18 ha', '_dica': 'Planejado'}
+OK    · fix 390x844 A(adendo C1) · tabela: C1 sem área livre e sem Sobreposição
+OK    · fix 390x844 A(adendo C1) · editar a soja 18 → 19 ha recusa com o motivo; continua 18
+OK    · fix 390x844 A(adendo C1) · sem rolagem lateral
+OK    · fix 390x844 A(adendo C1) · sem erro de JS
+OK    · fix 390x844 B(ordem inversa) · preparo: soja 90 ha no B1 em 2027 grava (sem café ainda)
+     (medido) fix 390x844 B(ordem inversa) B1 na safra 2020 (soja de 2027 fora da janela): {'SITUAÇÃO': 'Livre', 'ÁREA LIVRE': '120 ha', '_dica': '120 ha livres a partir de 01/01/2020 (folga 1 dia)'}
+FALHA · fix 390x844 B(ordem inversa) · café 2020 de 40 ha depois da soja 2027 (40 + 90 = 130 > 120) recusa com motivo; nada gravado · ('Corrija os campos destacados; o que você preencheu foi mantido. | B1-A tem Soja da BV 2027 primeiro desde 01/06/2027. O plano geraria insumo e O.S. sobre lavoura em campo. B1-A tem Soja da BV 2027 primeiro a partir de 01/06/2027. Para o café com o plano começar depois do cultivo anterior (01/01/2020), replaneje esse soja para 05/07/2027 ou depois.', [('n5_10014', 'B1-A', 'Soja', 90, 'SOJA-AT')])
+     (medido) fix 390x844 B(ordem inversa) mensagem da recusa do café: Corrija os campos destacados; o que você preencheu foi mantido. | B1-A tem Soja da BV 2027 primeiro desde 01/06/2027. O plano geraria insumo e O.S. sobre lavoura em campo. B1-A tem Soja da BV 2027 primeiro a partir de 01/06/2027. Para o café com o plano começar depois do cultivo anterior (01/01/2020), replaneje esse soja para 05/07/2027 ou depois.
+FALHA · fix 390x844 B(ordem inversa) · café 30 ha (limite 120) grava · ('Corrija os campos destacados; o que você preencheu foi mantido. | B1-A tem Soja da BV 2027 primeiro desde 01/06/2027. O plano geraria insumo e O.S. sobre lavoura em campo. B1-A tem Soja da BV 2027 primeiro a partir de 01/06/2027. Para o café com o plano começar depois do cultivo anterior (01/01/2020), replaneje esse soja para 05/07/2027 ou depois.', 'Safra aberta: Café 2020 depois · Cultivos e planos', [('n5_10014', 'B1-A', 'Soja', 90, 'SOJA-AT')])
+FALHA · fix 390x844 B(ordem inversa) · editar o café 30 → 31 ha recusa; continua 30 · ('Corrija os campos destacados; o que você preencheu foi mantido. | B1-A tem Soja da BV 2027 primeiro desde 01/06/2027. O plano geraria insumo e O.S. sobre lavoura em campo. B1-A tem Soja da BV 2027 primeiro a partir de 01/06/2027. Para o café com o plano começar depois do cultivo anterior (01/01/2020), replaneje esse soja para 05/07/2027 ou depois.', [('n5_10014', 'B1-A', 'Soja', 90, 'SOJA-AT')])
+     (medido) fix 390x844 B(ordem inversa) B1 na safra 2020 depois do café 30: {'sit': 'Livre', 'livre': '120 ha', 'dica': '120 ha livres a partir de 01/01/2020 (folga 1 dia)', 'ações': ['Planejar ›']}
+FALHA · fix 390x844 B(ordem inversa) · mais um café de 10 ha em 2020 (30 + 10 + 90 = 130) recusa; nada gravado · ('Corrija os campos destacados; o que você preencheu foi mantido. | B1-A tem Soja da BV 2027 primeiro desde 01/06/2027. O plano geraria insumo e O.S. sobre lavoura em campo. B1-A tem Soja da BV 2027 primeiro a partir de 01/06/2027. Para o café com o plano começar depois do cultivo anterior (01/01/2020), replaneje esse soja para 05/07/2027 ou depois.', [('n5_10014', 'B1-A', 'Soja', 90, 'SOJA-AT')])
+     (medido) fix 390x844 B(ordem inversa) mensagem da 2ª parcela de café: Corrija os campos destacados; o que você preencheu foi mantido. | B1-A tem Soja da BV 2027 primeiro desde 01/06/2027. O plano geraria insumo e O.S. sobre lavoura em campo. B1-A tem Soja da BV 2027 primeiro a partir de 01/06/2027. Para o café com o plano começar depois do cultivo anterior (01/01/2020), replaneje esse soja para 05/07/2027 ou depois.
+OK    · fix 390x844 B(ordem inversa) · sem rolagem lateral
+OK    · fix 390x844 B(ordem inversa) · sem erro de JS
+OK    · fix 390x844 C(aplicar plano) · preparo: soja antiga 50 ha com plano no B1 (2020)
+OK    · fix 390x844 C(aplicar plano) · preparo: soja A 70 ha sem plano (2027-06-01)
+     (medido) fix 390x844 C(aplicar plano) B1 na BV 2027 B: {'SITUAÇÃO': 'Livre', 'ÁREA LIVRE': '50 ha', '_dica': '50 ha livres a partir de 01/03/2027 (folga 1 dia)'}
+     (medido) fix 390x844 C(aplicar plano) soja B 70 ha sem plano (2027-07-01): toast/alerta: ('Cultivo incluído como parcela B1-B · 50 ha livres em B1. Escolha o plano agronômico na linha. Atenção: B1: a soma prevista das áreas passa da área do talhão de 01/07/2027 a 27/09/2027 (89 dias)..', '(painel fechado)')
+     (medido) fix 390x844 C(aplicar plano) painel Aplicar plano: Aplicar plano a 1 cultivo Escolha um plano da mesma cultura. Cada cultivo recebe o plano padrão; ajustes locais podem ser feitos depois. B1-B · Soja 58 W · 70 ha · não recebe: De 11/06/2027 a 27/09/2027, 70 ha de B1 estão com Soja (B1-A, BV 2027 A). Máximo 50 ha nesse período. Plano agronômico Escolha o plano Soja alta tecnologia v6 · 8 atividades Soja padrão v3 · 4 atividades Cancelar Aplicar plano em 0 cultivos
+OK    · fix 390x844 C(aplicar plano) · aplicar SOJA-AT na soja B (70 + 70 > 120, ocupação antiga de 2020 no talhão) recusa com motivo; plano não aplicado
+OK    · fix 390x844 C(aplicar plano) · sem erro de JS
+     (medido) fix 390x844 D(dividir C1) C1 na safra 2027: {'SITUAÇÃO': 'Livre', 'ÁREA LIVRE': '18 ha', 'LIVRE A PARTIR DE': '01/01/2027', '_dica': '18 ha livres a partir de 01/01/2027 (folga 1 dia)'}
+OK    · fix 390x844 D(dividir C1) · soja 19 ha (20 + 19 > 38) recusa
+OK    · fix 390x844 D(dividir C1) · soja 18 ha (limite) grava
+     (medido) fix 390x844 D(dividir C1) toast: Cultivo incluído como parcela C1-B · 20 ha livres em C1 · plano Soja alta tecnologia.
+OK    · fix 390x844 D(dividir C1) · Dividir C1 abre só a soja desta safra
+     (medido) fix 390x844 D(dividir C1) nome sugerido da parcela nova: C1-A
+     (medido) fix 390x844 D(dividir C1) resumo do painel Dividir: Dividir C1 em parcelas × Defina quantas parcelas precisar e os dados de cada uma; a soma não pode passar da área do talhão. 2 parcelas Talhão 38 ha · alocado 38 ha · livre 0 ha Área conferida PARCELA ÁREA (HA) CULTURA VARIEDADE PLANTIO META UNIDADE PLANO AGRON
+FALHA · fix 390x844 D(dividir C1) · dividir em 10 + 9 (20 + 19 > 38) recusa "Nada foi gravado" com o motivo; continua 18 · ('', [('n5_75838', 'C1-B', 'Soja', 18, 'SOJA-AT')])
+OK    · fix 390x844 D(dividir C1) · dividir em 10 + 8 (limite) grava
+     (medido) fix 390x844 D(dividir C1) toast do dividir: C1 dividido em 2 parcelas · 20 ha livres. Plano operacional, recursos e demanda recalculados.
+FALHA · fix 390x844 D(dividir C1) · toast do dividir não anuncia área livre que o café ocupa · C1 dividido em 2 parcelas · 20 ha livres. Plano operacional, recursos e demanda recalculados.
+OK    · fix 390x844 D(dividir C1) · sem rolagem lateral
+OK    · fix 390x844 D(dividir C1) · sem erro de JS
+
+RESULTADO fix: 50 ok · 14 falhas (tudo ['A', 'B', 'C', 'D'])
+  - fix 1440x900 A(adendo C1) · toast não anuncia área livre que o café ocupa (C1 fica 0 ha livre: 38 − 20 − 18)
+  - fix 1440x900 B(ordem inversa) · café 2020 de 40 ha depois da soja 2027 (40 + 90 = 130 > 120) recusa com motivo; nada gravado
+  - fix 1440x900 B(ordem inversa) · café 30 ha (limite 120) grava
+  - fix 1440x900 B(ordem inversa) · editar o café 30 → 31 ha recusa; continua 30
+  - fix 1440x900 B(ordem inversa) · mais um café de 10 ha em 2020 (30 + 10 + 90 = 130) recusa; nada gravado
+  - fix 1440x900 D(dividir C1) · dividir em 10 + 9 (20 + 19 > 38) recusa "Nada foi gravado" com o motivo; continua 18
+  - fix 1440x900 D(dividir C1) · toast do dividir não anuncia área livre que o café ocupa
+  - fix 390x844 A(adendo C1) · toast não anuncia área livre que o café ocupa (C1 fica 0 ha livre: 38 − 20 − 18)
+  - fix 390x844 B(ordem inversa) · café 2020 de 40 ha depois da soja 2027 (40 + 90 = 130 > 120) recusa com motivo; nada gravado
+  - fix 390x844 B(ordem inversa) · café 30 ha (limite 120) grava
+  - fix 390x844 B(ordem inversa) · editar o café 30 → 31 ha recusa; continua 30
+  - fix 390x844 B(ordem inversa) · mais um café de 10 ha em 2020 (30 + 10 + 90 = 130) recusa; nada gravado
+  - fix 390x844 D(dividir C1) · dividir em 10 + 9 (20 + 19 > 38) recusa "Nada foi gravado" com o motivo; continua 18
+  - fix 390x844 D(dividir C1) · toast do dividir não anuncia área livre que o café ocupa

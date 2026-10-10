@@ -1,0 +1,82 @@
+{
+  "source_hash": "1f18e705cdcbd7ee736dee2f175bcf50ad69fe4ede2305b0dfb9b949c13cd56a",
+  "a": {
+    "view": "A",
+    "source_period": [
+      "2027-02-01",
+      "2027-02-15"
+    ],
+    "occurrences": [
+      {
+        "id": "A1",
+        "dt": "2027-02-10",
+        "cls": "cal",
+        "h": 100
+      }
+    ],
+    "cell": {
+      "mi": 0,
+      "mes": "fev/27",
+      "d": 140,
+      "dThis": 100,
+      "dOth": 40,
+      "cap": 160,
+      "porUn": 160,
+      "ocup": 87.5,
+      "nec": 1,
+      "red": false,
+      "soma": false,
+      "own": true,
+      "ge": false,
+      "pendSR": 0
+    },
+    "verdict": {
+      "R": "R4",
+      "cor": "yellow",
+      "txt": "Na estimativa mensal, cabe nos 100 ha com plano. Fora da conta: 1 ocorrência da B depois do fim dela (Tratores 200,0 h)."
+    }
+  },
+  "b": {
+    "view": "B",
+    "source_period": [
+      "2027-02-01",
+      "2027-02-15"
+    ],
+    "occurrences": [
+      {
+        "id": "B1",
+        "dt": "2027-02-10",
+        "cls": "cal",
+        "h": 40
+      },
+      {
+        "id": "B2",
+        "dt": "2027-02-28",
+        "cls": "depois",
+        "h": 200
+      }
+    ],
+    "cell": {
+      "mi": 0,
+      "mes": "fev/27",
+      "d": 140,
+      "dThis": 40,
+      "dOth": 100,
+      "cap": 160,
+      "porUn": 160,
+      "ocup": 87.5,
+      "nec": 1,
+      "red": false,
+      "soma": false,
+      "own": true,
+      "ge": false,
+      "pendSR": 0
+    },
+    "verdict": {
+      "R": "R4",
+      "cor": "yellow",
+      "txt": "Na estimativa mensal, cabe nos 100 ha com plano. Fora da conta: 1 ocorrência depois do fim da safra."
+    }
+  },
+  "same_total": true
+}

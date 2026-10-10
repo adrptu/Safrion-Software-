@@ -1,0 +1,15 @@
+## B1.prim0 :: ["Manutenção", "Gerar 3 ordens preventivas"]
+## B1.inputs :: ["<input data-dc-tpl=\"185\" type=\"search\" aria-label=\"Buscar nesta tabela\" placeholder=\"Buscar…\" value=\"\" style=\"font-family: inherit; font-size: 12.5px; border: 0"]
+## B1.busca :: "ok"
+## B1.linhas :: ["v:PM-02|a03|s1"]
+## B1.prim :: ["Manutenção", "Gerar 3 ordens preventivas"]
+## B1.clk :: "ok"
+## B1.gerou :: ["OM-0234 a02", "OM-0235 a03", "OM-0236 a06", "OM-0237 a11"]
+## B2.blk :: "ok"
+## B2.r0 :: "ok"
+## B2.pan :: "Condição · Trator 02\nApto · responsável técnico: Zé\n×\nBloquear\nRestringir\nTrocar responsável técnico\nMotivo do bloqueio\nEvidência\nAchado de origem\nSem achado de origem\nINSP-104 · Vazamento leve em mangueira\nTratar na ordem\nSem ordem que trate (o detalhe pedirá Criar ordem corretiva)\nTratar na OM-0234 · Revisão 250 h · A liberar\nHISTÓRICO\nBloquear Trator 02"
+## B2.setmot :: false
+## B2.clk :: "ok"
+## B2.toast :: "Informe o motivo do bloqueio."
+## B2.cond :: "Apto"
+RESULTADO: 0/0 ok

@@ -1,0 +1,10 @@
+  ok  PM#PM-05: sem erro de JS 
+  FALHA base programada: próxima em 20/09/2027 · 
+Traceback (most recent call last):
+  File "<sp-pcm>/tools/prototipo/v37/gen37/ma_correcoes_pm_test.py", line 53, in <module>
+    J("(()=>{const r=[...document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.indexOf('Distribuidor')>=0); [...r.querySelectorAll('a')].find(a=>a.innerText.trim()==='Criar plano').click();})()"); time.sleep(1.4)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<sp-pcm>/tools/prototipo/v37/gen37/cdp.py", line 95, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught

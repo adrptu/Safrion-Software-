@@ -1,0 +1,13 @@
+== links
+TOTAL 8 · falhas 0
+rc=0
+== regras
+RESULTADO 11/11
+rc=0
+== pa_lista: python3 pa_lista_test.py
+RESULTADO: 16 ok · 0 falhas
+rc=0
+== patest: python3 patest.py
+RESULTADO: 46 ok · OK
+rc=0
+== acao_familias: python3 acao_unica_test.py familias

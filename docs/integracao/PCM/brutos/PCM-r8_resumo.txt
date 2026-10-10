@@ -1,0 +1,6 @@
+ma_app_fluxo_test exit=0 (63s) | 23/24 ok · FALHAS: 1
+ma_rastreio_test exit=0 (248s) | RESULTADO: 58/58 ok
+cada_cd03_test exit=0 (76s) | RESULTADO: OK 14/14
+ma_revisao_test exit=0 (318s) | RESULTADO: 18/18 ok
+varredura exit=0 (412s) | RESULTADO: 141/141 páginas sem erro
+FIM

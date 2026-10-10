@@ -1,0 +1,8 @@
+varredura exit=0 (373s) | RESULTADO: 141/141 páginas sem erro
+links_ocultos_test exit=0 (31s) | TOTAL 8 · falhas 0
+mbtest exit=0 (187s) | FALHAS: 0
+ma_unica_test exit=0 (444s) | RESULTADO: 22/22 ok
+ma_app_fluxo_test exit=0 (184s) | 22/22 ok · FALHAS: 0
+etapas_celular_test exit=0 (285s) | RESULTADO: 14 ok · 0 falhas (celular)
+producao_fluxo_test exit=0 (417s) | RESULTADO: OK 66/66
+FIM

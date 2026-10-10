@@ -1,0 +1,3 @@
+desempenho rodada 1 rc=0 16:44:55
+desempenho rodada 2 rc=0 16:46:11
+desempenho rodada 3 rc=0 16:47:24

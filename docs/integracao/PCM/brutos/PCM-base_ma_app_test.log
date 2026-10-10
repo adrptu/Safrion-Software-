@@ -1,0 +1,58 @@
+OK    motor JS (jsc/node) executou sem erro
+FALHA perfil e fila (exceção) · ReferenceError: cenClone is not defined
+    at C (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_app_unit_all.js:593:17)
+    at <sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_app_unit_all.js:600:13
+    at caso (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_app_unit_all.js:592:33)
+    at Object.<anonymous> (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_app_unit_all.js:599:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.
+FALHA máquina herdada (exceção) · ReferenceError: cenClone is not defined
+    at C (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_app_unit_all.js:593:17)
+    at <sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_app_unit_all.js:610:13
+    at caso (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_app_unit_all.js:592:33)
+    at Object.<anonymous> (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_app_unit_all.js:609:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.
+FALHA abastecimento pelo app (exceção) · ReferenceError: cenClone is not defined
+    at C (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_app_unit_all.js:593:17)
+    at <sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_app_unit_all.js:618:13
+    at caso (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_app_unit_all.js:592:33)
+    at Object.<anonymous> (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_app_unit_all.js:617:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.
+FALHA sem sinal: abastecer e reenvio (exceção) · ReferenceError: cenClone is not defined
+    at C (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_app_unit_all.js:593:17)
+    at <sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_app_unit_all.js:628:13
+    at caso (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_app_unit_all.js:592:33)
+    at Object.<anonymous> (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_app_unit_all.js:627:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.
+FALHA sem sinal: OM-0233 do começo ao fim (exceção) · ReferenceError: cenClone is not defined
+    at C (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_app_unit_all.js:593:17)
+    at <sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_app_unit_all.js:643:13
+    at caso (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_app_unit_all.js:592:33)
+    at Object.<anonymous> (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_app_unit_all.js:642:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.
+FALHA sem sinal: conflito (exceção) · ReferenceError: cenClone is not defined
+    at C (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_app_unit_all.js:593:17)
+    at <sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_app_unit_all.js:660:13
+    at caso (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_app_unit_all.js:592:33)
+    at Object.<anonymous> (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_app_unit_all.js:659:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.
+FALHA MB-04 → achado (exceção) · ReferenceError: cenClone is not defined
+    at C (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_app_unit_all.js:593:17)
+    at <sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_app_unit_all.js:679:13
+    at caso (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_app_unit_all.js:592:33)
+    at Object.<anonymous> (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_app_unit_all.js:678:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.
+RESULTADO: 1/8 ok · FALHAS: perfil e fila (exceção); máquina herdada (exceção); abastecimento pelo app (exceção); sem sinal: abastecer e reenvio (exceção); sem sinal: OM-0233 do começo ao fim (exceção); sem sinal: conflito (exceção); MB-04 → achado (exceção)

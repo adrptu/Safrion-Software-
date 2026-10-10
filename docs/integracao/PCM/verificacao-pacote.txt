@@ -1,0 +1,54 @@
+# verificacao do pacote PCM · base cdc185f · candidata ba03515 · 2026-10-09T23:57Z
+worktree temporaria em cdc185f: cdc185f
+git apply --check diff-cdc185f-ba03515.patch -> rc=0
+git apply diff-cdc185f-ba03515.patch -> rc=0
+caminhos conferidos: 47 · divergencias: 0
+arvore igual a ba03515 nos caminhos tocados -> rc=0
+git apply -R (volta a base) -> rc=0; status: ''
+worktree temporaria removida -> rc=0
+RESULTADO PCM: OK
+
+# teste dos bundles num repositorio novo, so com o historico ate cdc185f (o que o origin/claude/prototipo-v44 tem) · 2026-10-09T23:58Z
+repositorio novo com base=cdc185f e 147 commits
+== PCM/pcm.bundle
+<sp-proto>/docs/integracao/PCM/pcm.bundle is okay
+The bundle contains this ref:
+ba035151dd66f28fa569bd221e6f85324dd8b20c refs/heads/claude/v44-pcm
+The bundle requires these 3 refs:
+99537ca8c442fce1e867a4117f7873baa60e6df5 
+ecc8b00eee9a87aa57f585660440b1ccc2abf4fd 
+cdc185f551a9513d72734b18e4a869f921917c00 
+The bundle uses this hash algorithm: sha1
+== SAF-LOTE/C01b/c01b.bundle
+<sp-proto>/docs/integracao/SAF-LOTE/C01b/c01b.bundle is okay
+The bundle contains this ref:
+64a30418d8e9a7eca8dd3d0884b51b608fad52d3 refs/heads/claude/v44-saf-c01
+The bundle requires this ref:
+ecc8b00eee9a87aa57f585660440b1ccc2abf4fd 
+The bundle uses this hash algorithm: sha1
+== git fetch pcm.bundle ba03515
+fatal: couldn't find remote ref ba03515
+rc=128 FETCH_HEAD=
+== git fetch pcm.bundle claude/v44-pcm:refs/heads/pcm
+From <sp-proto>/docs/integracao/PCM/pcm.bundle
+ * [new branch]      claude/v44-pcm -> pcm
+rc=0 pcm=ba03515
+fsck rc=0
+ 47 files changed, 3993 insertions(+), 1687 deletions(-)
+== git fetch c01b.bundle claude/v44-saf-c01:refs/heads/c01b
+From <sp-proto>/docs/integracao/SAF-LOTE/C01b/c01b.bundle
+ * [new branch]      claude/v44-saf-c01 -> c01b
+rc=0 c01b=64a3041
+64a3041 SAF-C01: saídas brutas da verificação
+d1b81f4 SAF-C01: correções da verificação
+ef0d7b2 SAF-C01: trava de soma com perene antiga (varredura por eventos)
+commit
+ 45 files changed, 4398 insertions(+), 93 deletions(-)
+== git fetch pcm.bundle ba035151dd66f28fa569bd221e6f85324dd8b20c (sha completo)
+From <sp-proto>/docs/integracao/PCM/pcm.bundle
+ * branch            ba035151dd66f28fa569bd221e6f85324dd8b20c -> FETCH_HEAD
+rc=0 FETCH_HEAD=ba03515
+== git fetch c01b.bundle 64a30418d8e9a7eca8dd3d0884b51b608fad52d3 (sha completo)
+From <sp-proto>/docs/integracao/SAF-LOTE/C01b/c01b.bundle
+ * branch            64a30418d8e9a7eca8dd3d0884b51b608fad52d3 -> FETCH_HEAD
+rc=0 FETCH_HEAD=64a3041

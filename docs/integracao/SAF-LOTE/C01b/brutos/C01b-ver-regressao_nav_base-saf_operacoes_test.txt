@@ -1,0 +1,90 @@
+OK    · N1 etapa=6 abre a 4 "Confira a demanda de insumos"
+OK    · N2 etapa=3 abre a 3
+OK    · N2 etapa=4 abre a 3
+OK    · N2 etapa=5 abre a 3
+OK    · N3 passo=operacoes abre a 3
+OK    · N3 passo=demanda abre a 4
+OK    · N3 só saf= abre a 4
+OK    · N4a hashchange: etapa=6 → 4 e etapa=4 → 3 (etapa=4 nunca abre a demanda)
+OK    · matriz 1: 4 etapas; sem "Definir rendimentos", "Conferir plano operacional" nem "Dimensionar recursos"
+OK    · N6 retomada (§5.4): S2627 aplicar plano em 4; S27SF enviar demanda; S2526 consultar
+OK    · N6 aviso do Continuar da S27SF sem número de etapa
+OK    · N7 guardas estáticos (§5.3) = 0
+OK    · V1 veredito S2627 (R4, âmbar)
+OK    · V1 atalho "Maior uso: Colhedoras 81 % · fev/27"
+OK    · V1 custo de operação = espelho, "máquinas e pessoas, sem insumos"
+OK    · O1 g_op: 8 colunas na ordem do §3.4
+OK    · O1 operações na ordem da 1ª data (§2.1)
+OK    · O2 Pulverização = espelho (data, conjunto, 21,60 ha/h, ha-op, horas, R$/ha-op)
+OK    · O2 negativo: nenhuma operação com "ha" puro na área
+OK    · O2 "6 atividades" na Pulverização
+OK    · O4 S2627: 8 operações "Janela não informada", nenhum "Cabe na janela"; sem chips do filtro rápido
+OK    · Total da g_op só em horas-conjunto = espelho (561,8 h)
+OK    · O18 negativo: "/ha da safra" não aparece
+OK    · §5.2 área de ações: Aplicar plano em 4 cultivos, ‹ Cultivos e planos, Conferir demanda de insumos ›
+OK    · L1 1440 × 1040: 8 operações e Total acima da área de ações
+OK    · O3 Plantio T2: 2 configurações com a área atendida e o R$/ha de cada (espelho)
+OK    · O3 T2 horas = espelho (61,3 h) e Situação sem número
+OK    · O3 toque no talhão abre a configuração com "Neste talhão" (trio e decorrido)
+OK    · O8 Pulverização: "Aplicar em" = Todas; sem Janela editável; janela por atividade "nenhuma das 6 com janela"
+OK    · O13 Origem "Padrão do cadastro (CD-02)" e Custo R$/ha ao vivo
+OK    · O13 ao vivo: velocidade 12 "Ajustado nesta safra", voltar a 8 "Padrão"
+OK    · O14 "2,5" pessoas recusado e o digitado fica
+OK    · repetição: salvar sem mudar mantém horas e capacidade
+OK    · O9 "Todas": aviso "(6 atividades)" e totais = espelho (horas-conjunto e custo)
+OK    · O9 negativo: as 6 em uso com 32,4 ha/h; as fora de uso seguem 21,6
+OK    · O12 atividade abre com "Só esta atividade"
+OK    · P7 aviso antes → depois (§4.4): Adubação a lanço 40,2 → 74,1 h · Distribuidores nov/26: 16 % → 31 %
+OK    · O12 a atividade mostra 9,00 ha/h e R$ 25,89/ha; a operação "varia" no rendimento (o conjunto continua o mesmo, §3.4 coluna a coluna)
+OK    · O12 as demais atividades da operação ficam com 18,00 ha/h
+OK    · O11 Colheita de grãos (1 atividade): "Todas" sem campo de janela
+OK    · O11 janela com "Todas" é recusada no "Aplicar em"; nada gravado
+OK    · O5 janela 60 h só na Colheita: "Cabe na janela" e veredito com "16 de 17"
+OK    · O5 filtro rápido passa a mostrar 2 categorias
+OK    · O15 Colheita de grãos S2627: Custo R$/kg da soja
+OK    · V3 g_cap recolhida por padrão
+OK    · V3 g_cap aberta: 6 recursos e 15 colunas (Recurso, Maior uso, Mês e 12 meses)
+OK    · V3 Colhedoras: Maior uso 81 %, Mês fev/27; Tratores mar/27 só da Safrinha entre parênteses
+OK    · V3 atalhos somem com a g_cap aberta
+OK    · V14 "—" inerte (sem botão)
+OK    · V4 célula Colhedoras · fev/27: linha de filtro "122,0 h de 150,5 h (81 %) · precisa de 1, tem 1"
+OK    · V4 cabeçalho "Horas de Colhedoras" e Total 122,0 h
+OK    · V4 T1-A 32,0, T1-B 30,4, T2 59,6 h
+OK    · V4 "Ver todas" volta a Horas-conjunto e 561,8 h
+OK    · V6 Tratores · fev/27: desta safra 122,0 h · Safrinha 2027 67,3 h · precisa de 2, tem 4; só Colheita de grãos
+OK    · V7 Operadores out/26: 171,2 h de 1.425,6 h (12 %) · precisa de 2, tem 8; Total fecha
+OK    · P1 Tratores: 174,8 h em fev/27; 366,9 h na safra
+OK    · P1 prévia "Maior uso: 27 % → 22 % (fev/27)"
+OK    · P1 depois de salvar: Tratores fev/27 22 % (C10)
+OK    · P2 prévia Operadores 8 → 5 (§9.2 P2)
+OK    · P2 veredito R2 "Operadores e equipe precisam de 6 em mai/27 e você tem 5"
+OK    · V13 Colhedoras 0: veredito com "precisam de 1 em fev/27 e você tem 0. Inclui 3 ocorrências ainda sem alocação."
+OK    · V13 fev/27 "precisa 1"; Maior uso "não calculável"
+OK    · P8 +1 pessoa no Plantio: horas de Operadores no formulário do recurso = espelho (sobe 62,70 h)
+OK    · P8 horas-homem do Resumo = espelho (C22)
+OK    · P4 Resumo S2627: custo por cultura = espelho e Total
+OK    · P4 nota "Todos de hoje em diante" e trabalho da safra
+OK    · P4 Esc fecha o Resumo e o foco volta ao link
+OK    · V12 S27SF veredito R5 (verde) e atalho Colhedoras 56 % · jul/27
+OK    · V11 S2526: veredito R1; sem atalho; primária "Ver demanda de insumos ›"
+OK    · V11 S2526: g_cap toda "—" e recurso só em consulta ("Para ajustar, abra uma safra aberta.")
+OK    · V11 S2526: rendimento só em consulta
+OK    · V8 LG2627 veredito R2
+OK    · V8 atalhos "Operadores e equipe 1.584 % · nov/26" e "Tratores 234 % · out/26"
+OK    · V8 qualificador do custo (antes do início e pendentes)
+OK    · V8 Colheita de frutas: "sem recurso na fazenda · precisa de 10, tem 8"
+OK    · V8 g_cap: Operadores nov/26 "precisa 127", Maior uso 1.584 %
+OK    · L4 sem erro de JS · S2627
+OK    · L4 sem erro de JS · S27SF
+OK    · L4 sem erro de JS · LG2627
+OK    · L4 sem erro de JS · S2526
+OK    · L2 S2627 390×844: sem rolagem lateral; veredito e primária sem rolar
+OK    · N5 faixa a 390: "Etapa 3 de 4 · Dimensione operações e recursos"
+OK    · L2 LG2627 390×844: sem rolagem lateral; veredito e primária sem rolar
+OK    · L2 S2627 360×800: sem rolagem lateral; veredito e primária sem rolar
+OK    · L2 LG2627 360×800: sem rolagem lateral; veredito e primária sem rolar
+OK    · 390: célula Colhedoras · fev/27 filtra a g_op
+OK    · 390: sem erro de JS
+
+RESULTADO: 87 ok · 0 falhas (tudo)
+rc=0 tempo=259 s (inclui espera do lock)

@@ -1,0 +1,6 @@
+ma_app_fluxo_test exit=0 (106s) | 24/24 ok · FALHAS: 0
+mbtest exit=0 (273s) | FALHAS: 0
+app_restaurar_test exit=0 (54s) | 4/4 ok · FALHAS: 0
+varredura exit=0 (399s) | RESULTADO: 141/141 páginas sem erro
+.._ferramentas_acoes_duplicadas_.__tmp_PCM-dup.json exit=0 (366s) | RESULTADO: 141 páginas · 0 com ação repetida · erros 0
+FIM

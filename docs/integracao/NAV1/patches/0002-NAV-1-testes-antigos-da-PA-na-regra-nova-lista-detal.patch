@@ -1,0 +1,430 @@
+From 74a6df6ad5efacd15582298ae4ad706606287cbd Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Fri, 9 Oct 2026 16:48:24 +0000
+Subject: [PATCH 2/5] =?UTF-8?q?NAV-1:=20testes=20antigos=20da=20PA=20na=20?=
+ =?UTF-8?q?regra=20nova=20(lista=20=E2=86=92=20detalhe,=20sem=20etapas)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Motivo comum: a PA deixou de ter etapas (CONSOLIDADO §3.1); as regras de
+negócio testadas continuam as mesmas, só muda o caminho na tela.
+- patest.py: reescrito de etapas para lista → detalhe, com as mesmas regras
+  (rascunho v(n+1), diferenças, excluir com confirmação, gatilho antes do
+  plantio sem negativo, publicar sem mudar cultivos, descartar, novo plano
+  copiando de uma base, nome repetido recusado). Na base já estava vermelho
+  ("RuntimeError: Uncaught"; parava em "Recolher DAP 45", que não existe).
+- acao_unica_test.py, só nas linhas da PA:
+  11: lista com "Criar plano" verde no cabeçalho (BOT-02/03); detalhe sem
+      rascunho sem primária; com rascunho, "Publicar versão v7" a única;
+  25: rodapé do painel novo é "Incluir atividade" (verbo do efeito, BOT-02);
+  26: o detalhe sem rascunho no lugar da "etapa 3 · nada a publicar";
+  27: o detalhe (#plano=SOJA-AT) também entra na matriz 360/768/zoom.
+- componentes_test.py:
+  11 e 12: "abriu o plano" passa a ser o endereço #plano=, no lugar de
+      "Etapa 2 de 3";
+  14: "Criar plano" no cabeçalho; a etapa inerte passa a ser medida no
+      Planejar safra (a PA não tem mais faixa). Atenção ao integrar: a
+      frente DS mexe nas mesmas linhas do item 14.
+
+Executado (Chrome headless, _render do 19aeb94, build 0 FALHA):
+- patest.py → 46 ok
+- acao_unica_test.py familias → 8 ok · 0 falhas; v3 → 10 ok · 0 falhas
+- componentes_test.py matriz → 3/0; ajustes2 → 2/0; interacao → 8 ok ·
+  2 falhas (10 e 14: hover no headless), as mesmas 2 da base cdc185f
+  (vermelho conhecido componentes_interacao); 11 e 12 verdes.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01Div8EjesSwVnpSUvYjZ7kh
+---
+ tools/prototipo/v37/gen37/acao_unica_test.py  |  32 +--
+ tools/prototipo/v37/gen37/componentes_test.py |  16 +-
+ tools/prototipo/v37/gen37/patest.py           | 235 +++++++++---------
+ 3 files changed, 138 insertions(+), 145 deletions(-)
+
+diff --git a/tools/prototipo/v37/gen37/acao_unica_test.py b/tools/prototipo/v37/gen37/acao_unica_test.py
+index 8370d9d..36dac70 100644
+--- a/tools/prototipo/v37/gen37/acao_unica_test.py
++++ b/tools/prototipo/v37/gen37/acao_unica_test.py
+@@ -152,13 +152,17 @@ try:
+         chk('10 CMP · etapa 2: "Solicitar cotações ›" único; etapa 3 antes do envio: só o comando "Enviar convites (simulado)" com a causa; etapa 5: comando "Enviar à Direção" + avanço secundário; ir à etapa 6 não aprova (sem "Compra aprovada", sem PC-101)',
+             a2['prims']==['Solicitar cotações ›'] and a2['avancos']==1 and a3['prims']==['Enviar convites (simulado)'] and a3['avancos']==0 and a5['prims']==['Enviar à Direção'] and a5['avancos']==1 and a6['etapa']==6 and 'Compra aprovada' not in b and 'PC-101' not in b,
+             [a2,a3,a5,a6['etapa']])
+-        # 11 · PA: Novo plano secundário; etapa 2: Incluir atividade secundário, banner sem "Revisar e publicar", avanço na área; etapa 3 sem rascunho: nada a publicar
+-        abre('PA'); p1=est(); novo=J(f"(()=>{{const b=[...document.querySelectorAll('main button')].find(b=>{N}(b.innerText)==='Novo plano'); return b?getComputedStyle(b).backgroundColor:null;}})()")
++        # 11 · PA (NAV-1: lista → detalhe, sem etapas; design system 09/10, BOT-01/02/03/06): lista com o único verde "Criar plano" no
++        #      cabeçalho; detalhe sem rascunho sem primária ("Incluir atividade" secundário no bloco); com rascunho, "Publicar versão v7"
++        #      a única primária, no Próximo passo; nenhum avanço que só navega ("Revisar e publicar", "Ver versões e cultivos")
++        abre('PA'); p1=est(); novo=J(f"(()=>{{const b=[...document.querySelectorAll('header button')].find(b=>{N}(b.innerText)==='Criar plano'); return b?getComputedStyle(b).backgroundColor:null;}})()")
+         J("document.querySelector('main .g2card').click()"); time.sleep(.5); p2=est(); inc=J(f"[...document.querySelectorAll('main button')].filter(b=>b.getClientRects().length&&{N}(b.innerText)==='Incluir atividade').map(b=>getComputedStyle(b).backgroundColor)")
+-        rp=J(f"[...document.querySelectorAll('main button')].filter(b=>b.getClientRects().length&&/Revisar e publicar/.test(b.innerText)&&!b.closest('[data-acoes]')).length")
+-        acao('avancar'); p3=est(); shot('pa_etapa3')
+-        chk('11 PA · Novo plano secundário (etapa 1 sem primária); etapa 2: "Incluir atividade" secundário, nenhum "Revisar e publicar" fora da área, avanço "Ver versões e cultivos ›"; etapa 3 sem rascunho: só retorno e a nota "Nada a publicar"',
+-            p1['prims']==[] and novo=='rgb(255, 255, 255)' and p2['etapa']==2 and inc==['rgb(255, 255, 255)'] and rp==0 and p2['prims']==['Ver versões e cultivos ›'] and p3['etapa']==3 and p3['prims']==[] and any('Nada a publicar' in a for a in p3['area']),
++        rp=J(f"[...document.querySelectorAll('main button,[data-acoes] button')].filter(b=>b.getClientRects().length&&/Revisar e publicar|Ver versões e cultivos/.test(b.innerText)).length")
++        J("(()=>{const b=[...document.querySelectorAll('main button')].find(b=>(b.getAttribute('aria-label')||'').startsWith('Mostrar insumos de Fungicida 1ª aplicação')); b.click();})()"); time.sleep(.3)
++        J("[...document.querySelectorAll('main button.pa-dose')][0].click()"); time.sleep(.3); c.call('Input.insertText',{'text':'0,6'}); c.tecla('Enter','Enter',13,text='\r'); time.sleep(.5); p3=est(); shot('pa_detalhe_rascunho')
++        chk('11 PA · lista: "Criar plano" o único verde, no cabeçalho; detalhe sem rascunho: sem primária, "Incluir atividade" secundário e só "‹ Biblioteca de planos" na área; com rascunho: "Publicar versão v7" a única primária, como comando; nenhum avanço que só navega',
++            p1['prims']==['Criar plano'] and novo=='rgb(30, 122, 76)' and p1['etapa']==0 and p2['etapa']==0 and inc==['rgb(255, 255, 255)'] and rp==0 and p2['prims']==[] and p2['avancos']==0 and p2['area']==['voltar:‹ Biblioteca de planos']
++            and p3['prims']==['Publicar versão v7'] and p3['avancos']==0 and 'comando:Publicar versão v7' in p3['area'],
+             [p1,novo,p2,inc,rp,p3])
+         # 12 · PM: mesma regra (Novo plano secundário; avanço e retorno na área)
+         abre('PM'); m1=est(); r=J("(()=>{const b=[...document.querySelectorAll('main button[aria-label]')].find(b=>/^Abrir /.test(b.getAttribute('aria-label'))); if(!b) return 'sem cartão'; b.click(); return b.getAttribute('aria-label');})()"); time.sleep(.5); m2=est(); shot('pm_etapa2')
+@@ -342,25 +346,25 @@ try:
+         campo=J("(()=>{const d=document.querySelector('aside[role=dialog]'); const i=d&&[...d.querySelectorAll('input:not([type=checkbox]),textarea')].find(x=>x.getClientRects().length&&!x.readOnly); if(!i) return null; if(!i.id) i.id='v3campo'; return i.id;})()")
+         setv('#'+campo,'Teste saída') if campo else None; time.sleep(.2)
+         J("(()=>{const b=document.querySelector('aside[role=dialog] [aria-label=Fechar]'); if(b) b.click();})()"); time.sleep(.4)
+-        m=medida('PA · decisão de saída aberta'); M.append(m); sal=J("[...document.querySelectorAll('aside[role=dialog] button')].filter(b=>b.getClientRects().length&&/^(Salvar|Cancelar)$/.test(b.innerText.trim())).length"); shot('v3_decisao_saida')
+-        clk('Continuar editando','aside[role=dialog]'); sal2=J("[...document.querySelectorAll('aside[role=dialog] button')].filter(b=>b.getClientRects().length&&/^(Salvar|Cancelar)$/.test(b.innerText.trim())).length")
++        m=medida('PA · decisão de saída aberta'); M.append(m); sal=J("[...document.querySelectorAll('aside[role=dialog] button')].filter(b=>b.getClientRects().length&&/^(Salvar|Incluir atividade|Cancelar)$/.test(b.innerText.trim())).length"); shot('v3_decisao_saida')
++        clk('Continuar editando','aside[role=dialog]'); sal2=J("[...document.querySelectorAll('aside[role=dialog] button')].filter(b=>b.getClientRects().length&&/^(Salvar|Incluir atividade|Cancelar)$/.test(b.innerText.trim())).length")
+         val=J(f"(document.getElementById({json.dumps(campo)})||{{value:''}}).value") if campo else ''
+-        chk('25 decisão de saída (PA · Incluir atividade): "Continuar editando" a única primária, "Descartar alterações" separado e Salvar/Cancelar fora enquanto a decisão está aberta; continuar editando devolve Salvar/Cancelar e o texto',
++        chk('25 decisão de saída (PA · Incluir atividade): "Continuar editando" a única primária, "Descartar alterações" separado e o rodapé (Cancelar · Incluir atividade) fora enquanto a decisão está aberta; continuar editando devolve o rodapé e o texto',
+             m['prims']==['Continuar editando'] and sal==0 and sal2==2 and val=='Teste saída', [campo,m,sal,sal2,val])
+         J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Cancelar'); if(b) b.click();})()"); time.sleep(.3); clk('Descartar alterações','aside[role=dialog]')
+-        # 26 · impedimento e consulta: PA etapa 3 sem rascunho (nada a publicar) e SAF encerrada (S2526) na revisão: zero primária
+-        acao('avancar'); m1=medida('PA etapa 3 · nada a publicar'); M.append(m1)
++        # 26 · impedimento e consulta: PA detalhe sem rascunho (nada a publicar; NAV-1 tirou a etapa 3) e SAF encerrada (S2526) na revisão: zero primária
++        m1=medida('PA detalhe sem rascunho · nada a publicar'); M.append(m1)
+         abre('SAF',hash='#saf=S2526&etapa=6'); time.sleep(.4); m2=medida('SAF S2526 etapa 6 · consulta'); M.append(m2); shot('v3_consulta')
+-        chk('26 impedimento (PA etapa 3 sem rascunho) e consulta (SAF S2526 encerrada, etapa 6): 0 primária e 0 duplicata',
++        chk('26 impedimento (PA detalhe sem rascunho) e consulta (SAF S2526 encerrada, etapa 6): 0 primária e 0 duplicata',
+             m1['prims']==[] and m1['dup']==0 and m2['prims']==[] and m2['dup']==0, [m1,m2])
+         # 27 · celular, tablet e zoom de 200 %: SAF etapa 2 e 6, CMP etapa 2, PA, O.S.: 0 duplicata, no máximo uma primária, sem setas
+         ruins=[]
+         for tag,w,h,es,t in (('360x800',360,800,3,True),('768x1024',768,1024,2,True),('zoom200',720,450,2,False)):
+-            for pg,hs in (('SAF','#saf=S2627&etapa=2'),('SAF','#saf=S2627&etapa=6'),('CMP','#saf=S2627'),('PA',''),('OS','')):
++            for pg,hs in (('SAF','#saf=S2627&etapa=2'),('SAF','#saf=S2627&etapa=6'),('CMP','#saf=S2627'),('PA',''),('PA','#plano=SOJA-AT'),('OS','')):
+                 abre(pg,w,h,es,t,hash=hs,espera=.6,limpa=False); time.sleep(.2); m=medida(f'{pg}{hs} @{tag}'); M.append(m)
+                 if m['dup'] or len(m['prims'])>1 or m['setas']: ruins.append(m)
+         shot('v3_os_zoom200')
+-        chk('27 360×800, 768×1024 e zoom 200 % (SAF etapas 2 e 6, CMP etapa 2, PA, O.S.): 0 duplicata, no máximo uma primária e nenhuma seta', not ruins, ruins)
++        chk('27 360×800, 768×1024 e zoom 200 % (SAF etapas 2 e 6, CMP etapa 2, PA lista e detalhe, O.S.): 0 duplicata, no máximo uma primária e nenhuma seta', not ruins, ruins)
+         # 28 · v3.1: selecionar → buscar outro registro → somar à seleção → abrir o detalhe e voltar: seleção, busca e contexto preservados;
+         #      a seleção não desmontou o campo de busca nem trocou a barra inteira
+         abre('SAF',hash='#saf=S2627&etapa=2'); time.sleep(.3); marca('Selecionar T1-A'); time.sleep(.3)
+diff --git a/tools/prototipo/v37/gen37/componentes_test.py b/tools/prototipo/v37/gen37/componentes_test.py
+index aec588b..ac41b89 100644
+--- a/tools/prototipo/v37/gen37/componentes_test.py
++++ b/tools/prototipo/v37/gen37/componentes_test.py
+@@ -142,11 +142,11 @@ try:
+         c.js("window.__toasts=[]; new MutationObserver(()=>{const t=document.querySelector('[role=status]'); if(t&&t.innerText.trim()) window.__toasts.push(t.innerText.trim());}).observe(document.body,{subtree:true,childList:true,characterData:true})")
+         c.js(f"[...document.querySelectorAll('main .g2card')].find(b=>b.getAttribute('aria-label')==={json.dumps(nome)}).focus()")
+         c.tecla('Enter','Enter',13,text='\r'); time.sleep(.5)
+-        st2=c.js("(document.querySelector('.etp-itens [aria-current=step]')||{innerText:''}).innerText.replace(/\\s+/g,' ').trim()"); toasts=c.js("[...new Set(window.__toasts)]")
++        st2=c.js("location.hash"); toasts=c.js("[...new Set(window.__toasts)]")   # NAV-1: o plano abre no detalhe (#plano=), sem etapas
+         c.js("document.querySelector('[data-acoes] [data-acao=voltar]').click()"); time.sleep(.5)
+         volta=c.js(f"(()=>{{const f=document.querySelector('[aria-label=\"Filtrar planos por cultura\"] button[aria-pressed=true]'); const cs=[...document.querySelectorAll('main .g2card')]; const a=cs.find(b=>b.getAttribute('aria-current')==='true'); return [f?{N}(f.innerText):'', a?a.getAttribute('aria-label'):'', a?getComputedStyle(a).borderTopColor:'', a?getComputedStyle(a,'::after').content:'', cs.length];}})()"); shot('PA_1440_volta_selecionado')
+-        chk('11 PA teclado · Tab chega ao cartão com contorno de 2 px não cortado; pressionado escurece; Enter abre o plano uma vez (etapa 2); "‹ Biblioteca de planos" (área de ações) volta com filtro Soja, cartão aberto marcado (borda verde + "Último aberto")',
+-            k<30 and ef[0] and ef[1]=='solid' and ef[2]=='2px' and ef[4] and ea[0]=='rgb(228, 243, 233)' and st2.startswith('2 ') and len([t for t in toasts if t.startswith('Plano aberto')])==1
++        chk('11 PA teclado · Tab chega ao cartão com contorno de 2 px não cortado; pressionado escurece; Enter abre o plano uma vez (detalhe #plano=); "‹ Biblioteca de planos" (área de ações) volta com filtro Soja, cartão aberto marcado (borda verde + "Último aberto")',
++            k<30 and ef[0] and ef[1]=='solid' and ef[2]=='2px' and ef[4] and ea[0]=='rgb(228, 243, 233)' and st2.startswith('#plano=') and len([t for t in toasts if t.startswith('Plano aberto')])==1
+             and volta[0].startswith('Soja') and volta[1]==nome and volta[2]=='rgb(30, 122, 76)' and 'Último aberto' in volta[3] and volta[4]==2, [k,ef,ea,st2,toasts,volta])
+         # 12 · toque (sem hover, 390 px): passar o "dedo" não pinta hover; rolar até o último cartão, um toque abre o plano;
+         #      ‹ volta à biblioteca na mesma posição de rolagem, com o foco no cartão aberto
+@@ -155,11 +155,11 @@ try:
+         xy=centro(ULT); c.mouse(*xy); time.sleep(.15); eh=estilo(ULT,['background-color'])
+         rol="[...document.querySelectorAll('main[data-scroll],.ml-tog+div')].map(e=>Math.round(e.scrollTop))"
+         antes=c.js(rol); nome=c.js(f"{ULT}.getAttribute('aria-label')")
+-        c.toque(*xy); st=c.js("(document.querySelector('.etp-atual')||{innerText:''}).innerText.replace(/\\s+/g,' ').trim()"); shot('PA_390_toque_aberto')
++        c.toque(*xy); st=c.js("location.hash"); shot('PA_390_toque_aberto')   # NAV-1: detalhe #plano=, sem etapas
+         c.js("document.querySelector('[data-acoes] [data-acao=voltar]').click()"); time.sleep(.5)
+         depois=c.js(rol); foco=c.js("document.activeElement&&document.activeElement.getAttribute('aria-label')"); shot('PA_390_volta_posicao')
+         chk('12 toque sem hover (390 px) · sem pintura de hover; um toque no último cartão abre o plano; "‹ Biblioteca de planos" volta à mesma posição de rolagem com o foco no cartão aberto',
+-            not hv and eh[0]=='rgb(255, 255, 255)' and st.startswith('Etapa 2 de 3') and max(antes)>200 and all(abs(a-b)<=2 for a,b in zip(antes,depois)) and foco==nome, [hv,eh,st,antes,depois,foco,nome])
++            not hv and eh[0]=='rgb(255, 255, 255)' and st.startswith('#plano=') and max(antes)>200 and all(abs(a-b)<=2 for a,b in zip(antes,depois)) and foco==nome, [hv,eh,st,antes,depois,foco,nome])
+         # 13 · linha da grade com controle interno (CD-06): Enter/Espaço no expandir só expande/recolhe; Enter na linha abre o detalhe uma vez
+         abre('CD-06',1440,900)
+         CAR="document.querySelector('[role=row].g2ed .g2car')"
+@@ -171,16 +171,16 @@ try:
+         # 14 · uma ocorrência por família (hover/foco/pressionado) e conteúdo inerte sem cara de ação
+         fam={}
+         abre('PA',1440,900)
+-        NOVO=f"[...document.querySelectorAll('main button')].find(b=>{N}(b.innerText)==='Novo plano')"
++        NOVO=f"[...document.querySelectorAll('header button')].find(b=>{N}(b.innerText)==='Criar plano')"   # NAV-1/BOT-03: "Criar plano" no cabeçalho
+         mouse_em(NOVO); fam['botão primário hover']=estilo(NOVO,['filter'])[0]
+         MEN="[...document.querySelectorAll('.menu-lat a')].find(a=>a.innerText.trim()==='Planejar safra')"
+         mouse_em(MEN); fam['menu hover']=estilo(MEN,['box-shadow'])[0]
+         CHP=f"[...document.querySelectorAll('[aria-label=\"Filtrar planos por cultura\"] button')].find(b=>{N}(b.innerText).startsWith('Milho'))"
+         mouse_em(CHP); fam['chip hover']=estilo(CHP,['box-shadow','filter'])
+-        STP="document.querySelectorAll('.etp-itens>*')[1]"
+-        mouse_em(STP); fam['etapa inerte']=estilo(STP,['filter','cursor','box-shadow'])   # UX-ACAO-UNICA: a faixa só informa
+         INE="[...document.querySelectorAll('main div')].find(d=>/^soja\s*·/i.test(d.textContent.trim()))"; mouse_em(INE); fam['texto inerte']=estilo(INE,['cursor','filter','box-shadow'])
+         abre('SAF',1440,900); BUS="document.querySelector('main input[type=search]')"
++        STP="document.querySelectorAll('.etp-itens>*')[1]"   # NAV-1: a PA não tem mais faixa; a etapa inerte é medida no Planejar safra
++        mouse_em(STP); fam['etapa inerte']=estilo(STP,['filter','cursor','box-shadow'])   # UX-ACAO-UNICA: a faixa só informa
+         mouse_em(BUS); fam['busca hover']=estilo(f"{BUS}.closest('label')",['box-shadow'])[0]
+         c.js(f"{BUS}.focus()"); fam['busca foco']=estilo(f"{BUS}.closest('label')",['outline-style','outline-color'])
+         abre('IN-04',1440,900); c.js("(()=>{const s=document.querySelector('select[aria-label=\"Filtrar por fazenda\"]'); s.value='Santa Rita'; s.dispatchEvent(new Event('change',{bubbles:true}));})()"); time.sleep(.5)
+diff --git a/tools/prototipo/v37/gen37/patest.py b/tools/prototipo/v37/gen37/patest.py
+index 70a086d..ddef969 100644
+--- a/tools/prototipo/v37/gen37/patest.py
++++ b/tools/prototipo/v37/gen37/patest.py
+@@ -1,151 +1,140 @@
+ # -*- coding: utf-8 -*-
+-"""Teste CDP · Planos agronômicos (PA.dc.html): abrir plano, expandir sem editar, nome abre edição, alterar dose,
+-cancelar com aviso, salvar (rascunho v7), excluir com confirmação, publicar versão (cultivos continuam na v6)."""
+-import sys, os, time, subprocess, json
+-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+-from cdp import Chrome
+-from journeys import free
+-HERE = os.path.dirname(os.path.abspath(__file__)); R = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, '_render'); p = free()
+-srv = subprocess.Popen(['python3', '-m', 'http.server', str(p), '--bind', '127.0.0.1', '--directory', R], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL); time.sleep(0.8)
+-c = Chrome(port=free()); J = c.js
+-CLK = """((t,root)=>{const r=root?document.querySelector(root):document; if(!r) return 'SEM RAIZ '+root; const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...r.querySelectorAll('button,a')]; const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t))||els.find(x=>n(x.getAttribute('aria-label'))===t); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok';})"""
++"""Teste CDP · Planos agronômicos (PA.dc.html), reescrito para lista → detalhe (NAV-1, docs/navegacao/ESPECIFICACAO.md).
++As regras são as mesmas do teste de etapas que ele substitui: biblioteca com um cartão por plano; o plano abre no detalhe; mudar
++gatilho, dose ou insumo grava num rascunho v(n+1) sem mexer na versão publicada nem nos cultivos; excluir pede confirmação; o
++gatilho antes do plantio não usa número negativo; as diferenças v7 × v6 aparecem antes de publicar; publicar cria a v7 e os
++cultivos continuam na versão em que estão; descartar devolve a versão publicada; plano novo copiando de uma base nasce como
++rascunho v1; nome repetido na cultura é recusado.
++Uso (de gen37/): python3 patest.py [<_render>]   (sai 1 se algum caso falhar; capturas em _probe/pa_*.png)"""
++import sys, os, time, json
++HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
++from comp_lib import Chrome, servir
++import dados2 as D2
++R = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, '_render')
++PROBE = os.path.join(HERE, '_probe'); os.makedirs(PROBE, exist_ok=True)
++p, srv = servir(R); c = Chrome(); J = c.js
++CLK = """((t,root)=>{const r=root?document.querySelector(root):document; if(!r) return 'SEM RAIZ '+root; const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...r.querySelectorAll('button,a')].filter(e=>e.getClientRects().length); const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t))||els.find(x=>n(x.getAttribute('aria-label')).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok';})"""
+ SETV = """((sel,val)=>{const i=document.querySelector(sel); if(!i) return 'sem '+sel; const P=i.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(P,'value').set.call(i,val); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true})); return 'ok';})"""
+-T = lambda: J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')")
++T = lambda: J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')") or ''
+ DLG = lambda: J("!!document.querySelector('aside[role=dialog]')")
+-FAIL = []
+-def clk(t, root=None): r = J(f"({CLK})({json.dumps(t)},{json.dumps(root)})"); time.sleep(.4); return r
+-from comp_lib import IR_ETAPA
+-def ir_etapa(n): r = J(f"({IR_ETAPA})({n})"); time.sleep(.4); return r   # a faixa só informa: anda pela área de ações
++MAIN = lambda: J("document.querySelector('main').innerText")
++FAIL = []; NOK = [0]
++def clk(t, root=None, w=.4): r = J(f"({CLK})({json.dumps(t)},{json.dumps(root)})"); time.sleep(w); return r
+ def setv(sel, val): r = J(f"({SETV})({json.dumps(sel)},{json.dumps(val)})"); time.sleep(.25); return r
+ def check(nome, ok, info=''):
+-    print(('PASSOU ' if ok else 'FALHOU ') + nome, info if info else '')
+-    if not ok: FAIL.append(nome)
++    print(('PASSOU ' if ok else 'FALHOU ') + nome, '' if ok else str(info)[:900], flush=True)
++    if ok: NOK[0] += 1
++    else: FAIL.append(nome)
++def digita(txt): c.call('Input.insertText', {'text': txt}); time.sleep(.2)
++def enter(): c.tecla('Enter', 'Enter', 13, text='\r'); time.sleep(.45)
++def atv(nome): J(f"[...document.querySelectorAll('main button.pa-editar')].find(b=>b.innerText.trim()==={json.dumps(nome)}).click()"); time.sleep(.45)
++def mostra(nome): clk('Mostrar insumos de ' + nome, w=.35)
++def dose(prod, val):
++    clk('Alterar a dose de ' + prod, w=.3); J("document.activeElement.select&&document.activeElement.select()"); digita(val); enter()
++def gats(): return J("[...document.querySelectorAll('main .pa-gatilho b')].map(b=>b.innerText).filter(t=>/^DAP /.test(t))")
++def prims(): return J("[...document.querySelectorAll('header button,main button,[data-acoes] button')].filter(b=>b.getClientRects().length&&getComputedStyle(b).backgroundColor==='rgb(30, 122, 76)'&&b.getAttribute('aria-pressed')===null).map(b=>b.innerText.trim())")
+ try:
+-    c.size(1440, 1100); c.goto(f'http://127.0.0.1:{p}/PA.dc.html')
+-    J("window.__errs=[]; window.addEventListener('error',e=>window.__errs.push(String(e.message)));")
+-    cur = lambda: J("(document.querySelector('[aria-current=step]')||{innerText:''}).innerText.replace(/\\s+/g,' ')")
+-    check('começa na etapa 1 sem plano escolhido', '1' in cur() and 'Escolha o plano' in cur(), cur())
+-    steps = J("[...document.querySelectorAll('.etp-ind .etp-itens>li')].map(b=>b.innerText.replace(/\\s+/g,' '))")
+-    check('etapas 2 e 3 mostram impedimento', all('Escolha um plano' in s for s in steps[1:]), steps)
+-    cards = J("[...document.querySelectorAll('button[aria-label^=\"Abrir plano\"]')].map(b=>b.innerText.replace(/\\s+/g,' '))")
+-    import dados2 as _D2   # um card por plano da fonte (a camada sintética acrescentou os 2 planos irrigados do mamão)
+-    check(f'biblioteca com um card por plano ({len(_D2.PLANOS)})', len(cards) == len(_D2.PLANOS), (len(cards), [p['nome'] for p in _D2.PLANOS]))
++    c.aparelho(1440, 1000); c.goto(f'http://127.0.0.1:{p}/Main.dc.html', .2); J("localStorage.clear()"); c.goto(f'http://127.0.0.1:{p}/PA.dc.html', .8)
++    # ---- biblioteca
++    cards = J("[...document.querySelectorAll('main .g2card')].map(b=>b.innerText.replace(/\\s+/g,' '))")
++    check(f'biblioteca com um cartão por plano da fonte ({len(D2.PLANOS)}), sem faixa de etapas', len(cards) == len(D2.PLANOS) and not J("!!document.querySelector('.etp-ind')"), (len(cards), [x['nome'] for x in D2.PLANOS]))
+     soja = [x for x in cards if x.startswith('Soja alta tecnologia')][0]
+-    check('card mostra versão, estado, atividades, gatilhos, custo e cultivos', all(k in soja for k in ['v6', 'Publicado', '8 atividades', 'DAP', 'R$ 2.099,90', 'Aplicado em 5 cultivos', '3 na v6 · 2 na v5']), soja)
++    check('cartão mostra versão, estado, atividades, gatilhos, custo e cultivos', all(k in soja for k in ['v6', 'Publicado', '8 atividades', 'DAP', 'R$ 2.099,90', 'Aplicado em 5 cultivos', '3 na v6 · 2 na v5']), soja)
+     cafe = [x for x in cards if x.startswith('Café')][0]
+-    check('card do café com gatilhos Data e Após a colheita', 'Após a colheita' in cafe and 'Data' in cafe, cafe)
+-    ir_etapa(3); check('etapa 3 sem plano é bloqueada', '1' in cur(), T())
+-    # abrir plano
+-    J("document.querySelector('button[aria-label=\"Abrir plano Soja alta tecnologia\"]').click()"); time.sleep(.5)
+-    check('abrir plano leva à etapa 2', '2' in cur() and 'Edite' in cur(), cur())
+-    gats = J("[...document.querySelectorAll('main b')].map(b=>b.innerText).filter(t=>/^DAP /.test(t))")
+-    check('gatilhos DAP em ordem numérica com negativos', gats == ['DAP −20', 'DAP −1', 'DAP 0', 'DAP 20', 'DAP 25', 'DAP 45', 'DAP 60', 'DAP 118'], gats)
+-    check('faixa informa que editar cria rascunho v7', 'Editar cria o rascunho v7' in J("document.body.innerText"))
+-    # expandir/recolher gatilho sem abrir edição
+-    J("document.querySelector('button[aria-label=\"Recolher DAP 45\"]').click()"); time.sleep(.3)
+-    check('recolher gatilho não abre edição', not DLG() and not J("[...document.querySelectorAll('main button')].some(b=>b.innerText==='Fungicida 1ª aplicação')"))
+-    J("document.querySelector('button[aria-label=\"Expandir DAP 45\"]').click()"); time.sleep(.3)
+-    J("document.querySelector('button[aria-label=\"Expandir Fungicida 1ª aplicação\"]').click()"); time.sleep(.3)
+-    txt = J("document.querySelector('main').innerText")
+-    check('expandir atividade mostra produtos sem abrir edição', not DLG() and 'Adjuvante espalhante' in txt and 'R$ 145,00/L' in txt and 'R$ 72,50/ha' in txt)
+-    # clicar no nome abre edição imediatamente
+-    J("[...document.querySelectorAll('main button')].find(b=>b.innerText==='Fungicida 1ª aplicação').click()"); time.sleep(.4)
+-    check('clicar no nome abre formulário lateral', DLG() and 'Fungicida 1ª aplicação' in J("document.querySelector('aside[role=dialog] h2').innerText"))
+-    check('formulário traz gatilho DAP 45 e 2 produtos', J("document.querySelector('#fm_tipo').value") == 'DAP' and J("document.querySelector('#fm_dias').value") == '45' and J("document.querySelectorAll('aside select[id^=fm_prod_]').length") == 2)
+-    # alterar dose, cancelar com aviso
+-    setv('#fm_dose_0', '0,6')
+-    check('custo da linha recalcula', 'R$ 87,00/ha' in J("document.querySelector('aside[role=dialog]').innerText"))
+-    clk('Cancelar', 'aside[role=dialog]')
+-    check('cancelar com alteração mostra aviso', 'Há alterações não salvas' in J("document.querySelector('aside[role=dialog]').innerText"))
+-    clk('Continuar editando', 'aside[role=dialog]')
+-    # erro junto ao campo preservando o digitado
+-    setv('#fm_dias', '')
+-    clk('Salvar', 'aside[role=dialog]')
+-    check('validação junto ao campo', DLG() and 'Informe os dias' in J("document.querySelector('aside[role=dialog]').innerText") and J("document.querySelector('#fm_dose_0').value") == '0,6')
+-    setv('#fm_dias', '45')
+-    # incluir produto na atividade
+-    clk('+ Incluir produto', 'aside[role=dialog]')
+-    setv('#fm_prod_2', 'Inseticida B'); setv('#fm_dose_2', '0,2')
+-    clk('Salvar', 'aside[role=dialog]')
+-    check('salvar cria rascunho v7 sem mexer na v6', not DLG() and 'Rascunho v7 criado' in T() and 'v6 publicada' in T(), T())
+-    check('faixa amarela: aplicado em cultivos, não serão alterados', 'Aplicado em 3 cultivos na v6 e 2 na v5 (safra encerrada) — não serão alterados' in J("document.body.innerText"))
+-    check('atividade marcada como alterada', J("[...document.querySelectorAll('main span')].some(s=>s.innerText==='Alterada')"))
+-    # excluir com confirmação
+-    J("document.querySelector('button[aria-label=\"Excluir atividade Herbicida pós-emergente\"]').click()"); time.sleep(.3)
+-    check('excluir pede confirmação', 'Excluir “Herbicida pós-emergente” do rascunho v7?' in J("document.body.innerText") and not DLG())
+-    clk('Manter'); check('manter não exclui', J("[...document.querySelectorAll('main button')].some(b=>b.innerText==='Herbicida pós-emergente')"))
+-    J("document.querySelector('button[aria-label=\"Excluir atividade Herbicida pós-emergente\"]').click()"); time.sleep(.3)
+-    clk('Excluir atividade'); check('excluir confirmado remove a atividade', not J("[...document.querySelectorAll('main button')].some(b=>b.innerText==='Herbicida pós-emergente')") and 'excluída do rascunho v7' in T(), T())
+-    # incluir atividade nova (ancorada na colheita, sem misturar com DAP)
++    check('cartão do café com gatilhos Data e Após a colheita', 'Após a colheita' in cafe and 'Data' in cafe, cafe)
++    # ---- detalhe
++    J("document.querySelector('main .g2card[aria-label=\"Abrir plano Soja alta tecnologia\"]').click()"); time.sleep(.6)
++    check('abrir o cartão leva ao detalhe do plano (#plano=SOJA-AT), sem primária enquanto não há rascunho', J("location.hash") == '#plano=SOJA-AT' and J("document.querySelector('main h2').innerText") == 'Soja alta tecnologia' and prims() == [], [J("location.hash"), prims()])
++    check('gatilhos DAP em ordem numérica com negativos', gats() == ['DAP −20', 'DAP −1', 'DAP 0', 'DAP 20', 'DAP 25', 'DAP 45', 'DAP 60', 'DAP 118'], gats())
++    check('o detalhe informa que editar cria o rascunho v7', 'Editar cria o rascunho v7' in MAIN())
++    mostra('Fungicida 1ª aplicação'); txt = MAIN()
++    check('a seta da atividade mostra os insumos sem abrir edição', not DLG() and 'Adjuvante espalhante' in txt and 'R$ 145,00/L' in txt and 'R$ 72,50/ha' in txt)
++    atv('Fungicida 1ª aplicação')
++    check('o nome da atividade abre o painel com o gatilho DAP 45 e o resumo dos 2 insumos', DLG() and J("document.querySelector('#fm_tipo').value") == 'DAP' and J("document.querySelector('#fm_dias').value") == '45' and '2 insumos' in J("document.querySelector('aside[role=dialog]').innerText"))
++    setv('#fm_dias', '46'); clk('Cancelar', 'aside[role=dialog]')
++    check('cancelar com alteração avisa antes de descartar', 'Há alterações não salvas' in J("document.querySelector('aside[role=dialog]').innerText"))
++    clk('Continuar editando', 'aside[role=dialog]'); setv('#fm_dias', ''); clk('Salvar', 'aside[role=dialog]')
++    check('erro junto ao campo, o resto do que foi preenchido fica', DLG() and 'Informe os dias' in J("document.querySelector('aside[role=dialog]').innerText") and J("document.querySelector('#fm_tipo').value") == 'DAP')
++    clk('Cancelar', 'aside[role=dialog]'); clk('Descartar alterações', 'aside[role=dialog]')
++    check('descartar a edição fecha o painel sem criar rascunho', not DLG() and prims() == [], prims())
++    # ---- dose e insumo na tabela: rascunho v7
++    dose('Fungicida A', '0,6'); t1 = T()
++    check('mudar a dose na tabela cria o rascunho v7 sem mexer na v6', 'Rascunho v7 criado' in t1 and 'v6 publicada' in t1, t1)
++    check('faixa amarela: aplicado em cultivos, que não serão alterados', 'Aplicado em 3 cultivos na v6 e 2 na v5 (safra encerrada) — não serão alterados' in MAIN())
++    check('a dose fica marcada como alterada, com a versão publicada na dica', J("[...document.querySelectorAll('main span[title]')].some(s=>s.innerText==='dose alterada'&&/Na v6 publicada: 0,5 L\\/ha/.test(s.title))"))
++    clk('Incluir insumo em Fungicida 1ª aplicação', w=.35); digita('Inseticida B'); enter(); digita('0,2'); enter(); t2 = T()
++    check('incluir insumo pelo cadastro (busca, escolha, dose) grava no mesmo rascunho v7', 'Inseticida B incluído em Fungicida 1ª aplicação: 0,2 L/ha' in t2 and 'rascunho v7' in t2, t2)
++    check('a atividade fica marcada como alterada', J("[...document.querySelectorAll('main span')].some(s=>s.innerText==='Alterada')"))
++    # ---- excluir com confirmação
++    clk('Excluir atividade Herbicida pós-emergente', w=.3)
++    check('excluir pede confirmação', 'Excluir “Herbicida pós-emergente” do rascunho v7?' in MAIN() and not DLG())
++    clk('Manter'); check('manter não exclui', J("[...document.querySelectorAll('main button.pa-editar')].some(b=>b.innerText==='Herbicida pós-emergente')"))
++    clk('Excluir atividade Herbicida pós-emergente', w=.3); clk('Excluir atividade', 'main [role=alert]')
++    check('excluir confirmado remove a atividade do rascunho', not J("[...document.querySelectorAll('main button.pa-editar')].some(b=>b.innerText==='Herbicida pós-emergente')") and 'excluída do rascunho v7' in T(), T())
++    # ---- incluir atividade nova (ancorada na colheita)
+     clk('Incluir atividade')
+     ordem = J("[...document.querySelectorAll('aside[role=dialog] label')].map(l=>l.innerText.trim()).slice(0,2).join(' → ')")
+-    check('formulário começa por Operação → Atividade', ordem == 'Operação → Atividade', ordem)
++    check('o painel começa por Operação → Atividade, com o foco no 1º campo e o rodapé "Cancelar · Incluir atividade"', ordem == 'Operação → Atividade' and J("document.activeElement&&document.activeElement.id") == 'fm_op'
++          and J("[...document.querySelectorAll('aside[role=dialog] .pe-form button')].map(b=>b.innerText.trim())") == ['Cancelar', 'Incluir atividade'], ordem)
+     check('atividade desabilitada antes da operação', J("document.querySelector('#fm_atv').disabled") and 'Escolha a operação primeiro' in J("document.querySelector('#fm_atv').innerText"))
+-    setv('#fm_op', 'Adubação a lanço')
+-    opts = J("[...document.querySelectorAll('#fm_atv option')].map(o=>o.innerText)")
++    setv('#fm_op', 'Adubação a lanço'); opts = J("[...document.querySelectorAll('#fm_atv option')].map(o=>o.innerText)")
+     check('atividades filtradas pela operação (Adubação a lanço)', 'Calagem' in opts and 'Adubação de cobertura' in opts and 'Dessecação pré-plantio' not in opts and opts[-1] == 'Outra atividade…', opts)
+     setv('#fm_atv', '__outra'); check('"Outra atividade…" abre o campo do nome', J("!!document.querySelector('#fm_nome')"))
+-    setv('#fm_op', 'Pulverização')
+-    opts = J("[...document.querySelectorAll('#fm_atv option')].map(o=>o.innerText)")
++    setv('#fm_op', 'Pulverização'); opts = J("[...document.querySelectorAll('#fm_atv option')].map(o=>o.innerText)")
+     check('trocar a operação refiltra (Pulverização)', 'Dessecação pré-colheita' in opts and 'Calagem' not in opts, opts)
+-    setv('#fm_atv', 'Dessecação pré-colheita'); setv('#fm_tipo', 'DANC'); setv('#fm_dias', '5')
+-    clk('+ Incluir produto', 'aside[role=dialog]'); setv('#fm_prod_0', 'Diquat 200'); setv('#fm_dose_0', '2')
+-    clk('Salvar', 'aside[role=dialog]')
+-    grupos = J("[...document.querySelectorAll('main h3')].map(h=>h.innerText)")
+-    check('nova atividade entra no grupo "Em relação à colheita"', 'Em relação à colheita' in grupos and '5 dias antes da colheita' in J("document.querySelector('main').innerText"), grupos)
+-    c.shot(os.path.join(HERE, '_probe', 'pa_e2.png'))
+-    # clicar na linha (fora da seta) também abre; seta não abre
+-    J("[...document.querySelectorAll('[role=row].g2ed')].find(r=>/Adubação de cobertura/.test(r.innerText)).querySelector('button.g2car').click()"); time.sleep(.3)
+-    check('seta da atividade só expande', not DLG())
+-    J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>/Adubação de cobertura/.test(r.innerText)); r.focus(); r.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));})()"); time.sleep(.3)
+-    check('Enter na linha abre edição', DLG())
+-    clk('Cancelar', 'aside[role=dialog]'); check('cancelar sem alteração fecha', not DLG())
+-    # antes do plantio sem número negativo (39.6 · DAP-01)
+-    J("[...document.querySelectorAll('main button')].find(b=>b.innerText==='Dessecação pré-plantio').click()"); time.sleep(.4)
+-    tipos = J("[...document.querySelectorAll('#fm_tipo option')].map(o=>o.innerText)")
++    setv('#fm_atv', 'Dessecação pré-colheita'); setv('#fm_tipo', 'DANC'); setv('#fm_dias', '5'); clk('Incluir atividade', 'aside[role=dialog]')
++    grupos = J("[...document.querySelectorAll('main span')].map(s=>s.innerText).filter(t=>/^(Dias após o plantio|Em relação à colheita|Data do calendário)/.test(t))")
++    check('a atividade nova entra no grupo "Em relação à colheita", com a inclusão de insumo pronta', not DLG() and 'Em relação à colheita' in grupos and '5 dias antes da colheita' in MAIN()
++          and J("!!document.activeElement&&document.activeElement.getAttribute('role')==='combobox'"), grupos)
++    digita('Diquat 200'); enter(); digita('2'); enter()
++    check('o insumo da atividade nova entra pela tabela (Diquat 200, 2 L/ha)', 'Diquat 200 incluído em Dessecação pré-colheita: 2 L/ha' in T(), T())
++    c.shot(os.path.join(PROBE, 'pa_detalhe_rascunho.png'))
++    # ---- antes do plantio sem número negativo (39.6 · DAP-01)
++    atv('Dessecação pré-plantio'); tipos = J("[...document.querySelectorAll('#fm_tipo option')].map(o=>o.innerText)")
+     check('tipo "Dias antes do plantio" aparece antes do DAP', tipos[:2] == ['Dias antes do plantio', 'Dias após o plantio (DAP)'], tipos)
+     ftxt = J("document.querySelector('aside[role=dialog]').innerText")
+-    check('DAP −20 abre como "Dias antes do plantio" com 20, sem sinal', J("document.querySelector('#fm_tipo').value") == 'DAPA' and J("document.querySelector('#fm_dias').value") == '20' and 'dias antes do plantio' in ftxt, (J("document.querySelector('#fm_tipo').value"), J("document.querySelector('#fm_dias').value")))
++    check('DAP −20 abre como "Dias antes do plantio" com 20, sem sinal', J("document.querySelector('#fm_tipo').value") == 'DAPA' and J("document.querySelector('#fm_dias').value") == '20' and 'dias antes do plantio' in ftxt)
+     check('ajuda sem pedir negativo: "Zero é o dia do plantio."', 'Zero é o dia do plantio.' in ftxt and 'negativo' not in ftxt)
+     setv('#fm_dias', '-5'); clk('Salvar', 'aside[role=dialog]')
+     check('número negativo é recusado: "Use zero ou mais: o sentido já está no tipo."', DLG() and 'Use zero ou mais: o sentido já está no tipo.' in J("document.querySelector('aside[role=dialog]').innerText"))
+-    # sinal de menos tipográfico (−, como na lista 'DAP −20') e meia-risca (–) não podem virar DAP positivo
+     setv('#fm_tipo', 'DAP')
+     for s_ in ['−20', '–15']:
+         setv('#fm_dias', s_); clk('Salvar', 'aside[role=dialog]')
+         check(f'DAP com {s_} é recusado (não salva como DAP {s_[1:]})', DLG() and 'Use zero ou mais: o sentido já está no tipo.' in J("document.querySelector('aside[role=dialog]').innerText"))
+-    setv('#fm_tipo', 'DAPA'); d0 = J("document.querySelector('#fm_dose_0').value")
+-    setv('#fm_dias', '20'); setv('#fm_dose_0', '−2'); clk('Salvar', 'aside[role=dialog]')
+-    check('dose com − é recusada: "Informe a dose por hectare (maior que zero)."', DLG() and 'Informe a dose por hectare (maior que zero).' in J("document.querySelector('aside[role=dialog]').innerText"))
+-    setv('#fm_dose_0', d0)
+-    setv('#fm_dias', '181'); clk('Salvar', 'aside[role=dialog]')
++    setv('#fm_tipo', 'DAPA'); setv('#fm_dias', '181'); clk('Salvar', 'aside[role=dialog]')
+     check('antes do plantio limitado a 180 dias', 'Use de 0 a 180 dias.' in J("document.querySelector('aside[role=dialog]').innerText"))
+     setv('#fm_dias', '25'); clk('Salvar', 'aside[role=dialog]')
+-    gats = J("[...document.querySelectorAll('main b')].map(b=>b.innerText).filter(t=>/^DAP /.test(t))")
+-    check('salvar 25 dias antes grava DAP −25', not DLG() and gats[:2] == ['DAP −25', 'DAP −1'], gats)
+-    # publicar
+-    clk('Revisar e publicar ›')
+-    body = J("document.querySelector('main').innerText")
+-    check('etapa 3 lista diferenças', all(k in body for k in ['Alterações do rascunho v7 em relação à v6', 'Fungicida A: 0,5 → 0,6 L/ha', 'inclui Inseticida B', 'Excluída', 'Incluída', 'Dessecação pré-colheita']), body[:600])
+-    check('diferença mostra o gatilho DAP −20 → DAP −25', 'gatilho: DAP −20 → DAP −25' in body, body[:400])
+-    check('cultivos continuam na v6 ao publicar', 'Continua na v6 ao publicar' in body and 'Safra encerrada · fica na v5' in body)
+-    prim = J("[...document.querySelectorAll('header button')].map(b=>b.innerText).join('|')")
+-    check('ação primária Publicar versão v7', 'Publicar versão v7' in prim, prim)
+-    c.shot(os.path.join(HERE, '_probe', 'pa_e3.png'))
+-    clk('Publicar versão v7')
+-    check('publicar cria v7 e avisa que cultivos ficam', 'Versão v7 publicada' in T() and '3 cultivos na v6' in T(), T())
+-    body = J("document.querySelector('main').innerText")
+-    check('após publicar: v7 em vigor, v6 substituída com 3 cultivos, decidir em Planejar safra', 'Em vigor' in body and 'Substituída' in body and 'Na v6 · decidir adoção da v7' in body and 'Decidir em Planejar safra' in body)
+-    check('nada mais a publicar', 'Nada a publicar' in body)
+-    ir_etapa(1)
+-    soja = J("[...document.querySelectorAll('button[aria-label^=\"Abrir plano\"]')].map(b=>b.innerText.replace(/\\s+/g,' ')).find(t=>t.startsWith('Soja alta'))")
+-    check('card atualizado para v7 publicada, cultivos na v6', 'v7' in soja and 'Publicado' in soja and '3 na v6 · 2 na v5' in soja and '8 atividades' in soja, soja)
+-    # novo plano
+-    clk('Novo plano'); setv('#np_cult', 'Soja'); setv('#np_nome', 'Soja teste'); setv('#np_base', 'SOJA-PD'); clk('Salvar', 'aside[role=dialog]')
+-    check('novo plano nasce como rascunho v1 com cópia', 'rascunho v1' in T() and '4 atividades' in J("document.querySelector('main').innerText"), T())
++    check('salvar 25 dias antes grava DAP −25', not DLG() and gats()[:2] == ['DAP −25', 'DAP −1'], gats())
++    # ---- diferenças e publicar
++    body = MAIN()
++    check('o bloco de alterações v7 × v6 lista dose, inclusão, exclusão, atividade nova e gatilho', all(k in body for k in ['Alterações do rascunho v7 em relação à v6', 'Fungicida A: 0,5 → 0,6 L/ha', 'inclui Inseticida B', 'Excluída', 'Incluída', 'Dessecação pré-colheita', 'gatilho: DAP −20 → DAP −25']), body[-900:])
++    check('cultivos continuam na v6 ao publicar (safra encerrada fica na v5)', 'Continua na v6 ao publicar' in body and 'Safra encerrada · fica na v5' in body)
++    check('uma primária: "Publicar versão v7"', prims() == ['Publicar versão v7'], prims())
++    clk('Publicar versão v7', '[data-acoes]', .6)
++    check('publicar cria a v7 e avisa que os cultivos ficam', 'Versão v7 publicada' in T() and '3 cultivos na v6' in T(), T())
++    body = MAIN(); clk('Mostrar as versões', w=.35); vs = J("(document.getElementById('pa-versoes')||{innerText:''}).innerText")
++    check('depois de publicar: v7 em vigor, v6 substituída com 3 cultivos; cultivos "Na v6 · v7 publicada" com o link ao Planejar safra; sem primária',
++          'Em vigor' in vs and 'Substituída' in vs and 'Na v6 · v7 publicada' in body and 'Abrir cultivo no Planejar safra ›' in body and prims() == [], [vs, prims()])
++    clk('‹ Biblioteca de planos', '[data-acoes]', .6)
++    soja = J("[...document.querySelectorAll('main .g2card')].map(b=>b.innerText.replace(/\\s+/g,' ')).find(t=>t.startsWith('Soja alta'))")
++    check('o cartão passa à v7 publicada, com os cultivos ainda na v6 e na v5', 'v7' in soja and 'Publicado' in soja and '3 na v6 · 2 na v5' in soja and '8 atividades' in soja, soja)
++    # ---- descartar o rascunho de um plano publicado
++    J("document.querySelector('main .g2card[aria-label=\"Abrir plano Milho safrinha\"]').click()"); time.sleep(.6)
++    mostra(J("[...document.querySelectorAll('main button.pa-editar')].filter(b=>b.closest('.pa-atividade').querySelector('.pa-contagem').innerText!=='Só operação')[0].innerText"))
++    J("document.querySelector('main button.pa-dose').click()"); time.sleep(.3); J("document.activeElement.select()"); digita('9'); enter()
++    check('mudar a dose do milho cria o rascunho v5', 'Rascunho v5 criado' in T() and prims() == ['Publicar versão v5'], [T(), prims()])
+     clk('Descartar rascunho'); clk('Descartar rascunho', 'main [role=alert]')
+-    check('descartar plano novo volta à biblioteca', '1' in cur() and 'Plano novo descartado' in T(), T())
+-    check('sem erros JS', not J("window.__errs.length"), J("window.__errs"))
++    check('descartar o rascunho volta à v4 publicada, sem primária', 'Rascunho v5 descartado. A v4 publicada continua valendo.' in T() and prims() == [] and 'Publicado · v4' in MAIN(), [T(), prims()])
++    # ---- novo plano: copiar de uma base; nome repetido recusado
++    clk('‹ Biblioteca de planos', '[data-acoes]', .6); clk('Criar plano', 'header')
++    setv('#np_cult', 'Soja'); setv('#np_nome', 'Soja padrão'); clk('Criar plano', 'aside[role=dialog]')
++    check('nome repetido na cultura é recusado', DLG() and 'Já existe um plano com este nome nesta cultura.' in J("document.querySelector('aside[role=dialog]').innerText"))
++    setv('#np_nome', 'Soja teste'); setv('#np_base', 'SOJA-PD'); clk('Criar plano', 'aside[role=dialog]', .7)
++    check('plano novo nasce como rascunho v1 com a cópia das atividades e abre no detalhe', 'rascunho v1' in T() and '4 atividades' in MAIN() and J("location.hash").startswith('#plano=NP') and prims() == ['Publicar versão v1'], [T(), prims()])
++    clk('Descartar rascunho'); clk('Descartar rascunho', 'main [role=alert]')
++    check('descartar o plano novo volta à biblioteca', J("location.hash") == '' and 'Plano novo descartado' in T() and J("document.querySelectorAll('main .g2card').length") == len(D2.PLANOS), T())
++    check('sem erros JS', not J("window.__errs&&window.__errs.length"), J("window.__errs"))
+ finally:
+     c.close(); srv.terminate()
+-print('\nRESULTADO:', 'OK' if not FAIL else 'FALHAS: ' + '; '.join(FAIL))
++print(f'\nRESULTADO: {NOK[0]} ok · ' + ('OK' if not FAIL else 'FALHAS: ' + '; '.join(FAIL)))
++sys.exit(1 if FAIL else 0)
+-- 
+2.43.0
+

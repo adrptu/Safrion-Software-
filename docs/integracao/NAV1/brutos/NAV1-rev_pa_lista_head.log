@@ -1,0 +1,18 @@
+OK    L1a lista sem faixa de etapas e sem "impedida" 
+OK    L2 lista: 8 cartões; o único verde é "Criar plano", no cabeçalho à direita do título, com "+" e tamanho padrão (BOT-01/02/03/04/05); nenhum "Novo plano" 
+OK    L1b detalhe sem faixa de etapas e sem "impedida" 
+OK    L3 cartão → detalhe #plano=SOJA-AT; sem rascunho nenhuma primária; Próximo passo só com "‹ Biblioteca de planos"; Atividades, Cultivos e Versões visíveis; "Incluir atividade" branco, compacto, com "+", no cabeçalho do bloco Atividades 
+OK    L4 F5 reabre o mesmo plano; #plano=XYZ abre a lista sem erro (endereço limpo, aviso); trocar o endereço para #plano=MILHO-SF abre o Milho safrinha 
+OK    L5 mudar a dose na tabela: rascunho v7; UMA primária "Publicar versão v7" no Próximo passo; o bloco "Alterações do rascunho v7 em relação à v6" (dose, custo, impacto) é o último antes dele; cultivos "Continua na v6 ao publicar" 
+OK    L6 repetição: a 2ª mudança fica no rascunho v7 (uma primária); publicar: v7 em vigor e v6 substituída, sem primária nem bloco de alterações; o foco vai aos cultivos; c1, c2, c3 "Na v6 · v7 publicada" com o link ao cultivo no Planejar safra 
+FALHA L8 o link abre o Planejar safra na etapa 2 (Cultivos) da 2026/27 com o painel do cultivo c1 (T1-A) {'url': 'SAF.dc.html#saf=S2627&passo=cultivos&cult=c1', 'etapa': '2 Defina cultivos e planos · etapa atual', 'painel': ''}
+OK    L7a dose 0 recusada junto ao campo sem criar rascunho; Esc cancela e o detalhe continua sem primária; com a inclusão de insumo aberta, "Publicar versão v7" desabilitado com o motivo (nota e dica); Cancelar devolve 
+OK    L7b plano novo: rodapé "Cancelar · Criar plano"; nome repetido na cultura recusado; em branco abre o detalhe #plano= com "Publicar versão v1" desabilitado e o motivo; o bloco Atividades mantém "Incluir atividade" 
+OK    L7c descartar o plano novo volta à lista (sem endereço) e ele sai da biblioteca 
+OK    L9 teclado: Tab chega ao cartão e Enter abre o detalhe (foco no título do plano); Enter em "Incluir atividade" abre o painel com o foco no 1º campo; Esc fecha e o foco volta ao botão; Esc de novo volta à lista com o foco no cartão aberto 
+OK    L10 "‹ Biblioteca de planos" volta à posição de rolagem da biblioteca, com o foco e a marca no último cartão aberto 
+OK    L11 390 px (toque): sem rolagem lateral; "Criar plano" na tela; depois de mudar a dose, "Publicar versão v7" na tela, sem nada por cima; publicar pelo toque 
+     (informativo) cliques e teclas para mudar uma dose e publicar (cliques, teclas, publicou) {'depois': (4, 4, True), 'antes cdc185f': (5, 4, True)}
+OK    L12 mudar uma dose e publicar: 4 cliques (abrir o plano, abrir a atividade, tocar a dose, publicar) + "0,6" e Enter; com ANTES, 1 a menos que a base no mesmo cenário 
+OK    L13 sem erro de JavaScript 
+RESULTADO: 15 ok · 1 falhas

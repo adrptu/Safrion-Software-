@@ -1,0 +1,5 @@
+[["soma","cafe","c2",20970,110]] checar 8.727474 ms · mensagem 93710.275469 ms · De 01/06/2027 a sem fim, 40 ha de T1 estão com Café (T1-A, Perene original). Máximo 60 ha nesse período.
+
+real	1m33.915s
+user	0m47.125s
+sys	0m0.513s

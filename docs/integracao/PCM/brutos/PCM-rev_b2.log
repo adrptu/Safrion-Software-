@@ -1,0 +1,10 @@
+## ids :: ["INPUT#cd-motivo|", "INPUT#|", "SELECT#|Achado de origem", "SELECT#|Ordem que trata"]
+## set :: true
+## toast :: "✓\nTrator 02 bloqueado (CMD-18) · Freio de serviço sem ação · as O.S. que usam o ativo ficam impedidas. | Trator 02 bloqueado (CMD-18) · Freio de serviço sem ação · as O.S. que usam o ativo ficam impedidas."
+## cond :: "Bloqueado"
+## rec :: "Condição · Trator 02\nBloqueado · desde 23/09 · Freio de serviço sem ação · responsável técnico: Zé\n×\n✓\nTrator 02 bloqueado (CMD-18) · Freio de serviço sem ação · as O.S. que usam o ativo ficam impedidas.\nBloqueado → Apto só por “Declarar apto” na ordem que trata a condição, com teste aprovado (CMD-19).\nTrocar responsável técnico\nResponsável técnico\nOtávio\nZé\nJoão\nEquipe elétrica\nMotivo\nHISTÓRICO\n2"
+## os :: ["OS-0420", "OS-0431"]
+## os0420 :: ["Em execução", "", "id,tipo,talhao,area,etapa,versao,realizado,saldo,resp,ins,req,selos,ap,reservado"]
+## cd03 :: ["Trator T1 JD 6M 155 Trator 155 cv R$ 180,00/h 1 Bloqueado Ver ordens afetadas ›", "Trator 02 MF 7719 Trator 190 cv R$ 180,00/h 1 Bloqueado Ver ordens afetadas ›"]
+## mb09 :: "Máquina\nApto\ncondição, leitura e abastecimento · funciona sem sinal\nCom sinal\nSem sinal\nNada aguardando sinal\nVer envios\nVer como (simulação)\nMarcos · operador\nZé · mecânico\nMáquina\nHerdada do seu turno; toque noutra ou busque pelo nome.\nTrator 03\nPulverizador PJ-3030\nTrator 03 · MF 4292\nApto para operar\nLeitura 5.120 h · 22/09\nHerdada do turno da OS-0421 (alocação de hoje) · toque noutra para trocar\nRegistrar abastecimento\nTanque, volume e leitura; a foto do tíquete é a evidência.\nTanque · lote\nSede · D-118\nComboio CB-01 · D-118\nVolume · L\nHorímetro · h\nÚltima: 5.120 h · 22/09\nTanque cheio · "
+RESULTADO: 0/0 ok

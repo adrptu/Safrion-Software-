@@ -1,0 +1,27 @@
+safop head rc=0 161s 16:04:00
+safop base rc=0 151s 16:06:31
+safrev head rc=0 230s 16:10:21
+safrev base rc=0 247s 16:14:28
+tabsaf head rc=0 123s 16:16:31
+tabsaf base rc=0 143s 16:18:54
+cmpcont head rc=0 478s 16:26:52
+cmpcont base rc=0 301s 16:31:53
+cel head rc=0 315s 16:37:08
+cel base rc=0 106s 16:38:54
+partest head rc=0 109s 16:40:43
+partest base rc=0 168s 16:43:31
+acaosaf head rc=0 444s 16:50:55
+acaosaf base rc=0 495s 16:59:10
+acaov3 head rc=0 353s 17:05:03
+acaov3 base rc=0 247s 17:09:10
+rendfluxo head rc=0 291s 17:14:01
+rendfluxo base rc=0 252s 17:18:13
+rendtelas head rc=0 86s 17:19:39
+rendtelas base rc=0 112s 17:21:31
+rendbordas head rc=0 284s 17:26:15
+rendbordas base rc=0 168s 17:29:03
+varredura head rc=0 743s 17:41:26
+varredura base rc=0 505s 17:49:51
+simetrica head rc=0 98s
+simetrica baserender rc=1 93s
+FIM

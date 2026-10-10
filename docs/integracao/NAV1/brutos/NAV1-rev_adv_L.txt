@@ -1,0 +1,7 @@
+== L: rascunho v7; abre "Incluir insumo"; clique real em "Cancelar" da linha (5 vezes)
+    0 {'foco': 'combobox:ac-pa-add-a6-in', 'lista': True} | depois do 1º clique em Cancelar: inclusão aberta? False | área: ['voltar:‹ Biblioteca de planos', 'comando:Publicar versão v7']
+    1 {'foco': 'combobox:ac-pa-add-a6-in', 'lista': True} | depois do 1º clique em Cancelar: inclusão aberta? False | área: ['voltar:‹ Biblioteca de planos', 'comando:Publicar versão v7']
+    2 {'foco': 'combobox:ac-pa-add-a6-in', 'lista': True} | depois do 1º clique em Cancelar: inclusão aberta? False | área: ['voltar:‹ Biblioteca de planos', 'comando:Publicar versão v7']
+    3 {'foco': 'combobox:ac-pa-add-a6-in', 'lista': True} | depois do 1º clique em Cancelar: inclusão aberta? False | área: ['voltar:‹ Biblioteca de planos', 'comando:Publicar versão v7']
+    4 {'foco': 'combobox:ac-pa-add-a6-in', 'lista': True} | depois do 1º clique em Cancelar: inclusão aberta? False | área: ['voltar:‹ Biblioteca de planos', 'comando:Publicar versão v7']
+rc=0

@@ -1,0 +1,68 @@
+OK    · base 1440x900 A(adendo C1) · preparo: café 2019 reduzido a 20 ha (C1-A)
+OK    · base 1440x900 A(adendo C1) · safra 2028: C1 Livre 18 ha (38 − 20 do café sem fim)
+FALHA · base 1440x900 A(adendo C1) · 30 ha (20 + 30 = 50 > 38): duplo clique/toque real em Salvar recusa com o motivo; nada gravado · ('(painel fechado)', [('n5_34618', 'C1-B', 'Soja', 30, 'SOJA-AT')])
+FALHA · base 1440x900 A(adendo C1) · 30 ha: dois .click() no mesmo tique também recusam; nada gravado · ('(painel fechado)', [('n5_34618', 'C1-B', 'Soja', 30, 'SOJA-AT')])
+FALHA · base 1440x900 A(adendo C1) · rascunho preservado depois das recusas (cultura, plano, plantio, parcela, área, meta) · ({}, {'cult': 'Soja', 'var': '58 W', 'plano': 'SOJA-AT', 'plantio': '2028-06-01', 'pmin_txt': '21/01/2028 com este plano', 'local': 'C1-B', 'area': '30', 'colh_txt': '27/09/2028 · do plano', 'meta': '60', 'unm_txt': 'sc/ha', 'ocup_txt': '12/05/2028 a 27/09/2028'})
+FALHA · base 1440x900 A(adendo C1) · Escape com rascunho: "Há alterações não salvas" (não fecha) · 
+FALHA · base 1440x900 A(adendo C1) · "Continuar editando" volta ao rascunho intacto (30 ha, C1-B) · {}
+FALHA · base 1440x900 A(adendo C1) · limite 18 ha (20 + 18 = 38) grava, e o duplo .click() síncrono grava uma linha só · ('(painel fechado)', 'Capacidade não calculada: as 8 ocorrências desta safra ficam fora do calendário do protótipo (set/26 – ago/27).', [('n5_34618', 'C1-B', 'Soja', 30, 'SOJA-AT')])
+     (medido) base 1440x900 A(adendo C1) toast depois de gravar 18 ha: Capacidade não calculada: as 8 ocorrências desta safra ficam fora do calendário do protótipo (set/26 – ago/27).
+OK    · base 1440x900 A(adendo C1) · toast não anuncia área livre que o café ocupa (C1 fica 0 ha livre: 38 − 20 − 18)
+     (medido) base 1440x900 A(adendo C1) linha C1 depois de gravar: {'SITUAÇÃO': None, 'ÁREA LIVRE': None, 'ÁREA': None, '_dica': None}
+OK    · base 1440x900 A(adendo C1) · tabela: C1 sem área livre e sem Sobreposição
+FALHA · base 1440x900 A(adendo C1) · botão Salvar encontrado para o duplo clique · sem botão
+FALHA · base 1440x900 A(adendo C1) · editar a soja 18 → 19 ha recusa com o motivo; continua 18 · ('(painel fechado)', [('n5_34618', 'C1-B', 'Soja', 30, 'SOJA-AT')])
+OK    · base 1440x900 A(adendo C1) · sem rolagem lateral
+OK    · base 1440x900 A(adendo C1) · sem erro de JS
+OK    · base 1440x900 B(ordem inversa) · preparo: soja 90 ha no B1 em 2027 grava (sem café ainda)
+     (medido) base 1440x900 B(ordem inversa) B1 na safra 2020 (soja de 2027 fora da janela): {'SITUAÇÃO': 'Livre', 'ÁREA LIVRE': '120 ha', '_dica': '120 ha livres a partir de 01/01/2020 (folga 1 dia)'}
+FALHA · base 1440x900 B(ordem inversa) · café 2020 de 40 ha depois da soja 2027 (40 + 90 = 130 > 120) recusa com motivo; nada gravado · ('(painel fechado)', [('n5_56201', 'B1-A', 'Soja', 90, 'SOJA-AT'), ('n6_64901', 'B1-C', 'Café', 40, '')])
+     (medido) base 1440x900 B(ordem inversa) mensagem da recusa do café: (painel fechado)
+FALHA · base 1440x900 B(ordem inversa) · café 30 ha (limite 120) grava · ('(painel fechado)', 'Cultivo incluído como parcela B1-C · 80 ha livres em B1. Escolha o plano agronômico na linha.', [('n5_56201', 'B1-A', 'Soja', 90, 'SOJA-AT'), ('n6_64901', 'B1-C', 'Café', 40, '')])
+FALHA · base 1440x900 B(ordem inversa) · editar o café 30 → 31 ha recusa; continua 30 · ('(painel fechado)', [('n5_56201', 'B1-A', 'Soja', 90, 'SOJA-AT'), ('n6_64901', 'B1-C', 'Café', 31, '')])
+     (medido) base 1440x900 B(ordem inversa) B1 na safra 2020 depois do café 30: {'sit': 'Livre', 'livre': '89 ha', 'dica': '89 ha livres a partir de 01/01/2020 (folga 1 dia)', 'ações': ['▾', 'Planejar ›']}
+FALHA · base 1440x900 B(ordem inversa) · mais um café de 10 ha em 2020 (30 + 10 + 90 = 130) recusa; nada gravado · ('(painel fechado)', [('n5_56201', 'B1-A', 'Soja', 90, 'SOJA-AT'), ('n6_64901', 'B1-C', 'Café', 31, ''), ('n6_64901', 'B1-D', 'Café', 10, '')])
+     (medido) base 1440x900 B(ordem inversa) mensagem da 2ª parcela de café: (painel fechado)
+OK    · base 1440x900 B(ordem inversa) · sem rolagem lateral
+OK    · base 1440x900 B(ordem inversa) · sem erro de JS
+OK    · base 1440x900 C(aplicar plano) · preparo: soja antiga 50 ha com plano no B1 (2020)
+OK    · base 1440x900 C(aplicar plano) · preparo: soja A 70 ha sem plano (2027-06-01)
+     (medido) base 1440x900 C(aplicar plano) B1 na BV 2027 B: {'SITUAÇÃO': 'Livre', 'ÁREA LIVRE': '50 ha', '_dica': '50 ha livres a partir de 01/03/2027 (folga 1 dia)'}
+     (medido) base 1440x900 C(aplicar plano) soja B 70 ha sem plano (2027-07-01): toast/alerta: ('Cultivo incluído como parcela B1-B · 50 ha livres em B1. Escolha o plano agronômico na linha.', '(painel fechado)')
+     (medido) base 1440x900 C(aplicar plano) painel Aplicar plano: Aplicar plano a 1 cultivo Escolha um plano da mesma cultura. Cada cultivo recebe o plano padrão; ajustes locais podem ser feitos depois. B1-B · Soja 58 W · 70 ha Plano agronômico Escolha o plano Soja alta tecnologia v6 · 8 atividades Soja padrão v3 · 4 atividades Cancelar Aplicar plano em 1 cultivo
+FALHA · base 1440x900 C(aplicar plano) · aplicar SOJA-AT na soja B (70 + 70 > 120, ocupação antiga de 2020 no talhão) recusa com motivo; plano não aplicado · ('Aplicar plano em 1 cultivo', 'Aplicar plano a 1 cultivo Escolha um plano da mesma cultura. Cada cultivo recebe o plano padrão; ajustes locais podem ser feitos depois. B1-B · Soja 58 W · 70 ha Plano agronômico Escolha o plano Soja alta tecnologia v6 · 8 atividades Soja padrão v3 · 4 atividades Cancelar Aplicar plano em 1 cultivo', '', 'Soja alta tecnologia v6 aplicado a 1 cultivo. Plano operacional, recursos e demanda recalculados.', [('n5_83667', 'B1-A', 'Soja', 50, 'SOJA-AT'), ('n6_93098', 'B1-A', 'Soja', 70, ''), ('n7_02511', 'B1-B', 'Soja', 70, 'SOJA-AT')])
+OK    · base 1440x900 C(aplicar plano) · sem erro de JS
+     (medido) base 1440x900 D(dividir C1) C1 na safra 2027: {'SITUAÇÃO': 'Livre', 'ÁREA LIVRE': '18 ha', 'LIVRE A PARTIR DE': '01/01/2027', '_dica': '18 ha livres a partir de 01/01/2027 (folga 1 dia)'}
+FALHA · base 1440x900 D(dividir C1) · soja 19 ha (20 + 19 > 38) recusa · ('(painel fechado)', [('n5_20700', 'C1-B', 'Soja', 19, 'SOJA-AT')])
+FALHA · base 1440x900 D(dividir C1) · soja 18 ha (limite) grava · ('(painel fechado)', 'Cultivo incluído como parcela C1-B · 19 ha livres em C1 · plano Soja alta tecnologia.', [('n5_20700', 'C1-B', 'Soja', 19, 'SOJA-AT')])
+     (medido) base 1440x900 D(dividir C1) toast: Cultivo incluído como parcela C1-B · 19 ha livres em C1 · plano Soja alta tecnologia.
+FALHA · base 1440x900 D(dividir C1) · Dividir C1 abre só a soja desta safra · ('ok', [{'id': 'n1_28210', 'local': 'C1-B', 'area': '19', 'cult': 'Soja', 'var': '58 W', 'plantio': '2027-10-01', 'meta': '60', 'unm': 'sc/ha', 'plano': 'SOJA-AT', 'colheita': '', 'adj': None, 'from': '', 'decl': True, 'ask': False}])
+     (medido) base 1440x900 D(dividir C1) nome sugerido da parcela nova: C1-A
+     (medido) base 1440x900 D(dividir C1) resumo do painel Dividir: Dividir C1 em parcelas × Defina quantas parcelas precisar e os dados de cada uma; a soma não pode passar da área do talhão. 2 parcelas Talhão 38 ha · alocado 38 ha · livre 0 ha Área conferida PARCELA ÁREA (HA) CULTURA VARIEDADE PLANTIO META UNIDADE PLANO AGRON
+FALHA · base 1440x900 D(dividir C1) · dividir em 10 + 9 (20 + 19 > 38) recusa "Nada foi gravado" com o motivo; continua 18 · ('(painel fechado)', [('n5_20700', 'C1-B', 'Soja', 10, 'SOJA-AT'), ('n5_20700', 'C1-C', 'Soja', 9, 'SOJA-AT')])
+FALHA · base 1440x900 D(dividir C1) · dividir em 10 + 8 (limite) grava · ('(painel fechado)', 'Capacidade não calculada: as 16 ocorrências desta safra ficam fora do calendário do protótipo (set/26 – ago/27). | C1 dividido em 2 parcelas · 19 ha livres. Plano operacional, recursos e demanda recalculados.', [9, 10])
+     (medido) base 1440x900 D(dividir C1) toast do dividir: Capacidade não calculada: as 16 ocorrências desta safra ficam fora do calendário do protótipo (set/26 – ago/27). | C1 dividido em 2 parcelas · 19 ha livres. Plano operacional, recursos e demanda recalculados.
+FALHA · base 1440x900 D(dividir C1) · toast do dividir não anuncia área livre que o café ocupa · Capacidade não calculada: as 16 ocorrências desta safra ficam fora do calendário do protótipo (set/26 – ago/27). | C1 dividido em 2 parcelas · 19 ha livres. Plano operacional, recursos e demanda recalculados.
+OK    · base 1440x900 D(dividir C1) · sem rolagem lateral
+OK    · base 1440x900 D(dividir C1) · sem erro de JS
+
+RESULTADO base: 14 ok · 19 falhas (desktop ['A', 'B', 'C', 'D'])
+  - base 1440x900 A(adendo C1) · 30 ha (20 + 30 = 50 > 38): duplo clique/toque real em Salvar recusa com o motivo; nada gravado
+  - base 1440x900 A(adendo C1) · 30 ha: dois .click() no mesmo tique também recusam; nada gravado
+  - base 1440x900 A(adendo C1) · rascunho preservado depois das recusas (cultura, plano, plantio, parcela, área, meta)
+  - base 1440x900 A(adendo C1) · Escape com rascunho: "Há alterações não salvas" (não fecha)
+  - base 1440x900 A(adendo C1) · "Continuar editando" volta ao rascunho intacto (30 ha, C1-B)
+  - base 1440x900 A(adendo C1) · limite 18 ha (20 + 18 = 38) grava, e o duplo .click() síncrono grava uma linha só
+  - base 1440x900 A(adendo C1) · botão Salvar encontrado para o duplo clique
+  - base 1440x900 A(adendo C1) · editar a soja 18 → 19 ha recusa com o motivo; continua 18
+  - base 1440x900 B(ordem inversa) · café 2020 de 40 ha depois da soja 2027 (40 + 90 = 130 > 120) recusa com motivo; nada gravado
+  - base 1440x900 B(ordem inversa) · café 30 ha (limite 120) grava
+  - base 1440x900 B(ordem inversa) · editar o café 30 → 31 ha recusa; continua 30
+  - base 1440x900 B(ordem inversa) · mais um café de 10 ha em 2020 (30 + 10 + 90 = 130) recusa; nada gravado
+  - base 1440x900 C(aplicar plano) · aplicar SOJA-AT na soja B (70 + 70 > 120, ocupação antiga de 2020 no talhão) recusa com motivo; plano não aplicado
+  - base 1440x900 D(dividir C1) · soja 19 ha (20 + 19 > 38) recusa
+  - base 1440x900 D(dividir C1) · soja 18 ha (limite) grava
+  - base 1440x900 D(dividir C1) · Dividir C1 abre só a soja desta safra
+  - base 1440x900 D(dividir C1) · dividir em 10 + 9 (20 + 19 > 38) recusa "Nada foi gravado" com o motivo; continua 18
+  - base 1440x900 D(dividir C1) · dividir em 10 + 8 (limite) grava
+  - base 1440x900 D(dividir C1) · toast do dividir não anuncia área livre que o café ocupa

@@ -1,0 +1,21 @@
+  FALHA MB-01 Marcos: Minha fila só com O.S. (sem OM) e o cartão "Máquina" (MB-09) na vaga vazia
+  FALHA Ver como Zé (c.app.usuario): a OM-0233 na Minha fila com "Teste pendente" e a primária "Continuar serviço · OM-0233"
+  FALHA MB-09det: o painel da OM-0233 em 390 px, com "Não opere" no Trator T1 bloqueado
+  OK  MB-09det sem rolagem lateral a 390 px (390 px)
+  FALHA Teste: 2ª tentativa Aprovado com foto, gravada no cenário (só por acréscimo)
+1/5 ok · FALHAS: 4
+ - MB-01 Marcos: Minha fila só com O.S. (sem OM) e o cartão "Máquina" (MB-09) na vaga vazia
+ - Ver como Zé (c.app.usuario): a OM-0233 na Minha fila com "Teste pendente" e a primária "Continuar serviço · OM-0233"
+ - MB-09det: o painel da OM-0233 em 390 px, com "Não opere" no Trator T1 bloqueado
+ - Teste: 2ª tentativa Aprovado com foto, gravada no cenário (só por acréscimo)
+Traceback (most recent call last):
+  File "<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/ma_app_fluxo_test.py", line 42, in <module>
+    a.ok(cen("c.man.oms['OM-0233'].etapa") == 'Em conferência' and a.foot() == 'Declarar Trator T1 apto', 'Concluir pela regra única: OM-0233 Em conferência e a primária vira "Declarar Trator T1 apto"')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/ma_app_fluxo_test.py", line 13, in cen
+    def cen(expr): return a.J(f"(()=>{{const c=window.__cen.cenGet(); return ({expr});}})()")
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/cdp.py", line 95, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught

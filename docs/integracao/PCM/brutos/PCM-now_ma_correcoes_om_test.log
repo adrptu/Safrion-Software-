@@ -1,0 +1,13 @@
+  ok  MA-04: sem erro de JS 
+  FALHA CTL-3 (R-D4): cada tarefa respondida mostra quem e a hora
+  FALHA leitura 29.950 h: aviso a confirmar, ordem segue Em execução · A liberar
+  FALHA corrigir leitura e aplicar 12 de 16 L: sobra de 4 L · 
+  FALHA custo com o aplicado (690 + 12 × 28 + 5 h × 320) · 
+Traceback (most recent call last):
+  File "<sp-pcm>/tools/prototipo/v37/gen37/ma_correcoes_om_test.py", line 63, in <module>
+    setv(PSEL,'Zé'); time.sleep(.3); J("document.querySelector('aside [aria-label=\"Não feito · Lubrificar pontos de graxa\"]').click()"); time.sleep(.3)
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<sp-pcm>/tools/prototipo/v37/gen37/cdp.py", line 95, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught

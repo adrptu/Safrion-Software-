@@ -1,0 +1,43 @@
+== A: rascunho com 0,6 no Fungicida A; digita 6 na dose do Herbicida (sem Enter) e clica Publicar
+   atividades: ['Dessecação pré-plantio', 'Tratamento de sementes', 'Plantio e adubação de base', 'Adubação de cobertura', 'Herbicida pós-emergente', 'Fungicida 2ª aplicação + inseticida', 'Colheita']
+   doses visíveis: ['Alterar a dose de Glifosato 480, hoje 2 L/ha', 'Alterar a dose de 2,4-D 806, hoje 1 L/ha', 'Alterar a dose de Óleo mineral, hoje 0,5 L/ha', 'Alterar a dose de Fungicida A, hoje 0,6 L/ha', 'Alterar a dose de Adjuvante espalhante, hoje 0,25 L/ha']
+   bloco de alterações ANTES do clique (digitando 6): {'top': 1733, 'bot': 1945, 'vh': 900, 'txt': 'Alterações do rascunho v7 em relação à v6 Confira cada alteração antes de publicar; publicar cria a nova versão sem mudar os cultivos. Alterada Fungicida 1ª aplicação · Fungicida A: 0,5 → 0,6 L/ha Custo de insumos: R$ 2.099,90/ha na v6 → R$ 2.114,40/ha na v7 ('}
+   toast: A dose de Glifosato 480: 2 → 6 L/ha entrou no rascunho agora: confira as alterações ao lado de Publicar e clique de novo.
+   estado: {'h2': 'Soja alta tecnologia', 'est': 'Rascunho v7 em edição', 'hash': '#plano=SOJA-AT', 'area': ['nota:2 alterações na v7: Dessecação pré-plantio (Glifosato 480: 2 → 6 L/ha); Fungicida 1ª aplicação (Fungicida A: 0,5 → 0,6 L/ha). Ver alterações', 'atalho:Ver alterações', 'voltar:‹ Biblioteca de planos', 'comando:Publicar versão v7'], 'cards': 0, 'alerts': []}
+   versões: v7 rascunho em edição Rascunho — v6 publicada em 12/08/2026 Em vigor 3 cultivos v5 publicada em 18/08/2025 Substituída 2 cultivos
+   dose publicada de Glifosato 480 = 6 L/ha | Fungicida A = 0,6 L/ha
+== B: rascunho com 0,6; muda a dose do Fungicida A para 0 (inválido, sem Enter) e clica Publicar
+   toast: Dose de Fungicida A: 0,5 → 0,6 L/ha. Rascunho v7 criado; a v6 publicada e os 5 cultivos que usam o plano não mudam.
+   estado: {'h2': 'Soja alta tecnologia', 'est': 'Rascunho v7 em edição', 'hash': '#plano=SOJA-AT', 'area': ['nota:Confirme (Enter) ou cancele (Esc) a dose de Fungicida A para publicar a v7.', 'voltar:‹ Biblioteca de planos', 'comando:Publicar versão v7[dis]'], 'cards': 0, 'alerts': ['Informe a dose por hectare, maior que zero.']}
+   campo em edição ainda aberto? True 0
+== D: muda 0,5 → 0,6 e volta a 0,5; publica
+   estado: {'h2': 'Soja alta tecnologia', 'est': 'Rascunho v7 em edição', 'hash': '#plano=SOJA-AT', 'area': ['nota:O rascunho v7 está igual à v6: altere algo ou descarte o rascunho.', 'voltar:‹ Biblioteca de planos', 'comando:Publicar versão v7[dis]'], 'cards': 0, 'alerts': []}
+   bloco: Alterações do rascunho v7 em relação à v6 Confira cada alteração antes de publicar; publicar cria a nova versão sem mudar os cultivos. O rascunho está igual à versão publicada. Custo de insumos: R$ 2.099,90/ha na v6 → R$ 2.099,90/ha na v7 (sem mudança) Aplicado em 3 cultivos na v6 e 2 na v5 (safra e
+   toast: Dose de Fungicida A: 0,6 → 0,5 L/ha. Gravado no rascunho v7.
+   cultivos: None
+   links: 0
+== E: abre o filtro de uma coluna da tabela de cultivos, foca um botão do filtro e tecla Esc
+   botões de filtro: ['Filtrar Safra', 'Filtrar Talhão ou parcela', 'Filtrar Cultura e variedade', 'Filtrar Área', 'Filtrar Versão aplicada', 'Filtrar Situação']
+   popover: {'foco': '↑ Classificar de A a Z'}
+   depois do Esc: {'h2': 'Soja alta tecnologia', 'est': 'Publicado · v6', 'hash': '#plano=SOJA-AT', 'area': ['voltar:‹ Biblioteca de planos'], 'cards': 0, 'alerts': []} | popover aberto? False
+== F: 390 px, detalhe aberto, menu aberto pelo botão; Esc
+   antes: {'aberto': True, 'pos': 'absolute'} | depois: menu aberto? False | {'h2': 'Soja alta tecnologia', 'est': 'Publicado · v6', 'hash': '#plano=SOJA-AT', 'area': ['voltar:‹ Biblioteca de planos'], 'cards': 0, 'alerts': []}
+== H: cria plano "Soja teste", F5
+   hash: #plano=NPmv1h52r9 | depois do F5: {'h2': '', 'est': '', 'hash': '', 'area': [], 'cards': 8, 'alerts': []} | aviso: Plano do endereço não encontrado (no protótipo, um plano criado aqui não fica guardado ao recarregar): escolha um plano da biblioteca.
+== I 1440px: depois de mudar a dose: {'vh': 900, 'dif_top': 1160, 'dif_bot': 1372, 'dif_visivel_px': 0, 'pub_top': 414, 'pub_na_tela': True}
+== I 390px: depois de mudar a dose: {'vh': 844, 'dif_top': 1510, 'dif_bot': 1886, 'dif_visivel_px': 0, 'pub_top': 770, 'pub_na_tela': True}
+== J: abre "Incluir insumo", escolhe produto e digita dose; volta à biblioteca
+   dose digitada: 0,3 | depois do voltar: 0 cartões | aviso: Plano aberto: Soja alta tecnologia
+   !! NAO ACHEI document.querySelector('main .g2card[aria-label="Abrir plano Soja alta tecnologia"]')
+   reabrindo: inclusão ainda aberta? True | rascunho? Publicado · v6
+== G2: painel "Atividade · Dessecação pré-plantio" aberto na Soja; endereço → #plano=MILHO-SF; botão verde do rodapé do painel
+   painel: Atividade · Dessecação pré-plantio | rodapé: ['Cancelar', 'Salvar'] | atrás: Soja alta tecnologia
+   toast: Nada mudou em “Dessecação pré-plantio”: o plano continua como estava.
+   estado: {'h2': 'Soja alta tecnologia', 'est': 'Publicado · v6', 'hash': '#plano=SOJA-AT', 'area': ['voltar:‹ Biblioteca de planos'], 'cards': 0, 'alerts': []}
+   atividades do milho com "Dessecação": ['Dessecação pré-plantio']
+== L: rascunho v7; abre "Incluir insumo"; clique real em "Cancelar" da linha (5 vezes)
+    0 {'foco': 'combobox:ac-pa-add-a6-in', 'lista': True} | depois do 1º clique em Cancelar: inclusão aberta? False | área: ['nota:1 alteração na v7: Fungicida 1ª aplicação (Fungicida A: 0,5 → 0,6 L/ha). Ver alterações', 'atalho:Ver alterações', 'voltar:‹ Biblioteca de planos', 'comando:Publicar versão v7']
+    1 {'foco': 'combobox:ac-pa-add-a6-in', 'lista': True} | depois do 1º clique em Cancelar: inclusão aberta? False | área: ['nota:1 alteração na v7: Fungicida 1ª aplicação (Fungicida A: 0,5 → 0,6 L/ha). Ver alterações', 'atalho:Ver alterações', 'voltar:‹ Biblioteca de planos', 'comando:Publicar versão v7']
+    2 {'foco': 'combobox:ac-pa-add-a6-in', 'lista': True} | depois do 1º clique em Cancelar: inclusão aberta? False | área: ['nota:1 alteração na v7: Fungicida 1ª aplicação (Fungicida A: 0,5 → 0,6 L/ha). Ver alterações', 'atalho:Ver alterações', 'voltar:‹ Biblioteca de planos', 'comando:Publicar versão v7']
+    3 {'foco': 'combobox:ac-pa-add-a6-in', 'lista': True} | depois do 1º clique em Cancelar: inclusão aberta? False | área: ['nota:1 alteração na v7: Fungicida 1ª aplicação (Fungicida A: 0,5 → 0,6 L/ha). Ver alterações', 'atalho:Ver alterações', 'voltar:‹ Biblioteca de planos', 'comando:Publicar versão v7']
+    4 {'foco': 'combobox:ac-pa-add-a6-in', 'lista': True} | depois do 1º clique em Cancelar: inclusão aberta? False | área: ['nota:1 alteração na v7: Fungicida 1ª aplicação (Fungicida A: 0,5 → 0,6 L/ha). Ver alterações', 'atalho:Ver alterações', 'voltar:‹ Biblioteca de planos', 'comando:Publicar versão v7']

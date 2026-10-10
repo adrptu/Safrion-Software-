@@ -1,0 +1,16 @@
+# verificacao do pacote NAV1 · base cdc185f · candidata a7023ca · 2026-10-09T23:57Z
+worktree temporaria em cdc185f: cdc185f
+git apply --check diff-cdc185f-a7023ca.patch -> rc=0
+git apply diff-cdc185f-a7023ca.patch -> rc=0
+caminhos conferidos: 8 · divergencias: 0
+arvore igual a a7023ca nos caminhos tocados -> rc=0
+git apply -R (volta a base) -> rc=0; status: ''
+patch 0001-NAV-1-Planos-agron-micos-em-lista-detalhe-sem-etapas.patch -> apply --check + apply rc=0
+patch 0002-NAV-1-testes-antigos-da-PA-na-regra-nova-lista-detal.patch -> apply --check + apply rc=0
+patch 0003-NAV-1-especifica-o-decis-es-e-evid-ncia-docs-navegac.patch -> apply --check + apply rc=0
+patch 0004-NAV1-corre-es-da-revis-o.patch -> apply --check + apply rc=0
+patch 0005-NAV1-clique-do-pa_lista_test-espera-o-alvo-livre-e-e.patch -> apply --check + apply rc=0
+caminhos conferidos: 8 · divergencias: 0
+5 patches em sequencia: arvore igual a a7023ca -> rc=0
+worktree temporaria removida -> rc=0
+RESULTADO NAV1: OK

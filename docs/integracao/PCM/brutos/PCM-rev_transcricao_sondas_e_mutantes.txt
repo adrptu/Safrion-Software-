@@ -1,0 +1,91 @@
+# Revisão adversarial do PCM (agente PCM:revisar, HEAD 21c0e51): sondas P1-P20 (regras, sem navegador) e mutantes de regra
+# Saidas registradas no transcript do agente (nao havia arquivo de log). Extraidas sem reexecutar nada.
+# Horario UTC de cada comando; corpo de heredoc omitido; caminhos da maquina trocados por marcadores.
+
+### 2026-10-09T16:05:44.585Z
+$ SP=<scratchpad>/pcmrev; cat > $SP/probes/p1.js <<'EOF'
+  [corpo do heredoc omitido]
+P1.ab :: ["Lançamento AB-1043 registrado · Trator 02 · MF 7719 · 150 L · Trator 02 · MF 7719 em 3.010 h · vencimentos recalculados.",{"val":3010,"data":"2026-09-23","origem":"Abastecimento AB-1043"}]
+P1.estorno :: ["Estorno ES-0089 lançado para AB-1043 (leitura digitada errada (era 2.995)) · o original fica no histórico; registre o lançamento correto.","leitura atual do ativo depois do estorno:",{"val":3010,"data":"2026-09-23","origem":"Abastecimento AB-1043"},"lt:",{"id":"LT-0016","aid":"a02","val":3010,"un":"h","data":"2026-09-23","origem":"Abastecimento AB-1043","qual":"Confirmada","por":"Otávio (responsável de manutenção)","ab":"AB-1043"}]
+P1.venc.antes :: ["Revisão 250 h Vence em breve due 3043/2027-03-01","Revisão 500 h Em dia due 3293/2027-09-02"]
+P1.correto :: ["Lançamento AB-1044 registrado · Trator 02 · MF 7719 · 150 L · Leitura de 2.995 h menor que a anterior (3.010 h · 23/09) · confirme a troca de contador ou descarte; os vencimentos seguem na leitura anterior.",{"val":2995,"data":"2026-09-23","origem":"Abastecimento AB-1044","ab":"AB-1044","lt":"LT-0017","tipo":"menor"}]
+P1.confirmaTroca :: ["Troca de contador confirmada: Trator 02 · MF 7719 passa a 2.995 h · histórico ajustado em 15 h · vencimentos mantidos.",{"s1":{"data":"2026-09-02","leit":2778,"om":"OM-0219"},"s2":{"data":"2026-09-02","leit":2778,"om":"OM-0219"}},["Revisão 250 h Vence em breve due 3028/2027-03-01","Revisão 500 h Em dia due 3278/2027-09-02"]]
+P2.primeiro :: {"nada":true,"rep":"INSP-104","msg":"Possível repetição de INSP-104 (Vazamento leve em mangueira) · Somar ou Registrar novo."}
+P2.somar :: ["Somado ao INSP-104 · 2 ocorrências.","Média","Apto","Apto","Vincular à OM-0234"]
+P3.achado :: ["Achado INSP-106 registrado · Trator T1 · JD 6M 155 · Rodado e freios · Trator T1 bloqueado","Bloqueado",{"motivo":"Pressão hidráulica baixa · SM-0147 e INSP-105","desde":"2026-09-22","por":"Zé (mecânico)","evid":"checklist + manômetro","achado":"INSP-105","om":"OM-0233","ate":"","lim":""}]
+P3.corretiva :: ["OM-0235 criada em A liberar · Trator T1 · JD 6M 155 · Rodado e freios · Alta · janela 25/09 · informe o tempo previsto para liberar."]
+P3.novaOM.trata :: [null,["Verificação:Verificar: Freio de serviço sem ação no pedal"]]
+P3.concluir :: "OM-0233 em conferência · resolvido: SM-0147, INSP-105 · Trator T1 segue bloqueado até a decisão de aptidão."
+P3.apto :: ["Trator T1 · JD 6M 155 apto · CMD-19 por Zé (mecânico) na OM-0233 · a agenda antiga não é reassumida; volta pela reprogramação do PCP.","Apto","achado freio:","Na OM","Bloqueado","OM freio:","OM-0235","A liberar"]
+P4.fila1 :: {"fila":true,"id":"","msg":"Resposta de tarefa · OM-0234 · Trator 02 · Trocar óleo do motor · Feito · no aparelho, aguardando sinal (vai uma vez só ao voltar)."}
+P4.fila2 :: {"fila":true,"id":"","msg":"Resposta de tarefa · OM-0234 · Trator 02 · Trocar filtro de óleo do motor · Não feito · no aparelho, aguardando sinal (vai uma vez só ao voltar)."}
+P4.rvs :: [["d1",2],["d2",3]]
+P4.vincular :: "Achado INSP-104 vinculado à OM-0234 · vira a tarefa “Verificar: Vazamento leve em mangueira” (selo Tarefa nova para Zé) · nenhuma ordem nova."
+P4.rvServidor :: 3
+P4.sinal :: [{"n":1,"conf":["CA-001"]},"t0:","","t1:","Não feito",["d1:OM-0234 mudou no escritório depois do registro (outra alteração na mesma fase)"]]
+P5.encerrar :: "OM-0230 encerrada · custo R$ 4.392,00 (peças + 9 h × Custo R$/h da oficina 320)."
+P6.iniciar :: {"ini":"2026-09-23","lib":{"por":"Otávio (responsável de manutenção)","em":"2026-09-23","conf":"Conflito · OS-0420 28/09"}}
+P7 :: ["Não liberada: falta peça · Filtro de óleo MF 4292 (0 de 1 un). Solicite a compra.","Não liberada: falta peça · Filtro de óleo MF 4292 (0 de 1 un). Solicite a compra.",{"nome":"Óleo de motor 15W-40","un":"L","saldo":120,"reservado":0,"preco":28}]
+
+### 2026-10-09T16:10:52.156Z
+$ SP=<scratchpad>/pcmrev; mkdir -p $SP/mut; cat > $SP/mut/mutar.py <<'EOF'
+  [corpo do heredoc omitido]
+BASE regras falhas [] de 103 · app falhas [] de 28
+MORTO M01 recibo ignorado (idempotência) · regras: 2 falhas · app: 2 falhas · ex.: AC-PCM-16 · duplo toque (mesma chave) cria 1 e devolve o recibo
+MORTO M02 conclusão aceita leitura menor · regras: 2 falhas · app: 0 falhas · ex.: AC-PCM-16 · duplo toque (mesma chave) cria 1 e devolve o recibo
+MORTO M03 encerrar sem destino da peça retirada · regras: 3 falhas · app: 0 falhas · ex.: AC-PCM-13/26 · Encerrar é recusado na OM que trata a condição sem "Declarar apto"/"Manter"
+MORTO M04 encerrar sem decisão de aptidão · regras: 1 falhas · app: 0 falhas · ex.: AC-PCM-13/26 · Encerrar é recusado na OM que trata a condição sem "Declarar apto"/"Manter"
+MORTO M05 teste válido sempre · regras: 1 falhas · app: 0 falhas · ex.: AC-PCM-11 · achado de origem só fica Resolvido com teste válido: Medição Não conforme não 
+MORTO M06 conflito nunca · regras: 2 falhas · app: 0 falhas · ex.: AC-PCM-30 · conflito calculado sobre AL: OM-0234 (28/09) e OM-0236 (24/09) com conflito; O
+MORTO M07 executar sem ser executante · regras: 3 falhas · app: 1 falhas · ex.: AC-PCM-19 · Zé não inicia a OM-0228 (executante João): "Ação de João, executante"
+MORTO M08 liberar não reserva · regras: 1 falhas · app: 0 falhas · ex.: Item 12 · liberar reserva 100 % (1 un + 12 L) uma vez; repetir é recusado sem reservar de 
+MORTO M09 concluir baixa só o aplicado · regras: 3 falhas · app: 0 falhas · ex.: Item 12 · aplicar 9 L de 12: a reserva sai, o saldo baixa o entregue e a sobra de 3 L fica
+MORTO M10 sobras não voltam ao saldo · regras: 2 falhas · app: 0 falhas · ex.: Item 12 · devolver: +3 L uma vez só; repetir não soma de novo
+MORTO M11 achado grave vincula · regras: 1 falhas · app: 0 falhas · ex.: AC-PCM-09 · achado Alta no Trator 02 → primária "Criar ordem corretiva" (vincular só com j
+MORTO M12 volta do achado não acontece · regras: 1 falhas · app: 0 falhas · ex.: AC-PCM-09 · OM encerrada sem Conforme devolve o achado a Sem ordem com "Voltou da OM-0234"
+MORTO M13 não conforme sempre abre novo achado · regras: 1 falhas · app: 0 falhas · ex.: AC-PCM-11 · "Não conforme" e "Não foi possível verificar" somam no achado do ativo e compo
+MORTO M14 tíquete antigo vira leitura atual · regras: 2 falhas · app: 0 falhas · ex.: AC-PCM-15 · tíquete com data anterior entra no histórico sem pedir troca e sem mudar a lei
+MORTO M15 estorno não cria lançamento · regras: 1 falhas · app: 0 falhas · ex.: AC-PCM-16 abastecimento (exceção)
+MORTO M16 sinal sem conferir o.rv · regras: 0 falhas · app: 3 falhas · ex.: AC-PCM-27 · OM mudada no escritório: os registros do app viram "Conflito a resolver · Otáv
+MORTO M17 custo final usa planejado · regras: 2 falhas · app: 0 falhas · ex.: PCMS §10 C1 · OM-0234 encerra a R$ 2.626,00 (690 + 12 L × 28 + 5 h × 320)
+VIVO  M18 declarar apto fora de Em conferência · regras: 0 falhas · app: 0 falhas
+MORTO M19 gerar duplica ciclo · regras: 1 falhas · app: 0 falhas · ex.: Gerar ordem · lote (Sem ordem) e painel do vencimento usam a mesma regra: gerar de novo o 
+MORTO M20 mover troca o vencimento original · regras: 1 falhas · app: 0 falhas · ex.: AC-PCM-30 · mover dentro da tolerância: sem motivo, sem conflito, vencOrig preservado (28/
+VIVO  M21 incluir tarefa em preventiva · regras: 0 falhas · app: 0 falhas
+MORTO M22 leitura implausível sem aviso · regras: 2 falhas · app: 0 falhas · ex.: AC-PCM-15 · leitura implausível na conclusão dá aviso (não grava)
+MORTO M23 liberar sem executante · regras: 2 falhas · app: 0 falhas · ex.: AC-PCM-31 · sem executante: "Falta: executante" e nada liberado
+VIVO  M24 restringir sem prazo · regras: 0 falhas · app: 0 falhas
+MORTO M25 encerrar restrição sem evidência · regras: 1 falhas · app: 0 falhas · ex.: AC-PCM-13 · Restringir grava condição, motivo, prazo, por e data; "Encerrar restrição" sem
+MORTO M26 fechar achado sem motivo · regras: 1 falhas · app: 0 falhas · ex.: AC-PCM-09 · Fechar sem serviço exige motivo
+MORTO M27 manter não desfaz o vínculo · regras: 1 falhas · app: 0 falhas · ex.: AC-PCM-13 · "Manter bloqueado" exige motivo e desfaz o vínculo (o ativo pede Criar ordem c
+MORTO M28 mecânico muda condição de qualquer ativo · regras: 2 falhas · app: 0 falhas · ex.: AC-PCM-19 · Bloquear: Zé só onde é o responsável técnico (Trator 02 sim; Trator 03 não)
+MORTO M29 abastecimento sem chave · regras: 1 falhas · app: 0 falhas · ex.: AC-PCM-16 · duplo toque (mesma chave) cria 1 e devolve o recibo
+VIVO  M30 resposta grava autor de quem edita motivo · regras: 0 falhas · app: 0 falhas
+VIVO  M31 resposta sem permissão de executante · regras: 0 falhas · app: 0 falhas
+MORTO M32 conclusão não exige horas · regras: 1 falhas · app: 0 falhas · ex.: D-18 · horas de oficina obrigatórias (sem valor implícito)
+MORTO M33 Não feito não abre Pendência · regras: 1 falhas · app: 0 falhas · ex.: AC-PCM-11 · "Não feito" abre OM de Pendência com o executante da origem
+MORTO M34 fila do app grava duas vezes · regras: 0 falhas · app: 1 falhas · ex.: AC-PCM-27 · reenvio da mesma chave (fila repetida) não duplica: o recibo da chave já exist
+MORTO M35 conflito do app aplicado sem permissão · regras: 0 falhas · app: 2 falhas · ex.: AC-PCM-27 · resolver o conflito é do Otávio (Zé recusado)
+VIVO  M36 aplicado acima do planejado sem saldo · regras: 0 falhas · app: 0 falhas
+VIVO  M37 gerar em dia · regras: 0 falhas · app: 0 falhas
+MORTO M38 tentativa sem evidência · regras: 1 falhas · app: 0 falhas · ex.: AC-PCM-12 · tentativa sem evidência é recusada
+VIVO  M39 vincular em Em conferência · regras: 0 falhas · app: 0 falhas
+VIVO  M40 encerrar com sobra · regras: 0 falhas · app: 0 falhas
+VIVOS 9 ['M18 declarar apto fora de Em conferência', 'M21 incluir tarefa em preventiva', 'M24 restringir sem prazo', 'M30 resposta grava autor de quem edita motivo', 'M31 resposta sem permissão de executante', 'M36 aplicado acima do planejado sem saldo', 'M37 gerar em dia', 'M39 vincular em Em conferência', 'M40 encerrar com sobra']
+
+### 2026-10-09T16:17:52.201Z
+$ SP=<scratchpad>/pcmrev; cat > $SP/probes/p2.js <<'EOF'
+  [corpo do heredoc omitido]
+P8 :: {"parcial":"AB-1043","cheio":"AB-1044","lh":{"lh":7.5,"de":"AB-1042","h":12},"esperado_LH":15.833333333333334,"msg":"Lançamento AB-1044 registrado · Trator 02 · MF 7719 · 90 L · 7,5 L/h (tanque cheio) · Trator 02 · MF 7719 em 3.000 h · vencimentos recalculados."}
+P9 :: ["Lançamento AB-1043 registrado · Comboio CB-01 · 200 L · Comboio CB-01 em 48.300 km · vencimentos recalculados.","Lançamento AB-1044 registrado · Comboio CB-01 · 60 L · 0,3 L/h (tanque cheio) · Comboio CB-01 em 48.500 km · vencimentos recalculados."]
+P10 :: "Falta: resolver sobras · Otávio (simulado · papel do Almoxarifado)."
+P11 :: ["Declarar apto só em Em conferência.","Bloqueado"]
+P12 :: ["Saldo insuficiente de Kit filtros MF 7719 para aplicar 5 kit (disponível além do reservado: 1 kit).",{"nome":"Kit filtros MF 7719","un":"kit","saldo":2,"reservado":1,"preco":690}]
+P13 :: "Trator T1 · Revisão 250 h está em dia; gere a ordem quando a janela se aproximar."
+P14 :: "Ação de Zé, executante. Nada foi alterado."
+P15 :: "OM-0230 está Em conferência: vincule só a ordem em A liberar, Liberadas ou Em execução."
+P16 :: "A preventiva segue a versão do plano: inclua a tarefa no plano."
+P17 :: "Informe o prazo da restrição."
+P18 :: {"G2_PERFIS":["Ana","Caio","Rui","Paula","Zé","Otávio"],"executanteOM0228":"João","eletricistas":["João"]}
+P19 :: [["Conflito aceito · OS-0420"],"OM-0234 movida para 25/09 · dentro da tolerância (até 30/09) · Conflito · OS-0420 25/09.",false,["Conflito · OS-0420 25/09"]]
+P20 :: ["Achado SM-0153 registrado · Trator T1 · JD 6M 155 · Elétrico · Trator T1 bloqueado","INSP-105",1]

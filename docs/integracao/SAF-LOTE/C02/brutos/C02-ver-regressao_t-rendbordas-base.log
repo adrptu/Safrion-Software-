@@ -1,0 +1,15 @@
+janela 0: ('ok', 'Cálculo incompleto: Tratamento de sementes com 3 ocorrências pendentes (sem horas na janela). Fora da conta: T4, T3, P1 e P2 (475 ha), sem plano. | Rendimento de Tratamento de sementes · Máquina TSI na sede · equipe de 2: 40,00 ha/h · R$ 3,40/ha. Tratamento de sementes: 15,3 → 0,0 h.')
+OK    · B1a janela 0 h (rendimento 40 ha/h válido): a Situação diz "sem horas na janela · pendente", não "sem rendimento"
+OK    · B1b linhas de operação e atividade com todas as ocorrências pendentes não mostram 0,0 h nem R$ 0
+OK    · B1c o veredito diz que o cálculo está incompleto pelas ocorrências pendentes (R3)
+A: ('ok', 'Na estimativa mensal, cabe nos 690 ha com plano. Fora da conta: T4, T3, P1 e P2 (475 ha), sem plano. Prazo por talhão não verificado: 17 de 17 atividades sem janela. | Rendimento de Controle de ácaro · Trator 02 MF 7719 + Pulverizador PJ-3030 36 m: 3,60 ha/h · R$ 50,00/ha. Pulverização: 116,7 → 126,4 h.')
+incluir: ok
+B: ('ok', 'Na estimativa mensal, cabe nos 690 ha com plano. Fora da conta: T4, T3, P1 e P2 (475 ha), sem plano. Prazo por talhão não verificado: 17 de 17 atividades sem janela. | Configuração incluída em Controle de ácaro · B prestador 12 m: 7,20 ha/h. A área de Controle de ácaro agora se divide entre 2 configurações. Pulverização: 126,4 → 123,4 h.')
+A em sequência: ('ok', 'Cálculo incompleto: Pulverização com 25,8 ha sem conjunto, sequência que não cabe na janela. Fora da conta: T4, T3, P1 e P2 (475 ha), sem plano. | Rendimento de Controle de ácaro · Trator 02 MF 7719 + Pulverizador PJ-3030 36 m: 3,60 ha/h · R$ 50,00/ha. Pulverização: 123,4 → 117,7 h.')
+OK    · B2a sequência numa janela de 3 h: "sem conjunto" = espelho 25,8 ha; horas-conjunto 3,0 h
+OK    · B2b o conflito continua à vista com o motivo (precisam de 7,78 h para os 42 ha; a janela tem 3 h) e a área que não cabe é explicada
+OK    · B2c necessário = atendido + saldo na ocorrência ("Neste talhão") e em cada configuração ("Nesta configuração") = espelho
+OK    · B2d S5 na tela (50 % + 50 %, janela 3 h): necessário, atendido e saldo do espelho; motivo com as 8,75 h da demanda inteira
+OK    · B3 Enter na linha da atividade abre o formulário Rendimento ("Só esta atividade")
+OK    · B4 sem erros de JS
+RESULTADO: 9/9 OK

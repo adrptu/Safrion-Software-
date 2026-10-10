@@ -1,0 +1,14 @@
+OK    23 seleção ativa (SAF etapa 2, T1-A): 0 duplicatas, uma primária ("Aplicar plano" do lote, na barra da lista); a área fica com a nota e o avanço secundário, sem outra primária de aplicar; busca visível e "Limpar seleção" uma vez 
+OK    24 painel modal aberto (Aplicar plano): 0 duplicatas e uma primária no painel; aria-modal; 33 Tabs/Shift+Tab nunca saem do painel; ao fechar o foco volta a "Aplicar plano…" da área 
+OK    25 decisão de saída (PA · Incluir atividade): "Continuar editando" a única primária, "Descartar alterações" separado e Salvar/Cancelar fora enquanto a decisão está aberta; continuar editando devolve Salvar/Cancelar e o texto 
+OK    26 impedimento (PA etapa 3 sem rascunho) e consulta (SAF S2526 encerrada, etapa 6): 0 primária e 0 duplicata 
+OK    27 360×800, 768×1024 e zoom 200 % (SAF etapas 2 e 6, CMP etapa 2, PA, O.S.): 0 duplicata, no máximo uma primária e nenhuma seta 
+OK    28 v3.1 · T1-A selecionado → busca "P1" (campo segue focado) → soma P1 → abre o detalhe de P1 e fecha: "2 selecionados · 1 fora da vista…" antes e depois, busca "P1" mantida, etapa 2 
+OK    29 tipo por função: "Expandir/Recolher tudo" sem fundo e sem borda; filtro rápido escolhido (SAF), visão atual (O.S. Lista) e chip de fase escolhido sem o verde cheio da primária 
+OK    29b controle negativo da verificação: SAF etapa 3 limpa (0 duplicata, 1 primária, 0 avanço fora da área, 0 controle no indicador); com uma cópia do avanço injetada no cabeçalho a medida acusa duplicata, 2 primárias e avanço fora da área 
+     (informativo) duplicatas e primárias por estado [('SAF etapa 2 · seleção ativa', 0, ['Aplicar plano']), ('SAF etapa 2 · painel Aplicar plano', 0, ['Aplicar plano em 4 cultivos']), ('PA · decisão de saída aberta', 0, ['Continuar editando']), ('PA etapa 3 · nada a publicar', 0, []), ('SAF S2526 etapa 6 · consulta', 0, []), ('SAF#saf=S2627&etapa=2 @360x800', 0, ['Aplicar plano em 4 cultivos']), ('SAF#saf=S2627&etapa=6 @360x800', 0, ['Abrir Compra de insumos ›']), ('CMP#saf=S2627 @360x800', 0, ['Solicitar cotações ›']), ('PA @360x800', 0, []), ('OS @360x800', 0, ['Nova ordem']), ('SAF#saf=S2627&etapa=2 @768x1024', 0, ['Aplicar plano em 4 cultivos']), ('SAF#saf=S2627&etapa=6 @768x1024', 0, ['Abrir Compra de insumos ›']), ('CMP#saf=S2627 @768x1024', 0, ['Solicitar cotações ›']), ('PA @768x1024', 0, []), ('OS @768x1024', 0, ['Nova ordem']), ('SAF#saf=S2627&etapa=2 @zoom200', 0, ['Aplicar plano em 4 cultivos']), ('SAF#saf=S2627&etapa=6 @zoom2
+OK    31 v3.1 · 0 ação repetida nas 17 páginas do merge que seguem geradas; AG-01det: 1 link para a OS-0420 em repouso e, com ela encerrada, o elo volta a ser link sem repetir; MB-01 → MB-05#ordem nomeia a ordem e o MB-05 sem âncora não 
+OK    30 sem erro de JS (v3) 
+
+RESULTADO: 10 ok · 0 falhas (v3)
+rc=0

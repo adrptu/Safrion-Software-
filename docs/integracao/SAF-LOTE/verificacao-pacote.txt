@@ -1,0 +1,121 @@
+# verificacao do pacote C01b · base ef0d7b2 · candidata 64a3041 · 2026-10-09T23:57Z
+worktree temporaria em ef0d7b2: ef0d7b2
+git apply --check diff-ef0d7b2-64a3041.patch -> rc=0
+<sp-proto>/docs/integracao/SAF-LOTE/C01b/diff-ef0d7b2-64a3041.patch:2003: trailing whitespace.
+FALHA · SAF-C01 mensagem com o par antigo: a área física (40 ha) e o máximo que destrava (60 ha) · 
+<sp-proto>/docs/integracao/SAF-LOTE/C01b/diff-ef0d7b2-64a3041.patch:3094: trailing whitespace.
+OK    1 390 px · nenhuma etapa sobrepõe ou vaza (CMP, SAF, PA, EST, IR-02, MA-01) 
+<sp-proto>/docs/integracao/SAF-LOTE/C01b/diff-ef0d7b2-64a3041.patch:3095: trailing whitespace.
+OK    2 390 px · processo guiado com "Etapa i de n · Nome" e telas/seções com o nome da atual; lista recolhida; nenhuma seta ‹ › (UX-ACAO-UNICA) 
+<sp-proto>/docs/integracao/SAF-LOTE/C01b/diff-ef0d7b2-64a3041.patch:3096: trailing whitespace.
+OK    3 390 px · título inteiro, situação e comando principal na tela, sem rolagem horizontal da página (8 telas) 
+<sp-proto>/docs/integracao/SAF-LOTE/C01b/diff-ef0d7b2-64a3041.patch:3097: trailing whitespace.
+OK    4 390 px · tabelas em região rolável na horizontal; o conteúdo não rola de lado; nenhum texto ou comando cortado fora de região rolável nem texto sobre texto 
+warning: squelched 10 whitespace errors
+warning: 15 lines add whitespace errors.
+git apply diff-ef0d7b2-64a3041.patch -> rc=0
+caminhos conferidos: 45 · divergencias: 0
+arvore igual a 64a3041 nos caminhos tocados -> rc=0
+git apply -R (volta a base) -> rc=0; status: ''
+patch 0001-SAF-C01-corre-es-da-verifica-o.patch -> apply --check + apply rc=0
+<sp-proto>/docs/integracao/SAF-LOTE/C01b/patches/0002-SAF-C01-sa-das-brutas-da-verifica-o.patch:2073: trailing whitespace.
+FALHA · SAF-C01 mensagem com o par antigo: a área física (40 ha) e o máximo que destrava (60 ha) · 
+<sp-proto>/docs/integracao/SAF-LOTE/C01b/patches/0002-SAF-C01-sa-das-brutas-da-verifica-o.patch:3164: trailing whitespace.
+OK    1 390 px · nenhuma etapa sobrepõe ou vaza (CMP, SAF, PA, EST, IR-02, MA-01) 
+<sp-proto>/docs/integracao/SAF-LOTE/C01b/patches/0002-SAF-C01-sa-das-brutas-da-verifica-o.patch:3165: trailing whitespace.
+OK    2 390 px · processo guiado com "Etapa i de n · Nome" e telas/seções com o nome da atual; lista recolhida; nenhuma seta ‹ › (UX-ACAO-UNICA) 
+<sp-proto>/docs/integracao/SAF-LOTE/C01b/patches/0002-SAF-C01-sa-das-brutas-da-verifica-o.patch:3166: trailing whitespace.
+OK    3 390 px · título inteiro, situação e comando principal na tela, sem rolagem horizontal da página (8 telas) 
+<sp-proto>/docs/integracao/SAF-LOTE/C01b/patches/0002-SAF-C01-sa-das-brutas-da-verifica-o.patch:3167: trailing whitespace.
+OK    4 390 px · tabelas em região rolável na horizontal; o conteúdo não rola de lado; nenhum texto ou comando cortado fora de região rolável nem texto sobre texto 
+warning: squelched 10 whitespace errors
+warning: 15 lines add whitespace errors.
+patch 0002-SAF-C01-sa-das-brutas-da-verifica-o.patch -> apply --check + apply rc=0
+caminhos conferidos: 45 · divergencias: 0
+2 patches em sequencia: arvore igual a 64a3041 -> rc=0
+worktree temporaria removida -> rc=0
+RESULTADO C01b: OK
+
+# verificacao do pacote C02 · base 16d6734 · candidata 1671671 · 2026-10-09T23:57Z
+worktree temporaria em 16d6734: 16d6734
+git apply --check diff-16d6734-1671671.patch -> rc=0
+<sp-proto>/docs/integracao/SAF-LOTE/C02/diff-16d6734-1671671.patch:338: trailing whitespace.
+OK    1 SAF · faixa só informa: lista ordenada de 4 etapas sem botão/link/handler/Tab (0 controles), palavra do estado (concluída/etapa atual/pendente), cursor comum, clicar na etapa 3 não navega, nenhuma seta ‹ › e 45 Tabs nunca param na faixa 
+<sp-proto>/docs/integracao/SAF-LOTE/C02/diff-16d6734-1671671.patch:339: trailing whitespace.
+OK    2b SAF · a tabela de cultivos estica até a área de ações (≥ 300 px, todas as linhas cabem ou rolam dentro dela) e a área fica no pé do conteúdo (≤ 40 px do fim, altura ≤ 140 px), sem rolagem dupla 
+<sp-proto>/docs/integracao/SAF-LOTE/C02/diff-16d6734-1671671.patch:340: trailing whitespace.
+OK    2 SAF · no máximo uma primária e uma rota de avanço em cada estado (sem safra, falta de plano, etapas 3 e 4), sem cópia do mesmo comando; Nova safra secundária 
+<sp-proto>/docs/integracao/SAF-LOTE/C02/diff-16d6734-1671671.patch:341: trailing whitespace.
+OK    3 SAF · sem "Adicionar cultivo" (0); "Planejar ›" do T3 na tabela "Talhões e cultivos" abre o painel sem trocar de etapa; Esc pede confirmação e "Continuar editando" mantém o texto digitado 
+<sp-proto>/docs/integracao/SAF-LOTE/C02/diff-16d6734-1671671.patch:342: trailing whitespace.
+OK    4 SAF · falta de plano: nota com a causa e os talhões, "Aplicar plano em 4 cultivos" é a primária (resolver) e "Dimensionar operações ›" o único avanço, secundário; avançar leva à etapa 3 sem aplicar plano (4 sem plano antes e depois, na nota) 
+warning: squelched 37 whitespace errors
+warning: 42 lines add whitespace errors.
+git apply diff-16d6734-1671671.patch -> rc=0
+caminhos conferidos: 50 · divergencias: 0
+arvore igual a 1671671 nos caminhos tocados -> rc=0
+git apply -R (volta a base) -> rc=0; status: ''
+patch 0001-SAF-C02-capacidade-sim-trica-entre-safras-abertas-el.patch -> apply --check + apply rc=0
+patch 0002-SAF-C02-corre-es-da-verifica-o.patch -> apply --check + apply rc=0
+<sp-proto>/docs/integracao/SAF-LOTE/C02/patches/0003-SAF-C02-sa-das-brutas-da-verifica-o.patch:142: trailing whitespace.
+OK    1 SAF · faixa só informa: lista ordenada de 4 etapas sem botão/link/handler/Tab (0 controles), palavra do estado (concluída/etapa atual/pendente), cursor comum, clicar na etapa 3 não navega, nenhuma seta ‹ › e 45 Tabs nunca param na faixa 
+<sp-proto>/docs/integracao/SAF-LOTE/C02/patches/0003-SAF-C02-sa-das-brutas-da-verifica-o.patch:143: trailing whitespace.
+OK    2b SAF · a tabela de cultivos estica até a área de ações (≥ 300 px, todas as linhas cabem ou rolam dentro dela) e a área fica no pé do conteúdo (≤ 40 px do fim, altura ≤ 140 px), sem rolagem dupla 
+<sp-proto>/docs/integracao/SAF-LOTE/C02/patches/0003-SAF-C02-sa-das-brutas-da-verifica-o.patch:144: trailing whitespace.
+OK    2 SAF · no máximo uma primária e uma rota de avanço em cada estado (sem safra, falta de plano, etapas 3 e 4), sem cópia do mesmo comando; Nova safra secundária 
+<sp-proto>/docs/integracao/SAF-LOTE/C02/patches/0003-SAF-C02-sa-das-brutas-da-verifica-o.patch:145: trailing whitespace.
+OK    3 SAF · sem "Adicionar cultivo" (0); "Planejar ›" do T3 na tabela "Talhões e cultivos" abre o painel sem trocar de etapa; Esc pede confirmação e "Continuar editando" mantém o texto digitado 
+<sp-proto>/docs/integracao/SAF-LOTE/C02/patches/0003-SAF-C02-sa-das-brutas-da-verifica-o.patch:146: trailing whitespace.
+OK    4 SAF · falta de plano: nota com a causa e os talhões, "Aplicar plano em 4 cultivos" é a primária (resolver) e "Dimensionar operações ›" o único avanço, secundário; avançar leva à etapa 3 sem aplicar plano (4 sem plano antes e depois, na nota) 
+warning: squelched 37 whitespace errors
+warning: 42 lines add whitespace errors.
+patch 0003-SAF-C02-sa-das-brutas-da-verifica-o.patch -> apply --check + apply rc=0
+caminhos conferidos: 50 · divergencias: 0
+3 patches em sequencia: arvore igual a 1671671 -> rc=0
+worktree temporaria removida -> rc=0
+RESULTADO C02: OK
+
+# teste dos bundles num repositorio novo, so com o historico ate cdc185f (o que o origin/claude/prototipo-v44 tem) · 2026-10-09T23:58Z
+repositorio novo com base=cdc185f e 147 commits
+== PCM/pcm.bundle
+<sp-proto>/docs/integracao/PCM/pcm.bundle is okay
+The bundle contains this ref:
+ba035151dd66f28fa569bd221e6f85324dd8b20c refs/heads/claude/v44-pcm
+The bundle requires these 3 refs:
+99537ca8c442fce1e867a4117f7873baa60e6df5 
+ecc8b00eee9a87aa57f585660440b1ccc2abf4fd 
+cdc185f551a9513d72734b18e4a869f921917c00 
+The bundle uses this hash algorithm: sha1
+== SAF-LOTE/C01b/c01b.bundle
+<sp-proto>/docs/integracao/SAF-LOTE/C01b/c01b.bundle is okay
+The bundle contains this ref:
+64a30418d8e9a7eca8dd3d0884b51b608fad52d3 refs/heads/claude/v44-saf-c01
+The bundle requires this ref:
+ecc8b00eee9a87aa57f585660440b1ccc2abf4fd 
+The bundle uses this hash algorithm: sha1
+== git fetch pcm.bundle ba03515
+fatal: couldn't find remote ref ba03515
+rc=128 FETCH_HEAD=
+== git fetch pcm.bundle claude/v44-pcm:refs/heads/pcm
+From <sp-proto>/docs/integracao/PCM/pcm.bundle
+ * [new branch]      claude/v44-pcm -> pcm
+rc=0 pcm=ba03515
+fsck rc=0
+ 47 files changed, 3993 insertions(+), 1687 deletions(-)
+== git fetch c01b.bundle claude/v44-saf-c01:refs/heads/c01b
+From <sp-proto>/docs/integracao/SAF-LOTE/C01b/c01b.bundle
+ * [new branch]      claude/v44-saf-c01 -> c01b
+rc=0 c01b=64a3041
+64a3041 SAF-C01: saídas brutas da verificação
+d1b81f4 SAF-C01: correções da verificação
+ef0d7b2 SAF-C01: trava de soma com perene antiga (varredura por eventos)
+commit
+ 45 files changed, 4398 insertions(+), 93 deletions(-)
+== git fetch pcm.bundle ba035151dd66f28fa569bd221e6f85324dd8b20c (sha completo)
+From <sp-proto>/docs/integracao/PCM/pcm.bundle
+ * branch            ba035151dd66f28fa569bd221e6f85324dd8b20c -> FETCH_HEAD
+rc=0 FETCH_HEAD=ba03515
+== git fetch c01b.bundle 64a30418d8e9a7eca8dd3d0884b51b608fad52d3 (sha completo)
+From <sp-proto>/docs/integracao/SAF-LOTE/C01b/c01b.bundle
+ * branch            64a30418d8e9a7eca8dd3d0884b51b608fad52d3 -> FETCH_HEAD
+rc=0 FETCH_HEAD=64a3041
