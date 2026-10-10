@@ -14,7 +14,7 @@ Atualizado em 09/10/2026 por Claude, sobre a `main` `266a682`. PR aberto não si
 | Decisões delegadas (09/10) | Delegação do proprietário aos dois agentes (DEC-0910-03) e 30 linhas com acordo escrito do Codex (recibos 6091153950 e 6091443216), cada uma com o seu limite; 24 entradas aguardam a revisão do Codex. Nada é aprovação do proprietário; o PRD fica inalterado até a comparação final; implementação pendente | `docs/DECISIONS.md`; `docs/parceria/decisoes-delegadas-20261009.md` |
 | Repositório | Privado; PRs #2 a #31, #46 e #48 integrados | https://github.com/adrptu/Safrion-Software- |
 | Fundação | Domínio (decimal, unidades e saldo por lote); PostgreSQL/PostGIS com RLS e isolamento entre organizações; login OIDC com sessões; concessão e revogação de acesso; primeira interface de estoque e cadastros; imagens de homologação verificadas na CI | PRs #5, #7, #8, #9, #10 e #11 |
-| Homologação | Terraform, conexão ao banco por IP privado e fila de vínculo integrados e validados na CI, sem plan nem apply. **Nenhum ambiente hospedado**: provisionar depende de autorização concreta de custo e destino | PR #14; `infra/terraform/`; `docs/OPERACAO.md` |
+| Homologação | Terraform, conexão ao banco por IP privado e fila de vínculo integrados e validados na CI, sem plan nem apply. **Nenhum ambiente hospedado ainda**: desenvolvimento, QA e HML já estão autorizados com referência de custo (EXT-01, R-006); falta provisionar e comprovar o ambiente, dentro dessas autorizações concretas (plano revisado antes de cada apply; alerta de orçamento não é teto) | PR #14; `infra/terraform/`; `docs/OPERACAO.md`; EXT-01 em `docs/DECISIONS.md` |
 | Proteção da `main` | Ruleset `24154464` ativo, conferido na leitura do servidor (alterado em 29/09, 10:13 de Brasília): exclusão e force push bloqueados, pull request obrigatório e os 10 checks obrigatórios do app GitHub Actions, com branch atualizada antes do merge. Sem exceção de bypass | PR #15; `tools/github/` |
 | Produção | Não existe | — |
 
@@ -29,7 +29,7 @@ Atualizado em 09/10/2026 por Claude, sobre a `main` `266a682`. PR aberto não si
 ### Sequência
 
 1. Feito em 29/09: os 10 checks obrigatórios estão no ruleset existente, conferidos na leitura do servidor.
-2. Ensaio remoto da homologação, com autorização de custo e destino do proprietário: restauração do backup em instância isolada, logs sem dados pessoais, acesso e revogação.
+2. Ensaio remoto da homologação, dentro das autorizações concretas já recebidas (EXT-01, R-006): restauração do backup em instância isolada, logs sem dados pessoais, acesso e revogação.
 3. Antes do primeiro usuário externo: teste de todas as rotas com usuário de outra organização e inventário dos dados pessoais tratados.
 4. Feito em 09/10: PRD v3.11 vigente (#48). As decisões pendentes (73.12, 74.12, 75.8) continuam com o proprietário.
 5. Design system de 09/10: aplicar BOT, SEL, ETP e VIS no protótipo (componente comum, teste de conformidade e correção das telas depois da integração) e, ao passar para o software real, em `packages/ui`.
