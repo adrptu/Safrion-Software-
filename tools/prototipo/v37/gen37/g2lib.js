@@ -11,12 +11,22 @@ function g2unf(t,c){ const s=String(t==null?'':t).trim(); if(!c||!c.un||!/^[+−
 function g2fmt(v,c){ if(v===null||v===undefined||v==='') return '—'; if(c&&c.t==='date'&&/^\d{4}-\d{2}-\d{2}$/.test(String(v))){ const a=String(v).split('-'); return a[2]+'/'+a[1]+'/'+a[0]; } if(c&&c.zdash&&Number(v)===0) return '—'; if(c&&c.t==='num'){ const n=Number(v); if(isNaN(n)) return String(v); const t=(c.pre||'')+g2fmtn(n,c.d,c.dmin)+(c.u?' '+c.u:''); return c.un?g2unf(t,c):t; } return String(v); }
 function g2st(self,id){ return ((self.state.g2||{})[id])||{}; }
 function g2set(self,id,patch){ const all=Object.assign({},self.state.g2||{}); all[id]=Object.assign({},all[id]||{},patch); self.setState({g2:all});
-  if(G2KEEP[id]){ try{ const x=all[id]; sessionStorage.setItem(G2KEEP[id],JSON.stringify({f:x.f||{},q:x.q||'',so:x.so||null,qv:x.qv||''})); }catch(e){} } }
+  if(G2KEEP[id]) g2keepGrava(self,id,all[id]); }
+// grava o recorte guardado (g2keep): filtros, busca, ordenação, filtro rápido e, quando a tela pede (VISOES-1), Fazenda e Safra do topo
+function g2keepGrava(self,id,x){ if(!G2KEEP[id]) return; x=x||g2st(self,id); const o={f:x.f||{},q:x.q||'',so:x.so||null,qv:x.qv||''};
+  if(G2KEEP_TOPO[id]){ const s=self.state||{}; if(s.mf_faz) o.mf_faz=s.mf_faz; if(s.mf_saf) o.mf_saf=s.mf_saf; }
+  try{ sessionStorage.setItem(G2KEEP[id],JSON.stringify(o)); }catch(e){} }
 // recorte guardado na sessão (TABELAS-FOCO): filtros, busca e ordenação sobrevivem a abrir o detalhe e voltar; só a tabela que pede (g2keep)
-const G2KEEP={};
-function g2keep(self,id){ let key='g2:'+id; try{ key='g2:'+String(location.pathname).split('/').pop()+':'+id; }catch(e){} G2KEEP[id]=key;
-  if(self.__g2kept&&self.__g2kept[id]) return; (self.__g2kept=self.__g2kept||{})[id]=1;
-  try{ const o=JSON.parse(sessionStorage.getItem(key)||'null'); if(o&&typeof o==='object'){ const all=Object.assign({},self.state.g2||{}); all[id]=Object.assign({},all[id]||{},{f:o.f||{},q:o.q||'',so:o.so||null,qv:o.qv||''}); self.state.g2=all; } }catch(e){} }
+const G2KEEP={}, G2KEEP_TOPO={};
+// opt.topo (VISOES-1, §2.3): guarda também a Fazenda e a Safra do topo (mf_faz, mf_saf); opt.v: valores da tela já montados (o seletor do topo
+// mostra o valor restaurado no mesmo desenho). Na volta do detalhe, um talhão de outra fazenda não esvazia a lista com "filtro ativo".
+function g2keep(self,id,opt){ let key='g2:'+id; try{ key='g2:'+String(location.pathname).split('/').pop()+':'+id; }catch(e){} G2KEEP[id]=key;
+  if(opt&&opt.topo) G2KEEP_TOPO[id]=1;
+  if(self.__g2kept&&self.__g2kept[id]){ if(G2KEEP_TOPO[id]){ const s=self.state||{}, k=(s.mf_faz||'')+'|'+(s.mf_saf||''); if(self.__g2keptTopo!==k){ self.__g2keptTopo=k; g2keepGrava(self,id); } } return; }
+  (self.__g2kept=self.__g2kept||{})[id]=1;
+  try{ const o=JSON.parse(sessionStorage.getItem(key)||'null'); if(o&&typeof o==='object'){ const all=Object.assign({},self.state.g2||{}); all[id]=Object.assign({},all[id]||{},{f:o.f||{},q:o.q||'',so:o.so||null,qv:o.qv||''}); self.state.g2=all;
+    if(G2KEEP_TOPO[id]){ ['mf_faz','mf_saf'].forEach(c=>{ if(typeof o[c]==='string'&&o[c]&&self.state[c]===undefined){ self.state[c]=o[c]; if(opt&&opt.v) opt.v[c]=o[c]; } }); } } }catch(e){}
+  if(G2KEEP_TOPO[id]){ const s=self.state||{}; self.__g2keptTopo=(s.mf_faz||'')+'|'+(s.mf_saf||''); } }
 function g2rows(self,sp){ const st=g2st(self,sp.id); return st.rows||sp.rows; }
 function g2find(list,id){ for(const r of list){ if(r.id===id) return r; if(r.kids){ const k=g2find(r.kids,id); if(k) return k; } } return null; }
 function g2text(r,c){ if(r.s&&r.s[c.k]!==undefined&&r.s[c.k]!==null) return (c&&c.un)?g2unf(r.s[c.k],c):String(r.s[c.k]); if(r.v&&r.v[c.k]!==undefined&&r.v[c.k]!==null) return g2fmt(r.v[c.k],c); return ''; }
@@ -708,4 +718,159 @@ function g2ttTira(n){ if(G2D.tt&&n&&G2D.tt.contains(n)) return; g2ttVolta();
       const mv=b.closest('.g2ind'); g2flash(mv&&mv.querySelector('.g2motivo'),'Indisponível: '+m); } },true);   /* o motivo visível junto do botão (acao_motivo) é realçado */
   const repos=()=>{ if(G2D.el) g2dicaPos(); }; window.addEventListener('resize',()=>{ if(G2D.el) g2dicaFecha(); }); document.addEventListener('scroll',repos,true);
   try{ new MutationObserver(()=>{ if(G2D.el&&!g2vis(G2D.el)) g2dicaFecha(); }).observe(document.documentElement,{childList:true,subtree:true}); }catch(e){}
+})();
+// ===== VISOES-1 · seletor de visões das listagens (pedido do proprietário, 10/10/2026: "a visão nasce do atributo dominante") =====
+// A lista de visões válidas vem pronta do build (visoes.py → engine.visoes → G2_VISOES); aqui só o comportamento, sem recalcular regra.
+// Estado na grade (self.state.g2[gid].visao); endereço ?view=<k> gravado em toda escolha explícita, a Lista também (revisão Codex
+// 6093255041, item 1: sem o parâmetro vale a preferência só na entrada sem escolha); preferência por perfil × entidade no localStorage
+// (safrion.pref.visao:<perfil>:<entidade>, prefixo que o TF02 ignora); precedência URL › preferência › Lista. Trocar de visão nunca é ação
+// de negócio (não grava no cenário). Trocar o perfil não muda a visão aberta; a preferência do novo perfil vale na próxima entrada sem ?view.
+const G2_VISAO_PREF='safrion.pref.visao:'; const G2_VISAO_MEM={};
+function g2visaoValida(k,validas){ return typeof k==='string'&&/^[a-z]+$/.test(k)&&(validas||[]).indexOf(k)>=0; }
+// precedência (pura): ?view válida › preferência válida › a primeira das válidas (Lista); valor fora das válidas ou fora de ^[a-z]+$: aviso
+function g2visaoInicial(search,pref,validas){ let q=null; try{ q=new URLSearchParams(String(search||'')).get('view'); }catch(e){ q=null; }
+  if(q!==null&&g2visaoValida(q,validas)) return {k:q,fonte:'url',aviso:false};
+  const lista=(validas&&validas.length)?validas[0]:'lista', p=g2visaoValida(pref,validas)?pref:'';
+  return {k:p||lista,fonte:p?'pref':'lista',aviso:q!==null}; }
+// aviso do valor inválido no endereço: nunca repete o valor cru (só o nome da visão aberta)
+function g2visaoAviso(ini,nome){ if(!ini||!ini.aviso) return '';
+  return 'A visão pedida no endereço não existe nesta lista: aberta em '+(ini.fonte==='pref'?(nome||ini.k)+' (sua última escolha)':(nome||'Lista'))+'.'; }
+// endereço com a visão (puro): k grava ?view=<k>; k vazio tira o parâmetro; o hash e os outros parâmetros ficam
+function g2visaoUrl(pathname,search,hash,k){ let p; try{ p=new URLSearchParams(String(search||'')); }catch(e){ p=new URLSearchParams(''); }
+  if(k) p.set('view',k); else p.delete('view'); const q=p.toString(); return String(pathname||'')+(q?'?'+q:'')+String(hash||''); }
+// teclado da barra horizontal (pura): ← → movem o foco com volta, Home e End vão às pontas; ↑ ↓ não movem (no "mais", ↓ abre o menu).
+// Nenhuma seta ativa: ativar é Enter ou Espaço, nativos do botão (devolve nulo para elas e para as outras teclas)
+function g2visaoTecla(i,tecla,n,noMais){ if(!(n>0)||!(i>=0)||i>=n) return null;
+  if(tecla==='ArrowRight') return {foco:(i+1)%n}; if(tecla==='ArrowLeft') return {foco:(i-1+n)%n};
+  if(tecla==='Home') return {foco:0}; if(tecla==='End') return {foco:n-1};
+  if(tecla==='ArrowDown'&&noMais) return {abre:true};
+  return null; }
+function g2visaoChave(perfil,ent){ return G2_VISAO_PREF+String(perfil||'')+':'+String(ent||''); }
+// preferência: leitura e escrita com try/catch e cópia em memória (janela privada ou armazenamento bloqueado abre a Lista, sem erro)
+function g2visaoPrefLer(chave,st){ let v=null; try{ const s=st||(typeof localStorage!=='undefined'?localStorage:null); v=s?s.getItem(chave):null; }catch(e){ v=null; }
+  return (v!==null&&v!==undefined)?v:(G2_VISAO_MEM[chave]||null); }
+function g2visaoPrefGrava(chave,k,st){ G2_VISAO_MEM[chave]=k; try{ const s=st||(typeof localStorage!=='undefined'?localStorage:null); if(s) s.setItem(chave,k); }catch(e){} }
+// celular (pura): até 3 visões, todas na barra; 4 ou mais, as 3 primeiras e "mais" com as demais; a ativa dentro do "mais" marca o "mais"
+function g2visoesCelular(validas,ativa){ const v=(validas||[]).slice(); if(v.length<2) return {barra:[],mais:[],maisAtivo:false};
+  if(v.length<=3) return {barra:v,mais:[],maisAtivo:false}; const mais=v.slice(3); return {barra:v.slice(0,3),mais,maisAtivo:mais.indexOf(ativa)>=0}; }
+// volta do detalhe (pura; revisão Codex 6093255041, item 2): "back" só com entrada de histórico comprovada (a marca que a página de detalhe
+// gravou ao chegar da lista na mesma aba e history.length > 1); senão o destino canônico (a lista na visão em que estava, ?view); sem contexto
+// válido para o mesmo arquivo, o link segue como está
+function g2voltaValido(c){ return !!c&&typeof c==='object'&&/^[A-Za-z0-9][A-Za-z0-9_-]*(\.[A-Za-z0-9_-]+)*\.html$/.test(String(c.arq||''))&&/^[a-z]+$/.test(String(c.ent||''))
+  &&/^[a-z]+$/.test(String(c.view||''))&&/^[A-Za-z0-9_]+$/.test(String(c.gid||''))&&/^[a-z0-9]+$/.test(String(c.nt||'')); }
+function g2voltaDecide(c,arqLink,hist){ if(!g2voltaValido(c)||arqLink!==c.arq) return 'link';
+  return (hist&&hist.len>1&&hist.marca===c.nt)?'back':'canonico'; }
+function g2voltaUrl(c){ return g2visaoUrl(c.arq,c.q||'','',c.view); }
+
+function g2visaoSpec(gid){ return (typeof G2_VISOES!=='undefined'&&G2_VISOES&&G2_VISOES[gid])||null; }
+function g2arq(){ try{ return String(location.pathname).split('/').pop(); }catch(e){ return ''; } }
+// visão aberta da grade; na primeira leitura da tela aplica a precedência; o aviso do valor inválido sai uma vez e o endereço perde o valor
+// inválido (o F5 não repete o aviso)
+function g2visao(self,gid){ const sp=g2visaoSpec(gid); if(!sp) return 'lista'; const st=g2st(self,gid); if(st.visao&&sp.validas.indexOf(st.visao)>=0) return st.visao;
+  let search=''; try{ search=location.search; }catch(e){}
+  const ini=g2visaoInicial(search,g2visaoPrefLer(g2visaoChave(g2perfil().k,sp.ent)),sp.validas);
+  const all=Object.assign({},self.state.g2||{}); all[gid]=Object.assign({},all[gid]||{},{visao:ini.k}); self.state.g2=all;
+  if(ini.aviso){ try{ history.replaceState(history.state,'',g2visaoUrl(location.pathname,location.search,location.hash,'')); }catch(e){}
+    const m=g2visaoAviso(ini,(sp.nomes||{})[ini.k]); setTimeout(()=>self.setState({g2toast:m}),0); }
+  g2visaoLiga(self,gid); return ini.k; }
+// rolagem por visão: casca, conteúdo e as caixas que rolam dentro do corpo das visões
+function g2rolCaixas(gid){ return [...document.querySelectorAll('main .g2rola,main .rola,main [style*="overflow-x: auto"],main [style*="overflow: auto"]')].filter(e=>g2vis(e)&&!e.closest('aside[role=dialog],[role=dialog]')); }
+function g2rolLe(gid){ if(typeof document==='undefined') return null; const col=document.querySelector('.ml-tog+div'), m=document.querySelector('main[data-scroll]')||document.querySelector('main');
+  return {col:col?col.scrollTop:0,main:m?m.scrollTop:0,cx:g2rolCaixas(gid).map(e=>[e.scrollTop,e.scrollLeft])}; }
+function g2rolPoe(r,gid){ if(!r||typeof document==='undefined') return; const col=document.querySelector('.ml-tog+div'), m=document.querySelector('main[data-scroll]')||document.querySelector('main');
+  if(col) col.scrollTop=r.col||0; if(m) m.scrollTop=r.main||0; g2rolCaixas(gid).forEach((e,i)=>{ const x=(r.cx||[])[i]; if(x){ e.scrollTop=x[0]; e.scrollLeft=x[1]; } }); }
+// trocar de visão: grava o endereço (?view, replaceState: o Voltar sai da tela, não percorre visões) e, só na escolha pelo seletor, a preferência;
+// "Ver em lista" de um estado (origem fallback) não grava a preferência. A rolagem da visão de saída fica guardada e a da nova volta.
+function g2visaoIr(self,gid,k,origem){ const sp=g2visaoSpec(gid); if(!sp||sp.validas.indexOf(k)<0) return; const ant=g2visao(self,gid);
+  if(k!==ant){ (self.__g2rol=self.__g2rol||{})[gid+':'+ant]=g2rolLe(gid); }
+  if(origem==='seletor') g2visaoPrefGrava(g2visaoChave(g2perfil().k,sp.ent),k);
+  try{ history.replaceState(history.state,'',g2visaoUrl(location.pathname,location.search,location.hash,k)); }catch(e){}
+  g2set(self,gid,{visao:k,vf:null,vm:false});
+  setTimeout(()=>{ try{ if(k!==ant){ const r=(self.__g2rol||{})[gid+':'+k]; if(r) g2rolPoe(r,gid); }
+    if(origem==='seletor'){ const bar=document.querySelector('[data-visoes-gid="'+gid+'"]'); if(!bar) return;
+      const b=[...bar.querySelectorAll('[data-visao="'+k+'"]')].find(g2vis)||bar.querySelector('[data-visao-mais]');
+      if(b&&g2vis(b)&&document.activeElement!==b) b.focus({preventScroll:true}); } }catch(e){} },0); }
+// a visão não montou: o erro fica no estado da visão (§2.8) e o painel some; "Ver em lista" leva à Lista, que não depende dela.
+// window.__g2visaoFalha = '<k>' simula a falha (teste), como o ?falha=1 do AGROFIT
+function g2visaoTenta(self,gid,k,fn){ const e=(self.__g2vErr=self.__g2vErr||{}); const m=(e[gid]=e[gid]||{}); delete m[k];
+  try{ if(typeof window!=='undefined'&&window.__g2visaoFalha===k) throw new Error('falha simulada pelo teste'); fn(); return true; }
+  catch(er){ m[k]=String((er&&er.message)||er).replace(/\.$/,'').slice(0,160); return false; } }
+function g2visaoMenuFoco(gid){ const m=document.querySelector('[data-visoes-menu="'+gid+'"]'); if(!m) return;
+  const its=[...m.querySelectorAll('[role=menuitemradio]')]; const c=its.find(x=>x.getAttribute('aria-checked')==='true')||its[0]; if(c) c.focus(); }
+function g2visaoTeclaBarra(self,gid,e){ const bar=e.currentTarget, t=e.target; if(!bar||!t||!t.matches||!t.matches('[data-visao],[data-visao-mais]')) return;
+  const bs=[...bar.querySelectorAll('[data-visao],[data-visao-mais]')].filter(g2vis); const i=bs.indexOf(t);
+  const r=g2visaoTecla(i,e.key,bs.length,t.hasAttribute('data-visao-mais')); if(!r) return; e.preventDefault();
+  if(r.abre){ g2set(self,gid,{vm:true,vf:'__mais'}); setTimeout(()=>g2visaoMenuFoco(gid),0); return; }
+  const b=bs[r.foco]; b.focus(); g2set(self,gid,{vf:b.getAttribute('data-visao')||'__mais'}); }
+function g2visaoTeclaMenu(self,gid,e){ const m=e.currentTarget; const its=[...m.querySelectorAll('[role=menuitemradio]')]; const i=its.indexOf(e.target);
+  if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); g2set(self,gid,{vm:false});
+    setTimeout(()=>{ const b=document.querySelector('[data-visoes-gid="'+gid+'"] [data-visao-mais]'); if(b) b.focus(); },0); return; }
+  if(e.key==='Tab'){ g2set(self,gid,{vm:false}); return; }
+  let j=null; if(e.key==='ArrowDown') j=(i+1)%its.length; else if(e.key==='ArrowUp') j=(i-1+its.length)%its.length; else if(e.key==='Home') j=0; else if(e.key==='End') j=its.length-1;
+  if(j!==null&&its[j]){ e.preventDefault(); its[j].focus(); } }
+// buracos do componente, depois do EXTRAVALS da tela (o estado da visão usa o recorte que a tela calculou)
+function g2visoesFim(self,v){ if(typeof G2_VISOES==='undefined'||!G2_VISOES) return;
+  for(const gid in G2_VISOES){ const sp=G2_VISOES[gid]; const k=g2visao(self,gid), st=g2st(self,gid), err=((self.__g2vErr||{})[gid])||{};
+    const cel=g2visoesCelular(sp.validas,k), ir=(x)=>()=>g2visaoIr(self,gid,x,'seletor');
+    sp.validas.forEach(x=>{ v[gid+'_vb_'+x+'_p']=x===k?'true':'false'; v[gid+'_vb_'+x+'_t']=((st.vf?st.vf===x:x===k))?'0':'-1'; v[gid+'_vb_'+x+'_go']=ir(x);
+      v[gid+'_vmi_'+x+'_c']=x===k?'true':'false'; v[gid+'_vmi_'+x+'_go']=ir(x); });
+    (sp.paineis||[]).forEach(pn=>{ v[gid+'_vp_'+pn[0]]=pn.indexOf(k)>=0&&!err[k]; });
+    const maisFoc=st.vf?st.vf==='__mais':cel.maisAtivo;
+    v[gid+'_vm_t']=maisFoc?'0':'-1'; v[gid+'_vm_on']=cel.maisAtivo?'true':'false'; v[gid+'_vm_x']=st.vm?'true':'false'; v[gid+'_vm_open']=!!st.vm;
+    v[gid+'_vm_lab']='Mais visões'+(cel.maisAtivo?' (atual: '+String((sp.nomes||{})[k]||k).toLowerCase()+')':'');
+    v[gid+'_vm_go']=()=>{ const ab=!g2st(self,gid).vm; g2set(self,gid,{vm:ab}); if(ab) setTimeout(()=>g2visaoMenuFoco(gid),0); };
+    v[gid+'_vk']=(e)=>g2visaoTeclaBarra(self,gid,e); v[gid+'_vmk']=(e)=>g2visaoTeclaMenu(self,gid,e);
+    // estado em toda visão (§2.8): o erro da visão vem primeiro (a Lista continua disponível); depois o que a tela informa
+    let es=null;
+    if(err[k]) es={tipo:'erro',texto:'Não foi possível mostrar a visão '+((sp.nomes||{})[k]||k)+': '+err[k]+'.',acao:'Ver em lista',fn:()=>g2visaoIr(self,gid,sp.validas[0],'fallback')};
+    else if(self.g2visaoEstado) es=self.g2visaoEstado(gid,k)||null;
+    v[gid+'_vest_on']=!!es; v[gid+'_vest_t']=es?es.texto:''; v[gid+'_vest_tipo']=es?es.tipo:''; v[gid+'_vest_a']=(es&&es.acao)||'';
+    v[gid+'_vest_tema']=!!(es&&es.acao&&es.fn); v[gid+'_vest_go']=(es&&es.fn)||(()=>{}); } }
+// ---- volta do detalhe (§2.11 e revisão Codex 6093255041, item 2): contexto de retorno canônico na sessão, validado antes de usar ----
+const G2_VOLTA='g2volta', G2_VOLTA_REST='g2volta:restaura';
+function g2voltaLer(){ try{ const c=JSON.parse(sessionStorage.getItem(G2_VOLTA)||'null'); return g2voltaValido(c)?c:null; }catch(e){ return null; } }
+function g2voltaNt(){ return (Math.random().toString(36).slice(2,10)+Date.now().toString(36)).replace(/[^a-z0-9]/g,''); }
+// ao sair da lista (qualquer link para outra tela, também em nova aba): visão, parâmetros, rolagem da visão e o registro aberto (foco);
+// a entrada da lista no histórico ganha a marca própria (g2volta)
+function g2voltaGuarda(self,gid,dest){ const sp=g2visaoSpec(gid); if(!sp) return; const k=g2visao(self,gid), arq=g2arq(), nt=g2voltaNt();
+  let q=''; try{ const p=new URLSearchParams(location.search); p.delete('view'); q=p.toString(); }catch(e){}
+  const c={arq,ent:sp.ent,gid,view:k,q,foco:String((self.g2visaoFoco&&self.g2visaoFoco(gid))||''),nt,t:Date.now(),dest:String(dest||'')};
+  try{ sessionStorage.setItem('g2rol:'+arq+':'+gid+':'+k,JSON.stringify(g2rolLe(gid))); sessionStorage.setItem(G2_VOLTA,JSON.stringify(c)); }catch(e){}
+  try{ history.replaceState(Object.assign({},history.state||{},{g2volta:nt}),'',location.href); }catch(e){} }
+// na lista: volta comprovada (marca da sessão gravada pelo "Voltar" ou navegação de volta com a marca desta entrada) restaura rolagem e foco
+function g2visaoLiga(self,gid){ if(typeof window==='undefined'||window.__g2visaoTela) return; window.__g2visaoTela={self,gid};
+  let nav=''; try{ nav=((performance.getEntriesByType('navigation')||[])[0]||{}).type||''; }catch(e){}
+  const c=g2voltaLer(); let r=null; try{ r=JSON.parse(sessionStorage.getItem(G2_VOLTA_REST)||'null'); }catch(e){}
+  const arq=g2arq(), marca=(history.state||{}).g2volta;
+  const volta=!!c&&c.arq===arq&&c.gid===gid&&((!!r&&r.nt===c.nt&&Date.now()-(r.t||0)<60000)||(nav==='back_forward'&&marca===c.nt));
+  try{ sessionStorage.removeItem(G2_VOLTA_REST); }catch(e){}
+  if(!volta) return;
+  const poe=()=>{ try{ const k=g2visao(self,gid); let ro=null; try{ ro=JSON.parse(sessionStorage.getItem('g2rol:'+arq+':'+gid+':'+k)||'null'); }catch(e){} if(ro) g2rolPoe(ro,gid);
+    if(c.foco){ const el=[...document.querySelectorAll('[data-g2g="'+gid+'"] [role=row][data-rid]')].find(x=>g2vis(x)&&String(x.getAttribute('data-rid')).split('@')[0]===c.foco)
+        ||[...document.querySelectorAll('[role=list] [role=button][aria-label]')].find(x=>g2vis(x)&&String(x.getAttribute('aria-label')).indexOf('Abrir '+c.foco+' ')===0);
+      if(el) el.focus({preventScroll:true}); } }catch(e){} };
+  setTimeout(poe,80); setTimeout(poe,450); }
+(function g2visaoGlob(){ if(typeof document==='undefined'||window.__g2visaoGlob) return; window.__g2visaoGlob=1;
+  // menu "mais" aberto: tocar fora fecha
+  document.addEventListener('pointerdown',(e)=>{ const t=window.__g2visaoTela; if(!t||!g2st(t.self,t.gid).vm) return;
+    if(!(e.target&&e.target.closest&&e.target.closest('.g2visoes-w'))) g2set(t.self,t.gid,{vm:false}); },true);
+  // página de detalhe que chegou da lista na mesma aba (link, referrer da lista, histórico com entrada anterior, contexto recém-gravado):
+  // a entrada do detalhe ganha a marca que comprova o histórico (nova aba: history.length = 1, sem marca)
+  try{ const c=g2voltaLer(), arq=g2arq(); if(c&&c.dest===arq&&c.arq!==arq){ let nav=''; try{ nav=((performance.getEntriesByType('navigation')||[])[0]||{}).type||''; }catch(e){}
+      let ref=''; try{ const u=new URL(document.referrer); ref=u.origin===location.origin?u.pathname.split('/').pop():''; }catch(e){}
+      if(nav==='navigate'&&ref===c.arq&&history.length>1&&Date.now()-(c.t||0)<20000&&!((history.state||{}).g2voltaDe))
+        history.replaceState(Object.assign({},history.state||{},{g2voltaDe:c.nt}),'',location.href); } }catch(e){}
+  window.addEventListener('pageshow',(e)=>{ if(e.persisted){ try{ sessionStorage.removeItem(G2_VOLTA_REST); }catch(er){} } });
+  const lnk=(e)=>{ const a=e.target&&e.target.closest&&e.target.closest('a[href]'); if(!a) return null; let u=null; try{ u=new URL(a.getAttribute('href'),location.href); }catch(er){ return null; }
+    return u.origin===location.origin?{a,u,dest:u.pathname.split('/').pop()}:null; };
+  // sair da lista por um link (clique, Ctrl/meio para nova aba): guarda o contexto de retorno
+  const sai=(e)=>{ const t=window.__g2visaoTela; if(!t) return; const l=lnk(e); if(!l||l.dest===g2arq()) return; g2voltaGuarda(t.self,t.gid,l.dest); };
+  document.addEventListener('click',sai,true); document.addEventListener('auxclick',sai,true);
+  // "Voltar" (seta da página de detalhe) e a trilha do cabeçalho: história comprovada → history.back(); senão a lista na visão em que estava
+  document.addEventListener('click',(e)=>{ if(e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||window.__g2visaoTela) return;
+    const l=lnk(e); if(!l) return; const a=l.a; if(!(a.getAttribute('aria-label')==='Voltar'||(a.closest('header')&&!a.closest('.menu-lat')))) return;
+    const c=g2voltaLer(); const d=g2voltaDecide(c,l.dest,{len:history.length,marca:(history.state||{}).g2voltaDe}); if(d==='link') return;
+    try{ sessionStorage.setItem(G2_VOLTA_REST,JSON.stringify({nt:c.nt,t:Date.now()})); }catch(er){}
+    if(d==='back'){ e.preventDefault(); history.back(); return; }
+    a.setAttribute('href',g2voltaUrl(c)); },true);
 })();

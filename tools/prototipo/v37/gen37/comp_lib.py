@@ -140,3 +140,20 @@ def resumo(m):
         if not m.get('painelPrimOk'): p.append('ação do painel inalcançável')
     if m.get('escalaGlobal'): p.append('escala global')
     return p
+
+# ---------- VISOES-1: troca de visão pelo seletor de ícones ----------
+# Auxiliar único dos testes (o botão não tem texto visível: o alvo é o atributo data-visao, nunca o texto ou o rótulo). No estreito (até 640 px),
+# a visão fora da barra fica no "mais": o primeiro passo abre o menu e devolve 'mais'; troca_visao() escolhe o item no menu (data-visao-menu).
+VISAO = r"""((k,raiz)=>{ const R=raiz?document.querySelector(raiz):document; if(!R) return 'SEM RAIZ '+raiz; const vis=e=>!!e&&e.getClientRects().length>0;
+  const b=[...R.querySelectorAll('[data-visao="'+k+'"]')].find(vis); if(b){ b.click(); return 'ok'; }
+  const m=[...R.querySelectorAll('[data-visao-mais]')].find(vis)||[...document.querySelectorAll('[data-visao-mais]')].find(vis); if(!m) return 'NÃO ACHEI visão '+k;
+  if(m.getAttribute('aria-expanded')!=='true') m.click(); return 'mais'; })"""
+VISAO_MENU = r"""((k)=>{ const i=[...document.querySelectorAll('[data-visao-menu="'+k+'"]')].find(e=>e.getClientRects().length>0); if(!i) return 'NÃO ACHEI visão '+k+' no mais'; i.click(); return 'ok'; })"""
+def visao(k, raiz=None):
+    """Expressão JS que aciona a visão k pelo seletor (data-visao), opcionalmente dentro de raiz (ex.: '[aria-label="Visão das ordens"]')."""
+    return f"({VISAO})({json.dumps(k)},{json.dumps(raiz)})"
+def troca_visao(J, k, raiz=None, espera=.45):
+    """Aciona a visão k e espera o redesenho; no estreito escolhe pelo menu "mais" quando o botão não está na barra. Devolve 'ok' ou o motivo."""
+    r = J(visao(k, raiz)); time.sleep(.3)
+    if r == 'mais': r = J(f"({VISAO_MENU})({json.dumps(k)})")
+    time.sleep(espera); return r

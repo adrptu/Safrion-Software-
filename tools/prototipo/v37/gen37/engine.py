@@ -57,6 +57,15 @@ ICONS.update({'Indicadores':ICONS['Controle'],'PCE':ICONS['PCP'],'Estoque':ICONS
  'satelite':'M7.69 11.51L11.51 7.69L15.61 11.79L11.79 15.61zM1.89 17.44L5.92 13.41L10.59 18.08L6.56 22.11zM13.41 5.92L17.44 1.89L22.11 6.56L18.08 10.59zM8.25 15.75L10.09 13.91M13.91 10.09L15.75 8.25M13.7 13.7L14.97 14.97M13.98 17.66A3.4 3.4 0 0 0 17.66 13.98',
  'monitoramento':'M3.5 20.5C3.5 14.2 6.8 10.8 12.6 10.6C12.6 16.6 9.4 20.5 3.5 20.5zM3.5 20.5L9.2 14.8M20.2 9.2a5.2 5.2 0 1 1-10.4 0a5.2 5.2 0 0 1 10.4 0zM18.8 12.9L22 16.1',
 })
+# VISOES-1 (10/10/2026): ícones do seletor de visões, Lucide 1.45.0 (ISC; aviso em LICENSES/lucide-ISC.txt, que também traz o MIT do Feather,
+# origem dos ícones acima). rect/circle convertidos para o caminho único de icon(); só entram os que alguma tela usa.
+ICONS.update({
+ 'v_lista':'M3 5h.01M3 12h.01M3 19h.01M8 5h13M8 12h13M8 19h13',   # lucide list
+ 'v_agrupada':'M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2zM21 9H3M21 15H3',   # lucide rows-3
+ 'v_kanban':'M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2zM8 7v7M12 7v4M16 7v9',   # lucide square-kanban
+ 'v_carga':'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M16 3.128a4 4 0 0 1 0 7.744M22 21v-2a4 4 0 0 0-3-3.87M5 7a4 4 0 1 0 8 0a4 4 0 1 0 -8 0',   # lucide users
+ 'v_mais':'M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0M18 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0M4 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0',   # lucide ellipsis
+})
 def icon(name,size=16,color='currentColor'):
     if name=='Mapa': name='map' if 'map' in ICONS else 'Início'
     d=ICONS.get(name,'M4 4h16v16H4z')
@@ -978,11 +987,11 @@ def add(f,t,W,H,r):
 # exclusão confirmada e edição pela linha em formulário lateral) — substitui table()
 # =====================================================================================
 from html.parser import HTMLParser as _HP
-GRIDS=[]; NAVSPEC=[]
+GRIDS=[]; NAVSPEC=[]; VISOES_SPEC={}
 G2LIB=open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'g2lib.js')).read()
 _old_reset=_reset_screen
 def _reset_screen(f):
-    _old_reset(f); GRIDS.clear(); NAVSPEC.clear()
+    _old_reset(f); GRIDS.clear(); NAVSPEC.clear(); VISOES_SPEC.clear()
     try: EXTRAJS[0]=''
     except NameError: pass
 # =====================================================================================
@@ -1196,6 +1205,70 @@ DICA_CSS=(
     ".g2motivo{display:block;font-size:12.5px;font-weight:600;line-height:1.35;color:#65736A;text-align:right;white-space:normal;overflow-wrap:anywhere;border-radius:6px}"
     "@media (max-width:640px){.g2ind{align-items:flex-start;max-width:100%}.g2motivo{text-align:left}}"
 )
+# =====================================================================================
+# VISOES-1 (proprietário, 10/10/2026): seletor de visões por ícone no cabeçalho da listagem (visoes()). Trilho e raio da DS-36; 32 × 32 px
+# no computador e 44 × 44 com ponteiro grosso ou até 640 px; inativo em cor.texto.secundario corrigido (#5B6660, PRD 74.2: #65736A dá 4,38:1 no trilho); ativo tonal (fundo #E4F3E9, ícone #1E6B47, borda e
+# barra interna de 2 px como a etapa atual) com aria-pressed, nunca o verde cheio da primária (BOT-01); hover verde da DS (VIS-02) vem do
+# INTERACAO_CSS; dica no foco e no hover pelo g2dica (aria-label, sem texto visível). Até 640 px: as 3 primeiras e "mais" (menu com nome).
+# =====================================================================================
+DS_VISOES=dict(trilho='#EEF1EE',inativo='#5B6660',ativo_fundo='#E4F3E9',ativo_icone='#1E6B47',ativo_barra='#1E7A4C',alvo='32px',alvo_toque='44px')
+VISOES_CSS=(
+    ".g2visoes-w{position:relative;display:inline-flex;max-width:100%}"
+    f".g2visoes{{display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:999px;background:{DS_VISOES['trilho']}}}"
+    f".g2visoes>button{{display:inline-flex;align-items:center;justify-content:center;width:{DS_VISOES['alvo']};height:{DS_VISOES['alvo']};padding:0;margin:0;"
+    f"border:1px solid transparent;border-radius:999px;background:transparent;color:{DS_VISOES['inativo']};cursor:pointer;box-sizing:border-box;font-family:inherit;flex-shrink:0}}"
+    ".g2visoes>button svg{width:16px;height:16px}"
+    f".g2visoes>button[aria-pressed=true],.g2visoes>button[data-ativo=true]{{background:{DS_VISOES['ativo_fundo']};color:{DS_VISOES['ativo_icone']};"
+    f"border-color:{DS_VISOES['ativo_barra']};box-shadow:inset 0 -2px 0 {DS_VISOES['ativo_barra']}}}"
+    ".g2visoes>.g2vmais{display:none}"
+    "@media (max-width:640px){.g2visoes>button[data-i]:not([data-i=\"0\"]):not([data-i=\"1\"]):not([data-i=\"2\"]){display:none}.g2visoes>.g2vmais{display:inline-flex}}"
+    f"@media (pointer:coarse),(max-width:640px){{.g2visoes>button{{width:{DS_VISOES['alvo_toque']};height:{DS_VISOES['alvo_toque']}}}.g2visoes>button svg{{width:20px;height:20px}}}}"
+    ".g2vmenu{position:absolute;top:calc(100% + 6px);right:0;z-index:60;min-width:220px;max-width:calc(100vw - 32px);box-sizing:border-box;background:#FFFFFF;"
+    "border:1px solid #E4E9E5;border-radius:12px;box-shadow:0 14px 34px -14px rgba(21,32,26,.4);padding:6px;display:flex;flex-direction:column;gap:2px}"
+    ".g2vmenu>button{display:flex;align-items:center;gap:10px;min-height:44px;padding:8px 12px;border:0;border-radius:8px;background:transparent;color:#15201A;"
+    "font-family:inherit;font-size:14px;font-weight:600;text-align:left;cursor:pointer;white-space:nowrap}"
+    f".g2vmenu>button[aria-checked=true]{{background:{DS_VISOES['ativo_fundo']};color:{DS_VISOES['ativo_icone']};box-shadow:inset 0 -2px 0 {DS_VISOES['ativo_barra']}}}"
+    # estado em toda visão (§2.8): uma frase e a ação nomeada, no topo do painel
+    ".g2vest{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;padding:10px 12px;border:1px dashed #E4E9E5;border-radius:10px;background:#FFFFFF;"
+    "font-size:13px;font-weight:600;line-height:1.4;color:#15201A}"
+    ".g2vest[data-tipo=erro],.g2vest[data-tipo=cenario]{border-style:solid;border-color:#F4C7C1;background:#FDE8E6;color:#8F1C13}"
+    ".g2vest[data-tipo=regra]{border-style:solid;border-color:#EAD6A8;background:#FFF3D6;color:#5B4300}"
+)
+def visoes(gid, ent, paineis, rotulo):
+    """Seletor de visões (VISOES-1): devolve (barra, corpo). paineis: {visão: html | nome de outra visão (mesmo painel; ex.: a Tabela agrupada
+    usa a grade da Lista, o agrupamento é estado da grade)}. As visões vêm de visoes.validas(ent) (fonte única): chaves diferentes das válidas,
+    visão sem atributo com fonte ou painel que aponta para visão sem painel fazem o build falhar. Com uma visão só: ('', painel), sem seletor.
+    Corpo = estado da visão (§2.8, role=status) + um painel por grupo (sc-if pelo estado da grade: g2visoesFim no g2lib)."""
+    import visoes as V
+    val = V.validas(ent)
+    if sorted(paineis) != sorted(val):
+        raise ValueError(f'visoes({gid}): painéis {sorted(paineis)} ≠ visões válidas de {ent} {sorted(val)} (visoes.py)')
+    alias = {k: p for k, p in paineis.items() if isinstance(p, str) and p in V.ORDEM}
+    for k, p in alias.items():
+        if p not in paineis or p in alias: raise ValueError(f'visoes({gid}): {k} aponta para {p}, que não tem painel próprio')
+    grupos = [[k] + [a for a in val if alias.get(a) == k] for k in val if k not in alias]
+    if len(val) == 1: return '', paineis[val[0]]
+    for k in val:
+        if k not in V.ICONE: raise ValueError(f'visoes({gid}): visão {k} sem ícone (visoes.ICONE)')
+    VISOES_SPEC[gid] = dict(ent=ent, validas=val, nomes={k: V.menu_nome(k) for k in val}, paineis=grupos, rotulo=rotulo)
+    h = lambda s: _h(gid + s); F_ = '{{false}}'
+    bts = ''.join(f'<button type="button" data-visao="{k}" data-i="{i}" aria-label="{esc(V.rotulo(k))}" aria-pressed="{h("_vb_"+k+"_p")}" '
+                  f'tabIndex="{h("_vb_"+k+"_t")}" onClick="{h("_vb_"+k+"_go")}">{icon(V.ICONE[k],16)}</button>' for i, k in enumerate(val))
+    mais = menu = ''
+    if len(val) > 3:
+        mais = (f'<button type="button" class="g2vmais" data-visao-mais="1" aria-haspopup="menu" aria-expanded="{h("_vm_x")}" aria-label="{h("_vm_lab")}" '
+                f'data-ativo="{h("_vm_on")}" tabIndex="{h("_vm_t")}" onClick="{h("_vm_go")}">{icon("v_mais",16)}</button>')
+        menu = (f'<sc-if value="{h("_vm_open")}" hint-placeholder-val="{F_}"><div role="menu" class="g2vmenu" aria-label="Mais visões" data-visoes-menu="{gid}" onKeyDown="{h("_vmk")}">'
+                + ''.join(f'<button type="button" role="menuitemradio" tabIndex="-1" data-visao-menu="{k}" aria-checked="{h("_vmi_"+k+"_c")}" onClick="{h("_vmi_"+k+"_go")}">'
+                          f'{icon(V.ICONE[k],20)}<span>{esc(V.menu_nome(k))}</span></button>' for k in val[3:]) + '</div></sc-if>')
+    barra = (f'<div class="g2visoes-w"><div class="g2visoes" role="toolbar" aria-label="{esc(rotulo)}" data-visoes="{" ".join(val)}" data-visoes-gid="{gid}" '
+             f'onKeyDown="{h("_vk")}">{bts}{mais}</div>{menu}</div>')
+    est = (f'<sc-if value="{h("_vest_on")}" hint-placeholder-val="{F_}"><div class="g2vest" role="status" data-visoes-estado="{gid}" data-tipo="{h("_vest_tipo")}">'
+           f'<span>{h("_vest_t")}</span><sc-if value="{h("_vest_tema")}" hint-placeholder-val="{F_}"><button type="button" onClick="{h("_vest_go")}" style="{_MINI}">{h("_vest_a")}</button></sc-if></div></sc-if>')
+    # sem invólucro em volta do painel: o sc-if não vira elemento, e as regras "a tabela estica até o fim" (G2_CSS, div>.g2caixa) continuam valendo
+    corpo = est + ''.join(f'<sc-if value="{h("_vp_"+g[0])}" hint-placeholder-val="{{{{{"true" if i == 0 else "false"}}}}}">{paineis[g[0]]}</sc-if>'
+                         for i, g in enumerate(grupos))
+    return barra, corpo
 def acao_motivo(botao, dis, motivo):
     """Botão que pode ficar indisponível com motivo (PRD DS-06 e 74.5.0, VIS-04): o botão (com aria-disabled="{dis}" e data-dica="{motivo}") e,
     só enquanto indisponível, o motivo em texto visível logo abaixo, na cor do texto secundário. A dica no ponteiro, no foco e no toque longo
@@ -1236,7 +1309,7 @@ G2_CSS=(".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outlin
         "main section:only-of-type>div:last-child>div>.g2caixa:last-of-type{flex:1 1 0}main section:only-of-type>div:last-child>div>.g2caixa:last-of-type>.g2rola{flex:1 1 0}"
         "main section:only-of-type>div:last-child>div>.rola{flex:1 1 0;min-height:0;overflow:auto}"
         ".g2rola [role=table]>[role=row]:first-child{position:sticky;top:0;z-index:3}"
-        + INTERACAO_CSS + ACOES_CSS + SEP_CSS + RETORNO_CSS + DICA_CSS)
+        + INTERACAO_CSS + ACOES_CSS + SEP_CSS + RETORNO_CSS + DICA_CSS + VISOES_CSS)
 _TRASH='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>'
 _MINI=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer; white-space: nowrap;'
 _MINIP=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {ACC}; background: {ACC}; color: #fff; cursor: pointer; white-space: nowrap;'
@@ -1327,7 +1400,7 @@ def _ajuda_auto(cols,calc,campos=()):
 # do cabeçalho da coluna. A regra roda no navegador (g2lib.g2glossCol), sobre as linhas que a grade mostra (as do build e as montadas na tela), com
 # estas entradas do GLOSSARIO (as de "^" valem só para o rótulo): fonte única do texto, aqui.
 _GLOSS_CEL=[(rx,t) for rx,t in GLOSSARIO if not rx.startswith('^')]
-def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=True,so=None,add=None,bulk='',gid=None,x0=None,frame=True,tools='',headtools=True,qf=None):
+def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=True,so=None,add=None,bulk='',gid=None,x0=None,frame=True,tools='',headtools=True,qf=None,vazio=True):
     cols=[_col_un(c) for c in cols]
     # rótulos que ficariam iguais sem a unidade ("Custo (R$/h)" e "Custo (R$/ha)") mantêm a unidade, sem parênteses: "Custo R$/h", "Custo R$/ha"
     # (proprietário, 05/10/2026: "Custo R$/h e R$/ha é melhor e mais intuitivo")
@@ -1401,7 +1474,7 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     if total and any(c.get('agg') for c in cols):
         tot=(f'<div role="row" class="g2tot" tabIndex="0" onClick="{H("_totopen")}" title="Ver a composição do total" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; border-top: 2px solid {INK}; background: {BG}; font-size: 13px;">'
              + ('<div role="cell"></div>' if sel else '') + f'<sc-for list="{H("_tot")}" as="t" hint-placeholder-count="{len(cols)}"><div role="cell" class="{_h("t.cls")}" style="{_h("t.st")}">{_h("t.t")}</div></sc-for>' + ('<div role="cell"></div>' if dele else '') + '</div>')
-    empty=f'<sc-if value="{H("_empty")}" hint-placeholder-val="{{{{false}}}}"><div style="padding: 16px; font-size: 13px; color: {MUTED};">Nenhuma linha corresponde aos filtros · <button type="button" onClick="{H("_clear")}" style="border: 0; background: transparent; color: {ACC}; font-family: inherit; font-weight: 700; cursor: pointer;">Limpar filtros</button></div></sc-if>'
+    empty='' if not vazio else f'<sc-if value="{H("_empty")}" hint-placeholder-val="{{{{false}}}}"><div style="padding: 16px; font-size: 13px; color: {MUTED};">Nenhuma linha corresponde aos filtros · <button type="button" onClick="{H("_clear")}" style="border: 0; background: transparent; color: {ACC}; font-family: inherit; font-weight: 700; cursor: pointer;">Limpar filtros</button></div></sc-if>'
     tbl=(f'<div class="g2rola"><div role="table" data-g2g="{gid}" style="display: grid; grid-template-columns: var(--g2cols, repeat({n}, auto)); min-width: 100%; width: max-content;">{head}{body}{tot}</div></div>{empty}')
     EXTRA.append(_g2form(gid))
     box=f'background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; min-width: 0; overflow: hidden;' if frame else 'min-width: 0;'
@@ -1599,6 +1672,7 @@ ENGINE_JS2=ENGINE_JS2.replace("    return v;\n  }\n}","""    v.g2toast = this.st
     if (typeof PREVALS === 'function') PREVALS(this, v);
     for (const sp of GRIDS) g2vals(this, sp, v, vis[sp.id]);
     if (typeof EXTRAVALS === 'function') EXTRAVALS(this, v);
+    if (typeof g2visoesFim === 'function') g2visoesFim(this, v);   /* VISOES-1: seletor, painéis e estado da visão */
     if (typeof assinAvisoVals === 'function') assinAvisoVals(this, v);   // faixa de cobrança (PLAT-01, R11): só as telas da organização têm o buraco
     return v;
   }
@@ -1630,7 +1704,8 @@ def engine():
     grids=json.dumps(GRIDS,ensure_ascii=False).replace('</','<\\/')
     nav=json.dumps(NAVSPEC,ensure_ascii=False)
     gloss=json.dumps(_GLOSS_CEL,ensure_ascii=False)   # glossário da célula (revisão DS, achado 8): g2glossCol no g2lib
-    return 'const SPEC = '+spec+';\nconst GRIDS = '+grids+';\nconst NAV = '+nav+';\nconst G2_GLOSS = '+gloss+';\n'+G2LIB+'\n'+_assin_prefixo()+_conf_prefixo()+(EXTRAJS[0] or '')+'\n'+ENGINE_JS2
+    vis=json.dumps(VISOES_SPEC,ensure_ascii=False)
+    return 'const SPEC = '+spec+';\nconst GRIDS = '+grids+';\nconst NAV = '+nav+';\nconst G2_GLOSS = '+gloss+';\nconst G2_VISOES = '+vis+';\n'+G2LIB+'\n'+_assin_prefixo()+_conf_prefixo()+(EXTRAJS[0] or '')+'\n'+ENGINE_JS2
 # o aviso é visto aqui e anunciado uma vez pela região viva do g2lib (g2vivo, DS-RETORNO-20261009): aria-live=off evita a leitura em dobro
 # aviso temporário: largura do texto até min(560 px, janela − 32); sem o width, o left:50% limitava a caixa a meia janela (180 px a 360 px)
 # e o aviso quebrava em 3 a 17 linhas (medido: 47 e 345 caracteres), cobrindo o pé da tela (V55-RESP-01)
