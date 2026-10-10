@@ -57,7 +57,7 @@
 | Cadastros (recibo 6091443216) | Pela TF e pela CADUX acima | Passo 1, item 8; PRC-03; passo 3.4 |
 | Ficha do pivô e capacidade (checkpoint) | Permanece | Parcial: passo 2, Outorga e Agrofit (IRR-03 e IRR-04). A ficha do pivô no detalhe do equipamento: **fora dos passos, divergência explícita** |
 | Agrofit, praga-alvo (checkpoint) | Permanece | Parcial: passo 2 (AGR-07 confere o alvo). As colunas de praga-alvo na consulta Agrofit: **fora dos passos, divergência explícita** |
-| Hiperclareza (recibo 6091443216) | Não aparece no checkpoint. Nenhum resultado na busca do repositório | **Fora dos passos: divergência explícita.** O Codex indica a origem |
+| Hiperclareza (recibo 6091443216) | Pedido direto do proprietário ao Codex, preservado no recibo 6091898499 (PR #51), sem horário: "Se alguma tela não tiver hiper foco e hiper clareza ao usuário melhore com claude." e "sempre tem que estar hiper claro o que fazer, de onde veio, para onde vai no fluxo de processos. com ações únicas e não redundantes para cada coisa no sistema." | **Fora dos passos.** Encaixa em NAV, DS e UX existentes, sem fase nem portão novos; verificável por tela: origem e contexto, estado, ação primária, consequência e destino, recuperação, com rascunho, filtros e foco preservados |
 | Achados 5974392800 e precisão dose × área (FOCO v2) | Não aparece no bloco vigente. Pelo `RETOMADA-NUVEM.md`, a SINT-C03 foi corrigida no protótipo | Fora dos passos do protótipo. No software real, regra única em decimal no domínio (ENG-011 e ENG-013), como pendência da transferência. A PLA-DS13 trata só da exibição |
 | QUALIDADE-ARTEFATO v2 (5974025581): jornada completa das três IAs (FOCO v2) | Direção preservada | Não é passo: é a condição de saída do conjunto (PRC-06) |
 | Software real: C2 `4b7f2f07`, PR34 `a2ffe24`, PR35 `7251ff5`, F3, F2, Gitleaks, CI e HML (FOCO v2) | C2 e PRs #32 a #35 preservados para a transição | Fora dos passos por definição, porque não é protótipo. A PRC-06 os preserva |
@@ -74,5 +74,5 @@ Vêm do parecer de 09/10 e das decisões delegadas. Não conflitam com o FOCO v2
 
 - **Fora dos passos (divergência explícita):** restante da BEN-1, PCM-1c, NAV2, PCP-ALOC, CAT-ATV, REND-config com D4 e ALOC, MAPA (monitoramento, visões e ícones), ORC-CUSTOS, aplicação dos padrões do design system em todas as telas, ficha do pivô no detalhe do equipamento, colunas de praga-alvo e hiperclareza.
 - **A conferir:** a aderência da sp-sup ao SUP v2, da sp-solo ao SOLO-MAPA-TV e da sp-com ao VEN v2; o estado de aceite da REND e da AÇÃO.
-- **Divergência de ordem:** COM antes da PCM no checkpoint. Vale o checkpoint.
+- **Ordem:** "COM antes da PCM" (cabeçalho das 00:00 UTC) é estado antigo. Vigente pelos recibos do Codex de 10/10 (6091515434, 6091532182, 6091571327, 6091898499): composição SAF → DOM → PCM sobre o BEN corrigido, depois a NAV-1, e a COM depois da composição.
 - Nenhum desses IDs sai do conjunto vigente: todos continuam como requisito, com o estado do checkpoint, até a conclusão e a auditoria do conjunto (PRC-06).
