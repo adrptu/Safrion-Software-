@@ -845,7 +845,7 @@ function g2visoesFim(self,v){ if(typeof G2_VISOES==='undefined'||!G2_VISOES) ret
     // a ação do estado some no redesenho e levava o foco ao <body> (revisão VISOES-1, achados B4/C4): o foco vai ao botão da visão aberta
     v[gid+'_vest_tema']=!!(es&&es.acao&&es.fn); v[gid+'_vest_go']=(es&&es.fn)?(()=>{ es.fn(); setTimeout(()=>{ try{ const a=document.activeElement;
       if(a&&a!==document.body&&g2vis(a)) return; const b=g2visaoBotao(gid,g2visao(self,gid)); if(b) b.focus({preventScroll:true}); }catch(e){} },0); }):(()=>{});
-    // foco restaurado na volta: reafirmado depois de cada desenho até a 1ª interação da pessoa (revisão VISOES-1, achado A4)
+    // rolagem e foco restaurados na volta: reafirmados depois de cada desenho até a 1ª interação da pessoa (revisão VISOES-1, achado A4)
     const fg=self.__g2focoGuarda; if(fg){ if(Date.now()>fg.ate) self.__g2focoGuarda=null; else setTimeout(fg.fn,0); } } }
 // ---- volta do detalhe (§2.11, rev. Codex 01 e 02; VISOES-REV-20261010-02/03): contexto de retorno na sessão da aba, validado na lista ----
 // Ao sair da lista por um link (clique, Ctrl ou meio para nova aba), ela grava o contexto: arquivo, entidade, perfil, Fazenda e Safra, visão,
@@ -888,12 +888,13 @@ function g2visaoLiga(self,gid){ if(typeof window==='undefined'||window.__g2visao
   const linha=()=>alvo.foco?([...document.querySelectorAll('[data-g2g="'+gid+'"] [role=row][data-rid]')].find(x=>g2vis(x)&&String(x.getAttribute('data-rid')).split('@')[0]===alvo.foco)
       ||[...document.querySelectorAll('[role=list] [role=button][aria-label]')].find(x=>g2vis(x)&&String(x.getAttribute('aria-label')).indexOf('Abrir '+alvo.foco+' ')===0)):null;
   const foca=()=>{ try{ const el=linha(); if(el&&document.activeElement!==el) el.focus({preventScroll:true}); }catch(e){} };
+  // rolagem e foco reafirmados a cada desenho até a 1ª interação (sob carga a lista cresce depois dos 450 ms e a rolagem ficava em 0)
   const poe=()=>{ try{ const k=g2visao(self,gid); let ro=alvo.rol; if(!ro){ try{ ro=JSON.parse(sessionStorage.getItem('g2rol:'+arq+':'+gid+':'+k)||'null'); }catch(e){} }
     if(ro) g2rolPoe(ro,gid); foca(); }catch(e){} };
-  if(alvo.foco){ self.__g2focoGuarda={fn:foca,ate:Date.now()+10000};
-    const ev=['pointerdown','keydown','wheel','touchstart'], solta=()=>{ self.__g2focoGuarda=null; ev.forEach(t=>document.removeEventListener(t,solta,true)); };
-    ev.forEach(t=>document.addEventListener(t,solta,true)); }
-  setTimeout(poe,80); setTimeout(poe,450); }
+  self.__g2focoGuarda={fn:poe,ate:Date.now()+10000};
+  const ev=['pointerdown','keydown','wheel','touchstart'], solta=()=>{ self.__g2focoGuarda=null; ev.forEach(t=>document.removeEventListener(t,solta,true)); };
+  ev.forEach(t=>document.addEventListener(t,solta,true));
+  setTimeout(poe,80); setTimeout(poe,450); setTimeout(()=>{ if(self.__g2focoGuarda) poe(); },1200); }
 (function g2visaoGlob(){ if(typeof document==='undefined'||window.__g2visaoGlob) return; window.__g2visaoGlob=1;
   // menu "mais" aberto: tocar fora fecha
   document.addEventListener('pointerdown',(e)=>{ const t=window.__g2visaoTela; if(!t||!g2st(t.self,t.gid).vm) return;
