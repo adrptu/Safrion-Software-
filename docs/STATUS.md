@@ -1,6 +1,8 @@
 # Estado do projeto
 
-Atualizado em 09/10/2026 por Claude, sobre a `main` `266a682`. PR aberto não significa integrado; configuração só vale depois de lida no servidor.
+Base do retrato histórico abaixo: 09/10/2026, Claude, `main` `266a682`. Estados e recibos posteriores estão no [checkpoint único](https://github.com/adrptu/Safrion-Software-/issues/1#issuecomment-5858061746). PR aberto não significa integrado; configuração só vale depois de lida no servidor.
+
+**Prioridade de execução:** concluir e validar o conjunto vigente do protótipo, publicando incrementos operáveis conforme seus aceites. A reconciliação integral do PRD aguarda todas as implantações atuais. Após validação integral do protótipo, transferir para a aplicação existente por fatias tela → domínio → banco → HML. CMD-15, C2 e demais trabalhos reais permanecem preservados; F1 técnico de estoque não equivale à Fase 1 comercial.
 
 ## Onde estamos
 
@@ -8,7 +10,7 @@ Atualizado em 09/10/2026 por Claude, sobre a `main` `266a682`. PR aberto não si
 |---|---|---|
 | PRD | **v3.11** (27/09/2026), vigente desde o merge do #48 em 09/10/2026: 40.5 e 40.6, produto fixo ou troca de marca pelo mesmo ingrediente ativo; API de integração com credencial por integração; sobre a **v3.10**: caps. 73 (confiabilidade transacional, offline, desempenho), 74 (design system) e 75 (melhoria contínua), com as seções existentes reconciliadas. Decisões pendentes continuam pendentes em 73.12, 74.12 e 75.8 | `docs/PRD.md`; `docs/prd/v3_10-reconciliacao.md`; `docs/DECISIONS.md` |
 | Fluxogramas | v3.10: 14 dos 63 fluxos alterados, mesmas raias; v3.9 mantida ao lado | `docs/prd/fluxogramas/` |
-| Protótipo | Navegável, com dados sintéticos e sem banco ou login reais. Regime leve (AGENTS 3.5): branch única `claude/prototipo-v44`, PR #47 em rascunho; artefato v53 (09/10, Planejar safra integrado); frentes em andamento listadas no PR #47 | https://claude.ai/artifact/HqspGRcrX1wcayCVMe9emm |
+| Protótipo | Navegável, com dados sintéticos e sem banco ou login reais. Regime leve (AGENTS 3.5): branch única `claude/prototipo-v44`, PR #47 em rascunho; versão publicada, candidata em revisão e frentes pendentes identificadas separadamente no checkpoint; publicação parcial não encerra o conjunto | https://claude.ai/artifact/HqspGRcrX1wcayCVMe9emm |
 | Design system | PRD cap. 74 e os padrões do proprietário de 09/10 (DEC-0910-01): botões BOT-01 a BOT-09, seleção que abre detalhe (SEL), etapa futura neutra (ETP) e separador, hover verde, retorno visual e dica (VIS). SEL-02, BOT-03 e BOT-07 precisados pela revisão do Codex no PR #50 (DS-NAV-20261009-02): registro indisponível com aviso e recuperação, Programar só para agendar execução e alvo único semântico na linha. No protótipo: componente comum e teste de conformidade em andamento; correção das telas depois da integração das frentes. No software real (`packages/ui`): pendente | `docs/design-system/README.md` |
 | Merge na `main` | Feito pelos agentes: o revisor integra o PR do outro com CI verde e parecer escrito; ninguém integra o próprio (DEC-0910-02, 09/10) | `AGENTS.md` 2 e 3 |
 | Decisões delegadas (09/10) | Delegação do proprietário aos dois agentes (DEC-0910-03) e 30 linhas com acordo escrito do Codex (recibos 6091153950 e 6091443216), cada uma com o seu limite; 24 entradas aguardam a revisão do Codex. Nada é aprovação do proprietário; o PRD fica inalterado até a comparação final; implementação pendente | `docs/DECISIONS.md`; `docs/parceria/decisoes-delegadas-20261009.md` |
@@ -26,7 +28,9 @@ Atualizado em 09/10/2026 por Claude, sobre a `main` `266a682`. PR aberto não si
 
 ## Próximo passo e responsáveis
 
-### Sequência
+### Dependências de HML e registros históricos
+
+A lista abaixo preserva dependências e recibos; não substitui a prioridade de execução indicada acima. Não reiniciar checks ou trabalhos já encerrados sem novo incidente ou mudança pertinente.
 
 1. Feito em 29/09: os 10 checks obrigatórios estão no ruleset existente, conferidos na leitura do servidor.
 2. Ensaio remoto da homologação, dentro das autorizações concretas já recebidas (EXT-01, R-006): restauração do backup em instância isolada, logs sem dados pessoais, acesso e revogação.
