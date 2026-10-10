@@ -1,0 +1,12 @@
+mut ok
+mut2 ok
+B2 VEN PV-036 com RM programada · painel: ['×', 'Cancelar reserva', 'Abrir lote ›', 'Abrir carga ›', 'Encerrar saldo', 'Fechar', 'Abrir RM-0002 [VERDE]'] | header []
+mut3 ok
+B3 linha PV-036 (carga em trânsito): PV-036 · Frutas Real Mamão Formosa · fruta de campo Pronta entrega 24–26/09 10.000 kg R$ 3,05/kg 10.000 kg 0 kg 0 kg Entregue entregue · R$ 30.500,00 a receber
+B3 linha RM-0002: RM-0002 PV-036 · Frutas Real Mamão Formosa · fruta de campo L39-133 10.000 kg 10.000 kg Agricultor entrega Rota Sul Transportes · Baú refrigerado 12 t · ABC1D23 26/09 Em trânsito Confirmar entrega · Expedição
+mut4 ok
+lote devolvido L39-134
+B1 PROD lote devolvido, perfil Dora · header ['Liberar L39-134'] | painel ['×', 'Abrir carga ›', 'Ver carência e destino ›', 'Abrir carga ›', 'Cancelar', 'Liberar L39-134 [VERDE]']
+B1 depois do clique de Dora: {"quem":"Qualidade (Marta)","d":"2026-09-26","at":"18:14"} | toast L39-134 liberado por Qualidade (Marta): 400 kg aptos para reserva e venda.
+erros JS 
+RESULTADO: OK 0/0

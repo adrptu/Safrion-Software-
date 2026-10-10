@@ -1,0 +1,7 @@
+== unidade · A7 venda em saca de 50 kg e A11 datas sem barra
+OK  A7 reservar para o PV-030 (saca de 50 kg): sugestão 4.000 em "sc 50 kg" (200.000 kg) · ['ok', '4000', 'PV-030 · Coop Grão Sul Sem reserva Soja em grão · pronta entrega · set–out/26 · saldo do CT-201 × PRÓXIMO PASSO Falta 4.000 sc 50 kg: reservar lote apto (L10-031 46.104 sc 50 kg). QUANTIDADE 4.000 sc 50 kg PREÇO R$ 128,00/sc 50 kg VALOR R$ 512.000,00 UNIDADE DO CONTRATO saca de 50 kg
+OK  A7 a carga do PV-030 mostra "600 sc 50 kg" (a massa da venda), não "500 sc" · ['ok', 'RM-0002 PV-030 · Coop Grão Sul Soja em grão L10-031 600 sc 50 kg 600 sc 50 kg Cliente retira Coop Grão Sul · Bitrem graneleiro 37 t · AAA1A11 26/09 Entregue R$ 76.800,00 a receber até 26/09']
+OK  A7 devolução digitada "100" em sc 50 kg = 5.000 kg (não 6.000 kg) · [True, 5000, '100 sc 50 kg devolvidos da RM-0002 (Fora do padrão contratado): lote L39-133 Em inspeção, só a Qualidade libera. PV-030: entregue 500 sc 50 kg, a receber da carga R$ 64.000,00.']
+OK  A11 "Outras datas" com o teclado numérico (sem barra): 2809 e 3009 = janela 28/09–30/09 · [['2026-09-28', '2026-09-30'], 'stão: o menor entre o disponível do lote (37.920 sc) e a falta do pedido (100 sc). Pode reduzir. ATENDIMENTO · RESERVAS POR LOTE Nenhuma reserva. CARGAS DE SAÍDA Nenhuma carga. FINANCEIRO · A RECEBER Nada a receber ainda (nasce na saída). MOVIMENTOS Nenhum movimento. 
+OK  unidade: nenhuma página com erro de JS
+RESULTADO: OK 5/5

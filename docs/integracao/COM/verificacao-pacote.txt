@@ -1,0 +1,36 @@
+# verificacao do pacote COM · base 9fb09a5 · candidata 29cdc6e · 2026-10-10T00:46Z
+worktree temporaria em 9fb09a5: 9fb09a5
+git apply --check diff-9fb09a5-29cdc6e.patch -> rc=0
+git apply diff-9fb09a5-29cdc6e.patch -> rc=0
+caminhos conferidos: 25 · divergencias: 0
+arvore igual a 29cdc6e nos caminhos tocados -> rc=0
+git apply -R (volta a base) -> rc=0; status: ''
+worktree temporaria removida -> rc=0
+RESULTADO COM: OK
+
+# teste do bundle num repositorio novo, so com o historico ate cdc185f (o que o origin/claude/prototipo-v44 tem) · 2026-10-10T00:46Z
+repositorio novo com base=cdc185f e 147 commits
+9fb09a5 ausente antes do fetch (nao esta no origin)
+<sp-proto>/docs/integracao/COM/com.bundle is okay
+The bundle contains this ref:
+29cdc6e82ebc67e7449800f45f7a674f764ffda0 refs/heads/claude/v44-comercial
+The bundle requires these 3 refs:
+ecc8b00eee9a87aa57f585660440b1ccc2abf4fd 
+f4121bdfe58e58ae0b3483455d251f5707dd0671 
+cdc185f551a9513d72734b18e4a869f921917c00 
+The bundle uses this hash algorithm: sha1
+== git fetch com.bundle 29cdc6e (sha curto)
+fatal: couldn't find remote ref 29cdc6e
+rc=128
+== git fetch com.bundle 29cdc6e82ebc67e7449800f45f7a674f764ffda0 (sha completo)
+From <sp-proto>/docs/integracao/COM/com.bundle
+ * branch            29cdc6e82ebc67e7449800f45f7a674f764ffda0 -> FETCH_HEAD
+rc=0 FETCH_HEAD=29cdc6e
+== git fetch com.bundle claude/v44-comercial:refs/heads/com
+From <sp-proto>/docs/integracao/COM/com.bundle
+ * [new branch]      claude/v44-comercial -> com
+rc=0 com=29cdc6e
+fsck --connectivity-only rc=0
+base 9fb09a5 presente depois do fetch: 9fb09a5 Integra SAF-C01 (ef0d7b2) na branch única: trava de soma de área com p
+merge-base(com, 9fb09a5 ancestral?) sim
+ 25 files changed, 2617 insertions(+), 136 deletions(-)

@@ -1,0 +1,13 @@
+13:42:28 comercial_fluxo_test.py: RESULTADO: OK 70/70 exit 0 
+13:45:48 reserva_duplo_clique_test.py: RESULTADO: OK 2/2 exit 0 
+13:54:24 producao_fluxo_test.py: RESULTADO: FALHOU 65/66 exit 0 
+14:03:10 varredura.py: RESULTADO: 143/143 páginas sem erro exit 0 
+14:12:25 dup: RESULTADO: 143 páginas · 0 com ação repetida · erros 0 exit 0 
+14:18:59 acao_unica_test.py: RESULTADO: 10 ok · 0 falhas (saf) exit 0 
+14:21:30 vetest.py: RESULTADO: 1 FALHA(S) exit 0 
+14:23:10 lotest.py: RESULTADO: OK exit 0 
+14:24:56 est_cenario_test.py: RESULTADO: 15/15 ok exit 0 
+14:27:11 carencia_test.py: RESULTADO: 91/91 verificações exit 0 
+14:28:55 os_cenario_test.py: RESULTADO: 19/20 ok · FALHAS: A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cenário v2 sem aprov exit 1 
+14:30:22 app_cenario_test.py: exit 0 
+FIM

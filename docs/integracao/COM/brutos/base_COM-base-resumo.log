@@ -1,0 +1,11 @@
+varredura.py rc=0 0 falhas · RESULTADO: 140/140 páginas sem erro
+dup rc=0 0 falhas · RESULTADO: 140 páginas · 0 com ação repetida · erros 0
+producao_fluxo_test.py rc=0 0 falhas · RESULTADO: OK 66/66
+acao_unica_test.py rc=0 0 falhas · RESULTADO: 10 ok · 0 falhas (saf)
+vetest.py rc=0 1 falhas · RESULTADO: 1 FALHA(S)
+lotest.py rc=0 0 falhas · RESULTADO: OK
+est_cenario_test.py rc=0 0 falhas · RESULTADO: 15/15 ok
+os_cenario_test.py rc=1 0 falhas · RESULTADO: 19/20 ok · FALHAS: A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cenário v2 sem aprov
+app_cenario_test.py rc=0 0 falhas · 
+carencia_test.py rc=1 4 falhas · RESULTADO: 87/91 verificações · FALHAS: mapa: com a colheita impedida, a ação primária do Pivô 23 vira Rever programação → OS-0440 | PV06 após aplicar a OS-0504: carência até 07/10; o lote LC-0510-1 (colhido em 16/09) não é contaminado retroativamente | PV19: carência até 05/10 e o lote de 24/09 aparece Não conforme | CO-06 abre o lote do link: Não conforme por colheita em carência, com aplicação, prazo e quem resolve
+FIM

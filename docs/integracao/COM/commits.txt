@@ -1,0 +1,16 @@
+29cdc6e82ebc67e7449800f45f7a674f764ffda0 COM: correções da revisão
+bdc5ca831b87f1f5b7b11175c86f5893fd341c81 COM: Painel comercial sem "Ver vendas de …" como primária na linha em déficit (design system de 09/10, BOT-03/BOT-08)
+c7d48e961e695ed127da965026b5927f9c92a6f1 Merge branch 'claude/prototipo-v44' (9fb09a5: SAF-C01) na branch do Comercial
+d7b91ff9afda405eb5fb7e1961f49d90e5151728 COM A-17: Estoque de produto diz o próximo passo do lote quando a venda compatível está com a saca a conferir
+d59fad00023bacd912fe6c613b9be79b6bdd69cf COM: teste de navegador do fluxo principal (menu, tarefa do proprietário, recusas e repetição, perfis, painel, 390 px, produção)
+4533879735a80141481ee8870d84dca288478b0c COM A-17: venda encerrada sem a saca não suspende a oferta nem ressuscita quantidade ao registrar a massa depois
+c6b17da76b7d25e671c55c654b30e8cf3d099de4 spec COM v1.2: A-17 (massa do compromisso e saca a conferir), D-C26 e D-C27, KC19-KC20
+3044c7922ccdfa41306d3e8c6cfcf7890e062fe4 COM A-17: a venda guarda a massa da sua unidade; legado de soja com a saca ambígua fica "Saca a conferir" até registrar a massa com a fonte
+16b3974579931916811066c53f3b09eb5ecf681a COM: duplo clique sem erro, reservar antes de programar e primária só com o que dá para fazer
+f7d0fa6801cb9ca5c4b2d646f622af871eacd542 Merge branch 'claude/prototipo-v44' (cdc185f: SAF etapa única e etapa 2) na branch do Comercial
+d7386788c2a1229b3dd0d6cbc08b23dfe674cf94 COM P7: Previsão e colheita › Por semana sem as colunas comerciais; obrig/of.ob saem (D-C14, CE-05)
+5d84cc68fda1ba5386c5231d0c486fe718bcef99 COM P6: Estoque de produto só com lotes; a grade Pedidos passa a Contratos e pedidos (D-C14, CE-05)
+82312967b706b7535a6cbf64dc3be8eb54f30b5c COM P2-P5: telas Contratos e pedidos, Expedição e entregas e Painel comercial no grupo Comercial
+498104dacb0b3ee9bc7d4e15e1a6751e0c68a35b COM P1: regras e estado do comercial (vendas, crédito, carga de saída, devolução, painel)
+2fccd42d92b86cc144a7db4d936d054b815ab473 spec COM: revisão por contraexemplo
+1e31c8ec872d183a14ed8c831f43542652ef5afa spec COM: comercial e logística (contratos e pedidos, expedição e entregas, painel comercial)

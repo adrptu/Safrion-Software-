@@ -1,0 +1,132 @@
+# Correção do Comercial, 1ª tentativa (agente COM:corrigir interrompido; o trabalho foi retomado e commitado pelo seguinte): testes novos contra o código corrigido e contra o código da revisão (base_v)
+# Saidas registradas no transcript do agente (nao havia arquivo de log). Extraidas sem reexecutar nada.
+# Horario UTC de cada comando; corpo de heredoc omitido; caminhos da maquina trocados por marcadores.
+
+### 2026-10-09T18:29:04.567Z
+$ cd <sp-com>/tools/prototipo/v37/gen37 && SAFRION_DADOS=sintetico timeout 300 python3 comercial_unit_test.py 2>&1 | grep -v "^OK " | head -30; SAFRION_DADOS=sintetico timeout 300 python3 producao_unit_test.py 2>&1 | grep -v "^OK " | head -20
+FALHA C08b o lote de retorno não é reservável até a Qualidade liberar; depois de liberado, reserva · ["L39-134 não está apto (Em inspeção: Recebido devolvido: a Qualidade confere e libera). Quem resolve: Qualidade (Marta).","Liberar L39-134: decisão de Ana (gestora) ou Marta (qualidade). Nada foi alterado.","L39-134 não está apto (Em inspeção: Recebido devolvido: a Qualidade confere e libera). Quem resolve: Qualidade (Marta)."]
+RESULTADO: FALHOU 79/80
+FALHA U07g Com avaria → Em inspeção (dono Qualidade); Liberar lote pela Qualidade → Liberado · [{"fis":12050,"res":0,"q":"Em inspeção","mot":"Recebido com avaria: a Qualidade confere e libera","dono":"Qualidade (Marta)","blq":12050,"apto":0,"proc":0,"disp":0,"esgotado":false,"vencido":false},"Liberar L39-133: decisão de Ana (gestora) ou Marta (qualidade). Nada foi alterado.","Em inspeção"]
+FALHA R05a 2ª carga com avaria depois da liberação: lote novo Em inspeção; o liberado continua com 4.800 kg aptos · [null,"L39-133","L39-133"]
+RESULTADO: FALHOU 121/123
+
+### 2026-10-09T18:29:10.850Z
+$ cd <sp-com>/tools/prototipo/v37/gen37 && sed -i "s/prLiberarLote(x, L.id, 'Qualidade (Marta)')/prLiberarLote(x, L.id, 'Marta')/" comercial_unit.js && sed -i "s/prLiberarLote(x, r3.L.id, 'Qualidade (Marta)')/prLiberarLote(x, r3.L.id, 'Marta')/; s/prLiberarLote(x, a.L.id, 'Qualidade (Marta)')/prLiberarLote(x, a.L.id, 'Marta')/" producao_unit.js && grep -c "prLiberarLote(x, [a-zA-Z0-9.]*, 'Marta')" comercial_unit.js producao_unit.js && SAFRION_DADOS=sintetico timeout 300 python3 comercial_unit_test.py 2>&1 | tail -1; SAFRION_DADOS=sintetico timeout 300 python3 producao_unit_test.py 2>&1 | tail -1
+comercial_unit.js:1
+producao_unit.js:2
+RESULTADO: OK 80/80
+RESULTADO: OK 123/123
+
+### 2026-10-09T18:31:18.666Z
+$ cd <sp-com>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+FALHA RV-A2b carga antiga com o L39-133 em duas linhas: 10.000 kg contra 5.000 kg reservados ao PV-036 e 0 disponível são recusados; a reserva do PV-038 (7.050 kg) e o físico (12.050 kg) ficam intactos · ["Carga RM-0009 não encontrada.",{"fis":12050,"res":12050,"q":"Liberado","mot":"Íntegro no recebimento","dono":"","blq":0,"apto":12050,"proc":0,"disp":0,"esgotado":false,"vencido":false}]
+FALHA RV-A3 (exceção) · "TypeError: Cannot read properties of undefined (reading 'lote')\n    at <sp-com>/tools/prototipo/v37/gen37/_probe/comercial_unit_com.js:2256:187\n    at caso (<sp-com>/tools/prototipo/v37/gen37/_probe/comercial_unit_com.js:1972:33)\n    at Object.<anonymous> (<sp-com>/tools/prototipo/v37/gen37/_probe/comercial_unit_com.js:2255:1)\n    at Module._compile (node:internal/modules/cjs/loader:1706:14)\n    at Object..js (node:internal/modules/cjs/loader:1839:10)\n    at Module.load (node:internal/modules/cjs/loader:1441:32)\n    at Function._load (node:internal/modules/cjs/loader"
+FALHA RV-A5 (exceção) · "TypeError: Cannot read properties of undefined (reading 'st')\n    at comRmDescoberto (<sp-com>/tools/prototipo/v37/gen37/_probe/comercial_unit_com.js:1589:42)\n    at <sp-com>/tools/prototipo/v37/gen37/_probe/comercial_unit_com.js:2271:15\n    at caso (<sp-com>/tools/prototipo/v37/gen37/_probe/comercial_unit_com.js:1972:33)\n    at Object.<anonymous> (<sp-com>/tools/prototipo/v37/gen37/_probe/comercial_unit_com.js:2267:1)\n    at Module._compile (node:internal/modules/cjs/loader:1706:14)\n    at Object..js (node:internal/modules/cjs/loader:1839:10)\n    at Module."
+FALHA RV-A7 S3 formulário de reserva da venda em saca de 50 kg: quantidade em "sc 50 kg" e sugestão 4.000 (200.000 kg), não 3.333,333 sc de 60 kg · ["sc","0","Sugestão: o menor entre o disponível do lote (38.420 sc) e a falta do pedido (0 sc). Pode reduzir."]
+FALHA RV-A7b reserva e devolução na massa da venda: "600 sc 50 kg" reservados; "100" digitado em sc 50 kg = 5.000 kg devolvidos ("100 sc 50 kg"), não 6.000 kg · ["RS-0002: 600 sc 50 kg do L10-031 reservados para o PV-030 (Coop Grão Sul). L10-031 disponível 37.920 sc · PV-030 parcial.","120 sc 50 kg devolvidos da RM-0002 (Fora do padrão contratado): lote L39-133 Em inspeção, só a Qualidade libera. PV-030: entregue 480 sc 50 kg, a receber da carga R$ 61.440,00."]
+FALHA RV-A8 S3 venda encerrada com devolução de 1.000 kg: quantidade do contrato acompanha (5.000 kg) e o valor do acordo é R$ 15.250,00, igual ao a receber · [10000,10000,30500]
+FALHA RV-A9 (exceção) · "TypeError: Cannot read properties of undefined (reading 'ate')\n    at <sp-com>/tools/prototipo/v37/gen37/_probe/comercial_unit_com.js:2294:248\n    at caso (<sp-com>/tools/prototipo/v37/gen37/_probe/comercial_unit_com.js:1972:33)\n    at Object.<anonymous> (<sp-com>/tools/prototipo/v37/gen37/_probe/comercial_unit_com.js:2291:1)\n    at Module._compile (node:internal/modules/cjs/loader:1706:14)\n    at Object..js (node:internal/modules/cjs/loader:1839:10)\n    at Module.load (node:internal/modules/cjs/loader:1441:32)\n    at Function._load (node:internal/modules/cjs/loader:"
+FALHA RV-A12b M36 segunda entrega com outra chave recusada (a 1ª, 25/09, fica); M35 motivo de devolução fora da lista recusado · [null,"Escolha o motivo da devolução."]
+FALHA RV-A12e M24 venda antecipada expedida não entra na exposição (R$ 91.470,00); M05 exposição igual ao limite passa e 1 centavo acima pede a gestora; M28 entrega de 40 dias atrás fora do "entregue nos últimos 30 dias" · [91470,91470,true,false,91470]
+RESULTADO: FALHOU 91/100
+
+### 2026-10-09T18:32:00.215Z
+$ cd <sp-com>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+RESULTADO: OK 104/104
+
+### 2026-10-09T18:32:10.833Z
+$ SP=<scratchpad>; B=$SP/comfix/base_gen; rm -rf $B; mkdir -p $B; cd <sp-com>/tools/prototipo/v37/gen37 && rsync -a --exclude project --exclude _render --exclude _probe --exclude __pycache__ ./ $B/ && cd <sp-com> && for f in comercial.js producao.js g2lib.js areas/producao.py areas/vendas.py; do git show HEAD:tools/prototipo/v37/gen37/$f > $B/$f; done && cd $B && SAFRION_DADOS=sintetico timeout 300 python3 comercial_unit_test.py 2>&1 | grep -v "^OK " | cut -c1-250
+Exit code 127
+/bin/bash: line 1: rsync: command not found
+
+### 2026-10-09T18:32:15.499Z
+$ SP=<scratchpad>; B=$SP/comfix/base_gen; rm -rf $B; mkdir -p $B; cd <sp-com>/tools/prototipo/v37/gen37 && tar --exclude=./project --exclude=./_render --exclude=./_probe --exclude=./__pycache__ -cf - . | (cd $B && tar xf -) && cd <sp-com> && for f in comercial.js producao.js g2lib.js areas/producao.py areas/vendas.py; do git show HEAD:tools/prototipo/v37/gen37/$f > $B/$f; done && cd $B && SAFRION_DADOS=sintetico timeout 300 python3 comercial_unit_test.py 2>&1 | grep -v "^OK " | cut -c1-250
+Traceback (most recent call last):
+  File "<scratchpad>/comfix/base_gen/comercial_unit_test.py", line 56, in <module>
+    sys.exit(0 if main() else 1)
+                  ^^^^^^
+  File "<scratchpad>/comfix/base_gen/comercial_unit_test.py", line 40, in main
+    rodar(True)
+  File "<scratchpad>/comfix/base_gen/comercial_unit_test.py", line 32, in rodar
+    open(p, 'w', encoding='utf-8').write(fonte(nucleo))
+                                         ^^^^^^^^^^^^^
+  File "<scratchpad>/comfix/base_gen/comercial_unit_test.py", line 18, in fonte
+    from areas.processo_os import JS_NUCLEO
+  File "<scratchpad>/comfix/base_gen/areas/processo_os.py", line 59, in <module>
+    from ui37 import shell37, HEIGHTS37, tabs
+  File "<scratchpad>/comfix/base_gen/ui37.py", line 9, in <module>
+    CAT=json.load(open(os.path.join(V37,'..','catalogo.json')))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '<scratchpad>/comfix/base_gen/../catalogo.json'
+
+### 2026-10-09T18:32:25.474Z
+$ SP=<scratchpad>; R=$SP/comfix/base_v; mkdir -p $R/v37/gen37 && cd <sp-com>/tools/prototipo && cp -r ferramentas *.json *.md $R/ 2>/dev/null; cp v37/*.* $R/v37/ 2>/dev/null; cd v37/gen37 && tar --exclude=./project --exclude=./_render --exclude=./_probe --exclude=./__pycache__ -cf - . | (cd $R/v37/gen37 && tar xf -) && cd <sp-com> && for f in comercial.js producao.js g2lib.js areas/producao.py areas/vendas.py; do git show HEAD:tools/prototipo/v37/gen37/$f > $R/v37/gen37/$f; done && cd $R/v37/gen37 && SAFRION_DADOS=sintetico timeout 300 python3 comercial_unit_test.py 2>&1 | grep -v "^OK " | cut -c1-200
+FALHA RV-A2 S2 lote repetido na carga é recusado (o limite é por lote): nenhuma carga gravada · "RM-0002 programada por Dora (comercial): PV-036 (Frutas Real) · L39-133 5.000 kg + L39-133 5.000 kg
+FALHA RV-A2b carga antiga com o L39-133 em duas linhas: 10.000 kg contra 5.000 kg reservados ao PV-036 e 0 disponível são recusados; a reserva do PV-038 (7.050 kg) e o físico (12.050 kg) ficam inta
+FALHA RV-A2c pós-condição: saída que deixaria o físico do lote abaixo do reservado é recusada, nada baixado · "RM-0002: saída de 4.000 kg (16.000 − 12.000) para o PV-036 (Frutas Real). Em tr
+FALHA RV-A3 S2 lote devolvido: Dora, Rui, Caio, Paula e ninguém não liberam ("decisão de Ana (gestora) ou Marta (qualidade)"); continua Em inspeção · ["","L39-134 já está liberado.","L39-134 j
+FALHA RV-A3b Marta (qualidade) libera e o registro grava quem agiu ("Marta (qualidade)"), não um nome fixo · ["L39-134 já está liberado.",{"quem":"Dora","d":"2026-09-26","at":"18:32"}]
+FALHA RV-A3c perfis: Marta · Qualidade no cadastro, só com o papel qualidade · null
+FALHA RV-A4 S3 venda com a carga em trânsito: situação "Em trânsito" (não "Entregue"); entregue 30 d e realizado contam só o entregue (RM-0001: R$ 91.470,00; 30.490 kg) · ["Entregue",121970,404
+FALHA RV-A5 S3 cancelar a reserva de lote que está em carga programada da mesma venda é recusado (cancele a carga antes); a reserva continua Ativa · "RS-0002 cancelada (cliente adiou): 10.000 kg vo
+FALHA RV-A5 (exceção) · "ReferenceError: comRmDescoberto is not defined\n    at <scratchpad>/comfix/base_v/v37/gen37/_p
+FALHA RV-A7 S3 formulário de reserva da venda em saca de 50 kg: quantidade em "sc 50 kg" e sugestão 4.000 (200.000 kg), não 3.333,333 sc de 60 kg · ["sc","3333,333","Sugestão: o menor entre o dis
+FALHA RV-A7b reserva e devolução na massa da venda: "600 sc 50 kg" reservados; "100" digitado em sc 50 kg = 5.000 kg devolvidos ("100 sc 50 kg"), não 6.000 kg · ["RS-0002: 500 sc do L10-031 reserv
+FALHA RV-A8 S3 venda encerrada com devolução de 1.000 kg: quantidade do contrato acompanha (5.000 kg) e o valor do acordo é R$ 15.250,00, igual ao a receber · [5000,6000,18300]
+FALHA RV-A9 S3 aprovação de crédito: a mesma chave e o mesmo peso repetem sem gravar; a mesma chave com outro peso é conflito (não "já registrado" que não cobre) · [null,"Aprovar crédito do P
+FALHA RV-A10 S3 1º caminhão da soja 26/27 (30.000 kg): a safra fica "em colheita"; oferta = apto + previsão ainda não colhida (68.180 sc − 500 sc colhidos), livre sem o déficit falso · ["Estoq
+FALHA RV-A10b colheita fechada (todos os cultivos sem O.S. aberta nem carga a pesar): vale só o colhido apto, sem a previsão · ["Estoque (2026/27)",0,"Déficit"]
+FALHA RV-A11 S4 venda com "Agricultor entrega" não grava o local "Retira no Armazém Sede" do CD-05; com a modalidade do cadastro, herda · ["Retira no Armazém Sede (FOB) · seg–sáb 06–22h","Re
+RESULTADO: FALHOU 87/103
+
+### 2026-10-09T18:33:07.104Z
+$ cd <sp-com>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+RESULTADO: OK 104/104
+base falhas [] 94
+MORTO P: prReservar sem a checagem de ator · ['R01b reservar com perfil sem o papel (Caio · PCP) é recusado: decisão do comercial ou da gestora', 'C11 AC-12 R-C14: Rui não reserva; Dora reserva e
+MORTO P: prCancelarReserva aceita qualquer perfil · ['RV-A12d M17 entrega sem transportador recusada; M13 lote que vence antes da janela fora da lista (L39-133 vence 29/09, PV-038 começa 05/10); M14
+MORTO P: prSaldoFut sem o máximo zero · ['R02 CE-03 venda futura expedida acima da quantidade (30.040 de 30.000 kg): vendas futuras 0 kg, nunca −40, e a oferta livre não ganha 40 kg', 'C05h exces
+VIVO  P: prReservar aceita venda encerrada? (sem falta de qualquer jeito) · 94
+MORTO P: prSitPed sem Encerrada · ['R04 R-C11 venda com saldo encerrado aparece "Encerrada" (não "Entregue" nem "Sem reserva")', 'C09b cancelada a carga (reservas intactas), encerrar cancela RS-0001
+109:M19 encerrar: aceita com carga programada
+
+### 2026-10-09T18:33:22.662Z
+$ cd <sp-com>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+RESULTADO: OK 105/105
+43
+
+### 2026-10-09T18:36:58.308Z
+$ cd <sp-com>/tools/prototipo/v37/gen37 && ls <chrome> && env CHROME_BIN=<chrome> flock /tmp/cdpC.lock env CDP_GL=1 SAFRION_DADOS=sintetico timeout 900 python3 comercial_revisao_test.py > /tmp/COM-revisao.log 2>&1; echo "exit $?"; grep -v "^OK\|^  OK" /tmp/COM-revisao.log | cut -c1-600 | tail -40
+<chrome>
+exit 1
+== duplo · A1 duplo clique humano nas primárias do painel
+== cabecalho · A6 o cabeçalho não repete o verde do painel aberto
+== qualidade · A3 só a Qualidade (ou a gestora) libera o lote devolvido; A11 verde só para quem tem o papel
+== situacao · A4 em trânsito e A5 carga sem reserva que a cubra
+RESULTADO: OK 26/26
+Traceback (most recent call last):
+  File "<sp-com>/tools/prototipo/v37/gen37/comercial_revisao_test.py", line 151, in <module>
+    t.chk('A4 "Entregue nos últimos 30 dias" conta só o entregue (RM-0001: R$ 91.470,00), não a carga em trânsito', 'R$ 91.470,00' in kp.split('Entregue nos últimos 30 dias')[1][:40], kp)
+                                                                                                                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+IndexError: list index out of range
+
+### 2026-10-09T18:44:13.362Z
+$ cd <sp-com>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+exit 1
+== situacao · A4 em trânsito e A5 carga sem reserva que a cubra
+== unidade · A7 venda em saca de 50 kg e A11 datas sem barra
+FALHOU A11 "Outras datas" com o teclado numérico (sem barra): 2809 e 3009 = janela 28/09–30/09 · [['2026-09-01', '2026-10-31'], 'stão: o menor entre o disponível do lote (37.920 sc) e a falta do pedido (100 sc). Pode reduzir. ATENDIMENTO · RESERVAS POR LOTE Nenhuma reserva. CARGAS DE SAÍDA Nenhuma carga. FINANCEIRO · A RECEBER Nada a receber ainda (nasce na saída). MOVIMENTOS Nenhum movimento. 
+RESULTADO: FALHOU 11/12
+
+### 2026-10-09T18:49:07.567Z
+$ cd <sp-com>/tools/prototipo/v37/gen37 && grep -n "x.quem==='Dora (comercial)'" comercial_revisao_test.py | cut -c1-80 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+170:        v = cen("(()=>{ const v=Object.values(c.producao.pedidos).find(x=>x.
+exit 0
+== unidade · A7 venda em saca de 50 kg e A11 datas sem barra
+RESULTADO: OK 5/5

@@ -1,0 +1,9 @@
+OK    motor JS (node) executou sem erro
+FALHA R01 CE-10 reservar sem quem age (ator) é recusado e nada é gravado · ["RS-0002: 125 sc do L10-031 reservados para o PV-030 (Coop Grão Sul). L10-031 disponível 34.420 sc · PV-030 coberto."]
+FALHA R01b reservar com perfil sem o papel (Caio · PCP) é recusado: decisão do comercial ou da gestora · "Acima da falta do PV-030: 0 sc."
+FALHA R02 CE-03 venda futura expedida acima da quantidade (30.040 de 30.000 kg): vendas futuras 0 kg, nunca −40, e a oferta livre não ganha 40 kg · [-40,40]
+FALHA R03 R-C10 o expedido da venda desconta a devolução (30.490 − 400 = 30.090 kg) · 30490
+FALHA R04 R-C11 venda com saldo encerrado aparece "Encerrada" (não "Entregue" nem "Sem reserva") · "Entregue"
+FALHA R05 prNovoLote: o mesmo gerador L<semana>-<seq> do recebimento (26/09 = S39 → L39-133) · ""
+OK    motor JS (node) executou sem erro · montado SEM o núcleo da carência
+RESULTADO: FALHOU 2/8

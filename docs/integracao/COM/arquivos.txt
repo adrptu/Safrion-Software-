@@ -1,0 +1,170 @@
+# Arquivos alterados pela candidata COM 29cdc6e sobre a base 9fb09a5
+# Gerado com git (sem reexecutar testes). Status: A acrescentado, M modificado, D apagado, R renomeado.
+
+## 1. Efeito líquido (git diff --name-status 9fb09a5 29cdc6e)
+A	docs/comercial/DECISOES.md
+A	docs/comercial/ESPECIFICACAO.md
+A	docs/comercial/verificacao/contas.py
+A	docs/comercial/verificacao/sonda_base.py
+M	tools/prototipo/v37/ferramentas/acoes_duplicadas.py
+M	tools/prototipo/v37/gen37/aprova_quem_decide_unit.js
+M	tools/prototipo/v37/gen37/areas/indice.py
+M	tools/prototipo/v37/gen37/areas/producao.py
+A	tools/prototipo/v37/gen37/areas/vendas.py
+M	tools/prototipo/v37/gen37/cenario.py
+A	tools/prototipo/v37/gen37/comercial.js
+A	tools/prototipo/v37/gen37/comercial_fluxo_test.py
+A	tools/prototipo/v37/gen37/comercial_revisao_test.py
+A	tools/prototipo/v37/gen37/comercial_unit.js
+A	tools/prototipo/v37/gen37/comercial_unit_test.py
+A	tools/prototipo/v37/gen37/dados_comercial.py
+M	tools/prototipo/v37/gen37/dados_producao.py
+M	tools/prototipo/v37/gen37/g2lib.js
+M	tools/prototipo/v37/gen37/os_aprov_lib_unit.js
+M	tools/prototipo/v37/gen37/producao.js
+M	tools/prototipo/v37/gen37/producao_fluxo_test.py
+M	tools/prototipo/v37/gen37/producao_unit.js
+M	tools/prototipo/v37/gen37/producao_unit_test.py
+A	tools/prototipo/v37/gen37/reserva_duplo_clique_test.py
+M	tools/prototipo/v37/gen37/ui37.py
+
+## 2. Por commit, do mais antigo ao mais novo, com o autor
+# Commits comuns: arquivos do commit contra o pai (--name-status).
+# Merges: só os arquivos que o merge mudou em relação a TODOS os pais (--cc), isto é, resolução de conflito ou ajuste;
+# o que veio da branch única pelo merge não é trabalho da frente e não aparece.
+
+=== 1e31c8ec872d183a14ed8c831f43542652ef5afa
+    autor: Claude <noreply@anthropic.com> · 2026-10-06 06:14:57 +0000
+    pais: f4121bdfe58e58ae0b3483455d251f5707dd0671
+    spec COM: comercial e logística (contratos e pedidos, expedição e entregas, painel comercial)
+A	docs/comercial/DECISOES.md
+A	docs/comercial/ESPECIFICACAO.md
+A	docs/comercial/verificacao/contas.py
+=== 2fccd42d92b86cc144a7db4d936d054b815ab473
+    autor: Claude <noreply@anthropic.com> · 2026-10-06 06:37:46 +0000
+    pais: 1e31c8ec872d183a14ed8c831f43542652ef5afa
+    spec COM: revisão por contraexemplo
+M	docs/comercial/DECISOES.md
+M	docs/comercial/ESPECIFICACAO.md
+M	docs/comercial/verificacao/contas.py
+A	docs/comercial/verificacao/sonda_base.py
+=== 498104dacb0b3ee9bc7d4e15e1a6751e0c68a35b
+    autor: Claude <noreply@anthropic.com> · 2026-10-06 06:56:20 +0000
+    pais: 2fccd42d92b86cc144a7db4d936d054b815ab473
+    COM P1: regras e estado do comercial (vendas, crédito, carga de saída, devolução, painel)
+M	tools/prototipo/v37/gen37/aprova_quem_decide_unit.js
+M	tools/prototipo/v37/gen37/areas/producao.py
+M	tools/prototipo/v37/gen37/cenario.py
+A	tools/prototipo/v37/gen37/comercial.js
+A	tools/prototipo/v37/gen37/comercial_unit.js
+A	tools/prototipo/v37/gen37/comercial_unit_test.py
+A	tools/prototipo/v37/gen37/dados_comercial.py
+M	tools/prototipo/v37/gen37/dados_producao.py
+M	tools/prototipo/v37/gen37/g2lib.js
+M	tools/prototipo/v37/gen37/os_aprov_lib_unit.js
+M	tools/prototipo/v37/gen37/producao.js
+M	tools/prototipo/v37/gen37/producao_unit.js
+=== 82312967b706b7535a6cbf64dc3be8eb54f30b5c
+    autor: Claude <noreply@anthropic.com> · 2026-10-09 11:19:03 +0000
+    pais: 498104dacb0b3ee9bc7d4e15e1a6751e0c68a35b
+    COM P2-P5: telas Contratos e pedidos, Expedição e entregas e Painel comercial no grupo Comercial
+M	tools/prototipo/v37/ferramentas/acoes_duplicadas.py
+M	tools/prototipo/v37/gen37/areas/indice.py
+M	tools/prototipo/v37/gen37/areas/producao.py
+A	tools/prototipo/v37/gen37/areas/vendas.py
+M	tools/prototipo/v37/gen37/ui37.py
+=== 5d84cc68fda1ba5386c5231d0c486fe718bcef99
+    autor: Claude <noreply@anthropic.com> · 2026-10-09 11:33:24 +0000
+    pais: 82312967b706b7535a6cbf64dc3be8eb54f30b5c
+    COM P6: Estoque de produto só com lotes; a grade Pedidos passa a Contratos e pedidos (D-C14, CE-05)
+M	tools/prototipo/v37/gen37/areas/producao.py
+M	tools/prototipo/v37/gen37/producao_fluxo_test.py
+=== d7386788c2a1229b3dd0d6cbc08b23dfe674cf94
+    autor: Claude <noreply@anthropic.com> · 2026-10-09 11:36:47 +0000
+    pais: 5d84cc68fda1ba5386c5231d0c486fe718bcef99
+    COM P7: Previsão e colheita › Por semana sem as colunas comerciais; obrig/of.ob saem (D-C14, CE-05)
+M	tools/prototipo/v37/gen37/areas/producao.py
+M	tools/prototipo/v37/gen37/dados_producao.py
+M	tools/prototipo/v37/gen37/producao.js
+M	tools/prototipo/v37/gen37/producao_unit.js
+=== f7d0fa6801cb9ca5c4b2d646f622af871eacd542
+    autor: Claude <noreply@anthropic.com> · 2026-10-09 11:36:49 +0000
+    pais: d7386788c2a1229b3dd0d6cbc08b23dfe674cf94 cdc185f551a9513d72734b18e4a869f921917c00
+    Merge branch 'claude/prototipo-v44' (cdc185f: SAF etapa única e etapa 2) na branch do Comercial
+MM	tools/prototipo/v37/gen37/g2lib.js
+=== 16b3974579931916811066c53f3b09eb5ecf681a
+    autor: Claude <noreply@anthropic.com> · 2026-10-09 12:53:45 +0000
+    pais: f7d0fa6801cb9ca5c4b2d646f622af871eacd542
+    COM: duplo clique sem erro, reservar antes de programar e primária só com o que dá para fazer
+M	tools/prototipo/v37/gen37/areas/producao.py
+M	tools/prototipo/v37/gen37/areas/vendas.py
+A	tools/prototipo/v37/gen37/reserva_duplo_clique_test.py
+=== 3044c7922ccdfa41306d3e8c6cfcf7890e062fe4
+    autor: Claude <noreply@anthropic.com> · 2026-10-09 13:35:33 +0000
+    pais: 16b3974579931916811066c53f3b09eb5ecf681a
+    COM A-17: a venda guarda a massa da sua unidade; legado de soja com a saca ambígua fica "Saca a conferir" até registrar a massa com a fonte
+M	tools/prototipo/v37/gen37/areas/producao.py
+M	tools/prototipo/v37/gen37/areas/vendas.py
+M	tools/prototipo/v37/gen37/comercial.js
+M	tools/prototipo/v37/gen37/comercial_unit.js
+M	tools/prototipo/v37/gen37/dados_comercial.py
+M	tools/prototipo/v37/gen37/producao.js
+M	tools/prototipo/v37/gen37/producao_unit.js
+M	tools/prototipo/v37/gen37/producao_unit_test.py
+=== c6b17da76b7d25e671c55c654b30e8cf3d099de4
+    autor: Claude <noreply@anthropic.com> · 2026-10-09 13:35:41 +0000
+    pais: 3044c7922ccdfa41306d3e8c6cfcf7890e062fe4
+    spec COM v1.2: A-17 (massa do compromisso e saca a conferir), D-C26 e D-C27, KC19-KC20
+M	docs/comercial/DECISOES.md
+M	docs/comercial/ESPECIFICACAO.md
+M	docs/comercial/verificacao/contas.py
+=== 4533879735a80141481ee8870d84dca288478b0c
+    autor: Claude <noreply@anthropic.com> · 2026-10-09 13:37:35 +0000
+    pais: c6b17da76b7d25e671c55c654b30e8cf3d099de4
+    COM A-17: venda encerrada sem a saca não suspende a oferta nem ressuscita quantidade ao registrar a massa depois
+M	tools/prototipo/v37/gen37/comercial.js
+M	tools/prototipo/v37/gen37/comercial_unit.js
+M	tools/prototipo/v37/gen37/producao.js
+=== d59fad00023bacd912fe6c613b9be79b6bdd69cf
+    autor: Claude <noreply@anthropic.com> · 2026-10-09 13:42:43 +0000
+    pais: 4533879735a80141481ee8870d84dca288478b0c
+    COM: teste de navegador do fluxo principal (menu, tarefa do proprietário, recusas e repetição, perfis, painel, 390 px, produção)
+A	tools/prototipo/v37/gen37/comercial_fluxo_test.py
+=== d7b91ff9afda405eb5fb7e1961f49d90e5151728
+    autor: Claude <noreply@anthropic.com> · 2026-10-09 14:35:27 +0000
+    pais: d59fad00023bacd912fe6c613b9be79b6bdd69cf
+    COM A-17: Estoque de produto diz o próximo passo do lote quando a venda compatível está com a saca a conferir
+M	docs/comercial/ESPECIFICACAO.md
+M	tools/prototipo/v37/gen37/areas/producao.py
+M	tools/prototipo/v37/gen37/producao_fluxo_test.py
+=== c7d48e961e695ed127da965026b5927f9c92a6f1
+    autor: Claude <noreply@anthropic.com> · 2026-10-09 16:34:19 +0000
+    pais: d7b91ff9afda405eb5fb7e1961f49d90e5151728 9fb09a50851d6c897d8ea5eb234047994a86a429
+    Merge branch 'claude/prototipo-v44' (9fb09a5: SAF-C01) na branch do Comercial
+=== bdc5ca831b87f1f5b7b11175c86f5893fd341c81
+    autor: Claude <noreply@anthropic.com> · 2026-10-09 17:43:22 +0000
+    pais: c7d48e961e695ed127da965026b5927f9c92a6f1
+    COM: Painel comercial sem "Ver vendas de …" como primária na linha em déficit (design system de 09/10, BOT-03/BOT-08)
+M	docs/comercial/DECISOES.md
+M	docs/comercial/ESPECIFICACAO.md
+M	tools/prototipo/v37/gen37/areas/vendas.py
+M	tools/prototipo/v37/gen37/comercial_fluxo_test.py
+=== 29cdc6e82ebc67e7449800f45f7a674f764ffda0
+    autor: Claude <noreply@anthropic.com> · 2026-10-09 22:37:46 +0000
+    pais: bdc5ca831b87f1f5b7b11175c86f5893fd341c81
+    COM: correções da revisão
+M	docs/comercial/DECISOES.md
+M	docs/comercial/ESPECIFICACAO.md
+M	tools/prototipo/v37/gen37/areas/producao.py
+M	tools/prototipo/v37/gen37/areas/vendas.py
+M	tools/prototipo/v37/gen37/comercial.js
+M	tools/prototipo/v37/gen37/comercial_fluxo_test.py
+A	tools/prototipo/v37/gen37/comercial_revisao_test.py
+M	tools/prototipo/v37/gen37/comercial_unit.js
+M	tools/prototipo/v37/gen37/g2lib.js
+M	tools/prototipo/v37/gen37/producao.js
+M	tools/prototipo/v37/gen37/producao_fluxo_test.py
+M	tools/prototipo/v37/gen37/producao_unit.js
+
+## 3. Autores na faixa
+     16 Claude <noreply@anthropic.com>

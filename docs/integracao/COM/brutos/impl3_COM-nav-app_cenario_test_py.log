@@ -1,0 +1,19 @@
+### app_cenario_test.py  17:13:26
+   pré-carga: OS-0430 liberada. REQ-52 reservou no Estoque: Glifosato 480 320 L, 2,4-D 806 160 L, Óleo m · REQ-52
+  OK  MB-01: OS-0430 na fila com retirada a confirmar e rodapé "Confirmar recebimento" (Confirmar recebimento · OS-0430)
+  OK  MB-01 com 3 ordens cabe na altura (excesso 0 px)
+  OK  MB-05: itens entregues com lote e embalagem
+  OK  MB-05: confirmar recebimento grava no cenário: Recebimento confirmado: Glifosato 480 320 L, 2,4-D 806 160 L, Óleo min
+  OK  MB-03: turno iniciado na OS-0430 (Em execução) e rodapé "Fechar turno"
+  OK  sem sinal e consumo pré-calculado (2 L/ha × 60 ha = 120 L)
+  OK  fechar 60 ha sem sinal: fila 1, realizado não muda, O.S. segue Em execução
+  OK  sinal volta: realizado 60 e recibo exibido · 1 registro enviado ao voltar o sinal · recibo REC-7742 · cada registro entrou um
+  OK  sem duplicar: novo sinal não soma de novo nem cria outro recibo
+  OK  novo turno: pausar e retomar mudam o selo e ficam no turno
+  OK  fechar 110 ha recusado junto ao campo (saldo 100 ha): Máximo 100 ha: é o saldo da ordem. | Informe quanto usou: a sugestão de 220 L passa do que
+  OK  MB-04: ocorrência OC-501 registrada na OS-0430
+  OK  MB-02det: apontamento enviado, ocorrência e próximo passo da ordem
+  OK  sem erros JS []
+  OK  Restaurar demonstração volta o cenário ao início (cenReset)
+15/15 ok · FALHAS: 0
+### exit 0 17:16:19

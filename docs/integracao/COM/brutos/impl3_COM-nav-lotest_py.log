@@ -1,0 +1,78 @@
+### lotest.py  17:03:05
+LO-01.dc.html
+  OK  tela atual destacada: Programe o transporte
+  OK  faixa por links LO-01..04
+  OK  sem buracos {{}} visíveis
+  OK  sem botões Editar nas linhas
+  OK  grades cabem sem rolagem horizontal []
+LO-02.dc.html
+  OK  tela atual destacada: Expeça as cargas Doca 1 ocupada · Carga 07 sem NF
+  OK  faixa por links LO-01..04
+  OK  sem buracos {{}} visíveis
+  OK  sem botões Editar nas linhas
+  OK  grades cabem sem rolagem horizontal []
+LO-02det.dc.html
+  OK  tela atual destacada: Expeça as cargas Doca 1 ocupada · Carga 07 sem NF
+  OK  faixa por links LO-01..04
+  OK  sem buracos {{}} visíveis
+  OK  sem botões Editar nas linhas
+  OK  grades cabem sem rolagem horizontal []
+LO-03.dc.html
+  OK  tela atual destacada: Acompanhe viagens VG-117 · recusa em RC-15
+  OK  faixa por links LO-01..04
+  OK  sem buracos {{}} visíveis
+  OK  sem botões Editar nas linhas
+  OK  grades cabem sem rolagem horizontal []
+LO-04.dc.html
+  OK  tela atual destacada: Controle fretes
+  OK  faixa por links LO-01..04
+  OK  sem buracos {{}} visíveis
+  OK  sem botões Editar nas linhas
+  OK  grades cabem sem rolagem horizontal []
+LO-02 · fila
+  OK  chamar bloqueia com doca 1 ocupada: Chamada bloqueada: doca 1 ocupada pelo T2 até a saída (lacre pendente; slot 08:35–09:40 ex
+  OK  T3 aguarda doca 1: T3 2 09:00 08:50 espera 1h02 · alerta Presente · carga pronta Aguarda doca 1 (T2
+  OK  carga do T3 pronta p/ carregar (coerente com Apto)
+  OK  Avaliar encaixe abre painel de folga/impacto
+  OK  encaixe bloqueado sem separação: Encaixe bloqueado: TR-0459 ainda a separar. Use Separar lotes (K26-11)
+  OK  painel Separar lotes aberto
+  OK  lotes filtrados por pedido; L27-013 desabilitado: ['Nenhum lote apto para este pedido', 'L27-013 · 3.690 sc · Bloqueado · INSP-88 [x]']
+  OK  separação de PV-028 recusada com motivo: Corrija os campos destacados; o que você preencheu foi mantido. | Separação recusada: L27-013 bloque
+  OK  TR-0459 só K26-11 apto; quarentena desabilitada
+  OK  quantidade acima da carga recusada junto ao campo
+  OK  TR-0459 separada: TR-0459 separada: 10.000 kg do K26-11 (Galpão 2) · saldo apto do lote 50.000 → 40.000 kg; 
+  OK  linha TR-0459 atualizada
+  OK  T4 chamado à doca 3 após separar: T4 chamado para a doca 3 às 10:00 (termina 10:55) · decisão 
+  OK  painel de chegada
+  OK  campo de hora presente
+  OK  exige identificação verificada
+  OK  T1 presente, entra depois do T3
+  OK  KPI no pátio atualizado
+  OK  chamada cita T1 depois do T3
+  OK  linha abre form de posição
+  OK  reordenação publica nova versão: Fila v5 publicada · T3 na posição 3 · motivo, autor e horário registra
+  OK  sem erros JS []
+LO-02det
+  OK  primária abre o lacre pela linha
+  OK  lacre registrado: Lacre LC-778120 registrado · checklist 5/5 · falta a autoriz
+  OK  autorização concedida (simulada)
+  OK  saída confirmada: Saída do T2 confirmada às 09:58 · estoque MZ-26-03 baixado 37,00 t uma única vez
+  OK  repetir não duplica
+  OK  sem erros JS
+LO-03
+  OK  VG-117 mostra caso RC-15 e pedido: VG-117 Mamão classe A · 9,4 t · PV-026 · L38-110 → Frutas Real · Vitória/ES saída 22/09 14:10 · chegada 18:40 (janela at
+  OK  link abre o caso RC-15 em VE-06
+  OK  VG-119 reprogramada pela linha
+LO-04
+  OK  contratação vincula VG-119
+  OK  contratar de novo é idempotente
+  OK  serviço encaminhado ao pagamento
+  OK  pedido de cotação simulado
+  OK  sem erros JS
+LO-01
+  OK  slot sobreposto na doca 1 é recusado: Slot não reservado: Doca 1 · granel ocupada por T3 nesse horário. Escolha outro 
+  OK  reprogramação preserva janela original
+  OK  sem erros JS
+
+RESULTADO: OK
+### exit 0 17:07:19

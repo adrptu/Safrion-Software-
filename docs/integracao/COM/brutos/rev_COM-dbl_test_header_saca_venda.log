@@ -1,0 +1,28 @@
+=== header
+mut ok
+mut2 ok
+antes ['22000', '12000'] header ['Confirmar saída da RM-0002']
+ok
+depois ['', ''] saida? False toast 
+erros JS 
+RESULTADO: OK 0/0
+=== saca
+xy [1353.265625, 971.8125]
+toast RS-0002: 125 sc do L10-031 reservados para o PV-030 (Coop Grão Sul). L10-031 disponível 34.420 sc · PV-030 coberto.
+reservas PV-030 [["RS-0001",232500,"Ativa","Comercial"],["RS-0002",7500,"Ativa","Dora (comercial)"]]
+painel botões ['×', 'Cancelar reserva', 'Abrir lote ›', 'Cancelar reserva', 'Abrir lote ›', 'Encerrar saldo', 'Fechar', 'Programar carga do PV-030']
+erros JS 
+RESULTADO: OK 0/0
+=== venda
+mut ok
+Coop Grão Sul ok
+Soja em grão ok
+Pronta entrega ok
+xy [1353.921875, 971.875]
+toast RS-0002: 100 sc do L10-031 reservados para o PV-039 (Coop Grão Sul). L10-031 disponível 34.445 sc · PV-039 coberto.
+PV-039 {"q":6000} reservas PV-039 [["RS-0002",6000,"Ativa"]]
+painel botões ['×', 'Cancelar reserva', 'Abrir lote ›', 'Encerrar saldo', 'Fechar', 'Programar carga do PV-039']
+erros JS 
+RESULTADO: OK 0/0
+
+[exited with code 0]

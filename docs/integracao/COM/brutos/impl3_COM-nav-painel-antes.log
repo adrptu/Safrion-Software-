@@ -1,0 +1,15 @@
+### comercial_fluxo_test.py painel  17:24:58
+== painel · AC-11
+OK  A-17 semente: soja Estoque (2025/26) e Safra 2026/27 "suspenso · saca a conferir" (PV-030; CT-203, CRE-0095, BT-090), sem número inventado · ['Estoque (2025/26) 38.420 sc apto 0 sc + saca a conferir PV-030 3.875 sc suspenso saca a conferir: PV-030 Suspenso', 'Safra 2026/27 68.180 sc publicada 0 sc + saca a conferir CT-203, CRE-0095, BT-090 0 sc suspenso saca a conferir: CT-203, CRE-0095, BT-090 Suspenso']
+OK  A-17 semente: sem linha com livre, a primária é o passo que destrava: "Registrar a saca do PV-030" (abre a venda) · ['Registrar a saca do PV-030']
+OK  AC-11 soja (saca de 60 kg registrada): Estoque (2025/26) 38.420 sc apto · 4.000 sc · 3.875 sc · 34.420 sc · Livre · Estoque (2025/26) 38.420 sc apto 4.000 sc PV-030 3.875 sc 34.420 sc Livre
+OK  AC-11 soja: Safra 2026/27 68.180 sc publicada · 19.900 sc · 48.280 sc · Safra 2026/27 68.180 sc publicada 19.900 sc CT-203, CRE-0095, BT-090 0 sc 48.280 sc Livre
+OK  AC-11 mamão: Estoque 0 kg apto, déficit 10.000 kg; S41 sem versão publicada, déficit 30.000 kg · ['Estoque 0 kg apto 10.000 kg PV-036 0 kg déficit 10.000 kg Déficit', 'S41 (05/10–11/10) sem versão publicada 30.000 kg PV-038 0 kg déficit 30.000 kg Déficit']
+OK  AC-11 preço: soja R$ 131,00/sc contratado; mamão R$ 3,05/kg contratado e R$ 3,00/kg realizado; a receber R$ 91.470,00; referência sintética · A RECEBER (A VENCER) R$ 91.470,00 próximo: Frutas Real R$ 91.470,00 em 15/10 VENCIDO (COBRAR) R$ 0,00 nada vencido ENTREGUE NOS ÚLTIMOS 30 DIAS R$ 91.470,00 saídas de venda desde 27/08 Oferta e compromissos Produto › período: oferta (estoque apto ou previsão publicada) × compromissos (vendas) × livr
+OK  AC-11 sem seleção, a primária é vender a primeira linha com livre: "Vender Soja em grão · Estoque (2025/26)" · ['Vender Soja em grão · Estoque (2025/26)']
+FALHOU déficit (mamão S41): nenhuma primária, nem "Ver …" (BOT-03/BOT-08 do design system de 09/10); o painel diz o passo e lista o PV-038 com o elo · [['Ver vendas de S41 (05/10–11/10)'], 'Mamão Formosa · fruta de campo › S41 (05/10–11/10) Déficit Período futuro: previsão publicada × vendas futuras × PRÓXIMO PASSO Livre = sem versão publicada (0) − (vendas futuras 30.000 kg − já cobertas por lote 0 kg) = −30.000 kg. OFERTA sem versão publicada CO
+OK  selecionada a safra 26/27, a primária é "Vender Soja em grão · Safra 2026/27" · ['Vender Soja em grão · Safra 2026/27']
+OK  #nova:<produto>:<período> abre "Registrar venda" com Soja em grão, Venda futura e Safra 2026/27 herdados · ['Venda', 'Soja em grão', 'Venda futura', 'Safra 2026/27 · livre 48.280 sc']
+OK  painel: nenhuma página com erro de JS
+RESULTADO: FALHOU 10/11
+### exit 1 17:27:10
