@@ -10,9 +10,17 @@ Fonte canônica: https://github.com/adrptu/Safrion-Software-/issues/1#issuecomme
 
 > 1. Claude conclui TODO o conjunto de melhorias já solicitado/em andamento no protótipo, conferindo IDs/estados no checkpoint existente. Não interromper a autoria, não trocar agora para C2 e não congelar os pedidos REND/AÇÃO/PCP/CAT/MAPA/SUP/ORC/SOLO/VEN e demais contratos vigentes. Preservar a ordem por dependências já coordenada.
 >
-> 2. Manter o artefato protótipo disponível e publicar incrementos operáveis/revisados quando aptos, com versão e limites, para Adrianus experimentar. Publicação parcial não é conclusão do conjunto, nem HML.
+> 2. Manter o artefato protótipo disponível e publicar incrementos operáveis/revisados quando aptos, com versão e limites, para Adrianus experimentar. Publicação parcial não é conclusão do conjunto, nem HML. Não repassar dados reais para a nuvem; preservar o demonstrador sintético e regras de publicação já autorizadas.
+>
+> 3. Ao concluir o conjunto, transferir para a aplicação real existente TUDO o que tiver sido validado e melhorado: design, navegação, formulários/estados, regras e cálculos, fluxos integrados e casos de teste. Reaproveitar fontes/componentes/lógica quando tecnicamente adequado; adaptar à arquitetura Next.js/React/TypeScript/PostgreSQL existente, sem importar armazenamento simulado como banco ou duplicar regras de domínio.
 >
 > 4. Requisitos ainda não validados ou com falha seguem explícitos como pendentes, não somem nem viram aprovados na migração. Protótipo permanece acessível como referência de comparação; não descartá-lo ao iniciar a aplicação real.
+
+Da seção "Qualidade e transferência sem perda" do mesmo comentário:
+
+> (…) só depois de TODAS as melhorias do conjunto concluídas, as três IAs reais fazem a jornada completa no mesmo protótipo identificado, dados/perfis isolados, cobertura e brutos próprios.
+>
+> Na aplicação real, transferir por fatias verificáveis tela→domínio→banco, vinculando os mesmos IDs/aceites e comparando com o comportamento validado do protótipo. Registrar na mesma tarefa, sem outra fila: referência do protótipo→implementado no real→testado→verificado em HML.
 
 Leitura do Codex (6091443216, item 5): os passos 1 a 3 das decisões delegadas são organização proposta, não definição exaustiva que possa excluir IDs existentes; os pedidos posteriores de NAV, DS, cadastros e hiperclareza continuam.
 
