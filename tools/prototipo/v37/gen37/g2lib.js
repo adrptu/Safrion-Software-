@@ -288,6 +288,13 @@ function g2navvals(self,v,nav){ const rec=(self.state.menuRec===undefined)?g2men
   // com a barra recolhida, clicar no grupo abre a barra com esse grupo aberto
   v['nav'+i+'_tog']=()=>{ const n=Object.assign({},self.state.nav||{}); if(rec){ n[i]=true; fixa(false); self.setState({nav:n,menuRec:false}); return; } n[i]=!open; self.setState({nav:n}); }; }); }
 
+// V55-RESP-01: altura do aviso temporário (role=status fixo no pé) medida no aviso real, com a quebra do texto na largura atual; 0 sem
+// aviso. Com a área de ações em fluxo (altura curta) a área reserva a faixa dele no fim da rolagem e nos controles (ACOES_CSS: distância
+// do pé + safe-area + esta altura), em vez de uma altura estimada. Não depende da altura da janela (abrir o teclado não a muda). Medida a
+// cada troca do aviso (componentDidUpdate, no mesmo quadro) e no quadro do g2glob (redimensionar, rolar, mudar a página)
+function g2avisoH(){ try{ let h=0; document.querySelectorAll('[role=status]').forEach(t=>{ const cs=getComputedStyle(t); if(cs.position!=='fixed'||cs.bottom==='auto') return;
+    const r=t.getBoundingClientRect(); if(r.height>2&&r.width>2) h=Math.max(h,Math.ceil(r.height)); });
+  const v=h+'px', de=document.documentElement; if(de.style.getPropertyValue('--aviso-h')!==v) de.style.setProperty('--aviso-h',v); }catch(e){} }
 (function g2glob(){ if(typeof document==='undefined'||window.__g2glob) return; window.__g2glob=1;
   const vis=(e)=>!!e&&e.getClientRects().length>0;
   const rotulo=()=>[...document.querySelectorAll('.etp-chk')].find(vis);
@@ -321,7 +328,7 @@ function g2navvals(self,v,nav){ const rec=(self.state.menuRec===undefined)?g2men
       const vis=Math.max(96,Math.floor(cw-h.getBoundingClientRect().width-4)); r.style.setProperty('--g2cols',hs.map(x=>x===h?c0:'fit-content('+vis+'px)').join(' ')); }
     r.__c0w=cw; r.style.setProperty('--g2c0w',Math.round(h.getBoundingClientRect().width)+'px'); r.style.setProperty('--g2hh',Math.round(hr.getBoundingClientRect().height)+'px'); };
   const faixa=()=>{ const col=document.querySelector('.ml-tog+div'); if(!col) return; const nv=col.querySelector(':scope>.etp'); col.style.setProperty('--etp-h',(nv&&nv.getClientRects().length?nv.offsetHeight:0)+'px'); };
-  const acoes=()=>{ const a=[...document.querySelectorAll('main .acoes')].find(vis); const h=(a&&getComputedStyle(a).position==='sticky')?Math.round(a.getBoundingClientRect().height):0; document.documentElement.style.setProperty('--acoes-h',h+'px'); };
+  const acoes=()=>{ const a=[...document.querySelectorAll('main .acoes')].find(vis); const h=(a&&getComputedStyle(a).position==='sticky')?Math.round(a.getBoundingClientRect().height):0; document.documentElement.style.setProperty('--acoes-h',h+'px'); g2avisoH(); };
   const mais=()=>{ faixa(); acoes(); document.querySelectorAll('.g2rola,.rola').forEach(r=>{ if(r.classList.contains('g2rola')) presa(r); if(r.scrollWidth-r.clientWidth-r.scrollLeft>2) r.setAttribute('data-mais',''); else r.removeAttribute('data-mais'); }); };
   // o navegador não rola até um controle só em parte visível na caixa da tabela (ex.: botão do cabeçalho rente à borda, ou por
   // trás da coluna presa): ao receber o foco ele vem inteiro para a vista (a linha inteira e a coluna presa não precisam)

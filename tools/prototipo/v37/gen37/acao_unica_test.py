@@ -216,8 +216,12 @@ try:
         MAT=[('360x800',360,800,3,True),('800x360',800,360,3,True),('768x1024',768,1024,2,True),('1024x768',1024,768,2,True),
              ('1280x720',1280,720,1,False),('1440x900',1440,900,1,False),('zoom200',720,450,2,False)]
         # medida da área de ações: alcançável (rolando), não cobre a última linha do conteúdo, o foco levado à vista não fica sob ela,
-        # a página não rola de lado, um avanço só; com a faixa estreita, "Etapa i de n"
-        AREA=r"""(()=>{const vis=e=>{const r=e.getBoundingClientRect(); return r.width>1&&r.height>1&&getComputedStyle(e).display!=='none';};
+        # a página não rola de lado, um avanço só; o aviso temporário não fica sobre a área presa nem, no fim da rolagem, sobre um
+        # controle dela (V55-RESP-01). A medida espera dois quadros pintados (rAF, até 6 s): o g2lib põe a altura da área presa
+        # (--acoes-h, que sobe o aviso) num rAF, e com a máquina carregada o Chrome headless pinta um quadro a cada ~2 s; sem a espera
+        # a medida lia o estado entre a mutação e o quadro, que a pessoa nunca vê pintado (aviso sobre a área a 1440×900, V55-RESP-01)
+        AREA=r"""(async()=>{ await new Promise(ok=>{ let k=0; const f=()=>{ if(++k>2) ok(); else requestAnimationFrame(f); }; f(); setTimeout(ok,6000); });
+          const vis=e=>{const r=e.getBoundingClientRect(); return r.width>1&&r.height>1&&getComputedStyle(e).display!=='none';};
           const a=document.querySelector('[data-acoes]'); if(!a||!vis(a)) return {semArea:true};
           const col=document.querySelector('.ml-tog+div'); const m=document.querySelector('main[data-scroll]'); const R=(col&&col.scrollHeight>col.clientHeight+1&&getComputedStyle(col).overflowY==='auto')?col:m;
           const out={pos:getComputedStyle(a).position, lado:document.documentElement.scrollWidth>innerWidth+1};
@@ -226,30 +230,87 @@ try:
           out.cmd=b.innerText.trim(); out.alcanca=!!h&&(b===h||b.contains(h))&&rb.bottom<=innerHeight+1&&rb.top>=0;
           R.scrollTop=R.scrollHeight; const blocos=[...m.children].filter(x=>vis(x)&&!x.contains(a)&&!x.matches('.acoes')); const ult=blocos[blocos.length-1];
           const ra=a.getBoundingClientRect(); const ru=ult?ult.getBoundingClientRect():null; out.cobreUltima=!!ru&&ru.bottom>ra.top+1&&ru.bottom<=innerHeight;
+          const av=[...document.querySelectorAll('[role=status]')].find(x=>vis(x)&&getComputedStyle(x).position==='fixed'); out.aviso=av?av.innerText.trim().slice(0,40):'';
+          out.avisoSobreCmd=av?[...a.querySelectorAll('button,a')].filter(vis).filter(x=>{ const r=x.getBoundingClientRect(); const y=r.top+r.height/2; if(y<0||y>innerHeight-1) return false; const hx=document.elementFromPoint(Math.min(r.left+r.width/2,innerWidth-2),y); return !!hx&&av.contains(hx); }).map(x=>x.innerText.trim().slice(0,30)):[];
           const foc=[...m.querySelectorAll('button,a[href],input,select,[tabindex="0"]')].filter(x=>vis(x)&&!a.contains(x)&&!x.closest('[role=dialog]'));
           const f=foc[Math.max(0,foc.length-2)]; R.scrollTop=0; if(f){ f.focus(); const rf=f.getBoundingClientRect(); const hf=document.elementFromPoint(Math.min(Math.max(rf.left+4,1),innerWidth-2),Math.min(rf.top+rf.height/2,innerHeight-1)); out.focoCoberto=!(hf&&(f===hf||f.contains(hf)||hf.contains(f))); out.foco=(f.innerText||f.getAttribute('aria-label')||f.tagName).trim().slice(0,30); }
           const at=document.querySelector('.etp-atual'); out.etapa=at&&vis(at)?at.innerText.replace(/\s+/g,' ').trim():''; out.avancos=a.querySelectorAll('[data-acao=avancar]').length;
           const t=document.querySelector('[role=status]'); const rt=t?t.getBoundingClientRect():null; out.toastSobre=!!(rt&&rt.height>2&&out.pos==='sticky'&&rt.bottom>a.getBoundingClientRect().top+1&&rt.top<a.getBoundingClientRect().bottom); return out;})()"""
-        res={}; ruins={}
+        # progresso realmente renderizado (medido na carga, casca no topo). A faixa decide o modo por container query (ui37 _ETP_LIM: SAF,
+        # 4 etapas, compacta abaixo de 640 px de faixa; CMP, 6 etapas, abaixo de 900 px), não pela largura da janela:
+        #   compacta → "Etapa i de n · Nome" visível e livre;
+        #   lista    → as n etapas visíveis, inteiras (sem texto cortado), dentro da faixa e da janela, sem sobreposição, e a atual
+        #              (aria-current=step, começa por "i ") visível e livre (elementFromPoint).
+        # Nos dois modos, o contexto (chip "Safra 2026/27…" do cabeçalho) visível e livre.
+        PROG=r"""((n,i)=>{ const N=s=>(s||'').replace(/\s+/g,' ').trim();
+          const vis=e=>{ if(!e) return false; const r=e.getBoundingClientRect(); const cs=getComputedStyle(e); return r.width>1&&r.height>1&&cs.display!=='none'&&cs.visibility!=='hidden'; };
+          const R=e=>{ const r=e.getBoundingClientRect(); return [Math.round(r.left),Math.round(r.top),Math.round(r.width),Math.round(r.height)]; };
+          const livre=e=>{ const r=e.getBoundingClientRect(); const x=Math.min(Math.max(r.left+r.width/2,1),innerWidth-2), y=r.top+r.height/2; if(y<0||y>innerHeight-1) return false; const h=document.elementFromPoint(x,y); return !!h&&(h===e||e.contains(h)); };
+          const nav=document.querySelector('.etp-ind'); if(!nav) return {ok:false,semFaixa:true};
+          const rn=nav.getBoundingClientRect(); const at=nav.querySelector('.etp-atual'); const comp=vis(at); const ol=nav.querySelector('ol.etp-itens');
+          const out={modo:comp?'compacta':'lista', faixa:R(nav), classe:nav.className};
+          if(comp){ out.texto=N(at.innerText); out.ok=out.texto.startsWith('Etapa '+i+' de '+n+' · ')&&livre(at); }
+          else { const its=ol?[...ol.children].filter(vis):[]; const cur=ol&&ol.querySelector('[aria-current=step]'); let sob=0;
+            for(let x=0;x<its.length;x++) for(let y=x+1;y<its.length;y++){ const a=its[x].getBoundingClientRect(), b=its[y].getBoundingClientRect(); if(Math.min(a.right,b.right)-Math.max(a.left,b.left)>1&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>1) sob++; }
+            const fora=its.filter(x=>{ const r=x.getBoundingClientRect(); return r.left<Math.max(rn.left,0)-1||r.right>Math.min(rn.right,innerWidth)+1||r.top<-1||r.bottom>innerHeight+1; }).map(x=>N(x.innerText).slice(0,20));
+            const corte=its.filter(x=>[x,...x.querySelectorAll('*')].some(y=>vis(y)&&!y.classList.contains('etp-sr')&&(y.scrollWidth>y.clientWidth+1&&getComputedStyle(y).overflowX!=='visible'))).map(x=>N(x.innerText).slice(0,20));
+            out.itens=its.length; out.atual=cur?N(cur.innerText).slice(0,60):''; out.atualRet=cur?R(cur):null; out.atualLivre=!!cur&&livre(cur); out.sob=sob; out.fora=fora; out.corte=corte;
+            out.ok=its.length===n&&out.atual.startsWith(i+' ')&&out.atualLivre&&sob===0&&!fora.length&&!corte.length; }
+          const ch=[...document.querySelectorAll('header *')].find(e=>e.children.length===0&&/^Safra 2026\/27/.test(N(e.innerText))); out.contexto=ch?N(ch.innerText):''; out.contextoOk=!!ch&&vis(ch)&&livre(ch);
+          return out; })"""
+        res={}; ruins={}; prog={}
         for tag,w,h,e,t in MAT:
-            for pg,hs,alvo in (('SAF','#saf=S2627&etapa=6',6),('CMP','#saf=S2627',3)):
+            for pg,hs,alvo,n in (('SAF','#saf=S2627&passo=demanda',4,4),('CMP','#saf=S2627',3,6)):   # passo=demanda = etapa 4 de 4 (o etapa=N antigo é lido na numeração de 6)
                 abre(pg,w,h,e,t,hash=hs,espera=.6,limpa=(tag=='360x800'));
                 if pg=='CMP': etapa(alvo)
-                time.sleep(.2); m=J(AREA); res[f'{pg} {tag}']=m
-                ruim=m.get('semArea') or not m['alcanca'] or m['cobreUltima'] or m['focoCoberto'] or m['lado'] or m['avancos']>1 or m['toastSobre'] or (w<=800 and not m['etapa'].startswith('Etapa '))
+                time.sleep(.2); pr=J(f"({PROG})({n},{alvo})"); prog[f'{pg} {tag}']=pr
+                if tag in ('800x360','768x1024'): shot(f'{pg.lower()}_{tag}_progresso')
+                m=J(AREA); m['progresso']=pr; res[f'{pg} {tag}']=m
+                ruim=m.get('semArea') or not m['alcanca'] or m['cobreUltima'] or m['focoCoberto'] or m['lado'] or m['avancos']>1 or m['toastSobre'] or m['avisoSobreCmd'] or not pr.get('ok') or not pr.get('contextoOk')
                 if ruim: ruins[f'{pg} {tag}']=m
                 if tag in ('360x800','800x360','zoom200'): shot(f'{pg.lower()}_{tag}')
-        info('área de ações por dimensão',{k:(v.get('pos'),v.get('cmd'),v.get('etapa','')[:22]) for k,v in res.items()})
-        chk('17 matriz RESPONSIVIDADE (7 dimensões × SAF etapa 6 e CMP etapa 3) · área de ações alcançável, não cobre a última linha nem o foco nem o aviso, sem rolagem lateral, um avanço; no estreito "Etapa i de n"', not ruins, ruins)
+        info('área de ações por dimensão',{k:(v.get('pos'),v.get('cmd'),v.get('etapa','')[:22],v.get('aviso','')[:20]) for k,v in res.items()})
+        info('progresso por dimensão',{k:(v.get('modo'),v.get('texto') or v.get('atual','')[:30],v.get('faixa',[0,0,0])[2],v.get('contexto')) for k,v in prog.items()})
+        chk('17 matriz RESPONSIVIDADE (7 dimensões × SAF etapa 4 de 4 e CMP etapa 3 de 6) · área de ações alcançável, não cobre a última linha nem o foco; o aviso não fica sobre a área presa nem sobre um controle dela no fim da rolagem; sem rolagem lateral, um avanço; progresso renderizado: faixa compacta "Etapa i de n · Nome" ou a lista completa inteira com a atual visível, e o contexto (safra) visível', not ruins, ruins)
         # 18 · teclado virtual aberto (360×800 → 360×420, janela redimensionada pelo teclado): campo focado e comando alcançáveis
         abre('SAF',360,800,3,True,hash='#saf=S2627&etapa=2'); J("(()=>{const i=document.querySelector('main input[type=search]'); i.scrollIntoView({block:'center'}); i.focus();})()")
         c.aparelho(360,420,3,True); time.sleep(.5)
         kv=J(r"""(()=>{const i=document.activeElement; const r=i.getBoundingClientRect(); const h=document.elementFromPoint(Math.min(r.left+10,innerWidth-2),Math.min(r.top+r.height/2,innerHeight-1));
           const a=document.querySelector('[data-acoes]'); const b=a.querySelector('[data-acao=avancar],[data-acao=resolver]'); const vis=r.top>=0&&r.bottom<=innerHeight;
           b.scrollIntoView({block:'center'}); const rb=b.getBoundingClientRect(); const hb=document.elementFromPoint(rb.left+rb.width/2,rb.top+rb.height/2);
-          return {campo:i.type, campoVisivel:vis, campoLivre:!!h&&(h===i||i.contains(h)||h.closest('label')===i.closest('label')), pos:getComputedStyle(a).position, cmd:b.innerText.trim(), cmdAlcanca:!!hb&&(hb===b||b.contains(hb))};})()""")
+          const av=[...document.querySelectorAll('[role=status]')].find(x=>x.getClientRects().length&&x.getBoundingClientRect().height>2&&getComputedStyle(x).position==='fixed');
+          return {campo:i.type, campoVisivel:vis, campoLivre:!!h&&(h===i||i.contains(h)||h.closest('label')===i.closest('label')), pos:getComputedStyle(a).position, cmd:b.innerText.trim(), cmdAlcanca:!!hb&&(hb===b||b.contains(hb)),
+            cmdRet:[Math.round(rb.top),Math.round(rb.bottom)], noCentro:hb?(hb.getAttribute('role')||hb.tagName):'', aviso:av?[av.innerText.trim().slice(0,40),Math.round(av.getBoundingClientRect().top),Math.round(av.getBoundingClientRect().bottom)]:null};})()""")
         shot('saf_360x420_teclado')
         chk('18 teclado virtual aberto (360×420) · a busca focada continua visível e livre; a área de ações volta ao fluxo (static) e o comando é alcançável rolando', kv['campoVisivel'] and kv['campoLivre'] and kv['pos']=='static' and kv['cmdAlcanca'], kv)
+        # 18b/18c · V55-RESP-01 (proteção de regressão): com o aviso temporário REAL na tela (fixo no pé), a área em fluxo não fica sob ele:
+        #       no fim da rolagem nenhum controle da área está sob o aviso (elementFromPoint no centro de cada um) e o toque real
+        #       (Input.dispatchTouchEvent) no centro de "Dimensionar operações ›", depois de rolar e com o aviso ainda na tela, avança à
+        #       etapa 3. 18b: "Safra aberta…" (ao abrir). 18c: o aviso mais longo da etapa 2 ("Aplicar plano em 4 cultivos" com a P2 em
+        #       sobreposição, ~340 caracteres) com env(safe-area-inset-bottom) = 34 px: a folga vem da faixa medida do aviso (--aviso-h),
+        #       não de uma altura estimada. Antes da correção o centro caía no aviso e o toque se perdia.
+        FIM18=r"""(()=>{const col=document.querySelector('.ml-tog+div'); col.scrollTop=col.scrollHeight; const a=document.querySelector('[data-acoes]');
+          const av=[...document.querySelectorAll('[role=status]')].find(x=>x.getClientRects().length&&x.getBoundingClientRect().height>2&&getComputedStyle(x).position==='fixed');
+          const cs=[...a.querySelectorAll('button,a')].filter(x=>x.getClientRects().length).map(x=>{ const r=x.getBoundingClientRect(); const h=document.elementFromPoint(r.left+r.width/2,Math.min(r.top+r.height/2,innerHeight-1)); return [x.innerText.trim().slice(0,30),Math.round(r.top),Math.round(r.bottom),!!h&&(h===x||x.contains(h)),!!h&&!!h.closest('[role=status]')]; });
+          const alc=[...a.querySelectorAll('button,a')].filter(x=>x.getClientRects().length).map(x=>{ x.scrollIntoView({block:'nearest'}); const r=x.getBoundingClientRect(); const h=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2); return !!h&&(h===x||x.contains(h)); });
+          const b=a.querySelector('[data-acao=avancar]'); b.scrollIntoView({block:'center'}); const rb=b.getBoundingClientRect(); const hb=document.elementFromPoint(rb.left+rb.width/2,rb.top+rb.height/2);
+          const av2=[...document.querySelectorAll('[role=status]')].find(x=>x.getClientRects().length&&x.getBoundingClientRect().height>2&&getComputedStyle(x).position==='fixed');
+          return {aviso:av?[av.innerText.trim().length,Math.round(av.getBoundingClientRect().top),Math.round(av.getBoundingClientRect().bottom)]:null, avisoH:getComputedStyle(document.documentElement).getPropertyValue('--aviso-h'),
+            controles:cs, alcancaveis:alc, ponto:[rb.left+rb.width/2,rb.top+rb.height/2], noPonto:!!hb&&(hb===b||b.contains(hb)), avisoNoToque:!!av2};})()"""
+        for cid,av,sf in (('18b','carga',0),('18c','longo',34)):
+            abre('SAF',360,800,3,True,hash='#saf=S2627&etapa=2'); c.call('Emulation.setSafeAreaInsetsOverride',{'insets':{'bottom':sf,'bottomMax':sf}})
+            J("(()=>{const i=document.querySelector('main input[type=search]'); i.scrollIntoView({block:'center'}); i.focus();})()")
+            c.aparelho(360,420,3,True); time.sleep(.3); prep=''
+            if av=='longo':
+                prep=[acao('resolver',.6), J("(()=>{const d=document.querySelector('aside[role=dialog]'); const b=d&&[...d.querySelectorAll('button')].filter(b=>b.getClientRects().length).find(b=>b.innerText.trim().startsWith('Aplicar plano')); if(!b) return 'sem Aplicar'; b.click(); return b.innerText.trim();})()")]; time.sleep(.5)
+            fim=J(FIM18); e0=est()['etapa']; c.toque(*fim['ponto']); time.sleep(.6); e1=est()['etapa']; shot(f'saf_360x420_toque_avanco_{av}')
+            c.call('Emulation.setSafeAreaInsetsOverride',{'insets':{'bottom':0,'bottomMax':0}})
+            # 18b: aviso curto, toda a área livre no fim da rolagem. 18c: o aviso longo + safe-area deixam acima dele menos altura que a área
+            # (e a faixa de etapas presa no topo): no fim da rolagem nenhum controle fica sob o AVISO, e cada um, levado à vista (como o foco por
+            # Tab), fica livre
+            livres=all(x[3] for x in fim['controles']) if av=='carga' else all(fim['alcancaveis'])
+            chk(f'{cid} aviso temporário real na tela (360×420, teclado aberto, aviso {av}, safe-area {sf} px) · no fim da rolagem nenhum controle da área fica sob o aviso'+(' (todos livres)' if av=='carga' else '; cada controle levado à vista fica livre')+'; o toque real em "Dimensionar operações ›" depois de rolar, com o aviso ainda na tela, leva da etapa 2 à 3',
+                bool(fim['aviso']) and (av!='longo' or fim['aviso'][0]>300) and fim['controles'] and not any(x[4] for x in fim['controles']) and livres and all(fim['alcancaveis']) and fim['noPonto'] and fim['avisoNoToque'] and e0==2 and e1==3, [prep,fim,e0,e1])
         # 19 · inserção repetitiva com o teclado aberto (contraprova Gemini): 16ª parcela no "Dividir" do T4; uma instância de "+ Adicionar parcela",
         #      foco no nome da parcela nova, à vista e fora do rodapé do painel; contexto (talhão) mantido
         abre('SAF',360,420,3,True,hash='#saf=S2627&etapa=2'); r=J("(()=>{const b=[...document.querySelectorAll('main button')].filter(b=>b.getClientRects().length&&b.innerText.trim()==='Dividir')[0]; if(!b) return 'sem Dividir'; b.click(); return 'ok';})()"); time.sleep(.6)

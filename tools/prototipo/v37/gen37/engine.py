@@ -1046,6 +1046,7 @@ MOBILE_CSS=("[data-mroot]{max-width:var(--mw);max-height:100vh;max-height:100dvh
 # do conteúdo, alcançável por rolagem. O foco levado à vista desconta a altura dela (scroll-padding, medido pelo g2lib) e o
 # aviso temporário sobe acima dela. No estreito, empilha mantendo a ordem: nota, retorno, avanço/primária.
 # =====================================================================================
+AVISO_PE='22px'   # distância do aviso temporário (G2_TOAST) ao pé da janela, sem a área de ações presa; a reserva da área em fluxo usa a mesma
 ACOES_CSS=(".acoes{position:sticky;bottom:0;z-index:6;display:flex;flex-direction:column;gap:6px;margin-top:2px;padding:10px 0 2px;"
     "background:#F4F6F3;border-top:1px solid #E4E9E5;box-shadow:0 -8px 12px -12px rgba(21,32,26,.35)}"
     ".acoes-nota{margin:0;font-size:12.8px;line-height:1.4;color:#5B4300;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px}"
@@ -1062,8 +1063,14 @@ ACOES_CSS=(".acoes{position:sticky;bottom:0;z-index:6;display:flex;flex-directio
     "@media (pointer:coarse){.acoes :is(.acoes-sec,.acoes-prim){min-height:44px}}"
     # estreito: botões na largura disponível, sem comprimir a barra; ordem visual = ordem de leitura/Tab (retorno, avanço, primária)
     "@media (max-width:640px){.acoes-linha{flex-wrap:wrap}.acoes-esp{display:none}.acoes :is(.acoes-sec,.acoes-prim){flex:1 1 140px;white-space:normal;text-align:center}}"
-    # altura curta: a casca rola inteira (ui37) e a área volta ao fluxo, no fim do conteúdo
-    "@media (max-height:560px){.acoes{position:static;box-shadow:none}}"
+    # altura curta: a casca rola inteira (ui37) e a área volta ao fluxo, no fim do conteúdo. V55-RESP-01: em fluxo, o aviso temporário
+    # (role=status, fixo a AVISO_PE do pé) ficava sobre os botões da área no fim da rolagem e o toque caía no aviso. A área reserva a faixa
+    # do aviso real: AVISO_PE + safe-area + altura medida do aviso (--aviso-h, g2lib: a do aviso na tela, com a quebra do texto; 0 sem
+    # aviso) + 8 px, no fim da rolagem (margem) e nos controles (margem de rolagem): rolar até o fim, centralizar ou levar o foco por Tab
+    # deixa o comando acima do aviso, qualquer que seja o tamanho dele. Em fluxo a área não sobe o aviso: --acoes-h = 0 já no CSS, sem
+    # esperar o quadro do g2lib (ao abrir o teclado o aviso vai logo para o pé, onde a reserva conta com ele)
+    "@media (max-height:560px){:root{--acoes-h:0px!important}.acoes{position:static;box-shadow:none;margin-bottom:calc("+AVISO_PE+" + env(safe-area-inset-bottom,0px) + var(--aviso-h,0px) + 8px)}"
+    ".acoes :is(button,a){scroll-margin-bottom:calc("+AVISO_PE+" + env(safe-area-inset-bottom,0px) + var(--aviso-h,0px) + 8px)}}"
     # painel lateral com rodapé preso: o campo focado (teclado aberto) não fica sob o rodapé
     "aside[role=dialog]{scroll-padding-bottom:84px}"
     # leitor de tela: palavra do estado da etapa sem depender da cor
@@ -1441,7 +1448,8 @@ ENGINE_JS2=ENGINE_JS2.replace("    return v;\n  }\n}","""    v.g2toast = this.st
     if (typeof assinAvisoVals === 'function') assinAvisoVals(this, v);   // faixa de cobrança (PLAT-01, R11): só as telas da organização têm o buraco
     return v;
   }
-  componentDidUpdate(pp, ps) { if (this.state.g2toast && this.state.g2toast !== (ps || {}).g2toast) { clearTimeout(this._g2t); this._g2t = setTimeout(() => this.setState({ g2toast: '' }), 4500); } }
+  componentDidUpdate(pp, ps) { if (this.state.g2toast !== (ps || {}).g2toast && typeof g2avisoH === 'function') g2avisoH();   /* V55-RESP-01: altura do aviso medida na troca */
+    if (this.state.g2toast && this.state.g2toast !== (ps || {}).g2toast) { clearTimeout(this._g2t); this._g2t = setTimeout(() => this.setState({ g2toast: '' }), 4500); } }
 }""")
 assert 'g2vals' in ENGINE_JS2, 'patch do motor falhou'
 EXTRAJS=['']  # JS específico da tela (function EXTRAVALS(self,v){...}) — processos usam
@@ -1458,4 +1466,6 @@ def engine():
     grids=json.dumps(GRIDS,ensure_ascii=False).replace('</','<\\/')
     nav=json.dumps(NAVSPEC,ensure_ascii=False)
     return 'const SPEC = '+spec+';\nconst GRIDS = '+grids+';\nconst NAV = '+nav+';\n'+G2LIB+'\n'+_assin_prefixo()+(EXTRAJS[0] or '')+'\n'+ENGINE_JS2
-G2_TOAST=f'<div role="status" style="position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(22px + var(--acoes-h, 0px) + env(safe-area-inset-bottom, 0px)); z-index: 70; background: {INK}; color: #fff; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 12px 32px -8px rgba(21,32,26,.4); max-width: min(560px, calc(100vw - 32px)); box-sizing: border-box; {{{{g2toastst}}}}">{{{{g2toast}}}}</div>'
+# aviso temporário: largura do texto até min(560 px, janela − 32); sem o width, o left:50% limitava a caixa a meia janela (180 px a 360 px)
+# e o aviso quebrava em 3 a 17 linhas (medido: 47 e 345 caracteres), cobrindo o pé da tela (V55-RESP-01)
+G2_TOAST=f'<div role="status" style="position: fixed; left: 50%; transform: translateX(-50%); bottom: calc({AVISO_PE} + var(--acoes-h, 0px) + env(safe-area-inset-bottom, 0px)); z-index: 70; background: {INK}; color: #fff; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 12px 32px -8px rgba(21,32,26,.4); width: max-content; max-width: min(560px, calc(100vw - 32px)); box-sizing: border-box; {{{{g2toastst}}}}">{{{{g2toast}}}}</div>'
