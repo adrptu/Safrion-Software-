@@ -27,6 +27,7 @@ from ui37 import shell37, HEIGHTS37, PARENT37, MACRO, secoes_nav, secao_item
 import cenario
 import dados_irrigacao as DI
 from areas.cadastros import ncol_dinamico
+from areas.cad_ativos_pessoas import CAPCOL_JS   # TABR-CTX-02: a coluna Fazenda sai com o filtro, a ordem e o menu dela (a mesma função do CD-03)
 
 H=lambda s: '{{'+s+'}}'
 F=lambda: H('false')
@@ -149,8 +150,10 @@ function irrIsoM(m){ return (m===null||m===undefined)?'':irrIso(irrDiaN(m))+' '+
 // cultura e estádio em colunas próprias: "Milho V10" → Milho | V10; "Mamão · produção" (Lagoa Grande) → Mamão | fase do setor
 function irrCultEst(x){ const t=String(x.cult||''); const m=/^(.*\S)\s+([VR]\d+(?:\.\d+)?)$/.exec(t); if(m) return {c:m[1],e:m[2]};
   const i=t.indexOf(' · '); return i>0?{c:t.slice(0,i),e:x.fase||t.slice(i+3)}:{c:t,e:x.fase||''}; }
-// coluna Fazenda só com "Todas" no topo (com uma fazenda ela repetiria o mesmo nome em todas as linhas); hole = nº de trilhas da grade
-function irrColsFaz(gid,fz,v,hole){ const sp=IRG(gid); if(!sp.colsAll) sp.colsAll=sp.cols.slice(); sp.cols=fz?sp.colsAll.filter(c=>c.k!=='faz'):sp.colsAll; v[hole]=sp.cols.length; }
+// coluna Fazenda só com "Todas" no topo (com uma fazenda ela repetiria o mesmo nome em todas as linhas); hole = nº de trilhas da grade.
+// Ao sair, o filtro, a ordem e o menu de filtro dela saem junto (TABR-CTX-02: antes ficava o chip "faz: Santa Rita", ignorado, e voltava com "Todas")
+function irrColsFaz(self,gid,fz,v,hole){ const sp=IRG(gid); if(!sp.colsAll) sp.colsAll=sp.cols.slice(); capColDeps(self,gid,'faz',fz?'':'Fazenda');
+  sp.cols=fz?sp.colsAll.filter(c=>c.k!=='faz'):sp.colsAll; v[hole]=sp.cols.length; }
 // célula de texto (vazio = "—"), de lista (filtro por item: r.m) e de instante
 function irrTxt(r,k,t,b){ r.p[k]=[t?{k:b?'b':'txt',t:t}:{k:'mut',t:'—'}]; r.s[k]=t||''; }
 function irrLst(r,k,a,kind){ r.m=r.m||{}; r.m[k]=a.map(x=>({id:x.t,l:x.t})); r.s[k]=a.map(x=>x.t).join(', ');
@@ -168,7 +171,7 @@ function irrQuem(d){ return String(d||'').split(' · ')[0]; }
 // não); sem início, a duração prevista. Antes a coluna mostrava a prevista ao lado do horário real (OS-0394: 14,5 h ao lado de 20:00–22:06)
 function irrDurP(o,p){ const temI=p.ini!==null&&p.ini!==undefined; if(!temI) return p.dur; const i0=(p.iniReal!==undefined&&p.iniReal!==null)?p.iniReal:p.ini; const f=irrFimP(o,p); return f===null?p.dur:f-i0; }
 function irrQ(r,k,m,vazio){ r.v[k]=irrIsoM(m); r.p[k]=[m===null||m===undefined?{k:'mut',t:vazio||'—'}:{k:'txt',t:irrQuando(m)}]; r.s[k]=m===null||m===undefined?(vazio||''):irrQuando(m); }
-'''
+'''+CAPCOL_JS
 
 # =====================================================================================
 def ir01():
@@ -194,7 +197,7 @@ function PREVALS(self,v){ irrOuvir(self); const s=irrGet(); const fz=irrFazK(sel
     // abre o painel do setor quando a linha já estiver na grade (a troca de fazenda redesenha antes)
     let n=0; const abre=()=>{ const sp=IRG('g_set'); if(g2find(g2rows(self,sp),sid)) g2open(self,sp,sid,null); else if(n++<8) setTimeout(abre,120); }; setTimeout(abre,0); });
   const sids=Object.keys(s.setores).filter(k=>!fz||s.setores[k].faz===fz);
-  irrColsFaz('g_set',fz,v,'set_ncol');
+  irrColsFaz(self,'g_set',fz,v,'set_ncol');
   const rows=sids.map(k=>{ const x=s.setores[k]; const si=irrSituacao(s,k); const n=si.n; const top=si.top; const o=top&&top.o; const F=s.faz[x.faz]; const CE=irrCultEst(x);
     const temD=si.d!==null; const def=temD?[{k:'b',t:(si.est?'≈':'')+irrN(si.d,1)+' mm'}]:[{k:'mut',t:'—'}];
     const fon=!temD?'':(si.est?'Estimativa por ET':(F.demo?'Demonstrativo':'Medido'));
@@ -364,7 +367,7 @@ def ir03():
     EXTRAJS[0]=prefixo()+JS_COMUM+r"""
 const ORD=['A liberar','Em conferência','Em execução','Liberadas','Encerradas','Canceladas'];
 function PREVALS(self,v){ irrOuvir(self); const s=irrGet(); const fz=irrFazK(self); irrFazVals(self,v); irrFaixa(v,s,fz);
-  irrColsFaz('g_os',fz,v,'os_ncol');
+  irrColsFaz(self,'g_os',fz,v,'os_ncol');
   const rows=[];
   Object.values(s.ordens).filter(o=>!fz||o.faz===fz).forEach(o=>{ const x=s.setores[o.setor]; const et=irrEtapa(s,o); const sel=irrSelos(s,o); const p=irrProx(s,o);
     const ps=o.passadas; const i0=(q)=>(q.iniReal!==undefined&&q.iniReal!==null)?q.iniReal:q.ini; const def=ps.every(q=>q.ini!==null&&q.ini!==undefined);
@@ -650,7 +653,7 @@ const ESTC={'Ativa':'green','Suspeita':'red','Sem dado':'yellow','Aguardando 1ª
 const UN_GR={'Umidade do solo':'% vol.','Volume':'m³','ET₀ / chuva / vento':'mm/dia · mm · km/h'};
 function PREVALS(self,v){ irrOuvir(self); const s=irrGet(); const fz=irrFazK(self); irrFazVals(self,v); const c=irrFaixa(v,s,fz);
   const fs=Object.keys(s.fontes).filter(k=>!fz||s.fontes[k].faz===fz);
-  irrColsFaz('g_src',fz,v,'src_ncol'); irrColsFaz('g_cap',fz,v,'cap_ncol');
+  irrColsFaz(self,'g_src',fz,v,'src_ncol'); irrColsFaz(self,'g_cap',fz,v,'cap_ncol');
   IRG('g_src').rows=fs.map(k=>{ const f=s.fontes[k]; let cs; if(!f.cal) cs=['Não se aplica','gray']; else { const d=irrDeIso(f.cal); cs=d<0?['Vencida','red']:(d<=7?[(f.calAg?'Agendada':'Vence em 7 dias'),'yellow']:['Em dia','green']); }
     const stT=f.st==='Previsão'?'Só previsão':f.st;
     const x=f.setor?s.setores[f.setor]:null; const efe=f.st==='Previsão'?'não entra como chuva':(f.gr==='Volume'?'crédito das irrigações':(f.gr.indexOf('ET')===0?'ETc dos setores':(x?(f.st==='Ativa'?x.nome+' medido':x.nome+' por estimativa de ET (≈)'):(f.st==='Aguardando 1ª leitura'?'nada sem leitura validada':'balanço da fazenda'))));

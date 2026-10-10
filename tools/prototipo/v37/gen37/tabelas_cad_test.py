@@ -16,7 +16,9 @@ células quebram juntos; desalinhadas() pega pela ordem das bordas, sonda de 10/
 TABR-CTX-01 (revisão do Codex, 10/10/2026): a coluna de capacidade muda de grandeza com o filtro; o filtro, a ordem e o menu de filtro dela
 saem quando a grandeza muda ou a coluna sai (CD-03: Trator · Potência 78 cv → limpar só Classe → Irrigação; CD-06: Tanque · 15.000 L → Silo →
 Todos) e ficam com a mesma grandeza (Tratamento de sementes → Beneficiamento, kg/h); busca, outros filtros e foco ficam. A 1440 e a 390 px,
-por clique e só pelo teclado (Tab, Enter e Espaço no menu de filtro e nos chips).
+por clique e só pelo teclado (Tab, Enter e Espaço no menu de filtro e nos chips). Revisão do TABR-CTX-01 (10/10/2026): a cada vez que a
+coluna de capacidade entra, muda ou sai, a grade tem uma trilha por cabeçalho e nenhuma linha fora dela (a 390 px a 1ª coluna presa do
+g2lib guardava o nº de colunas da abertura e a última coluna caía para a linha de baixo; a 1440 px não há coluna presa).
 Uso: python3 tabelas_cad_test.py [pasta de capturas]   (~5 min) · python3 tabelas_cad_test.py --ctx [pasta]: só o TABR-CTX-01"""
 import sys, os, re, time, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -133,6 +135,14 @@ def qf(t, tec, shift=False):
         if not shift: foca('input[aria-label="Buscar nesta tabela"]')
         ok = tab_ate(pred, shift); ENTER(); time.sleep(.5); return ok
     J(f"[...document.querySelectorAll('[role=group][aria-label^=\"Filtro rápido\"] button')].filter(b=>b.offsetParent).find(b=>b.innerText.trim().startsWith({json.dumps(t)})).click()"); time.sleep(.5); return True
+def trilha(g, estado):
+    """[estado, trilhas do grid, cabeçalhos, linhas fora da trilha (desalinhadas)] da grade g: a trilha acompanha a coluna que entra e sai.
+    Mede com a caixa no início da rolagem lateral (com ela rolada, a 1ª coluna presa fica à esquerda das outras e desalinhadas() contaria o
+    cabeçalho; o teclado rola a caixa até o controle focado) e devolve a rolagem como estava."""
+    T_ = f"([...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent))[{g.i}]"
+    t = J(f"(()=>{{const t={T_}; const r=t.closest('.g2rola'); window.__sl=r?r.scrollLeft:0; if(r) r.scrollLeft=0; return [getComputedStyle(t).gridTemplateColumns.split(' ').length, t.querySelector('[role=row]').querySelectorAll('[role=columnheader]').length];}})()") or [0, -1]
+    time.sleep(.15); d = g.desalinhadas(); J(f"(()=>{{const r={T_}.closest('.g2rola'); if(r) r.scrollLeft=window.__sl||0;}})()"); time.sleep(.1)
+    return [estado] + t + [d]
 def ctx01(tam, tec):
     """TABR-CTX-01 no CD-03 e no CD-06 (roteiro do Codex). tec: só teclado; senão, clique (toque a 390 px)."""
     m = f'TABR-CTX-01 {tam} ' + ('teclado' if tec else 'clique')
@@ -148,41 +158,47 @@ def ctx01(tam, tec):
     # ---- CD-03: Trator · Potência = 78 cv (busca "o" e Situação = Apta) → limpar só Classe → Irrigação ----
     abre('CD-03.dc.html'); g = Grade(J, 0); CD3 = ['Máquina ou instalação', 'Situação', 'Classe', 'Custo R$/h', 'Conjuntos', 'Próxima calibração']
     busca('o'); prep = [filtra('Situação', 'Apta', 'Apta'), filtra('Classe', 'Trator', 'Trator'), filtra('Potência', '78', '78 cv'), ordena('Potência')]
-    r0, c0 = nomes(), fchips()
+    r0, c0 = nomes(), fchips(); al3 = [trilha(g, 'Trator')]
     chk(f'{m} CD-03: Situação Apta + Trator + Potência 78 cv (↓) → só o Trator 04, com os três chips', all(prep) and r0 == ['Trator 04'] and c0 == ['Situação: Apta', 'Classe: Trator', 'Potência: 78 cv'] and seta('Potência') == '▼', (prep, r0, c0))
-    tira_chip('Classe:', tec); c1, l1, f1, r1 = fchips(), g.labels(), foco(), nomes()
+    tira_chip('Classe:', tec); c1, l1, f1, r1 = fchips(), g.labels(), foco(), nomes(); al3.append(trilha(g, 'sem Classe'))
     chk(f'{m} CD-03: limpar só a Classe tira a coluna e o filtro da Potência (sem chip "capn: 78 cv"); a busca "o" e a Situação ficam'
         + ('; o foco fica no chip que sobra (Situação), não se perde' if tec else ''),
         c1 == ['Situação: Apta'] and l1 == CD3 and busca_val() == 'o' and 'Gotejo T7' in r1 and 'Trator 02' in r1 and (not tec or f1 == ['Remover filtro', 'Situação: Apta']), (c1, l1, busca_val(), f1, len(r1)))
-    filtra('Classe', 'Irriga', 'Irrigação'); c2, h2, r2 = fchips(), g.heads(), nomes()
+    filtra('Classe', 'Irriga', 'Irrigação'); c2, h2, r2 = fchips(), g.heads(), nomes(); al3.append(trilha(g, 'Irrigação'))
     chk(f'{m} CD-03: Classe = Irrigação → coluna Vazão em m³/h sem filtro nem ordem de outra grandeza (antes "Vazão: 78 cv" e lista vazia); as bombas/setores aptos à vista',
         sorted(c2) == ['Classe: Irrigação', 'Situação: Apta'] and [h for h, _ in h2] == CD3[:3] + ['Vazão'] + CD3[3:] and dict(h2).get('Vazão') == 'm³/h'
         and r2 == ['Bomba do Pivô 1', 'Gotejo T7'] and seta('Vazão') == '⇅' and busca_val() == 'o', (c2, h2, r2, seta('Vazão')))
     shot(f'ctx01-cd03-{tam.split()[0]}-{"teclado" if tec else "clique"}')
     # ---- CD-03: mesma grandeza (Capacidade kg/h): Tratamento de sementes · 2.400 kg/h (↓) → Beneficiamento mantém filtro e ordem ----
     abre('CD-03.dc.html'); g = Grade(J, 0)
-    prep = [filtra('Classe', 'Tratamento', 'Tratamento de sementes'), filtra('Capacidade', '2.400', '2.400 kg/h'), ordena('Capacidade')]; r3 = nomes()
-    filtra('Classe', 'Benefic', 'Beneficiamento'); c4, h4, r4 = fchips(), g.heads(), nomes()
+    prep = [filtra('Classe', 'Tratamento', 'Tratamento de sementes'), filtra('Capacidade', '2.400', '2.400 kg/h'), ordena('Capacidade')]; r3 = nomes(); al3.append(trilha(g, 'Tratamento de sementes'))
+    filtra('Classe', 'Benefic', 'Beneficiamento'); c4, h4, r4 = fchips(), g.heads(), nomes(); al3.append(trilha(g, 'Beneficiamento'))
     chk(f'{m} CD-03: mesma grandeza e unidade (kg/h): Tratamento de sementes · 2.400 kg/h → Beneficiamento mantém o filtro e a ordem (Packing linha 1)',
         all(prep) and r3 == ['Máquina TSI'] and sorted(c4) == ['Capacidade: 2.400 kg/h', 'Classe: Beneficiamento'] and dict(h4).get('Capacidade') == 'kg/h' and r4 == ['Packing linha 1'] and seta('Capacidade') == '▼',
         (prep, r3, c4, h4, r4, seta('Capacidade')))
+    chk(f'{m} CD-03: a coluna de capacidade entra (Trator), sai (sem Classe), muda (Irrigação) e volta (kg/h) com uma trilha por cabeçalho e cada célula sob o seu cabeçalho'
+        + (' (antes, a 390 px, 6 trilhas para 7 cabeçalhos e a Próxima calibração na linha de baixo)' if tam != '1440' else ''),
+        all(x[1] == x[2] and x[3] == 0 for x in al3), al3)
     # ---- CD-06 Locais: Tanque · 15.000 L (↓) → Silo (pelo teclado, com o menu da Capacidade aberto e o rascunho desmarcado) → 60.000 sc → Todos ----
     abre('CD-06.dc.html'); aba('Locais'); g = Grade(J, 0)
     busca('Santa'); prep = [filtra('Fazenda', 'Santa', 'Santa Rita'), qf('Tanque', tec), filtra('Capacidade', '15.000', '15.000 L'), ordena('Capacidade')]
-    r5, c5 = nomes(), fchips()
+    r5, c5 = nomes(), fchips(); al6 = [trilha(g, 'Tanque')]
     chk(f'{m} CD-06: Santa Rita + Tanque + Capacidade 15.000 L (↓) → só o Tanque Sede', all(prep) and r5 == ['Tanque Sede'] and c5 == ['Fazenda: Santa Rita', 'Capacidade: 15.000 L'], (prep, r5, c5))
     if tec:   # o menu da Capacidade aberto com o rascunho desmarcado; Shift+Tab sai do menu até o "Silo" do filtro rápido e Enter
         foca('button[aria-label="Filtrar Capacidade"]'); ENTER(); time.sleep(.45); c.tab(1, True); ESPACO(); time.sleep(.2)
         ok = qf('Silo', True, shift=True)
     else: ok = qf('Silo', False)
-    c6, h6, r6, mn, f6 = fchips(), g.heads(), nomes(), menu_aberto(), foco()
+    c6, h6, r6, mn, f6 = fchips(), g.heads(), nomes(), menu_aberto(), foco(); al6.append(trilha(g, 'Silo'))
     chk(f'{m} CD-06: Tanque → Silo tira o filtro e a ordem em L (antes "Capacidade: 15.000 L" e lista vazia); Silo 01 em sc de 60 kg; Fazenda e busca ficam'
         + ('; o menu da Capacidade com o rascunho de L fecha e o foco fica no "Silo"' if tec else ''),
         ok and c6 == ['Fazenda: Santa Rita'] and dict(h6).get('Capacidade') == 'sc de 60 kg' and r6 == ['Silo 01'] and seta('Capacidade') == '⇅' and busca_val() == 'Santa'
         and (not tec or (mn is None and f6[1].startswith('Silo'))), (ok, c6, h6, r6, mn, f6))
-    filtra('Capacidade', '60.000', '60.000 sc de 60 kg'); r7 = nomes(); qf('Todos', tec); c8, l8, r8 = fchips(), g.labels(), nomes()
+    filtra('Capacidade', '60.000', '60.000 sc de 60 kg'); r7 = nomes(); qf('Todos', tec); c8, l8, r8 = fchips(), g.labels(), nomes(); al6.append(trilha(g, 'Todos'))
     chk(f'{m} CD-06: Silo · 60.000 sc → Todos tira a coluna sem chip órfão ("capn: …"); Tanque Sede e Silo 01 voltam com a Fazenda e a busca',
         r7 == ['Silo 01'] and c8 == ['Fazenda: Santa Rita'] and 'Capacidade' not in l8 and {'Tanque Sede', 'Silo 01'} <= set(r8) and busca_val() == 'Santa', (r7, c8, l8, r8))
+    chk(f'{m} CD-06 Locais: a Capacidade entra (Tanque), muda (Silo) e sai (Todos) com uma trilha por cabeçalho e cada célula sob o seu cabeçalho'
+        + (' (antes, a 390 px, 4 trilhas para 5 cabeçalhos e "Itens com este local padrão" na linha de baixo)' if tam != '1440' else ''),
+        all(x[1] == x[2] and x[3] == 0 for x in al6), al6)
     shot(f'ctx01-cd06-{tam.split()[0]}-{"teclado" if tec else "clique"}')
 
 class _SoCtx(Exception): pass   # --ctx: só o TABR-CTX-01 (os dois tamanhos, clique e teclado)

@@ -10,6 +10,9 @@
     (A11, A6, A2); C10–C11 motivo e verbo da pessoa não alocável e a validade que vence primeiro (A3, M-i); C12–C13 calibração a vencer
     no chip e capacidade só com uma grandeza (A10, A4); B6 versão do estado salvo da irrigação (A9); B7 parcelas da lista = do detalhe
     (PV01 da Lagoa Grande, pré-existente); C14 duração da passada = fim − início da mesma linha (IR-03det, pré-existente).
+    TABR-CTX-01 (revisão do Codex, 10/10): C15–C18 filtro, ordem e menu da coluna de capacidade que muda de grandeza (CD-03, CD-06).
+    Revisão do TABR-CTX-01 (10/10): C19 (TABR-CTX-02) a coluna Fazenda do IR-01 sai com a fazenda do topo e leva filtro, ordem e menu dela;
+    C20 a 1ª coluna presa (g2lib) é refeita só quando a coluna entra ou sai (nº de colunas muda), não a cada desenho nem na troca de grandeza.
 Uso: python3 tabelas_cad_irr_unit.py   (sai com 1 se alguma regra falhar)"""
 import os, re, sys, json, subprocess
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE); os.chdir(HERE)
@@ -237,6 +240,51 @@ chk('C18 (TABR-CTX-01) CD-06 Locais: Tanque · 15.000 L → Silo tira filtro e o
     e0.get('vis') == ['Tanque Sede'] and e1.get('col') == 'Capacidade sc de 60 kg' and e1.get('f') == ['faz'] and e1.get('so') is None and e1.get('chips') == ['Fazenda: Santa Rita'] and e1.get('vis') == ['Silo 01']
     and e2.get('vis') == ['Silo 01'] and e3.get('col') is None and e3.get('chips') == ['Fazenda: Santa Rita'] and e3.get('f') == ['faz'] and e3.get('so') is None and len(e3.get('vis', [])) == 3
     and all(x.get('q') == 'Santa' and x.get('fm') == 'Rascunho sintético' for x in (e1, e3)), {k: ux.get(k) for k in ('e0', 'e1', 'e2', 'e3')})
+# C19 (TABR-CTX-02, revisão do TABR-CTX-01, 10/10/2026): no IR-01 a coluna Fazenda só existe com "Todas" no topo; com uma fazenda ela sai e leva
+# o filtro, a ordem e o menu de filtro dela (antes ficava o chip "faz: Santa Rita", o filtro era ignorado e voltava com "Todas"). Busca e outros
+# filtros ficam; a vista restaurada da sessão com filtro de Fazenda e uma fazenda no topo também sai limpa. Funções g2 da página IR-01.
+hi = page('IR-01')
+cdi = func(hi, 'capColDeps') if 'function capColDeps(' in hi else 'function capColDeps(){}'   # base 36ad018: o IR não tinha a reconciliação
+jsf = ("const G2KEEP={};\n" + '\n'.join(func(hi, f) for f in G2F) + '\n' + cdi + '\n' + func(hi, 'irrColsFaz') + r"""
+const spi={id:'g_set',cols:[{k:'setor',l:'Setor'},{k:'faz',l:'Fazenda'},{k:'sit',l:'Situação'}],so:{}}; const IRG=()=>spi;
+const RI=(setor,faz,sit)=>({id:setor+' '+faz,v:{setor,faz,sit},s:{setor,faz,sit}});
+const ROWSI=[RI('Pivô 1','Santa Rita','Impedida'),RI('Pivô 2','Santa Rita','A conferir'),RI('Gotejo T7','Santa Rita','Programada'),RI('Pivô 2','Lagoa Grande','Programada'),RI('Pivô 5','Lagoa Grande','Impedida')];
+const MK=(g2)=>{ const self={state:{g2}}; self.setState=(p)=>{ Object.assign(self.state,p); }; return self; };
+// um desenho do IR-01 com a fazenda do topo (fz: null = Todas, 'LG'): colunas (PREVALS) e o que a grade mostra
+function VI(self,fz){ const v={}; if(irrColsFaz.length===5) irrColsFaz(self,'g_set',fz,v,'set_ncol'); else irrColsFaz('g_set',fz,v,'set_ncol');
+  const st=g2st(self,'g_set'), rows=ROWSI.filter(r=>!fz||r.v.faz===(fz==='LG'?'Lagoa Grande':'Santa Rita'));
+  const chips=Object.keys(st.f||{}).filter(k=>(st.f[k]||[]).length).map(k=>{ const c=spi.cols.find(x=>x.k===k)||{l:k}; return c.l+': '+st.f[k].join(', '); }).sort();
+  return {cols:spi.cols.map(c=>c.k), ncol:v.set_ncol, chips, vis:g2sort(g2qrows(spi,st,rows).filter(r=>g2match(r,spi,st)),spi,st).map(r=>r.id), f:Object.keys(st.f||{}).sort(),
+    so:(st.so&&st.so.k)||null, fmc:st.fmc||null, q:st.q||''}; }
+const FI=(self,patch)=>g2set(self,'g_set',{f:Object.assign({},g2st(self,'g_set').f||{},patch)}); const out={};
+{ const a=MK({g_set:{q:'Pivô'}}); VI(a,null); FI(a,{sit:['Impedida','Programada'],faz:['Santa Rita']}); g2set(a,'g_set',{so:{k:'faz',d:true}}); out.t0=VI(a,null);
+  g2set(a,'g_set',{fmc:'faz',fmd:['Santa Rita'],fmq:'S',fpos:{x:0,xr:0,y:0}}); out.lg=VI(a,'LG'); out.todas=VI(a,null); }
+{ const b=MK({g_set:{f:{faz:['Santa Rita'],sit:['Impedida']}}}); out.rest=VI(b,'LG'); }
+{ const k=MK({g_set:{}}); VI(k,null); FI(k,{faz:['Lagoa Grande']}); out.k=VI(k,null); }
+console.log(JSON.stringify(out));""")
+uf = node(jsf) or {}
+t0, lg, td, rs, kk = (uf.get(k) or {} for k in ('t0', 'lg', 'todas', 'rest', 'k'))
+chk('C19 (TABR-CTX-02) IR-01: Todas + Fazenda = Santa Rita (↓) → Lagoa Grande no topo tira a coluna com o filtro, a ordem e o menu dela (sem chip "faz: Santa Rita"); '
+    'volta a Todas sem o filtro antigo; Situação e busca ficam; vista restaurada com filtro de Fazenda numa fazenda só sai limpa; com Todas, o filtro fica',
+    t0.get('vis') == ['Pivô 1 Santa Rita'] and t0.get('so') == 'faz' and 'Fazenda: Santa Rita' in t0.get('chips', [])
+    and lg.get('cols') == ['setor', 'sit'] and lg.get('ncol') == 2 and lg.get('chips') == ['Situação: Impedida, Programada'] and lg.get('f') == ['sit'] and lg.get('so') is None
+    and lg.get('fmc') is None and lg.get('q') == 'Pivô' and lg.get('vis') == ['Pivô 2 Lagoa Grande', 'Pivô 5 Lagoa Grande']
+    and td.get('ncol') == 3 and td.get('chips') == ['Situação: Impedida, Programada'] and sorted(td.get('vis', [])) == ['Pivô 1 Santa Rita', 'Pivô 2 Lagoa Grande', 'Pivô 5 Lagoa Grande']
+    and rs.get('f') == ['sit'] and rs.get('vis') == ['Pivô 5 Lagoa Grande'] and kk.get('chips') == ['Fazenda: Lagoa Grande'], uf)
+# C20 (revisão do TABR-CTX-01, 10/10/2026): a 390 px a 1ª coluna presa do g2lib (data-c0, --g2cols) guardava o nº de colunas da abertura e só era
+# refeita quando a largura mudava: com a capacidade (ou a Fazenda) entrando, a última coluna caía para a linha de baixo. capColDeps desfaz a coluna
+# presa quando a coluna entra ou sai, antes do novo desenho, e o motor a refaz com o nº novo. Só nesses passos: não a cada desenho nem quando só a
+# grandeza muda (mesmo nº de colunas), para não refazer sem necessidade (sem vaivém).
+jsc = "const G2KEEP={};\n" + '\n'.join(func(h3, f) for f in G2F + ('capColDeps',)) + r"""
+let RES=0; const R={removeAttribute:(a)=>{ if(a==='data-c0') RES++; }, style:{removeProperty:()=>{}}};
+global.document={querySelectorAll:(q)=>q==='.g2rola[data-c0]'?[R]:[], activeElement:null};
+const self={state:{g2:{}}}; self.setState=(p)=>Object.assign(self.state,p);
+const passo=(t)=>{ const a=RES; capColDeps(self,'g_atv','capn',t); return RES-a; };
+console.log(JSON.stringify(['','','Potência|cv','Potência|cv','Vazão|m³/h','','','Capacidade|kg/h'].map(passo).concat([(()=>{ const s2={state:{g2:{}}}; const a=RES; capColDeps(s2,'g_atv','capn','Potência|cv'); return RES-a; })()])));"""
+uc = node(jsc)
+chk('C20 (revisão do TABR-CTX-01) a coluna presa é refeita só quando a coluna de capacidade entra ou sai: abertura sem coluna 0, sem coluna 0, entra (Potência) 1, mesmo desenho 0, '
+    'Potência → Vazão (mesmo nº de colunas) 0, sai 1, fora 0, entra (kg/h) 1; abertura já com a coluna 0',
+    uc == [0, 0, 1, 0, 0, 1, 0, 1, 0], uc)
 # C14 (revisão TABR, pré-existente): no IR-03det a Duração é a da janela mostrada na linha (Início e Fim reais → real; previstos → prevista)
 hd = page('IR-03det')
 jsd = '\n'.join(func(hd, f) for f in ('irrPausaMin', 'irrFimP', 'irrDurP')) + r"""

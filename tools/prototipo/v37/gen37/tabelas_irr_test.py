@@ -13,6 +13,9 @@ pendência de outra ordem diz qual é (A2); a Vazão do IR-02 não junta o pico 
 na Pendência (A6); passadas necessárias no painel (A7); estado salvo de versão antiga descartado (A9); o tipo da pendência no chip e o
 detalhe na dica, responsável sem a função (A11); o Fim da ordem é o fim da última passada (mutante M-m); no IR-03det a Duração é a
 da janela da linha (OS-0394: 2,1 h, não as 14,5 h previstas; pré-existente).
+TABR-CTX-02 (revisão do TABR-CTX-01, 10/10/2026): a coluna Fazenda sai com a fazenda do topo e leva o filtro, a ordem e o menu de filtro
+dela (antes ficava o chip "faz: Santa Rita", o filtro era ignorado e voltava com "Todas"); busca e outros filtros ficam. A 1440 e a 390 px,
+por clique (toque) e pelo teclado (setas no seletor de fazenda; o foco fica nele).
 Uso: python3 tabelas_irr_test.py [pasta de capturas]   (< 3 min)"""
 import sys, os, re, time, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -57,6 +60,41 @@ def por_grupo(g, col):
         if grp: cur = []; out.append(cur)
         elif cur is not None: cur.append(cells[k])
     return out
+
+def fchips():
+    return J("[...document.querySelectorAll('button[aria-label=\"Remover filtro\"]')].filter(b=>b.offsetParent).map(b=>b.parentElement.innerText.replace(/\\s*×\\s*$/,'').trim())") or []
+def conta():
+    return J("([...document.querySelectorAll('main span')].filter(s=>s.offsetParent&&/^\\d+ de \\d+$/.test(s.innerText.trim())).map(s=>s.innerText.trim()))[0]||''") or ''
+def ctx02(tam, tec):
+    """TABR-CTX-02 no IR-01: "Todas" no topo, coluna Fazenda = Santa Rita (↓), Situação Impedida ou Programada e busca "Pivô" → Lagoa Grande no topo
+    (a coluna sai) → "Todas".
+    tec: a fazenda do topo muda pelo teclado (seta no seletor focado); senão, pelo valor do seletor."""
+    m = f'TABR-CTX-02 {tam} ' + ('teclado' if tec else 'clique')
+    SEL = "[...document.querySelectorAll('select')].find(s=>[...s.options].some(o=>o.value==='Todas'))"
+    def topo(f, seta):
+        if not tec: fazenda(f); return True
+        J(f"{SEL}.focus()"); time.sleep(.1); c.tecla(seta, seta, 40 if seta == 'ArrowDown' else 38); time.sleep(1)
+        return J(f"[{SEL}.value, document.activeElement==={SEL}]") == [f, True]
+    def busca(t):
+        J(f"""(()=>{{const i=[...document.querySelectorAll('input[aria-label="Buscar nesta tabela"]')].find(x=>x.offsetParent); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,{json.dumps(t)});
+          i.dispatchEvent(new Event('input',{{bubbles:true}})); i.dispatchEvent(new Event('change',{{bubbles:true}}));}})()"""); time.sleep(.4)
+    bval = lambda: J("(([...document.querySelectorAll('input[aria-label=\"Buscar nesta tabela\"]')].find(x=>x.offsetParent))||{}).value") or ''
+    abre('IR-01.dc.html'); fazenda('Todas'); limpa(J); g = Grade(J, 0)
+    SIT = ('Impedida', 'Programada'); busca('Pivô'); prep = [g.filtra('Situação', list(SIT)), g.filtra('Fazenda', ['Santa Rita']), g.ordena('Fazenda', desc=True)]
+    d0, c0 = g.dicts(), fchips(); cs = [x for x in c0 if x.startswith('Situação: ')]
+    chk(f'{m} IR-01 Todas: busca "Pivô" + Situação Impedida ou Programada + Fazenda = Santa Rita (↓) → só setores da Santa Rita, com os dois chips',
+        all(prep) and d0 and {r.get('Fazenda') for r in d0} == {'Santa Rita'} and len(cs) == 1 and sorted(c0) == ['Fazenda: Santa Rita'] + cs, (prep, [(r.get('Setor'), r.get('Fazenda')) for r in d0], c0))
+    ok1 = topo('Lagoa Grande', 'ArrowDown'); d1, c1, l1, n1 = g.dicts(), fchips(), g.labels(), conta()
+    chk(f'{m} IR-01 topo = Lagoa Grande: a coluna Fazenda sai com o filtro dela (sem chip "faz: Santa Rita"); a Situação e a busca ficam e a lista é da Lagoa Grande'
+        + ('; o foco fica no seletor' if tec else ''),
+        ok1 and c1 == cs and 'Fazenda' not in l1 and d1 and all(r.get('Situação') in SIT and 'Pivô' in r.get('Setor', '') for r in d1)
+        and n1 == f'{len(d1)} de 23' and bval() == 'Pivô' and alinhada(g) == 0, (ok1, c1, l1[:3], n1, [r.get('Setor') for r in d1], bval()))
+    ok2 = topo('Todas', 'ArrowUp'); d2, c2, l2, n2 = g.dicts(), fchips(), g.labels(), conta()
+    chk(f'{m} IR-01 topo = Todas: a coluna Fazenda volta sem o filtro antigo (antes voltava "Fazenda: Santa Rita" e escondia a Lagoa Grande); Situação e busca ficam',
+        ok2 and c2 == cs and l2[:3] == ['Setor', 'Fazenda', 'Situação'] and {r.get('Fazenda') for r in d2} == {'Santa Rita', 'Lagoa Grande'} and all(r.get('Situação') in SIT for r in d2)
+        and n2 == f'{len(d2)} de 26' and bval() == 'Pivô' and alinhada(g) == 0, (ok2, c2, l2[:3], n2, sorted({r.get('Fazenda') for r in d2})))
+    shot(f'ctx02-ir01-{tam.split()[0]}-{"teclado" if tec else "clique"}')
+    busca(''); limpa(J); fazenda('Santa Rita')
 
 def fluxo_janela(tam):
     """janela da OS-0422 no mesmo estado da irrigação: normal (salvar a sugerida), recusa (passada sem hora) e repetição (salvar de novo)."""
@@ -132,6 +170,7 @@ try:
     fazenda('Santa Rita'); g = Grade(J, 0)
     chk('IR-01 Santa Rita: a coluna Fazenda sai e a grade continua alinhada', g.labels() == SET and alinhada(g) == 0, g.labels()[:3])
     shot('ir01-1440')
+    ctx02('1440', False); ctx02('1440', True)
     # ================= IR-02 =================
     abre('IR-02.dc.html'); g = Grade(J, 0)
     AG = ['Captação › ordem', 'Etapa', 'Pendência', 'Próximo passo', 'Setor', 'Início', 'Fim', 'Lâmina', 'Avisos']
@@ -262,6 +301,7 @@ try:
     chk(f'390 px: {len(r390)} grades sem rolagem lateral da página; cada grade cabe ou rola dentro da caixa, com a 1ª coluna à vista', r390 and not ruim, ruim or r390[:3])
     chk('390 px: as grades largas rolam dentro da caixa', sum(1 for x in r390 if x[4]) >= len(r390) - 2, [x[0] for x in r390 if not x[4]])
     fluxo_janela('390 px')
+    ctx02('390 px', False); ctx02('390 px', True)
     abre('IR-03.dc.html'); g = Grade(J, 0); n0 = len(g.dicts())
     g.filtra('Etapa', ['A liberar']); a1 = [r.get('Ordem') for r in g.dicts()]; g.ordena('Início'); ini = [instante(x) for x in g.col('Início') if instante(x)]
     chk('390 px (normal): filtro Etapa = A liberar pelo menu da coluna e ordem por Início (instante), com toque', a1 and all(r.get('Etapa') == 'A liberar' for r in g.dicts()) and crescente(ini), (a1, g.col('Início')))

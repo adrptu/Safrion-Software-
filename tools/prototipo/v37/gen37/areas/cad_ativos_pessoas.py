@@ -98,11 +98,19 @@ CAPCOL={'Trator':('Potência','cv'),'Pulverizador':('Tanque útil','L'),'Plantad
         'Irrigação':('Vazão','m³/h'),'Armazenagem':('Capacidade','sc de 60 kg'),'Tratamento de sementes':('Capacidade','kg/h'),'Beneficiamento':('Capacidade','kg/h')}
 # TABR-CTX-01 (revisão do Codex, 10/10/2026): a coluna de capacidade muda de grandeza com o filtro (Classe no CD-03, Tanque/Silo no CD-06);
 # o filtro, a ordenação e o menu de filtro dela não podem sobrar de outra grandeza. Uma função para as duas telas (o CD-06 importa daqui).
+# Revisão do TABR-CTX-01 (10/10/2026): a coluna Fazenda da Irrigação (só com "Todas" no topo) usa a mesma função (TABR-CTX-02); e a coluna
+# presa do g2lib é refeita quando a coluna entra ou sai (a 390 px a última coluna caía para a linha de baixo).
 CAPCOL_JS=r'''
 // coluna que muda de grandeza com o filtro (tup = rótulo|unidade; '' sem coluna): filtro, ordenação e menu de filtro dela valem para uma tupla.
 // Mudou a tupla ou a coluna saiu: só eles saem (busca, outros filtros, menu de outra coluna e rascunho do cadastro ficam); mesma tupla, ficam.
-// Roda no PREVALS, antes de g2vals ler o estado (o mesmo desenho do talhão fora do recorte na O.S.)
-function capColDeps(self,gid,k,tup){ const m=self.__capTup=self.__capTup||{}; const ant=m[gid]; m[gid]=tup; if(tup&&(ant===undefined||ant===tup)) return;
+// Roda no PREVALS, antes de g2vals ler o estado (o mesmo desenho do talhão fora do recorte na O.S.). Serve também à coluna que só entra e sai
+// (Fazenda da Irrigação: tup = 'Fazenda' ou '').
+function capColDeps(self,gid,k,tup){ const m=self.__capTup=self.__capTup||{}; const ant=m[gid]; m[gid]=tup;
+  // a coluna entrou ou saiu: a 1ª coluna presa do g2lib (data-c0, --g2cols) foi feita com o nº anterior de colunas e o motor só a refaz quando a
+  // largura muda (a 390 px a última coluna caía para a linha de baixo). Desfeita aqui, antes do novo desenho, o motor a refaz com o nº novo de
+  // cabeçalhos (o desenho muda a lista de cabeçalhos e o observador do g2lib roda). Só quando o nº de colunas muda: a troca de grandeza não refaz.
+  if(ant!==undefined&&!ant!==!tup&&typeof document!=='undefined') document.querySelectorAll('.g2rola[data-c0]').forEach(r=>{ r.removeAttribute('data-c0'); r.style.removeProperty('--g2cols'); });
+  if(tup&&(ant===undefined||ant===tup)) return;
   const st=g2st(self,gid), f=st.f||{}, p={}; if(k in f){ p.f=Object.assign({},f); delete p.f[k]; } if(st.so&&st.so.k===k) p.so=null; if(st.fmc===k) Object.assign(p,{fmc:null,fmd:null,fmq:''});
   if(!Object.keys(p).length) return; const all=Object.assign({},self.state.g2||{}); all[gid]=Object.assign({},st,p); self.state.g2=all;
   // foco: o × que a pessoa usou (ex.: Classe) pode sumir junto com o chip da capacidade; sem foco, ele vai ao chip vizinho ou à busca da grade
