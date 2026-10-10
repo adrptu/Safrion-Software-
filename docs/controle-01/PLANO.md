@@ -393,7 +393,16 @@ python3 quantidade_test.py && python3 carencia_test.py unit && python3 mip_unit_
   - A ficha não prescreve lâmina; quem a define são a PA-07 e o responsável técnico.
   - Ponto de leitura da CAD do talhão: `fpvCad`. Ele lê `irrCadTxt` (frente SOLO, `claude/v44-solo`) quando a função existe.
   - Testes: `ficha_pivo_unit_test.py` (0/13 na 1440664 → 13/13) e `ficha_pivo_test.py` (0/4 na base → 14/14, 1440 e 390 px).
-- Fica: a Bomba do Pivô 1 diverge da mesma forma. O cadastro diz 300 m³/h e o setor P1 diz 150 L/s (540 m³/h). Sem ficha do P1, não há fonte para escolher; o dono do dado decide.
+- ~~Fica: a Bomba do Pivô 1 diverge da mesma forma.~~ Resolvido na revisão adicional de 10/10 (abaixo).
+
+**Correções da revisão adicional (10/10, executado; achados A1–A8 sobre 689c138..2f8a6e6):**
+- A1 (S3) conferência da ficha: tolerância = 0,05 mm + 0,05 mm × 100 ÷ percentímetro (meia casa da linha mais a da lâmina a 100 %, que a conta multiplica), em centésimos inteiros (`fpvConf`, `ficha_pivo.py`, uma conta). A ficha coerente da revisão (6,723 → 6,7) não acusa mais divergência; o 60 % sintético continua divergindo.
+- A2 (S3) vazão em um lugar: o setor da Irrigação guarda o equipamento do cadastro (`eq`) e lê a vazão dele; com ficha, vale a da ficha gravada (`irrGet` → `irrEqVaz`), que a duração e a trava de outorga usam. No CD-03 a vazão do pivô fica só leitura e a capacidade segue a ficha; renomear a bomba aparece na ficha. Bomba do Pivô 1 = 540 m³/h (150 L/s) e Gotejo T7 = 838,8 m³/h (233 L/s), os valores da Irrigação.
+- A3 (S3) a nota da ficha aponta para o limite por passada do setor (na Irrigação, o valor atual, ex.: "até 10,0 mm"); a política de água tem uma fonte (`dados.POLITICA_AGUA`: PA-07 v3, Ana agrônoma, até 30/11/2026), lida por Configurações.
+- A4 (S3) registro: "Registrar ficha do pivô ›" no equipamento do pivô (CD-03) e no setor (IR-01); "Editar ficha" na ficha aberta. Campos da ficha + tabela percentímetro × tempo × lâmina (a linha de 100 % vem dos campos; vazão e área já vêm do setor), gravado em `talhao-os-ficha-pivo-v1` (volta à semente com "Restaurar demonstração").
+- A5 (S3) AG-07: os chips de classe e de orgânicos contam as linhas que passam nos filtros das colunas (cada chip sem o próprio filtro), na lista por uso e por produto (`agChipsCol`).
+- A6 (S4) o filtro de cima passa a se chamar "Praga-alvo", o mesmo rótulo da coluna. A7 (S4) o setor mostra o nome do cadastro (Bomba do Pivô 2, não "Bomba B2"); o modelo do cadastro descreve o conjunto da ficha; a fazenda vem do setor. A8 (S4) o `cd03` de reserva lê a vazão do cadastro.
+- Testes: `ficha_pivo_unit_test.py` (3/23 na 2f8a6e6 → 23/23), `ficha_pivo_test.py` (0/4 na base, depois aborta → 21/21, 1440 e 390 px), `praga_alvo_unit_test.py` U20 (20/21 na base → 21/21), `praga_alvo_test.py` 3b (14/14).
 
 ---
 

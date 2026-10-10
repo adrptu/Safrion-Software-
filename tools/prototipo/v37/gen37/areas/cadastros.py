@@ -491,6 +491,9 @@ CLASSES=['Trator','Pulverizador','Plantadeira','Distribuidor','Colhedora','Imple
 CAPU=['cv','m de barra','linhas','t','m de plataforma','kg/h','m³/h','sc 60 kg']
 LOC_ATV=['Oficina Sede','Galpão 1','Santa Rita · T1','Santa Rita · T4','Pivô 2','Talhão T7','Armazém Sede']
 # (id, nome, modelo, classe, cap, capu, contador h, exige calibração, última, intervalo dias, local, fonte, valor R$, usado em)
+# cd03() de reserva (vale só sem areas/cad_ativos_pessoas.py): capacidade dos equipamentos de irrigação lida do cadastro (dados_cad), sem valor antigo (revisão de 10/10, A8)
+import dados_cad as _DC
+_VZ={a['id']:a.get('vazao') for a in _DC.ATIVOS}
 ATIVOS=[('a01','Trator T1','JD 6M 155','Trator',155,'cv',4312,'Não','',None,'Oficina Sede','Fabricante',412000,'r2'),
         ('a02','Trator 02','MF 7719','Trator',190,'cv',2988,'Não','',None,'Santa Rita · T4','Fabricante',486000,'r1'),
         ('a03','Trator 03','MF 4292','Trator',110,'cv',5120,'Não','',None,'Galpão 1','Fabricante',268000,'r3'),
@@ -501,8 +504,8 @@ ATIVOS=[('a01','Trator T1','JD 6M 155','Trator',155,'cv',4312,'Não','',None,'Of
         ('a08','Colhedora Axial-Flow 7250','plataforma 10 m','Colhedora',10,'m de plataforma',2150,'Não','',None,'Galpão 1','Fabricante',2450000,'r5'),
         ('a09','Máquina TSI','tratamento de sementes na sede','Tratamento de sementes',2400,'kg/h',720,'Sim','2026-07-20',60,'Oficina Sede','Ensaio da fazenda',180000,'r4'),
         ('a10','Esqueletadeira','café · 1 linha','Implemento',1,'linhas',310,'Não','',None,'Galpão 1','Fabricante',58000,'r7'),
-        ('a11','Bomba do Pivô 2','motobomba + hidrômetro novo','Irrigação',340,'m³/h',8914,'Sim','',30,'Pivô 2','Ensaio da fazenda',96000,''),
-        ('a12','Gotejo T7','cabeçal + injetora de fertilizante','Irrigação',45,'m³/h',5210,'Sim','2026-09-05',60,'Talhão T7','Ensaio da fazenda',210000,'r8'),
+        ('a11','Bomba do Pivô 2',next(a['modelo'] for a in _DC.ATIVOS if a['id']=='a11'),'Irrigação',_VZ['a11'],'m³/h',8914,'Sim','',30,'Pivô 2','Ensaio da fazenda',96000,''),
+        ('a12','Gotejo T7','cabeçal + injetora de fertilizante','Irrigação',_VZ['a12'],'m³/h',5210,'Sim','2026-09-05',60,'Talhão T7','Ensaio da fazenda',210000,'r8'),
         ('a13','Packing linha 1','esteira + balança','Beneficiamento',2400,'kg/h',12301,'Sim','2026-09-01',30,'Armazém Sede','Ensaio da fazenda',310000,''),
         ('a14','Silo 01','aeração + termometria','Armazenagem',60000,'sc 60 kg',0,'Sim','2026-09-18',90,'Armazém Sede','Fabricante',890000,'')]
 def cd03():

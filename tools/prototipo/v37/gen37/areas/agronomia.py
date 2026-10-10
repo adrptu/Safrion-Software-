@@ -941,7 +941,7 @@ def ag01det():
 # Listagem: grade G2 (ordenar e filtrar no cabeçalho, agrupar) com render incremental (50 linhas + "Mostrar mais"); busca sem acento
 # em produto, registro, ingrediente, grupo químico, titular, classe e modo de ação, e — palavra a palavra — num MESMO uso (cultura e
 # alvo juntos). Filtros: Cultura (combobox, culturas da fazenda primeiro; "Todas as culturas" do AGROFIT vale para qualquer cultura),
-# Praga ou alvo (aparece com a cultura), Classe por componente (+ Biológico) e Orgânicos.
+# Praga-alvo (aparece com a cultura), Classe por componente (+ Biológico) e Orgânicos.
 # Ficha (painel lateral): uso (cultura × alvo) → "Usar na O.S." (CTL-5 · RL-E3: a consulta não emite receituário; leva produto da fazenda,
 # cultura e alvo ao "Ajustar antes de liberar" da ordem A liberar escolhida, onde a liberação confere a regra legal única e grava a aprovação);
 # usos registrados; rotação (mesma cultura × alvo, OUTRO MODO DE AÇÃO pelo código IRAC/FRAC/HRAC de referência de cada ingrediente,
@@ -1027,8 +1027,8 @@ def _agf_filtros():
            f'<sc-if value="{H("agf_temClsO")}" hint-placeholder-val="{T_()}"><select aria-label="Outras classes" value="{H("agf_clsO")}" onChange="{H("agf_setClsO")}" style="{H("agf_clsOSt")}">'
            f'<sc-for list="{H("agf_clsOs")}" as="o" hint-placeholder-count="4"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select></sc-if></div>')
     cul=f'<div style="display: flex; flex-direction: column; gap: 4px;">{_LAB("Cultura")}{E.ac_campo("agc.","Cultura","250px")}</div>'
-    alvo=(f'<sc-if value="{H("agf_temCul")}" hint-placeholder-val="{F_()}"><div style="display: flex; flex-direction: column; gap: 4px;">{_LAB("Praga ou alvo")}'
-          f'{E.ac_campo("aga.","Praga ou alvo","330px")}</div></sc-if>')
+    alvo=(f'<sc-if value="{H("agf_temCul")}" hint-placeholder-val="{F_()}"><div style="display: flex; flex-direction: column; gap: 4px;">{_LAB("Praga-alvo")}'
+          f'{E.ac_campo("aga.","Praga-alvo","330px")}</div></sc-if>')   # o mesmo rótulo da coluna (revisão de 10/10, A6)
     org=(f'<div style="display: flex; flex-direction: column; gap: 4px;">{_LAB("Orgânicos")}<button type="button" aria-pressed="{H("agf_orgOn")}" onClick="{H("agf_orgTog")}" '
          f'title="Mostrar só produtos marcados como aprovados para agricultura orgânica no AGROFIT" style="{H("agf_orgSt")}">Aprovados para orgânicos <span style="opacity: .75;">{H("agf_orgN")}</span></button></div>')
     faixa=lambda cond,bg,t,d,bt,go: (f'<sc-if value="{H(cond)}" hint-placeholder-val="{F_()}"><div role="status" style="display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; '
@@ -1121,7 +1121,7 @@ def _agf_painel(link):
            f'<div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 12px;">'
            f'<label style="display: flex; flex-direction: column; gap: 4px; flex: 1 1 200px; min-width: 0; font-size: 12px; font-weight: 600; color: {MUTED};">Cultura'
            f'<select aria-label="Cultura do uso" value="{H("af_cul")}" onChange="{H("af_setcul")}" style="{SEL}"><sc-for list="{H("af_culs")}" as="o" hint-placeholder-count="3"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select></label>'
-           f'<label style="display: flex; flex-direction: column; gap: 4px; flex: 2 1 260px; min-width: 0; font-size: 12px; font-weight: 600; color: {MUTED};">Praga ou alvo'
+           f'<label style="display: flex; flex-direction: column; gap: 4px; flex: 2 1 260px; min-width: 0; font-size: 12px; font-weight: 600; color: {MUTED};">Praga-alvo'
            f'<select aria-label="Alvo do uso" value="{H("af_alvo")}" onChange="{H("af_setalvo")}" disabled="{H("af_alvoDis")}" style="{SEL}"><sc-for list="{H("af_alvos")}" as="o" hint-placeholder-count="3"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select></label></div>'
            f'<div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 12px;">'
            + se('af_hasPf',f'<label style="display: flex; flex-direction: column; gap: 4px; flex: 1 1 200px; min-width: 0; font-size: 12px; font-weight: 600; color: {MUTED};">Produto da fazenda'
@@ -1391,14 +1391,25 @@ function agVisUso(st){ const V=agVis(st), k=AGX.vk; if(AGX.uvk===k&&AGX.uvis) re
   const ws=g2norm(st.agf_q||'').split(/\s+/).filter(Boolean).slice(0,30), ok=new Set(V.pre), por={};
   [cul].concat(cul!==TD&&!semTD?[TD]:[]).forEach(c=>agUA(c).forEach((ps,a)=>{ if(al!==''&&a!==Number(al)) return; ps.forEach(i=>{ if(ok.has(i)) (por[i]=por[i]||[]).push([c,a]); }); }));
   const okCls=(p)=>!cls||(cls==='Biológico'?p.bio:p.comp.indexOf(cls)>=0);
-  const rows=[], cnt={}; let bio=0, orgN=0, semCls=0;
+  const rows=[], cnt={}, pool=[]; let bio=0, orgN=0, semCls=0;
   V.pre.forEach(i=>{ const L=por[i]; if(!L) return; const p=AGX.P[i];
     L.sort((x,y)=>((x[0]===cul?0:1)-(y[0]===cul?0:1))||AGC.compare(agAT(x[1]),agAT(y[1])));
-    const M=ws.length?L.filter(x=>ws.every(w=>p.hay.indexOf(w)>=0||agUH(x[0],x[1]).indexOf(w)>=0)):L; if(!M.length) return; const n=M.length;
+    const M=ws.length?L.filter(x=>ws.every(w=>p.hay.indexOf(w)>=0||agUH(x[0],x[1]).indexOf(w)>=0)):L; if(!M.length) return; const n=M.length; pool.push([i,M]);
     if(!org||p.org==='S'){ p.comp.forEach(c=>{ cnt[c]=(cnt[c]||0)+n; }); if(p.bio) bio+=n; semCls+=n; }
     if(okCls(p)&&p.org==='S') orgN+=n;
     if(okCls(p)&&(!org||p.org==='S')) M.forEach(x=>rows.push(agUsoLeaf(p,x[0],x[1]))); });
-  AGX.uvis={rows:rows,nCul:rows.filter(r=>r.uc===cul).length,cnt:cnt,bio:bio,orgN:orgN,semCls:semCls}; AGX.uvk=k; return AGX.uvis; }
+  AGX.uvis={rows:rows,nCul:rows.filter(r=>r.uc===cul).length,cnt:cnt,bio:bio,orgN:orgN,semCls:semCls,pool:pool}; AGX.uvk=k; return AGX.uvis; }
+// chips de classe e de orgânicos com os FILTROS DAS COLUNAS (revisão de 10/10, A5): com filtro de coluna, a contagem é sobre as linhas que
+// passam nele (a mesma unidade da lista: uso ou produto), cada chip sem o próprio filtro (classe: com orgânicos; orgânicos: com a classe).
+// Sem filtro de coluna, valem as contagens de agVis/agVisUso. Em cache pela chave dos filtros.
+function agChipsCol(st,gs){ const f=(gs&&gs.f)||{}; if(!Object.keys(f).some(k=>(f[k]||[]).length)) return null;
+  const mu=agModoUso(st), V=agVis(st), U=mu?agVisUso(st):null, cls=st.agf_cls||'', org=!!st.agf_org;
+  const k=AGX.vk+'#'+(mu?'u':'p')+'#'+JSON.stringify(f); if(AGX.cck===k&&AGX.ccv) return AGX.ccv;
+  const sp=GR(AGF_G), added=st.added||{}, okCls=(p)=>!cls||(cls==='Biológico'?p.bio:p.comp.indexOf(cls)>=0), cnt={}; let bio=0, semCls=0, orgN=0;
+  const conta=(r,p)=>{ if(!g2match(r,sp,{f:f},null,added)) return; if(!org||p.org==='S'){ p.comp.forEach(c=>{ cnt[c]=(cnt[c]||0)+1; }); if(p.bio) bio++; semCls++; } if(okCls(p)&&p.org==='S') orgN++; };
+  if(mu) U.pool.forEach(([i,M])=>{ const p=AGX.P[i]; M.forEach(x=>conta(agUsoLeaf(p,x[0],x[1]),p)); });
+  else V.pre.forEach(i=>{ const p=AGX.P[i]; conta(agLeaf(p),p); });
+  AGX.ccv={cnt:cnt,bio:bio,semCls:semCls,orgN:orgN}; AGX.cck=k; return AGX.ccv; }
 // total de usos da cultura (com "Todas as culturas", salvo "só os de"): o "de N usos em <cultura>" da contagem
 function agUsoTot(st){ const TD=AGX.I.todasCulturas, cul=Number(st.agf_cul); let n=0;
   [cul].concat(cul!==TD&&!st.agf_semTD?[TD]:[]).forEach(c=>agUA(c).forEach(ps=>{ n+=ps.length; })); return n; }
@@ -1530,7 +1541,7 @@ function PREVALS(self,v){
   v.aga=agAc(self,'agf_alvo',alItems,al,(x)=>{ agSetF(self,{agf_alvo:x}); },{ph:AGX.uSt==='ok'?('Todos os alvos de '+(cul!==''?I.culturas[Number(cul)][0]:'')+' · digite para buscar'):'Carregando alvos…'});
   const chip=(t,n,on,go,lab)=>({t:t,n:agNf(n),on:String(!!on),go:go,lab:lab,st:AG_QST+(on?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;')});
   // classes principais em chips (contagem com os demais filtros); as outras num seletor compacto
-  const CN=mu?VU:V, nCls=(k)=>k==='Biológico'?CN.bio:(CN.cnt[k]||0);
+  const CN=agChipsCol(st,g2st(self,AGF_G))||(mu?VU:V), nCls=(k)=>k==='Biológico'?CN.bio:(CN.cnt[k]||0);
   v.agf_clsL=[chip('Todas',CN.semCls,!cls,()=>agSetF(self,{agf_cls:''}),'Mostrar todas as classes')]
     .concat(AG_CLS_PRI.map(k=>chip(k,nCls(k),cls===k,()=>agSetF(self,{agf_cls:cls===k?'':k}),cls===k?'Mostrar todas as classes':'Mostrar só '+k)));
   const outras=Object.keys(CN.cnt).filter(k=>AG_CLS_PRI.indexOf(k)<0).sort((a,b)=>(CN.cnt[b]-CN.cnt[a])||AGC.compare(a,b)); if(cls&&AG_CLS_PRI.indexOf(cls)<0&&outras.indexOf(cls)<0) outras.push(cls);

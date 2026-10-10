@@ -79,6 +79,23 @@ try{
     out.u19={cntF:V9.cnt['Fungicida']||0,semCls:V9.semCls,nAll:V9.rows.length,orgN:V9.orgN,
       nF:agVisUso({agf_cul:String(SJ),agf_cls:'Fungicida'}).rows.length,nOrg:agVisUso({agf_cul:String(SJ),agf_org:true}).rows.length};
   }
+  // A5 (revisão de 10/10): os chips contam as linhas que passam nos FILTROS DAS COLUNAS, cada chip sem o próprio filtro
+  out.u20={fn:typeof agChipsCol==='function'};
+  if(out.u20.fn&&out.fn.agVisUso){ const sp2=GR('g_agf'), P0=sp2.cols; sp2.cols=AGF_COLS_U; const gs={f:{alvo:[FN]}};
+    const n=(st)=>agVisUso(st).rows.filter(x=>g2match(x,sp2,gs,null,{})).length;
+    const C0=agChipsCol({agf_cul:String(SJ)},gs); out.u20.todas=[C0.semCls,n({agf_cul:String(SJ)})]; out.u20.fung=[C0.cnt['Fungicida']||0,n({agf_cul:String(SJ),agf_cls:'Fungicida'})];
+    const C1=agChipsCol({agf_cul:String(SJ),agf_cls:'Fungicida'},gs); out.u20.org=[C1.orgN,n({agf_cul:String(SJ),agf_cls:'Fungicida',agf_org:true})];
+    const C2=agChipsCol({agf_cul:String(SJ),agf_org:true},gs); out.u20.fungOrg=[C2.cnt['Fungicida']||0,n({agf_cul:String(SJ),agf_cls:'Fungicida',agf_org:true})];
+    out.u20.semFiltro=agChipsCol({agf_cul:String(SJ)},{f:{}})===null;
+    // praga-alvo com produtos para orgânicos (o nome com mais usos orgânicos em Soja): o chip de orgânicos = a lista com ele
+    const cn={}; agVisUso({agf_cul:String(SJ),agf_org:true}).rows.forEach(r=>((r.m||{}).alvo||[]).forEach(x=>{ cn[x.id]=(cn[x.id]||0)+1; }));
+    const FN2=Object.keys(cn).sort((a,b)=>cn[b]-cn[a])[0]; const g2={f:{alvo:[FN2]}}; const n2=(st)=>agVisUso(st).rows.filter(x=>g2match(x,sp2,g2,null,{})).length;
+    const C3=agChipsCol({agf_cul:String(SJ)},g2); out.u20.org2=[FN2,C3.orgN,n2({agf_cul:String(SJ),agf_org:true}),C3.semCls,n2({agf_cul:String(SJ)}),C3.bio,n2({agf_cul:String(SJ),agf_cls:'Biológico'})];
+    // lista por produto (sem cultura): filtro na coluna Classe · modo de ação
+    sp2.cols=P0; const cc=P0.find(c=>c.k==='cls'); const L0=agVis({}).ids.map(i=>agLeaf(AGX.P[i])); const ck={}; L0.forEach(r=>g2fkeys(r,cc).forEach(x=>{ ck[x]=(ck[x]||0)+1; }));
+    const fv=Object.keys(ck).filter(x=>/Herbicida/.test(x)).sort((a,b)=>ck[b]-ck[a])[0]; const gp={f:{cls:[fv]}};
+    const np=(st)=>agVis(st).ids.filter(i=>g2match(agLeaf(AGX.P[i]),sp2,gp,null,{})).length; const CP=agChipsCol({},gp);
+    out.u20.prod=[fv,CP.semCls,np({}),CP.cnt['Herbicida']||0,np({agf_cls:'Herbicida'}),CP.orgN,np({agf_org:true})]; }
 }catch(e){ out.erro=String(e&&e.stack||e); }
 console.log('JSON:'+JSON.stringify(out));
 '''
@@ -109,7 +126,7 @@ chk('U5 as linhas de cada produto ficam juntas (ordem dos produtos da lista)', l
 E2 = usos((SJ,)); s2 = O.get('s2') or []
 chk(f'U6 "Ver só os de Soja" = {len(E2)} usos (= nUsos de Soja no índice, {CU[SJ][4]})', ids(s2) == E2 and len(s2) == len(E2) == CU[SJ][4] and O.get('tot2') == len(E2), [len(s2), len(E2), O.get('tot2')])
 E3 = {x for x in E1 if x[2] == PH}; s3 = O.get('s3') or []
-chk(f'U7 Praga ou alvo = Phakopsora pachyrhizi em Soja: {len(E3)} linhas, só desse alvo', ids(s3) == E3 and len(E3) > 10, [len(s3), len(E3)])
+chk(f'U7 Praga-alvo (caixa de escolha) = Phakopsora pachyrhizi em Soja: {len(E3)} linhas, só desse alvo', ids(s3) == E3 and len(E3) > 10, [len(s3), len(E3)])
 # busca sem acento e sem caixa: palavra no produto OU na praga-alvo do MESMO uso (cultura, nome científico e nomes comuns)
 P = {}
 for i, rr in enumerate(IDX['produtos']): P[REG[i]] = i
@@ -172,5 +189,11 @@ chk('U18 cada linha de uso abre a ficha do registro com a cultura e o alvo do us
 u19 = O.get('u19') or {}
 chk(f'U19 com a lista por uso, os chips contam usos (Soja): Fungicida = a lista com o chip, "Todas" = a lista sem chip ({len(E1)}), orgânicos = a lista com "Aprovados para orgânicos"',
     0 < u19.get('cntF', 0) == u19.get('nF') < u19.get('semCls', 0) == u19.get('nAll') == len(E1) and 0 < u19.get('orgN', 0) == u19.get('nOrg'), u19)
+u20 = O.get('u20') or {}; print('    u20:', u20)
+chk('U20 A5 · com o filtro da coluna Praga-alvo = "' + FN + '" (Soja), os chips contam as linhas filtradas: Todas = a lista sem chip, Fungicida = a lista com o chip, orgânicos = a lista com os dois; sem filtro de coluna valem as contagens de sempre; o mesmo na lista por produto',
+    u20.get('fn') is True and (u20.get('todas') or [0, 1])[0] == u20['todas'][1] > 0 and (u20.get('fung') or [0, 1])[0] == u20['fung'][1] > 0
+    and (u20.get('org') or [0, 1])[0] == u20['org'][1] and (u20.get('fungOrg') or [0, 1])[0] == u20['fungOrg'][1] and u20.get('semFiltro') is True
+    and len(u20.get('org2') or []) == 7 and u20['org2'][1] == u20['org2'][2] > 0 and u20['org2'][3] == u20['org2'][4] > u20['org2'][1] and u20['org2'][5] == u20['org2'][6]
+    and len(u20.get('prod') or []) == 7 and u20['prod'][1] == u20['prod'][2] > 0 and u20['prod'][3] == u20['prod'][4] > 0 and u20['prod'][5] == u20['prod'][6], u20)
 print(f'\nRESULTADO {len(OK)}/{len(OK) + len(FAIL)}')
 sys.exit(1 if FAIL else 0)

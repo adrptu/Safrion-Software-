@@ -201,9 +201,11 @@ function EXTRAVALS(self,v){ irrVista(self,'g_set');
   self.g2formActs=(gid,r)=>{ if(gid!=='g_set') return []; const s=irrGet(); const si=irrSituacao(s,r.id); const out=[];
     if(si.acao) out.push({t:si.acao[0],h:si.hoje,go:()=>irrGo(si.acao[1])});
     if(s.setores[r.id].bal&&(!si.acao||si.acao[0]!=='Programar irrigação')&&!(si.ords||[]).length) out.push({t:'Programar irrigação',h:'Abre a programação com a necessidade e a janela sugerida.',go:()=>irrGo('IR-02.dc.html#programar='+r.id)});
-    // ficha do pivô (capacidade do equipamento, a mesma do cadastro CD-03): só o setor que tem ficha registrada
-    const fid=fpvDe(r.id); if(fid) out.push({t:'Ficha do pivô',h:'Capacidade do equipamento: vazão, pressão, tempo de volta e lâmina pelo percentímetro (ficha do fabricante).',
-      go:()=>{ const fm=g2st(self,'g_set').fm; if(g2dirty(fm)){ g2set(self,'g_set',{fm:Object.assign({},fm,{warn:true})}); return; } g2set(self,'g_set',{fm:null}); fpvAbrir(self,fid,{gid:'g_set',rid:r.id}); }});
+    // ficha do pivô (capacidade do equipamento, a mesma do cadastro CD-03): o setor de pivô com equipamento do cadastro (x.eq) abre a ficha
+    // ou, sem ficha, registra (revisão de 10/10, A4); gotejo e setor sem equipamento no cadastro não oferecem
+    const fpo=fpvPode(r.id), fid=fpvDe(r.id); if(fpo) out.push({t:fid?'Ficha do pivô':'Registrar ficha do pivô',
+      h:fid?'Capacidade do equipamento: vazão, pressão, tempo de volta e lâmina pelo percentímetro (ficha do fabricante).':'Digite a capacidade como está na ficha do fabricante: vazão, pressão, tempo de volta e lâmina pelo percentímetro.',
+      go:()=>{ const fm=g2st(self,'g_set').fm; if(g2dirty(fm)){ g2set(self,'g_set',{fm:Object.assign({},fm,{warn:true})}); return; } g2set(self,'g_set',{fm:null}); fpvAbrir(self,fpo,{gid:'g_set',rid:r.id},!fid); }});
     return out; }; }
 """
     EXTRA.append(FP.painel())   # gaveta "Ficha do pivô" (o mesmo componente do CD-03)
@@ -548,7 +550,7 @@ def ir04():
     g_cap=grid([dict(k='nome',l='Captação',w=200),dict(k='ls',l='Vazão outorgada',t='num',a='r',u='L/s',w=110),dict(k='venc',l='Vencimento',t='date',w=100),
                 dict(k='st',l='Situação',w=120),dict(k='uso',l='Uso hoje',w=150),dict(k='set',l='Setores ligados',w=130)],[],
                edit=dict(m='ro',title='Captação',fields=[dict(k='nome',l='Captação',ro=True),dict(k='outorga',l='Outorga',ro=True),dict(k='obs',l='Observação',ro=True)]),gid='g_cap',total=False,search=False)
-    drows=[R('p2',o=['Hidrômetro · Pivô 2 · 32.480 m³ (09–22/09)','Medidor de energia · bomba B2 · 23.370 kWh','Eficiência = volume ÷ energia · lâmina = volume ÷ 80 ha'],
+    drows=[R('p2',o=['Hidrômetro · Pivô 2 · 32.480 m³ (09–22/09)','Medidor de energia · '+DI.eq_nome('a11')+' · 23.370 kWh','Eficiência = volume ÷ energia · lâmina = volume ÷ 80 ha'],
              setor=[Pt.b('Pivô 2'),Pt.mut('Milho')],vol=32480,kwh=23370,lam=40.6,ef=1.39,ind=[Pt.chip('+4 % vs quinzena anterior','green')]),
            R('p1',o=['Hidrômetro · Pivô 1 · 34.580 m³ (09–22/09)','Medidor de energia · bomba B1 · 25.610 kWh','Lâmina = volume ÷ 95 ha'],
              setor=[Pt.b('Pivô 1'),Pt.mut('Feijão')],vol=34580,kwh=25610,lam=36.4,ef=1.35,ind=[Pt.chip('Estável','gray')]),

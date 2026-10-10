@@ -86,6 +86,13 @@ try:
     chk(f'3 filtro da coluna Praga-alvo = "{FN}": "{nf(N_FN)} de {nf(N_SJ)} usos em Soja", só linhas com esse nome comum',
         n3 == f'{nf(N_FN)} de {nf(N_SJ)} usos em Soja' and L3 and all(FN in r[1] for r in L3), [n3, L3[:2]])
     shot('filtro_praga')
+    # 3b · A5 (revisão de 10/10): com o filtro da coluna, os chips contam as linhas filtradas e o número do chip é o que a lista mostra ao clicar
+    chips = lambda: dict((m[0], int(m[1].replace('.', ''))) for m in (J("[...document.querySelectorAll('main button')].map(b=>b.innerText.replace(/\\s+/g,' ').trim()).filter(t=>/^(Todas|Fungicida|Aprovados para orgânicos) [\\d.]+$/.test(t)).map(t=>[t.replace(/ [\\d.]+$/,''),t.match(/[\\d.]+$/)[0]])") or []))
+    n_ = lambda: int((cnt().split(' de ')[0] or '0').replace('.', ''))
+    k0 = chips(); clica('main', 'Fungicida'); time.sleep(.8); nF = n_(); k1 = chips(); clica('main', 'Aprovados para orgânicos'); time.sleep(.8); nO = n_()
+    clica('main', 'Aprovados para orgânicos'); time.sleep(.5); clica('main', 'Fungicida'); time.sleep(.5)
+    chk(f'3b A5 · com o filtro "{FN}", os chips contam as linhas filtradas: Todas = {nf(N_FN)}, Fungicida = a lista com o chip, orgânicos (com Fungicida) = a lista com os dois',
+        k0.get('Todas') == N_FN and k0.get('Fungicida') == nF > 0 and k1.get('Aprovados para orgânicos') == nO, [k0, nF, k1, nO])
     clica('main', 'Limpar filtros'); time.sleep(.6)
     # ---------- 4 · busca por praga-alvo (sem acento, no mesmo uso) ----------
     combo('Cultura', 'soja'); setv('main input[type=search]', 'ferrugem ASIATICA'); n4 = cnt(); L4 = linhas()

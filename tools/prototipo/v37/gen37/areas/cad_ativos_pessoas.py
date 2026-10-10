@@ -158,7 +158,7 @@ def cd03():
                cond={k:dict(t=c['t'],m=c['om']+' · '+c['det'],ordens=c['ordens'],om=c['om']) for k,c in DC.CONDICAO.items()},
                pes=[dict(v,id=pid) for pid,v in pessoas()])
     EXTRA_FP=FP.painel()   # gaveta "Ficha do pivô" (o mesmo componente do IR-01)
-    js({},ALOC_JS+FP.js('CD')+'const C3='+json.dumps(dados,ensure_ascii=False)+';\n'+r'''
+    js({},ALOC_JS+FP.store_js()+FP.js('CD')+'const C3='+json.dumps(dados,ensure_ascii=False)+';\n'+r'''
 function c3v(V,k){ return V[k+'_'+(C3.cod[V.classe]||'')]; }
 function c3n(V,k){ const x=c3v(V,k); return isnum(x)?Number(x):null; }
 function c3larg(V){ const c=V.classe; if(c==='Plantadeira'){ const a=c3n(V,'linhas'), b=c3n(V,'esp'); return (a!==null&&b!==null)?Math.round(a*b*100)/100:null; }
@@ -207,17 +207,22 @@ function c3usos(self){ const u={}; RW(self,'g_cj').forEach(r=>{ [r.v.maq,r.v.imp
 function c3temR(V){ return isnum(V.rend)&&String(V.rend)!==''; }
 // painel da máquina: os conjuntos que a usam (cada um abre o conjunto); painel do conjunto: rendimento e exclusão
 CAD_ACTS.g_atv=(self,r,fm)=>{ if(g2dirty(fm)) return []; const us=(c3usos(self)[r.v.nome]||[]);
-  // equipamento de irrigação com ficha registrada: a ficha do pivô (capacidade) como sub-detalhe; fechar volta a este painel
-  const fp=FPV[r.id]?[{t:'Ficha do pivô ›',h:'Capacidade do equipamento: vazão, pressão, tempo de volta e lâmina pelo percentímetro.',go:()=>{ g2set(self,'g_atv',{fm:null}); fpvAbrir(self,r.id,{gid:'g_atv',rid:r.id}); }}]:[];
+  // equipamento do pivô de um setor da Irrigação: a ficha do pivô (capacidade) como sub-detalhe; sem ficha, registrá-la (revisão de 10/10, A4);
+  // fechar volta a este painel
+  const tf=FPV_EQ[r.id]?!!fpvFicha(r.id):null;
+  const fp=tf===null?[]:[{t:tf?'Ficha do pivô ›':'Registrar ficha do pivô ›',h:tf?'Capacidade do equipamento: vazão, pressão, tempo de volta e lâmina pelo percentímetro.':'Digite a capacidade como está na ficha do fabricante: vazão, pressão, tempo de volta e lâmina pelo percentímetro.',
+    go:()=>{ g2set(self,'g_atv',{fm:null}); fpvAbrir(self,r.id,{gid:'g_atv',rid:r.id},!tf); }}];
   return fp.concat(us.map((c,i)=>{ const o=c.v.maq===r.v.nome?(c.v.impl&&c.v.impl!==C3.sem?c.v.impl:''):c.v.maq;
     return {t:(o?o+' · ':'')+(ml(c.v.ops).join(', ')||'conjunto')+' ›',h:i===us.length-1?(us.length>1?'Conjuntos que usam esta máquina.':'Conjunto que usa esta máquina.'):'',go:()=>{ g2set(self,'g_atv',{fm:null}); g2open(self,GR('g_cj'),c.id,null); }}; })); };
 CAD_ACTS.g_cj=(self,r)=>[c3temR(r.v)?null:{t:'Cadastrar rendimento ›',h:'Sem rendimento o planejamento não calcula horas nem custo deste conjunto.',go:()=>{ location.href='CD-02.dc.html#aba=operacoes'; }},
   cadExcluir(self,'g_cj',r,'conjunto',r.nd?'tem rendimento em Culturas e operações; troque o conjunto lá antes':'')];
 function PREVALS(self,v){ cadActsIni(self); fpvVals(self,v);
   // CD-03.dc.html#ficha=<equipamento> (vindo da Irrigação) abre a ficha do pivô; fechar volta ao detalhe do equipamento
-  if(!self.__fpvHash){ self.__fpvHash=1; try{ const m=/[#&]ficha=([^&]+)/.exec(location.hash||''); const id=m?decodeURIComponent(m[1]):''; if(FPV[id]) setTimeout(()=>fpvAbrir(self,id,{gid:'g_atv',rid:id}),0); }catch(e){} }
+  if(!self.__fpvHash){ self.__fpvHash=1; try{ const m=/[#&]ficha=([^&]+)/.exec(location.hash||''); const id=m?decodeURIComponent(m[1]):''; if(FPV_EQ[id]&&fpvFicha(id)) setTimeout(()=>fpvAbrir(self,id,{gid:'g_atv',rid:id}),0); }catch(e){} }
   const atv=RW(self,'g_atv'); self._c3nomes=self._c3nomes||{}; const usos=c3usos(self);
   atv.forEach(r=>{ const V=r.v; self._c3nomes[r.id]=V.nome; const C=c3cond(r);
+    // com ficha do pivô, a vazão do equipamento é a da ficha (uma fonte com a Irrigação; revisão de 10/10, A2)
+    const fv=FPV_EQ[r.id]?fpvFicha(r.id):null; if(fv) V.vazao_ir=fpvM3(fv.vazao_ls);
     r.p.nome=[{k:'b',t:V.nome||''}].concat(V.modelo?[{k:'mut',t:V.modelo}]:[]); r.s.nome=(V.nome||'')+' '+(V.modelo||'');
     r.p.classe=[{k:'txt',t:V.classe||'—'}]; r.s.classe=V.classe||'';
     r.p.cap=[{k:'txt',t:c3cap(V)}]; r.s.cap=c3cap(V);
@@ -259,6 +264,12 @@ function EXTRAVALS(self,v){
       g2set(self,'g_atv',{fm:Object.assign({},cur,{draft:d,errs:er,warn:false})}); }; }
   if(F&&F.open&&F.edit&&(g2st(self,'g_atv').fm||{}).isNew) F.sub=C3.subnew;
   selFiel(v.g_atv_F); selFiel(v.g_cj_F);
+  // vazão do pivô (equipamento de um setor da Irrigação): só leitura aqui; muda-se na ficha do pivô, que o cadastro e a Irrigação leem
+  // (revisão de 10/10, A2: uma fonte também durante o uso; sem ficha, vale a do setor até registrar a ficha)
+  if(F&&F.open&&F.fields){ const fm=g2st(self,'g_atv').fm; const pv=fm&&fm.rid&&FPV_EQ[fm.rid]; const fv=pv?fpvFicha(fm.rid):null; const f=F.fields.find(x=>x.fid==='fx_g_atv_vazao_ir');
+    if(f&&pv){ f.dis=true; if(fv) f.v=String(fpvM3(fv.vazao_ls)); f.ist=f.ist.replace('background:#FFFFFF','background:#F4F6F3'); f.set=()=>{}; f.hasHelp=true;
+      f.help=fv?('Vem da ficha do pivô ('+fpvNat(fv.vazao_ls)+' L/s): corrija na Ficha do pivô; o cadastro e a Irrigação usam a mesma vazão.')
+        :('Vazão do setor '+pv.setor+' na Irrigação ('+fpvNat(pv.vaz)+' L/s). Para mudar, registre a ficha do pivô: o cadastro e a Irrigação passam a usá-la.'); } }
   self.g2live=(gid,k,d)=>{ const n=x=>{ const y=g2num(d[x]); return isNaN(y)?null:y; };
     if(gid==='g_atv'&&k==='larg_pl'){ const a=n('linhas_pl'), b=n('esp_pl'); return (a!==null&&b!==null)?nfa(Math.round(a*b*100)/100):'—'; }
     if(gid==='g_cj'){ const atv=RW(self,'g_atv'); const M=atv.find(r=>r.v.nome===d.maq); const I=(d.impl&&d.impl!==C3.sem)?atv.find(r=>r.v.nome===d.impl):null;

@@ -60,7 +60,9 @@ SEMENTES={('Soja','58 W'):'Semente de soja 58 W',('Soja','62 X'):'Semente de soj
 # ============ CD-03 · máquinas, instalações e conjuntos ============
 # capacidade por classe: pot (cv) · barra (m) + tanque (L) · linhas × esp (m) · larg (m) [+ carga kg] · plat (m) · vazao (m³/h) · kgh (kg/h) · cap_sc (sc 60 kg)
 # custo_h: máquina/implemento R$/h que o rendimento (CD-02 e Planejar safra etapa 3) usa
-# Bomba do Pivô 2: a vazão (m³/h) é a da ficha do pivô (dados.FICHA_PIVO, 166 L/s), a mesma da Irrigação; antes 340 m³/h, divergente
+# vazão (m³/h) do equipamento de irrigação = a fonte da Irrigação (dados_irrigacao.eq_vazao_ls lê daqui): Bomba do Pivô 2 = a da ficha do pivô
+# (dados.FICHA_PIVO, 166 L/s; antes 340 m³/h); Bomba do Pivô 1 = 540 m³/h (150 L/s; antes 300); Gotejo T7 = 838,8 m³/h (233 L/s; antes 45)
+# (revisão de 10/10, A2: a mesma vazão no cadastro e na Irrigação). Modelo da a11 = o conjunto da ficha (pivô + motobomba), A7.
 ATIVOS=[
  dict(id='a01',nome='Trator T1',modelo='JD 6M 155',classe='Trator',pot=155,custo_h=180,cont=4312,exige='Não',local='Oficina Sede',fonte='Fabricante'),
  dict(id='a02',nome='Trator 02',modelo='MF 7719',classe='Trator',pot=190,custo_h=180,cont=2988,exige='Não',local='Santa Rita · T4',fonte='Fabricante'),
@@ -72,9 +74,9 @@ ATIVOS=[
  dict(id='a08',nome='Colhedora Axial-Flow 7250',modelo='Case IH 7250',classe='Colhedora',plat=10,custo_h=950,cont=2150,exige='Não',local='Galpão 1',fonte='Fabricante'),
  dict(id='a09',nome='Máquina TSI',modelo='tratamento de sementes na sede',classe='Tratamento de sementes',kgh=2400,custo_h=60,cont=720,exige='Sim',calib='2026-07-20',interv=60,local='Oficina Sede',fonte='Ensaio da fazenda'),
  dict(id='a10',nome='Esqueletadeira',modelo='café · 1 linha',classe='Implemento',larg=3,custo_h=60,cont=310,exige='Não',local='Galpão 1',fonte='Fabricante'),
- dict(id='a15',nome='Bomba do Pivô 1',modelo='motobomba 125 cv',classe='Irrigação',vazao=300,custo_h=85,cont=7650,exige='Sim',calib='2026-09-12',interv=30,local='Pivô 1',fonte='Ensaio da fazenda'),
- dict(id='a11',nome='Bomba do Pivô 2',modelo='motobomba + hidrômetro novo',classe='Irrigação',vazao=round(D.FICHA_PIVO['a11']['vazao_ls']*3.6,1),custo_h=85,cont=8914,exige='Sim',calib='',interv=30,local='Pivô 2',fonte='Ensaio da fazenda'),
- dict(id='a12',nome='Gotejo T7',modelo='cabeçal + injetora de fertilizante',classe='Irrigação',vazao=45,custo_h=25,cont=5210,exige='Sim',calib='2026-09-05',interv=60,local='Talhão T7',fonte='Ensaio da fazenda'),
+ dict(id='a15',nome='Bomba do Pivô 1',modelo='motobomba 125 cv',classe='Irrigação',vazao=540,custo_h=85,cont=7650,exige='Sim',calib='2026-09-12',interv=30,local='Pivô 1',fonte='Ensaio da fazenda'),
+ dict(id='a11',nome='Bomba do Pivô 2',modelo='pivô central fixo · 8 torres · motobomba + hidrômetro novo',classe='Irrigação',vazao=round(D.FICHA_PIVO['a11']['vazao_ls']*3.6,1),custo_h=85,cont=8914,exige='Sim',calib='',interv=30,local='Pivô 2',fonte='Ensaio da fazenda'),
+ dict(id='a12',nome='Gotejo T7',modelo='cabeçal + injetora de fertilizante',classe='Irrigação',vazao=838.8,custo_h=25,cont=5210,exige='Sim',calib='2026-09-05',interv=60,local='Talhão T7',fonte='Ensaio da fazenda'),
  dict(id='a13',nome='Packing linha 1',modelo='esteira + balança',classe='Beneficiamento',kgh=2400,custo_h=120,cont=12301,exige='Sim',calib='2026-09-01',interv=30,local='Armazém Sede',fonte='Ensaio da fazenda'),
  dict(id='a14',nome='Silo 01',modelo='aeração + termometria',classe='Armazenagem',cap_sc=60000,custo_h='',cont='',exige='Sim',calib='2026-09-18',interv=90,local='Armazém Sede',fonte='Fabricante'),
 ]

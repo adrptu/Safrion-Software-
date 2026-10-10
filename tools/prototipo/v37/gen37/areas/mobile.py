@@ -50,6 +50,7 @@ import engine as E
 from ui37 import mobile37, HEIGHTS37, selo, etapa, ETAPA_COR
 import dados as D
 import dados2 as D2
+import dados_irrigacao as _DI   # equipamento do setor (nome e vazão do cadastro e da ficha do pivô)
 import cenario
 
 H=lambda s: '{{'+s+'}}'
@@ -860,10 +861,10 @@ DCH(v,'hdr',k?(k.local+' · planta '+(n+1)):(s.m7ok?'contagem gravada':'escolha 
           kv('Janela',f'hoje {IRR["janela"]} · 1 volta de {IRR["dur"]} · iniciada {IRR["ini"]} ({IRR["ex"]}) · término previsto {IRR["fim"]}'),
           kv('Percentímetro',f'<b>{P["percent"]}%</b> → lâmina {br(P["lamina_aplicada"])} mm (100% = {br(P["lamina_100"])} mm)'),
           kv('Andamento',f'≈{br(AREA_COB)} de {AREA_PIVO} ha ({br(P["cobertura_pct"])}% da volta) · {br(P["exec_h"])} de {IRR["dur"]} executadas'),
-          kv('Medidores','bomba B2 · 166 L/s · pressão 2,8 bar · ponta parcial 20–21 h'),
+          kv('Medidores',f"{_DI.eq_nome('a11')} · {_DI.eq_vazao_ls('a11')} L/s · pressão 2,8 bar · ponta parcial 20–21 h"),   # nome e vazão do cadastro e da ficha do pivô (A7)
           chips(prazo('irrigando','volta em curso'))],state='green',desc='Acompanhe a volta e confirme o término no fim.')
       + h2('Ações da volta','Registre pausas e avanço sem encerrar a ordem.')
-      + btns(say('Pausar','Pausada · queda de pressão na bomba B2 · o tempo parado não conta como lâmina e empurra o término previsto.','clock','Pausar a volta com motivo'),
+      + btns(say('Pausar','Pausada · queda de pressão na '+_DI.eq_nome('a11')+' · o tempo parado não conta como lâmina e empurra o término previsto.','clock','Pausar a volta com motivo'),
              say('Retomar','Retomada · pressão normalizada · término previsto recalculado pelo tempo parado.','check','Retomar a volta'),
              say('Registrar avanço',f'Avanço registrado: {br(P["exec_h"])} h · {exec_txt} · balanço hídrico atualizado 1× por aplicação.','drop','Registrar o avanço da volta'))
       + btns(say('Finalizar apontamento do turno','Turno do irrigante finalizado · a ordem segue Em execução — finalizar o turno nunca conclui.','doc','Guardar o turno sem concluir'),

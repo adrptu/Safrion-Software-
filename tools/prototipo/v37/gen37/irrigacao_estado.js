@@ -13,10 +13,14 @@ function irrGet() {
   if (t) { let o = (t === IRR_RAW && IRR_OBJ) ? IRR_OBJ : null;
     if (!o) { try { const p = JSON.parse(t); if (p && p.v === IRR0.v) { o = p; o.capt = irrClone(IRR0.capt); } } catch (e) {} }   // outorga: vale sempre a do cadastro (CTL-5)
     if (o && irrOrfa(o)) { irrReset(); o = null; }
-    if (o) { IRR_RAW = t; IRR_OBJ = o; return o; } }
+    if (o) { IRR_RAW = t; IRR_OBJ = o; return irrEqVaz(o); } }
   if (IRR_MEM && irrOrfa(IRR_MEM)) IRR_MEM = null;
-  if (!IRR_MEM) IRR_MEM = irrInicial(); return IRR_MEM;
+  if (!IRR_MEM) IRR_MEM = irrInicial(); return irrEqVaz(IRR_MEM);
 }
+// vazão do setor = a do equipamento (x.eq, cadastro CD-03): com ficha do pivô registrada, vale a vazão da ficha (fpvFicha, ficha_pivo.py),
+// a mesma do cadastro; a duração e a trava de outorga usam este valor (revisão de 10/10, A2: uma fonte também durante o uso)
+function irrEqVaz(o) { if (typeof fpvFicha !== 'function' || !o || !o.setores) return o;
+  Object.keys(o.setores).forEach(k => { const x = o.setores[k]; const f = x.eq ? fpvFicha(x.eq) : null; if (f && f.vazao_ls > 0) x.vazao = f.vazao_ls; }); return o; }
 function irrSave(s) { s.cenVisto = Math.max(s.cenVisto || 0, irrCenRev()); IRR_MEM = s; try { const t = JSON.stringify(s); localStorage.setItem(IRR_KEY, t); IRR_RAW = t; IRR_OBJ = s; } catch (e) {} }
 function irrReset() { IRR_MEM = null; IRR_RAW = null; IRR_OBJ = null; try { localStorage.removeItem(IRR_KEY); } catch (e) {} }
 // mudança atômica: aplica fn numa cópia, grava e devolve a mensagem; com erro nada é gravado
@@ -28,7 +32,7 @@ function irrMudar(self, fn) {
 }
 function irrOuvir(self) {
   if (self.__irrOuvindo) return; self.__irrOuvindo = true;
-  try { window.addEventListener('storage', (e) => { if (e.key === IRR_KEY || e.key === 'talhao-os-cenario-v1') self.setState({ irrrev: Date.now() }); }); } catch (e) {}
+  try { window.addEventListener('storage', (e) => { if (e.key === IRR_KEY || e.key === 'talhao-os-cenario-v1' || e.key === 'talhao-os-ficha-pivo-v1') self.setState({ irrrev: Date.now() }); }); } catch (e) {}
 }
 // cenário da O.S. (cenario.js): lido uma vez por versão gravada (o texto do localStorage serve de chave do cache)
 let IRR_CRAW = null, IRR_COBJ = null;

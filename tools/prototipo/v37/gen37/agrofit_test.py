@@ -171,7 +171,7 @@ try:
     clica('main','Incluir "Todas as culturas"')
     # ---------- 7 · Praga ou alvo (aparece com a cultura) ----------
     PH=aid('Phakopsora pachyrhizi'); eA=usos(SJ,PH)|usos(TD,PH)
-    combo('Praga ou alvo','phakopsora'); c7=cnt(); L7=rows(); vis7=set(r[0].split('\n')[0] for r in L7)
+    combo('Praga-alvo','phakopsora'); c7=cnt(); L7=rows(); vis7=set(r[0].split('\n')[0] for r in L7)
     chk(f'7 Praga ou alvo = Phakopsora pachyrhizi em Soja: {len(eA)} usos (Soja + "Todas as culturas"), linhas só deles, com o nome científico na coluna própria',
         c7==f'{nf(len(eA),0)} de {nf(uS,0)} usos em Soja' and vis7 and vis7<= {P[i]['nome'] for i in eA} and all(r[2]=='Phakopsora pachyrhizi' for r in L7), [c7,len(eA),L7[:2]])
     shot('soja_ferrugem')
