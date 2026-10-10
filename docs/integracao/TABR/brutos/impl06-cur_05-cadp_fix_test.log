@@ -1,0 +1,21 @@
+$ env CHROME_BIN=<chrome> flock /tmp/cdp9333.lock env CDP_GL=1 timeout 900 python3 cadp_fix_test.py
+OK  1 sem erro JS
+OK  2 clientes com pedido (VE-04), contrato de venda (VE-05) e título (GE-05) existem no CD-05 como Cliente · faltam [] · VE-04 ['Atacado Bom Preço', 'CD Horti', 'Coop Grão Sul', 'Frutas Real', 'Rede Hortifrúti BA', 'Torrefação Serra'] · GE-05 ['Atacado Bom Preço', 'Coop Grão Sul', 'Frutas Real', 'Rede Hortifrúti BA'] · VE-05 ['Coop Grão Sul', 'Torrefação Serra']
+OK  3 contraparte de barter (VE-05) cadastrada como Fornecedor; Coopergrão, sem uso em outra tela, saiu · ['Agroquímica Delta', 'Fertisul'] · ['Agro Norte', 'Agroquímica Delta', 'Casa do Adubo', 'Coop. Vale', 'Fertisul', 'Química Centro-Oeste', 'Santa Rita Insumos', 'Sementes Vale']
+FALHOU 4 suspenso com motivo na linha · Casa do Adubo 22.456.789/0001-22 Fornecedor Juliana Prado 65 99822-3344 vendas@casadoadubo.com.br E-mail Suspenso
+FALHOU 5 reativado: linha volta a Homologado, sem o motivo · Casa do Adubo 22.456.789/0001-22 Fornecedor Juliana Prado 65 99822-3344 vendas@casadoadubo.com.br E-mail Homologado
+OK  6 nova suspensão começa com motivo vazio e a ajuda não promete histórico · '' · SUSPENSÃO Motivo da suspensão Aparece na listagem enquanto durar a suspensão.
+OK  7 salvar sem motivo novo é barrado junto ao campo · Informe motivo da suspensão.
+OK  8 Clientes · Situação do papel: sem "—" dos não clientes, contagens somam 7 · ['(vazio) 0', 'Limite vencido 1', 'Limite vigente 6']
+Traceback (most recent call last):
+  File "<sp-tabr>/tools/prototipo/v37/gen37/cadp_fix_test.py", line 65, in <module>
+    MENU('Papéis'); o2=J(OPTS)
+    ^^^^^^^^^^^^^^
+  File "<sp-tabr>/tools/prototipo/v37/gen37/cadp_fix_test.py", line 22, in <lambda>
+    MENU=lambda col: J(f"document.querySelector('[aria-label=\"Filtrar {col}\"]').click()") or time.sleep(.35)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<sp-tabr>/tools/prototipo/v37/gen37/cdp.py", line 95, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught
+[exit 1]

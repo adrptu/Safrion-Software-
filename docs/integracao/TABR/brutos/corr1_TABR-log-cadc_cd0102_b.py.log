@@ -1,0 +1,17 @@
+OK  largura abaixo do mínimo barrada · Corrija os campos destacados; o que você preencheu foi mantido. | Mínimo 0,5 m.
+OK  rendimento ao vivo acompanha o digitado · 0,15
+OK  salvou e fechou
+OK  aviso de salvo com o novo rendimento · Salvo: Pulverização rende 27,00 ha/h a R$ 333,00/h e R$ 12,33/ha. Novos planejamentos usam este padrão.
+OK  linha recalculada (27,00 ha/h · R$ 333,00 · R$ 12,33) e o painel com 36 m · 10 km/h · 75 % · ['Trator 02 MF 7719 + Pulverizador PJ-3030 36 m Medição local Tratos culturais Todas 27,00 ha/h R$ 333,00/h R$ 12,33/ha', ['36', '10', '75']]
+OK  Informado esconde largura, velocidade e eficiência · ['Operação', 'Conjunto ou equipe', 'Cultura', 'Como obter o rendimento', 'Rendimento efetivo', 'Máquina', 'Implemento', 'Pessoas na equipe', 'Custo por pessoa', 'Custo por hora', 'Fonte do dado', 'Vigente até']
+OK  Informado parte do rendimento atual (6,8) · 6,8
+OK  linha em modo informado (7,50 ha/h; o modo no painel) · ['Trator T1 JD 6M 155 + Plantadeira 24 linhas Fabricante Implantação Todas 7,50 ha/h R$ 396,00/h R$ 52,80/ha', 'Informado']
+RESULTADO: OK 8/8
+Traceback (most recent call last):
+  File "<sp-tabr>/tools/prototipo/v37/gen37/cadc_cd0102_b.py", line 30, in <module>
+    J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>/Trator 02/.test(r.innerText)); (r.querySelector('[role=cell] span')||r).click();})()"); time.sleep(.4)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<sp-tabr>/tools/prototipo/v37/gen37/cdp.py", line 95, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught

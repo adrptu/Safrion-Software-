@@ -1,0 +1,13 @@
+  OK  Santa Rita · todas as safras: selo vermelho com 3 impedidas = ordens abertas com selo vermelho (OS-0418 sem lote de Ureia, OS-0420, OS-0431), nenhuma de água
+  OK  safra 2025/26: nenhuma impedida sem vermelho
+  OK  Boa Vista: nenhuma impedida sem vermelho
+  OK  voltar a Santa Rita: vermelho de novo
+  OK  Lagoa Grande e Fazenda Todas: o selo segue o filtro (vermelho; impedidas = ordens abertas com selo vermelho; Todas = Santa Rita + Lagoa Grande)
+  OK  Santa Rita · todas as safras: 10 ordens agrícolas, chip Todas = linhas, sem OS-0419/0422/0423 na lista nem no texto da tela
+  OK  Kanban de Santa Rita: os mesmos 10 cartões da lista, nenhum de água
+  OK  OS-0418 (fertirrigação) continua na O.S.: produto Ureia 45% com requisição em Insumos, liberação pela agrônoma, liberar bloqueado sem lote
+  FALHA IR-03 · OS-0423: selo vermelho Conflito · parada da B3, nota de ET e lâmina 4,0 mm uma vez cada (formato irrMm: 2 casas, mínimo 1) · ('OS-0423 A liberar Conflito : parada da B3 · 14:00–15:00 Resolver conflito Caio Água Gotejo T7 hoje 14:00 hoje 16:00 4,0 mm', 'rgb(180, 35, 24)')
+  FALHA IR-03 · OS-0422: selo amarelo Janela a definir; 13,5 mm em 2 passadas, uma vez cada · ('OS-0422 A liberar Janela a definir Definir janela João Água Pivô 2 a definir a definir 13,5 mm', 'rgb(138, 90, 0)')
+  OK  IR-03 · OS-0419 liberada com 10,81 mm uma vez na linha; IR-03det abre a OS-0419 sem citar política nem agrônomo
+  OK  sem erro JS (O.S., IR-03 e IR-03det)
+RESULTADO: 10/12 ok · FALHAS: IR-03 · OS-0423: selo vermelho Conflito · parada da B3, nota de ET e lâmina 4,0 mm uma vez cada (formato irrMm: 2 casas, mínimo 1); IR-03 · OS-0422: selo amarelo Janela a definir; 13,5 mm em 2 passadas, uma vez cada

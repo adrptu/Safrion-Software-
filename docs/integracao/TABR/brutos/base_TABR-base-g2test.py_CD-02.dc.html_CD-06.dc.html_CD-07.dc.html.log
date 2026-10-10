@@ -1,0 +1,3 @@
+CD-02.dc.html {'grades': 1, 'ordena': True, 'linhas_editaveis': 12, 'abre_form': False, 'campos_editaveis': 0, 'consulta': True, 'teclado': True, 'link_nao_edita': True, 'botao_nao_edita': 'sem botão'}
+CD-06.dc.html {'grades': 1, 'ordena': True, 'linhas_editaveis': 50, 'abre_form': False, 'campos_editaveis': 0, 'consulta': True, 'teclado': True, 'link_nao_edita': 'sem link', 'botao_nao_edita': 'sem botão'}
+CD-07.dc.html {'grades': 1, 'ordena': True, 'linhas_editaveis': 23, 'abre_form': True, 'campos_editaveis': 9, 'consulta': False, 'valida': 'Corrija os campos destacados; o que você preencheu foi mantido. | Informe código.', 'aviso_nao_salvo': True, 'salvou': True, 'teclado': True, 'link_nao_edita': 'sem link', 'botao_nao_edita': 'sem botão'}

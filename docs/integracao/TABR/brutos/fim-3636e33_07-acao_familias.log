@@ -1,0 +1,13 @@
+$ env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 1200 python3 acao_unica_test.py familias
+OK    10 CMP · etapa 2: "Solicitar cotações ›" único; etapa 3 antes do envio: só o comando "Enviar convites (simulado)" com a causa; etapa 5: comando "Enviar à Direção" + avanço secundário; ir à etapa 6 não aprova (sem "Compra aprovada", sem PC-101) 
+OK    11 PA · Novo plano secundário (etapa 1 sem primária); etapa 2: "Incluir atividade" secundário, nenhum "Revisar e publicar" fora da área, avanço "Ver versões e cultivos ›"; etapa 3 sem rascunho: só retorno e a nota "Nada a publicar" 
+OK    12 PM · etapa 1 sem primária (Novo plano secundário); plano aberto: etapa 2 com retorno "‹ Biblioteca de planos" e um avanço; no máximo uma primária 
+OK    13 EST · "Seções do estoque": 6 seções sem número e sem setas, atual com aria-current; ir direto a Contagens e a Saldos; Saldos (consulta) sem primária de navegação 
+OK    14 IR e MA · faixa de telas irmãs ("Telas da irrigação" 4, "Telas da manutenção" 5): links com aria-current="page", sem número de etapa e sem setas; pendência escrita (ex.: "1 conflito") 
+OK    15 O.S. · Lista e Kanban com o mesmo filtro de fase (Liberadas: 2 = 2, antes 2 × 10), Kanban diz o filtro e oferece "Limpar filtros" (volta a 10), Recursos segue o mesmo recorte e diz qual (TABELAS-FOCO); "Nova ordem" a única primária; no painel a fase é texto, não comando 
+OK    15b O.S. "Ajustar antes de liberar" (360×800) · rodapé do formulário preso (sticky): Voltar à esquerda, primária à direita e visível sem rolar até o fim; o campo de área focado continua livre 
+OK    16 mapa · painel do talhão aberto com no máximo uma primária na tela (próximo passo no painel, sem cópia no cabeçalho) 
+     (informativo) erros de JS (famílias) []
+
+RESULTADO: 8 ok · 0 falhas (familias)
+[exit 0]

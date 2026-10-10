@@ -1,0 +1,73 @@
+  ok  IR-01 Setores: colunas Setor | Cultura | Estádio | Área | Déficit hoje | Fonte do déficit | Necessidade bruta | Passadas | Ordem | Cobertura | Resta | Situação | Pendência | Próxima passada | Próximo passo | Responsável · ['Setor', 'Cultura', 'Estádio', 'Área', 'Déficit hoje', 'Fonte do déficit', 'Necessidade bruta', 'Passadas', 'Ordem', 'Cobertura', 'Resta', 'Situação', 'Pendência', 'Próxima passada', 'Próximo passo', 'Responsável']
+  ok  IR-01 Setores: nenhum rótulo composto (" · ", " / ") · ['Setor', 'Cultura', 'Estádio', 'Área', 'Déficit hoje', 'Fonte do déficit', 'Necessidade bruta', 'Passadas', 'Ordem', 'Cobertura', 'Resta', 'Situação', 'Pendência', 'Próxima passada', 'Próximo passo', 'Responsável']
+  ok  IR-01 Setores: filtro (▾) e ordenação no título em todas as 16 colunas · [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+  ok  IR-01 Setores: unidade junto do valor (Área ha, Déficit hoje mm, Necessidade bruta mm, Cobertura %, Resta mm) · []
+  ok  IR-01 Setores: Situação em chip (3) · [True, True, True]
+  ok  IR-01: Pivô 2 = Milho | V10 | 80 ha | 11,2 mm | Medido | 12,44 mm | 2 | OS-0419 | 87 % | 1,5 mm | A conferir | Divergência · −3,8 % | — | Conferir medição | João · {'Setor': 'Pivô 2', 'Cultura': 'Milho', 'Estádio': 'V10', 'Área': '80 ha', 'Déficit hoje': '11,2 mm', 'Fonte do déficit': 'Medido', 'Necessidade bruta': '12,44 mm', 'Passadas': '2', 'Ordem': 'OS-0419', 'Cobertura': '87 %', 'Resta': '1,5 mm', 'Situação': 'A conferir', 'Pendência': 'Divergência · −3,8
+  ok  IR-01: a pendência explica a situação e a próxima passada tem coluna própria (Pivô 1 Impedida · Falta insumo · Ureia 45% · amanhã 21:00; Gotejo T7 Conflito · parada da B3 · hoje 14:00) · ({'Setor': 'Pivô 1', 'Cultura': 'Feijão', 'Estádio': 'R5', 'Área': '95 ha', 'Déficit hoje': '≈8,4 mm', 'Fonte do déficit': 'Estimativa por ET', 'Necessidade bruta': '9,33 mm', 'Passadas': '1', 'Ordem': 'OS-0418', 'Cobertura': '—', 'Resta': '—', 'Situação': 'Impedida', 'Pendência': 'Falta insumo · Ur
+  ok  IR-01: déficit estimado com ≈ e a fonte em coluna própria (Gotejo T7 ≈10,0 mm · Estimativa por ET) · {'Setor': 'Gotejo T7', 'Cultura': 'Mamão', 'Estádio': '—', 'Área': '42 ha', 'Déficit hoje': '≈10,0 mm', 'Fonte do déficit': 'Estimativa por ET', 'Necessidade bruta': '10,53 mm', 'Passadas': '2', 'Ordem': 'OS-0423', 'Cobertura': '38 %', 'Resta': '6,2 mm', 'Situação': 'Impedida', 'Pendência': 'Conflit
+  ok  IR-01: o filtro rápido de Situação tem os mesmos textos dos chips da coluna · (['Todos', 'Impedida', 'A conferir'], ['Impedida', 'Impedida', 'A conferir'])
+  ok  IR-01: filtro Fonte do déficit = Estimativa por ET → Gotejo T7 e Pivô 1 · ['Gotejo T7', 'Pivô 1']
+  ok  IR-01: ordenar Déficit hoje (decrescente) pelo número (o ≈ não atrapalha) · ['11,2 mm', '≈10,0 mm', '≈8,4 mm']
+  ok  IR-01: ordenar Próxima passada pelo instante (hoje 14:00 antes de amanhã 21:00) · ['hoje 14:00', 'amanhã 21:00', '—']
+  ok  IR-01 Todas: a coluna Fazenda entra (Pivô 2 da Santa Rita e da Lagoa Grande se distinguem) e cada célula fica sob o seu cabeçalho · (['Setor', 'Fazenda', 'Cultura'], ['Lagoa Grande', 'Santa Rita'], 0)
+  ok  IR-01 Todas: Lagoa Grande com Cultura Mamão e a fase do mamão em Estádio (antes "Mamão · produção" numa célula) · {'Setor': 'Pivô 21', 'Fazenda': 'Lagoa Grande', 'Cultura': 'Mamão', 'Estádio': 'pré-florada', 'Área': '80,82 ha', 'Déficit hoje': '8,8 mm', 'Fonte do déficit': 'Demonstrativo', 'Necessidade bruta': '10,35 mm', 'Passadas': '2', 'Ordem': 'OS-0605', 'Cobertura': '100 %', 'Resta': '0,0 mm', 'Situação': 
+  ok  IR-01 Santa Rita: a coluna Fazenda sai e a grade continua alinhada · ['Setor', 'Cultura', 'Estádio']
+  ok  IR-02 Agenda: colunas Captação › ordem | Tipo | Setor | Bomba | Vazão | Início | Fim | Lâmina | Passadas | Etapa | Pendência | Próximo passo | Responsável | Avisos · ['Captação › ordem', 'Tipo', 'Setor', 'Bomba', 'Vazão', 'Início', 'Fim', 'Lâmina', 'Passadas', 'Etapa', 'Pendência', 'Próximo passo', 'Responsável', 'Avisos']
+  ok  IR-02 Agenda: nenhum rótulo composto (" · ", " / ") · ['Captação › ordem', 'Tipo', 'Setor', 'Bomba', 'Vazão', 'Início', 'Fim', 'Lâmina', 'Passadas', 'Etapa', 'Pendência', 'Próximo passo', 'Responsável', 'Avisos']
+  ok  IR-02 Agenda: filtro (▾) e ordenação no título em todas as 14 colunas · [True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+  ok  IR-02 Agenda: unidade junto do valor (Vazão L/s, Lâmina mm) · []
+  ok  IR-02 Agenda: Etapa em chip (4) · [None, True, True, True, None, True]
+  ok  IR-02: captação com o pico de hoje na Vazão (166 L/s); OS-0419 Água | Pivô 2 | Bomba B2 | 166 L/s | hoje 20:00 | amanhã 10:31 | 10,81 mm | 1 | Liberadas · ({'Captação › ordem': 'Rio · captação da sede 3 ordens', 'Tipo': '', 'Setor': '', 'Bomba': '', 'Vazão': '166 L/s', 'Início': '', 'Fim': '', 'Lâmina': '', 'Passadas': '', 'Etapa': '', 'Pendência': '', 'Próximo passo': '', 'Responsável': '', 'Avisos': ''}, {'Captação › ordem': 'OS-0419', 'Tipo': 'Água
+  ok  IR-02: ordenar Início pelo instante dentro da captação; "a definir" no fim · [['hoje 20:00', 'amanhã 21:00', 'a definir'], ['hoje 14:00']]
+  ok  IR-03 Ordens: colunas Ordem | Tipo | Setor | Cultura | Início | Fim | Lâmina | Passadas | Etapa | Pendência | Avisos | Próximo passo | Responsável · ['Ordem', 'Tipo', 'Setor', 'Cultura', 'Início', 'Fim', 'Lâmina', 'Passadas', 'Etapa', 'Pendência', 'Avisos', 'Próximo passo', 'Responsável']
+  ok  IR-03 Ordens: nenhum rótulo composto (" · ", " / ") · ['Ordem', 'Tipo', 'Setor', 'Cultura', 'Início', 'Fim', 'Lâmina', 'Passadas', 'Etapa', 'Pendência', 'Avisos', 'Próximo passo', 'Responsável']
+  ok  IR-03 Ordens: filtro (▾) e ordenação no título em todas as 13 colunas · [True, True, True, True, True, True, True, True, True, True, True, True, True]
+  ok  IR-03 Ordens: unidade junto do valor (Lâmina mm) · []
+  ok  IR-03 Ordens: Etapa em chip (6) · [True, True, True, True, True, True]
+  ok  IR-03: OS-0394 Água | Pivô 2 | Milho | ontem 20:00 | ontem 22:06 | 10,81 mm | 1 | Em conferência | Divergência · −3,8 % · {'Ordem': 'OS-0394', 'Tipo': 'Água', 'Setor': 'Pivô 2', 'Cultura': 'Milho', 'Início': 'ontem 20:00', 'Fim': 'ontem 22:06', 'Lâmina': '10,81 mm', 'Passadas': '1', 'Etapa': 'Em conferência', 'Pendência': 'Divergência · −3,8 %', 'Avisos': '—', 'Próximo passo': 'Conferir medição', 'Responsável': 'João'}
+  ok  IR-03: Etapa só com as fases da O.S. (A liberar, Liberadas, Em execução, Em conferência, Encerradas) · {'Encerradas', 'Liberadas', 'Em conferência', 'A liberar'}
+  ok  IR-03: ordenar Início pelo instante (19/09 < ontem < hoje < amanhã; pelo texto "amanhã" viria antes de "hoje"); "a definir" no fim · ['19/09 14:00', 'ontem 20:00', 'hoje 14:00', 'hoje 20:00', 'amanhã 21:00', 'a definir']
+  ok  IR-03: ordenar Início decrescente pelo instante · ['amanhã 21:00', 'hoje 20:00', 'hoje 14:00', 'ontem 20:00', '19/09 14:00', 'a definir']
+  ok  IR-03: filtro Avisos por item (Ponta parcial) → OS-0419 · (['(vazio)', 'Estimativa por ET', 'Ponta parcial (20–21 h)'], ['OS-0419'])
+  ok  IR-03 Todas: coluna Fazenda (3ª) com Santa Rita e Lagoa Grande; células alinhadas · (['Ordem', 'Tipo', 'Fazenda', 'Setor'], 0)
+  ok  IR-03det Passadas: colunas Passada | Início | Fim | Lâmina | Duração | Estado | Área coberta | Volume medido · ['Passada', 'Início', 'Fim', 'Lâmina', 'Duração', 'Estado', 'Área coberta', 'Volume medido']
+  ok  IR-03det Passadas: nenhum rótulo composto (" · ", " / ") · ['Passada', 'Início', 'Fim', 'Lâmina', 'Duração', 'Estado', 'Área coberta', 'Volume medido']
+  ok  IR-03det Passadas: filtro (▾) e ordenação no título em todas as 8 colunas · [True, True, True, True, True, True, True, True]
+  ok  IR-03det Passadas: unidade junto do valor (Lâmina mm, Duração h, Área coberta ha, Volume medido m³) · []
+  ok  IR-03det Passadas: Estado em chip (1) · [True]
+  ok  IR-03det: 1ª | hoje 20:00 | amanhã 10:31 | 10,81 mm | 14,5 h | Programada | — | — · [{'Passada': '1ª', 'Início': 'hoje 20:00', 'Fim': 'amanhã 10:31', 'Lâmina': '10,81 mm', 'Duração': '14,5 h', 'Estado': 'Programada', 'Área coberta': '—', 'Volume medido': '—'}]
+  ok  IR-03det Trilha: colunas Quando | Recibo | Evento | Quem · ['Quando', 'Recibo', 'Evento', 'Quem']
+  ok  IR-03det Trilha: nenhum rótulo composto (" · ", " / ") · ['Quando', 'Recibo', 'Evento', 'Quem']
+  ok  IR-03det Trilha: filtro (▾) e ordenação no título em todas as 4 colunas · [True, True, True, True]
+  ok  IR-03det Trilha: unidade junto do valor (nenhuma) · []
+  ok  IR-03det: ordenar Quando pelo instante · ['hoje 06:12', 'hoje 06:12']
+  ok  IR-04 Fontes: colunas Fonte | Grandeza | Unidade | Atualização | Calibração | Validade da calibração | Cobertura | Estado | Efeito no balanço · ['Fonte', 'Grandeza', 'Unidade', 'Atualização', 'Calibração', 'Validade da calibração', 'Cobertura', 'Estado', 'Efeito no balanço']
+  ok  IR-04 Fontes: nenhum rótulo composto (" · ", " / ") · ['Fonte', 'Grandeza', 'Unidade', 'Atualização', 'Calibração', 'Validade da calibração', 'Cobertura', 'Estado', 'Efeito no balanço']
+  ok  IR-04 Fontes: filtro (▾) e ordenação no título em todas as 9 colunas · [True, True, True, True, True, True, True, True, True]
+  ok  IR-04 Fontes: unidade junto do valor (nenhuma) · []
+  ok  IR-04 Fontes: Estado em chip (6) · [True, True, True, True, True, True]
+  ok  IR-04: hidrômetro Volume | m³ | hoje 06:00 | Vence em 7 dias | 30/09/2026; sonda P1 Suspeita (o motivo vai para o painel) · ({'Fonte': 'Hidrômetro · Pivô 2', 'Grandeza': 'Volume', 'Unidade': 'm³', 'Atualização': 'hoje 06:00', 'Calibração': 'Vence em 7 dias', 'Validade da calibração': '30/09/2026', 'Cobertura': 'Pivô 2', 'Estado': 'Ativa', 'Efeito no balanço': 'crédito das irrigações · Pivô 2'}, {'Fonte': 'Sonda de umidad
+  ok  IR-04: ordenar Atualização pelo instante (20/09 antes de hoje) · ['20/09 06:00', 'hoje 05:40', 'hoje 05:40', 'hoje 06:00', 'hoje 06:00', 'hoje 06:00']
+  ok  IR-04: o painel da sonda P1 diz o motivo da suspeita (salto de 18 p.p.) · Fonte · Sonda de umidade · P1 (20 cm) × Suspeita · salto de 18 p.p. · desde hoje 05:40. O estado vem das leituras validadas. Nome Grandeza Umidade do solo Volume ET₀ / chuva / vento Unidade % vol. m³ 
+  ok  IR-04 Captações: colunas Captação | Outorga | Vazão outorgada | Regime | Vencimento | Situação | Volume hoje | Uso do dia | Setores ligados · ['Captação', 'Outorga', 'Vazão outorgada', 'Regime', 'Vencimento', 'Situação', 'Volume hoje', 'Uso do dia', 'Setores ligados']
+  ok  IR-04 Captações: nenhum rótulo composto (" · ", " / ") · ['Captação', 'Outorga', 'Vazão outorgada', 'Regime', 'Vencimento', 'Situação', 'Volume hoje', 'Uso do dia', 'Setores ligados']
+  ok  IR-04 Captações: filtro (▾) e ordenação no título em todas as 9 colunas · [True, True, True, True, True, True, True, True, True]
+  ok  IR-04 Captações: unidade junto do valor (Vazão outorgada L/s, Regime h/dia, Volume hoje m³, Uso do dia %) · []
+  ok  IR-04 Captações: Situação em chip (2) · [True, True]
+  ok  IR-04: Rio demonstrativa | 400 L/s | 21 h/dia | 30/06/2028 | Vigente | 2.390 m³ | 8 % | Pivô 2, Pivô 1 · {'Captação': 'Rio · captação da sede', 'Outorga': 'demonstrativa', 'Vazão outorgada': '400 L/s', 'Regime': '21 h/dia', 'Vencimento': '30/06/2028', 'Situação': 'Vigente', 'Volume hoje': '2.390 m³', 'Uso do dia': '8 %', 'Setores ligados': 'Pivô 2, Pivô 1'}
+  ok  IR-04: filtro Setores ligados por item (Gotejo T7) → Reservatório da sede · ['Reservatório da sede']
+  ok  IR-04 Desempenho: colunas Setor | Cultura | Volume | Energia | Lâmina aplicada | Eficiência | Variação da eficiência · ['Setor', 'Cultura', 'Volume', 'Energia', 'Lâmina aplicada', 'Eficiência', 'Variação da eficiência']
+  ok  IR-04 Desempenho: nenhum rótulo composto (" · ", " / ") · ['Setor', 'Cultura', 'Volume', 'Energia', 'Lâmina aplicada', 'Eficiência', 'Variação da eficiência']
+  ok  IR-04 Desempenho: filtro (▾) e ordenação no título em todas as 7 colunas · [True, True, True, True, True, True, True]
+  ok  IR-04 Desempenho: unidade junto do valor (Volume m³, Energia kWh, Lâmina aplicada mm, Eficiência m³/kWh, Variação da eficiência %) · []
+  ok  IR-04: Pivô 2 Milho | 32.480 m³ | 23.370 kWh | 40,6 mm | 1,39 m³/kWh | +4 % · {'Setor': 'Pivô 2', 'Cultura': 'Milho', 'Volume': '32.480 m³', 'Energia': '23.370 kWh', 'Lâmina aplicada': '40,6 mm', 'Eficiência': '1,39 m³/kWh', 'Variação da eficiência': '+4 %'}
+  ok  IR-04 Todas: Fazenda nas fontes e nas captações, com as células alinhadas · (['Fonte', 'Fazenda', 'Grandeza'], ['Captação', 'Fazenda', 'Outorga'])
+  ok  fluxo (normal): janela sugerida salva no detalhe (libera pela prontidão) → IR-03 mostra Início e Fim da OS-0422 e ordena por eles · ('Definir janela · OS-0422 × Pivô 2 · Bomba B2 · 13,5 mm em 2 passadas · intervalo', 'OS-0422 Liberadas · LIB-2291 · 13,5 mm em 2 passadas · amanhã 21:00–25/09 06:02 · 25/09 21:00–26/09 06:02 · liberar não liga o equipamento.', {'Ordem': 'OS-0422', 'Tipo': 'Água', 'Setor': 'Pivô 2', 'Cultura': 'Milh
+  ok  fluxo (recusa): passada sem hora → "Informe data e hora da passada 1." e a janela gravada não muda · (True, 'Informe data e hora da passada 1.', 'amanhã 21:00', 'amanhã 21:00')
+  ok  fluxo (repetição): salvar a mesma janela de novo não cria outra ordem nem muda o Início · (1, 'amanhã 21:00')
+  ok  sem erro de script (1440) · []
+  ok  390 px: 8 grades sem rolagem lateral da página; cada grade cabe ou rola dentro da caixa, com a 1ª coluna à vista · [('IR-01 #0', True, True, True, True), ('IR-02 #0', True, True, True, True), ('IR-03 #0', True, True, True, True)]
+  ok  390 px: as grades largas rolam dentro da caixa · []
+  ok  sem erro de script (390) · []
+RESULTADO: 72/72 ok

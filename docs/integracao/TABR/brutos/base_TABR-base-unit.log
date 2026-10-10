@@ -1,0 +1,33 @@
+OK    A1 CD-01: grades g_tal, g_amb, g_agua publicadas
+OK    A1 CD-01det: grades g_idt, g_parc publicadas
+OK    A1 CD-02: grades g_cv, g_rend publicadas
+OK    A1 CD-03: grades g_atv publicadas
+OK    A1 CD-04: grades g_pes publicadas
+OK    A1 CD-05: grades g_forn, g_cob publicadas
+OK    A1 CD-06: grades g_itm, g_loc publicadas
+OK    A1 CD-07: grades g_dim publicadas
+OK    A1 IR-01: grades g_set publicadas
+OK    A1 IR-02: grades g_ag publicadas
+OK    A1 IR-03: grades g_os publicadas
+OK    A1 IR-03det: grades g_pas, g_trl publicadas
+OK    A1 IR-04: grades g_src, g_cap, g_des publicadas
+FALHA A1 CD-05: colunas por papel (Fornecedor, Cliente, Parceiro de crédito, Transportador, Prestador) publicadas · []
+FALHA A1 CD-05: coluna dinâmica "Motivo da suspensão" publicada · {}
+FALHA A2 115 colunas: nenhum rótulo composto (" · ", " / ", " e ") · [('CD-01det', 'g_parc', 'Safra · parcela'), ('CD-01det', 'g_parc', 'Cultura · variedade'), ('CD-02', 'g_cv', 'Cultura · cultivar'), ('CD-02', 'g_rend', 'Operação · conjunto'), ('CD-04', 'g_pes', 'Pessoa · equipe'), ('CD-05', 'g_forn', 'Parceiro · CPF/CNPJ'), ('CD-06', 'g_itm', 'Grupo · item'), ('CD-06', 'g_itm', 'Unidade · embalagem'), ('CD-07', 'g_dim', 'Dimensão · código'), ('IR-02', 'g_ag', 'Ca
+FALHA A3 nenhuma coluna numérica com a unidade só no formato antigo (u/pre): a unidade vai na célula com data-un · [('CD-01', 'g_tal', 'Área cultivável'), ('CD-01', 'g_tal', 'Polígono'), ('CD-01', 'g_tal', 'Diferença'), ('CD-01', 'g_amb', 'Área'), ('CD-01det', 'g_idt', 'Área cultivável'), ('CD-01det', 'g_parc', 'Área'), ('CD-02', 'g_rend', 'Rendimento'), ('CD-02', 'g_rend', 'Custo por hora'), ('CD-02', 'g_rend', 'Custo por hectare'), ('IR-01', 'g_set', 'Déficit hoje'), ('IR-02', 'g_ag', 'Lâmina'), ('IR-03', 'g
+OK    A3 nenhum cabeçalho com unidade entre parênteses ("Área (ha)")
+OK    A4 custo por unidade rotulado "Custo R$/h", "Custo R$/ha"
+FALHA A5 colunas de medida (área, lâmina, vazão, custo…) com a unidade na célula (data-un) · [('CD-01', 'g_tal', 'Área cultivável'), ('CD-01', 'g_tal', 'Polígono'), ('CD-01', 'g_tal', 'Diferença'), ('CD-01', 'g_amb', 'Área'), ('CD-01det', 'g_idt', 'Área cultivável'), ('CD-01det', 'g_parc', 'Área'), ('CD-02', 'g_rend', 'Rendimento'), ('CD-02', 'g_rend', 'Custo por hora'), ('CD-02', 'g_rend', 'Custo por hectare'), ('CD-03', 'g_atv', 'Custo por hora'), ('CD-04', 'g_pes', 'Custo-hora'), ('IR-
+FALHA A6 datas e instantes tipados como data (ordenam por data): vencimento, plantio, início e fim, quando, atualização, validade · [('CD-01det', 'plantio'), ('IR-04', 'venc')]
+FALHA B1 vazão do documento em m³/h para ordenar: 180 m³/h → 180; 1,0 L/s → 3,6; "—" → vazio · [('180 m³/h', 'ERRO AttributeError: _vazao_m3h ausente'), ('1,0 L/s', 'ERRO AttributeError: _vazao_m3h ausente'), ('0,5 L/s', 'ERRO AttributeError: _vazao_m3h ausente'), ('—', 'ERRO AttributeError: _vazao_m3h ausente'), ('', 'ERRO AttributeError: _vazao_m3h ausente')]
+FALHA B2 documento do ponto de água: Outorga × Certidão (de uso insignificante); sem tipo fica vazio · ['ERRO AttributeError: _doc_agua ausente', 'ERRO AttributeError: _doc_agua ausente', 'ERRO AttributeError: _doc_agua ausente', 'ERRO AttributeError: _doc_agua ausente']
+FALHA B3 parcelas do T1 (Santa Rita) só com safras da Santa Rita (sem a Safra Mamão da Lagoa Grande) · ['ERRO TypeError: _parc_rows() takes 1 positional argument but 2 were given']
+FALHA C1 documento da água: outorga é "Outorga …" (antes saía "Certidão …"); certidão é "Certidão …" · ['Certidão SINT-003/0000', 'Certidão SINT-006/0000', '']
+FALHA C2 situação da água só com o estado e o próximo passo (a data fica em Vencimento; o processo no painel) · [['Vigente', '● Vigente até 30/04/2031'], ['Vencida', 'Vencida em 10/05/2026 Renovar ›'], ['Vence em 90 dias', 'Vence 20/11/2026 Renovar ›'], ['Em renovação', 'Em renovação venceu 01/12/2025 · processo SINT-REN-004']]
+Node.js v22.22.0
+FALHA C3 situação por papel (só o estado; o valor fica na coluna do papel): dois papéis = dois estados; vencido, sem limite, não homologado, sem RNTRC, suspenso; filtro de um papel mostra só o dele · []
+Node.js v22.22.0
+FALHA C4 cultura × estádio do setor: Milho | V10, Feijão | R5, Mamão | (vazio), Mamão | fase do mamão (Lagoa Grande) · None
+FALHA C5 instante ISO ordena no tempo (19/09 < ontem < hoje < amanhã < 25/09) e a célula mostra o texto relativo · ([], [])
+FALHA C6 pelo texto a ordem sairia errada ("amanhã" < "hoje" < "ontem"): por isso o valor que ordena é o ISO · []
+RESULTADO: 15/30 ok · FALHAS: A1 CD-05: colunas por papel (Fornecedor, Cliente, Parceiro de crédito, Transportador, Prestador) publicadas; A1 CD-05: coluna dinâmica "Motivo da suspensão" publicada; A2 115 colunas: nenhum rótulo composto (" · ", " / ", " e "); A3 nenhuma coluna numérica com a unidade só no formato antigo (u/pre): a unidade vai na célula com data-un; A5 colunas de medida (área, lâmina, vazão, custo…) com a unidade na célula (data-un); A6 datas e instantes tipados como data (ordenam por data): vencimento, plantio, início e fim, quando, atualização, validade; B1 vazão do documento em m³/h para ordenar: 180 m³/h → 180; 1,0 L/s → 3,6; "—" → vazio; B2 documento do ponto de água: Outorga × Certidão (de uso insignificante); sem tipo fica vazio; B3 parcelas do T1 (Santa Rita) só com safras da Santa Rita (sem a Safra Mamão da Lagoa Grande); C1 documento da água: outorga é "Outorga …" (antes saía "Certidão …"); certidão é "Certidão …"; C2 situação da água só com o estado e o próximo passo (a data fica em Vencimento; o processo no painel); C3 situação por papel (só o estado; o valor fica na coluna do papel): dois papéis = dois estados; vencido, sem limite, não homologado, sem RNTRC, suspenso; filtro de um papel mostra só o dele; C4 cultura × estádio do setor: Milho | V10, Feijão | R5, Mamão | (vazio), Mamão | fase do mamão (Lagoa Grande); C5 instante ISO ordena no tempo (19/09 < ontem < hoje < amanhã < 25/09) e a célula mostra o texto relativo; C6 pelo texto a ordem sairia errada ("amanhã" < "hoje" < "ontem"): por isso o valor que ordena é o ISO

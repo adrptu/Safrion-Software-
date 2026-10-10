@@ -1,0 +1,31 @@
+OK  cabeçalho com versão em vigor, rascunho e pendência; primária "Cadastrar código"; secundárias Importar e Publicar · Cadastros › Estrutura gerencial Estrutura gerencial v5 em vigor · rascunho v6 com 3 alterações · 1 tradução pendente
+OK  Cultura vem do CD-02 (5 culturas, com milho) e Processo é etapa (TRAT), sem PULV nem CR-SOJA · ['▾ Cultura 5 códigos', 'Culturas e cultivares', 'operações Pulverização, Adubação a lanço, Poda, Fertirrigação']
+OK  natureza mostra grupos do CD-06 e hierarquia; centro de responsabilidade mostra o rateio · ['grupos Fertilizantes, Corretivos', 'rateio por horas de máquina']
+OK  exclusão bloqueada com motivo (no painel): cultura do CD-02 e natureza usada em grupos · ['ançamento e é traduzida pela integração, sem conta fixa.\nExcluir código\nNão dá para excluir: vem de Culturas, cultivares e operações; exclua lá.\nCancelar\nSalvar', '.02 · TOP 1201.\nTipo de operação (TOP) no ERP\nExcluir código\nNão dá para excluir: é a natureza de grupos de insumo em Produtos;
+OK  código do CD-02 abre só com a tradução editável · Código · SOJA
+×
+Cultura vem de Culturas, cultivares e operações: aqui você altera só a tradução para o ERP.
+Código
+Nome
+Dimensão
+Cultura
+Cada código em uma dimensão: nunca combine fazenda, cultura e p
+FALHOU tradução salva no rascunho: SOJA mapeada, "alterado na v6" e 4 alterações no cabeçalho · ['SOJA Mapeado Soja 01/07/2024 — cultura 01 Alterado', 'Cadastros › Estrutura gerencial Estrutura gerencial v5 em vigor · rascunho v6 com 4 alterações · 1 tradução pendente']
+OK  rótulos sem jargão e grupos de insumo só leitura na natureza · ['Código', 'Nome', 'Dimensão', 'Origem', 'Vínculos', 'Código superior', 'Grupos de insumo', 'Início da vigência', 'Fim da vigência', 'Tradução no ERP', 'Conta ou centro no ERP', 'Tipo de operação (TOP) no ERP']
+OK  código superior inexistente é barrado junto ao campo · Corrija os campos destacados; o que você preencheu foi mantido. | Não existe o código 9.9 em Natureza.
+FALHOU novo centro: dimensão sem Cultura/Processo, pede o rateio e entra no rascunho · [['Empresa', 'Natureza', 'Centro de resultado', 'Centro de responsabilidade', 'Projeto'], ['Código', 'Nome', 'Dimensão', 'Código superior', 'Direcionador de rateio', 'Início da vigência', 'Fim da vigência', 'Tradução no ERP', 'Conta ou centro no ERP', 'Tipo de operação (TOP) no ERP'], 'CC-MAQ Mapead
+OK  Importar do ERP mostra a prévia simulada (novos, nome alterado, sem conta) · Prévia do ERP (Sankhya)
+simulada · nenhum dado real é lido
+NOVOS NO ERP
+3.1.07 · Serviços de terceiros · 4.1.1.07 · TOP 1203
+CC-ARM · Armazém · apoio · centro 312
+ALTERADO NO ERP
+3.1.02 · Defensivos → Defensivos agrícolas
+SEM CONTA NO ERP
+PRJ-PIVO3 · Expansão pivô 3 · investimento
+Trazer 3 mudanças 
+OK  trazer põe 2 códigos novos e 1 nome no rascunho, sem publicar · ['Cadastros › Estrutura gerencial Estrutura gerencial v5 em vigor · rascunho v6 com 8 alterações · 1 tradução pendente', 'Rascunho v6: 2 códigos novos e 1 código alterado vindos do ERP · nada foi publicado.']
+OK  segunda importação não repete as mudanças · Simulação: o ERP não tem mudanças novas para o rascunho.
+OK  publicar: v6 em vigor, v5 preservada, código sem conta fica fora · ['Simulação: estrutura v6 publicada para novos lançamentos com 25 de 26 códigos · v5 preservada · fora até ter conta: PRJ-PIVO3.', 'Cadastros › Estrutura gerencial Estrutura gerencial v6 em vigor · 1 tradução pendente']
+OK  sem alterações no rascunho não aparece "Publicar estrutura"; sem erros de JS · [True, '']
+RESULTADO: FALHOU 12/14

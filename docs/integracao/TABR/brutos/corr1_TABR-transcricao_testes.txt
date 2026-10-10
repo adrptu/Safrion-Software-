@@ -1,0 +1,134 @@
+# Correção da TABR, 1ª tentativa (agente TABR:corrigir interrompido, 17:40-19:22): unidade antes e depois e mutantes
+# Saidas registradas no transcript do agente (nao havia arquivo de log). Extraidas sem reexecutar nada.
+# Horario UTC de cada comando; corpo de heredoc omitido; caminhos da maquina trocados por marcadores.
+
+### 2026-10-09T17:59:25.175Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+(Bash completed with no output)
+
+### 2026-10-09T17:59:53.611Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+197:    const fon=!temD?'':(si.est?'Estimativa por ET':(F.demo?'Demonstrativo':'Medido'));
+
+### 2026-10-09T18:00:20.213Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+(Bash completed with no output)
+
+### 2026-10-09T18:05:45.382Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+175:      const inf=V.modo==='Informado'; r.p.modo=[{k:'txt',t:V.modo||'—'}]; r.s.modo=V.modo||'';
+176:      ['larg','vel','efic'].forEach(k=>{ const ok=!inf&&isnum(V[k])&&String(V[k])!==''; r.p[k]=[ok?{k:'txt',t:nfa(V[k])}:{k:'mut',t:'—'}]; r.s[k]=ok?nfa(V[k]):''; });
+
+### 2026-10-09T18:05:52.130Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+ok
+
+### 2026-10-09T18:06:51.178Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+97:CAPCOL={'Trator':('Potência','cv'),'Pulverizador':('Tanque útil','L'),'Plantadeira':('Linhas','linhas'),'Distribuid
+163:    dados=dict(cod=COD,impl=IMPL,calib=CALIB_CLS,sem=SEM_IMPL,ophab=OPHAB,subnew=SUB_NEW,capcol=CAPCOL,
+230:function PREVALS(self,v){ cadActsIni(self); const atv=RW(self,'g_atv'); self._c3nomes=self._c3nomes||{}; const usos=
+304:    ncol_dinamico(fname,['c3_ncol'])   # a coluna da capacidade entra e sai com o filtro de Classe
+
+### 2026-10-09T18:07:08.080Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+72:function chipc(t,c){ return {k:'chip',t:t,c:c}; }
+227:function sitOk(t){ return [chipc(t,'green')]; }
+228:function sitInfo(t){ return [chipc(t,'gray')]; }   // estado neutro (nem ok nem pendência)
+
+### 2026-10-09T18:08:00.895Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+32:def cd06():
+33-    fname='CD-06.dc.html'; E._reset_screen(fname)
+34-    it=_itens(); it.update(DC.ITENS_NOVOS)
+35-    lotes={l['item']:l for l in D2.LOTES}
+229:    shell37('CD-06','Produtos, unidades e locais',corpo,fname=fname,status=None,primary_html=None,search=False)
+230-    estado_cab(fname,'Produtos, unidades e locais','c6e')
+231-
+--
+393:    shell37('CD-07','Estrutura gerencial',corpo,fname=fname,status=None,primary_html=None,search=False)
+394-    estado_cab(fname,'Estrutura gerencial','c7e')
+
+### 2026-10-09T18:08:17.845Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+342:    r.p.conta=[!prop&&V.conta?{k:'txt',t:V.conta}:{k:'mut',t:'—'}]; r.s.conta=!prop&&V.conta?V.conta:''; r.p.top=[!prop&&V.top?{k:'txt',t:V.top}:{k:'mut',t:'—'}]; r.s.top=!prop&&V.top?V.top:''
+
+### 2026-10-09T18:11:58.215Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+FALHA: 0
+_render montado: 140 páginas + 20 arquivos do site · dados reais locais: 5/5
+1440 IR-04.dc.html  # 0 cw 1104 sobra 45 Fonte=166 | Estado=114 | Grandeza=133 | Unidade=106 | Atualização=114 | Calibração=136 | Validade da calibração=129 | Cobertura=105 | Efeito no balanço=146*
+1440 IR-04.dc.html  # 1 cw 1104 sobra 0 Captação=165 | Situação=104 | Outorga=113 | Vazão outorgada=139 | Regime=89 | Vencimento=120 | Volume hoje=124 | Uso do dia=111 | Setores ligados=139
+1440 IR-04.dc.html  # 2 cw 1104 sobra 0 Setor=133 | Cultura=146 | Volume=142 | Energia=153 | Lâmina aplicada=187 | Eficiência=156 | Variação da eficiência=187
+1440 CD-01.dc.html Água # 0 cw 1142 sobra 11 Ponto de água=236 | Situação=217 | Fazenda=102 | Documento=106 | Uso=145 | Curso d’água=166 | Vazão=74 | Vencimento=108*
+1440 CD-04.dc.html Pessoas # 0 cw 1142 sobra 21 Pessoa=81 | Situação=216 | Equipe=96 | Habilidades=186 | Vínculo=82 | Disponível até=121 | Custo R$/h=104 | Habilitação=105 | Validade da habilitação=173*
+1440 CD-06.dc.html Itens # 0 cw 1142 sobra 0 Grupo › item=240 | Situação=218 | Natureza de custo=188 | Unidade=89 | Embalagem=134 | Preço de referência=153 | Data do preço=121
+1440 CD-07.dc.html  # 0 cw 1142 sobra 20 Dimensão › código=214 | Situação=186 | Nome=205 | Início da vigência=138 | Fim da vigência=127 | Conta no ERP (Sankhya)=179 | No rascunho=112*
+
+### 2026-10-09T18:19:29.278Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && timeout 300 python3 tabelas_cad_irr_unit.py 2>&1 | tail -15
+OK    A5 colunas de medida (área, lâmina, vazão, custo…) com a unidade na célula (data-un)
+OK    A6 datas e instantes tipados como data (ordenam por data): vencimento, plantio, início e fim, quando, atualização, validade
+OK    B1 vazão do documento em m³/h para ordenar: 180 m³/h → 180; 1,0 L/s → 3,6; "—" → vazio
+OK    B2 documento do ponto de água: Outorga × Certidão (de uso insignificante); sem tipo fica vazio
+OK    B3 parcelas do T1 (Santa Rita) só com safras da Santa Rita (sem a Safra Mamão da Lagoa Grande)
+OK    C1 documento da água: outorga é "Outorga …" (antes saía "Certidão …"); certidão é "Certidão …"
+OK    C2 situação da água só com o estado e o próximo passo (a data fica em Vencimento; o processo no painel)
+OK    C3 situação por papel (só o estado; o valor fica na coluna do papel): dois papéis = dois estados; vencido, sem limite, não homologado, sem RNTRC, suspenso; filtro de um papel mostra só o dele
+OK    C4 cultura × estádio do setor: Milho | V10, Feijão | R5, Mamão | (vazio), Mamão | fase do mamão (Lagoa Grande)
+OK    C5 instante ISO ordena no tempo (19/09 < ontem < hoje < amanhã < 25/09) e a célula mostra o texto relativo
+OK    C6 pelo texto a ordem sairia errada ("amanhã" < "hoje" < "ontem"): por isso o valor que ordena é o ISO
+FALHA C7 Pendência sem repetir a Situação: "Impedida · bomba parada" → "Bomba parada" (cor mantida); falta insumo, conflito e janela ficam como estão; sem bloqueio = lista vazia · {'p': [['Bomba parada', 'red'], ['Falta insumo', 'red'], ['Conflito', 'red'], ['Janela a definir', 'yellow']], 'f': ['Bomba parada'], 'n': []}
+OK    B4 cada grandeza da fonte tem a sua unidade, na mesma ordem (a estação: ET₀, chuva e vento → mm/dia, mm e km/h)
+OK    B5 cadastrar sensor: o formulário não pede Unidade; cada grandeza do seletor tem a sua unidade (UN_GR) e ela é a mesma da semente
+RESULTADO: 32/33 ok · FALHAS: C7 Pendência sem repetir a Situação: "Impedida · bomba parada" → "Bomba parada" (cor mantida); falta insumo, conflito e janela ficam como estão; sem bloqueio = lista vazia
+
+### 2026-10-09T18:20:15.750Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+RESULTADO: 40/40 ok
+
+### 2026-10-09T18:28:42.268Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+parse-ok
+
+### 2026-10-09T18:37:31.803Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+parse-ok
+
+### 2026-10-09T18:44:38.445Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+OK    B1b vazão em L/s da grade publicada ordena pelo valor em m³/h (0,5 L/s → 1,8; 1,0 L/s → 3,6)
+RESULTADO: 41/41 ok
+
+### 2026-10-09T18:58:28.801Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+ok
+
+### 2026-10-09T18:59:12.533Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && S="areas/irrigacao.py areas/cad_ativos_pessoas.py areas/cad_culturas.py areas/cad_fazendas.py areas/cad_parceiros.py areas/cad_produtos_estrutura.py dados_irrigacao.py" && git stash push -q -- $S && python3 build.py > /tmp/TABR-build-old.log 2>&1; echo "FALHA old: $(grep -c FALHA /tmp/TABR-build-old.log)"; timeout 300 python3 tabelas_cad_irr_unit.py > /tmp/TABR-unit-old.log 2>&1; git stash pop -q && git diff --stat | tail -1; python3 build.py > /tmp/TABR-build.log 2>&1; echo "FALHA new: $(grep -c FALHA /tmp/TABR-build.log)"; grep -E "^FALHA|RESULTADO" /tmp/TABR-unit-old.log | cut -c1-150
+FALHA old: 0
+ 13 files changed, 420 insertions(+), 193 deletions(-)
+FALHA new: 0
+FALHA C7 Pendência: o tipo no chip e o detalhe na dica ("Falta insumo" + "Ureia 45%"; "Conflito" + "parada da B3 · 14:00–15:00"), sem repetir "Imp
+FALHA C8 (A6) selo informativo de ordem encerrada ("Encerrada automaticamente", mut) não entra na Pendência · [['Encerrada automaticamente', 'gray'
+FALHA C9 (A2) pendência de outra ordem diz qual é: "Divergência na OS-0394" (dica −3,8 %) · [['Divergência · −3,8 %', 'yellow', None]]
+FALHA C10 (A3) CD-04 não alocável: o chip diz a consequência, a dica o motivo e o verbo o que resolver (contrato encerrado → Renovar contrato; NR
+FALHA C12 (A10) CD-03: calibração que vence em 15 dias = chip "Calibração a vencer" com "Registrar calibração" (fora do "A resolver"); em dia = 
+FALHA C13 (A4) CD-03: capacidade só com uma grandeza no filtro de Classe, com rótulo e unidade dela (Irrigação → Vazão m³/h; Trator → Potên
+FALHA B6 (A9) estado salvo da irrigação com outra versão é descartado: semente v=3 e a leitura só aceita a mesma versão · 2
+RESULTADO: 34/41 ok · FALHAS: C7 Pendência: o tipo no chip e o detalhe na dica ("Falta insumo" + "Ureia 45%"; "Conflito" + "parada da B3 · 14:00–

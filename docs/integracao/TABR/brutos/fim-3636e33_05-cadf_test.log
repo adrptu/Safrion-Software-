@@ -1,0 +1,18 @@
+$ env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 900 python3 cadf_test.py
+OK  1 CD-01 sem erro, subtotal por fazenda e nenhum total somando fazendas · ['', '▾ Santa Rita 8 talhões ativos 1.165,0 ha', '▾ Boa Vista 1 talhão ativo 120,0 ha']
+OK  2 fazenda vazia: erros junto aos campos · Corrija os campos destacados; o que você preencheu foi mantido. | Informe nome da fazenda. | Informe município. | Informe área total do imóvel.
+OK  3 fuso sugerido pela UF (MT → Cuiabá) · América/Cuiabá (UTC−4)
+OK  4 arrendada pede arrendador, fim do contrato e custo da terra · [['Nome da fazenda', 'Empresa', 'Município', 'UF', 'Fuso horário', 'Área total do imóvel', 'Posse', 'Arrendador ou parceiro', 'Fim do contrato', 'Custo da terra', 'Módulos fiscais', 'CAR', 'Matrícula e cartório', 'Pendência nos documentos'], 'Corrija os campos destacados; o que você preencheu foi ma
+OK  5 fazenda salva: cartão novo e grupo vazio com "Cadastrar talhão" · ['Fazenda Nova Esperança cadastrada. Próximo passo: cadastrar os talhões dela.', 'Nova Esperança Cadastro incompleto Santa Rita Agro · Lucas do Rio Verde/MT 600 ha Área total 0,0 ha Cultivável 0 Talhões ativos Arrendada até 30/06/2030 Completar cadastro ›', 'Nova Esperança sem talhão ativo Cadastrar
+OK  6 talhão nasce na fazenda do grupo · Nova Esperança
+OK  7 regras do talhão: pivô já usado e área acima da fazenda · Corrija os campos destacados; o que você preencheu foi mantido. | Bomba do Pivô 1 já irriga o P1 (Santa Rita). | Os talhões ativos da Nova Esperança somariam 700 ha; a fazenda tem 600 ha.
+OK  8 talhão salvo na nova fazenda com subtotal próprio (Santa Rita não muda) · ['▾ Nova Esperança 1 talhão ativo 250,0 ha', 'N1 cadastrado na Nova Esperança. Próximo passo: definir o polígono no detalhe do talhão.']
+OK  9 volta ao talhão com a fazenda nova escolhida e o preenchido mantido · ['X9', '50', 'Serra Azul']
+OK  10 talhão X9 salvo na Serra Azul · ▾ Serra Azul 1 talhão ativo 50,0 ha
+OK  11 T1 com parcelas na safra não inativa · Corrija os campos destacados; o que você preencheu foi mantido. | T1 tem parcelas na Safra 2026/27 e na Safrinha 2027. Tire-as no Planejar safra antes de inativar.
+OK  12 B1 inativo: continua na lista com chip e sai do subtotal · ['B1 Sequeiro 120,0 ha — — 0 Inativo', '▾ Boa Vista sem talhão ativo 0,0 ha']
+OK  13 fazenda sem talhão ativo inativa sem excluir · Boa Vista Inativa Boa Vista Ltda · Sorriso/MT 420 ha Área total 0,0 ha Cultivável 0 Talhões ativos Arrendada até 31/08/2029 Inativa
+OK  14 "Abrir talhão ›" do painel do T2 abre o detalhe do T2 (seletor, crumb e primária do T2 na aba Parcelas) · ['CD-01det.dc.html#talhao=T2', 'Cadastros › Fazendas, áreas e talhões › T2 · 298 ha Talhão T1 · Santa Rita T2 · Santa Rita T3 · Santa Rita T4 · Santa Rita P1 · Santa Rita P2 · Santa Rita T7 · Santa Rita C1 · Santa Rita B1 · Boa Vista · inativo PV01 · Lagoa Grande PV02 · Lagoa Grande PV03 · Lagoa Gra
+OK  15 detalhe lê o cadastro salvo na lista: B1 inativo · ['PV22 · Lagoa Grande PV23 · Lagoa Grande PV24 · Lagoa Grande N1 · Nova Esperança X9 · Serra Azul Inativo desde 23/09/2026', 'Fazenda Sistema Setor de irrigação Área cultivável Polígono Versão Diferença ha Diferença % Situação Boa Vista Sequeiro — 120,0 ha — — — — Inativo Reativar B1 Parcelas por sa
+RESULTADO: OK 15/15
+[exit 0]

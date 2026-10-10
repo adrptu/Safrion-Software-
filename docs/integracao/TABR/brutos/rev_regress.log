@@ -1,0 +1,9 @@
+=== irtest.py
+=== irr_fluxo_test.py
+=== os_irrig_filtro_test.py
+RESULTADO: 15 ok · 0 falhas
+=== map_irrig_filtro_test.py
+=== cadp_fix_test.py
+RESULTADO: OK 15/15
+=== cadc_fix_cd07.py
+RESULTADO: OK 11/11

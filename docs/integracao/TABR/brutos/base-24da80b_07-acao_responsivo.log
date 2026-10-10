@@ -1,0 +1,9 @@
+$ env CHROME_BIN=<chrome> flock /tmp/cdp9333.lock env CDP_GL=1 timeout 1200 python3 acao_unica_test.py responsivo
+     (informativo) área de ações por dimensão {'SAF 360x800': ('sticky', 'Abrir Compra de insumos ›', 'Etapa 6 de 6 · Confira'), 'CMP 360x800': ('sticky', 'Enviar convites (simulado)', 'Etapa 3 de 6 · Solicit'), 'SAF 800x360': ('static', 'Abrir Compra de insumos ›', 'Etapa 6 de 6 · Confira'), 'CMP 800x360': ('static', 'Enviar convites (simulado)', 'Etapa 3 de 6 · Solicit'), 'SAF 768x1024': ('sticky', 'Abrir Compra de insumos ›', 'Etapa 6 de 6 · Confira'), 'CMP 768x1024': ('sticky', 'Enviar convites (simulado)', 'Etapa 3 de 6 · Solicit'), 'SAF 1024x768': ('sticky', 'Abrir Compra de insumos ›', 'Etapa 6 de 6 · Confira'), 'CMP 1024x768': ('sticky', 'Enviar convites (simulado)', 'Etapa 3 de 6 · Solicit'), 'SAF 1280x720': ('sticky', 'Abrir Compra de insumos ›', ''), 'CMP 1280x720': ('sticky', 'Enviar convites (simulado)', ''), 'SAF 1440x900': ('sticky', 'Abrir Compra de insumos ›', ''), 'CMP 1440x900': ('sticky', 'Enviar convites (simula
+OK    17 matriz RESPONSIVIDADE (7 dimensões × SAF etapa 6 e CMP etapa 3) · área de ações alcançável, não cobre a última linha nem o foco nem o aviso, sem rolagem lateral, um avanço; no estreito "Etapa i de n" 
+OK    18 teclado virtual aberto (360×420) · a busca focada continua visível e livre; a área de ações volta ao fluxo (static) e o comando é alcançável rolando 
+OK    19 16ª parcela com o teclado aberto (360×420) · a cada "+ Adicionar parcela" o foco vai ao nome da nova, à vista e sem nada por cima; uma só instância do botão; o painel continua no mesmo talhão 
+     (informativo) erros de JS (responsivo) []
+
+RESULTADO: 3 ok · 0 falhas (responsivo)
+[exit 0]

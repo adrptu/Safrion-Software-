@@ -1,0 +1,15 @@
+$ env CHROME_BIN=<chrome> flock /tmp/cdp9333.lock env CDP_GL=1 timeout 900 python3 cadp_vtest.py
+OK  PT-07 mostra um CNPJ da Fertisul · ['12.345.678/0001-95']
+OK  sem erro JS
+OK  CD-05 mostra o mesmo CNPJ da Fertisul que o PT-07 · CD-05 ['12.345.678/0001-95'] · PT-07 ['12.345.678/0001-95']
+OK  CNPJ da Fertisul recusado como parceiro novo · Corrija os campos destacados; o que você preencheu foi mantido. | CNPJ já cadastrado em Fertisul.
+OK  nenhum parceiro Dup criado
+OK  canal E-mail sem e-mail barrado · Corrija os campos destacados; o que você preencheu foi mantido. | Informe o e-mail ou desmarque o canal.
+OK  erro junto ao campo e-mail
+OK  nenhum parceiro salvo com e-mail autorizado vazio
+OK  canal WhatsApp sem número barrado · Corrija os campos destacados; o que você preencheu foi mantido. | Informe o WhatsApp ou desmarque o canal.
+OK  com o número preenchido salva · Teste Whats Vazio 11.222.333/0001-81 Fornecedor 65 99123-4567 Não homologado não recebe cotação
+OK  com o e-mail preenchido salva · Teste Email Cheio 11.444.777/0001-61 Fornecedor contato@teste.com.br Não homologado não recebe cotação
+OK  homologar sem e-mail pede o e-mail da cotação · Corrija os campos destacados; o que você preencheu foi mantido. | Informe o e-mail: a cotação é enviada por ele.
+RESULTADO: OK 12/12
+[exit 0]

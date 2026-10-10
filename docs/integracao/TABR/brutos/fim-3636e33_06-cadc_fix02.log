@@ -1,0 +1,11 @@
+$ env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 900 python3 cadc_test.py fix02
+OK  selo com pendências nasce amarelo · yellow
+OK  cultura renomeada: o formulário mostra Soja RR e a cultivar X1 é salva nela, com o aviso próprio · ['Soja RR', 'Salvo: X1 em Soja RR · item Semente de soja rr X1 criado em Produtos, unidades e locais (Sementes · kg).', '▾ Soja RR 4 cultivares Anual sc de 60 kg/ha', 'X1 Anual sc de 60 kg/ha 110 dias Semente de soja rr X1 › 0 Em dia', '', '']
+OK  Cadastrar rendimento sem mexer em Operação salva em Pulverização · ['Pulverização', '', 'Salvo: Pulverização rende 10,00 ha/h a R$ 100,00/h e R$ 10,00/ha. Novos planejamentos usam este padrão.', '▾ Pulverização 2 conjuntos Tratos culturais']
+OK  sem pendências: selo "Sem pendências" na cor de concluído (verde) · ['Cadastros › Culturas, cultivares e operações Culturas, cultivares e operações Sem pendências', 'green']
+OK  operação e conjunto novos aparecem inteiros no artboard (folga ≥ 20 px) · 22
+OK  ainda cabe mais um conjunto novo (folga ≥ 0 px) · 22
+OK  aba Culturas com a cultivar nova também cabe · 279
+OK  nenhum erro de JS
+RESULTADO: OK 8/8
+[exit 0]

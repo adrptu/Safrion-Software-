@@ -1,0 +1,44 @@
+$ env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 900 python3 irr_estado_test.py
+OK    1 sem erro de carga 
+OK    2 semente: P2 11,2 medido · P1 ≈8,4 (sonda suspeita) · T7 ≈10,0 (sem dado) 
+    LG: [['OS-0601', 'PV02', 'Liberadas', 2, 'hoje 21:00–amanhã 09:52 · amanhã 21:00–25/09 09:52'], ['OS-0602', 'PV08', 'Liberadas', 1, 'hoje 21:00–amanhã 13:49'], ['OS-0603', 'PV09', 'Liberadas', 2, 'hoje 21:00–amanhã 10:49 · amanhã 21:00–25/09 10:49'], ['OS-0604', 'PV18', 'Liberadas', 2, 'hoje 21:00–amanhã 11:56 · amanhã 21:00–25/09 11:56'], ['OS-0605', 'PV21', 'Liberadas', 2, 'hoje 06:15–17:45 · amanhã 00:15–11:45'], ['OS-0606', 'PV24', 'Liberadas', 2, 'hoje 21:00–amanhã 09:17 · amanhã 21:00–25/09 09:17']]
+OK    3 Lagoa Grande: 6 tarefas automáticas (PV02, PV08, PV09, PV18, PV21, PV24) a partir de OS-0601, liberadas pela prontidão 
+OK    4 gerar de novo não duplica (idempotente) e programar recupera a tarefa 
+    SR: [['OS-0419', 'Liberadas', '', 'Iniciar irrigação'], ['OS-0422', 'A liberar', 'Janela a definir', 'Definir janela'], ['OS-0423', 'A liberar', 'Conflito · parada da B3', 'Resolver conflito'], ['OS-0394', 'Em conferência', 'Divergência · −3,8 %', 'Conferir medição']]
+OK    5 SR: OS-0419 Liberadas (Iniciar) · OS-0422 Janela a definir · OS-0423 conflito com a parada da B3 · OS-0394 divergência (Conferir medição) 
+OK    6 OS-0419: aviso de ponta parcial (20–21 h) e cobre 87 % da necessidade (resta 1,5 mm) 
+OK    7 conflito da OS-0423: opções calculadas 15:00–17:00 (logo depois da parada) e 21:00–23:00 
+OK    8 resolver conflito libera a OS-0423 com LIB-2292 (estimativa por ET não bloqueia) 
+OK    9 janela sugerida da OS-0422: depois da OS-0419 na B2, fora da ponta e com 18 h entre passadas 
+OK    10 passadas sobrepostas são recusadas (a 2ª começa antes do fim da 1ª) e nada é gravado 
+OK    10b passada 2 antes da passada 1 é recusada (ordem de tempo) 
+OK    11 janela válida libera a OS-0422 com LIB-2291 
+OK    12 terminar sem iniciar é bloqueado com motivo 
+OK    13 pausa vira selo; término bloqueado enquanto pausada 
+OK    14 término com hidrômetro 8.480 m³ (−1,9 %) encerra sozinho e credita 9,5 mm líquidos: P2 1,7 mm 
+OK    15 crédito uma vez: repetir o término não duplica 
+OK    16 parada antes (21 de 42 ha, 800 m³): crédito só na faixa coberta (3,8 mm × 95 % nos 21 ha); o T7 segue 10,0 mm fora da faixa 
+OK    17 conferir medição: hidrômetro prevalece e encerra sem novo crédito (T7 10,0 · faixa 6,4) 
+OK    18 sem leitura do hidrômetro: Em conferência, nada creditado; informar leitura encerra e credita 
+OK    19 limites valem só para as próximas: OS-0422 liberada mantém 2 passadas 
+OK    20 marcar sonda P2 suspeita: P2 passa a estimativa por ET 
+OK    21 programar P2 recupera a OS-0422 aberta (tarefa única) 
+OK    22 IDs não colidem com o cenário da O.S. (OS-0603 ocupado no cenário) 
+OK    23 adicionar produtos: v2 volta a A liberar com o agrônomo e entra no cenário da O.S. (gravação única) 
+OK    25 adicionar produtos na OS-0423 em conflito com a parada da B3 é recusado (nada no cenário da O.S.) 
+OK    26 v2 da OS-0419 liberada na O.S. segura a B2: OS-0422 na mesma janela fica A liberar com conflito 
+OK    27 v2 durante a execução: Em execução · Revisão de saldo pendente · Liberar saldo na O.S.; passada 1 Parcial (v1, 30 ha creditados só na faixa) 
+OK    28 depois da liberação na O.S.: a ordem na irrigação segue a O.S. (Liberadas → Iniciar execução na O.S.), sem beco sem saída 
+OK    29 O.S. apontou os 50 ha do saldo: v1 (30 ha) + v2 (50 ha) completam a volta e o P2 recebe o crédito (menor lâmina líquida), sem faixa pendente 
+OK    30 O.S. encerrada: a ordem fica Encerradas na irrigação e o crédito vira definitivo 
+OK    31 cenário da O.S. restaurado: a irrigação volta à semente (sem v2 órfã) 
+OK    32 P1: OS-0418 parada por falta de insumo (vermelho, como na O.S.) e próximo passo Programar só água · João 
+OK    33 programar P1 cria a ordem só de água (OS-0418 segue parada na O.S.) 
+OK    34 P2 com 1,7 mm: OS-0422 (12,15 mm líquidos) na janela 23/09 22:00 → aviso Lâmina acima da necessidade (não bloqueia) 
+OK    35 sem janela: OS-0422 avisa Abaixo do limiar (1,7 de 8,0 mm) 
+OK    36 programar PV06 (3,2 mm, limiar 9,0) mostra o aviso Abaixo do limiar 
+OK    37 link direto: conferir/janela/conflito inválidos no estado são recusados com motivo; válidos passam 
+OK    24 sem erro de execução 
+
+38 ok · 0 falhas []
+[exit 0]

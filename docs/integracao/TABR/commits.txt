@@ -1,0 +1,20 @@
+8f19e0d6bd27e2aaa5805d1f628459190db4e919 TABR: correções da revisão
+3636e3319c4972d6c7f2f05c03daa904c72a45bd TABELAS-FOCO IR-04: teste de unidade da unidade do sensor (B5)
+300835d28cda43f110192beb728830c8c401a9ff Merge claude/prototipo-v44 (cdc185f: varredura espera conteúdo; saídas da SAF) em claude/v44-tabelas-r
+ecc8fcec86a73a02460487d23d5a8fd5767536ab TABELAS-FOCO IR-04: a unidade do sensor vem da grandeza (não se pede de novo)
+8356a0777173abca6dc37bbd1252fb95b3e42a03 TABELAS-FOCO CD-07: código excluído no rascunho sem "Excluído" repetido; testes antigos do CD-02
+a6b949b1419c878b37c125c0a01235b3bb078974 TABELAS-FOCO Cadastros: fluxo do cadastro na grade também a 390 px
+a881cbe45036c3677b134f32c266095953cee2d0 TABELAS-FOCO Irrigação: Pendência sem repetir a Situação, Tipo e grandezas com uma variável
+def9dc8e997f60ad5afa2fd800b7e416f8dd5785 Merge claude/prototipo-v44 (ecc8b00: CTL-3, Colheita e Planejar safra) em claude/v44-tabelas-r
+37577a643e9a1faffdae06b301062443233865a0 TABELAS-FOCO IR-03: testes da O.S. de água leem Lâmina e Passadas em colunas
+48a412c3fcb22438060717ea3f9f83ee3d1877e1 TABELAS-FOCO Cadastros: testes antigos adaptados e teste de unidade robusto
+cbc87f5f45cf609c9cb6e2f295dc7b3d4b53742b TABELAS-FOCO CD-04 e CD-05: calendário, acesso, papéis e motivo sem perda
+c161f29387de8c971916cfdfb98bc5826efac303 TABELAS-FOCO IR-01: passadas, pendência e próxima passada em colunas
+e392e64dd9f32f9eb8b97fc1db30bc1925e5b290 TABELAS-FOCO Cadastros e Irrigação: testes de unidade e de navegador
+6e71b3fc44bb5768c5682330f311dfc01ce3399c TABELAS-FOCO Irrigação: IR-01..IR-04 e IR-03det com uma variável por coluna
+4d9c1936ce23312df8af49f8f4f6437736376ead TABELAS-FOCO CD-05: trilha da grade acompanha as colunas do papel
+0fcf9979c37614a1ad8dfeb3dad7516531e9cf98 TABELAS-FOCO CD-06 e CD-07: itens, locais e estrutura com uma variável por coluna
+b37b1d05f69fc37ebf9f3d9c786798b2ee40b9a2 TABELAS-FOCO CD-05: parceiros com uma variável por coluna
+415152dca20291fad12b5f5be39a000876816d58 TABELAS-FOCO CD-03 e CD-04: máquinas e pessoas com uma variável por coluna
+79667b10798a1d786d0cc5cf2bbc31e164e163a3 TABELAS-FOCO CD-02: culturas e rendimentos com uma variável por coluna
+2a0c781abbb6d84ecae720274104e94cbf587820 TABELAS-FOCO CD-01: talhões, água e detalhe do talhão com uma variável por coluna

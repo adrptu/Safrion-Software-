@@ -1,0 +1,439 @@
+# Revisão adversarial da TABR (agente TABR:revisar, sobre 3636e33 x base 24da80b): sondas de largura e conteúdo, mutantes e testes reexecutados
+# Saidas registradas no transcript do agente (nao havia arquivo de log). Extraidas sem reexecutar nada.
+# Horario UTC de cada comando; corpo de heredoc omitido; caminhos da maquina trocados por marcadores.
+
+### 2026-10-09T16:09:42.767Z
+$ S=<scratchpad>; cd $S/rv/tools/prototipo/v37/gen37 && python3 tabelas_cad_irr_unit.py 2>&1 | tail -5; ls <chrome> && ls -la /tmp/cdpD.lock; sed -n 1,60p comp_lib.py | head -80
+OK    C6 pelo texto a ordem sairia errada ("amanhã" < "hoje" < "ontem"): por isso o valor que ordena é o ISO
+OK    C7 Pendência sem repetir a Situação: "Impedida · bomba parada" → "Bomba parada" (cor mantida); falta insumo, conflito e janela ficam como estão; sem bloqueio = lista vazia
+OK    B4 cada grandeza da fonte tem a sua unidade, na mesma ordem (a estação: ET₀, chuva e vento → mm/dia, mm e km/h)
+OK    B5 cadastrar sensor: o formulário não pede Unidade; cada grandeza do seletor tem a sua unidade (UN_GR) e ela é a mesma da semente
+RESULTADO: 33/33 ok
+<chrome>
+-rw-r--r-- 1 root root 0 Oct  9 11:14 /tmp/cdpD.lock
+# -*- coding: utf-8 -*-
+"""Apoio do componentes_test.py (QUALIDADE-ARTEFATO-20261003 RESPONSIVIDADE, UX-FEEDBACK-INTERACAO e MAPA-ICONES).
+Chrome headless por CDP com emulação de aparelho (largura × altura em px CSS, escala, toque, sem hover) e medidas que o
+widthcheck não vê: ocultação dos elementos-chave (elementFromPoint), comando principal alcançável, área útil, fonte mínima,
+painel lateral dentro da tela. É emulação: não substitui aparelho físico nem o Safari do iPhone."""
+import os, sys, time, json, subprocess, tempfile, shutil, urllib.request
+HERE=os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0,HERE)
+from cdp import WS, CH
+from journeys import free
+from cadc_lib import ERRS
+# Caminho único entre as etapas de um processo guiado (UX-ACAO-UNICA-20261003): a faixa só informa; o teste anda pela área de ações,
+# como a pessoa: avanço (data-acao=avancar) ou retorno (data-acao=voltar); para a etapa 1 sem retorno, o "Trocar safra" do topo.
+IR_ETAPA=r"""(async (n)=>{ const num=()=>{ const c=document.querySelector('.etp-ind [aria-current=step]'); return c?Number((c.innerText.match(/\d+/)||[0])[0]):0; };
+  for(let k=0;k<10;k++){ const i=num(); if(i===n) return i;
+    let b=document.querySelector(i<n?'[data-acoes] [data-acao=avancar]':'[data-acoes] [data-acao=voltar]');
+    if(!b&&i>n&&n===1) b=[...document.querySelectorAll('header button')].find(x=>x.innerText.trim()==='Trocar safra');
+    if(!b) return 'sem caminho de '+i+' para '+n; b.click(); await new Promise(r=>setTimeout(r,450)); }
+  return 'não chegou: '+num(); })"""
+
+class Chrome:
+    """Abre um Chrome próprio (CDP_GL=1: WebGL por software para o mapa real) ou anexa a um já aberto (CDP_PORT)."""
+    def __init__(self,espera=90):
+        self.p=None; self.dir=None; self.alvo=None; porta=os.environ.get('CDP_PORT')
+        if porta: self.port=int(porta)
+        else:
+            self.port=free(); self.dir=tempfile.mkdtemp(prefix='cdp_')
+            gl=(['--use-angle=swiftshader','--enable-unsafe-swiftshader'] if os.environ.get('CDP_GL')=='1' else ['--disable-gpu'])
+            self.p=subprocess.Popen([CH,'--headless=new']+gl+['--hide-scrollbars',f'--remote-debugging-port={self.port}',f'--user-data-dir={self.dir}','--window-size=1440,900','about:blank'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+        fim=time.time()+espera
+        while True:
+            try: urllib.request.urlopen(f'http://127.0.0.1:{self.port}/json/version',timeout=5); break
+            except Exception:
+                if time.time()>fim: raise
+                time.sleep(.4)
+        t=json.load(urllib.request.urlopen(urllib.request.Request(f'http://127.0.0.1:{self.port}/json/new?about:blank',method='PUT'),timeout=30)); self.alvo=t['id']
+        self.ws=WS(t['webSocketDebuggerUrl']); self.i=0
+        self.call('Page.enable'); self.call('Runtime.enable'); self.call('Page.addScriptToEvaluateOnNewDocument',{'source':ERRS})
+        try: self.call('Emulation.setFocusEmulationEnabled',{'enabled':True})   # página com foco, como a janela ativa de quem usa
+        except Exception: pass
+    def call(self,method,params=None,timeout=60):
+        self.i+=1; mid=self.i; self.ws.send(json.dumps({'id':mid,'method':method,'params':params or {}})); fim=time.monotonic()+timeout
+        while True:
+            m=json.loads(self.ws.recv(timeout=max(.1,fim-time.monotonic())))
+            if m.get('id')==mid:
+                if 'error' in m: raise RuntimeError(f"{method}: {m['error']}")
+                return m.get('result',{})
+    def js(self,expr):
+        r=self.call('Runtime.evaluate',{'expression':expr,'awaitPromise':True,'returnByValue':True})
+        if 'exceptionDetails' in r: raise RuntimeError(str(r['exceptionDetails'].get('exception',{}).get('description') or r['exceptionDetails'].get('text'))[:400])
+        return r['result'].get('value')
+    def aparelho(self,w,h,escala=1,toque=False):
+        """Janela de w × h px CSS. toque=True: celular/tablet (meta viewport vale, toque, ponteiro grosso e sem hover)."""
+        self.call('Emulation.setDeviceMetricsOverride',{'width':w,'height':h,'deviceScaleFactor':escala,'mobile':bool(toque),
+                  'screenOrientation':{'type':'portraitPrimary' if h>=w else 'landscapePrimary','angle':0 if h>=w else 90}})
+        self.call('Emulation.setTouchEmulationEnabled',{'enabled':bool(toque),'maxTouchPoints':5 if toque else 1})
+        self.call('Emulation.setEmulatedMedia',{'features':[{'name':'hover','value':'none' if toque else 'hover'},{'name':'pointer','value':'coarse' if toque else 'fine'}]})
+        time.sleep(.3)
+    def goto(self,url,espera=.6):
+        self.call('Page.navigate',{'url':url}); time.sleep(espera)
+        for _ in range(60):
+
+### 2026-10-09T16:11:11.511Z
+$ S=<scratchpad>; cd $S && sed -i 's/                    sonda(f/                    if not ty: print("SEM TIPOS", pg, tb, flush=True)\n                    sonda(f/' probe_geral.py && env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 1500 python3 probe_geral.py $S/rv/tools/prototipo/v37/gen37 > $S/probe_geral.log 2>&1; tail -3 $S/probe_geral.log; grep -c SEM $S/probe_geral.log
+{"tela": "IR-04.dc.html  Lagoa Grande", "grade": 0, "colunas": ["Fonte", "Grandeza", "Unidade", "Atualização", "Calibração", "Validade da calibração", "Cobertura", "Estado", "Efeito no balanço"], "sem_menu": [], "sempre_vazias": [], "com_ponto": [["Fonte", "ETo de referência · Lagoa Grande (demonstrativa)"], ["Fonte", "Sonda de umidade · Pivô 10"]], "ordem_exibida_fora": [], "linhas": 2}
+SEM TIPOS IR-04.dc.html 
+{"tela": "IR-04.dc.html  Lagoa Grande", "grade": 1, "colunas": ["Captação", "Outorga", "Vazão outorgada [L/s]", "Regime [h/dia]", "Vencimento", "Situação", "Volume hoje [m³]", "Uso do dia [%]", "Setores ligados"], "sem_menu": [], "sempre_vazias": [], "com_ponto": [["Captação", "Barramento · afluente do Ribeirão B (demonstração)"]], "ordem_exibida_fora": [], "linhas": 3}
+39
+
+### 2026-10-09T16:13:48.382Z
+$ S=<scratchpad>; cd $S && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+47:def TIPOS(pg):
+77:                    ty = TIPOS(pg)
+78:                    if not ty: print("SEM TIPOS", pg, tb, flush=True)
+[('Setor', None), ('Fazenda', None), ('Cultura', None), ('Estádio', None), ('Área', 'num'), ('Déficit hoje', 'num'), ('Fonte do déficit', None), ('Necessidade bruta', 'num'), ('Passadas', 'num'), ('Ordem', None), ('Cobertura', 'num'), ('Resta', 'num'), ('Situação', None), ('Pendência', None), ('Próxima passada', 'date'), ('Próximo passo', None), ('Responsável', None)]
+
+### 2026-10-09T16:13:55.582Z
+$ S=<scratchpad>; cd $S && env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 1500 python3 probe_geral.py $S/rv/tools/prototipo/v37/gen37 > $S/probe_geral.log 2>&1; grep -c SEM $S/probe_geral.log; tail -2 $S/probe_geral.log | cut -c1-300; python3 - <<EOF
+  [corpo do heredoc omitido]
+0
+{"tela": "IR-04.dc.html  Lagoa Grande", "grade": 0, "colunas": ["Fonte", "Grandeza", "Unidade", "Atualização", "Calibração", "Validade da calibração", "Cobertura", "Estado", "Efeito no balanço"], "sem_menu": [], "sempre_vazias": [], "com_ponto": [["Fonte", "ETo de referência · Lagoa Grande 
+{"tela": "IR-04.dc.html  Lagoa Grande", "grade": 1, "colunas": ["Captação", "Outorga", "Vazão outorgada [L/s]", "Regime [h/dia]", "Vencimento", "Situação", "Volume hoje [m³]", "Uso do dia [%]", "Setores ligados"], "sem_menu": [], "sempre_vazias": [], "com_ponto": [["Captação", "Barramento ·
+CD-01det.dc.html#talhao=T1 # 0 | linhas 1 | sem_menu ['Fazenda', 'Sistema', 'Setor de irrigação', 'Área cultivável', 'Polígono', 'Versão', 'Diferença ha', 'Diferença %', 'Situação'] | vazias ['Setor de irrigação'] | ordem []
+CD-01det.dc.html#talhao=T1 # 1 | linhas 3 | sem_menu [] | vazias ['Livre'] | ordem []
+CD-01det.dc.html#talhao=P1 # 0 | linhas 1 | sem_menu ['Fazenda', 'Sistema', 'Setor de irrigação', 'Área cultivável', 'Polígono', 'Versão', 'Diferença ha', 'Diferença %', 'Situação'] | vazias ['Setor de irrigação'] | ordem []
+CD-01det.dc.html#talhao=P1 # 1 | linhas 3 | sem_menu [] | vazias ['Livre'] | ordem []
+IR-03det.dc.html#OS-0422 # 0 | linhas 2 | sem_menu [] | vazias ['Área coberta', 'Volume medido'] | ordem []
+IR-03det.dc.html#OS-0422  Todas # 0 | linhas 2 | sem_menu [] | vazias ['Área coberta', 'Volume medido'] | ordem []
+IR-03det.dc.html#OS-0422  Lagoa Grande # 0 | linhas 2 | sem_menu [] | vazias ['Área coberta', 'Volume medido'] | ordem []
+
+### 2026-10-09T16:18:47.740Z
+$ S=<scratchpad>; python3 - <<EOF
+  [corpo do heredoc omitido]
+CD-01 | Área ambiental | Reserva legal averbada · gleba A (demonstração)
+CD-01 | Área ambiental | Reserva legal averbada · gleba B (demonstração)
+CD-01 | Área ambiental | Reserva legal averbada · gleba C (demonstração)
+CD-02 | Operação › conjunto | Derriçadeiras portáteis · equipe de 6
+CD-02 | Operação › conjunto | Máquina TSI na sede · equipe de 2
+CD-02 | Operação › conjunto | Sistema de gotejo T7 · 1 irrigante
+CD-03 | Modelo | café · 1 linha
+CD-06 | Natureza de custo | 3.1.01 · Fertilizantes e corretivos
+CD-06 | Natureza de custo | 3.1.02 · Defensivos
+CD-06 | Natureza de custo | 3.1.03 · Sementes e inoculantes
+CD-06 | Natureza de custo | 3.1.04 · Combustíveis e lubrificantes
+CD-06 | Natureza de custo | 3.1.05 · Peças e manutenção
+CD-06 | Natureza de custo | 3.1.06 · Embalagens
+CD-07 | Nome | Expansão pivô 3 · investimento
+CD-07 | Nome | Irrigação · apoio
+CD-07 | Nome | Oficina · apoio
+IR-01 | Pendência | Conflito · parada da B3
+IR-01 | Pendência | Divergência · −3,8 %
+IR-01 | Pendência | Falta insumo · Ureia 45%
+IR-01 | Responsável | Caio · PCP
+IR-02 | Pendência | Conflito · parada da B3
+IR-02 | Pendência | Falta insumo · Ureia 45%
+IR-02 | Responsável | Caio · PCP
+IR-03 | Pendência | Conflito · parada da B3
+IR-03 | Pendência | Divergência · −3,8 %
+IR-03 | Pendência | Falta insumo · Ureia 45%
+IR-03 | Responsável | Caio · PCP
+IR-03det | Evento | Necessidade do próximo ciclo · 13,5 mm brutos em 2 passadas de 6,75 mm (limite 12,0 mm)
+IR-04 | Fonte | Hidrômetro · Pivô 2
+IR-04 | Fonte | Sonda de umidade · P1 (20 cm)
+IR-04 | Fonte | Sonda de umidade · P2 (20 cm)
+IR-04 | Fonte | Sonda de umidade · T7
+IR-04 | Captação | Rio · captação da sede
+IR-04 | Fonte | ETo de referência · Lagoa Grande (demonstrativa)
+IR-04 | Fonte | Sonda de umidade · Pivô 10
+IR-04 | Captação | Barramento · afluente do Ribeirão B (demonstração)
+
+### 2026-10-09T16:21:30.361Z
+$ S=<scratchpad>; cd $S && env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 1200 python3 probe2.py $S/rv/tools/prototipo/v37/gen37 > $S/probe2.log 2>&1; wc -l $S/probe2.log; cut -c1-1200 $S/probe2.log | head -60
+24 <scratchpad>/probe2.log
+CD-01 PV01 e P1 na lista :: [{"Fazenda › talhão": "P1", "Sistema": "Pivô central", "Área cultivável": "95,0 ha", "Polígono": "94,7 ha", "Diferença": "−0,3 %", "Parcelas na safra 2026/27": "1", "Situação": "Em dia"}, {"Fazenda › talhão": "B1", "Sistema": "Sequeiro", "Área cultivável": "120,0 ha", "Polígono": "—", "Diferença": "—", "Parcelas na safra 2026/27": "0", "Situação": "Sem polígono Definir polígono ›"}, {"Fazenda › talhão": "PV01", "Sistema": "Pivô central", "Área cultivável": "29,9 ha", "Polígono": "—", "Diferença": "—", "Parcelas na safra 2026/27": "1", "Situação": "Círculo do KML"}]
+CD-01det P1 ficha :: [{"Fazenda": "Santa Rita", "Sistema": "Pivô central", "Setor de irrigação": "Bomba do Pivô 1", "Área cultivável": "95,0 ha", "Polígono": "94,7 ha", "Versão": "v1", "Diferença ha": "−0,3 ha", "Diferença %": "−0,3 %", "Situação": "Ativo"}]
+CD-01det P1 parcelas :: [{"Safra › parcela": "Safra 2026/27", "Tipo": "", "Cultura": "", "Cultivar": "", "Área": "95 ha", "Livre": "0 ha", "Plantio": "", "Situação": "Em planejamento"}, {"Safra › parcela": "P1", "Tipo": "Talhão inteiro", "Cultura": "Soja", "Cultivar": "58 W", "Área": "95,0 ha", "Livre": "", "Plantio": "10/11/2026", "Situação": "Polígono do talhão"}, {"Safra › parcela": "Safrinha 2027", "Tipo": "", "Cultura": "", "Cultivar": "", "Área": "95 ha", "Livre": "0 ha", "Plantio": "", "Situação": "Rascunho"}, {"Safra › parcela": "P1", "Tipo": "Talhão inteiro", "Cultura": "Feijão", "Cultivar": "Pérola", "Área": "95,0 ha", "Livre": "", "Plantio": "15/04/2027", "Situação": "Polígono do talhão"}, {"Safra › parcela": "Safra 2025/26", "Tipo": "", "Cultura": "", "Cultivar": "", "Área": "95 ha", "Livre": "0 ha", "Plantio": "", "Situação": "Encerrada"}]
+CD-01det PV01 ficha :: [{"Fazenda": "Lagoa Grande", "Sistema": "Pivô central", "Setor de irrigação": "—", "Área cultivável": "29,9 ha", "Polígono": "—", "Versão": "—", "Diferença ha": "—", "Diferença %": "—", "Situação": "Círculo do KML"}]
+CD-01det PV01 parcelas :: [{"Safra › parcela": "Safra Mamão 2026/27", "Tipo": "", "Cultura": "", "Cultivar": "", "Área": "0 ha", "Livre": "29,9 ha", "Plantio": "", "Situação": "Em planejamento"}]
+CD-01det B1 ficha :: [{"Fazenda": "Boa Vista", "Sistema": "Sequeiro", "Setor de irrigação": "—", "Área cultivável": "120,0 ha", "Polígono": "—", "Versão": "—", "Diferença ha": "—", "Diferença %": "—", "Situação": "Sem polígono"}]
+Traceback (most recent call last):
+  File "<scratchpad>/probe2.py", line 27, in <module>
+    abre(f'CD-01det.dc.html#talhao={t}'); P(f'CD-01det {t} ficha', Grade(J, 0).dicts()); P(f'CD-01det {t} parcelas', Grade(J, 1).dicts())
+                                                                                                                     ^^^^^^^^^^^^^^^^^^^
+  File "<scratchpad>/rv/tools/prototipo/v37/gen37/tabelas_lib.py", line 33, in dicts
+    hs = self.labels()
+         ^^^^^^^^^^^^^
+  File "<scratchpad>/rv/tools/prototipo/v37/gen37/tabelas_lib.py", line 25, in labels
+    return [h for h, _ in self.heads()]
+                          ^^^^^^^^^^^^
+  File "<scratchpad>/rv/tools/prototipo/v37/gen37/tabelas_lib.py", line 22, in heads
+    return self.J(f"[...{T(self.i)}.querySelectorAll('[role=columnheader]')].map(h=>[h.textContent.replace(/[⇅▾▴▼▲]/g,'').replace(/\\s+/g,' ').trim().replace(/ · \\d+$/,''),h.dataset.un||''])") or []
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<scratchpad>/rv/tools/prototipo/v37/gen37/comp_lib.py", line 49, in js
+    if 'exceptionDetails' in r: raise RuntimeError(str(r['exceptionDetails'].get('exception',{}).get('description') or r['exceptionDetails'].get('text'))[:400])
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: TypeError: Cannot read properties of undefined (reading 'querySelectorAll')
+    at <anonymous>:1:83
+
+### 2026-10-09T16:23:45.080Z
+$ S=<scratchpad>; cd $S && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+PV01 [["Fazenda Sistema Área cultivável Polígono Diferença Situação", "Lagoa Grande Lagoa Grande/MG · fuso UTC−3 Pivô central 29,9 ha Círculo do KML — ● Círculo do KML"], ["Safra · parcela ⇅ ▾ Cultura · variedade ⇅ ▾ Área ⇅ ▾ Livre ⇅ ▾ Plantio ⇅ ▾ Polígono ⇅ ▾", "Safra Mamão 2026/27 Em planejamento sem cultivo 0 de 29,92 ha 29,9 ha livres"]]
+B1 [["Fazenda Sistema Área cultivável Polígono Diferença Situação", "Boa Vista Sorriso/MT · fuso UTC−4 Sequeiro 120,0 ha — — Sem polígono"]]
+
+### 2026-10-09T16:25:18.447Z
+$ S=<scratchpad>; cd $S && env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 1200 python3 probe2.py $S/rv/tools/prototipo/v37/gen37 > $S/probe2.log 2>&1; wc -l $S/probe2.log; sed -n '7,200p' $S/probe2.log | cut -c1-1500
+53 <scratchpad>/probe2.log
+CD-01det B1 parcelas :: "SEM GRADE"
+CD-05 Clientes canais=WhatsApp :: ["Coop. Vale", "Coop Grão Sul", "Frutas Real", "Atacado Bom Preço", "CD Horti"]
+CD-05 Transportadores (filtro herdado) :: ["TransVale Transportes", "Rota Sul Transportes"]
+CD-05 menu Canais em Transportadores :: ["E-mail", "WhatsApp"]
+CD-05 texto da área :: ["Limpar filtros"]
+CD-05 colunas Todos :: ["Parceiro", "CPF/CNPJ", "Papéis", "Contato", "WhatsApp", "E-mail", "Canais autorizados", "Situação do papel"]
+CD-05 colunas Fornecedores :: ["Parceiro", "CPF/CNPJ", "Grupos homologados", "Contato", "WhatsApp", "E-mail", "Canais autorizados", "Homologado"]
+alinh CD-05 Forn :: {"nh": 8, "nc": 8, "dx": [0, 0, 0, 0, 0, 0, 0, 0]}
+alinh CD-05 Clientes :: {"nh": 10, "nc": 10, "dx": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
+alinh CD-05 Prest :: {"nh": 9, "nc": 9, "dx": [0, 0, 0, 0, 0, 0, 0, 0, 0]}
+CD-05 colunas Prest :: ["Parceiro", "CPF/CNPJ", "Papéis", "Contato", "WhatsApp", "E-mail", "Canais autorizados", "Operações que presta", "Situação do papel"]
+alinh IR-01.dc.html Todas #0 :: {"nh": 17, "nc": 17, "dx": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
+alinh IR-02.dc.html Todas #0 :: {"nh": 14, "nc": 14, "dx": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
+alinh IR-03.dc.html Todas #0 :: {"nh": 14, "nc": 14, "dx": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
+alinh IR-04.dc.html Todas #0 :: {"nh": 10, "nc": 10, "dx": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
+alinh IR-04.dc.html Todas #1 :: {"nh": 10, "nc": 10, "dx": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
+alinh IR-04.dc.html Todas #2 :: {"nh": 7, "nc": 7, "dx": [0, 0, 0, 0, 0, 0, 0]}
+alinh IR-01.dc.html Santa Rita #0 :: {"nh": 16, "nc": 16, "dx": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
+alinh IR-02.dc.html Santa Rita #0 :: {"nh": 14, "nc": 14, "dx": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
+alinh IR-03.dc.html Santa Rita #0 :: {"nh": 13, "nc": 13, "dx": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
+alinh IR-04.dc.html Santa Rita #0 :: {"nh": 9, "nc": 9, "dx": [0, 0, 0, 0, 0, 0, 0, 0, 0]}
+alinh IR-04.dc.html Santa Rita #1 :: {"nh": 9, "nc": 9, "dx": [0, 0, 0, 0, 0, 0, 0, 0, 0]}
+alinh IR-04.dc.html Santa Rita #2 :: {"nh": 7, "nc": 7, "dx": [0, 0, 0, 0, 0, 0, 0]}
+alinh IR-01.dc.html Lagoa Grande #0 :: {"nh": 16, "nc": 16, "dx": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
+alinh IR-02.dc.html Lagoa Grande #0 :: {"nh": 14, "nc": 14, "dx": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
+alinh IR-03.dc.html Lagoa Grande #0 :: {"nh": 13, "nc": 13, "dx": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
+alinh IR-04.dc.html Lagoa Grande #0 :: {"nh": 9, "nc": 9, "dx": [0, 0, 0, 0, 0, 0, 0, 0, 0]}
+alinh IR-04.dc.html Lagoa Grande #1 :: {"nh": 9, "nc": 9, "dx": [0, 0, 0, 0, 0, 0, 0, 0, 0]}
+IR-01 Todas→Santa Rita sem recarregar: colunas :: ["Setor", "Cultura", "Estádio", "Área", "Déficit hoje", "Fonte do déficit", "Necessidade bruta", "Passadas", "Ordem", "Cobertura", "Resta", "Situação", "Pendência", "Próxima passada", "Próximo passo", "Responsável"]
+alinh :: {"nh": 16, "nc": 16, "dx": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
+IR-03 linhas :: [["OS-0423", "A liberar", "hoje 14:00", "hoje 16:00", "4,0 mm", "1", "Estimativa por ET", "Conflito · parada da B3"], ["OS-0418", "A liberar", "amanhã 21:00", "25/09 11:15", "8,1 mm", "—", "—", "Falta insumo · Ureia 45%"], ["OS-0422", "A liberar", "a definir", "a definir", "13,5 mm", "2", "—", "Janela a definir"], ["OS-0394", "Em conferência", "ontem 20:00", "ontem 22:06", "10,81 mm", "1", "—", "Divergência · −3,8 %"], ["OS-0419", "Liberadas", "hoje 20:00", "amanhã 10:31", "10,81 mm", "1", "Ponta parcial (20–21 h)", "—"], ["OS-0392", "Encerradas", "19/09 14:00", "19/09 16:00", "4,0 mm", "1", "—", "Encerrada automaticamente"]]
+IR-03det OS-0394 passadas :: [{"Passada": "1ª", "Início": "ontem 20:00", "Fim": "ontem 22:06", "Lâmina": "10,81 mm", "Duração": "14,5 h", "Estado": "Parcial", "Área coberta": "11,6 ha", "Volume medido": "1.206 m³"}]
+IR-03det OS-0394 trilha :: [{"Quando": "ontem 20:00", "Recibo": "EX-5116", "Evento": "Início · telemetria da B2", "Quem": "João"}, {"Quando": "ontem 22:06", "Recibo": "EX-5116", "Evento": "Parou às 22:06 (2,1 h) · 11,6 de 80 ha cobertos · hidrômetro 1.206 m³", "Quem": "telemetria"}, {"Quando": "ontem 22:07", "Recibo": "EX-5116", "Evento": "Conferência: 10,4 mm medidos × 10,81 mm estimados na área coberta (−3,8 %) · acima da tolerância de 3 %", "Quem": "sistema"}]
+IR-03det OS-0392 passadas :: [{"Passada": "1ª", "Início": "19/09 14:00", "Fim": "19/09 16:00", "Lâmina": "4,0 mm", "Duração": "2,0 h", "Estado": "Feita", "Área coberta": "42,0 ha", "Volume medido": "1.680 m³"}]
+IR-03det OS-0392 trilha :: [{"Quando": "19/09 16:04", "Recibo": "EX-5108", "Evento": "Conferência automática · 1.680 m³ medidos × 1.680 m³ estimados · encerrada", "Quem": "sistema"}]
+IR-02 linhas :: [{"Captação › ordem": "Rio · captação da sede 3 ordens", "Tipo": "", "Setor": "", "Bomba": "", "Vazão": "166 L/s", "Início": "", "Fim": "", "Lâmina": "", "Passadas": "", "Etapa": "", "Pendência": "", "Próximo passo": "", "Responsável": "", "Avisos": ""}, {"Captação › ordem": "OS-0419", "Tipo": "Água", "Setor": "Pivô 2", "Bomba": "Bomba B2", "Vazão": "166 L/s", "Início": "hoje 20:00", "Fim": "amanhã 10:31", "Lâmina": "10,81 mm", "Passadas": "1", "Etapa": "Liberadas", "Pendência": "—", "Próximo passo": "Iniciar irrigação", "Responsável": "João", "Avisos": "Ponta parcial (20–21 h)"}, {"Captação › ordem": "OS-0422", "Tipo": "Água", "Setor": "Pivô 2", "Bomba": "Bomba B2", "Vazão": "166 L/s", "Início": "a definir", "Fim": "a definir", "Lâmina": "13,5 mm", "Passadas": "2", "Etapa": "A liberar", "Pendência": "Janela a definir", "Próximo passo": "Definir janela", "Responsável": "João", "Avisos": "—"}, {"Captação › ordem": "OS-0418", "Tipo": "Fertirrigação", "Setor": "Pivô 1", "Bomba": "Bomba B1", "Vazão": "150 L/s", "Início": "amanhã 21:00", "Fim": "25/09 11:15", "Lâmina": "8,1 mm", "Passadas": "—", "Etapa": "A liberar", "Pendência": "Falta insumo · Ureia 45%", "Próximo passo": "Receber o insumo no Estoque", "Responsável": "Suprimentos", "Avisos": "—"}, {"Captação › ordem": "Reservatório da sede 1 ordem", "Tipo": "", "Setor": "", "Bomba": "", "Vazão": "0 L/s", "Início": "", "Fim": "", "Lâmina": 
+IR-01 linhas (Todas) :: [{"Setor": "Gotejo T7", "Cultura": "Mamão", "Estádio": "—", "Área": "42 ha", "Déficit hoje": "≈10,0 mm", "Fonte do déficit": "Estimativa por ET", "Necessidade bruta": "10,53 mm", "Passadas": "2", "Ordem": "OS-0423", "Cobertura": "38 %", "Resta": "6,2 mm", "Situação": "Impedida", "Pendência": "Conflito · parada da B3", "Próxima passada": "hoje 14:00", "Próximo passo": "Resolver conflito", "Responsável": "Caio · PCP"}, {"Setor": "Pivô 1", "Cultura": "Feijão", "Estádio": "R5", "Área": "95 ha", "Déficit hoje": "≈8,4 mm", "Fonte do déficit": "Estimativa por ET", "Necessidade bruta": "9,33 mm", "Passadas": "1", "Ordem": "OS-0418", "Cobertura": "—", "Resta": "—", "Situação": "Impedida", "Pendência": "Falta insumo · Ureia 45%", "Próxima passada": "amanhã 21:00", "Próximo passo": "Programar só água", "Responsável": "João"}, {"Setor": "Pivô 2", "Cultura": "Milho", "Estádio": "V10", "Área": "80 ha", "Déficit hoje": "11,2 mm", "Fonte do déficit": "Medido", "Necessidade bruta": "12,44 mm", "Passadas": "2", "Ordem": "OS-0419", "Cobertura": "87 %", "Resta": "1,5 mm", "Situação": "A conferir", "Pendência": "Divergência · −3,8 %", "Próxima passada": "—", "Próximo passo": "Conferir medição", "Responsável": "João"}]
+IR-04 fontes :: [{"Fonte": "Estação meteorológica Santa Rita", "Grandeza": "ET₀, Chuva, Vento", "Unidade": "mm/dia, mm, km/h", "Atualização": "hoje 06:00", "Calibração": "Em dia", "Validade da calibração": "28/02/2027", "Cobertura": "Raio 8 km", "Estado": "Ativa", "Efeito no balanço": "ETc dos setores"}, {"Fonte": "Hidrômetro · Pivô 2", "Grandeza": "Volume", "Unidade": "m³", "Atualização": "hoje 06:00", "Calibração": "Vence em 7 dias", "Validade da calibração": "30/09/2026", "Cobertura": "Pivô 2", "Estado": "Ativa", "Efeito no balanço": "crédito das irrigações"}, {"Fonte": "Sonda de umidade · P2 (20 cm)", "Grandeza": "Umidade do solo", "Unidade": "% vol.", "Atualização": "hoje 05:40", "Calibração": "Em dia", "Validade da calibração": "31/01/2027", "Cobertura": "Pivô 2", "Estado": "Ativa", "Efeito no balanço": "Pivô 2 medido"}, {"Fonte": "Sonda de umidade · P1 (20 cm)", "Grandeza": "Umidade do solo", "Unidade": "% vol.", "Atualização": "hoje 05:40", "Calibração": "Em dia", "Validade da calibração": "31/01/2027", "Cobertura": "Pivô 1", "Estado": "Suspeita", "Efeito no balanço": "Pivô 1 por estimativa de ET (≈)"}, {"Fonte": "Sonda de umidade · T7", "Grandeza": "Umidade do solo", "Unidade": "% vol.", "Atualização": "20/09 06:00", "Calibração": "Em dia", "Validade da calibração": "31/01/2027", "Cobertura": "Gotejo T7", "Estado": "Sem dado", "Efeito no balanço": "Gotejo T7 por estimativa de ET (≈)"}, {"Fonte": "Previsão me
+IR-04 capt :: [{"Captação": "Rio · captação da sede", "Outorga": "demonstrativa", "Vazão outorgada": "400 L/s", "Regime": "21 h/dia", "Vencimento": "30/06/2028", "Situação": "Vigente", "Volume hoje": "2.390 m³", "Uso do dia": "8 %", "Setores ligados": "Pivô 2, Pivô 1"}, {"Captação": "Reservatório da sede", "Outorga": "demonstrativa", "Vazão outorgada": "250 L/s", "Regime": "21 h/dia", "Vencimento": "30/06/2028", "Situação": "Vigente", "Volume hoje": "0 m³", "Uso do dia": "0 %", "Setores ligados": "Gotejo T7"}]
+IR-04 des :: [{"Setor": "Pivô 2", "Cultura": "Milho", "Volume": "32.480 m³", "Energia": "23.370 kWh", "Lâmina aplicada": "40,6 mm", "Eficiência": "1,39 m³/kWh", "Variação da eficiência": "+4 %"}, {"Setor": "Pivô 1", "Cultura": "Feijão", "Volume": "34.580 m³", "Energia": "25.610 kWh", "Lâmina aplicada": "36,4 mm", "Eficiência": "1,35 m³/kWh", "Variação da eficiência": "0 %"}, {"Setor": "Gotejo T7", "Cultura": "Mamão", "Volume": "10.080 m³", "Energia": "5.760 kWh", "Lâmina aplicada": "24,0 mm", "Eficiência": "1,75 m³/kWh", "Variação da eficiência": "—"}, {"Setor": "Total", "Cultura": "", "Volume": "77.140 m³", "Energia": "54.740 kWh", "Lâmina aplicada": "", "Eficiência": "", "Variação da eficiência": ""}]
+CD-03 Capacidade asc :: [["Plantadeira", "24 linhas"], ["Irrigação", "45 m³/h"], ["Trator", "78 cv"], ["Trator", "110 cv"], ["Trator", "155 cv"], ["Trator", "190 cv"], ["Irrigação", "300 m³/h"], ["Irrigação", "340 m³/h"], ["Tratamento de sementes", "2.400 kg/h"], ["Beneficiamento", "2.400 kg/h"], ["Pulverizador", "3.000 L"], ["Distribuidor", "3.000 kg"], ["Armazenagem", "60.000 sc de 60 kg"], ["Colhedora", "—"], ["Implemento", "—"]]
+CD-06 locais :: [{"Local": "Galpão 1", "Fazenda": "Santa Rita", "Tipo": "Galpão", "Capacidade": "—", "Itens com este local padrão": "2"}, {"Local": "Galpão 2", "Fazenda": "Santa Rita", "Tipo": "Galpão", "Capacidade": "—", "Itens com este local padrão": "5"}, {"Local": "Almox. defensivos", "Fazenda": "Santa Rita", "Tipo": "Almoxarifado", "Capacidade": "—", "Itens com este local padrão": "12"}, {"Local": "Câmara fria", "Fazenda": "Santa Rita", "Tipo": "Câmara fria", "Capacidade": "—", "Itens com este local padrão": "5"}, {"Local": "Tanque Sede", "Fazenda": "Santa Rita", "Tipo": "Tanque", "Capacidade": "15.000 L", "Itens com este local padrão": "1"}, {"Local": "Silo 01", "Fazenda": "Santa Rita", "Tipo": "Silo", "Capacidade": "60.000 sc de 60 kg", "Itens com este local padrão": "0"}, {"Local": "Armazém Sede", "Fazenda": "Santa Rita", "Tipo": "Armazém", "Capacidade": "—", "Itens com este local padrão": "2"}, {"Local": "Packing", "Fazenda": "Santa Rita", "Tipo": "Packing", "Capacidade": "—", "Itens com este local padrão": "1"}, {"Local": "Galpão Boa Vista", "Fazenda": "Boa Vista", "Tipo": "Galpão", "Capacidade": "—", "Itens com este local padrão": "0"}, {"Local": "Almox. Lagoa Grande", "Fazenda": "Lagoa Grande", "Tipo": "Almoxarifado", "Capacidade": "—", "Itens com este local padrão": "10"}, {"Local": "Galpão de frutas Lagoa Grande", "Fazenda": "Lagoa Grande", "Tipo": "Galpão", "Capacidade": "—", "Itens com este local padrão": "0"}]
+CD-06 itens sem preço c/ data :: [["Calcário dolomítico", "—", "—"], ["Café beneficiado", "—", "—"], ["Soja em grão", "—", "—"]]
+CD-04 pessoas :: [{"Pessoa": "Ana", "Equipe": "Agronomia", "Habilidades": "Liberar O.S. (agrônomo)", "Vínculo": "CLT", "Disponível até": "—", "Custo R$/h": "R$ 84,00/h", "Habilitação": "CREA", "Validade da habilitação": "31/12/2027", "Calendário": "Da equipe", "Acesso ao app": "Com login", "Situação": "Alocável"}, {"Pessoa": "Marcos", "Equipe": "Campo 1", "Habilidades": "Operar trator, Operar pulverizador", "Vínculo": "CLT", "Disponível até": "—", "Custo R$/h": "R$ 38,00/h", "Habilitação": "NR-31", "Validade da habilitação": "30/09/2026", "Calendário": "Da equipe", "Acesso ao app": "Com login", "Situação": "Vence em 30 dias Renovar ›"}, {"Pessoa": "Carlos", "Equipe": "Campo 1", "Habilidades": "Operar trator, Operar plantadeira", "Vínculo": "CLT", "Disponível até": "—", "Custo R$/h": "R$ 38,00/h", "Habilitação": "NR-31", "Validade da habilitação": "31/08/2027", "Calendário": "Da equipe", "Acesso ao app": "Com login", "Situação": "Alocável"}, {"Pessoa": "Paula", "Equipe": "Campo 1", "Habilidades": "Preparar calda (caldeiro), Conferir", "Vínculo": "CLT", "Disponível até": "—", "Custo R$/h": "R$ 32,00/h", "Habilitação": "NR-31", "Validade da habilitação": "30/04/2027", "Calendário": "Da equipe", "Acesso ao app": "Com login", "Situação": "Alocável"}, {"Pessoa": "Nilton", "Equipe": "Campo 2", "Habilidades": "Preparar calda (caldeiro)", "Vínculo": "CLT", "Disponível até": "—", "Custo R$/h": "R$ 32,00/h", "Habilitação": "NR
+CD-07 :: [["01", "Mapeado", "—"], ["02", "Mapeado", "Novo"], ["3.1", "Mapeado", "—"], ["3.1.01", "Mapeado", "—"], ["3.1.02", "Mapeado", "—"], ["3.1.03", "Mapeado", "—"], ["3.1.04", "Mapeado", "—"], ["3.1.05", "Mapeado", "—"], ["3.1.06", "Mapeado", "Novo"], ["CR-SR", "Mapeado", "—"], ["CR-BV", "Mapeado", "Novo"], ["CC-OFI", "Mapeado", "—"], ["CC-IRR", "Mapeado", "—"], ["SOJA", "Dimensão própria", "—"], ["MILHO", "Dimensão própria", "—"], ["FEIJAO", "Dimensão própria", "—"], ["CAFE", "Dimensão própria", "—"], ["MAMAO", "Dimensão própria", "—"], ["IMPL", "Dimensão própria", "—"], ["TRAT", "Dimensão própria", "—"], ["COLH", "Dimensão própria", "—"], ["POSC", "Dimensão própria", "—"], ["PRJ-PIVO3", "Tradução pendente Traduzir ›", "—"]]
+CD-02 rend :: [["Trator 02 MF 7719 + Pulverizador PJ-3030 36 m", "Largura × velocidade", "36 m", "21,60 ha/h", "R$ 313,00/h", "R$ 14,49/ha", "Medição local"], ["Trator T1 JD 6M 155 + Plantadeira 24 linhas", "Largura × velocidade", "12 m", "6,80 ha/h", "R$ 396,00/h", "R$ 58,24/ha", "Fabricante"], ["Trator 03 + Distribuidor 3 t", "Largura × velocidade", "24 m", "18,00 ha/h", "R$ 233,00/h", "R$ 12,94/ha", "Referência"], ["Máquina TSI na sede · equipe de 2", "Informado", "—", "40,00 ha/h", "R$ 136,00/h", "R$ 3,40/ha", "Ensaio da fazenda"], ["Colhedora Axial-Flow 7250 + trator com graneleiro", "Largura × velocidade", "10 m", "5,00 ha/h", "R$ 1.146,00/h", "R$ 229,20/ha", "Medição local"], ["Derriçadeiras portáteis · equipe de 6", "Informado", "—", "0,35 ha/h", "R$ 232,00/h", "R$ 662,86/ha", "Premissa a validar Validar ›"], ["Trator 04 + esqueletadeira", "Informado", "—", "1,50 ha/h", "R$ 248,00/h", "R$ 165,33/ha", "Referência"], ["Sistema de gotejo T7 · 1 irrigante", "Informado", "—", "10,00 ha/h", "R$ 57,00/h", "R$ 5,70/ha", "Ensaio da fazenda"], ["Sulcador + equipe de plantio (8 pessoas)", "Informado", "—", "0,25 ha/h", "R$ 406,00/h", "R$ 1.624,00/ha", "Equipe da fazenda"], ["Equipe de tratos culturais (6 pessoas)", "Informado", "—", "0,60 ha/h", "R$ 180,00/h", "R$ 300,00/ha", "Equipe da fazenda"], ["Equipe de colheita (10 pessoas) + trator com carreta", "Informado", "—", "0,45 ha/h", "R$ 495,00/h", "R$ 1.100,00/ha", "Equipe da fazenda"]]
+erros :: []
+
+### 2026-10-09T16:32:19.691Z
+$ S=<scratchpad>; cat > $S/probe_base_ir.py <<'EOF'
+  [corpo do heredoc omitido]
+=== base
+IR-01 [["SETOR ⇅ ▾ DÉFICIT HOJE ⇅ ▾ NECESSIDADE ⇅ ▾ SITUAÇÃO ⇅ ▾ PRÓXIMO PASSO ⇅ ▾", "Gotejo T7 Mamão · 42 ha · Santa Rita ≈10,0 mm Estimativa por ET 10,53 mm brutos em 2 passadas OS-0423 cobre 38 % · resta 6,2 mm conflito · parada da B3 Resolver conflito Caio · PCP", "Pivô 1 Feijão R5 · 95 ha · Santa Rita ≈8,4 mm Estimativa por ET 9,33 mm brutos OS-0418 · fertirrigação falta insumo · OS-0418 Programar só água João", "Pivô 5 Mamão · formação inicial · 71 ha · Lagoa Grande 13,2 mm demonstrativo 15,53 mm brutos em 2 passadas OS-0507 · fertirrigação bomba parada · OS-0507 Abrir OS-0507 Manutenção", "Pivô 2 Milho V10 · 80 ha · Santa Rita 11,2 mm medido 12,44 mm brutos em 2 passadas OS-0419 cobre 87 % · resta 1,5 mm conferir medição · OS-0394 Conferir medição João", "Pivô 4 Mamão · produção · 73 ha · Lagoa Grande 4,8 mm demonstrativo 5,65 mm brutos OS-0506 · fertirrigação fertirrigação · OS-0506 Abrir OS-0506 Joaquim", "Pivô 2 Mamão · produção · 38 ha · Lagoa Grande 9,8 mm demonstrativo 11,53 mm brutos em 2 passadas OS-0601 cobre 100 % programada · hoje 21:00 Iniciar irrigação Joaquim", "Pivô 8 Mamão · formação inicial · 51 ha · Lagoa Grande 6,4 mm demonstrativo 7,53 mm brutos OS-0602 cobre 100 % programada · hoje 21:00 Iniciar irrigação Joaquim", "Pivô 9 Mamão · produção · 75 ha · Lagoa Grande 10,6 mm demonstrativo 12,47 mm brutos em 2 passadas OS-0603 cobre 100 % programada · hoje 21:00 Iniciar irrigação Joaquim", "Pivô 18 Mamão · produção · 49 ha · Lagoa Grande 11,4 mm demonstrativo 13,41 mm brutos em 2 passadas OS-0604 cobre 100 % programada · hoje 21:00 Iniciar irrigação Joaquim", "Pivô 21 Mamão · pré-florada · 81 ha · Lagoa Grande 8,8 mm demonstrativo 10,35 mm brutos em 2 passadas OS-0605 cobre 100 % programada · hoje 06:15 Iniciar irrigação Joaquim", "Pivô 24 Mamão · produção · 34 ha · Lagoa Grande 9,4 mm demonstrativo 11,06 mm brutos em 2 passadas OS-0606 cobre 100 % programada · hoje 21:00 Iniciar irrigação Joaquim", "Pivô 1 Mamão · pré-florada · 30 ha · Lagoa Grande 6,1 mm demonstrativo 7,18 mm brutos sem ordem sem necessidade hoje —", "Pivô 3 Mamão · pré-florada · 70 ha · Lagoa Grande 7,4 mm demonstrativo 8,71 mm brutos em 2 passadas sem ordem sem necessidade hoje —", "Pivô 6 Mamão · produção · 63 ha · Lagoa Grande 3,2 mm demonstrativo 3,76 mm brutos sem ordem sem necessidade hoje —", "Pivô 7 Mamão · formação inicial · 61 ha · Lagoa Grande 5,6 mm demonstrativo 6,59 mm brutos sem ordem sem necessidade hoje —", "Pivô 10 Mamão · pré-florada · 30 ha · Lagoa Gr
+IR-01 links [["Resolver conflito", "IR-03det.dc.html#OS-0423:conflito"], ["Programar só água", "IR-02.dc.html#programar=P1"], ["Abrir OS-0507", "OS.dc.html#OS-0507"], ["Conferir medição", "IR-03det.dc.html#OS-0394:conferir"], ["Abrir OS-0506", "OS.dc.html#OS-0506"], ["Iniciar irrigação", "IR-03det.dc.html#OS-0601"], ["Iniciar irrigação", "IR-03det.dc.html#OS-0602"], ["Iniciar irrigação", "IR-03det.dc.html#OS-0603"], ["Iniciar irrigação", "IR-03det.dc.html#OS-0604"], ["Iniciar irrigação", "IR-03det.dc.html#OS-0605"], ["Iniciar irrigação", "IR-03det.dc.html#OS-0606"]]
+IR-03det [["PASSADA JANELA LÂMINA DURAÇÃO ESTADO ÁREA COBERTA", "1ª ontem 20:00–22:06 10,81 mm 14,5 h Parcial 11,6 de 80,0 ha 1.206 m³ medidos"], ["QUANDO ⇅ ▾ RECIBO ⇅ ▾ EVENTO ⇅ ▾ QUEM ⇅ ▾", "ontem 20:00 EX-5116 Início · telemetria da B2 João", "ontem 22:06 EX-5116 Parou às 22:06 (2,1 h) · 11,6 de 80 ha cobertos · hidrômetro 1.206 m³ telemetria", "ontem 22:07 EX-5116 Conferência: 10,4 mm medidos × 10,81 mm estimados na área coberta (−3,8 %) · acima da tolerância de 3 % sistema"]]
+=== rv
+IR-01 [["SETOR ⇅ ▾ FAZENDA ⇅ ▾ CULTURA ⇅ ▾ ESTÁDIO ⇅ ▾ ÁREA ⇅ ▾ DÉFICIT HOJE ⇅ ▾ FONTE DO DÉFICIT ⇅ ▾ NECESSIDADE BRUTA ⇅ ▾ PASSADAS ⇅ ▾ ORDEM ⇅ ▾ COBERTURA ⇅ ▾ RESTA ⇅ ▾ SITUAÇÃO ⇅ ▾ PENDÊNCIA ⇅ ▾ PRÓXIMA PASSADA ⇅ ▾ PRÓXIMO PASSO ⇅ ▾ RESPONSÁVEL ⇅ ▾", "Gotejo T7 Santa Rita Mamão — 42 ha ≈10,0 mm Estimativa por ET 10,53 mm 2 OS-0423 38 % 6,2 mm Impedida Conflito · parada da B3 hoje 14:00 Resolver conflito Caio · PCP", "Pivô 1 Santa Rita Feijão R5 95 ha ≈8,4 mm Estimativa por ET 9,33 mm 1 OS-0418 — — Impedida Falta insumo · Ureia 45% amanhã 21:00 Programar só água João", "Pivô 5 Lagoa Grande Mamão formação inicial 71,11 ha 13,2 mm Demonstrativo 15,53 mm 2 OS-0507 — — Impedida Bomba parada — Abrir OS-0507 Manutenção", "Pivô 2 Santa Rita Milho V10 80 ha 11,2 mm Medido 12,44 mm 2 OS-0419 87 % 1,5 mm A conferir Divergência · −3,8 % — Conferir medição João", "Pivô 4 Lagoa Grande Mamão produção 73,18 ha 4,8 mm Demonstrativo 5,65 mm 1 OS-0506 — — Irrigando — — Abrir OS-0506 Joaquim", "Pivô 2 Lagoa Grande Mamão produção 37,75 ha 9,8 mm Demonstrativo 11,53 mm 2 OS-0601 100 % 0,0 mm Programada — hoje 21:00 Iniciar irrigação Joaquim", "Pivô 8 Lagoa Grande Mamão formação inicial 50,63 ha 6,4 mm Demonstrativo 7,53 mm 1 OS-0602 100 % 0,0 mm Programada — hoje 21:00 Iniciar irrigação Joaquim", "Pivô 9 Lagoa Grande Mamão produção 74,98 ha 10,6 mm Demonstrativo 12,47 mm 2 OS-0603 100 % 0,0 mm Programada — hoje 21:00 Iniciar irrigação Joaquim", "Pivô 18 Lagoa Grande Mamão produção 48,93 ha 11,4 mm Demonstrativo 13,41 mm 2 OS-0604 100 % 0,0 mm Programada — hoje 21:00 Iniciar irrigação Joaquim", "Pivô 21 Lagoa Grande Mamão pré-florada 80,82 ha 8,8 mm Demonstrativo 10,35 mm 2 OS-0605 100 % 0,0 mm Programada — hoje 06:15 Iniciar irrigação Joaquim", "Pivô 24 Lagoa Grande Mamão produção 34,37 ha 9,4 mm Demonstrativo 11,06 mm 2 OS-0606 100 % 0,0 mm Programada — hoje 21:00 Iniciar irrigação Joaquim", "Pivô 1 Lagoa Grande Mamão pré-florada 29,92 ha 6,1 mm Demonstrativo 7,18 mm 1 — — — Sem necessidade — — — —", "Pivô 3 Lagoa Grande Mamão pré-florada 70,18 ha 7,4 mm Demonstrativo 8,71 mm 2 — — — Sem necessidade — — — —", "Pivô 6 Lagoa Grande Mamão produção 62,79 ha 3,2 mm Demonstrativo 3,76 mm 1 — — — Sem necessidade — — — —", "Pivô 7 Lagoa Grande Mamão formação inicial 61,39 ha 5,6 mm Demonstrativo 6,59 mm 1 — — — Sem necessidade — — — —", "Pivô 10 Lagoa Grande Mamão pré-florada 30,15 ha ≈7,9 mm Estimativa por ET 9,29 mm 2 — — — Sem necessidade — — — —", "Pivô 14 Lagoa Grande Mamão pré-flor
+IR-01 links [["Resolver conflito", "IR-03det.dc.html#OS-0423:conflito"], ["Programar só água", "IR-02.dc.html#programar=P1"], ["Abrir OS-0507", "OS.dc.html#OS-0507"], ["Conferir medição", "IR-03det.dc.html#OS-0394:conferir"], ["Abrir OS-0506", "OS.dc.html#OS-0506"], ["Iniciar irrigação", "IR-03det.dc.html#OS-0601"], ["Iniciar irrigação", "IR-03det.dc.html#OS-0602"], ["Iniciar irrigação", "IR-03det.dc.html#OS-0603"], ["Iniciar irrigação", "IR-03det.dc.html#OS-0604"], ["Iniciar irrigação", "IR-03det.dc.html#OS-0605"], ["Iniciar irrigação", "IR-03det.dc.html#OS-0606"]]
+IR-03det [["PASSADA ⇅ ▾ INÍCIO ⇅ ▾ FIM ⇅ ▾ LÂMINA ⇅ ▾ DURAÇÃO ⇅ ▾ ESTADO ⇅ ▾ ÁREA COBERTA ⇅ ▾ VOLUME MEDIDO ⇅ ▾", "1ª ontem 20:00 ontem 22:06 10,81 mm 14,5 h Parcial 11,6 ha 1.206 m³"], ["QUANDO ⇅ ▾ RECIBO ⇅ ▾ EVENTO ⇅ ▾ QUEM ⇅ ▾", "ontem 20:00 EX-5116 Início · telemetria da B2 João", "ontem 22:06 EX-5116 Parou às 22:06 (2,1 h) · 11,6 de 80 ha cobertos · hidrômetro 1.206 m³ telemetria", "ontem 22:07 EX-5116 Conferência: 10,4 mm medidos × 10,81 mm estimados na área coberta (−3,8 %) · acima da tolerância de 3 % sistema"]]
+
+### 2026-10-09T16:35:15.120Z
+$ S=<scratchpad>; rm -rf $S/mut && mkdir -p $S/mut && cd <sp-tabr> && git archive HEAD | tar -x -C $S/mut && cd $S/mut/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+ok areas/cad_parceiros.py
+ok areas/cad_ativos_pessoas.py
+ok areas/cad_fazendas.py
+ok areas/cad_ativos_pessoas.py
+ok areas/irrigacao.py
+0
+repeat(8,
+repeat(3,
+
+### 2026-10-09T16:35:36.268Z
+$ S=<scratchpad>; cd $S/mut/tools/prototipo/v37/gen37 && python3 tabelas_cad_irr_unit.py 2>&1 | grep -E "FALHA|RESULTADO"; env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 1200 python3 tabelas_cad_test.py > $S/mut_cad.log 2>&1; grep -E "FALHOU|RESULTADO" $S/mut_cad.log | cut -c1-400
+FALHA B1 vazão do documento em m³/h para ordenar: 180 m³/h → 180; 1,0 L/s → 3,6; "—" → vazio · [('180 m³/h', 180.0), ('1,0 L/s', 1.0), ('0,5 L/s', 0.5), ('—', ''), ('', '')]
+RESULTADO: 32/33 ok · FALHAS: B1 vazão do documento em m³/h para ordenar: 180 m³/h → 180; 1,0 L/s → 3,6; "—" → vazio
+RESULTADO: 125/125 ok
+
+### 2026-10-09T16:39:15.222Z
+$ S=<scratchpad>; cat > $S/probe_cd05_alinh.py <<'EOF'
+  [corpo do heredoc omitido]
+== mut
+  File "<scratchpad>/probe_cd05_alinh.py", line 15, in <module>
+    if papel=='Clientes': c.shot(os.path.join(sys.argv[2], 'cd05_clientes.png'))
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<scratchpad>/mut/tools/prototipo/v37/gen37/comp_lib.py", line 68, in shot
+    d=self.call('Page.captureScreenshot',{'format':'png','captureBeyondViewport':False}); open(path,'wb').write(base64.b64decode(d['data']))
+                                                                                          ^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '<scratchpad>/shot_mut/cd05_clientes.png'
+== rv
+  File "<scratchpad>/probe_cd05_alinh.py", line 15, in <module>
+    if papel=='Clientes': c.shot(os.path.join(sys.argv[2], 'cd05_clientes.png'))
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<scratchpad>/rv/tools/prototipo/v37/gen37/comp_lib.py", line 68, in shot
+    d=self.call('Page.captureScreenshot',{'format':'png','captureBeyondViewport':False}); open(path,'wb').write(base64.b64decode(d['data']))
+                                                                                          ^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '<scratchpad>/shot_rv/cd05_clientes.png'
+
+### 2026-10-09T16:43:59.382Z
+$ S=<scratchpad>; mkdir -p $S/shot_mut $S/shot_rv; for v in mut rv; do echo "== $v"; env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 600 python3 $S/probe_cd05_alinh.py $S/$v/tools/prototipo/v37/gen37 $S/shot_$v 2>&1 | tail -7; done
+Command did not complete within its 600s timeout and was moved to the background (ID: bx1qhkys9). Output is being written to: <sessao-tmp>/tasks/bx1qhkys9.output. If it exits while you are still working you will be notified, but it is terminated when you give your final response and no notification can follow that — so do not end your turn to wait for it; if you need its result, wait for it before giving your final response. To check interim output, use Read on that file path.
+
+### 2026-10-09T16:54:41.299Z
+$ cat <sessao-tmp>/tasks/bx1qhkys9.output | tail -7; S=<scratchpad>; cd $S/mut/tools/prototipo/v37/gen37 && env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 1200 python3 tabelas_irr_test.py > $S/mut_irr.log 2>&1; grep -E "FALHOU|RESULTADO" $S/mut_irr.log | cut -c1-500
+Fornecedores colunas 8 linhas desalinhadas 0
+Clientes colunas 10 linhas desalinhadas 0
+Parceiros de crédito colunas 10 linhas desalinhadas 0
+Transportadores colunas 10 linhas desalinhadas 0
+Prestadores colunas 9 linhas desalinhadas 0
+
+[exited with code 0]
+RESULTADO: 84/84 ok
+
+### 2026-10-09T16:59:25.738Z
+$ S=<scratchpad>; cd $S; for v in rv mut; do echo "== fim $v"; env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 600 python3 probe3.py $S/$v/tools/prototipo/v37/gen37 fim 2>&1 | tail -4 | cut -c1-700; done
+== fim rv
+passadas ["1ª amanhã 21:00 25/09 06:02 6,75 mm 9,0 h Programada — —", "2ª 25/09 21:00 26/09 06:02 6,75 mm 9,0 h Programada — —"]
+IR-03.dc.html ["OS-0422 Água Pivô 2 Milho amanhã 21:00 26/09 06:02 13,5 mm 2 Liberadas — — Iniciar irrigação João"]
+IR-02.dc.html ["OS-0422 Água Pivô 2 Bomba B2 166 L/s amanhã 21:00 26/09 06:02 13,5 mm 2 Liberadas — Iniciar irrigação João —"]
+== fim mut
+passadas ["1ª amanhã 21:00 25/09 06:02 6,75 mm 9,0 h Programada — —", "2ª 25/09 21:00 26/09 06:02 6,75 mm 9,0 h Programada — —"]
+IR-03.dc.html ["OS-0422 Água Pivô 2 Milho amanhã 21:00 25/09 06:02 13,5 mm 2 Liberadas — — Iniciar irrigação João"]
+IR-02.dc.html ["OS-0422 Água Pivô 2 Bomba B2 166 L/s amanhã 21:00 25/09 06:02 13,5 mm 2 Liberadas — Iniciar irrigação João —"]
+
+### 2026-10-09T17:03:24.161Z
+$ S=<scratchpad>; cd $S; for v in rv base; do echo "== largura $v"; env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 900 python3 probe3.py $S/$v/tools/prototipo/v37/gen37 largura 2>&1 | grep -v "sobra 0 fora_da_vista \[\]" | cut -c1-400; done
+== largura rv
+1280 CD-01 Talhões # 0 cols 7 sobra 83 fora_da_vista ['Situação']
+1280 CD-01 Água # 0 cols 8 sobra 188 fora_da_vista ['Situação']
+1280 CD-02 Culturas # 0 cols 7 sobra 126 fora_da_vista ['Situação']
+1280 CD-02 Operações # 0 cols 11 sobra 541 fora_da_vista ['Rendimento', 'Custo R$/h', 'Custo R$/ha', 'Fonte']
+1280 CD-03  # 0 cols 9 sobra 423 fora_da_vista ['Conjuntos', 'Próxima calibração', 'Situação']
+1280 CD-04 Pessoas # 0 cols 11 sobra 445 fora_da_vista ['Validade da habilitação', 'Calendário', 'Acesso ao app', 'Situação']
+1280 CD-05 Parceiros # 0 cols 8 sobra 345 fora_da_vista ['Canais autorizados', 'Situação do papel']
+1280 CD-06 Itens # 0 cols 8 sobra 298 fora_da_vista ['Data do preço', 'Situação']
+1280 CD-07  # 0 cols 10 sobra 697 fora_da_vista ['Vínculos', 'Conta no ERP (Sankhya)', 'TOP no ERP', 'Situação', 'No rascunho']
+1280 IR-01  # 0 cols 16 sobra 762 fora_da_vista ['Cobertura', 'Resta', 'Situação', 'Pendência', 'Próxima passada', 'Próximo passo', 'Responsável']
+1280 IR-02  # 0 cols 14 sobra 684 fora_da_vista ['Etapa', 'Pendência', 'Próximo passo', 'Responsável', 'Avisos']
+1280 IR-03  # 0 cols 13 sobra 547 fora_da_vista ['Pendência', 'Avisos', 'Próximo passo', 'Responsável']
+1280 IR-04  # 0 cols 9 sobra 334 fora_da_vista ['Cobertura', 'Estado', 'Efeito no balanço']
+1280 IR-04  # 1 cols 9 sobra 70 fora_da_vista ['Setores ligados']
+1440 CD-01 Água # 0 cols 8 sobra 28 fora_da_vista ['Situação']
+1440 CD-02 Operações # 0 cols 11 sobra 381 fora_da_vista ['Custo R$/h', 'Custo R$/ha', 'Fonte']
+1440 CD-03  # 0 cols 9 sobra 263 fora_da_vista ['Próxima calibração', 'Situação']
+1440 CD-04 Pessoas # 0 cols 11 sobra 285 fora_da_vista ['Acesso ao app', 'Situação']
+1440 CD-05 Parceiros # 0 cols 8 sobra 185 fora_da_vista ['Situação do papel']
+1440 CD-06 Itens # 0 cols 8 sobra 138 fora_da_vista ['Situação']
+1440 CD-07  # 0 cols 10 sobra 537 fora_da_vista ['Conta no ERP (Sankhya)', 'TOP no ERP', 'Situação', 'No rascunho']
+1440 IR-01  # 0 cols 16 sobra 602 fora_da_vista ['Situação', 'Pendência', 'Próxima passada', 'Próximo passo', 'Responsável']
+1440 IR-02  # 0 cols 14 sobra 524 fora_da_vista ['Pendência', 'Próximo passo', 'Responsável', 'Avisos']
+1440 IR-03  # 0 cols 13 sobra 387 fora_da_vista ['Avisos', 'Próximo passo', 'Responsável']
+1440 IR-04  # 0 cols 9 sobra 174 fora_da_vista ['Efeito no balanço']
+== largura base
+1280 CD-01 Água # 0 cols 5 sobra 209 fora_da_vista ['Situação']
+1280 CD-02 Operações # 0 cols 6 sobra 2140 fora_da_vista ['Rendimento', 'Custo por hora', 'Custo por hectare', 'Fonte']
+1280 CD-03  # 0 cols 6 sobra 147 fora_da_vista ['Situação']
+1280 CD-04 Pessoas # 0 cols 5 sobra 29 fora_da_vista ['Situação']
+1280 CD-05 Parceiros # 0 cols 4 sobra 67 fora_da_vista ['Situação do papel']
+1280 CD-06 Itens # 0 cols 5 sobra 62 fora_da_vista ['Situação']
+1280 CD-07  # 0 cols 5 sobra 148 fora_da_vista ['Situação']
+1440 CD-01 Água # 0 cols 5 sobra 49 fora_da_vista ['Situação']
+
+### 2026-10-09T17:11:47.075Z
+$ S=<scratchpad>; cd $S/rv/tools/prototipo/v37/gen37 && for t in irtest.py irr_fluxo_test.py os_irrig_filtro_test.py map_irrig_filtro_test.py cadp_fix_test.py cadc_fix_cd07.py; do echo "=== $t"; env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 900 python3 $t 2>&1 | grep -E "RESULTADO|FALH|^[0-9]+/[0-9]+|ok$" | tail -4; done > $S/regress.log 2>&1; cat $S/regress.log | cut -c1-300
+Command running in background with ID: bz7jyf9jf. Output is being written to: <sessao-tmp>/tasks/bz7jyf9jf.output. If it exits while you are still working you will be notified, but it is terminated when you give your final response and no notification can follow that — so do not end your turn to wait for it; if you need its result, wait for it before giving your final response. To check interim output, use Read on that file path.
+Session cwd remains <repo>; directory changes made by the backgrounded command do not apply to subsequent commands.
+
+### 2026-10-09T17:12:03.084Z
+$ S=<scratchpad>; grep "^CD-04 pessoas" $S/probe2.log | python3 -c "
+import sys,json; l=sys.stdin.read(); j=l.split(' :: ',1)[1]
+" 2>/dev/null; grep "^CD-04 pessoas" $S/probe2.log | grep -o '"Habilitação": "[^"]*"' | sort | uniq -c; cd <sp-tabr>/tools/prototipo/v37/gen37 && grep -n "irrLst(r,'pend',irrPend(sel),'chip'); irrLst(r,'avs',av)" areas/irrigacao.py | cut -c1-60; grep -n "Encerrada automaticamente" irrigacao_estado.js | head -3 | cut -c1-200
+      1 "Habilitação": "CREA"
+      4 "Habilitação": "NR-31"
+357:    r.p.etapa=[{k:'chip',t:et,c:IRR_COR[et]||'gray'}]; r
+489:  if (et === 'Encerradas' && o.conf) out.push({ t: o.conf.st === 'Automática' ? 'Encerrada automaticamente' : 'Hidrômetro prevaleceu', c: 'gray', mut: true });
+
+### 2026-10-09T17:13:20.486Z
+$ cat <scratchpad>/regress.log 2>/dev/null | cut -c1-300; S=<scratchpad>; cat > $S/probe4.py <<'EOF'
+  [corpo do heredoc omitido]
+=== irtest.py
+== rv
+antes Carlos Campo 1 Operar trator, Operar plantadeira CLT — R$ 38,00/h NR-31 31/08/2027 Da equipe Com login Alocável
+campos ['fx_g_pes_nome', 'fx_g_pes_equipe', '', '', '', '', '', '', '', '', '', '', 'fx_g_pes_v31', 'fx_g_pes_vinc', 'fx_g_pes_adm', 'fx_g_pes_ate', 'fx_g_pes_cal', 'fx_g_pes_custo', 'fx_g_pes_acesso', 'fx_g_pes_sit']
+toast Salvo: Carlos · não alocável em O.S. até resolver contrato encerrado em 01/09/2026.
+depois Carlos Campo 1 Operar trator, Operar plantadeira CLT 01/09/2026 R$ 38,00/h NR-31 31/08/2027 Da equipe Com login Não alocável em O.S.
+transp linhas []
+topo ['Papéis: Cliente', 'Nenhuma linha corresponde aos filtros · Limpar filtros']
+menu Papéis [['Transportador 2', False]]
+== base
+antes Carlos Campo 1 Operar trator · Operar plantadeira CLT R$ 38,00/h ● Alocável · NR-31 até 31/08/2027
+campos ['fx_g_pes_nome', 'fx_g_pes_equipe', '', '', '', '', '', '', '', '', '', '', 'fx_g_pes_v31', 'fx_g_pes_vinc', 'fx_g_pes_adm', 'fx_g_pes_ate', 'fx_g_pes_cal', 'fx_g_pes_custo', 'fx_g_pes_acesso', 'fx_g_pes_sit']
+toast Salvo: Carlos · não alocável em O.S. até resolver contrato encerrado em 01/09/2026.
+depois Carlos Campo 1 Operar trator · Operar plantadeira CLT até 01/09/2026 R$ 38,00/h Não alocável em O.S. contrato encerrado em 01/09/2026
+transp linhas []
+topo ['Papéis: Cliente', 'Nenhuma linha corresponde aos filtros · Limpar filtros']
+menu Papéis [['Cliente 0', True], ['Transportador 2', False]]
+
+### 2026-10-09T17:20:45.958Z
+$ S=<scratchpad>; env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 900 python3 $S/probe5.py $S/rv/tools/prototipo/v37/gen37 2>&1 | tail -5; cat $S/regress.log | cut -c1-300
+irrGet global? False
+estado gravado? True
+v 2 EST-SR un mm/dia · mm · km/h
+estação com estado salvo v2 anterior: ET₀, Chuva, Vento | mm/dia, mm
+=== irtest.py
+=== irr_fluxo_test.py
+=== os_irrig_filtro_test.py
+RESULTADO: 15 ok · 0 falhas
+=== map_irrig_filtro_test.py
+
+### 2026-10-09T17:23:09.787Z
+$ S=<scratchpad>; cd $S/rv/tools/prototipo/v37/gen37 && for t in irtest.py irr_fluxo_test.py map_irrig_filtro_test.py; do echo "=== $t"; env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 900 python3 $t 2>&1 | tail -3; done > $S/regress2.log 2>&1; cat $S/regress2.log | cut -c1-400
+Command running in background with ID: b11imqs8d. Output is being written to: <sessao-tmp>/tasks/b11imqs8d.output. If it exits while you are still working you will be notified, but it is terminated when you give your final response and no notification can follow that — so do not end your turn to wait for it; if you need its result, wait for it before giving your final response. To check interim output, use Read on that file path.
+Session cwd remains <repo>; directory changes made by the backgrounded command do not apply to subsequent commands.
+
+### 2026-10-09T17:23:33.435Z
+$ S=<scratchpad>; env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 900 python3 $S/probe6.py $S/rv/tools/prototipo/v37/gen37 2>&1 | tail -7 | cut -c1-400; echo; cat $S/regress.log | cut -c1-300; echo; cat $S/regress2.log 2>/dev/null | cut -c1-300
+antes ['Novo', '—']
+clicou False
+dialogo 
+toast 
+colunas ['Dimensão › código', 'Nome', 'Origem', 'Início da vigência', 'Fim da vigência', 'Vínculos', 'Conta no ERP (Sankhya)', 'TOP no ERP', 'Situação', 'No rascunho']
+depois No rascunho ['Novo', '—']
+
+=== irtest.py
+=== irr_fluxo_test.py
+=== os_irrig_filtro_test.py
+RESULTADO: 15 ok · 0 falhas
+=== map_irrig_filtro_test.py
+=== cadp_fix_test.py
+
+=== irtest.py
+erros JS: nenhum
+
+26 de 26 verificações OK
+=== irr_fluxo_test.py
+
+### 2026-10-09T17:27:04.754Z
+$ S=<scratchpad>; python3 - <<'EOF'
+  [corpo do heredoc omitido]
+antes ['Novo', '—']
+clicou True
+dialogo 
+conf ['Cadastros\n▾', 'Agrícola\n▸', 'Produção\n▸', 'Manutenção\n▸', 'Suprimentos\n▸', 'Configurações\n▸', '', '1\ntradução pendente\nPRJ-PIVO3 · Expansão pivô 3 · investimento\nTraduzir no ERP ›', 'Todos 23', 'No rascunho v7 0', 'A resolver 1', 'Importar do ERP', 'Cadastrar código', 'Recolher tudo', 'Dimensão › código\n⇅', '▾', 'Nome\n⇅', '▾', 'Origem\n⇅', '▾', 'Início da vigência\n⇅', '▾', 'Fim da vigência\n⇅', '▾', 'Vínculos\n⇅', '▾', 'Conta no ERP (Sankhya)\n⇅', '▾', 'TOP no ERP\n⇅', '▾', 'Situação\n⇅', '▾', 'No rasc
+toast Simulação: estrutura v6 publicada para novos lançamentos com 22 de 23 códigos · v5 preservada · fora até ter conta: PRJ-PIVO3.
+colunas ['Dimensão › código', 'Nome', 'Origem', 'Início da vigência', 'Fim da vigência', 'Vínculos', 'Conta no ERP (Sankhya)', 'TOP no ERP', 'Situação', 'No rascunho']
+depois No rascunho ['—']
+
+### 2026-10-09T17:32:07.444Z
+$ S=<scratchpad>; cd $S/rv/tools/prototipo/v37/gen37 && for t in tabelas_cad_test.py tabelas_irr_test.py; do echo "=== $t"; env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 1200 python3 $t 2>&1 | grep -E "FALHOU|RESULTADO" | cut -c1-300; done > $S/regress3.log 2>&1; cat $S/regress3.log
+Command running in background with ID: blttta76h. Output is being written to: <sessao-tmp>/tasks/blttta76h.output. If it exits while you are still working you will be notified, but it is terminated when you give your final response and no notification can follow that — so do not end your turn to wait for it; if you need its result, wait for it before giving your final response. To check interim output, use Read on that file path.
+Session cwd remains <repo>; directory changes made by the backgrounded command do not apply to subsequent commands.
+
+### 2026-10-09T17:32:20.082Z
+$ S=<scratchpad>; cat > $S/probe7.py <<'EOF'
+  [corpo do heredoc omitido]
+== rv
+[['Packing linha 1', 'rgb(21, 32, 26)'], ['esteira + balança', 'rgb(21, 32, 26)'], ['Beneficiamento', 'rgb(21, 32, 26)'], ['2.400 kg/h', 'rgb(21, 32, 26)'], ['—', 'rgb(21, 32, 26)/rgb(101, 115, 106)'], ['R$ 120,00/h', 'rgb(21, 32, 26)'], ['—', 'rgb(21, 32, 26)/rgb(101, 115, 106)'], ['01/10/2026', 'rgb(21, 32, 26)/rgb(138, 90, 0)'], ['Apta', 'rgb(21, 32, 26)/rgb(30, 122, 76)']]
+== base
+[['Packing linha 1 esteira + balança', 'rgb(21, 32, 26)/rgb(101, 115, 106)'], ['Beneficiamento', 'rgb(21, 32, 26)'], ['2.400 kg/h', 'rgb(21, 32, 26)'], ['R$ 120,00/h', 'rgb(21, 32, 26)'], ['—', 'rgb(21, 32, 26)/rgb(101, 115, 106)'], ['● Apta · calibrar até 01/10/2026', 'rgb(21, 32, 26)/rgb(30, 122, 76)/rgb(101, 115, 106)']]

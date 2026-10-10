@@ -1,0 +1,11 @@
+$ env CHROME_BIN=<chrome> flock /tmp/cdp9333.lock env CDP_GL=1 timeout 1200 python3 componentes_test.py rotacao
+OK    4 rotação com rascunho (IR-02 · Programar irrigação) · painel continua aberto com o texto/escolha feita, sem recarregar; Fechar e Salvar alcançáveis em pé e deitado; foco no campo 
+OK    5 rotação/redimensionamento · safra escolhida na O.S. continua; CMP mantém a etapa 2 e o foco no avanço da área de ações ("Solicitar cotações ›") em 1440 → 390 → 1440, com "Etapa 2 de 6" na faixa compacta (UX-ACAO-UNICA) 
+OK    6 O.S. · painel da ordem dentro da tela em 360×800, 800×360 e zoom 200 %, com Fechar e ação principal alcançáveis 
+OK    7 App de campo · raiz com a largura do aparelho (até 720 px), título inteiro e comando principal visível sem rolar (360×800, 800×360, 768×1024) 
+     (informativo, pendência inicio.py) IN-04 360×800 hoje: {'mapaW': 262, 'mapaH': 496, 'painelW': 262, 'botoesFora': 0}
+OK    8 mapa IN-04 · proposta para inicio.py validada por injeção em 360×800: mapa ≥ 250 px de largura e ≥ 280 px de altura, painel do talhão na largura da tela com todos os botões dentro 
+OK    9 sem erro de JS nas telas visitadas (matriz e rotação) 
+
+RESULTADO: 6 ok · 0 falhas (rotacao)
+[exit 0]

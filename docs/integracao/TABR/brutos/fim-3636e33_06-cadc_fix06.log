@@ -1,0 +1,16 @@
+$ env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 900 python3 cadc_test.py fix06
+OK  abre com pendências no selo amarelo · ['Cadastros › Produtos, unidades e locais Produtos, unidades e locais 2 itens sem preço · 1 item sem embalagem', 'yellow']
+OK  Calcário: campo de preço abre vazio e o item salva sem preço, com Galpão 2 · ['', '', 'Salvo: Calcário dolomítico · t · granel · sem preço de referência.', 'Calcário dolomítico 3.1.01 · Fertilizantes e corretivos t granel Só lote — — Sem preço Informar preço ›']
+OK  semente do CD-02: preço abre vazio; só a embalagem é pedida · ['', 'Corrija os campos destacados; o que você preencheu foi mantido. | Informe quanto cabe em 1 saco (em kg).']
+OK  semente salva com embalagem e preço · ['', 'Semente de soja 64 Z 3.1.03 · Sementes e inoculantes kg saco de 40 kg Lote e validade R$ 12,50/kg 20/09/2026 Em dia']
+OK  Cadastro completo no selo verde · ['Cadastros › Produtos, unidades e locais Produtos, unidades e locais Cadastro completo', 'green']
+OK  grupo renomeado: o formulário mostra Fertilizantes minerais e o item é salvo nele, com o aviso próprio · ['Fertilizantes minerais', '', 'Salvo: Sulfato de amônio · kg · saco de 50 kg · sem preço de referência.', '▾ Fertilizantes minerais 12 itens 3.1.01 · Fertilizantes e corretivos', '']
+OK  local novo aparece em Local padrão do item · ['Galpão 1', 'Galpão 2', 'Almox. defensivos', 'Câmara fria', 'Tanque Sede', 'Silo 01', 'Armazém Sede', 'Packing', 'Galpão Boa Vista', 'Almox. Lagoa Grande', 'Galpão de frutas Lagoa Grande', 'Galpão BV 2']
+OK  renomear o local leva os itens junto e o local segue protegido contra exclusão (causa no painel) · ['Galpão 1 Santa Rita Galpão — 1', 'Galpão Norte Santa Rita Galpão — 1', 'pão\nAlmoxarifado\nCâmara fria\nTanque\nSilo\nArmazém\nExcluir local\nNão dá para excluir: tem itens com este local padrão; troque o local deles antes.\nCancelar\nSalvar']
+OK  NPK 20-05-20 (em Galpão 1) passa a Galpão Norte e a lista não oferece mais Galpão 1 · ['Galpão Norte', ['Galpão Norte', 'Galpão 2', 'Almox. defensivos', 'Câmara fria', 'Tanque Sede', 'Silo 01', 'Armazém Sede', 'Packing', 'Galpão Boa Vista', 'Almox. Lagoa Grande', 'Galpão de frutas Lagoa Grande', 'Galpão BV 2']]
+OK  Local padrão do item novo continua Galpão 2 · Galpão 2
+OK  com item e local novos, a tabela de locais cabe inteira no artboard (folga ≥ 20 px) · 324
+OK  Galpão 2 excluído: a lista do item novo mostra "Escolha…" e o salvar pede o local · [None, '', 'Escolha…', 'Corrija os campos destacados; o que você preencheu foi mantido. | Informe local padrão.', []]
+OK  nenhum erro de JS
+RESULTADO: OK 13/13
+[exit 0]
