@@ -1,0 +1,14 @@
+0 OB-0113: ['Liberadas', 1169]
+1 criar ok OB-0114 criada (A liberar): PACK-FRU v3 · L39-131 · 24.120 kg · 2.292 un de caixa (sugestão confirma
+2 impedimento da OB-0114: IMPEDIMENTOS DA LIBERAÇÃO Caixa de mamão Formosa 10 kg: 600 un disponíveis para 2.292 un · Estoque resolve: Rui (almoxarife) ou Paula (almoxarife) Faltam 1.692 un e não há nota de caixas a conferir nem sobra em custódia: a compra de caixas entra no BEN-2. Sem caixa, Cancelar a ordem (nada foi reservado). Ver saldo de caixas no Estoque › BALANÇO DE MASSA Entrada a processar 24.120 kg 1 lote Diferença e recuperação apu
+3 atalho NÃO ACHEI: Receber a devolução da OB-0113 no Estoque BEN.dc.html
+RESULTADO: OK 0/0
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/integ-ver/BEN-c1-B/probe/p9_sobra.py", line 14, in <module>
+    est_secao(3); rw = J("ROWTXT('REQ-041')") or ''; P('3 Receba devoluções · REQ-041:', rw[:220])
+    ^^^^^^^^^^^^
+  File "ben_fluxo_test_head", line 140, in est_secao
+  File "/home/user/sp-proto/tools/prototipo/v37/gen37/cdp.py", line 95, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught

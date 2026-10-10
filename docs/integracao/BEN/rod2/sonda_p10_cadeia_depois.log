@@ -1,0 +1,13 @@
+0 estado: ['A liberar', 'Liberadas'] | CX26-01 fís 600 res 0 | CX26-02 fís 31 res 0 | REQ-041(OB-0113 CX26-02) sol 1169 ent 1169 cust 1169 dev 0
+1 OB-0112 (Igor) impedimentos: IMPEDIMENTOS DA LIBERAÇÃO Caixa de mamão Formosa 10 kg: 600 un disponíveis para 881 un · Estoque resolve: Rui (almoxarife) ou Paula (almoxarife) Faltam 281 un e não há nota de caixas a conferir nem sobra em custódia: a compra de caixas entra no BEN-2. Sem caixa, Cancelar a ordem (nada foi reservado). Ver saldo de caixas no Estoque › BALANÇO DE MASSA Entrada 
+2 atalho NÃO ACHEI: Receber a devolução da OB-0113 no Estoque BEN.dc.html#OB-0112
+RESULTADO: OK 0/0
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/integ-ver/BEN-c1-B/probe/p10_cadeia.py", line 18, in <module>
+    est_secao(3); P('2 linha REQ-041:', (J("ROWTXT('REQ-041')") or '')[:200])
+    ^^^^^^^^^^^^
+  File "ben_fluxo_test_head", line 140, in est_secao
+  File "/home/user/sp-proto/tools/prototipo/v37/gen37/cdp.py", line 95, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught
