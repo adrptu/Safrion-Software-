@@ -48,7 +48,7 @@ ok('K-U09a café da roça: 2.400 L/ha; com o fruto pesado, 1.200 kg/ha = 1,2 t/h
    taxa(L, ha) == 2400 and taxa(kgf, ha) == 1200 and em(taxa(kgf, ha), 60) == 20)
 ok('K-U09b meta do C1 38 sc/ha de café beneficiado = 2.280 kg/ha; nunca comparada com o fruto', D(38) * 60 == 2280)
 # K-U10 · zero, pendência e não colhido
-ok('K-U10 0 kg em 10 ha = 0 kg/ha (zero medido); 5.000 kg sem área = pendência (sem divisão)', taxa(0, 10) == 0)
+ok('K-U10 0 kg em 10 ha = "0,00 kg/ha" (zero medido, 2 casas fixas); 5.000 kg sem área = pendência (sem divisão)', taxa(0, 10) == 0 and tela(taxa(0, 10)) == '0,00')
 # K-U11 · 20 trocas repetidas: a tela parte sempre da mesma base; nenhum texto muda
 base = taxa(60320, '62.79'); vistos = {}
 for i in range(20):
@@ -56,4 +56,17 @@ for i in range(20):
         t = tela(em(base, ms)); vistos.setdefault(u, t); 
         if vistos[u] != t: FALHAS.append('K-U11 ' + u)
 ok('K-U11 20 trocas kg → t → sc60 → cx10: textos idênticos a cada volta', not any(f.startswith('K-U11') for f in FALHAS), vistos)
+# K-U12 · rascunho "pela meta" pelo conversor = o de hoje (U11c): Pivô 2, 37,75 ha × 50 t/ha/ano ÷ 52 semanas
+hoje = q6(D('37.75') * 50 * 1000 / 52); conv = q6(D('37.75') * (D(50) * 1000) / 52)
+ok('K-U12 rascunho pela meta pelo conversor: 36.298,076923 kg/semana nos dois caminhos (U11c)', hoje == conv == D('36298.076923'), (hoje, conv))
+# K-U13 · meta com até 2 casas em toda tela (revisão RC-10): 64 sc/ha em t/ha = 3,84; com 1 casa (COLH de hoje) daria 3,8
+def tela_t(x, casas):
+    t = tela(x, casas); return t.rstrip('0').rstrip(',') if ',' in t else t
+mt = em(D(64) * 60, 1000)
+ok('K-U13 meta do T1-A em t/ha: "3,84" com até 2 casas (1 casa daria "3,8"); 3,85 t/ha em sc/ha = "64,17" (1 casa daria "64,2")',
+   tela_t(mt, 2) == '3,84' and tela_t(mt, 1) == '3,8' and tela_t(em(D('3.85') * 1000, 60), 2) == '64,17' and tela_t(em(D('3.85') * 1000, 60), 1) == '64,2')
+# K-U14 · um arredondamento só (PRD 10.0, revisão RC-14): base ÷ (área × massa) dá o mesmo texto da semente que o caminho em dois passos
+um = lambda kg, ha, ms: q6(D(kg) / (D(ha) * D(ms)))
+ok('K-U14 Pivô 6 e Pivô 19 com um arredondamento: textos iguais aos da tabela (0,96 · 16,01 · 96,07 · 0,48 · 8,08 · 48,49)',
+   [tela(um(60320, '62.79', m)) for m in (1000, 60, 10)] == ['0,96', '16,01', '96,07'] and [tela(um(36420, '75.11', m)) for m in (1000, 60, 10)] == ['0,48', '8,08', '48,49'])
 print('FALHAS:', len(FALHAS))
