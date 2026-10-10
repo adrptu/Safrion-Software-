@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Análise de solo na Ordem de Serviço (SOLO-01 · docs/analise-solo/ESPECIFICACAO.md §3.5 e §8) · teste de navegador, desktop e 390 px.
 AC-SOLO-14: "Usar 1.800" no Planejar safra → OS-0502 em A liberar com o selo "Plano mudou pela análise", Kanban com 5 fases, primário
-"Ajustar antes de liberar" (um só) e secundário "Liberar com 2.000 kg/ha"; ajustar abre com 1.800; "Salvar e liberar" recusa pelo
+"Ajustar antes de liberar" (um só), o bloqueio de estoque visível e sem "Liberar com 2.000 kg/ha" (revisão A6); ajustar abre com 1.800; "Salvar e liberar" recusa pelo
 estoque; "Salvar ajuste" grava a v2 e o selo some; com o lote elevado Ana aprova e libera (CMD-42 + CMD-06 com 1.800); nenhuma REC/DIA nova.
 AC-SOLO-16: Nova ordem do T1-A com o uso da análise → KCl 150 kg/ha × 160 ha = 24.000 kg, origem "pela análise · LAU-2061".
 AC-SOLO-20: Nova ordem da Calagem incluída no T2 → Calcário dolomítico (Corretivos) 1,2 t/ha × 298 ha = 357,6 t; a regra legal não trava;
@@ -66,7 +66,10 @@ try:
         t.chk('AC-SOLO-14 OS-0502 em A liberar com o selo "Plano mudou pela análise · 1.800 kg/ha (O.S. 2.000)"', 'Plano mudou pela análise · 1.800 kg/ha (O.S. 2.000)' in p and 'A liberar' in p, p[:500])
         kb = J("(()=>{ const hs=[...document.querySelectorAll('main span')].map(s=>N(s.innerText)).filter(x=>['A LIBERAR','LIBERADAS','EM EXECUÇÃO','EM CONFERÊNCIA','ENCERRADAS','A liberar','Liberadas','Em execução','Em conferência','Encerradas'].indexOf(x)>=0); return [...new Set(hs.map(x=>x.toUpperCase()))]; })()")
         t.chk('Kanban com as 5 fases (sem coluna nova)', kb == ['A LIBERAR', 'LIBERADAS', 'EM EXECUÇÃO', 'EM CONFERÊNCIA', 'ENCERRADAS'], kb)
-        t.chk('AC-SOLO-14 primário "Ajustar antes de liberar" (um só) e secundário "Liberar com 2.000 kg/ha"', J("PRIMS()") == ['Ajustar antes de liberar'] and 'Liberar com 2.000 kg/ha' in p, [J("PRIMS()"), p[p.find('PRÓXIMO'):][:400]])
+        # revisão A6 (10/10): o lote LG26-03 (60.000 kg) não cobre os 96.940 kg da O.S.; o bloqueio de estoque fica visível e "Liberar com 2.000" sai
+        # (o comando recusaria). Com estoque que cobre, o secundário volta: solo_rev_test.py (A6)
+        t.chk('AC-SOLO-14 primário "Ajustar antes de liberar" (um só); com o estoque curto, "Liberar bloqueado: saldo insuficiente" visível e sem "Liberar com 2.000 kg/ha"',
+              J("PRIMS()") == ['Ajustar antes de liberar'] and 'Liberar bloqueado: saldo insuficiente de Calcário dolomítico filler: 60.000 kg disponíveis' in p and 'Liberar com 2.000 kg/ha' not in p, [J("PRIMS()"), p[p.find('PRÓXIMO'):][:400]])
         t.chk('AC-SOLO-14 a origem da dose aparece na linha do insumo (padrão do plano v1)', 'padrão do plano v1' in p, p[p.find('INSUMOS'):][:300])
         clk('Ajustar antes de liberar', True); p = pan()
         d0 = J("(document.getElementById('aj_d0')||{}).value")

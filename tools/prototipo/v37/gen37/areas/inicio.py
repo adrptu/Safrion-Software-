@@ -825,7 +825,8 @@ function nxOf(self,o,mo){ const PF=g2perfil(); const pb=osProx(o,PF); const P=pb
     ins:(o.etapa==='A liberar'&&(o.ins||[]).length)?('Produtos: '+o.ins.map(x=>x.p+' '+nd(x.dose)+' '+x.un+'/ha').join(' · ')):'',hasIns:o.etapa==='A liberar'&&(o.ins||[]).length>0};
   // ação da ordem no passo: 'lib' = Ajustar antes de liberar (o primário é o Liberar do núcleo) · 'op' só com o passo impedido, quando leva a outro destino que o do impedimento
   const a=mo&&mo.act; if(a&&((a.k==='lib'&&g2papel(PF,'agronomo'))||(a.k==='op'&&b&&b.h&&a.h!==b.h))){   /* ajustar antes de liberar: só o agrônomo */ N.hasLib=true; N.libt=a.t; N.libh=a.h==='OS.dc.html'?'OS.dc.html#'+o.id:a.h; if(a.k==='lib') N.libh='OS.dc.html#'+o.id+':ajustar'; }
-  if(!b&&P.btn){ N.isBtn=true; N.btn=P.btn; N.go=()=>{ if(P.fn==='apontar'){ const prox=(o.ap||[]).find(x=>x.st==='Previsto'); const mx=Math.max(0,(o.saldo||0)-osApPend(o));
+  if(P.fn==='ajustar'){ N.hasLib=true; N.libt=P.btn; N.libh='OS.dc.html#'+o.id+':ajustar'; }   /* SOLO-01 · revisão A6: plano mudado pela análise, o ajuste abre na O.S. (o Mapa não tem o formulário) */
+  else if(!b&&P.btn){ N.isBtn=true; N.btn=P.btn; N.go=()=>{ if(P.fn==='apontar'){ const prox=(o.ap||[]).find(x=>x.st==='Previsto'); const mx=Math.max(0,(o.saldo||0)-osApPend(o));
       self.setState({mpa:{id:o.id,fn:'apontar',d:CEN_DIA_OP,ha:String(Math.min(mx,prox?prox.ha:mx)).replace('.',','),chave:'W-'+o.id+'-'+Date.now(),err:''}}); } else self.setState({mpa:{id:o.id,fn:P.fn,err:''}}); }; }
   if(!b&&o.dono){ N.dono='Pendência com '+o.dono+(o.prazo?' · '+o.prazo:''); N.hasDono=true; }
   if(pa&&['liberar','iniciar','conferencia','encerrar'].indexOf(pa.fn)>=0&&!(pa.fn==='liberar'&&b&&b.papel)){ N.conf=true;   /* aberta por outro perfil: não aparece (revisão do CTL-3, achado 1) */ N.ct=mapCt(o,pa.fn); N.cbtn={liberar:'Confirmar liberação',iniciar:'Confirmar início',conferencia:'Confirmar envio',encerrar:'Confirmar encerramento'}[pa.fn];

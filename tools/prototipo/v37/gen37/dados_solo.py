@@ -85,6 +85,8 @@ AGUA = [
 ]
 METODOS_AGUA = ['Curva de retenção (laboratório)', 'Anel volumétrico (campo + estufa)', 'Capacidade de campo no campo (inundação e drenagem)']
 UN_AGUA = ['% volume', 'mm/cm']
+# quem mede (revisão A9, S4): pessoas do cadastro (CD-04, dados_cad.PESSOAS) das equipes de Agronomia e Irrigação; a agrônoma no texto da semente
+RESP_AGUA = ['Ana (agrônoma)'] + [f"{p['nome']} ({p['funcao'].lower()})" for p in DC.PESSOAS if p['equipe'] in ('Agronomia', 'Irrigação') and p['nome'] != 'Ana']
 
 
 def _talhao(c):

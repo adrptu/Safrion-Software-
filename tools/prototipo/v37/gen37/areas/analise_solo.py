@@ -74,7 +74,7 @@ function soChs(c){ const k=G2C[c]||G2C.gray; return 'display:inline-flex;align-i
 function soDot(c){ const k=G2C[c]||G2C.gray; return 'width:6px;height:6px;border-radius:999px;flex-shrink:0;background:'+k[0]+';'; }
 const SOLO_SITC={'Validado':'green','Aguardando validação':'yellow','Inconsistente':'red','Vencido':'gray','Substituído':'gray'};
 function soDiaCol(r,k,iso){ const ok=/^\d{4}-\d{2}-\d{2}/.test(String(iso||'')); r.v[k]=ok?Number(String(iso).slice(0,10).replace(/-/g,'')):''; const t=ok?soloBr(iso):'—'; r.p[k]=[{k:'txt',t}]; r.s[k]=ok?t:''; }
-function soSugTxt(s){ return s.tipo==='retirar'?'retirar ('+(s.motivo||'pela análise')+')':(s.tipo==='incluir'?'incluir '+soloDoseTxt(s.sug,s.un):soloDoseTxt(s.sug,s.un)); }
+function soSugTxt(s){ return s.tipo==='retirar'?(s.incl0?'retirar a inclusão ('+(s.motivo||'pela análise')+')':'retirar ('+(s.motivo||'pela análise')+')'):(s.tipo==='incluir'?'incluir '+soloDoseTxt(s.sug,s.un):soloDoseTxt(s.sug,s.un)+(s.desf?' (padrão do plano)':'')); }
 function soEfeito(s,cu){ const out=[]; const area=Number((cu&&cu.area)||0);
   if(s.tipo==='retirar') out.push('Dose: '+soloDoseTxt(s.ef===null||s.ef==='-'?s.padrao:s.ef,s.un)+' → retirar'+(s.unico?' · a '+s.atv.nome+' sai do '+((cu&&cu.local)||'')+' (único insumo)':''));
   else out.push('Dose: '+(s.ef===null||s.ef==='-'?(s.tipo==='incluir'?'—':soloDoseTxt(s.padrao,s.un)):soloDoseTxt(s.ef,s.un))+' → '+soloDoseTxt(s.sug,s.un)+(s.padrao!==null&&s.padrao!==undefined&&s.tipo!=='incluir'?' (padrão '+soloDoseTxt(s.padrao,s.un)+')':''));
@@ -162,7 +162,8 @@ function soLdVals(self,v){ const l=self.__l; v.ld_open=!!l; if(!l) return; const
     {l:'Validação',v:l.por?(l.por+' em '+soloBr(l.em)):'—'},{l:'Validade para sugerir',v:l.tipo==='solo'?'até '+soloBr(l.val):'—'}];
   v.ld_arq=l.arq||'laudo.pdf'; const nu=soUsoCont(u); const saf=soSafraDe(u);
   let next='', pa=null, pb=null;
-  if(l.sit==='Aguardando validação'){ next=(g2papel(g2perfil(),'agronomo')?'':'Decisão de '+g2quem('agronomo')+'. ')+'Confira o extraído com o original e valide. O OCR nunca valida.'; pb={t:'Validar laudo',go:()=>soValidar(self,l.id)}; }
+  if(l.sit==='Aguardando validação'){ const ag=g2papel(g2perfil(),'agronomo');   /* revisão A8: sem o papel, nada de primário; a tela diz quem decide (o comando recusa igual) */
+    next=(ag?'':'Decisão de '+g2quem('agronomo')+': só o agrônomo valida. ')+'Confira o extraído com o original e valide. O OCR nunca valida.'; if(ag) pb={t:'Validar laudo',go:()=>soValidar(self,l.id)}; }
   else if(l.sit==='Inconsistente') next='Corrija a unidade de '+l.motivo.replace(/ sem unidade$/,'')+' na linha do extraído: o laudo volta a aguardar validação.';
   else if(l.sit==='Validado'&&l.tipo==='folha') next='Laudo foliar: consulta e correção de unidade; sem regra de dose.';
   else if(l.sit==='Validado'&&nu.n){ next=nu.n+(nu.n>1?' sugestões':' sugestão')+' no plano'+(nu.e?' · '+nu.e+' em uso':'')+'. Use no Planejar safra; ignorar não pede motivo.'; pa={t:'Ver no plano',h:soPlanoHref(saf)}; }
@@ -271,7 +272,7 @@ def build():
                                   dict(k='z',l='Profundidade efetiva das raízes',t='num',req=True,min=1,max=200,u='cm'),
                                   dict(k='metv',l='Método',t='sel',opts=DS.METODOS_AGUA,req=True),dict(k='un',l='Unidade',t='sel',opts=DS.UN_AGUA,req=True,**{'def':'% volume'}),
                                   dict(k='ccv',l='Capacidade de campo (CC)',t='num',req=True,min=0,max=100),dict(k='pmpv',l='Ponto de murcha permanente (PMP)',t='num',min=0,max=100,help='Sem PMP medido, a CAD fica "não calculável".'),
-                                  dict(k='fontev',l='Fonte ou laboratório',t='sel',opts=DS.LABS+['Equipe da fazenda'],req=True),dict(k='resp',l='Responsável',t='sel',opts=['Ana (agrônoma)'],req=True,**{'def':'Ana (agrônoma)'}),
+                                  dict(k='fontev',l='Fonte ou laboratório',t='sel',opts=DS.LABS+['Equipe da fazenda'],req=True),dict(k='resp',l='Responsável',t='sel',opts=DS.RESP_AGUA,req=True,**{'def':'Ana (agrônoma)'}),
                                   dict(k='cadT',l='Água disponível (CAD)',ro=True,live=True,help='CAD = (CC − PMP) × profundidade efetiva; unidades explícitas.')]),
                 add='Registrar medição',gid='g_agua',total=False,so=dict(k='data',d=True))
     g_ext=grid([dict(k='atr',l='Atributo',w=70),dict(k='val',l='Valor',w=150),dict(k='met',l='Método · extrator',w=140),dict(k='ld',l='Qualificador · LD',w=90),dict(k='orig',l='Origem',w=90)],[],

@@ -87,9 +87,12 @@ try:
         d = J("(()=>{ const x=Object.assign(__solo.exemplo(),{tal:'T3',area:96}); const a=__solo.registrar(x,'K-DUP-1'); const b=__solo.registrar(x,'K-DUP-1'); return [a.id||a.erro, b.msg||b.erro, Object.keys(__solo.get().laudos).length]; })()")
         t.chk('R13 duplo clique (mesma chave): o segundo devolve "Já registrado" e não cria outro laudo', d and d[0] == 'LAU-2074' and str(d[1]).startswith('Já registrado') and d[2] == 2, d)
         # Caio não valida; Ana valida
+        # revisão A8 (10/10): sem o papel de agrônomo o painel não oferece "Validar laudo" (o clique só gerava a recusa); diz quem decide.
+        # A recusa do comando para o Caio continua coberta no solo_unit_test (AC-SOLO-06 "Caio não valida")
         ir('AG-02.dc.html#LAU-2073', perfil='Caio'); time.sleep(.4); p = pan()
-        clk('Validar laudo', 'aside[role=dialog]'); a = alert()
-        t.chk('AC-SOLO-06 Caio não valida ("decisão de Ana (agrônoma)"); continua Aguardando validação', 'decisão de Ana (agrônoma)' in a and 'Aguardando validação' in pan(), [a, p[:200]])
+        bt = J("[...document.querySelectorAll('aside[role=dialog] button')].filter(VIS).map(b=>N(b.innerText))") or []
+        t.chk('AC-SOLO-06 Caio: painel sem "Validar laudo" e com "Decisão de Ana (agrônoma): só o agrônomo valida"; continua Aguardando validação',
+              'Validar laudo' not in bt and 'Decisão de Ana (agrônoma): só o agrônomo valida' in p and 'Aguardando validação' in p, [bt, p[:300]])
         ir('AG-02.dc.html#LAU-2073', perfil='Ana'); time.sleep(.4)
         clk('Validar laudo', 'aside[role=dialog]', .7); p = pan()
         t.chk('AC-SOLO-06 Ana valida: Validado e o T7 passa a ter "incluir 0,40 t/ha" disponível no plano', 'LAU-2073 validado por Ana (agrônoma)' in toast() and 'Validado' in p and 'incluir 0,40 t/ha' in p and 'disponível' in p and 'Ver no plano' in p, [toast(), p[-500:]])

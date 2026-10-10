@@ -507,10 +507,9 @@ function osProx(o,PF){
   else if(o.etapa==='Em conferência') P={t:'Confira apontamentos, consumo e sobras e encerre a ordem.',btn:'Conferir e encerrar',fn:'encerrar'};
   else if(o.etapa==='Canceladas') P={t:'Ordem cancelada sem execução: somente consulta.',btn:'',fn:''};
   else P={t:'Ordem encerrada: somente consulta.',btn:'',fn:''};
-  /* SOLO-01 (D-08, A14): com o plano mudado pela análise, o primário é ajustar; liberar com a dose da O.S. fica secundário (decisão do agrônomo) */
-  if(o.etapa==='A liberar'&&temIns&&!o.agua&&o.planoMudou){ const x=o.planoMudou[0];
-    P={t:'O plano mudou pela análise ('+x.ac.laudo+'): '+(x.ac.dose==='-'?'retirar '+x.p:x.p+' '+cenNum(x.ac.dose,4)+' '+x.un+'/ha')+'; a O.S. tem '+cenNum(x.os,4)+' '+x.un+'/ha. O agrônomo ajusta antes de liberar ou libera com a dose da O.S.',
-      btn:'Ajustar antes de liberar',fn:'ajustar',sec:{btn:'Liberar com '+cenNum(x.os,4)+' '+x.un+'/ha',fn:'liberar'}}; }
+  /* SOLO-01 (D-08, A14): com o plano mudado pela análise, o texto diz o que mudou; o primário de ajustar vem depois do impedimento (revisão A6) */
+  const pm=(o.etapa==='A liberar'&&temIns&&!o.agua&&o.planoMudou)?o.planoMudou[0]:null;
+  if(pm) P=Object.assign({},P,{t:'O plano mudou pela análise ('+pm.ac.laudo+'): '+(pm.ac.dose==='-'?'retirar '+pm.p:pm.p+' '+cenNum(pm.ac.dose,4)+' '+pm.un+'/ha')+'; a O.S. tem '+cenNum(pm.os,4)+' '+pm.un+'/ha. O agrônomo ajusta antes de liberar ou libera com a dose da O.S.'});
   // impedimento do próximo passo: do registro (máquina, janela, conflito) ou do cenário (saldo no Estoque; sinal ou sobra no encerramento)
   let b=(o.bloq&&o.bloq.fase===o.etapa&&o.bloq.acao===P.fn)?o.bloq:null;
   if(!b&&P.fn==='liberar'&&!o.agua){ const e=o.libErr||''; if(e) b=o.legal?{acao:'liberar',t:'Liberar bloqueado: '+e,q:OS_AGRO+', ajustando produto ou dose antes de liberar.',legal:true}:o.total0?{acao:'liberar',t:'Liberar bloqueado: '+e.charAt(0).toLowerCase()+e.slice(1),q:'Ana (agrônoma), ajustando a dose ou a área antes de liberar.',total0:true}
@@ -521,6 +520,12 @@ function osProx(o,PF){
   if(!b&&(P.fn==='liberar'||P.fn==='iniciar')&&o.carB) b=Object.assign({},o.carB,{acao:P.fn});   // carência (MAPA-CARENCIA-LMR-20261003)
   const LP=['agronomo',OS_LIB];   /* CTL-3 · ATOR: sem os dois papéis, a tela diz quem decide; o comando recusa do mesmo jeito */
   if(!b&&P.fn==='liberar'&&!o.agua&&PF&&!g2papel(PF,LP)) b={acao:'liberar',t:'Liberar para execução: decisão de '+g2quem(LP)+'.',q:g2quem('agronomo')+' aprova esta versão e '+g2quem(OS_LIB)+' libera; o perfil '+PF.t+' não tem esses papéis.',tone:'yellow',papel:true};
+  /* SOLO-01 · revisão A6: plano mudado e quem age é agrônomo (ou sem perfil, nos testes) → primário "Ajustar antes de liberar". "Liberar com a dose
+     da O.S." só fica como secundário quando nada impede liberar; o impedimento (estoque, regra legal, carência, total 0, papel) continua visível e
+     não esconde o ajuste (keep). Sem o papel de agrônomo, o passo segue liberar com o impedimento de quem decide. Dano evitado: botão sem efeito e
+     uma liberação oferecida que o comando recusa. */
+  if(pm&&(!PF||g2papel(PF,'agronomo'))){ P={t:P.t,btn:'Ajustar antes de liberar',fn:'ajustar',sec:b?null:{btn:'Liberar com '+cenNum(pm.os,4)+' '+pm.un+'/ha',fn:'liberar'}};
+    if(b) b=Object.assign({},b,{keep:true}); }
   return {P,b}; }
 '''
 JS=r'''
@@ -640,7 +645,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
   // próximo passo por fase e impedimento (osProx, o mesmo do Mapa)
   const pb=osProx(o,PF); const P=pb.P; let b=pb.b;
   v.pan_dono=(!b&&o.dono)?('Pendência com '+o.dono+' · '+o.prazo):''; v.pan_hasDono=!!v.pan_dono;
-  v.pan_pt=P.t; v.pan_pbtn=P.btn; v.pan_hasBtn=!!P.btn&&!b; v.pan_bloq=!!b; v.pan_bt=b?b.t:''; v.pan_bq=b?('Quem resolve: '+b.q):'';
+  v.pan_pt=P.t; v.pan_pbtn=P.btn; v.pan_hasBtn=!!P.btn&&(!b||!!b.keep); v.pan_bloq=!!b; v.pan_bt=b?b.t:''; v.pan_bq=b?('Quem resolve: '+b.q):'';
   v.pan_hasBl=!!(b&&b.h); v.pan_bh=(b&&b.h)||'#'; v.pan_bhl=(b&&b.hl)||'';
   carOsVals(self,v,o,b);   // carência: Rever programação da colheita (MAPA-CARENCIA-LMR-20261003)
   if(v.pan_retLink&&b&&b.h==='EST.dc.html'){ v.pan_retLink=false; v.pan_retT='Fichas de execução'; v.pan_hasRet=v.pan_hasPrep||v.pan_fichas; }  // o impedimento já leva ao Estoque: sem link duplicado
@@ -934,8 +939,11 @@ function EXTRAVALS(self,v){
       const sw=semana?prSem(cur.jan):''; const sn=semana?prSemN(sw):0;   /* R-18: perene de fruta, uma O.S. de colheita por cultivo e semana (com o ano: a safra cruza o ano, revisão A-19) */
       const semDe=(x)=>{ const co=cenGet().ordens[x.id]; return co?prSemDaOS(co):(new RegExp('semana '+sn+'\\b').test(String(x.tipo||''))?sw:''); };
       if(!Object.keys(errs).length){ const k=semana?cur.cult+'|'+sw:cur.cult+'|'+cur.atv;
-        const dup=all.find(x=>x.etapa!=='Canceladas'&&((x.keys||[]).indexOf(k)>=0||(semana&&x.talhao===c.local&&/^Colheita/.test(String(x.tipo||''))&&semDe(x)===sw)));
-        if(dup){ errs.atv='Já existe '+dup.id+(semana?' para a colheita da semana '+sn+' neste talhão.':' para esta atividade neste cultivo.'); dupId=dup.id; } }
+        /* SOLO-01 · revisão A1: calagem ou gessagem incluída pela análise tem uma O.S. por cultivo, de qualquer laudo (cultivo|solo:<laudo>:cal);
+           a do laudo novo não emite outra: ajusta-se a dose na que existe. Dano evitado: corrigir o talhão duas vezes */
+        const tc=(/^solo:[^:]+:(cal|ges)$/.exec(cur.atv)||[])[1]||'';
+        const dup=all.find(x=>x.etapa!=='Canceladas'&&((x.keys||[]).indexOf(k)>=0||(tc&&(x.keys||[]).some(q=>soloKCorr(q,cur.cult,tc)))||(semana&&x.talhao===c.local&&/^Colheita/.test(String(x.tipo||''))&&semDe(x)===sw)));
+        if(dup){ const dk=tc&&(dup.keys||[]).indexOf(k)<0; errs.atv='Já existe '+dup.id+(semana?' para a colheita da semana '+sn+' neste talhão.':(dk?' para a '+(tc==='ges'?'gessagem':'calagem')+' deste cultivo (incluída pelo '+String((dup.keys||[]).find(q=>soloKCorr(q,cur.cult,tc))).split(':')[1]+'): ajuste a dose nela.':' para esta atividade neste cultivo.')); dupId=dup.id; } }
       if(Object.keys(errs).length){ self.setState({nv:Object.assign({},cur,{errs,warn:false,dup:dupId})}); return; }
       const a=atvs.find(x=>x.id===cur.atv); const s=OSD.nova.safs.find(x=>x.id===cur.saf);
       const num=440+all.filter(x=>x.novo).length; const id='OS-0'+num;

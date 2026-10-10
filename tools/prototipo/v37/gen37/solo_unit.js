@@ -155,3 +155,124 @@ const F2 = x => x === null ? null : prFmt(x, 2);
 
 /* ---- unidade de mercado da cultura: a regra não tem constante de saca (A10) ---- */
 ok('A10 solo.js não define massa de saca nem aritmética decimal própria', typeof soloSugestoes === 'function' && !/\b60 ?kg|massa: ?60|BigInt\(/.test(String(soloSugestoes)));
+
+/* ===================== revisão adversarial do SOLO-01 (Codex, HEAD 9c1866c): regressão de A1–A9 e dos mutantes que sobreviviam ===================== */
+const T2_NOVO = (an) => ({ faz: 'Santa Rita', tal: 'T2', prof: '0–20', coleta: '2026-09-21', lab: 'Agrolab', ext: 'Mehlich-1', area: 298,
+  an: an || SOLO0.laudos.find(l => l.id === 'LAU-2063').an.map(a => a.a === 'Ca' ? Object.assign({}, a, { v: '1.00' }) : a) });
+const NOVO_LAU = (c, d, k) => { MUD(c, x => soloRegistrar(x, d, k + '-R', 'Ana')); const id = Object.keys(c.solo.laudos).pop(); MUD(c, x => soloValidar(x, id, k + '-V', 'Ana')); return id; };
+const ATIVOS = (c) => Object.values((c.solo || {}).aceites || {}).filter(a => a.st === 'ativo');
+const OS_COM = (c, id, etapa, keys) => { c.ordens[id] = { id, etapa, ins: [], osc: { novo: { keys } } }; };
+
+/* ---- A1 · calagem incluída com O.S. liberada: o laudo novo não a troca, o comando recusa e a O.S. em A liberar vê a substituta ---- */
+{ const c = NOVO(); const inc = SG(c, 'c3').sug.find(s => s.tipo === 'incluir'); MUD(c, x => soloAceitar(x, { aceitar: [inc] }, 'A1-1', 'Ana'));
+  OS_COM(c, 'OS-0441', 'Liberadas', ['c3|solo:LAU-2063:cal']); const lau = NOVO_LAU(c, T2_NOVO(), 'A1');
+  const s2 = SG(c, 'c3').sug.find(s => s.tipo === 'incluir');
+  ok('A1 laudo novo do T2 com a calagem do LAU-2063 já liberada (OS-0441): a sugestão de outra calagem vem negada pela R11, com o motivo',
+    lau === 'LAU-2073' && s2 && /OS-0441 já liberada \(calagem do LAU-2063\)/.test(s2.nega), s2 && [s2.k, s2.nega]);
+  const r = MUD(c, x => soloAceitar(x, { aceitar: [s2] }, 'A1-2', 'Ana'));
+  ok('A1 o comando recusa a troca mesmo se a tela mandar (nada gravado; a calagem do LAU-2063 continua a única ativa)', /OS-0441 já liberada/.test(r.erro || '') && ATIVOS(c).map(a => a.k).join() === 'c3|solo:LAU-2063:cal|Calcário dolomítico', [r, ATIVOS(c).map(a => a.k)]);
+  const lt = MUD(c, x => soloAceitarLote(x, [s2], 'A1-3', 'Ana')); ok('A1 o lote também recusa a linha (falha sozinha com o motivo)', /OS-0441 já liberada/.test(lt.erro || ''), lt);
+  const d = NOVO(); const i0 = SG(d, 'c3').sug.find(s => s.tipo === 'incluir'); MUD(d, x => soloAceitar(x, { aceitar: [i0] }, 'A1-4', 'Ana'));
+  OS_COM(d, 'OS-0441', 'A liberar', ['c3|solo:LAU-2063:cal']); NOVO_LAU(d, T2_NOVO(), 'A1b'); const s3 = SG(d, 'c3').sug.find(s => s.tipo === 'incluir');
+  const r3 = MUD(d, x => soloAceitar(x, { aceitar: [s3] }, 'A1-5', 'Ana')); const ac = soloAcDaChave(d, 'c3|solo:LAU-2063:cal', 'Calcário dolomítico');
+  ok('A1 com a O.S. da calagem antiga ainda em A liberar: o laudo novo troca a dose (1,32 t/ha) e a O.S. antiga lê a substituta (selo "Plano mudou pela análise")',
+    !r3.erro && s3.sug === 1.32 && !s3.nega && ac && ac.dose === 1.32 && ac.laudo === 'LAU-2073' && d.solo.aceites['c3|solo:LAU-2063:cal|Calcário dolomítico'].st === 'substituída pelo LAU-2073', [r3, ac && [ac.k, ac.dose]]);
+  ok('A1 soloKCorr reconhece a correção do cultivo por tipo (c3 × c30; cal × ges)', typeof soloKCorr === 'function' && soloKCorr('c3|solo:LAU-2063:cal', 'c3', 'cal') && !soloKCorr('c30|solo:LAU-2063:cal', 'c3', 'cal') && !soloKCorr('c3|solo:LAU-2063:ges', 'c3', 'cal') && !soloKCorr('c3|a4', 'c3', 'cal')); }
+
+/* ---- A2 · o comando reconfere o item: laudo substituído ou não validado é recusado; uma inclusão ativa por tipo sem depender do "substitui" ---- */
+{ const c = NOVO(); const velha = SG(c, 'c3').sug.find(s => s.tipo === 'incluir'); const k1 = SG(c, 'c1').sug[0];
+  NOVO_LAU(c, T2_NOVO(), 'A2'); const nova = SG(c, 'c3').sug.find(s => s.tipo === 'incluir'); MUD(c, x => soloAceitar(x, { aceitar: [nova] }, 'A2-1', 'Ana'));
+  const r = MUD(c, x => soloAceitar(x, { aceitar: [velha] }, 'A2-2', 'Ana'));
+  ok('A2 rascunho velho (calagem do LAU-2063, já Substituído) salvo depois: recusado com "a análise mudou … Reabra o painel" e só a calagem do LAU-2073 fica ativa',
+    /a análise mudou: LAU-2063 substituído pelo LAU-2073\. Reabra o painel\. Nada foi gravado/.test(r.erro || '') && ATIVOS(c).map(a => a.k + '=' + a.dose).join() === 'c3|solo:LAU-2073:cal|Calcário dolomítico=1.32', [r, ATIVOS(c).map(a => a.k)]);
+  MUD(c, x => soloCorrigir(x, 'LAU-2061', 'K', '30', 'mg/dm³', 'A2-3', 'Ana')); const r2 = MUD(c, x => soloAceitar(x, { aceitar: [k1] }, 'A2-4', 'Ana'));
+  ok('A2 KCl 150 do LAU-2061 depois de o laudo voltar a Aguardando validação: recusado; o T1-A segue com 120', /LAU-2061 aguardando validação/.test(r2.erro || '') && !c.solo.aceites['c1|a4|KCl 60%'], r2);
+  const lt = MUD(c, x => soloAceitarLote(x, [k1, nova], 'A2-5', 'Ana')); ok('A2 no lote, a linha do laudo não validado falha sozinha com o motivo', /aguardando validação/.test(((lt.neg || [])[0] || {}).motivo || '') && (lt.neg || []).length === 1, lt);
+  const d = NOVO(); const i0 = SG(d, 'c3').sug.find(s => s.tipo === 'incluir'); MUD(d, x => soloAceitar(x, { aceitar: [i0] }, 'A2-6', 'Ana')); NOVO_LAU(d, T2_NOVO(), 'A2b');
+  const sem = Object.assign({}, SG(d, 'c3').sug.find(s => s.tipo === 'incluir'), { substitui: '' }); MUD(d, x => soloAceitar(x, { aceitar: [sem] }, 'A2-7', 'Ana'));
+  const cal = soloAtividades({ id: 'c3', plano: SOLO0.planos['SOJA-AT'] }, {}, d.solo.aceites).atvs.filter(x => soloTipoAtv(x.a) === 'cal');
+  ok('A2 (e mutante MX) nova calagem sem "substitui" na tela: o comando desfaz a anterior do mesmo tipo; uma só calagem no plano (393,36 t, não 750,96 t)',
+    cal.length === 1 && cal[0].a.id === 'solo:LAU-2073:cal' && d.solo.aceites['c3|solo:LAU-2063:cal|Calcário dolomítico'].st === 'substituída pelo LAU-2073' && cenQtd(cal[0].prods[0].dose, 298) === 393.36, cal.map(x => x.a.id)); }
+
+/* ---- A3 · R22 também para inclusão e retirada: laudo novo que dispensa calagem e pede K ---- */
+{ const c = NOVO(); const t2 = SG(c, 'c3').sug; MUD(c, x => soloAceitar(x, { aceitar: t2 }, 'A3-1', 'Ana'));
+  const an = [{ a: 'Ca', v: '4.00', un: 'cmolc/dm³' }, { a: 'Mg', v: '1.50', un: 'cmolc/dm³' }, { a: 'K', v: '30', un: 'mg/dm³' }, { a: 'H+Al', v: '2.40', un: 'cmolc/dm³' }, { a: 'Al', v: '0', un: 'cmolc/dm³' }];
+  const lau = NOVO_LAU(c, T2_NOVO(an), 'A3'); const R0 = SG(c, 'c3'); const ret = R0.sug.find(s => s.incl0), k = R0.sug.find(s => s.prod === 'KCl 60%');
+  ok('A3 laudo novo do T2 (V 69,91 %, K 30 mg/dm³): o lote mostra "retirar a Calagem incluída" (−357,6 t) e KCl 180 kg/ha na cobertura retirada (+53.640 kg)',
+    ret && ret.tipo === 'retirar' && ret.dif === -357.6 && ret.laudo.id === lau && k && k.tipo === 'dose' && k.sug === 180 && k.ef === '-' && k.dif === 53640 && R0.sug.length === 2, R0.sug.map(s => [s.tipo, s.prod, s.sug, s.dif]));
+  const U = soloUsoNoPlano(c, SOLO0, soloLaudos(c, SOLO0).find(q => q.id === lau));
+  ok('A3 o "Uso no plano" do laudo novo mostra as duas como disponíveis', U.filter(u => u.st === 'disponível').length === 2, U.map(u => u.st));
+  const r = MUD(c, x => soloAceitarLote(x, R0.sug, 'A3-2', 'Ana')); const SA = soloAtividades({ id: 'c3', plano: SOLO0.planos['SOJA-AT'] }, {}, c.solo.aceites);
+  ok('A3 usar as duas: a calagem sai (uso "retirada pelo LAU-2073"), a Adubação de cobertura volta com KCl 180 pela análise · aviso Calcário −357,6 t e KCl +53.640 kg',
+    !r.erro && !SA.atvs.some(x => soloTipoAtv(x.a) === 'cal') && SA.atvs.find(x => x.a.id === 'a4').prods[0].dose === 180 && c.solo.aceites['c3|solo:LAU-2063:cal|Calcário dolomítico'].st === 'retirada pelo ' + lau
+    && /Calcário dolomítico −357,6 t/.test(r.msg) && /KCl 60% \+53\.640 kg/.test(r.msg) && SG(c, 'c3').sug.length === 0, [r, SA.atvs.map(x => x.a.id)]);
+  const o = NOVO(); const i0 = SG(o, 'c3').sug.find(s => s.tipo === 'incluir'); MUD(o, x => soloAceitar(x, { aceitar: [i0] }, 'A3-3', 'Ana')); OS_COM(o, 'OS-0441', 'A liberar', ['c3|solo:LAU-2063:cal']);
+  NOVO_LAU(o, T2_NOVO(an), 'A3b'); MUD(o, x => soloAceitarLote(x, SG(o, 'c3').sug.filter(s => s.incl0), 'A3-4', 'Ana')); const ao = soloAcDaChave(o, 'c3|solo:LAU-2063:cal', 'Calcário dolomítico');
+  ok('A3 a O.S. em A liberar da calagem retirada pela análise lê "retirar" (selo "Plano mudou pela análise")', ao && ao.dose === '-' && ao.laudo === 'LAU-2073', ao); }
+/* gessagem incluída (plano do Pivô 12 sem gessagem) e laudo 20–40 novo sem gatilho */
+{ const S1 = cenClone(SOLO0); S1.planos['MAMAO-IMP'].atividades = S1.planos['MAMAO-IMP'].atividades.filter(a => a.id !== 'i2');
+  const g = (c) => soloSugestoes(soloCtxBase(c, S1), soloCultivoBase(S1, S1.cult.find(x => x.id === 'lg12')));
+  const c = NOVO(); const inc = g(c).sug.find(s => s.regra === 'gessagem'); MUD(c, x => soloAceitar(x, { aceitar: [inc] }, 'G-1', 'Ana'));
+  const d = { faz: 'Lagoa Grande', tal: 'Pivô 12', prof: '20–40', coleta: '2026-09-22', lab: 'Agrolab', ext: 'Mehlich-1', an: [{ a: 'Ca', v: '1.20', un: 'cmolc/dm³' }, { a: 'Mg', v: '0.50', un: 'cmolc/dm³' }, { a: 'K', v: '31.28', un: 'mg/dm³' }, { a: 'H+Al', v: '3.00', un: 'cmolc/dm³' }, { a: 'Al', v: '0', un: 'cmolc/dm³' }, { a: 'Argila', v: '20', un: '%' }] };
+  NOVO_LAU(c, d, 'G'); const rg = g(c).sug.find(s => s.regra === 'gessagem');
+  ok('A3 gessagem incluída (1.500 kg/ha) e laudo 20–40 cm novo sem gatilho (Ca 1,20; m 0 %): "retirar a Gessagem incluída"', inc && inc.tipo === 'incluir' && inc.sug === 1500 && rg && rg.incl0 && rg.tipo === 'retirar' && rg.ef === 1500, [inc && inc.sug, rg]); }
+/* uso de laudo substituído sem conta no vigente (extrator sem regra) → voltar ao padrão */
+{ const c = NOVO(); MUD(c, x => soloAceitar(x, { aceitar: [SG(c, 'c1').sug[0]] }, 'VP-1', 'Ana'));
+  const d = { faz: 'Santa Rita', tal: 'T1', prof: '0–20', coleta: '2026-09-22', lab: 'Agrolab', ext: 'Resina', an: SOLO0.laudos.find(l => l.id === 'LAU-2061').an };
+  const lau = NOVO_LAU(c, d, 'VP'); const s = SG(c, 'c1').sug.find(x => x.prod === 'KCl 60%');
+  ok('A3 KCl 150 pelo LAU-2061 e laudo novo do T1 com extrator Resina (sem regra): sugere voltar ao padrão 120 kg/ha (−4.800 kg)', s && s.desf && s.sug === 120 && s.ef === 150 && s.dif === -4800 && s.laudo.id === lau, s);
+  const r = MUD(c, x => soloAceitarLote(x, [s], 'VP-2', 'Ana'));
+  ok('A3 usar: o uso volta ao padrão ("voltou ao padrão pelo …"), o plano fica com 120 e a O.S. em A liberar leria 120', !r.erro && c.solo.aceites['c1|a4|KCl 60%'].st === 'voltou ao padrão pelo ' + lau
+    && soloAtividades({ id: 'c1', plano: SOLO0.planos['SOJA-AT'] }, {}, c.solo.aceites).atvs.find(x => x.a.id === 'a4').prods[0].dose === 120 && (soloAcDaChave(c, 'c1|a4', 'KCl 60%') || {}).dose === 120, [r, c.solo.aceites['c1|a4|KCl 60%'].st]); }
+
+/* ---- A4 · K parcelado: o K₂O da regra se reparte, não se repete ---- */
+{ const S1 = cenClone(SOLO0); const pl = S1.planos['SOJA-AT']; pl.atividades.find(a => a.id === 'a3').prods.push({ grupo: 'Fertilizantes', prod: 'KCl 60%', dose: 60, un: 'kg', preco: 2.4 }); pl.atividades.find(a => a.id === 'a4').prods[0].dose = 60;
+  const R4 = soloSugestoes(soloCtxBase(NOVO(), S1), soloCultivoBase(S1, S1.cult.find(x => x.id === 'c1'))).sug.filter(s => s.prod === 'KCl 60%');
+  ok('A4 KCl 60 + 60 kg/ha (plantio + cobertura): 75 + 75 = 150 kg/ha de KCl = 90 kg/ha de K₂O (a regra), com o parcelamento na conta',
+    R4.length === 2 && R4.every(s => s.sug === 75) && R4.every(s => s.conta.join(' ').indexOf('50 % do K₂O do padrão → 45 kg/ha de K₂O') >= 0), R4.map(s => [s.atv.id, s.sug, s.conta]));
+  pl.atividades.find(a => a.id === 'a3').prods.find(p => p.prod === 'KCl 60%').dose = 30;
+  const R5 = soloSugestoes(soloCtxBase(NOVO(), S1), soloCultivoBase(S1, S1.cult.find(x => x.id === 'c1'))).sug.filter(s => s.prod === 'KCl 60%');
+  ok('A4 KCl 30 + 60 kg/ha: 50 + 100 = 150 kg/ha (proporção do padrão)', R5.map(s => s.sug).join() === '50,100', R5.map(s => [s.atv.id, s.sug])); }
+
+/* ---- A5 · R11 também para desfazer ---- */
+{ const c = NOVO(); const s = SG(c, 'c1').sug[0]; MUD(c, x => soloAceitar(x, { aceitar: [s] }, 'A5-1', 'Ana')); OS_COM(c, 'OS-0440', 'Em execução', ['c1|a4']);
+  const r = MUD(c, x => soloAceitar(x, { aceitar: [], desfazer: [{ k: 'c1|a4|KCl 60%', motivo: 'desfeito: dose do plano restaurada' }] }, 'A5-2', 'Ana'));
+  const r2 = MUD(c, x => soloDesfazer(x, 'c1|a4|KCl 60%', 'substituído por ajuste manual', 'A5-3', 'Ana'));
+  ok('A5 aceite de 150 com a OS-0440 em execução: Restaurar, ajuste manual e desfazer de outra aba são recusados ("não aplicável, OS-0440 em execução"); o plano segue com 150',
+    /OS-0440 em execução\. Nada foi gravado/.test(r.erro || '') && /OS-0440 em execução/.test(r2.erro || '') && c.solo.aceites['c1|a4|KCl 60%'].st === 'ativo', [r, r2]);
+  const d = NOVO(); const i0 = SG(d, 'c3').sug.find(x => x.tipo === 'incluir'); MUD(d, x => soloAceitar(x, { aceitar: [i0] }, 'A5-4', 'Ana')); OS_COM(d, 'OS-0441', 'Liberadas', ['c3|solo:LAU-2063:cal']);
+  const r3 = MUD(d, x => soloAceitar(x, { desfazer: [{ k: i0.k, motivo: 'desfeito' }] }, 'A5-5', 'Ana'));
+  ok('A5 "Desfazer inclusão" da calagem com a O.S. liberada: recusado', /OS-0441 já liberada/.test(r3.erro || '') && d.solo.aceites[i0.k].st === 'ativo', r3); }
+
+/* ---- A9 · custo em decimal ---- */
+{ const S1 = cenClone(SOLO0); S1.cult.find(x => x.id === 'c1').area = 0.145; S1.planos['SOJA-AT'].atividades.find(a => a.id === 'a4').prods[0].preco = 0.5;
+  const s = soloSugestoes(soloCtxBase(NOVO(), S1), soloCultivoBase(S1, S1.cult.find(x => x.id === 'c1'))).sug[0];
+  ok('A9 diferença 4,35 kg × R$ 0,50 = R$ 2,18 (decimal, meio para cima; o ponto flutuante dava 2,17)', s && s.dif === 4.35 && s.custo === 2.18, s && [s.dif, s.custo]); }
+
+/* ---- mutantes que sobreviviam (revisão: MA, MB, MC, MD, ME, MF, MG, MH, MI, MJ, MN, MO, MU, MW) ---- */
+{ const c = NOVO(); MUD(c, x => soloAceitar(x, { aceitar: [SG(c, 'c2').sug[0]] }, 'MA-1', 'Ana')); const S1 = cenClone(SOLO0); S1.cult.find(x => x.id === 'c2').meta = 60;
+  const s = soloSugestoes(soloCtxBase(c, S1), soloCultivoBase(S1, S1.cult.find(x => x.id === 'c2'))).sug[0]; MUD(c, x => soloAceitar(x, { aceitar: [s] }, 'MA-2', 'Ana'));
+  const a = c.solo.aceites['c2|a4|KCl 60%']; ok('MA R13 novo uso na mesma chave substitui (120), nunca soma (270), com o 150 no histórico', a.dose === 120 && a.hist.length === 1 && a.hist[0].dose === 150 && a.hist[0].st === 'substituído', a); }
+{ const c = NOVO(); const d = { faz: 'Santa Rita', tal: 'P2', zona: '', data: '2026-09-02', prof: '0–40', z: '30', met: 'Anel volumétrico (campo + estufa)', un: '% volume', cc: '30', pmp: '16', fonte: 'Agrolab', resp: 'Ana (agrônoma)' };
+  MUD(c, x => soloMedir(x, d, 'MB-1', 'Ana')); const m = soloAguaDo(SOLO0, c, 'Santa Rita', 'P2');
+  ok('MB R24 empate na data: vale o talhão inteiro antes da zona (P2, 02/09)', m && m.zona === '' && m.id === 'AGS-005', m);
+  const r = MUD(c, x => soloMedir(x, Object.assign({}, d, { data: '2026-09-24' }), 'MD-1', 'Ana')); ok('MD medição com data futura recusada', /depois de hoje/.test(r.erro || ''), r); }
+{ const c = NOVO(); const r = MUD(c, x => soloRegistrar(x, Object.assign({}, SOLO0.exemplo, { coleta: '2026-09-24' }), 'MC-1', 'Ana')); ok('MC laudo com coleta futura recusado', /depois de hoje/.test(r.erro || ''), r);
+  const r2 = MUD(c, x => soloRegistrar(x, Object.assign({}, SOLO0.exemplo, { lab: '' }), 'MO-1', 'Ana')); ok('MO laudo sem laboratório recusado', /Informe o laboratório/.test(r2.erro || ''), r2);
+  const cu0 = NOVO(); const r3 = MUD(cu0, x => soloCorrigir(x, 'LAU-2061', 'K', '58.65', '', 'MU-1', 'Ana')); ok('MU correção sem unidade recusada', /Informe a unidade de K/.test(r3.erro || ''), r3);
+  const ls = soloLaudos(c, SOLO0); ok('ME laudo por zona não é o vigente (T4, 0–20 e 20–40)', !soloVigente(ls, 'Santa Rita', 'T4', '0–20') && !soloVigente(ls, 'Santa Rita', 'T4', '20–40'));
+  ok('MF o vigente confere a fazenda (T1 da Lagoa Grande não usa o LAU-2061 da Santa Rita)', !soloVigente(ls, 'Lagoa Grande', 'T1', '0–20') && (soloVigente(ls, 'Santa Rita', 'T1', '0–20') || {}).id === 'LAU-2061'); }
+{ const S2 = Object.assign(cenClone(SOLO0), { hoje: '2027-10-01' }); const ls = soloLaudos(NOVO(), S2); const st = id => ls.find(l => l.id === id).sit;
+  ok('MH talhão irrigado vale 12 meses: em 01/10/2027 o LAU-2071 (Pivô 12) está Vencido e o LAU-2061 (T1, sequeiro) segue Validado', st('LAU-2071') === 'Vencido' && st('LAU-2061') === 'Validado', [st('LAU-2071'), st('LAU-2061')]);
+  const S3 = Object.assign(cenClone(SOLO0), { hoje: '2028-10-01' }); ok('MG em 01/10/2028 o LAU-2061 passou de 24 meses: Vencido e sem sugestão', soloLaudos(NOVO(), S3).find(l => l.id === 'LAU-2061').sit === 'Vencido'
+    && soloSugestoes(soloCtxBase(NOVO(), S3), soloCultivoBase(S3, S3.cult.find(x => x.id === 'c1'))).sug.length === 0); }
+{ const S1 = cenClone(SOLO0); S1.planos['SOJA-AT'].cultura = 'Milho'; S1.cult.find(x => x.id === 'c1').cultura = 'Milho';
+  const r = soloSugestoes(soloCtxBase(NOVO(), S1), soloCultivoBase(S1, S1.cult.find(x => x.id === 'c1')));
+  ok('MI regra de K só para Soja: Milho com KCl no plano não recebe dose e o painel diz "sem regra de demonstração para Milho"', !r.sug.some(s => s.regra === 'potássio') && r.info.join(' ').indexOf('sem regra de demonstração para Milho') >= 0, r);
+  const S4 = cenClone(SOLO0); S4.laudos.find(l => l.id === 'LAU-2061').ext = 'Resina'; const r4 = soloSugestoes(soloCtxBase(NOVO(), S4), soloCultivoBase(S4, S4.cult.find(x => x.id === 'c1')));
+  ok('MJ regra de K só com Mehlich-1: Resina não recebe dose e o painel diz "extrator Resina sem regra"', !r4.sug.some(s => s.regra === 'potássio') && r4.info.join(' ').indexOf('extrator Resina sem regra') >= 0, r4); }
+{ const c = NOVO(); MUD(c, x => soloAceitar(x, { aceitar: [SG(c, 'c1').sug[0]] }, 'MN-1', 'Ana')); MUD(c, x => soloDesfazer(x, 'c1|a4|KCl 60%', 'desfeito', 'MN-2', 'Caio'));
+  const h = c.solo.aceites['c1|a4|KCl 60%'].hist; ok('MN desfazer grava o histórico (quem e quando)', h.length === 1 && h[0].st === 'desfeito' && /^Caio/.test(h[0].por) && !!h[0].em, h); }
+{ const S1 = cenClone(SOLO0); const l = S1.laudos.find(x => x.id === 'LAU-2061'); l.an.find(a => a.a === 'Ca').v = '2.35'; l.an.find(a => a.a === 'H+Al').v = '3.75'; S1.cult.find(x => x.id === 'c1').plantio = '2027-01-10';
+  const i = soloSugestoes(soloCtxBase(NOVO(), S1), soloCultivoBase(S1, S1.cult.find(x => x.id === 'c1'))).sug.find(s => s.tipo === 'incluir');
+  ok('MW inclusão em plano por DAP com plantio 10/01/2027: data DAP −60 = 11/11/2026 (não a chegada viável)', i && i.dt === '2026-11-11' && i.conta.join(' ').indexOf('DAP −60 = 11/11/2026') >= 0, i && [i.dt, i.conta]); }

@@ -130,7 +130,7 @@ O laudo nasce **Aguardando validação**; o OCR nunca valida. Se já existe laud
 
 | Situação | Ação primária do painel |
 |---|---|
-| Aguardando validação | **Validar laudo** (só agrônomo, R03) |
+| Aguardando validação | **Validar laudo** (só agrônomo, R03). Sem o papel, nenhum primário: o próximo passo diz "Decisão de Ana (agrônoma): só o agrônomo valida" (revisão A8) |
 | Inconsistente | nenhuma: corrigir a unidade na linha → o laudo volta a Aguardando validação |
 | Validado com sugestão | **Ver no plano** (`SAF.dc.html#saf=<safra>&passo=cultivos&sug=1`) |
 | Validado sem sugestão, Vencido ou Substituído | nenhuma (consulta) |
@@ -145,6 +145,9 @@ O laudo nasce **Aguardando validação**; o OCR nunca valida. Se já existe laud
 - **Uma ação primária:** "Usar", "Retirar pela análise" e "Incluir calagem" são ações secundárias, no estilo de link. Elas preenchem o rascunho do painel, como "Restaurar" e "Retirar" fazem hoje. O primário continua **Salvar**, que grava tudo com uma chave (R13). Cancelar descarta o rascunho, com o aviso de alterações não salvas.
 - **Depois de salvar:** chip "pela análise · LAU-2061" no lugar de "dose deste talhão"; a coluna Padrão continua "120,00 kg/ha"; "Restaurar dose" desfaz. A atividade incluída entra no grupo "Data do calendário" com o chip "incluída pela análise".
 - **Dose da análise mudada à mão:** chip "ajustado pelo usuário". A linha "Análise sugere 150 kg/ha · Usar" volta e serve de comparação (R15).
+- **Laudo novo que dispensa a correção incluída** (R22): no topo, "Análise sugere retirar a Calagem incluída (V já atinge 60 %) · −357,6 t · Por quê · Retirar pela análise". Preenche o rascunho; o Salvar grava.
+- **Uso travado pela R11** (O.S. fora de A liberar ou data passada): a dose fica só leitura, sem Restaurar e sem Retirar, com o motivo no chip ("pela análise · LAU-2061 · OS-0440 em execução: vale a dose da O.S."); a inclusão fica sem "Desfazer inclusão".
+- **Mesma dose digitada de novo:** se a dose do rascunho é igual à do uso gravado, o uso fica (não vira ajuste da sessão). Salvar sem mudança com uso ativo diz "Sem mudanças em T1-A: valem o plano padrão e 1 uso da análise." (revisão A7)
 - **Laudo validado sem regra:** uma frase no subtítulo do painel, só ali. Exemplo com o LAU-2050 já validado: "LAU-2050 (C1 · 0–20 cm): sem regra de demonstração para Café; vale a dose do plano. Ver laudo ›". Quando a correção do laudo foi para outra safra (R17), a frase diz "calagem pelo LAU-2063 na Safra 2026/27".
 - **Celular, 390 px:** a linha da sugestão quebra em até 3 linhas; os botões têm 44 px de altura.
 
@@ -185,11 +188,14 @@ O laudo nasce **Aguardando validação**; o OCR nunca valida. Se já existe laud
 - **Painel da ordem, bloco Insumos:** cada linha mostra a origem da dose (R21).
 - **O.S. em A liberar com aceite de outra dose** (exemplo: OS-0502 depois de "Usar 1.800"):
   - **Selo:** amarelo, "Plano mudou pela análise · 1.800 kg/ha (O.S. 2.000)". Vem do aceite gravado no cenário, sem recalcular a regra, e some quando a dose da O.S. fica igual à do plano.
-  - **Primário:** **Ajustar antes de liberar**, que abre com 1.800 no campo e mostra "O.S. 2.000 → plano 1.800".
-  - **Secundário:** "Liberar com 2.000 kg/ha", a dose da O.S. (R20). Sem selo, o painel segue como hoje.
+  - **Primário (só com o papel de agrônomo):** **Ajustar antes de liberar**, que abre com 1.800 no campo e mostra "O.S. 2.000 → plano 1.800".
+  - **Secundário:** "Liberar com 2.000 kg/ha", a dose da O.S. (R20), só quando nada impede liberar. Com impedimento (estoque, regra legal, carência, total 0, papel), o bloqueio fica visível com quem resolve e o secundário some, porque o comando recusaria (revisão A6). Sem selo, o painel segue como hoje.
+  - **Sem o papel de agrônomo** (ex.: Caio, PCP): o texto diz que o plano mudou; o passo continua liberar, com o impedimento de quem decide e sem primário (revisão A6).
+- **Calagem ou gessagem incluída substituída por laudo mais novo** (R22): a O.S. dela em A liberar recebe o selo "Plano mudou pela análise · 1,32 t/ha (O.S. 1,2)" e o ajuste abre com a dose nova. Retirada pela análise, o selo diz "retirar".
 - **Estoque da OS-0502:** o lote LG26-03 tem 60.000 kg, e a ordem precisa de 87.246 kg (1.800 × 48,47) ou 96.940 kg (2.000 × 48,47). "Salvar e liberar" recusa pelo estoque. "Salvar ajuste" grava a v2 com 1.800 kg/ha, sem liberar. A liberação fica para depois do recebimento de 30/09, como hoje.
 - **Nova ordem:**
   - Usa a dose efetiva e a origem, e lista também as atividades incluídas pela análise, com a chave `cultivo|solo:<laudo>:cal`.
+  - Uma O.S. por correção incluída no cultivo, de qualquer laudo: com O.S. de `cultivo|solo:*:cal` viva, a Nova ordem da calagem de outro laudo é recusada ("Já existe OS-0440 para a calagem deste cultivo (incluída pelo LAU-2063): ajuste a dose nela."). *Dano evitado: corrigir o talhão duas vezes* (revisão A1).
   - `osc_nova` guarda o grupo de cada insumo (`g`). O Calcário dolomítico vai como corretivo, e a regra legal não o trava como agrotóxico sem registro.
   - Sem lote na Santa Rita, o liberar fica bloqueado por estoque, e o dono é Suprimentos.
 
@@ -227,6 +233,7 @@ O laudo nasce **Aguardando validação**; o OCR nunca valida. Se já existe laud
   - Classes de K em mg/dm³: baixo < 40 ≤ médio < 80 ≤ adequado < 120 ≤ alto.
   - Meta do cultivo em kg/ha = `prMul(meta, prUn(cultura).massa)`, a unidade da cultura no `PRDC` (DEC-0510-03). Nenhuma constante de saca no `solo.js`.
   - Faixa de meta da regra: 2.400 a 4.800 kg/ha. Fora dela, nada é sugerido, e a memória diz "meta fora da faixa da regra" (AGR-012, ACAG-08: sem extrapolação silenciosa).
+  - K parcelado no plano (mais de uma linha com K₂O): o K₂O da regra se reparte entre as linhas na proporção do K₂O do padrão (60 + 60 kg/ha de KCl → 75 + 75), e a conta diz a parte de cada linha. *Dano evitado: dobrar a dose ao repetir o K₂O inteiro em cada linha* (revisão A4).
 
   | K₂O (kg/ha) | baixo | médio | adequado | alto |
   |---|---|---|---|---|
@@ -244,6 +251,9 @@ O laudo nasce **Aguardando validação**; o OCR nunca valida. Se já existe laud
 - **R09 Arredondamento.** Dose com 2 casas na unidade do item, meio para cima, em decimal. Quantidade = `cenQtd(dose, área)`; a diferença no talhão é `cenQtd(sugerida, área) − cenQtd(efetiva, área)`. Dose sugerida igual à efetiva não mostra nada (37.2: sem ruído).
 - **R10 Rótulo e chave da regra.** Toda memória diz "Demonstração — tabela regional a decidir pelo proprietário". `SOLO_REGRA.estado` vale `'demonstração'` ou `'desligada'`; desligada, zero sugestões e o laudo continua visível.
 - **R11 Só o futuro.** O comando só é oferecido se a data da ocorrência é ≥ hoje e a O.S. do `cultivo|atividade` não existe ou está em **A liberar**. Senão a linha some e o AG-02 diz por quê. *Dano evitado: reescrever consumo executado ou dose já aprovada e reservada (ACFX-05, AJUSTE-09).*
+  - Vale também para desfazer: Restaurar, ajuste manual sobre o uso, "Desfazer inclusão" e desfazer de outra aba são recusados quando a O.S. do uso saiu de A liberar ou a data passou (revisão A5).
+  - Para incluir, trocar ou retirar uma calagem (ou gessagem) incluída, vale qualquer O.S. de `cultivo|solo:*:cal` (ou `:ges`) do cultivo, de qualquer laudo: liberada, em execução, em conferência ou encerrada, a sugestão vem negada ("OS-0441 já liberada (calagem do LAU-2063)") (revisão A1).
+  - O comando reconfere o item: além da R11, o laudo do item tem de ser o vigente do talhão e da profundidade (R02); senão, "a análise mudou: LAU-2063 substituído pelo LAU-2073. Reabra o painel. Nada foi gravado." No lote, a linha falha sozinha com o motivo (revisão A2: o servidor é a autoridade).
 - **R12 Usar.** Grava um ajuste local só daquele cultivo (PRD 40) com:
   - origem "pela análise", laudo, regra e entradas (inclusive a meta);
   - o plano (id e versão);
@@ -253,6 +263,7 @@ O laudo nasce **Aguardando validação**; o OCR nunca valida. Se já existe laud
 - **R13 Idempotência.** Todo comando sobre `c.solo` leva a chave de quem inicia: Registrar, Corrigir, Validar, Aceitar, Aceitar em lote e Desfazer. A chave nasce ao abrir o formulário, o painel de insumos ou o lote.
   - `c.solo.recibos[chave]` guarda o conteúdo e o resultado. Mesma chave e mesmo conteúdo: "já registrado", nada muda. Mesma chave e outro conteúdo: conflito, nada é gravado.
   - Um aceite por (cultivo, atividade, produto): o novo substitui o anterior, com histórico, e nunca soma.
+  - Uma correção incluída ativa por (cultivo, tipo: calagem ou gessagem): a nova substitui a anterior do mesmo tipo no comando, sem depender do que a tela mandou (revisão A2).
   - Laudo com o mesmo talhão, profundidade, coleta e laboratório: recusado.
 
   *Dano evitado: clique duplo dobrando a dose, a demanda ou o laudo.*
@@ -283,7 +294,11 @@ O laudo nasce **Aguardando validação**; o OCR nunca valida. Se já existe laud
 - **R19 Trocar produto** nunca é sugestão. É ação explícita (retirar + incluir) no painel.
 - **R20 Aprovação única.** Aceitar não cria recomendação, diagnóstico nem aprovação. A O.S. continua com a aprovação individual do agrônomo (CMD-42) e o liberar (CMD-06). A O.S. em A liberar com dose diferente da do plano recebe o selo da §3.5. Liberar com a dose da O.S. registra a decisão do agrônomo (o CMD-42 grava a dose). *Dano evitado: mudar uma dose aprovada ou reservada sem o agrônomo (S1).*
 - **R21 Origem visível.** A linha de insumo da O.S., a memória da demanda e o "Uso no plano" dizem uma destas: "padrão do plano vN", "pela análise · LAU-xxxx", "ajustado pelo usuário" ou "ajustado pelo agrônomo na O.S. vN". Sem análise, nada de selo científico (FX-002, AJUSTE-07).
-- **R22 Meta viva.** A regra de K lê a meta do cultivo (etapa 2). A linha "Análise sugere" volta a aparecer quando a sugestão atual difere do aceite, porque a meta, o laudo ou o laudo vigente (R02) mudou.
+- **R22 Meta viva.** A regra de K lê a meta do cultivo (etapa 2). A linha "Análise sugere" volta a aparecer quando a sugestão atual difere do aceite, porque a meta, o laudo ou o laudo vigente (R02) mudou. Vale também para (revisão A3):
+  - a correção incluída: laudo vigente com NC = 0 (ou 20–40 cm sem gatilho) sugere "retirar a inclusão"; usar desfaz o uso com o histórico "retirada pelo LAU-xxxx";
+  - a atividade retirada pela análise (único insumo): a regra de K continua a vê-la, e o laudo novo com K baixo sugere a dose nela;
+  - o uso feito com um laudo que deixou de ser o vigente, quando o vigente não tem conta para a linha (outro extrator, K não analisado): sugere voltar ao padrão; usar desfaz o uso ("voltou ao padrão pelo LAU-xxxx").
+  *Dano evitado: compra e quantidade de calcário ou KCl baseadas num laudo substituído, sem sinal.*
 - **R23 Medição de água no solo.** Comando `soloMedir` com a chave de quem inicia (R13). Exige fazenda, talhão, data (não futura), profundidade amostrada, profundidade efetiva, método, unidade, CC numérica, fonte e responsável; PMP é opcional. Medição repetida (mesmo talhão, zona, data, profundidade e método) é recusada. Sem PMP, com PMP ≥ CC ou com unidade sem conversão para lâmina (ex.: g/g), a CAD fica "não calculável", nunca 0. *Dano evitado: lâmina balizada por número inventado ou por medição duplicada.*
 - **R24 Propriedade, equipamento e recomendação separados.** A CAD é referência de leitura: não muda a lâmina máxima, o intervalo, a eficiência, a necessidade nem a programação da Irrigação, e nenhuma lâmina recomendada é calculada a partir dela. Vale a medição mais recente do talhão (empate na data: o talhão inteiro antes da zona). *Dano evitado: uma medição isolada virar prescrição de irrigação sem o responsável técnico.*
 
@@ -589,3 +604,45 @@ Autor: Claude, na branch `claude/v44-solo`. Rótulo: tudo o que está nesta seç
 - O `solo.js` vai para o prefixo de todas as telas, inclusive a O.S.: texto de política de água, PA-07 ou exceção fica fora dele (o `solo_unit_test.py` confere; o `os_irrig_filtro_test.py` derruba).
 - `cenario.py js_prefixo` concatena `producao.js`, `ben.js` e `solo.js`: outra frente que acrescentar regras ali precisa manter o `solo.js` (só funções) e a checagem de colisão de nomes do `solo_unit_test.py`.
 - Menu Agrícola com 7 itens (D-01). Se a frente NAV enxugar o menu, a "Análises de solo" pode virar acesso pelo plano sem mudar a tela.
+
+## 12. Revisão adversarial do Codex (10/10/2026) e correções
+Revisor: Codex, sobre `9c1866c` (três S2, quatro S3, dois S4 e 15 mutantes vivos). Autor das correções: Claude, nesta branch. Rótulo: tudo **executado** nesta branch, salvo o que diz "especificado" ou "análise de código". Nenhuma linha aqui é aceite do proprietário.
+
+| # | S | Achado | Correção | Regressão |
+|---|---|---|---|---|
+| A1 | S2 | Laudo novo trocava a calagem incluída com a O.S. dela já liberada; a Nova ordem emitia segunda calagem no T2 | `soloNegaCorr`: R11 sobre qualquer `cultivo\|solo:*:cal` (ou `:ges`), na sugestão e no comando. Nova ordem: uma O.S. por correção incluída no cultivo ("ajuste a dose nela"). A O.S. antiga em A liberar lê a inclusão substituta (`soloAcDaChave`): selo "Plano mudou pela análise · 1,32 t/ha (O.S. 1,2)" | `solo_unit` A1 (5); `solo_rev_test` A1 (6) |
+| A2 | S2 | O comando gravava o item da tela: rascunho velho criava duas calagens vivas (750,96 t); aceite de laudo voltado a Aguardando validação | `soloConfere`: R11 + laudo do item = vigente do talhão e profundidade (R02), com "a análise mudou … Reabra o painel. Nada foi gravado."; no lote, a linha falha sozinha. `soloGrava`: uma inclusão ativa por cultivo e tipo, sem depender do `substitui` | `solo_unit` A2 (4, um deles mata o mutante MX); `solo_rev_test` A2 |
+| A3 | S2 | R22 não valia para inclusão nem para a atividade retirada: laudo que dispensa calagem e pede K não mudava nada | Sugestão "retirar a inclusão" (calagem NC = 0; gessagem sem gatilho); a regra de K lê as atividades retiradas (`soloAtividades().ret`); uso de laudo que deixou de ser o vigente sem conta no vigente sugere voltar ao padrão (D-37). Painel, lote, Por quê e "Uso no plano" mostram | `solo_unit` A3 (7); `solo_rev_test` A3 (3) |
+| A4 | S3 | K₂O inteiro em cada linha de K: o parcelamento dobrava a dose | O K₂O da regra se reparte pela proporção do K₂O do padrão; a conta diz a parte (R07) | `solo_unit` A4 (2) |
+| A5 | S3 | Desfazer, Restaurar e ajuste manual passavam com a O.S. em execução | `soloNegaDesf` no `soloAceitar` (desfazer) e no `soloDesfazer`; o painel trava a dose, sem Restaurar, Retirar nem "Desfazer inclusão", com o motivo | `solo_unit` A5 (2); `solo_rev_test` A5 |
+| A6 | S3 | Plano mudado: primário sem efeito para quem não é agrônomo; bloqueio de estoque escondido; "Liberar com 2.000" que o comando recusava | `osProx`: o impedimento de liberar é calculado antes; com papel de agrônomo, primário "Ajustar antes de liberar" com o impedimento visível (`keep`) e "Liberar com X" só sem impedimento (D-38); sem o papel, passo liberar com quem decide. Mapa: o ajuste vira link para a O.S. | `solo_os_test` AC-SOLO-14 (expectativa mudada, abaixo); `solo_rev_test` A6 (5, com o Mapa) |
+| A7 | S3 | Redigitar a dose do uso o desfazia (sessão 150, Nova ordem 120); "vale o plano padrão" falso | `lpSalvar`: dose igual à do uso mantém o uso; aviso "Sem mudanças em T1-A: valem o plano padrão e 1 uso da análise." | `solo_rev_test` A7 (2) |
+| A8 | S4 | AG-02 oferecia "Validar laudo" a quem não é agrônomo | Sem o papel, sem primário; "Decisão de Ana (agrônoma): só o agrônomo valida" | `solo_ag02_test` (expectativa mudada); `solo_rev_test` A8 (2) |
+| A9 | S4 | Custo e diferença em ponto flutuante; "Responsável" só com a Ana | `prSub`/`prMul`/`soloR2` (decimal) no `solo.js`, no lote e no painel; responsável das equipes Agronomia e Irrigação do cadastro (`dados_solo.RESP_AGUA`) | `solo_unit` A9 (4,35 kg × R$ 0,50 = R$ 2,18) |
+
+**Mutantes.** Os 15 vivos ganharam teste (MA, MB, MC, MD, ME, MF, MG, MH, MI, MJ, MN, MO, MU, MW e o MX pela unicidade da inclusão) e o MY (lote apaga o ajuste da sessão) ganhou verificação no `solo_rev_test`. Rodado o `mutar.py` do revisor: 23 mortos; o trecho do MX não existe mais (o `substitui` saiu do comando). Doze mutantes novos das correções (N1–N12): todos mortos.
+
+**Prova antes e depois.** O `solo_unit_test` com o `solo.js` da `9c1866c` e os testes novos: FALHOU 105/126 (as 21 verificações de A1–A5 e A9). Com a correção: OK 126/126. Os reprodutores `r1.js` a `r5.js` do revisor, rodados de novo: A1 negado com "OS-0441 já liberada (calagem do LAU-2063)", A2 recusado, A3 com as duas sugestões, A4 75 + 75 kg/ha, A5 recusado.
+
+**Expectativas mudadas (motivo no commit).**
+- `solo_os_test` AC-SOLO-14: a OS-0502 tem estoque curto (60.000 kg para 96.940 kg); "Liberar com 2.000 kg/ha" sai e o bloqueio fica visível (A6). Com o estoque coberto o secundário volta e libera (o `solo_rev_test` prova).
+- `solo_ag02_test` AC-SOLO-06: o Caio não vê "Validar laudo" (A8); a recusa do comando continua no `solo_unit_test`.
+
+**Testes (build com 0 FALHA, 141 artboards; `montar_render.py` 141 páginas).**
+
+| Teste | Resultado |
+|---|---|
+| `solo_unit_test.py` · `solo_regressao_test.py` | OK 126/126 · OK 2/2 |
+| `legal_unit_test` 35/35, `aprova_quem_decide_test` 102/102, `os_aprov_lib_test` 45/45, `quantidade_test` 14/14, `inicio_entrega_test` 26/26, `capacidade_unit` 76, `ocupacao_unit` 117, `rend_multiconjuntos_unit` 106/106, `producao_unit_test` 121/121, `mip_unit_test` 34/34 | todos verdes |
+| `varredura.py` · `acoes_duplicadas.py` | 141/141 sem erro · 0 com ação repetida |
+| `solo_saf_test` desktop · celular | OK 33/33 · OK 3/3 |
+| `solo_os_test` desktop · celular | OK 16/16 · OK 2/2 |
+| `solo_ag02_test` | OK 32/32 |
+| `solo_rev_test` (novo) | OK 22/22 |
+| `saftest` (sem erro de script), `map_aprov_test` 5/5, `map_decisoes_test` 18/18, `tabelas_os_test` 38/38, `tabelas_saf_test` 24/24 | verdes |
+| `os_cenario_test` | 19/20: o vermelho conhecido da base (PEND-OS-01) |
+
+**Riscos restantes.**
+- A dose do item ainda vem da tela; o comando reconfere laudo, R11 e unicidade, mas não refaz a conta (o cultivo e a meta vivem na sessão do Planejar safra). No software real, o servidor refaz a conta.
+- O selo da O.S. antiga diz "Plano mudou pela análise" com o laudo novo no texto, e não "substituída pelo LAU-xxxx" (ajuste do achado A1, mesma informação).
+- O "Mapa" (IN-04) só ganhou o link de ajuste; `areas/inicio.py` é editado por outras frentes.
