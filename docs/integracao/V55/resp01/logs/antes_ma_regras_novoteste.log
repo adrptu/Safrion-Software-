@@ -1,0 +1,151 @@
+OK    motor JS (jsc/node) executou sem erro
+OK    AC-PCM-32 · estado v=4 com achados, leituras, abastecimentos e recibos (c.achados substitui c.ach)
+OK    AC-PCM-32 · o.ver continua a versão do plano (OM-0234 = 3) e a versão do registro é o.rv
+OK    D-43 · histórico encerrado sintético (OM-0102 … OM-0231) com custo pela função única
+OK    D-43 · OM-0221 (concessionária): peças + terceiro = R$ 3.800,00
+OK    AC-PCM-08 · gerar do seed cria OM-0235, OM-0236 e OM-0237 em A liberar, sem reserva, janelas 24/09, 24/09, 01/10
+OK    AC-PCM-08 · gerar de novo não duplica (Nada a gerar)
+OK    D-11 · a preventiva gerada traz as tarefas do plano com tipo (Serviço) e nenhuma respondida
+OK    AC-PCM-19 · gerar é do Otávio: Zé é recusado com o motivo
+OK    AC-PCM-30 · conflito calculado sobre AL: OM-0234 (28/09) e OM-0236 (24/09) com conflito; OM-0235 (5 h livres ≥ 4 h) e OM-0237 sem
+OK    AC-PCM-30 · selo "Conflito · OS-0420 28/09"; OM-0236 com OS-0420 e OS-0431
+OK    AC-PCM-30 · "Próxima sem conflito" da OM-0234 = 29/09
+OK    AC-PCM-30 · mover dentro da tolerância: sem motivo, sem conflito, vencOrig preservado (28/09)
+OK    AC-PCM-30 · fora da tolerância pede motivo (até o 1b) e não grava
+OK    AC-PCM-30 · com motivo move e registra (motivo, quem)
+OK    AC-PCM-30 · preventiva já vencida (OM-0236) pede motivo para mover
+OK    AC-PCM-19 · "Mover janela" é do Otávio (Zé recusado)
+OK    AC-PCM-31 · uma pessoa habilitada vem pré-escolhida: Zé (NR-12) para Mecânico; João (NR-10) para Eletricista
+OK    AC-PCM-31 · sem executante: "Falta: executante" e nada liberado
+OK    AC-PCM-31 · com o executante informado libera
+OK    AC-PCM-09 · INSP-104 (Média, Trator 02 com OM-0234 aberta) → primária "Vincular à OM-0234"
+OK    AC-PCM-09 · SM-0150 (colhedora sem OM e sem vencimento devido) → "Criar ordem corretiva"; Fechar sem serviço entre as secundárias
+OK    AC-PCM-09 · NC-0912 (Plantadeira, PM-05 vencida sem OM) → "Gerar ordem preventiva com NC-0912"
+OK    AC-PCM-09 · achado Alta no Trator 02 → primária "Criar ordem corretiva" (vincular só com janela até amanhã)
+OK    AC-PCM-09 · Vincular não é oferecido para a OM-0230 (Em conferência)
+OK    AC-PCM-09 · Criar ordem corretiva: 1 OM em A liberar com ativo, componente, sintoma e criticidade herdados; o selo "Nova" sai
+OK    AC-PCM-09 · repetir (mesma chave ou outra) devolve a mesma OM, sem ordem nova
+OK    AC-PCM-09 · Gerar com o achado: 1 OM preventiva + vínculo (NC-0912 vira Verificação da OM-0235)
+OK    AC-PCM-09 · Fechar sem serviço exige motivo
+OK    AC-PCM-09 · mesmo ativo e mesmo componente oferece Somar (INSP-104); componente diferente registra novo; Somar soma a ocorrência
+OK    D-48 · prefixo por origem e número = maior + 1 (Inspeção → INSP-106; Relato → SM-0153)
+OK    AC-PCM-09 · OM encerrada sem Conforme devolve o achado a Sem ordem com "Voltou da OM-0234"
+OK    AC-PCM-10 · nenhuma tarefa nasce respondida nas OMs abertas que não começaram
+OK    AC-PCM-11 · OM-0228: "Medir pressão de recalque" é Medição; as outras duas, Verificação
+OK    AC-PCM-11 · "Não feito" abre OM de Pendência com o executante da origem
+OK    AC-PCM-19 · Zé não inicia a OM-0228 (executante João): "Ação de João, executante"
+OK    AC-PCM-11 · "Não conforme" e "Não foi possível verificar" somam no achado do ativo e componente (SM-0152 · Hidráulico) ou abrem NC
+OK    AC-PCM-11 · achado de origem só fica Resolvido com teste válido: Medição Não conforme não resolve o SM-0152
+OK    AC-PCM-12 · a OM-0233 já traz a 1ª tentativa Reprovada (23/09 09:00)
+OK    AC-PCM-12 · Concluir é recusado sem a última tentativa Aprovada
+OK    AC-PCM-12 · Reprovado deixa a OM Em execução e o ativo Bloqueado, sem OM nova
+OK    AC-PCM-12 · depois de Reprovado e Aprovado, as tentativas ficam por acréscimo (3, a última Aprovada)
+OK    AC-PCM-12 · sem a habilitação (Otávio não é o executante nem tem "Testar reparo"): Teste recusado com o motivo
+OK    AC-PCM-12 · Zé sem a habilidade "Testar reparo" no CD-04: Teste desabilitado com o motivo
+OK    AC-PCM-12 · tentativa sem evidência é recusada
+OK    C · concluir a OM-0233 com teste aprovado: Em conferência; SM-0147 e INSP-105 resolvidos pelo Teste (D-31)
+OK    AC-PCM-13/26 · Encerrar é recusado na OM que trata a condição sem "Declarar apto"/"Manter" e com a bomba "A definir"
+OK    AC-PCM-19 · Ana não declara apto (não é Otávio nem o responsável técnico)
+OK    AC-PCM-13 · Zé (responsável técnico do T1) declara apto: condição Apto com histórico, por e data
+OK    AC-PCM-26 · Encerrar segue recusado com a peça retirada "A definir" (dano: perder peça recuperável)
+OK    AC-PCM-26 · destino com responsável e nenhum movimento de lote; depois disso encerra com o custo (R$ 4.100 de peças + 6,5 h)
+OK    AC-PCM-13 · "Encerrar restrição" recusado enquanto a OM-0228 trata a restrição
+OK    AC-PCM-13 · OM-0228 (Medição Conforme) devolve a Bomba do Pivô 2 a Apto; SM-0152 resolvido pela Medição
+OK    AC-PCM-13 · "Registrar e bloquear" + corretiva: a OM trata a condição e ganha "Teste do reparo · Freio sem ação"
+OK    AC-PCM-13 · …e chega a Apto, encerrada
+OK    AC-PCM-13 · "Manter bloqueado" exige motivo e desfaz o vínculo (o ativo pede Criar ordem corretiva)
+OK    AC-PCM-13 · Restringir grava condição, motivo, prazo, por e data; "Encerrar restrição" sem OM exige motivo e evidência
+OK    AC-PCM-19 · Bloquear: Zé só onde é o responsável técnico (Trator 02 sim; Trator 03 não)
+OK    AC-PCM-15 · regressão: concluir com 150 h no Trator 02 é recusado e não fecha o ciclo nem desloca referências
+OK    AC-PCM-15 · leitura implausível na conclusão dá aviso (não grava)
+OK    D-18 · horas de oficina obrigatórias (sem valor implícito)
+OK    AC-PCM-15 · fora da conclusão, leitura menor vira troca a confirmar; vencimentos seguem a anterior
+OK    AC-PCM-15 · tíquete com data anterior entra no histórico sem pedir troca e sem mudar a leitura atual
+OK    AC-PCM-15 · data anterior fora das vizinhas fica "a confirmar" (ainda sem troca)
+OK    AC-PCM-15 · leitura de hoje coerente recalcula (Trator 04 vence em breve)
+OK    D-19 · operador da alocação do ativo no dia (Trator 03 em 23/09 → Marcos; Trator 02 em 23/09 sem alocação → nenhum)
+OK    D-19 · lote pré-escolhido só com 1 elegível (Trator 02 no campo: só o comboio; Trator 03 no galpão: dois)
+OK    AC-PCM-16 · "Registrar outro" com 3 tíquetes (chave nova por registro) cria 3 lançamentos
+OK    AC-PCM-16 · duplo toque (mesma chave) cria 1 e devolve o recibo
+OK    AC-PCM-16 · estorno cria lançamento novo e mantém o original (Estornado)
+OK    AC-PCM-16 · L/h só com método (tanque cheio a tanque cheio): AB-1042 = 180 L ÷ 11 h; AB-1041 sem método
+OK    AC-PCM-16 · campos obrigatórios: tanque/lote, volume, leitura e operador
+OK    AC-PCM-19 · matriz "registrar": habilitado só para Otávio, Zé, Ana
+OK    AC-PCM-19 · matriz "decidir": habilitado só para Otávio
+OK    AC-PCM-19 · matriz "gerar": habilitado só para Otávio
+OK    AC-PCM-19 · matriz "liberar": habilitado só para Otávio
+OK    AC-PCM-19 · matriz "encerrar": habilitado só para Otávio
+OK    AC-PCM-19 · matriz "ponte": habilitado só para Otávio
+OK    AC-PCM-19 · matriz "plano": habilitado só para Otávio
+OK    AC-PCM-19 · executar a OM-0233: só Zé (executante)
+OK    AC-PCM-19 · executar a OM-0228: só João; Zé recebe "Ação de João, executante"
+OK    AC-PCM-19 · Incluir tarefa: Otávio até Liberadas; Zé Em execução quando executante
+OK    AC-PCM-19 · condição: Otávio sempre; Zé no T1, Trator 02 e Pulverizador; Ana não
+OK    AC-PCM-19 · consultar a matriz não muda o estado
+OK    AC-PCM-23 · a corretiva OM-0221 não serve de marco para a Colhedora (serviço diferente e corretiva)
+OK    AC-PCM-23 · marco pré-preenchido da última OM encerrada do mesmo serviço (OM-0102 · 15/10/2025 · 1.800 h)
+OK    D-41 · …ou de um serviço que o "cumpre também" (OM-0219, Revisão 500 h, cumpre a 250 h)
+OK    PCMS §10 C1 · OM-0234 encerra a R$ 2.626,00 (690 + 12 L × 28 + 5 h × 320)
+OK    PCMS §10 C2 · a estimativa da OM-0235 (gerada) é R$ 1.776,00
+OK    D-30 · a mesma chave devolve o recibo sem gravar de novo
+OK    D-46 · comando com versão do registro diferente é recusado ("Mudou desde que você abriu")
+OK    §0.1 · "Propor substituto" (sai no 1b): Otávio registra Trator 02 para as O.S. alocadas ao T1 desde o bloqueio (OS-0420 e OS-0431); repetir não duplica; Zé recusado
+OK    §0.1 · só para ativo bloqueado com ordem aberta (Trator 02 apto: recusado)
+OK    Item 12 · 1a · um estado: a manutenção vive em CEN0.man (sem chave própria) e manGet lê o cenário único
+OK    Item 12 · 1a · um saldo por item: nenhum item da manutenção tem lote no estoque geral (c.lotes) até o 1b
+OK    Item 12 · receber (ponte simulada): +1 un do filtro uma vez só; repetir não soma de novo
+OK    Item 12 · liberar reserva 100 % (1 un + 12 L) uma vez; repetir é recusado sem reservar de novo
+OK    Item 12 · aplicar 9 L de 12: a reserva sai, o saldo baixa o entregue e a sobra de 3 L fica a devolver
+OK    Item 12 · devolver: +3 L uma vez só; repetir não soma de novo
+OK    Item 12 · conservação: saldo final = inicial + recebido − aplicado em todo item; reservado volta ao inicial
+OK    Item 12 · um custo: OM-0235 encerra a R$ 1.692,00 (1 × 160 + 9 L × 28 + 4 h × 320), pela função única, e entra uma vez no custo do período
+OK    Item 12 · abastecimento e estorno não mexem em saldo de peça nem de lote (diesel como lote é o Bloco 6)
+OK    Horímetro único · abastecimento, achado, leitura avulsa e conclusão gravam pela mesma função no histórico c.leituras (4 origens)
+OK    Gerar ordem · lote (Sem ordem) e painel do vencimento usam a mesma regra: gerar de novo o ciclo do Trator 03 devolve a OM-0235, sem OM nova
+OK    REV-A1 · "Registrar e bloquear" no Trator T1 já bloqueado acrescenta o motivo (2) e diz "segue bloqueado"
+OK    REV-A1 · a corretiva do achado novo trata o motivo dele e ganha "Teste do reparo · Freio…"
+OK    REV-A1 · o comando de aptidão da OM-0233 diz que o T1 segue bloqueado
+OK    REV-A1 (S1) · "Declarar apto" na OM-0233 encerra só o motivo dela: o T1 segue Bloqueado · Falta: INSP-106 · OM-0235
+OK    REV-A1 · o último motivo pede "Declarar Trator T1 apto"
+OK    REV-A1 · resolvido o último motivo, o T1 fica Apto (sem motivo)
+OK    REV-A1 · o achado novo vira motivo da condição (antes só a mensagem dizia "bloqueado")
+OK    REV-A1 · bloquear a Bomba do Pivô 2 restrita põe o bloqueio à frente e guarda a restrição tratada pela OM-0228
+OK    REV-A1 · João (responsável técnico) encerra a restrição na OM-0228; a bomba segue Bloqueada pelo motivo novo
+OK    REV-A1 · "Criar ordem corretiva" pela condição num ativo apto é recusada (nada a tratar)
+OK    REV-A2 · a repetição avisa que a ocorrência nova é mais grave
+OK    REV-A2 (S2) · somar eleva criticidade e sugestão para a mais grave e guarda cada ocorrência (criticidade, sugestão e autor)
+OK    REV-A2 · com a gravidade somada, a primária do achado é "Criar ordem corretiva" (não vincula à preventiva de 28/09)
+OK    REV-A2 · "Somar e bloquear" (Zé, responsável técnico do Trator 02) bloqueia com o INSP-104 como motivo
+OK    REV-A2 · sem a competência (Ana) "Somar e bloquear" é recusado e nada grava
+OK    REV-A4 às 00:40 · o lançamento novo fica depois do AB-1042 (06:40) do mesmo dia e o consumo segue (100 + 90) L ÷ 12 h = 15,8 L/h, desde o AB-1042
+OK    REV-A4 às 00:40 · o estorno também fica depois do que já está gravado no dia (não antes do AB-1042 das 06:40)
+OK    REV-A3 (S2) · o estorno marca a leitura do lançamento como Estornada e o Trator 02 volta a 2.988 h
+OK    REV-A3 · o lançamento certo (2.995 h) entra Confirmado, sem troca de contador nem deslocar marco e últimas execuções
+OK    REV-A4 (S2) · tanque cheio a tanque cheio soma o parcial do meio: (100 + 90) L ÷ 12 h = 15,8 L/h
+OK    REV-A10 · o comboio (odômetro) mostra km/L: 200 km ÷ 60 L = 3,3 km/L, nunca "L/h"
+OK    REV-A9 · bloquear o Trator 02 não promete impedir as O.S.: avisa a alocada (OS-0420) para o PCP
+OK    REV-A11 · a OM mudou depois de aberta: o comando com a versão lida é recusado "Mudou desde que você abriu"
+OK    REV-S4 · Encerrar é recusado com registro do app "A resolver" (o fato do campo não fica para trás)
+OK    REV-S4 · Iniciar grava quem iniciou (Zé) além da data
+OK    REV-S4 · solicitar compra, registrar recebimento, resolver sobras e mudar criticidade gravam o autor
+OK    REV-S4 · "Mover mesmo assim" para dia com conflito guarda o conflito aceito (selo amarelo, não volta a vermelho)
+OK    M18 · "Declarar apto" fora de Em conferência é recusado (o T1 segue bloqueado)
+OK    M21 · incluir tarefa em preventiva é recusado (segue a versão do plano)
+OK    M24 · restringir sem prazo é recusado
+OK    M30 · editar só o motivo não troca o autor nem a hora da resposta
+OK    M31 · quem não é o executante não responde tarefa (Ana na OM-0233 do Zé)
+OK    M36 · aplicar acima do planejado sem saldo livre é recusado e nada baixa
+OK    M37 · gerar ordem de vencimento em dia é recusado
+OK    M39 · vincular achado a OM Em conferência é recusado
+OK    M40 · encerrar com sobra a resolver é recusado
+OK    motor JS da O.S. (S3) executou sem erro
+OK    REV-A5 · antes: OS-0420 (Em execução) e OS-0431 (A liberar) impedidas pelo Trator T1 com o link da OM-0233
+OK    REV-A5 (S3) · com o T1 apto, a OS-0420 em execução perde o impedimento e não vai para o PCP ("reprogramar" só antes de liberar)
+OK    REV-A5 · a OS-0431 (A liberar) perde o impedimento; o PCP reprograma uma vez e o texto diz quem libera depois
+OK    REV-A5 · em Em conferência a ordem volta ao dono da fase (quem confere), nunca "Pendência com PCP"
+FALHA COMP-02 A · OS-0420 Em execução com divergência de dose aberta e o Trator T1 apto: dono e prazo iguais aos da ordem sem o vínculo da máquina ("Ana (agrônoma)" · "revisar a divergência de dose do dia 1"), sem impedimento nem selo da máquina · [{"dono":"","prazo":"","bloq":null,"maq":[],"cond":"Em execução · 30 de 100 ha. Registre o apontamento de cada turno."},{"dono":"Ana (agrônoma)","prazo":"revisar a divergência de dose do dia 1","bloq":null,"maq":["Impedida · ativo bloqueado"],"cond":"Trator T1 bloqueado pela OM-0233 · Manutenção; substituto Trator 02 a partir de 24/09. Saldo de 70 ha na v3 (KCl −12 %), ajustada por Ana (agrônoma) em 23/09; 30 ha realizados preservados na v2."}]
+FALHA COMP-02 A · OS-0420 Em conferência com divergência de dose aberta e o Trator T1 apto: dono e prazo iguais aos da ordem sem o vínculo da máquina ("Ana (agrônoma)" · "revisar a divergência de dose"), sem impedimento nem selo da máquina · [{"dono":"Carlos","prazo":"conferir","bloq":null,"maq":[],"cond":"Aguardando conferência de apontamentos, consumo e sobras."},{"dono":"Ana (agrônoma)","prazo":"revisar a divergência de dose","bloq":null,"maq":["Impedida · ativo bloqueado"],"cond":"Aguardando conferência de apontamentos, consumo e sobras."}]
+OK    COMP-02 A · ativo apto não encerra a revisão agronômica: o encerramento continua bloqueado pela divergência (quem resolve: Ana (agrônoma))
+FALHA COMP-02 B · OS-0431 A liberar, Trator T1 apto e estoque dos insumos zerado: osLibErro dá "Saldo insuficiente…"; dono e próximo passo os de Suprimentos (receber o insumo), iguais aos da ordem sem o vínculo, não PCP/reprogramar; o texto diz que a liberação aguarda o insumo · ["Saldo insuficiente de Semente de soja 58 W: 0 kg disponíveis para 5.304 kg.",{"dono":"PCP","prazo":"reprogramar antes de liberar","bloq":null,"maq":[],"cond":"Trator T1 apto desde 22/09 (OM-0233) · o PCP reprograma a máquina da ordem (O.S. › Recursos); depois Ana (agrônoma) confere e libera. Próximo passo: liberar para execução."},{"dono":"Suprimentos","prazo":"receber o insumo no Estoque","bloq":null,"maq":["Falta máquina · Trator T1 bloqueado"],"cond":"Retirada de Liberadas em 23/09: a INSP-105 bloqueou o Trator T1 (OM-0233) antes do 1º início. Dono: PCP · prazo: antes de 24/09 06:00 · pró
+OK    COMP-02 controle · com o estoque original (sem pendência específica) a OS-0431 apta continua com o PCP: "reprogramar antes de liberar"
+RESULTADO: 147/150 ok · FALHAS: COMP-02 A · OS-0420 Em execução com divergência de dose aberta e o Trator T1 apto: dono e prazo iguais aos da ordem sem o vínculo da máquina ("Ana (agrônoma)" · "revisar a divergência de dose do dia 1"), sem impedimento nem selo da máquina; COMP-02 A · OS-0420 Em conferência com divergência de dose aberta e o Trator T1 apto: dono e prazo iguais aos da ordem sem o vínculo da máquina ("Ana (agrônoma)" · "revisar a divergência de dose"), sem impedimento nem selo da máquina; COMP-02 B · OS-0431 A liberar, Trator T1 apto e estoque dos insumos zerado: osLibErro dá "Saldo insuficiente…"; dono e próximo passo os de Suprimentos (receber o insumo), iguais aos da ordem sem o vínculo, não PCP/reprogramar; o texto diz que a liberação aguarda o insumo
