@@ -161,7 +161,7 @@ chk('C10 (A3) CD-04 não alocável: o chip diz a consequência, a dica o motivo 
 chk('C11 (M-i) CD-04: com duas habilitações datadas, a validade que vale é a que vence primeiro (NR-10 10/12/2026, não NR-31 31/08/2027)', u4.get('val') == '2026-12-10', u4.get('val'))
 # CD-03 (A10, A4): calibração a vencer diz isso no chip (a cor da data não é o único sinal); a capacidade só tem coluna com uma grandeza
 h3 = page('CD-03'); ic = h3.find('const C3='); C3 = json.JSONDecoder().raw_decode(h3[ic + 9:])[0] if ic >= 0 else {}
-js3 = "const HOJE='2026-09-23'; const C3=" + json.dumps(C3, ensure_ascii=False) + ";\n" + '\n'.join(func(h3, f) for f in ('br', 'ddiff', 'addd', 'chipc', 'sitOk', 'sitX', 'c3cond', 'c3calib', 'c3sit', 'c3capCol')) + r"""
+js3 = "const HOJE='2026-09-23'; const C3=" + json.dumps(C3, ensure_ascii=False) + ";\n" + '\n'.join(func(h3, f) for f in ('br', 'ddiff', 'addd', 'chipc', 'sitOk', 'sitX', 'c3cond', 'c3calib', 'c3sit', 'capColDeps', 'c3capCol')) + r"""
 const SP={id:'g_atv',cols:[{k:'nome'},{k:'est'},{k:'classe'},{k:'custo_h'},{k:'ncj'},{k:'calv'}]}; const GR=()=>SP; const ST={}; const g2st=()=>ST;
 const K=(f)=>{ ST.f={classe:f}; c3capCol({}); const c=SP.cols.find(x=>x.k==='capn'); return c?[SP.cols.indexOf(c),c.l,c.un,c.t]:null; };
 const sit=(V)=>{ const x=c3sit({id:'z',v:Object.assign({sit:'Ativo',exige:'Sim',interv:30},V)}); return [x.t,x.p.map(p=>p.t).join(' | '),!!x.res]; };
@@ -173,6 +173,70 @@ chk('C12 (A10) CD-03: calibração que vence em 15 dias = chip "Calibração a v
 chk('C13 (A4) CD-03: capacidade só com uma grandeza no filtro de Classe, com rótulo e unidade dela (Irrigação → Vazão m³/h; Trator → Potência cv; Trator + Pulverizador → sem coluna; sementes + beneficiamento → Capacidade kg/h)',
     cp.get('todas') is None and cp.get('irr') == [3, 'Vazão', 'm³/h', 'num'] and cp.get('tr') == [3, 'Potência', 'cv', 'num'] and cp.get('mist') is None
     and cp.get('kgh') == [3, 'Capacidade', 'kg/h', 'num'] and cp.get('col') is None, cp)
+# C15–C18 (TABR-CTX-01, revisão do Codex TABR-REV-20261010-01, comentário 6092263670): a coluna de capacidade muda de grandeza com o filtro
+# (Classe no CD-03, Tanque/Silo no CD-06); o filtro, a ordenação e o menu de filtro dela saem quando a grandeza+unidade muda ou a coluna sai,
+# e ficam com a mesma grandeza (Tratamento de sementes ↔ Beneficiamento, kg/h). Busca, outros filtros, menu de outra coluna e o rascunho do
+# cadastro ficam. Funções g2 originais da página; os chips seguem a fórmula de g2vals (rótulo da coluna, ou a chave quando ela não existe).
+h6 = page('CD-06')
+def cap6(html):
+    """c6capCol da página; na base sem a função (8f19e0d), o mesmo trecho que estava dentro do PREVALS."""
+    if 'function c6capCol(' in html: return func(html, 'c6capCol')
+    i = html.find("const sl=GR('g_loc');"); j = html.find('v.c6l_ncol=sl.cols.length;', i)
+    return 'function c6capCol(self){ const v={}; ' + html[i:j + 26] + ' return v.c6l_ncol; }' if i >= 0 and j > i else func(html, 'c6capCol')
+G2F = ('g2num', 'g2fmtn', 'g2unf', 'g2fmt', 'g2st', 'g2set', 'g2text', 'g2mem', 'g2fkeys', 'g2key', 'g2match', 'g2sort', 'g2qtok', 'g2qhas', 'g2qrows')
+jsx = ("const G2KEEP={}; const C3=" + json.dumps(C3, ensure_ascii=False) + ";\n" + '\n'.join(func(h3, f) for f in G2F + ('capColDeps', 'c3capCol')) + '\n' + cap6(h6) + r"""
+const sp3={id:'g_atv',cols:[{k:'nome',l:'Máquina ou instalação'},{k:'est',l:'Situação'},{k:'classe',l:'Classe'},{k:'custo_h',l:'Custo R$/h',t:'num',a:'r',un:'R$/h'}],so:{}};
+const sp6={id:'g_loc',cols:[{k:'nome',l:'Local'},{k:'faz',l:'Fazenda'},{k:'tipo',l:'Tipo'},{k:'itens',l:'Itens com este local padrão',t:'num',a:'r'}],qf:{k:'tipo',todas:'Todos'},so:{}};
+const GR=(id)=>id==='g_loc'?sp6:sp3;
+const R3=(nome,classe,n)=>({id:nome,v:{nome,classe,est:'Apta',capn:n},s:{nome,classe,est:'Apta',capn:g2fmtn(n)}});
+const ROWS3=[R3('Trator T1','Trator',155),R3('Trator 04','Trator',78),R3('Bomba do Pivô 1','Irrigação',300),R3('Gotejo T7','Irrigação',45),R3('Máquina TSI','Tratamento de sementes',2400),R3('Packing linha 1','Beneficiamento',2400)];
+const R6=(nome,tipo,n)=>({id:nome,v:{nome,faz:'Santa Rita',tipo,capn:n===null?'':n,itens:0},s:{nome,faz:'Santa Rita',tipo,capn:n===null?'':g2fmtn(n)}});
+const ROWS6=[R6('Tanque Sede','Tanque',15000),R6('Silo 01','Silo',60000),R6('Galpão 1','Galpão',null)];
+const MK=(g2)=>{ const self={state:{g2}}; self.setState=(p)=>{ Object.assign(self.state,p); }; return self; };
+// um render: a coluna de capacidade (PREVALS) e o que a grade mostra (cabeçalho, chips de filtro, linhas visíveis) e guarda
+function VER(self,sp,capCol,rows){ capCol(self); const st=g2st(self,sp.id); const cap=sp.cols.find(c=>c.k==='capn');
+  const chips=Object.keys(st.f||{}).filter(k=>(st.f[k]||[]).length).map(k=>{ const c=sp.cols.find(x=>x.k===k)||{l:k}; return c.l+': '+st.f[k].join(', '); }).sort();
+  return {col:cap?cap.l+' '+cap.un:null, chips, vis:g2sort(g2qrows(sp,st,rows).filter(r=>g2match(r,sp,st)),sp,st).map(r=>r.v.nome), f:Object.keys(st.f||{}).sort(),
+    so:(st.so&&st.so.k)||null, fmc:st.fmc||null, fmd:st.fmd||null, fmq:st.fmq||'', q:st.q||'', fm:(st.fm&&st.fm.draft&&st.fm.draft.nome)||null}; }
+const F=(self,gid,patch)=>g2set(self,gid,{f:Object.assign({},g2st(self,gid).f||{},patch)});
+const tira=(self,gid,k)=>{ const f=Object.assign({},g2st(self,gid).f||{}); delete f[k]; g2set(self,gid,{f}); };   // o × do chip
+const V3=(s)=>VER(s,sp3,c3capCol,ROWS3), V6=(s)=>VER(s,sp6,c6capCol,ROWS6), out={};
+// C15: roteiro do Codex (Trator · Potência = 78 cv → limpar só Classe → Irrigação), com busca, outro filtro e rascunho do cadastro
+{ const a=MK({g_atv:{f:{est:['Apta'],classe:['Trator']},q:'o',fm:{draft:{nome:'Rascunho sintético'},orig:{}}}}); V3(a);
+  F(a,'g_atv',{capn:['78 cv']}); g2set(a,'g_atv',{so:{k:'capn',d:true}}); out.a1=V3(a); tira(a,'g_atv','classe'); out.a2=V3(a); F(a,'g_atv',{classe:['Irrigação']}); out.a3=V3(a); }
+// C16: troca direta Trator → Irrigação com o menu de filtro da Potência aberto (rascunho marcado e pesquisa); o menu de outra coluna fica
+{ const b=MK({g_atv:{f:{classe:['Trator']}}}); V3(b); F(b,'g_atv',{capn:['78 cv']}); g2set(b,'g_atv',{so:{k:'capn',d:false}}); V3(b);
+  g2set(b,'g_atv',{fmc:'capn',fmd:['78 cv','155 cv'],fmq:'1',fpos:{x:0,xr:0,y:0}}); F(b,'g_atv',{classe:['Irrigação']}); out.b=V3(b);
+  const b2=MK({g_atv:{f:{classe:['Trator'],capn:['78 cv']}}}); V3(b2); g2set(b2,'g_atv',{fmc:'est',fmd:['Apta'],fmq:'Ap'}); F(b2,'g_atv',{classe:['Irrigação']}); out.b2=V3(b2); }
+// C17: mesma grandeza e unidade (Capacidade kg/h): Tratamento de sementes ↔ Beneficiamento mantém filtro, ordem e menu
+{ const k=MK({g_atv:{f:{classe:['Tratamento de sementes']}}}); V3(k); F(k,'g_atv',{capn:['2.400 kg/h']}); g2set(k,'g_atv',{so:{k:'capn',d:true},fmc:'est',fmd:['Apta'],fmq:'Ap'});
+  out.k0=V3(k); F(k,'g_atv',{classe:['Beneficiamento']}); out.k1=V3(k); F(k,'g_atv',{classe:['Tratamento de sementes','Beneficiamento']}); out.k2=V3(k); }
+// C18: CD-06 Tanque (L) ↔ Silo (sc de 60 kg) pelo filtro rápido de Tipo, e Todos (a coluna sai)
+{ const e=MK({g_loc:{qv:'Tanque',f:{faz:['Santa Rita']},q:'Santa',fm:{draft:{nome:'Rascunho sintético'},orig:{}}}}); V6(e);
+  F(e,'g_loc',{capn:['15.000 L']}); g2set(e,'g_loc',{so:{k:'capn',d:true}}); out.e0=V6(e); g2set(e,'g_loc',{qv:'Silo'}); out.e1=V6(e);
+  F(e,'g_loc',{capn:['60.000 sc de 60 kg']}); g2set(e,'g_loc',{so:{k:'capn',d:false}}); out.e2=V6(e); g2set(e,'g_loc',{qv:''}); out.e3=V6(e); }
+console.log(JSON.stringify(out));""")
+ux = node(jsx) or {}
+a1, a2, a3, b, b2 = (ux.get(k) or {} for k in ('a1', 'a2', 'a3', 'b', 'b2'))
+chk('C15 (TABR-CTX-01) CD-03, roteiro do Codex: Trator · Potência = 78 cv → limpar só Classe tira a coluna, o filtro e a ordem da Potência (sem chip "capn: 78 cv"); '
+    'Irrigação → Vazão sem filtro de outra grandeza e as 2 bombas/setores à vista; busca, filtro de Situação e rascunho do cadastro ficam',
+    a1.get('vis') == ['Trator 04'] and 'Potência: 78 cv' in a1.get('chips', [])
+    and a2.get('col') is None and a2.get('chips') == ['Situação: Apta'] and a2.get('f') == ['est'] and a2.get('so') is None and len(a2.get('vis', [])) == 6
+    and a3.get('col') == 'Vazão m³/h' and a3.get('chips') == ['Classe: Irrigação', 'Situação: Apta'] and a3.get('vis') == ['Bomba do Pivô 1', 'Gotejo T7']
+    and all(x.get('q') == 'o' and x.get('fm') == 'Rascunho sintético' for x in (a2, a3)), {k: ux.get(k) for k in ('a1', 'a2', 'a3')})
+chk('C16 (TABR-CTX-01) CD-03, Trator → Irrigação direto: filtro, ordem e menu aberto da Potência (rascunho e pesquisa) saem; o menu de outra coluna (Situação) fica com o rascunho',
+    b.get('col') == 'Vazão m³/h' and b.get('f') == ['classe'] and b.get('so') is None and b.get('fmc') is None and b.get('fmd') is None and b.get('fmq') == ''
+    and b.get('vis') == ['Bomba do Pivô 1', 'Gotejo T7'] and b2.get('f') == ['classe'] and b2.get('fmc') == 'est' and b2.get('fmd') == ['Apta'] and b2.get('fmq') == 'Ap', {'b': b, 'b2': b2})
+k0, k1, k2 = (ux.get(k) or {} for k in ('k0', 'k1', 'k2'))
+chk('C17 (TABR-CTX-01) CD-03, mesma grandeza (Capacidade kg/h): Tratamento de sementes → Beneficiamento → os dois mantêm o filtro 2.400 kg/h, a ordem e o menu aberto',
+    k0.get('vis') == ['Máquina TSI'] and k1.get('col') == 'Capacidade kg/h' and 'Capacidade: 2.400 kg/h' in k1.get('chips', []) and k1.get('so') == 'capn' and k1.get('vis') == ['Packing linha 1']
+    and (k1.get('fmc'), k1.get('fmd'), k1.get('fmq')) == ('est', ['Apta'], 'Ap') and sorted(k2.get('vis', [])) == ['Máquina TSI', 'Packing linha 1'] and k2.get('so') == 'capn', {k: ux.get(k) for k in ('k0', 'k1', 'k2')})
+e0, e1, e2, e3 = (ux.get(k) or {} for k in ('e0', 'e1', 'e2', 'e3'))
+chk('C18 (TABR-CTX-01) CD-06 Locais: Tanque · 15.000 L → Silo tira filtro e ordem em L (o Silo 01 aparece em sc de 60 kg); Silo · 60.000 sc → Todos tira a coluna sem chip órfão; '
+    'busca, filtro de Fazenda e rascunho ficam',
+    e0.get('vis') == ['Tanque Sede'] and e1.get('col') == 'Capacidade sc de 60 kg' and e1.get('f') == ['faz'] and e1.get('so') is None and e1.get('chips') == ['Fazenda: Santa Rita'] and e1.get('vis') == ['Silo 01']
+    and e2.get('vis') == ['Silo 01'] and e3.get('col') is None and e3.get('chips') == ['Fazenda: Santa Rita'] and e3.get('f') == ['faz'] and e3.get('so') is None and len(e3.get('vis', [])) == 3
+    and all(x.get('q') == 'Santa' and x.get('fm') == 'Rascunho sintético' for x in (e1, e3)), {k: ux.get(k) for k in ('e0', 'e1', 'e2', 'e3')})
 # C14 (revisão TABR, pré-existente): no IR-03det a Duração é a da janela mostrada na linha (Início e Fim reais → real; previstos → prevista)
 hd = page('IR-03det')
 jsd = '\n'.join(func(hd, f) for f in ('irrPausaMin', 'irrFimP', 'irrDurP')) + r"""

@@ -17,6 +17,7 @@ import dados2 as D2
 import dados_cad as DC
 from areas.cadastros import (sel, num, txt, dat, cond, R, js, _itens, CULTIVARES)
 from areas.cad_culturas import CADC_JS
+from areas.cad_ativos_pessoas import CAPCOL_JS   # TABR-CTX-01: capacidade que muda de grandeza (a mesma do CD-03)
 from areas.cadastros import (cadx_css, abas, pane, faixa, prim, secbtn, qf_chips, bloco_cad, estado_cab, acoes_form, arv)
 
 H=lambda s: '{{'+s+'}}'
@@ -131,7 +132,7 @@ def cd06():
     corpo=bloco_cad(abas('c6t',['Itens','Locais de estoque'],'Cadastros de produtos'),pane('c6t',0,faixa('c6_fx0')+arv(gi))+pane('c6t',1,gl),'Produtos, unidades e locais')
     dados=json.dumps(dict(receita=RECEITA,defg=next(r['id'] for r in g_rows if r['v']['nome']=='Fertilizantes'),
                           defl=next(l[0] for l in DC.LOCAIS if l[1]=='Galpão 2')),ensure_ascii=False)
-    js({},CADC_JS+f"const C6={dados}; const OUTRO_G={json.dumps(OUTRO_G,ensure_ascii=False)};\n"+r'''
+    js({},CADC_JS+CAPCOL_JS+f"const C6={dados}; const OUTRO_G={json.dumps(OUTRO_G,ensure_ascii=False)};\n"+r'''
 // itens de semente criados no CD-02 (cultivar nova) entram no grupo Sementes ao abrir a tela; ficam pendentes de preço e embalagem
 (function(){ try{ const o=JSON.parse(localStorage.getItem('talhao-os-cadastros-v1')||'{}'); const g=GR('g_itm'); const par=g.rows.find(p=>p.v.item==='Sementes'); if(!par) return;
   (o.sementes||[]).forEach((n,i)=>{ if(leaves(g.rows).some(r=>r.v.item===n)) return;
@@ -169,8 +170,11 @@ function PREVALS(self,v){ cadActsIni(self); const grps=RW(self,'g_grp'); const i
     const tq=V.tipo==='Tanque'&&isnum(V.cap)&&String(V.cap)!==''; const si=V.tipo==='Silo'&&isnum(V.capsc)&&String(V.capsc)!=='';
     V.capn=tq?Number(V.cap):(si?Number(V.capsc):''); const cap=tq?nf(V.cap):(si?nf(V.capsc):'');
     r.p.capn=cap?[{k:'txt',t:cap}]:[{k:'mut',t:'—'}]; r.s.capn=cap; });   /* a coluna põe a unidade do tipo */
-  const sl=GR('g_loc'); if(!sl.colsAll) sl.colsAll=sl.cols.slice(); const qv=g2st(self,'g_loc').qv||''; const un={'Tanque':'L','Silo':'sc de 60 kg'}[qv];
-  sl.cols=un?sl.colsAll.slice(0,3).concat([{k:'capn',l:'Capacidade',t:'num',a:'r',un:un}],sl.colsAll.slice(3)):sl.colsAll; v.c6l_ncol=sl.cols.length; }
+  v.c6l_ncol=c6capCol(self); }
+// capacidade dos locais com o filtro rápido Tanque (L) ou Silo (sc de 60 kg); L ↔ sc ou Todos tira o filtro e a ordem dela (TABR-CTX-01)
+function c6capCol(self){ const sl=GR('g_loc'); if(!sl.colsAll) sl.colsAll=sl.cols.slice(); const qv=g2st(self,'g_loc').qv||''; const un={'Tanque':'L','Silo':'sc de 60 kg'}[qv];
+  capColDeps(self,'g_loc','capn',un?'Capacidade|'+un:'');
+  sl.cols=un?sl.colsAll.slice(0,3).concat([{k:'capn',l:'Capacidade',t:'num',a:'r',un:un}],sl.colsAll.slice(3)):sl.colsAll; return sl.cols.length; }
 function EXTRAVALS(self,v){
   const its=leaves(RW(self,'g_itm')).filter(r=>!/^GR/.test(r.id));
   const semP=its.filter(r=>r.v.sit!=='Inativo'&&r.v.custo&&!isnum(r.v.preco)).length, semE=its.filter(r=>r.v.sit!=='Inativo'&&!c6emb(r.v)).length;

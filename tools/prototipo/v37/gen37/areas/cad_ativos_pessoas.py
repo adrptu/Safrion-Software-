@@ -96,6 +96,21 @@ SEM_IMPL='Sem implemento'
 # capacidade principal por classe (rótulo, unidade), a mesma de c3capn(): a coluna só aparece quando o filtro de Classe deixa uma grandeza
 CAPCOL={'Trator':('Potência','cv'),'Pulverizador':('Tanque útil','L'),'Plantadeira':('Linhas','linhas'),'Distribuidor':('Carga','kg'),
         'Irrigação':('Vazão','m³/h'),'Armazenagem':('Capacidade','sc de 60 kg'),'Tratamento de sementes':('Capacidade','kg/h'),'Beneficiamento':('Capacidade','kg/h')}
+# TABR-CTX-01 (revisão do Codex, 10/10/2026): a coluna de capacidade muda de grandeza com o filtro (Classe no CD-03, Tanque/Silo no CD-06);
+# o filtro, a ordenação e o menu de filtro dela não podem sobrar de outra grandeza. Uma função para as duas telas (o CD-06 importa daqui).
+CAPCOL_JS=r'''
+// coluna que muda de grandeza com o filtro (tup = rótulo|unidade; '' sem coluna): filtro, ordenação e menu de filtro dela valem para uma tupla.
+// Mudou a tupla ou a coluna saiu: só eles saem (busca, outros filtros, menu de outra coluna e rascunho do cadastro ficam); mesma tupla, ficam.
+// Roda no PREVALS, antes de g2vals ler o estado (o mesmo desenho do talhão fora do recorte na O.S.)
+function capColDeps(self,gid,k,tup){ const m=self.__capTup=self.__capTup||{}; const ant=m[gid]; m[gid]=tup; if(tup&&(ant===undefined||ant===tup)) return;
+  const st=g2st(self,gid), f=st.f||{}, p={}; if(k in f){ p.f=Object.assign({},f); delete p.f[k]; } if(st.so&&st.so.k===k) p.so=null; if(st.fmc===k) Object.assign(p,{fmc:null,fmd:null,fmq:''});
+  if(!Object.keys(p).length) return; const all=Object.assign({},self.state.g2||{}); all[gid]=Object.assign({},st,p); self.state.g2=all;
+  // foco: o × que a pessoa usou (ex.: Classe) pode sumir junto com o chip da capacidade; sem foco, ele vai ao chip vizinho ou à busca da grade
+  if(!p.f||typeof document==='undefined') return; const a=document.activeElement, cx=a&&a.closest?a.closest('.g2caixa'):null;
+  if(!cx||a.getAttribute('aria-label')!=='Remover filtro') return; const RF='button[aria-label="Remover filtro"]', i=[...cx.querySelectorAll(RF)].indexOf(a);
+  setTimeout(()=>{ const ae=document.activeElement; if(ae&&ae!==document.body) return; const xs=[...cx.querySelectorAll(RF)];
+    const b=xs[Math.min(i,xs.length-1)]||cx.querySelector('input[aria-label="Buscar nesta tabela"]'); if(b) b.focus(); },0); }
+'''
 # subtítulo do formulário: no cadastro a classe vem primeiro; na edição ela fica fixa
 SUB_NEW='Escolha a classe para abrir a capacidade dela.'
 SUB_EDIT='Altere capacidade, custo por hora e calibração; inative em vez de excluir, o histórico continua.'
@@ -163,7 +178,7 @@ def cd03():
     dados=dict(cod=COD,impl=IMPL,calib=CALIB_CLS,sem=SEM_IMPL,ophab=OPHAB,subnew=SUB_NEW,capcol=CAPCOL,
                cond={k:dict(t=c['t'],m=c['om']+' · '+c['det'],ordens=c['ordens'],om=c['om']) for k,c in DC.CONDICAO.items()},
                pes=[dict(v,id=pid) for pid,v in pessoas()])
-    js({},ALOC_JS+'const C3='+json.dumps(dados,ensure_ascii=False)+';\n'+r'''
+    js({},ALOC_JS+CAPCOL_JS+'const C3='+json.dumps(dados,ensure_ascii=False)+';\n'+r'''
 function c3v(V,k){ return V[k+'_'+(C3.cod[V.classe]||'')]; }
 function c3n(V,k){ const x=c3v(V,k); return isnum(x)?Number(x):null; }
 function c3larg(V){ const c=V.classe; if(c==='Plantadeira'){ const a=c3n(V,'linhas'), b=c3n(V,'esp'); return (a!==null&&b!==null)?Math.round(a*b*100)/100:null; }
@@ -218,6 +233,7 @@ function c3sit(r){ const V=r.v; const C=c3cond(r), K=c3calib(V);
 function c3capCol(self){ const sp=GR('g_atv'); if(!sp.colsAll) sp.colsAll=sp.cols.slice(); const fc=((g2st(self,'g_atv').f||{}).classe)||[];
   const ks=[...new Set(fc.map(c=>C3.capcol[c]?C3.capcol[c].join('|'):'').filter(Boolean))];
   const ok=fc.length&&fc.every(c=>C3.capcol[c])&&ks.length===1; const cc=ok?{k:'capn',l:C3.capcol[fc[0]][0],t:'num',a:'r',un:C3.capcol[fc[0]][1],w:140}:null;
+  capColDeps(self,'g_atv','capn',cc?cc.l+'|'+cc.un:'');   // TABR-CTX-01: Potência cv → Vazão m³/h (ou sem coluna) tira o filtro e a ordem; kg/h ↔ kg/h fica
   sp.cols=cc?sp.colsAll.slice(0,3).concat([cc],sp.colsAll.slice(3)):sp.colsAll; return sp.cols.length; }
 function c3usos(self){ const u={}; RW(self,'g_cj').forEach(r=>{ [r.v.maq,r.v.impl].forEach(n=>{ if(n&&n!==C3.sem) (u[n]=u[n]||[]).push(r); }); }); return u; }
 function c3temR(V){ return isnum(V.rend)&&String(V.rend)!==''; }

@@ -13,12 +13,17 @@ ordena em m³/h (mutante M-a: tabelas_cad_irr_unit B1 e B1b; a ordem na tela nã
 o detalhe do PV01 (Lagoa Grande) mostra a parcela que a lista conta (pré-existente). Colunas que entram e saem (CD-05 papel, CD-03 Classe,
 CD-06 Tanque/Silo) ficam sob os cabeçalhos e o cabeçalho não quebra linha (mutante M-e: sem ncol_dinamico a trilha fica menor e cabeçalho e
 células quebram juntos; desalinhadas() pega pela ordem das bordas, sonda de 10/10/2026).
-Uso: python3 tabelas_cad_test.py [pasta de capturas]   (< 3 min)"""
+TABR-CTX-01 (revisão do Codex, 10/10/2026): a coluna de capacidade muda de grandeza com o filtro; o filtro, a ordem e o menu de filtro dela
+saem quando a grandeza muda ou a coluna sai (CD-03: Trator · Potência 78 cv → limpar só Classe → Irrigação; CD-06: Tanque · 15.000 L → Silo →
+Todos) e ficam com a mesma grandeza (Tratamento de sementes → Beneficiamento, kg/h); busca, outros filtros e foco ficam. A 1440 e a 390 px,
+por clique e só pelo teclado (Tab, Enter e Espaço no menu de filtro e nos chips).
+Uso: python3 tabelas_cad_test.py [pasta de capturas]   (~5 min) · python3 tabelas_cad_test.py --ctx [pasta]: só o TABR-CTX-01"""
 import sys, os, re, time, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from comp_lib import Chrome, servir
 from tabelas_lib import Grade, limpa, num, un_ok, instante, crescente
-OUT = sys.argv[1] if len(sys.argv) > 1 else None
+CTX = '--ctx' in sys.argv; ARGS = [a for a in sys.argv[1:] if not a.startswith('--')]
+OUT = ARGS[0] if ARGS else None
 if OUT: os.makedirs(OUT, exist_ok=True)
 OK, FAIL = [], []
 def chk(n, cond, info=''):
@@ -78,7 +83,115 @@ def fluxo_custo(g, tam, val, cel):
     abre_linha('Trator 03'); salvar(); n3 = [r.get('Máquina ou instalação') for r in g.dicts()].count('Trator 03')
     chk(f'CD-03 fluxo {tam} (repetição): salvar de novo sem mudar não duplica a linha nem muda o valor', n3 == 1 and linha().get('Custo R$/h') == cel, n3)
 
+# ---------- TABR-CTX-01: a coluna de capacidade muda de grandeza; o filtro, a ordem e o menu dela não sobram (clique e teclado) ----------
+RF = 'button[aria-label="Remover filtro"]'
+def fchips():
+    return J(f"[...document.querySelectorAll('{RF}')].filter(b=>b.offsetParent).map(b=>b.parentElement.innerText.replace(/\\s*×\\s*$/,'').trim())") or []
+def foco():
+    """[aria-label, texto] do elemento com foco (do chip, quando é o × de um filtro); BODY quando o foco se perdeu."""
+    return J("""(()=>{const a=document.activeElement; if(!a||a===document.body) return ['BODY',''];
+      const l=a.getAttribute('aria-label')||''; return [l,(l==='Remover filtro'?a.parentElement.innerText.replace(/\\s*×\\s*$/,''):(a.innerText||a.value||'')).replace(/\\s+/g,' ').trim()];})()""") or ['', '']
+def menu_aberto():
+    return J("(()=>{const d=[...document.querySelectorAll('[role=dialog]')].find(d=>/^Filtrar /.test(d.getAttribute('aria-label')||'')); return d?[d.getAttribute('aria-label'),[...d.querySelectorAll('label')].map(l=>[l.innerText.replace(/\\s+\\d+$/,'').trim(),l.querySelector('input').checked])]:null;})()")
+def seta(col):
+    return J(f"(()=>{{const b=[...document.querySelectorAll('button[aria-label=\"Ordenar por {col}\"]')].find(x=>x.offsetParent); const sp=b&&b.querySelector('span[aria-hidden=true]'); return sp?sp.innerText.trim():'';}})()") or ''
+def busca_val():
+    return J("(([...document.querySelectorAll('input[aria-label=\"Buscar nesta tabela\"]')].find(x=>x.offsetParent))||{}).value") or ''
+ENTER = lambda: c.tecla('Enter', 'Enter', 13, text='\r')
+ESPACO = lambda: c.tecla(' ', 'Space', 32, text=' ')
+def digita(t):
+    for ch in t: c.tecla(ch, ('Key' + ch.upper()) if ch.isalpha() else (('Digit' + ch) if ch.isdigit() else ch), 0, text=ch)
+def foca(sel):
+    """ponto de partida da navegação por teclado (o resto anda com Tab, Enter e Espaço)."""
+    J(f"(()=>{{const b=[...document.querySelectorAll({json.dumps(sel)})].find(x=>x.offsetParent); b&&b.focus();}})()"); time.sleep(.1)
+def tab_ate(pred, shift=False, n=30):
+    for _ in range(n):
+        c.tab(1, shift)
+        if J(f"(()=>{{const a=document.activeElement; return !!a&&a!==document.body&&({pred})(a);}})()"): return True
+    return False
+def menu_tecla(col, busca, valor):
+    """filtro pelo menu da coluna só com o teclado: Enter no ▾ abre com o foco na pesquisa; Shift+Tab até "Limpar" e Espaço desmarca tudo;
+    Tab volta à pesquisa e digita; Tab vai ao valor e Espaço marca; Shift+Tab e Enter na pesquisa aplicam (é o OK)."""
+    foca(f'button[aria-label="Filtrar {col}"]'); ENTER(); time.sleep(.45)
+    c.tab(1, True); ESPACO(); time.sleep(.2); c.tab(); digita(busca); time.sleep(.3); c.tab()
+    lab = J("(()=>{const l=document.activeElement&&document.activeElement.closest('label'); return l?l.innerText.replace(/\\s+\\d+$/,'').trim():'';})()")
+    ESPACO(); time.sleep(.2); c.tab(1, True); ENTER(); time.sleep(.5); return lab == valor
+def ordena_tecla(col):
+    """↓ maior para menor pelo teclado: Enter no ▾, Shift+Tab 3× até "↓ Classificar…" e Espaço (Enter no menu é o OK do filtro)."""
+    foca(f'button[aria-label="Filtrar {col}"]'); ENTER(); time.sleep(.45); c.tab(3, True)
+    ok = (J("document.activeElement.innerText") or '').startswith('↓'); ESPACO(); time.sleep(.5); return ok
+def tira_chip(pref, tec):
+    """o × do chip do filtro (Classe): pelo teclado, Tab a partir da busca até ele e Enter; por clique, o clique nele."""
+    if tec:
+        foca('input[aria-label="Buscar nesta tabela"]')
+        ok = tab_ate(f"a=>a.getAttribute('aria-label')==='Remover filtro'&&a.parentElement.innerText.trim().startsWith({json.dumps(pref)})"); ENTER(); time.sleep(.5); return ok
+    J(f"(()=>{{const b=[...document.querySelectorAll('{RF}')].find(b=>b.offsetParent&&b.parentElement.innerText.trim().startsWith({json.dumps(pref)})); b&&b.click();}})()"); time.sleep(.5); return True
+def qf(t, tec, shift=False):
+    """filtro rápido (Tanque, Silo, Todos): pelo teclado, Tab (ou Shift+Tab, de dentro do menu aberto) até o botão e Enter; por clique, o clique."""
+    pred = f"a=>!!a.closest('[role=group][aria-label^=\"Filtro rápido\"]')&&a.innerText.trim().startsWith({json.dumps(t)})"
+    if tec:
+        if not shift: foca('input[aria-label="Buscar nesta tabela"]')
+        ok = tab_ate(pred, shift); ENTER(); time.sleep(.5); return ok
+    J(f"[...document.querySelectorAll('[role=group][aria-label^=\"Filtro rápido\"] button')].filter(b=>b.offsetParent).find(b=>b.innerText.trim().startsWith({json.dumps(t)})).click()"); time.sleep(.5); return True
+def ctx01(tam, tec):
+    """TABR-CTX-01 no CD-03 e no CD-06 (roteiro do Codex). tec: só teclado; senão, clique (toque a 390 px)."""
+    m = f'TABR-CTX-01 {tam} ' + ('teclado' if tec else 'clique')
+    def busca(t):
+        if tec: foca('input[aria-label="Buscar nesta tabela"]'); digita(t); time.sleep(.4); return
+        J(f"""(()=>{{const i=[...document.querySelectorAll('input[aria-label="Buscar nesta tabela"]')].find(x=>x.offsetParent); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,{json.dumps(t)});
+          i.dispatchEvent(new Event('input',{{bubbles:true}})); i.dispatchEvent(new Event('change',{{bubbles:true}}));}})()"""); time.sleep(.4)
+    def filtra(col, busca_, val):
+        return menu_tecla(col, busca_, val) if tec else g.filtra(col, [val])
+    def ordena(col):
+        return ordena_tecla(col) if tec else g.ordena(col, desc=True)
+    nomes = lambda: [r.get(g.labels()[0]) for r in g.dicts()]
+    # ---- CD-03: Trator · Potência = 78 cv (busca "o" e Situação = Apta) → limpar só Classe → Irrigação ----
+    abre('CD-03.dc.html'); g = Grade(J, 0); CD3 = ['Máquina ou instalação', 'Situação', 'Classe', 'Custo R$/h', 'Conjuntos', 'Próxima calibração']
+    busca('o'); prep = [filtra('Situação', 'Apta', 'Apta'), filtra('Classe', 'Trator', 'Trator'), filtra('Potência', '78', '78 cv'), ordena('Potência')]
+    r0, c0 = nomes(), fchips()
+    chk(f'{m} CD-03: Situação Apta + Trator + Potência 78 cv (↓) → só o Trator 04, com os três chips', all(prep) and r0 == ['Trator 04'] and c0 == ['Situação: Apta', 'Classe: Trator', 'Potência: 78 cv'] and seta('Potência') == '▼', (prep, r0, c0))
+    tira_chip('Classe:', tec); c1, l1, f1, r1 = fchips(), g.labels(), foco(), nomes()
+    chk(f'{m} CD-03: limpar só a Classe tira a coluna e o filtro da Potência (sem chip "capn: 78 cv"); a busca "o" e a Situação ficam'
+        + ('; o foco fica no chip que sobra (Situação), não se perde' if tec else ''),
+        c1 == ['Situação: Apta'] and l1 == CD3 and busca_val() == 'o' and 'Gotejo T7' in r1 and 'Trator 02' in r1 and (not tec or f1 == ['Remover filtro', 'Situação: Apta']), (c1, l1, busca_val(), f1, len(r1)))
+    filtra('Classe', 'Irriga', 'Irrigação'); c2, h2, r2 = fchips(), g.heads(), nomes()
+    chk(f'{m} CD-03: Classe = Irrigação → coluna Vazão em m³/h sem filtro nem ordem de outra grandeza (antes "Vazão: 78 cv" e lista vazia); as bombas/setores aptos à vista',
+        sorted(c2) == ['Classe: Irrigação', 'Situação: Apta'] and [h for h, _ in h2] == CD3[:3] + ['Vazão'] + CD3[3:] and dict(h2).get('Vazão') == 'm³/h'
+        and r2 == ['Bomba do Pivô 1', 'Gotejo T7'] and seta('Vazão') == '⇅' and busca_val() == 'o', (c2, h2, r2, seta('Vazão')))
+    shot(f'ctx01-cd03-{tam.split()[0]}-{"teclado" if tec else "clique"}')
+    # ---- CD-03: mesma grandeza (Capacidade kg/h): Tratamento de sementes · 2.400 kg/h (↓) → Beneficiamento mantém filtro e ordem ----
+    abre('CD-03.dc.html'); g = Grade(J, 0)
+    prep = [filtra('Classe', 'Tratamento', 'Tratamento de sementes'), filtra('Capacidade', '2.400', '2.400 kg/h'), ordena('Capacidade')]; r3 = nomes()
+    filtra('Classe', 'Benefic', 'Beneficiamento'); c4, h4, r4 = fchips(), g.heads(), nomes()
+    chk(f'{m} CD-03: mesma grandeza e unidade (kg/h): Tratamento de sementes · 2.400 kg/h → Beneficiamento mantém o filtro e a ordem (Packing linha 1)',
+        all(prep) and r3 == ['Máquina TSI'] and sorted(c4) == ['Capacidade: 2.400 kg/h', 'Classe: Beneficiamento'] and dict(h4).get('Capacidade') == 'kg/h' and r4 == ['Packing linha 1'] and seta('Capacidade') == '▼',
+        (prep, r3, c4, h4, r4, seta('Capacidade')))
+    # ---- CD-06 Locais: Tanque · 15.000 L (↓) → Silo (pelo teclado, com o menu da Capacidade aberto e o rascunho desmarcado) → 60.000 sc → Todos ----
+    abre('CD-06.dc.html'); aba('Locais'); g = Grade(J, 0)
+    busca('Santa'); prep = [filtra('Fazenda', 'Santa', 'Santa Rita'), qf('Tanque', tec), filtra('Capacidade', '15.000', '15.000 L'), ordena('Capacidade')]
+    r5, c5 = nomes(), fchips()
+    chk(f'{m} CD-06: Santa Rita + Tanque + Capacidade 15.000 L (↓) → só o Tanque Sede', all(prep) and r5 == ['Tanque Sede'] and c5 == ['Fazenda: Santa Rita', 'Capacidade: 15.000 L'], (prep, r5, c5))
+    if tec:   # o menu da Capacidade aberto com o rascunho desmarcado; Shift+Tab sai do menu até o "Silo" do filtro rápido e Enter
+        foca('button[aria-label="Filtrar Capacidade"]'); ENTER(); time.sleep(.45); c.tab(1, True); ESPACO(); time.sleep(.2)
+        ok = qf('Silo', True, shift=True)
+    else: ok = qf('Silo', False)
+    c6, h6, r6, mn, f6 = fchips(), g.heads(), nomes(), menu_aberto(), foco()
+    chk(f'{m} CD-06: Tanque → Silo tira o filtro e a ordem em L (antes "Capacidade: 15.000 L" e lista vazia); Silo 01 em sc de 60 kg; Fazenda e busca ficam'
+        + ('; o menu da Capacidade com o rascunho de L fecha e o foco fica no "Silo"' if tec else ''),
+        ok and c6 == ['Fazenda: Santa Rita'] and dict(h6).get('Capacidade') == 'sc de 60 kg' and r6 == ['Silo 01'] and seta('Capacidade') == '⇅' and busca_val() == 'Santa'
+        and (not tec or (mn is None and f6[1].startswith('Silo'))), (ok, c6, h6, r6, mn, f6))
+    filtra('Capacidade', '60.000', '60.000 sc de 60 kg'); r7 = nomes(); qf('Todos', tec); c8, l8, r8 = fchips(), g.labels(), nomes()
+    chk(f'{m} CD-06: Silo · 60.000 sc → Todos tira a coluna sem chip órfão ("capn: …"); Tanque Sede e Silo 01 voltam com a Fazenda e a busca',
+        r7 == ['Silo 01'] and c8 == ['Fazenda: Santa Rita'] and 'Capacidade' not in l8 and {'Tanque Sede', 'Silo 01'} <= set(r8) and busca_val() == 'Santa', (r7, c8, l8, r8))
+    shot(f'ctx01-cd06-{tam.split()[0]}-{"teclado" if tec else "clique"}')
+
+class _SoCtx(Exception): pass   # --ctx: só o TABR-CTX-01 (os dois tamanhos, clique e teclado)
 try:
+    if CTX:
+        for w, h, e, t, tam in ((1440, 900, 1, False, '1440'), (390, 844, 2, True, '390 px')):
+            c.aparelho(w, h, e, t); abre('Main.dc.html', .3); J("localStorage.clear(); sessionStorage.clear()")
+            ctx01(tam, False); ctx01(tam, True)
+        ERRS.extend(J("window.__errs") or []); chk('sem erro de script (TABR-CTX-01)', not ERRS, ERRS[:3]); raise _SoCtx
     c.aparelho(1440, 900, 1, False)
     abre('Main.dc.html', .3); J("localStorage.clear(); sessionStorage.clear()")
     # ================= CD-01 Talhões =================
@@ -308,7 +421,7 @@ try:
                     ruim = sorted({'Situação', 'Situação do papel', 'Fonte'} & set(m['fora'])) + (['rola %d px' % m['sobra']] if (w == 1440 and m['sobra'] > 1 and not pg.startswith('CD-05')) else [])
                     if ruim: larg.append((w, pg.split('.')[0], tb, i, ruim))
     chk('CD (A1): Situação à vista sem rolar a 1440 e 1280 px; a 1440 px as grades cabem na caixa (o CD-05 rola só os contatos)', not larg, larg)
-    c.aparelho(1440, 900, 1, False)
+    c.aparelho(1440, 900, 1, False); ctx01('1440', False); ctx01('1440', True)
     ERRS.extend(J("window.__errs") or []); chk('sem erro de script (1440)', not ERRS, ERRS[:3])
     # ================= 390 px =================
     c.aparelho(390, 844, 2, True); r390 = []
@@ -332,7 +445,9 @@ try:
     vaz = J("[...document.querySelectorAll('main div')].some(x=>x.offsetParent&&/^Nenhuma linha corresponde aos filtros/.test(x.innerText.trim()))")
     chk('CD-03 390 px (filtro): Classe = Irrigação → 3 linhas; + busca "Silo" → nenhuma linha e o aviso; Limpar filtros volta a todas',
         len(a1) == 3 and g.dicts() == [] and vaz and (limpa(J) or True) and len(g.dicts()) == n0, (a1, n0))
+    ctx01('390 px', False); ctx01('390 px', True)
     ERRS.extend(J("window.__errs") or []); chk('sem erro de script (390)', not ERRS, ERRS[:3])
+except _SoCtx: pass
 finally:
     c.close(); srv.terminate()
 print(f'RESULTADO: {len(OK)}/{len(OK) + len(FAIL)} ok' + (' · FALHAS: ' + '; '.join(FAIL) if FAIL else ''))
